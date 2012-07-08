@@ -690,10 +690,10 @@ function end_page( $menu_array=NULL, $links_per_line=0 )
 
    if( !$printable )
    {
-      if( isset($player_row['VaultCnt']) && isset($player_row['VaultTime']) )
+      if( isset($player_row['VaultCnt']) && isset($player_row['X_VaultTime']) )
       {
          echo '<br>', span('PageQuota',
-            sprintf( "%s: %s / %s", T_('Quota#user'), $player_row['VaultCnt'], date(DATE_FMT, $player_row['VaultTime']) ));
+            sprintf( "%s: %s / %s", T_('Quota#user'), $player_row['VaultCnt'], date(DATE_FMT, $player_row['X_VaultTime']) ));
       }
 
       echo '<br>', span('PageLapse',
@@ -2480,7 +2480,7 @@ function is_logged_in($handle, $scode, &$player_row, $login_opts=LOGIN_DEFAULT_O
 
    $query= "SELECT *,UNIX_TIMESTAMP(Sessionexpire) AS Expire"
           .",Adminlevel+0 AS admin_level"
-          .(VAULT_DELAY>0 ?",UNIX_TIMESTAMP(VaultTime) AS VaultTime" :'') //TODO use X_VaultTime instead
+          .(VAULT_DELAY>0 ? ",UNIX_TIMESTAMP(VaultTime) AS X_VaultTime" : '')
           .',UNIX_TIMESTAMP(LastMove) AS X_LastMove'
           .',UNIX_TIMESTAMP(Lastaccess) AS X_Lastaccess'
           .',UNIX_TIMESTAMP(LastQuickAccess) AS X_LastQuickAccess'
@@ -2552,9 +2552,9 @@ function is_logged_in($handle, $scode, &$player_row, $login_opts=LOGIN_DEFAULT_O
    $vaultcnt= true; //no vault for anonymous or if disabled or if server-down
    if( !$is_down && VAULT_DELAY>0 && !$session_expired ) //exclude access deny from an other user
    {
-      $vaultcnt= (int)@$player_row['VaultCnt'];
-      $vaulttime= @$player_row['VaultTime'];
-      $vault_fmt= T_("The activity of the account '%s' grew too high and swallowed up our bandwidth and resources." .
+      $vaultcnt = (int)@$player_row['VaultCnt'];
+      $vaulttime = @$player_row['X_VaultTime'];
+      $vault_fmt = T_("The activity of the account '%s' grew too high and swallowed up our bandwidth and resources." .
          "<br>Please, correct this behaviour.<br>This account is blocked until %s.");
       if( $NOW >= $vaulttime ) // fever cool enough (expire-date passed -> reset quota for another period)
       {
@@ -2592,7 +2592,8 @@ function is_logged_in($handle, $scode, &$player_row, $login_opts=LOGIN_DEFAULT_O
       }
 
       $player_row['VaultCnt']  = $vaultcnt;
-      $player_row['VaultTime'] = $vaulttime;
+      $player_row['VaultTime'] = date(DATE_FMT_QUICK, $vaulttime);
+      $player_row['X_VaultTime'] = $vaulttime;
    }//fever-fault check
 
    // DST-check if the player's clock need an adjustment from/to summertime

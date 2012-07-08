@@ -479,10 +479,10 @@ function dgs_json_encode( $var )
 function quick_suite_add_quota( &$arr )
 {
    global $player_row;
-   if( isset($player_row['VaultCnt']) && isset($player_row['VaultTime']) )
+   if( isset($player_row['VaultCnt']) && isset($player_row['X_VaultTime']) )
    {
       $arr['quota_count'] = (int)@$player_row['VaultCnt'];
-      $arr['quota_expire'] = date(DATE_FMT_QUICK, @$player_row['VaultTime']);
+      $arr['quota_expire'] = date(DATE_FMT_QUICK, @$player_row['X_VaultTime']);
    }
 }
 
