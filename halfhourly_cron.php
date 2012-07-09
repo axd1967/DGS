@@ -153,7 +153,8 @@ if( !$is_down )
    $result = db_query( 'halfhourly_cron.find_notifications',
          "SELECT ID AS uid, Handle, Email, SendEmail, UNIX_TIMESTAMP(Lastaccess) AS X_Lastaccess " .
          "FROM Players " .
-         "WHERE Notify='NOW' AND FIND_IN_SET('ON',SendEmail) AND Email>''");
+         "WHERE Notify='NOW' AND FIND_IN_SET('ON',SendEmail) AND Email>'' " .
+         "ORDER BY SendEmail, RAND()"); // fast-queries first, random-order on "categories" of SendEmail if one-run is not enough
    $nfyuser_iterator = new ListIterator( "halfhourly_cron.load_nfyuser" );
    while( $row = mysql_fetch_array( $result ) )
       $nfyuser_iterator->addItem( null, $row );
@@ -174,6 +175,8 @@ if( !$is_down )
       $msg = sprintf( "A message or game move is waiting for you [ %s ] at:\n ", $Handle )
                 . mail_link('',"status.php")."\n"
            . "(No more notifications will be sent until your reconnection)\n";
+
+      $found_entries = 0;
 
       // Find games
 
@@ -206,6 +209,7 @@ if( !$is_down )
 
             while( list(, $arr_item) = $games_iterator->getListIterator() )
             {
+               $found_entries++;
                $game_row = $arr_item[1];
                $gid = @$game_row['ID'];
 
@@ -264,6 +268,7 @@ if( !$is_down )
             $msg .= str_pad('', 47, '-') . "\n  New messages:\n";
             while( $msg_row = mysql_fetch_array( $res3 ) )
             {
+               $found_entries++;
                $From = ( $msg_row['FromName'] && $msg_row['FromHandle'] )
                   ? mail_strip_html("{$msg_row['FromName']} ({$msg_row['FromHandle']})")
                   : 'Server message';
@@ -283,21 +288,23 @@ if( !$is_down )
       $msg .= str_pad('', 47, '-');
 
 
-      // do not stop on mail-failure
-      if( send_email(/*no-die*/false, $Email, EMAILFMT_SKIP_WORDWRAP/*msg already wrapped*/, $msg) )
+      if( $found_entries > 0 )
       {
-         // if loop fails, everyone would be notified again on next start -> so mark user as notified till player's next visit
+         // do not stop on mail-failure
+         $nfy_done = send_email(/*no-die*/false, $Email, EMAILFMT_SKIP_WORDWRAP/*msg already wrapped*/, $msg );
+      }
+      else
+         $nfy_done = true; // mark as done if nothing to notify
+
+      if( $nfy_done )
+      {
+         // if loop fails, everyone would be notified again on next start -> so mark user as notified
+         // Setting Notify to 'DONE' stop notifications until the player's next visit
          db_query( "halfhourly_cron.update_players_notify_Done($uid)",
             "UPDATE Players SET Notify='DONE' " .
             "WHERE ID=$uid AND Notify='NOW' LIMIT 1" );
       }
    } //notifications found
-
-
-   // Setting Notify to 'DONE' stop notifications until the player's next visit (also for users with failed notifications)
-   db_query( 'halfhourly_cron.update_players_notify_Done',
-      "UPDATE Players SET Notify='DONE' " .
-      "WHERE Notify='NOW' AND FIND_IN_SET('ON',SendEmail)");
 
 
 
