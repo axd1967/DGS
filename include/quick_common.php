@@ -26,17 +26,18 @@ require_once( "include/connect2mysql.php" );
 // $is_maintenance is not changed (can be used to indicate maintenance-mode)
 global $is_down, $is_down_message, $is_maintenance; //PHP5
 $is_down = false;
-$is_down_message = "Between 07-10. June 2012 the Dragon Go Server will be down for maintenance.<br>\n"
-                 . " Clocks of running games are frozen till the server restarts.<br><br>\n"
-                 . " Status updates of the maintenance are available at: http://senseis.xmp.net/?DragonGoServer";
+$is_down_message = "Sorry, the Dragon Go Server is down for a short maintenance (starting [09-Jul-2012 18:25 GMT]).<br>\n"
+                 . "Please retry in 15 minutes or so.<br><br>\n"
+                 . "Don't worry: the clocks are frozen until the server restarts."
+                 ;
                  /*
-                   "Sorry, dragon is down for maintenance at the moment,"
-                 . " please return in an hour or so.<br>\n"
-                 . " Don't worry: the clocks are frozen until the server restarts";
+                   "Between 07-10. June 2012 the Dragon Go Server will be down for maintenance.<br>\n"
+                 . " Clocks of running games are frozen till the server restarts.<br><br>\n"
+                 . " Status updates of the maintenance are available at: http://senseis.xmp.net/?DragonGoServer"
                  */
 $is_maintenance = $is_down;
 
-$clocks_stopped = false; //e.g. shortly after maintenance for safety
+$clocks_stopped = false; //e.g. shortly after big maintenance for safety
 
 
 // chained crons, see 'cron_chained.php'
