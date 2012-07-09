@@ -20,6 +20,16 @@ ChangeLog
 ------------------------------------------------------------------
 
 ### ----- release-1_0_15-20120608 -----
+2012-07-10 juga
+
+   * INSTALL:
+   - adjusted crontab for halfhourly-cron extending read-timeout (900s wget-default to 1800s)
+
+   * halfhourly_cron.php:
+   - fix bug: undo check for found-entries, Notify='NEXT' is indicator that there is something
+     new (move or message), SendEmail='ON' needs notify even if NOT checked for new games/messages
+   - increased max-run-time from 25min -> 28min
+
 2012-07-09 juga
 
    * include/std_functions.php (start_page):

@@ -33,8 +33,8 @@ if( !$is_down )
       $chained = $half_diff;
    else
       connect2mysql();
+   $max_run_time = $NOW + $half_diff - 2*60; // "buffer" of 2min for long-lasting "last" query before stopping script
    $half_diff -= 300;
-   $max_run_time = $NOW + $half_diff;
    set_time_limit(0); // don't want script-break during "transaction" with multi-db-queries
 
 
@@ -176,8 +176,6 @@ if( !$is_down )
                 . mail_link('',"status.php")."\n"
            . "(No more notifications will be sent until your reconnection)\n";
 
-      $found_entries = 0;
-
       // Find games
 
       if( strpos($SendEmail, 'MOVE') !== false ) // game: move + optional board
@@ -209,7 +207,6 @@ if( !$is_down )
 
             while( list(, $arr_item) = $games_iterator->getListIterator() )
             {
-               $found_entries++;
                $game_row = $arr_item[1];
                $gid = @$game_row['ID'];
 
@@ -268,7 +265,6 @@ if( !$is_down )
             $msg .= str_pad('', 47, '-') . "\n  New messages:\n";
             while( $msg_row = mysql_fetch_array( $res3 ) )
             {
-               $found_entries++;
                $From = ( $msg_row['FromName'] && $msg_row['FromHandle'] )
                   ? mail_strip_html("{$msg_row['FromName']} ({$msg_row['FromHandle']})")
                   : 'Server message';
@@ -288,14 +284,8 @@ if( !$is_down )
       $msg .= str_pad('', 47, '-');
 
 
-      if( $found_entries > 0 )
-      {
-         // do not stop on mail-failure
-         $nfy_done = send_email(/*no-die*/false, $Email, EMAILFMT_SKIP_WORDWRAP/*msg already wrapped*/, $msg );
-      }
-      else
-         $nfy_done = true; // mark as done if nothing to notify
-
+      // do not stop on mail-failure (but collect mail-errors)
+      $nfy_done = send_email("halfhourly_cron($uid)", $Email, EMAILFMT_SKIP_WORDWRAP/*msg already wrapped*/, $msg );
       if( $nfy_done )
       {
          // if loop fails, everyone would be notified again on next start -> so mark user as notified
