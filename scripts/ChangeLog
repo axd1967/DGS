@@ -23,7 +23,7 @@ ChangeLog
 2012-07-09 juga
 
    * .cvsignore:
-   - ignore timeadjust.php
+   - ignore timeadjust.php, apple-touch-icon*.png
 
    * halfhourly_cron.php:
    - fix bug: select fast-queries first, then order randomly on SendEmail-"categories"

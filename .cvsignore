@@ -14,13 +14,14 @@
 .project
 *.bak
 *.diff
+Makefile
+apple-touch-icon*.png
 archive
 favicon.ico
 images
-Makefile
 php
 ref-doc
 snapshot
 temp
-userpic
 timeadjust.php
+userpic
