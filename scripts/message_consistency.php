@@ -22,8 +22,8 @@ require_once( "include/std_functions.php" );
 
 {
    disable_cache();
-
    connect2mysql();
+   set_time_limit(0); // don't want script-break during "transaction" with multi-db-queries or for large-datasets
 
    $logged_in = who_is_logged( $player_row);
    if( !$logged_in )
@@ -184,6 +184,7 @@ function check_myself_message( $user_id=false)
 
    $result = mysql_query( $query ) or die(mysql_error());
 
+   ta_begin();
    while( ($row = mysql_fetch_assoc( $result )) )
    {
       echo '<br>uid='.$row['uid'] .' mid='.$row['mid'];
@@ -203,6 +204,7 @@ function check_myself_message( $user_id=false)
       dbg_query("DELETE FROM MessageCorrespondents WHERE ID=$mcID LIMIT 1" );
    }
    mysql_free_result($result);
+   ta_end();
 
    echo "<br>Messages to myself done.\n";
 } //check_myself_message

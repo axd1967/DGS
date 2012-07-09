@@ -28,8 +28,9 @@ require_once 'include/rating.php';
 
 {
    disable_cache();
-
    connect2mysql();
+   set_time_limit(0); // don't want script-break during "transaction" with multi-db-queries
+
 
    $logged_in = who_is_logged( $player_row);
    if( !$logged_in )
@@ -123,6 +124,8 @@ echo ">>>> Must be enabled first in code. Make recalc-test. Do not run if you ar
    {//HOT-section to recalculate user-ratings
       while( $row = mysql_fetch_assoc( $result ) )
       {
+         if( connection_aborted() ) break; // not sure this works if nothing is flushed
+
          echo ' ', $row['gid'];
          $rating_changes = find_rating_changes( $row['X_Lastchanged'], $arr_rca );
 
