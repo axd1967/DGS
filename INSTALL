@@ -279,16 +279,27 @@ Check and adjust defines in 'include/graph.php':
 5) Add some cron jobs. These should preferrably be run on a remote machine, so that the
    clock is not running when the network is down.
 
+   Adjust MAILTO in crontab accordingly.
+
+   NOTE: (( Windows NT/200x/XP - some freeware clones of cron may be found on the web ))
+
+   NOTE: For debugging purposes you can use "wget -v" instead of "wget -q" to get a verbose
+         output to STDOUT mailed to you.
+
 > crontab -e
 
-# m  h dom mon dow command
-*/5 * * * *          wget -q -O - http://your.url/clock_tick.php
-7,22,37,52 * * * *   wget -q -O - http://your.url/tournaments/cron_tournaments.php
-0,30 * * * *         wget -q -O - http://your.url/halfhourly_cron.php
-25 5 * * *           wget -q -O - http://your.url/daily_cron.php
+----------------
+# min  hour day  mon  weekday
+# 0-59 0-23 0-31 0-12 0-7
 
+# DGS-live-server triggering clocks
+MAILTO= < EMAIL-OF-YOUR-CHOICE >
 
-(( Windows NT/200x/XP - some freeware clones of cron may be found on the web ))
+*/5  *  *  *  *   wget -q -O - http://www.dragongoserver.net/clock_tick.php
+0,30 *  *  *  *   wget -q --read-timeout=1800 -O - http://www.dragongoserver.net/halfhourly_cron.php
+25   5  *  *  *   wget -q -O - http://www.dragongoserver.net/daily_cron.php
+#7,22,37,52 * * * *   wget -q -O - http://www.dragongoserver.net/tournaments/cron_tournaments.php
+----------------
 
 
 
