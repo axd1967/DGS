@@ -252,6 +252,9 @@ function suggest_conventional($rating_W, $rating_B, $size, $positive_komi=false)
 //    b/wRatingStatus, b/wRating, b/wRatingMin/Max, Black/White_ID
 //
 // return: -1=error, or: RATEDSTATUS_...: 0=..RATED=rated-game, 1=..DELETABLE=not-rated, 2=..UNRATED=not-rated
+//
+// IMPORTANT NOTE: caller needs to open TA with HOT-section!!
+//
 function update_rating2($gid, $check_done=true, $simul=false, $game_row=null)
 {
    global $NOW;
