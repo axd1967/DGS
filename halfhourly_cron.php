@@ -194,9 +194,9 @@ if( !$is_down )
          $gres = db_query( "halfhourly_cron.find_games($uid)", $query );
 
          // pre-load all games of user to notify (to free db-result as soon as possible)
+         $games_iterator = new ListIterator( "halfhourly_cron.find_games($uid)" );
          if( @mysql_num_rows($gres) > 0 )
          {
-            $games_iterator = new ListIterator( "halfhourly_cron.find_games($uid)" );
             while( $row = mysql_fetch_array( $gres ) )
                $games_iterator->addItem( null, $row );
          }
