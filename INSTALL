@@ -57,10 +57,12 @@ Those files have to be unzipped in the dragon root directory to obtain a tree li
          status.php
          ...
 
-Copy /images/favicon.ico into the root folder (or place your own favicon.ico
+Copy  /images/favicon.ico  into the root folder (or place your own favicon.ico
 in the root folder). Some older browser ignore the shortcut-icon directive
 and expects it to be in the document-root.
 
+Copy all  /images/apple-touch-icon-*.png  into the root folder to avoid 'page_not_found'-errors.
+For reference see also http://mathiasbynens.be/notes/touch-icons
 
 
 

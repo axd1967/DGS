@@ -249,3 +249,15 @@ mkdir data-store
 mkdir data-store/rss data-store/qst data-store/wap
 chmod -R 775 data-store
 
+-----------
+# added image for Apple "favicons", must be copied to root-dir
+copy /images/apple-touch-icon-57x57-precomposed.png
+copy /images/apple-touch-icon-57x57.png
+copy /images/apple-touch-icon-72x72-precomposed.png
+copy /images/apple-touch-icon-72x72.png
+copy /images/apple-touch-icon-114x114-precomposed.png
+copy /images/apple-touch-icon-114x114.png
+copy /images/apple-touch-icon-precomposed.png
+copy /images/apple-touch-icon.png
+
+
