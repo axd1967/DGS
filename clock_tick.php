@@ -27,12 +27,14 @@ $TheErrors->set_mode(ERROR_MODE_COLLECT);
 
 if( !$is_down )
 {
-   $tick_diff = floor(3600/TICK_FREQUENCY);
+   $tick_diff = floor(3600/TICK_FREQUENCY); // called every 5 minutes (300s)
    if( $chained )
       $chained = $tick_diff;
    else
       connect2mysql();
    $tick_diff -= 10;
+   $max_run_time = $NOW + $tick_diff;
+   set_time_limit(0); // don't want script-break during "transaction" with multi-db-queries
 
 
    // Check that ticks are not too frequent
@@ -87,7 +89,7 @@ function clkrng( $n, $s, $e, $o=0)
 
 function handle_game_timeouts()
 {
-   global $NOW;
+   global $NOW, $max_run_time;
 
    // $NOW is time in UTC
    $hour = gmdate('G', $NOW);
@@ -177,6 +179,7 @@ function handle_game_timeouts()
 
    while($row = mysql_fetch_assoc($result))
    {
+      if( time() > $max_run_time ) break; // stop script if running too long to avoid concurrent runs
       extract($row);
 
       //$game_clause (lock) needed. See *** HOT_SECTION *** in confirm.php
