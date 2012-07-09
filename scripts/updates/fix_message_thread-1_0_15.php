@@ -22,8 +22,8 @@ require_once( "include/std_functions.php" );
 
 {
    disable_cache();
-
    connect2mysql();
+   set_time_limit(300); //max. 5min
 
    $logged_in = who_is_logged( $player_row);
    if( !$logged_in )
