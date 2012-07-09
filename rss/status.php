@@ -343,7 +343,7 @@ else
 
 
    // check for excessive usage
-   // NOTE: Without checking DB, this can be abusted to block other users. But that should be punished by an admin as abuse.
+   // NOTE: Without checking DB, this can be abused to block other users. But that should be punished by an admin as abuse.
    //       Advantage like this is to avoid DB-requests.
    if( (string)$uhandle == '' )
       error('invalid_user', "rss_status.check.miss_handle()", /*log-err*/false );
