@@ -34,6 +34,8 @@ if( !$is_down )
    else
       connect2mysql();
    $half_diff -= 300;
+   $max_run_time = $NOW + $half_diff;
+   set_time_limit(0); // don't want script-break during "transaction" with multi-db-queries
 
 
    // Check that updates are not too frequent
@@ -72,11 +74,74 @@ if( !$is_down )
       $TheErrors->dump_exit('halfhourly_cron.lock.2');
 
 
+
    // ---------- BEGIN ------------------------------
 
-// Send notifications
-// Email notification if the SendEmail 'ON' flag is set
-// more infos if other SendEmail flags are set
+   // ---------- Update activities
+
+   //close to 0.9964 for a four days halving time (in minutes)
+   $factor = exp( -M_LN2 * 30 / $ActivityHalvingTime );
+
+   //the WHERE is just added here to avoid to update the *whole* table each time
+   //the FLOOR and integer type also help the re-construction of the index of the column
+   db_query( 'halfhourly_cron.activity',
+      "UPDATE Players SET Activity=FLOOR($factor*Activity) WHERE Activity>0" );
+
+
+
+   // ---------- Check end of vacations and reset associated game clocks
+
+   $max_vacations = 365.24/12; //1 month [days]
+   $this_ticks_per_day = 2*24;
+
+   $result = db_query( 'halfhourly_cron.onvacation',
+      "SELECT ID, ClockUsed FROM Players " .
+      "WHERE OnVacation>0 AND OnVacation<=1/($this_ticks_per_day)" );
+
+   while( $prow = mysql_fetch_assoc( $result ) )
+   {
+      $uid = $prow['ID'];
+      $ClockUsed = $prow['ClockUsed'];
+      $WeekendClockUsed = $ClockUsed + WEEKEND_CLOCK_OFFSET;
+
+      // NOTE: LastTicks handle -(time spent) at the moment of the start of vacations
+      //       inserts this spent time into the (possibly new) ClockUsed by the player.
+      // NOTE: use weekendclock on Games.WeekendClock=N, otherwise use normal clock
+      db_query( 'edit_vacation.update_games',
+         "UPDATE Games"
+         ." INNER JOIN Clock ON Clock.ID=$ClockUsed"
+         ." SET Games.ClockUsed=IF(Games.WeekendClock='Y',$ClockUsed,$WeekendClockUsed)"
+            .", Games.LastTicks=Games.LastTicks+Clock.Ticks"
+         ." WHERE Games.Status" . IS_STARTED_GAME
+         ." AND Games.ToMove_ID=$uid"
+         ." AND Games.ClockUsed<0" // VACATION_CLOCK
+         );
+   }
+   mysql_free_result($result);
+
+
+
+   // ---------- Change vacation days
+
+   db_query( 'halfhourly_cron.vacation_days.increase', // -1 day after 1 day
+      "UPDATE Players SET "
+      . "OnVacation=GREATEST(0, OnVacation - 1/($this_ticks_per_day))"
+      . " WHERE OnVacation>0" );
+
+   db_query( 'halfhourly_cron.on_vacation.decrease', // +1 day after 12 days
+      "UPDATE Players SET "
+      . "VacationDays=LEAST($max_vacations, VacationDays + 1/(12*$this_ticks_per_day))"
+      . " WHERE VacationDays<$max_vacations" );
+
+
+
+   // ---------- Send notifications
+
+   // NOTE: do longest-lasting updates as last task
+
+   // Email notification if the SendEmail 'ON' flag is set
+   // more infos if other SendEmail flags are set
+
 
    // Setting Notify to 'NOW' for next bunch of notifications (to avoid race-conditions while directly processing 'NEXT')
    db_query( 'halfhourly_cron.update_players_notify_now',
@@ -97,6 +162,7 @@ if( !$is_down )
    // loop over users to notify
    while( list(, $arr_item) = $nfyuser_iterator->getListIterator() )
    {
+      if( time() > $max_run_time ) break; // stop script if running too long to avoid chance of concurrent runs
       $row = $arr_item[1];
       extract($row);
 
@@ -227,68 +293,11 @@ if( !$is_down )
       }
    } //notifications found
 
+
    // Setting Notify to 'DONE' stop notifications until the player's next visit (also for users with failed notifications)
    db_query( 'halfhourly_cron.update_players_notify_Done',
       "UPDATE Players SET Notify='DONE' " .
       "WHERE Notify='NOW' AND FIND_IN_SET('ON',SendEmail)");
-
-
-
-// Update activities
-
-   //close to 0.9964 for a four days halving time (in minutes)
-   $factor = exp( -M_LN2 * 30 / $ActivityHalvingTime );
-
-   //the WHERE is just added here to avoid to update the *whole* table each time
-   //the FLOOR and integer type also help the re-construction of the index of the column
-   db_query( 'halfhourly_cron.activity',
-      "UPDATE Players SET Activity=FLOOR($factor*Activity) WHERE Activity>0" );
-
-
-
-// Check end of vacations and reset associated game clocks
-
-   $max_vacations = 365.24/12; //1 month [days]
-   $this_ticks_per_day = 2*24;
-
-   $result = db_query( 'halfhourly_cron.onvacation',
-      "SELECT ID, ClockUsed FROM Players " .
-      "WHERE OnVacation>0 AND OnVacation<=1/($this_ticks_per_day)" );
-
-   while( $prow = mysql_fetch_assoc( $result ) )
-   {
-      $uid = $prow['ID'];
-      $ClockUsed = $prow['ClockUsed'];
-      $WeekendClockUsed = $ClockUsed + WEEKEND_CLOCK_OFFSET;
-
-      // NOTE: LastTicks handle -(time spent) at the moment of the start of vacations
-      //       inserts this spent time into the (possibly new) ClockUsed by the player.
-      // NOTE: use weekendclock on Games.WeekendClock=N, otherwise use normal clock
-      db_query( 'edit_vacation.update_games',
-         "UPDATE Games"
-         ." INNER JOIN Clock ON Clock.ID=$ClockUsed"
-         ." SET Games.ClockUsed=IF(Games.WeekendClock='Y',$ClockUsed,$WeekendClockUsed)"
-            .", Games.LastTicks=Games.LastTicks+Clock.Ticks"
-         ." WHERE Games.Status" . IS_STARTED_GAME
-         ." AND Games.ToMove_ID=$uid"
-         ." AND Games.ClockUsed<0" // VACATION_CLOCK
-         );
-   }
-   mysql_free_result($result);
-
-
-
-// Change vacation days
-
-   db_query( 'halfhourly_cron.vacation_days.increase', // -1 day after 1 day
-      "UPDATE Players SET "
-      . "OnVacation=GREATEST(0, OnVacation - 1/($this_ticks_per_day))"
-      . " WHERE OnVacation>0" );
-
-   db_query( 'halfhourly_cron.on_vacation.decrease', // +1 day after 12 days
-      "UPDATE Players SET "
-      . "VacationDays=LEAST($max_vacations, VacationDays + 1/(12*$this_ticks_per_day))"
-      . " WHERE VacationDays<$max_vacations" );
 
 
 
