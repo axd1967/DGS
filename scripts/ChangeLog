@@ -20,6 +20,139 @@ ChangeLog
 ------------------------------------------------------------------
 
 ### ----- release-1_0_15-20120608 -----
+2012-07-09 juga
+
+   * daily_cron.php:
+   - disable debugging
+
+   * scripts/start_frozen_clocks.php, scripts/tournament_consistency.php,
+     scripts/translation_consistency.php, scripts/updates/fix_message_thread-1_0_15.php:
+   - set larger max_execution_time instead of relying on 30s timeout-default
+
+   * halfhourly_cron.php, clock_tick.php (handle_game_timeouts):
+   - set max_execution_time=0 (no timeout instead of 30s timeout-default)
+     - to avoid timeout on large datasets
+     - to avoid breaking transactions with multi-table-changes
+   - added soft-check on running-time to avoid script running for too long
+   - re-ordered task executing send-mail-notifications as last task because
+     that takes longest and has greatest "risk" of taking more time
+     than the script should run with
+
+   * scripts/message_consistency.php, scripts/recalculate_ratings2.php:
+   - added ta_begin/end() to surround multi-table-updates with "transaction"
+
+   * scripts/updates/fix_game_comments-1_0_15.php, scripts/fix_game_snapshot.php,
+     scripts/fix_games_timeleft.php, scripts/forum_consistency.php,
+     scripts/game_consistency.php, scripts/message_consistency.php,
+     scripts/player_consistency.php, scripts/recalculate_ratings2.php,
+     scripts/voting_consistency.php, tournaments/cron_tournaments.php:
+   - set max_execution_time=0 (no timeout instead of 30s timeout-default)
+     - to avoid timeout on large datasets
+     - to avoid breaking transactions with multi-table-changes
+
+   * scripts/updates/other_changes_1_0_14_to_1_0_15.txt, INSTALL:
+   - added PNG-icons for Apple "favicons" in various size to avoid
+     'page_not_found'-errors (ca. 14000/month currently)
+-----------
+# added image for Apple "favicons", must be copied to root-dir
+copy /images/apple-touch-icon-57x57-precomposed.png
+copy /images/apple-touch-icon-57x57.png
+copy /images/apple-touch-icon-72x72-precomposed.png
+copy /images/apple-touch-icon-72x72.png
+copy /images/apple-touch-icon-114x114-precomposed.png
+copy /images/apple-touch-icon-114x114.png
+copy /images/apple-touch-icon-144x144-precomposed.png
+copy /images/apple-touch-icon-144x144.png
+copy /images/apple-touch-icon-precomposed.png
+copy /images/apple-touch-icon.png
+-----------
+
+   * include/std_functions.php (is_logged_in):
+   - changed fever-vault block-message
+
+2012-07-08 juga
+
+   * include/std_functions.php (LOGIN_SKIP_UPDATE, who_is_logged, is_logged_in),
+     error.php:
+   - error-page skips update of Players-table on login-check to avoid decreasing quota twice:
+     once by main-page + follow-up with error on error-page:
+     - do NOT decrease web-access-quota
+     - do NOT write IpStats-table
+     - do NOT reset mail-notify to 'NONE'
+     - do NOT update Players-table or $player_row, e.g. with ip, browser, last-access,
+       activity, hits, clock-change
+     - do NOT update main-menu indicators for new-messages, new-features, new-bulletins
+     - but DO load Players-data with browser-specific prefs, set timezone, load translation-tables,
+       check for maintenance-user, handle admin-status
+
+   * include/std_functions.php (is_logged_in):
+   - cleanup: refactored query-building for Players-update with UpdateQuery-class
+
+   * admin_users.php (update_user):
+   - fix bug: remove editing of Players.OnVacation/UseVacation as special handling
+     for the Players.TimeOutDate would be required, also user can change then length
+     of OnVacation already so no admin-intervention is needed
+   - re-ordered and added some shown-fields: LastQuickAccess, UserFlags, Hits
+
+   * include/std_functions.php (end_page, is_logged_in),
+     include/quick_common.php (quick_suite_add_quota):
+   - added separate field for Players.VaultTime as $player_row['X_VaultTime']
+     preserving original VaultTime-value
+
+   * include/gui_functions.php (is_valid_button, button_style),
+     include/std_functions.php (BUTTON_MAX),
+     edit_profile.php (parse_edit_form, handle_save_profile),
+     change_profile.php [removed]:
+   - merged 'edit_profile.php' and 'change_profile.php' into one page:
+     - added checks on all input-fields showing errors to user instead of throwing error,
+       also in preparation for mandatory email
+     - correct some invalid values to defaults if "injected" via URL and not via regular
+       form-submit only allowing form-supported field-values restricted by select-boxes
+     - save is only done if there are no check-errors any more
+     - fix bug: show correct last-capture-marker if ENA_MOVENUMBERS disabled
+
+   * scripts/mailtest.php:
+   - fix bug: trim email when checking for valid email
+
+2012-07-07 juga
+
+   * crossdomain.xml:
+   - added policy-file for Flash with least-permissive policy
+     to prevent 'page_not_found'-errors (ca. 21000/month),
+     see also http://www.dragongoserver.net/forum/read.php?forum=2&thread=33297#33464
+
+   * include/std_functions.php (verify_invalid_email, send_email, is_logged_in),
+     include/register_functions.php (UserRegistration.check_email),
+     scripts/mailtest.php, change_profile.php, halfhourly_cron.php,
+     send_new_password.php:
+   - fix bugs for handling invalid email:
+     - changed name and return-value of verify-method for easier checking:
+       verify_email -> verify_invalid_email
+     - fixed regex for emails allowing longer TLD of domain to prepare for new-TLDs released by ICANN
+     - return 'bad_mail_address'-error also if errors only collected and error()-call is not exiting
+  - send-new-password: die-on-error before writing adminlog and saving new password into database
+     - fix bugs for halfhourly-cron-script:
+     - skip mail notification for user with invalid email,
+       script was stopped when mail was sent to invalid email
+     - mark user as notified after successful mail-sending
+       to avoid being notified again on script-restart
+
+   * scripts/updates/database_changes_1_0_14_to_1_0_15.mysql:
+   - clearing invalid emails for users if email has no '@' or does contain spaces
+-----------
+-- cleanup invalid emails (no '@' found or containing space)
+SELECT Handle, Lastaccess, Email
+   FROM Players WHERE Email>'' AND (Email LIKE '% %' OR NOT Email LIKE '%@%') ;
+UPDATE Players
+   SET Email='' WHERE Email>'' AND (Email LIKE '% %' OR NOT Email LIKE '%@%') ;
+-----------
+
+   * statistics.php (show_stats_user_countries):
+   - text-change to allow for easier future changes without re-translating
+
+   * daily_cron.php, halfhourly_cron.php:
+   - enable debugging
+
 2012-07-06 juga
 
    * include/quick_common.php ($clocks_stopped):
