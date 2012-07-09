@@ -22,6 +22,17 @@ ChangeLog
 ### ----- release-1_0_15-20120608 -----
 2012-07-09 juga
 
+   * .cvsignore:
+   - ignore timeadjust.php
+
+   * halfhourly_cron.php:
+   - fix bug: select fast-queries first, then order randomly on SendEmail-"categories"
+     if one-run is not enough
+   - fix bug: skip mail-notification if nothing to send, but set Players.Notify to 'DONE'
+     to avoid re-doing on next run
+   - fix bug: removed after-loop setting of Players.Notify='DONE' if loop hadn't handled
+     ALL open notifications in one run, so they can be continued on next run
+
    * daily_cron.php:
    - disable debugging
 
