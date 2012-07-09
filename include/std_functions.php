@@ -410,8 +410,10 @@ function start_page( $title, $no_cache, $logged_in, &$player_row,
    if( $is_down && $logged_in )
       check_maintenance( $user_handle );
 
+   /* NOTE: prep for UTF-8 migration:
    if( $logged_in )
       error_log(sprintf("START_PAGE: U[%s] L[%s] AL[%s] ACH[%s]", @$player_row['Handle'], @$player_row['Lang'], @$_SERVER['HTTP_ACCEPT_LANGUAGE'], @$_SERVER['HTTP_ACCEPT_CHARSET']));
+    */
 
    start_html( $title, $no_cache, @$player_row['SkinName'], $style_string, $last_modified_stamp, $javascript );
 

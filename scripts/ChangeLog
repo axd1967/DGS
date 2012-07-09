@@ -22,6 +22,9 @@ ChangeLog
 ### ----- release-1_0_15-20120608 -----
 2012-07-09 juga
 
+   * include/std_functions.php (start_page):
+   - disabled logging of HTTP-headers (Accept-Language & Accept-Charset) to prep for UTF-8 migration
+
    * .cvsignore:
    - ignore timeadjust.php, apple-touch-icon*.png
 
