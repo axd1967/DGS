@@ -2557,8 +2557,8 @@ function is_logged_in($handle, $scode, &$player_row, $login_opts=LOGIN_DEFAULT_O
    {
       $vaultcnt = (int)@$player_row['VaultCnt'];
       $vaulttime = @$player_row['X_VaultTime'];
-      $vault_fmt = T_("The activity of the account '%s' grew too high and swallowed up our bandwidth and resources." .
-         "<br>Please, correct this behaviour.<br>This account is blocked until %s.");
+      $vault_fmt = T_("The activity of the account '%s' grew too high and swallowed up our bandwidth and resources.\n" .
+         "Please, correct this behaviour.\nThis account is blocked until %s.");
       if( $NOW >= $vaulttime ) // fever cool enough (expire-date passed -> reset quota for another period)
       {
          $vaultcnt = ( $uid > GUESTS_ID_MAX ) ? VAULT_CNT : VAULT_CNT_X; //multi-user account?
