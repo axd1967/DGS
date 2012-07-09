@@ -257,6 +257,8 @@ copy /images/apple-touch-icon-72x72-precomposed.png
 copy /images/apple-touch-icon-72x72.png
 copy /images/apple-touch-icon-114x114-precomposed.png
 copy /images/apple-touch-icon-114x114.png
+copy /images/apple-touch-icon-144x144-precomposed.png
+copy /images/apple-touch-icon-144x144.png
 copy /images/apple-touch-icon-precomposed.png
 copy /images/apple-touch-icon.png
 
