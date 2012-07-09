@@ -25,6 +25,8 @@ require_once( "include/classlib_game.php" );
 
 {
    connect2mysql();
+   set_time_limit(0); // don't want script-break during "transaction" with multi-db-queries or for large-datasets
+
 
    $logged_in = who_is_logged($player_row);
    if( !$logged_in )

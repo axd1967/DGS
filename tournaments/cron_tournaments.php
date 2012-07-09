@@ -38,6 +38,7 @@ if( ALLOW_TOURNAMENTS && !$is_down )
    else
       connect2mysql();
    $chk_time_diff -= 100;
+   set_time_limit(0); // don't want script-break during "transaction" with multi-db-queries or for large-datasets
 
 
    // Check that updates are not too frequent

@@ -186,11 +186,14 @@ function cnt_diff( $nam, $pfld, $gwhr, $gwhrB='', $gwhrW='')
 }
 
 
+
+// ---------- MAIN --------------------------------------------------
+
 {
    $beginall = getmicrotime();
    disable_cache();
-
    connect2mysql();
+   set_time_limit(0); // don't want script-break during "transaction" with multi-db-queries
 
    $logged_in = who_is_logged( $player_row);
    if( !$logged_in )
@@ -590,5 +593,6 @@ function cnt_diff( $nam, $pfld, $gwhr, $gwhrB='', $gwhrW='')
    echo "\n<br>Needed (all): " . sprintf("%1.3fs", (getmicrotime() - $beginall));
    echo "<hr>Done!!!\n";
    end_html();
-}
+}//main
+
 ?>

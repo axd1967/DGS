@@ -33,8 +33,9 @@ define('SEPLINE', "\n<p><hr>\n");
 {
    $beginall = getmicrotime();
    disable_cache();
-
    connect2mysql();
+   set_time_limit(0); // don't want script-break during "transaction" with multi-db-queries or for large-datasets
+
 
    $logged_in = who_is_logged( $player_row);
    if( !$logged_in )
@@ -253,7 +254,7 @@ define('SEPLINE', "\n<p><hr>\n");
    echo "\n<br>Needed (all): " . sprintf("%1.3fs", (getmicrotime() - $beginall));
    echo "\n<br>Done!!!\n";
    end_html();
-}
+}//main
 
 
 function update_forum_global_post_update( $do_it, $time )

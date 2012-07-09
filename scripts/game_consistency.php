@@ -27,8 +27,8 @@ require_once( 'include/classlib_game.php' );
 
 {
    disable_cache();
-
    connect2mysql();
+   set_time_limit(0); // don't want script-break during "transaction" with multi-db-queries or for large-datasets
 
    $logged_in = who_is_logged( $player_row);
    if( !$logged_in )
@@ -273,7 +273,7 @@ echo ">>>> Most of them needs manual fixes.";
 //---------
    echo "\n<hr>Done!!!\n";
    end_html();
-}
+}//main
 
 
 function check_consistency( $gid)
