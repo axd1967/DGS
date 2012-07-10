@@ -257,7 +257,7 @@ if( !$is_down )
               "AND me.Folder_nr IN ($folderstring) " .
               "AND me.Sender IN ('N','S') " . //exclude message to myself
               "AND Messages.Time > FROM_UNIXTIME($X_Lastaccess) " .
-            "ORDER BY Time DESC";
+            "ORDER BY me.mid DESC"; // me.mid (=Messages.ID) has same order as Messages.Time (but does not use temp-table-sort)
 
          $res3 = db_query( "halfhourly_cron.find_new_messages($uid)", $query );
          if( @mysql_num_rows($res3) > 0 )
