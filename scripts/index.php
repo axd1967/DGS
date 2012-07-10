@@ -55,6 +55,7 @@ require_once( "include/std_functions.php" );
             'data_report.php'          => "Show data from database",
             'mailtest.php'             => "Sends test mails",
             'recalculate_ratings2.php' => "Recalculate ratings (use with utter care)",
+            'check_players_email.php'  => "Check players for invalid email",
 
          "Consistency" => 0,
             'player_consistency.php'      => "Check consistency of Players-data",
