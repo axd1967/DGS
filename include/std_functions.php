@@ -1149,13 +1149,15 @@ function generate_random_password()
 function verify_invalid_email( $debugmsg, $email, $die_on_error=true )
 {
    // Syntax email-address:
-   // - RFC 5322 - 3.2.3 : see http://tools.ietf.org/html/rfc5322#section-3.2.3
+   // - RFC 5322 - 3.4.1 : see http://tools.ietf.org/html/rfc5322#section-3.4.1 ("local-part"),
+   //   RFC 5322 - 3.2.3 : see http://tools.ietf.org/html/rfc5322#section-3.2.3 ("atom")
    // - see http://en.wikipedia.org/wiki/Email_address#Local_part
    //   normally also the following chars are allowed: ! # $ % & ' * + - / = ? ^ _ ` { | } ~
    //   though some systems/organizations do not support all of these.
    //   DGS using only ...
    // - RFC 2822 - 3.4.1 : Addr-spec specification, see http: //www.faqs.org/rfcs/rfc2822
-   $regexp = "/^([-_a-z0-9]+)(\\.[-_a-z0-9]+)*@([-a-z0-9]+)(\\.[-a-z0-9]+)*(\\.[-a-z0-9]{2,63})\$/i";
+   static $atext = "[-+_a-z0-9]";
+   $regexp = "/^($atext+)(\\.$atext+)*@([-a-z0-9]+)(\\.[-a-z0-9]+)*(\\.[-a-z0-9]{2,63})\$/i";
    $res= preg_match($regexp, $email);
    if( !$res ) // invalid email
    {
