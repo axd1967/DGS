@@ -154,7 +154,7 @@ if( !$is_down )
          "SELECT ID AS uid, Handle, Email, SendEmail, NotifyFlags, UserFlags, UNIX_TIMESTAMP(Lastaccess) AS X_Lastaccess " .
          "FROM Players " .
          "WHERE Notify='NOW' AND FIND_IN_SET('ON',SendEmail) " .
-         "ORDER BY SendEmail, RAND()"); // fast-queries first, random-order on "categories" of SendEmail if one-run is not enough
+         "ORDER BY Lastaccess ASC"); // oldest-access users first (as newer-access-users can see new games/messages anyway)
    $nfyuser_iterator = new ListIterator( "halfhourly_cron.load_nfyuser" );
    while( $row = mysql_fetch_array( $result ) )
       $nfyuser_iterator->addItem( null, $row );
