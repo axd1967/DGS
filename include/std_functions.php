@@ -1439,7 +1439,7 @@ function send_message( $debugmsg, $text='', $subject=''
                $ids[]= $uid; // optimize: notify only eligible
          }
          if( count($ids) > 0 )
-            notify( $debugmsg, $ids );
+            notify( $debugmsg, $ids, '', NOTIFYFLAG_NEW_MSG );
       }
 
       // clear QST-cache for sender & receivers
@@ -1453,14 +1453,18 @@ function send_message( $debugmsg, $text='', $subject=''
    return $mid; //>0: no error
 } //send_message
 
+
+define('NOTIFYFLAG_NEW_MSG', 0x01 ); // new-message awaiting for mail-notifications
+
 /*!
  * \brief Sets Players.Notify-field (something to notify) for given uids.
  *        Starts the notification process for thoses from $ids having $type set.
- * \param $type is one element of the SET of SendEmail ('MOVE','MESSAGE' ...)
  * \param $ids id(s), or array of id(s)
+ * \param $type is one element of the SET of SendEmail ('MOVE','MESSAGE' ...), that need to be set in order to notify
+ * \param $nfy_flags if >0 set additional flags in Players.NotifyFlags; NOTIFYFLAG_...
  * \return ''=no-error, else error-string, e.g. 'no IDs'
  */
-function notify( $debugmsg, $ids, $type='')
+function notify( $debugmsg, $ids, $type='', $nfy_flags=0 )
 {
    if( !is_array($ids) )
       $ids= array( $ids);
@@ -1481,6 +1485,7 @@ function notify( $debugmsg, $ids, $type='')
    $ids= implode(',', $ids);
    db_query( "$debugmsg.notify",
       "UPDATE Players SET Notify='NEXT'"
+      .( $nfy_flags > 0 ? sprintf( ', NotifyFlags=NotifyFlags | %s ', (int)$nfy_flags ) : '' )
       ." WHERE ID IN ($ids) AND Notify='NONE'"
       ." AND FIND_IN_SET('ON',SendEmail)"
       .($type ? " AND FIND_IN_SET('$type',SendEmail)" : '')

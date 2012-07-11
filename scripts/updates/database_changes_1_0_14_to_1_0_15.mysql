@@ -2444,3 +2444,10 @@ UPDATE Players
    SET Email='' WHERE Email>'' AND (Email LIKE '% %' OR NOT Email LIKE '%@%') ;
 
 
+-- mark notify-types for mail-notifications
+ALTER TABLE Players
+   ADD NotifyFlags tinyint unsigned NOT NULL default '0' AFTER Notify ;
+UPDATE Players
+   SET NotifyFlags=1 WHERE Notify IN ('NOW','NEXT') ;
+
+

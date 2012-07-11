@@ -151,7 +151,7 @@ if( !$is_down )
 
    // pre-load all users to notify (to free db-result as soon as possible as main-loop can take quite a while)
    $result = db_query( 'halfhourly_cron.find_notifications',
-         "SELECT ID AS uid, Handle, Email, SendEmail, UNIX_TIMESTAMP(Lastaccess) AS X_Lastaccess " .
+         "SELECT ID AS uid, Handle, Email, SendEmail, NotifyFlags, UNIX_TIMESTAMP(Lastaccess) AS X_Lastaccess " .
          "FROM Players " .
          "WHERE Notify='NOW' AND FIND_IN_SET('ON',SendEmail) AND Email>'' " .
          "ORDER BY SendEmail, RAND()"); // fast-queries first, random-order on "categories" of SendEmail if one-run is not enough
@@ -243,7 +243,8 @@ if( !$is_down )
 
       // Find new messages
 
-      if( strpos($SendEmail, 'MESSAGE') !== false )
+      // only load if notify-flag set (to avoid too many slow-queries)
+      if( strpos($SendEmail, 'MESSAGE') !== false && ($NotifyFlags & NOTIFYFLAG_NEW_MSG) )
       {
          $folderstring = FOLDER_NEW;
          $query = "SELECT Messages.ID,Subject,Text, " .
@@ -291,7 +292,7 @@ if( !$is_down )
          // if loop fails, everyone would be notified again on next start -> so mark user as notified
          // Setting Notify to 'DONE' stop notifications until the player's next visit
          db_query( "halfhourly_cron.update_players_notify_Done($uid)",
-            "UPDATE Players SET Notify='DONE' " .
+            "UPDATE Players SET Notify='DONE', NotifyFlags=0 " .
             "WHERE ID=$uid AND Notify='NOW' LIMIT 1" );
       }
    } //notifications found

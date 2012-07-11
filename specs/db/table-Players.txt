@@ -53,6 +53,7 @@ OuA | Name             | varchar(40)                                 | NO   | MU
 Ou  | Rank             | varchar(40)                                 | NO   |     |                     |                |
  u  | SendEmail        | set('ON','MOVE','BOARD','MESSAGE')          | NO   |     |                     |                |
  S  | Notify           | enum('NONE','NEXT','NOW','DONE')            | NO   |     | NONE                |                |
+ S  | NotifyFlags      | tinyint(3) unsigned                         | NO   |     | 0                   |                |
  SZ | CountMsgNew      | mediumint(9)                                | NO   |     | -1                  |                |
  SZ | CountFeatNew     | smallint(6)                                 | NO   |     | -1                  |                |
  SZ | CountBulletinNew | smallint(6)                                 | NO   |     | -1                  |                |
@@ -169,6 +170,14 @@ Zu  | RejectTimeoutWin | tinyint(4)                                  | NO   |   
      - NEXT : something is there to notify, e.g. new message or game-move
      - NOW  : notify-state that is next picked up to send emails in halfhourly-cron (set to avoid race-condition in cron-script as well)
      - DONE : stops further notifications till the players next visit; set after last notification per email
+
+* NotifyFlags : bit-field indicating categories to check for building mail-notifications
+   - NOTE about mail-notifications:
+     for Players.Notify=NEXT always both, games-to-move and new-messages are checked.
+     Checking for new messages almost always is a slow query (7-12 on average); even games-loading (including board) only last <1 sec normally.
+     Therefore introduced notify-flags that indicate if new-messages (or other new data) must be checked
+     or not on collecting data for mail-notifications.
+   - 0x01 : if bit set, mail-notifications must check for new messages; if not set, no check for new messages needed
 
 * SendEmail : user-configuration controlling what notifications to sent per mail
    - ON : if set, mail-notifications are created at all and being sent out

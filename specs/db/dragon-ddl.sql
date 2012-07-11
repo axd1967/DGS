@@ -679,6 +679,7 @@ CREATE TABLE IF NOT EXISTS `Players` (
   `Rank` varchar(40) NOT NULL default '',
   `SendEmail` set('ON','MOVE','BOARD','MESSAGE') NOT NULL default '',
   `Notify` enum('NONE','NEXT','NOW','DONE') NOT NULL default 'NONE',
+  `NotifyFlags` tinyint(3) unsigned NOT NULL default '0',
   `CountMsgNew` mediumint(9) NOT NULL default '-1',
   `CountFeatNew` smallint(6) NOT NULL default '-1',
   `CountBulletinNew` smallint(6) NOT NULL default '-1',
