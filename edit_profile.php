@@ -531,7 +531,7 @@ function parse_edit_form( &$cfg_board )
          $emailnotify = 0;
       elseif( $emailnotify > 3 )
          $emailnotify = 3;
-      if( !empty($email) && $emailnotify >= 1 )
+      if( $emailnotify >= 1 )
       {
          $sendemail = 'ON';
          if( $emailnotify >= 2 ) // BOARD also includes moves+message
@@ -541,9 +541,10 @@ function parse_edit_form( &$cfg_board )
                $sendemail .= ',BOARD';
          }
          $vars['send_email'] = $sendemail;
+
+         if( empty($email) )
+            $errors[] = T_('Missing email-address for enabled email notifications.#profile');
       }
-      else if( !$email_error )
-         $errors[] = T_('Missing email-address for enabled email notifications.#profile');
       $vars['gui:email_notify'] = $emailnotify;
 
       $skipbulletin = 0;
