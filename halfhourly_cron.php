@@ -151,9 +151,9 @@ if( !$is_down )
 
    // pre-load all users to notify (to free db-result as soon as possible as main-loop can take quite a while)
    $result = db_query( 'halfhourly_cron.find_notifications',
-         "SELECT ID AS uid, Handle, Email, SendEmail, NotifyFlags, UNIX_TIMESTAMP(Lastaccess) AS X_Lastaccess " .
+         "SELECT ID AS uid, Handle, Email, SendEmail, NotifyFlags, UserFlags, UNIX_TIMESTAMP(Lastaccess) AS X_Lastaccess " .
          "FROM Players " .
-         "WHERE Notify='NOW' AND FIND_IN_SET('ON',SendEmail) AND Email>'' " .
+         "WHERE Notify='NOW' AND FIND_IN_SET('ON',SendEmail) " .
          "ORDER BY SendEmail, RAND()"); // fast-queries first, random-order on "categories" of SendEmail if one-run is not enough
    $nfyuser_iterator = new ListIterator( "halfhourly_cron.load_nfyuser" );
    while( $row = mysql_fetch_array( $result ) )
@@ -170,7 +170,25 @@ if( !$is_down )
       // check for valid email
       $Email = trim($Email);
       if( !$Email || verify_invalid_email("halfhourly_cron($uid)", $Email, /*err-die-collect-errors*/true) )
+      {
+         if( !($UserFlags & USERFLAG_NFY_BUT_NO_OR_INVALID_EMAIL) )
+         {
+            send_message( "halfhourly_cron.notify.bad_email($uid)",
+               sprintf( T_("You have enabled email notifications, which requires a valid email, " .
+                           "but there is no or an invalid email-address [%s] in your user profile.\n\n" .
+                           "Therefore all mail notifications are skipped till you have corrected your email-address " .
+                           "in your <home %s>user profile</home>."),
+                        $Email, 'edit_profile.php' ),
+               T_('Invalid email detected'),
+               $uid, '', /*notify*/false );
+         }
+
+         db_query( "halfhourly_cron.email_check.nfy_done($uid)[$Email]",
+            "UPDATE Players " .
+            "SET UserFlags=UserFlags | ".USERFLAG_NFY_BUT_NO_OR_INVALID_EMAIL.", Notify='DONE' " .
+            "WHERE ID=$uid AND Notify='NOW' LIMIT 1" );
          continue;
+      }//no-or-invalid-email
 
       $msg = sprintf( "A message or game move is waiting for you [ %s ] at:\n ", $Handle )
                 . mail_link('',"status.php")."\n"
@@ -291,7 +309,7 @@ if( !$is_down )
       {
          // if loop fails, everyone would be notified again on next start -> so mark user as notified
          // Setting Notify to 'DONE' stop notifications until the player's next visit
-         db_query( "halfhourly_cron.update_players_notify_Done($uid)",
+         db_query( "halfhourly_cron.nfy_done($uid)",
             "UPDATE Players SET Notify='DONE', NotifyFlags=0 " .
             "WHERE ID=$uid AND Notify='NOW' LIMIT 1" );
       }

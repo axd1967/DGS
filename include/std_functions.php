@@ -226,7 +226,8 @@ define('MAX_REJECT_TIMEOUT', 120); // days
 
 //-----
 // UserFlags (also stored in cookie)
-define('USERFLAG_JAVASCRIPT_ENABLED', 0x001);
+define('USERFLAG_JAVASCRIPT_ENABLED', 0x0001);
+define('USERFLAG_NFY_BUT_NO_OR_INVALID_EMAIL', 0x0002); // user has SendEmail>'' but missing or invalid Email
 //-----
 
 
@@ -1488,6 +1489,7 @@ function notify( $debugmsg, $ids, $type='', $nfy_flags=0 )
       .( $nfy_flags > 0 ? sprintf( ', NotifyFlags=NotifyFlags | %s ', (int)$nfy_flags ) : '' )
       ." WHERE ID IN ($ids) AND Notify='NONE'"
       ." AND FIND_IN_SET('ON',SendEmail)"
+      ." AND (UserFlags & ".USERFLAG_NFY_BUT_NO_OR_INVALID_EMAIL.") = 0"
       .($type ? " AND FIND_IN_SET('$type',SendEmail)" : '')
       ." LIMIT $cnt" );
 

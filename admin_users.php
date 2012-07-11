@@ -264,7 +264,11 @@ require_once( "include/form_functions.php" );
          $fval = @$urow[$field];
          if( $field == 'UserFlags' )
          {
-            $fval = sprintf( 'JavaScript=%s', ( $fval & USERFLAG_JAVASCRIPT_ENABLED ) ? 'ON' : 'OFF' );
+            $out = array();
+            $out[] = sprintf( 'JavaScript=%s', ( $fval & USERFLAG_JAVASCRIPT_ENABLED ) ? 'ON' : 'OFF' );
+            if( $fval & USERFLAG_NFY_BUT_NO_OR_INVALID_EMAIL )
+               $out[] = 'UserFlag_NFY_but_no_or_invalid_Email';
+            $fval = implode(', ', $out);
          }
          $uform->add_row( array(
             'DESCRIPTION', $field,

@@ -522,6 +522,8 @@ function parse_edit_form( &$cfg_board )
          if( $email_error )
             $errors[] = ErrorCode::get_error_text($email_error);
       }
+      else
+         $email_error = false;
       $vars['email'] = $email;
 
       $emailnotify = (int)@$_REQUEST['emailnotify'];
@@ -538,11 +540,11 @@ function parse_edit_form( &$cfg_board )
             if( $emailnotify >= 3 )
                $sendemail .= ',BOARD';
          }
+         $vars['send_email'] = $sendemail;
       }
-      else
-         $sendemail = '';
+      else if( !$email_error )
+         $errors[] = T_('Missing email-address for enabled email notifications.#profile');
       $vars['gui:email_notify'] = $emailnotify;
-      $vars['send_email'] = $sendemail;
 
       $skipbulletin = 0;
       foreach( array( BULLETIN_SKIPCAT_TOURNAMENT, BULLETIN_SKIPCAT_FEATURE, BULLETIN_SKIPCAT_PRIVATE_MSG, BULLETIN_SKIPCAT_SPAM ) as $mask )
@@ -584,6 +586,8 @@ function parse_edit_form( &$cfg_board )
          else
             $user_flags &= ~USERFLAG_JAVASCRIPT_ENABLED;
       }
+      if( !$email_error ) // reset error-flag if email valid
+         $user_flags &= ~USERFLAG_NFY_BUT_NO_OR_INVALID_EMAIL;
       $vars['user_flags'] = $user_flags;
 
 
