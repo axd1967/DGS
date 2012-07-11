@@ -3300,7 +3300,7 @@ function delete_all_observers( $gid, $notify, $Text='' )
          mysql_free_result($result);
 
          send_message( "delete_all_observers($gid)", $Text, $Subject
-            , $to_ids, '', /*notify*/false
+            , $to_ids, '', /*notify*/true
             , /*sys-msg*/0, MSGTYPE_NORMAL, $gid);
       }
       else
