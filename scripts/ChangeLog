@@ -19,8 +19,52 @@ Developers INFO:
 ChangeLog
 ------------------------------------------------------------------
 
+2012-07-11 juga
+
 ### ----- release-1_0_15-20120608 -----
+   * include/std_functions.php (USERFLAG_NFY_BUT_NO_OR_INVALID_EMAIL, notify),
+     admin_users.php,
+     edit_profile.php,
+     halfhourly_cron.php:
+   - introduced user-flag USERFLAG_NFY_BUT_NO_OR_INVALID_EMAIL to mark user-account
+     with missing or having an invalid email-address
+     - halfhourly-cron: send user a message to correct the email in user-profile
+       on missing or invalid email for mail-notifications in halfhourly-cron,
+     - edit-profile: reset flag when editing user-profile after providing a valid email
+     - edit-profile: show error if mail-notifications enabled by email is missing
+
+   * include/std_functions.php (send_message, notify),
+     scripts/updates/database_changes_1_0_14_to_1_0_15.mysql,
+     specs/db/table-Players.txt, specs/db/dragon-ddl.sql,
+     halfhourly_cron.php:
+   - mail-notifications: for Players.Notify=NEXT always both, games-to-move and
+     new-messages are checked. Checking for new messages almost always is a slow
+     query (7-12 on average).
+     Therefore introducing notify-flags that indicate if new-messages must be checked or not
+     on collecting data for mail-notifications.
+     - added Players.NotifyFlags for bitmask indicating new data for mail-notifications
+     - used mask 0x01 to indicate to check for new-messages
+-----------
+-- mark notify-types for mail-notifications
+ALTER TABLE Players
+   ADD NotifyFlags tinyint unsigned NOT NULL default '0' AFTER Notify ;
+UPDATE Players
+   SET NotifyFlags=1 WHERE Notify IN ('NOW','NEXT') ;
+-----------
+
 2012-07-10 juga
+
+   * include/error_functions.php (need_db_errorlog):
+   - disable logging of error-codes: not_logged_in, unknown_user
+
+   * halfhourly_cron.php:
+   - order messages by Messages.ID in hope to speed up message-query
+
+   * include/std_functions.php (verify_invalid_email):
+   - adjusted email-regex allowing '+' character
+
+   * scripts/check_players_email.php, scripts/index.php:
+   - added script to verify email of all players
 
    * INSTALL:
    - adjusted crontab for halfhourly-cron extending read-timeout (900s wget-default to 1800s)
