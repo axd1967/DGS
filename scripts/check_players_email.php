@@ -73,8 +73,7 @@ require_once( "include/classlib_game.php" );
    }
    mysql_free_result($result);
 
-   if( $do_it )
-      _echo('<br><br>Checking players email finished.');
+   _echo('<br><br>Checking players email finished.');
 
    _echo( "<p></p>Done." );
 
