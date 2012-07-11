@@ -35,6 +35,9 @@ define('SUB_PATH', '/');
 // From address for notification emails
 define('EMAIL_FROM', 'noreply@localhost');
 
+// additional sendmail parameters for local MTA used for sending mail in send_email()-function
+define('SENDMAIL_PARAMETERS', '');
+
 // comma-separated list with email-addresses of admins to inform about internal server-problems
 define('EMAIL_ADMINS', 'root@localhost');
 

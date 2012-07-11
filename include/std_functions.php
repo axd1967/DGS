@@ -1186,8 +1186,8 @@ define('EMAILFMT_SKIP_WORDWRAP', 0x01); // skipping word-wrapping
  * \param $formatopts format-options for email: 0=none, EMAILFMT_SKIP_WORDWRAP
  * \param $subject default => FRIENDLY_LONG_NAME.' notification';
  * \param $headers default => 'From: '.EMAIL_FROM;
- * \param $params optional command-line paramenters for mail-command (may differ);
- *     none per default
+ * \param $params optional command-line paramenters for mail-command (may differ); none per default;
+ *     always included are params from SENDMAIL_PARAMETERS from local config
  * \return true on success sending mail, false otherwise
  **/
 function send_email( $debugmsg, $email, $formatopts, $text, $subject='', $headers='', $params='')
@@ -1240,21 +1240,21 @@ function send_email( $debugmsg, $email, $formatopts, $text, $subject='', $header
    }
    $headers= preg_replace( $rgx, $rpl, trim($headers)); //.$eol;
 
-   $params= trim($params);
+   $params= trim(SENDMAIL_PARAMETERS . ' ' . $params);
    if( $params )
       $params= preg_replace( $rgx, $rpl, trim($params)); //.$eol;
 
    if( is_array($email) )
-      $email = implode( ',', $email);
+      $email = trim( implode( ',', $email) );
 
    if( function_exists('mail') )
    {
       $begin_time = time();
-      $res= @mail( $email, $subject, $text, $headers, $params);
+      $res = @mail( $email, $subject, $text, $headers, $params);
       error_log( sprintf("SEND_EMAIL($debugmsg,$email): subject [$subject] -> time %s", time() - $begin_time ) );
    }
    else
-      $res= false;
+      $res = false;
 
    if( is_string($debugmsg) && !$res )
       error('mail_failure', "send_email.$debugmsg($email,[$subject])");
