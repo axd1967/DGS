@@ -1248,7 +1248,11 @@ function send_email( $debugmsg, $email, $formatopts, $text, $subject='', $header
       $email = implode( ',', $email);
 
    if( function_exists('mail') )
+   {
+      $begin_time = time();
       $res= @mail( $email, $subject, $text, $headers, $params);
+      error_log( sprintf("SEND_EMAIL($debugmsg,$email): subject [$subject] -> time %s", time() - $begin_time ) );
+   }
    else
       $res= false;
 
