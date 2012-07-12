@@ -17,8 +17,6 @@ You should have received a copy of the GNU Affero General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-define('DBG_QUERY', 1);
-
 require_once 'include/std_functions.php';
 require_once 'include/std_classes.php';
 require_once 'include/mail_functions.php';
@@ -193,6 +191,7 @@ if( !$is_down )
       $msg = sprintf( "A message or game move is waiting for you [ %s ] at:\n ", $Handle )
                 . mail_link('',"status.php")."\n"
            . "(No more notifications will be sent until your reconnection)\n";
+      $begin_time = time();
 
       // Find games
 
@@ -257,6 +256,7 @@ if( !$is_down )
          unset($TheBoard);
          unset($game_row);
       }//games of user
+      $time_games = time();
 
 
       // Find new messages
@@ -299,12 +299,14 @@ if( !$is_down )
          }
          mysql_free_result($res3);
       }//messages of user
+      $time_msgs = time();
 
       $msg .= str_pad('', 47, '-');
 
 
       // do not stop on mail-failure (but collect mail-errors)
       $nfy_done = send_email("halfhourly_cron($uid)", $Email, EMAILFMT_SKIP_WORDWRAP/*msg already wrapped*/, $msg );
+      $time_mail = time();
       if( $nfy_done )
       {
          // if loop fails, everyone would be notified again on next start -> so mark user as notified
@@ -313,6 +315,9 @@ if( !$is_down )
             "UPDATE Players SET Notify='DONE', NotifyFlags=0 " .
             "WHERE ID=$uid AND Notify='NOW' LIMIT 1" );
       }
+
+      error_log( sprintf("MONITOR[halfhourly_cron.mail_notifications](%s): GAME %s, MSG %s, MAIL %s => SUM %ss",
+            $uid, $time_games - $begin_time, $time_msgs - $time_games, $time_mail - $time_msgs, time() - $begin_time ) );
    } //notifications found
 
 
