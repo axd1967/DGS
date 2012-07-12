@@ -540,12 +540,14 @@ function parse_edit_form( &$cfg_board )
             if( $emailnotify >= 3 )
                $sendemail .= ',BOARD';
          }
-         $vars['send_email'] = $sendemail;
 
          if( empty($email) )
             $errors[] = T_('Missing email-address for enabled email notifications.#profile');
       }
+      else
+         $sendemail = '';
       $vars['gui:email_notify'] = $emailnotify;
+      $vars['send_email'] = $sendemail;
 
       $skipbulletin = 0;
       foreach( array( BULLETIN_SKIPCAT_TOURNAMENT, BULLETIN_SKIPCAT_FEATURE, BULLETIN_SKIPCAT_PRIVATE_MSG, BULLETIN_SKIPCAT_SPAM ) as $mask )
