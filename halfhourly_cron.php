@@ -96,26 +96,41 @@ if( !$is_down )
       "SELECT ID, ClockUsed FROM Players " .
       "WHERE OnVacation>0 AND OnVacation<=1/($this_ticks_per_day)" );
 
-   while( $prow = mysql_fetch_assoc( $result ) )
+   ta_begin();
    {
-      $uid = $prow['ID'];
-      $ClockUsed = $prow['ClockUsed'];
-      $WeekendClockUsed = $ClockUsed + WEEKEND_CLOCK_OFFSET;
+      while( $prow = mysql_fetch_assoc( $result ) )
+      {
+         $uid = $prow['ID'];
+         $ClockUsed = $prow['ClockUsed'];
+         $WeekendClockUsed = $ClockUsed + WEEKEND_CLOCK_OFFSET;
 
-      // NOTE: LastTicks handle -(time spent) at the moment of the start of vacations
-      //       inserts this spent time into the (possibly new) ClockUsed by the player.
-      // NOTE: use weekendclock on Games.WeekendClock=N, otherwise use normal clock
-      db_query( 'edit_vacation.update_games',
-         "UPDATE Games"
-         ." INNER JOIN Clock ON Clock.ID=$ClockUsed"
-         ." SET Games.ClockUsed=IF(Games.WeekendClock='Y',$ClockUsed,$WeekendClockUsed)"
-            .", Games.LastTicks=Games.LastTicks+Clock.Ticks"
-         ." WHERE Games.Status" . IS_STARTED_GAME
-         ." AND Games.ToMove_ID=$uid"
-         ." AND Games.ClockUsed<0" // VACATION_CLOCK
-         );
+         // NOTE: LastTicks handle -(time spent) at the moment of the start of vacations
+         //       inserts this spent time into the (possibly new) ClockUsed by the player.
+         // NOTE: use weekendclock on Games.WeekendClock=N, otherwise use normal clock
+         db_query( "edit_vacation.update_games.weekend_clock_running($uid)",
+            "UPDATE Games"
+            ." INNER JOIN Clock ON Clock.ID=$ClockUsed"
+            ." SET Games.ClockUsed=$ClockUsed"
+               .", Games.LastTicks=Games.LastTicks+Clock.Ticks"
+            ." WHERE Games.Status" . IS_STARTED_GAME
+            ." AND Games.ToMove_ID=$uid"
+            ." AND Games.ClockUsed<0" // VACATION_CLOCK
+            ." AND Games.WeekendClock='Y'" // weekend-clock running
+            );
+         db_query( "edit_vacation.update_games.weekend_clock_stopped($uid)",
+            "UPDATE Games"
+            ." INNER JOIN Clock ON Clock.ID=$WeekendClockUsed"
+            ." SET Games.ClockUsed=$WeekendClockUsed"
+               .", Games.LastTicks=Games.LastTicks+Clock.Ticks"
+            ." WHERE Games.Status" . IS_STARTED_GAME
+            ." AND Games.ToMove_ID=$uid"
+            ." AND Games.ClockUsed<0" // VACATION_CLOCK
+            ." AND Games.WeekendClock='N'" // weekend-clock stopped
+            );
+      }
+      mysql_free_result($result);
    }
-   mysql_free_result($result);
+   ta_end();
 
 
 
@@ -316,8 +331,8 @@ if( !$is_down )
             "WHERE ID=$uid AND Notify='NOW' LIMIT 1" );
       }
 
-      error_log( sprintf("MONITOR[halfhourly_cron.mail_notifications](%s): GAME %s, MSG %s, MAIL %s => SUM %ss",
-            $uid, $time_games - $begin_time, $time_msgs - $time_games, $time_mail - $time_msgs, time() - $begin_time ) );
+      error_log( sprintf("MONITOR[halfhourly_cron.mail_notifications](%s): GAME %s, MSG %s, MAIL %s",
+            $uid, $time_games - $begin_time, $time_msgs - $time_games, $time_mail - $time_msgs ) );
    } //notifications found
 
 
