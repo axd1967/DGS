@@ -36,8 +36,9 @@ define('MESSAGEOPT_MID', 'mid');
 define('MESSAGEOPT_OTHER_UID', 'ouid');
 define('MESSAGEOPT_OTHER_HANDLE', 'ouser');
 define('MESSAGEOPT_FOLDER', 'folder');
-define('MESSAGEOPT_PARENT_MID', 'pmid');
-define('QMESSAGE_OPTIONS', 'mid|ouid|ouser|folder|pmid');
+define('MESSAGEOPT_SUBJECT', 'subj');
+define('MESSAGEOPT_MESSAGE', 'msg');
+define('QMESSAGE_OPTIONS', 'mid|ouid|ouser|folder|subj|msg');
 
 define('MESSAGECMD_SEND_MSG', 'send_msg');
 define('MESSAGECMD_MOVE_MESSAGE', 'move_msg');
@@ -337,7 +338,7 @@ class QuickHandlerMessage extends QuickHandler
    function process_cmd_send_msg()
    {
       $action = 'send_msg';
-      $subject = trim(@$_REQUEST['subj']); // mandatory only for send_msg
+      $subject = trim(@$_REQUEST[MESSAGEOPT_SUBJECT]); // mandatory only for send_msg
       $gid = 0;
 
       $cmd = $this->quick_object->cmd;
@@ -362,7 +363,7 @@ class QuickHandlerMessage extends QuickHandler
             'reply'        => $this->mid,
             'mpgid'        => 0,
             'subject'      => $subject,
-            'message'      => trim(@$_REQUEST['msg']),
+            'message'      => trim(@$_REQUEST[MESSAGEOPT_MESSAGE]),
             'gid'          => $gid,
             'disputegid'   => 0,
          );
