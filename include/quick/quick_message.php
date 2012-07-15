@@ -154,8 +154,17 @@ class QuickHandlerMessage extends QuickHandler
       }
       elseif( $cmd == MESSAGECMD_SEND_MSG || $cmd == MESSAGECMD_ACCEPT_INVITATION || $cmd == MESSAGECMD_DECLINE_INVITATION )
       {
-         if( !is_numeric($this->mid) || $this->mid < 0 )
-            error('invalid_args', "$dbgmsg.bad_message_id");
+         if( $cmd == MESSAGECMD_SEND_MSG )
+         {
+            // mid is optional (or mid=0 for new msg), if present then must be numeric>0 for reply
+            if( $this->mid && ( !is_numeric($this->mid) || $this->mid < 0 ) )
+               error('invalid_args', "$dbgmsg.bad_message_id");
+         }
+         else // accept|decline-invitation
+         {
+            if( !is_numeric($this->mid) || $this->mid < 0 )
+               error('invalid_args', "$dbgmsg.bad_message_id");
+         }
 
          if( $this->mid > 0 ) // reply
          {
@@ -360,7 +369,7 @@ class QuickHandlerMessage extends QuickHandler
             'action'       => $action,
             'senderid'     => $this->my_id,
             'folder'       => $this->folder_id,
-            'reply'        => $this->mid,
+            'reply'        => (int)$this->mid,
             'mpgid'        => 0,
             'subject'      => $subject,
             'message'      => trim(@$_REQUEST[MESSAGEOPT_MESSAGE]),
