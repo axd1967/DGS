@@ -615,7 +615,8 @@ CREATE TABLE IF NOT EXISTS `MoveStats` (
   `SlotWDay` tinyint(4) NOT NULL default '0',
   `SlotWeek` tinyint(4) NOT NULL default '0',
   `Counter` mediumint(8) unsigned NOT NULL default '0',
-  PRIMARY KEY  (`uid`,`SlotTime`,`SlotWDay`,`SlotWeek`)
+  PRIMARY KEY  (`uid`,`SlotTime`,`SlotWDay`,`SlotWeek`),
+  KEY `SlotWeek` (`SlotWeek`)
 ) ENGINE=MyISAM DEFAULT CHARSET=latin1;
 
 -- --------------------------------------------------------

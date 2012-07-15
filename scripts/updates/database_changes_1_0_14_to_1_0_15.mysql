@@ -2451,3 +2451,8 @@ UPDATE Players
    SET NotifyFlags=1 WHERE Notify IN ('NOW','NEXT') ;
 
 
+-- speed-up cleanup of MoveStats
+ALTER TABLE MoveStats
+   ADD KEY SlotWeek (SlotWeek) ;
+
+
