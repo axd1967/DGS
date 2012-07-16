@@ -19,9 +19,42 @@ Developers INFO:
 ChangeLog
 ------------------------------------------------------------------
 
-2012-07-11 juga
+2012-07-15 juga
+
+   * scripts/updates/database_changes_1_0_14_to_1_0_15.mysql, specs/db/dragon-ddl.sql:
+   - speed-up cleanup of MoveStats by adding key required to remove old entries
+-----------
+-- speed-up cleanup of MoveStats
+ALTER TABLE MoveStats
+   ADD KEY SlotWeek (SlotWeek) ;
+-----------
 
 ### ----- release-1_0_15-20120608 -----
+   * include/quick/quick_message.php (QuickHandlerMessage.prepare):
+   - bugfix: option 'mid' is optional for send-message (or 0 for new msg),
+     or if present it must be numeric and >0 for reply-msg
+
+2012-07-14 juga
+
+   * halfhourly_cron.php:
+   - fix bug: resetting game-clock for player leaving vacation used wrong clock
+     for LastTicks-calculation for games with weekend-clock stopped
+
+   * include/quick/quick_message.php (class QuickHandlerMessage, ~.process_cmd_send_msg):
+   - fix bug: add options 'subj|msg' to allowed options
+
+2012-07-12 juga
+
+   * halfhourly_cron.php:
+   - added time-measure for processing one user for mail-notifications
+   - disabled db-query debugging
+
+   * edit_profile.php:
+   - bugfix: adjusted check to email being optional if email-notification is disabled
+   - bugfix: allow disabling email-notification regardless of given email
+
+2012-07-11 juga
+
    * include/config.php (SENDMAIL_PARAMETERS),
      include/std_functions.php (send_email):
    - added local sendmail-parameters SENDMAIL_PARAMETERS for local MTA
