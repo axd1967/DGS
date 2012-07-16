@@ -253,8 +253,8 @@ class QuickHandlerMessage extends QuickHandler
       $this->addResultKey( 'flags', QuickHandlerMessage::convertMessageFlags($row['Flags']) );
       $this->addResultKey( 'folder',
          QuickHandlerFolder::build_obj_folder(
-            (int)$this->msg_row['Folder_nr'], $this->folder, $this->is_with_option(QWITH_FOLDER)) );
-      $this->addResultKey( 'created_at', QuickHandler::formatDate(@$urow['X_Time']) );
+            (int)$row['Folder_nr'], $this->folder, $this->is_with_option(QWITH_FOLDER)) );
+      $this->addResultKey( 'created_at', QuickHandler::formatDate(@$row['X_Time']) );
       $this->addResultKey( 'thread', (int)$row['Thread'] );
       $this->addResultKey( 'level', (int)$row['Level'] );
       $this->addResultKey( 'message_prev', (int)$row['ReplyTo'] );
