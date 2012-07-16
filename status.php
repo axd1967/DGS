@@ -352,6 +352,7 @@ function load_games_to_move( $uid, &$gtable )
       $arr_titles_colors = get_color_titles();
       $gtable->set_extend_table_form_function( 'status_games_extend_table_form' ); //func
 
+      $timefmt = TIMEFMT_ADDTYPE | TIMEFMT_ADDEXTRA | TIMEFMT_SHORT | TIMEFMT_ZERO;
       while( $row = mysql_fetch_assoc( $result ) )
       {
          $cnt_rows++;
@@ -404,7 +405,7 @@ function load_games_to_move( $uid, &$gtable )
          if( $gtable->Is_Column_Displayed[10] )
          {
             $my_col = ( $X_Color & 2 ) ? WHITE : BLACK;
-            $row_arr[10] = build_time_remaining( $row, $my_col, /*is_to_move*/true );
+            $row_arr[10] = build_time_remaining( $row, $my_col, /*is_to_move*/true, $timefmt );
          }
          if( $gtable->Is_Column_Displayed[11] )
          {
