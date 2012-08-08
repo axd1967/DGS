@@ -111,6 +111,7 @@ CREATE TABLE IF NOT EXISTS `Clock` (
   `ID` smallint(6) NOT NULL,
   `Ticks` int(11) NOT NULL default '0',
   `Lastchanged` datetime NOT NULL default '0000-00-00 00:00:00',
+  `Finished` datetime NOT NULL default '0000-00-00 00:00:00',
   PRIMARY KEY  (`ID`)
 ) ENGINE=MyISAM DEFAULT CHARSET=latin1;
 

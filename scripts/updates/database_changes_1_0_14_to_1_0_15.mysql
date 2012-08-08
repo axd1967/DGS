@@ -2456,3 +2456,8 @@ ALTER TABLE MoveStats
    ADD KEY SlotWeek (SlotWeek) ;
 
 
+-- store end-time of cron-run
+ALTER TABLE Clock
+   ADD Finished datetime NOT NULL default '0000-00-00 00:00:00' ;
+
+

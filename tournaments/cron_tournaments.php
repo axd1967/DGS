@@ -132,7 +132,7 @@ if( ALLOW_TOURNAMENTS && !$is_down )
    // ---------- END --------------------------------
 
    db_query( 'cron_tournament.reset_tick',
-      "UPDATE Clock SET Ticks=0 WHERE ID=".CLOCK_CRON_TOURNEY." LIMIT 1" );
+      "UPDATE Clock SET Ticks=0, Finished=FROM_UNIXTIME(".time().") WHERE ID=".CLOCK_CRON_TOURNEY." LIMIT 1" );
 
    if( !$chained )
       $TheErrors->dump_exit('cron_tournament');

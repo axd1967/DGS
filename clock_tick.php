@@ -64,7 +64,7 @@ if( !$is_down )
    // ---------- END --------------------------------
 
    db_query( 'clock_tick.reset_tick',
-         "UPDATE Clock SET Ticks=0 WHERE ID=".CLOCK_CRON_TICK." LIMIT 1" );
+         "UPDATE Clock SET Ticks=0, Finished=FROM_UNIXTIME(".time().") WHERE ID=".CLOCK_CRON_TICK." LIMIT 1" );
 
    if( !$chained )
       $TheErrors->dump_exit('clock_tick');

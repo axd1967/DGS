@@ -230,7 +230,7 @@ if num_rows==2 {compute differences and checks}
    // ---------- END --------------------------------
 
    db_query( 'daily_cron.reset_tick',
-         "UPDATE Clock SET Ticks=0 WHERE ID=".CLOCK_CRON_DAY." LIMIT 1" );
+         "UPDATE Clock SET Ticks=0, Finished=FROM_UNIXTIME(".time().") WHERE ID=".CLOCK_CRON_DAY." LIMIT 1" );
 
    if( !$chained )
       $TheErrors->dump_exit('daily_cron');
