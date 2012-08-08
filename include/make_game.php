@@ -489,15 +489,15 @@ function create_game(&$black_row, &$white_row, &$game_info_row, $game_setup=null
       if( !is_array($arr_shape) ) // overwrite with defaults
          error('invalid_snapshot', "create_game.check.shape($shape_id,$shape_snapshot)");
 
-      $GameSnapshot = $arr_shape['Snapshot'];
       $shape_black_first = (bool)@$arr_shape['PlayColorB'];
+      $GameSnapshot = $arr_shape['Snapshot'];
    }
    else
    {
       $shape_id = 0;
       $shape_snapshot = '';
       $shape_black_first = true;
-      $GameSnapshot = '';
+      $GameSnapshot = GameSnapshot::init_game_snapshot();
    }
 
    // multi-player-game
@@ -646,11 +646,9 @@ function create_game(&$black_row, &$white_row, &$game_info_row, $game_setup=null
    $upd_game->upd_txt('WeekendClock',  $game_info_row['WeekendClock']);
    $upd_game->upd_txt('StdHandicap', $stdhandicap);
    $upd_game->upd_txt('Rated', $game_info_row['Rated']);
-   $upd_game->upd_txt('Snapshot', GameSnapshot::init_game_snapshot());
+   $upd_game->upd_txt('Snapshot', $GameSnapshot);
    $upd_game->upd_txt('ShapeSnapshot', $shape_snapshot);
    $upd_game->upd_txt('GameSetup', $game_setup_encoded);
-   if( $shape_id > 0 )
-      $upd_game->upd_txt('Snapshot', $GameSnapshot);
 
    $set_game_query = $upd_game->get_query();
    if( $gid > 0 ) // game prepared by the invitation process or multi-player-game-setup
