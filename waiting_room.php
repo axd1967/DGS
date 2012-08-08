@@ -72,11 +72,12 @@ require_once( 'include/classlib_userconfig.php' );
       T_('Manual')         => "Handicaptype IN ('nigiri','double','black','white')",
       T_('Fix Color')      => "Handicaptype IN ('double','black','white')",
       T_('Fair Komi')      => "Handicaptype IN ('auko_sec','auko_opn','div_ykic','div_ikyc')",
+      T_('No Fair Komi')   => "Handicaptype NOT IN ('auko_sec','auko_opn','div_ykic','div_ikyc')",
    );
 
    $game_type_filter_array = MultiPlayerGame::build_game_type_filter_array();
    $game_type_filter_array[T_('Shape-Game#shape')] = "ShapeID>0";
-   $game_type_filter_array[T_('Fair Komi#fairkomi')] = "Handicaptype IN ('auko_sec','auko_opn','div_ykic','div_ikyc')";
+   $game_type_filter_array[T_('No Shapes#shape')] = "ShapeID=0";
 
    $my_rating = $player_row['Rating2'];
    $my_rated_games = (int)$player_row['RatedGames'];
