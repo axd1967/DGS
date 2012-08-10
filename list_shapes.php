@@ -123,7 +123,7 @@ $GLOBALS['ThePage'] = new Page('ShapeList');
       {
          $str = make_html_safe( $shape->Name, false, $rx_term );
          if( strlen($shape->Notes) )
-            $str .= echo_image_note( T_('Shape has notes#shape') );
+            $str .= echo_image_note( $shape->Notes );
          $row_str[ 4] = $str;
       }
       if( @$table->Is_Column_Displayed[ 5] )
