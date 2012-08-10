@@ -264,7 +264,7 @@ class QuickHandlerGameList extends QuickHandler
          $uid = (int)$row[$icol.'_ID'];
          $time_remaining = build_time_remaining( $row, $col,
                /*is_to_move*/ ( $uid == $row['ToMove_ID'] ),
-               TIMEFMT_QUICK|TIMEFMT_ADDTYPE|TIMEFMT_ADDEXTRA|TIMEFMT_ZERO );
+               TIMEFMT_QUICK|TIMEFMT_ADDTYPE|TIMEFMT_ZERO );
 
          $out[$prefix.'_user'] = $this->build_obj_user2($uid, $row, $icol.'_');
          $out[$prefix.'_gameinfo'] = array(

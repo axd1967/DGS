@@ -335,8 +335,9 @@ function print_status_games( $version, $player_row )
    {
       append_data(QST_CACHE_GAMES,
            "## G,game_id,'opponent_handle',player_color,'lastmove_date','time_remaining',game_action,game_status,move_id,tournament_id,shape_id,game_type,game_prio,'opponent_lastaccess_date',handicap\n" );
-      $timefmt_flags |= TIMEFMT_ADDEXTRA;
    }
+   else
+      $timefmt_flags |= TIMEFMT_NO_EXTRA;
 
    $arr_colors = array( BLACK => 'B', WHITE => 'W' );
    $crc_val = (int)$version;

@@ -26,7 +26,7 @@ On DGS there are 3 time-systems in use:
    1. Japanese Byo-yomi
    2. Canadian Byo-yomi
    3. Fischer time
-#
+
 #-------- (0) Time-Formats ----------------------------------------------------
 
 All text-representations are asserted on in unit-test TimeFormatTest.
@@ -47,34 +47,24 @@ Text-representation of time-formats for time-limits:
 
 Text-representation of time-formats for remaining-time:
 
-* abbreviated extra-time (T='J/C/F' for JAP/CAN/FIS-time):
-
-   "T: t (-)"        : t main-time left (absolute time, so without byo-yomi), OR
-                       t main-/byo-yomi-time left (and in last byo-yomi period for JAP-time)
-
-   "T: t (+)"        : t main-time left, '(+)' indicates that there is byo-yomi/extra-time
-
-   "T: t (..)"       : t byo-yomi-time left, '(..)' indicates that byo-yomi has been entered
-
-* all formats for JAP/CAN/FISH-time:
-   - m/B/b/t = "Xd Yh" (X days, Y hours), e.g. "2d 3h", "10d", "7h", "0h"
+* all formats for JAP/CAN/FIS-time:
+   - m/B/b = "Xd Yh" (X days, Y hours), e.g. "2d 3h", "10d", "7h", "0h"
    - p/P = [integer]
 
-   "J: m (+ B * p)"  : Japanese time, m main-time left + extra-time (B time per move and p extra byo-yomi-periods left)
-   "J: b (B * p)"    : Japanese time, in byo-yomi (no '+'), b byo-yomi-time left + extra-time (B time per move and p extra byo-yomi-periods left)
-   "J: t (-)"        : Japanese time, t main-time left or if in byo-yomi, only t byo-yomi-time left (no extra-periods left)
-   "J: m (+)"        : Japanese time, m main-time left, not in byo-yomi, there is extra-time (left out for shortness)
-   "J: b (..)"       : Japanese time, in byo-yomi, b byo-yomi-time left, there is extra-time (left out for shortness)
+   "J: m (-)"         : Japanese time, m main-time left (absolute time, no extra-periods)
+   "J: m (+ B * p)"   : Japanese time, m main-time left + extra-time (B time per move and p extra byo-yomi-periods left)
+   "J: b (B * p)"     : Japanese time, in byo-yomi (no '+'), b byo-yomi-time left + extra-time (B time per move and p extra byo-yomi-periods left)
+   "J: b (B * 0)"     : Japanese time, in byo-yomi (no '+'), b byo-yomi-time left, last byo-yomi-period
 
+   "C: m (-)"         : Canadian time, m main-time left (absolute time, no extra-time)
    "C: m (+ B / P)"   : Canadian time, m main-time left + extra-time (B time per P stones)
    "C: b / p (B / P)" : Canadian time, in byo-yomi (no '+'), b byo-yomi-time left for p stones to play (extra-time is B time per P stones)
-   "C: t (-)"         : Canadian time, t main-time left or if in byo-yomi, only t byo-yomi-time left (no extra-time left)
-   "C: m (+)"         : Canadian time, m main-time left, not in byo-yomi, there is extra-time (left out for shortness)
-   "C: b (..)"        : Canadian time, in byo-yomi, b byo-yomi-time left, there is extra-time (left out for shortness)
 
-   "F: m (+ B)"      : Fischer time, m main-time left + extra-time (B time extra per move)
-   "F: m (-)"        : Fischer time, m main-time left (no extra-time)
-   "F: m (+)"        : Fischer time, m main-time left, there is extra-time (left out for shortness)
+   "F: m (-)"         : Fischer time, m main-time left (absolute time, no extra-time)
+   "F: m (+ B)"       : Fischer time, m main-time left + extra-time (B time extra per move)
+
+* abbreviated time (T='J/C/F' for JAP/CAN/FIS-time):
+  for short-format time will always be given in hours (e.g. "51h", "240h")!
 
 
 #-------- (1) Japanese Byo-yomi -----------------------------------------------

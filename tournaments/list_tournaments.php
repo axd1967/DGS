@@ -243,7 +243,7 @@ $GLOBALS['ThePage'] = new Page('TournamentList');
          $row_str[15] = getRulesetText( $orow['Ruleset'] );
       if( $ttable->Is_Column_Displayed[16] )
          $row_str[16] = TimeFormat::echo_time_limit( $orow['Maintime'], $orow['Byotype'],
-            $orow['Byotime'], $orow['Byoperiods'], TIMEFMT_SHORT|TIMEFMT_ADDTYPE|TIMEFMT_ADDTYPE );
+            $orow['Byotime'], $orow['Byoperiods'], TIMEFMT_SHORT|TIMEFMT_ADDTYPE );
       if( $ttable->Is_Column_Displayed[17] )
          $row_str[17] = sprintf( '%s / %s', $tourney->RegisteredTP,
             ( $orow['MaxParticipants'] > 0 ) ? $orow['MaxParticipants'] : NO_VALUE );

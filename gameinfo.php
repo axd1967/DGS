@@ -384,13 +384,13 @@ function build_rating_diff( $rating_diff )
                ? $game_extratime
                : TimeFormat::echo_time_remaining( 0, $grow['Byotype'], $grow['Black_Byotime'],
                      $grow['Black_Byoperiods'], $grow['Byotime'], $grow['Byoperiods'],
-                     $timefmt | TIMEFMT_ADDEXTRA )
+                     $timefmt )
             ),
             (( $grow['White_Maintime'] > 0 )
                ? $game_extratime
                : TimeFormat::echo_time_remaining( 0, $grow['Byotype'], $grow['White_Byotime'],
                      $grow['White_Byoperiods'], $grow['Byotime'], $grow['Byoperiods'],
-                     $timefmt | TIMEFMT_ADDEXTRA )
+                     $timefmt )
             ),
          ));
 

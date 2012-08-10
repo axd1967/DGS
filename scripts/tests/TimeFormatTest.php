@@ -205,8 +205,8 @@ class TimeFormatTest extends PHPUnit_Framework_TestCase {
 
    /** Tests echo_time_remaining() for Japanese time. */
    public function test_echo_time_remaining_jap() {
-      // fmtflags: TIMEFMT_ENGL, TIMEFMT_HTMLSPC, TIMEFMT_ZERO, TIMEFMT_ADDTYPE, TIMEFMT_ADDEXTRA, TIMEFMT_ABBEXTRA
-      $fmt = TIMEFMT_ENGL | TIMEFMT_ADDTYPE | TIMEFMT_ADDEXTRA;
+      // fmtflags: TIMEFMT_ENGL, TIMEFMT_HTMLSPC, TIMEFMT_ZERO, TIMEFMT_ADDTYPE, TIMEFMT_NO_EXTRA
+      $fmt = TIMEFMT_ENGL | TIMEFMT_ADDTYPE;
 
       // JAP: M + B * P
       $this->assertEquals( "J: 0h",
@@ -233,30 +233,24 @@ class TimeFormatTest extends PHPUnit_Framework_TestCase {
       $this->assertEquals( "J: 1d 3h (2d * 4)",
          TimeFormat::echo_time_remaining( // in byoyomi
             0, BYOTYPE_JAPANESE, 18, 4,  30, 7, $fmt ));
-      $this->assertEquals( "J: 1d 3h (-)",
-         TimeFormat::echo_time_remaining( // in byoyomi
+      $this->assertEquals( "J: 1d 3h (2d * 0)",
+         TimeFormat::echo_time_remaining( // in byoyomi, last period
             0, BYOTYPE_JAPANESE, 18, 0,  30, 7, $fmt ));
 
       // format-opts
       $this->assertEquals( "8h&nbsp;(+&nbsp;2d&nbsp;*&nbsp;7)",
          TimeFormat::echo_time_remaining( // HTML-space, no type
             8, BYOTYPE_JAPANESE, 0, -1,  30, 7,
-            TIMEFMT_ENGL | TIMEFMT_ADDEXTRA | TIMEFMT_HTMLSPC ));
-      $this->assertEquals( "J: 10d 7h (+)",
-         TimeFormat::echo_time_remaining( // abbreviate extra-time
-            157, BYOTYPE_JAPANESE, 0, -1,  30, 7, $fmt | TIMEFMT_ABBEXTRA ));
-      $this->assertEquals( "J: 1d 5h (..)",
-         TimeFormat::echo_time_remaining( // abbreviate extra-time
-            0, BYOTYPE_JAPANESE, 20, 5,  30, 7, $fmt | TIMEFMT_ABBEXTRA ));
-      $this->assertEquals( "J: 1d 3h (-)",
-         TimeFormat::echo_time_remaining( // inherit add-extra
-            0, BYOTYPE_JAPANESE, 18, 0,  30, 7, ($fmt | TIMEFMT_ABBEXTRA) & ~TIMEFMT_ADDEXTRA ));
+            TIMEFMT_ENGL | TIMEFMT_HTMLSPC ));
+      $this->assertEquals( "J: 1d 3h",
+         TimeFormat::echo_time_remaining( // no-extra
+            0, BYOTYPE_JAPANESE, 18, 0,  30, 7, $fmt | TIMEFMT_NO_EXTRA ));
    }
 
    /** Tests echo_time_remaining() for Canadian time. */
    public function test_echo_time_remaining_can() {
-      // fmtflags: TIMEFMT_ENGL, TIMEFMT_HTMLSPC, TIMEFMT_ZERO, TIMEFMT_ADDTYPE, TIMEFMT_ADDEXTRA, TIMEFMT_ABBEXTRA
-      $fmt = TIMEFMT_ENGL | TIMEFMT_ADDTYPE | TIMEFMT_ADDEXTRA;
+      // fmtflags: TIMEFMT_ENGL, TIMEFMT_HTMLSPC, TIMEFMT_ZERO, TIMEFMT_ADDTYPE, TIMEFMT_NO_EXTRA
+      $fmt = TIMEFMT_ENGL | TIMEFMT_ADDTYPE;
 
       // CAN: M + B / P
       $this->assertEquals( "C: 0h",
@@ -285,20 +279,15 @@ class TimeFormatTest extends PHPUnit_Framework_TestCase {
       $this->assertEquals( "C: 1d (+ 6d / 4)",
          TimeFormat::echo_time_remaining( // with byoyomi: byo-yomi started, has main-time
             15, BYOTYPE_CANADIAN, 30, 3,  90, 4, $fmt ));
-
-      // format-opts
-      $this->assertEquals( "C: 10d 7h (+)",
-         TimeFormat::echo_time_remaining( // with byoyomi: byo-yomi not started yet
-            157, BYOTYPE_CANADIAN, 0, -1,  90, 4, $fmt | TIMEFMT_ABBEXTRA ));
-      $this->assertEquals( "C: 2d / 2 (..)",
-         TimeFormat::echo_time_remaining( // with byoyomi: byo-yomi not started yet
-            0, BYOTYPE_CANADIAN, 30, 2,  90, 4, $fmt | TIMEFMT_ABBEXTRA ));
+      $this->assertEquals( "C: 1d 3h / 2",
+         TimeFormat::echo_time_remaining( // in byoyomi, no-extra
+            0, BYOTYPE_CANADIAN, 18, 2,  90, 4, $fmt | TIMEFMT_NO_EXTRA ));
    }
 
    /** Tests echo_time_remaining() for Fischer time. */
    public function test_echo_time_remaining_fischer() {
-      // fmtflags: TIMEFMT_ENGL, TIMEFMT_HTMLSPC, TIMEFMT_ZERO, TIMEFMT_ADDTYPE, TIMEFMT_ADDEXTRA, TIMEFMT_ABBEXTRA
-      $fmt = TIMEFMT_ENGL | TIMEFMT_ADDTYPE | TIMEFMT_ADDEXTRA;
+      // fmtflags: TIMEFMT_ENGL, TIMEFMT_HTMLSPC, TIMEFMT_ZERO, TIMEFMT_ADDTYPE, TIMEFMT_NO_EXTRA
+      $fmt = TIMEFMT_ENGL | TIMEFMT_ADDTYPE;
 
       // FIS: M + B
       $this->assertEquals( "F: 0h",
@@ -324,11 +313,9 @@ class TimeFormatTest extends PHPUnit_Framework_TestCase {
       $this->assertEquals( "F: 8h (+ 3d 7h)",
          TimeFormat::echo_time_remaining( // with byoyomi: byo-yomi not started yet
             8, BYOTYPE_FISCHER, 18, 2,  52, 0, $fmt )); // byo-time is ignored anyway
-
-      // format-opts
-      $this->assertEquals( "F: 10d 7h (+)",
-         TimeFormat::echo_time_remaining( // with byoyomi: byo-yomi not started yet
-            157, BYOTYPE_FISCHER, 0, -1,  30, 0, $fmt | TIMEFMT_ABBEXTRA ));
+      $this->assertEquals( "F: 8h",
+         TimeFormat::echo_time_remaining( // no-extra
+            8, BYOTYPE_FISCHER, 18, 2,  52, 0, $fmt | TIMEFMT_NO_EXTRA ));
    }
 
 }

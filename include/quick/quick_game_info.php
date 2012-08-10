@@ -178,7 +178,7 @@ class QuickHandlerGameInfo extends QuickHandler
          $uid = (int)$row[$icol.'_ID'];
          $time_remaining = build_time_remaining( $row, $col,
                /*is_to_move*/ ( $uid == $row['ToMove_ID'] ),
-               TIMEFMT_QUICK|TIMEFMT_ADDTYPE|TIMEFMT_ADDEXTRA|TIMEFMT_ZERO );
+               TIMEFMT_QUICK|TIMEFMT_ADDTYPE|TIMEFMT_ZERO );
 
          $this->addResultKey( $prefix.'_user', $this->build_obj_user($uid, $this->user_rows, 'rating') );
          $this->addResultKey( $prefix.'_gameinfo', array(

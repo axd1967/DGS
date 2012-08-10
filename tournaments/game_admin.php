@@ -428,7 +428,7 @@ function draw_add_time( $tgame, $game, $allow_add_time )
       : GameAddTime::allow_add_time_opponent($game_row, $opp, $allow_add_time);
 
    $black_to_move = ( $game->ToMove_ID == $game->Black_ID );
-   $timefmt = TIMEFMT_ADDTYPE | TIMEFMT_ZERO | TIMEFMT_ADDEXTRA;
+   $timefmt = TIMEFMT_ADDTYPE | TIMEFMT_ZERO;
    $black_remtime = build_time_remaining( $game_row, BLACK, $black_to_move, $timefmt );
    $white_remtime = build_time_remaining( $game_row, WHITE, !$black_to_move, $timefmt );
 

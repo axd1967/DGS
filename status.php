@@ -352,7 +352,7 @@ function load_games_to_move( $uid, &$gtable )
       $arr_titles_colors = get_color_titles();
       $gtable->set_extend_table_form_function( 'status_games_extend_table_form' ); //func
 
-      $timefmt = TIMEFMT_ADDTYPE | TIMEFMT_ADDEXTRA | TIMEFMT_SHORT | TIMEFMT_ZERO;
+      $timefmt = TIMEFMT_ADDTYPE | TIMEFMT_SHORT | TIMEFMT_ZERO;
       while( $row = mysql_fetch_assoc( $result ) )
       {
          $cnt_rows++;

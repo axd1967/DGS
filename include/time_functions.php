@@ -347,7 +347,7 @@ function build_time_remaining( $grow, $color, $is_to_move, $timefmt=null )
    $userByotime    = $grow[$prefix_col.'_Byotime'];
    $userByoperiods = $grow[$prefix_col.'_Byoperiods'];
    if( is_null($timefmt) )
-      $timefmt = TIMEFMT_ADDTYPE | TIMEFMT_ABBEXTRA | TIMEFMT_ZERO;
+      $timefmt = TIMEFMT_ADDTYPE | TIMEFMT_ZERO;
 
    // no Ticks (vacation) == 0 => lead to 0 elapsed hours
    $elapsed_hours = ( $is_to_move ) ? ticks_to_hours(@$grow['X_Ticks'] - @$grow['LastTicks']) : 0;
@@ -424,10 +424,9 @@ define('TIMEFMT_ENGL',     0x0001 ); // ignore users-language (keep english)
 define('TIMEFMT_SHORT',    0x0002 ); // long-text <-> short-text form
 define('TIMEFMT_HTMLSPC',  0x0004 ); // whitespace separator: plain space <-> HTML &nbsp;
 define('TIMEFMT_ADDTYPE',  0x0008 ); // omit byo-type <-> include byo-type
-define('TIMEFMT_ADDEXTRA', 0x0010 ); // omit extra-time (byo-yomi) <-> include extra-time
+define('TIMEFMT_NO_EXTRA', 0x0010 ); // include extra-time <-> omit extra-time (byo-yomi)
 define('TIMEFMT_ZERO',     0x0020 ); // use zero time <-> return special-zero-value on zero
-define('TIMEFMT_ABBEXTRA', 0x0040 ); // abbreviate extra-time <-> full extra-specs
-define('TIMEFMT_QUICK',    0x0080 ); // time-format for quick-suite (also see specs/quick_suite.txt)
+define('TIMEFMT_QUICK',    0x0040 ); // time-format for quick-suite (also see specs/quick_suite.txt)
 
 /*!
  * \brief Static helper class to format Dragon time.
@@ -580,8 +579,7 @@ class TimeFormat
             if( $fmtflags & TIMEFMT_SHORT )
                $str .= '+ ' . TimeFormat::echo_time($byotime, $fmtflags);
             else
-               $str .= sprintf( $T_('with %s extra per move'),
-                                TimeFormat::echo_time($byotime, $fmtflags) );
+               $str .= sprintf( $T_('with %s extra per move'), TimeFormat::echo_time($byotime, $fmtflags) );
          }//else: absolute-time
       }
       else // JAP|CAN
@@ -624,13 +622,11 @@ class TimeFormat
    } //echo_time_limit
 
 
-   // fmtflags: TIMEFMT_ENGL, TIMEFMT_HTMLSPC, TIMEFMT_ZERO, TIMEFMT_ADDTYPE,
-   //           TIMEFMT_ADDEXTRA, TIMEFMT_ABBEXTRA
-   function echo_time_remaining( $maintime, $byotype, $byotime, $byoper,
-                                 $startbyotime, $startbyoper, $fmtflags=null )
+   // fmtflags: TIMEFMT_ENGL, TIMEFMT_HTMLSPC, TIMEFMT_ZERO, TIMEFMT_ADDTYPE, TIMEFMT_NO_EXTRA
+   function echo_time_remaining( $maintime, $byotype, $byotime, $byoper, $startbyotime, $startbyoper, $fmtflags=null )
    {
       if( is_null($fmtflags) )
-         $fmtflags = TIMEFMT_ADDTYPE | TIMEFMT_ADDEXTRA;
+         $fmtflags = TIMEFMT_ADDTYPE;
       $fmtflags |= TIMEFMT_SHORT; // default
       $T_= ($fmtflags & TIMEFMT_ENGL) ? 'fnop' : 'T_';
       $str = '';
@@ -655,9 +651,8 @@ class TimeFormat
 
       if( $startbyotime <= 0 ) // absolute time
       {
-         if( $fmtflags & (TIMEFMT_ADDEXTRA|TIMEFMT_ABBEXTRA) )
+         if( !($fmtflags & TIMEFMT_NO_EXTRA) )
             $str .= '(-)';
-
          return TimeFormat::_replace_space($str, $fmtflags);
       }
 
@@ -666,38 +661,24 @@ class TimeFormat
          $str .= "/ $byoper ";
 
       // extra-time
-      if( $fmtflags & (TIMEFMT_ADDEXTRA|TIMEFMT_ABBEXTRA) )
+      if( !($fmtflags & TIMEFMT_NO_EXTRA) )
       {
          if( $byotype == BYOTYPE_FISCHER )
+            $str .= '(+ ' . TimeFormat::echo_time($startbyotime, $fmtflags) . ')';
+         else // JAP | CAN
          {
-            $str .= ( $fmtflags & TIMEFMT_ABBEXTRA )
-               ? '(+)'
-               : '(+ ' . TimeFormat::echo_time($startbyotime, $fmtflags) . ')';
-         }
-         else
-         {
-            if( $byoper != 0 )
-            {
-               if( $byotype == BYOTYPE_CANADIAN )
-                  $rem_byoper = $startbyoper;
-               else
-                  $rem_byoper = ( $byoper > 0 ) ? $byoper : $startbyoper;
+            if( $byotype == BYOTYPE_CANADIAN )
+               $rem_byoper = $startbyoper;
+            else //if( $byotype == BYOTYPE_JAPANESE )
+               $rem_byoper = ( $byoper >= 0 ) ? $byoper : $startbyoper;
 
-               $str2 = TimeFormat::echo_time_limit( 0, $byotype, $startbyotime, $rem_byoper,
-                  $fmtflags & ~TIMEFMT_ADDTYPE );
-
-               if( $fmtflags & TIMEFMT_ABBEXTRA)
-                  $str .= ( $maintime > 0 ) ? '(+)' : '(..)';
-               else
-                  $str .= ( $maintime > 0 ) ? "(+ $str2)" : "($str2)";
-            }
-            else
-               $str .= '(-)';
+            $str2 = TimeFormat::echo_time_limit( 0, $byotype, $startbyotime, $rem_byoper, $fmtflags & ~TIMEFMT_ADDTYPE );
+            $str .= ( $maintime > 0 ) ? "(+ $str2)" : "($str2)";
          }
       }
 
       return TimeFormat::_replace_space($str, $fmtflags);
-   } //echo_time_remaining
+   }//echo_time_remaining
 
    /** \internal */
    function _replace_space( $str, $opts )
