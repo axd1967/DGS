@@ -19,6 +19,69 @@ Developers INFO:
 ChangeLog
 ------------------------------------------------------------------
 
+2012-08-10 juga
+
+   * include/quick/quick_message.php (QuickHandlerMessage.prepare, ~.process_cmd_info),
+     include/message_functions.php (DgsMessage.update_message_folder),
+     specs/quick_suite.txt:
+   - quick-message-handler: move message into target-folder on "info"-command if specified
+
+   * message.php:
+   - removed initial warning of missing subject/receiver, show only on preview and submit
+
+   * edit_shape.php, view_shape.php:
+   - word-wrap shape-notes on view/edit-shape to 60 chars
+
+   * list_shapes.php:
+   - show shape-notes on tool-tip for shape-lists
+
+   * include/time_functions.php (build_time_remaining; TimeFormat.echo_time_remaining),
+     include/quick/quick_game_info.php (QuickHandlerGameInfo.process_cmd_info),
+     include/quick/quick_game_list.php (QuickHandlerGameList.build_game_info),
+     scripts/tests/TimeFormatTest.php, specs/time.txt,
+     tournaments/game_admin.php (draw_add_time),
+     tournaments/list_tournaments.php,
+     game.php, gameinfo.php, quick_status.php, status.php,
+     code_examples/check_times.php:
+   - cleanup time-formats for remaining-time:
+     - always show extra-time information by removing TIMEFMT_ADDEXTRA,
+       except new TIMEFMT_NO_EXTRA-flag used for old quick-status
+     - removed abbreviated time-formats by removing TIMEFMT_ABBEXTRA
+     - for japanese-byo-yomi replaced "(-)" to indicate last byo-yomi-period
+       with "X * 0" to avoid ambiguity with "(-)" also representing "absolute time"
+
+2012-08-08 juga
+
+   * include/game_functions.php (increaseMoveStats):
+   - disabled writing move-statistics
+
+   * waiting_room.php:
+   - added game-type-filter to show games without shape
+   - added handicap-type-filter to show games without fair-komi
+
+   * include/make_game.php (create_game):
+   - fix bug: Column 'Snapshot' specified twice
+
+   * clock_tick.php, daily_cron.php, halfhourly_cron.php,
+     tournaments/cron_tournaments.php, specs/db/dragon-ddl.sql,
+     scripts/updates/database_changes_1_0_14_to_1_0_15.mysql:
+   - store end-time of cron-run
+-----------
+-- store end-time of cron-run
+ALTER TABLE Clock
+   ADD Finished datetime NOT NULL default '0000-00-00 00:00:00' ;
+-----------
+
+2012-07-17 juga
+
+   * include/quick/quick_message.php (QuickHandlerMessage.process_cmd_info):
+   - bugfix: 'created_at'-field took data from wrong var
+
+2012-07-16 juga
+
+   * status.php:
+   - show time-remaining of games in short but non-abbreviated form
+
 2012-07-15 juga
 
    * scripts/updates/database_changes_1_0_14_to_1_0_15.mysql, specs/db/dragon-ddl.sql:

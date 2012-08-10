@@ -385,7 +385,7 @@ Copyright (C) 2001-2012  Erik Ouchterlony
 
    * <home list_shapes.php>Shapes</home>:
       * Added shape-games starting with an arbitrary board setup of size, stones and color to play first
-      * Show note-icon on shape-list-page to indicate existing note (<image note.gif>)
+      * Show note-icon (<image note.gif>) on shape-list-page with notes as tooltip if available
       * Show views of 'All shapes' and 'My shapes' for shape-list, default is showing only public shapes
       * Added Shape Editor to manage shapes for shape-games,
         Create and edit board with <home goban_editor.php>Goban Editor</home>
