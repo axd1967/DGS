@@ -114,7 +114,7 @@ $GLOBALS['ThePage'] = new Page('ShapeEdit');
       $view_shape = '';
       $url_snapshot = urlencode($shape->Snapshot);
    }
-   $preview_notes = make_html_safe($vars['notes'], true);
+   $preview_notes = make_html_safe(wordwrap($vars['notes'], 60), true);
 
    // ---------- EDIT FORM -----------------------------------------
 

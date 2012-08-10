@@ -64,7 +64,7 @@ $GLOBALS['ThePage'] = new Page('ShapeView');
             'lc'        => formatDate($shape->Lastchanged),
             'snapshot'  => $shape->Snapshot,
             'shape'     => $shape,
-            'notes'     => ((string)$shape->Notes != '') ? make_html_safe($shape->Notes, true) : NO_VALUE,
+            'notes'     => ((string)$shape->Notes != '') ? make_html_safe(wordwrap($shape->Notes, 60), true) : NO_VALUE,
          );
       $url_invite_snapshot = GameSnapshot::build_extended_snapshot( $shape->Snapshot, $shape->Size, $shape->Flags );
    }
