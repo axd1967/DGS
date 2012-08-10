@@ -1778,14 +1778,21 @@ class DgsMessage
       return array( $arr_receivers, $errors );
    }//load_message_receivers
 
-   function update_message_folder( $mid, $uid, $Sender, $new_folder )
+   /*!
+    * \briefs Moves message into target folder.
+    * \param $Sender additional query-check; if null omitted in query (combination of mid/uid should be unique anyway)
+    * \note Throws error if no update is generated.
+    */
+   function update_message_folder( $mid, $uid, $Sender, $new_folder, $die=true )
    {
       $dbgmsg = "DgsMessage.update_message_folder($mid,$uid,$Sender,$new_folder)";
       db_query( "$dbgmsg.1",
          "UPDATE MessageCorrespondents SET Folder_nr=$new_folder " .
-         "WHERE mid=$mid AND uid=$uid AND Sender='$Sender' LIMIT 1" );
-      if( mysql_affected_rows() != 1)
+         "WHERE mid=$mid AND uid=$uid" . (is_null($Sender) ? '' : " AND Sender='$Sender'") . " LIMIT 1" );
+      $upd_count = mysql_affected_rows();
+      if( $die && $upd_count != 1)
          error('mysql_update_message', "$dbgmsg.2" );
+      return $upd_count;
    }//update_message_folder
 
 }// end 'DgsMessage'

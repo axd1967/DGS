@@ -126,6 +126,14 @@ class QuickHandlerMessage extends QuickHandler
             $this->user_rows = User::load_quick_userinfo( array(
                $my_id, (int)$this->msg_row['other_id'] ));
 
+         if( $this->folder_id > 0 ) // check folder to move message into after "reading"
+         {
+            $this->init_folders( $this->my_id );
+            if( !isset($this->folders[$this->folder_id]) )
+               error('invalid_args', "$dbgmsg.bad_folder({$this->folder_id})");
+            if( $this->msg_row['Replied'] == 'M' && $this->folder_id != FOLDER_REPLY )
+               $this->folder_id = FOLDER_REPLY; // correct to reply-folder if msg needs reply
+         }
          $this->folder = $this->load_folder( $my_id, $this->msg_row['Folder_nr'] );
       }
       elseif( $cmd == MESSAGECMD_MOVE_MESSAGE || $cmd == MESSAGECMD_DELETE_MESSAGE )
@@ -245,8 +253,9 @@ class QuickHandlerMessage extends QuickHandler
          default:  $uid_from = $uid_to = 0; break;
       }
       $gid = (int)$row['Game_ID'];
+      $mid = (int)$row['ID'];
 
-      $this->addResultKey( 'id', (int)$row['ID'] );
+      $this->addResultKey( 'id', $mid );
       $this->addResultKey( 'user_from', $this->build_obj_user($uid_from, $this->user_rows, 'rating') );
       $this->addResultKey( 'user_to',   $this->build_obj_user($uid_to, $this->user_rows, 'rating') );
       $this->addResultKey( 'type', strtoupper($row['Type']) );
@@ -264,9 +273,6 @@ class QuickHandlerMessage extends QuickHandler
       $this->addResultKey( 'game_id', $gid );
       $this->addResultKey( 'subject', $row['Subject'] );
       $this->addResultKey( 'text', $row['Text'] );
-
-      //TODO mark as "read" (like GUI)
-      //TODO handle FOLDER given (moving to given folder except for invitation)
 
       if( $row['Type'] == MSGTYPE_INVITATION )
       {
@@ -324,6 +330,18 @@ class QuickHandlerMessage extends QuickHandler
                   'calc_komi' => $gsc->calc_komi,
                ));
          }
+      }//invitation-info
+
+      // move message into target folder (if given)
+      if( $this->folder_id > 0 )
+      {
+         ta_begin();
+         {//HOT-section to move message into target folder
+            $updated = DgsMessage::update_message_folder( $mid, $my_id, /*Sender*/null, $this->folder_id, /*die*/false );
+            if( $updated && ($row['Folder_nr'] == FOLDER_NEW || $this->folder_id == FOLDER_NEW) )
+               update_count_message_new( 'QuickHandlerMessage.process_cmd_info.upd_msg_folder', $my_id, COUNTNEW_RECALC );
+         }
+         ta_end();
       }
    }//process_cmd_info
 

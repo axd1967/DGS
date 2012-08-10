@@ -867,6 +867,7 @@ Options:
 
    <FOLDER> = integer
       - target folder
+      - standard folders: 1=MAIN, 2=NEW, 3=REPLY, 4=TRASHCAN, 5=SENT
 
    <LIST_STYLE> = see list-style in section (2d)
 
@@ -886,8 +887,11 @@ Commands:
       - Important Notes:
          * message-type DISPUTED currently not supported by quick-suite,
            because that needs game-settings as well => ignore them
-         * using "info"-command will automatically mark message as read (like GUI on message-read),
-           can be overwritten with target-FOLDER for non-invitation-messages (e.g. reply-folder)
+
+         * using "info"-command will NOT mark message as read (like GUI on message-read),
+           but with the FOLDER-option a target folder to move the message into can be given.
+           If a target folder is given, but the message needs a reply (e.g. for invitations),
+           the REPLY-folder will be used instead as target-folder (if another folder was given).
 
       - Errors:
          - all errors of: [E-LOGIN], [E-GEN]
@@ -1117,6 +1121,9 @@ Examples for message-commands:
 
    # retrieve message
    quick_do.php?obj=message&cmd=info&mid=1234567
+
+   # retrieve message and mark as read moving into MAIN-folder (=1)
+   quick_do.php?obj=message&cmd=info&mid=1234567&folder=1
 
    # retrieve bulk-message for certain recipient
    quick_do.php?obj=message&cmd=info&mid=1234567&ouid=2
