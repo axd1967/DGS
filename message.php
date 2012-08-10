@@ -253,11 +253,11 @@ define('MSGBOXROWS_INVITE', 6);
       }
       else
       {
-         if( $mode == 'NewMessage' )
+         if( $preview )
             $errors[] = T_('Missing message receiver');
       }
 
-      if( $mode != 'Invite' && (string)$default_subject == '' )
+      if( $preview && $mode != 'Invite' && (string)$default_subject == '' )
          $errors[] = T_('Missing message subject');
    }//NewMessage
 
