@@ -223,8 +223,7 @@ define('MSGBOXROWS_INVITE', 6);
             ta_begin();
             {//HOT-section to move message away from NEW-folder
                DgsMessage::update_message_folder( $mid, $my_id, $Sender, $Folder_nr );
-               update_count_message_new( "message.update_message_folder.upd_cnt_msg_new($my_id)",
-                  $my_id, COUNTNEW_RECALC );
+               update_count_message_new( 'message.upd_msg_folder', $my_id, COUNTNEW_RECALC );
             }
             ta_end();
          }
