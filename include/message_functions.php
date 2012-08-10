@@ -2074,7 +2074,7 @@ class MessageControl
       $this->max_games_check = new MaxGamesCheck();
    }
 
-   // return: false=success, otherwise failure returning array of errors
+   // return: false=success, otherwise true on failure
    function read_message_receivers( &$dgs_msg, $msg_type, $invitation_step, &$to_handles )
    {
       global $player_row;
