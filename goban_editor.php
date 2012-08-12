@@ -28,6 +28,8 @@ require_once( 'include/goban_handler_sl.php' );
 require_once( 'include/goban_handler_gfx.php' );
 require_once( 'include/goban_handler_dgsgame.php' );
 require_once( 'include/sgf_parser.php' );
+require_once( 'include/board.php' );
+require_once( 'include/move.php' );
 require_once( 'include/coords.php' );
 require_once( 'include/db/shape.php' );
 
@@ -135,14 +137,6 @@ define('SGF_MAXSIZE_UPLOAD', 30*1024); // bytes
 
    $gobform = new Form( 'goban', $page, FORM_POST );
 
-   if( !is_null($errors) && count($errors) )
-   {
-      $gobform->add_empty_row();
-      $gobform->add_row( array(
-            'DESCRIPTION', T_('Errors'),
-            'TEXT', buildErrorListString(T_('There are some errors'), $errors) ));
-   }
-
    if( is_null($goban_preview) )
    {
       $arr_sizes = build_num_range_map( MIN_BOARD_SIZE, MAX_BOARD_SIZE, false );
@@ -214,6 +208,9 @@ define('SGF_MAXSIZE_UPLOAD', 30*1024); // bytes
       ? '' : GobanHandlerGfxBoard::style_string( $cfg_board->get_stone_size() );
    start_page( $title, true, $logged_in, $player_row, $style_str );
    echo "<h3 class=Header>$title</h3>\n";
+
+   if( !is_null($errors) && count($errors) )
+      echo buildErrorListString( T_('There are some errors'), $errors ), "<p>\n";
 
    if( is_null($goban_preview) )
       $gobform->echo_string();
@@ -342,9 +339,11 @@ function load_igoban_from_sgf( $file_sgf_arr )
       $sgf_data = @read_from_file( $upload->file_src_tmpfile );
       if( $sgf_data !== false )
       {
-         $sgf_parsed = parse_sgf_for_shape_game( $sgf_data );
-         $board_text = create_igoban_from_parsed_sgf( $sgf_parsed );
          $do_preview = true;
+         $sgf_parser = SgfParser::parse_sgf( $sgf_data );
+         list( $board_text, $err ) = create_igoban_from_parsed_sgf( $sgf_parser );
+         if( $err )
+            $errors = array( $err );
       }
    }
    if( $upload->has_error() )
@@ -355,47 +354,86 @@ function load_igoban_from_sgf( $file_sgf_arr )
 }//load_igoban_from_sgf
 
 // create <igoban>-tag from SGF parsed with sgf_parser(), see also 'include/sgf_parser.php'
-function create_igoban_from_parsed_sgf( $sgf_parsed )
+// return [ board_text, error|'' ]
+function create_igoban_from_parsed_sgf( $sgf_parser )
 {
    global $width, $height;
 
-   $size = (int)@$sgf_parsed['Size'];
+   $size = $sgf_parser->Size;
    if( $size >= MIN_BOARD_SIZE && $size <= MAX_BOARD_SIZE )
       $width = $height = $size;
 
+   $board = new Board( 0, $size ); // need board to really "move" (with capturing stones)
+   $board->init_board();
+
+   // handle setup B/W-stone
+   foreach( array( BLACK, WHITE ) as $stone )
+   {
+      $arr_coords = ( $stone == BLACK ) ? $sgf_parser->SetBlack : $sgf_parser->SetWhite;
+      foreach( $arr_coords as $sgf_coord )
+      {
+         list($x,$y) = sgf2number_coords($sgf_coord, $size);
+         $board->array[$x][$y] = $stone;
+      }
+   }
+
+   // handle B/W-moves on board handling captures
+   $gchkmove = new GameCheckMove( $board );
+   $Black_Prisoners = $White_Prisoners = 0;
+   $Last_Move = '';
+   $GameFlags = 0;
+   $to_move = BLACK;
+   $parse_error = '';
+   foreach( $sgf_parser->Moves as $move ) // move = B|W sgf-coord, e.g. "Baa", "Wbb"
+   {
+      if( $move[0] == 'B' )
+         $to_move = BLACK;
+      elseif( $move[0] == 'W' )
+         $to_move = WHITE;
+      else
+         continue; // unknown value
+      $sgf_move = substr($move, 1);
+
+      $err = $gchkmove->check_move( $sgf_move, $to_move, $Last_Move, $GameFlags, /*exit*/false);
+      if( $err )
+      {
+         $board_pos = sgf2board_coords( $sgf_move, $size );
+         $parse_error = sprintf( T_('Parsing SGF stopped: Error [%s] at position [%s] found!'), $err, $board_pos );
+         break;
+      }
+      $gchkmove->update_prisoners( $Black_Prisoners, $White_Prisoners );
+
+      if( $gchkmove->nr_prisoners == 1 )
+         $GameFlags |= GAMEFLAGS_KO;
+      else
+         $GameFlags &= ~GAMEFLAGS_KO;
+      $Last_Move = $sgf_move;
+   }
+
+   // parse Board into Goban
    $goban = new Goban();
    $goban->setOptionsCoords( GOBB_MID, true );
    $goban->setSize( $size, $size );
    $goban->makeBoard( $size, $size, /*withHoshi*/true );
-
-   // handle setup B/W-stone
-   foreach( array('AW','AB') as $key )
+   foreach( $board->array as $x => $arr_y )
    {
-      $stone_val = ($key == 'AB') ? GOBS_BLACK : GOBS_WHITE;
-      foreach( @$sgf_parsed[$key] as $sgf_coord )
+      foreach( $arr_y as $y => $stone )
       {
-         list($x,$y) = sgf2number_coords($sgf_coord, $size);
-         $goban->setStone( $x+1, $y+1, $stone_val );
+         if( $stone == BLACK )
+            $goban_stone = GOBS_BLACK;
+         elseif( $stone == WHITE )
+            $goban_stone = GOBS_WHITE;
+         else
+            continue;
+
+         $goban->setStone( $x+1, $y+1, $goban_stone );
       }
-   }
-
-   // handle B/W-moves
-   foreach( @$sgf_parsed['Moves'] as $move ) // move = B|W sgf-coord, e.g. "Baa", "Wbb"
-   {
-      if( $move[0] == 'B' )
-         $stone_val = GOBS_BLACK;
-      elseif( $move[0] == 'W' )
-         $stone_val = GOBS_WHITE;
-      else
-         continue; // unknown value
-
-      list($x,$y) = sgf2number_coords( substr($move,1), $size);
-      $goban->setStone( $x+1, $y+1, $stone_val );
    }
 
    $exporter = new GobanHandlerSL1( MarkupHandlerGoban::attribute_split( 'SL1' ) );
    $board_text = $exporter->write_goban( $goban );
-   return $board_text;
+
+   return array( $board_text, $parse_error );
 }//create_igoban_from_parsed_sgf
 
 function create_goban_from_extended_snapshot( $snapshot, $size=null )
