@@ -257,7 +257,7 @@ function itemL($text, $link='', $working=true, $last=false)
       item(T_('Shapes#shape'), "list_shapes.php", true);
       { $item_level++;
          item(T_('All shapes#shape'), "list_shapes.php?pub=0", true);
-         item(T_('My shapes#shape'), "list_shapes.php?user=".urlencode($player_row['Handle']).URI_AMP."pub=0", true);
+         item(T_('My shapes#shape'), "list_shapes.php?user=".urlencode($uhandle).URI_AMP."pub=0", ((string)$uhandle != '') );
          item(T_('New Shape (Goban Editor)#shape'), "goban_editor.php", true);
          item(T_('View Shape#shape'), "view_shape.php", false);
          { $item_level++;
