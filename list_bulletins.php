@@ -127,6 +127,7 @@ $GLOBALS['ThePage'] = new Page('BulletinList');
 
    // init search profile
    $search_profile = new SearchProfile( $my_id, PROFTYPE_FILTER_BULLETINS );
+   $search_profile->set_forbid_default();
    $bfilter = new SearchFilter( '', $search_profile );
    $search_profile->register_regex_save_args( 'read|view|handle' ); // named-filters FC_FNAME
    $btable = new Table( 'bulletins', $page, $cfg_tblcols, '', TABLE_ROWS_NAVI );
