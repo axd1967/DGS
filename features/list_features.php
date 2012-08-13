@@ -55,21 +55,23 @@ require_once( "features/lib_votes.php" );
    // init search profile
    $search_profile = new SearchProfile( $my_id, PROFTYPE_FILTER_FEATURES );
    $ffilter = new SearchFilter( '', $search_profile );
-   $search_profile->register_regex_save_args( 'my_vote' ); // named-filters FC_FNAME
+   $search_profile->register_regex_save_args( 'my_vote|status' ); // named-filters FC_FNAME
    $ftable = new Table( 'features', $page, $cfg_tblcols, '', TABLE_ROWS_NAVI );
    $ftable->set_profile_handler( $search_profile );
    $search_profile->handle_action();
 
    // table filters
    $ffilter->add_filter( 1, 'Numeric', 'F.ID', true, array( FC_SIZE => 8 ));
-   $ffilter->add_filter( 3, 'Selection', Feature::build_filter_selection_status('F.Status'), true,
-         array( FC_DEFAULT => 2 )); // def=0..
+   $filter_status =&
+      $ffilter->add_filter( 3, 'Selection', Feature::build_filter_selection_status('F.Status'), true,
+         array( FC_FNAME => 'status', FC_DEFAULT => 2 )); // def=0..; 2=VOTE
    $filter_subject =&
       $ffilter->add_filter( 4, 'Text', 'F.Subject', true,
          array( FC_SIZE => 30, FC_SUBSTRING => 1, FC_START_WILD => 2 ) );
    $ffilter->add_filter( 6, 'RelativeDate', 'F.Lastchanged', true,
          array( FC_TIME_UNITS => FRDTU_ALL_ABS, FC_SIZE => 8 ));
-   $ffilter->add_filter( 8, 'Selection',     # filter on user-voted-state
+   $filter_my_vote =&
+      $ffilter->add_filter( 8, 'Selection',     # filter on user-voted-state
          array( T_('All#filterfeat')      => '',
                 T_('Unvoted#filterfeat')  => "ISNULL(FV.fid)", // FC_DEFAULT
                 T_('Voted#filterfeat')    => "FV.fid>0",
@@ -77,7 +79,7 @@ require_once( "features/lib_votes.php" );
                 T_('=0#filterfeat')       => "FV.Points=0",
                 T_('>0#filterfeat')       => "FV.Points>0",
          ),
-         true, array( FC_FNAME => 'my_vote', FC_STATIC => 1, FC_DEFAULT => 1 )); // def=0..
+         true, array( FC_FNAME => 'my_vote', FC_STATIC => 1, FC_DEFAULT => 1 )); // def=0..; 1=UNVOTED
    $ffilter->add_filter(10, 'Selection', Feature::build_filter_selection_size('F.Size'), true );
    $ffilter->init(); // parse current value from _GET
    $rx_term = implode('|', $filter_subject->get_rx_terms() );
@@ -90,7 +92,7 @@ require_once( "features/lib_votes.php" );
    // NOTE: col-IDs in sync with list_votes.php
    $ftable->add_tablehead( 1, T_('Vote ID#header'),     'Button', TABLE_NO_HIDE, 'F.ID+'); // static
    $ftable->add_tablehead( 2, '',                       'Image', TABLE_NO_HIDE, ''); // edit (static)
-   $ftable->add_tablehead( 3, T_('Status#header'),      'Enum', 0, 'F.Status+');
+   $ftable->add_tablehead( 3, T_('Status#header'),      'Enum', TABLE_NO_HIDE, 'F.Status+');
    $ftable->add_tablehead(10, T_('Size#featheader'),    'Enum', 0, 'F.Size+');
    $ftable->add_tablehead( 4, T_('Subject#header'),     '', 0, 'F.Subject+');
    $ftable->add_tablehead( 8, T_('My Vote#featheader'), 'NumberC', TABLE_NO_HIDE, 'FV.Points-');
@@ -111,7 +113,12 @@ require_once( "features/lib_votes.php" );
    $show_rows = $ftable->compute_show_rows(mysql_num_rows($result));
    $ftable->set_found_rows( mysql_found_rows('featurelist.found_rows') );
 
-   $title = T_('Features to vote on');
+   if( $filter_my_vote->value == 2 ) // VOTED
+      $title = T_('My Feature Votes');
+   elseif( $filter_my_vote->value == 1 && $filter_status->value == 2 ) // UNVOTED + VOTE
+      $title = T_('Features to vote on');
+   else
+      $title = T_('Features');
    start_page( $title, true, $logged_in, $player_row,
                button_style($player_row['Button']) );
    if( $DEBUG_SQL ) echo "QUERY: ", make_html_safe($query), "<br>\n";
@@ -156,6 +163,8 @@ require_once( "features/lib_votes.php" );
          if( $ftable->Is_Column_Displayed[9] )
             $frow_strings[9] = ($fvote->lastchanged > 0 ? date(DATE_FMT2, $fvote->lastchanged) : '' );
       }
+      else if( $feature->allow_vote() )
+         $frow_strings[8] = array( 'text' => MINI_SPACING.'?', 'attbs' => array( 'class' => 'MissVote' ) );
       if( $ftable->Is_Column_Displayed[10] )
          $frow_strings[10] = $feature->size;
 
@@ -171,8 +180,9 @@ require_once( "features/lib_votes.php" );
 
 
    $menu_array = array();
-   $menu_array[T_('Vote on features')] = "features/list_features.php";
-   $menu_array[T_('My feature votes')] = "features/list_features.php?my_vote=0";
+   $menu_array[T_('Vote on features')] = "features/list_features.php?status=2".URI_AMP.'my_vote=1'.SPURI_ARGS.'status,my_vote';
+   $menu_array[T_('My feature votes')] = "features/list_features.php?status=3".URI_AMP.'my_vote=2'.SPURI_ARGS.'status,my_vote';
+   $menu_array[T_('All features')]     = "features/list_features.php?status=3".URI_AMP.'my_vote=0'.SPURI_ARGS.'status,my_vote';
    $menu_array[T_('Feature Vote Results')] = "features/list_votes.php";
    if( Feature::is_admin() )
       $menu_array[T_('Add new feature')] =
