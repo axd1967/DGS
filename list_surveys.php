@@ -63,6 +63,7 @@ $GLOBALS['ThePage'] = new Page('SurveyList');
    // init search profile
    $search_profile = new SearchProfile( $my_id, PROFTYPE_FILTER_SURVEYS );
    $sfilter = new SearchFilter( '', $search_profile );
+   $search_profile->register_regex_save_args( 'handle' ); // named-filters FC_FNAME
    $table = new Table( 'surveys', $page, null, '', TABLE_ROWS_NAVI );
    $table->set_profile_handler( $search_profile );
    $search_profile->handle_action();
