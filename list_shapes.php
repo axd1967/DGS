@@ -47,6 +47,7 @@ $GLOBALS['ThePage'] = new Page('ShapeList');
    // init search profile
    $search_profile = new SearchProfile( $my_id, PROFTYPE_FILTER_SHAPES );
    $sfilter = new SearchFilter( '', $search_profile );
+   $search_profile->register_regex_save_args( 'user|pub' ); // named-filters FC_FNAME
    $table = new Table( 'shapes', $page, null, '', TABLE_ROWS_NAVI );
    $table->set_profile_handler( $search_profile );
    $search_profile->handle_action();
@@ -142,10 +143,11 @@ $GLOBALS['ThePage'] = new Page('ShapeList');
    $table->echo_table();
 
 
+   //$no_prof = URI_AMP . $search_profile->get_request_params()->get_url_parts(); // add if not to load def-profile
    $menu_array = array();
    $menu_array[T_('Shapes#shape')] = "list_shapes.php";
-   $menu_array[T_('All shapes#shape')] = "list_shapes.php?pub=0";
-   $menu_array[T_('My shapes#shape')] = "list_shapes.php?user=".urlencode($player_row['Handle']).URI_AMP.'pub=0';
+   $menu_array[T_('All shapes#shape')] = "list_shapes.php?pub=0".SPURI_ARGS.'pub';
+   $menu_array[T_('My shapes#shape')] = "list_shapes.php?user=".urlencode($player_row['Handle']).URI_AMP.'pub=0'.SPURI_ARGS.'user,pub';
    $menu_array[T_('New Shape (Goban Editor)#shape')] = "goban_editor.php";
 
    end_page(@$menu_array);
