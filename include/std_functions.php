@@ -615,7 +615,8 @@ function make_dragon_main_menu( $player_row )
       {
          $arr_feats[] = MINI_SPACING;
          $arr_feats[] = array( span('MainMenuCount', $cnt_feat_new, '(%s)' ),
-            'features/list_features.php', array( 'class' => 'MainMenuCount' ) );
+            'features/list_features.php?status=2'.URI_AMP.'my_vote=1'.SPURI_ARGS.'status,my_vote',
+            array( 'class' => 'MainMenuCount' ) );
       }
       $menu->add( 5,3, $arr_feats );
    }
