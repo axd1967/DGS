@@ -3588,6 +3588,10 @@ span.VotingRestricted {
    font-weight: bold;
 }
 
+td.MissVote {
+   background: #bbddff;
+}
+
 td.Preview div.Survey {
    width: 100%;
    max-width: 800px;
