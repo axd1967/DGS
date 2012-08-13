@@ -338,6 +338,8 @@ class SearchProfile
    var $profile_type;
    /*! \brief Prefix to be used to read profile-action from _REQUEST. */
    var $prefix;
+   /*! \brief if true, no default-profile is allowed to be used (normally false).  */
+   var $forbid_default;
 
    /*! \brief single Profile-object read from DB or newly created (with id=0). */
    var $profile;
@@ -345,6 +347,8 @@ class SearchProfile
    var $saveargs;
    /*! \brief Set with registered arg-names [ argname => 1 ]. */
    var $argnames;
+   /*! \brief Map with arg-names that can be overwritten from $_REQUEST-values [ argname => 1 ]. */
+   var $overwrite_args;
    /*! \brief Map with values for args [ argname => argvalue ]. */
    var $args;
 
@@ -359,15 +363,26 @@ class SearchProfile
       $this->user_id = $user_id;
       $this->profile_type = $proftype;
       $this->prefix = $prefix;
+      $this->forbid_default = false;
 
       $this->saveargs = array();
       $this->argnames = array();
+      $this->overwrite_args = array();
       $this->profile = NULL;
       $this->args = NULL;
       $this->need_reset = false;
       $this->need_clear = false;
 
       $this->load_profile();
+
+      // parse overwrite-args
+      foreach( explode(',', @$_REQUEST[$prefix.SP_OVERWRITE_ARGS]) as $arg )
+         $this->overwrite_args[$arg] = 1;
+   }
+
+   function set_forbid_default()
+   {
+      $this->forbid_default = true;
    }
 
    /*! \brief Sets profile-var, if profile found; false otherwise and profile-var is NULL. */
@@ -439,7 +454,9 @@ class SearchProfile
          $result = '';
       elseif( is_array($this->args) )
       {
-         if( isset($this->args[$name]) )
+         if( isset($this->overwrite_args[$name]) && isset($_REQUEST[$name]) ) // overwrite allowed if value set
+            $result = get_request_arg($name);
+         elseif( isset($this->args[$name]) )
             $result = $this->args[$name];
          elseif( isset($this->argnames[$name]) )
             $result = ''; // overwrite (clear)
@@ -473,9 +490,10 @@ class SearchProfile
     */
    function handle_action()
    {
-      // load default-profile (if no action set)
+      // load default-profile (if no action set and allowed)
       $prof_fname = $this->prefix . SPFORM_PROFILE_ACTION;
-      $prof_action = (int)get_request_arg( $prof_fname, SPROF_LOAD_DEFAULT );
+      $default_action = ( $this->forbid_default ) ? SPROF_CURR_VALUES : SPROF_LOAD_DEFAULT;
+      $prof_action = (int)get_request_arg( $prof_fname, $default_action );
 
       $this->args = NULL;
       switch( (int)$prof_action )
@@ -492,6 +510,8 @@ class SearchProfile
             break;
 
          case SPROF_SAVE_DEFAULT:   // save profile (active=default or inactive)
+            if( $this->forbid_default )
+               error('invalid_args', "SearchProfile.handle_action.save_default.forbidden({$this->profile_type})");
          case SPROF_SAVE_PROFILE:
             $this->save_profile( ($prof_action == SPROF_SAVE_DEFAULT) );
             break;
@@ -510,7 +530,7 @@ class SearchProfile
                $this->args = $this->profile->get_text();
             break;
       }
-      //error_log("SearchProfile.handle_action($prof_action): ".$this->to_string());
+      #error_log("SearchProfile.handle_action($prof_action): ".$this->to_string());
    }//handle_action
 
    /*! \brief Saves profile: save values from _REQUEST for registered arg-names. */
@@ -585,6 +605,8 @@ class SearchProfile
          SPROF_SAVE_PROFILE  => T_('Save profile#filter'),
          SPROF_DEL_PROFILE   => T_('Delete profile#filter'),
       );
+      if( $this->forbid_default )
+         unset($arr_actions[SPROF_SAVE_DEFAULT]);
       if( !$this->has_profile() ) // has no saved profile
       {
          unset($arr_actions[SPROF_LOAD_PROFILE]);

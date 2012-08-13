@@ -161,6 +161,10 @@ define('MSGFLAG_DELETE', 0x80); // mark message as candidate for deletion for cl
 define('FNAME_REQUIRED', 'sf_req');  // comma-separated list of required filters (id or name); not included in SearchProfile!!
 define('REQF_URL', URI_AMP.FNAME_REQUIRED.'=');  // prepared URL-part for appending to require certain filters
 
+// suffix for overwriting search-profile (default) args (comma-separated arg-names)
+define('SP_OVERWRITE_ARGS', 'ovwarg_sp');
+define('SPURI_ARGS', URI_AMP.SP_OVERWRITE_ARGS.'=');
+
 
 // ---------- Rating stuff ----------------------------------------
 
