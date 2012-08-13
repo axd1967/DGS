@@ -499,7 +499,7 @@ require_once( 'include/classlib_userpicture.php' );
    if( $opp )
       $menu_array[ T_('Show opponents') ] = "{$page}{$filterURL}uid=$uid";
 
-   if( $uid != $my_id ) // others opponents
+   if( $uid != $my_id ) // other opponents
    {
       $menu_array[ T_('Show my opponents') ]   = "{$page}{$filterURL}uid=$my_id";
       if( $opp != $my_id )
