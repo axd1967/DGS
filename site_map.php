@@ -105,7 +105,7 @@ function itemL($text, $link='', $working=true, $last=false)
          item(T_('My finished games'), "show_games.php?uid=$id".URI_AMP."finished=1", true);
          item(T_('Games I\'m observing'), "show_games.php?observe=$id", true);
          if( ALLOW_TOURNAMENTS )
-            item(T_('My tournaments'), "tournaments/list_tournaments.php?user=".urlencode($uhandle), true);
+            item(T_('My tournaments'), "tournaments/list_tournaments.php?uid=$id", true);
          item(T_('My running multi-player-games'), "show_games.php?uid=$id".URI_AMP."mp=1", true);
          item(T_('My finished multi-player-games'), "show_games.php?uid=$id".URI_AMP."finished=1".URI_AMP."mp=1", true);
          item(T_('Show messages'), "message.php?mode=ShowMessage", false);
@@ -129,7 +129,7 @@ function itemL($text, $link='', $working=true, $last=false)
       {
       item(T_('Tournaments'), "tournaments/list_tournaments.php", true);
       { $item_level++;
-         item(T_('Show all tournaments'), "tournaments/list_tournaments.php", true);
+         item(T_('All tournaments'), "tournaments/list_tournaments.php", true);
          item(T_('My tournaments'), "tournaments/list_tournaments.php?uid=$id", true);
          item(T_('Directoring tournaments'), "tournaments/list_tournaments.php?tdir=$id", true);
          if( TournamentUtils::check_create_tournament() )
@@ -318,8 +318,9 @@ function itemL($text, $link='', $working=true, $last=false)
       {
          item(T_('Feature Vote Result'), "features/list_votes.php", true);
          { $item_level++;
-            item(T_('Vote on features'), "features/list_features.php", true);
-            item(T_('My feature votes'), "features/list_features.php?my_vote=0", true, true);
+            item(T_('Vote on features'), "features/list_features.php?status=2".URI_AMP.'my_vote=1'.SPURI_ARGS.'status,my_vote', true);
+            item(T_('My feature votes'), "features/list_features.php?status=3".URI_AMP.'my_vote=2'.SPURI_ARGS.'status,my_vote', true);
+            item(T_('All features'),     "features/list_features.php?status=3".URI_AMP.'my_vote=0'.SPURI_ARGS.'status,my_vote', true, true);
          } $item_level--;
       }
 
