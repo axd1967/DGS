@@ -76,9 +76,9 @@ $GLOBALS['ThePage'] = new Page('TournamentList');
 
    // init search profile
    $search_profile = new SearchProfile( $my_id, PROFTYPE_FILTER_TOURNAMENTS );
-   $tsfilter = new SearchFilter( 's', $search_profile );
+   $tsfilter = new SearchFilter( 's' );
    $tfilter = new SearchFilter( '', $search_profile );
-   $search_profile->register_regex_save_args( 'uid|tdir' ); // named-filters FC_FNAME
+   //$search_profile->register_regex_save_args( '' ); // named-filters FC_FNAME
    $ttable = new Table( 'tournament', $page, $cfg_tblcols, '', TABLE_ROWS_NAVI );
    $ttable->set_profile_handler( $search_profile );
    $search_profile->handle_action();
@@ -256,7 +256,7 @@ $GLOBALS['ThePage'] = new Page('TournamentList');
 
 
    $menu_array = array();
-   $menu_array[T_('Show all tournaments')] = 'tournaments/list_tournaments.php';
+   $menu_array[T_('All tournaments')] = 'tournaments/list_tournaments.php';
    $menu_array[T_('My tournaments')] = "tournaments/list_tournaments.php?uid=$my_id";
    $menu_array[T_('Directoring tournaments')] = "tournaments/list_tournaments.php?tdir=$my_id";
    $create_tourney = TournamentUtils::check_create_tournament();
