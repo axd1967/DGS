@@ -326,11 +326,14 @@ class SearchFilter
    function get_saved_arg( $name, $use_prefix = true )
    {
       $fname = ( $use_prefix ) ? $this->Prefix . $name : $name;
-      // clear & reset handled in init-func
-      $value = ( $this->ProfileHandler )
-         ? $this->ProfileHandler->get_arg( $fname )
-         : NULL;
-      return (is_null($value)) ? get_request_arg($fname) : $value;
+
+      // NOTE: clear & reset handled in init-func
+      $value = ( $this->ProfileHandler ) ? $this->ProfileHandler->get_arg( $fname ) : NULL;
+      if( is_null($value) )
+         $value = get_request_arg($fname);
+
+      #error_log("get_saved_arg[$name,$use_prefix] = [". (is_null($value) ? 'NULL' : $value) ."]");
+      return $value;
    }
 
    /*!
@@ -1453,10 +1456,16 @@ class Filter
    /*! \brief Returns string-representation of this filter (for debugging purposes). */
    function to_string()
    {
-      return "Filter{$this->type}={ id=[{$this->id}], name=[{$this->name}], dbf=[{$this->dbfield}], "
+      return "Filter{$this->type}={ id=[{$this->id}], name=[{$this->name}], "
+         . "dbf=[" .
+            ( !is_object($this->dbfield)
+                  ? $this->dbfield
+                  : ( method_exists($this->dbfield, 'to_string')
+                        ? $this->dbfield->to_string()
+                        : print_r($this->dbfield,true) ) ) . "], "
          . "active=[{$this->active}], visible=[{$this->visible}], "
          . "defvalues={" . map_to_string($this->defvalues) . "}}, "
-         . "value=[{$this->value}], errmsg=[{$this->errormsg}], warnmsg=[{$this->warnmsg}]"
+         . "value=[{$this->value}], errmsg=[{$this->errormsg}], warnmsg=[{$this->warnmsg}], "
          . "parsed p_start=[{$this->p_start}] p_end=[{$this->p_end}] p_value=[{$this->p_value}], "
          . "values={" . map_to_string($this->values) . "}}, "
          . "parser-flags=[{$this->parser_flags}], "
@@ -3095,7 +3104,7 @@ class FilterBoolean extends Filter
 
       if( is_array($this->dbfield) )
       {
-         $key = ($this->value) ? true : false;
+         $key = (bool)($this->value);
          $clause = (isset($this->dbfield[$key])) ? $this->dbfield[$key] : '';
       }
       else
