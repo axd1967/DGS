@@ -451,7 +451,7 @@ require_once( 'include/classlib_userconfig.php' );
    mysql_free_result($result);
 
 
-   if( $show_info )
+   if( @$show_info )
       add_old_game_form( 'joingame', $info_row, $iamrated );
 
 
