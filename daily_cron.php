@@ -221,8 +221,12 @@ if num_rows==2 {compute differences and checks}
    if( (int)GAME_INVITATIONS_EXPIRE_MONTHS > 0 )
    {
       db_query( "daily_cron.cleanup_old_invitations.delete",
-         "DELETE FROM Games WHERE Status='".GAME_STATUS_INVITED."' AND " .
-            "Lastchanged <= NOW() - INTERVAL ".GAME_INVITATIONS_EXPIRE_MONTHS." MONTH LIMIT 100" );
+         "DELETE FROM Games " .
+         "WHERE Status='".GAME_STATUS_INVITED."' AND " .
+            "Lastchanged <= NOW() - INTERVAL ".GAME_INVITATIONS_EXPIRE_MONTHS." MONTH " .
+         "LIMIT 100" );
+
+      fix_invitations_replied( 'daily_cron.cleanup_old_invitations', 100 );
    }
 
 

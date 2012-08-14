@@ -1354,7 +1354,8 @@ function change_folders_for_marked_messages($uid, $folders)
 }
 
 // return >0 success (messages moved), 0 = no messages to move
-// \param $need_replied false = change only messages that have been replied, true = change only message that need NO reply
+// \param $need_replied false = change only messages that have been replied,
+//                      true = change only message that need NO reply
 function change_folders($uid, $folders, $message_ids, $new_folder, $current_folder=false, $need_replied=false, $quick_suite=false)
 {
    if( count($message_ids) <= 0 )
@@ -1385,7 +1386,7 @@ function change_folders($uid, $folders, $message_ids, $new_folder, $current_fold
 
       if( $current_folder > FOLDER_ALL_RECEIVED && isset($folders[$current_folder])
             && $current_folder != FOLDER_DESTROYED )
-         $where_clause.= "AND Folder_nr='" .$current_folder. "' ";
+         $where_clause.= "AND Folder_nr='$current_folder' ";
    }
 
    if( $need_replied )
@@ -1411,6 +1412,42 @@ function change_folders($uid, $folders, $message_ids, $new_folder, $current_fold
 
    return $rows_updated;
 }//change_folders
+
+// fix invitation-messages: Replied='M' (=need-reply) only valid if Games-entry still existing
+// for example on invitation-cleanup, referenced Games may be deleted
+// => and so, Replied must be set to 'N' then (otherwise messages can not be changed folders for)
+// returns count of updated messages
+function fix_invitations_replied( $dbgmsg, $limit )
+{
+   if( !is_numeric($limit) || $limit < 1 )
+      $limit = 100;
+
+   // fix invitation-messages without game, that cannot be replied any more
+   $result = db_query( "$dbgmsg.fix_invitations_replied.find",
+      "SELECT MC.mid " .
+      "FROM MessageCorrespondents AS MC " .
+         "INNER JOIN Messages AS M ON M.ID=MC.mid " .
+         "LEFT JOIN Games AS G ON G.ID=M.Game_ID " .
+      "WHERE MC.Sender='N' AND MC.Replied='M' AND M.Type='".MSGTYPE_INVITATION."' AND M.Game_ID>0 AND G.ID IS NULL " .
+      "LIMIT $limit" );
+
+   $msg_ids = array();
+   while( $row = mysql_fetch_assoc($result) )
+      $msg_ids[] = $row['mid'];
+   mysql_free_result($result);
+
+   if( count($msg_ids) )
+   {
+      db_query( "$dbgmsg.fix_invitations_replied.upd(".count($msg_ids).")",
+         "UPDATE MessageCorrespondents SET Replied='N' " .
+         "WHERE Sender='N' AND Replied='M' AND mid IN (" . implode(',', $msg_ids) . ") LIMIT 100" );
+      $upd_count = mysql_affected_rows();
+   }
+   else
+      $upd_count = 0;
+
+   return $upd_count;
+}//fix_invitations_replied
 
 /*!
  * \brief Updates or resets Players.CountMsgNew.
@@ -1981,17 +2018,16 @@ class MessageListBuilder
          if( !$this->no_mark )
          {
             if( $row['Replied'] == 'M' )
-            {// message needs reply (so forbid marking and force inspection)
+            {// message needs reply (so forbid marking and force inspection); invitation, not-replied yet, valid game
                $mrow_strings[ 5] = '';
             }
-            elseif( !isset($arr_marks[$mid]) ) // for bulk-msg only mark first
+            elseif( !isset($arr_marks[$mid]) ) // normal|bulk (for bulk-msg only mark first)
             {
                $can_move_messages = true;
                $n = $this->table->Prefix."mark$mid";
                $checked = (('Y'==(string)@$_REQUEST[$n]) xor (bool)$toggle_marks);
                //if( $checked ) $page.= "$n=Y".URI_AMP;
-               $mrow_strings[ 5] = "<input type='checkbox' name='$n' value='Y'"
-                  . ($checked ? ' checked' : '') . '>';
+               $mrow_strings[ 5] = "<input type='checkbox' name='$n' value='Y'" . ($checked ? ' checked' : '') . '>';
                $arr_marks[$mid] = 1;
             }
             else if( $is_bulk )
