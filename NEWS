@@ -812,7 +812,7 @@ Copyright (C) 2001-2012  Erik Ouchterlony
          * ENABLE_DONATIONS                  - disabled
 ##       * ENABLE_GAME_VIEWER                - disabled (needs JavaScript)
 ##      * Added restriction on max. running games per player (200) and for tournament-registration (150)
-      * Added restriction on max. running games per player (200) and for tournament-registration (150)
+      * Added restriction on max. running games per player (200)
       * Default password encryption (SHA1 now)
       * Added database-connect retry
       * Added suffix-length of private notes for games-lists
