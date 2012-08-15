@@ -19,6 +19,66 @@ Developers INFO:
 ChangeLog
 ------------------------------------------------------------------
 
+2012-08-14 juga
+
+   * include/message_functions.php (fix_invitations_replied), daily_cron.php:
+   - fix bug: on invitation-cleanup the referenced game for an invitation is deleted
+     leaving the message with Replied='M' indicating a reply is needed, which is not
+     possible without the game. Therefore fix those messages by setting Replied='N'
+     to allow changing folders and no further reply being needed.
+
+2012-08-13 juga
+
+   * include/std_functions.php (make_dragon_main_menu), site_map.php:
+   - corrected links to feature-list and tournament-list
+
+   * list_shapes.php, waiting_room.php:
+   - fix bug: missed named-filters 'user/pub' for profile-saving for shape-list
+   - fix bug: allow overwriting filter-values otherwise loaded from existing default-profile
+
+   * features/edit_feature.php, features/list_votes.php, features/vote_feature.php:
+   - fix bug: allow overwriting filter-values otherwise loaded from existing default-profile
+   - removed 'Feature Vote Results'-link being available in main-menu with 'Features'
+   - added 'All features'-link
+
+   * features/list_features.php, skins/dragon/screen.css:
+   - fix bug: allow overwriting filter-values otherwise loaded from existing default-profile
+   - fix bug: missed named-filters 'status' for profile-saving for feature-list
+   - change title according to filter-selection on my-vote & status
+   - show missing feature-vote with blue-background and '?'
+   - added 'All features'-link
+
+   * tournaments/list_tournaments.php:
+   - fix bug: removed named-filters 'uid/tdir' for profile-saving,
+     removed search-profile for hidden static filters 'uid/tdir'
+   - adjusted link-text: Show all tournaments -> All tournaments
+
+   * list_surveys.php:
+   - fix bug: missed named-filters 'handle' for profile-saving for survey-list
+
+   * list_bulletins.php:
+   - forbid using default-search-profile to preserve showing of important bulletins
+
+   * include/classlib_profile.php (class SearchProfile, ~.set_forbid_default, ~.get_arg,
+       ~.handle_action, ~.get_form_elements),
+     include/globals.php (SP_OVERWRITE_ARGS, SPURI_ARGS):
+   - fix bug: allow overwriting filter-values otherwise loaded from existing default-profile
+   - forbid using default-search-profile
+
+   * include/filter.php (SearchFilter.get_saved_arg; Filter.to_string):
+   - minor changes: added debugging, fix bug in Filter.to_string() printing dbfield if object
+
+2012-08-12 juga
+
+   * include/sgf_parser.php (class SgfParser, ~.parse_sgf),
+     goban_editor.php (load_igoban_from_sgf, create_igoban_from_parsed_sgf):
+   - fix bug in goban-editor: captures were not removed on loading and parsing SGF
+     - parse SGF into object SgfParser, parse also handicap and komi
+     - placed errors below section-header
+
+   * site_map.php:
+   - fix bug: show link for my-shape-list only for valid user-handle
+
 2012-08-10 juga
 
    * include/quick/quick_message.php (QuickHandlerMessage.prepare, ~.process_cmd_info),
