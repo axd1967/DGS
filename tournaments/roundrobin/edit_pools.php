@@ -490,7 +490,7 @@ function echo_pool_summary( $tround, $arr_pool_sum )
    echo
       sprintf( T_('You have chosen the following pool parameters on the %s page:'),
          anchor($base_path."tournaments/roundrobin/define_pools.php?tid=$tid",
-         T_('Define Pools')) ),
+         T_('Define pools')) ),
       "<br>\n",
       sprintf( T_('Pool Count [%s], Pool-Size range %s, Best chosen Pool-Size [%s]'),
          $tround->Pools, build_range_text($tround->MinPoolSize, $tround->MaxPoolSize),

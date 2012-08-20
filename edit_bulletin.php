@@ -123,7 +123,7 @@ $GLOBALS['ThePage'] = new Page('BulletinEdit');
    }
 
    $page = "edit_bulletin.php";
-   $title = ($bid) ? T_('Edit Bulletin') : T_('New Bulletin');
+   $title = ($bid) ? T_('Edit Bulletin#title') : T_('New Bulletin#title');
 
 
    // ---------- Bulletin EDIT form --------------------------------

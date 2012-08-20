@@ -444,11 +444,11 @@ function draw_add_time( $tgame, $game, $allow_add_time )
    $tform->add_row( array(
          'DESCRIPTION', T_('Add time for'),
          'RADIOBUTTONS', 'color', array( BLACK => T_('Black') ), @$vars['color'],
-         'TEXT', SEP_SPACING . T_('Time Remaining') . MED_SPACING . $black_remtime['text'], ));
+         'TEXT', SEP_SPACING . T_('Time remaining') . MED_SPACING . $black_remtime['text'], ));
    $tform->add_row( array(
          'TAB',
          'RADIOBUTTONS', 'color', array( WHITE => T_('White') ), @$vars['color'],
-         'TEXT', SEP_SPACING . T_('Time Remaining') . MED_SPACING . $white_remtime['text'], ));
+         'TEXT', SEP_SPACING . T_('Time remaining') . MED_SPACING . $white_remtime['text'], ));
    $tform->add_empty_row();
 
    if( $allow_edit )

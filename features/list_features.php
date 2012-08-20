@@ -114,7 +114,7 @@ require_once( "features/lib_votes.php" );
    $ftable->set_found_rows( mysql_found_rows('featurelist.found_rows') );
 
    if( $filter_my_vote->value == 2 ) // VOTED
-      $title = T_('My Feature Votes');
+      $title = T_('My Feature Votes#title');
    elseif( $filter_my_vote->value == 1 && $filter_status->value == 2 ) // UNVOTED + VOTE
       $title = T_('Features to vote on');
    else

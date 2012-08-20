@@ -115,7 +115,7 @@ $GLOBALS['ThePage'] = new Page('SurveyAdmin');
          'DESCRIPTION', T_('Survey ID'),
          'TEXT',        ($sid ? anchor( $base_path."admin_survey.php?sid=$sid", $sid, T_('Reload Survey') ) . MED_SPACING .
                                 anchor( $base_path."view_survey.php?sid=$sid",
-                                        image( $base_path.'images/info.gif', T_('View Survey'), null, 'class="InTextImage"'))
+                                        image( $base_path.'images/info.gif', T_('View survey'), null, 'class="InTextImage"'))
                               : T_('NEW survey#survey')), ));
    $sform->add_row( array(
          'DESCRIPTION', T_('Survey Author'),

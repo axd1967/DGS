@@ -849,7 +849,7 @@ function build_form_start_game( $gid, $cmd, $errors )
                'TEXT', T_('Do you agree to start the game now?#mpg'), ));
          $form->add_row( array(
                'CELL', 1, '',
-               'SUBMITBUTTON', FACT_SAVE, T_('Start Game') ));
+               'SUBMITBUTTON', FACT_SAVE, T_('Start game') ));
       }
    }
 

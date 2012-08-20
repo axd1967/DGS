@@ -300,7 +300,7 @@ function itemL($text, $link='', $working=true, $last=false)
          item(T_('Thread list'), "forum/list.php", false);
          { $item_level++;
             item(T_('Read forum'), "forum/read.php", false); //?forum=fid&thread=tid
-            item(T_('New topic'), "forum/read.php", false, true); //?forum=fid without threadid
+            item(T_('New Topic'), "forum/read.php", false, true); //?forum=fid without threadid
          } $item_level--;
          item(T_('Search forums'), "forum/search.php", true);
          item(T_('Goban Editor'), "goban_editor.php", true, !ALLOW_SURVEY_VOTE);

@@ -369,7 +369,7 @@ $GLOBALS['ThePage'] = new Page('Game');
                   $grcol = ($Black_ID == $my_id) ? GPCOL_B : GPCOL_W;
                else
                   $grcol = ''; // all for ZenGo
-               $str = image( $base_path."images/msg.gif", T_('Send message'), null, 'class=InTextImage' ) . ' '
+               $str = image( $base_path."images/msg.gif", T_('Send Message'), null, 'class=InTextImage' ) . ' '
                   . anchor( "message.php?mode=NewMessage".URI_AMP."mpgid=$gid".URI_AMP."mpmt=".MPGMSG_RESIGN
                               . URI_AMP."mpcol=$grcol".URI_AMP."mpmove=$Moves".URI_AMP."preview=1",
                             T_('Ask your team-members') );
@@ -1007,10 +1007,10 @@ function draw_game_viewer()
    {
       echo anchor('#', T_('Browse Game'), '', 'class=GameViewer'),
          "<span id=\"GameViewer\">",
-            anchor('#', image($base_path.'images/start.gif', T_('First Move'), null), '',    'id=FirstMove'),
-            anchor('#', image($base_path.'images/prev.gif',  T_('Previous Move'), null), '', 'id=PrevMove'),
-            anchor('#', image($base_path.'images/next.gif',  T_('Next Move'), null), '',     'id=NextMove'),
-            anchor('#', image($base_path.'images/end.gif',   T_('Last Move'), null), '',     'id=LastMove'),
+            anchor('#', image($base_path.'images/start.gif', T_('First move'), null), '',    'id=FirstMove'),
+            anchor('#', image($base_path.'images/prev.gif',  T_('Previous move'), null), '', 'id=PrevMove'),
+            anchor('#', image($base_path.'images/next.gif',  T_('Next move'), null), '',     'id=NextMove'),
+            anchor('#', image($base_path.'images/end.gif',   T_('Last move'), null), '',     'id=LastMove'),
          "</span>\n";
    }
 }
