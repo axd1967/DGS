@@ -491,7 +491,7 @@ class ErrorCode
             . sprintf( T_('In case you HAVE an email set in your account, you can generate a new one sent to your email with: %s'),
                        sprintf('<a href="%s">%s</a>', $base_path.'forgot.php', T_('Forgot password?')) )
             . "<br><br><br>\n"
-            . T_('In case you have NO email set in your account:')
+            . T_('In case you have no email set in your account:')
             . "<br>\n"
             . T_("Please log in as guest-user and use the Support-forum to get help (provide your login-user-id and your email).")
             . "<br>\n"

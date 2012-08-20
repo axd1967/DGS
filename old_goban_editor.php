@@ -173,7 +173,7 @@ EOF_GOBAN;
          'DESCRIPTION', T_('Board'),
          'TEXT',        T_('Size').MINI_SPACING,
          'SELECTBOX',   'size', 1, $arr_sizes, $board_size, false,
-         'SUBMITBUTTON', 'gob_new', T_('New'),
+         'SUBMITBUTTON', 'gob_new', T_('New#goban'),
       ));
    $tool_on  = 'class=ToolOn';
    $tool_off = 'class=ToolOff';

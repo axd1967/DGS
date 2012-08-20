@@ -39,8 +39,8 @@ A "multi-player-game" (= MPG / MP-game) on DGS is an unrated game played by more
 than two unique players, alternatingly playing Black and White moves in two teams
 or in one team.
 
-The most common form of a MP-game is Pair-Go, also known as Rengo, which is a
-special form of Team-Go (2:2).
+The most common form of a MP-game is Rengo (or Pair-Go with one male and one female),
+both being special forms of Team-Go (2:2).
 
 There are three game-types to differ:
 
@@ -79,7 +79,7 @@ Out of Scope:
 
    It is still possible to share an account, but there is no direct support
    by the server for it. This approach has been chosen, because of easier
-   implementation avoding all "team"-stuff (incl. ratings, team-handling).
+   implementation avoiding all "team"-stuff (incl. ratings, team-handling).
 
 References:
    - http://senseis.xmp.net/?Rengo
@@ -126,7 +126,7 @@ Described Use-cases:
           3   => Zen-Go with 3 players
           5   => Zen-Go with 5 players
 
-          2:2 => Team-Go with 4 players, 2 vs 2, aka "Rengo" (or Pair-Go)
+          2:2 => Team-Go with 4 players, 2 vs 2, aka "Rengo"
           1:3 => Team-Go with 4 players, 1 vs 3
 
      - time-settings

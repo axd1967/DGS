@@ -92,7 +92,7 @@ require_once( "include/contacts.php" );
       }
    }
    else
-      $errormsg = '('.T_('unknown user').')';
+      $errormsg = '('.T_('Unknown user').')';
 
    $contact = null;
    if( !$errormsg && $cid )
