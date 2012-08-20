@@ -17,7 +17,7 @@ You should have received a copy of the GNU Affero General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-$TranslateGroups[] = "Docs";
+$TranslateGroups[] = "Links";
 
 require_once 'include/std_functions.php';
 require_once 'include/admin_faq_functions.php';
@@ -154,7 +154,7 @@ function save_link_section( $arg, $title )
 
    //save_new_faq_entry(dbgmsg,dbtable,tr_group,fid,is_cat,Q,A,Ref, append,translatable,log,chk_mode)
    $f = AdminFAQ::save_new_faq_entry( 'links.save_link_section', 'Links', 'Docs', 1, true,
-      $title, '', '', true, 'Y', false, 1 );
+      $title, '', '', true, 'Y', false, /*chk-md*/1 );
 }
 
 function save_link_entry( $url='', $text='', $extra='' )
@@ -163,7 +163,7 @@ function save_link_entry( $url='', $text='', $extra='' )
 
    //save_new_faq_entry(dbgmsg,dbtable,tr_group,fid,is_cat,Q,A,Ref, append,translatable,log,chk_mode)
    AdminFAQ::save_new_faq_entry( 'links.save_link_entry', 'Links', 'Docs', /*parent*/$f, false,
-      $text, $extra, $url, true, 'Y', false, 2 );
+      $text, $extra, $url, true, 'Y', false, /*chk-md*/2 );
 }
 
 function load_links()

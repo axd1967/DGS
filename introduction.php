@@ -17,7 +17,7 @@ You should have received a copy of the GNU Affero General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-$TranslateGroups[] = "Start";
+$TranslateGroups[] = "Intro";
 
 require_once 'include/std_functions.php';
 require_once 'include/admin_faq_functions.php';
