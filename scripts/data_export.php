@@ -834,8 +834,8 @@ function transl_dump( $database)
 #
 # Dumping data for table 'TranslationTexts'
 #
-INSERT INTO TranslationTexts VALUES (1,'Sorry, you may not pass before all handicap stones are placed.',0,'Done');
-ID,Text,Ref_ID,Translatable
+INSERT INTO TranslationTexts VALUES (1,'Sorry, you may not pass before all handicap stones are placed.',0,'Done',NOW());
+ID,Text,Ref_ID,Translatable,Updated
 #
 # Dumping data for table 'Translations'
 #

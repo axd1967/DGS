@@ -257,20 +257,22 @@ $info_box = '<ul>
          $edit_form->add_empty_row();
       }
 
+      $q_updated = ( $row['QUpdated'] ) ? date(DATE_FMT, $row['QUpdated']) : NO_VALUE;
       if( $row['Level'] == 1 ) //i.e. Category
       {
          //$edit_form->add_row( array( 'HEADER', 'Edit category' ) );
          $edit_form->add_row( array( 'DESCRIPTION', 'Category',
                                      'TEXTINPUT', 'question', 80, 80, $question ) );
-         if( !$faqhide && $row['QTranslatable'] === 'Done' )
-         {
-            $edit_form->add_row( array( 'TAB',
-                                        'CHECKBOX', 'Qchanged', 'Y',
-                                        'Mark entry as changed for translators', false) );
-         }
+         $edit_form->add_row( array( 'TAB',
+                                     'CHECKBOXX', 'Qchanged', 'Y',
+                                     sprintf( 'Mark entry as changed for translators (Last change: %s)', $q_updated ),
+                                     get_request_arg('Qchanged', false),
+                                     array( 'disabled' => ( $faqhide || $row['QTranslatable'] !== 'Done' ) ) ));
       }
       else //i.e. Question/Answer/Reference
       {
+         $a_updated = ( $row['AUpdated'] ) ? date(DATE_FMT, $row['AUpdated']) : NO_VALUE;
+
          //$edit_form->add_row( array( 'HEADER', "Edit $adm_title entry" ) );
          if( $label_ref )
          {
@@ -279,20 +281,18 @@ $info_box = '<ul>
          }
          $edit_form->add_row( array( 'DESCRIPTION', $label_head,
                                      'TEXTINPUT', 'question', 80, 80, $question ) );
-         if( !$faqhide && $row['QTranslatable'] === 'Done' )
-         {
-            $edit_form->add_row( array( 'TAB',
-                                        'CHECKBOX', 'Qchanged', 'Y',
-                                        'Mark entry as changed for translators', false) );
-         }
+         $edit_form->add_row( array( 'TAB',
+                                     'CHECKBOXX', 'Qchanged', 'Y',
+                                     sprintf( 'Mark entry as changed for translators (Last change: %s)', $q_updated ),
+                                     get_request_arg('Qchanged', false),
+                                     array( 'disabled' => ( $faqhide || $row['QTranslatable'] !== 'Done' ) ) ));
          $edit_form->add_row( array( 'DESCRIPTION', $label_cont,
                                      'TEXTAREA', 'answer', 80, $rows_cont, $answer ) );
-         if( !$faqhide && $row['ATranslatable'] === 'Done' )
-         {
-            $edit_form->add_row( array( 'TAB',
-                                        'CHECKBOX', 'Achanged', 'Y',
-                                        'Mark entry as changed for translators', false) );
-         }
+         $edit_form->add_row( array( 'TAB',
+                                     'CHECKBOXX', 'Achanged', 'Y',
+                                     sprintf( 'Mark entry as changed for translators (Last change: %s)', $a_updated ),
+                                     get_request_arg('Achanged', false),
+                                     array( 'disabled' => ( $faqhide || $row['ATranslatable'] !== 'Done' ) ) ));
       }
 
       $edit_form->add_row( array(

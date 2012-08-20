@@ -1329,6 +1329,8 @@ CREATE TABLE IF NOT EXISTS `TranslationTexts` (
   `Text` text NOT NULL,
   `Ref_ID` int(11) NOT NULL default '0',
   `Translatable` enum('Y','N','Done','Changed') NOT NULL default 'Y',
+  `Status` enum('USED','CHECK','ORPHAN') NOT NULL default 'USED',
+  `Updated` datetime NOT NULL default '0000-00-00 00:00:00',
   PRIMARY KEY  (`ID`)
 ) ENGINE=MyISAM  DEFAULT CHARSET=latin1;
 
@@ -1362,6 +1364,7 @@ CREATE TABLE IF NOT EXISTS `Translations` (
   `Language_ID` int(11) NOT NULL,
   `Text` blob NOT NULL,
   `Translated` enum('Y','N') NOT NULL default 'N',
+  `Updated` datetime NOT NULL default '0000-00-00 00:00:00',
   PRIMARY KEY  (`Language_ID`,`Original_ID`)
 ) ENGINE=MyISAM DEFAULT CHARSET=latin1;
 

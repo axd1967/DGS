@@ -2461,3 +2461,11 @@ ALTER TABLE Clock
    ADD Finished datetime NOT NULL default '0000-00-00 00:00:00' ;
 
 
+-- added last-change and status for translations for easier cleanup
+ALTER TABLE TranslationTexts
+   ADD Status enum('USED','CHECK','ORPHAN') NOT NULL default 'USED',
+   ADD Updated datetime NOT NULL default '0000-00-00 00:00:00' ;
+ALTER TABLE Translations
+   ADD Updated datetime NOT NULL default '0000-00-00 00:00:00' ;
+
+

@@ -102,8 +102,8 @@ require_once( "include/make_translationfiles.php" );
          else
             $translation = mysql_addslashes($translation);
 
-         //REPLACE INTO Translations (Original_ID,Language_ID,Text,Translated)
-         $replace_set .= ",($oid,$tlangID,'$translation','Y')";
+         //REPLACE INTO Translations (Original_ID,Language_ID,Text,Translated,Updated)
+         $replace_set .= ",($oid,$tlangID,'$translation','Y',FROM_UNIXTIME($NOW))";
 
          //no $log_set
       }
@@ -119,8 +119,8 @@ require_once( "include/make_translationfiles.php" );
          else
             $translation = mysql_addslashes($translation);
 
-         //REPLACE INTO Translations (Original_ID,Language_ID,Text,Translated)
-         $replace_set .= ",($oid,$tlangID,'$translation','Y')";
+         //REPLACE INTO Translations (Original_ID,Language_ID,Text,Translated,Updated)
+         $replace_set .= ",($oid,$tlangID,'$translation','Y',FROM_UNIXTIME($NOW))";
 
          //INSERT INTO Translationlog (Player_ID,Original_ID,Language_ID,Translation)
          $log_set .= ',(' . $player_row['ID'] . ",$oid,$tlangID,'$translation')";
@@ -133,7 +133,7 @@ require_once( "include/make_translationfiles.php" );
          // note: Translations needs PRIMARY KEY (Language_ID,Original_ID):
          db_query( 'update_translation.replace',
             "REPLACE INTO Translations " .
-                      "(Original_ID,Language_ID,Text,Translated) VALUES " .
+                      "(Original_ID,Language_ID,Text,Translated,Updated) VALUES " .
                       substr($replace_set,1) );
 
       if( $log_set )

@@ -39,13 +39,15 @@ class AdminFAQ
       return $row['ID'];
    }
 
-   // returns row with fields: FAQ/Links.* + Q + A + QTranslatable + ATranslatable
+   // returns row with fields: FAQ/Links/Intro.* + Q + A + (Q|A)Translatable + (Q|A)Updated
    function get_faq_entry_row( $dbtable, $id )
    {
       $row = mysql_single_fetch( "AdminFAQ::get_faq_entry_row($id)",
            "SELECT DBT.*, Question.Text AS Q, Answer.Text AS A".
                ", Question.Translatable AS QTranslatable".
-               ", Answer.Translatable AS ATranslatable ".
+               ", UNIX_TIMESTAMP(Question.Updated) AS QUpdated".
+               ", Answer.Translatable AS ATranslatable".
+               ", IF(ISNULL(Answer.Updated),0,UNIX_TIMESTAMP(Answer.Updated)) AS AUpdated ".
            "FROM $dbtable AS DBT " .
                "INNER JOIN TranslationTexts AS Question ON Question.ID=DBT.Question " .
                "LEFT JOIN TranslationTexts AS Answer ON Answer.ID=DBT.Answer " .
@@ -55,16 +57,23 @@ class AdminFAQ
       return $row;
    }
 
+   // fid: parent entry, 1=root
+   // chk_mode: 0=std-entry (Answer), 1=Question, 2=reference (for Links)
    function save_new_faq_entry( $dbgmsg, $dbtable, $tr_group, $fid, $is_cat, $question, $answer, $reference,
          $append=false, $translatable='N', $do_log=true, $chk_mode=0 )
    {
+      global $NOW, $player_row;
+
       $dbgmsg .= ".save_new_faq_entry($dbtable,$tr_group,$fid)";
+      if( !preg_match("/^(FAQ|Intro|Links)$/", $dbtable) )
+         error('invalid_args', "$dbgmsg.check.bad_dbtable");
 
       $tr_group_id = AdminFAQ::get_faq_group_id( $dbgmsg, $tr_group );
 
       $ReferenceSql = ($reference) ? mysql_addslashes($reference) : $reference;
       if( $chk_mode == 2 && $reference )
       {
+         // check if URL already existing
          $row = mysql_single_fetch( "$dbgmsg.do_new.find_ref",
             "SELECT ID FROM $dbtable WHERE Reference='$ReferenceSql' LIMIT 1" );
          if( $row )
@@ -72,6 +81,7 @@ class AdminFAQ
       }
       elseif( $chk_mode == 1 )
       {
+         // check if Question already existing
          $Qsql = mysql_addslashes( latin1_safe($question) );
          $row = mysql_single_fetch( "$dbgmsg.do_new.find_q1",
             "SELECT TT.ID FROM TranslationTexts AS TT " .
@@ -88,6 +98,7 @@ class AdminFAQ
 
       ta_begin();
       {//HOT-section to add new FAQ-entry
+         // add ROOT-element (=seed) for $dbtable
          $query = "SELECT * FROM $dbtable WHERE ID=$fid LIMIT 1";
          $row = mysql_single_fetch( "$dbgmsg.do_new.find1($fid)", $query );
          if( $fid==1 && (!$row || $row['Hidden']=='Y') )
@@ -130,8 +141,8 @@ class AdminFAQ
          db_query( "$dbgmsg.do_new.insert",
             "INSERT INTO $dbtable SET " .
             "SortOrder=$new_sortorder, Parent={$row['Parent']}, Level={$row['Level']}, Reference='$ReferenceSql'" );
-         $faq_id = mysql_insert_id();
-         $ref_id = $faq_id;
+         $faq_id = mysql_insert_id(); // FAQ | Intro | Links
+         $ref_id = ($dbtable == 'FAQ') ? $faq_id : 0; // set Ref_ID only for FAQ-entry
 
          $Qsql = mysql_addslashes( latin1_safe($question) );
          $q_id = 0;
@@ -147,7 +158,8 @@ class AdminFAQ
          if( $q_id == 0 )
          {
             db_query( "$dbgmsg.do_new.transltexts1",
-               "INSERT INTO TranslationTexts SET Text='$Qsql', Ref_ID=$faq_id, Translatable='$translatable'" );
+               "INSERT INTO TranslationTexts SET Text='$Qsql', Ref_ID=$ref_id, Translatable='$translatable', " .
+               "Updated=FROM_UNIXTIME($NOW)" );
             $q_id = mysql_insert_id();
             db_query( "$dbgmsg.do_new.translfoundingrp1",
                "INSERT INTO TranslationFoundInGroup SET Text_ID=$q_id, Group_ID=$tr_group_id" );
@@ -169,7 +181,8 @@ class AdminFAQ
             if( $a_id == 0 )
             {
                db_query( "$dbgmsg.do_new.transltexts2",
-                  "INSERT INTO TranslationTexts SET Text='$Asql', Ref_ID=$faq_id, Translatable='$translatable'" );
+                  "INSERT INTO TranslationTexts SET Text='$Asql', Ref_ID=$ref_id, Translatable='$translatable', " .
+                  "Updated=FROM_UNIXTIME($NOW)" );
                $a_id = mysql_insert_id();
                db_query( "$dbgmsg.do_new.translfoundingrp2",
                   "INSERT INTO TranslationFoundInGroup SET Text_ID=$a_id, Group_ID=$tr_group_id" );
@@ -183,7 +196,6 @@ class AdminFAQ
 
          if( $do_log )
          {
-            global $player_row;
             db_query( "$dbgmsg.do_new.faqlog",
                "INSERT INTO FAQlog SET FAQID=$fid, uid={$player_row['ID']}, Question='$Qsql', Answer='$Asql', " .
                "Reference='$ReferenceSql'" ); //+ Date= timestamp
@@ -375,6 +387,8 @@ class AdminFAQ
    //$row = row from AdminFAQ::get_faq_entry_row()
    function update_faq_entry( $dbgmsg, $dbtable, $fid, $row, $q_change, $a_change, $question, $answer, $reference )
    {
+      global $NOW, $player_row;
+
       $dbgmsg .= ".update_faq_entry($dbtable,$fid)";
       $QID = $row['Question'];
       $AID = $row['Answer'];
@@ -395,7 +409,7 @@ class AdminFAQ
          {
             if( $Qchanged )
             {
-               $QchangedSql = ", Translatable='Changed'";
+               $QchangedSql = ", Translatable='Changed', Updated=FROM_UNIXTIME($NOW)";
                db_query( "$dbgmsg.update_Qflags",
                   "UPDATE Translations SET Translated='N' WHERE Original_ID=$QID" ); // #>1
                $log |= 0x4;
@@ -416,7 +430,7 @@ class AdminFAQ
          {
             if( $Achanged )
             {
-               $AchangedSql = ", Translatable='Changed'";
+               $AchangedSql = ", Translatable='Changed', Updated=FROM_UNIXTIME($NOW)";;
                db_query( "$dbgmsg.update_Aflags",
                   "UPDATE Translations SET Translated='N' WHERE Original_ID=$AID" ); // #>1
                $log |= 0x8;
@@ -434,7 +448,6 @@ class AdminFAQ
 
          if( $log )
          {
-            global $player_row;
             db_query( "$dbgmsg.faqlog",
                "INSERT INTO FAQlog SET FAQID=$fid, uid={$player_row['ID']}, Question='$Qsql', Answer='$Asql', " .
                "Reference='$ReferenceSql'" ); //+ Date= timestamp
