@@ -129,6 +129,8 @@ function admin_log( $uid, $handle, $err)
 
 function writeIpStats( $page )
 {
+   return; // not used currently
+
    global $player_row, $NOW;
 
    $ip = @$_SERVER['REMOTE_ADDR'];
