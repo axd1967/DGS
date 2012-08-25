@@ -122,9 +122,8 @@ $info_box = '<ul>
    $objtype = (int)get_request_arg('ot');
    if( $objtype == TXTOBJTYPE_INTRO )
    {
-      $dbtable = 'Intro';
+      $dbtable = $tr_group = 'Intro';
       $adm_title = 'Introduction';
-      $tr_group = 'Start';
       $label_head = 'Title';
       $label_cont = 'Description';
       $label_ref = '';
@@ -132,8 +131,7 @@ $info_box = '<ul>
    }
    elseif( $objtype == TXTOBJTYPE_LINKS )
    {
-      $dbtable = $adm_title = 'Links';
-      $tr_group = 'Docs';
+      $dbtable = $adm_title = $tr_group = 'Links';
       $label_head = 'Link Text';
       $label_cont = 'Description';
       $label_ref = 'Reference (URL)';

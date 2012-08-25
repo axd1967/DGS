@@ -153,7 +153,7 @@ function save_link_section( $arg, $title )
    global $f;
 
    //save_new_faq_entry(dbgmsg,dbtable,tr_group,fid,is_cat,Q,A,Ref, append,translatable,log,chk_mode)
-   $f = AdminFAQ::save_new_faq_entry( 'links.save_link_section', 'Links', 'Docs', 1, true,
+   $f = AdminFAQ::save_new_faq_entry( 'links.save_link_section', 'Links', 'Links', 1, true,
       $title, '', '', true, 'Y', false, /*chk-md*/1 );
 }
 
@@ -162,7 +162,7 @@ function save_link_entry( $url='', $text='', $extra='' )
    global $f;
 
    //save_new_faq_entry(dbgmsg,dbtable,tr_group,fid,is_cat,Q,A,Ref, append,translatable,log,chk_mode)
-   AdminFAQ::save_new_faq_entry( 'links.save_link_entry', 'Links', 'Docs', /*parent*/$f, false,
+   AdminFAQ::save_new_faq_entry( 'links.save_link_entry', 'Links', 'Links', /*parent*/$f, false,
       $text, $extra, $url, true, 'Y', false, /*chk-md*/2 );
 }
 
