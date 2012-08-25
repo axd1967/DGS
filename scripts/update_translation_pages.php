@@ -105,7 +105,8 @@ function filepat2preg($p, $flg=0)
 
 function find_php_files( )
 {
-   $directories = array( ''
+   $directories = array(
+           ''
          , 'include/'
          , 'include/db/'
          , 'include/quick/'
@@ -148,7 +149,9 @@ function group_string( $id)
    return var_export( array_search($id, $translationgroups), true)."($id)";
 }
 
-{
+
+
+{//main
    disable_cache();
 
    connect2mysql();
@@ -166,7 +169,6 @@ function group_string( $id)
 
    start_html('update_translation_pages', 0);
 
-//echo ">>>> One shot fix. Do not run it again."; end_html(); exit;
    if( $do_it=@$_REQUEST['do_it'] )
    {
       function dbg_query($s) {
@@ -214,8 +216,7 @@ function group_string( $id)
          if( !isset($translationgroups[$group_found]) )
          {
             echo "<hr>Should be adjusted NOW: '$group_found' from $file ... OR be added:<br>\n";
-            dbg_query("INSERT INTO TranslationGroups"
-               ." SET Groupname='" . mysql_addslashes($group_found) . "'");
+            dbg_query("INSERT INTO TranslationGroups SET Groupname='" . mysql_addslashes($group_found) . "'");
             echo "<hr>Fatal error: re-run the script!!!\n";
             end_html();
             exit;
@@ -275,6 +276,6 @@ function group_string( $id)
 
    echo "<hr>Done!!!\n";
    end_html();
-}
+}//main
 
 ?>
