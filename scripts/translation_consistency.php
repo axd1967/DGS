@@ -199,6 +199,7 @@ function check_consistency_faq( $dbtable, $commit )
 
 
    // (1) read all texts of type dbtable
+   echo BRLF, "[$dbtable] Checking for bad Type ...", BRLF;
    $db_type = strtoupper($dbtable);
    $arr_remove_type = array(); // TT.ID => 1 (if db_type matches)
    $result = db_query("$dbgmsg.check.QA.Type.1",
@@ -227,9 +228,10 @@ function check_consistency_faq( $dbtable, $commit )
    }
    if( count($arr_remove_type) )
    {
-      echo ERR_CHECK, "[$dbtable] Found ", count($arr_remove_type), " entries with bad type: Needs fix! ", BRLF;
+      $arr_rm = array_keys($arr_remove_type);
+      echo ERR_CHECK, "[$dbtable] Found ", count($arr_rm), " entries with bad type: Needs fix! ", BRLF;
       commit_query("$dbgmsg.fix.QA.Type.3", $commit,
-         "UPDATE TranslationTexts SET Type='NONE' WHERE ID IN (" . implode(', ', $arr_remove_type) . ")" );
+         "UPDATE TranslationTexts SET Type='NONE' WHERE ID IN (" . implode(', ', $arr_rm) . ")" );
    }
    if( count($arr_set_type) )
    {
