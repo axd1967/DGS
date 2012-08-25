@@ -162,6 +162,14 @@ function language_exists( $browsercode, $charenc='', $langname='' )
    }
 
    return false;
+}//language_exists
+
+function get_translation_group( $group )
+{
+   $row = mysql_single_fetch( "get_translation_group($group)",
+            "SELECT ID FROM TranslationGroups WHERE Groupname='" . mysql_addslashes($group) . "' LIMIT 1" )
+      or error('internal_error', "get_translation_group.2($group)");
+   return $row['ID'];
 }
 
 ?>
