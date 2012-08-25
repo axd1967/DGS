@@ -65,8 +65,9 @@ class AdminFAQ
       global $NOW, $player_row;
 
       $dbgmsg .= ".save_new_faq_entry($dbtable,$tr_group,$fid)";
-      if( !preg_match("/^(FAQ|Intro|Links)$/", $dbtable) )
+      if( !preg_match("/^(FAQ|Links|Intro)$/", $dbtable) )
          error('invalid_args', "$dbgmsg.check.bad_dbtable");
+      $db_type = strtoupper($dbtable);
 
       $tr_group_id = AdminFAQ::get_faq_group_id( $dbgmsg, $tr_group );
 
@@ -137,12 +138,10 @@ class AdminFAQ
             $new_sortorder = $row['SortOrder'] + 1;
          }
 
-         $ref_id = $fid; // anchor-ref
          db_query( "$dbgmsg.do_new.insert",
             "INSERT INTO $dbtable SET " .
             "SortOrder=$new_sortorder, Parent={$row['Parent']}, Level={$row['Level']}, Reference='$ReferenceSql'" );
          $faq_id = mysql_insert_id(); // FAQ | Intro | Links
-         $ref_id = ($dbtable == 'FAQ') ? $faq_id : 0; // set Ref_ID only for FAQ-entry
 
          $Qsql = mysql_addslashes( latin1_safe($question) );
          $q_id = 0;
@@ -158,7 +157,7 @@ class AdminFAQ
          if( $q_id == 0 )
          {
             db_query( "$dbgmsg.do_new.transltexts1",
-               "INSERT INTO TranslationTexts SET Text='$Qsql', Ref_ID=$ref_id, Translatable='$translatable', " .
+               "INSERT INTO TranslationTexts SET Text='$Qsql', Type='$db_type', Translatable='$translatable', " .
                "Updated=FROM_UNIXTIME($NOW)" );
             $q_id = mysql_insert_id();
             db_query( "$dbgmsg.do_new.translfoundingrp1",
@@ -181,7 +180,7 @@ class AdminFAQ
             if( $a_id == 0 )
             {
                db_query( "$dbgmsg.do_new.transltexts2",
-                  "INSERT INTO TranslationTexts SET Text='$Asql', Ref_ID=$ref_id, Translatable='$translatable', " .
+                  "INSERT INTO TranslationTexts SET Text='$Asql', Type='$db_type', Translatable='$translatable', " .
                   "Updated=FROM_UNIXTIME($NOW)" );
                $a_id = mysql_insert_id();
                db_query( "$dbgmsg.do_new.translfoundingrp2",
@@ -197,8 +196,8 @@ class AdminFAQ
          if( $do_log )
          {
             db_query( "$dbgmsg.do_new.faqlog",
-               "INSERT INTO FAQlog SET FAQID=$fid, uid={$player_row['ID']}, Question='$Qsql', Answer='$Asql', " .
-               "Reference='$ReferenceSql'" ); //+ Date= timestamp
+               "INSERT INTO FAQlog SET Type='$dbtable', Ref_ID=$fid, uid={$player_row['ID']}, " .
+                  "Question='$Qsql', Answer='$Asql', Reference='$ReferenceSql'" ); //+ Date= timestamp
          }
       }
       ta_end();
@@ -390,6 +389,8 @@ class AdminFAQ
       global $NOW, $player_row;
 
       $dbgmsg .= ".update_faq_entry($dbtable,$fid)";
+      if( !preg_match("/^(FAQ|Links|Intro)$/", $dbtable) )
+         error('invalid_args', "$dbgmsg.check.bad_dbtable");
       $QID = $row['Question'];
       $AID = $row['Answer'];
       $log = 0;
@@ -449,8 +450,8 @@ class AdminFAQ
          if( $log )
          {
             db_query( "$dbgmsg.faqlog",
-               "INSERT INTO FAQlog SET FAQID=$fid, uid={$player_row['ID']}, Question='$Qsql', Answer='$Asql', " .
-               "Reference='$ReferenceSql'" ); //+ Date= timestamp
+               "INSERT INTO FAQlog SET Type='$dbtable', Ref_ID=$fid, uid={$player_row['ID']}, " .
+                  "Question='$Qsql', Answer='$Asql', Reference='$ReferenceSql'" ); //+ Date= timestamp
          }
       }
       ta_end();
