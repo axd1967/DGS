@@ -52,9 +52,10 @@ require_once( "include/table_columns.php" );
 
    // add_tablehead($nr, $descr, $attbs=null, $mode=TABLE_NO_HIDE|TABLE_NO_SORT, $sortx='')
    $atable->add_tablehead( 1, T_('ID#header'), 'ID');
+   $atable->add_tablehead( 7, T_('Type#header'));
    $atable->add_tablehead( 2, T_('User#header'), 'User');
    $atable->add_tablehead( 3, T_('Time#header'), 'User');
-   $atable->add_tablehead( 4, T_('FAQ ID#header'), 'ID');
+   $atable->add_tablehead( 4, T_('Ref ID#header'), 'ID');
    $atable->add_tablehead( 5, T_('Question & Reference#header'));
    $atable->add_tablehead( 6, T_('Answer#header'));
 
@@ -63,7 +64,7 @@ require_once( "include/table_columns.php" );
             'IFNULL(UNIX_TIMESTAMP(FL.Date),0) AS X_Date, ' .
             'PUser.Handle AS PUser_Handle ' .
          'FROM FAQlog AS FL ' .
-            'LEFT JOIN FAQ ON FAQ.ID=FL.FAQID ' .
+            'LEFT JOIN FAQ ON FAQ.ID=FL.Ref_ID ' .
             'LEFT JOIN Players AS PUser ON PUser.ID=FL.uid ' .
          'ORDER BY ID DESC ' . $limit );
 
@@ -80,15 +81,20 @@ require_once( "include/table_columns.php" );
          $arow_str[3] = ($row['X_Date'] > 0 ? date(DATE_FMT2, $row['X_Date']) : NULL );
       if( $atable->Is_Column_Displayed[4] )
       {
+         $objtype = (@$row['Type'] == 'FAQ')
+            ? TXTOBJTYPE_FAQ
+            : ( @$row['Type'] == 'Links' ? TXTOBJTYPE_LINKS : TXTOBJTYPE_INTRO );
          $typechar = (@$row['Level'] == 1) ? 'c' : 'e';
-         $edit_link = 'admin_faq.php?edit=1'.URI_AMP.'type='.$typechar.URI_AMP.'id='.@$row['FAQID'];
-         $arow_str[4] = '<a href="' . $edit_link . '">' . sprintf( T_('Edit(%s)#faq'), @$row['FAQID']) . '</a>';
+         $edit_link = 'admin_faq.php?ot='.$objtype.URI_AMP.'edit=1'.URI_AMP.'type='.$typechar.URI_AMP.'id='.@$row['Ref_ID'];
+         $arow_str[4] = '<a href="' . $edit_link . '">' . sprintf( T_('Edit(%s)#faq'), @$row['Ref_ID']) . '</a>';
       }
       if( $atable->Is_Column_Displayed[5] )
          $arow_str[5] = make_html_safe( @$row['Question'], 'cell' )
             . (@$row['Reference'] ? "<br>\n" . $row['Reference'] : '' );
       if( $atable->Is_Column_Displayed[6] )
          $arow_str[6] = make_html_safe( wordwrap(@$row['Answer'], 60, "\n", false), 'faq' );
+      if( $atable->Is_Column_Displayed[7] )
+         $arow_str[7] = @$row['Type'];
       $atable->add_row( $arow_str );
    }
    mysql_free_result($result);
