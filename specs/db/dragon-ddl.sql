@@ -244,7 +244,8 @@ CREATE TABLE IF NOT EXISTS `FAQ` (
 CREATE TABLE IF NOT EXISTS `FAQlog` (
   `ID` int(11) NOT NULL auto_increment,
   `uid` int(11) NOT NULL default '0',
-  `FAQID` int(11) NOT NULL default '0',
+  `Ref_ID` int(11) NOT NULL default '0',
+  `Type` enum('FAQ','Links','Intro') NOT NULL default 'FAQ',
   `Question` text NOT NULL,
   `Answer` text NOT NULL,
   `Reference` varchar(255) NOT NULL default '',
@@ -1327,11 +1328,12 @@ CREATE TABLE IF NOT EXISTS `TranslationPages` (
 CREATE TABLE IF NOT EXISTS `TranslationTexts` (
   `ID` int(11) NOT NULL auto_increment,
   `Text` text NOT NULL,
-  `Ref_ID` int(11) NOT NULL default '0',
+  `Type` enum('NONE','FAQ','LINKS','INTRO','SRC') NOT NULL default 'NONE',
   `Translatable` enum('Y','N','Done','Changed') NOT NULL default 'Y',
   `Status` enum('USED','CHECK','ORPHAN') NOT NULL default 'USED',
   `Updated` datetime NOT NULL default '0000-00-00 00:00:00',
-  PRIMARY KEY  (`ID`)
+  PRIMARY KEY  (`ID`),
+  KEY `Text` (`Text`(4))
 ) ENGINE=MyISAM  DEFAULT CHARSET=latin1;
 
 -- --------------------------------------------------------
@@ -1345,7 +1347,6 @@ CREATE TABLE IF NOT EXISTS `Translationlog` (
   `Player_ID` int(11) NOT NULL,
   `Language_ID` int(11) NOT NULL,
   `Original_ID` int(11) NOT NULL default '0',
-  `CString` text NOT NULL,
   `OldTranslation` blob NOT NULL,
   `Translation` blob NOT NULL,
   `Date` timestamp NOT NULL default CURRENT_TIMESTAMP on update CURRENT_TIMESTAMP,
@@ -1365,7 +1366,8 @@ CREATE TABLE IF NOT EXISTS `Translations` (
   `Text` blob NOT NULL,
   `Translated` enum('Y','N') NOT NULL default 'N',
   `Updated` datetime NOT NULL default '0000-00-00 00:00:00',
-  PRIMARY KEY  (`Language_ID`,`Original_ID`)
+  PRIMARY KEY  (`Language_ID`,`Original_ID`),
+  KEY `Original_ID` (`Original_ID`)
 ) ENGINE=MyISAM DEFAULT CHARSET=latin1;
 
 -- --------------------------------------------------------

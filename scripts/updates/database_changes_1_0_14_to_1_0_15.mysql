@@ -2469,3 +2469,26 @@ ALTER TABLE Translations
    ADD Updated datetime NOT NULL default '0000-00-00 00:00:00' ;
 
 
+-- add Type to check for double-text of same type
+ALTER TABLE TranslationTexts
+   ADD Type enum('NONE','FAQ','LINKS','INTRO','SRC') NOT NULL default 'NONE' AFTER Text ;
+ALTER TABLE FAQlog
+   ADD Type enum('FAQ','Links','Intro') NOT NULL default 'FAQ' AFTER FAQID ;
+ALTER TABLE FAQlog
+   CHANGE FAQID Ref_ID int(11) NOT NULL default '0' ;
+
+-- add index for faster consistency-checks, add Type to check for double-text of same type
+ALTER TABLE TranslationTexts
+   ADD KEY Text (Text(4)) ;
+ALTER TABLE Translations
+   ADD KEY Original_ID (Original_ID) ;
+ANALYZE TABLE TranslationTexts;
+ANALYZE TABLE Translations;
+
+-- drop unused columns
+ALTER TABLE Translationlog
+   DROP COLUMN CString ;
+ALTER TABLE TranslationTexts
+   DROP COLUMN Ref_ID ;
+
+
