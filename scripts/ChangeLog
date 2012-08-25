@@ -20,6 +20,7 @@ ChangeLog
 ------------------------------------------------------------------
 
 2012-08-25 juga
+### ----- release-1_0_15-20120608 -----
 
    * scripts/obsolete/alter_moves_table.php, scripts/obsolete/calculate_no_games.php,
      scripts/obsolete/convert_move_tables.php, scripts/obsolete/delete_move_tables.php,
@@ -257,7 +258,6 @@ ALTER TABLE MoveStats
    ADD KEY SlotWeek (SlotWeek) ;
 -----------
 
-### ----- release-1_0_15-20120608 -----
    * include/quick/quick_message.php (QuickHandlerMessage.prepare):
    - bugfix: option 'mid' is optional for send-message (or 0 for new msg),
      or if present it must be numeric and >0 for reply-msg
