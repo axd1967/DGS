@@ -141,7 +141,7 @@ function retry_admin( $msg)
 
          $Group_ID = $row['ID'];
 
-         $tmp = add_text_to_translate('admin_do_translators.add', $langname, $Group_ID);
+         add_text_to_translate('admin_do_translators.add', $langname, $Group_ID);
       }
       ta_end();
 
