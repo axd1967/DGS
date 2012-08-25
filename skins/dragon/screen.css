@@ -1860,6 +1860,10 @@ body.Donation table#pageLayout td#pageBody div.Section table {
 /* translations page */
 /* ------------------------- */
 
+span.UpdTransl {
+   color: darkred;
+}
+
 form#translateForm table.FormClass tr.LinksT td,
 form#translateForm table.FormClass tr.LinksB td {
    background: #d0d0d0;

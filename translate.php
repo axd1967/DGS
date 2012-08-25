@@ -28,17 +28,22 @@ $GLOBALS['ThePage'] = new Page('Translate');
 define('ALLOW_PROFIL_CHARSET', 1); //allow the admins to overwrite the page encoding
 define('TRANSL_ALLOW_FILTER', 1); //allow a search on the english phrases
 
-
-$info_box = '<br>When translating you should keep in mind the following things:
+$info_box = '<br>When translating you should keep the following things in mind:
 <ul>
   <li> You must enter your translation in the second column boxes.
        <br>
        The first column displays the english original phrases in a similar way
        but is read-only.
        <br>
-       The third part displays the english original phrases in the HTML way as a
-       display example. Caution: this example may sometime differs from the effective
+       The text below the english original phrases shows the preview of how the text
+       looks on the site, while the text below the textarea in the 2nd column
+       shows the preview of the translation-text currently stored in the database.
+       Caution: this preview examples may sometime differ from the effective
        display in the normal page because of additional constraints of the normal page.
+  <li> Below the english phrase you can also see a date of the last-change (if present).
+       <br>
+       The date is shown in red color if the text is new or has been updated and need
+       a re-translation.
   <li> If a translated word is the same as in english, leave it blank and click
        the \'untranslated\' box to the right.
   <li> If you need to know the context of a phrase to translate (where it appears on DGS),
@@ -73,7 +78,7 @@ $info_box = '<br>When translating you should keep in mind the following things:
        So you can use them here (or copy thoses used by the FAQ maintainers).
        For instance, for links homed at DGS, use not &lt;a href="..."&gt;, but the
        home-tag, i.e. &lt;home users.php&gt;Users&lt;/home&gt;: this will make the
-       FAQ entries portable to an other site.
+       FAQ entries portable to an other site and is shorter.
        <br>
        The FAQ maintainers also have the possibility to use the note-tag
        &lt;note&gt;(removed from entry)&lt;/note&gt; to add some notes seen only
@@ -82,7 +87,8 @@ $info_box = '<br>When translating you should keep in mind the following things:
   <li> If a word ends with #2 or #note (without space), for example \'To#2\' or \'All#msg\',
        this means a second word with the same spelling, so just ignore the #2 part when
        translating. This is necessary since in some languages \'to\' is translated differently
-       depending on the context (e.g. \'bis\' or \'an\' in german).
+       depending on the context (e.g. \'bis\' or \'an\' in german), or the case is written
+       differently.
        Some words may end with #short or other suffixes after the \'#\'-char.
        Often used in tables, they have to be translated with the shorter abbreviation of the word.
        For example, \'days#short\' and \'hours#short\' are translated in english by \'d\' and
@@ -239,7 +245,7 @@ $info_box = '<br>When translating you should keep in mind the following things:
 
    if( $translate_lang )
    {
-      $nbcol = 3;
+      $nbcol = 2;
       { //$translate_form
       $translate_form = new Form( 'translate', 'update_translation.php', FORM_POST );
       $translate_form->add_row( array(
@@ -285,7 +291,7 @@ $info_box = '<br>When translating you should keep in mind the following things:
       else
          $rx_term = '';
 
-      $translate_form->add_row( array( 'HR' ) ); //$nbcol
+      $translate_form->add_row( array( 'HR' ) );
 
       $oid= -1;
       while( ($row = mysql_fetch_assoc($result)) && $show_rows-- > 0 )
@@ -296,29 +302,43 @@ $info_box = '<br>When translating you should keep in mind the following things:
          if( $oid == $row['Original_ID'] ) continue;
          $oid = $row['Original_ID'];
 
-         $string = $row['Original'];
+         $orig_string = $row['Original'];
          $translation = $row['Text'];
 
          //$debuginfo must be html_safe.
          if( (@$player_row['admin_level'] & ADMIN_DEVELOPER) /* && @$_REQUEST['debug'] */ )
-            $debuginfo = "<br><span class=DebugInfo>"
-               . "L=".$row['Language_ID'].",G=".$row['Group_ID']
-               . ",T=$oid [".$row['Translated'].'/'.$row['Translatable'].']'
+            $debuginfo = "<br><span class=\"DebugInfo Smaller\">"
+               . "L=".$row['Language_ID']
+               . ", G=".$row['Group_ID']
+               . ", TP=".$row['Type']
+               . ", ST=".$row['Status']
+               . ", T=$oid [".$row['Translated'].'/'.$row['Translatable'].']'
                . "</span>";
          else
             $debuginfo = '';
 
-         $hsize = 60;
+         $orig_updinfo = ( $row['TT_Updated'] )
+            ? ( $row['TT_Updated'] > $row['T_Updated']
+                  ? span("Smaller UpdTransl", '(Updated: ' . date(DATE_FMT6, $row['TT_Updated']) . ')')
+                  : span('Smaller', '(Last change: ' . date(DATE_FMT6, $row['TT_Updated']) . ')')
+              )
+            : '';
+         $transl_updinfo = ( $row['T_Updated'] )
+            ? span('Smaller', '(Last change: ' . date(DATE_FMT6, $row['T_Updated']) . ')')
+            : '';
+
+         $hsize = 70;
          $vsize = intval( floor( max( 2,
                      substr_count( wordwrap( $translation, $hsize, "\n", 1), "\n" ),
-                     substr_count( wordwrap( $string, $hsize, "\n", 1), "\n" )
+                     substr_count( wordwrap( $orig_string, $hsize, "\n", 1), "\n" )
                   )));
 
          //insert the rx_term highlights as if it was 'faq' (lose) item
-         $sample = make_html_safe($string, 'faq', $rx_term);
+         $orig_preview = make_html_safe($orig_string, 'faq', $rx_term);
+         $translation_preview = make_html_safe($translation, 'faq');
 
          //execute the textarea_safe() here because of the various_encoding
-         $string = textarea_safe($string, 'iso-8859-1'); //LANG_DEF_CHARSET);
+         $orig_string = textarea_safe( $orig_string, 'iso-8859-1'); //LANG_DEF_CHARSET);
          $translation = textarea_safe( $translation, $translate_encoding);
 
          //both textareas in OWNHTML because of previous textarea_safe()
@@ -326,14 +346,13 @@ $info_box = '<br>When translating you should keep in mind the following things:
                'CELL', 1, 'class=English',
                'OWNHTML', "<textarea name=\"orgen$oid\" readonly" //readonly disabled
                   . " cols=\"$hsize\" rows=\"$vsize\">"
-                  . $string."</textarea>"
-                  . $debuginfo, //already html_safe, maybe empty
+                  . $orig_string."</textarea>"
+                  . trim($debuginfo . ' ' . $orig_updinfo),
                'CELL', 1, 'class=Language',
                'OWNHTML', "<textarea name=\"transl$oid\""
                   . " cols=\"$hsize\" rows=\"$vsize\">"
                   . $translation."</textarea>",
-               'BR', 'CHECKBOX', "same$oid", 'Y',
-                        T_('untranslated'), $row['Text'] === '',
+               'BR', 'CHECKBOX', "same$oid", 'Y', T_('untranslated'), $row['Text'] === '',
             );
          /*
             Unchanged box is useful when, for instance, a FAQ entry receive
@@ -342,9 +361,13 @@ $info_box = '<br>When translating you should keep in mind the following things:
          */
          if( $row['Translated'] === 'N' ) //exclude not yet translated items
             array_push( $form_row,
-                  'TEXT', '&nbsp;&nbsp;',
+                  'TEXT', MED_SPACING,
                   'CHECKBOX', "unch$oid", 'Y', T_('unchanged'), false
                );
+
+         array_push( $form_row,
+               'TEXT', SMALL_SPACING . $transl_updinfo
+            );
 
          // allow some space on the right
          if( $nbcol > 2 )
@@ -353,11 +376,13 @@ $info_box = '<br>When translating you should keep in mind the following things:
          $translate_form->add_row( $form_row);
 
          $translate_form->add_row( array(
-               'CELL', $nbcol, 'class=Sample',
-               'TEXT', $sample //already html_safe
+               'CELL', 1, 'class=Sample',
+               'TEXT', $orig_preview, //already html_safe
+               'CELL', 1, 'class=Sample',
+               'TEXT', $translation_preview, //already html_safe
             ));
 
-         $translate_form->add_row( array( 'HR' ) ); //$nbcol
+         $translate_form->add_row( array( 'HR' ) );
       }
       mysql_free_result( $result);
 
@@ -373,7 +398,7 @@ $info_box = '<br>When translating you should keep in mind the following things:
 
       if( $oid > 0 ) //not empty table
       {
-         $translate_form->add_row( array( 'SPACE' ) ); //$nbcol
+         $translate_form->add_row( array( 'SPACE' ) );
          $translate_form->add_row( array( 'ROW', 'SubmitTransl',
                'CELL', $nbcol, '',
                'HIDDEN', 'translate_lang', $translate_lang,
