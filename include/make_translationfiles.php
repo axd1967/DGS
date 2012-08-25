@@ -190,6 +190,10 @@ function translations_query( $translate_lang, $untranslated, $group, $from_row=-
           . ",TFIG.Group_ID"
           . ",TT.Text AS Original"
           . ",TT.Translatable"
+          . ",TT.Type"
+          . ",TT.Status"
+          . ",UNIX_TIMESTAMP(TT.Updated) AS TT_Updated"
+          . ",UNIX_TIMESTAMP(Translations.Updated) AS T_Updated"
           . ",Translations.Translated"
    . " FROM TranslationTexts AS TT"
       . " INNER JOIN TranslationGroups AS TG"
@@ -220,14 +224,15 @@ function translations_query( $translate_lang, $untranslated, $group, $from_row=-
 
 
 // IMPORTANT NOTE: caller needs to open TA with HOT-section if used with other db-writes!!
-// return arr( error|false, found/inserted-text_id, sql-insert )
+// IMPORTANT NOTE: do NOT use to save FAQ/Intro/Links-texts, but only for T_...-entries from sources
+// return arr( error|false, found/inserted-text_id, arr-double, sql-insert )
 function add_text_to_translate( $debugmsg, $orig_text, $Group_ID, $do_it=true)
 {
    global $NOW;
 
    $orig_text = trim($orig_text);
    if( !$orig_text || $Group_ID <= 0 )
-      return array( false, 0, '' );
+      return array( false, 0, array(), '' );
 
    $text_sql = mysql_addslashes( latin1_safe($orig_text) );
    $error = false;
@@ -235,11 +240,12 @@ function add_text_to_translate( $debugmsg, $orig_text, $Group_ID, $do_it=true)
    $result = db_query( $debugmsg.'.find_transltext',
       "SELECT TT.ID, TT.Text, TT.Status, COALESCE(TFIG.Text_ID,0) AS X_tfig " .
       "FROM TranslationTexts AS TT " .
-         "LEFT JOIN TranslationFoundInGroup AS TFIG ON TFIG.Text_ID=TT.ID AND TFIG.Group_ID=$Group_ID " .
-      "WHERE TT.Text='$text_sql'" ); // case-insensitive find
+         "LEFT JOIN TranslationFoundInGroup AS TFIG ON TFIG.Text_ID=TT.ID AND TFIG.Group_ID=$Group_ID " . // TFIG assigned?
+      "WHERE TT.Text='$text_sql' AND TT.Type IN ('NONE','SRC')" ); // case-insensitive find
 
    $Text_ID = 0;
    $new_tfig = true;
+   $arr_double = array();
    $found_rows = (int)@mysql_num_rows($result);
    if( $found_rows == 0 )
       $action = 'I'; // insert (new text)
@@ -250,15 +256,20 @@ function add_text_to_translate( $debugmsg, $orig_text, $Group_ID, $do_it=true)
       while( $row = mysql_fetch_assoc($result) )
       {
          $Text_ID = $row['ID'];
+         $arr_double[] = $Text_ID;
          if( strcmp($row['Text'], $orig_text) != 0 ) // compare case of orig-text
          {
+            // different case
             if( $found_rows == 1 && $row['Status'] == TRANSL_STAT_ORPHAN )
+            {
                $action = 'U'; // re-use orphan text
+               $new_tfig = ( $row['X_tfig'] == 0 );
+            }
             else
                $err[] = $row['Text'];
          }
-         else
-            $new_tfig = ( $row['X_tfig'] == 0 ); // exact match
+         else // case-exact match
+            $new_tfig = ( $row['X_tfig'] == 0 );
       }
       if( count($err) )
          $error = sprintf( 'Text [%s] must be unique, but found [{%s}]. Need fix in db and/or code!',
@@ -270,11 +281,12 @@ function add_text_to_translate( $debugmsg, $orig_text, $Group_ID, $do_it=true)
    mysql_free_result($result);
 
    if( $error )
-      return array( $error, 0, '' );
+      return array( $error, 0, $arr_double, '' );
 
    if( $action == 'I' )
    {
-      $sql = "INSERT INTO TranslationTexts SET Translatable='Y', Updated=FROM_UNIXTIME($NOW), Text='$text_sql'";
+      $sql = "INSERT INTO TranslationTexts SET Text='$text_sql', Type='SRC', Translatable='Y', " .
+         "Status='".TRANSL_STAT_USED."', Updated=FROM_UNIXTIME($NOW)";
       if( $do_it )
       {
          db_query( "$debugmsg.new_transltext", $sql );
@@ -283,9 +295,15 @@ function add_text_to_translate( $debugmsg, $orig_text, $Group_ID, $do_it=true)
    }
    elseif( $action == 'U' ) // only one (orphan) row found
    {
-      $sql = "UPDATE TranslationTexts SET Translatable='Y', Updated=FROM_UNIXTIME($NOW), Text='$text_sql' WHERE ID=$Text_ID LIMIT 1";
+      $sql1 = "UPDATE TranslationTexts SET Text='$text_sql', Type='SRC', Translatable='Changed', " .
+         "Status='".TRANSL_STAT_USED."', Updated=FROM_UNIXTIME($NOW) WHERE ID=$Text_ID LIMIT 1";
+      $sql2 = "UPDATE Translations SET Translated='N' WHERE Original_ID=$Text_ID";
+      $sql = "-- $sql1 -- $sql2";
       if( $do_it )
-         db_query( "$debugmsg.reuse_orphan_transltext", $sql );
+      {
+         db_query( "$debugmsg.reuse_orphan_transltext.1", $sql1 );
+         db_query( "$debugmsg.reuse_orphan_transltext.2", $sql2 );
+      }
    }
    else
       $sql = '';
@@ -296,7 +314,7 @@ function add_text_to_translate( $debugmsg, $orig_text, $Group_ID, $do_it=true)
          "INSERT INTO TranslationFoundInGroup SET Text_ID=$Text_ID, Group_ID=$Group_ID" );
    }
 
-   return array( false, $Text_ID, $sql );
+   return array( false, $Text_ID, array(), $sql );
 }//add_text_to_translate
 
 
@@ -316,6 +334,8 @@ function generate_translation_texts( $do_it, $echo=true )
    $errcnt = 0;
    $newcnt = 0;
    $arr_text_id = array();
+   $arr_tfig = array(); // group_id => [ text_id, ... ]
+   $arr_double_text_id = array();
    while( $row = mysql_fetch_array($result) )
    {
       $Filename = $row['Page'];
@@ -375,7 +395,7 @@ function generate_translation_texts( $do_it, $echo=true )
          }
          else
          {// $tstring defined
-            list( $error, $text_id, $sql ) =
+            list( $error, $text_id, $dbl_ids, $sql ) =
                add_text_to_translate('generate_translation_texts', $tstring, $Group_ID, $do_it);
             if( $error )
             {
@@ -390,7 +410,15 @@ function generate_translation_texts( $do_it, $echo=true )
                   echo textarea_safe($tmp), "<br>\n";
             }
             if( $text_id > 0 )
+            {
                $arr_text_id[] = $text_id;
+               if( !isset($arr_tfig[$Group_ID]) )
+                  $arr_tfig[$Group_ID] = array( $text_id );
+               else
+                  $arr_tfig[$Group_ID][] = $text_id;
+            }
+            if( count($dbl_ids) )
+               $arr_double_text_id = array_merge( $arr_double_text_id, $dbl_ids );
          }
       }
    }
@@ -414,22 +442,7 @@ function generate_translation_texts( $do_it, $echo=true )
          echo "<p>No new entries found.\n";
    }
 
-   /* TODO
-   // mark entries as USED for later consistency-checks
-   if( count($arr_text_id) )
-   {
-      echo sprintf( "<p>There are %s text entries, that will be marked as USED.<br>\n", count($arr_text_id) );
-      if( $do_it )
-      {
-         db_query( 'generate_translation_texts.mark_used',
-            "UPDATE TranslationTexts SET Status='".TRANSL_STAT_USED."' " .
-            "WHERE ID IN (" . implode(',', $arr_text_id) . ")"); // IN restricted by mysql-var 'max_allowed_packet'
-         echo "MARKED all used TranslationTexts as USED!<br>\n";
-      }
-   }
-   */
-
-   return ( $errcnt > 0 ) ? 0 : $arr_text_id;
+   return array( $errcnt, $arr_text_id, $arr_tfig, $arr_double_text_id );
 }//generate_translation_texts
 
 /*!

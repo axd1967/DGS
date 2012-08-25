@@ -137,8 +137,8 @@ function insert_values( $table, $names, $query, $title=false)
    }
 
    // NOTE: OLD_STYLE_DUMP (removed now) does not ensure that some columns are not swapped.
-   // old-style: INSERT INTO TranslationTexts VALUES (5,'Move outside board?',NULL,'Y');
-   // new-style: (5,'Move outside board?',NULL,'Y'),
+   // old-style: INSERT INTO TranslationTexts VALUES (5,'Move outside board?',NULL,'Y' .. );
+   // new-style: (5,'Move outside board?',NULL,'Y' .. ),
    $rowbeg = CRINDENT."(";
    $rowend = "),";
 
@@ -162,8 +162,8 @@ function insert_values( $table, $names, $query, $title=false)
 
 /* new-style:
 INSERT INTO TranslationTexts
-      (ID,Text,Ref_ID,Translatable) VALUES
-      (5,'Move outside board?',0,'Y'),
+      (ID,Text,Type,Translatable, ... ) VALUES
+      (5,'Move outside board?','FAQ','Y', ... ),
       (...);
 */
    if( $text )
@@ -834,13 +834,13 @@ function transl_dump( $database)
 #
 # Dumping data for table 'TranslationTexts'
 #
-INSERT INTO TranslationTexts VALUES (1,'Sorry, you may not pass before all handicap stones are placed.',0,'Done',NOW());
-ID,Text,Ref_ID,Translatable,Updated
+INSERT INTO TranslationTexts VALUES (1,'Sorry, you may not pass before all handicap stones are placed.','SRC','Done','USED',NOW());
+ID,Text,Type,Translatable,Status,Updated
 #
 # Dumping data for table 'Translations'
 #
-INSERT INTO Translations VALUES (96,1,'Admin','N');
-Original_ID,Language_ID,Text,Translated
+INSERT INTO Translations VALUES (96,1,'Admin','N',NOW());
+Original_ID,Language_ID,Text,Translated,Updated
 #
 # Dumping data for table 'TranslationLanguages'
 #
@@ -869,7 +869,7 @@ Page,Group_ID
       'TranslationPages'
          => array('Page,Group_ID','', 'Group_ID,Page'),
       'TranslationTexts' //Originals
-         => array('ID,Text,Ref_ID,Translatable','','ID'),
+         => array('ID,Text,Type,Translatable,Status,Updated','','ID'),
       'TranslationFoundInGroup'
          => array('Text_ID,Group_ID','','Text_ID,Group_ID'),
 /**
@@ -878,9 +878,8 @@ Page,Group_ID
       $langID = ID_of('en.iso-8859-1'); //which is not 1, actually
       'TranslationLanguages'
          => array('ID,Language,Name',"ID=$langID", 'ID'),
-      //TODO missing Translations.Translated
       'Translations' //better to split it in different files
-         => array('Language_ID,Original_ID,Text',"Language_ID=$langID",'Language_ID,Original_ID'),
+         => array('Language_ID,Original_ID,Text,Translated,Updated',"Language_ID=$langID",'Language_ID,Original_ID'),
  * or, farther:
       $text.= language_dump( $database, 'en.iso-8859-1', false);
  **/
