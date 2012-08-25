@@ -199,16 +199,15 @@ General instructions for developers:
 
    Take care of the T_() function and translation features.
 
-   Use the T_() enclosure each time that the string need a
-   translation. Don't use such an enclosure anywhere else: most
-   of the PHP files are scanned to find it and so, the strings
-   to translate.
+   Use the T_() enclosure each time the string need a translation.
+   Don't use such an enclosure anywhere else: most of the PHP files
+   are scanned to find it and the strings to translate.
 
-   During the scan process, the $TranslateGroups[] var at the top of
-   some files is used too. As of the TranslationPages table in the
+   During the scan process, the $TranslateGroups[] declaration at the top of
+   files is used as well as the TranslationPages-table in the
    database. These are the two places to modify when you add a new
    PHP file containing T_() translations. As a start point, have a
-   look at the README.translations file in the scripts folder.
+   look at the documentation 'scripts/README.translations'.
 
    Thumb of rule is, that admin-related pages do not have translated
    texts. Though T_(..) can and should be used, the admin pages
@@ -218,7 +217,7 @@ General instructions for developers:
    if later someone want to enable translations for admin-pages.
 
    When adding a new string, try to first find if a similar one
-   already existing in the database.
+   is already existing in the database.
 
    You may encounter the following or similar notations around
    texts:
@@ -226,16 +225,23 @@ General instructions for developers:
       //T_//('text')   - the T_// is to "hide" the translation to the
                          scanning translation-functions. Otherwise it
                          would appear as text-to-be-translated.
-                         Comments are not skipped yet while scanning.
+                         Comments are skipped while scanning.
 
       /*T_*/('text')   - The commented out parts should be kept to indicate,
                          that it's a potential text to translate or once it
-                         was one and will be again in the future.
+                         was one and could be again in the future.
 
    Maybe this is not the best way to do translations but it works quite
    well, and is hard to modify. A big advantage is, that it does not need
-   much database-access, but only sometimes to export all translated texts
-   into the "cache"-directory 'translations'.
+   much database-access, but only once to export all translated texts
+   into the "cache"-directory 'translations' (initially or on changed texts
+   in the source-code).
+
+   To understand translations better please also read:
+
+      - next section "Using translations in libraries/classes"
+      - database-tables for translations in 'specs/db/table-Translations.txt'
+      - see 'scripts/README.translations' of tasks to execute
 
 
 ----------------- PHP, Using translations in libraries/classes:

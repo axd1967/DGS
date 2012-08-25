@@ -5,7 +5,7 @@ run (need the ADMIN_DATABASE privilege):
 # keep in mind, that translation-text discovery only works correctly,
 # if T_('')-call is correct. Only constant quoted strings are valid.
 # Using defined constants does not work, because the eval-scope would need
-# to know the constant when parse in the script 'generate_translation_texts.php'.
+# to know the constant when parse in the script 'scripts/generate_translation_texts.php'.
 # Variables within texts are not allowed, because they can't be statically
 # used as translation texts!
 #
@@ -22,12 +22,12 @@ run (need the ADMIN_DATABASE privilege):
 #
 # Leading and trailing white-spaces are not allowed within a T_('text ').
 # Those are trimmed away. You have to use the white-space outside of the
-# translation-text.
+# translation-text, e.g.  T_('text') . ' '.
 
 
 # NOTE:
 # When adding new sub-directories with PHP-files,
-# you must add them in the find_php_files()-function in the scripts
+# you must add them in the find_php_files()-function in the script
 # 'scripts/update_translation_pages.php'
 # Afterwards the 'update_translation_pages.php'-script needs to be run
 # at least two times to find all new groups and new pages.
@@ -40,24 +40,24 @@ run (need the ADMIN_DATABASE privilege):
 #     $TranslateGroups[] = "GroupName";
 #
 # The statement must begin in the first column. The exact regex for matching
-# the line can be checked in the 'update_translation_pages'-script.
+# the line can be checked in the script 'scripts/update_translation_pages.php'.
 
 
 
-> update_translation_pages.php
+> scripts/update_translation_pages.php
 then, after checking:
-> update_translation_pages.php?do_it=1
+> scripts/update_translation_pages.php?do_it=1
 
 
 
 
 To scan PHP files and recover the "T_('')" strings
 then update the database with new english texts,
-run (need the ADMIN_TRANSLATORS privilege):
+run the following (need the ADMIN_TRANSLATORS privilege):
 
-> generate_translation_texts.php
+> scripts/generate_translation_texts.php
 then, after checking:
-> generate_translation_texts.php?do_it=1
+> scripts/generate_translation_texts.php?do_it=1
 
 
 
@@ -65,7 +65,7 @@ then, after checking:
 To create all translation files used by the server,
 run (need no privilege):
 
-> make_all_translationfiles.php
+> scripts/make_all_translationfiles.php
 
 
 
