@@ -19,6 +19,111 @@ Developers INFO:
 ChangeLog
 ------------------------------------------------------------------
 
+2012-08-25 juga
+
+   * scripts/obsolete/alter_moves_table.php, scripts/obsolete/calculate_no_games.php,
+     scripts/obsolete/convert_move_tables.php, scripts/obsolete/delete_move_tables.php,
+     scripts/obsolete/fix_frombackuptable.php, scripts/obsolete/fix_frombackuptable2.php,
+     scripts/obsolete/fix_rated_status.php, scripts/obsolete/game_test.php,
+     scripts/obsolete/index_old.php, scripts/obsolete/make_gmdate.php,
+     scripts/obsolete/mlrate.php:
+     - removed old scripts, that are no longer useful due to changed tables
+
+   * translate.php, skins/dragon/screen.css:
+   - show preview of translated text under translation-text currently stored
+   - added admin-info about new TranslationTexts-fields: Type, Status
+   - added last-change date of original and translated text
+
+   * include/admin_faq_functions.php (AdminFAQ.save_new_faq_entry, ~.update_faq_entry),
+     include/make_translationfiles.php (translations_query, add_text_to_translate,
+       generate_translation_texts),
+     include/translation_functions.php (get_translation_group),
+     scripts/translation_consistency.php (commit_query, check_consistency_faq,
+       check_consistency_tfig, check_consistency_transl, check_consistency_texts),
+     scripts/updates/database_changes_1_0_14_to_1_0_15.mysql, specs/db/dragon-ddl.sql,
+     scripts/data_export.php, scripts/README.developers, scripts/README.translations,
+     admin_show_faqlog.php:
+   - re-worked translation-handling for better consistency-checks and automatic fixes
+     - re-worked translation-consistency-script adding more checks and automatic fixes
+       - added checks for all translation-tables and all the fields
+       - FAQ/Links/Intro: check Parent-FK, SortOrder, Level, Question/Answer-FK, Reference
+       - TranslationFoundInGroup: check FK
+       - Translations: check Language_ID-FK, Original_ID-FK, check/fix Updated
+       - TranslationTexts: check missing/unused TFIG, identify orphan texts, Type,
+         case-insensitive double-texts, check/fix Updated
+       - added indexes for faster consistency-checks
+     - added TranslationTexts/FAQlog.Type to mark the source of the text,
+       - prevent double-texts of same type: FAQ, Links, Intro, source-code, unknown (NONE)
+       - keep separate realms for FAQ/Links/Intro-texts and source-code
+     - bugfix: fix FAQ-admin on edit-link dependent on Type to edit FAQ/Links/Intro
+     - added TranslationTexts/Translations.Updated as last-change-date
+     - dropped unused translation-columns: TranslationTexts.Ref_ID, FAQlog.CString
+     - updated documentation about translation-handling
+-----------
+-- add Type to check for double-text of same type
+ALTER TABLE TranslationTexts
+   ADD Type enum('NONE','FAQ','LINKS','INTRO','SRC') NOT NULL default 'NONE' AFTER Text ;
+ALTER TABLE FAQlog
+   ADD Type enum('FAQ','Links','Intro') NOT NULL default 'FAQ' AFTER FAQID ;
+ALTER TABLE FAQlog
+   CHANGE FAQID Ref_ID int(11) NOT NULL default '0' ;
+
+-- add index for faster consistency-checks, add Type to check for double-text of same type
+ALTER TABLE TranslationTexts
+   ADD KEY Text (Text(4)) ;
+ALTER TABLE Translations
+   ADD KEY Original_ID (Original_ID) ;
+ANALYZE TABLE TranslationTexts;
+ANALYZE TABLE Translations;
+
+-- drop unused columns
+ALTER TABLE Translationlog
+   DROP COLUMN CString ;
+ALTER TABLE TranslationTexts
+   DROP COLUMN Ref_ID ;
+-----------
+
+   * admin_faq.php, links.php (save_link_section, save_link_entry):
+   - changed translation-group for links-page (Docs -> Links) and intro-page (Start -> Intro)
+
+2012-08-20 juga
+
+   * include/admin_faq_functions.php (AdminFAQ.get_faq_entry_row, ~.save_new_faq_entry,
+       ~.update_faq_entry),
+     include/make_translationfiles.php (add_text_to_translate, generate_translation_texts,
+       find_translation_texts, eat_comments, eat_whitespace, eat_translation_text),
+     scripts/updates/database_changes_1_0_14_to_1_0_15.mysql,
+     scripts/generate_translation_texts.php,
+     scripts/data_export.php, specs/db/dragon-ddl.sql,
+     admin_faq.php, update_translation.php:
+   - handle case-INsensitive checking of existing translation-texts
+     - re-use case-different text if marked as ORPHAN
+     - forcing to manually resolve to unique translation-texts by reporting as error
+   - Admin-FAQ: show added last-change-date TranslationTexts.Updated for FAQ/Intro/Links
+     question- & answer-text, disable checkbox if no translation-check needed
+   - update TranslationTexts.Updated on translating
+   - added TranslationTexts.Status to support translation-consistency-checking for orphan texts
+   - fix bug: write TranslationTexts.Ref_ID only for FAQ-texts, not for Intro/Links-references
+   - moved generate_translation_texts() and related funcs
+     from 'scripts/generate_translation_texts.php' into 'include/make_translationfiles.php'
+-----------
+-- added last-change and status for translations for easier cleanup
+ALTER TABLE TranslationTexts
+   ADD Status enum('USED','CHECK','ORPHAN') NOT NULL default 'USED',
+   ADD Updated datetime NOT NULL default '0000-00-00 00:00:00' ;
+ALTER TABLE Translations
+   ADD Updated datetime NOT NULL default '0000-00-00 00:00:00' ;
+-----------
+
+   * introduction.php, links.php:
+   - used own translation-group
+
+   * include/connect2mysql.php (writeIpStats):
+   - disable writing ip-stats for now
+
+   * scripts/obsolete/fix_faq.php:
+   - removed obsolete
+
 2012-08-14 juga
 
    * include/message_functions.php (fix_invitations_replied), daily_cron.php:
