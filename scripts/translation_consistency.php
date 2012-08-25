@@ -83,7 +83,7 @@ define('VAL_CHECK', '<font color="blue">-- <b>Need Validate!:</b> </font>');
    // Checks on TranslationFoundInGroup-table
    $errcnt += check_consistency_tfig($do_it);
 
-   // Checks on Translations-table
+   // Checks on Translations-table (must be called before TranslationTexts-checks)
    $errcnt += check_consistency_transl($do_it);
 
    // Checks on TranslationTexts-table
@@ -331,12 +331,16 @@ function check_consistency_tfig( $commit )
 
 function check_consistency_transl( $commit )
 {
-   global $NOW;
+   global $NOW, $cnt_translations_no_updated; // pass on to TranslationTexts-check-func
 
    $dbgmsg = "check_consistency_transl($commit)";
    $errcnt = 0;
 
    echo SEP_CHECK;
+
+   $row = mysql_single_fetch("$dbgmsg.count.T.upd0",
+      "SELECT COUNT(*) AS X_Count FROM Translations WHERE Updated=0" );
+   $cnt_translations_no_updated = ( $row ) ? (int)@$row['X_Count'] : 0;
 
    // check that all Translations.Language_ID exists
    echo BRLF, "Checking FK Translations.Language_ID ...", BRLF;
@@ -450,7 +454,7 @@ function check_consistency_transl( $commit )
 
 function check_consistency_texts( $commit )
 {
-   global $NOW;
+   global $NOW, $cnt_translations_no_updated;
 
    $dbgmsg = "check_consistency_texts($commit)";
    $errcnt = 0;
@@ -614,46 +618,55 @@ function check_consistency_texts( $commit )
 
    // check for unset TranslationTexts.Updated
    echo BRLF, "Check TranslationTexts.Updated ...", BRLF, BRLF;
-   $result = db_query("$dbgmsg.check.TT.upd.1",
-      "SELECT TT.ID, TT.Translatable, IF(ISNULL(T.Original_ID),0,1) AS T_Exists, " .
-         "MIN(IF(T.Translated='Y',UNIX_TIMESTAMP(T.Updated),$NOW)) AS MIN_Updated, " . // $NOW for upper-limit for 'N'
-         "MAX(UNIX_TIMESTAMP(T.Updated)) AS MAX_Updated " .
-      "FROM TranslationTexts AS TT " .
-      "LEFT JOIN Translations AS T ON T.Original_ID=TT.ID " .
-      "WHERE TT.Updated=0 " .
-      "GROUP BY TT.ID" );
-   while( $row = mysql_fetch_assoc($result) )
+   if( $cnt_translations_no_updated > 0 )
    {
-      $ID = $row['ID'];
-      $transl_exists = $row['T_Exists']; // false = no translations
-
-      // NOTE: For a new or changed text all existing translations for the text are marked with Translations.Translated='N'
-      if( $transl_exists )
-      {
-         if( $row['Translatable'] == 'Done' )
-         {
-            // TranslationTexts.Translatable=Done means, there is at least one translation of newer date
-            // => so take MIN of Translations.Updated (oldest translation) with Translated=Y - 1 hour
-            $new_upd = $row['MIN_Updated'] - SECS_PER_HOUR;
-         }
-         else // Y,N,Changed
-         {
-            // TranslationTexts.Translatable=Y|N|Changed (<> Done) means, there is no translation yet of the new/changed text
-            // => so take MAX of all Translations.Updated (those are older translations) + 1 hour
-            $new_upd = $row['MAX_Updated'] + SECS_PER_HOUR;
-         }
-      }
-      else // take NOW if there are no translations
-         $new_upd = $NOW;
-
       $errcnt++;
-      echo ERR_CHECK, "Found unset TranslationTexts.Updated for ID [$ID]: Needs manual fix!", BRLF,
-         "-- SELECT * FROM TranslationTexts WHERE ID=$ID LIMIT 1 ;", BRLF,
-         "-- SELECT Original_ID, Language_ID, Updated, Translated, Text FROM Translations WHERE Original_ID=$ID ORDER BY Updated ;", BRLF;
-      commit_query("$dbgmsg.fix.TT.upd.1($ID)", $commit,
-         "UPDATE TranslationTexts SET Updated=FROM_UNIXTIME($new_upd) WHERE ID=$ID LIMIT 1" );
+      echo ERR_CHECK, "To check and fix TranslationTexts.Updated all Translations.Updated must be set (found ",
+         $cnt_translations_no_updated, " entries with Updated=0): Needs 2nd-run fix!", BRLF;
    }
-   mysql_free_result($result);
+   else
+   {
+      $result = db_query("$dbgmsg.check.TT.upd.1",
+         "SELECT TT.ID, TT.Translatable, IF(ISNULL(T.Original_ID),0,1) AS T_Exists, " .
+            "MIN(IF(T.Translated='Y',UNIX_TIMESTAMP(T.Updated),$NOW)) AS MIN_Updated, " . // $NOW for upper-limit for 'N'
+            "MAX(UNIX_TIMESTAMP(T.Updated)) AS MAX_Updated " .
+         "FROM TranslationTexts AS TT " .
+         "LEFT JOIN Translations AS T ON T.Original_ID=TT.ID " .
+         "WHERE TT.Updated=0 " .
+         "GROUP BY TT.ID" );
+      while( $row = mysql_fetch_assoc($result) )
+      {
+         $ID = $row['ID'];
+         $transl_exists = $row['T_Exists']; // false = no translations
+
+         // NOTE: For a new or changed text all existing translations for the text are marked with Translations.Translated='N'
+         if( $transl_exists )
+         {
+            if( $row['Translatable'] == 'Done' )
+            {
+               // TranslationTexts.Translatable=Done means, there is at least one translation of newer date
+               // => so take MIN of Translations.Updated (oldest translation) with Translated=Y - 1 hour
+               $new_upd = $row['MIN_Updated'] - SECS_PER_HOUR;
+            }
+            else // Y,N,Changed
+            {
+               // TranslationTexts.Translatable=Y|N|Changed (<> Done) means, there is no translation yet of the new/changed text
+               // => so take MAX of all Translations.Updated (those are older translations) + 1 hour
+               $new_upd = $row['MAX_Updated'] + SECS_PER_HOUR;
+            }
+         }
+         else // take NOW if there are no translations
+            $new_upd = $NOW;
+
+         $errcnt++;
+         echo ERR_CHECK, "Found unset TranslationTexts.Updated for ID [$ID]: Needs manual fix!", BRLF,
+            "-- SELECT * FROM TranslationTexts WHERE ID=$ID LIMIT 1 ;", BRLF,
+            "-- SELECT Original_ID, Language_ID, Updated, Translated, Text FROM Translations WHERE Original_ID=$ID ORDER BY Updated ;", BRLF;
+         commit_query("$dbgmsg.fix.TT.upd.1($ID)", $commit,
+            "UPDATE TranslationTexts SET Updated=FROM_UNIXTIME($new_upd) WHERE ID=$ID LIMIT 1" );
+      }
+      mysql_free_result($result);
+   }
 
    return $errcnt;
 }//check_consistency_texts
