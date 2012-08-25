@@ -718,6 +718,8 @@ Copyright (C) 2001-2012  Erik Ouchterlony
 
    * Changes for Translators:
       * Added comments to clarify the translation process
+      * Added last-change date for texts and translations
+      * Show HTML for translated text on file
       * Changed access-key of Translate-link from [t] to [l]
       * Added the 'N'=Native pseudo-language to browser settings section
       * Displaying the group-names
