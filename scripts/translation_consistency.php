@@ -608,7 +608,7 @@ function check_consistency_texts( $commit )
                       cut_str($row['Text'], 20, false), $ID, $sum, $row2['Status'], $row2['Type'] ),
             BRLF,
             "-- SELECT * FROM TranslationTexts WHERE ID=$ID LIMIT 1 ;", BRLF,
-            "-- SELECT * FROM TranslationFoundInGroup WHERE Text_ID=$ID ORDER BY Language_ID ;", BRLF,
+            "-- SELECT * FROM TranslationFoundInGroup WHERE Text_ID=$ID ORDER BY Group_ID ;", BRLF,
             "-- SELECT * FROM Translations WHERE Original_ID=$ID ORDER BY Language_ID ;", BRLF,
             "-- DELETE FROM TranslationTexts WHERE ID=$ID LIMIT 1 ;", BRLF,
             BRLF;
