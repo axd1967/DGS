@@ -431,7 +431,7 @@ require_once( 'include/classlib_userconfig.php' );
       {
          $restrictions = array(
                T_('Handicap-type (conventional and proper handicap-type need a rating for calculations)#wroom'),
-               T_('Rating range (user rating must be between the requested rating range), e.g. "25k-2d"#wroom'),
+               T_('Rating range (user rating must be within the requested rating range), e.g. "25k-2d"#wroom'),
                T_('Number of rated finished games, e.g. "RG[2]"#wroom'),
                T_('Max. number of opponents started games must not exceed limits, e.g. "MXG"#wroom'),
                T_('Acceptance mode for challenges from same opponent, e.g. "SOT[1]" (total) or "SO[1x]" or "SO[&gt;7d]"#wroom'),
