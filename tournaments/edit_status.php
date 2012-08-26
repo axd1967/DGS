@@ -256,7 +256,7 @@ function build_status_notes()
    $arrst[TOURNEY_STATUS_CLOSED]   = T_('Tournament finalizing phase (results are announced, tournament is finished)#tstat_closed');
    $arrst[TOURNEY_STATUS_ADMIN]    = T_('Tournament admin phase managed only by tournament admin (hidden, archived tournaments)#tstat_admin');
    $arrst[TOURNEY_STATUS_DELETE]   = T_('Tournament delete phase managed only by tournament admin (tournament ready for deletion)#tstat_del');
-   $narr = array( T_('Tournament Status') );
+   $narr = array( T_('Tournament Status#tourney') );
    foreach( $arrst as $status => $descr )
       $narr[] = sprintf( "%s = %s", Tournament::getStatusText($status), $descr );
    $notes[] = $narr;

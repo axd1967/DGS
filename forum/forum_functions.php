@@ -491,7 +491,7 @@ class DisplayForum
          $this->new_count++;
          $link = ($mode & NEWMODE_NO_LINK)
             ? '' : sprintf(' href="#new%d"', $this->new_count + $addnew );
-         $new = sprintf( $this->fmt_new, $anchor_prefix, $this->new_count, $link, T_('new') );
+         $new = sprintf( $this->fmt_new, $anchor_prefix, $this->new_count, $link, T_('new#forum') );
       }
       return $new;
    } //get_new_string
@@ -825,7 +825,7 @@ class DisplayForum
          if( $user_may_post && Forum::allow_posting($player_row, $this->forum_opts) )
          {
             // reply link
-            echo '<a href="', $thread_url,URI_AMP,"reply=$pid#$pid\">[ ", T_('reply'), " ]</a>&nbsp;&nbsp;";
+            echo '<a href="', $thread_url,URI_AMP,"reply=$pid#$pid\">[ ", T_('reply#forum'), " ]</a>&nbsp;&nbsp;";
             if( ALLOW_QUOTING )
                echo '<a href="', $thread_url,URI_AMP,"quote=1",URI_AMP,"reply=$pid#$pid\">[ ",
                   T_('quote'), " ]</a>&nbsp;&nbsp;";
@@ -852,15 +852,15 @@ class DisplayForum
             if( $post->is_pending_approval() )
             {
                echo sprintf( $modurl_fmt, 'approve',  T_('Approve') ),
-                  "&nbsp;&nbsp;",
+                  MED_SPACING,
                   sprintf( $modurl_fmt, 'reject',  T_('Reject') );
             }
             else
             {
                if( $post->is_approved() )
-                  echo sprintf( $modurl_fmt, 'hide',  T_('hide') );
+                  echo sprintf( $modurl_fmt, 'hide',  T_('hide#forum') );
                else
-                  echo sprintf( $modurl_fmt, 'show',  T_('show') );
+                  echo sprintf( $modurl_fmt, 'show',  T_('show#forum') );
             }
          }
          echo "</td></tr>\n";

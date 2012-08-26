@@ -384,7 +384,7 @@ define('MSGBOXROWS_INVITE', 6);
             ));
          $message_form->add_row( array(
                'TAB', 'CELL', 1, '', // align submit-buttons
-               'SUBMITBUTTONX', 'send_message', T_('Send Message'),
+               'SUBMITBUTTONX', 'send_message', T_('Send message'),
                            array( 'accesskey' => ACCKEY_ACT_EXECUTE ),
                'SUBMITBUTTONX', 'preview', T_('Preview'),
                            array( 'accesskey' => ACCKEY_ACT_PREVIEW ),

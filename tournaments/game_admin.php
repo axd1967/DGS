@@ -156,7 +156,7 @@ define('GA_RES_TIMOUT', 3);
          'TEXT',        $tourney->build_info() ));
    TournamentUtils::show_tournament_flags( $tform, $tourney );
    $tform->add_row( array(
-         'DESCRIPTION', T_('Tournament Status'),
+         'DESCRIPTION', T_('Tournament Status#tourney'),
          'TEXT',        Tournament::getStatusText($tourney->Status) ));
    $tform->add_row( array(
          'DESCRIPTION', T_('Tournament Game Status'),

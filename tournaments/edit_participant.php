@@ -293,7 +293,7 @@ $GLOBALS['ThePage'] = new Page('TournamentEditParticipant');
          'DESCRIPTION', T_('Tournament ID'),
          'TEXT',        $tourney->build_info() ));
    $tpform->add_row( array(
-         'DESCRIPTION', T_('Tournament Status'),
+         'DESCRIPTION', T_('Tournament Status#tourney'),
          'TEXT',        Tournament::getStatusText($tourney->Status), ));
    if( !is_null($user) )
       $tpform->add_row( array(

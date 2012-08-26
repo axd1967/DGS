@@ -186,14 +186,14 @@ $GLOBALS['ThePage'] = new Page('Tournament');
 
    // --------------- Status --------------------
 
-   section( 'TournamentStatus', T_('Tournament Status#T_view'), 'status', true );
+   section( 'TournamentStatus', T_('Tournament Status#tourney'), 'status', true );
 
    $arr_locks = check_locks( $tourney );
 
    $itable = new Table_info('tstatus', TABLEOPT_LABEL_COLON);
    if( count($arr_locks) )
       $itable->add_sinfo( T_('Tournament Locks'), implode("<br>\n", $arr_locks) );
-   $itable->add_sinfo( T_('Tournament Status'), $tourney->getStatusText($tourney->Status) );
+   $itable->add_sinfo( T_('Tournament Status#tourney'), $tourney->getStatusText($tourney->Status) );
    if( $ttype->need_rounds )
       $itable->add_sinfo( T_('Tournament Round'), $tourney->formatRound() );
    if( $reg_user_info )

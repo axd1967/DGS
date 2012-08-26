@@ -1164,6 +1164,8 @@ class Table
     */
    function make_table_filter( $thead )
    {
+      global $base_path;
+
       // get filter for column
       $fid = $thead['Nr']; // keep as sep var
       if( $fid == 0 ) // row-num
@@ -1202,10 +1204,7 @@ class Table
 
          $query = clean_url( $query);
          $fcolor_hide = ( $filter->errormsg() ) ? 'white' : 'red';
-         $togglestr_show =
-            "<a href=\"$query\" title=" . attb_quote(T_('Show')) . '>'
-            . CHAR_SHOWFILTER ."</a>";
-         global $base_path;
+         $togglestr_show = "<a href=\"$query\" title=" . attb_quote(T_('Show')) . '>' . CHAR_SHOWFILTER ."</a>";
          $togglestr_hide = image( $base_path.'images/remove.gif', 'x', '', 'class=Hide');
          $togglestr_hide = anchor( $query, $togglestr_hide, T_('Hide'));
          $togglestr_hide = '<span class=Tool>' . $togglestr_hide . "</span>";
@@ -1416,7 +1415,7 @@ class Table
                  $qstr //end_sep
                  . $this->Prefix . 'from_row=' . ($this->From_Row-$this->Rows_Per_Page)
                , image( $base_path.'images/prev.gif', '<=', '', $align)
-               , T_("prev page")
+               , T_('Prev Page')
                , array( 'accesskey' => ACCKEY_ACT_PREV )
                );
          }
@@ -1433,7 +1432,7 @@ class Table
                  $qstr //end_sep
                  . $this->Prefix . 'from_row=' . ($this->From_Row+$this->Rows_Per_Page)
                , image( $base_path.'images/next.gif', '=>', '', $align)
-               , T_("next page")
+               , T_('Next Page')
                , array( 'accesskey' => ACCKEY_ACT_NEXT )
                );
          }

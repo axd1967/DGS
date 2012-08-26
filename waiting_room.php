@@ -456,7 +456,7 @@ require_once( 'include/classlib_userconfig.php' );
 
 
    $menu_array = array();
-   $menu_array[T_('New game')] = 'new_game.php';
+   $menu_array[T_('New Game')] = 'new_game.php';
    $menu_array[T_('Show all waiting games')] = $baseURLMenu.'good=0'.SPURI_ARGS.'good';
    $menu_array[T_('Show suitable games only')] = $baseURLMenu.'good=1'.SPURI_ARGS.'good';
 

@@ -86,7 +86,7 @@ $GLOBALS['ThePage'] = new Page('ForumsList');
          ? sprintf( ' <span class=PostUser>%s %s</span>', T_('by'), $lpost->author->user_reference())
          : '';
       $new_str = ( $forum->has_new_posts )
-         ? sprintf( '<span class="NewFlag">%s</span>', T_('new') )
+         ? sprintf( '<span class="NewFlag">%s</span>', T_('new#forum') )
          : '';
       $fopts_str = $forum->build_options_text( $f_opts );
 
