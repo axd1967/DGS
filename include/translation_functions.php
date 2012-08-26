@@ -62,6 +62,11 @@ function T_($string)
    return preg_replace('%(.)#[_0-9A-Za-z]*$%', '\\1', $string); // \w (=_0-9a-z) is locale-dependent
 }
 
+function strip_translation_label( $string )
+{
+   return preg_replace('%(.)#[_0-9A-Za-z]*$%', '\\1', $string); // \w (=_0-9a-z) is locale-dependent
+}
+
 //if $player_row is absent, use the browser default settings
 //called by is_logged_in()
 function include_all_translate_groups($player_row=null) //must be called from main dir

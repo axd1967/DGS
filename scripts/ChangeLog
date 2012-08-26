@@ -19,8 +19,20 @@ Developers INFO:
 ChangeLog
 ------------------------------------------------------------------
 
-2012-08-25 juga
+2012-08-26 juga
+
 ### ----- release-1_0_15-20120608 -----
+   * include/translation_functions.php (strip_translation_label),
+     include/make_translationfiles.php (TRANS_ROW_PER_PAGE),
+     translate.php (update_translation),
+     update_translation.php [REMOVED]:
+   - added preview for translations
+     - refactored saving translations from 'update_translation.php'
+       into 'translate.php' for preview-support
+     - strip translation-label
+   - reduced row-number for translating: 30 -> 10
+
+2012-08-25 juga
 
    * scripts/obsolete/alter_moves_table.php, scripts/obsolete/calculate_no_games.php,
      scripts/obsolete/convert_move_tables.php, scripts/obsolete/delete_move_tables.php,

@@ -23,6 +23,7 @@ require_once( "include/std_functions.php" );
 require_once( "include/form_functions.php" );
 require_once( "include/filter_functions.php" );
 require_once( "include/make_translationfiles.php" );
+
 $GLOBALS['ThePage'] = new Page('Translate');
 
 define('ALLOW_PROFIL_CHARSET', 1); //allow the admins to overwrite the page encoding
@@ -37,7 +38,8 @@ $info_box = '<br>When translating you should keep the following things in mind:
        <br>
        The text below the english original phrases shows the preview of how the text
        looks on the site, while the text below the textarea in the 2nd column
-       shows the preview of the translation-text currently stored in the database.
+       shows the preview of the translation-text.
+       <br>
        Caution: this preview examples may sometime differ from the effective
        display in the normal page because of additional constraints of the normal page.
   <li> Below the english phrase you can also see a date of the last-change (if present).
@@ -100,8 +102,6 @@ $info_box = '<br>When translating you should keep the following things in mind:
 </ul>';
 
 {
-   // NOTE: using page: update_translation.php
-
    connect2mysql();
 
    $logged_in = who_is_logged( $player_row);
@@ -109,7 +109,6 @@ $info_box = '<br>When translating you should keep the following things in mind:
       error('not_logged_in', 'translate');
    if( $player_row['ID'] <= GUESTS_ID_MAX )
       error('not_allowed_for_guest', 'translate');
-
 
    $lang_desc = get_language_descriptions_translated(true);
    if( TRANS_FULL_ADMIN && (@$player_row['admin_level'] & ADMIN_TRANSLATORS))
@@ -133,7 +132,7 @@ $info_box = '<br>When translating you should keep the following things in mind:
    $untranslated = (int)(bool)@$_REQUEST['untranslated'];
    $alpha_order = (int)(bool)@$_REQUEST['alpha_order'];
    if( TRANSL_ALLOW_FILTER )
-      $filter_en = get_request_arg('filter_en');
+      $filter_en = trim(get_request_arg('filter_en'));
    else
       $filter_en = '';
    $no_pages = (int)(bool)@$_REQUEST['no_pages'];
@@ -141,7 +140,6 @@ $info_box = '<br>When translating you should keep the following things in mind:
       $from_row = -1;
    else
       $from_row = max(0,(int)@$_REQUEST['from_row']);
-
 
    $result = db_query( 'translate.groups_query', "SELECT Groupname FROM TranslationGroups" );
    $translation_groups = array();
@@ -157,7 +155,6 @@ $info_box = '<br>When translating you should keep the following things in mind:
       $untranslated = 1;
    }
 
-
    if( count( $translator_array ) > 1 )
       $lang_choice = true;
    else
@@ -167,19 +164,40 @@ $info_box = '<br>When translating you should keep the following things in mind:
          $translate_lang = $translator_array[0];
    }
 
+   $is_save = @$_REQUEST['save'];
+   $is_preview = @$_REQUEST['preview'];
+
    if( $translate_lang )
    {
       if( !in_array( $translate_lang, $translator_array ) )
          error('not_correct_transl_language', "translate.check.language($translate_lang)");
 
-      $result = translations_query( $translate_lang, $untranslated, $group
-               , $from_row, $alpha_order, $filter_en)
+      $result = translations_query( $translate_lang, $untranslated, $group, $from_row, $alpha_order, $filter_en)
          or error('mysql_query_failed','translate.translation_query');
 
       $show_rows = (int)@mysql_num_rows($result);
       if( !TRANSL_ALLOW_FILTER && $show_rows <= 0 && !$untranslated )
-         error('translation_bad_language_or_group', 'translate.check.lang_group');
+         error('translation_bad_language_or_group', "translate.check.lang_group($translate_lang)");
+      if( $show_rows > TRANS_ROW_PER_PAGE )
+         $show_rows = TRANS_ROW_PER_PAGE;
+   }
 
+   if( $is_save )
+   {
+      update_translation( $translate_lang, $result, $show_rows );
+
+      jump_to("translate.php?translate_lang=".urlencode($translate_lang) .
+         ($profil_charset ? URI_AMP."profil_charset=".$profil_charset : '') .
+         URI_AMP."group=".urlencode($group) .
+         ($untranslated ? URI_AMP."untranslated=$untranslated" : '') .
+         ($alpha_order ? URI_AMP."alpha_order=$alpha_order" : '') .
+         ($filter_en ? URI_AMP."filter_en=".urlencode($filter_en) : '') .
+         ($from_row > 0 ? URI_AMP."from_row=$from_row" : '') );
+   }
+
+
+   if( $translate_lang )
+   {
       $lang_string = '';
       foreach( $known_languages as $browsercode => $array )
       {
@@ -227,7 +245,7 @@ $info_box = '<br>When translating you should keep the following things in mind:
 
    start_page(T_('Translate'), true, $logged_in, $player_row);
    $str = T_('Read this before translating');
-   if( (bool)@$_REQUEST['infos'] )
+   if( @$_REQUEST['infos'] )
    {
       echo "<h3 class=Header>$str:</h3>\n"
          . "<table class=InfoBox><tr><td>\n"
@@ -246,8 +264,8 @@ $info_box = '<br>When translating you should keep the following things in mind:
    if( $translate_lang )
    {
       $nbcol = 2;
-      { //$translate_form
-      $translate_form = new Form( 'translate', 'update_translation.php', FORM_POST );
+
+      $translate_form = new Form( 'translate', 'translate.php', FORM_POST );
       $translate_form->add_row( array(
                   'CELL', $nbcol, '', //set $nbcol for the table
                   'HEADER', T_('Translate the following strings') ) );
@@ -286,10 +304,9 @@ $info_box = '<br>When translating you should keep the following things in mind:
             ));
       }
 
-      if( $filter_en != '' )
-         $rx_term = implode('|', sql_extract_terms( $filter_en ));
-      else
-         $rx_term = '';
+      $rx_term = ( (string)$filter_en != '' )
+         ? implode('|', sql_extract_terms( $filter_en ))
+         : '';
 
       $translate_form->add_row( array( 'HR' ) );
 
@@ -299,11 +316,14 @@ $info_box = '<br>When translating you should keep the following things in mind:
          /* see the translations_query() function for the constraints
           * on the "ORDER BY" clause associated with this "$oid" filter:
           */
-         if( $oid == $row['Original_ID'] ) continue;
+         if( $oid == $row['Original_ID'] )
+            continue;
          $oid = $row['Original_ID'];
 
          $orig_string = $row['Original'];
-         $translation = $row['Text'];
+         $translation = ( $is_preview ) ? trim(get_request_arg("transl$oid")) : $row['Text'];
+         $transl_untranslated = ( $is_preview ) ? (@$_REQUEST["same$oid"] === 'Y') : ($row['Text'] === '');
+         $transl_unchanged = ( $is_preview ) ? (@$_REQUEST["unch$oid"] === 'Y') : false;
 
          //$debuginfo must be html_safe.
          if( (@$player_row['admin_level'] & ADMIN_DEVELOPER) /* && @$_REQUEST['debug'] */ )
@@ -334,7 +354,7 @@ $info_box = '<br>When translating you should keep the following things in mind:
                   )));
 
          //insert the rx_term highlights as if it was 'faq' (lose) item
-         $orig_preview = make_html_safe($orig_string, 'faq', $rx_term);
+         $orig_preview = make_html_safe( strip_translation_label($orig_string), 'faq', $rx_term);
          $translation_preview = make_html_safe($translation, 'faq');
 
          //execute the textarea_safe() here because of the various_encoding
@@ -352,7 +372,7 @@ $info_box = '<br>When translating you should keep the following things in mind:
                'OWNHTML', "<textarea name=\"transl$oid\""
                   . " cols=\"$hsize\" rows=\"$vsize\">"
                   . $translation."</textarea>",
-               'BR', 'CHECKBOX', "same$oid", 'Y', T_('untranslated'), $row['Text'] === '',
+               'BR', 'CHECKBOX', "same$oid", 'Y', T_('untranslated'), $transl_untranslated,
             );
          /*
             Unchanged box is useful when, for instance, a FAQ entry receive
@@ -362,7 +382,7 @@ $info_box = '<br>When translating you should keep the following things in mind:
          if( $row['Translated'] === 'N' ) //exclude not yet translated items
             array_push( $form_row,
                   'TEXT', MED_SPACING,
-                  'CHECKBOX', "unch$oid", 'Y', T_('unchanged'), false
+                  'CHECKBOX', "unch$oid", 'Y', T_('unchanged'), $transl_unchanged
                );
 
          array_push( $form_row,
@@ -408,15 +428,21 @@ $info_box = '<br>When translating you should keep the following things in mind:
                'HIDDEN', 'alpha_order', $alpha_order,
                'HIDDEN', 'filter_en', $filter_en,
                'HIDDEN', 'from_row', $from_row,
-               'SUBMITBUTTONX', 'apply_changes',
+               'SUBMITBUTTONX', 'save',
                   T_('Apply translation changes to Dragon'),
                   array( 'accesskey' => ACCKEY_ACT_EXECUTE ),
+               'TEXT', SMALL_SPACING.SMALL_SPACING,
+               'SUBMITBUTTONX', 'preview',
+                  T_('Preview translations'),
+                  array( 'accesskey' => ACCKEY_ACT_PREVIEW ),
             ));
       }
 
       $translate_form->echo_string($tabindex);
       $tabindex= $translate_form->tabindex;
-      } //$translate_form
+
+      // end of $translate_form
+
 
       $nbcol = 1;
       $groupchoice_form = new Form( 'selectgroup', $page, FORM_POST );
@@ -447,6 +473,7 @@ $info_box = '<br>When translating you should keep the following things in mind:
       $tabindex= $groupchoice_form->tabindex;
    }
 
+   // show language-choice for admin or translator with >1 language
    if( $lang_choice )
    {
       $nbcol = 1;
@@ -457,12 +484,9 @@ $info_box = '<br>When translating you should keep the following things in mind:
       $vals = array();
       foreach( $lang_desc as $lang => $langname )
       {
-           @list( $browsercode, $charenc) = explode( LANG_CHARSET_CHAR, $lang, 2);
-           if( in_array( $lang, $translator_array )
-                  || in_array( $browsercode, $translator_array ) )
-           {
-              $vals[$lang] = $langname;
-           }
+         @list( $browsercode, $charenc) = explode( LANG_CHARSET_CHAR, $lang, 2);
+         if( in_array( $lang, $translator_array ) || in_array( $browsercode, $translator_array ) )
+            $vals[$lang] = $langname;
       }
 
       $langchoice_form->add_row( array(
@@ -476,8 +500,7 @@ $info_box = '<br>When translating you should keep the following things in mind:
             'SUBMITBUTTON', 'cl', T_('Select'),
          ));
 
-      if( ALLOW_PROFIL_CHARSET
-            && (@$player_row['admin_level'] & ADMIN_TRANSLATORS) )
+      if( ALLOW_PROFIL_CHARSET && (@$player_row['admin_level'] & ADMIN_TRANSLATORS) )
       {
          $langchoice_form->add_row( array( 'ROW', 'DebugInfo',
                'CELL', $nbcol, '',
@@ -489,5 +512,88 @@ $info_box = '<br>When translating you should keep the following things in mind:
    }
 
    end_page();
-}
+}//main
+
+
+// save translations
+function update_translation( $transl_lang, $result, $show_rows )
+{
+   global $NOW, $player_row;
+
+   $replace_set = '';
+   $log_set = '';
+   $done_set = '';
+   $oid= -1;
+   while( ($row = mysql_fetch_assoc($result)) && $show_rows-- > 0 )
+   {
+      /* see the translations_query() function for the constraints
+       * on the "ORDER BY" clause associated with this "$oid" filter:
+       */
+      if( $oid == $row['Original_ID'] )
+         continue;
+      $oid = $row['Original_ID'];
+      $tlangID = (int)@$row['Language_ID'];
+
+      $translation = trim(get_request_arg("transl$oid"));
+      $same = ( @$_REQUEST["same$oid"] === 'Y' );
+      $unchanged = ( @$_REQUEST["unch$oid"] === 'Y' );
+
+
+      if( $unchanged && $row['Translated'] === 'N' ) //exclude not yet translated items
+      { //unchanged item
+         //UPDATE TranslationTexts SET Translatable='Done' WHERE ID IN
+         if( @$row['Translatable'] !== 'N' && @$row['Translatable'] !== 'Done' )
+            $done_set .= ",$oid";
+
+         $translation = ( $same ) ? '' : mysql_addslashes($translation);
+
+         //REPLACE INTO Translations (Original_ID,Language_ID,Text,Translated,Updated)
+         $replace_set .= ",($oid,$tlangID,'$translation','Y',FROM_UNIXTIME($NOW))";
+
+         //no $log_set
+      }
+      elseif( ( $same && $row['Text'] !== '' ) || ( !empty($translation) && $row['Text'] !== $translation ) )
+      { //same or modified item
+         //UPDATE TranslationTexts SET Translatable='Done' WHERE ID IN
+         if( @$row['Translatable'] !== 'N' && @$row['Translatable'] !== 'Done' )
+            $done_set .= ",$oid";
+
+         $translation = ( $same ) ? '' : mysql_addslashes($translation);
+
+         //REPLACE INTO Translations (Original_ID,Language_ID,Text,Translated,Updated)
+         $replace_set .= ",($oid,$tlangID,'$translation','Y',FROM_UNIXTIME($NOW))";
+
+         //INSERT INTO Translationlog (Player_ID,Original_ID,Language_ID,Translation)
+         $log_set .= ',(' . $player_row['ID'] . ",$oid,$tlangID,'$translation')";
+      }
+   } //foreach translation phrases
+
+   ta_begin();
+   {//HOT-section to update translations
+      if( $replace_set )
+      {
+         // NOTE: Translations needs PRIMARY KEY (Language_ID,Original_ID):
+         db_query( 'translate.update_translation.replace',
+            "REPLACE INTO Translations " .
+               "(Original_ID,Language_ID,Text,Translated,Updated) VALUES " . substr($replace_set,1) );
+      }
+
+      if( $log_set )
+      {
+         db_query( 'translate.update_translation.log',
+            "INSERT INTO Translationlog " .
+               "(Player_ID,Original_ID,Language_ID,Translation) VALUES " . substr($log_set,1) ); //+ Date= timestamp
+      }
+
+      if( $done_set )
+      {
+         db_query( 'translate.update_translation.done',
+            "UPDATE TranslationTexts SET Translatable='Done' WHERE ID IN (" . substr($done_set,1) . ')' );
+      }
+   }
+   ta_end();
+
+   make_include_files($transl_lang); //must be called from main dir
+}//update_translation
+
 ?>

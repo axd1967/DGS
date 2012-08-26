@@ -20,7 +20,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 // The Sourceforge devel server need a soft link:
 // ln -s -d /tmp/persistent/dragongoserver/translations /home/groups/d/dr/dragongoserver/htdocs/translations
 
-define('TRANS_ROW_PER_PAGE', 30);
+define('TRANS_ROW_PER_PAGE', 10);
 define('TRANS_FULL_ADMIN', 1); //allow all languages access to ADMIN_TRANSLATORS
 
 // TranslationTexts.Status
