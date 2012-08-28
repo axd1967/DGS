@@ -2423,10 +2423,9 @@ function get_request_user( &$uid, &$uhandle, $from_referer=false)
    return 0; //not found
 } //get_request_user
 
-function who_is_logged( &$player_row, $quick_suite=false, $skip_update=false )
+function who_is_logged( &$player_row, $login_opts=LOGIN_DEFAULT_OPTS )
 {
    global $main_path;
-   $login_opts = LOGIN_DEFAULT_OPTS | ( $quick_suite ? LOGIN_QUICK_SUITE : 0 ) | ( $skip_update ? LOGIN_SKIP_UPDATE : 0 );
    $handle = safe_getcookie('handle');
    $sessioncode = safe_getcookie('sessioncode');
    $curdir = getcwd();
@@ -2460,6 +2459,7 @@ define('LOGIN_QUICK_SUITE', 0x01);
 define('LOGIN_UPD_ACTIVITY', 0x02);
 define('LOGIN_RESET_NOTIFY', 0x04); // set Players.Notify to NONE (nothing to notify, after user checked on GUI)
 define('LOGIN_SKIP_UPDATE',  0x08); // skips update & other checks for Players-table or main-menu; for error-page (to not decrease quota)
+define('LOGIN_QUICK_PLAY', 0x10);
 define('LOGIN_DEFAULT_OPTS', (LOGIN_UPD_ACTIVITY|LOGIN_RESET_NOTIFY));
 
 /**
@@ -2473,6 +2473,9 @@ define('LOGIN_DEFAULT_OPTS', (LOGIN_UPD_ACTIVITY|LOGIN_RESET_NOTIFY));
 function is_logged_in($handle, $scode, &$player_row, $login_opts=LOGIN_DEFAULT_OPTS ) //must be called from main dir
 {
    global $hostname_jump, $NOW, $dbcnx, $ActivityForHit, $ActivityMax, $is_down;
+
+   if( $login_opts & LOGIN_QUICK_PLAY )
+      $login_opts |= LOGIN_QUICK_SUITE;
    $is_quick_suite = ($login_opts & LOGIN_QUICK_SUITE);
    $skip_update = ($login_opts & LOGIN_SKIP_UPDATE);
 
@@ -2517,7 +2520,7 @@ function is_logged_in($handle, $scode, &$player_row, $login_opts=LOGIN_DEFAULT_O
    }
 
    if( !$skip_update && $is_quick_suite ) // NOTE: for now only for quick-suite
-      writeIpStats( ($is_quick_suite ? 'QDO' : 'WEB') );
+      writeIpStats( (($login_opts & LOGIN_QUICK_PLAY) ? 'QPL' : ($is_quick_suite ? 'QDO' : 'WEB')) );
 
    $uid = (int)@$player_row['ID'];
    if( $uid <= 0 )

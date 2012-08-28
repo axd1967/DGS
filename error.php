@@ -35,7 +35,7 @@ require_once( "include/error_codes.php" );
    {
       $tmp= $TheErrors->set_mode(ERROR_MODE_COLLECT);
       //may call error() again:
-      $logged_in = who_is_logged( $player_row, /*quick*/false, /*skip-upd*/true );
+      $logged_in = who_is_logged( $player_row, LOGIN_DEFAULT_OPTS|LOGIN_SKIP_UPDATE );
       $TheErrors->set_mode($tmp);
       if( !is_null($player_row) )
       {

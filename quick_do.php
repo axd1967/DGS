@@ -32,7 +32,7 @@ else
    disable_cache();
    connect2mysql();
 
-   $logged_in = who_is_logged( $player_row, LOGIN_QUICK_SUITE );
+   $logged_in = who_is_logged( $player_row, LOGIN_DEFAULT_OPTS|LOGIN_QUICK_SUITE );
    if( !$logged_in )
       error('not_logged_in', 'quick_do.logged_in');
    if( !ALLOW_QUICK_DO )
