@@ -48,6 +48,7 @@ class QuickHandlerWaitingroom extends QuickHandler
 {
    var $wroom_id;
    var $wroom;
+   var $suitable;
 
    function QuickHandlerWaitingroom( $quick_object )
    {
@@ -55,6 +56,7 @@ class QuickHandlerWaitingroom extends QuickHandler
 
       $this->wroom_id = 0;
       $this->wroom = null;
+      $this->suitable = false; // allow all waiting-room-entries
    }
 
 
@@ -92,7 +94,8 @@ class QuickHandlerWaitingroom extends QuickHandler
 
       if( $cmd == QCMD_INFO )
       {
-         $this->wroom = Waitingroom::load_waitingroom( $this->wroom_id, $this->is_with_option(QWITH_USER_ID) );
+         $qsql = WaitingroomControl::build_waiting_room_query( $this->wroom_id, $this->suitable );
+         $this->wroom = Waitingroom::load_waitingroom_by_query( $qsql );
          if( is_null($this->wroom) )
             error('unknown_entry', "$dbgmsg.load_wroom({$this->wroom_id})");
       }
@@ -116,20 +119,18 @@ class QuickHandlerWaitingroom extends QuickHandler
    function process_cmd_info()
    {
       $wr = $this->wroom;
+      $wro = new WaitingroomOffer( $wr->wrow );
+      $wro->calculate_offer_settings(); // probable game settings
       $user_rows = array( $wr->uid => $wr->User->urow );
       $time_limit = TimeFormat::echo_time_limit(
             $wr->Maintime, $wr->Byotype, $wr->Byotime, $wr->Byoperiods,
             TIMEFMT_QUICK|TIMEFMT_ENGL|TIMEFMT_SHORT|TIMEFMT_ADDTYPE);
       $opp_started_games = GameHelper::count_started_games( $this->my_id, $wr->uid );
 
-      $restrictions = ''; //TODO TODO
-         //echo_game_restrictions($MustBeRated, $RatingMin, $RatingMax,
-            //$MinRatedGames, $goodmaxgames, $SameOpponent, (!$suitable && @$CH_hidden), true) );
-
-      $calc_type = 1; // TODO quality of setings: 1=probable-setting (conv/proper depends on rating), 2=fix-calculated
-      $calc_color = 'black'; // TODO probable/fix color of logged-in user=> double | fairkomi | nigiri | black | white
-      $calc_handicap = 3; // TODO probable/fix handicap
-      $calc_komi = 6.5; // TODO probably/fix komi
+      list( $restrictions, $joinable ) =
+         WaitingroomControl::get_waitingroom_restrictions( $wr->wrow, $this->suitable, /*html*/false );
+      if( $restrictions == NO_VALUE )
+         $restrictions = '';
 
       $this->addResultKey('id', $wr->ID );
       $this->addResultKey('user', $this->build_obj_user($wr->uid, $user_rows, 'country,rating') );
@@ -163,12 +164,18 @@ class QuickHandlerWaitingroom extends QuickHandler
       $this->addResultKey('time_byo', $wr->Byotime );
       $this->addResultKey('time_periods', $wr->Byoperiods );
 
-      //TODO $this->addResultKey('restrictions', $restrictions );
+      $this->addResultKey('can_join', ( !$wro->is_my_game() && $joinable ? 1 : 0 ) );
+      $this->addResultKey('restrictions', $restrictions );
       $this->addResultKey('opp_started_games', $opp_started_games );
-      //TODO $this->addResultKey('calc_type', $calc_type );
-      //TODO $this->addResultKey('calc_color', $calc_color );
-      //TODO $this->addResultKey('calc_handicap', $calc_handicap );
-      //TODO $this->addResultKey('calc_komi', $calc_komi );
+
+      $this->addResultKey('calc_type', $wro->resultType );
+      $this->addResultKey('calc_color', $wro->resultColor );
+      if( ($wro->resultType == 1 || $wro->resultType == 2) && $wro->resultColor )
+      {
+         $this->addResultKey('calc_handicap', $wro->resultHandicap );
+         if( $wro->resultColor != 'fairkomi' )
+            $this->addResultKey('calc_komi', $wro->resultKomi );
+      }
    }//process_cmd_info
 
 

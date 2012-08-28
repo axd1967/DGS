@@ -87,6 +87,7 @@ class Waitingroom
    // non-DB fields
 
    var $User; // User-object
+   var $wrow; // remaining fields from larger query
 
    /*! \brief Constructs Waitingroom-object with specified arguments. */
    function Waitingroom( $id=0, $uid=0, $user=null, $gid=0, $count_offers=0, $created=0,
@@ -130,6 +131,7 @@ class Waitingroom
       $this->Comment = $comment;
       // non-DB fields
       $this->User = (is_a($user, 'User')) ? $user : new User( $this->uid );
+      $this->wrow = null;
    }
 
    function to_string()
@@ -214,7 +216,9 @@ class Waitingroom
             'WR.uid AS WRP_ID',
             'WRP.Name AS WRP_Name',
             'WRP.Handle AS WRP_Handle',
+            'WRP.Type AS WRP_Type',
             'WRP.Rating2 AS WRP_Rating2',
+            'WRP.RatingStatus AS WRP_RatingStatus',
             'WRP.Country AS WRP_Country' );
          $qsql->add_part( SQLP_FROM,
             'INNER JOIN Players AS WRP ON WRP.ID=WR.uid' );
@@ -227,7 +231,7 @@ class Waitingroom
    /*! \brief Returns Waitingroom-object created from specified (db-)row. */
    function new_from_row( $row )
    {
-      $bull = new Waitingroom(
+      $wroom = new Waitingroom(
             // from Waitingroom
             @$row['ID'],
             @$row['uid'],
@@ -263,7 +267,8 @@ class Waitingroom
             @$row['ShapeSnapshot'],
             @$row['Comment']
          );
-      return $bull;
+      $wroom->wrow = $row;
+      return $wroom;
    }
 
    /*!
@@ -277,6 +282,17 @@ class Waitingroom
       $qsql->add_part( SQLP_LIMIT, '1' );
 
       $row = mysql_single_fetch( "Waitingroom::load_wroom.find_wroom($wroom_id)", $qsql->get_select() );
+      return ($row) ? Waitingroom::new_from_row($row) : NULL;
+   }
+
+   /*!
+    * \brief Loads and returns Waitingroom-object for given QuerySQL limited to 1 result-entry.
+    */
+   function load_waitingroom_by_query( $qsql )
+   {
+      $qsql->add_part( SQLP_LIMIT, '1' );
+
+      $row = mysql_single_fetch( "Waitingroom::load_wroom_by_query.find_wroom()", $qsql->get_select() );
       return ($row) ? Waitingroom::new_from_row($row) : NULL;
    }
 

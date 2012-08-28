@@ -23,9 +23,11 @@ $TranslateGroups[] = "Game";
 
 require_once( "include/std_functions.php" );
 require_once( "include/message_functions.php" );
+require_once( "include/game_functions.php" );
 require_once( "include/rating.php" );
 require_once( "include/make_game.php" );
 require_once( "include/contacts.php" );
+require_once( "include/db/waitingroom.php" );
 
 
  /*!
@@ -33,11 +35,111 @@ require_once( "include/contacts.php" );
   *
   * \brief Controller-Class to handle waitingroom-stuff.
   */
-
 class WaitingroomControl
 {
 
    // ------------ static functions ----------------------------
+
+   /*! \brief Returns QuerySQL for waiting-room. */
+   function build_waiting_room_query( $wroom_id=0, $suitable=false )
+   {
+      global $player_row, $NOW;
+
+      $my_id = $player_row['ID'];
+      $my_rating = $player_row['Rating2'];
+      $my_rated_games = (int)$player_row['RatedGames'];
+      $iamrated = user_has_rating();
+
+      $qsql = Waitingroom::build_query_sql( $wroom_id, /*with_player*/true );
+
+      $qsql->add_part( SQLP_FIELDS,
+         'WRJ.JoinedCount',
+         'UNIX_TIMESTAMP(WRJ.ExpireDate) AS X_ExpireDate' );
+
+      // $calculated = ( $Handicaptype == 'conv' || $Handicaptype == 'proper' );
+      // $haverating = ( !$calculated || is_numeric($my_rating) );
+      // if( $MustBeRated != 'Y' )         $goodrating = true;
+      // else if( is_numeric($my_rating) ) $goodrating = ( $my_rating>=$RatingMin && $my_rating<=$RatingMax );
+      // else                              $goodrating = false;
+      // $goodmingames = ( $MinRatedGames > 0 ? ($my_rated_games >= $MinRatedGames) : true );
+
+      $calculated = "(WR.Handicaptype='conv' OR WR.Handicaptype='proper')";
+      if( $iamrated )
+      {
+         $haverating = "1";
+         $goodrating = "IF(WR.MustBeRated='Y' AND"
+                     . " ($my_rating<WR.RatingMin OR $my_rating>WR.RatingMax)"
+                     . ",0,1)";
+      }
+      else
+      {
+         $haverating = "NOT $calculated";
+         $goodrating = "IF(WR.MustBeRated='Y',0,1)";
+      }
+      $sql_goodmingames = "IF(WR.MinRatedGames>0,($my_rated_games >= WR.MinRatedGames),1)";
+
+      $sql_goodmaxgames = ( MaxGamesCheck::is_limited() ) // Opponent max-games
+         ? "IF(WR.uid=$my_id OR (WRP.Running + WRP.GamesMPG < ".MAX_GAMESRUN."),1,0)" : 1;
+
+      $qsql->add_part( SQLP_FIELDS,
+         "$calculated AS calculated",
+         "$haverating AS haverating",
+         "$goodrating AS goodrating",
+         "$sql_goodmingames AS goodmingames",
+         "$sql_goodmaxgames AS goodmaxgames",
+         "CASE WHEN (WR.uid=$my_id OR WR.SameOpponent=0 OR (WR.SameOpponent > ".SAMEOPP_TOTAL." AND ISNULL(WRJ.wroom_id))) THEN 1 " .
+              "WHEN (WR.SameOpponent < ".SAMEOPP_TOTAL.") THEN ( " . // total-times-check
+                  "((SELECT COUNT(*) FROM Games AS G1 WHERE G1.Status".IS_STARTED_GAME." AND G1.GameType='".GAMETYPE_GO."' AND G1.Black_ID=$my_id AND G1.White_ID=WR.uid) + " .
+                  " (SELECT COUNT(*) FROM Games AS G2 WHERE G2.Status".IS_STARTED_GAME." AND G2.GameType='".GAMETYPE_GO."' AND G2.Black_ID=WR.uid AND G2.White_ID=$my_id)) " .
+                  "< -WR.SameOpponent + ".SAMEOPP_TOTAL." ) " .
+              "WHEN (WR.SameOpponent<0) THEN (WRJ.JoinedCount < -WR.SameOpponent) " . // same-offer-times-check
+              "ELSE (WRJ.ExpireDate <= FROM_UNIXTIME($NOW)) " . // same-offer-date-check
+              "END AS goodsameopp",
+         "IF(WR.uid=$my_id OR WR.SameOpponent > ".SAMEOPP_TOTAL.",0, " .
+              "((SELECT COUNT(*) FROM Games AS G1 WHERE G1.Status".IS_STARTED_GAME." AND G1.GameType='".GAMETYPE_GO."' AND G1.Black_ID=$my_id AND G1.White_ID=WR.uid) + " .
+              " (SELECT COUNT(*) FROM Games AS G2 WHERE G2.Status".IS_STARTED_GAME." AND G2.GameType='".GAMETYPE_GO."' AND G2.Black_ID=WR.uid AND G2.White_ID=$my_id)) ) AS X_TotalCount"
+         );
+      $qsql->add_part( SQLP_FROM,
+         "LEFT JOIN WaitingroomJoined AS WRJ ON WRJ.opp_id=$my_id AND WRJ.wroom_id=WR.ID" );
+      if( $suitable && MaxGamesCheck::is_limited() )
+         $qsql->add_part( SQLP_HAVING, 'goodmaxgames' );
+
+      // Contacts: make the protected waitingroom games invisible
+      $qsql->add_part( SQLP_FIELDS,
+         "IF(ISNULL(C.uid),0,C.SystemFlags & ".CSYSFLAG_WAITINGROOM.") AS C_denied" );
+      $qsql->add_part( SQLP_FROM,
+         "LEFT JOIN Contacts AS C ON C.uid=WR.uid AND C.cid=$my_id" );
+      $qsql->add_part( SQLP_WHERE,
+         'WR.nrGames>0' );
+      $qsql->add_part( SQLP_HAVING,
+         'C_denied=0' );
+
+      // Contacts: hide unwanted user-offers
+      $qsql->add_part( SQLP_FIELDS,
+         "IF(ISNULL(CH.uid),0,CH.SystemFlags & ".CSYSFLAG_WR_HIDE_GAMES.") AS CH_hidden" );
+      $qsql->add_part( SQLP_FROM,
+         "LEFT JOIN Contacts AS CH ON CH.uid=$my_id AND CH.cid=WR.uid" );
+      if( $suitable )
+         $qsql->add_part( SQLP_HAVING, 'CH_hidden=0' );
+
+      return $qsql;
+   }//build_waiting_room_query
+
+   /*!
+    * \brief Returns restrictions for joining waiting-room entry and if offer is joinable or not.
+    * \param $row waiting-room row loaded by query built from build_waiting_room_query().
+    * \param $html false = no HTML-entities in restrictions
+    * \return array( restrictions|NO_VALUE, joinable=true|false ); NO_VALUE = no restrictions found
+    */
+   function get_waitingroom_restrictions( $row, $suitable, $html=true )
+   {
+      $restrictions = echo_game_restrictions( $row['MustBeRated'], $row['RatingMin'], $row['RatingMax'],
+            $row['MinRatedGames'], $row['goodmaxgames'], $row['SameOpponent'],
+            ( !$suitable && @$row['CH_hidden'] ), /*short*/true, $html );
+      $joinable = ( $row['goodrating'] && $row['goodmingames'] && $row['goodmaxgames']
+         && $row['goodsameopp'] && !@$row['CH_hidden'] );
+      return array( $restrictions, $joinable );
+   }//get_waitingroom_restrictions
 
    /*! \brief Joins waiting-room game. */
    function join_waitingroom_game( $wr_id )
@@ -310,5 +412,184 @@ class WaitingroomControl
    }//delete_waitingroom_game
 
 } // end of 'WaitingroomControl'
+
+
+
+ /*!
+  * \class WaitingroomOffer
+  *
+  * \brief Container-Class to handle single waitingroom-offer.
+  */
+class WaitingroomOffer
+{
+   var $row;
+   var $CategoryHanditype;
+   var $mp_player_count;
+   var $iamrated;
+
+   var $resultType; // 1=calculated, 2=fix, 3=mpg (see (3f) in quick-specs)
+   var $resultColor; // '' | double | mpg | fairkomi | nigiri | black | white (see quick-specs (3f))used for quick-suite)
+   var $resultHandicap;
+   var $resultKomi;
+
+   function WaitingroomOffer( $row )
+   {
+      $this->row = $row;
+      $this->CategoryHanditype = get_category_handicaptype($row['Handicaptype']);
+      $this->mp_player_count = ($this->row['GameType'] == GAMETYPE_GO)
+         ? 0
+         : MultiPlayerGame::determine_player_count($this->row['GamePlayers']);
+      $this->iamrated = user_has_rating();
+   }
+
+   function is_fairkomi()
+   {
+      return ( $this->CategoryHanditype == CAT_HTYPE_FAIR_KOMI );
+   }
+
+   function is_my_game()
+   {
+      global $player_row;
+      return ( $this->row['uid'] == $player_row['ID'] );
+   }
+
+   // calculate game-settings for waiting-room or quick-suite
+   function calculate_offer_settings()
+   {
+      global $player_row;
+
+      $is_my_game = $this->is_my_game();
+      $my_rating = $player_row['Rating2'];
+
+      $handitype = $this->row['Handicaptype'];
+      $game_type = $this->row['GameType'];
+      $is_fairkomi = $this->is_fairkomi();
+
+      // probable game-settings without adjustment
+      $infoHandi = $this->row['Handicap'];
+      $infoKomi = $this->resultKomi = $this->row['Komi'];
+      $iamblack = '';
+      $info_nigiri = false;
+      if( $this->iamrated && !$is_my_game && !$is_fairkomi ) // conv/proper/manual
+      {
+         if( user_has_rating($this->row, 'WRP_') ) // other has rating
+         {
+            if( $handitype == HTYPE_CONV )
+               list( $infoHandi, $infoKomi, $iamblack, $info_nigiri ) =
+                  suggest_conventional( $my_rating, $this->row['WRP_Rating2'], $this->row['Size'] );
+            elseif( $handitype == HTYPE_PROPER )
+               list( $infoHandi, $infoKomi, $iamblack, $info_nigiri ) =
+                  suggest_proper( $my_rating, $this->row['WRP_Rating2'], $this->row['Size'] );
+         }
+      }
+
+      if( $is_my_game )
+         $this->resultType = 0;
+      elseif( $game_type != GAMETYPE_GO ) // MPG
+         $this->resultType = 3;
+      elseif( (string)$iamblack != '' ) // probable setting
+         $this->resultType = 1;
+      else // fix-calculated
+         $this->resultType = 2;
+
+      $colstr = WaitingroomOffer::determine_color(
+         $game_type, $handitype, $this->CategoryHanditype, $is_my_game, $iamblack,
+         $info_nigiri, $player_row['Handle'], $this->row['WRP_Handle'] );
+
+      $settings_str = '';
+      if( !$is_my_game && $game_type == GAMETYPE_GO && !$is_fairkomi )
+      {
+         $this->resultHandicap = adjust_handicap( $infoHandi,
+            $this->row['AdjHandicap'], $this->row['MinHandicap'], $this->row['MaxHandicap'] );
+         $this->resultKomi = adjust_komi( $infoKomi, $this->row['AdjKomi'], $this->row['JigoMode'] );
+         $settings_str = ($this->resultHandicap > 0)
+            ? sprintf( T_('%s H%s K%s#wrsettings'), $colstr, (int)$this->resultHandicap, $this->resultKomi )
+            : sprintf( T_('%s Even K%s#wrsettings'), $colstr, $this->resultKomi );
+      }
+      elseif( $is_fairkomi )
+      {
+         $this->resultHandicap = 0;
+         $settings_str = $colstr . ' ' . T_('Negotiate#fairkomi_wrsettings');
+      }
+      elseif( $game_type != GAMETYPE_GO ) // MPG
+      {
+         $this->resultHandicap = $this->resultKomi = 0;
+         $settings_str = $colstr . MINI_SPACING . echo_image_game_players( $this->row['gid'] )
+            . MINI_SPACING . sprintf( '(%s/%s)', $this->row['nrGames'], $this->mp_player_count);
+      }
+
+      if( ENABLE_STDHANDICAP && ($this->row['StdHandicap'] !== 'Y') && !$is_fairkomi )
+         $settings_str .= ($settings_str ? ' ' : '') . T_('(Free Handicap)#handicap_tablewr');
+
+      return $settings_str;
+   }//calculate_offer_settings
+
+
+   // ------------ static functions ----------------------------
+
+   function determine_color( $game_type, $Handicaptype, $CategoryHanditype, $is_my_game, $iamblack, $is_nigiri, $my_handle, $opp_handle )
+   {
+      global $base_path;
+
+      if( $game_type != GAMETYPE_GO ) //MPG
+      {
+         $this->resultColor = 'mpg';
+         $colstr = image( $base_path.'17/y.gif', T_('Manual#color'), T_('Color set by game-master for multi-player-game#color') );
+      }
+      elseif( $Handicaptype == HTYPE_NIGIRI || $is_nigiri )
+      {
+         $this->resultColor = 'nigiri';
+         $colstr = image( $base_path.'17/y.gif', T_('Nigiri#color'), T_('Nigiri (You randomly play Black or White)#color') );
+      }
+      elseif( $Handicaptype == HTYPE_DOUBLE )
+      {
+         $this->resultColor = 'double';
+         $colstr = image( $base_path.'17/w_b.gif', T_('B+W#color'), T_('You play Black and White#color') );
+      }
+      elseif( $Handicaptype == HTYPE_BLACK )
+      {
+         $this->resultColor = ( $is_my_game ) ? 'black' : 'white';
+         if( $is_my_game )
+            $colstr = image( $base_path.'17/b.gif', T_('B#color'), T_('I play Black#color') );
+         else
+            $colstr = image( $base_path.'17/w.gif', T_('W#color'), T_('You play White#color') );
+      }
+      elseif( $Handicaptype == HTYPE_WHITE )
+      {
+         $this->resultColor = ( $is_my_game ) ? 'white' : 'black';
+         if( $is_my_game )
+            $colstr = image( $base_path.'17/w.gif', T_('W#color'), T_('I play White#color') );
+         else
+            $colstr = image( $base_path.'17/b.gif', T_('B#color'), T_('You play Black#color') );
+      }
+      elseif( $CategoryHanditype == CAT_HTYPE_FAIR_KOMI )
+      {
+         $this->resultColor = 'fairkomi';
+         $col_note = ( $is_my_game )
+            ? GameTexts::get_fair_komi_types( $Handicaptype, NULL, $my_handle, /*opp*/NULL )
+            : GameTexts::get_fair_komi_types( $Handicaptype, NULL, $opp_handle, $my_handle );
+         $colstr = image( $base_path.'17/y.gif', $col_note, NULL );
+      }
+      elseif( (string)$iamblack != '' ) // $iamrated && !$is_my_game && HTYPE_CONV/PROPER
+      {
+         $this->resultColor = ($iamblack) ? 'black' : 'white';
+         if( $iamblack )
+            $colstr = image( $base_path.'17/b.gif', T_('B#color'), T_('You probably play Black#color') );
+         else
+            $colstr = image( $base_path.'17/w.gif', T_('W#color'), T_('You probably play White#color') );
+      }
+      else // HTYPE_CONV/PROPER (unrated|my-game-offer) or otherwise calculated
+      {
+         $this->resultColor = '';
+         $colstr = '';
+      }
+
+      if( $colstr && $Handicaptype != HTYPE_DOUBLE )
+         $colstr = insert_width(5) . $colstr;
+
+      return $colstr;
+   }//determine_color
+
+} // end of 'WaitingroomOffer'
 
 ?>

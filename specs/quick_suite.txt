@@ -1325,7 +1325,6 @@ Commands:
             ]
          }
 
-   # NOT fully IMPLEMENTED: to-impl (calc-game-settings)
    "info" : returns information on single game-offer from waiting-room
       - required opts: WROOM_ID
       - optional opts: WITH
@@ -1394,12 +1393,17 @@ Commands:
             "time_byo" : 225,          # time-limit byo-time [1 unit = 1 hour, 15 hour = 1 DGS-day]; extra-time for Fischer-time
             "time_periods" : 8,        # time-limit byo-periods: periods (for JAP), stones (for CAN), unused (=0, for FIS)
 
+            "can_join" : 1,            # 1=game-offer can be joined, 0=can not be joined (because your own or unsuitable)
             "restrictions" : "",       # empty = no restrictions (offer can be joined); non-empty = info-string with restrictions
             "opp_started_games" : 0,   # number of games already started with opponent
-            "calc_type" : 1,           # quality of setings: 1=probable-setting (conv/proper depends on rating), 2=fix-calculated
-            "calc_color" : "black",    # probable/fix color of logged-in user: double | fairkomi | nigiri | black | white
+            "calc_type" : 1,           # quality of setings: 0=own-game-offer, 1=probable-setting (conv/proper depends on rating),
+                                       #    2=fix-calculated, 3=MPG (color/handicap/komi set by game-master)
+            "calc_color" : "black",    # probable/fix color of logged-in user: '' | mpg | double | fairkomi | nigiri | black | white
+                                       #    '' (=empty) if color cannot be determined (e.g. if users are not rated for conventional-handicap)
+
+            # the next two fields are only set if calc_type is 1 or 2 AND calc_color is not empty:
             "calc_handicap" : 3,       # probable/fix handicap
-            "calc_komi" : 6.5,         # probably/fix komi
+            "calc_komi" : 6.5,         # probably/fix komi, field omitted for fair-komi
          }
 
    "delete" : deletes own game-offer from waiting-room

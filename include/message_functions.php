@@ -776,6 +776,7 @@ function message_info_table($mid, $date, $to_me, //$mid==0 means preview
  *     GSET_WAITINGROOM = for waiting_room.php
  *     GSET_TOURNAMENT_LADDER = for ladder-tournament challenge
  *     GSET_TOURNAMENT_ROUNDROBIN = for round-robin-tournament
+ * \param $game_row see below for expected fields
  * \param $use_src_opp mandatory for GSET_MSG_INVITE|DISPUTE (can be null otherwise) used to get jigo-mode from correct game-setup:
  *        true  = use opponents game-setup (invitation or dispute to me),
  *        false = use my game-setup (inv/dispute from me)
@@ -1200,9 +1201,11 @@ function build_adjust_handicap( $adj_handicap, $min_handicap, $max_handicap, $pr
  * \param $OppGoodMaxGames ignore if null
  * \param $SameOpponent ignore if null
  * \param $Hidden ignore if null
+ * \param $html false=no HTML-entities
+ * \return NO_VALUE if no restrictions
  */
 function echo_game_restrictions($MustBeRated, $RatingMin, $RatingMax, $MinRatedGames,
-      $OppGoodMaxGames=null, $SameOpponent=null, $Hidden=null, $short=false )
+      $OppGoodMaxGames=null, $SameOpponent=null, $Hidden=null, $short=false, $html=true )
 {
    $out = array();
 
@@ -1240,7 +1243,7 @@ function echo_game_restrictions($MustBeRated, $RatingMin, $RatingMax, $MinRatedG
    if( !is_null($Hidden) && $Hidden )
       $out[] = sprintf( '[%s]', T_('Hidden#wroom') );
 
-   return ( count($out) ? implode(', ', $out) : NO_VALUE );
+   return ( count($out) ) ? preg_replace("/\\&gt;/", '>', implode(', ', $out)) : NO_VALUE;
 }//echo_game_restrictions
 
 

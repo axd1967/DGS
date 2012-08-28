@@ -860,4 +860,13 @@ function update_player_rating( $uid, $new_rating=null, $upd_players=null )
       "UPDATE Players SET $upd_query WHERE ID=$uid LIMIT 1" );
 }//update_player_rating
 
+function user_has_rating( $row=NULL, $prefix='' )
+{
+   if( is_null($row) )
+      $row = $GLOBALS['player_row'];
+   $rating = $row[$prefix.'Rating2'];
+   $is_rated = ( $row[$prefix.'RatingStatus'] != RATING_NONE && is_numeric($rating) && $rating >= MIN_RATING );
+   return $is_rated;
+}//user_has_rating
+
 ?>
