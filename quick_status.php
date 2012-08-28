@@ -78,6 +78,9 @@ else
    if( !$player_row )
       error('unknown_user', "quick_status.find_player2($uhandle)");
 
+   if( (@$player_row['AdminOptions'] & ADMOPT_DENY_LOGIN) )
+      error('login_denied', 'quick_status', /*log*/false);
+
    if( $login_mode == 'password' )
    {
       if( !check_password( $uhandle, $player_row['Password'], $player_row['Newpassword'], $passwd ) )
