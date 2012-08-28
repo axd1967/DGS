@@ -56,8 +56,8 @@ class QuickSuite
       //   Order should be kept according to most frequent usage.
       static $quick_handler_list = array(
          'QuickHandlerGame',        // game: delete | set_handicap | move | resign | status_score | score
-         'QuickHandlerMessage',     // message: info
-         'QuickHandlerWaitingroom', // wroom: list | info | new_game
+         'QuickHandlerMessage',     // message: info | move_msg | delete_msg | send_msg | accept_inv | decline_inv
+         'QuickHandlerWaitingroom', // wroom: info | delete | join
          'QuickHandlerBulletin',    // bulletin: list | mark_read
          'QuickHandlerUser',        // user: info
          'QuickHandlerGameInfo',    // game: info | get_notes
