@@ -30,6 +30,10 @@ define('ERROR_MODE_QUICK_SUITE', 5);
 define('ERROR_FORMAT_TEXT', 1);
 define('ERROR_FORMAT_JSON', 2);
 
+define('ERROR_HEADER_DEFAULT', 0);
+define('ERROR_HEADER_TEXT', 1);
+define('ERROR_HEADER_JSON', 2);
+
 class DgsErrors
 {
    var $mode;
@@ -37,7 +41,8 @@ class DgsErrors
    var $log_errors;
    var $collect_errors;
    var $print_errors;
-   var $error_format;
+   var $error_format; // ERROR_FORMAT_...
+   var $error_header; // ERROR_HEADER_...
 
    var $error_list;
 
@@ -60,6 +65,7 @@ class DgsErrors
             $this->collect_errors = false;
             $this->print_errors = true;
             $this->error_format = ERROR_FORMAT_TEXT;
+            $this->error_header = ERROR_HEADER_DEFAULT;
             break;
          case ERROR_MODE_COLLECT:
             $this->mode = $m;
@@ -68,6 +74,7 @@ class DgsErrors
             $this->collect_errors = true;
             $this->print_errors = false;
             $this->error_format = ERROR_FORMAT_TEXT;
+            $this->error_header = ERROR_HEADER_DEFAULT;
             break;
          case ERROR_MODE_TEST:
             $this->mode = $m;
@@ -76,6 +83,7 @@ class DgsErrors
             $this->collect_errors = true;
             $this->print_errors = false;
             $this->error_format = ERROR_FORMAT_TEXT;
+            $this->error_header = ERROR_HEADER_DEFAULT;
             break;
          case ERROR_MODE_QUICK_SUITE:
             $this->mode = $m;
@@ -84,6 +92,7 @@ class DgsErrors
             $this->collect_errors = false;
             $this->print_errors = true;
             $this->error_format = ERROR_FORMAT_JSON;
+            $this->error_header = ERROR_HEADER_JSON;
             break;
 
          default:
@@ -94,6 +103,7 @@ class DgsErrors
             $this->collect_errors = false;
             $this->print_errors = false;
             $this->error_format = ERROR_FORMAT_TEXT;
+            $this->error_header = ERROR_HEADER_DEFAULT;
             break;
       }
       return $p;
@@ -166,6 +176,12 @@ class DgsErrors
 
       if( $this->print_errors || $warn )
       {
+         if( $this->error_header == ERROR_HEADER_JSON )
+            header('Content-Type: application/json');
+         elseif( $this->error_header == ERROR_HEADER_TEXT )
+            header('Content-Type: text/plain;charset=utf-8');
+         //else //if( $this->error_header == ERROR_HEADER_DEFAULT )
+
          if( $this->error_format == ERROR_FORMAT_TEXT )
             echo '[', ( $warn ? "#Warning" : "#Error" ), ": $err; $debugmsg]\n";
          else //if( $this->error_format == ERROR_FORMAT_JSON )
@@ -179,7 +195,6 @@ class DgsErrors
                   );
                quick_suite_add_quota( $err_arr );
 
-               //TODO? header( 'Content-Type: application/json' );
                echo dgs_json_encode( $err_arr );
             }
          }
