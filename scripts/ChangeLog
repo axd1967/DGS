@@ -19,9 +19,122 @@ Developers INFO:
 ChangeLog
 ------------------------------------------------------------------
 
+2012-08-30 juga
+
+   * include/quick/quick_wroom.php (class QuickHandlerWaitingroom, ~.parseURL, ~.process,
+       ~.process_cmd_list, ~.fill_wroom_object),
+     include/quick/quick_handler.php (class QuickHandler, ~.parseFilters),
+     include/wroom_control.php (WaitingroomControl.get_waitingroom_restrictions,
+       ~.check_joining_waitingroom),
+     include/game_functions.php (MaxGamesCheck.get_error_text, ~.get_warn_text),
+     specs/quick_suite.txt,
+     waiting_room.php (add_old_game_form):
+   - quick-suite:
+     - specified and implemented standard-way to parse and handle filter-values for quick-suite
+     - waitingroom quick-handler:
+       - added suitable-filter with default ON for 'list'-command
+       - refactor additional checks from 'add_old_game_form()' into WaitingroomOffer-class
+         also to be used for quick-suite waitingroom-info quick-handler
+       - changed and added fields for 'info'-command:
+         - 'can_join' renamed to 'join' to have prefix on join-fields,
+         - added 'join_warn' & 'join_err'-fields
+         - 'opp_started_games'-fields only for 'info'
+
+2012-08-29 juga
+
+   * include/quick/quick_wroom.php (class QuickHandlerWaitingroom, ~.prepare, ~.process,
+       ~.process_cmd_list, ~.fill_wroom_object),
+     include/db/waitingroom.php (Waitingroom.load_waitingroom_entries),
+     specs/quick_suite.txt:
+   - waitingroom-list quick-handler:
+     - implemented 'list'-command returning all waiting-room-entries
+     - fields calc_handicap & calc_komi now empty instead of omitted; this is needed to have complete list of fields for all list-entries
+
+   * include/quick/quick_handler.php (class QuickHandler, ~._parse_options, ~.is_with_option,
+       ~.check_list_style, ~.add_query_limits, ~.read_found_rows, ~.add_list),
+     include/quick/quick_bulletin.php (QuickHandlerBulletin.prepare, ~.process_cmd_list),
+     include/quick/quick_contact.php (QuickHandlerContact.prepare),
+     include/quick/quick_folder.php (QuickHandlerFolder.prepare, ~.process_cmd_list),
+     include/globals.php (QUICK_VERSION), specs/quick_suite.txt:
+   - added standard-option to specify LIMIT and OFFSET with defaults
+   - added 'list_totals' as standard-field in list-response with total count of rows
+   - set std-field 'list_has_next' in list-repsonse to 1 if there are is a next-page
+     to retrieve for list-command
+   - added missing order-by-fields for existing lists: bulletin, folder
+   - minor changes (renamed vars, cleaned up time-format-specs)
+
+   * include/quick/quick_contact.php (QuickHandlerContact.build_obj_contact_user),
+     specs/quick_suite.txt:
+   - contact-list quick-handler: add additional user-data only if WITH-option='user_id'
+
+   * include/quick/quick_handler.php (class QuickHandler, ~.getProcessedResult, ~.add_list,
+       ~.clear_unexpected_fields, ~.buildObjectArray),
+     specs/quick_suite.txt, quick_do.php:
+   - added standard-option 'fields' to restrict the output of fields in the quick-response
+     - always include standard-fields: version,error*,quota_*,list_*,id
+     - include all fields if fields-option omitted or empty
+     - match on 1st-level of field-keys in response
+     - check syntax of fields-option: plain fieldname or *-suffix-pattern
+
+2012-08-28 juga
+
+   * include/quick/quick_wroom.php (class QuickHandlerWaitingroom, ~.prepare, ~.process_cmd_info),
+     include/wroom_control.php (WaitingroomControl.build_waiting_room_query, ~.get_waitingroom_restrictions;
+       class WaitingroomOffer, ~.is_fairkomi, ~.is_my_game, ~.calculate_offer_settings, ~.determine_color),
+     include/db/waitingroom.php (class Waitingroom, ~.build_query_sql, ~.new_from_row,
+       ~.load_waitingroom_by_query),
+     include/message_functions.php (echo_game_restrictions),
+     include/rating.php (user_has_rating),
+     specs/quick_suite.txt,
+     waiting_room.php (add_old_game_form):
+   - implemented game-settings calculations for waiting-room quick-handler for "info"-command
+     - refactored building of query for waiting-room into WaitingroomControl-class
+     - refactored game-settings calculations of color/handicap/komi/settings into WaitingroomOffer-class
+   - bugfix: overwrite default-profile also for "info"-link
+
+   * include/std_functions.php (who_is_logged, is_logged_in),
+     error.php, quick_do.php, quick_play.php:
+   - quick-play: check for quota-exceeded, set timezone
+     - replaced login-check, login-denied-check, ip-stats by using standard login who_is_logged()
+
+   * quick_status.php:
+   - check for login-denied
+
+   * include/error_functions.php (class DgsErrors, ~.set_mode, ~.add_error):
+   - bugfix: added configuration of DgsErrors for setting HTTP-Header
+     - use 'application/json' HTTP-HEADER also for errors for ERROR_MODE_QUICK_SUITE
+
 2012-08-26 juga
 
 ### ----- release-1_0_15-20120608 -----
+
+   * game.php, message.php, new_game.php, site_map.php, waiting_room.php,
+     forum/forum_functions.php, forum/index.php, include/table_columns.php,
+     scripts/updates/database_changes_1_0_14_to_1_0_15.mysql,
+     tournaments/edit_participant.php, tournaments/edit_status.php,
+     tournaments/game_admin.php, tournaments/register.php,
+     tournaments/view_tournament.php:
+   - fix translation-texts for live-servers preventing double text-entries
+     - Send Message -> Send message
+     - New game -> New Game
+     - for forum: new -> new#forum, reply -> reply#forum, hide -> hide#forum, show -> show#forum
+     - prev page -> Prev Page, next page -> Next Page
+     - Tournament Status -> Tournament Status#tourney
+-----------
+-- fix translation-adjustments in code
+-- 1. following selects must results in not more than one entry per select
+SELECT * FROM TranslationTexts WHERE Text='Send Message';
+SELECT * from TranslationTexts where Text='prev page';
+SELECT * from TranslationTexts where Text='next page';
+SELECT * from TranslationTexts where Text='Tournament Status';
+
+-- 2. only if criteria in (1) is met, update the following:
+UPDATE TranslationTexts SET Text='Send message' where Text='Send Message' LIMIT 1;
+UPDATE TranslationTexts SET Text='Prev Page' WHERE Text='prev page' LIMIT 1;
+UPDATE TranslationTexts SET Text='Next Page' WHERE Text='next page' LIMIT 1;
+UPDATE TranslationTexts SET Text='Tournament Status#tourney' WHERE Text='Tournament Status' LIMIT 1;
+-----------
+
    * include/translation_functions.php (strip_translation_label),
      include/make_translationfiles.php (TRANS_ROW_PER_PAGE),
      translate.php (update_translation),
