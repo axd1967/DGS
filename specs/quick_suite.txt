@@ -167,7 +167,7 @@ The HTTP-Content-Type of the result is "application/json", except when the optio
 instead.
 
 
-#-------- (2c) Standard Reponse -----------------------------------------------
+#-------- (2c) Standard Response ----------------------------------------------
 
 The standard minimal response is a JSON-formatted text with a quick-suite-version
 and an error-code, there can be an optional 'error_msg' element:
@@ -218,7 +218,7 @@ IMPORTANT NOTE:
    in the response or its nested return objects.
 
 
-#-------- (2d) List Reponse ---------------------------------------------------
+#-------- (2d) List Response --------------------------------------------------
 
 The quick-suite can also return list of object entries. In this case, the result
 always contains several mandatory and some optional standard fields:
@@ -1248,7 +1248,7 @@ Request:
    quick_do.php?obj=contact&cmd=<COMMAND>
 
    # list
-   quick_do.php?obj=contact&cmd=list&lstyle=<LIST_STYLE>
+   quick_do.php?obj=contact&cmd=list&with=<WITH>&lstyle=<LIST_STYLE>
 
 Options:
 
@@ -1256,12 +1256,17 @@ Options:
 
    <LIST_STYLE> = see list-style in section (2d)
 
+   <WITH> = optional with-option to deep-load recursive data (see commands)
+
 
 Commands:
 
    "list" : returns list of contacts
       - required opts: -
-      - optional opts: LIST_STYLE
+      - optional opts: WITH, LIST_STYLE
+
+      - WITH-option:
+         - 'user_id' : returns additional user_id-data (see example below) for contact-user
 
       - Errors:
          - all errors of: [E-LOGIN], [E-GEN]
@@ -1280,6 +1285,7 @@ Commands:
                      "handle" : "guest",  # USER_HANDLE
                      "name" : "Guest",    # user name
                      # for the following fields -> see "info"-command for user-object (3b)
+                     # the following fields only if WITH-option contain 'user_id'
                      "type" : "",
                      "country" : "se",
                      "picture" : "",
@@ -2451,6 +2457,7 @@ in use (JAP=Japanese, CAN=Canadian, FIS=Fischer-time):
 
 
 * Format of [TR] Time-remaining:
+//TODO TODO TODO sync with current time-formats !!!
 
    - some basic formats:
       - "TYPE: 0h" = all time is up for all types TYPE=J|C|F = no remaining time

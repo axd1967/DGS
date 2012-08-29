@@ -119,14 +119,17 @@ class QuickHandlerContact extends QuickHandler
    {
       $urow = $contact->contact_user_row;
       $out = $this->build_obj_user( $contact->cid, array( $contact->cid => $urow ), '', /*always*/true );
-      $out['type'] = QuickHandlerUser::convertUserType($urow['Type']);
-      $out['country'] = $urow['Country'];
-      $out['picture'] = $urow['UserPicture'];
-      $out['last_access'] = QuickHandler::formatDate($urow['X_Lastaccess']);
-      $out['last_move'] = QuickHandler::formatDate($urow['X_LastMove']);
-      $out['rating_status'] = strtoupper($urow['RatingStatus']);
-      $out['rating'] = echo_rating($urow['Rating2'], 1, 0, true, 1);
-      $out['rating_elo'] = echo_rating_elo($urow['Rating2']);
+      if( $this->is_with_option(QWITH_USER_ID) )
+      {
+         $out['type'] = QuickHandlerUser::convertUserType($urow['Type']);
+         $out['country'] = $urow['Country'];
+         $out['picture'] = $urow['UserPicture'];
+         $out['last_access'] = QuickHandler::formatDate($urow['X_Lastaccess']);
+         $out['last_move'] = QuickHandler::formatDate($urow['X_LastMove']);
+         $out['rating_status'] = strtoupper($urow['RatingStatus']);
+         $out['rating'] = echo_rating($urow['Rating2'], 1, 0, true, 1);
+         $out['rating_elo'] = echo_rating_elo($urow['Rating2']);
+      }
       return $out;
    }//build_obj_contact_user
 
