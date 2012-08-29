@@ -44,7 +44,8 @@ define('QCMD_LIST', 'list');  // retrieve list of objects
 define('QOPT_WITH', 'with');  // recursive (=deep-) loading of some objects
 define('QOPT_TEST', 'test');  // output JSON in "plain/text" content-type
 define('QOPT_LIST_STYLE', 'lstyle');  // output-style for result-list: table (=default) | json
-define('QUICK_STD_OPTIONS', 'obj|cmd|test|lstyle|with');
+define('QOPT_FIELDS', 'fields');  // filter fields in result: '' (=default=all-fields) | name1,name2,...
+define('QUICK_STD_OPTIONS', 'obj|cmd|test|lstyle|with|fields');
 
 // with-options
 define('QWITH_USER_ID', 'user_id'); // include user-id user-fields: id, handle, name
@@ -114,6 +115,7 @@ class QuickHandler
    var $quick_object;
    var $with_option;
    var $list_style_option;
+   var $rx_keep_fields; // regex with varnames to keep; or empty (=all fields)
 
    function QuickHandler( $quick_object )
    {
@@ -121,19 +123,37 @@ class QuickHandler
       $this->my_id = (int)$player_row['ID'];
       $this->quick_object = $quick_object;
 
+      // parse option: with
       $this->with_option = array();
       $with_arr = explode(',', @$_REQUEST[QOPT_WITH]);
       foreach( $with_arr as $opt )
          $this->with_option[$opt] = 1;
 
+      // parse option: lstyle
       $this->list_style_option = @$_REQUEST[QOPT_LIST_STYLE];
       if( $this->list_style_option != QLIST_STYLE_JSON && $this->list_style_option != QLIST_STYLE_TABLE )
          $this->list_style_option = QLIST_STYLE_TABLE;
+
+      // parse option: fields
+      $field_opt = @$_REQUEST[QOPT_FIELDS];
+      if( (string)$field_opt == '' )
+         $this->rx_keep_fields = '';
+      else
+      {
+         static $RXK = '[a-z_][a-z0-9_]*\\*?'; // varname (with optional *-suffix)
+         if( !preg_match("/^$RXK(|(,$RXK)+)$/", $field_opt) ) // lower-case only
+            error('invalid_args', "QuickHandler.opt.fields.bad_syntax($field_opt)");
+         $rx_fields = str_replace('*', '.*', str_replace(',', '|', $field_opt)); // , * -> | .*
+         $this->rx_keep_fields = "/^(version|error.*|quota_.+|list_.+|id|$rx_fields)$/"; // +std-fields
+      }
    }
 
-   function getResult()
+   /*! \brief Returns result (processed to keep only expected fields). */
+   function getProcessedResult()
    {
-      return $this->quick_object->getResult();
+      if( $this->quick_object->cmd != QCMD_LIST )
+         $this->clear_unexpected_fields( $this->quick_object->result );
+      return $this->quick_object->result;
    }
 
    function addResultKey( $key, $value )
@@ -230,19 +250,44 @@ class QuickHandler
       $this->addResultKey( 'list_has_next', 0);
       $this->addResultKey( 'list_order', $ordered_by );
 
+      // build "processed" list
       if( count($list) && $this->check_list_style() ) // list-style = table
       {
+         $this->addResultKey( 'list_header',
+            QuickHandler::buildObjectArray( $list[0], /*keys*/true, $this->rx_keep_fields ) );
+
          $out = array();
          foreach( $list as $item )
-            $out[] = QuickHandler::buildObjectArray( $item, /*keys*/false );
-
-         $this->addResultKey( 'list_header',
-            QuickHandler::buildObjectArray( $list[0], /*keys*/true ) );
-         $this->addResultKey( 'list_result', $out );
+            $out[] = QuickHandler::buildObjectArray( $item, /*keys*/false, $this->rx_keep_fields );
       }
       else // list-style = json
-         $this->addResultKey( 'list_result', $list );
+      {
+         if( $this->rx_keep_fields )
+         {
+            $out = array();
+            foreach( $list as $elem )
+            {
+               $this->clear_unexpected_fields( $elem );
+               $out[] = $elem;
+            }
+         }
+         else
+            $out = $list;
+      }
+      $this->addResultKey( 'list_result', $out );
    }//add_list
+
+   function clear_unexpected_fields( &$arr )
+   {
+      if( $this->rx_keep_fields )
+      {
+         foreach( $arr as $key => $val )
+         {
+            if( !preg_match($this->rx_keep_fields, $key) )
+               unset($arr[$key]);
+         }
+      }
+   }
 
 
    // ---------- Interface ----------------------------------------
@@ -306,26 +351,32 @@ class QuickHandler
 
    /*!
     * \brief Converts object into flat array for keys (get_keys=true) or values (get_keys=false).
+    * \param $get_keys true (=return only keys of structure), false (=return keys + vars converted)
+    * \param $rx_keep_fields '' (=return all fields), otherwise regex with key-names to keep
     * \note Only works correctly, if all map-entries (key+value) are set in object,
     *       especially if this method is used to convert a list of objects.
     */
-   function buildObjectArray( $obj, $get_keys, $prefix='' )
+   function buildObjectArray( $obj, $get_keys, $rx_keep_fields='', $prefix='' )
    {
       $out = array();
       foreach( array_keys($obj) as $key )
       {
+         $pkey = $prefix.$key;
+         if( $rx_keep_fields && !preg_match($rx_keep_fields, $pkey) )
+            continue;
+
          $val = $obj[$key];
          if( is_array($val) )
          {
-            $arr = QuickHandler::buildObjectArray($val, $get_keys, "$prefix$key.");
+            $arr = QuickHandler::buildObjectArray($val, $get_keys, $rx_keep_fields, $pkey.'.' );
             foreach( $arr as $elem )
                $out[] = $elem;
          }
          else
-            $out[] = ($get_keys) ? $prefix.$key : $val;
+            $out[] = ($get_keys) ? $pkey : $val;
       }
       return $out;
-   }
+   }//buildObjectArray
 
 } // end of 'QuickHandler'
 

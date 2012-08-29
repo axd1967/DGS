@@ -38,6 +38,7 @@ Topics:
       b. Request
       c. Standard Response
       d. List Response
+      e. Expected Fields
 
    3. Objects
       a. "game"     - playing a started game
@@ -301,6 +302,47 @@ Example for JSON-style:
          }
       ]
    }
+
+
+#-------- (2e) Expected Fields ------------------------------------------------
+
+Some of the commands can return a large amount of data-fields, though the client
+is not interested in all of them. To restrict the response to return only a certain
+list of fields, the standard-option 'fields' can be used. For example:
+
+   # command with field-restriction
+   quick_do.php?obj=user&cmd=info&user=guest&fields=handle,rat*
+
+   # the result would be for example:
+   Result (JSON) =
+      {
+         "version": "1.0.15:13",
+         "error": "",
+         "quota_count": 497,
+         "quota_expire": "2012-03-27 17:34:12"
+         "id" : 1,
+         "handle" : "guest",
+         "rating_status" : "RATED",
+         "rating" : "5k (+46%)",
+         "rating_elo" : "1643.88952636719",
+      }
+
+This works for "normal" objects and "list"-responses alike.
+
+The syntax for the 'fields'-option is:
+
+   - if option is omitted or empty (=''), all fields as given in the specs are returned
+   - if the option is given, only the specified and standard fields are returned,
+     standard-fields (always included) are:
+
+         version,error*,quota_*,list_*,id
+
+   - only the fields on the 1st level can be restricted, fields on (nested) sub-objects
+     can not be excluded
+   - fields-option contains a comma-separated list of either a field-name or a field-regex.
+     field-regex can contain '*' at the end of the field-name matching all fields
+     starting with the given prefix
+
 
 
 #-------- (3) Objects ---------------------------------------------------------

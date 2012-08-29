@@ -45,7 +45,7 @@ else
    $quick_handler->parseURL(); // get args from URL
    $quick_handler->prepare();
    $quick_handler->process();
-   $result = $quick_handler->getResult();
+   $result = $quick_handler->getProcessedResult();
 
    // output HTTP-header
    if( get_request_arg(QOPT_TEST) )
