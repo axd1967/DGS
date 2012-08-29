@@ -296,5 +296,24 @@ class Waitingroom
       return ($row) ? Waitingroom::new_from_row($row) : NULL;
    }
 
+   /*! \brief Returns enhanced (passed) ListIterator with Waitingroom-objects. */
+   function load_waitingroom_entries( $qsql, $iterator )
+   {
+      $iterator->setQuerySQL( $qsql );
+      $query = $iterator->buildQuery();
+      $result = db_query( "Waitingroom::load_waitingroom_entries", $query );
+      $iterator->setResultRows( mysql_num_rows($result) );
+
+      $iterator->clearItems();
+      while( $row = mysql_fetch_array( $result ) )
+      {
+         $survey = Waitingroom::new_from_row( $row );
+         $iterator->addItem( $survey, $row );
+      }
+      mysql_free_result($result);
+
+      return $iterator;
+   }
+
 } // end of 'Waitingroom'
 ?>

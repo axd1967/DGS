@@ -36,7 +36,7 @@ require_once 'include/message_functions.php';
 define('WROOMCMD_DELETE', 'delete');
 define('WROOMCMD_JOIN', 'join');
 define('WROOMCMD_NEW_GAME', 'new_game'); //TODO impl
-define('WROOM_COMMANDS', 'info|delete|join');
+define('WROOM_COMMANDS', 'info|list|delete|join');
 
 
  /*!
@@ -48,6 +48,7 @@ class QuickHandlerWaitingroom extends QuickHandler
 {
    var $wroom_id;
    var $wroom;
+   var $wroom_iterator;
    var $suitable;
 
    function QuickHandlerWaitingroom( $quick_object )
@@ -56,6 +57,7 @@ class QuickHandlerWaitingroom extends QuickHandler
 
       $this->wroom_id = 0;
       $this->wroom = null;
+      $this->wroom_iterator = null;
       $this->suitable = false; // allow all waiting-room-entries
    }
 
@@ -83,7 +85,7 @@ class QuickHandlerWaitingroom extends QuickHandler
       $this->checkCommand( $dbgmsg, WROOM_COMMANDS );
       $cmd = $this->quick_object->cmd;
 
-      // prepare command: list, info, delete, join
+      // prepare command: info, delete, join, list
 
       if( $cmd == QCMD_INFO || $cmd == WROOMCMD_DELETE || $cmd == WROOMCMD_JOIN )
       {
@@ -99,9 +101,14 @@ class QuickHandlerWaitingroom extends QuickHandler
          if( is_null($this->wroom) )
             error('unknown_entry', "$dbgmsg.load_wroom({$this->wroom_id})");
       }
-
-      // check for invalid-action
-
+      elseif( $cmd == QCMD_LIST )
+      {
+         $qsql = WaitingroomControl::build_waiting_room_query( 0, $this->suitable );
+         $this->add_query_limits( $qsql, /*calc-rows*/true );
+         $iterator = new ListIterator("$dbgmsg.list");
+         $this->wroom_iterator = Waitingroom::load_waitingroom_entries( $qsql, $iterator );
+         $this->read_found_rows();
+      }
    }//prepare
 
    /*! \brief Processes command for object; may fire error(..) and perform db-operations. */
@@ -109,16 +116,33 @@ class QuickHandlerWaitingroom extends QuickHandler
    {
       $cmd = $this->quick_object->cmd;
       if( $cmd == QCMD_INFO )
-         $this->process_cmd_info();
+         $this->fill_wroom_object( $this->quick_object->result, $this->wroom );
+      elseif( $cmd == QCMD_LIST )
+         $this->process_cmd_list();
       elseif( $cmd == WROOMCMD_DELETE )
          WaitingroomControl::delete_waitingroom_game( $this->wroom_id );
       elseif( $cmd == WROOMCMD_JOIN )
          WaitingroomControl::join_waitingroom_game( $this->wroom_id );
    }
 
-   function process_cmd_info()
+   function process_cmd_list()
    {
-      $wr = $this->wroom;
+      $out = array();
+      if( !is_null($this->wroom_iterator) )
+      {
+         while( list(,$arr_item) = $this->wroom_iterator->getListIterator() )
+         {
+            list( $wr, $wrow ) = $arr_item;
+            $arr = array();
+            $this->fill_wroom_object( $arr, $wr );
+            $out[] = $arr;
+         }
+      }
+      $this->add_list( QOBJ_WROOM, $out, 'user.rating-,user.handle+' );
+   }//process_cmd_list
+
+   function fill_wroom_object( &$result, $wr )
+   {
       $wro = new WaitingroomOffer( $wr->wrow );
       $wro->calculate_offer_settings(); // probable game settings
       $user_rows = array( $wr->uid => $wr->User->urow );
@@ -132,51 +156,52 @@ class QuickHandlerWaitingroom extends QuickHandler
       if( $restrictions == NO_VALUE )
          $restrictions = '';
 
-      $this->addResultKey('id', $wr->ID );
-      $this->addResultKey('user', $this->build_obj_user($wr->uid, $user_rows, 'country,rating') );
-      $this->addResultKey('created_at', QuickHandler::formatDate($wr->Created) );
-      $this->addResultKey('count_offers', $wr->CountOffers );
-      $this->addResultKey('comment', $wr->Comment );
+      $result['id'] = $wr->ID;
+      $result['user'] = $this->build_obj_user($wr->uid, $user_rows, 'country,rating');
+      $result['created_at'] = QuickHandler::formatDate($wr->Created);
+      $result['count_offers'] = $wr->CountOffers;
+      $result['comment'] = $wr->Comment;
 
       // game-settings
-      $this->addResultKey('game_type', $wr->GameType );
-      $this->addResultKey('game_players', $wr->GamePlayers );
-      $this->addResultKey('handicap_type', strtolower($wr->Handicaptype) );
-      $this->addResultKey('shape_id', $wr->ShapeID );
+      $result['game_type'] = $wr->GameType;
+      $result['game_players'] = $wr->GamePlayers;
+      $result['handicap_type'] = strtolower($wr->Handicaptype);
+      $result['shape_id'] = $wr->ShapeID;
 
-      $this->addResultKey('rated', ( $wr->Rated ) ? 1 : 0 );
-      $this->addResultKey('ruleset', strtoupper($wr->Ruleset) );
-      $this->addResultKey('size', $wr->Size );
-      $this->addResultKey('komi', $wr->Komi );
-      $this->addResultKey('jigo_mode', strtoupper($wr->JigoMode) );
-      $this->addResultKey('handicap', $wr->Handicap );
-      $this->addResultKey('handicap_mode', ( $wr->StdHandicap ) ? 'STD' : 'FREE' );
+      $result['rated'] = ( $wr->Rated ) ? 1 : 0;
+      $result['ruleset'] = strtoupper($wr->Ruleset);
+      $result['size'] = $wr->Size;
+      $result['komi'] = $wr->Komi;
+      $result['jigo_mode'] = strtoupper($wr->JigoMode);
+      $result['handicap'] = $wr->Handicap;
+      $result['handicap_mode'] = ( $wr->StdHandicap ) ? 'STD' : 'FREE';
 
-      $this->addResultKey('adjust_komi', $wr->AdjKomi );
-      $this->addResultKey('adjust_handicap', $wr->AdjHandicap );
-      $this->addResultKey('min_handicap', $wr->MinHandicap );
-      $this->addResultKey('max_handicap', $wr->MaxHandicap );
+      $result['adjust_komi'] = $wr->AdjKomi;
+      $result['adjust_handicap'] = $wr->AdjHandicap;
+      $result['min_handicap'] = $wr->MinHandicap;
+      $result['max_handicap'] = $wr->MaxHandicap;
 
-      $this->addResultKey('time_weekend_clock', ( $wr->WeekendClock ) ? 1 : 0 );
-      $this->addResultKey('time_mode', strtoupper($wr->Byotype) );
-      $this->addResultKey('time_limit', $time_limit );
-      $this->addResultKey('time_main', $wr->Maintime );
-      $this->addResultKey('time_byo', $wr->Byotime );
-      $this->addResultKey('time_periods', $wr->Byoperiods );
+      $result['time_weekend_clock'] = ( $wr->WeekendClock ) ? 1 : 0;
+      $result['time_mode'] = strtoupper($wr->Byotype);
+      $result['time_limit'] = $time_limit;
+      $result['time_main'] = $wr->Maintime;
+      $result['time_byo'] = $wr->Byotime;
+      $result['time_periods'] = $wr->Byoperiods;
 
-      $this->addResultKey('can_join', ( !$wro->is_my_game() && $joinable ? 1 : 0 ) );
-      $this->addResultKey('restrictions', $restrictions );
-      $this->addResultKey('opp_started_games', $opp_started_games );
+      $result['can_join'] = ( !$wro->is_my_game() && $joinable ) ? 1 : 0;
+      $result['restrictions'] = $restrictions;
+      $result['opp_started_games'] = $opp_started_games;
 
-      $this->addResultKey('calc_type', $wro->resultType );
-      $this->addResultKey('calc_color', $wro->resultColor );
+      $result['calc_type'] = $wro->resultType;
+      $result['calc_color'] = $wro->resultColor;
+      $result['calc_handicap'] = $result['calc_komi'] = ''; // needed for LIST-cmd
       if( ($wro->resultType == 1 || $wro->resultType == 2) && $wro->resultColor )
       {
-         $this->addResultKey('calc_handicap', $wro->resultHandicap );
+         $result['calc_handicap'] = $wro->resultHandicap;
          if( $wro->resultColor != 'fairkomi' )
-            $this->addResultKey('calc_komi', $wro->resultKomi );
+            $result['calc_komi'] = $wro->resultKomi;
       }
-   }//process_cmd_info
+   }//fill_wroom_object
 
 
    // ------------ static functions ----------------------------

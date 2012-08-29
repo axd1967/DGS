@@ -37,8 +37,9 @@ Topics:
       a. Login & Logout
       b. Request
       c. Standard Response
-      d. List Request & Response
-      e. Expected Fields
+      d. List Response
+      e. Standard Request Parameters
+      f. Expected Fields
 
    3. Objects
       a. "game"     - playing a started game
@@ -72,11 +73,14 @@ Topics:
 
 #############  TODO TODO TODO  ###############
 
-Issues to specify:
+Issues to specify (see also section (8)):
+
    - how to handle DGS-tags in text (messages/posts/etc) on client-side ?
-   - how to control paging of lists (offset, limit, has_next)
-   - charsets, see http://www.dragongoserver.net/forum/read.php?forum=10&thread=27755#29511
-   - refactor error-codes, see section (5) !?
+
+   - charsets / encoding / utf-8:
+      - see http://www.dragongoserver.net/forum/read.php?forum=10&thread=27755#29511
+      - see http://www.dragongoserver.net/forum/read.php?forum=10&thread=27755#33564
+      - see http://www.dragongoserver.net/forum/read.php?forum=10&thread=27755#33772
 
    - fair-komi negotiation for game-status KOMI
 
@@ -335,7 +339,22 @@ Example for JSON-style:
    }
 
 
-#-------- (2e) Expected Fields ------------------------------------------------
+#-------- (2e) Standard Request Parameters ------------------------------------
+
+For the 'list'-command for all objects there are a bunch of standard list-parameters,
+that can always be used and are therefore not enlisted in the parameter-list for the
+respective commands in the object-specs below:
+
+   - 'limit'   = see section (2d), limits number of returned entries
+   - 'off'     = see section (2d), start position for paginating entries
+   - 'lstyle'  = see section (2d), list-output-style
+
+Additional standard parameters that are available for other objects and commands:
+
+   - 'test'    = see section (2b), header-type of response
+
+
+#-------- (2f) Expected Fields ------------------------------------------------
 
 Some of the commands can return a large amount of data-fields, though the client
 is not interested in all of them. To restrict the response to return only a certain
@@ -423,7 +442,7 @@ Request:
    quick_do.php?obj=game&cmd=<COMMAND>&gid=<GAME_ID>&move_id=<MOVE_ID>&move=<MOVES>&msg=<MESSAGE>&with=<WITH>&fmt=<FORMAT>&toggle=<TOGGLE>&agree=<AGREE>
 
    # list
-   quick_do.php?obj=game&cmd=list&view=<VIEW>&with=<WITH>&lstyle=<LIST_STYLE>&uid=<USER_ID>
+   quick_do.php?obj=game&cmd=list&view=<VIEW>&with=<WITH>&uid=<USER_ID>
 
 Options:
 
@@ -490,8 +509,6 @@ Options:
 
       - NOTE: agreement could be represented by an empty MOVES-argument, but to prevent "slip"
         in client, it's specified explicitly by giving the AGREE-argument.
-
-   <LIST_STYLE> = see list-style in section (2d)
 
    <USER_ID> = integer | 'mine'
       - user-id (integer)
@@ -597,7 +614,7 @@ Commands:
    # NOT IMPLEMENTED: to-specify (TODO)
    "list" : retrieve list of games
       - required opts: VIEW
-      - optional opts: USER_ID, LIST_STYLE, WITH
+      - optional opts: USER_ID, WITH
 
       - VIEW-option:
          - 'status'    : ask for running games where to move in for given USER_ID
@@ -912,7 +929,7 @@ Request:
    quick_do.php?obj=message&cmd=<COMMAND>&mid=<MESSAGE_ID>&ouid=<OTHER_UID>&ouser=<OTHER_HANDLE>&subj=<SUBJECT>&msg=<MESSAGE>&folder=<FOLDER>&with=<WITH>
 
    # list
-   quick_do.php?obj=message&cmd=list&with=<WITH>&lstyle=<LIST_STYLE>
+   quick_do.php?obj=message&cmd=list&with=<WITH>
 
 Options:
 
@@ -941,8 +958,6 @@ Options:
    <FOLDER> = integer
       - target folder
       - standard folders: 1=MAIN, 2=NEW, 3=REPLY, 4=TRASHCAN, 5=SENT
-
-   <LIST_STYLE> = see list-style in section (2d)
 
    <WITH> = optional with-option to deep-load recursive data (see commands)
 
@@ -1134,7 +1149,7 @@ Commands:
    # NOT fully IMPLEMENTED: to-specify (filter) (TODO)
    "list" : retrieve list of messages
       - required opts: -
-      - optional opts: LIST_STYLE, WITH, FILTERS (TODO)
+      - optional opts: WITH, FILTERS (TODO)
 
       - to-specify (TODO): limit, offset, order, filters
          - FILTERS-args:
@@ -1217,20 +1232,18 @@ Request:
    quick_do.php?obj=folder&cmd=<COMMAND>
 
    # list
-   quick_do.php?obj=folder&cmd=list&lstyle=<LIST_STYLE>
+   quick_do.php?obj=folder&cmd=list
 
 Options:
 
    <COMMAND> = "list"
-
-   <LIST_STYLE> = see list-style in section (2d)
 
 
 Commands:
 
    "list" : returns list of message-folders in natural order
       - required opts: -
-      - optional opts: LIST_STYLE
+      - optional opts: -
 
       - NOTES:
          - all folders of user are returned; std-options <LIMIT> and <OFFSET> have no effect
@@ -1284,13 +1297,11 @@ Request:
    quick_do.php?obj=contact&cmd=<COMMAND>
 
    # list
-   quick_do.php?obj=contact&cmd=list&with=<WITH>&lstyle=<LIST_STYLE>
+   quick_do.php?obj=contact&cmd=list&with=<WITH>
 
 Options:
 
    <COMMAND> = "list"
-
-   <LIST_STYLE> = see list-style in section (2d)
 
    <WITH> = optional with-option to deep-load recursive data (see commands)
 
@@ -1299,7 +1310,7 @@ Commands:
 
    "list" : returns list of contacts
       - required opts: -
-      - optional opts: WITH, LIST_STYLE
+      - optional opts: WITH
 
       - WITH-option:
          - 'user_id' : returns additional user_id-data (see example below) for contact-user
@@ -1371,52 +1382,26 @@ Request:
 
    quick_do.php?obj=wroom&cmd=<COMMAND>&wrid=<WROOM_ID>
 
-   quick_do.php?obj=wroom&cmd=list&with=<WITH>&lstyle=<LIST_STYLE>
+   # list
+   quick_do.php?obj=wroom&cmd=list&with=<WITH>
 
 Options:
 
-   <COMMAND> = "list" | "info" | "delete" | "join" | "new_game"
+   <COMMAND> = "info" | "list" | "delete" | "join" | "new_game"
 
    <WROOM_ID> = id of waiting-room-entry
 
    <WITH> = optional with-option to deep-load recursive data (see commands)
 
-   <LIST_STYLE> = see list-style in section (2d)
-
 
 Commands:
-
-   # NOT IMPLEMENTED: to-specify (TODO)
-   "list" : returns list of suitable game-offers from waiting-room
-      - required opts: VIEW
-      - optional opts: USER_ID, LIST_STYLE, WITH
-
-      - Errors:
-         - all errors of: [E-LOGIN], [E-GEN]
-
-      - Result (JSON) = // also see specs/db/table-Waitingroom.txt
-
-         {
-            "list_object" : "wroom",
-            "list_totals": -1,
-            "list_size" : 3,
-            "list_offset" : 0,
-            "list_limit" : 0,
-            "list_order" : "", # TODO order of list + direction '+|-' (field-names, comma-separated), ""=standard-order
-            "list_result" : [
-               {
-                  "id" : 123, # waiting-room-id
-               },
-               ...
-            ]
-         }
 
    "info" : returns information on single game-offer from waiting-room
       - required opts: WROOM_ID
       - optional opts: WITH
 
       - WITH-option:
-         - 'user_id' : additionally return user_id-data (handle + name) for message correspondent
+         - 'user_id' : return additional user_id-data of game-offerer
 
       - Errors:
          - all errors of: [E-LOGIN], [E-GEN]
@@ -1487,9 +1472,39 @@ Commands:
             "calc_color" : "black",    # probable/fix color of logged-in user: '' | mpg | double | fairkomi | nigiri | black | white
                                        #    '' (=empty) if color cannot be determined (e.g. if users are not rated for conventional-handicap)
 
-            # the next two fields are only set if calc_type is 1 or 2 AND calc_color is not empty:
+            # the next two fields are '' (empty = non-int/float), if calc_type is 0 or 3 or 'calc_color' is empty:
             "calc_handicap" : 3,       # probable/fix handicap
             "calc_komi" : 6.5,         # probably/fix komi, field omitted for fair-komi
+         }
+
+   # NOT IMPLEMENTED: filters (suitable) is not handled for 'info' <-> 'list' (TODO)
+   "list" : returns list of all game-offers from waiting-room
+      - optional opts: WITH
+
+      - WITH-option:
+         - 'user_id' : return additional user_id-data of game-offerer
+
+      - Errors:
+         - all errors of: [E-LOGIN], [E-GEN]
+
+      - Result (JSON) = // also see specs/db/table-Waitingroom.txt
+
+         {
+            "list_object" : "wroom",
+            "list_totals": -1,
+            "list_size" : 3,
+            "list_offset" : 0,
+            "list_limit" : 0,
+            "list_order" : "user.rating-,user.handle+",  # std-order for waiting-room-list
+            "list_result" : [
+               # each list-element looks like the output for the "info"-command without the std-fields
+               {
+                  "id" : 123, # waiting-room-id
+                  "user" ...
+                  ...
+               },
+               ...
+            ]
          }
 
    "delete" : deletes own game-offer from waiting-room
@@ -1555,7 +1570,7 @@ Request:
    quick_do.php?obj=bulletin&cmd=<COMMAND>&bid=<BULLETIN_ID>
 
    # list
-   quick_do.php?obj=bulletin&cmd=list&with=<WITH>&lstyle=<LIST_STYLE>
+   quick_do.php?obj=bulletin&cmd=list&with=<WITH>
 
 Options:
 
@@ -1565,13 +1580,11 @@ Options:
 
    <WITH> = optional with-option to deep-load recursive data (see commands)
 
-   <LIST_STYLE> = see list-style in section (2d)
-
 
 Commands:
 
    "list" : returns list of unread bulletins
-      - optional opts: LIST_STYLE, WITH
+      - optional opts: WITH
 
       - WITH-option:
          - 'user_id' : additionally return user_id-data (handle + name) for author
