@@ -38,8 +38,9 @@ Topics:
       b. Request
       c. Standard Response
       d. List Response
-      e. Standard Request Parameters
+      e. Filtered Response
       f. Expected Fields
+      g. Standard Request Parameters
 
    3. Objects
       a. "game"     - playing a started game
@@ -339,19 +340,29 @@ Example for JSON-style:
    }
 
 
-#-------- (2e) Standard Request Parameters ------------------------------------
+#-------- (2e) Filtered Response ----------------------------------------------
 
-For the 'list'-command for all objects there are a bunch of standard list-parameters,
-that can always be used and are therefore not enlisted in the parameter-list for the
-respective commands in the object-specs below:
+The web-site provide a standard way using filters on the lists of the various
+table-rows to restrict the returned data. To allow restricting the data-queries
+for the quick-suite as well, though only with the defined set of filters as
+specified in this spec for the different objects.
 
-   - 'limit'   = see section (2d), limits number of returned entries
-   - 'off'     = see section (2d), start position for paginating entries
-   - 'lstyle'  = see section (2d), list-output-style
+A filter can be provided by giving a URL-argument starting with a 'filter_'-prefix.
+The available filters for the quick-suite objects are described for the different
+commands as:
 
-Additional standard parameters that are available for other objects and commands:
+   quick_do.php?... &filter_...=<FILTER>
 
-   - 'test'    = see section (2b), header-type of response
+   - FILTER-option:
+      - 'filter_NAME=VAL' :
+
+NAME stands for the name of the filter.
+For example see the 'list'-command for the 'wroom'-object:
+
+   - 'filter_suitable=VAL' : suitable-filter
+
+Such a filter normally has a correspondence on the web-site to make the quick-suite
+behave similar like the web-site.
 
 
 #-------- (2f) Expected Fields ------------------------------------------------
@@ -392,6 +403,23 @@ The syntax for the 'fields'-option is:
    - fields-option contains a comma-separated list of either a field-name or a field-regex.
      field-regex can contain '*' at the end of the field-name matching all fields
      starting with the given prefix
+
+
+#-------- (2g) Standard Request Parameters ------------------------------------
+
+For the 'list'-command for all objects there are a bunch of standard list-parameters,
+that can always be used and are therefore not enlisted in the parameter-list for the
+respective commands in the object-specs below:
+
+   - 'limit'         = see section (2d), limits number of returned entries
+   - 'off'           = see section (2d), start position for paginating entries
+   - 'lstyle'        = see section (2d), list-output-style
+
+Additional standard parameters that are available for other objects and commands:
+
+   - 'filter_...'    = see section (2e), restrict query by certain select-criteria
+   - 'fields'        = see section (2f), return only certain fields
+   - 'test'          = see section (2b), header-type of response
 
 
 
@@ -1383,13 +1411,15 @@ Request:
    quick_do.php?obj=wroom&cmd=<COMMAND>&wrid=<WROOM_ID>
 
    # list
-   quick_do.php?obj=wroom&cmd=list&with=<WITH>
+   quick_do.php?obj=wroom&cmd=list&with=<WITH>&filter_...=<FILTER>
 
 Options:
 
    <COMMAND> = "info" | "list" | "delete" | "join" | "new_game"
 
    <WROOM_ID> = id of waiting-room-entry
+
+   <FILTER> = optional filter-options (see commands)
 
    <WITH> = optional with-option to deep-load recursive data (see commands)
 
@@ -1464,8 +1494,12 @@ Commands:
             "time_byo" : 225,          # time-limit byo-time [1 unit = 1 hour, 15 hour = 1 DGS-day]; extra-time for Fischer-time
             "time_periods" : 8,        # time-limit byo-periods: periods (for JAP), stones (for CAN), unused (=0, for FIS)
 
-            "can_join" : 1,            # 1=game-offer can be joined, 0=can not be joined (because your own or unsuitable)
-            "restrictions" : "",       # empty = no restrictions (offer can be joined); non-empty = info-string with restrictions
+            "restrictions" : "",       # empty = no restrictions defined for game-offer; non-empty = info-string with restrictions.
+                                       #    despite having restrictions, a game-offer may be joinable (e.g. for hidden entries)
+            "join" : 1,                # 1=game-offer can be joined, 0=can not be joined (because your own or unsuitable)
+            "join_warn" : "",          # if not-empty, contains warning about joining (about max-games reached soon)
+            "join_err" : "",           # if not-empty, contains error-reasons why joining not possible (e.g. max-games reached,
+                                       #    MPG already joined, opponents max-games reached)
             "opp_started_games" : 0,   # number of games already started with opponent
             "calc_type" : 1,           # quality of setings: 0=own-game-offer, 1=probable-setting (conv/proper depends on rating),
                                        #    2=fix-calculated, 3=MPG (color/handicap/komi set by game-master)
@@ -1477,9 +1511,13 @@ Commands:
             "calc_komi" : 6.5,         # probably/fix komi, field omitted for fair-komi
          }
 
-   # NOT IMPLEMENTED: filters (suitable) is not handled for 'info' <-> 'list' (TODO)
    "list" : returns list of all game-offers from waiting-room
-      - optional opts: WITH
+      - optional opts: FILTER, WITH
+
+      - FILTER-options:
+         - 'filter_suitable=VAL' :
+            - VAL = '1' : only finding suitable game-offers (default)
+            - VAL = '0' : find all game-offers
 
       - WITH-option:
          - 'user_id' : return additional user_id-data of game-offerer
@@ -1497,15 +1535,29 @@ Commands:
             "list_limit" : 0,
             "list_order" : "user.rating-,user.handle+",  # std-order for waiting-room-list
             "list_result" : [
-               # each list-element looks like the output for the "info"-command without the std-fields
+               # each list-element looks like the output for the "info"-command (without the std-fields),
+               # except for the fields mentioned below in "Exception Notes"
                {
                   "id" : 123, # waiting-room-id
-                  "user" ...
                   ...
                },
                ...
             ]
          }
+
+         - Exception Notes:
+            - Field 'join' : this field is included, but shows only the result of general checks.
+              The more precise checks are only done for the 'info'-command as they would be
+              too expensive for a list of elements. So if the value is "0" the offer can for
+              sure NOT be joined, but if the value is "1" it can still be that the offer
+              is not joinable. But this can only happen if the users max-games have been reached.
+
+            - Field 'join_warn' and 'join_err' : these fields are only included for the 'info'-command.
+              They contain reasons and warnings based on the detail-checks for the 'join'-field,
+              and are therefore not included for the 'list'-command as well.
+
+            - Field 'opp_started_games' : this field is not included for the 'list'-command,
+              because it is too expensive to be caclculated for a list.
 
    "delete" : deletes own game-offer from waiting-room
       - required opts: WROOM_ID

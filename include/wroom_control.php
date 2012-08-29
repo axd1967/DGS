@@ -114,7 +114,7 @@ class WaitingroomControl
       $qsql->add_part( SQLP_HAVING,
          'C_denied=0' );
 
-      // Contacts: hide unwanted user-offers
+      // Contacts: hide unwanted user-offers (though still joinable)
       $qsql->add_part( SQLP_FIELDS,
          "IF(ISNULL(CH.uid),0,CH.SystemFlags & ".CSYSFLAG_WR_HIDE_GAMES.") AS CH_hidden" );
       $qsql->add_part( SQLP_FROM,
@@ -135,9 +135,9 @@ class WaitingroomControl
    {
       $restrictions = echo_game_restrictions( $row['MustBeRated'], $row['RatingMin'], $row['RatingMax'],
             $row['MinRatedGames'], $row['goodmaxgames'], $row['SameOpponent'],
-            ( !$suitable && @$row['CH_hidden'] ), /*short*/true, $html );
-      $joinable = ( $row['goodrating'] && $row['goodmingames'] && $row['goodmaxgames']
-         && $row['goodsameopp'] && !@$row['CH_hidden'] );
+            ( !$suitable && $row['CH_hidden'] ), /*short*/true, $html );
+      $joinable = ( $row['haverating'] && $row['goodrating'] && $row['goodmingames'] && $row['goodmaxgames']
+         && $row['goodsameopp'] && !$row['C_denied'] );
       return array( $restrictions, $joinable );
    }//get_waitingroom_restrictions
 
@@ -589,6 +589,66 @@ class WaitingroomOffer
 
       return $colstr;
    }//determine_color
+
+   function check_joining_waitingroom( $html )
+   {
+      global $player_row;
+      $my_id = $player_row['ID'];
+
+      $html_out = $join_warning = '';
+      $join_errors = array();
+
+      if( $this->row['GameType'] != GAMETYPE_GO ) // user can join mp-game only once
+         $can_join_mpg = !GamePlayer::exists_game_player( $this->row['gid'], $my_id );
+      else
+         $can_join_mpg = true;
+
+      $maxGamesCheck = new MaxGamesCheck();
+      $can_join_maxg = $maxGamesCheck->allow_game_start(); //own MAX-games
+
+      $can_join = $can_join_mpg && $can_join_maxg;
+      if( !$this->is_my_game() )
+      {
+         $html_out .= "<br>\n";
+
+         if( $can_join )
+         {
+            if( $html )
+               $html_out .= $maxGamesCheck->get_warn_text();
+            else
+               $join_warning = $maxGamesCheck->get_warn_text(/*html*/false);
+         }
+         elseif( !$can_join_maxg )
+         {
+            if( $html )
+               $html_out .= $maxGamesCheck->get_error_text() . "<br>\n" . $maxGamesCheck->get_warn_text();
+            else
+            {
+               $join_errors[] = $maxGamesCheck->get_error_text(/*html*/false);
+               $join_errors[] = $maxGamesCheck->get_warn_text(/*html*/false);
+            }
+         }
+         elseif( !$can_join_mpg )
+         {
+            $err_text = T_('Already invited to or joined this multi-player-game!');
+            if( $html )
+               $html_out .= span('MPGWarning', $err_text );
+            else
+               $join_errors[] = $err_text;
+         }
+
+         if( $can_join_mpg && !$this->row['goodmaxgames'] )
+         {
+            $err_text = ErrorCode::get_error_text('max_games_opp');
+            if( $html )
+               $html_out .= "<br>\n" . span('ErrMsgMaxGames', $err_text);
+            else
+               $join_errors[] = $err_text;
+         }
+      }
+
+      return array( $can_join, $html_out, $join_warning, implode(' / ', $join_errors) );
+   }//check_joining_waitingroom
 
 } // end of 'WaitingroomOffer'
 

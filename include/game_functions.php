@@ -2207,10 +2207,10 @@ class MaxGamesCheck
       }
    }
 
-   function get_error_text( $with_span=true )
+   function get_error_text( $html=true )
    {
       $msg = sprintf( T_('Sorry, you are not allowed to start more than %s games!'), MAX_GAMESRUN );
-      return ($with_span) ? span('ErrMsgMaxGames', $msg) : $msg;
+      return ($html) ? span('ErrMsgMaxGames', $msg) : $msg;
    }
 
    /*! \brief Returns true, if warning-threshold reached. */
@@ -2226,7 +2226,7 @@ class MaxGamesCheck
       return ( $this->count_games >= max(1, $warn_threshold) );
    }
 
-   function get_warn_text()
+   function get_warn_text( $html=true )
    {
       if( !$this->need_warning() )
          return '';
@@ -2237,7 +2237,7 @@ class MaxGamesCheck
             MaxGamesCheck::_MAX_GAMESRUN_TREG() );
 
       $class = ($this->count_games >= MAX_GAMESRUN) ? 'ErrMsg' : 'WarnMsg';
-      return span($class, $msg) . "<br><br>\n";
+      return ($html) ? span($class, $msg) . "<br><br>\n" : $msg;
    }
 
    function is_limited()

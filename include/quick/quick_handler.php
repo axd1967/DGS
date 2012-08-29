@@ -47,7 +47,7 @@ define('QOPT_LIST_STYLE', 'lstyle');  // output-style for result-list: table (=d
 define('QOPT_FIELDS', 'fields');  // filter fields in result: '' (=default=all-fields) | name1,name2,...
 define('QOPT_LIMIT', 'limit');  // max. number of rows to deliver for 'list'-command
 define('QOPT_OFFSET', 'off');  // starting row to page result for 'list'-command
-define('QUICK_STD_OPTIONS', 'obj|cmd|test|lstyle|with|fields|limit|off');
+define('QUICK_STD_OPTIONS', 'obj|cmd|test|lstyle|with|fields|limit|off|filter_\\w+');
 
 // with-options
 define('QWITH_USER_ID', 'user_id'); // include user-id user-fields: id, handle, name
@@ -117,6 +117,7 @@ class QuickHandler
 {
    var $my_id;
    var $quick_object;
+   var $filters; // [ name => value ]
 
    // from options: with, lstyle, fields, limit, off
    var $with;
@@ -133,6 +134,7 @@ class QuickHandler
       global $player_row;
       $this->my_id = (int)$player_row['ID'];
       $this->quick_object = $quick_object;
+      $this->filters = array();
 
       $this->_parse_options();
 
@@ -225,6 +227,22 @@ class QuickHandler
       {
          if( !isset($_COOKIE[$key]) && !preg_match($regex, $key) )
             error('invalid_args', "QuickHandler::checkArgsUnknown.unknown_arg($key,allowed=[$rx_chk_opts])");
+      }
+   }
+
+   function parseFilters( $rx_filters )
+   {
+      $regex = sprintf( "/^filter_(%s)\$/", $rx_filters );
+      $matches = array();
+      foreach( $_REQUEST as $key => $val )
+      {
+         if( strncmp($key, 'filter_', 7) )
+            continue;
+
+         if( !preg_match($regex, $key, $matches) )
+            error('invalid_args', "QuickHandler::parseFilters.unknown($key,allowed=[$rx_filters])");
+         $fkey = $matches[1];
+         $this->filters[$fkey] = $val;
       }
    }
 

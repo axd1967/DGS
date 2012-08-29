@@ -205,7 +205,7 @@ require_once( 'include/wroom_control.php' );
    if( !$idinfo )
       echo $maxGamesCheck->get_warn_text();
 
-   $info_row = NULL;
+   $info_row = $info_joinable = NULL;
    if( $show_rows > 0 || $wrfilter->has_query() )
    {
       while( ($row = mysql_fetch_assoc( $result )) && $show_rows-- > 0 )
@@ -216,10 +216,15 @@ require_once( 'include/wroom_control.php' );
          $is_fairkomi = $wro->is_fairkomi();
          extract($row); //including $calculated, $haverating, $goodrating, $goodmingames, $goodmaxgames, $goodsameopp, $X_Time
 
+         list( $restrictions, $joinable ) = WaitingroomControl::get_waitingroom_restrictions( $row, $suitable );
+
          if( $GameType != GAMETYPE_GO )
             $Handicaptype = HTYPEMP_MANUAL;
          if( $idinfo == (int)$ID )
+         {
             $info_row = $row;
+            $info_joinable = $joinable;
+         }
 
          $wrow_strings = array();
          if( $wrtable->Is_Column_Displayed[17] )
@@ -261,7 +266,6 @@ require_once( 'include/wroom_control.php' );
             $wrow_strings[ 7] = $Size;
          if( $wrtable->Is_Column_Displayed[ 8] )
          {
-            list( $restrictions, $joinable ) = WaitingroomControl::get_waitingroom_restrictions( $row, $suitable );
             $wrow_strings[ 8] = array( 'text' => $restrictions );
             if( !$joinable )
                $wrow_strings[ 8]['attbs']= warning_cell_attb( T_('Out of range'), true);
@@ -326,7 +330,7 @@ require_once( 'include/wroom_control.php' );
 
 
    if( @$show_info )
-      add_old_game_form( 'joingame', $info_row, $iamrated );
+      add_old_game_form( 'joingame', $info_row, $iamrated, $info_joinable );
 
 
    $menu_array = array();
@@ -338,9 +342,9 @@ require_once( 'include/wroom_control.php' );
 }
 
 
-function add_old_game_form( $form_id, $game_row, $iamrated )
+function add_old_game_form( $form_id, $game_row, $iamrated, $joinable )
 {
-   global $player_row, $maxGamesCheck;
+   global $player_row;
    static $ARR_COPY_FIELDS = array(
       'WRP_ID' => 'other_id',
       'WRP_Handle' => 'other_handle',
@@ -348,11 +352,11 @@ function add_old_game_form( $form_id, $game_row, $iamrated )
       'WRP_Rating2' => 'other_rating',
       'WRP_RatingStatus' => 'other_ratingstatus', );
 
+   $wro = new WaitingroomOffer( $game_row );
+   $is_my_game = $wro->is_my_game();
    $my_id = $player_row['ID'];
-   $opp_id = $game_row['WRP_ID'];
-   $is_my_game = ($opp_id == $my_id);
-   $gid = (int)$game_row['gid'];
-
+   $opp_id = $game_row['uid'];
+   list( $can_join, $html_out, $join_warning, $join_error ) = $wro->check_joining(/*html*/true);
 
    $game_form = new Form($form_id, 'join_waitingroom_game.php', FORM_POST, true);
 
@@ -360,13 +364,6 @@ function add_old_game_form( $form_id, $game_row, $iamrated )
    foreach( $ARR_COPY_FIELDS as $src => $trg )
       $game_row[$trg]  = $game_row[$src];
    game_info_table( GSET_WAITINGROOM, $game_row, $player_row, $iamrated );
-
-   if( $game_row['GameType'] != GAMETYPE_GO ) // user can join mp-game only once
-      $can_join_mpg = !GamePlayer::exists_game_player( $gid, $my_id );
-   else
-      $can_join_mpg = true;
-   $can_join_maxg = $maxGamesCheck->allow_game_start(); //own MAX-games
-   $can_join = $can_join_mpg && $can_join_maxg;
 
    $game_form->add_hidden( 'id', $game_row['ID'] ); // wroom-id
    if( $is_my_game )
@@ -376,8 +373,7 @@ function add_old_game_form( $form_id, $game_row, $iamrated )
             'SUBMITBUTTON', 'deletebut', T_('Delete'),
          ));
    }
-   elseif( $can_join && $game_row['haverating'] && $game_row['goodrating'] && $game_row['goodmingames']
-           && $game_row['goodmaxgames'] && $game_row['goodsameopp'] )
+   elseif( $can_join && $joinable )
    {
       $game_form->add_row( array(
             'SUBMITBUTTONX', 'join', T_('Join'), array( 'accesskey' => ACCKEY_ACT_EXECUTE ),
@@ -385,20 +381,7 @@ function add_old_game_form( $form_id, $game_row, $iamrated )
    }
 
    $game_form->echo_string(1);
-   if( !$is_my_game )
-   {
-      echo "<br>\n";
-
-      if( $can_join )
-         echo $maxGamesCheck->get_warn_text();
-      elseif( !$can_join_maxg )
-         echo $maxGamesCheck->get_error_text(), "<br>\n", $maxGamesCheck->get_warn_text();
-      elseif( !$can_join_mpg )
-         echo span('MPGWarning', T_('Already invited to or joined this multi-player-game!'));
-
-      if( $can_join_mpg && !$game_row['goodmaxgames'] )
-         echo "<br>\n", span('ErrMsgMaxGames', ErrorCode::get_error_text('max_games_opp'));
-   }
+   echo $html_out;
 }//add_old_game_form
 
 // find waiting-room-id for given game-id
