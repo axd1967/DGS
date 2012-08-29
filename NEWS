@@ -490,6 +490,8 @@ Copyright (C) 2001-2012  Erik Ouchterlony
    * Quick-Suite (new alternative interface "quick_do.php") for robots and other DGS-clients:
       * see 'specs/quick_suite.txt' on DGS source repository for full specs
       * Added remaining quota in every response
+      * Added standard option 'fields' to restrict field-output
+      * Added standard option 'limit' and 'off' to paginate lists
 
       * Added game-handler to
          * retrieve information about game, with nested user-objects
@@ -512,6 +514,7 @@ Copyright (C) 2001-2012  Erik Ouchterlony
       * Added contact-handler to
          * retrieve information about own contacts
       * Added waitingroom-handler to
+         * retrieve list of all or only suitable waiting-room game1
          * retrieve information about waiting-room game
          * delete own waiting-room game
          * join waiting-room game
