@@ -28,7 +28,7 @@ require_once 'include/config-local.php';
 define('DGS_VERSION', '1.0.15');
 
 // global version of quick-suite: increased with each release
-define('QUICK_VERSION', 1);
+define('QUICK_VERSION', 2);
 define('QUICK_SUITE_VERSION', DGS_VERSION.':'.QUICK_VERSION);
 
 // ---------- General stuff----------------------------------------

@@ -45,7 +45,9 @@ define('QOPT_WITH', 'with');  // recursive (=deep-) loading of some objects
 define('QOPT_TEST', 'test');  // output JSON in "plain/text" content-type
 define('QOPT_LIST_STYLE', 'lstyle');  // output-style for result-list: table (=default) | json
 define('QOPT_FIELDS', 'fields');  // filter fields in result: '' (=default=all-fields) | name1,name2,...
-define('QUICK_STD_OPTIONS', 'obj|cmd|test|lstyle|with|fields');
+define('QOPT_LIMIT', 'limit');  // max. number of rows to deliver for 'list'-command
+define('QOPT_OFFSET', 'off');  // starting row to page result for 'list'-command
+define('QUICK_STD_OPTIONS', 'obj|cmd|test|lstyle|with|fields|limit|off');
 
 // with-options
 define('QWITH_USER_ID', 'user_id'); // include user-id user-fields: id, handle, name
@@ -54,6 +56,8 @@ define('QWITH_FOLDER',  'folder');  // include main folder-fields: id, name, sys
 // listtype-option
 define('QLIST_STYLE_TABLE', 'table'); // default
 define('QLIST_STYLE_JSON', 'json');
+
+define('QLIST_LIMIT_DEFAULT', 10);
 
 
 
@@ -113,9 +117,16 @@ class QuickHandler
 {
    var $my_id;
    var $quick_object;
-   var $with_option;
-   var $list_style_option;
+
+   // from options: with, lstyle, fields, limit, off
+   var $with;
+   var $list_style;
+   var $list_limit;
+   var $list_offset;
    var $rx_keep_fields; // regex with varnames to keep; or empty (=all fields)
+
+   // calculated
+   var $list_totals;
 
    function QuickHandler( $quick_object )
    {
@@ -123,16 +134,34 @@ class QuickHandler
       $this->my_id = (int)$player_row['ID'];
       $this->quick_object = $quick_object;
 
+      $this->_parse_options();
+
+      $this->list_totals = -1;
+   }
+
+   // \internal
+   function _parse_options()
+   {
       // parse option: with
-      $this->with_option = array();
+      $this->with = array();
       $with_arr = explode(',', @$_REQUEST[QOPT_WITH]);
       foreach( $with_arr as $opt )
-         $this->with_option[$opt] = 1;
+         $this->with[$opt] = 1;
 
       // parse option: lstyle
-      $this->list_style_option = @$_REQUEST[QOPT_LIST_STYLE];
-      if( $this->list_style_option != QLIST_STYLE_JSON && $this->list_style_option != QLIST_STYLE_TABLE )
-         $this->list_style_option = QLIST_STYLE_TABLE;
+      $this->list_style = @$_REQUEST[QOPT_LIST_STYLE];
+      if( $this->list_style != QLIST_STYLE_JSON && $this->list_style != QLIST_STYLE_TABLE )
+         $this->list_style = QLIST_STYLE_TABLE;
+
+      // parse option: limit
+      $limit_opt = @$_REQUEST[QOPT_LIMIT];
+      $this->list_limit = ( (string)$limit_opt != '' && is_numeric($limit_opt) )
+         ? limit( (int)@$_REQUEST[QOPT_LIMIT], 1, 100, QLIST_LIMIT_DEFAULT )
+         : QLIST_LIMIT_DEFAULT;
+
+      // parse option: off
+      $offset_opt = @$_REQUEST[QOPT_OFFSET];
+      $this->list_offset = ( (string)$offset_opt != '' && is_numeric($offset_opt) && $offset_opt >= 0 ) ? (int)$offset_opt : 0;
 
       // parse option: fields
       $field_opt = @$_REQUEST[QOPT_FIELDS];
@@ -146,7 +175,7 @@ class QuickHandler
          $rx_fields = str_replace('*', '.*', str_replace(',', '|', $field_opt)); // , * -> | .*
          $this->rx_keep_fields = "/^(version|error.*|quota_.+|list_.+|id|$rx_fields)$/"; // +std-fields
       }
-   }
+   }//parse_options
 
    /*! \brief Returns result (processed to keep only expected fields). */
    function getProcessedResult()
@@ -169,12 +198,12 @@ class QuickHandler
    /*! \brief Returns true if specified with-option value has been specified. */
    function is_with_option( $with )
    {
-      return isset($this->with_option[$with]);
+      return isset($this->with[$with]);
    }
 
    function check_list_style( $ltype=QLIST_STYLE_TABLE )
    {
-      return ($this->list_style_option == $ltype);
+      return ($this->list_style == $ltype);
    }
 
    /*! \brief throw error for unknown command. */
@@ -240,14 +269,41 @@ class QuickHandler
       return $userinfo;
    }
 
-   /*! \brief Adds list-result into result-map. */
-   function add_list( $object_name, $list, $ordered_by='', $offset=0, $limit=0 )
+   function add_query_limits( &$qsql, $calc_rows )
    {
+      if( $calc_rows )
+         $qsql->add_part( SQLP_OPTS, SQLOPT_CALC_ROWS );
+      if( $this->list_limit > 0 )
+         $qsql->add_part( SQLP_LIMIT,
+            sprintf('%s,%s', $this->list_offset, $this->list_limit + 1) ); //+1 to check for has-next
+   }
+
+   function read_found_rows()
+   {
+      $this->list_totals = mysql_found_rows(
+         "quick_handler.found_rows({$this->quick_object->obj},{$this->quick_object->cmd})");
+   }
+
+   /*! \brief Adds list-result into result-map (totals + offset + limit taken from handler-vars). */
+   function add_list( $object_name, $list, $ordered_by='' )
+   {
+      $has_next = 0;
+      if( $this->list_limit > 0 && count($list) == $this->list_limit + 1 )
+      {
+         $has_next = 1;
+         array_pop( $list ); // remove last element to determine has-next
+      }
+      elseif( $this->list_limit == 0 && $this->list_totals < 0 )
+      {
+         $this->list_totals = count($list);
+      }
+
       $this->addResultKey( 'list_object', $object_name );
+      $this->addResultKey( 'list_totals', $this->list_totals );
       $this->addResultKey( 'list_size', count($list) );
-      $this->addResultKey( 'list_offset', (int)$offset );
-      $this->addResultKey( 'list_limit', (int)$limit );
-      $this->addResultKey( 'list_has_next', 0);
+      $this->addResultKey( 'list_offset', $this->list_offset );
+      $this->addResultKey( 'list_limit', $this->list_limit );
+      $this->addResultKey( 'list_has_next', $has_next );
       $this->addResultKey( 'list_order', $ordered_by );
 
       // build "processed" list

@@ -76,11 +76,10 @@ class QuickHandlerContact extends QuickHandler
       {
          $qsql = Contact::build_querysql_contact( $uid );
          $qsql->add_part( SQLP_ORDER, "P.Name ASC" );
+         $this->add_query_limits( $qsql, /*calc-rows*/true );
          $this->contacts = Contact::load_quick_contacts( $uid, $qsql );
+         $this->read_found_rows();
       }
-
-      // check for invalid-action
-
    }//prepare
 
    /*! \brief Processes command for object; may fire error(..) and perform db-operations. */

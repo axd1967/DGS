@@ -79,12 +79,10 @@ class QuickHandlerFolder extends QuickHandler
 
       if( $cmd == QCMD_LIST )
       {
+         $this->list_offset = $this->list_limit = 0; // return all entries
          $this->cfg_pages = ConfigPages::load_config_pages( $uid, CFGCOLS_STATUS_GAMES );
          $this->folders = get_folders( $uid, /*remove-all-received-folder*/true );
       }
-
-      // check for invalid-action
-
    }//prepare
 
    /*! \brief Processes command for object; may fire error(..) and perform db-operations. */
@@ -104,7 +102,7 @@ class QuickHandlerFolder extends QuickHandler
             $out[] = QuickHandlerFolder::build_obj_folder( $folder_id, $arr, /*with*/true, $this->cfg_pages );
       }
 
-      $this->add_list( QOBJ_FOLDER, $out );
+      $this->add_list( QOBJ_FOLDER, $out, 'id+' );
    }//process_cmd_list
 
 

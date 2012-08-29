@@ -37,7 +37,7 @@ Topics:
       a. Login & Logout
       b. Request
       c. Standard Response
-      d. List Response
+      d. List Request & Response
       e. Expected Fields
 
    3. Objects
@@ -218,26 +218,55 @@ IMPORTANT NOTE:
    in the response or its nested return objects.
 
 
-#-------- (2d) List Response --------------------------------------------------
+#-------- (2d) List Request & Response ----------------------------------------
 
-The quick-suite can also return list of object entries. In this case, the result
+The quick-suite can also return a list of object entries. In this case, the result
 always contains several mandatory and some optional standard fields:
 
    {
       "list_object": "game",        # object-name, corresponds to obj-option
-      "list_size": 2,               # total list-size
+      "list_totals": -1,            # total list-size; or -1 if total size is unknown
+      "list_size": 2,               # current list-size returned in response, 0=empty
       "list_offset": 0,             # list offset for paging a result
       "list_limit": 20,             # number of entries per page; 0=all entries returned
       "list_has_next": 0,           # 1=has next-page, 0=last page retrieved
-      "list_order": "key1+,key2-",  # list order, can be empty, +=ASCending, -=DESCending
-      "list_header": [ "key1", "key2", ... ],   # (optional); field-names for TABLE-style
+      "list_order": "key1+,key2-",  # list order, can be empty (=no-order); + = ASCending, - = DESCending
+      "list_header": [ "key1", "key2", ... ],   # (optional); field-names for TABLE-list-style
       "list_result": [ item1, item2, ... ]      # list-entries (array | objects)
    }
+
+   * NOTE about "list_totals" and "list_size":
+      - it is not always possible to find out the total number of rows, because that
+        can be a very expensive query. In such cases, the 'list_totals' is -1.
+      - the 'list_size' is a redundant information giving the number of entries in
+        the response from the 'list_result'-array. When the total number of rows
+        is larger than the given LIMIT, only a subset of items is returned.
+        The starting offset is 'list_offset', the 'list_size' is the number of
+        entries in the current result, and 'list_totals' gives the total number
+        of found rows for the query. However if 'list_totals' is -1, at least you
+        can check 'list_has_next' to check if there are more "pages" to retrieve.
+        If 'list_has_next' is 0 the last "page" has been reached.
 
    * NOTE about "list_header" (see also example below):
       - this field is only used for TABLE-style
       - and only if list contains at least one item
       - keys of nested objects are written using '.', e.g. "game.message.user.name"
+
+To paginate when using the 'list'-command you can always use the following parameters:
+
+   - 'limit' : gives maximum number of rows returned in the response,
+               if omitted or empty, a default of 10 is used.
+               can be in range 1..100
+
+   - 'off'   : gives the starting offset to load the next "page" of data from.
+               if omitted or empty or negative, a default of 0 is used.
+
+   - NOTES:
+      - These two parameters can always be used, though they are not parsed for every
+        object-handler. For example, the quick-handler for folders is always returning
+        all entries regardless of the limit or offset given.
+        However, such exceptions are documented on the respective object-specs.
+
 
 The output of objects in a full JSON-format can be quite large, because an object
 is normally represented as map of keys with their respective values for EACH item
@@ -262,6 +291,7 @@ Example for TABLE-style:
 
    {
       "list_object": "game",
+      "list_totals": -1,
       "list_size": 2,
       "list_offset": 0,
       "list_limit": 0,
@@ -279,6 +309,7 @@ Example for JSON-style:
 
    {
       "list_object": "game",
+      "list_totals": -1,
       "list_size": 2,
       "list_offset": 0,
       "list_limit": 0,
@@ -1115,7 +1146,8 @@ Commands:
       - Result (JSON) =
          {
             "list_object" : "message", # list of object-types
-            "list_size" : 5,           # list-size total
+            "list_totals": -1,         # total list-size
+            "list_size" : 5,           # current list-size
             "list_offset" : 0,         # start offset of list-part (for paging)
             "list_limit" : 0,          # number of entries per page
             "list_order" : "",         # order of list (field-names, comma-separated), ""=no-order
@@ -1200,6 +1232,9 @@ Commands:
       - required opts: -
       - optional opts: LIST_STYLE
 
+      - NOTES:
+         - all folders of user are returned; std-options <LIMIT> and <OFFSET> have no effect
+
       - Errors:
          - all errors of: [E-LOGIN], [E-GEN]
 
@@ -1207,10 +1242,11 @@ Commands:
 
          {
             "list_object" : "folder",  # list of object-types
-            "list_size" : 5,           # list-size total
+            "list_totals": -1,         # total list-size
+            "list_size" : 5,           # current list-size
             "list_offset" : 0,         # start offset of list-part (for paging)
             "list_limit" : 0,          # number of entries per page
-            "list_order" : "",         # order of list (field-names, comma-separated), ""=no-order
+            "list_order" : "id+",      # order of list (field-names, comma-separated), ""=no-order
             "list_result" : [          # array with found objects matching list-search
                {
                   "id" : 2,                # folder-nr (<0, 0-5 system-folder, >= 6 user-folder)
@@ -1274,6 +1310,7 @@ Commands:
       - Result (JSON) =
          {
             "list_object" : "contact",
+            "list_totals": -1,
             "list_size" : 3,
             "list_offset" : 0,
             "list_limit" : 0,
@@ -1361,6 +1398,7 @@ Commands:
 
          {
             "list_object" : "wroom",
+            "list_totals": -1,
             "list_size" : 3,
             "list_offset" : 0,
             "list_limit" : 0,
@@ -1544,6 +1582,7 @@ Commands:
       - Result (JSON) = // also see specs/db/table-Bulletin.txt
          {
             "list_object" : "bulletin",
+            "list_totals": -1,
             "list_size" : 2,
             "list_offset" : 0,
             "list_limit" : 0,
@@ -2417,6 +2456,11 @@ in use (JAP=Japanese, CAN=Canadian, FIS=Fischer-time):
    - [TL] Time-limit : static time-settings for game
    - [TR] Time-Remaining : dynamic time of game for each player
 
+The main specification for time-limits and time-remaining you can find in:
+
+   - time-specifications defined in 'specs/time.txt'
+
+
 * General format:
 
    - Format of TIME is:
@@ -2424,49 +2468,18 @@ in use (JAP=Japanese, CAN=Canadian, FIS=Fischer-time):
       - "0h" = zero time
       - one of DAYS or HOURS is optional
 
-* Format of [TL] Time-limit:
-
-   - basic format is: "TYPE: MAINTIME + EXTRATIME"
-      - TYPE: J=Japanese-byo-yomi, C=Canadian-byo-yomi, F=Fischer-time
-      - one of MAINTIME or EXTRATIME is optional for types JAP/CAN
-      - for Fischer-time only EXTRATIME is optional
-      - time without EXTRATIME => game has only absolute time
-      - time without MAINTIME  => game starts right off in byo-yomi
-
-   - Format of MAINTIME is always like TIME-format (see above)
-
    - Format of EXTRATIME for types:
       - type=JAP: "TIME * Z" = TIME byo-yomi-time per move and Z extra periods
       - type=CAN: "TIME / Z" = TIME byo-yomi-time per Z stones
       - type=FIS: "TIME"     = TIME extra-time per move
 
+* Format of [TL] Time-limit:
+
    - Examples:
       - see "include/time_functions.php", method "echo_time_limit()"
       - see "scripts/tests/TimeFormatTest.php", test-method "test_echo_time_limit()"
 
-      - "J: 7d 3h + 2d * 5"
-      - "J: 7d 3h"            (absolute)
-      - "J: 2d * 5"           (only extra-time)
-
-      - "C: 7d 3h + 9d / 3"
-      - "C: 7d 3h"            (absolute)
-      - "C: 9d / 3"           (only extra-time)
-
-      - "F: 7d 3h + 2d"
-      - "F: 7d 3h"            (absolute)
-
-
 * Format of [TR] Time-remaining:
-//TODO TODO TODO sync with current time-formats !!!
-
-   - some basic formats:
-      - "TYPE: 0h" = all time is up for all types TYPE=J|C|F = no remaining time
-
-      - "TYPE: MAINTIME (-)"  = no extra-time defined (=absolute time)
-      - "TYPE: EXTRATIME (-)" = no main-time defined, or main-time is up and only extra-time left
-
-      - "TYPE: REM-MAINTIME (+ EXTRATIME)"   = remaining main-time left, byo-yomi not started
-      - "TYPE: STARTED-EXTRATIME (REM-EXTRATIME)" = main-time is up, byo-yomi started
 
    - Examples:
       - see "include/time_functions.php", method "echo_time_remaining()"
@@ -2474,49 +2487,6 @@ in use (JAP=Japanese, CAN=Canadian, FIS=Fischer-time):
          - for TYPE=JAP: "test_echo_time_remaining_jap()"
          - for TYPE=CAN: "test_echo_time_remaining_can()"
          - for TYPE=FIS: "test_echo_time_remaining_fischer()"
-
-
-   - Format for type=JAP:
-
-      - "J: TIME (-)"            = TIME=absolute remaining-MAINTIME (no EXTRATIME); OR
-                                   TIME=remaining-EXTRATIME, main-time is up, no byo-yomi-period left
-
-      - "J: TIME (+ EXTRATIME)"  = TIME=remaining-MAINTIME + remaining-EXTRATIME, byo-yomi CAN be or CAN NOT be started;
-                                   EXTRATIME is not always original-EXTRATIME because of the possibility of added-time.
-
-      - "J: TIME (EXTRATIME)"    = TIME=remaining-time of current started byo-yomi-period + remaining-EXTRATIME
-
-      - Examples:
-         - "J: 0h"                  ; time is up
-         - "J: 10d 7h (-)",         ; absolute-remaining-maintime; OR main-time is up, in byo-yomi, no extra-time any more
-         - "J: 10d 7h (+ 2d * 7)"   ; remaining-maintime, byo-yomi not started yet
-         - "J: 1d (+ 2d * 4)"       ; remaining time of started byo-yomi-period, has still main-time (maybe by added time)
-         - "J: 1d 3h (2d * 4)"      ; remaining time of started byo-yomi-period, remaining extra-time, main-time is up
-
-   - Format for type=CAN:
-
-      - "C: TIME (-)"            = TIME=absolute remaining-MAINTIME (no EXTRATIME)
-
-      - "C: TIME (+ EXTRATIME)"  = TIME=remaining-MAINTIME + original-EXTRATIME, byo-yomi not started yet
-
-      - "C: REM-EXTRATIME (EXTRATIME)" = remaining-EXTRATIME + original-EXTRATIME, byo-yomi started
-
-      - Examples:
-         - "C: 0h"                  ; time is up
-         - "C: 10d 7h (-)"          ; absolute-remaining-maintime
-         - "C: 10d 7h (+ 6d / 4)"   ; remaining-maintime, byo-yomi not started yet
-         - "C: 1d 3h / 2 (6d / 4)"  ; remaining-extra-time, in byoyomi
-
-   - Format for type=FIS:
-
-      - "F: TIME (-)"            = TIME=absolute remaining-MAINTIME (no EXTRATIME)
-
-      - "F: TIME (+ EXTRATIME)"  = TIME=remaining-MAINTIME + original-EXTRATIME
-
-      - Examples:
-         - "F: 0h"                  ; time is up
-         - "F: 10d 7h (-)"          ; absolute-remaining-maintime
-         - "F: 10d 7h (+ 2d)"       ; remaining-main-time, with original extra-time
 
 
 #-------- (7) Classes and Files -----------------------------------------------

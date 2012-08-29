@@ -80,12 +80,13 @@ class QuickHandlerBulletin extends QuickHandler
 
       if( $cmd == QCMD_LIST )
       {
-         $iterator = new ListIterator( $dbgmsg.'.list',
-               new QuerySQL( SQLP_WHERE, 'BR.bid IS NULL' ), // unread-bulletins
-               'ORDER BY PublishTime DESC' );
+         $qsql = new QuerySQL( SQLP_WHERE, 'BR.bid IS NULL' ); // unread-bulletins
+         $this->add_query_limits( $qsql, /*calc-rows*/true );
+         $iterator = new ListIterator( $dbgmsg.'.list', $qsql, 'ORDER BY PublishTime DESC' );
          $iterator->addQuerySQLMerge(
             Bulletin::build_view_query_sql( /*adm*/false, /*cnt*/false, /*type*/'', /*chk*/false ) );
          $this->bulletin_iterator = Bulletin::load_bulletins( $iterator );
+         $this->read_found_rows();
       }
       elseif( $cmd == BULLETINCMD_MARK_READ )
       {
@@ -137,7 +138,7 @@ class QuickHandlerBulletin extends QuickHandler
             );
       }
 
-      $this->add_list( QOBJ_BULLETIN, $out );
+      $this->add_list( QOBJ_BULLETIN, $out, 'time_published-' );
    }//process_cmd_list
 
    function process_cmd_mark_read()
