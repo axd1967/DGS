@@ -4174,7 +4174,7 @@ class NextGameOrder
       GameHelper::extend_query_with_game_prio( $qsql, $uid, $load_prio );
 
       if( $load_notes )
-         GameHelper::extend_query_with_game_notes( $qsql, $uid, 'G' );
+         GameHelper::extend_query_with_game_notes( $qsql, $uid );
 
       return $qsql;
    }//build_status_games_query
