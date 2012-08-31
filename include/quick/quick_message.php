@@ -256,8 +256,8 @@ class QuickHandlerMessage extends QuickHandler
       $mid = (int)$row['ID'];
 
       $this->addResultKey( 'id', $mid );
-      $this->addResultKey( 'user_from', $this->build_obj_user($uid_from, $this->user_rows, 'rating') );
-      $this->addResultKey( 'user_to',   $this->build_obj_user($uid_to, $this->user_rows, 'rating') );
+      $this->addResultKey( 'user_from', $this->build_obj_user($uid_from, @$this->user_rows[$uid_from], '', 'rating') );
+      $this->addResultKey( 'user_to',   $this->build_obj_user($uid_to, @$this->user_rows[$uid_to], '', 'rating') );
       $this->addResultKey( 'type', strtoupper($row['Type']) );
       $this->addResultKey( 'flags', QuickHandlerMessage::convertMessageFlags($row['Flags']) );
       $this->addResultKey( 'folder',

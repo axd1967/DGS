@@ -128,7 +128,7 @@ class QuickHandlerBulletin extends QuickHandler
                'time_published' => QuickHandler::formatDate(@$bulletin->PublishTime),
                'time_expires' => QuickHandler::formatDate(@$bulletin->ExpireTime),
                'time_updated' => QuickHandler::formatDate(@$bulletin->Lastchanged),
-               'author' => $this->build_obj_user2($bulletin->uid, $orow, 'BP_'),
+               'author' => $this->build_obj_user($bulletin->uid, $orow, 'BP_'),
                'tournament_id' => $bulletin->tid,
                'game_id' => $bulletin->gid,
                'hits' => (int)$bulletin->CountReads,

@@ -179,7 +179,7 @@ class QuickHandlerWaitingroom extends QuickHandler
       }
 
       $result['id'] = $wr->ID;
-      $result['user'] = $this->build_obj_user($wr->uid, $user_rows, 'country,rating');
+      $result['user'] = $this->build_obj_user($wr->uid, @$user_rows[$wr->uid], '', 'country,rating');
       $result['created_at'] = QuickHandler::formatDate($wr->Created);
       $result['count_offers'] = $wr->CountOffers;
       $result['comment'] = $wr->Comment;
