@@ -129,11 +129,11 @@ Description:
    - ZEN_GO = Multi-player Go (N) with odd N > 2, N players with switching colors
 
 * GamePlayers : matching of players for game, see also Waitingroom.GamePlayers
-   - format: "1:1" (Go), "N:M" (Team-Go), "N" (Zen-Go)
+   - format: "" (Go), "N:M" (Team-Go), "N" (Zen-Go)
    - GameType is determined from GamePlayers-info
-   - 1:1 | 2 = Go (standard Go)
-   - N:M = Team-Go, N+M > 2, 2:2 = Rengo
-   - N = Zen-Go, N > 2
+     - "" | 1:1 | 2 = Go (standard Go); for normal Go the field must be empty
+     - N:M = Team-Go, N+M > 2, 2:2 = Rengo
+     - N = Zen-Go, N > 2
 
    - IMPORTANT NOTE:
      When a MP-game is started (leaving SETUP-status), the 'GamePlayers'-fields
