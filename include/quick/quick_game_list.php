@@ -142,6 +142,7 @@ class QuickHandlerGameList extends QuickHandler
             error('invalid_args', "$dbgmsg.check.view.only_mine");
 
          $glc->setView( GAMEVIEW_STATUS, $uid );
+         $this->clear_with_options( array( QWITH_RATINGDIFF ) ); // ST: not allowed
 
          // allow returning ALL entries for status-view
          if( @$_REQUEST[QOPT_LIMIT] === 'all' )
@@ -156,7 +157,8 @@ class QuickHandlerGameList extends QuickHandler
       else //view running|finished|observe
       {
          //TODO
-         error('invalid_args', "$dbgmsg.not_supported_view");
+         if( !preg_match("/^(observe)\$/", $this->opt_view) )
+            error('invalid_args', "$dbgmsg.not_supported_view");
 
          if( $this->opt_view == GAMELIST_OPTVAL_VIEW_OBSERVE && !($uid === 'all' || $uid == $my_id) )
             error('invalid_args', "$dbgmsg.check.view.uid.only_all_or_mine");
@@ -167,6 +169,9 @@ class QuickHandlerGameList extends QuickHandler
             $glc->setView( ($uid === 'all' ? GAMEVIEW_OBSERVE_ALL : GAMEVIEW_OBSERVE_MINE), $uid );
          else // running/finished
             $glc->setView( ($this->opt_view == GAMELIST_OPTVAL_VIEW_RUNNING ? GAMEVIEW_RUNNING : GAMEVIEW_FINISHED), $uid );
+
+         if( $glc->is_observe_all() )
+            $this->clear_with_options( array( QWITH_PRIO, QWITH_NOTES, QWITH_RATINGDIFF ) ); // OA: not allowed
 
          $glc->mp_game = $f_mpg;
          $glc->ext_tid = $f_ext_tid;
@@ -211,7 +216,7 @@ class QuickHandlerGameList extends QuickHandler
          foreach( $this->game_result_rows as $game_row )
          {
             $arr = array();
-            $out[] = QuickHandlerGameInfo::fill_game_info($this, $arr, $game_row);
+            $out[] = QuickHandlerGameInfo::fill_game_info($this, $this->glc, $arr, $game_row);
          }
       }
 

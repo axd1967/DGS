@@ -48,6 +48,7 @@ class QuickHandlerGameInfo extends QuickHandler
 {
    var $gid;
 
+   var $glc; // GameListControl
    var $game_row;
    var $gamenotes;
 
@@ -55,6 +56,7 @@ class QuickHandlerGameInfo extends QuickHandler
    {
       parent::QuickHandler( $quick_object );
       $this->gid = 0;
+      $this->glc = null;
 
       $this->game_row = null;
       $this->gamenotes = null;
@@ -96,6 +98,7 @@ class QuickHandlerGameInfo extends QuickHandler
       {
          $glc = new GameListControl();
          $glc->setView( GAMEVIEW_INFO, 'all' );
+         $this->glc = $glc;
 
          $qsql = $glc->build_games_query( $this->is_with_option(QWITH_RATINGDIFF), /*remtime*/true );
          $qsql->add_part( SQLP_WHERE, "G.ID=$gid" );
@@ -121,7 +124,7 @@ class QuickHandlerGameInfo extends QuickHandler
    {
       $cmd = $this->quick_object->cmd;
       if( $cmd == QCMD_INFO )
-         QuickHandlerGameInfo::fill_game_info($this, $this->quick_object->result, $this->game_row);
+         QuickHandlerGameInfo::fill_game_info($this, $this->glc, $this->quick_object->result, $this->game_row);
       elseif( $cmd == GAMECMD_GET_NOTES )
          $this->addResultKey( 'notes', (is_null($this->gamenotes) ? "" : $this->gamenotes) );
    }
@@ -139,25 +142,23 @@ class QuickHandlerGameInfo extends QuickHandler
       return implode(',', $out);
    }
 
-   function fill_game_info( $quick_handler, &$out, $row )
+   function fill_game_info( $quick_handler, $glc, &$out, $row )
    {
-      //$ST = $this->glc->is_status();
-      //$OB = $this->glc->is_observe();
-      //$OA = $this->glc->is_observe_all();
       //$RU = $this->glc->is_running();
       //$FU = $this->glc->is_finished();
       //$all = $this->glc->is_all();
 
       // init init fields
       $color = ($row['ToMove_ID'] == $row['Black_ID']) ? BLACK : WHITE;
+      $is_my_game = ( $row['Black_ID'] == $this->my_id ) || ( $row['White_ID'] == $this->my_id );
       $row['Blackhandle'] = @$row['BlackHandle']; // for FK-info
       $row['Whitehandle'] = @$row['WhiteHandle']; // for FK-info
       $game_setup = GameSetup::new_from_game_setup($row['GameSetup']);
 
 
       // output for views: info (INFO), status (ST), observe_mine (OU), observe_all (OA), running-user (RU), finished-user (FU)
-      // DONE views: INFO
-      // TODO views: ST, OU, OA, RU, FU
+      // DONE views: INFO, ST, OA, OU
+      // TODO views: RU, FU
 
       $out['id'] = (int)$row['ID'];
       $out['double_id'] = (int)$row['DoubleGame_ID'];
@@ -198,7 +199,7 @@ class QuickHandlerGameInfo extends QuickHandler
       $out['move_last'] = strtolower($row['Last_Move']);
       //$out['move_ko'] = ($row['X_GameFlags'] & GAMEFLAGS_KO) ? 1 : 0;
 
-      $out['prio'] = @$row['X_Priority'];
+      $out['prio'] = (int)@$row['X_Priority'];
       if( $quick_handler->is_with_option(QWITH_NOTES) )
          $out['notes'] = strip_gamenotes( @$row['X_Note'] );
 
@@ -209,9 +210,15 @@ class QuickHandlerGameInfo extends QuickHandler
          $icol = ($col == BLACK) ? 'Black' : 'White';
          $prefix = strtolower($icol);
          $uid = (int)$row[$icol.'_ID'];
-         $time_remaining = build_time_remaining( $row, $col,
-               /*is_to_move*/ ( $uid == $row['ToMove_ID'] ),
-               TIMEFMT_QUICK|TIMEFMT_ADDTYPE|TIMEFMT_ZERO );
+         if( $game_started && $is_my_game )
+         {
+            $time_remaining = build_time_remaining( $row, $col,
+                  /*is_to_move*/ ( $uid == $row['ToMove_ID'] ),
+                  TIMEFMT_QUICK|TIMEFMT_ADDTYPE|TIMEFMT_ZERO );
+            $remtime = $time_remaining['text'];
+         }
+         else
+            $remtime = '';
 
          // user-info
          $out[$prefix.'_user'] = $quick_handler->build_obj_user($uid, $row, $prefix, 'country,rating,lastacc');
@@ -219,8 +226,8 @@ class QuickHandlerGameInfo extends QuickHandler
          // game-info
          $ginfo = array();
          $ginfo['prisoners'] = (int)$row[$icol.'_Prisoners'];
-         if( $game_started )
-            $ginfo['remtime'] = $time_remaining['text'];
+         if( $remtime )
+            $ginfo['remtime'] = $remtime;
          $ginfo['rating_start'] = echo_rating($row[$icol.'_Start_Rating'], /*perc*/1, /*uid*/0, /*engl*/true, /*short*/1);
          $ginfo['rating_start_elo'] = echo_rating_elo($row[$icol.'_Start_Rating']);
 
@@ -242,6 +249,12 @@ class QuickHandlerGameInfo extends QuickHandler
          }
 
          $out[$prefix.'_gameinfo'] = $ginfo;
+      }
+
+      if( $glc->is_observe_all() )
+      {
+         $out['obs_count'] = (int)@$row['X_ObsCount'];
+         $out['obs_mine'] = ( @$row['X_MeObserved'] == 'Y' ) ? 1 : 0;
       }
 
       return $out;

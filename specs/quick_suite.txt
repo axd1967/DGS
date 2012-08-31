@@ -610,7 +610,7 @@ Commands:
             },
             "black_gameinfo" : {    # game-info of black-user
                "prisoners" : 3,                         # prisoners
-               "remtime" : "C: 1d 10h (+ 15d / 8)",     # remaining-time (same format as for quick-status, see [4.QST]); field omitted for finished games
+               "remtime" : "C: 1d 10h (+ 15d / 8)",     # remaining-time (same format as for quick-status, see [4.QST]); field omitted for finished games and only included for games where black or white user is logged-in user
                "rating_start" : "3k (-7%)",             # start-rating
                "rating_start_elo" : "1792.59326171875", # start-rating ELO
 
@@ -646,53 +646,69 @@ Commands:
       - required opts: VIEW
       - optional opts: USER_ID, WITH, LIMIT, FILTER
 
+      - IMPORTANT NOTES: #TODO
+         - the fields differ from web-page, where the "opponents" data is shown on the status-page.
+           For the quick-suite, the opponent must be identified by the client by checking the
+           the 'move_opp' or 'move_color'-field and finding the corresponding 'black|white_...'-fields.
+           This was done to always have the same field-names for all views.
+           For example, the "opponent" for the result shown for the "info"-command above is 222,
+           indicated by the 'move_opp'-field. Or determine the opponent by the 'move_color'-field.
+           If the value is 'B', then the opponent has the White color, so the opponents data
+           can be found in the "white_..."-structures.
+
       - VIEW-option:
-         - 'status'    : ask for running games where to move in for given USER_ID
-         - 'running'   : ask for running games for logged-in user  (uid=mine)
-         - 'finished'  : ask for finished games for logged-in user (uid=mine)
-         - 'observe'   : ask for all observed games, or my observed games
+         - 'status'    : ask for status-games (=own running games where to move in)
+            - LIMIT-option may be 'all' to return all status-games in one go
+            - available WITH-options: user_id, prio, notes
+            - USER_ID-option is restricted to logged-in user (or equivalent '' | 0 | 'mine' )
+
+         - 'observe'   : ask for all observed games (USER_ID-option 'all'), or else for observed games of logged-in user
+            - available WITH-options: user_id
+
+         - 'running'   : ask for running games for logged-in user  (uid=mine) #TODO
+         - 'finished'  : ask for finished games for logged-in user (uid=mine) #TODO
 
       - USER_ID-option:
          - empty | 0 = default, for all views the default-USER_ID is 'mine'
          - integer   = use other user-id (can be logged-in user-id)
          - 'mine'    = use logged-in user-id
-         - 'all'     = only allowed for 'observe'-view # TODO
-
-         - NOTE: not all values allowed for all views
+         - 'all'     = only allowed for 'observe'-view
 
       - WITH-option:
-         - 'user_id' : additionally return user_id-data (handle + name) for game-players
-         - 'ratingdiff' : # TODO
-         - 'notes' : # TODO
+         - 'user_id' : additionally return user_id-data for black + white game-users: handle, name, country, rating, rating_elo, last_access
+         - 'prio'    : additionally return the games priority set by the user, otherwise the field is not included
+         - 'notes'   : additionally return the starting text (ca. 30 chars) of the logged-in users private game-notes
+         - 'ratingdiff' : additionally return the rating-diff for finished games for black + white game-users
 
       - LIMIT-option:
-         - # TODO allow 'all' for status-view
+         - only for VIEW-option 'status', the LIMIT-option can be 'all' to return all status-games in one go
 
       - FILTER-options:
-         - # TODO mpg=0|1, tid
+         - 'filter_mpg=VAL' :
+            - VAL = '1' : find all / filter on multi-player-games
+            - VAL = '0' : normal games-result as web-page (default)
+         - 'filter_tid=VAL' : filter on only given tournament-id
 
       - Errors:
          - all errors of: [E-LOGIN], [E-GEN]
 
       - Result (JSON) = result-list see section (2d) with list of objects dependent on view:
-         - only fields are listed here, check semantics on section (3a), see "info"-command
+         - only the field-names for the different views are listed here,
+         - the fields content and semantics are the same as for the game-object "info"-command (see above (3a))
 
-         * VIEW = 'status'
-           game_id, tournament_id, game_status, game_prio, move_id,
-           game_type, ruleset, size, handicap, komi, rated,
-           moves, move_color, time_lastmove, time_remaining,
-           opp_uid, opp_handle, opp_name, opp_rating, opp_lastaccess
+         * VIEW = 'status' :
+            - full set of fields is returned for each list-element as for "info"-command
 
-         * VIEW = 'running' | 'finished' | 'observing' | 'observed':
-           - not defined ATM -> see 'status'
-           - to-specify:
-             black|white_user (nested object according to WITH-option),
-             black|white_gameinfo.remtime
+         * VIEW = 'observe' (all observed games  OR  games i'm observing) :
+            - full set of fields is returned for each list-element as for "info"-command
+            - only for "all observed games" the following additional fields are appended to the result:
 
-         * VIEW = 'mpg':
-           - not defined ATM -> see 'status'
+                  {
+                     "obs_count" : 3,        # number of observers of the game
+                     "obs_mine" : 1,         # 1=observed game is one of logged-in user, 0=otherwise
+                  }
 
-
+         * VIEW = 'running' | 'finished'
 
    "delete" : deletes specified game
       - required opts: GAME_ID, MOVE_ID
@@ -858,6 +874,7 @@ Examples of game-playing cycle:
    # get game-notes
    do_quick.php?obj=game&cmd=get_notes&gid=12345
 
+   # TODO add examples for all views
    # retrieve list of my running-games in JSON-style list-format
    do_quick.php?obj=game&cmd=list&view=running&uid=mine&lstyle=json&with=user_id
 

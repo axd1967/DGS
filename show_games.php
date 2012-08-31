@@ -443,12 +443,12 @@ $GLOBALS['ThePage'] = new Page('GamesList');
    {
       $gtable->add_tablehead(17, T_('Black name#header'), 'User', 0, 'blackName+');
       $gtable->add_tablehead(18, T_('Black userid#header'), 'User', 0, 'blackHandle+');
-      $gtable->add_tablehead(26, T_('Black start rating#header'), 'Rating', 0, 'blackStartRating-');
-      $gtable->add_tablehead(19, T_('Black rating#header'), 'Rating', 0, 'blackRating-');
+      $gtable->add_tablehead(26, T_('Black start rating#header'), 'Rating', 0, 'Black_Start_Rating-');
+      $gtable->add_tablehead(19, T_('Black rating#header'), 'Rating', 0, 'blackRating2-');
       $gtable->add_tablehead(20, T_('White name#header'), 'User', 0, 'whiteName+');
       $gtable->add_tablehead(21, T_('White userid#header'), 'User', 0, 'whiteHandle+');
-      $gtable->add_tablehead(29, T_('White start rating#header'), 'Rating', 0, 'whiteStartRating-');
-      $gtable->add_tablehead(22, T_('White rating#header'), 'Rating', 0, 'whiteRating-');
+      $gtable->add_tablehead(29, T_('White start rating#header'), 'Rating', 0, 'White_Start_Rating-');
+      $gtable->add_tablehead(22, T_('White rating#header'), 'Rating', 0, 'whiteRating2-');
    }
    else if( $finished ) //FU+FA ?UNION
    {
@@ -456,15 +456,15 @@ $GLOBALS['ThePage'] = new Page('GamesList');
       {
          $gtable->add_tablehead(17, T_('Black name#header'), 'User', 0, 'blackName+');
          $gtable->add_tablehead(18, T_('Black userid#header'), 'User', 0, 'blackHandle+');
-         $gtable->add_tablehead(26, T_('Black start rating#header'), 'Rating', 0, 'blackStartRating-');
+         $gtable->add_tablehead(26, T_('Black start rating#header'), 'Rating', 0, 'Black_Start_Rating-');
          $gtable->add_tablehead(27, T_('Black end rating#header'), 'Rating', 0, 'blackEndRating-');
-         $gtable->add_tablehead(19, T_('Black rating#header'), 'Rating', 0, 'blackRating-');
+         $gtable->add_tablehead(19, T_('Black rating#header'), 'Rating', 0, 'blackRating2-');
          $gtable->add_tablehead(28, T_('Black rating diff#header'), 'Number', 0, 'blackDiff-');
          $gtable->add_tablehead(20, T_('White name#header'), 'User', 0, 'whiteName+');
          $gtable->add_tablehead(21, T_('White userid#header'), 'User', 0, 'whiteHandle+');
-         $gtable->add_tablehead(29, T_('White start rating#header'), 'Rating', 0, 'whiteStartRating-');
+         $gtable->add_tablehead(29, T_('White start rating#header'), 'Rating', 0, 'White_Start_Rating-');
          $gtable->add_tablehead(30, T_('White end rating#header'), 'Rating', 0, 'whiteEndRating-');
-         $gtable->add_tablehead(22, T_('White rating#header'), 'Rating', 0, 'whiteRating-');
+         $gtable->add_tablehead(22, T_('White rating#header'), 'Rating', 0, 'whiteRating2-');
          $gtable->add_tablehead(31, T_('White rating diff#header'), 'Number', 0, 'whiteDiff-');
       }
       else //FU ?UNION
@@ -488,12 +488,12 @@ $GLOBALS['ThePage'] = new Page('GamesList');
       {
          $gtable->add_tablehead(17, T_('Black name#header'), 'User', 0, 'blackName+');
          $gtable->add_tablehead(18, T_('Black userid#header'), 'User', 0, 'blackHandle+');
-         $gtable->add_tablehead(26, T_('Black start rating#header'), 'Rating', 0, 'blackStartRating-');
-         $gtable->add_tablehead(19, T_('Black rating#header'), 'Rating', 0, 'blackRating-');
+         $gtable->add_tablehead(26, T_('Black start rating#header'), 'Rating', 0, 'Black_Start_Rating-');
+         $gtable->add_tablehead(19, T_('Black rating#header'), 'Rating', 0, 'blackRating2-');
          $gtable->add_tablehead(20, T_('White name#header'), 'User', 0, 'whiteName+');
          $gtable->add_tablehead(21, T_('White userid#header'), 'User', 0, 'whiteHandle+');
-         $gtable->add_tablehead(29, T_('White start rating#header'), 'Rating', 0, 'whiteStartRating-');
-         $gtable->add_tablehead(22, T_('White rating#header'), 'Rating', 0, 'whiteRating-');
+         $gtable->add_tablehead(29, T_('White start rating#header'), 'Rating', 0, 'White_Start_Rating-');
+         $gtable->add_tablehead(22, T_('White rating#header'), 'Rating', 0, 'whiteRating2-');
       }
       else //RU ?UNION
       {
@@ -621,8 +621,8 @@ $GLOBALS['ThePage'] = new Page('GamesList');
    $arr_titles_colors = get_color_titles();
    while( ($show_rows-- > 0) && ($row = mysql_fetch_assoc( $result )) )
    {
-      $oppRating = $blackRating = $whiteRating = NULL;
-      $oppStartRating = $blackStartRating = $whiteStartRating = NULL;
+      $oppRating = $blackRating2 = $whiteRating2 = NULL;
+      $oppStartRating = $Black_Start_Rating = $White_Start_Rating = NULL;
       $oppEndRating = $blackEndRating = $whiteEndRating = NULL;
       $oppRatingDiff = $blackDiff = $whiteDiff = NULL;
       extract($row);
@@ -655,11 +655,11 @@ $GLOBALS['ThePage'] = new Page('GamesList');
          if( $gtable->Is_Column_Displayed[18] )
             $row_arr[18] = "<A href=\"userinfo.php?uid=$blackID\">" . $blackHandle . "</a>";
          if( $gtable->Is_Column_Displayed[26] )
-            $row_arr[26] = echo_rating($blackStartRating,true,$blackID);
+            $row_arr[26] = echo_rating($Black_Start_Rating,true,$blackID);
          if( $finished && $gtable->Is_Column_Displayed[27] )
             $row_arr[27] = echo_rating($blackEndRating,true,$blackID);
          if( $gtable->Is_Column_Displayed[19] )
-            $row_arr[19] = echo_rating($blackRating,true,$blackID);
+            $row_arr[19] = echo_rating($blackRating2,true,$blackID);
          if( $finished && $gtable->Is_Column_Displayed[28] )
          {
             if( isset($blackDiff) )
@@ -670,11 +670,11 @@ $GLOBALS['ThePage'] = new Page('GamesList');
          if( $gtable->Is_Column_Displayed[21] )
             $row_arr[21] = "<A href=\"userinfo.php?uid=$whiteID\">" . $whiteHandle . "</a>";
          if( $gtable->Is_Column_Displayed[29] )
-            $row_arr[29] = echo_rating($whiteStartRating,true,$whiteID);
+            $row_arr[29] = echo_rating($White_Start_Rating,true,$whiteID);
          if( $finished && $gtable->Is_Column_Displayed[30] )
             $row_arr[30] = echo_rating($whiteEndRating,true,$whiteID);
          if( $gtable->Is_Column_Displayed[22] )
-            $row_arr[22] = echo_rating($whiteRating,true,$whiteID);
+            $row_arr[22] = echo_rating($whiteRating2,true,$whiteID);
          if( $finished && $gtable->Is_Column_Displayed[31] )
          {
             if( isset($whiteDiff) )

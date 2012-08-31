@@ -208,6 +208,16 @@ class QuickHandler
       return isset($this->with[$with]);
    }
 
+   /*! \brief Resets parts of WITH-option given as elements in array. */
+   function clear_with_options( $arr )
+   {
+      if( is_array($arr) )
+      {
+         foreach( $arr as $opt )
+            unset($this->with[$opt]);
+      }
+   }
+
    function check_list_style( $ltype=QLIST_STYLE_TABLE )
    {
       return ($this->list_style == $ltype);
