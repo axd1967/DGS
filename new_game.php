@@ -25,7 +25,6 @@ require_once 'include/std_classes.php';
 require_once 'include/rating.php';
 require_once 'include/table_columns.php';
 require_once 'include/form_functions.php';
-require_once 'include/classlib_game.php';
 require_once 'include/message_functions.php';
 require_once 'include/game_functions.php';
 require_once 'include/time_functions.php';

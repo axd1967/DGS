@@ -23,7 +23,8 @@ chdir( '../' );
 require_once( "include/std_functions.php" );
 require_once( "include/board.php" );
 require_once( "include/move.php" );
-require_once( 'include/classlib_game.php' );
+require_once( "include/game_functions.php" );
+
 
 {
    disable_cache();

@@ -37,8 +37,9 @@ function error($err, $debugmsg=NULL)
 
 require_once( "include/quick_common.php" );
 require_once( "include/connect2mysql.php" );
-require_once( "include/classlib_game.php" );
 require_once( "include/std_functions.php" );
+require_once( "include/game_functions.php" );
+
 
 $TheErrors->set_mode(ERROR_MODE_PRINT);
 

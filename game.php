@@ -40,7 +40,6 @@ require_once( "include/game_functions.php" );
 require_once( "include/form_functions.php" );
 require_once( "include/board.php" );
 require_once( "include/move.php" );
-require_once( 'include/classlib_game.php' );
 require_once( 'include/classlib_user.php' );
 require_once( 'include/time_functions.php' );
 require_once( "include/rating.php" );

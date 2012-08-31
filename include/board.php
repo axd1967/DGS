@@ -19,7 +19,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 require_once( 'include/classlib_userconfig.php' );
 require_once( "include/coords.php" );
-require_once( 'include/classlib_game.php' );
+require_once( "include/game_functions.php" );
 
 if( !defined('EDGE_SIZE') )
    define('EDGE_SIZE', 10);

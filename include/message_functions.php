@@ -27,7 +27,6 @@ require_once 'include/game_functions.php';
 require_once 'include/time_functions.php';
 require_once 'include/utilities.php';
 require_once 'include/error_codes.php';
-require_once 'include/classlib_game.php';
 require_once 'include/shape_control.php';
 require_once 'include/make_game.php';
 

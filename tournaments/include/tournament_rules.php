@@ -27,7 +27,6 @@ require_once 'include/game_functions.php';
 require_once 'include/make_game.php';
 require_once 'include/rating.php';
 require_once 'include/db/shape.php';
-require_once 'include/classlib_game.php';
 require_once 'tournaments/include/tournament_globals.php';
 require_once 'tournaments/include/tournament_helper.php';
 

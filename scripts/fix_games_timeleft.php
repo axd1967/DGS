@@ -21,7 +21,8 @@ chdir( '../' );
 require_once( "include/std_functions.php" );
 require_once( "include/std_classes.php" );
 require_once( "include/time_functions.php" );
-require_once( "include/classlib_game.php" );
+require_once( "include/game_functions.php" );
+
 
 {
    connect2mysql();

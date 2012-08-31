@@ -19,7 +19,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 //$TranslateGroups[] = "Game";
 
-require_once 'include/classlib_game.php';
+require_once 'include/game_functions.php';
 
 
 
