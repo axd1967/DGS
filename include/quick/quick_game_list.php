@@ -18,12 +18,14 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
 require_once 'include/quick/quick_handler.php';
+require_once 'include/quick/quick_game_info.php';
 require_once 'include/std_functions.php';
 require_once 'include/std_classes.php';
 require_once 'include/classlib_user.php';
 require_once 'include/time_functions.php';
+require_once 'include/game_functions.php';
 require_once 'include/rating.php';
-require_once 'include/classlib_game.php';
+require_once 'include/gamelist_control.php';
 
 
  /*!
@@ -41,11 +43,14 @@ define('GAMELIST_OPT_UID', 'uid');
 define('QGAMELIST_OPTIONS', 'view|uid');
 
 define('GAMELIST_OPTVAL_VIEW_STATUS', 'status');
+define('GAMELIST_OPTVAL_VIEW_OBSERVE', 'observe');
 define('GAMELIST_OPTVAL_VIEW_RUNNING', 'running');
 define('GAMELIST_OPTVAL_VIEW_FINISHED', 'finished');
-define('GAMELIST_OPTVAL_VIEW_OBSERVING', 'observing');
-define('GAMELIST_OPTVAL_VIEW_OBSERVED', 'observed');
-define('CHECK_GAMELIST_OPTVAL_VIEW', 'status|running|finished|observing|observed');
+define('CHECK_GAMELIST_OPTVAL_VIEW', 'status|observe|running|finished');
+
+define('GAMELIST_FILTER_MPG', 'mpg');
+define('GAMELIST_FILTER_TID', 'tid');
+define('GAMELIST_FILTERS', 'mpg|tid');
 
 
  /*!
@@ -55,20 +60,20 @@ define('CHECK_GAMELIST_OPTVAL_VIEW', 'status|running|finished|observing|observed
   */
 class QuickHandlerGameList extends QuickHandler
 {
-   var $view;
-   var $opt_uid; // original option: int | 'mine' | 'all'
-   var $uid; // 0 | int>0
+   var $opt_view;
+   var $opt_uid; // original option: int | 'all' | 'mine'
 
-   var $games;
+   var $glc; // GameListControl
+   var $game_result_rows;
 
    function QuickHandlerGameList( $quick_object )
    {
       parent::QuickHandler( $quick_object );
-      $this->view = '';
-      $this->opt_uid = '';
-      $this->uid = 0;
+      $this->opt_view = '';
+      $this->opt_uid = 0;
 
-      $this->games = null;
+      $this->glc = null;
+      $this->game_result_rows = null;
    }
 
 
@@ -76,15 +81,22 @@ class QuickHandlerGameList extends QuickHandler
 
    function canHandle( $obj, $cmd ) // static
    {
-      return false; // TODO: not implemented yet
       return ( $obj == QOBJ_GAME ) && QuickHandler::matchRegex(GAMELIST_COMMANDS, $cmd);
    }
 
    function parseURL()
    {
       parent::checkArgsUnknown(QGAMELIST_OPTIONS);
-      $this->view = get_request_arg(GAMELIST_OPT_VIEW);
+      parent::parseFilters(GAMELIST_FILTERS);
+
+      $this->opt_view = get_request_arg(GAMELIST_OPT_VIEW);
       $this->opt_uid = get_request_arg(GAMELIST_OPT_UID);
+
+      // filter-defaults
+      if( !isset($this->filters[GAMELIST_FILTER_MPG]) )
+         $this->filters[GAMELIST_FILTER_MPG] = 0; // default: OFF
+      if( !ALLOW_TOURNAMENTS || !isset($this->filters[GAMELIST_FILTER_TID]) )
+         $this->filters[GAMELIST_FILTER_TID] = 0; // default: 0
    }
 
    function prepare()
@@ -98,105 +110,85 @@ class QuickHandlerGameList extends QuickHandler
       $cmd = $this->quick_object->cmd;
 
       // check args
-      QuickHandler::checkArgMandatory( $dbgmsg, GAMELIST_OPT_VIEW, $this->view );
-      if( !QuickHandler::matchRegex(CHECK_GAMELIST_OPTVAL_VIEW, $this->view) )
-         error('invalid_args', "$dbgmsg.check.opt.view({$this->view})");
-      $view = $this->view;
+      QuickHandler::checkArgMandatory( $dbgmsg, GAMELIST_OPT_VIEW, $this->opt_view );
+      if( !QuickHandler::matchRegex(CHECK_GAMELIST_OPTVAL_VIEW, $this->opt_view) )
+         error('invalid_args', "$dbgmsg.check.opt.view({$this->opt_view})");
 
+      $uid = 0;
       if( is_numeric($this->opt_uid) && $this->opt_uid > 0 )
-         $this->uid = (int)$this->opt_uid;
-      elseif( (string)$this->opt_uid == '' || $this->opt_uid == 'mine' )
-         $this->uid = $my_id;
-      //elseif( $this->opt_uid == 'all' ) //TODO see below
-         //$this->uid = 'all';
+         $uid = (int)$this->opt_uid;
+      elseif( $this->opt_uid == 'all' )
+         $uid = 'all';
+      elseif( (string)$this->opt_uid == '' || $this->opt_uid == 0 || $this->opt_uid == 'mine' )
+         $uid = $my_id;
       else
          error('invalid_args', "$dbgmsg.check.opt.uid({$this->opt_uid})");
-      $uid = $this->uid; // int>0 (user-id) | 'all'
 
-      $dbgmsg = "QuickHandlerGameList.prepare($view,$uid)";
+      // check filters
+      $f_ext_tid = $this->filters[GAMELIST_FILTER_TID];
+      if( !ALLOW_TOURNAMENTS || !is_numeric($f_ext_tid) || $f_ext_tid < 0 )
+         $f_ext_tid = 0;
+      $f_mpg = (bool)$this->filters[GAMELIST_FILTER_MPG];
 
-      if( !is_numeric($uid) )
-         error('invalid_args', "$dbgmsg.check.view.uid");
+      $dbgmsg = "QuickHandlerGameList.prepare({$this->opt_view},$uid)";
 
-      //TODO handle offset + limit on lists before implementing uid=all; status=no-limit
-      //TODO handle uid=all
 
       // prepare command: list
 
-      $qsql = new QuerySQL(
-         SQLP_FIELDS,
-            'G.*',
-            'G.Flags+0 AS X_Flags',
-            'UNIX_TIMESTAMP(G.Starttime) AS X_Starttime',
-            'UNIX_TIMESTAMP(G.Lastchanged) AS X_Lastchanged',
-            'COALESCE(Clock.Ticks,0) AS X_Ticks' );
-
-      if( $view == GAMELIST_OPTVAL_VIEW_STATUS )
+      $glc = new GameListControl();
+      if( $this->opt_view == GAMELIST_OPTVAL_VIEW_STATUS )
       {
-         $qsql->add_part( SQLP_FROM, 'Games AS G', 'LEFT JOIN Clock ON Clock.ID=G.ClockUsed' );
-         $qsql->add_part( SQLP_WHERE, "G.ToMove_ID=$uid", 'Status' . IS_STARTED_GAME );
+         if( $uid != $my_id )
+            error('invalid_args', "$dbgmsg.check.view.only_mine");
 
-         // handle next-game-order
-         $next_game_order = ($uid == $my_id)
-            ? $player_row['NextGameOrder']
-            : NextGameOrder::load_user_next_game_order( $uid );
-         if( $next_game_order == NGO_PRIO )
-         {
-            $qsql->add_part( SQLP_FIELDS, 'COALESCE(GP.Priority,0) AS X_Priority' );
-            $qsql->add_part( SQLP_FROM, "LEFT JOIN GamesPriority AS GP ON GP.gid=G.ID AND GP.uid=$uid" );
-         }
-         $qsql->add_part( SQLP_ORDER,
-            NextGameOrder::get_next_game_order( $next_game_order, 'G', false ) );
+         $glc->setView( GAMEVIEW_STATUS, $uid );
+
+         // allow returning ALL entries for status-view
+         if( @$_REQUEST[QOPT_LIMIT] === 'all' )
+            $this->list_limit = $this->list_offset = 0;
+
+         $qsql = GameListControl::build_game_list_query_status_view(
+            $uid, $this->is_with_option(QWITH_NOTES), $this->is_with_option(QWITH_PRIO), $f_mpg, $f_ext_tid );
+
+         if( $this->is_with_option(QWITH_USER_ID) )
+            GameListControl::extend_game_list_query_with_user_info( $qsql );
       }
-      elseif( $view == GAMELIST_OPTVAL_VIEW_RUNNING )
+      else //view running|finished|observe
       {
-         $qsql->add_part( SQLP_FROM, 'Games AS G', 'LEFT JOIN Clock ON Clock.ID=G.ClockUsed' );
-         $qsql->add_part( SQLP_WHERE, 'G.Status' . IS_STARTED_GAME );
-         $qsql->add_part( SQLP_UNION_WHERE, "G.White_ID=$uid", "G.Black_ID=$uid" );
-         $qsql->useUnionAll();
-      }
-      elseif( $view == GAMELIST_OPTVAL_VIEW_FINISHED )
-      {
-         $qsql->add_part( SQLP_FROM, 'Games AS G', 'LEFT JOIN Clock ON Clock.ID=G.ClockUsed' );
-         $qsql->add_part( SQLP_WHERE, "G.Status='".GAME_STATUS_FINISHED."'" );
-         $qsql->add_part( SQLP_UNION_WHERE, "G.White_ID=$uid", "G.Black_ID=$uid" );
-         $qsql->useUnionAll();
-      }
-      elseif( $view == GAMELIST_OPTVAL_VIEW_OBSERVING || $view == GAMELIST_OPTVAL_VIEW_OBSERVED )
-      {
-         if( (string)$this->opt_uid != '' && $uid != $my_id )
-            error('invalid_args', "$dbgmsg.check.view.uid.only_mine");
+         //TODO
+         error('invalid_args', "$dbgmsg.not_supported_view");
 
-         $qsql->add_part( SQLP_FROM,
-               'Observers AS Obs',
-               'INNER JOIN Games AS G ON G.ID=Obs.gid',
-               'LEFT JOIN Clock ON Clock.ID=G.ClockUsed' );
+         if( $this->opt_view == GAMELIST_OPTVAL_VIEW_OBSERVE && !($uid === 'all' || $uid == $my_id) )
+            error('invalid_args', "$dbgmsg.check.view.uid.only_all_or_mine");
+         elseif( $this->opt_view != GAMELIST_OPTVAL_VIEW_OBSERVE && $uid === 'all' ) // would need restriction as web-site
+            error('invalid_args', "$dbgmsg.check.view.uid.all.not_supported({$this->opt_uid})");
 
-         if( $view == GAMELIST_OPTVAL_VIEW_OBSERVING )
-            $qsql->add_part( SQLP_WHERE, "Obs.uid=$my_id" );
+         if( $this->opt_view == GAMELIST_OPTVAL_VIEW_OBSERVE )
+            $glc->setView( ($uid === 'all' ? GAMEVIEW_OBSERVE_ALL : GAMEVIEW_OBSERVE_MINE), $uid );
+         else // running/finished
+            $glc->setView( ($this->opt_view == GAMELIST_OPTVAL_VIEW_RUNNING ? GAMEVIEW_RUNNING : GAMEVIEW_FINISHED), $uid );
+
+         $glc->mp_game = $f_mpg;
+         $glc->ext_tid = $f_ext_tid;
+
+         // only load notes/ratingdiff/rem-time if field requested by client to reduce server-load
+         // avoiding additional joins on respective tables: GamesNotes, Ratinglog, Clock
+         $is_mine = ($uid == $my_id);
+         $show_notes = (LIST_GAMENOTE_LEN>0 && !$glc->is_observe() && !$glc->is_all() && $is_mine); // FU+RU subset
+         $glc->load_notes = ($show_notes && $this->is_with_option(QWITH_NOTES) );
+         $load_remaining_time = ( $glc->is_running() && !$glc->is_all() );
+
+         $qsql = $glc->build_games_query( $this->is_with_option(QWITH_RATINGDIFF), $load_remaining_time );
+
+         // default order
+         if( $glc->is_observe_all() )
+            $qsql->add_part( SQLP_ORDER, 'X_ObsCount DESC', 'Lastchanged DESC', 'ID DESC' );
          else
-         {
-            $qsql->add_part( SQLP_FIELDS, 'COUNT(Obs.uid) AS X_ObsCount' );
-            $qsql->add_part( SQLP_GROUP, 'Obs.gid' );
-         }
+            $qsql->add_part( SQLP_ORDER, 'Lastchanged DESC', 'ID DESC' );
       }
+      $this->glc = $glc;
 
-      if( !$qsql->has_part(SQLP_ORDER) )
-         $qsql->add_part( SQLP_ORDER, 'Lastchanged ASC', 'ID' );
-
-      // add user-info
-      if( $this->is_with_option(QWITH_USER_ID) )
-      {
-         $qsql->add_part( SQLP_FIELDS,
-            'black.Handle AS Black_Handle',
-            'black.Name AS Black_Name',
-            'white.Handle AS White_Handle',
-            'white.Name AS White_Name' );
-         $qsql->add_part( SQLP_FROM,
-            'INNER JOIN Players AS black ON black.ID=G.Black_ID',
-            'INNER JOIN Players AS white ON white.ID=G.White_ID' );
-      }
-
+      $this->add_query_limits( $qsql, /*calc-rows*/true );
 
       // load games
       $arr = array();
@@ -204,80 +196,32 @@ class QuickHandlerGameList extends QuickHandler
       while( $row = mysql_fetch_assoc($result) )
          $arr[] = $row;
       mysql_free_result($result);
-      $this->games = $arr;
+      $this->game_result_rows = $arr;
+
+      $this->read_found_rows();
    }//prepare
 
    /*! \brief Processes command for object; may fire error(..) and perform db-operations. */
    function process()
    {
       $out = array();
-      if( is_array($this->games) )
+
+      if( is_array($this->game_result_rows) )
       {
-         foreach( $this->games as $game_row )
-            $out[] = $this->build_game_info($game_row);
+         foreach( $this->game_result_rows as $game_row )
+         {
+            $arr = array();
+            $out[] = QuickHandlerGameInfo::fill_game_info($this, $arr, $game_row);
+         }
       }
 
       //TODO set list-order
       $this->add_list( QOBJ_GAME, $out );
    }//process
 
-   function build_game_info( $row )
-   {
-      $out = array();
-      $color = ($row['ToMove_ID'] == $row['Black_ID']) ? BLACK : WHITE;
 
-      $out['id'] = (int)$row['ID'];
-      //$out['double_id', (int)$row['DoubleGame_ID'];
-      $out['tournament_id'] = (int)$row['tid'];
-      $out['game_type'] = GameTexts::format_game_type($row['GameType'], $row['GamePlayers'], true);
-      $out['status'] = strtoupper($row['Status']);
-      //$out['flags'] = QuickHandlerGameInfo::convertGameFlags($row['X_Flags']);
-      //$out['score'] = ( $row['Status'] == GAME_STATUS_FINISHED )
-            //? score2text($row['Score'], /*verbose*/false, /*engl*/true, /*quick*/true)
-            //: "";
-      //$out['rated'] = ($row['Rated'] == 'N') ? 0 : 1;
-      //$out['ruleset'] = strtoupper($row['Ruleset']);
-      //$out['size'] = (int)$row['Size'];
-      //$out['komi'] = (float)$row['Komi'];
-      //$out['handicap'] = (int)$row['Handicap'];
-      //$out['handicap_mode'] = ($row['StdHandicap'] == 'Y') ? 'STD' : 'FREE';
+   // ------------ static functions ----------------------------
 
-      //$out['time_started'] = QuickHandler::formatDate(@$row['X_Starttime']);
-      $out['time_lastmove'] = QuickHandler::formatDate(@$row['X_Lastchanged']);
-      //$out['time_weekend_clock'] = ($row['WeekendClock'] == 'Y') ? 1 : 0;
-      //$out['time_mode'] = strtoupper($row['Byotype']);
-      //$out['time_limit'] =
-         //TimeFormat::echo_time_limit(
-            //$row['Maintime'], $row['Byotype'], $row['Byotime'], $row['Byoperiods'],
-            //TIMEFMT_QUICK|TIMEFMT_ENGL|TIMEFMT_SHORT|TIMEFMT_ADDTYPE);
-
-      $out['move_id'] = (int)$row['Moves'];
-      $out['move_color'] = ($color == BLACK) ? 'B' : 'W';
-      //$out['move_uid'] = (int)$row['ToMove_ID'];
-      //$out['move_last'] = strtolower($row['Last_Move']);
-      //$out['move_ko'] = ($row['X_Flags'] & GAMEFLAGS_KO) ? 1 : 0;
-
-      foreach( array( BLACK, WHITE ) as $col )
-      {
-         $icol = ($col == BLACK) ? 'Black' : 'White';
-         $prefix = strtolower($icol);
-         $uid = (int)$row[$icol.'_ID'];
-         $time_remaining = build_time_remaining( $row, $col,
-               /*is_to_move*/ ( $uid == $row['ToMove_ID'] ),
-               TIMEFMT_QUICK|TIMEFMT_ADDTYPE|TIMEFMT_ZERO );
-
-         $out[$prefix.'_user'] = $this->build_obj_user2($uid, $row, $icol.'_');
-         $out[$prefix.'_gameinfo'] = array(
-            //'prisoners'        => (int)$row[$icol.'_Prisoners'],
-            'remtime'          => $time_remaining['text'],
-            //'rating_start'     => echo_rating($row[$icol.'_Start_Rating'], /*perc*/1, /*uid*/0, /*engl*/true, /*short*/1),
-            //'rating_start_elo' => echo_rating_elo($row[$icol.'_Start_Rating']),
-            //'rating_end'       => echo_rating($row[$icol.'_End_Rating'], /*perc*/1, /*uid*/0, /*engl*/true, /*short*/1),
-            //'rating_end_elo'   => echo_rating_elo($row[$icol.'_End_Rating']),
-         );
-      }
-      return $out;
-   }//build_game_info
 
 } // end of 'QuickHandlerGameList'
 

@@ -50,7 +50,6 @@ class QuickHandlerGameInfo extends QuickHandler
 
    var $game_row;
    var $gamenotes;
-   var $user_rows;
 
    function QuickHandlerGameInfo( $quick_object )
    {
@@ -59,7 +58,6 @@ class QuickHandlerGameInfo extends QuickHandler
 
       $this->game_row = null;
       $this->gamenotes = null;
-      $this->user_rows = null;
    }
 
 
@@ -96,19 +94,18 @@ class QuickHandlerGameInfo extends QuickHandler
 
       if( $cmd == QCMD_INFO )
       {
-         $this->game_row = mysql_single_fetch( "QuickHandlerGameInfo.prepare.find_game3($gid)",
-                    "SELECT G.*, "
-                    ."G.Flags+0 AS X_Flags "
-                    .",UNIX_TIMESTAMP(G.Starttime) AS X_Starttime "
-                    .",UNIX_TIMESTAMP(G.Lastchanged) AS X_Lastchanged "
-                    .",COALESCE(Clock.Ticks,0) AS X_Ticks "
-                    ."FROM Games AS G LEFT JOIN Clock ON Clock.ID=G.ClockUsed "
-                    ."WHERE G.ID=$gid LIMIT 1" )
-               or error('unknown_game', "QuickHandlerGameInfo.prepare.find_game4($gid)");
+         $glc = new GameListControl();
+         $glc->setView( GAMEVIEW_INFO, 'all' );
 
-         if( $this->is_with_option(QWITH_USER_ID) )
-            $this->user_rows = User::load_quick_userinfo( array(
-               (int)$this->game_row['Black_ID'], (int)$this->game_row['White_ID'] ));
+         $qsql = $glc->build_games_query( $this->is_with_option(QWITH_RATINGDIFF), /*remtime*/true );
+         $qsql->add_part( SQLP_WHERE, "G.ID=$gid" );
+         $qsql->add_part( SQLP_LIMIT, 1 );
+
+         if( $this->is_with_option(QWITH_NOTES) )
+            GameHelper::extend_query_with_game_notes( $qsql, $uid, 'G' );
+
+         $this->game_row = mysql_single_fetch( "QuickHandlerGameInfo.prepare.find_game3($gid)", $qsql->get_select() )
+               or error('unknown_game', "QuickHandlerGameInfo.prepare.find_game4($gid)");
       }
       elseif( $cmd == GAMECMD_GET_NOTES )
       {
@@ -124,73 +121,10 @@ class QuickHandlerGameInfo extends QuickHandler
    {
       $cmd = $this->quick_object->cmd;
       if( $cmd == QCMD_INFO )
-         $this->process_cmd_info();
+         QuickHandlerGameInfo::fill_game_info($this, $this->quick_object->result, $this->game_row);
       elseif( $cmd == GAMECMD_GET_NOTES )
          $this->addResultKey( 'notes', (is_null($this->gamenotes) ? "" : $this->gamenotes) );
    }
-
-   function process_cmd_info()
-   {
-      $row = $this->game_row;
-      $color = ($row['ToMove_ID'] == $row['Black_ID']) ? BLACK : WHITE;
-
-      $this->addResultKey( 'id', (int)$row['ID'] );
-      $this->addResultKey( 'double_id', (int)$row['DoubleGame_ID'] );
-      $this->addResultKey( 'tournament_id', (int)$row['tid'] );
-      $this->addResultKey( 'game_action',
-         GameHelper::get_quick_game_action($row['Status'], (int)$row['Handicap'], (int)$row['Moves'],
-            new FairKomiNegotiation( GameSetup::new_from_game_setup($row['GameSetup']), $row ) ) );
-      $this->addResultKey( 'status', strtoupper($row['Status']) );
-      $this->addResultKey( 'flags', QuickHandlerGameInfo::convertGameFlags($row['X_Flags']) );
-      $this->addResultKey( 'score', ( $row['Status'] == GAME_STATUS_FINISHED )
-            ? score2text($row['Score'], /*verbose*/false, /*engl*/true, /*quick*/true)
-            : "" );
-      $this->addResultKey( 'rated', ($row['Rated'] == 'N') ? 0 : 1 );
-      $this->addResultKey( 'game_type', GameTexts::format_game_type($row['GameType'], $row['GamePlayers'], true) );
-      $this->addResultKey( 'ruleset', strtoupper($row['Ruleset']) );
-      $this->addResultKey( 'size', (int)$row['Size'] );
-      $this->addResultKey( 'komi', (float)$row['Komi'] );
-      $this->addResultKey( 'handicap', (int)$row['Handicap'] );
-      $this->addResultKey( 'handicap_mode', ($row['StdHandicap'] == 'Y') ? 'STD' : 'FREE' );
-
-      $this->addResultKey( 'shape_id', (int)$row['ShapeID'] );
-      $this->addResultKey( 'shape_snapshot', $row['ShapeSnapshot'] );
-
-      $this->addResultKey( 'time_started', QuickHandler::formatDate(@$row['X_Starttime']) );
-      $this->addResultKey( 'time_lastmove', QuickHandler::formatDate(@$row['X_Lastchanged']) );
-      $this->addResultKey( 'time_weekend_clock', ($row['WeekendClock'] == 'Y') ? 1 : 0 );
-      $this->addResultKey( 'time_mode', strtoupper($row['Byotype']) );
-      $this->addResultKey( 'time_limit',
-         TimeFormat::echo_time_limit(
-            $row['Maintime'], $row['Byotype'], $row['Byotime'], $row['Byoperiods'],
-            TIMEFMT_QUICK|TIMEFMT_ENGL|TIMEFMT_SHORT|TIMEFMT_ADDTYPE) );
-
-      $this->addResultKey( 'move_id', (int)$row['Moves'] );
-      $this->addResultKey( 'move_color', ($color == BLACK) ? 'B' : 'W' );
-      $this->addResultKey( 'move_uid', (int)$row['ToMove_ID'] );
-      $this->addResultKey( 'move_last', strtolower($row['Last_Move']) );
-      $this->addResultKey( 'move_ko', ($row['X_Flags'] & GAMEFLAGS_KO) ? 1 : 0 );
-
-      foreach( array( BLACK, WHITE ) as $col )
-      {
-         $icol = ($col == BLACK) ? 'Black' : 'White';
-         $prefix = strtolower($icol);
-         $uid = (int)$row[$icol.'_ID'];
-         $time_remaining = build_time_remaining( $row, $col,
-               /*is_to_move*/ ( $uid == $row['ToMove_ID'] ),
-               TIMEFMT_QUICK|TIMEFMT_ADDTYPE|TIMEFMT_ZERO );
-
-         $this->addResultKey( $prefix.'_user', $this->build_obj_user($uid, $this->user_rows, 'rating') );
-         $this->addResultKey( $prefix.'_gameinfo', array(
-            'prisoners'        => (int)$row[$icol.'_Prisoners'],
-            'remtime'          => $time_remaining['text'],
-            'rating_start'     => echo_rating($row[$icol.'_Start_Rating'], /*perc*/1, /*uid*/0, /*engl*/true, /*short*/1),
-            'rating_start_elo' => echo_rating_elo($row[$icol.'_Start_Rating']),
-            'rating_end'       => echo_rating($row[$icol.'_End_Rating'], /*perc*/1, /*uid*/0, /*engl*/true, /*short*/1),
-            'rating_end_elo'   => echo_rating_elo($row[$icol.'_End_Rating']),
-         ));
-      }
-   }//process_cmd_info
 
 
    // ------------ static functions ----------------------------
@@ -204,6 +138,114 @@ class QuickHandlerGameInfo extends QuickHandler
          $out[] = 'ADMRESULT';
       return implode(',', $out);
    }
+
+   function fill_game_info( $quick_handler, &$out, $row )
+   {
+      //$ST = $this->glc->is_status();
+      //$OB = $this->glc->is_observe();
+      //$OA = $this->glc->is_observe_all();
+      //$RU = $this->glc->is_running();
+      //$FU = $this->glc->is_finished();
+      //$all = $this->glc->is_all();
+
+      // init init fields
+      $color = ($row['ToMove_ID'] == $row['Black_ID']) ? BLACK : WHITE;
+      $row['Blackhandle'] = @$row['BlackHandle']; // for FK-info
+      $row['Whitehandle'] = @$row['WhiteHandle']; // for FK-info
+      $game_setup = GameSetup::new_from_game_setup($row['GameSetup']);
+
+
+      // output for views: info (INFO), status (ST), observe_mine (OU), observe_all (OA), running-user (RU), finished-user (FU)
+      // DONE views: INFO
+      // TODO views: ST, OU, OA, RU, FU
+
+      $out['id'] = (int)$row['ID'];
+      $out['double_id'] = (int)$row['DoubleGame_ID'];
+      $out['tournament_id'] = (int)$row['tid'];
+      $out['game_action'] =
+         GameHelper::get_quick_game_action($row['Status'], (int)$row['Handicap'], (int)$row['Moves'],
+            new FairKomiNegotiation( $game_setup, $row ) );
+      $out['status'] = strtoupper($row['Status']);
+      $out['flags'] = QuickHandlerGameInfo::convertGameFlags($row['X_GameFlags']);
+      $out['score'] = ( $row['Status'] == GAME_STATUS_FINISHED )
+            ? score2text($row['Score'], /*verbose*/false, /*engl*/true, /*quick*/true)
+            : "";
+
+      $out['game_type'] = GameTexts::format_game_type($row['GameType'], $row['GamePlayers'], true);
+      $out['rated'] = ($row['Rated'] == 'N') ? 0 : 1;
+      $out['ruleset'] = strtoupper($row['Ruleset']);
+      $out['size'] = (int)$row['Size'];
+      $out['komi'] = (float)$row['Komi'];
+      $out['jigo_mode'] = $game_setup->JigoMode;
+      $out['handicap'] = (int)$row['Handicap'];
+      $out['handicap_mode'] = ($row['StdHandicap'] == 'Y') ? 'STD' : 'FREE';
+      $out['shape_id'] = (int)$row['ShapeID'];
+
+      $out['time_started'] = QuickHandler::formatDate(@$row['X_Starttime']);
+      $out['time_lastmove'] = QuickHandler::formatDate(@$row['X_Lastchanged']);
+      $out['time_weekend_clock'] = ($row['WeekendClock'] == 'Y') ? 1 : 0;
+      $out['time_mode'] = strtoupper($row['Byotype']);
+      $out['time_limit'] =
+         TimeFormat::echo_time_limit(
+            $row['Maintime'], $row['Byotype'], $row['Byotime'], $row['Byoperiods'],
+            TIMEFMT_QUICK|TIMEFMT_ENGL|TIMEFMT_SHORT|TIMEFMT_ADDTYPE);
+
+      $out['move_id'] = (int)$row['Moves'];
+      $out['move_count'] = (int)$row['Moves'];
+      $out['move_color'] = ($color == BLACK) ? 'B' : 'W';
+      $out['move_uid'] = (int)$row['ToMove_ID'];
+      $out['move_opp'] = ($color == BLACK) ? (int)$row['White_ID'] : (int)$row['Black_ID'];
+      $out['move_last'] = strtolower($row['Last_Move']);
+      //$out['move_ko'] = ($row['X_GameFlags'] & GAMEFLAGS_KO) ? 1 : 0;
+
+      $out['prio'] = @$row['X_Priority'];
+      if( $quick_handler->is_with_option(QWITH_NOTES) )
+         $out['notes'] = strip_gamenotes( @$row['X_Note'] );
+
+      $game_finished = ($row['Status'] == GAME_STATUS_FINISHED);
+      $game_started = isStartedGame($row['Status']);
+      foreach( array( BLACK, WHITE ) as $col )
+      {
+         $icol = ($col == BLACK) ? 'Black' : 'White';
+         $prefix = strtolower($icol);
+         $uid = (int)$row[$icol.'_ID'];
+         $time_remaining = build_time_remaining( $row, $col,
+               /*is_to_move*/ ( $uid == $row['ToMove_ID'] ),
+               TIMEFMT_QUICK|TIMEFMT_ADDTYPE|TIMEFMT_ZERO );
+
+         // user-info
+         $out[$prefix.'_user'] = $quick_handler->build_obj_user($uid, $row, $prefix, 'country,rating,lastacc');
+
+         // game-info
+         $ginfo = array();
+         $ginfo['prisoners'] = (int)$row[$icol.'_Prisoners'];
+         if( $game_started )
+            $ginfo['remtime'] = $time_remaining['text'];
+         $ginfo['rating_start'] = echo_rating($row[$icol.'_Start_Rating'], /*perc*/1, /*uid*/0, /*engl*/true, /*short*/1);
+         $ginfo['rating_start_elo'] = echo_rating_elo($row[$icol.'_Start_Rating']);
+
+         if( $game_finished )
+         {
+            $ginfo['rating_end']     = echo_rating($row[$icol.'_End_Rating'], /*perc*/1, /*uid*/0, /*engl*/true, /*short*/1);
+            $ginfo['rating_end_elo'] = echo_rating_elo($row[$icol.'_End_Rating']);
+
+            if( $quick_handler->is_with_option(QWITH_RATINGDIFF) )
+            {
+               if( isset($row[$prefix.'Diff']) )
+               {
+                  $rat_diff = $row[$prefix.'Diff'];
+                  $ginfo['rating_diff'] = ( $rat_diff > 0 ? '+' : '' ) . sprintf( "%0.2f", $rat_diff / 100 );
+               }
+               else
+                  $ginfo['rating_diff'] = '';
+            }
+         }
+
+         $out[$prefix.'_gameinfo'] = $ginfo;
+      }
+
+      return $out;
+   }//fill_game_info
 
 } // end of 'QuickHandlerGameInfo'
 
