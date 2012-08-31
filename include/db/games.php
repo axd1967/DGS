@@ -110,6 +110,10 @@ class Games
    var $ShapeSnapshot;
    var $GameSetup;
 
+   // other DB-fields
+
+   var $grow;
+
    /*! \brief Constructs Games-object with specified arguments. */
    function Games( $id=0, $tid=0, $shape_id=0, $starttime=0, $lastchanged=0, $mid=0, $double_gid=0,
                    $black_id=0, $white_id=0, $tomove_id=0, $game_type=GAMETYPE_GO, $game_players='',
@@ -171,6 +175,8 @@ class Games
       $this->Snapshot = $snapshot;
       $this->ShapeSnapshot = $shape_snapshot;
       $this->GameSetup = $game_setup;
+      // other DB-fields
+      $this->grow = null;
    }//constructor
 
    function setStatus( $status )
@@ -397,6 +403,7 @@ class Games
             @$row['ShapeSnapshot'],
             @$row['GameSetup']
          );
+      $g->grow = $row;
       return $g;
    }//new_from_row
 
