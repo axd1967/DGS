@@ -52,6 +52,11 @@ define('QUICK_STD_OPTIONS', 'obj|cmd|test|lstyle|with|fields|limit|off|filter_\\
 // with-options
 define('QWITH_USER_ID', 'user_id'); // include user-id user-fields: id, handle, name
 define('QWITH_FOLDER',  'folder');  // include main folder-fields: id, name, system, color_bg, color_fg
+// object-specific with-options
+define('QWITH_PRIO', 'prio'); // game: include prio-field
+define('QWITH_NOTES', 'notes'); // game: include notes-field
+define('QWITH_RATINGDIFF', 'ratingdiff'); // game: include rating-diff
+
 
 // listtype-option
 define('QLIST_STYLE_TABLE', 'table'); // default
@@ -248,44 +253,36 @@ class QuickHandler
 
    /*!
     * \brief Returns map for user-object; with handle/name-fields only if WITH-option QWITH_USER_ID used.
-    * \param $inclkeys fieldnames to explicitly include additional fields: 'country,rating'
+    * \param $inclkeys fieldnames to explicitly include additional fields: 'country,rating,lastacc'
     */
-   function build_obj_user( $uid, $user_rows=null, $inclkeys='', $always=false )
+   function build_obj_user( $uid, $user_row=null, $prefix='', $inclkeys='', $always=false )
    {
       $userinfo = array( 'id' => $uid );
-      if( ($always || $this->is_with_option(QWITH_USER_ID)) && is_array($user_rows) && is_array(@$user_rows[$uid]) )
+      if( ($always || $this->is_with_option(QWITH_USER_ID)) && is_array($user_row) )
       {
-         $userinfo['handle'] = @$user_rows[$uid]['Handle'];
-         $userinfo['name'] = @$user_rows[$uid]['Name'];
+         $userinfo['handle'] = @$user_row[$prefix.'Handle'];
+         $userinfo['name'] = @$user_row[$prefix.'Name'];
+
          if( strpos($inclkeys, 'country') !== false )
-            $userinfo['country'] = @$user_rows[$uid]['Country'];
+            $userinfo['country'] = @$user_row[$prefix.'Country'];
+
          if( strpos($inclkeys, 'rating') !== false )
          {
-            if( isset($user_rows[$uid]['Rating2']) )
+            if( isset($user_row[$prefix.'Rating2']) )
             {
-               $rating = @$user_rows[$uid]['Rating2'];
+               $rating = $user_row[$prefix.'Rating2'];
                $userinfo['rating'] = echo_rating($rating, /*perc*/1, /*uid*/0, /*engl*/true, /*short*/1 );
-               if( $userinfo['rating'] != '' )
-                  $userinfo['rating_elo'] = $rating;
+               $userinfo['rating_elo'] = $rating;
             }
             else
                $userinfo['rating'] = $userinfo['rating_elo'] = '';
          }
-      }
-      return $userinfo;
-   }
 
-   /*! \brief Returns map for user-object; with handle/name-fields only if WITH-option QWITH_USER_ID used. */
-   function build_obj_user2( $uid, $user_row=null, $prefix='' )
-   {
-      $userinfo = array( 'id' => $uid );
-      if( $this->is_with_option(QWITH_USER_ID) && is_array($user_row) )
-      {
-         $userinfo['handle'] = $user_row[$prefix.'Handle'];
-         $userinfo['name'] = $user_row[$prefix.'Name'];
+         if( strpos($inclkeys, 'lastacc') !== false )
+            $userinfo['last_access'] = QuickHandler::formatDate( @$user_row[$prefix.'X_Lastaccess'] );
       }
       return $userinfo;
-   }
+   }//build_obj_user
 
    function add_query_limits( &$qsql, $calc_rows )
    {
