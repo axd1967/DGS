@@ -27,7 +27,6 @@ require_once( "include/table_columns.php" );
 require_once( "include/game_functions.php" );
 require_once( "include/message_functions.php" );
 require_once( 'include/classlib_userconfig.php' );
-require_once( 'include/classlib_game.php' );
 require_once( 'include/gui_bulletin.php' );
 
 $GLOBALS['ThePage'] = new Page('Status');
@@ -326,21 +325,8 @@ function load_games_to_move( $uid, &$gtable )
    $gtable->use_show_rows(false);
 
    // build status-query (including next-game-order)
-   $qsql = NextGameOrder::build_status_games_query( $uid, IS_STARTED_GAME, $next_game_order );
-   $qsql->add_part( SQLP_FIELDS,
-      "IF(Rated='N','N','Y') AS X_Rated",
-      //extra bits of X_Color are for sorting purposes
-      //b0= White to play, b1= I am White, b4= not my turn, b5= bad or no ToMove info
-      "IF(ToMove_ID=$uid,0,0x10)+IF(White_ID=$uid,2,0)+IF(White_ID=ToMove_ID,1,IF(Black_ID=ToMove_ID,0,0x20)) AS X_Color",
-      "COALESCE(Clock.Ticks,0) AS X_Ticks", //always my clock because always my turn (status page)
-      "UNIX_TIMESTAMP(opp.Lastaccess) AS opp_Lastaccess" );
-   $qsql->add_part( SQLP_FROM,
-      "LEFT JOIN Clock ON Clock.ID=Games.ClockUsed" );
-   if( $load_notes )
-   {
-      $qsql->add_part( SQLP_FIELDS, "GN.Notes AS X_Note" );
-      $qsql->add_part( SQLP_FROM, "LEFT JOIN GamesNotes AS GN ON GN.gid=Games.ID AND GN.uid=$uid" );
-   }
+   $qsql = NextGameOrder::build_status_games_query(
+      $uid, IS_STARTED_GAME, $next_game_order, /*ticks*/true, $load_prio, $load_notes );
 
    $query = $qsql->get_select();
    if( $DEBUG_SQL ) echo "QUERY-GAMES: " . make_html_safe($query) ."<br>\n";
