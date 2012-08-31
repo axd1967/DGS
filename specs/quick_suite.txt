@@ -469,6 +469,9 @@ Request:
 
    quick_do.php?obj=game&cmd=<COMMAND>&gid=<GAME_ID>&move_id=<MOVE_ID>&move=<MOVES>&msg=<MESSAGE>&with=<WITH>&fmt=<FORMAT>&toggle=<TOGGLE>&agree=<AGREE>
 
+   # info | get_notes
+   quick_do.php?obj=game&cmd=<COMMAND>&gid=<GAME_ID>&with=<WITH>
+
    # list
    quick_do.php?obj=game&cmd=list&view=<VIEW>&with=<WITH>&uid=<USER_ID>
 
@@ -515,7 +518,7 @@ Options:
 
    <VIEW> = view for game-list
 
-   <WITH> = optional with-option to deep-load recursive data (see commands)
+   <WITH> = optional with-option to include additional data-fields (see commands)
 
    <FORMAT> = output-format for coordinates (default is "sgf"):
       - "sgf"   : SGF-format without separator, e.g. "bcefnj"
@@ -550,7 +553,10 @@ Commands:
       - optional opts: WITH
 
       - WITH-option:
-         - 'user_id' : additionally return user_id-data (handle + name) for white and black user
+         - 'user_id' : additionally return user_id-data for black + white game-users: handle, name, country, rating, rating_elo, last_access
+         - 'prio'    : additionally return the games priority set by the user, otherwise the field is not included
+         - 'notes'   : additionally return the starting text (ca. 30 chars) of the logged-in users private game-notes
+         - 'ratingdiff' : additionally return the rating-diff for finished games for black + white game-users
 
       - Errors:
          - all errors of: [E-LOGIN], [E-GEN]
@@ -564,65 +570,61 @@ Commands:
             "game_action" : 2,      # game-action as defined for [4.QST]
             "status" : "PLAY",      # game-status: KOMI | SETUP | PLAY | PASS | SCORE | SCORE2 | FINISHED
             "flags" : "HIDDENMSG",  # flags (comma-separated): HIDDENMSG (game contains hidden-messages), ADMRESULT (admin ended game)
-            "score" : "",           # score for finished game only (same format as for status_score-command above)
+            "score" : "",           # score for finished game only (same format as for game-object status_score-command); '' (=empty) if game not finished
 
-            "rated" : 1,            # 0=unrated, 1=rated
             "game_type" : "GO",     # GO | TEAM_GO(N:M) | ZEN_GO (N); N,M >= 1
+            "rated" : 1,            # 0=unrated, 1=rated
             "ruleset" : "JAPANESE", # ruleset: JAPANESE | CHINESE
             "size" : 19,            # board-size
             "komi" : 6.5,           # komi
             "jigo_mode" : "KEEP_KOMI", # only relevant for fair-komi: KEEP_KOMI, ALLOW_JIGO, NO_JIGO
             "handicap" : 0,         # handicap-stones
             "handicap_mode" : "FREE", # STD=standard-handicap, FREE=free-handicap
-
             "shape_id" : 0,         # shape-id > 0 if game was started as shape-game
-            "shape_snapshot" : "",  # shape-snapshot
 
             "time_started" : "YYYY-MM-DD hh:mm:ss",  # game started time
             "time_lastmove" : "YYYY-MM-DD hh:mm:ss", # last-moved (also game-end-time if finished)
             "time_weekend_clock" : 1, # 1=time-running on weekend, 0=otherwise
             "time_mode" : "CAN",      # time-mode: FIS=Fischer-time, JAP=japanese-time, CAN=canadian-time
-            "time_limit" : "C: 14d + 15d / 8", # initial time-settings for game (like in waiting-room),
-                                               # see section (6b) "TimeLimit-Formats"
+            "time_limit" : "C: 14d + 15d / 8", # initial time-settings for game (like in waiting-room), see section (6b) "TimeLimit-Formats"
 
             "move_id" : 75,         # move-id, required as context for playing via game-quick-suite
+            "move_count" : 75,      # number of moves
             "move_color" : "B",     # B=black-to-move, W=white-to-move
             "move_uid" : 111,       # user-id to move next
-            "move_last" : "bc",     # SGF-format of last-move ("" for non-board-move, e.g. pass/scoring)
-            "move_ko" : 0,          # 1=ko, 0=no-ko in last-move
+            "move_opp" : 222,       # opponent of user-id
+            "move_last" : "bc",     # SGF-format of last-move ("" for non-board-move, e.g. pass/scoring/setup)
+
+            "prio" : 0,             # games-priority, 0 if not set or loaded; field only loaded if WITH-option contains 'prio' used AND status-games ordered by prio
+            "notes" : "",           # beginning of game-notes (if existing for logged-in user); field only present if WITH-option contains 'notes' used
 
             "black_user" : {        # black-user object-info
                "id" : 111,                # USER_ID
-               # the following fields only if WITH-option contain 'user_id'
-               "handle" : "black-handle", # USER_HANDLE
-               "name" : "black-name",     # user name
+               # the following fields only if WITH-option contains 'user_id'
+               "handle" : "black-handle",
+               "name" : "black-name",
+               "country" : "de",
                "rating" : "3k (-7%)",             # current DGS rating | "" (=no rating)
                "rating_elo" : "1792.59326171875", # current DGS elo-rating | "" (=no rating)
+               "last_access" : "YYYY-MM-DD hh:mm:ss",
             },
             "black_gameinfo" : {    # game-info of black-user
                "prisoners" : 3,                         # prisoners
-               "remtime" : "C: 1d 10h (+ 15d / 8)",     # remaining-time (same format as for quick-status)
+               "remtime" : "C: 1d 10h (+ 15d / 8)",     # remaining-time (same format as for quick-status, see [4.QST]); field omitted for finished games
                "rating_start" : "3k (-7%)",             # start-rating
                "rating_start_elo" : "1792.59326171875", # start-rating ELO
-               "rating_end" : "3k (-7%)",               # end-rating (after game finished)
-               "rating_end_elo" : "1792.59326171875",   # start-rating ELO (after game finished)
+
+               # the following 3 fields are only included if the game is finished, omitted otherwise
+               "rating_end" : "3k (-7%)",               # end-rating
+               "rating_end_elo" : "1792.59326171875",   # start-rating ELO
+               "rating_diff" : "+0.23",                 # rating-diff, field only included if WITH-option contains 'ratingdiff'
             },
 
             "white_user" : {        # white-user object-info
-               "id" : 111,                # USER_ID
-               # the following fields only if WITH-option contain 'user_id'
-               "handle" : "white-handle", # USER_HANDLE
-               "name" : "white-name",     # user name
-               "rating" : "3k (-7%)",             # current DGS rating | "" (=no rating)
-               "rating_elo" : "1792.59326171875", # current DGS elo-rating | "" (=no rating)
+               # same fields as described above for 'black_user'
             },
             "white_gameinfo" : {    # game-info of white-user
-               "prisoners" : 3,                         # prisoners
-               "remtime" : "C: 11h / 2 (15d / 8)",      # remaining-time (same format as for quick-status)
-               "rating_start" : "3k (-7%)",             # start-rating
-               "rating_end" : "3k (-7%)",               # end-rating (after game finished)
-               "rating_elo_start" : "1792.59326171875", # start-rating ELO
-               "rating_elo_end" : "1792.59326171875",   # start-rating ELO (after game finished)
+               # same fields as described above for 'black_gameinfo'
             }
          }
 
@@ -642,25 +644,32 @@ Commands:
    # NOT IMPLEMENTED: to-specify (TODO)
    "list" : retrieve list of games
       - required opts: VIEW
-      - optional opts: USER_ID, WITH
+      - optional opts: USER_ID, WITH, LIMIT, FILTER
 
       - VIEW-option:
          - 'status'    : ask for running games where to move in for given USER_ID
          - 'running'   : ask for running games for logged-in user  (uid=mine)
          - 'finished'  : ask for finished games for logged-in user (uid=mine)
-         - 'observing' : ask for games observed by logged-in user  (uid=mine)
-         - 'observed'  : ask for all observed games
-         - 'mpg'       : ask for multi-player-games
+         - 'observe'   : ask for all observed games, or my observed games
 
       - USER_ID-option:
-         - empty | 0 = default, for most views the default-USER_ID is 'mine'
-         - 'mine'    = use logged-in user-id
+         - empty | 0 = default, for all views the default-USER_ID is 'mine'
          - integer   = use other user-id (can be logged-in user-id)
+         - 'mine'    = use logged-in user-id
+         - 'all'     = only allowed for 'observe'-view # TODO
 
          - NOTE: not all values allowed for all views
 
       - WITH-option:
          - 'user_id' : additionally return user_id-data (handle + name) for game-players
+         - 'ratingdiff' : # TODO
+         - 'notes' : # TODO
+
+      - LIMIT-option:
+         - # TODO allow 'all' for status-view
+
+      - FILTER-options:
+         - # TODO mpg=0|1, tid
 
       - Errors:
          - all errors of: [E-LOGIN], [E-GEN]
@@ -682,6 +691,7 @@ Commands:
 
          * VIEW = 'mpg':
            - not defined ATM -> see 'status'
+
 
 
    "delete" : deletes specified game
@@ -987,7 +997,7 @@ Options:
       - target folder
       - standard folders: 1=MAIN, 2=NEW, 3=REPLY, 4=TRASHCAN, 5=SENT
 
-   <WITH> = optional with-option to deep-load recursive data (see commands)
+   <WITH> = optional with-option to include additional data-fields (see commands)
 
 
 Commands:
@@ -1019,7 +1029,7 @@ Commands:
             "id" : 1,          # message-id
             "user_from" : {
                "id" : 111,          # user-id of sender, 0=server-message
-               # the following fields only if WITH-option contain 'user_id'
+               # the following fields only if WITH-option contains 'user_id'
                "handle" : "user1",  # USER_HANDLE
                "name" : "name1",    # user name
                "rating" : "5k (+46%)",            # DGS rating | "" (=no rating)
@@ -1027,7 +1037,7 @@ Commands:
             },
             "user_to" : {
                "id" : 222,          # user-id of receiver
-               # the following fields only if WITH-option contain 'user_id'
+               # the following fields only if WITH-option contains 'user_id'
                "handle" : "user2",  # USER_HANDLE
                "name" : "name2",    # user name
                "rating" : "5k (+46%)",            # DGS rating | "" (=no rating)
@@ -1039,7 +1049,7 @@ Commands:
             "flags" : "",      # flags (comma-separated): BULK (multi-receiver bulk-message)
             "folder" : {
                "id" : 2,                # folder-nr (<0, 0-5 system-folder, >= 6 user-folder)
-               # the following fields only if WITH-option contain 'folder'
+               # the following fields only if WITH-option contains 'folder'
                "name" : "New",          # folder-name (lang-dependent)
                "system" : 1,            # 1=system-folder, 0=user-folder
                "color_bg" : "F7F5E399", # folder background-color (incl. alpha-channel) in hex-format
@@ -1199,7 +1209,7 @@ Commands:
                   "id" : 1,          # message-id
                   "user_from" : {
                      "id" : 111,          # user-id of sender, 0=server-message
-                     # the following fields only if WITH-option contain 'user_id'
+                     # the following fields only if WITH-option contains 'user_id'
                      "handle" : "user1",  # USER_HANDLE
                      "name" : "name1",    # user name
                      "rating" : "3k (-7%)",             # current DGS rating | "" (=no rating)
@@ -1207,7 +1217,7 @@ Commands:
                   },
                   "user_to" : {
                      "id" : 222,          # user-id of receiver
-                     # the following fields only if WITH-option contain 'user_id'
+                     # the following fields only if WITH-option contains 'user_id'
                      "handle" : "user2",  # USER_HANDLE
                      "name" : "name2",    # user name
                      "rating" : "",       # current DGS rating | "" (=no rating)
@@ -1331,7 +1341,7 @@ Options:
 
    <COMMAND> = "list"
 
-   <WITH> = optional with-option to deep-load recursive data (see commands)
+   <WITH> = optional with-option to include additional data-fields (see commands)
 
 
 Commands:
@@ -1361,7 +1371,7 @@ Commands:
                      "handle" : "guest",  # USER_HANDLE
                      "name" : "Guest",    # user name
                      # for the following fields -> see "info"-command for user-object (3b)
-                     # the following fields only if WITH-option contain 'user_id'
+                     # the following fields only if WITH-option contains 'user_id'
                      "type" : "",
                      "country" : "se",
                      "picture" : "",
@@ -1421,7 +1431,7 @@ Options:
 
    <FILTER> = optional filter-options (see commands)
 
-   <WITH> = optional with-option to deep-load recursive data (see commands)
+   <WITH> = optional with-option to include additional data-fields (see commands)
 
 
 Commands:
@@ -1441,7 +1451,7 @@ Commands:
             "id" : 1,          # waitingroom-id
             "user" : {
                "id" : 111,          # user-id of sender, 0=server-message
-               # the following fields only if WITH-option contain 'user_id'
+               # the following fields only if WITH-option contains 'user_id'
                "handle" : "user1",  # USER_HANDLE
                "name" : "name1",    # user name
                "country" : "xe",    # country-code
@@ -1630,7 +1640,7 @@ Options:
 
    <BULLETIN_ID> = list of comma-separated bulletin-ids
 
-   <WITH> = optional with-option to deep-load recursive data (see commands)
+   <WITH> = optional with-option to include additional data-fields (see commands)
 
 
 Commands:
@@ -1664,7 +1674,7 @@ Commands:
                   "time_updated" : "YYYY-MM-DD hh:mm:ss",   # last-changed-time
                   "author" : {
                      "id" : 111,          # user-id of author
-                     # the following fields only if WITH-option contain 'user_id'
+                     # the following fields only if WITH-option contains 'user_id'
                      "handle" : "user1",  # USER_HANDLE
                      "name" : "Name1",    # user name
                   },
@@ -2210,7 +2220,8 @@ Response:
                            - ZEN_GO(N)
          game_prio       : priority set by user for game
                            - value-range: -32768..32767
-                           - 0 = not-loaded (e.g. for other user) or no prio
+                           - 0 = not-loaded or no prio
+                           - NOTE: prio is only loaded if next-game-order for status-games is priority
          opponent_lastaccess_date : date of opponents last-access-date in format "YYYY-MM-DD hh:mm:ss[ GMT]" (timezone only if not logged-in)
          handicap        : number of handicap-stones
 
