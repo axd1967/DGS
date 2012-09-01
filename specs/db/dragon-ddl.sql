@@ -148,7 +148,7 @@ CREATE TABLE IF NOT EXISTS `ConfigBoard` (
 CREATE TABLE IF NOT EXISTS `ConfigPages` (
   `User_ID` int(11) NOT NULL,
   `StatusFlags` smallint(6) NOT NULL default '3',
-  `StatusFolders` varchar(40) NOT NULL default '',
+  `StatusFolders` char(40) NOT NULL default '',
   `ForumFlags` tinyint(3) unsigned NOT NULL default '8',
   `ColumnsStatusGames` int(11) NOT NULL default '-1',
   `ColumnsStatusTournaments` int(11) NOT NULL default '-1',
@@ -298,12 +298,12 @@ CREATE TABLE IF NOT EXISTS `Folders` (
   `ID` int(11) NOT NULL auto_increment,
   `uid` int(11) NOT NULL,
   `Folder_nr` tinyint(4) NOT NULL default '0',
-  `Name` varchar(40) NOT NULL,
-  `BGColor` varchar(8) NOT NULL default 'f7f5e3FF',
-  `FGColor` varchar(6) NOT NULL default '000000',
+  `Name` char(40) NOT NULL,
+  `BGColor` char(8) NOT NULL default 'f7f5e3FF',
+  `FGColor` char(6) NOT NULL default '000000',
   PRIMARY KEY  (`ID`),
   KEY `uid` (`uid`,`Folder_nr`)
-) ENGINE=MyISAM  DEFAULT CHARSET=latin1;
+) ENGINE=MyISAM DEFAULT CHARSET=latin1;
 
 -- --------------------------------------------------------
 
@@ -348,9 +348,9 @@ CREATE TABLE IF NOT EXISTS `Forumreads` (
 
 CREATE TABLE IF NOT EXISTS `Forums` (
   `ID` smallint(6) NOT NULL auto_increment,
-  `Name` varchar(40) NOT NULL default '',
-  `Description` varchar(255) NOT NULL default '',
-  `SortOrder` smallint(5) unsigned NOT NULL default '0',
+  `Name` char(40) NOT NULL default '',
+  `Description` char(128) NOT NULL default '',
+  `SortOrder` tinyint(3) unsigned NOT NULL default '0',
   `Options` int(11) unsigned NOT NULL default '0',
   `LastPost` int(11) NOT NULL default '0',
   `Updated` datetime NOT NULL default '0000-00-00 00:00:00',
@@ -358,7 +358,7 @@ CREATE TABLE IF NOT EXISTS `Forums` (
   `PostsInForum` mediumint(8) unsigned NOT NULL default '0',
   PRIMARY KEY  (`ID`),
   KEY `SortOrder` (`SortOrder`)
-) ENGINE=MyISAM  DEFAULT CHARSET=latin1;
+) ENGINE=MyISAM DEFAULT CHARSET=latin1;
 
 -- --------------------------------------------------------
 
@@ -522,7 +522,7 @@ CREATE TABLE IF NOT EXISTS `Intro` (
 CREATE TABLE IF NOT EXISTS `IpStats` (
   `uid` int(11) NOT NULL default '0',
   `Page` char(4) NOT NULL default '',
-  `IP` varchar(16) NOT NULL,
+  `IP` char(16) NOT NULL,
   `Counter` int(10) unsigned NOT NULL default '0',
   `Created` datetime NOT NULL default '0000-00-00 00:00:00',
   `Lastchanged` datetime NOT NULL default '0000-00-00 00:00:00',
@@ -1002,7 +1002,7 @@ CREATE TABLE IF NOT EXISTS `TournamentExtension` (
   `IntValue` int(11) NOT NULL default '0',
   `DateValue` datetime NOT NULL default '0000-00-00 00:00:00',
   `Lastchanged` datetime NOT NULL default '0000-00-00 00:00:00',
-  `ChangedBy` varchar(54) NOT NULL default '',
+  `ChangedBy` char(54) NOT NULL default '',
   PRIMARY KEY  (`tid`,`Property`),
   KEY `DateValue` (`DateValue`)
 ) ENGINE=MyISAM DEFAULT CHARSET=latin1;
@@ -1071,7 +1071,7 @@ CREATE TABLE IF NOT EXISTS `TournamentLadder` (
 CREATE TABLE IF NOT EXISTS `TournamentLadderProps` (
   `tid` int(11) NOT NULL,
   `Lastchanged` datetime NOT NULL default '0000-00-00 00:00:00',
-  `ChangedBy` varchar(54) NOT NULL default '',
+  `ChangedBy` char(54) NOT NULL default '',
   `ChallengeRangeAbsolute` smallint(6) NOT NULL default '0',
   `ChallengeRangeRelative` tinyint(3) unsigned NOT NULL default '0',
   `ChallengeRangeRating` smallint(6) NOT NULL default '-32768',
@@ -1174,7 +1174,7 @@ CREATE TABLE IF NOT EXISTS `TournamentPool` (
 CREATE TABLE IF NOT EXISTS `TournamentProperties` (
   `tid` int(11) NOT NULL,
   `Lastchanged` datetime NOT NULL default '0000-00-00 00:00:00',
-  `ChangedBy` varchar(54) NOT NULL default '',
+  `ChangedBy` char(54) NOT NULL default '',
   `MinParticipants` smallint(6) NOT NULL default '2',
   `MaxParticipants` smallint(6) NOT NULL default '0',
   `RatingUseMode` enum('COPY_CUSTOM','CURR_FIX','COPY_FIX') NOT NULL default 'COPY_CUSTOM',
@@ -1228,7 +1228,7 @@ CREATE TABLE IF NOT EXISTS `TournamentRound` (
   `Pools` smallint(5) unsigned NOT NULL default '0',
   `PoolSize` tinyint(3) unsigned NOT NULL default '0',
   `Lastchanged` datetime NOT NULL default '0000-00-00 00:00:00',
-  `ChangedBy` varchar(54) NOT NULL default '',
+  `ChangedBy` char(54) NOT NULL default '',
   PRIMARY KEY  (`ID`),
   UNIQUE KEY `tidRound` (`tid`,`Round`)
 ) ENGINE=MyISAM DEFAULT CHARSET=latin1;
@@ -1290,7 +1290,7 @@ CREATE TABLE IF NOT EXISTS `TranslationFoundInGroup` (
 
 CREATE TABLE IF NOT EXISTS `TranslationGroups` (
   `ID` int(11) NOT NULL auto_increment,
-  `Groupname` varchar(32) NOT NULL,
+  `Groupname` char(32) NOT NULL,
   PRIMARY KEY  (`ID`)
 ) ENGINE=MyISAM  DEFAULT CHARSET=latin1;
 
@@ -1302,8 +1302,8 @@ CREATE TABLE IF NOT EXISTS `TranslationGroups` (
 
 CREATE TABLE IF NOT EXISTS `TranslationLanguages` (
   `ID` int(11) NOT NULL auto_increment,
-  `Language` varchar(32) NOT NULL,
-  `Name` varchar(32) NOT NULL,
+  `Language` char(32) NOT NULL,
+  `Name` char(32) NOT NULL,
   PRIMARY KEY  (`ID`)
 ) ENGINE=MyISAM  DEFAULT CHARSET=latin1;
 
@@ -1314,7 +1314,7 @@ CREATE TABLE IF NOT EXISTS `TranslationLanguages` (
 --
 
 CREATE TABLE IF NOT EXISTS `TranslationPages` (
-  `Page` varchar(64) NOT NULL,
+  `Page` char(64) NOT NULL,
   `Group_ID` int(11) NOT NULL,
   PRIMARY KEY  (`Page`)
 ) ENGINE=MyISAM DEFAULT CHARSET=latin1;
