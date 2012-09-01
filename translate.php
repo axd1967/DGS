@@ -298,7 +298,7 @@ $info_box = '<br>When translating you should keep the following things in mind:
                T_('Next Page'), '', array( 'accesskey' => ACCKEY_ACT_NEXT ));
       }
 
-      $table_entries = ( $found_rows > 0 ) ? sprintf('(%s entries)', $found_rows) : '';
+      $table_entries = ( $found_rows > 0 ) ? sprintf('(%s entries to translate)', $found_rows) : '';
       if( $table_links || $table_entries )
       {
          $translate_form->add_row( array( 'ROW', 'LinksT',
