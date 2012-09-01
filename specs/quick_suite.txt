@@ -480,14 +480,34 @@ Request:
    quick_do.php?obj=game&cmd=<COMMAND>&gid=<GAME_ID>&with=<WITH>
 
    # list
-   quick_do.php?obj=game&cmd=list&view=<VIEW>&with=<WITH>&uid=<USER_ID>
+   quick_do.php?obj=game&cmd=list&view=<VIEW>&with=<WITH>&uid=<USER_ID>&filter_...=<FILTER>
 
 Options:
 
    <COMMAND> = "info" | "get_notes" | "list" | "delete" | "set_handicap" | "move" | "resign" | "status_score" | "score"
 
+   <AGREE> = for "score"-command: give agreement with current state of stones (dead/alive/neutral/dame) and score
+      - 1 = agree
+      - 0 = disagree (default)
+
+      - NOTE: agreement could be represented by an empty MOVES-argument, but to prevent "slip"
+        in client, it's specified explicitly by giving the AGREE-argument.
+
+   <FILTER> = optional filter-options (see commands)
+
+   <FORMAT> = output-format for coordinates (default is "sgf"):
+      - "sgf"   : SGF-format without separator, e.g. "bcefnj"
+      - ","     : SGF-format with comma-separator, e.g. "bc,ef,nj"
+      - "board" : board-coordindates with comma-separator, e.g. "b17,e14,o10"
+
+      - NOTE about lengths of output for different formats:
+            sgf-format < ','-format < board-format, e.g. 900 < 1250 < 1450 bytes
+
    <GAME_ID> = integer
       - reference game to perform game-operation on
+
+   <MESSAGE> = message
+      - optional game-message on game-operation
 
    <MOVE_ID> = context for move
       - move_id = current DGS-move-number as stored in db in Games.Moves,
@@ -519,38 +539,19 @@ Options:
                - sgf-mode (without comma),   e.g. "bcpqmoeq"
                - sgf-mode (comma-separated), e.g. "bc,pq,mo,eq"
                - label-mode (comma-separated), e.g. "b17,q3,n5,e3"
-
-   <MESSAGE> = message
-      - optional game-message on game-operation
-
-   <VIEW> = view for game-list
-
-   <WITH> = optional with-option to include additional data-fields (see commands)
-
-   <FORMAT> = output-format for coordinates (default is "sgf"):
-      - "sgf"   : SGF-format without separator, e.g. "bcefnj"
-      - ","     : SGF-format with comma-separator, e.g. "bc,ef,nj"
-      - "board" : board-coordindates with comma-separator, e.g. "b17,e14,o10"
-
-      - NOTE about lengths of output for different formats:
-            sgf-format < ','-format < board-format, e.g. 900 < 1250 < 1450 bytes
-
    <TOGGLE> = toggle-mode for "status_score" and "score" commands
       - "all" (default) = each given coordinate-point toggles the point-state and
         adjacent points of the same "group" (as the GUI does it)
       - "uniq" = given coordinate-points toggle groups in a unique fashion,
         i.e. points are only toggled once for all togglings if they belong to the same unique group.
 
-   <AGREE> = for "score"-command: give agreement with current state of stones (dead/alive/neutral/dame) and score
-      - 1 = agree
-      - 0 = disagree (default)
-
-      - NOTE: agreement could be represented by an empty MOVES-argument, but to prevent "slip"
-        in client, it's specified explicitly by giving the AGREE-argument.
-
    <USER_ID> = integer | 'mine'
       - user-id (integer)
       - 'mine' = logged-in user
+
+   <VIEW> = view for game-list
+
+   <WITH> = optional with-option to include additional data-fields (see commands)
 
 
 Commands:
@@ -1060,11 +1061,20 @@ Request:
    quick_do.php?obj=message&cmd=<COMMAND>&mid=<MESSAGE_ID>&ouid=<OTHER_UID>&ouser=<OTHER_HANDLE>&subj=<SUBJECT>&msg=<MESSAGE>&folder=<FOLDER>&with=<WITH>
 
    # list
-   quick_do.php?obj=message&cmd=list&with=<WITH>
+   quick_do.php?obj=message&cmd=list&with=<WITH>&filter_...=<FILTER>
 
 Options:
 
    <COMMAND> = "info" | "send_msg" | "move_msg" | "delete_msg" | "accept_inv" | "decline_inv" | "list"
+
+   <FILTER> = optional filter-options (see commands)
+
+   <FOLDER> = integer
+      - target folder
+      - standard folders: 1=MAIN, 2=NEW, 3=REPLY, 4=TRASHCAN, 5=SENT
+
+   <MESSAGE> = text-body of message
+      - message-text for message-operation
 
    <MESSAGE_ID> = integer
       - message-id referencing private DGS-message to perform message-operation on
@@ -1082,13 +1092,6 @@ Options:
       - only one argument for <OTHER_UID> or <OTHER_HANDLE> can be used for sending message
 
    <SUBJECT> = title of message
-
-   <MESSAGE> = text-body of message
-      - message-text for message-operation
-
-   <FOLDER> = integer
-      - target folder
-      - standard folders: 1=MAIN, 2=NEW, 3=REPLY, 4=TRASHCAN, 5=SENT
 
    <WITH> = optional with-option to include additional data-fields (see commands)
 
@@ -1277,61 +1280,21 @@ Commands:
       - Errors:
          - all errors of: [E-LOGIN], [E-GEN], [E-GAMECREATE], [E-MSG], [E-MSGSEND]
 
-   # NOT IMPLEMENTED: to-specify (filter) (TODO)
+   # NOT IMPLEMENTED: TODO
    "list" : retrieve list of messages
       - required opts: -
-      - optional opts: WITH, FILTERS #TODO
+      - optional opts: WITH, FILTER
 
-      - to-specify: limit, offset, order, filters #TODO
-         - FILTERS-args:
-           - filter.type = INVITATION (match values from "info")
-           - filter.folder = 1,2, ... ; std-folders have aliases NEW, REPLY, MAIN, TRASH, DEL, ... ???
-           - filter.need_reply = 0|1|all=empty
+      - WITH-option:
          - WITH-options ? -> only msg-id (no texts, maybe subject included, text only in single-mode)
 
-      - Result (JSON) =
-         {
-            "list_object" : "message",
-            "list_totals": -1,
-            "list_size" : 5,
-            "list_offset" : 0,
-            "list_limit" : 0,
-            "list_order" : "",            # list-order is set dependent on view
-            "list_result" : [
-               {
-                  "id" : 1,          # message-id
-                  "user_from" : {
-                     "id" : 111,          # user-id of sender, 0=server-message
-                     # the following fields only if WITH-option contains 'user_id'
-                     "handle" : "user1",  # USER_HANDLE
-                     "name" : "name1",    # user name
-                     "rating" : "3k (-7%)",             # current DGS rating | "" (=no rating)
-                     "rating_elo" : "1792.59326171875", # current DGS elo-rating | "" (=no rating)
-                  },
-                  "user_to" : {
-                     "id" : 222,          # user-id of receiver
-                     # the following fields only if WITH-option contains 'user_id'
-                     "handle" : "user2",  # USER_HANDLE
-                     "name" : "name2",    # user name
-                     "rating" : "",       # current DGS rating | "" (=no rating)
-                     "rating_elo" : "",   # current DGS elo-rating | "" (=no rating)
-                  },
-                  "type" : "NORMAL",      # message-type (see "info"-command)
-                  "flags" : "",           # flags (comma-separated): BULK (multi-receiver bulk-message)
-                  "folder_id" : 2,        # folder.id (see "info"-command)
-                  "created_at" : "YYYY-MM-DD hh:mm:ss", # creation-date of message
-                  "thread" : 0,           # message-id of first message in a message-thread, 0=system-message
-                  "level" : 0,            # thread-level of message-thread (starting at 0)
-                  "message_prev" : 0,     # message-id of message that has been replied to
-                  "message_hasnext" : 1,  # 0=no-answer for current message, 1=there are answer(s) to this message
-                  "needs_reply" : 1,      # 1=message-needs-reply, 0=normal message
-                  "game_id" : 0,          # game-id for game-related message (e.g. invitation); game may be deleted
-                  "subject" : "boo",      # subject of message
-               },
-               ...
-            ]
-         }
+      - FILTER-options:
+         - 'filter_type=VAL' : INVITATION (match values from "info")
+         - 'filter_folder=VAL' : 1,2, ... ; std-folders have aliases NEW, REPLY, MAIN, TRASH, DEL, ... ???
+         - 'filter_need_reply=VAL' :  0|1|all=empty
 
+      - Result (JSON) = result-list see section (2d) with list of objects:
+         - the fields content and semantics are the same as for the message-object "info"-command (see above (3c))
 
 
 Examples for message-commands:
@@ -2688,13 +2651,15 @@ but are not necessarily going to be implemented (soon or at all).
    - [quick] encoding JSON: http://www.dragongoserver.net/forum/read.php?forum=10&thread=27755#29511
 
 * game-obj:
-   - handle MPG with game-players >2, handle setup for multi-player-game
    - handle fair-komi
+   - handle MPG with game-players >2, handle setup for multi-player-game
    - replace_notes, add_time, set_prio
-   - list-cmd: include shapes, all views, type=running/finished uid=all
 
 * message-obj:
    - handle send-invitation / send-dispute
+
+* wroom-obj:
+   - new-game
 
 * user-obj:
    - user-vacation, picture, list-cmd
