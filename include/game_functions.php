@@ -4183,11 +4183,13 @@ class NextGameOrder
     * \brief Maps NextGameOrder for status-games.
     * \param $idx if numeric (map selection-index to enum-value (sql_order=false) or to order-string;
     *             if string (map enum-value to selection-index ot to order-string)
-    * \param $tablename return SQL 'ORDER BY...' if tablename given; return enum for numeric-index if empty
+    * \param $tablename return SQL 'ORDER BY...' if tablename given;
+    *                   return enum for numeric-index if empty
+    *                   return quick-order for next-game-order if 'QUICK'
     * \return '' for unknown $idx; otherwise return enum-value or SQL-order-by-clause dependent on $tablename
     *
     * Examples:
-    *   get_next_game_order( 3 ) -> PRIO
+    *   get_next_game_order( 3 ) -> NGO_PRIO
     *   get_next_game_order( 'MOVES' ) -> 2
     *   get_next_game_order( 'MOVES', 'G', true ) = get_..( 2, 'G', true ) -> 'ORDER BY G.Moves, ...'
     *   get_next_game_order( 'MOVES', 'Games' ) = 'G.Moves, ...'
@@ -4197,11 +4199,11 @@ class NextGameOrder
       // SQL-ordering for Status-game list and "next game" on game-page (%G = Games-table)
       // NOTE: also adjust 'jump_to_next_game(..)' in confirm.php
       static $ARR_NEXT_GAME_ORDER = array(
-         // idx => [ Players.NextGameOrder-value, order-string ]
-         1 => array( NGO_LASTMOVED, '%G.Lastchanged ASC, %G.ID DESC' ),
-         2 => array( NGO_MOVES,     '%G.Moves DESC, %G.Lastchanged ASC, %G.ID DESC' ),
-         3 => array( NGO_PRIO,      'X_Priority DESC, %G.Lastchanged ASC, %G.ID DESC' ),
-         4 => array( NGO_TIMELEFT,  '%G.TimeOutDate ASC, %G.Lastchanged ASC, %G.ID DESC' ),
+         // idx => [ Players.NextGameOrder-value, order-string, quick-suite-order ]
+         1 => array( NGO_LASTMOVED, '%G.Lastchanged ASC, %G.ID DESC',                     'time_lastmove+,id-' ),
+         2 => array( NGO_MOVES,     '%G.Moves DESC, %G.Lastchanged ASC, %G.ID DESC',      'move_count-,time_lastmove+,id-' ),
+         3 => array( NGO_PRIO,      'X_Priority DESC, %G.Lastchanged ASC, %G.ID DESC',    'prio-,time_lastmove+,id-' ),
+         4 => array( NGO_TIMELEFT,  '%G.TimeOutDate ASC, %G.Lastchanged ASC, %G.ID DESC', 'TIMEOUTDATE+,time_lastmove+,id-' ),
          NGO_LASTMOVED => 1,
          NGO_MOVES     => 2,
          NGO_PRIO      => 3,
@@ -4219,7 +4221,9 @@ class NextGameOrder
             return $idx_value;
       }
 
-      if( $tablename )
+      if( $tablename === 'QUICK' )
+         return $ARR_NEXT_GAME_ORDER[$idx_value][2];
+      elseif( $tablename )
       {
          $order_fmt = $ARR_NEXT_GAME_ORDER[$idx_value][1];
          return ( $with_order_by ? 'ORDER BY ' : '' ) . str_replace( '%G', $tablename, $order_fmt );

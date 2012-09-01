@@ -129,6 +129,7 @@ class QuickHandler
    var $list_style;
    var $list_limit;
    var $list_offset;
+   var $list_order;
    var $rx_keep_fields; // regex with varnames to keep; or empty (=all fields)
 
    // calculated
@@ -144,6 +145,7 @@ class QuickHandler
       $this->_parse_options();
 
       $this->list_totals = -1;
+      $this->list_order = ''; // default: no-order
    }
 
    // \internal
@@ -329,7 +331,7 @@ class QuickHandler
       $this->addResultKey( 'list_offset', $this->list_offset );
       $this->addResultKey( 'list_limit', $this->list_limit );
       $this->addResultKey( 'list_has_next', $has_next );
-      $this->addResultKey( 'list_order', $ordered_by );
+      $this->addResultKey( 'list_order', ( $ordered_by ? $ordered_by : $this->list_order ) );
 
       // build "processed" list
       if( count($list) && $this->check_list_style() ) // list-style = table

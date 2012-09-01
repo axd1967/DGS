@@ -190,6 +190,7 @@ class QuickHandlerGameInfo extends QuickHandler
             $row['Maintime'], $row['Byotype'], $row['Byotime'], $row['Byoperiods'],
             TIMEFMT_QUICK|TIMEFMT_ENGL|TIMEFMT_SHORT|TIMEFMT_ADDTYPE);
 
+      $out['my_id'] = $glc->my_id;
       $out['move_id'] = (int)$row['Moves'];
       $out['move_count'] = (int)$row['Moves'];
       if( !$game_finished )

@@ -151,6 +151,8 @@ class QuickHandlerGameList extends QuickHandler
          $qsql = GameListControl::build_game_list_query_status_view(
             $uid, $this->is_with_option(QWITH_NOTES), $this->is_with_option(QWITH_PRIO), $f_mpg, $f_ext_tid );
 
+         $this->list_order = NextGameOrder::get_next_game_order( $player_row['NextGameOrder'], 'QUICK', false );
+
          if( $this->is_with_option(QWITH_USER_ID) )
             GameListControl::extend_game_list_query_with_user_info( $qsql );
       }
@@ -188,9 +190,15 @@ class QuickHandlerGameList extends QuickHandler
 
          // default order
          if( $glc->is_observe_all() )
+         {
             $qsql->add_part( SQLP_ORDER, 'X_ObsCount DESC', 'Lastchanged DESC', 'ID DESC' );
+            $this->list_order = 'obs_count-,time_lastmove-,id-';
+         }
          else
+         {
             $qsql->add_part( SQLP_ORDER, 'Lastchanged DESC', 'ID DESC' );
+            $this->list_order = 'time_lastmove-,id-';
+         }
       }
       $this->glc = $glc;
 
@@ -221,7 +229,6 @@ class QuickHandlerGameList extends QuickHandler
          }
       }
 
-      //TODO set list-order
       $this->add_list( QOBJ_GAME, $out );
    }//process
 
