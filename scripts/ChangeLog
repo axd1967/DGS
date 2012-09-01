@@ -21,6 +21,15 @@ ChangeLog
 
 2012-09-01 juga
 
+### ----- release-1_0_15-20120608 -----
+
+   * include/make_translationfiles.php (translations_query), translate.php:
+   - bugfix: show next/prev-page again for paginating, handled show_rows in the wrong way
+   - added found-rows in table-head with entries to translate
+
+   * include/std_functions.php (start_page):
+   - bugfix: show quota-hits left as VaultCnt-1 because you got booted on the last one
+
    * scripts/updates/database_changes_1_0_14_to_1_0_15.mysql,
      specs/db/dragon-ddl.sql:
    - replace varchars to get fixed-size tables: ConfigPages, Folders, Forums, IpStats,
@@ -274,8 +283,6 @@ UPDATE Players
      - use 'application/json' HTTP-HEADER also for errors for ERROR_MODE_QUICK_SUITE
 
 2012-08-26 juga
-
-### ----- release-1_0_15-20120608 -----
 
    * game.php, message.php, new_game.php, site_map.php, waiting_room.php,
      forum/forum_functions.php, forum/index.php, include/table_columns.php,
