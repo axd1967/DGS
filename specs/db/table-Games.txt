@@ -284,6 +284,10 @@ Description:
 
 * Rated : game-setting
    - game is rated if field-value != 'N' ('Y', 'Done'), non-rated otherwise ('N')
+   - 'Done' = A game start with the 'N' or 'Y' status. After it has the 'Y'-status at the end
+     of a game, the rating of the player is updated and after that the 'Rated'-status is set to 'Done'
+     to avoid doing this stuff twice. So, when a game is finished it had either the 'N' or
+     'Done' status; so 'Done' means 'Y' + rating-recorded.
 
 * StdHandicap : game-setting
    - game uses standard handicap stones placement on setup-phase if value == 'Y',
