@@ -181,7 +181,7 @@ and an error-code, there can be an optional 'error_msg' element:
       "version": "1.0.15:13",      # DGS_VERSION:QUICK_VERSION
       "error": "error_code",
       "error_msg": "error message",
-      "quota_count": 497,          # remaining quota-count and quota-expire
+      "quota_count": 497,          # remaining quota-count and quota-expire (if count is 1, the next command will get blocked)
       "quota_expire": "2012-03-27 17:34:12"
    }
 

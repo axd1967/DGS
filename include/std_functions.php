@@ -462,13 +462,13 @@ function start_page( $title, $no_cache, $logged_in, &$player_row,
    echo "\n  <td id=\"pageBody\">\n\n";
 
    sysmsg(get_request_arg('sysmsg'));
-   if( isset($player_row['VaultCnt']) && $player_row['VaultCnt'] <= 10 )
+   if( isset($player_row['VaultCnt']) && $player_row['VaultCnt'] <= 11 )
    {
       if( $player_row['VaultCnt'] > 0 )
       {
          $block_hours = ( (int)@$player_row['ID'] > GUESTS_ID_MAX ? VAULT_TIME : VAULT_TIME_X ) / 3600; //hours
          sysmsg( sprintf( T_('Your access quota is running low.<br>You only got %s hits left before you get blocked for %s !!'),
-                 @$player_row['VaultCnt'], TimeFormat::echo_hour($block_hours) ),
+                 @$player_row['VaultCnt'] - 1, TimeFormat::echo_hour($block_hours) ),
                  'WarnQuota');
       }
       else
