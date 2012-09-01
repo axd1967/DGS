@@ -72,8 +72,7 @@ function setTZ( $tz='GMT')
    $res= $curtz;
    if( is_string( $tz) && !empty( $tz) )
    {
-      if( !function_exists('date_default_timezone_set')
-            || !date_default_timezone_set( $tz) )
+      if( !function_exists('date_default_timezone_set') || !date_default_timezone_set( $tz) )
       {
          putenv( 'TZ='.$tz);
          //putenv('PHP_TZ='.$tz); //Does not seem to realize something
@@ -210,7 +209,7 @@ define('LANG_DEF_CHARSET', 'utf-8'); //lowercase
 //used as default load of translations:
 define('LANG_DEF_LOAD', 'en'.LANG_CHARSET_CHAR.'iso-8859-1'); //lowercase
 
-function fnop( $a)
+function fnop( $a )
 {
    return $a;
 }
