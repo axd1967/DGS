@@ -54,6 +54,7 @@ function make_known_languages() //must be called from main dir
 
    fwrite( $fd, "<?php\n\n"
 ."\$TranslateGroups[] = \"$group\"; //local use\n"
+."if( !function_exists('fnop') ) {\n   function fnop(\$a) { return \$a; }\n}\n"
 ."// The \$T_ are required for 'scripts/generate_translation_texts.php'.\n"
 ."\$T_ = 'fnop';\n" //or 'trim'... never translated in known_languages.php
 ."\n\$known_languages = array(\n" );

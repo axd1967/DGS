@@ -118,6 +118,9 @@ function get_hoshi_coords( $size_x, $size_y, $start=0 )
 {
    global $hoshi_dist, $hoshi_pos;
 
+   if( $size_x < 1 || $size_x > 25 || $size_y < 1 || $size_y > 25 ) // unknown sizes
+      return array();
+
    $hdx = $hoshi_dist[$size_x];
    $hdy = $hoshi_dist[$size_y];
    $hpx = $hoshi_pos[$size_x];

@@ -19,6 +19,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 require_once 'include/std_functions.php';
 require_once 'include/game_functions.php';
+require_once 'include/message_functions.php';
 require_once 'include/classlib_userquota.php';
 require_once 'include/db/bulletin.php';
 

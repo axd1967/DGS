@@ -303,7 +303,9 @@ function mysql_single_fetch( $debugmsg, $query, $fetch_type=FETCHTYPE_ASSOC )
 {
    $dbg_str = ( !is_string($debugmsg) ) ? false : $debugmsg.'.single_fetch';
    $result = db_query( $dbg_str, $query);
-   if( mysql_num_rows($result) != 1 )
+   if( !$result )
+      return false;
+   elseif( mysql_num_rows($result) != 1 )
    {
       mysql_free_result($result);
       return false;
