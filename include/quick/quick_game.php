@@ -644,14 +644,16 @@ class QuickHandlerGame extends QuickHandler
       elseif( $fmt == 'board' )
       {
          $out = array();
-         for( $i=0; $i < strlen($coord_str); $i+=2 )
+         $coord_len = strlen($coord_str);
+         for( $i=0; $i < $coord_len; $i+=2 )
             $out[] = sgf2board_coords( substr($coord_str, $i, 2 ), $size );
          return implode(',', $out);
       }
       else // fmt= separator
       {
          $out = array();
-         for( $i=0; $i < strlen($coord_str); $i+=2 )
+         $coord_len = strlen($coord_str);
+         for( $i=0; $i < $coord_len; $i+=2 )
             $out[] = substr($coord_str, $i, 2);
          return implode($fmt, $out);
       }
@@ -665,7 +667,8 @@ class QuickHandlerGame extends QuickHandler
       else
       {
          $out = array();
-         for( $i=0; $i < strlen($move_str); $i += 2 )
+         $move_len = strlen($move_str);
+         for( $i=0; $i < $move_len; $i += 2 )
             $out[] = substr($move_str, $i, 2);
          return $out;
       }

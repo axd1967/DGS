@@ -244,7 +244,8 @@ function array_intersect_key_values( $array1 ) // var-args
 {
    $arr_keys = array();
 
-   for( $i=1; $i < func_num_args(); $i++)
+   $cnt_args = func_num_args();
+   for( $i=1; $i < $cnt_args; $i++)
    {
       $arr_intersect = func_get_arg($i);
       if( !is_array($arr_intersect) )

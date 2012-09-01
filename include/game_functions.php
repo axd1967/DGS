@@ -4438,7 +4438,8 @@ class GameSnapshot
       // 00=empty, 01=Black, 10=White, 11=Dead-stone
       $out = array();
       $psize = $size * $size;
-      for( $i=0, $p=0; $p < $psize && $i < strlen($snapshot); $i++ )
+      $snapshot_len = strlen($snapshot);
+      for( $i=0, $p=0; $p < $psize && $i < $snapshot_len; $i++ )
       {
          $ch = $snapshot[$i];
          if( $ch == ' ' ) // stop on space (extended syntax)

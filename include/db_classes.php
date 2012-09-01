@@ -99,7 +99,8 @@ class Entity
 
       // skip arg #0=type-arg to add var-args: fields
       $type = 0;
-      for( $i=1; $i < func_num_args(); $i++)
+      $cnt_args = func_num_args();
+      for( $i=1; $i < $cnt_args; $i++)
       {
          $arg = trim(func_get_arg($i));
          if( is_numeric($arg) )

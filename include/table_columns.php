@@ -389,7 +389,8 @@ class Table
       $this->Head_closed = 1;
       $s = array();
       //even if TABLE_NO_SORT or TABLE_MAX_SORT == 0:
-      for( $i=0; $i < func_num_args(); $i++ )
+      $cnt_args = func_num_args();
+      for( $i=0; $i < $cnt_args; $i++ )
       {
          $sd = func_get_arg($i);
          if( is_string($sd) )
@@ -422,7 +423,8 @@ class Table
       $this->Head_closed = 1;
 
       $s = array();
-      for( $i=0; $i < func_num_args(); $i++ )
+      $cnt_args = func_num_args();
+      for( $i=0; $i < $cnt_args; $i++ )
       {
          $sd = func_get_arg($i);
          if( is_string($sd) )

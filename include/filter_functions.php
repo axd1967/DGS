@@ -77,7 +77,8 @@ function sql_replace_wildcards( $valsql, $arr_repl, $arr_allow = array() )
    $sql = '';
    $esc = 0;
    $cnt_wild = 0;
-   for( $pos = 0; $pos < strlen($valsql); $pos++)
+   $valsql_len = strlen($valsql);
+   for( $pos = 0; $pos < $valsql_len; $pos++)
    {
       $char = $valsql{$pos};
       $repl = $char;

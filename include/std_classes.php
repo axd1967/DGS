@@ -198,7 +198,8 @@ class QuerySQL
 
       // skip arg #0=type-arg to add var-args: parts
       $type = '';
-      for( $i=0; $i < func_num_args(); $i++)
+      $cnt_args = func_num_args();
+      for( $i=0; $i < $cnt_args; $i++)
       {
          $arg = trim(func_get_arg($i));
          if( isset($this->parts[$arg]) )
@@ -259,7 +260,8 @@ class QuerySQL
 
 
       // skip arg #0=type-arg to add var-args: parts
-      for( $i=1; $i < func_num_args(); $i++)
+      $cnt_args = func_num_args();
+      for( $i=1; $i < $cnt_args; $i++)
       {
          $part = trim(func_get_arg($i));
          if( (string)$part != '' )
@@ -698,7 +700,8 @@ class ListIterator
    /*! \brief Adds index-field(s) to be generated on iterator. */
    function addIndex( /*var-args*/ )
    {
-      for( $i=0; $i < func_num_args(); $i++)
+      $cnt_args = func_num_args();
+      for( $i=0; $i < $cnt_args; $i++)
       {
          $field = func_get_arg($i);
          $this->Index[$field] = array();
