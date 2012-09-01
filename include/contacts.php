@@ -258,8 +258,7 @@ class Contact
     */
    function load_quick_contacts( $uid, $qsql )
    {
-      static $arr_userfields = array( 'Type', 'Name', 'Handle', 'Country',
-         'X_Lastaccess', 'X_LastMove', 'UserPicture', 'RatingStatus', 'Rating2' );
+      static $arr_userfields = array( 'Type', 'Name', 'Handle', 'Country', 'X_Lastaccess', 'X_LastMove', 'Rating2' );
 
       $query = $qsql->get_select();
       $result = db_query( "contact.load_quick_contacts($uid)", $query );
@@ -346,14 +345,14 @@ class Contact
          // userflag => ( form_elem_name, translation )
          if( $quick )
          {
-            $arr[CUSERFLAG_BUDDY]   = 'BUDDY';
-            $arr[CUSERFLAG_FRIEND]  = 'FRIEND';
-            $arr[CUSERFLAG_STUDENT] = 'STUDENT';
-            $arr[CUSERFLAG_TEACHER] = 'TEACHER';
-            $arr[CUSERFLAG_FAN]     = 'FAN';
-            $arr[CUSERFLAG_TROLL]   = 'TROLL';
-            $arr[CUSERFLAG_ADMIN]   = 'ADMIN';
-            $arr[CUSERFLAG_MISC]    = 'MISC';
+            $arr[CUSERFLAG_BUDDY]   = array( 0, 'BUDDY' );
+            $arr[CUSERFLAG_FRIEND]  = array( 0, 'FRIEND' );
+            $arr[CUSERFLAG_STUDENT] = array( 0, 'STUDENT' );
+            $arr[CUSERFLAG_TEACHER] = array( 0, 'TEACHER' );
+            $arr[CUSERFLAG_FAN]     = array( 0, 'FAN' );
+            $arr[CUSERFLAG_TROLL]   = array( 0, 'TROLL' );
+            $arr[CUSERFLAG_ADMIN]   = array( 0, 'ADMIN' );
+            $arr[CUSERFLAG_MISC]    = array( 0, 'MISC' );
          }
          else
          {
@@ -385,10 +384,10 @@ class Contact
          // sysflag => ( form_elem_name, translation )
          if( $quick )
          {
-            $arr[CSYSFLAG_WR_HIDE_GAMES]  = 'WR_HIDE_GAMES';
-            $arr[CSYSFLAG_WAITINGROOM]    = 'WAITINGROOM';
-            $arr[CSYSFLAG_REJECT_MESSAGE] = 'REJECT_MESSAGE';
-            $arr[CSYSFLAG_REJECT_INVITE]  = 'REJECT_INVITE';
+            $arr[CSYSFLAG_WR_HIDE_GAMES]  = array( 0, 'WR_HIDE_GAMES' );
+            $arr[CSYSFLAG_WAITINGROOM]    = array( 0, 'WR_PROTECT_GAMES' );
+            $arr[CSYSFLAG_REJECT_MESSAGE] = array( 0, 'REJECT_MESSAGE' );
+            $arr[CSYSFLAG_REJECT_INVITE]  = array( 0, 'REJECT_INVITE' );
          }
          else
          {

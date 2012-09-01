@@ -116,18 +116,13 @@ class QuickHandlerContact extends QuickHandler
 
    function build_obj_contact_user( $contact )
    {
+      $with_fields = ( $this->is_with_option(QWITH_USER_ID) ) ? 'country,rating,lastacc' : '';
       $urow = $contact->contact_user_row;
-      $out = $this->build_obj_user( $contact->cid, $urow, '', '', /*always*/true );
-      if( $this->is_with_option(QWITH_USER_ID) )
+      $out = $this->build_obj_user( $contact->cid, $urow, '', $with_fields, /*always*/true );
+      if( $with_fields )
       {
-         $out['type'] = QuickHandlerUser::convertUserType($urow['Type']);
-         $out['country'] = $urow['Country'];
-         $out['picture'] = $urow['UserPicture'];
-         $out['last_access'] = QuickHandler::formatDate($urow['X_Lastaccess']);
          $out['last_move'] = QuickHandler::formatDate($urow['X_LastMove']);
-         $out['rating_status'] = strtoupper($urow['RatingStatus']);
-         $out['rating'] = echo_rating($urow['Rating2'], 1, 0, true, 1);
-         $out['rating_elo'] = echo_rating_elo($urow['Rating2']);
+         $out['type'] = QuickHandlerUser::convertUserType($urow['Type']);
       }
       return $out;
    }//build_obj_contact_user
