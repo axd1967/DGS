@@ -2506,3 +2506,8 @@ UPDATE TranslationTexts SET Text='Next Page' WHERE Text='next page' LIMIT 1;
 UPDATE TranslationTexts SET Text='Tournament Status#tourney' WHERE Text='Tournament Status' LIMIT 1;
 
 
+-- use alias for removed tzdata of 'China/Shanghai'-timezone
+UPDATE Players
+   SET Timezone='Asia/Shanghai' WHERE Timezone ='China/Shanghai' ;
+
+
