@@ -156,10 +156,6 @@ class QuickHandlerGameList extends QuickHandler
       }
       else //view running|finished|observe
       {
-         //TODO
-         if( !preg_match("/^(observe|running)\$/", $this->opt_view) )
-            error('invalid_args', "$dbgmsg.not_supported_view");
-
          if( $this->opt_view == GAMELIST_OPTVAL_VIEW_OBSERVE && !($uid === 'all' || $uid == $my_id) )
             error('invalid_args', "$dbgmsg.check.view.uid.only_all_or_mine");
          elseif( $this->opt_view != GAMELIST_OPTVAL_VIEW_OBSERVE && $uid === 'all' ) // would need restriction as web-site
@@ -170,10 +166,13 @@ class QuickHandlerGameList extends QuickHandler
          else // running/finished
             $glc->setView( ($this->opt_view == GAMELIST_OPTVAL_VIEW_RUNNING ? GAMEVIEW_RUNNING : GAMEVIEW_FINISHED), $uid );
 
+         // reset forbidden WITH-options
          if( $glc->is_observe_all() )
-            $this->clear_with_options( array( QWITH_PRIO, QWITH_NOTES, QWITH_RATINGDIFF ) ); // OA: not allowed
+            $this->clear_with_options( array( QWITH_PRIO, QWITH_NOTES, QWITH_RATINGDIFF ) ); // OA
          elseif( $glc->is_running() )
-            $this->clear_with_options( array( QWITH_PRIO, QWITH_RATINGDIFF ) ); // RU: not allowed
+            $this->clear_with_options( array( QWITH_PRIO, QWITH_RATINGDIFF ) ); // RU
+         elseif( $glc->is_finished() )
+            $this->clear_with_options( array( QWITH_PRIO, QWITH_NOTES ) ); // FU
 
          $glc->mp_game = $f_mpg;
          $glc->ext_tid = $f_ext_tid;

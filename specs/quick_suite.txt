@@ -590,11 +590,13 @@ Commands:
 
             "move_id" : 75,         # move-id, required as context for playing via game-quick-suite
             "move_count" : 75,      # number of moves
+            # the following 4 fields are omitted for finished games
             "move_color" : "B",     # B=black-to-move, W=white-to-move
             "move_uid" : 111,       # user-id to move next
             "move_opp" : 222,       # opponent of user-id
             "move_last" : "bc",     # SGF-format of last-move ("" for non-board-move, e.g. pass/scoring/setup)
 
+            # the following 2 fields are omitted for finished games
             "prio" : 0,             # games-priority, 0 if not set or loaded; field only loaded if WITH-option contains 'prio' used AND status-games ordered by prio
             "notes" : "",           # beginning of game-notes (if existing but only for logged-in user); field only present if WITH-option contains 'notes' used
 
@@ -643,12 +645,18 @@ Commands:
          }
 
 
-   # NOT IMPLEMENTED: to-specify (TODO)
    "list" : retrieve list of games
       - required opts: VIEW
       - optional opts: USER_ID, WITH, LIMIT, FILTER
 
-      - IMPORTANT NOTES: #TODO
+      - IMPORTANT NOTE about "comparison between web-site and quick-suite":
+         - #TODO web-site "status.php" / "show_games.php" <-> game-object "list"-command
+         - #TODO views are the same if existing
+         - #TODO view running-all & finished-all not existing for quick-suite, because it would require RESTRICT_GAMES-stuff as web-site has
+         - #TODO view my-running/my-finished/status has role of opponent and user on website <-> but on quick-suite always black + white, the role of opponent and user must be determiend by fields 'move_color' or 'move_opp' => describe how to determine
+         - #TODO same restrictions for MPGs apply as for web-site, i.e. game-lists do not show MPGs if user is not B|W at the moment -> use 'mpg'-parameter
+
+         #TODO
          - the fields differ from web-page, where the "opponents" data is shown on the status-page.
            For the quick-suite, the opponent must be identified by the client by checking the
            the 'move_opp' or 'move_color'-field and finding the corresponding 'black|white_...'-fields.
@@ -666,14 +674,16 @@ Commands:
 
          - 'running'   : ask for running games for user
             - available WITH-options: user_id, notes
-            - USER_ID-option contains user-d to show running games for
+            - USER_ID-option contains user-id to show running games for
+
+         - 'finished'  : ask for running games for user
+            - available WITH-options: user_id, ratingdiff
+            - USER_ID-option contains user-id to show finished games for
 
          - 'observe'   : ask for all observed games (USER_ID-option 'all'), or else for observed games of logged-in user
             - available WITH-options: user_id
             - USER_ID-option ='all' : all observed games
             - USER_ID-option ='mine' (or equivalents): like "games i'm observing" from web-site
-
-         - 'finished'  : ask for finished games for logged-in user (uid=mine) #TODO
 
       - USER_ID-option:
          - empty | 0 = default, for all views the default-USER_ID is 'mine'
@@ -703,11 +713,8 @@ Commands:
          - only the field-names for the different views are listed here,
          - the fields content and semantics are the same as for the game-object "info"-command (see above (3a))
 
-         * VIEW = 'status' :
-            - full set of fields is returned for each list-element as for "info"-command
-
-         * VIEW = 'running' :
-            - full set of fields is returned for each list-element as for "info"-command
+         * VIEW = 'status' | 'running' | 'finished' :
+            - full set of fields is returned for each list-element as for "info"-command (exceptions are described there)
 
          * VIEW = 'observe' (all observed games  OR  games i'm observing) :
             - full set of fields is returned for each list-element as for "info"-command
@@ -717,8 +724,6 @@ Commands:
                      "obs_count" : 3,        # number of observers of the game
                      "obs_mine" : 1,         # 1=observed game is one of logged-in user, 0=otherwise
                   }
-
-         * VIEW = 'finished' # TODO
 
    "delete" : deletes specified game
       - required opts: GAME_ID, MOVE_ID
@@ -881,12 +886,36 @@ Examples of game-playing cycle:
    quick_do.php?obj=game&cmd=delete&gid=12345&move_id=6
 
 
+   # retrieve game-information (with all possible fields)
+   do_quick.php?obj=game&cmd=info&gid=12345&lstyle=json&with=user_id,prio,notes,ratingdiff
+
    # get game-notes
    do_quick.php?obj=game&cmd=get_notes&gid=12345
 
-   # TODO add examples for all views
+   # retrieve list of (all) my status-games
+   do_quick.php?obj=game&cmd=list&view=status&limit=all&with=user_id,prio,notes
+
    # retrieve list of my running-games in JSON-style list-format
    do_quick.php?obj=game&cmd=list&view=running&uid=mine&lstyle=json&with=user_id
+   do_quick.php?obj=game&cmd=list&view=running&uid=0
+   do_quick.php?obj=game&cmd=list&view=running
+   do_quick.php?obj=game&cmd=list&view=running&with=user_id,notes
+
+   # retrieve list of other users running-games
+   do_quick.php?obj=game&cmd=list&view=running&uid=2
+
+   # retrieve list of my finished-games
+   do_quick.php?obj=game&cmd=list&view=finished&with=user_id,notes,ratingdiff
+
+   # retrieve list of other users finished-games
+   do_quick.php?obj=game&cmd=list&view=finished&uid=2
+
+   # retrieve list of games i'm observing
+   do_quick.php?obj=game&cmd=list&view=observe
+
+   # retrieve list of all observed games
+   do_quick.php?obj=game&cmd=list&view=observe&uid=all
+
 
 
 #-------- (3b) Objects - "user" -----------------------------------------------
@@ -972,6 +1001,7 @@ Examples for user-commands:
 
    # retrieve user-info
    quick_do.php?obj=user&cmd=info&user=guest
+
 
 
 #-------- (3c) Objects - "message" --------------------------------------------
@@ -1214,9 +1244,9 @@ Commands:
    # NOT fully IMPLEMENTED: to-specify (filter) (TODO)
    "list" : retrieve list of messages
       - required opts: -
-      - optional opts: WITH, FILTERS (TODO)
+      - optional opts: WITH, FILTERS #TODO
 
-      - to-specify (TODO): limit, offset, order, filters
+      - to-specify: limit, offset, order, filters #TODO
          - FILTERS-args:
            - filter.type = INVITATION (match values from "info")
            - filter.folder = 1,2, ... ; std-folders have aliases NEW, REPLY, MAIN, TRASH, DEL, ... ???
@@ -1283,6 +1313,7 @@ Examples for message-commands:
    quick_do.php?obj=message&cmd=info&mid=1234567&ouid=2
 
 
+
 #-------- (3d) Objects - "folder" ---------------------------------------------
 
 Purpose:
@@ -1346,6 +1377,7 @@ Examples for folder-commands:
 
    # retrieve folders
    quick_do.php?obj=folder&cmd=list
+
 
 
 #-------- (3e) Objects - "contact" --------------------------------------------
@@ -1426,6 +1458,7 @@ Examples for contact-commands:
 
    # retrieve all contacts
    quick_do.php?obj=contact&cmd=list
+
 
 
 #-------- (3f) Objects - "wroom" ----------------------------------------------
@@ -1643,6 +1676,7 @@ Examples for wroom-commands:
 
    # joins waiting-room game
    quick_do.php?obj=wroom&cmd=join&wrid=123
+
 
 
 #-------- (3g) Objects - "bulletin" -------------------------------------------

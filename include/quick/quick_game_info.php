@@ -153,11 +153,11 @@ class QuickHandlerGameInfo extends QuickHandler
       $row['Blackhandle'] = @$row['BlackHandle']; // for FK-info
       $row['Whitehandle'] = @$row['WhiteHandle']; // for FK-info
       $game_setup = GameSetup::new_from_game_setup($row['GameSetup']);
+      $game_finished = ($row['Status'] == GAME_STATUS_FINISHED);
+      $game_started = isStartedGame($row['Status']);
 
 
       // output for views: info (INFO), status (ST), observe_mine (OU), observe_all (OA), running-user (RU), finished-user (FU)
-      // DONE views: INFO, ST, OA, OU, RU
-      // TODO views: FU
 
       $out['id'] = (int)$row['ID'];
       $out['double_id'] = (int)$row['DoubleGame_ID'];
@@ -192,18 +192,19 @@ class QuickHandlerGameInfo extends QuickHandler
 
       $out['move_id'] = (int)$row['Moves'];
       $out['move_count'] = (int)$row['Moves'];
-      $out['move_color'] = ($color == BLACK) ? 'B' : 'W';
-      $out['move_uid'] = (int)$row['ToMove_ID'];
-      $out['move_opp'] = ($color == BLACK) ? (int)$row['White_ID'] : (int)$row['Black_ID'];
-      $out['move_last'] = strtolower($row['Last_Move']);
-      //$out['move_ko'] = ($row['X_GameFlags'] & GAMEFLAGS_KO) ? 1 : 0;
+      if( !$game_finished )
+      {
+         $out['move_color'] = ($color == BLACK) ? 'B' : 'W';
+         $out['move_uid'] = (int)$row['ToMove_ID'];
+         $out['move_opp'] = ($color == BLACK) ? (int)$row['White_ID'] : (int)$row['Black_ID'];
+         $out['move_last'] = strtolower($row['Last_Move']);
+         //$out['move_ko'] = ($row['X_GameFlags'] & GAMEFLAGS_KO) ? 1 : 0;
 
-      $out['prio'] = (int)@$row['X_Priority'];
-      if( $quick_handler->is_with_option(QWITH_NOTES) )
-         $out['notes'] = strip_gamenotes( @$row['X_Note'] );
+         $out['prio'] = (int)@$row['X_Priority'];
+         if( $quick_handler->is_with_option(QWITH_NOTES) )
+            $out['notes'] = strip_gamenotes( @$row['X_Note'] );
+      }
 
-      $game_finished = ($row['Status'] == GAME_STATUS_FINISHED);
-      $game_started = isStartedGame($row['Status']);
       foreach( array( BLACK, WHITE ) as $col )
       {
          $icol = ($col == BLACK) ? 'Black' : 'White';

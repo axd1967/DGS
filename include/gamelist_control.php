@@ -224,29 +224,35 @@ class GameListControl
 
          if( $is_finished ) //FU ?UNION
          {
-            if( $this->mp_game )
-            {
-               $qsql->add_part( SQLP_FIELDS,
-                  "G.Score AS X_Score", // seen as Black
-                  -OUT_OF_RATING." AS oppEndRating", // opp is always user
-                  -OUT_OF_RATING." AS userEndRating" );
-            }
-            else
-            {
-               $qsql->add_part( SQLP_FIELDS,
-                  "IF(G.Black_ID=$uid, -G.Score, G.Score) AS X_Score",
-                  "IF(G.Black_ID=$uid, G.White_End_Rating, G.Black_End_Rating) AS oppEndRating",
-                  "IF(G.White_ID=$uid, G.White_End_Rating, G.Black_End_Rating) AS userEndRating" );
-            }
-            $qsql->add_part( SQLP_FIELDS, 'oppRlog.RatingDiff AS oppRatingDiff' );
-            $qsql->add_part( SQLP_FROM,
-               "LEFT JOIN Ratinglog AS oppRlog ON oppRlog.gid=G.ID AND oppRlog.uid=G.White_ID+G.Black_ID-$uid" );
             $qsql->add_part( SQLP_WHERE, "G.Status='".GAME_STATUS_FINISHED."'" );
 
-            if( $load_user_ratingdiff && !$this->mp_game ) // opp is always user for MP-game
+            if( $this->is_quick )
+               $need_ratingdiff = $load_user_ratingdiff;
+            else
             {
-               $qsql->add_part( SQLP_FIELDS, 'userRlog.RatingDiff AS userRatingDiff' );
-               $qsql->add_part( SQLP_FROM, "LEFT JOIN Ratinglog AS userRlog ON userRlog.gid=G.ID AND userRlog.uid=$uid" );
+               if( $this->mp_game )
+               {
+                  $qsql->add_part( SQLP_FIELDS,
+                     "G.Score AS X_Score", // seen as Black
+                     -OUT_OF_RATING." AS oppEndRating", // opp is always user
+                     -OUT_OF_RATING." AS userEndRating" );
+               }
+               else
+               {
+                  $qsql->add_part( SQLP_FIELDS,
+                     "IF(G.Black_ID=$uid, -G.Score, G.Score) AS X_Score",
+                     "IF(G.Black_ID=$uid, G.White_End_Rating, G.Black_End_Rating) AS oppEndRating",
+                     "IF(G.White_ID=$uid, G.White_End_Rating, G.Black_End_Rating) AS userEndRating" );
+               }
+               $qsql->add_part( SQLP_FIELDS, 'oppRlog.RatingDiff AS oppRatingDiff' );
+               $qsql->add_part( SQLP_FROM,
+                  "LEFT JOIN Ratinglog AS oppRlog ON oppRlog.gid=G.ID AND oppRlog.uid=G.White_ID+G.Black_ID-$uid" );
+
+               if( $load_user_ratingdiff && !$this->mp_game ) // opp is always user for MP-game
+               {
+                  $qsql->add_part( SQLP_FIELDS, 'userRlog.RatingDiff AS userRatingDiff' );
+                  $qsql->add_part( SQLP_FROM, "LEFT JOIN Ratinglog AS userRlog ON userRlog.gid=G.ID AND userRlog.uid=$uid" );
+               }
             }
          }
          elseif( $is_running ) //RU ?UNION
