@@ -496,7 +496,8 @@ Copyright (C) 2001-2012  Erik Ouchterlony
       * Added game-handler to
          * retrieve information about game, with nested user-objects
          * retrieve own private notes of game
-##         * retrieve list of games with views: status, running, finished, observing, observed, MPG
+         * retrieve list of games with views: status, my/user running, my/user finished, observing, all observed;
+           including filter for MPG
          * play game (set-handicap stones, move, pass)
          * score game
          * delete game
@@ -512,7 +513,7 @@ Copyright (C) 2001-2012  Erik Ouchterlony
       * Added folder-handler to
          * retrieve information about message-folders
       * Added contact-handler to
-         * retrieve information about own contacts
+         * retrieve list of own contacts
       * Added waitingroom-handler to
          * retrieve list of all or only suitable waiting-room game1
          * retrieve information about waiting-room game

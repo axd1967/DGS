@@ -19,6 +19,174 @@ Developers INFO:
 ChangeLog
 ------------------------------------------------------------------
 
+2012-09-01 juga
+
+   * scripts/updates/database_changes_1_0_14_to_1_0_15.mysql,
+     specs/db/dragon-ddl.sql:
+   - replace varchars to get fixed-size tables: ConfigPages, Folders, Forums, IpStats,
+     TranslationGroups, TranslationLanguages, TranslationPages, TournamentExtension,
+     TournamentLadderProps, TournamentProperties, TournamentRound
+-----------
+-- replace varchars to get fixed-size tables
+ALTER TABLE ConfigPages
+   MODIFY StatusFolders char(40) NOT NULL default '' ;
+ALTER TABLE Folders
+   MODIFY Name char(40) NOT NULL,
+   MODIFY BGColor char(8) NOT NULL default 'f7f5e3FF',
+   MODIFY FGColor char(6) NOT NULL default '000000' ;
+ALTER TABLE Forums
+   MODIFY Name char(40) NOT NULL default '',
+   MODIFY Description char(128) NOT NULL default '',
+   MODIFY SortOrder tinyint unsigned NOT NULL default '0' ;
+ALTER TABLE IpStats
+   MODIFY IP char(16) NOT NULL ;
+ALTER TABLE TranslationGroups
+   MODIFY Groupname char(32) NOT NULL ;
+ALTER TABLE TranslationLanguages
+   MODIFY Language char(32) NOT NULL,
+   MODIFY Name char(32) NOT NULL ;
+ALTER TABLE TranslationPages
+   MODIFY Page char(64) NOT NULL ;
+ALTER TABLE TournamentExtension
+   MODIFY ChangedBy char(54) NOT NULL default '' ;
+ALTER TABLE TournamentLadderProps
+   MODIFY ChangedBy char(54) NOT NULL default '' ;
+ALTER TABLE TournamentProperties
+   MODIFY ChangedBy char(54) NOT NULL default '' ;
+ALTER TABLE TournamentRound
+   MODIFY ChangedBy char(54) NOT NULL default '' ;
+-----------
+
+   * labels.rdf:
+   - fix PHP-warnings noticed by E_STRICT:
+     added empty "labels.rdf", see http://www.java-samples.com/showtutorial.php?tutorialid=1584
+
+   * include/connect2mysql.php (mysql_single_fetch),
+     include/coords.php (get_hoshi_coords),
+     include/make_translationfiles.php (fnop),
+     daily_cron.php:
+   - fix PHP-warnings noticed by E_STRICT:
+     missing include, missing resource-check, check allowed args, define unknown func 'fnop'
+
+   * include/db_classes.php (Entity),
+     include/filter_functions.php (sql_replace_wildcards),
+     include/form_functions.php (Form, ~.create_form_string),
+     include/game_functions.php (GameSnapshot.parse_stones_snapshot),
+     include/std_classes.php (QuerySQL, ~.add_part, ~.addIndex),
+     include/table_columns.php (Table.set_default_sort, ~.set_sort),
+     include/utilities.php (array_intersect_key_values),
+     include/quick/quick_game.php (QuickHandlerGame.convert_coords):
+   - cleanup: refactor static calculated loop-expression out of loop
+   - use defined consts
+
+   * include/timezones.php (get_timezone_array),
+     scripts/updates/database_changes_1_0_14_to_1_0_15.mysql:
+   - use alias 'Asia/Shanghai' for removed tzdata of 'China/Shanghai'-timezone as live-system
+     does not know it anymore
+-----------
+-- use alias for removed tzdata of 'China/Shanghai'-timezone
+UPDATE Players
+   SET Timezone='Asia/Shanghai' WHERE Timezone ='China/Shanghai' ;
+-----------
+
+   * include/contacts.php (Contact.load_quick_contacts, ~.getContactUserFlags, ~.getContactSystemFlags),
+     include/game_functions.php (NextGameOrder.get_next_game_order),
+     include/quick/quick_game_list.php (QuickHandlerGameList.prepare),
+     include/quick/quick_handler.php (class QuickHandler, ~.add_list),
+     include/quick/quick_game_info.php (QuickHandlerGameInfo.fill_game_info),
+     include/quick/quick_contact.php (QuickHandlerContact.build_obj_contact_user),
+     specs/quick_suite.txt:
+   - quick-handler:
+     - game-list: set list_order for all views
+     - game-info/list: added 'my_id'-field
+     - set 'list_order' for all object-list commands,
+       'list_order'-field can contain fieldnames that are not returned in result
+     - contact-list:
+       - used std-func to build user-info
+       - removed contact-user-fields ratingstatus, picture
+       - renamed system-flag for quick-suite: WAITINGROOM -> WR_PROTECT_GAMES
+       - bugfix: correct contact-user/system-flags for quick-suite
+
+   * include/quick/quick_bulletin.php (QuickHandlerBulletin.prepare):
+   - bugfix: fix order-query for bulletin-list quick-handler
+
+   * include/gamelist_control.php (GameListControl.build_games_query),
+     include/quick/quick_game_info.php (QuickHandlerGameInfo.fill_game_info),
+     include/quick/quick_game_list.php (QuickHandlerGameList.prepare),
+     specs/quick_suite.txt:
+   - game-list quick-handler: implemented 'finished'-view to show my or other-users finished games
+
+   * include/gamelist_control.php (class GameListControl, ~.build_games_query),
+     include/quick/quick_game_info.php (QuickHandlerGameInfo.prepare, ~.fill_game_info),
+     include/quick/quick_game_list.php (QuickHandlerGameList.prepare),
+     specs/quick_suite.txt, show_games.php:
+   - game-list quick-handler: implemented 'running'-view to show my or other-users running games
+   - bugfix: load X_Ticks to calculate remaining-time only for my games
+
+   * include/quick/quick_game_info.php (class QuickHandlerGameInfo, ~.prepare, ~.process,
+       ~.fill_game_info),
+     include/quick/quick_game_list.php (QuickHandlerGameList.prepare, ~.process),
+     include/quick/quick_handler.php (QuickHandler.clear_with_options),
+     specs/quick_suite.txt, show_games.php:
+   - game-list quick-handler:
+     - implemented 'observe'-view to show "all observed games" and "games i'm observing"
+       - bugfix: show time-remaining only for own games
+       - bugfix: cast game-priority to integer
+     - implemented 'status'-view
+       - allow LIMIT-option 'all' for game-status-view
+       - USER_ID restricted to logged-in user
+       - added available WITH-option: user_id, prio, notes
+       - added available FILTER-options
+   - cleanup: use Games-fields instead of extra-fields: -> Black|White_Start_Rating
+   - cleanup: unified SQL field-naming: black|whiteRating -> ..Rating2
+
+2012-08-31 juga
+
+   * include/gamelist_control.php (class GameListControl, ~.setView, ~.is_observe, ~.is_running,
+       ~.is_finished, ~.is_all, ~.is_observe_all, ~.is_status, ~.is_info, ~.build_games_query,
+       ~.build_game_list_query_status_view, ~.extend_game_list_query_with_user_info),
+     include/game_functions.php (GameHelper.extend_query_with_game_notes,
+       ~.extend_query_with_game_prio;
+       NextGameOrder.build_status_games_query),
+     include/quick/quick_game_list.php (class QuickHandlerGameList, ~.canHandle, ~.parseURL,
+       ~.prepare, ~.process),
+     include/quick/quick_game_info.php (class QuickHandlerGameInfo, ~.prepare, ~.process,
+       ~.fill_game_info),
+     specs/quick_suite.txt, quick_status.php, show_games.php, status.php:
+   - game-info quick-handler:
+     - completed implementation of "info"-command for game-quick-handler
+     - added WITH-option to control adding fields: user_id, prio, notes, ratingdiff
+     - added fields for game-info: jigo_mode, notes, prio, game_action
+     - refactored building for game-info and game-list queries into GameListControl-class
+     - refactored building game-info-result to be used for all views
+   - game-list quick-handler:
+     - refactored to merge with game-info, started to clean up list-views
+     - added FILTER-options for MPG, tournaments
+     - added LIMIT-handling
+   - bugfix show_games: URL-argument finished must be set (<>0) to activate finished-view
+   - cleanup:
+     - refactored all classes from 'include/classlib_game.php' into 'include/game_functions.php'
+     - refactored specific status-query-parts into NextGameOrder::build_status_games_query()
+     - merged QuickHandler.build_obj_user2() into QuickHandler.build_obj_user()
+
+   * include/game_functions.php (class GameScore; class BoardStatus; class NextGameOrder;
+       class GameSnapshot),
+     include/classlib_game.php [REMOVED],
+     include/board.php, include/make_game.php, include/message_functions.php,
+     include/move.php, include/sgf_builder.php, include/shape_control.php,
+     tournaments/include/tournament_rules.php, scripts/check_players_email.php,
+     scripts/fix_games_timeleft.php, scripts/game_consistency.php,
+     clock_tick.php, confirm.php, game.php, gameinfo.php, new_game.php, wap/status.php:
+   - cleanup: refactored all classes from 'include/classlib_game.php' into 'include/game_functions.php'
+
+   * include/quick/quick_handler.php (class QuickHandler, ~.build_obj_user),
+     include/quick/quick_bulletin.php, include/quick/quick_contact.php,
+     include/quick/quick_message.php, include/quick/quick_wroom.php:
+   - cleanup: merged QuickHandler.build_obj_user2() into QuickHandler.build_obj_user()
+
+   * include/db/games.php (class Games, ~.new_from_row):
+   - store original game-row in container
+
 2012-08-30 juga
 
    * include/quick/quick_wroom.php (class QuickHandlerWaitingroom, ~.parseURL, ~.process,
@@ -48,7 +216,8 @@ ChangeLog
      specs/quick_suite.txt:
    - waitingroom-list quick-handler:
      - implemented 'list'-command returning all waiting-room-entries
-     - fields calc_handicap & calc_komi now empty instead of omitted; this is needed to have complete list of fields for all list-entries
+     - fields calc_handicap & calc_komi now empty instead of omitted;
+       this is needed to have complete list of fields for all list-entries
 
    * include/quick/quick_handler.php (class QuickHandler, ~._parse_options, ~.is_with_option,
        ~.check_list_style, ~.add_query_limits, ~.read_found_rows, ~.add_list),
