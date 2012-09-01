@@ -252,6 +252,13 @@ always contains several mandatory and some optional standard fields:
         can check 'list_has_next' to check if there are more "pages" to retrieve.
         If 'list_has_next' is 0 the last "page" has been reached.
 
+   * NOTE about "list_order":
+      - the keys returned in 'list_order' refers to the field-names of the command,
+        e.g. for waitingroom-list: "user.rating-,user.handle+"
+      - if the key is a name in full upper-case, then it resembles an internal field,
+        that is not returned in the result, e.g. for game-list of status-view with
+        next-game-order 'TIMELEFT': "TIMEOUTDATE+,time_lastmove+,id-"
+
    * NOTE about "list_header" (see also example below):
       - this field is only used for TABLE-style
       - and only if list contains at least one item
@@ -588,6 +595,7 @@ Commands:
             "time_mode" : "CAN",      # time-mode: FIS=Fischer-time, JAP=japanese-time, CAN=canadian-time
             "time_limit" : "C: 14d + 15d / 8", # initial time-settings for game (like in waiting-room), see section (6b) "TimeLimit-Formats"
 
+            "my_id" : 111,          # user-id of logged-in user (redundant in each element, but included if logged-in user-id unknown)
             "move_id" : 75,         # move-id, required as context for playing via game-quick-suite
             "move_count" : 75,      # number of moves
             # the following 4 fields are omitted for finished games
@@ -649,23 +657,6 @@ Commands:
       - required opts: VIEW
       - optional opts: USER_ID, WITH, LIMIT, FILTER
 
-      - IMPORTANT NOTE about "comparison between web-site and quick-suite":
-         - #TODO web-site "status.php" / "show_games.php" <-> game-object "list"-command
-         - #TODO views are the same if existing
-         - #TODO view running-all & finished-all not existing for quick-suite, because it would require RESTRICT_GAMES-stuff as web-site has
-         - #TODO view my-running/my-finished/status has role of opponent and user on website <-> but on quick-suite always black + white, the role of opponent and user must be determiend by fields 'move_color' or 'move_opp' => describe how to determine
-         - #TODO same restrictions for MPGs apply as for web-site, i.e. game-lists do not show MPGs if user is not B|W at the moment -> use 'mpg'-parameter
-
-         #TODO
-         - the fields differ from web-page, where the "opponents" data is shown on the status-page.
-           For the quick-suite, the opponent must be identified by the client by checking the
-           the 'move_opp' or 'move_color'-field and finding the corresponding 'black|white_...'-fields.
-           This was done to always have the same field-names for all views.
-           For example, the "opponent" for the result shown for the "info"-command above is 222,
-           indicated by the 'move_opp'-field. Or determine the opponent by the 'move_color'-field.
-           If the value is 'B', then the opponent has the White color, so the opponents data
-           can be found in the "white_..."-structures.
-
       - VIEW-option:
          - 'status'    : ask for status-games (=own running games where to move in)
             - LIMIT-option may be 'all' to return all status-games in one go
@@ -705,6 +696,51 @@ Commands:
             - VAL = '1' : find all / filter on multi-player-games
             - VAL = '0' : normal games-result as web-page (default)
          - 'filter_tid=VAL' : filter on only given tournament-id
+
+      - IMPORTANT NOTES: "comparison between web-site and quick-suite"
+         * The quick-suite game-list uses the same kind of views as the web-site does.
+           So there is no list of ALL games, but only certain views on them, namely:
+
+               - 'status'-view = like 'status.php', running games of own (logged-in user) where to move in next
+               - 'running'-view = like 'show_games.php', user-specific running games
+               - 'finished'-view = like 'show_games.php', user-specific finished games
+               - 'observe'-view = like 'show_games.php', games i'm observing, OR all observed games (by all users)
+
+         * The views for ALL running or ALL finished games is not supported by the quick-suite,
+           because the query is very expensive and would need to be restricted as the web-site is
+           to make it efficient enough.
+
+         * The web-site show the data-fields differently for "my running games" and "my finished games".
+           These views assume a fix "user" (logged-in user) and show only data-fields for the "opponent".
+
+           Out of consistency-reasons the quick-suite does not return "opponent" and "user"-data,
+           but always for all views show data-fields for the Black- and White-user-roles
+           with additional fields 'my_id', 'move_color', 'move_uid' and 'move_opp' to determine
+           the roles of "user" and "opponent".
+
+           To have the same "view" as the web-site, the client of the quick-suite must determine
+           the "user" and "opponent" matching it to the black- and white-user.
+
+           Example:
+               - result-fields: my_id=111, move_color=B, move_uid=222, move_opp=111
+
+               - then the logged-in users user-id is 111, so the "user" would be 111 and
+                 the "opponent" would be 222. With this check the "black_user.id" and
+                 "white_user.id"-field to get the according color the user or opponent has.
+                 If the "black_user.id" is 222, then the respective game-info can
+                 be found in the "black_gameinfo"-object.
+
+         * Finally for multi-player-games (MPGs) the same "restrictions" apply as for the web-site.
+           That means, the normal quick-suite game-lists could contain some multi-player-games,
+           but only as long as the requested user-id has the role of the Black or White-user.
+
+           To get a game-list with the quick-suite to all MPGs of a specific user, the client has
+           to use the 'mpg' FILTER-option, adding 'filter_mpg=1' to the URL-arguments.
+
+           For example, the "opponent" for the result shown for the "info"-command above is 222,
+           indicated by the 'move_opp'-field. Or determine the opponent by the 'move_color'-field.
+           If the value is 'B', then the opponent has the White color, so the opponents data
+           can be found in the "white_..."-structures.
 
       - Errors:
          - all errors of: [E-LOGIN], [E-GEN]
@@ -1241,7 +1277,7 @@ Commands:
       - Errors:
          - all errors of: [E-LOGIN], [E-GEN], [E-GAMECREATE], [E-MSG], [E-MSGSEND]
 
-   # NOT fully IMPLEMENTED: to-specify (filter) (TODO)
+   # NOT IMPLEMENTED: to-specify (filter) (TODO)
    "list" : retrieve list of messages
       - required opts: -
       - optional opts: WITH, FILTERS #TODO
@@ -1255,13 +1291,13 @@ Commands:
 
       - Result (JSON) =
          {
-            "list_object" : "message", # list of object-types
-            "list_totals": -1,         # total list-size
-            "list_size" : 5,           # current list-size
-            "list_offset" : 0,         # start offset of list-part (for paging)
-            "list_limit" : 0,          # number of entries per page
-            "list_order" : "",         # order of list (field-names, comma-separated), ""=no-order
-            "list_result" : [          # array with found objects matching list-search
+            "list_object" : "message",
+            "list_totals": -1,
+            "list_size" : 5,
+            "list_offset" : 0,
+            "list_limit" : 0,
+            "list_order" : "",            # list-order is set dependent on view
+            "list_result" : [
                {
                   "id" : 1,          # message-id
                   "user_from" : {
@@ -1350,13 +1386,13 @@ Commands:
       - Result (JSON) = // also see specs/db/table-Messages.txt
 
          {
-            "list_object" : "folder",  # list of object-types
-            "list_totals": -1,         # total list-size
-            "list_size" : 5,           # current list-size
-            "list_offset" : 0,         # start offset of list-part (for paging)
-            "list_limit" : 0,          # number of entries per page
-            "list_order" : "id+",      # order of list (field-names, comma-separated), ""=no-order
-            "list_result" : [          # array with found objects matching list-search
+            "list_object" : "folder",
+            "list_totals": -1,
+            "list_size" : 5,
+            "list_offset" : 0,
+            "list_limit" : 0,
+            "list_order" : "id+",
+            "list_result" : [
                {
                   "id" : 2,                # folder-nr (<0, 0-5 system-folder, >= 6 user-folder)
                   "name" : "New",          # folder-name (lang-dependent)
@@ -1422,7 +1458,7 @@ Commands:
             "list_size" : 3,
             "list_offset" : 0,
             "list_limit" : 0,
-            "list_order" : "contact_user.name+", # order of list + direction '+|-' (field-names, comma-separated), ""=standard-order
+            "list_order" : "contact_user.name+",
             "list_result" : [
                {
                   "contact_user" : {
@@ -1430,17 +1466,15 @@ Commands:
                      "handle" : "guest",  # USER_HANDLE
                      "name" : "Guest",    # user name
                      # for the following fields -> see "info"-command for user-object (3b)
-                     # the following fields only if WITH-option contains 'user_id'
-                     "type" : "",
+                     # the following fields are only included if WITH-option contains 'user_id'
                      "country" : "se",
-                     "picture" : "",
-                     "last_access" : "YYYY-MM-DD hh:mm:ss",
-                     "last_move" : "YYYY-MM-DD hh:mm:ss",
-                     "rating_status" : "RATED",
                      "rating" : "5k (+46%)",
                      "rating_elo" : "1643.88952636719",
+                     "last_access" : "YYYY-MM-DD hh:mm:ss",
+                     "last_move" : "YYYY-MM-DD hh:mm:ss",
+                     "type" : "",
                   },
-                  "system_flags" : "",    # system flags (comma-separated): WAITINGROOM REJECT_MESSAGE REJECT_INVITE WR_HIDE_GAMES
+                  "system_flags" : "",    # system flags (comma-separated): WR_PROTECT_GAMES REJECT_MESSAGE REJECT_INVITE WR_HIDE_GAMES
                   "user_flags" : "",      # user flags (comma-separated): BUDDY FRIEND STUDENT TEACHER FAN ADMIN TROLL MISC
                   "created_at" : "YYYY-MM-DD hh:mm:ss", # contact created date
                   "updated_at" : "YYYY-MM-DD hh:mm:ss", # contact last-updated date
@@ -1603,7 +1637,7 @@ Commands:
             "list_size" : 3,
             "list_offset" : 0,
             "list_limit" : 0,
-            "list_order" : "user.rating-,user.handle+",  # std-order for waiting-room-list
+            "list_order" : "user.rating-,user.handle+",
             "list_result" : [
                # each list-element looks like the output for the "info"-command (without the std-fields),
                # except for the fields mentioned below in "Exception Notes"
@@ -1722,7 +1756,7 @@ Commands:
             "list_size" : 2,
             "list_offset" : 0,
             "list_limit" : 0,
-            "list_order" : "", # TODO order of list + direction '+|-' (field-names, comma-separated), ""=standard-order
+            "list_order" : "time_published-",
             "list_result" : [
                {
                   "id" : 123, # bulletin-id
