@@ -185,7 +185,7 @@ function translations_query( $translate_lang, $untranslated, $group, $from_row=-
    else
       $limit = '';
 
-   $query = "SELECT Translations.Text"
+   $query = "SELECT SQL_CALC_FOUND_ROWS Translations.Text"
           . ",TT.ID AS Original_ID"
           . ",TL.ID AS Language_ID"
           . ",TFIG.Group_ID"

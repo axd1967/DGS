@@ -124,18 +124,18 @@ $info_box = '<br>When translating you should keep the following things in mind:
 
    $translate_lang = get_request_arg('translate_lang');
    if( ALLOW_PROFIL_CHARSET && (@$player_row['admin_level'] & ADMIN_TRANSLATORS) )
-      $profil_charset = (int)(bool)@$_REQUEST['profil_charset'];
+      $profil_charset = (int)@$_REQUEST['profil_charset'];
    else
       $profil_charset = 0;
 
    $group = get_request_arg('group');
-   $untranslated = (int)(bool)@$_REQUEST['untranslated'];
-   $alpha_order = (int)(bool)@$_REQUEST['alpha_order'];
+   $untranslated = (int)@$_REQUEST['untranslated'];
+   $alpha_order = (int)@$_REQUEST['alpha_order'];
    if( TRANSL_ALLOW_FILTER )
       $filter_en = trim(get_request_arg('filter_en'));
    else
       $filter_en = '';
-   $no_pages = (int)(bool)@$_REQUEST['no_pages'];
+   $no_pages = (int)@$_REQUEST['no_pages'];
    if( $no_pages )
       $from_row = -1;
    else
@@ -167,6 +167,7 @@ $info_box = '<br>When translating you should keep the following things in mind:
    $is_save = @$_REQUEST['save'];
    $is_preview = @$_REQUEST['preview'];
 
+   $show_rows = $found_rows = 0;
    if( $translate_lang )
    {
       if( !in_array( $translate_lang, $translator_array ) )
@@ -178,12 +179,15 @@ $info_box = '<br>When translating you should keep the following things in mind:
       $show_rows = (int)@mysql_num_rows($result);
       if( !TRANSL_ALLOW_FILTER && $show_rows <= 0 && !$untranslated )
          error('translation_bad_language_or_group', "translate.check.lang_group($translate_lang)");
-      if( $show_rows > TRANS_ROW_PER_PAGE )
-         $show_rows = TRANS_ROW_PER_PAGE;
+
+      if( $show_rows > 0 )
+         $found_rows = mysql_found_rows('translate.found_rows');
    }
 
    if( $is_save )
    {
+      if( $show_rows > TRANS_ROW_PER_PAGE )
+         $show_rows = TRANS_ROW_PER_PAGE;
       update_translation( $translate_lang, $result, $show_rows );
 
       jump_to("translate.php?translate_lang=".urlencode($translate_lang) .
@@ -294,11 +298,12 @@ $info_box = '<br>When translating you should keep the following things in mind:
                T_('Next Page'), '', array( 'accesskey' => ACCKEY_ACT_NEXT ));
       }
 
-      if( $table_links )
+      $table_entries = ( $found_rows > 0 ) ? sprintf('(%s entries)', $found_rows) : '';
+      if( $table_links || $table_entries )
       {
          $translate_form->add_row( array( 'ROW', 'LinksT',
                'CELL', 1, 'class=PageLinksL',
-               'TEXT', $table_links,
+               'TEXT', $table_links . SMALL_SPACING . $table_entries,
                'CELL', $nbcol-1, 'class=PageLinksR',
                'TEXT', $table_links,
             ));
@@ -321,9 +326,18 @@ $info_box = '<br>When translating you should keep the following things in mind:
          $oid = $row['Original_ID'];
 
          $orig_string = $row['Original'];
-         $translation = ( $is_preview ) ? trim(get_request_arg("transl$oid")) : $row['Text'];
-         $transl_untranslated = ( $is_preview ) ? (@$_REQUEST["same$oid"] === 'Y') : ($row['Text'] === '');
-         $transl_unchanged = ( $is_preview ) ? (@$_REQUEST["unch$oid"] === 'Y') : false;
+         if( $is_preview )
+         {
+            $translation = trim( get_request_arg("transl$oid") );
+            $transl_untranslated = ( @$_REQUEST["same$oid"] === 'Y' );
+            $transl_unchanged = ( @$_REQUEST["unch$oid"] === 'Y' );
+         }
+         else
+         {
+            $translation = $row['Text'];
+            $transl_untranslated = ( $row['Text'] === '' );
+            $transl_unchanged = false;
+         }
 
          //$debuginfo must be html_safe.
          if( (@$player_row['admin_level'] & ADMIN_DEVELOPER) /* && @$_REQUEST['debug'] */ )
