@@ -135,7 +135,7 @@ class QuickHandlerGameList extends QuickHandler
 
       // prepare command: list
 
-      $glc = new GameListControl();
+      $glc = new GameListControl(/*quick*/true);
       if( $this->opt_view == GAMELIST_OPTVAL_VIEW_STATUS )
       {
          if( $uid != $my_id )
@@ -157,7 +157,7 @@ class QuickHandlerGameList extends QuickHandler
       else //view running|finished|observe
       {
          //TODO
-         if( !preg_match("/^(observe)\$/", $this->opt_view) )
+         if( !preg_match("/^(observe|running)\$/", $this->opt_view) )
             error('invalid_args', "$dbgmsg.not_supported_view");
 
          if( $this->opt_view == GAMELIST_OPTVAL_VIEW_OBSERVE && !($uid === 'all' || $uid == $my_id) )
@@ -172,6 +172,8 @@ class QuickHandlerGameList extends QuickHandler
 
          if( $glc->is_observe_all() )
             $this->clear_with_options( array( QWITH_PRIO, QWITH_NOTES, QWITH_RATINGDIFF ) ); // OA: not allowed
+         elseif( $glc->is_running() )
+            $this->clear_with_options( array( QWITH_PRIO, QWITH_RATINGDIFF ) ); // RU: not allowed
 
          $glc->mp_game = $f_mpg;
          $glc->ext_tid = $f_ext_tid;
@@ -181,7 +183,7 @@ class QuickHandlerGameList extends QuickHandler
          $is_mine = ($uid == $my_id);
          $show_notes = (LIST_GAMENOTE_LEN>0 && !$glc->is_observe() && !$glc->is_all() && $is_mine); // FU+RU subset
          $glc->load_notes = ($show_notes && $this->is_with_option(QWITH_NOTES) );
-         $load_remaining_time = ( $glc->is_running() && !$glc->is_all() );
+         $load_remaining_time = ( $glc->is_running() && !$glc->is_all() && $uid == $my_id );
 
          $qsql = $glc->build_games_query( $this->is_with_option(QWITH_RATINGDIFF), $load_remaining_time );
 

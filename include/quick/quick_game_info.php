@@ -96,7 +96,7 @@ class QuickHandlerGameInfo extends QuickHandler
 
       if( $cmd == QCMD_INFO )
       {
-         $glc = new GameListControl();
+         $glc = new GameListControl(/*quick*/true);
          $glc->setView( GAMEVIEW_INFO, 'all' );
          $this->glc = $glc;
 
@@ -144,7 +144,6 @@ class QuickHandlerGameInfo extends QuickHandler
 
    function fill_game_info( $quick_handler, $glc, &$out, $row )
    {
-      //$RU = $this->glc->is_running();
       //$FU = $this->glc->is_finished();
       //$all = $this->glc->is_all();
 
@@ -157,8 +156,8 @@ class QuickHandlerGameInfo extends QuickHandler
 
 
       // output for views: info (INFO), status (ST), observe_mine (OU), observe_all (OA), running-user (RU), finished-user (FU)
-      // DONE views: INFO, ST, OA, OU
-      // TODO views: RU, FU
+      // DONE views: INFO, ST, OA, OU, RU
+      // TODO views: FU
 
       $out['id'] = (int)$row['ID'];
       $out['double_id'] = (int)$row['DoubleGame_ID'];
@@ -226,8 +225,7 @@ class QuickHandlerGameInfo extends QuickHandler
          // game-info
          $ginfo = array();
          $ginfo['prisoners'] = (int)$row[$icol.'_Prisoners'];
-         if( $remtime )
-            $ginfo['remtime'] = $remtime;
+         $ginfo['remtime'] = ($remtime) ? $remtime : '';
          $ginfo['rating_start'] = echo_rating($row[$icol.'_Start_Rating'], /*perc*/1, /*uid*/0, /*engl*/true, /*short*/1);
          $ginfo['rating_start_elo'] = echo_rating_elo($row[$icol.'_Start_Rating']);
 

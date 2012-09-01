@@ -53,7 +53,7 @@ $GLOBALS['ThePage'] = new Page('GamesList');
      mp                       : select only MPGs
 */
 
-   $glc = new GameListControl();
+   $glc = new GameListControl(/*quick*/false);
 
    $glc->mp_game = (int)get_request_arg(FGTNAME_MPGAME); // multi-player-game
 
@@ -301,7 +301,7 @@ $GLOBALS['ThePage'] = new Page('GamesList');
    // NOTE: check after add_or_del_column()-call
    // only activate if column shown for user to reduce server-load for page
    // avoiding additional outer-join on Clock-table !!
-   $load_remaining_time = ( $running && !$all
+   $load_remaining_time = ( $running && !$all && $uid == $my_id
       && ($gtable->is_column_displayed(39) || $gtable->is_column_displayed(40)) );
 
 /*****

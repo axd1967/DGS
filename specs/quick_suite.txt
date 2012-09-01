@@ -596,7 +596,7 @@ Commands:
             "move_last" : "bc",     # SGF-format of last-move ("" for non-board-move, e.g. pass/scoring/setup)
 
             "prio" : 0,             # games-priority, 0 if not set or loaded; field only loaded if WITH-option contains 'prio' used AND status-games ordered by prio
-            "notes" : "",           # beginning of game-notes (if existing for logged-in user); field only present if WITH-option contains 'notes' used
+            "notes" : "",           # beginning of game-notes (if existing but only for logged-in user); field only present if WITH-option contains 'notes' used
 
             "black_user" : {        # black-user object-info
                "id" : 111,                # USER_ID
@@ -610,7 +610,9 @@ Commands:
             },
             "black_gameinfo" : {    # game-info of black-user
                "prisoners" : 3,                         # prisoners
-               "remtime" : "C: 1d 10h (+ 15d / 8)",     # remaining-time (same format as for quick-status, see [4.QST]); field omitted for finished games and only included for games where black or white user is logged-in user
+               "remtime" : "C: 1d 10h (+ 15d / 8)",     # remaining-time (same format as for quick-status, see [4.QST]);
+                                                        # - field only filled for games where black or white user is logged-in user
+                                                        # - field empty for finished games
                "rating_start" : "3k (-7%)",             # start-rating
                "rating_start_elo" : "1792.59326171875", # start-rating ELO
 
@@ -662,10 +664,15 @@ Commands:
             - available WITH-options: user_id, prio, notes
             - USER_ID-option is restricted to logged-in user (or equivalent '' | 0 | 'mine' )
 
+         - 'running'   : ask for running games for user
+            - available WITH-options: user_id, notes
+            - USER_ID-option contains user-d to show running games for
+
          - 'observe'   : ask for all observed games (USER_ID-option 'all'), or else for observed games of logged-in user
             - available WITH-options: user_id
+            - USER_ID-option ='all' : all observed games
+            - USER_ID-option ='mine' (or equivalents): like "games i'm observing" from web-site
 
-         - 'running'   : ask for running games for logged-in user  (uid=mine) #TODO
          - 'finished'  : ask for finished games for logged-in user (uid=mine) #TODO
 
       - USER_ID-option:
@@ -699,6 +706,9 @@ Commands:
          * VIEW = 'status' :
             - full set of fields is returned for each list-element as for "info"-command
 
+         * VIEW = 'running' :
+            - full set of fields is returned for each list-element as for "info"-command
+
          * VIEW = 'observe' (all observed games  OR  games i'm observing) :
             - full set of fields is returned for each list-element as for "info"-command
             - only for "all observed games" the following additional fields are appended to the result:
@@ -708,7 +718,7 @@ Commands:
                      "obs_mine" : 1,         # 1=observed game is one of logged-in user, 0=otherwise
                   }
 
-         * VIEW = 'running' | 'finished'
+         * VIEW = 'finished' # TODO
 
    "delete" : deletes specified game
       - required opts: GAME_ID, MOVE_ID
