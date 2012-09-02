@@ -356,7 +356,7 @@ function add_old_game_form( $form_id, $game_row, $iamrated, $joinable )
    $is_my_game = $wro->is_my_game();
    $my_id = $player_row['ID'];
    $opp_id = $game_row['uid'];
-   list( $can_join, $html_out, $join_warning, $join_error ) = $wro->check_joining(/*html*/true);
+   list( $can_join, $html_out, $join_warning, $join_error ) = $wro->check_joining_waitingroom(/*html*/true);
 
    $game_form = new Form($form_id, 'join_waitingroom_game.php', FORM_POST, true);
 

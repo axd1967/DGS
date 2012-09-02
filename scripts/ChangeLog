@@ -19,9 +19,14 @@ Developers INFO:
 ChangeLog
 ------------------------------------------------------------------
 
-2012-09-01 juga
+2012-09-02 juga
 
 ### ----- release-1_0_15-20120608 -----
+
+   * waiting_room.php:
+   - bugfix: waiting-room info for joining was broken
+
+2012-09-01 juga
 
    * include/make_translationfiles.php (translations_query), translate.php:
    - bugfix: show next/prev-page again for paginating, handled show_rows in the wrong way
