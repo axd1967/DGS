@@ -37,7 +37,7 @@ Topics:
       a. Login & Logout
       b. Request
       c. Standard Response
-      d. List Response
+      d. List Request & Response
       e. Filtered Response
       f. Expected Fields
       g. Standard Request Parameters
