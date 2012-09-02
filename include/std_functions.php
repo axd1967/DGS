@@ -1670,9 +1670,9 @@ global $html_code; //PHP5
 $html_code['cell'] = 'note|b|i|u|strong|em|tt|strike|color';
 $html_code['line'] = 'home|a|'.$html_code['cell'];
 $html_code['msg'] = 'br|/br|p|/p|li|hr'.$html_code_closed['msg']
-   .'goban|mailto|https?|news|game_?|tourney_?|survey_?|user_?|send_?|image';
+   .'goban|mailto|_?https?|_?news|_?ftp|game_?|tourney_?|survey_?|user_?|send_?|image';
 $html_code['game'] = 'br|/br|p|/p|li|hr'.$html_code_closed['game']
-   .'goban|mailto|https?|news|ftp|game_?|tourney_?|survey_?|user_?|send_?|image';
+   .'goban|mailto|_?https?|_?news|_?ftp|game_?|tourney_?|survey_?|user_?|send_?|image';
 $html_code['faq'] = '\w+|/\w+'; //all non-empty words
 
 
@@ -1954,11 +1954,13 @@ $html_safe_preg = array(
  '/'.ALLOWED_LT."(mailto:)([^`\\n\\s]+)".ALLOWED_GT.'/is'
   => ALLOWED_LT."a href=".ALLOWED_QUOT."\\1\\2".ALLOWED_QUOT.ALLOWED_GT."\\2".ALLOWED_LT."/a".ALLOWED_GT,
 
-//<http://...>, <https://...>, <news://...>, <ftp://...>
- '%'.ALLOWED_LT."((http:|https:|news:|ftp:)//[^`'\\r\\n\\s]+?)(?:\s+\|([^'\\r\\n]+?))?".ALLOWED_GT.'%ise'
+//<http://...>, <https://...>, <news://...>, <ftp://...>, <_(http|https|news|ftp)://...>
+ '%'.ALLOWED_LT."(_)?((http:|https:|news:|ftp:)//[^`'\\r\\n\\s]+?)(?:\s+\|([^'\\r\\n]+?))?".ALLOWED_GT.'%ise'
   => '"'.ALLOWED_LT.'a class='.ALLOWED_QUOT.'linkmarkup'.ALLOWED_QUOT
-         . ' href='.ALLOWED_QUOT."\\1".ALLOWED_QUOT.ALLOWED_GT.'"'
-         . ".( strlen(trim('\\3')) ? '\\3' : '\\1' )."
+         . ' href='.ALLOWED_QUOT."\\2".ALLOWED_QUOT
+         . "\".('\\1'?' target=".ALLOWED_QUOT.'_blank'.ALLOWED_QUOT."':'').\""
+         . ALLOWED_GT.'"'
+         . ".( strlen(trim('\\4')) ? '\\4' : '\\2' )."
          . '"'.ALLOWED_LT."/a".ALLOWED_GT.'"',
 
 //<game gid[,move]> =>show game
@@ -1999,7 +2001,7 @@ $html_safe_preg = array(
  '%'.ALLOWED_LT."/quote *".ALLOWED_GT.'%is'
   => ALLOWED_LT."/div".ALLOWED_GT,
 
-//<home page>...</home> =>translated to <a href="{HOSTBASE}$page">...</a>
+//<home page>...</home>, <home_ ...> =>translated to <a href="{HOSTBASE}$page">...</a>
  '%'.ALLOWED_LT."home(_)?[\\n\\s]+((\.?[^\.\\\\:\"`\\n\\s])+)".ALLOWED_GT.'%ise'
   => '"'.ALLOWED_LT."a href=".ALLOWED_QUOT.HOSTBASE."\\2".ALLOWED_QUOT
       ."\".('\\1'?' target=".ALLOWED_QUOT.'_blank'.ALLOWED_QUOT."':'').\""
