@@ -190,7 +190,7 @@ $GLOBALS['ThePage'] = new Page('Game');
    // toggle observing (also allowed for my-game)
    if( $logged_in && ($Status != GAME_STATUS_FINISHED) && @$_REQUEST['toggleobserve'] )
       $my_observe = toggle_observe_list($gid, $my_id, @$_REQUEST['toggleobserve'] ); // Y|N
-   elseif( !$logged_in || $my_game || ($Status == GAME_STATUS_FINISHED) )
+   elseif( !$logged_in || ($Status == GAME_STATUS_FINISHED) )
       $my_observe = null;
    else
       $my_observe = is_on_observe_list( $gid, $my_id);
@@ -831,7 +831,7 @@ $GLOBALS['ThePage'] = new Page('Game');
    if( $is_mp_game )
       $menu_array[T_('Show game-players')] = "game_players.php?gid=$gid";
 
-   end_page(@$menu_array);
+   end_page(@$menu_array, -4);
 }// main
 
 
