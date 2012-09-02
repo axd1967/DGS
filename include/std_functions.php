@@ -818,18 +818,23 @@ function show_maintenance_page()
 //    linktext  => URL
 //    linktext  => array( 'url' => URL, attb1 => val1, ... )
 //    dummytext => Form-object
+// $links_per_line : <0 (absolute), >0 (balanced)
 function make_menu($menu_array, $with_accesskeys=true, $links_per_line=0 )
 {
    global $base_path, $max_links_in_main_menu;
-   $links_per_line = ( $links_per_line > 0 ) ? $links_per_line : $max_links_in_main_menu;
+
+   $balanced = ( $links_per_line >= 0 );
+   if( $links_per_line == 0 )
+      $links_per_line = $max_links_in_main_menu;
+   elseif( !$balanced )
+      $links_per_line = -$links_per_line;
 
    $nr_menu_links = count($menu_array);
    if( $nr_menu_links == 0 )
       return;
 
    $menu_levels = ceil( $nr_menu_links / $links_per_line );
-   $menu_width = ceil($nr_menu_links/$menu_levels);
-   $remain = ($menu_levels*$menu_width) - $nr_menu_links +1;
+   $menu_width = ( $balanced ) ? ceil($nr_menu_links / $menu_levels) : $links_per_line;
    $w = 100/$menu_width;
 
    echo "\n\n<table id=\"pageLinks\" class=Links>\n <tr>";
