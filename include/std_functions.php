@@ -345,7 +345,7 @@ function start_html( $title, $no_cache, $skinname=NULL, $style_string=NULL, $las
    if( !isset($skinname) || !$skinname )
       $skinname = 'dragon';
    $skin_screen = ( file_exists("{$main_path}skins/$skinname/screen.css") ) ? $skinname : 'dragon';
-   echo "\n <link rel=\"stylesheet\" type=\"text/css\" media=\"screen\" href=\"{$base_path}skins/$skin_screen/screen.css\">";
+   echo "\n <link rel=\"stylesheet\" type=\"text/css\" media=\"screen\" href=\"{$base_path}skins/$skin_screen/screen.css?t=".CSS_VERSION."\">";
    $skin_print = ( file_exists("{$main_path}skins/$skinname/print.css") ) ? $skinname : 'dragon';
    echo "\n <link rel=\"stylesheet\" type=\"text/css\" media=\"print\" href=\"{$base_path}skins/$skin_print/print.css\">";
 
