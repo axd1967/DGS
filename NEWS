@@ -161,6 +161,7 @@ Copyright (C) 2001-2012  Erik Ouchterlony
       * Show hint about area-scoring before passing to avoid odd dame
 ##      * Show tournament info for tournament-game
       * Show multi-player-game info
+      * Allow observe-toggling of own game
 
    * Game info page (new):
       * Added rematch for new game with same settings as invitation (Rematch) or waiting-room (Copy new game)
