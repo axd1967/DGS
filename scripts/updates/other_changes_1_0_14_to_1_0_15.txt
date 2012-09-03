@@ -263,3 +263,8 @@ copy /images/apple-touch-icon-precomposed.png
 copy /images/apple-touch-icon.png
 
 
+-----------
+# added view to expand/collapse tree-overview
+copy /images/expand.gif
+copy /images/collapse.gif
+

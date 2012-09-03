@@ -232,7 +232,9 @@ CREATE TABLE IF NOT EXISTS `FAQ` (
   `Answer` int(11) NOT NULL default '0',
   `Hidden` enum('N','Y') NOT NULL default 'N',
   `Reference` varchar(255) NOT NULL default '',
-  PRIMARY KEY  (`ID`)
+  PRIMARY KEY  (`ID`),
+  KEY `Parent` (`Parent`),
+  KEY `Level` (`Level`)
 ) ENGINE=MyISAM  DEFAULT CHARSET=latin1;
 
 -- --------------------------------------------------------
@@ -510,7 +512,9 @@ CREATE TABLE IF NOT EXISTS `Intro` (
   `Answer` int(11) NOT NULL default '0',
   `Hidden` enum('N','Y') NOT NULL default 'N',
   `Reference` varchar(255) NOT NULL default '',
-  PRIMARY KEY  (`ID`)
+  PRIMARY KEY  (`ID`),
+  KEY `Parent` (`Parent`),
+  KEY `Level` (`Level`)
 ) ENGINE=MyISAM DEFAULT CHARSET=latin1;
 
 -- --------------------------------------------------------
@@ -545,7 +549,9 @@ CREATE TABLE IF NOT EXISTS `Links` (
   `Answer` int(11) NOT NULL default '0',
   `Hidden` enum('N','Y') NOT NULL default 'N',
   `Reference` varchar(255) NOT NULL default '',
-  PRIMARY KEY  (`ID`)
+  PRIMARY KEY  (`ID`),
+  KEY `Parent` (`Parent`),
+  KEY `Level` (`Level`)
 ) ENGINE=MyISAM  DEFAULT CHARSET=latin1;
 
 -- --------------------------------------------------------

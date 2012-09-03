@@ -2541,3 +2541,15 @@ ALTER TABLE TournamentRound
    MODIFY ChangedBy char(54) NOT NULL default '' ;
 
 
+-- added some keys for FAQ/Intro/Links for editing
+ALTER TABLE FAQ
+   ADD KEY Parent (Parent),
+   ADD KEY Level (Level) ;
+ALTER TABLE Links
+   ADD KEY Parent (Parent),
+   ADD KEY Level (Level) ;
+ALTER TABLE Intro
+   ADD KEY Parent (Parent),
+   ADD KEY Level (Level) ;
+
+

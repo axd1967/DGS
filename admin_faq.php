@@ -20,6 +20,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 // translations remove for admin page: $TranslateGroups[] = "Admin";
 
 require_once( "include/std_functions.php" );
+require_once( "include/std_classes.php" );
 require_once( "include/gui_functions.php" );
 require_once( "include/form_functions.php" );
 require_once( "include/make_translationfiles.php" );
@@ -112,12 +113,44 @@ $info_box = '<ul>
    if( !(@$player_row['admin_level'] & ADMIN_FAQ) )
       error('adminlevel_too_low', 'admin_faq');
 
-   $fid = max(0,@$_REQUEST['id']);
+/* Actual REQUEST calls used:
+     # actions
+     back&id=&ot=&view=&qterm= : back to list (jump to pos), see handling-above
+     move=u|d&dir=&id=        : move entry up/down (on same level, within category), dir=move-dist
+     move=uu|dd&id=           : move entry up/down (on parent level, other category)
+     toggleH=Y|N&id=          : toggle hidden-state of entry to Y (hide) or N (show)
+     toggleT=Y|N&id=          : toggle translatable-state of entry to Y (translatable) or N
+     edit&type=c|e&id=        : open editor for entry of TYPE (e=entry, c=category), optional preview
+         &preview=&question=&answer=&reference=
+     do_edit&type=c|e&id=     : save edited entry of TYPE (e=entry, c=category)
+         &question=&answer=&reference=
+     new&type=c|e&id=         : open editor for new entry of TYPE (e=entry, c=category), optional preview
+         &preview=&question=&answer=&reference=
+     do_new&type=c|e&id=      : save new entry of TYPE (e=entry, c=category)
+         &question=&answer=&reference=
+
+     # parameters
+     ot           : object-type TXTOBJTYPE_INTRO|LINKS|FAQ
+     view         : category to view: '' (sections only), 'all' (all sections expanded), id (category-id to expand)
+     dir          : [int] number of steps to move (<0 or >0)
+     id           : FAQ.ID
+     movedist     : [int] steps to move on moving entries up or down
+     preview      : '' (no preview), 't' (show preview)
+     qterm        : search term (in question or answer)
+     type         : 'e' = entry, 'c' = category
+     question     : question-text
+     answer       : answer-text
+     reference    : reference-text
+*/
+
+   $fid = max(0, (int)@$_REQUEST['id']);
    $sql_term = get_request_arg('qterm', '');
-   if( $sql_term )
-      $url_term = URI_AMP.'qterm='.urlencode($sql_term);
-   else
-      $url_term = '';
+   $url_term = ( $sql_term ) ? URI_AMP.'qterm='.urlencode($sql_term) : '';
+
+   $view = get_request_arg('view', 0); // ''|0, all, [int]
+   $view_all = ( $view === 'all' );
+   $view = (int)$view;
+   if( $view < 0 ) $view = 0;
 
    $objtype = (int)get_request_arg('ot');
    if( $objtype == TXTOBJTYPE_INTRO )
@@ -154,13 +187,13 @@ $info_box = '<ul>
       safe_setcookie( 'admin_faq_movedist', $movedist, 3600 ); // save for 1h
 
    $show_list = true;
-   $page = "admin_faq.php?ot=$objtype";
+   $page_base = "admin_faq.php?ot=$objtype";
+   $page = $page_base . URI_AMP.'view='.$view;
 
 
    // ***********        Move entry       ****************
 
    $errors = array();
-
    // args: id, move=u|d, dir=length of the move (int, pos or neg)
    if( ($action=@$_REQUEST['move']) == 'u' || $action == 'd' )
    {
@@ -212,10 +245,9 @@ $info_box = '<ul>
 
    // ***********        Edit entry       ****************
 
-   // args: id, edit=t type=c|e [ do_edit=?, preview=t, qterm=sql_term ]
+   // args: id, edit=t, type=c|e, question, answer, reference  [ preview=1, qterm=sql_term ]
    // keep it tested before 'do_edit' for the preview feature
-   elseif( @$_REQUEST['edit']
-         && ( ($action=@$_REQUEST['type']) == 'c' ||  $action == 'e' ) )
+   elseif( @$_REQUEST['edit'] && ( ($action=@$_REQUEST['type']) == 'c' ||  $action == 'e' ) )
    {
       if( $action == 'c' )
          $title = $adm_title.' Admin - Edit category';
@@ -295,6 +327,7 @@ $info_box = '<ul>
 
       $edit_form->add_row( array(
             'HIDDEN', 'type', $action,
+            'HIDDEN', 'view', $view,
             'HIDDEN', 'preview', 1,
             'HIDDEN', 'qterm', textarea_safe($sql_term),
             'SUBMITBUTTONX', 'do_edit', 'Save entry',
@@ -305,20 +338,16 @@ $info_box = '<ul>
             ));
       $edit_form->echo_string(1);
 
-      if( @$_REQUEST['preview'] )
-         $rx_term = '';
-      else
-         $rx_term = implode('|', sql_extract_terms( $sql_term ));
+      $rx_term = ( @$_REQUEST['preview'] ) ? '' : implode('|', sql_extract_terms( $sql_term ));
       show_preview( $row['Level'], $question, $answer, $reference, "e$fid", $rx_term);
    } //edit
 
 
    // ***********        Save edited entry       ****************
 
-   // args: id, do_edit=t type=c|e, question, answer [ preview='', qterm=sql_term ]
+   // args: id, do_edit=t type=c|e, question, answer, reference  [ preview='', qterm=sql_term ]
    // keep it tested after 'edit' for the preview feature
-   elseif( @$_REQUEST['do_edit']
-         && ( ($action=@$_REQUEST['type']) == 'c' ||  $action == 'e' ) )
+   elseif( @$_REQUEST['do_edit'] && ( ($action=@$_REQUEST['type']) == 'c' ||  $action == 'e' ) )
    {
       $question = trim( get_request_arg('question') );
       $answer = trim( get_request_arg('answer') );
@@ -357,17 +386,18 @@ $info_box = '<ul>
             make_include_files(null, $tr_group); //must be called from main dir
       }
 
-      //clean URL (focus on edited entry or parent category if entry deleted)
       jump_to( $page.URI_AMP."id={$ref_id}{$url_term}#e$ref_id" );
+      // overview-loading takes so long, so refresh edit-page
+      //jump_to( $page.URI_AMP."edit=1".URI_AMP."type=$action".URI_AMP."id=$ref_id$url_term"
+         //. URI_AMP.'sysmsg='.urlencode('Entry saved!') );
    } //do_edit
 
 
    // ***********        New entry       ****************
 
-   // args: id, new=t type=c|e [ do_new=?, preview=t ]
+   // args: id, new=t, type=c|e, question, answer, reference  [ do_new=?, preview=t ]
    // keep it tested before 'do_new' for the preview feature
-   elseif( @$_REQUEST['new']
-         && ( ($action=@$_REQUEST['type']) == 'c' ||  $action == 'e' ) )
+   elseif( @$_REQUEST['new'] && ( ($action=@$_REQUEST['type']) == 'c' ||  $action == 'e' ) )
    {
       if( $action == 'c' )
          $title = $adm_title.' Admin - New category';
@@ -427,6 +457,7 @@ $info_box = '<ul>
       $edit_form->add_row( array(
             'HIDDEN', 'type', $action,
             'HIDDEN', 'preview', 1,
+            'HIDDEN', 'view', $view,
             'SUBMITBUTTONX', 'do_new', 'Add entry',
                   array( 'accesskey' => ACCKEY_ACT_EXECUTE, 'disabled' => count($errors) ),
             'SUBMITBUTTONX', 'new', 'Preview',
@@ -441,10 +472,9 @@ $info_box = '<ul>
 
    // ***********        Save new entry       ****************
 
-   // args: id, do_new=t type=c|e, question, answer, [ preview='' ]
+   // args: id, do_new=t type=c|e, question, answer, reference  [ preview='' ]
    // keep it tested after 'new' for the preview feature
-   elseif( @$_REQUEST['do_new']
-         && ( ($action=@$_REQUEST['type']) == 'c' ||  $action == 'e' ) )
+   elseif( @$_REQUEST['do_new'] && ( ($action=@$_REQUEST['type']) == 'c' ||  $action == 'e' ) )
    {
       $question = trim( get_request_arg('question') );
       $answer = trim( get_request_arg('answer') );
@@ -453,10 +483,13 @@ $info_box = '<ul>
       if( !$question || ($objtype == TXTOBJTYPE_LINKS && $action == 'e' && !$reference) )
          jump_to($page.URI_AMP."sysmsg=".urlencode('Error: an entry must be given'));
 
-      AdminFAQ::save_new_faq_entry( 'admin_faq', $dbtable, $tr_group, $fid, ($action == 'c'),
+      $new_id = AdminFAQ::save_new_faq_entry( 'admin_faq', $dbtable, $tr_group, $fid, ($action == 'c'),
          $question, $answer, $reference );
 
       jump_to( $page.URI_AMP."id=$ref_id#e$ref_id" ); //clean URL (focus on new entry)
+      // overview-loading takes so long, so redirect to edit-page
+      //jump_to( $page.URI_AMP."edit=1".URI_AMP."type=$action".URI_AMP."id=$new_id$url_term"
+         //. URI_AMP.'sysmsg='.urlencode('Entry saved!') );
    } //do_new
 
 
@@ -503,30 +536,40 @@ $info_box = '<ul>
 
 
       //build comparison with implicit wildcards
-      $like = ( $sql_term ) ? " LIKE '".mysql_addslashes("%$sql_term%")."'" : '';
-      $query =
-         "SELECT entry.*, Question.Text AS Q"
-         . ",Question.Translatable AS QTranslatable, Answer.Translatable AS ATranslatable"
-         . ",IF(entry.Level=1,entry.SortOrder,parent.SortOrder) AS CatOrder"
-         . ( $like
-            ? ",IF(Question.Text$like,1,0) AS MatchQuestion "
-            . ",IF(entry.Level>1 AND Answer.Text$like,1,0) AS MatchAnswer"
-/* old try with a binary field:
-            ? ",IF(LOWER(Question.Text)$like,1,0) AS MatchQuestion "
-            . ",IF(entry.Level>1 AND LOWER(Answer.Text)$like,1,0) AS MatchAnswer"
-*/
-            : ",0 AS MatchQuestion"
-            . ",0 AS MatchAnswer"
-           )
-         . " FROM $dbtable AS entry"
-            . " INNER JOIN $dbtable AS parent ON parent.ID=entry.Parent"
-            . " INNER JOIN TranslationTexts AS Question ON Question.ID=entry.Question"
-            . " LEFT JOIN TranslationTexts AS Answer ON Answer.ID=entry.Answer"
-         . " WHERE entry.Level<3 AND entry.Level>0"
-         . " ORDER BY CatOrder,entry.Level,entry.SortOrder";
+      if( $view_all )
+         $view_qpart = 'E.Level IN (1,2)';
+      elseif( $view > 0 )
+         $view_qpart = "E.Level=1 OR (E.Level=2 AND E.Parent=$view)";
+      else
+         $view_qpart = 'E.Level=1';
 
-      #echo "<br>QUERY: $query<br>\n"; // debug
-      $result = db_query( 'admin_faq.list', $query );
+      $qsql = new QuerySQL(
+         SQLP_FIELDS,
+            'E.*', 'Question.Text AS Q',
+            'Question.Translatable AS QTranslatable',
+            'Answer.Translatable AS ATranslatable',
+            'IF(E.Level=1,E.SortOrder,PE.SortOrder) AS CatOrder',
+         SQLP_FROM, "$dbtable AS E",
+            "INNER JOIN $dbtable AS PE ON PE.ID=E.Parent",
+            'INNER JOIN TranslationTexts AS Question ON Question.ID=E.Question',
+            'LEFT JOIN TranslationTexts AS Answer ON Answer.ID=E.Answer',
+         SQLP_WHERE,
+            $view_qpart,
+         SQLP_ORDER,
+            'CatOrder', 'E.Level', 'E.SortOrder' );
+      if( $sql_term )
+      {
+         $term_like = "LIKE '".mysql_addslashes("%$sql_term%")."'";
+         $qsql->add_part( SQLP_FIELDS,
+            "IF(Question.Text $term_like,1,0) AS MatchQuestion",
+            "IF(E.Level>1 AND Answer.Text $term_like,1,0) AS MatchAnswer" );
+            // old try with a binary field:
+            //"IF(LOWER(Question.Text) $term_like,1,0) AS MatchQuestion",
+            //"IF(E.Level>1 AND LOWER(Answer.Text) $term_like,1,0) AS MatchAnswer",
+      }
+      else
+         $qsql->add_part( SQLP_FIELDS, '0 AS MatchQuestion', '0 AS MatchAnswer' );
+      $result = db_query( 'admin_faq.list', $qsql->get_select() );
 
 
       echo "<h3 class=Header>$title</h3>\n";
@@ -537,66 +580,80 @@ $info_box = '<ul>
       // table-columns:
       // curr-entry | match-term | Q/New | A | move-up | ~down | cat-up | ~down | New | Hide | Transl
 
-      echo "<tr><td colspan=2></td>" //for marks
-         . TD_button( 'Add new category',
+      if( !$view_all )
+         echo "<tr><td colspan=2></td>",
+            TD_button( 'Expand all categories', $page_base.URI_AMP.'view=all', 'images/expand.gif', ''),
+            '<td colspan=2>Expand all categories</td>',
+            '<td colspan=', ($nbcol-5), '></td></tr>', "\n";
+      if( $view_all || $view )
+         echo "<tr><td colspan=2></td>",
+            TD_button( 'Collapse all categories', $page_base.URI_AMP.'view=0', 'images/collapse.gif', ''),
+            '<td colspan=2>Collapse all categories</td>',
+            '<td colspan=', ($nbcol-5), '></td></tr>', "\n";
+      echo "<tr><td>&nbsp;</td><tr>\n";
+
+      echo "<tr><td colspan=2></td>", //for marks
+         TD_button( 'Add new category',
                $page.URI_AMP."new=1".URI_AMP."type=c".URI_AMP."id=1",
-               'images/new.png', 'N')
-         . '<td colspan=2>(first category)</td>'
-         . '<td colspan='.($nbcol-5).'></td></tr>';
+               'images/new.png', 'N'),
+         '<td colspan=2>(first category)</td>',
+         '<td colspan=', ($nbcol-5), '></td></tr>', "\n";
 
       while( $row = mysql_fetch_assoc( $result ) )
       {
          $question = (empty($row['Q']) ? '(empty)' : $row['Q']);
          $faqhide = ( @$row['Hidden'] == 'Y' );
          $transl = AdminFAQ::transl_toggle_state($row);
-
-         $entry_ref = "#e{$row['ID']}";
+         $eid = $row['ID'];
+         $entry_ref = "#e$eid";
 
          // mark 'current' entry and matched-terms (2 cols)
          echo '<tr><td>';
          if( $row['MatchQuestion'] || $row['MatchAnswer'] )
             echo '<font color="red">#</font>';
          echo '</td><td>';
-         if( $fid == $row['ID'] )
+         if( $fid == $eid )
             echo '<font color="blue"><b>&gt;</b></font>';
          echo '</td>';
 
          // anchor-label + td-start for cat/entry
          if( $row['Level'] == 1 )
          {
-            echo '<td class=Category colspan=3><a name="e'.$row['ID'].'"></a>';
+            echo '<td class=Category colspan=3><a name="e'.$eid.'"></a>',
+               anchor( $page_base.URI_AMP."view=$eid", image( 'images/expand.gif', 'E', 'Expand category', 'class=InTextImage' )),
+               MINI_SPACING;
             $typechar = 'c'; //category
          }
          else
          {
             echo '<td class=Indent></td>'
-               . '<td class=Entry colspan=2><a name="e'.$row['ID'].'"></a>';
+               . '<td class=Entry colspan=2><a name="e'.$eid.'"></a>';
             $typechar = 'e'; //entry
          }
 
          // question/answer (1 col)
          if( $faqhide )
             echo "(H) ";
-         echo "<A href=\"$page".URI_AMP."edit=1".URI_AMP."type=$typechar".URI_AMP."id=".$row['ID']
+         echo "<A href=\"$page".URI_AMP."edit=1".URI_AMP."type=$typechar".URI_AMP."id=$eid"
                   ."$url_term\" title=\"Edit\">$question</A>";
          echo "\n</td>";
 
          // move entry up/down (focus parent category)
          echo TD_button( 'Move up',
-               $page.URI_AMP."move=u".URI_AMP.'id='.$row['ID'].URI_AMP."dir={$movedist}$entry_ref",
+               $page.URI_AMP."move=u".URI_AMP."id=$eid".URI_AMP."dir={$movedist}$entry_ref",
                'images/up.png', 'u');
          echo TD_button( 'Move down',
-               $page.URI_AMP."move=d".URI_AMP.'id='.$row['ID'].URI_AMP."dir={$movedist}$entry_ref",
+               $page.URI_AMP."move=d".URI_AMP."id=$eid".URI_AMP."dir={$movedist}$entry_ref",
                'images/down.png', 'd');
 
          if( $row['Level'] > 1 )
          {
             // move entry up/down to other category (focus current entry)
             echo TD_button( 'Move to previous category',
-                  $page.URI_AMP."move=uu".URI_AMP.'id='.$row['ID']."$entry_ref",
+                  $page.URI_AMP."move=uu".URI_AMP."id=$eid$entry_ref",
                   'images/up_up.png', 'U');
             echo TD_button( 'Move to next category',
-                  $page.URI_AMP."move=dd".URI_AMP.'id='.$row['ID']."$entry_ref",
+                  $page.URI_AMP."move=dd".URI_AMP."id=$eid$entry_ref",
                   'images/down_down.png', 'D');
          }
          else
@@ -604,17 +661,17 @@ $info_box = '<ul>
 
          // new entry
          echo TD_button( ($typechar == 'e' ? 'Add new entry' : 'Add new category'),
-               $page.URI_AMP."new=1".URI_AMP."type=$typechar".URI_AMP."id=".$row['ID'],
+               $page.URI_AMP."new=1".URI_AMP."type=$typechar".URI_AMP."id=$eid",
                'images/new.png', 'N');
 
          // hide (focus parent category)
          if( $faqhide )
             echo TD_button( 'Show',
-                  $page.URI_AMP."toggleH=N".URI_AMP."id=".$row['ID']."$entry_ref",
+                  $page.URI_AMP."toggleH=N".URI_AMP."id=$eid$entry_ref",
                   'images/hide_no.png', 'h');
          else
             echo TD_button( 'Hide',
-                  $page.URI_AMP."toggleH=Y".URI_AMP."id=".$row['ID']."$entry_ref",
+                  $page.URI_AMP."toggleH=Y".URI_AMP."id=$eid$entry_ref",
                   'images/hide.png', 'H');
 
          // translatable (focus parent category)
@@ -622,11 +679,11 @@ $info_box = '<ul>
          {
             if( $transl == 'Y' )
                echo TD_button( 'Make untranslatable',
-                     $page.URI_AMP."toggleT=N".URI_AMP."id=".$row['ID']."$entry_ref",
+                     $page.URI_AMP."toggleT=N".URI_AMP."id=$eid$entry_ref",
                      'images/transl.png', 'T');
             else
                echo TD_button( 'Make translatable',
-                     $page.URI_AMP."toggleT=Y".URI_AMP."id=".$row['ID']."$entry_ref",
+                     $page.URI_AMP."toggleT=Y".URI_AMP."id=$eid$entry_ref",
                      'images/transl_no.png', 't');
          }
          else
@@ -635,13 +692,13 @@ $info_box = '<ul>
          echo '</tr>';
 
          // new category (below section-title)
-         if( $row['Level'] == 1 )
-            echo "<tr><td colspan=2></td><td class=Indent></td>"
-               . TD_button( 'Add new entry',
-                  $page.URI_AMP."new=1".URI_AMP."type=e".URI_AMP."id=".$row['ID'],
-                  'images/new.png', 'N')
-               . '<td>(first entry)</td>'
-               . '<td colspan='.($nbcol-5).'></td></tr>';
+         if( $row['Level'] == 1 && ($view_all || $view == $eid) )
+            echo "<tr><td colspan=2></td><td class=Indent></td>",
+               TD_button( 'Add new entry',
+                  $page.URI_AMP."new=1".URI_AMP."type=e".URI_AMP."id=$eid",
+                  'images/new.png', 'N'),
+               '<td>(first entry)</td>',
+               '<td colspan=', ($nbcol-5), '></td></tr>';
       }
       mysql_free_result($result);
 
