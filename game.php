@@ -734,6 +734,10 @@ $GLOBALS['ThePage'] = new Page('Game');
       $show_notes = false;
    }
 
+   echo SMALL_SPACING,
+      anchor( 'http://eidogo.com/#url:'.HOSTBASE."sgf.php?gid=$gid",
+         image( 'images/eidogo.gif', T_('EidoGo Game Player'), null, 'class=InTextImage' ));
+
    // observers may view the comments in the sgf files, so not restricted to own games
    if( $Status != GAME_STATUS_KOMI )
    {
