@@ -449,9 +449,7 @@ Copyright (C) 2001-2012  Erik Ouchterlony
 ##      * Added restriction on max. running/started games per player and for tournament-registration
       * Added restriction on max. running/started games per player
          * Show warning or error if about to exceed limit on starting new games
-      * Enhanced remaining-time format with extra-time-info in
-         * full form for game-page, game-info and <home_ quick_status.php>quick-status</home>
-         * abbreviated form for <home status.php>status games</home> and my running games
+      * Enhanced remaining-time format with extra-time-info
 
       * <home show_games.php>Games list</home>:
          * Adjusted page title and bottom menu links
@@ -584,7 +582,7 @@ Copyright (C) 2001-2012  Erik Ouchterlony
       * Added JavaScript management in profile setting
       * Changed order, grouping and description of hover-options
       * Enlarged length of field 'Open for matches' to 60 chars
-      * Aliased timezone 'China/Beijing' with 'Asia/Shanghai'
+      * Aliased timezone 'China/Beijing' and 'China/Shanghai' with 'Asia/Shanghai'
 
       * <home edit_rating.php>Rating change</home>:
          * Added separate "<home edit_rating.php>Change rating & rank page</home>" to set rank & rating
@@ -730,6 +728,8 @@ Copyright (C) 2001-2012  Erik Ouchterlony
       * Displaying the group-names
 
    * Changes for FAQ-editors:
+      * Simplified entry-overview by adding view to:
+         * Show only categories, Expand all categories, Expand only one category
       * Added editor "Admin Introduction" for <home introduction.php>Introduction page</home>
       * Added editor "Admin Links" for <home links.php>links page</home>
 
