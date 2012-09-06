@@ -465,6 +465,7 @@ Copyright (C) 2001-2012  Erik Ouchterlony
       * Show icons when player in off-time: Vacation (<image vacation.gif>), Night time (<image night.gif>), Weekend (<image wclock_stop.gif>)
       * Replaced 'OnVacation'-text by vacation-icon
       * Show SGF-move-number near view-moves list
+      * Added link to external HTML-based <http://eidogo.com| EidoGo Game Analysis Tool> (marked by <image eidogo.gif> on game-page)
       * Changed "move"-selectbox (view-moves list) containing only a subset of moves now fixing possible bug on large boards
       * Mark handicap-setup in view-moves list
       * Added access keys [x]='Next Game', [w]=Preview
