@@ -344,9 +344,8 @@ class TournamentHelper
          SQLP_WHERE,
             'TLP.UserAbsenceDays > 0',
             "T.Status='".TOURNEY_STATUS_PLAY."'",
-            //TODO handle LastQuickAccess as well for "absent" users
-            //TODO handle UseVacation : decrease down together with OnVacation !? or why it's an int (and no float) !?
-            'P.Lastaccess < NOW() - INTERVAL (TLP.UserAbsenceDays + IF(P.OnVacation>0,P.UseVacation,0)) DAY',
+            'P.Lastaccess < NOW() - INTERVAL (TLP.UserAbsenceDays + CEIL(P.OnVacation)) DAY',
+            'P.LastQuickAccess < NOW() - INTERVAL (TLP.UserAbsenceDays + CEIL(P.OnVacation)) DAY',
          SQLP_ORDER,
             'TL.tid ASC'
          );
