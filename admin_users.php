@@ -70,7 +70,7 @@ require_once( "include/form_functions.php" );
       'Sessionexpire', 'Browser', 'IP', 'Lang',
       'Email', 'SendEmail', 'Notify', 'UserFlags',
       'Registerdate', 'Lastaccess', 'LastQuickAccess', 'LastMove',
-      'OnVacation', 'UseVacation', 'Activity', 'Hits',
+      'OnVacation', 'Activity', 'Hits',
    );
    $user_fields =
         implode(',', array_keys($attributes_edit)) . ','

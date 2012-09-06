@@ -2553,3 +2553,8 @@ ALTER TABLE Intro
    ADD KEY Level (Level) ;
 
 
+-- cleanup: removed not needed field for tournament-ladder user-absence-tracking
+ALTER TABLE Players
+   DROP COLUMN UseVacation ;
+
+

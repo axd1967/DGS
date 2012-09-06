@@ -68,7 +68,6 @@ require_once( "include/form_functions.php" );
             db_query( 'edit_vacation.change_vacation',
                "UPDATE Players SET VacationDays=VacationDays-($vacationdiff)"
                      . ", OnVacation=OnVacation+($vacationdiff)"
-                     . ", UseVacation=UseVacation+($vacationdiff)"
                      . " WHERE ID=$my_id AND VacationDays >= ($vacationdiff) LIMIT 1" );
          }
          ta_end();
@@ -129,7 +128,6 @@ require_once( "include/form_functions.php" );
             db_query( 'edit_vacation.update_player',
                "UPDATE Players SET VacationDays=VacationDays-($vacationlength)"
                   . ", OnVacation=$vacationlength"
-                  . ", UseVacation=$vacationlength"
                . " WHERE ID=$my_id AND VacationDays >= ($vacationlength) LIMIT 1" );
          }
          ta_end();

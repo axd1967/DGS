@@ -74,7 +74,6 @@ Ou  | Open             | varchar(60)                                 | NO   |   
  u  | Lang             | varchar(20)                                 | NO   |     | C                   |                |
 OSA | VacationDays     | float                                       | NO   | MUL | 14                  |                |
 OSA | OnVacation       | float                                       | NO   | MUL | 0                   |                |
- S  | UseVacation      | tinyint(3) unsigned                         | NO   |     | 0                   |                |
 OS  | Running          | smallint(5) unsigned                        | NO   |     | 0                   |                |
 OS  | Finished         | mediumint(8) unsigned                       | NO   |     | 0                   |                |
 OS  | RatedGames       | mediumint(8) unsigned                       | NO   |     | 0                   |                |

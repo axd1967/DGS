@@ -709,7 +709,6 @@ CREATE TABLE IF NOT EXISTS `Players` (
   `Lang` varchar(20) NOT NULL default 'C',
   `VacationDays` float NOT NULL default '14',
   `OnVacation` float NOT NULL default '0',
-  `UseVacation` tinyint(3) unsigned NOT NULL default '0',
   `Running` smallint(5) unsigned NOT NULL default '0',
   `Finished` mediumint(8) unsigned NOT NULL default '0',
   `RatedGames` mediumint(8) unsigned NOT NULL default '0',
