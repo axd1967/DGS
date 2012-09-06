@@ -171,8 +171,8 @@ $GLOBALS['ThePage'] = new Page('TournamentLadderChallenge');
          'TEXT',        $tourney->build_info() ));
    $tform->add_empty_row();
 
-   add_form_user_info( $tform, T_('Challenger'), $user_ch, $tladder_ch );
    add_form_user_info( $tform, T_('Defender'),   $user_df, $tladder_df );
+   add_form_user_info( $tform, T_('Challenger'), $user_ch, $tladder_ch );
 
    $has_errors = ( count($errors) > 0 );
    if( $has_errors )
@@ -232,6 +232,7 @@ function add_form_user_info( &$tform, $utype, $user, $tladder )
       $tform->add_row( array(
             'DESCRIPTION', $utype,
             'TEXT',        $user->user_reference(),
+            'TEXT',        echo_off_time( false, $user->urow['OnVacation'], null ),
             'TEXT',        SEP_SPACING . echo_rating( $user->Rating, true, $user->ID), ));
    if( !is_null($tladder) )
       $tform->add_row( array(

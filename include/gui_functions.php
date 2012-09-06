@@ -231,6 +231,7 @@ function echo_image_online( $in_the_house=true, $last_access=0, $withSep=true )
 /*!
  * \brief Returns off-time echo-string for certain player.
  * \param $on_vacation true|false | vacation-days
+ * \param $player_clock_used null | int
  */
 function echo_off_time( $player_to_move, $on_vacation, $player_clock_used )
 {
@@ -241,11 +242,18 @@ function echo_off_time( $player_to_move, $on_vacation, $player_clock_used )
          TimeFormat::echo_onvacation($on_vacation), $player_to_move );
    else
       $vac_str = '';
-   return SMALL_SPACING . $vac_str
-         . (is_weekend_clock_stopped($player_clock_used)
-               ? MINI_SPACING . echo_image_weekendclock( true, $player_to_move ) : '' )
-         . (is_nighttime_clock($player_clock_used)
-               ? MINI_SPACING . echo_image_nighttime( 'in_text', $player_to_move ) : '');
+
+   $game_str = '';
+   if( !is_null($player_clock_used) )
+   {
+      if( is_weekend_clock_stopped($player_clock_used) )
+         $game_str .= MINI_SPACING . echo_image_weekendclock( true, $player_to_move );
+      if( is_nighttime_clock($player_clock_used) )
+         $game_str .= MINI_SPACING . echo_image_nighttime( 'in_text', $player_to_move );
+   }
+
+   $result = $vac_str . $game_str;
+   return ($result) ? SMALL_SPACING . $result : '';
 }
 
 /*! \brief Returns image to game-info page for given game-id. */
