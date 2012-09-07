@@ -282,7 +282,7 @@ $GLOBALS['ThePage'] = new Page('GamesList');
       $extparam->add_entry( 'observe', $opt_observe );
    else
    {
-      $extparam->add_entry( 'uid', $uid );
+      $extparam->add_entry( 'uid', ($all ? 'all' : $uid) );
       if( $finished )
          $extparam->add_entry( 'finished', 1 );
    }

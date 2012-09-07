@@ -19,6 +19,11 @@ Developers INFO:
 ChangeLog
 ------------------------------------------------------------------
 
+2012-09-07 juga
+
+   * show_games.php:
+   - bugfix: SEARCHing on ALL-finished/running games switched to MY-view, corrected 'uid'-parameter
+
 2012-09-03 juga
 
 ### ----- release-1_0_15-20120608 -----
