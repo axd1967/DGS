@@ -102,6 +102,10 @@ $GLOBALS['ThePage'] = new Page('SurveyAdmin');
       }
    }
 
+   // default for <opt>-tag
+   if( empty($vars['survey_opts']) )
+      $vars['survey_opts'] = '<opt tag [min_points] "title">description</tt>';
+
    $page = "admin_survey.php";
    $title = T_('Admin Survey');
 
