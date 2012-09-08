@@ -265,10 +265,10 @@ class TournamentLadderProps
             build_range_text(1, 255) );
 
       if( $this->CrownKingHours < 0 || $this->RankPeriodLength > 50000 )
-         $errors[] = sprintf( T_('Crowning of king time must be in range %s hours.'),
+         $errors[] = sprintf( T_('Crowning of king time must be in range %s hours.#tourney'),
             build_range_text(0, 50000) );
       if( ($this->CrownKingHours > 0 && $this->CrownKingStart == 0) || ($this->CrownKingHours ==0 && $this->CrownKingStart > 0) )
-         $errors[] = T_('For auto-crowning of king you need both settings (hours and check start date).');
+         $errors[] = T_('For auto-crowning of king you need both settings (hours and check start date).#tourney');
 
       return $errors;
    }//check_properties
@@ -279,98 +279,98 @@ class TournamentLadderProps
       $arr_props = array();
 
       // challenge-range
-      $arr = array( T_('You can challenge the highest ladder position matching the following conditions') );
+      $arr = array( T_('You can challenge the highest ladder position matching the following conditions#tourney') );
       if( $this->ChallengeRangeAbsolute < 0 )
-         $arr[] = T_('anyone above your own ladder position');
+         $arr[] = T_('anyone above your own ladder position#tourney');
       elseif( $this->ChallengeRangeAbsolute > 0 )
-         $arr[] = sprintf( T_('%s positions above your own'), $this->ChallengeRangeAbsolute );
+         $arr[] = sprintf( T_('%s positions above your own#tourney'), $this->ChallengeRangeAbsolute );
       if( $this->ChallengeRangeRelative > 0 )
-         $arr[] = sprintf( T_('%s of ladder users above your own position'), $this->ChallengeRangeRelative.'%' );
+         $arr[] = sprintf( T_('%s of ladder users above your own position#tourney'), $this->ChallengeRangeRelative.'%' );
       if( $this->ChallengeRangeRating != TLADDER_CHRNG_RATING_UNUSED )
       {
          if( $this->ChallengeRangeRating < 0 )
-            $arr[] = sprintf( T_('%s positions above your theoretical position ordered by user rating'),
+            $arr[] = sprintf( T_('%s positions above your theoretical position ordered by user rating#tourney'),
                               abs($this->ChallengeRangeRating) );
          elseif( $this->ChallengeRangeRating > 0 )
-            $arr[] = sprintf( T_('%s positions below your theoretical position ordered by user rating'),
+            $arr[] = sprintf( T_('%s positions below your theoretical position ordered by user rating#tourney'),
                               $this->ChallengeRangeRating );
          else //==0
-            $arr[] = T_('your theoretical position ordered by user rating');
+            $arr[] = T_('your theoretical position ordered by user rating#tourney');
       }
       $arr_props[] = $arr;
 
       // incoming challenges
-      $arr = array( T_('The number of incoming challenges for any defender is restricted to') );
+      $arr = array( T_('The number of incoming challenges for any defender is restricted to#tourney') );
       $groups = 3;
       if( $this->MaxDefenses1 > 0 && $this->MaxDefensesStart1 > 0 )
-         $arr[] = sprintf( T_('%s challenges for ranks #1..%s'),
+         $arr[] = sprintf( T_('%s challenges for ranks #1..%s#tourney'),
                            $this->MaxDefenses1, $this->MaxDefensesStart1 );
       else
          --$groups;
       if( $this->MaxDefenses2 > 0 && $this->MaxDefensesStart2 > 0 )
-         $arr[] = sprintf( T_('%s challenges for ranks #%s..%s'),
+         $arr[] = sprintf( T_('%s challenges for ranks #%s..%s#tourney'),
                            $this->MaxDefenses2, $this->MaxDefensesStart1 + 1, $this->MaxDefensesStart2 );
       else
          --$groups;
       if( $this->MaxDefenses > 0 )
       {
          if( $groups > 1 )
-            $arr[] = sprintf( T_('%s challenges for remaining ranks'), $this->MaxDefenses );
+            $arr[] = sprintf( T_('%s challenges for remaining ranks#tourney'), $this->MaxDefenses );
          else
-            $arr[] = sprintf( T_('%s challenges for all ranks'), $this->MaxDefenses );
+            $arr[] = sprintf( T_('%s challenges for all ranks#tourney'), $this->MaxDefenses );
       }
       $arr_props[] = $arr;
 
       // outgoing challenges
       if( $this->MaxChallenges > 0 )
-         $arr_props[] = sprintf( T_('The number of outgoing challenges is restricted to %s games.'),
+         $arr_props[] = sprintf( T_('The number of outgoing challenges is restricted to %s games.#tourney'),
                                  $this->MaxChallenges );
       else
-         $arr_props[] = T_('The number of outgoing challenges is not restricted.');
+         $arr_props[] = T_('The number of outgoing challenges is not restricted.#tourney');
 
       // challenge-rematch
       if( $this->ChallengeRematchWaitHours > 0 )
-         $arr_props[] = sprintf( T_('Before a rematch with the same user you will have to wait %s.'),
+         $arr_props[] = sprintf( T_('Before a rematch with the same user you will have to wait %s.#tourney'),
                                  TournamentLadderProps::echo_rematch_wait($this->ChallengeRematchWaitHours) );
 
       // general conditions
-      $arr_props[] = T_('You may only have one running game per opponent.');
-      $arr_props[] = T_("On user removal or retreat from the ladder, the running tournament games\n"
-         . "will be continued as normal games without further effect to the tournament.");
+      $arr_props[] = T_('You may only have one running game per opponent.#tourney');
+      $arr_props[] = T_('On user removal or retreat from the ladder#tourney') . ":\n"
+         . wordwrap( TournamentLadder::get_notes_user_removed(), 80 );
 
       // game-end handling
-      $arr = array( T_('On game-end the following action is performed:') );
-      $arr[] = sprintf( '%s: %s', T_('if challenger wins by score or resignation'),
+      $arr = array( T_('On game-end the following action is performed:#tourney') );
+      $arr[] = sprintf( '%s: %s', T_('if challenger wins by score or resignation#tourney'),
                         TournamentLadderProps::getGameEndText($this->GameEndNormal) );
-      $arr[] = sprintf( '%s: %s', T_('if challenger wins by timeout'),
+      $arr[] = sprintf( '%s: %s', T_('if challenger wins by timeout#tourney'),
                         TournamentLadderProps::getGameEndText($this->GameEndTimeoutWin) );
-      $arr[] = sprintf( '%s: %s', T_('if challenger loses by timeout'),
+      $arr[] = sprintf( '%s: %s', T_('if challenger loses by timeout#tourney'),
                         TournamentLadderProps::getGameEndText($this->GameEndTimeoutLoss) );
-      $arr[] = sprintf( '%s: %s', T_('on Jigo'), TournamentLadderProps::getGameEndText($this->GameEndJigo) );
+      $arr[] = sprintf( '%s: %s', T_('on Jigo#tourney'), TournamentLadderProps::getGameEndText($this->GameEndJigo) );
       $arr_props[] = $arr;
 
       // user absence handling
       if( $this->UserAbsenceDays > 0 )
          $arr_props[] = sprintf( T_("The user will be removed from the ladder, if player hasn't accessed DGS\n"
-            . 'within the last %d days (excluding vacation).'), $this->UserAbsenceDays );
+            . 'within the last %d days (excluding vacation).#tourney'), $this->UserAbsenceDays );
 
       // rank-change period
-      $arr_props[] = T_('Length of one rank-archive period') . ': ' .
+      $arr_props[] = T_('Length of one rank-archive period#tourney') . ': ' .
          ( ($this->RankPeriodLength == 1)
                ? T_('1 month')
                : sprintf( T_('%s months'), $this->RankPeriodLength ) );
 
       // crowning king
       if( $this->CrownKingHours > 0 )
-         $arr_props[] = sprintf( T_('You will be crowned as "King of the Hill" after keeping the top rank for %s.'),
+         $arr_props[] = sprintf( T_('You will be crowned as "King of the Hill" after keeping the top rank for %s.#tourney'),
             TimeFormat::_echo_time( $this->CrownKingHours, 24, TIMEFMT_SHORT|TIMEFMT_ZERO, 0 ) ) . "\n" .
-            sprintf( T_('The check for this starts at [%s].'), date(DATE_FMT, $this->CrownKingStart) );
+            sprintf( T_('The check for this starts at [%s].#tourney'), date(DATE_FMT, $this->CrownKingStart) );
 
-      return array( T_('The ladder is configured with the following properties') . ':', $arr_props );
+      return array( T_('The ladder is configured with the following properties#tourney') . ':', $arr_props );
    }//build_notes_props
 
    /*!
-    * \brief Enhances ladder with additional info/data (Challenge-range).
+    * \brief Enhances ladder with additional info/data (Challenge-range): TL.AllowChange, TL.MaxChallengedIn.
     * \param $iterator ListIterator on ordered TournamentLadder with iterator-Index on Rank & uid
     * \return TournamentLadder of given user or null if not in ladder.
     */
@@ -407,7 +407,7 @@ class TournamentLadderProps
    }//fill_ladder_challenge_range
 
    /*!
-    * \brief Enhances ladder with additional info/data (incoming challenge-games).
+    * \brief Enhances ladder with additional info/data for defenders (incoming challenge-games):
     * \note Must run after fill_ladder_challenge_range()-func
     * \param $iterator ListIterator on ordered TournamentLadder with iterator-Index on uid
     * \param $tgame_iterator ListIterator on TournamentGames
@@ -422,19 +422,21 @@ class TournamentLadderProps
          $df_tladder = $iterator->getIndexValue( 'uid', $tgame->Defender_uid, 0 );
          if( !is_null($df_tladder) )
          {
+            $tgame->Defender_tladder = $df_tladder;
             if( $tgame->Challenger_uid == $my_id )
                $df_tladder->AllowChallenge = false;
 
             $ch_tladder = $iterator->getIndexValue( 'uid', $tgame->Challenger_uid, 0 );
+            $tgame->Challenger_tladder = $ch_tladder;
             if( !is_null($ch_tladder) )
             {
-               $tgame->Defender_tladder = $df_tladder;
-               $tgame->Challenger_tladder = $ch_tladder;
                if( $tgame->Status == TG_STATUS_WAIT )
                   $df_tladder->RematchWait = $this->calc_rematch_wait_remaining_hours( $tcache, $tgame );
                else
                   $df_tladder->add_running_game( $tgame );
             }
+            else // no challenger from detached T-game
+               $df_tladder->add_running_game( $tgame );
          }
       }
    }//fill_ladder_running_games
@@ -556,23 +558,29 @@ class TournamentLadderProps
    /*!
     * \brief Checks tournament-game-score and returns corresponding ladder-action for it.
     * \param $score tournament-game score, see also 'specs/db/table-Tournaments.txt'
+    * \param $tgame_flags TournamentGames.Flags, see also 'specs/db/table-Tournaments.txt'
     * \return TGEND_NO_CHANGE if no action needed; otherwise TGEND_..-action
+    * \internal
     */
-   function calc_game_end_action( $score )
+   function calc_game_end_action( $score, $tgame_flags )
    {
       $action = TGEND_NO_CHANGE;
 
-      if( $score == -SCORE_TIME ) // game timeout (challenger won)
-         $action = $this->GameEndTimeoutWin;
-      elseif( $score == SCORE_TIME ) // game timeout (challenger lost)
-         $action = $this->GameEndTimeoutLoss;
-      elseif( $score != 0 ) // game score|resignation
+      // Score only has meaning if game is not detached
+      if( !($tgame_flags & TG_FLAG_GAME_DETACHED) )
       {
-         if( $score < 0 )
-            $action = $this->GameEndNormal;
+         if( $score == -SCORE_TIME ) // game timeout (challenger won)
+            $action = $this->GameEndTimeoutWin;
+         elseif( $score == SCORE_TIME ) // game timeout (challenger lost)
+            $action = $this->GameEndTimeoutLoss;
+         elseif( $score != 0 ) // game score|resignation
+         {
+            if( $score < 0 )
+               $action = $this->GameEndNormal;
+         }
+         else // ==0 = jigo
+            $action = $this->GameEndJigo;
       }
-      else // ==0 = jigo
-         $action = $this->GameEndJigo;
 
       return $action;
    }//calc_game_end_action
