@@ -71,8 +71,6 @@ define('MYSQL_VERSION', '5.0.45');
  **/
 define('PASSWORD_ENCRYPT', 'SHA1');
 
-define('ALLOW_SQL_UNION', 1); // 1 = UNION supported (needs min. mysql 4.0.X)
-
 // 1 = allow full table-navigation using SQL_CALC_FOUND_ROWS
 // IMPORTANT NOTE:
 //   Assure, that you've set "mysql.trace_mode = Off" in php.ini for webserver,

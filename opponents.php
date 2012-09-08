@@ -264,20 +264,12 @@ require_once( 'include/classlib_userpicture.php' );
 
    $uqsql = new QuerySQL( // base-query is to show only opponents
       SQLP_OPTS, 'DISTINCT',
-      SQLP_FROM, 'Games AS G' );
-   if( ALLOW_SQL_UNION )
-   {
-      $uqsql->add_part( SQLP_UNION_WHERE,
+      SQLP_FROM, 'Games AS G',
+      SQLP_UNION_WHERE,
          "G.White_ID=$uid AND P.ID=G.Black_ID",
          "G.Black_ID=$uid AND P.ID=G.White_ID" );
-      $uqsql->useUnionAll(false); // need distinct-UNION
-   }
-   else
-   {
-      $uqsql->add_part( SQLP_WHERE,
-         "(G.White_ID=$uid OR G.Black_ID=$uid)",
-         "P.ID=G.White_ID+G.Black_ID-$uid" );
-   }
+   $uqsql->useUnionAll(false); // need distinct-UNION
+   // NOTE: SQL without union: SQLP_WHERE, "(G.White_ID=$uid OR G.Black_ID=$uid)", "P.ID=G.White_ID+G.Black_ID-$uid"
 
    $uqsql->add_part( SQLP_FIELDS,
       'P.*', 'P.Rank AS Rankinfo',
