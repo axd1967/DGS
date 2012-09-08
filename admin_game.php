@@ -184,14 +184,20 @@ define('GA_RES_TIMOUT', 3);
       $iform->add_row( array(
             'DESCRIPTION', T_('Tournament Game Status'),
             'TEXT',        TournamentGames::getStatusText($tgame->Status) ));
+      if( $tgame->Flags )
+         $iform->add_row( array(
+               'DESCRIPTION', T_('Tournament Game Flags'),
+               'TEXT',        $tgame->formatFlags() ));
    }
 
+   $gflags = ($game->Flags & ~GAMEFLAGS_KO );
    $iform->add_row( array(
-         'DESCRIPTION', T_('Game Type & Status#gameadm'),
-         'TEXT', sprintf( '%s [%s]',
+         'DESCRIPTION', T_('Game Type & Status & Flags#gameadm'),
+         'TEXT', sprintf( '%s [%s] %s| %s',
                           GameTexts::format_game_type( $game->GameType, $game->GamePlayers )
                               . ($game->GameType == GAMETYPE_GO ? '' : MINI_SPACING . echo_image_game_players($gid)),
-                          $game->Status ), ));
+                          $game->Status, SMALL_SPACING, ($gflags ? Games::buildFlags($gflags) : NO_VALUE) ), ));
+
    $iform->add_row( array(
          'DESCRIPTION', T_('Rated#gameadm'),
          'TEXT',        yesno($game->Rated) ));
