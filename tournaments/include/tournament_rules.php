@@ -236,6 +236,7 @@ class TournamentRules
    function convertTournamentRules_to_GameRow()
    {
       // NOTE: keep "sync'ed" with new-game handle_add_game()-func
+      // NOTE: see also create_game() in 'include/make_game.php'
 
       $grow = array();
       $grow['double_gid'] = 0;
@@ -503,7 +504,7 @@ class TournamentRules
       $gs->Handicaptype = TournamentRules::convert_trule_handicaptype_to_stdhtype($this->Handicaptype);
       $gs->Handicap = (int)$this->Handicap;
       $gs->Komi = (float)$this->Komi;
-      $gs->AdjKomi = (int)$this->AdjKomi;
+      $gs->AdjKomi = (float)$this->AdjKomi;
       $gs->JigoMode = $this->JigoMode;
       $gs->AdjHandicap = (int)$this->AdjHandicap;
       $gs->MinHandicap = (int)$this->MinHandicap;
@@ -560,9 +561,9 @@ class TournamentRules
     * \param $user_df User-object of defender with set urow['Rating2'] (dito)
     *
     * \note IMPORTANT NOTE: caller needs to open TA with HOT-section if used with other db-writes!!
-    * \note Expect set var this.TourneyType
+    * \note Expect filled var this->TourneyType
     */
-   function create_game( $user_ch, $user_df )
+   function create_tournament_game( $user_ch, $user_df )
    {
       $ch_uid = $user_ch->ID;
       $df_uid = $user_df->ID;
@@ -571,32 +572,33 @@ class TournamentRules
       $game_row = $this->convertTournamentRules_to_GameRow();
       $game_row['tid'] = $this->tid;
 
-      $ch_is_black = $this->prepare_create_game_row( $game_row,
+      $ch_is_black = $this->prepare_create_game_row( $game_row, $game_setup,
          $ch_uid, $user_ch->urow['Rating2'],
          $df_uid, $user_df->urow['Rating2'] );
       if( $ch_is_black )
-      {
-         $game_setup->uid = $ch_uid;
          $gid = create_game($user_ch->urow, $user_df->urow, $game_row, $game_setup);
-      }
-      else
-      {
-         $game_setup->uid = $df_uid;
+      else // challenger is white
          $gid = create_game($user_df->urow, $user_ch->urow, $game_row, $game_setup);
-      }
 
-      db_query( "TournamentRules.create_game.update_players({$this->tid},$ch_uid,$df_uid)",
+      db_query( "TournamentRules.create_tournament_game.update_players({$this->tid},$ch_uid,$df_uid)",
          "UPDATE Players SET Running=Running+1" .
             ( $this->Rated ? ", RatingStatus='".RATING_RATED."'" : '' ) .
          " WHERE ID IN ($ch_uid,$df_uid) LIMIT 2" );
 
       return $gid;
-   }//create_game
+   }//create_tournament_game
 
-   /*! \brief Prepares game_row setting fields: Handicap/Komi and returning if challenger is black. */
-   function prepare_create_game_row( &$game_row, $ch_uid, $ch_rating, $df_uid, $df_rating )
+   /*!
+    * \brief Prepares game_row and game_setup setting fields: game_row (Handicap/Komi), game_setup (uid).
+    * \return true if challenger is black.
+    */
+   function prepare_create_game_row( &$game_row, &$game_setup, $ch_uid, $ch_rating, $df_uid, $df_rating )
    {
+      if( !$this->TourneyType )
+         error('invalid_args', "TournamentRules.prepare_create_game_row.miss_var.TourneyType($ch_uid,$df_uid)");
+
       $game_row['Handicaptype'] = TournamentRules::convert_trule_handicaptype_to_stdhtype($this->Handicaptype);
+      $gs_uid = $ch_uid; // default
 
       switch( (string)$this->Handicaptype )
       {
@@ -621,6 +623,7 @@ class TournamentRules
                $ch_is_black = true;
             else //TOURNEY_TYPE_ROUND_ROBIN : stronger is black
                $ch_is_black = ( $ch_rating > $df_rating );
+            $gs_uid = ($ch_is_black) ? $ch_uid : $df_uid;
             break;
 
          case TRULE_HANDITYPE_WHITE:
@@ -628,6 +631,7 @@ class TournamentRules
                $ch_is_black = false;
             else //TOURNEY_TYPE_ROUND_ROBIN : stronger is white
                $ch_is_black = ( $ch_rating < $df_rating );
+            $gs_uid = ($ch_is_black) ? $df_uid : $ch_uid;
             break;
 
          default:
@@ -635,6 +639,9 @@ class TournamentRules
                . "({$this->tid},$ch_uid,$df_uid,{$this->Handicaptype})");
             break;
       }
+
+      if( $game_setup )
+         $game_setup->uid = $gs_uid;
 
       return $ch_is_black;
    }//prepare_create_game_row

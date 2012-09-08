@@ -783,6 +783,7 @@ function message_info_table($mid, $date, $to_me, //$mid==0 means preview
 function game_info_table( $tablestyle, $game_row, $player_row, $iamrated, $use_src_opp=null )
 {
    global $base_path;
+   $is_tourney = ( $tablestyle == GSET_TOURNAMENT_LADDER || $tablestyle == GSET_TOURNAMENT_ROUNDROBIN );
 
    // defaults (partly overwritten by $game_row)
    $GameType = GAMETYPE_GO;
@@ -837,9 +838,10 @@ function game_info_table( $tablestyle, $game_row, $player_row, $iamrated, $use_s
          : true;
       //$haverating passed in from $game_row
    }
-   elseif( $tablestyle == GSET_TOURNAMENT_LADDER )
+   elseif( $is_tourney )
    {
       // for transparency put following into separate fields (see tournaments/ladder/challenge.php)
+      // - for GSET_TOURNAMENT_LADDER: TournamentRules.*, X_Handitype, X_Color, X_Calculated, X_ChallengerIsBlack
       $Handitype  = $X_Handitype;
       $Color      = $X_Color;
       $calculated = (bool)$X_Calculated;
@@ -1000,10 +1002,12 @@ function game_info_table( $tablestyle, $game_row, $player_row, $iamrated, $use_s
                   $user_w = $player_row;
                   $user_b = array( 'ID' => $other_id, 'Handle' => $other_handle, 'Name' => $other_name );
                }
+
+               // overwrite subtype
                if( $tablestyle == GSET_TOURNAMENT_LADDER )
-                  $subtype = ($Color == HTYPE_BLACK) ? T_('Color Challenger Black#T_ladder') : T_('Color Challenger White#T_ladder');
+                  $subtype = ($Handitype == HTYPE_BLACK) ? T_('Color Challenger Black#T_ladder') : T_('Color Challenger White#T_ladder');
                elseif( $tablestyle == GSET_TOURNAMENT_ROUNDROBIN )
-                  $subtype = ($Color == HTYPE_BLACK) ? T_('Color Stronger Black#T_RRobin') : T_('Color Stronger White#T_RRobin');
+                  $subtype = ($Handitype == HTYPE_BLACK) ? T_('Color Stronger Black#T_RRobin') : T_('Color Stronger White#T_RRobin');
 
                $colortxt = image( $base_path.'17/w.gif', T_('White'), null, $color_class) . MINI_SPACING
                   . user_reference( 0, 1, '', $user_w )

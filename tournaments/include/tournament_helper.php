@@ -166,7 +166,7 @@ class TournamentHelper
 
    // ------------ static functions ----------------------------
 
-   /*! \brief Wrapper to TournamentRules.create_game(). */
+   /*! \brief Wrapper to TournamentRules.create_tournament_game(). */
    function create_game_from_tournament_rules( $tid, $tourney_type, $user_ch, $user_df )
    {
       $trules = TournamentRules::load_tournament_rule( $tid );
@@ -187,7 +187,7 @@ class TournamentHelper
       $df_rating = TournamentHelper::get_tournament_rating( $tid, $user_df, $tprops->RatingUseMode );
       $user_df->urow['Rating2'] = $df_rating;
 
-      return $trules->create_game( $user_ch, $user_df );
+      return $trules->create_tournament_game( $user_ch, $user_df );
    }
 
    /*!
@@ -209,10 +209,10 @@ class TournamentHelper
          return null;
 
       // read T-rule
-      $trule = TournamentRules::load_tournament_rule( $tid );
-      if( is_null($trule) )
+      $trules = TournamentRules::load_tournament_rule( $tid );
+      if( is_null($trules) )
          error('bad_tournament', "TournamentHelper::start_tournament_round_games.find_trules($tid)");
-      $trule->TourneyType = $tourney->Type;
+      $trules->TourneyType = $tourney->Type;
 
       // read T-props
       $tprops = TournamentProperties::load_tournament_properties( $tid );
@@ -249,7 +249,7 @@ class TournamentHelper
             foreach( $arr_users as $df_uid )
             {
                $df_tpool = $poolTables->get_user_tournament_pool( $df_uid );
-               if( TournamentHelper::create_pairing_game( $trule, $tround->ID, $pool, $user_ch, $df_tpool->User ) )
+               if( TournamentHelper::create_pairing_game( $trules, $tround->ID, $pool, $user_ch, $df_tpool->User ) )
                   $count_games++;
 
                if( !($count_games % 25) )
@@ -278,7 +278,7 @@ class TournamentHelper
 
    /*!
     * \brief Creates tournament game for specific pairing of two users for round-robin-tourneys.
-    * \param $trule TournamentRules-object containing tourney-id tid
+    * \param $trules TournamentRules-object containing tourney-id tid
     * \param $tround_id TournamentRound-ID
     * \param $pool TournamentPool.Pool number
     * \param $user_ch 1st user (challenger) as User-object with ID and urow->['TP_ID'] (=rid) set
@@ -287,13 +287,13 @@ class TournamentHelper
     *
     * \note IMPORTANT NOTE: caller needs to open TA with HOT-section!!
     */
-   function create_pairing_game( $trule, $tround_id, $pool, $user_ch, $user_df )
+   function create_pairing_game( $trules, $tround_id, $pool, $user_ch, $user_df )
    {
-      $gid = $trule->create_game( $user_ch, $user_df );
+      $gid = $trules->create_tournament_game( $user_ch, $user_df );
       if( !$gid )
          return null;
 
-      $tg = new TournamentGames( 0, $trule->tid );
+      $tg = new TournamentGames( 0, $trules->tid );
       $tg->Challenger_uid = $user_ch->ID;
       $tg->Challenger_rid = $user_ch->urow['TP_ID'];
       $tg->Defender_uid   = $user_df->ID;
