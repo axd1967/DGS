@@ -117,7 +117,10 @@ $GLOBALS['ThePage'] = new Page('TournamentPoolView');
 
    $my_tpool = $tpool_iterator->getIndexValue( 'uid', $my_id, 0 );
    if( $my_tpool )
-      echo sprintf( T_('You are playing in Pool %s.'), $my_tpool->Pool ), "<br>\n";
+   {
+      $pool_link = anchor('#pool'.$my_tpool->Pool, sprintf( T_('Pool %s#tourney'), $my_tpool->Pool ) );
+      echo sprintf( T_('You are playing in %s.#tourney_pool'), $pool_link ), "<br>\n";
+   }
    echo "<br>\n";
 
    $poolViewer = new PoolViewer( $tid, $page, $poolTables,

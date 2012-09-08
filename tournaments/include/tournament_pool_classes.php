@@ -765,8 +765,8 @@ class PoolViewer
          $this->table->add_row_one_col( '', array( 'extra_class' => 'Empty' ) );
       if( $cnt_users )
       {
-         $this->table->add_row_title(
-            ($pool == 0) ? T_('Users without pool assignment') : sprintf( T_('Pool %s'), $pool) );
+         $pool_title = ($pool == 0) ? T_('Users without pool assignment') : sprintf( T_('Pool %s#tourney'), $pool );
+         $this->table->add_row_title( "<a name=\"pool$pool\">$pool_title</a>" );
          if( $this->first_pool )
             $this->table->add_row_thead();
          else
