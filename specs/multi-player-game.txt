@@ -332,10 +332,10 @@ Described Use-cases:
      to be done for every query on the usual games-list, which already is
      quite big and may be time consuming.
 
-     - (3a) To search for a user-specific MP-game (MY/USER running/finished games),
+     - (4a) To search for a user-specific MP-game (MY/USER running/finished games),
        the checkbox in the GameType-column-header needs to be checked.
 
-     - (3b) To search for a user-unspecific MP-game (ALL running/finished games),
+     - (4b) To search for a user-unspecific MP-game (ALL running/finished games),
        use the selection-box of the GameType-column to find "Non-std" games.
 
 

@@ -26,7 +26,7 @@ require_once 'include/sgf_builder.php';
       gid=1234|game1234    : game-id
       no_cache=0|1         : 1 = disable cache (expire-header)
       owned_comments=0|1|N : 1 = if set try to return private comments (for game-players only) including private notes on game,
-                             0 = return only public comments
+                             0 = return only public comments (default)
                              N = return NO comments or notes
       mpg=<INT>            : flags for multi-player-game: 0 = default, 1 (bit #0) = no-user-per-node
       inline=0|1           : 1 = use Content-Disposition type of "inline" to directly start assigned application
