@@ -681,7 +681,7 @@ Description:
 * gid : FK to Games.ID, 0 = unset yet
 
 * Status : status for Tournament-game
-   - INIT = Tournament-game scheduled, need to be started
+   - INIT = Tournament-game scheduled, need to be started (not used for ladder-tournament)
    - PLAY = Tournament-game is being played by challenger and defender
    - SCORE = Tournament-game has ended by score/resign/jigo/timeout and
      needs processing for tournament
@@ -691,10 +691,13 @@ Description:
 
 * TicksDue : half-hour due-ticks to keep track of rematch-lock
    - has meaning only if status=WAIT
-   - TicksDue contains the absolute half-hour-ticks when the status is changed
+   - TicksDue contains the absolute number of half-hour-ticks when the status is changed
      to DONE to allow rematch of challenger and defender
 
 * Flags : flags
+   - 0x0001 = game-result (Score) has been set by tournament-director (not taken from Games.Score)
+   - 0x0002 = game is detached from tournament (on user-removal for example),
+     TG.Score has no meaning if this flag is set
 
 * Lastchanged : date of last update of table-entry
 
@@ -709,6 +712,9 @@ Description:
 * EndTime : like Games.Lastchanged when game finished
 
 * Score : similar to Games.Score but meaning is oriented on challenger/defender-roles
+   - Score has no meaning if game is "detached" from tournament (see TG.Flags),
+     then Score should normally be 0.
+
    - 0 = unset yet, only for INIT/PLAY-status
 
    - set for SCORE/DONE-status:

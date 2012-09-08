@@ -26,6 +26,7 @@ require_once 'include/std_classes.php';
 require_once 'include/std_functions.php';
 require_once 'include/utilities.php';
 require_once 'include/time_functions.php';
+require_once 'include/classlib_user.php';
 require_once 'tournaments/include/tournament_globals.php';
 require_once 'tournaments/include/tournament_utils.php';
 require_once 'tournaments/include/tournament.php';
@@ -121,7 +122,10 @@ class TournamentLadder
       return $this->RunningTourneyGames;
    }
 
-   /*! \brief Returns non-null array with "[#Rank]" linked to game-id for running tourney-games. */
+   /*!
+    * \brief Returns non-null array with "[#Rank]" linked to game-id for running tourney-games.
+    * \see fill_ladder_running_games()
+    */
    function build_linked_running_games()
    {
       $arr = array();
@@ -131,8 +135,13 @@ class TournamentLadder
 
          foreach( $this->get_running_games() as $tgid => $tgame )
          {
-            $rank = $tgame->Challenger_tladder->Rank;
-            $arr[] = sprintf( '[%s]', anchor( $base_path."game.php?gid={$tgame->gid}", "#$rank" ));
+            // [#R] = known challenger, [#] = unknown challenger (user removed); add class for detached (user could re-join)
+            $is_detached = ( $tgame->Flags & TG_FLAG_GAME_DETACHED );
+            $gtext = ( is_null($tgame->Challenger_tladder) ) ? '#' : '#' . $tgame->Challenger_tladder->Rank;
+            $ginfo = '[' . anchor( $base_path."game.php?gid={$tgame->gid}", $gtext ) . ']';
+            if( $is_detached )
+               $ginfo = span('TGDetached', $ginfo, '%s', T_('detached#tourney') );
+            $arr[] = $ginfo;
          }
       }
       return $arr;
@@ -235,32 +244,65 @@ class TournamentLadder
    }
 
    /*!
-    * \brief Removes user from ladder with given tournament tid and remove TP if $remove_all=true.
-    * \note ignoring running games for tournament
+    * \brief Removes user from ladder with given tournament tid, remove TP and notifies opponents of running games.
+    * \param $upd_rank false (normal), true = update TL.RankChanged-field
+    * \param $nfy_user true = notify user, false = user not informed about own user-removal
+    * \return is-deleted
+    *
+    * \note notification to removed-user is done outside of this function
+    * \note running games for tournament are "detached" (made unrated + detached-flag set)
+    * \note IMPORTANT NOTE: expecting to run in HOT-section
     */
-   function remove_user_from_ladder( $remove_all, $upd_rank=false )
+   function remove_user_from_ladder( $dbgmsg, $upd_rank, $rm_uid, $rm_uhandle, $nfy_user, $reason=null )
    {
+      $xdbgmsg = "$dbgmsg.TL.remove_user_from_ladder({$this->tid},{$this->rid},{$this->uid},$rm_uid,$nfy_user)";
+
       //HOT-section to remove user from ladder and eventually from TournamentParticipant-table
       $table = $GLOBALS['ENTITY_TOURNAMENT_LADDER']->table;
       $table2 = $GLOBALS['ENTITY_TOURNAMENT_PARTICIPANT']->table; // needed for nested-lock for process-game-end
       $table3 = $GLOBALS['ENTITY_TOURNAMENT']->table; // needed for nested-lock for delete-TP
-      db_lock( "TournamentLadder.remove_user_from_ladder({$this->tid},{$this->rid})",
+      db_lock( "$xdbgmsg.upd_tladder",
          "$table WRITE, $table AS TL READ, $table2 WRITE, $table3 WRITE" );
       {//LOCK TournamentLadder
          $this->delete();
          $is_deleted = ( TournamentLadder::load_rank($this->tid, $this->rid) == 0 );
          if( $is_deleted )
+         {
             TournamentLadder::move_up_ladder_part($this->tid, $upd_rank, $this->Rank, 0);
-
-         if( $remove_all && $is_deleted )
             TournamentParticipant::delete_tournament_participant($this->tid, $this->rid);
+         }
       }
       db_unlock();
 
-      // reset Players.CountBulletinNew
-      if( $remove_all && $is_deleted && $this->uid > 0 )
-         db_query( "TournamentLadder.remove_user_from_ladder.upd_cntbullnew({$this->tid},{$this->uid})",
-            "UPDATE Players SET CountBulletinNew=-1 WHERE ID='{$this->uid}' LIMIT 1" );
+      if( $is_deleted )
+      {
+         // identify running TGs in role as challenger + defender
+         list( $arr_tg_id, $arr_gid, $arr_opp ) = TournamentGames::find_undetached_running_games( $this->tid, $this->uid );
+         if( count($arr_tg_id) ) // set TournamentGames: detached-flag, SCORE-process to fix in/out-challenges
+         {
+            db_query( "$xdbgmsg.upd_tg",
+               sprintf( "UPDATE TournamentGames SET Flags=Flags | %s, Status=IF(Status='%s','%s',Status) WHERE ID IN (%s)",
+                        TG_FLAG_GAME_DETACHED, TG_STATUS_PLAY, TG_STATUS_SCORE, implode(',', $arr_tg_id) ));
+         }
+         if( count($arr_gid) ) // set Games: unrated, detached-flag
+         {
+            // NOTE: keep Rated-state if game already finished or rated-calculation done
+            db_query( "$xdbgmsg.upd_games.detach",
+               sprintf( "UPDATE Games SET Flags=Flags | %s, Rated=IF( (Status='%s' OR Rated='Done'), Rated,'N') WHERE ID IN (%s)",
+                        GAMEFLAGS_TG_DETACHED, GAME_STATUS_FINISHED, implode(',', $arr_gid) ));
+         }
+
+         // notify opponents about user-removal (if there are running games)
+         TournamentLadder::notify_user_removal( "$xdbgmsg.opp_nfy", $this->tid, $rm_uid, $rm_uhandle, $reason, $arr_opp );
+
+         if( $nfy_user ) // notify removed user
+            TournamentLadder::notify_user_removal( "$xdbgmsg.user_nfy", $this->tid, $rm_uid, $rm_uhandle, $reason );
+
+         // reset Players.CountBulletinNew
+         if( $is_deleted && $this->uid > 0 )
+            db_query( "$xdbgmsg.upd_cntbullnew",
+               "UPDATE Players SET CountBulletinNew=-1 WHERE ID='{$this->uid}' LIMIT 1" );
+      }
 
       return $is_deleted;
    }//remove_user_from_ladder
@@ -455,7 +497,10 @@ class TournamentLadder
       return $iterator;
    }
 
-   /*! \brief Adds user given by User-object for tournament tid at bottom of ladder. */
+   /*!
+    * \brief Adds user given by User-object for tournament tid at bottom of ladder.
+    * \note IMPORTANT NOTE: caller needs to open TA with HOT-section!!
+    */
    function add_user_to_ladder( $tid, $uid )
    {
       if( $uid <= GUESTS_ID_MAX )
@@ -472,17 +517,25 @@ class TournamentLadder
          error('tournament_participant_invalid_status',
                "TournamentLadder::add_user_to_ladder.check_tp_status($tid,$uid,{$tp->Status})");
 
-      return TournamentLadder::add_participant_to_ladder( $tid, $tp->ID, $uid );
-   }
+      $success = TournamentLadder::add_participant_to_ladder( $tid, $tp->ID, $uid );
+      if( $success )
+         $success = TournamentLadder::fix_tournament_games_for_rejoin( $tid, $tp->ID, $uid );
 
-   /*! \brief Adds TP configured by rid,uid for tournament tid at bottom of ladder. */
+      return $success;
+   }//add_user_to_ladder
+
+   /*!
+    * \brief Adds TP configured by rid,uid for tournament tid at bottom of ladder.
+    * \return success
+    * \internal
+    */
    function add_participant_to_ladder( $tid, $rid, $uid )
    {
+      global $NOW;
       static $query_next_rank = "IFNULL(MAX(Rank),0)+1"; // must result in 1 result-row
-      $NOW = $GLOBALS['NOW'];
       $table = $GLOBALS['ENTITY_TOURNAMENT_LADDER']->table;
 
-      // defaults: RankChanged=0, ChallengesIn=0
+      // defaults: RankChanged=0, ChallengesIn=0, ChallengesOut=0
       $query = "INSERT INTO $table (tid,rid,uid,Created,Rank,BestRank,StartRank,PeriodRank,HistoryRank) "
              . "SELECT $tid, $rid, $uid, FROM_UNIXTIME($NOW), "
                   . "$query_next_rank AS Rank, "
@@ -492,7 +545,51 @@ class TournamentLadder
                   . "$query_next_rank AS HistoryRank "
              . "FROM $table WHERE tid=$tid";
       return db_query( "TournamentLadder::add_participant_to_ladder.insert(tid[$tid],rid[$rid],uid[$uid])", $query );
-   }
+   }//add_participant_to_ladder
+
+   /*!
+    * \brief Fixes TournamentLadder.ChallengesIn/Out for potentially rejoining user.
+    * \return success
+    * \internal
+    *
+    * \note When a user had been removed from the same tournament and rejoins now, there could
+    *       still be running games from the moment of the removal (which are detached
+    *       from the tournament). They are set on TG.Status=SCORE to remove the challenges.
+    *       Howver, the processing is delayed (because running in a cron), so it can happen,
+    *       that those games are still there. Therefore they they still count as incoming and
+    *       outgoing challenges for the challenger and defender in order to ensure correct
+    *       in/out-limits on the ladder-users (the next run of the tourney-cron should fix this).
+    * \see remove_user_from_ladder()
+    */
+   function fix_tournament_games_for_rejoin( $tid, $rid, $uid )
+   {
+      $dbgmsg = "TournamentLadder::fix_tournament_games_for_rejoin($tid,$rid,$uid)";
+      $query_part = "SELECT COUNT(*) AS X_Count FROM TournamentGames WHERE tid=$tid AND " .
+         "Status IN ('".TG_STATUS_PLAY."','".TG_STATUS_SCORE."') AND ";
+
+      $row = mysql_single_fetch( "$dbgmsg.ch", $query_part . "Challenger_uid=$uid" );
+      $challenges_out = (int)@$row['X_Count'];
+
+      $row = mysql_single_fetch( "$dbgmsg.df", $query_part . "Defender_uid=$uid" );
+      $challenges_in = (int)@$row['X_Count'];
+
+      $qset = array();
+      if( $challenges_in > 0 )
+         $qset[] = "ChallengesIn=$challenges_in";
+      if( $challenges_out > 0 )
+         $qset[] = "ChallengesOut=$challenges_out";
+
+      if( count($qset) > 0 )
+      {
+         $table = $GLOBALS['ENTITY_TOURNAMENT_LADDER']->table;
+         $success = db_query( "$dbgmsg.upd_tl",
+            "UPDATE $table SET " . implode(', ', $qset) . " WHERE tid=$tid AND rid=$rid LIMIT 1" );
+      }
+      else
+         $success = true;
+
+      return $success;
+   }//fix_tournament_games_for_rejoin
 
    /*!
     * \brief Moves all tourney-users one rank up for incl. rank-range; min/max=0 separately or both for all.
@@ -726,6 +823,7 @@ class TournamentLadder
 
       // process game-end
       $success = true;
+      $dbgmsg = "TournamentLadder.process_game_end($tid,$ch_rid,$df_rid,$game_end_action)";
       switch( (string)$game_end_action )
       {
          case TGEND_CHALLENGER_ABOVE:
@@ -770,12 +868,8 @@ class TournamentLadder
 
          case TGEND_CHALLENGER_DELETE:
          {
-            $success = $tladder_ch->remove_user_from_ladder( /*rem-all*/true, /*upd-rank*/true );
+            $success = $tladder_ch->remove_user_from_ladder( $dbgmsg, /*upd-rank*/true, $tladder_ch->uid, '', /*nfy-user*/true );
             $logmsg = "CH.Rank={$tladder_ch->Rank}>DEL";
-
-            if( $success )
-               TournamentLadder::notify_removed_user( "TournamentLadder::_process_game_end($game_end_action)",
-                  $tid, $tladder_ch->uid, null );
             break;
          }
 
@@ -820,40 +914,63 @@ class TournamentLadder
 
          case TGEND_DEFENDER_DELETE:
          {
-            $success = $tladder_df->remove_user_from_ladder( /*rem-all*/true, /*upd-rank*/true );
+            $success = $tladder_df->remove_user_from_ladder( $dbgmsg, /*upd-rank*/true, $tladder_df->uid, '', /*nfy-user*/true );
             $logmsg = "DF.Rank={$tladder_df->Rank}>DEL";
-
-            if( $success ) // notify removed user
-               TournamentLadder::notify_removed_user( "TournamentLadder::_process_game_end($game_end_action)",
-                  $tid, $tladder_df->uid, null );
             break;
          }
       }//switch(game_end_action)
 
       if( DBG_QUERY )
-         error_log("TournamentLadder.process_game_end($tid,$ch_rid,$df_rid,$game_end_action): $logmsg");
+         error_log("$dbgmsg: $logmsg");
 
       return $success;
    }//_process_game_end
 
    /*!
-    * \brief Sends notify to removed-user.
-    * \param $main_body null=game-end-handling, otherwise body-header-text given as arg
+    * \brief Sends notify to removed-user or to list of opponents about user-removal and detached tournament-games.
+    * \param $rm_uid removed-user-id
+    * \param $rm_uhandle should be set, but is loaded if empty
+    * \param $reason null (default on processing game-end); or text instead
+    * \param $arr_uid null = send msg to removed-user; otherwise send msg to opponents-uids from $arr_uid (if not empty)
     */
-   function notify_removed_user( $dbgmsg, $tid, $uid, $main_body=null )
+   function notify_user_removal( $dbgmsg, $tid, $rm_uid, $rm_uhandle, $reason=null, $arr_uid=null )
    {
-      if( is_null($main_body) )
-         $body = sprintf( T_('The system has removed you from %s due to the ladder configuration defined for tournament game-ends.#tourney'),
-                          "<tourney $tid>" );
-      else
-         $body = $main_body;
+      $is_user = !is_array($arr_uid);
+      if( !$is_user && count($arr_uid) == 0 )
+         return;
 
-      return send_message( "$dbgmsg.notify($tid,$uid)",
-         trim( $body . "\n" . TournamentLadder::get_notes_user_removed() ),
-         sprintf( T_('Removal from tournament #%s'), $tid ),
-         $uid, '', /*notify*/true,
+      if( !$is_user && !$rm_uhandle ) // load removed-user handle if not set
+      {
+         $uarr = User::load_quick_userinfo( array( $rm_uid ) );
+         $rm_uhandle = @$uarr[$rm_uid]['Handle'];
+         if( !$rm_uhandle )
+            $rm_uhandle = "<user $rm_uid>";
+      }
+
+      if( !$reason ) // default reason for processing game-end
+         $reason = T_('The system has removed the user from the tournament due to the ladder-configurations defined for tournament-game endings.');
+
+      $subject = ( $is_user )
+          ? sprintf( T_('Removal from tournament #%s'), $tid )
+          : sprintf( T_('Removal of user [%s] from tournament #%s'), $rm_uhandle, $tid );
+
+      $body = array();
+      $body[] = ( $is_user )
+         ? T_('You have been removed from the tournament') . ": <tourney $tid>"
+         : sprintf( T_('User %s has been removed from the tournament'), "<user $rm_uid>" ) . ": <tourney $tid>";
+      $body[] = T_('Reason#tourney') . ': ' . $reason . "\n";
+      $body[] = TournamentLadder::get_notes_user_removed() . "\n";
+      $body[] = ( $is_user )
+         ? anchor( "show_games.php?tid=$tid",
+                   sprintf( T_('My running games for tournament #%s'), $tid ))
+         : anchor( "show_games.php?tid=$tid".URI_AMP."opp_hdl=".urlencode($rm_uhandle),
+                   sprintf( T_('My running games with user [%s] for tournament #%s'), $rm_uhandle, $tid ));
+
+      send_message( "$dbgmsg.sendmsg($tid,$rm_uid)",
+         implode("\n", $body), $subject,
+         ( $is_user ? $rm_uid : $arr_uid ), '', /*notify*/true,
          0/*sys-msg*/, MSGTYPE_NORMAL );
-   }
+   }//notify_user_removal
 
    /*!
     * \brief Processes long absence of user not being online by removing user from ladder.
@@ -867,19 +984,14 @@ class TournamentLadder
          return true;
 
       // remove user from ladder
-      $success = $tladder->remove_user_from_ladder( /*rem-all*/true, /*upd-rank*/true );
+      $reason = sprintf( T_('The system has removed the user from the tournament due to inactivity for more than %s days as defined in the ladder-configurations.#tourney'),
+                         $user_abs_days );
+      $success = $tladder->remove_user_from_ladder( "TournamentLadder::process_user_absence($tid,$uid,$user_abs_days)",
+         /*upd-rank*/true, $uid, '', /*nfy-user*/true, $reason );
       $logmsg = "U.Rank={$tladder->Rank}>DEL";
 
       if( DBG_QUERY )
-         error_log("TournamentLadder::process_user_absence($tid,$uid): $logmsg");
-
-      // notify removed user
-      if( $success )
-      {
-         TournamentLadder::notify_removed_user( "TournamentLadder::process_user_absence", $tid, $uid,
-            sprintf( T_('The system has removed you from %s due to inactivity for more than %s days.#tourney'),
-                     "<tourney $tid>", $user_abs_days ) );
-      }
+         error_log("TournamentLadder::process_user_absence($tid,$uid,$user_abs_days): $logmsg");
 
       return $success;
    }//process_user_absence
@@ -946,7 +1058,7 @@ class TournamentLadder
 
    function get_notes_user_removed()
    {
-      return T_('Your running tournament games will be continued as normal games without effecting the tournament.');
+      return T_('Running tournament games will be "detached", i.e. continued as normal games, without further effect to the tournament.');
    }
 
    function get_rank_info_format()

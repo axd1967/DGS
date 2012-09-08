@@ -2558,3 +2558,8 @@ ALTER TABLE Players
    DROP COLUMN UseVacation ;
 
 
+-- added flag to store detached-tournament-game
+ALTER TABLE Games
+   MODIFY Flags SET('Ko','HiddenMsg','AdmResult','TGDetached') NOT NULL default '' ;
+
+

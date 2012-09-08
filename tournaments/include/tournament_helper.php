@@ -89,7 +89,7 @@ class TournamentHelper
          return false;
 
       // process game-end
-      $game_end_action = $tl_props->calc_game_end_action( $tgame->Score );
+      $game_end_action = $tl_props->calc_game_end_action( $tgame->Score, $tgame->Flags );
 
       ta_begin();
       {//HOT-section to process tournament-game-end

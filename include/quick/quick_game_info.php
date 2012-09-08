@@ -139,6 +139,8 @@ class QuickHandlerGameInfo extends QuickHandler
          $out[] = 'HIDDENMSG';
       if( $flags & GAMEFLAGS_ADMIN_RESULT )
          $out[] = 'ADMRESULT';
+      if( $flags & GAMEFLAGS_TG_DETACHED )
+         $out[] = 'TGDETACHED';
       return implode(',', $out);
    }
 

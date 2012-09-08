@@ -316,6 +316,7 @@ class Games
          'KO'        => GAMEFLAGS_KO,
          'HIDDENMSG' => GAMEFLAGS_HIDDEN_MSG,
          'ADMRESULT' => GAMEFLAGS_ADMIN_RESULT,
+         'TGDETACHED' => GAMEFLAGS_TG_DETACHED,
       );
 
       $flags = 0;
@@ -337,6 +338,8 @@ class Games
          $arr[] = 'HiddenMsg';
       if( $flags & GAMEFLAGS_ADMIN_RESULT )
          $arr[] = 'AdmResult';
+      if( $flags & GAMEFLAGS_TG_DETACHED )
+         $arr[] = 'TGDetached';
       return implode(',', $arr);
    }
 

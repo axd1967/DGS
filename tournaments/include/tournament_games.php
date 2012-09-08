@@ -133,6 +133,18 @@ class TournamentGames
          return null;
    }
 
+   function formatFlags()
+   {
+      $arr = array();
+      $arr_flags = TournamentGames::getFlagsText();
+      foreach( $arr_flags as $flag => $flagtext )
+      {
+         if( $this->Flags & $flag )
+            $arr[] = $flagtext;
+      }
+      return implode(', ', $arr);
+   }
+
    /*! \brief Inserts or updates tournament-ladder-props in database. */
    function persist()
    {
@@ -371,7 +383,7 @@ class TournamentGames
          $row = mysql_single_fetch( "TournamentGames::count_tournament_games($tid,$round_id)", $qsql->get_select() );
          return ( $row ) ? (int)$row['X_Count'] : 0;
       }
-   }
+   }//count_tournament_games
 
    /*! \brief Counts Games for consistency-check with Tournament-games. */
    function count_games_started( $tid, $round_id )
@@ -391,6 +403,41 @@ class TournamentGames
       $row = mysql_single_fetch( "TournamentGames::count_games_started($tid,$round_id)", $qsql->get_select() );
       return ( $row ) ? (int)$row['X_Count'] : 0;
    }
+
+   /*!
+    * \brief Finds running, undetached tournament-games.
+    * \return array( TG.ID-arr, gid-array, opp-uid-arr ) : TG.ID and gid to set DETACHED-flag, opponent-arr to notify
+    */
+   function find_undetached_running_games( $tid, $uid )
+   {
+      $qsql = new QuerySQL(
+         SQLP_FIELDS,
+            'ID', 'gid', 'Status', 'Challenger_uid', 'Defender_uid',
+         SQLP_FROM,
+            'TournamentGames',
+         SQLP_WHERE,
+            "tid=$tid",
+            "Status IN ('".TG_STATUS_PLAY."','".TG_STATUS_SCORE."')",
+            '(Flags & '.TG_FLAG_GAME_DETACHED.')=0',
+         SQLP_UNION_WHERE,
+            "Challenger_uid=$uid",
+            "Defender_uid=$uid" );
+      $result = db_query( "TournamentGames::find_undetached_running_games($tid,$uid)", $qsql->get_select() );
+
+      $out_tg_id = array();
+      $out_gid = array();
+      $out_opp = array();
+      while( $row = mysql_fetch_array( $result ) )
+      {
+         $out_tg_id[] = $row['ID'];
+         $out_gid[] = $row['gid'];
+         if( $row['Status'] == TG_STATUS_PLAY )
+            $out_opp[] = ( $row['Challenger_uid'] == $uid ) ? $row['Defender_uid'] : $row['Challenger_uid'];
+      }
+      mysql_free_result($result);
+
+      return array( $out_tg_id, $out_gid, array_unique($out_opp) );
+   }//find_undetached_running_games
 
    /*!
     * \brief Signals end of tournament-game updating TournamentGames to SCORE-status and
@@ -460,13 +507,37 @@ class TournamentGames
       return $ARR_GLOBALS_TOURNAMENT_GAMES[$key][$status];
    }
 
+   /*! \brief Returns Flags-text or all Flags-texts (if arg=null). */
+   function getFlagsText( $flag=null )
+   {
+      global $ARR_GLOBALS_TOURNAMENT_GAMES;
+
+      // lazy-init of texts
+      $key = 'FLAGS';
+      if( !isset($ARR_GLOBALS_TOURNAMENT_GAMES[$key]) )
+      {
+         $arr = array();
+         $arr[TG_FLAG_GAME_END_TD] = T_('Game End by TD#TG_flag');
+         $arr[TG_FLAG_GAME_DETACHED] = T_('Game Detached#TG_flag');
+         $ARR_GLOBALS_TOURNAMENT_GAMES[$key] = $arr;
+      }
+
+      if( is_null($flag) )
+         return $ARR_GLOBALS_TOURNAMENT_GAMES[$key];
+      if( !isset($ARR_GLOBALS_TOURNAMENT_GAMES[$key][$flag]) )
+         error('invalid_args', "TournamentGames::getFlagsText($flag)");
+      return $ARR_GLOBALS_TOURNAMENT_GAMES[$key][$flag];
+   }
+
    /*! \brief Returns array for Selection-filter on TournamentGames.Status. */
    function buildStatusFilterArray( $prefix='' )
    {
-      $arr = array( T_('All') => '' );
+      $arr = array(
+         T_('All') => '',
+         T_('Active#TG_stat_filter') => $prefix."Status IN ('".TG_STATUS_PLAY."','".TG_STATUS_SCORE."','".TG_STATUS_WAIT."')", );
       foreach( TournamentGames::getStatusText() as $tg_status => $tg_text )
          $arr[$tg_text] = $prefix."Status='$tg_status'";
-      $arr[T_('None')] = $prefix.'Status IS NULL';
+      $arr[T_('None#TG_stat_filter')] = $prefix.'Status IS NULL';
       return $arr;
    }
 

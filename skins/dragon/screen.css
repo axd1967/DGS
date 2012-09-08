@@ -3018,6 +3018,12 @@ span.LadderWarn {
    color: darkred;
 }
 
+span.TGDetached,
+span.TGDetached a:link,
+span.TGDetached a:visited {
+   color: red;
+}
+
 span.ScoreWarning {
    color: darkred;
    font-weight: bold;

@@ -161,6 +161,9 @@ define('GA_RES_TIMOUT', 3);
    $tform->add_row( array(
          'DESCRIPTION', T_('Tournament Game Status'),
          'TEXT',        TournamentGames::getStatusText($tgame->Status) ));
+   $tform->add_row( array(
+         'DESCRIPTION', T_('Tournament Game Flags'),
+         'TEXT',        $tgame->formatFlags() ));
    $tform->add_empty_row();
 
    $tform->add_row( array(
