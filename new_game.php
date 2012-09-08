@@ -167,6 +167,8 @@ function add_new_game_form( $form_id, $viewmode, $iamrated, $need_redraw, $gsc )
 
 
 // return GameSetupChecker
+// NOTE: keep in sync with TournamentRules.convert-functions: convertTournamentRules_to_GameRow(),
+//       convertTournamentRules_to_EditForm(), convertEditForm_to_TournamentRules()
 function handle_add_game( $my_id, $viewmode )
 {
    global $player_row, $NOW;
