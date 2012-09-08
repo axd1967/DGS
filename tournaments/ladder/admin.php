@@ -55,8 +55,7 @@ $GLOBALS['ThePage'] = new Page('TournamentLadderAdmin');
      tid=                        : admin T-ladder
      ta_seed&tid=                : seed T-ladder with registered TPs
      ta_adduser&tid=&uid=        : add user (Players.ID) to T-ladder
-     ta_deluser&tid=&uid=        : remove user (Players.ID) from T-ladder (no confirm)
-     ta_deluserall&tid=&uid=     : remove user (Players.ID) along WITH user-registration (no confirm)
+     ta_deluser&tid=&uid=        : remove user (Players.ID) along WITH user-registration (no confirm)
      ta_delete&tid=              : delete T-ladder (to seed again, need confirm)
      ta_delete&confirm=1&tid=    : delete T-ladder (confirmed)
      ta_cancel&tid=              : cancel ladder-deletion
@@ -144,8 +143,7 @@ $GLOBALS['ThePage'] = new Page('TournamentLadderAdmin');
          $sys_msg = urlencode( T_('Ladder deleted!#tourney') );
          jump_to("tournaments/ladder/admin.php?tid=$tid".URI_AMP."sysmsg=$sys_msg");
       }
-
-      if( @$_REQUEST['ta_seed'] && $authorise_seed )
+      elseif( @$_REQUEST['ta_seed'] && $authorise_seed )
       {
          $seed_order = (int)get_request_arg('seed_order');
          $seed_reorder = (bool)get_request_arg('seed_reorder');
@@ -153,40 +151,32 @@ $GLOBALS['ThePage'] = new Page('TournamentLadderAdmin');
          $sys_msg = urlencode( T_('Ladder seeded!#tourney') );
          jump_to("tournaments/ladder/admin.php?tid=$tid".URI_AMP."sysmsg=$sys_msg");
       }
-
-      if( @$_REQUEST['ta_adduser'] && $authorise_add_user && !is_null($user) && is_null($tladder_user) )
+      elseif( @$_REQUEST['ta_adduser'] && $authorise_add_user && !is_null($user) && is_null($tladder_user) )
       {
-         TournamentLadder::add_user_to_ladder( $tid, $user->ID );
+         ta_begin();
+         {//HOT-section to add user in ladder
+            TournamentLadder::add_user_to_ladder( $tid, $user->ID );
+         }
+         ta_end();
          $sys_msg = urlencode( sprintf( T_('User [%s] added to ladder!#tourney'), $user->Handle) );
          jump_to("tournaments/ladder/admin.php?tid=$tid".URI_AMP."uid=$uid".URI_AMP."sysmsg=$sys_msg");
       }
-
-      $remove_all = (bool)@$_REQUEST['ta_deluserall'];
-      if( (@$_REQUEST['ta_deluser'] || $remove_all) && $authorise_edit_user && !is_null($user) && !is_null($tladder_user) )
+      elseif( @$_REQUEST['ta_deluser'] && $authorise_edit_user && !is_null($user) && !is_null($tladder_user) )
       {
+         $reason = sprintf( T_('Tournament-Director (or admin) %s has removed the user.#tourney'), "<user $my_id>" );
          ta_begin();
          {//HOT-section to remove user from ladder
-            if( $tladder_user->remove_user_from_ladder( $remove_all ) )
+            if( $tladder_user->remove_user_from_ladder( 'Tournament.ladder_admin',
+                  /*upd-rank*/false, $uid, $user->Handle, /*nfy-user*/true, $reason ) )
             {
-               if( $remove_all )
-               {
-                  TournamentLadder::notify_removed_user( "Tournament.ladder_admin.notify($tid,$uid,$my_id)", $tid, $uid,
-                     sprintf( T_('You have been removed from %s by tournament director (or admin).#tourney'),
-                              "<tourney $tid>", "<user $uid>" ));
-               }
-
-               $txtfmt = ($remove_all)
-                  ? T_('User [%s] completely removed from this ladder-tournament!#tourney')
-                  : T_('User [%s] removed from ladder!#tourney');
-               $sys_msg = sprintf( $txtfmt, $user->Handle )
-                  . ( $remove_all ? ' ' . T_('User has been notified!') : '' );
-               jump_to("tournaments/ladder/admin.php?tid=$tid".URI_AMP."uid=$uid".URI_AMP."sysmsg=".urlencode($sys_msg));
+               $sys_msg = urlencode( sprintf( T_('User [%s] removed from this ladder-tournament!#tourney'), $user->Handle )
+                  . ' ' . T_('User and opponents have been notified!#tourney') );
+               jump_to("tournaments/ladder/admin.php?tid=$tid".URI_AMP."uid=$uid".URI_AMP."sysmsg=$sys_msg");
             }
          }
          ta_end();
       }
-
-      if( @$_REQUEST['ta_crownking'] && $authorise_edit_user && !is_null($user) && !is_null($tladder_user)
+      elseif( @$_REQUEST['ta_crownking'] && $authorise_edit_user && !is_null($user) && !is_null($tladder_user)
             && $tl_props->CrownKingHours == 0 )
       {
          TournamentHelper::process_tournament_ladder_crown_king( array(
@@ -199,8 +189,7 @@ $GLOBALS['ThePage'] = new Page('TournamentLadderAdmin');
                'Rating2'         => $user->Rating,
                'owner_uid'       => $tourney->Owner_ID, ),
             $my_id );
-
-         $sys_msg = urlencode( sprintf( T_('User [%s] crowned as king for this ladder!#tourney'), $user->Handle ));
+         $sys_msg = urlencode( sprintf( T_('User [%s] crowned as king for this ladder-tournament!#tourney'), $user->Handle ));
          jump_to("tournaments/ladder/admin.php?tid=$tid".URI_AMP."uid=$uid".URI_AMP."sysmsg=$sys_msg");
       }
    }//actions
@@ -299,11 +288,18 @@ $GLOBALS['ThePage'] = new Page('TournamentLadderAdmin');
       $tform->add_hidden( 'uid', $uid );
       $tform->add_row( array(
             'CELL', 2, '',
-            'TEXT', sprintf( '%s: %s%s',
-                             T_('User to edit#tourney'),
-                             SMALL_SPACING . $user->user_reference() . SMALL_SPACING.SMALL_SPACING,
-                             anchor( $base_path."tournaments/edit_participant.php?tid=$tid".URI_AMP."uid=$uid",
-                                     T_('Edit participant'), '', 'class="TAdmin"') ), ));
+            'TEXT', T_('User to edit#tourney') . ': ' .
+                    sptext( $user->user_reference(), 3) .
+                    anchor( $base_path."tournaments/edit_participant.php?tid=$tid".URI_AMP."uid=$uid",
+                            T_('Edit participant'), '', 'class="TAdmin"') .
+                    SEP_SPACING .
+                    sprintf( T_('Tournament Games of [%s]'), $user->Handle ) . ': ' .
+                    anchor( $base_path."show_games.php?tid=$tid".URI_AMP."uid=$uid",
+                            T_('Running#tourney_games') ) .
+                    MED_SPACING .
+                    anchor( $base_path."show_games.php?tid=$tid".URI_AMP."finished=1".URI_AMP."uid=$uid",
+                            T_('Finished#tourney_games') ),
+         ));
       $tform->add_empty_row();
    }
    if( !$is_delete && !is_null($user) && $authorise_edit_user ) // valid user
@@ -324,15 +320,9 @@ $GLOBALS['ThePage'] = new Page('TournamentLadderAdmin');
       {
          add_form_edit_user( $tform, $user,
             'ta_deluser', T_('Remove user [%s] from ladder'),
-            T_('Remove tournament participant from ladder and eventually remove user registration too.'),
-            /*notify*/0,
-            T_('User will only be removed from ladder. Tournament user registration is kept.') );
-
-         $tform->add_empty_row();
-         add_form_edit_user( $tform, $user,
-            'ta_deluserall', T_('Remove user [%s] completely'),
-            T_('User will be removed from ladder and tournament user registration will be removed too.'),
-            /*notify*/1 );
+            T_('User will be removed from ladder along with tournament user registration.'),
+            /*notify*/2,
+            TournamentLadder::get_notes_user_removed() );
       }
       $tform->add_empty_row();
    }
@@ -387,17 +377,22 @@ function add_form_edit_user( &$form, $user, $action, $act_fmt, $title, $notify=0
          'CELL', 2, '',
          'TEXT', $title ));
    if( $extra )
+   {
       $form->add_row( array(
             'CELL', 2, '',
-            'TEXT', $extra ));
+            'TEXT', '* ' . $extra ));
+   }
    if( is_numeric($notify) )
    {
-      $nfy_text = ( $notify )
-         ? T_('User will be notified about this.#tourney')
-         : T_('User will NOT be notified about this.#tourney');
+      if( $notify > 1 )
+         $nfy_text = T_('User and opponents of running games will be notified about this.#tourney');
+      elseif( $notify )
+         $nfy_text = T_('User will be notified about this.#tourney');
+      else
+         $nfy_text = T_('User will NOT be notified about this.#tourney');
       $form->add_row( array(
             'CELL', 2, '',
-            'TEXT', $nfy_text, ));
+            'TEXT', '* ' . $nfy_text, ));
    }
    $form->add_row( array(
          'CELL', 2, '',
