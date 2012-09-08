@@ -175,7 +175,7 @@ $GLOBALS['ThePage'] = new Page('Tournament');
       }
    }
    else
-      echo "<center>", T_('No tournament news yet.#tnews'), "</center><br>\n";
+      echo "<center>", T_('No tournament news.#tnews'), "</center><br>\n";
 
    // ------------- Section Menu
 
@@ -384,7 +384,7 @@ function echo_tournament_rules( $tourney, $trule )
    if( $trule->Notes != '')
       echo make_html_safe( $trule->Notes, true ), "<br><br>\n";
 
-   echo T_('The following ruleset is used for this tournament'), ':',
+   echo T_('The following game rules are used for this tournament'), ':',
       $itable->make_table(),
       "<br>\n";
 }//echo_tournament_rules
