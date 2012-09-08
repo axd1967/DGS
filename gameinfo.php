@@ -463,6 +463,11 @@ function build_rating_diff( $rating_diff )
                T_('Tourney Game Status#tourney'),
                TournamentGames::getStatusText($tgame->Status) );
 
+         if( $tourney->Type == TOURNEY_TYPE_LADDER )
+            $itable->add_sinfo(
+                  T_('Tourney Game Role#tourney'),
+                  ( $tgame->Challenger_uid == $my_id ? T_('Challenger#tourney') : T_('Defender#tourney') ) );
+
          if( $tgame->isScoreStatus() && $black_id )
          {
             $arr_flags = array();
@@ -478,6 +483,16 @@ function build_rating_diff( $rating_diff )
             $itable->add_sinfo(
                   T_('Tourney Game Score#tourney'),
                   $tg_score_str . $flags_str );
+         }
+
+         $arr_flags = array();
+         if( $tgame->Flags & TG_FLAG_GAME_DETACHED )
+            $arr_flags[] = span('TWarning', T_('detached#tourney'));
+         if( count($arr_flags) )
+         {
+            $itable->add_sinfo(
+                  T_('Tourney Game Flags#tourney'),
+                  implode(', ', $arr_flags) );
          }
       }
 
