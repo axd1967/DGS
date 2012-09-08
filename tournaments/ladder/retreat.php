@@ -74,7 +74,14 @@ $GLOBALS['ThePage'] = new Page('TournamentLadderRetreat');
 
    if( @$_REQUEST['confirm'] && !is_null($tladder) && count($errors) == 0 ) // confirm retreat
    {
-      $tladder->remove_user_from_ladder(true);
+      ta_begin();
+      {//HOT-section to remove user
+         $tladder->remove_user_from_ladder( 'Tournament.ladder_retreat',
+            /*upd-rank*/false, $my_id, $player_row['Handle'], /*nfy-user*/false,
+            T_('User retreated from the ladder tournament.') );
+      }
+      ta_end();
+
       $sys_msg = urlencode( T_('Retreated from Ladder!#tourney') );
       jump_to("tournaments/view_tournament.php?tid=$tid".URI_AMP."sysmsg=$sys_msg");
    }
@@ -144,6 +151,7 @@ $GLOBALS['ThePage'] = new Page('TournamentLadderRetreat');
    $menu_array[T_('Tournament info')] = "tournaments/view_tournament.php?tid=$tid";
    $menu_array[T_('Tournament participants')] = "tournaments/list_participants.php?tid=$tid";
    $menu_array[T_('View Ladder')] = "tournaments/ladder/view.php?tid=$tid";
+   $menu_array[T_('My running games')] = "show_games.php?tid=$tid".URI_AMP."uid=$my_id";
 
    end_page(@$menu_array);
 }
@@ -154,10 +162,10 @@ function build_retreat_notes()
 {
    $notes = array();
 
-   $notes[] = T_('Retreating from this ladder will also remove your tournament user registration.');
-   $notes[] = TournamentLadder::get_notes_user_removed();
+   $notes[] = TournamentLadder::get_notes_user_removed() . "\n" .
+      T_('The opponents in your running tournament games (if there are any) will be notified about the retreat.#tourney');
+   $notes[] = T_('Retreating from this ladder will also remove your tournament user registration along with the tournaments rank history.');
    $notes[] = T_('If you rejoin the ladder, your ladder rank will be restarted according to the tournaments properties.');
-   $notes[] = null; // empty line
 
    return $notes;
 }//build_retreat_notes
