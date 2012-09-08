@@ -1,0 +1,237 @@
+# Topic: Tournaments
+# Description: Managing tournaments on DGS
+#
+# URL: http://www.dragongoserver.net/forum/read.php?forum=5&thread=9423#9423
+#      http://www.dragongoserver.net/forum/read.php?forum=6&thread=25718#25735
+# Author: Jens-Uwe Gaspar, DGS 'juga'
+
+## /*
+## Dragon Go Server
+## Copyright (C) 2001-2012  Erik Ouchterlony, Jens-Uwe Gaspar
+##
+## This program is free software: you can redistribute it and/or modify
+## it under the terms of the GNU Affero General Public License as
+## published by the Free Software Foundation, either version 3 of the
+## License, or (at your option) any later version.
+##
+## This program is distributed in the hope that it will be useful,
+## but WITHOUT ANY WARRANTY; without even the implied warranty of
+## MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+## GNU Affero General Public License for more details.
+##
+## You should have received a copy of the GNU Affero General Public License
+## along with this program.  If not, see <http://www.gnu.org/licenses/>.
+## */
+
+Legend:
+- T = Tournament
+- TD = Tournament director
+- TP = Tournament participant/player
+- TV = Viewer of tournament
+- Opp = opponent
+- TL = tournament-ladder
+- TRR = tournament-round-robin
+
+Topics:
+
+   1. Introduction
+   X. Design, Classes and Files (implementation details)
+
+   * Tournament = tourney = T : what it is, what it not is
+   * types of tournaments : Ladders, Round Robin
+   * scope of Ts: Dragon, Public, Private
+   * tournament-process + status: ADM,NEW,REG,PAIR,PLAY,CLOSED,DEL
+   * tournament-editing: locks
+   * tables -> ddl-description
+   * roles of T: T-Adm, TD, TP, TV(viewers)
+
+   * GUI for T-Adm, for TD, for TP, for TV
+      * page T-wizard: How to create new T (setting defaults)
+      * page T-list
+      * page T-info
+      * page T-Manager
+         -> common managing: info-section (T-info, owner, last-changed, changedby, my-role, flags, status)
+         -> common managing: edit-locks, change-status, edit-T, news/bulletins, add TDs, edit-reg-props, edit-game-rules
+         -> specifics for tournament-ladders.txt : edit-ladder-props
+         -> specifics for tournament-round_robin.txt : change-round-status, edit-rounds
+         -> common managing: edit-TPs
+         -> specifics for tournament-ladders.txt : adm-ladder, edit-ladder, view-ladder
+         -> specifics for tournament-round_robin.txt : def-pools, create-pools, edit-pools, edit-game-pairings
+         -> common managing: admin-TG
+         -> specifics for tournament-round_robin.txt : edit-ranks
+      * page T-game-list
+      * page TP-list
+      * page TP-reg, TD-edit-reg
+      * T-cron
+
+   * ladder: "What happens with running games on user-removal ?"
+      * use-cases for user-removal:
+         (1) user removed by TD/T-Adm
+         (2) user retreated from ladder
+         (3) user removed by T-system (game-end ladder-config)
+         (4) user removed by T-system (long-absence ladder-config)
+      * user is removed from tournament-ladder (other users move up one rank)
+      * users tournament user registration is removed
+      * running games are "detached" (continued as normal games)
+         * Games.Flags-detach set, Games made UNRATED (!)
+         * TG.Flags-detach set, TG.Status=SCORE to be processed and challengesIn/Out corrected (time-delayed by cron)
+         * "detached" can be seen on game-page, gameinfo-page, game-list for T
+      * if user re-joins challengesIn/Out are corrected from ACTIVE (PLAY|SCORE) games
+      * notify sent to user (except for (1))
+      * notify sent to opponents of running games
+
+   * Requirements / Backlog / Ideas:
+      * see (local) specs/Tournaments.txt
+
+#-------- (1) Introduction ----------------------------------------------------
+
+#-------- (2) Users Guide -----------------------------------------------------
+
+#-------- (2a) Setup MP-game --------------------------------------------------
+
+#-------- (3) Design, Classes and Files ---------------------------------------
+
+* Table-Design:
+
+* Classes / Files:
+
+
+
+#-------- Design Thoughts --------------------------------------
+
+T-process:
+   - T-creation
+   - T-registration
+   - T-confirmation (opt)
+   - prepare T-round + T-games (auto/manually)
+   - T-start: auto-start all games
+   - (TPs playing games), TPs-game-end: gather results, end round, next round (prep)
+   - T-close: report T-winners
+
+T-use-cases / pages:
+   - create new T
+   - list Ts
+   - view T
+
+
+#-------- Wanted features --------------------------------------
+
+Tournament-types:
+   - Ladder, King of the hill
+   - Round-Robin
+   - League-T (pyramid-like structure), connection to next/prev Ts
+   - Championship (ala IYT): http://www.itsyourturn.com/pp?tournmain
+   - K.O. variations (rounded T):
+      - Best of 2 (std), Best of N (N>1) + N-Best of M (N,M>1)
+      - Double-KO
+   - McMahon, Swiss
+      - see diploma-thesis Christoph Gerlach: http://senseis.xmp.net/?McMahonPairing
+      - upper / lower / no bar
+   - Manual (?), flexible setup
+
+Features / Processes:
+
+* General:
+   - define T process
+   - T can handle more than one TD
+   - TD can add time to game, TPs can't add time
+      - add time for directors ? to users with time-cheating (timezone) ?
+      - game-page: "add-time" not possible for tournaments(!)
+   - setup: TP requirements (rating or by TD, min. finished/rated games, min. moves, min. active play)
+   - setup: T min/max TP
+   - handling of vacation: ignore-vacation
+   - forbid delete-game
+   - support-ticket to all TDs
+   - bulletin board to all TDs/TPs -> may use T-forum, multi-receiver messages, maybe RSS-feed on forum
+   - manage fee-paid, even if not paid over DGS (register-phase) (?)
+
+* registration + removal / user-related:
+   - T registration
+   - TP unregister
+   - Invite-tournaments: register only by inviting; manual invite to T by TD
+   - REG: TD has full control of T-registration, T-games and T-results for "punishment" (unfair conduct, escapers, swindlers) or "adjudication"
+   - TD can set TP in any round/pool
+      - some players start in round >1 (e.g. winners from last tournament or dan-players) & more
+      - setting players in later rounds (dan/prev-tournament) by director
+   - handling late-entrance: TD can add TPs at any time (after T started)
+   - handling of sandbagger, escaper, swindler by TD
+   - handling tournament-escapers: TD can set/end/overwrite result of game
+   - need tournament-rank for players, changeable from normal DGS-rank; use DGS-rank
+      - TP can register with DGS rating, TD can overwrite it
+   - (TRR) use start-rating or current rating in all rounds
+
+* type-related / setup games / scoring:
+   - T-types: round robin (pooled), 1-n rounds with pools of 1..m TPs
+   - PAIR: Pairing algorithms (depends on T-type): slaughther, slide, adjacent, random; "bars"; TD has full (manual) control over "pairing"
+   - pairing / rounds / pools
+   - setup: winner-calculation (wins/tie-breaker/rounds)
+   - (TRR) rules: tie-breaker, http://senseis.xmp.net/?TieBreaker
+   - (TRR) rules: score of a "bye" 0 or 0.5
+   - (TRR) handling odd participant-count
+   - (TRR) handling tournament-escapers (odd <-> even TPs, pooling)
+   - T-scoring / pairing: McMahon, Swiss, Round-Robin, Hahn-System (http://senseis.xmp.net/?HahnSystem)
+   - T-scoring: http://senseis.xmp.net/?TournamentScoring
+
+#-------- Tournament References --------------------------------
+
+* General SL-links:
+   - DGS-T-Features: http://senseis.xmp.net/?DragonGoServer%2FTournaments
+   - http://senseis.xmp.net/?OrganizingATournament
+   - http://senseis.xmp.net/?TournamentDirectingSoftware
+
+* Former DGS-tournaments (managed on SL):
+   - http://senseis.xmp.net/?DGSShogun (partly failed)
+      - I Shogun: http://www.garyshomepage.btinternet.co.uk/Tourney/tourney_index_page.htm
+   - http://senseis.xmp.net/?DragonTourney2005
+      - http://www.dragongoserver.net/forum/read.php?forum=4&thread=7398
+   - http://senseis.xmp.net/?DragonTourney2006
+   - http://senseis.xmp.net/?DragonTourney2007
+   - http://senseis.xmp.net/?DragonTourney2008
+      - http://senseis.xmp.net/?DragonTourney2008%2FRegistration
+   - http://senseis.xmp.net/?DragonTourney2009
+   - http://senseis.xmp.net/?DragonTournament2010
+
+   - http://senseis.xmp.net/?Ryzours DGS-tournament-director (-2009)
+   - T-attempt: http://www.dragongoserver.net/forum/read.php?forum=4&thread=15858
+
+* URL(TBGG - turn-based-go guild):
+   - Erik was one guild-founder, "King of the Hill" and "Ladders"
+   - http://senseis.xmp.net/?TurnBasedGoGuild
+   - http://business.baylor.edu/steve_rich/go/rules.html (dead)
+
+* Templates:
+   - (TRR) google-tabs: http://spreadsheets.google.com/pub?key=p6wtm-AUn1NmziCSIU-oeGg
+   - (TRR) google-tabs: http://spreadsheets.google.com/pub?key=p6wtm-AUn1NmURr6h4S45Kg
+   - (TRR) LittleGolem (Tie-Breaker SODOS): http://www.edcollins.com/golem/#What%20is%20Son?
+   - (TRR) LittleGolem: http://www.littlegolem.net/jsp/tournament/tournament.jsp?trnid=go9.ch.1.1.1
+   - (TRR) Chess T-status/Pool-Matrix: http://www.yourturnmyturn.com/toernooi.php?toernooi=2814
+
+* Other Go Servers:
+   * http://senseis.xmp.net/?TurnBasedGoServers
+
+   * FICGS: http://www.ficgs.com/tournaments.html#go_tournaments
+
+   * IYT: http://www.itsyourturn.com/pp?tournmain
+
+   * LittleGolem:
+      - http://www.littlegolem.net/jsp/tournament/index.jsp
+      - FAQ: http://www.edcollins.com/golem/#Could you explain the different types of tournaments available?
+
+   * OGS: http://www.online-go.com/
+      - Formats: http://senseis.xmp.net/?OGS%2FTournamentFormats
+      - Example: http://www.online-go.com/faq/tournaments.php#q1b
+
+* old incomplete tournaments on DGS (2004): see CVS-history (dead files):
+   new_tournament.php
+   list_tournaments.php
+   show_tournament.php
+   create_tournament.php
+   include/tournament_round.php
+   include/tournament.php
+   include/tournamenttypes/macmahon.php
+   include/tournamenttypes/index.php
+   include/tournamenttypes/all_types.php
+   specs/old-dgs-tournaments-2004.sql
+
+#-------- Related features -------------------------------------
+
