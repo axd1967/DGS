@@ -215,7 +215,7 @@ $GLOBALS['ThePage'] = new Page('TournamentRegistration');
          TournamentParticipant::update_tournament_registeredTP( $tid, $old_status, $tp->Status );
 
          if( $rid == 0 ) // new TP
-            Bulletin::update_count_bulletin_new( "Tournament.register.add_tp($tid)", $uid );
+            Bulletin::update_count_bulletin_new( "Tournament.register.add_tp($tid)", $tp->uid );
       }
       ta_end();
 
