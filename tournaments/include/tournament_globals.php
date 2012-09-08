@@ -122,7 +122,8 @@ define('TG_STATUS_WAIT',   'WAIT');
 define('TG_STATUS_DONE',   'DONE');
 define('CHECK_TG_STATUS', 'INIT|PLAY|SCORE|WAIT|DONE');
 
-define('TG_FLAG_GAME_END_TD', 0x0001); // T-game ended by TD
+define('TG_FLAG_GAME_END_TD',   0x0001); // T-game ended by TD
+define('TG_FLAG_GAME_DETACHED', 0x0002); // T-game "detached" (taken out of T)
 
 // ---------- Tournament News Stuff -------------------------------
 
@@ -157,8 +158,8 @@ define('CHECK_TGEND_TIMEOUT_LOSS',  'NO_CHANGE|CH_LAST|CH_DEL');
 
 // ladder-limits
 define('TLADDER_MAX_DEFENSES', 20);
-define('TLADDER_MAX_CHALLENGES', 200);
-define('TLADDER_MAX_WAIT_REMATCH', 3*30*24); // 3 months
+define('TLADDER_MAX_CHALLENGES', 50);
+define('TLADDER_MAX_WAIT_REMATCH', 3*30*24); // [hours]: 3 months
 define('TLADDER_MAX_CHRNG_RATING', 32767);
 define('TLADDER_MAX_CHRNG_ABS', 2000);
 define('TLADDER_CHRNG_RATING_UNUSED', -TLADDER_MAX_CHRNG_RATING-1);
