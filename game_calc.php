@@ -127,6 +127,7 @@ require_once( "include/table_columns.php" );
 
 
 // loads RatingMin/Max for given user from previous Ratinglog-entry before rlog_id
+// FIXME: could be wrong if user had rating-change inbetween
 function load_rating_data( $uid, $rlog_id, $gid=0 )
 {
    if( $rlog_id > 0 )
