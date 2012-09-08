@@ -3042,7 +3042,7 @@ function tournament_reference( $link, $safe_it, $class, $tid )
    $legal = ( $tid > 0 );
    if( $legal )
    {
-      $query = "SELECT Title FROM Tournament WHERE ID='$tid' LIMIT 1";
+      $query = "SELECT Title FROM Tournament WHERE ID=$tid LIMIT 1";
       if( $row = mysql_single_fetch( "tournament_reference.find_tournament($tid)", $query ) )
       {
          $title = trim(@$row['Title']);
@@ -3052,8 +3052,7 @@ function tournament_reference( $link, $safe_it, $class, $tid )
          $legal = false;
    }
 
-   $tourney = sprintf( T_('Tournament #%s [%s]'),
-                       $tid, ( $legal ? $title : T_('???#tournament') ));
+   $tourney = sprintf( T_('Tournament #%s [%s]'), $tid, ( $legal ? $title : T_('???#tournament') ));
    if( $safe_it )
       $tourney = make_html_safe($tourney);
 
@@ -3076,7 +3075,7 @@ function tournament_reference( $link, $safe_it, $class, $tid )
    }
 
    return $tourney;
-}
+}//tournament_reference
 
 // format: Survey #n [title]
 function survey_reference( $link, $safe_it, $class, $sid )
