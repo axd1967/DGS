@@ -232,7 +232,7 @@ $GLOBALS['ThePage'] = new Page('TournamentLadderView');
          if( $ltable->Is_Column_Displayed[12] )
             $row_str[12] = $run_games_str;
          if( $ltable->Is_Column_Displayed[13] )
-            $row_str[13] = TimeFormat::echo_time_diff( $GLOBALS['NOW'], $user->Lastaccess, 24, TIMEFMT_SHORT, '' );
+            $row_str[13] = TimeFormat::echo_time_diff( $GLOBALS['NOW'], $user->Lastaccess, 24, TIMEFMT_SHORT|TIMEFMT_ZERO );
 
          if( $is_mine )
             $row_str['extra_class'] = 'TourneyUser';
