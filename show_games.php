@@ -174,7 +174,8 @@ $GLOBALS['ThePage'] = new Page('GamesList');
       $gfilter->add_filter(32, 'Boolean', 'G.tid>0', true,
             array( FC_LABEL => echo_image_tournament_info(1, true, true) ));
    if( $glc->ext_tid > 0 )
-      $gfilter->add_filter(42, 'Selection', TournamentGames::buildStatusFilterArray('TG.'), true);
+      $gfilter->add_filter(42, 'Selection', TournamentGames::buildStatusFilterArray('TG.'), true,
+            array( FC_DEFAULT => ($finished) ? 0 : 1 ));
    $gfilter->add_filter( 6, 'Numeric', 'G.Size', true,
          array( FC_SIZE => 3 ));
    $gfilter->add_filter( 7, 'Numeric', 'G.Handicap', true,
@@ -413,9 +414,10 @@ $GLOBALS['ThePage'] = new Page('GamesList');
  * 39: >  RU (my remaining time)
  * 40: >  RU (oppenent remaining time)
  * 41: >  FU (Indicator if there are (hidden) game-comments)
- * 42:    TournamentGames.Status
+ * 42:    TournamentGames.Status (+ TG_FLAG_GAME_DETACHED)
  * 43:    Ruleset
  * 44:    GameType + FairKomi-info
+ * 45:    TG_Challenge
  *****/
 
    // add_tablehead($nr, $descr, $attbs=null, $mode=TABLE_NO_HIDE|TABLE_NO_SORT, $sortx='')
@@ -427,7 +429,10 @@ $GLOBALS['ThePage'] = new Page('GamesList');
       $gtable->add_tablehead(41, new TableHead( T_('Hidden game comments'), 'images/game_comment.gif'), 'Image', 0 ); // game-comment
    $gtable->add_tablehead( 2, T_('sgf#header'), 'Sgf', TABLE_NO_SORT);
    if( $glc->ext_tid )
+   {
       $gtable->add_tablehead(42, T_('TGame-Status#header'), 'Enum', 0 );
+      $gtable->add_tablehead(45, T_('TGame-Role#header'), 'Enum', 0 );
+   }
    if( $observe_all )
    {
       $gtable->add_tablehead(34, T_('#Observers#header'), 'NumberC', 0, 'X_ObsCount-');
@@ -798,7 +803,13 @@ $GLOBALS['ThePage'] = new Page('GamesList');
          $row_arr[14] = ($X_Rated == 'N' ? T_('No') : T_('Yes') );
 
       if( $glc->ext_tid && $gtable->Is_Column_Displayed[42] && @$TG_Status )
+      {
          $row_arr[42] = TournamentGames::getStatusText($TG_Status);
+         if( @$TG_Flags & TG_FLAG_GAME_DETACHED )
+            $row_arr[42] .= span('TGDetached', ' (D)', '%s', T_('detached#tourney'));
+      }
+      if( $glc->ext_tid && $gtable->Is_Column_Displayed[45] && @$TG_Challenge >= 0 )
+         $row_arr[45] = ( $TG_Challenge > 0 ) ? T_('Challenger#TG_role') : T_('Defender#TG_role');
 
       if( $gtable->Is_Column_Displayed[43] )
          $row_arr[43] = getRulesetText($Ruleset);

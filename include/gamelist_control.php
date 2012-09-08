@@ -268,7 +268,7 @@ class GameListControl
             if( !$this->is_quick )
                $qsql->add_part( SQLP_WHERE, "Opp.ID=$uid" );
          }
-         elseif( ALLOW_SQL_UNION ) //FU+RU ?UNION
+         else
          {
             if( $this->is_quick )
                $qsql->add_part( SQLP_UNION_WHERE, "G.White_ID=$uid", "G.Black_ID=$uid" );
@@ -279,19 +279,6 @@ class GameListControl
                   "G.Black_ID=$uid AND Opp.ID=G.White_ID" );
             }
             $qsql->useUnionAll();
-         }
-         else //FU+RU
-         {
-            if( $this->is_quick )
-               $qsql->add_part( SQLP_WHERE, "(G.White_ID=$uid OR G.Black_ID=$uid)" );
-            else
-            {
-               $qsql->add_part( SQLP_WHERE,
-                  //"(( G.Black_ID=$uid AND G.White_ID=Opp.ID ) OR
-                  //( G.White_ID=$uid AND G.Black_ID=Opp.ID ))"
-                  "(G.White_ID=$uid OR G.Black_ID=$uid)",
-                  "Opp.ID=G.White_ID+G.Black_ID-$uid" );
-            }
          }
       }//FU+RU
 
@@ -314,10 +301,15 @@ class GameListControl
 
       if( $this->ext_tid )
       {
-         $qsql->add_part( SQLP_WHERE, "G.tid={$this->ext_tid}" );
-
-         $qsql->add_part( SQLP_FIELDS, 'TG.Status AS TG_Status' );
-         $qsql->add_part( SQLP_FROM, 'LEFT JOIN TournamentGames AS TG ON TG.gid=G.ID' );
+         $qsql->add_part( SQLP_FIELDS,
+            'TG.Status AS TG_Status',
+            'TG.Flags AS TG_Flags',
+            "IF(T.Type='".TOURNEY_TYPE_LADDER."',IF(TG.Challenger_uid=$uid,1,0),-1) AS TG_Challenge" );
+         $qsql->add_part( SQLP_FROM,
+            'LEFT JOIN TournamentGames AS TG ON TG.gid=G.ID',
+            'INNER JOIN Tournament AS T ON T.ID=G.tid' );
+         $qsql->add_part( SQLP_WHERE,
+            "G.tid={$this->ext_tid}" );
       }
 
       return $qsql;
