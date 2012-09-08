@@ -735,7 +735,7 @@ $GLOBALS['ThePage'] = new Page('Game');
    }
 
    echo SMALL_SPACING,
-      anchor( 'http://eidogo.com/#url:'.HOSTBASE."sgf.php?gid=$gid",
+      anchor( 'http://eidogo.com/#url:'.HOSTBASE."sgf.php?gid=$gid".URI_AMP.'owned_comments=1',
          image( 'images/eidogo.gif', T_('EidoGo Game Player'), null, 'class=InTextImage' ));
 
    // observers may view the comments in the sgf files, so not restricted to own games
@@ -1214,13 +1214,16 @@ function draw_game_info( $game_row, $game_setup, $board, $tourney )
    //tournament rows
    if( ALLOW_TOURNAMENTS && !is_null($tourney) )
    {
+      $tflags_str = ($game_row['GameFlags'] & GAMEFLAGS_TG_DETACHED)
+         ? span('TWarning', sprintf('(%s) ', T_('detached#tourney')))
+         : '';
       echo "<tr id=\"gameRules\">\n"
          , '<td class=Color>', echo_image_tournament_info($tourney->ID), "</td>\n"
          , "<td colspan=\"", ($cols-1), "\">", $tourney->build_info(4), "</td>\n"
          , "</tr>\n"
          , "<tr id=\"gameRules\">\n"
          , "<td></td>\n"
-         , "<td colspan=\"$cols\">", T_('Title#tourney'), ': ', make_html_safe($tourney->Title, true), "</td>\n"
+         , "<td colspan=\"$cols\">", $tflags_str, T_('Title#tourney'), ': ', make_html_safe($tourney->Title, true), "</td>\n"
          , "</tr>\n";
    }
 
