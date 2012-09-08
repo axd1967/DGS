@@ -75,7 +75,7 @@ class TournamentCache
          $tourney = $this->cache_tournament[$tid];
       else
       {
-         $tourney = Tournament::load_tournament($tid);
+         $tourney = Tournament::load_tournament($tid); // without owner-handle
          if( is_null($tourney) )
             error('unknown_tournament', "$dbgmsg.find_tournament($tid)");
          else

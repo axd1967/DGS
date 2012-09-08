@@ -68,11 +68,6 @@ $GLOBALS['ThePage'] = new Page('TournamentList');
       $idx++;
    }
 
-   $owner_filter_array = array(
-         T_('All') => '',
-         T_('Mine#T_owner') => "T.Owner_ID=$my_id",
-      );
-
 
    // init search profile
    $search_profile = new SearchProfile( $my_id, PROFTYPE_FILTER_TOURNAMENTS );
@@ -105,7 +100,6 @@ $GLOBALS['ThePage'] = new Page('TournamentList');
    $filter_title =&
       $tfilter->add_filter( 5, 'Text', 'T.Title #OP #VAL', true,
          array( FC_SIZE => 16, FC_SUBSTRING => 1, FC_START_WILD => 3, FC_SQL_TEMPLATE => 1 ));
-   $tfilter->add_filter( 6, 'Selection', $owner_filter_array, true );
    $tfilter->add_filter( 8, 'RelativeDate', 'T.StartTime', true,
          array( FC_TIME_UNITS => FRDTU_YMWD|FRDTU_ABS ));
    $tfilter->add_filter(13, 'Numeric', 'TRULE.Size', true,
@@ -136,10 +130,10 @@ $GLOBALS['ThePage'] = new Page('TournamentList');
    $ttable->add_tablehead(16, T_('Time limit#header'), 'Enum', TABLE_NO_SORT);
    $ttable->add_tablehead(10, T_('Round#headert'), 'NumberC', 0, 'CurrentRound+');
    $ttable->add_tablehead(17, T_('Tournament-Size#headert'), 'Number', TABLE_NO_SORT);
-   $ttable->add_tablehead( 6, T_('Owner#headert'), 'User', 0, 'X_OwnerHandle+');
    $ttable->add_tablehead( 7, T_('Last changed#headert'), 'Date', 0, 'T.Lastchanged-');
    $ttable->add_tablehead( 8, T_('Start time#headert'), 'Date', 0, 'StartTime+');
    $ttable->add_tablehead( 9, T_('End time#headert'), 'Date', 0, 'EndTime+');
+   // 6 is freed
 
    $ttable->set_default_sort( 2, 1 ); //on ID
 
@@ -214,8 +208,6 @@ $GLOBALS['ThePage'] = new Page('TournamentList');
             $str .= MED_SPACING . echo_image_shapeinfo($orow['ShapeID'], $orow['Size'], $orow['ShapeSnapshot']);
          $row_str[ 5] = $str;
       }
-      if( $ttable->Is_Column_Displayed[ 6] )
-         $row_str[ 6] = user_reference( REF_LINK, 1, '', $tourney->Owner_ID, $tourney->Owner_Handle, '' );
       if( $ttable->Is_Column_Displayed[ 7] )
          $row_str[ 7] = ($tourney->Lastchanged > 0) ? date(DATE_FMT2, $tourney->Lastchanged) : '';
       if( $ttable->Is_Column_Displayed[ 8] )

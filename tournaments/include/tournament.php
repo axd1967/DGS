@@ -474,13 +474,16 @@ class Tournament
    // ------------ static functions ----------------------------
 
    /*! \brief Returns db-fields to be used for query of Tournament-object. */
-   function build_query_sql()
+   function build_query_sql( $with_owner )
    {
       $qsql = $GLOBALS['ENTITY_TOURNAMENT']->newQuerySQL('T');
-      $qsql->add_part( SQLP_FIELDS,
-         'Owner.Handle AS X_OwnerHandle' );
-      $qsql->add_part( SQLP_FROM,
-         'INNER JOIN Players AS Owner ON Owner.ID=T.Owner_ID' );
+      if( $with_owner )
+      {
+         $qsql->add_part( SQLP_FIELDS,
+            'Owner.Handle AS X_OwnerHandle' );
+         $qsql->add_part( SQLP_FROM,
+            'INNER JOIN Players AS Owner ON Owner.ID=T.Owner_ID' );
+      }
       return $qsql;
    }
 
@@ -512,12 +515,12 @@ class Tournament
    }
 
    /*! \brief Loads and returns Tournament-object for given tournament-ID; NULL if nothing found. */
-   function load_tournament( $tid )
+   function load_tournament( $tid, $with_owner=false )
    {
       $result = NULL;
       if( $tid > 0 )
       {
-         $qsql = Tournament::build_query_sql();
+         $qsql = Tournament::build_query_sql( $with_owner );
          $qsql->add_part( SQLP_WHERE, "T.ID='$tid'" );
          $qsql->add_part( SQLP_LIMIT, '1' );
 
@@ -531,7 +534,7 @@ class Tournament
    /*! \brief Returns enhanced (passed) ListIterator with Tournament-objects. */
    function load_tournaments( $iterator )
    {
-      $qsql = Tournament::build_query_sql();
+      $qsql = Tournament::build_query_sql( /*owner*/false );
       $iterator->setQuerySQL( $qsql );
       $query = $iterator->buildQuery();
       $result = db_query( "Tournament.load_tournaments", $query );
