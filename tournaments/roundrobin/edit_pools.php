@@ -263,11 +263,11 @@ $GLOBALS['ThePage'] = new Page('TournamentPoolEdit');
       $tform->add_row( array(
             'TAB', 'CELL', 1, '', // align submit-buttons
             'SUBMITBUTTON', 't_detach', T_('Detach from Pool'),
-            'TEXT', MED_SPACING . '(' . T_('To detach mark in selected pools') . ')', ));
+            'TEXT', MED_SPACING . '(' . T_('To detach, mark in selected pools') . ')', ));
       $tform->add_row( array(
             'TAB', 'CELL', 1, '', // align submit-buttons
             'SUBMITBUTTON', 't_reassign', T_('Reassign Pool'),
-            'TEXT', MED_SPACING . '(' . T_('To re-assign enter individual new pool') . ')', ));
+            'TEXT', MED_SPACING . '(' . T_('To re-assign, enter new pool') . ')', ));
    }
 
    // --------------- Start Page ------------------------------------
@@ -453,8 +453,9 @@ function load_and_fill_pool_unassigned( $tid, $round, &$uatable )
          $row_arr[6] = (@$user->urow['TP_X_RegisterTime'] > 0) ? date(DATE_FMT2, $user->urow['TP_X_RegisterTime']) : '';
       if( $uatable->Is_Column_Displayed[7] )
          $row_arr[7] = ($user->Lastaccess > 0) ? date(DATE_FMT2, $user->Lastaccess) : '';
-      $row_arr[8] = $tform->print_insert_text_input( "uap_$uid", 4, 4, '' ) . ' '
-         . $tform->print_insert_checkbox( "mark_$uid", '1', '', false, false )
+      $row_arr[8] = $tform->print_insert_text_input( "uap_$uid", 4, 4, '', array( 'title' => T_('assign (unassigned) user to new pool#tourney')) )
+         . ' '
+         . $tform->print_insert_checkbox( "mark_$uid", '1', '', false, array( 'title' => T_('mark user for pool-action#tourney')) )
          . MED_SPACING;
 
       $uatable->add_row( $row_arr );
@@ -465,8 +466,9 @@ function load_and_fill_pool_unassigned( $tid, $round, &$uatable )
 function pools_edit_col_actions( &$poolviewer, $uid )
 {
    global $tform;
-   return $tform->print_insert_text_input( "rap_$uid", 4, 4, '' ) . ' '
-      . $tform->print_insert_checkbox( "mark_$uid", '1', '', false, false )
+   return $tform->print_insert_text_input( "rap_$uid", 4, 4, '', array( 'title' => T_('re-assign user to new pool#tourney')) )
+      . ' '
+      . $tform->print_insert_checkbox( "mark_$uid", '1', '', false, array( 'title' => T_('mark user for pool-action#tourney')) )
       . MED_SPACING;
 }
 
@@ -474,7 +476,7 @@ function pools_edit_col_actions( &$poolviewer, $uid )
 function pools_unassigned_extend_table_form( &$table, &$form )
 {
    return SMALL_SPACING
-      . $form->print_insert_text_input( 'newpool', 4, 4, get_request_arg('newpool') )
+      . $form->print_insert_text_input( 'newpool', 4, 4, get_request_arg('newpool'), array( 'title' => T_('pool to assign for marked users#tourney')) )
       . $form->print_insert_submit_button( 't_assign', T_('Assign to Pool') );
 }
 
