@@ -774,6 +774,12 @@ Notes:
      and number of games per round for the same user (later e.g. double or triple round-robin),
      so for 25 max. poolsize and triple-round-robin it would be max. 24 * 3 games
 
+   - TournamentPool-table is actually keeping track of user-assignment in a pool along with
+     the users pool-rank. A better table-name would be TournamentPoolEntry, but TournamentPool
+     is used as it is shorter.
+     Also to note is, that the table is only in 2NF containing some redundancies (tid+Round_ID+Pool
+     could be extracted as FK for example), but these fields are kept out of performance-reasons.
+
 | Field | Type                 | Null | Key | Default | Extra          |
 +-------+----------------------+------+-----+---------+----------------+
 | ID    | int(11)              | NO   | PRI | NULL    | auto_increment |
@@ -793,6 +799,7 @@ Notes:
 * Pool : pool number
 
 * uid : FK to TournamentParticipant.uid = Players.ID
+   - one uid can only appear once in the same pool -> UNIQ(tid,Round,Pool,uid)
 
 * Rank : place of users within one pool
    - -100 = Rank not set yet, not shown
@@ -833,6 +840,7 @@ Description:
 * uid : FK to TournamentResult.uid = Players.ID
 
 * rid : FK to TournamentResult.rid = TournamentParticipant.ID
+   - can be not existing for ladders if user removed
 
 * Rating : current rating of player Players.Rating2 at time of storing result
 
