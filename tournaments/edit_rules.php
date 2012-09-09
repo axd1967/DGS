@@ -164,9 +164,14 @@ function parse_edit_form( &$trule )
    $errors = array();
    $is_posted = ( @$_REQUEST['tr_save'] || @$_REQUEST['tr_preview'] );
 
-   $gsc = GameSetupChecker::check_fields( GSETVIEW_EXPERT );
-   if( $gsc->has_errors() )
-      $gsc->add_default_values_info();
+   if( $is_posted )
+   {
+      $gsc = GameSetupChecker::check_fields( GSETVIEW_EXPERT );
+      if( $gsc->has_errors() )
+         $gsc->add_default_values_info();
+   }
+   else
+      $gsc = null;
 
    // read from DB or set defaults
    $vars = array();
