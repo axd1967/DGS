@@ -33,6 +33,7 @@ require_once 'tournaments/include/tournament_status.php';
 require_once 'tournaments/include/tournament_ladder.php';
 require_once 'tournaments/include/tournament_ladder_props.php';
 require_once 'tournaments/include/tournament_rules.php';
+require_once 'tournaments/include/tournament_participant.php';
 require_once 'tournaments/include/tournament_properties.php';
 
 $GLOBALS['ThePage'] = new Page('TournamentLadderChallenge');
@@ -96,6 +97,7 @@ $GLOBALS['ThePage'] = new Page('TournamentLadderChallenge');
 
    // check if challenge is valid
    $trules = $tprops = null;
+   $need_trating = false;
    if( !is_null($tladder_ch) && !is_null($tladder_df) )
    {
       $tl_props = TournamentLadderProps::load_tournament_ladder_props( $tid );
@@ -110,6 +112,14 @@ $GLOBALS['ThePage'] = new Page('TournamentLadderChallenge');
       $tprops = TournamentProperties::load_tournament_properties( $tid );
       if( is_null($tprops) )
          error('bad_tournament', "Tournament.ladder.challenge.find_tprops($tid)");
+
+      $need_trating = ( $tprops->RatingUseMode != TPROP_RUMODE_CURR_FIX );
+      if( $need_trating )
+      {
+         $arr_uid = TournamentParticipant::load_tournament_rating( $tid, array( $user_ch->ID, $user_df->ID ));
+         $user_ch->urow['TP_Rating'] = @$arr_uid[$user_ch->ID];
+         $user_df->urow['TP_Rating'] = @$arr_uid[$user_df->ID];
+      }
 
       $rating_pos = 0;
       if( $tl_props->ChallengeRangeRating != TLADDER_CHRNG_RATING_UNUSED )
@@ -230,18 +240,27 @@ function add_form_user_info( &$tform, $utype, $user, $tladder )
 
    $tform->add_row( array( 'HR' ));
    if( !is_null($user) )
+   {
       $tform->add_row( array(
-            'DESCRIPTION', $utype,
-            'TEXT',        $user->user_reference(),
-            'TEXT',        echo_off_time( false, $user->urow['OnVacation'], null ),
-            'TEXT',        SEP_SPACING . echo_rating( $user->Rating, true, $user->ID), ));
+            'DESCRIPTION', span('bold', $utype),
+            'TEXT', $user->user_reference(),
+            'TEXT', echo_off_time( false, $user->urow['OnVacation'], null ),
+            'TEXT', SEP_SPACING . echo_rating( $user->Rating, true, $user->ID), ));
+      if( isset($user->urow['TP_Rating']) )
+         $tform->add_row( array(
+               'DESCRIPTION', T_('Tournament-Rating#tourney'),
+               'TEXT', echo_rating( $user->urow['TP_Rating'], true, $user->ID ), ));
+   }
+
    if( !is_null($tladder) )
+   {
       $tform->add_row( array(
-            'TAB',
-            'TEXT', sprintf( T_('Ladder Rank #%s'), $tladder->Rank ),
+            'DESCRIPTION', T_('Ladder Rank#tourney'),
+            'TEXT', '#' . $tladder->Rank,
             'TEXT', ( ($tladder->RankChanged > 0)
                         ? SEP_SPACING . sprintf( T_('Kept for %s'), $tladder->build_rank_kept(TIMEFMT_ZERO, NO_VALUE) )
                         : '' ), ));
+   }
 
    $tform->add_empty_row();
 }//add_form_user_info
