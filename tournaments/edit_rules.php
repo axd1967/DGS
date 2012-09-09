@@ -74,7 +74,7 @@ $GLOBALS['ThePage'] = new Page('TournamentRulesEdit');
       $errors[] = $tourney->buildAdminLockText();
 
    // check + parse edit-form (notes)
-   list( $vars, $edits, $input_errors ) = parse_edit_form( $trule );
+   list( $vars, $edits, $input_errors, $gsc ) = parse_edit_form( $trule );
    $errors = array_merge( $errors, $input_errors );
 
    // check (if Rated=Yes) that ALL existing TPs have a user-rating (can happen by admin-ops)
@@ -115,7 +115,7 @@ $GLOBALS['ThePage'] = new Page('TournamentRulesEdit');
    }
 
    $formstyle = ($tourney->Type == TOURNEY_TYPE_LADDER) ? GSET_TOURNAMENT_LADDER : GSET_TOURNAMENT_ROUNDROBIN;
-   game_settings_form( $trform, $formstyle, GSETVIEW_EXPERT, true/*$iamrated*/, 'redraw', $vars );
+   game_settings_form( $trform, $formstyle, GSETVIEW_EXPERT, true/*$iamrated*/, 'redraw', $vars, null, $gsc );
 
    $trform->add_empty_row();
    $trform->add_row( array(
@@ -157,12 +157,16 @@ $GLOBALS['ThePage'] = new Page('TournamentRulesEdit');
    end_page(@$menu_array);
 }
 
-// return [ vars-hash, edits-arr, errorlist ]
+// return [ vars-hash, edits-arr, errorlist, GameSetupChecker ]
 function parse_edit_form( &$trule )
 {
    $edits = array();
    $errors = array();
    $is_posted = ( @$_REQUEST['tr_save'] || @$_REQUEST['tr_preview'] );
+
+   $gsc = GameSetupChecker::check_fields( GSETVIEW_EXPERT );
+   if( $gsc->has_errors() )
+      $gsc->add_default_values_info();
 
    // read from DB or set defaults
    $vars = array();
@@ -222,7 +226,7 @@ function parse_edit_form( &$trule )
          $edits[] = T_('Shape#edits');
    }
 
-   return array( $vars, array_unique($edits), $errors );
+   return array( $vars, array_unique($edits), $errors, $gsc );
 }//parse_edit_form
 
 // return true|false from val (Y|N|bool|int|str|null)
