@@ -135,7 +135,8 @@ class GameListControl
       $my_id = $this->my_id;
       $uid = $this->view_uid;
       $is_finished = $this->is_finished(); // FU+FA
-      $is_running = $this->is_running();  // RU+RA
+      $is_running = $this->is_running(); // RU+RA
+      $is_all = $this->is_all(); // RA+FA
 
       $need_ticks = $need_ratingdiff = $need_bw_user_info = false;
 
@@ -165,7 +166,7 @@ class GameListControl
             $qsql->add_part( SQLP_WHERE, 'Obs.uid=' . $my_id );
          }
       }
-      elseif( $this->is_all() ) //FA+RA
+      elseif( $is_all ) //FA+RA
       {
          $need_bw_user_info = true;
          $qsql->add_part( SQLP_FROM, 'Games AS G' );
@@ -303,13 +304,19 @@ class GameListControl
       {
          $qsql->add_part( SQLP_FIELDS,
             'TG.Status AS TG_Status',
-            'TG.Flags AS TG_Flags',
-            "IF(T.Type='".TOURNEY_TYPE_LADDER."',IF(TG.Challenger_uid=$uid,1,0),-1) AS TG_Challenge" );
+            'TG.Flags AS TG_Flags' );
          $qsql->add_part( SQLP_FROM,
-            'LEFT JOIN TournamentGames AS TG ON TG.gid=G.ID',
-            'INNER JOIN Tournament AS T ON T.ID=G.tid' );
+            'LEFT JOIN TournamentGames AS TG ON TG.gid=G.ID' );
          $qsql->add_part( SQLP_WHERE,
             "G.tid={$this->ext_tid}" );
+
+         if( !$is_all )
+         {
+            $qsql->add_part( SQLP_FIELDS,
+               "IF(T.Type='".TOURNEY_TYPE_LADDER."',IF(TG.Challenger_uid=$uid,1,0),-1) AS TG_Challenge" );
+            $qsql->add_part( SQLP_FROM,
+               'INNER JOIN Tournament AS T ON T.ID=G.tid' );
+         }
       }
 
       return $qsql;

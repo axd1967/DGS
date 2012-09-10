@@ -417,7 +417,7 @@ $GLOBALS['ThePage'] = new Page('GamesList');
  * 42:    TournamentGames.Status (+ TG_FLAG_GAME_DETACHED)
  * 43:    Ruleset
  * 44:    GameType + FairKomi-info
- * 45:    TG_Challenge
+ * 45: >  FU+RU (TG_Challenge)
  *****/
 
    // add_tablehead($nr, $descr, $attbs=null, $mode=TABLE_NO_HIDE|TABLE_NO_SORT, $sortx='')
@@ -431,7 +431,8 @@ $GLOBALS['ThePage'] = new Page('GamesList');
    if( $glc->ext_tid )
    {
       $gtable->add_tablehead(42, T_('TGame-Status#header'), 'Enum', 0 );
-      $gtable->add_tablehead(45, T_('TGame-Role#header'), 'Enum', 0 );
+      if( !$all )
+         $gtable->add_tablehead(45, T_('TGame-Role#header'), 'Enum', 0 );
    }
    if( $observe_all )
    {
@@ -808,7 +809,7 @@ $GLOBALS['ThePage'] = new Page('GamesList');
          if( @$TG_Flags & TG_FLAG_GAME_DETACHED )
             $row_arr[42] .= span('TGDetached', ' (D)', '%s', T_('detached#tourney'));
       }
-      if( $glc->ext_tid && $gtable->Is_Column_Displayed[45] && @$TG_Challenge >= 0 )
+      if( $glc->ext_tid && !$all && @$gtable->Is_Column_Displayed[45] && @$TG_Challenge >= 0 )
          $row_arr[45] = ( $TG_Challenge > 0 ) ? T_('Challenger#TG_role') : T_('Defender#TG_role');
 
       if( $gtable->Is_Column_Displayed[43] )
