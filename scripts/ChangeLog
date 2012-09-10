@@ -19,12 +19,182 @@ Developers INFO:
 ChangeLog
 ------------------------------------------------------------------
 
+2012-09-10 juga
+
+   * tournaments/include/tournament_pool_classes.php (class PoolGame, ~.get_user_col_map, ~.fill_games,
+         ~.calc_pool_summary, ~.calc_pool_games_count;
+       class PoolViewer, ~.init_pool_table, ~.make_pool_table, ~.make_single_pool_table, ~.echo_pool_table),
+     tournaments/include/tournament_rules.php (TournamentRules.convertEditForm_to_TournamentRules,
+       ~.determineJigoBehaviour, ~.create_tournament_games, ~.prepare_create_game_row,
+       ~.getHandicaptypeText, ~.convert_trule_handicaptype_to_stdhtype),
+     tournaments/include/tournament_helper.php (TournamentHelper.create_games_from_tournament_rules,
+       ~.determine_games_per_challenge, ~.start_tournament_round_games),
+     tournaments/include/tournament_pool.php (TournamentPool.count_tournament_pool_games,
+       ~.load_tournament_pools, ~.check_pools),
+     tournaments/include/tournament_games.php (TournamentGames.get_ordered_uids),
+     tournaments/include/tournament_utils.php (TournamentUtils.calc_pool_games),
+     include/message_functions.php (game_settings_form),
+     specs/db/table-Tournaments.txt,
+     tournaments/edit_rules.php (parse_edit_form),
+     tournaments/ladder/challenge.php,
+     tournaments/roundrobin/create_pools.php,
+     tournaments/roundrobin/define_pools.php (calc_suggestion, make_suggestions_table),
+     tournaments/roundrobin/edit_pairing.php,
+     tournaments/roundrobin/edit_pools.php,
+     tournaments/roundrobin/view_pools.php:
+   - added support for tournament DOUBLE-handicap-types with two games per user-pair
+     - allow DOUBLE-games for round-robin-tournaments, forbid for ladder-tournament
+     - extended view-pool game-result-matrix for DOUBLE-games
+     - PAIR: create DOUBLE-game for DOUBLE-handicap-type
+     - PAIR: check restart and continuation of stopped pairing
+   - bugfix: set TournamentGames.Challenger/Defender_rid on starting games
+   - refactorings, renaming methods, bugfixes and smaller changes
+
+   * include/std_classes.php (class ListIterator, ~.sortListIteratorCustom, ~.sortListIterator,
+       ~._compare_items_numeric, ~._compare_items_string, ~._compare_items_string_nocase):
+   - added sorting for ListIterator on known row-fields with sort-flags to support numerical,
+     case-sensitive and case-insensitive string sort
+
+   * include/gamelist_control.php (GameListControl.build_games_query),
+     show_games.php:
+   - bugfix: show TG-challenge-role only for USER-finished/running, not for ALL-view
+
+2012-09-09 juga
+
+   * tournaments/edit_rules.php (parse_edit_form):
+   - to edit tournament-rules use GameSetupChecker to verify and highlight errorneous
+     fields of game-settings-form
+
+   * tournaments/include/tournament_participant.php (TournamentParticipant.load_tournament_rating),
+     tournaments/ladder/challenge.php (add_form_user_info):
+   - show tournament-rating on ladder-challenge-page if RatingUseMode is configured to copy-rating
+   - show text for ladder-rank as description in users-table of ladder-challenge
+
+   * tournaments/roundrobin/edit_pools.php (pools_edit_col_actions, pools_unassigned_extend_table_form):
+   - added tooltips for pool-form to mark-user (checkbox) and assign pool (input-box)
+
+2012-09-08 juga
+
+   * tournaments/include/tournament_rules.php (TournamentRules.convertTournamentRules_to_GameSetup,
+       ~.create_tournament_game, ~.prepare_create_game_row),
+     tournaments/include/tournament_helper.php (TournamentHelper.create_game_from_tournament_rules,
+       ~.start_tournament_round_games, ~.create_pairing_game),
+     include/message_functions.php (game_info_table),
+     tournaments/ladder/challenge.php (show_game_info):
+   - bugfixes and cleanup for setup of tournament-game:
+     - fix wrong color for challenger-WHITE-handicap-type by set TournamentRules.TourneyType
+       for preparing game-row for game-info
+     - set correct GameSetup.uid for BLACK/WHITE-handicaptype fixing correct rematch from game-info
+     - use Handicaptype for subtype instead of Color in tournament-game-info on ladder-challenge
+     - use correct casting on TournamentRules.AdjKomi: int -> float
+
+   * tournaments/include/tournament.php (Tournament.build_query_sql, ~.load_tournament, ~.load_tournaments),
+     tournaments/include/tournament_cache.php,
+     tournaments/edit_tournament.php, tournaments/list_directors.php,
+     tournaments/list_tournaments.php, tournaments/manage_tournament.php:
+   - removed owner from tournament-list as T-director and not owner should be main-contact
+   - cleanup: don't force owner-data-load if owner-Handle already available
+
+   * tournaments/include/tournament_pool_classes.php (PoolViewer.make_pool_table),
+     tournaments/roundrobin/view_pools.php:
+   - round-robin-tournament: added link to my-pool-table
+
+   * admin_survey.php:
+   - add default <opt>-tag if survey-options-field empty to know format
+
+   * tournaments/include/tournament_ladder.php (TournamentLadder.build_linked_running_games,
+       ~.remove_user_from_ladder, ~.add_user_to_ladder, ~.fix_tournament_games_for_rejoin,
+       ~._process_game_end, ~.notify_user_removal, ~.process_user_absence, ~.get_notes_user_removed),
+     tournaments/include/tournament_ladder_props.php (TournamentLadderProps.check_properties,
+       ~.build_notes_props, ~.fill_ladder_running_games, ~.calc_game_end_action),
+     tournaments/include/tournament_games.php (TournamentGames.formatFlags,
+        ~.find_undetached_running_games, ~.getFlagsText, ~.buildStatusFilterArray),
+     tournaments/include/tournament_helper.php (TournamentHelper.process_tournament_ladder_game_end),
+     tournaments/include/tournament_globals.php (TG_FLAG_GAME_DETACHED),
+     include/quick/quick_game_info.php (QuickHandlerGameInfo.convertGameFlags),
+     include/gamelist_control.php (GameListControl.build_games_query),
+     include/db/games.php (Games.parseFlags, ~.buildFlags),
+     include/globals.php (GAMEFLAGS_TG_DETACHED),
+     scripts/updates/database_changes_1_0_14_to_1_0_15.mysql, specs/db/dragon-ddl.sql,
+     specs/db/table-Games.txt, specs/db/table-Tournaments.txt, skins/dragon/screen.css,
+     tournaments/ladder/admin.php (add_form_edit_user),
+     tournaments/ladder/retreat.php (build_retreat_notes),
+     tournaments/game_admin.php,
+     admin_game.php, game.php, gameinfo.php, show_games.php:
+   - overwork user-removal from ladder-tournament:
+     - always fully remove user from ladder including tourney-user-registration
+     - "detach" running games from tournament: set detach-flag, make game unrated, set SCORE-status
+     - no ladder-change on detached tournament-games on game-end-processing
+     - fix re-joining user with unprocessed detached tournament-games
+     - put more details in notification and notes about user-removal
+     - notify opponents in active running tournament-games with removed-user
+     - show detached-tournament-game flag on game-/game-info-/tourney-game-admin-page
+     - show detached games in ladder-view in red-color and without rank: [#x] -> [#]
+     - added link to running/finished tournament-games
+   - show tournament-game-role for ladder-tournament: Challenger or Defender
+   - tourney games-list: show only active non-finished tournament-games as default
+   - adjusted texts
+-----------
+-- added flag to store detached-tournament-game
+ALTER TABLE Games
+   MODIFY Flags SET('Ko','HiddenMsg','AdmResult','TGDetached') NOT NULL default '' ;
+-----------
+
+   * tournaments/include/tournament_globals.php (TLADDER_MAX_CHALLENGES):
+   - reduced max ladder challenges-out: 200 -> 50
+
+   * include/gamelist_control.php (GameListControl.build_games_query),
+     include/config.php, opponents.php:
+   - removed server-config ALLOW_SQL_UNION assuming UNION is allowed
+     with requirement of at least mysql 5.0
+
+   * tournaments/ladder/view.php:
+   - show last-access within one hour as '0h' instead of ''
+
+   * tournaments/register.php:
+   - bugfix: used wrong var for bulletin-new-reset after TP-update
+
+   * game.php:
+   - bugfix: download move-messages as well for eidogo-game-link
+
+   * specs/tournaments.txt:
+   - started docs/specs for tournament (specs from 2009)
+
 2012-09-07 juga
 
    * show_games.php:
    - bugfix: SEARCHing on ALL-finished/running games switched to MY-view, corrected 'uid'-parameter
 
+2012-09-06 juga
+
+   * include/gui_functions.php (echo_off_time),
+     tournaments/ladder/challenge.php:
+   - show vacation-icon for users on tournament-ladder-challenge
+
+   * tournaments/include/tournament_helper.php (TournamentHelper.load_ladder_absent_users),
+     scripts/updates/database_changes_1_0_14_to_1_0_15.mysql,
+     specs/db/dragon-ddl.sql, specs/db/table-Players.txt,
+     admin_users.php, edit_vacation.php:
+   - cleanup: removed not-needed Players.UseVacation for tournament-ladder user-absence-tracking
+   - bugfix: check Players.LastQuickAccess for tournament-ladder user-absence-checking
+-----------
+-- cleanup: removed not needed field for tournament-ladder user-absence-tracking
+ALTER TABLE Players
+   DROP COLUMN UseVacation ;
+-----------
+
 2012-09-03 juga
+
+   * game.php:
+   - added magnifying-glass-icon with link to EidoGo.com loading SGF from DGS
+     to browse game with JavaScript
+-----------
+# added icon for eidogo (magnifying glass)
+copy /images/eidogo.gif
+-----------
+
+   * include/std_functions.php (echo_dragon_top_bar):
+   - removed link on user-id
 
 ### ----- release-1_0_15-20120608 -----
 

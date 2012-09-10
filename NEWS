@@ -26,9 +26,12 @@ Copyright (C) 2001-2012  Erik Ouchterlony
 ##          * "Directoring tournaments"-view with ID-button linked to manage your tournaments
 ##
 ##       * Tournament Info page to show all important information of a tournament
-##          * description, news, status, (preliminrary) standings, ruleset, registration, games, results
+##          * description, news, status, (preliminrary) standings, rules, registration, games, results
 ##       * Tournament News page
 ##       * Tournament Directors page showing tournament-owner and tournament-directors
+##       * Adjusted <home show_games.php>Games page</home> to show only tournament-specific games
+##          * Added tournament game status, only showing active non-finished tournament-games as default
+##          * Added game-role for ladder-tournament: Challenger or Defender
 ##
 ##       * Tournament Manager to edit and control tournament
 ##          * Tournament Editor to change tournament start-time, title, description
@@ -71,9 +74,10 @@ Copyright (C) 2001-2012  Erik Ouchterlony
 ##          * Tournament Ladder admin-interface to prepare and edit ladder and crown king
 ##          * Tournament Ladder challenge page to confirm challenge starting tournament game
 ##             * Show probable game-settings for challenge
+##             * Show if user is on vacation
 ##          * Tournament user notifications:
 ##             * Defender will be notified about game challenge
-##             * User will be notified about full removal from tournament
+##             * User and opponents with running games will be notified about user-removal from tournament
 ##          * Crown "King of the Hill" for ladder-tournaments as tournament-result
 ##
 ## ##    * Tournament-type specific pages for Pooled Round-Robin Tournament:
@@ -159,7 +163,7 @@ Copyright (C) 2001-2012  Erik Ouchterlony
       * Show and notify if there are hidden game comments (<image game_comment.gif>) for a finished game
       * Show hint to close all boundaries before passing
       * Show hint about area-scoring before passing to avoid odd dame
-##      * Show tournament info for tournament-game
+##      * Show tournament info for tournament-game, show if detached game
       * Show multi-player-game info
       * Allow observe-toggling of own game
 
@@ -174,7 +178,7 @@ Copyright (C) 2001-2012  Erik Ouchterlony
       * Show full time info of game for each player:
          * Full remaining time including extra-time
          * Clock status (stopped/running) with reason why
-##      * Show tournament info for tournament-game
+##      * Show tournament info for tournament-game, show if detached game
       * Show fair-komi info with komi-bids, color-choice, player's turn
 
    * Game settings:
