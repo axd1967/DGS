@@ -380,7 +380,9 @@ Description:
    - BLACK | WHITE =
      - ladder-tournament:      manual game with challenger getting black | white
      - round-robin-tournament: manual game with stronger player getting black | white
-   - DOUBLE = double game (not supported yet)
+   - DOUBLE = double game
+     - ladder-tournament:      not supported, because it makes no sense for ladders
+     - round-robin-tournament: supported
    - in relation to Waitingroom-table noted enums in upper-case
 
 * AdjKomi : used to adjust (calculated) komi

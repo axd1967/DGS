@@ -25,6 +25,7 @@ require_once 'include/db_classes.php';
 require_once 'include/std_classes.php';
 require_once 'include/classlib_user.php';
 require_once 'tournaments/include/tournament_globals.php';
+require_once 'tournaments/include/tournament_helper.php';
 require_once 'tournaments/include/tournament_pool_classes.php';
 require_once 'tournaments/include/tournament_utils.php';
 
@@ -44,10 +45,11 @@ require_once 'tournaments/include/tournament_utils.php';
   */
 
 define('TPOOL_LOADOPT_USER',    0x01 ); // load Players-stuff
-define('TPOOL_LOADOPT_TRATING', 0x02 ); // load TournamentParticipant.Rating
-define('TPOOL_LOADOPT_REGTIME', 0x04 ); // load TournamentParticipant.Created (=register-time)
-define('TPOOL_LOADOPT_ONLY_RATING', 0x08 ); // only load Rating2 from Players-table
-define('TPOOL_LOADOPT_UROW_RATING', 0x10 ); // additionally set TPool->User->urow['Rating2']
+define('TPOOL_LOADOPT_TP_ID',   0x02 ); // load TournamentParticipant.ID (for rid)
+define('TPOOL_LOADOPT_TRATING', 0x04 ); // load TournamentParticipant.Rating
+define('TPOOL_LOADOPT_REGTIME', 0x08 ); // load TournamentParticipant.Created (=register-time)
+define('TPOOL_LOADOPT_ONLY_RATING', 0x10 ); // only load Rating2 from Players-table
+define('TPOOL_LOADOPT_UROW_RATING', 0x20 ); // additionally set TPool->User->urow['Rating2']
 
 global $ENTITY_TOURNAMENT_POOL; //PHP5
 $ENTITY_TOURNAMENT_POOL = new Entity( 'TournamentPool',
@@ -287,9 +289,11 @@ class TournamentPool
          . "WHERE tid=%s AND Round=%s GROUP BY Pool", (int)$tid, (int)$round );
       $result = db_query( "TournamentPool::count_tournament_pool_games($tid,$round)", $query );
 
+      $games_per_challenge = TournamentHelper::determine_games_per_challenge( $tid );
+
       $count = 0;
       while( $row = mysql_fetch_assoc($result) )
-         $count += TournamentUtils::calc_pool_games( $row['X_Count'] );
+         $count += TournamentUtils::calc_pool_games( $row['X_Count'], $games_per_challenge );
       mysql_free_result($result);
 
       return $count;
@@ -345,7 +349,7 @@ class TournamentPool
    function load_tournament_pools( $iterator, $tid, $round, $pool=0, $load_opts=0 )
    {
       $needs_user = ( $load_opts & TPOOL_LOADOPT_USER );
-      $needs_tp = ( $load_opts & (TPOOL_LOADOPT_TRATING|TPOOL_LOADOPT_REGTIME) );
+      $needs_tp = ( $load_opts & (TPOOL_LOADOPT_TP_ID|TPOOL_LOADOPT_TRATING|TPOOL_LOADOPT_REGTIME) );
       $needs_tp_rating = ( $load_opts & TPOOL_LOADOPT_TRATING );
       $has_userdata = $needs_user || $needs_tp;
 
@@ -371,7 +375,7 @@ class TournamentPool
 
          if( !$needs_tp_rating )
             $qsql->add_part( SQLP_FIELDS, 'TPU.Rating2 AS TP_Rating' );
-         if( !$needs_tp )
+         if( !($load_opts & TPOOL_LOADOPT_REGTIME) )
             $qsql->add_part( SQLP_FIELDS, '0 AS TP_X_RegisterTime' );
       }
 
@@ -535,8 +539,8 @@ class TournamentPool
          elseif( $slice_mode == TROUND_SLICE_FILLUP_POOLS )
          {
             if( $pool < $tround->Pools && $arr_pools[$pool] >= $tround->PoolSize )
-               $pool++;
-         } //else: always 0 for TROUND_SLICE_MANUAL
+               ++$pool;
+         } //else: $pool always 0 for TROUND_SLICE_MANUAL
 
          $tpool = $tpool_iterator->getIndexValue( 'uid', $uid, 0 );
          if( is_null($tpool) ) // user not joined yet
@@ -652,6 +656,8 @@ class TournamentPool
       $round = $tround->Round;
       $errors = array();
 
+      $games_per_challenge = TournamentHelper::determine_games_per_challenge( $tid );
+
       // load tourney-participants and pool data
       $iterator = new ListIterator( 'TournamentTemplateRoundRobin.checkPooling.load_tp_pools' );
       $iterator = TournamentPool::load_tournament_participants_with_pools( $iterator, $tid, $round, $only_summary );
@@ -659,7 +665,7 @@ class TournamentPool
       $poolTables = new PoolTables( $tround->Pools );
       $poolTables->fill_pools( $iterator );
 
-      $pool_summary = $poolTables->calc_pool_summary();
+      $pool_summary = $poolTables->calc_pool_summary( $games_per_challenge );
       if( $only_summary ) // load only summary
          return array( $errors, $pool_summary );
 

@@ -68,6 +68,7 @@ $GLOBALS['ThePage'] = new Page('TournamentRulesEdit');
    $trule = TournamentRules::load_tournament_rule( $tid );
    if( is_null($trule) )
       error('bad_tournament', "Tournament.edit_rules.miss_rules($tid,$my_id)");
+   $trule->TourneyType = $tourney->Type; // for parsing rules
 
    $errors = $tstatus->check_edit_status( TournamentRules::get_edit_tournament_status() );
    if( !TournamentUtils::isAdmin() && $tourney->isFlagSet(TOURNEY_FLAG_LOCK_ADMIN) )
@@ -202,6 +203,7 @@ function parse_edit_form( &$trule )
          $edits[] = T_('Handicap type#edits');
       elseif( $tr_cat_htype == CAT_HTYPE_MANUAL )
       {
+         if( $old_vals['color_m'] != $vars['color_m'] ) $edits[] = T_('Color#edits');
          if( $old_vals['handicap_m'] != $trule->Handicap ) $edits[] = T_('Handicap#edits');
          if( $old_vals['komi_m'] != $trule->Komi ) $edits[] = T_('Komi#edits');
       }

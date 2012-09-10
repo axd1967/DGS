@@ -84,6 +84,7 @@ $GLOBALS['ThePage'] = new Page('TournamentPoolView');
    // init
    $errors = array();
    $need_trating = ( $tprops->RatingUseMode != TPROP_RUMODE_CURR_FIX );
+   $games_per_challenge = TournamentHelper::determine_games_per_challenge( $tid );
 
    $tpool_iterator = new ListIterator( 'Tournament.pool_view.load_pools' );
    $tpool_iterator = TournamentPool::load_tournament_pools( $tpool_iterator, $tid, $round, 0,
@@ -123,13 +124,13 @@ $GLOBALS['ThePage'] = new Page('TournamentPoolView');
    }
    echo "<br>\n";
 
-   $poolViewer = new PoolViewer( $tid, $page, $poolTables,
+   $poolViewer = new PoolViewer( $tid, $page, $poolTables, $games_per_challenge,
       ($need_trating ? 0 : PVOPT_NO_TRATING) | ($edit ? PVOPT_EDIT_RANK : 0) );
    if( $edit )
       $poolViewer->setEditCallback( 'pool_user_edit_rank' );
-   $poolViewer->init_table();
-   $poolViewer->make_table();
-   $poolViewer->echo_table();
+   $poolViewer->init_pool_table();
+   $poolViewer->make_pool_table();
+   $poolViewer->echo_pool_table();
 
    echo_notes( 'edittournamentpoolnotesTable', T_('Tournament pool notes'), build_pool_notes(), true, false );
 

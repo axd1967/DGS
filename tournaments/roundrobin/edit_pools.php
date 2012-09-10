@@ -181,6 +181,8 @@ $GLOBALS['ThePage'] = new Page('TournamentPoolEdit');
    $count_errors = count($errors);
    if( $show_pools && count($arr_selpool) && ($count_errors == $count_status_errors) )
    {
+      $games_per_challenge = TournamentHelper::determine_games_per_challenge( $tid );
+
       $tpool_iterator = new ListIterator( 'Tournament.pool_view.load_pools' );
       $tpool_iterator->addQuerySQLMerge(
          new QuerySQL( SQLP_WHERE, 'TPOOL.Pool IN (' . implode(',', $arr_selpool) . ')' ));
@@ -286,14 +288,14 @@ $GLOBALS['ThePage'] = new Page('TournamentPoolEdit');
       $pv_opts = PVOPT_NO_COLCFG | PVOPT_NO_RESULT | PVOPT_NO_EMPTY;
       if( $show_pools && !$show_unassigned && $count_status_errors == 0 )
          $pv_opts |= PVOPT_EDIT_COL;
-      $poolViewer = new PoolViewer( $tid, $page, $poolTables, $pv_opts );
+      $poolViewer = new PoolViewer( $tid, $page, $poolTables, $games_per_challenge, $pv_opts );
       $poolViewer->setEditCallback( 'pools_edit_col_actions' );
-      $poolViewer->init_table();
+      $poolViewer->init_pool_table();
       foreach( $arr_selpool as $pool )
-         $poolViewer->make_pool_table( $pool, PVOPT_EMPTY_SEL );
+         $poolViewer->make_single_pool_table( $pool, PVOPT_EMPTY_SEL );
 
       section('poolSelected', T_('Selected Pools'));
-      $poolViewer->echo_table();
+      $poolViewer->echo_pool_table();
    }
 
    if( $show_unassigned )

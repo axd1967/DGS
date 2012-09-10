@@ -26,10 +26,12 @@ require_once 'include/form_functions.php';
 require_once 'include/table_columns.php';
 require_once 'tournaments/include/tournament.php';
 require_once 'tournaments/include/tournament_factory.php';
+require_once 'tournaments/include/tournament_helper.php';
 require_once 'tournaments/include/tournament_participant.php';
 require_once 'tournaments/include/tournament_pool.php';
 require_once 'tournaments/include/tournament_round.php';
 require_once 'tournaments/include/tournament_round_status.php';
+require_once 'tournaments/include/tournament_rules.php';
 require_once 'tournaments/include/tournament_status.php';
 require_once 'tournaments/include/tournament_utils.php';
 
@@ -139,7 +141,13 @@ $GLOBALS['ThePage'] = new Page('TournamentPoolDefine');
 
    $ttable = null;
    if( @$_REQUEST['t_suggest'] || @$_REQUEST['t_save'] || @$_REQUEST['t_preview'] )
-      $ttable = make_suggestions_table( $tround, $reg_count, $errors, $tround->PoolSize, $tround->Pools );
+   {
+      $games_per_challenge = TournamentHelper::determine_games_per_challenge( $tid );
+      $ttable = make_suggestions_table( $tround, $reg_count, $errors, $games_per_challenge,
+         $tround->PoolSize, $tround->Pools );
+   }
+   else
+      $games_per_challenge = 1;
 
    // save tournament-round-object with values from edit-form
    if( @$_REQUEST['t_save'] && count($errors) == 0 )
@@ -232,6 +240,9 @@ $GLOBALS['ThePage'] = new Page('TournamentPoolDefine');
       echo "<p>\n",
          sprintf( T_('The table shows sample distributions for the %s registered users of round #%s for allowed pool-sizes.'),
                   "<b>$reg_count</b>", $round ), ":<br>\n",
+         ( $games_per_challenge > 1
+               ? '( ' . sprintf( T_('"Games Count" is based on %s games per challenge!#tourney'), $games_per_challenge ) . ' )'
+               : '' ), "<br>\n",
          $ttable->make_table(),
          "<br>\n";
 
@@ -332,10 +343,9 @@ function parse_edit_form( &$trd )
 //               4:$pool_count_remain, 5:$pool_count_base, 6:$games_count, 7:$distribution,
 //               8:$user_choice )
 //     for given pool-size and pool-count
-function calc_suggestion( $reg_count, $pool_size, $pool_count, $user_choice=0 )
+// param $chall_games : games per challenge = factor for games-count (e.g. 2 for double-htype tourney-rules)
+function calc_suggestion( $reg_count, $pool_size, $pool_count, $chall_games, $user_choice=0 )
 {
-   $chall_games = 1; // later: 2 for double-round-robin
-
    $user_capacity = $pool_size * $pool_count;
    $pool_size_base = ($pool_count > 0) ? floor( $reg_count / $pool_count ) : 1;
    $pool_count_remain = $reg_count - $pool_size_base * $pool_count;
@@ -353,20 +363,20 @@ function calc_suggestion( $reg_count, $pool_size, $pool_count, $user_choice=0 )
       $pool_count_remain, $pool_count_base, $games_count, $distribution, $user_choice );
 }
 
-function make_suggestions_table( $tround, $reg_count, &$errors, $user_pool_size=0, $user_pool_count=0 )
+function make_suggestions_table( $tround, $reg_count, &$errors, $games_per_challenge, $user_pool_size=0, $user_pool_count=0 )
 {
    $arr_check = array();
    $arr_uniq = array();
    if( $user_pool_size > 0 && $user_pool_count > 0 )
    {
       $old_user_pool_size = $user_pool_size;
-      $arr_sugg = calc_suggestion( $reg_count, $user_pool_size, $user_pool_count, 1 );
+      $arr_sugg = calc_suggestion( $reg_count, $user_pool_size, $user_pool_count, $games_per_challenge, 1 );
       if( $arr_sugg[4] > 0 && $arr_sugg[3] + 1 != $user_pool_size )
          $user_pool_size = $arr_sugg[3] + 1;
       elseif( $arr_sugg[4] == 0 && $arr_sugg[3] != $user_pool_size )
          $user_pool_size = $arr_sugg[3];
       if( $old_user_pool_size != $user_pool_size )
-         $arr_sugg = calc_suggestion( $reg_count, $user_pool_size, $user_pool_count, 2 );
+         $arr_sugg = calc_suggestion( $reg_count, $user_pool_size, $user_pool_count, $games_per_challenge, 2 );
       $arr_uniq["$user_pool_size:$user_pool_count"] = 1;
       $arr_check[] = $arr_sugg;
    }
@@ -375,7 +385,7 @@ function make_suggestions_table( $tround, $reg_count, &$errors, $user_pool_size=
       $pool_count = TournamentUtils::calc_pool_count( $reg_count, $pool_size );
       $key_uniq = "$pool_size:$pool_count";
       if( !isset($arr_uniq[$key_uniq]) )
-         $arr_check[] = calc_suggestion( $reg_count, $pool_size, $pool_count );
+         $arr_check[] = calc_suggestion( $reg_count, $pool_size, $pool_count, $games_per_challenge );
       $arr_uniq[$key_uniq] = 1;
    }
    unset($arr_uniq);

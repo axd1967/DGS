@@ -143,7 +143,11 @@ $GLOBALS['ThePage'] = new Page('TournamentLadderChallenge');
    {
       ta_begin();
       {//HOT-section to start T-game
-         $gid = TournamentHelper::create_game_from_tournament_rules( $tid, $tourney->Type, $user_ch, $user_df );
+         $gids = TournamentHelper::create_games_from_tournament_rules( $tid, $tourney->Type, $user_ch, $user_df );
+         $cnt_gids = count($gids);
+         if( $cnt_gids != 1 )
+            error('internal_error', "Tournament.ladder.challenge.create_game($tid,{$user_ch->ID},{$user_df->ID},$cnt_gids)");
+         $gid = $gids[0];
 
          $tg = TournamentLadder::new_tournament_game( $tid, $tladder_ch, $tladder_df );
          $tg->gid = $gid;
@@ -157,7 +161,7 @@ $GLOBALS['ThePage'] = new Page('TournamentLadderChallenge');
          // notify defender about started game
          $ch_uid = $user_ch->ID;
          $df_uid = $user_df->ID;
-         send_message( "tournament.ladder.challenge.notify($tid,$ch_uid,$df_uid)",
+         send_message( "Tournament.ladder.challenge.notify($tid,$ch_uid,$df_uid)",
             trim( sprintf( T_('%s has challenged you in %s: %s#tourney'),
                            "<user $ch_uid>", "<tourney $tid>", "<game $gid>" )),
             sprintf( T_('Challenge started for tournament #%s'), $tid ),

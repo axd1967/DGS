@@ -166,8 +166,11 @@ class TournamentHelper
 
    // ------------ static functions ----------------------------
 
-   /*! \brief Wrapper to TournamentRules.create_tournament_game(). */
-   function create_game_from_tournament_rules( $tid, $tourney_type, $user_ch, $user_df )
+   /*!
+    * \brief Wrapper to TournamentRules.create_tournament_games() creating game(s) between two users.
+    * \return array of Games.ID (e.g. for DOUBLE-tourney)
+    */
+   function create_games_from_tournament_rules( $tid, $tourney_type, $user_ch, $user_df )
    {
       $trules = TournamentRules::load_tournament_rule( $tid );
       if( is_null($trules) )
@@ -187,7 +190,8 @@ class TournamentHelper
       $df_rating = TournamentHelper::get_tournament_rating( $tid, $user_df, $tprops->RatingUseMode );
       $user_df->urow['Rating2'] = $df_rating;
 
-      return $trules->create_tournament_game( $user_ch, $user_df );
+      $gids = $trules->create_tournament_games( $user_ch, $user_df );
+      return $gids;
    }
 
    /*!
@@ -201,7 +205,6 @@ class TournamentHelper
       global $NOW;
       $tid = $tourney->ID;
       $round = $tround->Round;
-      $count_games = 0;
 
       // lock T-ext
       $t_ext = new TournamentExtension( $tid, TE_PROP_TROUND_START_TGAMES, 0, $NOW );
@@ -213,27 +216,53 @@ class TournamentHelper
       if( is_null($trules) )
          error('bad_tournament', "TournamentHelper::start_tournament_round_games.find_trules($tid)");
       $trules->TourneyType = $tourney->Type;
+      $games_per_challenge = TournamentHelper::determine_games_per_challenge( $tid, $trules );
 
       // read T-props
       $tprops = TournamentProperties::load_tournament_properties( $tid );
       if( is_null($tprops) )
          error('bad_tournament', "TournamentHelper::start_tournament_round_games.find_tprops($tid)");
 
-      // read all pools with all users and TPs (if needed for T-rating)
-      $load_opts_tpool = TPOOL_LOADOPT_USER | TPOOL_LOADOPT_ONLY_RATING | TPOOL_LOADOPT_UROW_RATING;
+      // read T-games: read all existing TGames to check if creation has been partly done
+      $check_tgames = array(); // uid.uid => game-count
+      $tg_iterator = new ListIterator( "TournamentHelper::start_tournament_round_games.find_tgames($tid,$round)" );
+      $tg_iterator = TournamentGames::load_tournament_games( $tg_iterator, $tid, $tround->ID );
+      while( list(,$arr_item) = $tg_iterator->getListIterator() )
+      {
+         list( $tgame, $orow ) = $arr_item;
+         list( $uid1, $uid2 ) = $tgame->get_ordered_uids();
+         $fkey = "$uid1.$uid2";
+         if( !isset($check_tgames[$fkey]) )
+            $check_tgames[$fkey] = 1;
+         else
+            ++$check_tgames[$fkey];
+      }
+      unset($tg_iterator);
+
+      // ensure, that games-per-challenge for existing games is ok (e.g. half of DOUBLE-game must be fixed by admin)
+      foreach( $check_tgames as $fkey => $cnt )
+      {
+         if( $cnt != $games_per_challenge )
+            error('bad_tournament', "TournamentHelper::start_tournament_round_games.check_gper_chall($tid,[$fkey])");
+      }
+
+      // read all pools with all users and TPs (if needed for T-rating), need TP_ID for TG.*_rid
+      $load_opts_tpool = TPOOL_LOADOPT_TP_ID | TPOOL_LOADOPT_USER | TPOOL_LOADOPT_ONLY_RATING | TPOOL_LOADOPT_UROW_RATING;
       if( $tprops->RatingUseMode != TPROP_RUMODE_CURR_FIX )
          $load_opts_tpool |= TPOOL_LOADOPT_TRATING;
       $tpool_iterator = new ListIterator( "TournamentHelper::start_tournament_round_games.load_pools($tid,$round)" );
       $tpool_iterator->addIndex( 'uid' );
       $tpool_iterator = TournamentPool::load_tournament_pools( $tpool_iterator, $tid, $round, 0, $load_opts_tpool );
+
       $poolTables = new PoolTables( $tround->Pools );
       $poolTables->fill_pools( $tpool_iterator );
       $arr_poolusers = $poolTables->get_pool_users();
-      $expected_games = $poolTables->calc_pool_games_count();
+      $expected_games = $poolTables->calc_pool_games_count( $games_per_challenge );
 
       // loop over all pools
-      $cnt_pools = count($arr_poolusers);
       echo "<table id=\"Progress\"><tr><td><ul>\n";
+      $count_games = $count_old_games = $progress = 0;
+      $cnt_pools = count($arr_poolusers);
       foreach( $arr_poolusers as $pool => $arr_users )
       {
          echo_message( "<br>\n<li>" . sprintf( T_('Pool %s of %s'), $pool, $cnt_pools ) . ":<br>\n" );
@@ -249,10 +278,20 @@ class TournamentHelper
             foreach( $arr_users as $df_uid )
             {
                $df_tpool = $poolTables->get_user_tournament_pool( $df_uid );
-               if( TournamentHelper::create_pairing_game( $trules, $tround->ID, $pool, $user_ch, $df_tpool->User ) )
-                  $count_games++;
 
-               if( !($count_games % 25) )
+               // check if TGames already exists for pair challenger vs defender
+               $fkey = ( $ch_uid < $df_uid ) ? "$ch_uid.$df_uid" : "$df_uid.$ch_uid";
+               $cnt_exist_tgames = (int)@$check_tgames[$fkey];
+               if( $cnt_exist_tgames > 0 ) // games already created
+                  $count_old_games += $cnt_exist_tgames;
+               else // NEW
+               {
+                  $arr_tg = TournamentHelper::create_pairing_games( $trules, $tround->ID, $pool, $user_ch, $df_tpool->User );
+                  if( is_array($arr_tg) )
+                     $count_games += count($arr_tg);
+               }
+
+               if( !(++$progress % 25) )
                   echo_message( sprintf( T_('Created %s games so far ...') . "<br>\n", $count_games ));
             }
          }
@@ -260,9 +299,12 @@ class TournamentHelper
          echo_message( sprintf( T_('Created %s games for pool #%s') . "</li>",
             ($count_games - $count_game_curr), $pool ));
       }
+      if( $count_old_games > 0 )
+         echo_message( "<br>\n<li>" . sprintf( T_('%s games already existed') . '</li>', $count_old_games ));
       echo_message("</ul></td></tr></table>\n");
 
       // check expected games-count
+      $count_games += $count_old_games;
       if( $count_games == $expected_games )
       {
          // switch T-round-status PAIR -> PLAY
@@ -277,36 +319,41 @@ class TournamentHelper
    }//start_tournament_round_games
 
    /*!
-    * \brief Creates tournament game for specific pairing of two users for round-robin-tourneys.
+    * \brief Creates tournament game (or games for DOUBLE) for specific pairing of two users for round-robin-tourneys.
     * \param $trules TournamentRules-object containing tourney-id tid
     * \param $tround_id TournamentRound-ID
     * \param $pool TournamentPool.Pool number
     * \param $user_ch 1st user (challenger) as User-object with ID and urow->['TP_ID'] (=rid) set
     * \param $user_df 2nd user (defender) as User-object (dito as $user_ch)
-    * \return TournamentGames-object or null on error (shouldn't happen because "exceptions" on errors).
+    * \return array with TournamentGames-object or null on error (shouldn't happen because "exceptions" on errors).
     *
     * \note IMPORTANT NOTE: caller needs to open TA with HOT-section!!
     */
-   function create_pairing_game( $trules, $tround_id, $pool, $user_ch, $user_df )
+   function create_pairing_games( $trules, $tround_id, $pool, $user_ch, $user_df )
    {
-      $gid = $trules->create_tournament_game( $user_ch, $user_df );
-      if( !$gid )
+      $gids = $trules->create_tournament_games( $user_ch, $user_df );
+      if( !$gids )
          return null;
 
-      $tg = new TournamentGames( 0, $trules->tid );
-      $tg->Challenger_uid = $user_ch->ID;
-      $tg->Challenger_rid = $user_ch->urow['TP_ID'];
-      $tg->Defender_uid   = $user_df->ID;
-      $tg->Defender_rid   = $user_df->urow['TP_ID'];
+      $out = array();
+      foreach( $gids as $gid ) // can be multiple games per pair (e.g. DOUBLE-tourney)
+      {
+         $tg = new TournamentGames( 0, $trules->tid );
+         $tg->Challenger_uid = $user_ch->ID;
+         $tg->Challenger_rid = $user_ch->urow['TP_ID'];
+         $tg->Defender_uid   = $user_df->ID;
+         $tg->Defender_rid   = $user_df->urow['TP_ID'];
 
-      $tg->gid = $gid;
-      $tg->Round_ID = $tround_id;
-      $tg->Pool = $pool;
-      $tg->setStatus( TG_STATUS_PLAY );
-      $tg->StartTime = $GLOBALS['NOW'];
-      $tg->insert();
+         $tg->gid = $gid;
+         $tg->Round_ID = $tround_id;
+         $tg->Pool = $pool;
+         $tg->setStatus( TG_STATUS_PLAY );
+         $tg->StartTime = $GLOBALS['NOW'];
+         $tg->insert();
+         $out[] = $tg;
+      }
 
-      return $tg;
+      return $out;
    }
 
    /*!
@@ -328,6 +375,22 @@ class TournamentHelper
       }
 
       return $rating;
+   }
+
+   /*! \brief Finds out games-per-challenge from various sources for given tournament. */
+   function determine_games_per_challenge( $tid, $trule=null )
+   {
+      if( !($trule instanceof TournamentRules) )
+      {
+         // load T-rules (need HandicapType for games-count)
+         $trule = TournamentRules::load_tournament_rule( $tid );
+         if( is_null($trule) )
+            error('bad_tournament', "TournamentHelper::determine_games_per_challenge.find_trules($tid)");
+      }
+
+      $games_per_challenge = ( $trule->Handicaptype == TRULE_HANDITYPE_DOUBLE ) ? 2 : 1;
+
+      return $games_per_challenge;
    }
 
    function load_ladder_absent_users( $iterator=null )
@@ -476,7 +539,7 @@ class TournamentHelper
 
       // 1. identify pools to finish
       $arr_tgames = TournamentGames::count_tournament_games( $tid, $tround->ID, array(), /*pool-group*/true );
-      $arr_finished_pools = array(); // [ pool, ... ]
+      $arr_finished_pools = array(); // [ pool, ... ] = all pool that have all games finished
       foreach( $arr_tgames as $pool => $arr_status )
       {
          if( !array_key_exists(TG_STATUS_PLAY, $arr_status) )
@@ -486,7 +549,7 @@ class TournamentHelper
       $arr_pools_no_rank = TournamentPool::count_tournament_pool_users( $tid, $round, TPOOLRK_NO_RANK );
       foreach( $arr_finished_pools as $pool )
       {
-         if( @$arr_pools_no_rank[$pool] )
+         if( @$arr_pools_no_rank[$pool] ) // pool is to finish when there are entries with NO_RANK
             $arr_pools_to_finish[] = $pool;
       }
       $count_finish = count($arr_pools_to_finish);

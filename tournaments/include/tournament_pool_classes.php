@@ -45,13 +45,16 @@ require_once 'tournaments/include/tournament_pool.php';
   */
 class PoolGame
 {
+   var $GameNo; // 1..<games-per-challenge>
    var $Challenger_uid; // smaller than Defender_uid
    var $Defender_uid;
    var $gid;
    var $Score; // score for challenger
 
-   function PoolGame( $ch_uid=0, $df_uid=0, $gid=0, $score=null )
+   function PoolGame( $game_no, $ch_uid=0, $df_uid=0, $gid=0, $score=null )
    {
+      $this->GameNo = ($game_no) ? (int)$game_no : 1;
+
       $new_score = (is_null($score)) ? null : (float)$score;
       if( $ch_uid < $df_uid )
       {
@@ -119,7 +122,7 @@ class PoolGame
       }
 
       return array( $chk_score, $points, $mark, $title, $style );
-   }
+   }//calc_result
 
 } // end of 'PoolGame'
 
@@ -368,13 +371,17 @@ class PoolTables
       return $this->pools;
    }
 
-   /*! \brief Returns array( uid => col-idx, ... ) for given pool-no (col-idx starting with 1(!)). */
-   function get_user_col_map( $pool )
+   /*!
+    * \brief Returns array( uid => col-idx, ... ) for given pool-no.
+    * \return col-idx in resulting array starting with 0(!) and not taking games-per-challenge into account.
+    * \note array-key is defined by PoolGame.get_opponent()
+    */
+   function get_user_col_map( $pool, $games_per_challenge )
    {
       $map = array();
-      $idx = 1;
+      $idx = -1;
       foreach( $this->pools[$pool] as $uid )
-         $map[$uid] = $idx++;
+         $map[$uid] = ++$idx;
       return $map;
    }
 
@@ -383,7 +390,8 @@ class PoolTables
       while( list(,$arr_item) = $tpool_iterator->getListIterator() )
       {
          list( $tpool, $orow ) = $arr_item;
-         if( is_null($tpool) ) continue;
+         if( is_null($tpool) )
+            continue;
          $uid = $tpool->uid;
          $pool = $tpool->Pool;
 
@@ -397,6 +405,13 @@ class PoolTables
    {
       $reorder_pools = array(); // pool-no => 1 (=needs re-order of users)
       $defeated_opps = array(); // uid => [ opp-uid, ... ];  won(opp 2x) or jigo(opp 1x)
+
+      // fix stored PoolGame-list to correct PoolGame.GameNo in correct order
+      // NOTE: tgames_iterator could be ordered by TG.ID instead in, but that would do a slow filesort
+      //       => so we sort the T-games manually
+      $fix_game_no = array(); // ch_uid.df_uid => game-no (= 1..<games-per-challenge>)
+      $tgames_iterator->sortListIterator('ID', SORT_NUMERIC); // sort by TG.ID
+
       while( list(,$arr_item) = $tgames_iterator->getListIterator() )
       {
          list( $tgame, $orow ) = $arr_item;
@@ -406,34 +421,43 @@ class PoolTables
          $tpool_df = $this->users[$df_uid];
 
          $game_score = ($tgame->isScoreStatus()) ? $tgame->Score : null;
-         $poolGame = new PoolGame( $ch_uid, $df_uid, $tgame->gid, $game_score );
+         $poolGame = new PoolGame( 1, $ch_uid, $df_uid, $tgame->gid, $game_score );
+
+         // fix PoolGame.GameNo in the same order as TG.ID to keep same position in pools-view
+         $fkey = $poolGame->Challenger_uid . '.' . $poolGame->Defender_uid; // smaller uid 1st
+         if( !isset($fix_game_no[$fkey]) )
+            $fix_game_no[$fkey] = 1;
+         else
+            $poolGame->GameNo = ++$fix_game_no[$fkey];
 
          $tpool_ch->PoolGames[] = $poolGame;
          $tpool_df->PoolGames[] = $poolGame;
 
-         $arr = $poolGame->calc_result( $ch_uid ); // score,points,mark,title,style
-         $tpool_ch->Points += $arr[1];
-         if( !is_null($arr[0]) )
+         $ch_arr = $poolGame->calc_result( $ch_uid ); // score,points,mark,title,style
+         $tpool_ch->Points += $ch_arr[1];
+         $ch_score = $ch_arr[0];
+         if( !is_null($ch_score) )
          {
-            if( $arr[0] > 0 ) $tpool_ch->Losses++;
-            if( $arr[0] < 0 ) $tpool_ch->Wins++;
-            if( $arr[0] < 0 ) $defeated_opps[$ch_uid][] = $df_uid;
-            if( $arr[0] <= 0 ) $defeated_opps[$ch_uid][] = $df_uid; // win counts double
+            if( $ch_score > 0 ) $tpool_ch->Losses++;
+            if( $ch_score < 0 ) $tpool_ch->Wins++;
+            if( $ch_score < 0 ) $defeated_opps[$ch_uid][] = $df_uid;
+            if( $ch_score <= 0 ) $defeated_opps[$ch_uid][] = $df_uid; // win counts double, jigo simple
          }
 
-         $arr = $poolGame->calc_result( $df_uid );
-         $tpool_df->Points += $arr[1];
-         if( !is_null($arr[0]) )
+         $df_arr = $poolGame->calc_result( $df_uid );
+         $tpool_df->Points += $df_arr[1];
+         $df_score = $df_arr[0];
+         if( !is_null($df_score) )
          {
-            if( $arr[0] > 0 ) $tpool_df->Losses++;
-            if( $arr[0] < 0 ) $tpool_df->Wins++;
-            if( $arr[0] < 0 ) $defeated_opps[$df_uid][] = $ch_uid;
-            if( $arr[0] <= 0 ) $defeated_opps[$df_uid][] = $ch_uid; // win counts double
+            if( $df_score > 0 ) $tpool_df->Losses++;
+            if( $df_score < 0 ) $tpool_df->Wins++;
+            if( $df_score < 0 ) $defeated_opps[$df_uid][] = $ch_uid;
+            if( $df_score <= 0 ) $defeated_opps[$df_uid][] = $ch_uid; // win counts double, jigo simple
          }
 
          if( !is_null($game_score) )
             $reorder_pools[$tpool_ch->Pool] = 1;
-      }
+      }//process TGs
 
       // calc SODOS
       foreach( $defeated_opps as $uid => $arr_opps )
@@ -533,23 +557,23 @@ class PoolTables
     * \brief Returns #users for each pool with some extra.
     * \return arr( pool => arr( user-count, errors-arr(empty), pool-games-count ), ... ).
     */
-   function calc_pool_summary()
+   function calc_pool_summary( $games_per_challenge )
    {
       $arr = array(); // [ pool => [ #users, [], #games-per-pool ], ... ]
       foreach( $this->pools as $pool => $arr_users )
       {
          $usercount = count($arr_users);
-         $arr[$pool] = array( $usercount, array(), TournamentUtils::calc_pool_games($usercount) );
+         $arr[$pool] = array( $usercount, array(), TournamentUtils::calc_pool_games($usercount, $games_per_challenge) );
       }
       return $arr;
    }
 
    /*! \brief Returns expected sum of games for all pools. */
-   function calc_pool_games_count()
+   function calc_pool_games_count( $games_per_challenge )
    {
       $count = 0;
       foreach( $this->pools as $pool => $arr_users )
-         $count += TournamentUtils::calc_pool_games( count($arr_users) );
+         $count += TournamentUtils::calc_pool_games( count($arr_users), $games_per_challenge );
       return $count;
    }
 
@@ -646,7 +670,7 @@ class PoolSummary
 define('PVOPT_NO_RESULT',  0x01); // don't show cross-table with results
 define('PVOPT_NO_COLCFG',  0x02); // don't load table-column-config
 define('PVOPT_NO_EMPTY',   0x04); // don't show empty pools
-define('PVOPT_EMPTY_SEL',  0x08); // show "selected" empty-pools (directly called with make_pool_table-func)
+define('PVOPT_EMPTY_SEL',  0x08); // show "selected" empty-pools (directly called with make_single_pool_table-func)
 define('PVOPT_NO_TRATING', 0x10); // don't show T-rating (is same as user-rating)
 define('PVOPT_EDIT_COL',   0x20); // add edit-actions table-column for pool-edit
 define('PVOPT_EDIT_RANK',  0x40); // add edit-actions table-column for rank-edit
@@ -657,6 +681,7 @@ class PoolViewer
    var $table; // Table-object
 
    var $my_id; // player_row['ID']
+   var $games_per_challenge;
    var $options;
    var $edit_callback;
 
@@ -665,12 +690,13 @@ class PoolViewer
    var $poolidx; // start-index of result-matrix starting with 1
 
    /*! \brief Construct PoolViewer setting up Table-structure. */
-   function PoolViewer( $tid, $page, $pool_tables, $pv_opts=0 )
+   function PoolViewer( $tid, $page, $pool_tables, $games_per_challenge=1, $pv_opts=0 )
    {
       global $player_row;
 
       $this->ptabs = $pool_tables;
       $this->my_id = $player_row['ID'];
+      $this->games_per_challenge = (int)$games_per_challenge;
       $this->options = (int)$pv_opts;
       $this->pools_max_users = $this->ptabs->count_pools_max_user();
       $this->first_pool = true;
@@ -698,7 +724,7 @@ class PoolViewer
       $this->edit_callback = $edit_callback;
    }
 
-   function init_table()
+   function init_pool_table()
    {
       // add_tablehead($nr, $descr, $attbs=null, $mode=TABLE_NO_HIDE|TABLE_NO_SORT, $sortx='')
       if( $this->options & PVOPT_EDIT_COL )
@@ -710,14 +736,22 @@ class PoolViewer
          $this->table->add_tablehead( 4, T_('Tournament Rating#pool_header'), 'Rating', 0 );
       $this->table->add_tablehead( 5, T_('Country#pool_header'), 'Image', 0 );
 
-      $idx = 13;
-      $this->poolidx = $idx - 1;
+      $idx = 12; // last used-static-col
+      $this->poolidx = $idx;
       if( !($this->options & PVOPT_NO_RESULT) )
       {
          $this->table->add_tablehead( 6, T_('Place#pool_header'), 'NumberC', TABLE_NO_HIDE );
 
          foreach( range(1, $this->pools_max_users) as $pool )
-            $this->table->add_tablehead( $idx++, $pool, 'Matrix', TABLE_NO_HIDE );
+         {
+            if( $this->games_per_challenge > 1 )
+            {
+               for( $g=0; $g < $this->games_per_challenge; ++$g )
+                  $this->table->add_tablehead( ++$idx, $pool, 'Matrix', TABLE_NO_HIDE );
+            }
+            else
+               $this->table->add_tablehead( ++$idx, $pool, 'Matrix', TABLE_NO_HIDE );
+         }
 
          $this->table->add_tablehead( 9, T_('#Wins#pool_header'), 'NumberC', 0 );
          $this->table->add_tablehead( 7, T_('Points#pool_header'), 'NumberC', TABLE_NO_HIDE );
@@ -727,21 +761,21 @@ class PoolViewer
       }
       if( ($this->options & PVOPT_EDIT_RANK) && !($this->options & PVOPT_EDIT_COL) )
          $this->table->add_tablehead( 8, T_('Edit#pool_header'), 'Image', TABLE_NO_HIDE );
-   }
+   }//init_pool_table
 
    /*! \brief Makes table for all pools. */
-   function make_table()
+   function make_pool_table()
    {
       $this->first_pool = true;
 
       // unassigned users first
       if( isset($this->ptabs->pools[0]) )
-         $this->make_pool_table( 0 );
+         $this->make_single_pool_table( 0 );
 
       foreach( $this->ptabs->pools as $pool => $arr_users )
       {
          if( $pool > 0 )
-            $this->make_pool_table( $pool, 0 );
+            $this->make_single_pool_table( $pool, 0 );
       }
    }
 
@@ -749,12 +783,12 @@ class PoolViewer
     * \brief Makes table for single pool.
     * \param $opts optional: PVOPT_EMPTY_SEL
     */
-   function make_pool_table( $pool, $opts=0 )
+   function make_single_pool_table( $pool, $opts=0 )
    {
       global $base_path;
 
       $arr_users = $this->ptabs->pools[$pool];
-      $map_usercols = $this->ptabs->get_user_col_map($pool);
+      $map_usercols = $this->ptabs->get_user_col_map( $pool, $this->games_per_challenge );
       $cnt_users = count($arr_users);
       $show_results = ( $pool > 0 ) && !( $this->options & PVOPT_NO_RESULT );
       $show_trating = !( $this->options & PVOPT_NO_TRATING );
@@ -780,17 +814,26 @@ class PoolViewer
          return;
       }
 
-      // crosstable
-      $idx = 0;
+
+      // init crosstable
+      $cell_matrix_self = Table::build_row_cell( 'X', 'MatrixSelf' );
+      if( $cnt_users < $this->pools_max_users ) // too few users in pool
+         $arr_miss_users = array_fill( $this->poolidx + 1 + $cnt_users * $this->games_per_challenge,
+            $this->pools_max_users - $cnt_users + $this->games_per_challenge - 1, '-' );
+      else
+         $arr_miss_users = null;
+
+      // build crosstable
+      $idx = -1;
       foreach( $arr_users as $uid )
       {
          $tpool = $this->ptabs->users[$uid];
          $user = $tpool->User;
-         $idx++;
+         ++$idx;
 
          $row_arr = array(
             2 => user_reference( REF_LINK, 1, '', $uid, $user->Handle, ''),
-            6 => $idx,
+            6 => $idx + 1,
             7 => $tpool->Points,
             9 => $tpool->Wins . ' : ' . $tpool->Losses,
             10 => $tpool->SODOS,
@@ -806,19 +849,20 @@ class PoolViewer
          if( $this->table->Is_Column_Displayed[5] )
             $row_arr[5] = getCountryFlagImage( $user->Country );
 
-         if( $show_results )
+         if( $show_results ) // build game-result-matrix (one user-row)
          {
-            $row_arr[$this->poolidx + $idx] = Table::build_row_cell( 'X', 'MatrixSelf' );
-            if( $cnt_users < $this->pools_max_users ) // too few users in pool
-               $row_arr += array_fill( $this->poolidx + $cnt_users + 1, $this->pools_max_users - $cnt_users, '-' );
+            for( $g=0; $g < $this->games_per_challenge; ++$g ) // blacken self-pairings
+               $row_arr[$this->poolidx + 1 + $idx * $this->games_per_challenge + $g] = $cell_matrix_self;
+            if( $arr_miss_users ) // add '-' if too few users in pool
+               $row_arr += $arr_miss_users;
 
             // add game-results
-            // - X=self, 0=lost, 1=jigo, 2=won, #=running-game;; for Hahn use score instead +-score
-            // - link to running/finished game
+            // - X=self, 0=lost, 1=jigo, 2=won, #=running-game;; for Hahn use score instead '+-score'
+            // - linked to running/finished game
             foreach( $tpool->PoolGames as $poolGame )
             {
                $game_url = $base_path."game.php?gid=".$poolGame->gid;
-               $col = $map_usercols[$poolGame->get_opponent($uid)];
+               $col = $map_usercols[ $poolGame->get_opponent($uid) ] * $this->games_per_challenge + $poolGame->GameNo;
 
                list( $score, $points, $mark, $title, $style ) = $poolGame->calc_result( $uid );
                $cell = anchor( $game_url, $mark, $title );
@@ -831,24 +875,23 @@ class PoolViewer
             // mark line of current-user
             if( $uid == $this->my_id )
             {
-               foreach( range(1,$this->poolidx) as $cell )
+               foreach( range(1, $this->poolidx) as $cell_idx )
                {
-                  if( isset($row_arr[$cell]) )
-                     $row_arr[$cell] = Table::build_row_cell($row_arr[$cell], 'TourneyUser');
+                  if( isset($row_arr[$cell_idx]) )
+                     $row_arr[$cell_idx] = Table::build_row_cell($row_arr[$cell_idx], 'TourneyUser');
                }
             }
-         }
+         }//result-matrix
 
          if( $show_edit_col && !is_null($this->edit_callback) )
-            $row_arr[8] = call_user_func_array( $this->edit_callback,
-               array( $this, $uid ) ); // call vars by ref
+            $row_arr[8] = call_user_func_array( $this->edit_callback, array( $this, $uid ) ); // call vars by ref
 
          $this->table->add_row( $row_arr );
       }
-   }//make_pool_table
+   }//make_single_pool_table
 
-   /*! \brief Prints built table, need make_table() first. */
-   function echo_table()
+   /*! \brief Prints built table, need make_pool_table() first. */
+   function echo_pool_table()
    {
       echo $this->table->echo_table();
    }

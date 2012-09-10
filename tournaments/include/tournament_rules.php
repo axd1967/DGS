@@ -49,8 +49,8 @@ define('TRULE_HANDITYPE_PROPER', 'PROPER');
 define('TRULE_HANDITYPE_NIGIRI', 'NIGIRI');
 define('TRULE_HANDITYPE_BLACK',  'BLACK');
 define('TRULE_HANDITYPE_WHITE',  'WHITE');
-//define('TRULE_HANDITYPE_DOUBLE', 'DOUBLE');
-define('CHECK_TRULE_HANDITYPE', 'CONV|PROPER|NIGIRI|BLACK|WHITE');
+define('TRULE_HANDITYPE_DOUBLE', 'DOUBLE');
+define('CHECK_TRULE_HANDITYPE', 'CONV|PROPER|NIGIRI|BLACK|WHITE|DOUBLE');
 
 // lazy-init in TournamentRules::get..Text()-funcs
 global $ARR_GLOBALS_TOURNAMENT_RULES; //PHP5
@@ -327,6 +327,9 @@ class TournamentRules
    {
       // NOTE: keep "sync'ed" with new-game handle_add_game()-func
 
+      if( !$this->TourneyType )
+         error('invalid_args', "TournamentRules.convertEditForm_to_TournamentRules.miss_var.TourneyType({$this->tid})");
+
       $cat_handicap_type = @$vars['cat_htype'];
       $color_m = @$vars['color_m'];
       $handicap_type = ( $cat_handicap_type == CAT_HTYPE_MANUAL ) ? $color_m : $cat_handicap_type;
@@ -342,13 +345,17 @@ class TournamentRules
             $komi = 0.0;
             break;
 
+         case HTYPE_DOUBLE:
+            if( $this->TourneyType != TOURNEY_TYPE_ROUND_ROBIN )
+               error('invalid_args', "TournamentRules.convertEditForm_to_TournamentRules.bad_htype({$this->tid},{$this->TourneyType},$handicap_type)");
+            // fall-through setting H/K
+
          case HTYPE_BLACK:
          case HTYPE_WHITE:
             $handicap = (int)@$vars['handicap_m'];
             $komi = (float)@$vars['komi_m'];
             break;
 
-         case HTYPE_DOUBLE:
          case HTYPE_AUCTION_SECRET:
          case HTYPE_AUCTION_OPEN:
          case HTYPE_YOU_KOMI_I_COLOR:
@@ -541,6 +548,7 @@ class TournamentRules
          return -1; // can be x.0|x.5 for CONV|PROPER and AdjkustKomi doesn't change that
 
       if( $this->Handicaptype == TRULE_HANDITYPE_NIGIRI
+            || $this->Handicaptype == TRULE_HANDITYPE_DOUBLE
             || $this->Handicaptype == TRULE_HANDITYPE_BLACK
             || $this->Handicaptype == TRULE_HANDITYPE_WHITE )
       { // manual-handicap-type
@@ -552,18 +560,19 @@ class TournamentRules
       }
 
       // unknown rule-type
-      error('invalid_args', 'TournamentRules.determineJigoBehaviour()');
+      error('invalid_args', "TournamentRules.determineJigoBehaviour({$this->JIGOMODE_NO_JIGO},{$this->Handicaptype},{$this->Komi},{$this->AdjKomi})");
    }
 
    /*!
-    * \brief Creates normal game and updates all game-stuff.
+    * \brief Creates normal game(s) and updates all game-stuff for two given users.
     * \param $user_ch User-object of challenger with set urow['Rating2'] (according to rating-use-mode)
     * \param $user_df User-object of defender with set urow['Rating2'] (dito)
+    * \return array of created Games.ID (can be multiple, e.g. for DOUBLE-game)
     *
     * \note IMPORTANT NOTE: caller needs to open TA with HOT-section if used with other db-writes!!
     * \note Expect filled var this->TourneyType
     */
-   function create_tournament_game( $user_ch, $user_df )
+   function create_tournament_games( $user_ch, $user_df )
    {
       $ch_uid = $user_ch->ID;
       $df_uid = $user_df->ID;
@@ -571,22 +580,35 @@ class TournamentRules
       $game_setup = $this->convertTournamentRules_to_GameSetup();
       $game_row = $this->convertTournamentRules_to_GameRow();
       $game_row['tid'] = $this->tid;
+      $is_double = ( $this->Handicaptype == TRULE_HANDITYPE_DOUBLE );
 
       $ch_is_black = $this->prepare_create_game_row( $game_row, $game_setup,
          $ch_uid, $user_ch->urow['Rating2'],
          $df_uid, $user_df->urow['Rating2'] );
-      if( $ch_is_black )
-         $gid = create_game($user_ch->urow, $user_df->urow, $game_row, $game_setup);
+
+      $gids = array();
+      if( $ch_is_black || $is_double )
+         $gids[] = create_game($user_ch->urow, $user_df->urow, $game_row, $game_setup);
       else // challenger is white
-         $gid = create_game($user_df->urow, $user_ch->urow, $game_row, $game_setup);
+         $gids[] = create_game($user_df->urow, $user_ch->urow, $game_row, $game_setup);
+      $gid = $gids[0];
 
-      db_query( "TournamentRules.create_tournament_game.update_players({$this->tid},$ch_uid,$df_uid)",
-         "UPDATE Players SET Running=Running+1" .
-            ( $this->Rated ? ", RatingStatus='".RATING_RATED."'" : '' ) .
-         " WHERE ID IN ($ch_uid,$df_uid) LIMIT 2" );
+      if( $is_double )
+      {
+         // provide a link between the two paired "double" games
+         $game_row['double_gid'] = $gid;
+         $double_gid2 = create_game($user_df->urow, $user_ch->urow, $game_row, $game_setup);
+         $gids[] = $double_gid2;
 
-      return $gid;
-   }//create_tournament_game
+         db_query( "TRules.create_tournament_games.upd_double2($gid)",
+            "UPDATE Games SET DoubleGame_ID=$double_gid2 WHERE ID=$gid LIMIT 1" );
+      }
+
+      GameHelper::update_players_start_game( "TRules.create_tournament_games({$this->tid})",
+         $ch_uid, $df_uid, count($gids), $this->Rated );
+
+      return $gids;
+   }//create_tournament_games
 
    /*!
     * \brief Prepares game_row and game_setup setting fields: game_row (Handicap/Komi), game_setup (uid).
@@ -618,6 +640,10 @@ class TournamentRules
             $ch_is_black = mt_rand(0,1);
             break;
 
+         case TRULE_HANDITYPE_DOUBLE:
+            $ch_is_black = true;
+            break;
+
          case TRULE_HANDITYPE_BLACK:
             if( $this->TourneyType == TOURNEY_TYPE_LADDER ) // challenger is black
                $ch_is_black = true;
@@ -635,7 +661,7 @@ class TournamentRules
             break;
 
          default:
-            error('not_implemented', "TournamentRules.prepare_game_row.unknown_htype"
+            error('not_implemented', "TournamentRules.prepare_create_game_row.unknown_htype"
                . "({$this->tid},$ch_uid,$df_uid,{$this->Handicaptype})");
             break;
       }
@@ -781,7 +807,7 @@ class TournamentRules
          {
             $arr[TRULE_HANDITYPE_BLACK] = T_('Manual game with stronger player getting Black#TR_handitype');
             $arr[TRULE_HANDITYPE_WHITE] = T_('Manual game with stronger player getting White#TR_handitype');
-            //$arr[TRULE_HANDITYPE_DOUBLE] = T_('Double game#TR_handitype');
+            $arr[TRULE_HANDITYPE_DOUBLE] = T_('Double game#TR_handitype');
          }
          $ARR_GLOBALS_TOURNAMENT_RULES[$key] = $arr;
       }
@@ -801,6 +827,7 @@ class TournamentRules
          TRULE_HANDITYPE_NIGIRI  => HTYPE_NIGIRI,
          TRULE_HANDITYPE_BLACK   => HTYPE_BLACK,
          TRULE_HANDITYPE_WHITE   => HTYPE_WHITE,
+         TRULE_HANDITYPE_DOUBLE  => HTYPE_DOUBLE,
       );
       return (isset($map_trule_htype_stdhtype[$trule_htype]))
          ? $map_trule_htype_stdhtype[$trule_htype]

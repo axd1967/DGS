@@ -95,8 +95,14 @@ $GLOBALS['ThePage'] = new Page('TournamentPairEdit');
    // check for pairing-"lock" (stored in T-extension)
    $t_ext = TournamentExtension::load_tournament_extension( $tid, TE_PROP_TROUND_START_TGAMES );
    if( !is_null($t_ext) )
-      $errors[] = sprintf( T_('Creating tournament games is in work already (started at [%s] by %s ).'),
-         date(DATE_FMT, $t_ext->DateValue), $t_ext->ChangedBy );
+   {
+      $errors[] =
+         sprintf( T_('Creating tournament games is in work already (started at [%s] by %s ).'),
+                  date(DATE_FMT, $t_ext->DateValue), $t_ext->ChangedBy ) .
+         "<br>\n" .
+         T_("If an error occured during creation of the tournament-games or it was stopped manually,<br>\n" .
+            "the tournament is broken and must be fixed by a tournament-admin.");
+   }
 
    $arr_pool_summary = null;
    if( count($errors) == 0 && !$do_pair )

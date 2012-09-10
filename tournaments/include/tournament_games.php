@@ -133,6 +133,15 @@ class TournamentGames
          return null;
    }
 
+   /*! \brief Returns array( uid, uid ) from Challenger_uid and Defender_uid smallest first. */
+   function get_ordered_uids()
+   {
+      if( $this->Challenger_uid < $this->Defender_uid )
+         return array( $this->Challenger_uid, $this->Defender_uid );
+      else
+         return array( $this->Defender_uid, $this->Challenger_uid );
+   }
+
    function formatFlags()
    {
       $arr = array();
