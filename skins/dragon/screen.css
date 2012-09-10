@@ -3125,6 +3125,11 @@ div.TournamentNews div.Text {
    clear: left;
 }
 
+span.TNewsFlags {
+   color: teal;
+   font-weight: normal;
+}
+
 ul.TAdminLinks {
    line-height: 1.4em;
 }

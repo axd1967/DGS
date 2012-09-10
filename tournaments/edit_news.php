@@ -84,8 +84,8 @@ $GLOBALS['ThePage'] = new Page('TournamentNewsEdit');
    $tnews_old_status = $tnews->Status;
    $arr_status = TournamentNews::getStatusText();
    $arr_flags = array(
-      TNEWS_FLAG_HIDDEN  => 'flag_hidden',
-      TNEWS_FLAG_PRIVATE => 'flag_priv',
+      TNEWS_FLAG_HIDDEN  => array( 'flag_hidden', T_('news only for tournament-directors#tourney') ),
+      TNEWS_FLAG_PRIVATE => array( 'flag_priv',   T_('news only for tournament-users#tourney') ),
    );
 
    // check + parse edit-form
@@ -139,12 +139,14 @@ $GLOBALS['ThePage'] = new Page('TournamentNewsEdit');
          'SELECTBOX',    'status', 1, $arr_status, $vars['status'], false, ));
 
    $first = true;
-   foreach( $arr_flags as $flag => $name )
+   foreach( $arr_flags as $flag => $farr )
    {
+      list( $name, $ftext ) = $farr;
       $arr = ($first) ? array( 'DESCRIPTION', T_('Flags') ) : array( 'TAB' );
       $first = false;
       array_push( $arr,
-         'CHECKBOX', $name, 1, TournamentNews::getFlagsText($flag), ($tnews->Flags & $flag) );
+         'CHECKBOX', $name, 1, TournamentNews::getFlagsText($flag), ($tnews->Flags & $flag),
+         'TEXT', sptext("($ftext)", 1) );
       $tnform->add_row( $arr );
    }
 
@@ -226,8 +228,11 @@ function parse_edit_form( &$tnews )
    // handle checkboxes having no key/val in _POST-hash
    if( $is_posted )
    {
-      foreach( array_values($arr_flags) as $key )
+      foreach( array_values($arr_flags) as $farr )
+      {
+         list( $key, $tmp ) = $farr;
          $vars[$key] = get_request_arg( $key, false );
+      }
    }
 
    // parse URL-vars
@@ -238,8 +243,9 @@ function parse_edit_form( &$tnews )
       $tnews->setStatus($vars['status']);
 
       $new_value = 0;
-      foreach( $arr_flags as $flag => $name )
+      foreach( $arr_flags as $flag => $farr )
       {
+         list( $name, $tmp ) = $farr;
          if( $vars[$name] )
             $new_value |= $flag;
       }

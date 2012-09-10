@@ -334,12 +334,21 @@ class TournamentNews
    {
       $title = make_html_safe($tnews->Subject, true);
       $text = make_html_safe($tnews->Text, true);
-      $publish_text = sprintf( T_('[%s] by %s#tnews_publish'),
+
+      $fout = array();
+      if( $tnews->Flags & TNEWS_FLAG_HIDDEN )
+         $fout[] = TournamentNews::getFlagsText(TNEWS_FLAG_HIDDEN);
+      if( $tnews->Flags & TNEWS_FLAG_PRIVATE )
+         $fout[] = TournamentNews::getFlagsText(TNEWS_FLAG_PRIVATE);
+      $publish_text = ( count($fout) ) ? span('TNewsFlags', implode(', ', $fout), '(%s) ') : '';
+
+      $publish_text .= sprintf( T_('[%s] by %s#tnews_publish'),
          date(DATE_FMT2, $tnews->Published), $tnews->User->user_reference() );
+
       return
          "<div class=\"TournamentNews\">\n" .
             "<div class=\"Title\">$title</div>" .
-            "<div class=\"Published\">$publish_text</div>" .
+            "<div class=\"Published\">$publish_text</div>\n" .
             "<div class=\"Text\">$text</div>" .
          "</div>\n";
    }
