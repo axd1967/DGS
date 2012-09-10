@@ -587,6 +587,8 @@ class ListIterator
    var $QueryOrder;
    /*! \brief optional limit string to be appended to query. */
    var $QueryLimit;
+   /*! \brief field-name for comparison-function _compare_items_...() for sortListIterator(). */
+   var $SortField;
 
    /*! \brief (internal) QuerySQL built from merging QuerySQL with list of QuerySQLMerge. */
    var $MergedQuerySQL;
@@ -612,6 +614,7 @@ class ListIterator
       $this->addQuerySQLMerge( $qsql );
       $this->QueryOrder = $order;
       $this->QueryLimit = $limit;
+      $this->SortField = null;
 
       $this->MergedQuerySQL = null;
       $this->Query = '';
@@ -642,6 +645,67 @@ class ListIterator
    function resetListIterator()
    {
       reset( $this->Items );
+   }
+
+   /*! \brief Sorts internal items-list by given compare-function $cmp_func. */
+   function sortListIteratorCustom( $cmp_func )
+   {
+      return usort( $this->Items, $cmp_func );
+   }
+
+   /*!
+    * \brief Sorts internal items-list by given $field (from row-data).
+    * \param $sort_flags SORT_NUMERIC, SORT_STRING (case-sensitive), SORT_STRING|SORT_FLAG_CASE (case-insensitive)
+    */
+   function sortListIterator( $field, $sort_flags=SORT_REGULAR )
+   {
+      if( count($this->Items) == 0 )
+         return true;
+
+      if( !isset($this->Items[0][1][$field]) ) // 1st item, row[field]
+         error('invalid_args', "ListIterator.sortListIterator.unknown_field($field,$sort_flags)");
+      $this->SortField = $field;
+
+      $cmp_func = array( $this );
+      if( $sort_flags == SORT_NUMERIC )
+         $cmp_func[] = '_compare_items_numeric';
+      elseif( $sort_flags & SORT_STRING )
+         $cmp_func[] = '_compare_items_string';
+      elseif( ($sort_flags & (SORT_STRING|SORT_FLAG_CASE)) == (SORT_STRING|SORT_FLAG_CASE) )
+         $cmp_func[] = '_compare_items_string_nocase';
+      else
+         error('invalid_args', "ListIterator.sortListIterator.bad_sort_flags($field,$sort_flags)");
+
+      return usort( $this->Items, $cmp_func );
+   }
+
+   // \internal, see sortListIterator()
+   function _compare_items_numeric( $item1, $item2 )
+   {
+      $a = $item1[1][$this->SortField]; // row[field]
+      $b = $item2[1][$this->SortField];
+
+      // could use cmp_int(), but inline is faster
+      if ($a == $b)
+         return 0;
+      else
+         return ($a < $b) ? -1 : 1;
+   }
+
+   // \internal, see sortListIterator()
+   function _compare_items_string( $item1, $item2 )
+   {
+      $a = $item1[1][$this->SortField]; // row[field]
+      $b = $item2[1][$this->SortField];
+      return strcmp($a, $b);
+   }
+
+   // \internal, see sortListIterator()
+   function _compare_items_string_nocase( $item1, $item2 )
+   {
+      $a = $item1[1][$this->SortField]; // row[field]
+      $b = $item2[1][$this->SortField];
+      return strcasecmp($a, $b);
    }
 
    /*! \brief Sets main QuerySQL. */
