@@ -122,7 +122,7 @@ $GLOBALS['ThePage'] = new Page('Tournament');
          ( $cnt_tstandings > 0
             ? "\n<li>" . anchor( "$base_page_tourney#standings", T_('Tournament standings') )
             : ''),
-         "\n<li>", anchor( "$base_page_tourney#rules", T_('Tournament ruleset') ),
+         "\n<li>", anchor( "$base_page_tourney#rules", T_('Tournament rules') ),
          "\n<li>", anchor( "$base_page_tourney#registration", T_('Tournament registration information') ),
          "\n<li>", anchor( "$base_page_tourney#games", T_('Tournament games') ),
          ( $show_tresult
