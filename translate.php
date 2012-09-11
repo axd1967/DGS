@@ -31,47 +31,72 @@ define('TRANSL_ALLOW_FILTER', 1); //allow a search on the english phrases
 
 $info_box = '<br>When translating you should keep the following things in mind:
 <ul>
-  <li> You must enter your translation in the second column boxes.
+  <li> You must <b>enter your translation</b> in the second column boxes.
        <br>
-       The first column displays the english original phrases in a similar way
+       The first column displays the <b>english original</b> phrases in a similar way
        but is read-only.
        <br>
-       The text below the english original phrases shows the preview of how the text
+       The text below the english original phrases shows the <b>preview</b> of how the text
        looks on the site, while the text below the textarea in the 2nd column
        shows the preview of the translation-text.
        <br>
-       Caution: this preview examples may sometime differ from the effective
+       <b>Caution:</b> this preview examples may sometime differ from the effective
        display in the normal page because of additional constraints of the normal page.
-  <li> Below the english phrase you can also see a date of the last-change (if present).
+       <br><br>
+  <li> Below the english phrase you can also see a <b>date of the last-change</b> (if present).
        <br>
        The date is shown in red color if the text is new or has been updated and need
        a re-translation.
-  <li> If a translated word is the same as in english, leave it blank and click
+       <br><br>
+  <li> If a translated <b>word is the same</b> as in english, leave it blank and click
        the \'untranslated\' box to the right.
-  <li> If you need to know the context of a phrase to translate (where it appears on DGS),
+       <br><br>
+  <li> If you need to know the <b>context</b> of a phrase to translate (where it appears on DGS),
        you can ask in the translator forum for help.
-  <li> In some places there is a percent-character followed by some characters.
+       <br><br>
+  <li> If a text ends with <b>#label</b> (without space and only alpha-numeric chars),
+       for example \'To#2\' or \'All#msg\', this is an alternate text with the same spelling,
+       so just ignore the #label part when translating.
+       <br>
+       This was necessary since in some languages \'to\' is translated differently
+       depending on the context (e.g. \'bis\' or \'an\' in german), or the case is written
+       differently (e.g. \'Edit#2\' vs \'edit\').
+       <br>
+       Currently there are over 100 different labels in use. To list them all would be too
+       much, but the label often gives a hint to the texts context, so can be of help
+       in translating.
+       <br>
+       This is often used in tables, where words have to be translated with a shorter
+       abbreviation of the word to make the table column more narrow.
+       For example, \'days#short\' and \'hours#short\' are translated in english by \'d\' and
+       \'h\', as you can see them in the \'Time remaining\' column of the status page
+       (e.g. \'12d 8h\').
+       <br><br>
+  <li> In some places there is a <b>percent-character</b> followed by some characters.
        This is a special place where the program might put some data in.
        <br>
        Example: \'with %s extra per move\' might be displayed as \'with 2 hours extra per move\'.
        <br>
-       If you want to change the order of these you can use \'%1$s\' to place to make
+       If you want to <b>change the order</b> of these you can use \'%1$s\' to place to make
        sure that you get the first argument and \'%2$s\' for the second etc.
        <br>
        <a href="http://www.php.net/manual/en/function.sprintf.php">You can read more here</a>
-  <li> In some strings there are html tags (enclosed by \'&lt;\' and \'&gt;\')
+       <br><br>
+  <li> In some strings there are <b>html tags</b> (enclosed by \'&lt;\' and \'&gt;\')
        or entities (starting with a \'&amp;\', ended by a \';\').
        If you don\'t know how to use html code, just copy the original code and
        change the real language. If you are unsure, you can use the translator
        forum to get help.
+       <br><br>
   <li> If you want to change the html code in some way in the translation, keep in mind
        that the code shall conform to the standard layout of Dragon.
        <br>
-       Do not introduce unwanted html elements, use
+       Do not introduce <b>unwanted html</b> elements, use
        &amp;lt; instead of &lt;, &amp;gt; instead of &gt; and &amp;amp; instead of &amp;,
        if you need to display those characters in your translated string.
+       <br><br>
   <li> Inside your messages, posts and some other places of DGS, you may use our private
-       pseudo-html tags. Those pseudo-tags (like &lt;home ...&gt;, &lt;color ...&gt;)
+       <b>pseudo-html</b> tags. Those pseudo-tags (like &lt;home ...&gt;, &lt;color ...&gt;)
        need a special decoding step from our own code to work, and so, they are,
        most of the time, unusable in the translated strings.
        <br>
@@ -86,19 +111,6 @@ $info_box = '<br>When translating you should keep the following things in mind:
        &lt;note&gt;(removed from entry)&lt;/note&gt; to add some notes seen only
        by them and by the translators. Read these notes then... copy them to or remove
        them from your translated string... they will not be displayed in the FAQ pages.
-  <li> If a word ends with #2 or #note (without space), for example \'To#2\' or \'All#msg\',
-       this means a second word with the same spelling, so just ignore the #2 part when
-       translating. This is necessary since in some languages \'to\' is translated differently
-       depending on the context (e.g. \'bis\' or \'an\' in german), or the case is written
-       differently.
-       Some words may end with #short or other suffixes after the \'#\'-char.
-       Often used in tables, they have to be translated with the shorter abbreviation of the word.
-       For example, \'days#short\' and \'hours#short\' are translated in english by \'d\' and
-       \'h\', as you can see them in the \'Time remaining\' column of the status page
-       (e.g. \'12d 8h\').
-       <br>
-       The other purpose is to provide a way to manage different wording or abbreviations
-       for the same words, e.g. #header for some title in tables.
 </ul>';
 
 {
