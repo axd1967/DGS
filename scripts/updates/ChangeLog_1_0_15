@@ -279,12 +279,12 @@ UPDATE Players
 -- fix translation-adjustments in code
 -- 1. following selects must results in not more than one entry per select
 SELECT * FROM TranslationTexts WHERE Text='Send Message';
-SELECT * from TranslationTexts where Text='prev page';
-SELECT * from TranslationTexts where Text='next page';
-SELECT * from TranslationTexts where Text='Tournament Status';
+SELECT * FROM TranslationTexts WHERE Text='prev page';
+SELECT * FROM TranslationTexts WHERE Text='next page';
+SELECT * FROM TranslationTexts WHERE Text='Tournament Status';
 
 -- 2. only if criteria in (1) is met, update the following:
-UPDATE TranslationTexts SET Text='Send message' where Text='Send Message' LIMIT 1;
+UPDATE TranslationTexts SET Text='Send message' WHERE Text='Send Message' LIMIT 1;
 UPDATE TranslationTexts SET Text='Prev Page' WHERE Text='prev page' LIMIT 1;
 UPDATE TranslationTexts SET Text='Next Page' WHERE Text='next page' LIMIT 1;
 UPDATE TranslationTexts SET Text='Tournament Status#tourney' WHERE Text='Tournament Status' LIMIT 1;
