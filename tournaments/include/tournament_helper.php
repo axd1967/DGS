@@ -474,7 +474,7 @@ class TournamentHelper
          $errors[] = sprintf( T_('Only tournament rounds on status [%s] can be removed.'),
             TournamentRound::getStatusText(TROUND_STATUS_INIT) );
       if( $tourney->Rounds <= 1 )
-         $errors[] = T_('There must be at least one tournament-round.');
+         $errors[] = T_('There must be at least one tournament round.');
       if( $tround->Round != $tourney->Rounds )
          $errors[] = sprintf( T_('You can only remove the last tournament round #%s.'), $tourney->Rounds );
       if( count($errors) || $check_only )
@@ -669,7 +669,7 @@ class TournamentHelper
       // build message-text for TD/owner notify
       $msg_text = '';
       if( $by_tdir_uid > 0 )
-         $ufmt = ( ($by_tdir_uid == $row['owner_uid']) ? T_('Owner#tourney') : T_('Tournament director#tourney') )
+         $ufmt = ( ($by_tdir_uid == $row['owner_uid']) ? T_('Owner#tourney') : T_('Tournament director') )
             . " <user $by_tdir_uid>";
       else
          $ufmt = 'CRON';

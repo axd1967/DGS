@@ -219,11 +219,11 @@ $GLOBALS['ThePage'] = new Page('TournamentPoolEdit');
          'DESCRIPTION', T_('Tournament ID'),
          'TEXT',        $tourney->build_info() ));
    $tform->add_row( array(
-         'DESCRIPTION', T_('Tournament Round#tround'),
+         'DESCRIPTION', T_('Tournament Round'),
          'TEXT',        $tourney->formatRound(), ));
    TournamentUtils::show_tournament_flags( $tform, $tourney );
    $tform->add_row( array(
-         'DESCRIPTION', T_('Round Status#tround'),
+         'DESCRIPTION', T_('Round Status#tourney'),
          'TEXT',        TournamentRound::getStatusText($tround->Status), ));
 
    if( $count_errors )
@@ -241,7 +241,7 @@ $GLOBALS['ThePage'] = new Page('TournamentPoolEdit');
    $tform->add_row( array(
          'DESCRIPTION',  T_('Selection'),
          'CELL', 1, '', // align submit-buttons
-         'SUBMITBUTTON', 't_unassigned', T_('Show Unassigned'),
+         'SUBMITBUTTON', 't_unassigned', T_('Show Unassigned#tpool'),
          'TEXT', MED_SPACING,
          'TEXTINPUT',   'selpool1', 4, 4, get_request_arg('selpool1'),
          'TEXTINPUT',   'selpool2', 4, 4, get_request_arg('selpool2'),
@@ -403,15 +403,15 @@ function make_pool_unassigned_table( $tid, &$uatable, &$uafilter )
    $uatable->add_external_parameters( $page_vars, true ); // add as hiddens
 
    // add_tablehead($nr, $descr, $attbs=null, $mode=TABLE_NO_HIDE|TABLE_NO_SORT, $sortx='')
-   $uatable->add_tablehead( 8, T_('Actions#pool_header'), 'Image', TABLE_NO_HIDE );
+   $uatable->add_tablehead( 8, T_('Actions#header'), 'Image', TABLE_NO_HIDE );
    $uatable->add_tablehead( 1, T_('Name#header'), 'User', 0, 'Name+' );
    $uatable->add_tablehead( 2, T_('Userid#header'), 'User', TABLE_NO_HIDE, 'Handle+' );
-   $uatable->add_tablehead( 3, T_('User Rating#pool_header'), 'Rating', 0, 'TPU.Rating2-' );
+   $uatable->add_tablehead( 3, T_('User Rating#tourney'), 'Rating', 0, 'TPU.Rating2-' );
    if( $needs_trating )
-      $uatable->add_tablehead( 4, T_('Tournament Rating#pool_header'), 'Rating', 0, 'TP_Rating-' );
-   $uatable->add_tablehead( 5, T_('Country#pool_header'), 'Image', 0, 'Country+' );
-   $uatable->add_tablehead( 6, T_('Register Time#pool_header'), 'Date', 0, 'TP_X_RegisterTime+' );
-   $uatable->add_tablehead( 7, T_('Last access#pool_header'), 'Date', 0, 'Lastaccess-');
+      $uatable->add_tablehead( 4, T_('Tournament Rating#header'), 'Rating', 0, 'TP_Rating-' );
+   $uatable->add_tablehead( 5, T_('Country#header'), 'Image', 0, 'Country+' );
+   $uatable->add_tablehead( 6, T_('Register Time#TP_header'), 'Date', 0, 'TP_X_RegisterTime+' );
+   $uatable->add_tablehead( 7, T_('Last access#header'), 'Date', 0, 'Lastaccess-');
 
    $uatable->set_default_sort( 4, 2); //on T-Rating
 
@@ -455,9 +455,9 @@ function load_and_fill_pool_unassigned( $tid, $round, &$uatable )
          $row_arr[6] = (@$user->urow['TP_X_RegisterTime'] > 0) ? date(DATE_FMT2, $user->urow['TP_X_RegisterTime']) : '';
       if( $uatable->Is_Column_Displayed[7] )
          $row_arr[7] = ($user->Lastaccess > 0) ? date(DATE_FMT2, $user->Lastaccess) : '';
-      $row_arr[8] = $tform->print_insert_text_input( "uap_$uid", 4, 4, '', array( 'title' => T_('assign (unassigned) user to new pool#tourney')) )
+      $row_arr[8] = $tform->print_insert_text_input( "uap_$uid", 4, 4, '', array( 'title' => T_('assign (unassigned) user to new pool')) )
          . ' '
-         . $tform->print_insert_checkbox( "mark_$uid", '1', '', false, array( 'title' => T_('mark user for pool-action#tourney')) )
+         . $tform->print_insert_checkbox( "mark_$uid", '1', '', false, array( 'title' => T_('mark user for pool-action')) )
          . MED_SPACING;
 
       $uatable->add_row( $row_arr );
@@ -468,9 +468,9 @@ function load_and_fill_pool_unassigned( $tid, $round, &$uatable )
 function pools_edit_col_actions( &$poolviewer, $uid )
 {
    global $tform;
-   return $tform->print_insert_text_input( "rap_$uid", 4, 4, '', array( 'title' => T_('re-assign user to new pool#tourney')) )
+   return $tform->print_insert_text_input( "rap_$uid", 4, 4, '', array( 'title' => T_('re-assign user to new pool')) )
       . ' '
-      . $tform->print_insert_checkbox( "mark_$uid", '1', '', false, array( 'title' => T_('mark user for pool-action#tourney')) )
+      . $tform->print_insert_checkbox( "mark_$uid", '1', '', false, array( 'title' => T_('mark user for pool-action')) )
       . MED_SPACING;
 }
 
@@ -478,7 +478,7 @@ function pools_edit_col_actions( &$poolviewer, $uid )
 function pools_unassigned_extend_table_form( &$table, &$form )
 {
    return SMALL_SPACING
-      . $form->print_insert_text_input( 'newpool', 4, 4, get_request_arg('newpool'), array( 'title' => T_('pool to assign for marked users#tourney')) )
+      . $form->print_insert_text_input( 'newpool', 4, 4, get_request_arg('newpool'), array( 'title' => T_('pool to assign for marked users')) )
       . $form->print_insert_submit_button( 't_assign', T_('Assign to Pool') );
 }
 

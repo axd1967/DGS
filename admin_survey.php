@@ -155,16 +155,16 @@ $GLOBALS['ThePage'] = new Page('SurveyAdmin');
          'SELECTBOX',    'type', 1, $arr_types, $vars['type'], false, ));
 
    $sform->add_row( array(
-         'DESCRIPTION', T_('Current Status#survey'),
+         'DESCRIPTION', T_('Current Status'),
          'TEXT',        SurveyControl::getStatusText($s_old_status) ));
    $sform->add_row( array(
          'TAB',
          'SELECTBOX',    'status', 1, $arr_status, $vars['status'], false, ));
    $sform->add_row( array(
          'DESCRIPTION', (Survey::is_point_type($survey->Type)) ? T_('Points#survey') : T_('Selections#survey'),
-         'TEXT',        T_('Min#survey') . MINI_SPACING,
+         'TEXT',        T_('Min') . MINI_SPACING,
          'TEXTINPUT',   'min_points', 3, 5, $vars['min_points'],
-         'TEXT',        SMALL_SPACING . T_('Max#survey') . MINI_SPACING,
+         'TEXT',        SMALL_SPACING . T_('Max') . MINI_SPACING,
          'TEXTINPUT',   'max_points', 3, 5, $vars['max_points'], ));
    $sform->add_row( array(
          'DESCRIPTION', T_('Title'),
@@ -173,7 +173,7 @@ $GLOBALS['ThePage'] = new Page('SurveyAdmin');
          'DESCRIPTION', T_('Survey Options'),
          'TEXTAREA',    'survey_opts', 80, min(12, (int)(2.5*count($survey->SurveyOptions)) ), $vars['survey_opts'], ));
    $sform->add_row( array(
-         'DESCRIPTION', T_('User List#survey'),
+         'DESCRIPTION', T_('User List'),
          'TEXT',        T_('to restrict users to vote on survey, user-id (text or numeric)#survey_userlist'), ));
    $sform->add_row( array(
          'TAB',
@@ -531,14 +531,14 @@ function parse_edit_form( &$survey )
 
       // determine edits
       $has_upd_status = ( $old_vals['status'] != $survey->Status );
-      if( $old_vals['type'] != $survey->Type ) $edits[] = T_('Type#edits');
-      if( $has_upd_status ) $edits[] = T_('Status#edits');
-      if( $old_vals['flags'] != $survey->Flags ) $edits[] = T_('Flags#edits');
-      if( $old_vals['min_points'] != $survey->MinPoints ) $edits[] = T_('Min-Points#edits');
-      if( $old_vals['max_points'] != $survey->MaxPoints ) $edits[] = T_('Max-Points#edits');
-      if( $old_vals['title'] != $survey->Title ) $edits[] = T_('Title#edits');
-      if( $old_vals['survey_opts'] != $vars['survey_opts'] ) $edits[] = T_('Survey-Options#edits');
-      if( $old_vals['user_list'] != $vars['user_list'] ) $edits[] = T_('UserList#edits');
+      if( $old_vals['type'] != $survey->Type ) $edits[] = T_('Type#survey');
+      if( $has_upd_status ) $edits[] = T_('Status');
+      if( $old_vals['flags'] != $survey->Flags ) $edits[] = T_('Flags');
+      if( $old_vals['min_points'] != $survey->MinPoints ) $edits[] = T_('Min-Points');
+      if( $old_vals['max_points'] != $survey->MaxPoints ) $edits[] = T_('Max-Points');
+      if( $old_vals['title'] != $survey->Title ) $edits[] = T_('Title');
+      if( $old_vals['survey_opts'] != $vars['survey_opts'] ) $edits[] = T_('Survey-Options');
+      if( $old_vals['user_list'] != $vars['user_list'] ) $edits[] = T_('User List');
 
       if( $survey->hasUserVotes() && count($edits) > 0 && !( count($edits) == 1 && $has_upd_status ) )
          $errors[] = T_('Update of survey not allowed, because there are user-votes.');

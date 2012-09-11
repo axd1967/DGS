@@ -103,7 +103,7 @@ $GLOBALS['ThePage'] = new Page('TournamentPoolView');
 
    $title = sprintf( T_('Pools of Tournament #%s for round %s'), $tid, $round );
    start_page( $title, true, $logged_in, $player_row );
-   echo "<h2 class=Header>", $tourney->build_info(3, sprintf(T_('Round #%s'), $round)), "</h2>\n";
+   echo "<h2 class=Header>", $tourney->build_info(3, sprintf(T_('Round #%s#tourney'), $round)), "</h2>\n";
 
    if( count($errors) )
    {
@@ -112,15 +112,15 @@ $GLOBALS['ThePage'] = new Page('TournamentPoolView');
          "</tr></table>\n";
    }
 
-   echo sprintf( T_('Round summary (%s players): %s games started, %s finished, %s running'),
+   echo sprintf( T_('Round summary (%s players): %s games started, %s finished, %s running#tpool'),
                  $count_players, $counts['all'], $counts['finished'], $counts['run'] ),
       "<br>\n";
 
    $my_tpool = $tpool_iterator->getIndexValue( 'uid', $my_id, 0 );
    if( $my_tpool )
    {
-      $pool_link = anchor('#pool'.$my_tpool->Pool, sprintf( T_('Pool %s#tourney'), $my_tpool->Pool ) );
-      echo sprintf( T_('You are playing in %s.#tourney_pool'), $pool_link ), "<br>\n";
+      $pool_link = anchor('#pool'.$my_tpool->Pool, sprintf( T_('Pool %s'), $my_tpool->Pool ) );
+      echo sprintf( T_('You are playing in %s.#tpool'), $pool_link ), "<br>\n";
    }
    echo "<br>\n";
 
@@ -132,7 +132,7 @@ $GLOBALS['ThePage'] = new Page('TournamentPoolView');
    $poolViewer->make_pool_table();
    $poolViewer->echo_pool_table();
 
-   echo_notes( 'edittournamentpoolnotesTable', T_('Tournament pool notes'), build_pool_notes(), true, false );
+   echo_notes( 'edittournamentpoolnotesTable', T_('Tournament Pool notes'), build_pool_notes(), true, false );
 
 
    $menu_array = array();
@@ -141,10 +141,10 @@ $GLOBALS['ThePage'] = new Page('TournamentPoolView');
    if( $allow_edit_tourney )
    {
       if( $tround->Status == TROUND_STATUS_POOL )
-         $menu_array[T_('Edit pools')] =
+         $menu_array[T_('Edit pools#TPool')] =
             array( 'url' => "tournaments/roundrobin/edit_pools.php?tid=$tid", 'class' => 'TAdmin' );
       if( $tround->Status == TROUND_STATUS_PLAY )
-         $menu_array[T_('Edit ranks')] =
+         $menu_array[T_('Edit ranks#tpool')] =
             array( 'url' => "tournaments/roundrobin/edit_ranks.php?tid=$tid", 'class' => 'TAdmin' );
       $menu_array[T_('Manage tournament')] =
          array( 'url' => "tournaments/manage_tournament.php?tid=$tid", 'class' => 'TAdmin' );
@@ -159,7 +159,7 @@ function pool_user_edit_rank( &$poolviewer, $uid )
 {
    global $base_path, $tid;
    return anchor( $base_path."tournaments/roundrobin/edit_ranks.php?tid=$tid".URI_AMP."uid=$uid",
-         image( $base_path.'images/edit.gif', T_('Edit Rank'), null, 'class="InTextImage"' ) );
+         image( $base_path.'images/edit.gif', T_('Edit Rank#tpool'), null, 'class="InTextImage"' ) );
 }
 
 /*! \brief Returns array with notes about tournament pools. */
@@ -167,29 +167,29 @@ function build_pool_notes()
 {
    $notes = array();
    $notes[] = sprintf( T_('Pools are ranked by Tie-breakers: %s'),
-      implode(', ', array( T_('Points#tiebreaker'), T_('SODOS#tiebreaker') ) ));
+      implode(', ', array( T_('Points#tourney'), T_('SODOS#tourney') ) ));
 
    $mfmt = MINI_SPACING . '%s' . MINI_SPACING;
    $img_next_round = echo_image_tourney_next_round();
    $notes[] =
-      sprintf( T_('[%s] 1..n: \'#\' = running game, \'-\' = no game, %s'),
-         T_('Place#pool_header'), span('MatrixSelf', T_('self#pool_table'), $mfmt) )
+      sprintf( T_('[%s] 1..n: \'#\' = running game, \'-\' = no game, %s#tpool'),
+         T_('Place#tourney'), span('MatrixSelf', T_('self#tpool_table'), $mfmt) )
       . ",<br>\n"
-      . sprintf( T_('\'%s\' on colored background (%s)'), T_('Points#pool_header'),
+      . sprintf( T_('\'%s\' on colored background (%s)#tpool_table'), T_('Points#tourney'),
             sprintf( ' %s %s %s ',
-               span('MatrixWon', T_('game won#pool_table')   . ' = 2', $mfmt),
-               span('MatrixLost', T_('game lost#pool_table') . ' = 0', $mfmt),
-               span('MatrixJigo', T_('game draw#pool_table') . ' = 1', $mfmt) ));
-   $notes[] = sprintf( T_('[%s] in format "wins : losses" = number of wins and losses for user'), T_('#Wins#pool_header') );
-   $notes[] = sprintf( T_('[%s] = points calculated from wins, losses and jigo for user'), T_('Points#pool_header') );
-   $notes[] = sprintf( T_('[%s] = Tie-Breaker SODOS = Sum of Defeated Opponents Score'), T_('SODOS#pool_header') );
+               span('MatrixWon', T_('game won#tpool_table')   . ' = 2', $mfmt),
+               span('MatrixLost', T_('game lost#tpool_table') . ' = 0', $mfmt),
+               span('MatrixJigo', T_('game draw#tpool_table') . ' = 1', $mfmt) ));
+   $notes[] = sprintf( T_('[%s] in format "wins : losses" = number of wins and losses for user'), T_('#Wins#tourney') );
+   $notes[] = sprintf( T_('[%s] = points calculated from wins, losses and jigo for user'), T_('Points#header') );
+   $notes[] = sprintf( T_('[%s] = Tie-Breaker SODOS = Sum of Defeated Opponents Score'), T_('SODOS#tourney') );
    $notes[] = array(
-      sprintf( T_('[%s] = Rank of user within one pool (1=Highest rank); Format "R (CR) %s"'),
-               T_('Rank#pool_header'), $img_next_round ),
-      T_('R = (optional) rank set by tournament director, really final only at end of tournament round'),
-      T_('R = \'---\' = user retreating from next round (temporary mark)'),
-      T_('CR = preliminary calculated rank, omitted when it can\'t be calculated or identical to rank R'),
-      sprintf( T_('%s = marks user to advance to next round, or mark for final result'), $img_next_round ),
+      sprintf( T_('[%s] = Rank of user within one pool (1=Highest rank); Format "R (CR) %s#tpool"'),
+               T_('Rank#tpool'), $img_next_round ),
+      T_('R = (optional) rank set by tournament director, really final only at end of tournament round#tpool'),
+      T_('R = \'---\' = user retreating from next round (temporary mark)#tpool'),
+      T_('CR = preliminary calculated rank, omitted when it can\'t be calculated or identical to rank R#tpool'),
+      sprintf( T_('%s = marks user to advance to next round, or mark for final result#tpool'), $img_next_round ),
    );
 
    return $notes;

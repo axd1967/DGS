@@ -55,7 +55,7 @@ $GLOBALS['ThePage'] = new Page('ShapeView');
    if( !is_null($shape) )
    {
       $shape1 = array(
-            'src'       => sprintf( T_('Shape ID #%s#shape'), $shape->ID ),
+            'src'       => sprintf( T_('Shape ID #%s'), $shape->ID ),
             'author'    => $shape->User->user_reference(),
             'name'      => $shape->Name,
             'size'      => $shape->Size,
@@ -78,7 +78,7 @@ $GLOBALS['ThePage'] = new Page('ShapeView');
    $shape2 = array();
    if( is_array($parsed_snapshot) )
    {
-      $shape2['src'] = T_('Game Shape#shape');
+      $shape2['src'] = T_('Game Shape');
       if( isset($parsed_snapshot['Size']) )
          $shape2['size'] = (int)$parsed_snapshot['Size'];
       $shape_flags = ( @$parsed_snapshot['PlayColorB'] ? 0 : SHAPE_FLAG_PLAYCOLOR_W );
@@ -100,13 +100,13 @@ $GLOBALS['ThePage'] = new Page('ShapeView');
    $itable = build_info_table( $shape1, $shape2 );
 
 
-   $title = T_('View Shape#shape');
+   $title = T_('View Shape');
    start_page($title, true, $logged_in, $player_row, GobanHandlerGfxBoard::style_string($stone_size) );
    echo "<h3 class=Header>$title</h3>\n";
 
    // show snapshot-diff
    $view_shape2 = '';
-   $title_row = sprintf( "<tr><th></th><th class=\"left\">%s</th><th></th></tr>\n", T_('Shape Notes#shape') );
+   $title_row = sprintf( "<tr><th></th><th class=\"left\">%s</th><th></th></tr>\n", T_('Shape Notes') );
    if( !@$shape1['shape'] ) // only parsed-shape
       $view_shape1 = ShapeControl::build_view_shape($shape2['shape'], $stone_size);
    elseif( !@$shape2['shape'] ) // only db-shape
@@ -118,7 +118,7 @@ $GLOBALS['ThePage'] = new Page('ShapeView');
       {
          $view_shape2 = ShapeControl::build_view_shape($shape2['shape'], $stone_size);
          $title_row = sprintf( "<tr><th>%s</th><th>%s</th><th>%s</th></tr>\n",
-            $shape1['src'], T_('Shape Notes#shape'), $shape2['src'] );
+            $shape1['src'], T_('Shape Notes'), $shape2['src'] );
       }
    }
 
@@ -134,15 +134,15 @@ $GLOBALS['ThePage'] = new Page('ShapeView');
 
 
    $menu_array = array();
-   $menu_array[T_('Edit Shape#shape')] = "edit_shape.php?shape=$shape_id".URI_AMP."snapshot=$url_snapshot";
-   $menu_array[T_('Show in Goban Editor#shape')] =
+   $menu_array[T_('Edit Shape')] = "edit_shape.php?shape=$shape_id".URI_AMP."snapshot=$url_snapshot";
+   $menu_array[T_('Show in Goban Editor')] =
       "goban_editor.php?shape=$shape_id".URI_AMP."snapshot=$url_snapshot";
-   $menu_array[T_('Shapes#shape')] = "list_shapes.php";
+   $menu_array[T_('Shapes')] = "list_shapes.php";
    if( @$shape->ID && $url_invite_snapshot )
    {
-      $menu_array[T_('Invite#shape')] =
+      $menu_array[T_('Invite')] =
          "message.php?mode=Invite".URI_AMP."shape={$shape->ID}".URI_AMP."snapshot=".urlencode($url_invite_snapshot);
-      $menu_array[T_('New Shape-Game#shape')] =
+      $menu_array[T_('New Shape-Game')] =
          "new_game.php?shape={$shape->ID}".URI_AMP."snapshot=".urlencode($url_invite_snapshot);
    }
 
@@ -154,12 +154,12 @@ function build_info_table( $shape1, $shape2 )
 {
    $descr = array(
          'src'       => T_('Source#shape'),
-         'author'    => T_('Author#shape'),
-         'name'      => T_('Shape Name#shape'),
-         'size'      => T_('Board Size#shape'),
-         'flags'     => T_('Flags#shape'),
-         'created'   => T_('Created#shape'),
-         'lc'        => T_('Lastchanged#shape'),
+         'author'    => T_('Author'),
+         'name'      => T_('Shape Name'),
+         'size'      => T_('Board Size'),
+         'flags'     => T_('Flags'),
+         'created'   => T_('Created'),
+         'lc'        => T_('Last changed'),
       );
 
    if( !@$shape1['src'] ) // only parsed-shape

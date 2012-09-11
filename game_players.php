@@ -307,7 +307,7 @@ function build_game_settings( $grow )
       $arr_shape = GameSnapshot::parse_check_extended_snapshot($grow['ShapeSnapshot']);
       $ShapeBlackFirst = ( is_array($arr_shape) ) ? (bool)@$arr_shape['PlayColorB'] : true;
       $itable->add_sinfo(
-            T_('Shape-Game#shape'),
+            T_('Shape-Game'),
             ShapeControl::build_snapshot_info(
                $grow['ShapeID'], $grow['Size'], $grow['ShapeSnapshot'], $ShapeBlackFirst ) );
    }
@@ -331,7 +331,7 @@ function build_game_settings( $grow )
          sprintf( "%s, %s\n",
                TimeFormat::echo_time_limit( $grow['Maintime'], $grow['Byotype'], $grow['Byotime'], $grow['Byoperiods'],
                      TIMEFMT_SHORT|TIMEFMT_HTMLSPC|TIMEFMT_ADDTYPE ),
-               ( $grow['WeekendClock'] == 'Y' ? T_('Clock running on weekend') : T_('Clock stopped on weekend') )
+               ( $grow['WeekendClock'] == 'Y' ? T_('Clock runs on weekend') : T_('Clock stopped on weekend') )
          ));
 
    if( count($arr_ratings) )
@@ -514,13 +514,13 @@ function build_table_game_players( $grow, $cmd, &$form )
    $utable->add_tablehead( 1, '#', 'Number' );
    if( $chg_group_color )
       $utable->add_tablehead( 9, T_('Set Group#header'), '', TABLE_NO_HIDE, '');
-   $utable->add_tablehead( 2, T_('Color#headermp'), 'ImageGroupColor' );
+   $utable->add_tablehead( 2, T_('Color#header'), 'ImageGroupColor' );
    $utable->add_tablehead( 3, T_('Player#header'), 'User' );
    $utable->add_tablehead( 5, T_('Country#header'), 'Image' );
    $utable->add_tablehead( 4, T_('Rating#header'), 'Rating' );
    $utable->add_tablehead( 6, T_('Last access#header'), 'Date' );
-   $utable->add_tablehead( 7, T_('Flags#headermp'), 'ImagesLeft' );
-   $utable->add_tablehead( 8, T_('Actions#headermp'), 'ImagesLeft' );
+   $utable->add_tablehead( 7, T_('Flags#header'), 'ImagesLeft' );
+   $utable->add_tablehead( 8, T_('Actions#header'), 'ImagesLeft' );
 
    $group_max_players = MultiPlayerGame::determine_groups_player_count( $grow['GamePlayers'] );
 
@@ -807,9 +807,9 @@ function build_form_change_group( &$form, $grow, $cmd, $edit_hk=false )
       $form->add_empty_row();
    }
 
-   $form->add_row( array( 'SUBMITBUTTON', FACT_SAVE, T_('Update#submit'),
+   $form->add_row( array( 'SUBMITBUTTON', FACT_SAVE, T_('Update'),
                           'TEXT', SMALL_SPACING,
-                          'SUBMITBUTTON', FACT_PREVIEW, T_('Preview#submit') ));
+                          'SUBMITBUTTON', FACT_PREVIEW, T_('Preview') ));
    return $form;
 }//build_form_change_group
 
@@ -820,7 +820,7 @@ function build_form_change_order( $grow, $gid, $cmd, $edit_hk=false )
    $form->add_hidden( 'cmd', $cmd );
 
    $form->add_empty_row();
-   $form->add_row( array( 'SUBMITBUTTON', FACT_SAVE, T_('Update#submit') ));
+   $form->add_row( array( 'SUBMITBUTTON', FACT_SAVE, T_('Update') ));
    return $form;
 }//build_form_change_order
 
@@ -1105,13 +1105,13 @@ function build_tableinfo_handicap_suggestion( &$form, $group, $arr_conv_sugg, $a
          T_('Conventional handicap'),
          array(
             sptext( build_suggestion_shortinfo($arr_conv_sugg), true ),
-            $form->print_insert_submit_button(FACT_USE_CONV, T_('Preview#submit') )
+            $form->print_insert_submit_button(FACT_USE_CONV, T_('Preview') )
          ));
    $itable->add_sinfo(
          T_('Proper handicap'),
          array(
             sptext( build_suggestion_shortinfo($arr_prop_sugg), true ),
-            $form->print_insert_submit_button(FACT_USE_PROP, T_('Preview#submit') )
+            $form->print_insert_submit_button(FACT_USE_PROP, T_('Preview') )
          ));
    return $itable;
 }//build_tableinfo_handicap_suggestion

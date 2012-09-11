@@ -77,8 +77,8 @@ require_once( 'include/wroom_control.php' );
    );
 
    $game_type_filter_array = MultiPlayerGame::build_game_type_filter_array();
-   $game_type_filter_array[T_('Shape-Game#shape')] = "ShapeID>0";
-   $game_type_filter_array[T_('No Shapes#shape')] = "ShapeID=0";
+   $game_type_filter_array[T_('Shape-Game')] = "ShapeID>0";
+   $game_type_filter_array[T_('No Shapes')] = "ShapeID=0";
 
    $my_rating = $player_row['Rating2'];
    $iamrated = ( $player_row['RatingStatus'] != RATING_NONE && is_numeric($my_rating) && $my_rating >= MIN_RATING );
@@ -155,7 +155,7 @@ require_once( 'include/wroom_control.php' );
    $wrtable->add_tablehead( 7, T_('Size#header'), 'Number', 0, 'Size-');
    $wrtable->add_tablehead( 5, T_('Type#headerwr'), '', 0, 'Handicaptype+');
    $wrtable->add_tablehead(18, T_('Settings#headerwr'), 'GameSettings', TABLE_NO_SORT );
-   $wrtable->add_tablehead(14, T_('Handicap#headerwr'), 'Number', 0, 'Handicap+');
+   $wrtable->add_tablehead(14, T_('Handicap#header'), 'Number', 0, 'Handicap+');
    $wrtable->add_tablehead( 6, T_('Komi#header'), 'Number', 0, 'Komi-');
    $wrtable->add_tablehead( 8, T_('Restrictions#header'), '', TABLE_NO_HIDE|TABLE_NO_SORT);
    $wrtable->add_tablehead( 9, T_('Time limit#header'), null, TABLE_NO_SORT );

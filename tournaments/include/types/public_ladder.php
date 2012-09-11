@@ -61,7 +61,7 @@ class PublicLadderTournament extends TournamentTemplateLadder
    {
       global $player_row;
       $tourney = $this->make_tournament( TOURNEY_SCOPE_PUBLIC,
-         sprintf( T_('%s\'s Ladder'), $player_row['Handle'] ) );
+         sprintf( T_('%s\'s Ladder#tourney'), $player_row['Handle'] ) );
 
       $tprops = new TournamentProperties();
       $tprops->MinParticipants = 0;

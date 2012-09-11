@@ -142,7 +142,7 @@ $GLOBALS['ThePage'] = new Page('GamesList');
    }
 
    $game_type_filter_array = MultiPlayerGame::build_game_type_filter_array();
-   $game_type_filter_array[T_('Shape-Game#shape')] = "ShapeID>0";
+   $game_type_filter_array[T_('Shape-Game')] = "ShapeID>0";
    $game_type_filter_array[T_('Fair Komi#fairkomi')] = "Status='".GAME_STATUS_KOMI."'";
 
    // load table-columns
@@ -810,7 +810,7 @@ $GLOBALS['ThePage'] = new Page('GamesList');
             $row_arr[42] .= span('TGDetached', ' (D)', '%s', T_('detached#tourney'));
       }
       if( $glc->ext_tid && !$all && @$gtable->Is_Column_Displayed[45] && @$TG_Challenge >= 0 )
-         $row_arr[45] = ( $TG_Challenge > 0 ) ? T_('Challenger#TG_role') : T_('Defender#TG_role');
+         $row_arr[45] = ( $TG_Challenge > 0 ) ? T_('Challenger#T_ladder') : T_('Defender#T_ladder');
 
       if( $gtable->Is_Column_Displayed[43] )
          $row_arr[43] = getRulesetText($Ruleset);

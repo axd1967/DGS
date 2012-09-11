@@ -59,12 +59,12 @@ class TournamentGuiHelper
 
       // add_tablehead($nr, $descr, $attbs=null, $mode=TABLE_NO_HIDE|TABLE_NO_SORT, $sortx='')
       $ltable->add_tablehead( 1, T_('Rank#T_ladder'), 'Number', TABLE_NO_HIDE );
-      $ltable->add_tablehead( 3, T_('Name#T_ladder'), 'User', 0 );
-      $ltable->add_tablehead( 4, T_('Userid#T_ladder'), 'User', TABLE_NO_HIDE );
-      $ltable->add_tablehead( 5, T_('Country#T_ladder'), 'Image', 0 );
-      $ltable->add_tablehead( 6, T_('Rating#T_ladder'), 'Rating', 0 );
-      $ltable->add_tablehead(10, T_('Rank Kept#T_ladder'), '', 0 );
-      $ltable->add_tablehead(13, T_('Last access#T_ladder'), '', 0 );
+      $ltable->add_tablehead( 3, T_('Name#header'), 'User', 0 );
+      $ltable->add_tablehead( 4, T_('Userid#header'), 'User', TABLE_NO_HIDE );
+      $ltable->add_tablehead( 5, T_('Country#header'), 'Image', 0 );
+      $ltable->add_tablehead( 6, T_('Rating#header'), 'Rating', 0 );
+      $ltable->add_tablehead(10, T_('Rank Kept#header'), '', 0 );
+      $ltable->add_tablehead(13, T_('Last access#header'), '', 0 );
 
       $iterator = TournamentLadder::build_tournament_ladder_iterator( $tid, $ltable->get_query(), $limit );
 
@@ -122,7 +122,7 @@ class TournamentGuiHelper
       $iterator = TournamentResult::load_tournament_results( $iterator, $tid );
 
       if( $iterator->getItemCount() == 0 )
-         return T_('No tournament results yet.#T_result');
+         return T_('No tournament results yet.');
 
       // create table
       $cfg_tblcols = ConfigTableColumns::load_config( $my_id, CFGCOLS_TOURNAMENT_RESULTS );
@@ -133,15 +133,15 @@ class TournamentGuiHelper
       $table->add_or_del_column();
 
       // add_tablehead($nr, $descr, $attbs=null, $mode=TABLE_NO_HIDE|TABLE_NO_SORT, $sortx='')
-      $table->add_tablehead( 6, T_('Rank#tres_header'), 'Number', TABLE_NO_HIDE );
+      $table->add_tablehead( 6, T_('Rank#tourney_result'), 'Number', TABLE_NO_HIDE );
       $table->add_tablehead( 1, T_('Name#header'), 'User', TABLE_NO_HIDE);
       $table->add_tablehead( 2, T_('Userid#header'), 'User', TABLE_NO_HIDE);
       $table->add_tablehead( 3, T_('Country#header'), 'Image', 0);
-      $table->add_tablehead( 4, T_('Current Rating#tres_header'), 'Rating', 0);
-      $table->add_tablehead( 5, T_('Result Rating#tres_header'), 'Rating', 0);
+      $table->add_tablehead( 4, T_('Current Rating#header'), 'Rating', 0);
+      $table->add_tablehead( 5, T_('Result Rating#header'), 'Rating', 0);
       if( $tourney->Type == TOURNEY_TYPE_LADDER )
-         $table->add_tablehead( 7, T_('Rank Kept#T_ladder'), '', 0);
-      $table->add_tablehead( 8, T_('Result Date#tres_header'), '', 0);
+         $table->add_tablehead( 7, T_('Rank Kept#header'), '', 0);
+      $table->add_tablehead( 8, T_('Result Date#header'), '', 0);
 
       while( list(,$arr_item) = $iterator->getListIterator() )
       {

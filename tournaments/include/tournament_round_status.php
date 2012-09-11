@@ -151,7 +151,7 @@ class TournamentRoundStatus
       if( $this->curr_status != TROUND_STATUS_PAIR )
          $this->errors[] = $this->error_expected_status( TROUND_STATUS_PAIR );
 
-      $this->errors[] = T_('Status change normally done automatically by Pairing-Editor.') . ' '
+      $this->errors[] = T_('Status change normally done automatically by Pairing-Editor.#tourney') . ' '
          . sprintf( T_('Change to Tournament Round Status [%s] only allowed by Tournament Admin.'),
                     TournamentRound::getStatusText($this->new_status) );
    }

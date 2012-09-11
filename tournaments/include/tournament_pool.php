@@ -699,7 +699,7 @@ class TournamentPool
          $errors[] = sprintf( T_('Expected %s pools, but currently there are %s pools.'),
             $tround->Pools, $cnt_real_pools );
          for( $i = $tround->Pools; $i <= $cnt_real_pools; $i++ )
-            $pool_summary[$i][1][] = T_('Bad Pool-Number#poolsum');
+            $pool_summary[$i][1][] = T_('Bad Pool-Number');
       }
 
       // check that all registered users joined somewhere in the pools
@@ -720,7 +720,7 @@ class TournamentPool
       if( $cnt_pool0 > 0 )
       {
          $errors[] = sprintf( T_('There are %s unassigned users. Please assign them to a pool!'), $cnt_pool0 );
-         $pool_summary[0][1][] = T_('Unassigned users#poolsum');
+         $pool_summary[0][1][] = T_('Unassigned users#tpool');
       }
 
       // check that the user-count of each pool is in valid range of min/max-pool-size
@@ -731,9 +731,9 @@ class TournamentPool
          if( $pool_usercount < $tround->MinPoolSize || $pool_usercount > $tround->MaxPoolSize )
             $cnt_violate_poolsize++;
          if( $pool_usercount < $tround->MinPoolSize )
-            $pool_summary[$pool][1][] = T_('Pool-Size too small#poolsum');
+            $pool_summary[$pool][1][] = T_('Pool-Size too small');
          if( $pool_usercount > $tround->MaxPoolSize )
-            $pool_summary[$pool][1][] = T_('Pool-Size too big#poolsum');
+            $pool_summary[$pool][1][] = T_('Pool-Size too big');
       }
       if( $cnt_violate_poolsize > 0 )
          $errors[] = sprintf( T_('There are %s pools violating the valid pool-size range %s.'),
@@ -747,7 +747,7 @@ class TournamentPool
          if( $pool_usercount == 0 )
          {
             $cnt_empty++;
-            $pool_summary[$pool][1][] = T_('Pool empty#poolsum');
+            $pool_summary[$pool][1][] = T_('Pool empty');
          }
       }
       if( $cnt_empty > 0 )

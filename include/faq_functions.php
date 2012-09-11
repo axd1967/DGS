@@ -114,7 +114,7 @@ function check_faq_search_terms( $query_terms )
       foreach( $arr_words as $term )
       {
          if( strlen($term) < 2 )
-            return sprintf( T_('Search term [%s] too short#FAQ'), $term );
+            return sprintf( T_('Search term [%s] too short'), $term );
       }
    }
    return '';

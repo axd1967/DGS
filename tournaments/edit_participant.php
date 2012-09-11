@@ -183,9 +183,9 @@ $GLOBALS['ThePage'] = new Page('TournamentEditParticipant');
    if( !$rid ) // new-TP
    {
       if( count($reg_errors) )
-         $errors[] = T_('[Errors]: Registration restrictions disallow user to be registered.');
+         $errors[] = T_('[Errors]: Registration restrictions disallow user to be registered.#tourney');
       if( !$ignore_warnings && count($reg_warnings) )
-         $errors[] = T_('[Warnings]: Registration restrictions normally disallow user to be registered.');
+         $errors[] = T_('[Warnings]: Registration restrictions normally disallow user to be registered.#tourney');
 
       $tp->Status = TP_STATUS_INVITE; // TD can only invite
    }
@@ -231,7 +231,7 @@ $GLOBALS['ThePage'] = new Page('TournamentEditParticipant');
          $tp->Flags |= TP_FLAGS_VIOLATE;
 
       if( $old_status != $tp->Status )
-         $edits[] = T_('Status#edits');
+         $edits[] = T_('Status');
 
       $tp->authorise_edit_register_status($tourney->Status, $old_status, $errors); // check status-change
 
@@ -260,7 +260,7 @@ $GLOBALS['ThePage'] = new Page('TournamentEditParticipant');
                $sys_msg = send_register_notification( $ntype, $tp, $my_id );
             }
             else
-               $sys_msg = urlencode( T_('Registration saved!') );
+               $sys_msg = urlencode( T_('Tournament Registration saved!') );
 
             if( $rid == 0 ) // new TP
                Bulletin::update_count_bulletin_new( "Tournament.edit_participant.add_tp($tid)", $uid );
@@ -293,7 +293,7 @@ $GLOBALS['ThePage'] = new Page('TournamentEditParticipant');
          'DESCRIPTION', T_('Tournament ID'),
          'TEXT',        $tourney->build_info() ));
    $tpform->add_row( array(
-         'DESCRIPTION', T_('Tournament Status#tourney'),
+         'DESCRIPTION', T_('Tournament Status'),
          'TEXT',        Tournament::getStatusText($tourney->Status), ));
    if( !is_null($user) )
       $tpform->add_row( array(
@@ -317,7 +317,7 @@ $GLOBALS['ThePage'] = new Page('TournamentEditParticipant');
    if( count($reg_errors) || count($reg_warnings) )
    {
       $tpform->add_row( array( 'HR' ));
-      $tpform->add_row( array( 'HEADER', T_('Registration restrictions') ));
+      $tpform->add_row( array( 'HEADER', T_('Registration restrictions#tourney') ));
       if( count($reg_errors) )
          $tpform->add_row( array(
                'OWNHTML', buildErrorListString(
@@ -350,12 +350,12 @@ $GLOBALS['ThePage'] = new Page('TournamentEditParticipant');
       $old_status_str = ($old_status) ? TournamentParticipant::getStatusText($old_status) : NO_VALUE;
 
       $tpform->add_row( array(
-            'DESCRIPTION', T_('Current Registration Status'),
+            'DESCRIPTION', T_('Current Registration Status#tourney'),
             'TEXT',        $old_status_str, ));
       if( $authorise_edit_custom )
       {
          $tpform->add_row( array(
-               'DESCRIPTION', T_('New Registration Status'),
+               'DESCRIPTION', T_('New Registration Status#tourney'),
                'TEXT',        span('TWarning', TournamentParticipant::getStatusText($tp->Status)) .
                               SMALL_SPACING,
                'SELECTBOX',   'status', 1, build_new_status_choices($tp), $vars['status'], false, ));
@@ -373,7 +373,7 @@ $GLOBALS['ThePage'] = new Page('TournamentEditParticipant');
       // EDIT: Ratings --------------------
 
       $tpform->add_row( array(
-            'DESCRIPTION', T_('Rating Use Mode'),
+            'DESCRIPTION', T_('Rating Use Mode#tourney'),
             'TEXT',  TournamentProperties::getRatingUseModeText($tprops->RatingUseMode)
                      . "<br>\n"
                      . span('TInfo', TournamentProperties::getRatingUseModeText($tprops->RatingUseMode, false), '(%s)'), ));
@@ -387,7 +387,7 @@ $GLOBALS['ThePage'] = new Page('TournamentEditParticipant');
          $rating_type = get_request_arg('rating_type', 'dragonrank');
 
          $tpform->add_row( array(
-               'DESCRIPTION', T_('Customized Rating'),
+               'DESCRIPTION', T_('Customized Rating#tourney'),
                'TEXT',        $custom_rating_str . SMALL_SPACING,
                'TEXTINPUT',   'custom_rating', 10, 10, $vars['custom_rating'],
                'SELECTBOX',   'rating_type', 1, getRatingTypes(), $rating_type, false,
@@ -402,7 +402,7 @@ $GLOBALS['ThePage'] = new Page('TournamentEditParticipant');
          if( !$is_delete && $authorise_edit_custom && $tp->User->hasRating() ) // T-rating not needed if user has rating
             array_push( $arr,
                'TEXT', SMALL_SPACING,
-               'CHECKBOX', 'del_rating', '1', T_('Remove customized rating'),
+               'CHECKBOX', 'del_rating', '1', T_('Remove customized rating#tourney'),
                            (get_request_arg('del_rating') ? 1 : '') );
          $tpform->add_row( $arr );
       }
@@ -413,11 +413,11 @@ $GLOBALS['ThePage'] = new Page('TournamentEditParticipant');
       if( $ttype->need_rounds && !$is_delete )
       {
          $tpform->add_row( array(
-               'DESCRIPTION', T_('Current Start Round'),
+               'DESCRIPTION', T_('Current Start Round#tourney'),
                'TEXT',        $old_start_round, ));
          if( $tourney->Rounds > 1 && !$is_delete && $authorise_edit_custom )
             $tpform->add_row( array(
-                  'DESCRIPTION', T_('Customized Start Round'),
+                  'DESCRIPTION', T_('Customized Start Round#tourney'),
                   'TEXTINPUT',   'start_round', 3, 3, get_request_arg('start_round'),
                   'TEXT',        MINI_SPACING . $tourney->getRoundLimitText(), ));
          $tpform->add_empty_row();
@@ -428,11 +428,11 @@ $GLOBALS['ThePage'] = new Page('TournamentEditParticipant');
       if( !$is_delete )
       {
          $tpform->add_row( array(
-               'DESCRIPTION', T_('Public User Comment'),
+               'DESCRIPTION', T_('Public User Comment#tourney'),
                'TEXT',        $tp->Comment, ));
 
          $tpform->add_row( array(
-               'DESCRIPTION', T_('User Message'),
+               'DESCRIPTION', T_('User Message#tourney'),
                'TEXT', make_html_safe( $tp->UserMessage, true ) ));
 
          $tpform->add_row( array(
@@ -460,7 +460,7 @@ $GLOBALS['ThePage'] = new Page('TournamentEditParticipant');
             $tpform->add_hidden( 'confirm', 1 );
             $tpform->add_row( array(
                   'TAB', 'CELL', 1, '', // align submit-buttons
-                  'SUBMITBUTTON', 'tp_delete', T_('Confirm removal of registration'),
+                  'SUBMITBUTTON', 'tp_delete', T_('Confirm removal of registration#tourney'),
                   'TEXT', SMALL_SPACING,
                   'SUBMITBUTTON', 'tp_cancel', T_('Cancel') ));
          }
@@ -469,12 +469,12 @@ $GLOBALS['ThePage'] = new Page('TournamentEditParticipant');
       {
          $rowarr = array(
                'TAB', 'CELL', 1, '', // align submit-buttons
-               'SUBMITBUTTON', 'tp_save', ($rid ? T_('Update registration') : T_('Save registration')),
+               'SUBMITBUTTON', 'tp_save', ($rid ? T_('Update registration#tourney') : T_('Save registration#tourney')),
                'SUBMITBUTTON', 'tp_preview', T_('Preview') );
          if( $rid && $authorise_delete )
             array_push( $rowarr,
                   'TEXT', SMALL_SPACING,
-                  'SUBMITBUTTON', 'tp_delete', T_('Remove registration') );
+                  'SUBMITBUTTON', 'tp_delete', T_('Remove registration#tourney') );
          if( @$_REQUEST['tp_save'] || @$_REQUEST['tp_preview'] )
             array_push( $rowarr,
                   'TEXT', SMALL_SPACING,
@@ -588,7 +588,7 @@ function parse_edit_form( &$tp, $tourney, $ttype )
          if( (string)$new_value != '' )
          {
             if( !is_numeric($new_value) || $new_value < 1 )
-               $errors[] = T_('Expecting positive number for start round');
+               $errors[] = T_('Expecting positive number for start round#tourney');
             elseif( $tourney->Rounds > 0 && $new_value > $tourney->Rounds )
                $errors[] = sprintf( T_('Start round is out of range of actual rounds %s for this tournament.'),
                   TournamentUtils::build_range_text(1, $tourney->Rounds) );
@@ -598,8 +598,8 @@ function parse_edit_form( &$tp, $tourney, $ttype )
       }
 
       // determine edits
-      if( $old_rating != $tp->Rating ) $edits[] = T_('Rating#edits');
-      if( $old_vals['start_round'] != $tp->StartRound ) $edits[] = T_('StartRound#edits');
+      if( $old_rating != $tp->Rating ) $edits[] = T_('Rating');
+      if( $old_vals['start_round'] != $tp->StartRound ) $edits[] = T_('Start Round#tourney');
    }
 
    if( $is_posted || @$_REQUEST['tp_ack_apply'] )
@@ -608,8 +608,8 @@ function parse_edit_form( &$tp, $tourney, $ttype )
       $tp->Notes = trim($vars['admin_notes']);
 
       // determine edits
-      if( $old_vals['admin_message'] != $tp->AdminMessage ) $edits[] = T_('AdminMessage#edits');
-      if( $old_vals['admin_notes'] != $tp->Notes ) $edits[] = T_('AdminNotes#edits');
+      if( $old_vals['admin_message'] != $tp->AdminMessage ) $edits[] = T_('Admin Message');
+      if( $old_vals['admin_notes'] != $tp->Notes ) $edits[] = T_('Admin Notes');
    }
 
    return array( $vars, array_unique($edits), $errors );
@@ -628,30 +628,30 @@ function send_register_notification( $type, $tp, $my_id )
       case 'delete':
          $subj = T_('Removed registration for tournament #%s');
          $body = T_('Your registration for %s has been deleted by tournament director %s.');
-         $msg  = T_('Participant [%s] removed!');
+         $msg  = T_('Participant [%s] removed!#tourney');
          break;
       case 'ack_apply':
          $subj = T_('Approved registration for tournament #%s');
          $body = T_('Your application for %s has been approved by tournament director %s.');
-         $msg  = T_('Application of user [%s] accepted!');
+         $msg  = T_('Application of user [%s] accepted!#tourney');
          break;
       case 'new_invite':
          $subj = T_('Invitation for tournament #%s');
          $body = T_('Tournament director %2$s has invited you for %1$s. This invitation must be verified by you by either approving or rejecting it.');
          $body2 = anchor( SUB_PATH."tournaments/register.php?tid=$tid", T_('Edit tournament registration') );
-         $msg  = T_('User [%s] invited!');
+         $msg  = T_('User [%s] invited!#tourney');
          break;
       case TP_STATUS_APPLY.'_invite':
          $subj = T_('Verification of registration for tournament #%s');
          $body = T_('Your application for %s has been verified by tournament director %s and changed to an invitation, which needs your verification.');
          $body2 = anchor( SUB_PATH."tournaments/register.php?tid=$tid", T_('Edit tournament registration') );
-         $msg  = T_('Application of user [%s] changed to invitation!');
+         $msg  = T_('Application of user [%s] changed to invitation!#tourney');
          break;
       case TP_STATUS_REGISTER.'_invite':
          $subj = T_('Verification of registration for tournament #%s');
          $body = T_('Your registration for %s has been verified by tournament director %s and changed to an invitation, which needs your verification.');
          $body2 = anchor( SUB_PATH."tournaments/register.php?tid=$tid", T_('Edit tournament registration') );
-         $msg  = T_('Registration of user [%s] changed to invitation!');
+         $msg  = T_('Registration of user [%s] changed to invitation!#tourney');
          break;
       default:
          error('invalid_args', "tournament.edit_participant($type,$tid,$uid,$my_id)");
@@ -660,12 +660,12 @@ function send_register_notification( $type, $tp, $my_id )
    send_message( "tournament.edit_participant.$type($tid,$uid,$my_id)",
       trim( sprintf( $body, "<tourney $tid>", "<user $my_id>" ) . "\n\n" .
             ( $body2 ? "$body2\n\n" : '' ) .
-            "$sep<b>" . T_('Last user message:') . "</b>\n" . $tp->UserMessage . "\n" .
-            "$sep<b>" . T_('Last admin message:') . "</b>\n" . $tp->AdminMessage ),
+            "$sep<b>" . T_('Last user message#tourney') . ":</b>\n" . $tp->UserMessage . "\n" .
+            "$sep<b>" . T_('Last admin message#tourney') . ":</b>\n" . $tp->AdminMessage ),
       sprintf( $subj, $tid ),
       $uid, '', /*notify*/true,
       0/*sys-msg*/, MSGTYPE_NORMAL );
 
-   return urlencode( sprintf( "$msg " . T_('Message sent to user!#tourney'), $tp->User->Handle ) );
+   return urlencode( sprintf( "$msg " . T_('Message sent to user!'), $tp->User->Handle ) );
 }//send_register_notification
 ?>

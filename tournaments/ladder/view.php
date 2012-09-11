@@ -110,7 +110,7 @@ $GLOBALS['ThePage'] = new Page('TournamentLadderView');
             $old_rank = $tladder->Rank;
             if( $tladder->change_user_rank($new_rank) )
             {
-               $sys_msg = urlencode( sprintf( T_('Moved selected user from rank [%s] to [%s]!#tourney'),
+               $sys_msg = urlencode( sprintf( T_('Moved selected user from rank [%s] to [%s]!#T_ladder'),
                                               $old_rank, $new_rank ));
                jump_to("tournaments/ladder/view.php?tid=$tid".URI_AMP."admin=1".URI_AMP."rid=$rid"
                      . URI_AMP."sysmsg=$sys_msg");
@@ -135,19 +135,19 @@ $GLOBALS['ThePage'] = new Page('TournamentLadderView');
       $ltable->add_external_parameters( $page_vars, true ); // add as hiddens
 
       // add_tablehead($nr, $descr, $attbs=null, $mode=TABLE_NO_HIDE|TABLE_NO_SORT, $sortx='')
-      $ltable->add_tablehead( 2, T_('Change#T_ladder'), 'Center', 0 );
+      $ltable->add_tablehead( 2, T_('Change#TL_header'), 'Center', 0 );
       $ltable->add_tablehead( 1, T_('Rank#T_ladder'), 'Number', TABLE_NO_HIDE );
-      $ltable->add_tablehead( 3, T_('Name#T_ladder'), 'User', 0 );
-      $ltable->add_tablehead( 4, T_('Userid#T_ladder'), 'User', TABLE_NO_HIDE );
-      $ltable->add_tablehead( 5, T_('Country#T_ladder'), 'Image', 0 );
-      $ltable->add_tablehead( 6, T_('Current Rating#T_ladder'), 'Rating', 0 );
-      $ltable->add_tablehead( 7, T_('Action#T_ladder'), '', TABLE_NO_HIDE );
-      $ltable->add_tablehead(12, new TableHead( T_('Running Games#T_ladder'), 'images/table.gif'), 'Image', 0 );
-      $ltable->add_tablehead( 8, T_('Challenges#T_ladder'), '', TABLE_NO_HIDE );
+      $ltable->add_tablehead( 3, T_('Name#header'), 'User', 0 );
+      $ltable->add_tablehead( 4, T_('Userid#header'), 'User', TABLE_NO_HIDE );
+      $ltable->add_tablehead( 5, T_('Country#header'), 'Image', 0 );
+      $ltable->add_tablehead( 6, T_('Current Rating#header'), 'Rating', 0 );
+      $ltable->add_tablehead( 7, T_('Actions#header'), '', TABLE_NO_HIDE );
+      $ltable->add_tablehead(12, new TableHead( T_('Running games'), 'images/table.gif'), 'Image', 0 );
+      $ltable->add_tablehead( 8, T_('Challenges#header'), '', TABLE_NO_HIDE );
       $ltable->add_tablehead( 9, T_('Rank Changed#T_ladder'), 'Date', 0 );
-      $ltable->add_tablehead(10, T_('Rank Kept#T_ladder'), '', 0 );
-      $ltable->add_tablehead(13, T_('Last access#T_ladder'), '', 0 );
-      $ltable->add_tablehead(11, T_('Started#T_ladder'), 'Date', 0 );
+      $ltable->add_tablehead(10, T_('Rank Kept#header'), '', 0 );
+      $ltable->add_tablehead(13, T_('Last access#header'), '', 0 );
+      $ltable->add_tablehead(11, T_('Started#header'), 'Date', 0 );
 
       $iterator = TournamentLadder::build_tournament_ladder_iterator( $tid, $ltable->get_query(), 0, /*idx*/true );
 
@@ -244,7 +244,7 @@ $GLOBALS['ThePage'] = new Page('TournamentLadderView');
    {
       echo '<h3 class="Header">', T_('Edit Ladder'), "</h3>\n";
       if( TournamentUtils::isAdmin() )
-         echo T_('Tournament Flags#tourney'), ': ', $tourney->formatFlags(NO_VALUE), "<br><br>\n";
+         echo T_('Tournament Flags'), ': ', $tourney->formatFlags(NO_VALUE), "<br><br>\n";
    }
 
    if( count($errors) )
@@ -260,36 +260,36 @@ $GLOBALS['ThePage'] = new Page('TournamentLadderView');
       {
          if( !$admin_mode || $tdwork_locked )
             echo $tourney->buildMaintenanceLockText(0, ': '),
-               span('LadderWarn', T_('Challenging locked')), ".<br>\n";
+               span('LadderWarn', T_('Challenging locked#T_ladder')), ".<br>\n";
          if( $tourney->isFlagSet(TOURNEY_FLAG_LOCK_CLOSE) )
             echo Tournament::getLockText(TOURNEY_FLAG_LOCK_CLOSE), MINI_SPACING,
-               span('LadderWarn', T_('Challenging locked')), ".<br>\n";
+               span('LadderWarn', T_('Challenging locked#T_ladder')), ".<br>\n";
          echo "<br>\n";
       }
 
       if( !is_null($tl_user) && !$admin_mode )
       {
          if( $tl_props->MaxChallenges > 0 )
-            $ch_out_str = sprintf( T_('You have started %s of max. %s outgoing game challenges'),
+            $ch_out_str = sprintf( T_('You have started %s of max. %s outgoing game challenges#T_ladder'),
                                    $tl_user->ChallengesOut, $tl_props->MaxChallenges ) . ': ';
          else
-            $ch_out_str = sprintf( T_('You have started %s outgoing game challenges'),
+            $ch_out_str = sprintf( T_('You have started %s outgoing game challenges#T_ladder'),
                                    $tl_user->ChallengesOut ) . ': ';
          echo
             ( ($tl_user->MaxChallengedOut)
-               ? span('TLMaxChallenges', $ch_out_str) . span('LadderWarn', T_('Challenging stalled'))
-               : $ch_out_str . T_('Challenging allowed')
+               ? span('TLMaxChallenges', $ch_out_str) . span('LadderWarn', T_('Challenging stalled#T_ladder'))
+               : $ch_out_str . T_('Challenging allowed#T_ladder')
             ), ".<br>\n";
          if( !is_javascript_enabled() )
          {
-            echo sprintf( T_('Your start rank (change) in the current period is: %s'),
+            echo sprintf( T_('Your start rank (change) in the current period is: %s#T_ladder'),
                         TournamentLadder::build_rank_diff( $tl_user->Rank, $tl_user->PeriodRank )), "<br>\n";
-            echo sprintf( T_('Your rank (change) in the previous period was: %s'),
+            echo sprintf( T_('Your rank (change) in the previous period was: %s#T_ladder'),
                         TournamentLadder::build_rank_diff( $tl_user->Rank, $tl_user->HistoryRank )), "<br>\n";
          }
-         echo sprintf( T_('Your current rank is %s.'), $tl_user->Rank ),
+         echo sprintf( T_('Your current rank is %s.#T_ladder'), $tl_user->Rank ),
             MED_SPACING,
-            sprintf( T_('Your best rank is %s.'), $tl_user->BestRank ),
+            sprintf( T_('Your best rank is %s.#T_ladder'), $tl_user->BestRank ),
             "<br>\n";
       }
 
@@ -333,7 +333,7 @@ function prepare_update_rank( $tid, $rid, $new_rank, &$errors )
 {
    $tladder = null;
    if( @$_REQUEST['ta_updrank'] && $rid <= 0 )
-      $errors[] = T_('Missing user selection for rank change');
+      $errors[] = T_('Missing user selection for rank change#T_ladder');
    else
    {
       $tladder = TournamentLadder::load_tournament_ladder_by_user($tid, 0, $rid);
@@ -343,11 +343,11 @@ function prepare_update_rank( $tid, $rid, $new_rank, &$errors )
 
    $max_rank = TournamentLadder::load_max_rank($tid);
    if( $new_rank < 1 || $new_rank > $max_rank )
-      $errors[] = sprintf( T_('New rank [%s] is out of valid range %s.'), $new_rank,
+      $errors[] = sprintf( T_('New rank [%s] is out of valid range %s.#T_ladder'), $new_rank,
          build_range_text(1, $max_rank) );
 
    if( !is_null($tladder) && $new_rank == $tladder->Rank )
-      $errors[] = sprintf( T_('No change in rank [%s] for selected user'), $tladder->Rank );
+      $errors[] = sprintf( T_('No change in rank [%s] for selected user#T_ladder'), $tladder->Rank );
 
    return $tladder;
 }
@@ -356,7 +356,7 @@ function prepare_update_rank( $tid, $rid, $new_rank, &$errors )
 function admin_edit_ladder_extend_table_form( &$table, &$form )
 {
    $result = $form->print_insert_text_input( 'new_rank', 6, 6, get_request_arg('new_rank') );
-   $result .= $form->print_insert_submit_button( 'ta_updrank', T_('Update rank') );
+   $result .= $form->print_insert_submit_button( 'ta_updrank', T_('Update rank#T_ladder') );
    return $result;
 }
 
@@ -410,27 +410,27 @@ function build_action_row_str( &$tladder, $is_mine, $rid, $run_games_str )
       {
          global $tl_user, $play_locked;
          if( $play_locked )
-            $row_str = span('LadderWarn', T_('Challenging locked') );
+            $row_str = span('LadderWarn', T_('Challenging locked#T_ladder') );
          elseif( !is_null($tl_user) && $tl_user->MaxChallengedOut )
-            $row_str = span('LadderWarn', T_('Challenging stalled') );
+            $row_str = span('LadderWarn', T_('Challenging stalled#T_ladder') );
          else
             $row_str = sprintf( '[%s]',
                anchor( $base_path."tournaments/ladder/challenge.php?tid=$tid".URI_AMP."rid={$tladder->rid}",
-                       T_('Challenge this user') ));
+                       T_('Challenge this user#T_ladder') ));
       }
       elseif( $tladder->MaxChallengedIn )
       {
-         $row_str = span('LadderInfo', sprintf( T_('Already in %s challenges'), $tladder->ChallengesIn ));
+         $row_str = span('LadderInfo', sprintf( T_('Already in %s challenges#T_ladder'), $tladder->ChallengesIn ));
       }
       elseif( $tladder->RematchWait >= 0 )
       {
          if( $tladder->RematchWait > 0 )
          {
             $time_str = TournamentLadderProps::echo_rematch_wait($tladder->RematchWait, true);
-            $time_str = sprintf( T_('Rematch Wait [%s]'), $time_str );
+            $time_str = sprintf( T_('Rematch Wait [%s]#T_ladder'), $time_str );
          }
          else
-            $time_str = T_('Rematch Wait due');
+            $time_str = T_('Rematch Wait due#T_ladder');
          $row_str = span('LadderInfo', $time_str);
       }
    }

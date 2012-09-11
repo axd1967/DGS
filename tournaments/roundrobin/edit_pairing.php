@@ -118,11 +118,11 @@ $GLOBALS['ThePage'] = new Page('TournamentPairEdit');
          'DESCRIPTION', T_('Tournament ID'),
          'TEXT',        $tourney->build_info() ));
    $tform->add_row( array(
-         'DESCRIPTION', T_('Tournament Round#tround'),
+         'DESCRIPTION', T_('Tournament Round'),
          'TEXT',        $tourney->formatRound(), ));
    TournamentUtils::show_tournament_flags( $tform, $tourney );
    $tform->add_row( array(
-         'DESCRIPTION', T_('Round Status#tround'),
+         'DESCRIPTION', T_('Round Status#tourney'),
          'TEXT',        TournamentRound::getStatusText($tround->Status), ));
 
    $disable_create = '';
@@ -144,8 +144,8 @@ $GLOBALS['ThePage'] = new Page('TournamentPairEdit');
    {
       $tform->add_row( array(
             'CELL', 2, '', // align submit-buttons
-            'SUBMITBUTTONX', 't_pair', T_('Create tournament games'), $disable_create,
-            'TEXT', MED_SPACING . T_('Start games for all pools in current round'), ));
+            'SUBMITBUTTONX', 't_pair', T_('Create Tournament Games'), $disable_create,
+            'TEXT', MED_SPACING . T_('Start games for all pools in current round#tourney'), ));
       $tform->add_row( array(
             'CELL', 2, '', // align submit-buttons
             'TEXT', '<u>' . T_('Notes') . ':</u>'

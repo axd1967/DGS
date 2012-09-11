@@ -118,7 +118,7 @@ $GLOBALS['ThePage'] = new Page('TournamentPoolCreate');
          $slice_mode = (int)get_request_arg('slice_mode');
          if( TournamentPool::seed_pools( $tid, $tprops, $tround, $seed_order, $slice_mode ) )
          {
-            $sys_msg = urlencode( T_('Tournament Pools seeded!#tourney') );
+            $sys_msg = urlencode( T_('Tournament Pools seeded!') );
             jump_to("tournaments/roundrobin/create_pools.php?tid=$tid".URI_AMP."sysmsg=$sys_msg");
          }
       }
@@ -126,7 +126,7 @@ $GLOBALS['ThePage'] = new Page('TournamentPoolCreate');
       {
          if( TournamentPool::delete_pools($tid, $round) )
          {
-            $sys_msg = urlencode( T_('Tournament Pools removed!#tourney') );
+            $sys_msg = urlencode( T_('Tournament Pools removed!') );
             jump_to("tournaments/roundrobin/create_pools.php?tid=$tid".URI_AMP."sysmsg=$sys_msg");
          }
       }
@@ -134,7 +134,7 @@ $GLOBALS['ThePage'] = new Page('TournamentPoolCreate');
       {
          if( TournamentPool::add_missing_registered_users( $tid, $tround ) )
          {
-            $sys_msg = urlencode( T_('Tournament Default Pool filled with missing users!#tourney') );
+            $sys_msg = urlencode( T_('Tournament Default Pool filled with missing users!') );
             jump_to("tournaments/roundrobin/create_pools.php?tid=$tid".URI_AMP."sysmsg=$sys_msg");
          }
       }
@@ -149,11 +149,11 @@ $GLOBALS['ThePage'] = new Page('TournamentPoolCreate');
          'DESCRIPTION', T_('Tournament ID'),
          'TEXT',        $tourney->build_info() ));
    $tform->add_row( array(
-         'DESCRIPTION', T_('Tournament Round#tround'),
+         'DESCRIPTION', T_('Tournament Round'),
          'TEXT',        $tourney->formatRound(), ));
    TournamentUtils::show_tournament_flags( $tform, $tourney );
    $tform->add_row( array(
-         'DESCRIPTION', T_('Round Status#tround'),
+         'DESCRIPTION', T_('Round Status#tourney'),
          'TEXT',        TournamentRound::getStatusText($tround->Status), ));
 
    $has_errors = count($errors);
@@ -216,7 +216,7 @@ $GLOBALS['ThePage'] = new Page('TournamentPoolCreate');
             'CELL', 2, '',
             'TEXT',         T_('Order by') . MED_SPACING,
             'SELECTBOX',    'seed_order', 1, $arr_seed_order, $seed_order_val, false,
-            'TEXT',         SMALL_SPACING . T_('Slice by') . MED_SPACING,
+            'TEXT',         SMALL_SPACING . T_('Slice by#tourney') . MED_SPACING,
             'SELECTBOX',    'slice_mode', 1, $arr_slice_mode, $slice_mode_val, false,
             'SUBMITBUTTONX', 't_seed', T_('Seed Pools'), $disable_submit ));
       $tform->add_row( array(

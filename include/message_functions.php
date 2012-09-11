@@ -335,7 +335,7 @@ function game_settings_form(&$mform, $formstyle, $viewmode, $iamrated=true, $my_
    if( $is_fstyle_tourney )
    {
       $mform->add_row( array(
-            'DESCRIPTION', T_('Shape-Game ID#shape'),
+            'DESCRIPTION', T_('Shape-Game ID'),
             'TEXTINPUT', 'shape', 5, 10, $orig_shape_id, ));
    }
    if( $ShapeID && $ShapeSnapshot )
@@ -345,7 +345,7 @@ function game_settings_form(&$mform, $formstyle, $viewmode, $iamrated=true, $my_
       $mform->add_hidden( 'snapshot', $ShapeSnapshot );
 
       $mform->add_row( array(
-            'DESCRIPTION', T_('Shape Game#shape'),
+            'DESCRIPTION', T_('Shape Game'),
             'TEXT', ShapeControl::build_snapshot_info( $ShapeID, $Size, $ShapeSnapshot, $ShapeBlackFirst ), ));
       $mform->add_empty_row();
    }
@@ -371,7 +371,7 @@ function game_settings_form(&$mform, $formstyle, $viewmode, $iamrated=true, $my_
       $mform->add_hidden('ruleset', RULESET_JAPANESE);
 
    $value_array = array_value_to_key_and_value( range( MIN_BOARD_SIZE, MAX_BOARD_SIZE ));
-   $mform->add_row( array( 'DESCRIPTION', T_('Board size'),
+   $mform->add_row( array( 'DESCRIPTION', T_('Board Size'),
                            'SELECTBOXX', 'size', 1, $value_array, $Size, false, array( 'disabled' => $ShapeID ) ));
 
    $mform->add_row( array( 'SPACE' ) );
@@ -928,7 +928,7 @@ function game_info_table( $tablestyle, $game_row, $player_row, $iamrated, $use_s
       $itable->add_scaption(T_('Game info'));
 
    if( $ShapeID && ($tablestyle == GSET_MSG_INVITE || $tablestyle == GSET_WAITINGROOM) ) // invite & dispute, w-room
-      $itable->add_sinfo( T_('Shape Game#shape'),
+      $itable->add_sinfo( T_('Shape Game'),
             ShapeControl::build_snapshot_info( $ShapeID, $Size, $ShapeSnapshot, $ShapeBlackFirst ));
 
    if( $tablestyle == GSET_WAITINGROOM )
@@ -1931,7 +1931,7 @@ class MessageListBuilder
       $this->table->add_tablehead( 8, image( $ico, '*-*'), 'Image', TABLE_NO_HIDE, 'flow+');
       $this->table->add_tablehead(10, new TableHead( T_('First message in thread#header'),
             'images/msg_first.gif', T_('Show initial message in thread') ), 'Image', TABLE_NO_SORT );
-      $this->table->add_tablehead( 4, T_('Date#header'), 'Date', 0, 'me.mid-'); // order of me.mid == order of msg-date
+      $this->table->add_tablehead( 4, T_('Created#header'), 'Date', 0, 'me.mid-'); // order of me.mid == order of msg-date
       if( !$this->no_mark )
          $this->table->add_tablehead( 5, T_('Mark#header'), 'Mark', TABLE_NO_HIDE|TABLE_NO_SORT);
    }//message_list_head

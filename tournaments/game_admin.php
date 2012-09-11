@@ -108,7 +108,7 @@ define('GA_RES_TIMOUT', 3);
          $tgame->setStatus(TG_STATUS_SCORE);
          if( $tgame->update_score( 'Tournament.game_admin', TG_STATUS_PLAY ) )
          {
-            $sys_msg = urlencode( T_('Tournament game result set!#tourney') );
+            $sys_msg = urlencode( T_('Tournament Game result set!') );
             jump_to("tournaments/game_admin.php?tid=$tid".URI_AMP."gid=$gid".URI_AMP."sysmsg=$sys_msg");
          }
       }
@@ -156,7 +156,7 @@ define('GA_RES_TIMOUT', 3);
          'TEXT',        $tourney->build_info() ));
    TournamentUtils::show_tournament_flags( $tform, $tourney );
    $tform->add_row( array(
-         'DESCRIPTION', T_('Tournament Status#tourney'),
+         'DESCRIPTION', T_('Tournament Status'),
          'TEXT',        Tournament::getStatusText($tourney->Status) ));
    $tform->add_row( array(
          'DESCRIPTION', T_('Tournament Game Status'),
@@ -344,7 +344,7 @@ function parse_edit_form( &$tgame, $game )
 
 
       // determine edits
-      if( $old_vals['TG_Score'] != $tgame->Score ) $edits[] = T_('Score#edits');
+      if( $old_vals['TG_Score'] != $tgame->Score ) $edits[] = T_('Score');
    }//game-end
    elseif( @$_REQUEST['addtime_save'] )
    {
@@ -383,24 +383,24 @@ function draw_game_end( $tgame )
          'RADIOBUTTONSX', 'color', array( BLACK => T_('Black') ), @$vars['color'], $disabled,
          'TEXT', SMALL_SPACING . T_('wins by#TG_admin') . SMALL_SPACING,
          'CELL', 1, '',
-         'RADIOBUTTONSX', 'result', array( GA_RES_SCORE => T_('Score#TG_admin') ), @$vars['result'], $disabled,
+         'RADIOBUTTONSX', 'result', array( GA_RES_SCORE => T_('Score') ), @$vars['result'], $disabled,
          'TEXT', MED_SPACING,
          'TEXTINPUTX', 'score', 6, 6, @$vars['score'], $disabled,
          'TEXT', sprintf( ' (%s)', T_('0=Jigo#TG_admin') ), ));
    $tform->add_row( array(
          'RADIOBUTTONSX', 'color', array( WHITE => T_('White') ), @$vars['color'], $disabled,
          'CELL', 1, '',
-         'RADIOBUTTONSX', 'result', array( GA_RES_RESIGN => T_('Resignation#TG_admin') ), @$vars['result'], $disabled, ));
+         'RADIOBUTTONSX', 'result', array( GA_RES_RESIGN => T_('Resignation') ), @$vars['result'], $disabled, ));
    $tform->add_row( array(
          'TAB',
-         'RADIOBUTTONSX', 'result', array( GA_RES_TIMOUT => T_('Timeout#TG_admin') ), @$vars['result'], $disabled, ));
+         'RADIOBUTTONSX', 'result', array( GA_RES_TIMOUT => T_('Timeout') ), @$vars['result'], $disabled, ));
 
    if( $allow_edit )
    {
       $tform->add_empty_row();
       $tform->add_row( array(
             'CELL', 2, '', // align submit-buttons
-            'SUBMITBUTTON', 'gend_save', T_('Save game result#TG_admin'), ));
+            'SUBMITBUTTON', 'gend_save', T_('Save Game Result'), ));
    }
 
    $tform->add_empty_row();
@@ -479,7 +479,7 @@ function draw_add_time( $tgame, $game, $allow_add_time )
    }
 
    $tform->add_row( array(
-         'SUBMITBUTTON', 'addtime_save', T_('Add time#TG_admin'), ));
+         'SUBMITBUTTON', 'addtime_save', T_('Add Time'), ));
 
    $tform->add_empty_row();
    $tform->echo_string();

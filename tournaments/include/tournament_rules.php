@@ -795,19 +795,19 @@ class TournamentRules
       if( !isset($ARR_GLOBALS_TOURNAMENT_RULES[$key]) )
       {
          $arr = array();
-         $arr[TRULE_HANDITYPE_CONV]   = T_('Conventional handicap#TR_handitype');
-         $arr[TRULE_HANDITYPE_PROPER] = T_('Proper handicap#TR_handitype');
-         $arr[TRULE_HANDITYPE_NIGIRI] = T_('Even game with nigiri#TR_handitype');
+         $arr[TRULE_HANDITYPE_CONV]   = T_('Conventional handicap');
+         $arr[TRULE_HANDITYPE_PROPER] = T_('Proper handicap');
+         $arr[TRULE_HANDITYPE_NIGIRI] = T_('Even game with nigiri');
          if( $tourney_type == TOURNEY_TYPE_LADDER )
          {
-            $arr[TRULE_HANDITYPE_BLACK] = T_('Manual game with Challenger getting Black#TR_handitype');
-            $arr[TRULE_HANDITYPE_WHITE] = T_('Manual game with Challenger getting White#TR_handitype');
+            $arr[TRULE_HANDITYPE_BLACK] = T_('Manual game with Challenger getting Black#T_ladder');
+            $arr[TRULE_HANDITYPE_WHITE] = T_('Manual game with Challenger getting White#T_ladder');
          }
          else //TOURNEY_TYPE_ROUND_ROBIN
          {
-            $arr[TRULE_HANDITYPE_BLACK] = T_('Manual game with stronger player getting Black#TR_handitype');
-            $arr[TRULE_HANDITYPE_WHITE] = T_('Manual game with stronger player getting White#TR_handitype');
-            $arr[TRULE_HANDITYPE_DOUBLE] = T_('Double game#TR_handitype');
+            $arr[TRULE_HANDITYPE_BLACK] = T_('Manual game with stronger player getting Black#tourney');
+            $arr[TRULE_HANDITYPE_WHITE] = T_('Manual game with stronger player getting White#tourney');
+            $arr[TRULE_HANDITYPE_DOUBLE] = T_('Double game');
          }
          $ARR_GLOBALS_TOURNAMENT_RULES[$key] = $arr;
       }

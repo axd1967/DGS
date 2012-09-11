@@ -166,11 +166,11 @@ $GLOBALS['ThePage'] = new Page('TournamentRankEditor');
          'DESCRIPTION', T_('Tournament ID'),
          'TEXT',        $tourney->build_info() ));
    $tform->add_row( array(
-         'DESCRIPTION', T_('Tournament Round#tround'),
+         'DESCRIPTION', T_('Tournament Round'),
          'TEXT',        $tourney->formatRound(), ));
    TournamentUtils::show_tournament_flags( $tform, $tourney );
    $tform->add_row( array(
-         'DESCRIPTION', T_('Round Status#tround'),
+         'DESCRIPTION', T_('Round Status#tourney'),
          'TEXT',        TournamentRound::getStatusText($tround->Status), ));
 
    if( count($errors) )
@@ -186,23 +186,23 @@ $GLOBALS['ThePage'] = new Page('TournamentRankEditor');
 
    $disable_submit = ($has_errors) ? 'disabled=1' : '';
    $arr_actions = array(
-      RKACT_SET_NEXT_RND   => T_('Set Next-Round#rank_edit'),
-      RKACT_CLEAR_NEXT_RND => T_('Clear Next-Round#rank_edit'),
-      RKACT_CLEAR_RANKS    => T_('Clear Rank (=0)#rank_edit'),
-      RKACT_REMOVE_RANKS   => T_('Remove Rank#rank_edit'),
+      RKACT_SET_NEXT_RND   => T_('Set Next-Round#tourney'),
+      RKACT_CLEAR_NEXT_RND => T_('Clear Next-Round#tourney'),
+      RKACT_CLEAR_RANKS    => T_('Clear Rank (=0)#tpool'),
+      RKACT_REMOVE_RANKS   => T_('Remove Rank#tpool'),
    );
 
    $tform->add_row( array( 'HR' ));
 
    $tform->add_row( array(
          'CELL', 1, '',
-         'SUBMITBUTTONX', 't_stats', T_('Show Rank Stats'), $disable_submit,
+         'SUBMITBUTTONX', 't_stats', T_('Show Rank Stats#tourney'), $disable_submit,
          'CELL', 1, '',
-         'TEXT', T_('Show counts of all ranks + Show rank-actions.'), ));
+         'TEXT', T_('Show counts of all ranks + Show rank-actions.#tourney'), ));
 
    $tform->add_row( array(
          'CELL', 1, '',
-         'SUBMITBUTTONX', 't_fill', T_('Fill Ranks'), $disable_submit,
+         'SUBMITBUTTONX', 't_fill', T_('Fill Ranks#tpool'), $disable_submit,
          'CELL', 1, '',
          'TEXT', T_('Fill ranks for finished pools.'), ));
 
@@ -210,17 +210,17 @@ $GLOBALS['ThePage'] = new Page('TournamentRankEditor');
    {
       $arr_ranks = array_value_to_key_and_value( $rank_summary->get_ranks() );
       $arr_ranks_to = array( '' => '=' ) + $arr_ranks;
-      $arr_ranks = array( '' => T_('All#ranks') ) + $arr_ranks;
-      $arr_pools = array( '' => T_('All#ranks') ) + array_value_to_key_and_value( range(1, $tround->Pools) );
+      $arr_ranks = array( '' => T_('All') ) + $arr_ranks;
+      $arr_pools = array( '' => T_('All') ) + array_value_to_key_and_value( range(1, $tround->Pools) );
       $tform->add_empty_row();
       $tform->add_row( array(
             'CELL', 2, '',
             'SELECTBOX', 'action', 1, $arr_actions, get_request_arg('action', RKACT_SET_NEXT_RND), false,
-            'TEXT', T_('for all users with ranks#rank_edit') . MED_SPACING,
+            'TEXT', T_('for all users with ranks#tpool') . MED_SPACING,
             'SELECTBOX', 'rank_from', 1, $arr_ranks, get_request_arg('rank_from',''), false,
             'TEXT', '...' . MED_SPACING,
             'SELECTBOX', 'rank_to', 1, $arr_ranks_to, get_request_arg('rank_to',''), false,
-            'TEXT', T_('on pool#rank_edit') . MED_SPACING,
+            'TEXT', T_('on pool') . MED_SPACING,
             'SELECTBOX', 'pool', 1, $arr_pools, get_request_arg('pool'), false,
             'TEXT', ' ',
             'SUBMITBUTTONX', 't_exec', T_('Execute'), $disable_submit, ));
@@ -233,17 +233,17 @@ $GLOBALS['ThePage'] = new Page('TournamentRankEditor');
       $tform->add_empty_row();
       $tform->add_row( array(
             'CELL', 2, '',
-            'TEXT', sprintf( T_('Edit Rank of pool-user [ %s ] with rating [%s] in pool %s') . ':',
+            'TEXT', sprintf( T_('Edit Rank of pool-user [ %s ] with rating [%s] in pool %s#tpool') . ':',
                              $user->user_reference(), echo_rating($user->Rating, true),
                              $tpool_user->Pool ), ));
       $tform->add_row( array(
             'CELL', 2, '',
-            'TEXT', T_('Current Rank#rank_edit') . ': '
+            'TEXT', T_('Current Rank#tpool') . ': '
                   . span('TRank', ( $curr_rank < TPOOLRK_RANK_ZONE
-                        ? T_('unset#rank_edit') : $tpool_user->formatRank() )), ));
+                        ? T_('unset#tpool') : $tpool_user->formatRank() )), ));
       $tform->add_row( array(
             'CELL', 2, '',
-            'TEXT', T_('Current Next-Round Status#rank_edit') . ': '
+            'TEXT', T_('Current Next-Round Status#tourney') . ': '
                   . span('TRank', $tpool_user->echoRankImage(NO_VALUE)), ));
 
       $arr_set_ranks = array_value_to_key_and_value( range(1, $tround->PoolSize) );
@@ -252,14 +252,14 @@ $GLOBALS['ThePage'] = new Page('TournamentRankEditor');
             'CELL', 2, '',
             'SELECTBOX', 'action', 1, $arr_actions, get_request_arg('action', RKACT_SET_NEXT_RND), false,
             'TEXT', ' ',
-            'SUBMITBUTTONX', 't_userexec', T_('Execute#rank_edit'), $disable_submit,
+            'SUBMITBUTTONX', 't_userexec', T_('Execute'), $disable_submit,
             'TEXT', SMALL_SPACING.SMALL_SPACING . T_('or') . SMALL_SPACING.SMALL_SPACING,
-            'TEXT', T_('Set Rank#rank_edit') . MED_SPACING,
+            'TEXT', T_('Set Rank#tpool') . MED_SPACING,
             'SELECTBOX', 'rank', 1, $arr_set_ranks, $rank_defval, false,
             'TEXT', ' ',
-            'CHECKBOX', 'nextrnd', 1, T_('Next-Round#rank_edit'), ($curr_rank > 0),
+            'CHECKBOX', 'nextrnd', 1, T_('Next Round#tourney'), ($curr_rank > 0),
             'TEXT', SMALL_SPACING,
-            'SUBMITBUTTONX', 't_setrank', T_('Execute#rank_edit'), $disable_submit, ));
+            'SUBMITBUTTONX', 't_setrank', T_('Execute'), $disable_submit, ));
    }
 
 
@@ -279,7 +279,7 @@ $GLOBALS['ThePage'] = new Page('TournamentRankEditor');
    $menu_array = array();
    $menu_array[T_('Tournament info')] = "tournaments/view_tournament.php?tid=$tid";
    $menu_array[T_('View Pools')] = "tournaments/roundrobin/view_pools.php?tid=$tid".URI_AMP.'edit=1';
-   $menu_array[T_('Edit ranks')] =
+   $menu_array[T_('Edit ranks#tpool')] =
       array( 'url' => "tournaments/roundrobin/edit_ranks.php?tid=$tid", 'class' => 'TAdmin' );
    $menu_array[T_('Manage tournament')] =
       array( 'url' => "tournaments/manage_tournament.php?tid=$tid", 'class' => 'TAdmin' );

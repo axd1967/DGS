@@ -601,10 +601,10 @@ class PoolSummary
          TABLE_NO_SORT|TABLE_NO_HIDE|TABLE_NO_PAGE|TABLE_NO_SIZE );
 
       // add_tablehead($nr, $descr, $attbs=null, $mode=TABLE_NO_HIDE|TABLE_NO_SORT, $sortx='')
-      $pstable->add_tablehead( 1, T_('Pool#poolsum_header'), 'Number' );
-      $pstable->add_tablehead( 2, T_('Size#poolsum_header'), 'Number' );
-      $pstable->add_tablehead( 3, T_('Games#poolsum_header'), 'Number' );
-      $pstable->add_tablehead( 4, T_('Pool Errors#poolsum_header'), 'Note' );
+      $pstable->add_tablehead( 1, T_('Pool'), 'Number' );
+      $pstable->add_tablehead( 2, T_('Size#header'), 'Number' );
+      $pstable->add_tablehead( 3, T_('#Games#header'), 'Number' );
+      $pstable->add_tablehead( 4, T_('Pool Errors#header'), 'Note' );
       $this->table = $pstable;
    }
 
@@ -624,7 +624,7 @@ class PoolSummary
             1 => $pool,
             2 => $pool_usercount,
             3 => $pool_games,
-            4 => ( $cnt_errors ? implode(', ', $errors ) : T_('OK#poolsum') ),
+            4 => ( $cnt_errors ? implode(', ', $errors ) : T_('OK') ),
          );
          if( $cnt_errors )
             $row_arr['extra_class'] = 'Violation';
@@ -635,7 +635,7 @@ class PoolSummary
       $this->table->add_row( array(
             2 => $cnt_users,
             3 => $cnt_games,
-            4 => T_('Sum#poolsum'),
+            4 => T_('Sum'),
             'extra_class' => 'Sum', ));
 
       return $this->table;
@@ -728,19 +728,19 @@ class PoolViewer
    {
       // add_tablehead($nr, $descr, $attbs=null, $mode=TABLE_NO_HIDE|TABLE_NO_SORT, $sortx='')
       if( $this->options & PVOPT_EDIT_COL )
-         $this->table->add_tablehead( 8, T_('Actions#pool_header'), 'Image', TABLE_NO_HIDE );
+         $this->table->add_tablehead( 8, T_('Actions#header'), 'Image', TABLE_NO_HIDE );
       $this->table->add_tablehead( 1, T_('Name#header'), 'User', 0 );
       $this->table->add_tablehead( 2, T_('Userid#header'), 'User', TABLE_NO_HIDE );
-      $this->table->add_tablehead( 3, T_('User Rating#pool_header'), 'Rating', 0 );
+      $this->table->add_tablehead( 3, T_('User Rating#header'), 'Rating', 0 );
       if( !($this->options & PVOPT_NO_TRATING) )
-         $this->table->add_tablehead( 4, T_('Tournament Rating#pool_header'), 'Rating', 0 );
-      $this->table->add_tablehead( 5, T_('Country#pool_header'), 'Image', 0 );
+         $this->table->add_tablehead( 4, T_('Tournament Rating#header'), 'Rating', 0 );
+      $this->table->add_tablehead( 5, T_('Country#header'), 'Image', 0 );
 
       $idx = 12; // last used-static-col
       $this->poolidx = $idx;
       if( !($this->options & PVOPT_NO_RESULT) )
       {
-         $this->table->add_tablehead( 6, T_('Place#pool_header'), 'NumberC', TABLE_NO_HIDE );
+         $this->table->add_tablehead( 6, T_('Place#tourney'), 'NumberC', TABLE_NO_HIDE );
 
          foreach( range(1, $this->pools_max_users) as $pool )
          {
@@ -753,14 +753,14 @@ class PoolViewer
                $this->table->add_tablehead( ++$idx, $pool, 'Matrix', TABLE_NO_HIDE );
          }
 
-         $this->table->add_tablehead( 9, T_('#Wins#pool_header'), 'NumberC', 0 );
-         $this->table->add_tablehead( 7, T_('Points#pool_header'), 'NumberC', TABLE_NO_HIDE );
-         $this->table->add_tablehead(10, T_('SODOS#pool_header'), 'NumberC', 0 );
-         $this->table->add_tablehead(11, T_('Rank#pool_header'), 'TRank', TABLE_NO_HIDE );
+         $this->table->add_tablehead( 9, T_('#Wins#tourney'), 'NumberC', 0 );
+         $this->table->add_tablehead( 7, T_('Points#header'), 'NumberC', TABLE_NO_HIDE );
+         $this->table->add_tablehead(10, T_('SODOS#tourney'), 'NumberC', 0 );
+         $this->table->add_tablehead(11, T_('Rank#tpool'), 'TRank', TABLE_NO_HIDE );
          $this->table->add_tablehead(12, '', '', TABLE_NO_HIDE );
       }
       if( ($this->options & PVOPT_EDIT_RANK) && !($this->options & PVOPT_EDIT_COL) )
-         $this->table->add_tablehead( 8, T_('Edit#pool_header'), 'Image', TABLE_NO_HIDE );
+         $this->table->add_tablehead( 8, T_('Edit#header'), 'Image', TABLE_NO_HIDE );
    }//init_pool_table
 
    /*! \brief Makes table for all pools. */
@@ -799,7 +799,7 @@ class PoolViewer
          $this->table->add_row_one_col( '', array( 'extra_class' => 'Empty' ) );
       if( $cnt_users )
       {
-         $pool_title = ($pool == 0) ? T_('Users without pool assignment') : sprintf( T_('Pool %s#tourney'), $pool );
+         $pool_title = ($pool == 0) ? T_('Users without pool assignment') : sprintf( T_('Pool %s'), $pool );
          $this->table->add_row_title( "<a name=\"pool$pool\">$pool_title</a>" );
          if( $this->first_pool )
             $this->table->add_row_thead();
@@ -922,7 +922,7 @@ class RankSummary
          TABLE_NO_SORT|TABLE_NO_HIDE|TABLE_NO_PAGE|TABLE_NO_SIZE );
 
       // add_tablehead($nr, $descr, $attbs=null, $mode=TABLE_NO_HIDE|TABLE_NO_SORT, $sortx='')
-      $rstable->add_tablehead( 1, T_('Rank#ranksum_header'), 'TRank' );
+      $rstable->add_tablehead( 1, T_('Rank#tpool'), 'TRank' );
       $rstable->add_tablehead( 2, T_('Count#ranksum_header'), 'NumberC' );
       $rstable->add_tablehead( 3, T_('NR-Count#ranksum_header'), 'NumberC' );
       $this->table = $rstable;
@@ -957,9 +957,9 @@ class RankSummary
    {
       $notes = array();
       $notes[] = T_('Rank \'TP\' = tournament-participants registered for next-round');
-      $notes[] = sprintf( T_('Rank \'%s\' = rank not set yet for pool-users'), T_('unset#ranksum') );
-      $notes[] = sprintf( T_('%s = count of users with given rank set'), T_('Count#ranksum_header') );
-      $notes[] = sprintf( T_('%s = count of users advancing to Next-Round, or marked for final result'),
+      $notes[] = sprintf( T_('Rank \'%s\' = rank not set yet for pool-users'), T_('unset#tpool') );
+      $notes[] = sprintf( T_('%s = count of users with given rank set#tpool'), T_('Count#ranksum_header') );
+      $notes[] = sprintf( T_('%s = count of users advancing to Next-Round, or marked for final result#tourney'),
          T_('NR-Count#ranksum_header') );
       return $notes;
    }
@@ -982,7 +982,7 @@ class RankSummary
          $count_nextround += $arr[1];
          $count_users += $arr[0];
          $this->table->add_row( array(
-               1 => ($rank < TPOOLRK_RANK_ZONE) ? T_('unset#ranksum') : $rank,
+               1 => ($rank < TPOOLRK_RANK_ZONE) ? T_('unset#tpool') : $rank,
                2 => $arr[0],
                3 => ($arr[1] ? $arr[1] : ''),
             ));
@@ -990,7 +990,7 @@ class RankSummary
 
       // summary row
       $this->table->add_row( array(
-            1 => T_('Sum#ranksum'),
+            1 => T_('Sum'),
             2 => $count_users,
             3 => $count_nextround,
             'extra_class' => 'Sum', ));

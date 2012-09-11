@@ -61,7 +61,7 @@ require_once( 'include/message_functions.php' );
    $mtable->add_tablehead( 3, T_('Correspondent#header'), 'User' );
    $mtable->add_tablehead( 4, T_('Level#header'), 'Number' );
    $mtable->add_tablehead( 5, T_('Subject#header') );
-   $mtable->add_tablehead( 6, T_('Date#header'), 'Date' );
+   $mtable->add_tablehead( 6, T_('Created#header'), 'Date' );
 
 
    // see also the note about MessageCorrespondents.mid==0 in message_list_query()

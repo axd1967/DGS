@@ -116,17 +116,17 @@ $GLOBALS['ThePage'] = new Page('Tournament');
       T_('This page contains all necessary information and links to participate in the tournament.'),
       MINI_SPACING,
       T_('There are different sections:#tourney'), "\n<ul>",
-         "\n<li>", anchor( "$base_page_tourney#title", T_('Tournament description') ),
-         "\n<li>", anchor( "$base_page_tourney#news", T_('Tournament news') ),
-         "\n<li>", anchor( "$base_page_tourney#status", T_('Tournament status') ),
+         "\n<li>", anchor( "$base_page_tourney#title", T_('Tournament Description') ),
+         "\n<li>", anchor( "$base_page_tourney#news", T_('Tournament News#T_view') ),
+         "\n<li>", anchor( "$base_page_tourney#status", T_('Tournament Status') ),
          ( $cnt_tstandings > 0
-            ? "\n<li>" . anchor( "$base_page_tourney#standings", T_('Tournament standings') )
+            ? "\n<li>" . anchor( "$base_page_tourney#standings", T_('Tournament Standings') )
             : ''),
-         "\n<li>", anchor( "$base_page_tourney#rules", T_('Tournament rules') ),
-         "\n<li>", anchor( "$base_page_tourney#registration", T_('Tournament registration information') ),
-         "\n<li>", anchor( "$base_page_tourney#games", T_('Tournament games') ),
+         "\n<li>", anchor( "$base_page_tourney#rules", T_('Tournament Rules') ),
+         "\n<li>", anchor( "$base_page_tourney#registration", T_('Tournament Registration Information') ),
+         "\n<li>", anchor( "$base_page_tourney#games", T_('Tournament Games') ),
          ( $show_tresult
-            ? "\n<li>" . anchor( "$base_page_tourney#result", T_('Tournament results') )
+            ? "\n<li>" . anchor( "$base_page_tourney#result", T_('Tournament Results') )
             : ''),
       "</ul>\n",
       make_html_safe(
@@ -175,33 +175,33 @@ $GLOBALS['ThePage'] = new Page('Tournament');
       }
    }
    else
-      echo "<center>", T_('No tournament news.#tnews'), "</center><br>\n";
+      echo "<center>", T_('No tournament news.'), "</center><br>\n";
 
    // ------------- Section Menu
 
    $sectmenu = array();
-   $sectmenu[T_('Tournament news archive#tnews')] = "tournaments/list_news.php?tid=$tid";
+   $sectmenu[T_('Tournament news archive')] = "tournaments/list_news.php?tid=$tid";
 
    make_menu( $sectmenu, false);
 
    // --------------- Status --------------------
 
-   section( 'TournamentStatus', T_('Tournament Status#tourney'), 'status', true );
+   section( 'TournamentStatus', T_('Tournament Status'), 'status', true );
 
    $arr_locks = check_locks( $tourney );
 
    $itable = new Table_info('tstatus', TABLEOPT_LABEL_COLON);
    if( count($arr_locks) )
       $itable->add_sinfo( T_('Tournament Locks'), implode("<br>\n", $arr_locks) );
-   $itable->add_sinfo( T_('Tournament Status#tourney'), $tourney->getStatusText($tourney->Status) );
+   $itable->add_sinfo( T_('Tournament Status'), $tourney->getStatusText($tourney->Status) );
    if( $ttype->need_rounds )
       $itable->add_sinfo( T_('Tournament Round'), $tourney->formatRound() );
    if( $reg_user_info )
-      $itable->add_sinfo( T_('Registration status'), span('TUserStatus', $reg_user_info) );
+      $itable->add_sinfo( T_('Registration Status#tourney'), span('TUserStatus', $reg_user_info) );
    if( $tt_user_state )
    {
       if( $tourney->Type == TOURNEY_TYPE_LADDER )
-         $itable->add_sinfo( T_('User Result State'), $tt_user_state );
+         $itable->add_sinfo( T_('User Result State#T_ladder'), $tt_user_state );
    }
 
    echo $itable->make_table();
@@ -210,7 +210,7 @@ $GLOBALS['ThePage'] = new Page('Tournament');
 
    if( $cnt_tstandings > 0 )
    {
-      section( 'TournamentStandings', sprintf( T_('Tournament Standings (TOP %s)#T_view'), $cnt_tstandings ),
+      section( 'TournamentStandings', sprintf( T_('Tournament Standings (TOP %s)'), $cnt_tstandings ),
          'standings' );
 
       if( $tourney->Type == TOURNEY_TYPE_LADDER )
@@ -219,7 +219,7 @@ $GLOBALS['ThePage'] = new Page('Tournament');
 
    // --------------- Rules -----------------------------------------
 
-   section( 'TournamentRules', T_('Tournament Rules#T_view'), 'rules', true );
+   section( 'TournamentRules', T_('Tournament Rules'), 'rules', true );
 
    if( !is_null($trule) )
       echo_tournament_rules( $tourney, $trule );
@@ -227,7 +227,7 @@ $GLOBALS['ThePage'] = new Page('Tournament');
 
    // --------------- Registration ----------------------------------
 
-   section( 'TournamentRegistration', T_('Tournament Registration#T_view'), 'registration', true );
+   section( 'TournamentRegistration', T_('Tournament Registration'), 'registration', true );
 
    if( !is_null($tprops) )
       echo_tournament_registration( $tprops );
@@ -239,7 +239,7 @@ $GLOBALS['ThePage'] = new Page('Tournament');
    foreach( $tp_counts as $t_status => $cnt )
    {
       echo "  <li>",
-         sprintf( T_('%3d users on status [%s]'), $cnt, TournamentParticipant::getStatusText($t_status) ),
+         sprintf( T_('%3d users on status [%s]#tourney'), $cnt, TournamentParticipant::getStatusText($t_status) ),
          "\n";
    }
    echo "</ul>\n";
@@ -262,7 +262,7 @@ $GLOBALS['ThePage'] = new Page('Tournament');
 
    // --------------- Games -----------------------------------------
 
-   section( 'TournamentGames', T_('Tournament Games#T_view'), 'games', true );
+   section( 'TournamentGames', T_('Tournament Games'), 'games', true );
 
    // show tourney-type-specific properties
    $tt_notes = null;
@@ -296,7 +296,7 @@ $GLOBALS['ThePage'] = new Page('Tournament');
 
    if( $show_tresult )
    {
-      section( 'TournamentResult', T_('Tournament Results#T_view'), 'result', true );
+      section( 'TournamentResult', T_('Tournament Results'), 'result', true );
 
       echo "<center>",
          TournamentGuiHelper::build_tournament_results( $page, $tourney ),
@@ -324,24 +324,24 @@ function echo_tournament_rules( $tourney, $trule )
 {
    $adj_komi = array();
    if( $trule->AdjKomi )
-      $adj_komi[] = sprintf( T_('adjusted by %s points#trules_komi'),
+      $adj_komi[] = sprintf( T_('adjusted by %s points#komi'),
             spacing( ($trule->AdjKomi > 0 ? '+' : '') . sprintf('%.1f', $trule->AdjKomi), 1, 'b') );
    if( $trule->JigoMode == JIGOMODE_ALLOW_JIGO )
-      $adj_komi[] = T_('Jigo allowed#trules_komi');
+      $adj_komi[] = T_('Jigo allowed');
    elseif( $trule->JigoMode == JIGOMODE_NO_JIGO )
-      $adj_komi[] = T_('No Jigo allowed#trules_komi');
+      $adj_komi[] = T_('No Jigo allowed');
 
    $adj_handi = array();
    if( $trule->AdjHandicap )
-      $adj_handi[] = sprintf( T_('adjusted by %s stones#trules_handi'),
+      $adj_handi[] = sprintf( T_('adjusted by %s stones#handi'),
             spacing( ($trule->AdjHandicap > 0 ? '+' : '') . $trule->AdjHandicap, 1, 'b') );
    if( $trule->MinHandicap > 0 && $trule->MaxHandicap < MAX_HANDICAP )
-      $adj_handi[] = sprintf( T_('limited by min. %s and max. %s stones#trules_handi'),
+      $adj_handi[] = sprintf( T_('limited by min. %s and max. %s stones'),
             $trule->MinHandicap, min( MAX_HANDICAP, $trule->MaxHandicap) );
    elseif( $trule->MinHandicap > 0 )
-      $adj_handi[] = sprintf( T_('limited by min. %s stones#trules_handi'), $trule->MinHandicap );
+      $adj_handi[] = sprintf( T_('limited by min. %s stones'), $trule->MinHandicap );
    elseif( $trule->MaxHandicap < MAX_HANDICAP )
-      $adj_handi[] = sprintf( T_('limited by max. %s stones#trules_handi'), $trule->MaxHandicap );
+      $adj_handi[] = sprintf( T_('limited by max. %s stones'), $trule->MaxHandicap );
 
    $itable = new Table_info('gamerules', TABLEOPT_LABEL_COLON);
    if( $trule->ShapeID && $trule->ShapeSnapshot )
@@ -349,37 +349,33 @@ function echo_tournament_rules( $tourney, $trule )
       $arr_shape = GameSnapshot::parse_check_extended_snapshot($trule->ShapeSnapshot);
       if( is_array($arr_shape) )
       {
-         $itable->add_sinfo( T_('Shape-Game#shape'),
+         $itable->add_sinfo( T_('Shape-Game'),
                ShapeControl::build_snapshot_info(
                   $trule->ShapeID, $arr_shape['Size'], $arr_shape['Snapshot'], $arr_shape['PlayColorB'] ) );
       }
    }
    $itable->add_sinfo( T_('Ruleset'), getRulesetText($trule->Ruleset) );
-   $itable->add_sinfo( T_('Board Size#trules'), $trule->Size .' x '. $trule->Size );
-   $itable->add_sinfo( T_('Handicap Type#trules'),
+   $itable->add_sinfo( T_('Board Size'), $trule->Size .' x '. $trule->Size );
+   $itable->add_sinfo( T_('Handicap Type'),
          TournamentRules::getHandicaptypeText($trule->Handicaptype, $tourney->Type) );
-   $itable->add_sinfo( T_('Handicap#trules'),
-      ( $trule->needsCalculatedHandicap()
-            ? T_('calculated stones#trules_handi')
-            : sprintf( T_('%s stones#trules_handi'), $trule->Handicap) )
+   $itable->add_sinfo( T_('Handicap'),
+      ( $trule->needsCalculatedHandicap() ? T_('calculated stones') : sprintf( T_('%s stones'), $trule->Handicap) )
       . ', ' .
-      ( $trule->needsCalculatedKomi()
-            ? T_('calculated komi#trules_handi')
-            : sprintf( T_('%s points komi#trules_handi'), $trule->Komi) ));
+      ( $trule->needsCalculatedKomi() ? T_('calculated komi') : sprintf( T_('%s points komi'), $trule->Komi) ));
    if( count($adj_handi) )
-      $itable->add_sinfo( T_('Handicap adjustment#trules_handi'), implode(', ', $adj_handi) );
+      $itable->add_sinfo( T_('Handicap adjustment'), implode(', ', $adj_handi) );
    if( count($adj_komi) )
-      $itable->add_sinfo( T_('Komi adjustment#trules_komi'), implode(', ', $adj_komi) );
+      $itable->add_sinfo( T_('Komi adjustment'), implode(', ', $adj_komi) );
    if( ENABLE_STDHANDICAP )
-      $itable->add_sinfo( T_('Standard placement#trules_handi'), yesno($trule->StdHandicap) );
-   $itable->add_sinfo( T_('Main time#trules'), TimeFormat::echo_time($trule->Maintime)
-         . ( ($trule->Byotime == 0) ? SMALL_SPACING.T_('(absolute time)#trules') : '' ));
+      $itable->add_sinfo( T_('Standard placement'), yesno($trule->StdHandicap) );
+   $itable->add_sinfo( T_('Main time'), TimeFormat::echo_time($trule->Maintime)
+         . ( ($trule->Byotime == 0) ? SMALL_SPACING.T_('(absolute time)') : '' ));
    if( $trule->Byotime > 0 )
       $itable->add_sinfo(
          TimeFormat::echo_byotype($trule->Byotype),
          TimeFormat::echo_time_limit( -1, $trule->Byotype, $trule->Byotime, $trule->Byoperiods, 0) );
-   $itable->add_sinfo( T_('Clock runs on weekends#trules'), yesno($trule->WeekendClock) );
-   $itable->add_sinfo( T_('Rated#trules'), yesno($trule->Rated) );
+   $itable->add_sinfo( T_('Clock runs on weekends'), yesno($trule->WeekendClock) );
+   $itable->add_sinfo( T_('Rated'), yesno($trule->Rated) );
 
    if( $trule->Notes != '')
       echo make_html_safe( $trule->Notes, true ), "<br><br>\n";
@@ -396,7 +392,7 @@ function echo_tournament_registration( $tprops )
 
    // limit register end-time
    if( $tprops->RegisterEndTime )
-      $arr_tprops[] = sprintf( T_('Registration phase ends on [%s]'), formatDate($tprops->RegisterEndTime) );
+      $arr_tprops[] = sprintf( T_('Registration phase ends on [%s]#tourney'), formatDate($tprops->RegisterEndTime) );
 
    // limit participants
    if( $tprops->MinParticipants > 0 && $tprops->MaxParticipants > 0 )

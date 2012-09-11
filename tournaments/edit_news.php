@@ -84,8 +84,8 @@ $GLOBALS['ThePage'] = new Page('TournamentNewsEdit');
    $tnews_old_status = $tnews->Status;
    $arr_status = TournamentNews::getStatusText();
    $arr_flags = array(
-      TNEWS_FLAG_HIDDEN  => array( 'flag_hidden', T_('news only for tournament-directors#tourney') ),
-      TNEWS_FLAG_PRIVATE => array( 'flag_priv',   T_('news only for tournament-users#tourney') ),
+      TNEWS_FLAG_HIDDEN  => array( 'flag_hidden', T_('news only for tournament-directors#tnews') ),
+      TNEWS_FLAG_PRIVATE => array( 'flag_priv',   T_('news only for tournament-users#tnews') ),
    );
 
    // check + parse edit-form
@@ -114,7 +114,7 @@ $GLOBALS['ThePage'] = new Page('TournamentNewsEdit');
          'DESCRIPTION', T_('Tournament ID'),
          'TEXT',        $tourney->build_info() ));
    $tnform->add_row( array(
-         'DESCRIPTION', T_('Tournament Status#tourney'),
+         'DESCRIPTION', T_('Tournament Status'),
          'TEXT',        Tournament::getStatusText($tourney->Status), ));
    if( $tnews->Lastchanged )
       $tnform->add_row( array(
@@ -151,7 +151,7 @@ $GLOBALS['ThePage'] = new Page('TournamentNewsEdit');
    }
 
    $tnform->add_row( array(
-         'DESCRIPTION', T_('Publish Date'),
+         'DESCRIPTION', T_('Publish Time'),
          'TEXTINPUT',   'publish', 20, 30, $vars['publish'],
          'TEXT',  '&nbsp;' . span('EditNote', sprintf( T_('(Date format [%s])'), FMT_PARSE_DATE )), ));
    $tnform->add_row( array(
@@ -168,7 +168,7 @@ $GLOBALS['ThePage'] = new Page('TournamentNewsEdit');
    $tnform->add_empty_row();
    $tnform->add_row( array(
          'TAB', 'CELL', 1, '', // align submit-buttons
-         'SUBMITBUTTON', 'tn_save', T_('Save tournament news'),
+         'SUBMITBUTTON', 'tn_save', T_('Save Tournament News'),
          'TEXT', SMALL_SPACING,
          'SUBMITBUTTON', 'tn_preview', T_('Preview'),
       ));
@@ -251,7 +251,7 @@ function parse_edit_form( &$tnews )
       }
       $tnews->Flags = $new_value;
 
-      $parsed_value = parseDate( T_('Publish date for news#tnews'), $vars['publish'] );
+      $parsed_value = parseDate( T_('Publish time for news#tnews'), $vars['publish'] );
       if( is_numeric($parsed_value) )
       {
          $tnews->Published = $parsed_value;
@@ -271,11 +271,11 @@ function parse_edit_form( &$tnews )
 
 
       // determine edits
-      if( $old_vals['status'] != $tnews->Status ) $edits[] = T_('Status#edits');
-      if( $old_vals['flags'] != $tnews->Flags ) $edits[] = T_('Flags#edits');
-      if( $old_vals['publish'] != $tnews->Published ) $edits[] = T_('Publish-date#edits');
-      if( $old_vals['subject'] != $tnews->Subject ) $edits[] = T_('Subject#edits');
-      if( $old_vals['text'] != $tnews->Text ) $edits[] = T_('Text#edits');
+      if( $old_vals['status'] != $tnews->Status ) $edits[] = T_('Status');
+      if( $old_vals['flags'] != $tnews->Flags ) $edits[] = T_('Flags');
+      if( $old_vals['publish'] != $tnews->Published ) $edits[] = T_('Publish Time');
+      if( $old_vals['subject'] != $tnews->Subject ) $edits[] = T_('Subject');
+      if( $old_vals['text'] != $tnews->Text ) $edits[] = T_('Text');
    }
 
    return array( $vars, array_unique($edits), $errors );

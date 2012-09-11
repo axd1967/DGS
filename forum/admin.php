@@ -279,7 +279,7 @@ $GLOBALS['ThePage'] = new Page('ForumAdmin');
          echo '<tr>';
          echo '<td colspan='.($nbcol-3).' class=Entry>'
             ."<A href=\"$page?edit=1".URI_AMP."id=" . $row['ID']
-            .'" title="' . T_('Edit') . "\">$name</A></td>";
+            .'" title="' . T_('Edit#2') . "\">$name</A></td>";
 
          echo TD_button( T_('Move up'),
                "$page?move=u".URI_AMP.'id=' . $row['ID'],

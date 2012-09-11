@@ -87,7 +87,7 @@ $GLOBALS['ThePage'] = new Page('TournamentRulesEdit');
    {
       $trule->update();
       jump_to("tournaments/edit_rules.php?tid={$tid}".URI_AMP
-            . "sysmsg=". urlencode(T_('Tournament rules saved!')) );
+            . "sysmsg=". urlencode(T_('Tournament Rules saved!')) );
    }
 
    $page = "edit_rules.php";
@@ -129,7 +129,7 @@ $GLOBALS['ThePage'] = new Page('TournamentRulesEdit');
 
    $trform->add_row( array(
          'TAB', 'CELL', 1, '', // align submit-buttons
-         'SUBMITBUTTON', 'tr_save', T_('Save tournament rules'),
+         'SUBMITBUTTON', 'tr_save', T_('Save Tournament Rules'),
          'TEXT', SMALL_SPACING,
          'SUBMITBUTTON', 'tr_preview', T_('Preview'),
       ));
@@ -198,24 +198,24 @@ function parse_edit_form( &$trule )
 
       // determine edits
       $tr_cat_htype = get_category_handicaptype(strtolower($trule->Handicaptype));
-      if( $old_vals['size'] != $trule->Size ) $edits[] = T_('Board size#edits');
+      if( $old_vals['size'] != $trule->Size ) $edits[] = T_('Board Size');
       if( $old_vals['cat_htype'] != $tr_cat_htype )
-         $edits[] = T_('Handicap type#edits');
+         $edits[] = T_('Handicap Type');
       elseif( $tr_cat_htype == CAT_HTYPE_MANUAL )
       {
-         if( $old_vals['color_m'] != $vars['color_m'] ) $edits[] = T_('Color#edits');
-         if( $old_vals['handicap_m'] != $trule->Handicap ) $edits[] = T_('Handicap#edits');
-         if( $old_vals['komi_m'] != $trule->Komi ) $edits[] = T_('Komi#edits');
+         if( $old_vals['color_m'] != $vars['color_m'] ) $edits[] = T_('Color');
+         if( $old_vals['handicap_m'] != $trule->Handicap ) $edits[] = T_('Handicap');
+         if( $old_vals['komi_m'] != $trule->Komi ) $edits[] = T_('Komi');
       }
 
       if( ($old_vals['adj_komi'] != $trule->AdjKomi) || ( $old_vals['jigo_mode'] != $trule->JigoMode ) )
-         $edits[] = T_('Adjust Komi#edits');
+         $edits[] = T_('Adjust Komi');
       if( ($old_vals['adj_handicap'] != $trule->AdjHandicap)
             || ( $old_vals['min_handicap'] != $trule->MinHandicap )
             || ( $old_vals['max_handicap'] != $trule->MaxHandicap ) )
-         $edits[] = T_('Adjust Handicap#edits');
+         $edits[] = T_('Adjust Handicap');
       if( getBool($old_vals['stdhandicap']) != getBool($trule->StdHandicap) )
-         $edits[] = T_('Standard placement#edits');
+         $edits[] = T_('Standard placement');
 
       list($old_hours, $old_byohours, $old_byoperiods) =
          TournamentRules::convertFormTimeSettings( $old_vals );
@@ -223,14 +223,14 @@ function parse_edit_form( &$trule )
             || ($old_hours != $trule->Maintime)
             || ($old_byohours != $trule->Byotime)
             || ($trule->Byotype == BYOTYPE_FISCHER && $old_byoperiods != $trule->Byoperiods) )
-         $edits[] = T_('Time settings#edits');
+         $edits[] = T_('Time settings');
 
       if( getBool($old_vals['weekendclock']) != getBool($trule->WeekendClock) )
-         $edits[] = T_('Weekend clock#edits');
-      if( getBool($old_vals['rated']) != getBool($trule->Rated) ) $edits[] = T_('Rated#edits');
-      if( $old_vals['_tr_notes'] != $trule->Notes ) $edits[] = T_('Notes#edits');
+         $edits[] = T_('Weekend Clock');
+      if( getBool($old_vals['rated']) != getBool($trule->Rated) ) $edits[] = T_('Rated');
+      if( $old_vals['_tr_notes'] != $trule->Notes ) $edits[] = T_('Notes');
       if( ($old_vals['shape'] != $trule->ShapeID) || ($old_vals['snapshot'] != $trule->ShapeSnapshot) )
-         $edits[] = T_('Shape#edits');
+         $edits[] = T_('Shape');
    }
 
    return array( $vars, array_unique($edits), $errors, $gsc );

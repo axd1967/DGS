@@ -77,7 +77,7 @@ $GLOBALS['ThePage'] = new Page('TournamentNewsView');
 
    $menu_array = array();
    $menu_array[T_('Tournament info')] = "tournaments/view_tournament.php?tid=$tid";
-   $menu_array[T_('Tournament news archive#tnews')] = "tournaments/list_news.php?tid=$tid";
+   $menu_array[T_('Tournament news archive')] = "tournaments/list_news.php?tid=$tid";
    if( $allow_edit_tourney ) # for TD
    {
       $menu_array[T_('Add news#tnews')] =

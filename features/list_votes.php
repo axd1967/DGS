@@ -71,14 +71,14 @@ require_once( "features/lib_votes.php" );
 
    // add_tablehead($nr, $descr, $attbs=null, $mode=TABLE_NO_HIDE|TABLE_NO_SORT, $sortx='')
    // NOTE: col-IDs in sync with list_features.php
-   $vtable->add_tablehead( 1, T_('Vote ID#header'),     'Button', TABLE_NO_HIDE, 'F.ID+');
-   $vtable->add_tablehead( 3, T_('Status#header'),      'Enum', 0, 'F.Status+');
-   $vtable->add_tablehead(14, T_('Size#featheader'),    'Enum', 0, 'F.Size+');
-   $vtable->add_tablehead( 4, T_('Subject#header'),     '', 0, 'F.Subject+');
-   $vtable->add_tablehead(10, T_('Points#header'),      'Number', 0, 'sumPoints-');
-   $vtable->add_tablehead(11, T_('#Votes#header'),      'Number', 0, 'countVotes-');
-   $vtable->add_tablehead(12, T_('#Y#header'),          'Number', 0, 'countYes-');
-   $vtable->add_tablehead(13, T_('#N#header'),          'Number', 0, 'countNo-');
+   $vtable->add_tablehead( 1, T_('Vote ID#header'), 'Button', TABLE_NO_HIDE, 'F.ID+');
+   $vtable->add_tablehead( 3, T_('Status#header'),  'Enum', 0, 'F.Status+');
+   $vtable->add_tablehead(14, T_('Size#feature'),   'Enum', 0, 'F.Size+');
+   $vtable->add_tablehead( 4, T_('Subject#header'), '', 0, 'F.Subject+');
+   $vtable->add_tablehead(10, T_('Points#header'),  'Number', 0, 'sumPoints-');
+   $vtable->add_tablehead(11, T_('#Votes#header'),  'Number', 0, 'countVotes-');
+   $vtable->add_tablehead(12, T_('#Y#header'),      'Number', 0, 'countYes-');
+   $vtable->add_tablehead(13, T_('#N#header'),      'Number', 0, 'countNo-');
 
    $vtable->set_default_sort(10, 1); //on sumPoints, ID
    $order = $vtable->current_order_string();

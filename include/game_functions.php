@@ -2754,14 +2754,14 @@ class GameSetup
       if( $gs_old->Ruleset !== $gs_new->Ruleset )
          $out[] = array( T_('Ruleset'), getRulesetText($gs_old->Ruleset), getRulesetText($gs_new->Ruleset) );
       if( $gs_old->Size !== $gs_new->Size )
-         $out[] = array( T_('Board size'), $gs_old->Size, $gs_new->Size );
+         $out[] = array( T_('Board Size'), $gs_old->Size, $gs_new->Size );
 
       // handicap-type
       $htype_new = GameSetup::swap_htype_black_white($gs_new->Handicaptype);
       $htype_old_text = $gs_old->format_handicap_type( null, $my_handle, $opp_handle );
       $htype_new_text = $gs_new->format_handicap_type( $htype_new, $my_handle, $opp_handle );
       if( $htype_old_text !== $htype_new_text )
-         $out[] = array( T_('Handicap-Type#inv_diff'), $htype_old_text, $htype_new_text, 1 );
+         $out[] = array( T_('Handicap Type#inv_diff'), $htype_old_text, $htype_new_text, 1 );
 
       if( $gs_old->StdHandicap !== $gs_new->StdHandicap )
          $out[] = array( T_('Handicap stones placement#inv_diff'), $gs_old->format_std_handicap(), $gs_new->format_std_handicap() );
@@ -2962,9 +2962,9 @@ class GameSetupChecker
          $this->errors[] = $has_err = sprintf( T_('Invalid value for komi-adjustment [%s].'), $adj_komi );
 
       if( abs($adj_komi) > MAX_KOMI_RANGE )
-         $this->errors[] = $has_err = T_('Adjust komi#errchk') . ': ' . ErrorCode::get_error_text('komi_range');
+         $this->errors[] = $has_err = T_('Adjust Komi') . ': ' . ErrorCode::get_error_text('komi_range');
       if( floor(2 * $adj_komi) != 2 * $adj_komi ) // check for x.0|x.5
-         $this->errors[] = $has_err = T_('Adjust komi#errchk') . ': ' . ErrorCode::get_error_text('komi_bad_fraction');
+         $this->errors[] = $has_err = T_('Adjust Komi') . ': ' . ErrorCode::get_error_text('komi_bad_fraction');
 
       if( $has_err )
          $this->error_fields['adj_komi'] = 1;
@@ -3649,7 +3649,7 @@ class GameRematch
          $allow_invite = $allow_newgame = true;
 
       if( $allow_invite )
-         $arr_menu[T_('Rematch#rematch')] = $base_path."game_rematch.php?mode=" . REMATCH_INVITE .URI_AMP."gid=$gid";
+         $arr_menu[T_('Rematch')] = $base_path."game_rematch.php?mode=" . REMATCH_INVITE .URI_AMP."gid=$gid";
       if( $allow_newgame )
          $arr_menu[T_('Copy as new game#rematch')] = $base_path."game_rematch.php?mode=" . REMATCH_NEWGAME .URI_AMP."gid=$gid";
    }//add_rematch_links

@@ -307,13 +307,13 @@ function echo_image_shapeinfo( $shape_id, $board_size, $snapshot, $edit_goban=fa
       }
       else
       {
-         $img_str = image( $base_path.'images/shape.gif', T_('Shape#shape'), null, 'class="InTextImage"');
+         $img_str = image( $base_path.'images/shape.gif', T_('Shape'), null, 'class="InTextImage"');
          $link = anchor( $page_url, $img_str );
       }
    }
    else
    {
-      $img_str = image( $base_path.'images/shape.gif', T_('Shape Information#shape'), null, 'class="InTextImage"');
+      $img_str = image( $base_path.'images/shape.gif', T_('Shape Information'), null, 'class="InTextImage"');
       $link = anchor( $page_url, $img_str );
    }
 

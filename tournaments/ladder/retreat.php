@@ -82,7 +82,7 @@ $GLOBALS['ThePage'] = new Page('TournamentLadderRetreat');
       }
       ta_end();
 
-      $sys_msg = urlencode( T_('Retreated from Ladder!#tourney') );
+      $sys_msg = urlencode( T_('Retreated from Ladder!') );
       jump_to("tournaments/view_tournament.php?tid=$tid".URI_AMP."sysmsg=$sys_msg");
    }
 
@@ -117,13 +117,13 @@ $GLOBALS['ThePage'] = new Page('TournamentLadderRetreat');
          'DESCRIPTION', T_('Started'),
          'TEXT',        date(DATE_FMT, $tladder->Created) ));
    $tform->add_row( array(
-         'DESCRIPTION', T_('Rank changed'),
+         'DESCRIPTION', T_('Rank Changed#T_ladder'),
          'TEXT',        date(DATE_FMT, $tladder->RankChanged ) ));
    $tform->add_row( array(
-         'DESCRIPTION', T_('Rank'),
+         'DESCRIPTION', T_('Rank#T_ladder'),
          'TEXT',        $tladder->Rank ));
    $tform->add_row( array(
-         'DESCRIPTION', T_('Best Rank'),
+         'DESCRIPTION', T_('Best Rank#T_ladder'),
          'TEXT',        $tladder->BestRank ));
    $tform->add_empty_row();
 
@@ -133,7 +133,7 @@ $GLOBALS['ThePage'] = new Page('TournamentLadderRetreat');
                . T_('(also see notes below)'), ));
    $tform->add_row( array(
          'TAB', 'CELL', 2, '',
-         'SUBMITBUTTONX', 'tu_retreat', T_('Confirm Retreat'), ($has_errors ? 'disabled=1' : ''),
+         'SUBMITBUTTONX', 'tu_retreat', T_('Confirm Retreat#T_ladder'), ($has_errors ? 'disabled=1' : ''),
          'TEXT', SMALL_SPACING,
          'SUBMITBUTTON', 'tu_cancel', T_('Cancel') ));
 
@@ -144,7 +144,7 @@ $GLOBALS['ThePage'] = new Page('TournamentLadderRetreat');
 
    $tform->echo_string();
 
-   echo_notes( 'retreatnotesTable', T_('Retreat notes'), build_retreat_notes() );
+   echo_notes( 'retreatnotesTable', T_('Retreat notes#T_ladder'), build_retreat_notes() );
 
 
    $menu_array = array();
@@ -163,7 +163,7 @@ function build_retreat_notes()
    $notes = array();
 
    $notes[] = TournamentLadder::get_notes_user_removed() . "\n" .
-      T_('The opponents in your running tournament games (if there are any) will be notified about the retreat.#tourney');
+      T_('The opponents in your running tournament games (if there are any) will be notified about the retreat.#T_ladder');
    $notes[] = T_('Retreating from this ladder will also remove your tournament user registration along with the tournaments rank history.');
    $notes[] = T_('If you rejoin the ladder, your ladder rank will be restarted according to the tournaments properties.');
 

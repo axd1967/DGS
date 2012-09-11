@@ -157,7 +157,7 @@ $GLOBALS['ThePage'] = new Page('BulletinEdit');
             'TEXT',        formatDate($bulletin->Lastchanged), ));
    if( !is_null($bulletin->Tournament) )
       $bform->add_row( array(
-            'DESCRIPTION', T_('Tournament#bulletin'),
+            'DESCRIPTION', T_('Tournament'),
             'TEXT',        $bulletin->Tournament->build_info(1), ));
    if( $bulletin->gid > 0 )
       $bform->add_row( array(
@@ -349,10 +349,10 @@ function parse_edit_form( &$bulletin )
 
 
       // determine edits
-      if( $bulletin->tid > 0 && $old_vals['target_type'] != $bulletin->TargetType ) $edits[] = T_('TargetType#edits');
-      if( $old_vals['expire_time'] != $bulletin->ExpireTime ) $edits[] = T_('ExpireTime#edits');
-      if( $old_vals['subject'] != $bulletin->Subject ) $edits[] = T_('Subject#edits');
-      if( $old_vals['text'] != $bulletin->Text ) $edits[] = T_('Text#edits');
+      if( $bulletin->tid > 0 && $old_vals['target_type'] != $bulletin->TargetType ) $edits[] = T_('Target Type');
+      if( $old_vals['expire_time'] != $bulletin->ExpireTime ) $edits[] = T_('Expire Time');
+      if( $old_vals['subject'] != $bulletin->Subject ) $edits[] = T_('Subject');
+      if( $old_vals['text'] != $bulletin->Text ) $edits[] = T_('Text');
    }
 
    return array( $vars, array_unique($edits), $errors );

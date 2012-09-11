@@ -43,7 +43,7 @@ $GLOBALS['ThePage'] = new Page('RatingAdmin');
       error('adminlevel_too_low', 'admin_rating');
 
    $page = "admin_rating.php";
-   $title = T_('Admin editor of DGS-rating#rankadm');
+   $title = T_('Admin Editor of DGS-rating');
 
 /* Actual REQUEST calls used:
      (no args)          : ask for user
@@ -73,9 +73,9 @@ $GLOBALS['ThePage'] = new Page('RatingAdmin');
       );
 
       if( $user->RatingStatus != RATING_RATED )
-         $errors[] = sprintf( T_('Rating can only be changed for rating-status [%s].#rankadm'), RATING_RATED );
+         $errors[] = sprintf( T_('Rating can only be changed for rating-status [%s].'), RATING_RATED );
       if( $uid == $my_id )
-         $errors[] = T_('You can\'t change your own rating. Ask another admin.#rankadm');
+         $errors[] = T_('You can\'t change your own rating. Ask another admin.');
 
       if( (string)$arg_rating != '' ) // update rating
       {
@@ -94,9 +94,9 @@ $GLOBALS['ThePage'] = new Page('RatingAdmin');
       }
 
       if( !is_valid_rating($upd_user['Rating']) )
-         $errors[] = sprintf( T_('Rating [%s] is invalid#rankadm'), $upd_user['Rating'] );
+         $errors[] = sprintf( T_('Rating [%s] is invalid'), $upd_user['Rating'] );
       if( $changes == 0 && (@$_REQUEST['preview'] || @$_REQUEST['save']) )
-         $errors[] = T_('No rating-change or it is too small.#rankadm');
+         $errors[] = T_('No rating-change or it is too small.');
 
       $rcatable = load_old_rating_changes( $uid );
    }
@@ -121,7 +121,7 @@ $GLOBALS['ThePage'] = new Page('RatingAdmin');
          }
          ta_end();
 
-         jump_to("admin_rating.php?uid=$uid".URI_AMP."sysmsg=".urlencode(T_('Rating changed!#rankadm')));
+         jump_to("admin_rating.php?uid=$uid".URI_AMP."sysmsg=".urlencode(T_('Rating changed!')));
       }
    }//actions
 
@@ -133,11 +133,11 @@ $GLOBALS['ThePage'] = new Page('RatingAdmin');
 
    if( $uid )
    {
-      $rform->add_row( array( 'DESCRIPTION', T_('User#rankadm'),
+      $rform->add_row( array( 'DESCRIPTION', T_('User'),
                               'TEXT', $user->user_reference(), ));
-      $rform->add_row( array( 'DESCRIPTION', T_('Rating status#rankadm'),
+      $rform->add_row( array( 'DESCRIPTION', T_('Rating Status'),
                               'TEXT', $user->RatingStatus, ));
-      $rform->add_row( array( 'DESCRIPTION', T_('Current Rating#rankadm'),
+      $rform->add_row( array( 'DESCRIPTION', T_('Current Rating'),
                               'TEXT', echo_rating($user->Rating, true, $my_id, false ) ));
    }
 
@@ -153,32 +153,32 @@ $GLOBALS['ThePage'] = new Page('RatingAdmin');
    if( $uid && $user->RatingStatus == RATING_RATED )
    {
       $rform->add_row( array(
-            'DESCRIPTION', T_('New Rating#rankadm'),
+            'DESCRIPTION', T_('New Rating'),
             'TEXTINPUT', 'rating', 16, 16, $arg_rating,
             'SELECTBOX', 'ratingtype', 1, getRatingTypes(), $arg_ratingtype, false, ));
       $rform->add_row( array(
             'TAB',
-            'CHECKBOX', 'reset_confival', 1, T_('Reset Confidence interval#rankadm'),
+            'CHECKBOX', 'reset_confival', 1, T_('Reset Confidence interval'),
                         (int)get_request_arg('reset_confival'), ));
 
       $rform->add_empty_row();
       $rform->add_row( array(
-            'DESCRIPTION', T_('New Rating#rankadm'),
+            'DESCRIPTION', T_('New Rating'),
             'TEXT', echo_rating($upd_user['Rating'], true, 0, false), ));
       $rform->add_row( array(
-            'DESCRIPTION', T_('Current Confidence Interval#rankadm'),
+            'DESCRIPTION', T_('Current Confidence Interval'),
             'TEXT', sprintf( '%1.6f (%s) > %1.6f < (%s) %1.6f',
                              $user->urow['RatingMin'], diff( $user->Rating - $user->urow['RatingMin'] ),
                              $user->Rating,
                              diff( $user->urow['RatingMax'] - $user->Rating ), $user->urow['RatingMax'] ), ));
       $rform->add_row( array(
-            'DESCRIPTION', T_('New Confidence Interval#rankadm'),
+            'DESCRIPTION', T_('New Confidence Interval'),
             'TEXT', sprintf( '%1.6f (%s) > %1.6f < (%s) %1.6f',
                              $upd_user['RatingMin'], diff( $upd_user['Rating'] - $upd_user['RatingMin'] ),
                              $upd_user['Rating'],
                              diff( $upd_user['RatingMax'] - $upd_user['Rating'] ), $upd_user['RatingMax'] ), ));
       $rform->add_row( array(
-            'DESCRIPTION', T_('Delta Rating Change#rankadm'),
+            'DESCRIPTION', T_('Delta Rating Change'),
             'TEXT', sprintf( '%s (%s) > %s < (%s) %s',
                              diff( $user->urow['RatingMin'] - $upd_user['RatingMin'], '%1.2f' ),
                              percent( $user->Rating - $user->urow['RatingMin'], $upd_user['Rating'] - $upd_user['RatingMin'] ),
@@ -206,21 +206,21 @@ $GLOBALS['ThePage'] = new Page('RatingAdmin');
 
    if( !is_nulL($rcatable) )
    {
-      section('old_ratingchanges', T_('Former rating-changes of user#rankadm'));
+      section('old_ratingchanges', T_('Former rating-changes of user'));
       $rcatable->echo_table();
    }
 
 
    $notes = array();
-   $notes[] = T_("WARNING: No rating-updates on change of daylight-saving-time to avoid side-effects on rating-recalculations, because time of rating-changes and game-ends must be synchronized.#rankadm");
+   $notes[] = T_('WARNING: No rating-updates on change of daylight-saving-time to avoid side-effects on rating-recalculations, because time of rating-changes and game-ends must be synchronized.');
    $notes[] = null;
-   $notes[] = sprintf( T_("Check notes about rating-change on page %s.#rankadm"), anchor("edit_rating.php", T_('Change rating & rank')) );
-   $notes[] = T_("Rating-change is OK if ranking-diff >6k.#rankadm");
-   $notes[] = T_("Reset of confidence-interval is OK if ranking-diff >3k and SHOULD always be used if rating is changed.#rankadm");
-   echo_notes( 'adminratingnotes', T_('Important notes about Rating changes#rankadm'), $notes );
+   $notes[] = sprintf( T_('Check notes about rating-change on page %s.'), anchor("edit_rating.php", T_('Change rating & rank')) );
+   $notes[] = T_('Rating-change is OK if ranking-diff >6k.');
+   $notes[] = T_('Reset of confidence-interval is OK if ranking-diff >3k and SHOULD always be used if rating is changed.');
+   echo_notes( 'adminratingnotes', T_('Important notes about Rating changes'), $notes );
 
    $menu_array = array();
-   $menu_array[T_('Refresh#rankadm')] = "$page?uid=$uid";
+   $menu_array[T_('Refresh')] = "$page?uid=$uid";
 
    end_page(@$menu_array);
 }//main
@@ -247,9 +247,9 @@ function load_old_rating_changes( $uid )
       TABLE_NO_HIDE|TABLE_NO_SORT|TABLE_NO_SIZE|TABLE_ROWS_NAVI );
 
    // add_tablehead($nr, $descr, $attbs=null, $mode=TABLE_NO_HIDE|TABLE_NO_SORT, $sortx='')
-   $rcatable->add_tablehead( 1, T_('Created#rankadm'), 'Date', 0, 'Created-');
-   $rcatable->add_tablehead( 2, T_('Changes#rankadm'), 'Enum' );
-   $rcatable->add_tablehead( 3, T_('Rating#rankadm'), 'Rating' );
+   $rcatable->add_tablehead( 1, T_('Created#header'), 'Date', 0, 'Created-');
+   $rcatable->add_tablehead( 2, T_('Changes#header'), 'Enum' );
+   $rcatable->add_tablehead( 3, T_('Rating#header'), 'Rating' );
 
    $iterator = new ListIterator( 'AdminRating', null, 'ORDER BY Created DESC' );
    $iterator = RatingChangeAdmin::load_ratingchangeadmin( $iterator, $uid );

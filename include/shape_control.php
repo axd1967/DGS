@@ -120,7 +120,7 @@ class ShapeControl
       $shape_name = ShapeControl::load_shape_name($shape_id);
       $colfirst_text = (is_null($b_first) || $b_first) ? '' : ' (' . T_('W-First#SHP_flag') . ')';
       return ($incl_image ? echo_image_shapeinfo( $shape_id, $size, $snapshot ) . ' ' : '') .
-         sprintf( '%s #%s%s: %s', T_('Shape#shape'), $shape_id, $colfirst_text, $shape_name );
+         sprintf( '%s #%s%s: %s', T_('Shape'), $shape_id, $colfirst_text, $shape_name );
    }
 
 } // end of 'ShapeControl'

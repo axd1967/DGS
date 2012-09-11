@@ -119,7 +119,7 @@ $GLOBALS['ThePage'] = new Page('TournamentDirectorEdit');
       ta_end();
 
       jump_to("tournaments/list_directors.php?tid=$tid".URI_AMP."sysmsg="
-            . urlencode(T_('Tournament director removed!')) );
+            . urlencode(T_('Tournament Director removed!')) );
    }
 
    // init
@@ -145,7 +145,7 @@ $GLOBALS['ThePage'] = new Page('TournamentDirectorEdit');
       ta_end();
 
       jump_to("tournaments/list_directors.php?tid=$tid".URI_AMP."sysmsg="
-            . urlencode(T_('Tournament director saved!')) );
+            . urlencode(T_('Tournament Director saved!')) );
    }
 
 
@@ -243,7 +243,7 @@ $GLOBALS['ThePage'] = new Page('TournamentDirectorEdit');
             $tdform->add_hidden( 'confirm', 1 );
             $tdform->add_row( array(
                'TAB', 'CELL', 1, '', // align submit-buttons
-               'SUBMITBUTTON', 'td_delete', T_('Remove tournament director'),
+               'SUBMITBUTTON', 'td_delete', T_('Remove Tournament Director'),
                'TEXT', SMALL_SPACING,
                'SUBMITBUTTON', 'td_cancel', T_('Cancel') ));
          }
@@ -251,7 +251,7 @@ $GLOBALS['ThePage'] = new Page('TournamentDirectorEdit');
          {
             $tdform->add_row( array(
                   'TAB', 'CELL', 1, '', // align submit-buttons
-                  'SUBMITBUTTON', 'td_save', T_('Save tournament director'),
+                  'SUBMITBUTTON', 'td_save', T_('Save Tournament Director'),
                   'TEXT', SMALL_SPACING,
                   'SUBMITBUTTON', 'td_preview', T_('Preview'),
                ));
@@ -325,8 +325,8 @@ function parse_edit_form( &$tdir )
       $tdir->Comment = trim($vars['comment']);
 
       // determine edits
-      if( $old_vals['flags'] != $tdir->Flags ) $edits[] = T_('Flags#edits');
-      if( $old_vals['comment'] != $tdir->Comment ) $edits[] = T_('Comment#edits');
+      if( $old_vals['flags'] != $tdir->Flags ) $edits[] = T_('Flags');
+      if( $old_vals['comment'] != $tdir->Comment ) $edits[] = T_('Comment');
    }
 
    return array( $vars, array_unique($edits), $errors );

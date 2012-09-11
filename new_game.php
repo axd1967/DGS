@@ -134,7 +134,7 @@ require_once 'include/utilities.php';
 
    $menu_array = array();
    $menu_array[T_('New Game')] = 'new_game.php?view='.GSETVIEW_SIMPLE . $shape_url_suffix . $tmpl_suffix;
-   $menu_array[T_('Shapes#shape')] = 'list_shapes.php';
+   $menu_array[T_('Shapes')] = 'list_shapes.php';
    ProfileTemplate::add_menu_link( $menu_array );
 
    $menu_array[T_('New expert game')] = 'new_game.php?view='.GSETVIEW_EXPERT . $shape_url_suffix . $tmpl_suffix;

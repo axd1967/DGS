@@ -645,7 +645,7 @@ class TournamentParticipant
             return '';
       }
 
-      return ($reg_user_status) ? T_('Edit my registration') : T_('Registration');
+      return ($reg_user_status) ? T_('Edit my registration#tourney') : T_('Registration#tourney');
    }
 
    function get_edit_tournament_status()

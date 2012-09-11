@@ -74,12 +74,12 @@ $GLOBALS['ThePage'] = new Page('TournamentDirectorList');
    $tdtable->add_external_parameters( $page_vars, true ); // add as hiddens
 
    // add_tablehead($nr, $descr, $attbs=null, $mode=TABLE_NO_HIDE|TABLE_NO_SORT, $sortx='')
-   $tdtable->add_tablehead( 1, T_('Actions#T_dir'), 'ImagesLeft', TABLE_NO_HIDE, '');
-   $tdtable->add_tablehead( 2, T_('Tournament director#T_dir'), 'User', 0, 'Name+');
-   $tdtable->add_tablehead( 3, T_('Rating#T_dir'), 'Rating', 0, 'Rating2-');
-   $tdtable->add_tablehead( 4, T_('Last access#T_dir'), 'Date', 0, 'Lastaccess-');
-   $tdtable->add_tablehead( 6, T_('Admin Flags#T_dir'), '', TABLE_NO_SORT);
-   $tdtable->add_tablehead( 5, T_('Comment#T_dir'), '', TABLE_NO_SORT);
+   $tdtable->add_tablehead( 1, T_('Actions#header'), 'ImagesLeft', TABLE_NO_HIDE, '');
+   $tdtable->add_tablehead( 2, T_('Tournament director#header'), 'User', 0, 'Name+');
+   $tdtable->add_tablehead( 3, T_('Rating#header'), 'Rating', 0, 'Rating2-');
+   $tdtable->add_tablehead( 4, T_('Last access#header'), 'Date', 0, 'Lastaccess-');
+   $tdtable->add_tablehead( 6, T_('Admin Flags#header'), '', TABLE_NO_SORT);
+   $tdtable->add_tablehead( 5, T_('Comment#header'), '', TABLE_NO_SORT);
 
    $tdtable->set_default_sort( 4 ); //on Lastaccess
 
@@ -102,7 +102,7 @@ $GLOBALS['ThePage'] = new Page('TournamentDirectorList');
 
    $tform = new Form( 'tournament', $page, FORM_POST );
    $tform->add_row( array(
-         'DESCRIPTION', T_('Tournament Owner#tourney'),
+         'DESCRIPTION', T_('Tournament Owner'),
          'TEXT', ( ($tourney->Owner_ID)
                      ? user_reference( REF_LINK, 1, $tourney->Owner_Handle, $tourney->Owner_ID )
                      : NO_VALUE ) ));
@@ -122,8 +122,7 @@ $GLOBALS['ThePage'] = new Page('TournamentDirectorList');
       {
          $msg_subj = urlencode( sprintf( T_('[Tournament #%d]'), $tid ));
          $msg_text = urlencode( sprintf(
-            T_("Request for %s:\n\nEdit subject and text to match your request "
-               . "but please keep the reference to the tournament.#tourney"),
+            T_("Request for %s:\n\nEdit subject and text to match your request but please keep the reference to the tournament."),
             "<tourney $tid>" ));
          $links = array();
          $links[] = anchor( $base_path."message.php?mode=NewMessage".URI_AMP."uid=$uid".URI_AMP."subject=$msg_subj" .
@@ -134,7 +133,7 @@ $GLOBALS['ThePage'] = new Page('TournamentDirectorList');
                image( $base_path.'images/edit.gif', 'E', '', 'class="Action"' ), T_('Edit tournament director'));
          if( $allow_edit )
             $links[] = anchor( $base_path."tournaments/edit_director.php?tid=$tid".URI_AMP."uid=$uid".URI_AMP."td_delete=1",
-               image( $base_path.'images/trashcan.gif', 'X', '', 'class="Action"' ), T_('Remove tournament director'));
+               image( $base_path.'images/trashcan.gif', 'X', '', 'class="Action"' ), T_('Remove Tournament Director'));
          $row_str[1] = implode(' ', $links);
       }
       if( $tdtable->Is_Column_Displayed[2] )

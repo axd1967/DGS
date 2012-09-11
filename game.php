@@ -1223,7 +1223,7 @@ function draw_game_info( $game_row, $game_setup, $board, $tourney )
          , "</tr>\n"
          , "<tr id=\"gameRules\">\n"
          , "<td></td>\n"
-         , "<td colspan=\"$cols\">", $tflags_str, T_('Title#tourney'), ': ', make_html_safe($tourney->Title, true), "</td>\n"
+         , "<td colspan=\"$cols\">", $tflags_str, T_('Title'), ': ', make_html_safe($tourney->Title, true), "</td>\n"
          , "</tr>\n";
    }
 

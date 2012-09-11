@@ -162,15 +162,15 @@ $GLOBALS['ThePage'] = new Page('TournamentLadderChallenge');
          $ch_uid = $user_ch->ID;
          $df_uid = $user_df->ID;
          send_message( "Tournament.ladder.challenge.notify($tid,$ch_uid,$df_uid)",
-            trim( sprintf( T_('%s has challenged you in %s: %s#tourney'),
+            trim( sprintf( T_('%s has challenged you in %s: %s#T_ladder'),
                            "<user $ch_uid>", "<tourney $tid>", "<game $gid>" )),
-            sprintf( T_('Challenge started for tournament #%s'), $tid ),
+            sprintf( T_('Challenge started for tournament #%s#T_ladder'), $tid ),
             $df_uid, '', /*notify*/true,
             0/*sys-msg*/, MSGTYPE_NORMAL );
       }
       ta_end();
 
-      $sys_msg = urlencode( T_('Tournament game started!#tourney') );
+      $sys_msg = urlencode( T_('Tournament Game started!') );
       jump_to("game.php?gid=$gid".URI_AMP."sysmsg=$sys_msg");
    }
 
@@ -186,8 +186,8 @@ $GLOBALS['ThePage'] = new Page('TournamentLadderChallenge');
          'TEXT',        $tourney->build_info() ));
    $tform->add_empty_row();
 
-   add_form_user_info( $tform, T_('Defender'),   $user_df, $tladder_df );
-   add_form_user_info( $tform, T_('Challenger'), $user_ch, $tladder_ch );
+   add_form_user_info( $tform, T_('Defender#T_ladder'),   $user_df, $tladder_df );
+   add_form_user_info( $tform, T_('Challenger#T_ladder'), $user_ch, $tladder_ch );
 
    $has_errors = ( count($errors) > 0 );
    if( $has_errors )
@@ -203,13 +203,13 @@ $GLOBALS['ThePage'] = new Page('TournamentLadderChallenge');
 
    $tform->add_row( array(
          'CELL', 2, '',
-         'TEXT', T_('Please confirm if you want to challenge this user!') . "<br>\n" . T_('(also see notes below)'), ));
+         'TEXT', T_('Please confirm if you want to challenge this user!#T_ladder') . "<br>\n" . T_('(also see notes below)'), ));
 
    if( !$has_errors )
       $tform->add_hidden( 'confirm', 1 );
    $tform->add_row( array(
          'CELL', 2, '',
-         'SUBMITBUTTONX', 'tl_challenge', T_('Confirm Challenge'), ( $has_errors ? 'disabled=1' : '' ),
+         'SUBMITBUTTONX', 'tl_challenge', T_('Confirm Challenge#T_ladder'), ( $has_errors ? 'disabled=1' : '' ),
          'TEXT', SMALL_SPACING,
          'SUBMITBUTTON', 'tl_cancel', T_('Cancel') ));
 
@@ -226,7 +226,7 @@ $GLOBALS['ThePage'] = new Page('TournamentLadderChallenge');
    // show probable game-info/settings for challenge
    show_game_info( $tid, $user_ch, $user_df, $trules, $tprops );
 
-   echo_notes( 'challengenotesTable', T_('Challenge notes'), build_challenge_notes() );
+   echo_notes( 'challengenotesTable', T_('Challenge notes#T_ladder'), build_challenge_notes() );
 
 
    $menu_array = array();
@@ -252,17 +252,17 @@ function add_form_user_info( &$tform, $utype, $user, $tladder )
             'TEXT', SEP_SPACING . echo_rating( $user->Rating, true, $user->ID), ));
       if( isset($user->urow['TP_Rating']) )
          $tform->add_row( array(
-               'DESCRIPTION', T_('Tournament-Rating#tourney'),
+               'DESCRIPTION', T_('Tournament Rating'),
                'TEXT', echo_rating( $user->urow['TP_Rating'], true, $user->ID ), ));
    }
 
    if( !is_null($tladder) )
    {
       $tform->add_row( array(
-            'DESCRIPTION', T_('Ladder Rank#tourney'),
+            'DESCRIPTION', T_('Ladder Rank'),
             'TEXT', '#' . $tladder->Rank,
             'TEXT', ( ($tladder->RankChanged > 0)
-                        ? SEP_SPACING . sprintf( T_('Kept for %s'), $tladder->build_rank_kept(TIMEFMT_ZERO, NO_VALUE) )
+                        ? SEP_SPACING . sprintf( T_('Kept for %s#T_ladder'), $tladder->build_rank_kept(TIMEFMT_ZERO, NO_VALUE) )
                         : '' ), ));
    }
 

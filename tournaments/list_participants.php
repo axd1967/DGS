@@ -98,26 +98,26 @@ $GLOBALS['ThePage'] = new Page('TournamentParticipantList');
 
    // add_tablehead($nr, $descr, $attbs=null, $mode=TABLE_NO_HIDE|TABLE_NO_SORT, $sortx='')
    if( $allow_edit_tourney )
-      $tptable->add_tablehead( 1, T_('Actions#T_reg'), 'Image', TABLE_NO_HIDE, '');
-   $tptable->add_tablehead( 2, T_('Name#T_reg'), 'User', 0, 'Name+');
-   $tptable->add_tablehead( 3, T_('Userid#T_reg'), 'User', TABLE_NO_HIDE, 'Handle+');
-   $tptable->add_tablehead( 4, T_('Country#T_reg'), 'Image', 0, 'Country+');
-   $tptable->add_tablehead( 5, T_('Current Rating#T_reg'), 'Rating', 0, 'Rating2-');
-   $tptable->add_tablehead( 6, T_('Comment#T_reg'), null, TABLE_NO_SORT);
-   $tptable->add_tablehead( 7, T_('Reg ID#T_reg'), 'Number', 0, 'ID+');
-   $tptable->add_tablehead( 8, T_('Status#T_reg'), 'Enum', ($allow_edit_tourney ? TABLE_NO_HIDE : 0), 'Status+');
+      $tptable->add_tablehead( 1, T_('Actions#header'), 'Image', TABLE_NO_HIDE, '');
+   $tptable->add_tablehead( 2, T_('Name#header'), 'User', 0, 'Name+');
+   $tptable->add_tablehead( 3, T_('Userid#header'), 'User', TABLE_NO_HIDE, 'Handle+');
+   $tptable->add_tablehead( 4, T_('Country#header'), 'Image', 0, 'Country+');
+   $tptable->add_tablehead( 5, T_('Current Rating#header'), 'Rating', 0, 'Rating2-');
+   $tptable->add_tablehead( 6, T_('Comment#header'), null, TABLE_NO_SORT);
+   $tptable->add_tablehead( 7, T_('Reg ID#T_header'), 'Number', 0, 'ID+');
+   $tptable->add_tablehead( 8, T_('Status#header'), 'Enum', ($allow_edit_tourney ? TABLE_NO_HIDE : 0), 'Status+');
    if( $allow_edit_tourney )
-      $tptable->add_tablehead( 9, T_('Flags#T_reg'), 'Enum', 0, 'Flags+');
-   $tptable->add_tablehead(10, T_('Round#T_reg'), 'Number', 0, 'StartRound-');
-   $tptable->add_tablehead(15, new TableHead( T_('Running Games#T_reg'), 'images/table.gif'), 'ImagesLeft', TABLE_NO_SORT);
-   $tptable->add_tablehead(11, T_('Tournament Rating#T_reg'), 'Rating', 0, 'Rating-');
-   $tptable->add_tablehead(16, T_('Finished#T_reg'), 'Number', 0, 'Finished-');
-   $tptable->add_tablehead(17, T_('Won#T_reg'), 'Number', 0, 'Won-');
-   $tptable->add_tablehead(18, T_('Lost#T_reg'), 'Number', 0, 'Lost-');
-   $tptable->add_tablehead(12, T_('Registered#T_reg'), 'Date', 0, 'Created+');
-   $tptable->add_tablehead(13, T_('Updated#T_reg'), 'Date', 0, 'Lastchanged-');
+      $tptable->add_tablehead( 9, T_('Flags#header'), 'Enum', 0, 'Flags+');
+   $tptable->add_tablehead(10, T_('Round#header'), 'Number', 0, 'StartRound-');
+   $tptable->add_tablehead(15, new TableHead( T_('Running games'), 'images/table.gif'), 'ImagesLeft', TABLE_NO_SORT);
+   $tptable->add_tablehead(11, T_('Tournament Rating#header'), 'Rating', 0, 'Rating-');
+   $tptable->add_tablehead(16, T_('Finished#header'), 'Number', 0, 'Finished-');
+   $tptable->add_tablehead(17, T_('Won#header'), 'Number', 0, 'Won-');
+   $tptable->add_tablehead(18, T_('Lost#header'), 'Number', 0, 'Lost-');
+   $tptable->add_tablehead(12, T_('Registered#T_header'), 'Date', 0, 'Created+');
+   $tptable->add_tablehead(13, T_('Updated#header'), 'Date', 0, 'Lastchanged-');
    if( $allow_edit_tourney )
-      $tptable->add_tablehead(14, T_('Messages#T_reg'), 'Enum', TABLE_NO_SORT);
+      $tptable->add_tablehead(14, T_('Messages#T_header'), 'Enum', TABLE_NO_SORT);
 
    $tptable->set_default_sort( 7 ); //on Reg-ID
 
@@ -150,7 +150,7 @@ $GLOBALS['ThePage'] = new Page('TournamentParticipantList');
       {
          $msg_subj = urlencode( sprintf( T_('[Tournament #%d]'), $tid ));
          $msg_text = urlencode( sprintf(
-            T_("Registration info for %s:\n\nEdit subject and text"),
+            T_("Registration info for %s:\n\nEdit subject and text#tourney"),
             "<tourney $tid>" ));
 
          $links = array();
@@ -158,7 +158,7 @@ $GLOBALS['ThePage'] = new Page('TournamentParticipantList');
                             URI_AMP."message=$msg_text",
             image( $base_path.'images/send.gif', 'M', '', 'class="Action"' ), T_('Send a message'));
          $links[] = anchor( $base_path."tournaments/edit_participant.php?tid=$tid".URI_AMP."uid=$uid".URI_AMP."rid=$rid",
-               image( $base_path.'images/edit.gif', 'E', '', 'class="Action"' ), T_('Edit user registration'));
+               image( $base_path.'images/edit.gif', 'E', '', 'class="Action"' ), T_('Edit user registration#tourney'));
          $row_str[1] = implode(' ', $links);
       }
 

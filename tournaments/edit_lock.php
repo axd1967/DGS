@@ -107,7 +107,7 @@ $GLOBALS['ThePage'] = new Page('TournamentLockEdit');
          'DESCRIPTION', T_('Last changed'),
          'TEXT',        TournamentUtils::buildLastchangedBy($tourney->Lastchanged, $tourney->ChangedBy) ));
    $tform->add_row( array(
-         'DESCRIPTION', T_('Flags#tourney'),
+         'DESCRIPTION', T_('Flags'),
          'TEXT',        $tourney->formatFlags(NO_VALUE), ));
    $tform->add_row( array(
          'DESCRIPTION', T_('Status#tourney'),
@@ -127,12 +127,12 @@ $GLOBALS['ThePage'] = new Page('TournamentLockEdit');
    {
       $disable = ( !$is_admin && @$arr_flags_admin[$flag] ) ? 'disabled=1' : '';
       $flag_set = $tourney->isFlagSet($flag);
-      $arr = ($first) ? array( 'DESCRIPTION', T_('Flags#tourney') ) : array( 'TAB' );
+      $arr = ($first) ? array( 'DESCRIPTION', T_('Flags') ) : array( 'TAB' );
       $first = false;
 
       array_push( $arr, 'CHECKBOXX', $name, 1, Tournament::getFlagsText($flag), $flag_set, $disable );
       if( @$arr_flags_admin[$flag] )
-         array_push( $arr, 'TEXT', MINI_SPACING . '('.T_('change only by admin#tlock').')' );
+         array_push( $arr, 'TEXT', MINI_SPACING . '('.T_('change only by admin').')' );
       $tform->add_row( $arr );
 
       if( $disable )
@@ -141,7 +141,7 @@ $GLOBALS['ThePage'] = new Page('TournamentLockEdit');
 
    $tform->add_row( array(
          'DESCRIPTION', T_('Lock Note'),
-         'TEXT', T_('Please add your reasons for locking (for other directors/admins):') .
+         'TEXT', T_('Please add your reasons for locking (for other directors/admins)#tourney') . ':' .
                  sprintf( "<br>\n(%s)<br>\n(%s)<br>\n",
                           T_('edit only your own note lines'),
                           T_('your lines will be prefixed with date and user-handle') ),
@@ -158,7 +158,7 @@ $GLOBALS['ThePage'] = new Page('TournamentLockEdit');
    $tform->add_empty_row();
    $tform->add_row( array(
          'TAB', 'CELL', 1, '', // align submit-buttons
-         'SUBMITBUTTON', 't_save', T_('Save locks'),
+         'SUBMITBUTTON', 't_save', T_('Save locks#tourney'),
          'TEXT', SMALL_SPACING,
          'SUBMITBUTTON', 't_preview', T_('Preview'),
       ));
@@ -279,7 +279,7 @@ function build_notes_locking()
    $notes = array();
    //$notes[] = null; // empty line
 
-   $narr = array( T_('Tournament Locks:') );
+   $narr = array( T_('Tournament Locks') . ':' );
    foreach( Tournament::getFlagsText(null, false) as $flag => $descr )
       $narr[] = sprintf( "%s = $descr", Tournament::getFlagsText($flag) );
    $notes[] = $narr;

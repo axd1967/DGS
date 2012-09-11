@@ -87,7 +87,7 @@ $GLOBALS['ThePage'] = new Page('TournamentRoundEdit');
    {
       $tround->persist(); // insert or update
       jump_to("tournaments/roundrobin/edit_round_props.php?tid={$tid}".URI_AMP."round={$round}".URI_AMP
-            . "sysmsg=". urlencode(T_('Tournament round saved!')) );
+            . "sysmsg=". urlencode(T_('Tournament Round saved!')) );
    }
 
    $page = "edit_round_props.php";
@@ -104,14 +104,14 @@ $GLOBALS['ThePage'] = new Page('TournamentRoundEdit');
          'DESCRIPTION', T_('Tournament ID'),
          'TEXT',        $tourney->build_info() ));
    $trform->add_row( array(
-         'DESCRIPTION', T_('Tournament Round#tround'),
+         'DESCRIPTION', T_('Tournament Round'),
          'TEXT',        $tround->Round, ));
    $trform->add_row( array(
          'DESCRIPTION', T_('Last changed'),
          'TEXT',        TournamentUtils::buildLastchangedBy($tround->Lastchanged, $tround->ChangedBy) ));
    TournamentUtils::show_tournament_flags( $trform, $tourney );
    $trform->add_row( array(
-         'DESCRIPTION', T_('Round Status#tround'),
+         'DESCRIPTION', T_('Round Status#tourney'),
          'TEXT',        TournamentRound::getStatusText($tround->Status), ));
 
    if( count($errors) )
@@ -125,15 +125,15 @@ $GLOBALS['ThePage'] = new Page('TournamentRoundEdit');
 
    $trform->add_row( array( 'HR' ));
    $trform->add_row( array(
-         'DESCRIPTION', T_('Min. Pool Size#tround'),
+         'DESCRIPTION', T_('Min. Pool Size'),
          'TEXTINPUT',   'min_pool_size', 3, 3, $vars['min_pool_size'],
          'TEXT',        $t_limits->getLimitRangeTextAdmin(TLIMITS_TRD_MIN_POOLSIZE), ));
    $trform->add_row( array(
-         'DESCRIPTION', T_('Max. Pool Size#tround'),
+         'DESCRIPTION', T_('Max. Pool Size'),
          'TEXTINPUT',   'max_pool_size', 3, 3, $vars['max_pool_size'],
          'TEXT',        $t_limits->getLimitRangeTextAdmin(TLIMITS_TRD_MAX_POOLSIZE), ));
    $trform->add_row( array(
-         'DESCRIPTION', T_('Max. Pool Count#tround'),
+         'DESCRIPTION', T_('Max. Pool Count'),
          'TEXTINPUT',   'max_pool_count', 5, 5, $vars['max_pool_count'],
          'TEXT',        $t_limits->getLimitRangeTextAdmin(TLIMITS_TRD_MAX_POOLCOUNT), ));
 
@@ -144,7 +144,7 @@ $GLOBALS['ThePage'] = new Page('TournamentRoundEdit');
 
    $trform->add_row( array(
          'TAB', 'CELL', 1, '', // align submit-buttons
-         'SUBMITBUTTON', 'tr_save', T_('Save tournament round'),
+         'SUBMITBUTTON', 'tr_save', T_('Save Tournament Round'),
          'TEXT', SMALL_SPACING,
          'SUBMITBUTTON', 'tr_preview', T_('Preview'),
       ));
@@ -158,7 +158,7 @@ $GLOBALS['ThePage'] = new Page('TournamentRoundEdit');
 
    $menu_array = array();
    $menu_array[T_('Tournament info')] = "tournaments/view_tournament.php?tid=$tid";
-   $menu_array[T_('Edit rounds')] =
+   $menu_array[T_('Edit rounds#tourney')] =
          array( 'url' => "tournaments/roundrobin/edit_rounds.php?tid=$tid".URI_AMP."round=$round", 'class' => 'TAdmin' );
    $menu_array[T_('Manage tournament')] =
          array( 'url' => "tournaments/manage_tournament.php?tid=$tid", 'class' => 'TAdmin' );
@@ -228,9 +228,9 @@ function parse_edit_form( &$trd, $t_limits )
             $t_limits->getLimitRangeText(TLIMITS_TRD_MAX_POOLCOUNT) ); // check for general MAX, but show specific max
 
       // determine edits
-      if( $old_vals['min_pool_size'] != $trd->MinPoolSize ) $edits[] = T_('Pool-Size#edits');
-      if( $old_vals['max_pool_size'] != $trd->MaxPoolSize ) $edits[] = T_('Pool-Size#edits');
-      if( $old_vals['max_pool_count'] != $trd->MaxPoolCount ) $edits[] = T_('Pool-Count#edits');
+      if( $old_vals['min_pool_size'] != $trd->MinPoolSize ) $edits[] = T_('Pool Size');
+      if( $old_vals['max_pool_size'] != $trd->MaxPoolSize ) $edits[] = T_('Pool Size');
+      if( $old_vals['max_pool_count'] != $trd->MaxPoolCount ) $edits[] = T_('Pool Count');
    }
 
    return array( $vars, array_unique($edits), $errors );

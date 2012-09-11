@@ -93,12 +93,12 @@ require_once( "features/lib_votes.php" );
    $ftable->add_tablehead( 1, T_('Vote ID#header'),     'Button', TABLE_NO_HIDE, 'F.ID+'); // static
    $ftable->add_tablehead( 2, '',                       'Image', TABLE_NO_HIDE, ''); // edit (static)
    $ftable->add_tablehead( 3, T_('Status#header'),      'Enum', TABLE_NO_HIDE, 'F.Status+');
-   $ftable->add_tablehead(10, T_('Size#featheader'),    'Enum', 0, 'F.Size+');
+   $ftable->add_tablehead(10, T_('Size#feature'),       'Enum', 0, 'F.Size+');
    $ftable->add_tablehead( 4, T_('Subject#header'),     '', 0, 'F.Subject+');
    $ftable->add_tablehead( 8, T_('My Vote#featheader'), 'NumberC', TABLE_NO_HIDE, 'FV.Points-');
    $ftable->add_tablehead( 9, T_('Lastvoted#header'),   'Date', 0, 'FV.Lastchanged+');
    $ftable->add_tablehead( 5, T_('Created#header'),     'Date', 0, 'F.Created+');
-   $ftable->add_tablehead( 6, T_('Lastchanged#header'), 'Date', 0, 'F.Lastchanged+');
+   $ftable->add_tablehead( 6, T_('Last changed#header'), 'Date', 0, 'F.Lastchanged+');
 
    $ftable->set_default_sort( 1); //on Feature.ID
    $order = $ftable->current_order_string();

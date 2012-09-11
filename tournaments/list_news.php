@@ -94,17 +94,17 @@ $GLOBALS['ThePage'] = new Page('TournamentNewsList');
 
    // add_tablehead($nr, $descr, $attbs=null, $mode=TABLE_NO_HIDE|TABLE_NO_SORT, $sortx='')
    if( $allow_edit_tourney )
-      $tntable->add_tablehead( 1, T_('Actions#tnews'), 'Image', TABLE_NO_HIDE, '');
-   $tntable->add_tablehead( 2, T_('Author#tnews'), 'User', 0, 'Handle+');
+      $tntable->add_tablehead( 1, T_('Actions#header'), 'Image', TABLE_NO_HIDE, '');
+   $tntable->add_tablehead( 2, T_('Author#header'), 'User', 0, 'Handle+');
    if( $allow_edit_tourney )
    {
-      $tntable->add_tablehead( 3, T_('Status#tnews'), 'Enum', TABLE_NO_HIDE, 'Status+');
-      $tntable->add_tablehead( 4, T_('Flags#tnews'), 'Enum', 0, 'Flags+');
+      $tntable->add_tablehead( 3, T_('Status#header'), 'Enum', TABLE_NO_HIDE, 'Status+');
+      $tntable->add_tablehead( 4, T_('Flags#header'), 'Enum', 0, 'Flags+');
    }
-   $tntable->add_tablehead( 5, T_('Published#tnews'), 'Date', 0, 'Published-');
-   $tntable->add_tablehead( 8, new TableHead( T_('View Tournament News#tnews'), 'images/info.gif'), 'Image', 0);
-   $tntable->add_tablehead( 6, T_('Subject#tnews'), null, TABLE_NO_SORT);
-   $tntable->add_tablehead( 7, T_('Updated#tnews'), 'Date', 0, 'Lastchanged-');
+   $tntable->add_tablehead( 5, T_('Published#header'), 'Date', 0, 'Published-');
+   $tntable->add_tablehead( 8, new TableHead( T_('View Tournament News'), 'images/info.gif'), 'Image', 0);
+   $tntable->add_tablehead( 6, T_('Subject#header'), null, TABLE_NO_SORT);
+   $tntable->add_tablehead( 7, T_('Updated#header'), 'Date', 0, 'Lastchanged-');
    $cnt_tablecols = $tntable->get_column_count() - ($allow_edit_tourney ? 1 : 0);
 
    $tntable->set_default_sort( 5 ); //on Published
@@ -136,13 +136,13 @@ $GLOBALS['ThePage'] = new Page('TournamentNewsList');
       $tntable->current_filter_string(1) .
       $tntable->current_from_string(1);
    if( $with_text )
-      $menu[T_('Hide news texts')] = $baseURLMenu.'text=0';
+      $menu[T_('Hide news texts#tnews')] = $baseURLMenu.'text=0';
    else
-      $menu[T_('Show news texts')] = $baseURLMenu.'text=1';
+      $menu[T_('Show news texts#tnews')] = $baseURLMenu.'text=1';
    make_menu( $menu, false);
 
 
-   $img_str = image( $base_path.'images/info.gif', T_('View Tournament News#tnews'), null, 'class="InTextImage"');
+   $img_str = image( $base_path.'images/info.gif', T_('View Tournament News'), null, 'class="InTextImage"');
    while( ($show_rows-- > 0) && list(,$arr_item) = $iterator->getListIterator() )
    {
       list( $tnews, $orow ) = $arr_item;
@@ -152,7 +152,7 @@ $GLOBALS['ThePage'] = new Page('TournamentNewsList');
       if( $allow_edit_tourney && @$tntable->Is_Column_Displayed[1] )
       {
          $links = anchor( $base_path."tournaments/edit_news.php?tid=$tid".URI_AMP."tnid={$tnews->ID}",
-               image( $base_path.'images/edit.gif', 'E', '', 'class="Action"' ), T_('Edit tournament news#tnews'));
+               image( $base_path.'images/edit.gif', 'E', '', 'class="Action"' ), T_('Edit tournament news'));
          $row_str[1] = $links;
       }
 

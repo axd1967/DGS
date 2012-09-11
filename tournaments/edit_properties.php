@@ -119,12 +119,12 @@ $GLOBALS['ThePage'] = new Page('TournamentPropertiesEdit');
 
    $reg_end_time = trim(get_request_arg('reg_end_time'));
    $tform->add_row( array(
-         'DESCRIPTION', T_('Register end time'),
+         'DESCRIPTION', T_('Register end time#tourney'),
          'TEXTINPUT',   'reg_end_time', 20, 20, $vars['reg_end_time'],
          'TEXT',  '&nbsp;' . span('EditNote', sprintf( T_('(Date format [%s])'), FMT_PARSE_DATE )), ));
 
    $tform->add_row( array(
-         'DESCRIPTION', T_('Restrict participants'),
+         'DESCRIPTION', T_('Restrict participants#tourney'),
          'TEXTINPUT',   'min_participants', 5, 5, $vars['min_participants'],
          'TEXT',        MINI_SPACING . T_('(Minimum)'), ));
    $tform->add_row( array(
@@ -133,12 +133,12 @@ $GLOBALS['ThePage'] = new Page('TournamentPropertiesEdit');
          'TEXT',        MINI_SPACING . T_('(Maximum)'),
          'TEXT',        $t_limits->getLimitRangeTextAdmin(TLIMITS_MAX_TP), ));
    $tform->add_row( array(
-         'DESCRIPTION', T_('Rating Use Mode'),
+         'DESCRIPTION', T_('Rating Use Mode#tourney'),
          'SELECTBOX',   'rating_use_mode', 1, $arr_rating_use_modes, $vars['rating_use_mode'], false, ));
    $tform->add_empty_row();
 
    $tform->add_row( array(
-         'DESCRIPTION', T_('Restrict user rating'),
+         'DESCRIPTION', T_('Restrict user rating#tourney'),
          'CHECKBOX',    'user_rated', '1', '', $vars['user_rated'],
          'TEXT',        sptext(T_('If yes, rating between'), 1),
          'SELECTBOX',   'user_min_rating', 1, $rating_array, $vars['user_min_rating'], false,
@@ -162,7 +162,7 @@ $GLOBALS['ThePage'] = new Page('TournamentPropertiesEdit');
 
    $tform->add_row( array(
          'TAB', 'CELL', 1, '', // align submit-buttons
-         'SUBMITBUTTON', 'tp_save', T_('Save tournament properties'),
+         'SUBMITBUTTON', 'tp_save', T_('Save Tournament Properties'),
          'TEXT', SMALL_SPACING,
          'SUBMITBUTTON', 'tp_preview', T_('Preview'),
       ));
@@ -180,7 +180,7 @@ $GLOBALS['ThePage'] = new Page('TournamentPropertiesEdit');
 
    $tform->echo_string();
 
-   echo_notes( 'edittournamentpropsnotesTable', T_('Tournament properties notes'),
+   echo_notes( 'edittournamentpropsnotesTable', T_('Tournament Properties notes'),
                build_properties_notes() );
 
 
@@ -232,7 +232,7 @@ function parse_edit_form( &$tpr, $t_limits )
       $old_vals['user_min_rating'] = $tpr->UserMinRating;
       $old_vals['user_max_rating'] = $tpr->UserMaxRating;
 
-      $parsed_value = parseDate( T_('End time for registration'), $vars['reg_end_time'] );
+      $parsed_value = parseDate( T_('End time for registration#tourney'), $vars['reg_end_time'] );
       if( is_numeric($parsed_value) )
       {
          $tpr->RegisterEndTime = $parsed_value;
@@ -289,16 +289,16 @@ function parse_edit_form( &$tpr, $t_limits )
       $vars['user_max_rating'] = echo_rating( $tpr->UserMaxRating, false, 0, true, false );
 
       // determine edits
-      if( $old_vals['reg_end_time'] != $tpr->RegisterEndTime ) $edits[] = T_('End time#edits');
-      if( $old_vals['min_participants'] != $tpr->MinParticipants ) $edits[] = T_('Participants#edits');
-      if( $old_vals['max_participants'] != $tpr->MaxParticipants ) $edits[] = T_('Participants#edits');
-      if( $old_vals['rating_use_mode'] != $tpr->RatingUseMode ) $edits[] = T_('Rating use mode#edits');
-      if( $old_vals['user_rated'] != $tpr->UserRated ) $edits[] = T_('User-Rating#edits');
-      if( $old_vals['user_min_rating'] != $tpr->UserMinRating ) $edits[] = T_('User-Rating#edits');
-      if( $old_vals['user_max_rating'] != $tpr->UserMaxRating ) $edits[] = T_('User-Rating#edits');
-      if( $old_vals['min_games_finished'] != $tpr->UserMinGamesFinished ) $edits[] = T_('User-Games#edits');
-      if( $old_vals['min_games_rated'] != $tpr->UserMinGamesRated ) $edits[] = T_('User-Games#edits');
-      if( $old_vals['notes'] != $tpr->Notes ) $edits[] = T_('Notes#edits');
+      if( $old_vals['reg_end_time'] != $tpr->RegisterEndTime ) $edits[] = T_('Register end time#tourney');
+      if( $old_vals['min_participants'] != $tpr->MinParticipants ) $edits[] = T_('Participants');
+      if( $old_vals['max_participants'] != $tpr->MaxParticipants ) $edits[] = T_('Participants');
+      if( $old_vals['rating_use_mode'] != $tpr->RatingUseMode ) $edits[] = T_('Rating Use Mode#tourney');
+      if( $old_vals['user_rated'] != $tpr->UserRated ) $edits[] = T_('User Rating');
+      if( $old_vals['user_min_rating'] != $tpr->UserMinRating ) $edits[] = T_('User Rating');
+      if( $old_vals['user_max_rating'] != $tpr->UserMaxRating ) $edits[] = T_('User Rating');
+      if( $old_vals['min_games_finished'] != $tpr->UserMinGamesFinished ) $edits[] = T_('User-Games');
+      if( $old_vals['min_games_rated'] != $tpr->UserMinGamesRated ) $edits[] = T_('User-Games');
+      if( $old_vals['notes'] != $tpr->Notes ) $edits[] = T_('Notes');
    }
 
    if( ($tpr->MinParticipants + $tpr->MaxParticipants == 0) && ($tpr->MinParticipants > $tpr->MaxParticipants) )
@@ -323,7 +323,7 @@ function build_properties_notes()
    $notes[] = T_('To disable restrictions, you may use 0-value in (some) fields.');
    $notes[] = null; // empty line
 
-   $narr = array( T_('Rating Use Mode:') );
+   $narr = array( T_('Rating Use Mode#tourney') . ':' );
    foreach( TournamentProperties::getRatingUseModeText(null, false) as $usemode => $descr )
       $narr[] = sprintf( "%s = $descr", TournamentProperties::getRatingUseModeText($usemode) );
    $notes[] = $narr;

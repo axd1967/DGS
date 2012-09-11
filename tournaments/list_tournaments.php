@@ -115,24 +115,24 @@ $GLOBALS['ThePage'] = new Page('TournamentList');
    $ttable->add_external_parameters( $tsfilter->get_req_params(), true );
 
    // add_tablehead($nr, $descr, $attbs=null, $mode=TABLE_NO_HIDE|TABLE_NO_SORT, $sortx='')
-   $ttable->add_tablehead( 1, T_('ID#headert'), 'Button', TABLE_NO_HIDE, 'T.ID-');
-   $ttable->add_tablehead( 2, T_('Scope#headert'), 'Enum', 0, 'T.Scope+');
-   $ttable->add_tablehead( 3, T_('Type#headert'), 'Enum', 0, 'T.Type+');
-   $ttable->add_tablehead( 4, T_('Status#headert'), 'Enum', 0, 'T.Status+');
-   $ttable->add_tablehead( 5, T_('Title#headert'), '', TABLE_NO_HIDE, 'Title+');
+   $ttable->add_tablehead( 1, T_('ID#header'), 'Button', TABLE_NO_HIDE, 'T.ID-');
+   $ttable->add_tablehead( 2, T_('Scope#T_header'), 'Enum', 0, 'T.Scope+');
+   $ttable->add_tablehead( 3, T_('Type#T_header'), 'Enum', 0, 'T.Type+');
+   $ttable->add_tablehead( 4, T_('Status#header'), 'Enum', 0, 'T.Status+');
+   $ttable->add_tablehead( 5, T_('Title#header'), '', TABLE_NO_HIDE, 'Title+');
    if( $has_uid )
-      $ttable->add_tablehead(11, T_('Registration Status#headert'), 'Enum', TABLE_NO_HIDE, 'TP_Status+');
-   $ttable->add_tablehead(13, T_('Size#headert'), 'Number', 0, 'TRULE.Size-');
-   $ttable->add_tablehead(14, T_('Rated#headert'), 'YesNo', TABLE_NO_SORT);
-   $ttable->add_tablehead(15, T_('Ruleset#headert'), 'Enum', TABLE_NO_SORT);
+      $ttable->add_tablehead(11, T_('Registration Status#T_header'), 'Enum', TABLE_NO_HIDE, 'TP_Status+');
+   $ttable->add_tablehead(13, T_('Size#header'), 'Number', 0, 'TRULE.Size-');
+   $ttable->add_tablehead(14, T_('Rated#header'), 'YesNo', TABLE_NO_SORT);
+   $ttable->add_tablehead(15, T_('Ruleset#header'), 'Enum', TABLE_NO_SORT);
    if( $is_admin )
-      $ttable->add_tablehead(12, T_('Flags#headert'), '', 0, 'T.Flags-');
+      $ttable->add_tablehead(12, T_('Flags#header'), '', 0, 'T.Flags-');
    $ttable->add_tablehead(16, T_('Time limit#header'), 'Enum', TABLE_NO_SORT);
-   $ttable->add_tablehead(10, T_('Round#headert'), 'NumberC', 0, 'CurrentRound+');
-   $ttable->add_tablehead(17, T_('Tournament-Size#headert'), 'Number', TABLE_NO_SORT);
-   $ttable->add_tablehead( 7, T_('Last changed#headert'), 'Date', 0, 'T.Lastchanged-');
-   $ttable->add_tablehead( 8, T_('Start time#headert'), 'Date', 0, 'StartTime+');
-   $ttable->add_tablehead( 9, T_('End time#headert'), 'Date', 0, 'EndTime+');
+   $ttable->add_tablehead(10, T_('Round#header'), 'NumberC', 0, 'CurrentRound+');
+   $ttable->add_tablehead(17, T_('Tournament-Size#header'), 'Number', TABLE_NO_SORT);
+   $ttable->add_tablehead( 7, T_('Last changed#header'), 'Date', 0, 'T.Lastchanged-');
+   $ttable->add_tablehead( 8, T_('Start time#header'), 'Date', 0, 'StartTime+');
+   $ttable->add_tablehead( 9, T_('End time#header'), 'Date', 0, 'EndTime+');
    // 6 is freed
 
    $ttable->set_default_sort( 2, 1 ); //on ID

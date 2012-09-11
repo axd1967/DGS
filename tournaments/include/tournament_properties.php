@@ -205,7 +205,7 @@ class TournamentProperties
       // limit register end-time
       global $NOW;
       if( $this->RegisterEndTime && $NOW > $this->RegisterEndTime )
-         $warnings[] = sprintf( T_('Registration phase ended on [%s].'), formatDate($this->RegisterEndTime) );
+         $warnings[] = sprintf( T_('Registration phase ended on [%s].#tourney'), formatDate($this->RegisterEndTime) );
 
       // limit participants
       if( $this->MaxParticipants > 0 )
@@ -233,7 +233,7 @@ class TournamentProperties
       elseif( $this->RatingUseMode == TPROP_RUMODE_COPY_CUSTOM )
       {
          if( !$tp_has_rating && !$user->hasRating() )
-            $errors[] = T_('User needs valid Dragon rating or customized rating, which is required by tournament rating mode.');
+            $errors[] = T_('User needs valid Dragon rating or customized rating, which is required by tournament rating mode.#tourney');
       }
 
       // limit user-rating
@@ -287,15 +287,15 @@ class TournamentProperties
       $default = 0;
       if( $this->RatingUseMode == TPROP_RUMODE_CURR_FIX )
       {
-         $arr[TOURNEY_SEEDORDER_CURRENT_RATING] = T_('Current user rating#seedorder');
+         $arr[TOURNEY_SEEDORDER_CURRENT_RATING] = T_('Current User Rating#T_seedorder');
          $default = TOURNEY_SEEDORDER_CURRENT_RATING;
       }
-      $arr[TOURNEY_SEEDORDER_REGISTER_TIME] = T_('Tournament register time#seedorder');
+      $arr[TOURNEY_SEEDORDER_REGISTER_TIME] = T_('Tournament Register Time#T_seedorder');
       if( $default == 0 )
          $default = TOURNEY_SEEDORDER_REGISTER_TIME;
       if( $this->RatingUseMode == TPROP_RUMODE_COPY_CUSTOM || $this->RatingUseMode == TPROP_RUMODE_COPY_FIX )
-         $arr[TOURNEY_SEEDORDER_TOURNEY_RATING] = T_('Tournament rating#seedorder');
-      $arr[TOURNEY_SEEDORDER_RANDOM] = T_('Random#seedorder');
+         $arr[TOURNEY_SEEDORDER_TOURNEY_RATING] = T_('Tournament Rating#T_seedorder');
+      $arr[TOURNEY_SEEDORDER_RANDOM] = T_('Random#T_seedorder');
       return array( $default, $arr );
    }
 
@@ -380,8 +380,8 @@ class TournamentProperties
          $ARR_GLOBALS_TOURNAMENT_PROPERTIES[$key] = $arr;
 
          $arr = array();
-         $arr[TPROP_RUMODE_COPY_CUSTOM] = T_('Dragon user rating is used for registration, but can be customized by user.');
-         $arr[TPROP_RUMODE_COPY_FIX]    = T_('Dragon user rating is copied on registration and can not be changed.');
+         $arr[TPROP_RUMODE_COPY_CUSTOM] = T_('Dragon user rating is used for tournament registration, but can be customized by user.');
+         $arr[TPROP_RUMODE_COPY_FIX]    = T_('Dragon user rating is copied on tournament registration and can not be changed.');
          $arr[TPROP_RUMODE_CURR_FIX]    = T_('Current Dragon user rating will be used during whole tournament.');
          $ARR_GLOBALS_TOURNAMENT_PROPERTIES[$key.'_LONG'] = $arr;
       }

@@ -114,48 +114,48 @@ $GLOBALS['ThePage'] = new Page('TournamentLadderPropsEdit');
 
    // challenge range
    $tform->add_row( array(
-         'DESCRIPTION', T_('Challenge Range Absolute'),
+         'DESCRIPTION', T_('Challenge Range Absolute#T_ladder'),
          'TEXTINPUT',   'chall_range_abs', 5, 5, $vars['chall_range_abs'], ));
    $tform->add_row( array(
-         'DESCRIPTION', T_('Challenge Range Relative'),
+         'DESCRIPTION', T_('Challenge Range Relative#T_ladder'),
          'TEXTINPUT',   'chall_range_rel', 3, 3, $vars['chall_range_rel'],
          'TEXT',        MINI_SPACING . '%', ));
    $tform->add_row( array(
-         'DESCRIPTION', T_('Challenge Range Rating'),
+         'DESCRIPTION', T_('Challenge Range Rating#T_ladder'),
          'TEXTINPUT',   'chall_range_rat', 6, 6, $vars['chall_range_rat'],
          'TEXT',        MINI_SPACING . '('.T_('clear to deactivate').')', ));
 
    // challenge rematch
    $tform->add_row( array(
-         'DESCRIPTION', T_('Challenge Rematch Wait-Time'),
+         'DESCRIPTION', T_('Challenge Rematch Wait-Time#T_ladder'),
          'TEXTINPUT',   'chall_rematch', 5, 5, $vars['chall_rematch'],
          'TEXT',        MINI_SPACING . T_('hours'), ));
    $tform->add_empty_row();
 
    // max. defenses
    $tform->add_row( array(
-         'DESCRIPTION', T_('Max. Defenses'),
-         'TEXT',        T_('Start Rank') . ': ',
+         'DESCRIPTION', T_('Max. Defenses#T_ladder'),
+         'TEXT',        T_('Start Rank#T_ladder') . ': ',
          'TEXTINPUT',   'max_def_start1', 3, 3, $vars['max_def_start1'],
-         'TEXT',        MED_SPACING . T_('Max. Defenses') . ': ',
+         'TEXT',        MED_SPACING . T_('Max. Defenses#T_ladder') . ': ',
          'TEXTINPUT',   'max_def1', 3, 3, $vars['max_def1'],
-         'TEXT',        T_('(Group #1)'), ));
+         'TEXT',        sprintf( T_('(Group #%s)#T_ladder'), 1) ));
    $tform->add_row( array(
          'TAB',
-         'TEXT',        T_('Start Rank') . ': ',
+         'TEXT',        T_('Start Rank#T_ladder') . ': ',
          'TEXTINPUT',   'max_def_start2', 3, 3, $vars['max_def_start2'],
-         'TEXT',        MED_SPACING . T_('Max. Defenses') . ': ',
+         'TEXT',        MED_SPACING . T_('Max. Defenses#T_ladder') . ': ',
          'TEXTINPUT',   'max_def2', 3, 3, $vars['max_def2'],
-         'TEXT',        T_('(Group #2)'), ));
+         'TEXT',        sprintf( T_('(Group #%s)#T_ladder'), 2) ));
    $tform->add_row( array(
          'TAB',
-         'TEXT',        T_('For remaining ranks restrict max. defenses to') . ': ',
+         'TEXT',        T_('For remaining ranks restrict max. defenses to#T_ladder') . ': ',
          'TEXTINPUT',   'max_def', 3, 3, $vars['max_def'],
          'TEXT',        $t_limits->getLimitRangeTextAdmin(TLIMITS_TL_MAX_DF), ));
 
    // max. challenges
    $tform->add_row( array(
-         'DESCRIPTION', T_('Max. outgoing Challenges'),
+         'DESCRIPTION', T_('Max. outgoing Challenges#T_ladder'),
          'TEXTINPUT',   'max_chall', 5, 5, $vars['max_chall'],
          'TEXT',        $t_limits->getLimitRangeTextAdmin(TLIMITS_TL_MAX_CH), ));
    $tform->add_empty_row();
@@ -165,17 +165,17 @@ $GLOBALS['ThePage'] = new Page('TournamentLadderPropsEdit');
          'DESCRIPTION', T_('Game End handling'),
          'SELECTBOX',   'gend_normal', 1, TournamentLadderProps::getGameEndText(null, TGE_NORMAL),
                         $vars['gend_normal'], false,
-         'TEXT',        sprintf( '(%s)', T_('Challenger wins by score or resignation')), ));
+         'TEXT',        sprintf( '(%s)', T_('Challenger wins by score or resignation#T_ladder')), ));
    $tform->add_row( array(
          'TAB',
          'SELECTBOX',   'gend_timeout_w', 1, TournamentLadderProps::getGameEndText(null, TGE_TIMEOUT_WIN),
                         $vars['gend_timeout_w'], false,
-         'TEXT',        sprintf( '(%s)', T_('Challenger wins by timeout')), ));
+         'TEXT',        sprintf( '(%s)', T_('Challenger wins by timeout#T_ladder')), ));
    $tform->add_row( array(
          'TAB',
          'SELECTBOX',   'gend_timeout_l', 1, TournamentLadderProps::getGameEndText(null, TGE_TIMEOUT_LOSS),
                         $vars['gend_timeout_l'], false,
-         'TEXT',        sprintf( '(%s)', T_('Challenger loses by timeout')), ));
+         'TEXT',        sprintf( '(%s)', T_('Challenger loses by timeout#T_ladder')), ));
    $tform->add_row( array(
          'TAB',
          'SELECTBOX',   'gend_jigo', 1, TournamentLadderProps::getGameEndText(null, TGE_JIGO),
@@ -185,28 +185,28 @@ $GLOBALS['ThePage'] = new Page('TournamentLadderPropsEdit');
 
    // user-absence
    $tform->add_row( array(
-         'DESCRIPTION', T_('User Absence handling'),
+         'DESCRIPTION', T_('User Absence handling#T_ladder'),
          'TEXTINPUT',   'uabs_days', 4, 4, $vars['uabs_days'],
          'TEXT',        sprintf( '(%s)', T_('[days] user can be absent without being removed from ladder')), ));
    $tform->add_empty_row();
 
    // rank-archive-period
    $tform->add_row( array(
-         'DESCRIPTION', T_('Rank-archive Period Length'),
+         'DESCRIPTION', T_('Rank-archive Period Length#T_ladder'),
          'TEXTINPUT',   'rankplen', 4, 4, $vars['rankplen'],
          'TEXT',        T_('months'), ));
    $tform->add_empty_row();
 
    // crowning king
    $tform->add_row( array(
-         'DESCRIPTION', T_('Crown King'),
+         'DESCRIPTION', T_('Crown King#T_ladder'),
          'TEXTINPUT',   'crownking', 8, 8, $vars['crownking'],
          'TEXT',
             sprintf( '[%s], %s',
                TimeFormat::_echo_time( $tl_props->CrownKingHours, 24, TIMEFMT_SHORT|TIMEFMT_ZERO, 0 ),
-               T_('time in hours top rank must be kept, format: "99d 99h"') ), ));
+               T_('time in hours top rank must be kept, format: "99d 99h"#T_ladder') ), ));
    $tform->add_row( array(
-         'DESCRIPTION', T_('Crown King Check time'),
+         'DESCRIPTION', T_('Crown King Check time#T_ladder'),
          'TEXTINPUT',   'crownstart', 20, 20, $vars['crownstart'],
          'TEXT',  '&nbsp;' . span('EditNote', sprintf( T_('(Date format [%s])'), FMT_PARSE_DATE )), ));
    $tform->add_empty_row();
@@ -221,7 +221,7 @@ $GLOBALS['ThePage'] = new Page('TournamentLadderPropsEdit');
 
    $tform->add_row( array(
          'TAB', 'CELL', 1, '', // align submit-buttons
-         'SUBMITBUTTON', 'tlp_save', T_('Save Ladder properties'),
+         'SUBMITBUTTON', 'tlp_save', T_('Save Ladder Properties'),
          'TEXT', SMALL_SPACING,
          'SUBMITBUTTON', 'tlp_preview', T_('Preview'),
       ));
@@ -293,14 +293,14 @@ function parse_edit_form( &$tlp, $t_limits )
             && $new_value >= -1 && $new_value <= TLADDER_MAX_CHRNG_ABS )
          $tlp->ChallengeRangeAbsolute = limit( $new_value, -1, TLADDER_MAX_CHRNG_ABS, 10 );
       else
-         $errors[] = sprintf( T_('Expecting number for absolute challenge range in range %s.'),
+         $errors[] = sprintf( T_('Expecting number for absolute challenge range in range %s.#T_ladder'),
                               build_range_text(-1, TLADDER_MAX_CHRNG_ABS) );
 
       $new_value = $vars['chall_range_rel'];
       if( TournamentUtils::isNumberOrEmpty($new_value, true) )
          $tlp->ChallengeRangeRelative = (int)$new_value;
       else
-         $errors[] = sprintf( T_('Expecting number for relative challenge range in percentage range %s.'),
+         $errors[] = sprintf( T_('Expecting number for relative challenge range in percentage range %s.#T_ladder'),
                               build_range_text(0, 100) );
 
       $new_value = trim($vars['chall_range_rat']);
@@ -312,7 +312,7 @@ function parse_edit_form( &$tlp, $t_limits )
       else
       {
          $is_error = true;
-         $errors[] = sprintf( T_('Expecting number for rating challenge range in range %s.'),
+         $errors[] = sprintf( T_('Expecting number for rating challenge range in range %s.#T_ladder'),
                               build_range_text( -TLADDER_MAX_CHRNG_RATING, TLADDER_MAX_CHRNG_RATING ) );
       }
       if( !$is_error ) // reformat
@@ -322,7 +322,7 @@ function parse_edit_form( &$tlp, $t_limits )
       if( is_numeric($new_value) && $new_value >= 0 && $new_value <= TLADDER_MAX_WAIT_REMATCH )
          $tlp->ChallengeRematchWaitHours = $new_value;
       else
-         $errors[] = sprintf( T_('Expecting number for rematch waiting time in hours range %s.'),
+         $errors[] = sprintf( T_('Expecting number for rematch waiting time in hours range %s.#T_ladder'),
                               build_range_text(0, TLADDER_MAX_WAIT_REMATCH) );
 
 
@@ -336,47 +336,47 @@ function parse_edit_form( &$tlp, $t_limits )
             $tlp->MaxDefenses = $new_value;
       }
       else
-         $errors[] = sprintf( T_('Expecting number for max. defenses in range %s.'),
+         $errors[] = sprintf( T_('Expecting number for max. defenses in range %s.#T_ladder'),
                               // check for general MAX, but show specific max
                               build_range_text(1, $t_limits->getMaxLimit(TLIMITS_TL_MAX_DF) ));
 
       $new_value = $vars['max_def1'];
       if( TournamentUtils::isNumberOrEmpty($new_value) && $new_value >= 0 && $new_value <= TLADDER_MAX_DEFENSES )
       {
-         $limit_errors = $t_limits->checkLadder_MaxDefenses( $new_value, $tlp->MaxDefenses1, sprintf( T_('of group #%s'), 1) );
+         $limit_errors = $t_limits->checkLadder_MaxDefenses( $new_value, $tlp->MaxDefenses1, sprintf( T_('of group #%s#T_ladder'), 1) );
          if( count($limit_errors) )
             $errors = array_merge( $errors, $limit_errors );
          else
             $tlp->MaxDefenses1 = $new_value;
       }
       else
-         $errors[] = sprintf( T_('Expecting number for max. defenses of group #%s in range %s.'), 1,
+         $errors[] = sprintf( T_('Expecting number for max. defenses of group #%s in range %s.#T_ladder'), 1,
             $t_limits->getLimitRangeText(TLIMITS_TL_MAX_DF) ); // check for general MAX, but show specific max
 
       $new_value = $vars['max_def2'];
       if( TournamentUtils::isNumberOrEmpty($new_value) && $new_value >= 0 && $new_value <= TLADDER_MAX_DEFENSES )
       {
-         $limit_errors = $t_limits->checkLadder_MaxDefenses( $new_value, $tlp->MaxDefenses2, sprintf( T_('of group #%s'), 2) );
+         $limit_errors = $t_limits->checkLadder_MaxDefenses( $new_value, $tlp->MaxDefenses2, sprintf( T_('of group #%s#T_ladder'), 2) );
          if( count($limit_errors) )
             $errors = array_merge( $errors, $limit_errors );
          else
             $tlp->MaxDefenses2 = $new_value;
       }
       else
-         $errors[] = sprintf( T_('Expecting number for max. defenses of group #%s in range %s.'), 2,
+         $errors[] = sprintf( T_('Expecting number for max. defenses of group #%s in range %s.#T_ladder'), 2,
             $t_limits->getLimitRangeText(TLIMITS_TL_MAX_DF) ); // check for general MAX, but show specific max
 
       $new_value = $vars['max_def_start1'];
       if( TournamentUtils::isNumberOrEmpty($new_value) )
          $tlp->MaxDefensesStart1 = $new_value;
       else
-         $errors[] = sprintf( T_('Expecting number for max. defenses start-rank of group #%s'), 1 );
+         $errors[] = sprintf( T_('Expecting number for max. defenses start-rank of group #%s#T_ladder'), 1 );
 
       $new_value = $vars['max_def_start2'];
       if( TournamentUtils::isNumberOrEmpty($new_value) )
          $tlp->MaxDefensesStart2 = $new_value;
       else
-         $errors[] = sprintf( T_('Expecting number for max. defenses start-rank of group #%s'), 2 );
+         $errors[] = sprintf( T_('Expecting number for max. defenses start-rank of group #%s#T_ladder'), 2 );
 
 
       $new_value = $vars['max_chall'];
@@ -389,7 +389,7 @@ function parse_edit_form( &$tlp, $t_limits )
             $tlp->MaxChallenges = $new_value;
       }
       else
-         $errors[] = sprintf( T_('Expecting number for max. outgoing challenges in range %s.'),
+         $errors[] = sprintf( T_('Expecting number for max. outgoing challenges in range %s.#T_ladder'),
                               $t_limits->getLimitRangeText(TLIMITS_TL_MAX_CH) ); // check for general MAX, but show specific max
 
 
@@ -397,14 +397,14 @@ function parse_edit_form( &$tlp, $t_limits )
       if( TournamentUtils::isNumberOrEmpty($new_value) )
          $tlp->UserAbsenceDays = $new_value;
       else
-         $errors[] = sprintf( T_('Expecting number for user absence in range %s days'),
+         $errors[] = sprintf( T_('Expecting number for user absence in range %s days#T_ladder'),
                               build_range_text(0, 255) );
 
       $new_value = $vars['rankplen'];
       if( TournamentUtils::isNumberOrEmpty($new_value) )
          $tlp->RankPeriodLength = $new_value;
       else
-         $errors[] = sprintf( T_('Expecting number for rank-archive period length in range %s months'),
+         $errors[] = sprintf( T_('Expecting number for rank-archive period length in range %s months#T_ladder'),
                               build_range_text(1, 255) );
 
       $new_value = $vars['crownking'];
@@ -412,9 +412,9 @@ function parse_edit_form( &$tlp, $t_limits )
       if( !is_null($parsed_hours) )
          $tlp->CrownKingHours = $parsed_hours;
       else
-         $errors[] = T_('Expecting time for crowning king.');
+         $errors[] = T_('Expecting time for crowning king.#T_ladder');
 
-      $parsed_value = parseDate( T_('Crown King Check time'), $vars['crownstart'] );
+      $parsed_value = parseDate( T_('Crown King Check time#T_ladder'), $vars['crownstart'] );
       if( is_numeric($parsed_value) )
       {
          $tlp->CrownKingStart = $parsed_value;
@@ -430,24 +430,24 @@ function parse_edit_form( &$tlp, $t_limits )
       $tlp->setGameEndJigo( $vars['gend_jigo'] );
 
       // determine edits
-      if( $old_vals['chall_range_abs'] != $tlp->ChallengeRangeAbsolute ) $edits[] = T_('ChallengeRange#edits');
-      if( $old_vals['chall_range_rel'] != $tlp->ChallengeRangeRelative ) $edits[] = T_('ChallengeRange#edits');
-      if( $old_vals['chall_range_rat'] != $tlp->ChallengeRangeRating ) $edits[] = T_('ChallengeRange#edits');
-      if( $old_vals['chall_rematch'] != $tlp->ChallengeRematchWaitHours ) $edits[] = T_('ChallengeRematchWait#edits');
-      if( $old_vals['max_def'] != $tlp->MaxDefenses ) $edits[] = T_('MaxDefenses#edits');
-      if( $old_vals['max_def1'] != $tlp->MaxDefenses1 ) $edits[] = T_('MaxDefenses#edits');
-      if( $old_vals['max_def2'] != $tlp->MaxDefenses2 ) $edits[] = T_('MaxDefenses#edits');
-      if( $old_vals['max_def_start1'] != $tlp->MaxDefensesStart1 ) $edits[] = T_('MaxDefenses#edits');
-      if( $old_vals['max_def_start2'] != $tlp->MaxDefensesStart2 ) $edits[] = T_('MaxDefenses#edits');
-      if( $old_vals['max_chall'] != $tlp->MaxChallenges ) $edits[] = T_('MaxChallenges#edits');
-      if( $old_vals['gend_normal'] != $tlp->GameEndNormal ) $edits[] = T_('GameEnd#edits');
-      if( $old_vals['gend_timeout_w'] != $tlp->GameEndTimeoutWin ) $edits[] = T_('GameEnd#edits');
-      if( $old_vals['gend_timeout_l'] != $tlp->GameEndTimeoutLoss ) $edits[] = T_('GameEnd#edits');
-      if( $old_vals['gend_jigo'] != $tlp->GameEndJigo ) $edits[] = T_('GameEnd#edits');
-      if( $old_vals['uabs_days'] != $tlp->UserAbsenceDays ) $edits[] = T_('UserAbsence#edits');
-      if( $old_vals['rankplen'] != $tlp->RankPeriodLength ) $edits[] = T_('RankPeriodLength#edits');
-      if( $old_vals['crownking'] != $tlp->CrownKingHours ) $edits[] = T_('CrownKing#edits');
-      if( $old_vals['crownstart'] != $tlp->CrownKingStart ) $edits[] = T_('CrownKing-Check-time#edits');
+      if( $old_vals['chall_range_abs'] != $tlp->ChallengeRangeAbsolute ) $edits[] = T_('Challenge Range#T_ladder');
+      if( $old_vals['chall_range_rel'] != $tlp->ChallengeRangeRelative ) $edits[] = T_('Challenge Range#T_ladder');
+      if( $old_vals['chall_range_rat'] != $tlp->ChallengeRangeRating ) $edits[] = T_('Challenge Range#T_ladder');
+      if( $old_vals['chall_rematch'] != $tlp->ChallengeRematchWaitHours ) $edits[] = T_('Challenge Rematch Wait#T_ladder');
+      if( $old_vals['max_def'] != $tlp->MaxDefenses ) $edits[] = T_('Max. Defenses#T_ladder');
+      if( $old_vals['max_def1'] != $tlp->MaxDefenses1 ) $edits[] = T_('Max. Defenses#T_ladder');
+      if( $old_vals['max_def2'] != $tlp->MaxDefenses2 ) $edits[] = T_('Max. Defenses#T_ladder');
+      if( $old_vals['max_def_start1'] != $tlp->MaxDefensesStart1 ) $edits[] = T_('Max. Defenses#T_ladder');
+      if( $old_vals['max_def_start2'] != $tlp->MaxDefensesStart2 ) $edits[] = T_('Max. Defenses#T_ladder');
+      if( $old_vals['max_chall'] != $tlp->MaxChallenges ) $edits[] = T_('Max. Challenges#T_ladder');
+      if( $old_vals['gend_normal'] != $tlp->GameEndNormal ) $edits[] = T_('Game End');
+      if( $old_vals['gend_timeout_w'] != $tlp->GameEndTimeoutWin ) $edits[] = T_('Game End');
+      if( $old_vals['gend_timeout_l'] != $tlp->GameEndTimeoutLoss ) $edits[] = T_('Game End');
+      if( $old_vals['gend_jigo'] != $tlp->GameEndJigo ) $edits[] = T_('Game End');
+      if( $old_vals['uabs_days'] != $tlp->UserAbsenceDays ) $edits[] = T_('User Absence#T_ladder');
+      if( $old_vals['rankplen'] != $tlp->RankPeriodLength ) $edits[] = T_('Rank-archive Period Length#T_ladder');
+      if( $old_vals['crownking'] != $tlp->CrownKingHours ) $edits[] = T_('Crown King#T_ladder');
+      if( $old_vals['crownstart'] != $tlp->CrownKingStart ) $edits[] = T_('Crown King Check time#T_ladder');
    }
 
    return array( $vars, array_unique($edits), $errors );

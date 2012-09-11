@@ -83,18 +83,18 @@ $GLOBALS['ThePage'] = new Page('TournamentManage');
          'DESCRIPTION', T_('Your Roles#tourney'),
          'TEXT', $tourney->getRoleText($my_id), ));
    $tform->add_row( array(
-         'DESCRIPTION', T_('Flags#tourney'),
+         'DESCRIPTION', T_('Flags'),
          'TEXT', $tourney->formatFlags(NO_VALUE) . SEP_SPACING .
                  make_menu_link( T_('Edit locks#tourney'),
                      array( 'url' => "tournaments/edit_lock.php?tid=$tid", 'class' => 'TAdmin' )) ));
    if( $tourney->LockNote )
       $tform->add_row( array(
-            'DESCRIPTION', T_('Lock Note#tourney'),
+            'DESCRIPTION', T_('Lock Note'),
             'TEXT',        make_html_safe($tourney->LockNote, true), ));
    $tform->add_row( array(
          'DESCRIPTION', T_('Status#tourney'),
          'TEXT', $tourney->getStatusText($tourney->Status) . SEP_SPACING .
-                 make_menu_link( T_('Change status#tourney'),
+                 make_menu_link( T_('Change Status'),
                      array( 'url' => "tournaments/edit_status.php?tid=$tid", 'class' => 'TAdmin' )) ));
 
    $round = $tourney->CurrentRound;
@@ -106,9 +106,9 @@ $GLOBALS['ThePage'] = new Page('TournamentManage');
          error('bad_tournament', "manage_tournament.find_tround($tid,$round,$my_id)");
 
       $tform->add_row( array(
-            'DESCRIPTION', T_('Round Status#tround'),
+            'DESCRIPTION', T_('Round Status#tourney'),
             'TEXT', TournamentRound::getStatusText($tround->Status) . SEP_SPACING .
-                    make_menu_link( T_('Change round status#tourney'),
+                    make_menu_link( T_('Change Round Status#tourney'),
                         array( 'url' => "tournaments/roundrobin/edit_round_status.php?tid=$tid".URI_AMP."round=$round",
                                'class' => 'TAdmin' )) ));
       $tform->add_row( array(
@@ -123,10 +123,10 @@ $GLOBALS['ThePage'] = new Page('TournamentManage');
    $tform->echo_string();
 
    echo '<table id="TournamentManager"><tr><td>', "<hr>\n",
-      make_header( 1, T_('Setup phase'), TOURNEY_STATUS_NEW ), //------------------------
+      make_header( 1, T_('Setup phase#tourney'), TOURNEY_STATUS_NEW ), //------------------------
       '<ul class="TAdminLinks">',
          '<li>', make_menu_link( T_('Edit tournament'), array( 'url' => "tournaments/edit_tournament.php?tid=$tid", 'class' => 'TAdmin' )),
-                 subList( array( T_('Change start-time, title, description#mngt') . ($is_admin ? '; ' . T_('owner, scope#mngt') : '') )),
+                 subList( array( T_('Change start-time, title, description#t_mng') . ($is_admin ? '; ' . T_('owner, scope#t_mng') : '') )),
          '<li>', make_menu_link( T_('Add news#tnews'), array( 'url' => "tournaments/edit_news.php?tid=$tid", 'class' => 'TAdmin' )),
                  SEP_SPACING,
                  make_menu_link( T_('Show tournament news'), "tournaments/list_news.php?tid=$tid" ),
@@ -138,31 +138,31 @@ $GLOBALS['ThePage'] = new Page('TournamentManage');
          '<li>', ( $allow_new_del_TD
                      ? make_menu_link( T_('Add tournament director'), array( 'url' => "tournaments/edit_director.php?tid=$tid", 'class' => 'TAdmin' ))
                      : T_('Add tournament director') ),
-                 sprintf( ' (%s)', T_('only by owner') ), SEP_SPACING,
+                 sprintf( ' (%s)', T_('only by owner#tourney') ), SEP_SPACING,
                  make_menu_link( T_('Show tournament directors'), "tournaments/list_directors.php?tid=$tid" ),
-         '<li>', make_menu_link( T_('Edit registration properties'), array( 'url' => "tournaments/edit_properties.php?tid=$tid", 'class' => 'TAdmin' )),
-                 subList( array( T_('tournament-related: end-time, min./max. participants, rating-use-mode#mngt'),
-                                 T_('user-related: user rating-range, min. games#mngt') )),
-         '<li>', make_menu_link( T_('Edit rules'), array( 'url' => "tournaments/edit_rules.php?tid=$tid", 'class' => 'TAdmin' )),
-                 subList( array( T_('Change game-settings: shape, ruleset, board size, handicap-settings, time-settings, rated#mngt') )),
+         '<li>', make_menu_link( T_('Edit registration properties#tourney'), array( 'url' => "tournaments/edit_properties.php?tid=$tid", 'class' => 'TAdmin' )),
+                 subList( array( T_('tournament-related: end-time, min./max. participants, rating-use-mode#t_mng'),
+                                 T_('user-related: user rating-range, min. games#t_mng') )),
+         '<li>', make_menu_link( T_('Edit rules#tourney'), array( 'url' => "tournaments/edit_rules.php?tid=$tid", 'class' => 'TAdmin' )),
+                 subList( array( T_('Change game-settings: shape, ruleset, board size, handicap-settings, time-settings, rated#t_mng') )),
          make_links_ttype_specific( $tourney, TOURNEY_STATUS_NEW ),
       '</ul>',
 
-      make_header( 2, T_('Registration phase'), TOURNEY_STATUS_REGISTER ), //------------------------
+      make_header( 2, T_('Registration phase#tourney'), TOURNEY_STATUS_REGISTER ), //------------------------
       '<ul class="TAdminLinks">',
          '<li>', make_menu_link( T_('Edit participants'), array( 'url' => "tournaments/edit_participant.php?tid=$tid", 'class' => 'TAdmin' )),
                  SEP_SPACING,
                  make_menu_link( T_('Show tournament participants'), "tournaments/list_participants.php?tid=$tid" ),
-                 subList( array( T_('Manage registration of users: invite user, approve or reject application, remove registration#mngt'),
-                                 T_('Change status, start-round, read message from user and answer with message#mngt') )),
+                 subList( array( T_('Manage registration of users: invite user, approve or reject application, remove registration#t_mng'),
+                                 T_('Change status, start-round, read message from user and answer with message#t_mng') )),
       '</ul>',
 
-      make_header( 3, T_('Start phase'), TOURNEY_STATUS_PAIR ), //------------------------
+      make_header( 3, T_('Start phase#tourney'), TOURNEY_STATUS_PAIR ), //------------------------
       '<ul class="TAdminLinks">',
          make_links_ttype_specific( $tourney, TOURNEY_STATUS_PAIR ),
       '</ul>',
 
-      make_header( 4, T_('Play phase'), TOURNEY_STATUS_PLAY ), //------------------------
+      make_header( 4, T_('Play phase#tourney'), TOURNEY_STATUS_PLAY ), //------------------------
       '<ul class="TAdminLinks">',
          make_links_ttype_specific( $tourney, TOURNEY_STATUS_PLAY ),
       '</ul>',
@@ -196,9 +196,9 @@ function make_links_ttype_specific( $tourney, $tstat )
    {
       if( $tstat == TOURNEY_STATUS_NEW )
          return '<li>'
-            . make_menu_link( T_('Edit Ladder properties'), array( 'url' => "tournaments/ladder/edit_props.php?tid=$tid", 'class' => 'TAdmin' ))
-            . subList( array( T_('challenge-range, max. defenses, max. challenges#mngt'),
-                              T_('game-end-handling, user-absence-handling, rank-period length, crown-king#mngt'), ));
+            . make_menu_link( T_('Edit Ladder Properties'), array( 'url' => "tournaments/ladder/edit_props.php?tid=$tid", 'class' => 'TAdmin' ))
+            . subList( array( T_('challenge-range, max. defenses, max. challenges#t_mng'),
+                              T_('game-end-handling, user-absence-handling, rank-period length, crown-king#t_mng'), ));
 
       if( $tstat == TOURNEY_STATUS_PAIR )
          return '<li>'
@@ -207,8 +207,8 @@ function make_links_ttype_specific( $tourney, $tstat )
             . make_menu_link( T_('Edit Ladder'), array( 'url' => "tournaments/ladder/view.php?tid=$tid".URI_AMP."admin=1", 'class' => 'TAdmin' ))
             . SEP_SPACING
             . make_menu_link( T_('View Ladder'), "tournaments/ladder/view.php?tid=$tid" )
-            . subList( array( T_('Admin Ladder (seed ladder, remove users)#mngt'),
-                              T_('Edit Ladder (remove users, rank-changes)#mngt') ));
+            . subList( array( T_('Admin Ladder (seed ladder, remove users)#t_mng'),
+                              T_('Edit Ladder (remove users, rank-changes)#t_mng') ));
 
       if( $tstat == TOURNEY_STATUS_PLAY )
          return '<li>'
@@ -217,7 +217,7 @@ function make_links_ttype_specific( $tourney, $tstat )
             . make_menu_link( T_('Show all running tournament games'), "show_games.php?tid=$tid".URI_AMP."uid=all" )
             . '<li>'
             . make_admin_tgame( $tid ) . MED_SPACING . '(' . T_('also see game info pages') . ')'
-            . subList( array( T_('End game, Add time#mngt') ));
+            . subList( array( T_('End game, Add time#t_mng') ));
    }
 
 
@@ -238,12 +238,12 @@ function make_links_ttype_specific( $tourney, $tstat )
             . make_menu_link( T_('Edit pools'), array( 'url' => "tournaments/roundrobin/edit_pools.php?tid=$tid", 'class' => 'TAdmin' ))
             . SEP_SPACING
             . make_menu_link( T_('View Pools'), "tournaments/roundrobin/view_pools.php?tid=$tid" )
-            . subList( array( T_('Define pools (set pool parameters: pool-size, pool-count)#mngt'),
-                              T_('Create pools (create, remove, seed pools)#mngt'),
-                              T_('Edit pools (assign users to pools)#mngt') ))
+            . subList( array( T_('Define pools (set pool parameters: pool-size, pool-count)#t_mng'),
+                              T_('Create pools (create, remove, seed pools)#t_mng'),
+                              T_('Edit pools (assign users to pools)#t_mng') ))
             . '<li>'
             . make_menu_link( T_('Edit game pairing'), array( 'url' => "tournaments/roundrobin/edit_pairing.php?tid=$tid", 'class' => 'TAdmin' ))
-            . subList( array( T_('Starting games for all pools#mngt') ));
+            . subList( array( T_('Starting games for all pools#t_mng') ));
 
       if( $tstat == TOURNEY_STATUS_PLAY )
          return '<li>'
@@ -252,10 +252,10 @@ function make_links_ttype_specific( $tourney, $tstat )
             . make_menu_link( T_('Show all running tournament games'), "show_games.php?tid=$tid".URI_AMP."uid=all" )
             . '<li>'
             . make_admin_tgame( $tid ) . MED_SPACING . '(' . T_('also see game info pages') . ')'
-            . subList( array( T_('End game, Add time#mngt') ))
+            . subList( array( T_('End game, Add time#t_mng') ))
             . '<li>'
-            . make_menu_link( T_('Edit ranks'), array( 'url' => "tournaments/roundrobin/edit_ranks.php?tid=$tid", 'class' => 'TAdmin' ))
-            . subList( array( T_('Set pool-ranks, next-round flagging#mngt') ));
+            . make_menu_link( T_('Edit ranks#tpool'), array( 'url' => "tournaments/roundrobin/edit_ranks.php?tid=$tid", 'class' => 'TAdmin' ))
+            . subList( array( T_('Set pool-ranks, next-round flagging#t_mng') ));
    }
 
    return '';
@@ -273,7 +273,7 @@ function make_admin_tgame( $tid )
 {
    global $base_path;
    $label_textbox = span('TAdmin', T_('Admin tournament game')) . ', ' . T_('Enter Game ID');
-   $label_submit = T_('Edit#T_gameadmin');
+   $label_submit = T_('Edit#2');
 
    return <<<___FORMEND___
       <FORM action="{$base_path}tournaments/game_admin.php" method="GET">

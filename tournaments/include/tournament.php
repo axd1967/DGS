@@ -199,7 +199,7 @@ class Tournament
          if( $short )
             return $this->CurrentRound . ' / ' . $rounds_str;
          else
-            return sprintf( T_('%s of %s rounds'), $this->CurrentRound, $rounds_str );
+            return sprintf( T_('%s of %s rounds#tourney'), $this->CurrentRound, $rounds_str );
       }
       else //if( $this->Type == TOURNEY_TYPE_LADDER )
          return ( $short ) ? 1 : T_('1 round#tourney');
@@ -208,9 +208,9 @@ class Tournament
    function getRoundLimitText()
    {
       if( $this->Rounds > 0 )
-         return sprintf( T_('(max. %s rounds)'), $this->Rounds );
+         return sprintf( T_('(max. %s rounds)#tourney'), $this->Rounds );
       else
-         return T_('(unlimited rounds)#Trounds');
+         return T_('(unlimited rounds)#tourney');
    }
 
    function setTP_Counts( $arr )
@@ -327,12 +327,12 @@ class Tournament
 
       $arr = array();
       if( $this->Owner_ID == $uid )
-         $arr[] = T_('Owner#T_role');
+         $arr[] = T_('Owner#tourney');
       $td = $TOURNAMENT_CACHE->is_tournament_director('Tournament.getRoleText', $this->ID, $uid, 0xffff);
       if( !is_null($td) )
-         $arr[] = sprintf( T_('Tournament Director [%s]#T_role'), $td->formatFlags() );
+         $arr[] = sprintf( T_('Tournament Director [%s]'), $td->formatFlags() );
       if( TournamentUtils::isAdmin() )
-         $arr[] = T_('Tournament Admin#T_role');
+         $arr[] = T_('Tournament Admin');
       return (count($arr)) ? implode(', ', $arr) : NO_VALUE;
    }
 
@@ -435,7 +435,7 @@ class Tournament
     */
    function checkRegistrationLocks( $check_type, $with_admin_check=true )
    {
-      $regerr = T_('Registration/Edit prohibited at the moment');
+      $regerr = T_('Registration/Edit prohibited at the moment#tourney');
       $errors = array();
       if( $check_type != TCHKTYPE_TD )
          $warnings =& $errors;
@@ -683,11 +683,11 @@ class Tournament
          $ARR_GLOBALS_TOURNAMENT[$key] = $arr;
 
          $arr = array();
-         $arr[TOURNEY_FLAG_LOCK_ADMIN]    = T_('Prohibits all writing operations on tournament for non-admins.');
-         $arr[TOURNEY_FLAG_LOCK_REGISTER] = T_('Prohibits users to join tournament (by application, registration, ACK-invite).');
-         $arr[TOURNEY_FLAG_LOCK_TDWORK]   = T_('Provides exclusive write-access to tournament directors on certain tournament-data.');
-         $arr[TOURNEY_FLAG_LOCK_CRON]     = T_('Provides exclusive write-access to tounament-cron on certain tournament-data.');
-         $arr[TOURNEY_FLAG_LOCK_CLOSE]    = T_('Prohibits users to join tournament or start challenges (preparation to finish tournament).');
+         $arr[TOURNEY_FLAG_LOCK_ADMIN]    = T_('Prohibits all writing operations on tournament for non-admins.#T_locktxt');
+         $arr[TOURNEY_FLAG_LOCK_REGISTER] = T_('Prohibits users to join tournament (by application, registration, ACK-invite).#T_locktxt');
+         $arr[TOURNEY_FLAG_LOCK_TDWORK]   = T_('Provides exclusive write-access to tournament directors on certain tournament-data.#T_locktxt');
+         $arr[TOURNEY_FLAG_LOCK_CRON]     = T_('Provides exclusive write-access to tounament-cron on certain tournament-data.#T_locktxt');
+         $arr[TOURNEY_FLAG_LOCK_CLOSE]    = T_('Prohibits users to join tournament or start challenges (preparation to finish tournament).#T_locktxt');
          $ARR_GLOBALS_TOURNAMENT[$key.'_LONG'] = $arr;
 
          $arr = array();

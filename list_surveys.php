@@ -90,16 +90,16 @@ $GLOBALS['ThePage'] = new Page('SurveyList');
 
    // add_tablehead($nr, $descr, $attbs=null, $mode=TABLE_NO_HIDE|TABLE_NO_SORT, $sortx='')
    $table->add_tablehead( 1, T_('ID#header'), 'Button', TABLE_NO_HIDE, 'ID-');
-   $table->add_tablehead( 3, T_('Type#survey'), 'Enum', TABLE_NO_HIDE, 'Type+');
-   $table->add_tablehead( 4, T_('Status#survey'), 'Enum', TABLE_NO_HIDE, 'Status+');
+   $table->add_tablehead( 3, T_('Type#header'), 'Enum', TABLE_NO_HIDE, 'Type+');
+   $table->add_tablehead( 4, T_('Status#header'), 'Enum', TABLE_NO_HIDE, 'Status+');
    if( $is_admin )
       $table->add_tablehead( 2, new TableHead( T_('Edit Survey#survey'), 'images/edit.gif'), 'ImagesLeft', TABLE_NO_HIDE);
-   $table->add_tablehead( 5, T_('Author#survey'), 'User', 0, 'SP_Handle+');
-   $table->add_tablehead( 6, T_('Title#survey'), null, TABLE_NO_SORT|TABLE_NO_HIDE );
+   $table->add_tablehead( 5, T_('Author#header'), 'User', 0, 'SP_Handle+');
+   $table->add_tablehead( 6, T_('Title#header'), null, TABLE_NO_SORT|TABLE_NO_HIDE );
    $table->add_tablehead( 9, T_('#Votes#survey'), 'Number', 0, 'UserCount+' );
-   $table->add_tablehead(10, T_('Flags#survey'), 'Enum', 0, 'Flags+' );
-   $table->add_tablehead( 7, T_('Created#survey'), 'Date', 0, 'Created-');
-   $table->add_tablehead( 8, T_('Updated#survey'), 'Date', 0, 'Lastchanged-');
+   $table->add_tablehead(10, T_('Flags#header'), 'Enum', 0, 'Flags+' );
+   $table->add_tablehead( 7, T_('Created#header'), 'Date', 0, 'Created-');
+   $table->add_tablehead( 8, T_('Updated#header'), 'Date', 0, 'Lastchanged-');
 
    $table->set_default_sort( 1 ); //on ID
 

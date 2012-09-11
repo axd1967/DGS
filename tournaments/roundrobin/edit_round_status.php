@@ -98,7 +98,7 @@ $GLOBALS['ThePage'] = new Page('TournamentRoundStatusEdit');
    {
       $tround->persist();
       jump_to("tournaments/roundrobin/edit_round_status.php?tid=$tid".URI_AMP."round=$round".URI_AMP
-            . "sysmsg=". urlencode(T_('Tournament round status saved!')) );
+            . "sysmsg=". urlencode(T_('Tournament Round Status saved!')) );
    }
 
    $page = "edit_round_status.php";
@@ -116,13 +116,13 @@ $GLOBALS['ThePage'] = new Page('TournamentRoundStatusEdit');
          'TEXT',        $tourney->build_info() ));
    TournamentUtils::show_tournament_flags( $tform, $tourney );
    $tform->add_row( array(
-         'DESCRIPTION', T_('Tournament Round#tround'),
+         'DESCRIPTION', T_('Tournament Round'),
          'TEXT',        $tround->Round, ));
    $tform->add_row( array(
          'DESCRIPTION', T_('Last changed'),
          'TEXT',        TournamentUtils::buildLastchangedBy($tround->Lastchanged, $tround->ChangedBy) ));
    $tform->add_row( array(
-         'DESCRIPTION', T_('Round Status#tround'),
+         'DESCRIPTION', T_('Round Status#tourney'),
          'TEXT',        TournamentRound::getStatusText($tround->Status), ));
    $tform->add_row( array( 'HR' ));
 
@@ -135,12 +135,12 @@ $GLOBALS['ThePage'] = new Page('TournamentRoundStatusEdit');
    }
 
    $tform->add_row( array(
-         'DESCRIPTION', T_('Current Status#tround'),
+         'DESCRIPTION', T_('Current Round Status#tourney'),
          'TEXT',        TournamentRound::getStatusText($tr_status->curr_status) ));
    $tform->add_row( array(
          'TAB',
          'SELECTBOX',    'status', 1, $arr_status, $tround->Status, false,
-         'SUBMITBUTTON', 't_save', T_('Change status#tourney'), ));
+         'SUBMITBUTTON', 't_save', T_('Change Round Status#tourney'), ));
 
    if( count($edits) && @$_REQUEST['t_save'] ) // show confirmation
    {
@@ -167,7 +167,7 @@ $GLOBALS['ThePage'] = new Page('TournamentRoundStatusEdit');
          $role_str = $tourney->build_role_info();
          $tform->add_empty_row();
          $tform->add_row( array(
-               'DESCRIPTION', T_('Confirmation notes#tourney'),
+               'DESCRIPTION', T_('Confirmation notes'),
                'TEXT', span('ErrorMsg',
                           sprintf( "%s<br>\n%s", $tourney->build_role_info(), $confirm_notes )), ));
          $tform->add_row( array(
@@ -184,12 +184,12 @@ $GLOBALS['ThePage'] = new Page('TournamentRoundStatusEdit');
 
    $tform->echo_string();
 
-   echo_notes( 'edittroundstatusTable', T_('Tournament Round status notes'), build_status_notes() );
+   echo_notes( 'edittroundstatusTable', T_('Tournament Round Status notes'), build_status_notes() );
 
 
    $menu_array = array();
    $menu_array[T_('Tournament info')] = "tournaments/view_tournament.php?tid=$tid";
-   $menu_array[T_('Edit rounds')] =
+   $menu_array[T_('Edit rounds#tourney')] =
       array( 'url' => "tournaments/roundrobin/edit_rounds.php?tid=$tid".URI_AMP."round=$round", 'class' => 'TAdmin' );
    $menu_array[T_('Manage tournament')] =
       array( 'url' => "tournaments/manage_tournament.php?tid=$tid", 'class' => 'TAdmin' );
@@ -220,7 +220,7 @@ function parse_edit_form( &$tround )
       $tround->setStatus($vars['status'], true/*check-only*/);
 
       // determine edits
-      if( $old_vals['status'] != $vars['status'] ) $edits[] = T_('Status#edits');
+      if( $old_vals['status'] != $vars['status'] ) $edits[] = T_('Status');
    }
 
    return array( $vars, array_unique($edits) );
@@ -258,11 +258,11 @@ function build_status_notes()
    $notes[] = null;
 
    $arrst = array();
-   $arrst[TROUND_STATUS_INIT] = T_('Tournament round setup phase (set properties needed for pooling, pairing and playing)#trdstat');
-   $arrst[TROUND_STATUS_POOL] = T_('Tournament round pooling phase (create pools, assign users to pools)#trdstat');
-   $arrst[TROUND_STATUS_PAIR] = T_('Tournament game setup phase (prepare all tournament games)#trdstat');
-   $arrst[TROUND_STATUS_PLAY] = T_('Tournament playing phase (tournament game can be played)#trdstat');
-   $arrst[TROUND_STATUS_DONE] = T_('Tournament finalizing phase (prepare next round, announce results, tournament round is finished)#trdstat');
+   $arrst[TROUND_STATUS_INIT] = T_('Tournament round setup phase (set properties needed for pooling, pairing and playing)#trd_status');
+   $arrst[TROUND_STATUS_POOL] = T_('Tournament round pooling phase (create pools, assign users to pools)#trd_status');
+   $arrst[TROUND_STATUS_PAIR] = T_('Tournament game setup phase (prepare all tournament games)#trd_status');
+   $arrst[TROUND_STATUS_PLAY] = T_('Tournament playing phase (tournament game can be played)#trd_status');
+   $arrst[TROUND_STATUS_DONE] = T_('Tournament finalizing phase (prepare next round, announce results, tournament round is finished)#trd_status');
    $narr = array( T_('Tournament Round Status') );
    foreach( $arrst as $status => $descr )
       $narr[] = sprintf( "%s = %s", TournamentRound::getStatusText($status), $descr );

@@ -114,7 +114,7 @@ $GLOBALS['ThePage'] = new Page('TournamentEdit');
    if( $tourney->Flags > 0 )
    {
       $tform->add_row( array(
-            'DESCRIPTION', T_('Flags#tourney'),
+            'DESCRIPTION', T_('Flags'),
             'TEXT',        $tourney->formatFlags(), ));
    }
    $tform->add_row( array(
@@ -155,7 +155,7 @@ $GLOBALS['ThePage'] = new Page('TournamentEdit');
 
    $tform->add_empty_row();
    $tform->add_row( array(
-         'DESCRIPTION', T_('Start time'),
+         'DESCRIPTION', T_('Start Time'),
          'TEXTINPUT',   'start_time', 20, 20, $vars['start_time'],
          'TEXT',  '&nbsp;' . span('EditNote', sprintf( T_('(Date format [%s])'), FMT_PARSE_DATE )), ));
    $tform->add_row( array(
@@ -176,7 +176,7 @@ $GLOBALS['ThePage'] = new Page('TournamentEdit');
    $tform->add_empty_row();
    $tform->add_row( array(
          'TAB', 'CELL', 1, '', // align submit-buttons
-         'SUBMITBUTTON', 't_save', T_('Save tournament'),
+         'SUBMITBUTTON', 't_save', T_('Save Tournament'),
          'TEXT', SMALL_SPACING,
          'SUBMITBUTTON', 't_preview', T_('Preview'),
       ));
@@ -239,12 +239,12 @@ function parse_edit_form( &$tney, $ttype, $is_admin )
       {
          $new_value = trim($vars['owner']);
          if( (string)$new_value == '' )
-            $errors[] = T_('Missing owner handle');
+            $errors[] = T_('Missing owner handle#tourney');
          elseif( $new_value != $tney->Owner_Handle )
          {
             $owner_row = TournamentDirector::load_user_row( 0, $new_value );
             if( !is_array($owner_row) )
-               $errors[] = T_('Unknown user handle for owner');
+               $errors[] = T_('Unknown user handle for owner#tourney');
             else
             {
                $tney->Owner_ID = $owner_row['ID'];
@@ -287,11 +287,11 @@ function parse_edit_form( &$tney, $ttype, $is_admin )
 
 
       // determine edits
-      if( $old_vals['owner'] != $vars['owner'] ) $edits[] = T_('Owner#edits');
-      if( $old_vals['scope'] != $tney->Scope ) $edits[] = T_('Scope#edits');
-      if( $old_vals['start_time'] != $tney->StartTime ) $edits[] = T_('Start-time#edits');
-      if( $old_vals['title'] != $tney->Title ) $edits[] = T_('Title#edits');
-      if( $old_vals['descr'] != $tney->Description ) $edits[] = T_('Description#edits');
+      if( $old_vals['owner'] != $vars['owner'] ) $edits[] = T_('Owner#tourney');
+      if( $old_vals['scope'] != $tney->Scope ) $edits[] = T_('Scope#tourney');
+      if( $old_vals['start_time'] != $tney->StartTime ) $edits[] = T_('Start Time');
+      if( $old_vals['title'] != $tney->Title ) $edits[] = T_('Title');
+      if( $old_vals['descr'] != $tney->Description ) $edits[] = T_('Description');
    }
 
    return array( $vars, array_unique($edits), $errors );

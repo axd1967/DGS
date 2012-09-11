@@ -346,7 +346,7 @@ function echo_delete_template( $profile )
                           'TEXT', ProfileTemplate::get_template_type_text( $profile->Type ), ));
    $form->add_row( array( 'DESCRIPTION', T_('Name#tmpl'),
                           'TEXT', $profile->Name, ));
-   $form->add_row( array( 'DESCRIPTION', T_('Lastchanged#tmpl'),
+   $form->add_row( array( 'DESCRIPTION', T_('Last changed'),
                           'TEXT', ($profile->Lastchanged > 0 ? date(DATE_FMT2, $profile->Lastchanged) : '' ), ));
 
    $form->add_empty_row();

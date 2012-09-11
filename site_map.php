@@ -116,7 +116,7 @@ function itemL($text, $link='', $working=true, $last=false)
             item(T_('Show observers'), "users.php", false);
             item(T_('Show game info'), "gameinfo.php", false);
             { $item_level++;
-               item(T_('Rematch#rematch'), "game_rematch.php?mode=".REMATCH_INVITE, false);
+               item(T_('Rematch'), "game_rematch.php?mode=".REMATCH_INVITE, false);
                item(T_('Copy as new game#rematch'), "game_rematch.php".REMATCH_NEWGAME, false, true);
             } $item_level--;
             item(T_('Show game-players'), "game_players.php", false, true);
@@ -141,18 +141,18 @@ function itemL($text, $link='', $working=true, $last=false)
                item(T_('Send a message'), "message.php?mode=NewMessage", false);
                item(T_('Add tournament director'), "tournaments/edit_directors.php", false);
                item(T_('Edit tournament director'), "tournaments/edit_directors.php", false);
-               item(T_('Remove tournament director'), "tournaments/edit_directors.php?td_delete=1", false, true);
+               item(T_('Remove Tournament Director'), "tournaments/edit_directors.php?td_delete=1", false, true);
             } $item_level--;
             item(T_('Manage this tournament'), "tournaments/manage_tournament.php", false);
             { $item_level++;
-               item(T_('Change status'), "tournaments/edit_status.php", false);
+               item(T_('Change Status'), "tournaments/edit_status.php", false);
                item(T_('Edit tournament'), "tournaments/edit_tournament.php", false);
                item(T_('Add news#tnews'), "tournaments/edit_news.php", false);
                item(T_('Show tournament news'), "tournaments/list_news.php", false);
                item(T_('Add tournament director'), "tournaments/edit_directors.php", false);
                item(T_('Show tournament directors'), "tournaments/list_directors.php", false);
-               item(T_('Edit registration properties'), "tournaments/edit_properties.php", false);
-               item(T_('Edit rules'), "tournaments/edit_rules.php", false);
+               item(T_('Edit registration properties#tourney'), "tournaments/edit_properties.php", false);
+               item(T_('Edit rules#tourney'), "tournaments/edit_rules.php", false);
                item(T_('Edit participants'), "tournaments/edit_participant.php", false);
                { $item_level++;
                   item(T_('Show users'), "users.php", false);
@@ -162,7 +162,7 @@ function itemL($text, $link='', $working=true, $last=false)
                item(T_('Show tournament participants'), "tournaments/list_participants.php", false, true);
             } $item_level--;
             item(T_('Tournament participants'), "tournaments/list_participants.php", false, false);
-            item(T_('Registration'), "tournaments/register.php", false, false);
+            item(T_('Registration#tourney'), "tournaments/register.php", false, false);
             item(T_('Edit participants'), "tournaments/edit_participant.php", false, true);
          } $item_level--;
       } $item_level--;
@@ -208,7 +208,7 @@ function itemL($text, $link='', $working=true, $last=false)
          item(T_('New expert game'), "new_game.php?view=".GSETVIEW_EXPERT, true);
          item(T_('New fair-komi game'), "new_game.php?view=".GSETVIEW_FAIRKOMI, true);
          item(T_('New multi-player-game'), "new_game.php?view=".GSETVIEW_MPGAME, true);
-         item(T_('Shapes#shape'), "list_shapes.php", true);
+         item(T_('Shapes'), "list_shapes.php", true);
          item(T_('Templates'), "templates.php", true, true);
       } $item_level--;
 
@@ -254,17 +254,17 @@ function itemL($text, $link='', $working=true, $last=false)
          item(T_('Invite user'), "message.php?mode=Invite", false, true);
       } $item_level--;
 
-      item(T_('Shapes#shape'), "list_shapes.php", true);
+      item(T_('Shapes'), "list_shapes.php", true);
       { $item_level++;
-         item(T_('All shapes#shape'), "list_shapes.php?pub=0", true);
-         item(T_('My shapes#shape'), "list_shapes.php?user=".urlencode($uhandle).URI_AMP."pub=0", ((string)$uhandle != '') );
-         item(T_('New Shape (Goban Editor)#shape'), "goban_editor.php", true);
-         item(T_('View Shape#shape'), "view_shape.php", false);
+         item(T_('All shapes'), "list_shapes.php?pub=0", true);
+         item(T_('My shapes'), "list_shapes.php?user=".urlencode($uhandle).URI_AMP."pub=0", ((string)$uhandle != '') );
+         item(T_('New Shape (Goban Editor)'), "goban_editor.php", true);
+         item(T_('View Shape'), "view_shape.php", false);
          { $item_level++;
-            item(T_('Invite#shape'), "message.php?mode=Invite", false);
-            item(T_('New Shape-Game#shape'), "new_game.php", false, true);
+            item(T_('Invite'), "message.php?mode=Invite", false);
+            item(T_('New Shape-Game'), "new_game.php", false, true);
          } $item_level--;
-         item(T_('Edit Shape#shape'), "edit_shape.php", false, true);
+         item(T_('Edit Shape'), "edit_shape.php", false, true);
       } $item_level--;
 
       itemL(T_('Introduction'), "introduction.php", true);

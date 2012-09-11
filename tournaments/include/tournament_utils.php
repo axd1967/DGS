@@ -149,7 +149,7 @@ class TournamentUtils
       if( TournamentUtils::isAdmin() && $tourney->Flags > 0 )
       {
          $tform->add_row( array(
-               'DESCRIPTION', T_('Tournament Flags#tourney'),
+               'DESCRIPTION', T_('Tournament Flags'),
                'TEXT',        $tourney->formatFlags(NO_VALUE) ));
       }
    }

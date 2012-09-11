@@ -158,13 +158,13 @@ class TournamentRound
       $errors = array();
 
       if( $this->MinPoolSize < 2 || $this->MinPoolSize > TROUND_MAX_POOLSIZE )
-         $errors[] = sprintf( T_('Tournament round min. pool size must be in range %s.'),
+         $errors[] = sprintf( T_('Tournament Round min. pool size must be in range %s.'),
             build_range_text(2, TROUND_MAX_POOLSIZE) );
       if( $this->MaxPoolSize < 2 || $this->MaxPoolSize > TROUND_MAX_POOLSIZE )
-         $errors[] = sprintf( T_('Tournament round max. pool size must be in range %s.'),
+         $errors[] = sprintf( T_('Tournament Round max. pool size must be in range %s.'),
             build_range_text(2, TROUND_MAX_POOLSIZE) );
       if( $this->MinPoolSize > $this->MaxPoolSize )
-         $errors[] = T_('Tournament round min. pool size must be smaller than max. pool size.');
+         $errors[] = T_('Tournament Round min. pool size must be smaller than max. pool size.');
 
       if( $this->MaxPoolCount < 0 || $this->MaxPoolCount > TROUND_MAX_POOLCOUNT )
          $errors[] = sprintf( T_('Tournament Round max. pool count must be in range %s.'),
@@ -181,8 +181,8 @@ class TournamentRound
       // status / pool-size / pool-count
       $arr_props[] = sprintf( '%s: %s', T_('Tournament Round Status'),
          TournamentRound::getStatusText($this->Status) );
-      $arr_props[] = sprintf( '%s: %s', T_('Min. Pool Size#tround'), $this->MinPoolSize );
-      $arr_props[] = sprintf( '%s: %s', T_('Max. Pool Size#tround'), $this->MaxPoolSize );
+      $arr_props[] = sprintf( '%s: %s', T_('Min. Pool Size'), $this->MinPoolSize );
+      $arr_props[] = sprintf( '%s: %s', T_('Max. Pool Size'), $this->MaxPoolSize );
       if( $this->MaxPoolCount > 0 )
          $arr_props[] = sprintf( '%s: %s', T_('Maximum Pool count'), $this->MaxPoolCount );
 
@@ -190,7 +190,7 @@ class TournamentRound
       $arr_props[] = sprintf( T_("You may only retreat from the tournament round while not in status [%s]."),
          TournamentRound::getStatusText(TROUND_STATUS_PLAY) );
 
-      $arr_props[] = sprintf( '%s: %s', T_('Pool Count#tround'), $this->Pools );
+      $arr_props[] = sprintf( '%s: %s', T_('Pool Count'), $this->Pools );
 
       return array( sprintf( T_('Configuration of the current tournament round #%s'), $this->Round )
             . ':', $arr_props );
@@ -329,11 +329,11 @@ class TournamentRound
       if( !isset($ARR_GLOBALS_TOURNAMENT_ROUND[$key]) )
       {
          $arr = array();
-         $arr[TROUND_STATUS_INIT] = T_('Init#TRD_status');
-         $arr[TROUND_STATUS_POOL] = T_('Pool#TRD_status');
-         $arr[TROUND_STATUS_PAIR] = T_('Pair#TRD_status');
-         $arr[TROUND_STATUS_PLAY] = T_('Play#TRD_status');
-         $arr[TROUND_STATUS_DONE] = T_('Done#TRD_status');
+         $arr[TROUND_STATUS_INIT] = T_('Init#trd_status');
+         $arr[TROUND_STATUS_POOL] = T_('Pool#trd_status');
+         $arr[TROUND_STATUS_PAIR] = T_('Pair#trd_status');
+         $arr[TROUND_STATUS_PLAY] = T_('Play#trd_status');
+         $arr[TROUND_STATUS_DONE] = T_('Done#trd_status');
          $ARR_GLOBALS_TOURNAMENT_ROUND[$key] = $arr;
       }
 

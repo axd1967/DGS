@@ -85,7 +85,7 @@ $GLOBALS['ThePage'] = new Page('TournamentStatusEdit');
          $tourney->EndTime = $NOW;
       $tourney->persist();
       jump_to("tournaments/edit_status.php?tid=$tid".URI_AMP
-            . "sysmsg=". urlencode(T_('Tournament status saved!')) );
+            . "sysmsg=". urlencode(T_('Tournament Status saved!')) );
    }
 
    $page = "edit_status.php";
@@ -118,12 +118,12 @@ $GLOBALS['ThePage'] = new Page('TournamentStatusEdit');
    }
 
    $tform->add_row( array(
-         'DESCRIPTION', T_('Current Status#tourney'),
+         'DESCRIPTION', T_('Current Status'),
          'TEXT',        Tournament::getStatusText($tstatus->curr_status) ));
    $tform->add_row( array(
          'TAB',
          'SELECTBOX',    'status', 1, $arr_status, $tourney->Status, false,
-         'SUBMITBUTTON', 't_save', T_('Change status#tourney'), ));
+         'SUBMITBUTTON', 't_save', T_('Change Status'), ));
 
    if( count($edits) && @$_REQUEST['t_save'] ) // show confirmation
    {
@@ -150,7 +150,7 @@ $GLOBALS['ThePage'] = new Page('TournamentStatusEdit');
          $role_str = $tourney->build_role_info();
          $tform->add_empty_row();
          $tform->add_row( array(
-               'DESCRIPTION', T_('Confirmation notes#tourney'),
+               'DESCRIPTION', T_('Confirmation notes'),
                'TEXT', span('ErrorMsg',
                           sprintf( "%s<br>\n%s", $tourney->build_role_info(), $confirm_notes )), ));
          $tform->add_row( array(
@@ -167,7 +167,7 @@ $GLOBALS['ThePage'] = new Page('TournamentStatusEdit');
 
    $tform->echo_string();
 
-   echo_notes( 'edittourneystatusTable', T_('Tournament status notes'), build_status_notes() );
+   echo_notes( 'edittourneystatusTable', T_('Tournament Status notes'), build_status_notes() );
 
 
    $menu_array = array();
@@ -203,7 +203,7 @@ function parse_edit_form( &$tourney )
       $tourney->setStatus($vars['status'], true/*check-only*/);
 
       // determine edits
-      if( $old_vals['status'] != $vars['status'] ) $edits[] = T_('Status#edits');
+      if( $old_vals['status'] != $vars['status'] ) $edits[] = T_('Status');
    }
 
    return array( $vars, array_unique($edits) );
@@ -239,7 +239,7 @@ function build_status_notes()
       );
    $notes[] = null;
 
-   $notes[] = array( T_('Reserved Status changes for Tournament Admins:'),
+   $notes[] = array( T_('Reserved status changes for Tournament Admins') . ':',
          sprintf( "<b>* > %s > *%s%s > *:</b><br>\n%s",
             Tournament::getStatusText(TOURNEY_STATUS_ADMIN),
             SEP_SPACING,
@@ -256,7 +256,7 @@ function build_status_notes()
    $arrst[TOURNEY_STATUS_CLOSED]   = T_('Tournament finalizing phase (results are announced, tournament is finished)#tstat_closed');
    $arrst[TOURNEY_STATUS_ADMIN]    = T_('Tournament admin phase managed only by tournament admin (hidden, archived tournaments)#tstat_admin');
    $arrst[TOURNEY_STATUS_DELETE]   = T_('Tournament delete phase managed only by tournament admin (tournament ready for deletion)#tstat_del');
-   $narr = array( T_('Tournament Status#tourney') );
+   $narr = array( T_('Tournament Status') );
    foreach( $arrst as $status => $descr )
       $narr[] = sprintf( "%s = %s", Tournament::getStatusText($status), $descr );
    $notes[] = $narr;

@@ -79,23 +79,23 @@ function get_executives( $level )
    $out = array();
    // NOTE: don't include: ADMIN_TRANSLATORS, ADMIN_DATABASE, ADMIN_SKINNER
    if( $level & ADMIN_SUPERADMIN )
-      $out[] = T_('Admin manager#admin');
+      $out[] = T_('Admin manager');
    if( $level & ADMIN_DEVELOPER )
-      $out[] = T_('Site#admin');
+      $out[] = T_('Site');
    if( $level & ADMIN_PASSWORD )
-      $out[] = T_('Password#admin');
+      $out[] = T_('Password');
    if( $level & ADMIN_FAQ )
-      $out[] = T_('FAQ editor#admin');
+      $out[] = T_('FAQ editor');
    if( $level & ADMIN_FORUM )
-      $out[] = T_('Forum moderator#admin');
+      $out[] = T_('Forum moderator');
    if( $level & ADMIN_TOURNAMENT )
-      $out[] = T_('Tournaments#admin');
+      $out[] = T_('Tournaments');
    if( $level & ADMIN_GAME )
-      $out[] = T_('Game & Rating#admin');
+      $out[] = T_('Game & Rating');
    if( ALLOW_FEATURE_VOTE && ($level & ADMIN_FEATURE) )
-      $out[] = T_('Feature-Vote#admin');
+      $out[] = T_('Feature-Vote');
    if( ALLOW_SURVEY_VOTE && ($level & ADMIN_SURVEY) )
-      $out[] = T_('Survey#admin');
+      $out[] = T_('Survey');
    return array( count($out), implode(', ', $out) );
 }
 

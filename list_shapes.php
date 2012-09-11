@@ -75,13 +75,13 @@ $GLOBALS['ThePage'] = new Page('ShapeList');
 
    // add_tablehead($nr, $descr, $attbs=null, $mode=TABLE_NO_HIDE|TABLE_NO_SORT, $sortx='')
    $table->add_tablehead( 1, T_('ID#header'), 'Button', TABLE_NO_HIDE, 'ID-');
-   $table->add_tablehead( 2, new TableHead( T_('Shape Information#shape'), 'images/shape.gif'), 'ImagesLeft', TABLE_NO_HIDE);
-   $table->add_tablehead( 3, T_('Author#shape'), 'User', 0, 'SHPP_Handle+');
-   $table->add_tablehead( 4, T_('Name#shape'), 'Text', TABLE_NO_HIDE, 'Name+');
-   $table->add_tablehead( 5, T_('Size#shape'), 'Number', TABLE_NO_HIDE, 'Size+');
-   $table->add_tablehead( 6, T_('Flags#shape'), 'Enum', TABLE_NO_HIDE|TABLE_NO_SORT, 'Flags+');
-   $table->add_tablehead( 7, T_('Created#shape'), 'Date', 0, 'Created-');
-   $table->add_tablehead( 8, T_('Updated#shape'), 'Date', 0, 'Lastchanged-');
+   $table->add_tablehead( 2, new TableHead( T_('Shape Information'), 'images/shape.gif'), 'ImagesLeft', TABLE_NO_HIDE);
+   $table->add_tablehead( 3, T_('Author#header'), 'User', 0, 'SHPP_Handle+');
+   $table->add_tablehead( 4, T_('Name#header'), 'Text', TABLE_NO_HIDE, 'Name+');
+   $table->add_tablehead( 5, T_('Size#header'), 'Number', TABLE_NO_HIDE, 'Size+');
+   $table->add_tablehead( 6, T_('Flags#header'), 'Enum', TABLE_NO_HIDE|TABLE_NO_SORT, 'Flags+');
+   $table->add_tablehead( 7, T_('Created#header'), 'Date', 0, 'Created-');
+   $table->add_tablehead( 8, T_('Updated#header'), 'Date', 0, 'Lastchanged-');
 
    $table->set_default_sort( 4, 1 ); //on Name, ID
 
@@ -115,7 +115,7 @@ $GLOBALS['ThePage'] = new Page('ShapeList');
          $links = echo_image_shapeinfo($shape_id, $shape->Size, $shape->Snapshot, /*edit-goban*/true );
          if( $my_id == $shape->uid )
             $links .= ' ' . anchor( "edit_shape.php?shape=$shape_id",
-               image( 'images/edit.gif', 'E', '', 'class="Action InTextImage"' ), T_('Edit Shape#shape'));
+               image( 'images/edit.gif', 'E', '', 'class="Action InTextImage"' ), T_('Edit Shape'));
          $row_str[ 2] = $links;
       }
       if( @$table->Is_Column_Displayed[ 3] )
@@ -145,10 +145,10 @@ $GLOBALS['ThePage'] = new Page('ShapeList');
 
    //$no_prof = URI_AMP . $search_profile->get_request_params()->get_url_parts(); // add if not to load def-profile
    $menu_array = array();
-   $menu_array[T_('Shapes#shape')] = "list_shapes.php";
-   $menu_array[T_('All shapes#shape')] = "list_shapes.php?pub=0".SPURI_ARGS.'pub';
-   $menu_array[T_('My shapes#shape')] = "list_shapes.php?user=".urlencode($player_row['Handle']).URI_AMP.'pub=0'.SPURI_ARGS.'user,pub';
-   $menu_array[T_('New Shape (Goban Editor)#shape')] = "goban_editor.php";
+   $menu_array[T_('Shapes')] = "list_shapes.php";
+   $menu_array[T_('All shapes')] = "list_shapes.php?pub=0".SPURI_ARGS.'pub';
+   $menu_array[T_('My shapes')] = "list_shapes.php?user=".urlencode($player_row['Handle']).URI_AMP.'pub=0'.SPURI_ARGS.'user,pub';
+   $menu_array[T_('New Shape (Goban Editor)')] = "goban_editor.php";
 
    end_page(@$menu_array);
 }

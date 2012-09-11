@@ -134,8 +134,8 @@ $GLOBALS['ThePage'] = new Page('TournamentPoolDefine');
    // ---------- Process actions ------------------------------------------------
 
    $arr_sugg_order = array(
-      1 => T_('Pool Size#T_poolsugg_order'),
-      2 => T_('Best Pool Distribution#T_poolsugg_order'),
+      1 => T_('Pool Size#tpool_sugg_order'),
+      2 => T_('Best Pool Distribution#tpool_sugg_order'),
    );
    $sugg_order_val = get_request_arg('sugg_order', 1);
 
@@ -154,7 +154,7 @@ $GLOBALS['ThePage'] = new Page('TournamentPoolDefine');
    {
       $tround->update();
       jump_to("tournaments/roundrobin/define_pools.php?tid=$tid".URI_AMP."round=$round".URI_AMP
-            . "sysmsg=". urlencode(T_('Tournament round saved!')) );
+            . "sysmsg=". urlencode(T_('Tournament Round saved!')) );
    }
 
    // --------------- Tournament-Pools EDIT form --------------------
@@ -167,11 +167,11 @@ $GLOBALS['ThePage'] = new Page('TournamentPoolDefine');
          'DESCRIPTION', T_('Tournament ID'),
          'TEXT',        $tourney->build_info() ));
    $tform->add_row( array(
-         'DESCRIPTION', T_('Tournament Round#tround'),
+         'DESCRIPTION', T_('Tournament Round'),
          'TEXT',        $tourney->formatRound(), ));
    TournamentUtils::show_tournament_flags( $tform, $tourney );
    $tform->add_row( array(
-         'DESCRIPTION', T_('Round Status#tround'),
+         'DESCRIPTION', T_('Round Status#tourney'),
          'TEXT',        TournamentRound::getStatusText($tround->Status), ));
 
    if( count($errors) )
@@ -185,11 +185,11 @@ $GLOBALS['ThePage'] = new Page('TournamentPoolDefine');
    $tform->add_row( array( 'HR' ));
 
    $tform->add_row( array(
-         'DESCRIPTION', T_('Base Pool Size#tround'),
+         'DESCRIPTION', T_('Base Pool Size'),
          'TEXTINPUT',   'pool_size', 4, 3, $vars['pool_size'],
          'TEXT',        build_range_text( $tround->MinPoolSize, $tround->MaxPoolSize ), ));
    $tform->add_row( array(
-         'DESCRIPTION', T_('Pool Count#tround'),
+         'DESCRIPTION', T_('Pool Count'),
          'TEXTINPUT',   'pool_count', 4, 4, $vars['pool_count'],
          'TEXT',        ( $adjust_pool ? "<b>$adjust_pool</b>" . SMALL_SPACING : ''),
          'TEXT',        build_range_text( $min_pool_count, $max_pool_count ), ));
@@ -213,7 +213,7 @@ $GLOBALS['ThePage'] = new Page('TournamentPoolDefine');
 
    $tform->add_row( array(
          'TAB', 'CELL', 1, '', // align submit-buttons
-         'SUBMITBUTTON', 't_save', T_('Save pools'),
+         'SUBMITBUTTON', 't_save', T_('Save Pools'),
          'TEXT', SMALL_SPACING,
          'SUBMITBUTTON', 't_preview', T_('Preview'),
          'TEXT', SMALL_SPACING,
@@ -222,7 +222,7 @@ $GLOBALS['ThePage'] = new Page('TournamentPoolDefine');
    $tform->add_empty_row();
    $tform->add_row( array(
          'CELL', 2, '',
-         'TEXT',        T_('Order by#T_poolsugg') . ' ',
+         'TEXT',        T_('Order by') . ' ',
          'SELECTBOX',   'sugg_order', 1, $arr_sugg_order, $sugg_order_val, false,
          'TEXT', SMALL_SPACING,
          'SUBMITBUTTON', 't_suggest', T_('Suggest Pool Parameters'), ));
@@ -238,25 +238,25 @@ $GLOBALS['ThePage'] = new Page('TournamentPoolDefine');
    {
       section( 'suggestions', T_('Pool Suggestions') );
       echo "<p>\n",
-         sprintf( T_('The table shows sample distributions for the %s registered users of round #%s for allowed pool-sizes.'),
+         sprintf( T_('The table shows sample distributions for the %s registered users of round #%s for allowed pool-sizes.#tpool'),
                   "<b>$reg_count</b>", $round ), ":<br>\n",
          ( $games_per_challenge > 1
-               ? '( ' . sprintf( T_('"Games Count" is based on %s games per challenge!#tourney'), $games_per_challenge ) . ' )'
+               ? '( ' . sprintf( T_('"Games Count" is based on %s games per challenge!#tpool'), $games_per_challenge ) . ' )'
                : '' ), "<br>\n",
          $ttable->make_table(),
          "<br>\n";
 
-      echo_notes( 'defineTPoolsTable', T_('Legend#T_poolsugg'), array(
-         sprintf( T_('%s = maximal user capacity for chosen pool-size and count'), stripLF(T_("User\nCapacity#T_poolsugg")) ),
-         sprintf( T_('%s = number of missing users to only have full pools'), stripLF(T_("User\nDiff#T_poolsugg")) ),
+      echo_notes( 'defineTPoolsTable', T_('Legend for pool suggestions'), array(
+         sprintf( T_('%s = maximal user capacity for chosen pool-size and count'), stripLF(T_("User\nCapacity#tpool_sugg")) ),
+         sprintf( T_('%s = number of missing users to only have full pools'), stripLF(T_("User\nDiff#tpool_sugg")) ),
          sprintf( T_('%s = best equally shared round-robin pool distribution for all %s registered users'),
-                  stripLF(T_("Best Pool\nDistribution#T_poolsugg")), $reg_count )
+                  stripLF(T_("Best Pool\nDistribution#tpool_sugg")), $reg_count )
             . "\n" . T_('P x S : P = number of pools, S = pool-size; P1 + P2 = chosen pool-count'),
-         sprintf( T_('%s = number of games for best pool distribution'), stripLF(T_("Games\nCount#T_poolsugg")) ),
+         sprintf( T_('%s = number of games for best pool distribution'), stripLF(T_("Games\nCount#tpool_sugg")) ),
          null,
          T_("Recommended distributions are the suggestions with a minimal user-diff\nand a minimum of pools, that are smaller than the chosen pool-size."),
          T_('You are free to use other combinations if they are valid.'),
-         T_('The current parameter choice by tournament director is included and the line marked if valid.')
+         T_('The current parameter choice by tournament director is included and the line is marked if valid.')
             . "\n"
             . T_('Eventually the pool-size is adjusted in order to find a good pool distribution.'),
          ), false);
@@ -332,8 +332,8 @@ function parse_edit_form( &$trd )
          $errors[] = T_('Adding and deleting pool are mutual exclusive actions: Choose only one.');
 
       // determine edits
-      if( $old_vals['pool_size'] != $trd->PoolSize ) $edits[] = T_('Pool-Size#edits');
-      if( $old_vals['pool_count'] != $trd->Pools ) $edits[] = T_('Pool-Count#edits');
+      if( $old_vals['pool_size'] != $trd->PoolSize ) $edits[] = T_('Pool Size');
+      if( $old_vals['pool_count'] != $trd->Pools ) $edits[] = T_('Pool Count');
    }
 
    return array( $vars, array_unique($edits), $errors );
@@ -395,13 +395,13 @@ function make_suggestions_table( $tround, $reg_count, &$errors, $games_per_chall
       TABLE_NO_SORT|TABLE_NO_HIDE|TABLE_NO_PAGE|TABLE_NO_SIZE );
 
    // add_tablehead($nr, $descr, $attbs=null, $mode=TABLE_NO_HIDE|TABLE_NO_SORT, $sortx='')
-   $table->add_tablehead( 1, T_("Pool\nSize#T_poolsugg"), 'NumberC');
-   $table->add_tablehead( 2, T_("Pool\nCount#T_poolsugg"), 'NumberC');
-   $table->add_tablehead( 3, T_("User\nCapacity#T_poolsugg"), 'NumberC');
-   $table->add_tablehead( 4, T_("User\nDiff#T_poolsugg"), 'NumberC');
-   $table->add_tablehead( 5, T_("Best Pool\nDistribution#T_poolsugg"), 'Right');
-   $table->add_tablehead( 6, T_("Games\nCount#T_poolsugg"), 'Number');
-   $table->add_tablehead( 7, T_('Suggestion Note#T_poolsugg'), 'Note');
+   $table->add_tablehead( 1, T_("Pool\nSize#tpool_sugg"), 'NumberC');
+   $table->add_tablehead( 2, T_("Pool\nCount#tpool_sugg"), 'NumberC');
+   $table->add_tablehead( 3, T_("User\nCapacity#tpool_sugg"), 'NumberC');
+   $table->add_tablehead( 4, T_("User\nDiff#tpool_sugg"), 'NumberC');
+   $table->add_tablehead( 5, T_("Best Pool\nDistribution#tpool_sugg"), 'Right');
+   $table->add_tablehead( 6, T_("Games\nCount#tpool_sugg"), 'Number');
+   $table->add_tablehead( 7, T_('Suggestion Note#tpool_sugg'), 'Note');
 
    $arr_best = array();
    foreach( $arr_check as $arr_item )
@@ -425,19 +425,19 @@ function make_suggestions_table( $tround, $reg_count, &$errors, $games_per_chall
       $violation = '';
       if( $pool_size_check < $tround->MinPoolSize )
       {
-         $violation = T_('Violates min. pool-size on slicing!#T_poolsugg');
+         $violation = T_('Violates min. pool-size on slicing!');
          $errors[] = sprintf( T_('Pool count [%s] is too large, the min. pool size [%s] would be violated on slicing.'),
             $pool_count, $tround->MinPoolSize );
       }
       elseif( $pool_size_check > $tround->MaxPoolSize )
       {
-         $violation = T_('Violates max. pool-size!#T_poolsugg');
+         $violation = T_('Violates max. pool-size!');
          $errors[] = sprintf( T_('Pool count [%s] is too small, the max. pool size [%s] would be violated.'),
             $pool_count, $tround->MaxPoolSize );
       }
       elseif( $user_capacity < $reg_count )
       {
-         $violation = T_('Pool-size or count too small!#T_poolsugg');
+         $violation = T_('Pool-size or count too small!');
          $errors[] = sprintf( T_('Either the pool size [%s] or pool count [%s] is too small to cover all %s registered users.'),
             $pool_size, $pool_count, $reg_count );
       }
@@ -447,7 +447,7 @@ function make_suggestions_table( $tround, $reg_count, &$errors, $games_per_chall
       if( $user_choice )
       {
          $extra_class .= ' UserChoice';
-         $arr_note[] = T_('TD-Choice#T_poolsugg');
+         $arr_note[] = T_('TD-Choice#tpool_sugg');
       }
       if( $violation )
       {
@@ -486,7 +486,7 @@ function make_suggestions_table( $tround, $reg_count, &$errors, $games_per_chall
          break;
       $break_val = $stop_val;
 
-      $row_str[7] = concat_str( $row_str[7], ', ', T_('Recommended distribution!#T_poolsugg') );
+      $row_str[7] = concat_str( $row_str[7], ', ', T_('Recommended distribution!#tpool_sugg') );
       $row_str['extra_class'] = concat_str( (string)@$row_str['extra_class'], ' ' , 'Best' );
    }
 

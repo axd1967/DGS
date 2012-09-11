@@ -61,7 +61,7 @@ class PrivateLadderTournament extends TournamentTemplateLadder
    {
       global $player_row;
       $tourney = $this->make_tournament( TOURNEY_SCOPE_PRIVATE,
-         sprintf( T_('%s\'s Private Ladder'), $player_row['Handle'] ) );
+         sprintf( T_('%s\'s Private Ladder#tourney'), $player_row['Handle'] ) );
 
       $tprops = new TournamentProperties();
       $tprops->MinParticipants = 0;

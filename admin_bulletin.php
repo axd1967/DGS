@@ -152,7 +152,7 @@ $GLOBALS['ThePage'] = new Page('BulletinAdmin');
             'TEXT',        formatDate($bulletin->Lastchanged), ));
    if( !is_null($bulletin->Tournament) )
       $bform->add_row( array(
-            'DESCRIPTION', T_('Tournament#bulletin'),
+            'DESCRIPTION', T_('Tournament'),
             'TEXT',        $bulletin->Tournament->build_info(1), ));
    if( $bid )
    {
@@ -201,13 +201,13 @@ $GLOBALS['ThePage'] = new Page('BulletinAdmin');
          || $vars['tnews_tid'] || $bulletin->tid > 0 )
    {
       $bform->add_row( array(
-            'DESCRIPTION', T_('Tournament ID#bulletin'),
+            'DESCRIPTION', T_('Tournament ID'),
             'TEXTINPUT',   'tnews_tid', 8, 12, $vars['tnews_tid'], ));
    }
    if( $vars['target_type'] == BULLETIN_TRG_USERLIST || (string)trim(get_request_arg('user_list')) != '' )
    {
       $bform->add_row( array(
-            'DESCRIPTION', T_('User List#bulletin'),
+            'DESCRIPTION', T_('User List'),
             'TEXT',        sprintf( T_('only for target-type [%s], user-id (text or numeric)#bulletin_userlist'),
                                     GuiBulletin::getTargetTypeText($vars['target_type']) ), ));
       $bform->add_row( array(
@@ -217,8 +217,8 @@ $GLOBALS['ThePage'] = new Page('BulletinAdmin');
       if( count($arr_user_msg_rejected) )
       {
          $bform->add_row( array(
-               'DESCRIPTION', span('FormWarning', T_('User List Warning#bulletin')),
-               'CHECKBOX',    'warn_reject', 1, T_('Ignore User List Warning#bulletin'), $vars['warn_reject'], ));
+               'DESCRIPTION', span('FormWarning', T_('User List Warning')),
+               'CHECKBOX',    'warn_reject', 1, T_('Ignore User List Warning'), $vars['warn_reject'], ));
          $bform->add_row( array(
                'TAB', 'TEXT', span('FormWarning',
                   sprintf( T_('Users [%s] have reject message contact-setting for bulletin-author [%s]'),
@@ -229,7 +229,7 @@ $GLOBALS['ThePage'] = new Page('BulletinAdmin');
    if( $vars['target_type'] == BULLETIN_TRG_MPG || $vars['gid'] || $bulletin->gid > 0 )
    {
       $bform->add_row( array(
-            'DESCRIPTION', T_('Game ID#bulletin'),
+            'DESCRIPTION', T_('Game ID'),
             'TEXTINPUT',   'gid', 8, 12, $vars['gid'], ));
    }
 
@@ -251,7 +251,7 @@ $GLOBALS['ThePage'] = new Page('BulletinAdmin');
          'TEXTINPUT',   'expire_time', 20, 30, $vars['expire_time'],
          'TEXT',  '&nbsp;' .
             span('EditNote', sprintf( T_('(Date format [%s])'), FMT_PARSE_DATE ) .
-                  ( $bulletin->is_user_bulletin() ? '' : ', ' . T_('can be empty#bulletin_expire') )
+                  ( $bulletin->is_user_bulletin() ? '' : ', ' . T_('can be empty') )
                ), ));
 
    $bform->add_row( array(
@@ -287,13 +287,13 @@ $GLOBALS['ThePage'] = new Page('BulletinAdmin');
             {
                $arr[] = user_reference( REF_LINK, 1, '', $urow ) .
                   ( @$urow['C_RejectMsg']
-                     ? span('FormWarning', T_('User has reject-message contact-setting with bulletin-author#bulletin'), ' - %s' )
+                     ? span('FormWarning', T_('User has reject-message contact-setting with bulletin-author'), ' - %s' )
                      : '' ) .
                   "<br>\n";
             }
 
             $bform->add_row( array(
-                  'DESCRIPTION', T_('Target Users#bulletin'),
+                  'DESCRIPTION', T_('Target Users'),
                   'TEXT', implode('', $arr) ));
          }
       }
@@ -449,7 +449,7 @@ function parse_edit_form( &$bulletin )
          if( is_null($user) && is_numeric($new_value) && $new_value > GUESTS_ID_MAX )
             $user = User::load_user( $new_value );
          if( is_null($user) )
-            $errors[] = sprintf( T_('No user found for author [%s]#bulletin'), $new_value );
+            $errors[] = sprintf( T_('No user found for author [%s]'), $new_value );
          else
          {
             $bulletin->uid = $user->ID;
@@ -488,7 +488,7 @@ function parse_edit_form( &$bulletin )
       else
          $errors[] = $parsed_value;
       if( $bulletin->PublishTime == 0 )
-         $errors[] = T_('Missing Publish time#bulletin');
+         $errors[] = T_('Missing Publish time');
 
       $parsed_value = parseDate( T_('Expire time for bulletin'), $vars['expire_time'] );
       if( is_numeric($parsed_value) )
@@ -526,18 +526,18 @@ function parse_edit_form( &$bulletin )
 
 
       // determine edits
-      if( $old_vals['category'] != $bulletin->Category ) $edits[] = T_('Category#edits');
-      if( $old_vals['status'] != $bulletin->Status ) $edits[] = T_('Status#edits');
-      if( $old_vals['target_type'] != $bulletin->TargetType ) $edits[] = T_('TargetType#edits');
-      if( $old_vals['admin_note'] != $bulletin->AdminNote ) $edits[] = T_('Admin-Note#edits');
-      if( $old_vals['tnews_tid'] != $bulletin->tid ) $edits[] = T_('Tournament-ID#edits');
-      if( $old_vals['gid'] != $bulletin->gid ) $edits[] = T_('Game-ID#edits');
-      if( $old_vals['user_list'] != $vars['user_list'] ) $edits[] = T_('UserList#edits');
-      if( $old_vals['author'] != $vars['author'] ) $edits[] = T_('Author#edits');
-      if( $old_vals['publish_time'] != $bulletin->PublishTime ) $edits[] = T_('PublishTime#edits');
-      if( $old_vals['expire_time'] != $bulletin->ExpireTime ) $edits[] = T_('ExpireTime#edits');
-      if( $old_vals['subject'] != $bulletin->Subject ) $edits[] = T_('Subject#edits');
-      if( $old_vals['text'] != $bulletin->Text ) $edits[] = T_('Text#edits');
+      if( $old_vals['category'] != $bulletin->Category ) $edits[] = T_('Category');
+      if( $old_vals['status'] != $bulletin->Status ) $edits[] = T_('Status');
+      if( $old_vals['target_type'] != $bulletin->TargetType ) $edits[] = T_('Target Type#bulletin');
+      if( $old_vals['admin_note'] != $bulletin->AdminNote ) $edits[] = T_('Admin Note');
+      if( $old_vals['tnews_tid'] != $bulletin->tid ) $edits[] = T_('Tournament ID');
+      if( $old_vals['gid'] != $bulletin->gid ) $edits[] = T_('Game ID');
+      if( $old_vals['user_list'] != $vars['user_list'] ) $edits[] = T_('User List');
+      if( $old_vals['author'] != $vars['author'] ) $edits[] = T_('Author');
+      if( $old_vals['publish_time'] != $bulletin->PublishTime ) $edits[] = T_('Publish Time');
+      if( $old_vals['expire_time'] != $bulletin->ExpireTime ) $edits[] = T_('Expire Time');
+      if( $old_vals['subject'] != $bulletin->Subject ) $edits[] = T_('Subject');
+      if( $old_vals['text'] != $bulletin->Text ) $edits[] = T_('Text');
    }
 
    return array( $vars, array_unique($edits), $arr_rejected, $errors );

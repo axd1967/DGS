@@ -134,14 +134,14 @@ class TournamentStatus
    /*! \brief Check if change to ADM-tourney-status is allowed. */
    function check_conditions_status_ADM()
    {
-      $this->errors[] = sprintf( T_('Change to Tournament status [%s] only allowed by Tournament Admin.'),
+      $this->errors[] = sprintf( T_('Change on Tournament Status [%s] only allowed by Tournament Admin.'),
                                  Tournament::getStatusText($this->new_status) );
    }
 
    /*! \brief Check if change to NEW-tourney-status is allowed. */
    function check_conditions_status_NEW()
    {
-      $this->errors[] = sprintf( T_('Change to Tournament status [%s] only allowed by Tournament Admin.'),
+      $this->errors[] = sprintf( T_('Change on Tournament Status [%s] only allowed by Tournament Admin.'),
                                  Tournament::getStatusText($this->new_status) );
    }
 
@@ -279,7 +279,7 @@ class TournamentStatus
       else
          $status_str = Tournament::getStatusText($status);
 
-      return sprintf( T_('Expecting current tournament status [%s] for change to status [%s]'),
+      return sprintf( T_('Expecting current Tournament Status [%s] for change to status [%s]'),
                       $status_str,
                       Tournament::getStatusText($this->new_status) );
    }

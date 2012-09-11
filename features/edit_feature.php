@@ -219,7 +219,7 @@ require_once( "features/lib_votes.php" );
       $size_values[FEATSIZE_UNSET] = '?';
 
       $fform->add_row( array(
-         'DESCRIPTION', T_('Size'),
+         'DESCRIPTION', T_('Size#feature'),
          'SELECTBOX', 'size', 1, $size_values, $feature->size, false, ));
       $fform->add_row( array(
          'DESCRIPTION', T_('Subject'),

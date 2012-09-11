@@ -170,7 +170,7 @@ $GLOBALS['ThePage'] = new Page('UserInfo');
          $admin_rating = SMALL_SPACING . span('AdminLink',
             anchor("admin_rating.php?uid=$uid",
                image( $base_path.'images/edit.gif', 'E' ),
-               T_('Admin user rating#rankadm') ));
+               T_('Admin user rating') ));
       }
       else
          $admin_rating = '';

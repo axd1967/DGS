@@ -984,7 +984,7 @@ class TournamentLadder
          return true;
 
       // remove user from ladder
-      $reason = sprintf( T_('The system has removed the user from the tournament due to inactivity for more than %s days as defined in the ladder-configurations.#tourney'),
+      $reason = sprintf( T_('The system has removed the user from the tournament due to inactivity for more than %s days as defined in the ladder-configurations.'),
                          $user_abs_days );
       $success = $tladder->remove_user_from_ladder( "TournamentLadder::process_user_absence($tid,$uid,$user_abs_days)",
          /*upd-rank*/true, $uid, '', /*nfy-user*/true, $reason );
@@ -1065,10 +1065,10 @@ class TournamentLadder
    {
       return
          sprintf( "%s: %%s.<br>%s: %%s.<br>%s: %%s<br>%s: %%s",
-            basic_safe(T_('Current Rank')),
-            basic_safe(T_('Best Rank')),
-            basic_safe(T_('Start of Period (Change)')),
-            basic_safe(T_('Previous Period (Change)')) );
+            basic_safe(T_('Current Rank#T_ladder')),
+            basic_safe(T_('Best Rank#T_ladder')),
+            basic_safe(T_('Start of Period (Change)#T_ladder')),
+            basic_safe(T_('Previous Period (Change)#T_ladder')) );
    }
 
    function get_edit_tournament_status()

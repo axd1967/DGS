@@ -193,7 +193,7 @@ function build_rating_diff( $rating_diff )
          : '';
       $itable->add_sinfo( T_('Score'), score2text(@$grow['Score'], false) . $admResult);
    }
-   $itable->add_sinfo( T_('Start time'),  date(DATE_FMT3, @$grow['X_Starttime']) );
+   $itable->add_sinfo( T_('Start Time'),  date(DATE_FMT3, @$grow['X_Starttime']) );
    $itable->add_sinfo( T_('Lastchanged'), date(DATE_FMT3, @$grow['X_Lastchanged']) );
    $itable->add_sinfo( T_('Ruleset'),     getRulesetText($grow['Ruleset']) );
    $itable->add_sinfo( T_('Size'),        $grow['Size'] );
@@ -438,7 +438,7 @@ function build_rating_diff( $rating_diff )
       $itable->add_caption( T_('Tournament info') );
 
       $itable->add_sinfo(
-            T_('ID#tourney'),
+            T_('ID'),
             anchor( $base_path."tournaments/view_tournament.php?tid=$tid", "#$tid" )
                . echo_image_tournament_info($tid, true) );
       $itable->add_sinfo(
@@ -448,25 +448,25 @@ function build_rating_diff( $rating_diff )
             T_('Type#tourney'),
             Tournament::getTypeText($tourney->Type) );
       $itable->add_sinfo(
-            T_('Title#tourney'),
+            T_('Title'),
             make_html_safe(wordwrap($tourney->Title, 30), true) );
       if( $tourney->Type != TOURNEY_TYPE_LADDER )
          $itable->add_sinfo(
                T_('Current Round#tourney'),
                $tourney->formatRound() );
       $itable->add_sinfo(
-            T_('Tourney Status#tourney'),
+            T_('Tournament Status'),
             Tournament::getStatusText($tourney->Status) );
       if( !is_null($tgame) )
       {
          $itable->add_sinfo(
-               T_('Tourney Game Status#tourney'),
+               T_('Tournament Game Status'),
                TournamentGames::getStatusText($tgame->Status) );
 
          if( $tourney->Type == TOURNEY_TYPE_LADDER )
             $itable->add_sinfo(
-                  T_('Tourney Game Role#tourney'),
-                  ( $tgame->Challenger_uid == $my_id ? T_('Challenger#tourney') : T_('Defender#tourney') ) );
+                  T_('Tournament Game Role'),
+                  ( $tgame->Challenger_uid == $my_id ? T_('Challenger#T_ladder') : T_('Defender#T_ladder') ) );
 
          if( $tgame->isScoreStatus() && $black_id )
          {
@@ -481,7 +481,7 @@ function build_rating_diff( $rating_diff )
                $tg_score_str = span('ScoreWarning', $tg_score_str );
 
             $itable->add_sinfo(
-                  T_('Tourney Game Score#tourney'),
+                  T_('Tournament Game Score'),
                   $tg_score_str . $flags_str );
          }
 
@@ -491,7 +491,7 @@ function build_rating_diff( $rating_diff )
          if( count($arr_flags) )
          {
             $itable->add_sinfo(
-                  T_('Tourney Game Flags#tourney'),
+                  T_('Tournament Game Flags'),
                   implode(', ', $arr_flags) );
          }
       }

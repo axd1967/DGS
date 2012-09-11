@@ -61,12 +61,12 @@ require_once( "include/form_functions.php" );
    // search form
    $faq_form = new Form( 'faq', $faq_url, FORM_GET );
    $faq_form->add_row( array(
-      'DESCRIPTION',    T_('Search Terms#FAQ'),
+      'DESCRIPTION',    T_('Search Terms'),
       'TEXTINPUTX',     'qterm', 30, -1, $qterm,
                         array( 'title' => T_('Syntax[FAQ]: any words or characters (min. length 2)') ),
       'SUBMITBUTTONX',  'search', T_('Search'),
                         array( 'accesskey' => ACCKEY_ACT_FILT_SEARCH ),
-      'TEXT',           ' ' . sprintf( T_('in language (%s)#FAQ'), $arr_languages[$lang] ),
+      'TEXT',           ' ' . sprintf( T_('in language (%s)'), $arr_languages[$lang] ),
       ));
    if( $err_search )
       $faq_form->add_row( array( 'TAB', 'TEXT', "<span class=ErrMsg>($err_search)</span>" ));

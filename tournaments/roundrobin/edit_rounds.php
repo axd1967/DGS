@@ -122,7 +122,7 @@ $GLOBALS['ThePage'] = new Page('TournamentRoundEditor');
          if( !is_null($new_tround) )
          {
             $round = $new_tround->Round;
-            $sys_msg = urlencode( T_('Tournament round added!#tround') );
+            $sys_msg = urlencode( T_('Tournament Round added!') );
             jump_to("tournaments/roundrobin/edit_rounds.php?tid=$tid".URI_AMP."round=$round".URI_AMP."sysmsg=$sys_msg");
          }
       }
@@ -131,7 +131,7 @@ $GLOBALS['ThePage'] = new Page('TournamentRoundEditor');
          $success = TournamentHelper::delete_tournament_round( $tourney, $tround, $action_errors, false );
          if( $success )
          {
-            $sys_msg = urlencode( sprintf( T_('Tournament round #%s removed!#tround'), $round ) );
+            $sys_msg = urlencode( sprintf( T_('Tournament Round #%s removed!'), $round ) );
             jump_to("tournaments/roundrobin/edit_rounds.php?tid=$tid".URI_AMP."sysmsg=$sys_msg");
          }
       }
@@ -140,7 +140,7 @@ $GLOBALS['ThePage'] = new Page('TournamentRoundEditor');
          $success = TournamentHelper::set_tournament_round( $tourney, $round, $action_errors, false );
          if( $success )
          {
-            $sys_msg = urlencode( sprintf( T_('Tournament round #%s switched!#tround'), $round ) );
+            $sys_msg = urlencode( sprintf( T_('Tournament Round #%s switched!'), $round ) );
             jump_to("tournaments/roundrobin/edit_rounds.php?tid=$tid".URI_AMP."round=$round".URI_AMP."sysmsg=$sys_msg");
          }
       }
@@ -162,7 +162,7 @@ $GLOBALS['ThePage'] = new Page('TournamentRoundEditor');
          'TEXT',        $tourney->build_info() ));
    TournamentUtils::show_tournament_flags( $tform, $tourney );
    $tform->add_row( array(
-         'DESCRIPTION', T_('Tournament Status#tourney'),
+         'DESCRIPTION', T_('Tournament Status'),
          'TEXT', $tourney->getStatusText($tourney->Status) ));
    $tform->add_row( array(
          'DESCRIPTION', T_('Rounds#tourney'),
@@ -183,16 +183,16 @@ $GLOBALS['ThePage'] = new Page('TournamentRoundEditor');
 
    $tform->add_row( array( 'HR' ));
    $tform->add_row( array(
-         'DESCRIPTION', T_('Select Round'),
+         'DESCRIPTION', T_('Select Round#tourney'),
          'SELECTBOX',   'round', 1, $arr_rounds, $round, false,
          'TEXT', SMALL_SPACING,
-         'SUBMITBUTTON', 'tre_view', T_('View Round'), ));
+         'SUBMITBUTTON', 'tre_view', T_('View Round#tourney'), ));
 
    if( $tourney->Rounds < $max_rounds ) // valid to add T-round
    {
       $tform->add_row( array(
             'TAB', 'CELL', 1, '',
-            'SUBMITBUTTON', 'tre_add', T_('Add Round'), ));
+            'SUBMITBUTTON', 'tre_add', T_('Add Round#tourney'), ));
       if( @$_REQUEST['tre_add'] && !$has_action_error )
          echo_confirm( $tform, T_('Please confirm adding of a new tournament round'),
             'tre_add', T_('Confirm add') );
@@ -202,7 +202,7 @@ $GLOBALS['ThePage'] = new Page('TournamentRoundEditor');
    {
       $tform->add_row( array(
             'TAB', 'CELL', 1, '',
-            'SUBMITBUTTON', 'tre_del', T_('Remove Round'), ));
+            'SUBMITBUTTON', 'tre_del', T_('Remove Round#tourney'), ));
       if( @$_REQUEST['tre_del'] && !$has_action_error )
          echo_confirm( $tform, sprintf( T_('Please confirm deletion of selected tournament round #%s'), $round ),
             'tre_del', T_('Confirm deletion') );
@@ -210,13 +210,13 @@ $GLOBALS['ThePage'] = new Page('TournamentRoundEditor');
 
    $tform->add_row( array(
          'TAB', 'CELL', 1, '',
-         'SUBMITBUTTON', 'tre_edit', T_('Edit Round Properties'), ));
+         'SUBMITBUTTON', 'tre_edit', T_('Edit Round Properties#tourney'), ));
 
    if( $authorise_set_tround && ($tourney->Rounds > 1) ) // valid to set current T-round
    {
       $tform->add_row( array(
             'TAB', 'CELL', 1, '',
-            'SUBMITBUTTON', 'tre_set', T_('Set Current Round'), ));
+            'SUBMITBUTTON', 'tre_set', T_('Set Current Round#tourney'), ));
       if( @$_REQUEST['tre_set'] && !$has_action_error )
          echo_confirm( $tform,
             sprintf( T_('Please confirm setting the current tournament round from #%s to #%s'),
@@ -226,7 +226,7 @@ $GLOBALS['ThePage'] = new Page('TournamentRoundEditor');
 
    $tform->add_row( array(
          'TAB', 'CELL', 1, '',
-         'SUBMITBUTTON', 'tre_stat', T_('Change Round Status'), ));
+         'SUBMITBUTTON', 'tre_stat', T_('Change Round Status#tourney'), ));
 
    // GUI: show round info -------------
 
@@ -235,22 +235,22 @@ $GLOBALS['ThePage'] = new Page('TournamentRoundEditor');
       $tform->add_row( array( 'HR' ));
       $tform->add_row( array( 'HEADER', T_('Tournament Round Info') ));
       $tform->add_row( array(
-            'DESCRIPTION', T_('Tournament Round#tround'),
+            'DESCRIPTION', T_('Tournament Round'),
             'TEXT', $tround->Round, ));
       $tform->add_row( array(
             'DESCRIPTION', T_('Last changed'),
             'TEXT',        TournamentUtils::buildLastchangedBy($tround->Lastchanged, $tround->ChangedBy) ));
       $tform->add_row( array(
-            'DESCRIPTION', T_('Round Status#tround'),
+            'DESCRIPTION', T_('Round Status#tourney'),
             'TEXT', TournamentRound::getStatusText($tround->Status), ));
       $tform->add_row( array(
-            'DESCRIPTION', T_('Min. Pool Size#tround'),
+            'DESCRIPTION', T_('Min. Pool Size'),
             'TEXT', $tround->MinPoolSize, ));
       $tform->add_row( array(
-            'DESCRIPTION', T_('Max. Pool Size#tround'),
+            'DESCRIPTION', T_('Max. Pool Size'),
             'TEXT', $tround->MaxPoolSize, ));
       $tform->add_row( array(
-            'DESCRIPTION', T_('Max. Pool Count#tround'),
+            'DESCRIPTION', T_('Max. Pool Count'),
             'TEXT', ( $tround->MaxPoolCount > 0 ? $tround->MaxPoolCount : NO_VALUE ), ));
    }
 

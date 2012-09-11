@@ -154,8 +154,8 @@ class TournamentLimits
    {
       return $this->_checkValue_MinMaxDisable(
          TLIMITS_MAX_TP, $value, $curr_value,
-         T_('Disabling feature of maximum participants with 0-value not allowed.'),
-         T_('Expecting number for maximum participants in range %s.') );
+         T_('Disabling feature of maximum participants with 0-value not allowed.#tourney'),
+         T_('Expecting number for maximum participants in range %s.#tourney') );
    }
 
    // ---------- Fields checks for Ladder-tournaments --------------------
@@ -169,11 +169,11 @@ class TournamentLimits
          $group_label = (is_null($group_id)) ? '' : " $group_id";
          list( $disable_allowed, $min_value, $max_value ) = $limits;
          if( $value == 0 && is_null($group_id) /*&& !$disable_allowed*/ ) // always forbidden for main-group
-            $errors[] = T_('Disabling feature of maximum defenses with 0-value not allowed.');
+            $errors[] = T_('Disabling feature of maximum defenses with 0-value not allowed.#T_ladder');
          elseif(  ( !is_null($min_value) && $value < $min_value )
                || ( !is_null($max_value) && $max_value < TLADDER_MAX_DEFENSES && $value > $max_value ) )
          {
-            $errors[] = sprintf( T_('Max. defenses%s must be in range %s, but was [%s].'),
+            $errors[] = sprintf( T_('Max. defenses%s must be in range %s, but was [%s].#T_ladder'),
                $group_label, build_range_text($min_value, $max_value), $value );
          }
       }
@@ -185,8 +185,8 @@ class TournamentLimits
    {
       return $this->_checkValue_MinMaxDisable(
          TLIMITS_TL_MAX_CH, $value, $curr_value,
-         T_('Disabling feature of max. outgoing challenges with 0-value not allowed.'),
-         T_('Max. outgoing challenges must be in range %s.') );
+         T_('Disabling feature of max. outgoing challenges with 0-value not allowed.#T_ladder'),
+         T_('Max. outgoing challenges must be in range %s.#T_ladder') );
    }
 
    // ---------- Fields checks for Round-Robin-tournaments --------------------
