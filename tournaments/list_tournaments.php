@@ -64,7 +64,10 @@ $GLOBALS['ThePage'] = new Page('TournamentList');
    foreach( Tournament::getStatusText() as $status => $text )
    {
       $status_filter_array[$text] = "T.Status='$status'";
-      if( $status == TOURNEY_STATUS_ADMIN ) $idx_status_admin = $idx;
+      if( $status == TOURNEY_STATUS_ADMIN )
+         $idx_status_admin = $idx;
+      elseif( $status == TOURNEY_STATUS_DELETE )
+         $idx_status_delete = $idx;
       $idx++;
    }
 
@@ -161,9 +164,18 @@ $GLOBALS['ThePage'] = new Page('TournamentList');
          $tqsql,
          $ttable->current_order_string('ID-'),
          $ttable->current_limit_string() );
-   if( !TournamentUtils::isAdmin() && $idx_status_admin != (int)$tfilter->get_filter_value(4) )
-      $iterator->addQuerySQLMerge(
-         new QuerySQL( SQLP_WHERE, "T.Status<>'".TOURNEY_STATUS_ADMIN."'" ));
+   if( !TournamentUtils::isAdmin() ) // filter away ADM/DEL-status for non-admins
+   {
+      $f_status = (int)$tfilter->get_filter_value(4);
+      $arr_f_stat = array(); // show ADM|DEL if selected in filter
+      if( $f_status != $idx_status_admin )
+         $arr_f_stat[] = TOURNEY_STATUS_ADMIN;
+      if( $f_status != $idx_status_delete )
+         $arr_f_stat[] = TOURNEY_STATUS_DELETE;
+      if( count($arr_f_stat) )
+         $iterator->addQuerySQLMerge(
+            new QuerySQL( SQLP_WHERE, "NOT T.Status IN ('" . implode("','", $arr_f_stat) . "')" ));
+   }
    $iterator = Tournament::load_tournaments( $iterator );
 
    $show_rows = $ttable->compute_show_rows( $iterator->ResultRows );
