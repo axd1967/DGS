@@ -19,7 +19,51 @@ Developers INFO:
 ChangeLog
 ------------------------------------------------------------------
 
+2012-09-11 juga
+
+   * include/faq_functions.php, include/game_functions.php, include/gui_functions.php,
+     include/message_functions.php, include/shape_control.php,
+     tournaments/include/tournament.php, tournaments/include/tournament_gui_helper.php,
+     tournaments/include/tournament_helper.php, tournaments/include/tournament_ladder.php,
+     tournaments/include/tournament_ladder_props.php, tournaments/include/tournament_limits.php,
+     tournaments/include/tournament_participant.php, tournaments/include/tournament_pool.php,
+     tournaments/include/tournament_pool_classes.php, tournaments/include/tournament_properties.php,
+     tournaments/include/tournament_round.php, tournaments/include/tournament_round_status.php,
+     tournaments/include/tournament_rules.php, tournaments/include/tournament_status.php,
+     tournaments/include/tournament_utils.php, tournaments/include/types/private_ladder.php,
+     tournaments/include/types/public_ladder.php,
+     features/edit_feature.php, features/list_features.php, features/list_votes.php,
+     forum/admin.php,
+     tournaments/edit_director.php, tournaments/edit_lock.php, tournaments/edit_news.php,
+     tournaments/edit_participant.php, tournaments/edit_properties.php, tournaments/edit_rules.php,
+     tournaments/edit_status.php, tournaments/edit_tournament.php, tournaments/game_admin.php,
+     tournaments/ladder/admin.php, tournaments/ladder/challenge.php, tournaments/ladder/edit_props.php,
+     tournaments/ladder/retreat.php, tournaments/ladder/view.php, tournaments/list_directors.php,
+     tournaments/list_news.php, tournaments/list_participants.php, tournaments/list_tournaments.php,
+     tournaments/manage_tournament.php, tournaments/register.php, tournaments/roundrobin/create_pools.php,
+     tournaments/roundrobin/define_pools.php, tournaments/roundrobin/edit_pairing.php,
+     tournaments/roundrobin/edit_pools.php, tournaments/roundrobin/edit_ranks.php,
+     tournaments/roundrobin/edit_round_props.php, tournaments/roundrobin/edit_round_status.php,
+     tournaments/roundrobin/edit_rounds.php, tournaments/roundrobin/view_pools.php,
+     tournaments/view_news.php, tournaments/view_tournament.php,
+     admin_bulletin.php, admin_game.php, admin_rating.php, admin_survey.php, edit_bulletin.php,
+     edit_shape.php, faq.php, game.php, game_players.php, gameinfo.php, goban_editor.php,
+     list_bulletins.php, list_shapes.php, list_surveys.php, message.php, message_thread.php,
+     new_game.php, people.php, show_games.php, site_map.php, templates.php, userinfo.php,
+     view_shape.php, waiting_room.php, translate.php:
+   - cleanup:
+     - consolidated T_()-translation-texts using less alternate texts with '#label'-suffix,
+       reduced by ca. 200 translations
+     - removed the '#label'-context when the context is clear by reading the text to translate
+     - added '#label'-context were unclear
+
 2012-09-10 juga
+
+   * tournaments/include/tournament_news.php (TournamentNews.build_tournament_news),
+     include/globals.php (CSS_VERSION),
+     tournaments/edit_news.php (parse_edit_form),
+     skins/dragon/screen.css:
+   - show flags of tournament-news, show flag-comment for editing T-news
 
    * tournaments/include/tournament_pool_classes.php (class PoolGame, ~.get_user_col_map, ~.fill_games,
          ~.calc_pool_summary, ~.calc_pool_games_count;
