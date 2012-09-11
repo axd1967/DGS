@@ -697,7 +697,7 @@ function parse_edit_form( &$cfg_board )
 // save profile-data $nval into database and jumps to user-info-page
 function handle_save_profile( &$cfg_board, $nval )
 {
-   global $player_row;
+   global $player_row, $cookie_prefs;
 
    $my_id = $player_row['ID'];
    if( $my_id <= GUESTS_ID_MAX )

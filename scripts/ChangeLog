@@ -21,6 +21,9 @@ ChangeLog
 
 2012-09-11 juga
 
+   * edit_profile.php (handle_save_profile):
+   - bugfix: save user-profile in browser-settings stored in cookie
+
    * include/faq_functions.php, include/game_functions.php, include/gui_functions.php,
      include/message_functions.php, include/shape_control.php,
      tournaments/include/tournament.php, tournaments/include/tournament_gui_helper.php,
@@ -53,7 +56,7 @@ ChangeLog
      view_shape.php, waiting_room.php, translate.php:
    - cleanup:
      - consolidated T_()-translation-texts using less alternate texts with '#label'-suffix,
-       reduced by ca. 200 translations
+       reduced by ca. 650 translations
      - removed the '#label'-context when the context is clear by reading the text to translate
      - added '#label'-context were unclear
 
