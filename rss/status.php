@@ -352,6 +352,10 @@ else
    list( $allow_exec, $last_call_time ) =
       enforce_min_timeinterval( 'rss', 'rss_status-'.strtolower($uhandle), RSS_CHECK_MIN, RSS_CHECK_MAX );
 
+   define('MONITOR_RSS_HANDLES', '');
+   if( MONITOR_RSS_HANDLES && preg_match("/^(".MONITOR_RSS_HANDLES.")$/i", $uhandle) )
+      error_log("[MONITOR-RSS] user=[$uhandle]: allow=[".($allow_exec?1:0)."] last_call=[".($last_call_time > 0 ? date(DATE_FMT_QUICK, $last_call_time) : 0)."]");
+
    //disabling caches make some RSS feeders to instantaneously refresh.
    disable_cache( $NOW, $NOW + CACHE_MIN*60);
 
