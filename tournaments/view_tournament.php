@@ -69,7 +69,9 @@ $GLOBALS['ThePage'] = new Page('Tournament');
    $tourney->setTP_Counts($tp_counts);
    $tp_count_all = (int)@$tp_counts[TPCOUNT_STATUS_ALL];
    unset($tp_counts[TPCOUNT_STATUS_ALL]);
-   $reg_user_status = TournamentParticipant::isTournamentParticipant($tid, $my_id);
+
+   $my_tp = TournamentParticipant::load_tournament_participant($tid, $my_id);
+   $reg_user_status = ( $my_tp ) ? $my_tp->Status : false;
    $reg_user_info   = TournamentParticipant::getStatusUserInfo($reg_user_status);
 
    $news_qsql = TournamentNews::build_view_query_sql(
@@ -81,6 +83,7 @@ $GLOBALS['ThePage'] = new Page('Tournament');
    $tprops = TournamentProperties::load_tournament_properties( $tid );
    $trule  = TournamentRules::load_tournament_rule( $tid );
 
+   // user result state
    $tt_props = null; // T-type-specific props
    $tt_user_state = '';
    if( $tourney->Type == TOURNEY_TYPE_LADDER )
@@ -94,6 +97,17 @@ $GLOBALS['ThePage'] = new Page('Tournament');
    elseif( $tourney->Type == TOURNEY_TYPE_ROUND_ROBIN )
    {
       $tt_props = TournamentRound::load_tournament_round( $tid, $tourney->CurrentRound );
+      if( $my_tp )
+      {
+         $tt_user_state = NO_VALUE;
+         $tpool = TournamentPool::load_tournament_pool_user( $tid, $tourney->CurrentRound, $my_id );
+         if( $tpool )
+         {
+            $tt_user_state = sprintf( T_('Rank %s in Pool %s'), $tpool->formatRank(), $tpool->Pool );
+            if( $tpool->Rank > 0 )
+               $tt_user_state .= SMALL_SPACING . '+ ' . $tpool->echoRankImage();
+         }
+      }
    }
 
 
@@ -198,10 +212,13 @@ $GLOBALS['ThePage'] = new Page('Tournament');
       $itable->add_sinfo( T_('Tournament Round'), $tourney->formatRound() );
    if( $reg_user_info )
       $itable->add_sinfo( T_('Registration Status#tourney'), span('TUserStatus', $reg_user_info) );
+   if( $my_tp )
+      $itable->add_sinfo( T_('Tournament Games'),
+         sprintf( T_('%s finished, %s won, %s lost tournament games'), $my_tp->Finished, $my_tp->Won, $my_tp->Lost ));
    if( $tt_user_state )
    {
-      if( $tourney->Type == TOURNEY_TYPE_LADDER )
-         $itable->add_sinfo( T_('User Result State#T_ladder'), $tt_user_state );
+      if( $tourney->Type == TOURNEY_TYPE_LADDER || $tourney->Type == TOURNEY_TYPE_ROUND_ROBIN )
+         $itable->add_sinfo( T_('User Result State#tourney'), $tt_user_state );
    }
 
    echo $itable->make_table();
