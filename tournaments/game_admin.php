@@ -151,6 +151,7 @@ define('GA_RES_TIMOUT', 3);
 
    $tform = new Form( 'tournament1', $page, FORM_GET );
 
+   // tournament + tournament-game-info
    $tform->add_row( array(
          'DESCRIPTION', T_('Tournament ID'),
          'TEXT',        $tourney->build_info() ));
@@ -158,21 +159,42 @@ define('GA_RES_TIMOUT', 3);
    $tform->add_row( array(
          'DESCRIPTION', T_('Tournament Status'),
          'TEXT',        Tournament::getStatusText($tourney->Status) ));
+
+   $arr = array();
+   $arr[] = sprintf( T_('Status [%s]'), TournamentGames::getStatusText($tgame->Status) );
+   if( $tgame->Round_ID > 0 )
+   {
+      $tround = TournamentRound::load_tournament_round_by_id( $tgame->Round_ID );
+      if( !is_null($tround) )
+         $arr[] = sprintf( T_('Round %s on Status [%s]#tourney'), $tround->Round, TournamentRound::getStatusText($tround->Status) );
+   }
+   if( $tgame->Pool > 0 )
+      $arr[] = sprintf( T_('Pool %s'), $tgame->Pool );
    $tform->add_row( array(
-         'DESCRIPTION', T_('Tournament Game Status'),
-         'TEXT',        TournamentGames::getStatusText($tgame->Status) ));
-   $tform->add_row( array(
+         'DESCRIPTION', T_('Tournament Game Info'),
+         'TEXT',        implode(', ', $arr) ));
+   if( $tgame->Flags > 0 )
+      $tform->add_row( array(
          'DESCRIPTION', T_('Tournament Game Flags'),
          'TEXT',        $tgame->formatFlags() ));
    $tform->add_empty_row();
 
+   // game-info
    $tform->add_row( array(
          'DESCRIPTION', T_('Game ID'),
          'TEXT',        anchor($base_path."game.php?gid=$gid", "#$gid"),
          'TEXT',        echo_image_gameinfo($gid, true) ));
+
+   $arr = array();
+   $arr[] = sprintf( T_('Status [%s]'), Games::getStatusText($game->Status) );
+   $arr[] = ( $game->Rated ) ? T_('Rated') : T_('Unrated');
    $tform->add_row( array(
-         'DESCRIPTION', T_('Game Status'),
-         'TEXT',        Games::getStatusText($game->Status) ));
+         'DESCRIPTION', T_('Game Info'),
+         'TEXT',        implode(', ', $arr) ));
+   if( $game->Flags > 0 )
+      $tform->add_row( array(
+         'DESCRIPTION', T_('Game Flags'),
+         'TEXT',        Games::buildFlags($game->Flags) ));
    $tform->add_row( array(
          'DESCRIPTION', T_('Black player'),
          'TEXT',        $user_black->user_reference() . SEP_SPACING .
@@ -198,12 +220,19 @@ define('GA_RES_TIMOUT', 3);
 
    if( $authorise_game_end )
       draw_game_end( $tgame );
+   else
+      echo span('TWarning', T_('You are not authorised to end a tournament game.')), "<br><br>\n";
 
 
    // ADMIN: Add time ------------------
 
-   if( $authorise_add_time && isStartedGame($game->Status) )
-      draw_add_time( $tgame, $game, $authorise_add_time );
+   if( $authorise_add_time )
+   {
+      if( isStartedGame($game->Status) )
+         draw_add_time( $tgame, $game, $authorise_add_time );
+   }
+   else
+      echo span('TWarning', T_('You are not authorised to add time to a tournament game.')), "<br><br>\n";
 
 
    $menu_array = array();
@@ -372,7 +401,8 @@ function draw_game_end( $tgame )
    $tform->add_row( array(
          'CELL', 2, '',
          'HEADER', T_('End Tournament Game') ));
-   $tform->add_row( array(
+   if( $allow_edit )
+      $tform->add_row( array(
          'CELL', 2, '',
          'TEXT', span('TWarning', T_('This operation is irreversible, so please be careful!')), ));
 
