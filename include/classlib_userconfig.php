@@ -356,6 +356,9 @@ define('FORUMFLAG_FORUM_SHOWAUTHOR',  0x01); // last-post author
 define('FORUMFLAG_THREAD_SHOWAUTHOR', 0x02);
 //define('FORUMFLAG_...', 0x04); //re-use for db
 define('FORUMFLAG_POSTVIEW_OVERVIEW', 0x08); // show overview
+define('FORUMFLAG_POSTVIEW_FLAT_NEW_FIRST', 0x10); // both flat-flags not set => TREE-view
+define('FORUMFLAG_POSTVIEW_FLAT_OLD_FIRST', 0x20);
+define('FORUMFLAGS_POSTVIEW_FLAT', (FORUMFLAG_POSTVIEW_FLAT_NEW_FIRST|FORUMFLAG_POSTVIEW_FLAT_OLD_FIRST));
 
 // Table column-sets (db-fieldname-prefix for ConfigPages-table for BitSet-handling)
 define('CFGCOLS_STATUS_GAMES',            'ColumnsStatusGames');
@@ -603,6 +606,16 @@ class ConfigPages
          return 1;
       }
       return 0;
+   }
+
+   function set_clear_forum_flags( $uid, $clear_flags, $set_flags )
+   {
+      if( is_numeric($clear_flags) && is_numeric($set_flags) && $clear_flags >= 0 && $set_flags >= 0
+            && $clear_flags + $set_flags > 0 )
+      {
+         db_query( "ConfigPages::set_clear_forum_flags.upd($uid,$clear_flags,$set_flags)",
+            "UPDATE ConfigPages SET ForumFlags=(ForumFlags & ~$clear_flags) | $set_flags WHERE User_ID='$uid' LIMIT 1" );
+      }
    }
 
 } // end of 'ConfigPages'

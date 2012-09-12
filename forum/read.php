@@ -41,14 +41,28 @@ require_once( 'forum/post.php' );
    $edit = @$_REQUEST['edit']+0;
    $rx_term = get_request_arg('xterm', '');
 
-   // toggle forumflag
-   $toggleflag = @$_REQUEST['toggleflag'] + 0;
+   // toggle / change forumflags
+   $toggleflag = (int)@$_REQUEST['toggleflag'];
+   $chg_view = @$_REQUEST['view']; // t=tree-view, fo=flat-old-first, fn=flat-new-first
    $toggle_baseurl = "read.php?forum=$forum_id"
       . URI_AMP."thread=$thread"
       . ( $rx_term != '' ? URI_AMP."xterm=$rx_term" : '');
-   if( ConfigPages::toggle_forum_flags($my_id, $toggleflag) )
+
+   if( $toggleflag > 0 && ConfigPages::toggle_forum_flags($my_id, $toggleflag) )
       jump_to( 'forum/'.$toggle_baseurl );
-   $show_overview = ( $cfg_pages->get_forum_flags() & FORUMFLAG_POSTVIEW_OVERVIEW );
+   elseif( $chg_view )
+   {
+      if( $chg_view == 't' )
+         ConfigPages::set_clear_forum_flags($my_id, FORUMFLAGS_POSTVIEW_FLAT, 0 );
+      elseif( $chg_view == 'fo' )
+         ConfigPages::set_clear_forum_flags($my_id, FORUMFLAGS_POSTVIEW_FLAT, FORUMFLAG_POSTVIEW_FLAT_OLD_FIRST );
+      elseif( $chg_view == 'fn' )
+         ConfigPages::set_clear_forum_flags($my_id, FORUMFLAGS_POSTVIEW_FLAT, FORUMFLAG_POSTVIEW_FLAT_NEW_FIRST );
+      jump_to( 'forum/'.$toggle_baseurl );
+   }
+
+   $f_flags = $cfg_pages->get_forum_flags();
+   $show_overview = ( $f_flags & FORUMFLAG_POSTVIEW_OVERVIEW );
 
    $arg_moderator = get_request_arg('moderator');
    $switch_moderator = switch_admin_status( $player_row, ADMIN_FORUM, $arg_moderator );
@@ -112,6 +126,7 @@ require_once( 'forum/post.php' );
 
    $disp_forum = new DisplayForum( $my_id, $is_moderator, $forum_id, $thread );
    $disp_forum->setConfigBoard( $cfg_board );
+   $disp_forum->set_threadpost_view( $f_flags );
    $disp_forum->set_forum_options( $forum->options );
    $disp_forum->set_rx_term( $rx_term );
    $disp_forum->cols = 2;
@@ -142,30 +157,6 @@ require_once( 'forum/post.php' );
       }
    }
 
-
-   if( $show_overview )
-   {
-      $headtitle1 = sprintf( '%s <span class="HeaderToggle">(<a href="%s">%s</a>)</span>',
-         T_('Reading thread overview'),
-         $toggle_baseurl .URI_AMP.'toggleflag='.FORUMFLAG_POSTVIEW_OVERVIEW,
-         T_('Hide overview#threadoverview') );
-      $headline1 = array(
-         $headtitle1 => "colspan={$disp_forum->cols}"
-      );
-
-      $headtitle2 = T_('Reading thread posts');
-   }
-   else
-   {
-      $headline1 = null;
-
-      $headtitle2 = sprintf( '%s <span class="HeaderToggle">(<a href="%s">%s</a>)</span>',
-         T_('Reading thread posts'),
-         $toggle_baseurl .URI_AMP.'toggleflag='.FORUMFLAG_POSTVIEW_OVERVIEW,
-         T_('Show overview#threadoverview') );
-   }
-
-
    // load thread/post-data
    $revh_post_id = (int)@$_GET['revision_history'];
    if( $revh_post_id > 0 )
@@ -182,7 +173,13 @@ require_once( 'forum/post.php' );
          "P.Forum_ID=$forum_id",
          "P.Thread_ID=$thread",
          "P.PosIndex>''" ); // '' == inactivated (edited)
-      $qsql->add_part( SQLP_ORDER, 'P.PosIndex' );
+
+      if( $disp_forum->flat_view < 0 ) // flat old-first
+         $qsql->add_part( SQLP_ORDER, 'P.Time ASC' );
+      elseif( $disp_forum->flat_view > 0 ) // flat new-first
+         $qsql->add_part( SQLP_ORDER, 'P.Time DESC' );
+      else // tree-view
+         $qsql->add_part( SQLP_ORDER, 'P.PosIndex' );
 
       $fthread = new ForumThread( $FR );
       $fthread->load_posts( $qsql );
@@ -234,6 +231,7 @@ require_once( 'forum/post.php' );
    }
 
    // headline2 = no thread tree-overview
+   list( $headline1, $headtitle2 ) = $disp_forum->build_threadpostview_headlines( $toggle_baseurl, $show_overview );
    $headtitle2 .= DASH_SPACING . '(' . sprintf(T_('%s hits#fthread'), $fthread->get_thread_hits()) . ')';
    $headline2 = array(
       $headtitle2 => "colspan={$disp_forum->cols}"
@@ -248,7 +246,11 @@ require_once( 'forum/post.php' );
       $disp_forum->print_headline( $headline2 );
    }
 
+
    // draw posts
+   if( $disp_forum->flat_view )
+      $disp_forum->change_depth( 1 );
+
    $all_my_posts = true;
    foreach( $fthread->posts as $post )
    {
@@ -261,7 +263,8 @@ require_once( 'forum/post.php' );
       if( $hidden && !$post->is_thread_post() && !$show_hidden_post )
          continue;
 
-      $disp_forum->change_depth( $post->depth );
+      if( !$disp_forum->flat_view )
+         $disp_forum->change_depth( $post->depth );
 
       if( $edit == $pid && $is_my_post )
          $drawmode = DRAWPOST_EDIT;

@@ -207,6 +207,7 @@ class DisplayForum
    var $rx_term;
    var $ConfigBoard;
    var $forum_opts;
+   var $flat_view; // 0 = tree-view, -1 = flat-old-first (order Posts.Time ASC), 1 = flat-new-first (order Posts.Time DESC)
 
    // consts
    var $max_rows;
@@ -235,6 +236,7 @@ class DisplayForum
       $this->rx_term = '';
       $this->ConfigBoard = null;
       $this->forum_opts = null;
+      $this->flat_view = 0; // tree-view
 
       $this->max_rows = MAXROWS_PER_PAGE_DEFAULT;
       $this->offset = 0;
@@ -263,6 +265,16 @@ class DisplayForum
    function set_forum_options( $forum_opts )
    {
       $this->forum_opts = $forum_opts;
+   }
+
+   function set_threadpost_view( $forum_flags )
+   {
+      if( ($forum_flags & FORUMFLAGS_POSTVIEW_FLAT) == FORUMFLAG_POSTVIEW_FLAT_NEW_FIRST )
+         $this->flat_view = 1;
+      elseif( ($forum_flags & FORUMFLAGS_POSTVIEW_FLAT) == FORUMFLAG_POSTVIEW_FLAT_OLD_FIRST )
+         $this->flat_view = -1;
+      else
+         $this->flat_view = 0;
    }
 
    function show_found_rows( $rows )
@@ -322,6 +334,58 @@ class DisplayForum
          $this->echo_links('B');
       echo "</table>\n", name_anchor('fbottom');
    }
+
+   // return arr( headline1, headtitle2 )
+   function build_threadpostview_headlines( $base_url, $show_overview )
+   {
+      // build view-links "(tree | new/old first)"
+      $arr = array();
+      if( $this->flat_view == 0 ) // tree-view
+      {
+         $arr[] = array( $base_url .URI_AMP.'view=fo', T_('Old First#thread_view') );
+         $arr[] = array( $base_url .URI_AMP.'view=fn', T_('New First#thread_view') );
+      }
+      else
+      {
+         $arr[] = array( $base_url .URI_AMP.'view=t', T_('Tree View#thread_view') );
+         if( $this->flat_view > 0 ) // flat new-first
+            $arr[] = array( $base_url .URI_AMP.'view=fo', T_('Old First#thread_view') );
+         else //if( $this->flat_view < 0 ) // flat old-first
+            $arr[] = array( $base_url .URI_AMP.'view=fn', T_('New First#thread_view') );
+      }
+
+      $head_fmt = '%s%s<span class="HeaderToggle">( <a href="%s">%s</a> ) ( <a href="%s">%s</a> | <a href="%s">%s</a> )</span>';
+      if( $show_overview )
+      {
+
+         $headtitle1 = sprintf( $head_fmt,
+            T_('Reading thread overview'),
+            SMALL_SPACING,
+            $base_url .URI_AMP.'toggleflag='.FORUMFLAG_POSTVIEW_OVERVIEW,
+            T_('Hide overview#threadoverview'),
+            $arr[0][0], $arr[0][1],
+            $arr[1][0], $arr[1][1] );
+         $headline1 = array(
+            $headtitle1 => "colspan={$this->cols}"
+         );
+
+         $headtitle2 = T_('Reading thread posts');
+      }
+      else
+      {
+         $headline1 = null;
+
+         $headtitle2 = sprintf( $head_fmt,
+            T_('Reading thread posts'),
+            SMALL_SPACING,
+            $base_url .URI_AMP.'toggleflag='.FORUMFLAG_POSTVIEW_OVERVIEW,
+            T_('Show overview#threadoverview'),
+            $arr[0][0], $arr[0][1],
+            $arr[1][0], $arr[1][1] );
+      }
+
+      return array( $headline1, $headtitle2 );
+   }//build_threadpostview_headlines
 
    // param ReqParam: optional object RequestParameters containing URL-parts to be included for paging
    function make_link_array( $ReqParam = null )
@@ -573,11 +637,11 @@ class DisplayForum
          return;
 
       if( $this->cur_depth >= 1 ) //this means that a cell table is already opened
-         echo "</table></td></tr>";
+         echo "</table></td></tr>\n";
 
       if( $new_depth < 1 ) //this means close it
       {
-         echo "</table></td></tr>";
+         echo "</table></td></tr>\n";
          $this->cur_depth = -1;
          return;
       }
@@ -767,7 +831,7 @@ class DisplayForum
             echo "</td></tr>";
          }
 
-         // [header-row] post-info
+         // [header-row] post-info: "author, created (edited)  (No. X)"
          echo "\n<tr class=\"$hdrclass Author\"><td class=Author colspan=$hdrcols>";
 
          $post_reference = date(DATE_FMT, $post->created);
@@ -783,7 +847,9 @@ class DisplayForum
          if( $post->last_edited > 0 )
             $post_reference = date(DATE_FMT, $post->last_edited);
 
-         echo "</td></tr>\n";
+         echo SMALL_SPACING, sprintf( '(%s %s)', T_('No.#num'), $post->creation_order );
+
+         echo "</td></tr>";
 
          $post_reference = "<user {$post->author->ID}> ($post_reference):";
       }
@@ -796,6 +862,7 @@ class DisplayForum
       // post bottom line (footer)
       if( $drawmode_type == DRAWPOST_NORMAL )
       {
+         $flat = ( $this->flat_view != 0 );
          echo "\n<tr class=PostButtons><td colspan=$cols>";
 
          $imgarr = $this->init_navi_images();
@@ -805,10 +872,10 @@ class DisplayForum
          $next_parent = ( is_null($post->next_parent_post) )
             ? ''
             : anchor( '#'.$post->next_parent_post->id, $imgarr['next_parent'] ) . '&nbsp;';
-         $prev_answer = ( is_null($post->prev_post) )
+         $prev_answer = ( is_null($post->prev_post) || $flat )
             ? ''
             : anchor( '#'.$post->prev_post->id, $imgarr['prev_answer'] ) . '&nbsp;';
-         $next_answer = ( is_null($post->next_post) )
+         $next_answer = ( is_null($post->next_post) || $flat )
             ? ''
             : anchor( '#'.$post->next_post->id, $imgarr['next_answer'] ) . '&nbsp;';
          $first_answer = ( is_null($post->first_child_post) )
@@ -864,7 +931,7 @@ class DisplayForum
             }
          }
          echo "</td></tr>\n";
-      }
+      }//post-footer
 
       return $post_reference;
    } //draw_post
@@ -878,8 +945,8 @@ class DisplayForum
 
       echo "\n<tr class=TreePostNormal><td><table class=ForumTreeOverview>",
          "\n<tr class=\"TreePostNormal Header\">",
-         sprintf( '<th>%s</th><th>%s</th><th>%s</th></tr>',
-            T_('Subject'), T_('Author'), T_('Last changed') );
+         sprintf( '<th>%s</th><th>%s</th><th>%s'.SMALL_SPACING.'(%s)</th></tr>',
+            T_('Subject'), T_('Author'), T_('Last changed'), T_('No.#num') );
 
       // draw for post: subject, author, date
       $c=2;
@@ -902,17 +969,18 @@ class DisplayForum
          $c = 3 - $c;
          $mypostclass = ($is_my_post) ? ' class=MyPost' : '';
          $mypost_fmt = ($is_my_post) ? '<span class="MyPost">%s</span>' : '%s';
+         $depth = ( $this->flat_view ) ? 1 : $post->depth;
          echo "\n<tr class=\"TreePostNormal Row{$c}". ($is_my_post ? ' MyPost' : '') ."\">",
             "<td$mypostclass>",
-            str_repeat( '&nbsp;', 3*($post->depth - 1) ),
+            str_repeat( '&nbsp;', 3*($depth - 1) ),
             sprintf( $mypost_fmt, anchor( '#'.$post->id, $sbj, '', 'class=PostSubject' ) ),
             $newstr,
             $modstr,
             "</td><td>",
             sprintf( '<span class=PostUser>%s</span>', $post->author->user_reference() ),
             "</td><td>",
-            sprintf( '<span class=PostDate>%s</span>',
-               date( DATE_FMT, max($post->created, $post->last_edited) ) ),
+            sprintf( '<span class=PostDate>%s'.SMALL_SPACING.'(%s)</span>',
+               date( DATE_FMT, max($post->created, $post->last_edited) ), $post->creation_order ),
             '</td></tr>';
       }
 
@@ -1500,6 +1568,16 @@ class ForumThread
     */
    function create_navigation_tree( $set_in_posts=true )
    {
+      // find out flat-order
+      $arr_order = array();
+      foreach( $this->posts as $post_id => $post )
+         $arr_order[$post_id] = $post->created;
+      asort($arr_order, SORT_NUMERIC);
+      $idx = 0;
+      foreach( array_keys($arr_order) as $post_id )
+         $arr_order[$post_id] = ++$idx;
+
+      // build tree
       $navtree = array();
       $last_parent_posts = array(); // [ parent_id => last_post_id in parent-thread ]
       $parent_children = array(); // [ parent_id => [ post_id1, post_id2, ... ] ]
@@ -1526,6 +1604,8 @@ class ForumThread
             $parent_children[$parent_id][] = $post_id;
          }
          $navtree[$post_id] = $navmap;
+
+         $post->creation_order = $arr_order[$post_id]; // set flat-order (sort by creation-date)
       }
 
       foreach( $parent_children as $parent_id => $children )
@@ -1621,6 +1701,8 @@ class ForumPost
 
    /*! \brief true, if for thread no link should be drawn (used in draw_post-func) [default=false] */
    var $thread_no_link;
+   /*! \brief [int] order in thread-view (1..n); 0 = unset. */
+   var $creation_order;
 
    /*! \brief true if thread has new posts. */
    var $has_new_posts;
@@ -1668,6 +1750,7 @@ class ForumPost
       $this->old_id = (int) $old_id;
       // non-db
       $this->thread_no_link = false;
+      $this->creation_order = 0;
       $this->has_new_posts = false;
       $this->is_read = true;
       $this->score = 0;
@@ -1761,6 +1844,7 @@ class ForumPost
          . "crc32=[{$this->crc32}], "
          . "old_id=[{$this->old_id}], "
          . "thread_no_link=[{$this->thread_no_link}], "
+         . "creation_order=[{$this->creation_order}], "
          . "has_new_posts=[{$this->has_new_posts}], "
          . "is_read=[{$this->is_read}], "
          . "score=[{$this->score}]";

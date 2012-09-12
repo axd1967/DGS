@@ -66,6 +66,7 @@ Navigation
      - thread list: show max-rows (configurable)
      - thread-post list: show all
      - revision history: show all
+   - different views for thread-post-list: tree, flat-old-first, flat-new-first
 
 Forum view, shown by "forum/index.php":
    - show list of all forums ordered by Forums.SortOrder
@@ -97,14 +98,16 @@ Thread list view (for single forum-id), shown by "forum/list.php":
 
 Thread post view (for single thread-id), shown by "forum/read.php":
    - viewing thread marks new posts as read
+   - view-modes (can be changed): tree-view, flat-old-first, flat-new-first
    - thread-tree overview shows subject, author and last-change of each thread-post
      - subject is linked to full post-data on same page
      - subject is level-indented up to 40 levels
      - subject is emphasized for own posts
      - "new" is appended to subject and linked to corresponding new post
      - tree-overview can be hidden
-   - thread-post-list shows all non-hidden posts with subject, author,
-     creation-date, last-edit-date if edited and the post-text
+     - post-number (order) is shown
+   - thread-post-list shows all non-hidden posts with subject, author
+     creation-date, last-edit-date if edited and the post-text, post-number (order)
      - subject is linked to post itself to have the URL to be used as reference
      - "new" is appended to subject if it's a new post and linked to next new post
      - edited is linked to show post revision history
@@ -116,7 +119,7 @@ Thread post view (for single thread-id), shown by "forum/read.php":
        - arrows for navigation within thread are linked:
          - to top (=initial thread-post), to bottom
          - to previous/next parent
-         - to previous/next post
+         - to previous/next post (except for flat-views)
          - to first answer
        - for moderators additional actions:
          - [approve] to approve a post that needs moderating -> non-hidden post
@@ -239,7 +242,7 @@ step from less OO-oriented code (mostly function-call-sequences passing
 global vars) to concentrate object-behaviour in classes with the goals
 explained above.
 
-   class ForumDisplay
+   class DisplayForum
       Serving as general container to help in displaying forum content
 
    class Forum
