@@ -115,19 +115,27 @@ class TournamentGames
       $this->Status = $status;
    }
 
-   /*! \brief Returns true if tournament-game is on status with set score. */
-   function isScoreStatus()
+   /*!
+    * \brief Returns true if tournament-game is on status with set score.
+    * \param $check_detached true = check that game is not detached (and has no score), false = check only TG.Status
+    */
+   function isScoreStatus( $check_detached )
    {
       static $arr_status_with_score = array( TG_STATUS_SCORE, TG_STATUS_WAIT, TG_STATUS_DONE );
-      return in_array( $this->Status, $arr_status_with_score );
+
+      $result = in_array( $this->Status, $arr_status_with_score );
+      if( $check_detached && ($this->Flags & TG_FLAG_GAME_DETACHED) )
+         $result = false;
+      return $result ;
    }
 
+   /*! \brief Returns score for given user; null if no score set. */
    function getScoreForUser( $uid )
    {
       if( $uid <= 0 )
          error('invalid_args', "TournamentGames.getScoreForUser($uid)");
 
-      if( $uid > 0 && $this->isScoreStatus() )
+      if( $uid > 0 && $this->isScoreStatus(/*chk-detach*/true) )
          return (( $this->Challenger_uid == $uid ) ? 1 : -1 ) * $this->Score;
       else
          return null;

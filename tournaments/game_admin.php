@@ -30,6 +30,7 @@ require_once 'include/time_functions.php';
 require_once 'include/db/games.php';
 require_once 'tournaments/include/tournament.php';
 require_once 'tournaments/include/tournament_games.php';
+require_once 'tournaments/include/tournament_rules.php';
 require_once 'tournaments/include/tournament_status.php';
 require_once 'tournaments/include/tournament_utils.php';
 
@@ -56,9 +57,9 @@ define('GA_RES_TIMOUT', 3);
    $page = "game_admin.php";
 
 /* Actual REQUEST calls used
-     tid=&gid=                : admin T-game
-     gend_save&tid/gid=       : update T-game-score/status for admin-game-end
-     addtime_save&tid/gid=    : add time for T-game
+     tid=&gid=                      : admin T-game
+     gend_save&tid/gid/jigo_check=  : update T-game-score/status for admin-game-end
+     addtime_save&tid/gid=          : add time for T-game
 */
 
    $tid = (int) @$_REQUEST['tid'];
@@ -74,12 +75,21 @@ define('GA_RES_TIMOUT', 3);
    $game = Games::load_game($gid);
    if( is_null($game) )
       error('unknown_game', "Tournament.game_admin.find_tournament($tid)");
+   $g_score = ( $game->Status == GAME_STATUS_FINISHED ) ? $game->Score : null;
+   $g_score_text = score2text($g_score, false);
 
    $tgame = TournamentGames::load_tournament_game_by_gid($gid);
    if( is_null($tgame) )
       error('bad_tournament', "Tournament.game_admin.find_tgame($tid,$gid)");
    if( $tgame->tid != $tid )
       error('bad_tournament', "Tournament.game_admin.check_tgame.tid($tid,$gid)");
+   $tg_score = $tgame->getScoreForUser( $game->Black_ID );
+   $tg_score_text = score2text($tg_score, false);
+   $diff_score = ( $g_score !== $tg_score );
+
+   $trule = TournamentRules::load_tournament_rule($tid);
+   if( is_null($trule) )
+      error('bad_tournament', "Tournament.game_admin.find_trule($tid)");
 
    // edit allowed?
    $is_admin = TournamentUtils::isAdmin();
@@ -93,7 +103,7 @@ define('GA_RES_TIMOUT', 3);
    $authorise_add_time = $tourney->allow_edit_tournaments($my_id, TD_FLAG_GAME_ADD_TIME);
 
    // init
-   list( $vars, $edits, $input_errors ) = parse_edit_form( $tgame, $game );
+   list( $vars, $edits, $input_errors ) = parse_edit_form( $tgame, $trule, $game );
    $errors = array_merge( $errors, $input_errors );
    $user_black = User::load_user( $game->Black_ID );
    $user_white = User::load_user( $game->White_ID );
@@ -177,6 +187,9 @@ define('GA_RES_TIMOUT', 3);
       $tform->add_row( array(
          'DESCRIPTION', T_('Tournament Game Flags'),
          'TEXT',        $tgame->formatFlags() ));
+   $tform->add_row( array(
+      'DESCRIPTION', T_('Tournament Game Score'),
+      'TEXT',        ( $diff_score ? span('ScoreWarning', $tg_score_text) : $tg_score_text ) ));
    $tform->add_empty_row();
 
    // game-info
@@ -195,6 +208,9 @@ define('GA_RES_TIMOUT', 3);
       $tform->add_row( array(
          'DESCRIPTION', T_('Game Flags'),
          'TEXT',        Games::buildFlags($game->Flags) ));
+   $tform->add_row( array(
+      'DESCRIPTION', T_('Game Score'),
+      'TEXT',        ( $diff_score ? span('ScoreWarning', $g_score_text) : $g_score_text ) ));
    $tform->add_row( array(
          'DESCRIPTION', T_('Black player'),
          'TEXT',        $user_black->user_reference() . SEP_SPACING .
@@ -219,7 +235,7 @@ define('GA_RES_TIMOUT', 3);
    // ADMIN: End game ------------------
 
    if( $authorise_game_end )
-      draw_game_end( $tgame );
+      draw_game_end( $tgame, $trule );
    else
       echo span('TWarning', T_('You are not authorised to end a tournament game.')), "<br><br>\n";
 
@@ -247,7 +263,7 @@ define('GA_RES_TIMOUT', 3);
 
 
 // return [ vars-hash, edits-arr, errorlist ]
-function parse_edit_form( &$tgame, $game )
+function parse_edit_form( &$tgame, $trule, $game )
 {
    $edits = array();
    $errors = array();
@@ -361,11 +377,22 @@ function parse_edit_form( &$tgame, $game )
 
          if( !is_null($game_score) )
          {
-            if( $vars['color'] == BLACK ) // normalize to BLACK(<0), WHITE(>0)
-               $game_score = -$game_score;
-            if( $tgame->Challenger_uid == $game->White_ID ) // adjust to Challenger/Defender-color
-               $game_score = -$game_score;
-            $vars['TG_Score'] = $tgame->Score = $game_score;
+            if( $game_score != SCORE_RESIGN && $game_score != SCORE_TIME && !@$_REQUEST['jigo_check'] ) // jigo_check=1 : skip jigo-check
+            {
+               $jigo_behaviour = $trule->determineJigoBehaviour();
+               $chk_score = floor( abs( 2 * (float)$game_score ) );
+               if( ( $jigo_behaviour > 0 && !($chk_score & 1) ) || ( $jigo_behaviour == 0 && ($chk_score & 1) ) )
+                  $errors[] = TournamentRules::getJigoBehaviourText( $jigo_behaviour );
+            }
+
+            if( count($errors) == 0 )
+            {
+               if( $vars['color'] == BLACK ) // normalize to BLACK(<0), WHITE(>0)
+                  $game_score = -$game_score;
+               if( $tgame->Challenger_uid == $game->White_ID ) // adjust to Challenger/Defender-color
+                  $game_score = -$game_score;
+               $vars['TG_Score'] = $tgame->Score = $game_score;
+            }
          }
       }
       else
@@ -388,7 +415,7 @@ function parse_edit_form( &$tgame, $game )
    return array( $vars, array_unique($edits), $errors );
 }//parse_edit_form
 
-function draw_game_end( $tgame )
+function draw_game_end( $tgame, $trule )
 {
    global $page, $vars;
    $allow_edit = ( $tgame->Status == TG_STATUS_PLAY );
@@ -424,6 +451,18 @@ function draw_game_end( $tgame )
    $tform->add_row( array(
          'TAB',
          'RADIOBUTTONSX', 'result', array( GA_RES_TIMOUT => T_('Timeout') ), @$vars['result'], $disabled, ));
+
+   $jigo_behaviour_text = TournamentRules::getJigoBehaviourText( $trule->determineJigoBehaviour() );
+   if( $jigo_behaviour_text )
+   {
+      $tform->add_empty_row();
+      $tform->add_row( array(
+         'CELL', 2, '',
+         'TEXT', T_('Notes on Jigo') . ":<br>\n" . span('TWarning', $jigo_behaviour_text), ));
+      $tform->add_row( array(
+         'CELL', 2, '',
+         'CHECKBOX', 'jigo_check', 1, T_('allow to set a score contradicting Jigo-restrictions'), @$_REQUEST['jigo_check'], ));
+   }
 
    if( $allow_edit )
    {

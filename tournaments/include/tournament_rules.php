@@ -536,6 +536,7 @@ class TournamentRules
    /*!
     * \brief Checks what score for tournament-game with this tournamet-rules is allowed.
     * \return Returns 0 if only x.0 is allowed, 1 if x.5 allowed, otherwise -1 if x.5 and x.0 allowed.
+    * \see getJigoBehaviourText()
     */
    function determineJigoBehaviour()
    {
@@ -561,7 +562,7 @@ class TournamentRules
 
       // unknown rule-type
       error('invalid_args', "TournamentRules.determineJigoBehaviour({$this->JIGOMODE_NO_JIGO},{$this->Handicaptype},{$this->Komi},{$this->AdjKomi})");
-   }
+   }//determineJigoBehaviour
 
    /*!
     * \brief Creates normal game(s) and updates all game-stuff for two given users.
@@ -838,6 +839,16 @@ class TournamentRules
    {
       static $statuslist = array( TOURNEY_STATUS_NEW );
       return $statuslist;
+   }
+
+   function getJigoBehaviourText( $jigo_behaviour )
+   {
+      if( $jigo_behaviour == 0 )
+         return T_('Tournament-rules enforces Jigo, so game score must be an integer, not ending on .5');
+      elseif( $jigo_behaviour == 1 )
+         return T_('Tournament-rules forbid Jigo, so game score must be a float ending on .5');
+      else
+         return '';
    }
 
 } // end of 'TournamentRules'

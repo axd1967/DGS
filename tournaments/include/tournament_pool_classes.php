@@ -420,7 +420,7 @@ class PoolTables
          $tpool_ch = $this->users[$ch_uid];
          $tpool_df = $this->users[$df_uid];
 
-         $game_score = ($tgame->isScoreStatus()) ? $tgame->Score : null;
+         $game_score = ($tgame->isScoreStatus( /*chk-detach*/true )) ? $tgame->Score : null;
          $poolGame = new PoolGame( 1, $ch_uid, $df_uid, $tgame->gid, $game_score );
 
          // fix PoolGame.GameNo in the same order as TG.ID to keep same position in pools-view

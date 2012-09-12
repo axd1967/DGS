@@ -316,10 +316,8 @@ function parse_edit_form( &$game )
 
             $jigo_behaviour = $trule->determineJigoBehaviour();
             $chk_score = floor( abs( 2 * (float)$new_value ) );
-            if( $jigo_behaviour > 0 && !($chk_score & 1) )
-               $score_errors[] = T_('Tournament-rules forbid Jigo, so game score must be a float ending on .5');
-            elseif( $jigo_behaviour == 0 && ($chk_score & 1) )
-               $score_errors[] = T_('Tournament-rules enforces Jigo, so game score must be an integer, not ending on .5');
+            if( ( $jigo_behaviour > 0 && !($chk_score & 1) ) || ( $jigo_behaviour == 0 && ($chk_score & 1) ) )
+               $score_errors[] = TournamentRules::getJigoBehaviourText( $jigo_behaviour );
          }
 
          if( count($score_errors) > 0 )

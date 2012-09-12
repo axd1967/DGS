@@ -468,7 +468,7 @@ function build_rating_diff( $rating_diff )
                   T_('Tournament Game Role'),
                   ( $tgame->Challenger_uid == $my_id ? T_('Challenger#T_ladder') : T_('Defender#T_ladder') ) );
 
-         if( $tgame->isScoreStatus() && $black_id )
+         if( $tgame->isScoreStatus(/*chk-detach*/true) && $black_id )
          {
             $arr_flags = array();
             if( $tgame->Flags & TG_FLAG_GAME_END_TD )
