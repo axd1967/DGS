@@ -506,15 +506,18 @@ Description:
 * Rank : current ladder-rank (=position) for user
 
 * BestRank : maximum of reached ladder-ranks for user caused by direct win or loss
-   - defaults to Rank
+   - initially := Rank
 
 * StartRank : starting rank, doesn't change
+   - defaults to Rank (initial rank)
 
 * PeriodRank : rank at start of new period
+   - initially 0
    - period defined by ladder configuration
       - e.g. one month, so could be rank from start of month
 
 * HistoryRank : rank from previous period
+   - initially 0
    - period defined by ladder configuration
       - e.g. one month, so could be rank from previous month
 
@@ -847,7 +850,7 @@ Description:
 * Rating : current rating of player Players.Rating2 at time of storing result
 
 * Type : type of tournament-result
-   - 1 = King (of ladder)
+   - 1 = Crowned King (of ladder)
 
 * StartTime : start-time for entry
 

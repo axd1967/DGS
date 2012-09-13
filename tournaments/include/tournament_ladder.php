@@ -535,14 +535,12 @@ class TournamentLadder
       static $query_next_rank = "IFNULL(MAX(Rank),0)+1"; // must result in 1 result-row
       $table = $GLOBALS['ENTITY_TOURNAMENT_LADDER']->table;
 
-      // defaults: RankChanged=0, ChallengesIn=0, ChallengesOut=0
-      $query = "INSERT INTO $table (tid,rid,uid,Created,Rank,BestRank,StartRank,PeriodRank,HistoryRank) "
+      // defaults: RankChanged=0, ChallengesIn=0, ChallengesOut=0; PeriodRank=0, HistoryRank=0
+      $query = "INSERT INTO $table (tid,rid,uid,Created,Rank,BestRank,StartRank) "
              . "SELECT $tid, $rid, $uid, FROM_UNIXTIME($NOW), "
                   . "$query_next_rank AS Rank, "
                   . "$query_next_rank AS BestRank, "
-                  . "$query_next_rank AS StartRank, "
-                  . "$query_next_rank AS PeriodRank, "
-                  . "$query_next_rank AS HistoryRank "
+                  . "$query_next_rank AS StartRank "
              . "FROM $table WHERE tid=$tid";
       return db_query( "TournamentLadder::add_participant_to_ladder.insert(tid[$tid],rid[$rid],uid[$uid])", $query );
    }//add_participant_to_ladder
@@ -556,7 +554,7 @@ class TournamentLadder
     *       still be running games from the moment of the removal (which are detached
     *       from the tournament). They are set on TG.Status=SCORE to remove the challenges.
     *       Howver, the processing is delayed (because running in a cron), so it can happen,
-    *       that those games are still there. Therefore they they still count as incoming and
+    *       that those games are still there. Therefore they still count as incoming and
     *       outgoing challenges for the challenger and defender in order to ensure correct
     *       in/out-limits on the ladder-users (the next run of the tourney-cron should fix this).
     * \see remove_user_from_ladder()
@@ -674,8 +672,7 @@ class TournamentLadder
             $tladder = $tl_iterator->getIndexValue( 'uid', $uid, 0 );
             if( is_null($tladder) ) // user not joined ladder yet
             {
-               $tladder = new TournamentLadder( $tid, $row['rid'], $uid, $NOW, 0,
-                  $rank, $rank, $rank, $rank, $rank );
+               $tladder = new TournamentLadder( $tid, $row['rid'], $uid, $NOW, 0, $rank, $rank, $rank );
             }
             else // user already joined ladder
             {
@@ -1043,10 +1040,13 @@ class TournamentLadder
       return ( count($errors) == 0 );
    }
 
-   /*! \brief Returns relative rank-diff-info for given ranks and format. */
+   /*! \brief Returns rank-diff-info for given prev-rank (relative to rank) and format, NO_VALUE if prev-rank is 0. */
    function build_rank_diff( $rank, $prev_rank, $fmt='%s. (%s)' )
    {
       // also see 'js/common.js buildRankDiff()'
+      if( $prev_rank == 0 ) // nothing to compare
+         return NO_VALUE;
+
       if( $rank == $prev_rank )
          $rank_diff = '=';
       elseif( $rank < $prev_rank )

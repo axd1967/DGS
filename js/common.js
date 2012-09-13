@@ -90,6 +90,9 @@ function showTLRankInfo( e, rank, best_rank, period_rank, history_rank )
 // see PHP TournamentLadder::build_rank_diff()
 function buildRankDiff( rank, prev_rank )
 {
+   if( prev_rank == 0 )
+      return '---';
+
    var rank_diff;
    if( rank == prev_rank )
       rank_diff = '=';
