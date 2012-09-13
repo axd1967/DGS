@@ -19,7 +19,58 @@ Developers INFO:
 ChangeLog
 ------------------------------------------------------------------
 
+2012-09-13 juga
+
+   * tournaments/include/tournament_ladder.php (TournamentLadder.add_participant_to_ladder,
+       ~.seed_ladder, ~.build_rank_diff),
+     js/common.js (buildRankDiff),
+     specs/db/table-Tournaments.txt:
+   - init TournamentLadder.PeriodRank/HistoryRank with 0 instead of StartRank,
+     show them as empty '---'
+
+2012-09-12 juga
+
+   * tournaments/include/tournament_games.php (TournamentGames.isScoreStatus, ~.getScoreForUser),
+     tournaments/include/tournament_pool_classes.php (PoolTables.fill_games),
+     tournaments/include/tournament_rules.php (TournamentRules.getJigoBehaviourText),
+     tournaments/game_admin.php (parse_edit_form, draw_game_end),
+     admin_game.php, gameinfo.php:
+   - tournament-game-admin:
+     - added warning about jigo-restrictions on setting game-score
+     - added checkbox to allow setting game-score violating jigo-restrictions
+     - show error if jigo-restrictions are violated by score
+     - show game and tournament-game score and if they differ
+   - bugfix: check detached-flag as TournamentGames.Score has only meaning if not "detached"
+
+   * tournaments/view_tournament.php:
+   - extend tournament-status for user in tournament-info:
+     - show user-result-state for round-robin-tournament (rank + pool + next-round icon)
+     - show tournament-participants game-count (finished, won, lost)
+
+   * rss/status.php (MONITOR_RSS_HANDLES):
+   - add monitoring-code to write RSS-cache-info to Apache error-log
+
+   * tournaments/game_admin.php (draw_game_end):
+   - show more defailed and condensed tournament-game-info and game-info
+   - show if user is authorised to end-game or add-time
+
+   * forum/forum_functions.php (class DisplayForum, ~.set_threadpost_view, ~.draw_post, ~.draw_overview,
+         ~.build_threadpostview_headlines, ~.create_navigation_tree;
+       class ForumPost, ~.to_string),
+     include/classlib_userconfig.php (class ConfigPages, ~.set_clear_forum_flags),
+     specs/forums.txt, forum/read.php:
+   - forum thread-post-view:
+     - added post-number in order of post-creation behind post-date to tree-overview and post-list
+     - added view-toggle to switch between: tree-view, flat-new-first, flat-old-first
+       - omit next/prev-answer navigation-icons in flat-view
+       - flatten post-view for flat-view omitting indent shown for tree-view
+       - added ConfigPages.ForumFlags to store view-mode
+
 2012-09-11 juga
+
+   * tournaments/list_tournaments.php:
+   - tournament-list: do not show tournaments with ADM|DEL-status for non-admins at start,
+     but allow to filter on these status
 
    * edit_profile.php (handle_save_profile):
    - bugfix: save user-profile in browser-settings stored in cookie
