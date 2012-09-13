@@ -202,7 +202,7 @@ define('GA_RES_TIMOUT', 3);
    $arr[] = sprintf( T_('Status [%s]'), Games::getStatusText($game->Status) );
    $arr[] = ( $game->Rated ) ? T_('Rated') : T_('Unrated');
    $tform->add_row( array(
-         'DESCRIPTION', T_('Game Info'),
+         'DESCRIPTION', T_('Game Info#tourney'),
          'TEXT',        implode(', ', $arr) ));
    if( $game->Flags > 0 )
       $tform->add_row( array(
