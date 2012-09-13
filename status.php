@@ -200,7 +200,7 @@ if( $player_row['GamesMPG'] > 0 )
    $mpgtable->add_tablehead( 6, T_('Joined#header'), 'NumberC', 0, 'Moves+');
    $mpgtable->add_tablehead( 3, T_('Ruleset#header'), '', 0, 'Ruleset-');
    $mpgtable->add_tablehead( 4, T_('Size#header'), 'Number', 0, 'Size-');
-   $mpgtable->add_tablehead( 5, T_('Last change#header'), 'Date', 0, 'Lastchanged-');
+   $mpgtable->add_tablehead( 5, T_('Last changed#header'), 'Date', 0, 'Lastchanged-');
 
    $mpgtable->set_default_sort( 5/*, 1*/); //on Lastchanged,ID
    $order = $mpgtable->current_order_string('ID-');
