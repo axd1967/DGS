@@ -28,6 +28,7 @@ require_once 'tournaments/include/tournament_round.php';
 require_once 'tournaments/include/tournament_round_status.php';
 require_once 'tournaments/include/tournament_status.php';
 require_once 'tournaments/include/tournament_utils.php';
+require_once 'tournaments/include/tournament_log_helper.php';
 
 $GLOBALS['ThePage'] = new Page('TournamentRoundStatusEdit');
 
@@ -96,7 +97,14 @@ $GLOBALS['ThePage'] = new Page('TournamentRoundStatusEdit');
    $allow_confirm = ( !$tr_status->has_error() || $is_admin );
    if( @$_REQUEST['t_confirm'] && count($edits) && $allow_confirm && count($status_errors) == 0 )
    {
-      $tround->persist();
+      ta_begin();
+      {//HOT-section to change tournament-round-status
+         $tround->persist();
+         TournamentLogHelper::log_change_tournament_round_status( $tid, $allow_edit_tourney,
+            sprintf('%s -> %s', $tr_status->curr_status, $tr_status->new_status ) );
+      }
+      ta_end();
+
       jump_to("tournaments/roundrobin/edit_round_status.php?tid=$tid".URI_AMP."round=$round".URI_AMP
             . "sysmsg=". urlencode(T_('Tournament Round Status saved!')) );
    }

@@ -3409,7 +3409,8 @@ table#adminusersTable td span.Flags {
 table#adminusersTable tr,
 table#faqlogTable tr,
 table#errorlogTable tr,
-table#adminlogTable tr {
+table#adminlogTable tr,
+table#tournamentlogTable tr {
    vertical-align: top;
 }
 

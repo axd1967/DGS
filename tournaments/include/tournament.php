@@ -152,12 +152,12 @@ class Tournament
       return ($this->Flags & $flag);
    }
 
-   function formatFlags( $zero_val='', $intersect_flags=0, $short=false, $class=null )
+   function formatFlags( $zero_val='', $intersect_flags=0, $short=false, $class=null, $html=true, $flags_val=null )
    {
       if( is_null($class) )
          $class = 'TLockWarn';
 
-      $check_flags = $this->Flags;
+      $check_flags = ( is_null($flags_val) ) ? $this->Flags : $flags_val;
       if( $intersect_flags > 0 )
          $check_flags &= $intersect_flags;
 
@@ -166,7 +166,7 @@ class Tournament
       foreach( $arr_flags as $flag => $flagtext )
       {
          if( $check_flags & $flag )
-            $arr[] = ( $class || ($flag & (TOURNEY_FLAG_LOCK_ADMIN|TOURNEY_FLAG_LOCK_TDWORK)) ) // emphasize
+            $arr[] = ( $html && ( $class || ($flag & (TOURNEY_FLAG_LOCK_ADMIN|TOURNEY_FLAG_LOCK_TDWORK)) ) ) // emphasize
                ? span($class, $flagtext)
                : $flagtext;
       }
@@ -339,6 +339,7 @@ class Tournament
    /*!
     * \brief Returns true if given user can edit tournament,
     *        or if can admin tournament-game if tournament-director-flag given.
+    * \return false if not allowed; otherwise !false with one of TLOG_TYPE_ADMIN/OWNER/DIRECTOR
     */
    function allow_edit_tournaments( $uid, $td_flag=0 )
    {
@@ -347,16 +348,16 @@ class Tournament
 
       // logged-in admin is allowed anything
       if( TournamentUtils::isAdmin() )
-         return true;
+         return TLOG_TYPE_ADMIN;
 
       // edit/admin-game allowed for T-owner or TD
       if( $this->Owner_ID == $uid )
-         return true;
+         return TLOG_TYPE_OWNER;
 
       // admin-game allowed for TD with respective right (td_flag)
       global $TOURNAMENT_CACHE;
       if( $TOURNAMENT_CACHE->is_tournament_director('Tournament.allow_edit_tournaments', $this->ID, $uid, $td_flag) )
-         return true;
+         return TLOG_TYPE_DIRECTOR;
 
       return false;
    }

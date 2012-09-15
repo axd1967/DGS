@@ -23,6 +23,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 require_once 'tournaments/include/tournament_globals.php';
 require_once 'tournaments/include/tournament_template.php';
+require_once 'tournaments/include/tournament_log_helper.php';
 
 require_once 'tournaments/include/tournament_ladder_props.php';
 require_once 'tournaments/include/tournament_ladder.php';
@@ -94,6 +95,8 @@ class TournamentTemplateLadder extends TournamentTemplate
                TournamentUtils::get_month_start_time($NOW) );
          if( !$t_ext->persist() )
             $this->create_error("TournamentTemplateLadder._createTournament.t_ext.insert(%s,$tid)");
+
+         TournamentLogHelper::log_create_tournament( $tid, $tourney->WizardType, $tourney->Title );
       }
       ta_end();
 

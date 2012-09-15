@@ -30,6 +30,7 @@ require_once 'tournaments/include/tournament_pool.php';
 require_once 'tournaments/include/tournament_pool_classes.php';
 require_once 'tournaments/include/tournament_properties.php';
 require_once 'tournaments/include/tournament_round.php';
+require_once 'tournaments/include/tournament_log_helper.php';
 
  /*!
   * \file tournament_template_round_robin.php
@@ -94,6 +95,8 @@ class TournamentTemplateRoundRobin extends TournamentTemplate
          $tround->tid = $tid;
          if( !$tround->insert() )
             $this->create_error("TournamentTemplateRoundRobin._createTournament.tround.insert(%s,$tid)");
+
+         TournamentLogHelper::log_create_tournament( $tid, $tourney->WizardType, $tourney->Title );
       }
       ta_end();
 

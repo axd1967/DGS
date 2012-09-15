@@ -47,18 +47,14 @@ $ENTITY_TOURNAMENT_LOG = new Entity( 'Tournamentlog',
       FTYPE_DATE, 'Date'
    );
 
-define('TLOG_TYPE_ADMIN', 'TA');
-define('TLOG_TYPE_OWNER', 'TO');
-define('TLOG_TYPE_DIRECTOR', 'TD');
-define('TLOG_TYPE_USER', 'U');
-
 // type_subtype:
 // - type: T, TD, TPR, TRULE, TN, TP, TG, TRES; TL, TLP, TRR, TRND, TPOOL
 // - subtype: Lock, Status, Game, Reg, Rank, News, Props, Pool, Round, NextRound
 //define('TLOG_OBJ_', 'X');
 
-// actions: Change, Lock, Unlock, Remove, Create, Add, Set, Clear, Seed, Start
-//define('TLOG_ACT_', 'X');
+// actions: Change, Remove, Create, Add, Set, Clear, Seed, Start
+define('TLOG_ACT_CREATE', 'Create');
+define('TLOG_ACT_CHANGE', 'Change');
 
 class Tournamentlog
 {
@@ -72,18 +68,42 @@ class Tournamentlog
    var $actuid;
    var $Message;
 
-   /*! \brief Constructs Tournamentlog-object with specified arguments. */
+   /*!
+    * \brief Constructs Tournamentlog-object with specified arguments.
+    * \param $uid user-id, if <=0 use use my-id
+    * \param $date creation-date, if <=0 use current date
+    * \param $type TLOG_TYPE_..., if empty determine from players admin-level
+    */
    function Tournamentlog( $id=0, $tid=0, $uid=0, $date=0, $type='', $object='T', $action='', $actuid=0, $message='' )
    {
+      global $player_row, $NOW;
+
       $this->ID = (int)$id;
       $this->tid = (int)$tid;
-      $this->uid = (int)$uid;
-      $this->Date = (int)$date;
-      $this->Type = $type;
+      $this->uid = ( is_numeric($uid) && $uid > 0 ) ? (int)$uid : $player_row['ID'];
+      $this->Date = ( is_numeric($date) && $date > 0 ) ? (int)$date : $NOW;
+      $this->setType( $type );
       $this->Object = $object;
       $this->Action = $action;
       $this->actuid = (int)$actuid;
       $this->Message = $message;
+   }
+
+   /* \brief Sets type to TLOG_TYPE_..., if empty determine from players admin-level. */
+   function setType( $type )
+   {
+      if( $type )
+      {
+         if( !preg_match( "/^(".CHECK_TLOG_TYPES.")$/", $type ) )
+            error('invalid_args', "Tournamentlog.setType($type)");
+      }
+      else
+      {
+         global $player_row;
+         $type = ( @$player_row['admin_level'] & ADMIN_TOURNAMENT ) ? TLOG_TYPE_ADMIN : TLOG_TYPE_USER;
+      }
+
+      $this->Type = $type;
    }
 
    function to_string()

@@ -56,6 +56,8 @@ $GLOBALS['ThePage'] = new Page('TournamentLockEdit');
    if( is_null($tourney) )
       error('unknown_tournament', "Tournament.edit_lock.find_tournament($tid)");
    $tstatus = new TournamentStatus( $tourney );
+   $old_flags = $tourney->Flags;
+   $old_locknote = $tourney->LockNote;
 
    // edit allowed?
    $is_admin = TournamentUtils::isAdmin();
@@ -84,9 +86,20 @@ $GLOBALS['ThePage'] = new Page('TournamentLockEdit');
    $errors = array_merge( $errors, $input_errors );
 
    // save tournament-object with values from edit-form
-   if( @$_REQUEST['t_save'] && !@$_REQUEST['t_preview'] && count($errors) == 0 )
+   if( @$_REQUEST['t_save'] && !@$_REQUEST['t_preview'] && count($errors) == 0 && count($edits) > 0 )
    {
-      $tourney->update();
+      ta_begin();
+      {//HOT-section to change tournament-lock
+         $tourney->update();
+         TournamentLogHelper::log_tournament_lock( $tid, $allow_edit_tourney,
+            sprintf("Change of [%s]\nLock Flags: [%s] -> [%s]\nLock Note: [%s] -> [%s]",
+               implode(', ', $edits),
+               $tourney->formatFlags('', 0, true, '', false, $old_flags ),
+               $tourney->formatFlags('', 0, true, '', false),
+               $old_locknote, $tourney->LockNote ) );
+      }
+      ta_end();
+
       jump_to("tournaments/edit_lock.php?tid={$tourney->ID}".URI_AMP
             . "sysmsg=". urlencode(T_('Tournament saved!')) );
    }
@@ -237,8 +250,8 @@ function parse_edit_form( &$tney )
          $tney->LockNote = ( $lock_flags ) ? $new_value : '';
 
       // determine edits
-      if( $old_vals['flags'] != $tney->Flags ) $edits[] = T_('Flags#edits');
-      if( $old_vals['locknote'] != $tney->LockNote ) $edits[] = T_('LockNote#edits');
+      if( $old_vals['flags'] != $tney->Flags ) $edits[] = T_('Flags');
+      if( $old_vals['locknote'] != $tney->LockNote ) $edits[] = T_('Lock Note');
    }
 
    return array( $vars, array_unique($edits), $errors );

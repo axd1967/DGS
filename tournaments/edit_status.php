@@ -26,6 +26,7 @@ require_once 'include/form_functions.php';
 require_once 'tournaments/include/tournament.php';
 require_once 'tournaments/include/tournament_status.php';
 require_once 'tournaments/include/tournament_utils.php';
+require_once 'tournaments/include/tournament_log_helper.php';
 
 $GLOBALS['ThePage'] = new Page('TournamentStatusEdit');
 
@@ -83,7 +84,15 @@ $GLOBALS['ThePage'] = new Page('TournamentStatusEdit');
    {
       if( $tourney->Status == TOURNEY_STATUS_CLOSED ) // set end-time
          $tourney->EndTime = $NOW;
-      $tourney->persist();
+
+      ta_begin();
+      {//HOT-section to change tournament-status
+         $tourney->persist();
+         TournamentLogHelper::log_change_tournament_status( $tid, $allow_edit_tourney,
+            sprintf('%s -> %s', $tstatus->curr_status, $tstatus->new_status ) );
+      }
+      ta_end();
+
       jump_to("tournaments/edit_status.php?tid=$tid".URI_AMP
             . "sysmsg=". urlencode(T_('Tournament Status saved!')) );
    }
@@ -173,7 +182,7 @@ $GLOBALS['ThePage'] = new Page('TournamentStatusEdit');
    $menu_array = array();
    if( $tid )
       $menu_array[T_('Tournament info')] = "tournaments/view_tournament.php?tid=$tid";
-   if( $allow_edit_tourney ) # for TD
+   if( $allow_edit_tourney )
       $menu_array[T_('Manage tournament')] =
          array( 'url' => "tournaments/manage_tournament.php?tid=$tid", 'class' => 'TAdmin' );
 

@@ -79,6 +79,14 @@ define('TCHKTYPE_TD', 1);
 define('TCHKTYPE_USER_NEW', 2);
 define('TCHKTYPE_USER_EDIT', 3);
 
+// ---------- Tournament Log Stuff --------------------------------
+
+define('TLOG_TYPE_ADMIN', 'TA');
+define('TLOG_TYPE_OWNER', 'TO');
+define('TLOG_TYPE_DIRECTOR', 'TD');
+define('TLOG_TYPE_USER', 'U');
+define('CHECK_TLOG_TYPES', 'TA|TO|TD|U');
+
 // ---------- Tournament Properties Stuff -------------------------
 
 define('TPROP_RUMODE_COPY_CUSTOM',  'COPY_CUSTOM');

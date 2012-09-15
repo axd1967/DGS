@@ -950,7 +950,7 @@ Description:
 * Object : object action is performed on
    - format: <type>_<subtype>
    - type: T, TD, TPR, TRULE, TN, TP, TG, TRES; TL, TLP, TRR, TRND, TPOOL
-   - subtype: Lock, Status, Game, Reg, Rank, News, Props, Pool, Round, NextRound
+   - subtype: Data, Lock, Status, Game, Reg, Rank, News, Props, Pool, Round, NextRound
 
    - Examples with content:
      - # TODO
@@ -960,7 +960,7 @@ Description:
      - TL_Seed : seed T-ladder
 
 * Action : performed action
-   - Change, Lock, Unlock, Remove, Create, Add, Set, Clear, Seed, Start
+   - Create, Change, Remove, Add, Set, Clear, Seed, Start
 
 * actuid : user on which action was performed, FK to Players.ID
    - can be 0 (if action is not applied on user)
