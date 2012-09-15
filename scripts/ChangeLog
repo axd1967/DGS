@@ -19,6 +19,69 @@ Developers INFO:
 ChangeLog
 ------------------------------------------------------------------
 
+2012-09-15 juga
+
+   * tournaments/include/tournament_globals.php (TLOG_TYPE_CRON, CHECK_TLOG_TYPES),
+     tournaments/include/tournament_games.php (TournamentGames.formatFlags),
+     tournaments/include/tournament_log.php (TLOG_ACT_ADDTIME),
+     skins/dragon/screen.css, specs/db/table-Tournaments.txt,
+     tournaments/game_admin.php:
+   - write tournament-log for tournament-game-admin actions:
+     - set tournament-game-score
+     - add time for tournament-game
+
+   * tournaments/show_tournament_log.php (format_tlog_message):
+   - replace special references in message with links to:
+     TG#id (tournament-game-admin), GID#id (game-page), UID#id (user-info-page)
+   - use short-form + rank for user, show tid after user, add tournament-link on tid,
+     add rank for action-user
+
+   * tournaments/include/tournament_log.php (class Tournamentlog, ~.setType),
+     tournaments/include/tournament.php (Tournament.formatFlags, ~.allow_edit_tournaments),
+     tournaments/include/tournament_globals.php (TLOG_TYPE_...),
+     tournaments/include/tournament_template_ladder.php (TournamentTemplateLadder._createTournament),
+     tournaments/include/tournament_template_round_robin.php (TournamentTemplateRoundRobin._createTournament),
+     skins/dragon/screen.css, specs/db/table-Tournaments.txt,
+     tournaments/edit_lock.php (parse_edit_form), tournaments/edit_status.php,
+     tournaments/roundrobin/edit_round_status.php:
+   - write tournament-log for actions:
+     - create tournament
+     - change tournament-lock-flags/note
+     - change tournament-status
+     - change tournament-round-status
+
+   * tournaments/include/tournament_round_status.php (class TournamentRoundStatus):
+   - bugfix: wrong declared object-attribute
+
+   * tournaments/include/tournament_log.php (class TournamentLog, ~.to_string, ~.persist, ~.insert,
+       ~.update, ~.fillEntityData, ~.build_query_sql, ~.new_from_row, ~.load_tournament_logs),
+     scripts/updates/database_changes_1_0_14_to_1_0_15.mysql,
+     specs/db/dragon-ddl.sql,
+     specs/db/table-Tournaments.txt,
+     tournaments/manage_tournament.php,
+     tournaments/show_tournament_log.php,
+     admin.php:
+   - added tournament-log and log-viewer to log actions on tournaments
+     - allow admins to view log of all tournaments
+     - allow directors and owners to view log only of their tournaments
+     - introduced for more transparency on who did what
+-----------
+-- added tournament-log to log actions on tournaments
+CREATE TABLE Tournamentlog (
+  ID int NOT NULL auto_increment,
+  tid int NOT NULL,
+  uid int NOT NULL,
+  Date datetime NOT NULL default '0000-00-00 00:00:00',
+  Type char(2) NOT NULL,
+  Object varchar(16) NOT NULL default 'T',
+  Action varchar(16) NOT NULL,
+  actuid int NOT NULL default '0',
+  Message text NOT NULL,
+  PRIMARY KEY (ID),
+  KEY tid (tid)
+) ENGINE=MyISAM ;
+-----------
+
 2012-09-13 juga
 
    * tournaments/include/tournament_ladder.php (TournamentLadder.add_participant_to_ladder,
