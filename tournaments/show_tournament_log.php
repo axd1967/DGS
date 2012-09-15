@@ -81,12 +81,12 @@ require_once 'tournaments/include/tournament_log.php';
    $table->add_tablehead( 1, T_('ID#header'), 'ID', TABLE_NO_HIDE, 'ID-');
    $table->add_tablehead( 2, T_('tid#header'), 'Number', TABLE_NO_HIDE|TABLE_NO_SORT, 'tid+');
    $table->add_tablehead( 3, T_('Userid#header'), 'User', TABLE_NO_HIDE, 'uid+');
-   $table->add_tablehead( 4, T_('Action Date#header'), 'Date', TABLE_NO_SORT, 'Date-');
-   $table->add_tablehead( 5, T_('Type#header'), 'Enum', TABLE_NO_HIDE|TABLE_NO_SORT, 'Type+');
+   $table->add_tablehead( 5, T_('Type#header'), 'Center', TABLE_NO_HIDE|TABLE_NO_SORT, 'Type+');
    $table->add_tablehead( 6, T_('Object#header'), 'Enum', TABLE_NO_HIDE|TABLE_NO_SORT, 'Object+');
    $table->add_tablehead( 7, T_('Action#header'), 'Action', TABLE_NO_HIDE|TABLE_NO_SORT, 'Action+');
-   $table->add_tablehead( 8, T_('Action User#header'), 'User', TABLE_NO_SORT, 'actuid+');
    $table->add_tablehead( 9, T_('Message#header'), 'Text');
+   $table->add_tablehead( 4, T_('Action Date#header'), 'Date', TABLE_NO_SORT, 'Date-');
+   $table->add_tablehead( 8, T_('Action User#header'), 'User', TABLE_NO_SORT, 'actuid+');
 
    $table->set_default_sort( 1); // on ID
 
@@ -130,10 +130,14 @@ require_once 'tournaments/include/tournament_log.php';
          $row_str[6] = $tlog->Object;
       if( $table->Is_Column_Displayed[7] )
          $row_str[7] = $tlog->Action;
-      if( $table->Is_Column_Displayed[8] && $tlog->actuid > 0 )
-         $row_str[8] = user_reference( REF_LINK, 1, '', $tlog->actuid, $orow['AP_Name'], $orow['AP_Handle'] );
+      if( $table->Is_Column_Displayed[8] )
+      {
+         $row_str[8] = ( $tlog->actuid > 0 )
+            ? user_reference( REF_LINK, 1, '', $tlog->actuid, $orow['AP_Name'], $orow['AP_Handle'] )
+            : NO_VALUE;
+      }
       if( $table->Is_Column_Displayed[9] )
-         $row_str[9] = wordwrap($tlog->Message, 40, "<br>\n", true);
+         $row_str[9] = wordwrap( str_replace( "\n", "<br>\n", $tlog->Message ), 80, "<br>\n", true );
 
       $table->add_row( $row_str );
    }
@@ -159,10 +163,10 @@ require_once 'tournaments/include/tournament_log.php';
       '<b>TRR</b> = tournament round-robin, <b>TRND</b> = tournament round, <b>TRULE</b> = tournament rule',
       );
    $notes[] = array( 'Object subtypes:',
-      'Game, Lock, News, NextRound, Pool, Props = Properties, Rank, Reg = Registration, Round, Status',
+      'Data, Game, Lock, News, NextRound, Pool, Props = Properties, Rank, Reg = Registration, Round, Status',
       );
    $notes[] = array( 'Actions:',
-      'Add, Change, Clear, Create, Lock, Remove, Seed, Set, Start Unlock',
+      'Add, Change, Clear, Create, Remove, Seed, Set, Start',
       );
    echo_notes( 'tournamentlog', T_('Tournament Log notes'), $notes );
 
