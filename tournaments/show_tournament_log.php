@@ -30,6 +30,7 @@ chdir('..');
 require_once 'include/std_functions.php';
 require_once 'include/table_columns.php';
 require_once 'include/filter.php';
+require_once 'include/rating.php';
 require_once 'tournaments/include/tournament.php';
 require_once 'tournaments/include/tournament_log.php';
 
@@ -79,8 +80,8 @@ require_once 'tournaments/include/tournament_log.php';
 
    // add_tablehead($nr, $descr, $attbs=null, $mode=TABLE_NO_HIDE|TABLE_NO_SORT, $sortx='')
    $table->add_tablehead( 1, T_('ID#header'), 'ID', TABLE_NO_HIDE, 'ID-');
-   $table->add_tablehead( 2, T_('tid#header'), 'Number', TABLE_NO_HIDE|TABLE_NO_SORT, 'tid+');
    $table->add_tablehead( 3, T_('Userid#header'), 'User', TABLE_NO_HIDE, 'uid+');
+   $table->add_tablehead( 2, T_('tid#header'), 'Number', TABLE_NO_HIDE|TABLE_NO_SORT, 'tid+');
    $table->add_tablehead( 5, T_('Type#header'), 'Center', TABLE_NO_HIDE|TABLE_NO_SORT, 'Type+');
    $table->add_tablehead( 6, T_('Object#header'), 'Enum', TABLE_NO_HIDE|TABLE_NO_SORT, 'Object+');
    $table->add_tablehead( 7, T_('Action#header'), 'Action', TABLE_NO_HIDE|TABLE_NO_SORT, 'Action+');
@@ -94,8 +95,8 @@ require_once 'tournaments/include/tournament_log.php';
    $qsql = $table->get_query(); // clause-parts for filter
    $qsql->merge( new QuerySQL(
       SQLP_FIELDS,
-         'P.Handle AS P_Handle', 'P.Name AS P_Name',
-         'AP.Handle AS AP_Handle', 'AP.Name AS AP_Name',
+         'P.Handle AS P_Handle', 'P.Rating2 AS P_Rating',
+         'AP.Handle AS AP_Handle', 'AP.Name AS AP_Name', 'AP.Rating2 AS AP_Rating',
       SQLP_FROM,
          'INNER JOIN Players AS P ON P.ID=TLOG.uid',
          'LEFT JOIN Players AS AP ON AP.ID=TLOG.actuid' ));
@@ -119,9 +120,10 @@ require_once 'tournaments/include/tournament_log.php';
       if( $table->Is_Column_Displayed[1] )
          $row_str[1] = $tlog->ID;
       if( $table->Is_Column_Displayed[2] )
-         $row_str[2] = $tlog->tid;
+         $row_str[2] = anchor($base_path."tournaments/view_tournament.php?tid=".$tlog->tid, $tlog->tid);
       if( $table->Is_Column_Displayed[3] )
-         $row_str[3] = user_reference( REF_LINK, 1, '', $tlog->uid, $orow['P_Name'], $orow['P_Handle'] );
+         $row_str[3] = user_reference( REF_LINK, 1, '', $tlog->uid, $orow['P_Handle'], '' ) . ', ' .
+            echo_rating($orow['P_Rating'], /*show%*/false, $tlog->uid, /*engl*/false, /*short*/true);
       if( $table->Is_Column_Displayed[4] )
          $row_str[4] = ( $tlog->Date > 0 ) ? date(DATE_FMT3, $tlog->Date) : '';
       if( $table->Is_Column_Displayed[5] )
@@ -133,11 +135,12 @@ require_once 'tournaments/include/tournament_log.php';
       if( $table->Is_Column_Displayed[8] )
       {
          $row_str[8] = ( $tlog->actuid > 0 )
-            ? user_reference( REF_LINK, 1, '', $tlog->actuid, $orow['AP_Name'], $orow['AP_Handle'] )
+            ? user_reference( REF_LINK, 1, '', $tlog->actuid, $orow['AP_Name'], $orow['AP_Handle'] ) . ', ' .
+                  echo_rating($orow['AP_Rating'], /*show%*/false, $tlog->actuid, /*engl*/false, /*short*/true)
             : NO_VALUE;
       }
       if( $table->Is_Column_Displayed[9] )
-         $row_str[9] = wordwrap( str_replace( "\n", "<br>\n", $tlog->Message ), 80, "<br>\n", true );
+         $row_str[9] = format_tlog_message( $tlog );
 
       $table->add_row( $row_str );
    }
@@ -171,6 +174,19 @@ require_once 'tournaments/include/tournament_log.php';
    echo_notes( 'tournamentlog', T_('Tournament Log notes'), $notes );
 
    end_page();
+}
+
+
+function format_tlog_message( $tlog )
+{
+   global $base_path;
+   $msg = wordwrap( str_replace( "\n", "<br>\n", $tlog->Message ), 80, "<br>\n", true );
+
+   $msg = preg_replace("/TG#(\\d+)/", anchor($base_path."tournaments/game_admin.php?tid={$tlog->tid}".URI_AMP.'gid=$1', 'TGame #$1'), $msg );
+   $msg = preg_replace("/GID#(\\d+)/", anchor($base_path."game.php?gid=\$1", 'Game #$1'), $msg );
+   $msg = preg_replace("/UID#(\\d+)/", anchor($base_path."userinfo.php?uid=\$1", 'User #$1'), $msg );
+
+   return $msg;
 }
 
 ?>
