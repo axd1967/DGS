@@ -45,7 +45,7 @@ class TournamentRoundStatus
    var $ttype; // specific typed TournamentTemplate-object
    var $tround; // TournamentRound-object
    var $Round; // TournamentRound.Round
-   var $old_status;
+   var $curr_status;
    var $new_status;
    var $errors; // arr
 
