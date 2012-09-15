@@ -1102,6 +1102,26 @@ CREATE TABLE IF NOT EXISTS `TournamentLadderProps` (
 -- --------------------------------------------------------
 
 --
+-- Table structure for table `Tournamentlog`
+--
+
+CREATE TABLE `TournamentLog` (
+  `ID` int(11) NOT NULL auto_increment,
+  `tid` int(11) NOT NULL,
+  `uid` int(11) NOT NULL,
+  `Date` datetime NOT NULL default '0000-00-00 00:00:00',
+  `Type` char(2) NOT NULL,
+  `Object` varchar(16) NOT NULL default 'T',
+  `Action` varchar(16) NOT NULL,
+  `actuid` int(11) NOT NULL default '0',
+  `Message` text NOT NULL,
+  PRIMARY KEY  (`ID`),
+  KEY `tid` (`tid`)
+) ENGINE=MyISAM DEFAULT CHARSET=latin1;
+
+-- --------------------------------------------------------
+
+--
 -- Table structure for table `TournamentNews`
 --
 

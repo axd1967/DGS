@@ -2563,3 +2563,19 @@ ALTER TABLE Games
    MODIFY Flags SET('Ko','HiddenMsg','AdmResult','TGDetached') NOT NULL default '' ;
 
 
+-- added tournament-log to log actions on tournaments
+CREATE TABLE Tournamentlog (
+  ID int NOT NULL auto_increment,
+  tid int NOT NULL,
+  uid int NOT NULL,
+  Date datetime NOT NULL default '0000-00-00 00:00:00',
+  Type char(2) NOT NULL,
+  Object varchar(16) NOT NULL default 'T',
+  Action varchar(16) NOT NULL,
+  actuid int NOT NULL default '0',
+  Message text NOT NULL,
+  PRIMARY KEY (ID),
+  KEY tid (tid)
+) ENGINE=MyISAM ;
+
+

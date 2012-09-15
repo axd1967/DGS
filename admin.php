@@ -73,6 +73,8 @@ $GLOBALS['ThePage'] = new Page('Admin');
                      '', $admin_level & (ADMIN_FORUM|ADMIN_DEVELOPER));
    add_link_page_link('admin_show_users.php', T_('Show Administrated Users'),
                      '', $admin_level & ADMINGROUP_EXECUTIVE);
+   add_link_page_link('tournaments/show_tournament_log.php', T_('Show Tournament Log'),
+                     '', $admin_level & (ADMIN_DEVELOPER|ADMIN_TOURNAMENT));
    add_link_page_link('admin_show_errorlog.php', T_('Show Error Log'),
                      '', $admin_level & ADMIN_DEVELOPER);
    add_link_page_link('admin_show_adminlog.php', T_('Show Admin Log'),

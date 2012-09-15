@@ -911,3 +911,60 @@ Description:
 
 * ChangedBy : handle-list of users, that last changed data-row in format '[last-user] [prev-user] ...'
 
+
+###########################################################################
+## --- TournamentLog ---
+
+Description:
+   Table to log actions by TD, TA, owner & users on tournaments.
+
+| Field   | Type        | Null | Key | Default             | Extra          |
++---------+-------------+------+-----+---------------------+----------------+
+| ID      | int(11)     | NO   | PRI | NULL                | auto_increment |
+| tid     | int(11)     | NO   | MUL | NULL                |                |
+| uid     | int(11)     | NO   |     | NULL                |                |
+| Date    | datetime    | NO   |     | 0000-00-00 00:00:00 |                |
+| Type    | char(2)     | NO   |     | NULL                |                |
+| Object  | varchar(16) | NO   |     | T                   |                |
+| Action  | varchar(16) | NO   |     | NULL                |                |
+| actuid  | int(11)     | NO   |     | 0                   |                |
+| Message | text        | NO   |     | NULL                |                |
+
+
+## Fields:
+
+* ID : PK
+
+* tid : tournament-id, FK to Tournament.ID
+
+* uid : user that performed action, FK to Players.ID
+
+* Date : time of performed action
+
+* Type : type of user that performed action
+   - TA = tournament-admin
+   - TO = tournament-owner
+   - TD = tournament-director
+   - U  = user
+
+* Object : object action is performed on
+   - format: <type>_<subtype>
+   - type: T, TD, TPR, TRULE, TN, TP, TG, TRES; TL, TLP, TRR, TRND, TPOOL
+   - subtype: Lock, Status, Game, Reg, Rank, News, Props, Pool, Round, NextRound
+
+   - Examples with content:
+     - # TODO
+     - T_Lock : change T-lock with lock-note
+     - T_Status : change T-status with old -> new status
+     - TRND_Status : change T-Round-status with old -> new status
+     - TL_Seed : seed T-ladder
+
+* Action : performed action
+   - Change, Lock, Unlock, Remove, Create, Add, Set, Clear, Seed, Start
+
+* actuid : user on which action was performed, FK to Players.ID
+   - can be 0 (if action is not applied on user)
+
+* Message : free-text describing action
+
+

@@ -174,6 +174,8 @@ $GLOBALS['ThePage'] = new Page('TournamentManage');
    $menu_array = array();
    if( $tid )
       $menu_array[T_('Tournament info')] = "tournaments/view_tournament.php?tid=$tid";
+   $menu_array[T_('Show Tournament Log')] =
+      array( 'url' => "tournaments/show_tournament_log.php?tid=$tid", 'class' => 'TAdmin' );
    $menu_array[T_('Manage tournament')] =
       array( 'url' => "tournaments/manage_tournament.php?tid=$tid", 'class' => 'TAdmin' );
 
