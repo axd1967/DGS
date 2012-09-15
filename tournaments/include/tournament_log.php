@@ -52,9 +52,10 @@ $ENTITY_TOURNAMENT_LOG = new Entity( 'Tournamentlog',
 // - subtype: Lock, Status, Game, Reg, Rank, News, Props, Pool, Round, NextRound
 //define('TLOG_OBJ_', 'X');
 
-// actions: Change, Remove, Create, Add, Set, Clear, Seed, Start
+// actions: Remove, Add, Set, Clear, Seed, Start
 define('TLOG_ACT_CREATE', 'Create');
 define('TLOG_ACT_CHANGE', 'Change');
+define('TLOG_ACT_ADDTIME', 'AddTime');
 
 class Tournamentlog
 {

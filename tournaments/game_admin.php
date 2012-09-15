@@ -33,6 +33,7 @@ require_once 'tournaments/include/tournament_games.php';
 require_once 'tournaments/include/tournament_rules.php';
 require_once 'tournaments/include/tournament_status.php';
 require_once 'tournaments/include/tournament_utils.php';
+require_once 'tournaments/include/tournament_log_helper.php';
 
 $GLOBALS['ThePage'] = new Page('TournamentGameAdmin');
 
@@ -86,6 +87,8 @@ define('GA_RES_TIMOUT', 3);
    $tg_score = $tgame->getScoreForUser( $game->Black_ID );
    $tg_score_text = score2text($tg_score, false);
    $diff_score = ( $g_score !== $tg_score );
+   $old_tg_flags = $tgame->Flags;
+   $old_tg_status = $tgame->Status;
 
    $trule = TournamentRules::load_tournament_rule($tid);
    if( is_null($trule) )
@@ -93,7 +96,8 @@ define('GA_RES_TIMOUT', 3);
 
    // edit allowed?
    $is_admin = TournamentUtils::isAdmin();
-   if( !$tourney->allow_edit_tournaments($my_id) )
+   $allow_edit_tourney = $tourney->allow_edit_tournaments($my_id);
+   if( !$allow_edit_tourney )
       error('tournament_edit_not_allowed', "Tournament.game_admin.edit($tid,$my_id)");
 
    $errors = $tstatus->check_edit_status( TournamentGames::get_admin_tournament_status() );
@@ -116,11 +120,22 @@ define('GA_RES_TIMOUT', 3);
       {
          $tgame->Flags |= TG_FLAG_GAME_END_TD;
          $tgame->setStatus(TG_STATUS_SCORE);
-         if( $tgame->update_score( 'Tournament.game_admin', TG_STATUS_PLAY ) )
-         {
-            $sys_msg = urlencode( T_('Tournament Game result set!') );
-            jump_to("tournaments/game_admin.php?tid=$tid".URI_AMP."gid=$gid".URI_AMP."sysmsg=$sys_msg");
+
+         ta_begin();
+         {//HOT-section to update TG-score
+            $success = $tgame->update_score( 'Tournament.game_admin', TG_STATUS_PLAY );
+            if( $success )
+            {
+               TournamentLogHelper::log_tournament_game_end( $tid, $allow_edit_tourney, $tgame->gid, $edits,
+                  $tg_score, $tgame->Score,  $tgame->formatFlags($old_tg_flags), $tgame->formatFlags(),
+                  TournamentGames::getStatusText($old_tg_status), TournamentGames::getStatusText($tgame->Status) );
+            }
          }
+         ta_end();
+
+         if( $success )
+            jump_to("tournaments/game_admin.php?tid=$tid".URI_AMP."gid=$gid".URI_AMP .
+               "sysmsg=".urlencode( T_('Tournament Game result set!') ));
       }
 
       if( @$_REQUEST['addtime_save'] && $authorise_add_time )
@@ -139,12 +154,19 @@ define('GA_RES_TIMOUT', 3);
          ta_begin();
          {//HOT-section to add time
             $add_hours = GameAddTime::add_time_opponent( $game_row, $opp, $add_days_hours, $reset_byo, /*by_td*/$my_id );
+            if( !is_numeric($add_hours) ) // error occured
+               $errors[] = $add_hours;
+            else
+            {
+               TournamentLogHelper::log_tournament_game_add_time( $tid, $allow_edit_tourney,
+                  sprintf("Add time for TG#%s GID#%s for UID#%s with color [%s]:\n[%s] hours (=%s days) added, reset byo-yomi [%s]",
+                     $tgame->gid, $tgame->gid, $opp, ($color == BLACK ? 'W' : 'B'), // opp-color
+                     $add_hours, $add_days, ($reset_byo ? 1 : 0) ));
+            }
          }
          ta_end();
 
-         if( !is_numeric($add_hours) ) // error occured
-            $errors[] = $add_hours;
-         else
+         if( is_numeric($add_hours) )
          {
             $sys_msg = urlencode( T_('Time added!') );
             jump_to("tournaments/game_admin.php?tid=$tid".URI_AMP."gid=$gid".URI_AMP."sysmsg=$sys_msg");

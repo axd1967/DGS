@@ -945,6 +945,7 @@ Description:
    - TA = tournament-admin
    - TO = tournament-owner
    - TD = tournament-director
+   - CR = cron (system)
    - U  = user
 
 * Object : object action is performed on
@@ -960,7 +961,7 @@ Description:
      - TL_Seed : seed T-ladder
 
 * Action : performed action
-   - Create, Change, Remove, Add, Set, Clear, Seed, Start
+   - Create, Change, AddTime; Remove, Add, Set, Clear, Seed, Start
 
 * actuid : user on which action was performed, FK to Players.ID
    - can be 0 (if action is not applied on user)

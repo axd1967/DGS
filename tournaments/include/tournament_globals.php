@@ -84,8 +84,9 @@ define('TCHKTYPE_USER_EDIT', 3);
 define('TLOG_TYPE_ADMIN', 'TA');
 define('TLOG_TYPE_OWNER', 'TO');
 define('TLOG_TYPE_DIRECTOR', 'TD');
+define('TLOG_TYPE_CRON', 'CR');
 define('TLOG_TYPE_USER', 'U');
-define('CHECK_TLOG_TYPES', 'TA|TO|TD|U');
+define('CHECK_TLOG_TYPES', 'TA|TO|TD|CR|U');
 
 // ---------- Tournament Properties Stuff -------------------------
 

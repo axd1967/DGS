@@ -967,7 +967,7 @@ table.Table td.Sgf a {
    color: #d50047;
 }
 
-/* table.Table td.ID, */
+table.Table td.ID,
 table.Table td.Number {
    text-align: right; /* left */
 }
