@@ -24,7 +24,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
  * - needs to be tournament-owner or tournament-director to see entries of THEIR tournament
  */
 
-$TranslateGroups[] = "Admin";
+$TranslateGroups[] = "Tournament";
 
 chdir('..');
 require_once 'include/std_functions.php';
