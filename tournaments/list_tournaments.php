@@ -275,9 +275,9 @@ $GLOBALS['ThePage'] = new Page('TournamentList');
             ( $orow['MaxParticipants'] > 0 ) ? $orow['MaxParticipants'] : NO_VALUE );
       if( $ttable->Is_Column_Displayed[18] )
       {
-         list( $restrictions, $class ) = build_restrictions( $tourney, $orow );
+         list( $restrictions, $class, $title ) = build_restrictions( $tourney, $orow );
          $row_str[18] = ( $class )
-            ? array( 'text' => $restrictions, 'attbs' => array( 'class' => $class ) )
+            ? array( 'text' => $restrictions, 'attbs' => array( 'class' => $class, 'title' => $title ) )
             : $restrictions;
       }
 
@@ -300,9 +300,9 @@ $GLOBALS['ThePage'] = new Page('TournamentList');
    if( $ttable->is_column_displayed(18) ) // restrictions
    {
       $notes[] = array( sprintf('<b>%s</b> (%s):', T_('Tournament Registration Restrictions'), T_('background colors') ),
-            span('TJoinErr',  T_('Tournament can not be joined.')),
-            span('TJoinWarn', T_('Joining tournament only by invitation, but tournament director may deny it because of restrictions.')),
-            span('TJoinInv',  T_('Invite-only tournament without restrictions.')),
+            span('TJoinErr',  T_('Error')   . ' = ' . T_('Tournament can not be joined.')),
+            span('TJoinWarn', T_('Warning') . ' = ' . T_('Joining tournament only by invitation, but tournament director may deny it because of restrictions.')),
+            span('TJoinInv',  T_('Invite')  . ' = ' . T_('Invite-only tournament without restrictions.')),
             T_('Tournament can be joined without restrictions.'),
          );
       $notes[] = array( sprintf('<b>%s</b> (%s):', T_('Tournament Registration Restrictions'), T_('values') ),
@@ -353,15 +353,24 @@ function build_restrictions( $tourney, $row )
    }
 
    if( @$types['E'] )
+   {
       $class = 'TJoinErr';
+      $title = T_('Error');
+   }
    elseif( @$types['W'] )
+   {
       $class = 'TJoinWarn';
+      $title = T_('Warning');
+   }
    elseif( @$types['W'] )
+   {
       $class = 'TJoinInv';
+      $title = T_('Invite');
+   }
    else
-      $class = '';
+      $class = $title = '';
 
-   return array( implode(', ', $out), $class );
+   return array( implode(', ', $out), $class, $title );
 }
 
 ?>
