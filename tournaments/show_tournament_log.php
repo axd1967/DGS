@@ -96,7 +96,7 @@ require_once 'tournaments/include/tournament_log.php';
    $qsql->merge( new QuerySQL(
       SQLP_FIELDS,
          'P.Handle AS P_Handle', 'P.Rating2 AS P_Rating',
-         'AP.Handle AS AP_Handle', 'AP.Name AS AP_Name', 'AP.Rating2 AS AP_Rating',
+         'AP.Handle AS AP_Handle', 'AP.Rating2 AS AP_Rating',
       SQLP_FROM,
          'INNER JOIN Players AS P ON P.ID=TLOG.uid',
          'LEFT JOIN Players AS AP ON AP.ID=TLOG.actuid' ));
@@ -135,7 +135,7 @@ require_once 'tournaments/include/tournament_log.php';
       if( $table->Is_Column_Displayed[8] )
       {
          $row_str[8] = ( $tlog->actuid > 0 )
-            ? user_reference( REF_LINK, 1, '', $tlog->actuid, $orow['AP_Name'], $orow['AP_Handle'] ) . ', ' .
+            ? user_reference( REF_LINK, 1, '', $tlog->actuid, $orow['AP_Handle'], '' ) . ', ' .
                   echo_rating($orow['AP_Rating'], /*show%*/false, $tlog->actuid, /*engl*/false, /*short*/true)
             : NO_VALUE;
       }
