@@ -3227,7 +3227,8 @@ table#PoolViewerTable td.Matrix {
 table#PoolViewerTable td.TourneyUser {
    background: #bbddff;
 }
-span.MatrixSelf, table#PoolViewerTable td.MatrixSelf { background: black; color: white; }
+table#PoolViewerTable td.MatrixSelf { background: black; color: black; }
+span.MatrixSelf { background: black; color: white; }
 span.MatrixWon,  table#PoolViewerTable td.MatrixWon  { background: #bbffbb; }
 span.MatrixLost, table#PoolViewerTable td.MatrixLost { background: #ff99bb; }
 span.MatrixJigo, table#PoolViewerTable td.MatrixJigo { background: #aaddee; }
