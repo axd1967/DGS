@@ -29,6 +29,7 @@ require_once 'include/filter.php';
 require_once 'include/classlib_profile.php';
 require_once 'include/classlib_userconfig.php';
 require_once 'tournaments/include/tournament.php';
+require_once 'tournaments/include/tournament_helper.php';
 require_once 'tournaments/include/tournament_participant.php';
 require_once 'tournaments/include/tournament_utils.php';
 
@@ -131,6 +132,7 @@ $GLOBALS['ThePage'] = new Page('TournamentList');
    if( $is_admin )
       $ttable->add_tablehead(12, T_('Flags#header'), '', 0, 'T.Flags-');
    $ttable->add_tablehead(16, T_('Time limit#header'), 'Enum', TABLE_NO_SORT);
+   $ttable->add_tablehead(18, T_('Restrictions#header'), '', TABLE_NO_SORT);
    $ttable->add_tablehead(10, T_('Round#header'), 'NumberC', 0, 'CurrentRound+');
    $ttable->add_tablehead(17, T_('Tournament-Size#header'), 'Number', TABLE_NO_SORT);
    $ttable->add_tablehead( 7, T_('Last changed#header'), 'Date', 0, 'T.Lastchanged-');
@@ -147,18 +149,30 @@ $GLOBALS['ThePage'] = new Page('TournamentList');
    $tqsql->merge( new QuerySQL(
       SQLP_FIELDS,
          'TRULE.Size',
-         "IF(TRULE.Rated='N','N','Y') AS X_Rated",
+         "TRULE.Rated AS X_Rated",
          'TRULE.Ruleset',
          'TRULE.ShapeID', 'TRULE.ShapeSnapshot',
          'TRULE.Maintime', 'TRULE.Byotype', 'TRULE.Byotime', 'TRULE.Byoperiods',
       SQLP_FROM,
          'INNER JOIN TournamentRules AS TRULE ON TRULE.tid=T.ID' ));
-   if( $ttable->is_column_displayed(17) )
+   if( $ttable->is_column_displayed(18) )
+   {
+      $tqsql->merge( new QuerySQL(
+         SQLP_FIELDS,
+            'TPR.MaxParticipants', 'TPR.RatingUseMode',
+            'UNIX_TIMESTAMP(TPR.RegisterEndTime) AS X_RegisterEndTime',
+            'TPR.UserRated', 'TPR.UserMinRating', 'TPR.UserMaxRating',
+            'TPR.UserMinGamesFinished', 'TPR.UserMinGamesRated',
+         SQLP_FROM,
+            'INNER JOIN TournamentProperties AS TPR ON TPR.tid=T.ID' ));
+   }
+   if( $ttable->is_column_displayed(17) && !$ttable->is_column_displayed(18) )
    {
       $tqsql->merge( new QuerySQL(
          SQLP_FIELDS, 'TPR.MaxParticipants',
-         SQLP_FROM, 'INNER JOIN TournamentProperties AS TPR ON TPR.tid=T.ID' ));
+         SQLP_FROM,   'INNER JOIN TournamentProperties AS TPR ON TPR.tid=T.ID' ));
    }
+
 
    $iterator = new ListIterator( 'Tournaments',
          $tqsql,
@@ -180,6 +194,8 @@ $GLOBALS['ThePage'] = new Page('TournamentList');
 
    $show_rows = $ttable->compute_show_rows( $iterator->ResultRows );
    $ttable->set_found_rows( mysql_found_rows('Tournament.list_tournaments.found_rows') );
+
+   $maxGamesCheck = new MaxGamesCheck();
 
 
    if( $has_uid )
@@ -251,12 +267,46 @@ $GLOBALS['ThePage'] = new Page('TournamentList');
       if( $ttable->Is_Column_Displayed[17] )
          $row_str[17] = sprintf( '%s / %s', $tourney->RegisteredTP,
             ( $orow['MaxParticipants'] > 0 ) ? $orow['MaxParticipants'] : NO_VALUE );
+      if( $ttable->Is_Column_Displayed[18] )
+      {
+         list( $restrictions, $class ) = build_restrictions( $tourney, $orow );
+         $row_str[18] = ( $class )
+            ? array( 'text' => $restrictions, 'attbs' => array( 'class' => $class ) )
+            : $restrictions;
+      }
 
       $ttable->add_row( $row_str );
    }
 
    // print static-filter & table
    $ttable->echo_table();
+
+
+   $notes = array();
+   if( $ttable->is_column_displayed(18) ) // restrictions
+   {
+      $notes[] = array( T_('<b>Restrictions</b> Background-Colors#tourney'),
+            span('TJoinErr',  T_('Tournament can not be joined.')),
+            span('TJoinWarn', T_('Joining tournament only by invitation, but tournament director may deny it because of restrictions.')),
+            span('TJoinInv',  T_('Invite-only tournament without restrictions.')),
+            T_('Tournament can be joined without restrictions.'),
+         );
+      $notes[] = array( T_('<b>Restrictions</b> for tournaments'),
+            T_('The darkest background color takes priority for all restrictions.#tourney'),
+            span('TJoinErr',  'STAT') . ' = ' . T_('Bad tournament status for joining.'),
+            span('TJoinErr',  'MXG')  . ' = ' . T_('Max. number of your started games exceed tournament-limits.'),
+            span('TJoinErr',  'R')    . ' = ' . T_('Tournament requires a user rating.'),
+            span('TJoinWarn', 'RRNG') . ' = ' . T_('User rating does not match tournaments rating range.'),
+            span('TJoinWarn', 'MXP')  . ' = ' . T_('Max. number of tournament participants have been reached.'),
+            span('TJoinWarn', 'REND') . ' = ' . T_('Tournaments register end time has been reached.'),
+            span('TJoinWarn', 'FG')   . ' = ' . T_('You have too few finished games (rated or unrated).'),
+            span('TJoinWarn', 'RG')   . ' = ' . T_('You have too few rated finished games.'),
+            span('TJoinInv',  'PRIV') . ' = ' . T_('Private tournaments are invite-only.'),
+         );
+   }
+   $notes[] = sprintf( T_("Column <b>%s</b> shows the current registered X and allowed total Y tournament participants: X / Y."),
+                       T_('Tournament-Size#header') );
+   echo_notes( 'tournamentnotes', T_('Tournament notes'), $notes );
 
 
    $menu_array = array();
@@ -273,4 +323,31 @@ $GLOBALS['ThePage'] = new Page('TournamentList');
 
    end_page(@$menu_array);
 }
+
+
+function build_restrictions( $tourney, $row )
+{
+   global $maxGamesCheck;
+   $arr = TournamentHelper::build_tournament_join_restrictions( $tourney, $maxGamesCheck, $row );
+
+   $out = array();
+   $types = array(); // find gravest type: E > W > I > ok
+   foreach( $arr as $item )
+   {
+      $types[$item[0]] = 1;
+      $out[] = substr($item, 2);
+   }
+
+   if( @$types['E'] )
+      $class = 'TJoinErr';
+   elseif( @$types['W'] )
+      $class = 'TJoinWarn';
+   elseif( @$types['W'] )
+      $class = 'TJoinInv';
+   else
+      $class = '';
+
+   return array( implode(', ', $out), $class );
+}
+
 ?>

@@ -22,6 +22,8 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 $TranslateGroups[] = "Tournament";
 
 require_once 'include/connect2mysql.php';
+require_once 'include/classlib_user.php';
+require_once 'include/game_functions.php';
 require_once 'tournaments/include/tournament_cache.php';
 require_once 'tournaments/include/tournament_director.php';
 require_once 'tournaments/include/tournament_extension.php';
@@ -37,6 +39,7 @@ require_once 'tournaments/include/tournament_properties.php';
 require_once 'tournaments/include/tournament_round.php';
 require_once 'tournaments/include/tournament_result.php';
 require_once 'tournaments/include/tournament_rules.php';
+require_once 'tournaments/include/tournament_status.php';
 require_once 'tournaments/include/tournament_utils.php';
 
  /*!
@@ -699,6 +702,78 @@ class TournamentHelper
       }
       ta_end();
    }//process_tournament_ladder_crown_king
+
+   /*
+    * \brief Builds restrictions to check for suitable tournaments to join.
+    * \return array of restrictions with category-prefix: [ cat:reason, ... ]
+    *         cat : E (error), W (warning), I (invite-only)
+    *         E-reasons : STAT (tournament-status), MXG (max-games-check), R (rating),
+    *         W-reasons : RRNG (rating-range), MXP (max participants), REND (register-end-time), FG (min. finished games), RG (min. rated games),
+    *         I-reasons : PRIV (private tournament)
+    *
+    * \note E = ERR  -> T cannot be joined, T not suitable (no-rating, max-game-check, T-status)
+    *       W = WARN -> T cannot be joined, only by invite by TD
+    *       I = INV  -> T cannot be joined, TP must be invited (no restrictions, if no WARNing)
+    *       '' = OK  -> T can be joined, no restrictions
+    */
+   function build_tournament_join_restrictions( $tourney, $maxGamesCheck, $row )
+   {
+      global $NOW, $player_row;
+      $out = array(); // restrictions
+
+      // registration only on allowed tournament-status
+      $tstatus = new TournamentStatus( $tourney );
+      $ttype = TournamentFactory::getTournament($tourney->WizardType);
+      $errors = $tstatus->check_edit_status( $ttype->allow_register_tourney_status, false );
+      if( count($errors) > 0 )
+         $out[] = 'E:STAT';
+
+      // registration only if not too much started games
+      if( !$maxGamesCheck->allow_tournament_registration() )
+         $out[] = 'E:MXG';
+
+      // registration only with rating
+      $user = User::new_from_row( $player_row );
+      $user_has_rating = $user->hasRating();
+      $rating_use_mode = $row['RatingUseMode'];
+      if( !( $user_has_rating || $rating_use_mode == TPROP_RUMODE_COPY_CUSTOM ) )
+         $out[] = 'E:R';
+
+      // registration only with rating in correct range
+      if( $row['UserRated'] == 'Y' )
+      {
+         if( !$user_has_rating )
+            $out[] = 'E:R';
+         elseif( !$user->matchRating( $row['UserMinRating'], $row['UserMaxRating'] ) )
+            $out[] = 'W:RRNG';
+      }
+
+      // registration only up to max-participants
+      $max_tp = (int)$row['MaxParticipants'];
+      if( $max_tp > 0 && $tourney->RegisteredTP >= $max_tp )
+         $out[] = 'W:MXP';
+
+      // registration only till tournament register-end-time
+      $reg_endtime = (int)$row['X_RegisterEndTime'];
+      if( $reg_endtime > 0 && $NOW >= $reg_endtime )
+         $out[] = 'W:REND';
+
+      // registration only with min. finished games
+      $min_fin_games = (int)$row['UserMinGamesFinished'];
+      if( $min_fin_games > 0 && $player_row['Finished'] < $min_fin_games )
+         $out[] = 'W:FG';
+
+      // registration only with min. rated games
+      $min_rated_games = (int)$row['UserMinGamesRated'];
+      if( $min_rated_games > 0 && $player_row['RatedGames'] < $min_rated_games )
+         $out[] = 'W:RG';
+
+      // registration only per invitation
+      if( $tourney->Scope == TOURNEY_SCOPE_PRIVATE )
+         $out[] = 'I:PRIV';
+
+      return array_unique($out);
+   }//build_tournament_join_restrictions
 
 } // end of 'TournamentHelper'
 
