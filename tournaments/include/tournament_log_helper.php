@@ -89,14 +89,14 @@ class TournamentLogHelper
       $tlog->insert();
    }
 
-   function log_add_tournament_director( $tid, $tlog_type, $director )
+   function log_create_tournament_director( $tid, $tlog_type, $director )
    {
       $tlog = new Tournamentlog( 0, $tid, 0, 0, $tlog_type, 'TD_User', TLOG_ACT_CREATE, $director->uid,
          sprintf( "TD-Flags [%s]; TD-Comment [%s]", $director->formatFlags(), $director->Comment ) );
       $tlog->insert();
    }
 
-   function log_update_tournament_director( $tid, $tlog_type, $edits, $director, $old_flags_val, $old_comment )
+   function log_change_tournament_director( $tid, $tlog_type, $edits, $director, $old_flags_val, $old_comment )
    {
       $old_flags = $director->formatFlags($old_flags_val);
       $new_flags = $director->formatFlags();
@@ -112,7 +112,7 @@ class TournamentLogHelper
       $tlog->insert();
    }
 
-   function log_delete_tournament_director( $tid, $tlog_type, $tdir_uid )
+   function log_remove_tournament_director( $tid, $tlog_type, $tdir_uid )
    {
       $tlog = new Tournamentlog( 0, $tid, 0, 0, $tlog_type, 'TD_User', TLOG_ACT_REMOVE, $tdir_uid );
       $tlog->insert();
