@@ -124,8 +124,7 @@ $GLOBALS['ThePage'] = new Page('TournamentList');
    $ttable->add_tablehead( 3, T_('Type#T_header'), 'Enum', 0, 'T.Type+');
    $ttable->add_tablehead( 4, T_('Status#header'), 'Enum', 0, 'T.Status+');
    $ttable->add_tablehead( 5, T_('Title#header'), '', TABLE_NO_HIDE, 'Title+');
-   if( $has_uid )
-      $ttable->add_tablehead(11, T_('Registration Status#T_header'), 'Enum', TABLE_NO_HIDE, 'TP_Status+');
+   $ttable->add_tablehead(11, T_('Registration Status#T_header'), 'Enum', ($has_uid ? TABLE_NO_HIDE : 0), 'TP_Status+');
    $ttable->add_tablehead(13, T_('Size#header'), 'Number', 0, 'TRULE.Size-');
    $ttable->add_tablehead(14, T_('Rated#header'), 'YesNo', TABLE_NO_SORT);
    $ttable->add_tablehead(15, T_('Ruleset#header'), 'Enum', TABLE_NO_SORT);
@@ -171,6 +170,11 @@ $GLOBALS['ThePage'] = new Page('TournamentList');
       $tqsql->merge( new QuerySQL(
          SQLP_FIELDS, 'TPR.MaxParticipants',
          SQLP_FROM,   'INNER JOIN TournamentProperties AS TPR ON TPR.tid=T.ID' ));
+   }
+   if( !$has_uid )
+   {
+      $tqsql->add_part( SQLP_FIELDS, 'TP.Status AS TP_Status' );
+      $tqsql->add_part( SQLP_FROM, "LEFT JOIN TournamentParticipant AS TP ON TP.tid=T.ID AND TP.uid=$my_id" );
    }
 
 
@@ -244,14 +248,16 @@ $GLOBALS['ThePage'] = new Page('TournamentList');
          $row_str[ 9] = ($tourney->EndTime > 0) ? date(DATE_FMT2, $tourney->EndTime) : '';
       if( $ttable->Is_Column_Displayed[10] )
          $row_str[10] = $tourney->formatRound(true);
-      if( $has_uid && $ttable->Is_Column_Displayed[11] )
+      if( $ttable->Is_Column_Displayed[11] )
       {
          $row_str[11] =
             anchor( $base_path."tournaments/register.php?tid=$ID",
                image( $base_path.'images/info.gif',
-                  sprintf( T_('Registration for tournament %s'), $ID ),
-                  null, 'class=InTextImage'))
-            . '&nbsp;' . TournamentParticipant::getStatusText($orow['TP_Status']);
+                  sprintf( T_('Registration for tournament %s'), $ID ), null, 'class=InTextImage'))
+            . ' '
+            . ( $orow['TP_Status']
+                  ? TournamentParticipant::getStatusText($orow['TP_Status'])
+                  : NO_VALUE );
       }
       if( $is_admin && $ttable->Is_Column_Displayed[12] )
          $row_str[12] = $tourney->formatFlags('', 0, true, 'TWarning');
@@ -283,15 +289,23 @@ $GLOBALS['ThePage'] = new Page('TournamentList');
 
 
    $notes = array();
+   if( $ttable->is_column_displayed(11) ) // reg-status
+   {
+      $reg_notes = array( sprintf('<b>%s</b> (%s):', T_('Registration Status#T_header'), T_('Registration Status') ) );
+      $arr = array_merge( array( '' => NO_VALUE ), TournamentParticipant::getStatusText() );
+      foreach( $arr as $tpstat => $text )
+         $reg_notes[] = $text . ' = ' . TournamentParticipant::getStatusText($tpstat, false, true);
+      $notes[] = $reg_notes;
+   }
    if( $ttable->is_column_displayed(18) ) // restrictions
    {
-      $notes[] = array( T_('<b>Restrictions</b> Background-Colors#tourney'),
+      $notes[] = array( sprintf('<b>%s</b> (%s):', T_('Tournament Registration Restrictions'), T_('background colors') ),
             span('TJoinErr',  T_('Tournament can not be joined.')),
             span('TJoinWarn', T_('Joining tournament only by invitation, but tournament director may deny it because of restrictions.')),
             span('TJoinInv',  T_('Invite-only tournament without restrictions.')),
             T_('Tournament can be joined without restrictions.'),
          );
-      $notes[] = array( T_('<b>Restrictions</b> for tournaments'),
+      $notes[] = array( sprintf('<b>%s</b> (%s):', T_('Tournament Registration Restrictions'), T_('values') ),
             T_('The darkest background color takes priority for all restrictions.#tourney'),
             span('TJoinErr',  'STAT') . ' = ' . T_('Bad tournament status for joining.'),
             span('TJoinErr',  'MXG')  . ' = ' . T_('Max. number of your started games exceed tournament-limits.'),
