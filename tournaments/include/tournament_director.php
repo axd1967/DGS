@@ -67,13 +67,16 @@ class TournamentDirector
       $this->User = (is_a($user, 'User')) ? $user : new User( $this->uid );
    }
 
-   function formatFlags()
+   function formatFlags( $flags_val=null )
    {
+      if( is_null($flags_val) )
+         $flags_val = $this->Flags;
+
       $arr = array();
       $arr_flags = TournamentDirector::getFlagsText();
       foreach( $arr_flags as $flag => $flagtext )
       {
-         if( $this->Flags & $flag )
+         if( $flags_val & $flag )
             $arr[] = $flagtext;
       }
       return implode(', ', $arr);

@@ -362,14 +362,20 @@ class Tournament
       return false;
    }
 
-   /*! \brief Returns true if given user can edit tournament directors. */
+   /*! \brief Returns TLOG_TYPE_... if given user can edit tournament directors; false otherwise. */
    function allow_edit_directors( $uid )
    {
       if( $uid <= GUESTS_ID_MAX ) // forbidden for guests
          return false;
 
       // only admin or owner can create/delete TDs, or edit all TDs
-      return TournamentUtils::isAdmin() || ( $this->Owner_ID == $uid );
+      if( TournamentUtils::isAdmin() )
+         return TLOG_TYPE_ADMIN;
+
+      if( $this->Owner_ID == $uid )
+         return TLOG_TYPE_OWNER;
+
+      return false;
    }
 
    /*! \brief Returns info about tournament with linked ID, scope, type and title; version=1..3. */

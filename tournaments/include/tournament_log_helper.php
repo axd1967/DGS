@@ -21,6 +21,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 $TranslateGroups[] = "Tournament";
 
+require_once 'tournaments/include/tournament_director.php';
 require_once 'tournaments/include/tournament_log.php';
 require_once 'tournaments/include/tournament_utils.php';
 
@@ -85,6 +86,35 @@ class TournamentLogHelper
    function log_tournament_game_add_time( $tid, $tlog_type, $msg )
    {
       $tlog = new Tournamentlog( 0, $tid, 0, 0, $tlog_type, 'TG_Data', TLOG_ACT_ADDTIME, 0, $msg );
+      $tlog->insert();
+   }
+
+   function log_add_tournament_director( $tid, $tlog_type, $director )
+   {
+      $tlog = new Tournamentlog( 0, $tid, 0, 0, $tlog_type, 'TD_User', TLOG_ACT_CREATE, $director->uid,
+         sprintf( "TD-Flags [%s]; TD-Comment [%s]", $director->formatFlags(), $director->Comment ) );
+      $tlog->insert();
+   }
+
+   function log_update_tournament_director( $tid, $tlog_type, $edits, $director, $old_flags_val, $old_comment )
+   {
+      $old_flags = $director->formatFlags($old_flags_val);
+      $new_flags = $director->formatFlags();
+
+      $msg = array();
+      if( $old_flags != $new_flags )
+         $msg[] = sprintf('TD-Flags [%s] -> [%s]', $old_flags, $new_flags );
+      if( $old_comment != $director->Comment )
+         $msg[] = sprintf('TD-Comment [%s] -> [%s]', $old_comment, $director->Comment );
+
+      $tlog = new Tournamentlog( 0, $tid, 0, 0, $tlog_type, 'TD_Props', TLOG_ACT_CHANGE, $director->uid,
+         sprintf( "Change of [%s]: %s", implode(', ', $edits), implode('; ', $msg) ));
+      $tlog->insert();
+   }
+
+   function log_delete_tournament_director( $tid, $tlog_type, $tdir_uid )
+   {
+      $tlog = new Tournamentlog( 0, $tid, 0, 0, $tlog_type, 'TD_User', TLOG_ACT_REMOVE, $tdir_uid );
       $tlog->insert();
    }
 

@@ -27,6 +27,7 @@ require_once( 'include/rating.php' );
 require_once( 'include/db/bulletin.php' );
 require_once( 'tournaments/include/tournament.php' );
 require_once( 'tournaments/include/tournament_director.php' );
+require_once( 'tournaments/include/tournament_log_helper.php' );
 require_once( 'tournaments/include/tournament_status.php' );
 require_once( 'tournaments/include/tournament_utils.php' );
 
@@ -107,13 +108,21 @@ $GLOBALS['ThePage'] = new Page('TournamentDirectorEdit');
    if( count($tduser_errors) == 0 && $uid )
       $director = TournamentDirector::load_tournament_director( $tid, $uid ); // existing TD ?
    if( is_null($director) )
+   {
       $director = new TournamentDirector( $tid, $uid ); // new TD
+      $new_tdir = true;
+   }
+   else
+      $new_tdir = false;
+   $old_flags = $director->Flags;
+   $old_comment = $director->Comment;
 
    if( $uid && $owner_allow_edit && @$_REQUEST['td_delete'] && @$_REQUEST['confirm'] && count($errors) == 0 ) // delete TD
    {
       ta_begin();
       {//HOT-section to save tournament-director
          $director->delete();
+         TournamentLogHelper::log_remove_tournament_director( $tid, $owner_allow_edit, $uid );
          Bulletin::update_count_bulletin_new( "Tournament.edit_dir.del_td($tid)", $uid );
       }
       ta_end();
@@ -133,14 +142,19 @@ $GLOBALS['ThePage'] = new Page('TournamentDirectorEdit');
    $errors = array_merge( $errors, $input_errors );
 
    // persist TD in database
-   if( $uid && @$_REQUEST['td_save'] && !@$_REQUEST['td_preview'] && count($errors) == 0 )
+   if( $uid && @$_REQUEST['td_save'] && !@$_REQUEST['td_preview'] && count($errors) == 0 && count($edits) > 0 )
    {
       ta_begin();
       {//HOT-section to save tournament-director
          $director->persist();
 
-         if( !is_null($tduser_row) ) // new TD
+         if( $new_tdir ) // new TD
+         {
+            TournamentLogHelper::log_create_tournament_director( $tid, $owner_allow_edit, $director );
             Bulletin::update_count_bulletin_new( "Tournament.edit_dir.add_td($tid)", $uid );
+         }
+         else
+            TournamentLogHelper::log_change_tournament_director( $tid, $owner_allow_edit, $edits, $director, $old_flags, $old_comment );
       }
       ta_end();
 

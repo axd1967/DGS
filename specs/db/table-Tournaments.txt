@@ -951,7 +951,7 @@ Description:
 * Object : object action is performed on
    - format: <type>_<subtype>
    - type: T, TD, TPR, TRULE, TN, TP, TG, TRES; TL, TLP, TRR, TRND, TPOOL
-   - subtype: Data, Lock, Status, Game, Reg, Rank, News, Props, Pool, Round, NextRound
+   - subtype: Data, Lock, Status, Game, Reg, Rank, News, Props, Pool, Round, User, NextRound
 
    - Examples with content:
      - # TODO
