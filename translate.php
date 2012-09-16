@@ -27,7 +27,6 @@ require_once( "include/make_translationfiles.php" );
 $GLOBALS['ThePage'] = new Page('Translate');
 
 define('ALLOW_PROFIL_CHARSET', 1); //allow the admins to overwrite the page encoding
-define('TRANSL_ALLOW_FILTER', 1); //allow a search on the english phrases
 
 $info_box = '<br>When translating you should keep the following things in mind:
 <ul>
@@ -143,10 +142,10 @@ $info_box = '<br>When translating you should keep the following things in mind:
    $group = get_request_arg('group');
    $untranslated = (int)@$_REQUEST['untranslated'];
    $alpha_order = (int)@$_REQUEST['alpha_order'];
-   if( TRANSL_ALLOW_FILTER )
-      $filter_en = trim(get_request_arg('filter_en'));
-   else
-      $filter_en = '';
+   $filter_en = trim(get_request_arg('filter_en'));
+   $max_len = (int)@$_REQUEST['max_len'];
+   if( $max_len < 0 )
+      $max_len = 0;
    $no_pages = (int)@$_REQUEST['no_pages'];
    if( $no_pages )
       $from_row = -1;
@@ -185,11 +184,11 @@ $info_box = '<br>When translating you should keep the following things in mind:
       if( !in_array( $translate_lang, $translator_array ) )
          error('not_correct_transl_language', "translate.check.language($translate_lang)");
 
-      $result = translations_query( $translate_lang, $untranslated, $group, $from_row, $alpha_order, $filter_en)
+      $result = translations_query( $translate_lang, $untranslated, $group, $from_row, $alpha_order, $filter_en, $max_len)
          or error('mysql_query_failed','translate.translation_query');
 
       $show_rows = (int)@mysql_num_rows($result);
-      if( !TRANSL_ALLOW_FILTER && $show_rows <= 0 && !$untranslated )
+      if( $show_rows <= 0 && !$untranslated )
          error('translation_bad_language_or_group', "translate.check.lang_group($translate_lang)");
 
       if( $show_rows > 0 )
@@ -208,6 +207,7 @@ $info_box = '<br>When translating you should keep the following things in mind:
          ($untranslated ? URI_AMP."untranslated=$untranslated" : '') .
          ($alpha_order ? URI_AMP."alpha_order=$alpha_order" : '') .
          ($filter_en ? URI_AMP."filter_en=".urlencode($filter_en) : '') .
+         ($max_len ? URI_AMP."max_len=".urlencode($max_len) : '') .
          ($from_row > 0 ? URI_AMP."from_row=$from_row" : '') );
    }
 
@@ -254,6 +254,8 @@ $info_box = '<br>When translating you should keep the following things in mind:
       $page_hiddens['alpha_order'] = 1;
    if( $filter_en )
       $page_hiddens['filter_en'] = $filter_en;
+   if( $max_len )
+      $page_hiddens['max_len'] = $max_len;
    if( $from_row > 0 )
       $page_hiddens['from_row'] = $from_row;
 
@@ -453,6 +455,7 @@ $info_box = '<br>When translating you should keep the following things in mind:
                'HIDDEN', 'untranslated', $untranslated,
                'HIDDEN', 'alpha_order', $alpha_order,
                'HIDDEN', 'filter_en', $filter_en,
+               'HIDDEN', 'max_len', $max_len,
                'HIDDEN', 'from_row', $from_row,
                'SUBMITBUTTONX', 'save',
                   T_('Apply translation changes to Dragon'),
@@ -476,12 +479,13 @@ $info_box = '<br>When translating you should keep the following things in mind:
             'HEADER', T_('Groups'),
          )); //$nbcol
 
-      if( TRANSL_ALLOW_FILTER )
-         $groupchoice_form->add_row( array(
-               'CELL', $nbcol, '',
-               'TEXT', T_('English filter (_:any char, %:any number of chars, \:escape)&nbsp;'),
-               'TEXTINPUT', 'filter_en', 20, 80, $filter_en,
-            ));
+      $groupchoice_form->add_row( array(
+            'CELL', $nbcol, '',
+            'TEXT', T_('English filter (_:any char, %:any number of chars, \:escape)&nbsp;'),
+            'TEXTINPUT', 'filter_en', 20, 80, $filter_en,
+            'TEXT', sptext(T_('with max. length'), 1),
+            'TEXTINPUT', 'max_len', 4, 4, (int)@$_REQUEST['max_len'],
+         ));
       $groupchoice_form->add_row( array(
 //         'DESCRIPTION', T_('Change to group'),
             'CELL', $nbcol, '',
@@ -522,6 +526,7 @@ $info_box = '<br>When translating you should keep the following things in mind:
             'HIDDEN', 'untranslated', $untranslated,
             'HIDDEN', 'alpha_order', $alpha_order,
             'HIDDEN', 'filter_en', $filter_en,
+            'HIDDEN', 'max_len', $max_len,
             'HIDDEN', 'from_row', 0,
             'SUBMITBUTTON', 'cl', T_('Select'),
          ));

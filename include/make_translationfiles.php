@@ -163,7 +163,7 @@ function make_include_files($language=null, $group=null) //must be called from m
 } //make_include_files
 
 
-function translations_query( $translate_lang, $untranslated, $group, $from_row=-1, $alpha_order=false, $filter_en='')
+function translations_query( $translate_lang, $untranslated, $group, $from_row=-1, $alpha_order=false, $filter_en='', $max_len=0 )
 {
    /* Note: Some items appear two or more times within the untranslated set
       when from different groups. But we can't use:
@@ -208,6 +208,8 @@ function translations_query( $translate_lang, $untranslated, $group, $from_row=-
 
    if( $filter_en )
       $query .= " AND TT.Text LIKE '%".mysql_addslashes($filter_en)."%'";
+   if( is_numeric($max_len) && $max_len > 0 )
+      $query .= " AND LENGTH(TT.Text) <= $max_len";
 
    if( $untranslated )
    {
