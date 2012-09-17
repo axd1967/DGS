@@ -2579,3 +2579,8 @@ CREATE TABLE Tournamentlog (
 ) ENGINE=MyISAM ;
 
 
+-- determine ladder-position for new user
+ALTER TABLE TournamentLadderProps
+   ADD UserJoinOrder enum('REGTIME','RATING','RANDOM') NOT NULL default 'REGTIME' AFTER GameEndTimeoutLoss ;
+
+

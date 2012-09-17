@@ -59,7 +59,7 @@ $ENTITY_TOURNAMENT_LADDER_PROPS = new Entity( 'TournamentLadderProps',
                   'MaxDefenses', 'MaxDefenses1', 'MaxDefenses2', 'MaxDefensesStart1', 'MaxDefensesStart2',
                   'MaxChallenges', 'UserAbsenceDays', 'RankPeriodLength', 'CrownKingHours',
       FTYPE_DATE, 'Lastchanged', 'CrownKingStart',
-      FTYPE_ENUM, 'GameEndNormal', 'GameEndJigo', 'GameEndTimeoutWin', 'GameEndTimeoutLoss'
+      FTYPE_ENUM, 'GameEndNormal', 'GameEndJigo', 'GameEndTimeoutWin', 'GameEndTimeoutLoss', 'UserJoinOrder'
    );
 
 class TournamentLadderProps
@@ -81,6 +81,7 @@ class TournamentLadderProps
    var $GameEndJigo;
    var $GameEndTimeoutWin;
    var $GameEndTimeoutLoss;
+   var $UserJoinOrder;
    var $UserAbsenceDays;
    var $RankPeriodLength;
    var $CrownKingHours;
@@ -94,6 +95,7 @@ class TournamentLadderProps
          $max_challenges=0,
          $game_end_normal=TGEND_CHALLENGER_ABOVE, $game_end_jigo=TGEND_CHALLENGER_BELOW,
          $game_end_timeout_win=TGEND_DEFENDER_BELOW, $game_end_timeout_loss=TGEND_CHALLENGER_LAST,
+         $user_join_order=TLP_JOINORDER_REGTIME,
          $user_absence_days=0, $rank_period_len=1, $crown_king_hours=0, $crown_king_start=0 )
    {
       $this->tid = (int)$tid;
@@ -113,6 +115,7 @@ class TournamentLadderProps
       $this->setGameEndJigo($game_end_jigo);
       $this->setGameEndTimeoutWin($game_end_timeout_win);
       $this->setGameEndTimeoutLoss($game_end_timeout_loss);
+      $this->setUserJoinOrder($user_join_order);
       $this->UserAbsenceDays = (int)$user_absence_days;
       $this->RankPeriodLength = limit( (int)$rank_period_len, 1, 255, 1 );
       $this->CrownKingHours = (int)$crown_king_hours;
@@ -150,6 +153,13 @@ class TournamentLadderProps
       if( !preg_match( "/^(".CHECK_TGEND_TIMEOUT_LOSS.")$/", $game_end ) )
          error('invalid_args', "TournamentLadderProps.setGameEndTimeoutLoss($game_end)");
       $this->GameEndTimeoutLoss = $game_end;
+   }
+
+   function setUserJoinOrder( $user_join_order )
+   {
+      if( !preg_match( "/^(".CHECK_TLP_JOINORDER.")$/", $user_join_order ) )
+         error('invalid_args', "TournamentLadderProps.setUserJoinOrder($user_join_order)");
+      $this->UserJoinOrder = $user_join_order;
    }
 
    /*! \brief Inserts or updates tournament-ladder-props in database. */
@@ -205,6 +215,7 @@ class TournamentLadderProps
       $data->set_value( 'GameEndJigo', $this->GameEndJigo );
       $data->set_value( 'GameEndTimeoutWin', $this->GameEndTimeoutWin );
       $data->set_value( 'GameEndTimeoutLoss', $this->GameEndTimeoutLoss );
+      $data->set_value( 'UserJoinOrder', $this->UserJoinOrder );
       $data->set_value( 'UserAbsenceDays', $this->UserAbsenceDays );
       $data->set_value( 'RankPeriodLength', $this->RankPeriodLength );
       $data->set_value( 'CrownKingHours', $this->CrownKingHours );
@@ -333,10 +344,7 @@ class TournamentLadderProps
          $arr_props[] = sprintf( T_('Before a rematch with the same user you will have to wait %s.#T_ladder'),
                                  TournamentLadderProps::echo_rematch_wait($this->ChallengeRematchWaitHours) );
 
-      // general conditions
       $arr_props[] = T_('You may only have one running game per opponent.#T_ladder');
-      $arr_props[] = T_('On user removal or retreat from the ladder') . ":\n"
-         . wordwrap( TournamentLadder::get_notes_user_removed(), 80 );
 
       // game-end handling
       $arr = array( T_('On game-end the following action is performed:#T_ladder') );
@@ -349,10 +357,16 @@ class TournamentLadderProps
       $arr[] = sprintf( '%s: %s', T_('on Jigo'), TournamentLadderProps::getGameEndText($this->GameEndJigo) );
       $arr_props[] = $arr;
 
+      // user-join-order
+      $arr_props[] = TournamentLadderProps::getUserJoinOrderText($this->UserJoinOrder, /*short*/false);
+
       // user absence handling
       if( $this->UserAbsenceDays > 0 )
          $arr_props[] = sprintf( T_("The user will be removed from the ladder, if player hasn't accessed DGS\n"
             . 'within the last %d days (excluding vacation).'), $this->UserAbsenceDays );
+
+      $arr_props[] = T_('On user removal or retreat from the ladder') . ":\n"
+         . wordwrap( TournamentLadder::get_notes_user_removed(), 80 );
 
       // rank-change period
       $arr_props[] = T_('Length of one rank-archive period#T_ladder') . ': ' .
@@ -640,6 +654,7 @@ class TournamentLadderProps
             @$row['GameEndJigo'],
             @$row['GameEndTimeoutWin'],
             @$row['GameEndTimeoutLoss'],
+            @$row['UserJoinOrder'],
             @$row['UserAbsenceDays'],
             @$row['RankPeriodLength'],
             @$row['CrownKingHours'],
@@ -721,6 +736,36 @@ class TournamentLadderProps
          error('invalid_args', "TournamentLadderProps.getGameEndText($game_end)");
       return $ARR_GLOBALS_TOURNAMENT_LADDER_PROPS[$key][$game_end];
    }//getGameEndText
+
+   function getUserJoinOrderText( $join_order=null, $short=true )
+   {
+      global $ARR_GLOBALS_TOURNAMENT_LADDER_PROPS;
+
+      // lazy-init of texts
+      $key = 'UJOINORDER';
+      if( !isset($ARR_GLOBALS_TOURNAMENT_LADDER_PROPS[$key]) )
+      {
+         $arr = array();
+         $arr[TLP_JOINORDER_REGTIME] = T_('Tournament Registration Time');
+         $arr[TLP_JOINORDER_RATING]  = T_('Current User Rating#T_ladder');
+         $arr[TLP_JOINORDER_RANDOM]  = T_('Random#T_ladder');
+         $ARR_GLOBALS_TOURNAMENT_LADDER_PROPS[$key] = $arr;
+
+         $arr = array();
+         $arr[TLP_JOINORDER_REGTIME] = T_('Add new user in position ordered by tournament registration time (bottom of ladder).#T_ladder');
+         $arr[TLP_JOINORDER_RATING]  = T_('Add new user in ladder at position below user with same user rating.#T_ladder');
+         $arr[TLP_JOINORDER_RANDOM]  = T_('Add new user at random position in the ladder.#T_ladder');
+         $ARR_GLOBALS_TOURNAMENT_LADDER_PROPS[$key.'_LONG'] = $arr;
+      }
+
+      if( !$short )
+         $key .= '_LONG';
+      if( is_null($join_order) )
+         return array() + $ARR_GLOBALS_TOURNAMENT_LADDER_PROPS[$key]; // cloned
+      if( !isset($ARR_GLOBALS_TOURNAMENT_LADDER_PROPS[$key][$join_order]) )
+         error('invalid_args', "TournamentLadderProps.getUserJoinOrderText($join_order,$short)");
+      return $ARR_GLOBALS_TOURNAMENT_LADDER_PROPS[$key][$join_order];
+   }//getUserJoinOrderText
 
    function echo_rematch_wait( $hours, $short=false )
    {

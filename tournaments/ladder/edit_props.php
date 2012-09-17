@@ -183,11 +183,19 @@ $GLOBALS['ThePage'] = new Page('TournamentLadderPropsEdit');
          'TEXT',        sprintf( '(%s)', T_('Jigo')), ));
    $tform->add_empty_row();
 
+   // user-join-order
+   $tform->add_row( array(
+         'DESCRIPTION', T_('User Join Order#T_ladder'),
+         'SELECTBOX',   'join_order', 1, TournamentLadderProps::getUserJoinOrderText(),
+                        $vars['join_order'], false,
+         'TEXT',        T_('order determines ladder-position for newly joined user#T_ladder'), ));
+   $tform->add_empty_row();
+
    // user-absence
    $tform->add_row( array(
          'DESCRIPTION', T_('User Absence handling#T_ladder'),
          'TEXTINPUT',   'uabs_days', 4, 4, $vars['uabs_days'],
-         'TEXT',        sprintf( '(%s)', T_('[days] user can be absent without being removed from ladder')), ));
+         'TEXT',        T_('[days] user can be absent without being removed from ladder'), ));
    $tform->add_empty_row();
 
    // rank-archive-period
@@ -271,6 +279,7 @@ function parse_edit_form( &$tlp, $t_limits )
       'gend_jigo'       => $tlp->GameEndJigo,
       'gend_timeout_w'  => $tlp->GameEndTimeoutWin,
       'gend_timeout_l'  => $tlp->GameEndTimeoutLoss,
+      'join_order'      => $tlp->UserJoinOrder,
       'uabs_days'       => $tlp->UserAbsenceDays,
       'rankplen'        => $tlp->RankPeriodLength,
       'crownking'       => $tlp->CrownKingHours,
@@ -429,6 +438,8 @@ function parse_edit_form( &$tlp, $t_limits )
       $tlp->setGameEndTimeoutLoss( $vars['gend_timeout_l'] );
       $tlp->setGameEndJigo( $vars['gend_jigo'] );
 
+      $tlp->setUserJoinOrder( $vars['join_order'] );
+
       // determine edits
       if( $old_vals['chall_range_abs'] != $tlp->ChallengeRangeAbsolute ) $edits[] = T_('Challenge Range#T_ladder');
       if( $old_vals['chall_range_rel'] != $tlp->ChallengeRangeRelative ) $edits[] = T_('Challenge Range#T_ladder');
@@ -444,6 +455,7 @@ function parse_edit_form( &$tlp, $t_limits )
       if( $old_vals['gend_timeout_w'] != $tlp->GameEndTimeoutWin ) $edits[] = T_('Game End');
       if( $old_vals['gend_timeout_l'] != $tlp->GameEndTimeoutLoss ) $edits[] = T_('Game End');
       if( $old_vals['gend_jigo'] != $tlp->GameEndJigo ) $edits[] = T_('Game End');
+      if( $old_vals['join_order'] != $tlp->UserJoinOrder ) $edits[] = T_('User Join Order#T_ladder');
       if( $old_vals['uabs_days'] != $tlp->UserAbsenceDays ) $edits[] = T_('User Absence#T_ladder');
       if( $old_vals['rankplen'] != $tlp->RankPeriodLength ) $edits[] = T_('Rank-archive Period Length#T_ladder');
       if( $old_vals['crownking'] != $tlp->CrownKingHours ) $edits[] = T_('Crown King#T_ladder');

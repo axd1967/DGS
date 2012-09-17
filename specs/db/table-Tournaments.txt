@@ -551,6 +551,7 @@ Description:
 | GameEndJigo            | enum('NO_CHANGE','CH_ABOVE','CH_BELOW')                                        | NO   |     | CH_BELOW            |       |
 | GameEndTimeoutWin      | enum('NO_CHANGE','CH_ABOVE','CH_BELOW','SWITCH','DF_BELOW','DF_LAST','DF_DEL') | NO   |     | DF_BELOW            |       |
 | GameEndTimeoutLoss     | enum('NO_CHANGE','CH_LAST','CH_DEL')                                           | NO   |     | CH_LAST             |       |
+| UserJoinOrder          | enum('REGTIME','RATING','RANDOM')                                              | NO   |     | REGTIME             |       |
 | UserAbsenceDays        | tinyint(3) unsigned                                                            | NO   | MUL | 0                   |       |
 | RankPeriodLength       | tinyint(3) unsigned                                                            | NO   |     | 1                   |       |
 | CrownKingHours         | smallint(5) unsigned                                                           | NO   |     | 0                   |       |
@@ -620,6 +621,13 @@ Description:
 * GameEndTimeoutLoss : handling of game-end when challengers loses by timeout (=defender wins by timeout)
    - default = CH_LAST
    - Enum-values: see tournaments/include/tournament_globals.php
+
+* UserJoinOrder : determines position in ladder for newly joined user
+   - REGTIME : add users in ladder-position ordered by register-time (new at bottom); default
+   - RATING  : add users in ladder-position below user with same rating;
+     dependent on TournamentProperties.RatingUseMode this may be either the current user rating (CURR_FIX)
+     or the copied tournament-rating (COPY_CUSTOM|COPY_FIX)
+   - RANDOM  : add users in random ladder-positions in the ladder
 
 * UserAbsenceDays : days of user being absent without taking actions
    - 0 = unused

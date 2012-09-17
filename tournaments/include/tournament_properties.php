@@ -287,15 +287,15 @@ class TournamentProperties
       $default = 0;
       if( $this->RatingUseMode == TPROP_RUMODE_CURR_FIX )
       {
-         $arr[TOURNEY_SEEDORDER_CURRENT_RATING] = T_('Current User Rating#T_seedorder');
+         $arr[TOURNEY_SEEDORDER_CURRENT_RATING] = T_('Current User Rating#T_ladder');
          $default = TOURNEY_SEEDORDER_CURRENT_RATING;
       }
-      $arr[TOURNEY_SEEDORDER_REGISTER_TIME] = T_('Tournament Register Time#T_seedorder');
+      $arr[TOURNEY_SEEDORDER_REGISTER_TIME] = T_('Tournament Registration Time');
       if( $default == 0 )
          $default = TOURNEY_SEEDORDER_REGISTER_TIME;
       if( $this->RatingUseMode == TPROP_RUMODE_COPY_CUSTOM || $this->RatingUseMode == TPROP_RUMODE_COPY_FIX )
-         $arr[TOURNEY_SEEDORDER_TOURNEY_RATING] = T_('Tournament Rating#T_seedorder');
-      $arr[TOURNEY_SEEDORDER_RANDOM] = T_('Random#T_seedorder');
+         $arr[TOURNEY_SEEDORDER_TOURNEY_RATING] = T_('Tournament Rating');
+      $arr[TOURNEY_SEEDORDER_RANDOM] = T_('Random#T_ladder');
       return array( $default, $arr );
    }
 

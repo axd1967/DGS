@@ -1091,6 +1091,7 @@ CREATE TABLE IF NOT EXISTS `TournamentLadderProps` (
   `GameEndJigo` enum('NO_CHANGE','CH_ABOVE','CH_BELOW') NOT NULL default 'CH_BELOW',
   `GameEndTimeoutWin` enum('NO_CHANGE','CH_ABOVE','CH_BELOW','SWITCH','DF_BELOW','DF_LAST','DF_DEL') NOT NULL default 'DF_BELOW',
   `GameEndTimeoutLoss` enum('NO_CHANGE','CH_LAST','CH_DEL') NOT NULL default 'CH_LAST',
+  `UserJoinOrder` enum('REGTIME','RATING','RANDOM') NOT NULL default 'REGTIME',
   `UserAbsenceDays` tinyint(3) unsigned NOT NULL default '0',
   `RankPeriodLength` tinyint(3) unsigned NOT NULL default '1',
   `CrownKingHours` smallint(5) unsigned NOT NULL default '0',
