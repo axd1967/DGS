@@ -30,9 +30,11 @@ require_once 'include/classlib_user.php';
 require_once 'tournaments/include/tournament_globals.php';
 require_once 'tournaments/include/tournament_utils.php';
 require_once 'tournaments/include/tournament.php';
+require_once 'tournaments/include/tournament_cache.php';
+require_once 'tournaments/include/tournament_games.php';
+require_once 'tournaments/include/tournament_ladder_props.php';
 require_once 'tournaments/include/tournament_participant.php';
 require_once 'tournaments/include/tournament_properties.php';
-require_once 'tournaments/include/tournament_games.php';
 
  /*!
   * \file tournament_ladder.php
@@ -477,6 +479,35 @@ class TournamentLadder
       return ($row) ? TournamentLadder::new_from_row($row) : NULL;
    }
 
+   /*!
+    * \brief Loads and returns TournamentLadder-object for given tournament-ID:
+    *        find entry with lowest ladder-position with at least the given user-rating.
+    * \param $use_tourney_rating true = compare given $user_rating with ladder users TournamentParticipant.Rating2;
+    *        false = compare given $user_rating with ladder users Players.Rating2
+    * \return found TournamentLadder-object; or null if ladder contains only users with weaker user-rating.
+    */
+   function load_tournament_ladder_by_user_rating( $tid, $user_rating, $use_tourney_rating )
+   {
+      $qsql = TournamentLadder::build_query_sql( $tid );
+      if( $use_tourney_rating )
+      {
+         $qsql->add_part( SQLP_FROM, "INNER JOIN TournamentParticipant AS TP ON TP.tid=TL.tid AND TP.ID=TL.rid" );
+         $qsql->add_part( SQLP_WHERE, "TP.Rating >= $user_rating" );
+         $qsql->add_part( SQLP_ORDER, 'TP.Rating ASC' );
+      }
+      else
+      {
+         $qsql->add_part( SQLP_FROM, "INNER JOIN Players AS P ON P.ID=TL.uid" );
+         $qsql->add_part( SQLP_WHERE, "P.Rating2 >= $user_rating" );
+         $qsql->add_part( SQLP_ORDER, 'P.Rating2 ASC' );
+      }
+      $qsql->add_part( SQLP_LIMIT, '1' );
+
+      $row = mysql_single_fetch( "TournamentLadder::load_tournament_ladder_by_user_rating($tid,$user_rating,$use_tourney_rating)",
+         $qsql->get_select() );
+      return ($row) ? TournamentLadder::new_from_row($row) : null;
+   }
+
    /*! \brief Returns enhanced (passed) ListIterator with TournamentLadder-objects for given tournament-id. */
    function load_tournament_ladder( $iterator, $tid=-1 )
    {
@@ -501,7 +532,7 @@ class TournamentLadder
     * \brief Adds user given by User-object for tournament tid at bottom of ladder.
     * \note IMPORTANT NOTE: caller needs to open TA with HOT-section!!
     */
-   function add_user_to_ladder( $tid, $uid )
+   function add_user_to_ladder( $tid, $uid, $tl_props=null, $tprops=null )
    {
       if( $uid <= GUESTS_ID_MAX )
          error('invalid_user', "TournamentLadder::add_user_to_ladder.check_user($tid)");
@@ -517,7 +548,29 @@ class TournamentLadder
          error('tournament_participant_invalid_status',
                "TournamentLadder::add_user_to_ladder.check_tp_status($tid,$uid,{$tp->Status})");
 
-      $success = TournamentLadder::add_participant_to_ladder( $tid, $tp->ID, $uid );
+      // init
+      if( is_null($tl_props) )
+         $tl_props = TournamentLadderProps::load_tournament_ladder_props($tid);
+      if( is_null($tl_props) )
+         error('bad_tournament', "TournamentLadder::add_user_to_ladder.miss_tlp($tid)");
+
+      // add user to ladder
+      if( $tl_props->UserJoinOrder == TLP_JOINORDER_REGTIME )
+         $success = TournamentLadder::add_participant_to_ladder_bottom( $tp );
+      elseif( $tl_props->UserJoinOrder == TLP_JOINORDER_RATING )
+      {
+         if( is_null($tprops) )
+            $tprops = TournamentProperties::load_tournament_properties($tid);
+         if( is_null($tprops) )
+            error('bad_tournament', "TournamentLadder::add_user_to_ladder.miss_tprops($tid)");
+
+         $success = TournamentLadder::add_participant_to_ladder_by_rating( $tp, $tprops->need_rating_copy() );
+      }
+      elseif( $tl_props->UserJoinOrder == TLP_JOINORDER_RANDOM )
+         $success = TournamentLadder::add_participant_to_ladder_by_random( $tp );
+      else
+         error('invalid_args', "TournamentLadder::add_user_to_ladder.check_tlp_joinorder($tid,{$tl_props->UserJoinOrder})");
+
       if( $success )
          $success = TournamentLadder::fix_tournament_games_for_rejoin( $tid, $tp->ID, $uid );
 
@@ -529,11 +582,14 @@ class TournamentLadder
     * \return success
     * \internal
     */
-   function add_participant_to_ladder( $tid, $rid, $uid )
+   function add_participant_to_ladder_bottom( $tp )
    {
       global $NOW;
-      static $query_next_rank = "IFNULL(MAX(Rank),0)+1"; // must result in 1 result-row
+      static $query_next_rank = "IFNULL(MAX(TL.Rank),0)+1"; // must result in 1 result-row
       $table = $GLOBALS['ENTITY_TOURNAMENT_LADDER']->table;
+      $tid = $tp->tid;
+      $rid = $tp->ID;
+      $uid = $tp->uid;
 
       // defaults: RankChanged=0, ChallengesIn=0, ChallengesOut=0; PeriodRank=0, HistoryRank=0
       $query = "INSERT INTO $table (tid,rid,uid,Created,Rank,BestRank,StartRank) "
@@ -541,9 +597,109 @@ class TournamentLadder
                   . "$query_next_rank AS Rank, "
                   . "$query_next_rank AS BestRank, "
                   . "$query_next_rank AS StartRank "
-             . "FROM $table WHERE tid=$tid";
-      return db_query( "TournamentLadder::add_participant_to_ladder.insert(tid[$tid],rid[$rid],uid[$uid])", $query );
-   }//add_participant_to_ladder
+             . "FROM $table AS TL WHERE TL.tid=$tid";
+      return db_query( "TournamentLadder::add_participant_to_ladder_bottom.insert(tid[$tid],rid[$rid],uid[$uid])", $query );
+   }//add_participant_to_ladder_bottom
+
+   /*!
+    * \brief Adds TP configured by rid,uid for tournament tid at ladder-position below user with same rating.
+    * \return success
+    * \internal
+    */
+   function add_participant_to_ladder_by_rating( $tp, $use_tourney_rating )
+   {
+      global $player_row;
+      $tid = $tp->tid;
+      $rid = $tp->ID;
+      $uid = $tp->uid;
+
+      // determine user-rating to use (to find correct ladder-position)
+      if( $use_tourney_rating )
+         $user_rating = $tp->Rating;
+      elseif( $player_row['ID'] == $uid )
+         $user_rating = $player_row['Rating2'];
+      else
+      {
+         $arr = User::load_quick_userinfo( array( $uid ) );
+         if( count($arr) == 0 )
+            error('invalid_args', "TournamentLadder::add_participant_to_ladder_by_rating.check.bad_uid($tid,$rid,$uid)");
+         $user_rating = $arr[$uid]['Rating2'];
+      }
+
+      $table = $GLOBALS['ENTITY_TOURNAMENT_LADDER']->table;
+      $extra_lock = ( $use_tourney_rating ) //see load_tournament_ladder_by_user_rating()
+         ? ', TournamentParticipant AS TP READ'
+         : ', Players AS P READ';
+      db_lock( "TournamentLadder::add_participant_to_ladder_by_rating($tid,$rid,$uid)",
+         "$table WRITE, $table AS TL READ $extra_lock" );
+      {//LOCK TournamentLadder (to avoid race-conditions)
+         $cnt_tp = TournamentLadder::count_tournament_ladder( $tid );
+         if( $cnt_tp > 0 )
+         {
+            $tladder_rating = TournamentLadder::load_tournament_ladder_by_user_rating( $tid, $user_rating, $use_tourney_rating );
+            if( is_null($tladder_rating) )
+               $new_rank = 1; // all ladder-users are weaker
+            else
+               $new_rank = $tladder_rating->Rank + 1; // insert below user with same or stronger rating
+         }
+         else
+            $new_rank = 1;
+
+         $result = TournamentLadder::_add_participant_to_ladder_with_new_rank( $tp, $cnt_tp, $new_rank );
+      }
+      db_unlock();
+
+      return $result;
+   }//add_participant_to_ladder_by_rating
+
+   /*!
+    * \brief Adds TP configured by rid,uid for tournament tid at random position in ladder.
+    * \return success
+    * \internal
+    */
+   function add_participant_to_ladder_by_random( $tp )
+   {
+      $tid = $tp->tid;
+      $rid = $tp->ID;
+      $uid = $tp->uid;
+
+      $table = $GLOBALS['ENTITY_TOURNAMENT_LADDER']->table;
+      db_lock( "TournamentLadder::add_participant_to_ladder_by_random($tid,$rid,$uid)",
+         "$table WRITE, $table AS TL READ" );
+      {//LOCK TournamentLadder (to avoid race-conditions)
+         $cnt_tp = TournamentLadder::count_tournament_ladder( $tid );
+         $new_rank = mt_rand( 1, $cnt_tp + 1 );
+
+         $result = TournamentLadder::_add_participant_to_ladder_with_new_rank( $tp, $cnt_tp, $new_rank );
+      }
+      db_unlock();
+
+      return $result;
+   }//add_participant_to_ladder_by_random
+
+   /*!
+    * Adds tournament-participant to ladder at given new rank.
+    * \note IMPORTANT: needs DB-lock on writing tables
+    * \internal
+    */
+   function _add_participant_to_ladder_with_new_rank( $tp, $cnt_tp, $new_rank )
+   {
+      if( $cnt_tp == 0 || $new_rank > $cnt_tp )
+      {
+         // add at bottom for empty ladder or last rank
+         $result = TournamentLadder::add_participant_to_ladder_bottom( $tp );
+      }
+      else
+      {
+         // insert at new ladder-pos
+         TournamentLadder::move_down_ladder_part( $tp->tid, false, $new_rank, 0 );
+
+         $tladder = new TournamentLadder( $tp->tid, $tp->ID, $tp->uid, 0, 0, $new_rank, $new_rank, $new_rank );
+         $result = $tladder->insert();
+      }
+
+      return $result;
+   }//_add_participant_to_ladder_with_new_rank
 
    /*!
     * \brief Fixes TournamentLadder.ChallengesIn/Out for potentially rejoining user.
@@ -628,8 +784,7 @@ class TournamentLadder
    /*! \brief Delete complete ladder for given tournament-id. */
    function delete_ladder( $tid )
    {
-      $table = $GLOBALS['ENTITY_TOURNAMENT_LADDER']->table;
-      $query = "DELETE FROM $table WHERE tid=$tid";
+      $query = "DELETE FROM TournamentLadder WHERE tid=$tid";
       return db_query( "TournamentLadder::delete_ladder(tid[$tid])", $query );
    }
 
@@ -637,6 +792,7 @@ class TournamentLadder
     * \brief Seeds ladder with all registered TPs handling already joined users.
     * \param $reorder true = reorder already joined users according to $seed_order;
     *        false = append new users below existing users
+    * \return count of updated/inserted entries
     */
    function seed_ladder( $tourney, $tprops, $seed_order, $reorder=false )
    {
@@ -697,15 +853,17 @@ class TournamentLadder
 
          // insert all registered TPs to ladder
          $cnt = count($arr_inserts);
-         $seed_query = $entity_tladder->build_sql_insert_values(true) . implode(',', $arr_inserts)
-            . " ON DUPLICATE KEY UPDATE Rank=VALUES(Rank), BestRank=VALUES(BestRank), "
-            . " RankChanged=VALUES(RankChanged)";
-         $result = db_query( "TournamentLadder::seed_ladder.insert($tid,$seed_order,$reorder,#$cnt)",
-            $seed_query );
+         if( $cnt > 0 )
+         {
+            $seed_query = $entity_tladder->build_sql_insert_values(true) . implode(',', $arr_inserts)
+               . " ON DUPLICATE KEY UPDATE Rank=VALUES(Rank), BestRank=VALUES(BestRank), "
+               . " RankChanged=VALUES(RankChanged)";
+            $result = db_query( "TournamentLadder::seed_ladder.insert($tid,$seed_order,$reorder,#$cnt)", $seed_query );
+         }
       }
       db_unlock();
 
-      return $result;
+      return $cnt;
    }//seed_ladder
 
    /*!
@@ -1084,7 +1242,7 @@ class TournamentLadder
       return ($isTD) ? $statuslist_TD : $statuslist_user;
    }
 
-   function build_tournament_ladder_iterator( $tid, $query_sql, $limit=0, $with_index=false )
+   function build_tournament_ladder_iterator( $tid, $query_sql, $with_tp_rating, $limit=0, $with_index=false )
    {
       $iterator = new ListIterator( 'TournamentLadder.build_tournament_ladder_iterator.load_ladder',
          $query_sql, 'ORDER BY Rank ASC', ($limit > 0 ? "LIMIT $limit" : '') );
@@ -1094,6 +1252,11 @@ class TournamentLadder
                          'UNIX_TIMESTAMP(TLP.Lastaccess) AS TLP_X_Lastaccess',
             SQLP_FROM,   'INNER JOIN Players AS TLP ON TLP.ID=TL.uid'
          ));
+      if( $with_tp_rating )
+         $iterator->addQuerySQLMerge( new QuerySQL(
+               SQLP_FIELDS, 'TP.Rating AS TP_Rating',
+               SQLP_FROM,   'INNER JOIN TournamentParticipant AS TP ON TP.tid=TL.tid AND TP.ID=TL.rid'
+            ));
       if( $with_index )
          $iterator->addIndex( 'uid', 'Rank' );
       $iterator = TournamentLadder::load_tournament_ladder( $iterator, $tid );
