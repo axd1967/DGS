@@ -51,9 +51,9 @@ State-Diagram for feature-status:
    - EPIC = multiple stories intermingled, very big, >6 months work
    - XXL  = ca. 3 months work
    - XL   = ca. 1 month work
-   - L    = ca. 1 week work
-   - M    = ca. 3 days work
-   - S    = ca. 1 day work
+   - L    = ca. 14 days work
+   - M    = ca. 7 days work
+   - S    = ca. 3 days work
 
 * Subject : title of feature request
 

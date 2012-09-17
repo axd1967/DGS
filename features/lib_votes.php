@@ -33,7 +33,7 @@ require_once 'include/gui_functions.php';
  */
 
 define('FEAT_SUBJECT_WRAPLEN', 55);
-define('FEAT_DESCRIPTION_WRAPLEN', 80);
+define('FEAT_DESCRIPTION_WRAPLEN', 100);
 
 // Feature.Status, see 'specs/db/table-Voting.txt'
 define('FEATSTAT_NEW',  'NEW');
@@ -429,9 +429,9 @@ class Feature
 
       return array( T_('Size#feature') . ' (' . T_('estimated effort#feature') . '):',
             sprintf($fmt, FEATSIZE_UNSET, T_('unknown size#feature') ),
-            sprintf($fmt, FEATSIZE_S, sprintf( $day_work, 1 ) ) . ', ' .
-            sprintf($fmt, FEATSIZE_M, sprintf( $day_work, 3 ) ) . ', ' .
-            sprintf($fmt, FEATSIZE_L, sprintf( $day_work, 7 ) ),
+            sprintf($fmt, FEATSIZE_S, sprintf( $day_work, 3 ) ) . ', ' .
+            sprintf($fmt, FEATSIZE_M, sprintf( $day_work, 7 ) ) . ', ' .
+            sprintf($fmt, FEATSIZE_L, sprintf( $day_work, 14 ) ),
             sprintf($fmt, FEATSIZE_XL, sprintf( $month_work, 1 ) ) . ', ' .
             sprintf($fmt, FEATSIZE_XXL, sprintf( $month_work, 3 ) ) . ', ' .
             sprintf($fmt, FEATSIZE_EPIC, T_('very big, >6 months work#feature') ),
