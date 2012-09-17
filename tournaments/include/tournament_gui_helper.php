@@ -47,7 +47,7 @@ class TournamentGuiHelper
    // ------------ static functions ----------------------------
 
    /*! \brief Returns tournament-standings of ladder, or null for none. */
-   function build_tournament_ladder_standings( $page, $tid, $limit=0 )
+   function build_tournament_ladder_standings( $page, $tid, $need_tp_rating, $limit=0 )
    {
       global $player_row;
       $my_id = $player_row['ID'];
@@ -63,10 +63,12 @@ class TournamentGuiHelper
       $ltable->add_tablehead( 4, T_('Userid#header'), 'User', TABLE_NO_HIDE );
       $ltable->add_tablehead( 5, T_('Country#header'), 'Image', 0 );
       $ltable->add_tablehead( 6, T_('Rating#header'), 'Rating', 0 );
+      if( $need_tp_rating )
+         $ltable->add_tablehead(14, T_('Tournament Rating#header'), 'Rating', 0 );
       $ltable->add_tablehead(10, T_('Rank Kept#header'), '', 0 );
       $ltable->add_tablehead(13, T_('Last access#header'), '', 0 );
 
-      $iterator = TournamentLadder::build_tournament_ladder_iterator( $tid, $ltable->get_query(), $limit );
+      $iterator = TournamentLadder::build_tournament_ladder_iterator( $tid, $ltable->get_query(), $need_tp_rating, $limit );
 
       while( list(,$arr_item) = $iterator->getListIterator() )
       {
@@ -91,6 +93,8 @@ class TournamentGuiHelper
             $row_str[10] = $tladder->build_rank_kept();
          if( $ltable->Is_Column_Displayed[13] )
             $row_str[13] = TimeFormat::echo_time_diff( $GLOBALS['NOW'], $user->Lastaccess, 24, TIMEFMT_SHORT, '' );
+         if( $ltable->Is_Column_Displayed[14] )
+            $row_str[14] = echo_rating( $orow['TP_Rating'], true, $uid);
          if( $is_mine )
             $row_str['extra_class'] = 'TourneyUser';
          $ltable->add_row( $row_str );

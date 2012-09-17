@@ -81,7 +81,11 @@ $GLOBALS['ThePage'] = new Page('Tournament');
    $news_iterator = TournamentNews::load_tournament_news( $news_iterator, $tid );
 
    $tprops = TournamentProperties::load_tournament_properties( $tid );
-   $trule  = TournamentRules::load_tournament_rule( $tid );
+   if( is_null($tprops) )
+      error('bad_tournament', "Tournament.view_tournament.find_tprops($tid)");
+   $trule = TournamentRules::load_tournament_rule( $tid );
+   if( is_null($trule) )
+      error('bad_tournament', "Tournament.view_tournament.find_trule($tid)");
 
    // user result state
    $tt_props = null; // T-type-specific props
@@ -231,23 +235,21 @@ $GLOBALS['ThePage'] = new Page('Tournament');
          'standings' );
 
       if( $tourney->Type == TOURNEY_TYPE_LADDER )
-         echo TournamentGuiHelper::build_tournament_ladder_standings( $page, $tid, $cnt_tstandings );
+         echo TournamentGuiHelper::build_tournament_ladder_standings( $page, $tid, $tprops->need_rating_copy(), $cnt_tstandings );
    }
 
    // --------------- Rules -----------------------------------------
 
    section( 'TournamentRules', T_('Tournament Rules'), 'rules', true );
 
-   if( !is_null($trule) )
-      echo_tournament_rules( $tourney, $trule );
+   echo_tournament_rules( $tourney, $trule );
 
 
    // --------------- Registration ----------------------------------
 
    section( 'TournamentRegistration', T_('Tournament Registration'), 'registration', true );
 
-   if( !is_null($tprops) )
-      echo_tournament_registration( $tprops );
+   echo_tournament_registration( $tprops );
 
    // number of registered users
    echo sprintf( T_('Registrations for this tournament: %s user(s)'), $tp_count_all ),

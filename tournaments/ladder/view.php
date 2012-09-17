@@ -36,6 +36,7 @@ require_once 'tournaments/include/tournament_ladder.php';
 require_once 'tournaments/include/tournament_ladder_props.php';
 require_once 'tournaments/include/tournament_games.php';
 require_once 'tournaments/include/tournament_helper.php';
+require_once 'tournaments/include/tournament_properties.php';
 require_once 'tournaments/include/tournament_utils.php';
 
 $GLOBALS['ThePage'] = new Page('TournamentLadderView');
@@ -90,6 +91,11 @@ $GLOBALS['ThePage'] = new Page('TournamentLadderView');
    if( is_null($tl_props) )
       error('bad_tournament', "Tournament.ladder_view.ladder_props($tid,$my_id)");
 
+   $tprops = TournamentProperties::load_tournament_properties($tid);
+   if( is_null($tl_props) )
+      error('bad_tournament', "Tournament.ladder_view.t_props($tid)");
+   $need_tp_rating = $tprops->need_rating_copy();
+
    $errors = $tstatus->check_view_status( TournamentLadder::get_view_ladder_status($allow_edit_tourney) );
    $allow_view = ( count($errors) == 0 );
    $allow_admin = ($admin_mode)
@@ -141,6 +147,8 @@ $GLOBALS['ThePage'] = new Page('TournamentLadderView');
       $ltable->add_tablehead( 4, T_('Userid#header'), 'User', TABLE_NO_HIDE );
       $ltable->add_tablehead( 5, T_('Country#header'), 'Image', 0 );
       $ltable->add_tablehead( 6, T_('Current Rating#header'), 'Rating', 0 );
+      if( $need_tp_rating )
+         $ltable->add_tablehead(14, T_('Tournament Rating#header'), 'Rating', 0 );
       $ltable->add_tablehead( 7, T_('Actions#header'), '', TABLE_NO_HIDE );
       $ltable->add_tablehead(12, new TableHead( T_('Running games'), 'images/table.gif'), 'Image', 0 );
       $ltable->add_tablehead( 8, T_('Challenges#header'), '', TABLE_NO_HIDE );
@@ -149,7 +157,7 @@ $GLOBALS['ThePage'] = new Page('TournamentLadderView');
       $ltable->add_tablehead(13, T_('Last access#header'), '', 0 );
       $ltable->add_tablehead(11, T_('Started#header'), 'Date', 0 );
 
-      $iterator = TournamentLadder::build_tournament_ladder_iterator( $tid, $ltable->get_query(), 0, /*idx*/true );
+      $iterator = TournamentLadder::build_tournament_ladder_iterator( $tid, $ltable->get_query(), $need_tp_rating, 0, /*idx*/true );
 
       $ltable->set_found_rows( mysql_found_rows('Tournament.ladder_view.found_rows') );
       $ltable->set_rows_per_page( null ); // no navigating
@@ -233,6 +241,8 @@ $GLOBALS['ThePage'] = new Page('TournamentLadderView');
             $row_str[12] = $run_games_str;
          if( $ltable->Is_Column_Displayed[13] )
             $row_str[13] = TimeFormat::echo_time_diff( $GLOBALS['NOW'], $user->Lastaccess, 24, TIMEFMT_SHORT|TIMEFMT_ZERO );
+         if( $ltable->Is_Column_Displayed[14] )
+            $row_str[14] = echo_rating( $orow['TP_Rating'], true, $uid);
 
          if( $is_mine )
             $row_str['extra_class'] = 'TourneyUser';
