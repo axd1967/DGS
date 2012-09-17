@@ -114,10 +114,10 @@ require_once( "features/lib_votes.php" );
             $feature->update_feature();
             $added_points = $feature->fix_user_quota_feature_points( $old_status, $new_status );
 
-            if( $new_status == FEATSTAT_NEW && ( $fid == 0 || $old_status != $new_status ) )
-               Feature::update_count_feature_new( "edit_feature.upd_feature.to_new($fid)", 0, 1 ); // one NEW more for all users
-            elseif( $old_status == FEATSTAT_NEW && $fid > 0 && $old_status != $new_status )
-               Feature::update_count_feature_new( "edit_feature.upd_feature.from_new($fid)", 0, -1 ); // one NEW less for all users
+            if( $new_status == FEATSTAT_VOTE && ( $fid == 0 || $old_status != $new_status ) )
+               Feature::update_count_feature_new( "edit_feature.upd_feature.to_new($fid)", 0, 1 ); // one new-VOTE more for all users
+            elseif( $old_status == FEATSTAT_VOTE && $fid > 0 && $old_status != $new_status )
+               Feature::update_count_feature_new( "edit_feature.upd_feature.from_new($fid)", 0, -1 ); // one new-VOTE less for all users
          }
          ta_end();
 
