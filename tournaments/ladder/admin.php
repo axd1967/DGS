@@ -147,15 +147,15 @@ $GLOBALS['ThePage'] = new Page('TournamentLadderAdmin');
       {
          $seed_order = (int)get_request_arg('seed_order');
          $seed_reorder = (bool)get_request_arg('seed_reorder');
-         TournamentLadder::seed_ladder( $tourney, $tprops, $seed_order, $seed_reorder );
-         $sys_msg = urlencode( T_('Ladder seeded!') );
+         $cnt = TournamentLadder::seed_ladder( $tourney, $tprops, $seed_order, $seed_reorder );
+         $sys_msg = urlencode( ( $cnt > 0 ? T_('Ladder seeded!') : T_('No change!') ) );
          jump_to("tournaments/ladder/admin.php?tid=$tid".URI_AMP."sysmsg=$sys_msg");
       }
       elseif( @$_REQUEST['ta_adduser'] && $authorise_add_user && !is_null($user) && is_null($tladder_user) )
       {
          ta_begin();
          {//HOT-section to add user in ladder
-            TournamentLadder::add_user_to_ladder( $tid, $user->ID );
+            TournamentLadder::add_user_to_ladder( $tid, $user->ID, $tl_props, $tprops );
          }
          ta_end();
          $sys_msg = urlencode( sprintf( T_('User [%s] added to ladder!'), $user->Handle) );
@@ -251,6 +251,10 @@ $GLOBALS['ThePage'] = new Page('TournamentLadderAdmin');
          $tform->add_row( array(
                'CELL', 2, '',
                'TEXT', T_('Seed ladder with all registered tournament participants') . ':', ));
+         $tform->add_row( array(
+               'CELL', 2, '',
+               'TEXT', sprintf( '(<b>%s</b> = %s)', T_('User Join Order#T_ladder'),
+                                TournamentLadderProps::getUserJoinOrderText($tl_props->UserJoinOrder) ), ));
          $tform->add_row( array(
                'CELL', 2, '',
                'TEXT',         T_('Order by') . MED_SPACING,
