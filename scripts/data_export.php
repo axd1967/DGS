@@ -306,6 +306,7 @@ function get_tables( $database)
             'TournamentGames',
             'TournamentLadder',
             'TournamentLadderProps',
+            'Tournamentlog',
             'TournamentNews',
             'TournamentParticipant',
             'TournamentPool',
