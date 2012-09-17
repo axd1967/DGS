@@ -345,7 +345,8 @@ $GLOBALS['ThePage'] = new Page('TournamentRegistration');
          $tpform->add_row( array(
                'DESCRIPTION', T_('Preview'),
                'TEXT', make_html_safe( $tp->UserMessage, true ) ));
-      $tpform->add_row( array(
+      if( (string)$tp->AdminMessage != '' )
+         $tpform->add_row( array(
             'DESCRIPTION', T_('Admin Message'),
             'TEXT', make_html_safe($tp->AdminMessage, true), ));
 
