@@ -169,5 +169,14 @@ class TournamentCache
       return true;
    }
 
+
+   // ------------ static functions ----------------------------
+
+   function get_instance()
+   {
+      global $TOURNAMENT_CACHE;
+      return $TOURNAMENT_CACHE;
+   }
+
 } // end of 'TournamentCache'
 ?>

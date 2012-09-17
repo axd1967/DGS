@@ -61,7 +61,7 @@ class TournamentHelper
 
    function TournamentHelper()
    {
-      $this->tcache = new TournamentCache();
+      $this->tcache = TournamentCache::get_instance();
    }
 
    function process_tournament_game_end( $tourney, $tgame, $check_only )
