@@ -297,7 +297,7 @@ $GLOBALS['ThePage'] = new Page('TournamentList');
          $reg_notes[] = $text . ' = ' . TournamentParticipant::getStatusText($tpstat, false, true);
       $notes[] = $reg_notes;
    }
-   if( $ttable->is_column_displayed(18) ) // restrictions
+   if( $ttable->is_column_displayed(18) && !$has_tdir ) // restrictions
    {
       $notes[] = array( sprintf('<b>%s</b> (%s):', T_('Tournament Registration Restrictions'), T_('background colors') ),
             span('TJoinErr',  T_('Error')   . ' = ' . T_('Tournament can not be joined.')),
