@@ -22,6 +22,7 @@ Copyright (C) 2001-2012  Erik Ouchterlony
 ## ##       * Pooled Round-Robin Tournament without restrictions of 'Dragon'-scope (created by Admin only)
 ##
 ##       * <home tournaments/list_tournaments.php>Tournament List</home> with different views:
+##          * Show registration restrictions for users
 ##          * "My tournaments"-view with ID-button linked to view tournaments you are participating
 ##          * "Directoring tournaments"-view with ID-button linked to manage your tournaments
 ##
@@ -730,6 +731,7 @@ Copyright (C) 2001-2012  Erik Ouchterlony
 
    * Changes for Translators:
       * Added Preview for translations
+      * Added min. length search on original texts
       * Added comments to clarify the translation process
       * Added last-change date for texts and translations
       * Changed access-key of Translate-link from [t] to [l]

@@ -19,9 +19,67 @@ Developers INFO:
 ChangeLog
 ------------------------------------------------------------------
 
+2012-09-17 juga
+
+   * tournaments/include/tournament_ladder.php (TournamentLadder.load_tournament_ladder_by_user_rating,
+       ~.add_user_to_ladder, ~.add_participant_to_ladder_bottom, ~.add_participant_to_ladder_by_rating,
+       ~.add_participant_to_ladder_by_random, ~._add_participant_to_ladder_with_new_rank, ~.seed_ladder,
+       ~.build_tournament_ladder_iterator),
+     tournaments/include/tournament_ladder_props.php (class TournamentLadderProps, ~.setUserJoinOrder,
+       ~.fillEntityData, ~.build_notes_props, ~.new_from_row, ~.getUserJoinOrderText),
+     tournaments/include/tournament_gui_helper.php (TournamentGuiHelper.build_tournament_ladder_standings),
+     tournaments/include/tournament_properties.php (TournamentProperties.build_seed_order),
+     tournaments/include/tournament_globals.php (TLP_JOINORDER_...),
+     tournaments/ladder/edit_props.php (parse_edit_form),
+     tournaments/ladder/admin.php, tournaments/ladder/view.php,
+     tournaments/manage_tournament.php, tournaments/view_tournament.php,
+     scripts/updates/database_changes_1_0_14_to_1_0_15.mysql,
+     specs/db/table-Tournaments.txt, specs/db/dragon-ddl.sql:
+   - added option user-join-order to control position where user is entering ladder-tournament
+     - REGTIME = add new user at ladder-bottom
+     - RATING = add new user at ladder-position below user with same rating (current rating or
+       tournament-rating according to RatingUseMode)
+     - RANDOM = add new user at random ladder-position
+   - add column in tournament-ladder-view with tournament-rating
+   - show if no change on seed-ladder
+-----------
+-- determine ladder-position for new user
+ALTER TABLE TournamentLadderProps
+   ADD UserJoinOrder enum('REGTIME','RATING','RANDOM') NOT NULL default 'REGTIME' AFTER GameEndTimeoutLoss ;
+-----------
+
+   * tournaments/include/tournament_cache.php (TournamentCache.get_instance),
+     tournaments/include/tournament_helper.php (class TournamentHelper):
+   - use TournamentCache::get_instance() to get cache-singleton
+
+2012-09-16 juga
+
+   * tournaments/include/tournament_log_helper.php (TournamentLogHelper.log_create_tournament_director,
+       ~.log_change_tournament_director, ~.log_remove_tournament_director),
+     tournaments/include/tournament_director.php (TournamentDirector.formatFlags),
+     tournaments/include/tournament.php (Tournament.allow_edit_directors),
+     tournaments/include/tournament_log.php (TLOG_ACT_REMOVE),
+     tournaments/edit_director.php:
+   - write tournament-log for adding, updating, removing tournament-director
+
+   * include/make_translationfiles.php (translations_query), translate.php:
+   - added search for min. length on original translation-text
+   - cleanup: removed const TRANSL_ALLOW_FILTER
+
+   * tournaments/include/tournament_helper.php (TournamentHelper.build_tournament_join_restrictions),
+     tournaments/list_tournaments.php (build_restrictions),
+     skins/dragon/screen.css:
+   - tournament-list:
+     - add "Restrictions" to show suitable tournaments for joining.
+       check T-status, max-games-check, user-rating, T-rating-use-mode, T-rating-range,
+       T-max-participants, T-register-end-time, user min. finished/rated games, T-scope
+     - show tournament-registration-status column also for all tournaments view
+
 2012-09-15 juga
 
-   * tournaments/include/tournament_globals.php (TLOG_TYPE_CRON, CHECK_TLOG_TYPES),
+   * tournaments/include/tournament_log_helper.php (TournamentLogHelper.log_tournament_game_end,
+       ~.log_tournament_game_add_time),
+     tournaments/include/tournament_globals.php (TLOG_TYPE_CRON, CHECK_TLOG_TYPES),
      tournaments/include/tournament_games.php (TournamentGames.formatFlags),
      tournaments/include/tournament_log.php (TLOG_ACT_ADDTIME),
      skins/dragon/screen.css, specs/db/table-Tournaments.txt,
@@ -33,10 +91,11 @@ ChangeLog
    * tournaments/show_tournament_log.php (format_tlog_message):
    - replace special references in message with links to:
      TG#id (tournament-game-admin), GID#id (game-page), UID#id (user-info-page)
-   - use short-form + rank for user, show tid after user, add tournament-link on tid,
-     add rank for action-user
+   - use short-form + rank for user + action-user, show tid after user, add tournament-link on tid
 
-   * tournaments/include/tournament_log.php (class Tournamentlog, ~.setType),
+   * tournaments/include/tournament_log_helper.php (class TournamentLogHelper, ~.log_create_tournament,
+       ~.log_change_tournament_status, ~.log_change_tournament_round_status, ~.log_tournament_lock),
+     tournaments/include/tournament_log.php (class Tournamentlog, ~.setType),
      tournaments/include/tournament.php (Tournament.formatFlags, ~.allow_edit_tournaments),
      tournaments/include/tournament_globals.php (TLOG_TYPE_...),
      tournaments/include/tournament_template_ladder.php (TournamentTemplateLadder._createTournament),
@@ -55,11 +114,9 @@ ChangeLog
 
    * tournaments/include/tournament_log.php (class TournamentLog, ~.to_string, ~.persist, ~.insert,
        ~.update, ~.fillEntityData, ~.build_query_sql, ~.new_from_row, ~.load_tournament_logs),
-     scripts/updates/database_changes_1_0_14_to_1_0_15.mysql,
-     specs/db/dragon-ddl.sql,
-     specs/db/table-Tournaments.txt,
-     tournaments/manage_tournament.php,
-     tournaments/show_tournament_log.php,
+     scripts/updates/database_changes_1_0_14_to_1_0_15.mysql, scripts/data_export.php,
+     specs/db/dragon-ddl.sql, specs/db/table-Tournaments.txt,
+     tournaments/manage_tournament.php, tournaments/show_tournament_log.php,
      admin.php:
    - added tournament-log and log-viewer to log actions on tournaments
      - allow admins to view log of all tournaments
