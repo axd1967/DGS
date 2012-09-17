@@ -83,7 +83,7 @@ $GLOBALS['ThePage'] = new Page('TournamentPoolView');
 
    // init
    $errors = array();
-   $need_trating = ( $tprops->RatingUseMode != TPROP_RUMODE_CURR_FIX );
+   $need_trating = $tprops->need_rating_copy();
    $games_per_challenge = TournamentHelper::determine_games_per_challenge( $tid );
 
    $tpool_iterator = new ListIterator( 'Tournament.pool_view.load_pools' );
