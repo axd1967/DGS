@@ -175,7 +175,7 @@ require_once( "features/lib_votes.php" );
 
    // end of table
 
-   $notes = Feature::build_feature_notes( $user_vote_reason );
+   $notes = Feature::build_feature_notes( $user_vote_reason, $ftable->Is_Column_Displayed[10] );
    echo_notes( 'featurenotesTable', T_('Feature notes'), $notes );
 
 

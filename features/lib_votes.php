@@ -33,6 +33,7 @@ require_once 'include/gui_functions.php';
  */
 
 define('FEAT_SUBJECT_WRAPLEN', 55);
+define('FEAT_DESCRIPTION_WRAPLEN', 80);
 
 // Feature.Status, see 'specs/db/table-Voting.txt'
 define('FEATSTAT_NEW',  'NEW');
@@ -385,7 +386,7 @@ class Feature
    }
 
    /*! \brief Returns array with notes about feature-voting. */
-   function build_feature_notes( $deny_reason=null, $intro=true )
+   function build_feature_notes( $deny_reason=null, $with_size=true, $intro=true )
    {
       $notes = array();
       if( !is_null($deny_reason) )
@@ -414,8 +415,28 @@ class Feature
          $notes_fstatus[] = sprintf( T_('%s = show status %s + %s + %s'), T_('Open#featstat'), FEATSTAT_VOTE, FEATSTAT_WORK, FEATSTAT_DONE );
       $notes[] = $notes_fstatus;
 
+      if( $with_size )
+         $notes[] = Feature::build_feature_notes_size();
+
       return $notes;
    }//build_feature_notes
+
+   function build_feature_notes_size()
+   {
+      $day_work = T_('ca. %s day(s) work#feature');
+      $month_work = T_('ca. %s month(s) work#feature');
+      $fmt = '<b>%s</b> = %s';
+
+      return array( T_('Size#feature') . ' (' . T_('estimated effort#feature') . '):',
+            sprintf($fmt, FEATSIZE_UNSET, T_('unknown size#feature') ),
+            sprintf($fmt, FEATSIZE_S, sprintf( $day_work, 1 ) ) . ', ' .
+            sprintf($fmt, FEATSIZE_M, sprintf( $day_work, 3 ) ) . ', ' .
+            sprintf($fmt, FEATSIZE_L, sprintf( $day_work, 7 ) ),
+            sprintf($fmt, FEATSIZE_XL, sprintf( $month_work, 1 ) ) . ', ' .
+            sprintf($fmt, FEATSIZE_XXL, sprintf( $month_work, 3 ) ) . ', ' .
+            sprintf($fmt, FEATSIZE_EPIC, T_('very big, >6 months work#feature') ),
+         );
+   }//build_feature_notes_size
 
    /*!
     * \brief Returns null if current user ($player_row) is allowed to participate in voting;

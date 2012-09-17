@@ -235,11 +235,11 @@ require_once( "features/lib_votes.php" );
       {
          $fform->add_row( array(
             'DESCRIPTION', T_('Preview'),
-            'TEXT', make_html_safe( wordwrap($feature->subject,FEAT_SUBJECT_WRAPLEN), true ),
+            'TEXT', make_html_safe( wordwrap($feature->subject, FEAT_SUBJECT_WRAPLEN), true ),
             ));
          $fform->add_row( array(
             'TAB',
-            'TEXT', make_html_safe( $feature->description, true),
+            'TEXT', make_html_safe( wordwrap($feature->description, FEAT_DESCRIPTION_WRAPLEN), true),
             ));
       }
 
@@ -269,6 +269,7 @@ require_once( "features/lib_votes.php" );
          T_('Ask a developer for feature size (required effort for implementation).')
       );
    }
+   $notes[] = Feature::build_feature_notes_size();
    echo_notes( 'featurenotesTable', T_('Feature notes'), $notes );
 
    $menu_array = array();
