@@ -75,6 +75,7 @@ require_once( "features/lib_votes.php" );
    $vtable->add_tablehead( 3, T_('Status#header'),  'Enum', 0, 'F.Status+');
    $vtable->add_tablehead(14, T_('Size#feature'),   'Enum', 0, 'F.Size+');
    $vtable->add_tablehead( 4, T_('Subject#header'), '', 0, 'F.Subject+');
+   $vtable->add_tablehead(15, T_('My Points#header'), 'NumberC', 0, 'myPoints-');
    $vtable->add_tablehead(10, T_('Points#header'),  'Number', 0, 'sumPoints-');
    $vtable->add_tablehead(11, T_('#Votes#header'),  'Number', 0, 'countVotes-');
    $vtable->add_tablehead(12, T_('#Y#header'),      'Number', 0, 'countYes-');
@@ -85,7 +86,7 @@ require_once( "features/lib_votes.php" );
    $limit = $vtable->current_limit_string();
 
    // build SQL-query
-   $qsql = FeatureVote::build_query_featurevote_list( $vtable->get_query() );
+   $qsql = FeatureVote::build_query_featurevote_list( $vtable->get_query(), $my_id );
    $query = $qsql->get_select() . "$order $limit";
 
    $result = db_query( 'votelist.find_data', $query );
@@ -131,6 +132,18 @@ require_once( "features/lib_votes.php" );
          $frow_strings[13] = $row['countNo'];
       if( $vtable->Is_Column_Displayed[14] )
          $frow_strings[14] = $feature->size;
+      if( $vtable->Is_Column_Displayed[15] )
+      {
+         if( is_numeric($row['myPoints']) )
+            $frow_strings[15] = FeatureVote::formatPoints($row['myPoints']);
+         else
+         {
+            $td_class = ( $feature->allow_vote() ) ? 'MissVote' : '';
+            $frow_strings[15] = array(
+               'text' => MINI_SPACING.'?',
+               'attbs' => array( 'title' => T_('no vote'), 'class' => $td_class ) );
+         }
+      }
 
       $vtable->add_row( $frow_strings );
    }

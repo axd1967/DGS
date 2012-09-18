@@ -689,12 +689,13 @@ class FeatureVote
     * \brief Returns QuerySQL for feature-vote-list page.
     * \param mquery QuerySQL object to merge
     */
-   function build_query_featurevote_list( $mquery=null )
+   function build_query_featurevote_list( $mquery=null, $my_id )
    {
       // build SQL-query
       $qsql = new QuerySQL();
       $qsql->add_part_fields( Feature::get_query_fields(true) );
       $qsql->add_part( SQLP_FIELDS,
+         "IF(FV.Voter_ID=$my_id,FV.Points,'') AS myPoints",
          'SUM(FV.Points) AS sumPoints',
          'COUNT(FV.fid) AS countVotes',
          'SUM(IF(FV.Points>0,1,0)) AS countYes',
