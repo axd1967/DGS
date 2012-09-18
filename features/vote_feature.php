@@ -74,14 +74,14 @@ require_once( "features/lib_votes.php" );
    }
    if( is_null($feature) )
       error('invalid_args', "vote_feature.no_featureid($fid)");
-   if( (string)$points == '' ) // set default
-      $points = 0;
 
    // check user pre-conditions
    $user_vote_reason = Feature::allow_vote_check();
    $allow_vote_edit = is_null($user_vote_reason) && $feature->allow_vote();
    if( $viewmode )
       $allow_vote_edit = false;
+   if( $allow_vote_edit && (string)$points == '' ) // set default for edit-mode
+      $points = 0;
 
    // insert/update feature-vote-object with values from edit-form if no error
    if( is_null($errormsg) && @$_REQUEST['vote_save'] && $allow_vote_edit )
