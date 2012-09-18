@@ -19,7 +19,53 @@ Developers INFO:
 ChangeLog
 ------------------------------------------------------------------
 
+2012-09-18 juga
+
+   * features/lib_votes.php (Feature.update_vote; FeatureVote.update_feature_vote, ~.getFeaturePointsText),
+     include/classlib_userquota.php (UserQuota.set_feature_points),
+     scripts/updates/database_changes_1_0_14_to_1_0_15.mysql,
+     features/vote_feature.php:
+   - bugfix: don't add negative voted points to available user-quota feature-points
+   - show positive/negative points in blue/red-color on feature-voting-view
+   - show last-voted only if voting allowed, which is not when user has no remaining feature-points
+   - cleanup: renamed FeatureVote.update_vote() -> update_feature_vote() to avoid name-clash
+-----------
+-- IMPORTANT NOTE: run this FIX ONLY if you have used the features-feature before on your server!!
+-- [FIX] fix negative voted points on UserQuota
+CREATE TEMPORARY TABLE fix_uq (
+   uid int NOT NULL,
+   sumP smallint NOT NULL
+   ) SELECT Voter_ID AS uid, SUM(ABS(Points)) AS sumP FROM FeatureVote GROUP BY Voter_ID ;
+SELECT * FROM fix_uq AS FIX WHERE FIX.sumP > 0 ;
+SELECT UQ.uid, UQ.FeaturePoints FROM UserQuota AS UQ INNER JOIN fix_uq AS FIX ON FIX.uid=UQ.uid WHERE FIX.sumP > 0 ;
+
+-- [FIX] NOTE: 29 is the initial start quota of 25 + 98 (=4*20 +x) days since live-server upgrade on 10-Jun-2012
+UPDATE UserQuota AS UQ INNER JOIN fix_uq AS FIX ON FIX.uid=UQ.uid
+   SET UQ.FeaturePoints= 29 - FIX.sumP WHERE FIX.sumP > 0;
+-----------
+
+   * features/lib_votes.php (FeatureVote.build_query_featurevote_list),
+     features/list_votes.php:
+   - add "my points" to feature-vote-results list
+
+   * features/vote_feature.php:
+   - feature-voting: show 0 (neutral) as default for voting points, only in edit-mode
+   - show "--- (no vote)" for Lastvoted-date for features on VOTE-status as voted-indicator
+
 2012-09-17 juga
+
+   * features/lib_votes.php (Feature.build_feature_notes_size),
+     specs/db/table-Voting.txt:
+   - increase wordwrap for feature-description: 80 -> 100
+   - adjusted feature-size: S (1->3d), M (3->7d), L (7->14d)
+
+   * features/lib_votes.php (Feature.build_feature_notes, ~.build_feature_notes_size),
+     features/edit_feature.php, features/list_features.php, features/list_votes.php:
+   - added notes about feature-size
+   - use wordwrap for feature-description: 80 chars
+
+   * features/edit_feature.php:
+   - bugfix: increase/decrease new-feature-count only for feature-status VOTE
 
    * tournaments/include/tournament_ladder.php (TournamentLadder.load_tournament_ladder_by_user_rating,
        ~.add_user_to_ladder, ~.add_participant_to_ladder_bottom, ~.add_participant_to_ladder_by_rating,
