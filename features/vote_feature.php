@@ -84,7 +84,7 @@ require_once( "features/lib_votes.php" );
       $points = 0;
 
    // insert/update feature-vote-object with values from edit-form if no error
-   if( is_null($errormsg) && @$_REQUEST['vote_save'] && $allow_vote_edit && $is_numeric($points) )
+   if( is_null($errormsg) && @$_REQUEST['vote_save'] && $allow_vote_edit && is_numeric($points) )
    {
       ta_begin();
       {//HOT-section to update feature-vote
