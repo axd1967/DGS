@@ -127,13 +127,14 @@ require_once( "features/lib_votes.php" );
    $fform->add_row( array(
       'DESCRIPTION',  T_('Lastchanged'),
       'TEXT',         date(DATEFMT_FEATURE, $feature->lastchanged) ));
-   if( $allow_vote_edit && !is_null($fvote) && $fvote->lastchanged > 0 )
+
+   $has_voted = ( !is_null($fvote) && $fvote->lastchanged > 0 );
+   if( $allow_vote_edit )
    {
       $fform->add_row( array(
          'DESCRIPTION',  T_('Lastvoted'),
-         'TEXT',         date(DATEFMT_FEATURE, $fvote->lastchanged) ));
+         'TEXT',         ( $has_voted ? date(DATEFMT_FEATURE, $fvote->lastchanged) : sprintf( T_('%s (no vote)'), NO_VALUE) ), ));
    }
-
    $fform->add_row( array(
       'DESCRIPTION', T_('Subject'),
       'TEXT',        make_html_safe( wordwrap($feature->subject, FEAT_SUBJECT_WRAPLEN), true) ));
@@ -146,6 +147,7 @@ require_once( "features/lib_votes.php" );
          'DESCRIPTION', T_('Error'),
          'TEXT',        '<span class="ErrorMsg">' . $errormsg . '</span>' ));
 
+   $fform->add_empty_row();
    if( $allow_vote_edit && $user_quota->feature_points > 0 )
    {
       $vote_values = array();
@@ -154,7 +156,6 @@ require_once( "features/lib_votes.php" );
          $vote_values[$i] = (($i > 0) ? '+' : '') . $i;
       $vote_values['0'] = '=0';
 
-      $fform->add_empty_row();
       $fform->add_row( array(
          'DESCRIPTION', T_('Vote'),
          'SELECTBOX',   'points', 1, $vote_values, $points, false,
