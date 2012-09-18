@@ -524,7 +524,7 @@ function echo_dragon_top_bar( $logged_in, $user_handle )
    echo "\n  <td class='LoginBox'>";
 
    if( $logged_in && !$is_down )
-      echo T_("Logged in as"), ': <a id="loggedId">', $user_handle, '</a>';
+      echo T_("Logged in as"), ': <a id="loggedId" title="' . $player_row['ID'] . '">', $user_handle, '</a>';
    else
       echo T_("Not logged in");
 
