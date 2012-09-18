@@ -19,9 +19,22 @@ Developers INFO:
 ChangeLog
 ------------------------------------------------------------------
 
-2012-09-18 juga
+2012-09-19 juga
+
+   * include/std_functions.php (echo_dragon_top_bar):
+   - added Players.ID of logged-in user as tooltip on Handle top-bar at right-side
 
 ### ----- release-1_0_15-20120608 -----
+
+   * features/lib_votes.php (Feature.build_query_featurevote_list, ~.formatPointsText),
+     features/vote_feature.php:
+   - overworked feature-voting:
+     - bugfix: fixed SQL-query for my-points value in feature-vote-result-list
+     - bugfix: allow to change or revoke points if remaining points-quota is 0
+     - always show current vote, put lastvoted-date directly above current-vote and vote-select-box
+     - minor changes
+
+2012-09-18 juga
 
    * features/vote_feature.php:
    - bugfix: correct var $is_numeric() to func-call without '$'

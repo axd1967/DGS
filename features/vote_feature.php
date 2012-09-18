@@ -53,13 +53,6 @@ require_once( "features/lib_votes.php" );
    $points = get_request_arg('points', '');
    $viewmode = get_request_arg('view', ''); // can be forced
 
-   // error-check on feature to save
-   $errormsg = null;
-   if( @$_REQUEST['vote_save'] )
-   {
-      $errormsg = FeatureVote::check_points( $points, $user_quota->feature_points );
-   }
-
    // load feature + vote
    $feature = $fvote = null;
    if( $fid )
@@ -74,11 +67,23 @@ require_once( "features/lib_votes.php" );
    }
    if( is_null($feature) )
       error('invalid_args', "vote_feature.no_featureid($fid)");
+   $has_vote = !is_null($fvote);
+
+   // determine max-points user can spend or revoke
+   $check_maxp = max( 0, $user_quota->feature_points ); // max points to give
+   if( $has_vote )
+      $check_maxp += abs($fvote->points); // max points to revoke
+   $max_points = min( FEATVOTE_MAXPOINTS, $check_maxp );
+
+   // error-check on feature to save
+   $errormsg = null;
+   if( @$_REQUEST['vote_save'] )
+      $errormsg = FeatureVote::check_points( $points, $max_points );
 
    // check user pre-conditions
    $user_vote_reason = Feature::allow_vote_check();
    $allow_vote_edit = is_null($user_vote_reason) && $feature->allow_vote();
-   if( $viewmode || $user_quota->feature_points <= 0 )
+   if( $viewmode )
       $allow_vote_edit = false;
    if( $allow_vote_edit && (string)$points == '' ) // set default for edit-mode
       $points = 0;
@@ -92,7 +97,7 @@ require_once( "features/lib_votes.php" );
          $user_quota->modify_feature_points( $add_fpoints );
          $user_quota->update_feature_points();
 
-         if( is_null($fvote) ) // is new vote by user
+         if( !$has_vote ) // is new vote by user
             Feature::update_count_feature_new( "vote_feature.save_vote($fid)", $my_id, -1 ); // one NEW less
       }
       ta_end();
@@ -110,7 +115,7 @@ require_once( "features/lib_votes.php" );
       'DESCRIPTION',  T_('ID'),
       'TEXT',         ($fid ? $fid : NO_VALUE) ));
    $fform->add_row( array(
-      'DESCRIPTION',  T_('Status'),
+      'DESCRIPTION',  T_('Feature Status'),
       'TEXT',         $feature->status ));
    $fform->add_row( array(
       'DESCRIPTION',  T_('Size#feature'),
@@ -127,14 +132,6 @@ require_once( "features/lib_votes.php" );
    $fform->add_row( array(
       'DESCRIPTION',  T_('Lastchanged'),
       'TEXT',         date(DATEFMT_FEATURE, $feature->lastchanged) ));
-
-   $has_voted = ( !is_null($fvote) && $fvote->lastchanged > 0 );
-   if( $allow_vote_edit || $has_voted )
-   {
-      $fform->add_row( array(
-         'DESCRIPTION',  T_('Lastvoted'),
-         'TEXT',         ( $has_voted ? date(DATEFMT_FEATURE, $fvote->lastchanged) : sprintf( T_('%s (no vote)'), NO_VALUE) ), ));
-   }
    $fform->add_row( array(
       'DESCRIPTION', T_('Subject'),
       'TEXT',        make_html_safe( wordwrap($feature->subject, FEAT_SUBJECT_WRAPLEN), true) ));
@@ -145,13 +142,24 @@ require_once( "features/lib_votes.php" );
    if( !is_null($errormsg) )
       $fform->add_row( array(
          'DESCRIPTION', T_('Error'),
-         'TEXT',        '<span class="ErrorMsg">' . $errormsg . '</span>' ));
+         'TEXT',        span('ErrorMsg', $errormsg), ));
 
    $fform->add_empty_row();
-   if( $allow_vote_edit )
+   if( $has_vote && $fvote->lastchanged > 0 )
+   {
+      $fform->add_row( array(
+         'DESCRIPTION',  T_('Lastvoted'),
+         'TEXT',         date(DATEFMT_FEATURE, $fvote->lastchanged), ));
+   }
+
+   $curr_points = ( $has_vote ) ? $fvote->points : '';
+   $fform->add_row( array(
+      'DESCRIPTION', T_('Current Vote'),
+      'TEXT',        FeatureVote::formatPointsText($curr_points), ));
+
+   if( $allow_vote_edit ) // NEW, EDIT vote (spend or revoke points)
    {
       $vote_values = array();
-      $max_points = min( FEATVOTE_MAXPOINTS, abs($user_quota->feature_points) );
       for( $i = +$max_points; $i >= -$max_points; $i--)
          $vote_values[$i] = (($i > 0) ? '+' : '') . $i;
       $vote_values['0'] = '=0';
@@ -162,26 +170,8 @@ require_once( "features/lib_votes.php" );
          'TEXT',        T_('points#feature') . ' (' . T_('0=neutral, <0=not wanted, >0=wanted feature') . ')' ));
       $fform->add_row( array(
          'TAB', 'CELL', 1, '', // align submit-button
-         'SUBMITBUTTON', 'vote_save', T_('Save vote'),
-         ));
+         'SUBMITBUTTON', 'vote_save', T_('Save vote'), ));
       $fform->add_hidden( 'fid', $fid );
-   }
-   else
-   {// only view
-      if( !is_numeric($points) )
-         $point_str = sprintf( T_('%s (no vote)'), NO_VALUE );
-      else
-      {
-         $point_str = sprintf( T_('%s points#feature'), ( $points > 0 ? '+' . $points : $points ) );
-         if( $points > 0 )
-            $point_str = span('Positive', $point_str);
-         elseif( $points < 0 )
-            $point_str = span('Negative', $point_str);
-      }
-      $fform->add_row( array(
-         'DESCRIPTION', T_('Vote'),
-         'TEXT',        $point_str,
-         ));
    }
 
 

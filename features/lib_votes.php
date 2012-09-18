@@ -403,7 +403,7 @@ class Feature
          $notes[] = null; // empty line
       }
 
-      $notes_fstatus = array( T_('Feature status'),
+      $notes_fstatus = array( T_('Feature status') . ':',
             sprintf( T_('%s = feature in edit-mode, only for feature-admin'), FEATSTAT_NEW ),
             sprintf( T_('%s = new feature to vote on'), FEATSTAT_VOTE ),
             sprintf( T_('%s = feature implementation started by developer'), FEATSTAT_WORK ),
@@ -691,18 +691,21 @@ class FeatureVote
     */
    function build_query_featurevote_list( $mquery=null, $my_id )
    {
+
       // build SQL-query
       $qsql = new QuerySQL();
       $qsql->add_part_fields( Feature::get_query_fields(true) );
       $qsql->add_part( SQLP_FIELDS,
-         "IF(FV.Voter_ID=$my_id,FV.Points,'') AS myPoints",
+         "IF(ISNULL(MYFV.fid),'',MYFV.Points) AS myPoints",
          'SUM(FV.Points) AS sumPoints',
          'COUNT(FV.fid) AS countVotes',
          'SUM(IF(FV.Points>0,1,0)) AS countYes',
          'SUM(IF(FV.Points<0,1,0)) AS countNo'
          );
       $qsql->add_part( SQLP_FROM, 'Feature AS F' );
-      $qsql->add_part( SQLP_FROM, 'LEFT JOIN FeatureVote AS FV ON F.ID=FV.fid' );
+      $qsql->add_part( SQLP_FROM,
+         "LEFT JOIN FeatureVote AS MYFV on MYFV.fid=F.ID AND MYFV.Voter_ID=$my_id",
+         'LEFT JOIN FeatureVote AS FV ON F.ID=FV.fid' );
       $qsql->add_part( SQLP_WHERE, 'FV.Points<>0' ); // abstention from voting
       $qsql->add_part( SQLP_GROUP, 'FV.fid' );
       $qsql->add_part( SQLP_HAVING, 'sumPoints is not null' );
@@ -811,6 +814,19 @@ class FeatureVote
          return span('Positive', MINI_SPACING . $points);
       else
          return MINI_SPACING . $points;
+   }
+
+   function formatPointsText( $points )
+   {
+      if( !is_numeric($points) )
+         return sprintf( T_('%s (no vote)'), NO_VALUE );
+
+      $point_str = sprintf( T_('%s points#feature'), ( $points > 0 ? '+' . $points : $points ) );
+      if( $points > 0 )
+         $point_str = span('Positive', $point_str);
+      elseif( $points < 0 )
+         $point_str = span('Negative', $point_str);
+      return $point_str;
    }
 
 } // end of 'FeatureVote'
