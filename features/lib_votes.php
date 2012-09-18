@@ -403,7 +403,7 @@ class Feature
          $notes[] = null; // empty line
       }
 
-      $notes_fstatus = array( T_('Feature status') . ':',
+      $notes_fstatus = array( T_('Feature Status') . ':',
             sprintf( T_('%s = feature in edit-mode, only for feature-admin'), FEATSTAT_NEW ),
             sprintf( T_('%s = new feature to vote on'), FEATSTAT_VOTE ),
             sprintf( T_('%s = feature implementation started by developer'), FEATSTAT_WORK ),
