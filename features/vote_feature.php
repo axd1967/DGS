@@ -68,12 +68,14 @@ require_once( "features/lib_votes.php" );
       if( !is_null($feature) )
       {
          $fvote = $feature->load_featurevote( $my_id );
-         if( !is_null($fvote) && $points == '' )
+         if( !is_null($fvote) && (string)$points == '' )
             $points = $fvote->get_points();
       }
    }
    if( is_null($feature) )
       error('invalid_args', "vote_feature.no_featureid($fid)");
+   if( (string)$points == '' ) // set default
+      $points = 0;
 
    // check user pre-conditions
    $user_vote_reason = Feature::allow_vote_check();
