@@ -2584,3 +2584,17 @@ ALTER TABLE TournamentLadderProps
    ADD UserJoinOrder enum('REGTIME','RATING','RANDOM') NOT NULL default 'REGTIME' AFTER GameEndTimeoutLoss ;
 
 
+-- IMPORTANT NOTE: run this FIX ONLY if you have used the features-feature before on your server!!
+-- [FIX] fix negative voted points on UserQuota
+CREATE TEMPORARY TABLE fix_uq (
+   uid int NOT NULL,
+   sumP smallint NOT NULL
+   ) SELECT Voter_ID AS uid, SUM(ABS(Points)) AS sumP FROM FeatureVote GROUP BY Voter_ID ;
+SELECT * FROM fix_uq AS FIX WHERE FIX.sumP > 0 ;
+SELECT UQ.uid, UQ.FeaturePoints FROM UserQuota AS UQ INNER JOIN fix_uq AS FIX ON FIX.uid=UQ.uid WHERE FIX.sumP > 0 ;
+
+-- [FIX] NOTE: 29 is the initial start quota of 25 + 98 (=4*20 +x) days since live-server upgrade on 10-Jun-2012
+UPDATE UserQuota AS UQ INNER JOIN fix_uq AS FIX ON FIX.uid=UQ.uid
+   SET UQ.FeaturePoints= 29 - FIX.sumP WHERE FIX.sumP > 0;
+
+

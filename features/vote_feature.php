@@ -78,13 +78,13 @@ require_once( "features/lib_votes.php" );
    // check user pre-conditions
    $user_vote_reason = Feature::allow_vote_check();
    $allow_vote_edit = is_null($user_vote_reason) && $feature->allow_vote();
-   if( $viewmode )
+   if( $viewmode || $user_quota->feature_points <= 0 )
       $allow_vote_edit = false;
    if( $allow_vote_edit && (string)$points == '' ) // set default for edit-mode
       $points = 0;
 
    // insert/update feature-vote-object with values from edit-form if no error
-   if( is_null($errormsg) && @$_REQUEST['vote_save'] && $allow_vote_edit )
+   if( is_null($errormsg) && @$_REQUEST['vote_save'] && $allow_vote_edit && $is_numeric($points) )
    {
       ta_begin();
       {//HOT-section to update feature-vote
@@ -129,7 +129,7 @@ require_once( "features/lib_votes.php" );
       'TEXT',         date(DATEFMT_FEATURE, $feature->lastchanged) ));
 
    $has_voted = ( !is_null($fvote) && $fvote->lastchanged > 0 );
-   if( $allow_vote_edit )
+   if( $allow_vote_edit || $has_voted )
    {
       $fform->add_row( array(
          'DESCRIPTION',  T_('Lastvoted'),
@@ -148,10 +148,10 @@ require_once( "features/lib_votes.php" );
          'TEXT',        '<span class="ErrorMsg">' . $errormsg . '</span>' ));
 
    $fform->add_empty_row();
-   if( $allow_vote_edit && $user_quota->feature_points > 0 )
+   if( $allow_vote_edit )
    {
       $vote_values = array();
-      $max_points = min( FEATVOTE_MAXPOINTS, $user_quota->feature_points );
+      $max_points = min( FEATVOTE_MAXPOINTS, abs($user_quota->feature_points) );
       for( $i = +$max_points; $i >= -$max_points; $i--)
          $vote_values[$i] = (($i > 0) ? '+' : '') . $i;
       $vote_values['0'] = '=0';
@@ -168,9 +168,16 @@ require_once( "features/lib_votes.php" );
    }
    else
    {// only view
-      $point_str = ( is_numeric($points) )
-         ? sprintf( T_('%s points#feature'), ($points > 0 ? '+' : '') . $points )
-         : sprintf( T_('%s (no vote)'), NO_VALUE );
+      if( !is_numeric($points) )
+         $point_str = sprintf( T_('%s (no vote)'), NO_VALUE );
+      else
+      {
+         $point_str = sprintf( T_('%s points#feature'), ( $points > 0 ? '+' . $points : $points ) );
+         if( $points > 0 )
+            $point_str = span('Positive', $point_str);
+         elseif( $points < 0 )
+            $point_str = span('Negative', $point_str);
+      }
       $fform->add_row( array(
          'DESCRIPTION', T_('Vote'),
          'TEXT',        $point_str,

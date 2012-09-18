@@ -63,10 +63,14 @@ class UserQuota
       $this->feature_points_updated = $feature_points_updated;
    }
 
-   /*! \brief Sets feature points within allowed limits 0..FEATURE_POINTS_MAX_VALUE. */
+   /*! \brief Sets feature points within allowed limits -infinity..FEATURE_POINTS_MAX_VALUE. */
    function set_feature_points( $points )
    {
-      $this->feature_points = limit( (int)$points, 0, FEATURE_POINTS_MAX_VALUE, 25 );
+      if( !is_numeric($points) )
+         $points = 25; // start-value
+      elseif( $points > FEATURE_POINTS_MAX_VALUE )
+         $points = FEATURE_POINTS_MAX_VALUE;
+      $this->feature_points = (int)$points;
    }
 
    /*!

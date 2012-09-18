@@ -267,7 +267,7 @@ class Feature
       if( is_null($this->featurevote) )
       {// no vote so far
          $this->featurevote = FeatureVote::new_featurevote( $this->id, $voter, $points );
-         $fpoints = -$points;
+         $fpoints = -abs($points);
       }
       else
       {// already voted
@@ -278,7 +278,7 @@ class Feature
       }
 
       //error_log("F.update_vote: " . $this->to_string());
-      $this->featurevote->update_vote();
+      $this->featurevote->update_feature_vote();
       return $fpoints;
    }
 
@@ -638,7 +638,7 @@ class FeatureVote
     * \brief Updates current FeatureVote-data into database (may replace existing featurevote,
     *        set lastchanged=NOW and IP of voter).
     */
-   function update_vote()
+   function update_feature_vote()
    {
       global $NOW;
       $this->lastchanged = $NOW;
@@ -649,7 +649,7 @@ class FeatureVote
          . ', Points=' . (int)$this->points
          . ', Lastchanged=FROM_UNIXTIME(' . $this->lastchanged .')'
          ;
-      db_query( "feature.update_vote({$this->fid},{$this->voter},{$this->points})", $update_query );
+      db_query( "feature.update_feature_vote({$this->fid},{$this->voter},{$this->points})", $update_query );
    }
 
 
@@ -796,6 +796,10 @@ class FeatureVote
    /*! \brief Returns text informing about remaining feature-points. */
    function getFeaturePointsText( $points )
    {
+      if( $points > 0 )
+         $points = span('Positive', $points);
+      elseif( $points < 0 )
+         $points = span('VotingRestricted', $points);
       return sprintf( T_('You have %s points available for voting on features.'), $points );
    }
 
