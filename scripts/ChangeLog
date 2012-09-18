@@ -21,6 +21,14 @@ ChangeLog
 
 2012-09-18 juga
 
+### ----- release-1_0_15-20120608 -----
+
+   * features/vote_feature.php:
+   - bugfix: correct var $is_numeric() to func-call without '$'
+
+   * include/quick/quick_game.php (QuickHandlerGame.process_cmd_play):
+   - bugfix: wrong reference to $my_id -> $this->my_id
+
    * features/lib_votes.php (Feature.update_vote; FeatureVote.update_feature_vote, ~.getFeaturePointsText),
      include/classlib_userquota.php (UserQuota.set_feature_points),
      scripts/updates/database_changes_1_0_14_to_1_0_15.mysql,
@@ -459,8 +467,6 @@ copy /images/eidogo.gif
 
    * include/std_functions.php (echo_dragon_top_bar):
    - removed link on user-id
-
-### ----- release-1_0_15-20120608 -----
 
    * include/std_functions.php (start_html),
      include/globals.php (CSS_VERSION):
