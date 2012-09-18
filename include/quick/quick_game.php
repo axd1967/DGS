@@ -529,7 +529,7 @@ class QuickHandlerGame extends QuickHandler
 
          if( $game_finished )
          {
-            $game_finalizer = new GameFinalizer( ACTBY_PLAYER, $my_id, $gid, $tid,
+            $game_finalizer = new GameFinalizer( ACTBY_PLAYER, $this->my_id, $gid, $tid,
                $Status, $GameType, $GamePlayers, $GameFlags, $Black_ID, $White_ID, $Moves, ($Rated != 'N') );
 
             $do_delete = ( $this->action == GAMECMD_DELETE );
