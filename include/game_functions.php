@@ -2155,7 +2155,8 @@ class GameNotify
       $obs_info_text = $info_text;
 
       if( $this->timeout_rejected )
-         $info_text .= "<p><b>Info:</b> The winner rejected a win by timeout, so the game was changed to unrated!";
+         $info_text .= "<p><b>Info:</b> Based on the winner's profile preference, " .
+            "the win by timeout was automatically rejected and the game was changed to unrated!";
 
       $player_text = $this->players_text;
       $msg_text = ( $this->message ) ? "<p>The {$MAP_ACTBY_SUBJECT[$action_by]} wrote:<p></p>" . $this->message : '';
