@@ -426,7 +426,7 @@ function game_settings_form(&$mform, $formstyle, $viewmode, $iamrated=true, $my_
    if( !$is_view_mpgame && !$is_view_fairkomi )
    {
       $color_arr = GameTexts::get_manual_handicap_types();
-      if( ($formstyle != GSET_TOURNAMENT_ROUNDROBIN) || $is_view_mpgame )
+      if( ( $formstyle == GSET_TOURNAMENT_LADDER ) || $is_view_mpgame )
          unset($color_arr[HTYPE_DOUBLE]);
 
       if( $formstyle == GSET_TOURNAMENT_LADDER )
