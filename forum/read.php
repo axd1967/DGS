@@ -182,7 +182,7 @@ require_once( 'forum/post.php' );
          $qsql->add_part( SQLP_ORDER, 'P.PosIndex' );
 
       $fthread = new ForumThread( $FR );
-      $fthread->load_posts( $qsql );
+      $disp_forum->count_new_posts = $fthread->load_posts( $qsql );
       $fthread->create_navigation_tree();
 
       if( !$reply && !$edit && !$preview && $allow_mark_read )

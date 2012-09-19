@@ -162,10 +162,11 @@ function display_posts_pending_approval()
 } //display_posts_pending_approval
 
 
-// mode-bitmask for get_new_string-func
-define('NEWMODE_BOTTOM',   0x1);
-define('NEWMODE_OVERVIEW', 0x2);
-define('NEWMODE_NO_LINK',  0x4);
+// mode-bitmask for get_new_string() and echo_links()
+define('NEWMODE_TOP',      0x01);
+define('NEWMODE_BOTTOM',   0x02);
+define('NEWMODE_OVERVIEW', 0x04);
+define('NEWMODE_NO_LINK',  0x08);
 
 // draw-modes for draw_post()
 define('MASK_DRAWPOST_MODES', 0x0f); // lower 4 bits reserved for draw-modes
@@ -199,6 +200,7 @@ class DisplayForum
    var $link_array_left;
    var $link_array_right;
    var $found_rows;
+   var $count_new_posts; // for get_new_string() and echo_link() to support "first new"
    var $new_count; // global new-counter for displaying
    var $back_post_id;
    var $cur_depth;
@@ -212,7 +214,6 @@ class DisplayForum
    // consts
    var $max_rows;
    var $offset;
-   var $fmt_new;
    var $navi_img;
 
    /*! \brief Constructs display handler for forum-pages. */
@@ -229,6 +230,7 @@ class DisplayForum
       $this->link_array_left = array();
       $this->link_array_right = array();
       $this->found_rows = -1; // not shown
+      $this->count_new_posts = 0;
       $this->new_count = 0;
       $this->back_post_id = 0;
       $this->cur_depth = -1;
@@ -240,8 +242,6 @@ class DisplayForum
 
       $this->max_rows = MAXROWS_PER_PAGE_DEFAULT;
       $this->offset = 0;
-      // fmt_new: anchor_prefix, new-idx, link-ref, new-text
-      $this->fmt_new = '<span class="NewFlag"><a name="%s%d"%s>%s</a></span>';
       $this->navi_img = null;
    }
 
@@ -300,7 +300,7 @@ class DisplayForum
       $this->make_link_array( $ReqParam );
 
       if( $this->links & LINK_MASKS )
-         $this->echo_links('T');
+         $this->echo_links(NEWMODE_TOP);
 
       $this->print_headline();
 
@@ -331,7 +331,7 @@ class DisplayForum
    function forum_end_table( $bottom_bar=true )
    {
       if( $bottom_bar && $this->links & LINK_MASKS )
-         $this->echo_links('B');
+         $this->echo_links(NEWMODE_BOTTOM);
       echo "</table>\n", name_anchor('fbottom');
    }
 
@@ -484,8 +484,15 @@ class DisplayForum
       }
    } //make_link_array
 
-   function echo_links( $id )
+   function echo_links( $new_mode )
    {
+      if( ($new_mode & (NEWMODE_TOP|NEWMODE_BOTTOM)) == NEWMODE_TOP )
+         $id = 'T';
+      elseif( ($new_mode & (NEWMODE_TOP|NEWMODE_BOTTOM)) == NEWMODE_BOTTOM )
+         $id = 'B';
+      else
+         error('invalid_args', "DisplayForum.echo_links.check.new_mode($new_mode)");
+
       $lcols = $this->cols; //1; $cols/2; $cols-1;
       $tmp = ( $lcols > 1 ? ' colspan='.$lcols : '' );
       echo "<tr class=Links$id><td$tmp><div class=TreeLinks>";
@@ -502,7 +509,7 @@ class DisplayForum
          else
             echo anchor( $link, $name);
       }
-      echo $this->get_new_string(NEWMODE_BOTTOM);
+      echo $this->get_new_string( $new_mode );
 
       $lcols = $this->cols - $lcols;
       $tmp = ( $lcols > 1 ? ' colspan='.$lcols : '' );
@@ -529,18 +536,22 @@ class DisplayForum
 
    /*!
     * \brief Increase global new counter, builds and returns current new-string.
-    * param $mode bitmask of NEWMODE_BOTTOM ('new' for bottom-bar);
+    * param $mode bitmask of NEWMODE_TOP|BOTTOM ('new' for top/bottom-bar);
     *       NEWMODE_OVERVIEW, NEWMODE_NO_LINK
     */
    function get_new_string( $mode=0 )
    {
+      static $fmt_new = '<span class="NewFlag"><a name="%s%d"%s>%s</a></span>'; // anchor_prefix, new-idx, link-ref, new-text
+
       $new = '';
       $anchor_prefix = 'new';
-      if( $mode & NEWMODE_BOTTOM ) // bottom-bar refers to 1st-NEW
+      if( $mode & (NEWMODE_TOP|NEWMODE_BOTTOM) ) // top/bottom-bar refer to 1st-NEW
       {
          $link = ($mode & NEWMODE_NO_LINK) ? '' : ' href="#new1"';
-         if( $this->new_count > 0 )
-            $new = sprintf( $this->fmt_new, $anchor_prefix, $this->new_count + 1, $link, T_('first new') );
+         if( ($mode & NEWMODE_TOP) && $this->count_new_posts > 0 )
+            $new = sprintf( $fmt_new, $anchor_prefix, 0, $link, T_('first new') );
+         elseif( ($mode & NEWMODE_BOTTOM) && $this->new_count > 0 )
+            $new = sprintf( $fmt_new, $anchor_prefix, $this->new_count + 1, $link, T_('first new') );
       }
       else
       {
@@ -555,7 +566,7 @@ class DisplayForum
          $this->new_count++;
          $link = ($mode & NEWMODE_NO_LINK)
             ? '' : sprintf(' href="#new%d"', $this->new_count + $addnew );
-         $new = sprintf( $this->fmt_new, $anchor_prefix, $this->new_count, $link, T_('new#forum') );
+         $new = sprintf( $fmt_new, $anchor_prefix, $this->new_count, $link, T_('new#forum') );
       }
       return $new;
    } //get_new_string
@@ -1459,6 +1470,7 @@ class ForumThread
    /*!
     * \brief Loads and adds posts (to posts-arr): query fields and FROM set,
     *        needs WHERE and ORDER in qsql2-arg QuerySQL; Needs fresh object-instance.
+    * \return number of new posts
     * \note sets ForumPost.is_read
     * \note sets this.last_created
     * NOTE: Needs var forum_read set in this object!
@@ -1474,18 +1486,23 @@ class ForumThread
 
       $this->thread_post = null;
       $this->last_created = 0;
+      $new_posts = 0;
       while( $row = mysql_fetch_array( $result ) )
       {
          $post = ForumPost::new_from_row( $row );
          if( $post->parent_id == 0 )
             $this->thread_post = $post;
          $post->is_read = $post->is_post_read( $this->forum_read );
+         if( !$post->is_read )
+            ++$new_posts;
          if( $post->created > $this->last_created )
             $this->last_created = $post->created;
 
          $this->posts[$post->id] = $post;
       }
       mysql_free_result($result);
+
+      return $new_posts;
    }//load_posts
 
    /*!
