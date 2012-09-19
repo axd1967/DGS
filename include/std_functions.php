@@ -2685,20 +2685,11 @@ function is_logged_in($handle, $scode, &$player_row, $login_opts=LOGIN_DEFAULT_O
             break;
 
          default:
+            error('fever_vault', "is_logged_in($uid,$handle)");
             if( $is_quick_suite )
-            {
-               error('fever_vault', "is_logged_in($uid)");
                return 0; // should not be reached normally
-            }
-            else
-               jump_to("index.php");
             break;
       }
-/* options:
-      set_login_cookie("","", true);
-      error('fever_vault', "is_logged_in($uid,$handle)"); //log record
-      jump_to("error.php?err=fever_vault"); //no log record
-*/
    }
 
    if( $session_expired || ( !$skip_update && !$updok ) )

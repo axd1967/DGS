@@ -136,20 +136,25 @@ ErrorDocument 404 /DragonGoServer/error.php?err=page_not_found&redir=htaccess
 // returns true, if debug-message should be hidden (because containing sensitive data)
 function handle_error( $error_code, $errorlog_id, $userid, $is_admin, $block_reason )
 {
-   $hide_debugmsg = false;
+   $jump_to_login = ( isset($_REQUEST['page']) && $error_code == 'login_if_not_logged_in' );
 
-   ErrorCode::echo_error_text($error_code, $errorlog_id);
+   if( !$jump_to_login )
+      ErrorCode::echo_error_text($error_code, $errorlog_id);
+
+   $hide_debugmsg = false;
    if( ErrorCode::is_sensitive($error_code) )
       $hide_debugmsg = true;
 
    switch( (string)$error_code )
    {
-      case('mysql_query_failed'):
-         if( !$is_admin ) $hide_debugmsg = true; // contains DB-query
+      case('login_if_not_logged_in'):
+         // show login-page passing on error-code-info and "original" page for later redirect after login
+         if( $jump_to_login )
+            jump_to('index.php?err=not_logged_in'.URI_AMP.'eid='.urlencode($errorlog_id).URI_AMP.'page='.urlencode($_REQUEST['page']));
          break;
 
-      case('ip_blocked_register'):
-         jump_to("do_registration_blocked.php?errlog_id=$errorlog_id");
+      case('fever_vault'):
+         jump_to('index.php?logout=1'.URI_AMP.'err=fever_vault'.URI_AMP.'eid='.urlencode($errorlog_id));
          break;
 
       case('login_denied'):
@@ -170,10 +175,18 @@ function handle_error( $error_code, $errorlog_id, $userid, $is_admin, $block_rea
          break;
       }//login_denied
 
+      case('mysql_query_failed'):
+         if( !$is_admin ) $hide_debugmsg = true; // contains DB-query
+         break;
+
       case('edit_bio_denied'):
       case('adminlevel_too_low'):
          if( (string)$userid != '' )
             admin_log( 0, $userid, $error_code );
+         break;
+
+      case('ip_blocked_register'):
+         jump_to("do_registration_blocked.php?errlog_id=$errorlog_id");
          break;
    } //end-switch
 
