@@ -30,7 +30,7 @@ require_once( 'include/gui_functions.php' );
 
    $logged_in = who_is_logged( $player_row);
    if( !$logged_in )
-      error('not_logged_in', 'edit_picture');
+      error('login_if_not_logged_in', 'edit_picture');
    if( USERPIC_FOLDER == '' )
       error('feature_disabled', 'edit_picture');
 

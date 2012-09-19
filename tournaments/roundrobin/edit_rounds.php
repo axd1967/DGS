@@ -38,7 +38,7 @@ $GLOBALS['ThePage'] = new Page('TournamentRoundEditor');
 
    $logged_in = who_is_logged( $player_row);
    if( !$logged_in )
-      error('not_logged_in', 'Tournament.roundrobin.edit_rounds');
+      error('login_if_not_logged_in', 'Tournament.roundrobin.edit_rounds');
    if( !ALLOW_TOURNAMENTS )
       error('feature_disabled', 'Tournament.roundrobin.edit_rounds');
    $my_id = $player_row['ID'];

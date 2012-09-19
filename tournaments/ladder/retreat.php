@@ -34,7 +34,7 @@ $GLOBALS['ThePage'] = new Page('TournamentLadderRetreat');
 
    $logged_in = who_is_logged( $player_row);
    if( !$logged_in )
-      error('not_logged_in', 'Tournament.ladder.retreat');
+      error('login_if_not_logged_in', 'Tournament.ladder.retreat');
    if( !ALLOW_TOURNAMENTS )
       error('feature_disabled', 'Tournament.ladder.retreat');
    $my_id = $player_row['ID'];

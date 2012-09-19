@@ -37,7 +37,7 @@ require_once( "features/lib_votes.php" );
    $logged_in = who_is_logged( $player_row);
 
    if( !$logged_in )
-      error('not_logged_in', 'list_features');
+      error('login_if_not_logged_in', 'list_features');
    if( !ALLOW_FEATURE_VOTE )
       error('feature_disabled', 'list_features');
 

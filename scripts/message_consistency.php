@@ -27,7 +27,7 @@ require_once( "include/std_functions.php" );
 
    $logged_in = who_is_logged( $player_row);
    if( !$logged_in )
-      error('not_logged_in', 'scripts.message_consistency');
+      error('login_if_not_logged_in', 'scripts.message_consistency');
    if( $player_row['ID'] <= GUESTS_ID_MAX )
       error('not_allowed_for_guest', 'scripts.message_consistency');
    if( !(@$player_row['admin_level'] & ADMIN_DATABASE) )

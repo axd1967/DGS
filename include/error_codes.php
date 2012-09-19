@@ -323,6 +323,7 @@ class ErrorCode
             . "\n<li>" . T_('You haven\'t enabled cookies in your browser.')
             . "\n</ul>\n"
             . "</td></tr></table>\n";
+         $arr['login_if_not_logged_in'] = $arr['not_logged_in'];
 
          $arr['login_denied'] = ''; // splitted in 2 mapped texts in error.php
          $arr['login_denied:blocked_with_reason'] =

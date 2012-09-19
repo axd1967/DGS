@@ -202,8 +202,9 @@ class DgsErrors
 
       if( !$warn && $this->mode == ERROR_MODE_JUMP )
       {
+         $page_url = ( $err == 'login_if_not_logged_in' ) ? URI_AMP.'page='.urlencode(get_request_url()) : '';
          disable_cache();
-         jump_to( $uri );
+         jump_to( $uri . $page_url );
       }
 
       if( $this->errors_are_fatal && !$warn )

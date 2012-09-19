@@ -41,7 +41,7 @@ $GLOBALS['ThePage'] = new Page('GamesList');
 
    $logged_in = who_is_logged( $player_row);
    if( !$logged_in )
-      error('not_logged_in', 'show_games');
+      error('login_if_not_logged_in', 'show_games');
    $my_id = $player_row['ID'];
 
 /* Actual REQUEST calls used:

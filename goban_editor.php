@@ -45,7 +45,7 @@ define('SGF_MAXSIZE_UPLOAD', 30*1024); // bytes
 
    $logged_in = who_is_logged( $player_row);
    if( !$logged_in )
-      error('not_logged_in', 'goban_editor');
+      error('login_if_not_logged_in', 'goban_editor');
    $my_id = $player_row['ID'];
    $cfg_board = ConfigBoard::load_config_board($my_id);
 

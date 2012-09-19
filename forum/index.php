@@ -30,7 +30,7 @@ $GLOBALS['ThePage'] = new Page('ForumsList');
 
    $logged_in = who_is_logged( $player_row);
    if( !$logged_in )
-      error('not_logged_in', 'forum.index');
+      error('login_if_not_logged_in', 'forum.index');
    $my_id = $player_row['ID'];
    $cfg_pages = ConfigPages::load_config_pages($my_id);
 

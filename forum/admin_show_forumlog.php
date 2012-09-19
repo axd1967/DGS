@@ -32,7 +32,7 @@ require_once( "forum/forum_functions.php" );
 
    $logged_in = who_is_logged($player_row);
    if( !$logged_in )
-      error('not_logged_in', 'admin_show_forumlog');
+      error('login_if_not_logged_in', 'admin_show_forumlog');
    if( $player_row['ID'] <= GUESTS_ID_MAX )
       error('not_allowed_for_guest', 'admin_show_forumlog');
    if( !Forum::is_admin() )

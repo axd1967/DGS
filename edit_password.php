@@ -29,7 +29,7 @@ require_once( "include/form_functions.php" );
 
    $logged_in = who_is_logged( $player_row);
    if( !$logged_in )
-      error('not_logged_in', 'edit_password');
+      error('login_if_not_logged_in', 'edit_password');
 
 
    start_page(T_("Edit password"), true, $logged_in, $player_row );

@@ -35,7 +35,7 @@ $GLOBALS['ThePage'] = new Page('RatingAdmin');
 
    $logged_in = who_is_logged( $player_row);
    if( !$logged_in )
-      error('not_logged_in', 'admin_rating');
+      error('login_if_not_logged_in', 'admin_rating');
    $my_id = $player_row['ID'];
    if( $my_id <= GUESTS_ID_MAX )
       error('not_allowed_for_guest', 'admin_rating');

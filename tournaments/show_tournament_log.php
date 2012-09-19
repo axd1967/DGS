@@ -40,7 +40,7 @@ require_once 'tournaments/include/tournament_log.php';
 
    $logged_in = who_is_logged( $player_row );
    if( !$logged_in )
-      error('not_logged_in', 'Tournament.show_tlog');
+      error('login_if_not_logged_in', 'Tournament.show_tlog');
    if( !ALLOW_TOURNAMENTS )
       error('feature_disabled', 'Tournament.show_tlog');
    $my_id = $player_row['ID'];

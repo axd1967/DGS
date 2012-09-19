@@ -46,7 +46,7 @@ define('FACT_CANCEL', 'cancel');
    connect2mysql();
    $logged_in = who_is_logged($player_row);
    if( !$logged_in )
-      error('not_logged_in', 'templates');
+      error('login_if_not_logged_in', 'templates');
 
    $page = "templates.php";
 

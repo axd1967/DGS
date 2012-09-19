@@ -28,7 +28,7 @@ $GLOBALS['ThePage'] = new Page('Admin');
 
    $logged_in = who_is_logged( $player_row);
    if( !$logged_in )
-      error('not_logged_in', 'admin');
+      error('login_if_not_logged_in', 'admin');
 
    $admin_level = (int)@$player_row['admin_level']; //local modifications
    if( !$admin_level )

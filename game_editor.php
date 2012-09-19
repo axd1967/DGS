@@ -33,7 +33,7 @@ $GLOBALS['ThePage'] = new Page('GameEditor');
 
    $logged_in = who_is_logged( $player_row);
    if( !$logged_in )
-      error('not_logged_in', 'game_editor');
+      error('login_if_not_logged_in', 'game_editor');
    if( !ALLOW_GAME_EDITOR || !is_javascript_enabled() )
       error('feature_disabled', 'game_editor');
    $my_id = $player_row['ID'];

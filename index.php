@@ -21,20 +21,22 @@ $TranslateGroups[] = "Start";
 
 require_once( "include/std_functions.php" );
 require_once( "include/form_functions.php" );
+require_once( "include/error_codes.php" );
 
 {
    connect2mysql();
 
-
    if( @$_GET['logout'] )
-   {
       set_login_cookie("","", true);
-      jump_to("index.php");
-   }
 
    $logged_in = who_is_logged( $player_row);
 
-   $sysmsg= get_request_arg('sysmsg'); unset($_REQUEST['sysmsg']);
+   $sysmsg = get_request_arg('sysmsg');
+   unset($_REQUEST['sysmsg']);
+
+   $error_code = @$_REQUEST['err'];
+   $errorlog_id = (int)@$_REQUEST['eid'];
+   $page = @$_REQUEST['page']; // for redirect after login
 
    // check for maintenance-user to allow form-login, use URL:
    // index.php?userid=... without exposing password in URL
@@ -56,23 +58,30 @@ require_once( "include/form_functions.php" );
    echo "\n<BR>&nbsp;";
 
 
-   if( HOSTNAME == "dragongoserver.sourceforge.net" )
+   if( $error_code )
    {
-      // for devel server
-      echo "<p></p><font color=green>\n" .
-         T_("Welcome to the development version of the Dragon Go Server!") .
-         '<br>&nbsp;<br>' . T_("If you want to play on the real server, please visits <a href=\"http://www.dragongoserver.net\">http://www.dragongoserver.net</a> instead.") .
-         '<br>&nbsp;<br><b>' . T_("Note: Since this server is running on the CVS code, bugs and even data losses could happen at any time, so don't feel too attached to your games ;-)") . '</b>' .
-         '<br>&nbsp;<br>' . T_("Have a look to the FAQ for more infos.") .
-         "</font><HR>\n";
+      echo "<p></p>", ErrorCode::echo_error_text( $error_code, $errorlog_id ), "\n<hr>\n";
    }
    else
    {
-      // for live server
-      echo "<p></p><font color=green>\n" .
-         sprintf( T_('Welcome to the %s!'), FRIENDLY_LONG_NAME) .
-         '<br>&nbsp;<br>' . T_("Please, feel free to register and play some games.") .
-         "</font><HR>\n";
+      if( HOSTNAME == "dragongoserver.sourceforge.net" )
+      {
+         // for devel server
+         echo "<p></p><font color=green>\n" .
+            T_("Welcome to the development version of the Dragon Go Server!") .
+            '<br>&nbsp;<br>' . T_("If you want to play on the real server, please visits <a href=\"http://www.dragongoserver.net\">http://www.dragongoserver.net</a> instead.") .
+            '<br>&nbsp;<br><b>' . T_("Note: Since this server is running on the CVS code, bugs and even data losses could happen at any time, so don't feel too attached to your games ;-)") . '</b>' .
+            '<br>&nbsp;<br>' . T_("Have a look to the FAQ for more infos.") .
+            "</font><HR>\n";
+      }
+      else
+      {
+         // for live server
+         echo "<p></p><font color=green>\n" .
+            sprintf( T_('Welcome to the %s!'), FRIENDLY_LONG_NAME) .
+            '<br>&nbsp;<br>' . T_("Please, feel free to register and play some games.") .
+            "</font><HR>\n";
+      }
    }
 
    sysmsg($sysmsg);
@@ -82,6 +91,7 @@ require_once( "include/form_functions.php" );
       sprintf( T_("To look around, use %s."), "'guest' / '$GUESTPASS'" ) . " </font>\n";
 
    $login_form = new Form( 'loginform', 'login.php', FORM_POST );
+   $login_form->add_hidden('page', $page);
 
    $login_form->add_row( array(
          'DESCRIPTION', T_('Userid'),

@@ -47,7 +47,7 @@ $GLOBALS['ThePage'] = new Page('TournamentLadderView');
 
    $logged_in = who_is_logged( $player_row);
    if( !$logged_in )
-      error('not_logged_in', 'Tournament.ladder.view');
+      error('login_if_not_logged_in', 'Tournament.ladder.view');
    if( !ALLOW_TOURNAMENTS )
       error('feature_disabled', 'Tournament.ladder.view');
    $my_id = $player_row['ID'];

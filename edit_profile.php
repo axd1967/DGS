@@ -40,7 +40,7 @@ require_once( 'include/gui_bulletin.php' );
 
    $logged_in = who_is_logged($player_row);
    if( !$logged_in )
-      error('not_logged_in', 'edit_profile');
+      error('login_if_not_logged_in', 'edit_profile');
    $my_id = $player_row['ID'];
    $cfg_board = ConfigBoard::load_config_board($my_id);
 

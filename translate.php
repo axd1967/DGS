@@ -117,7 +117,7 @@ $info_box = '<br>When translating you should keep the following things in mind:
 
    $logged_in = who_is_logged( $player_row);
    if( !$logged_in )
-      error('not_logged_in', 'translate');
+      error('login_if_not_logged_in', 'translate');
    if( $player_row['ID'] <= GUESTS_ID_MAX )
       error('not_allowed_for_guest', 'translate');
 

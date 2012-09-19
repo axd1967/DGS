@@ -34,7 +34,7 @@ require_once( "include/classlib_profile.php" );
 
    $logged_in = who_is_logged( $player_row);
    if( !$logged_in )
-      error('not_logged_in', 'search_messages');
+      error('login_if_not_logged_in', 'search_messages');
 
    $page = 'search_messages.php?';
    $my_id = $player_row["ID"];

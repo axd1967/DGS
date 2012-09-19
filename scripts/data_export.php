@@ -1012,7 +1012,7 @@ function freesql_dump( $database, $query)
    setTZ('GMT');
 
    if( !$logged_in )
-      error('not_logged_in', 'scripts.data_export');
+      error('login_if_not_logged_in', 'scripts.data_export');
    if( $player_row['ID'] <= GUESTS_ID_MAX )
       error('not_allowed_for_guest', 'scripts.data_export');
    if( !(@$player_row['admin_level'] & ADMIN_DATABASE) )

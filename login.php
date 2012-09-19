@@ -102,6 +102,9 @@ if( $quick_mode )
       echo "\nOk";
       exit;
    }
-   jump_to("status.php");
+
+   // redirect to original intended page (or else status-page)
+   $page = ( isset($_REQUEST['page']) ) ? $_REQUEST['page'] : 'status.php';
+   jump_to($page);
 }
 ?>

@@ -31,7 +31,7 @@ require_once( "include/game_functions.php" );
 
    $logged_in = who_is_logged($player_row);
    if( !$logged_in )
-      error('not_logged_in', 'scripts.fix_games_timeleft');
+      error('login_if_not_logged_in', 'scripts.fix_games_timeleft');
    if( $player_row['ID'] <= GUESTS_ID_MAX )
       error('not_allowed_for_guest', 'scripts.fix_games_timeleft');
    if( !(@$player_row['admin_level'] & (ADMIN_DATABASE|ADMIN_GAME)) )

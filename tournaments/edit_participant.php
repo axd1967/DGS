@@ -42,7 +42,7 @@ $GLOBALS['ThePage'] = new Page('TournamentEditParticipant');
    $logged_in = who_is_logged( $player_row);
 
    if( !$logged_in )
-      error('not_logged_in', 'Tournament.edit_participant');
+      error('login_if_not_logged_in', 'Tournament.edit_participant');
    if( !ALLOW_TOURNAMENTS )
       error('feature_disabled', 'Tournament.edit_participant');
    $my_id = $player_row['ID'];

@@ -37,7 +37,7 @@ $GLOBALS['ThePage'] = new Page('Status');
 
    $logged_in = who_is_logged( $player_row);
    if( !$logged_in )
-      error('not_logged_in', 'status');
+      error('login_if_not_logged_in', 'status');
    $my_id = $uid = $player_row['ID'];
 
    $page = 'status.php';

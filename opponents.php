@@ -40,7 +40,7 @@ require_once( 'include/classlib_userpicture.php' );
 
    $logged_in = who_is_logged( $player_row);
    if( !$logged_in )
-      error('not_logged_in', 'opponents');
+      error('login_if_not_logged_in', 'opponents');
 
    /*
     * uid = player to show opponents for, if empty, use myself

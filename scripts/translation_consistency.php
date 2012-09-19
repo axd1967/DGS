@@ -35,7 +35,7 @@ define('VAL_CHECK', '<font color="blue">-- <b>Need Validate!:</b> </font>');
 
    $logged_in = who_is_logged( $player_row);
    if( !$logged_in )
-      error('not_logged_in', 'scripts.translation_consistency');
+      error('login_if_not_logged_in', 'scripts.translation_consistency');
    if( $player_row['ID'] <= GUESTS_ID_MAX )
       error('not_allowed_for_guest', 'scripts.translation_consistency');
    if( !(@$player_row['admin_level'] & ADMIN_DATABASE) )
