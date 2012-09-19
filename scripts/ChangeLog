@@ -21,6 +21,35 @@ ChangeLog
 
 2012-09-19 juga
 
+### ----- release-1_0_15-20120608 -----
+
+   * include/game_functions.php (GameNotify.get_text_game_result):
+   - adjusted text for reject-win-by-timeout: making it clearer it is an automatic action
+
+   * tournaments/edit_director.php:
+   - bugfix: remove double textarea_safe()
+
+   * include/std_functions.php (textarea_safe):
+   - bugfix: PHP-function htmlspecialchars-func in textarea_safe() performs a double-encoding
+     of already encoded HTML-entities, e.g. for UTF-8 chars, so we fix it by reverting the
+     double-encode of &amp;#xx; to &#xx;
+
+   * include/message_functions.php (game_settings_form):
+   - bugfix: double-game must only be forbidden for ladder-tournament
+
+   * forum/forum_functions.php (class DisplayForum, ~.forum_start_table, ~.forum_end_table,
+       ~.echo_links, ~.get_new_string; ForumThread.load_posts),
+     forum/read.php:
+   - forum thread-post-view: show 'first new' also in top-bar if there are some
+
+   * include/faq_functions.php (faq_item_html),
+     skins/dragon/screen.css, faq.php:
+   - allow view of single FAQ-question/answer with section-title
+   - show FAQ-question on detail-view with link to copy (but as normal text)
+
+   * include/message_functions.php (message_info_table):
+   - bugfix: on preview keep select-box-choice to move message into folder
+
    * forum/forum_functions.php (DisplayForum.draw_post):
    - bugfix: do not show post-number in forum-search
 
@@ -76,8 +105,6 @@ ChangeLog
 
    * include/std_functions.php (echo_dragon_top_bar):
    - added Players.ID of logged-in user as tooltip on Handle top-bar at right-side
-
-### ----- release-1_0_15-20120608 -----
 
    * features/lib_votes.php (Feature.build_query_featurevote_list, ~.formatPointsText),
      features/vote_feature.php:
