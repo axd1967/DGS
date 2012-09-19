@@ -188,7 +188,7 @@ $GLOBALS['ThePage'] = new Page('TournamentDirectorEdit');
    {
       $tdform->add_row( array(
             'DESCRIPTION',  T_('Userid'),
-            'TEXTINPUT',    'user', 16, 16, textarea_safe($user),
+            'TEXTINPUT',    'user', 16, 16, $user,
             'SUBMITBUTTON', 'td_check', T_('Check user') ));
       if( count($tduser_errors) )
          $tdform->add_row( array( 'TAB', 'TEXT', buildErrorListString( '', $tduser_errors ) ));
