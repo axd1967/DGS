@@ -80,6 +80,16 @@ require_once( "include/form_functions.php" );
 
    $cat = @$_GET['cat'];
    if( $cat !== 'all' && !is_numeric($cat) ) $cat = 0;
+   $entry = (int)@$_GET['e'];
+
+   if( $cat <= 0 )
+      $q_part = '';
+   elseif( $entry )
+      $q_part = "AND entry.ID IN ($cat,$entry)";
+   else
+      $q_part = "AND (entry.ID=$cat OR entry.Parent=$cat)";
+
+   $href_base = 'href="faq.php?read=t'.URI_AMP.'cat=';
 
    if( $is_search )
    { // show matching faq-entries
@@ -96,7 +106,7 @@ require_once( "include/form_functions.php" );
             "INNER JOIN FAQ AS parent ON parent.ID=entry.Parent " .
             "INNER JOIN TranslationTexts AS Question ON Question.ID=entry.Question " .
             "LEFT JOIN TranslationTexts AS Answer ON Answer.ID=entry.Answer " .
-         "WHERE $faqhide " .
+         "WHERE $faqhide $q_part " .
          "ORDER BY CatOrder,ParentOrder,entry.SortOrder";
       $result = db_query( 'faq.search_entries', $query );
 
@@ -104,6 +114,7 @@ require_once( "include/form_functions.php" );
       if( mysql_num_rows($result) > 0 )
       {
          echo "</td></tr><tr><td class=FAQsearch>\n";
+         $qterm_url = 'qterm='.urlencode($qterm).URI_AMP.'search=1';
 
          echo faq_item_html( 0);
          $outbuf = '';
@@ -125,10 +136,11 @@ require_once( "include/form_functions.php" );
             $match = search_faq_match_terms( $question, $answer, $rx_term );
             if( $level == 1 || $match )
             {
-               $a_attb = ( $level == 1 )
-                  ? "href=\"faq.php#Title{$row['ID']}\""
-                  : "name=\"Entry{$row['ID']}\"";
-               $faqtext = faq_item_html( $level, $question, $answer, $a_attb, $rx_term );
+               $href = ( $row['Level'] == 1 )
+                  ? $href_base.$row['ID'].URI_AMP.$qterm_url."#Title{$row['ID']}\""
+                  : $href_base.$row['Parent'].URI_AMP.'e='.$row['ID'].URI_AMP.$qterm_url.'#Entry'.$row['ID'].'"';
+               $attb = "name=\"Entry{$row['ID']}\"";
+               $faqtext = faq_item_html( $level, $question, $answer, $href, $attb, $rx_term );
             }
             else
                $faqtext = '';
@@ -168,7 +180,7 @@ require_once( "include/form_functions.php" );
             "INNER JOIN FAQ AS parent ON parent.ID=entry.Parent " .
             "INNER JOIN TranslationTexts AS Question ON Question.ID=entry.Question " .
             "LEFT JOIN TranslationTexts AS Answer ON Answer.ID=entry.Answer " .
-         "WHERE $faqhide " . ( $cat === 'all' ? '' : "AND (entry.ID=$cat OR entry.Parent=$cat) " ) .
+         "WHERE $faqhide $q_part " .
          "ORDER BY CatOrder,ParentOrder,entry.SortOrder" );
 
       if( mysql_num_rows($result) > 0 )
@@ -178,12 +190,11 @@ require_once( "include/form_functions.php" );
          echo faq_item_html( 0);
          while( $row = mysql_fetch_assoc( $result ) )
          { //expand answers
-            echo faq_item_html( $row['Level']
-                           , $TW_( $row['Q'] ), $TW_( $row['A'] )
-                           , $row['Level'] == 1
-                              ? "href=\"faq.php#Title{$row['ID']}\""
-                              : "name=\"Entry{$row['ID']}\""
-                           );
+            $href = ( $row['Level'] == 1 )
+               ? "href=\"faq.php#Title{$row['ID']}\""
+               : $href_base.$row['Parent'].URI_AMP.'e='.$row['ID'].'#Entry'.$row['ID'].'"';
+            $attb = "name=\"Entry{$row['ID']}\"";
+            echo faq_item_html( $row['Level'], $TW_( $row['Q'] ), $TW_( $row['A'] ), $href, $attb );
             if( $row['Level'] == 1 )
                echo name_anchor("Entry{$row['ID']}");
          }
@@ -209,15 +220,12 @@ require_once( "include/form_functions.php" );
          echo "</td></tr><tr><td class=FAQindex>\n";
 
          echo faq_item_html( 0);
-         $tmp = 'href="faq.php?read=t'.URI_AMP.'cat=';
          while( $row = mysql_fetch_assoc( $result ) )
          { //titles only
-            echo faq_item_html( $row['Level']
-                           , $TW_( $row['Q'] ), ''
-                           , $row['Level'] == 1
-                              ? $tmp.$row['ID'].'#Entry'.$row['ID'].'"'
-                              : $tmp.$row['Parent'].'#Entry'.$row['ID'].'"'
-                           );
+            $href = ( $row['Level'] == 1 )
+               ? $href_base.$row['ID'].'#Entry'.$row['ID'].'"'
+               : $href_base.$row['Parent'].'#Entry'.$row['ID'].'"';
+            echo faq_item_html( $row['Level'], $TW_( $row['Q'] ), '', $href );
             if( $row['Level'] == 1 )
                echo name_anchor("Title{$row['ID']}");
          }

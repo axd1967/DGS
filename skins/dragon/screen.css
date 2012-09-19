@@ -3309,6 +3309,11 @@ table.FAQ td.FAQindex ul.FAQlevel2 {
 table.FAQ td.FAQindex ul.FAQlevel2 strong.Question {
    font-weight: normal;
 }
+strong.QDetail a:link,
+strong.QDetail a:visited {
+   text-decoration: none;
+   color: black;
+}
 
 table.FAQ td.FAQread div.Answer {
    border: 0px solid red;

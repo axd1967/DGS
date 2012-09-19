@@ -25,9 +25,9 @@ require_once 'include/classlib_goban.php';
 /**
  * $level=0 print the start of the container and intialize the function
  * $level=-1 print the end of the container
- * $attbs is the '<A $attbs></A>' arguments which will enclose the $Qtxt
+ * $href + $attbs : is the '<A $href $attbs></A>' arguments which will enclose the $Qtxt
  **/
-function faq_item_html( $level=2, $Qtext='', $Atext='', $attbs='', $rx_term='' )
+function faq_item_html( $level=2, $Qtext='', $Atext='', $href='', $attbs='', $rx_term='' )
 {
    static $prevlevel= 0;
 
@@ -49,8 +49,9 @@ function faq_item_html( $level=2, $Qtext='', $Atext='', $attbs='', $rx_term='' )
          $tmp = make_html_safe( $Qtext, 'cell', $rx_term );
          if( !$tmp )
             $tmp = UNKNOWN_VALUE;
-         if( $attbs )
-            $tmp = "<A $attbs>$tmp</A>";
+         $a_attbs = trim($href . ' ' . $attbs);
+         if( $a_attbs )
+            $tmp = "<A $a_attbs>$tmp</A>";
          $itm = "<strong class=Rubric>$tmp</strong>";
 
          if( $prevlevel > 1 )
@@ -69,9 +70,11 @@ function faq_item_html( $level=2, $Qtext='', $Atext='', $attbs='', $rx_term='' )
          $tmp = make_html_safe( $Qtext, 'cell', $rx_term );
          if( !$tmp )
             $tmp = UNKNOWN_VALUE;
-         if( $attbs )
-            $tmp = "<A $attbs>$tmp</A>";
-         $itm = "<strong class=Question>$tmp</strong>";
+         $a_attbs = trim($href . ' ' . $attbs);
+         if( $a_attbs )
+            $tmp = "<A $a_attbs>$tmp</A>";
+         $qclass = ( (string)$Atext != '' ) ? ' QDetail' : '';
+         $itm = "<strong class=\"Question$qclass\">$tmp</strong>";
 
          $tmp = make_html_safe( $Atext, 'faq', $rx_term );
          if( MarkupHandlerGoban::contains_goban($tmp) )
