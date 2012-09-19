@@ -746,7 +746,8 @@ function message_info_table($mid, $date, $to_me, //$mid==0 means preview
                $fldrs[$key] = $val[0];
          }
 
-         echo $form->print_insert_select_box('folder', '1', $fldrs, '', '');
+         $arg_folder = @$_REQUEST['folder'];
+         echo $form->print_insert_select_box('folder', '1', $fldrs, $arg_folder, '');
          if( $delayed_move )
             echo T_('Move to folder when replying');
          else
