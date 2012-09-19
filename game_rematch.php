@@ -26,6 +26,8 @@ require_once 'include/classlib_user.php';
 
 
 {
+   // NOTE: used by pages: gameinfo.php
+
    connect2mysql();
 
    $logged_in = who_is_logged( $player_row);

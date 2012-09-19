@@ -67,6 +67,8 @@ function retry_admin( $msg)
 
 
 {
+   // NOTE: used by pages: admin_translators.php
+
    connect2mysql();
 
    $logged_in = who_is_logged( $player_row);
