@@ -847,7 +847,8 @@ class DisplayForum
          if( $post->last_edited > 0 )
             $post_reference = date(DATE_FMT, $post->last_edited);
 
-         echo SMALL_SPACING, sprintf( '(%s %s)', T_('No.#num'), $post->creation_order );
+         if( $drawmode_type != DRAWPOST_SEARCH )
+            echo SMALL_SPACING, sprintf( '(%s %s)', T_('No.#num'), $post->creation_order );
 
          echo "</td></tr>";
 
