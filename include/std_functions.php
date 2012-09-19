@@ -2129,7 +2129,7 @@ function make_html_safe( $msg, $some_html=false, $mark_terms='')
    }
 
    return $msg;
-}
+}//make_html_safe
 
 function textarea_safe( $msg, $charenc=false)
 {
@@ -2138,8 +2138,12 @@ function textarea_safe( $msg, $charenc=false)
       $charenc = $encoding_used;
    //else 'iso-8859-1' LANG_DEF_CHARSET
 
+   // NOTE: No: $msg = @htmlentities($msg, ENT_QUOTES, $charenc); //Too much entities for not iso-8859-1 languages
    $msg = @htmlspecialchars($msg, ENT_QUOTES, $charenc);
-   //No: $msg = @htmlentities($msg, ENT_QUOTES, $charenc); //Too much entities for not iso-8859-1 languages
+
+   // NOTE: with PHP 5.3 htmlspecialchars(.., $double_enc=false) has double_enc-arg which is true per default :-(
+   //       Till then we have to decode the &amp; of already encoded original &#xx; entities.
+   $msg = preg_replace( '/(&amp;)(?=#[0-9]+;)/is', '&', $msg);
    return $msg;
 }
 
