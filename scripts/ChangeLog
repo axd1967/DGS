@@ -21,6 +21,59 @@ ChangeLog
 
 2012-09-19 juga
 
+   * forum/forum_functions.php (DisplayForum.draw_post):
+   - bugfix: do not show post-number in forum-search
+
+   * include/error_functions.php (DgsErrors.add_error),
+     include/error_codes.php (ErrorCode.init),
+     include/std_functions.php (is_logged_in),
+     error.php (handle_error),
+     scripts/check_block_ip.php, scripts/check_players_email.php, scripts/clear_datastore.php,
+     scripts/convert_from_old_forum.php, scripts/convert_posindex.php, scripts/data_export.php,
+     scripts/data_report.php, scripts/fix_game_snapshot.php, scripts/fix_games_timeleft.php,
+     scripts/forum_consistency.php, scripts/game_consistency.php, scripts/generate_translation_texts.php,
+     scripts/index.php, scripts/mailtest.php, scripts/message_consistency.php, scripts/player_consistency.php,
+     scripts/server-info.php, scripts/start_frozen_clocks.php, scripts/tournament_consistency.php,
+     scripts/translation_consistency.php, scripts/update_translation_pages.php, scripts/voting_consistency.php,
+     scripts/updates/fix_game_comments-1_0_15.php, scripts/updates/fix_message_thread-1_0_15.php,
+     features/edit_feature.php, features/list_features.php, features/list_votes.php, features/vote_feature.php,
+     forum/admin.php, forum/admin_show_forumlog.php, forum/index.php, forum/list.php, forum/read.php,
+     forum/search.php,
+     tournaments/edit_director.php, tournaments/edit_lock.php, tournaments/edit_news.php,
+     tournaments/edit_participant.php, tournaments/edit_properties.php, tournaments/edit_rules.php,
+     tournaments/edit_status.php, tournaments/edit_tournament.php, tournaments/game_admin.php,
+     tournaments/list_directors.php, tournaments/list_news.php, tournaments/list_participants.php,
+     tournaments/list_tournaments.php, tournaments/manage_tournament.php, tournaments/register.php,
+     tournaments/show_tournament_log.php, tournaments/view_news.php, tournaments/view_tournament.php,
+     tournaments/wizard.php, tournaments/ladder/admin.php, tournaments/ladder/challenge.php,
+     tournaments/ladder/edit_props.php, tournaments/ladder/retreat.php, tournaments/ladder/view.php,
+     tournaments/roundrobin/create_pools.php, tournaments/roundrobin/define_pools.php,
+     tournaments/roundrobin/edit_pairing.php, tournaments/roundrobin/edit_pools.php,
+     tournaments/roundrobin/edit_ranks.php, tournaments/roundrobin/edit_round_props.php,
+     tournaments/roundrobin/edit_round_status.php, tournaments/roundrobin/edit_rounds.php,
+     tournaments/roundrobin/view_pools.php,
+     admin.php, admin_admins.php, admin_bulletin.php, admin_faq.php, admin_game.php, admin_password.php,
+     admin_rating.php, admin_show_adminlog.php, admin_show_errorlog.php, admin_show_faqlog.php,
+     admin_show_users.php, admin_survey.php, admin_translators.php, admin_users.php, bookmark.php,
+     edit_bio.php, edit_bulletin.php, edit_contact.php, edit_folders.php, edit_password.php, edit_picture.php,
+     edit_profile.php, edit_rating.php, edit_shape.php, edit_vacation.php, game_calc.php, game_editor.php,
+     game_players.php, gameinfo.php, goban_editor.php, index.php, list_bulletins.php, list_contacts.php,
+     list_messages.php, list_shapes.php, list_surveys.php, login.php, message.php, message_thread.php,
+     new_game.php, old_goban_editor.php, opponents.php, ratinggraph.php, search_messages.php, show_games.php,
+     status.php, templates.php, translate.php, userinfo.php, users.php, view_bulletin.php, view_shape.php,
+     view_survey.php, waiting_room.php:
+   - jump to login-page if not logged-in for web-site pages
+     - redirecting and passing on "current" page through error()-call with special handling
+       for new error-code 'login_if_not_logged_in'
+     - show error-code on login-page indicating problem to user
+     - not done for
+       - pages that users can not directly view like follow-up-pages on form-actions,
+         game-comments or game-rematch-handling-page
+       - not done for pages that generate images
+       - not done for quick-suite or similar pages like quick-status, quick-play
+   - on fever-vault (user-web-access quota exceeded) log out and jump to login-page
+     with fever_vault-error
+
    * include/std_functions.php (echo_dragon_top_bar):
    - added Players.ID of logged-in user as tooltip on Handle top-bar at right-side
 
