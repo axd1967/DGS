@@ -1855,6 +1855,24 @@ body.Donation table#pageLayout td#pageBody div.Section table {
    width: 60%;
 }
 
+body.Goodies table#pageLayout td#pageBody div {
+   width: 85%;
+   text-align: left;
+   background-color: white;
+   padding: 0.1em 1.5em;
+}
+body.Goodies li {
+   margin-top: 2em;
+   border-top: 1px solid gray;
+   padding: 0px 1em;
+}
+body.Goodies pre {
+   margin: 0.5em 0px;
+   background-color: #f0f0f0;
+   overflow: visible;
+}
+
+
 
 /* ------------------------- */
 /* translations page */
