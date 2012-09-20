@@ -328,19 +328,18 @@ function start_html( $title, $no_cache, $skinname=NULL, $style_string=NULL, $las
 
    //This full DOCTYPE make most of the browsers to leave the "quirks" mode.
    //This may be a disavantage with IE5-mac because its "conform" mode is worst.
-   echo '<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"'
-         .' "http://www.w3.org/TR/html4/loose.dtd">';
+   echo '<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">';
 
    echo "\n<HTML>\n<HEAD>";
 
-   echo "\n <META http-equiv=\"content-type\" content=\"text/html;charset=$encoding_used\">";
+   echo "\n <meta http-equiv=\"content-type\" content=\"text/html;charset=$encoding_used\">";
 
-   echo "\n <META NAME=\"DESCRIPTION\" CONTENT=\"To play go on a turn by turn basis.\">";
+   echo "\n <meta name=\"description\" content=\"To play go on a turn by turn basis.\">";
 
-   echo "\n <TITLE>".basic_safe(FRIENDLY_SHORT_NAME." - $title")."</TITLE>";
+   echo "\n <title>".basic_safe(FRIENDLY_SHORT_NAME." - $title")."</title>";
 
    //because of old browsers favicon.ico should always stay in the root folder
-   echo "\n <LINK REL=\"shortcut icon\" TYPE=\"image/x-icon\" HREF=\"".HOSTBASE."favicon.ico\">";
+   echo "\n <link rel=\"shortcut icon\" type=\"image/x-icon\" href=\"".HOSTBASE."favicon.ico\">";
 
    if( !isset($skinname) || !$skinname )
       $skinname = 'dragon';
