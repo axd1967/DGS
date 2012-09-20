@@ -34,7 +34,8 @@ ChangeLog
      index.php, introduction.php, rank_converter.php, faq.php, news.php,
      policy.php, docs.php, goodies/index.php
 
-   * goodies/index.php, skins/dragon/screen.css, docs.php:
+   * goodies/index.php, scripts/update_translation_pages.php,
+     skins/dragon/screen.css, docs.php:
    - added link to goodies-page
    - re-structured goodies-page to use standard DGS-layout
 

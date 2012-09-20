@@ -107,6 +107,7 @@ function find_php_files( )
 {
    $directories = array(
            ''
+         , 'goodies/'
          , 'include/'
          , 'include/db/'
          , 'include/quick/'
