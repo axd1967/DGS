@@ -23,6 +23,9 @@ ChangeLog
 
 ### ----- release-1_0_15-20120608 -----
 
+   * include/globals.php (CSS_VERSION), skins/dragon/screen.css:
+   - use darker colors for feature-points
+
    * include/page_functions.php (class HTMLPage, ~.set_meta_robots, ~.set_meta_keywords; class Page),
      include/std_functions.php (DGS_DESCRIPTION, start_html),
      robots.txt, sitemap.xml,

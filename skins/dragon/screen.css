@@ -3615,10 +3615,10 @@ div.Bulletin div.MarkRead a:hover {
 /* ------------------------- */
 
 span.Negative {
-   color: red;
+   color: #bb0000; /*red*/
 }
 span.Positive {
-   color: blue;
+   color: #0000c0; /*blue*/
 }
 
 span.VotingRestricted {
