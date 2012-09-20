@@ -21,6 +21,8 @@ $TranslateGroups[] = "Game";
 
 require_once 'include/rank_converter.php';
 
+$GLOBALS['ThePage'] = new Page('RankConverter');
+
 
 {
    connect2mysql();

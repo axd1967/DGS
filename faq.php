@@ -23,6 +23,8 @@ require_once( "include/std_functions.php" );
 require_once( "include/faq_functions.php" );
 require_once( "include/form_functions.php" );
 
+$GLOBALS['ThePage'] = new Page('FAQ');
+
 {
    connect2mysql();
 
