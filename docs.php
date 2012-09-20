@@ -20,7 +20,10 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 $TranslateGroups[] = "Docs";
 
 require_once( "include/std_functions.php" );
-$GLOBALS['ThePage'] = new Page('Docs');
+
+$GLOBALS['ThePage'] = new Page('Docs', ROBOTS_NO_FOLLOW,
+   "Overview of static documents of the Dragon Go Server (DGS) where you can play turn-based Go (aka Baduk or Weichi).",
+   'documents, introduction, policy, links, site map, contributors' );
 
 {
    connect2mysql();

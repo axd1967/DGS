@@ -19,12 +19,29 @@ Developers INFO:
 ChangeLog
 ------------------------------------------------------------------
 
-2012-09-19 juga
+2012-09-20 juga
 
 ### ----- release-1_0_15-20120608 -----
 
+   * include/page_functions.php (class HTMLPage, ~.set_meta_robots, ~.set_meta_keywords; class Page),
+     include/std_functions.php (DGS_DESCRIPTION, start_html),
+     robots.txt, sitemap.xml,
+     docs.php, faq.php, index.php, introduction.php, news.php, policy.php, rank_converter.php,
+     goodies/index.php:
+   - allow <meta>-tags with page-specific description, robots, keywords
+   - add sitemap and adjusted robots.txt with indexable pages for web-crawlers
+   - added meaningful content for meta-description/robots/keywords-directives for static pages:
+     index.php, introduction.php, rank_converter.php, faq.php, news.php,
+     policy.php, docs.php, goodies/index.php
+
+   * goodies/index.php, skins/dragon/screen.css, docs.php:
+   - added link to goodies-page
+   - re-structured goodies-page to use standard DGS-layout
+
+2012-09-19 juga
+
    * include/game_functions.php (GameNotify.get_text_game_result):
-   - adjusted text for reject-win-by-timeout: making it clearer it is an automatic action
+   - adjusted text for reject-win-by-timeout: making it clearer that it is an automatic action
 
    * tournaments/edit_director.php:
    - bugfix: remove double textarea_safe()

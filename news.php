@@ -37,10 +37,13 @@ function build_TOC( $text )
          . '<hr noshade="1" size="1">';
    else
       return '';
-} //build_TOC
+}//build_TOC
+
 
 {
-   $GLOBALS['ThePage'] = new Page('News');
+   $GLOBALS['ThePage'] = new Page('News', ROBOTS_NO_FOLLOW,
+      "Release notes with the list of features for the Dragon Go Server (DGS), where you can play turn-based Go (aka Baduk or Weichi).",
+      'release notes, new features, features, news' );
 
    connect2mysql();
 

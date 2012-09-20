@@ -22,7 +22,9 @@ $TranslateGroups[] = "Start";
 require_once( "include/std_functions.php" );
 
 {
-   $GLOBALS['ThePage'] = new Page('Policy');
+   $GLOBALS['ThePage'] = new Page('Policy', ROBOTS_NO_FOLLOW,
+      "Terms of service (policy) for the Dragon Go Server (DGS) where you can play turn-based Go (aka Baduk or Weichi) with other players from around the world.",
+      'policy, terms of service, rules, rules of conduct, privacy, behavior, etiquette' );
 
    connect2mysql();
 

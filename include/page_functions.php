@@ -24,6 +24,10 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
  * \brief Functions for creating Dragon pages.
  */
 
+define('ROBOTS_NO_INDEX_NOR_FOLLOW', 'noindex, nofollow'); // default
+define('ROBOTS_NO_FOLLOW', 'nofollow');
+define('ROBOTS_NO_INDEX', 'noindex');
+
 /*!
  * \class HTMLPage
  *
@@ -39,11 +43,20 @@ class HTMLPage
    /*! \brief Script of the page relative to the root, e.g: 'forum/index.php' */
    var $BaseName;
 
+   // HTML-head <meta>-tags should be added for the crawler-indexed pages (see sitemap.xml or robots.txt)
+   var $meta_description;
+   var $meta_robots; // ROBO_...
+   var $meta_keywords;
+
 
    /*! \publicsection */
 
-   /*! \brief Constructor. Create a new page and initialize it. */
-   function HTMLPage( $_pageid=false )
+   /*!
+    * \brief Constructor. Create a new page and initialize it.
+    * \param $meta_robots '' (use default from start_html()-func); otherwise ROBO_...
+    * \param $meta_description description for page-meta-tag; should be in enlish (not translatable)
+    */
+   function HTMLPage( $_pageid=false, $meta_robots='', $meta_description='', $meta_keywords='' )
    {
       $this->BaseName = substr( @$_SERVER['PHP_SELF'], strlen(SUB_PATH));
 
@@ -51,6 +64,10 @@ class HTMLPage
          $_pageid = substr( $this->BaseName, 0, strrpos($this->BaseName,'.'));
       //make it CSS compatible, just allowing the space (see getCSSclass())
       $this->ClassCSS = preg_replace('%[^ a-zA-Z0-9]+%', '-', $_pageid);
+
+      $this->meta_description = $meta_description;
+      $this->meta_robots = $meta_robots;
+      $this->meta_keywords = $meta_keywords;
 
       /*
        * a soon bufferization seems to prevent a possible E_WARNING message
@@ -75,6 +92,17 @@ class HTMLPage
       return $this->ClassCSS;
    }
 
+   // \param $meta_robots : ROBO_...
+   function set_meta_robots( $meta_robots )
+   {
+      $this->meta_robots = $meta_robots;
+   }
+
+   function set_meta_keywords( $meta_keywords )
+   {
+      $this->meta_keywords = $meta_keywords;
+   }
+
 } //class HTMLPage
 
 
@@ -85,9 +113,9 @@ class HTMLPage
  */
 class Page extends HTMLPage
 {
-   function Page( $_pageid=false )
+   function Page( $_pageid=false, $meta_robots='', $meta_description='', $meta_keywords='' )
    {
-      parent::HTMLPage( $_pageid );
+      parent::HTMLPage( $_pageid, $meta_robots, $meta_description, $meta_keywords );
    }
 } //class Page
 

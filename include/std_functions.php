@@ -53,6 +53,9 @@ require_once( "include/survey_control.php" );
 define('BEGINYEAR', 2001);
 define('BEGINMONTH', 8);
 
+define('DGS_DESCRIPTION',
+   "The Dragon Go Server (DGS) is a place where you can play turn-based Go (aka Baduk or Weichi) with other players from around the world in different time zones. " .
+   "It functions more or less the same way as playing Go via email but just using your web browser. DGS also provides discussion forums about Go." );
 
 // because of the cookies host, $hostname_jump = true is nearly mandatory
 global $hostname_jump; //PHP5
@@ -318,7 +321,8 @@ function start_html( $title, $no_cache, $skinname=NULL, $style_string=NULL, $las
       disable_cache($last_modified_stamp);
 
    global $ThePage;
-   if( !is_a($ThePage, 'HTMLPage') )
+   $has_thepage = ( is_a($ThePage, 'HTMLPage') );
+   if( !$has_thepage )
       ob_start('ob_gzhandler');
 
    if( empty($encoding_used) )
@@ -334,7 +338,18 @@ function start_html( $title, $no_cache, $skinname=NULL, $style_string=NULL, $las
 
    echo "\n <meta http-equiv=\"content-type\" content=\"text/html;charset=$encoding_used\">";
 
-   echo "\n <meta name=\"description\" content=\"To play go on a turn by turn basis.\">";
+   $meta_description = ( $has_thepage && $ThePage->meta_description )
+      ? $ThePage->meta_description
+      : 'Play the board game Go on a turn by turn basis.';
+   echo "\n <meta name=\"description\" content=\"$meta_description\">";
+
+   $meta_robots = ( $has_thepage && $ThePage->meta_robots ) ? $ThePage->meta_robots : ROBOTS_NO_INDEX_NOR_FOLLOW;
+   echo "\n <meta name=\"robots\" content=\"$meta_robots\">";
+
+   $meta_keywords = 'dgs, dragon, dragon go server, go server, go, igo, weiqi, weichi, baduk, board game, boardgame, turn-based, correspondence';
+   if( $has_thepage && $ThePage->meta_keywords )
+      $meta_keywords .= ', ' . $ThePage->meta_keywords;
+   echo "\n <meta name=\"keywords\" content=\"$meta_keywords\">";
 
    echo "\n <title>".basic_safe(FRIENDLY_SHORT_NAME." - $title")."</title>";
 

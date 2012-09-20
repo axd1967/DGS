@@ -714,6 +714,8 @@ Copyright (C) 2001-2012  Erik Ouchterlony
 
    * Added <home donation.php>Donation page</home> (deactivated when target reached)
 
+   * Added meaningful content to let web-crawlers index static informative DGS pages
+
    * <home statistics.php>Statistics page</home>:
       * Added statistic view with <home statistics.php?stats=1>user countries</home> also showing all existing flags
       * Restrict the 'loadavg'-stats to admins view
