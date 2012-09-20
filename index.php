@@ -54,6 +54,7 @@ $GLOBALS['ThePage'] = new Page('Start', ROBOTS_NO_FOLLOW, DGS_DESCRIPTION,
       $player_row['Handle'] = $user_handle;
    }
 
+   T_('Home'); // keep translations
    start_page(T_('Dragon Go Server'), true, $logged_in, $player_row );
 
 
