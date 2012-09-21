@@ -1,7 +1,7 @@
 # Syntax: http://en.wikipedia.org/wiki/Robots_Exclusion_Standard
 # NOTES: Allow is not known to all crawlers
-Sitemap: http://www.dragongoserver.net/sitemap.xml
 User-agent: *
+Allow: /index.php
 Allow: /docs.php
 # FAQ: what is this place?
 Allow: /faq.php?read=t&cat=48&e=49
@@ -12,4 +12,5 @@ Allow: /news.php
 Allow: /policy.php
 Allow: /rank_converter.php
 Disallow: /
+Sitemap: http://www.dragongoserver.net/sitemap.xml
 
