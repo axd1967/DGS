@@ -241,7 +241,7 @@ $GLOBALS['ThePage'] = new Page('TournamentLadderView');
             $row_str[12] = $run_games_str;
          if( $ltable->Is_Column_Displayed[13] )
             $row_str[13] = TimeFormat::echo_time_diff( $GLOBALS['NOW'], $user->Lastaccess, 24, TIMEFMT_SHORT|TIMEFMT_ZERO );
-         if( $ltable->Is_Column_Displayed[14] )
+         if( $need_tp_rating && @$ltable->Is_Column_Displayed[14] )
             $row_str[14] = echo_rating( $orow['TP_Rating'], true, $uid);
 
          if( $is_mine )
