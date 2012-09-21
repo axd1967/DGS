@@ -258,7 +258,7 @@ function db_unlock()
 function db_query( $debugmsg, $query, $errorcode='mysql_query_failed' )
 {
    //echo $debugmsg.'.db_query='.$query.'<br>';
-   if( DBG_QUERY ) error_log("db_query($debugmsg,$errorcode): query=[$query]");
+   if( DBG_QUERY && DBG_QUERY <= 2 ) error_log("db_query($debugmsg,$errorcode): query=[$query]");
    //for debug: $result = ( preg_match( "/^(insert|update|delete)/i", $query )) ? 1 : mysql_query($query);
    if( @$GLOBALS['is_down'] )
    {
@@ -270,7 +270,9 @@ function db_query( $debugmsg, $query, $errorcode='mysql_query_failed' )
       }
    }
 
+   $begin_time = getmicrotime();
    $result = mysql_query($query);
+   if( DBG_QUERY > 2 ) error_log("db_query($debugmsg,$errorcode)[" . round( 1000 * (getmicrotime()-$begin_time) ) . "ms]: query=[$query]");
    if( $result )
       return $result;
    if( is_string($debugmsg) )
