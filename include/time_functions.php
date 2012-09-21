@@ -34,8 +34,7 @@ define('REGEX_BYOTYPES', '('.BYOTYPE_JAPANESE.'|'.BYOTYPE_CANADIAN.'|'.BYOTYPE_F
 
 function getmicrotime()
 {
-   list($usec, $sec) = explode(" ",microtime());
-   return ((float)$usec + (float)$sec);
+   return microtime(/*float*/true);
 }
 
 function unix_timestamp($date)
