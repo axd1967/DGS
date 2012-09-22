@@ -526,7 +526,7 @@ else
    $next_game_order = @$player_row['NextGameOrder'];
    $qsql = NextGameOrder::build_status_games_query( $my_id, IS_STARTED_GAME, $next_game_order );
 
-   $result = db_query( 'rss4', $qsql->get_select() );
+   $result = db_query( 'rss.find_games', $qsql->get_select() );
    $cat= 'Status/Game';
    $clrs="BW"; //player's color... so color to play.
    while( $row = mysql_fetch_assoc($result) )
