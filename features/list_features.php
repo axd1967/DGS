@@ -52,6 +52,14 @@ require_once( "features/lib_votes.php" );
 
    $page = 'list_features.php?';
 
+   if( @$_REQUEST['vote_neutral'] && $user_can_vote )
+   {
+      if( handle_vote_neutral($my_id) )
+         jump_to("features/list_features.php?status=2".URI_AMP.'my_vote=1'.SPURI_ARGS.'status,my_vote');
+   }
+   $toggle_marks = (bool)@$_REQUEST['toggle_marks'];
+
+
    // init search profile
    $search_profile = new SearchProfile( $my_id, PROFTYPE_FILTER_FEATURES );
    $ffilter = new SearchFilter( '', $search_profile );
@@ -83,6 +91,14 @@ require_once( "features/lib_votes.php" );
    $ffilter->add_filter(10, 'Selection', Feature::build_filter_selection_size('F.Size'), true );
    $ffilter->init(); // parse current value from _GET
    $rx_term = implode('|', $filter_subject->get_rx_terms() );
+   $is_vote_features = ( $filter_my_vote->value == 1 && $filter_status->value == 2 ); // UNVOTED + VOTE-status
+   $allow_vote_neutral = $is_vote_features && $user_can_vote;
+
+   if( $allow_vote_neutral )
+   {
+      $ftable->make_table_form();
+      $ftable->set_extend_table_form_function( 'features_vote_neutral_extend_table_form' ); //func
+   }
 
    // init table
    $ftable->register_filter( $ffilter );
@@ -115,7 +131,7 @@ require_once( "features/lib_votes.php" );
 
    if( $filter_my_vote->value == 2 ) // VOTED
       $title = T_('My Feature Votes#title');
-   elseif( $filter_my_vote->value == 1 && $filter_status->value == 2 ) // UNVOTED + VOTE
+   elseif( $is_vote_features ) // UNVOTED + VOTE-status
       $title = T_('Features to vote on');
    else
       $title = T_('Features');
@@ -164,13 +180,25 @@ require_once( "features/lib_votes.php" );
             $frow_strings[9] = ($fvote->lastchanged > 0 ? date(DATE_FMT2, $fvote->lastchanged) : '' );
       }
       else if( $feature->allow_vote() )
-         $frow_strings[8] = array( 'text' => MINI_SPACING.'?', 'attbs' => array( 'class' => 'MissVote' ) );
+      {
+         if( $allow_vote_neutral )
+         {
+            $name = "vf$ID";
+            $checked = ((bool)@$_REQUEST[$name] xor $toggle_marks);
+            $chk_str = $ftable->TableForm->print_insert_checkbox($name, '1', '', $checked,
+               array( 'title' => T_('Mark for setting neutral vote') ) );
+         }
+         else
+            $chk_str = '';
+         $frow_strings[8] = array( 'text' => $chk_str . ' ?', 'attbs' => array( 'class' => 'MissVote' ) );
+      }
       if( $ftable->Is_Column_Displayed[10] )
          $frow_strings[10] = $feature->size;
 
       $ftable->add_row( $frow_strings );
    }
    mysql_free_result($result);
+
    $ftable->echo_table();
 
    // end of table
@@ -189,5 +217,37 @@ require_once( "features/lib_votes.php" );
          array( 'url' => "features/edit_feature.php", 'class' => 'AdminLink' );
 
    end_page(@$menu_array);
+}//main
+
+
+function features_vote_neutral_extend_table_form( &$table, &$form )
+{
+   return $form->print_insert_submit_button( 'toggle_marks', T_('Toggle Marks') )
+      . MED_SPACING
+      . $form->print_insert_submit_button( 'vote_neutral', T_('Set Neutral Vote') );
 }
+
+function handle_vote_neutral( $my_id )
+{
+   $feature_ids = array();
+   foreach( $_REQUEST as $key => $val )
+   {
+      if( preg_match("/^vf(\d+)$/", $key, $matches) )
+         $feature_ids[]= $matches[1];
+   }
+
+   if( count($feature_ids) > 0 )
+   {
+      ta_begin();
+      {//HOT-section to update feature-vote
+         FeatureVote::insert_feature_neutral_votes( $my_id, $feature_ids );
+         Feature::update_count_feature_new( "list_features.handle_vote_neutral", $my_id, -1 );
+      }
+      ta_end();
+      return true;
+   }
+   else
+      return false;
+}//handle_vote_neutral
+
 ?>

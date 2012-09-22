@@ -634,10 +634,7 @@ class FeatureVote
    }
 
 
-   /*!
-    * \brief Updates current FeatureVote-data into database (may replace existing featurevote,
-    *        set lastchanged=NOW and IP of voter).
-    */
+   /*! \brief Updates current FeatureVote-data into database (may replace existing featurevote, set lastchanged=NOW). */
    function update_feature_vote()
    {
       global $NOW;
@@ -794,6 +791,24 @@ class FeatureVote
          return null;
 
       return FeatureVote::new_from_row( $row );
+   }
+
+   /*! \brief Inserts new FeatureVote-entries into database with 0 points (neutral vote). */
+   function insert_feature_neutral_votes( $uid, $feature_ids )
+   {
+      global $NOW;
+
+      if( count($feature_ids) > 0 )
+      {
+         // (fid,Voter_ID,Points,Lastchanged)
+         $val_sets = array();
+         foreach( $feature_ids as $fid )
+            $val_sets[] = sprintf('(%s,%s,0,FROM_UNIXTIME(%s))', $fid, $uid, $NOW );
+
+         // NOTE: must not use REPLACE as then we would need to handle existing Points<>0
+         db_query( "featurevote::insert_feature_neutral_votes($uid)",
+            'INSERT INTO FeatureVote (fid,Voter_ID,Points,Lastchanged) VALUES ' . implode(', ', $val_sets) );
+      }
    }
 
    /*! \brief Returns text informing about remaining feature-points. */
