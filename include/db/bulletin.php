@@ -302,6 +302,11 @@ class Bulletin
       return ($errmsg) ? error('bulletin_edit_not_allowed', "$errmsg.last_check") : false;
    }//allow_bulletin_user_edit
 
+   function allow_bulletin_user_view()
+   {
+      return ( $this->Status == BULLETIN_STATUS_SHOW || $this->Status == BULLETIN_STATUS_ARCHIVE );
+   }
+
    /*! \brief Returns true if this Bulletin.Category should be skipped according to Players.SkipBulletin-flags. */
    function skipCategory()
    {

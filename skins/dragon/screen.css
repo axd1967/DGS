@@ -182,8 +182,11 @@ a.linkmarkup {
    text-align: right;
 }
 
-.nowrap
-{
+.smaller {
+   font-size: smaller
+}
+
+.nowrap {
    white-space: nowrap;
 }
 

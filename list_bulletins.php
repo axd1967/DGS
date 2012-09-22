@@ -44,6 +44,9 @@ $GLOBALS['ThePage'] = new Page('BulletinList');
    $was_admin = $is_admin = Bulletin::is_bulletin_admin();
    $mine = (@$_REQUEST['mine']) ? 1 : 0;
    $no_adm = ($mine || @$_REQUEST['no_adm']) ? 1 : 0;
+   //FIXME later
+   //$no_adm = (@$_REQUEST['no_adm']) ? 1 : 0;
+   //if( $mine && !$was_admin ) $no_adm = 1;
    if( $no_adm )
       $is_admin = false;
    $view_edit = $is_admin || $mine;
@@ -150,6 +153,7 @@ $GLOBALS['ThePage'] = new Page('BulletinList');
    if( $view_edit )
       $bfilter->add_filter(12, 'Selection', $adminview_filter_array, true,
             array( FC_FNAME => 'view', FC_STATIC => 1, FC_ADD_HAVING => 1 ) );
+   $bfilter->add_filter(14, 'Numeric', 'B.ID', true);
    $bfilter->init();
 
    if( $mine )
@@ -173,6 +177,7 @@ $GLOBALS['ThePage'] = new Page('BulletinList');
    $btable->add_external_parameters( $page_vars, true ); // add as hiddens
 
    // add_tablehead($nr, $descr, $attbs=null, $mode=TABLE_NO_HIDE|TABLE_NO_SORT, $sortx='')
+   $btable->add_tablehead(14, T_('ID#header'), 'Button', TABLE_NO_HIDE, 'ID-');
    $btable->add_tablehead( 8, T_('Target#bulletin'), 'Enum', TABLE_NO_HIDE, 'TargetType+');
    $btable->add_tablehead( 3, T_('Status#header'), 'Enum', TABLE_NO_HIDE, 'Status+');
    $btable->add_tablehead( 4, T_('Category#bulletin'), 'Enum', TABLE_NO_HIDE, 'Category+');
@@ -206,7 +211,8 @@ $GLOBALS['ThePage'] = new Page('BulletinList');
 
 
    $title = T_('Bulletin Board');
-   start_page($title, true, $logged_in, $player_row );
+   start_page($title, true, $logged_in, $player_row,
+               button_style($player_row['Button']) );
 
    if( $DEBUG_SQL ) echo "QUERY: " . make_html_safe( $iterator->Query );
    if( $is_admin )
@@ -236,6 +242,10 @@ $GLOBALS['ThePage'] = new Page('BulletinList');
       $uid = $bulletin->uid;
       $row_str = array();
 
+      if( $btable->Is_Column_Displayed[14] )
+         $row_str[14] = ($bulletin->allow_bulletin_user_view())
+            ? button_TD_anchor( "view_bulletin.php?bid=".$bulletin->ID, $bulletin->ID )
+            : "<a class=\"Button smaller\">{$bulletin->Status}</a>";
       if( @$btable->Is_Column_Displayed[ 1] )
       {
          $links = '';
