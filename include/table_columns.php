@@ -536,20 +536,23 @@ class Table
       }
    }
 
-   function make_table_form( $need_form=true )
+   function make_table_form( $need_form=true, $overwrite=false )
    {
-      if( !is_null($this->ExternalForm) )
-         $this->TableForm = $this->ExternalForm; // read-only
-      elseif( $need_form || !($this->Mode & TABLE_NO_HIDE) ) // need form for filter, show-rows or add-column
+      if( is_null($this->TableForm) || $overwrite )
       {
-         $table_form = new Form( $this->Prefix.'tableFAC', // Filter/AddColumn-table-form
-            clean_url( $this->Page),
-            FORM_GET, false, 'FormTableFAC');
-         $table_form->attach_table($this);
-         $this->TableForm = $table_form;
+         if( !is_null($this->ExternalForm) )
+            $this->TableForm = $this->ExternalForm; // read-only
+         elseif( $need_form || !($this->Mode & TABLE_NO_HIDE) ) // need form for filter, show-rows or add-column
+         {
+            $table_form = new Form( $this->Prefix.'tableFAC', // Filter/AddColumn-table-form
+               clean_url( $this->Page),
+               FORM_GET, false, 'FormTableFAC');
+            $table_form->attach_table($this);
+            $this->TableForm = $table_form;
+         }
+         else
+            $this->TableForm = NULL;
       }
-      else
-         $this->TableForm = NULL;
 
       return $this->TableForm;
    }
