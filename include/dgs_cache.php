@@ -1,0 +1,153 @@
+<?php
+/*
+Dragon Go Server
+Copyright (C) 2001-2012  Erik Ouchterlony, Jens-Uwe Gaspar
+
+This program is free software: you can redistribute it and/or modify
+it under the terms of the GNU Affero General Public License as
+published by the Free Software Foundation, either version 3 of the
+License, or (at your option) any later version.
+
+This program is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU Affero General Public License for more details.
+
+You should have received a copy of the GNU Affero General Public License
+along with this program.  If not, see <http://www.gnu.org/licenses/>.
+*/
+
+ /* Author: Jens-Uwe Gaspar */
+
+require_once 'include/globals.php';
+
+ /*!
+  * \file dgs_cache.php
+  *
+  * \brief Container and function to handle caching using different cache methods on DGS.
+  */
+
+if( !defined('DGS_CACHE') )
+   define('DGS_CACHE', 0); // 0=no-cache, cache-class-name (e.g. ApcCache)
+if( !defined('DBG_CACHE') )
+   define('DBG_CACHE', 0);
+
+
+/*! \brief basic cache interface with basic cache-operations. */
+interface CacheInterface
+{
+   /*! \brief Returns stored cache-entry for given cache-key; or else null. */
+   public function cache_fetch( $id );
+
+   /*!
+    * \brief Stores cache-entry for given cache-key with given TTL [secs].
+    * \param $data storing NULL is possible but not detectable, so don't use it!!
+    */
+   public function cache_store( $id, $data, $ttl );
+
+   /*! \brief Deletes cache-entry for given cache-key. */
+   public function cache_delete( $id );
+
+} // end of 'CacheInterface'
+
+
+/*! \brief Cache-implementation with (shared-memory) APC-based cache. */
+class ApcCache implements CacheInterface
+{
+   public function cache_fetch( $id )
+   {
+      $result = apc_fetch($id, $success);
+      return ( $success ) ? $result : null;
+   }
+
+   public function cache_store( $id, $data, $ttl )
+   {
+      return apc_store( $id, $data, $ttl );
+   }
+
+   public function cache_delete( $id )
+   {
+      return apc_delete($id);
+   }
+} // end of 'ApcCache'
+
+
+
+ /*!
+  * \class DgsCache
+  *
+  * \brief Wrapper-class to cache objects with grouped-keys.
+  *
+  * \note use const DGS_CACHE (=Cache-class or 0=no-cache) to setup which cache-implementation to use
+  * \note use const DBG_CACHE for logging cache-calls into error-log (if >0)
+  *
+  * \see specs/caching.txt
+  */
+class DgsCache
+{
+   var $cache_impl;
+
+   private function DgsCache()
+   {
+      // NOTE (JUG): I wanted to call static cache-specific-functions like: $class=DGS_CACHE; $class::cache_func(..)
+      //    but that construction needs PHP >= 5.3 (and live-server is still PHP 5.1).
+      //    Therefore we need an instance of the cache-implementation using object-methods.
+      if( DGS_CACHE == 'ApcCache' )
+         $this->cache_impl = new ApcCache();
+      else
+         $this->cache_impl = null;
+   }
+
+   // ------------ static functions ----------------------------
+
+   function is_shared_enabled()
+   {
+      return ( DGS_CACHE == 'ApcCache' );
+   }
+
+   function get_cache()
+   {
+      global $DGS_CACHE;
+      if( !@$DGS_CACHE )
+         $DGS_CACHE = new DgsCache();
+
+      return $DGS_CACHE->cache_impl;
+   }
+
+
+   function fetch( $dbgmsg, $id )
+   {
+      $cache = DgsCache::get_cache();
+      if( !$cache )
+         return null;
+
+      $result = $cache->cache_fetch( $id );
+      if( DBG_CACHE ) error_log("DgsCache.fetch($id).$dbgmsg = [" . (is_null($result) ? 'NULL' : $result) . "]");
+      return $result;
+   }
+
+   function store( $dbgmsg, $id, $data, $ttl )
+   {
+      $cache = DgsCache::get_cache();
+      if( !$cache )
+         return false;
+
+      $result = $cache->cache_store( $id, $data, $ttl );
+      if( DBG_CACHE ) error_log("DgsCache.store($id).$dbgmsg = [" . (is_null($result) ? 'NULL' : $result) . "]");
+      return $result;
+   }
+
+   function delete( $dbgmsg, $id )
+   {
+      $cache = DgsCache::get_cache();
+      if( !$cache )
+         return true;
+
+      $result = $cache->cache_delete( $id );
+      if( DBG_CACHE ) error_log("DgsCache.delete($id).$dbgmsg = [" . (is_null($result) ? 'NULL' : $result) . "]");
+      return $result;
+   }
+
+} // end of 'DgsCache'
+
+?>
