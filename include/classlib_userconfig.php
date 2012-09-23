@@ -19,6 +19,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 require_once( 'include/globals.php' );
 require_once( 'include/classlib_bitset.php' );
+require_once( 'include/dgs_cache.php' );
 
  /* Author: Jens-Uwe Gaspar */
 
@@ -539,11 +540,17 @@ class ConfigPages
       ConfigPages::_check_user_id( $uid, $dbgmsg );
       $cfg_size = ($col_name) ? ConfigTableColumns::get_config_size($col_name, $dbgmsg) : 0;
 
-      $fieldset = 'User_ID,StatusFlags,StatusFolders,ForumFlags';
-      if( $col_name )
-         $fieldset .= ',' . ConfigTableColumns::build_fieldset( $col_name );
-      $row = mysql_single_fetch("ContactPages::load_config_pages.find($uid,$col_name)",
-            "SELECT $fieldset FROM ConfigPages WHERE User_ID='$uid' LIMIT 1");
+      // need different handling to load only specific field or caching all fields
+      if( DgsCache::is_shared_enabled() )
+         $row = ConfigPages::load_cache_config_pages( $uid );
+      else
+      {
+         $fieldset = 'User_ID,StatusFlags,StatusFolders,ForumFlags';
+         if( $col_name )
+            $fieldset .= ',' . ConfigTableColumns::build_fieldset( $col_name );
+         $row = mysql_single_fetch("ContactPages::load_config_pages.find($uid,$col_name)",
+               "SELECT $fieldset FROM ConfigPages WHERE User_ID='$uid' LIMIT 1");
+      }
       if( !$row )
          return null;
 
@@ -562,6 +569,25 @@ class ConfigPages
 
       return $config;
    }//load_config_pages
+
+   function load_cache_config_pages( $uid )
+   {
+      $dbgmsg = "ConfigPages::load_cache_config_pages($uid)";
+      $key = "ConfigPages.$uid";
+      $row = DgsCache::fetch($dbgmsg, $key);
+      if( is_null($row) )
+      {
+         $row = mysql_single_fetch($dbgmsg.'.find', "SELECT * FROM ConfigPages WHERE User_ID='$uid' LIMIT 1" );
+         if( !is_null($row) )
+            DgsCache::store( $dbgmsg, $key, $row, SECS_PER_DAY );
+      }
+      return $row;
+   }//load_cache_config_pages
+
+   function delete_cache_config_pages( $uid )
+   {
+      DgsCache::delete("ConfigPages::load_cache_config_pages($uid)", "ConfigPages.$uid");
+   }
 
    /*!
     * \brief (static) Updates ContigPages-table for given user_id
@@ -583,8 +609,11 @@ class ConfigPages
          else
             $sqlpart = $field_set_query;
          if( $sqlpart )
+         {
             db_query( $errmsg,
                "UPDATE ConfigPages SET $sqlpart WHERE User_ID='$user_id' LIMIT 1" );
+            ConfigPages::delete_cache_config_pages( $user_id );
+         }
       }
    }//_update_query
 
@@ -603,6 +632,7 @@ class ConfigPages
       {
          db_query( "ConfigPages::toggle_forum_flags.toggle_flag($uid,$flag)",
             "UPDATE ConfigPages SET ForumFlags=ForumFlags ^ $flag WHERE User_ID='$uid' LIMIT 1" );
+         ConfigPages::delete_cache_config_pages( $uid );
          return 1;
       }
       return 0;
@@ -615,6 +645,7 @@ class ConfigPages
       {
          db_query( "ConfigPages::set_clear_forum_flags.upd($uid,$clear_flags,$set_flags)",
             "UPDATE ConfigPages SET ForumFlags=(ForumFlags & ~$clear_flags) | $set_flags WHERE User_ID='$uid' LIMIT 1" );
+         ConfigPages::delete_cache_config_pages( $uid );
       }
    }
 
