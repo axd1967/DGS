@@ -112,6 +112,7 @@ define('TICK_FREQUENCY', 12); // ticks/hour (every 5 minutes)
 
 define('SECS_PER_DAY', 86400);
 define('SECS_PER_HOUR', 3600);
+define('SECS_PER_MIN', 60);
 
 //a $_REQUEST['handle'] will not overlap $_COOKIE['cookie_handle']
 define('COOKIE_PREFIX', 'cookie_');
