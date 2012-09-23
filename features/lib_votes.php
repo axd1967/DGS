@@ -208,6 +208,9 @@ class Feature
          . ', Lastchanged=FROM_UNIXTIME(' . $this->lastchanged .')'
          ;
       $result = db_query( "feature.update_feature({$this->id},{$this->subject})", $update_query );
+      if( $result == 1 && !$this->id )
+         $this->id = mysql_insert_id();
+      return $result;
    }
 
    /*! \brief Returns true, if delete-feature allowed (checks constraints). */
@@ -693,7 +696,7 @@ class FeatureVote
       $qsql = new QuerySQL();
       $qsql->add_part_fields( Feature::get_query_fields(true) );
       $qsql->add_part( SQLP_FIELDS,
-         "IF(ISNULL(MYFV.fid),'',MYFV.Points) AS myPoints",
+         "MYFV.Points AS myPoints",
          'SUM(FV.Points) AS sumPoints',
          'COUNT(FV.fid) AS countVotes',
          'SUM(IF(FV.Points>0,1,0)) AS countYes',

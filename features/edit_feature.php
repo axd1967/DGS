@@ -112,6 +112,9 @@ require_once( "features/lib_votes.php" );
          ta_begin();
          {//HOT-section to update feature
             $feature->update_feature();
+            if( !$fid && $feature->id > 0 )
+               $fid = $feature->id;
+
             $added_points = $feature->fix_user_quota_feature_points( $old_status, $new_status );
 
             if( $new_status == FEATSTAT_VOTE && ( $fid == 0 || $old_status != $new_status ) )
