@@ -102,7 +102,7 @@ is_on_observe_list(gid,uid)                     1d    DEL-on-upd-obs       10B/e
 has_observers(gid)                              1d    DEL-on-upd-obs       10B/e          => YES, 1d, DEL-on-toggle(gid)
 load_clock_ticks.find(clock_id)                 5min  DEL-on-run-cron      30B/e * 55     => YES, 5min, DEL-on-cron-clocktick(all); special cache (loading all Clocks)
 board.load_from_db.find_moves(gid)              1h    DEL-on-move          3KB/gid        => YES, 1h, DEL-on-move(gid)
-board.load_from_db.movemessage(gid,MoveNr)      1h    DEL-on-move          1KB/e          => YES, 1h, DEL-on-move(gid); special cache (loading all move-msgs)
+board.load_from_db.movemessage(gid,MoveNr)      1h    DEL-on-move          1KB/e          => YES, 1h, DEL-on-move(gid); special cache (loading all move-msgs), needed all?
 game.gamenotes.single_fetch(gid,uid)            1h    DEL-on-upd-user      50B/e          => YES, 1h, DEL-on-upd-notes(gid,uid)
 statistics.games.count_moves(-)                 1h    DEL-on-move          100B           => YES, 1d, EXPIRE
 statistics.q2(-)                                1h    DEL-on-move          20B            => refactor using "WITH ROLLUP" on statistics.games.count_moves
