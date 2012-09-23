@@ -271,3 +271,7 @@ copy /images/collapse.gif
 # added icon for eidogo (magnifying glass)
 copy /images/eidogo.gif
 
+-----------
+# removed unused image
+rm images/wood1.png
+
