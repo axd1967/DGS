@@ -42,6 +42,8 @@ require_once( 'include/gui_bulletin.php' );
    if( !$logged_in )
       error('login_if_not_logged_in', 'edit_profile');
    $my_id = $player_row['ID'];
+
+   ConfigBoard::delete_cache_config_board($my_id); // force reload
    $cfg_board = ConfigBoard::load_config_board($my_id);
 
 /* Actual REQUEST calls used:

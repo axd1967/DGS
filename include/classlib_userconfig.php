@@ -260,6 +260,7 @@ class ConfigBoard
          . " WHERE User_ID='{$this->user_id}' LIMIT 1";
          ;
       db_query( "ConfigBoard::update_all.update({$this->user_id})", $update_query );
+      ConfigBoard::delete_cache_config_board( $this->user_id );
    }
 
    /*! \brief Fills current values into $player_row. */
@@ -295,8 +296,15 @@ class ConfigBoard
 
       if( $force_load || $need_load )
       {
-         $src_row = mysql_single_fetch("ConfigBoard::load_config_board.find($uid)",
-               "SELECT * FROM ConfigBoard WHERE User_ID='$uid' LIMIT 1");
+         $dbgmsg = "ConfigBoard::load_config_board($uid)";
+         $key = "ConfigBoard.$uid";
+         $src_row = DgsCache::fetch($dbgmsg, $key);
+         if( is_null($src_row) )
+         {
+            $src_row = mysql_single_fetch($dbgmsg.'find', "SELECT * FROM ConfigBoard WHERE User_ID='$uid' LIMIT 1");
+            if( !is_null($src_row) )
+               DgsCache::store( $dbgmsg, $key, $src_row, SECS_PER_HOUR );
+         }
          if( !$src_row )
             return null;
       }
@@ -321,6 +329,11 @@ class ConfigBoard
          $config->fill_player_row();
       return $config;
    }//load_config_board
+
+   function delete_cache_config_board( $uid )
+   {
+      DgsCache::delete("ConfigBoard::delete_cache_config_board($uid)", "ConfigBoard.$uid");
+   }
 
    /*! \brief (static) Inserts default ConfigBoard. */
    function insert_default( $user_id )
@@ -540,7 +553,7 @@ class ConfigPages
       ConfigPages::_check_user_id( $uid, $dbgmsg );
       $cfg_size = ($col_name) ? ConfigTableColumns::get_config_size($col_name, $dbgmsg) : 0;
 
-      // need different handling to load only specific field or caching all fields
+      // need special handling to load only specific field or caching all fields
       if( DgsCache::is_shared_enabled() )
          $row = ConfigPages::load_cache_config_pages( $uid );
       else
@@ -579,14 +592,14 @@ class ConfigPages
       {
          $row = mysql_single_fetch($dbgmsg.'.find', "SELECT * FROM ConfigPages WHERE User_ID='$uid' LIMIT 1" );
          if( !is_null($row) )
-            DgsCache::store( $dbgmsg, $key, $row, SECS_PER_DAY );
+            DgsCache::store( $dbgmsg, $key, $row, SECS_PER_HOUR );
       }
       return $row;
    }//load_cache_config_pages
 
    function delete_cache_config_pages( $uid )
    {
-      DgsCache::delete("ConfigPages::load_cache_config_pages($uid)", "ConfigPages.$uid");
+      DgsCache::delete("ConfigPages::delete_cache_config_pages($uid)", "ConfigPages.$uid");
    }
 
    /*!
@@ -752,10 +765,16 @@ class ConfigTableColumns
       ConfigPages::_check_user_id( $uid, 'ConfigTableColumns::load_config');
       $cfg_size = ConfigTableColumns::get_config_size($col_name, "load_config($uid)");
 
-      $fieldset = 'User_ID';
-      $fieldset .= ',' . ConfigTableColumns::build_fieldset( $col_name );
-      $row = mysql_single_fetch("ConfigTableColumns::load_config.find($uid,$col_name)",
-            "SELECT $fieldset FROM ConfigPages WHERE User_ID='$uid' LIMIT 1");
+      // need special handling to load only specific field or caching all fields
+      if( DgsCache::is_shared_enabled() )
+         $row = ConfigPages::load_cache_config_pages( $uid );
+      else
+      {
+         $fieldset = 'User_ID';
+         $fieldset .= ',' . ConfigTableColumns::build_fieldset( $col_name );
+         $row = mysql_single_fetch("ConfigTableColumns::load_config.find($uid,$col_name)",
+               "SELECT $fieldset FROM ConfigPages WHERE User_ID='$uid' LIMIT 1");
+      }
       if( !$row )
          return null;
 
