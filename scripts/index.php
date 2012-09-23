@@ -46,8 +46,12 @@ require_once( "include/std_functions.php" );
             'generate_translation_texts.php' => "2. scan pages for translation-texts",
             'make_all_translationfiles.php'  => "3. export translations-dir",
 
-         "Server admin" => 0,
+         "Cache admin" => 0,
+            'apc.php'                  => "APC Manager",
+            'apc_cache_info.php'       => "Show APC cache info and content",
             'apc_clear_cache.php'      => "Clear APC cache",
+
+         "Server admin" => 0,
             'clear_datastore.php'      => "Show & Clear Data-Store cache-dir",
             'sql_game_export.php'      => "Export single game as SQL (for local tests)",
             'check_block_ip.php'       => "Check syntax for IP-blocking of user",
@@ -71,7 +75,6 @@ require_once( "include/std_functions.php" );
          "Info" => 0,
             'phpinfo.php'              => "Shows PHP-info",
             'phpinfo.php?module=1&config=1&env=1&var=1' => "Shows PHP-info with ENV and variables (sensitive)",
-            'apc_cache_info.php'       => "Show info for APC cache",
             'server-info.php'          => "Shows Server-info (CPU, Memory)",
             'browser_stats.php'        => "Build browser statistics on all players",
       ),
