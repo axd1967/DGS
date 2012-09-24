@@ -26,7 +26,7 @@ require_once( "include/std_functions.php" );
 
    connect2mysql();
 
-   $logged_in = who_is_logged( $player_row);
+   $logged_in = who_is_logged( $player_row, LOGIN_SKIP_UPDATE );
 
    start_page(T_('Donation'), true, $logged_in, $player_row );
 

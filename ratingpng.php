@@ -42,7 +42,7 @@ function interpolate($val1, $val3, $time1, $time2, $time3)
 {
    connect2mysql();
 
-   $logged_in = who_is_logged( $player_row);
+   $logged_in = who_is_logged( $player_row, LOGIN_SKIP_UPDATE );
 
    // rating-graph can be viewed without being logged in
    // if( !$logged_in )
