@@ -31,6 +31,7 @@ require_once 'include/std_functions.php';
 require_once 'include/time_functions.php';
 require_once 'include/game_texts.php';
 require_once 'include/error_codes.php';
+require_once 'include/dgs_cache.php';
 require_once 'tournaments/include/tournament_games.php';
 
 
@@ -1140,6 +1141,8 @@ class GameHelper
          "DELETE FROM GamePlayers WHERE gid=$gid" );
       db_query( "GameHelper::_delete_base_game_tables.games($gid)",
          "DELETE FROM Games WHERE ID=$gid LIMIT 1" );
+
+      DgsCache::delete_group( "GameHelper::_delete_base_game_tables.observers($gid)", "Observers.$gid" );
    }//_delete_base_game_tables
 
    /*!

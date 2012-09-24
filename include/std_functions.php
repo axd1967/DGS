@@ -24,6 +24,7 @@ $TranslateGroups[] = "Common";
 require_once( 'include/globals.php' );
 require_once( "include/quick_common.php" );
 require_once( 'include/utilities.php' );
+require_once( 'include/dgs_cache.php' );
 
 require_once( "include/time_functions.php" );
 
@@ -3268,10 +3269,20 @@ function user_reference( $link, $safe_it, $class, $player_ref, $player_name=fals
  */
 function check_for_observers( $gid, $uid, $check_user )
 {
-   $is_on_observe_list = ( is_null($check_user) ) ? is_on_observe_list( $gid, $uid ) : (bool)$check_user;
-   $has_observers = ( $is_on_observe_list ) ? false : has_observers( $gid );
+   $dbgmsg = "check_for_observers($gid,$uid)";
+   $key = "Observers.$gid.$uid";
 
-   return array( $has_observers, $is_on_observe_list );
+   $result = DgsCache::fetch($dbgmsg, $key);
+   if( is_null($result) )
+   {
+      $is_on_observe_list = ( is_null($check_user) ) ? is_on_observe_list( $gid, $uid ) : (bool)$check_user;
+      $has_observers = ( $is_on_observe_list ) ? false : has_observers( $gid );
+
+      $result = array( $has_observers, $is_on_observe_list );
+      DgsCache::store( $dbgmsg, $key, $result, 10*SECS_PER_MIN, "Observers.$gid" );
+   }
+
+   return $result;
 }
 
 // returns true, if there are observers for specified game
@@ -3299,28 +3310,36 @@ function is_on_observe_list( $gid, $uid )
 
 function toggle_observe_list( $gid, $uid, $toggle_yes )
 {
+   $dbgmsg = "toggle_observe_list($gid,$uid,$toggle_yes)";
+
    $my_observe = is_on_observe_list( $gid, $uid );
    if( $toggle_yes == ($my_observe ? 'N' : 'Y') )
    {
-      if( $my_observe )
-         db_query( 'toggle_observe_list.delete',
-            "DELETE FROM Observers WHERE gid=$gid AND uid=$uid LIMIT 1");
-      else
-         db_query( 'toggle_observe_list.insert',
-            "INSERT INTO Observers SET gid=$gid, uid=$uid");
-      $my_observe = !$my_observe;
+      ta_begin();
+      {//HOT-section to update observers
+         if( $my_observe )
+            db_query( $dbgmsg.'.delete', "DELETE FROM Observers WHERE gid=$gid AND uid=$uid LIMIT 1");
+         else
+            db_query( $dbgmsg.'.insert', "INSERT INTO Observers SET gid=$gid, uid=$uid");
+         $my_observe = !$my_observe;
+
+         DgsCache::delete_group( $dbgmsg, "Observers.$gid" );
+      }
+      ta_end();
    }
    return $my_observe;
 }
 
 //$Text must NOT be escaped by mysql_addslashes()
+// IMPORTANT NOTE: caller needs to open TA with HOT-section!!
 function delete_all_observers( $gid, $notify, $Text='' )
 {
    global $NOW;
+   $dbgmsg = "delete_all_observers($gid,$notify)";
 
    if( $notify )
    {
-      $result = db_query( 'delete_all_observers.find',
+      $result = db_query( $dbgmsg.'.find',
          "SELECT Observers.uid AS pid " .
          "FROM Observers " .
          "WHERE gid=$gid AND Observers.uid>".GUESTS_ID_MAX ); //exclude guest
@@ -3334,7 +3353,7 @@ function delete_all_observers( $gid, $notify, $Text='' )
             $to_ids[] = $row['pid'];
          mysql_free_result($result);
 
-         send_message( "delete_all_observers($gid)", $Text, $Subject
+         send_message( $dbgmsg.'send_msg', $Text, $Subject
             , $to_ids, '', /*notify*/true
             , /*sys-msg*/0, MSGTYPE_NORMAL, $gid);
       }
@@ -3342,8 +3361,8 @@ function delete_all_observers( $gid, $notify, $Text='' )
          mysql_free_result($result);
    }
 
-   db_query( 'delete_all_observers.delete',
-      "DELETE FROM Observers WHERE gid=$gid" );
+   db_query( $dbgmsg.'.del_obs', "DELETE FROM Observers WHERE gid=$gid" );
+   DgsCache::delete_group( $dbgmsg, "Observers.$gid" );
 } //delete_all_observers
 
 
