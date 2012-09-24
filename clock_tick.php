@@ -21,6 +21,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 require_once( "include/std_functions.php" );
 require_once( "include/rating.php" );
 require_once( 'include/game_functions.php' );
+require_once( 'include/cache_clock.php' );
 
 $TheErrors->set_mode(ERROR_MODE_COLLECT);
 
@@ -131,6 +132,7 @@ function handle_game_timeouts()
          . "WHERE $clock_modified " // game-clocks
          . "OR Clock.ID=".CLOCK_TIMELEFT // clock for remaining-time ordering
       );
+   ClockCache::delete_cache_clocks();
 
 
    // Check if any game has timed out
