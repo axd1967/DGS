@@ -382,8 +382,7 @@ class SgfBuilder
       $this->player_notes = '';
       if( $this->include_games_notes )
       {
-         $gn_row = mysql_single_fetch( "SgfBuilder.load_player_game_notes.find_notes({$this->gid},$uid)",
-            "SELECT Notes FROM GamesNotes WHERE gid={$this->gid} AND uid='$uid' LIMIT 1" );
+         $gn_row = GameHelper::load_game_notes( 'SgfBuilder.load_player_game_notes', $this->gid, $uid );
          if( is_array($gn_row) )
             $this->player_notes = @$gn_row['Notes'];
       }

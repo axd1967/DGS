@@ -1337,6 +1337,40 @@ class GameHelper
          $qsql->add_part( SQLP_FIELDS, '0 AS X_Priority');
    }
 
+   function load_game_notes( $dbgmsg, $gid, $uid )
+   {
+      $dbgmsg = "GameHelper::load_game_notes($gid,$uid).$dbgmsg";
+      $key = "GameNotes.$gid.$uid";
+
+      $row = DgsCache::fetch($dbgmsg, $key);
+      if( is_null($row) )
+      {
+         $row = mysql_single_fetch( $dbgmsg,
+            "SELECT Hidden, Notes FROM GamesNotes WHERE gid=$gid AND uid=$uid LIMIT 1" );
+         DgsCache::store( $dbgmsg, $key, $row, 10*SECS_PER_MIN );
+      }
+
+      return $row;
+   }
+
+   function update_game_notes( $dbgmsg, $gid, $uid, $hidden, $notes )
+   {
+      $dbgmsg = "GameHelper::update_game_notes($gid,$uid,$hidden).$dbgmsg";
+      if( $hidden != 'Y' && $hidden != 'N' )
+         error('invalid_args', $dbgmsg.'check.hidden');
+
+      ta_begin();
+      {//HOT-section to update private game-notes
+         // note: GamesNotes needs PRIMARY KEY (gid,player):
+         db_query( $dbgmsg,
+            "REPLACE INTO GamesNotes (gid,uid,Hidden,Notes) " .
+            "VALUES ($gid,$uid,'$hidden','" . mysql_addslashes($notes) . "')" );
+
+         DgsCache::store( $dbgmsg, "GameNotes.$gid.$uid", array( 'Hidden' => $hidden, 'Notes' => $notes ), 10*SECS_PER_MIN );
+      }
+      ta_end();
+   }
+
 } // end 'GameHelper'
 
 

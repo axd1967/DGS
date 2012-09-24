@@ -549,12 +549,11 @@ $GLOBALS['ThePage'] = new Page('Game');
       $notes = '';
       $noteshide = (substr( $notesmode, -3) == 'OFF') ? 'Y' : 'N';
 
-      $gnrow = mysql_single_fetch( 'game.gamenotes',
-         "SELECT Hidden,Notes FROM GamesNotes WHERE gid=$gid AND uid=$my_id LIMIT 1" );
-      if( $gnrow )
+      $gn_row = GameHelper::load_game_notes( 'game', $gid, $my_id );
+      if( $gn_row )
       {
-         $notes = $gnrow['Notes'];
-         $noteshide = $gnrow['Hidden'];
+         $notes = $gn_row['Notes'];
+         $noteshide = $gn_row['Hidden'];
       }
       else if( $is_fairkomi_negotiation )
          $noteshide = 'Y'; // default off for fair-komi
@@ -585,10 +584,7 @@ $GLOBALS['ThePage'] = new Page('Game');
          if( $is_guest )
             error('not_allowed_for_guest', 'game.save_notes');
 
-         // note: GamesNotes needs PRIMARY KEY (gid,player):
-         db_query( 'game.replace_gamenote',
-                 "REPLACE INTO GamesNotes (gid,uid,Hidden,Notes)"
-               . " VALUES ($gid,$my_id,'$noteshide','" . mysql_addslashes($notes) . "')" );
+         GameHelper::update_game_notes( 'game', $gid, $my_id, $noteshide, $notes );
       }
    }
    else // !$my_game

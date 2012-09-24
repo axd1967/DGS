@@ -112,8 +112,7 @@ class QuickHandlerGameInfo extends QuickHandler
       }
       elseif( $cmd == GAMECMD_GET_NOTES )
       {
-         $gn_row = mysql_single_fetch( "QuickHandlerGameInfo.prepare.find_gamenotes($gid,$uid)",
-                  "SELECT Notes FROM GamesNotes WHERE gid={$gid} AND uid='$uid' LIMIT 1" );
+         $gn_row = GameHelper::load_game_notes( 'QuickHandlerGameInfo.prepare', $gid, $uid );
          if( is_array($gn_row) )
             $this->gamenotes = @$gn_row['Notes'];
       }
