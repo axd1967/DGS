@@ -385,14 +385,17 @@ function update_user( $uid, $user, $fv )
    if( count($arr_sql) == 0 )
       return -1; // no update
 
+   $dbgmsg = "admin_users.save_user($user)";
    ta_begin();
    {//HOT-section to update admin-stuff of player
       admin_log( @$player_row['ID'], $user, 'updated_user: ' . implode(', ', $arrdiff) );
 
-      db_query( "admin_users.save_user($user)",
+      db_query( $dbgmsg,
          'UPDATE Players SET ' . implode(', ', $arr_sql)
             . " WHERE ID='".mysql_addslashes($uid)."'"
             . " AND Handle='".mysql_addslashes($user)."' LIMIT 1" ); // double(user+uid) for safety
+
+      delete_cache_user_reference( $dbgmsg, $uid, $user, $fv['Handle'] );
    }
    ta_end();
 

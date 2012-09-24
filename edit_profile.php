@@ -776,15 +776,17 @@ function handle_save_profile( &$cfg_board, $nval )
    }
 
 
+   $dbgmsg = "edit_profile.handle_save_profile($my_id)";
    ta_begin();
    {//HOT-section to update players profile
       // table (Players)
-      $upd_players_query = "UPDATE Players SET " . $upd->get_query() . " WHERE ID=$my_id LIMIT 1";
-      db_query( "edit_profile.handle_save_profile($my_id)", $upd_players_query );
+      db_query( $dbgmsg, "UPDATE Players SET " . $upd->get_query() . " WHERE ID=$my_id LIMIT 1" );
 
       // table (ConfigBoard)
       if( $save_config_board )
          $cfg_board->update_all();
+
+      delete_cache_user_reference( $dbgmsg, $my_id, $player_row['Handle'] );
    }
    ta_end();
 

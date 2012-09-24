@@ -3197,20 +3197,17 @@ function user_reference( $link, $safe_it, $class, $player_ref, $player_name=fals
    }
    if( $legal && ($player_name===false || $player_handle===false) )
    {
-     $query = 'SELECT Name, Handle ' .
-              'FROM Players ' .
-              "WHERE " . ( $byid ? 'ID' : 'Handle' ) . "='".mysql_addslashes($player_ref)."' " .
-              'LIMIT 1' ;
-     if( $row=mysql_single_fetch( 'user_reference', $query ) )
-     {
-         if( $player_name===false )
+      $row = load_cache_user_reference( 'user_reference', $byid, $player_ref );
+      if( $row )
+      {
+         if( $player_name === false )
             $player_name = $row['Name'];
-         if( $player_handle===false )
+         if( $player_handle === false )
             $player_handle = $row['Handle'];
          $safe_it = true;
-     }
-     else
-       $legal = false;
+      }
+      else
+         $legal = false;
    }
    $player_name = trim($player_name);
    $player_handle = trim($player_handle);
@@ -3256,6 +3253,33 @@ function user_reference( $link, $safe_it, $class, $player_ref, $player_name=fals
          $player_name = "<$url>$player_name</A>" ;
    }
    return $player_name ;
+}
+
+function load_cache_user_reference( $dbgmsg, $by_id, $player_ref )
+{
+   $player_ref = strtolower($player_ref);
+   $qfield = ( $by_id ) ? 'ID' : 'Handle';
+   $qvalue = ( $by_id ) ? (int)$player_ref : sprintf("'%s'", mysql_addslashes($player_ref) );
+
+   $dbgmsg = "load_user_reference($qfield,$player_ref).$dbgmsg";
+   $key = 'user_ref.' . strtolower($qfield) . '.' . $player_ref;
+
+   $row = DgsCache::fetch($dbgmsg, $key);
+   if( is_null($row) )
+   {
+      $row = mysql_single_fetch( $dbgmsg, "SELECT Name, Handle FROM Players WHERE $qfield = $qvalue LIMIT 1" );
+      DgsCache::store( $dbgmsg, $key, $row, SECS_PER_DAY );
+   }
+   return $row;
+}
+
+// clear cache for load_cache_user_reference() on potential Name/Handle-update
+function delete_cache_user_reference( $dbgmsg, $uid, $uhandle, $uhandle_new=null )
+{
+   DgsCache::delete( $dbgmsg, "user_ref.id.$uid" );
+   DgsCache::delete( $dbgmsg, "user_ref.handle." . strtolower($uhandle) );
+   if( !is_null($uhandle_new) && strcasecmp($uhandle, $uhandle_new) != 0 )
+      DgsCache::delete( $dbgmsg, "user_ref.handle." . strtolower($uhandle_new) );
 }
 
 /*!
