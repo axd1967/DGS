@@ -34,25 +34,63 @@ if( !defined('DBG_CACHE') )
 
 
 /*! \brief basic cache interface with basic cache-operations. */
-interface CacheInterface
+abstract class AbstractCache
 {
    /*! \brief Returns stored cache-entry for given cache-key; or else null. */
-   public function cache_fetch( $id );
+   abstract public function cache_fetch( $id );
 
    /*!
     * \brief Stores cache-entry for given cache-key with given TTL [secs].
-    * \param $data storing NULL is possible but not detectable, so don't use it!!
+    * \param $data storing NULL is NOT possible!
     */
-   public function cache_store( $id, $data, $ttl );
+   abstract public function cache_store( $id, $data, $ttl );
 
-   /*! \brief Deletes cache-entry for given cache-key. */
-   public function cache_delete( $id );
+   /*!
+    * \brief Stores cache-entries in array( cache_key => data ) with given TTL [secs].
+    * \param $arr_data storing NULL is NOT possible for array-values!
+    * \note overwrite if there's a special implementation.
+    */
+   public function cache_store_array( $arr_data, $ttl )
+   {
+      foreach( $arr_data as $id => $data )
+         $this->cache_store( $id, $data, $ttl );
+   }
 
-} // end of 'CacheInterface'
+   /*! \brief Deletes single cache-entry with given key $id. */
+   abstract public function cache_delete( $id );
+
+
+   /*! \brief Stores cache-entry with group of other cache-keys (used to clear cache for a group of related elements). */
+   public function cache_store_group( $group_id, $elem_id, $ttl )
+   {
+      $arr_group = $this->cache_fetch( $group_id );
+      if( is_null($arr_group) )
+         $arr_group = array( $elem_id );
+      else
+         $arr_group[] = $elem_id;
+
+      return $this->cache_store( $group_id, $arr_group, $ttl );
+   }
+
+   /*! \brief Deletes all cache-entries of cache-group and group-id itself. */
+   public function cache_delete_group( $group_id )
+   {
+      $arr_group = $this->cache_fetch( $group_id );
+      if( !is_null($arr_group) )
+      {
+         $arr_group = array_unique( $arr_group );
+         foreach( $arr_group as $elem_id )
+            $this->cache_delete( $elem_id );
+         $this->cache_delete( $group_id );
+      }
+      return $arr_group;
+   }
+
+} // end of 'AbstractCache'
 
 
 /*! \brief Cache-implementation with (shared-memory) APC-based cache. */
-class ApcCache implements CacheInterface
+class ApcCache extends AbstractCache
 {
    public function cache_fetch( $id )
    {
@@ -63,6 +101,11 @@ class ApcCache implements CacheInterface
    public function cache_store( $id, $data, $ttl )
    {
       return apc_store( $id, $data, $ttl );
+   }
+
+   public function cache_store_array( $arr_data, $ttl )
+   {
+      return apc_store( $arr_data, null, $ttl );
    }
 
    public function cache_delete( $id )
@@ -126,14 +169,17 @@ class DgsCache
       return $result;
    }
 
-   function store( $dbgmsg, $id, $data, $ttl )
+   function store( $dbgmsg, $id, $data, $ttl, $group_id='' )
    {
       $cache = DgsCache::get_cache();
       if( !$cache )
          return false;
 
       $result = $cache->cache_store( $id, $data, $ttl );
-      if( DBG_CACHE ) error_log("DgsCache.store($id).$dbgmsg = [" . (is_null($result) ? 'NULL' : $result) . "]");
+      if( $group_id )
+         $cache->cache_store_group( $group_id, $id, $ttl );
+
+      if( DBG_CACHE ) error_log("DgsCache.store([$group_id]$id).$dbgmsg = [" . ($result ? 1 : 0) . "]");
       return $result;
    }
 
@@ -144,8 +190,19 @@ class DgsCache
          return true;
 
       $result = $cache->cache_delete( $id );
-      if( DBG_CACHE ) error_log("DgsCache.delete($id).$dbgmsg = [" . (is_null($result) ? 'NULL' : $result) . "]");
+      if( DBG_CACHE ) error_log("DgsCache.delete($id).$dbgmsg = [" . ($result ? 1 : 0) . "]");
       return $result;
+   }
+
+   function delete_group( $dbgmsg, $group_id )
+   {
+      $cache = DgsCache::get_cache();
+      if( !$cache )
+         return null;
+
+      $arr_group = $cache->cache_delete_group( $group_id );
+      if( DBG_CACHE ) error_log("DgsCache.delete_group($group_id).$dbgmsg: group [" . (is_null($arr_group) ? '-' : implode(' ', $arr_group)) . "]");
+      return $arr_group;
    }
 
 } // end of 'DgsCache'
