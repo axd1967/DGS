@@ -67,44 +67,32 @@ function stats_start_page( $title )
    echo "<h3 class=\"Header\">$title</h3>\n";
 }
 
-
 function show_stats_default()
 {
-   global $ActivityForHit, $player_row, $NOW;
+   global $player_row, $NOW;
 
-   $q1 = "SELECT SQL_SMALL_RESULT Status,SUM(Moves) AS moves, COUNT(*) AS count FROM Games GROUP BY Status";
-   $q2 = "SELECT SUM(Moves) AS moves, COUNT(*) AS count FROM Games";
-   $q3 = "SELECT SUM(Hits) AS hits, COUNT(*) AS count, SUM(Activity)/$ActivityForHit AS activity FROM Players";
-
-   $result = db_query( 'statistics.games.count_moves', $q1 );
+   $arr_moves = load_cache_games_stats( 1 );
+   $arr_activity = load_cache_games_stats( 2 );
 
    echo "<table border=1>\n"
       , "<tr><th>Status</th><th>Games</th><th>Moves</th></tr>\n";
 
    $col_fmt = '<td class="right">%s</td>';
-   while( $row = mysql_fetch_array( $result ) )
+   foreach( $arr_moves as $row )
    {
+      $col_title = ( is_null($row['Status']) ) ? 'Total' : $row['Status'];
       echo '<tr>'
-         , "<td>{$row['Status']}</td>"
+         , "<td>$col_title</td>"
          , sprintf( $col_fmt, number_format($row['count']))
          , sprintf( $col_fmt, number_format($row['moves']))
          , "</tr>\n";
    }
-   mysql_free_result($result);
 
-   $row = mysql_single_fetch( 'statistics.q2', $q2 );
-   if( $row )
-   {
-      echo '<tr><td>Total</td>'
-         , sprintf( $col_fmt, number_format($row['count']))
-         , sprintf( $col_fmt, number_format($row['moves']))
-         , "</tr>\n";
-   }
    echo "</table>\n";
 
-   $row = mysql_single_fetch( 'statistics.q3', $q3 );
-   if( $row )
+   if( $arr_activity )
    {
+      $row = $arr_activity;
       echo '<p>', number_format($row["hits"]), ' hits by ', number_format($row["count"]), ' players</p>';
       echo '<p>Activity: ', number_format(round($row['activity'])), "</p>\n";
    }
@@ -131,6 +119,37 @@ function show_stats_default()
    echo "<h3 class=Header>$title</h3>\n";
    echo "<img src=\"statratingspng.php$args\" alt=\"$title\">\n";
 }//show_stats_default
+
+function load_cache_games_stats( $num )
+{
+   $dbgmsg = 'statistics.load_cache_games_stats.'.$num;
+   $key = "Statistics.games.$num";
+
+   $result = DgsCache::fetch($dbgmsg, $key);
+   if( is_null($result) )
+   {
+      if( $num == 1 )
+      {
+         $result = array();
+         $db_result = db_query( $dbgmsg,
+            "SELECT SQL_SMALL_RESULT Status,SUM(Moves) AS moves, COUNT(*) AS count " .
+            "FROM Games GROUP BY Status WITH ROLLUP" );
+         while( $row = mysql_fetch_array($db_result) )
+            $result[] = $row;
+         mysql_free_result($db_result);
+      }
+      else // num==2
+      {
+         global $ActivityForHit;
+         $result = mysql_single_fetch( $dbgmsg,
+            "SELECT SUM(Hits) AS hits, COUNT(*) AS count, SUM(Activity)/$ActivityForHit AS activity FROM Players" );
+      }
+
+      DgsCache::store( $dbgmsg, $key, $result, SECS_PER_DAY );
+   }
+
+   return $result;
+}//load_cache_games_stats
 
 function show_stats_user_countries()
 {

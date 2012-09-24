@@ -21,6 +21,7 @@ require_once 'include/std_functions.php';
 require_once 'include/game_functions.php';
 require_once 'include/message_functions.php';
 require_once 'include/classlib_userquota.php';
+require_once 'include/dgs_cache';
 require_once 'include/db/bulletin.php';
 
 $TheErrors->set_mode(ERROR_MODE_COLLECT);
@@ -152,6 +153,9 @@ if num_rows==2 {compute differences and checks}
 
    db_query( 'daily_cron.statistics_insert',
       "INSERT INTO Statistics SET $query" );
+
+   DgsCache::delete( 'daily_cron.statistics', 'Statistics.games.1' );
+   DgsCache::delete( 'daily_cron.statistics', 'Statistics.games.2' );
 
 
 
