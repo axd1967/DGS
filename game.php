@@ -188,13 +188,17 @@ $GLOBALS['ThePage'] = new Page('Game');
    $my_mpgame = ( !$my_game && $is_mp_game ) ? MultiPlayerGame::is_game_player($gid, $my_id) : $my_game;
 
    // toggle observing (also allowed for my-game)
+   $chk_observers = true;
+   $chk_my_observe = null; // null = to-check
    if( $logged_in && ($Status != GAME_STATUS_FINISHED) && @$_REQUEST['toggleobserve'] )
-      $my_observe = toggle_observe_list($gid, $my_id, @$_REQUEST['toggleobserve'] ); // Y|N
+      $chk_my_observe = toggle_observe_list($gid, $my_id, @$_REQUEST['toggleobserve'] ); // Y|N
    elseif( !$logged_in || ($Status == GAME_STATUS_FINISHED) )
-      $my_observe = null;
+      $chk_observers = false;
+
+   if( $chk_observers )
+      list( $has_observers, $my_observe ) = check_for_observers( $gid, $my_id, $chk_my_observe );
    else
-      $my_observe = is_on_observe_list( $gid, $my_id);
-   $has_observers = ($is_fairkomi_negotiation) ? false : has_observers($gid);
+      $has_observers = $my_observe = null;
 
 
    $too_few_moves = ( $Moves < DELETE_LIMIT+$Handicap );

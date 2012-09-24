@@ -3257,6 +3257,23 @@ function user_reference( $link, $safe_it, $class, $player_ref, $player_name=fals
    return $player_name ;
 }
 
+/*!
+ * \brief Checks if there are observers (has_observers) and if specific user is an observer.
+ * \param $check_user null = check for is_on_observe_list(gid,uid);
+ *        otherwise assume $check_user is pre-loaded is_on_observe_list()
+ * \return arr( bool has_observers, bool uid-is-on-observe-list )
+ *
+ * \see is_on_observe_list()
+ * \see has_observers()
+ */
+function check_for_observers( $gid, $uid, $check_user )
+{
+   $is_on_observe_list = ( is_null($check_user) ) ? is_on_observe_list( $gid, $uid ) : (bool)$check_user;
+   $has_observers = ( $is_on_observe_list ) ? false : has_observers( $gid );
+
+   return array( $has_observers, $is_on_observe_list );
+}
+
 // returns true, if there are observers for specified game
 function has_observers( $gid )
 {
