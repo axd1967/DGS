@@ -28,7 +28,7 @@ require_once 'include/globals.php';
   */
 
 if( !defined('DGS_CACHE') )
-   define('DGS_CACHE', 0); // 0=no-cache, cache-class-name (e.g. ApcCache)
+   define('DGS_CACHE', ''); // ''=no-cache, cache-class-name (e.g. ApcCache)
 if( !defined('DBG_CACHE') )
    define('DBG_CACHE', 0);
 
@@ -135,7 +135,7 @@ class DgsCache
       // NOTE (JUG): I wanted to call static cache-specific-functions like: $class=DGS_CACHE; $class::cache_func(..)
       //    but that construction needs PHP >= 5.3 (and live-server is still PHP 5.1).
       //    Therefore we need an instance of the cache-implementation using object-methods.
-      if( DGS_CACHE == 'ApcCache' )
+      if( DGS_CACHE === 'ApcCache' )
          $this->cache_impl = new ApcCache();
       else
          $this->cache_impl = null;
