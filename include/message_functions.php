@@ -1303,39 +1303,68 @@ function interpret_time_limit_forms($byoyomitype, $timevalue, $timeunit,
 }
 
 // FOLDER_DESTROYED is NOT in standard-folders
-function get_folders($uid, $remove_all_received=true, $folder_nr=null)
+function get_folders($uid, $remove_all_received=true, $user_folder_nr=null)
 {
    global $STANDARD_FOLDERS;
 
-   if( !is_null($folder_nr) && is_numeric($folder_nr) )
-   {
-      $result = db_query( 'get_folders',
-         "SELECT * FROM Folders " .
-         "WHERE uid=$uid AND Folder_nr='$folder_nr' LIMIT 1" );
-   }
-   else
-   {
-      $result = db_query( 'get_folders',
-         "SELECT * FROM Folders WHERE uid=$uid ORDER BY Folder_nr" );
-   }
-
+   $arr_folders = load_cache_folders( $uid, $user_folder_nr );
    $fldrs = $STANDARD_FOLDERS;
 
-   while( $row = mysql_fetch_assoc($result) )
+   foreach( $arr_folders as $folder_nr => $row )
    {
       if( empty($row['Name']))
-         $row['Name'] = ( $row['Folder_nr'] < USER_FOLDERS )
-               ? $STANDARD_FOLDERS[$row['Folder_nr']][0]
-               : T_('Folder name');
-      $fldrs[$row['Folder_nr']] = array($row['Name'], $row['BGColor'], $row['FGColor']);
+         $row['Name'] = ( $folder_nr < USER_FOLDERS ) ? $STANDARD_FOLDERS[$folder_nr][0] : T_('Folder name');
+      $fldrs[$folder_nr] = array( $row['Name'], $row['BGColor'], $row['FGColor'] );
    }
-   mysql_free_result($result);
 
    if( $remove_all_received )
       unset($fldrs[FOLDER_ALL_RECEIVED]);
 
    return $fldrs;
-}
+}//get_folders
+
+function load_cache_folders( $uid, $folder_nr=null )
+{
+   static $fields = 'Folder_nr, Name, BGColor, FGColor';
+   $dbgmsg = "load_cache_folders.get_folders($uid,$folder_nr)";
+   $key = "Folders.$uid";
+
+   $use_cache = DgsCache::is_shared_enabled();
+   $load_single_folder = ( !is_null($folder_nr) && is_numeric($folder_nr) );
+   $query_all_folders = "SELECT $fields FROM Folders WHERE uid=$uid ORDER BY Folder_nr";
+   $query = false;
+
+   // need special handling to load only specific folder or caching all
+   if( $use_cache )
+   {
+      $result = DgsCache::fetch($dbgmsg, $key);
+      if( is_null($result) )
+         $query = $query_all_folders;
+   }
+   elseif( $load_single_folder )
+      $query = "SELECT $fields FROM Folders WHERE uid=$uid AND Folder_nr=$folder_nr LIMIT 1";
+   else // load all folders
+      $query = $query_all_folders;
+
+   if( $query ) // load and collect folders
+   {
+      $db_result = db_query( $dbgmsg, $query );
+
+      $result = array();
+      while( $row = mysql_fetch_assoc($db_result) )
+         $result[$row['Folder_nr']] = $row;
+      mysql_free_result($db_result);
+
+      if( $use_cache )
+         DgsCache::store( $dbgmsg, $key, $result, 30*SECS_PER_MIN );
+   }
+
+   // extract single folder from all folders
+   if( $use_cache && $load_single_folder && count($result) > 0 && isset($result[$folder_nr]) )
+      $result = array( $folder_nr => $result[$folder_nr] );
+
+   return $result;
+}//load_cache_folders
 
 function change_folders_for_marked_messages($uid, $folders)
 {
