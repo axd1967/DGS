@@ -23,6 +23,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 $TranslateGroups[] = "Users";
 
 require_once( "include/std_functions.php" );
+require_once( "include/dgs_cache.php" );
 
 
 // profile.Type
@@ -154,15 +155,16 @@ class Profile
     */
    function save_profile( $check_user=false )
    {
+      $dbgmsg = "profile.save_profile({$this->id},{$this->uid},{$this->Type})";
       if( $this->uid <= GUESTS_ID_MAX )
-         error('not_allowed_for_guest', "profile.save_profile({$this->uid})");
+         error('not_allowed_for_guest', $dbgmsg.'.check.uid');
 
       if( $check_user )
       {
-         $row = mysql_single_fetch( "profile.save_profile.find_user({$this->uid})",
+         $row = mysql_single_fetch( $dbgmsg.'.find_user',
             "SELECT ID FROM Players WHERE ID={$this->uid} LIMIT 1" );
          if( !$row )
-            error('unknown_user', "profile.save_profile.find_user2({$this->uid})");
+            error('unknown_user', $dbgmsg.'.find_user2');
       }
 
       $this->Lastchanged = $GLOBALS['NOW'];
@@ -177,33 +179,30 @@ class Profile
       $upd->upd_time('Lastchanged', (int)$this->Lastchanged );
       $upd->upd_txt('Text', $this->Text ); // blob
 
-      db_query( "profile.save_profile({$this->id},{$this->uid},{$this->Type})",
-         "REPLACE INTO Profiles SET " . $upd->get_query() );
+      ta_begin();
+      {//HOT-section to save game profile
+         db_query( $dbgmsg.'.replace', "REPLACE INTO Profiles SET " . $upd->get_query() );
+         Profile::delete_profile_cache( $dbgmsg, $this->uid, $this->Type );
+      }
+      ta_end();
    }//save_profile
 
    /*! \brief Deletes current profile from database. */
    function delete_profile()
    {
+      $dbgmsg = "profile.delete_profile({$this->id},{$this->uid},{$this->Type})";
       if( $this->uid <= GUESTS_ID_MAX )
-         error('not_allowed_for_guest', "profile.delete_profile.check({$this->uid})");
+         error('not_allowed_for_guest', $dbgmsg.'check.uid');
 
       if( $this->id > 0 )
-         db_query( "profile.delete_profile.del({$this->id})",
-            "DELETE FROM Profiles WHERE ID='{$this->id}' LIMIT 1" );
-   }
-
-   /*! \brief Deletes all profiles for specific user-id and type from database. */
-   function delete_all_profiles( $user_id, $type )
-   {
-      $user_id = (int)$user_id;
-      $type = (int)$type;
-      if( $this->uid <= GUESTS_ID_MAX || $user_id <= GUESTS_ID_MAX )
-         error('not_allowed_for_guest', "profile.delete_all_profiles.check.uid($user_id/{$this->uid},$type)");
-      if( $type < 0 || $type > MAX_PROFTYPE )
-         error('invalid_args', "profile.delete_all_profiles.check.type($user_id,$type)");
-
-      db_query( "profile.delete_all_profiles.del($user_id,$type)",
-         "DELETE FROM Profiles WHERE User_ID='$user_id' AND Type='$type'" );
+      {
+         ta_begin();
+         {//HOT-section to delete game profile
+            db_query( $dbgmsg.'.del', "DELETE FROM Profiles WHERE ID='{$this->id}' LIMIT 1" );
+            Profile::delete_profile_cache( $dbgmsg, $this->uid, $this->Type );
+         }
+         ta_end();
+      }
    }
 
    /*! \brief Returns string-representation of this object (for debugging purposes). */
@@ -257,25 +256,25 @@ class Profile
     * \brief Returns single Profile-object for specified profile-id (must be owned by given user-id).
     * \return null if no profile found.
     */
-   function load_profile( $prof_id, $user_id )
+   function load_profile_by_id( $prof_id, $user_id )
    {
       if( !is_numeric($prof_id) || !is_numeric($user_id) )
-         error('invalid_args', "Profile::load_profile($prof_id,$user_id)");
+         error('invalid_args', "Profile::load_profile_by_id($prof_id,$user_id)");
 
       $fields = implode(',', Profile::get_query_fields());
-      $row = mysql_single_fetch("Profile::load_profile2($prof_id,$user_id)",
+      $row = mysql_single_fetch("Profile::load_profile_by_id.find($prof_id,$user_id)",
             "SELECT $fields FROM Profiles WHERE ID='$prof_id' AND User_ID='$user_id' LIMIT 1");
       if( !$row )
          return NULL;
 
       return Profile::new_from_row( $row );
-   }//load_profile
+   }//load_profile_by_id
 
    /*!
     * \brief Returns list of Profile-objects for specified user-id and type (in SortOrder).
     * \param $types single type or array of types
-    * \param $load_templates true to order by profile-template related stuff; false to load ONE profile
-    * \return empty-array if no profile found.
+    * \param $load_templates true to order by profile-template related stuff
+    * \return array( Profile, ...); otherwise empty-array if no profile found
     */
    function load_profiles( $user_id, $types, $load_templates=false )
    {
@@ -288,23 +287,57 @@ class Profile
          else
             $types = array( $types );
       }
-      if( is_array($types) && count($types) == 0 )
+      $cnt_types = count($types);
+      if( is_array($types) && $cnt_types == 0 )
          error('invalid_args', "Profile::load_profiles.check.types($user_id,$types)");
 
-      $fields = implode(',', Profile::get_query_fields());
+      $use_cache = ( $cnt_types == 1 && !$load_templates );
       $sql_types = implode(',', $types);
-      $result = db_query( "Profile::load_profiles2($user_id,$load_templates)",
-            "SELECT $fields FROM Profiles " .
-            "WHERE User_ID='$user_id' AND Type IN ($sql_types) " .
-            "ORDER BY " . ( $load_templates ? "Type,Name,ID" : "SortOrder,ID LIMIT 1" ) );
+      $dbgmsg = "Profile::load_profiles($user_id,$load_templates,T[$sql_types])";
+      $key = "Profile.$user_id.$sql_types";
 
-      $arr_out = array();
-      while( ($row = mysql_fetch_assoc( $result )) )
-         $arr_out[] = Profile::new_from_row($row);
-      mysql_free_result($result);
+      $arr_profiles = ( $use_cache ) ? DgsCache::fetch($dbgmsg, $key) : null;
+      if( is_null($arr_profiles) )
+      {
+         $fields = implode(',', Profile::get_query_fields());
+         $db_result = db_query( $dbgmsg,
+               "SELECT $fields FROM Profiles " .
+               "WHERE User_ID=$user_id AND Type IN ($sql_types) " .
+               "ORDER BY " . ( $load_templates ? "Type,Name,ID" : "SortOrder,ID LIMIT 1" ) );
 
-      return $arr_out;
+         $arr_profiles = array();
+         while( ($row = mysql_fetch_assoc($db_result)) )
+            $arr_profiles[] = Profile::new_from_row($row);
+         mysql_free_result($db_result);
+
+         if( $use_cache )
+            DgsCache::store( $dbgmsg, $key, $arr_profiles, SECS_PER_HOUR );
+      }
+
+      return $arr_profiles;
    }//load_profiles
+
+   function delete_profile_cache( $dbgmsg, $uid, $type )
+   {
+      DgsCache::delete( $dbgmsg, "Profile.$uid.$type" );
+   }
+
+   /*! \brief Deletes all profiles for specific user-id and type from database. */
+   function delete_all_profiles( $uid, $type )
+   {
+      $dbgmsg = "profile.delete_all_profiles($uid,$type)";
+      if( !is_numeric($uid) || $uid <= GUESTS_ID_MAX )
+         error('not_allowed_for_guest', $dbgmsg.'.check.uid');
+      if( !is_numeric($type) || $type < 0 || $type > MAX_PROFTYPE )
+         error('invalid_args', $dbgmsg.'.check.type');
+
+      ta_begin();
+      {//HOT-section to delete game profile
+         db_query( $dbgmsg.'.del', "DELETE FROM Profiles WHERE User_ID=$uid AND Type=$type" );
+         Profile::delete_profile_cache( $dbgmsg, $uid, $type );
+      }
+      ta_end();
+   }//delete_all_profiles
 
 } // end of 'Profile'
 
@@ -518,7 +551,7 @@ class SearchProfile
 
          case SPROF_DEL_PROFILE:    // delete profile(s) for user
             if( !is_null($this->profile) )
-               $this->profile->delete_all_profiles( $this->user_id, $this->profile_type );
+               Profile::delete_all_profiles( $this->user_id, $this->profile_type );
             $this->load_profile();
             break;
 

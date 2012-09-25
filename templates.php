@@ -309,7 +309,7 @@ function save_template( $uid, $name, $replace )
    $prof_type = (int)@$_REQUEST['type'];
 
    if( $replace > 0 )
-      $profile = Profile::load_profile( $replace, $uid );
+      $profile = Profile::load_profile_by_id( $replace, $uid );
    else
       $profile = ProfileTemplate::new_default_profile( $uid, $prof_type );
 
@@ -322,7 +322,7 @@ function save_template( $uid, $name, $replace )
 
 function check_delete_template( $uid, $prof_id )
 {
-   $profile = Profile::load_profile( $prof_id, $uid );
+   $profile = Profile::load_profile_by_id( $prof_id, $uid );
    if( is_null($profile) )
       error('invalid_profile', "templates.check_delete_template.find($prof_id,$uid)");
 

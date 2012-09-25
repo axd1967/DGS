@@ -101,7 +101,7 @@ define('MSGBOXROWS_INVITE', 6);
    $profile = null;
    if( $prof_tmpl_id > 0 )
    {
-      $profile = Profile::load_profile( $prof_tmpl_id, $my_id ); // loads only if user-id correct
+      $profile = Profile::load_profile_by_id( $prof_tmpl_id, $my_id ); // loads only if user-id correct
       if( is_null($profile) )
          error('invalid_profile', "message.check.profile($prof_tmpl_id)");
 

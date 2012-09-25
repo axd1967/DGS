@@ -51,7 +51,7 @@ require_once 'include/utilities.php';
    $prof_tmpl_id = (int)@$_REQUEST['tmpl'];
    if( $prof_tmpl_id > 0 )
    {
-      $profile = Profile::load_profile( $prof_tmpl_id, $my_id ); // loads only if user-id correct
+      $profile = Profile::load_profile_by_id( $prof_tmpl_id, $my_id ); // loads only if user-id correct
       if( is_null($profile) )
          error('invalid_profile', "new_game.check.profile($prof_tmpl_id)");
 
