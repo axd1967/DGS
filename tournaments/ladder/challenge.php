@@ -29,6 +29,7 @@ require_once 'include/game_functions.php';
 require_once 'tournaments/include/tournament_utils.php';
 require_once 'tournaments/include/tournament_helper.php';
 require_once 'tournaments/include/tournament.php';
+require_once 'tournaments/include/tournament_cache.php';
 require_once 'tournaments/include/tournament_status.php';
 require_once 'tournaments/include/tournament_ladder.php';
 require_once 'tournaments/include/tournament_ladder_props.php';
@@ -68,9 +69,7 @@ $GLOBALS['ThePage'] = new Page('TournamentLadderChallenge');
    if( @$_REQUEST['tl_cancel'] ) // cancel delete
       jump_to("tournaments/ladder/view.php?tid=$tid");
 
-   $tourney = Tournament::load_tournament($tid);
-   if( is_null($tourney) )
-      error('unknown_tournament', "Tournament.ladder.challenge.find_tournament($tid)");
+   $tourney = TournamentCache::load_cache_tournament( 'Tournament.ladder.challenge.find_tournament', $tid );
    $tstatus = new TournamentStatus( $tourney );
 
    if( $tourney->Status != TOURNEY_STATUS_PLAY )

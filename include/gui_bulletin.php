@@ -25,7 +25,7 @@ require_once 'include/db/bulletin.php';
 require_once 'include/classlib_user.php';
 require_once 'include/std_functions.php';
 require_once 'include/gui_functions.php';
-require_once 'tournaments/include/tournament.php';
+require_once 'tournaments/include/tournament_cache.php';
 
 
  /*!
@@ -177,8 +177,13 @@ class GuiBulletin
       if( $bulletin->tid > 0 )
       {
          if( is_null($bulletin->Tournament) )
-            $bulletin->Tournament = Tournament::load_tournament($bulletin->tid);
-         $ref_text = span('Reference', $bulletin->Tournament->build_info(5, 30) );
+            $bulletin->Tournament = TournamentCache::load_cache_tournament( 'GuiBulletin::build_view_bulletin',
+               $bulletin->tid, /*check*/false );
+
+         $ref_text = span('Reference',
+            ( is_null($bulletin->Tournament)
+               ? sprintf( T_('Unknown tournament [%s]'), $bulletin->tid )
+               : $bulletin->Tournament->build_info(5, 30) ));
       }
       elseif( $bulletin->gid > 0 )
       {

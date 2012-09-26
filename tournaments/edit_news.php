@@ -56,15 +56,12 @@ $GLOBALS['ThePage'] = new Page('TournamentNewsEdit');
    $tnews_id = (int) @$_REQUEST['tnid'];
    if( $tnews_id < 0 ) $tnews_id = 0;
 
-   $tourney = Tournament::load_tournament( $tid ); // existing tournament ?
-   if( is_null($tourney) )
-      error('unknown_tournament', "TournamentNews.edit_news.find_tournament($tid)");
-
    // edit allowed?
+   $tourney = TournamentCache::load_cache_tournament( 'Tournament.edit_news.find_tournament', $tid );
    $is_admin = TournamentUtils::isAdmin();
    $allow_edit_tourney = $tourney->allow_edit_tournaments( $my_id );
    if( !$allow_edit_tourney )
-      error('tournament_edit_not_allowed', "TournamentNews.edit_news.edit($tid,$my_id)");
+      error('tournament_edit_not_allowed', "Tournament.edit_news.edit($tid,$my_id)");
 
    // init
    if( $tnews_id > 0 )
@@ -77,7 +74,7 @@ $GLOBALS['ThePage'] = new Page('TournamentNewsEdit');
    if( is_null($tnews) )
    {
       if( $tnews_id )
-         error('bad_tournament_news', "TournamentNews.edit_news.edit($tid,$tnews_id)");
+         error('bad_tournament_news', "Tournament.edit_news.edit($tid,$tnews_id)");
       $tnews = new TournamentNews( 0, $tid, $my_id );
       $tnews->Published = $NOW;
    }

@@ -27,7 +27,7 @@ require_once 'include/filter.php';
 require_once 'include/filterlib_country.php';
 require_once 'include/form_functions.php';
 require_once 'include/table_columns.php';
-require_once 'tournaments/include/tournament.php';
+require_once 'tournaments/include/tournament_cache.php';
 require_once 'tournaments/include/tournament_extension.php';
 require_once 'tournaments/include/tournament_factory.php';
 require_once 'tournaments/include/tournament_games.php';
@@ -67,9 +67,7 @@ $GLOBALS['ThePage'] = new Page('TournamentPairEdit');
    if( $tid < 0 ) $tid = 0;
    $do_pair = (bool)@$_REQUEST['t_pair'];
 
-   $tourney = Tournament::load_tournament( $tid ); // existing tournament ?
-   if( is_null($tourney) )
-      error('unknown_tournament', "Tournament.edit_pairing.find_tournament($tid)");
+   $tourney = TournamentCache::load_cache_tournament( 'Tournament.edit_pairing.find_tournament', $tid );
    $tstatus = new TournamentStatus( $tourney );
    $ttype = TournamentFactory::getTournament($tourney->WizardType);
    if( !$ttype->need_rounds )

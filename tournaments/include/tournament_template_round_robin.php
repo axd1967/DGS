@@ -24,7 +24,7 @@ $TranslateGroups[] = "Tournament";
 require_once 'tournaments/include/tournament_globals.php';
 require_once 'tournaments/include/tournament_template.php';
 
-require_once 'tournaments/include/tournament.php';
+require_once 'tournaments/include/tournament_cache.php';
 require_once 'tournaments/include/tournament_games.php';
 require_once 'tournaments/include/tournament_pool.php';
 require_once 'tournaments/include/tournament_pool_classes.php';
@@ -158,9 +158,7 @@ class TournamentTemplateRoundRobin extends TournamentTemplate
       // see also tournament_status.php
       $errors = array();
 
-      $tourney = Tournament::load_tournament( $tid );
-      if( is_null($tourney) )
-         error('unknown_tournament', "TournamentTemplateRoundRobin.checkGamesStarted.find_tourney($tid,$round,{$this->uid})");
+      $tourney = TournamentCache::load_cache_tournament( 'TournamentTemplateRoundRobin.checkGamesStarted.find_tourney', $tid );
       $round = $tourney->CurrentRound;
 
       $tround = TournamentRound::load_tournament_round( $tid, $round );

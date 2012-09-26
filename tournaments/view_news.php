@@ -22,7 +22,7 @@ $TranslateGroups[] = "Tournament";
 chdir('..');
 require_once( 'include/std_functions.php' );
 require_once( 'include/std_classes.php' );
-require_once( 'tournaments/include/tournament.php' );
+require_once( 'tournaments/include/tournament_cache.php' );
 require_once( 'tournaments/include/tournament_news.php' );
 require_once( 'tournaments/include/tournament_participant.php' );
 require_once( 'tournaments/include/tournament_utils.php' );
@@ -46,9 +46,7 @@ $GLOBALS['ThePage'] = new Page('TournamentNewsView');
    if( $tid == 0 || $tnews_id < 0 )
       error('invalid_args', "Tournament.view_news.check_args($tid,$tnews_id)");
 
-   $tourney = Tournament::load_tournament( $tid );
-   if( is_null($tourney) )
-      error('unknown_tournament', "Tournament.view_news.find_tournament($tid)");
+   $tourney = TournamentCache::load_cache_tournament( 'Tournament.view_news.find_tournament', $tid );
 
    // init
    $is_admin = TournamentUtils::isAdmin();

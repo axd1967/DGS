@@ -25,6 +25,7 @@ require_once( 'include/gui_functions.php' );
 require_once( 'include/form_functions.php' );
 require_once( 'tournaments/include/tournament_utils.php' );
 require_once( 'tournaments/include/tournament.php' );
+require_once( 'tournaments/include/tournament_cache.php' );
 require_once( 'tournaments/include/tournament_status.php' );
 
 $GLOBALS['ThePage'] = new Page('TournamentLockEdit');
@@ -52,9 +53,7 @@ $GLOBALS['ThePage'] = new Page('TournamentLockEdit');
    $tid = (int) @$_REQUEST['tid'];
    if( $tid < 0 ) $tid = 0;
 
-   $tourney = Tournament::load_tournament( $tid ); // existing tournament ?
-   if( is_null($tourney) )
-      error('unknown_tournament', "Tournament.edit_lock.find_tournament($tid)");
+   $tourney = TournamentCache::load_cache_tournament( 'Tournament.edit_lock.find_tournament', $tid );
    $tstatus = new TournamentStatus( $tourney );
    $old_flags = $tourney->Flags;
    $old_locknote = $tourney->LockNote;

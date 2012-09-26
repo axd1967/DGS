@@ -31,6 +31,7 @@ require_once 'include/classlib_userconfig.php';
 require_once 'include/time_functions.php';
 require_once 'include/game_functions.php';
 require_once 'tournaments/include/tournament.php';
+require_once 'tournaments/include/tournament_cache.php';
 require_once 'tournaments/include/tournament_status.php';
 require_once 'tournaments/include/tournament_ladder.php';
 require_once 'tournaments/include/tournament_ladder_props.php';
@@ -74,9 +75,7 @@ $GLOBALS['ThePage'] = new Page('TournamentLadderView');
    $new_rank = (int)@$_REQUEST['new_rank'];
    if( $tid < 0 ) $tid = 0;
 
-   $tourney = Tournament::load_tournament($tid);
-   if( is_null($tourney) )
-      error('unknown_tournament', "Tournament.ladder_view.find_tournament($tid)");
+   $tourney = TournamentCache::load_cache_tournament( 'Tournament.ladder_view.find_tournament', $tid );
    $tstatus = new TournamentStatus( $tourney );
    $is_seed_status = ( $tourney->Status == TOURNEY_STATUS_PAIR );
    $allow_play = ( $tourney->Status == TOURNEY_STATUS_PLAY );

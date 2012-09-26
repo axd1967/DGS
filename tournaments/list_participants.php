@@ -29,7 +29,7 @@ require_once( 'include/filterlib_country.php' );
 require_once( 'include/rating.php' );
 require_once( 'include/classlib_profile.php' );
 require_once( 'include/classlib_userconfig.php' );
-require_once( 'tournaments/include/tournament.php' );
+require_once( 'tournaments/include/tournament_cache.php' );
 require_once( 'tournaments/include/tournament_participant.php' );
 
 $GLOBALS['ThePage'] = new Page('TournamentParticipantList');
@@ -47,10 +47,7 @@ $GLOBALS['ThePage'] = new Page('TournamentParticipantList');
    $my_id = $player_row['ID'];
 
    $tid = (int) @$_REQUEST['tid'];
-   $tourney = Tournament::load_tournament( $tid );
-   if( is_null($tourney) )
-      error('unknown_tournament', "Tournament.list_participants.find_tournament($tid)");
-
+   $tourney = TournamentCache::load_cache_tournament( 'Tournament.list_participants.find_tournament', $tid );
    $allow_edit_tourney = $tourney->allow_edit_tournaments( $my_id );
 
    // TD has different view of table-column-set

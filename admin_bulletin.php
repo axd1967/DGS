@@ -27,7 +27,7 @@ require_once 'include/db/bulletin.php';
 require_once 'include/gui_bulletin.php';
 require_once 'include/gui_user_functions.php';
 require_once 'include/classlib_user.php';
-require_once 'tournaments/include/tournament.php';
+require_once 'tournaments/include/tournament_cache.php';
 
 $GLOBALS['ThePage'] = new Page('BulletinAdmin');
 
@@ -73,7 +73,7 @@ $GLOBALS['ThePage'] = new Page('BulletinAdmin');
    {
       $bulletin->loadUserList();
       if( $bulletin->tid > 0 )
-         $bulletin->Tournament = Tournament::load_tournament($bulletin->tid);
+         $bulletin->Tournament = TournamentCache::load_cache_tournament( 'admin_bulletin', $bulletin->tid, /*check*/false );
    }
    $bulletin->readLockVersion();
 
@@ -384,7 +384,7 @@ function parse_edit_form( &$bulletin )
          $errors[] = T_('Tournament-ID must be numeric!');
       elseif( $need_tid )
       {
-         $tourney = Tournament::load_tournament($new_value);
+         $tourney = TournamentCache::load_cache_tournament( 'admin_bulletin.parse_edit_form', $new_value, /*check*/false );
          if( is_null($tourney) )
             $errors[] = sprintf( T_('No tournament found for tournament-ID [%s]!'), $new_value );
          else

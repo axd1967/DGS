@@ -31,7 +31,7 @@ require_once 'include/std_functions.php';
 require_once 'include/table_columns.php';
 require_once 'include/filter.php';
 require_once 'include/rating.php';
-require_once 'tournaments/include/tournament.php';
+require_once 'tournaments/include/tournament_cache.php';
 require_once 'tournaments/include/tournament_log.php';
 
 
@@ -56,7 +56,7 @@ require_once 'tournaments/include/tournament_log.php';
    $allow_view = false;
    if( $tid )
    {
-      $tourney = Tournament::load_tournament( $tid );
+      $tourney = TournamentCache::load_cache_tournament( 'Tournament.show_tlog', $tid, /*check*/false );
       if( !is_null($tourney) ) // deleted tournament perhaps (so no error)
          $allow_view = $tourney->allow_edit_tournaments( $my_id );
    }

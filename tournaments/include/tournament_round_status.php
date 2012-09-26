@@ -21,6 +21,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 $TranslateGroups[] = "Tournament";
 
+require_once 'tournaments/include/tournament_cache.php';
 require_once 'tournaments/include/tournament_factory.php';
 require_once 'tournaments/include/tournament_round.php';
 require_once 'tournaments/include/tournament_utils.php';
@@ -65,7 +66,7 @@ class TournamentRoundStatus
       elseif( is_numeric($tid) && $tid > 0 )
       {
          $this->tid = (int)$tid;
-         $this->tourney = Tournament::load_tournament( $this->tid );
+         $this->tourney = TournamentCache::load_cache_tournament( 'TournamentRoundStatus.find_tournament', $this->tid );
       }
       if( is_null($this->tourney) || (int)$this->tid <= 0 )
          error('unknown_tournament', "TournamentRoundStatus.find_tournament({$this->tid},{$this->Round})");

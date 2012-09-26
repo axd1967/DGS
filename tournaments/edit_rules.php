@@ -25,7 +25,7 @@ require_once 'include/gui_functions.php';
 require_once 'include/form_functions.php';
 require_once 'include/message_functions.php';
 require_once 'include/db/shape.php';
-require_once 'tournaments/include/tournament.php';
+require_once 'tournaments/include/tournament_cache.php';
 require_once 'tournaments/include/tournament_rules.php';
 require_once 'tournaments/include/tournament_status.php';
 require_once 'tournaments/include/tournament_utils.php';
@@ -56,9 +56,7 @@ $GLOBALS['ThePage'] = new Page('TournamentRulesEdit');
    $tid = (int) @$_REQUEST['tid'];
    if( $tid < 0 ) $tid = 0;
 
-   $tourney = Tournament::load_tournament( $tid ); // existing tournament ?
-   if( is_null($tourney) )
-      error('unknown_tournament', "Tournament.edit_rules.find_tournament($tid)");
+   $tourney = TournamentCache::load_cache_tournament( 'Tournament.edit_rules.find_tournament', $tid );
    $tstatus = new TournamentStatus( $tourney );
 
    // create/edit allowed?

@@ -23,6 +23,7 @@ $TranslateGroups[] = "Tournament";
 
 require_once 'include/std_classes.php';
 require_once 'tournaments/include/tournament.php';
+require_once 'tournaments/include/tournament_cache.php';
 require_once 'tournaments/include/tournament_director.php';
 require_once 'tournaments/include/tournament_factory.php';
 require_once 'tournaments/include/tournament_games.php';
@@ -69,7 +70,7 @@ class TournamentStatus
       elseif( is_numeric($tid) && $tid > 0 )
       {
          $this->tid = (int)$tid;
-         $this->tourney = Tournament::load_tournament( $this->tid );
+         $this->tourney = TournamentCache::load_cache_tournament( 'TournamentStatus.find_tournament', $this->tid );
       }
       if( is_null($this->tourney) || (int)$this->tid <= 0 )
          error('unknown_tournament', "TournamentStatus.find_tournament({$this->tid})");

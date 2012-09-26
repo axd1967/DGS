@@ -24,6 +24,7 @@ require_once 'include/std_functions.php';
 require_once 'include/gui_functions.php';
 require_once 'include/form_functions.php';
 require_once 'tournaments/include/tournament.php';
+require_once 'tournaments/include/tournament_cache.php';
 require_once 'tournaments/include/tournament_factory.php';
 require_once 'tournaments/include/tournament_globals.php';
 require_once 'tournaments/include/tournament_round.php';
@@ -49,7 +50,7 @@ $GLOBALS['ThePage'] = new Page('TournamentManage');
 
    $tourney = null;
    if( $tid )
-      $tourney = Tournament::load_tournament($tid); // existing tournament ?
+      $tourney = TournamentCache::load_cache_tournament( 'Tournament.manage_tournament.find_tournament', $tid );
    if( is_null($tourney) )
       error('unknown_tournament', "manage_tournament.find_tournament($tid)");
    $ttype = TournamentFactory::getTournament($tourney->WizardType);
@@ -133,7 +134,7 @@ $GLOBALS['ThePage'] = new Page('TournamentManage');
                  SEP_SPACING,
                  make_menu_link( T_('New bulletin'), "edit_bulletin.php?n_tid=$tid" ),
                  ( Bulletin::is_bulletin_admin()
-                     ? SEP_SPACING . make_menu_link( T_('New admin bulletin'), array( 'url' => "admin_bulletin.php?tid=$tid", 'class' => 'AdminLink' ))
+                     ? SEP_SPACING . make_menu_link( T_('New admin bulletin'), array( 'url' => "admin_bulletin.php?n_tid=$tid", 'class' => 'AdminLink' ))
                      : '' ),
          '<li>', ( $allow_new_del_TD
                      ? make_menu_link( T_('Add tournament director'), array( 'url' => "tournaments/edit_director.php?tid=$tid", 'class' => 'TAdmin' ))

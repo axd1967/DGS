@@ -27,7 +27,7 @@ require_once( 'include/filter.php' );
 require_once( 'include/rating.php' );
 require_once( 'include/classlib_profile.php' );
 require_once( 'include/classlib_userconfig.php' );
-require_once( 'tournaments/include/tournament.php' );
+require_once( 'tournaments/include/tournament_cache.php' );
 require_once( 'tournaments/include/tournament_director.php' );
 
 $GLOBALS['ThePage'] = new Page('TournamentDirectorList');
@@ -44,9 +44,7 @@ $GLOBALS['ThePage'] = new Page('TournamentDirectorList');
    $my_id = $player_row['ID'];
 
    $tid = (int) @$_REQUEST['tid'];
-   $tourney = Tournament::load_tournament($tid);
-   if( is_null($tourney) )
-      error('unknown_tournament', "list_directors.find_tournament($tid)");
+   $tourney = TournamentCache::load_cache_tournament( 'Tournament.list_directors.find_tournament', $tid );
    $allow_edit = $tourney->allow_edit_directors($my_id);
 
    $page = "list_directors.php?";

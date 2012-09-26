@@ -23,7 +23,7 @@ chdir('../..');
 require_once 'include/std_functions.php';
 require_once 'include/form_functions.php';
 require_once 'include/classlib_user.php';
-require_once 'tournaments/include/tournament.php';
+require_once 'tournaments/include/tournament_cache.php';
 require_once 'tournaments/include/tournament_factory.php';
 require_once 'tournaments/include/tournament_helper.php';
 require_once 'tournaments/include/tournament_round.php';
@@ -73,9 +73,7 @@ $GLOBALS['ThePage'] = new Page('TournamentRoundEditor');
    elseif( @$_REQUEST['tre_stat'] ) // edit-status
       jump_to("tournaments/roundrobin/edit_round_status.php?tid=$tid".URI_AMP."round=$round");
 
-   $tourney = Tournament::load_tournament($tid);
-   if( is_null($tourney) )
-      error('unknown_tournament', "Tournament.edit_rounds.find_tournament($tid)");
+   $tourney = TournamentCache::load_cache_tournament( 'Tournament.edit_rounds.find_tournament', $tid );
    $tstatus = new TournamentStatus( $tourney );
    $ttype = TournamentFactory::getTournament($tourney->WizardType);
    if( !$ttype->need_rounds )

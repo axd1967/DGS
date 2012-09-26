@@ -27,6 +27,7 @@ require_once( 'include/game_functions.php' );
 require_once( 'include/rating.php' );
 require_once( 'include/db/bulletin.php' );
 require_once( 'tournaments/include/tournament.php' );
+require_once( 'tournaments/include/tournament_cache.php' );
 require_once( 'tournaments/include/tournament_participant.php' );
 require_once( 'tournaments/include/tournament_properties.php' );
 require_once( 'tournaments/include/tournament_status.php' );
@@ -66,6 +67,7 @@ $GLOBALS['ThePage'] = new Page('TournamentRegistration');
 */
 
    $tid = (int) @$_REQUEST['tid'];
+   if( $tid < 0 ) $tid = 0;
    $rid = (int) @$_REQUEST['rid'];
    $is_delete = (bool) @$_REQUEST['tp_delete'];
    if( $rid < 0 ) $rid = 0;
@@ -73,9 +75,7 @@ $GLOBALS['ThePage'] = new Page('TournamentRegistration');
    if( @$_REQUEST['tp_cancel'] ) // cancel delete
       jump_to("tournaments/register.php?tid=$tid".URI_AMP."rid=$rid");
 
-   $tourney = Tournament::load_tournament($tid); // existing tournament ?
-   if( is_null($tourney) || $tid <= 0 )
-      error('unknown_tournament', "Tournament.register.find_tournament($tid)");
+   $tourney = TournamentCache::load_cache_tournament( 'Tournament.register.find_tournament', $tid );
    $tstatus = new TournamentStatus( $tourney );
    $ttype = TournamentFactory::getTournament($tourney->WizardType);
 

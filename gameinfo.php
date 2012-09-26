@@ -29,6 +29,7 @@ require_once( 'include/rating.php' );
 require_once( 'include/game_functions.php' );
 if( ALLOW_TOURNAMENTS ) {
    require_once 'tournaments/include/tournament.php';
+   require_once 'tournaments/include/tournament_cache.php';
    require_once 'tournaments/include/tournament_games.php';
 }
 
@@ -114,10 +115,7 @@ function build_rating_diff( $rating_diff )
       $tid = 0;
    else
    {
-      $tourney = Tournament::load_tournament($tid);
-      if( is_null($tourney) )
-         error('unknown_tournament', "gameinfo.find_tournament($gid,$tid)");
-
+      $tourney = TournamentCache::load_cache_tournament( "gameinfo.find_tournament($gid,$tid)", $tid );
       $tgame = TournamentGames::load_tournament_game_by_gid($gid);
    }
 

@@ -25,7 +25,7 @@ require_once( 'include/std_classes.php' );
 require_once( 'include/table_columns.php' );
 require_once( 'include/filter.php' );
 require_once( 'include/classlib_profile.php' );
-require_once( 'tournaments/include/tournament.php' );
+require_once( 'tournaments/include/tournament_cache.php' );
 require_once( 'tournaments/include/tournament_news.php' );
 require_once( 'tournaments/include/tournament_participant.php' );
 require_once( 'tournaments/include/tournament_utils.php' );
@@ -45,9 +45,7 @@ $GLOBALS['ThePage'] = new Page('TournamentNewsList');
    $my_id = $player_row['ID'];
 
    $tid = (int) @$_REQUEST['tid'];
-   $tourney = Tournament::load_tournament( $tid );
-   if( is_null($tourney) )
-      error('unknown_tournament', "Tournament.list_news.find_tournament($tid)");
+   $tourney = TournamentCache::load_cache_tournament( 'Tournament.list_news.find_tournament', $tid );
 
    $is_admin = TournamentUtils::isAdmin();
    $allow_edit_tourney = $tourney->allow_edit_tournaments( $my_id );

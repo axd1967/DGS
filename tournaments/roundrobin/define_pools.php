@@ -24,7 +24,7 @@ require_once 'include/std_functions.php';
 require_once 'include/gui_functions.php';
 require_once 'include/form_functions.php';
 require_once 'include/table_columns.php';
-require_once 'tournaments/include/tournament.php';
+require_once 'tournaments/include/tournament_cache.php';
 require_once 'tournaments/include/tournament_factory.php';
 require_once 'tournaments/include/tournament_helper.php';
 require_once 'tournaments/include/tournament_participant.php';
@@ -65,9 +65,7 @@ $GLOBALS['ThePage'] = new Page('TournamentPoolDefine');
    $tid = (int) @$_REQUEST['tid'];
    if( $tid < 0 ) $tid = 0;
 
-   $tourney = Tournament::load_tournament( $tid ); // existing tournament ?
-   if( is_null($tourney) )
-      error('unknown_tournament', "Tournament.define_pools.find_tournament($tid)");
+   $tourney = TournamentCache::load_cache_tournament( 'Tournament.define_pools.find_tournament', $tid );
    $tstatus = new TournamentStatus( $tourney );
    $ttype = TournamentFactory::getTournament($tourney->WizardType);
    if( !$ttype->need_rounds )

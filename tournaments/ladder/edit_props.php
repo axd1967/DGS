@@ -24,7 +24,7 @@ require_once 'include/std_functions.php';
 require_once 'include/gui_functions.php';
 require_once 'include/form_functions.php';
 require_once 'include/time_functions.php';
-require_once 'tournaments/include/tournament.php';
+require_once 'tournaments/include/tournament_cache.php';
 require_once 'tournaments/include/tournament_status.php';
 require_once 'tournaments/include/tournament_ladder_props.php';
 require_once 'tournaments/include/tournament_utils.php';
@@ -56,20 +56,18 @@ $GLOBALS['ThePage'] = new Page('TournamentLadderPropsEdit');
    $tid = (int) @$_REQUEST['tid'];
    if( $tid < 0 ) $tid = 0;
 
-   $tourney = Tournament::load_tournament( $tid ); // existing tournament ?
-   if( is_null($tourney) )
-      error('unknown_tournament', "TournamentLadderProps.edit_props.find_tournament($tid)");
+   $tourney = TournamentCache::load_cache_tournament( 'Tournament.ladder.edit_props.find_tournament', $tid );
    $tstatus = new TournamentStatus( $tourney );
    $ttype = TournamentFactory::getTournament($tourney->WizardType);
    $t_limits = $ttype->getTournamentLimits();
 
    // create/edit allowed?
    if( !$tourney->allow_edit_tournaments($my_id) )
-      error('tournament_edit_not_allowed', "TournamentLadderProps.edit_props.edit_tournament($tid,$my_id)");
+      error('tournament_edit_not_allowed', "Tournament.ladder.edit_props.edit_tournament($tid,$my_id)");
 
    $tl_props = TournamentLadderProps::load_tournament_ladder_props( $tid );
    if( is_null($tl_props) )
-      error('bad_tournament', "TournamentLadderProps.edit_props.miss_properties($tid,$my_id)");
+      error('bad_tournament', "Tournament.ladder.edit_props.miss_properties($tid,$my_id)");
 
    // init
    $errors = $tstatus->check_edit_status( TournamentLadderProps::get_edit_tournament_status() );

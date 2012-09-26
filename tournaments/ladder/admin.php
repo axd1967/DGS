@@ -23,7 +23,7 @@ chdir('../..');
 require_once 'include/std_functions.php';
 require_once 'include/form_functions.php';
 require_once 'include/classlib_user.php';
-require_once 'tournaments/include/tournament.php';
+require_once 'tournaments/include/tournament_cache.php';
 require_once 'tournaments/include/tournament_factory.php';
 require_once 'tournaments/include/tournament_helper.php';
 require_once 'tournaments/include/tournament_ladder.php';
@@ -70,9 +70,7 @@ $GLOBALS['ThePage'] = new Page('TournamentLadderAdmin');
    if( @$_REQUEST['ta_cancel'] ) // cancel delete
       jump_to("tournaments/ladder/admin.php?tid=$tid");
 
-   $tourney = Tournament::load_tournament($tid);
-   if( is_null($tourney) )
-      error('unknown_tournament', "Tournament.ladder_admin.find_tournament($tid)");
+   $tourney = TournamentCache::load_cache_tournament( 'Tournament.ladder_admin.find_tournament', $tid );
    $tstatus = new TournamentStatus( $tourney );
    $ttype = TournamentFactory::getTournament($tourney->WizardType);
 

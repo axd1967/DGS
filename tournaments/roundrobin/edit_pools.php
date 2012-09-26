@@ -27,7 +27,7 @@ require_once 'include/filter.php';
 require_once 'include/filterlib_country.php';
 require_once 'include/form_functions.php';
 require_once 'include/table_columns.php';
-require_once 'tournaments/include/tournament.php';
+require_once 'tournaments/include/tournament_cache.php';
 require_once 'tournaments/include/tournament_factory.php';
 require_once 'tournaments/include/tournament_participant.php';
 require_once 'tournaments/include/tournament_pool.php';
@@ -72,9 +72,7 @@ $GLOBALS['ThePage'] = new Page('TournamentPoolEdit');
    $show_pools = ( @$_REQUEST['t_showpools'] || $show_unassigned
       || @$_REQUEST['t_detach'] || @$_REQUEST['t_reassign'] );
 
-   $tourney = Tournament::load_tournament( $tid ); // existing tournament ?
-   if( is_null($tourney) )
-      error('unknown_tournament', "Tournament.edit_pools.find_tournament($tid)");
+   $tourney = TournamentCache::load_cache_tournament( 'Tournament.edit_pools.find_tournament', $tid );
    $tstatus = new TournamentStatus( $tourney );
    $ttype = TournamentFactory::getTournament($tourney->WizardType);
    if( !$ttype->need_rounds )

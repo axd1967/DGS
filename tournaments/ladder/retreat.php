@@ -22,7 +22,7 @@ $TranslateGroups[] = "Tournament";
 chdir('../..');
 require_once 'include/std_functions.php';
 require_once 'include/form_functions.php';
-require_once 'tournaments/include/tournament.php';
+require_once 'tournaments/include/tournament_cache.php';
 require_once 'tournaments/include/tournament_status.php';
 require_once 'tournaments/include/tournament_ladder.php';
 
@@ -56,9 +56,7 @@ $GLOBALS['ThePage'] = new Page('TournamentLadderRetreat');
    if( @$_REQUEST['tu_cancel'] ) // cancel delete
       jump_to("tournaments/ladder/view.php?tid=$tid");
 
-   $tourney = Tournament::load_tournament($tid);
-   if( is_null($tourney) )
-      error('unknown_tournament', "Tournament.ladder_retreat.find_tournament($tid)");
+   $tourney = TournamentCache::load_cache_tournament( 'Tournament.ladder_retreat.find_tournament', $tid );
    $tstatus = new TournamentStatus( $tourney );
 
    $errors = $tstatus->check_edit_status( TournamentLadder::get_view_ladder_status(false) );

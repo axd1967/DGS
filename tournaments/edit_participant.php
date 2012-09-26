@@ -28,6 +28,7 @@ require_once( 'include/rating.php' );
 require_once( 'include/error_codes.php' );
 require_once( 'include/db/bulletin.php' );
 require_once( 'tournaments/include/tournament.php' );
+require_once( 'tournaments/include/tournament_cache.php' );
 require_once( 'tournaments/include/tournament_participant.php' );
 require_once( 'tournaments/include/tournament_properties.php' );
 require_once( 'tournaments/include/tournament_status.php' );
@@ -82,9 +83,7 @@ $GLOBALS['ThePage'] = new Page('TournamentEditParticipant');
    if( @$_REQUEST['tp_cancel'] ) // cancel delete or edit
       jump_to("tournaments/edit_participant.php?tid=$tid".URI_AMP."uid=$uid");
 
-   $tourney = Tournament::load_tournament( $tid ); // existing tournament ?
-   if( is_null($tourney) )
-      error('unknown_tournament', "Tournament.edit_participant.find_tournament($tid)");
+   $tourney = TournamentCache::load_cache_tournament( "Tournament.edit_participant.find_tournament($my_id)", $tid );
    $tstatus = new TournamentStatus( $tourney );
    $ttype = TournamentFactory::getTournament($tourney->WizardType);
 

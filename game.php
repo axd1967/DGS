@@ -48,7 +48,7 @@ if( ENABLE_STDHANDICAP ) {
    require_once( "include/sgf_parser.php" );
 }
 if( ALLOW_TOURNAMENTS ) {
-   require_once 'tournaments/include/tournament.php';
+   require_once 'tournaments/include/tournament_cache.php';
 }
 
 $GLOBALS['ThePage'] = new Page('Game');
@@ -117,13 +117,10 @@ $GLOBALS['ThePage'] = new Page('Game');
       error('internal_error', "game.check.status_komi.no_fairkomi($gid,$Status,{$game_setup->Handicaptype})");
    $is_fairkomi_negotiation = ( $is_fairkomi && $Status == GAME_STATUS_KOMI );
 
-   $tourney = null;
    if( ALLOW_TOURNAMENTS && ($tid > 0) )
-   {
-      $tourney = Tournament::load_tournament($tid);
-      if( is_null($tourney) )
-         error('unknown_tournament', "game.find_tournament($gid,$tid)");
-   }
+      $tourney = TournamentCache::load_cache_tournament( "game.find_tournament($gid)", $tid );
+   else
+      $tourney = null;
 
    $score_mode = getRulesetScoring($Ruleset);
 

@@ -23,7 +23,7 @@ chdir('../..');
 require_once 'include/std_classes.php';
 require_once 'include/std_functions.php';
 require_once 'include/gui_functions.php';
-require_once 'tournaments/include/tournament.php';
+require_once 'tournaments/include/tournament_cache.php';
 require_once 'tournaments/include/tournament_factory.php';
 require_once 'tournaments/include/tournament_globals.php';
 require_once 'tournaments/include/tournament_pool.php';
@@ -57,9 +57,7 @@ $GLOBALS['ThePage'] = new Page('TournamentPoolView');
    if( $round < 0 ) $round = 0;
    $edit = (get_request_arg('edit', 0)) ? 1 : 0;
 
-   $tourney = Tournament::load_tournament($tid);
-   if( is_null($tourney) )
-      error('unknown_tournament', "Tournament.pool_view.find_tournament($tid)");
+   $tourney = TournamentCache::load_cache_tournament( 'Tournament.pool_view.find_tournament', $tid );
    $tstatus = new TournamentStatus( $tourney );
    $ttype = TournamentFactory::getTournament($tourney->WizardType);
    if( !$ttype->need_rounds )

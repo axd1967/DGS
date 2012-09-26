@@ -29,6 +29,7 @@ require_once 'include/game_functions.php';
 require_once 'include/time_functions.php';
 require_once 'include/db/games.php';
 require_once 'tournaments/include/tournament.php';
+require_once 'tournaments/include/tournament_cache.php';
 require_once 'tournaments/include/tournament_games.php';
 require_once 'tournaments/include/tournament_rules.php';
 require_once 'tournaments/include/tournament_status.php';
@@ -68,9 +69,7 @@ define('GA_RES_TIMOUT', 3);
    if( $tid < 0 ) $tid = 0;
    if( $gid < 0 ) $gid = 0;
 
-   $tourney = Tournament::load_tournament($tid);
-   if( is_null($tourney) )
-      error('unknown_tournament', "Tournament.game_admin.find_tournament($tid)");
+   $tourney = TournamentCache::load_cache_tournament( 'Tournament.game_admin.find_tournament', $tid );
    $tstatus = new TournamentStatus( $tourney );
 
    $game = Games::load_game($gid);

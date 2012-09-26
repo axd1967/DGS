@@ -27,7 +27,7 @@ require_once 'include/db/bulletin.php';
 require_once 'include/gui_bulletin.php';
 require_once 'include/classlib_user.php';
 require_once 'include/game_functions.php';
-require_once 'tournaments/include/tournament.php';
+require_once 'tournaments/include/tournament_cache.php';
 
 $GLOBALS['ThePage'] = new Page('BulletinEdit');
 
@@ -286,7 +286,7 @@ function check_bulletin_input( &$bulletin, $my_id )
       $bulletin->tid = 0;
    elseif( $tid > 0 )
    {
-      $tourney = Tournament::load_tournament($bulletin->tid);
+      $tourney = TournamentCache::load_cache_tournament( 'edit_bulletin', $bulletin->tid, /*check*/false );
       if( is_null($tourney) )
          $errors[] = sprintf( T_('No tournament found for tournament-ID [%s]!'), $tid );
       $bulletin->Tournament = $tourney;
