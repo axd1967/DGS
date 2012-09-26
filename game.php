@@ -739,7 +739,7 @@ $GLOBALS['ThePage'] = new Page('Game');
    }
 
    echo SMALL_SPACING,
-      anchor( 'http://eidogo.com/#url:'.HOSTBASE."sgf.php?gid=$gid".URI_AMP.'owned_comments=1',
+      anchor( 'http://eidogo.com/#url:'.HOSTBASE."sgf.php?gid=$gid",
          image( 'images/eidogo.gif', T_('EidoGo Game Player'), null, 'class=InTextImage' ));
 
    // observers may view the comments in the sgf files, so not restricted to own games
