@@ -49,7 +49,7 @@ $GLOBALS['ThePage'] = new Page('TournamentManage');
 
    $tourney = null;
    if( $tid )
-      $tourney = Tournament::load_tournament( $tid, /*owner*/true ); // existing tournament ?
+      $tourney = Tournament::load_tournament($tid); // existing tournament ?
    if( is_null($tourney) )
       error('unknown_tournament', "manage_tournament.find_tournament($tid)");
    $ttype = TournamentFactory::getTournament($tourney->WizardType);
@@ -75,7 +75,7 @@ $GLOBALS['ThePage'] = new Page('TournamentManage');
          'TEXT',        $tourney->build_info() ));
    $tform->add_row( array(
          'DESCRIPTION', T_('Owner#tourney'),
-         'TEXT',        ( ($tourney->Owner_ID) ? user_reference( REF_LINK, 1, $tourney->Owner_Handle, $tourney->Owner_ID ) : NO_VALUE ) ));
+         'TEXT',        ( ($tourney->Owner_ID) ? user_reference( REF_LINK, 1, '', $tourney->Owner_ID ) : NO_VALUE ) ));
    $tform->add_row( array(
          'DESCRIPTION', T_('Last changed'),
          'TEXT',        TournamentUtils::buildLastchangedBy($tourney->Lastchanged, $tourney->ChangedBy) ));

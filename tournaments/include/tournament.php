@@ -26,7 +26,6 @@ require_once 'include/std_functions.php';
 require_once 'tournaments/include/tournament_globals.php';
 require_once 'tournaments/include/tournament_utils.php';
 require_once 'tournaments/include/tournament_director.php';
-require_once 'tournaments/include/tournament_cache.php';
 
  /*!
   * \file tournament.php
@@ -65,7 +64,6 @@ class Tournament
    var $Title;
    var $Description;
    var $Owner_ID;
-   var $Owner_Handle; // non-table
    var $Status;
    var $Flags;
    var $Created;
@@ -80,12 +78,13 @@ class Tournament
 
    // non-DB vars
 
+   var $Owner_Handle;
    var $TP_Counts;
 
    /*! \brief Constructs ConfigBoard-object with specified arguments. */
    function Tournament( $id=0, $scope=TOURNEY_SCOPE_PUBLIC, $type=TOURNEY_TYPE_LADDER,
                         $wizard_type=TOURNEY_WIZTYPE_PUBLIC_LADDER, $title='', $description='',
-                        $owner_id=0, $owner_handle='', $status=TOURNEY_STATUS_NEW, $flags=0,
+                        $owner_id=0, $status=TOURNEY_STATUS_NEW, $flags=0,
                         $created=0, $lastchanged=0, $changed_by='', $starttime=0, $endtime=0,
                         $rounds=1, $current_round=1, $registeredTP=0, $lock_note='' )
    {
@@ -96,7 +95,6 @@ class Tournament
       $this->Title = $title;
       $this->Description = $description;
       $this->Owner_ID = (int)$owner_id;
-      $this->Owner_Handle = $owner_handle;
       $this->setStatus( $status );
       $this->Flags = (int)$flags;
       $this->Created = (int)$created;
@@ -109,6 +107,7 @@ class Tournament
       $this->RegisteredTP = (int)$registeredTP;
       $this->LockNote = $lock_note;
       // non-DB
+      $this->Owner_Handle = '';
       $this->TP_Counts = NULL;
    }
 
@@ -481,16 +480,9 @@ class Tournament
    // ------------ static functions ----------------------------
 
    /*! \brief Returns db-fields to be used for query of Tournament-object. */
-   function build_query_sql( $with_owner )
+   function build_query_sql()
    {
       $qsql = $GLOBALS['ENTITY_TOURNAMENT']->newQuerySQL('T');
-      if( $with_owner )
-      {
-         $qsql->add_part( SQLP_FIELDS,
-            'Owner.Handle AS X_OwnerHandle' );
-         $qsql->add_part( SQLP_FROM,
-            'INNER JOIN Players AS Owner ON Owner.ID=T.Owner_ID' );
-      }
       return $qsql;
    }
 
@@ -505,7 +497,6 @@ class Tournament
             @$row['Title'],
             @$row['Description'],
             @$row['Owner_ID'],
-            @$row['X_OwnerHandle'],
             @$row['Status'],
             @$row['Flags'],
             @$row['X_Created'],
@@ -522,12 +513,12 @@ class Tournament
    }
 
    /*! \brief Loads and returns Tournament-object for given tournament-ID; NULL if nothing found. */
-   function load_tournament( $tid, $with_owner=false )
+   function load_tournament( $tid )
    {
       $result = NULL;
       if( $tid > 0 )
       {
-         $qsql = Tournament::build_query_sql( $with_owner );
+         $qsql = Tournament::build_query_sql();
          $qsql->add_part( SQLP_WHERE, "T.ID='$tid'" );
          $qsql->add_part( SQLP_LIMIT, '1' );
 
@@ -541,7 +532,7 @@ class Tournament
    /*! \brief Returns enhanced (passed) ListIterator with Tournament-objects. */
    function load_tournaments( $iterator )
    {
-      $qsql = Tournament::build_query_sql( /*owner*/false );
+      $qsql = Tournament::build_query_sql();
       $iterator->setQuerySQL( $qsql );
       $query = $iterator->buildQuery();
       $result = db_query( "Tournament.load_tournaments", $query );

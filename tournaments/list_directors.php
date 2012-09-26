@@ -44,7 +44,7 @@ $GLOBALS['ThePage'] = new Page('TournamentDirectorList');
    $my_id = $player_row['ID'];
 
    $tid = (int) @$_REQUEST['tid'];
-   $tourney = Tournament::load_tournament( $tid, /*owner*/true );
+   $tourney = Tournament::load_tournament($tid);
    if( is_null($tourney) )
       error('unknown_tournament', "list_directors.find_tournament($tid)");
    $allow_edit = $tourney->allow_edit_directors($my_id);
@@ -103,9 +103,7 @@ $GLOBALS['ThePage'] = new Page('TournamentDirectorList');
    $tform = new Form( 'tournament', $page, FORM_POST );
    $tform->add_row( array(
          'DESCRIPTION', T_('Tournament Owner'),
-         'TEXT', ( ($tourney->Owner_ID)
-                     ? user_reference( REF_LINK, 1, $tourney->Owner_Handle, $tourney->Owner_ID )
-                     : NO_VALUE ) ));
+         'TEXT', ( ($tourney->Owner_ID) ? user_reference( REF_LINK, 1, '', $tourney->Owner_ID ) : NO_VALUE ) ));
    $tform->echo_string();
    echo "<br>\n";
 

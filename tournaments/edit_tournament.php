@@ -53,11 +53,19 @@ $GLOBALS['ThePage'] = new Page('TournamentEdit');
    $tid = (int) @$_REQUEST['tid'];
    if( $tid < 0 ) $tid = 0;
 
-   $tourney = Tournament::load_tournament( $tid, /*owner*/true ); // existing tournament ?
+   $tourney = Tournament::load_tournament($tid); // existing tournament ?
    if( is_null($tourney) )
       error('unknown_tournament', "Tournament.edit_tournament.find_tournament($tid)");
    $tstatus = new TournamentStatus( $tourney );
    $ttype = TournamentFactory::getTournament($tourney->WizardType);
+
+   // load T-owner
+   if( $tourney->Owner_ID > 0 )
+   {
+      $owner_row = load_cache_user_reference( "Tournament.edit_tournament.find_owner($tid,{$tourney->Owner_ID})",
+         true, $tourney->Owner_ID );
+      $tourney->Owner_Handle = @$owner_row['Handle'];
+   }
 
    // edit allowed?
    $is_admin = TournamentUtils::isAdmin();
@@ -98,7 +106,7 @@ $GLOBALS['ThePage'] = new Page('TournamentEdit');
          'TEXT',        $tourney->build_info() ));
    $tform->add_row( array(
          'DESCRIPTION', T_('Owner#tourney'),
-         'TEXT',        user_reference( REF_LINK, 1, $tourney->Owner_Handle, $tourney->Owner_ID ), ));
+         'TEXT',        user_reference( REF_LINK, 1, '', $tourney->Owner_ID ), ));
    $tform->add_row( array(
          'DESCRIPTION', T_('Created'),
          'TEXT',        date(DATE_FMT, $tourney->Created) ));
