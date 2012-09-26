@@ -21,6 +21,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 require_once 'include/connect2mysql.php';
 require_once 'include/cache_clock.php';
+require_once 'include/dgs_cache.php';
 require_once 'tournaments/include/tournament_globals.php';
 require_once 'tournaments/include/tournament.php';
 require_once 'tournaments/include/tournament_director.php';
@@ -41,10 +42,9 @@ $TOURNAMENT_CACHE = new TournamentCache();
   *
   * \brief Helper-class to store different tournament-objects in local cache.
   */
-
 class TournamentCache
 {
-   /*! \brief array( tid => Tournament-object ) */
+   /*! \brief array( tid => Tournament-object ); fallback if shared-mem-cache disabled. */
    var $cache_tournament;
 
    /*! \brief array( tid:uid => TournamentDirector-object(without-user) ) */
@@ -66,22 +66,6 @@ class TournamentCache
       $this->cache_tl_props = array();
       $this->cache_clock = ClockCache::get_clock_cache();
       $this->lock_tourney = null;
-   }
-
-   function load_tournament( $dbgmsg, $tid )
-   {
-      $tid = (int)$tid;
-      if( isset($this->cache_tournament[$tid]) )
-         $tourney = $this->cache_tournament[$tid];
-      else
-      {
-         $tourney = Tournament::load_tournament($tid); // without owner-handle
-         if( is_null($tourney) )
-            error('unknown_tournament', "$dbgmsg.find_tournament($tid)");
-         else
-            $this->cache_tournament[$tid] = $tourney;
-      }
-      return $tourney;
    }
 
    /*!
@@ -141,8 +125,11 @@ class TournamentCache
       // release (previous) lock when handling NEW tourney-ID
       if( $this->is_tournament_locked() && ($tid != $this->lock_tourney->ID) )
       {
+         $lock_tid = $this->lock_tourney->ID;
          $this->lock_tourney->update_flags( TOURNEY_FLAG_LOCK_CRON, 0 );
          $this->lock_tourney = null;
+
+         TournamentCache::delete_cache_tournament( $lock_tid );
       }
    }
 
@@ -153,8 +140,7 @@ class TournamentCache
     */
    function set_tournament_cron_lock( $tid )
    {
-      // load (cached) Tournament
-      $tourney = $this->load_tournament( 'TournamentCache.set_tournament_cron_lock.find', $tid );
+      $tourney = TournamentCache::load_cache_tournament( 'TCache.set_tournament_cron_lock.find', $tid );
 
       if( $tourney->isFlagSet(TOURNEY_FLAG_LOCK_ADMIN | TOURNEY_FLAG_LOCK_TDWORK) )
          return false;
@@ -176,6 +162,55 @@ class TournamentCache
    {
       global $TOURNAMENT_CACHE;
       return $TOURNAMENT_CACHE;
+   }
+
+   /*!
+    * \brief Loads and caches tournament for given tournament-id (fallback to run-cache if shared-mem-cache unavailable).
+    * \param $check_exist true = die if tournament cannot be found
+    */
+   function load_cache_tournament( $dbgmsg, $tid, $check_exist=true )
+   {
+      $tid = (int)$tid;
+      $dbgmsg .= ".TCache::load_cache_tournament($tid,$check_exist)";
+      $key = "Tournament.$tid";
+
+      $use_dgs_cache = DgsCache::is_shared_enabled();
+
+      $tourney = $tcache = null;
+      if( $use_dgs_cache )
+         $tourney = DgsCache::fetch($dbgmsg, $key);
+      else
+      {
+         $tcache = TournamentCache::get_instance();
+         if( isset($tcache->cache_tournament[$tid]) )
+            $tourney = $tcache->cache_tournament[$tid];
+      }
+
+      if( is_null($tourney) )
+      {
+         $tourney = Tournament::load_tournament($tid);
+         if( $check_exist && is_null($tourney) )
+            error('unknown_tournament', $dbgmsg);
+
+         if( !is_null($tourney) ) // only cache if existing
+         {
+            if( $use_dgs_cache )
+               DgsCache::store( $dbgmsg, $key, $tourney, SECS_PER_HOUR );
+            else
+               $tcache->cache_tournament[$tid] = $tourney;
+         }
+      }
+
+      return $tourney;
+   }//load_cache_tournament
+
+   function delete_cache_tournament( $tid )
+   {
+      DgsCache::delete( "TCache.delete_cache_tournament($tid)", "Tournament.$tid" );
+
+      // delete run-cache
+      $tcache = TournamentCache::get_instance();
+      unset($tcache->cache_tournament[$tid]);
    }
 
 } // end of 'TournamentCache'

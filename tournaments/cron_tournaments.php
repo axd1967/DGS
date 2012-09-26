@@ -73,7 +73,7 @@ if( ALLOW_TOURNAMENTS && !$is_down )
       list( $tgame, $orow ) = $arr_item;
       $tid = $tgame->tid;
 
-      $tourney = $thelper->tcache->load_tournament( 'cron_tournament.game_end', $tid );
+      $tourney = TournamentCache::load_cache_tournament( 'cron_tournament.game_end', $tid );
       if( !is_null($tourney) && $thelper->process_tournament_game_end( $tourney, $tgame, /*check*/true ) )
       {
          $thelper->tcache->release_tournament_cron_lock( $tid );
