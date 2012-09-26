@@ -22,6 +22,8 @@ $TranslateGroups[] = "Game";
 require_once 'include/std_functions.php';
 require_once 'include/table_columns.php';
 require_once 'include/game_functions.php';
+require_once 'include/board.php';
+require_once 'include/dgs_cache.php';
 
 $TheErrors->set_mode(ERROR_MODE_PRINT);
 
@@ -73,15 +75,7 @@ $TheErrors->set_mode(ERROR_MODE_PRINT);
    if( $is_mp_game )
       GamePlayer::load_users_for_mpgame( $gid, '', false, $arr_users );
 
-
-   // include moves: PASS, SCORE, RESIGN
-   $result = db_query( 'game_comments.messages',
-      'SELECT Moves.MoveNr,Moves.Stone,MoveMessages.Text'
-      .' FROM MoveMessages'
-         ." INNER JOIN Moves ON Moves.gid=$gid AND Moves.MoveNr=MoveMessages.MoveNr"
-      ." WHERE MoveMessages.gid=$gid"
-            .' AND Moves.PosX>='.POSX_RESIGN.' AND Moves.Stone IN ('.WHITE.','.BLACK.')'
-      .' ORDER BY Moves.MoveNr' );
+   list( $arr_moves, $arr_movemsg ) = load_game_comments_data( $gid );
 
 
    start_html(T_('Comments'), true, @$player_row['SkinName']);
@@ -100,14 +94,16 @@ $TheErrors->set_mode(ERROR_MODE_PRINT);
    $ctable->add_tablehead(2, T_('Comments'), 'Comment');
 
    $cnt_comments = 0;
-   while( $row = mysql_fetch_assoc($result) )
+   foreach( $arr_moves as $row )
    {
-      $crow_strings = array();
-      $Text = $row['Text'];
+      $move_nr = (int)$row['MoveNr'];
+      $Text = @$arr_movemsg[$move_nr];
+
       if( !$my_game && !$my_mpgame )
          $Text = game_tag_filter( $Text);
       $Text = trim(make_html_safe( $Text, $row['Stone']==$my_color ? 'gameh' : $html_mode));
-      if( empty($Text) ) continue;
+      if( empty($Text) )
+         continue;
       $cnt_comments++;
 
       $color_class = ' class="InTextStone"';
@@ -116,8 +112,7 @@ $TheErrors->set_mode(ERROR_MODE_PRINT);
       else
          $colortxt = '<img src="17/w.gif" alt="' . T_('White') . "\"$color_class>" ;
 
-      $move_nr = (int)$row['MoveNr'];
-
+      $crow_strings = array();
       $crow_strings[1] = "$move_nr&nbsp;$colortxt";
       $crow_strings[2] = $Text;
       if( $is_mp_game )
@@ -131,11 +126,39 @@ $TheErrors->set_mode(ERROR_MODE_PRINT);
 
       $ctable->add_row( $crow_strings );
    }
-   mysql_free_result($result);
 
    echo spacing(sprintf( T_('(%s moves, %s comments)'), (int)$game['Moves'], $cnt_comments ), 0, 'center'), "\n";
    $ctable->echo_table();
 
    end_html();
-}
+}//main
+
+
+// return arr( $arr_moves, $arr_movemsg )
+function load_game_comments_data( $gid )
+{
+   // load moves
+   $arr_moves = array();
+   $arr_cached_moves = Board::load_cache_game_moves(
+      'game_comments.load_game_comments_data', $gid, /*fetch*/true, /*store*/false );
+   if( is_array($arr_cached_moves) )
+   {
+      foreach( $arr_cached_moves as $row )
+      {
+         $stone = $row['Stone'];
+
+         // include moves: PASS, SCORE, RESIGN
+         if( $row['PosX'] >= POSX_RESIGN && ($stone == BLACK || $stone == WHITE) )
+            $arr_moves[] = $row;
+      }
+   }
+   unset($arr_cached_moves);
+
+   // load move-messages
+   $arr_movemsg = Board::load_cache_game_move_message(
+      'game_comments.load_game_comments_data', $gid, /*move*/null, /*fetch*/true, /*store*/false );
+
+   return array( $arr_moves, $arr_movemsg );
+}//load_game_comments_data
+
 ?>

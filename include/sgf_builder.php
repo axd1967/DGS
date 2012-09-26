@@ -390,23 +390,24 @@ class SgfBuilder
 
    function load_trimmed_moves( $with_comments )
    {
+      // load moves
+      $arr_moves = Board::load_cache_game_moves( 'SgfBuilder.load_trimmed_moves', $this->gid, /*fetch*/true, /*store*/false );
+      if( !is_array($arr_moves) )
+         $arr_moves = array();
+
+      // load move-messages
       if( $with_comments )
       {
-         $moves_query =
-            "SELECT Moves.*,MoveMessages.Text " .
-            "FROM Moves LEFT JOIN MoveMessages " .
-               "ON MoveMessages.gid={$this->gid} AND MoveMessages.MoveNr=Moves.MoveNr " .
-            "WHERE Moves.gid={$this->gid} ORDER BY Moves.ID";
+         $arr_movemsg = Board::load_cache_game_move_message( 'SgfBuilder.load_trimmed_moves',
+            $this->gid, /*move*/null, /*fetch*/true, /*store*/false );
+         if( !is_array($arr_movemsg) )
+            $arr_movemsg = array();
       }
       else
-      {
-         $moves_query =
-            "SELECT Moves.*, '' AS Text " .
-            "FROM Moves WHERE Moves.gid={$this->gid} ORDER BY Moves.ID";
-      }
-      $result = db_query( "SgfBuilder.load_trimmed_moves({$this->gid})", $moves_query );
+         $arr_movemsg = array();
 
-      $this->moves_iterator->setResultRows( @mysql_num_rows($result) );
+      $cnt_moves = count($arr_moves);
+      $this->moves_iterator->setResultRows( $cnt_moves );
 
       // possibly skip some moves
       $this->sgf_trim_nr = $this->moves_iterator->ResultRows - 1 ;
@@ -416,32 +417,28 @@ class SgfBuilder
 
          //skip the ending moves where PosX <= $sgf_trim_level
          //-1=POSX_PASS= skip ending pass, -2=POSX_SCORE= keep them ... -999= keep everything
-         if( abs($score) < SCORE_RESIGN ) // real-score
+         if( abs($score) < SCORE_RESIGN ) // real-point-score
             $sgf_trim_level = POSX_SCORE; // keep PASSes for better SGF=DGS-move-numbering
          else if( abs($score) == SCORE_TIME )
-            $sgf_trim_level = POSX_RESIGN;
-         else
+            $sgf_trim_level = POSX_RESIGN; // keep PASSes and SCORing
+         else // resignation
             $sgf_trim_level = POSX_SCORE;
 
          while( $this->sgf_trim_nr >= 0 )
          {
-            if( !mysql_data_seek($result, $this->sgf_trim_nr) )
-               break;
-            if( !$row = mysql_fetch_array($result) )
-               break;
+            $row = $arr_moves[$this->sgf_trim_nr];
             if( $row['PosX'] > $sgf_trim_level && ($row['Stone'] == WHITE || $row['Stone'] == BLACK) )
                break;
             $this->sgf_trim_nr-- ;
          }
-
-         if( $this->moves_iterator->ResultRows > 0 )
-            mysql_data_seek($result, 0);
       }
 
       $this->moves_iterator->clearItems();
-      while( $row = mysql_fetch_array( $result ) )
+      foreach( $arr_moves as $row )
+      {
+         $row['Text'] = @$arr_movemsg[$row['MoveNr']];
          $this->moves_iterator->addItem( null, $row );
-      mysql_free_result($result);
+      }
    }//load_trimmed_moves
 
    function build_filename_sgf( $bulk_filename )
@@ -660,7 +657,7 @@ class SgfBuilder
       {
          $row = $arr_item[1];
          $Text = '';
-         extract($row); // fields: ID,gid,MoveNr,Stone,PosX,PosY,Hours
+         extract($row); // fields: MoveNr,Stone,PosX,PosY,Hours; Text
          $coord = chr($PosX + ord('a')) . chr($PosY + ord('a'));
 
          switch( (int)$Stone )
@@ -774,22 +771,13 @@ class SgfBuilder
                }
                elseif( $this->sgf_trim_nr >= 0 )
                {// move
-                  if( $Stone == WHITE )
-                     $color = 'W';
-                  else
-                     $color = 'B';
-
+                  $color = ( $Stone == WHITE ) ? 'W' : 'B';
                   if( $this->next_color != $color )
                   {
                      $this->sgf_echo_prop('PL'); //setup property
                      $this->echo_sgf( "[$color]" );
                   }
-
-
-                  if( $Stone == WHITE )
-                     $this->next_color = 'B';
-                  else
-                     $this->next_color = 'W';
+                  $this->next_color = ( $Stone == WHITE ) ? 'B' : 'W';
 
                   $this->echo_sgf( "\n;" ); //Node start
                   $this->prop_type = '';
