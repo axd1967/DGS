@@ -437,6 +437,8 @@ This is why:
          $result = db_query( "confirm.message_query($gid,$action)", $message_query );
          if( mysql_affected_rows() < 1 && $action != 'delete' )
             error('mysql_insert_move', "confirm.message_query2($gid,$action)");
+
+         Board::delete_cache_game_move_messages( "confirm.message_query($gid,$action)", $gid );
       }
 
       $do_delete = false;

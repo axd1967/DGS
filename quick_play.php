@@ -238,13 +238,15 @@ This is why:
       $result = db_query( "quick_play.update_moves($gid,$action)", $move_query );
       if( mysql_affected_rows() < 1 && $action != 'delete' )
          error('mysql_insert_move', "quick_play.update_moves2($gid,$action)");
-      Board::delete_cache_game_moves( "quick_play.update_moves($gid,$action)", $gid );
+      Board::delete_cache_game_moves( "quick_play.update_moves3($gid,$action)", $gid );
 
       if( $message_query )
       {
          $result = db_query( "quick_play.update_movemessage1($gid)", $message_query );
          if( mysql_affected_rows() < 1 && $action != 'delete' )
             error('mysql_insert_move', "quick_play.update_movemessage2($gid,$action)");
+
+         Board::delete_cache_game_move_messages( "quick_play.update_movemessage3($gid)", $gid );
       }
 
       // Notify opponent about move

@@ -1144,8 +1144,10 @@ class GameHelper
       db_query( "GameHelper::_delete_base_game_tables.games($gid)",
          "DELETE FROM Games WHERE ID=$gid LIMIT 1" );
 
+      // clear big-cache-entries to free cache-space
       DgsCache::delete_group( "GameHelper::_delete_base_game_tables.observers($gid)", "Observers.$gid" );
-      Board::delete_cache_game_moves( "GameHelper::_delete_base_game_tables.moves($gid)", $gid ); // clear big cache-entry
+      Board::delete_cache_game_moves( "GameHelper::_delete_base_game_tables.moves($gid)", $gid );
+      Board::delete_cache_game_move_messages( "GameHelper::_delete_base_game_tables.movemsg($gid)", $gid );
    }//_delete_base_game_tables
 
    /*!

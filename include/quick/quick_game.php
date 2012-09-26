@@ -528,6 +528,8 @@ class QuickHandlerGame extends QuickHandler
             $result = db_query( "QuickHandlerGame.process.insert_movemessage($gid,$action})", $message_query );
             if( mysql_affected_rows() < 1 && $this->action != GAMECMD_DELETE )
                error('mysql_insert_move', "QuickHandlerGame.process.insert_movemessage2($gid,$action})");
+
+            Board::delete_cache_game_move_messages( "QuickHandlerGame.process.insert_movemessage($gid,$action})", $gid );
          }
 
          if( $game_finished )
