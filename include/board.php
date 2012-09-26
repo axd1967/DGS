@@ -24,6 +24,12 @@ require_once( "include/game_functions.php" );
 if( !defined('EDGE_SIZE') )
    define('EDGE_SIZE', 10);
 
+// for Board::load_from_db()
+define('BOARDOPT_MARK_DEAD',     0x01);
+define('BOARDOPT_LOAD_LAST_MSG', 0x02);
+define('BOARDOPT_STOP_ON_FIX',   0x04); // if set: stop and return FALSE if corrupted game found
+define('BOARDOPT_USE_CACHE',     0x08);
+
 
 class Board
 {
@@ -96,14 +102,19 @@ class Board
       $this->moves_captures = array();
    }//init_board
 
-
-   // fills $array with positions where the stones are (incl. handling of shape-game)
-   // fills $moves with moves and coordinates.
-   // keep the coords, color and message of the move $move.
-   // \param $move move-number, 0=last-move, MOVE_SETUP=S=initial-setup-for-shape-game
-   // \param $game_row need fields: ID, Size, Moves, ShapeSnapshot
-   // \param $fix_stop true = stop and return FALSE if corrupted game found
-   function load_from_db( $game_row, $move=0, $no_marked_dead=true, $load_last_message=true, $fix_stop=false )
+   /*!
+    * \brief Loads move and messages into Board for given game-info and move-number.
+    * \param $game_row need fields: ID, Size, Moves, ShapeSnapshot
+    * \param $move move-number, 0=last-move, MOVE_SETUP=S=initial-setup-for-shape-game
+    * \param $board_opts BOARDOPT_... specifying extras to do or not do:
+    *        BOARDOPT_MARK_DEAD, BOARDOPT_LOAD_LAST_MSG, BOARDOPT_STOP_ON_FIX, BOARDOPT_USE_CACHE
+    * \param $cache_ttl 0 = use default (see load_cache_game_moves-func); otherwise TTL in secs for caching game-moves
+    *
+    * \note fills $this->array with positions where the stones are (incl. handling of shape-game)
+    * \note fills $this->moves with moves and coordinates.
+    * \note keep the coords, color and message of the move $move.
+    */
+   function load_from_db( $game_row, $move=0, $board_opts=0, $cache_ttl=0 )
    {
       $this->init_board();
 
@@ -134,16 +145,13 @@ class Board
          $move = $this->max_moves;
 
       // load moves
-      $result = db_query( "board.load_from_db.find_moves($gid)",
-         "SELECT * FROM Moves WHERE gid=$gid ORDER BY MoveNr" );
-      if( !$result )
+      $use_cache = (bool)( $board_opts & BOARDOPT_USE_CACHE );
+      $arr_moves = Board::load_cache_game_moves( 'load_from_db', $gid, $use_cache, $use_cache, $cache_ttl );
+      if( $arr_moves === false )
          return FALSE;
-      $cnt_moves = @mysql_num_rows($result);
-      if( (!$is_shape && $cnt_moves <=0) || ($is_shape && $cnt_moves < 0) )
-      {
-         mysql_free_result($result);
+      $cnt_moves = count($arr_moves);
+      if( $cnt_moves == 0 )
          return FALSE;
-      }
 
 
       $marked_dead = array();
@@ -166,7 +174,8 @@ class Board
       }
 
       // load moves
-      while( $row = mysql_fetch_assoc($result) )
+      $fix_stop = ( $board_opts & BOARDOPT_STOP_ON_FIX );
+      foreach( $arr_moves as $row )
       {
          extract($row); //$MoveNr, $Stone, $PosX, $PosY, $Hours
 
@@ -226,9 +235,9 @@ class Board
             $this->js_moves[] = array( $MoveNr, $Stone, $PosX, $PosY );
          }
       }//scan moves
-      mysql_free_result($result);
+      unset($arr_moves);
 
-      if( !$no_marked_dead && $removed_dead )
+      if( ($board_opts & BOARDOPT_MARK_DEAD) && $removed_dead )
       {
          foreach( $marked_dead as $sub )
          {
@@ -237,7 +246,7 @@ class Board
          }
       }
 
-      if( $load_last_message && !$show_move_setup && isset($this->moves[$move]) )
+      if( ($board_opts & BOARDOPT_LOAD_LAST_MSG) && !$show_move_setup && isset($this->moves[$move]) )
       {
          list($this->movecol, $this->movemrkx, $this->movemrky) = $this->moves[$move];
 
@@ -251,6 +260,44 @@ class Board
 
       return TRUE;
    } //load_from_db
+
+   // static
+   function load_cache_game_moves( $dbgmsg, $gid, $fetch_cache, $store_cache, $cache_ttl=0 )
+   {
+      $dbgmsg = "board.load_cache_game_moves($gid,$fetch_cache,$store_cache).$dbgmsg";
+      $key = "Game.moves.$gid";
+
+      $arr_moves = ( $fetch_cache ) ? DgsCache::fetch($dbgmsg, $key) : null;
+      if( is_null($arr_moves) )
+      {
+         $db_result = db_query( $dbgmsg,
+            "SELECT MoveNr, Stone, PosX, PosY, Hours FROM Moves WHERE gid=$gid ORDER BY MoveNr" );
+
+         if( $db_result )
+         {
+            $arr_moves = array();
+            while( $row = mysql_fetch_assoc($db_result) )
+               $arr_moves[] = $row;
+         }
+         else
+            $arr_moves = false;
+         mysql_free_result($db_result);
+
+         if( $store_cache )
+         {
+            $ttl = ( is_numeric($cache_ttl) && $cache_ttl > 0 ) ? $cache_ttl : 10*SECS_PER_MIN;
+            DgsCache::store( $dbgmsg, $key, $arr_moves, $ttl );
+         }
+      }
+
+      return $arr_moves;
+   }//load_cache_game_moves
+
+   // static
+   function delete_cache_game_moves( $dbgmsg, $gid )
+   {
+      DgsCache::delete( $dbgmsg, "Game.moves.$gid" );
+   }
 
    // fills $array with positions where the stones are (incl. handling of shape-game)
    // NOTE: only used for shape-checking, not to control board
@@ -1317,6 +1364,8 @@ class Board
             "DELETE FROM Moves WHERE gid=$gid AND MoveNr=$max_movenr" );
          db_query( "board.fix_corrupted_move_table.delete_move_mess($gid)",
             "DELETE FROM MoveMessages WHERE gid=$gid AND MoveNr=$max_movenr" );
+
+         Board::delete_cache_game_moves( "board.fix_corrupted_move_table.delete_moves($gid)", $gid );
       }
       ta_end();
    }//fix_corrupted_move_table

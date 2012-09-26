@@ -237,7 +237,8 @@ class QuickHandlerGame extends QuickHandler
       // load board with moves
       $this->TheBoard = new Board();
       $no_marked_dead = ( $this->action == GAMECMD_MOVE || $Status == GAME_STATUS_PLAY || $Status == GAME_STATUS_PASS );
-      if( !$this->TheBoard->load_from_db( $this->game_row, 0, $no_marked_dead) )
+      $board_opts = ( $no_marked_dead ? 0 : BOARDOPT_MARK_DEAD );
+      if( !$this->TheBoard->load_from_db( $this->game_row, 0, $board_opts) )
          error('internal_error', "$dbgmsg.load_board($no_marked_dead)");
    }//prepare
 
@@ -518,6 +519,8 @@ class QuickHandlerGame extends QuickHandler
             $result = db_query( "QuickHandlerGame.process.update_moves($gid,$action})", $move_query );
             if( mysql_affected_rows() < 1 && $this->action != GAMECMD_DELETE )
                error('mysql_insert_move', "QuickHandlerGame.process.update_moves2($gid,$action})");
+
+            Board::delete_cache_game_moves( "QuickHandlerGame.process.update_moves($gid,$action})", $gid );
          }
 
          if( $message_query )

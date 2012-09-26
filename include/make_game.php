@@ -692,7 +692,7 @@ function create_game(&$black_row, &$white_row, &$game_info_row, $game_setup=null
       // create game-snapshot for thumbnail (for handicap-stones)
       $stdh_game_row = array( 'ID' => $gid, 'Size' => $size, 'Moves' => $moves, 'ShapeSnapshot' => '' );
       $TheBoard = new Board();
-      if( $TheBoard->load_from_db($stdh_game_row, 0, /*dead*/true, /*lastmsg*/false, /*fix*/false) ) // ignore errors
+      if( $TheBoard->load_from_db($stdh_game_row) ) // ignore errors
       {
          $snapshot = GameSnapshot::make_game_snapshot($size, $TheBoard);
          db_query( "create_game.upd_game.stdh_snapshot($gid,$size)",
@@ -720,6 +720,7 @@ function create_game(&$black_row, &$white_row, &$game_info_row, $game_setup=null
       }
    }
 
+   Board::delete_cache_game_moves( "create_game.shape_w1st($gid)", $gid ); // not needed for NEW game, but not hurting either
    if( $tomove > GUESTS_ID_MAX ) // safety-check
       clear_cache_quick_status( $tomove, QST_CACHE_GAMES );
 

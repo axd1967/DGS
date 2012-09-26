@@ -243,9 +243,13 @@ $GLOBALS['ThePage'] = new Page('Game');
 
    $no_marked_dead = ( $Status == GAME_STATUS_KOMI || $Status == GAME_STATUS_PLAY || $Status == GAME_STATUS_PASS ||
                        $action == 'choose_move' || $action == 'domove' );
+   $board_opts = ( $no_marked_dead ? 0 : BOARDOPT_MARK_DEAD ) | BOARDOPT_LOAD_LAST_MSG | BOARDOPT_USE_CACHE;
+   $cache_ttl = ( $Status == GAME_STATUS_KOMI || $Status == GAME_STATUS_FINISHED )
+      ? 5*SECS_PER_MIN
+      : 0; // use default
 
    $TheBoard = new Board( );
-   if( !$TheBoard->load_from_db( $game_row, $arg_move, $no_marked_dead) )
+   if( !$TheBoard->load_from_db( $game_row, $arg_move, $board_opts, $cache_ttl) )
       error('internal_error', "game.load_from_db($gid)");
    $movecol= $TheBoard->movecol;
    $movemsg= $TheBoard->movemsg;

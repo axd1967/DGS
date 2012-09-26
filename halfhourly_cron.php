@@ -255,7 +255,7 @@ if( !$is_down )
                if( strpos($SendEmail, 'BOARD') !== false )
                {
                   $TheBoard = new Board();
-                  if( !$TheBoard->load_from_db($game_row, 0, /*dead*/true, /*lastmsg*/true, /*fixstop*/true) )
+                  if( !$TheBoard->load_from_db($game_row, 0, BOARDOPT_MARK_DEAD|BOARDOPT_LOAD_LAST_MSG|BOARDOPT_STOP_ON_FIX) )
                      error('internal_error', "halfhourly_cron.game.load_from_db($gid,$uid)");
 
                   // remove all tags

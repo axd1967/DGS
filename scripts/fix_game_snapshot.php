@@ -146,10 +146,10 @@ function fix_single_game( $gid )
    if( $game->Status == GAME_STATUS_SETUP || $game->Status == GAME_STATUS_INVITED )
       error('invalid_game_status', "fix_game_snaphost.check.status($gid,{$game->Status})");
 
-   $no_marked_dead = ( $game->Status == GAME_STATUS_KOMI || $game->Status == GAME_STATUS_PLAY || $game->Status == GAME_STATUS_PASS );
+   $board_opts = ( GameHelper::game_need_mark_dead($game->Status) ) ? BOARDOPT_MARK_DEAD : 0;
 
    $board = new Board();
-   if( !$board->load_from_db( $game_row, $game->Moves, $no_marked_dead, /*last-msg*/false) )
+   if( !$board->load_from_db( $game_row, $game->Moves, $board_opts) )
       error('internal_error', "fix_game_snapshost.load_from_db($gid)");
    $new_snapshot = GameSnapshot::make_game_snapshot( $board->size, $board );
 
@@ -212,10 +212,11 @@ function bulk_fix_missing_game_snapshots( $status, $uid, $startgid, $limit, $sle
       $cnt++;
       $gid = $game_row['ID'];
       $game_status = $game_row['Status'];
-      $no_marked_dead = ( $game_status == GAME_STATUS_KOMI || $game_status == GAME_STATUS_PLAY || $game_status == GAME_STATUS_PASS );
+
+      $board_opts = (( GameHelper::game_need_mark_dead($game_status) ) ? BOARDOPT_MARK_DEAD : 0 ) | BOARDOPT_STOP_ON_FIX;
 
       $board = new Board();
-      if( $board->load_from_db( $game_row, $game_row['Moves'], $no_marked_dead, /*last-msg*/false, /*fix-stop*/true) )
+      if( $board->load_from_db( $game_row, $game_row['Moves'], $board_opts) )
       {
          $new_snapshot = GameSnapshot::make_game_snapshot( $board->size, $board );
 

@@ -433,6 +433,8 @@ class GameAddTime
       if( mysql_affected_rows() != 1 )
          error('mysql_insert_move',"GameAddTime::add_time_opponent.insert_move($gid)");
 
+      Board::delete_cache_game_moves( "GameAddTime::add_time_opponent($gid)", $gid );
+
       return $add_hours; // success (no-error)
    } //add_time_opponent
 
@@ -1143,6 +1145,7 @@ class GameHelper
          "DELETE FROM Games WHERE ID=$gid LIMIT 1" );
 
       DgsCache::delete_group( "GameHelper::_delete_base_game_tables.observers($gid)", "Observers.$gid" );
+      Board::delete_cache_game_moves( "GameHelper::_delete_base_game_tables.moves($gid)", $gid ); // clear big cache-entry
    }//_delete_base_game_tables
 
    /*!
@@ -1369,6 +1372,11 @@ class GameHelper
          DgsCache::store( $dbgmsg, "GameNotes.$gid.$uid", array( 'Hidden' => $hidden, 'Notes' => $notes ), 10*SECS_PER_MIN );
       }
       ta_end();
+   }
+
+   function game_need_mark_dead( $game_status )
+   {
+      return ( $game_status == GAME_STATUS_SCORE || $game_status == GAME_STATUS_SCORE2 || $game_status == GAME_STATUS_FINISHED );
    }
 
 } // end 'GameHelper'

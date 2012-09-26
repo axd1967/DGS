@@ -134,9 +134,10 @@ require_once( "include/rating.php" );
    $time_query = $upd_clock->get_query(false, true);
 
    $no_marked_dead = ( $Status == GAME_STATUS_PLAY || $Status == GAME_STATUS_PASS || $action == 'domove' );
+   $board_opts = ( $no_marked_dead ? 0 : BOARDOPT_MARK_DEAD );
 
-   $TheBoard = new Board( );
-   if( !$TheBoard->load_from_db( $game_row, 0, $no_marked_dead) )
+   $TheBoard = new Board();
+   if( !$TheBoard->load_from_db( $game_row, 0, $board_opts) )
       error('internal_error', "confirm.board.load_from_db($gid)");
 
    $mp_query = '';
@@ -427,6 +428,8 @@ This is why:
          $result = db_query( "confirm.update_moves($gid,$action)", $move_query );
          if( mysql_affected_rows() < 1 && $action != 'delete' )
             error('mysql_insert_move', "confirm.update_moves2($gid,$action)");
+
+         Board::delete_cache_game_moves( "confirm.update_moves($gid,$action)", $gid );
       }
 
       if( $message_query )

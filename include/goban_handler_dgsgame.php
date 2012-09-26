@@ -99,7 +99,7 @@ class GobanHandlerDgsGame
          error('unknown_game', "GobanHandlerDgsGame.load_board($gid,$movenum)");
 
       $board = new Board();
-      if( !$board->load_from_db($game_row, $movenum, /*no-dead-marks*/true, /*load-last-msg*/false, /*fix*/false ) )
+      if( !$board->load_from_db($game_row, $movenum) )
          error('internal_error', "GobanHandlerDgsGame.load_board2($gid,$movenum)");
       return $board;
    }//load_board
