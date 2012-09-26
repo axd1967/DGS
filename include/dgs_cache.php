@@ -165,7 +165,7 @@ class DgsCache
          return null;
 
       $result = $cache->cache_fetch( $id );
-      if( DBG_CACHE ) error_log("DgsCache.fetch($id).$dbgmsg = [" . (is_null($result) ? 'NULL' : $result) . "]");
+      if( DBG_CACHE ) error_log("DgsCache.fetch($id).$dbgmsg = [" . DgsCache::debug_result($result) . "]");
       return $result;
    }
 
@@ -203,6 +203,15 @@ class DgsCache
       $arr_group = $cache->cache_delete_group( $group_id );
       if( DBG_CACHE ) error_log("DgsCache.delete_group($group_id).$dbgmsg: group [" . (is_null($arr_group) ? '-' : implode(' ', $arr_group)) . "]");
       return $arr_group;
+   }
+
+   // \internal
+   function debug_result( $value )
+   {
+      if( is_null($value) )
+         return 'NULL';
+      else
+         return gettype($value) . ':' . ( is_object($value) ? get_class($value) : $value );
    }
 
 } // end of 'DgsCache'
