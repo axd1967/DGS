@@ -221,9 +221,8 @@ class TournamentLadder
       if( !is_numeric($diff) || $diff == 0 )
          error('invalid_args', "TournamentLadder.update_incoming_challenges.check.diff({$this->rid},$diff)");
 
-      $table = $GLOBALS['ENTITY_TOURNAMENT_LADDER']->table;
       $result = db_query( "TournamentLadder.update_incoming_challenges.update({$this->rid},$diff)",
-         "UPDATE $table SET ChallengesIn=ChallengesIn+($diff) " // maybe diff<0
+         "UPDATE TournamentLadder SET ChallengesIn=ChallengesIn+($diff) " // maybe diff<0
             . "WHERE tid={$this->tid} AND rid={$this->rid} LIMIT 1" );
       if( $result )
          $this->ChallengesIn += $diff;
@@ -236,9 +235,8 @@ class TournamentLadder
       if( !is_numeric($diff) || $diff == 0 )
          error('invalid_args', "TournamentLadder.update_outgoing_challenges.check.diff({$this->rid},$diff)");
 
-      $table = $GLOBALS['ENTITY_TOURNAMENT_LADDER']->table;
       $result = db_query( "TournamentLadder.update_outgoing_challenges.update({$this->rid},$diff)",
-         "UPDATE $table SET ChallengesOut=ChallengesOut+($diff) " // maybe diff<0
+         "UPDATE TournamentLadder SET ChallengesOut=ChallengesOut+($diff) " // maybe diff<0
             . "WHERE tid={$this->tid} AND rid={$this->rid} LIMIT 1" );
       if( $result )
          $this->ChallengesOut += $diff;
@@ -260,11 +258,10 @@ class TournamentLadder
       $xdbgmsg = "$dbgmsg.TL.remove_user_from_ladder({$this->tid},{$this->rid},{$this->uid},$rm_uid,$nfy_user)";
 
       //HOT-section to remove user from ladder and eventually from TournamentParticipant-table
-      $table = $GLOBALS['ENTITY_TOURNAMENT_LADDER']->table;
-      $table2 = $GLOBALS['ENTITY_TOURNAMENT_PARTICIPANT']->table; // needed for nested-lock for process-game-end
-      $table3 = $GLOBALS['ENTITY_TOURNAMENT']->table; // needed for nested-lock for delete-TP
       db_lock( "$xdbgmsg.upd_tladder",
-         "$table WRITE, $table AS TL READ, $table2 WRITE, $table3 WRITE" );
+         "TournamentLadder WRITE, TournamentLadder AS TL READ, " .
+         "TournamentParticipant WRITE, " . // needed for nested-lock for process-game-end
+         "Tournament WRITE" ); // needed for nested-lock for delete-TP
       {//LOCK TournamentLadder
          $this->delete();
          $is_deleted = ( TournamentLadder::load_rank($this->tid, $this->rid) == 0 );
@@ -316,9 +313,8 @@ class TournamentLadder
          return true;
 
       //HOT-section to change user-rank
-      $table = $GLOBALS['ENTITY_TOURNAMENT_LADDER']->table;
       db_lock( "TournamentLadder.change_user_rank({$this->tid},$new_rank)",
-         "$table WRITE, $table AS TL READ" );
+         "TournamentLadder WRITE, TournamentLadder AS TL READ" );
       {//LOCK TournamentLadder
          $tl2 = TournamentLadder::load_tournament_ladder_by_rank($this->tid, $new_rank);
          if( is_null($tl2) )
@@ -586,18 +582,17 @@ class TournamentLadder
    {
       global $NOW;
       static $query_next_rank = "IFNULL(MAX(TL.Rank),0)+1"; // must result in 1 result-row
-      $table = $GLOBALS['ENTITY_TOURNAMENT_LADDER']->table;
       $tid = $tp->tid;
       $rid = $tp->ID;
       $uid = $tp->uid;
 
       // defaults: RankChanged=0, ChallengesIn=0, ChallengesOut=0; PeriodRank=0, HistoryRank=0
-      $query = "INSERT INTO $table (tid,rid,uid,Created,Rank,BestRank,StartRank) "
+      $query = "INSERT INTO TournamentLadder (tid,rid,uid,Created,Rank,BestRank,StartRank) "
              . "SELECT $tid, $rid, $uid, FROM_UNIXTIME($NOW), "
                   . "$query_next_rank AS Rank, "
                   . "$query_next_rank AS BestRank, "
                   . "$query_next_rank AS StartRank "
-             . "FROM $table AS TL WHERE TL.tid=$tid";
+             . "FROM TournamentLadder AS TL WHERE TL.tid=$tid";
       return db_query( "TournamentLadder::add_participant_to_ladder_bottom.insert(tid[$tid],rid[$rid],uid[$uid])", $query );
    }//add_participant_to_ladder_bottom
 
@@ -626,12 +621,11 @@ class TournamentLadder
          $user_rating = $arr[$uid]['Rating2'];
       }
 
-      $table = $GLOBALS['ENTITY_TOURNAMENT_LADDER']->table;
       $extra_lock = ( $use_tourney_rating ) //see load_tournament_ladder_by_user_rating()
          ? ', TournamentParticipant AS TP READ'
          : ', Players AS P READ';
       db_lock( "TournamentLadder::add_participant_to_ladder_by_rating($tid,$rid,$uid)",
-         "$table WRITE, $table AS TL READ $extra_lock" );
+         "TournamentLadder WRITE, TournamentLadder AS TL READ $extra_lock" );
       {//LOCK TournamentLadder (to avoid race-conditions)
          $cnt_tp = TournamentLadder::count_tournament_ladder( $tid );
          if( $cnt_tp > 0 )
@@ -663,9 +657,8 @@ class TournamentLadder
       $rid = $tp->ID;
       $uid = $tp->uid;
 
-      $table = $GLOBALS['ENTITY_TOURNAMENT_LADDER']->table;
       db_lock( "TournamentLadder::add_participant_to_ladder_by_random($tid,$rid,$uid)",
-         "$table WRITE, $table AS TL READ" );
+         "TournamentLadder WRITE, TournamentLadder AS TL READ" );
       {//LOCK TournamentLadder (to avoid race-conditions)
          $cnt_tp = TournamentLadder::count_tournament_ladder( $tid );
          $new_rank = mt_rand( 1, $cnt_tp + 1 );
@@ -735,9 +728,8 @@ class TournamentLadder
 
       if( count($qset) > 0 )
       {
-         $table = $GLOBALS['ENTITY_TOURNAMENT_LADDER']->table;
          $success = db_query( "$dbgmsg.upd_tl",
-            "UPDATE $table SET " . implode(', ', $qset) . " WHERE tid=$tid AND rid=$rid LIMIT 1" );
+            "UPDATE TournamentLadder SET " . implode(', ', $qset) . " WHERE tid=$tid AND rid=$rid LIMIT 1" );
       }
       else
          $success = true;
@@ -817,9 +809,8 @@ class TournamentLadder
       $entity_tladder = $GLOBALS['ENTITY_TOURNAMENT_LADDER']->newEntityData();
       $arr_inserts = array();
 
-      $table = $entity_tladder->entity->table;
       db_lock( "TournamentLadder::seed_ladder($tid,$seed_order)",
-         "$table WRITE, $table AS TL READ" );
+         "TournamentLadder WRITE, TournamentLadder AS TL READ" );
       {//LOCK TournamentLadder
          $rank = ($reorder) ? 1 : TournamentLadder::load_max_rank($tid) + 1;
          foreach( $arr_TPs as $row )
@@ -872,10 +863,9 @@ class TournamentLadder
     */
    function check_participant_registrations( $tid, $arr_TPs )
    {
-      $table = $GLOBALS['ENTITY_TOURNAMENT_LADDER']->table;
       $qsql = new QuerySQL();
       $qsql->add_part( SQLP_FIELDS, 'rid', 'uid' );
-      $qsql->add_part( SQLP_FROM,   $table );
+      $qsql->add_part( SQLP_FROM,   'TournamentLadder' );
       $qsql->add_part( SQLP_WHERE,  "tid=$tid" );
       $result = db_query( "TournamentLadder::check_participant_registrations.load_ladder($tid)",
          $qsql->get_select() );
@@ -941,9 +931,8 @@ class TournamentLadder
       $df_rid = $tgame->Defender_rid;
 
       //HOT-section to update ladder (besides reading)
-      $table = $GLOBALS['ENTITY_TOURNAMENT_LADDER']->table;
       db_lock( "TournamentLadder.process_game_end($tid,$ch_rid,$df_rid,$game_end_action)",
-         "$table WRITE, $table AS TL READ" );
+         "TournamentLadder WRITE, TournamentLadder AS TL READ" );
       {//LOCK TournamentLadder
          $success = TournamentLadder::_process_game_end( $tid, $ch_rid, $df_rid, $game_end_action );
       }

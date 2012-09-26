@@ -267,7 +267,6 @@ class SurveyOption
 
       $sid = (int)$sid;
 
-      $table = $GLOBALS['ENTITY_SURVEY_OPTION']->table;
       $arr_inserts = array();
       foreach( $arr_upd as $id => $diff_score )
       {
@@ -277,7 +276,7 @@ class SurveyOption
 
       if( count($arr_inserts) > 0 )
       {
-         $query = "INSERT INTO $table (ID,Score) VALUES " . implode(', ', $arr_inserts)
+         $query = "INSERT INTO SurveyOption (ID,Score) VALUES " . implode(', ', $arr_inserts)
             . " ON DUPLICATE KEY UPDATE Score=Score+(VALUES(Score))";
 
          return db_query( "SurveyOption::update_aggregates_survey_options.on_dupl_key($sid)", $query );

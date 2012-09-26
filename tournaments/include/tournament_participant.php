@@ -430,8 +430,7 @@ class TournamentParticipant
    /*! \brief Returns array( ID=>uid ) with TournamentParticipant.ID for given tournament. */
    function load_tournament_participants_registered( $tid )
    {
-      $table = $GLOBALS['ENTITY_TOURNAMENT_PARTICIPANT']->table;
-      $query = "SELECT ID, uid FROM $table WHERE tid=$tid AND Status='".TP_STATUS_REGISTER."'";
+      $query = "SELECT ID, uid FROM TournamentParticipant WHERE tid=$tid AND Status='".TP_STATUS_REGISTER."'";
       $result = db_query( "TournamentParticipant.load_tournament_participants_registered($tid)", $query );
 
       $arr = array();
@@ -448,10 +447,9 @@ class TournamentParticipant
    function load_registered_users_in_seedorder( $tid, $seed_order )
    {
       // find all registered TPs (optimized)
-      $table = $GLOBALS['ENTITY_TOURNAMENT_PARTICIPANT']->table;
       $qsql = new QuerySQL();
       $qsql->add_part( SQLP_FIELDS, 'TP.ID AS rid', 'TP.uid' );
-      $qsql->add_part( SQLP_FROM,   "$table AS TP" );
+      $qsql->add_part( SQLP_FROM,   "TournamentParticipant AS TP" );
       $qsql->add_part( SQLP_WHERE,  "TP.tid=$tid", "TP.Status='".TP_STATUS_REGISTER."'" );
       if( $seed_order == TOURNEY_SEEDORDER_CURRENT_RATING )
       {
@@ -486,9 +484,8 @@ class TournamentParticipant
       $out = array();
       if( count($arr_uid) > 0 )
       {
-         $table = $GLOBALS['ENTITY_TOURNAMENT_PARTICIPANT']->table;
          $result = db_query( "TournamentParticipant.load_tournament_rating($tid)",
-            "SELECT uid, Rating FROM $table " .
+            "SELECT uid, Rating FROM TournamentParticipant " .
             "WHERE tid=$tid AND Status='" . mysql_addslashes($tp_status) . "' " .
                "AND uid IN (" . implode(',', $arr_uid) . ")" );
 

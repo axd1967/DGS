@@ -474,9 +474,8 @@ class TournamentGames
          return 0;
 
       global $NOW;
-      $table = $GLOBALS['ENTITY_TOURNAMENT_GAMES']->table;
       $result = db_query( $dbgmsg."($gid,$tid,$black_uid,$score)",
-         "UPDATE $table SET "
+         "UPDATE TournamentGames SET "
             . "Status='".TG_STATUS_SCORE."', "
             . "Score=IF(Challenger_uid=$black_uid,$score,-$score), "
             . "EndTime=FROM_UNIXTIME($NOW), "
@@ -492,9 +491,8 @@ class TournamentGames
          error('invalid_args', "TournamentGames.update_tournament_game_wait.check.ticks($wait_ticks)");
 
       global $NOW;
-      $table = $GLOBALS['ENTITY_TOURNAMENT_GAMES']->table;
       $result = db_query( "$dbgmsg.update_tournament_game_wait($wait_ticks)",
-         "UPDATE $table SET "
+         "UPDATE TournamentGames SET "
             . "Status='".TG_STATUS_DONE."', "
             . "Lastchanged=FROM_UNIXTIME($NOW) "
          . " WHERE Status='".TG_STATUS_WAIT."' AND TicksDue<=$wait_ticks" );

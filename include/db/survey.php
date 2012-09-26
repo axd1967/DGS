@@ -330,9 +330,8 @@ class Survey
       if( !is_numeric($diff) )
          error('invalid_args', "Survey.updateUserCount.check.diff($sid,$diff)");
 
-      $table = $GLOBALS['ENTITY_SURVEY']->table;
       return db_query( "Survey.updateUserCount.upd($sid,$diff)",
-         "UPDATE $table SET UserCount=UserCount+($diff) WHERE ID=$sid LIMIT 1" );
+         "UPDATE Survey SET UserCount=UserCount+($diff) WHERE ID=$sid LIMIT 1" );
    }
 
    /*!

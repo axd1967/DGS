@@ -213,13 +213,12 @@ class TournamentRound
    function add_tournament_round( $tid )
    {
       global $player_row, $NOW;
-      $table = $GLOBALS['ENTITY_TOURNAMENT_ROUND']->table;
       $tround = null;
 
       // defaults: Status=INIT, MinPoolSize=0, MaxPoolSize=0, MaxPoolCount=0
       $changed_by = EntityData::build_sql_value_changed_by( $player_row['Handle'] );
-      $query = "INSERT INTO $table (tid,Round,Lastchanged,ChangedBy) "
-             . "SELECT $tid, MAX(Round)+1, FROM_UNIXTIME($NOW), $changed_by FROM $table WHERE tid=$tid";
+      $query = "INSERT INTO TournamentRound (tid,Round,Lastchanged,ChangedBy) "
+             . "SELECT $tid, MAX(Round)+1, FROM_UNIXTIME($NOW), $changed_by FROM TournamentRound WHERE tid=$tid";
       if( db_query( "TournamentRound::add_tournament_round.insert($tid)", $query ) )
       {
          $new_id = mysql_insert_id();

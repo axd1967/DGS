@@ -199,9 +199,8 @@ class TournamentDirector
       if( $tid <= 0 )
          error('invalid_args', "TournamentDirector::count_tournament_directors($tid)");
 
-      $table = $GLOBALS['ENTITY_TOURNAMENT_DIRECTOR']->table;
       $row = mysql_single_fetch( "TournamentDirector::count_tournament_directors($tid)",
-         "SELECT COUNT(*) AS X_Count FROM $table WHERE tid=$tid" );
+         "SELECT COUNT(*) AS X_Count FROM TournamentDirector WHERE tid=$tid" );
       return ($row) ? (int)@$row['X_Count'] : 0;
    }
 

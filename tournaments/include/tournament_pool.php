@@ -485,8 +485,7 @@ class TournamentPool
       if( !is_numeric($round) || $round < 1 )
          error('invalid_args', "TournamentPool::delete_pools.check.round($tid,$round)");
 
-      $table = $GLOBALS['ENTITY_TOURNAMENT_POOL']->table;
-      $query = "DELETE FROM $table WHERE tid=$tid AND Round=$round";
+      $query = "DELETE FROM TournamentPool WHERE tid=$tid AND Round=$round";
       return db_query( "TournamentPool::delete_pools($tid,$round)", $query );
    }
 
@@ -560,9 +559,8 @@ class TournamentPool
       $seed_query = $entity_tpool->build_sql_insert_values(true, /*with-PK*/true) . implode(',', $arr_inserts)
          . " ON DUPLICATE KEY UPDATE Pool=VALUES(Pool) ";
 
-      $table = $entity_tpool->entity->table;
       db_lock( "TournamentPool::seed_pools($tid,$round,$seed_order,$slice_mode)",
-         "$table WRITE" );
+         "TournamentPool WRITE" );
       {//LOCK TournamentPool
          $result = db_query( "TournamentPool::seed_pools.insert($tid,$round,$seed_order,$slice_mode,#$cnt)",
             $seed_query );
@@ -617,8 +615,8 @@ class TournamentPool
       $seed_query = $entity_tpool->build_sql_insert_values(true, /*with-PK*/true) . implode(',', $arr_inserts)
          . " ON DUPLICATE KEY UPDATE Pool=VALUES(Pool) ";
 
-      $table = $entity_tpool->entity->table;
-      db_lock( "TournamentPool::add_missing_registered_users($tid,$round)", "$table WRITE" );
+      db_lock( "TournamentPool::add_missing_registered_users($tid,$round)", 
+         "TournamentPool WRITE" );
       {//LOCK TournamentPool
          $result = db_query( "TournamentPool::add_missing_registered_users.insert($tid,$round,#$cnt)", $seed_query );
       }
@@ -638,10 +636,9 @@ class TournamentPool
       if( $cnt == 0 )
          return true;
 
-      $table = $GLOBALS['ENTITY_TOURNAMENT_POOL']->table;
       $uid_where = implode(',', $arr_uid);
       return db_query( "TournamentPool::assign_pool.update($tid,$round,$pool)",
-         "UPDATE $table SET Pool=$pool WHERE tid=$tid AND Round=$round AND uid IN ($uid_where) LIMIT $cnt" );
+         "UPDATE TournamentPool SET Pool=$pool WHERE tid=$tid AND Round=$round AND uid IN ($uid_where) LIMIT $cnt" );
    }
 
    /*!
