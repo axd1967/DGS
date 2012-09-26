@@ -26,6 +26,7 @@ require_once 'include/std_functions.php';
 require_once 'tournaments/include/tournament_globals.php';
 require_once 'tournaments/include/tournament_utils.php';
 require_once 'tournaments/include/tournament_director.php';
+require_once 'tournaments/include/tournament_cache.php';
 
  /*!
   * \file tournament.php
@@ -322,12 +323,10 @@ class Tournament
 
    function getRoleText( $uid )
    {
-      global $TOURNAMENT_CACHE;
-
       $arr = array();
       if( $this->Owner_ID == $uid )
          $arr[] = T_('Owner#tourney');
-      $td = $TOURNAMENT_CACHE->is_tournament_director('Tournament.getRoleText', $this->ID, $uid, 0xffff);
+      $td = TournamentCache::get_instance()->is_tournament_director('Tournament.getRoleText', $this->ID, $uid, 0xffff);
       if( !is_null($td) )
          $arr[] = sprintf( T_('Tournament Director [%s]'), $td->formatFlags() );
       if( TournamentUtils::isAdmin() )
@@ -354,8 +353,7 @@ class Tournament
          return TLOG_TYPE_OWNER;
 
       // admin-game allowed for TD with respective right (td_flag)
-      global $TOURNAMENT_CACHE;
-      if( $TOURNAMENT_CACHE->is_tournament_director('Tournament.allow_edit_tournaments', $this->ID, $uid, $td_flag) )
+      if( TournamentCache::get_instance()->is_tournament_director('Tournament.allow_edit_tournaments', $this->ID, $uid, $td_flag) )
          return TLOG_TYPE_DIRECTOR;
 
       return false;
