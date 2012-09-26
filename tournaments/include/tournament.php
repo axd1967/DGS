@@ -22,6 +22,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 $TranslateGroups[] = "Tournament";
 
 require_once 'include/db_classes.php';
+require_once 'include/dgs_cache.php';
 require_once 'include/std_functions.php';
 require_once 'tournaments/include/tournament_globals.php';
 require_once 'tournaments/include/tournament_utils.php';
@@ -243,13 +244,17 @@ class Tournament
       $this->Lastchanged = $GLOBALS['NOW'];
 
       $entityData = $this->fillEntityData(false /*-Created*/);
-      return $entityData->update( "Tournament::update(%s)" );
+      $result = $entityData->update( "Tournament::update(%s)" );
+      Tournament::delete_cache_tournament( 'Tournament.update', $this->ID );
+      return $result;
    }
 
    function delete()
    {
       $entityData = $this->fillEntityData(false);
-      return $entityData->delete( "Tournament::delete(%s)" );
+      $result = $entityData->delete( "Tournament::delete(%s)" );
+      Tournament::delete_cache_tournament( 'Tournament.update', $this->ID );
+      return $result;
    }
 
    function fillEntityData( $withCreated=false )
@@ -296,7 +301,9 @@ class Tournament
          $data->set_value( 'ID', $this->ID );
          $data->set_value( 'Flags', $this->Flags );
          $query = $data->build_sql_update( 1, false, false );
-         return db_query( "Tournament.update_flags({$this->ID},$flag,$set_flag)", $query );
+         $result = db_query( "Tournament.update_flags({$this->ID},$flag,$set_flag)", $query );
+         Tournament::delete_cache_tournament( 'Tournament.update_flags', $this->ID );
+         return $result;
       }
       else
          return false;
@@ -318,7 +325,9 @@ class Tournament
          $data->set_value( 'CurrentRound', $curr_round );
       $data->set_value( 'Lastchanged', $GLOBALS['NOW'] );
       $data->set_value( 'ChangedBy', $this->ChangedBy );
-      return $data->update( "Tournament.update_rounds(%s,$change_rounds,$curr_round)" );
+      $result = $data->update( "Tournament.update_rounds(%s,$change_rounds,$curr_round)" );
+      Tournament::delete_cache_tournament( 'Tournament.update_rounds', $this->ID );
+      return $result;
    }
 
    function getRoleText( $uid )
@@ -547,7 +556,11 @@ class Tournament
       return $iterator;
    }
 
-   /*! \brief Increases/decreases Tournament.RegisteredTP for given tournament. */
+   /*!
+    * \brief Increases/decreases Tournament.RegisteredTP for given tournament.
+    *
+    * \note IMPORTANT NOTE: caller needs to open TA with HOT-section!!
+    */
    function update_tournament_registeredTP( $tid, $diff )
    {
       if( !is_numeric($tid) || !is_numeric($diff) )
@@ -556,6 +569,7 @@ class Tournament
       {
          db_query( "Tournament::update_tournament_registeredTP($tid,$diff)",
             "UPDATE Tournament SET RegisteredTP=RegisteredTP+($diff) WHERE ID=$tid LIMIT 1" );
+         Tournament::delete_cache_tournament( 'Tournament.update_tournament_registeredTP', $tid );
       }
    }
 
@@ -729,6 +743,11 @@ class Tournament
    {
       static $statuslist = array( TOURNEY_STATUS_PAIR, TOURNEY_STATUS_REGISTER, TOURNEY_STATUS_PLAY );
       return $statuslist;
+   }
+
+   function delete_cache_tournament( $dbgmsg, $tid )
+   {
+      DgsCache::delete( $dbgmsg, "Tournament.$tid" );
    }
 
 } // end of 'Tournament'
