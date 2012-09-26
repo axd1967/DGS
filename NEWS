@@ -386,6 +386,7 @@ Copyright (C) 2001-2012  Erik Ouchterlony
    * <home features/list_features.php>Voting on features</home> including feature status management
       * <home features/list_votes.php>Show feature votes</home>, added as Vote-link in main-menu
       * Show count of NEW features (on VOTE-status) in main-menu with link to vote on them
+      * Added bulk-operation for setting neutral vote
 
    * <home list_surveys.php>Surveys</home>:
       * Added Surveys that users can vote on with types (Points, Sum, Single-choice, Multiple-choice)
@@ -449,7 +450,6 @@ Copyright (C) 2001-2012  Erik Ouchterlony
 
       * Added markup-images without board-lines: square (<image board/s.gif>), triangle (<image board/t.gif>), circle (<image board/c.gif>), cross (<image board/x.gif>)
       * Fixed letter-iamges "l(a-z).gif" for board-markup: (<image board/la.gif> ... <image board/lz.gif>)
-
 
    Minor changes:
 
@@ -690,6 +690,10 @@ Copyright (C) 2001-2012  Erik Ouchterlony
 
    Code improvements:
 
+##   * Shared memory caching using APC:
+##      * Added caching to load ConfigPages, ConfigBoard, Clocks, game observers, private game notes, user_reference,
+##        main game- and moves statistics, message folders, tables search profile, game moves, game move messages
+##
    * Improvements of database queries
       * Users: faster Activity handling and Vacation handling
       * Game: faster skip-to-next-game
@@ -835,6 +839,7 @@ Copyright (C) 2001-2012  Erik Ouchterlony
          * ALLOW_QUOTING                     - disabled
 ##         * ALLOW_TOURNAMENTS_ROUND_ROBIN     - disabled
 ##         * ALLOW_TOURNAMENTS_CREATE_BY_USER  - disabled
+##         * DGS_CACHE                         - disabled
          * ENABLE_DONATIONS                  - disabled
 ##       * ENABLE_GAME_VIEWER                - disabled (needs JavaScript)
 ##      * Added restriction on max. running games per player (200) and for tournament-registration (150)

@@ -19,6 +19,178 @@ Developers INFO:
 ChangeLog
 ------------------------------------------------------------------
 
+2012-09-26 juga
+
+   * include/board.php (Board.load_from_db, ~.load_cache_game_moves, ~.load_cache_game_move_message,
+       ~.delete_cache_game_move_messages, ~.fix_corrupted_move_table),
+     include/game_functions.php (GameHelper._delete_base_game_tables),
+     include/quick/quick_game.php (QuickHandlerGame.process_cmd_play),
+     confirm.php, quick_play.php:
+   - use shared-mem caching to load game-move-messages on game-page,
+     invalidate cache on adding or deleting MoveMessages-entries to save cache-space:
+     one move-list cache-entry can take up to 250KB for a game with many comments
+   - bugfix: don't cache game-moves without shared-mem-cache
+
+   * game.php:
+   - reverted bugfix: so do NOT download move-messages for eidogo-game-link
+     as eidogo has no login-cookies for downloading SGF from DGS
+
+   * include/game_functions.php ( GameAddTime.add_time_opponent;
+       GameHelper._delete_base_game_tables, ~.game_need_mark_dead),
+     include/board.php (Board.load_from_db, ~.load_cache_game_moves, ~.delete_cache_game_moves),
+     include/quick/quick_game.php (QuickHandlerGame.prepare, ~.process_cmd_play),
+     include/goban_handler_dgsgame.php (GobanHandlerDgsGame.load_board),
+     include/make_game.php (create_game),
+     scripts/fix_game_snapshot.php (fix_single_game, bulk_fix_missing_game_snapshots),
+     confirm.php, game.php, halfhourly_cron.php, quick_play.php:
+   - use shared-mem caching to load game-moves on game-page,
+     invalidate cache on adding or deleting Moves-entries to save cache-space:
+     one move-list cache-entry can take up to 250KB for a big finished game
+   - use different cache-TTL of 5min (instead of 10min default) for game-moves of finished game
+   - optimize-cleanup:
+     - don't load game-last-move-message on confirm-page and quick-game-handler
+     - refactored Board.load_from_db() using board-options with flags instead of bool-args
+     - game-page: change order on loading Moves-table (ID -> MoveNr)
+       because that uses index-sort instead of file-sort
+     - game-page: removed some unneccessary checks (shape/moves-count)
+
+2012-09-25 juga
+
+   * include/classlib_profile.php (SearchProfile.handle_action;
+       Profile.save_profile, ~.delete_profile, ~.load_profile_by_id, ~.load_profiles,
+         ~.delete_profile_cache, ~.delete_all_profiles),
+     templates.php (save_template, check_delete_template),
+     message.php, new_game.php:
+   - use shared-mem caching to load single non-template search-profile,
+     invalidate cache on saving/deleting profile
+   - cleanup: renamed Profile::load_profile() -> Profile::load_profile_by_id()
+   - cleanup: refactored object-method Profile::delete_all_profiles() to static-method
+
+   * include/message_functions.php (get_folders, load_cache_folders),
+     edit_folders.php:
+   - use shared-mem caching to load message-folders, invalidate cache on editing folders
+
+2012-09-24 juga
+
+   * statistics.php (show_stats_default, load_cache_games_stats),
+     daily_cron.php:
+   - use shared-mem caching to load main game-/moves-statistics,
+     invalidate cache on updating statistics by daily-cron
+   - replaced sum-total-query by merging with main-query using "group-by WITH ROLLUP"
+
+   * donation_success.php, ratingpng.php, statisticspng.php, statratingspng.php:
+   - skip login-update of Players-table on follow-up-pages:
+     - donation-success-page
+     - sub-picture-pages: ratingpng.php, statisticspng.php, statratingspng.php
+
+   * include/std_functions.php (user_reference, load_cache_user_reference, delete_cache_user_reference),
+     edit_profile.php (handle_save_profile),
+     admin_users.php:
+   - use shared-mem caching to load user_reference,
+     invalidate cache on updating users Name or Handle by user or admin
+
+   * include/game_functions.php (GameHelper.load_game_notes, ~.update_game_notes),
+     include/quick/quick_game_info.php (QuickHandlerGameInfo.prepare),
+     include/sgf_builder.php (SgfBuilder.load_player_game_notes),
+     game.php:
+   - use shared-mem caching to load private-game-notes for players,
+     invalidate cache on updating game-notes
+
+   * include/std_functions.php (check_for_observers, toggle_observe_list, delete_all_observers),
+     include/game_functions.php (GameHelper._delete_base_game_tables):
+   - use shared-mem caching to load game-observers,
+     invalidate cache on toggling/deleting Observers for game
+
+   * include/dgs_cache.php (class AbstractCache, ~.cache_store_array, ~.cache_store_group, ~.cache_delete_group;
+       class ApcCache, ~.cache_store_array;
+       DgsCache.store, ~.delete, ~.delete_group):
+   - added handling for grouping of cache-entries
+   - added support for cache-bulk-store
+   - refactored CacheInterface-interface into AbstractCache-abstract class
+     with some basic implementations to handle cache-entry-groups
+
+   * include/std_functions.php (check_for_observers),
+     game.php:
+   - optimize: avoid double-checking for observers if logged-in-user or someone other is observing
+   - bugfix: don't check for observers for finished game
+
+   * include/cache_clock.php (CacheClock.load_clock_ticks, ~.load_cache_clocks, ~.delete_cache_clocks),
+     include/quick_common.php (SECS_PER_MIN),
+     clock_tick.php:
+   - use shared-mem caching to load Clocks-table,
+     invalidate cache on updating Clock-ticks in clock-tick-cron
+
+2012-09-23 juga
+
+   * include/classlib_userconfig.php (ConfigBoard.update_all, ~.load_config_board, ~.delete_cache_config_board;
+       ConfigPages.load_cache_config_pages, ~.delete_cache_config_pages, ~.load_config),
+     edit_profile.php:
+   - use shared-mem caching to load ConfigBoard-table for user-id,
+     invalidate cache on updating ConfigBoard-table
+   - reduced cache-TTL for loading ConfigPages: 1d -> 1h
+
+   * include/classlib_userconfig.php (ConfigPages.load_config_pages, ~.load_cache_config_pages,
+       ~.delete_cache_config_pages, ~._update_query, ~.toggle_forum_flags, ~.set_clear_forum_flags):
+   - use shared-mem caching to load ConfigPages-table for user-id,
+     invalidate cache on updating ConfigPages-table
+
+   * include/dgs_cache.php (DGS_CACHE, DBG_CACHE;
+       class ApcCache, ~.cache_fetch, ~.cache_store, ~.cache_delete;
+       interface CacheInterface, ~.cache_fetch, ~.cache_store, ~.cache_delete;
+       class DgsCache, ~.is_shared_enabled, ~.fetch, ~.store, ~.delete):
+   - added DGS-cache wrapper-class to support shared-memory cache
+     - added support to enable and disable DGS-cache allowing different implementations
+     - added cache-debugging with DBG_CACHE
+     - added support to use APC-based-cache
+
+   * scripts/index.php, scripts/apc_clear_cache.php:
+   - consolidated cache-admin scripts into cache-section, added APC-manager script
+   - apc_clear_cache-script: clear both cache-parts: op-code-cache & user-cache
+
+   * robots.txt:
+   - replaced "Disallow: /" blocking everything with Disallowing single directories and files,
+     tested with Google
+
+   * features/lib_votes.php (Feature.update_vote; FeatureVote.build_query_featurevote_list),
+     features/edit_feature.php:
+   - bugfix: fixed string-based order on feature-list myPoints to using numeric-based-order
+   - bugfix: jump to edit-feature of newly added new feature
+
+2012-09-22 juga
+
+   * include/db/bulletin.php (Bulletin.allow_bulletin_user_view),
+     skins/dragon/screen.css, list_bulletins.php:
+   - bulletin-list: add ID-column with button to view single bulletin
+     if status allows to view (SHOW|ARCHIVE-status) or else show status without a link
+
+   * features/lib_votes.php (FeatureVote.insert_feature_neutral_votes),
+     include/table_columns.php (Table.make_table_form),
+     features/list_features.php (features_vote_neutral_extend_table_form, handle_vote_neutral):
+   - feature-list: added neutral bulk-vote on unvoted features
+     - added toggle-marks button to toggle selection
+     - allow neutral bulk-vote only if voting allowed and not restricted
+     - show neutral bulk-vote only on view for UNVOTED features on VOTE-status
+
+   * scripts/updates/other_changes_1_0_14_to_1_0_15.txt,
+     images/wood1.png:
+   - removed unused image
+
+2012-09-21 juga
+
+   * specs/caching.txt:
+   - started analysis for candidates for caching + requirements
+
+   * robots.txt:
+   - forgot to allow index.php
+
+   * include/connect2mysql.php (db_query):
+   - added debug-code to log execution-time of db-query in ms and user-id/handle if available,
+     enabled with DBG_QUERY>2
+
+   * include/time_functions.php (getmicrotime):
+   - fixed getmicrotime(): splitting microtime() and adding sec+ms is 2-3 times slower
+     than using microtime(true) directly returning the same
+
 2012-09-20 juga
 
 ### ----- release-1_0_15-20120608 -----
