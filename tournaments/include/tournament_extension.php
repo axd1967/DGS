@@ -21,8 +21,8 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 //$TranslateGroups[] = "Tournament";
 
-require_once( 'include/db_classes.php' );
-require_once( 'tournaments/include/tournament_globals.php' );
+require_once 'include/db_classes.php';
+require_once 'tournaments/include/tournament_globals.php';
 
  /*!
   * \file tournament_extension.php
