@@ -77,9 +77,7 @@ $GLOBALS['ThePage'] = new Page('TournamentPoolDefine');
 
    // load existing T-round
    $round = $tourney->CurrentRound;
-   $tround = TournamentRound::load_tournament_round( $tid, $round );
-   if( is_null($tround) )
-      error('bad_tournament', "Tournament.define_pools.find_tournament_round($tid,$round,$my_id)");
+   $tround = TournamentCache::load_cache_tournament_round( 'Tournament.define_pools', $tid, $round );
    $trstatus = new TournamentRoundStatus( $tourney, $tround );
 
    if( @$_REQUEST['t_cancel'] )

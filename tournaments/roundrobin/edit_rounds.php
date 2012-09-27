@@ -89,9 +89,9 @@ $GLOBALS['ThePage'] = new Page('TournamentRoundEditor');
    $max_rounds = $t_limits->getMaxLimit(TLIMITS_TRD_MAX_ROUNDS);
    if( $round < 1 || $round > $max_rounds )
       $round = $tourney->CurrentRound;
-   $tround = null;
-   if( $round > 0 )
-      $tround = TournamentRound::load_tournament_round( $tid, $round );
+   $tround = ( $round > 0 )
+      ? TournamentCache::load_cache_tournament_round( 'Tournament.edit_rounds', $tid, $round, /*check*/false )
+      : null;
 
    // init
    $errors = $tstatus->check_edit_status( TournamentRound::get_edit_tournament_status() );
@@ -110,7 +110,7 @@ $GLOBALS['ThePage'] = new Page('TournamentRoundEditor');
       if( @$_REQUEST['tre_add'] )
          TournamentHelper::add_new_tournament_round( $tourney, $action_errors, true );
       elseif( @$_REQUEST['tre_del'] )
-         TournamentHelper::delete_tournament_round( $tourney, $tround, $action_errors, true );
+         TournamentHelper::remove_tournament_round( $tourney, $tround, $action_errors, true );
       elseif( @$_REQUEST['tre_set'] )
          TournamentHelper::set_tournament_round( $tourney, $round, $action_errors, true );
       // do confirmed actions
@@ -126,7 +126,7 @@ $GLOBALS['ThePage'] = new Page('TournamentRoundEditor');
       }
       elseif( @$_REQUEST['tre_del_confirm'] ) // remove T-round
       {
-         $success = TournamentHelper::delete_tournament_round( $tourney, $tround, $action_errors, false );
+         $success = TournamentHelper::remove_tournament_round( $tourney, $tround, $action_errors, false );
          if( $success )
          {
             $sys_msg = urlencode( sprintf( T_('Tournament Round #%s removed!'), $round ) );

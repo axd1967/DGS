@@ -377,7 +377,7 @@ class TournamentHelper
       }
 
       return $out;
-   }
+   }//create_pairing_games
 
    /*!
     * \brief Returns rating for user from Players/TournamentParticipant-table according to rating-use-mode.
@@ -398,7 +398,7 @@ class TournamentHelper
       }
 
       return $rating;
-   }
+   }//get_tournament_rating
 
    /*! \brief Finds out games-per-challenge from various sources for given tournament. */
    function determine_games_per_challenge( $tid, $trule=null )
@@ -435,7 +435,7 @@ class TournamentHelper
          $iterator = new ListIterator( 'TournamentHelper::load_ladder_absent_users' );
       $iterator->addQuerySQLMerge( $qsql );
       return TournamentLadder::load_tournament_ladder( $iterator );
-   }
+   }//load_ladder_absent_users
 
    function load_ladder_rank_period_update( $iterator = null )
    {
@@ -456,7 +456,7 @@ class TournamentHelper
          $iterator = new ListIterator( 'TournamentHelper::load_ladder_rank_period_update' );
       $iterator->addQuerySQLMerge( $qsql );
       return TournamentExtension::load_tournament_extensions( $iterator );
-   }
+   }//load_ladder_rank_period_update
 
    /*! \brief Adds new tournament-round and updates Tournament.Rounds, returning new TournamentRound-object. */
    function add_new_tournament_round( $tourney, &$errors, $check_only )
@@ -480,10 +480,10 @@ class TournamentHelper
       ta_end();
 
       return $tround;
-   }
+   }//add_new_tournament_round
 
    /*! \brief Deletes tournament-round and updates Tournament.Rounds. */
-   function delete_tournament_round( $tourney, $tround, &$errors, $check_only )
+   function remove_tournament_round( $tourney, $tround, &$errors, $check_only )
    {
       $errors = array();
       if( $tourney->CurrentRound == $tround->Round )
@@ -507,14 +507,13 @@ class TournamentHelper
       ta_end();
 
       return $success;
-   }
+   }//remove_tournament_round
 
    /*! \brief Sets current tournament-round updating Tournament.CurrentRound. */
    function set_tournament_round( $tourney, $new_round, &$errors, $check_only )
    {
-      $tround = TournamentRound::load_tournament_round( $tourney->ID, $tourney->CurrentRound );
-      if( is_null($tround) )
-         error('bad_tournament', "TournamentHelper.set_tournament_round.find_tround({$tourney->ID},{$tourney->CurrentRound})");
+      $tround = TournamentCache::load_cache_tournament_round( 'TournamentHelper.set_tournament_round',
+         $tourney->ID, $tourney->CurrentRound );
 
       $errors = array();
       if( !TournamentRound::authorise_set_tround($tourney->Status) )

@@ -104,9 +104,7 @@ $GLOBALS['ThePage'] = new Page('TournamentManage');
    $tround = null;
    if( $ttype->need_rounds )
    {
-      $tround = TournamentRound::load_tournament_round( $tid, $round );
-      if( is_null($tround) )
-         error('bad_tournament', "manage_tournament.find_tround($tid,$round,$my_id)");
+      $tround = TournamentCache::load_cache_tournament_round( 'manage_tournament', $tid, $round );
 
       $tform->add_row( array(
             'DESCRIPTION', T_('Round Status#tourney'),

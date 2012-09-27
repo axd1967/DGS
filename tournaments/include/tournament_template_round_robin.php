@@ -114,10 +114,7 @@ class TournamentTemplateRoundRobin extends TournamentTemplate
       $round = $tourney->CurrentRound;
       $errors = array();
 
-      $tround = TournamentRound::load_tournament_round( $tid, $round );
-      if( is_null($tround) )
-         error('bad_tournament', "TournamentTemplateRoundRobin.checkProperties.find_tround($tid,$round,{$this->uid})");
-
+      $tround = TournamentCache::load_cache_tournament_round( 'TournamentTemplateRoundRobin.checkProperties', $tid, $round );
       if( $t_status == TOURNEY_STATUS_REGISTER || $t_status == TOURNEY_STATUS_PAIR )
          $errors = array_merge( $errors, $tround->check_properties() );
 
@@ -136,11 +133,7 @@ class TournamentTemplateRoundRobin extends TournamentTemplate
          $round = $tround->Round;
       }
       else
-      {
-         $tround = TournamentRound::load_tournament_round( $tid, $round );
-         if( is_null($tround) )
-            error('bad_tournament', "TournamentTemplateRoundRobin.checkPooling.find_tround($tid,$round,{$this->uid})");
-      }
+         $tround = TournamentCache::load_cache_tournament_round( 'TournamentTemplateRoundRobin.checkPooling', $tid, $round );
 
       list( $check_errors, $arr_pool_summary ) = TournamentPool::check_pools( $tround );
       return $check_errors;
@@ -161,9 +154,7 @@ class TournamentTemplateRoundRobin extends TournamentTemplate
       $tourney = TournamentCache::load_cache_tournament( 'TournamentTemplateRoundRobin.checkGamesStarted.find_tourney', $tid );
       $round = $tourney->CurrentRound;
 
-      $tround = TournamentRound::load_tournament_round( $tid, $round );
-      if( is_null($tround) )
-         error('bad_tournament', "TournamentTemplateRoundRobin.checkGamesStarted.find_tround($tid,$round,{$this->uid})");
+      $tround = TournamentCache::load_cache_tournament_round( 'TournamentTemplateRoundRobin.checkGamesStarted', $tid, $round );
       if( $tround->Status != TROUND_STATUS_PLAY )
          $errors[] = sprintf( T_('Expecting current tournament round status [%s] for status-change'),
                               TournamentRound::getStatusText(TROUND_STATUS_PLAY) );

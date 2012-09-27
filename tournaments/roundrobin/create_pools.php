@@ -79,9 +79,7 @@ $GLOBALS['ThePage'] = new Page('TournamentPoolCreate');
 
    // load existing T-round
    $round = $tourney->CurrentRound;
-   $tround = TournamentRound::load_tournament_round( $tid, $round );
-   if( is_null($tround) )
-      error('bad_tournament', "Tournament.create_pools.find_tournament_round($tid,$round,$my_id)");
+   $tround = TournamentCache::load_cache_tournament_round( 'Tournament.create_pools', $tid, $round );
    $trstatus = new TournamentRoundStatus( $tourney, $tround );
 
    $tprops = TournamentCache::load_cache_tournament_properties( 'Tournament.create_pools', $tid );

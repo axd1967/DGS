@@ -72,9 +72,7 @@ $GLOBALS['ThePage'] = new Page('TournamentPoolView');
    // load existing T-round
    if( $round < 1 || $round > $tourney->CurrentRound )
       $round = $tourney->CurrentRound;
-   $tround = TournamentRound::load_tournament_round( $tid, $round );
-   if( is_null($tround) )
-      error('bad_tournament', "Tournament.pool_view.find_tournament_round($tid,$round,$my_id)");
+   $tround = TournamentCache::load_cache_tournament_round( 'Tournament.pool_view', $tid, $round );
 
    // init
    $errors = array();

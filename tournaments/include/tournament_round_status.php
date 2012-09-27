@@ -81,9 +81,7 @@ class TournamentRoundStatus
       else
       {
          $this->Round = (int)$round;
-         $this->tround = TournamentRound::load_tournament_round( $this->tid, $this->Round );
-         if( is_null($this->tround) )
-            error('bad_tournament', "TournamentRoundStatus.find_tround({$this->tid},{$this->Round})");
+         $this->tround = TournamentCache::load_cache_tournament_round( 'TournamentRoundStatus.find_tround', $this->tid, $this->Round );
       }
 
       $this->is_admin = TournamentUtils::isAdmin();

@@ -27,6 +27,7 @@ require_once 'tournaments/include/tournament_director.php';
 require_once 'tournaments/include/tournament_globals.php';
 require_once 'tournaments/include/tournament_ladder_props.php';
 require_once 'tournaments/include/tournament_properties.php';
+require_once 'tournaments/include/tournament_round.php';
 require_once 'tournaments/include/tournament_rules.php';
 
  /*!
@@ -268,6 +269,31 @@ class TournamentCache
 
       return $trule;
    }//load_cache_tournament_rules
+
+   /*!
+    * \brief Loads and caches TournamentRound for given tournament-id and round.
+    * \param $check_exist true = die if db-entry cannot be found
+    */
+   function load_cache_tournament_round( $dbgmsg, $tid, $round, $check_exist=true )
+   {
+      $tid = (int)$tid;
+      $round = (int)$round;
+      $dbgmsg .= ".TCache::load_cache_tround($tid,$round,$check_exist)";
+      $key = "TRound.$tid.$round";
+
+      $tround = DgsCache::fetch($dbgmsg, $key);
+      if( is_null($tround) )
+      {
+         $tround = TournamentRound::load_tournament_round($tid, $round);
+         if( $check_exist && is_null($tround) )
+            error('bad_tournament', $dbgmsg);
+
+         if( !is_null($tround) ) // only cache if existing
+            DgsCache::store( $dbgmsg, $key, $tround, SECS_PER_HOUR );
+      }
+
+      return $tround;
+   }//load_cache_tournament_round
 
 } // end of 'TournamentCache'
 ?>

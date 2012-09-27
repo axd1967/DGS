@@ -22,6 +22,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 $TranslateGroups[] = "Tournament";
 
 require_once 'include/db_classes.php';
+require_once 'include/dgs_cache.php';
 require_once 'include/std_classes.php';
 require_once 'tournaments/include/tournament_utils.php';
 
@@ -117,6 +118,7 @@ class TournamentRound
       $result = $entityData->insert( "TournamentRound::insert(%s)" );
       if( $result )
          $this->ID = mysql_insert_id();
+      TournamentRound::delete_cache_tournament_round( 'TournamentRound.insert', $this->tid, $this->Round );
       return $result;
    }
 
@@ -125,13 +127,17 @@ class TournamentRound
       $this->Lastchanged = $GLOBALS['NOW'];
 
       $entityData = $this->fillEntityData();
-      return $entityData->update( "TournamentRound::update(%s)" );
+      $result = $entityData->update( "TournamentRound::update(%s)" );
+      TournamentRound::delete_cache_tournament_round( 'TournamentRound.update', $this->tid, $this->Round );
+      return $result;
    }
 
    function delete()
    {
       $entityData = $this->fillEntityData();
-      return $entityData->delete( "TournamentRound::delete(%s)" );
+      $result = $entityData->delete( "TournamentRound::delete(%s)" );
+      TournamentRound::delete_cache_tournament_round( 'TournamentRound.delete', $this->tid, $this->Round );
+      return $result;
    }
 
    function fillEntityData()
@@ -230,8 +236,12 @@ class TournamentRound
    /*! \brief Deletes TournamentRound-entry for given id. */
    function delete_tournament_round( $tid, $round )
    {
+      $tid = (int)$tid;
+      $round = (int)$round;
+
       $result = db_query( "TournamentRound::delete_tournament_round($tid,$round)",
-         "DELETE FROM TournamentRound WHERE tid='$tid' AND Round='$round' LIMIT 1" );
+         "DELETE FROM TournamentRound WHERE tid=$tid AND Round=$round LIMIT 1" );
+      TournamentRound::delete_cache_tournament_round( 'TournamentRound.delete_tournament_round', $tid, $round );
       return $result;
    }
 
@@ -355,6 +365,11 @@ class TournamentRound
    function authorise_set_tround( $t_status )
    {
       return ( $t_status == TOURNEY_STATUS_PAIR || TournamentUtils::isAdmin() );
+   }
+
+   function delete_cache_tournament_round( $dbgmsg, $tid, $round )
+   {
+      DgsCache::delete( $dbgmsg, "TRound.$tid.$round" );
    }
 
 } // end of 'TournamentRound'

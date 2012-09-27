@@ -85,9 +85,7 @@ $GLOBALS['ThePage'] = new Page('TournamentPoolEdit');
 
    // load existing T-round
    $round = $tourney->CurrentRound;
-   $tround = TournamentRound::load_tournament_round( $tid, $round );
-   if( is_null($tround) )
-      error('bad_tournament', "Tournament.edit_pools.find_tournament_round($tid,$round,$my_id)");
+   $tround = TournamentCache::load_cache_tournament_round( 'Tournament.edit_pools', $tid, $round );
    $trstatus = new TournamentRoundStatus( $tourney, $tround );
 
    $tprops = TournamentCache::load_cache_tournament_properties( 'Tournament.edit_pools', $tid );

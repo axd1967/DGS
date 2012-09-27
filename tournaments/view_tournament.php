@@ -96,7 +96,8 @@ $GLOBALS['ThePage'] = new Page('Tournament');
    }
    elseif( $tourney->Type == TOURNEY_TYPE_ROUND_ROBIN )
    {
-      $tt_props = TournamentRound::load_tournament_round( $tid, $tourney->CurrentRound );
+      $tt_props = TournamentCache::load_cache_tournament_round( 'Tournament.view_tournament',
+         $tid, $tourney->CurrentRound, /*check*/false );
       if( $my_tp )
       {
          $tt_user_state = NO_VALUE;

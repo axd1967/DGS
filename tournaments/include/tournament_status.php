@@ -108,9 +108,7 @@ class TournamentStatus
       if( is_null($this->tround) && $this->ttype->need_rounds )
       {
          $round = $this->tourney->CurrentRound;
-         $this->tround = TournamentRound::load_tournament_round( $this->tid, $round );
-         if( is_null($this->tround) )
-            error('bad_tournament', "TournamentStatus.find_tournament_round({$this->tid},$round)");
+         $this->tround = TournamentCache::load_cache_tournament_round( 'TournamentStatus.find_tround', $this->tid, $round );
       }
    }
 

@@ -68,9 +68,7 @@ $GLOBALS['ThePage'] = new Page('TournamentRoundEdit');
       error('tournament_edit_not_allowed', "Tournament.edit_round_props.edit_tournament($tid,$my_id)");
 
    // load existing T-round
-   $tround = TournamentRound::load_tournament_round( $tid, $round );
-   if( is_null($tround) )
-      error('bad_tournament', "Tournament.edit_round_props.find_tournament_round($tid,$round,$my_id)");
+   $tround = TournamentCache::load_cache_tournament_round( 'Tournament.edit_round_props', $tid, $round );
 
    // init
    $errors = $tstatus->check_edit_status( TournamentRound::get_edit_tournament_status() );
