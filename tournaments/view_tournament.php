@@ -92,7 +92,7 @@ $GLOBALS['ThePage'] = new Page('Tournament');
    $tt_user_state = '';
    if( $tourney->Type == TOURNEY_TYPE_LADDER )
    {
-      $tt_props = TournamentLadderProps::load_tournament_ladder_props( $tid );
+      $tt_props = TournamentCache::load_cache_tournament_ladder_props( 'Tournament.view', $tid, /*check*/false );
       $tl_rank = TournamentLadder::load_rank( $tid, 0, $my_id );
       $tt_user_state = ( $tl_rank > 0 )
          ? sprintf( T_('Your current ladder rank is #%s out of %s.'), $tl_rank, (int)@$tp_counts[TP_STATUS_REGISTER] )

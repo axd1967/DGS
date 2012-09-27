@@ -185,13 +185,17 @@ class TournamentLadderProps
       $this->Lastchanged = $GLOBALS['NOW'];
 
       $entityData = $this->fillEntityData();
-      return $entityData->update( "TournamentLadderProps.update(%s)" );
+      $result = $entityData->update( "TournamentLadderProps.update(%s)" );
+      TournamentLadderProps::delete_cache_tournament_ladder_props( 'TournamentLadderProps.update', $this->tid );
+      return $result;
    }
 
    function delete()
    {
       $entityData = $this->fillEntityData();
-      return $entityData->delete( "TournamentLadderProps.delete(%s)" );
+      $result = $entityData->delete( "TournamentLadderProps.delete(%s)" );
+      TournamentLadderProps::delete_cache_tournament_ladder_props( 'TournamentLadderProps.delete', $this->tid );
+      return $result;
    }
 
    function fillEntityData( $data=null )
@@ -781,6 +785,11 @@ class TournamentLadderProps
    {
       static $statuslist = array( TOURNEY_STATUS_NEW );
       return $statuslist;
+   }
+
+   function delete_cache_tournament_ladder_props( $dbgmsg, $tid )
+   {
+      DgsCache::delete( $dbgmsg, "TLadderProps.$tid" );
    }
 
 } // end of 'TournamentLadderProps'

@@ -99,9 +99,7 @@ $GLOBALS['ThePage'] = new Page('TournamentLadderChallenge');
    $need_trating = false;
    if( !is_null($tladder_ch) && !is_null($tladder_df) )
    {
-      $tl_props = TournamentLadderProps::load_tournament_ladder_props( $tid );
-      if( is_null($tl_props) )
-         error('bad_tournament', "Tournament.ladder.challenge.find_lprops($tid)");
+      $tl_props = TournamentCache::load_cache_tournament_ladder_props( 'Tournament.ladder.challenge', $tid );
 
       $trules = TournamentRules::load_tournament_rule( $tid );
       if( is_null($trules) )

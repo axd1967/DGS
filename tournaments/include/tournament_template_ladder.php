@@ -25,9 +25,10 @@ require_once 'tournaments/include/tournament_globals.php';
 require_once 'tournaments/include/tournament_template.php';
 require_once 'tournaments/include/tournament_log_helper.php';
 
-require_once 'tournaments/include/tournament_ladder_props.php';
-require_once 'tournaments/include/tournament_ladder.php';
+require_once 'tournaments/include/tournament_cache.php';
 require_once 'tournaments/include/tournament_extension.php';
+require_once 'tournaments/include/tournament_ladder.php';
+require_once 'tournaments/include/tournament_ladder_props.php';
 
  /*!
   * \file tournament_template_ladder.php
@@ -110,10 +111,7 @@ class TournamentTemplateLadder extends TournamentTemplate
 
       if( $t_status == TOURNEY_STATUS_REGISTER )
       {
-         $tl_props = TournamentLadderProps::load_tournament_ladder_props($tid);
-         if( is_null($tl_props) )
-            error('bad_tournament', "TournamentTemplateLadder.checkProperties($tid,{$this->uid})");
-
+         $tl_props = TournamentCache::load_cache_tournament_ladder_props( "TournamentTemplateLadder.checkProperties({$this->uid})", $tid );
          $errors = $tl_props->check_properties();
       }
 

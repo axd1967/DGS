@@ -27,14 +27,14 @@ require_once 'include/std_functions.php';
 require_once 'include/utilities.php';
 require_once 'include/time_functions.php';
 require_once 'include/classlib_user.php';
-require_once 'tournaments/include/tournament_globals.php';
-require_once 'tournaments/include/tournament_utils.php';
 require_once 'tournaments/include/tournament.php';
 require_once 'tournaments/include/tournament_cache.php';
 require_once 'tournaments/include/tournament_games.php';
+require_once 'tournaments/include/tournament_globals.php';
 require_once 'tournaments/include/tournament_ladder_props.php';
 require_once 'tournaments/include/tournament_participant.php';
 require_once 'tournaments/include/tournament_properties.php';
+require_once 'tournaments/include/tournament_utils.php';
 
  /*!
   * \file tournament_ladder.php
@@ -546,9 +546,7 @@ class TournamentLadder
 
       // init
       if( is_null($tl_props) )
-         $tl_props = TournamentLadderProps::load_tournament_ladder_props($tid);
-      if( is_null($tl_props) )
-         error('bad_tournament', "TournamentLadder::add_user_to_ladder.miss_tlp($tid)");
+         $tl_props = TournamentCache::load_cache_tournament_ladder_props( 'TournamentLadder::add_user_to_ladder', $tid );
 
       // add user to ladder
       if( $tl_props->UserJoinOrder == TLP_JOINORDER_REGTIME )

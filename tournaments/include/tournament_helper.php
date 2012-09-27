@@ -87,7 +87,7 @@ class TournamentHelper
    function process_tournament_ladder_game_end( $tourney, $tgame )
    {
       $tid = $tourney->ID;
-      $tl_props = $this->tcache->load_tournament_ladder_props( 'process_tournament_ladder_game_end', $tid);
+      $tl_props = TournamentCache::load_cache_tournament_ladder_props( 'process_tournament_ladder_game_end', $tid, /*check*/false );
       if( is_null($tl_props) )
          return false;
 
@@ -152,7 +152,7 @@ class TournamentHelper
    function process_rank_period( $t_ext )
    {
       $tid = $t_ext->tid;
-      $tl_props = $this->tcache->load_tournament_ladder_props( 'process_rank_period', $tid);
+      $tl_props = TournamentCache::load_cache_tournament_ladder_props( 'process_rank_period', $tid, /*check*/false );
       if( is_null($tl_props) )
          return false;
 

@@ -47,9 +47,6 @@ class TournamentCache
    /*! \brief array( tid => Tournament-object ); fallback if shared-mem-cache disabled. */
    var $cache_tournament;
 
-   /*! \brief array( tid => TournamentLadderProps-object ) */
-   var $cache_tl_props;
-
    var $cache_clock;
 
    /*! \brief locked Tournament-object (mostly used for cron-locking). */
@@ -59,25 +56,8 @@ class TournamentCache
    function TournamentCache()
    {
       $this->cache_tournament = array();
-      $this->cache_tl_props = array();
       $this->cache_clock = ClockCache::get_clock_cache();
       $this->lock_tourney = null;
-   }
-
-   function load_tournament_ladder_props( $dbgmsg, $tid )
-   {
-      $tid = (int)$tid;
-      if( isset($this->cache_tl_props[$tid]) )
-         $tl_props = $this->cache_tl_props[$tid];
-      else
-      {
-         $tl_props = TournamentLadderProps::load_tournament_ladder_props( $tid );
-         if( is_null($tl_props) )
-            error('unknown_tournament', "$dbgmsg.find_tladder_props($tid)");
-         else
-            $this->cache_tl_props[$tid] = $tl_props;
-      }
-      return $tl_props;
    }
 
    function load_clock_ticks( $dbgmsg, $clock_id )
@@ -214,6 +194,30 @@ class TournamentCache
 
       return $td_result;
    }//is_cache_tournament_director
+
+   /*!
+    * \brief Loads and caches TournamentLadderProps for given tournament-id.
+    * \param $check_exist true = die if db-entry cannot be found
+    */
+   function load_cache_tournament_ladder_props( $dbgmsg, $tid, $check_exist=true )
+   {
+      $tid = (int)$tid;
+      $dbgmsg .= ".TCache::load_cache_tlp($tid,$check_exist)";
+      $key = "TLadderProps.$tid";
+
+      $tl_props = DgsCache::fetch($dbgmsg, $key);
+      if( is_null($tl_props) )
+      {
+         $tl_props = TournamentLadderProps::load_tournament_ladder_props($tid);
+         if( $check_exist && is_null($tl_props) )
+            error('bad_tournament', $dbgmsg);
+
+         if( !is_null($tl_props) ) // only cache if existing
+            DgsCache::store( $dbgmsg, $key, $tl_props, SECS_PER_HOUR );
+      }
+
+      return $tl_props;
+   }//load_cache_tournament_ladder_props
 
 } // end of 'TournamentCache'
 ?>
