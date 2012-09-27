@@ -87,10 +87,7 @@ $GLOBALS['ThePage'] = new Page('TournamentLadderView');
       error('tournament_edit_not_allowed', "Tournament.ladder_view.admin_mode($tid,$my_id)");
 
    $tl_props = TournamentCache::load_cache_tournament_ladder_props( 'Tournament.ladder_view', $tid );
-
-   $tprops = TournamentProperties::load_tournament_properties($tid);
-   if( is_null($tprops) )
-      error('bad_tournament', "Tournament.ladder_view.t_props($tid)");
+   $tprops = TournamentCache::load_cache_tournament_properties( 'Tournament.ladder_view', $tid );
    $need_tp_rating = $tprops->need_rating_copy();
 
    $errors = $tstatus->check_view_status( TournamentLadder::get_view_ladder_status($allow_edit_tourney) );

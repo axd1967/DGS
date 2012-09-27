@@ -99,11 +99,7 @@ class TournamentStatus
    function _load_tprops()
    {
       if( is_null($this->tprops) )
-      {
-         $this->tprops = TournamentProperties::load_tournament_properties($this->tid);
-         if( is_null($this->tprops) )
-            error('bad_tournament', "TournamentStatus.find_tournament_properties({$this->tid})");
-      }
+         $this->tprops = TournamentCache::load_cache_tournament_properties( 'TournamentStatus.find_tprops', $this->tid );
    }
 
    /*! \internal to load TournamentRound (if needed). */

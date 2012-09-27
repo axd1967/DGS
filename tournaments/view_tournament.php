@@ -77,12 +77,11 @@ $GLOBALS['ThePage'] = new Page('Tournament');
    $news_qsql = TournamentNews::build_view_query_sql(
       /*tid*/0, /*tn*/0, TNEWS_STATUS_SHOW, $allow_edit_tourney, $reg_user_status );
    $news_qsql->add_part( SQLP_ORDER, 'TN.Published DESC' );
-   $news_iterator = new ListIterator( 'Tournament.view.news.SHOW', $news_qsql );
+   $news_iterator = new ListIterator( 'Tournament.view_tournament.news.SHOW', $news_qsql );
    $news_iterator = TournamentNews::load_tournament_news( $news_iterator, $tid );
 
-   $tprops = TournamentProperties::load_tournament_properties( $tid );
-   if( is_null($tprops) )
-      error('bad_tournament', "Tournament.view_tournament.find_tprops($tid)");
+   $tprops = TournamentCache::load_cache_tournament_properties( 'Tournament.view_tournament', $tid );
+
    $trule = TournamentRules::load_tournament_rule( $tid );
    if( is_null($trule) )
       error('bad_tournament', "Tournament.view_tournament.find_trule($tid)");
@@ -92,7 +91,7 @@ $GLOBALS['ThePage'] = new Page('Tournament');
    $tt_user_state = '';
    if( $tourney->Type == TOURNEY_TYPE_LADDER )
    {
-      $tt_props = TournamentCache::load_cache_tournament_ladder_props( 'Tournament.view', $tid, /*check*/false );
+      $tt_props = TournamentCache::load_cache_tournament_ladder_props( 'Tournament.view_tournament', $tid, /*check*/false );
       $tl_rank = TournamentLadder::load_rank( $tid, 0, $my_id );
       $tt_user_state = ( $tl_rank > 0 )
          ? sprintf( T_('Your current ladder rank is #%s out of %s.'), $tl_rank, (int)@$tp_counts[TP_STATUS_REGISTER] )

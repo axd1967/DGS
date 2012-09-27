@@ -153,13 +153,17 @@ class TournamentProperties
       $this->Lastchanged = $GLOBALS['NOW'];
 
       $entityData = $this->fillEntityData();
-      return $entityData->update( "TournamentProperties::update(%s)" );
+      $result = $entityData->update( "TournamentProperties::update(%s)" );
+      Tournament::delete_cache_tournament_properties( 'TournamentProperties.update', $this->tid );
+      return $result;
    }
 
    function delete()
    {
       $entityData = $this->fillEntityData();
-      return $entityData->delete( "TournamentProperties::delete(%s)" );
+      $result = $entityData->delete( "TournamentProperties::delete(%s)" );
+      Tournament::delete_cache_tournament_properties( 'TournamentProperties.delete', $this->tid );
+      return $result;
    }
 
    function fillEntityData( )
@@ -399,6 +403,11 @@ class TournamentProperties
    {
       static $statuslist = array( TOURNEY_STATUS_NEW );
       return $statuslist;
+   }
+
+   function delete_cache_tournament_properties( $dbgmsg, $tid )
+   {
+      DgsCache::delete( $dbgmsg, "TProps.$tid" );
    }
 
 } // end of 'TournamentProperties'

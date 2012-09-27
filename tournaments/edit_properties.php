@@ -66,9 +66,7 @@ $GLOBALS['ThePage'] = new Page('TournamentPropertiesEdit');
    if( !TournamentHelper::allow_edit_tournaments($tourney, $my_id) )
       error('tournament_edit_not_allowed', "Tournament.edit_properties.edit_tournament($tid,$my_id)");
 
-   $tprops = TournamentProperties::load_tournament_properties( $tid );
-   if( is_null($tprops) )
-      error('bad_tournament', "Tournament.edit_properties.miss_properties($tid,$my_id)");
+   $tprops = TournamentCache::load_cache_tournament_properties( 'Tournament.edit_properties', $tid );
 
    // init
    $errors = $tstatus->check_edit_status( TournamentProperties::get_edit_tournament_status() );

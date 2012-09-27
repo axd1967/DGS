@@ -219,5 +219,29 @@ class TournamentCache
       return $tl_props;
    }//load_cache_tournament_ladder_props
 
+   /*!
+    * \brief Loads and caches TournamentProperties for given tournament-id.
+    * \param $check_exist true = die if db-entry cannot be found
+    */
+   function load_cache_tournament_properties( $dbgmsg, $tid, $check_exist=true )
+   {
+      $tid = (int)$tid;
+      $dbgmsg .= ".TCache::load_cache_tprops($tid,$check_exist)";
+      $key = "TProps.$tid";
+
+      $tprops = DgsCache::fetch($dbgmsg, $key);
+      if( is_null($tprops) )
+      {
+         $tprops = TournamentProperties::load_tournament_properties($tid);
+         if( $check_exist && is_null($tprops) )
+            error('bad_tournament', $dbgmsg);
+
+         if( !is_null($tprops) ) // only cache if existing
+            DgsCache::store( $dbgmsg, $key, $tprops, SECS_PER_HOUR );
+      }
+
+      return $tprops;
+   }//load_cache_tournament_properties
+
 } // end of 'TournamentCache'
 ?>

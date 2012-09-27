@@ -78,10 +78,7 @@ $GLOBALS['ThePage'] = new Page('TournamentRegistration');
    $tourney = TournamentCache::load_cache_tournament( 'Tournament.register.find_tournament', $tid );
    $tstatus = new TournamentStatus( $tourney );
    $ttype = TournamentFactory::getTournament($tourney->WizardType);
-
-   $tprops = TournamentProperties::load_tournament_properties($tid);
-   if( is_null($tprops) )
-      error('bad_tournament', "Tournament.register.miss_properties($tid,$my_id)");
+   $tprops = TournamentCache::load_cache_tournament_properties( 'Tournament.register', $tid );
 
    $errors = $tstatus->check_edit_status( $ttype->allow_register_tourney_status, false );
 

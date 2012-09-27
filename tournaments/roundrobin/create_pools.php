@@ -84,10 +84,7 @@ $GLOBALS['ThePage'] = new Page('TournamentPoolCreate');
       error('bad_tournament', "Tournament.create_pools.find_tournament_round($tid,$round,$my_id)");
    $trstatus = new TournamentRoundStatus( $tourney, $tround );
 
-   $tprops = TournamentProperties::load_tournament_properties($tid);
-   if( is_null($tprops) )
-      error('bad_tournament', "Tournament.create_pools.find_tprops($tid,$round,$my_id)");
-
+   $tprops = TournamentCache::load_cache_tournament_properties( 'Tournament.create_pools', $tid );
    list( $count_poolrows, $count_pools ) = TournamentPool::count_tournament_pool( $tid, $round );
 
 

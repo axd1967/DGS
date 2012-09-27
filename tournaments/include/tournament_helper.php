@@ -208,9 +208,7 @@ class TournamentHelper
          error('bad_tournament', "TournamentHelper::create_game_from_tournament_rules.find_trules($tid)");
       $trules->TourneyType = $tourney_type;
 
-      $tprops = TournamentProperties::load_tournament_properties( $tid );
-      if( is_null($tprops) )
-         error('bad_tournament', "TournamentHelper::create_game_from_tournament_rules.find_tprops($tid)");
+      $tprops = TournamentCache::load_cache_tournament_properties( 'TournamentHelper::create_game_from_tournament_rules', $tid );
 
       // set challenger & defender rating according to rating-use-mode
       $ch_uid = $user_ch->ID;
@@ -250,9 +248,7 @@ class TournamentHelper
       $games_per_challenge = TournamentHelper::determine_games_per_challenge( $tid, $trules );
 
       // read T-props
-      $tprops = TournamentProperties::load_tournament_properties( $tid );
-      if( is_null($tprops) )
-         error('bad_tournament', "TournamentHelper::start_tournament_round_games.find_tprops($tid)");
+      $tprops = TournamentCache::load_cache_tournament_properties( 'TournamentHelper::start_tournament_round_games', $tid );
 
       // read T-games: read all existing TGames to check if creation has been partly done
       $check_tgames = array(); // uid.uid => game-count

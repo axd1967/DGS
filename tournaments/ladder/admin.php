@@ -79,10 +79,7 @@ $GLOBALS['ThePage'] = new Page('TournamentLadderAdmin');
    if( !TournamentHelper::allow_edit_tournaments($tourney, $my_id) )
       error('tournament_edit_not_allowed', "Tournament.ladder_admin.edit($tid,$my_id)");
 
-   $tprops = TournamentProperties::load_tournament_properties($tid);
-   if( is_null($tprops) )
-      error('bad_tournament', "Tournament.ladder_admin.miss_properties($tid,$my_id)");
-
+   $tprops = TournamentCache::load_cache_tournament_properties( 'Tournament.ladder_admin', $tid );
    $tl_props = TournamentCache::load_cache_tournament_ladder_props( 'Tournament.ladder_admin', $tid );
 
    $errors = $tstatus->check_edit_status( TournamentLadder::get_edit_tournament_status() );

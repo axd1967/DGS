@@ -76,12 +76,9 @@ $GLOBALS['ThePage'] = new Page('TournamentPoolView');
    if( is_null($tround) )
       error('bad_tournament', "Tournament.pool_view.find_tournament_round($tid,$round,$my_id)");
 
-   $tprops = TournamentProperties::load_tournament_properties( $tid );
-   if( is_null($tprops) )
-      error('bad_tournament', "Tournament.edit_pools.find_tournament_props($tid,$my_id)");
-
    // init
    $errors = array();
+   $tprops = TournamentCache::load_cache_tournament_properties( 'Tournament.pool_view', $tid );
    $need_trating = $tprops->need_rating_copy();
    $games_per_challenge = TournamentHelper::determine_games_per_challenge( $tid );
 

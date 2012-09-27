@@ -26,16 +26,16 @@ require_once 'include/classlib_user.php';
 require_once 'include/rating.php';
 require_once 'include/message_functions.php';
 require_once 'include/game_functions.php';
-require_once 'tournaments/include/tournament_utils.php';
-require_once 'tournaments/include/tournament_helper.php';
 require_once 'tournaments/include/tournament.php';
 require_once 'tournaments/include/tournament_cache.php';
-require_once 'tournaments/include/tournament_status.php';
+require_once 'tournaments/include/tournament_helper.php';
 require_once 'tournaments/include/tournament_ladder.php';
 require_once 'tournaments/include/tournament_ladder_props.php';
 require_once 'tournaments/include/tournament_rules.php';
 require_once 'tournaments/include/tournament_participant.php';
 require_once 'tournaments/include/tournament_properties.php';
+require_once 'tournaments/include/tournament_status.php';
+require_once 'tournaments/include/tournament_utils.php';
 
 $GLOBALS['ThePage'] = new Page('TournamentLadderChallenge');
 
@@ -106,10 +106,7 @@ $GLOBALS['ThePage'] = new Page('TournamentLadderChallenge');
          error('bad_tournament', "Tournament.ladder.challenge.find_rules($tid)");
       $trules->TourneyType = $tourney->Type;
 
-      $tprops = TournamentProperties::load_tournament_properties( $tid );
-      if( is_null($tprops) )
-         error('bad_tournament', "Tournament.ladder.challenge.find_tprops($tid)");
-
+      $tprops = TournamentCache::load_cache_tournament_properties( 'Tournament.ladder.challenge', $tid );
       $need_trating = ( $tprops->RatingUseMode != TPROP_RUMODE_CURR_FIX );
       if( $need_trating )
       {

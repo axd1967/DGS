@@ -127,13 +127,9 @@ $GLOBALS['ThePage'] = new Page('TournamentEditParticipant');
             . urlencode( T_('Guest users can not be edited, please choose another user!') ));
 
    // user eligible?
-   $tprops = null;
-   if( !is_null($user) )
-   {
-      $tprops = TournamentProperties::load_tournament_properties($tid);
-      if( is_null($tprops) )
-         error('bad_tournament', "Tournament.edit_participant.miss_properties($tid,$my_id)");
-   }
+   $tprops = ( is_null($user) )
+      ? null
+      : TournamentCache::load_cache_tournament_properties( 'Tournament.edit_participant', $tid );
 
    // existing participation ?
    $tp = TournamentParticipant::load_tournament_participant($tid, $uid);

@@ -554,10 +554,7 @@ class TournamentLadder
       elseif( $tl_props->UserJoinOrder == TLP_JOINORDER_RATING )
       {
          if( is_null($tprops) )
-            $tprops = TournamentProperties::load_tournament_properties($tid);
-         if( is_null($tprops) )
-            error('bad_tournament', "TournamentLadder::add_user_to_ladder.miss_tprops($tid)");
-
+            $tprops = TournamentCache::load_cache_tournament_properties( 'TournamentLadder::add_user_to_ladder', $tid );
          $success = TournamentLadder::add_participant_to_ladder_by_rating( $tp, $tprops->need_rating_copy() );
       }
       elseif( $tl_props->UserJoinOrder == TLP_JOINORDER_RANDOM )
