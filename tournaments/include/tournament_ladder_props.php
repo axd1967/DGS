@@ -23,6 +23,7 @@ $TranslateGroups[] = "Tournament";
 
 require_once 'include/globals.php';
 require_once 'include/db_classes.php';
+require_once 'include/dgs_cache.php';
 require_once 'include/std_classes.php';
 require_once 'include/utilities.php';
 require_once 'include/time_functions.php';
