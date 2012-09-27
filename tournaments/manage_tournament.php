@@ -27,6 +27,8 @@ require_once 'tournaments/include/tournament.php';
 require_once 'tournaments/include/tournament_cache.php';
 require_once 'tournaments/include/tournament_factory.php';
 require_once 'tournaments/include/tournament_globals.php';
+require_once 'tournaments/include/tournament_gui_helper.php';
+require_once 'tournaments/include/tournament_helper.php';
 require_once 'tournaments/include/tournament_round.php';
 require_once 'tournaments/include/tournament_utils.php';
 
@@ -57,7 +59,7 @@ $GLOBALS['ThePage'] = new Page('TournamentManage');
 
    // create/edit allowed?
    $is_admin = TournamentUtils::isAdmin();
-   if( !$tourney->allow_edit_tournaments($my_id) )
+   if( !TournamentHelper::allow_edit_tournaments($tourney, $my_id) )
       error('tournament_edit_not_allowed', "manage_tournament.edit_tournament($tid,$my_id)");
    $allow_new_del_TD = $tourney->allow_edit_directors($my_id);
 
@@ -82,7 +84,7 @@ $GLOBALS['ThePage'] = new Page('TournamentManage');
          'TEXT',        TournamentUtils::buildLastchangedBy($tourney->Lastchanged, $tourney->ChangedBy) ));
    $tform->add_row( array(
          'DESCRIPTION', T_('Your Roles#tourney'),
-         'TEXT', $tourney->getRoleText($my_id), ));
+         'TEXT', TournamentGuiHelper::getTournamentRoleText($tourney, $my_id), ));
    $tform->add_row( array(
          'DESCRIPTION', T_('Flags'),
          'TEXT', $tourney->formatFlags(NO_VALUE) . SEP_SPACING .

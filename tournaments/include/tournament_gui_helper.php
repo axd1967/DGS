@@ -28,7 +28,10 @@ require_once 'include/countries.php';
 require_once 'include/rating.php';
 require_once 'include/time_functions.php';
 require_once 'include/classlib_userconfig.php';
+require_once 'tournaments/include/tournament_cache.php';
 require_once 'tournaments/include/tournament_ladder.php';
+require_once 'tournaments/include/tournament_utils.php';
+
 
  /*!
   * \file tournament_gui_helper.php
@@ -179,6 +182,25 @@ class TournamentGuiHelper
 
       return $table->make_table();
    }//build_tournament_results
+
+   /*! \brief Returns roles (text) of user in tournament: owner, tournament-director, tournament-admin. */
+   function getTournamentRoleText( $tourney, $uid )
+   {
+      $arr = array();
+
+      if( $tourney->Owner_ID == $uid )
+         $arr[] = T_('Owner#tourney');
+
+      $td = TournamentCache::get_instance()->is_tournament_director('TournamentGuiHelper.getTournamentRoleText',
+         $tourney->ID, $uid, 0xffff);
+      if( !is_null($td) )
+         $arr[] = sprintf( T_('Tournament Director [%s]'), $td->formatFlags() );
+
+      if( TournamentUtils::isAdmin() )
+         $arr[] = T_('Tournament Admin');
+
+      return (count($arr)) ? implode(', ', $arr) : NO_VALUE;
+   }//getTournamentRoleText
 
 } // end of 'TournamentGuiHelper'
 
