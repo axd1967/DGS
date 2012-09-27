@@ -191,7 +191,7 @@ class TournamentHelper
          return TLOG_TYPE_OWNER;
 
       // admin-game allowed for TD with respective right (td_flag)
-      if( TournamentCache::get_instance()->is_tournament_director('TournamentHelper.allow_edit_tournaments', $tourney->ID, $uid, $td_flag) )
+      if( TournamentCache::is_cache_tournament_director('TournamentHelper.allow_edit_tournaments', $tourney->ID, $uid, $td_flag) )
          return TLOG_TYPE_DIRECTOR;
 
       return false;

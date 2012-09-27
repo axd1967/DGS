@@ -22,9 +22,9 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 require_once 'include/connect2mysql.php';
 require_once 'include/cache_clock.php';
 require_once 'include/dgs_cache.php';
-require_once 'tournaments/include/tournament_globals.php';
 require_once 'tournaments/include/tournament.php';
 require_once 'tournaments/include/tournament_director.php';
+require_once 'tournaments/include/tournament_globals.php';
 require_once 'tournaments/include/tournament_ladder_props.php';
 
  /*!
@@ -47,9 +47,6 @@ class TournamentCache
    /*! \brief array( tid => Tournament-object ); fallback if shared-mem-cache disabled. */
    var $cache_tournament;
 
-   /*! \brief array( tid:uid => TournamentDirector-object(without-user) ) */
-   var $cache_tdirector;
-
    /*! \brief array( tid => TournamentLadderProps-object ) */
    var $cache_tl_props;
 
@@ -62,35 +59,9 @@ class TournamentCache
    function TournamentCache()
    {
       $this->cache_tournament = array();
-      $this->cache_tdirector = array();
       $this->cache_tl_props = array();
       $this->cache_clock = ClockCache::get_clock_cache();
       $this->lock_tourney = null;
-   }
-
-   /*!
-    * \brief Checks if user(uid) is tournament-director for given tournament with given flags.
-    * \param $flags TD_FLAG_GAME_END, ...
-    * \return flags-matching TournamentDirectory-object; null otherwise
-    */
-   function is_tournament_director( $dbgmsg, $tid, $uid, $flags=0 )
-   {
-      $tid = (int)$tid;
-      $uid = (int)$uid;
-      $key = "$tid:$uid";
-      if( isset($this->cache_tdirector[$key]) )
-         $td = $this->cache_tdirector[$key];
-      else
-      {
-         $td = TournamentDirector::load_tournament_director( $tid, $uid, /*with_user*/false );
-         if( !is_null($td) )
-            $this->cache_tdirector[$key] = $td;
-      }
-
-      $is_tdir = !is_null($td);
-      if( $is_tdir && ($flags > 0) )
-         $is_tdir = ( $td->Flags & $flags );
-      return ($is_tdir) ? $td : null;
    }
 
    function load_tournament_ladder_props( $dbgmsg, $tid )
@@ -212,6 +183,37 @@ class TournamentCache
       $tcache = TournamentCache::get_instance();
       unset($tcache->cache_tournament[$tid]);
    }
+
+   /*!
+    * \brief Checks if user(uid) is tournament-director for given tournament with given flags.
+    * \param $flags TD_FLAG_GAME_END, ...
+    * \return TournamentDirector-object (with Flags set, but without Comment) for matching director;
+    *         or null if user is not tournament-director
+    */
+   function is_cache_tournament_director( $dbgmsg, $tid, $uid, $flags=0 )
+   {
+      $tid = (int)$tid;
+      $uid = (int)$uid;
+      $dbgmsg .= ".TCache::is_cache_tournament_director($tid,$uid,$flags)";
+      $key = "TDirector.$tid";
+
+      $arr_tdir = DgsCache::fetch($dbgmsg, $key);
+      if( is_null($arr_tdir) )
+      {
+         $arr_tdir = TournamentDirector::load_tournament_directors_flags( $tid );
+         DgsCache::store( $dbgmsg, $key, $arr_tdir, SECS_PER_HOUR );
+      }
+
+      $td_result = null;
+      if( isset($arr_tdir[$uid]) ) // user is TD
+      {
+         $td_flags = (int)$arr_tdir[$uid];
+         if( $flags <= 0 || ($td_flags & $flags) ) // pure TD, or TD-matching-flags
+            $td_result = new TournamentDirector($tid, $uid, $td_flags);
+      }
+
+      return $td_result;
+   }//is_cache_tournament_director
 
 } // end of 'TournamentCache'
 ?>

@@ -95,19 +95,25 @@ class TournamentDirector
    function insert()
    {
       $entityData = $this->fillEntityData();
-      return $entityData->insert( "TournamentDirector::insert(%s,{$this->uid})" );
+      $result = $entityData->insert( "TournamentDirector::insert(%s,{$this->uid})" );
+      TournamentDirector::delete_cache_tournament_director( 'TournamentDirector.insert', $this->tid );
+      return $result;
    }
 
    function update()
    {
       $entityData = $this->fillEntityData();
-      return $entityData->update( "TournamentDirector::update(%s,{$this->uid})" );
+      $result = $entityData->update( "TournamentDirector::update(%s,{$this->uid})" );
+      TournamentDirector::delete_cache_tournament_director( 'TournamentDirector.update', $this->tid );
+      return $result;
    }
 
    function delete()
    {
       $entityData = $this->fillEntityData();
-      return $entityData->delete( "TournamentDirector::delete(%s,{$this->uid})" );
+      $result = $entityData->delete( "TournamentDirector::delete(%s,{$this->uid})" );
+      TournamentDirector::delete_cache_tournament_director( 'TournamentDirector.delete', $this->tid );
+      return $result;
    }
 
    function fillEntityData()
@@ -224,6 +230,20 @@ class TournamentDirector
       return $iterator;
    }
 
+   /*! \brief Returns non-null arr( uid -> TournamentDirector.Flags, ... ) for given tournament-id. */
+   function load_tournament_directors_flags( $tid )
+   {
+      $db_result = db_query( "TournamentDirector.load_tournament_directors_flags($tid)",
+         "SELECT uid, Flags FROM TournamentDirector WHERE tid=$tid" );
+
+      $result = array();
+      while( $row = mysql_fetch_array($db_result) )
+         $result[$row['uid']] = $row['Flags'];
+      mysql_free_result($db_result);
+
+      return $result;
+   }
+
    /*! \brief Returns list of uid of tournament-directors for given tournament. */
    function load_tournament_directors_uid( $tid )
    {
@@ -323,6 +343,11 @@ class TournamentDirector
          TOURNEY_STATUS_PLAY, TOURNEY_STATUS_CLOSED
       );
       return $statuslist;
+   }
+
+   function delete_cache_tournament_director( $dbgmsg, $tid )
+   {
+      DgsCache::delete( $dbgmsg, "TDirector.$tid" );
    }
 
 } // end of 'TournamentDirector'

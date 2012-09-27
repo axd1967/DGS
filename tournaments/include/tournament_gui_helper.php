@@ -191,8 +191,7 @@ class TournamentGuiHelper
       if( $tourney->Owner_ID == $uid )
          $arr[] = T_('Owner#tourney');
 
-      $td = TournamentCache::get_instance()->is_tournament_director('TournamentGuiHelper.getTournamentRoleText',
-         $tourney->ID, $uid, 0xffff);
+      $td = TournamentCache::is_cache_tournament_director('TournamentGuiHelper.getTournamentRoleText', $tourney->ID, $uid, 0xffff);
       if( !is_null($td) )
          $arr[] = sprintf( T_('Tournament Director [%s]'), $td->formatFlags() );
 
