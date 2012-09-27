@@ -20,16 +20,16 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 $TranslateGroups[] = "Tournament";
 
 chdir('..');
-require_once( 'include/std_functions.php' );
-require_once( 'include/std_classes.php' );
-require_once( 'include/table_columns.php' );
-require_once( 'include/filter.php' );
-require_once( 'include/rating.php' );
-require_once( 'include/classlib_profile.php' );
-require_once( 'include/classlib_userconfig.php' );
-require_once( 'tournaments/include/tournament_cache.php' );
-require_once( 'tournaments/include/tournament_director.php' );
-require_once( 'tournaments/include/tournament_helper.php' );
+require_once 'include/std_functions.php';
+require_once 'include/std_classes.php';
+require_once 'include/table_columns.php';
+require_once 'include/filter.php';
+require_once 'include/rating.php';
+require_once 'include/classlib_profile.php';
+require_once 'include/classlib_userconfig.php';
+require_once 'tournaments/include/tournament_cache.php';
+require_once 'tournaments/include/tournament_director.php';
+require_once 'tournaments/include/tournament_helper.php';
 
 $GLOBALS['ThePage'] = new Page('TournamentDirectorList');
 

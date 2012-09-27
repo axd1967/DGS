@@ -20,26 +20,26 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 $TranslateGroups[] = "Tournament";
 
 chdir('..');
-require_once( 'include/std_functions.php' );
-require_once( 'include/gui_functions.php' );
-require_once( 'include/form_functions.php' );
-require_once( 'include/table_infos.php' );
-require_once( 'include/rating.php' );
-require_once( 'include/game_functions.php' );
-require_once( 'include/shape_control.php' );
-require_once( 'tournaments/include/tournament.php' );
-require_once( 'tournaments/include/tournament_cache.php' );
-require_once( 'tournaments/include/tournament_factory.php' );
-require_once( 'tournaments/include/tournament_gui_helper.php' );
-require_once( 'tournaments/include/tournament_helper.php' );
-require_once( 'tournaments/include/tournament_ladder.php' );
-require_once( 'tournaments/include/tournament_ladder_props.php' );
-require_once( 'tournaments/include/tournament_news.php' );
-require_once( 'tournaments/include/tournament_participant.php' );
-require_once( 'tournaments/include/tournament_properties.php' );
-require_once( 'tournaments/include/tournament_result.php' );
-require_once( 'tournaments/include/tournament_rules.php' );
-require_once( 'tournaments/include/tournament_utils.php' );
+require_once 'include/std_functions.php';
+require_once 'include/gui_functions.php';
+require_once 'include/form_functions.php';
+require_once 'include/table_infos.php';
+require_once 'include/rating.php';
+require_once 'include/game_functions.php';
+require_once 'include/shape_control.php';
+require_once 'tournaments/include/tournament.php';
+require_once 'tournaments/include/tournament_cache.php';
+require_once 'tournaments/include/tournament_factory.php';
+require_once 'tournaments/include/tournament_gui_helper.php';
+require_once 'tournaments/include/tournament_helper.php';
+require_once 'tournaments/include/tournament_ladder.php';
+require_once 'tournaments/include/tournament_ladder_props.php';
+require_once 'tournaments/include/tournament_news.php';
+require_once 'tournaments/include/tournament_participant.php';
+require_once 'tournaments/include/tournament_properties.php';
+require_once 'tournaments/include/tournament_result.php';
+require_once 'tournaments/include/tournament_rules.php';
+require_once 'tournaments/include/tournament_utils.php';
 
 $GLOBALS['ThePage'] = new Page('Tournament');
 
