@@ -23,6 +23,7 @@ chdir('..');
 require_once( 'include/std_functions.php' );
 require_once( 'include/std_classes.php' );
 require_once( 'tournaments/include/tournament_cache.php' );
+require_once( 'tournaments/include/tournament_helper.php' );
 require_once( 'tournaments/include/tournament_news.php' );
 require_once( 'tournaments/include/tournament_participant.php' );
 require_once( 'tournaments/include/tournament_utils.php' );
@@ -50,7 +51,7 @@ $GLOBALS['ThePage'] = new Page('TournamentNewsView');
 
    // init
    $is_admin = TournamentUtils::isAdmin();
-   $allow_edit_tourney = $tourney->allow_edit_tournaments( $my_id );
+   $allow_edit_tourney = TournamentHelper::allow_edit_tournaments($tourney, $my_id);
    $is_participant = ($allow_edit_tourney)
       ? true
       : TournamentParticipant::isTournamentParticipant( $tid, $my_id );

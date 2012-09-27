@@ -31,6 +31,7 @@ require_once( 'tournaments/include/tournament.php' );
 require_once( 'tournaments/include/tournament_cache.php' );
 require_once( 'tournaments/include/tournament_factory.php' );
 require_once( 'tournaments/include/tournament_gui_helper.php' );
+require_once( 'tournaments/include/tournament_helper.php' );
 require_once( 'tournaments/include/tournament_ladder.php' );
 require_once( 'tournaments/include/tournament_ladder_props.php' );
 require_once( 'tournaments/include/tournament_news.php' );
@@ -56,7 +57,7 @@ $GLOBALS['ThePage'] = new Page('Tournament');
    $tid = (int) @$_REQUEST['tid'];
    $tourney = TournamentCache::load_cache_tournament( 'Tournament.view_tournament.find_tournament', $tid );
    $ttype = TournamentFactory::getTournament($tourney->WizardType);
-   $allow_edit_tourney = $tourney->allow_edit_tournaments( $my_id );
+   $allow_edit_tourney = TournamentHelper::allow_edit_tournaments($tourney, $my_id);
 
    // init
    $page = "view_tournament.php?tid=$tid";

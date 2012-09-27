@@ -80,7 +80,7 @@ $GLOBALS['ThePage'] = new Page('TournamentRoundEditor');
       error('tournament_edit_rounds_not_allowed', "Tournament.edit_rounds.need_rounds($tid)");
 
    // edit allowed?
-   if( !$tourney->allow_edit_tournaments($my_id) )
+   if( !TournamentHelper::allow_edit_tournaments($tourney, $my_id) )
       error('tournament_edit_not_allowed', "Tournament.edit_rounds.edit($tid,$my_id)");
 
    $authorise_set_tround = TournamentRound::authorise_set_tround( $tourney->Status );

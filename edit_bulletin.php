@@ -28,6 +28,7 @@ require_once 'include/gui_bulletin.php';
 require_once 'include/classlib_user.php';
 require_once 'include/game_functions.php';
 require_once 'tournaments/include/tournament_cache.php';
+require_once 'tournaments/include/tournament_helper.php';
 
 $GLOBALS['ThePage'] = new Page('BulletinEdit');
 
@@ -291,7 +292,7 @@ function check_bulletin_input( &$bulletin, $my_id )
          $errors[] = sprintf( T_('No tournament found for tournament-ID [%s]!'), $tid );
       $bulletin->Tournament = $tourney;
 
-      if( !is_null($tourney) && !$tourney->allow_edit_tournaments($my_id) )
+      if( !TournamentHelper::allow_edit_tournaments($tourney, $my_id) )
          $errors[] = sprintf( T_('Only the owner or a director of tournament [%s] can create a tournament-news-bulletin.'), $tid );
    }
 

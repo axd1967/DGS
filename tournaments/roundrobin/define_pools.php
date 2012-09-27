@@ -72,7 +72,7 @@ $GLOBALS['ThePage'] = new Page('TournamentPoolDefine');
       error('tournament_edit_rounds_not_allowed', "Tournament.define_pools.need_rounds($tid)");
 
    // create/edit allowed?
-   if( !$tourney->allow_edit_tournaments($my_id) )
+   if( !TournamentHelper::allow_edit_tournaments($tourney, $my_id) )
       error('tournament_edit_not_allowed', "Tournament.define_pools.edit_tournament($tid,$my_id)");
 
    // load existing T-round

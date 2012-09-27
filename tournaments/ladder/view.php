@@ -32,12 +32,12 @@ require_once 'include/time_functions.php';
 require_once 'include/game_functions.php';
 require_once 'tournaments/include/tournament.php';
 require_once 'tournaments/include/tournament_cache.php';
-require_once 'tournaments/include/tournament_status.php';
-require_once 'tournaments/include/tournament_ladder.php';
-require_once 'tournaments/include/tournament_ladder_props.php';
 require_once 'tournaments/include/tournament_games.php';
 require_once 'tournaments/include/tournament_helper.php';
+require_once 'tournaments/include/tournament_ladder.php';
+require_once 'tournaments/include/tournament_ladder_props.php';
 require_once 'tournaments/include/tournament_properties.php';
+require_once 'tournaments/include/tournament_status.php';
 require_once 'tournaments/include/tournament_utils.php';
 
 $GLOBALS['ThePage'] = new Page('TournamentLadderView');
@@ -82,7 +82,7 @@ $GLOBALS['ThePage'] = new Page('TournamentLadderView');
    $tdwork_locked = $tourney->isFlagSet(TOURNEY_FLAG_LOCK_TDWORK);
    $play_locked = $tdwork_locked || $tourney->isFlagSet(TOURNEY_FLAG_LOCK_ADMIN | TOURNEY_FLAG_LOCK_CLOSE);
 
-   $allow_edit_tourney = $tourney->allow_edit_tournaments( $my_id );
+   $allow_edit_tourney = TournamentHelper::allow_edit_tournaments($tourney, $my_id);
    if( $admin_mode && !$allow_edit_tourney )
       error('tournament_edit_not_allowed', "Tournament.ladder_view.admin_mode($tid,$my_id)");
 

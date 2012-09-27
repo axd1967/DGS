@@ -26,6 +26,7 @@ require_once 'include/gui_functions.php';
 require_once 'tournaments/include/tournament_cache.php';
 require_once 'tournaments/include/tournament_factory.php';
 require_once 'tournaments/include/tournament_globals.php';
+require_once 'tournaments/include/tournament_helper.php';
 require_once 'tournaments/include/tournament_pool.php';
 require_once 'tournaments/include/tournament_pool_classes.php';
 require_once 'tournaments/include/tournament_properties.php';
@@ -64,7 +65,7 @@ $GLOBALS['ThePage'] = new Page('TournamentPoolView');
       error('tournament_edit_rounds_not_allowed', "Tournament.pool_view.find_tournament($tid)");
 
    // create/edit allowed?
-   $allow_edit_tourney = $tourney->allow_edit_tournaments( $my_id );
+   $allow_edit_tourney = TournamentHelper::allow_edit_tournaments($tourney, $my_id );
    if( $edit && !$allow_edit_tourney )
       error('tournament_edit_not_allowed', "Tournament.pool_view.find_tournament($tid)");
 

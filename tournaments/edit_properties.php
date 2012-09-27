@@ -25,10 +25,11 @@ require_once( 'include/gui_functions.php' );
 require_once( 'include/form_functions.php' );
 require_once( 'include/rating.php' );
 require_once( 'tournaments/include/tournament_cache.php' );
+require_once( 'tournaments/include/tournament_factory.php' );
 require_once( 'tournaments/include/tournament_globals.php' );
+require_once( 'tournaments/include/tournament_helper.php' );
 require_once( 'tournaments/include/tournament_properties.php' );
 require_once( 'tournaments/include/tournament_status.php' );
-require_once( 'tournaments/include/tournament_factory.php' );
 require_once( 'tournaments/include/tournament_utils.php' );
 
 $GLOBALS['ThePage'] = new Page('TournamentPropertiesEdit');
@@ -62,7 +63,7 @@ $GLOBALS['ThePage'] = new Page('TournamentPropertiesEdit');
    $t_limits = $ttype->getTournamentLimits();
 
    // create/edit allowed?
-   if( !$tourney->allow_edit_tournaments($my_id) )
+   if( !TournamentHelper::allow_edit_tournaments($tourney, $my_id) )
       error('tournament_edit_not_allowed', "Tournament.edit_properties.edit_tournament($tid,$my_id)");
 
    $tprops = TournamentProperties::load_tournament_properties( $tid );

@@ -31,6 +31,7 @@ if( ALLOW_TOURNAMENTS ) {
    require_once 'tournaments/include/tournament.php';
    require_once 'tournaments/include/tournament_cache.php';
    require_once 'tournaments/include/tournament_games.php';
+   require_once 'tournaments/include/tournament_helper.php';
 }
 
 $GLOBALS['ThePage'] = new Page('GameInfo');
@@ -547,10 +548,10 @@ function build_rating_diff( $rating_diff )
    {
       if( $tourney->Type == TOURNEY_TYPE_LADDER )
          $menu_array[T_('View Ladder')] = "tournaments/ladder/view.php?tid=$tid";
-      if( $tourney->allow_edit_tournaments($my_id, TD_FLAG_GAME_END) )
+      if( TournamentHelper::allow_edit_tournaments($tourney, $my_id, TD_FLAG_GAME_END) )
          $menu_array[T_('Admin tournament game')] =
             array( 'url' => "tournaments/game_admin.php?tid=$tid".URI_AMP."gid=$gid", 'class' => 'TAdmin' );
-      if( $tourney->allow_edit_tournaments($my_id) )
+      if( TournamentHelper::allow_edit_tournaments($tourney, $my_id) )
          $menu_array[T_('Manage tournament')] =
             array( 'url' => "tournaments/manage_tournament.php?tid=$tid", 'class' => 'TAdmin' );
    }

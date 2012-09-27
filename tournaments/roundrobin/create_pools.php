@@ -26,6 +26,7 @@ require_once 'include/form_functions.php';
 require_once 'include/table_columns.php';
 require_once 'tournaments/include/tournament_cache.php';
 require_once 'tournaments/include/tournament_factory.php';
+require_once 'tournaments/include/tournament_helper.php';
 require_once 'tournaments/include/tournament_participant.php';
 require_once 'tournaments/include/tournament_pool.php';
 require_once 'tournaments/include/tournament_properties.php';
@@ -73,7 +74,7 @@ $GLOBALS['ThePage'] = new Page('TournamentPoolCreate');
       error('tournament_edit_rounds_not_allowed', "Tournament.create_pools.need_rounds($tid)");
 
    // create/edit allowed?
-   if( !$tourney->allow_edit_tournaments($my_id) )
+   if( !TournamentHelper::allow_edit_tournaments($tourney, $my_id) )
       error('tournament_edit_not_allowed', "Tournament.create_pools.edit_tournament($tid,$my_id)");
 
    // load existing T-round

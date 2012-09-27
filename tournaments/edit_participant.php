@@ -29,10 +29,11 @@ require_once( 'include/error_codes.php' );
 require_once( 'include/db/bulletin.php' );
 require_once( 'tournaments/include/tournament.php' );
 require_once( 'tournaments/include/tournament_cache.php' );
+require_once( 'tournaments/include/tournament_factory.php' );
+require_once( 'tournaments/include/tournament_helper.php' );
 require_once( 'tournaments/include/tournament_participant.php' );
 require_once( 'tournaments/include/tournament_properties.php' );
 require_once( 'tournaments/include/tournament_status.php' );
-require_once( 'tournaments/include/tournament_factory.php' );
 
 $GLOBALS['ThePage'] = new Page('TournamentEditParticipant');
 
@@ -87,7 +88,7 @@ $GLOBALS['ThePage'] = new Page('TournamentEditParticipant');
    $tstatus = new TournamentStatus( $tourney );
    $ttype = TournamentFactory::getTournament($tourney->WizardType);
 
-   $allow_edit_tourney = $tourney->allow_edit_tournaments( $my_id );
+   $allow_edit_tourney = TournamentHelper::allow_edit_tournaments($tourney, $my_id);
    if( !$allow_edit_tourney )
       error('tournament_edit_not_allowed', "Tournament.edit_participant($tid,$my_id)");
    $is_admin = TournamentUtils::isAdmin();

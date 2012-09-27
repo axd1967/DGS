@@ -32,6 +32,7 @@ require_once 'include/table_columns.php';
 require_once 'include/filter.php';
 require_once 'include/rating.php';
 require_once 'tournaments/include/tournament_cache.php';
+require_once 'tournaments/include/tournament_helper.php';
 require_once 'tournaments/include/tournament_log.php';
 
 
@@ -58,7 +59,7 @@ require_once 'tournaments/include/tournament_log.php';
    {
       $tourney = TournamentCache::load_cache_tournament( 'Tournament.show_tlog', $tid, /*check*/false );
       if( !is_null($tourney) ) // deleted tournament perhaps (so no error)
-         $allow_view = $tourney->allow_edit_tournaments( $my_id );
+         $allow_view = TournamentHelper::allow_edit_tournaments($tourney, $my_id);
    }
    if( !($is_admin || $allow_view) )
       error('adminlevel_too_low', 'Tournament.show_tlog');

@@ -170,6 +170,34 @@ class TournamentHelper
    // ------------ static functions ----------------------------
 
    /*!
+    * \brief Returns true if given user can edit tournament,
+    *        or if user can admin tournament-game (if tournament-director-flag given).
+    * \return false if not allowed; otherwise !false with one of TLOG_TYPE_ADMIN/OWNER/DIRECTOR
+    */
+   function allow_edit_tournaments( $tourney, $uid, $td_flag=0 )
+   {
+      if( $uid <= GUESTS_ID_MAX ) // forbidden for guests
+         return false;
+
+      // logged-in admin is allowed anything
+      if( TournamentUtils::isAdmin() )
+         return TLOG_TYPE_ADMIN;
+
+      if( is_null($tourney) )
+         error('invalid_args', "TournamentHelper.allow_edit_tournaments.check.tney_null($uid,$td_flag)");
+
+      // edit/admin-game allowed for T-owner or TD
+      if( $tourney->Owner_ID == $uid )
+         return TLOG_TYPE_OWNER;
+
+      // admin-game allowed for TD with respective right (td_flag)
+      if( TournamentCache::get_instance()->is_tournament_director('TournamentHelper.allow_edit_tournaments', $tourney->ID, $uid, $td_flag) )
+         return TLOG_TYPE_DIRECTOR;
+
+      return false;
+   }//allow_edit_tournaments
+
+   /*!
     * \brief Wrapper to TournamentRules.create_tournament_games() creating game(s) between two users.
     * \return array of Games.ID (e.g. for DOUBLE-tourney)
     */

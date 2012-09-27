@@ -29,6 +29,7 @@ require_once( 'include/classlib_profile.php' );
 require_once( 'include/classlib_userconfig.php' );
 require_once( 'tournaments/include/tournament_cache.php' );
 require_once( 'tournaments/include/tournament_director.php' );
+require_once( 'tournaments/include/tournament_helper.php' );
 
 $GLOBALS['ThePage'] = new Page('TournamentDirectorList');
 
@@ -155,7 +156,7 @@ $GLOBALS['ThePage'] = new Page('TournamentDirectorList');
    if( $allow_edit )
       $menu_array[T_('Add tournament director')] =
          array( 'url' => "tournaments/edit_director.php?tid=$tid", 'class' => 'TAdmin' );
-   if( $tourney->allow_edit_tournaments($my_id) )
+   if( TournamentHelper::allow_edit_tournaments($tourney, $my_id) )
       $menu_array[T_('Manage tournament')] =
          array( 'url' => "tournaments/manage_tournament.php?tid=$tid", 'class' => 'TAdmin' );
 

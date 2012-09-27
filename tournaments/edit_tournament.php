@@ -26,6 +26,7 @@ require_once( 'include/form_functions.php' );
 require_once( 'tournaments/include/tournament.php' );
 require_once( 'tournaments/include/tournament_cache.php' );
 require_once( 'tournaments/include/tournament_factory.php' );
+require_once( 'tournaments/include/tournament_helper.php' );
 require_once( 'tournaments/include/tournament_status.php' );
 require_once( 'tournaments/include/tournament_utils.php' );
 
@@ -68,7 +69,7 @@ $GLOBALS['ThePage'] = new Page('TournamentEdit');
 
    // edit allowed?
    $is_admin = TournamentUtils::isAdmin();
-   $allow_edit_tourney = $tourney->allow_edit_tournaments( $my_id );
+   $allow_edit_tourney = TournamentHelper::allow_edit_tournaments($tourney, $my_id);
    if( !$allow_edit_tourney )
       error('tournament_edit_not_allowed', "Tournament.edit_tournament.edit($tid,$my_id)");
 

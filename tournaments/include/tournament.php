@@ -26,8 +26,6 @@ require_once 'include/dgs_cache.php';
 require_once 'include/std_functions.php';
 require_once 'tournaments/include/tournament_globals.php';
 require_once 'tournaments/include/tournament_utils.php';
-require_once 'tournaments/include/tournament_director.php';
-require_once 'tournaments/include/tournament_cache.php';
 
  /*!
   * \file tournament.php
@@ -328,44 +326,6 @@ class Tournament
       $result = $data->update( "Tournament.update_rounds(%s,$change_rounds,$curr_round)" );
       Tournament::delete_cache_tournament( 'Tournament.update_rounds', $this->ID );
       return $result;
-   }
-
-   function getRoleText( $uid )
-   {
-      $arr = array();
-      if( $this->Owner_ID == $uid )
-         $arr[] = T_('Owner#tourney');
-      $td = TournamentCache::get_instance()->is_tournament_director('Tournament.getRoleText', $this->ID, $uid, 0xffff);
-      if( !is_null($td) )
-         $arr[] = sprintf( T_('Tournament Director [%s]'), $td->formatFlags() );
-      if( TournamentUtils::isAdmin() )
-         $arr[] = T_('Tournament Admin');
-      return (count($arr)) ? implode(', ', $arr) : NO_VALUE;
-   }
-
-   /*!
-    * \brief Returns true if given user can edit tournament,
-    *        or if can admin tournament-game if tournament-director-flag given.
-    * \return false if not allowed; otherwise !false with one of TLOG_TYPE_ADMIN/OWNER/DIRECTOR
-    */
-   function allow_edit_tournaments( $uid, $td_flag=0 )
-   {
-      if( $uid <= GUESTS_ID_MAX ) // forbidden for guests
-         return false;
-
-      // logged-in admin is allowed anything
-      if( TournamentUtils::isAdmin() )
-         return TLOG_TYPE_ADMIN;
-
-      // edit/admin-game allowed for T-owner or TD
-      if( $this->Owner_ID == $uid )
-         return TLOG_TYPE_OWNER;
-
-      // admin-game allowed for TD with respective right (td_flag)
-      if( TournamentCache::get_instance()->is_tournament_director('Tournament.allow_edit_tournaments', $this->ID, $uid, $td_flag) )
-         return TLOG_TYPE_DIRECTOR;
-
-      return false;
    }
 
    /*! \brief Returns TLOG_TYPE_... if given user can edit tournament directors; false otherwise. */

@@ -76,7 +76,7 @@ $GLOBALS['ThePage'] = new Page('TournamentLadderAdmin');
 
    // edit allowed?
    $is_admin = TournamentUtils::isAdmin();
-   if( !$tourney->allow_edit_tournaments($my_id) )
+   if( !TournamentHelper::allow_edit_tournaments($tourney, $my_id) )
       error('tournament_edit_not_allowed', "Tournament.ladder_admin.edit($tid,$my_id)");
 
    $tprops = TournamentProperties::load_tournament_properties($tid);

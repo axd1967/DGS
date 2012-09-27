@@ -27,6 +27,7 @@ require_once( 'include/rating.php' );
 require_once( 'include/db/bulletin.php' );
 require_once( 'tournaments/include/tournament_cache.php' );
 require_once( 'tournaments/include/tournament_director.php' );
+require_once( 'tournaments/include/tournament_helper.php' );
 require_once( 'tournaments/include/tournament_log_helper.php' );
 require_once( 'tournaments/include/tournament_status.php' );
 require_once( 'tournaments/include/tournament_utils.php' );
@@ -63,7 +64,8 @@ $GLOBALS['ThePage'] = new Page('TournamentDirectorEdit');
    $tourney = TournamentCache::load_cache_tournament( 'Tournament.edit_director.find_tournament', $tid );
    $tstatus = new TournamentStatus( $tourney );
 
-   if( !$tourney->allow_edit_tournaments($my_id) )
+   $allow_edit_tourney = TournamentHelper::allow_edit_tournaments($tourney, $my_id);
+   if( !$allow_edit_tourney )
       error('tournament_director_edit_not_allowed', "Tournament.edit_director.edit($tid,$my_id)");
 
    if( @$_REQUEST['td_delete'] ) // at least one TD remaining ?
@@ -286,7 +288,7 @@ $GLOBALS['ThePage'] = new Page('TournamentDirectorEdit');
    if( $owner_allow_edit )
       $menu_array[T_('Add tournament director')] =
          array( 'url' => "tournaments/edit_director.php?tid=$tid", 'class' => 'TAdmin' );
-   if( $tourney->allow_edit_tournaments($my_id) )
+   if( $allow_edit_tourney )
       $menu_array[T_('Manage tournament')] =
          array( 'url' => "tournaments/manage_tournament.php?tid=$tid", 'class' => 'TAdmin' );
 

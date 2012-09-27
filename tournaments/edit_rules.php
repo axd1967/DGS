@@ -26,10 +26,11 @@ require_once 'include/form_functions.php';
 require_once 'include/message_functions.php';
 require_once 'include/db/shape.php';
 require_once 'tournaments/include/tournament_cache.php';
+require_once 'tournaments/include/tournament_helper.php';
+require_once 'tournaments/include/tournament_participant.php';
 require_once 'tournaments/include/tournament_rules.php';
 require_once 'tournaments/include/tournament_status.php';
 require_once 'tournaments/include/tournament_utils.php';
-require_once 'tournaments/include/tournament_participant.php';
 
 $GLOBALS['ThePage'] = new Page('TournamentRulesEdit');
 
@@ -60,7 +61,7 @@ $GLOBALS['ThePage'] = new Page('TournamentRulesEdit');
    $tstatus = new TournamentStatus( $tourney );
 
    // create/edit allowed?
-   if( !$tourney->allow_edit_tournaments($my_id) )
+   if( !TournamentHelper::allow_edit_tournaments($tourney, $my_id) )
       error('tournament_edit_not_allowed', "Tournament.edit_rules.edit_tournament($tid,$my_id)");
 
    $trule = TournamentRules::load_tournament_rule( $tid );

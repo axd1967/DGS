@@ -25,6 +25,7 @@ require_once 'include/gui_functions.php';
 require_once 'include/form_functions.php';
 require_once 'include/time_functions.php';
 require_once 'tournaments/include/tournament_cache.php';
+require_once 'tournaments/include/tournament_helper.php';
 require_once 'tournaments/include/tournament_status.php';
 require_once 'tournaments/include/tournament_ladder_props.php';
 require_once 'tournaments/include/tournament_utils.php';
@@ -62,7 +63,7 @@ $GLOBALS['ThePage'] = new Page('TournamentLadderPropsEdit');
    $t_limits = $ttype->getTournamentLimits();
 
    // create/edit allowed?
-   if( !$tourney->allow_edit_tournaments($my_id) )
+   if( !TournamentHelper::allow_edit_tournaments($tourney, $my_id) )
       error('tournament_edit_not_allowed', "Tournament.ladder.edit_props.edit_tournament($tid,$my_id)");
 
    $tl_props = TournamentLadderProps::load_tournament_ladder_props( $tid );
