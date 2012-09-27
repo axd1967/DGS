@@ -183,13 +183,17 @@ class TournamentRules
       $this->checkData();
 
       $entityData = $this->fillEntityData();
-      return $entityData->update( "TournamentRules::update(%s,{$this->tid})" );
+      $result = $entityData->update( "TournamentRules::update(%s,{$this->tid})" );
+      TournamentRules::delete_cache_tournament_rules( 'TournamentRules.update', $this->ID );
+      return $result;
    }
 
    function delete()
    {
       $entityData = $this->fillEntityData();
-      return $entityData->delete( "TournamentRules::delete(%s,{$this->tid})" );
+      $result = $entityData->delete( "TournamentRules::delete(%s,{$this->tid})" );
+      TournamentRules::delete_cache_tournament_rules( 'TournamentRules.delete', $this->ID );
+      return $result;
    }
 
    function checkData()
@@ -849,6 +853,11 @@ class TournamentRules
          return T_('Tournament-rules forbid Jigo, so game score must be a float ending on .5');
       else
          return '';
+   }
+
+   function delete_cache_tournament_rules( $dbgmsg, $tid )
+   {
+      DgsCache::delete( $dbgmsg, "TRules.$tid" );
    }
 
 } // end of 'TournamentRules'

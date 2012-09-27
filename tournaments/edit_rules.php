@@ -64,9 +64,7 @@ $GLOBALS['ThePage'] = new Page('TournamentRulesEdit');
    if( !TournamentHelper::allow_edit_tournaments($tourney, $my_id) )
       error('tournament_edit_not_allowed', "Tournament.edit_rules.edit_tournament($tid,$my_id)");
 
-   $trule = TournamentRules::load_tournament_rule( $tid );
-   if( is_null($trule) )
-      error('bad_tournament', "Tournament.edit_rules.miss_rules($tid,$my_id)");
+   $trule = TournamentCache::load_cache_tournament_rules( 'Tournament.edit_rules', $tid );
    $trule->TourneyType = $tourney->Type; // for parsing rules
 
    $errors = $tstatus->check_edit_status( TournamentRules::get_edit_tournament_status() );

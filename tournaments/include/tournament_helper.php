@@ -203,9 +203,7 @@ class TournamentHelper
     */
    function create_games_from_tournament_rules( $tid, $tourney_type, $user_ch, $user_df )
    {
-      $trules = TournamentRules::load_tournament_rule( $tid );
-      if( is_null($trules) )
-         error('bad_tournament', "TournamentHelper::create_game_from_tournament_rules.find_trules($tid)");
+      $trules = TournamentCache::load_cache_tournament_rules( 'TournamentHelper::create_game_from_tournament_rules', $tid );
       $trules->TourneyType = $tourney_type;
 
       $tprops = TournamentCache::load_cache_tournament_properties( 'TournamentHelper::create_game_from_tournament_rules', $tid );
@@ -241,9 +239,7 @@ class TournamentHelper
          return null;
 
       // read T-rule
-      $trules = TournamentRules::load_tournament_rule( $tid );
-      if( is_null($trules) )
-         error('bad_tournament', "TournamentHelper::start_tournament_round_games.find_trules($tid)");
+      $trules = TournamentCache::load_cache_tournament_rules( 'TournamentHelper::start_tournament_round_games', $tid );
       $trules->TourneyType = $tourney->Type;
       $games_per_challenge = TournamentHelper::determine_games_per_challenge( $tid, $trules );
 
@@ -407,16 +403,11 @@ class TournamentHelper
    /*! \brief Finds out games-per-challenge from various sources for given tournament. */
    function determine_games_per_challenge( $tid, $trule=null )
    {
+      // load T-rules (need HandicapType for games-count)
       if( !($trule instanceof TournamentRules) )
-      {
-         // load T-rules (need HandicapType for games-count)
-         $trule = TournamentRules::load_tournament_rule( $tid );
-         if( is_null($trule) )
-            error('bad_tournament', "TournamentHelper::determine_games_per_challenge.find_trules($tid)");
-      }
+         $trule = TournamentCache::load_cache_tournament_rules( 'TournamentHelper::determine_games_per_challenge', $tid );
 
       $games_per_challenge = ( $trule->Handicaptype == TRULE_HANDITYPE_DOUBLE ) ? 2 : 1;
-
       return $games_per_challenge;
    }
 

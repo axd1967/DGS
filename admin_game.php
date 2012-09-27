@@ -308,10 +308,7 @@ function parse_edit_form( &$game )
             $score_errors[] = sprintf( T_('Expecting number in format %s.5 for game score'), SCORE_MAX );
          elseif( $game->tid > 0 )
          {
-            $trule = TournamentRules::load_tournament_rule( $game->tid );
-            if( is_null($trule) )
-               error('bad_tournament', "admin_game.find_tournament_rules($tid)");
-
+            $trule = TournamentCache::load_cache_tournament_rules( 'admin_game', $game->tid );
             $jigo_behaviour = $trule->determineJigoBehaviour();
             $chk_score = floor( abs( 2 * (float)$new_value ) );
             if( ( $jigo_behaviour > 0 && !($chk_score & 1) ) || ( $jigo_behaviour == 0 && ($chk_score & 1) ) )

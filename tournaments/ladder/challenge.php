@@ -101,9 +101,7 @@ $GLOBALS['ThePage'] = new Page('TournamentLadderChallenge');
    {
       $tl_props = TournamentCache::load_cache_tournament_ladder_props( 'Tournament.ladder.challenge', $tid );
 
-      $trules = TournamentRules::load_tournament_rule( $tid );
-      if( is_null($trules) )
-         error('bad_tournament', "Tournament.ladder.challenge.find_rules($tid)");
+      $trules = TournamentCache::load_cache_tournament_rules( 'Tournament.ladder.challenge', $tid );
       $trules->TourneyType = $tourney->Type;
 
       $tprops = TournamentCache::load_cache_tournament_properties( 'Tournament.ladder.challenge', $tid );

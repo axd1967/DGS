@@ -81,10 +81,7 @@ $GLOBALS['ThePage'] = new Page('Tournament');
    $news_iterator = TournamentNews::load_tournament_news( $news_iterator, $tid );
 
    $tprops = TournamentCache::load_cache_tournament_properties( 'Tournament.view_tournament', $tid );
-
-   $trule = TournamentRules::load_tournament_rule( $tid );
-   if( is_null($trule) )
-      error('bad_tournament', "Tournament.view_tournament.find_trule($tid)");
+   $trule = TournamentCache::load_cache_tournament_rules( 'Tournament.view_tournament', $tid );
 
    // user result state
    $tt_props = null; // T-type-specific props

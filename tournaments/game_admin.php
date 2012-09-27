@@ -90,9 +90,7 @@ define('GA_RES_TIMOUT', 3);
    $old_tg_flags = $tgame->Flags;
    $old_tg_status = $tgame->Status;
 
-   $trule = TournamentRules::load_tournament_rule($tid);
-   if( is_null($trule) )
-      error('bad_tournament', "Tournament.game_admin.find_trule($tid)");
+   $trule = TournamentCache::load_cache_tournament_rules( 'Tournament.game_admin', $tid );
 
    // edit allowed?
    $is_admin = TournamentUtils::isAdmin();
