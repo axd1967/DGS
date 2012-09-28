@@ -30,6 +30,7 @@ require_once 'include/time_functions.php';
 require_once 'include/classlib_userconfig.php';
 require_once 'tournaments/include/tournament_cache.php';
 require_once 'tournaments/include/tournament_ladder.php';
+require_once 'tournaments/include/tournament_participant.php';
 require_once 'tournaments/include/tournament_utils.php';
 
 
@@ -200,6 +201,23 @@ class TournamentGuiHelper
 
       return (count($arr)) ? implode(', ', $arr) : NO_VALUE;
    }//getTournamentRoleText
+
+   /*! \brief Returns (cached) registration-link-text for given user; return empty string if user-registration is denied. */
+   function getLinkTextRegistration( $tid, $reg_user_status=null )
+   {
+      global $player_row;
+
+      if( is_null($reg_user_status) )
+         $reg_user_status = TournamentCache::is_cache_tournament_participant( 'TGuiHelper.getLinkTextRegistration',
+            $tid, $player_row['ID'] );
+      if( $reg_user_status != TP_STATUS_REGISTER )
+      {
+         if( @$player_row['AdminOptions'] & ADMOPT_DENY_TOURNEY_REGISTER )
+            return '';
+      }
+
+      return ($reg_user_status) ? T_('Edit my registration#tourney') : T_('Registration#tourney');
+   }//getLinkTextRegistration
 
 } // end of 'TournamentGuiHelper'
 

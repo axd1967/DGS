@@ -166,7 +166,7 @@ class TournamentStatus
       $this->_load_tprops();
       $this->_load_tround();
       $min_participants = $this->ttype->calcTournamentMinParticipants( $this->tprops, $this->tround );
-      $tp_counts = TournamentParticipant::count_tournament_participants($this->tid, TP_STATUS_REGISTER); //TODO count TP for StartRound=CurrentRound
+      $tp_counts = TournamentCache::count_cache_tournament_participants($this->tid, TP_STATUS_REGISTER); //TODO count TP for StartRound=CurrentRound
       $reg_count = (int)@$tp_counts[TPCOUNT_STATUS_ALL];
       if( $min_participants > 0 && $reg_count < $min_participants )
          $this->errors[] = sprintf( //TODO ... "for users registered to start in round X"

@@ -533,9 +533,9 @@ class TournamentLadder
       if( $uid <= GUESTS_ID_MAX )
          error('invalid_user', "TournamentLadder::add_user_to_ladder.check_user($tid)");
 
-      $tp = TournamentParticipant::load_tournament_participant( $tid, $uid, 0 );
+      $tp = TournamentCache::load_cache_tournament_participant( 'TournamentLadder::add_user_to_ladder', $tid, $uid );
       if( is_null($tp) )
-         error('invalid_args', "TournamentLadder::add_user_to_ladder.load_tp($tid,$uid)");
+         error('internal_error', "TournamentLadder::add_user_to_ladder.load_tp($tid,$uid)");
 
       // check pre-conditions
       if( TournamentLadder::load_rank($tid, 0, $uid) > 0 )

@@ -54,7 +54,7 @@ $GLOBALS['ThePage'] = new Page('TournamentNewsView');
    $allow_edit_tourney = TournamentHelper::allow_edit_tournaments($tourney, $my_id);
    $is_participant = ($allow_edit_tourney)
       ? true
-      : TournamentParticipant::isTournamentParticipant( $tid, $my_id );
+      : TournamentCache::is_cache_tournament_participant( 'Tournament.view_news', $tid, $my_id );
 
    $qsql = TournamentNews::build_view_query_sql( $tnews_id, $tid, /*tn-stat*/null,
       $allow_edit_tourney, $is_participant );

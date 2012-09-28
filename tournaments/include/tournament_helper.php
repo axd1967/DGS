@@ -118,8 +118,8 @@ class TournamentHelper
             $tgame->update();
 
             // update TP.Finished/Won/Lost for challenger and defender
-            TournamentParticipant::update_game_end_stats( $tid, $tgame->Challenger_rid, $tgame->Score );
-            TournamentParticipant::update_game_end_stats( $tid, $tgame->Defender_rid, -$tgame->Score );
+            TournamentParticipant::update_game_end_stats( $tid, $tgame->Challenger_rid, $tgame->Challenger_uid, $tgame->Score );
+            TournamentParticipant::update_game_end_stats( $tid, $tgame->Defender_rid, $tgame->Defender_uid, -$tgame->Score );
          }
       }
       ta_end();
@@ -137,8 +137,8 @@ class TournamentHelper
          $tgame->update();
 
          // update TP.Finished/Won/Lost for challenger and defender
-         TournamentParticipant::update_game_end_stats( $tid, $tgame->Challenger_rid, $tgame->Score );
-         TournamentParticipant::update_game_end_stats( $tid, $tgame->Defender_rid, -$tgame->Score );
+         TournamentParticipant::update_game_end_stats( $tid, $tgame->Challenger_rid, $tgame->Challenger_uid, $tgame->Score );
+         TournamentParticipant::update_game_end_stats( $tid, $tgame->Defender_rid, $tgame->Defender_uid, -$tgame->Score );
       }
       ta_end();
 
@@ -390,10 +390,9 @@ class TournamentHelper
          $rating = $user->Rating;
       else //if( $RatingUseMode == TPROP_RUMODE_COPY_CUSTOM || $RatingUseMode == TPROP_RUMODE_COPY_FIX )
       {
-         $tp = TournamentParticipant::load_tournament_participant( $tid, $user->ID, 0, false, false );
+         $tp = TournamentCache::load_cache_tournament_participant( 'TournamentHelper::get_tournament_rating', $tid, $user->ID );
          if( is_null($tp) )
-            error('tournament_participant_unknown',
-                  "TournamentHelper::get_tournament_rating($tid,{$user->ID},$RatingUseMode)");
+            error('tournament_participant_unknown', "TournamentHelper::get_tournament_rating($tid,{$user->ID},$RatingUseMode)");
          $rating = $tp->Rating;
       }
 

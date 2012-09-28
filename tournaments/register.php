@@ -28,6 +28,7 @@ require_once 'include/rating.php';
 require_once 'include/db/bulletin.php';
 require_once 'tournaments/include/tournament.php';
 require_once 'tournaments/include/tournament_cache.php';
+require_once 'tournaments/include/tournament_gui_helper.php';
 require_once 'tournaments/include/tournament_participant.php';
 require_once 'tournaments/include/tournament_properties.php';
 require_once 'tournaments/include/tournament_status.php';
@@ -83,7 +84,10 @@ $GLOBALS['ThePage'] = new Page('TournamentRegistration');
    $errors = $tstatus->check_edit_status( $ttype->allow_register_tourney_status, false );
 
    // existing application ? (check matching tid & uid if loaded by rid)
-   $tp = TournamentParticipant::load_tournament_participant( $tid, $my_id, $rid, true, true );
+   if( $rid > 0 )
+      $tp = TournamentParticipant::load_tournament_participant_by_id( $rid, $tid, $my_id );
+   else
+      $tp = TournamentCache::load_cache_tournament_participant( 'Tournament.register', $tid, $my_id );
    if( is_null($tp) )
       $tp = new TournamentParticipant( 0, $tid, $my_id, User::new_from_row($player_row) ); // new TP
    $rid = $tp->ID; // 0=new-registration, >0 = edit-registration
@@ -158,7 +162,7 @@ $GLOBALS['ThePage'] = new Page('TournamentRegistration');
             $tp->Status = TP_STATUS_REGISTER;
             $tp->Flags |= TP_FLAGS_ACK_INVITE;
             $ttype->joinTournament( $tourney, $tp ); // update
-            TournamentParticipant::update_tournament_registeredTP( $tid, $old_status, $tp->Status );
+            TournamentParticipant::sync_tournament_registeredTP( $tid, $old_status, $tp->Status );
          }
          ta_end();
 
@@ -174,7 +178,7 @@ $GLOBALS['ThePage'] = new Page('TournamentRegistration');
             $tp->Status = TP_STATUS_APPLY;
             $tp->Flags &= ~TP_FLAGS_ACK_APPLY;
             $tp->persist(); // update
-            TournamentParticipant::update_tournament_registeredTP( $tid, $old_status, $tp->Status );
+            TournamentParticipant::sync_tournament_registeredTP( $tid, $old_status, $tp->Status );
          }
          ta_end();
 
@@ -209,7 +213,7 @@ $GLOBALS['ThePage'] = new Page('TournamentRegistration');
       ta_begin();
       {//HOT-section to update tourney-registration
          $ttype->joinTournament( $tourney, $tp ); // insert or update (and join eventually)
-         TournamentParticipant::update_tournament_registeredTP( $tid, $old_status, $tp->Status );
+         TournamentParticipant::sync_tournament_registeredTP( $tid, $old_status, $tp->Status );
 
          if( $rid == 0 ) // new TP
             Bulletin::update_count_bulletin_new( "Tournament.register.add_tp($tid)", $tp->uid );
@@ -408,7 +412,7 @@ $GLOBALS['ThePage'] = new Page('TournamentRegistration');
    $menu_array[T_('Tournament participants')] = "tournaments/list_participants.php?tid=$tid";
    $menu_array[T_('Tournament directors')] = "tournaments/list_directors.php?tid=$tid";
 
-   $reg_user_str = TournamentParticipant::getLinkTextRegistration($tid, $old_status);
+   $reg_user_str = TournamentGuiHelper::getLinkTextRegistration($tid, $old_status);
    $menu_array[$reg_user_str] = "tournaments/register.php?tid=$tid";
 
    end_page(@$menu_array);

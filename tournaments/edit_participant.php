@@ -132,7 +132,7 @@ $GLOBALS['ThePage'] = new Page('TournamentEditParticipant');
       : TournamentCache::load_cache_tournament_properties( 'Tournament.edit_participant', $tid );
 
    // existing participation ?
-   $tp = TournamentParticipant::load_tournament_participant($tid, $uid);
+   $tp = TournamentCache::load_cache_tournament_participant( 'Tournament.edit_participant', $tid, $uid );
    if( is_null($tp) )
    {
       if( !is_null($user) )
@@ -245,7 +245,7 @@ $GLOBALS['ThePage'] = new Page('TournamentEditParticipant');
          ta_begin();
          {//HOT-section to update tournament-registration
             $ttype->joinTournament( $tourney, $tp ); // insert or update (and join eventually)
-            TournamentParticipant::update_tournament_registeredTP( $tid, $old_status, $tp->Status );
+            TournamentParticipant::sync_tournament_registeredTP( $tid, $old_status, $tp->Status );
 
             // send notification (if needed)
             if( $old_status == TP_STATUS_APPLY && $tp->Status == TP_STATUS_REGISTER ) // APPLY-ACK

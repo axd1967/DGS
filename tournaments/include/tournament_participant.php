@@ -23,9 +23,9 @@ $TranslateGroups[] = "Tournament";
 
 require_once 'include/utilities.php';
 require_once 'include/db_classes.php';
+require_once 'tournaments/include/tournament.php';
 require_once 'tournaments/include/tournament_utils.php';
 require_once 'tournaments/include/tournament_globals.php';
-require_once 'tournaments/include/tournament.php';
 
  /*!
   * \file tournament_participant.php
@@ -130,6 +130,18 @@ class TournamentParticipant
       $this->StartRound = limit( (int)$start_round, 1, 255, 1 );
    }
 
+   /*!
+    * \brief Checks if tid and uid of this TournamentParticipant-object matches given $tid and $uid.
+    * \see load_tournament_participant_by_id()
+    */
+   function assert_tournament_participant( $dbgmsg, $tid, $uid )
+   {
+      if( $this->tid != $tid )
+         error('tournament_register_edit_not_allowed', $dbgmsg.".TP.assert_tp.check.tid($tid,$uid,{$this->rid})");
+      if( $this->uid != $uid )
+         error('tournament_register_edit_not_allowed', $dbgmsg.".TP.assert_tp.check.uid($tid,$uid,{$this->rid})");
+   }
+
    function to_string()
    {
       return " ID=[{$this->ID}]"
@@ -227,6 +239,8 @@ class TournamentParticipant
       $result = $entityData->insert( "TournamentParticipant::insert(%s)" );
       if( $result )
          $this->ID = mysql_insert_id();
+      TournamentParticipant::delete_cache_tournament_participant_count( 'TournamentParticipant.insert', $this->tid );
+      TournamentParticipant::delete_cache_tournament_participant( 'TournamentParticipant.insert', $this->tid, $this->uid );
       return $result;
    }
 
@@ -236,13 +250,19 @@ class TournamentParticipant
 
       $this->checkData();
       $entityData = $this->fillEntityData();
-      return $entityData->update( "TournamentParticipant::update(%s)" );
+      $result = $entityData->update( "TournamentParticipant::update(%s)" );
+      TournamentParticipant::delete_cache_tournament_participant_count( 'TournamentParticipant.update', $this->tid );
+      TournamentParticipant::delete_cache_tournament_participant( 'TournamentParticipant.update', $this->tid, $this->uid );
+      return $result;
    }
 
    function delete()
    {
       $entityData = $this->fillEntityData();
-      return $entityData->delete( "TournamentParticipant::delete(%s)" );
+      $result = $entityData->delete( "TournamentParticipant::delete(%s)" );
+      TournamentParticipant::delete_cache_tournament_participant_count( 'TournamentParticipant.delete', $this->tid );
+      TournamentParticipant::delete_cache_tournament_participant( 'TournamentParticipant.delete', $this->tid, $this->uid );
+      return $result;
    }
 
    function checkData()
@@ -281,7 +301,7 @@ class TournamentParticipant
 
    /*!
     * \brief Returns non-null array with count of TournamentParticipants for given tournament and TP-status.
-    * \return array( TP_STATUS_... => count, '*' => summary-count )
+    * \return array( TP_STATUS_... => count, TPCOUNT_STATUS_ALL => summary-count )
     */
    function count_tournament_participants( $tid, $status=NULL )
    {
@@ -310,6 +330,7 @@ class TournamentParticipant
    {
       $qsql = $GLOBALS['ENTITY_TOURNAMENT_PARTICIPANT']->newQuerySQL('TP');
       $qsql->add_part( SQLP_FIELDS,
+         'TPP.ID AS TPP_ID',
          'TPP.Name AS TPP_Name',
          'TPP.Handle AS TPP_Handle',
          'TPP.Country AS TPP_Country',
@@ -352,56 +373,64 @@ class TournamentParticipant
    }
 
    /*!
-    * \brief Checks, if user is participant for given tournament and status
-    *        (TP_STATUS_...) within; returns status if given status is null; false if no entry found.
-    * \param $rid TournamentParticipant.ID overrules $uid (which should be 0 then)
-    * \param $status returns true if TP exists on given $status; false otherwise
+    * \brief Checks, if user is participating for given tournament.
+    * \return TournamentParticipant.Status if entry found; false otherwise
     */
-   function isTournamentParticipant( $tid, $uid, $rid=0, $status=null )
+   function isTournamentParticipant( $tid, $uid )
    {
-      $tp_query = (is_numeric($rid) && $rid > 0) ? "ID='$rid'" : "uid='$uid'";
-      $row = mysql_single_fetch( "TournamentParticipant.isTournamentParticipant($tid,$uid,$rid)",
-         sprintf( "SELECT Status FROM TournamentParticipant WHERE tid='%s' AND $tp_query LIMIT 1", $tid ) );
-      if( is_null($status) )
-         return ($row) ? @$row['Status'] : false;
-      else
-         return ( strcmp($status, @$row['Status']) == 0 );
+      $tid = (int)$tid;
+      $uid = (int)$uid;
+      $row = mysql_single_fetch( "TournamentParticipant.isTournamentParticipant($tid,$uid)",
+         "SELECT Status FROM TournamentParticipant WHERE tid=$tid AND uid=$uid LIMIT 1" );
+      return ($row) ? @$row['Status'] : false;
    }
 
    /*!
-    * \brief Loads and returns TournamentParticipant-object for given tournament-ID
-    *        and user-id and registration-id (PK); NULL if nothing found.
+    * \brief Loads and returns TournamentParticipant-object for given registration-id ($rid, which is PK).
+    * \return TournamentParticipant-object; or null if TP not found
     */
-   function load_tournament_participant( $tid, $uid, $rid=0, $check_tid=true, $check_uid=false )
+   function load_tournament_participant_by_id( $rid, $tid, $uid )
    {
+      $rid = (int)$rid;
+
+      $result = NULL;
+      if( $rid > 0 )
+      {
+         $qsql = TournamentParticipant::build_query_sql();
+         $qsql->add_part( SQLP_WHERE, "TP.ID=$rid" ); // primary-key
+         $qsql->add_part( SQLP_LIMIT, '1' );
+
+         $row = mysql_single_fetch( "TournamentParticipant.load_tournament_participant_by_id($rid)",
+            $qsql->get_select() );
+         if( $row )
+         {
+            $result = TournamentParticipant::new_from_row( $row );
+            $result->assert_tournament_participant("TournamentParticipant.load_tournament_participant_by_id($rid)", $tid, $uid);
+         }
+      }
+      return $result;
+   }
+
+   /*!
+    * \brief Loads and returns TournamentParticipant-object for given tournament-ID and user-id.
+    * \return TournamentParticipant-object; NULL if no entry found.
+    */
+   function load_tournament_participant( $tid, $uid )
+   {
+      $tid = (int)$tid;
+      $uid = (int)$uid;
+
       $result = NULL;
       if( $tid > 0 && $uid > GUESTS_ID_MAX )
       {
          $qsql = TournamentParticipant::build_query_sql();
-         if( $rid > 0 ) // primary-key
-            $qsql->add_part( SQLP_WHERE, "TP.ID='$rid'" );
-         else
-            $qsql->add_part( SQLP_WHERE,
-               "TP.tid='$tid'",
-               "TP.uid='$uid'" );
+         $qsql->add_part( SQLP_WHERE, "TP.tid=$tid", "TP.uid=$uid" );
          $qsql->add_part( SQLP_LIMIT, '1' );
 
-         $row = mysql_single_fetch( "TournamentParticipant.load_tournament_participant($tid,$uid,$rid)",
+         $row = mysql_single_fetch( "TournamentParticipant.load_tournament_participant($tid,$uid)",
             $qsql->get_select() );
-
          if( $row )
-         {
-            if( $rid > 0 ) // load by reg-id, check for matching tid and uid
-            {
-               if( $check_tid && @$row['tid'] != $tid )
-                  error('tournament_register_edit_not_allowed',
-                        "TournamentParticipant.load_tournament_participant.check.tid($tid,$uid,$rid)");
-               if( $check_uid && @$row['uid'] != $uid )
-                  error('tournament_register_edit_not_allowed',
-                        "TournamentParticipant.load_tournament_participant.check.uid($tid,$uid,$rid)");
-            }
             $result = TournamentParticipant::new_from_row( $row );
-         }
       }
       return $result;
    }
@@ -504,17 +533,15 @@ class TournamentParticipant
       $row = mysql_single_fetch( "TournamentParticipant::check_rated_tournament_participants.find_unrated($tid)",
          "SELECT TP.uid FROM TournamentParticipant AS TP INNER JOIN Players AS P ON P.ID=TP.uid " .
          "WHERE TP.tid=$tid AND P.RatingStatus='NONE' LIMIT 1" );
-      if( $row )
-         return false;
-
-      return true;
+      return ( $row ) ? false : true;
    }
 
    /*!
     * \brief Updates TournamentParticipant.Finished/Won/Lost-fields for given rid (=TP.ID).
+    * \param $uid PK is $rid, but $uid is required for deleting TP-cache
     * \param $score relative score for user: <0 = game won, >0 = game lost for given user
     */
-   function update_game_end_stats( $tid, $rid, $score )
+   function update_game_end_stats( $tid, $rid, $uid, $score )
    {
       $data = $GLOBALS['ENTITY_TOURNAMENT_PARTICIPANT']->newEntityData();
       $data->set_value( 'ID', $rid );
@@ -526,11 +553,13 @@ class TournamentParticipant
       if( $score > 0 )
          $data->set_query_value( 'Lost', "Lost+1" );
 
-      return $data->update( "TournamentParticipant::update_game_end_stats($tid,$rid,$score)" );
+      $result = $data->update( "TournamentParticipant::update_game_end_stats($tid,$rid,$score)" );
+      TournamentParticipant::delete_cache_tournament_participant( 'TournamentParticipant::update_game_end_stats', $tid, $uid );
+      return $result;
    }
 
    /*! \brief Updates Tournament.RegisteredTP if needed by comparing old/new TP-status. */
-   function update_tournament_registeredTP( $tid, $old_tp_status, $new_tp_status )
+   function sync_tournament_registeredTP( $tid, $old_tp_status, $new_tp_status )
    {
       if( $old_tp_status != TP_STATUS_REGISTER && $new_tp_status == TP_STATUS_REGISTER )
          Tournament::update_tournament_registeredTP( $tid, 1 );
@@ -540,16 +569,21 @@ class TournamentParticipant
 
    /*!
     * \brief Deletes TournamentParticipant-entry for given tournament- and reg-id.
-    * \note Updates Tournament.RegisteredTP if TP was REGISTERed.
+    * \note Updates Tournament.RegisteredTP if TP was REGISTERed. See also sync_tournament_registeredTP()
     *
     * \note IMPORTANT NOTE: caller needs to open TA with HOT-section!!
     */
    function delete_tournament_participant( $tid, $rid )
    {
-      $is_registered = TournamentParticipant::isTournamentParticipant( $tid, 0, $rid, TP_STATUS_REGISTER );
-      $tp = new TournamentParticipant( $rid, $tid );
-      $result = $tp->delete( "TournamentParticipant::delete_tournament_participant(%s,$tid)" );
-      Tournament::update_tournament_registeredTP( $tid, -1 );
+      $tp = TournamentParticipant::load_tournament_participant_by_id( $rid );
+      if( is_null($tp) )
+         $result = true; // already deleted
+      else
+      {
+         $result = $tp->delete();
+         if( $tp->Status == TP_STATUS_REGISTER )
+            Tournament::update_tournament_registeredTP( $tid, -1 );
+      }
       return $result;
    }
 
@@ -629,28 +663,22 @@ class TournamentParticipant
       return implode(', ', $out);
    }
 
-   /*! \brief Returns registration-link-text for given user; return empty string if user-registration is denied. */
-   function getLinkTextRegistration( $tid, $reg_user_status=null )
-   {
-      global $player_row;
-
-      if( is_null($reg_user_status) )
-         $reg_user_status = TournamentParticipant::isTournamentParticipant($tid, $player_row['ID']);
-      if( $reg_user_status != TP_STATUS_REGISTER )
-      {
-         if( @$player_row['AdminOptions'] & ADMOPT_DENY_TOURNEY_REGISTER )
-            return '';
-      }
-
-      return ($reg_user_status) ? T_('Edit my registration#tourney') : T_('Registration#tourney');
-   }
-
    function get_edit_tournament_status()
    {
       static $statuslist = array(
          TOURNEY_STATUS_REGISTER, TOURNEY_STATUS_PLAY
       );
       return $statuslist;
+   }
+
+   function delete_cache_tournament_participant_count( $dbgmsg, $tid )
+   {
+      DgsCache::delete( $dbgmsg, "TPCount.$tid" );
+   }
+
+   function delete_cache_tournament_participant( $dbgmsg, $tid, $uid )
+   {
+      DgsCache::delete( $dbgmsg, "TParticipant.$tid.$uid" );
    }
 
 } // end of 'TournamentParticipant'

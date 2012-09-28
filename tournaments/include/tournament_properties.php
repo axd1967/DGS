@@ -25,6 +25,7 @@ require_once 'include/classlib_user.php';
 require_once 'include/db_classes.php';
 require_once 'include/dgs_cache.php';
 require_once 'include/gui_functions.php';
+require_once 'tournaments/include/tournament_cache.php';
 require_once 'tournaments/include/tournament_globals.php';
 require_once 'tournaments/include/tournament_utils.php';
 require_once 'tournaments/include/tournament_participant.php';
@@ -217,7 +218,7 @@ class TournamentProperties
       {
          if( is_null($tourney->TP_Counts) ) //TODO check for TP.StartRound=1 !?
             $tourney->setTP_Counts(
-               TournamentParticipant::count_tournament_participants($this->tid, TP_STATUS_REGISTER) );
+               TournamentCache::count_cache_tournament_participants($this->tid, TP_STATUS_REGISTER) );
 
          if( (int)@$tourney->TP_Counts[TPCOUNT_STATUS_ALL] >= $this->MaxParticipants )
             $warnings[] = sprintf( T_('Tournament max. participant limit (%s users) is reached.'),
@@ -318,7 +319,7 @@ class TournamentProperties
    function delete_tournament_properties( $tid )
    {
       $t_props = new TournamentProperties( $tid );
-      return $t_props->delete( "TournamentProperties::delete_tournament_properties(%s)" );
+      return $t_props->delete();
    }
 
    /*! \brief Returns db-fields to be used for query of single TournamentProperties-object for given tournament-id. */

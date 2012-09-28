@@ -102,7 +102,7 @@ $GLOBALS['ThePage'] = new Page('TournamentLadderAdmin');
       {
          $tladder_user = TournamentLadder::load_tournament_ladder_by_user($tid, $uid);
 
-         $tp = TournamentParticipant::load_tournament_participant( $tid, $uid, 0 );
+         $tp = TournamentCache::load_cache_tournament_participant( 'Tournament.ladder_admin', $tid, $uid );
          if( is_null($tp) )
             $errors[] = sprintf( T_('Missing tournament user registration for user [%s].'), $user->Handle );
          else
@@ -120,7 +120,7 @@ $GLOBALS['ThePage'] = new Page('TournamentLadderAdmin');
    }
    elseif( !$is_delete && $uid <= 0 )
    {
-      $tp_arr = TournamentParticipant::count_tournament_participants( $tid, TP_STATUS_REGISTER );
+      $tp_arr = TournamentCache::count_cache_tournament_participants($tid, TP_STATUS_REGISTER); //TODO only for current-round
       $count_tp_reg = (int)@$tp_arr[TP_STATUS_REGISTER];
       $count_tl_user = TournamentLadder::count_tournament_ladder( $tid );
    }

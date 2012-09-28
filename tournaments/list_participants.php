@@ -30,6 +30,7 @@ require_once 'include/rating.php';
 require_once 'include/classlib_profile.php';
 require_once 'include/classlib_userconfig.php';
 require_once 'tournaments/include/tournament_cache.php';
+require_once 'tournaments/include/tournament_gui_helper.php';
 require_once 'tournaments/include/tournament_helper.php';
 require_once 'tournaments/include/tournament_participant.php';
 
@@ -219,7 +220,7 @@ $GLOBALS['ThePage'] = new Page('TournamentParticipantList');
 
    $menu_array = array();
    $menu_array[T_('Tournament info')] = "tournaments/view_tournament.php?tid=$tid";
-   $reg_user_str = TournamentParticipant::getLinkTextRegistration($tid);
+   $reg_user_str = TournamentGuiHelper::getLinkTextRegistration($tid);
    if( $reg_user_str )
       $menu_array[$reg_user_str] = "tournaments/register.php?tid=$tid";
    if( $allow_edit_tourney )

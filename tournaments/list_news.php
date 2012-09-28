@@ -52,7 +52,7 @@ $GLOBALS['ThePage'] = new Page('TournamentNewsList');
    $allow_edit_tourney = TournamentHelper::allow_edit_tournaments($tourney, $my_id);
    $is_participant = ($allow_edit_tourney)
       ? true
-      : TournamentParticipant::isTournamentParticipant( $tid, $my_id );
+      : TournamentCache::is_cache_tournament_participant( 'Tournament.list_news', $tid, $my_id );
 
    $page = "list_news.php?";
 

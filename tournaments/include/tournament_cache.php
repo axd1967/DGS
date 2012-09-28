@@ -27,6 +27,7 @@ require_once 'tournaments/include/tournament_director.php';
 require_once 'tournaments/include/tournament_globals.php';
 require_once 'tournaments/include/tournament_ladder_props.php';
 require_once 'tournaments/include/tournament_news.php';
+require_once 'tournaments/include/tournament_participant.php';
 require_once 'tournaments/include/tournament_properties.php';
 require_once 'tournaments/include/tournament_round.php';
 require_once 'tournaments/include/tournament_rules.php';
@@ -312,6 +313,63 @@ class TournamentCache
 
       return $arr_tnews;
    }//load_cache_tournament_news
+
+   /*!
+    * \brief Returns non-null array with count of TournamentParticipants for given tournament and TP-status.
+    * \note if caching is activated, all stati are returned even if $status != null
+    */
+   function count_cache_tournament_participants( $tid, $status=null )
+   {
+      $tid = (int)$tid;
+      $dbgmsg = "TCache::count_cache_tp($tid,$status)";
+      $key = "TPCount.$tid";
+
+      $arr_counts = DgsCache::fetch($dbgmsg, $key);
+      if( is_null($arr_counts) )
+      {
+         $arr_counts = TournamentParticipant::count_tournament_participants($tid);
+         DgsCache::store( $dbgmsg, $key, $arr_counts, SECS_PER_HOUR );
+      }
+
+      return $arr_counts;
+   }//count_cache_tournament_participants
+
+   /*! \brief Loads and caches TournamentParticipant for given tournament-id and user-id. */
+   function load_cache_tournament_participant( $dbgmsg, $tid, $uid )
+   {
+      $tid = (int)$tid;
+      $uid = (int)$uid;
+      $dbgmsg .= ".TCache::load_cache_tp($tid,$uid)";
+      $key = "TParticipant.$tid.$uid";
+
+      $tp = DgsCache::fetch($dbgmsg, $key);
+      if( is_null($tp) )
+      {
+         $tp = TournamentParticipant::load_tournament_participant( $tid, $uid );
+         if( !is_null(@$tp->User->urow) )
+            $tp->User->urow = null; // all fields read
+         if( $uid > 0 )
+            DgsCache::store( $dbgmsg, $key, (is_null($tp) ? false : $tp), SECS_PER_HOUR );
+      }
+      elseif( $tp === false )
+         $tp = null;
+
+      return $tp;
+   }//load_cache_tournament_participant
+
+   function is_cache_tournament_participant( $dbgmsg, $tid, $uid )
+   {
+      if( DgsCache::is_shared_enabled() )
+      {
+         $dbgmsg .= ".TCache::is_cache_tp";
+         $tp = TournamentCache::load_cache_tournament_participant( $dbgmsg, $tid, $uid );
+         $result = (is_null($tp)) ? false : $tp->Status;
+      }
+      else
+         $result = TournamentParticipants::isTournamentParticipant( $tid, $uid );
+
+      return $result;
+   }//is_cache_tournament_participant
 
 } // end of 'TournamentCache'
 ?>

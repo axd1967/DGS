@@ -65,12 +65,12 @@ $GLOBALS['ThePage'] = new Page('Tournament');
    $show_tresult = TournamentResult::show_tournament_result( $tourney->Status );
 
    // TP-count
-   $tp_counts = TournamentParticipant::count_tournament_participants( $tid );
+   $tp_counts = TournamentCache::count_cache_tournament_participants($tid);
    $tourney->setTP_Counts($tp_counts);
    $tp_count_all = (int)@$tp_counts[TPCOUNT_STATUS_ALL];
    unset($tp_counts[TPCOUNT_STATUS_ALL]);
 
-   $my_tp = TournamentParticipant::load_tournament_participant($tid, $my_id);
+   $my_tp = TournamentCache::load_cache_tournament_participant( 'Tournament.view_tournament', $tid, $my_id );
    $reg_user_status = ( $my_tp ) ? $my_tp->Status : false;
    $reg_user_info   = TournamentParticipant::getStatusUserInfo($reg_user_status);
 
@@ -258,7 +258,7 @@ $GLOBALS['ThePage'] = new Page('Tournament');
    $sectmenu = array();
    $sectmenu[T_('Tournament participants')] = "tournaments/list_participants.php?tid=$tid";
 
-   $reg_user_str = TournamentParticipant::getLinkTextRegistration($tid, $reg_user_status);
+   $reg_user_str = TournamentGuiHelper::getLinkTextRegistration($tid, $reg_user_status);
    if( $reg_user_str )
       $sectmenu[$reg_user_str] = "tournaments/register.php?tid=$tid"; # for user
 
