@@ -20,12 +20,13 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
  /* Author: Jens-Uwe Gaspar */
 
 require_once 'include/connect2mysql.php';
-require_once 'include/cache_clock.php';
 require_once 'include/dgs_cache.php';
+require_once 'include/std_classes.php';
 require_once 'tournaments/include/tournament.php';
 require_once 'tournaments/include/tournament_director.php';
 require_once 'tournaments/include/tournament_globals.php';
 require_once 'tournaments/include/tournament_ladder_props.php';
+require_once 'tournaments/include/tournament_news.php';
 require_once 'tournaments/include/tournament_properties.php';
 require_once 'tournaments/include/tournament_round.php';
 require_once 'tournaments/include/tournament_rules.php';
@@ -50,8 +51,6 @@ class TournamentCache
    /*! \brief array( tid => Tournament-object ); fallback if shared-mem-cache disabled. */
    var $cache_tournament;
 
-   var $cache_clock;
-
    /*! \brief locked Tournament-object (mostly used for cron-locking). */
    var $lock_tourney;
 
@@ -59,13 +58,7 @@ class TournamentCache
    function TournamentCache()
    {
       $this->cache_tournament = array();
-      $this->cache_clock = ClockCache::get_clock_cache();
       $this->lock_tourney = null;
-   }
-
-   function load_clock_ticks( $dbgmsg, $clock_id )
-   {
-      return $this->cache_clock->load_clock_ticks( $dbgmsg, $clock_id, /*use-cache*/true );
    }
 
    function is_tournament_locked()
@@ -294,6 +287,31 @@ class TournamentCache
 
       return $tround;
    }//load_cache_tournament_round
+
+   /*! \brief Loads and caches TournamentNews for view_tournament.php-page for given combination of tournament-id/is-admin/is-TP. */
+   function load_cache_tournament_news( $dbgmsg, $tid, $is_admin, $is_tp )
+   {
+      $tid = (int)$tid;
+      $dbgmsg .= ".TCache::load_cache_tnews($tid,$is_admin,$is_tp)";
+      $key = sprintf( "TNews.%s.%s.%s", $tid, ($is_admin ? 1 : 0), ($is_tp ? 1 : 0) );
+
+      $arr_tnews = DgsCache::fetch($dbgmsg, $key);
+      if( is_null($arr_tnews) )
+      {
+         $news_qsql = TournamentNews::build_view_query_sql( /*tid*/0, /*tn*/0, TNEWS_STATUS_SHOW, $is_admin, $is_tp );
+         $news_qsql->add_part( SQLP_ORDER, 'TN.Published DESC' );
+         $news_iterator = new ListIterator( 'Tournament.view_tournament.news.SHOW', $news_qsql );
+         $news_iterator = TournamentNews::load_tournament_news( $news_iterator, $tid );
+
+         $arr_tnews = array();
+         while( list(,$arr_item) = $news_iterator->getListIterator() )
+            $arr_tnews[] = $arr_item[0];
+
+         DgsCache::store( $dbgmsg, $key, $arr_tnews, SECS_PER_HOUR, "TNews.$tid" );
+      }
+
+      return $arr_tnews;
+   }//load_cache_tournament_news
 
 } // end of 'TournamentCache'
 ?>
