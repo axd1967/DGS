@@ -431,7 +431,7 @@ class TournamentLadderProps
     * \param $iterator ListIterator on ordered TournamentLadder with iterator-Index on uid
     * \param $tgame_iterator ListIterator on TournamentGames
     */
-   function fill_ladder_running_games( &$tcache, &$iterator, $tgame_iterator, $my_id )
+   function fill_ladder_running_games( &$iterator, $tgame_iterator, $my_id )
    {
       while( list(,$arr_item) = $tgame_iterator->getListIterator() )
       {
@@ -450,7 +450,7 @@ class TournamentLadderProps
             if( !is_null($ch_tladder) )
             {
                if( $tgame->Status == TG_STATUS_WAIT )
-                  $df_tladder->RematchWait = $this->calc_rematch_wait_remaining_hours( $tcache, $tgame );
+                  $df_tladder->RematchWait = $this->calc_rematch_wait_remaining_hours( $tgame );
                else
                   $df_tladder->add_running_game( $tgame );
             }
@@ -605,19 +605,19 @@ class TournamentLadderProps
    }//calc_game_end_action
 
    /*! \brief Returns TicksDue for rematch-wait, anchored on half-hourly-clock. */
-   function calc_ticks_due_rematch_wait( &$tcache )
+   function calc_ticks_due_rematch_wait()
    {
-      $clock_ticks = $tcache->load_clock_ticks(
-         "TournamentLadderProps.calc_ticks_due_rematch_wait({$this->tid})", CLOCK_TOURNEY_GAME_WAIT );
+      $clock_ticks = get_clock_ticks( "TournamentLadderProps.calc_ticks_due_rematch_wait({$this->tid})",
+         CLOCK_TOURNEY_GAME_WAIT );
+
       $ticks_due = $clock_ticks + 2 * $this->ChallengeRematchWaitHours; // half-hour-ticks to wait
       return $ticks_due;
    }
 
    /*! \brief Returns remaining hours to wait for rematch. */
-   function calc_rematch_wait_remaining_hours( &$tcache, $tgame )
+   function calc_rematch_wait_remaining_hours( $tgame )
    {
-      $wait_ticks = $tcache->load_clock_ticks(
-         "TournamentLadderProps.calc_rematch_wait_remaining_hours({$this->tid},{$tgame->ID})",
+      $wait_ticks = get_clock_ticks( "TournamentLadderProps.calc_rematch_wait_remaining_hours({$this->tid},{$tgame->ID})",
          CLOCK_TOURNEY_GAME_WAIT);
 
       $remaining_hours = floor(($tgame->TicksDue - $wait_ticks + 1) / 2);

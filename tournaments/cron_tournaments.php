@@ -21,6 +21,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 chdir('..');
 require_once 'include/globals.php';
 require_once 'include/std_functions.php';
+require_once 'include/time_functions.php';
 require_once 'tournaments/include/tournament.php';
 require_once 'tournaments/include/tournament_cache.php';
 require_once 'tournaments/include/tournament_games.php';
@@ -86,7 +87,7 @@ if( ALLOW_TOURNAMENTS && !$is_down )
 
    // ---------- finish waiting, due tournament-games
 
-   $wait_ticks = (int)$thelper->tcache->load_clock_ticks( 'cron_tournament.game_wait', CLOCK_TOURNEY_GAME_WAIT );
+   $wait_ticks = get_clock_ticks( 'cron_tournament.game_wait', CLOCK_TOURNEY_GAME_WAIT );
    TournamentGames::update_tournament_game_wait( 'cron_tournament', $wait_ticks );
 
 

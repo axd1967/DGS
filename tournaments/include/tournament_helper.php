@@ -111,7 +111,7 @@ class TournamentHelper
             if( $tl_props->ChallengeRematchWaitHours > 0 )
             {
                $tgame->setStatus(TG_STATUS_WAIT);
-               $tgame->TicksDue = $tl_props->calc_ticks_due_rematch_wait( $this->tcache );
+               $tgame->TicksDue = $tl_props->calc_ticks_due_rematch_wait();
             }
             else
                $tgame->setStatus(TG_STATUS_DONE);

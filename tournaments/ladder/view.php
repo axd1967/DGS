@@ -171,7 +171,7 @@ $GLOBALS['ThePage'] = new Page('TournamentLadderView');
          // add ladder-info (challenge-range)
          $thelper = new TournamentHelper();
          $tl_user = $tl_props->fill_ladder_challenge_range( $iterator, $my_id );
-         $tl_props->fill_ladder_running_games( $thelper->tcache, $iterator, $tg_iterator, $my_id );
+         $tl_props->fill_ladder_running_games( $iterator, $tg_iterator, $my_id );
       }
    }//allow-view
 
