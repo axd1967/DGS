@@ -74,12 +74,8 @@ $GLOBALS['ThePage'] = new Page('Tournament');
    $reg_user_status = ( $my_tp ) ? $my_tp->Status : false;
    $reg_user_info   = TournamentParticipant::getStatusUserInfo($reg_user_status);
 
-   $news_qsql = TournamentNews::build_view_query_sql(
-      /*tid*/0, /*tn*/0, TNEWS_STATUS_SHOW, $allow_edit_tourney, $reg_user_status );
-   $news_qsql->add_part( SQLP_ORDER, 'TN.Published DESC' );
-   $news_iterator = new ListIterator( 'Tournament.view_tournament.news.SHOW', $news_qsql );
-   $news_iterator = TournamentNews::load_tournament_news( $news_iterator, $tid );
-
+   $arr_tnews = TournamentCache::load_cache_tournament_news( 'Tournament.view_tournament.news',
+      $tid, $allow_edit_tourney, $reg_user_status );
    $tprops = TournamentCache::load_cache_tournament_properties( 'Tournament.view_tournament', $tid );
    $trule = TournamentCache::load_cache_tournament_rules( 'Tournament.view_tournament', $tid );
 
@@ -181,13 +177,10 @@ $GLOBALS['ThePage'] = new Page('Tournament');
 
    section( 'TournamentNews', T_('Tournament News#T_view'), 'news' );
 
-   if( $news_iterator->getItemCount() )
+   if( count($arr_tnews) > 0 )
    {
-      while( list(,$arr_item) = $news_iterator->getListIterator() )
-      {
-         list( $tnews, $orow ) = $arr_item;
+      foreach( $arr_tnews as $tnews )
          echo TournamentNews::build_tournament_news( $tnews );
-      }
    }
    else
       echo "<center>", T_('No tournament news.'), "</center><br>\n";

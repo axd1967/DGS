@@ -132,6 +132,7 @@ class TournamentNews
       $result = $entityData->insert( "TournamentNews::insert(%s)" );
       if( $result )
          $this->ID = mysql_insert_id();
+      TournamentNews::delete_cache_tournament_news( 'TournamentNews.insert', $this->tid );
       return $result;
    }
 
@@ -141,13 +142,17 @@ class TournamentNews
 
       $this->checkData();
       $entityData = $this->fillEntityData();
-      return $entityData->update( "TournamentNews::update(%s)" );
+      $result = $entityData->update( "TournamentNews::update(%s)" );
+      TournamentNews::delete_cache_tournament_news( 'TournamentNews.update', $this->tid );
+      return $result;
    }
 
    function delete()
    {
       $entityData = $this->fillEntityData();
-      return $entityData->delete( "TournamentNews::delete(%s)" );
+      $result = $entityData->delete( "TournamentNews::delete(%s)" );
+      TournamentNews::delete_cache_tournament_news( 'TournamentNews.delete', $this->tid );
+      return $result;
    }
 
    function checkData()
@@ -275,10 +280,25 @@ class TournamentNews
       if( !is_numeric($days_age) )
          error('invalid_args', "TournamentNews::process_tournament_news_deleted($days_age)");
 
-      db_query( "TournamentNews.process_tournament_news_deleted($days_age)",
-         "DELETE FROM TournamentNews WHERE Status='".TNEWS_STATUS_DELETE."' AND " .
-            "Lastchanged < FROM_UNIXTIME($NOW) - INTERVAL $days_age DAY" );
-   }
+      $query = "FROM TournamentNews WHERE Status='".TNEWS_STATUS_DELETE."' AND " .
+            "Lastchanged < FROM_UNIXTIME($NOW) - INTERVAL $days_age DAY";
+
+      ta_begin();
+      {//HOT-section to delete old tournament-news
+         // find tournament-id to clear cache for
+         $arr_tids = array();
+         $result = db_query( "TournamentNews.process_tournament_news_deleted.find_tourney($days_age)",
+            "SELECT tid $query" );
+         while( $row = mysql_fetch_array($result) )
+            $arr_tids[] = $row['tid'];
+         mysql_free_result($result);
+
+         db_query( "TournamentNews.process_tournament_news_deleted($days_age)", "DELETE $query" );
+         foreach( $arr_tids as $tid )
+            TournamentNews::delete_cache_tournament_news( 'TournamentNews::process_tournament_news_deleted', $tid );
+      }
+      ta_end();
+   }//process_tournament_news_deleted
 
    /*! \brief Returns status-text or all status-texts (if arg=null). */
    function getStatusText( $status=null )
@@ -351,6 +371,11 @@ class TournamentNews
             "<div class=\"Published\">$publish_text</div>\n" .
             "<div class=\"Text\">$text</div>" .
          "</div>\n";
+   }
+
+   function delete_cache_tournament_news( $dbgmsg, $tid )
+   {
+      DgsCache::delete_group( $dbgmsg, "TNews.$tid" );
    }
 
 } // end of 'TournamentNews'
