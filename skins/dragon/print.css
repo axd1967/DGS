@@ -355,6 +355,10 @@ img.MinWidth {
 }
 
 
+.NoPrint {
+   display: none;
+}
+
 
 /* ************************* */
 /* main page skeleton */

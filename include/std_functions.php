@@ -362,7 +362,7 @@ function start_html( $title, $no_cache, $skinname=NULL, $style_string=NULL, $las
    $skin_screen = ( file_exists("{$main_path}skins/$skinname/screen.css") ) ? $skinname : 'dragon';
    echo "\n <link rel=\"stylesheet\" type=\"text/css\" media=\"screen\" href=\"{$base_path}skins/$skin_screen/screen.css?t=".CSS_VERSION."\">";
    $skin_print = ( file_exists("{$main_path}skins/$skinname/print.css") ) ? $skinname : 'dragon';
-   echo "\n <link rel=\"stylesheet\" type=\"text/css\" media=\"print\" href=\"{$base_path}skins/$skin_print/print.css\">";
+   echo "\n <link rel=\"stylesheet\" type=\"text/css\" media=\"print\" href=\"{$base_path}skins/$skin_print/print.css?t=".CSS_VERSION."\">";
 
    $enable_js_game = false;
    switch( (string)substr( @$_SERVER['PHP_SELF'], strlen(SUB_PATH)) )
@@ -708,6 +708,7 @@ function end_page( $menu_array=NULL, $links_per_line=0 )
 
    if( !$printable )
    {
+      echo "<span class=NoPrint>";
       if( isset($player_row['VaultCnt']) && isset($player_row['X_VaultTime']) )
       {
          echo '<br>', span('PageQuota',
@@ -716,6 +717,7 @@ function end_page( $menu_array=NULL, $links_per_line=0 )
 
       echo '<br>', span('PageLapse',
             T_('Page created in') . sprintf(' %0.2f ms', (getmicrotime() - $page_microtime)*1000));
+      echo "</span>";
    }
 
    echo "</td>";
@@ -741,7 +743,7 @@ function end_page( $menu_array=NULL, $links_per_line=0 )
            "\n</table>";
 
       // Start of a new host line
-      echo "\n<table class=HostedBy>",
+      echo "\n<table class=\"HostedBy NoPrint\">",
            "\n <tr>";
    }
 

@@ -423,8 +423,9 @@ $GLOBALS['ThePage'] = new Page('Game');
 
             $extra_infos[T_('Score') . ": " . score2text($score, true)] = 'Score';
 
-            $strtmp = sprintf( T_("Please mark dead stones and click %s'done'%s when finished."),
-                  "<a href=\"$done_url\">", '</a>');
+            $strtmp = span('NoPrint',
+               sprintf( T_("Please mark dead stones and click %s'done'%s when finished."),
+                  "<a href=\"$done_url\">", '</a>'));
             $extra_infos[$strtmp] = 'Info';
             $coord = ''; // already processed/stored in $stonestring
             break;
@@ -655,7 +656,7 @@ $GLOBALS['ThePage'] = new Page('Game');
    if( FRIENDLY_SHORT_NAME != 'DGS' ) // show other scoring on test-server as well
    {
       if( $Status == GAME_STATUS_SCORE || $Status == GAME_STATUS_SCORE2 || $Status == GAME_STATUS_FINISHED )
-         echo "<br>\nOther scoring:<br>\n";
+         echo span('NoPrint', "<br>\nOther scoring:<br>\n");
       GameScore::draw_score_box( $game_score, ($score_mode == GSMODE_AREA_SCORING ? GSMODE_TERRITORY_SCORING : GSMODE_AREA_SCORING) );
    }
    echo "</td><td>";
@@ -737,7 +738,8 @@ $GLOBALS['ThePage'] = new Page('Game');
 
    echo SMALL_SPACING,
       anchor( 'http://eidogo.com/#url:'.HOSTBASE."sgf.php?gid=$gid",
-         image( 'images/eidogo.gif', T_('EidoGo Game Player'), null, 'class=InTextImage' ));
+         image( 'images/eidogo.gif', T_('EidoGo Game Player'), null, 'class=InTextImage' ),
+         '', 'class=NoPrint' );
 
    // observers may view the comments in the sgf files, so not restricted to own games
    if( $Status != GAME_STATUS_KOMI )
@@ -745,7 +747,8 @@ $GLOBALS['ThePage'] = new Page('Game');
       echo SMALL_SPACING,
          anchor( "game_comments.php?gid=$gid", T_('Comments'), '',
                  array( 'accesskey' => ACCKEYP_GAME_COMMENT,
-                        'target' => FRIENDLY_SHORT_NAME.'_game_comments', ));
+                        'target' => FRIENDLY_SHORT_NAME.'_game_comments',
+                        'class' => 'NoPrint' ));
    }
    if( $Status == GAME_STATUS_FINISHED && ($GameFlags & GAMEFLAGS_HIDDEN_MSG) )
       echo MED_SPACING . echo_image_gamecomment( $gid );
@@ -1000,8 +1003,8 @@ function draw_moves( $gid, $move, $handicap )
       echo " onchange=\"javascript:this.form['movechange'].click();\"";
    }
    echo ">\n$str</SELECT>";
-   echo '<INPUT type="HIDDEN" name="gid" value="' . $gid . "\">";
-   echo '<INPUT type="submit" name="movechange" value="' . T_('View move') . "\">";
+   echo '<INPUT type="HIDDEN" name="gid" value="' . $gid . "\" class=NoPrint>";
+   echo '<INPUT type="submit" name="movechange" value="' . T_('View move') . "\" class=NoPrint>";
 } //draw_moves
 
 function draw_game_viewer()
@@ -1284,7 +1287,7 @@ function draw_game_info( $game_row, $game_setup, $board, $tourney )
    {
       $txt= draw_board_info($board);
       if( $txt )
-         echo "<tr id=\"boardInfos\" class=BoardInfos><td colspan=$cols\n>$txt</td></tr>\n";
+         echo "<tr id=\"boardInfos\" class=\"BoardInfos NoPrint\"><td colspan=$cols\n>$txt</td></tr>\n";
    }
 
    echo "</table>\n";
@@ -1341,7 +1344,7 @@ function draw_board_info($board)
       }
    }
    if( $txt )
-      $txt= "<dl class=BoardInfos>$txt</dl>\n";
+      $txt= "<dl class=\"BoardInfos\">$txt</dl>\n";
    return $txt;
 } //draw_board_info
 
@@ -1365,7 +1368,7 @@ function draw_notes( $collapsed='N', $notes='', $height=0, $width=0)
    {
       //echo textarea_safe( $notes) . "\n";
       echo '<INPUT type="HIDDEN" name="hidenotes" value="N">'
-         , "  <input name=\"togglenotes\" type=\"submit\" value=\"", T_('Show notes'), "\">";
+         , "  <input name=\"togglenotes\" type=\"submit\" value=\"", T_('Show notes'), "\" class=NoPrint>";
       return;
    }
 
@@ -1378,7 +1381,7 @@ function draw_notes( $collapsed='N', $notes='', $height=0, $width=0)
       , "   <textarea name=\"gamenotes\" id=\"gameNotes\" cols=\"$width\" rows=\"$height\">",
             textarea_safe( $notes), "</textarea>\n"
       , "  </td></tr>\n"
-      , "  <tr><td><input name=\"savenotes\" type=\"submit\" value=\"", T_('Save notes'), "\">";
+      , "  <tr><td class=NoPrint><input name=\"savenotes\" type=\"submit\" value=\"", T_('Save notes'), "\">";
 
    if( $collapsed == 'N' )
    {
