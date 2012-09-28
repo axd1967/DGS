@@ -177,7 +177,7 @@ class DgsCache
 
       $result = $cache->cache_store( $id, $data, $ttl );
       if( $group_id )
-         $cache->cache_store_group( $group_id, $id, $ttl );
+         $cache->cache_store_group( "GROUP_$group_id", $id, $ttl );
 
       if( DBG_CACHE ) error_log("DgsCache.store([$group_id]$id).$dbgmsg = [" . ($result ? 1 : 0) . "]");
       return $result;
@@ -200,7 +200,7 @@ class DgsCache
       if( !$cache )
          return null;
 
-      $arr_group = $cache->cache_delete_group( $group_id );
+      $arr_group = $cache->cache_delete_group( "GROUP_$group_id" );
       if( DBG_CACHE ) error_log("DgsCache.delete_group($group_id).$dbgmsg: group [" . (is_null($arr_group) ? '-' : implode(' ', $arr_group)) . "]");
       return $arr_group;
    }
