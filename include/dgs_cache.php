@@ -20,6 +20,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
  /* Author: Jens-Uwe Gaspar */
 
 require_once 'include/globals.php';
+require_once 'include/utilities.php';
 
  /*!
   * \file dgs_cache.php
@@ -28,7 +29,7 @@ require_once 'include/globals.php';
   */
 
 if( !defined('DGS_CACHE') )
-   define('DGS_CACHE', ''); // ''=no-cache, cache-class-name (e.g. ApcCache)
+   define('DGS_CACHE', ''); // ''=no-cache, use const CACHE_TYPE_...
 if( !defined('DBG_CACHE') )
    define('DBG_CACHE', 0);
 
@@ -36,6 +37,9 @@ if( !defined('DBG_CACHE') )
 /*! \brief basic cache interface with basic cache-operations. */
 abstract class AbstractCache
 {
+   /*! \brief Returns true if cache-implementation is storing persistent data (so other requests can see same data). */
+   abstract public function is_persistent_cache();
+
    /*! \brief Returns stored cache-entry for given cache-key; or else null. */
    abstract public function cache_fetch( $id );
 
@@ -89,9 +93,15 @@ abstract class AbstractCache
 } // end of 'AbstractCache'
 
 
+
 /*! \brief Cache-implementation with (shared-memory) APC-based cache. */
 class ApcCache extends AbstractCache
 {
+   public function is_persistent_cache()
+   {
+      return true;
+   }
+
    public function cache_fetch( $id )
    {
       $result = apc_fetch($id, $success);
@@ -113,6 +123,100 @@ class ApcCache extends AbstractCache
       return apc_delete($id);
    }
 } // end of 'ApcCache'
+
+
+
+/*!
+ * \brief Cache-implementation for file-based cache.
+ * \note adapted source Sabre_Cache_Filesystem taken from http://www.rooftopsolutions.nl/blog/107
+ *       to match DGS-environment and needs.
+ */
+class FileCache extends AbstractCache
+{
+   var $base_filepath;
+
+   function FileCache()
+   {
+      if( (string)DATASTORE_FOLDER == '' )
+         error('internal_error', "FileCache.construct.miss.datastore");
+
+      $path = build_path_dir( $_SERVER['DOCUMENT_ROOT'], DATASTORE_FOLDER ) . 'filecache';
+      if( !is_dir($path) )
+      {
+         if( !mkdir($path, 0777, /*recursive*/true) )
+            error('internal_error', "FileCahce.construct.miss.datastore_dir(filecache)");
+      }
+      $this->base_filepath = $path;
+   }
+
+   private function build_cache_filename( $id ) {
+      return $this->base_filepath . '/' . $id;
+   }
+
+   public function is_persistent_cache()
+   {
+      return true;
+   }
+
+   public function cache_fetch( $id )
+   {
+      $filename = $this->build_cache_filename( $id );
+      if( !file_exists($filename) )
+         return null;
+
+      $file_handle = fopen($filename, 'r'); // open read-only
+      if( !$file_handle )
+         return null;
+
+      flock($file_handle, LOCK_SH); // get shared lock
+      $raw_data = @file_get_contents($filename);
+      fclose($file_handle);
+
+      $result = null;
+      if( $raw_data )
+      {
+         $file_data = @unserialize($raw_data);
+         if( $file_data )
+         {
+            list( $expire, $data ) = $file_data;
+            if( $GLOBALS['NOW'] <= $expire )
+               $result = $data;
+         }
+      }
+
+      if( is_null($result) )
+         @unlink($filename); // delete file if loading or unserialize failed, or file expired
+
+      return $result;
+   }//cache_fetch
+
+   public function cache_store( $id, $data, $ttl )
+   {
+      $filename = $this->build_cache_filename( $id );
+
+      $file_handle = fopen($filename, 'a+'); // open read-write (append) to get lock of potentially existing file
+      if( !$file_handle )
+         return false;
+
+      flock($file_handle, LOCK_EX); // get exclusive lock
+      fseek($file_handle, 0);
+      ftruncate($file_handle, 0);
+
+      $raw_data = serialize( array( $GLOBALS['NOW'] + $ttl, $data ) ); // store: array( expire-time, $data )
+      $result = fwrite($file_handle, $raw_data);
+      fclose($file_handle);
+
+      return $result;
+   }//cache_store
+
+   public function cache_delete( $id )
+   {
+      $filename = $this->build_cache_filename( $id );
+      return ( file_exists($filename) ) ? unlink($filename) : false;
+   }
+
+} // end of 'FileCache'
+
 
 
 
@@ -143,12 +247,14 @@ class DgsCache
       }
       $this->groups_enabled = ( count($arr) > 0 ) ? $arr : false;
 
-      // NOTE: "$class=DGS_CACHE; $class::cache_func(..)" needs PHP >= 5.3 (but live-server is still PHP 5.1)
+      // NOTE: wanted "$class=DGS_CACHE; $class::cache_func(..)" but needs PHP >= 5.3 (and live-server is still PHP 5.1)
       if( DGS_CACHE === CACHE_TYPE_APC )
          $this->cache_impl = new ApcCache();
+      elseif( DGS_CACHE === CACHE_TYPE_FILE )
+         $this->cache_impl = new FileCache();
       else
          $this->cache_impl = null;
-   }
+   }//constructor
 
    public function allow_group_caching( $cache_group )
    {
@@ -166,10 +272,7 @@ class DgsCache
    function is_persistent( $cache_group )
    {
       $cache = DgsCache::get_cache( $cache_group );
-      if( is_null($cache) )
-         return false;
-      else
-         return ( DGS_CACHE == 'ApcCache' );
+      return ( is_null($cache) ) ? false : $cache->is_persistent_cache();
    }
 
    /*!

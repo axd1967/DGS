@@ -25,6 +25,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 // cache-implementations
 define('CACHE_TYPE_APC', 'ApcCache');
+define('CACHE_TYPE_FILE', 'FileCache');
 
 // cache content
 define('CACHE_GRP_CFG_PAGES', 1);
