@@ -504,29 +504,6 @@ class TournamentParticipant
       return $arr_TPs;
    }//load_registered_users_ordered
 
-   /*!
-    * \brief Returns tournament-rating from TournamentParticipant-table for given users: arr( uid => t-rating, ).
-    * \see also TournamentHelper.get_tournament_rating()
-    */
-   function load_tournament_rating( $tid, $arr_uid, $tp_status=TP_STATUS_REGISTER )
-   {
-      $out = array();
-      if( count($arr_uid) > 0 )
-      {
-         $result = db_query( "TournamentParticipant.load_tournament_rating($tid)",
-            "SELECT uid, Rating FROM TournamentParticipant " .
-            "WHERE tid=$tid AND Status='" . mysql_addslashes($tp_status) . "' " .
-               "AND uid IN (" . implode(',', $arr_uid) . ")" );
-
-         $arr = array();
-         while( $row = mysql_fetch_array( $result ) )
-            $out[$row['uid']] = $row['Rating'];
-         mysql_free_result($result);
-      }
-
-      return $out;
-   }
-
    /*! \brief Returns false, if there is at least one TP, that does not have a user-rating. */
    function check_rated_tournament_participants( $tid )
    {

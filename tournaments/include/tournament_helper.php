@@ -383,11 +383,12 @@ class TournamentHelper
     * \brief Returns rating for user from Players/TournamentParticipant-table according to rating-use-mode.
     * \param $user User-object
     * \param $RatingUseMode TournamentProperties.RatingUseMode
+    * \param $strict_tp_rating true = return null if rating taken from $user
     */
-   function get_tournament_rating( $tid, $user, $RatingUseMode )
+   function get_tournament_rating( $tid, $user, $RatingUseMode, $strict_tp_rating=false )
    {
       if( $RatingUseMode == TPROP_RUMODE_CURR_FIX )
-         $rating = $user->Rating;
+         $rating = ($strict_tp_rating) ? null : $user->Rating;
       else //if( $RatingUseMode == TPROP_RUMODE_COPY_CUSTOM || $RatingUseMode == TPROP_RUMODE_COPY_FIX )
       {
          $tp = TournamentCache::load_cache_tournament_participant( 'TournamentHelper::get_tournament_rating', $tid, $user->ID );

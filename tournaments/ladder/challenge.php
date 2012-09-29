@@ -96,7 +96,6 @@ $GLOBALS['ThePage'] = new Page('TournamentLadderChallenge');
 
    // check if challenge is valid
    $trules = $tprops = null;
-   $need_trating = false;
    if( !is_null($tladder_ch) && !is_null($tladder_df) )
    {
       $tl_props = TournamentCache::load_cache_tournament_ladder_props( 'Tournament.ladder.challenge', $tid );
@@ -105,13 +104,14 @@ $GLOBALS['ThePage'] = new Page('TournamentLadderChallenge');
       $trules->TourneyType = $tourney->Type;
 
       $tprops = TournamentCache::load_cache_tournament_properties( 'Tournament.ladder.challenge', $tid );
-      $need_trating = ( $tprops->RatingUseMode != TPROP_RUMODE_CURR_FIX );
-      if( $need_trating )
-      {
-         $arr_uid = TournamentParticipant::load_tournament_rating( $tid, array( $user_ch->ID, $user_df->ID ));
-         $user_ch->urow['TP_Rating'] = @$arr_uid[$user_ch->ID];
-         $user_df->urow['TP_Rating'] = @$arr_uid[$user_df->ID];
-      }
+
+      // prep TP_Rating for add_form_user_info()
+      $tp_rating_ch = TournamentHelper::get_tournament_rating( $tid, $user_ch, $tprops->RatingUseMode, /*strict*/true );
+      $tp_rating_df = TournamentHelper::get_tournament_rating( $tid, $user_df, $tprops->RatingUseMode, /*strict*/true );
+      if( !is_null($tp_rating_ch) )
+         $user_ch->urow['TP_Rating'] = $tp_rating_ch;
+      if( !is_null($tp_rating_df) )
+         $user_df->urow['TP_Rating'] = $tp_rating_df;
 
       $rating_pos = 0;
       if( $tl_props->ChallengeRangeRating != TLADDER_CHRNG_RATING_UNUSED )
