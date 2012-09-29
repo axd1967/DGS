@@ -125,7 +125,7 @@ function load_cache_games_stats( $num )
    $dbgmsg = 'statistics.load_cache_games_stats.'.$num;
    $key = "Statistics.games.$num";
 
-   $result = DgsCache::fetch($dbgmsg, $key);
+   $result = DgsCache::fetch( $dbgmsg, CACHE_GRP_STATS_GAMES, $key );
    if( is_null($result) )
    {
       if( $num == 1 )
@@ -145,7 +145,7 @@ function load_cache_games_stats( $num )
             "SELECT SUM(Hits) AS hits, COUNT(*) AS count, SUM(Activity)/$ActivityForHit AS activity FROM Players" );
       }
 
-      DgsCache::store( $dbgmsg, $key, $result, SECS_PER_DAY );
+      DgsCache::store( $dbgmsg, CACHE_GRP_STATS_GAMES, $key, $result, SECS_PER_DAY, 'Statistics.games' );
    }
 
    return $result;

@@ -154,8 +154,7 @@ if num_rows==2 {compute differences and checks}
    db_query( 'daily_cron.statistics_insert',
       "INSERT INTO Statistics SET $query" );
 
-   DgsCache::delete( 'daily_cron.statistics', 'Statistics.games.1' );
-   DgsCache::delete( 'daily_cron.statistics', 'Statistics.games.2' );
+   DgsCache::delete_group( 'daily_cron.statistics', CACHE_GRP_STATS_GAMES, 'Statistics.games' );
 
 
 
