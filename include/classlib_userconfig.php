@@ -298,12 +298,12 @@ class ConfigBoard
       {
          $dbgmsg = "ConfigBoard::load_config_board($uid)";
          $key = "ConfigBoard.$uid";
-         $src_row = DgsCache::fetch($dbgmsg, $key);
+         $src_row = DgsCache::fetch( $dbgmsg, CACHE_GRP_CFG_BOARD, $key );
          if( is_null($src_row) )
          {
             $src_row = mysql_single_fetch($dbgmsg.'find', "SELECT * FROM ConfigBoard WHERE User_ID='$uid' LIMIT 1");
             if( !is_null($src_row) )
-               DgsCache::store( $dbgmsg, $key, $src_row, SECS_PER_HOUR );
+               DgsCache::store( $dbgmsg, CACHE_GRP_CFG_BOARD, $key, $src_row, SECS_PER_HOUR );
          }
          if( !$src_row )
             return null;
@@ -332,7 +332,7 @@ class ConfigBoard
 
    function delete_cache_config_board( $uid )
    {
-      DgsCache::delete("ConfigBoard::delete_cache_config_board($uid)", "ConfigBoard.$uid");
+      DgsCache::delete( "ConfigBoard::delete_cache_config_board($uid)", CACHE_GRP_CFG_BOARD, "ConfigBoard.$uid" );
    }
 
    /*! \brief (static) Inserts default ConfigBoard. */
@@ -554,7 +554,7 @@ class ConfigPages
       $cfg_size = ($col_name) ? ConfigTableColumns::get_config_size($col_name, $dbgmsg) : 0;
 
       // need special handling to load only specific field or caching all fields
-      if( DgsCache::is_persistent() )
+      if( DgsCache::is_persistent(CACHE_GRP_CFG_PAGES) )
          $row = ConfigPages::load_cache_config_pages( $uid );
       else
       {
@@ -587,19 +587,19 @@ class ConfigPages
    {
       $dbgmsg = "ConfigPages::load_cache_config_pages($uid)";
       $key = "ConfigPages.$uid";
-      $row = DgsCache::fetch($dbgmsg, $key);
+      $row = DgsCache::fetch( $dbgmsg, CACHE_GRP_CFG_PAGES, $key );
       if( is_null($row) )
       {
          $row = mysql_single_fetch($dbgmsg.'.find', "SELECT * FROM ConfigPages WHERE User_ID='$uid' LIMIT 1" );
          if( !is_null($row) )
-            DgsCache::store( $dbgmsg, $key, $row, SECS_PER_HOUR );
+            DgsCache::store( $dbgmsg, CACHE_GRP_CFG_PAGES, $key, $row, SECS_PER_HOUR );
       }
       return $row;
    }//load_cache_config_pages
 
    function delete_cache_config_pages( $uid )
    {
-      DgsCache::delete("ConfigPages::delete_cache_config_pages($uid)", "ConfigPages.$uid");
+      DgsCache::delete( "ConfigPages::delete_cache_config_pages($uid)", CACHE_GRP_CFG_PAGES, "ConfigPages.$uid" );
    }
 
    /*!
@@ -766,7 +766,7 @@ class ConfigTableColumns
       $cfg_size = ConfigTableColumns::get_config_size($col_name, "load_config($uid)");
 
       // need special handling to load only specific field or caching all fields
-      if( DgsCache::is_persistent() )
+      if( DgsCache::is_persistent(CACHE_GRP_CFG_PAGES) )
          $row = ConfigPages::load_cache_config_pages( $uid );
       else
       {

@@ -858,7 +858,7 @@ class TournamentRules
 
    function delete_cache_tournament_rules( $dbgmsg, $tid )
    {
-      DgsCache::delete( $dbgmsg, "TRules.$tid" );
+      DgsCache::delete( $dbgmsg, CACHE_GRP_TRULES, "TRules.$tid" );
    }
 
 } // end of 'TournamentRules'

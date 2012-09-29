@@ -790,7 +790,7 @@ class TournamentLadderProps
 
    function delete_cache_tournament_ladder_props( $dbgmsg, $tid )
    {
-      DgsCache::delete( $dbgmsg, "TLadderProps.$tid" );
+      DgsCache::delete( $dbgmsg, CACHE_GRP_TLPROPS, "TLadderProps.$tid" );
    }
 
 } // end of 'TournamentLadderProps'

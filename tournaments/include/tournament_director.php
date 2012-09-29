@@ -348,7 +348,7 @@ class TournamentDirector
 
    function delete_cache_tournament_director( $dbgmsg, $tid )
    {
-      DgsCache::delete( $dbgmsg, "TDirector.$tid" );
+      DgsCache::delete( $dbgmsg, CACHE_GRP_TDIRECTOR, "TDirector.$tid" );
    }
 
 } // end of 'TournamentDirector'

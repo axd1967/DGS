@@ -369,7 +369,7 @@ class TournamentRound
 
    function delete_cache_tournament_round( $dbgmsg, $tid, $round )
    {
-      DgsCache::delete( $dbgmsg, "TRound.$tid.$round" );
+      DgsCache::delete( $dbgmsg, CACHE_GRP_TROUND, "TRound.$tid.$round" );
    }
 
 } // end of 'TournamentRound'

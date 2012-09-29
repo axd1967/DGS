@@ -122,11 +122,11 @@ class TournamentCache
       $dbgmsg .= ".TCache::load_cache_tournament($tid,$check_exist)";
       $key = "Tournament.$tid";
 
-      $use_dgs_cache = DgsCache::is_persistent();
+      $use_dgs_cache = DgsCache::is_persistent( CACHE_GRP_TOURNAMENT );
 
       $tourney = $tcache = null;
       if( $use_dgs_cache )
-         $tourney = DgsCache::fetch($dbgmsg, $key);
+         $tourney = DgsCache::fetch( $dbgmsg, CACHE_GRP_TOURNAMENT, $key );
       else
       {
          $tcache = TournamentCache::get_instance();
@@ -143,7 +143,7 @@ class TournamentCache
          if( !is_null($tourney) ) // only cache if existing
          {
             if( $use_dgs_cache )
-               DgsCache::store( $dbgmsg, $key, $tourney, SECS_PER_HOUR );
+               DgsCache::store( $dbgmsg, CACHE_GRP_TOURNAMENT, $key, $tourney, SECS_PER_HOUR );
             else
                $tcache->cache_tournament[$tid] = $tourney;
          }
@@ -154,7 +154,7 @@ class TournamentCache
 
    function delete_cache_tournament( $tid )
    {
-      DgsCache::delete( "TCache.delete_cache_tournament($tid)", "Tournament.$tid" );
+      DgsCache::delete( "TCache.delete_cache_tournament($tid)", CACHE_GRP_TOURNAMENT, "Tournament.$tid" );
 
       // delete run-cache
       $tcache = TournamentCache::get_instance();
@@ -174,11 +174,11 @@ class TournamentCache
       $dbgmsg .= ".TCache::is_cache_tournament_director($tid,$uid,$flags)";
       $key = "TDirector.$tid";
 
-      $arr_tdir = DgsCache::fetch($dbgmsg, $key);
+      $arr_tdir = DgsCache::fetch( $dbgmsg, CACHE_GRP_TDIRECTOR, $key );
       if( is_null($arr_tdir) )
       {
          $arr_tdir = TournamentDirector::load_tournament_directors_flags( $tid );
-         DgsCache::store( $dbgmsg, $key, $arr_tdir, SECS_PER_HOUR );
+         DgsCache::store( $dbgmsg, CACHE_GRP_TDIRECTOR, $key, $arr_tdir, SECS_PER_HOUR );
       }
 
       $td_result = null;
@@ -202,7 +202,7 @@ class TournamentCache
       $dbgmsg .= ".TCache::load_cache_tlp($tid,$check_exist)";
       $key = "TLadderProps.$tid";
 
-      $tl_props = DgsCache::fetch($dbgmsg, $key);
+      $tl_props = DgsCache::fetch( $dbgmsg, CACHE_GRP_TLPROPS, $key );
       if( is_null($tl_props) )
       {
          $tl_props = TournamentLadderProps::load_tournament_ladder_props($tid);
@@ -210,7 +210,7 @@ class TournamentCache
             error('bad_tournament', $dbgmsg);
 
          if( !is_null($tl_props) ) // only cache if existing
-            DgsCache::store( $dbgmsg, $key, $tl_props, SECS_PER_HOUR );
+            DgsCache::store( $dbgmsg, CACHE_GRP_TLPROPS, $key, $tl_props, SECS_PER_HOUR );
       }
 
       return $tl_props;
@@ -226,7 +226,7 @@ class TournamentCache
       $dbgmsg .= ".TCache::load_cache_tprops($tid,$check_exist)";
       $key = "TProps.$tid";
 
-      $tprops = DgsCache::fetch($dbgmsg, $key);
+      $tprops = DgsCache::fetch( $dbgmsg, CACHE_GRP_TPROPS, $key );
       if( is_null($tprops) )
       {
          $tprops = TournamentProperties::load_tournament_properties($tid);
@@ -234,7 +234,7 @@ class TournamentCache
             error('bad_tournament', $dbgmsg);
 
          if( !is_null($tprops) ) // only cache if existing
-            DgsCache::store( $dbgmsg, $key, $tprops, SECS_PER_HOUR );
+            DgsCache::store( $dbgmsg, CACHE_GRP_TPROPS, $key, $tprops, SECS_PER_HOUR );
       }
 
       return $tprops;
@@ -250,7 +250,7 @@ class TournamentCache
       $dbgmsg .= ".TCache::load_cache_trules($tid,$check_exist)";
       $key = "TRules.$tid";
 
-      $trule = DgsCache::fetch($dbgmsg, $key);
+      $trule = DgsCache::fetch( $dbgmsg, CACHE_GRP_TRULES, $key );
       if( is_null($trule) )
       {
          $trule = TournamentRules::load_tournament_rule($tid);
@@ -258,7 +258,7 @@ class TournamentCache
             error('bad_tournament', $dbgmsg);
 
          if( !is_null($trule) ) // only cache if existing
-            DgsCache::store( $dbgmsg, $key, $trule, SECS_PER_HOUR );
+            DgsCache::store( $dbgmsg, CACHE_GRP_TRULES, $key, $trule, SECS_PER_HOUR );
       }
 
       return $trule;
@@ -275,7 +275,7 @@ class TournamentCache
       $dbgmsg .= ".TCache::load_cache_tround($tid,$round,$check_exist)";
       $key = "TRound.$tid.$round";
 
-      $tround = DgsCache::fetch($dbgmsg, $key);
+      $tround = DgsCache::fetch( $dbgmsg, CACHE_GRP_TROUND, $key );
       if( is_null($tround) )
       {
          $tround = TournamentRound::load_tournament_round($tid, $round);
@@ -283,7 +283,7 @@ class TournamentCache
             error('bad_tournament', $dbgmsg);
 
          if( !is_null($tround) ) // only cache if existing
-            DgsCache::store( $dbgmsg, $key, $tround, SECS_PER_HOUR );
+            DgsCache::store( $dbgmsg, CACHE_GRP_TROUND, $key, $tround, SECS_PER_HOUR );
       }
 
       return $tround;
@@ -296,7 +296,7 @@ class TournamentCache
       $dbgmsg .= ".TCache::load_cache_tnews($tid,$is_admin,$is_tp)";
       $key = sprintf( "TNews.%s.%s.%s", $tid, ($is_admin ? 1 : 0), ($is_tp ? 1 : 0) );
 
-      $arr_tnews = DgsCache::fetch($dbgmsg, $key);
+      $arr_tnews = DgsCache::fetch( $dbgmsg, CACHE_GRP_TNEWS, $key );
       if( is_null($arr_tnews) )
       {
          $news_qsql = TournamentNews::build_view_query_sql( /*tid*/0, /*tn*/0, TNEWS_STATUS_SHOW, $is_admin, $is_tp );
@@ -308,7 +308,7 @@ class TournamentCache
          while( list(,$arr_item) = $news_iterator->getListIterator() )
             $arr_tnews[] = $arr_item[0];
 
-         DgsCache::store( $dbgmsg, $key, $arr_tnews, SECS_PER_HOUR, "TNews.$tid" );
+         DgsCache::store( $dbgmsg, CACHE_GRP_TNEWS, $key, $arr_tnews, SECS_PER_HOUR, "TNews.$tid" );
       }
 
       return $arr_tnews;
@@ -324,11 +324,11 @@ class TournamentCache
       $dbgmsg = "TCache::count_cache_tp($tid,$status)";
       $key = "TPCount.$tid";
 
-      $arr_counts = DgsCache::fetch($dbgmsg, $key);
+      $arr_counts = DgsCache::fetch( $dbgmsg, CACHE_GRP_TP_COUNT, $key );
       if( is_null($arr_counts) )
       {
          $arr_counts = TournamentParticipant::count_tournament_participants($tid);
-         DgsCache::store( $dbgmsg, $key, $arr_counts, SECS_PER_HOUR );
+         DgsCache::store( $dbgmsg, CACHE_GRP_TP_COUNT, $key, $arr_counts, SECS_PER_HOUR );
       }
 
       return $arr_counts;
@@ -342,14 +342,14 @@ class TournamentCache
       $dbgmsg .= ".TCache::load_cache_tp($tid,$uid)";
       $key = "TParticipant.$tid.$uid";
 
-      $tp = DgsCache::fetch($dbgmsg, $key);
+      $tp = DgsCache::fetch( $dbgmsg, CACHE_GRP_TPARTICIPANT, $key );
       if( is_null($tp) )
       {
          $tp = TournamentParticipant::load_tournament_participant( $tid, $uid );
          if( !is_null(@$tp->User->urow) )
             $tp->User->urow = null; // all fields read
          if( $uid > 0 )
-            DgsCache::store( $dbgmsg, $key, (is_null($tp) ? false : $tp), SECS_PER_HOUR );
+            DgsCache::store( $dbgmsg, CACHE_GRP_TPARTICIPANT, $key, (is_null($tp) ? false : $tp), SECS_PER_HOUR );
       }
       elseif( $tp === false )
          $tp = null;
@@ -359,7 +359,7 @@ class TournamentCache
 
    function is_cache_tournament_participant( $dbgmsg, $tid, $uid )
    {
-      if( DgsCache::is_persistent() )
+      if( DgsCache::is_persistent(CACHE_GRP_TPARTICIPANT) )
       {
          $dbgmsg .= ".TCache::is_cache_tp";
          $tp = TournamentCache::load_cache_tournament_participant( $dbgmsg, $tid, $uid );

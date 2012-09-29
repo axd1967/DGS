@@ -162,7 +162,7 @@ require_once( "include/message_functions.php" );
       if( $folder_query )
       {
          db_query( "edit_folders.main($my_id)", $folder_query ); // table Folders
-         DgsCache::delete( "edit_folders.main($my_id)", "Folders.$my_id" );
+         DgsCache::delete( "edit_folders.main($my_id)", CACHE_GRP_FOLDERS, "Folders.$my_id" );
          if( !$sysmsg )
             $sysmsg = T_('Folders adjusted!');
       }

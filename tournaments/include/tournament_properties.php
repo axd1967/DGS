@@ -409,7 +409,7 @@ class TournamentProperties
 
    function delete_cache_tournament_properties( $dbgmsg, $tid )
    {
-      DgsCache::delete( $dbgmsg, "TProps.$tid" );
+      DgsCache::delete( $dbgmsg, CACHE_GRP_TPROPS, "TProps.$tid" );
    }
 
 } // end of 'TournamentProperties'

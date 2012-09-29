@@ -1329,7 +1329,7 @@ function load_cache_folders( $uid, $folder_nr=null )
    $dbgmsg = "load_cache_folders.get_folders($uid,$folder_nr)";
    $key = "Folders.$uid";
 
-   $use_cache = DgsCache::is_persistent();
+   $use_cache = DgsCache::is_persistent( CACHE_GRP_FOLDERS );
    $load_single_folder = ( !is_null($folder_nr) && is_numeric($folder_nr) );
    $query_all_folders = "SELECT $fields FROM Folders WHERE uid=$uid ORDER BY Folder_nr";
    $query = false;
@@ -1337,7 +1337,7 @@ function load_cache_folders( $uid, $folder_nr=null )
    // need special handling to load only specific folder or caching all
    if( $use_cache )
    {
-      $result = DgsCache::fetch($dbgmsg, $key);
+      $result = DgsCache::fetch( $dbgmsg, CACHE_GRP_FOLDERS, $key );
       if( is_null($result) )
          $query = $query_all_folders;
    }
@@ -1356,7 +1356,7 @@ function load_cache_folders( $uid, $folder_nr=null )
       mysql_free_result($db_result);
 
       if( $use_cache )
-         DgsCache::store( $dbgmsg, $key, $result, 30*SECS_PER_MIN );
+         DgsCache::store( $dbgmsg, CACHE_GRP_FOLDERS, $key, $result, 30*SECS_PER_MIN );
    }
 
    // extract single folder from all folders

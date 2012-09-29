@@ -650,12 +650,12 @@ class TournamentParticipant
 
    function delete_cache_tournament_participant_count( $dbgmsg, $tid )
    {
-      DgsCache::delete( $dbgmsg, "TPCount.$tid" );
+      DgsCache::delete( $dbgmsg, CACHE_GRP_TP_COUNT, "TPCount.$tid" );
    }
 
    function delete_cache_tournament_participant( $dbgmsg, $tid, $uid )
    {
-      DgsCache::delete( $dbgmsg, "TParticipant.$tid.$uid" );
+      DgsCache::delete( $dbgmsg, CACHE_GRP_TPARTICIPANT, "TParticipant.$tid.$uid" );
    }
 
 } // end of 'TournamentParticipant'

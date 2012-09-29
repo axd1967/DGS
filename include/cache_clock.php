@@ -57,7 +57,7 @@ class ClockCache
       if( !$use_cache || !isset($this->cache_clock_ticks[$clock_id]) )
       {
          // need special handling to load all or only one clock-entry (if cache disabled)
-         if( DgsCache::is_persistent() )
+         if( DgsCache::is_persistent(CACHE_GRP_CLOCKS) )
          {
             $arr_clocks = ClockCache::load_cache_clocks( !$use_cache );
             if( is_null($arr_clocks) || !isset($arr_clocks[$clock_id]) )
@@ -93,7 +93,7 @@ class ClockCache
    {
       $dbgmsg = "ClockCache::load_cache_clocks()";
       $key = "Clocks";
-      $result = DgsCache::fetch($dbgmsg, $key);
+      $result = DgsCache::fetch( $dbgmsg, CACHE_GRP_CLOCKS, $key );
       if( $reload || is_null($result) )
       {
          $result = array();
@@ -102,14 +102,14 @@ class ClockCache
             $result[$row['ID']] = (int)$row['Ticks'];
          mysql_free_result($db_result);
 
-         DgsCache::store( $dbgmsg, $key, $result, 10*SECS_PER_MIN );
+         DgsCache::store( $dbgmsg, CACHE_GRP_CLOCKS, $key, $result, 10*SECS_PER_MIN );
       }
       return $result;
    }
 
    function delete_cache_clocks()
    {
-      DgsCache::delete("ClockCache::delete_cache_clocks()", "Clocks");
+      DgsCache::delete( "ClockCache::delete_cache_clocks()", CACHE_GRP_CLOCKS, "Clocks" );
    }
 
 } // end of 'ClockCache'

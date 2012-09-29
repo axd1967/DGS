@@ -375,7 +375,7 @@ class TournamentNews
 
    function delete_cache_tournament_news( $dbgmsg, $tid )
    {
-      DgsCache::delete_group( $dbgmsg, "TNews.$tid" );
+      DgsCache::delete_group( $dbgmsg, CACHE_GRP_TNEWS, "TNews.$tid" );
    }
 
 } // end of 'TournamentNews'

@@ -707,7 +707,7 @@ class Tournament
 
    function delete_cache_tournament( $dbgmsg, $tid )
    {
-      DgsCache::delete( $dbgmsg, "Tournament.$tid" );
+      DgsCache::delete( $dbgmsg, CACHE_GRP_TOURNAMENT, "Tournament.$tid" );
    }
 
 } // end of 'Tournament'

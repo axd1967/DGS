@@ -1145,7 +1145,8 @@ class GameHelper
          "DELETE FROM Games WHERE ID=$gid LIMIT 1" );
 
       // clear big-cache-entries to free cache-space
-      DgsCache::delete_group( "GameHelper::_delete_base_game_tables.observers($gid)", "Observers.$gid" );
+      DgsCache::delete_group( "GameHelper::_delete_base_game_tables.observers($gid)",
+         CACHE_GRP_GAME_OBSERVERS, "Observers.$gid" );
       Board::delete_cache_game_moves( "GameHelper::_delete_base_game_tables.moves($gid)", $gid );
       Board::delete_cache_game_move_messages( "GameHelper::_delete_base_game_tables.movemsg($gid)", $gid );
    }//_delete_base_game_tables
@@ -1347,12 +1348,12 @@ class GameHelper
       $dbgmsg = "GameHelper::load_game_notes($gid,$uid).$dbgmsg";
       $key = "GameNotes.$gid.$uid";
 
-      $row = DgsCache::fetch($dbgmsg, $key);
+      $row = DgsCache::fetch( $dbgmsg, CACHE_GRP_GAME_NOTES, $key );
       if( is_null($row) )
       {
          $row = mysql_single_fetch( $dbgmsg,
             "SELECT Hidden, Notes FROM GamesNotes WHERE gid=$gid AND uid=$uid LIMIT 1" );
-         DgsCache::store( $dbgmsg, $key, $row, 10*SECS_PER_MIN );
+         DgsCache::store( $dbgmsg, CACHE_GRP_GAME_NOTES, $key, $row, 10*SECS_PER_MIN );
       }
 
       return $row;
@@ -1371,7 +1372,8 @@ class GameHelper
             "REPLACE INTO GamesNotes (gid,uid,Hidden,Notes) " .
             "VALUES ($gid,$uid,'$hidden','" . mysql_addslashes($notes) . "')" );
 
-         DgsCache::store( $dbgmsg, "GameNotes.$gid.$uid", array( 'Hidden' => $hidden, 'Notes' => $notes ), 10*SECS_PER_MIN );
+         DgsCache::store( $dbgmsg, CACHE_GRP_GAME_NOTES, "GameNotes.$gid.$uid",
+            array( 'Hidden' => $hidden, 'Notes' => $notes ), 10*SECS_PER_MIN );
       }
       ta_end();
    }

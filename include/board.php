@@ -264,7 +264,9 @@ class Board
       $dbgmsg = "board.load_cache_game_moves($gid,$fetch_cache,$store_cache).$dbgmsg";
       $key = "Game.moves.$gid";
 
-      $arr_moves = ( $fetch_cache && DgsCache::is_persistent() ) ? DgsCache::fetch($dbgmsg, $key) : null;
+      $arr_moves = ( $fetch_cache && DgsCache::is_persistent(CACHE_GRP_GAME_MOVES) )
+         ? DgsCache::fetch( $dbgmsg, CACHE_GRP_GAME_MOVES, $key )
+         : null;
       if( is_null($arr_moves) )
       {
          $db_result = db_query( $dbgmsg,
@@ -283,7 +285,7 @@ class Board
          if( $store_cache )
          {
             $ttl = ( is_numeric($cache_ttl) && $cache_ttl > 0 ) ? $cache_ttl : 10*SECS_PER_MIN;
-            DgsCache::store( $dbgmsg, $key, $arr_moves, $ttl );
+            DgsCache::store( $dbgmsg, CACHE_GRP_GAME_MOVES, $key, $arr_moves, $ttl );
          }
       }
 
@@ -293,7 +295,7 @@ class Board
    // static
    function delete_cache_game_moves( $dbgmsg, $gid )
    {
-      DgsCache::delete( $dbgmsg, "Game.moves.$gid" );
+      DgsCache::delete( $dbgmsg, CACHE_GRP_GAME_MOVES, "Game.moves.$gid" );
    }
 
    // static
@@ -305,9 +307,9 @@ class Board
       $key = "Game.movemsg.$gid";
 
       $query = false;
-      if( $fetch_cache && DgsCache::is_persistent() )
+      if( $fetch_cache && DgsCache::is_persistent(CACHE_GRP_GAME_MOVEMSG) )
       {
-         $result = DgsCache::fetch($dbgmsg, $key);
+         $result = DgsCache::fetch( $dbgmsg, CACHE_GRP_GAME_MOVEMSG, $key );
          if( is_null($result) )
             $query = "SELECT MoveNr, Text FROM MoveMessages WHERE gid=$gid";
       }
@@ -332,7 +334,7 @@ class Board
          if( $store_cache )
          {
             $ttl = ( is_numeric($cache_ttl) && $cache_ttl > 0 ) ? $cache_ttl : 10*SECS_PER_MIN;
-            DgsCache::store( $dbgmsg, $key, $result, $ttl );
+            DgsCache::store( $dbgmsg, CACHE_GRP_GAME_MOVEMSG, $key, $result, $ttl );
          }
       }
 
@@ -345,7 +347,7 @@ class Board
    // static
    function delete_cache_game_move_messages( $dbgmsg, $gid )
    {
-      DgsCache::delete( $dbgmsg, "Game.movemsg.$gid" );
+      DgsCache::delete( $dbgmsg, CACHE_GRP_GAME_MOVEMSG, "Game.movemsg.$gid" );
    }
 
    // fills $array with positions where the stones are (incl. handling of shape-game)

@@ -296,7 +296,7 @@ class Profile
       $dbgmsg = "Profile::load_profiles($user_id,$load_templates,T[$sql_types])";
       $key = "Profile.$user_id.$sql_types";
 
-      $arr_profiles = ( $use_cache ) ? DgsCache::fetch($dbgmsg, $key) : null;
+      $arr_profiles = ( $use_cache ) ? DgsCache::fetch( $dbgmsg, CACHE_GRP_PROFILE, $key ) : null;
       if( is_null($arr_profiles) )
       {
          $fields = implode(',', Profile::get_query_fields());
@@ -311,7 +311,7 @@ class Profile
          mysql_free_result($db_result);
 
          if( $use_cache )
-            DgsCache::store( $dbgmsg, $key, $arr_profiles, SECS_PER_HOUR );
+            DgsCache::store( $dbgmsg, CACHE_GRP_PROFILE, $key, $arr_profiles, SECS_PER_HOUR );
       }
 
       return $arr_profiles;
@@ -319,7 +319,7 @@ class Profile
 
    function delete_profile_cache( $dbgmsg, $uid, $type )
    {
-      DgsCache::delete( $dbgmsg, "Profile.$uid.$type" );
+      DgsCache::delete( $dbgmsg, CACHE_GRP_PROFILE, "Profile.$uid.$type" );
    }
 
    /*! \brief Deletes all profiles for specific user-id and type from database. */

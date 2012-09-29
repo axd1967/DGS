@@ -3266,11 +3266,11 @@ function load_cache_user_reference( $dbgmsg, $by_id, $player_ref )
    $dbgmsg = "load_user_reference($qfield,$player_ref).$dbgmsg";
    $key = 'user_ref.' . strtolower($qfield) . '.' . $player_ref;
 
-   $row = DgsCache::fetch($dbgmsg, $key);
+   $row = DgsCache::fetch( $dbgmsg, CACHE_GRP_USER_REF, $key );
    if( is_null($row) )
    {
       $row = mysql_single_fetch( $dbgmsg, "SELECT Name, Handle FROM Players WHERE $qfield = $qvalue LIMIT 1" );
-      DgsCache::store( $dbgmsg, $key, $row, SECS_PER_DAY );
+      DgsCache::store( $dbgmsg, CACHE_GRP_USER_REF, $key, $row, SECS_PER_DAY );
    }
    return $row;
 }
@@ -3278,10 +3278,10 @@ function load_cache_user_reference( $dbgmsg, $by_id, $player_ref )
 // clear cache for load_cache_user_reference() on potential Name/Handle-update
 function delete_cache_user_reference( $dbgmsg, $uid, $uhandle, $uhandle_new=null )
 {
-   DgsCache::delete( $dbgmsg, "user_ref.id.$uid" );
-   DgsCache::delete( $dbgmsg, "user_ref.handle." . strtolower($uhandle) );
+   DgsCache::delete( $dbgmsg, CACHE_GRP_USER_REF, "user_ref.id.$uid" );
+   DgsCache::delete( $dbgmsg, CACHE_GRP_USER_REF, "user_ref.handle." . strtolower($uhandle) );
    if( !is_null($uhandle_new) && strcasecmp($uhandle, $uhandle_new) != 0 )
-      DgsCache::delete( $dbgmsg, "user_ref.handle." . strtolower($uhandle_new) );
+      DgsCache::delete( $dbgmsg, CACHE_GRP_USER_REF, "user_ref.handle." . strtolower($uhandle_new) );
 }
 
 /*!
@@ -3298,14 +3298,14 @@ function check_for_observers( $gid, $uid, $check_user )
    $dbgmsg = "check_for_observers($gid,$uid)";
    $key = "Observers.$gid.$uid";
 
-   $result = DgsCache::fetch($dbgmsg, $key);
+   $result = DgsCache::fetch( $dbgmsg, CACHE_GRP_GAME_OBSERVERS, $key );
    if( is_null($result) )
    {
       $is_on_observe_list = ( is_null($check_user) ) ? is_on_observe_list( $gid, $uid ) : (bool)$check_user;
       $has_observers = ( $is_on_observe_list ) ? false : has_observers( $gid );
 
       $result = array( $has_observers, $is_on_observe_list );
-      DgsCache::store( $dbgmsg, $key, $result, 10*SECS_PER_MIN, "Observers.$gid" );
+      DgsCache::store( $dbgmsg, CACHE_GRP_GAME_OBSERVERS, $key, $result, 10*SECS_PER_MIN, "Observers.$gid" );
    }
 
    return $result;
@@ -3349,7 +3349,7 @@ function toggle_observe_list( $gid, $uid, $toggle_yes )
             db_query( $dbgmsg.'.insert', "INSERT INTO Observers SET gid=$gid, uid=$uid");
          $my_observe = !$my_observe;
 
-         DgsCache::delete_group( $dbgmsg, "Observers.$gid" );
+         DgsCache::delete_group( $dbgmsg, CACHE_GRP_GAME_OBSERVERS, "Observers.$gid" );
       }
       ta_end();
    }
@@ -3388,7 +3388,7 @@ function delete_all_observers( $gid, $notify, $Text='' )
    }
 
    db_query( $dbgmsg.'.del_obs', "DELETE FROM Observers WHERE gid=$gid" );
-   DgsCache::delete_group( $dbgmsg, "Observers.$gid" );
+   DgsCache::delete_group( $dbgmsg, CACHE_GRP_GAME_OBSERVERS, "Observers.$gid" );
 } //delete_all_observers
 
 

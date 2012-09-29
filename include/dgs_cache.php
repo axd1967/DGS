@@ -128,49 +128,90 @@ class ApcCache extends AbstractCache
   */
 class DgsCache
 {
+   var $groups_enabled; // false = enable all CACHE_GRP_..-groups; otherwise arr( CACHE_GRP_.. => 1, ... )
    var $cache_impl;
 
    private function DgsCache()
    {
+      global $DGS_CACHE_ENABLE_GROUPS;
+
+      $arr = array();
+      if( is_array($DGS_CACHE_ENABLE_GROUPS) )
+      {
+         foreach( $DGS_CACHE_ENABLE_GROUPS as $group )
+            $arr[$group] = 1;
+      }
+      $this->groups_enabled = ( count($arr) > 0 ) ? $arr : false;
+
       // NOTE: "$class=DGS_CACHE; $class::cache_func(..)" needs PHP >= 5.3 (but live-server is still PHP 5.1)
-      if( DGS_CACHE === 'ApcCache' )
+      if( DGS_CACHE === CACHE_TYPE_APC )
          $this->cache_impl = new ApcCache();
       else
          $this->cache_impl = null;
    }
 
-   // ------------ static functions ----------------------------
-
-   /*! \brief Returns true, if caching is persistent (meaning different request see same cache-content). */
-   function is_persistent()
+   public function allow_group_caching( $cache_group )
    {
-      return ( DGS_CACHE == 'ApcCache' );
+      return ( is_array($this->groups_enabled) ) ? @$this->groups_enabled[(int)$cache_group] : true;
    }
 
-   function get_cache()
+
+   // ------------ static functions ----------------------------
+
+   /*!
+    * \brief Returns true, if caching is persistent (meaning different request see same cache-content) and
+    *        allowed for given cache-group.
+    * \param $cache_group CACHE_GRP_...
+    */
+   function is_persistent( $cache_group )
+   {
+      $cache = DgsCache::get_cache( $cache_group );
+      if( is_null($cache) )
+         return false;
+      else
+         return ( DGS_CACHE == 'ApcCache' );
+   }
+
+   /*!
+    * \brief Returns cache-implementation if caching enabled and caching for $cache_group is allowed.
+    * \param $cache_group CACHE_GRP_...
+    */
+   function get_cache( $cache_group )
    {
       global $DGS_CACHE;
       if( !@$DGS_CACHE )
          $DGS_CACHE = new DgsCache();
 
-      return $DGS_CACHE->cache_impl;
-   }
+      if( $DGS_CACHE->allow_group_caching($cache_group) )
+         return $DGS_CACHE->cache_impl;
+      else
+         return null;
+   }//get_cache
 
 
-   function fetch( $dbgmsg, $id )
+   /*!
+    * \brief Fetches cache-entry for cache-group with cache-key $id.
+    * \param $cache_group CACHE_GRP_...
+    */
+   function fetch( $dbgmsg, $cache_group, $id )
    {
-      $cache = DgsCache::get_cache();
+      $cache = DgsCache::get_cache( $cache_group );
       if( !$cache )
          return null;
 
       $result = $cache->cache_fetch( $id );
-      if( DBG_CACHE ) error_log("DgsCache.fetch($id).$dbgmsg = [" . DgsCache::debug_result($result) . "]");
+      if( DBG_CACHE ) error_log("DgsCache.fetch($cache_group,$id).$dbgmsg = [" . DgsCache::debug_result($result) . "]");
       return $result;
    }
 
-   function store( $dbgmsg, $id, $data, $ttl, $group_id='' )
+   /*!
+    * \brief Stores cache-entry for cache-group with cache-key $id and given $data and $ttl (TimeToLive in secs).
+    * \param $cache_group CACHE_GRP_...
+    * \param $group_id optional group-name to collect specific cache-keys for collective delete with DgsCache::delete_group()
+    */
+   function store( $dbgmsg, $cache_group, $id, $data, $ttl, $group_id='' )
    {
-      $cache = DgsCache::get_cache();
+      $cache = DgsCache::get_cache( $cache_group );
       if( !$cache )
          return false;
 
@@ -178,29 +219,38 @@ class DgsCache
       if( $group_id )
          $cache->cache_store_group( "GROUP_$group_id", $id, $ttl );
 
-      if( DBG_CACHE ) error_log("DgsCache.store([$group_id]$id).$dbgmsg = [" . ($result ? 1 : 0) . "]");
+      if( DBG_CACHE ) error_log("DgsCache.store($cache_group,$id,$ttl,[$group_id]).$dbgmsg = [" . ($result ? 1 : 0) . "]");
       return $result;
    }
 
-   function delete( $dbgmsg, $id )
+   /*!
+    * \brief Deletes cache-entry for cache-group with cache-key $id.
+    * \param $cache_group CACHE_GRP_...
+    */
+   function delete( $dbgmsg, $cache_group, $id )
    {
-      $cache = DgsCache::get_cache();
+      $cache = DgsCache::get_cache( $cache_group );
       if( !$cache )
          return true;
 
       $result = $cache->cache_delete( $id );
-      if( DBG_CACHE ) error_log("DgsCache.delete($id).$dbgmsg = [" . ($result ? 1 : 0) . "]");
+      if( DBG_CACHE ) error_log("DgsCache.delete($cache_group,$id).$dbgmsg = [" . ($result ? 1 : 0) . "]");
       return $result;
    }
 
-   function delete_group( $dbgmsg, $group_id )
+   /*!
+    * \brief Deletes multiple cache-entries collected under group $group_id for cache-group.
+    * \param $cache_group CACHE_GRP_...
+    * \param $group_id group-name under which specific cache-keys where collected, see $group_id for DgsCache::store()
+    */
+   function delete_group( $dbgmsg, $cache_group, $group_id )
    {
-      $cache = DgsCache::get_cache();
+      $cache = DgsCache::get_cache( $cache_group );
       if( !$cache )
          return null;
 
       $arr_group = $cache->cache_delete_group( "GROUP_$group_id" );
-      if( DBG_CACHE ) error_log("DgsCache.delete_group($group_id).$dbgmsg: group [" . (is_null($arr_group) ? '-' : implode(' ', $arr_group)) . "]");
+      if( DBG_CACHE ) error_log("DgsCache.delete_group($cache_group,$group_id).$dbgmsg: group [" . (is_null($arr_group) ? '-' : implode(' ', $arr_group)) . "]");
       return $arr_group;
    }
 
