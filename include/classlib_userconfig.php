@@ -554,7 +554,7 @@ class ConfigPages
       $cfg_size = ($col_name) ? ConfigTableColumns::get_config_size($col_name, $dbgmsg) : 0;
 
       // need special handling to load only specific field or caching all fields
-      if( DgsCache::is_shared_enabled() )
+      if( DgsCache::is_persistent() )
          $row = ConfigPages::load_cache_config_pages( $uid );
       else
       {
@@ -766,7 +766,7 @@ class ConfigTableColumns
       $cfg_size = ConfigTableColumns::get_config_size($col_name, "load_config($uid)");
 
       // need special handling to load only specific field or caching all fields
-      if( DgsCache::is_shared_enabled() )
+      if( DgsCache::is_persistent() )
          $row = ConfigPages::load_cache_config_pages( $uid );
       else
       {

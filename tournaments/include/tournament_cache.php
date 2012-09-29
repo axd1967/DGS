@@ -122,7 +122,7 @@ class TournamentCache
       $dbgmsg .= ".TCache::load_cache_tournament($tid,$check_exist)";
       $key = "Tournament.$tid";
 
-      $use_dgs_cache = DgsCache::is_shared_enabled();
+      $use_dgs_cache = DgsCache::is_persistent();
 
       $tourney = $tcache = null;
       if( $use_dgs_cache )
@@ -359,7 +359,7 @@ class TournamentCache
 
    function is_cache_tournament_participant( $dbgmsg, $tid, $uid )
    {
-      if( DgsCache::is_shared_enabled() )
+      if( DgsCache::is_persistent() )
       {
          $dbgmsg .= ".TCache::is_cache_tp";
          $tp = TournamentCache::load_cache_tournament_participant( $dbgmsg, $tid, $uid );

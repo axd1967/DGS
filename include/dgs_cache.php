@@ -132,9 +132,7 @@ class DgsCache
 
    private function DgsCache()
    {
-      // NOTE (JUG): I wanted to call static cache-specific-functions like: $class=DGS_CACHE; $class::cache_func(..)
-      //    but that construction needs PHP >= 5.3 (and live-server is still PHP 5.1).
-      //    Therefore we need an instance of the cache-implementation using object-methods.
+      // NOTE: "$class=DGS_CACHE; $class::cache_func(..)" needs PHP >= 5.3 (but live-server is still PHP 5.1)
       if( DGS_CACHE === 'ApcCache' )
          $this->cache_impl = new ApcCache();
       else
@@ -143,7 +141,8 @@ class DgsCache
 
    // ------------ static functions ----------------------------
 
-   function is_shared_enabled()
+   /*! \brief Returns true, if caching is persistent (meaning different request see same cache-content). */
+   function is_persistent()
    {
       return ( DGS_CACHE == 'ApcCache' );
    }

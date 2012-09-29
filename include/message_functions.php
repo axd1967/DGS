@@ -1329,7 +1329,7 @@ function load_cache_folders( $uid, $folder_nr=null )
    $dbgmsg = "load_cache_folders.get_folders($uid,$folder_nr)";
    $key = "Folders.$uid";
 
-   $use_cache = DgsCache::is_shared_enabled();
+   $use_cache = DgsCache::is_persistent();
    $load_single_folder = ( !is_null($folder_nr) && is_numeric($folder_nr) );
    $query_all_folders = "SELECT $fields FROM Folders WHERE uid=$uid ORDER BY Folder_nr";
    $query = false;

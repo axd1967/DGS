@@ -57,7 +57,7 @@ class ClockCache
       if( !$use_cache || !isset($this->cache_clock_ticks[$clock_id]) )
       {
          // need special handling to load all or only one clock-entry (if cache disabled)
-         if( DgsCache::is_shared_enabled() )
+         if( DgsCache::is_persistent() )
          {
             $arr_clocks = ClockCache::load_cache_clocks( !$use_cache );
             if( is_null($arr_clocks) || !isset($arr_clocks[$clock_id]) )

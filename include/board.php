@@ -264,7 +264,7 @@ class Board
       $dbgmsg = "board.load_cache_game_moves($gid,$fetch_cache,$store_cache).$dbgmsg";
       $key = "Game.moves.$gid";
 
-      $arr_moves = ( $fetch_cache && DgsCache::is_shared_enabled() ) ? DgsCache::fetch($dbgmsg, $key) : null;
+      $arr_moves = ( $fetch_cache && DgsCache::is_persistent() ) ? DgsCache::fetch($dbgmsg, $key) : null;
       if( is_null($arr_moves) )
       {
          $db_result = db_query( $dbgmsg,
@@ -305,7 +305,7 @@ class Board
       $key = "Game.movemsg.$gid";
 
       $query = false;
-      if( $fetch_cache && DgsCache::is_shared_enabled() )
+      if( $fetch_cache && DgsCache::is_persistent() )
       {
          $result = DgsCache::fetch($dbgmsg, $key);
          if( is_null($result) )
