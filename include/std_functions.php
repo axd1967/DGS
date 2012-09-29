@@ -2778,94 +2778,34 @@ function load_global_forum_new()
 }
 
 // Caution: can cause concurrency problems
-if( function_exists('file_put_contents') )
+function write_to_file($filename, $data, $quit_on_error=true )
 {
-   function write_to_file($filename, $data, $quit_on_error=true )
+   $num= @file_put_contents($filename, $data);
+   if( is_int($num) )
    {
-      $num= @file_put_contents($filename, $data);
-      if( is_int($num) )
-      {
-         @chmod( $filename, 0666);
-         return $num;
-      }
-      if( $quit_on_error )
-         error( 'couldnt_open_file', "write_to_file($filename)");
-      trigger_error("write_to_file($filename) failed to write stream", E_USER_WARNING);
-      return false;
+      @chmod( $filename, 0666);
+      return $num;
    }
-}
-else
-{
-   function write_to_file( $filename, $data, $quit_on_error=true )
-   {
-      $fh = @fopen($filename, 'wb');
-      if( $fh )
-      {
-         flock($fh, LOCK_EX);
-         $num= @fwrite($fh, $data);
-         fclose( $fh );
-         if( is_int($num) )
-         {
-            @chmod( $filename, 0666);
-            return $num;
-         }
-      }
-      if( $quit_on_error )
-         error( 'couldnt_open_file', "write_to_file($filename)");
-      trigger_error("write_to_file($filename) failed to write stream", E_USER_WARNING);
-      return false;
-   }
-} //write_to_file
+   if( $quit_on_error )
+      error( 'couldnt_open_file', "write_to_file($filename)");
+   trigger_error("write_to_file($filename) failed to write stream", E_USER_WARNING);
+   return false;
+}//write_to_file
 
-if( function_exists('file_get_contents') )
+function read_from_file( $filename, $quit_on_error=true, $incpath=false )
 {
-   function read_from_file($filename, $quit_on_error=true, $incpath=false)
-   {
-      if( defined('FILE_USE_INCLUDE_PATH') ) //since PHP5
-         $data = @file_get_contents( $filename, ($incpath ? FILE_USE_INCLUDE_PATH : 0) );
-      else
-         $data = @file_get_contents( $filename, $incpath ); //PHP4
-      if( is_string($data) )
-         return $data;
-      if( $quit_on_error )
-         error( 'couldnt_open_file', "read_from_file.err1($filename)");
-      trigger_error("read_from_file($filename) failed to open stream", E_USER_WARNING);
-      return false;
-   }
+   $data = @file_get_contents( $filename, ($incpath ? FILE_USE_INCLUDE_PATH : 0) );
+   if( is_string($data) )
+      return $data;
+   if( $quit_on_error )
+      error( 'couldnt_open_file', "read_from_file.err1($filename)");
+   trigger_error("read_from_file($filename) failed to open stream", E_USER_WARNING);
+   return false;
 }
-else
-{
-   function read_from_file($filename, $quit_on_error=true, $incpath=false)
-   {
-      $fh = @fopen($filename, 'rb', $incpath);
-      if( $fh )
-      {
-         flock($fh, LOCK_SH);
-         clearstatcache();
-         if( ($fsize=@filesize($filename)) )
-         {
-            $data = @fread($fh, $fsize);
-         }
-         else
-         {
-            $data = '';
-            while( !feof($fh) )
-               $data.= @fread($fh, 8192);
-         }
-         fclose($fh);
-         if( is_string($data) )
-            return $data;
-      }
-      if( $quit_on_error )
-         error( 'couldnt_open_file', "read_from_file.err2($filename)");
-      trigger_error("read_from_file($filename) failed to open stream", E_USER_WARNING);
-      return false;
-   }
-} //read_from_file
 
 function centered_container( $open=true)
 {
-//the container must be a centered one which can be left or right aligned
+   //the container must be a centered one which can be left or right aligned
    static $opened = false;
    if( $opened )
    { //opened, close it

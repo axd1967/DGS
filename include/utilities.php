@@ -87,19 +87,6 @@ function modf( $k, $m)
    return $k - $m * floor($k/$m);
 }
 
-if( !function_exists('array_combine') ) //exists in PHP5
-{
-   function array_combine($keys, $values)
-   {
-      $res = array();
-      while( (list(, $k)=each( $keys)) && (list(, $v)=each( $values)) )
-      {
-         $res[$k]= $v;
-      }
-      return $res;
-   }
-}
-
 // [ v1, v2, ... ] converted to [ v1 => v1, v2 => v2, ... ]
 function array_value_to_key_and_value( $array )
 {

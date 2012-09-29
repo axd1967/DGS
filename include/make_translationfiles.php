@@ -334,7 +334,6 @@ function generate_translation_texts( $do_it, $echo=true )
    if( $echo )
       echo "<p><b>NOTE:</b> Check at <a href=\"#errors\">bottom</a> if errors or new entries are detected.<br>\n";
 
-   $php5_strip_php_comments = (function_exists('php_strip_whitespace'));
    $errcnt = 0;
    $newcnt = 0;
    $arr_text_id = array();
@@ -349,16 +348,7 @@ function generate_translation_texts( $do_it, $echo=true )
       if( $echo )
          echo "<hr><p>$Filename - Group $Group_ID [$GroupName]</p><hr>\n";
 
-
-      if( $php5_strip_php_comments )
-         $contents = php_strip_whitespace($Filename); // strips also LFs
-      else
-      {
-         $fd = fopen( $main_path . $Filename, 'r' )
-            or error( 'couldnt_open_file', "generate_translation_texts.open_file($Filename)");
-         $contents = fread($fd, filesize($main_path . $Filename));
-         fclose($fd);
-      }
+      $contents = php_strip_whitespace($Filename); // strips also LFs
       if( (string)$contents == '' )
       {
          printf( $errorfmt, ++$errcnt, "no content found reading file [$Filename]" );
