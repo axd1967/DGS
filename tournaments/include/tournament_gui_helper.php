@@ -98,7 +98,7 @@ class TournamentGuiHelper
          if( $ltable->Is_Column_Displayed[13] )
             $row_str[13] = TimeFormat::echo_time_diff( $GLOBALS['NOW'], $user->Lastaccess, 24, TIMEFMT_SHORT, '' );
          if( $ltable->Is_Column_Displayed[14] )
-            $row_str[14] = echo_rating( $orow['TP_Rating'], true, $uid);
+            $row_str[14] = echo_rating( @$orow['TP_Rating'], true, $uid);
          if( $is_mine )
             $row_str['extra_class'] = 'TourneyUser';
          $ltable->add_row( $row_str );
