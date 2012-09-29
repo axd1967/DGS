@@ -1,5 +1,12 @@
 <?php
 
+require_once 'include/cache_globals.php'; // needed for cache-consts
+
+// set debug-level for writing db-queries into error-log: 0 = disabled, 3 = db-query with user+time-needed
+define('DBG_QUERY', 0);
+//error_log('##########[DGS-LOC]' . str_repeat('##########',10)); // comment out for separation of page-requests
+
+
 // Friendly names.
 
 //Long name: Keep it AscII
@@ -114,6 +121,17 @@ define('DATASTORE_FOLDER', '../data-store/');
 // Set it to '' (empty string) to disable user-pictures.
 // NOTE: not to be mistaken for an URL, which may look the same
 define('USERPIC_FOLDER', 'userpic/');
+
+
+// Global parameters to control caching
+
+// list of items to enable caching: CACHE_GRP_... ; empty array = enable all groups
+// NOTE: some content-groups may require considerable amount of memory for shared-mem-caches.
+global $DGS_CACHE_ENABLE_GROUPS;
+$DGS_CACHE_ENABLE_GROUPS = array(
+      CACHE_GRP_STATS_GAMES,
+      CACHE_GRP_CLOCKS,
+   );
 
 
 // Global parameters to configure behaviour for features of your DGS-server:
