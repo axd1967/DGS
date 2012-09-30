@@ -221,7 +221,7 @@ function interpolate($val1, $val3, $time1, $time2, $time3)
    { // the X-axis is the date of games
       $step = 20.; //min grid distance in pixels
       $step/= $gr->sizeX; //graph width
-      $step/= 3600*24*30; //one month
+      $step/= 30 * SECS_PER_DAY; //one month
       $step = ceil(($endtime - $starttime) * $step);
 
       $month = date('n',$starttime)+1;
@@ -337,7 +337,7 @@ function get_rating_data($uid)
 
    if( ($endtime - $starttime) < GRAPH_RATING_MIN_INTERVAL )
    {
-      $mean = ( $starttime + $endtime )/2 + 12*3600;
+      $mean = ( $starttime + $endtime )/2 + 12*SECS_PER_HOUR;
       $starttime = $mean - GRAPH_RATING_MIN_INTERVAL/2;
       $endtime = $starttime + GRAPH_RATING_MIN_INTERVAL;
    }

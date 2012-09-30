@@ -46,7 +46,7 @@ if( $is_down )
 else
 {
    // see the Expires header below and 'no_cache'-URL-arg
-   //disable_cache( $NOW, $NOW+5*60);
+   //disable_cache( $NOW, $NOW+5*SECS_PER_MIN);
 
    connect2mysql();
 
@@ -139,7 +139,7 @@ else
    //to allow some mime applications to find it in the cache
    if( $use_cache )
    {
-      header('Expires: ' . gmdate(GMDATE_FMT, $NOW+5*60));
+      header('Expires: ' . gmdate(GMDATE_FMT, $NOW+5*SECS_PER_MIN));
       header('Last-Modified: ' . gmdate(GMDATE_FMT, $NOW));
    }
 

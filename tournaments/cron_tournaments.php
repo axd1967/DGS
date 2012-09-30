@@ -33,7 +33,7 @@ $TheErrors->set_mode(ERROR_MODE_COLLECT);
 
 if( ALLOW_TOURNAMENTS && !$is_down )
 {
-   $chk_time_diff = 3600/4;
+   $chk_time_diff = SECS_PER_HOUR / 4;
    if( $chained )
       $chained = $chk_time_diff;
    else

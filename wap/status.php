@@ -43,8 +43,8 @@ require_once( "include/game_functions.php" );
 
 $TheErrors->set_mode(ERROR_MODE_PRINT);
 
-define('WAP_CHECK_MIN', 5*60 - 5); //secs
-define('WAP_CHECK_MAX', 1*3600);   //secs
+define('WAP_CHECK_MIN', 5*SECS_PER_MIN - 5); //secs
+define('WAP_CHECK_MAX', 1*SECS_PER_HOUR);   //secs
 
 
 $xmltrans = array();

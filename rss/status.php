@@ -59,8 +59,8 @@ require_once( "include/gui_bulletin.php" );
 
 $TheErrors->set_mode(ERROR_MODE_PRINT);
 
-define('RSS_CHECK_MIN', 5*60 - 5); //secs
-define('RSS_CHECK_MAX', 1*3600);   //secs
+define('RSS_CHECK_MIN', 5*SECS_PER_MIN - 5); //secs
+define('RSS_CHECK_MAX', 1*SECS_PER_HOUR);   //secs
 
 
 /* For a default layout:
@@ -357,7 +357,7 @@ else
       error_log("[MONITOR-RSS] user=[$uhandle]: allow=[".($allow_exec?1:0)."] last_call=[".($last_call_time > 0 ? date(DATE_FMT_QUICK, $last_call_time) : 0)."]");
 
    //disabling caches make some RSS feeders to instantaneously refresh.
-   disable_cache( $NOW, $NOW + CACHE_MIN*60);
+   disable_cache( $NOW, $NOW + CACHE_MIN * SECS_PER_MIN );
 
    $channel_title = "RSS-Status of $uhandle";
    $channel_description = "Bulletins, Messages and Games for $uhandle";

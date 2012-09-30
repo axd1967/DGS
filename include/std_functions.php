@@ -136,9 +136,9 @@ define('NEWGAME_MAX_GAMES', 10);
 
 //Allow the "by number of games" graphic (as well as "by date of games").
 define('GRAPH_RATING_BY_NUM_ENABLED', true);
-define('GRAPH_RATING_MIN_INTERVAL', 2*31*24*3600);
+define('GRAPH_RATING_MIN_INTERVAL', 2*31 * SECS_PER_DAY);
 // see also CACHE_FOLDER in config.php
-define('CACHE_EXPIRE_GRAPH', 24*3600); //1 day
+define('CACHE_EXPIRE_GRAPH', SECS_PER_DAY); //1 day
 
 define('MENU_MULTI_SEP', ' / ');
 
@@ -481,7 +481,7 @@ function start_page( $title, $no_cache, $logged_in, &$player_row,
    {
       if( $player_row['VaultCnt'] > 0 )
       {
-         $block_hours = ( (int)@$player_row['ID'] > GUESTS_ID_MAX ? VAULT_TIME : VAULT_TIME_X ) / 3600; //hours
+         $block_hours = ( (int)@$player_row['ID'] > GUESTS_ID_MAX ? VAULT_TIME : VAULT_TIME_X ) / SECS_PER_HOUR;
          sysmsg( sprintf( T_('Your access quota is running low.<br>You only got %s hits left before you get blocked for %s !!'),
                  @$player_row['VaultCnt'] - 1, TimeFormat::echo_hour($block_hours) ),
                  'WarnQuota');
@@ -1523,15 +1523,10 @@ function notify( $debugmsg, $ids, $type='', $nfy_flags=0 )
 } //notify
 
 
-function safe_setcookie($name, $value='', $rel_expire=-3600)
+function safe_setcookie( $name, $value='', $rel_expire=-3600 ) //-SECS_PER_HOUR
 //should be: ($name, $value, $expire, $path, $domain, $secure)
 {
    global $NOW;
-
-/*
-   if( COOKIE_OLD_COMPATIBILITY )
-      setcookie( $name, '', $NOW-3600, SUB_PATH);
-*/
 
    $name= COOKIE_PREFIX.$name;
 
@@ -1541,8 +1536,9 @@ function safe_setcookie($name, $value='', $rel_expire=-3600)
    else
       $n= 0;
 
-   while( $n>1 ) {
-      setcookie( $name, '', $NOW-3600, SUB_PATH);
+   while( $n>1 )
+   {
+      setcookie( $name, '', $NOW-SECS_PER_HOUR, SUB_PATH);
       $n--;
    }
    setcookie( $name, $value, $NOW+$rel_expire, SUB_PATH );
@@ -1575,7 +1571,7 @@ function set_cookie_prefs(&$player_row, $delete=false)
    if( $delete )
       safe_setcookie("prefs$uid");
    else
-      safe_setcookie("prefs$uid", serialize($cookie_prefs), 3600*12*61*12*5); //5 years
+      safe_setcookie("prefs$uid", serialize($cookie_prefs), SECS_PER_HOUR*12*61 * 12*5); //5 years
 } //set_cookie_prefs
 
 function get_cookie_prefs(&$player_row)
@@ -1635,7 +1631,7 @@ function switch_admin_status(&$player_row, $mask=0, $cmd='')
    if( $old != $status )
    {
       if( $status )
-         safe_setcookie( $cookie, $status, 3600);
+         safe_setcookie( $cookie, $status, SECS_PER_HOUR);
       else
          safe_setcookie( $cookie);
       $player_row['admin_status'] = $status;
@@ -2475,11 +2471,11 @@ function who_is_logged( &$player_row, $login_opts=LOGIN_DEFAULT_OPTS )
  * Caution: VaultCnt is a SMALLINT in the database
  **/
 define('VAULT_CNT', 500); //an account with more than x hits...
-define('VAULT_DELAY', 3600); //... during y seconds ...
-define('VAULT_TIME', 24*3600); //... is vaulted for z seconds
+define('VAULT_DELAY', SECS_PER_HOUR); //... during y seconds ...
+define('VAULT_TIME', 24*SECS_PER_HOUR); //... is vaulted for z seconds
 //two specific parameters for multi-users accounts, e.g. 'guest':
 define('VAULT_CNT_X', VAULT_CNT*10); //activity count (larger)
-define('VAULT_TIME_X', 2*3600); //vault duration (smaller)
+define('VAULT_TIME_X', 2*SECS_PER_HOUR); //vault duration (smaller)
 
 // login-options
 define('LOGIN_QUICK_SUITE', 0x01);

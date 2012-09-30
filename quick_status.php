@@ -29,8 +29,8 @@ $TheErrors->set_mode(ERROR_MODE_PRINT);
 define('MIN_REQ_IVAL_GAMES', 1); // min. request-interval [mins] for status-games
 define('DEFAULT_MIN_REQ_IVAL', 15); // default min. request-interval [mins]
 
-define('QST_CHECK_MIN', 1*60 - 5); //secs
-define('QST_CHECK_MAX', DEFAULT_MIN_REQ_IVAL*60); //secs
+define('QST_CHECK_MIN', 1*SECS_PER_MIN - 5); //secs
+define('QST_CHECK_MAX', DEFAULT_MIN_REQ_IVAL * SECS_PER_MIN); //secs
 
 //force $language_used and $encoding_used
 //see also recover_language() for regular recovery of $encoding_used
@@ -114,7 +114,7 @@ else
 
       $min = ($block == QST_CACHE_GAMES) ? MIN_REQ_IVAL_GAMES : DEFAULT_MIN_REQ_IVAL;
       $expire_min[$block] = $min;
-      $expire_time[$block] = $NOW + 60 * $min;
+      $expire_time[$block] = $NOW + $min * SECS_PER_MIN;
    }
 
    if( $no_cache != 2 )
@@ -245,7 +245,7 @@ function print_bulletins( $player_row )
       }
    }
 
-   $expire_time[QST_CACHE_BULLETIN] = $GLOBALS['NOW'] + $expire_min[QST_CACHE_BULLETIN] * 60;
+   $expire_time[QST_CACHE_BULLETIN] = $GLOBALS['NOW'] + $expire_min[QST_CACHE_BULLETIN] * SECS_PER_MIN;
 }//print_bulletins
 
 function print_messages( $version, $player_id )
@@ -305,7 +305,7 @@ function print_messages( $version, $player_id )
       }
    }
 
-   $expire_time[QST_CACHE_MSG] = $GLOBALS['NOW'] + $expire_min[QST_CACHE_MSG]  * 60;
+   $expire_time[QST_CACHE_MSG] = $GLOBALS['NOW'] + $expire_min[QST_CACHE_MSG] * SECS_PER_MIN;
 }//print_messages
 
 function print_status_games( $version, $player_row )
@@ -388,7 +388,7 @@ function print_status_games( $version, $player_row )
       $exp_min = min( 2 * $expire_min[QST_CACHE_GAMES], DEFAULT_MIN_REQ_IVAL );
 
    $expire_min[QST_CACHE_GAMES] = $exp_min;
-   $expire_time[QST_CACHE_GAMES] = $GLOBALS['NOW'] + $exp_min * 60;
+   $expire_time[QST_CACHE_GAMES] = $GLOBALS['NOW'] + $exp_min * SECS_PER_MIN;
 }//print_status_games
 
 function print_mpg( $player_row )
@@ -430,7 +430,7 @@ function print_mpg( $player_row )
       mysql_free_result($result);
    }
 
-   $expire_time[QST_CACHE_MPG] = $GLOBALS['NOW'] + $expire_min[QST_CACHE_MPG] * 60;
+   $expire_time[QST_CACHE_MPG] = $GLOBALS['NOW'] + $expire_min[QST_CACHE_MPG] * SECS_PER_MIN;
 }//print_mpg
 
 
@@ -506,7 +506,7 @@ function loc_start_page( $use_cache=true )
 
    if( $use_cache )
    {
-      header('Expires: ' . gmdate(GMDATE_FMT, $NOW+5*60)); // 5min
+      header('Expires: ' . gmdate(GMDATE_FMT, $NOW+5*SECS_PER_MIN)); // 5min
       header('Last-Modified: ' . gmdate(GMDATE_FMT, $NOW));
    }
 }//loc_start_page

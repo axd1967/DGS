@@ -184,7 +184,7 @@ $info_box = '<ul>
    if( $movedist < 1 )
       $movedist = max( 1, (int)safe_getcookie('admin_faq_movedist'));
    if( @$_REQUEST['setmovedist'] ) // write into cookie
-      safe_setcookie( 'admin_faq_movedist', $movedist, 3600 ); // save for 1h
+      safe_setcookie( 'admin_faq_movedist', $movedist, SECS_PER_HOUR ); // save for 1h
 
    $show_list = true;
    $page_base = "admin_faq.php?ot=$objtype";

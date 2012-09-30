@@ -31,7 +31,7 @@ define('VAL_CHECK', '<font color="blue">-- <b>Need Validate!:</b> </font>');
 {
    disable_cache();
    connect2mysql();
-   set_time_limit(60); //max. 1min
+   set_time_limit(SECS_PER_MIN); //max. 1min
 
    $logged_in = who_is_logged( $player_row);
    if( !$logged_in )

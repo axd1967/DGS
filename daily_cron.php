@@ -29,12 +29,12 @@ $TheErrors->set_mode(ERROR_MODE_COLLECT);
 
 if( !$is_down )
 {
-   $daily_diff = 3600*24;
+   $daily_diff = SECS_PER_DAY;
    if( $chained )
       $chained = $daily_diff;
    else
       connect2mysql();
-   $daily_diff -= 3600;
+   $daily_diff -= SECS_PER_HOUR;
 
 
    // Check that updates are not too frequent

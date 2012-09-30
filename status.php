@@ -395,7 +395,7 @@ function load_games_to_move( $uid, &$gtable )
          }
          if( $gtable->Is_Column_Displayed[11] )
          {
-            $is_online = ($NOW - @$opp_Lastaccess) < SPAN_ONLINE_MINS * 60; // online up to X mins ago
+            $is_online = ($NOW - @$opp_Lastaccess) < SPAN_ONLINE_MINS * SECS_PER_MIN; // online up to X mins ago
             $row_arr[11] = echo_image_online( $is_online, @$opp_Lastaccess, false );
          }
          if( $gtable->Is_Column_Displayed[15] )

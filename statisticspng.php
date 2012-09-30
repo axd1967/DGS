@@ -228,7 +228,7 @@ require_once( "include/graph.php" );
 
    $step = 20.; //min grid distance in pixels
    $step/= $gr->sizeX; //graph width
-   $step/= 3600*24*30; //one month
+   $step/= 30 * SECS_PER_DAY; //one month
    $step = ceil(($maxTime - $minTime) * $step);
 
    $month = date('n',$minTime)+1;

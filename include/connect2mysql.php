@@ -64,7 +64,7 @@ function disable_cache($stamp=NULL, $expire=NULL)
    if( !$stamp )
       $stamp = $NOW;  // Always modified
    if( !$expire )
-      $expire = $stamp-3600;  // Force revalidation
+      $expire = $stamp - SECS_PER_HOUR;  // Force revalidation
 
    //header('Expires: Mon, 26 Jul 1997 05:00:00 GMT');
    header('Expires: ' . gmdate(GMDATE_FMT, $expire)); // HTTP/1.0 (replaced with max-age)

@@ -245,7 +245,7 @@ require_once( 'include/classlib_userpicture.php' );
          $crow_strings[11] = ($row['CX_Lastchanged']>0 ? date(DATE_FMT2, $row['CX_Lastchanged']) : '');
       if( $ctable->Is_Column_Displayed[14] )
       {
-         $is_online = ($NOW - @$row['X_Lastaccess']) < SPAN_ONLINE_MINS * 60; // online up to X mins ago
+         $is_online = ($NOW - @$row['X_Lastaccess']) < SPAN_ONLINE_MINS * SECS_PER_MIN; // online up to X mins ago
          $crow_strings[14] = echo_image_online( $is_online, @$row['X_Lastaccess'], false );
       }
 

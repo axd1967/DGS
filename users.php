@@ -294,7 +294,7 @@ require_once( 'include/classlib_userpicture.php' );
          $urow_strings[19] = UserPicture::getImageHtml( @$row['Handle'], true );
       if( $utable->Is_Column_Displayed[20] )
       {
-         $is_online = ($NOW - @$row['LastaccessU']) < SPAN_ONLINE_MINS * 60; // online up to X mins ago
+         $is_online = ($NOW - @$row['LastaccessU']) < SPAN_ONLINE_MINS * SECS_PER_MIN; // online up to X mins ago
          $urow_strings[20] = echo_image_online( $is_online, @$row['LastaccessU'], false );
       }
       if( $utable->Is_Column_Displayed[22] )

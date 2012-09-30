@@ -217,7 +217,7 @@ function echo_image_online( $in_the_house=true, $last_access=0, $withSep=true )
       $title = T_('Online');
       if( $last_access > 0 )
       {
-         $mins_ago = round( ($NOW - $last_access + 59) / 60 );
+         $mins_ago = round( ($NOW - $last_access + SECS_PER_MIN - 1) / SECS_PER_MIN );
          if( $mins_ago >= 0 )
             $title = sprintf( T_('Online &lt;%s mins ago'), $mins_ago );
       }

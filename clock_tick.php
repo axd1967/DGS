@@ -27,7 +27,7 @@ $TheErrors->set_mode(ERROR_MODE_COLLECT);
 
 if( !$is_down )
 {
-   $tick_diff = floor(3600/TICK_FREQUENCY); // called every 5 minutes (300s)
+   $tick_diff = floor(SECS_PER_HOUR / TICK_FREQUENCY); // called every 5 minutes (300s)
    if( $chained )
       $chained = $tick_diff;
    else

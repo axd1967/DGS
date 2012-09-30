@@ -1110,7 +1110,7 @@ function freesql_dump( $database, $query)
       header( "Content-Description: PHP Generated Data" );
 
       //to allow some mime applications to find it in the cache
-      header('Expires: ' . gmdate(GMDATE_FMT, $NOW+5*60));
+      header('Expires: ' . gmdate(GMDATE_FMT, $NOW+5*SECS_PER_MIN));
       header('Last-Modified: ' . gmdate(GMDATE_FMT, $NOW));
 
       echo $text;

@@ -26,13 +26,13 @@ $TheErrors->set_mode(ERROR_MODE_COLLECT);
 
 if( !$is_down )
 {
-   $half_diff = 3600/2;
+   $half_diff = SECS_PER_HOUR / 2;
    if( $chained )
       $chained = $half_diff;
    else
       connect2mysql();
-   $max_run_time = $NOW + $half_diff - 2*60; // "buffer" of 2min for long-lasting "last" query before stopping script
-   $half_diff -= 300;
+   $max_run_time = $NOW + $half_diff - 2 * SECS_PER_MIN; // "buffer" of 2min for long-lasting "last" query before stopping script
+   $half_diff -= 5 * SECS_PER_MIN;
    set_time_limit(0); // don't want script-break during "transaction" with multi-db-queries
 
 
