@@ -401,7 +401,7 @@ class TournamentCache
          while( list(,$arr_item) = $iterator->getListIterator() )
             $arr_tresult[] = $arr_item;
 
-         DgsCache::store( $dbgmsg, CACHE_GRP_TRESULT, $key, $arr_tresult, SECS_PER_HOUR );
+         DgsCache::store( $dbgmsg, CACHE_GRP_TRESULT, $key, $arr_tresult, SECS_PER_DAY );
       }
 
       return $arr_tresult;
