@@ -874,6 +874,7 @@ class Table
    /*!
     * \brief Sets the sort-images in the table-header.
     * \note Should be called, if current_order_string() is not used
+    * \note To make this work add_tablehead()-calls for table must have a field-sort-order.
     */
    function make_sort_images()
    {

@@ -136,7 +136,7 @@ $GLOBALS['ThePage'] = new Page('TournamentLadderView');
 
       // add_tablehead($nr, $descr, $attbs=null, $mode=TABLE_NO_HIDE|TABLE_NO_SORT, $sortx='')
       $ltable->add_tablehead( 2, T_('Change#TL_header'), 'Center', 0 );
-      $ltable->add_tablehead( 1, T_('Rank#T_ladder'), 'Number', TABLE_NO_HIDE );
+      $ltable->add_tablehead( 1, T_('Rank#T_ladder'), 'Number', TABLE_NO_HIDE, 'Rank+' );
       $ltable->add_tablehead( 3, T_('Name#header'), 'User', 0 );
       $ltable->add_tablehead( 4, T_('Userid#header'), 'User', TABLE_NO_HIDE );
       $ltable->add_tablehead( 5, T_('Country#header'), 'Image', 0 );
@@ -150,6 +150,9 @@ $GLOBALS['ThePage'] = new Page('TournamentLadderView');
       $ltable->add_tablehead(10, T_('Rank Kept#header'), '', 0 );
       $ltable->add_tablehead(13, T_('Last access#header'), '', 0 );
       $ltable->add_tablehead(11, T_('Started#header'), 'Date', 0 );
+
+      $ltable->set_default_sort( 1 );
+      //$ltable->make_sort_images(); //obvious, so left away as it also take a bit of unneccessary table-width
 
       $iterator = TournamentLadder::build_tournament_ladder_iterator( $tid, $ltable->get_query(), $need_tp_rating, 0, /*idx*/true );
 
