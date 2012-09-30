@@ -113,23 +113,9 @@ class TournamentGuiHelper
       $my_id = $player_row['ID'];
       $tid = $tourney->ID;
 
-      // check + load tournament-results
-      if( $tourney->Type == TOURNEY_TYPE_LADDER )
-         $order = 'ORDER BY Rank ASC, RankKept DESC, EndTime DESC';
-      elseif( $tourney->Type == TOURNEY_TYPE_ROUND_ROBIN )
-         $order = 'ORDER BY Round DESC, Rank ASC, EndTime DESC';
-      else
-         $order = 'ORDER BY ID';
-      $iterator = new ListIterator( 'TournamentGuiHelper.build_tournament_results.load_tresult',
-         null, $order );
-      $iterator->addQuerySQLMerge( new QuerySQL(
-            SQLP_FIELDS, 'TRP.Name AS TRP_Name', 'TRP.Handle AS TRP_Handle',
-                         'TRP.Country AS TRP_Country', 'TRP.Rating2 AS TRP_Rating2',
-            SQLP_FROM,   'INNER JOIN Players AS TRP ON TRP.ID=TRS.uid'
-         ));
-      $iterator = TournamentResult::load_tournament_results( $iterator, $tid );
-
-      if( $iterator->getItemCount() == 0 )
+      $arr_tresult = TournamentCache::load_cache_tournament_results( 'TournamentGuiHelper.build_tournament_results',
+         $tid, $tourney->Type );
+      if( count($arr_tresult) == 0 )
          return T_('No tournament results yet.');
 
       // create table
@@ -141,17 +127,23 @@ class TournamentGuiHelper
       $table->add_or_del_column();
 
       // add_tablehead($nr, $descr, $attbs=null, $mode=TABLE_NO_HIDE|TABLE_NO_SORT, $sortx='')
-      $table->add_tablehead( 6, T_('Rank#tourney_result'), 'Number', TABLE_NO_HIDE );
-      $table->add_tablehead( 1, T_('Name#header'), 'User', TABLE_NO_HIDE);
-      $table->add_tablehead( 2, T_('Userid#header'), 'User', TABLE_NO_HIDE);
-      $table->add_tablehead( 3, T_('Country#header'), 'Image', 0);
-      $table->add_tablehead( 4, T_('Current Rating#header'), 'Rating', 0);
-      $table->add_tablehead( 5, T_('Result Rating#header'), 'Rating', 0);
+      $table->add_tablehead( 6, T_('Rank#tourney_result'), 'Number', TABLE_NO_HIDE, 'Rank+');
+      $table->add_tablehead( 1, T_('Name#header'), 'User', TABLE_NO_HIDE, 'TRP_Name+');
+      $table->add_tablehead( 2, T_('Userid#header'), 'User', TABLE_NO_HIDE, 'TRP_Handle+');
+      $table->add_tablehead( 3, T_('Country#header'), 'Image', 0, 'TRP_Count+');
+      $table->add_tablehead( 4, T_('Current Rating#header'), 'Rating', 0, 'TRP_Rating2-');
+      $table->add_tablehead( 5, T_('Result Rating#header'), 'Rating', 0, 'Rating-');
       if( $tourney->Type == TOURNEY_TYPE_LADDER )
-         $table->add_tablehead( 7, T_('Rank Kept#header'), '', 0);
-      $table->add_tablehead( 8, T_('Result Date#header'), '', 0);
+         $table->add_tablehead( 7, T_('Rank Kept#header'), '', 0, 'RankKept-');
+      $table->add_tablehead( 8, T_('Result Date#header'), '', 0, 'EndTime+');
 
-      while( list(,$arr_item) = $iterator->getListIterator() )
+      if( $tourney->Type == TOURNEY_TYPE_LADDER )
+         $table->set_default_sort( 6, 7, 8 );
+      elseif( $tourney->Type == TOURNEY_TYPE_ROUND_ROBIN )
+         $table->set_default_sort( 6, 8 );
+      $table->make_sort_images();
+
+      foreach( $arr_tresult as $arr_item )
       {
          list( $tresult, $orow ) = $arr_item;
          $uid = $tresult->uid;

@@ -29,6 +29,7 @@ require_once 'tournaments/include/tournament_ladder_props.php';
 require_once 'tournaments/include/tournament_news.php';
 require_once 'tournaments/include/tournament_participant.php';
 require_once 'tournaments/include/tournament_properties.php';
+require_once 'tournaments/include/tournament_result.php';
 require_once 'tournaments/include/tournament_round.php';
 require_once 'tournaments/include/tournament_rules.php';
 
@@ -370,6 +371,41 @@ class TournamentCache
 
       return $result;
    }//is_cache_tournament_participant
+
+   /*! \brief Loads and caches TournamentResults for given tournament-id and type. */
+   function load_cache_tournament_results( $dbgmsg, $tid, $tourney_type )
+   {
+      $tid = (int)$tid;
+      $dbgmsg .= ".TCache::load_cache_tresults($tid,$tourney_type)";
+      $key = "TResult.$tid";
+
+      $arr_tresult = DgsCache::fetch( $dbgmsg, CACHE_GRP_TRESULT, $key );
+      if( is_null($arr_tresult) )
+      {
+         // load tournament-results
+         if( $tourney_type == TOURNEY_TYPE_LADDER )
+            $order = 'ORDER BY Rank ASC, RankKept DESC, EndTime DESC';
+         elseif( $tourney_type == TOURNEY_TYPE_ROUND_ROBIN )
+            $order = 'ORDER BY Round DESC, Rank ASC, EndTime DESC';
+         else
+            $order = 'ORDER BY ID';
+         $iterator = new ListIterator( $dbgmsg, null, $order );
+         $iterator->addQuerySQLMerge( new QuerySQL(
+               SQLP_FIELDS, 'TRP.Name AS TRP_Name', 'TRP.Handle AS TRP_Handle',
+                            'TRP.Country AS TRP_Country', 'TRP.Rating2 AS TRP_Rating2',
+               SQLP_FROM,   'INNER JOIN Players AS TRP ON TRP.ID=TRS.uid'
+            ));
+         $iterator = TournamentResult::load_tournament_results( $iterator, $tid );
+
+         $arr_tresult = array();
+         while( list(,$arr_item) = $iterator->getListIterator() )
+            $arr_tresult[] = $arr_item;
+
+         DgsCache::store( $dbgmsg, CACHE_GRP_TRESULT, $key, $arr_tresult, SECS_PER_HOUR );
+      }
+
+      return $arr_tresult;
+   }//load_cache_tournament_results
 
 } // end of 'TournamentCache'
 ?>

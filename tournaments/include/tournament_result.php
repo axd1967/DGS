@@ -22,6 +22,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 $TranslateGroups[] = "Tournament";
 
 require_once 'include/db_classes.php';
+require_once 'include/dgs_cache.php';
 require_once 'include/std_classes.php';
 require_once 'tournaments/include/tournament_utils.php';
 
@@ -100,19 +101,24 @@ class TournamentResult
       $result = $entityData->insert( "TournamentResult::insert(%s)" );
       if( $result )
          $this->ID = mysql_insert_id();
+      TournamentResult::delete_cache_tournament_result( 'TournamentResult.insert', $this->tid );
       return $result;
    }
 
    function update()
    {
       $entityData = $this->fillEntityData();
-      return $entityData->update( "TournamentResult::update(%s)" );
+      $result = $entityData->update( "TournamentResult::update(%s)" );
+      TournamentResult::delete_cache_tournament_result( 'TournamentResult.update', $this->tid );
+      return $result;
    }
 
    function delete()
    {
       $entityData = $this->fillEntityData();
-      return $entityData->delete( "TournamentResult::delete(%s)" );
+      $result = $entityData->delete( "TournamentResult::delete(%s)" );
+      TournamentResult::delete_cache_tournament_result( 'TournamentResult.delete', $this->tid );
+      return $result;
    }
 
    function fillEntityData()
@@ -189,6 +195,11 @@ class TournamentResult
    {
       static $statuslist = array( TOURNEY_STATUS_ADMIN, TOURNEY_STATUS_PLAY, TOURNEY_STATUS_CLOSED );
       return in_array( $t_status, $statuslist );
+   }
+
+   function delete_cache_tournament_result( $dbgmsg, $tid )
+   {
+      DgsCache::delete( $dbgmsg, CACHE_GRP_TRESULT, "TResult.$tid" );
    }
 
 } // end of 'TournamentResult'
