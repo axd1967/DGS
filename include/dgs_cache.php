@@ -29,7 +29,7 @@ require_once 'include/utilities.php';
   */
 
 if( !defined('DGS_CACHE') )
-   define('DGS_CACHE', ''); // ''=no-cache, use const CACHE_TYPE_...
+   define('DGS_CACHE', CACHE_TYPE_NONE);
 if( !defined('DBG_CACHE') )
    define('DBG_CACHE', 0);
 
@@ -128,6 +128,7 @@ class ApcCache extends AbstractCache
 
 /*!
  * \brief Cache-implementation for file-based cache.
+ *
  * \note adapted source Sabre_Cache_Filesystem taken from http://www.rooftopsolutions.nl/blog/107
  *       to match DGS-environment and needs.
  */
@@ -239,33 +240,54 @@ class FileCache extends AbstractCache
   */
 class DgsCache
 {
-   var $groups_enabled; // false = enable all CACHE_GRP_..-groups; otherwise arr( CACHE_GRP_.. => 1, ... )
-   var $cache_impl;
+   var $cache_groups; // arr( CACHE_GRP_.. => CACHE_TYPE_.., ... )
+   var $cache_impl; // arr( CACHE_TYPE_.. => initialized-cache-instance(-singleton), ... )
 
    private function DgsCache()
    {
-      global $DGS_CACHE_ENABLE_GROUPS;
+      global $DGS_CACHE_GROUPS;
 
-      $arr = array();
-      if( is_array($DGS_CACHE_ENABLE_GROUPS) )
+      $arr_cache_types = array( DGS_CACHE => 1 );
+      $this->cache_groups = array();
+      if( @is_array($DGS_CACHE_GROUPS) )
       {
-         foreach( $DGS_CACHE_ENABLE_GROUPS as $group )
-            $arr[$group] = 1;
+         foreach( $DGS_CACHE_GROUPS as $cache_group => $cache_type )
+         {
+            $this->cache_groups[$cache_group] = $cache_type;
+            $arr_cache_types[$cache_type] = 1;
+         }
       }
-      $this->groups_enabled = ( count($arr) > 0 ) ? $arr : false;
 
-      // NOTE: wanted "$class=DGS_CACHE; $class::cache_func(..)" but needs PHP >= 5.3 (and live-server is still PHP 5.1)
-      if( DGS_CACHE === CACHE_TYPE_APC )
-         $this->cache_impl = new ApcCache();
-      elseif( DGS_CACHE === CACHE_TYPE_FILE )
-         $this->cache_impl = new FileCache();
-      else
-         $this->cache_impl = null;
+      $this->cache_impl = array( CACHE_TYPE_NONE => null );
+      if( isset($arr_cache_types[CACHE_TYPE_APC]) )
+         $this->cache_impl[CACHE_TYPE_APC] = new ApcCache();
+      if( isset($arr_cache_types[CACHE_TYPE_FILE]) )
+         $this->cache_impl[CACHE_TYPE_FILE] = new FileCache();
    }//constructor
 
-   public function allow_group_caching( $cache_group )
+   /*!
+    * \brief Return cache-type to use for cache-group.
+    * \return can be one of CACHE_TYPE_NONE (no caching), CACHE_TYPE_APC (shared-mem), CACHE_TYPE_FILE (file-cache)
+    */
+   public function get_cache_type( $cache_group )
    {
-      return ( is_array($this->groups_enabled) ) ? @$this->groups_enabled[(int)$cache_group] : true;
+      if( !is_numeric($cache_group) )
+         error('invalid_args', "DgsCache.get_cache_type.check.cache_group($cache_group)");
+
+      if( isset($this->cache_groups[$cache_group]) )
+         $cache_type = $this->cache_groups[$cache_group];
+      else
+         $cache_type = DGS_CACHE; // use default if no special type set
+      return $cache_type;
+   }
+
+   /*!
+    * \brief Returns cache-implementation for given cache-type.
+    * \return cache-implementation (if used in cache-config, see constructor); otherwise null.
+    */
+   public function get_cache_impl( $cache_type )
+   {
+      return ( isset($this->cache_impl[$cache_type]) ) ? $this->cache_impl[$cache_type] : null;
    }
 
 
@@ -292,12 +314,14 @@ class DgsCache
       if( !@$DGS_CACHE )
          $DGS_CACHE = new DgsCache();
 
-      if( $GLOBALS['is_maintenance'] ) // no caching in maintenance-mode
-         return null;
-      elseif( $DGS_CACHE->allow_group_caching($cache_group) )
-         return $DGS_CACHE->cache_impl;
+      if( $GLOBALS['is_maintenance'] ) // caching disabled during maintenance-mode
+         $cache = null;
       else
-         return null;
+      {
+         $cache_type = $DGS_CACHE->get_cache_type( $cache_group );
+         $cache = $DGS_CACHE->get_cache_impl( $cache_type );
+      }
+      return $cache;
    }//get_cache
 
 

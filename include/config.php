@@ -125,12 +125,48 @@ define('USERPIC_FOLDER', 'userpic/');
 
 // Global parameters to control caching
 
-// list of items to enable caching: CACHE_GRP_... ; empty array = enable all groups
-// NOTE: some content-groups may require considerable amount of memory for shared-mem-caches.
-global $DGS_CACHE_ENABLE_GROUPS;
-$DGS_CACHE_ENABLE_GROUPS = array(
-      CACHE_GRP_STATS_GAMES,
-      CACHE_GRP_CLOCKS,
+// Default caching-type to use.
+// If enabled, this default cache-type is used for cache-groups not listed in $DGS_CACHE_GROUPS below
+define('DGS_CACHE', CACHE_TYPE_NONE); // caching disabled
+//define('DGS_CACHE', CACHE_TYPE_APC);  // APC-cache needs APC to be installed, see INSTALL-doc
+//define('DGS_CACHE', CACHE_TYPE_FILE); // file-cache needs working DATASTORE_FOLDER
+
+// cache debugging: 0 = debug disabled, 1 = write debug-info into error-log
+define('DBG_CACHE', 0);
+
+// Defines which cache-type to use for each cache-group:
+// - CACHE_TYPE_NONE = disable caching for cache-group
+// - CACHE_TYPE_APC  = use APC shared-memory cache
+// - CACHE_TYPE_FILE = use file-based caching (requires DATASTORE_FOLDER)
+//
+// NOTE: Commented out or omitted cache-groups are using the default cache-type defined by DGS_CACHE above!
+//
+// NOTE: Some cache-groups may require a considerable amount of free space (memory or disc-space dependent on cache).
+//       Size estimations are given with comments for defines of CACHE_GRP_...
+global $DGS_CACHE_GROUPS;
+$DGS_CACHE_GROUPS = array(
+      // CACHE_GRP_..         => CACHE_TYPE_NONE|APC|FILE
+      #CACHE_GRP_CFG_PAGES     => CACHE_TYPE_APC,
+      #CACHE_GRP_CFG_BOARD     => CACHE_TYPE_APC,
+      #CACHE_GRP_CLOCKS        => CACHE_TYPE_APC,
+      #CACHE_GRP_GAME_OBSERVERS => CACHE_TYPE_APC,
+      #CACHE_GRP_GAME_NOTES    => CACHE_TYPE_APC,
+      #CACHE_GRP_USER_REF      => CACHE_TYPE_APC,
+      #CACHE_GRP_STATS_GAMES   => CACHE_TYPE_APC,
+      #CACHE_GRP_FOLDERS       => CACHE_TYPE_APC,
+      #CACHE_GRP_PROFILE       => CACHE_TYPE_APC,
+      #CACHE_GRP_GAME_MOVES    => CACHE_TYPE_FILE,
+      #CACHE_GRP_GAME_MOVEMSG  => CACHE_TYPE_FILE,
+      #CACHE_GRP_TOURNAMENT    => CACHE_TYPE_APC,
+      #CACHE_GRP_TDIRECTOR     => CACHE_TYPE_APC,
+      #CACHE_GRP_TLPROPS       => CACHE_TYPE_APC,
+      #CACHE_GRP_TPROPS        => CACHE_TYPE_APC,
+      #CACHE_GRP_TRULES        => CACHE_TYPE_APC,
+      #CACHE_GRP_TROUND        => CACHE_TYPE_APC,
+      #CACHE_GRP_TNEWS         => CACHE_TYPE_APC,
+      #CACHE_GRP_TP_COUNT      => CACHE_TYPE_APC,
+      #CACHE_GRP_TPARTICIPANT  => CACHE_TYPE_FILE,
+      #CACHE_GRP_TRESULT       => CACHE_TYPE_FILE,
    );
 
 
