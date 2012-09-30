@@ -107,12 +107,8 @@ define('DATE_FMT_YMD', 'Y-m-d');
 define('DATE_FMT_QUICK_YMD', 'Y-m-d'); // quick-suite date-format
 define('DATE_FMT_QUICK', 'Y-m-d H:i:s'); // quick-suite datetime-format
 
-define('SESSION_DURATION', 3600*12*61); // 1 month (=30.5 days)
+define('SESSION_DURATION', SECS_PER_HOUR*12*61); // 1 month (=30.5 days)
 define('TICK_FREQUENCY', 12); // ticks/hour (every 5 minutes)
-
-define('SECS_PER_DAY', 86400);
-define('SECS_PER_HOUR', 3600);
-define('SECS_PER_MIN', 60);
 
 //a $_REQUEST['handle'] will not overlap $_COOKIE['cookie_handle']
 define('COOKIE_PREFIX', 'cookie_');

@@ -23,6 +23,10 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
  * \brief Definitions and declarations for DGS caching.
  */
 
+define('SECS_PER_MIN',  60);
+define('SECS_PER_HOUR', 3600);
+define('SECS_PER_DAY',  86400);
+
 // cache-implementations
 define('CACHE_TYPE_NONE', false); // no caching
 define('CACHE_TYPE_APC', 'ApcCache');
@@ -38,6 +42,7 @@ define('CACHE_TYPE_FILE', 'FileCache');
 //    #game-views/time: 100/min, 350/10min, 1200/h, 4500/8h
 //    #tournaments unknown as feature is not live (therefore the '?')
 //
+define('CACHE_GRP_DEFAULT', 0);
 define('CACHE_GRP_CFG_PAGES', 1);   // 7KB/user * 1h -> 5 MB
 define('CACHE_GRP_CFG_BOARD', 2);   // 2KB/user * 1d -> 5 MB
 define('CACHE_GRP_CLOCKS', 3);      // 1KB total * 10min -> 1 KB
@@ -61,5 +66,33 @@ define('CACHE_GRP_TPARTICIPANT', 20); // 2KB/tourney/TP * 1h -> 20 MB(!) ?
 define('CACHE_GRP_TRESULT', 21);    // 20KB/tourney * 1d -> 1 MB ?
 // NOTE: keep as last def and adjust to MAX when adding a new cache-group
 define('MAX_CACHE_GRP', 21);
+
+// configure cleanup for expired cache-entries (cache-groups not listed uses expire-time of CACHE_GRP_DEFAULT)
+global $ARR_CACHE_GROUP_CLEANUP;
+$ARR_CACHE_GROUP_CLEANUP = array(
+      // CACHE_GRP_.. => expire-time [secs]
+      CACHE_GRP_DEFAULT       => 2*SECS_PER_DAY,
+      #CACHE_GRP_CFG_PAGES     => SECS_PER_DAY,
+      #CACHE_GRP_CFG_BOARD     => SECS_PER_DAY,
+      #CACHE_GRP_CLOCKS        => SECS_PER_DAY,
+      CACHE_GRP_GAME_OBSERVERS => SECS_PER_HOUR,
+      CACHE_GRP_GAME_NOTES    => SECS_PER_HOUR,
+      CACHE_GRP_USER_REF      => SECS_PER_DAY,
+      #CACHE_GRP_STATS_GAMES   => SECS_PER_DAY,
+      #CACHE_GRP_FOLDERS       => SECS_PER_DAY,
+      #CACHE_GRP_PROFILE       => SECS_PER_DAY,
+      CACHE_GRP_GAME_MOVES    => SECS_PER_HOUR,
+      CACHE_GRP_GAME_MOVEMSG  => SECS_PER_HOUR,
+      CACHE_GRP_TOURNAMENT    => SECS_PER_DAY,
+      CACHE_GRP_TDIRECTOR     => SECS_PER_DAY,
+      CACHE_GRP_TLPROPS       => SECS_PER_DAY,
+      CACHE_GRP_TPROPS        => SECS_PER_DAY,
+      CACHE_GRP_TRULES        => SECS_PER_DAY,
+      CACHE_GRP_TROUND        => SECS_PER_DAY,
+      CACHE_GRP_TNEWS         => SECS_PER_DAY,
+      CACHE_GRP_TP_COUNT      => SECS_PER_DAY,
+      CACHE_GRP_TPARTICIPANT  => SECS_PER_DAY,
+      CACHE_GRP_TRESULT       => SECS_PER_DAY,
+   );
 
 ?>

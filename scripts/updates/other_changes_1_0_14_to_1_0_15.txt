@@ -275,3 +275,7 @@ copy /images/eidogo.gif
 # removed unused image
 rm images/wood1.png
 
+-----------
+# added hourly-cron-entry for file-cache-cleanup (see INSTALL-file)
+25 5 * * *   wget -q -O - http://www.dragongoserver.net/daily_cron.php
+

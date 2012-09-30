@@ -63,6 +63,12 @@ abstract class AbstractCache
    /*! \brief Deletes single cache-entry with given key $id. */
    abstract public function cache_delete( $id, $cache_group=0 );
 
+   /*!
+    * \brief Purge cache-entries of given cache-group for expired entries (if possible).
+    * \return number of entries purged; false if cache does not support cleanup
+    */
+   abstract public function cache_cleanup( $cache_group, $expire_time );
+
 
    /*! \brief Stores cache-entry with group of other cache-keys (used to clear cache for a group of related elements). */
    public function cache_store_group( $group_id, $elem_id, $ttl, $cache_group=0 )
@@ -122,6 +128,12 @@ class ApcCache extends AbstractCache
    {
       return apc_delete($id);
    }
+
+   public function cache_cleanup( $cache_group, $expire_time )
+   {
+      return false;
+   }
+
 } // end of 'ApcCache'
 
 
@@ -223,6 +235,29 @@ class FileCache extends AbstractCache
       return ( file_exists($filename) ) ? unlink($filename) : false;
    }
 
+   /*! \brief Purges expired files in cache-dir for given cache-group, return number of deleted files. */
+   public function cache_cleanup( $cache_group, $expire_time )
+   {
+      $dir_path = $this->build_cache_filename( 0, $cache_group, /*dir*/true );
+      $arr_files = glob("$dir_path/*");
+
+      $cnt = 0;
+      foreach( $arr_files as $file )
+      {
+         if( !is_file($file) )
+            continue;
+         $mtime = (int)@filemtime( $file );
+         if( $mtime <= $expire_time ) // file expired?
+         {
+            if( unlink($file) )
+               ++$cnt;
+         }
+      }
+
+      if( DBG_CACHE && $cnt > 0 ) error_log("FileCache.cache_cleanup($cache_group): purged $cnt entries");
+      return $cnt;
+   }//cache_cleanup_dir
+
 } // end of 'FileCache'
 
 
@@ -307,8 +342,9 @@ class DgsCache
    /*!
     * \brief Returns cache-implementation if caching enabled and caching for $cache_group is allowed.
     * \param $cache_group CACHE_GRP_...
+    * \param $cache_type optional, CACHE_TYPE_... can ask for specific cache-type regardless of cache-group
     */
-   function get_cache( $cache_group )
+   function get_cache( $cache_group, $cache_type=null )
    {
       global $DGS_CACHE;
       if( !@$DGS_CACHE )
@@ -316,11 +352,14 @@ class DgsCache
 
       if( $GLOBALS['is_maintenance'] ) // caching disabled during maintenance-mode
          $cache = null;
-      else
+      else if( is_null($cache_type) )
       {
          $cache_type = $DGS_CACHE->get_cache_type( $cache_group );
          $cache = $DGS_CACHE->get_cache_impl( $cache_type );
       }
+      else
+         $cache = $DGS_CACHE->get_cache_impl( $cache_type );
+
       return $cache;
    }//get_cache
 
@@ -389,6 +428,35 @@ class DgsCache
       if( DBG_CACHE ) error_log("DgsCache.delete_group($cache_group,$group_id).$dbgmsg: group [" . (is_null($arr_group) ? '-' : implode(' ', $arr_group)) . "]");
       return $arr_group;
    }
+
+   /*!
+    * \brief Purges expired cache-entries for all supported cache-groups.
+    * \return return number of deleted cache-entries.
+    */
+   function cleanup_cache()
+   {
+      global $NOW, $ARR_CACHE_GROUP_CLEANUP;
+
+      $default_expire = ( isset($ARR_CACHE_GROUP_CLEANUP[CACHE_GRP_DEFAULT]) )
+         ? $NOW - $ARR_CACHE_GROUP_CLEANUP[CACHE_GRP_DEFAULT]
+         : $NOW - 7 * SECS_PER_DAY; // default-expire: 1 week
+
+      $cnt_deleted = 0;
+      for( $cache_group=0; $cache_group <= MAX_CACHE_GRP; ++$cache_group )
+      {
+         $cache = DgsCache::get_cache( $cache_group );
+         if( !is_null($cache) )
+         {
+            $group_expire = ( isset($ARR_CACHE_GROUP_CLEANUP[$cache_group]) )
+               ? $ARR_CACHE_GROUP_CLEANUP[$cache_group]
+               : $default_expire;
+            $cnt_deleted += $cache->cache_cleanup( $cache_group, $group_expire );
+         }
+      }
+
+      if( DBG_CACHE && $cnt_deleted > 0 ) error_log("DgsCache.cleanup_cache(SUM): purged $cnt_deleted total entries");
+      return $cnt_deleted;
+   }//cleanup_cache
 
    // \internal
    function debug_result( $value )

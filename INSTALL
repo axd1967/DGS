@@ -297,6 +297,7 @@ MAILTO= < EMAIL-OF-YOUR-CHOICE >
 
 */5  *  *  *  *   wget -q -O - http://www.dragongoserver.net/clock_tick.php
 0,30 *  *  *  *   wget -q --read-timeout=1800 -O - http://www.dragongoserver.net/halfhourly_cron.php
+58   *  *  *  *   wget -q -O - http://www.dragongoserver.net/hourly_cron.php
 25   5  *  *  *   wget -q -O - http://www.dragongoserver.net/daily_cron.php
 #7,22,37,52 * * * *   wget -q -O - http://www.dragongoserver.net/tournaments/cron_tournaments.php
 ----------------

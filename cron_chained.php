@@ -40,6 +40,9 @@ if( !$is_down )
       // normally every 30 mins
       include_once( "halfhourly_cron.php" );
 
+      // normally every 1 h
+      include_once( "hourly_cron.php" );
+
       // normally every 24 h
       include_once( "daily_cron.php" );
    }

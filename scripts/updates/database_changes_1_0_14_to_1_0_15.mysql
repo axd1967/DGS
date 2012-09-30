@@ -2598,3 +2598,7 @@ UPDATE UserQuota AS UQ INNER JOIN fix_uq AS FIX ON FIX.uid=UQ.uid
    SET UQ.FeaturePoints= 29 - FIX.sumP WHERE FIX.sumP > 0;
 
 
+-- added hourly-cron to cleanup expired cache-entries
+INSERT INTO Clock SET ID=208,Lastchanged=0 ;
+
+
