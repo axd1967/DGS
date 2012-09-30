@@ -303,7 +303,7 @@ class ConfigBoard
          {
             $src_row = mysql_single_fetch($dbgmsg.'find', "SELECT * FROM ConfigBoard WHERE User_ID='$uid' LIMIT 1");
             if( !is_null($src_row) )
-               DgsCache::store( $dbgmsg, CACHE_GRP_CFG_BOARD, $key, $src_row, SECS_PER_HOUR );
+               DgsCache::store( $dbgmsg, CACHE_GRP_CFG_BOARD, $key, $src_row, SECS_PER_DAY );
          }
          if( !$src_row )
             return null;

@@ -309,7 +309,7 @@ class TournamentCache
          while( list(,$arr_item) = $news_iterator->getListIterator() )
             $arr_tnews[] = $arr_item[0];
 
-         DgsCache::store( $dbgmsg, CACHE_GRP_TNEWS, $key, $arr_tnews, SECS_PER_HOUR, "TNews.$tid" );
+         DgsCache::store( $dbgmsg, CACHE_GRP_TNEWS, $key, $arr_tnews, SECS_PER_DAY, "TNews.$tid" );
       }
 
       return $arr_tnews;

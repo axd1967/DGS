@@ -24,31 +24,41 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
 // cache-implementations
+define('CACHE_TYPE_NONE', false); // no caching
 define('CACHE_TYPE_APC', 'ApcCache');
 define('CACHE_TYPE_FILE', 'FileCache');
 
-// cache content
-define('CACHE_GRP_CFG_PAGES', 1);
-define('CACHE_GRP_CFG_BOARD', 2);
-define('CACHE_GRP_CLOCKS', 3);
-define('CACHE_GRP_GAME_OBSERVERS', 4);
-define('CACHE_GRP_GAME_NOTES', 5);
-define('CACHE_GRP_USER_REF', 6);
-define('CACHE_GRP_STATS_GAMES', 7);
-define('CACHE_GRP_FOLDERS', 8);
-define('CACHE_GRP_PROFILE', 9);
-define('CACHE_GRP_GAME_MOVES', 10);
-define('CACHE_GRP_GAME_MOVEMSG', 11);
-define('CACHE_GRP_TOURNAMENT', 12);
-define('CACHE_GRP_TDIRECTOR', 13);
-define('CACHE_GRP_TLPROPS', 14); // TournamentLadderProps
-define('CACHE_GRP_TPROPS', 15);
-define('CACHE_GRP_TRULES', 16);
-define('CACHE_GRP_TROUND', 17);
-define('CACHE_GRP_TNEWS', 18);
-define('CACHE_GRP_TP_COUNT', 19); // TournamentParticipant-count
-define('CACHE_GRP_TPARTICIPANT', 20);
-define('CACHE_GRP_TRESULT', 21);
+// Cache Content:
+//
+// NOTE: noted are average size-requirements for APC-cache -> NEED X (estimated size X for live-server)
+//       file-caches requires only 20% (or less) for one entry as given for APC-cache.
+//
+// NOTE: live-server stats used for total size-estimations:
+//    #users/time: 50/min, 150/5min, 200/10min, 500/30min, 700/h, 900/2h, 1300/4h, 1500/6h, 2000/12h, 2500/1d, 3500/7d, 4400/30d
+//    #game-views/time: 100/min, 350/10min, 1200/h, 4500/8h
+//    #tournaments unknown as feature is not live (therefore the '?')
+//
+define('CACHE_GRP_CFG_PAGES', 1);   // 7KB/user * 1h -> 5 MB
+define('CACHE_GRP_CFG_BOARD', 2);   // 2KB/user * 1d -> 5 MB
+define('CACHE_GRP_CLOCKS', 3);      // 1KB total * 10min -> 1 KB
+define('CACHE_GRP_GAME_OBSERVERS', 4); // 0.5KB/user/game-id * 30min -> 750 KB
+define('CACHE_GRP_GAME_NOTES', 5);  // 1KB/user/game-id * 30min -> 3 MB + cache-REFRESH
+define('CACHE_GRP_USER_REF', 6);    // 0.5KB/id,handle * 1d -> 1 MB
+define('CACHE_GRP_STATS_GAMES', 7); // 8KB total * 1d -> 8 KB
+define('CACHE_GRP_FOLDERS', 8);     // 7KB/user * 30min -> 6 MB
+define('CACHE_GRP_PROFILE', 9);     // 0.5K/user/type * 1d -> 2 MB
+define('CACHE_GRP_GAME_MOVES', 10); // 100-200KB/game * 10min -> 30-100 MB(!)
+define('CACHE_GRP_GAME_MOVEMSG', 11); // 40-250KB/game * 10min -> 20-120 MB(!)
+define('CACHE_GRP_TOURNAMENT', 12); // 2KB/tourney * 1h -> 100 KB ?
+define('CACHE_GRP_TDIRECTOR', 13);  // 0.5KB/tourney * 1h -> 50 KB ?
+define('CACHE_GRP_TLPROPS', 14);    // 2KB/tourney * 1h -> 200 KB ?    // TournamentLadderProps
+define('CACHE_GRP_TPROPS', 15);     // 1KB/tourney * 1h -> 50 KB ?
+define('CACHE_GRP_TRULES', 16);     // 2KB/tourney * 1h -> 100 KB ?
+define('CACHE_GRP_TROUND', 17);     // 0.5KB/tourney/round * 1h -> 50 KB ?
+define('CACHE_GRP_TNEWS', 18);      // ~50KB/tourney * 1d -> 2 MB ?
+define('CACHE_GRP_TP_COUNT', 19);   // 0.5KB/tourney * 1h -> 25 KB ?   // TournamentParticipant-count
+define('CACHE_GRP_TPARTICIPANT', 20); // 2KB/tourney/TP * 1h -> 20 MB(!) ?
+define('CACHE_GRP_TRESULT', 21);    // 20KB/tourney * 1d -> 1 MB ?
 // NOTE: keep as last def and adjust to MAX when adding a new cache-group
 define('MAX_CACHE_GRP', 21);
 

@@ -311,7 +311,7 @@ class Profile
          mysql_free_result($db_result);
 
          if( $use_cache )
-            DgsCache::store( $dbgmsg, CACHE_GRP_PROFILE, $key, $arr_profiles, SECS_PER_HOUR );
+            DgsCache::store( $dbgmsg, CACHE_GRP_PROFILE, $key, $arr_profiles, SECS_PER_DAY );
       }
 
       return $arr_profiles;

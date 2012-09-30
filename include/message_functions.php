@@ -1356,7 +1356,7 @@ function load_cache_folders( $uid, $folder_nr=null )
       mysql_free_result($db_result);
 
       if( $use_cache )
-         DgsCache::store( $dbgmsg, CACHE_GRP_FOLDERS, $key, $result, 30*SECS_PER_MIN );
+         DgsCache::store( $dbgmsg, CACHE_GRP_FOLDERS, $key, $result, SECS_PER_HOUR );
    }
 
    // extract single folder from all folders
