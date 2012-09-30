@@ -420,7 +420,7 @@ function start_html( $title, $no_cache, $skinname=NULL, $style_string=NULL, $las
 function start_page( $title, $no_cache, $logged_in, &$player_row,
                      $style_string=NULL, $last_modified_stamp=NULL, $javascript=null )
 {
-   global $base_path, $is_down, $is_down_message, $is_maintenance, $ARR_USERS_MAINTENANCE, $printable;
+   global $base_path, $is_down, $is_down_message, $ARR_USERS_MAINTENANCE, $printable;
 
    $user_handle = @$player_row['Handle'];
    if( $is_down && $logged_in )
