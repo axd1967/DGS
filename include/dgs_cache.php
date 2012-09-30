@@ -41,51 +41,51 @@ abstract class AbstractCache
    abstract public function is_persistent_cache();
 
    /*! \brief Returns stored cache-entry for given cache-key; or else null. */
-   abstract public function cache_fetch( $id );
+   abstract public function cache_fetch( $id, $cache_group=0 );
 
    /*!
     * \brief Stores cache-entry for given cache-key with given TTL [secs].
     * \param $data storing NULL is NOT possible!
     */
-   abstract public function cache_store( $id, $data, $ttl );
+   abstract public function cache_store( $id, $data, $ttl, $cache_group=0 );
 
    /*!
     * \brief Stores cache-entries in array( cache_key => data ) with given TTL [secs].
     * \param $arr_data storing NULL is NOT possible for array-values!
     * \note overwrite if there's a special implementation.
     */
-   public function cache_store_array( $arr_data, $ttl )
+   public function cache_store_array( $arr_data, $ttl, $cache_group=0 )
    {
       foreach( $arr_data as $id => $data )
-         $this->cache_store( $id, $data, $ttl );
+         $this->cache_store( $id, $data, $ttl, $cache_group );
    }
 
    /*! \brief Deletes single cache-entry with given key $id. */
-   abstract public function cache_delete( $id );
+   abstract public function cache_delete( $id, $cache_group=0 );
 
 
    /*! \brief Stores cache-entry with group of other cache-keys (used to clear cache for a group of related elements). */
-   public function cache_store_group( $group_id, $elem_id, $ttl )
+   public function cache_store_group( $group_id, $elem_id, $ttl, $cache_group=0 )
    {
-      $arr_group = $this->cache_fetch( $group_id );
+      $arr_group = $this->cache_fetch( $group_id, $cache_group );
       if( is_null($arr_group) )
          $arr_group = array( $elem_id );
       else
          $arr_group[] = $elem_id;
 
-      return $this->cache_store( $group_id, $arr_group, $ttl );
+      return $this->cache_store( $group_id, $arr_group, $ttl, $cache_group );
    }
 
    /*! \brief Deletes all cache-entries of cache-group and group-id itself. */
-   public function cache_delete_group( $group_id )
+   public function cache_delete_group( $group_id, $cache_group=0 )
    {
-      $arr_group = $this->cache_fetch( $group_id );
+      $arr_group = $this->cache_fetch( $group_id, $cache_group );
       if( !is_null($arr_group) )
       {
          $arr_group = array_unique( $arr_group );
          foreach( $arr_group as $elem_id )
-            $this->cache_delete( $elem_id );
-         $this->cache_delete( $group_id );
+            $this->cache_delete( $elem_id, $cache_group );
+         $this->cache_delete( $group_id, $cache_group );
       }
       return $arr_group;
    }
@@ -102,23 +102,23 @@ class ApcCache extends AbstractCache
       return true;
    }
 
-   public function cache_fetch( $id )
+   public function cache_fetch( $id, $cache_group=0 )
    {
       $result = apc_fetch($id, $success);
       return ( $success ) ? $result : null;
    }
 
-   public function cache_store( $id, $data, $ttl )
+   public function cache_store( $id, $data, $ttl, $cache_group=0 )
    {
       return apc_store( $id, $data, $ttl );
    }
 
-   public function cache_store_array( $arr_data, $ttl )
+   public function cache_store_array( $arr_data, $ttl, $cache_group=0 )
    {
       return apc_store( $arr_data, null, $ttl );
    }
 
-   public function cache_delete( $id )
+   public function cache_delete( $id, $cache_group=0 )
    {
       return apc_delete($id);
    }
@@ -140,17 +140,24 @@ class FileCache extends AbstractCache
       if( (string)DATASTORE_FOLDER == '' )
          error('internal_error', "FileCache.construct.miss.datastore");
 
-      $path = build_path_dir( $_SERVER['DOCUMENT_ROOT'], DATASTORE_FOLDER ) . 'filecache';
-      if( !is_dir($path) )
+      $this->base_filepath = build_path_dir( $_SERVER['DOCUMENT_ROOT'], DATASTORE_FOLDER ) . 'filecache';
+      for( $cache_group=0; $cache_group <= MAX_CACHE_GRP; ++$cache_group )
       {
-         if( !mkdir($path, 0777, /*recursive*/true) )
-            error('internal_error', "FileCahce.construct.miss.datastore_dir(filecache)");
+         $path = $this->build_cache_filename( 0, $cache_group, /*dir*/true );
+         if( !is_dir($path) )
+         {
+            if( !mkdir($path, 0777, /*recursive*/true) )
+               error('internal_error', "FileCache.construct.mkdir.datastore_dir(filecache,$cache_group)");
+         }
       }
-      $this->base_filepath = $path;
    }
 
-   private function build_cache_filename( $id ) {
-      return $this->base_filepath . '/' . $id;
+   private function build_cache_filename( $id, $cache_group=0, $dir_only=false )
+   {
+      $path = ( $cache_group == 0 )
+         ? $this->base_filepath
+         : $this->base_filepath . sprintf( '-%02d', $cache_group );
+      return ($dir_only) ? $path : $path . '/' . $id;
    }
 
    public function is_persistent_cache()
@@ -158,9 +165,9 @@ class FileCache extends AbstractCache
       return true;
    }
 
-   public function cache_fetch( $id )
+   public function cache_fetch( $id, $cache_group=0 )
    {
-      $filename = $this->build_cache_filename( $id );
+      $filename = $this->build_cache_filename( $id, $cache_group );
       if( !file_exists($filename) )
          return null;
 
@@ -190,9 +197,9 @@ class FileCache extends AbstractCache
       return $result;
    }//cache_fetch
 
-   public function cache_store( $id, $data, $ttl )
+   public function cache_store( $id, $data, $ttl, $cache_group=0 )
    {
-      $filename = $this->build_cache_filename( $id );
+      $filename = $this->build_cache_filename( $id, $cache_group );
 
       $file_handle = fopen($filename, 'a+'); // open read-write (append) to get lock of potentially existing file
       if( !$file_handle )
@@ -209,9 +216,9 @@ class FileCache extends AbstractCache
       return $result;
    }//cache_store
 
-   public function cache_delete( $id )
+   public function cache_delete( $id, $cache_group=0 )
    {
-      $filename = $this->build_cache_filename( $id );
+      $filename = $this->build_cache_filename( $id, $cache_group );
       return ( file_exists($filename) ) ? unlink($filename) : false;
    }
 
@@ -285,7 +292,9 @@ class DgsCache
       if( !@$DGS_CACHE )
          $DGS_CACHE = new DgsCache();
 
-      if( $DGS_CACHE->allow_group_caching($cache_group) )
+      if( $GLOBALS['is_maintenance'] ) // no caching in maintenance-mode
+         return null;
+      elseif( $DGS_CACHE->allow_group_caching($cache_group) )
          return $DGS_CACHE->cache_impl;
       else
          return null;
@@ -302,7 +311,7 @@ class DgsCache
       if( !$cache )
          return null;
 
-      $result = $cache->cache_fetch( $id );
+      $result = $cache->cache_fetch( $id, $cache_group );
       if( DBG_CACHE ) error_log("DgsCache.fetch($cache_group,$id).$dbgmsg = [" . DgsCache::debug_result($result) . "]");
       return $result;
    }
@@ -318,9 +327,9 @@ class DgsCache
       if( !$cache )
          return false;
 
-      $result = $cache->cache_store( $id, $data, $ttl );
+      $result = $cache->cache_store( $id, $data, $ttl, $cache_group );
       if( $group_id )
-         $cache->cache_store_group( "GROUP_$group_id", $id, $ttl );
+         $cache->cache_store_group( "GROUP_$group_id", $id, $ttl, $cache_group );
 
       if( DBG_CACHE ) error_log("DgsCache.store($cache_group,$id,$ttl,[$group_id]).$dbgmsg = [" . ($result ? 1 : 0) . "]");
       return $result;
@@ -336,7 +345,7 @@ class DgsCache
       if( !$cache )
          return true;
 
-      $result = $cache->cache_delete( $id );
+      $result = $cache->cache_delete( $id, $cache_group );
       if( DBG_CACHE ) error_log("DgsCache.delete($cache_group,$id).$dbgmsg = [" . ($result ? 1 : 0) . "]");
       return $result;
    }
@@ -352,7 +361,7 @@ class DgsCache
       if( !$cache )
          return null;
 
-      $arr_group = $cache->cache_delete_group( "GROUP_$group_id" );
+      $arr_group = $cache->cache_delete_group( "GROUP_$group_id", $cache_group );
       if( DBG_CACHE ) error_log("DgsCache.delete_group($cache_group,$group_id).$dbgmsg: group [" . (is_null($arr_group) ? '-' : implode(' ', $arr_group)) . "]");
       return $arr_group;
    }

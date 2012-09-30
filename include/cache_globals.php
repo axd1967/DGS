@@ -48,5 +48,7 @@ define('CACHE_GRP_TROUND', 17);
 define('CACHE_GRP_TNEWS', 18);
 define('CACHE_GRP_TP_COUNT', 19); // TournamentParticipant-count
 define('CACHE_GRP_TPARTICIPANT', 20);
+// NOTE: keep as last def and adjust to MAX when adding a new cache-group
+define('MAX_CACHE_GRP', 20);
 
 ?>
