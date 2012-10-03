@@ -382,7 +382,7 @@ class SgfBuilder
       $this->player_notes = '';
       if( $this->include_games_notes )
       {
-         $gn_row = GameHelper::load_game_notes( 'SgfBuilder.load_player_game_notes', $this->gid, $uid );
+         $gn_row = GameHelper::load_cache_game_notes( 'SgfBuilder.load_player_game_notes', $this->gid, $uid );
          if( is_array($gn_row) )
             $this->player_notes = @$gn_row['Notes'];
       }

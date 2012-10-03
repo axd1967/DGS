@@ -104,7 +104,7 @@ $GLOBALS['ThePage'] = new Page('Game');
    $is_guest = ( $my_id <= GUESTS_ID_MAX );
 
 
-   $game_row = GameHelper::load_game_row( 'game.findgame', $gid, /*addf*/true );
+   $game_row = GameHelper::load_cache_game_row( 'game', $gid );
    extract($game_row);
    $is_shape = ($ShapeID > 0);
 
@@ -551,7 +551,7 @@ $GLOBALS['ThePage'] = new Page('Game');
       $notes = '';
       $noteshide = (substr( $notesmode, -3) == 'OFF') ? 'Y' : 'N';
 
-      $gn_row = GameHelper::load_game_notes( 'game', $gid, $my_id );
+      $gn_row = GameHelper::load_cache_game_notes( 'game', $gid, $my_id );
       if( $gn_row )
       {
          $notes = $gn_row['Notes'];
