@@ -434,6 +434,7 @@ class GameAddTime
          error('mysql_insert_move',"GameAddTime::add_time_opponent.insert_move($gid)");
 
       Board::delete_cache_game_moves( "GameAddTime::add_time_opponent($gid)", $gid );
+      GameHelper::delete_cache_game_row( "GameAddTime::add_time_opponent($gid)", $gid );
 
       return $add_hours; // success (no-error)
    } //add_time_opponent
@@ -1149,6 +1150,7 @@ class GameHelper
          CACHE_GRP_GAME_OBSERVERS, "Observers.$gid" );
       Board::delete_cache_game_moves( "GameHelper::_delete_base_game_tables.moves($gid)", $gid );
       Board::delete_cache_game_move_messages( "GameHelper::_delete_base_game_tables.movemsg($gid)", $gid );
+      GameHelper::delete_cache_game_row( "GameHelper::_delete_base_game_tables.games($gid)", $gid );
    }//_delete_base_game_tables
 
    /*!
@@ -1312,6 +1314,27 @@ class GameHelper
       return $grow;
    }//load_game_row
 
+   function load_cache_game_row( $dbgmsg, $gid )
+   {
+      $dbgmsg = "GameHelper::load_cache_game_row($gid).$dbgmsg";
+      $key = "Games.$gid";
+
+      $row = DgsCache::fetch( $dbgmsg, CACHE_GRP_GAMES, $key );
+      if( is_null($row) )
+         $row = GameHelper::load_game_row( $dbgmsg, $gid, /*add-fields*/true );
+
+      // store first time + refresh cache-expiry on access for another period
+      if( $row && isStartedGame(@$row['Status']) )
+         DgsCache::store( $dbgmsg, CACHE_GRP_GAMES, $key, $row, 10*SECS_PER_MIN );
+
+      return $row;
+   }//load_cache_game_row
+
+   function delete_cache_game_row( $dbgmsg, $gid )
+   {
+      DgsCache::delete( $dbgmsg, CACHE_GRP_GAMES, "Games.$gid" );
+   }
+
    function get_quick_game_action( $game_status, $handicap, $moves, $fk )
    {
       if( $handicap > 0 && $moves < $handicap && $game_status == GAME_STATUS_PLAY )
@@ -1343,9 +1366,9 @@ class GameHelper
          $qsql->add_part( SQLP_FIELDS, '0 AS X_Priority');
    }
 
-   function load_game_notes( $dbgmsg, $gid, $uid )
+   function load_cache_game_notes( $dbgmsg, $gid, $uid )
    {
-      $dbgmsg = "GameHelper::load_game_notes($gid,$uid).$dbgmsg";
+      $dbgmsg = "GameHelper::load_cache_game_notes($gid,$uid).$dbgmsg";
       $key = "GameNotes.$gid.$uid";
 
       $row = DgsCache::fetch( $dbgmsg, CACHE_GRP_GAME_NOTES, $key );
@@ -1794,6 +1817,8 @@ class FairKomiNegotiation
       else
          $result = 0; // komi-bid saved
 
+      GameHelper::delete_cache_game_row( "FKN.save_komi.update2({$this->gid})", $this->gid );
+
       return $result;
    }//save_komi
 
@@ -1997,6 +2022,7 @@ class GameFinalizer
          /*notify*/true, /*system-msg*/0, MSGTYPE_RESULT, $gid );
 
       clear_cache_quick_status( array( $this->Black_ID, $this->White_ID ), QST_CACHE_GAMES );
+      GameHelper::delete_cache_game_row( "GameFinalizer.finish_game.del_cache($gid)", $gid );
    }//finish_game
 
    /*! \brief Returns true, if opponent rejects-win-by-timout and game should be made unrated. */

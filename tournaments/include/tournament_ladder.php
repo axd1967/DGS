@@ -289,6 +289,9 @@ class TournamentLadder
             db_query( "$xdbgmsg.upd_games.detach",
                sprintf( "UPDATE Games SET Flags=Flags | %s, Rated=IF( (Status='%s' OR Rated='Done'), Rated,'N') WHERE ID IN (%s)",
                         GAMEFLAGS_TG_DETACHED, GAME_STATUS_FINISHED, implode(',', $arr_gid) ));
+
+            foreach( $arr_gid as $tgid )
+               GameHelper::delete_cache_game_row( "$xdbgmsg.upd_games.detach.del_cach($tgid)", $tgid );
          }
 
          // notify opponents about user-removal (if there are running games)

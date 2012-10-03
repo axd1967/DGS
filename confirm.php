@@ -421,6 +421,8 @@ This is why:
          $result = db_query( "confirm.update_game($gid,$action)", $game_query . $game_clause );
          if( mysql_affected_rows() != 1 )
             error('mysql_update_game', "confirm.update_game2($gid,$action)");
+
+         GameHelper::delete_cache_game_row( "confirm.update_game3($gid,$action)", $gid );
       }
 
       if( $move_query )
@@ -429,7 +431,7 @@ This is why:
          if( mysql_affected_rows() < 1 && $action != 'delete' )
             error('mysql_insert_move', "confirm.update_moves2($gid,$action)");
 
-         Board::delete_cache_game_moves( "confirm.update_moves($gid,$action)", $gid );
+         Board::delete_cache_game_moves( "confirm.update_moves3($gid,$action)", $gid );
       }
 
       if( $message_query )
@@ -438,7 +440,7 @@ This is why:
          if( mysql_affected_rows() < 1 && $action != 'delete' )
             error('mysql_insert_move', "confirm.message_query2($gid,$action)");
 
-         Board::delete_cache_game_move_messages( "confirm.message_query($gid,$action)", $gid );
+         Board::delete_cache_game_move_messages( "confirm.message_query3($gid,$action)", $gid );
       }
 
       $do_delete = false;

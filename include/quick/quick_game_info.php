@@ -112,7 +112,7 @@ class QuickHandlerGameInfo extends QuickHandler
       }
       elseif( $cmd == GAMECMD_GET_NOTES )
       {
-         $gn_row = GameHelper::load_game_notes( 'QuickHandlerGameInfo.prepare', $gid, $uid );
+         $gn_row = GameHelper::load_cache_game_notes( 'QuickHandlerGameInfo.prepare', $gid, $uid );
          if( is_array($gn_row) )
             $this->gamenotes = @$gn_row['Notes'];
       }

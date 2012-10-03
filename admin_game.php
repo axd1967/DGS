@@ -115,8 +115,10 @@ define('GA_RES_TIMOUT', 3);
          ta_begin();
          {//HOT-section to change game-rated-status
             admin_log( $my_id, $player_row['Handle'], "Update game #$gid with Rated=[{$game->Rated} -> $toggled_rated]" );
-            db_query( "admin_game.toggle_rated($gid,$game_rated)",
+            db_query( "admin_game.toggle_rated($gid,$toggle_rated)",
                "UPDATE Games SET Rated='$toggled_rated' WHERE ID=$gid AND Rated='{$game->Rated}' LIMIT 1" );
+
+            GameHelper::delete_cache_game_row( "admin_game.toggle_rated.del_cache($gid,$toggle_rated)", $gid );
          }
          ta_end();
 

@@ -64,8 +64,9 @@ define('CACHE_GRP_TNEWS', 18);      // ~50KB/tourney * 1d -> 2 MB ?
 define('CACHE_GRP_TP_COUNT', 19);   // 0.5KB/tourney * 1h -> 25 KB ?   // TournamentParticipant-count
 define('CACHE_GRP_TPARTICIPANT', 20); // 2KB/tourney/TP * 1h -> 20 MB(!) ?
 define('CACHE_GRP_TRESULT', 21);    // 20KB/tourney * 1d -> 1 MB ?
+define('CACHE_GRP_GAMES', 22);      // 7KB/game * 10min -> 4 MB   // no long-caching accepting delayed data-display: vacation-start/end, user-updates (rating, clockused, name)
 // NOTE: keep as last def and adjust to MAX when adding a new cache-group
-define('MAX_CACHE_GRP', 21);
+define('MAX_CACHE_GRP', 22);
 
 // configure cleanup for expired cache-entries (cache-groups not listed uses expire-time of CACHE_GRP_DEFAULT)
 global $ARR_CACHE_GROUP_CLEANUP;
@@ -93,6 +94,7 @@ $ARR_CACHE_GROUP_CLEANUP = array(
       CACHE_GRP_TP_COUNT      => SECS_PER_DAY,
       CACHE_GRP_TPARTICIPANT  => SECS_PER_DAY,
       CACHE_GRP_TRESULT       => SECS_PER_DAY,
+      CACHE_GRP_GAMES         => SECS_PER_HOUR,
    );
 
 ?>

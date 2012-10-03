@@ -512,6 +512,8 @@ class QuickHandlerGame extends QuickHandler
             $result = db_query( "QuickHandlerGame.process.update_game($gid,$action})", $game_query . $game_clause );
             if( mysql_affected_rows() != 1 )
                error('mysql_update_game', "QuickHandlerGame.process.update_game2($gid,$action})");
+
+            GameHelper::delete_cache_game_row( "QuickHandlerGame.process.update_game3($gid,$action)", $gid );
          }
 
          if( $move_query )

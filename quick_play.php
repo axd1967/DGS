@@ -234,6 +234,7 @@ This is why:
       $result = db_query( "quick_play.update_game($gid)", $game_query . $game_clause );
       if( mysql_affected_rows() != 1 )
          error('mysql_update_game', "quick_play.update_game2($gid)");
+      GameHelper::delete_cache_game_row( "quick_play.update_game3($gid)", $gid );
 
       $result = db_query( "quick_play.update_moves($gid,$action)", $move_query );
       if( mysql_affected_rows() < 1 && $action != 'delete' )
