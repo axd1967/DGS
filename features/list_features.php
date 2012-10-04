@@ -222,7 +222,7 @@ require_once( "features/lib_votes.php" );
 
 function features_vote_neutral_extend_table_form( &$table, &$form )
 {
-   return $form->print_insert_submit_button( 'toggle_marks', T_('Toggle Marks') )
+   return $form->print_insert_submit_button( 'toggle_marks', T_('Toggle marks') )
       . MED_SPACING
       . $form->print_insert_submit_button( 'vote_neutral', T_('Set Neutral Vote') );
 }
