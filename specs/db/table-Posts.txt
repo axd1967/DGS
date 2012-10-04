@@ -32,6 +32,7 @@ Example:
 | User_ID       | int(11)               | NO   |     | NULL                |                |
 | Parent_ID     | int(11)               | NO   | MUL | 0                   |                |
 | Thread_ID     | int(11)               | NO   | MUL | 0                   |                |
+| Flags         | tinyint(3) unsigned   | NO   |     | 0                   |                |
 | AnswerNr      | mediumint(8) unsigned | NO   |     | 0                   |                |
 | Depth         | tinyint(3) unsigned   | NO   |     | 0                   |                |
 | crc32         | int(11)               | YES  |     | NULL                |                |
@@ -52,6 +53,9 @@ Example:
 * Thread_ID : int (FK id)
   - Posts.ID, which started the thread
   - appears in all Posts of the same thread
+
+* Flags : flags
+  - 0x01 = read-only flag (executives may reply)
 
 * Depth : int
   - Thread starter post has depth=1

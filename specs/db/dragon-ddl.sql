@@ -764,6 +764,7 @@ CREATE TABLE IF NOT EXISTS `Posts` (
   `User_ID` int(11) NOT NULL,
   `Parent_ID` int(11) NOT NULL default '0',
   `Thread_ID` int(11) NOT NULL default '0',
+  `Flags` tinyint(3) unsigned NOT NULL default '0',
   `AnswerNr` mediumint(8) unsigned NOT NULL default '0',
   `Depth` tinyint(3) unsigned NOT NULL default '0',
   `crc32` int(11) default NULL,

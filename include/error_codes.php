@@ -417,6 +417,9 @@ class ErrorCode
          $arr['read_only_forum'] =
             T_("Sorry, you are not allowed to post in this forum.");
 
+         $arr['read_only_thread'] =
+            T_("Sorry, you are not allowed to post in this thread.");
+
          $arr['forbidden_post'] =
             T_("Sorry, you are not allowed to view this post.");
 

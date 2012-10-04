@@ -118,6 +118,7 @@ require_once( 'forum/forum_functions.php' );
          $c=($c % LIST_ROWS_MODULO)+1;
          $lpost = $thread->last_post;
 
+         $readonly_str = $thread->format_flags( $thread->flags & FPOST_FLAG_READ_ONLY );
          $newstr = ($thread->has_new_posts) ? $disp_forum->get_new_string(NEWMODE_NO_LINK) : '';
          $subject = make_html_safe( $thread->subject, SUBJECT_HTML);
          $author = $thread->author->user_reference();
@@ -128,7 +129,7 @@ require_once( 'forum/forum_functions.php' );
             : '';
 
          echo "<tr class=Row$c>"
-            . '<td class=Subject>' . anchor( $thread->build_url_post(''), $subject ) . $newstr . '</td>'
+            . '<td class=Subject>' . anchor( $thread->build_url_post(''), $subject ) . $readonly_str . $newstr . '</td>'
             . "<td class=Name>$author</td>"
             . "<td class=PostCnt>{$thread->count_posts}</td>"
             . "<td class=HitCnt>{$thread->count_hits}</td>"

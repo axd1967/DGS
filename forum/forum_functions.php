@@ -80,6 +80,8 @@ define('FORUMLOGACT_HIDE_POST',     'hide_post');
 define('FORUMLOGACT_SUFFIX_NEW_THREAD', ':new_thread');
 define('FORUMLOGACT_SUFFIX_REPLY',      ':reply');
 
+// Posts.Flags
+define('FPOST_FLAG_READ_ONLY', 0x01);
 
 
 /* \brief Adds entry into Forumlog */
@@ -120,7 +122,7 @@ function display_posts_pending_approval()
 {
    $result = // fields matching ForumPost::new_from_row
       db_query( 'display_posts_pending_approval.find',
-         'SELECT Posts.ID, Forum_ID, Thread_ID, Subject, UNIX_TIMESTAMP(Time) as X_Time, '
+         'SELECT Posts.ID, Forum_ID, Thread_ID, Flags, Subject, UNIX_TIMESTAMP(Time) as X_Time, '
             . 'User_ID, PAuthor.Name AS Author_Name, PAuthor.Handle AS Author_Handle, '
             . 'Forums.Name AS X_Forumname '
          . 'FROM Posts '
@@ -573,7 +575,8 @@ class DisplayForum
    } //get_new_string
 
    // \param $drawmode one of DRAWPOST_NORMAL | PREVIEW | EDIT | REPLY
-   function forum_message_box( $drawmode, $post_id, $GoDiagrams=null, $ErrorMsg='', $Subject='', $Text='' )
+   // \note checking for thread-read-only flag must be done at caller-side
+   function forum_message_box( $drawmode, $post_id, $GoDiagrams=null, $ErrorMsg='', $Subject='', $Text='', $Flags=0 )
    {
       global $player_row;
       if( ($player_row['AdminOptions'] & ADMOPT_FORUM_NO_POST) ) // user not allowed to post
@@ -615,6 +618,13 @@ class DisplayForum
             'HIDDEN', 'forum', $this->forum_id ));
       $form->add_row( array(
             'TAB', 'TEXTAREA', 'Text', 70, 25, $Text ));
+
+      if( $post_id == 0 && ForumPost::allow_post_read_only() ) // only for new thread
+      {
+         $form->add_row( array(
+            'TAB', 'CHECKBOX', 'ReadOnly', 1, T_('Read-only thread (only admin executives may reply)'),
+               ($Flags & FPOST_FLAG_READ_ONLY), ));
+      }
 
       $arr_dump_diagrams = array();
 /*
@@ -744,8 +754,9 @@ class DisplayForum
 //      if( ALLOW_GO_DIAGRAMS && is_javascript_enabled() && !is_null($GoDiagrams) )
 //         $txt = replace_goban_tags_with_boards($txt, $GoDiagrams);
       $txt = MarkupHandlerGoban::replace_igoban_tags( $txt );
-
       if( strlen($txt) == 0 ) $txt = '&nbsp;';
+
+      $sbj_readonly = ( $post->is_thread_post() ) ? $post->format_flags() : '';
 
       // CSS-class for post header
       $drawmode_type = ($drawmode & MASK_DRAWPOST_MODES);
@@ -775,7 +786,7 @@ class DisplayForum
          $hdrcols = $cols;
 
          echo "\n<tr class=\"$hdrclass Subject\"><td class=Subject colspan=$hdrcols>"
-            ,"<a name=\"preview\" class=\"PostSubject\">$sbj</a></td></tr> "
+            ,"<a name=\"preview\" class=\"PostSubject\">$sbj</a> $sbj_readonly</td></tr> "
             ,"\n<tr class=\"$hdrclass Author\"><td class=Author colspan=$hdrcols>"
             ,T_('by'),' ' ,user_reference( REF_LINK, 1, '', $player_row)
             , ', ', echo_rating($player_row['Rating2'], /*show%*/false, $player_row['ID'], /*engl*/false, /*short*/true)
@@ -818,10 +829,10 @@ class DisplayForum
 
             //from revision_history or because, when edited, the link will be obsolete
             if( $drawmode_type == DRAWPOST_EDIT || $post->thread_no_link )
-               echo "<a name=\"$pid\" class=\"PostSubject\">$subject_modstr</a>";
+               echo "<a name=\"$pid\" class=\"PostSubject\">$subject_modstr</a> $sbj_readonly";
             else
                echo "<a name=\"$pid\" class=\"PostSubject\" href=\"", $thread_url, $term_url,
-                  "#$pid\">$subject_modstr</a>", $newstr;
+                  "#$pid\">$subject_modstr</a>", $sbj_readonly, $newstr;
          }
 
          // first [header-row] with different content (adding hidden-state)
@@ -904,11 +915,14 @@ class DisplayForum
 
          if( $user_may_post && Forum::allow_posting($player_row, $this->forum_opts) )
          {
-            // reply link
-            echo '<a href="', $thread_url,URI_AMP,"reply=$pid#$pid\">[ ", T_('reply#forum'), " ]</a>&nbsp;&nbsp;";
-            if( ALLOW_QUOTING )
-               echo '<a href="', $thread_url,URI_AMP,"quote=1",URI_AMP,"reply=$pid#$pid\">[ ",
-                  T_('quote'), " ]</a>&nbsp;&nbsp;";
+            if( !is_null($post->thread_post) && $post->thread_post->allow_post_reply() )
+            {
+               // reply link
+               echo '<a href="', $thread_url,URI_AMP,"reply=$pid#$pid\">[ ", T_('reply#forum'), " ]</a>&nbsp;&nbsp;";
+               if( ALLOW_QUOTING )
+                  echo '<a href="', $thread_url,URI_AMP,"quote=1",URI_AMP,"reply=$pid#$pid\">[ ",
+                     T_('quote'), " ]</a>&nbsp;&nbsp;";
+            }
 
             // edit link
             if( $is_my_post )
@@ -1547,6 +1561,9 @@ class ForumThread
       }
       mysql_free_result($result);
 
+      foreach( $this->posts as $pid => $post )
+         $post->thread_post = $this->thread_post;
+
       return $new_posts;
    }//load_posts
 
@@ -1591,6 +1608,7 @@ class ForumThread
       {
          $post = ForumPost::new_from_row($row);
          $post->thread_no_link = true; // display-opt
+         $post->thread_post = $this->thread_post;
          $this->posts[$post->id] = $post;
       }
       mysql_free_result($result);
@@ -1735,6 +1753,8 @@ class ForumPost
    var $subject;
    /*! \brief Posts.Text */
    var $text;
+   /*! \brief Posts.Flags */
+   var $flags;
 
    /*! \brief Posts.Parent_ID */
    var $parent_id;
@@ -1762,6 +1782,9 @@ class ForumPost
 
    // non-db vars
 
+   /*! \brief ref to thread ForumPost (set by ForumThread.load_posts). */
+   var $thread_post;
+
    /*! \brief true, if for thread no link should be drawn (used in draw_post-func) [default=false] */
    var $thread_no_link;
    /*! \brief [int] order in thread-view (1..n); 0 = unset. */
@@ -1788,7 +1811,7 @@ class ForumPost
 
    /*! \brief Constructs ForumPost-object with specified arguments: dates are in UNIX-time. */
    function ForumPost( $id=0, $forum_id=0, $thread_id=0, $author=null, $last_post_id=0,
-         $count_posts=0, $count_hits=0, $subject='', $text='', $parent_id=0, $answer_num=0,
+         $count_posts=0, $count_hits=0, $subject='', $text='', $flags=0, $parent_id=0, $answer_num=0,
          $depth=0, $posindex='', $approved='Y',
          $created=0, $last_changed=0, $last_edited=0, $crc32=0, $old_id=0 )
    {
@@ -1801,6 +1824,7 @@ class ForumPost
       $this->author = ( is_null($author) ? new User() : $author );
       $this->subject = $subject;
       $this->text = $text;
+      $this->flags = (int) $flags;
       $this->parent_id = (int) $parent_id;
       $this->answer_num = (int) $answer_num;
       $this->depth = (int) $depth;
@@ -1812,6 +1836,7 @@ class ForumPost
       $this->crc32 = (int) $crc32;
       $this->old_id = (int) $old_id;
       // non-db
+      $this->thread_post = null;
       $this->thread_no_link = false;
       $this->creation_order = 0;
       $this->has_new_posts = false;
@@ -1819,6 +1844,12 @@ class ForumPost
       $this->score = 0;
    }
 
+   function copy_post()
+   {
+      global $player_row;
+      return new ForumPost( 0, $this->forum_id, $this->thread_id, User::new_from_row($player_row), 0, 0, 0,
+         $this->subject, '', 0, $this->parent_id );
+   }
 
    /*! \brief Returns true, if post is thread-post. */
    function is_thread_post()
@@ -1842,6 +1873,23 @@ class ForumPost
    function is_author( $uid )
    {
       return ( $this->author->ID == $uid );
+   }
+
+   function allow_post_reply()
+   {
+      return ( !($this->flags & FPOST_FLAG_READ_ONLY) || ForumPost::allow_post_read_only() );
+   }
+
+   function format_flags( $flags=null )
+   {
+      if( is_null($flags) )
+         $flags = $this->flags;
+
+      $out = array();
+      if( $flags & FPOST_FLAG_READ_ONLY )
+         $out[] = span('ForumOpts', '[' . T_('Read-Only') . ']' );
+
+      return (count($out)) ? MED_SPACING . implode(' ', $out) : '';
    }
 
    /*! \brief Sets tree-navigation vars for this post (NULL=not-set). */
@@ -1895,6 +1943,7 @@ class ForumPost
          . "last_post_id=[{$this->last_post_id}], "
          . "subject=[{$this->subject}], "
          . 'text..=[' . cut_str($this->text, 30, false, '..], ')
+         . "flags=[{$this->flags}], "
          . 'author={' . ( is_null($this->author) ? 'null' : $this->author->to_string() ) . '}, '
          . "parent_id=[{$this->parent_id}], "
          . "answer#=[{$this->answer_num}], "
@@ -1942,7 +1991,7 @@ class ForumPost
    /*! \brief Builds basic QuerySQL to load post(s). */
    function build_query_sql()
    {
-      // Posts: ID,Forum_ID,Time,Lastchanged,Lastedited,Subject,Text,User_ID,Parent_ID,Thread_ID,
+      // Posts: ID,Forum_ID,Time,Lastchanged,Lastedited,Subject,Text,User_ID,Parent_ID,Thread_ID,Flags,
       //        AnswerNr,Depth,crc32,PosIndex,old_ID,Approved,PostsInThread,LastPost
       $qsql = new QuerySQL();
       $qsql->add_part( SQLP_FIELDS,
@@ -1976,6 +2025,7 @@ class ForumPost
             @$row['Hits'],
             @$row['Subject'],
             @$row['Text'],
+            @$row['Flags'],
             @$row['Parent_ID'],
             @$row['AnswerNr'],
             @$row['Depth'],
@@ -1999,6 +2049,12 @@ class ForumPost
          return 'H';
       else //if( $approved == 'Y' )
          return 'S';
+   }
+
+   function allow_post_read_only()
+   {
+      global $player_row;
+      return ( @$player_row['admin_level'] & ADMINGROUP_EXECUTIVE );
    }
 
 } // end of 'ForumPost'

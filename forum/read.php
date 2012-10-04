@@ -221,12 +221,14 @@ require_once( 'forum/post.php' );
    $is_empty_thread = is_null($post0);
    if( $is_empty_thread )
    {
+      $allow_thread_post = true;
       $thread_Subject = '';
       $Lastchangedthread = 0 ;
       $cnt_posts = 0;
    }
    else
    {
+      $allow_thread_post = $post0->allow_post_reply();
       $thread_Subject = $post0->subject;
       $Lastchangedthread = $post0->last_changed;
       $cnt_posts = $post0->count_posts;
@@ -289,8 +291,8 @@ require_once( 'forum/post.php' );
       $post_reference = $disp_forum->draw_post( $drawmode, $post, $is_my_post, $GoDiagrams );
 
       // preview of new or existing post (within existing thread)
-      $pvw_post = $post; // copy for preview/edit
-      if( $preview && $preview_ID == $pid )
+      $pvw_post = $post->copy_post(); // copy for preview/edit
+      if( $allow_thread_post && $preview && $preview_ID == $pid )
       {
          $disp_forum->change_depth( $disp_forum->cur_depth + 1 );
 
@@ -301,7 +303,7 @@ require_once( 'forum/post.php' );
       }
 
       // input-form for reply/edit-post
-      if( $drawmode_type == DRAWPOST_EDIT || $drawmode_type == DRAWPOST_REPLY )
+      if( $allow_thread_post && ( $drawmode_type == DRAWPOST_EDIT || $drawmode_type == DRAWPOST_REPLY ) )
       {
          $pvw_post_text = $pvw_post->text;
          if( $drawmode_type == DRAWPOST_REPLY && !($preview && $preview_ID == $pid) )
@@ -321,19 +323,21 @@ require_once( 'forum/post.php' );
    } //posts loop
 
 
-   if( Forum::allow_posting( $player_row, $forum->options ) )
+   if( $allow_thread_post && Forum::allow_posting( $player_row, $forum->options ) )
    {
       // preview of new thread
       if( $preview && $preview_ID == 0 )
       {
          $disp_forum->change_depth( 1 );
          $post = new ForumPost( 0, $forum_id, 0, null, 0, 0, 0, $preview_Subject, $preview_Text );
+         if( get_request_arg('ReadOnly') )
+            $post->flags |= FPOST_FLAG_READ_ONLY;
          $GoDiagrams = $preview_GoDiagrams;
          $disp_forum->draw_post(DRAWPOST_PREVIEW, $post, false, $GoDiagrams );
 
          echo "<tr><td colspan={$disp_forum->cols} align=center>\n";
          $disp_forum->forum_message_box(DRAWPOST_PREVIEW, $thread, $GoDiagrams, $post_errmsg,
-            $post->subject, $post->text );
+            $post->subject, $post->text, $post->flags );
          echo "</td></tr>\n";
       }
 

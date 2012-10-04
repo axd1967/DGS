@@ -65,6 +65,10 @@ function post_message($player_row, &$cfg_board, $forum_opts, &$thread )
    if( (string)$Subject == '' || (string)$Text == '' )
       return array( 0, T_('Message not saved, because of missing subject and/or text-body.') );
 
+   $ReadOnly = (bool)get_request_arg('ReadOnly');
+   if( !$parent || !ForumPost::allow_post_read_only() ) // new post setting read-only flag only allowed for new-thread and executives
+      $ReadOnly = false;
+
    if( is_null($cfg_board) && MarkupHandlerGoban::contains_goban($Text) ) // lazy-load
       $cfg_board = ConfigBoard::load_config_board($uid);
 
@@ -126,15 +130,19 @@ function post_message($player_row, &$cfg_board, $forum_opts, &$thread )
    // -------   Add post  ----------
 
       // -------   Reply / Quote  ---------- (use-case U08)
+      $post_flags = 0;
       if( $parent > 0 ) // existing thread
       {
          $is_newthread = false;
          $row = mysql_single_fetch( "post_message.reply.find($forum,$parent)",
-                        "SELECT PosIndex,Depth,Thread_ID FROM Posts " .
+                        "SELECT PosIndex,Depth,Thread_ID,Flags FROM Posts " .
                         "WHERE ID=$parent AND Forum_ID=$forum LIMIT 1" )
             or error('unknown_parent_post', "post_message.reply.find2($forum,$parent)" );
 
-         extract( $row); // $PosIndex, $Depth, $Thread_ID
+         extract( $row); // $PosIndex, $Depth, $Thread_ID, $Flags
+
+         if( ($Flags & FPOST_FLAG_READ_ONLY) && !ForumPost::allow_post_read_only() )
+            error('read_only_thread', "post_message.reply.check.thread_readonly($forum,$parent)" );
 
          $row = mysql_single_fetch( "post_message.reply.max($parent)",
                         "SELECT MAX(AnswerNr) AS answer_nr " .
@@ -155,6 +163,8 @@ function post_message($player_row, &$cfg_board, $forum_opts, &$thread )
          $Depth = 0;
          $Thread_ID = -1;
          $lastchanged_string = "LastChanged=FROM_UNIXTIME($NOW), ";
+         if( $ReadOnly )
+            $post_flags |= FPOST_FLAG_READ_ONLY;
       }
 
 
@@ -172,6 +182,7 @@ function post_message($player_row, &$cfg_board, $forum_opts, &$thread )
       $query = "INSERT INTO Posts SET " .
          "Forum_ID=$forum, " .
          "Thread_ID=$Thread_ID, " .
+         "Flags=$post_flags, " .
          "Time=FROM_UNIXTIME($NOW), " .
          $lastchanged_string .
          "Subject=\"$Subject\", " .

@@ -326,6 +326,7 @@ TABLE Posts
    Lastchanged    - last-changed-date for thread (post-edit is NO change to thread)
    PostsInThread  - number of shown posts for this thread { Thread_ID }
    Hits           - number of hits (reads/action on thread-posts)
+   Flags          - thread-flags, though could later be used for Posts-flags as well
 
    User_ID        - Players.ID, author of post
    Parent_ID      - Posts.ID of answered/replied post (to build thread-tree)
@@ -351,7 +352,7 @@ TABLE Posts
                     see forum/old_links_redirect.php
 
    # entered data
-   Forum_ID, Thread_ID, User_ID, Parent_ID, AnswerNr, Depth, PosIndex,
+   Forum_ID, Thread_ID, User_ID, Parent_ID, Flags, AnswerNr, Depth, PosIndex,
    Time, Lastedited, Approved, Subject, Text, crc32, (old_ID)
 
    # calculated fields

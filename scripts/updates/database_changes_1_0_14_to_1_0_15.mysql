@@ -2602,3 +2602,8 @@ UPDATE UserQuota AS UQ INNER JOIN fix_uq AS FIX ON FIX.uid=UQ.uid
 INSERT INTO Clock SET ID=208,Lastchanged=0 ;
 
 
+-- add read-only flag for threads
+ALTER TABLE Posts
+   ADD Flags tinyint unsigned NOT NULL default '0' AFTER Thread_ID ;
+
+
