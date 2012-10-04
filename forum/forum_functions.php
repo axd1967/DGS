@@ -32,6 +32,7 @@ require_once( "include/form_functions.php" );
 require_once( 'include/classlib_user.php' );
 require_once( 'include/classlib_goban.php' );
 require_once( 'include/rating.php' );
+require_once( 'include/dgs_cache.php' );
 require_once( 'forum/class_forum_options.php' );
 require_once( 'forum/class_forum_read.php' );
 //if( ALLOW_GO_DIAGRAMS ) require_once( "include/GoDiagram.php" );
@@ -1243,6 +1244,8 @@ class Forum
          echo sprintf( $debug_format, $query );
          if( !$debug )
             db_query( "Forum.fix_forum.update($fid)", $query );
+
+         Forum::delete_cache_forum( "Forum.fix_forum.update($fid)", $fid );
       }
 
       return (count($upd_arr) > 0) ? 1 : 0;
@@ -1317,6 +1320,27 @@ class Forum
       return Forum::new_from_row( $row );
    }
 
+   // cached version of Forum::load_forum()
+   function load_cache_forum( $id )
+   {
+      $dbgmsg = "Forum::load_cache_forum($id)";
+      $key = "Forum.$id";
+
+      $forum = DgsCache::fetch( $dbgmsg, CACHE_GRP_FORUM, $key );
+      if( is_null($forum) )
+      {
+         $forum = Forum::load_forum( $id );
+         DgsCache::store( $dbgmsg, CACHE_GRP_FORUM, $key, $forum, SECS_PER_DAY );
+      }
+
+      return $forum;
+   }
+
+   function delete_cache_forum( $dbgmsg, $fid )
+   {
+      DgsCache::delete( $dbgmsg, CACHE_GRP_FORUM, "Forum.$fid" );
+   }
+
    /*!
     * \brief Returns array of Forum-objects for specified user-id (in ForumOptions);
     *        returns null if no feature found.
@@ -1388,23 +1412,44 @@ class Forum
     *        with [ id => name ] entries.
     * param forum_opts is object ForumOptions($player_row), load all forum names if omitted
     */
-   function load_forum_names( $forum_opts )
+   function load_cache_forum_names( $forum_opts )
    {
-      // build forum-array for filter: ( Name => Forum_ID )
-      $result = db_query( 'Forum::load_forum_names',
-            'SELECT ID, Name, Options FROM Forums ORDER BY SortOrder' );
+      $dbgmsg = "Forum::load_cache_forum_names";
+      $key = "ForumNames";
 
-      $fnames = array();
-      while( $row = mysql_fetch_array( $result ) )
+      $arr_forum_names = DgsCache::fetch( $dbgmsg, CACHE_GRP_FORUM_NAMES, $key );
+      if( is_null($arr_forum_names) )
       {
+         // build forum-array for filter: ( Name => Forum_ID )
+         $db_result = db_query( 'Forum::load_cache_forum_names',
+               'SELECT ID, Name, Options FROM Forums ORDER BY SortOrder' );
+
+         $arr_forum_names = array();
+         while( $row = mysql_fetch_array($db_result) )
+            $arr_forum_names[$row['ID']] = array( $row['Name'], $row['Options'] );
+         mysql_free_result($db_result);
+
+         DgsCache::store( $dbgmsg, CACHE_GRP_FORUM_NAMES, $key, $arr_forum_names, SECS_PER_DAY );
+      }
+
+      $forum_names = array();
+      foreach( $arr_forum_names as $fid => $arr )
+      {
+         list( $f_name, $f_opts ) = $arr;
+
          // can user view forum?
-         if( $forum_opts && !$forum_opts->is_visible_forum( $row['Options'] ) )
+         if( $forum_opts && !$forum_opts->is_visible_forum($f_opts) )
             continue;
 
-         $fnames[$row['ID']] = $row['Name'];
+         $forum_names[$fid] = $f_name;
       }
-      mysql_free_result($result);
-      return $fnames;
+
+      return $forum_names;
+   }//load_cache_forum_names
+
+   function delete_cache_forum_names( $dbgmsg )
+   {
+      DgsCache::delete( $dbgmsg, CACHE_GRP_FORUM_NAMES, "ForumNames" );
    }
 
    /*! \brief Returns array of Forum-objects with raw Forums-fields (for forum-fixes). */

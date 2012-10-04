@@ -41,7 +41,7 @@ require_once( "include/filterlib_mysqlmatch.php" );
 
    // build forum-array for filter: ( Name => Forum_ID )
    $f_opts = new ForumOptions( $player_row );
-   $arr_fnames = Forum::load_forum_names( $f_opts ); // id => name
+   $arr_fnames = Forum::load_cache_forum_names( $f_opts ); // id => name
    $farr_vis = array_keys($arr_fnames); // IDs of visible forums
    $arr_forum = array( T_('All#forum') => '' );
    foreach( $arr_fnames as $id => $name )

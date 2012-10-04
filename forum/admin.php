@@ -86,6 +86,8 @@ $GLOBALS['ThePage'] = new Page('ForumAdmin');
             //move the entry forward, reference by ID
             db_query( "forum_admin.move.update_sortorder2($fid,$end)",
                   "UPDATE Forums SET SortOrder=$end WHERE ID=$fid LIMIT 1" );
+
+            Forum::delete_cache_forum_names( "forum_admin.move.update_sortorder1($start:$end)" );
          }
          ta_end();
       }
@@ -139,40 +141,44 @@ $GLOBALS['ThePage'] = new Page('ForumAdmin');
       $name = trim( get_request_arg('name') );
       $description = trim( get_request_arg('description') );
 
-      // Delete or update ?
-      if( !$name && !$description )
-      { // Delete
-         if( mysql_single_fetch( 'forum_admin.do_edit.empty',
-            "SELECT ID FROM Posts WHERE Forum_ID=".$row['ID']." LIMIT 1") )
-         {
-            $msg = urlencode('Error: forum not empty');
-            jump_to("$abspage?sysmsg=$msg");
-         }
+      ta_begin();
+      {//HOT-section to delete or update forum
+         // Delete or update ?
+         if( !$name && !$description )
+         { // Delete
+            $row_posts = mysql_single_fetch( 'forum_admin.do_edit.empty',
+               "SELECT ID FROM Posts WHERE Forum_ID=$fid LIMIT 1" );
+            if( $row_posts )
+            {
+               $msg = urlencode('Error: forum not empty');
+               jump_to("$abspage?sysmsg=$msg");
+            }
 
-         ta_begin();
-         {//HOT-section to delete forum
             db_query( "forum_admin.do_edit.delete($fid)",
                   "DELETE FROM Forums WHERE ID=$fid LIMIT 1" );
             db_query( "forum_admin.do_edit.update_sortorder",
                   "UPDATE Forums SET SortOrder=SortOrder-1 WHERE SortOrder>" . $row["SortOrder"] );
          }
-         ta_end();
-      }
-      else
-      { //Update
-         if( !$name )
-         {
-            $msg = urlencode('Error: an entry must be given');
-            jump_to("$abspage?sysmsg=$msg");
+         else
+         { //Update
+            if( !$name )
+            {
+               $msg = urlencode('Error: an entry must be given');
+               jump_to("$abspage?sysmsg=$msg");
+            }
+
+            db_query( "forum_admin.do_edit.update_forums($fid)",
+                  "UPDATE Forums SET"
+                     . " Name='".mysql_addslashes($name)."'"
+                     . ",Description='".mysql_addslashes($description)."'"
+                     . ',Options='. build_forum_options( @$_REQUEST )
+                     . " WHERE ID=$fid LIMIT 1" );
          }
 
-         db_query( "forum_admin.do_edit.update_forums({$row['ID']})",
-               "UPDATE Forums SET"
-                  . " Name='".mysql_addslashes($name)."'"
-                  . ",Description='".mysql_addslashes($description)."'"
-                  . ',Options='. build_forum_options( @$_REQUEST )
-                  . " WHERE ID=" . $row['ID'] . " LIMIT 1" );
+         Forum::delete_cache_forum( "forum_admin.do_edit($fid)", $fid );
+         Forum::delete_cache_forum_names( "forum_admin.do_edit($fid)" );
       }
+      ta_end();
 
       jump_to($abspage); //clean URL
    } //do_edit
@@ -239,6 +245,8 @@ $GLOBALS['ThePage'] = new Page('ForumAdmin');
                   . ",Description='".mysql_addslashes($description)."'"
                   . ",Options=" . build_forum_options( @$_REQUEST )
                   . ",SortOrder=" . ($SortOrder+1) );
+
+         Forum::delete_cache_forum_names( "forum_admin.insert" );
       }
       ta_end();
 

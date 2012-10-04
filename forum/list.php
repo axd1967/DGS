@@ -52,7 +52,7 @@ require_once( 'forum/forum_functions.php' );
       jump_to( 'forum/'.$toggle_baseurl );
    $show_lp_author = ( $cfg_pages->get_forum_flags() & FORUMFLAG_THREAD_SHOWAUTHOR );
 
-   $forum = Forum::load_forum( $forum_id );
+   $forum = Forum::load_cache_forum( $forum_id );
    $f_opts = new ForumOptions( $player_row );
    if( !$f_opts->is_visible_forum( $forum->options ) )
       error('forbidden_forum', "forumlist.check.forum($forum_id)");

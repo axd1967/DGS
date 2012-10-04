@@ -236,6 +236,8 @@ function post_message($player_row, &$cfg_board, $forum_opts, &$thread )
             . "Updated=GREATEST(Updated,FROM_UNIXTIME($NOW)) "
             . "WHERE ID='$forum' LIMIT 1" );
 
+         Forum::delete_cache_forum( "post_message.forum_trigger($forum)", $forum );
+
          // global forum-trigger
          ForumRead::trigger_recalc_global_post_update( $NOW );
 
@@ -294,6 +296,8 @@ function approve_post( $fid, $tid, $pid )
       . "Updated=GREATEST(Updated,FROM_UNIXTIME($NOW)), "
       . "LastPost=GREATEST(LastPost,$pid) "
       . "WHERE ID=$fid LIMIT 1" );
+
+   Forum::delete_cache_forum( "approve_post.trigger_forum($fid,$pid)", $fid );
 
    // global-trigger
    ForumRead::trigger_recalc_global_post_update( $NOW );
@@ -363,6 +367,8 @@ function hide_post_update_trigger( $fid, $tid, $pid )
       . "Updated=GREATEST(Updated,FROM_UNIXTIME($NOW)) "
       . "WHERE ID=$fid LIMIT 1" );
 
+   Forum::delete_cache_forum( "hide_post_update_trigger.trigger_forum($fid,$pid)", $fid );
+
    // global-trigger
    ForumRead::trigger_recalc_global_post_update( $NOW );
 
@@ -422,6 +428,8 @@ function show_post( $fid, $tid, $pid )
       . 'PostsInForum=PostsInForum+1 '
       . "WHERE ID=$fid LIMIT 1" );
 
+   Forum::delete_cache_forum( "show_post.trigger_forum($fid,$pid)", $fid );
+
    // global-trigger
    ForumRead::trigger_recalc_global_post_update( $NOW );
 
@@ -461,6 +469,8 @@ function recalc_forum_lastpost( $fid )
 
    db_query( "recalc_forum_lastpost.update_lastpost($fid)",
       "UPDATE Forums SET LastPost=$lastpost WHERE ID='$fid' LIMIT 1" );
+
+   Forum::delete_cache_forum( "recalc_forum_lastpost.update_lastpost($fid)", $fid );
 }
 
 ?>

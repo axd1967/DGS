@@ -169,6 +169,10 @@ define('SEPLINE', "\n<p><hr>\n");
 
    do_updates( 'forum_consistency.update_thread.LastPost_Lastchanged', $upd_arr, $do_it );
 
+   foreach( $upd_freads as $fid => $tmp )
+      Forum::delete_cache_forum( 'forum_consistency.update_thread.LastPost_Lastchanged', $fid );
+
+
    //------------------------ Fix distinct Posts.Forum_ID per threads
 
    echo sprintf( "Check for distinct Posts.Forum_ID for all %s threads ...<br>\n", count($threads) );
