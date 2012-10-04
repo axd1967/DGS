@@ -77,7 +77,7 @@ require_once( 'forum/post.php' );
    if( $forum_id == 0 && $thread > 0 )
       $forum_id = load_forum_id( $thread );
 
-   $forum = Forum::load_forum( $forum_id );
+   $forum = Forum::load_cache_forum( $forum_id );
    $f_opts = new ForumOptions( $player_row );
    if( !$f_opts->is_visible_forum( $forum->options ) )
       error('forbidden_forum', "forum_read.check.forum_visible($forum_id,$my_id)");
@@ -161,7 +161,7 @@ require_once( 'forum/post.php' );
    $revh_post_id = (int)@$_GET['revision_history'];
    if( $revh_post_id > 0 )
       $fthread = load_revision_history( $revh_post_id );
-   else
+   else if( $thread > 0 )
    {
       // load user forum-reads
       $FR = new ForumRead( $my_id, $forum_id, $thread );
@@ -188,6 +188,8 @@ require_once( 'forum/post.php' );
       if( !$reply && !$edit && !$preview && $allow_mark_read )
          $FR->mark_thread_read( $thread, $fthread->last_created ); // use-case U01
    }
+   else
+      $fthread = new ForumThread();
 
    if( is_null($cfg_board) && $fthread->contains_goban() )
       $cfg_board = ConfigBoard::load_config_board($my_id);
