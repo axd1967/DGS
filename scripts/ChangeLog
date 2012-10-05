@@ -19,7 +19,420 @@ Developers INFO:
 ChangeLog
 ------------------------------------------------------------------
 
+2012-10-05 juga
+
+   * include/dgs_cache.php (class FileCache, ~.set_unlink_expired, ~.set_read_expired, ~.cache_fetch,
+         ~.cache_cleanup, ~.cache_clear, ~.get_cache_files, ~.get_cache_file;
+       AbstractCache.cache_clear;
+       ApcCache.cache_clear;
+       DgsCache.get_cache, ~.cleanup_cache)
+     scripts/dgs_cache_admin.php (build_list_cache_config, build_cleanup_cycle, build_timeunit,
+       build_file_list_cache_group, build_view_cache_entry),
+     include/cache_globals.php ($ARR_CACHE_GROUP_NAMES),
+     skins/dragon/screen.css, scripts/index.php, scripts/apc_cache_info.php:
+   - added DGS-Cache Manager to administrate dgs-caching for APC- and File-cache
+     - list all cache-groups with group-name, cache-type and cleanup cycle
+     - clear APC-cache and File-cache
+     - cleanup expired entries of File-Cache
+     - list of single cache-group with all its cache-file-entries
+     - view sinlge cache-file-entry with extra-info like size, last-change and last-access time
+     - delete single cache-file-entry
+     - allow to fetch entry from file-cache without deleting file on error or if expired for admin-mode
+     - allow to bypass maintenance-mode for admin-mode
+
+   * scripts/apc.php:
+   - added APC-manager script (not live-version)
+
+2012-10-04 juga
+
+   * forum/forum_functions.php (display_posts_pending_approval;
+       DisplayForum.forum_message_box, ~.draw_post;
+       ForumThread.load_posts, ~.load_revision_history;
+       class ForumPost, ~.copy_post, ~.allow_post_reply, ~.format_flags, ~.to_string, ~.new_from_row,
+         ~.allow_post_read_only),
+     scripts/updates/database_changes_1_0_14_to_1_0_15.mysql,
+     include/error_codes.php (ErrorCode.init),
+     forum/post.php (post_message),
+     specs/db/dragon-ddl.sql, specs/db/table-Posts.txt, specs/forums.txt,
+     forum/list.php, forum/read.php:
+   - forum: added read-only thread
+     - only admin executives can create read-only on starting a new thread
+     - reply only allowed by admin executives
+     - show '[Read-Only]' behind subject for thread-posts-view on thread-post and for thread-list
+-----------
+-- add read-only flag for threads
+ALTER TABLE Posts
+   ADD Flags tinyint unsigned NOT NULL default '0' AFTER Thread_ID ;
+-----------
+
+   * include/cache_globals.php (CACHE_GRP_FORUM, CACHE_GRP_FORUM_NAMES),
+     include/config.php ($DGS_CACHE_GROUPS),
+     forum/forum_functions.php (Forum.fix_forum, ~.load_cache_forum, ~.delete_cache_forum,
+       ~.load_cache_forum_names, ~.delete_cache_forum_names),
+     forum/post.php (post_message, approve_post, hide_post, show_post, recalc_forum_lastpost),
+     forum/admin.php, forum/list.php, forum/read.php, forum/search.php,
+     scripts/forum_consistency.php:
+   - use caching to load single forum and forum-names, invalidate cache on Forums-table-changes
+   - cleanup: don't load thread/forum-reads for writing new-topic
+
+2012-10-03 juga
+
+   * include/game_functions.php (GameAddTime.add_time_opponent;
+       GameHelper._delete_base_game_tables; ~.load_cache_game_row, ~.delete_cache_game_row,
+         ~.load_cache_game_notes;
+       FairKomiNegotiation.save_komi;
+       GameFinalizer.finish_game),
+     include/cache_globals.php (CACHE_GRP_GAMES, $ARR_CACHE_GROUP_CLEANUP),
+     include/quick/quick_game.php (QuickHandlerGame.process_cmd_play),
+     include/quick/quick_game_info.php (QuickHandlerGameInfo.prepare),
+     include/sgf_builder.php (SgfBuilder.load_player_game_notes)
+     include/config.php ($DGS_CACHE_GROUPS),
+     include/make_game.php (create_game),
+     tournaments/include/tournament_ladder.php (TournamentLadder.remove_user_from_ladder),
+     scripts/fix_games_timeleft.php (update_games_timeoutdate),
+     admin_game.php, confirm.php, game.php, quick_play.php:
+   - use caching to load Games-row for viewing game-page, invalidate cache on Games-table update;
+     except for starting/ending-vacation and Players-update (name, rating, vacation) the delay of 10mins
+     is accepted as cache-delete would require additional queries to find affected game-IDs
+   - renamed GameHelper::load_game_notes() -> ::load_cache_game_notes()
+
+2012-09-30 juga
+
+   * include/cache_globals.php, include/connect2mysql.php, include/gui_functions.php,
+     include/quick_common.php, include/std_functions.php, scripts/data_export.php,
+     scripts/translation_consistency.php, tournaments/cron_tournaments.php,
+     rss/status.php, wap/status.php, admin_faq.php, clock_tick.php, daily_cron.php,
+     halfhourly_cron.php, list_contacts.php, opponents.php, quick_status.php,
+     ratinggraph.php, ratingpng.php, sgf.php, statisticspng.php, status.php, users.php:
+   - use consts SECS_PER_MIN/HOUR/DAY instead of numbers where possible
+
+   * include/dgs_cache.php (AbstractCache.cache_cleanup; ApcCache.cache_cleanup; FileCache.cache_cleanup;
+       DgsCache.get_cache, ~.cleanup_cache),
+     include/cache_globals.php (SECS_PER_MIN, SECS_PER_HOUR, SECS_PER_DAY, $ARR_CACHE_GROUP_CLEANUP),
+     include/globals.php (CLOCK_CRON_HOUR),
+     include/quick_common.php,
+     scripts/updates/database_changes_1_0_14_to_1_0_15.mysql,
+     scripts/updates/other_changes_1_0_14_to_1_0_15.txt,
+     specs/db/dragon-data.sql,
+     cron_chained.php,
+     hourly_cron.php,
+     INSTALL:
+   - added hourly-cron to cleanup expired cache-entries
+     - configure cleanup for expired cache-entries;
+       cache-groups not listed uses expire-time of CACHE_GRP_DEFAULT
+     - moved consts SECS_PER_MIN/HOUR/DAY from 'include/quick_common.php' into 'include/cache_globals.php'
+-----------
+-- added hourly-cron to cleanup expired cache-entries
+INSERT INTO Clock SET ID=208,Lastchanged=0 ;
+-----------
+
+   * tournaments/include/tournament_cache.php (TournamentCache.load_cache_tournament_news),
+     include/game_functions.php (GameHelper.load_game_notes, ~.update_game_notes),
+     include/classlib_userconfig.php (ConfigBoard.load_config_board),
+     include/classlib_profile.php (Profile.load_profiles),
+     include/message_functions.php (load_cache_folders),
+     include/std_functions.php (check_for_observers),
+     include/cache_globals.php:
+   - added cache-size-estimations for cache-groups
+   - changed cache-expire-times for cache-groups:
+     - TournamentNews: 1h -> 1d
+     - GameNotes: 10min -> 30min
+     - ConfigBoard: 1h -> 1d
+     - Profile: 1h -> 1d
+     - Folders: 30min -> 1h
+     - Observers: 10min -> 30min
+
+   * include/dgs_cache.php (class DgsCache, ~.get_cache_type, ~.get_cache_impl, ~.get_cache),
+     include/config.php (DGS_CACHE, DBG_CACHE, $DGS_CACHE_GROUPS):
+   - extended server-config:
+     - added mapping for all cache-groups to specific cache-type (NONE, APC, FILE)
+       with fallback to default cache-type (DGS_CACHE) if not set
+     - added DBG_CACHE for cache-debugging
+
+   * tournaments/include/tournament_result.php (TournamentResult.insert, ~.update, ~.delete,
+       ~.delete_cache_tournament_result),
+     tournaments/include/tournament_cache.php (TournamentCache.load_cache_tournament_results),
+     tournaments/include/tournament_gui_helper.php (TournamentGuiHelper.build_tournament_results),
+     include/cache_globals.php (CACHE_GRP_TRESULT):
+   - use caching to load TournamentResult, invalidate cache on tournament-result-insert/update/delete
+   - show default-sort for tournament-result-table
+
+   * include/dgs_cache.php (AbstractCache.cache_fetch, ~.cache_store, ~.cache_store_array,
+         ~.cache_delete, ~.cache_store_group, ~.cache_delete_group;
+       class ApcCache;
+       class FileCache.build_cache_filename, ~.cache_fetch, ~.cache_store, ~.cache_delete;
+       class DgsCache.get_cache, ~.fetch, ~.store, ~.delete, ~.delete_group),
+     include/cache_globals.php (MAX_CACHE_GRP):
+   - use subdirs for FileCache to prevent too many files in one dir
+     - create all potential subdirs for caching in FileCache-constructor
+     - changed signature of cache-methods to allow passing cache-group to file-cache
+   - disable caching on server maintenance mode
+
+2012-09-29 juga
+
+   * include/dgs_cache.php (AbstractCache.is_persistent_cache;
+       ApcCache.is_persistent_cache;
+       class FileCache, ~.build_cache_filename, ~.is_persistent_cache, ~.cache_fetch, ~.cache_store,
+         ~.cache_delete;
+       class DgsCache, ~.is_persistent_cache),
+     include/cache_globals.php (CACHE_TYPE_FILE):
+   - added FileCache-implementation as alternative to shared-mem-cache and for very large data-blocks
+     by adapting Sabre_Cache_Filesystem taken from http://www.rooftopsolutions.nl/blog/107
+   - added is_persistent_cache()-func for cache-specific-implementation
+
+   * include/make_translationfiles.php (generate_translation_texts),
+     include/std_functions.php (write_to_file, read_from_file),
+     include/connect2mysql.php (mysql_addslashes),
+     include/utilities.php (REMOVED array_combine/dir_slashe/filepat2preg),
+     scripts/update_translation_pages.php (REMOVED glob):
+   - cleanup: removed alternative but now dead code because functions had been added in PHP 5
+     as DGS requires PHP 5 anwyay
+
+   * include/dgs_cache.php (class DgsCache, ~.allow_group_caching, ~.is_persistent, ~.get_cache,
+       ~.fetch, ~.store, ~.delete, ~.delete_group),
+     include/cache_globals.php (CACHE_TYPE_APC, CACHE_GRP_...),
+     include/config.php (DBG_QUERY, $DGS_CACHE_ENABLE_GROUPS)
+     include/board.php, include/cache_clock.php, include/classlib_profile.php,
+     include/classlib_userconfig.php, include/game_functions.php,
+     include/message_functions.php, include/std_functions.php,
+     tournaments/include/tournament.php, tournaments/include/tournament_cache.php,
+     tournaments/include/tournament_director.php, tournaments/include/tournament_ladder_props.php,
+     tournaments/include/tournament_news.php, tournaments/include/tournament_participant.php,
+     tournaments/include/tournament_properties.php, tournaments/include/tournament_round.php,
+     tournaments/include/tournament_rules.php,
+     daily_cron.php, edit_folders.php, statistics.php:
+   - enabled caching only for selected elements defined by CACHE_GRP_... configured
+     by global-config $DGS_CACHE_ENABLE_GROUPS to control what items are allowed to cache
+   - use collective-group for caching games-statistics
+   - config: formally added DBG_QUERY to global-config to write db-queries to error-log
+
+   * include/dgs_cache.php (DgsCache.is_persistent),
+     include/board.php, include/cache_clock.php,
+     include/classlib_userconfig.php, include/message_functions.php,
+     tournaments/include/tournament_cache.php:
+   - better name: renamed DgsCache::is_shared_enabled() into ::is_persistent()
+
+   * tournaments/include/tournament_helper.php (TournamentHelper.get_tournament_rating),
+     tournaments/include/tournament_participant.php (class TournamentParticipant),
+     tournaments/ladder/challenge.php:
+   - cleanup: combined TournamentParticipant::load_tournament_rating()
+     into TournamentHelper::get_tournament_rating()
+
+   * tournaments/include/tournament_participant.php (TournamentParticipant.assert_tournament_participant,
+       ~.insert, ~.update, ~.delete, ~.build_query_sql, ~.isTournamentParticipant,
+       ~.load_tournament_participant_by_id, ~.load_tournament_participant,
+       ~.check_rated_tournament_participants, ~.update_game_end_stats, ~.sync_tournament_registeredTP,
+       ~.delete_tournament_participant, ~.delete_cache_tournament_participant_count,
+       ~.delete_cache_tournament_participant)
+     tournaments/include/tournament_cache.php (TournamentCache.count_cache_tournament_participants,
+       ~.load_cache_tournament_participant, ~.is_cache_tournament_participant),
+     tournaments/include/tournament_helper.php (TournamentHelper.process_tournament_ladder_game_end,
+       ~.process_tournament_round_robin_game_end, ~.get_tournament_rating),
+     tournaments/include/tournament_gui_helper.php (TournamentGuiHelper.getLinkTextRegistration),
+     tournaments/include/tournament_properties.php (TournamentProperties.checkUserRegistration),
+     tournaments/include/tournament_status.php (TournamentStatus.check_conditions_status_PAIR),
+     tournaments/include/tournament_ladder.php (TournamentLadder.add_user_to_ladder),
+     tournaments/ladder/admin.php,
+     tournaments/roundrobin/create_pools.php, tournaments/roundrobin/define_pools.php,
+     tournaments/edit_participant.php, tournaments/list_news.php, tournaments/list_participants.php,
+     tournaments/register.php, tournaments/view_news.php, tournaments/view_tournament.php:
+   - added caching for TournamentParticipant-table:
+     - use shared-mem caching to count status of TournamentParticipants of tournament,
+       invalidate cache on tournament-participant-insert/update/delete
+     - use shared-mem caching to load TournamentParticipant,
+       invalidate cache on tournament-participant-insert/update/delete
+       - refactored TournamentParticipant::getLinkTextRegistration() into TournamentGuiHelper
+         to avoid cache-usage in TournamentParticipant-db-class
+       - splitted TournamentParticipant::load_tournament_participant() into
+         ::load_tournament_participant_by_id() to load TP by rid for clearer semantics and
+         easier caching of loading TP by user-id
+     - use shared-mem caching to check if user is TournamentParticipant
+   - cleanup: renamed TournamentParticipant::update_tournament_registeredTP()
+     to ::sync_tournament_registeredTP() to avoid ambiguity with Tournament::~
+
+2012-09-28 juga
+
+   * tournaments/include/tournament_ladder_props.php (TournamentLadderProps.fill_ladder_running_games,
+       ~.calc_ticks_due_rematch_wait, ~.calc_rematch_wait_remaining_hours),
+     tournaments/include/tournament_helper.php (TournamentHelper.process_tournament_ladder_game_end),
+     tournaments/include/tournament_cache.php (class TournamentCache),
+     tournaments/ladder/view.php,
+     tournaments/cron_tournaments.php:
+   - cleanup: refactor TournamentCache->load_clock_ticks() using existing cached-func get_clock_ticks()
+
+   * include/dgs_cache.php (DgsCache.store, ~.delete_group):
+   - use 'GROUP_'-prefix for group-ID in cache
+
+   * tournaments/include/tournament_news.php (TournamentNews.insert, ~.update, ~.delete,
+       ~.process_tournament_news_deleted, ~.delete_cache_tournament_news),
+     tournaments/include/tournament_cache.php (TournamentCache.load_cache_tournament_news),
+     tournaments/view_tournament.php:
+   - use shared-mem caching to load TournamentNews for view-tournament-page,
+     invalidate cache on tournament-news-insert/update/delete
+
+   * include/game_functions.php (GameScore.draw_score_box),
+     include/std_functions.php (start_html, end_page),
+     include/globals.php (CSS_VERSION),
+     skins/dragon/print.css,
+     game.php:
+   - added CSS NoPrint-class to hide some disturbing elements for print-view
+   - use CSS_VERSION to auto-reload print.css
+
+2012-09-27 juga
+
+   * tournaments/include/tournament_round.php (TournamentRound.insert, ~.update, ~.delete,
+       ~.delete_tournament_round, ~.delete_cache_tournament_round),
+     tournaments/include/tournament_template_round_robin.php (TournamentTemplateRoundRobin.checkProperties,
+       ~.checkPooling, ~.checkGamesStarted),
+     tournaments/include/tournament_helper.php (TournamentHelper.remove_tournament_round,
+       ~.set_tournament_round),
+     tournaments/include/tournament_cache.php (TournamentCache.load_cache_tournament_round),
+     tournaments/include/tournament_round_status.php (class TournamentRoundStatus),
+     tournaments/include/tournament_status.php (TournamentStatus._load_tround),
+     tournaments/roundrobin/create_pools.php, tournaments/roundrobin/define_pools.php,
+     tournaments/roundrobin/edit_pairing.php, tournaments/roundrobin/edit_pools.php,
+     tournaments/roundrobin/edit_ranks.php, tournaments/roundrobin/edit_round_props.php,
+     tournaments/roundrobin/edit_rounds.php, tournaments/roundrobin/view_pools.php,
+     tournaments/manage_tournament.php, tournaments/view_tournament.php:
+   - use shared-mem caching to load TournamentRound, invalidate cache on table-insert/update/delete
+     - TournamentHelper: renamed delete_tournament_round() to remove_tournament_round() to avoid ambiguity
+
+   * tournaments/include/tournament_rules.php (TournamentRules.update, ~.delete,
+       ~.delete_cache_tournament_rules),
+     tournaments/include/tournament_helper.php (TournamentHelper.create_games_from_tournament_rules,
+       ~.start_tournament_round_games, ~.determine_games_per_challenge),
+     tournaments/include/tournament_cache.php (TournamentCache.load_cache_tournament_rules),
+     tournaments/ladder/challenge.php, tournaments/edit_rules.php,
+     tournaments/game_admin.php, tournaments/view_tournament.php,
+     admin_game.php:
+   - use shared-mem caching to load TournamentRules, invalidate cache on table-update/delete
+
+   * tournaments/include/tournament_properties.php (TournamentProperties.update, ~.delete,
+       ~.delete_cache_tournament_properties),
+     tournaments/include/tournament_helper.php (TournamentHelper.create_games_from_tournament_rules,
+       ~.start_tournament_round_games),
+     tournaments/include/tournament_cache.php (TournamentCache.load_cache_tournament_properties),
+     tournaments/include/tournament_ladder.php (TournamentLadder.add_user_to_ladder),
+     tournaments/include/tournament_status.php (TournamentStatus._load_tprops),
+     tournaments/ladder/admin.php, tournaments/ladder/challenge.php, tournaments/ladder/view.php,
+     tournaments/roundrobin/create_pools.php, tournaments/roundrobin/edit_pools.php,
+     tournaments/roundrobin/view_pools.php, tournaments/edit_participant.php,
+     tournaments/edit_properties.php, tournaments/register.php, tournaments/view_tournament.php:
+   - use shared-mem caching to load TournamentProperties, invalidate cache on table-update/delete
+
+   * tournaments/include/tournament_ladder_props.php (TournamentLadderProps.update, ~.delete,
+       ~.delete_cache_tournament_ladder_props),
+     tournaments/include/tournament_helper.php (TournamentHelper.process_tournament_ladder_game_end,
+       ~.process_rank_period),
+     tournaments/include/tournament_cache.php (class TournamentCache, ~.load_cache_tournament_ladder_props),
+     tournaments/include/tournament_template_ladder.php (TournamentTemplateLadder.checkProperties),
+     tournaments/include/tournament_ladder.php (TournamentLadder.add_user_to_ladder),
+     tournaments/ladder/admin.php, tournaments/ladder/challenge.php, tournaments/ladder/edit_props.php,
+     tournaments/ladder/view.php, tournaments/view_tournament.php:
+   - use shared-mem caching to load TournamentLadderProps,
+     invalidate cache on table-update/delete
+     - replaced TournamentCache->load_tournament_ladder_props() by TournamentCache::load_cache_tournament_ladder_props()
+
+   * tournaments/include/tournament_director.php (TournamentDirector.insert, ~.update, ~.delete,
+       ~.load_tournament_directors_flags, ~.delete_cache_tournament_director),
+     tournaments/include/tournament_cache.php (class TournamentCache, ~.is_cache_tournament_director),
+     tournaments/include/tournament_gui_helper.php (TournamentGuiHelper.getTournamentRoleText),
+     tournaments/include/tournament_helper.php (TournamentHelper.allow_edit_tournaments):
+   - use shared-mem caching to check if user is tournament-director with optional flags,
+     invalidate cache on table-changes
+     - replaced TournamentCache->is_tournament_director() by TournamentCache::is_cache_tournament_director()
+
+   * tournaments/include/tournament_gui_helper.php (TournamentGuiHelper.getTournamentRoleText),
+     tournaments/manage_tournament.php:
+   - cleanup to get rid of dependencies in persistence of 'tournament/include/tournament.php':
+     - refactored Tournament->allow_edit_tournaments() into static TournamentHelper::allow_edit_tournaments()
+     - refactored Tournament->getRoleText() into static TournamentGuiHelper::getTournamentRoleText()
+
+   * tournaments/include/tournament_helper.php (TournamentHelper.allow_edit_tournaments),
+     tournaments/include/tournament.php (class Tournament),
+     tournaments/edit_director.php, tournaments/edit_lock.php, tournaments/edit_news.php,
+     tournaments/edit_participant.php, tournaments/edit_properties.php, tournaments/edit_rules.php,
+     tournaments/edit_status.php, tournaments/edit_tournament.php, tournaments/game_admin.php,
+     tournaments/list_directors.php, tournaments/list_news.php, tournaments/list_participants.php,
+     tournaments/show_tournament_log.php, tournaments/view_news.php, tournaments/view_tournament.php,
+     tournaments/ladder/admin.php, tournaments/ladder/edit_props.php, tournaments/ladder/view.php,
+     tournaments/roundrobin/create_pools.php, tournaments/roundrobin/define_pools.php,
+     tournaments/roundrobin/edit_pairing.php, tournaments/roundrobin/edit_pools.php,
+     tournaments/roundrobin/edit_ranks.php, tournaments/roundrobin/edit_round_props.php,
+     tournaments/roundrobin/edit_round_status.php, tournaments/roundrobin/edit_rounds.php,
+     tournaments/roundrobin/view_pools.php,
+     edit_bulletin.php, gameinfo.php:
+   - cleanup to get rid of dependencies in persistence of 'tournament/include/tournament.php':
+     - refactored Tournament->allow_edit_tournaments() into static TournamentHelper::allow_edit_tournaments()
+
 2012-09-26 juga
+
+   * tournaments/include/tournament_template_round_robin.php (TournamentTemplateRoundRobin.checkGamesStarted),
+     tournaments/include/tournament_round_status.php (class TournamentRoundStatus),
+     tournaments/include/tournament_status.php (class TournamentStatus),
+     include/gui_bulletin.php (GuiBulletin.build_view_bulletin),
+     tournaments/ladder/admin.php, tournaments/ladder/challenge.php, tournaments/ladder/edit_props.php,
+     tournaments/ladder/retreat.php, tournaments/ladder/view.php,
+     tournaments/roundrobin/create_pools.php, tournaments/roundrobin/define_pools.php,
+     tournaments/roundrobin/edit_pairing.php, tournaments/roundrobin/edit_pools.php,
+     tournaments/roundrobin/edit_ranks.php, tournaments/roundrobin/edit_round_props.php,
+     tournaments/roundrobin/edit_rounds.php, tournaments/roundrobin/view_pools.php,
+     tournaments/edit_director.php, tournaments/edit_lock.php, tournaments/edit_news.php,
+     tournaments/edit_participant.php, tournaments/edit_properties.php, tournaments/edit_rules.php,
+     tournaments/edit_tournament.php, tournaments/game_admin.php, tournaments/list_directors.php,
+     tournaments/list_news.php, tournaments/list_participants.php, tournaments/manage_tournament.php,
+     tournaments/register.php, tournaments/show_tournament_log.php, tournaments/view_news.php,
+     tournaments/view_tournament.php,
+     admin_bulletin.php (parse_edit_form),
+     admin_game.php, edit_bulletin.php, game.php, gameinfo.php:
+   - use shared-mem caching to load tournament
+
+   * tournaments/include/tournament_ladder.php (TournamentLadder.update_incoming_challenges,
+       ~.update_outgoing_challenges, ~.remove_user_from_ladder, ~.change_user_rank,
+       ~.add_participant_to_ladder_bottom, ~.add_participant_to_ladder_by_rating,
+       ~.add_participant_to_ladder_by_random, ~.fix_tournament_games_for_rejoin, ~.seed_ladder,
+       ~.check_participant_registrations, ~.process_game_end),
+     tournaments/include/tournament_participant.php (TournamentParticipant.load_tournament_participants_registered,
+       ~.load_registered_users_in_seedorder, ~.load_tournament_rating),
+     tournaments/include/tournament_pool.php (TournamentPool.delete_pools, ~.seed_pools,
+       ~.add_missing_registered_users, ~.assign_pool),
+     tournaments/include/tournament_games.php (TournamentGames.update_tournament_game_end,
+       ~.update_tournament_game_wait),
+     tournaments/include/tournament_director.php (TournamentDirector.count_tournament_directors),
+     tournaments/include/tournament_round.php (TournamentRound.add_tournament_round),
+     include/db/survey_option.php (SurveyOption.update_aggregates_survey_options),
+     include/db/survey.php (Survey.update_user_count):
+   - cleanup: use table-name directly instead of reading it from global Entity-object
+
+   * tournaments/include/tournament.php (Tournament.update, ~.delete, ~.update_flags, ~.update_rounds,
+       ~.update_tournament_registeredTP, ~.delete_cache_tournament):
+   - invalidate Tournament-cache-entry for update/delete on Tournament-table
+
+   * tournaments/include/tournament.php (Tournament.getRoleText, ~.allow_edit_tournaments):
+   - bugfix: TournamentCache-include is required, replaced global var with using TournamentCache::get_instance()
+
+   * tournaments/include/tournament_cache.php (TournamentCache.release_tournament_cron_lock,
+       ~.set_tournament_cron_lock, ~.load_cache_tournament, ~.delete_cache_tournament),
+     tournaments/cron_tournaments.php:
+   - use shared-mem caching to load tournament, set and release tournament-lock for tournament-cron,
+     invalidate cache on release-lock
+   - replaced TournamentCache->load_tournament() with TournamentCache::load_cache_tournament()
+     using shared-mem-cache if available or else falling back to local run-cache for tournament-cron
+
+   * include/dgs_cache.php (DgsCache.fetch, ~.debug_result):
+   - bugfix: fix printing object-results
+
+   * tournaments/include/tournament.php (class Tournament, ~.build_query_sql, ~.new_from_row,
+       ~.load_tournament, ~.load_tournaments),
+     tournaments/edit_tournament.php, tournaments/list_directors.php,
+     tournaments/manage_tournament.php:
+   - cleanup: refactor loading tournament-owner separately and not combined with loading tournament,
+     relying on user_reference()-caching to load owner-info
+   - bugfix: missed class-arg for user_reference()-call
+
+   * include/sgf_builder.php (SgfBuilder.load_trimmed_moves, ~.build_sgf_moves),
+     game_comments.php (load_game_comments_data):
+   - load game-moves and game-move-messages from shared-mem-cache without storing cache-data
 
    * include/board.php (Board.load_from_db, ~.load_cache_game_moves, ~.load_cache_game_move_message,
        ~.delete_cache_game_move_messages, ~.fix_corrupted_move_table),
