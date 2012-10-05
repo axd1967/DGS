@@ -69,6 +69,12 @@ abstract class AbstractCache
     */
    abstract public function cache_cleanup( $cache_group, $expire_time );
 
+   /*!
+    * \brief Clears all cache-entries.
+    * \return number of entries purged; 1 also if count cannot be determined.
+    */
+   abstract public function cache_clear();
+
 
    /*! \brief Stores cache-entry with group of other cache-keys (used to clear cache for a group of related elements). */
    public function cache_store_group( $group_id, $elem_id, $ttl, $cache_group=0 )
@@ -134,6 +140,13 @@ class ApcCache extends AbstractCache
       return false;
    }
 
+   public function cache_clear()
+   {
+      apc_clear_cache(); // clear op-code-cache
+      apc_clear_cache('user');
+      return 1;
+   }
+
 } // end of 'ApcCache'
 
 
@@ -147,6 +160,8 @@ class ApcCache extends AbstractCache
 class FileCache extends AbstractCache
 {
    var $base_filepath;
+   var $unlink_expired; // true = unlink expired files on cache_fetch()
+   var $read_expired; // false = return NULL if data expired on cache_fetch()
 
    function FileCache()
    {
@@ -163,11 +178,24 @@ class FileCache extends AbstractCache
                error('internal_error', "FileCache.construct.mkdir.datastore_dir(filecache,$cache_group)");
          }
       }
+
+      $this->unlink_expired = true;
+      $this->read_expired = false;
+   }
+
+   public function set_unlink_expired( $unlink_expired )
+   {
+      $this->unlink_expired = $unlink_expired;
+   }
+
+   public function set_read_expired( $read_expired )
+   {
+      $this->read_expired = $read_expired;
    }
 
    private function build_cache_filename( $id, $cache_group=0, $dir_only=false )
    {
-      $path = ( $cache_group == 0 )
+      $path = ( $cache_group <= 0 )
          ? $this->base_filepath
          : $this->base_filepath . sprintf( '-%02d', $cache_group );
       return ($dir_only) ? $path : $path . '/' . $id;
@@ -199,12 +227,12 @@ class FileCache extends AbstractCache
          if( $file_data )
          {
             list( $expire, $data ) = $file_data;
-            if( $GLOBALS['NOW'] <= $expire )
+            if( $this->read_expired || $GLOBALS['NOW'] <= $expire )
                $result = $data;
          }
       }
 
-      if( is_null($result) )
+      if( $this->unlink_expired && is_null($result) )
          @unlink($filename); // delete file if loading or unserialize failed, or file expired
 
       return $result;
@@ -235,7 +263,10 @@ class FileCache extends AbstractCache
       return ( file_exists($filename) ) ? unlink($filename) : false;
    }
 
-   /*! \brief Purges expired files in cache-dir for given cache-group, return number of deleted files. */
+   /*!
+    * \brief Purges expired files in cache-dir for given cache-group, return number of deleted files.
+    * \param $expire_time if 0 clear all entries; if > 0 removing entries older than expire-time
+    */
    public function cache_cleanup( $cache_group, $expire_time )
    {
       $dir_path = $this->build_cache_filename( 0, $cache_group, /*dir*/true );
@@ -247,7 +278,7 @@ class FileCache extends AbstractCache
          if( !is_file($file) )
             continue;
          $mtime = (int)@filemtime( $file );
-         if( $mtime <= $expire_time ) // file expired?
+         if( $expire_time == 0 || $mtime <= $expire_time ) // file expired?
          {
             if( unlink($file) )
                ++$cnt;
@@ -256,7 +287,72 @@ class FileCache extends AbstractCache
 
       if( DBG_CACHE && $cnt > 0 ) error_log("FileCache.cache_cleanup($cache_group): purged $cnt entries");
       return $cnt;
-   }//cache_cleanup_dir
+   }//cache_cleanup
+
+   public function cache_clear()
+   {
+      $cnt = 0;
+      for( $cache_group=0; $cache_group <= MAX_CACHE_GRP; ++$cache_group )
+         $cnt += $this->cache_cleanup( $cache_group, 0 );
+      return $cnt;
+   }
+
+
+   /*!
+    * \brief Returns info about cache-file-entry for given cache-group.
+    * \return array of arr( filename, size, last-modify-time, last-access-time )
+    *       with first row containing sum with arr( dir, total-size ).
+    */
+   public function get_cache_files( $cache_group )
+   {
+      $dir_path = $this->build_cache_filename( 0, $cache_group, /*dir*/true );
+      $arr_files = glob("$dir_path/*");
+      $len_docroot = strlen($_SERVER['DOCUMENT_ROOT']) + 1;
+      $len_dir = strlen($dir_path) + 1;
+
+      $result = array();
+      $total_size = 0;
+      foreach( $arr_files as $file )
+      {
+         if( is_file($file) )
+         {
+            $stat = stat($file);
+            if( $stat !== false )
+            {
+               $result[] = array( substr($file, $len_dir), $stat['size'], $stat['mtime'], $stat['atime'] );
+               $total_size += $stat['size'];
+            }
+         }
+      }
+
+      array_unshift( $result, array( substr($dir_path, $len_docroot), $total_size ) );
+
+      return $result;
+   }//get_cache_files
+
+   /*!
+    * \brief Returns info about single cache-file-entry for given cache-group and file.
+    * \return array of arr( content, size, last-modify-time, last-access-time ); or null if not existing or on error.
+    */
+   public function get_cache_file( $id, $cache_group )
+   {
+      $content = $this->cache_fetch( $id, $cache_group );
+      $result = null;
+      if( !is_null($content) )
+      {
+         $file_path = $this->build_cache_filename( $id, $cache_group );
+         if( is_file($file_path) )
+         {
+            $stat = stat($file_path);
+            if( $stat !== false )
+               $result = array( $content, (int)@$stat['size'], (int)@$stat['mtime'], (int)@$stat['atime'] );
+            else
+               $result = array( $content, 0, 0, 0 );
+         }
+      }
+
+      return $result;
+   }//get_cache_file
 
 } // end of 'FileCache'
 
@@ -343,14 +439,15 @@ class DgsCache
     * \brief Returns cache-implementation if caching enabled and caching for $cache_group is allowed.
     * \param $cache_group CACHE_GRP_...
     * \param $cache_type optional, CACHE_TYPE_... can ask for specific cache-type regardless of cache-group
+    * \return NULL if caching disabled for given cache-group
     */
-   function get_cache( $cache_group, $cache_type=null )
+   function get_cache( $cache_group, $cache_type=null, $admin_mode=false )
    {
       global $DGS_CACHE;
       if( !@$DGS_CACHE )
          $DGS_CACHE = new DgsCache();
 
-      if( $GLOBALS['is_maintenance'] ) // caching disabled during maintenance-mode
+      if( !$admin_mode && $GLOBALS['is_maintenance'] ) // caching disabled during maintenance-mode
          $cache = null;
       else if( is_null($cache_type) )
       {
@@ -431,18 +528,22 @@ class DgsCache
 
    /*!
     * \brief Purges expired cache-entries for all supported cache-groups.
+    * \param $only_cache_group null = cleanup all cache-groups; otherwise only given one
     * \return return number of deleted cache-entries.
     */
-   function cleanup_cache()
+   function cleanup_cache( $only_cache_group=null )
    {
       global $NOW, $ARR_CACHE_GROUP_CLEANUP;
+      if( !is_numeric($only_cache_group) || $only_cache_group < 0 || $only_cache_group > MAX_CACHE_GRP)
+         $only_cache_group = null;
 
       $default_expire = ( isset($ARR_CACHE_GROUP_CLEANUP[CACHE_GRP_DEFAULT]) )
          ? $NOW - $ARR_CACHE_GROUP_CLEANUP[CACHE_GRP_DEFAULT]
          : $NOW - 7 * SECS_PER_DAY; // default-expire: 1 week
 
       $cnt_deleted = 0;
-      for( $cache_group=0; $cache_group <= MAX_CACHE_GRP; ++$cache_group )
+      $start_group = (is_numeric($only_cache_group)) ? $only_cache_group : 0;
+      for( $cache_group=$start_group; $cache_group <= MAX_CACHE_GRP; ++$cache_group )
       {
          $cache = DgsCache::get_cache( $cache_group );
          if( !is_null($cache) )
@@ -450,8 +551,12 @@ class DgsCache
             $group_expire = ( isset($ARR_CACHE_GROUP_CLEANUP[$cache_group]) )
                ? $ARR_CACHE_GROUP_CLEANUP[$cache_group]
                : $default_expire;
-            $cnt_deleted += $cache->cache_cleanup( $cache_group, $group_expire );
+            $cnt_cleanup = $cache->cache_cleanup( $cache_group, $group_expire );
+            if( is_numeric($cnt_cleanup) )
+               $cnt_deleted += $cnt_cleanup;
          }
+         if( is_numeric($only_cache_group) )
+            break;
       }
 
       if( DBG_CACHE && $cnt_deleted > 0 ) error_log("DgsCache.cleanup_cache(SUM): purged $cnt_deleted total entries");

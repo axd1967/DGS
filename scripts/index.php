@@ -47,12 +47,13 @@ require_once( "include/std_functions.php" );
             'make_all_translationfiles.php'  => "3. export translations-dir",
 
          "Cache admin" => 0,
-            'apc.php'                  => "APC Manager",
+            'dgs_cache_admin.php'      => "DGS Cache Administration (clear caches, cleanup, view file-cache)",
+            'apc-live.php'             => "APC Manager",
             'apc_cache_info.php'       => "Show APC cache info and content",
             'apc_clear_cache.php'      => "Clear APC cache",
+            'clear_datastore.php'      => "Show & Clear Data-Store cache-dir",
 
          "Server admin" => 0,
-            'clear_datastore.php'      => "Show & Clear Data-Store cache-dir",
             'sql_game_export.php'      => "Export single game as SQL (for local tests)",
             'check_block_ip.php'       => "Check syntax for IP-blocking of user",
             'data_export.php'          => "Export DDL, translation-data",

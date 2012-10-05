@@ -70,6 +70,37 @@ define('CACHE_GRP_FORUM_NAMES', 24); // 7KB total * 1d -> 7 KB
 // NOTE: keep as last def and adjust to MAX when adding a new cache-group
 define('MAX_CACHE_GRP', 24);
 
+// names for DGS-cache manager
+global $ARR_CACHE_GROUP_NAMES;
+$ARR_CACHE_GROUP_NAMES = array(
+      // CACHE_GRP_.. => keys/names (to be able to search for in cache)
+      CACHE_GRP_DEFAULT        => 'DEFAULT',
+      CACHE_GRP_CFG_PAGES      => 'ConfigPages',
+      CACHE_GRP_CFG_BOARD      => 'ConfigBoard',
+      CACHE_GRP_CLOCKS         => 'Clocks',
+      CACHE_GRP_GAME_OBSERVERS => 'Observers',
+      CACHE_GRP_GAME_NOTES     => 'GameNotes',
+      CACHE_GRP_USER_REF       => 'user_ref',
+      CACHE_GRP_STATS_GAMES    => 'Statistics.games',
+      CACHE_GRP_FOLDERS        => 'Folders',
+      CACHE_GRP_PROFILE        => 'Profile',
+      CACHE_GRP_GAME_MOVES     => 'Game.moves',
+      CACHE_GRP_GAME_MOVEMSG   => 'Game.movemsg',
+      CACHE_GRP_TOURNAMENT     => 'Tournament',
+      CACHE_GRP_TDIRECTOR      => 'TDirector',
+      CACHE_GRP_TLPROPS        => 'TLadderProps',
+      CACHE_GRP_TPROPS         => 'TProps',
+      CACHE_GRP_TRULES         => 'TRules',
+      CACHE_GRP_TROUND         => 'TRound',
+      CACHE_GRP_TNEWS          => 'TNews',
+      CACHE_GRP_TP_COUNT       => 'TPCount',
+      CACHE_GRP_TPARTICIPANT   => 'TParticipant',
+      CACHE_GRP_TRESULT        => 'TResult',
+      CACHE_GRP_GAMES          => 'Games',
+      CACHE_GRP_FORUM          => 'Forum',
+      CACHE_GRP_FORUM_NAMES    => 'ForumNames',
+   );
+
 // configure cleanup for expired cache-entries (cache-groups not listed uses expire-time of CACHE_GRP_DEFAULT)
 global $ARR_CACHE_GROUP_CLEANUP;
 $ARR_CACHE_GROUP_CLEANUP = array(
