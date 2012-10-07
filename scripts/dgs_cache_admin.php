@@ -178,7 +178,7 @@ function build_cleanup_cycle( $secs )
    elseif( ($secs % SECS_PER_HOUR) == 0 )
       return build_timeunit($secs / SECS_PER_HOUR, '%s hour', '%s hours');
    elseif( ($secs % SECS_PER_MIN) == 0 )
-      return build_timeunit($secs / SECS_PER_MIN, '%s min', '% mins');
+      return build_timeunit($secs / SECS_PER_MIN, '%s min', '%s mins');
    else
       return build_timeunit($secs, '%s sec', '%s secs');
 }
