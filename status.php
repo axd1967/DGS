@@ -42,7 +42,7 @@ $GLOBALS['ThePage'] = new Page('Status');
 
    $page = 'status.php';
 
-   if( get_request_arg('set_order') )
+   if( get_request_arg('set_order') ) // change NextGameOrder for user
    {
       $value = get_request_arg('stg_order', 1);
       $next_game_order = NextGameOrder::get_next_game_order( $value );
@@ -53,11 +53,14 @@ $GLOBALS['ThePage'] = new Page('Status');
          db_query( "status.update.next_game_order($uid,$value)",
             "UPDATE Players SET NextGameOrder='".mysql_addslashes($next_game_order) .
             "' WHERE ID=$my_id LIMIT 1" );
+
+         clear_cache_quick_status( $my_id, QST_CACHE_GAMES );
+         GameHelper::delete_cache_status_games( "status.update.next_game_order", $my_id );
       }
       jump_to($page);
    }
 
-   // mark bulletin as read + reload (for recount remaining bulletins)
+   // mark bulletin as read + reload (for recount of remaining bulletins)
    $markread = (int)get_request_arg('mr');
    if( $markread > 0 )
    {
@@ -324,24 +327,17 @@ function load_games_to_move( $uid, &$gtable )
    $gtable->make_sort_images();
    $gtable->use_show_rows(false);
 
-   // build status-query (including next-game-order)
-   $qsql = NextGameOrder::build_status_games_query(
-      $uid, IS_STARTED_GAME, $next_game_order, /*ticks*/true, $load_prio, $load_notes );
+   $game_rows = GameHelper::load_cache_status_games( 'status', $next_game_order, 'X_Lastaccess', $load_prio, $load_notes );
 
-   $query = $qsql->get_select();
-   if( $DEBUG_SQL ) echo "QUERY-GAMES: " . make_html_safe($query) ."<br>\n";
-   $result = db_query( "status.find_games($uid)", $query );
-
-   $cnt_rows = 0;
-   if( @mysql_num_rows($result) > 0 )
+   $cnt_rows = count($game_rows);
+   if( $cnt_rows > 0 )
    {
       $arr_titles_colors = get_color_titles();
       $gtable->set_extend_table_form_function( 'status_games_extend_table_form' ); //func
 
       $timefmt = TIMEFMT_ADDTYPE | TIMEFMT_SHORT | TIMEFMT_ZERO;
-      while( $row = mysql_fetch_assoc( $result ) )
+      foreach( $game_rows as $row )
       {
-         $cnt_rows++;
          $Rating = NULL;
          extract($row);
 
@@ -418,7 +414,6 @@ function load_games_to_move( $uid, &$gtable )
       }
       $gtable->set_found_rows( $cnt_rows );
    }
-   mysql_free_result($result);
 
    return $cnt_rows;
 }//load_games_to_move

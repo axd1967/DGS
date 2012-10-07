@@ -522,6 +522,8 @@ class QuickHandlerGame extends QuickHandler
             if( mysql_affected_rows() < 1 && $this->action != GAMECMD_DELETE )
                error('mysql_insert_move', "QuickHandlerGame.process.update_moves2($gid,$action})");
 
+            clear_cache_quick_status( array( $ToMove_ID, $next_to_move_ID ), QST_CACHE_GAMES );
+            GameHelper::delete_cache_status_games( "QuickHandlerGame.process.update_moves($gid,$action})", $ToMove_ID, $next_to_move_ID );
             Board::delete_cache_game_moves( "QuickHandlerGame.process.update_moves($gid,$action})", $gid );
          }
 
@@ -542,7 +544,7 @@ class QuickHandlerGame extends QuickHandler
             $do_delete = ( $this->action == GAMECMD_DELETE );
 
             $game_finalizer->skip_game_query();
-            $game_finalizer->finish_game( "QuickHandlerGame.process", $do_delete, null, $score, $message_raw ); // +clears QST-cache
+            $game_finalizer->finish_game( "QuickHandlerGame.process", $do_delete, null, $score, $message_raw );
          }
          else
             $do_delete = false;
@@ -557,9 +559,6 @@ class QuickHandlerGame extends QuickHandler
                ",Activity=LEAST($ActivityMax,$ActivityForMove+Activity)" .
                ",LastMove=FROM_UNIXTIME($NOW)" .
             " WHERE ID={$this->my_id} LIMIT 1" );
-
-         if( !$game_finished )
-            clear_cache_quick_status( array( $Black_ID, $White_ID ), QST_CACHE_GAMES );
 
          increaseMoveStats( $this->my_id );
       }

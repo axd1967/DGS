@@ -720,10 +720,12 @@ function create_game(&$black_row, &$white_row, &$game_info_row, $game_setup=null
       }
    }
 
-   Board::delete_cache_game_moves( "create_game($gid)", $gid ); // not needed for NEW game, but not hurting either
-   GameHelper::delete_cache_game_row( "create_game($gid)", $gid );
+   // clear caches
    if( $tomove > GUESTS_ID_MAX ) // safety-check
       clear_cache_quick_status( $tomove, QST_CACHE_GAMES );
+   GameHelper::delete_cache_status_games( "create_game($gid)", $tomove );
+   GameHelper::delete_cache_game_row( "create_game($gid)", $gid );
+   Board::delete_cache_game_moves( "create_game($gid)", $gid ); // not needed for NEW game, but not hurting either
 
    return $gid;
 } //create_game

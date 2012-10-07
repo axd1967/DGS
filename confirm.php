@@ -431,7 +431,9 @@ This is why:
          if( mysql_affected_rows() < 1 && $action != 'delete' )
             error('mysql_insert_move', "confirm.update_moves2($gid,$action)");
 
-         Board::delete_cache_game_moves( "confirm.update_moves3($gid,$action)", $gid );
+         clear_cache_quick_status( array( $ToMove_ID, $next_to_move_ID ), QST_CACHE_GAMES );
+         GameHelper::delete_cache_status_games( "confirm.update_moves3($gid,$action)", $ToMove_ID, $next_to_move_ID );
+         Board::delete_cache_game_moves( "confirm.update_moves4($gid,$action)", $gid );
       }
 
       if( $message_query )
@@ -452,7 +454,7 @@ This is why:
          $do_delete = ( $action == 'delete' );
 
          $game_finalizer->skip_game_query();
-         $game_finalizer->finish_game( "confirm", $do_delete, null, $score, $message_raw ); // +clears QST-cache
+         $game_finalizer->finish_game( "confirm", $do_delete, null, $score, $message_raw );
       }
 
       // Notify opponent about move
@@ -465,9 +467,6 @@ This is why:
             .",Activity=LEAST($ActivityMax,$ActivityForMove+Activity)"
             .",LastMove=FROM_UNIXTIME($NOW)"
             ." WHERE ID=$my_id LIMIT 1" );
-
-      if( !$game_finished )
-         clear_cache_quick_status( array( $Black_ID, $White_ID ), QST_CACHE_GAMES );
 
       increaseMoveStats( $my_id );
    }
@@ -590,9 +589,6 @@ function do_komi_save( $game_row, $my_id, $start_game=false )
    ta_begin();
    {//HOT-section to process komi-bid-saving (and starting-game)
       $fk_result = $fk->save_komi( $game_row, $req_komibid, $start_game );
-
-      if( $fk_result == 0 || $fk_result == 1 )
-         clear_cache_quick_status( array( $game_row['Black_ID'], $game_row['White_ID'] ), QST_CACHE_GAMES );
    }
    ta_end();
 

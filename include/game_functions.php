@@ -401,9 +401,10 @@ class GameAddTime
          return $add_hours;
 
       // handle Games.TimeOutDate if opponent-to-move
-      if( $game_row['ToMove_ID'] != $uid )
+      $to_move_id = $game_row['ToMove_ID'];
+      if( $to_move_id != $uid )
       {
-         $col_to_move = ( $game_row['ToMove_ID'] == $game_row['Black_ID'] ) ? BLACK : WHITE;
+         $col_to_move = ( $to_move_id == $game_row['Black_ID'] ) ? BLACK : WHITE;
          $timeout_date = NextGameOrder::make_timeout_date( $game_row, $col_to_move, $game_row['ClockUsed'], $game_row['LastTicks'] );
 
          $game_addtime->game_query .= ",TimeOutDate=$timeout_date";
@@ -433,8 +434,11 @@ class GameAddTime
       if( mysql_affected_rows() != 1 )
          error('mysql_insert_move',"GameAddTime::add_time_opponent.insert_move($gid)");
 
+      // clear caches
       Board::delete_cache_game_moves( "GameAddTime::add_time_opponent($gid)", $gid );
       GameHelper::delete_cache_game_row( "GameAddTime::add_time_opponent($gid)", $gid );
+      clear_cache_quick_status( $to_move_id, QST_CACHE_GAMES );
+      GameHelper::delete_cache_status_games( "GameAddTime::add_time_opponent($gid)", $to_move_id );
 
       return $add_hours; // success (no-error)
    } //add_time_opponent
@@ -1016,17 +1020,15 @@ class GameHelper
    /*!
     * \brief Deletes non-tourney game and all related tables for given game-id, if not finished yet.
     * \param $upd_players if true, also decrease Players.Running
-    * \param $grow game-row can be provided to save additional query
     * \return true on success, false on invalid args or invalid game to delete (finished, tourney)
     */
-   function delete_running_game( $gid, $upd_players=true, $grow=null )
+   function delete_running_game( $gid, $upd_players=true )
    {
       if( !is_numeric($gid) && $gid <= 0 )
          return false;
 
-      if( is_null($grow) )
-         $grow = mysql_single_fetch( "GameHelper::delete_running_game.check.gid($gid)",
-            "SELECT Status, tid, DoubleGame_ID, GameType, Black_ID, White_ID from Games WHERE ID=$gid LIMIT 1");
+      $grow = mysql_single_fetch( "GameHelper::delete_running_game.check.gid($gid)",
+            "SELECT Status, tid, DoubleGame_ID, GameType, Black_ID, White_ID, ToMove_ID from Games WHERE ID=$gid LIMIT 1");
       if( !$grow || (int)@$grow['tid'] > 0 )
          return false;
       elseif( @$grow['Status'] == GAME_STATUS_FINISHED ) // must not be finished game, allow for setup/fair-komi
@@ -1059,7 +1061,10 @@ class GameHelper
 
          GameHelper::_delete_base_game_tables( $gid );
 
-         clear_cache_quick_status( array( $Black_ID, $White_ID ), QST_CACHE_GAMES );
+         // clear caches
+         $tomove_id = (int)@$grow['ToMove_ID'];
+         clear_cache_quick_status( $tomove_id, QST_CACHE_GAMES );
+         GameHelper::delete_cache_status_games( "GameHelper::delete_running_game($gid)", $tomove_id );
       }
       ta_end();
 
@@ -1405,6 +1410,66 @@ class GameHelper
    function game_need_mark_dead( $game_status )
    {
       return ( $game_status == GAME_STATUS_SCORE || $game_status == GAME_STATUS_SCORE2 || $game_status == GAME_STATUS_FINISHED );
+   }
+
+   /*!
+    * \brief Loads status-games rows-array from cache (if stored).
+    * \param $next_game_order NGO_...; normally from $player_row['NextGameOrder']
+    * \param $field_lastaccess fieldname of $player_row to check for last-access within minute (if longer ago
+    *        no need to cache anything); leave empty '' to always store in cache.
+    * \return non-null array with rows from db-query
+    */
+   function load_cache_status_games( $dbgmsg, $next_game_order, $field_lastaccess='X_Lastaccess', $load_prio=false, $load_notes=false )
+   {
+      global $player_row, $NOW;
+
+      $uid = (int)@$player_row['ID'];
+      $dbgmsg = $dbgmsg.".GameHelper::load_cache_status_games($uid)";
+      $key = "StatusGames.$uid";
+
+      // build status-query (including next-game-order)
+      $qsql = NextGameOrder::build_status_games_query(
+         $uid, IS_STARTED_GAME, $next_game_order, /*ticks*/true, $load_prio, $load_notes );
+      $query = $qsql->get_select();
+      $chksum_query = crc32($query); // compare with stored checksum in cache
+
+      $result = DgsCache::fetch( $dbgmsg, CACHE_GRP_GAMELIST_STATUS, $key );
+      if( is_array($result) )
+      {
+         // check if db-query matches stored db-query by comparing check-sum
+         if( count($result) > 0 )
+         {
+            $stored_chksum_query = array_shift($result); // remove checksum for final result
+            if( $stored_chksum_query != $chksum_query )
+               $result = null; // different query -> reload
+         }
+         else
+            $result = null; // invalid store-data -> reload
+      }
+      if( is_null($result) )
+      {
+         $result = array( $chksum_query );
+         $db_result = db_query( $dbgmsg.'.find_games', $query );
+         while( $row = mysql_fetch_assoc($db_result) )
+            $result[] = $row;
+         mysql_free_result($db_result);
+
+         // store in cache only if last-access within one min (otherwise it's expired immediately) thereby saving cache-space
+         $last_access = ($field_lastaccess ) ? (int)@$player_row[$field_lastaccess] : 0;
+         $store_cache = ( $last_access >= $NOW - 1*SECS_PER_MIN );
+         if( $store_cache )
+            DgsCache::store( $dbgmsg, CACHE_GRP_GAMELIST_STATUS, $key, $result, 1*SECS_PER_MIN );
+         array_shift($result); // remove checksum for final result (only needed for cache)
+      }
+
+      return $result;
+   }//load_cache_status_games
+
+   function delete_cache_status_games( $dbgmsg, $uid, $oid=0 )
+   {
+      DgsCache::delete( $dbgmsg, CACHE_GRP_GAMELIST_STATUS, "StatusGames.$uid" );
+      if( $oid > 0 )
+         DgsCache::delete( $dbgmsg, CACHE_GRP_GAMELIST_STATUS, "StatusGames.$oid" );
    }
 
 } // end 'GameHelper'
@@ -1817,14 +1882,19 @@ class FairKomiNegotiation
       else
          $result = 0; // komi-bid saved
 
-      GameHelper::delete_cache_game_row( "FKN.save_komi.update2({$this->gid})", $this->gid );
+      // clear caches
+      clear_cache_quick_status( array( $this->tomove_id, $next_tomove_id ), QST_CACHE_GAMES );
+      GameHelper::delete_cache_status_games( "FKN.save_komi.update2({$this->gid})", $this->tomove_id, $next_tomove_id );
+      GameHelper::delete_cache_game_row( "FKN.save_komi.update3({$this->gid})", $this->gid );
 
       return $result;
    }//save_komi
 
    /*!
     * \brief Starts fairkomi-game by updating existing game on KOMI-status.
+    *
     * \see also create_game()-func in "include/make_game.php"
+    * \note clearing game-caches is done outside -> see save_komi()
     * \note IMPORTANT NOTE: caller needs to open TA with HOT-section!!
     */
    function start_fairkomi_game( $new_black_id )
@@ -2021,7 +2091,9 @@ class GameFinalizer
          $game_notify->get_recipients(), '',
          /*notify*/true, /*system-msg*/0, MSGTYPE_RESULT, $gid );
 
+      // clear caches
       clear_cache_quick_status( array( $this->Black_ID, $this->White_ID ), QST_CACHE_GAMES );
+      GameHelper::delete_cache_status_games( "GameFinalizer.finish_game.del_cache($gid)", $this->Black_ID, $this->White_ID );
       GameHelper::delete_cache_game_row( "GameFinalizer.finish_game.del_cache($gid)", $gid );
    }//finish_game
 
@@ -4355,7 +4427,9 @@ class NextGameOrder
             "ON DUPLICATE KEY UPDATE Priority=VALUES(Priority)" );
       }
 
+      // clear caches
       clear_cache_quick_status( $uid, QST_CACHE_GAMES );
+      GameHelper::delete_cache_status_games( "NextGameOrder::persist_game_priority($gid,$uid)", $uid );
    }//persist_game_priority
 
    /*! \brief Deletes all GamesPriority-table-entries for given game-id. */
