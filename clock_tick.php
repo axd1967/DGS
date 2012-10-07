@@ -217,7 +217,7 @@ function handle_game_timeouts()
          ta_begin();
          {//HOT-section to save game-timeout
             // send message to my opponent / all-players / observers about the result
-            $game_finalizer->finish_game( "clock_tick.time_is_up", /*del*/false, null, $score, '' ); // +clears QST-cache
+            $game_finalizer->finish_game( "clock_tick.time_is_up", /*del*/false, null, $score, '' );
          }
          ta_end();
       }//time-out

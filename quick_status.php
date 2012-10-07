@@ -324,7 +324,7 @@ function print_status_games( $version, $player_row )
    $status_op = ( $version < 2 ) ? IS_RUNNING_GAME : IS_STARTED_GAME;
    $qsql = NextGameOrder::build_status_games_query( $player_id, $status_op, $game_order, /*ticks*/true, /*prio*/false );
 
-   $result = db_query( 'quick_status.find_games', $qsql->get_select() );
+   $result = db_query( "quick_status.find_games(v$version)", $qsql->get_select() );
 
    $timefmt_flags = TIMEFMT_ENGL | TIMEFMT_ADDTYPE;
 
