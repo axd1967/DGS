@@ -150,14 +150,12 @@ require_once( "include/filter.php" );
    $limit = $mtable->current_limit_string();
 
    $qsql->merge( $mtable->get_query() ); // include found-rows-stuff, may need adjustment for filters
-   list( $result ) = message_list_query($my_id, $folderstring, $order, $limit, $qsql);
-
-   $show_rows = mysql_num_rows($result);
+   $arr_msg = MessageListBuilder::message_list_query($my_id, $folderstring, $order, $limit, $qsql);
+   $show_rows = count($arr_msg);
 
    if( $find_answers && $show_rows == 1 )
    {
-      $row = mysql_fetch_assoc( $result);
-      $mid = $row["mid"];
+      $mid = $arr_msg[0]['mid'];
       jump_to( "message.php?mode=ShowMessage".URI_AMP."mid=$mid".URI_AMP."xterm=".urlencode($rx_term) );
    }
 
@@ -169,7 +167,7 @@ require_once( "include/filter.php" );
 
    echo "<h3 class=Header>$title</h3>\n";
 
-   $can_move_messages = $msglist_builder->message_list_body( $result, $show_rows, $my_folders, $toggle_marks, $rx_term);
+   $can_move_messages = $msglist_builder->message_list_body( $arr_msg, $show_rows, $my_folders, $toggle_marks, $rx_term);
 
    $mtable->echo_table();
    //echo "<br>\n";

@@ -1464,11 +1464,12 @@ function send_message( $debugmsg, $text='', $subject=''
             notify( $debugmsg, $ids, '', NOTIFYFLAG_NEW_MSG );
       }
 
-      // clear QST-cache for sender & receivers
+      // clear caches for sender & receivers
       $clear_uids = array_keys($receivers);
       if( $from_id > GUESTS_ID_MAX )
          $clear_uids[] = $from_id;
       clear_cache_quick_status( $clear_uids, QST_CACHE_MSG );
+      MessageListBuilder::delete_cache_message_list( $debugmsg, $clear_uids );
    }
    ta_end();
 

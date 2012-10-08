@@ -172,6 +172,8 @@ require_once( "include/message_functions.php" );
       {
          $cfg_pages->set_status_folders( implode(',', $statusfolders) );
          $cfg_pages->update_status_folders();
+         clear_cache_quick_status( $my_id, QST_CACHE_MSG );
+         MessageListBuilder::delete_cache_message_list( "edit_folders.main($my_id)", $my_id );
          if( !$sysmsg )
             $sysmsg = T_('Folders adjusted!');
       }

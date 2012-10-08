@@ -29,6 +29,7 @@ require_once 'include/utilities.php';
 require_once 'include/error_codes.php';
 require_once 'include/shape_control.php';
 require_once 'include/make_game.php';
+require_once 'include/dgs_cache.php';
 
 
 // game-settings form-/table-style defs
@@ -1515,8 +1516,10 @@ function update_count_message_new( $dbgmsg, $uid, $diff=null )
       db_query( "$dbgmsg.recalc",
          "UPDATE Players SET CountMsgNew=$count_new WHERE ID='$uid' LIMIT 1" );
 
-      clear_cache_quick_status( $uid, QST_CACHE_MSG );
    }
+
+   clear_cache_quick_status( $uid, QST_CACHE_MSG );
+   MessageListBuilder::delete_cache_message_list( $dbgmsg, $uid );
 }//update_count_message_new
 
 /*!
@@ -1873,51 +1876,6 @@ class DgsMessage
 
 
 
-// param extra_querysql: QuerySQL-object to extend query
-// return array( result, merged-QuerySQL )
-// NOTE: $order (default sort on me.mid equals to sort on date) !!
-function message_list_query($my_id, $folderstring='all', $order=' ORDER BY me.mid', $limit='', $extra_querysql=null)
-{
-/**
- * N.B.: On 2007-10-15, we have found, in the DGS database,
- *  30 records of MessageCorrespondents with .mid == 0
- *  all between "2004-06-03 09:25:17" and "2006-08-10 20:40:31".
- * While this should not have occured, those "lost" records can disturb
- *  some queries like this one where .mid is compared to .ReplyTo which
- *  may be 0 (meaning "no reply").
- * We have strengthened this query but also manually changed the faulty
- *  .mid from 0 to -9999 (directly in the database) to move them apart.
- **/
-   $qsql = new QuerySQL();
-   $qsql->add_part( SQLP_FIELDS,
-      'M.Type', 'M.Flags', 'M.Thread', 'M.Level', 'M.Subject', 'M.Game_ID',
-      'UNIX_TIMESTAMP(M.Time) AS Time',
-      "IF(NOT ISNULL(previous.mid),".FLOW_ANSWER.",0)" .
-          "+IF(me.Replied='Y' OR other.Replied='Y',".FLOW_ANSWERED.",0) AS flow",
-      'me.mid', 'me.Replied', 'me.Sender', 'me.Folder_nr AS folder',
-      "IF(me.Sender='M',' ',otherP.Name) AS other_name", // the ' ' helps to sort
-      'otherP.ID AS other_ID',
-      'otherP.Handle AS other_handle' );
-   $qsql->add_part( SQLP_FROM,
-      'Messages AS M',
-      'INNER JOIN MessageCorrespondents AS me ON M.ID=me.mid',
-      'LEFT JOIN MessageCorrespondents AS other ON other.mid=me.mid AND other.Sender!=me.Sender',
-      'LEFT JOIN Players AS otherP ON otherP.ID=other.uid',
-      'LEFT JOIN MessageCorrespondents AS previous ON M.ReplyTo>0 AND previous.mid=M.ReplyTo AND previous.uid='.$my_id );
-   $qsql->add_part( SQLP_WHERE, "me.uid=$my_id" );
-   if( $folderstring != "all" && $folderstring != '' )
-      $qsql->add_part( SQLP_WHERE, "me.Folder_nr IN ($folderstring)" );
-   $qsql->merge( $extra_querysql );
-   $query = $qsql->get_select() . "$order$limit";
-
-   $result = db_query( 'message_list_query', $query );
-
-   return array( $result, $qsql );
-}//message_list_query
-
-
-
-
 class MessageListBuilder
 {
    var $table;
@@ -1966,10 +1924,10 @@ class MessageListBuilder
          $this->table->add_tablehead( 5, T_('Mark#header'), 'Mark', TABLE_NO_HIDE|TABLE_NO_SORT);
    }//message_list_head
 
-   // param result: typically coming from message_list_query()
+   // param $arr_msg: typically coming from message_list_query()
    // param rx_terms: rx with terms to be marked within text
    // NOTE: frees given mysql $result
-   function message_list_body( $result, $show_rows, $my_folders, $toggle_marks=false, $rx_term='' )
+   function message_list_body( $arr_msg, $show_rows, $my_folders, $toggle_marks=false, $rx_term='' )
    {
       global $base_path, $msg_icones, $player_row;
 
@@ -1989,8 +1947,10 @@ class MessageListBuilder
       $url_terms = ($rx_term != '') ? URI_AMP."xterm=".urlencode($rx_term) : '';
       $arr_marks = array(); // mid => 1
 
-      while( ($row = mysql_fetch_assoc( $result )) && $show_rows-- > 0 )
+      foreach( $arr_msg as $row )
       {
+         if( $show_rows-- <= 0 )
+            break;
          $mid = $row["mid"];
          $oid = $row['other_ID'];
          $is_bulk = ( $row['Flags'] & MSGFLAG_BULK );
@@ -2074,7 +2034,6 @@ class MessageListBuilder
          }
          $this->table->add_row( $mrow_strings );
       }
-      mysql_free_result($result);
 
       // NOTE:
       // insertion of the marks in the URL of sort, page move and add/del column.
@@ -2118,6 +2077,81 @@ class MessageListBuilder
 
       return $user_str;
    }//message_build_user_string
+
+
+   // ------------ static functions ----------------------------
+
+   // param extra_querysql: QuerySQL-object to extend query
+   // return arr( msg-row, ... )
+   // NOTE: $order (default sort on me.mid equals to sort on date) !!
+   // \static
+   function message_list_query( $my_id, $folderstring='all', $order=' ORDER BY me.mid', $limit='', $extra_querysql=null )
+   {
+      /**
+       * N.B.: On 2007-10-15, we have found, in the DGS database,
+       *  30 records of MessageCorrespondents with .mid == 0
+       *  all between "2004-06-03 09:25:17" and "2006-08-10 20:40:31".
+       * While this should not have occured, those "lost" records can disturb
+       *  some queries like this one where .mid is compared to .ReplyTo which
+       *  may be 0 (meaning "no reply").
+       * We have strengthened this query but also manually changed the faulty
+       *  .mid from 0 to -9999 (directly in the database) to move them apart.
+       **/
+      $qsql = new QuerySQL();
+      $qsql->add_part( SQLP_FIELDS,
+         'M.Type', 'M.Flags', 'M.Thread', 'M.Level', 'M.Subject', 'M.Game_ID',
+         'UNIX_TIMESTAMP(M.Time) AS Time',
+         "IF(NOT ISNULL(previous.mid),".FLOW_ANSWER.",0)" .
+             "+IF(me.Replied='Y' OR other.Replied='Y',".FLOW_ANSWERED.",0) AS flow",
+         'me.mid', 'me.Replied', 'me.Sender', 'me.Folder_nr AS folder',
+         "IF(me.Sender='M',' ',otherP.Name) AS other_name", // the ' ' helps to sort
+         'otherP.ID AS other_ID',
+         'otherP.Handle AS other_handle' );
+      $qsql->add_part( SQLP_FROM,
+         'Messages AS M',
+         'INNER JOIN MessageCorrespondents AS me ON M.ID=me.mid',
+         'LEFT JOIN MessageCorrespondents AS other ON other.mid=me.mid AND other.Sender!=me.Sender',
+         'LEFT JOIN Players AS otherP ON otherP.ID=other.uid',
+         'LEFT JOIN MessageCorrespondents AS previous ON M.ReplyTo>0 AND previous.mid=M.ReplyTo AND previous.uid='.$my_id );
+      $qsql->add_part( SQLP_WHERE, "me.uid=$my_id" );
+      if( $folderstring != "all" && $folderstring != '' )
+         $qsql->add_part( SQLP_WHERE, "me.Folder_nr IN ($folderstring)" );
+      $qsql->merge( $extra_querysql );
+      $query = $qsql->get_select() . "$order$limit";
+
+      $result = db_query( 'MLB.message_list_query', $query );
+
+      $arr_msg = array();
+      while( $row = mysql_fetch_assoc($result) )
+         $arr_msg[] = $row;
+      mysql_free_result($result);
+
+      return $arr_msg;
+   }//message_list_query
+
+   function load_cache_message_list( $dbgmsg, $uid, $folderstring='all', $order=' ORDER BY me.mid', $arg_limit=0 )
+   {
+      $dbgmsg .= ".MLB::load_cache_message_list($uid,$folderstring,$order,$arg_limit)";
+      $key = "Messages.$uid";
+
+      $arr_msg = DgsCache::fetch( $dbgmsg, CACHE_GRP_MSGLIST, $key );
+      if( is_null($arr_msg) )
+      {
+         $limit = ( $arg_limit ) ? ' LIMIT '.((int)$arg_limit) : '';
+         $arr_msg = MessageListBuilder::message_list_query( $uid, $folderstring, $order, $limit );
+         DgsCache::store( $dbgmsg, CACHE_GRP_MSGLIST, $key, $arr_msg, 4*SECS_PER_HOUR );
+      }
+
+      return $arr_msg;
+   }//load_cache_message_list
+
+   function delete_cache_message_list( $dbgmsg, $uids )
+   {
+      if( !is_array($uids) )
+         $uids = array( $uids );
+      foreach( $uids as $uid )
+         DgsCache::delete( $dbgmsg, CACHE_GRP_MSGLIST, "Messages.$uid" );
+   }
 
 } // end of 'MessageListBuilder'
 

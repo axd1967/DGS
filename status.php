@@ -147,29 +147,32 @@ if( (string)$folder_nr_querystr != '' )
 
    //$mtable->add_or_del_column();
    $msglist_builder = new MessageListBuilder( $mtable, FOLDER_NONE /*FOLDER_ALL_RECEIVED*/,
-      /*no_sort=no_mark*/true, /*full*/true );
+      /*no_sort=no_mark*/true, /*full*/true ); //no_sort must=true because of the fixed LIMIT and no prev/next-paging
    $msglist_builder->message_list_head();
-   //no_sort must stay true because of the fixed LIMIT and no prev/next feature
 
    $mtable->set_default_sort( 4); //on 'date' (to display the sort-image)
    $mtable->use_show_rows(false);
-   $order = $mtable->current_order_string(/*'date+'*/);
-   $limit = ' LIMIT 20'; //$mtable->current_limit_string();
+   $order = $mtable->current_order_string();
+   $limit = 20;
 
-   list( $result ) = message_list_query($my_id, $folder_nr_querystr, $order, $limit);
-   if( @mysql_num_rows($result) > 0 )
+   $arr_msg = MessageListBuilder::load_cache_message_list('status', $my_id, $folder_nr_querystr, $order, $limit + 1);
+   $cnt_msg = count($arr_msg);
+   if( $cnt_msg > 0 )
    {
       init_standard_folders();
       $my_folders = get_folders($my_id);
 
       section( 'Message', T_('New messages'));
 
-      $msglist_builder->message_list_body( $result, 20, $my_folders) ; // also frees $result
+      $msglist_builder->message_list_body( $arr_msg, $limit, $my_folders) ; // also frees $result
       $mtable->echo_table();
+
+      if( $cnt_msg > $limit )
+      {
+         echo "<font size=\"+1\">...</font>\n";
+         make_menu( array( T_('Show all messages') => 'list_messages.php' ), false );
+      }
    }
-   else
-      mysql_free_result($result);
-   //unset($mtable);
 } // show messages
 
 
@@ -180,7 +183,6 @@ if( (string)$folder_nr_querystr != '' )
       $gtable->echo_table();
    else
       echo T_('No games found');
-   //unset($gtable);
 }// status-games
 
 
@@ -238,7 +240,6 @@ if( $player_row['GamesMPG'] > 0 )
       $mpgtable->echo_table();
    }
    mysql_free_result($result);
-   unset($mpgtable);
 }// multi-player-games
 
 

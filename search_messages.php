@@ -162,11 +162,9 @@ require_once( "include/classlib_profile.php" );
    // only std- & user-folders, i.e. non-deleted
    $qsql->add_part( SQLP_WHERE, 'me.Folder_Nr > '.FOLDER_ALL_RECEIVED );
 
-   list( $result, $rqsql ) = message_list_query($my_id, '', $order, $limit, $qsql);
-
-   $show_rows = mysql_num_rows($result);
-   $show_rows = $mtable->compute_show_rows( $show_rows);
-   //$mtable->set_found_rows( mysql_found_rows('search_messages.found_rows') );
+   $arr_msg = MessageListBuilder::message_list_query( $my_id, '', $order, $limit, $qsql );
+   $show_rows = count($arr_msg);
+   $show_rows = $mtable->compute_show_rows( $show_rows );
 
 
    $title = T_('Message search');
@@ -174,7 +172,7 @@ require_once( "include/classlib_profile.php" );
 
    echo "<h3 class=Header>$title</h3>\n";
 
-   $msglist_builder->message_list_body( $result, $show_rows, $my_folders, /*toggle_marks*/false, $rx_term);
+   $msglist_builder->message_list_body( $arr_msg, $show_rows, $my_folders, /*toggle_marks*/false, $rx_term);
 
    // print form with table
    $extform_string = $smform->get_form_string(); // static form
