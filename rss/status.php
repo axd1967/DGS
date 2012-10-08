@@ -457,22 +457,13 @@ else
 
    if( $player_row['CountBulletinNew'] > 0 )
    {
-      $iterator = new ListIterator( 'rss_status.bulletins.unread',
-         new QuerySQL( SQLP_WHERE,
-               "BR.bid IS NULL", // only unread
-               "B.Status='".BULLETIN_STATUS_SHOW."'" ),
-         'ORDER BY B.PublishTime DESC' );
-      $iterator->addQuerySQLMerge( Bulletin::build_view_query_sql( /*adm*/false, /*count*/false ) );
-      $iterator = Bulletin::load_bulletins( $iterator );
-
-      if( $iterator->ResultRows > 0 )
+      $arr_bulletins = Bulletin::load_cache_bulletins( 'quick_status', $my_id );
+      if( count($arr_bulletins) > 0 )
          $nothing_found = false;
 
       $cat = 'Status/Bulletin';
-      while( list(,$arr_item) = $iterator->getListIterator() )
+      foreach( $arr_bulletins as $bulletin )
       {
-         list( $bulletin, $orow ) = $arr_item;
-
          $tit= sprintf( T_('Bulletin to %s with "%s"#rss'),
                         GuiBulletin::getTargetTypeText($bulletin->TargetType),
                         GuiBulletin::getCategoryText($bulletin->Category) );

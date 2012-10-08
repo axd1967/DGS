@@ -68,8 +68,9 @@ define('CACHE_GRP_GAMES', 22);      // 7KB/game * 10min -> 4 MB   // no long-cac
 define('CACHE_GRP_FORUM', 23);      // 1KB/forum * 1d -> 12 KB
 define('CACHE_GRP_FORUM_NAMES', 24); // 7KB total * 1d -> 7 KB
 define('CACHE_GRP_GAMELIST_STATUS', 25); // 5.5KB/user/game (1.9KB FILE) * 1min -> 7 MB
+define('CACHE_GRP_BULLETINS', 26);  // 8KB KB/user/bulletin * 1d -> 10 MB
 // NOTE: keep as last def and adjust to MAX when adding a new cache-group
-define('MAX_CACHE_GRP', 25);
+define('MAX_CACHE_GRP', 26);
 
 // names for DGS-cache manager
 global $ARR_CACHE_GROUP_NAMES;
@@ -101,6 +102,7 @@ $ARR_CACHE_GROUP_NAMES = array(
       CACHE_GRP_FORUM          => 'Forum',
       CACHE_GRP_FORUM_NAMES    => 'ForumNames',
       CACHE_GRP_GAMELIST_STATUS => 'StatusGames',
+      CACHE_GRP_BULLETINS      => 'Bulletins',
    );
 
 // configure cleanup for expired cache-entries (cache-groups not listed uses expire-time of CACHE_GRP_DEFAULT)
@@ -133,6 +135,7 @@ $ARR_CACHE_GROUP_CLEANUP = array(
       CACHE_GRP_FORUM         => SECS_PER_DAY,
       CACHE_GRP_FORUM_NAMES   => SECS_PER_DAY,
       CACHE_GRP_GAMELIST_STATUS => 10*SECS_PER_MIN,
+      CACHE_GRP_BULLETINS     => SECS_PER_DAY,
    );
 
 ?>

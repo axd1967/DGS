@@ -110,28 +110,23 @@ $GLOBALS['ThePage'] = new Page('Status');
 if( @$player_row['CountBulletinNew'] > 0 )
 { // show unread bulletins
    $limit = 3;
-   $iterator = new ListIterator( 'status.list_bulletin.unread',
-      new QuerySQL( SQLP_WHERE,
-            "BR.bid IS NULL", // only unread
-            "B.Status='".BULLETIN_STATUS_SHOW."'" ),
-      'ORDER BY B.PublishTime DESC',
-      'LIMIT '.($limit+1) );
-   $iterator->addQuerySQLMerge( Bulletin::build_view_query_sql( /*adm*/false, /*count*/false ) );
-   $iterator = Bulletin::load_bulletins( $iterator );
+   $arr_bulletins = Bulletin::load_cache_bulletins( 'status', $my_id );
 
-   if( $iterator->ResultRows > 0 )
+   $cnt_bulletins = count($arr_bulletins);
+   if( $cnt_bulletins > 0 )
    {
       section('bulletin', T_('Message of the Day (unread bulletins)'));
 
       $show_rows = $limit;
-      while( ($show_rows-- > 0) && list(,$arr_item) = $iterator->getListIterator() )
+      foreach( $arr_bulletins as $bulletin )
       {
-         list( $bulletin, $orow ) = $arr_item;
-         $mark_as_read_url = ( !@$orow['BR_Read'] && $bulletin->Status == BULLETIN_STATUS_SHOW ) ? $page : '';
+         if( $show_rows-- <= 0 )
+            break;
+         $mark_as_read_url = ( !$bulletin->ReadState && $bulletin->Status == BULLETIN_STATUS_SHOW ) ? $page : '';
          echo GuiBulletin::build_view_bulletin($bulletin, $mark_as_read_url);
       }
 
-      if( $iterator->ResultRows > $limit )
+      if( $cnt_bulletins > $limit )
       {
          echo "<font size=\"+1\">...</font>\n";
          $sectmenu = array();

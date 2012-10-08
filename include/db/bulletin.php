@@ -23,6 +23,7 @@ $TranslateGroups[] = "Bulletin";
 
 require_once 'include/globals.php';
 require_once 'include/db_classes.php';
+require_once 'include/dgs_cache.php';
 require_once 'include/std_classes.php';
 require_once 'include/classlib_user.php';
 
@@ -113,6 +114,8 @@ class Bulletin
    var $UserListUserRefs; // [ uid => [ ID/Handle/Name/C_RejectMsg => val ], ... ]
    var $Tournament; // Tournament-object for $tid | null
 
+   var $ReadState; // 0 = unread, 1 = marked as read, false = unset
+
    /*! \brief Constructs Bulletin-object with specified arguments. */
    function Bulletin( $id=0, $uid=0, $user=null, $category=BULLETIN_CAT_ADMIN_MSG,
             $status=BULLETIN_STATUS_NEW, $target_type=BULLETIN_TRG_UNSET, $flags=0,
@@ -141,6 +144,7 @@ class Bulletin
       $this->UserListHandles = array();
       $this->UserListUserRefs = array();
       $this->Tournament = null;
+      $this->ReadState = false;
    }
 
    /*! \brief Returns true if LockVersion for optimistic-locking does not match latest version. */
@@ -371,6 +375,8 @@ class Bulletin
             @$row['X_Lastchanged']
          );
       $bull->LockVersion = (int)@$row[FIELD_LOCKVERSION];
+      if( isset($row['BR_Read']) )
+         $bull->ReadState = (int)@$row['BR_Read'];
       return $bull;
    }
 
@@ -632,7 +638,7 @@ class Bulletin
    {
       global $player_row;
       if( !is_numeric($bid) || $bid <= 0 )
-         error('invalid_args', "Bulletin:mark_bulletin_as_read.check.bid($bid)");
+         error('invalid_args', "Bulletin::mark_bulletin_as_read.check.bid($bid)");
       $uid = (int)$player_row['ID'];
 
       ta_begin();
@@ -652,9 +658,10 @@ class Bulletin
                db_query( "Bulletin::mark_bulletin_as_read.inc_read($bid)",
                   "UPDATE Bulletin SET CountReads=CountReads+1 WHERE ID=$bid LIMIT 1" );
             }
-         }
 
-         clear_cache_quick_status( $uid, QST_CACHE_BULLETIN );
+            clear_cache_quick_status( $uid, QST_CACHE_BULLETIN );
+            Bulletin::delete_cache_bulletins( "Bulletin::mark_bulletin_as_read($bid)", $uid );
+         }
       }
       ta_end();
    }//mark_bulletin_as_read
@@ -739,6 +746,8 @@ class Bulletin
          db_query( "$dbgmsg.recalc",
             "UPDATE Players SET CountBulletinNew=$count_new WHERE ID='$uid' LIMIT 1" );
       }
+
+      Bulletin::delete_cache_bulletins( $dbgmsg, $uid );
    }//update_count_bulletin_new
 
    /*!
@@ -772,11 +781,12 @@ class Bulletin
    function update_bulletin_count_players( $dbgmsg, $status, $target_type, $uid=0, $bid=0, $tid=0, $gid=0 )
    {
       global $NOW;
+      $dbgmsg .= "Bulletin::update_bulletin_count_players($status,$target_type,$uid)";
+
+      Bulletin::update_cache_bulletins_global( $dbgmsg );
 
       if( $status != BULLETIN_STATUS_SHOW )
          return false;
-
-      $dbgmsg .= "Bulletin::update_bulletin_count_players($status,$target_type,$uid)";
 
       // NOTE: no sql-'LIMIT' allowed with multi-table-UPDATE
       if( is_numeric($uid) && $uid > 0 )
@@ -845,6 +855,63 @@ class Bulletin
    {
       global $player_row;
       return (@$player_row['admin_level'] & ADMIN_DEVELOPER);
+   }
+
+   function load_cache_bulletins( $dbgmsg, $uid )
+   {
+      $dbgmsg = $dbgmsg.".Bulletin::load_cache_bulletins($uid)";
+      $gkey = "Bulletins.global";
+      $key = "Bulletins.$uid";
+
+      // time of last new or changed bulletin
+      $lastchange_bulletin = DgsCache::fetch( $dbgmsg, CACHE_GRP_BULLETINS, $gkey );
+      if( !is_numeric($lastchange_bulletin) )
+         $lastchange_bulletin = 0;
+
+      $result = DgsCache::fetch( $dbgmsg, CACHE_GRP_BULLETINS, $key );
+      if( is_array($result) )
+      {
+         // check if cache-entry creation-date is older than that of global bulletin-change-time
+         if( count($result) > 0 )
+         {
+            $stored_creation_time = array_shift($result); // remove time for final result
+            if( $lastchange_bulletin > 0 && $stored_creation_time < $lastchange_bulletin )
+               $result = null; // outdated -> reload
+         }
+         else
+            $result = null; // invalid store-data -> reload
+      }
+      if( is_null($result) )
+      {
+         $result = array( $GLOBALS['NOW'] ); // bulletin-cache-entry creation-time
+
+         $iterator = new ListIterator( $dbgmsg.'.list_bulletin.unread',
+            new QuerySQL( SQLP_WHERE,
+                  "BR.bid IS NULL", // only unread
+                  "B.Status='".BULLETIN_STATUS_SHOW."'" ),
+            'ORDER BY B.PublishTime DESC' );
+         $iterator->addQuerySQLMerge( Bulletin::build_view_query_sql( /*adm*/false, /*count*/false ) );
+         $iterator = Bulletin::load_bulletins( $iterator );
+
+         while( list(,$arr_item) = $iterator->getListIterator() )
+            $result[] = $arr_item[0]; // Bulletin-obj
+
+         // store in cache
+         DgsCache::store( $dbgmsg, CACHE_GRP_BULLETINS, $key, $result, SECS_PER_DAY );
+         array_shift($result); // remove creation-time for final result
+      }
+
+      return $result;
+   }//load_cache_bulletins
+
+   function delete_cache_bulletins( $dbgmsg, $uid )
+   {
+      DgsCache::delete( $dbgmsg, CACHE_GRP_BULLETINS, "Bulletins.$uid" );
+   }
+
+   function update_cache_bulletins_global( $dbgmsg )
+   {
+      DgsCache::store( $dbgmsg, CACHE_GRP_BULLETINS, "Bulletins.global", $GLOBALS['NOW'], 7*SECS_PER_DAY );
    }
 
 } // end of 'Bulletin'

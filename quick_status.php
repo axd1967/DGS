@@ -219,21 +219,12 @@ function print_bulletins( $player_row )
 
    if( $player_row['CountBulletinNew'] > 0 ) // show unread bulletins
    {
-      $iterator = new ListIterator( 'quick_status.bulletins.unread',
-         new QuerySQL( SQLP_WHERE,
-               "BR.bid IS NULL", // only unread
-               "B.Status='".BULLETIN_STATUS_SHOW."'" ),
-         'ORDER BY B.PublishTime DESC' );
-      $iterator->addQuerySQLMerge( Bulletin::build_view_query_sql( /*adm*/false, /*count*/false ) );
-      $iterator = Bulletin::load_bulletins( $iterator );
-
-      if( $iterator->ResultRows > 0 )
+      $arr_bulletins = Bulletin::load_cache_bulletins( 'quick_status', $player_id );
+      if( count($arr_bulletins) > 0 )
          $nothing_found = false;
 
-      while( list(,$arr_item) = $iterator->getListIterator() )
+      foreach( $arr_bulletins as $bulletin )
       {
-         list( $bulletin, $orow ) = $arr_item;
-
          // type, Bulletin.ID, TargetType, Category, PublishTime, ExpireTime, Subject
          append_data(QST_CACHE_BULLETIN,
               sprintf( "B,%s,%s,%s,'%s','%s','%s'\n",
