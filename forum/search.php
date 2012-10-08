@@ -27,7 +27,6 @@ require_once( "include/filterlib_mysqlmatch.php" );
 
 
 {
-   #$DEBUG_SQL = true;
    connect2mysql();
 
    $logged_in = who_is_logged( $player_row);
@@ -223,8 +222,6 @@ require_once( "include/filterlib_mysqlmatch.php" );
          $qsql->add_part( SQLP_ORDER, $sql_order );
       $qsql->add_part( SQLP_LIMIT, "$offset," . ($maxrows+1) ); // +1 for next-page detection
       $query = $qsql->get_select();
-
-      if( $DEBUG_SQL ) echo "QUERY: " . make_html_safe($query) . "<br>\n";
 
       $result = db_query( 'forum_search.find', $query );
       $nr_rows = mysql_num_rows($result);

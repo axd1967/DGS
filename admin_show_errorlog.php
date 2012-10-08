@@ -30,7 +30,6 @@ require_once( "include/table_columns.php" );
 require_once( "include/filter.php" );
 
 {
-   #$DEBUG_SQL = true;
    connect2mysql();
 
    $logged_in = who_is_logged( $player_row);
@@ -159,8 +158,6 @@ require_once( "include/filter.php" );
 
    start_page(T_('Show Error Log'), true, $logged_in, $player_row);
    section( 'errorlog', T_('Error Log') );
-   if ( $DEBUG_SQL ) echo "WHERE: " . make_html_safe($query_elfilter->get_select()) ."<br>";
-   if ( $DEBUG_SQL ) echo "QUERY: " . make_html_safe($query);
 
    $atable->echo_table();
 

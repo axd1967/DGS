@@ -32,7 +32,6 @@ require_once( 'include/gui_bulletin.php' );
 $GLOBALS['ThePage'] = new Page('Status');
 
 {
-   #$DEBUG_SQL = true;
    connect2mysql();
 
    $logged_in = who_is_logged( $player_row);
@@ -215,7 +214,6 @@ if( $player_row['GamesMPG'] > 0 )
       . "WHERE GP.uid=$uid AND G.Status='".GAME_STATUS_SETUP."'"
       . $order;
 
-   if( $DEBUG_SQL ) echo "QUERY-MP-GAMES: " . make_html_safe($query) ."<br>\n";
    $result = db_query( "status.find_mp_games($uid)", $query );
    if( @mysql_num_rows($result) > 0 )
    {
@@ -276,7 +274,7 @@ if( $player_row['GamesMPG'] > 0 )
 
 function load_games_to_move( $uid, &$gtable )
 {
-   global $player_row, $NOW, $DEBUG_SQL, $base_path;
+   global $player_row, $NOW, $base_path;
 
    $next_game_order = $player_row['NextGameOrder'];
    $gtable->add_or_del_column();

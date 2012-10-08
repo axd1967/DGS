@@ -110,7 +110,6 @@ require_once( 'include/message_functions.php' );
 
    $title = T_('Message thread');
    start_page( $title, true, $logged_in, $player_row );
-   if( $DEBUG_SQL ) echo "QUERY: " . make_html_safe($query) . "<br>\n";
    echo "<h3 class=Header>$title</h3>\n";
 
    // thread-list can be very long, so add switch also on top

@@ -35,7 +35,6 @@ $GLOBALS['ThePage'] = new Page('TournamentNewsList');
 
 
 {
-   #$DEBUG_SQL = true;
    connect2mysql();
 
    $logged_in = who_is_logged( $player_row);
@@ -125,7 +124,6 @@ $GLOBALS['ThePage'] = new Page('TournamentNewsList');
    $title = sprintf( T_('Tournament News Archive of [%s]'), $tourney->Title );
    start_page($pagetitle, true, $logged_in, $player_row );
 
-   if( $DEBUG_SQL ) echo "QUERY: " . make_html_safe( $iterator->Query );
    echo "<h3 class=Header>". $title . "</h3>\n";
 
    $menu = array();

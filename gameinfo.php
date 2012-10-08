@@ -53,7 +53,6 @@ function build_rating_diff( $rating_diff )
 
 
 {
-   #$DEBUG_SQL = true;
    connect2mysql();
 
    $logged_in = who_is_logged( $player_row);
@@ -529,7 +528,6 @@ function build_rating_diff( $rating_diff )
    $title = T_('Game information');
    start_page( $title, true, $logged_in, $player_row );
 
-   if( $DEBUG_SQL ) echo "QUERY: " . make_html_safe($query) ."<br>\n";
    echo "<h3 class=Header>$title</h3>\n";
 
    echo

@@ -37,7 +37,6 @@ $GLOBALS['ThePage'] = new Page('TournamentList');
 
 
 {
-   #$DEBUG_SQL = true;
    connect2mysql();
 
    $logged_in = who_is_logged( $player_row);
@@ -211,7 +210,6 @@ $GLOBALS['ThePage'] = new Page('TournamentList');
    start_page($title, true, $logged_in, $player_row,
                button_style($player_row['Button']) );
 
-   if( $DEBUG_SQL ) echo "QUERY: " . make_html_safe( $iterator->Query );
    echo "<h3 class=Header>". $title . "</h3>\n";
 
    while( ($show_rows-- > 0) && list(,$arr_item) = $iterator->getListIterator() )

@@ -32,7 +32,6 @@ $GLOBALS['ThePage'] = new Page('BulletinList');
 
 
 {
-   #$DEBUG_SQL = true;
    connect2mysql();
 
    $logged_in = who_is_logged( $player_row);
@@ -214,7 +213,6 @@ $GLOBALS['ThePage'] = new Page('BulletinList');
    start_page($title, true, $logged_in, $player_row,
                button_style($player_row['Button']) );
 
-   if( $DEBUG_SQL ) echo "QUERY: " . make_html_safe( $iterator->Query );
    if( $is_admin )
       $title .= sprintf( ' - %s', span('AdminTitle', T_('Admin View#bulletin')) );
    elseif( $was_admin )

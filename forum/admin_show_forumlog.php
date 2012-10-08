@@ -27,7 +27,6 @@ require_once( "include/filter.php" );
 require_once( "forum/forum_functions.php" );
 
 {
-   #$DEBUG_SQL = true;
    connect2mysql();
 
    $logged_in = who_is_logged($player_row);
@@ -109,8 +108,6 @@ require_once( "forum/forum_functions.php" );
 
    $title = T_('Forum log');
    start_page( $title, true, $logged_in, $player_row );
-   if ( $DEBUG_SQL ) echo "WHERE: " . make_html_safe($query_flfilter->get_select()) ."<br>";
-   if ( $DEBUG_SQL ) echo "QUERY: " . make_html_safe($query);
 
    echo "<h3 class=Header>$title</h3>\n";
 

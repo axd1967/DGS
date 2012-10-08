@@ -35,7 +35,6 @@ require_once( 'include/classlib_userpicture.php' );
 
 
 {
-   #$DEBUG_SQL = true;
    connect2mysql();
 
    $logged_in = who_is_logged( $player_row);
@@ -379,12 +378,6 @@ require_once( 'include/classlib_userpicture.php' );
 
    start_page( $title1, true, $logged_in, $player_row,
                button_style($player_row['Button']) );
-   if( $DEBUG_SQL )
-   {
-      if( isset($query_black) ) echo "QUERY-BLACK: " . make_html_safe($query_black) . "<br>\n";
-      if( isset($query_white) ) echo "QUERY-WHITE: " . make_html_safe($query_white) . "<br>\n";
-      if( !$opp) echo "QUERY: " . make_html_safe($query) . "<br>\n";
-   }
 
    // static filter-values
    $arrtmp = array();

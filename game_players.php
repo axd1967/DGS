@@ -57,7 +57,6 @@ define('KEY_GROUP_COLOR', 'gpc');
 define('KEY_GROUP_ORDER', 'gpo');
 
 {
-   #$DEBUG_SQL = true;
    connect2mysql();
 
    $logged_in = who_is_logged($player_row);
@@ -231,7 +230,6 @@ define('KEY_GROUP_ORDER', 'gpo');
    $title_page = build_page_title( $title, $grow['Status'] );
    start_page( $title, true, $logged_in, $player_row );
 
-   if( $DEBUG_SQL ) echo "QUERY: " . make_html_safe($query) ."<br>\n";
    echo "<h3 class=Header>$title_page</h3>\n";
 
    $itable_game_settings = build_game_settings( $grow );

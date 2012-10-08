@@ -39,7 +39,6 @@ require_once( 'include/wroom_control.php' );
 {
    // NOTE: using page: join_waitingroom_game.php
 
-   #$DEBUG_SQL = true;
    connect2mysql();
 
    $logged_in = who_is_logged( $player_row);
@@ -198,7 +197,6 @@ require_once( 'include/wroom_control.php' );
    start_page($title, true, $logged_in, $player_row,
                button_style($player_row['Button']) );
 
-   if( $DEBUG_SQL ) echo "QUERY: " . make_html_safe($query);
    echo "<h3 class=Header>". $title . "</h3>\n";
 
    $maxGamesCheck = new MaxGamesCheck();

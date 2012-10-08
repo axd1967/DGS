@@ -26,7 +26,6 @@ require_once( 'forum/post.php' );
 
 
 {
-   #$DEBUG = true;
    connect2mysql();
 
    $logged_in = who_is_logged( $player_row);
@@ -203,7 +202,6 @@ require_once( 'forum/post.php' );
 
    $fopts_str = $forum->build_options_text( $f_opts );
    echo "<h3 class=Header>$title$fopts_str</h3>\n";
-   if( $DEBUG ) echo "<pre>", print_r($_REQUEST,true), "</pre><br>\n";
 
    $disp_forum->print_moderation_note('99%');
 

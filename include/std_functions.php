@@ -79,11 +79,6 @@ else
    $GUESTPASS = 'guest';
 define('GUESTS_ID_MAX', 1); //minimum 1 because hard-coded in init.mysql
 
-// for debugging various variables (used for development)
-global $DEBUG, $DEBUG_SQL; //PHP5
-$DEBUG = false;
-$DEBUG_SQL = false; // for debugging filter showing where-clause on page
-
 define('LAYOUT_FILTER_IN_TABLEHEAD', true); // default is to show filters within tablehead (not below rows)
 define('LAYOUT_FILTER_EXTFORM_HEAD', true); // default is to show external-filter-form above filter-table
 

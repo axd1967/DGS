@@ -36,7 +36,6 @@ require_once( 'include/gamelist_control.php' );
 $GLOBALS['ThePage'] = new Page('GamesList');
 
 {
-   #$DEBUG_SQL = true;
    connect2mysql();
 
    $logged_in = who_is_logged( $player_row);
@@ -612,7 +611,6 @@ $GLOBALS['ThePage'] = new Page('GamesList');
    start_page( $title1, true, $logged_in, $player_row,
                button_style($player_row['Button']) );
 
-   if( $DEBUG_SQL ) echo "QUERY: " . make_html_safe($query) ."<br>\n";
    echo "<h3 class=Header>$title2</h3>\n";
 
    if( $restrict_games != '' && !$gfilter->is_init() )

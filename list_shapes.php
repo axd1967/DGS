@@ -30,7 +30,6 @@ $GLOBALS['ThePage'] = new Page('ShapeList');
 
 
 {
-   #$DEBUG_SQL = true;
    connect2mysql();
 
    $logged_in = who_is_logged( $player_row);
@@ -98,7 +97,6 @@ $GLOBALS['ThePage'] = new Page('ShapeList');
    $title = T_('Shapes');
    start_page($title, true, $logged_in, $player_row, button_style($player_row['Button']) );
 
-   if( $DEBUG_SQL ) echo "QUERY: " . make_html_safe( $iterator->Query );
    section('Shape', $title );
 
    while( ($show_rows-- > 0) && list(,$arr_item) = $iterator->getListIterator() )
