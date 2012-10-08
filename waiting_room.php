@@ -315,7 +315,7 @@ require_once( 'include/wroom_control.php' );
                         sprintf('[%s]', T_('Hidden#wroom')) ),
             );
          $notes = array();
-         $notes[] = T_('Column \'Settings\' shows the probably game-color, handicap and komi.')
+         $notes[] = T_('Column \'Settings\' shows the probable game-color, handicap and komi.')
                . sprintf( '<br>%s = %s', T_('(Free Handicap)#handicap_tablewr'), T_('indicator of free handicap stone placement') );
          $notes[] = T_('A waiting game is <b>suitable</b> when a player matches the requested game restrictions on:')
                . "\n* " . implode(",\n* ", $restrictions);
