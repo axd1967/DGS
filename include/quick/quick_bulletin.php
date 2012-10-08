@@ -81,7 +81,9 @@ class QuickHandlerBulletin extends QuickHandler
       if( $cmd == QCMD_LIST )
       {
          $qsql = Bulletin::build_view_query_sql( /*adm*/false, /*cnt*/false, /*type*/'', /*chk*/false );
-         $qsql->add_part( SQLP_WHERE, 'BR.bid IS NULL' ); // unread-bulletins
+         $qsql->add_part( SQLP_WHERE,
+            'BR.bid IS NULL', // unread-bulletins
+            "B.Status='".BULLETIN_STATUS_SHOW."'" );
          $qsql->add_part( SQLP_ORDER, 'PublishTime DESC' );
          $this->add_query_limits( $qsql, /*calc-rows*/true );
          $iterator = new ListIterator( $dbgmsg.'.list', $qsql );
