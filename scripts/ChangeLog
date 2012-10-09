@@ -19,6 +19,84 @@ Developers INFO:
 ChangeLog
 ------------------------------------------------------------------
 
+2012-10-09 juga
+
+   * include/cache_globals.php (CACHE_GRP_TGAMES, $ARR_CACHE_GROUP_NAMES, $ARR_CACHE_GROUP_CLEANUP),
+     include/std_classes.php (ListIterator.to_string, ~.getItemRows, ~.rescanIndex),
+     include/config.php ($DGS_CACHE_GROUPS),
+     tournaments/include/tournament_games.php (TournamentGames.update_tournament_game_wait,
+       ~.delete_cache_tournament_games),
+     tournaments/include/tournament_helper.php (TournamentHelper.process_tournament_game_end,
+       ~.start_tournament_round_games),
+     tournaments/include/tournament_cache.php (TournamentCache.load_cache_tournament_games),
+     tournaments/ladder/challenge.php, tournaments/ladder/view.php,
+     tournaments/roundrobin/view_pools.php, tournaments/game_admin.php:
+   - use caching to load tournament-games
+     - invalidate cache on setting tourney-game-end by admin, processing game-end by cron,
+       starting tourney-game for round-robin-tourney, starting ladder-challenge
+
+   * include/wroom_control.php (WaitingroomOffer.calculate_offer_settings),
+     include/gui_functions.php (echo_image_game_players):
+   - add more info about free-slots in waiting-room on MPG-icon tooltip
+
+   * include/message_functions.php (update_count_message_new; MessageListBuilder.message_list_body,
+       ~.message_list_query, ~.load_cache_message_list, ~.delete_cache_message_list),
+     include/cache_globals.php (CACHE_GRP_MSGLIST, $ARR_CACHE_GROUP_NAMES, $ARR_CACHE_GROUP_CLEANUP),
+     include/config.php ($DGS_CACHE_GROUPS),
+     include/std_functions.php (send_message),
+     edit_folders.php, list_messages.php, search_messages.php, status.php:
+   - use caching to load message-list for status-page
+     - invalidate cache on sending-message, change-msg-folder, change-status-folders
+     - refactored message_list_query() into MessageListBuilder-class
+   - added link to show all messages if there are more than 20 messages shown on status-page
+
+2012-10-08 juga
+
+   * include/db/bulletin.php (class Bulletin, ~.new_from_row, ~.mark_bulletin_as_read,
+       ~.update_count_bulletin_new, ~.update_bulletin_count_players, ~.load_cache_bulletins,
+       ~.delete_cache_bulletins, ~.update_cache_bulletins_global),
+     include/cache_globals.php (CACHE_GRP_BULLETINS),
+     include/config.php ($DGS_CACHE_GROUPS),
+     rss/status.php, quick_status.php, status.php:
+   - use caching to load bulletins
+     - invalidate cache on changed global-bulletin/changed-bulletin-count for user
+     - check if global bulletin changed-time needs refresh of user-specific loading of bulletins
+
+   * include/quick/quick_bulletin.php (QuickHandlerBulletin.prepare):
+   - bugfix: only return bulletins on SHOW-status
+
+2012-10-07 juga
+
+   * include/std_functions.php, features/list_features.php, features/list_votes.php,
+     forum/admin_show_forumlog.php, forum/read.php, forum/search.php,
+     tournaments/list_directors.php, tournaments/list_news.php,
+     tournaments/list_participants.php, tournaments/list_tournaments.php,
+     admin_show_errorlog.php, game_players.php, gameinfo.php, list_bulletins.php,
+     list_contacts.php, list_shapes.php, list_surveys.php, message_thread.php, opponents.php,
+     search_messages.php, show_games.php, status.php, users.php, waiting_room.php:
+   - cleanup: remove old debugging-code with $DEBUG/$DEBUG_SQL
+
+   * include/game_functions.php (GameAddTime.add_time_opponent;
+       GameHelper.delete_running_game, ~.load_cache_status_games, ~.delete_cache_status_games;
+       FairKomiNegotiation.save_komi;
+       GameFinalizer.finish_game;
+       NextGameOrder.persist_game_priority),
+     include/cache_globals.php (CACHE_GRP_GAMELIST_STATUS, $ARR_CACHE_GROUP_NAMES, $ARR_CACHE_GROUP_CLEANUP),
+     include/quick/quick_game.php (QuickHandlerGame.process_cmd_play),
+     include/config.php ($DGS_CACHE_GROUPS),
+     include/make_game.php (create_game),
+     status.php (load_games_to_move),
+     confirm.php, quick_play.php:
+   - use caching to load games-list for status-page,
+     - invalidate cache on game-move, game-end, add-time, game-prio-change, create-game, start-FK-game,
+       delete-game, change-next-game-order
+     - no cache-invalidation on start/end-vacation, clock-tick, timeleft-fix-script, opp-name-change,
+       opp-rating-change, user nighttime-change, opp-last-access-change
+       as 1 minute is a short enough expire-period to bear not showing the latest updates
+     - caching for 1 min if players last-access-time was within one minute thereby saving cache-space
+     - check if db-query changed by comparing stored checksum stored in cache-value
+   - re-arranged clearing QST-cache
+
 2012-10-05 juga
 
    * include/dgs_cache.php (class FileCache, ~.set_unlink_expired, ~.set_read_expired, ~.cache_fetch,

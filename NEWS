@@ -694,7 +694,8 @@ Copyright (C) 2001-2012  Erik Ouchterlony
 
 ##   * Shared memory caching using APC:
 ##      * Added caching to load ConfigPages, ConfigBoard, Clocks, game observers, private game notes, user_reference,
-##        main game- and moves statistics, message folders, tables search profile, game moves, game move messages
+##        main game- and moves statistics, message folders, tables search profile, game moves, game move messages,
+##        game-list & message-list & bulletins on status-page
 ##
    * Improvements of database queries
       * Users: faster Activity handling and Vacation handling
