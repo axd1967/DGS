@@ -167,12 +167,10 @@ $GLOBALS['ThePage'] = new Page('TournamentLadderView');
       }
       else
       {
-         $tg_iterator = new ListIterator( 'Tournament.ladder_view.load_tgames' );
-         $tg_iterator = TournamentGames::load_tournament_games( $tg_iterator, $tid, 0, 0,
-               array(TG_STATUS_PLAY, TG_STATUS_WAIT, TG_STATUS_SCORE) );
+         $tg_iterator = TournamentCache::load_cache_tournament_games( 'Tournament.ladder_view',
+            $tid, 0, 0, array(TG_STATUS_PLAY, TG_STATUS_WAIT, TG_STATUS_SCORE) );
 
          // add ladder-info (challenge-range)
-         $thelper = new TournamentHelper();
          $tl_user = $tl_props->fill_ladder_challenge_range( $iterator, $my_id );
          $tl_props->fill_ladder_running_games( $iterator, $tg_iterator, $my_id );
       }

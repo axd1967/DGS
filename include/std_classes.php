@@ -819,6 +819,7 @@ class ListIterator
          $arr[] = sprintf( "Item.%d=[%s]", $idx++,
             ( method_exists($item, 'to_string') ? $item->to_string() : print_r($item,true) ));
       }
+      $this->resetListIterator();
       $arr[] = 'Index=[' . print_r( $this->Index, true ) . ']';
       return "ListIterator({$this->Name}): " . implode(', ', $arr);
    }
@@ -868,6 +869,16 @@ class ListIterator
       return $out;
    }
 
+   /*! \brief Return array with list of raw rows only. */
+   function getItemRows()
+   {
+      $out = array();
+      foreach( $this->Items as $arr_item )
+         $out[] = $arr_item[1];
+      $this->resetListIterator();
+      return $out;
+   }
+
    /*! \brief Rescans items and re-filling index. */
    function rescanIndex()
    {
@@ -880,6 +891,7 @@ class ListIterator
          foreach( $this->Index as $field => $map )
             $this->Index[$field][$row[$field]] = $arr_item;
       }
+      $this->resetListIterator();
    }
 
 } // end of 'ListIterator'

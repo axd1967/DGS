@@ -487,17 +487,35 @@ class TournamentGames
    /*! \brief Updates due tournament-games finishing with DONE-status. */
    function update_tournament_game_wait( $dbgmsg, $wait_ticks )
    {
-      if( !is_numeric($wait_ticks) )
-         error('invalid_args', "TournamentGames.update_tournament_game_wait.check.ticks($wait_ticks)");
-
       global $NOW;
-      $result = db_query( "$dbgmsg.update_tournament_game_wait($wait_ticks)",
-         "UPDATE TournamentGames SET "
-            . "Status='".TG_STATUS_DONE."', "
-            . "Lastchanged=FROM_UNIXTIME($NOW) "
-         . " WHERE Status='".TG_STATUS_WAIT."' AND TicksDue<=$wait_ticks" );
+
+      $dbgmsg .= ".TG.update_tournament_game_wait($wait_ticks)";
+      if( !is_numeric($wait_ticks) )
+         error('invalid_args', "$dbgmsg.check.ticks");
+
+      $query_part = " WHERE Status='".TG_STATUS_WAIT."' AND TicksDue<=$wait_ticks";
+
+      // find tournament-id to clear cache for
+      $arr_tids = array();
+      $result = db_query( "$dbgmsg.find_tids", "SELECT tid FROM TournamentGames $query_part" );
+      while( $row = mysql_fetch_array($result) )
+         $arr_tids[] = $row['tid'];
+      mysql_free_result($result);
+
+      ta_begin();
+      {//HOT-section to finish waiting tournament-games
+         $result = db_query( "$dbgmsg.upd_tgame",
+            "UPDATE TournamentGames SET Status='".TG_STATUS_DONE."', Lastchanged=FROM_UNIXTIME($NOW) $query_part" );
+         if( $result )
+         {
+            foreach( $arr_tids as $tid )
+               TournamentGames::delete_cache_tournament_games( $dbgmsg, $tid );
+         }
+      }
+      ta_end();
+
       return $result;
-   }
+   }//update_tournament_game_wait
 
    /*! \brief Returns status-text or all status-texts (if arg=null). */
    function getStatusText( $status=null )
@@ -562,6 +580,11 @@ class TournamentGames
    {
       static $statuslist = array( TOURNEY_STATUS_PAIR, TOURNEY_STATUS_PLAY, TOURNEY_STATUS_CLOSED );
       return $statuslist;
+   }
+
+   function delete_cache_tournament_games( $dbgmsg, $tid )
+   {
+      DgsCache::delete_group( $dbgmsg, CACHE_GRP_TGAMES, "TGames.$tid" );
    }
 
 } // end of 'TournamentGames'

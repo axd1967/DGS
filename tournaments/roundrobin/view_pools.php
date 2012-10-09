@@ -87,8 +87,8 @@ $GLOBALS['ThePage'] = new Page('TournamentPoolView');
    $poolTables->fill_pools( $tpool_iterator );
    $count_players = $tpool_iterator->getItemCount();
 
-   $tg_iterator = new ListIterator( 'Tournament.pool_view.load_tgames' );
-   $tg_iterator = TournamentGames::load_tournament_games( $tg_iterator, $tid, $tround->ID, 0, /*all-stati*/null );
+   $tg_iterator = TournamentCache::load_cache_tournament_games( 'Tournament.pool_view',
+      $tid, $tround->ID, 0, /*all-stati*/null );
    $poolTables->fill_games( $tg_iterator );
    $counts = $poolTables->count_games();
 

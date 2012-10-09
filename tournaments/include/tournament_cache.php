@@ -25,6 +25,7 @@ require_once 'include/std_classes.php';
 require_once 'tournaments/include/tournament.php';
 require_once 'tournaments/include/tournament_director.php';
 require_once 'tournaments/include/tournament_globals.php';
+require_once 'tournaments/include/tournament_games.php';
 require_once 'tournaments/include/tournament_ladder_props.php';
 require_once 'tournaments/include/tournament_news.php';
 require_once 'tournaments/include/tournament_participant.php';
@@ -406,6 +407,36 @@ class TournamentCache
 
       return $arr_tresult;
    }//load_cache_tournament_results
+
+   /*! \brief Loads and caches TournamentGames for given tournament-id. */
+   function load_cache_tournament_games( $dbgmsg, $tid, $round_id=0, $pool=0, $status=null )
+   {
+      $tid = (int)$tid;
+      $pool_info = (is_array($pool)) ? implode(',', $pool) : $pool;
+
+      $dbgmsg .= ".TCache::load_cache_tgames($tid)";
+      $group_id = "TGames.$tid";
+      $key = "TGames.$tid.$round_id.$pool_info";
+      $tg_iterator = new ListIterator( $dbgmsg );
+
+      $arr_tgames = DgsCache::fetch( $dbgmsg, CACHE_GRP_TGAMES, $key );
+      if( is_null($arr_tgames) )
+      {
+         $tg_iterator = TournamentGames::load_tournament_games( $tg_iterator, $tid, $round_id, $pool, $status );
+
+         DgsCache::store( $dbgmsg, CACHE_GRP_TGAMES, $key, $tg_iterator->getItemRows(), SECS_PER_DAY, $group_id );
+      }
+      else // transform cache-stored row-arr into ListIterator of TournamentGames
+      {
+         foreach( $arr_tgames as $row )
+         {
+            $tgame = TournamentGames::new_from_row( $row );
+            $tg_iterator->addItem( $tgame, $row );
+         }
+      }
+
+      return $tg_iterator;
+   }//load_cache_tournament_games
 
 } // end of 'TournamentCache'
 ?>

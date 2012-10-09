@@ -77,11 +77,16 @@ class TournamentHelper
          return true;
 
       if( $tourney->Type == TOURNEY_TYPE_LADDER )
-         return $this->process_tournament_ladder_game_end( $tourney, $tgame );
+         $result = $this->process_tournament_ladder_game_end( $tourney, $tgame );
       elseif( $tourney->Type == TOURNEY_TYPE_ROUND_ROBIN )
-         return $this->process_tournament_round_robin_game_end( $tourney, $tgame );
+         $result = $this->process_tournament_round_robin_game_end( $tourney, $tgame );
       else
-         return false;
+         $result = false;
+
+      // clear cache
+      TournamentGames::delete_cache_tournament_games( "TournamentHelper.process_tournament_game_end($tid)", $tid );
+
+      return $result;
    }
 
    function process_tournament_ladder_game_end( $tourney, $tgame )
@@ -325,6 +330,9 @@ class TournamentHelper
       if( $count_old_games > 0 )
          echo_message( "<br>\n<li>" . sprintf( T_('%s games already existed') . '</li>', $count_old_games ));
       echo_message("</ul></td></tr></table>\n");
+
+      // clear cache
+      TournamentGames::delete_cache_tournament_games( "TournamentHelper::start_tournament_round_games($tid,$round)", $tid );
 
       // check expected games-count
       $count_games += $count_old_games;

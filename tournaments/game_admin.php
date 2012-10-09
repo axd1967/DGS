@@ -124,6 +124,9 @@ define('GA_RES_TIMOUT', 3);
             $success = $tgame->update_score( 'Tournament.game_admin', TG_STATUS_PLAY );
             if( $success )
             {
+               // clear cache
+               TournamentGames::delete_cache_tournament_games( "Tournament.game_admin($tid)", $tid );
+
                TournamentLogHelper::log_tournament_game_end( $tid, $allow_edit_tourney, $tgame->gid, $edits,
                   $tg_score, $tgame->Score,  $tgame->formatFlags($old_tg_flags), $tgame->formatFlags(),
                   TournamentGames::getStatusText($old_tg_status), TournamentGames::getStatusText($tgame->Status) );

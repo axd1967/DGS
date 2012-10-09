@@ -159,6 +159,9 @@ $GLOBALS['ThePage'] = new Page('TournamentLadderChallenge');
             sprintf( T_('Challenge started for tournament #%s#T_ladder'), $tid ),
             $df_uid, '', /*notify*/true,
             0/*sys-msg*/, MSGTYPE_NORMAL );
+
+         // clear cache
+         TournamentGames::delete_cache_tournament_games( "Tournament.ladder.challenge($tid,$ch_uid,$df_uid)", $tid );
       }
       ta_end();
 
