@@ -514,7 +514,10 @@ class WaitingroomOffer
       elseif( $game_type != GAMETYPE_GO ) // MPG
       {
          $this->resultHandicap = $this->resultKomi = 0;
-         $settings_str = $colstr . MINI_SPACING . echo_image_game_players( $this->row['gid'] )
+         $icon_text = T_('Multi-Player-Game') . ': '
+            . sprintf( T_('%s free slot(s) of %s players#mpg'), $this->row['nrGames'], $this->mp_player_count )
+            . '; ' . T_('Show game-players');
+         $settings_str = $colstr . MINI_SPACING . echo_image_game_players( $this->row['gid'], $icon_text )
             . MINI_SPACING . sprintf( '(%s/%s)', $this->row['nrGames'], $this->mp_player_count);
       }
 

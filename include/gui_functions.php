@@ -378,12 +378,13 @@ function echo_image_tourney_next_round()
 }
 
 /*! \brief Returns image-tag for MP-game (linked to game-players-page if game-id > 0 given). */
-function echo_image_game_players( $gid )
+function echo_image_game_players( $gid, $icon_text='' )
 {
    global $base_path;
-   $img = image( $base_path.'images/team.gif',
-      ($gid < 0) ? T_('Show multi-player-games') : T_('Show game-players'),
-      null, 'class="InTextImage"' );
+   if( !$icon_text )
+      $icon_text = T_('Multi-Player-Game') . ': ' . T_('Show game-players');
+   $text = ($gid <= 0) ? T_('Show multi-player-games') : $icon_text;
+   $img = image( $base_path.'images/team.gif', $text, null, 'class="InTextImage"' );
    return ($gid > 0) ? anchor( $base_path."game_players.php?gid=$gid", $img ) : $img;
 }
 
