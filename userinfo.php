@@ -103,9 +103,9 @@ $GLOBALS['ThePage'] = new Page('UserInfo');
    start_page($title, true, $logged_in, $player_row );
    echo "<h3 class=Header>$title</h3>\n";
 
+   $fmt_block = "<p><font color=\"red\"><b>( %s )</b></font><br>\n";
    if( (@$row['AdminOptions'] & ADMOPT_DENY_LOGIN) )
-      echo sprintf( "<p><font color=\"red\"><b>( %s )</b></font><br>\n",
-         T_('Account blocked - Login denied') );
+      echo sprintf( $fmt_block, T_('Account blocked - Login denied') );
 
    $run_link = "show_games.php?uid=$uid";
    $run_mpg_link = "show_games.php?uid=$uid".URI_AMP.'mp=1';

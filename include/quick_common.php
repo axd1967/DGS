@@ -51,9 +51,9 @@ $chained = 0;
 //define('ADMOPT_BYPASS_IP_BLOCK', 0x001); // by-passes blocked IP for user
 define('ADMOPT_DENY_LOGIN',            0x0002); // deny: server usage, login
 define('ADMOPT_DENY_EDIT_BIO',         0x0004);
-//define('ADMOPT_DENY_START_GAME', 0x0008); // deny: new/join game in waitroom, invite; being invited allowed
-//define('ADMOPT_DENY_SEND_MSG',   0x0010);
-//define('ADMOPT_DENY_UPD_FORUM',  0x0020); // deny: new/edits in forums
+//define('', 0x0008); // for re-use
+//define('', 0x0010); // for re-use
+//define('', 0x0020); // for re-use
 define('ADMOPT_HIDE_BIO',              0x0080); // hide user bio
 define('ADMOPT_FGROUP_ADMIN',          0x0100); // user can see ADMIN-forums
 define('ADMOPT_FGROUP_DEV',            0x0200); // user can see DEV-forums
