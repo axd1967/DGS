@@ -23,6 +23,8 @@ require_once 'include/quick/quick_suite.php';
 
 $TheErrors->set_mode(ERROR_MODE_QUICK_SUITE);
 
+header('Access-Control-Allow-Origin: *');
+
 if( $is_down )
 {
    error('server_down', str_replace("\n", "  ", $is_down_message));

@@ -37,6 +37,7 @@ define('QST_CHECK_MAX', DEFAULT_MIN_REQ_IVAL * SECS_PER_MIN); //secs
 $encoding_used = 'utf-8'; //LANG_DEF_CHARSET;
 $language_used = 'en'.LANG_CHARSET_CHAR.$encoding_used; //lowercase
 
+header('Access-Control-Allow-Origin: *');
 
 if( $is_down )
 {
