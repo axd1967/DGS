@@ -50,6 +50,9 @@ $GLOBALS['ThePage'] = new Page('TournamentList');
 
    $page = "list_tournaments.php?";
 
+   $show_notes = ( @$_REQUEST['notes'] ) ? 1 : 0;
+
+
    // config for filters
    $scope_filter_array = array( T_('All') => '' );
    foreach( Tournament::getScopeText() as $scope => $text )
@@ -116,6 +119,12 @@ $GLOBALS['ThePage'] = new Page('TournamentList');
 
    // attach external URL-parameters from static filter
    $ttable->add_external_parameters( $tsfilter->get_req_params(), true );
+
+   if( $show_notes )
+   {
+      $rp = new RequestParameters( array( 'notes' => $show_notes ) );
+      $ttable->add_external_parameters( $rp, true );
+   }
 
    // add_tablehead($nr, $descr, $attbs=null, $mode=TABLE_NO_HIDE|TABLE_NO_SORT, $sortx='')
    $ttable->add_tablehead( 1, T_('ID#header'), 'Button', TABLE_NO_HIDE, 'T.ID-');
@@ -318,7 +327,19 @@ $GLOBALS['ThePage'] = new Page('TournamentList');
    }
    $notes[] = sprintf( T_("Column <b>%s</b> shows the current registered X and allowed total Y tournament participants: X / Y."),
                        T_('Tournament-Size#header') );
-   echo_notes( 'tournamentnotes', T_('Tournament notes'), $notes );
+
+   $baseURL = $page
+      . $ttable->current_rows_string(1)
+      . $ttable->current_sort_string(1)
+      . $ttable->current_filter_string(1)
+      . $ttable->current_from_string(1);
+   if( $show_notes )
+   {
+      echo_notes( 'tournamentnotes', T_('Tournament notes'), $notes );
+      echo anchor( $baseURL.'notes=0', T_('Hide tournament notes') ), "\n";
+   }
+   else
+      echo "<br><br>\n", anchor( $baseURL.'notes=1', T_('Show tournament notes') ), "\n";
 
 
    $menu_array = array();
