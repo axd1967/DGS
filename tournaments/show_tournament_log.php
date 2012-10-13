@@ -111,7 +111,7 @@ require_once 'tournaments/include/tournament_log.php';
    $iterator = Tournamentlog::load_tournament_logs( $iterator );
 
    $show_rows = $table->compute_show_rows( $iterator->ResultRows );
-   $table->set_found_rows( mysql_found_rows('Tournament.show_tlog.found_rows') );
+   //$table->set_found_rows( mysql_found_rows('Tournament.show_tlog.found_rows') );
 
    while( ($show_rows-- > 0) && list(,$arr_item) = $iterator->getListIterator() )
    {
