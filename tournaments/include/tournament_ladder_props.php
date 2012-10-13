@@ -391,7 +391,7 @@ class TournamentLadderProps
    /*!
     * \brief Enhances ladder with additional info/data (Challenge-range): TL.AllowChange, TL.MaxChallengedIn.
     * \param $iterator ListIterator on ordered TournamentLadder with iterator-Index on Rank & uid
-    * \return TournamentLadder of given user or null if not in ladder.
+    * \return (modified) TournamentLadder of given user or null if not in ladder.
     */
    function fill_ladder_challenge_range( &$iterator, $uid )
    {
@@ -405,8 +405,8 @@ class TournamentLadderProps
 
       // highest challenge-rank
       $user_rank = $tl_user->Rank;
-      $user_rating_tl_pos = $this->find_ladder_rating_pos( $iterator, @$tl_user_orow['TLP_Rating2'] );
-      $high_rank = $this->calc_highest_challenge_rank( $user_rank, $user_rating_tl_pos );
+      $tl_user_rating_pos = $this->determine_ladder_rating_pos( $iterator, @$tl_user_orow['TLP_Rating2'] );
+      $high_rank = $this->calc_highest_challenge_rank( $user_rank, $tl_user_rating_pos );
       for( $pos=$user_rank; $pos >= $high_rank; $pos-- )
       {
          $tladder = $iterator->getIndexValue( 'Rank', $pos, 0 );
@@ -464,11 +464,13 @@ class TournamentLadderProps
     * \brief Returns theoretical position for given rating in ladder ordered by user rating.
     * \param $iterator ListIterator on ordered TournamentLadder, expecting orow-field TLP_Rating2 with user-rating
     * \return ladder-position; or 0 if given rating greater than all ladder-users-ratings
+    *
+    * \note sync with TournamentLadder::find_ladder_rating_pos()
+    * \note purpose of this method is to avoid db-query using pre-loaded iterator on TournamentLadder instead
     */
-   function find_ladder_rating_pos( $iterator, $rating )
+   function determine_ladder_rating_pos( $iterator, $rating )
    {
-      if( $this->ChallengeRangeRating == TLADDER_CHRNG_RATING_UNUSED
-            || (string)$rating == '' || (int)$rating <= NO_RATING )
+      if( $this->ChallengeRangeRating == TLADDER_CHRNG_RATING_UNUSED || (string)$rating == '' || (int)$rating <= NO_RATING )
          return 0;
 
       $cnt_higher = 0; // count of ladder-users with rating >= given-rating
@@ -485,7 +487,7 @@ class TournamentLadderProps
       $iterator->resetListIterator();
 
       return $cnt_higher;
-   }//find_ladder_rating_pos
+   }//determine_ladder_rating_pos
 
    /*!
     * \brief Returns highest allowed challenge rank.

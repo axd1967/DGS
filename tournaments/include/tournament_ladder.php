@@ -1250,5 +1250,24 @@ class TournamentLadder
       return $iterator;
    }
 
+   /*!
+    * \brief Returns theoretical position for given rating in ladder ordered by user rating.
+    * \return ladder-position; or 0 if given rating greater than all ladder-users-ratings
+    *
+    * \note sync with TournamentLadderProps.determine_ladder_rating_pos()
+    */
+   function find_ladder_rating_pos( $dbgmsg, $tid, $tl_props, $rating )
+   {
+      if( $tl_props->ChallengeRangeRating == TLADDER_CHRNG_RATING_UNUSED
+            || (string)$rating == '' || (int)$rating <= NO_RATING )
+         return 0;
+
+      // count of ladder-users with rating >= given-rating
+      $row = mysql_single_fetch( $dbgmsg.".TL::find_ladder_rating_pos($tid,$rating)",
+         "SELECT COUNT(*) AS X_Count FROM TournamentLadder AS TL INNER JOIN Players AS TLP ON TLP.ID=TL.uid " .
+         "WHERE TL.tid=$tid AND TLP.Rating2 >= $rating" );
+      return ($row) ? (int)$row['X_Count'] : 0;
+   }//find_ladder_rating_pos
+
 } // end of 'TournamentLadder'
 ?>
