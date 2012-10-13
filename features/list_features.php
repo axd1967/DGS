@@ -233,12 +233,13 @@ function handle_vote_neutral( $my_id )
          $feature_ids[]= $matches[1];
    }
 
-   if( count($feature_ids) > 0 )
+   $cnt_features = count($feature_ids);
+   if( $cnt_features > 0 )
    {
       ta_begin();
       {//HOT-section to update feature-vote
          FeatureVote::insert_feature_neutral_votes( $my_id, $feature_ids );
-         Feature::update_count_feature_new( "list_features.handle_vote_neutral", $my_id, -1 );
+         Feature::update_count_feature_new( "list_features.handle_vote_neutral", $my_id, -$cnt_features );
       }
       ta_end();
       return true;
