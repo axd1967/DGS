@@ -82,7 +82,7 @@ abstract class AbstractCache
       $arr_group = $this->cache_fetch( $group_id, $cache_group );
       if( is_null($arr_group) )
          $arr_group = array( $elem_id );
-      else
+      else if( !in_array($elem_id, $arr_group) ) // keep unique
          $arr_group[] = $elem_id;
 
       return $this->cache_store( $group_id, $arr_group, $ttl, $cache_group );
