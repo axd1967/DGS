@@ -692,11 +692,14 @@ Copyright (C) 2001-2012  Erik Ouchterlony
 
    Code improvements:
 
-##   * Shared memory caching using APC:
-##      * Added caching to load ConfigPages, ConfigBoard, Clocks, game observers, private game notes, user_reference,
-##        main game- and moves statistics, message folders, tables search profile, game moves, game move messages,
-##        game-list & message-list & bulletins on status-page
-##
+   * Shared memory caching using APC or file-based cache:
+      * Added caching to load ConfigPages, ConfigBoard, Clocks, game observers, private game notes, user_reference,
+        main game- and moves statistics, message folders, tables search profile, game moves, game move messages,
+        game-list & message-list & bulletins on status-page, game-info on game-page, forums-list, forum-names
+##      * Added caching to load tournament, tournament directors, tournament-ladder-props, tournament-properties,
+##        tournament-rules, tournament-round, tournament-news, tournament-participant-list & -count,
+##        tournament-results, tournament-games, tournament-ladder
+
    * Improvements of database queries
       * Users: faster Activity handling and Vacation handling
       * Game: faster skip-to-next-game

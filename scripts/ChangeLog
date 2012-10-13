@@ -19,6 +19,61 @@ Developers INFO:
 ChangeLog
 ------------------------------------------------------------------
 
+2012-10-13 juga
+
+   * tournaments/show_tournament_log.php:
+   - bugfix: FOUND-ROWS() is not configured
+
+   * include/cache_globals.php (CACHE_GRP_TLADDER, $ARR_CACHE_GROUP_NAMES, $ARR_CACHE_GROUP_CLEANUP),
+     include/config.php ($DGS_CACHE_GROUPS),
+     tournaments/include/tournament_ladder.php (TournamentLadder.remove_user_from_ladder, ~.change_user_rank,
+       ~.add_user_to_ladder, ~.delete_ladder, ~.seed_ladder, ~.check_participant_registrations,
+       ~.load_cache_tournament_ladder, ~.determine_ladder_rank, ~.delete_cache_tournament_ladder),
+     tournaments/include/tournament_gui_helper.php (TournamentGuiHelper.build_tournament_ladder_standings),
+     tournaments/include/tournament_helper.php (TournamentHelper.process_tournament_game_end),
+     tournaments/ladder/challenge.php, tournaments/ladder/edit_props.php, tournaments/ladder/view.php,
+     tournaments/cron_tournaments.php, tournaments/view_tournament.php:
+   - use caching to load tournament-ladder
+     - invalidate cache on user-joining-tournament, adding-user, removing-user, ladder-challenge,
+       processing-game-end, delete-ladder, seed-ladder, edit-ladder-props, change-user-rank by T-director
+     - cache with expire of 1 hour not invalidated on processing-rank-period, crowning-ladder-king
+     - optimizing cache-clearing for processing tournament-game-end per tournament instead of per T-game
+     - optimizing db-queries loading tournament-ladder-rank using ladder-iterator for tournament-standings
+       by refactoring loading ladder-iterator
+
+   * tournaments/include/tournament_ladder.php (TournamentLadder.check_participant_registrations):
+   - uncommented/fixed auto-removing of user without fixing TLadder.Rank for remaining ladder-entries
+
+   * tournaments/include/tournament_utils.php (TournamentUtils.get_tournament_ladder_notes_user_removed),
+     tournaments/include/tournament_ladder_props.php (TournamentLadderProps.build_notes_props),
+     tournaments/include/tournament_ladder.php (TournamentLadder.notify_user_removal),
+     tournaments/ladder/admin.php, tournaments/ladder/retreat.php:
+   - cleanup: refactored TournamentLadder::get_notes_user_removed() into
+     TournamentUtils::get_tournament_ladder_notes_user_removed() to avoid dependency of TournamentLadder
+     in TournamentLadderProps-class
+
+   * include/dgs_cache.php (AbstractCache.cache_store_group):
+   - keeping cache-group-entries unique
+
+   * include/std_classes.php (ListIterator.hasIndex, ~.rescanIndex):
+   - bugfix for rescanning index for ListIterator
+
+   * tournaments/include/tournament_ladder_props.php (TournamentLadderProps.fill_ladder_challenge_range,
+       ~.determine_ladder_rating_pos),
+     tournaments/include/tournament_ladder.php (TournamentLadder.find_ladder_rating_pos)
+     tournaments/ladder/challenge.php:
+   - cleanup: optimized db-queries to determine theoretical position of user in ladder sorted by rating,
+     refactored TournamentLadderProps.find_ladder_rating_pos() into TLP.determine_ladder_rating_pos()
+     and TournamentLadder::find_ladder_rating_pos()
+
+2012-10-12 juga
+
+   * quick_do.php, quick_status.php:
+   - added HTTP-header Access-Control-Allow-Origin to allow cross-site-scripting
+
+   * tournaments/list_tournaments.php:
+   - show tournament-notes only on demand
+
 2012-10-09 juga
 
    * include/cache_globals.php (CACHE_GRP_TGAMES, $ARR_CACHE_GROUP_NAMES, $ARR_CACHE_GROUP_CLEANUP),
