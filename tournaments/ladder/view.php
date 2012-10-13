@@ -154,9 +154,8 @@ $GLOBALS['ThePage'] = new Page('TournamentLadderView');
       $ltable->set_default_sort( 1 );
       //$ltable->make_sort_images(); //obvious, so left away as it also take a bit of unneccessary table-width
 
-      $iterator = TournamentLadder::build_tournament_ladder_iterator( $tid, $ltable->get_query(), $need_tp_rating, 0, /*idx*/true );
-
-      $ltable->set_found_rows( mysql_found_rows('Tournament.ladder_view.found_rows') );
+      $iterator = TournamentLadder::load_cache_tournament_ladder( 'Tournament.ladder_view', $tid, $need_tp_rating, 0, /*idx*/true );
+      $ltable->set_found_rows( $iterator->getItemCount() );
       $ltable->set_rows_per_page( null ); // no navigating
       $show_rows = $ltable->compute_show_rows( $iterator->ResultRows );
 

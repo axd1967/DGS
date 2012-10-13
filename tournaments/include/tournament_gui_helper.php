@@ -51,7 +51,7 @@ class TournamentGuiHelper
    // ------------ static functions ----------------------------
 
    /*! \brief Returns tournament-standings of ladder, or null for none. */
-   function build_tournament_ladder_standings( $page, $tid, $need_tp_rating, $limit=0 )
+   function build_tournament_ladder_standings( $iterator, $page, $need_tp_rating )
    {
       global $player_row;
       $my_id = $player_row['ID'];
@@ -71,8 +71,6 @@ class TournamentGuiHelper
          $ltable->add_tablehead(14, T_('Tournament Rating#header'), 'Rating', 0 );
       $ltable->add_tablehead(10, T_('Rank Kept#header'), '', 0 );
       $ltable->add_tablehead(13, T_('Last access#header'), '', 0 );
-
-      $iterator = TournamentLadder::build_tournament_ladder_iterator( $tid, $ltable->get_query(), $need_tp_rating, $limit );
 
       while( list(,$arr_item) = $iterator->getListIterator() )
       {

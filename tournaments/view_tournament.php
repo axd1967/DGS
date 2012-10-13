@@ -85,7 +85,9 @@ $GLOBALS['ThePage'] = new Page('Tournament');
    if( $tourney->Type == TOURNEY_TYPE_LADDER )
    {
       $tt_props = TournamentCache::load_cache_tournament_ladder_props( 'Tournament.view_tournament', $tid, /*check*/false );
-      $tl_rank = TournamentLadder::load_rank( $tid, 0, $my_id );
+      $tl_iterator = TournamentLadder::load_cache_tournament_ladder( 'Tournament.view_tournament',
+         $tid, $tprops->need_rating_copy(), $cnt_tstandings );
+      $tl_rank = TournamentLadder::determine_ladder_rank( $tl_iterator, $my_id );
       $tt_user_state = ( $tl_rank > 0 )
          ? sprintf( T_('Your current ladder rank is #%s out of %s.'), $tl_rank, (int)@$tp_counts[TP_STATUS_REGISTER] )
          : NO_VALUE;
@@ -225,7 +227,7 @@ $GLOBALS['ThePage'] = new Page('Tournament');
          'standings' );
 
       if( $tourney->Type == TOURNEY_TYPE_LADDER )
-         echo TournamentGuiHelper::build_tournament_ladder_standings( $page, $tid, $tprops->need_rating_copy(), $cnt_tstandings );
+         echo TournamentGuiHelper::build_tournament_ladder_standings( $tl_iterator, $page, $tprops->need_rating_copy() );
    }
 
    // --------------- Rules -----------------------------------------

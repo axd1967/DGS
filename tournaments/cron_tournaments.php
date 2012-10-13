@@ -69,6 +69,7 @@ if( ALLOW_TOURNAMENTS && !$is_down )
    $tg_iterator = new ListIterator( 'cron_tournament.load_tgames.score', null, $tg_order );
    $tg_iterator = TournamentGames::load_tournament_games( $tg_iterator, 0, 0, 0, TG_STATUS_SCORE );
 
+   $clear_cache = array();
    while( list(,$arr_item) = $tg_iterator->getListIterator() )
    {
       list( $tgame, $orow ) = $arr_item;
@@ -80,9 +81,20 @@ if( ALLOW_TOURNAMENTS && !$is_down )
          $thelper->tcache->release_tournament_cron_lock( $tid );
          if( $thelper->tcache->set_tournament_cron_lock( $tid ) )
             $thelper->process_tournament_game_end( $tourney, $tgame, /*check*/false );
+         $clear_cache[$tid] = $tourney->Type;
       }
    }
    $thelper->tcache->release_tournament_cron_lock();
+
+   // clear caches
+   foreach( $clear_cache as $tid => $ttype )
+   {
+      $dbgmsg = "cron_tournament.game_end($tid,$ttype)";
+      TournamentGames::delete_cache_tournament_games( $dbgmsg, $tid );
+      if( $ttype == TOURNEY_TYPE_LADDER )
+         TournamentLadder::delete_cache_tournament_ladder( $dbgmsg, $tid );
+   }
+
 
 
    // ---------- finish waiting, due tournament-games
@@ -190,6 +202,7 @@ function run_once_daily()
    TournamentNews::process_tournament_news_deleted( 7 ); // 7days
 
 }//run_once_daily
+
 
 function run_hourly()
 {

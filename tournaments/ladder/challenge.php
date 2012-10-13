@@ -126,10 +126,14 @@ $GLOBALS['ThePage'] = new Page('TournamentLadderChallenge');
    {
       ta_begin();
       {//HOT-section to start T-game
+         $ch_uid = $user_ch->ID;
+         $df_uid = $user_df->ID;
+         $dbgmsg = "Tournament.ladder.challenge($tid,$ch_uid,$df_uid)";
+
          $gids = TournamentHelper::create_games_from_tournament_rules( $tid, $tourney->Type, $user_ch, $user_df );
          $cnt_gids = count($gids);
          if( $cnt_gids != 1 )
-            error('internal_error', "Tournament.ladder.challenge.create_game($tid,{$user_ch->ID},{$user_df->ID},$cnt_gids)");
+            error('internal_error', "$dbgmsg.create_game($cnt_gids)");
          $gid = $gids[0];
 
          $tg = TournamentLadder::new_tournament_game( $tid, $tladder_ch, $tladder_df );
@@ -142,17 +146,16 @@ $GLOBALS['ThePage'] = new Page('TournamentLadderChallenge');
          $tladder_ch->update_outgoing_challenges( +1 );
 
          // notify defender about started game
-         $ch_uid = $user_ch->ID;
-         $df_uid = $user_df->ID;
-         send_message( "Tournament.ladder.challenge.notify($tid,$ch_uid,$df_uid)",
+         send_message( "$dbgmsg.notify",
             trim( sprintf( T_('%s has challenged you in %s: %s#T_ladder'),
                            "<user $ch_uid>", "<tourney $tid>", "<game $gid>" )),
             sprintf( T_('Challenge started for tournament #%s#T_ladder'), $tid ),
             $df_uid, '', /*notify*/true,
             0/*sys-msg*/, MSGTYPE_NORMAL );
 
-         // clear cache
-         TournamentGames::delete_cache_tournament_games( "Tournament.ladder.challenge($tid,$ch_uid,$df_uid)", $tid );
+         // clear caches
+         TournamentGames::delete_cache_tournament_games( $dbgmsg, $tid );
+         TournamentLadder::delete_cache_tournament_ladder( $dbgmsg, $tid );
       }
       ta_end();
 

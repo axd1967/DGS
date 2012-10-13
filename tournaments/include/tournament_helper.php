@@ -64,6 +64,11 @@ class TournamentHelper
       $this->tcache = TournamentCache::get_instance();
    }
 
+   /*!
+    * \brief Processes end of tournament-game.
+    *
+    * \note caller needs to take care of clearing caches.
+    */
    function process_tournament_game_end( $tourney, $tgame, $check_only )
    {
       $tid = $tourney->ID;
@@ -82,9 +87,6 @@ class TournamentHelper
          $result = $this->process_tournament_round_robin_game_end( $tourney, $tgame );
       else
          $result = false;
-
-      // clear cache
-      TournamentGames::delete_cache_tournament_games( "TournamentHelper.process_tournament_game_end($tid)", $tid );
 
       return $result;
    }

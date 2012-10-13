@@ -27,6 +27,7 @@ require_once 'include/time_functions.php';
 require_once 'tournaments/include/tournament_cache.php';
 require_once 'tournaments/include/tournament_helper.php';
 require_once 'tournaments/include/tournament_status.php';
+require_once 'tournaments/include/tournament_ladder.php';
 require_once 'tournaments/include/tournament_ladder_props.php';
 require_once 'tournaments/include/tournament_utils.php';
 
@@ -80,7 +81,12 @@ $GLOBALS['ThePage'] = new Page('TournamentLadderPropsEdit');
    // save properties-object with values from edit-form
    if( @$_REQUEST['tlp_save'] && !@$_REQUEST['tlp_preview'] && count($edits) && count($errors) == 0 )
    {
-      $tl_props->update();
+      ta_begin();
+      {//HOT-section to update TournamentLadderProps
+         $tl_props->update();
+         TournamentLadder::delete_cache_tournament_ladder( "Tournament.ladder.edit_props($tid)", $tid );
+      }
+      ta_end();
       jump_to("tournaments/ladder/edit_props.php?tid={$tid}".URI_AMP
             . "sysmsg=". urlencode(T_('Tournament Ladder Properties saved!')) );
    }
