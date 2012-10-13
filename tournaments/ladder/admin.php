@@ -319,7 +319,7 @@ $GLOBALS['ThePage'] = new Page('TournamentLadderAdmin');
             'ta_deluser', T_('Remove user [%s] from ladder'),
             T_('User will be removed from ladder along with tournament user registration.'),
             /*notify*/2,
-            TournamentLadder::get_notes_user_removed() );
+            TournamentUtils::get_tournament_ladder_notes_user_removed() );
       }
       $tform->add_empty_row();
    }

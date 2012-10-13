@@ -25,6 +25,7 @@ require_once 'include/form_functions.php';
 require_once 'tournaments/include/tournament_cache.php';
 require_once 'tournaments/include/tournament_status.php';
 require_once 'tournaments/include/tournament_ladder.php';
+require_once 'tournaments/include/tournament_utils.php';
 
 $GLOBALS['ThePage'] = new Page('TournamentLadderRetreat');
 
@@ -160,7 +161,7 @@ function build_retreat_notes()
 {
    $notes = array();
 
-   $notes[] = TournamentLadder::get_notes_user_removed() . "\n" .
+   $notes[] = TournamentUtils::get_tournament_ladder_notes_user_removed() . "\n" .
       T_('The opponents in your running tournament games (if there are any) will be notified about the retreat.#T_ladder');
    $notes[] = T_('Retreating from this ladder will also remove your tournament user registration along with the tournaments rank history.');
    $notes[] = T_('If you rejoin the ladder, your ladder rank will be restarted according to the tournaments properties.');

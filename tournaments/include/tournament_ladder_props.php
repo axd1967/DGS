@@ -27,6 +27,7 @@ require_once 'include/dgs_cache.php';
 require_once 'include/std_classes.php';
 require_once 'include/utilities.php';
 require_once 'include/time_functions.php';
+require_once 'tournaments/include/tournament_games.php';
 require_once 'tournaments/include/tournament_globals.php';
 
  /*!
@@ -371,7 +372,7 @@ class TournamentLadderProps
             . 'within the last %d days (excluding vacation).'), $this->UserAbsenceDays );
 
       $arr_props[] = T_('On user removal or retreat from the ladder') . ":\n"
-         . wordwrap( TournamentLadder::get_notes_user_removed(), 80 );
+         . wordwrap( TournamentUtils::get_tournament_ladder_notes_user_removed(), 80 );
 
       // rank-change period
       $arr_props[] = T_('Length of one rank-archive period#T_ladder') . ': ' .

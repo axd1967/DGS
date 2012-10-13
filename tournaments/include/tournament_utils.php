@@ -179,6 +179,11 @@ class TournamentUtils
       return $games_per_challenge * floor( $pool_size * ( $pool_size - 1 ) / 2 );
    }
 
+   function get_tournament_ladder_notes_user_removed()
+   {
+      return T_('Running tournament games will be "detached", i.e. continued as normal games, without further effect to the tournament.');
+   }
+
 } // end of 'TournamentUtils'
 
 ?>
