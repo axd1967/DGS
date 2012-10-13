@@ -243,7 +243,7 @@ NOTE: order of the following items is not strict. You may need to re-edit the
      magic_quotes_runtime = Off
      magic_quotes_sybase = Off
      max_execution_time = 30 ;except for some rebuilding scripts with large databases
-     memory_limit = 8M
+     memory_limit = 24M
      output_buffering = Off
      post_max_size = 8M ;greater than upload_max_filesize if used
      precision = 14
