@@ -21,6 +21,8 @@ ChangeLog
 
 2012-10-13 juga
 
+### ----- release-1_0_15-20120608 -----
+
    * tournaments/show_tournament_log.php:
    - bugfix: FOUND-ROWS() is not configured
 
@@ -738,8 +740,6 @@ INSERT INTO Clock SET ID=208,Lastchanged=0 ;
      than using microtime(true) directly returning the same
 
 2012-09-20 juga
-
-### ----- release-1_0_15-20120608 -----
 
    * include/globals.php (CSS_VERSION), skins/dragon/screen.css:
    - use darker colors for feature-points
