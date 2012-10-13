@@ -772,6 +772,12 @@ class ListIterator
       }
    }
 
+   /*! \brief Returns true if field has filled index. */
+   function hasIndex( $field )
+   {
+      return ( count(@$this->Index[$field]) > 0 );
+   }
+
    /*! \brief Returns index-map for indexed field; die with error on unknown field. */
    function getIndexMap( $field )
    {
@@ -882,8 +888,8 @@ class ListIterator
    /*! \brief Rescans items and re-filling index. */
    function rescanIndex()
    {
-      foreach( $this->Index as $field => $map )
-         $map[$field] = array();
+      foreach( array_keys($this->Index) as $field )
+         $this->Index[$field] = array();
 
       foreach( $this->Items as $arr_item )
       {
