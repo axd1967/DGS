@@ -1848,7 +1848,7 @@ class ForumPost
    {
       global $player_row;
       return new ForumPost( 0, $this->forum_id, $this->thread_id, User::new_from_row($player_row), 0, 0, 0,
-         $this->subject, '', 0, $this->parent_id );
+         $this->subject, $this->text, 0, $this->parent_id );
    }
 
    /*! \brief Returns true, if post is thread-post. */
