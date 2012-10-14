@@ -19,9 +19,26 @@ Developers INFO:
 ChangeLog
 ------------------------------------------------------------------
 
-2012-10-13 juga
+2012-10-14 juga
 
 ### ----- release-1_0_15-20120608 -----
+
+   * daily_cron.php:
+   - bugfix: fix bad name of include-file
+
+   * include/std_functions.php (send_message, delete_cache_message_list),
+     include/message_functions.php (update_count_message_new),
+     edit_folders.php:
+   - bugfix: refactored MessageListBuilder::delete_cache_message_list()
+     into 'include/std_functions.php' to avoid circular dependency in send_message()
+
+   * scripts/dgs_cache_admin.php (build_file_list_cache_group):
+   - show table-row for listing cache-group-content
+
+   * include/table_columns.php (class Table, ~.build_cell_rownum):
+   - added RowNumDiff to control ROW_NUM-column start-value for Table
+
+2012-10-13 juga
 
    * features/list_features.php:
    - bugfix: reduce new-feature-count for main-menu by amount of changed neutral-votes
@@ -176,7 +193,7 @@ ChangeLog
      - clear APC-cache and File-cache
      - cleanup expired entries of File-Cache
      - list of single cache-group with all its cache-file-entries
-     - view sinlge cache-file-entry with extra-info like size, last-change and last-access time
+     - view single cache-file-entry with extra-info like size, last-change and last-access time
      - delete single cache-file-entry
      - allow to fetch entry from file-cache without deleting file on error or if expired for admin-mode
      - allow to bypass maintenance-mode for admin-mode
