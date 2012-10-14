@@ -75,6 +75,11 @@ abstract class AbstractCache
     */
    abstract public function cache_clear();
 
+   /*!
+    * \brief Returns info about cache-content for given cache-group.
+    * \return arr( count => #entries, size => bytes-taken )
+    */
+   abstract public function cache_info( $cache_group );
 
    /*! \brief Stores cache-entry with group of other cache-keys (used to clear cache for a group of related elements). */
    public function cache_store_group( $group_id, $elem_id, $ttl, $cache_group=0 )
@@ -145,6 +150,11 @@ class ApcCache extends AbstractCache
       apc_clear_cache(); // clear op-code-cache
       apc_clear_cache('user');
       return 1;
+   }
+
+   public function cache_info( $cache_group )
+   {
+      return array( 'count' => 0, 'size' => 0 );
    }
 
 } // end of 'ApcCache'
@@ -294,6 +304,13 @@ class FileCache extends AbstractCache
       for( $cache_group=0; $cache_group <= MAX_CACHE_GRP; ++$cache_group )
          $cnt += $this->cache_cleanup( $cache_group, 0 );
       return $cnt;
+   }
+
+   public function cache_info( $cache_group )
+   {
+      $entries = $this->get_cache_files( $cache_group );
+      $totals = array_shift($entries);
+      return array( 'count' => count($entries), 'size' => $totals[1] );
    }
 
 

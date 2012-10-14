@@ -102,6 +102,7 @@ require_once 'include/time_functions.php';
 
    $sectmenu = array();
    $sectmenu[T_('List Cache Groups')] = $page;
+   $sectmenu[T_('Full-List Cache Groups')] = $page.'?full=1';
    $sectmenu[T_('Cleanup All Expired')] = $page.'?a=cleanup';
    $sectmenu[T_('Clear APC Cache')] = $page.'?a=clear_apc';
    $sectmenu[T_('Clear File Cache')] = $page.'?a=clear_file';
@@ -112,7 +113,7 @@ require_once 'include/time_functions.php';
    elseif( $action == 'view' && is_numeric($group) && $file )
       build_view_cache_entry( $group, $file );
    else
-      build_list_cache_config();
+      build_list_cache_config( @$_REQUEST['full'] );
 
    echo "<br>\n";
 
@@ -120,7 +121,7 @@ require_once 'include/time_functions.php';
 }//main
 
 
-function build_list_cache_config()
+function build_list_cache_config( $full )
 {
    global $page, $DGS_CACHE, $base_path, $ARR_CACHE_GROUP_NAMES, $ARR_CACHE_GROUP_CLEANUP;
 
@@ -129,13 +130,19 @@ function build_list_cache_config()
    $table->add_tablehead( 2, T_('Cache Group#header'), 'Left' );
    $table->add_tablehead( 3, T_('Cache Type#header'), 'Center' );
    $table->add_tablehead( 5, T_('Actions#header'), '' );
-   $table->add_tablehead( 4, T_('Cleanup Cycle#header'), 'Center' );
+   $table->add_tablehead( 4, T_('Expire#header'), 'Center' );
+   if( $full )
+   {
+      $table->add_tablehead( 6, T_('Entries#header'), 'Number' );
+      $table->add_tablehead( 7, T_('Size [KB]#header'), 'Number' );
+   }
 
    // show config for all cache-groups
    for( $cache_group=0; $cache_group <= MAX_CACHE_GRP; ++$cache_group )
    {
       $cache = DgsCache::get_cache( $cache_group, null, /*adm-mode*/true );
       $cache_type = $DGS_CACHE->get_cache_type( $cache_group );
+      $cache_info = $cache->cache_info( $cache_group ); // [ count|size => ]
 
       $actions = array();
       $apage = $base_path . $page . "?gr=$cache_group".URI_AMP;
@@ -162,6 +169,15 @@ function build_list_cache_config()
             4 => build_cleanup_cycle( @$ARR_CACHE_GROUP_CLEANUP[$cache_group] ),
             5 => implode(SMALL_SPACING, $actions),
          );
+      if( $full )
+      {
+         $count = (int)@$cache_info['count'];
+         $size  = (int)@$cache_info['size'];
+         if( $count > 0 )
+            $row_arr[6] = $count;
+         if( $size > 0 )
+            $row_arr[7] = number_format( $size / 1024 );
+      }
       $table->add_row($row_arr);
    }
 
