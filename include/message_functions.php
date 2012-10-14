@@ -1519,7 +1519,7 @@ function update_count_message_new( $dbgmsg, $uid, $diff=null )
    }
 
    clear_cache_quick_status( $uid, QST_CACHE_MSG );
-   MessageListBuilder::delete_cache_message_list( $dbgmsg, $uid );
+   delete_cache_message_list( $dbgmsg, $uid );
 }//update_count_message_new
 
 /*!
@@ -2144,14 +2144,6 @@ class MessageListBuilder
 
       return $arr_msg;
    }//load_cache_message_list
-
-   function delete_cache_message_list( $dbgmsg, $uids )
-   {
-      if( !is_array($uids) )
-         $uids = array( $uids );
-      foreach( $uids as $uid )
-         DgsCache::delete( $dbgmsg, CACHE_GRP_MSGLIST, "Messages.$uid" );
-   }
 
 } // end of 'MessageListBuilder'
 

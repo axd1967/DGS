@@ -1469,12 +1469,23 @@ function send_message( $debugmsg, $text='', $subject=''
       if( $from_id > GUESTS_ID_MAX )
          $clear_uids[] = $from_id;
       clear_cache_quick_status( $clear_uids, QST_CACHE_MSG );
-      MessageListBuilder::delete_cache_message_list( $debugmsg, $clear_uids );
+      delete_cache_message_list( $debugmsg, $clear_uids );
    }
    ta_end();
 
    return $mid; //>0: no error
 } //send_message
+
+
+// see MessageListBuilder.load_cache_message_list()
+// NOTE: can't put in 'include/message_functions.php' because needed in send_message() and circular dependency
+function delete_cache_message_list( $dbgmsg, $uids )
+{
+   if( !is_array($uids) )
+      $uids = array( $uids );
+   foreach( $uids as $uid )
+      DgsCache::delete( $dbgmsg, CACHE_GRP_MSGLIST, "Messages.$uid" );
+}
 
 
 define('NOTIFYFLAG_NEW_MSG', 0x01 ); // new-message awaiting for mail-notifications
