@@ -592,7 +592,7 @@ class ConfigPages
       {
          $row = mysql_single_fetch($dbgmsg.'.find', "SELECT * FROM ConfigPages WHERE User_ID='$uid' LIMIT 1" );
          if( !is_null($row) )
-            DgsCache::store( $dbgmsg, CACHE_GRP_CFG_PAGES, $key, $row, SECS_PER_HOUR );
+            DgsCache::store( $dbgmsg, CACHE_GRP_CFG_PAGES, $key, $row, SECS_PER_DAY );
       }
       return $row;
    }//load_cache_config_pages

@@ -180,7 +180,7 @@ class TournamentCache
       if( is_null($arr_tdir) )
       {
          $arr_tdir = TournamentDirector::load_tournament_directors_flags( $tid );
-         DgsCache::store( $dbgmsg, CACHE_GRP_TDIRECTOR, $key, $arr_tdir, SECS_PER_HOUR );
+         DgsCache::store( $dbgmsg, CACHE_GRP_TDIRECTOR, $key, $arr_tdir, SECS_PER_DAY );
       }
 
       $td_result = null;
@@ -212,7 +212,7 @@ class TournamentCache
             error('bad_tournament', $dbgmsg);
 
          if( !is_null($tl_props) ) // only cache if existing
-            DgsCache::store( $dbgmsg, CACHE_GRP_TLPROPS, $key, $tl_props, SECS_PER_HOUR );
+            DgsCache::store( $dbgmsg, CACHE_GRP_TLPROPS, $key, $tl_props, SECS_PER_DAY );
       }
 
       return $tl_props;
@@ -236,7 +236,7 @@ class TournamentCache
             error('bad_tournament', $dbgmsg);
 
          if( !is_null($tprops) ) // only cache if existing
-            DgsCache::store( $dbgmsg, CACHE_GRP_TPROPS, $key, $tprops, SECS_PER_HOUR );
+            DgsCache::store( $dbgmsg, CACHE_GRP_TPROPS, $key, $tprops, SECS_PER_DAY );
       }
 
       return $tprops;
@@ -260,7 +260,7 @@ class TournamentCache
             error('bad_tournament', $dbgmsg);
 
          if( !is_null($trule) ) // only cache if existing
-            DgsCache::store( $dbgmsg, CACHE_GRP_TRULES, $key, $trule, SECS_PER_HOUR );
+            DgsCache::store( $dbgmsg, CACHE_GRP_TRULES, $key, $trule, SECS_PER_DAY );
       }
 
       return $trule;
@@ -285,7 +285,7 @@ class TournamentCache
             error('bad_tournament', $dbgmsg);
 
          if( !is_null($tround) ) // only cache if existing
-            DgsCache::store( $dbgmsg, CACHE_GRP_TROUND, $key, $tround, SECS_PER_HOUR );
+            DgsCache::store( $dbgmsg, CACHE_GRP_TROUND, $key, $tround, SECS_PER_DAY );
       }
 
       return $tround;
