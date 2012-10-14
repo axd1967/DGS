@@ -55,29 +55,29 @@ require_once 'include/time_functions.php';
    $file = get_request_arg('file');
    $do_jump = ( get_request_arg('j') == 'filelist' );
 
-   if( $action == 'clear_apc' )
+   if( $action == 'clear_apc' ) // clear full APC-cache
    {
       $cache = new ApcCache();
       $cache->cache_clear();
       $_REQUEST['sysmsg'] = T_('APC Cache cleared (op-code + user-entries)!');
    }
-   elseif( $action == 'clear_file' )
+   elseif( $action == 'clear_file' ) // clear full file-cache
    {
       $cache = new FileCache();
       $cnt_deleted = $cache->cache_clear();
       $_REQUEST['sysmsg'] = sprintf( T_('File Cache cleared (%s entries removed)!'), $cnt_deleted );
    }
-   elseif( $action == 'cleanup' )
+   elseif( $action == 'cleanup' ) // run cleanup removing expired entries for all cache-groups
    {
       $cnt_deleted = DgsCache::cleanup_cache();
       $_REQUEST['sysmsg'] = sprintf( T_('Cleaned up %s expired entries on DgsCache!'), $cnt_deleted );
    }
-   elseif( $action == 'clean' )
+   elseif( $action == 'clean' ) // cleanup single cache-group removing expired entries
    {
       $cnt_deleted = DgsCache::cleanup_cache( $group );
       $_REQUEST['sysmsg'] = sprintf( T_('Cleaned up %s expired entries for cache-group [%s]!'), $cnt_deleted, $group );
    }
-   elseif( $action == 'clear' )
+   elseif( $action == 'clear' ) // Remove all entries for single cache-group
    {
       $cache = DgsCache::get_cache( $group );
       if( !is_null($cache) )
@@ -86,7 +86,7 @@ require_once 'include/time_functions.php';
          $_REQUEST['sysmsg'] = sprintf( T_('Cleared %s entries for cache-group [%s]!'), $cnt_deleted, $group );
       }
    }
-   elseif( $action == 'del' && $file )
+   elseif( $action == 'del' && $file ) // Remove single cache-entry
    {
       if( DgsCache::delete( "dgs_cache_admin.del($group,$file)", $group, $file ) )
          $_REQUEST['sysmsg'] = sprintf( T_('Deleted cache-entry [%s] for cache-group [%s]!'), $file, $group );
@@ -192,18 +192,23 @@ function build_file_list_cache_group( $cache_group )
 {
    global $page, $base_path, $ARR_CACHE_GROUP_NAMES;
 
-   $table = new Table( 'dgscache', $page, null, '', TABLE_NO_SIZE|TABLE_NO_PAGE|TABLE_NO_SIZE|TABLE_ROWS_NAVI|TABLE_ROW_NUM );
+   $table = new Table( 'dgscache', $page, null, '',
+      TABLE_NO_SIZE|TABLE_NO_PAGE|TABLE_NO_SIZE|TABLE_NO_SORT|TABLE_ROWS_NAVI|TABLE_ROW_NUM );
    $table->RowNumDiff = -1; // force row-num starting with 0
 
    $table->add_tablehead( 1, T_('File#header'), '' );
    $table->add_tablehead( 2, T_('Size#header'), 'Number' );
-   $table->add_tablehead( 3, T_('Last changed#header'), 'Date' );
+   $table->add_tablehead( 3, T_('Last changed#header'), 'Date', TABLE_NO_HIDE, 'mtime+' );
    $table->add_tablehead( 4, T_('Last access#header'), 'Date' );
    $table->add_tablehead( 5, T_('Actions#header'), '' );
 
+   $table->set_default_sort( 3 );
+   $table->make_sort_images();
+
    $file_cache = new FileCache();
-   $arr_files = $file_cache->get_cache_files( $cache_group );
+   $arr_files = $file_cache->get_cache_files( $cache_group ); // [ file, size, mtime, atime ], ...
    $totals = array_shift( $arr_files );
+   usort( $arr_files, '_compare_cache_files_mtime' ); // order by last-changed-time
 
    $actions = array();
    if( count($arr_files) > 0 )
@@ -238,6 +243,19 @@ function build_file_list_cache_group( $cache_group )
          $cache_group, @$ARR_CACHE_GROUP_NAMES[$cache_group], $totals[0] );
    $table->echo_table();
 }//build_file_list_cache_group
+
+// \internal
+function _compare_cache_files_mtime( $item1, $item2 )
+{
+   $a = $item1[2]; // [file, size, mtime, atime]
+   $b = $item2[2];
+
+   // could use cmp_int(), but inline is faster
+   if ($a == $b)
+      return 0;
+   else
+      return ($a < $b) ? -1 : 1;
+}
 
 function build_view_cache_entry( $cache_group, $id )
 {
