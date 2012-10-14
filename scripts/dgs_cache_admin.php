@@ -137,12 +137,17 @@ function build_list_cache_config( $full )
       $table->add_tablehead( 7, T_('Size [KB]#header'), 'Number' );
    }
 
+   $sum_types = array(
+      CACHE_TYPE_APC  => array( 'count' => 0, 'size' => 0 ),
+      CACHE_TYPE_FILE => array( 'count' => 0, 'size' => 0 ),
+      );
+   $sum_all = array( 'count' => 0, 'size' => 0 );
+
    // show config for all cache-groups
    for( $cache_group=0; $cache_group <= MAX_CACHE_GRP; ++$cache_group )
    {
       $cache = DgsCache::get_cache( $cache_group, null, /*adm-mode*/true );
       $cache_type = $DGS_CACHE->get_cache_type( $cache_group );
-      $cache_info = $cache->cache_info( $cache_group ); // [ count|size => ]
 
       $actions = array();
       $apage = $base_path . $page . "?gr=$cache_group".URI_AMP;
@@ -171,15 +176,37 @@ function build_list_cache_config( $full )
          );
       if( $full )
       {
+         $cache_info = $cache->cache_info( $cache_group ); // [ count|size => ]
          $count = (int)@$cache_info['count'];
          $size  = (int)@$cache_info['size'];
          if( $count > 0 )
             $row_arr[6] = $count;
          if( $size > 0 )
             $row_arr[7] = number_format( $size / 1024 );
+
+         $sum_types[$cache_type]['count'] += $count;
+         $sum_types[$cache_type]['size'] += $size;
+         $sum_all['count'] += $count;
+         $sum_all['size'] += $size;
       }
       $table->add_row($row_arr);
    }
+
+   // add sums
+   foreach( $sum_types as $cache_type => $info )
+   {
+      $table->add_row( array(
+            2 => span('bold', T_('Sum')),
+            3 => $cache_type,
+            6 => $info['count'],
+            7 => number_format( $info['size'] / 1024 ),
+         ));
+   }
+   $table->add_row( array(
+         2 => span('bold', T_('Totals')),
+         6 => span('bold', $sum_all['count'] ),
+         7 => span('bold', number_format( $sum_all['size'] / 1024 ) ),
+      ));
 
    echo "<br>\n";
    $table->echo_table();
