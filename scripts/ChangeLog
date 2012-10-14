@@ -23,8 +23,17 @@ ChangeLog
 
 ### ----- release-1_0_15-20120608 -----
 
+   * include/dgs_cache.php (ApcCache.cache_cleanup, ~.cache_info, ~.saveHit, ~.get_cache_entries;
+       FileCache.cache_fetch),
+     scripts/dgs_cache_admin.php:
+   - dgs-cache-admin:
+     - always use full-list for cache-group-overview
+     - added cache-group-specific cache-cleanup and cache-clear for APC-cache
+     - retrieved size and count of cache-entries for APC-cache
+   - store 'CacheGroups'-entry in APC-cache saving cache-hits & cache-misses for FileCache
+
    * scripts/dgs_cache_admin.php (build_list_cache_config):
-   - added cache-count/size for cache-types and totals
+   - dgs-cache-admin: added cache-count/size for cache-types and totals
 
    * include/cache_globals.php ($ARR_CACHE_GROUP_CLEANUP),
      include/classlib_userconfig.php,

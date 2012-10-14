@@ -142,7 +142,14 @@ class ApcCache extends AbstractCache
 
    public function cache_cleanup( $cache_group, $expire_time )
    {
-      return false;
+      $entries = $this->get_cache_entries( $cache_group, $expire_time );
+      $count_deleted = 0;
+      foreach( $entries as $id )
+      {
+         if( apc_delete($id) )
+            ++$count_deleted;
+      }
+      return $count_deleted;
    }
 
    public function cache_clear()
@@ -154,8 +161,77 @@ class ApcCache extends AbstractCache
 
    public function cache_info( $cache_group )
    {
-      return array( 'count' => 0, 'size' => 0 );
-   }
+      global $ARR_CACHE_GROUP_NAMES;
+      $count = $size = 0;
+
+      $group_name = @$ARR_CACHE_GROUP_NAMES[$cache_group];
+      if( $group_name )
+      {
+         $info = apc_cache_info('user');
+         foreach( $info['cache_list'] as $entry )
+         {
+            if( stristr($entry['info'], $group_name) === false )
+               continue;
+            ++$count;
+            $size += $entry['mem_size'];
+         }
+      }
+
+      return array( 'count' => $count, 'size' => $size );
+   }//cache_info
+
+
+   // NOTE: not thread-save, but must only be roughly accurate to get an idea about hits and misses of other cache-types
+   // \static
+   // \param $hit true = cache-hit, false = cache-miss
+   public function saveHit( $cache_group, $hit )
+   {
+      global $DGS_CACHE_GROUPS;
+      if( !function_exists('apc_fetch') )
+         return;
+
+      $cache_type = ( isset($DGS_CACHE_GROUPS[$cache_group]) ) ? $DGS_CACHE_GROUPS[$cache_group] : DGS_CACHE;
+      if( $cache_type != CACHE_TYPE_APC && $cache_type != CACHE_TYPE_NONE )
+      {
+         $cache_id = "CacheGroups";
+         $arr_key = sprintf('%s%02d', ($hit ? 'H' : 'M'), $cache_group );
+         $arr_info = apc_fetch($cache_id);
+         if( is_array($arr_info) )
+         {
+            if( isset($arr_info[$arr_key]) )
+               ++$arr_info[$arr_key];
+            else
+               $arr_info[$arr_key] = 1;
+         }
+         else
+            $arr_info = array( $arr_key => 1 );
+         apc_store($cache_id, $arr_info, SECS_PER_DAY);
+      }
+   }//saveHit
+
+
+   // \param $expire_time 0 = return all matching entries, >0 = only return matching entries that have expired
+   private function get_cache_entries( $cache_group, $expire_time=0 )
+   {
+      global $ARR_CACHE_GROUP_NAMES;
+      $result = array();
+
+      $group_name = @$ARR_CACHE_GROUP_NAMES[$cache_group];
+      if( $group_name )
+      {
+         $info = apc_cache_info('user');
+         foreach( $info['cache_list'] as $entry )
+         {
+            if( stristr($entry['info'], $group_name) !== false )
+            {
+               if( $expire_time == 0 || $entry['mtime'] <= $expire_time ) // entry expired?
+                  $result[] = $entry['info'];
+            }
+         }
+      }
+
+      return $result;
+   }//get_cache_entries
 
 } // end of 'ApcCache'
 
@@ -220,11 +296,17 @@ class FileCache extends AbstractCache
    {
       $filename = $this->build_cache_filename( $id, $cache_group );
       if( !file_exists($filename) )
+      {
+         ApcCache::saveHit( $cache_group, false );
          return null;
+      }
 
       $file_handle = fopen($filename, 'r'); // open read-only
       if( !$file_handle )
+      {
+         ApcCache::saveHit( $cache_group, false );
          return null;
+      }
 
       flock($file_handle, LOCK_SH); // get shared lock
       $raw_data = @file_get_contents($filename);
@@ -243,7 +325,12 @@ class FileCache extends AbstractCache
       }
 
       if( $this->unlink_expired && is_null($result) )
+      {
          @unlink($filename); // delete file if loading or unserialize failed, or file expired
+         ApcCache::saveHit( $cache_group, false );
+      }
+      else
+         ApcCache::saveHit( $cache_group, true );
 
       return $result;
    }//cache_fetch

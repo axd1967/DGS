@@ -102,7 +102,6 @@ require_once 'include/time_functions.php';
 
    $sectmenu = array();
    $sectmenu[T_('List Cache Groups')] = $page;
-   $sectmenu[T_('Full-List Cache Groups')] = $page.'?full=1';
    $sectmenu[T_('Cleanup All Expired')] = $page.'?a=cleanup';
    $sectmenu[T_('Clear APC Cache')] = $page.'?a=clear_apc';
    $sectmenu[T_('Clear File Cache')] = $page.'?a=clear_file';
@@ -113,7 +112,7 @@ require_once 'include/time_functions.php';
    elseif( $action == 'view' && is_numeric($group) && $file )
       build_view_cache_entry( $group, $file );
    else
-      build_list_cache_config( @$_REQUEST['full'] );
+      build_list_cache_config( @$_REQUEST['short'] );
 
    echo "<br>\n";
 
@@ -121,7 +120,7 @@ require_once 'include/time_functions.php';
 }//main
 
 
-function build_list_cache_config( $full )
+function build_list_cache_config( $short )
 {
    global $page, $DGS_CACHE, $base_path, $ARR_CACHE_GROUP_NAMES, $ARR_CACHE_GROUP_CLEANUP;
 
@@ -131,7 +130,7 @@ function build_list_cache_config( $full )
    $table->add_tablehead( 3, T_('Cache Type#header'), 'Center' );
    $table->add_tablehead( 5, T_('Actions#header'), '' );
    $table->add_tablehead( 4, T_('Expire#header'), 'Center' );
-   if( $full )
+   if( !$short )
    {
       $table->add_tablehead( 6, T_('Entries#header'), 'Number' );
       $table->add_tablehead( 7, T_('Size [KB]#header'), 'Number' );
@@ -152,12 +151,15 @@ function build_list_cache_config( $full )
       $actions = array();
       $apage = $base_path . $page . "?gr=$cache_group".URI_AMP;
       $group_name = @$ARR_CACHE_GROUP_NAMES[$cache_group];
-      if( $cache_type == CACHE_TYPE_FILE )
+
+      if( $cache_type == CACHE_TYPE_FILE || $cache_type == CACHE_TYPE_APC )
       {
-         $list_page = $apage.'a=filelist';
          $actions[] = anchor( $apage.'a=clear', T_('Clear') );
          $actions[] = anchor( $apage.'a=clean', T_('Clean Expired') );
       }
+
+      if( $cache_type == CACHE_TYPE_FILE )
+         $list_page = $apage.'a=filelist';
       elseif( $cache_type == CACHE_TYPE_APC )
          $list_page = $base_path.'scripts/apc-live.php?SCOPE=A'.URI_AMP.'SORT1=H'.URI_AMP.'SORT2=D'.URI_AMP.'COUNT=20'
             .URI_AMP.'OB=3' . ($cache_group == CACHE_GRP_DEFAULT ? '' : URI_AMP.'SEARCH='.urlencode($group_name) );
@@ -167,6 +169,8 @@ function build_list_cache_config( $full )
       if( $list_page )
          $group_name = anchor( $list_page, $group_name );
 
+      // build row
+
       $row_arr = array(
             1 => $cache_group,
             2 => $group_name,
@@ -174,7 +178,7 @@ function build_list_cache_config( $full )
             4 => build_cleanup_cycle( @$ARR_CACHE_GROUP_CLEANUP[$cache_group] ),
             5 => implode(SMALL_SPACING, $actions),
          );
-      if( $full )
+      if( !$short )
       {
          $cache_info = $cache->cache_info( $cache_group ); // [ count|size => ]
          $count = (int)@$cache_info['count'];
@@ -193,20 +197,23 @@ function build_list_cache_config( $full )
    }
 
    // add sums
-   foreach( $sum_types as $cache_type => $info )
+   if( !$short )
    {
+      foreach( $sum_types as $cache_type => $info )
+      {
+         $table->add_row( array(
+               2 => span('bold', T_('Sum')),
+               3 => $cache_type,
+               6 => number_format( $info['count'] ),
+               7 => number_format( $info['size'] / 1024 ),
+            ));
+      }
       $table->add_row( array(
-            2 => span('bold', T_('Sum')),
-            3 => $cache_type,
-            6 => number_format( $info['count'] ),
-            7 => number_format( $info['size'] / 1024 ),
+            2 => span('bold', T_('Totals')),
+            6 => span('bold', number_format( $sum_all['count'] ) ),
+            7 => span('bold', number_format( $sum_all['size'] / 1024 ) ),
          ));
    }
-   $table->add_row( array(
-         2 => span('bold', T_('Totals')),
-         6 => span('bold', number_format( $sum_all['count'] ) ),
-         7 => span('bold', number_format( $sum_all['size'] / 1024 ) ),
-      ));
 
    echo "<br>\n";
    $table->echo_table();
