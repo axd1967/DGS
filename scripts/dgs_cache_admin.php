@@ -192,7 +192,9 @@ function build_file_list_cache_group( $cache_group )
 {
    global $page, $base_path, $ARR_CACHE_GROUP_NAMES;
 
-   $table = new Table( 'dgscache', $page, null, '', TABLE_NO_SIZE|TABLE_NO_PAGE|TABLE_NO_SIZE|TABLE_ROWS_NAVI );
+   $table = new Table( 'dgscache', $page, null, '', TABLE_NO_SIZE|TABLE_NO_PAGE|TABLE_NO_SIZE|TABLE_ROWS_NAVI|TABLE_ROW_NUM );
+   $table->RowNumDiff = -1; // force row-num starting with 0
+
    $table->add_tablehead( 1, T_('File#header'), '' );
    $table->add_tablehead( 2, T_('Size#header'), 'Number' );
    $table->add_tablehead( 3, T_('Last changed#header'), 'Date' );
