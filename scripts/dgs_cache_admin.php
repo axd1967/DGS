@@ -180,7 +180,7 @@ function build_list_cache_config( $full )
          $count = (int)@$cache_info['count'];
          $size  = (int)@$cache_info['size'];
          if( $count > 0 )
-            $row_arr[6] = $count;
+            $row_arr[6] = number_format( $count );
          if( $size > 0 )
             $row_arr[7] = number_format( $size / 1024 );
 
@@ -198,13 +198,13 @@ function build_list_cache_config( $full )
       $table->add_row( array(
             2 => span('bold', T_('Sum')),
             3 => $cache_type,
-            6 => $info['count'],
+            6 => number_format( $info['count'] ),
             7 => number_format( $info['size'] / 1024 ),
          ));
    }
    $table->add_row( array(
          2 => span('bold', T_('Totals')),
-         6 => span('bold', $sum_all['count'] ),
+         6 => span('bold', number_format( $sum_all['count'] ) ),
          7 => span('bold', number_format( $sum_all['size'] / 1024 ) ),
       ));
 
