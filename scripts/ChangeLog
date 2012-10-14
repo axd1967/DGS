@@ -23,6 +23,10 @@ ChangeLog
 
 ### ----- release-1_0_15-20120608 -----
 
+   * include/db/bulletin.php (Bulletin.load_cache_bulletins):
+   - store only Bulletin-original-row-data in cache instead of full Bulletin including row
+     in sub-User-object
+
    * include/dgs_cache.php (ApcCache.cache_cleanup, ~.cache_info, ~.saveHit, ~.get_cache_entries;
        FileCache.cache_fetch),
      scripts/dgs_cache_admin.php:

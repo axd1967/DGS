@@ -868,23 +868,23 @@ class Bulletin
       if( !is_numeric($lastchange_bulletin) )
          $lastchange_bulletin = 0;
 
-      $result = DgsCache::fetch( $dbgmsg, CACHE_GRP_BULLETINS, $key );
-      if( is_array($result) )
+      $arr_rows = DgsCache::fetch( $dbgmsg, CACHE_GRP_BULLETINS, $key );
+      if( is_array($arr_rows) )
       {
          // check if cache-entry creation-date is older than that of global bulletin-change-time
-         if( count($result) > 0 )
+         if( count($arr_rows) > 0 )
          {
-            $stored_creation_time = array_shift($result); // remove time for final result
+            $stored_creation_time = array_shift($arr_rows); // remove time for final result
             if( $lastchange_bulletin > 0 && $stored_creation_time < $lastchange_bulletin )
-               $result = null; // outdated -> reload
+               $arr_rows = null; // outdated -> reload
          }
          else
-            $result = null; // invalid store-data -> reload
+            $arr_rows = null; // invalid store-data -> reload
       }
-      if( is_null($result) )
-      {
-         $result = array( $GLOBALS['NOW'] ); // bulletin-cache-entry creation-time
 
+      $result = array();
+      if( is_null($arr_rows) )
+      {
          $iterator = new ListIterator( $dbgmsg.'.list_bulletin.unread',
             new QuerySQL( SQLP_WHERE,
                   "BR.bid IS NULL", // only unread
@@ -893,12 +893,20 @@ class Bulletin
          $iterator->addQuerySQLMerge( Bulletin::build_view_query_sql( /*adm*/false, /*count*/false ) );
          $iterator = Bulletin::load_bulletins( $iterator );
 
+         $cache_result = array( $GLOBALS['NOW'] ); // bulletin-cache-entry creation-time
          while( list(,$arr_item) = $iterator->getListIterator() )
+         {
             $result[] = $arr_item[0]; // Bulletin-obj
+            $cache_result[] = $arr_item[1]; // only cache row-data
+         }
 
          // store in cache
-         DgsCache::store( $dbgmsg, CACHE_GRP_BULLETINS, $key, $result, SECS_PER_DAY );
-         array_shift($result); // remove creation-time for final result
+         DgsCache::store( $dbgmsg, CACHE_GRP_BULLETINS, $key, $cache_result, SECS_PER_DAY );
+      }
+      else // transform cache-stored row-arr into Bulletin-arr
+      {
+         foreach( $arr_rows as $row )
+            $result[] = Bulletin::new_from_row( $row );
       }
 
       return $result;
