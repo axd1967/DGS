@@ -277,8 +277,7 @@ class FileCache extends AbstractCache
       {
          if( !is_file($file) )
             continue;
-         $mtime = (int)@filemtime( $file );
-         if( $expire_time == 0 || $mtime <= $expire_time ) // file expired?
+         if( $expire_time == 0 || (int)@filemtime($file) <= $expire_time ) // file expired?
          {
             if( unlink($file) )
                ++$cnt;
@@ -549,7 +548,7 @@ class DgsCache
          if( !is_null($cache) )
          {
             $group_expire = ( isset($ARR_CACHE_GROUP_CLEANUP[$cache_group]) )
-               ? $ARR_CACHE_GROUP_CLEANUP[$cache_group]
+               ? $NOW - $ARR_CACHE_GROUP_CLEANUP[$cache_group]
                : $default_expire;
             $cnt_cleanup = $cache->cache_cleanup( $cache_group, $group_expire );
             if( is_numeric($cnt_cleanup) )
