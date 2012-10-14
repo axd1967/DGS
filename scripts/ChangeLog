@@ -23,6 +23,13 @@ ChangeLog
 
 ### ----- release-1_0_15-20120608 -----
 
+   * include/dgs_cache.php (FileCache.cache_cleanup; DgsCache.cleanup_cache):
+   - bugfix: calculate group-expire for cache-cleanup is absolute not relative
+   - optimize: check filemtime() on file only if needed
+
+   * scripts/dgs_cache_admin.php (build_file_list_cache_group, _compare_cache_files_mtime):
+   - sort cache-file-entries by last-changed-time
+
    * daily_cron.php:
    - bugfix: fix bad name of include-file
 
