@@ -134,15 +134,18 @@ function build_list_cache_config( $short )
    {
       $table->add_tablehead( 6, T_('Entries#header'), 'Number' );
       $table->add_tablehead( 7, T_('Size [KB]#header'), 'Number' );
+      $table->add_tablehead( 8, T_('Hits#header'), 'Number' );
+      $table->add_tablehead( 9, T_('Misses#header'), 'Number' );
    }
 
    $sum_types = array(
-      CACHE_TYPE_APC  => array( 'count' => 0, 'size' => 0 ),
-      CACHE_TYPE_FILE => array( 'count' => 0, 'size' => 0 ),
+      CACHE_TYPE_APC  => array( 'count' => 0, 'size' => 0, 'hits' => 0, 'misses' => 0 ),
+      CACHE_TYPE_FILE => array( 'count' => 0, 'size' => 0, 'hits' => 0, 'misses' => 0 ),
       );
-   $sum_all = array( 'count' => 0, 'size' => 0 );
+   $sum_all = array( 'count' => 0, 'size' => 0, 'hits' => 0, 'misses' => 0 );
 
    // show config for all cache-groups
+   $misses_apc_counted = false;
    for( $cache_group=0; $cache_group <= MAX_CACHE_GRP; ++$cache_group )
    {
       $cache = DgsCache::get_cache( $cache_group, null, /*adm-mode*/true );
@@ -183,15 +186,32 @@ function build_list_cache_config( $short )
          $cache_info = $cache->cache_info( $cache_group ); // [ count|size => ]
          $count = (int)@$cache_info['count'];
          $size  = (int)@$cache_info['size'];
+         $hits  = (int)@$cache_info['hits'];
+         $misses = (int)@$cache_info['misses'];
+         if( $cache_type == CACHE_TYPE_APC ) // only global misses-count
+         {
+            if( $misses_apc_counted )
+               $misses = 0;
+            $misses_apc_counted = true;
+         }
+
          if( $count > 0 )
             $row_arr[6] = number_format( $count );
          if( $size > 0 )
             $row_arr[7] = number_format( $size / 1024 );
+         if( $hits > 0 )
+            $row_arr[8] = number_format( $hits );
+         if( $misses > 0 )
+            $row_arr[9] = number_format( $misses );
 
          $sum_types[$cache_type]['count'] += $count;
          $sum_types[$cache_type]['size'] += $size;
+         $sum_types[$cache_type]['hits'] += $hits;
+         $sum_types[$cache_type]['misses'] += $misses;
          $sum_all['count'] += $count;
          $sum_all['size'] += $size;
+         $sum_all['hits'] += $hits;
+         $sum_all['misses'] += $misses;
       }
       $table->add_row($row_arr);
    }
@@ -206,12 +226,16 @@ function build_list_cache_config( $short )
                3 => $cache_type,
                6 => number_format( $info['count'] ),
                7 => number_format( $info['size'] / 1024 ),
+               8 => number_format( $info['hits'] ),
+               9 => number_format( $info['misses'] ),
             ));
       }
       $table->add_row( array(
             2 => span('bold', T_('Totals')),
             6 => span('bold', number_format( $sum_all['count'] ) ),
             7 => span('bold', number_format( $sum_all['size'] / 1024 ) ),
+            8 => span('bold', number_format( $sum_all['hits'] ) ),
+            9 => span('bold', number_format( $sum_all['misses'] ) ),
          ));
    }
 

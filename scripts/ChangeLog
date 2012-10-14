@@ -23,6 +23,12 @@ ChangeLog
 
 ### ----- release-1_0_15-20120608 -----
 
+   * include/dgs_cache.php (AbstractCache.cache_info; ApcCache.cache_info, ~.getHitInfo; FileCache.cache_info),
+     scripts/dgs_cache_admin.php (build_list_cache_config):
+   - dgs-cache-admin: added hits & misses in cache-group-overview for each cache-group if available
+     - FileCache: hits & misses are stored in array as APC-cache-entry 'CacheGroups'
+     - ApcCache:  hits & misses can be retrieved in apc_cache_info('user'), but only with global misses-count
+
    * include/db/bulletin.php (Bulletin.load_cache_bulletins):
    - store only Bulletin-original-row-data in cache instead of full Bulletin including row
      in sub-User-object

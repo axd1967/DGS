@@ -77,7 +77,7 @@ abstract class AbstractCache
 
    /*!
     * \brief Returns info about cache-content for given cache-group.
-    * \return arr( count => #entries, size => bytes-taken )
+    * \return arr( count => #entries, size => bytes-taken, hits => #hits, misses => #misses )
     */
    abstract public function cache_info( $cache_group );
 
@@ -162,22 +162,25 @@ class ApcCache extends AbstractCache
    public function cache_info( $cache_group )
    {
       global $ARR_CACHE_GROUP_NAMES;
-      $count = $size = 0;
+      $count = $size = $hits = $misses = 0;
 
       $group_name = @$ARR_CACHE_GROUP_NAMES[$cache_group];
       if( $group_name )
       {
          $info = apc_cache_info('user');
+         $misses = $info['num_misses']; // only global
+
          foreach( $info['cache_list'] as $entry )
          {
             if( stristr($entry['info'], $group_name) === false )
                continue;
             ++$count;
             $size += $entry['mem_size'];
+            $hits += $entry['num_hits'];
          }
       }
 
-      return array( 'count' => $count, 'size' => $size );
+      return array( 'count' => $count, 'size' => $size, 'hits' => $hits, 'misses' => $misses );
    }//cache_info
 
 
@@ -208,6 +211,26 @@ class ApcCache extends AbstractCache
          apc_store($cache_id, $arr_info, SECS_PER_DAY);
       }
    }//saveHit
+
+   // \static
+   function getHitInfo( $cache_group )
+   {
+      $hits = $miss = 0;
+      if( function_exists('apc_fetch') )
+      {
+         $cache_id = "CacheGroups";
+         $arr_info = apc_fetch($cache_id);
+         if( is_array($arr_info) )
+         {
+            $key_hit  = sprintf('H%02d', $cache_group );
+            $key_miss = sprintf('M%02d', $cache_group );
+            $hits = (int)@$arr_info[$key_hit];
+            $miss = (int)@$arr_info[$key_miss];
+         }
+      }
+
+      return array( $hits, $miss );
+   }//getHitInfo
 
 
    // \param $expire_time 0 = return all matching entries, >0 = only return matching entries that have expired
@@ -397,7 +420,9 @@ class FileCache extends AbstractCache
    {
       $entries = $this->get_cache_files( $cache_group );
       $totals = array_shift($entries);
-      return array( 'count' => count($entries), 'size' => $totals[1] );
+      list( $hits, $misses ) = ApcCache::getHitInfo( $cache_group );
+
+      return array( 'count' => count($entries), 'size' => $totals[1], 'hits' => $hits, 'misses' => $misses );
    }
 
 
