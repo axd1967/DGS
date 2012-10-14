@@ -23,6 +23,18 @@ ChangeLog
 
 ### ----- release-1_0_15-20120608 -----
 
+   * include/cache_globals.php ($ARR_CACHE_GROUP_CLEANUP),
+     include/classlib_userconfig.php,
+     include/message_functions.php,
+     tournaments/include/tournament_cache.php:
+   - adjusted cache-expire-time and cleanup-expire-time for various cache-groups:
+     config-pages 1h -> 1d, folders 30min -> 1d,
+     tourney-director/tladder-props/properties/rules/round 1h -> 1d
+
+   * include/dgs_cache.php (AbstractCache.cache_info; ApcCache.cache_info; FileCache.cache_info),
+     scripts/dgs_cache_admin.php (build_list_cache_config):
+   - dgs-cache-admin: added total size and entry-count for cache-group overview
+
    * include/dgs_cache.php (FileCache.cache_cleanup; DgsCache.cleanup_cache):
    - bugfix: calculate group-expire for cache-cleanup is absolute not relative
    - optimize: check filemtime() on file only if needed
