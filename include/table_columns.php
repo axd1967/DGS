@@ -152,6 +152,9 @@ class Table
    /*! \brief number of FOUND_ROWS by MySQL SQL_CALC_FOUND_ROWS, activated by table-option TABLE_ROWS_NAVI; -1 = not used. */
    var $FoundRows;
 
+   /*! \brief add to row-num for showing TABLE_ROW_NUM; 0 = default, only (row_num + RowNumDiff) > 0 is shown. */
+   var $RowNumDiff;
+
    /*! \brief true to use JavaScript features. */
    var $JavaScript;
 
@@ -243,6 +246,7 @@ class Table
       $this->Use_Show_Rows = true;
       $this->Rows_Per_Page = $player_row['TableMaxRows'];
       $this->FoundRows = -1;
+      $this->RowNumDiff = 0;
       $this->JavaScript = is_javascript_enabled();
 
       // filter-stuff
@@ -1330,17 +1334,21 @@ class Table
    // build cell with table row-number, expecting
    // - array( 'owntd' => .., 'text' => .., 'attbs' => .. )
    // - text with '%s' or empty text
-   function build_cell_rownum( &$cell, $row_num )
+   function build_cell_rownum( &$cell, $orig_row_num )
    {
-      if( is_array($cell) )
+      $row_num = $orig_row_num + $this->RowNumDiff;
+      if( $row_num > 0 )
       {
-         $cellfmt = ( isset($cell['text']) ) ? $cell['text'] : '%s.';
-         $cell['text'] = sprintf( $cellfmt, $row_num );
-      }
-      else
-      {
-         $cellfmt = ( isset($cell) ) ? $cell : '%s.';
-         $cell = sprintf( $cellfmt, $row_num );
+         if( is_array($cell) )
+         {
+            $cellfmt = ( isset($cell['text']) ) ? $cell['text'] : '%s.';
+            $cell['text'] = sprintf( $cellfmt, $row_num );
+         }
+         else
+         {
+            $cellfmt = ( isset($cell) ) ? $cell : '%s.';
+            $cell = sprintf( $cellfmt, $row_num );
+         }
       }
    }
 
