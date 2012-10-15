@@ -201,7 +201,7 @@ function build_list_cache_config( $short )
             $row_arr[7] = number_format( $size / 1024 );
          if( $hits > 0 )
             $row_arr[8] = number_format( $hits );
-         if( $misses > 0 )
+         if( $cache_type != CACHE_TYPE_APC && $misses > 0 )
             $row_arr[9] = number_format( $misses );
 
          $sum_types[$cache_type]['count'] += $count;
