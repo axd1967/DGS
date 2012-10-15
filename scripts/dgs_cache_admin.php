@@ -181,7 +181,7 @@ function build_list_cache_config( $short )
             4 => build_cleanup_cycle( @$ARR_CACHE_GROUP_CLEANUP[$cache_group] ),
             5 => implode(SMALL_SPACING, $actions),
          );
-      if( !$short )
+      if( !$short && !is_null($cache) )
       {
          $cache_info = $cache->cache_info( $cache_group ); // [ count|size => ]
          $count = (int)@$cache_info['count'];

@@ -19,9 +19,14 @@ Developers INFO:
 ChangeLog
 ------------------------------------------------------------------
 
-2012-10-14 juga
+2012-10-15 juga
 
 ### ----- release-1_0_15-20120608 -----
+
+   * scripts/dgs_cache_admin.php (build_list_cache_config):
+   - bugfix: no cache-info for NONE-cache-type
+
+2012-10-14 juga
 
    * include/dgs_cache.php (AbstractCache.cache_info; ApcCache.cache_info, ~.getHitInfo; FileCache.cache_info),
      scripts/dgs_cache_admin.php (build_list_cache_config):
