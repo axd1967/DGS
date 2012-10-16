@@ -47,7 +47,7 @@ define('CACHE_GRP_CFG_PAGES', 1);   // 7KB/user * 1d -> 17 MB
 define('CACHE_GRP_CFG_BOARD', 2);   // 2KB/user * 1d -> 5 MB
 define('CACHE_GRP_CLOCKS', 3);      // 1KB total * 10min -> 4 KB
 define('CACHE_GRP_GAME_OBSERVERS', 4); // 0.5KB/user/game-id * 30min -> 750 KB
-define('CACHE_GRP_GAME_NOTES', 5);  // 1KB/user/game-id * 30min -> 3 MB + cache-REFRESH
+define('CACHE_GRP_GAME_NOTES', 5);  // 1KB/user/game-id * 30min -> 3 MB
 define('CACHE_GRP_USER_REF', 6);    // 0.5KB/id,handle * 1d -> 1 MB
 define('CACHE_GRP_STATS_GAMES', 7); // 8KB total * 1d -> 8 KB
 define('CACHE_GRP_FOLDERS', 8);     // 7KB/user * 1d -> 17 MB

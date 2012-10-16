@@ -1381,9 +1381,9 @@ class GameHelper
       {
          $row = mysql_single_fetch( $dbgmsg,
             "SELECT Hidden, Notes FROM GamesNotes WHERE gid=$gid AND uid=$uid LIMIT 1" );
+
+         DgsCache::store( $dbgmsg, CACHE_GRP_GAME_NOTES, $key, $row, 30*SECS_PER_MIN );
       }
-      // store first time + refresh cache-expiry on access for another period
-      DgsCache::store( $dbgmsg, CACHE_GRP_GAME_NOTES, $key, $row, 30*SECS_PER_MIN );
 
       return $row;
    }
