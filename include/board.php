@@ -150,7 +150,7 @@ class Board
       if( $arr_moves === false )
          return FALSE;
       $cnt_moves = count($arr_moves);
-      if( $cnt_moves == 0 )
+      if( !$is_shape && $cnt_moves <= 0 )
          return FALSE;
 
 
