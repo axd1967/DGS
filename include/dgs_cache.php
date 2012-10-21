@@ -168,7 +168,7 @@ class ApcCache extends AbstractCache
       if( $group_name )
       {
          $info = apc_cache_info('user');
-         $misses = $info['num_misses']; // only global
+         $misses = 0; // only global for cache-lifetime, so not available
 
          foreach( $info['cache_list'] as $entry )
          {

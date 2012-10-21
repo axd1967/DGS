@@ -145,7 +145,6 @@ function build_list_cache_config( $short )
    $sum_all = array( 'count' => 0, 'size' => 0, 'hits' => 0, 'misses' => 0 );
 
    // show config for all cache-groups
-   $misses_apc_counted = false;
    for( $cache_group=0; $cache_group <= MAX_CACHE_GRP; ++$cache_group )
    {
       $cache = DgsCache::get_cache( $cache_group, null, /*adm-mode*/true );
@@ -188,12 +187,6 @@ function build_list_cache_config( $short )
          $size  = (int)@$cache_info['size'];
          $hits  = (int)@$cache_info['hits'];
          $misses = (int)@$cache_info['misses'];
-         if( $cache_type == CACHE_TYPE_APC ) // only global misses-count
-         {
-            if( $misses_apc_counted )
-               $misses = 0;
-            $misses_apc_counted = true;
-         }
 
          if( $count > 0 )
             $row_arr[6] = number_format( $count );
