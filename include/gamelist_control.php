@@ -234,7 +234,7 @@ class GameListControl
                if( $this->mp_game )
                {
                   $qsql->add_part( SQLP_FIELDS,
-                     "G.Score AS X_Score", // seen as Black
+                     "IF(GP.GroupColor='W',G.Score,-G.Score) AS X_Score", // user takes opp-role, GrCol=B|W|BW
                      -OUT_OF_RATING." AS oppEndRating", // opp is always user
                      -OUT_OF_RATING." AS userEndRating" );
                }
