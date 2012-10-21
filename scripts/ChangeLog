@@ -21,6 +21,8 @@ ChangeLog
 
 2012-10-21 juga
 
+### ----- release-1_0_15-20120608 -----
+
    * edit_profile.php (parse_edit_form):
    - bugfix: change of night-time was not possible
 
@@ -32,8 +34,6 @@ ChangeLog
    - bugfix: score for multi-player-game was wrongly shown
 
 2012-10-18 juga
-
-### ----- release-1_0_15-20120608 -----
 
    * include/board.php (Board.load_from_db):
    - bugfix: fix checking of moves on loading shape-game; was from optimize-attempt
