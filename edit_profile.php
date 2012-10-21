@@ -515,7 +515,7 @@ function parse_edit_form( &$cfg_board )
          // setTZ( $timezone); //for get_clock_used()
          // $query .= "ClockUsed=" . get_clock_used($nightstart) . ", ";
       }
-      $vars['nightstart'] = $nightstart;
+      $vars['night_start'] = $nightstart;
 
       $email = trim(get_request_arg('email'));
       if( $email )
