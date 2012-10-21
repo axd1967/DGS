@@ -19,12 +19,35 @@ Developers INFO:
 ChangeLog
 ------------------------------------------------------------------
 
-2012-10-15 juga
+2012-10-21 juga
+
+   * edit_profile.php (parse_edit_form):
+   - bugfix: change of night-time was not possible
+
+   * include/dgs_cache.php (ApcCache.cache_info),
+     scripts/dgs_cache_admin.php (build_list_cache_config):
+   - bugfix: don't count global misses for APC-cache
+
+   * include/gamelist_control.php (GameListControl.build_games_query):
+   - bugfix: score for multi-player-game was wrongly shown
+
+2012-10-18 juga
 
 ### ----- release-1_0_15-20120608 -----
 
+   * include/board.php (Board.load_from_db):
+   - bugfix: fix checking of moves on loading shape-game; was from optimize-attempt
+
+2012-10-16 juga
+
+   * include/game_functions.php (GameHelper.load_cache_game_notes):
+   - no cache-refresh on loading game-notes
+
+2012-10-15 juga
+
    * scripts/dgs_cache_admin.php (build_list_cache_config):
    - bugfix: no cache-info for NONE-cache-type
+   - bugfix: show APC-cache-misses only for SUM
 
 2012-10-14 juga
 
