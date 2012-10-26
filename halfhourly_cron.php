@@ -331,8 +331,7 @@ if( !$is_down )
             "WHERE ID=$uid AND Notify='NOW' LIMIT 1" );
       }
 
-      error_log( sprintf("MONITOR[halfhourly_cron.mail_notifications](%s): GAME %s, MSG %s, MAIL %s",
-            $uid, $time_games - $begin_time, $time_msgs - $time_games, $time_mail - $time_msgs ) );
+      //error_log( sprintf("MONITOR[halfhourly_cron.mail_notifications](%s): GAME %s, MSG %s, MAIL %s", $uid, $time_games - $begin_time, $time_msgs - $time_games, $time_mail - $time_msgs ) );
    } //notifications found
 
 
