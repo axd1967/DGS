@@ -19,6 +19,52 @@ Developers INFO:
 ChangeLog
 ------------------------------------------------------------------
 
+2012-10-26 juga
+
+   * forum/class_forum_read.php (ForumRead.load_global_new),
+     forum/post.php (recalc_thread_lastpost),
+     scripts/updates/database_changes_1_0_14_to_1_0_15.mysql,
+     specs/forums.txt:
+   - bugfix:
+     - Posts.Lastchanged must not be updated if all thread-posts are hidden,
+       which happened in moderated forums editing shown-posts of single-post-threads
+     - recalculate forum-NEW-marks if Players.ForumReadNew < 0, used for data-fix
+-----------
+-- fix Posts.Lastchanged for single-post threads that once were hidden due to rejecting or re-editing
+UPDATE Posts
+   SET Lastchanged=Time WHERE ID=Thread_ID AND PostsInThread=1 AND PosIndex >'' AND Time <> Lastchanged ;
+
+-- trigger recalc of NEW forum-entries
+UPDATE Players
+   SET ForumReadNew=-1 WHERE ForumReadNew > 0 ;
+-----------
+
+   * include/game_functions.php (GameHelper.load_cache_game_row):
+   - do not refresh cache with Games-row if read from cache, but let it expire first instead
+
+2012-10-23 juga
+
+   * tournaments/include/tournament_pool_classes.php (PoolViewer.make_single_pool_table),
+     include/table_columns.php (Table.make_add_column_form):
+   - bugfix: call_user_func_array() requires calling vars-by-ref notation for PHP5.3
+
+   * include/connect2mysql.php:
+   - bugfix: replaced getmicrotime() with direct call microtime() to avoid include
+
+   * include/graph.php (TTF_PATH):
+   - cleared default font-path for TTFs
+
+   * include/std_functions.php (send_email, split_url),
+     halfhourly_cron.php:
+   - disable error-log of sending-mail
+   - cleanup: replaced deprecated PHP-function split() by preg_split()
+
+   * scripts/data_export.php:
+   - cleanup: replaced deprecated PHP-function ereg_replace() by preg_replace()
+
+   * scripts/experiments/analyze-slow_log.php:
+   - cleanup: replaced deprecated PHP-function mysql_escape_string() by mysql_real_escape_string()
+
 2012-10-21 juga
 
 ### ----- release-1_0_15-20120608 -----
