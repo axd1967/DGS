@@ -39,7 +39,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
  * TTF_HEIGHT:
  *  adjust it to match the embedded font height
  */
-define('TTF_PATH', '/var/lib/defoma/fontconfig.d/F/%s.ttf'); // Font path
+define('TTF_PATH', ''); // Font path
 define('TTF_NAME', 'FreeSans-Medium'); //Font name
 define('TTF_HEIGHT', 10); //Font height
 
