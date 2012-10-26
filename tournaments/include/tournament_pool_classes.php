@@ -884,7 +884,7 @@ class PoolViewer
          }//result-matrix
 
          if( $show_edit_col && !is_null($this->edit_callback) )
-            $row_arr[8] = call_user_func_array( $this->edit_callback, array( $this, $uid ) ); // call vars by ref
+            $row_arr[8] = call_user_func_array( $this->edit_callback, array( &$this, &$uid ) ); // call vars by ref
 
          $this->table->add_row( $row_arr );
       }

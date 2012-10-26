@@ -1556,8 +1556,7 @@ class Table
 
       $ex_string = '';
       if( $this->ExtendTableFormFunc && function_exists($this->ExtendTableFormFunc) )
-         $ex_string = call_user_func_array( $this->ExtendTableFormFunc,
-               array( $this, $ac_form ) ); // call vars by ref
+         $ex_string = call_user_func_array( $this->ExtendTableFormFunc, array( &$this, &$ac_form ) ); // call vars by ref
 
       $string = false;
       if( $ac_string || $f_string || $r_string || $ex_string )
