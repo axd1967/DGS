@@ -501,6 +501,9 @@ Posts():
 Posts($fid,$tid):
    # combined calculate
    LastPost := X_LastPost,
+
+   # set Lastchanged only if there is one; there could be none if all posts are hidden especially
+   #   on single-post-threads (e.g. edit on shown post for moderated forum puts post back in hidden-state)
    Lastchanged := X_Lastchanged :
       SELECT ID AS X_LastPost, Time AS X_Lastchanged FROM Posts
       WHERE Thread_ID=$tid AND Approved='Y' AND PosIndex>''
@@ -521,6 +524,12 @@ Posts($fid,$tid):
      of each other, i.e. for example, that 'new'-flag for thread-list is NOT needed
      to calculate 'new'-flag for forum-list or global-forum, nor is 'new'-flag
      calculation for forum-list needed for global-forum 'new'-flag.
+
+   - There can be tricky cases that must not update Posts.Lastchanged for thread-entry
+     if the thread contains only hidden posts (esp. for single-post-threads).
+     There was a nasty bug originating from the fact, that a shown post in a moderated
+     forum was edited, which recalculated the threads Posts.Lastchanged resetting it
+     to $NOW, which was wrong as it make the NEW re-appear repeatedly.
 
 * NEW-flags in thread-post view
    - post is "read" when Posts[$pid].Time is older than FORUM_WEEKS_NEW_END weeks
@@ -577,6 +586,7 @@ Posts($fid,$tid):
 
          Players.ForumReadTime == FR.Time
          Players.ForumReadNew  == FR.HasNew
+         # NOTE: if Players.ForumReadNew is <0 forum-has-new will be recalculated
 
      when global-forum-updated-date (stored by modification-time of cache-file)
      CACHEFILE_FORUM_GLOBAL.ModifiedTime > FR.Time,

@@ -459,11 +459,12 @@ function recalc_thread_lastpost( $tid )
          . "AND PosIndex>'' " // ''=inactivated (edited)
          . "ORDER BY Time DESC LIMIT 1" );
    $lastpost = ($row) ? $row['ID'] : 0;
-   $lastchanged = ($row) ? $row['X_Time'] : $NOW;
+   $lastchanged = ($row) ? $row['X_Time'] : 0; // 0=no-upd for (un-approved) one-post-threads e.g. for moderated forum
 
-   db_query( "recalc_thread_lastpost.update_lastpost($tid)",
+   db_query( "recalc_thread_lastpost.update_lastpost($tid,$lastpost,$lastchanged)",
       'UPDATE Posts SET '
-      . "LastPost=$lastpost, Lastchanged=FROM_UNIXTIME($lastchanged) "
+      . "LastPost=$lastpost "
+      . ( $lastchanged > 0 ? ", Lastchanged=FROM_UNIXTIME($lastchanged) " : '' )
       . "WHERE ID='$tid' LIMIT 1" );
 }
 

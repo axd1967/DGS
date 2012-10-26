@@ -2607,3 +2607,12 @@ ALTER TABLE Posts
    ADD Flags tinyint unsigned NOT NULL default '0' AFTER Thread_ID ;
 
 
+-- fix Posts.Lastchanged for single-post threads that once were hidden due to rejecting or re-editing
+UPDATE Posts
+   SET Lastchanged=Time WHERE ID=Thread_ID AND PostsInThread=1 AND PosIndex >'' AND Time <> Lastchanged ;
+
+-- trigger recalc of NEW forum-entries
+UPDATE Players
+   SET ForumReadNew=-1 WHERE ForumReadNew > 0 ;
+
+

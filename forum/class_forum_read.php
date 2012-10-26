@@ -315,8 +315,9 @@ class ForumRead
       $global_has_new = false;
 
       // load (from player_row) and check against global forum-read for user
+      $fr_new = (int)@$player_row['ForumReadNew']; // recalc if <0
       $fr_time = (int)@$player_row['X_ForumReadTime'];
-      if( $fr_time <= 0 || $global_updated > $fr_time )
+      if( $fr_new < 0 || $fr_time <= 0 || $global_updated > $fr_time )
       {
          $global_has_new = ForumRead::has_new_posts_in_all_forums( $forum_opts );
          $success_update = ForumRead::update_global_forum_read( "load_global_new", // no TA
