@@ -248,7 +248,7 @@ function db_query( $debugmsg, $query, $errorcode='mysql_query_failed' )
       }
    }
 
-   $begin_time = getmicrotime();
+   $begin_time = microtime(/*float*/true);
    $result = mysql_query($query);
    if( DBG_QUERY > 2 ) error_log("db_query($debugmsg,$errorcode)[" . round( 1000 * (getmicrotime()-$begin_time) ) . "ms]{U" . @$GLOBALS['player_row']['ID'] . "," . @$GLOBALS['player_row']['Handle'] . "}: query=[$query]");
    if( $result )
