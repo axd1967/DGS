@@ -1326,11 +1326,11 @@ class GameHelper
 
       $row = DgsCache::fetch( $dbgmsg, CACHE_GRP_GAMES, $key );
       if( is_null($row) )
+      {
          $row = GameHelper::load_game_row( $dbgmsg, $gid, /*add-fields*/true );
-
-      // store first time + refresh cache-expiry on access for another period
-      if( $row && isStartedGame(@$row['Status']) )
-         DgsCache::store( $dbgmsg, CACHE_GRP_GAMES, $key, $row, 10*SECS_PER_MIN );
+         if( $row && isStartedGame(@$row['Status']) )
+            DgsCache::store( $dbgmsg, CACHE_GRP_GAMES, $key, $row, 10*SECS_PER_MIN );
+      }
 
       return $row;
    }//load_cache_game_row
