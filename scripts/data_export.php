@@ -510,8 +510,8 @@ function quoteit( $mixed, $quote='`')
 function adj_eol( $str, $cr=CR, $trim=' ')
 {
    //if( $cr===false ) $cr = CR;
-   return ereg_replace(
-         "[$trim\x01-\x1f]*[\x0a\x0d]+[$trim\x01-\x1f]*",
+   return preg_replace(
+         "/[$trim\x01-\x1f]*[\x0a\x0d]+[$trim\x01-\x1f]*/",
          $cr,
          $str );
 } //adj_eol
@@ -766,7 +766,6 @@ class dbTable
             $$ary = implode(CR.$spc, $$ary);
             if( !QUOTE_NAME )
                $$ary = str_replace('`', '', $$ary);
-               //$$ary = ereg_replace("['`]+", '', $$ary);
             $str.= $spc.$$ary.CR;
             //$str.= comment_line( '----')
          }
