@@ -263,14 +263,9 @@ function Myarg( $help, &$i, $key, $arg)
       break;
    }
 
-if( isset($dbcnx) && $dbcnx )
+function Myslashes($s)
 {
-function Myslashes($s) { return mysql_real_escape_string($s); }
-}
-else
-{
-//function Myslashes($s) { return addslashes($s); }
-function Myslashes($s) { return mysql_escape_string($s); }
+   return mysql_real_escape_string($s);
 }
 
 if (!function_exists('fputcsv')) {
