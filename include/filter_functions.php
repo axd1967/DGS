@@ -66,7 +66,7 @@ function make_text_end_exclusive( $v ) {
   * signature: (string sql, int cnt_wild) = replace_wildcards(
   *             string val, array( src_char => dest_char ),
   *             array( allow_char-despite-being-forbidden => 1 ))
-  * note: incompatible (doing more) than mysql_escape_string()-func because of special-chars
+  * note: incompatible (doing more) than mysql_real_escape_string()-func because of special-chars
   * note: because of SQL-injection, dest_char must never be one of: ' " \
   * note: use with caution!! allow-char-array allows forbidden dest_chars
   * note: also handle, if wildcar_char is '%' using correct escaping
