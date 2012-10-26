@@ -1268,7 +1268,7 @@ function send_email( $debugmsg, $email, $formatopts, $text, $subject='', $header
    {
       $begin_time = time();
       $res = @mail( $email, $subject, $text, $headers, $params);
-      error_log( sprintf("SEND_EMAIL($debugmsg,$email): subject [$subject] -> time %s", time() - $begin_time ) );
+      //error_log( sprintf("SEND_EMAIL($debugmsg,$email): subject [$subject] -> time %s", time() - $begin_time ) );
    }
    else
       $res = false;
@@ -1279,7 +1279,7 @@ function send_email( $debugmsg, $email, $formatopts, $text, $subject='', $header
 } //send_email
 
 /**
- * $text and $subject must NOT be escaped by mysql_escape_string()
+ * $text and $subject must NOT be escaped by mysql_real_escape_string()
  * $to_ids and $to_handles have been splitted because, historically, some handles
  *  may seems to be numeric (e.g. '00000') as their first char may be a digit.
  *  In fact, both are treated like strings or arrays here.
@@ -2343,7 +2343,7 @@ function build_hidden( $args)
 function split_url($url, &$page, &$args, $sep='')
 {
    if( !$sep ) $sep = URI_AMP;
-   $url = split( '([?#]|'.$sep.')', $url );
+   $url = preg_split( "/([?#]|$sep)/", $url );
    list( , $page ) = each( $url );
    $args = array();
    while( list( , $query ) = each( $url ) )
