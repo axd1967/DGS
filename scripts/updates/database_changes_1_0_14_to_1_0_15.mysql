@@ -2616,3 +2616,8 @@ UPDATE Players
    SET ForumReadNew=-1 WHERE ForumReadNew > 0 ;
 
 
+-- disable added GamesPriority for my running games per default
+UPDATE ConfigPages
+   SET ColumnsGamesRunningUser2 = ColumnsGamesRunningUser2 & ~0x8000 ;
+
+

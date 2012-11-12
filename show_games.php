@@ -300,6 +300,11 @@ $GLOBALS['ThePage'] = new Page('GamesList');
 
    // NOTE: check after add_or_del_column()-call
    // only activate if column shown for user to reduce server-load for page
+   // avoiding additional outer-join on GamesPriority-table !!
+   $show_game_prio = $is_mine && $gtable->is_column_displayed(46);
+
+   // NOTE: check after add_or_del_column()-call
+   // only activate if column shown for user to reduce server-load for page
    // avoiding additional outer-join on Clock-table !!
    $load_remaining_time = ( $running && !$all && $uid == $my_id
       && ($gtable->is_column_displayed(39) || $gtable->is_column_displayed(40)) );
@@ -417,6 +422,7 @@ $GLOBALS['ThePage'] = new Page('GamesList');
  * 43:    Ruleset
  * 44:    GameType + FairKomi-info
  * 45: >  FU+RU (TG_Challenge)
+ * 46: >  RU (X_Priority)
  *****/
 
    // add_tablehead($nr, $descr, $attbs=null, $mode=TABLE_NO_HIDE|TABLE_NO_SORT, $sortx='')
@@ -549,6 +555,8 @@ $GLOBALS['ThePage'] = new Page('GamesList');
       if( !$all ) //RU ?UNION
       {
          $gtable->add_tablehead(15, T_('Opponents Last Access#header'), 'Date', 0, 'oppLastaccess-');
+         if( $show_game_prio ) //MY-RU
+            $gtable->add_tablehead(46, T_('Priority#header'), 'Number', 0, 'X_Priority-');
       }
    }
    $gtable->add_tablehead(12, T_('Weekend Clock#header'), 'Date', 0, 'WeekendClock-');
@@ -568,7 +576,7 @@ $GLOBALS['ThePage'] = new Page('GamesList');
 
 
    // build SQL-query
-   $qsql = $glc->build_games_query( $load_user_ratingdiff, $load_remaining_time );
+   $qsql = $glc->build_games_query( $load_user_ratingdiff, $load_remaining_time, $show_game_prio );
    $qsql->merge( $gtable->get_query() );
    $query = $qsql->get_select() . "$order$limit";
 
@@ -767,6 +775,8 @@ $GLOBALS['ThePage'] = new Page('GamesList');
          }
          else //RU
          {
+            if( $show_game_prio && $gtable->Is_Column_Displayed[46] )
+               $row_arr[46] = ($X_Priority) ? $X_Priority : ''; // don't show 0
             if( $gtable->Is_Column_Displayed[15] )
                $row_arr[15] = ( $oppLastaccess > 0 ? date(DATE_FMT, $oppLastaccess) : '' );
             if( $is_mine && $gtable->Is_Column_Displayed[39] ) // my-RemTime

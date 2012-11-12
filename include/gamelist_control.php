@@ -127,7 +127,7 @@ class GameListControl
 
 
    /*! \brief Returns QuerySQL for games-list. */
-   function build_games_query( $load_user_ratingdiff, $load_remaining_time )
+   function build_games_query( $load_user_ratingdiff, $load_remaining_time, $load_game_prio )
    {
       if( $this->is_status() )
          error('invalid_action', "GameListControl.build_games_query({$this->view},{$this->view_all},{$this->view_uid})");
@@ -186,7 +186,8 @@ class GameListControl
       {
          $need_bw_user_info = $need_ticks = $need_ratingdiff = true;
          $qsql->add_part( SQLP_FROM, 'Games AS G' );
-         GameHelper::extend_query_with_game_prio( $qsql, $uid, true, 'G' );
+         if( $load_game_prio )
+            GameHelper::extend_query_with_game_prio( $qsql, $uid, true, 'G' );
       }
       else //FU+RU ?UNION
       {
@@ -262,6 +263,9 @@ class GameListControl
 
             if( $load_remaining_time ) //RU
                $need_ticks = true;
+
+            if( $load_game_prio )
+               GameHelper::extend_query_with_game_prio( $qsql, $uid, true, 'G' );
          }
 
          if( $this->mp_game )
