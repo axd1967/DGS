@@ -172,7 +172,12 @@ class QuickHandlerGameList extends QuickHandler
          if( $glc->is_observe_all() )
             $this->clear_with_options( array( QWITH_PRIO, QWITH_NOTES, QWITH_RATINGDIFF ) ); // OA
          elseif( $glc->is_running() )
-            $this->clear_with_options( array( QWITH_PRIO, QWITH_RATINGDIFF ) ); // RU
+         {
+            if( $uid == $my_id )
+               $this->clear_with_options( array( QWITH_RATINGDIFF ) ); // MY-RU
+            else
+               $this->clear_with_options( array( QWITH_PRIO, QWITH_RATINGDIFF ) ); // OTHER-RU
+         }
          elseif( $glc->is_finished() )
             $this->clear_with_options( array( QWITH_PRIO, QWITH_NOTES ) ); // FU
 
@@ -186,7 +191,7 @@ class QuickHandlerGameList extends QuickHandler
          $glc->load_notes = ($show_notes && $this->is_with_option(QWITH_NOTES) );
          $load_remaining_time = ( $glc->is_running() && !$glc->is_all() && $uid == $my_id );
 
-         $qsql = $glc->build_games_query( $this->is_with_option(QWITH_RATINGDIFF), $load_remaining_time, $this->is_with_option(QWITH_PRIO) )r
+         $qsql = $glc->build_games_query( $this->is_with_option(QWITH_RATINGDIFF), $load_remaining_time, $this->is_with_option(QWITH_PRIO) );
 
          // default order
          if( $glc->is_observe_all() )
