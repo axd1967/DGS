@@ -39,6 +39,8 @@ define('MAX_ADD_DAYS', 14); // max. amount of days that can be added to game by 
 
 define('MAX_GAME_PLAYERS', 16);
 
+define('WROOM_MAX_ENTRIES', 4); // max. waiting-room entries per user, only for new-game (not for MPGs)
+
 // GamePlayers.Flags
 define('GPFLAG_MASTER',      0x0001); // game-master
 define('GPFLAG_JOINED',      0x0002); // joined game, user set
@@ -3170,6 +3172,20 @@ class GameSetupChecker
       $gsc->check_game_players();
       return $gsc;
    }//check_fields
+
+   /*! \brief Checks max. count of existing waiting-room-entries. */
+   function check_wroom_count( $view, $uid, &$errors )
+   {
+      if( $view == GSETVIEW_SIMPLE || $view == GSETVIEW_EXPERT || $view == GSETVIEW_FAIRKOMI )
+      {
+         $row = mysql_single_fetch( "GameSetupChecker::check_wroom_count.count_wr($uid,$view)",
+               "SELECT COUNT(*) AS X_Count FROM Waitingroom WHERE uid=$uid" );
+         if( $row && (int)@$row['X_Count'] >= WROOM_MAX_ENTRIES )
+            $errors[] = sprintf( T_('Max. number of own waiting-room entries [%s] has been reached.'), WROOM_MAX_ENTRIES ) . "\n" .
+               T_('You can save the form as template for later, delete one waiting-room offer or wait till they are joined.') . "\n" .
+               T_('Number of games for same offer can be set with \'Number of games to add\'.');
+      }
+   }//check_wroom_count
 
 } //end 'GameSetupChecker'
 

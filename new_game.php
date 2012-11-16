@@ -91,6 +91,7 @@ require_once 'include/utilities.php';
    {
       $gsc = NULL;
       $errors = array();
+      GameSetupChecker::check_wroom_count( $viewmode, $my_id, $errors );
    }
 
 
@@ -179,10 +180,11 @@ function handle_add_game( $my_id, $viewmode )
 
    $gsc = GameSetupChecker::check_fields( $viewmode );
    if( $gsc->has_errors() )
-   {
       $gsc->add_default_values_info();
+   if( @$_REQUEST['add_game'] )
+      GameSetupChecker::check_wroom_count( $viewmode, $player_row['ID'], $gsc->errors );
+   if( $gsc->has_errors() )
       return $gsc;
-   }
 
    $my_rating = $player_row['Rating2'];
    $iamrated = ( $player_row['RatingStatus'] != RATING_NONE && is_numeric($my_rating) && $my_rating >= MIN_RATING );
