@@ -561,7 +561,7 @@ class ConfigPages
          $fieldset = 'User_ID,StatusFlags,StatusFolders,ForumFlags';
          if( $col_name )
             $fieldset .= ',' . ConfigTableColumns::build_fieldset( $col_name );
-         $row = mysql_single_fetch("ContactPages::load_config_pages.find($uid,$col_name)",
+         $row = mysql_single_fetch("ConfigPages::load_config_pages.find($uid,$col_name)",
                "SELECT $fieldset FROM ConfigPages WHERE User_ID='$uid' LIMIT 1");
       }
       if( !$row )
