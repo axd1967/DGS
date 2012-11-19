@@ -3176,6 +3176,9 @@ class GameSetupChecker
    /*! \brief Checks max. count of existing waiting-room-entries. */
    function check_wroom_count( $view, $uid, &$errors )
    {
+      if( WROOM_MAX_ENTRIES <= 0 )
+         return;
+
       if( $view == GSETVIEW_SIMPLE || $view == GSETVIEW_EXPERT || $view == GSETVIEW_FAIRKOMI || $view == GSETVIEW_MPGAME )
       {
          $row = mysql_single_fetch( "GameSetupChecker::check_wroom_count.count_wr($uid,$view)",
