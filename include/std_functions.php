@@ -1209,43 +1209,17 @@ define('EMAILFMT_SKIP_WORDWRAP', 0x01); // skipping word-wrapping
  **/
 function send_email( $debugmsg, $email, $formatopts, $text, $subject='', $headers='', $params='')
 {
+   // NOTE: mail-format of header and text see http://de3.php.net/manual/en/function.mail.php
+
    if( !$subject )
       $subject = FRIENDLY_LONG_NAME.' notification';
    $subject= preg_replace("/[\\x01-\\x20]+/", ' ', $subject);
 
-   $rgx= array("/\r\n/","/\r/");
-   $rpl= array("\n","\n");
-   $text= preg_replace( $rgx, $rpl, $text);
+   // EOL for message-body should be LF
+   $text = str_replace( array("\r\n", "\r"), "\n", $text );
    if( !($formatopts & EMAILFMT_SKIP_WORDWRAP) )
       $text= wordwrap( $text, 70, "\n", 1);
-
-   /**
-    * How to break the lines of an email ? CRLF.
-    * http://cr.yp.to/docs/smtplf.html
-    * http://www.ietf.org/rfc/rfc0822.txt
-    * Any problems may be platform dependent. Maybe:
-    * switch( (string)strtoupper(substr(PHP_OS, 0, 3)) ) {
-    *   case 'WIN': $eol= "\r\n"; break;
-    *   case 'MAC': $eol= "\r"; break;
-    *   default: $eol= "\n"; break;
-    * }
-    * $text= str_replace( nl2br("\n"), $eol, nl2br($text) );
-    **/
-   $eol= "\r\n"; //desired one for emails
-
-   switch( (string)$eol )
-   {
-      default:
-         $eol = "\r\n";
-      case "\r":
-         $text = preg_replace( "/\n/", $eol, $text);
-      case "\n":
-         break;
-   }
-   $text= trim($text).$eol;
-
-   $rgx= array("/[\r\n]+/");
-   $rpl= array($eol);
+   $text = trim($text) . "\n";
 
    $headers= trim($headers);
    if( !$headers )
@@ -1255,11 +1229,16 @@ function send_email( $debugmsg, $email, $formatopts, $text, $subject='', $header
       //$headers.= "\nMIME-Version: 1.0";
       //$headers.= "\nContent-type: text/html; charset=iso-8859-1";
    }
-   $headers= preg_replace( $rgx, $rpl, trim($headers)); //.$eol;
+
+   // EOL of message-headers should be CRLF
+   // NOTE: How to break the lines of an email ? CRLF -> http://cr.yp.to/docs/smtplf.html
+   $rgx = "/[\r\n]+/";
+   $eol = "\r\n"; // desired one for emails
+   $headers = preg_replace( $rgx, $eol, trim($headers)); //.$eol;
 
    $params= trim(SENDMAIL_PARAMETERS . ' ' . $params);
    if( $params )
-      $params= preg_replace( $rgx, $rpl, trim($params)); //.$eol;
+      $params = preg_replace( $rgx, $eol, trim($params)); //.$eol;
 
    if( is_array($email) )
       $email = trim( implode( ',', $email) );
