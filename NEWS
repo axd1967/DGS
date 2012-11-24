@@ -194,6 +194,7 @@ Copyright (C) 2001-2012  Erik Ouchterlony
       * <home waiting_room.php>Waiting room</home>:
          * Moved adding of a new game offer for the waiting room to a separate page:
            Added <home new_game.php>New game</home> page into main-menu (access-key [n])
+         * Limited waiting-room entries a user can offer: max. 4 entries
          * Show number of already started games with opponent
          * Show probable game-settings for challenger with color, handicap and komi
          * Simplified filter for "suitable" waiting games, added notes

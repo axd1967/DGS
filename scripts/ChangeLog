@@ -19,6 +19,42 @@ Developers INFO:
 ChangeLog
 ------------------------------------------------------------------
 
+2012-11-24 juga
+
+### ----- release-1_0_15-20120608 -----
+
+   * include/std_functions.php (send_email):
+   - bugfix: replace CRLF in message-body with LF only
+
+2012-11-19 juga
+
+   * include/game_functions.php (GameSetupChecker.check_wroom_count):
+   - limiting waiting-room entries a user can offer also for starting MPGs
+     even if wanting to invite-only-MPG
+   - skip count-check if WROOM_MAX_ENTRIES <= 0
+
+2012-11-16 juga
+
+   * include/game_functions.php (WROOM_MAX_ENTRIES, GameSetupChecker.check_wroom_count),
+     new_game.php (handle_add_game):
+   - limiting waiting-room entries a user can offer, max. 4 entries, not restricted for MPGs
+     - see http://www.dragongoserver.net/features/vote_feature.php?fid=2
+
+2012-11-12 juga
+
+   * include/gamelist_control.php (GameListControl.build_games_query),
+     include/quick/quick_game_info.php (QuickHandlerGameInfo.prepare),
+     include/quick/quick_game_list.php (QuickHandlerGameList.prepare),
+     scripts/updates/database_changes_1_0_14_to_1_0_15.mysql,
+     show_games.php:
+   - added GamesPriority for my running games, disabled table-column per default
+   - quick-suite: add GamesPriority for running game only if specified in WITH-option
+-----------
+-- disable added GamesPriority for my running games per default
+UPDATE ConfigPages
+   SET ColumnsGamesRunningUser2 = ColumnsGamesRunningUser2 & ~0x8000 ;
+-----------
+
 2012-10-26 juga
 
    * forum/class_forum_read.php (ForumRead.load_global_new),
@@ -66,8 +102,6 @@ UPDATE Players
    - cleanup: replaced deprecated PHP-function mysql_escape_string() by mysql_real_escape_string()
 
 2012-10-21 juga
-
-### ----- release-1_0_15-20120608 -----
 
    * edit_profile.php (parse_edit_form):
    - bugfix: change of night-time was not possible
