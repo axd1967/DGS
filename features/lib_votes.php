@@ -178,7 +178,7 @@ class Feature
     */
    function allow_edit()
    {
-      if( Feature::is_super_admin() ) // feature-super-admin can always edit
+      if( Feature::is_super_admin() && $this->status != FEATSTAT_LIVE ) // feature-super-admin can always edit non-LIVE feature
          return true;
       if( !Feature::is_admin() ) // only admin can edit
          return false;

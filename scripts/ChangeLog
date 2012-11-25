@@ -23,6 +23,12 @@ ChangeLog
 
 ### ----- release-1_0_15-20120608 -----
 
+   * features/lib_votes.php (Feature.allow_edit),
+     features/edit_feature.php:
+   - bugfix: keep old-status to check on preview
+   - bugfix: features on LIVE-status can not be edited anymore
+   - bugfix: show feature-points-added also if not super-admin
+
    * include/game_functions.php (GameHelper.extend_query_with_game_prio),
      scripts/game_consistency.php,
      confirm.php (jump_to_next_game):

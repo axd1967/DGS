@@ -65,7 +65,8 @@ require_once( "features/lib_votes.php" );
 
    // error-check on feature to save
    $errormsg = null;
-   if( @$_REQUEST['feature_save'] || @$_REQUEST['feature_preview'] )
+   $is_preview = @$_REQUEST['feature_preview'];
+   if( @$_REQUEST['feature_save'] || $is_preview )
    {
       if( strlen(trim(get_request_arg('subject'))) == 0 )
          $errormsg = '('.T_('Missing subject of feature').')';
@@ -100,14 +101,15 @@ require_once( "features/lib_votes.php" );
       error('feature_edit_bad_status', "edit_feature.feature.edit_status($fid,$my_id,{$feature->status},$new_status)");
 
    // insert/update feature-object with values from edit-form if no error
-   if( @$_REQUEST['feature_save'] || @$_REQUEST['feature_preview'] )
+   if( @$_REQUEST['feature_save'] || $is_preview )
    {
-      $feature->set_status( $new_status );
+      if( !$is_preview )
+         $feature->set_status( $new_status );
       $feature->set_size( get_request_arg('size') );
       $feature->set_subject( get_request_arg('subject') );
       $feature->set_description( get_request_arg('description') );
 
-      if( !@$_REQUEST['feature_preview'] && is_null($errormsg) )
+      if( !$is_preview && is_null($errormsg) )
       {
          ta_begin();
          {//HOT-section to update feature
@@ -124,11 +126,12 @@ require_once( "features/lib_votes.php" );
          }
          ta_end();
 
-         $sysmsg = ( $is_super_admin && $added_points > 0 )
+         $sysmsg = ( $added_points > 0 )
             ? sprintf( T_('Feature saved! %s feature-points returned to voters!'), $added_points )
             : T_('Feature saved!');
-         // if new feature added, add next; if edit feature, edit again
-         jump_to("features/edit_feature.php?fid=$fid".URI_AMP."sysmsg=". urlencode($sysmsg));
+         // if new feature added, add next; if edit feature, edit again; if live, edit not longer possible
+         $jump_url = ( $new_status == FEATSTAT_LIVE ) ? 'features/vote_feature.php' : 'features/edit_feature.php';
+         jump_to($jump_url."?fid=$fid".URI_AMP."sysmsg=". urlencode($sysmsg));
       }
    }
 
@@ -234,7 +237,7 @@ require_once( "features/lib_votes.php" );
          'TEXTAREA',    'description', 70, 10, $feature->description,
          ));
 
-      if( @$_REQUEST['feature_preview'] || ($feature->subject . $feature->description != '') )
+      if( $is_preview || ($feature->subject . $feature->description != '') )
       {
          $fform->add_row( array(
             'DESCRIPTION', T_('Preview'),
