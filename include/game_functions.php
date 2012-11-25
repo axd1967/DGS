@@ -1366,8 +1366,8 @@ class GameHelper
    {
       if( $load_prio )
       {
-         $qsql->add_part( SQLP_FIELDS, "COALESCE(GP.Priority,0) AS X_Priority" );
-         $qsql->add_part( SQLP_FROM, "LEFT JOIN GamesPriority AS GP ON GP.gid=$tablename.ID AND GP.uid=$uid" );
+         $qsql->add_part( SQLP_FIELDS, "COALESCE(GPRIO.Priority,0) AS X_Priority" );
+         $qsql->add_part( SQLP_FROM, "LEFT JOIN GamesPriority AS GPRIO ON GPRIO.gid=$tablename.ID AND GPRIO.uid=$uid" );
       }
       else
          $qsql->add_part( SQLP_FIELDS, '0 AS X_Priority');

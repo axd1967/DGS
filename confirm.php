@@ -531,12 +531,12 @@ function jump_to_next_game($uid, $Lastchanged, $Moves, $TimeOutDate, $gid)
          break;
       case NGO_PRIO:
          $prio = NextGameOrder::load_game_priority( $gid, $uid );
-         $qsql->add_part( SQLP_FIELDS, 'COALESCE(GP.Priority,0) AS X_Priority' );
+         $qsql->add_part( SQLP_FIELDS, 'COALESCE(GPRIO.Priority,0) AS X_Priority' );
          $qsql->add_part( SQLP_FROM,
-            "LEFT JOIN GamesPriority AS GP ON GP.gid=Games.ID AND GP.uid=$uid" );
+            "LEFT JOIN GamesPriority AS GPRIO ON GPRIO.gid=Games.ID AND GPRIO.uid=$uid" );
          $qsql->add_part( SQLP_WHERE,
-            "( COALESCE(GP.Priority,0) < $prio OR "
-               . "(COALESCE(GP.Priority,0)=$prio AND $def_where_nextgame ))" );
+            "( COALESCE(GPRIO.Priority,0) < $prio OR "
+               . "(COALESCE(GPRIO.Priority,0)=$prio AND $def_where_nextgame ))" );
          break;
       case NGO_TIMELEFT:
          $qsql->add_part( SQLP_WHERE,
