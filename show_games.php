@@ -555,7 +555,7 @@ $GLOBALS['ThePage'] = new Page('GamesList');
       if( !$all ) //RU ?UNION
       {
          $gtable->add_tablehead(15, T_('Opponents Last Access#header'), 'Date', 0, 'oppLastaccess-');
-         if( $show_game_prio ) //MY-RU
+         if( $is_mine ) //MY-RU
             $gtable->add_tablehead(46, T_('Priority#header'), 'Number', 0, 'X_Priority-');
       }
    }
