@@ -19,9 +19,20 @@ Developers INFO:
 ChangeLog
 ------------------------------------------------------------------
 
-2012-11-24 juga
+2012-11-25 juga
 
 ### ----- release-1_0_15-20120608 -----
+
+   * include/game_functions.php (GameHelper.extend_query_with_game_prio),
+     scripts/game_consistency.php,
+     confirm.php (jump_to_next_game):
+   - bugfix: use table-alias GPRIO for GamesPriority-table to avoid ambiguity
+     with GamePlayers-table-alias GP
+
+   * show_games.php:
+   - bugfix: add column for GamesPriority for MY-running-games
+
+2012-11-24 juga
 
    * include/std_functions.php (send_email):
    - bugfix: replace CRLF in message-body with LF only
