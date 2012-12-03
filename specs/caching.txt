@@ -876,7 +876,22 @@ See "template" for new cache-group at end of this section.
 
    - Expire-time of each is 1 minute.
 
+   - (*) IMPORTANT TO NOTE is, that there are some use-cases, that do not invalidate
+     the cache-entry for the users even so they have influence on the status-content.
+     These use-cases are:
+         - starting/ending vacation
+         - the clock-tick-script changing the time for games
+         - game time-left fixing script
+         - change of night-time for users
+         - change of players name, rating and last-access
+     With the short expire-time of 1 minute all the above exceptions to cache-
+     invalidation are accepted to show up delayed (by 1 min).
+
    - Currently (Nov-2012) this cache-group is disabled on the live-server.
+     Mainly out of reasons mentioned above at (*).
+
+     However, if you have your own server, you could accept to enable caching
+     for this cache-group if 1 min delay is acceptable for the use-cases mentioned.
 
 
 * CACHE_GRP_BULLETINS
