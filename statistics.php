@@ -105,10 +105,13 @@ function show_stats_default()
          echo '<p><span class=DebugInfo>Loadavg: ', $tmp, '</span></p>';
    }
 
+   // pass URL-args to graph-generation-script
    $args= array();
-   $args['show_time']= (int)(bool)@$_REQUEST['show_time'];
-   $args['activity']= (int)(bool)@$_REQUEST['activity'];
-   $args['dyna']= floor($NOW/CACHE_EXPIRE_GRAPH); //force caches refresh
+   $args['show_time']= ( @$_REQUEST['show_time'] ) ? 1 : 0;
+   $args['activity']= ( @$_REQUEST['activity'] ) ? 1 : 0;
+   $args['size']= (int)@$_REQUEST['size'];
+   $args['no_cache']= ( @$_REQUEST['no_cache'] ) ? 1 : 0;
+   $args['dyna']= floor($NOW/CACHE_EXPIRE_GRAPH); //force caches refresh //FIXME what is this var!?
    $args= make_url('?', $args);
 
    $title = T_('Statistics graph');
