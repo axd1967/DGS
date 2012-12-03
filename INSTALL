@@ -13,9 +13,11 @@ Requirements:
 *) FreeType for optional fonts in rating graph <http://www.freetype.org>
 
 Last versions used by Dragon Live Server:
- Apache Version Apache/2.2.3 (Unix) PHP/5.1.6
- MySQL 5.0.45
+   Apache Version Apache/2.2.3 (Unix) PHP/5.1.6
+   MySQL 5.0.45
 
+Optional but recommended:
+   APC 3.1.9  shared-memory cache
 
 
 
@@ -131,11 +133,23 @@ NOTE: order of the following items is not strict. You may need to re-edit the
       local-config for some of the items.
 
 
-* Copy config-template and adjust for local configuration and
-  adjust 'include/config-local.php' to your environment
-  and needed set of DGS-features.
+* Copy config-template and adjust for local configuration:
 
   > cp include/config.php include/config-local.php
+
+  Adjust 'include/config-local.php' to fit to your environment and needed set of
+  DGS-features. For configuration of the cache read on first.
+
+  DGS allows a file-based or APC-based caching. For usage and configuration of
+  the caching you need to read some chapters of 'specs/caching.txt':
+
+      - chapter (2a) to install the APC-cache, including the 'apc-live.php'-script
+
+      - chapter (2) in full if you also want to use file-based caching
+
+      - chapter (3) to adjust the cache-configuration in your local config
+
+      - chapter (4) to get familiar with cache-admin scripts
 
 * Edit permissions for include/config-local.php and directory translations/:
 
