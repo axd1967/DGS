@@ -22,72 +22,1109 @@
 ## along with this program.  If not, see <http://www.gnu.org/licenses/>.
 ## */
 
+Topics:
+
+   1. Introduction
+   2. Installation
+      2a. [APC]-cache
+      2b. [FILE]-cache
+   3. Configuration
+   4. Cache Administration
+   5. Cache Groups
+   6. Design, Classes and Files (implementation details)
+   7. Add new cache-group
+   8. Cache-Group Specifics
+   9. Other Caching Strategies
+      9a. Quick-Status
+      9b. RSS/WAP
+      9c. Grabbing Web-Output
+      9d. Same-Thread Caching
+
+Appendices:
+
+   A. Analysis Report
+   B. Future Enhancements
+
+
+#-------- (1) Introduction ----------------------------------------------------
+
+After the latest big upgrade DGS 1.0.15 in June 2012 the server was pretty slow,
+because of lot of additional database queries (new features or the split of the
+Players-table to name a few).
+
+For the quick-status (QST, see 'specs/quick-suite.txt') and the RSS- & WAP-status
+page some quota-control and caching had been added before DGS 1.0.15 already
+to reduce the server-load with a different implementation:
+
+   # Quick-Status - Progressive Block-Specific Caching
+   # RSS/WAP/Quick-Status
+   see section "(9) Other Caching Strategies"
+
+The MAIN "caching" this document is about is describing the CACHE-GROUP-caching
+(see section (5), (6) and (8)), that caches data that directly resulted from
+database-queries. A new implementation, especially with a shared memory caching
+was aimed at as that would have more potential than the previous caching of the
+alternative-interfaces (RSS/WAP/Quick-Status).
+
+The server was still barely usable also because the server machine was
+pretty old and the server had only 1GB(!) of memory. With the webserver and the
+database on the same machine running, slow disc-I/O the performance was so bad,
+that for example sending mails took lowest priority and sending one mail could
+take up to 50 secs.
+
+Therefore an analysis on database-queries was done (see Appendix (A)) to identify
+queries, that are worth caching to reduce the server-load. The ideal candidates
+would be queries that only dependent on a small set of variables, are often
+loaded and are not updated too frequently. If a data-set is updated and if it's
+cached, the cache-entry must be either invalidated or the expire-time must be
+chosen so small, that the invalidation of the cache-entry is not necessary
+(accepting that showing the updated data in a delayed fashion is acceptable).
+
+
+For each candidate that is cached an expire-time is defined, which should not be
+longer than one day to keep the number of cache-entries reasonable small. To ensure
+that, a cache cleanup-script removes cache-entries, that are stored for too long.
+
+Some example considerations:
+
+   - loading the Players-table in 'is_logged_in()'-function can NOT be cached
+     as it changes with every user visit -> therefore no candidate for caching
+
+   - the games-list on the status-page can be stored in a cache, but only with
+     a small expire-time of 1 min: The status-games show a players last-access-time,
+     which can be updated every second. The "1 min" is short enough as it could be
+     an acceptable time-window to delay showing the updated opponents last-access-time.
+
+     If for running your DGS-server this is not acceptable it's possible to
+     disable caching for particular cached queries.
+
+
+
+#-------- (2) Installation ----------------------------------------------------
+
+Important Note:
+   * The DGS server can be used WITHOUT ANY caching!
+     Caching is purely optional, but it is recommended as it can take away load from
+     the database.
+
+The cache is currently based on two implementations, which are provided to have
+the possiblity to adjust the DGS config to the servers restrictions on memory
+and disc-space. Using the cache-implementation is abstracted in a generic
+interface 'AbstractCache' to be independent of the implementation.
+
+Current cache implementations are:
+
+   * [APC]  shared-memory cache (APC)
+   * [FILE] file-based cache
+
+   * another older file-based cache, see "(9a) Quick-Status" and "(9b) RSS/WAP"
+     and function 'enforce_min_timeinterval()'
+
+     These should be replaced in the future using the [FILE]-cache instead,
+     as the latter has a better implementation on file-locking.
+
+
+#-------- (2a) [APC] cache ----------
+
+The [APC]-cache is the preferred cache as cache-entries are stored in memory.
+It is very fast, but requires to reserve a block of server memory. So this is
+only possible to use if sufficient memory is available.
+
+APC is a PECL extension for PHP, which is not bundled with PHP. The installation
+is explained on:
+
+   http://www.php.net/manual/en/book.apc.php
+
+Part of the the APC package is the admin-script "apc.php". On the live-server
+it must be installed at the location "scripts/apc-live.php". The script "apc.php"
+committed in the DGS-code is exactly that script but with a specific version.
+You may have a newer version, that should be used and configured accordingly.
+
+This script has two ways of configuring for admins. Authorization allows to view
+the cache-entries. These can contain sensitive information and must therefore
+be protected against unintended access.
+
+The 'scripts'-folder is already protected with a web-password with
+base-authentification. So the recommended configuration in the apc-script is
+to set the default "USE_AUTHENTICATION" to "0".
+
+If you set an admin-password in the apc-script, take note, that it must be the
+same as the one the 'scripts'-folder is protected with. Otherwise you are not
+able to enter the scripts in the 'scripts'-folder as the web-server only keeps
+track of ONE realm for base-authentification.
+
+#-------- (2b) [FILE] cache ----------
+
+The [FILE]-cache only needs enough disc-space and the "DATASTORE_FOLDER"-variable
+configured in "include/config-local.php" (see 'INSTALL'-file).
+
+Take note, that the "DATASTORE_FOLDER" must reside outside of the webservers
+document-root. Otherwise (ab)users would have access to sensitive data, that
+is stored in the file-cache.
+
+
+
+#-------- (3) Configuration ---------------------------------------------------
+
+The server-configuration "include/config-local.php" contains 3 important configs
+to setup the caching for db-queries (this does not affect the caching for the
+RSS/WAP/quick-status):
+
+   * DGS_CACHE : default cache-implementation to use
+      - CACHE_TYPE_NONE = caching for db-queries CACHE_GRP_... is disabled
+      - CACHE_TYPE_APC  = use [APC] cache-implementation as default
+      - CACHE_TYPE_FILE = use [FILE] cache-implementation as default
+
+      To use [APC] the APC-package must be installed.
+      To use [FILE] the "DATASTORE_FOLDER" must be set appropriately.
+      Also see section "(2) Installation".
+
+   * DBG_CACHE :
+      - value >0 writes debugging of caching-statements into error-log
+      - value 0 disables debugging of caching
+
+   * $DGS_CACHE_GROUPS = array(...)
+      - With this array you can define what cache-type to use for specific
+        cache-groups. If no cache-type is given (e.g. commented out), the
+        default defined by "DGS_CACHE" is used instead.
+
+      - This setting is only relevant if DGS_CACHE is enabled at all.
+
+      - When the cache-type is changed, remember to clean/clear the specific
+        cache-group cache-entries (or the full cache) on the (live-)server
+        to save space.
+
+      - Example:
+         - If the default is CACHE_TYPE_FILE and you have enough shared memory
+           to spare, some cache-groups can be configured to use CACHE_TYPE_APC
+           instead.
+
+
+
+#-------- (4) Cache Administration --------------------------------------------
+
+There are several scripts to administrate the caching for the db-queries and
+also for the older RSS/WAP/quick-status caching using the data-store:
+
+   * 'scripts/index.php' : list with all admin-scripts, see section "Cache Admin"
+
+   * 'scripts/dgs_cache_admin.php' : Admin page to control db-query caching
+
+      * "List Cache Group" : lists all cache-groups with their cache-type in use,
+        the cleanup-time (Expire) and some statistics about the number of entries,
+        the consumed size in KBytes, the number of hits (entry read from cache)
+        and misses (entry not found in cache). The "misses" are not available
+        for [APC]-cache, and for the [FILE]-cache only if the APC-cache is available
+        as the [FILE]-cache uses APC to keep track of hits and misses.
+
+      * "Cleanup All Expired" : Each cache-entry has its own expire-time and each
+        cache-group has its own defined cleanup-expire-time. A "cleanup" removes
+        all cache-entries that are older than the cleanup-expire-time.
+
+      * "Clear APC Cache" : The [APC]-user-cache is cleared completely.
+      * "Clear File Cache" : The [FILE]-cache for all cache-groups is emptied.
+        These two above are sometimes required after a live-server update,
+        especially if cached database-table have been altered and old cache-entries
+        would contain wrong data-structures.
+
+      * Cache-Group specific actions:
+
+         * "Clear" : this action clears the cache only for the specific cache-group
+
+         * "Clean Expired" : this action cleans up the cache but only for the
+           specific cache-group. For the meaning of "cleanup" see the action above
+           "Cleanup All Expired", but just applied to one cache-group.
+
+   * 'scripts/apc-live.php' : this script controls the [APC]-cache
+      - shows overview of cache-config, memory usage, cache-entries of user- and
+        opcode-cache
+
+   * 'scripts/apc_cache_info.php' :
+     this script shows the full meta-content of the [APC]-cache
+
+   * 'scripts/apc_clear_cache.php' :
+     this script clears the complete APC-cache: all user-cache-entries and all
+     entries from the op-code-cache (which is used to buffer the PHP-files for
+     the web-browser).
+
+   * 'scripts/clear_datastore.php' :
+     this script allows to empty directories of the file-based caches stored
+     in the "DATASTORE_FOLDER"-directory.
+
+   * 'hourly_cron.php' :
+     this scripts runs every hour and cleans up old cache-entries to keep the
+     used cache-size reasonable small.
+
+
+
+#-------- (5) Cache Groups ----------------------------------------------------
+
+A so-called "cache-group" represents a group of cache-entries all created from
+one database-query with or without dependent variables. All entries for one
+cache-group must share the same cache-key-prefix, which should also be unique
+amongst all cache-groups, so that single entries of cache-groups can be deleted
+easily without disturbing other entries by using a pattern-match on the keys.
+
+The PHP-include "include/cache_globals.php" contains the definitions of all
+the cache-groups in use for the server. If the use is enabled or disabled can
+be configured; see section "(3) Configuration".
+
+The comments behind the different cache-groups give expected size, expire-time
+and some size-requirements for [APC]-cache, that are likely to be needed for
+the live-server. The numbers are based on some statistics from the live-server,
+which are given in the comments above the constants and estimates.
+
+
+
+#-------- (6) Design, Classes and Files (implementation details) --------------
+
+There are four classes to control the caching of db-queries:
+
+   DgsCache       = a singleton-wrapper to cache objects loaded by database-queries
+
+   AbstractCache  = abstract class with a generic API for cache-implementations
+
+   ApcCache       = implementation for APC-based caching
+   FileCache      = implementation for file-based caching
+
+
+Class DgsCache:
+
+   - basic cache-operations : fetch, store, delete
+
+   - cache-entries are grouped in so-called "cache-groups" (CACHE_GRP_...),
+     which identify different resultset of one database-query with different
+     dependent variables: see also section "(5) Cache-Groups".
+     For example, there's a cache-group for loading the ConfigPages-table.
+
+   - Cache-entries for a certain cache-group may be required to be grouped
+     variable-dependent into a meta-group. This meta-group is used to be
+     able to invalidate all cache-entries that belong to only one of a set
+     of dependent variables.
+
+     For example, storing cache-entries for observers of a game is dependent
+     on the game-id (gid) and a user-id (uid). The use-cases for invalidation
+     of the cache-entry knows only the game-id. This problem is solved by
+     specifying a meta-group, that collects all such cache-entries.
+
+         # cache-group CACHE_GRP_GAME_OBSERVERS for game-id 12345
+         cache-key for user 4711: "Observers.12345.4711"
+         cache-key for user 4712: "Observers.12345.4712"
+
+         # meta-group (user-id independent)
+         cache-group-key: "Observers.12345"
+
+     So storing a single cache-entry is done with:
+
+         DgsCache::store( .., CACHE_GRP_GAME_OBSERVERS, "Observers.12345.4711", .., .., "Observers.12345" );
+         DgsCache::store( .., CACHE_GRP_GAME_OBSERVERS, "Observers.12345.4712", .., .., "Observers.12345" );
+
+     Invalidating is then either possible for a single cache-key or for the
+     cache-group-key deleting all collected single entries.
+
+     For such a meta-group-key a separate cache-entry is stored with an array
+     to reference all single cache-keys.
+
+   - Sometimes a different behaviour is required in case the caching is disabled,
+     or a cache is not persistent over different web-requests. To act on this,
+     there are functions to determine if the caching is disabled or if the caching
+     is persistent.
+
+     For example this is currently used for caching the Clock- and ConfigPages-table.
+     See also section "(8) Cache-Group Specifics"
+
+
+Class ApcCache / FileCache:
+
+   - These classes contain not only the implementation for the AbstractCache-functions,
+     but also function that are directly used for the cache cleanup- and admin-scripts.
+
+   - For the FileCache a statistics about MISSes and HITs of the cache-entries is
+     created and stored in the [APC]-cache (only if it's supported of course).
+     The stored data only needs ca. 2 KB, that can be spared from regular caching-
+     entries.
+     The number of misses & hits are shown on the 'scripts/dgs_cache_admin.php'-script.
+
+
+#-------- (7) Add new cache-group ---------------------------------------------
+
+Important Notes:
+   * Before you make a new cache-group be aware of possible race-conditions,
+     that can occur because of cached-data. So it is not advisable to load
+     cached data if updates are done dependent on the cached data!
+
+
+To add a new cache-group the following steps are required:
+
+   * Adjust "include/cache_globals.php":
+      - Add a new "CACHE_GRP_..." definition (use consecutive numbers)
+
+      - Adjust the "MAX_CACHE_GRP" definition in there accordingly
+
+      - Add a new line in the array "$ARR_CACHE_GROUP_NAMES" for the new cache-group
+        specifying the prefix for the cache-key to be used. This is used to be able
+        to find cache-entries in the caches to clear or cleanup those entries.
+
+      - Add a new line in the array "$ARR_CACHE_GROUP_CLEANUP" specifying a cleanup-time
+        (=expire-time for cleanup) for the new cache-group. This expire-time must be
+        greater than or equal to the highest expire-time you use to store a cache-entry
+        for the new cache-group.
+
+        If you think no cleanup is required (for example for cache-entries that are
+        independent of any variables), then the entry can be commented out.
+        For example see the CACHE_GRP_CLOCKS-entry.
+
+   * Adjust "include/config.php":
+      - Add a line in the array "$DGS_CACHE_GROUPS" for the new cache-group
+        with a cache-type that makes sense, but comment it out.
+        For a specific server-installation the new config have to be added
+        in the servers local configuration "include/config-local.php" as well.
+
+   * Adjust "include/config-local.php" on the live-server:
+      - Configure the new cache-group according to the specific needs of the live-server.
+
+   * Adjust "scripts/updates/other_changes_...txt":
+      - Add a new configuration also in the "scripts/updates/other_changes_.."-file,
+        so that it is not forgotten on server-upgrades.
+
+   * Use DgsCache::fetch/store/delete to fetch, store and invalidate (=delete)
+     cache-entries. Think for which use-cases invalidation is needed, if you need a
+     meta-group or not.
+
+     Think WHAT you want to store in the cache-entry. You should not store the
+     database-result directly as no mysql-binding can be cached (or should be).
+
+     Also think about in which format it is stored. The more complex a data
+     structure is, the more space is required in the cache. Especially for the
+     [APC]-cache a single object can take a LOT of space. You can use the apc-script
+     to view a single entry and the size-requirement. A thumb of rule is,
+     that the space required in the APC-cache is 5 times larger than a serialized
+     data object in the [FILE]-cache would need.
+
+     The simplest data structure to store often is a plain array.
+
+     You should NOT cache PHP-objects, that contain redundant data as that eats
+     up additional space in the cache. For example, the bulletins-view for a user
+     on the web-status-page is cached (see cache-group CACHE_GRP_BULLETINS).
+     After loading the data from the database, the normally resulting data
+     consists of a list of Bulletin-objects with embedded original raw data
+     from the database. So for this example, the original raw-data is cached
+     instead of the Bulletin-objects (with the raw-data). Then on loading the
+     data from the cache, the Bulletin-objects are re-assembled into the expected
+     list of Bulletins; see function "Bulletin::load_cache_bulletins()".
+
+   * Adjust section "(8) Cache-Group Specifics" in "specs/caching.txt" if there's
+     something special about the new cache-group, that is worth mentioning for
+     other developers.
+
+
+
+#-------- (8) Cache-Group Specifics -------------------------------------------
+
+This section describes each cache-group (sometimes summoned) with a motivation
+for caching, a description, for which use-cases a cache-invalidation is needed,
+the expire-time and if needed what special handling is used.
+
+See "template" for new cache-group at end of this section.
+
+
+* CACHE_GRP_CFG_PAGES
+   - Before DGS 1.0.15 (Jun-2012), all fields from the 'ConfigPages'-table were
+     in the Players-table, which is always loaded. The splitted away ConfigPages-
+     table contain fields to configure the table-columns for table-lists and
+     some configs for the status- and forum-pages. So whenever these pages are
+     loaded, the ConfigPages-entry for the user must be loaded as well.
+     The split of the Players-table was done, because it grew a bit too big with
+     all the new features to make up a good table-design.
+
+     The configuration stored in the ConfigPages-table is not changed so often,
+     so it made sense to store it in the cache.
+
+   - The previous code was using "ConfigPages::load_config_pages()" which only
+     loaded the one specific table-field which is needed for a loaded page.
+     When the caching is disabled for this cache-group, this code is still used
+     to avoid to load too much data at once when it's not needed.
+
+     However, when the cache is used ALL fields needs to be loaded.
+     This requires to check, if the caching is persistent (with different threads).
+     If it is persistent, all fields must be loaded and stored in the cache,
+     while otherwise only the one field required need to be loaded.
+
+   - All required cache-functions for this cache-group can be found in the
+     'ConfigPages'-class. The function to load db-data and/or to fetch it from
+     the cache is "ConfigPages::load_config_pages".
+
+   - The cache-entry is dependent only on the user-id [=Players.ID]
+
+   - A cache-entry is invalidated when the table-columns are hidden/shown,
+     the folders to show on the status-page are changed, or when the forum-thread-
+     view options have changed.
+
+     All these actions are considered to happen sparsely enough to justify
+     an expire-time of 1 day.
+
+
+* CACHE_GRP_CFG_BOARD
+   - Before DGS 1.0.15 (Jun-2012), all fields from the 'ConfigBoard'-table were
+     in the Players-table, which is always loaded. The splitted away ConfigBoard-
+     table contain fields to configure the GUI of the game-page.
+
+     The configuration stored in the ConfigBoard-table is not changed so often.
+
+   - The cache-functions for this cache-group are in the 'ConfigBoard'-class.
+
+   - A cache-entry is dependent only on the user-id [=Players.ID]
+
+   - A cache-entry is invalidated when the preferences for board-GUI in the
+     user-profiles are changed.
+
+     This update is assumed to not happen often, therefore using an expire-time
+     of 1 day.
+
+
+* CACHE_GRP_CLOCKS
+   - Before DGS 1.0.15 (Jun-2012), there was the 'ClockCache'-class (see also
+     section "(9d) Same Thread Caching"), which was used to cache Clock-data
+     within one thread for one web-request to prevent loading the same clock-entry
+     multiple-times as the code is quite fragmented and different portions need
+     the clock-data.
+
+     The cache-entries are load from the 'Clocks'-table.
+
+     This caching was enhanced by caching ALL (currently 56) Clock-entries,
+     which are not that many right now and will not increase by much in the
+     future.
+
+     Even if the Clock-ticks are updated every 5 minutes by the clock-tick-cron-
+     script, the Clock-data is used very often, which justified putting it
+     into a persistent cache with an expire-time of 10 minutes.
+
+   - When the caching is disabled for this cache-group, the one-thread-
+     caching is still used loading only one specific Clock.ID at a time
+     to avoid to load too much data at once when it's not needed.
+
+     However, when the cache is used ALL Clocks need to be loaded.
+     This requires to check, if the caching is persistent and if it is,
+     all clocks must be loaded and stored in the cache.
+
+   - All required cache-functions for this cache-group can be found in the
+     'CacheClock'-class. The function to load db-data and/or to fetch it from
+     the cache is "ClockCache::load_clock_ticks()".
+
+   - The cache-entry is invalidated when the Clocks are updated in the
+     "clock_ticks.php"-script.
+
+
+* CACHE_GRP_GAME_OBSERVERS
+   - A game can be observed by the players or viewers of a running game.
+     The data is loaded from the 'Observers'-table. There are two calls:
+
+         - 'is_on_observe_list(gid,uid)' to check if a user is observing a game
+         - 'has_observers(gid)' to check if there are any other observers
+
+     As currently (DGS 1.0.15) the game is frequently loaded to just browse
+     the move-history of a game by the same users within a shorter amount of
+     time, both of these information about observers is combined and stored
+     as cache-entries using the function "check_for_observers()".
+
+   - Because one of the source-functions depends on both game-id and user-id
+     while the other only depends on game-id, a meta-group is needed for
+     each game-id, that collect each cache-entry for the same game but by
+     different users.
+
+     Cache-invalidation is needed if any users changes the observer-status
+     on a game (game-id). Additionally the cache-entries are deleted, if all
+     observers of a game are deleted (e.g. when the game is deleted or is
+     finished).
+
+   - As the caching is only meant to decrease server-load for the case
+     of browsing the move-history of a game, the expire-time for the cache
+     is only 30 minutes.
+
+
+* CACHE_GRP_GAME_NOTES
+   - A game can have private game notes by the players stored in the
+     'GamesNotes'-table.
+
+     Currently (DGS 1.0.15) the game is frequently loaded to just browse
+     the move-history of a game by the same users within a shorter amount of
+     time, also the game-notes need to be loaded.
+
+   - Cache-invalidation is needed if a player changes the game-notes,
+     so they are dependent on game-id and user-id.
+
+   - As the caching is only meant to decrease server-load for the case
+     of browsing the move-history of a game, the expire-time for the cache
+     is only 30 minutes.
+
+
+* CACHE_GRP_USER_REF
+   - The user-reference tag is used in forum-pages or private messages in the
+     form <user uid> or <user =handle>. The output shows the Players.Handle and
+     Players.Name.
+
+   - A cache-entry for this cache-group is dependent either of the user-id
+     or by user-handle, so on invalidation (update of handle or name), both
+     potential entries must be deleted from the cache.
+
+     Problem with the user-handle is, that it is a text, so the user can
+     use arbitrary case for the letters in the handle. Therefore the case of the
+     cache-key is converted into lower-case to be able to identify it on
+     invalidation.
+
+   - The user-handle can only be changed by an admin.
+     The user-name can be changed by the player or an admin at any time.
+     However, that is rarely done for most of the users, so an expire-time
+     for the caching-entries of 1 day was chosen.
+
+     The cleanup-expire time is even greater as it's really rare, that the
+     handle or name is changed.
+
+
+* CACHE_GRP_STATS_GAMES
+   - The statistics-page accumulates the number and sum of moves for all game
+     status values. This db-operation can take quite a while, because it has
+     to lock the Games-table, which is a frequently used db-table.
+
+     Therefore the cumulated values are cached.
+
+   - Because there are two sets of cumulated values, a meta-group is used
+     to make it easy to delete all relevant cache-entries. At the moment there
+     are only 2 cache-entries not depending on further variables. In the
+     future more cached-entries are thinkable.
+
+   - Cache-invalidation is only done on a daily-basis by the daily-cron-script,
+     that also generates entries in the Statistics-table, though there is no
+     direct connection to this cache-group the invalidation takes place in
+     that script.
+
+     The cumulated number/sum for game-moves could be interesting for a shorter
+     time-interval than one day, but as the data-creation can be quite expensive,
+     the longer expire-time of 1 day was considered acceptable.
+
+   - There is another caching in use to store the generated graphics.
+     For this description see section "(9c) Grabbing Web-Output".
+
+
+* CACHE_GRP_FOLDERS
+   - The 'Folders'-table contain customized message-folders for the users.
+     Folder-information is used in various places (message-lists, message-search,
+     status-page, message-thread) and luckily does not change often, so being
+     a good candidate for caching.
+
+   - When the caching is disabled for this cache-group or a non-persistent-
+     cache-implementation would be used, only specific folders can be loaded.
+     For caching the full set for a user is loaded and cached.
+
+   - A cache-entry only depends on the user-id.
+
+   - Cache-invalidation is only needed when some data on the user-folders is
+     changed.
+
+   - Expire-time for the message-folders is 1 day.
+
+
+* CACHE_GRP_PROFILE
+   - The 'Profiles'-table is used to store search-profiles for pages with
+     table-lists and store templates. The search-profile for a page with
+     table-list is always loaded, so this is a candidate for caching to
+     reduce the server-load.
+
+   - A cache-entry depends on user-id and the profile-type (page-dependent).
+
+   - The cache-entry for user-id and search-profile of a table is invalidated,
+     if that specific search-profile is saved or deleted.
+
+   - The expire-time for a search-profile is 1 day as it's not expected to
+     change frequently.
+
+   - All required cache-functions for this cache-group can be found in the
+     'Profile'-class.
+
+
+* CACHE_GRP_GAME_MOVES
+* CACHE_GRP_GAME_MOVEMSG
+   - Currently (DGS 1.0.15) the game is frequently loaded to just browse
+     the move-history of a game by the same users within a shorter amount of
+     time. This makes the list of moves and corresponding move-messages
+     loaded from the 'Moves'-table (and 'MoveMessages'-table respectively)
+     a good candidate for caching.
+
+   - The moves (and messages) are only cached when the caching is using
+     a persistent cache and only for viewing a game. Caching is never used
+     to pre-load data to handle some processing (like making a move for example)
+     as caching would be a great danger of race-conditions or inaccurate data,
+     which could be easily lead to inconsistencies.
+
+   - A cache-entry depends only the game-id.
+
+   - Cache-entries for cache-group CACHE_GRP_GAME_MOVES are invalidated
+     on every occasion someone has to insert an entry into the 'Moves'-table
+     (e.g. moving, passing, scoring, adding-time, creating or deleting a game;
+     the latter two cases need no invalidation, but it doesn't hurt either).
+
+   - Cache-entries for cache-group CACHE_GRP_GAME_MOVEMSG are invalidated
+     on every occasion someone has to insert an entry into the 'MoveMessages'-table
+     (e.g. move-actions with a comment).
+
+   - Storing the moves can consume quite some space, therefore only a short
+     time of 10 mins is chosen as expire-time, or even less with 5 mins for
+     finished games or game in fair-komi-negotiation.
+
+
+* CACHE_GRP_TOURNAMENT
+   - Once a tournament has been created, there are normally not longer changes
+     to the Tournament-table except for registration of users. There are some
+     changes by the tournament-system, but the 'Tournament'-table is loaded
+     very often for all the tournament-features, so caching is almost inevitable.
+
+   - A cache-entry depends only on the tournament-ID (tid).
+
+   - There is the "TournamentCache"-class, which is used for all kind of caching
+     for tournaments. For locking the tournamnet by the cron-script, an additional
+     soft-caching kicks in if the caching for this cache-group is not persistent
+     or disabled.
+     For this also see function 'TournamentCache::release_tournament_cron_lock()'.
+
+   - Cache-invalidation is done on any change of the 'Tournament'-table.
+     See also "Tournament"-class.
+
+     Entries are also deleted for releasing the locking by the cron-script as
+     mentioned above.
+
+   - Expire-time of 1 hour is used, because of the moderate volatility mentioned
+     above.
+
+
+* CACHE_GRP_TDIRECTOR
+   - 'TournamentDirector'-table
+   - expire 1d
+   - comment not cached, only if TD + flags
+
+   - The tournament-directors are not changed that often once a tournament has
+     been created and started, but are used a lot for tournament-features.
+     Especially a check is done, if a user is a tournamnent-director or not,
+     and which admin-roles (saved in the Flags-field) he/she is able to fulfill.
+     Though for example the Comment-field is only needed for the director-list.
+
+   - A cache-entry is storing all entries with user-id + flags for a specific
+     tournament-ID (tid) from the 'TournamentDirector'-table, which is the only
+     dependency.
+
+   - The "TournamentCache"-class is used as wrapper to load cached data for these
+     db-tables, esp. see function 'TournamentCache::is_cache_tournament_director()'.
+
+   - Cache-invalidation is done on adding, changing or deleting a director of
+     a tournament.
+
+   - Expire-time of each is 1 day.
+
+
+* CACHE_GRP_TLPROPS (caching of the 'TournamentLadderProps'-table)
+* CACHE_GRP_TPROPS  (caching of the 'TournamentProperties'-table)
+* CACHE_GRP_TRULES  (caching of the 'TournamentRules'-table)
+   - Once a tournament has been created and started, there are normally not longer
+     changes to these db-tables except for admin-intervention. Also these tables
+     are often used to configure tournaments on various pages, so their content
+     is often required for a specific tournament.
+
+   - A cache-entry for these tables depends only on the tournament-ID (tid).
+
+   - The "TournamentCache"-class is used as wrapper to load cached data for these
+     db-tables.
+
+   - Cache-invalidation is done on any change of the respective db-table (except
+     for an insert as that is only used for tournament-creation).
+
+   - Expire-time of each is 1 day.
+
+
+* CACHE_GRP_TROUND
+   - For round-robin-tournaments, rounds (stored in the 'TournamentRound'-table)
+     can be added, that contain configurations of tournament-pools. This data
+     does only change during setup of a tournament. So caching the round-data
+     makes sense as the data is often needed to just view tournament-data.
+
+   - A cache-entry for these tables depends on the tournament-ID (tid) and round.
+
+   - The "TournamentCache"-class is used as wrapper to load cached data for these
+     db-tables.
+
+   - Cache-invalidation is done on any change of the 'TournamentRound'-table.
+
+   - Expire-time of each is 1 day.
+
+
+* CACHE_GRP_TNEWS
+   - Tournament-News are shown on the view-tournament-page, which is presumably
+     often used to get a status of the tournament. Tournament-News, once entered,
+     do not change often during a day. Therefore they are cached to reduce
+     general server load.
+
+   - A cache-entry for these tables depends only on the tournament-ID (tid).
+
+   - The "TournamentCache"-class is used as wrapper to load cached data for these
+     db-tables.
+
+   - Cache-invalidation is done on any change of the 'TournamentNews'-table.
+
+   - Expire-time of each is 1 day.
+
+
+* CACHE_GRP_TP_COUNT     (caching of the 'TournamentParticipant'-table)
+* CACHE_GRP_TPARTICIPANT (caching of the 'TournamentParticipant'-table)
+   - The number of registered participants of a tournament is needed to be shown
+     on viewing the tournament-info-page. Also wether a user is already registered
+     in a tournament is often checked as well as the tournament-rating of a user
+     is needed.
+
+     Therefore the count of tournament-participants per registration-status
+     is cached as well as the data for single tournament-participants.
+
+   - A cache-entry for the count depends only on the tournament-ID (tid).
+   - A cache-entry for the tournament-participant depends on the
+     tournament-ID (tid) and the user-id.
+
+   - The "TournamentCache"-class is used as wrapper to load cached data for these
+     db-tables.
+
+   - Cache-invalidation for both cache-groups is done on any change of the
+     'TournamentParticipant'-table.
+
+   - Expire-time of each is 1 hour.
+
+
+* CACHE_GRP_TRESULT
+   - 'TournamentResult'-table
+   - Tournament-Results are shown on the view-tournament-page, which is presumably
+     often used to get a status of the tournament. Therefore they are cached to reduce
+     general server load.
+
+   - A cache-entry for 'TournamentResult'-table depends only on the
+     tournament-ID (tid).
+
+   - The "TournamentCache"-class is used as wrapper to load cached data for these
+     db-tables.
+
+   - Cache-invalidation is done on any change of the 'TournamentResult'-table.
+
+   - Expire-time of each is 1 day.
+
+
+* CACHE_GRP_GAMES
+   - As currently (DGS 1.0.15) the game is frequently loaded to just browse
+     the move-history of a game by the same users within a shorter amount of
+     time. To further reduce the server-load for this case, the 'Games'-table
+     is cached for the game-page.
+
+   - A cache-entry depends only the game-id.
+
+   - Cache-entries are invalidated on every change of the 'Games'-table,
+     especially for adding time, deleting game, save komi for fair-komi-
+     negotiation, finishing a game, move-like operations, fix-script for
+     time-left (Games.TimeOutDate), removing a user from a ladder-tournament.
+
+   - Expire-time is 10 mins.
+
+
+* CACHE_GRP_FORUM
+   - For the forums-thread-list and forum-thread-posts-view the data of the
+     specific forum is required and be cached easily as the relevant and cached
+     forum-data from the 'Forums'-table (name, description, options) does not
+     change often.
+
+   - A cache-entry for this cache-group depends only on the forum-ID (fid).
+
+   - Cache-invalidation is done on any change of the 'Forums'-table including
+     forum-administration (e.g. changing flags, name or description), on posting
+     or moderating forum-messages, recalculating and forum-consistency.
+
+   - Expire-time of is 1 day.
+
+
+* CACHE_GRP_FORUM_NAMES
+   - For the forum-search the list of forum-IDs with names from the 'Forums'-table
+     is cached.
+
+   - The cache-entry has no dependencies.
+
+   - Cache-invalidation is done whenever an admin changes the forum-names or
+     their order in the 'Forums'-table.
+
+   - Expire-time of is 1 day.
+
+
+* CACHE_GRP_GAMELIST_STATUS
+   - Evaluated from some web-log-statistics there are several users, that open
+     the web-status-page quite often even within one minute. To overcome this
+     caching for the status-page game-list (read from the 'Games'-table) has been
+     added.
+
+   - However, the status- list contains also the opponents last-access-date/time
+     in form of a icon showing when he/she was last "online" and that can change
+     any second; but the used precision for a timestamp is 1 min, so that is used
+     as expire-time for this cache-group.
+
+   - A cache-entry depends on the user-ID (uid).
+
+   - Cache-invalidation is done when some field of the status-list is changed,
+     except for the opponents last-access. So cache-entry deletion is done for
+     example for: moving in a game of the old and new player to move next,
+     on fair-komi-negotiation, on updating the next-game-order on the status-page,
+     on creating a game by joining a waiting-room-offer, starting an invitation-game,
+     on deleting and finishing a game, on adding time
+
+   - Expire-time of each is 1 minute.
+
+   - Currently (Nov-2012) this cache-group is disabled on the live-server.
+
+
+* CACHE_GRP_BULLETINS
+   - Bulletins shown on the web-status-page do not change often over the day.
+     The status-page is one of the pages that is requested a LOT, so every
+     reduction of additional db-query that can be avoided to reload is favourable
+     to server-load and to response-time for the users.
+
+     Related db-tables are: 'Bulletin', 'BulletinRead', 'BulletinTarget'
+
+   - The 1st three bulletins are shown if there are some new or changed ones.
+     That is decided upon a global lastchange-date for all bulletins.
+     This date is cached in a single cache-entry within this cache-group.
+
+     Besides that the read-state for bulletins on the status-page is dependent
+     on the user-ID (uid).
+
+   - Cache-invalidation of the user-dependent cache-entries is done on any change
+     of a players bulletin-new-count, which is updated when the user opens
+     a web-page showing the status-menu; and therefore indirectly triggered
+     after every update on bulletins.
+     Also when the user marks a bulletin as read the cache-entry is deleted.
+
+     The single global cache-entry is only updated (not deleted normally).
+
+   - Expire-time of each is 1 day.
+
+
+* CACHE_GRP_MSGLIST
+   - Private messages read from the 'Messages'-table that are new or needs
+     a reply are normally shown on the web-status-page (can be configured though).
+     The status-page is one of the pages that is requested a LOT, so every
+     reduction of additional db-query that can be avoided to reload is favourable
+     to server-load and to response-time for the users.
+
+   - A cache-entry for this cache-group depends only on the user-ID (uid).
+
+   - Cache-invalidation is done on sending a private message, editing folders
+     or moving the message into different folders.
+
+   - Expire-time of each is 4 hours (to avoid the needed cache-size grows too big).
+
+
+* CACHE_GRP_TGAMES
+   - Each tournament-type has a page to view the current games for the players.
+     Right now there is a ladder-view for ladder-tournaments and a pool-view for
+     round-robin-tournaments. With BIG tournaments the data to be loaded can be
+     quite big as well. The full ladder or all pools would need to be loaded
+     for every user. For larger tournaments this could easily be around 1000-2000
+     rows. Therefore it's imperative to try to reduce to reload the same data
+     over and over if it's not changing too often.
+
+   - The 'TournamentGames'-table contain the started and running game-IDs for
+     a tournament along with the results of already finished games. Therefore
+     the rows from this table are cached.
+
+   - A cache-entry for this cache-group depends on the tournament-ID (tid),
+     the round-ID and the pools (the round-ID and pool-info is static for ladder-
+     tournaments).
+     For invalidation the specific round or pool-info is not available, so a
+     meta-group is used to collect all cached entries for a specific tournament.
+
+   - Cache-invalidation for this cache-group is done on tournament game-administration,
+     starting a ladder-challenge, on updating the game-wait-state, starting
+     a tournament-round-game or on finishing a tournament-game.
+
+   - The "TournamentCache"-class is used as wrapper to load cached data for these
+     db-tables.
+
+   - Expire-time of a cache-entry is 1 day.
+
+
+* CACHE_GRP_TLADDER
+   - Right now there is a ladder-view for ladder-tournaments. With BIG tournaments
+     the data to be loaded from the 'TournamentLadder'-table can be quite big as well.
+     The full ladder would need to be loaded for every user. For larger tournaments
+     this could easily be around 1000 rows. Therefore it's imperative to try to
+     reduce to reload the same data over and over if it's not changing too often.
+
+     Also on the tournament-info for ladder-tournament the top 5 ladder-standings
+     are shown, which is loaded from the same table. So some caching can be
+     combined here.
+
+   - A cache-entry for these tables depends on the tournament-ID (tid), the limit
+     first asked and a boolean state telling if the tournament-rating is included
+     in the ladder-view or not.
+
+     Regarding the "limit": if the ladder-standings are first asked then not the
+     whole ladder is loaded. If on the other hand the full ladder is loaded, then
+     for the ladder-standings the full ladder is used but shortened to the
+     5 entries shown.
+
+     On the various occasions where a cache-invalidation is needed, not all of
+     the dependent variables are available. So a meta-group is used to collect
+     all related cache-entries for a specific tournament-ID.
+
+   - Cache-invalidation for this cache-group is done on editing the ladder-properties,
+     starting a new ladder-challenge, changing the ladder-rank of a user, adding
+     a user to the ladder, on deleting and seeding the ladder and after processing
+     the game-end for the tournament.
+
+   - The "TournamentCache"-class is used as wrapper to load cached data for these
+     db-tables.
+
+   - Expire-time of each is 1 hour.
+
+
+* new cache-group CACHE_GRP_ ...
+   - motivation, description, cache-invalidation, expire-time, special-handling ?
+
+
+
+#-------- (9) Other Caching Strategies ----------------------------------------
+
+Besides the cache-group-based caching mainly described in this document, this
+chapter lists the other used caching strategies currently (Dec-2012) in use.
+
+
+#-------- (9a) Quick-Status ----------------
+
+In early 2012 (ca. Jan) the it was detected, that the RSS- and quick-status-page
+were excessively used and tremendously slowed down the server due to heavy server-
+load. Later this was documented on the live-server forums mostly regarding RSS,
+but also hinting towards quick-status:
+
+   # 02-May-2012: Too many server requests and countermeasures
+   see http://www.dragongoserver.net/forum/read.php?forum=4&thread=32273
+
+So for the quick-status some form of caching was introduced, which ended in a
+"Progressive Block-Specific Caching". This form of caching is described in
+'specs/quick-suite.txt' section (4.QST) "Important Notes".
+
+The quick-status-page uses another kind of file-based-caching, that is not
+explained in this document, see also function 'enforce_min_timeinterval()'.
+
+For consistency-reasons, it would be good to replace this kind of caching
+with something using the [FILE]- or [APC]-cache.
+
+
+#-------- (9b) RSS/WAP ---------------------
+
+In early 2012 (ca. Jan) the it was detected, that the RSS- and quick-status-page
+were excessively used and tremendously slowed down the server due to heavy server-
+load. For RSS alone 11 Mio page-requests (of 29 Mio, ca. 38%) per month were done.
+Sometimes even every 5-10 secs the RSS-requests came in (resulting in over 3 Mio
+request/month):
+
+   # 02-May-2012: Too many server requests and countermeasures
+   see http://www.dragongoserver.net/forum/read.php?forum=4&thread=32273
+
+This was way too much, so the RSS-pages were restricted with a temporary lock
+if asked more frequent than 5 minutes. To measure the time since the last query
+the same kind of caching was used as for the quick-status-page (see section "(9a)")
+with the difference, that not much content is stored in the cache-files.
+
+This "hard" way of blocking requests has been chosen, because the users using RSS
+were often users, that played not via the web-page but with a mobile device, didn't
+read private messages or had no email on file that would have allowed some kind of
+polite request to reduce the queries. Often from studying old webserver-logs and
+the db-Errorlog it happened, that there were users that left the DGS-site without
+deactivating the RSS-requests. In summary, the chance to reach those RSS-"abusers"
+directly were slim.
+
+   # see also http://www.dragongoserver.net/forum/read.php?forum=4&thread=32273#32280
+
+Therefore a more direct "punch-in-the-face"-approach was chosen blocking off
+requests, that took place too often giving out a warning (and no content).
+
+The "temporary block" is as the word says only temporary. So if the user does
+not send another RSS-request within 5 mins, the expected RSS-status data is
+returned.
+
+After that measure, the number of RSS-page-requests dropped to ca. 350.000 per month.
+
+
+#-------- (9c) Grabbing Web-Output ---------
+
+Since Dec-2008 the graphics that are generated by "statisticspng.php" are saved
+in a file-based cache-file in the "CACHE_FOLDER"-directory, which is located in
+the document-root and therefore is publically accessible to the users.
+
+The graphic is generated on the server with the GD-library and sent to the requesting
+user. This bears a disadvantage, because a logged-in users language profile is used
+to build the texts, that are included in the graphs.
+
+To overcome that, there is a 'no_cache'-option. By (manually) setting it to '1' in
+the URL to the "statistics.php"-page, the cache-files can be invalidated.
+
+When stored in the cache the generated image is captured with the function
+'grab_output_start()' and 'grab_output_end()' using the ob-handlers from PHP.
+
+When restored from the cache the function 'image_passthru()' is used to return
+the graph-image loaded from the cache-file (if existing).
+
+
+#-------- (9d) Same-Thread Caching ---------
+
+If the caching is not using a persistent cache-implementation, there are classes
+that serve as local cache storing data for ONE web-request. Other web-requests
+can not see that data, but even within one web-request the same data can be
+needed several times and to complexity and dependencies of the code, the data
+can not be passed on via function-calls but need to temporarily stored in a cache
+to reduce redundant db-queries.
+
+* class TournamentCache
+   - The "TournamentCache"-class is used for all kind of caching for tournaments.
+     For locking the tournamnet by the tournament-cron-script, an additional
+     soft-caching kicks in if the caching is not persistent or disabled.
+
+     For this also
+      - see function 'TournamentCache::release_tournament_cron_lock()'.
+      - see CACHE_GRP_TOURNAMENT
+
+* class ClockCache
+   - The 'ClockCache'-class is used to cache Clock-data within one thread for
+     one web-request to prevent loading the same clock-entry multiple-times as
+     the code is quite fragmented and different portions need the clock-data.
+
+
+
+#-------- (A) Analysis Report -------------------------------------------------
+
 # candidates for caching: file + TTL + DELCHK (=need-active-delete) + DEP(depend on WHAT object) + estimated size needed
-# current live-server needs more RAM (only 1GB)
+# current live-server (Sep-2012) needs more RAM (only 1GB)
 
 # Run analysis, sources:
 # - db_query-log from webserver-error-log (after enabling db_query-logging) on LIVE-server for 8h (with ca. 500.000 db_query-requests)
 # - web-stats: http://www.dragongoserver.net/stat/ -> TOP 30 URL's
 # - source-code
 
-#--------------------------------------------------------------------------
-# Requirements for Caching
+   # check all occurences of the following func-calls
+   # RAW: mysql_query
+   # FUNC: db_query
+   # FUNC: mysql_exists_row
+   # FUNC: mysql_found_rows
+   # FUNC: mysql_single_fetch
+   # FUNC: mysql_single_col
 
-   - based on memory-based APC-cache 3.1; install scripts/apc.php to control-cache, adjust INSTALL-doc
-   - keeping RSS/WAP/quick-status caching, but extended with db-query-caching
-   - caching independent from mysql-caching
-
-   - URL-arg clear_cache=1 should bypass caching, but only for admins (or perhaps if AdminOption of user is set)
-   - enable/disable caching globally with statement
-   - use singleton
-
-   - store object with extra-data to identify "group" with parameters, e.g. uid, tid, etc.
-   - for "group" the SQL-query must be known to build CRC() of query and compare if it's exactly the same,
-     so use CRC() perhaps as part of cache-id
-   - be able to delete "group" for specific or general "group", e.g. delete "group" for uid, delete "group" for all uids
-
-   - API:
-      - obj = C->fetch(id);
-      - C->store(id, data, ttl); // TTL in secs
-      - C->delete(id)
-      - C->is_cache_enabled()
-
-      - perhaps: obj = C->fetch(id, ttl|expire );
-
-      - if possible define API in a way, that cache-implementation can be exchanged (apc -> different caching),
-        - provide simple array-based-cache or file-based-cache (as fallback, and options)
-      - define an easy syntax/API to use cache (enabled or disabled)
-      - define std-groups !?
-      - application may show different behavior with C->is_cache_enabled()
-
-   - Special API-Caches (e.g. for Clock, ConfigPages)
-     - if currently source-code loads single-field -> refactor to load all fields (for caching) and pick field from all-fields
-
-   - as object is stored, but not mysql-result, cached object has no mysql-binding any more,
-     so need to replace looping over mysql-result and other mysql-based operations.
-     Perhaps replacing it with ListIterator, defining new objects or array-structs to use instead, etc.
-
-      # check all occurences of the following func-calls
-      # RAW: mysql_query
-      # FUNC: db_query
-      # FUNC: mysql_exists_row
-      # FUNC: mysql_found_rows
-      # FUNC: mysql_single_fetch
-      # FUNC: mysql_single_col
-
-      # check for the following commands at places to add caching
-      # CHECK: mysql_affected_rows
-      # CHECK: mysql_close
-      # CHECK: mysql_data_seek
-      # CHECK: mysql_error
-      # CHECK: mysql_fetch_array
-      # CHECK: mysql_fetch_assoc
-      # CHECK: mysql_fetch_row
-      # CHECK: mysql_free_result
-      # CHECK: mysql_num_rows
-
-   - replace existing clock-caching
-   - replace existing tournament-caching
+   # check for the following commands at places to add caching
+   # CHECK: mysql_affected_rows
+   # CHECK: mysql_close
+   # CHECK: mysql_data_seek
+   # CHECK: mysql_error
+   # CHECK: mysql_fetch_array
+   # CHECK: mysql_fetch_assoc
+   # CHECK: mysql_fetch_row
+   # CHECK: mysql_free_result
+   # CHECK: mysql_num_rows
 
 #--------------------------------------------------------------------------
 # GOOD CANDIDATES:
@@ -528,869 +1565,14 @@ tournaments/include/types/private_ladder.php
 tournaments/include/types/public_ladder.php
 
 
-#------------------------------------------------------------------------
-# check all occurences of the following func-calls
-# RAW: mysql_query
-# FUNC: db_query
-# FUNC: mysql_exists_row
-# FUNC: mysql_found_rows
-# FUNC: mysql_single_fetch
-# FUNC: mysql_single_col
-#
-# check for the following commands at places to add caching
-# CHECK: mysql_affected_rows
-# CHECK: mysql_close
-# CHECK: mysql_data_seek
-# CHECK: mysql_error
-# CHECK: mysql_fetch_array
-# CHECK: mysql_fetch_assoc
-# CHECK: mysql_fetch_row
-# CHECK: mysql_free_result
-# CHECK: mysql_num_rows
 
-#--------------------------------------------------------------------------
-# db_query:
-# ./include/connect2mysql.php:258:function db_query( $debugmsg, $query, $errorcode='mysql_query_failed' )
-./edit_bio.php:50:   $result = db_query( "edit_bio.find_bios($my_id)",
-./status.php:53:         db_query( "status.update.next_game_order($uid,$value)",
-./status.php:216:   $result = db_query( "status.find_mp_games($uid)", $query );
-./status.php:333:   $result = db_query( "status.find_games($uid)", $query );
-./edit_profile.php:781:      db_query( "edit_profile.handle_save_profile($my_id)", $upd_players_query );
-./edit_folders.php:164:         db_query( "edit_folders.main($my_id)", $folder_query ); // table Folders
-./scripts/fix_game_snapshot.php:168:      db_query( "fix_game_snapshost.fix_single_game.upd_game_snapshot($gid)",
-./scripts/fix_game_snapshot.php:204:   $result = db_query( "fix_game_snapshost.find_games($status,$uid,$limit,$sleep)", $qsql->get_select() );
-./scripts/fix_game_snapshot.php:222:         db_query( "fix_game_snapshost.bulkfix.upd_game_snapshot($gid)",
-./scripts/check_players_email.php:56:   $result = db_query("scripts.check_players_email", $query ) or die(mysql_error());
-./scripts/admin-export-games_info.php:89:      $result = db_query( 'export_gamesinfo.find_games', "$query LIMIT $curr_offset, $offset" );
-./scripts/forum_consistency.php:104:   $result = db_query( 'forum_consistency.load_threads',
-./scripts/forum_consistency.php:119:   $result = db_query( 'forum_consistency.read_thread.PostsInThread',
-./scripts/forum_consistency.php:176:   $result = db_query( 'forum_consistency.read_thread.distinct_forum_id',
-./scripts/forum_consistency.php:229:   $result = db_query( 'forum_consistency.check_authors',
-./scripts/forum_consistency.php:277:         db_query( $dbgmsg, $query );
-./scripts/voting_consistency.php:84:   $result = db_query( 'voting_consistency.check_survey_usercount',
-./scripts/voting_consistency.php:115:   $result = db_query( 'voting_consistency.check_surveyoption_score',
-./scripts/voting_consistency.php:163:         db_query( $dbgmsg, $query );
-./scripts/experiments/bitfield_mysql_set.php:41:   db_query( 'test.create',
-./scripts/experiments/bitfield_mysql_set.php:47:   db_query( 'test.insert',
-./scripts/experiments/bitfield_mysql_set.php:96:            db_query( 'test.set_all',
-./scripts/experiments/bitfield_mysql_set.php:99:            db_query( 'test.clr_all',
-./scripts/experiments/bitfield_mysql_set.php:112:      db_query( 'test.update',
-./scripts/experiments/bitmask_signed_int.php:150:      db_query( 'test.TmpRaz', 'DROP TABLE IF EXISTS tmp_rodival');
-./scripts/experiments/bitmask_signed_int.php:151:      db_query( 'test.TmpCreate',
-./scripts/experiments/bitmask_signed_int.php:159:      db_query( 'test.TmpRaz', 'TRUNCATE TABLE tmp_rodival');
-./scripts/experiments/bitmask_signed_int.php:161:      db_query( 'test.TmpCreate',
-./scripts/experiments/bitmask_signed_int.php:169:      db_query( 'test.TmpInsert',
-./scripts/experiments/bitmask_signed_int.php:172:      $result= db_query( 'test.read',
-./scripts/experiments/bitmask_signed_int.php:179:      db_query( 'test.TmpDrop', 'DROP TEMPORARY TABLE tmp_rodival');
-./scripts/experiments/activity_players.php:84:   db_query( 'test.drop',
-./scripts/experiments/activity_players.php:89:   db_query( 'test.create',
-./scripts/experiments/activity_players.php:103:   db_query( 'test.init.ID',
-./scripts/experiments/activity_players.php:108:   db_query( 'test.init.acts',
-./scripts/experiments/activity_players.php:145:         //db_query( 'test.activity_factor.'.$tst,
-./scripts/experiments/activity_players.php:160:      db_query( 'test.drop', "DROP TEMPORARY TABLE IF EXISTS $tname");
-./scripts/tests/db/seed_db.php:38:      db_query('seed_db1', "DELETE FROM Tournament WHERE ID=$del_tid LIMIT 1");
-./scripts/tests/db/seed_db.php:39:      db_query('seed_db2', "DELETE FROM TournamentDirector WHERE tid=$del_tid");
-./scripts/tests/db/seed_db.php:40:      db_query('seed_db3', "DELETE FROM TournamentGames WHERE tid=$del_tid");
-./scripts/tests/db/seed_db.php:41:      db_query('seed_db4', "DELETE FROM TournamentLadder WHERE tid=$del_tid");
-./scripts/tests/db/seed_db.php:42:      db_query('seed_db5', "DELETE FROM TournamentLadderProps WHERE tid=$del_tid");
-./scripts/tests/db/seed_db.php:43:      db_query('seed_db6', "DELETE FROM TournamentParticipant WHERE tid=$del_tid");
-./scripts/tests/db/seed_db.php:44:      db_query('seed_db7', "DELETE FROM TournamentProperties WHERE tid=$del_tid");
-./scripts/tests/db/seed_db.php:45:      db_query('seed_db8', "DELETE FROM TournamentRound WHERE tid=$del_tid");
-./scripts/tests/db/seed_db.php:46:      db_query('seed_db9', "DELETE FROM TournamentRules WHERE tid=$del_tid");
-./scripts/tests/db/seed_db.php:47:      db_query('seed_db10', "DELETE FROM TournamentExtension WHERE tid=$del_tid");
-./scripts/tests/db/seed_db.php:48:      db_query('seed_db11', "DELETE FROM TournamentPool WHERE tid=$del_tid");
-./scripts/translation_consistency.php:102:      db_query($dbgmsg, $sql );
-./scripts/translation_consistency.php:121:   $result = db_query("$dbgmsg.check.parent",
-./scripts/translation_consistency.php:135:   $result = db_query("$dbgmsg.check.sortorder",
-./scripts/translation_consistency.php:165:   $result = db_query("$dbgmsg.check.level",
-./scripts/translation_consistency.php:177:   $result = db_query("$dbgmsg.check.QA.FK",
-./scripts/translation_consistency.php:205:   $result = db_query("$dbgmsg.check.QA.Type.1",
-./scripts/translation_consistency.php:215:      $result = db_query("$dbgmsg.check.QA.Type.2($field)",
-./scripts/translation_consistency.php:249:      $result = db_query("$dbgmsg.check.TFIG.QA.$field",
-./scripts/translation_consistency.php:269:      $result = db_query("$dbgmsg.check.TFIG.QA.$field",
-./scripts/translation_consistency.php:299:   $result = db_query("$dbgmsg.check.FK.TFIG.Text_ID",
-./scripts/translation_consistency.php:316:   $result = db_query("$dbgmsg.check.FK.TFIG.Group_ID",
-./scripts/translation_consistency.php:349:   $result = db_query("$dbgmsg.check.FK.T.Language_ID",
-./scripts/translation_consistency.php:368:   $result = db_query("$dbgmsg.check.FK.T.Original_ID",
-./scripts/translation_consistency.php:398:      $result = db_query("$dbgmsg.fix.T.Updated.1",
-./scripts/translation_consistency.php:424:      $result = db_query("$dbgmsg.check.T.Updated.3",
-./scripts/translation_consistency.php:441:      $result = db_query("$dbgmsg.check.T.Updated.5",
-./scripts/translation_consistency.php:468:   $result = db_query("$dbgmsg.check.TT.empty_text",
-./scripts/translation_consistency.php:485:   db_query("$dbgmsg.check.TT.Status.2",
-./scripts/translation_consistency.php:487:   db_query("$dbgmsg.check.TT.Status.1",
-./scripts/translation_consistency.php:497:         db_query("$dbgmsg.check.TT.Status.3",
-./scripts/translation_consistency.php:503:      db_query("$dbgmsg.check.TT.Status.3",
-./scripts/translation_consistency.php:507:      $result = db_query("$dbgmsg.check.TT.Status.4",
-./scripts/translation_consistency.php:526:      $result = db_query("$dbgmsg.find.TT.type_src",
-./scripts/translation_consistency.php:545:      $result = db_query("$dbgmsg.find.TFIG.unused",
-./scripts/translation_consistency.php:583:   $result = db_query("$dbgmsg.check.TT.double.1",
-./scripts/translation_consistency.php:596:      $result2 = db_query("$dbgmsg.check.TT.double.2",
-./scripts/translation_consistency.php:631:      $result = db_query("$dbgmsg.check.TT.upd.1",
-./scripts/admin-sgf-bulk.php:82:   $result = db_query( 'sgf_bulk.find_games', $qsql->get_select() );
-./scripts/tournament_consistency.php:85:   $result = db_query( 'tournament_consistency.check_authors',
-./scripts/tournament_consistency.php:129:         db_query( $dbgmsg, $query );
-./waiting_room.php:187:   $result = db_query( 'waiting_room.find_waiters', $query );
-./game_comments.php:78:   $result = db_query( 'game_comments.messages',
-./admin_show_users.php:146:   $result = db_query( $query_msg, $query );
-./ratinggraph.php:41:   $result = db_query( "ratinggraph.find_player($uid,$uhandle)",
-./ratinggraph.php:100:   $result = db_query( "ratinggraph.find_rating_data($uid)",
-./translate.php:155:   $result = db_query( 'translate.groups_query', "SELECT Groupname FROM TranslationGroups" );
-./translate.php:607:         db_query( 'translate.update_translation.replace',
-./translate.php:614:         db_query( 'translate.update_translation.log',
-./translate.php:621:         db_query( 'translate.update_translation.done',
-./admin_admins.php:61:   $result = db_query( 'admin_admins.find_admins',
-./admin_admins.php:128:               db_query( "admin_admins.update_admin($my_id,$uid,$adm_level)",
-./admin_admins.php:140:   $result = db_query( 'admin_admins.find_admins2',
-./code_examples/test_clock_tick.php:79:   $result = db_query( "clock_tick.find_timeout_games", $query );
-./game_players.php:444:   $result = db_query( "game_players.find.game_players($gid)",
-./game_players.php:906:      db_query( "game_players.add_waiting_room_mpgame.insert_wroom($gid,$slots)", $query_wroom );
-./game_players.php:907:      db_query( "game_players.add_waiting_room_mpgame.gp_upd_flags($gid,$slots)",
-./game_players.php:927:      db_query( "game_players.add_invitation_mpgame.gp_upd_flags($gid,$inv_uid)",
-./game_players.php:970:      db_query( "game_players.accept_invite.gp_upd($gid,$uid)",
-./game_players.php:1056:            db_query( "game_players.change_group_color.gp_upd($gid)",
-./game_players.php:1084:         db_query( "game_players.change_group_order.gp_upd($gid)",
-./game_players.php:1128:      db_query( "game_players.update_handicap_komi.games_upd($gid,$handicap,$komi)",
-./statisticspng.php:289:   $result = db_query( 'statisticspng.min_max',
-./statisticspng.php:307:   $result = db_query( 'statisticspng.load_data',
-./forum/admin_show_forumlog.php:105:   $result = db_query( 'show_forumlog.find_data', $query );
-./forum/admin.php:80:            db_query( "forum_admin.move.update_sortorder1($start:$end)",
-./forum/admin.php:87:            db_query( "forum_admin.move.update_sortorder2($fid,$end)",
-./forum/admin.php:154:            db_query( "forum_admin.do_edit.delete($fid)",
-./forum/admin.php:156:            db_query( "forum_admin.do_edit.update_sortorder",
-./forum/admin.php:169:         db_query( "forum_admin.do_edit.update_forums({$row['ID']})",
-./forum/admin.php:233:         db_query( 'forum_admin.update_sortorder',
-./forum/admin.php:236:         db_query( 'forum_admin.insert',
-./forum/admin.php:259:      $result = db_query( 'forum_admin.list', $query );
-./forum/post.php:31:      db_query( "forum_post.hit_thread($thread)",
-./forum/post.php:94:         db_query( "post_message.edit.update($edit)",
-./forum/post.php:103:         db_query( 'post_message.edit.insert',
-./forum/post.php:187:      db_query( "post_message.insert_new_post($Thread_ID)", $query );
-./forum/post.php:194:         db_query( "post_message.new_thread($New_ID)",
-./forum/post.php:222:            db_query( "post_message.thread_trigger($Thread_ID)",
-./forum/post.php:231:         db_query( "post_message.forum_trigger($forum)",
-./forum/post.php:257:   db_query( "approve_post.update_post($pid)",
-./forum/post.php:281:   db_query( "approve_post.trigger_thread($tid,$pid)",
-./forum/post.php:290:   db_query( "approve_post.trigger_forum($fid,$pid)",
-./forum/post.php:306:   db_query( "reject_post.update_post($pid)",
-./forum/post.php:319:   db_query( "hide_post.update_post($pid)",
-./forum/post.php:352:   db_query( "hide_post_update_trigger.trigger_thread($tid,$pid)",
-./forum/post.php:359:   db_query( "hide_post_update_trigger.trigger_forum($fid,$pid)",
-./forum/post.php:383:   db_query( "show_post.update_post($pid)",
-./forum/post.php:409:   db_query( "show_post.trigger_thread($tid,$pid)",
-./forum/post.php:418:   db_query( "show_post.trigger_forum($fid,$pid)",
-./forum/post.php:445:   db_query( "recalc_thread_lastpost.update_lastpost($tid)",
-./forum/post.php:462:   db_query( "recalc_forum_lastpost.update_lastpost($fid)",
-./forum/search.php:229:      $result = db_query( 'forum_search.find', $query );
-./forum/class_forum_read.php:82:      $result = db_query( "ForumRead.load_forum_reads({$this->uid},{$this->fid},{$this->tid})", $query );
-./forum/class_forum_read.php:104:      db_query( $dbgmsg."({$this->uid},$fid,$tid)",
-./forum/class_forum_read.php:155:      $result = db_query( "ForumRead.mark_forum_read.load({$this->uid},{$this->fid})", $query );
-./forum/class_forum_read.php:176:            db_query( "ForumRead.mark_forum_read.update(({$this->uid},{$this->fid})",
-./forum/class_forum_read.php:195:            db_query( "ForumRead.mark_forum_read.insert(({$this->uid},{$this->fid})",
-./forum/class_forum_read.php:234:      return db_query( "ForumRead::update_global_forum_read.$dbgmsg($uid,$time,$new_val)",
-./forum/forum_functions.php:93:   db_query( "forum.add_forum_log.insert($uid,$tid,$pid,$action)",
-./forum/forum_functions.php:106:   $result = db_query( 'load_forum_id',
-./forum/forum_functions.php:121:      db_query( 'display_posts_pending_approval.find',
-./forum/forum_functions.php:1154:      $result = db_query( "Forum.load_threads($user_id,$is_moderator,$show_rows,$offset)", $query );
-./forum/forum_functions.php:1245:            db_query( "Forum.fix_forum.update($fid)", $query );
-./forum/forum_functions.php:1350:      $result = db_query( "Forum::load_forum_list($user_id)", $query );
-./forum/forum_functions.php:1394:      $result = db_query( 'Forum::load_forum_names',
-./forum/forum_functions.php:1416:      $result = db_query( "Forum::load_fix_forum_list", $qsql->get_select() );
-./forum/forum_functions.php:1485:      $result = db_query( "ForumThread.load_posts", $query );
-./forum/forum_functions.php:1543:      $result = db_query( "ForumThread.load_revision_history.find_edits($post_id)", $qsql->get_select() );
-./send_new_password.php:41:   $result = db_query( "send_new_password.find_player($pswduser)",
-./send_new_password.php:108:      db_query( "send_new_password.update($pswduser)",
-./admin_users.php:392:      db_query( "admin_users.save_user($user)",
-./confirm.php:420:         $result = db_query( "confirm.update_game($gid,$action)", $game_query . $game_clause );
-./confirm.php:427:         $result = db_query( "confirm.update_moves($gid,$action)", $move_query );
-./confirm.php:434:         $result = db_query( "confirm.message_query($gid,$action)", $message_query );
-./confirm.php:456:      db_query( 'confirm.activity',
-./halfhourly_cron.php:54:      db_query( "halfhourly_cron.inc_ticks($clock_ticks)",
-./halfhourly_cron.php:68:   db_query( 'halfhourly_cron.set_lastchanged',
-./halfhourly_cron.php:85:   db_query( 'halfhourly_cron.activity',
-./halfhourly_cron.php:95:   $result = db_query( 'halfhourly_cron.onvacation',
-./halfhourly_cron.php:110:         db_query( "edit_vacation.update_games.weekend_clock_running($uid)",
-./halfhourly_cron.php:120:         db_query( "edit_vacation.update_games.weekend_clock_stopped($uid)",
-./halfhourly_cron.php:139:   db_query( 'halfhourly_cron.vacation_days.increase', // -1 day after 1 day
-./halfhourly_cron.php:144:   db_query( 'halfhourly_cron.on_vacation.decrease', // +1 day after 12 days
-./halfhourly_cron.php:160:   db_query( 'halfhourly_cron.update_players_notify_now',
-./halfhourly_cron.php:166:   $result = db_query( 'halfhourly_cron.find_notifications',
-./halfhourly_cron.php:199:         db_query( "halfhourly_cron.email_check.nfy_done($uid)[$Email]",
-./halfhourly_cron.php:224:         $gres = db_query( "halfhourly_cron.find_games($uid)", $query );
-./halfhourly_cron.php:296:         $res3 = db_query( "halfhourly_cron.find_new_messages($uid)", $query );
-./halfhourly_cron.php:329:         db_query( "halfhourly_cron.nfy_done($uid)",
-./halfhourly_cron.php:342:   db_query( 'halfhourly_cron.reset_tick',
-./clock_tick.php:49:   db_query( 'clock_tick.set_lastchanged',
-./clock_tick.php:65:   db_query( 'clock_tick.reset_tick',
-./clock_tick.php:129:   db_query( 'clock_tick.increase_clocks',
-./clock_tick.php:167:   $result = db_query( 'clock_tick.find_timeout_games',
-./wap/status.php:293:      $result = @db_query( "wap_status.find_user($uhandle)",
-./wap/status.php:360:   $resultM = db_query( 'wap3', $query );
-./wap/status.php:368:   $resultG = db_query( 'wap4', $qsql->get_select() );
-./admin_show_adminlog.php:63:   $result = db_query( 'admin_show_adminlog.find_data',
-./show_games.php:576:   $result = db_query( 'show_games.find_games', $query);
-./list_contacts.php:174:   $result = db_query( 'list_contacts.find_data', $query );
-./quick_status.php:267:   $result = db_query( 'quick_status.find_messages', $query );
-./quick_status.php:327:   $result = db_query( 'quick_status.find_games', $qsql->get_select() );
-./quick_status.php:409:      $result = db_query( "quick_status.find_mp_games($player_id)", $query );
-./login.php:80:         db_query( 'login.update_player',
-./userinfo.php:73:   $bio_result = db_query( "userinfo.find_bio($uid)",
-./features/list_votes.php:92:   $result = db_query( 'votelist.find_data', $query );
-./features/lib_votes.php:210:      $result = db_query( "feature.update_feature({$this->id},{$this->subject})", $update_query );
-./features/lib_votes.php:242:      db_query( "feature.delete_feature({$this->id})", $delete_query );
-./features/lib_votes.php:312:         db_query( "Feature({$this->id}).fix_user_quota_feature_points($old_status,$new_status)",
-./features/lib_votes.php:566:         db_query( "$dbgmsg.reset", $query );
-./features/lib_votes.php:573:         db_query( "$dbgmsg.upd", $query );
-./features/lib_votes.php:581:         db_query( "$dbgmsg.recalc",
-./features/lib_votes.php:652:      db_query( "feature.update_feature_vote({$this->fid},{$this->voter},{$this->points})", $update_query );
-./features/list_features.php:111:   $result = db_query( 'featurelist.find_data', $query );
-./statistics.php:79:   $result = db_query( 'statistics.games.count_moves', $q1 );
-./statistics.php:152:   $result = db_query( 'statistics.users.count_countries',
-./introduction.php:75:   $result = db_query( 'intro.load_intro',
-./admin_do_translators.php:134:         db_query( 'admin_do_translators.add.insert',
-./admin_do_translators.php:216:         db_query( "admin_do_translators.user.update($transluser,$new_langs)",
-./admin_do_translators.php:235:         db_query( "admin_do_translators.user.revert($transluser,$old_langs)",
-./ratingpng.php:313:   $result = db_query( 'ratingpng.find_initial', $query );
-./ratingpng.php:329:   $result = db_query( 'ratingpng.find_max_time',
-./ratingpng.php:346:   $result = db_query( 'ratingpng.ratingdata',
-./tournaments/include/tournament_result.php:174:      $result = db_query( "TournamentResult::load_tournament_results", $query );
-./tournaments/include/tournament_log.php:194:      $result = db_query( "Tournamentlog::load_tournament_log", $query );
-./tournaments/include/tournament_games.php:245:      $result = db_query( "$dbgmsg.TournamentGames.update_score({$this->ID},{$this->tid},{$this->gid},{$this->Score})",
-./tournaments/include/tournament_games.php:351:      $result = db_query( "TournamentGames::load_tournament_games($tid,$round_id,$pool)", $query );
-./tournaments/include/tournament_games.php:391:         $result = db_query( "TournamentGames::count_tournament_games.group($tid,$round_id)", $qsql->get_select() );
-./tournaments/include/tournament_games.php:444:      $result = db_query( "TournamentGames::find_undetached_running_games($tid,$uid)", $qsql->get_select() );
-./tournaments/include/tournament_games.php:478:      $result = db_query( $dbgmsg."($gid,$tid,$black_uid,$score)",
-./tournaments/include/tournament_games.php:496:      $result = db_query( "$dbgmsg.update_tournament_game_wait($wait_ticks)",
-./tournaments/include/tournament_ladder.php:225:      $result = db_query( "TournamentLadder.update_incoming_challenges.update({$this->rid},$diff)",
-./tournaments/include/tournament_ladder.php:240:      $result = db_query( "TournamentLadder.update_outgoing_challenges.update({$this->rid},$diff)",
-./tournaments/include/tournament_ladder.php:285:            db_query( "$xdbgmsg.upd_tg",
-./tournaments/include/tournament_ladder.php:292:            db_query( "$xdbgmsg.upd_games.detach",
-./tournaments/include/tournament_ladder.php:305:            db_query( "$xdbgmsg.upd_cntbullnew",
-./tournaments/include/tournament_ladder.php:371:      return db_query( "TournamentLadder.switch_user_rank.save" .
-./tournaments/include/tournament_ladder.php:517:      $result = db_query( "TournamentLadder::load_tournament_ladder", $query );
-./tournaments/include/tournament_ladder.php:601:      return db_query( "TournamentLadder::add_participant_to_ladder_bottom.insert(tid[$tid],rid[$rid],uid[$uid])", $query );
-./tournaments/include/tournament_ladder.php:739:         $success = db_query( "$dbgmsg.upd_tl",
-./tournaments/include/tournament_ladder.php:763:      return db_query( "TournamentLadder::move_up_ladder_part.update($tid,$upd_rank,$min_rank,$max_rank)", $query );
-./tournaments/include/tournament_ladder.php:781:      return db_query( "TournamentLadder::move_down_ladder_part.update($tid,$upd_rank,$min_rank,$max_rank)", $query );
-./tournaments/include/tournament_ladder.php:788:      return db_query( "TournamentLadder::delete_ladder(tid[$tid])", $query );
-./tournaments/include/tournament_ladder.php:861:            $result = db_query( "TournamentLadder::seed_ladder.insert($tid,$seed_order,$reorder,#$cnt)", $seed_query );
-./tournaments/include/tournament_ladder.php:880:      $result = db_query( "TournamentLadder::check_participant_registrations.load_ladder($tid)",
-./tournaments/include/tournament_ladder.php:1160:      return db_query( "TournamentLadder::process_rank_period($tid)",
-./tournaments/include/tournament_ladder.php:1172:      return db_query( "TournamentLadder::process_crown_king($tid,$rid)",
-./tournaments/include/tournament_round.php:223:      if( db_query( "TournamentRound::add_tournament_round.insert($tid)", $query ) )
-./tournaments/include/tournament_round.php:234:      $result = db_query( "TournamentRound::delete_tournament_round($tid,$round)",
-./tournaments/include/tournament_round.php:308:      $result = db_query( "TournamentRound::load_tournament_rounds", $query );
-./tournaments/include/tournament_participant.php:289:      $result = db_query( "TournamentParticipant.count_tournament_participants($tid,$status)",
-./tournaments/include/tournament_participant.php:416:      $result = db_query( "TournamentParticipant.load_tournament_participants($tid)", $query );
-./tournaments/include/tournament_participant.php:435:      $result = db_query( "TournamentParticipant.load_tournament_participants_registered($tid)", $query );
-./tournaments/include/tournament_participant.php:467:      $result = db_query( "TournamentParticipant::load_registered_users_ordered.find_TPs($tid,$seed_order)",
-./tournaments/include/tournament_participant.php:490:         $result = db_query( "TournamentParticipant.load_tournament_rating($tid)",
-./tournaments/include/tournament_extension.php:85:      return db_query( "TournamentExtension.persist.on_dupl_key({$this->tid},{$this->Property})", $query );
-./tournaments/include/tournament_extension.php:176:      $result = db_query( "TournamentExtension.load_tournament_extensions", $query );
-./tournaments/include/tournament_helper.php:639:      $result = db_query( "TournamentHelper::load_ladder_crown_kings", $iterator->buildQuery() );
-./tournaments/include/tournament_director.php:214:      $result = db_query( "TournamentDirector.load_tournament_directors($tid)", $query );
-./tournaments/include/tournament_director.php:235:      $result = db_query( "TournamentDirector.load_tournament_directors_uid($tid)", $qsql->get_select() );
-./tournaments/include/tournament_pool.php:260:      $result = db_query( "TournamentPool::count_tournament_pool_users($tid,$round,$rank)", $query );
-./tournaments/include/tournament_pool.php:275:      $result = db_query( "TournamentPool::count_tournament_pool_ranks($tid,$round)", $query );
-./tournaments/include/tournament_pool.php:290:      $result = db_query( "TournamentPool::count_tournament_pool_games($tid,$round)", $query );
-./tournaments/include/tournament_pool.php:309:      $result = db_query( "TournamentPool::load_tournament_pool_bad_user($tid,$round)", $query );
-./tournaments/include/tournament_pool.php:397:      $result = db_query( "TournamentPool::load_tournament_pools", $query );
-./tournaments/include/tournament_pool.php:454:      $result = db_query( "TournamentPool::load_tournament_participants_with_pools", $query );
-./tournaments/include/tournament_pool.php:490:      return db_query( "TournamentPool::delete_pools($tid,$round)", $query );
-./tournaments/include/tournament_pool.php:567:         $result = db_query( "TournamentPool::seed_pools.insert($tid,$round,$seed_order,$slice_mode,#$cnt)",
-./tournaments/include/tournament_pool.php:623:         $result = db_query( "TournamentPool::add_missing_registered_users.insert($tid,$round,#$cnt)", $seed_query );
-./tournaments/include/tournament_pool.php:643:      return db_query( "TournamentPool::assign_pool.update($tid,$round,$pool)",
-./tournaments/include/tournament_pool.php:787:      $result = db_query( "TournamentPool::update_tournament_pool_ranks.update($tpool_id,$rank)",
-./tournaments/include/tournament_pool.php:886:      return db_query( "TournamentPool.execute_rank_action.update("
-./tournaments/include/tournament.php:299:         return db_query( "Tournament.update_flags({$this->ID},$flag,$set_flag)", $query );
-./tournaments/include/tournament.php:547:      $result = db_query( "Tournament.load_tournaments", $query );
-./tournaments/include/tournament.php:568:         db_query( "Tournament::update_tournament_registeredTP($tid,$diff)",
-./tournaments/include/tournament_rules.php:604:         db_query( "TRules.create_tournament_games.upd_double2($gid)",
-./tournaments/include/tournament_rules.php:753:      $result = db_query( "TournamentRules::load_tournament_rules($tid)", $query );
-./tournaments/include/tournament_news.php:257:      $result = db_query( "TournamentNews.load_tournament_news($tid)", $query );
-./tournaments/include/tournament_news.php:278:      db_query( "TournamentNews.process_tournament_news_deleted($days_age)",
-./tournaments/cron_tournaments.php:54:   db_query( 'cron_tournament.set_lastchanged',
-./tournaments/cron_tournaments.php:106:         db_query( 'cron_tournament.daily.next_run_date',
-./tournaments/cron_tournaments.php:125:         db_query( 'cron_tournament.hourly.next_run_date',
-./tournaments/cron_tournaments.php:134:   db_query( 'cron_tournament.reset_tick',
-./people.php:140:   $result = db_query( 'people.find_faq_admins',
-./people.php:182:   $result = db_query( 'people.find_forum_moderators',
-./people.php:212:   $result = db_query( 'people.find_executives',
-./people.php:251:   $result = db_query( 'people.find_translators',
-./admin_faq.php:572:      $result = db_query( 'admin_faq.list', $qsql->get_select() );
-./opponents.php:78:   $result = db_query( "opponents.find_users($uid,$opp)", $query );
-./opponents.php:349:      $result = db_query( "opponents.find_stats($uid,$opp)", $query );
-./opponents.php:535:      $result = db_query( "opponents.extract_user_stats($color)", $query );
-./faq.php:115:      $result = db_query( 'faq.search_entries', $query );
-./faq.php:179:      $result = db_query( 'faq.find_entries',
-./faq.php:213:      $result = db_query( 'faq.find_titles',
-./daily_cron.php:49:   db_query( 'daily_cron.set_lastchanged',
-./daily_cron.php:66:         db_query( 'daily_cron.waitingroom.del_type_go',
-./daily_cron.php:70:         $result = db_query( 'daily_cron.waitingroom.find_mpg',
-./daily_cron.php:85:               db_query( "daily_cron.waitingroom.del_mpg($wr_id,$gid)",
-./daily_cron.php:102:         db_query( 'daily_cron.waitingroom_joined',
-./daily_cron.php:153:   db_query( 'daily_cron.statistics_insert',
-./daily_cron.php:161:   db_query( 'daily_cron.cleanup_forum_read.delete_old',
-./daily_cron.php:170:   $result = db_query( 'daily_cron.night_hours',
-./daily_cron.php:184:         db_query( "daily_cron.night_hours.update($uid,$newclock)",
-./daily_cron.php:215:   db_query( "daily_cron.movestats_cleanup.delete",
-./daily_cron.php:224:      db_query( "daily_cron.cleanup_old_invitations.delete",
-./daily_cron.php:237:   db_query( 'daily_cron.reset_tick',
-./admin_show_errorlog.php:97:   $result = db_query( 'admin_show_errorlog.find_data', $query );
-./statratingspng.php:259:         $result = db_query( 'statratingspng.query'.$g, $query );
-./change_password.php:73:   db_query( 'change_password', $query );
-./include/classlib_userquota.php:97:      db_query( "UserQuota::update.update_feature_points({$this->user_id})", $update_query );
-./include/classlib_userquota.php:137:      db_query( "UserQuota::insert_default.insert({$user_id})",
-./include/classlib_userquota.php:157:      db_query( "UserQuota::increase_update_feature_points.update($NOW)", $update_query );
-./include/make_game.php:123:   $result = db_query( "make_invite_game.update_game($disputegid)", $query, 'mysql_insert_game' );
-./include/make_game.php:416:         db_query( "$dbg.update_double2",
-./include/make_game.php:656:      db_query( "create_game.update($gid,$game_type)",
-./include/make_game.php:663:      db_query( 'create_game.insert',
-./include/make_game.php:688:         db_query( "create_game.update_games.next2_gp($gid,$game_type,$next_black_id)",
-./include/make_game.php:698:         db_query( "create_game.upd_game.stdh_snapshot($gid,$size)",
-./include/make_game.php:708:         db_query( "create_game.shape_w1st.pass($gid)",
-./include/make_game.php:717:            db_query( "create_game.update_games.shape_w1st.next3_gp($gid,$game_type,$next_black_id)",
-./include/make_game.php:777:   db_query( 'make_std_handicap.insert_moves.err3', $moves_query );
-./include/make_translationfiles.php:34:   $result = db_query( 'make_translationfiles.make_knownlanguages',
-./include/make_translationfiles.php:119:   $result = db_query( 'make_translationfiles.make_include_files', $query );
-./include/make_translationfiles.php:224:   $result = db_query( 'translations_query', $query );
-./include/make_translationfiles.php:244:   $result = db_query( $debugmsg.'.find_transltext',
-./include/make_translationfiles.php:296:         db_query( "$debugmsg.new_transltext", $sql );
-./include/make_translationfiles.php:308:         db_query( "$debugmsg.reuse_orphan_transltext.1", $sql1 );
-./include/make_translationfiles.php:309:         db_query( "$debugmsg.reuse_orphan_transltext.2", $sql2 );
-./include/make_translationfiles.php:317:      db_query( "$debugmsg.update_translfig($Text_ID,$Group_ID)",
-./include/make_translationfiles.php:327:   $result = db_query( "generate_translation_texts.find",
-./include/classlib_user.php:254:         $result = db_query( "User.load_quick_userinfo($users)",
-./include/std_functions.php:1336:      $result = db_query( "$debugmsg.get$field($var)", $query);
-./include/std_functions.php:1379:      db_query( "$debugmsg.message", $query);
-./include/std_functions.php:1401:         db_query( "$debugmsg.upd_thread($mid,$from_id)",
-./include/std_functions.php:1421:         db_query( "$debugmsg.correspondent", $query );
-./include/std_functions.php:1430:         db_query( "$debugmsg.count_msg_new([$ids])",
-./include/std_functions.php:1438:         db_query( "$debugmsg.game_message($gid)",
-./include/std_functions.php:1448:         db_query( "$debugmsg.reply_correspondent", $query );
-./include/std_functions.php:1452:            db_query( "$debugmsg.reply_message",
-./include/std_functions.php:1510:   db_query( "$debugmsg.notify",
-./include/std_functions.php:2535:   $result = db_query( 'is_logged_in.find_player', $query );
-./include/std_functions.php:2689:      $updok = db_query( "is_logged_in.update_player($uid)",
-./include/std_functions.php:3263:   $result = db_query( 'has_observers',
-./include/std_functions.php:3274:   $result = db_query( 'is_on_observe_list',
-./include/std_functions.php:3289:         db_query( 'toggle_observe_list.delete',
-./include/std_functions.php:3292:         db_query( 'toggle_observe_list.insert',
-./include/std_functions.php:3306:      $result = db_query( 'delete_all_observers.find',
-./include/std_functions.php:3328:   db_query( 'delete_all_observers.delete',
-./include/connect2mysql.php:126:   $result = db_query( 'connect2mysql.admin_log', $query );
-./include/connect2mysql.php:143:      db_query( "writeIpStats.insert($uid,$page,$ip)",
-./include/connect2mysql.php:247:   return db_query( "db_lock($locktables).$debugmsg", 'LOCK TABLES '.$locktables );
-./include/connect2mysql.php:253:   $result = db_query( "db_unlock()", 'UNLOCK TABLES' );
-./include/connect2mysql.php:260:   //echo $debugmsg.'.db_query='.$query.'<br>';
-./include/connect2mysql.php:261:   if( DBG_QUERY && DBG_QUERY <= 2 ) error_log("db_query($debugmsg,$errorcode): query=[$query]");
-./include/connect2mysql.php:268:         error('server_down', "db_query.check.no_select(): $debugmsg");
-./include/connect2mysql.php:275:   if( DBG_QUERY > 2 ) error_log("db_query($debugmsg,$errorcode)[" . round( 1000 * (getmicrotime()-$begin_time) ) . "ms]{U" . @$GLOBALS['player_row']['ID'] . "," . @$GLOBALS['player_row']['Handle'] . "}: query=[$query]");
-./include/connect2mysql.php:292:   $result = db_query( $debugmsg, 'SELECT FOUND_ROWS()' );
-./include/connect2mysql.php:307:   $result = db_query( $dbg_str, $query);
-./include/connect2mysql.php:328:   $result = db_query( $dbg_str, $query);
-./include/connect2mysql.php:362:   $result = db_query( $dbg_str, $query);
-./include/connect2mysql.php:411:      db_query( "check_password.set_password($uhandle)",
-./include/wroom_control.php:303:               db_query( "WC.join_waitingroom_game.update_double2($gid)",
-./include/wroom_control.php:328:            db_query( 'join_waitingroom_game.reduce',
-./include/wroom_control.php:333:            db_query( 'join_waitingroom_game.reduce_delete',
-./include/wroom_control.php:361:            db_query( "WC.join_waitingroom_game.wroom_joined.save(u$my_id,wr$wr_id)", $query_so );
-./include/wroom_control.php:403:         db_query( "WC.delete_waitingroom_game.delete($wr_id,$gid)",
-./include/GoDiagram.php:256:         $result = db_query( 'godiagram.create_godiagrams.find',
-./include/GoDiagram.php:284:            db_query( 'godiagram.create_godiagrams.insert',
-./include/GoDiagram.php:320:            db_query( 'godiagram.create_godiagrams.save',
-./include/GoDiagram.php:343:   $result = db_query( 'godiagram.find_godiagrams',
-./include/GoDiagram.php:373:      db_query( 'godiagram.save_diagrams',
-./include/rating.php:278:   $result = db_query( 'update_rating2.find_game', $query );
-./include/rating.php:303:         db_query( 'update_rating2.set_rated_N',
-./include/rating.php:400:      db_query( 'update_rating2.set_rated_Done',
-./include/rating.php:405:      db_query( 'update_rating2.set_black_rating',
-./include/rating.php:410:      db_query( 'update_rating2.set_white_rating',
-./include/rating.php:415:      db_query( 'update_rating2.ratinglog',
-./include/rating.php:814:   db_query( "change_user_rating.update_players($uid,$rating)",
-./include/rating.php:822:      db_query( "change_user_rating.insert_rating_chg($uid,$rating,$reset_confidence)",
-./include/rating.php:859:   db_query( "update_player_rating.update($uid,$new_rating)",
-./include/db/ratinglog.php:184:      $result = db_query( "Ratinglog.load_ratinglogs", $query );
-./include/db/waitingroom.php:304:      $result = db_query( "Waitingroom::load_waitingroom_entries", $query );
-./include/db/survey_vote.php:73:      return db_query( "SurveyVote.persist.on_dupl_key({$this->soid},{$this->uid},{$this->Points})", $query );
-./include/db/survey_vote.php:145:      $result = db_query( "SurveyVote.load_survey_votes($soid,$uid)", $query );
-./include/db/survey_vote.php:184:      return db_query( "SurveyOption::persist_survey_votes.on_dupl_key($sid,$uid)", $query );
-./include/db/survey_option.php:222:      $result = db_query( "SurveyOption.load_survey_options", $query );
-./include/db/survey_option.php:259:      return db_query( "SurveyOption::persist_survey_options.on_dupl_key($sid)", $query );
-./include/db/survey_option.php:283:         return db_query( "SurveyOption::update_aggregates_survey_options.on_dupl_key($sid)", $query );
-./include/db/survey_option.php:306:      $result = db_query( "SurveyOption::delete_survey_options.del($sid;$ids)",
-./include/db/bulletin.php:255:         $result = db_query( "Bulletin.loadUserList({$this->ID})",
-./include/db/bulletin.php:539:      $result = db_query( "Bulletin.load_bulletins", $query );
-./include/db/bulletin.php:635:         db_query( "Bulletin::mark_bulletin_as_read($bid,$uid)",
-./include/db/bulletin.php:647:               db_query( "Bulletin::mark_bulletin_as_read.inc_read($bid)",
-./include/db/bulletin.php:677:      db_query( "Bulletin::persist_bulletin_userlist.del($bid)",
-./include/db/bulletin.php:681:      db_query( "Bulletin::persist_bulletin_userlist.add($bid,$cnt_uids)",
-./include/db/bulletin.php:691:      db_query( "Bulletin::process_expired_bulletins.upd_bulletin()",
-./include/db/bulletin.php:721:         db_query( "$dbgmsg.reset",
-./include/db/bulletin.php:726:         db_query( "$dbgmsg.upd",
-./include/db/bulletin.php:734:         db_query( "$dbgmsg.recalc",
-./include/db/bulletin.php:786:         db_query( "$dbgmsg.upd_td($tid)",
-./include/db/bulletin.php:789:         db_query( "$dbgmsg.upd_towner($tid)",
-./include/db/bulletin.php:795:         db_query( "$dbgmsg.upd_tp($tid)",
-./include/db/bulletin.php:801:         db_query( "$dbgmsg.upd_userlist($bid)",
-./include/db/bulletin.php:807:         db_query( "$dbgmsg.upd_mpg($gid)",
-./include/db/bulletin.php:815:         db_query( "$dbgmsg.upd_all",
-./include/db/bulletin.php:826:      db_query( "Bulletin::reset_bulletin_read($bid)",
-./include/db/ratingchangeadmin.php:161:      $result = db_query( "RatingChangeAdmin.load_ratingchangeadmin", $query );
-./include/db/shape.php:210:      $result = db_query( "Shape.load_shapes", $query );
-./include/db/survey.php:216:         $result = db_query( "Survey.loadUserList({$this->ID})",
-./include/db/survey.php:304:      $result = db_query( "Survey.load_surveys", $query );
-./include/db/survey.php:334:      return db_query( "Survey.updateUserCount.upd($sid,$diff)",
-./include/db/survey.php:362:      db_query( "Survey::persist_survey_userlist.del($sid,$cnt_uids)",
-./include/db/survey.php:367:         db_query( "Survey::persist_survey_userlist.add($sid,$cnt_uids)",
-./include/message_functions.php:1312:      $result = db_query( 'get_folders',
-./include/message_functions.php:1318:      $result = db_query( 'get_folders',
-./include/message_functions.php:1407:      db_query( "change_folders.update($uid,$new_folder,[$msg_id_str])",
-./include/message_functions.php:1433:   $result = db_query( "$dbgmsg.fix_invitations_replied.find",
-./include/message_functions.php:1448:      db_query( "$dbgmsg.fix_invitations_replied.upd(".count($msg_ids).")",
-./include/message_functions.php:1472:      db_query( "$dbgmsg.reset",
-./include/message_functions.php:1477:      db_query( "$dbgmsg.upd",
-./include/message_functions.php:1486:      db_query( "$dbgmsg.recalc",
-./include/message_functions.php:1572:   $result = db_query( 'folder_is_empty',
-./include/message_functions.php:1791:      $result = db_query( "DgsMessage::load_message_receivers.find($my_id,$type,$invitation_step)",
-./include/message_functions.php:1833:      db_query( "$dbgmsg.1",
-./include/message_functions.php:1884:   $result = db_query( 'message_list_query', $query );
-./include/classlib_userpicture.php:161:         db_query( "UserPicture::update_picture($pic_file,$cache_suffix)", $update_query );
-./include/sgf_builder.php:313:      $result = db_query( "SgfBuilder.load_game_info({$this->gid})",
-./include/sgf_builder.php:408:      $result = db_query( "SgfBuilder.load_trimmed_moves({$this->gid})", $moves_query );
-./include/register_functions.php:162:         $result = db_query( "UserReg.check_existing_user.find_player({$this->uhandle})",
-./include/register_functions.php:176:         $result = db_query( "UserReg.check_existing_user.find_player_regexp({$this->uhandle},[$regx]})",
-./include/register_functions.php:194:         $result = db_query( "UserReg.register_user.insert_player({$this->uhandle})",
-./include/register_functions.php:254:         $result = db_query( "UserReg.register_blocked_user.insert_new_post({$this->uhandle})", $query );
-./include/register_functions.php:259:         db_query( "UserReg.register_blocked_user.new_thread($new_id)",
-./include/classlib_userconfig.php:261:      db_query( "ConfigBoard::update_all.update({$this->user_id})", $update_query );
-./include/classlib_userconfig.php:328:      db_query( "ConfigBoard::insert_default.insert({$user_id})",
-./include/classlib_userconfig.php:586:            db_query( $errmsg,
-./include/classlib_userconfig.php:595:      db_query( "ConfigPages::insert_default.insert($user_id)",
-./include/classlib_userconfig.php:604:         db_query( "ConfigPages::toggle_forum_flags.toggle_flag($uid,$flag)",
-./include/classlib_userconfig.php:616:         db_query( "ConfigPages::set_clear_forum_flags.upd($uid,$clear_flags,$set_flags)",
-./include/classlib_profile.php:180:      db_query( "profile.save_profile({$this->id},{$this->uid},{$this->Type})",
-./include/classlib_profile.php:191:         db_query( "profile.delete_profile.del({$this->id})",
-./include/classlib_profile.php:205:      db_query( "profile.delete_all_profiles.del($user_id,$type)",
-./include/classlib_profile.php:296:      $result = db_query( "Profile::load_profiles2($user_id,$load_templates)",
-./include/quick/quick_game.php:511:            $result = db_query( "QuickHandlerGame.process.update_game($gid,$action})", $game_query . $game_clause );
-./include/quick/quick_game.php:518:            $result = db_query( "QuickHandlerGame.process.update_moves($gid,$action})", $move_query );
-./include/quick/quick_game.php:525:            $result = db_query( "QuickHandlerGame.process.insert_movemessage($gid,$action})", $message_query );
-./include/quick/quick_game.php:548:         db_query( "QuickHandlerGame.process.update_activity($gid,$action})",
-./include/quick/quick_game_list.php:209:      $result = db_query( "$dbgmsg.find_games", $qsql->get_select() );
-./include/game_functions.php:427:      db_query( "GameAddTime::add_time_opponent.update($gid)", $game_query );
-./include/game_functions.php:431:      db_query( "GameAddTime::add_time_opponent.insert_move($gid)", $move_query );
-./include/game_functions.php:518:         db_query( "MultiPlayerGame::revoke_offer_game_players.update_gp($gid,$del_count,$gp_flag)",
-./include/game_functions.php:567:      db_query( "$dbgmsg.init_multi_player_game.insert_gp($gid,$uid,$gp_count)",
-./include/game_functions.php:583:      db_query( "$dbgmsg.join_waitingroom_game.update_game_players($gid,$uid)",
-./include/game_functions.php:611:      db_query( "$dbgmsg.change_joined_players.upd_games($gid,$diff)",
-./include/game_functions.php:647:      db_query( "$dbgmsg.change_player_mpg_count($gid,$uid,$diff)",
-./include/game_functions.php:655:      db_query( "MultiPlayerGame::update_players_start_mpgame($gid)",
-./include/game_functions.php:673:      db_query( "MultiPlayerGame::update_players_end_mpgame($gid,$game_in_setup_mode)",
-./include/game_functions.php:744:         $result = db_query( "MultiPlayerGame::calc_average_group_ratings.find($gamedata)",
-./include/game_functions.php:897:      $result = db_query( "GamePlayer::load_users_for_mpgame.find($gid,$group_color)",
-./include/game_functions.php:978:      db_query( "GamePlayer::delete_reserved_invitation.gp_upd($gid,$uid)",
-./include/game_functions.php:993:      db_query( "GamePlayer::delete_joined_player.gp_upd($gid,$uid)",
-./include/game_functions.php:1040:            db_query( "GameHelper::delete_running_game.del_wroom($gid)",
-./include/game_functions.php:1049:               db_query( "GameHelper::delete_running_game.upd_players($gid,$Black_ID,$White_ID)",
-./include/game_functions.php:1098:            db_query( "GameHelper::delete_finished_unrated_game.upd_players($gid,$Black_ID,$White_ID)",
-./include/game_functions.php:1103:            db_query( "GameHelper::delete_finished_unrated_game.upd_mgplayers($gid)",
-./include/game_functions.php:1120:         db_query( "GameHelper::remove_double_game_reference.doublegame($gid)",
-./include/game_functions.php:1131:      db_query( "GameHelper::_delete_base_game_tables.observers($gid)",
-./include/game_functions.php:1133:      db_query( "GameHelper::_delete_base_game_tables.notes($gid)",
-./include/game_functions.php:1135:      db_query( "GameHelper::_delete_base_game_tables.movemsg($gid)",
-./include/game_functions.php:1137:      db_query( "GameHelper::_delete_base_game_tables.moves($gid)",
-./include/game_functions.php:1139:      db_query( "GameHelper::_delete_base_game_tables.gameplayers($gid)",
-./include/game_functions.php:1141:      db_query( "GameHelper::_delete_base_game_tables.games($gid)",
-./include/game_functions.php:1151:      db_query( "GameHelper::delete_invitation_game.delgame.$dbgmsg($gid,$uid1,$uid2)",
-./include/game_functions.php:1175:      db_query( "$dbgmsg.update",
-./include/game_functions.php:1190:         db_query( $dbgmsg."GameHelper::update_players_end_game.W($gid,$white_id)",
-./include/game_functions.php:1196:         db_query( $dbgmsg."GameHelper::update_players_end_game.B($gid,$black_id)",
-./include/game_functions.php:1728:      db_query( "FKN.save_komi.update({$this->gid},{$this->tomove_id},$komibid)",
-./include/game_functions.php:1736:      db_query( "FKN.save_komi.upd_activity({$this->gid},$my_id)",
-./include/game_functions.php:1815:      db_query( "$dbgmsg.update",
-./include/game_functions.php:1905:         $result = db_query( "$dbgmsg.upd_game", $game_updquery );
-./include/game_functions.php:2065:         $result = db_query( "GameNotify.find_players({$this->gid})",
-./include/game_functions.php:2070:         $result = db_query( "GameNotify.find_mpg_players({$this->gid})",
-./include/game_functions.php:4266:         db_query( "NextGameOrder::persist_game_priority.delete($gid,$uid)",
-./include/game_functions.php:4277:         db_query( "NextGameOrder::persist_game_priority.update($gid,$uid,$new_prio)",
-./include/game_functions.php:4288:      db_query( "NextGameOrder::delete_game_priorities.delete_all($gid)",
-./include/game_functions.php:5030:   db_query( "increaseMoveStats.insert($uid)",
-./include/gui_user_functions.php:86:      $result = db_query( "check_user_list.uids($author_uid)",
-./include/gui_user_functions.php:105:      $result = db_query( "check_user_list.handles($author_uid)",
-./include/contacts.php:166:      $result = db_query( "contact.find_user({$this->uid},{$this->cid})",
-./include/contacts.php:181:      $result = db_query( "contact.update_contact2({$this->uid},{$this->cid})", $update_query );
-./include/contacts.php:194:      $result = db_query( 'contacts.delete_contact', $delete_query );
-./include/contacts.php:264:      $result = db_query( "contact.load_quick_contacts($uid)", $query );
-./include/contacts.php:294:      $result = db_query( 'Contact::has_contact',
-./include/db_classes.php:451:      return db_query( sprintf($msgfmt, $this->get_pkey_string()), $this->build_sql_insert() );
-./include/db_classes.php:456:      return db_query( sprintf($msgfmt, $this->get_pkey_string()), $this->build_sql_update($limit) );
-./include/db_classes.php:461:      return db_query( sprintf($msgfmt, $this->get_pkey_string()), $this->build_sql_delete($limit) );
-./include/board.php:137:      $result = db_query( "board.load_from_db.find_moves($gid)",
-./include/board.php:1316:         db_query( "board.fix_corrupted_move_table.delete_moves($gid)",
-./include/board.php:1318:         db_query( "board.fix_corrupted_move_table.delete_move_mess($gid)",
-./include/admin_faq_functions.php:108:            db_query( "$dbgmsg.do_new.replace_seed($fid)",
-./include/admin_faq_functions.php:134:            db_query( "$dbgmsg.do_new.update_sortorder",
-./include/admin_faq_functions.php:141:         db_query( "$dbgmsg.do_new.insert",
-./include/admin_faq_functions.php:159:            db_query( "$dbgmsg.do_new.transltexts1",
-./include/admin_faq_functions.php:163:            db_query( "$dbgmsg.do_new.translfoundingrp1",
-./include/admin_faq_functions.php:182:               db_query( "$dbgmsg.do_new.transltexts2",
-./include/admin_faq_functions.php:186:               db_query( "$dbgmsg.do_new.translfoundingrp2",
-./include/admin_faq_functions.php:193:         db_query( "$dbgmsg.do_new.update",
-./include/admin_faq_functions.php:198:            db_query( "$dbgmsg.do_new.faqlog",
-./include/admin_faq_functions.php:235:            db_query( "$dbgmsg.update_sortorder1",
-./include/admin_faq_functions.php:240:            db_query( "$dbgmsg.update_sortorder2",
-./include/admin_faq_functions.php:282:            db_query( "$dbgmsg.update_sortorder1",
-./include/admin_faq_functions.php:287:            db_query( "$dbgmsg.update_sortorder2",
-./include/admin_faq_functions.php:325:         db_query( "$dbgmsg.upd_entry",
-./include/admin_faq_functions.php:335:            db_query( "$dbgmsg.upd_transltext",
-./include/admin_faq_functions.php:351:      db_query( "$dbgmsg.upd_transltext",
-./include/admin_faq_functions.php:370:         db_query( "$dbgmsg.delete_entry",
-./include/admin_faq_functions.php:372:         db_query( "$dbgmsg.update_sortorder",
-./include/admin_faq_functions.php:376:         db_query( "$dbgmsg.delete_tranlsgrps",
-./include/admin_faq_functions.php:378:         db_query( "$dbgmsg.delete_tranlstexts",
-./include/admin_faq_functions.php:403:            db_query( "$dbgmsg.update_reference",
-./include/admin_faq_functions.php:414:               db_query( "$dbgmsg.update_Qflags",
-./include/admin_faq_functions.php:422:            db_query( 'admin_faq.do_edit.update_Qtexts',
-./include/admin_faq_functions.php:435:               db_query( "$dbgmsg.update_Aflags",
-./include/admin_faq_functions.php:443:            db_query( "$dbgmsg.update_Atexts",
-./include/admin_faq_functions.php:452:            db_query( "$dbgmsg.faqlog",
-./message_thread.php:88:   $result = db_query( "message_thread.find_msg.load($thread,$mid)", $query );
-./change_bio.php:46:   $result = db_query( 'change_bio.find_bio',
-./change_bio.php:61:            db_query( "change_bio.delete_bio[$bid]", "DELETE FROM Bio WHERE ID=$bid LIMIT 1" );
-./change_bio.php:136:         db_query( "change_bio.alter_bio[$bid]", $query );
-./change_bio.php:158:         db_query( 'change_bio.insert_bio', $query );
-./game.php:585:         db_query( 'game.replace_gamenote',
-./admin_show_faqlog.php:62:   $result = db_query( 'admin_show_errorlog.find_data',
-./edit_vacation.php:60:            db_query( 'edit_vacation.change_vacation.update_games',
-./edit_vacation.php:68:            db_query( 'edit_vacation.change_vacation',
-./edit_vacation.php:118:            db_query( 'edit_vacation.update_games',
-./edit_vacation.php:128:            db_query( 'edit_vacation.update_player',
-./edit_contact.php:66:      $result = db_query( 'edit_contact.find_user.id',
-./edit_contact.php:75:      $result = db_query( 'edit_contact.find_user.handle',
-./quick_play.php:234:      $result = db_query( "quick_play.update_game($gid)", $game_query . $game_clause );
-./quick_play.php:238:      $result = db_query( "quick_play.update_moves($gid,$action)", $move_query );
-./quick_play.php:244:         $result = db_query( "quick_play.update_movemessage1($gid)", $message_query );
-./quick_play.php:253:      db_query( "quick_play.update_player($gid,$my_id)",
-./links.php:173:   $result = db_query( 'links.load_links',
-./admin_game.php:120:            db_query( "admin_game.toggle_rated($gid,$game_rated)",
-./users.php:222:   $result = db_query( 'users.find_data', $query );
-./new_game.php:515:         db_query( 'new_game.handle_add_game.insert.waitingroom', $query_wroom );
-./new_game.php:518:         $result = db_query( 'new_game.handle_add_game.insert.game', $query_mpgame, 'mysql_insert_game' );
-./rss/status.php:390:      $result = @db_query( "rss_status.find_user.password($uhandle)",
-./rss/status.php:412:      $result = @db_query( "rss_status.find_user.login($uhandle)",
-./rss/status.php:500:   $result = db_query( 'rss3', $query );
-./rss/status.php:529:   $result = db_query( 'rss4', $qsql->get_select() );
+#-------- (B) Future Enhancements ---------------------------------------------
 
-#--------------------------------------------------------------------------
-# mysql_query
-./scripts/recalculate_ratings2.php:59:         if( !mysql_query( $s) )
-./scripts/recalculate_ratings2.php:118:   $result = mysql_query( $query )
-./scripts/player_consistency.php:35:   $result = mysql_query( $query );
-./scripts/player_consistency.php:111:   return mysql_query( $s); // return query-results
-./scripts/player_consistency.php:246:        if( !mysql_query( $s) )
-./scripts/message_consistency.php:49:        if( !mysql_query( $s) )
-./scripts/message_consistency.php:94:   $result = mysql_query( $query ) or die(mysql_error());
-./scripts/message_consistency.php:115:   $result = mysql_query( $query ) or die(mysql_error());
-./scripts/message_consistency.php:143:   $result = mysql_query( $query ) or die(mysql_error());
-./scripts/message_consistency.php:185:   $result = mysql_query( $query ) or die(mysql_error());
-./scripts/message_consistency.php:229:   $result = mysql_query( $query )
-./scripts/message_consistency.php:269:   $result = mysql_query( $query )
-./scripts/start_frozen_clocks.php:49:        if( !mysql_query( $s) )
-./scripts/start_frozen_clocks.php:74:   $result = mysql_query($query);
-./scripts/browser_stats.php:100:   $result = mysql_query("SELECT SQL_SMALL_RESULT COUNT(*) AS Count, Browser FROM Players " .
-./scripts/fix_games_timeleft.php:52:        if( !mysql_query( $s) )
-./scripts/fix_games_timeleft.php:90:   $result = mysql_query( $query ) or die(mysql_error());
-./scripts/experiments/activity_players.php:146:         mysql_query( $sub['qry']);
-./scripts/updates/fix_game_comments-1_0_15.php:48:         if( !mysql_query( $s) )
-./scripts/updates/fix_game_comments-1_0_15.php:80:   $result = mysql_query( $query ) or die(mysql_error());
-./scripts/updates/fix_game_comments-1_0_15.php:125:   $result = mysql_query( $query ) or die(mysql_error());
-./scripts/updates/fix_message_thread-1_0_15.php:48:        if( !mysql_query( $s) )
-./scripts/updates/fix_message_thread-1_0_15.php:77:   $result = mysql_query( $query ) or die(mysql_error());
-./scripts/obsolete/fix_moves.php:11://$result = mysql_query("select ID as gid from Games where Status != 'INVITED' order by ID");
-./scripts/obsolete/fix_moves.php:16:   $result = mysql_query( $query )
-./scripts/obsolete/fix_moves.php:25:     mysql_query( $query )
-./scripts/obsolete/fix_posxy.php:11:$result = mysql_query("select ID as gid from Games where Status != 'INVITED' AND Moves>0 order by ID");
-./scripts/obsolete/fix_posxy.php:19:      $res = mysql_query( $query )
-./scripts/obsolete/fix_posxy.php:32:     mysql_query( $query )
-./scripts/obsolete/fix_tomoveid.php:11:$result = mysql_query("select ID as gid,Black_ID,White_ID from Games " .
-./scripts/obsolete/fix_tomoveid.php:21:      $res = mysql_query( $query )
-./scripts/obsolete/fix_tomoveid.php:38:     mysql_query( $query )
-./scripts/obsolete/fix_game_ratings.php:12:   $result = mysql_query("Select ID,Black_ID, White_ID, Starttime " .
-./scripts/obsolete/fix_game_ratings.php:28:      mysql_query( $query )
-./scripts/data_report.php:106:         $result= mysql_query('SHOW PROCESSLIST', $dbcnx);
-./scripts/data_report.php:118:         $result= mysql_query("SHOW VARIABLES LIKE 'long_query_time'", $dbcnx);
-./scripts/data_report.php:326:            mysql_query("KILL $dbthread", $dbcnxctl);
-./scripts/data_report.php:339:      $result = mysql_query( $query, $dbcnx);
-./scripts/game_consistency.php:89:        if( !mysql_query( $s) )
-./scripts/game_consistency.php:122:      $result = mysql_query($query)
-./scripts/game_consistency.php:155:   $result = mysql_query($query)
-./scripts/game_consistency.php:187:   $result = mysql_query($query)
-./scripts/game_consistency.php:219:   $result = mysql_query($query)
-./scripts/game_consistency.php:248:   $result = mysql_query($query)
-./scripts/game_consistency.php:285:   $result = mysql_query("SELECT * FROM Games WHERE ID=$gid");
-./scripts/game_consistency.php:308:   $result = mysql_query( "SELECT * FROM Moves WHERE gid=$gid ORDER BY ID" )
-./scripts/translation_consistency.php:53:        if( !mysql_query( $s) )
-./scripts/update_translation_pages.php:176:         if( !mysql_query( $s) )
-./scripts/update_translation_pages.php:196:   $result = mysql_query($query) or die(mysql_error());
-./scripts/update_translation_pages.php:233:   $result = mysql_query($query) or die(mysql_error());
-./scripts/data_export.php:73:   $result = mysql_query( $query) or die(mysql_error());
-./scripts/data_export.php:120:   $result = mysql_query( $query) or die(mysql_error());
-./scripts/data_export.php:331:      $result = mysql_query( 'SHOW TABLES FROM ' . quoteit( $database) )
-./scripts/data_export.php:685:         mysql_query('SET SQL_QUOTE_SHOW_CREATE='
-./scripts/data_export.php:941:   $result = mysql_query( $query);
-./scripts/convert_from_old_forum.php:45:   $res0 = mysql_query( "SELECT * FROM forums" ) or die(mysql_error());
-./scripts/convert_from_old_forum.php:53:      mysql_query("INSERT INTO Forums SET " .
-./scripts/convert_from_old_forum.php:70:      $result_1 = mysql_query( $query ) or die(mysql_error());
-./scripts/convert_from_old_forum.php:89:            $result = mysql_query("SELECT ID as parent,PosIndex,Depth,Thread_ID FROM Posts " .
-./scripts/convert_from_old_forum.php:102:            $result = mysql_query("SELECT MAX(AnswerNr) AS answer_nr " .
-./scripts/convert_from_old_forum.php:143:         mysql_query( $query ) or die(mysql_error());
-./scripts/convert_from_old_forum.php:153:            mysql_query("UPDATE Posts SET Thread_ID=ID WHERE ID=$Thread_ID")
-./scripts/sql_game_export.php:121:   $result = mysql_query($query);
-./scripts/convert_posindex.php:47:        if( !mysql_query( $s) )
-./scripts/convert_posindex.php:72:   $result = mysql_query($query) or die(mysql_error());
-./translate.php:188:         or error('mysql_query_failed','translate.translation_query');
-./forum/admin.php:66:          or error('mysql_query_failed',"forum_admin.move.$action.max");
-./daily_cron.php:186:            or error('mysql_query_failed', "daily_cron.night_hours.update2($uid,$newclock)");
-./error.php:178:      case('mysql_query_failed'):
-./include/connect2mysql.php:90:         //error('mysql_query_failed','mysql_addslashes');
-./include/connect2mysql.php:258:function db_query( $debugmsg, $query, $errorcode='mysql_query_failed' )
-./include/connect2mysql.php:262:   //for debug: $result = ( preg_match( "/^(insert|update|delete)/i", $query )) ? 1 : mysql_query($query);
-./include/connect2mysql.php:274:   $result = mysql_query($query);
-./include/connect2mysql.php:394:         or error('mysql_query_failed', "check_password.get_password2($method)");
-./include/error_codes.php:117:         $arr_logid['mysql_query_failed'] = 1;
-./include/error_codes.php:127:         $arr_secret['mysql_query_failed'] = 0; // contains DB-query, but handle in error.php (for admin)
-./include/error_codes.php:243:         $arr['mysql_query_failed'] =
-./include/error_functions.php:284:         if( @mysql_query( $errorlog_query ) !== false )
-./include/admin_faq_functions.php:220:          or error('mysql_query_failed', "$dbgmsg.find_max2($parent)");
+* NTH: cache-bypassing with URL-argument:
+   A nice-to-have feature for the caching, which is not implemented yet would be
+   to allow certain admins to be able to bypass the caching by providing a specific
+   URL-parameter like 'bypass_cache=1' for example. This could be controlable with
+   the field Players.AdminOption.
 
-#--------------------------------------------------------------------------
-# mysql_exists_row
-./forum/class_forum_read.php:264:      $has_new = mysql_exists_row( "ForumRead::has_new_posts_in_forums($uid,$forum_id)", $query );
-./forum/class_forum_read.php:297:      $has_new = mysql_exists_row( "ForumRead::has_new_posts_in_all_forums($uid)", $query );
-./include/connect2mysql.php:359:function mysql_exists_row( $debugmsg, $query, $expected_rows=1 )
 
-#--------------------------------------------------------------------------
-# mysql_found_rows
-./waiting_room.php:190:   $wrtable->set_found_rows( mysql_found_rows('waiting_room.found_rows') );
-./translate.php:195:         $found_rows = mysql_found_rows('translate.found_rows');
-./forum/admin_show_forumlog.php:108:   $fltable->set_found_rows( mysql_found_rows('show_forumlog.found_rows') );
-./forum/search.php:231:      $found_rows = mysql_found_rows('forum_search.found_rows');
-./search_messages.php:170:   //$mtable->set_found_rows( mysql_found_rows('search_messages.found_rows') );
-./show_games.php:579:   $gtable->set_found_rows( mysql_found_rows('show_games.found_rows') );
-./list_contacts.php:176:   $ctable->set_found_rows( mysql_found_rows('list_contacts.found_rows') );
-./list_shapes.php:95:   $table->set_found_rows( mysql_found_rows('Shape.list.found_rows') );
-./features/list_votes.php:95:   $vtable->set_found_rows( mysql_found_rows('votelist.found_rows') );
-./features/list_features.php:114:   $ftable->set_found_rows( mysql_found_rows('featurelist.found_rows') );
-./list_bulletins.php:207:   $btable->set_found_rows( mysql_found_rows('Bulletin.list.found_rows') );
-./tournaments/roundrobin/edit_pools.php:435:   $uatable->set_found_rows( mysql_found_rows('Tournament.edit_pools.pools_unassigned.found_rows') );
-./tournaments/list_tournaments.php:200:   $ttable->set_found_rows( mysql_found_rows('Tournament.list_tournaments.found_rows') );
-./tournaments/ladder/view.php:162:      $ltable->set_found_rows( mysql_found_rows('Tournament.ladder_view.found_rows') );
-./tournaments/list_participants.php:131:   $tptable->set_found_rows( mysql_found_rows('Tournament.list_participants.found_rows') );
-./tournaments/list_news.php:122:   $tntable->set_found_rows( mysql_found_rows('Tournament.list_news.found_rows') );
-./tournaments/show_tournament_log.php:113:   $table->set_found_rows( mysql_found_rows('Tournament.show_tlog.found_rows') );
-./opponents.php:352:      $utable->set_found_rows( mysql_found_rows('opponents.found_rows') );
-./admin_show_errorlog.php:100:   $atable->set_found_rows( mysql_found_rows('admin_show_errorlog.found_rows') );
-./include/connect2mysql.php:286:function mysql_found_rows( $debugmsg )
-./include/quick/quick_handler.php:310:      $this->list_totals = mysql_found_rows(
-./list_surveys.php:114:   $table->set_found_rows( mysql_found_rows('Survey.list.found_rows') );
-./list_messages.php:165:   //$mtable->set_found_rows( mysql_found_rows('list_messages.found_rows') ); // too slow for so many msgs
-./users.php:224:   $utable->set_found_rows( mysql_found_rows('users.found_rows') );
-
-#--------------------------------------------------------------------------
-# mysql_single_fetch
-./message.php:675:         $row = mysql_single_fetch( 'message.handle', "SELECT Handle FROM Players WHERE ID=$uid LIMIT 1" );
-./message.php:697:   $game_row = mysql_single_fetch( "$dbgmsg.load_game",
-./scripts/recalculate_ratings2.php:195:      $urow = mysql_single_fetch( "recalc_ratings2.find_user1($uid,{$rca->ID})",
-./scripts/forum_consistency.php:143:      $row = mysql_single_fetch( "forum_consistency.read_thread.LastPost_Lastchanged($tid)",
-./scripts/experiments/bitfield_mysql_set.php:80:      $row= mysql_single_fetch( 'test.read',
-./scripts/translation_consistency.php:343:   $row = mysql_single_fetch("$dbgmsg.count.T.upd0",
-./scripts/translation_consistency.php:387:   $row = mysql_single_fetch("$dbgmsg.check.T.need_Updated",
-./scripts/data_export.php:642:      if( $row=mysql_single_fetch( false, $query) )
-./scripts/data_export.php:715:      if( $row=mysql_single_fetch( false,
-./scripts/data_export.php:913:   if( ($row=mysql_single_fetch( false, $query))
-./scripts/data_export.php:1029:   if( $row=mysql_single_fetch( false, 'SELECT VERSION() AS version') )
-./scripts/convert_from_old_forum.php:50:      $r = mysql_single_fetch( 'conv_forum', "SELECT MAX(SortOrder) FROM Forums", FETCHTYPE_ROW );
-./waiting_room.php:390:   $row = mysql_single_fetch( "waiting_room.load_wroom($gid)",
-./game_comments.php:46:   $game = mysql_single_fetch( 'game_comments.find_game',
-./admin_admins.php:103:         $row = mysql_single_fetch( "admin_admins.find_new_admin($newadmin)",
-./game_players.php:421:   $grow = mysql_single_fetch( "game_players.find.game($gid)", $query );
-./game_players.php:609:      $wrow = mysql_single_fetch( "game_players.build_form_add_waiting_room.find_wroom($gid)",
-./forum/admin.php:60:      $row = mysql_single_fetch( 'forum_admin.move.find',
-./forum/admin.php:64:      $row2 = mysql_single_fetch( 'forum_admin.move.max',
-./forum/admin.php:108:      $row = mysql_single_fetch( 'forum_admin.edit.find',
-./forum/admin.php:135:      $row = mysql_single_fetch( 'forum_admin.do_edit.find',
-./forum/admin.php:145:         if( mysql_single_fetch( 'forum_admin.do_edit.empty',
-./forum/admin.php:225:      $row = mysql_single_fetch( 'forum_admin.do_new.find', $query );
-./forum/post.php:81:      $row = mysql_single_fetch( "post_message.edit.find_post($uid,$edit)",
-./forum/post.php:132:         $row = mysql_single_fetch( "post_message.reply.find($forum,$parent)",
-./forum/post.php:139:         $row = mysql_single_fetch( "post_message.reply.max($parent)",
-./forum/post.php:266:      mysql_single_fetch( "approve_post.find_post($pid)",
-./forum/post.php:273:      mysql_single_fetch( "approve_post.find_thread($tid)",
-./forum/post.php:337:      mysql_single_fetch( "hide_post_update_trigger.find_thread($tid)",
-./forum/post.php:345:      mysql_single_fetch( "hide_post_update_trigger.find_forum($tid)",
-./forum/post.php:393:      mysql_single_fetch( "show_post.find_post($pid)",
-./forum/post.php:400:      mysql_single_fetch( "show_post.find_thread($tid)",
-./forum/post.php:437:      mysql_single_fetch( "recalc_thread_lastpost.find_lastpost($tid)",
-./forum/post.php:455:      mysql_single_fetch( "recalc_forum_lastpost.find_lastpost($fid)",
-./forum/forum_functions.php:1215:      $row = mysql_single_fetch( "Forum.fix_forum.read.LastPost($fid)",
-./forum/forum_functions.php:1225:      $row = mysql_single_fetch( "Forum.fix_forum.read.PostsInForum($fid)",
-./forum/forum_functions.php:1233:      $row = mysql_single_fetch( "Forum.fix_forum.read.ThreadsInForum($fid)",
-./forum/forum_functions.php:1313:      $row = mysql_single_fetch( "Forum::load_forum2($id)", $query );
-./forum/forum_functions.php:1521:      $row = mysql_single_fetch( "ForumThread.load_revision_history.find_post($post_id)", $qsql->get_select() )
-./forum/old_links_redirect.php:30:   $row = mysql_single_fetch( "forum_old_links_redirect($old_forum,$old_id)",
-./admin_users.php:142:      $urow = mysql_single_fetch( 'admin_users.find_user',
-./admin_users.php:345:   $row = mysql_single_fetch( "admin_users.save_user_find($user)",
-./gameinfo.php:103:   $grow = mysql_single_fetch( "gameinfo.find($gid)", $query );
-./confirm.php:544:   $row = mysql_single_fetch( "confirm.jump_to_next_game($gid,$uid)", $qsql->get_select() );
-./admin_password.php:41:      $row = mysql_single_fetch( "admin_password.find_user($user)", $query );
-./halfhourly_cron.php:41:   $row = mysql_single_fetch( 'halfhourly_cron.check_frequency',
-./clock_tick.php:41:   $row = mysql_single_fetch( 'clock_tick.check_frequency',
-./show_games.php:82:            $user_row = mysql_single_fetch( "show_games.find_player($uid,$uhandle)",
-./quick_status.php:74:   $player_row = mysql_single_fetch( "quick_status.find_player($uhandle)",
-./login.php:52:   $row = mysql_single_fetch( "login.find_player($uhandle)",
-./userinfo.php:54:   $row = mysql_single_fetch( "userinfo.find_player($uid,$uhandle)",
-./userinfo.php:87:      $gp_row = mysql_single_fetch( "userinfo.count_gameplayer($uid)",
-./admin_translators.php:135:      $userrow = mysql_single_fetch( 'admin_translators.transluser',
-./features/lib_votes.php:219:         $row = mysql_single_fetch( "feature.check_delete_feature({$this->id})",
-./features/lib_votes.php:537:      $row = mysql_single_fetch("feature::load_feature2($id)",
-./features/lib_votes.php:743:      $row = mysql_single_fetch( "FeatureVote::load_featurevote_summary($fid)", $query );
-./features/lib_votes.php:791:      $row = mysql_single_fetch("featurevote::load_feature2($fid,$voter)",
-./statistics.php:95:   $row = mysql_single_fetch( 'statistics.q2', $q2 );
-./statistics.php:105:   $row = mysql_single_fetch( 'statistics.q3', $q3 );
-./admin_do_translators.php:140:         $row = mysql_single_fetch( 'admin_do_translators.add.find_group',
-./admin_do_translators.php:162:      $row = mysql_single_fetch( 'admin_do_translators.user.find',
-./admin_do_translators.php:223:         $tmp = mysql_single_fetch( "admin_do_translators.user.translator($transluser)",
-./tournaments/include/tournament_properties.php:308:      return (bool)mysql_single_fetch( "TournamentProperties.isTournamentProperties($tid)",
-./tournaments/include/tournament_properties.php:359:         $row = mysql_single_fetch( "TournamentProperties.load_tournament_properties($tid)",
-./tournaments/include/tournament_games.php:301:      $row = mysql_single_fetch( "TournamentGames::load_tournament_game_by_gid.find_tgame($gid)",
-./tournaments/include/tournament_games.php:325:      $row = mysql_single_fetch( "TournamentGames::load_tournament_game_by_uid.find_tgame($tid,$ch_uid,$df_uid)",
-./tournaments/include/tournament_games.php:402:         $row = mysql_single_fetch( "TournamentGames::count_tournament_games($tid,$round_id)", $qsql->get_select() );
-./tournaments/include/tournament_games.php:422:      $row = mysql_single_fetch( "TournamentGames::count_games_started($tid,$round_id)", $qsql->get_select() );
-./tournaments/include/tournament_ladder.php:414:      $row = mysql_single_fetch( "TournamentLadder::load_max_rank($tid)", $qsql->get_select() );
-./tournaments/include/tournament_ladder.php:424:      $row = mysql_single_fetch( "TournamentLadder::count_tournament_ladder($tid)", $qsql->get_select() );
-./tournaments/include/tournament_ladder.php:442:      $row = mysql_single_fetch( "TournamentLadder::load_rank($tid,$rid,$uid)", $qsql->get_select() );
-./tournaments/include/tournament_ladder.php:462:      $row = mysql_single_fetch( "TournamentLadder::load_tournament_ladder_by_user($tid,$uid,$rid)",
-./tournaments/include/tournament_ladder.php:477:      $row = mysql_single_fetch( "TournamentLadder::load_tournament_ladder_by_rank($tid,$rank)",
-./tournaments/include/tournament_ladder.php:506:      $row = mysql_single_fetch( "TournamentLadder::load_tournament_ladder_by_user_rating($tid,$user_rating,$use_tourney_rating)",
-./tournaments/include/tournament_ladder.php:724:      $row = mysql_single_fetch( "$dbgmsg.ch", $query_part . "Challenger_uid=$uid" );
-./tournaments/include/tournament_ladder.php:727:      $row = mysql_single_fetch( "$dbgmsg.df", $query_part . "Defender_uid=$uid" );
-./tournaments/include/tournament_round.php:205:      return (bool)mysql_single_fetch( "TournamentRound::isTournamentRound($tid,$round)",
-./tournaments/include/tournament_round.php:282:         $row = mysql_single_fetch( "TournamentRound::load_tournament_round($tid,$round)",
-./tournaments/include/tournament_round.php:298:      $row = mysql_single_fetch( "TournamentRound::load_tournament_round_by_id($id)", $qsql->get_select() );
-./tournaments/include/tournament_participant.php:363:      $row = mysql_single_fetch( "TournamentParticipant.isTournamentParticipant($tid,$uid,$rid)",
-./tournaments/include/tournament_participant.php:389:         $row = mysql_single_fetch( "TournamentParticipant.load_tournament_participant($tid,$uid,$rid)",
-./tournaments/include/tournament_participant.php:507:      $row = mysql_single_fetch( "TournamentParticipant::check_rated_tournament_participants.find_unrated($tid)",
-./tournaments/include/tournament_extension.php:162:         $row = mysql_single_fetch( "TournamentExtension.load_tournament_extension($tid,$property)",
-./tournaments/include/tournament_ladder_props.php:669:      return (bool)mysql_single_fetch( "TournamentLadderProps::isTournamentLadderProps($tid)",
-./tournaments/include/tournament_ladder_props.php:685:      $row = mysql_single_fetch( "TournamentLadderProps::load_tournament_ladder_props($tid)",
-./tournaments/include/tournament_director.php:171:         $row = mysql_single_fetch( "TournamentDirector.load_tournament_director($tid,$uid)",
-./tournaments/include/tournament_director.php:188:         $row = mysql_single_fetch( "TournamentDirector.has_tournament_director($tid)",
-./tournaments/include/tournament_director.php:203:      $row = mysql_single_fetch( "TournamentDirector::count_tournament_directors($tid)",
-./tournaments/include/tournament_director.php:257:         $row = mysql_single_fetch( "TournamentDirector.load_user_row.find_user.id($uid)",
-./tournaments/include/tournament_director.php:266:         $row = mysql_single_fetch( "edit_director.find_user.handle($uid,$uhandle)",
-./tournaments/include/tournament_pool.php:228:      $row = mysql_single_fetch( "TournamentPool::exists_tournament_pool.find($tid,$round,$pool,$uid)",
-./tournaments/include/tournament_pool.php:244:      $row = mysql_single_fetch( "TournamentPool::count_tournament_pool($tid,$round,$pool)", $query );
-./tournaments/include/tournament.php:534:         $row = mysql_single_fetch( "Tournament.load_tournament($tid)", $qsql->get_select() );
-./tournaments/include/tournament_rules.php:739:         $row = mysql_single_fetch( "TournamentRules::load_tournament_rule($tid)",
-./tournaments/include/tournament_news.php:246:      $row = mysql_single_fetch( "TournamentNews.load_tournament_news_entry_by_query()",
-./tournaments/cron_tournaments.php:46:   $row = mysql_single_fetch( 'cron_tournament.check_frequency',
-./tournaments/cron_tournaments.php:99:   $row = mysql_single_fetch( 'cron_tournament.daily.check_frequency',
-./tournaments/cron_tournaments.php:118:   $row = mysql_single_fetch( 'cron_tournament.hourly.check_frequency',
-./people.php:156:         $lastUpd = mysql_single_fetch( 'people.faq_admins.lastupdate', $query);
-./people.php:278:            $tmp = mysql_single_fetch( 'people.translators.lastupdate', $query);
-./phorum/read.php:13:   $row = mysql_single_fetch( "forum_old_links_redirect($old_forum,$old_id)",
-./daily_cron.php:41:   $row = mysql_single_fetch( 'daily_cron.check_frequency',
-./daily_cron.php:139:      $row = mysql_single_fetch( "daily_cron.statistics.$key", $query);
-./include/translation_functions.php:174:   $row = mysql_single_fetch( "get_translation_group($group)",
-./include/classlib_userquota.php:125:      $row = mysql_single_fetch("UserQuota::load_user_quota.find($user_id)",
-./include/make_game.php:42:      $grow = mysql_single_fetch( "make_game.make_invite_game.dispute($disputegid)",
-./include/make_game.php:293:   $game_row = mysql_single_fetch( "$dbg.findgame",
-./include/classlib_user.php:215:         $row = mysql_single_fetch( $dbgmsg, $qsql->get_select() );
-./include/std_functions.php:1360:      $prev_msgrow = mysql_single_fetch( "$debugmsg.find_prev($from_id,$prev_mid)",
-./include/std_functions.php:2737:   $row = mysql_single_fetch( "count_messages_new($uid)",
-./include/std_functions.php:2756:   $row = mysql_single_fetch( "count_features_new($uid)",
-./include/std_functions.php:2981:      $game_row = mysql_single_fetch( "game_reference.find_game($gid)",
-./include/std_functions.php:3055:      if( $row = mysql_single_fetch( "tournament_reference.find_tournament($tid)", $query ) )
-./include/std_functions.php:3099:      if( $row = mysql_single_fetch( "survey_reference.find_survey($sid)", $query ) )
-./include/std_functions.php:3203:     if( $row=mysql_single_fetch( 'user_reference', $query ) )
-./include/connect2mysql.php:33:// fetch-types for mysql_single_fetch-function
-./include/connect2mysql.php:304:function mysql_single_fetch( $debugmsg, $query, $fetch_type=FETCHTYPE_ASSOC )
-./include/connect2mysql.php:391:      mysql_single_fetch( "check_password.get_password($method)",
-./include/wroom_control.php:182:      $game_row = mysql_single_fetch( "WC.join_waitingroom_game.find_game($wr_id,$my_id)", $query);
-./include/wroom_control.php:194:      $opponent_row = mysql_single_fetch('join_waitingroom_game.find_players',
-./include/wroom_control.php:391:      $game_row = mysql_single_fetch( "WC.delete_waitingroom_game.find_game($wr_id,$my_id)",
-./include/rating.php:533:   $row = mysql_single_fetch( "get_rating_at.find_data($uid,$date)",
-./include/rating.php:539:      $row = mysql_single_fetch( "get_rating_at.initial_rating($uid)",
-./include/db/ratinglog.php:173:      $row = mysql_single_fetch( "Ratinglog::load_ratinglog_with_query.find_ratinglog()",
-./include/db/waitingroom.php:284:      $row = mysql_single_fetch( "Waitingroom::load_wroom.find_wroom($wroom_id)", $qsql->get_select() );
-./include/db/waitingroom.php:295:      $row = mysql_single_fetch( "Waitingroom::load_wroom_by_query.find_wroom()", $qsql->get_select() );
-./include/db/survey_vote.php:135:      $row = mysql_single_fetch( "SurveyVote::load_survey_vote.find_surveyvote($soid,$uid)", $qsql->get_select() );
-./include/db/survey_option.php:212:      $row = mysql_single_fetch( "SurveyOption::load_survey_option.find_surveyoption($sopt_id)", $qsql->get_select() );
-./include/db/bulletin.php:151:      $row = mysql_single_fetch( "Bulletin.is_optimistic_lock_clash({$this->ID},{$this->LockVersion})",
-./include/db/bulletin.php:518:      $row = mysql_single_fetch( "Bulletin::load_bulletin.find_Bulletin($bid)", $qsql->get_select() );
-./include/db/bulletin.php:526:      $row = mysql_single_fetch( "Bulletin::load_bulletin_by_query()", $qsql->get_select() );
-./include/db/bulletin.php:750:      $row = mysql_single_fetch( 'Bulletin::count_bulletin_new', $qsql->get_select() );
-./include/db/bulletin.php:833:      $game_row = mysql_single_fetch( "Bulletin::load_multi_player_game($gid)",
-./include/db/games.php:425:      $row = mysql_single_fetch( "Games::load_game.find_game($gid)",
-./include/db/ratingchangeadmin.php:150:      $row = mysql_single_fetch( "RatingChangeAdmin::load_ratingchangeadmin_with_query.find_RatingChangeAdmin()",
-./include/db/shape.php:189:      $row = mysql_single_fetch( "Shape::load_shape.find_shape($shape_id)", $qsql->get_select() );
-./include/db/shape.php:200:      $row = mysql_single_fetch( "Shape::load_shape_by_name.find_shape($name)", $qsql->get_select() );
-./include/db/survey.php:283:      $row = mysql_single_fetch( "Survey::load_survey.find_survey($sid)", $qsql->get_select() );
-./include/db/survey.php:291:      $row = mysql_single_fetch( "Bulletin::load_survey_by_query()", $qsql->get_select() );
-./include/db/survey.php:381:      $row = mysql_single_fetch( "Survey::exists_survey_user($sid,$uid)",
-./include/message_functions.php:247:      $game_row = mysql_single_fetch( "game_settings_form($gid)", $query );
-./include/message_functions.php:1744:      $msg_row = mysql_single_fetch( "$dbgmsg.DgsMessage::load_message.find($mid)", $qsql->get_select() );
-./include/sgf_builder.php:385:         $gn_row = mysql_single_fetch( "SgfBuilder.load_player_game_notes.find_notes({$this->gid},$uid)",
-./include/cache_clock.php:58:         $row = mysql_single_fetch( "$dbgmsg.load_clock_ticks.find($clock_id)",
-./include/classlib_userconfig.php:297:         $src_row = mysql_single_fetch("ConfigBoard::load_config_board.find($uid)",
-./include/classlib_userconfig.php:545:      $row = mysql_single_fetch("ContactPages::load_config_pages.find($uid,$col_name)",
-./include/classlib_userconfig.php:726:      $row = mysql_single_fetch("ConfigTableColumns::load_config.find($uid,$col_name)",
-./include/classlib_profile.php:162:         $row = mysql_single_fetch( "profile.save_profile.find_user({$this->uid})",
-./include/classlib_profile.php:266:      $row = mysql_single_fetch("Profile::load_profile2($prof_id,$user_id)",
-./include/quick/quick_game_info.php:110:         $this->game_row = mysql_single_fetch( "QuickHandlerGameInfo.prepare.find_game3($gid)", $qsql->get_select() )
-./include/quick/quick_game_info.php:115:         $gn_row = mysql_single_fetch( "QuickHandlerGameInfo.prepare.find_gamenotes($gid,$uid)",
-./include/game_functions.php:225:         $this->game_row = mysql_single_fetch( 'add_time_opponent',
-./include/game_functions.php:530:      $row = mysql_single_fetch( "MultiPlayerGame::count_game_players($gid)",
-./include/game_functions.php:538:      $row = mysql_single_fetch( "MultiPlayerGame::is_game_player($gid,$uid)",
-./include/game_functions.php:602:      $grow = mysql_single_fetch( "$dbgmsg.load_master_uid($gid)",
-./include/game_functions.php:840:      $row = mysql_single_fetch( "GamePlayer::load_game_player($gid,$group_color,$group_order)",
-./include/game_functions.php:851:      $row = mysql_single_fetch( "GamePlayer::load_game_player_by_uid($gid,$uid)",
-./include/game_functions.php:863:      $row = mysql_single_fetch( "GamePlayer::load_uid_for_move($gid,$group_color,$group_order)",
-./include/game_functions.php:874:      $row = mysql_single_fetch( "GamePlayer::exists_game_player($gid,$uid,$flags)",
-./include/game_functions.php:1024:         $grow = mysql_single_fetch( "GameHelper::delete_running_game.check.gid($gid)",
-./include/game_functions.php:1075:      $grow = mysql_single_fetch( "GameHelper::delete_finished_unrated_game.check.gid($gid)",
-./include/game_functions.php:1209:      $row = mysql_single_fetch( "GameHelper::count_started_games($uid,$opp)",
-./include/game_functions.php:1288:      $grow = mysql_single_fetch( "GameHelper.load_game_row($gid).$dbgmsg",
-./include/game_functions.php:1971:         $urow_winner = mysql_single_fetch("GameFinalizer.should_reject_win_by_timeout.find_winner({$this->gid},$uid_winner)",
-./include/game_functions.php:1981:            $urow_loser = mysql_single_fetch("GameFinalizer.should_reject_win_by_timeout.find_loser({$this->gid},$uid_loser)",
-./include/contacts.php:238:      $row = mysql_single_fetch("contact.load_contact2($uid,$cid)",
-./include/goban_handler_dgsgame.php:96:      $game_row = mysql_single_fetch( "GobanHandlerDgsGame.load_board($gid,$movenum)",
-./include/board.php:245:         $row= mysql_single_fetch( 'board.load_from_db.movemessage',
-./include/board.php:1296:      $row= mysql_single_fetch( "board.fix_corrupted_move_table.moves: $gid",
-./include/board.php:1302:      $row = mysql_single_fetch( "board.fix_corrupted_move_table.max: $gid",
-./include/admin_faq_functions.php:35:      $row = mysql_single_fetch( "$dbgmsg.get_faq_group_id($tr_group)",
-./include/admin_faq_functions.php:45:      $row = mysql_single_fetch( "AdminFAQ::get_faq_entry_row($id)",
-./include/admin_faq_functions.php:78:         $row = mysql_single_fetch( "$dbgmsg.do_new.find_ref",
-./include/admin_faq_functions.php:87:         $row = mysql_single_fetch( "$dbgmsg.do_new.find_q1",
-./include/admin_faq_functions.php:93:            $row2 = mysql_single_fetch( "$dbgmsg.do_new.find_q2",
-./include/admin_faq_functions.php:104:         $row = mysql_single_fetch( "$dbgmsg.do_new.find1($fid)", $query );
-./include/admin_faq_functions.php:112:            $row = mysql_single_fetch( "$dbgmsg.do_new.find2($fid)", $query );
-./include/admin_faq_functions.php:124:            $order_row = mysql_single_fetch( "$dbgmsg.do_new.find_order($fid)",
-./include/admin_faq_functions.php:150:            $q_row = mysql_single_fetch( "$dbgmsg.do_new.find_qtext",
-./include/admin_faq_functions.php:173:               $a_row = mysql_single_fetch( "$dbgmsg.do_new.find_atext",
-./include/admin_faq_functions.php:212:      $row = mysql_single_fetch( "$dbgmsg.find($fid)",
-./include/admin_faq_functions.php:218:      $row2 = mysql_single_fetch( "$dbgmsg.find_max($parent)",
-./include/admin_faq_functions.php:251:      $row = mysql_single_fetch( "$dbgmsg.find($fid)",
-./include/admin_faq_functions.php:263:      $row2 = mysql_single_fetch("$dbgmsg.newparent", $query );
-./include/admin_faq_functions.php:268:         $row3 = mysql_single_fetch( "$dbgmsg.max_sortorder",
-./include/admin_faq_functions.php:363:      $exists_category = mysql_single_fetch( 'admin_faq.do_edit.empty',
-./game.php:548:      $gnrow = mysql_single_fetch( 'game.gamenotes',
-./users.php:202:      $row_upos = mysql_single_fetch( 'users.find_upos', $qsql_upos->get_select() . $order );
-
-#--------------------------------------------------------------------------
-# mysql_single_col
-./forum/class_forum_read.php:386:      $row = mysql_single_col( "ForumRead::trigger_recalc_forum_read_update.read_forum($uid,$forum_id)",
-./include/connect2mysql.php:325:function mysql_single_col( $debugmsg, $query, $keyed=false)
-./include/game_functions.php:4240:      $user_row = mysql_single_col( "NextGameOrder::load_user_next_game_order.find($uid)",
-./include/game_functions.php:4251:      $prio_row = mysql_single_col( "NextGameOrder::load_game_priority.find($gid,$uid)",
 
