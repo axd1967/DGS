@@ -308,7 +308,7 @@ if( !$is_down )
                    "Date: ".date(DATE_FMT, $msg_row['date']) . "\n" .
                    "From: $From\n" .
                    "Subject: ".mail_strip_html($msg_row['Subject']) . "\n\n" .
-                   wordwrap(mail_strip_html($msg_row['Text']),47) . "\n";
+                   wordwrap(mail_strip_html($msg_row['Text']),70) . "\n";
             }
             unset($msg_row);
          }
