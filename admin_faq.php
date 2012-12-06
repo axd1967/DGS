@@ -145,9 +145,11 @@ $info_box = '<ul>
 
    $fid = max(0, (int)@$_REQUEST['id']);
    $sql_term = get_request_arg('qterm', '');
-   $url_term = ( $sql_term ) ? URI_AMP.'qterm='.urlencode($sql_term) : '';
+   $url_term = ( (string)$sql_term != '' ) ? URI_AMP.'qterm='.urlencode($sql_term) : '';
 
    $view = get_request_arg('view', 0); // ''|0, all, [int]
+   if( $url_term )
+      $view = 'all'; // enforce expand-all on term-search
    $view_all = ( $view === 'all' );
    $view = (int)$view;
    if( $view < 0 ) $view = 0;
@@ -743,9 +745,7 @@ function show_preview( $level, $question, $answer, $reference, $id='preview', $r
    {
       echo "<table class=FAQ><tr><td class=FAQread>\n";
       echo faq_item_html( 0);
-      echo faq_item_html( $level, $question, $answer,
-                  $level == 1 ? "href=\"#$id\"" : "name=\"$id\"",
-                  $rx_term);
+      echo faq_item_html( $level, $question, $answer, ( $level == 1 ? "href=\"#$id\"" : "name=\"$id\"" ), '', $rx_term );
       echo faq_item_html(-1);
       echo "</td></tr></table>\n";
    }
