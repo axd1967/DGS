@@ -41,6 +41,8 @@ require_once( "include/std_functions.php" );
       'S4' => 'edit_vacation.php',
       // shortcut to editing profile
       'S5' => 'edit_profile.php',
+      // my-running-MPGs
+      'S6' => "show_games.php?uid=$my_id&mp=1",
    );
 
    // get and check args
