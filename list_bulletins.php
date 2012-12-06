@@ -43,9 +43,6 @@ $GLOBALS['ThePage'] = new Page('BulletinList');
    $was_admin = $is_admin = Bulletin::is_bulletin_admin();
    $mine = (@$_REQUEST['mine']) ? 1 : 0;
    $no_adm = ($mine || @$_REQUEST['no_adm']) ? 1 : 0;
-   //FIXME later
-   //$no_adm = (@$_REQUEST['no_adm']) ? 1 : 0;
-   //if( $mine && !$was_admin ) $no_adm = 1;
    if( $no_adm )
       $is_admin = false;
    $view_edit = $is_admin || $mine;
@@ -81,6 +78,8 @@ $GLOBALS['ThePage'] = new Page('BulletinList');
       {
          $status_filter_array[T_('Admin#B_status')] =
             "B.Status IN ('".BULLETIN_STATUS_PENDING."','".BULLETIN_STATUS_SHOW."')";
+         $status_filter_array[T_('Fresh#B_status')] =
+            "B.Status IN ('".BULLETIN_STATUS_NEW."','".BULLETIN_STATUS_PENDING."')";
          $idx_status_default = 3;
       }
       else //if( $mine )
