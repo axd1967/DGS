@@ -351,6 +351,7 @@ span.Maintenance {
 img.Action {
    margin: 1px 2px 0px 2px;
    padding: 0px;
+   vertical-align: middle;
 }
 
 table.Table td.GameSettings img,
