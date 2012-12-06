@@ -74,7 +74,7 @@ take up to 50 secs.
 
 Therefore an analysis on database-queries was done (see Appendix (A)) to identify
 queries, that are worth caching to reduce the server-load. The ideal candidates
-would be queries that only dependent on a small set of variables, are often
+would be queries that only are dependent on a small set of variables, are often
 loaded and are not updated too frequently. If a data-set is updated and if it's
 cached, the cache-entry must be either invalidated or the expire-time must be
 chosen so small, that the invalidation of the cache-entry is not necessary
