@@ -1,4 +1,1560 @@
-[...]
+==================================================================
+Release [2012-06-08] - DGS 1.0.15 - CVS-tag [release-1_0_15-20120608] on branch [DGS-stable-201206]
+
+# History:
+2012-06-10: release 1.0.15 (from CVS-HEAD)
+2012-12-06: final bugfixes for release DGS 1.0.15 (from CVS-HEAD)
+
+
+2012-12-06 juga
+
+### ----- release-1_0_15-20120608 -----
+
+   * include/std_functions.php (echo_dragon_top_bar),
+     bookmark.php:
+   - added my-running-multi-player-games in topbars bookmark-selectbox
+
+   * include/filter.php (SearchFilter.add_filter;
+       Filter.get_url_parts, ~.build_generic_input_text_elem, ~.build_generic_selectbox_elem,
+         ~.build_generic_checkbox_elem),
+     include/filterlib_gametype.php (FilterGameType.get_input_element):
+   - bugfix:
+     - prefix-using SearchFilter did not work for GameType-filter checkbox
+       with unprefixed form-field-name
+     - check if filters form-field-name needs a prefix
+
+   * include/db/bulletin.php (Bulletin.allow_bulletin_user_edit),
+     include/globals.php (CSS_VERSION),
+     list_bulletins.php, skins/dragon/screen.css:
+   - bugfix: always allow bulletin-edit for own bulletins
+   - bulletin: add Fresh-status-view (NEW+PENDING) in status-filter for admin
+
+   * admin_faq.php (show_preview):
+   - bugfixes for FAQ-editor:
+     - enforce expand-all on term-search
+     - mark search-term in preview of entry-edit
+
+   * halfhourly_cron.php:
+   - increase wordwrap for email-notification message: 47 -> 70
+
+2012-12-03 juga
+
+   * statistics.php (show_stats_default):
+   - bugfix: pass all URL-args from parent statistics-page to image-generating page (size, no_cache)
+
+   * specs/caching.txt, INSTALL:
+   - documented full specs for all kind of caching in use for DGS
+
+2012-11-25 juga
+
+   * features/lib_votes.php (Feature.allow_edit),
+     features/edit_feature.php:
+   - bugfix: keep old-status to check on preview
+   - bugfix: features on LIVE-status can not be edited anymore
+   - bugfix: show feature-points-added also if not super-admin
+
+   * include/game_functions.php (GameHelper.extend_query_with_game_prio),
+     scripts/game_consistency.php,
+     confirm.php (jump_to_next_game):
+   - bugfix: use table-alias GPRIO for GamesPriority-table to avoid ambiguity
+     with GamePlayers-table-alias GP
+
+   * show_games.php:
+   - bugfix: add column for GamesPriority for MY-running-games
+
+2012-11-24 juga
+
+   * include/std_functions.php (send_email):
+   - bugfix: replace CRLF in message-body with LF only
+
+2012-11-19 juga
+
+   * include/game_functions.php (GameSetupChecker.check_wroom_count):
+   - limiting waiting-room entries a user can offer also for starting MPGs
+     even if wanting to invite-only-MPG
+   - skip count-check if WROOM_MAX_ENTRIES <= 0
+
+2012-11-16 juga
+
+   * include/game_functions.php (WROOM_MAX_ENTRIES, GameSetupChecker.check_wroom_count),
+     new_game.php (handle_add_game):
+   - limiting waiting-room entries a user can offer, max. 4 entries, not restricted for MPGs
+     - see http://www.dragongoserver.net/features/vote_feature.php?fid=2
+
+2012-11-12 juga
+
+   * include/gamelist_control.php (GameListControl.build_games_query),
+     include/quick/quick_game_info.php (QuickHandlerGameInfo.prepare),
+     include/quick/quick_game_list.php (QuickHandlerGameList.prepare),
+     scripts/updates/database_changes_1_0_14_to_1_0_15.mysql,
+     show_games.php:
+   - added GamesPriority for my running games, disabled table-column per default
+   - quick-suite: add GamesPriority for running game only if specified in WITH-option
+-----------
+-- disable added GamesPriority for my running games per default
+UPDATE ConfigPages
+   SET ColumnsGamesRunningUser2 = ColumnsGamesRunningUser2 & ~0x8000 ;
+-----------
+
+2012-10-26 juga
+
+   * forum/class_forum_read.php (ForumRead.load_global_new),
+     forum/post.php (recalc_thread_lastpost),
+     scripts/updates/database_changes_1_0_14_to_1_0_15.mysql,
+     specs/forums.txt:
+   - bugfix:
+     - Posts.Lastchanged must not be updated if all thread-posts are hidden,
+       which happened in moderated forums editing shown-posts of single-post-threads
+     - recalculate forum-NEW-marks if Players.ForumReadNew < 0, used for data-fix
+-----------
+-- fix Posts.Lastchanged for single-post threads that once were hidden due to rejecting or re-editing
+UPDATE Posts
+   SET Lastchanged=Time WHERE ID=Thread_ID AND PostsInThread=1 AND PosIndex >'' AND Time <> Lastchanged ;
+
+-- trigger recalc of NEW forum-entries
+UPDATE Players
+   SET ForumReadNew=-1 WHERE ForumReadNew > 0 ;
+-----------
+
+   * include/game_functions.php (GameHelper.load_cache_game_row):
+   - do not refresh cache with Games-row if read from cache, but let it expire first instead
+
+2012-10-23 juga
+
+   * tournaments/include/tournament_pool_classes.php (PoolViewer.make_single_pool_table),
+     include/table_columns.php (Table.make_add_column_form):
+   - bugfix: call_user_func_array() requires calling vars-by-ref notation for PHP5.3
+
+   * include/connect2mysql.php:
+   - bugfix: replaced getmicrotime() with direct call microtime() to avoid include
+
+   * include/graph.php (TTF_PATH):
+   - cleared default font-path for TTFs
+
+   * include/std_functions.php (send_email, split_url),
+     halfhourly_cron.php:
+   - disable error-log of sending-mail
+   - cleanup: replaced deprecated PHP-function split() by preg_split()
+
+   * scripts/data_export.php:
+   - cleanup: replaced deprecated PHP-function ereg_replace() by preg_replace()
+
+   * scripts/experiments/analyze-slow_log.php:
+   - cleanup: replaced deprecated PHP-function mysql_escape_string() by mysql_real_escape_string()
+
+2012-10-21 juga
+
+   * edit_profile.php (parse_edit_form):
+   - bugfix: change of night-time was not possible
+
+   * include/dgs_cache.php (ApcCache.cache_info),
+     scripts/dgs_cache_admin.php (build_list_cache_config):
+   - bugfix: don't count global misses for APC-cache
+
+   * include/gamelist_control.php (GameListControl.build_games_query):
+   - bugfix: score for multi-player-game was wrongly shown
+
+2012-10-18 juga
+
+   * include/board.php (Board.load_from_db):
+   - bugfix: fix checking of moves on loading shape-game; was from optimize-attempt
+
+2012-10-16 juga
+
+   * include/game_functions.php (GameHelper.load_cache_game_notes):
+   - no cache-refresh on loading game-notes
+
+2012-10-15 juga
+
+   * scripts/dgs_cache_admin.php (build_list_cache_config):
+   - bugfix: no cache-info for NONE-cache-type
+   - bugfix: show APC-cache-misses only for SUM
+
+2012-10-14 juga
+
+   * include/dgs_cache.php (AbstractCache.cache_info; ApcCache.cache_info, ~.getHitInfo; FileCache.cache_info),
+     scripts/dgs_cache_admin.php (build_list_cache_config):
+   - dgs-cache-admin: added hits & misses in cache-group-overview for each cache-group if available
+     - FileCache: hits & misses are stored in array as APC-cache-entry 'CacheGroups'
+     - ApcCache:  hits & misses can be retrieved in apc_cache_info('user'), but only with global misses-count
+
+   * include/db/bulletin.php (Bulletin.load_cache_bulletins):
+   - store only Bulletin-original-row-data in cache instead of full Bulletin including row
+     in sub-User-object
+
+   * include/dgs_cache.php (ApcCache.cache_cleanup, ~.cache_info, ~.saveHit, ~.get_cache_entries;
+       FileCache.cache_fetch),
+     scripts/dgs_cache_admin.php:
+   - dgs-cache-admin:
+     - always use full-list for cache-group-overview
+     - added cache-group-specific cache-cleanup and cache-clear for APC-cache
+     - retrieved size and count of cache-entries for APC-cache
+   - store 'CacheGroups'-entry in APC-cache saving cache-hits & cache-misses for FileCache
+
+   * scripts/dgs_cache_admin.php (build_list_cache_config):
+   - dgs-cache-admin: added cache-count/size for cache-types and totals
+
+   * include/cache_globals.php ($ARR_CACHE_GROUP_CLEANUP),
+     include/classlib_userconfig.php,
+     include/message_functions.php,
+     tournaments/include/tournament_cache.php:
+   - adjusted cache-expire-time and cleanup-expire-time for various cache-groups:
+     config-pages 1h -> 1d, folders 30min -> 1d,
+     tourney-director/tladder-props/properties/rules/round 1h -> 1d
+
+   * include/dgs_cache.php (AbstractCache.cache_info; ApcCache.cache_info; FileCache.cache_info),
+     scripts/dgs_cache_admin.php (build_list_cache_config):
+   - dgs-cache-admin: added total size and entry-count for cache-group overview
+
+   * include/dgs_cache.php (FileCache.cache_cleanup; DgsCache.cleanup_cache):
+   - bugfix: calculate group-expire for cache-cleanup is absolute not relative
+   - optimize: check filemtime() on file only if needed
+
+   * scripts/dgs_cache_admin.php (build_file_list_cache_group, _compare_cache_files_mtime):
+   - sort cache-file-entries by last-changed-time
+
+   * daily_cron.php:
+   - bugfix: fix bad name of include-file
+
+   * include/std_functions.php (send_message, delete_cache_message_list),
+     include/message_functions.php (update_count_message_new),
+     edit_folders.php:
+   - bugfix: refactored MessageListBuilder::delete_cache_message_list()
+     into 'include/std_functions.php' to avoid circular dependency in send_message()
+
+   * scripts/dgs_cache_admin.php (build_file_list_cache_group):
+   - show table-row for listing cache-group-content
+
+   * include/table_columns.php (class Table, ~.build_cell_rownum):
+   - added RowNumDiff to control ROW_NUM-column start-value for Table
+
+2012-10-13 juga
+
+   * features/list_features.php:
+   - bugfix: reduce new-feature-count for main-menu by amount of changed neutral-votes
+
+   * forum/forum_functions.php (ForumPost.copy_post):
+   - bugfix: edit existing post showed empty forum-messagebox
+
+   * tournaments/show_tournament_log.php:
+   - bugfix: FOUND-ROWS() is not configured
+
+   * include/cache_globals.php (CACHE_GRP_TLADDER, $ARR_CACHE_GROUP_NAMES, $ARR_CACHE_GROUP_CLEANUP),
+     include/config.php ($DGS_CACHE_GROUPS),
+     tournaments/include/tournament_ladder.php (TournamentLadder.remove_user_from_ladder, ~.change_user_rank,
+       ~.add_user_to_ladder, ~.delete_ladder, ~.seed_ladder, ~.check_participant_registrations,
+       ~.load_cache_tournament_ladder, ~.determine_ladder_rank, ~.delete_cache_tournament_ladder),
+     tournaments/include/tournament_gui_helper.php (TournamentGuiHelper.build_tournament_ladder_standings),
+     tournaments/include/tournament_helper.php (TournamentHelper.process_tournament_game_end),
+     tournaments/ladder/challenge.php, tournaments/ladder/edit_props.php, tournaments/ladder/view.php,
+     tournaments/cron_tournaments.php, tournaments/view_tournament.php:
+   - use caching to load tournament-ladder
+     - invalidate cache on user-joining-tournament, adding-user, removing-user, ladder-challenge,
+       processing-game-end, delete-ladder, seed-ladder, edit-ladder-props, change-user-rank by T-director
+     - cache with expire of 1 hour not invalidated on processing-rank-period, crowning-ladder-king
+     - optimizing cache-clearing for processing tournament-game-end per tournament instead of per T-game
+     - optimizing db-queries loading tournament-ladder-rank using ladder-iterator for tournament-standings
+       by refactoring loading ladder-iterator
+
+   * tournaments/include/tournament_ladder.php (TournamentLadder.check_participant_registrations):
+   - uncommented/fixed auto-removing of user without fixing TLadder.Rank for remaining ladder-entries
+
+   * tournaments/include/tournament_utils.php (TournamentUtils.get_tournament_ladder_notes_user_removed),
+     tournaments/include/tournament_ladder_props.php (TournamentLadderProps.build_notes_props),
+     tournaments/include/tournament_ladder.php (TournamentLadder.notify_user_removal),
+     tournaments/ladder/admin.php, tournaments/ladder/retreat.php:
+   - cleanup: refactored TournamentLadder::get_notes_user_removed() into
+     TournamentUtils::get_tournament_ladder_notes_user_removed() to avoid dependency of TournamentLadder
+     in TournamentLadderProps-class
+
+   * include/dgs_cache.php (AbstractCache.cache_store_group):
+   - keeping cache-group-entries unique
+
+   * include/std_classes.php (ListIterator.hasIndex, ~.rescanIndex):
+   - bugfix for rescanning index for ListIterator
+
+   * tournaments/include/tournament_ladder_props.php (TournamentLadderProps.fill_ladder_challenge_range,
+       ~.determine_ladder_rating_pos),
+     tournaments/include/tournament_ladder.php (TournamentLadder.find_ladder_rating_pos)
+     tournaments/ladder/challenge.php:
+   - cleanup: optimized db-queries to determine theoretical position of user in ladder sorted by rating,
+     refactored TournamentLadderProps.find_ladder_rating_pos() into TLP.determine_ladder_rating_pos()
+     and TournamentLadder::find_ladder_rating_pos()
+
+2012-10-12 juga
+
+   * quick_do.php, quick_status.php:
+   - added HTTP-header Access-Control-Allow-Origin to allow cross-site-scripting
+
+   * tournaments/list_tournaments.php:
+   - show tournament-notes only on demand
+
+2012-10-09 juga
+
+   * include/cache_globals.php (CACHE_GRP_TGAMES, $ARR_CACHE_GROUP_NAMES, $ARR_CACHE_GROUP_CLEANUP),
+     include/std_classes.php (ListIterator.to_string, ~.getItemRows, ~.rescanIndex),
+     include/config.php ($DGS_CACHE_GROUPS),
+     tournaments/include/tournament_games.php (TournamentGames.update_tournament_game_wait,
+       ~.delete_cache_tournament_games),
+     tournaments/include/tournament_helper.php (TournamentHelper.process_tournament_game_end,
+       ~.start_tournament_round_games),
+     tournaments/include/tournament_cache.php (TournamentCache.load_cache_tournament_games),
+     tournaments/ladder/challenge.php, tournaments/ladder/view.php,
+     tournaments/roundrobin/view_pools.php, tournaments/game_admin.php:
+   - use caching to load tournament-games
+     - invalidate cache on setting tourney-game-end by admin, processing game-end by cron,
+       starting tourney-game for round-robin-tourney, starting ladder-challenge
+
+   * include/wroom_control.php (WaitingroomOffer.calculate_offer_settings),
+     include/gui_functions.php (echo_image_game_players):
+   - add more info about free-slots in waiting-room on MPG-icon tooltip
+
+   * include/message_functions.php (update_count_message_new; MessageListBuilder.message_list_body,
+       ~.message_list_query, ~.load_cache_message_list, ~.delete_cache_message_list),
+     include/cache_globals.php (CACHE_GRP_MSGLIST, $ARR_CACHE_GROUP_NAMES, $ARR_CACHE_GROUP_CLEANUP),
+     include/config.php ($DGS_CACHE_GROUPS),
+     include/std_functions.php (send_message),
+     edit_folders.php, list_messages.php, search_messages.php, status.php:
+   - use caching to load message-list for status-page
+     - invalidate cache on sending-message, change-msg-folder, change-status-folders
+     - refactored message_list_query() into MessageListBuilder-class
+   - added link to show all messages if there are more than 20 messages shown on status-page
+
+2012-10-08 juga
+
+   * include/db/bulletin.php (class Bulletin, ~.new_from_row, ~.mark_bulletin_as_read,
+       ~.update_count_bulletin_new, ~.update_bulletin_count_players, ~.load_cache_bulletins,
+       ~.delete_cache_bulletins, ~.update_cache_bulletins_global),
+     include/cache_globals.php (CACHE_GRP_BULLETINS),
+     include/config.php ($DGS_CACHE_GROUPS),
+     rss/status.php, quick_status.php, status.php:
+   - use caching to load bulletins
+     - invalidate cache on changed global-bulletin/changed-bulletin-count for user
+     - check if global bulletin changed-time needs refresh of user-specific loading of bulletins
+
+   * include/quick/quick_bulletin.php (QuickHandlerBulletin.prepare):
+   - bugfix: only return bulletins on SHOW-status
+
+2012-10-07 juga
+
+   * include/std_functions.php, features/list_features.php, features/list_votes.php,
+     forum/admin_show_forumlog.php, forum/read.php, forum/search.php,
+     tournaments/list_directors.php, tournaments/list_news.php,
+     tournaments/list_participants.php, tournaments/list_tournaments.php,
+     admin_show_errorlog.php, game_players.php, gameinfo.php, list_bulletins.php,
+     list_contacts.php, list_shapes.php, list_surveys.php, message_thread.php, opponents.php,
+     search_messages.php, show_games.php, status.php, users.php, waiting_room.php:
+   - cleanup: remove old debugging-code with $DEBUG/$DEBUG_SQL
+
+   * include/game_functions.php (GameAddTime.add_time_opponent;
+       GameHelper.delete_running_game, ~.load_cache_status_games, ~.delete_cache_status_games;
+       FairKomiNegotiation.save_komi;
+       GameFinalizer.finish_game;
+       NextGameOrder.persist_game_priority),
+     include/cache_globals.php (CACHE_GRP_GAMELIST_STATUS, $ARR_CACHE_GROUP_NAMES, $ARR_CACHE_GROUP_CLEANUP),
+     include/quick/quick_game.php (QuickHandlerGame.process_cmd_play),
+     include/config.php ($DGS_CACHE_GROUPS),
+     include/make_game.php (create_game),
+     status.php (load_games_to_move),
+     confirm.php, quick_play.php:
+   - use caching to load games-list for status-page,
+     - invalidate cache on game-move, game-end, add-time, game-prio-change, create-game, start-FK-game,
+       delete-game, change-next-game-order
+     - no cache-invalidation on start/end-vacation, clock-tick, timeleft-fix-script, opp-name-change,
+       opp-rating-change, user nighttime-change, opp-last-access-change
+       as 1 minute is a short enough expire-period to bear not showing the latest updates
+     - caching for 1 min if players last-access-time was within one minute thereby saving cache-space
+     - check if db-query changed by comparing stored checksum stored in cache-value
+   - re-arranged clearing QST-cache
+
+2012-10-05 juga
+
+   * include/dgs_cache.php (class FileCache, ~.set_unlink_expired, ~.set_read_expired, ~.cache_fetch,
+         ~.cache_cleanup, ~.cache_clear, ~.get_cache_files, ~.get_cache_file;
+       AbstractCache.cache_clear;
+       ApcCache.cache_clear;
+       DgsCache.get_cache, ~.cleanup_cache)
+     scripts/dgs_cache_admin.php (build_list_cache_config, build_cleanup_cycle, build_timeunit,
+       build_file_list_cache_group, build_view_cache_entry),
+     include/cache_globals.php ($ARR_CACHE_GROUP_NAMES),
+     skins/dragon/screen.css, scripts/index.php, scripts/apc_cache_info.php:
+   - added DGS-Cache Manager to administrate dgs-caching for APC- and File-cache
+     - list all cache-groups with group-name, cache-type and cleanup cycle
+     - clear APC-cache and File-cache
+     - cleanup expired entries of File-Cache
+     - list of single cache-group with all its cache-file-entries
+     - view single cache-file-entry with extra-info like size, last-change and last-access time
+     - delete single cache-file-entry
+     - allow to fetch entry from file-cache without deleting file on error or if expired for admin-mode
+     - allow to bypass maintenance-mode for admin-mode
+
+   * scripts/apc.php:
+   - added APC-manager script (not live-version)
+
+2012-10-04 juga
+
+   * forum/forum_functions.php (display_posts_pending_approval;
+       DisplayForum.forum_message_box, ~.draw_post;
+       ForumThread.load_posts, ~.load_revision_history;
+       class ForumPost, ~.copy_post, ~.allow_post_reply, ~.format_flags, ~.to_string, ~.new_from_row,
+         ~.allow_post_read_only),
+     scripts/updates/database_changes_1_0_14_to_1_0_15.mysql,
+     include/error_codes.php (ErrorCode.init),
+     forum/post.php (post_message),
+     specs/db/dragon-ddl.sql, specs/db/table-Posts.txt, specs/forums.txt,
+     forum/list.php, forum/read.php:
+   - forum: added read-only thread
+     - only admin executives can create read-only on starting a new thread
+     - reply only allowed by admin executives
+     - show '[Read-Only]' behind subject for thread-posts-view on thread-post and for thread-list
+-----------
+-- add read-only flag for threads
+ALTER TABLE Posts
+   ADD Flags tinyint unsigned NOT NULL default '0' AFTER Thread_ID ;
+-----------
+
+   * include/cache_globals.php (CACHE_GRP_FORUM, CACHE_GRP_FORUM_NAMES),
+     include/config.php ($DGS_CACHE_GROUPS),
+     forum/forum_functions.php (Forum.fix_forum, ~.load_cache_forum, ~.delete_cache_forum,
+       ~.load_cache_forum_names, ~.delete_cache_forum_names),
+     forum/post.php (post_message, approve_post, hide_post, show_post, recalc_forum_lastpost),
+     forum/admin.php, forum/list.php, forum/read.php, forum/search.php,
+     scripts/forum_consistency.php:
+   - use caching to load single forum and forum-names, invalidate cache on Forums-table-changes
+   - cleanup: don't load thread/forum-reads for writing new-topic
+
+2012-10-03 juga
+
+   * include/game_functions.php (GameAddTime.add_time_opponent;
+       GameHelper._delete_base_game_tables; ~.load_cache_game_row, ~.delete_cache_game_row,
+         ~.load_cache_game_notes;
+       FairKomiNegotiation.save_komi;
+       GameFinalizer.finish_game),
+     include/cache_globals.php (CACHE_GRP_GAMES, $ARR_CACHE_GROUP_CLEANUP),
+     include/quick/quick_game.php (QuickHandlerGame.process_cmd_play),
+     include/quick/quick_game_info.php (QuickHandlerGameInfo.prepare),
+     include/sgf_builder.php (SgfBuilder.load_player_game_notes)
+     include/config.php ($DGS_CACHE_GROUPS),
+     include/make_game.php (create_game),
+     tournaments/include/tournament_ladder.php (TournamentLadder.remove_user_from_ladder),
+     scripts/fix_games_timeleft.php (update_games_timeoutdate),
+     admin_game.php, confirm.php, game.php, quick_play.php:
+   - use caching to load Games-row for viewing game-page, invalidate cache on Games-table update;
+     except for starting/ending-vacation and Players-update (name, rating, vacation) the delay of 10mins
+     is accepted as cache-delete would require additional queries to find affected game-IDs
+   - renamed GameHelper::load_game_notes() -> ::load_cache_game_notes()
+
+2012-09-30 juga
+
+   * include/cache_globals.php, include/connect2mysql.php, include/gui_functions.php,
+     include/quick_common.php, include/std_functions.php, scripts/data_export.php,
+     scripts/translation_consistency.php, tournaments/cron_tournaments.php,
+     rss/status.php, wap/status.php, admin_faq.php, clock_tick.php, daily_cron.php,
+     halfhourly_cron.php, list_contacts.php, opponents.php, quick_status.php,
+     ratinggraph.php, ratingpng.php, sgf.php, statisticspng.php, status.php, users.php:
+   - use consts SECS_PER_MIN/HOUR/DAY instead of numbers where possible
+
+   * include/dgs_cache.php (AbstractCache.cache_cleanup; ApcCache.cache_cleanup; FileCache.cache_cleanup;
+       DgsCache.get_cache, ~.cleanup_cache),
+     include/cache_globals.php (SECS_PER_MIN, SECS_PER_HOUR, SECS_PER_DAY, $ARR_CACHE_GROUP_CLEANUP),
+     include/globals.php (CLOCK_CRON_HOUR),
+     include/quick_common.php,
+     scripts/updates/database_changes_1_0_14_to_1_0_15.mysql,
+     scripts/updates/other_changes_1_0_14_to_1_0_15.txt,
+     specs/db/dragon-data.sql,
+     cron_chained.php,
+     hourly_cron.php,
+     INSTALL:
+   - added hourly-cron to cleanup expired cache-entries
+     - configure cleanup for expired cache-entries;
+       cache-groups not listed uses expire-time of CACHE_GRP_DEFAULT
+     - moved consts SECS_PER_MIN/HOUR/DAY from 'include/quick_common.php' into 'include/cache_globals.php'
+-----------
+-- added hourly-cron to cleanup expired cache-entries
+INSERT INTO Clock SET ID=208,Lastchanged=0 ;
+-----------
+
+   * tournaments/include/tournament_cache.php (TournamentCache.load_cache_tournament_news),
+     include/game_functions.php (GameHelper.load_game_notes, ~.update_game_notes),
+     include/classlib_userconfig.php (ConfigBoard.load_config_board),
+     include/classlib_profile.php (Profile.load_profiles),
+     include/message_functions.php (load_cache_folders),
+     include/std_functions.php (check_for_observers),
+     include/cache_globals.php:
+   - added cache-size-estimations for cache-groups
+   - changed cache-expire-times for cache-groups:
+     - TournamentNews: 1h -> 1d
+     - GameNotes: 10min -> 30min
+     - ConfigBoard: 1h -> 1d
+     - Profile: 1h -> 1d
+     - Folders: 30min -> 1h
+     - Observers: 10min -> 30min
+
+   * include/dgs_cache.php (class DgsCache, ~.get_cache_type, ~.get_cache_impl, ~.get_cache),
+     include/config.php (DGS_CACHE, DBG_CACHE, $DGS_CACHE_GROUPS):
+   - extended server-config:
+     - added mapping for all cache-groups to specific cache-type (NONE, APC, FILE)
+       with fallback to default cache-type (DGS_CACHE) if not set
+     - added DBG_CACHE for cache-debugging
+
+   * tournaments/include/tournament_result.php (TournamentResult.insert, ~.update, ~.delete,
+       ~.delete_cache_tournament_result),
+     tournaments/include/tournament_cache.php (TournamentCache.load_cache_tournament_results),
+     tournaments/include/tournament_gui_helper.php (TournamentGuiHelper.build_tournament_results),
+     include/cache_globals.php (CACHE_GRP_TRESULT):
+   - use caching to load TournamentResult, invalidate cache on tournament-result-insert/update/delete
+   - show default-sort for tournament-result-table
+
+   * include/dgs_cache.php (AbstractCache.cache_fetch, ~.cache_store, ~.cache_store_array,
+         ~.cache_delete, ~.cache_store_group, ~.cache_delete_group;
+       class ApcCache;
+       class FileCache.build_cache_filename, ~.cache_fetch, ~.cache_store, ~.cache_delete;
+       class DgsCache.get_cache, ~.fetch, ~.store, ~.delete, ~.delete_group),
+     include/cache_globals.php (MAX_CACHE_GRP):
+   - use subdirs for FileCache to prevent too many files in one dir
+     - create all potential subdirs for caching in FileCache-constructor
+     - changed signature of cache-methods to allow passing cache-group to file-cache
+   - disable caching on server maintenance mode
+
+2012-09-29 juga
+
+   * include/dgs_cache.php (AbstractCache.is_persistent_cache;
+       ApcCache.is_persistent_cache;
+       class FileCache, ~.build_cache_filename, ~.is_persistent_cache, ~.cache_fetch, ~.cache_store,
+         ~.cache_delete;
+       class DgsCache, ~.is_persistent_cache),
+     include/cache_globals.php (CACHE_TYPE_FILE):
+   - added FileCache-implementation as alternative to shared-mem-cache and for very large data-blocks
+     by adapting Sabre_Cache_Filesystem taken from http://www.rooftopsolutions.nl/blog/107
+   - added is_persistent_cache()-func for cache-specific-implementation
+
+   * include/make_translationfiles.php (generate_translation_texts),
+     include/std_functions.php (write_to_file, read_from_file),
+     include/connect2mysql.php (mysql_addslashes),
+     include/utilities.php (REMOVED array_combine/dir_slashe/filepat2preg),
+     scripts/update_translation_pages.php (REMOVED glob):
+   - cleanup: removed alternative but now dead code because functions had been added in PHP 5
+     as DGS requires PHP 5 anwyay
+
+   * include/dgs_cache.php (class DgsCache, ~.allow_group_caching, ~.is_persistent, ~.get_cache,
+       ~.fetch, ~.store, ~.delete, ~.delete_group),
+     include/cache_globals.php (CACHE_TYPE_APC, CACHE_GRP_...),
+     include/config.php (DBG_QUERY, $DGS_CACHE_ENABLE_GROUPS)
+     include/board.php, include/cache_clock.php, include/classlib_profile.php,
+     include/classlib_userconfig.php, include/game_functions.php,
+     include/message_functions.php, include/std_functions.php,
+     tournaments/include/tournament.php, tournaments/include/tournament_cache.php,
+     tournaments/include/tournament_director.php, tournaments/include/tournament_ladder_props.php,
+     tournaments/include/tournament_news.php, tournaments/include/tournament_participant.php,
+     tournaments/include/tournament_properties.php, tournaments/include/tournament_round.php,
+     tournaments/include/tournament_rules.php,
+     daily_cron.php, edit_folders.php, statistics.php:
+   - enabled caching only for selected elements defined by CACHE_GRP_... configured
+     by global-config $DGS_CACHE_ENABLE_GROUPS to control what items are allowed to cache
+   - use collective-group for caching games-statistics
+   - config: formally added DBG_QUERY to global-config to write db-queries to error-log
+
+   * include/dgs_cache.php (DgsCache.is_persistent),
+     include/board.php, include/cache_clock.php,
+     include/classlib_userconfig.php, include/message_functions.php,
+     tournaments/include/tournament_cache.php:
+   - better name: renamed DgsCache::is_shared_enabled() into ::is_persistent()
+
+   * tournaments/include/tournament_helper.php (TournamentHelper.get_tournament_rating),
+     tournaments/include/tournament_participant.php (class TournamentParticipant),
+     tournaments/ladder/challenge.php:
+   - cleanup: combined TournamentParticipant::load_tournament_rating()
+     into TournamentHelper::get_tournament_rating()
+
+   * tournaments/include/tournament_participant.php (TournamentParticipant.assert_tournament_participant,
+       ~.insert, ~.update, ~.delete, ~.build_query_sql, ~.isTournamentParticipant,
+       ~.load_tournament_participant_by_id, ~.load_tournament_participant,
+       ~.check_rated_tournament_participants, ~.update_game_end_stats, ~.sync_tournament_registeredTP,
+       ~.delete_tournament_participant, ~.delete_cache_tournament_participant_count,
+       ~.delete_cache_tournament_participant)
+     tournaments/include/tournament_cache.php (TournamentCache.count_cache_tournament_participants,
+       ~.load_cache_tournament_participant, ~.is_cache_tournament_participant),
+     tournaments/include/tournament_helper.php (TournamentHelper.process_tournament_ladder_game_end,
+       ~.process_tournament_round_robin_game_end, ~.get_tournament_rating),
+     tournaments/include/tournament_gui_helper.php (TournamentGuiHelper.getLinkTextRegistration),
+     tournaments/include/tournament_properties.php (TournamentProperties.checkUserRegistration),
+     tournaments/include/tournament_status.php (TournamentStatus.check_conditions_status_PAIR),
+     tournaments/include/tournament_ladder.php (TournamentLadder.add_user_to_ladder),
+     tournaments/ladder/admin.php,
+     tournaments/roundrobin/create_pools.php, tournaments/roundrobin/define_pools.php,
+     tournaments/edit_participant.php, tournaments/list_news.php, tournaments/list_participants.php,
+     tournaments/register.php, tournaments/view_news.php, tournaments/view_tournament.php:
+   - added caching for TournamentParticipant-table:
+     - use shared-mem caching to count status of TournamentParticipants of tournament,
+       invalidate cache on tournament-participant-insert/update/delete
+     - use shared-mem caching to load TournamentParticipant,
+       invalidate cache on tournament-participant-insert/update/delete
+       - refactored TournamentParticipant::getLinkTextRegistration() into TournamentGuiHelper
+         to avoid cache-usage in TournamentParticipant-db-class
+       - splitted TournamentParticipant::load_tournament_participant() into
+         ::load_tournament_participant_by_id() to load TP by rid for clearer semantics and
+         easier caching of loading TP by user-id
+     - use shared-mem caching to check if user is TournamentParticipant
+   - cleanup: renamed TournamentParticipant::update_tournament_registeredTP()
+     to ::sync_tournament_registeredTP() to avoid ambiguity with Tournament::~
+
+2012-09-28 juga
+
+   * tournaments/include/tournament_ladder_props.php (TournamentLadderProps.fill_ladder_running_games,
+       ~.calc_ticks_due_rematch_wait, ~.calc_rematch_wait_remaining_hours),
+     tournaments/include/tournament_helper.php (TournamentHelper.process_tournament_ladder_game_end),
+     tournaments/include/tournament_cache.php (class TournamentCache),
+     tournaments/ladder/view.php,
+     tournaments/cron_tournaments.php:
+   - cleanup: refactor TournamentCache->load_clock_ticks() using existing cached-func get_clock_ticks()
+
+   * include/dgs_cache.php (DgsCache.store, ~.delete_group):
+   - use 'GROUP_'-prefix for group-ID in cache
+
+   * tournaments/include/tournament_news.php (TournamentNews.insert, ~.update, ~.delete,
+       ~.process_tournament_news_deleted, ~.delete_cache_tournament_news),
+     tournaments/include/tournament_cache.php (TournamentCache.load_cache_tournament_news),
+     tournaments/view_tournament.php:
+   - use shared-mem caching to load TournamentNews for view-tournament-page,
+     invalidate cache on tournament-news-insert/update/delete
+
+   * include/game_functions.php (GameScore.draw_score_box),
+     include/std_functions.php (start_html, end_page),
+     include/globals.php (CSS_VERSION),
+     skins/dragon/print.css,
+     game.php:
+   - added CSS NoPrint-class to hide some disturbing elements for print-view
+   - use CSS_VERSION to auto-reload print.css
+
+2012-09-27 juga
+
+   * tournaments/include/tournament_round.php (TournamentRound.insert, ~.update, ~.delete,
+       ~.delete_tournament_round, ~.delete_cache_tournament_round),
+     tournaments/include/tournament_template_round_robin.php (TournamentTemplateRoundRobin.checkProperties,
+       ~.checkPooling, ~.checkGamesStarted),
+     tournaments/include/tournament_helper.php (TournamentHelper.remove_tournament_round,
+       ~.set_tournament_round),
+     tournaments/include/tournament_cache.php (TournamentCache.load_cache_tournament_round),
+     tournaments/include/tournament_round_status.php (class TournamentRoundStatus),
+     tournaments/include/tournament_status.php (TournamentStatus._load_tround),
+     tournaments/roundrobin/create_pools.php, tournaments/roundrobin/define_pools.php,
+     tournaments/roundrobin/edit_pairing.php, tournaments/roundrobin/edit_pools.php,
+     tournaments/roundrobin/edit_ranks.php, tournaments/roundrobin/edit_round_props.php,
+     tournaments/roundrobin/edit_rounds.php, tournaments/roundrobin/view_pools.php,
+     tournaments/manage_tournament.php, tournaments/view_tournament.php:
+   - use shared-mem caching to load TournamentRound, invalidate cache on table-insert/update/delete
+     - TournamentHelper: renamed delete_tournament_round() to remove_tournament_round() to avoid ambiguity
+
+   * tournaments/include/tournament_rules.php (TournamentRules.update, ~.delete,
+       ~.delete_cache_tournament_rules),
+     tournaments/include/tournament_helper.php (TournamentHelper.create_games_from_tournament_rules,
+       ~.start_tournament_round_games, ~.determine_games_per_challenge),
+     tournaments/include/tournament_cache.php (TournamentCache.load_cache_tournament_rules),
+     tournaments/ladder/challenge.php, tournaments/edit_rules.php,
+     tournaments/game_admin.php, tournaments/view_tournament.php,
+     admin_game.php:
+   - use shared-mem caching to load TournamentRules, invalidate cache on table-update/delete
+
+   * tournaments/include/tournament_properties.php (TournamentProperties.update, ~.delete,
+       ~.delete_cache_tournament_properties),
+     tournaments/include/tournament_helper.php (TournamentHelper.create_games_from_tournament_rules,
+       ~.start_tournament_round_games),
+     tournaments/include/tournament_cache.php (TournamentCache.load_cache_tournament_properties),
+     tournaments/include/tournament_ladder.php (TournamentLadder.add_user_to_ladder),
+     tournaments/include/tournament_status.php (TournamentStatus._load_tprops),
+     tournaments/ladder/admin.php, tournaments/ladder/challenge.php, tournaments/ladder/view.php,
+     tournaments/roundrobin/create_pools.php, tournaments/roundrobin/edit_pools.php,
+     tournaments/roundrobin/view_pools.php, tournaments/edit_participant.php,
+     tournaments/edit_properties.php, tournaments/register.php, tournaments/view_tournament.php:
+   - use shared-mem caching to load TournamentProperties, invalidate cache on table-update/delete
+
+   * tournaments/include/tournament_ladder_props.php (TournamentLadderProps.update, ~.delete,
+       ~.delete_cache_tournament_ladder_props),
+     tournaments/include/tournament_helper.php (TournamentHelper.process_tournament_ladder_game_end,
+       ~.process_rank_period),
+     tournaments/include/tournament_cache.php (class TournamentCache, ~.load_cache_tournament_ladder_props),
+     tournaments/include/tournament_template_ladder.php (TournamentTemplateLadder.checkProperties),
+     tournaments/include/tournament_ladder.php (TournamentLadder.add_user_to_ladder),
+     tournaments/ladder/admin.php, tournaments/ladder/challenge.php, tournaments/ladder/edit_props.php,
+     tournaments/ladder/view.php, tournaments/view_tournament.php:
+   - use shared-mem caching to load TournamentLadderProps,
+     invalidate cache on table-update/delete
+     - replaced TournamentCache->load_tournament_ladder_props() by TournamentCache::load_cache_tournament_ladder_props()
+
+   * tournaments/include/tournament_director.php (TournamentDirector.insert, ~.update, ~.delete,
+       ~.load_tournament_directors_flags, ~.delete_cache_tournament_director),
+     tournaments/include/tournament_cache.php (class TournamentCache, ~.is_cache_tournament_director),
+     tournaments/include/tournament_gui_helper.php (TournamentGuiHelper.getTournamentRoleText),
+     tournaments/include/tournament_helper.php (TournamentHelper.allow_edit_tournaments):
+   - use shared-mem caching to check if user is tournament-director with optional flags,
+     invalidate cache on table-changes
+     - replaced TournamentCache->is_tournament_director() by TournamentCache::is_cache_tournament_director()
+
+   * tournaments/include/tournament_gui_helper.php (TournamentGuiHelper.getTournamentRoleText),
+     tournaments/manage_tournament.php:
+   - cleanup to get rid of dependencies in persistence of 'tournament/include/tournament.php':
+     - refactored Tournament->allow_edit_tournaments() into static TournamentHelper::allow_edit_tournaments()
+     - refactored Tournament->getRoleText() into static TournamentGuiHelper::getTournamentRoleText()
+
+   * tournaments/include/tournament_helper.php (TournamentHelper.allow_edit_tournaments),
+     tournaments/include/tournament.php (class Tournament),
+     tournaments/edit_director.php, tournaments/edit_lock.php, tournaments/edit_news.php,
+     tournaments/edit_participant.php, tournaments/edit_properties.php, tournaments/edit_rules.php,
+     tournaments/edit_status.php, tournaments/edit_tournament.php, tournaments/game_admin.php,
+     tournaments/list_directors.php, tournaments/list_news.php, tournaments/list_participants.php,
+     tournaments/show_tournament_log.php, tournaments/view_news.php, tournaments/view_tournament.php,
+     tournaments/ladder/admin.php, tournaments/ladder/edit_props.php, tournaments/ladder/view.php,
+     tournaments/roundrobin/create_pools.php, tournaments/roundrobin/define_pools.php,
+     tournaments/roundrobin/edit_pairing.php, tournaments/roundrobin/edit_pools.php,
+     tournaments/roundrobin/edit_ranks.php, tournaments/roundrobin/edit_round_props.php,
+     tournaments/roundrobin/edit_round_status.php, tournaments/roundrobin/edit_rounds.php,
+     tournaments/roundrobin/view_pools.php,
+     edit_bulletin.php, gameinfo.php:
+   - cleanup to get rid of dependencies in persistence of 'tournament/include/tournament.php':
+     - refactored Tournament->allow_edit_tournaments() into static TournamentHelper::allow_edit_tournaments()
+
+2012-09-26 juga
+
+   * tournaments/include/tournament_template_round_robin.php (TournamentTemplateRoundRobin.checkGamesStarted),
+     tournaments/include/tournament_round_status.php (class TournamentRoundStatus),
+     tournaments/include/tournament_status.php (class TournamentStatus),
+     include/gui_bulletin.php (GuiBulletin.build_view_bulletin),
+     tournaments/ladder/admin.php, tournaments/ladder/challenge.php, tournaments/ladder/edit_props.php,
+     tournaments/ladder/retreat.php, tournaments/ladder/view.php,
+     tournaments/roundrobin/create_pools.php, tournaments/roundrobin/define_pools.php,
+     tournaments/roundrobin/edit_pairing.php, tournaments/roundrobin/edit_pools.php,
+     tournaments/roundrobin/edit_ranks.php, tournaments/roundrobin/edit_round_props.php,
+     tournaments/roundrobin/edit_rounds.php, tournaments/roundrobin/view_pools.php,
+     tournaments/edit_director.php, tournaments/edit_lock.php, tournaments/edit_news.php,
+     tournaments/edit_participant.php, tournaments/edit_properties.php, tournaments/edit_rules.php,
+     tournaments/edit_tournament.php, tournaments/game_admin.php, tournaments/list_directors.php,
+     tournaments/list_news.php, tournaments/list_participants.php, tournaments/manage_tournament.php,
+     tournaments/register.php, tournaments/show_tournament_log.php, tournaments/view_news.php,
+     tournaments/view_tournament.php,
+     admin_bulletin.php (parse_edit_form),
+     admin_game.php, edit_bulletin.php, game.php, gameinfo.php:
+   - use shared-mem caching to load tournament
+
+   * tournaments/include/tournament_ladder.php (TournamentLadder.update_incoming_challenges,
+       ~.update_outgoing_challenges, ~.remove_user_from_ladder, ~.change_user_rank,
+       ~.add_participant_to_ladder_bottom, ~.add_participant_to_ladder_by_rating,
+       ~.add_participant_to_ladder_by_random, ~.fix_tournament_games_for_rejoin, ~.seed_ladder,
+       ~.check_participant_registrations, ~.process_game_end),
+     tournaments/include/tournament_participant.php (TournamentParticipant.load_tournament_participants_registered,
+       ~.load_registered_users_in_seedorder, ~.load_tournament_rating),
+     tournaments/include/tournament_pool.php (TournamentPool.delete_pools, ~.seed_pools,
+       ~.add_missing_registered_users, ~.assign_pool),
+     tournaments/include/tournament_games.php (TournamentGames.update_tournament_game_end,
+       ~.update_tournament_game_wait),
+     tournaments/include/tournament_director.php (TournamentDirector.count_tournament_directors),
+     tournaments/include/tournament_round.php (TournamentRound.add_tournament_round),
+     include/db/survey_option.php (SurveyOption.update_aggregates_survey_options),
+     include/db/survey.php (Survey.update_user_count):
+   - cleanup: use table-name directly instead of reading it from global Entity-object
+
+   * tournaments/include/tournament.php (Tournament.update, ~.delete, ~.update_flags, ~.update_rounds,
+       ~.update_tournament_registeredTP, ~.delete_cache_tournament):
+   - invalidate Tournament-cache-entry for update/delete on Tournament-table
+
+   * tournaments/include/tournament.php (Tournament.getRoleText, ~.allow_edit_tournaments):
+   - bugfix: TournamentCache-include is required, replaced global var with using TournamentCache::get_instance()
+
+   * tournaments/include/tournament_cache.php (TournamentCache.release_tournament_cron_lock,
+       ~.set_tournament_cron_lock, ~.load_cache_tournament, ~.delete_cache_tournament),
+     tournaments/cron_tournaments.php:
+   - use shared-mem caching to load tournament, set and release tournament-lock for tournament-cron,
+     invalidate cache on release-lock
+   - replaced TournamentCache->load_tournament() with TournamentCache::load_cache_tournament()
+     using shared-mem-cache if available or else falling back to local run-cache for tournament-cron
+
+   * include/dgs_cache.php (DgsCache.fetch, ~.debug_result):
+   - bugfix: fix printing object-results
+
+   * tournaments/include/tournament.php (class Tournament, ~.build_query_sql, ~.new_from_row,
+       ~.load_tournament, ~.load_tournaments),
+     tournaments/edit_tournament.php, tournaments/list_directors.php,
+     tournaments/manage_tournament.php:
+   - cleanup: refactor loading tournament-owner separately and not combined with loading tournament,
+     relying on user_reference()-caching to load owner-info
+   - bugfix: missed class-arg for user_reference()-call
+
+   * include/sgf_builder.php (SgfBuilder.load_trimmed_moves, ~.build_sgf_moves),
+     game_comments.php (load_game_comments_data):
+   - load game-moves and game-move-messages from shared-mem-cache without storing cache-data
+
+   * include/board.php (Board.load_from_db, ~.load_cache_game_moves, ~.load_cache_game_move_message,
+       ~.delete_cache_game_move_messages, ~.fix_corrupted_move_table),
+     include/game_functions.php (GameHelper._delete_base_game_tables),
+     include/quick/quick_game.php (QuickHandlerGame.process_cmd_play),
+     confirm.php, quick_play.php:
+   - use shared-mem caching to load game-move-messages on game-page,
+     invalidate cache on adding or deleting MoveMessages-entries to save cache-space:
+     one move-list cache-entry can take up to 250KB for a game with many comments
+   - bugfix: don't cache game-moves without shared-mem-cache
+
+   * game.php:
+   - reverted bugfix: so do NOT download move-messages for eidogo-game-link
+     as eidogo has no login-cookies for downloading SGF from DGS
+
+   * include/game_functions.php ( GameAddTime.add_time_opponent;
+       GameHelper._delete_base_game_tables, ~.game_need_mark_dead),
+     include/board.php (Board.load_from_db, ~.load_cache_game_moves, ~.delete_cache_game_moves),
+     include/quick/quick_game.php (QuickHandlerGame.prepare, ~.process_cmd_play),
+     include/goban_handler_dgsgame.php (GobanHandlerDgsGame.load_board),
+     include/make_game.php (create_game),
+     scripts/fix_game_snapshot.php (fix_single_game, bulk_fix_missing_game_snapshots),
+     confirm.php, game.php, halfhourly_cron.php, quick_play.php:
+   - use shared-mem caching to load game-moves on game-page,
+     invalidate cache on adding or deleting Moves-entries to save cache-space:
+     one move-list cache-entry can take up to 250KB for a big finished game
+   - use different cache-TTL of 5min (instead of 10min default) for game-moves of finished game
+   - optimize-cleanup:
+     - don't load game-last-move-message on confirm-page and quick-game-handler
+     - refactored Board.load_from_db() using board-options with flags instead of bool-args
+     - game-page: change order on loading Moves-table (ID -> MoveNr)
+       because that uses index-sort instead of file-sort
+     - game-page: removed some unneccessary checks (shape/moves-count)
+
+2012-09-25 juga
+
+   * include/classlib_profile.php (SearchProfile.handle_action;
+       Profile.save_profile, ~.delete_profile, ~.load_profile_by_id, ~.load_profiles,
+         ~.delete_profile_cache, ~.delete_all_profiles),
+     templates.php (save_template, check_delete_template),
+     message.php, new_game.php:
+   - use shared-mem caching to load single non-template search-profile,
+     invalidate cache on saving/deleting profile
+   - cleanup: renamed Profile::load_profile() -> Profile::load_profile_by_id()
+   - cleanup: refactored object-method Profile::delete_all_profiles() to static-method
+
+   * include/message_functions.php (get_folders, load_cache_folders),
+     edit_folders.php:
+   - use shared-mem caching to load message-folders, invalidate cache on editing folders
+
+2012-09-24 juga
+
+   * statistics.php (show_stats_default, load_cache_games_stats),
+     daily_cron.php:
+   - use shared-mem caching to load main game-/moves-statistics,
+     invalidate cache on updating statistics by daily-cron
+   - replaced sum-total-query by merging with main-query using "group-by WITH ROLLUP"
+
+   * donation_success.php, ratingpng.php, statisticspng.php, statratingspng.php:
+   - skip login-update of Players-table on follow-up-pages:
+     - donation-success-page
+     - sub-picture-pages: ratingpng.php, statisticspng.php, statratingspng.php
+
+   * include/std_functions.php (user_reference, load_cache_user_reference, delete_cache_user_reference),
+     edit_profile.php (handle_save_profile),
+     admin_users.php:
+   - use shared-mem caching to load user_reference,
+     invalidate cache on updating users Name or Handle by user or admin
+
+   * include/game_functions.php (GameHelper.load_game_notes, ~.update_game_notes),
+     include/quick/quick_game_info.php (QuickHandlerGameInfo.prepare),
+     include/sgf_builder.php (SgfBuilder.load_player_game_notes),
+     game.php:
+   - use shared-mem caching to load private-game-notes for players,
+     invalidate cache on updating game-notes
+
+   * include/std_functions.php (check_for_observers, toggle_observe_list, delete_all_observers),
+     include/game_functions.php (GameHelper._delete_base_game_tables):
+   - use shared-mem caching to load game-observers,
+     invalidate cache on toggling/deleting Observers for game
+
+   * include/dgs_cache.php (class AbstractCache, ~.cache_store_array, ~.cache_store_group, ~.cache_delete_group;
+       class ApcCache, ~.cache_store_array;
+       DgsCache.store, ~.delete, ~.delete_group):
+   - added handling for grouping of cache-entries
+   - added support for cache-bulk-store
+   - refactored CacheInterface-interface into AbstractCache-abstract class
+     with some basic implementations to handle cache-entry-groups
+
+   * include/std_functions.php (check_for_observers),
+     game.php:
+   - optimize: avoid double-checking for observers if logged-in-user or someone other is observing
+   - bugfix: don't check for observers for finished game
+
+   * include/cache_clock.php (CacheClock.load_clock_ticks, ~.load_cache_clocks, ~.delete_cache_clocks),
+     include/quick_common.php (SECS_PER_MIN),
+     clock_tick.php:
+   - use shared-mem caching to load Clocks-table,
+     invalidate cache on updating Clock-ticks in clock-tick-cron
+
+2012-09-23 juga
+
+   * include/classlib_userconfig.php (ConfigBoard.update_all, ~.load_config_board, ~.delete_cache_config_board;
+       ConfigPages.load_cache_config_pages, ~.delete_cache_config_pages, ~.load_config),
+     edit_profile.php:
+   - use shared-mem caching to load ConfigBoard-table for user-id,
+     invalidate cache on updating ConfigBoard-table
+   - reduced cache-TTL for loading ConfigPages: 1d -> 1h
+
+   * include/classlib_userconfig.php (ConfigPages.load_config_pages, ~.load_cache_config_pages,
+       ~.delete_cache_config_pages, ~._update_query, ~.toggle_forum_flags, ~.set_clear_forum_flags):
+   - use shared-mem caching to load ConfigPages-table for user-id,
+     invalidate cache on updating ConfigPages-table
+
+   * include/dgs_cache.php (DGS_CACHE, DBG_CACHE;
+       class ApcCache, ~.cache_fetch, ~.cache_store, ~.cache_delete;
+       interface CacheInterface, ~.cache_fetch, ~.cache_store, ~.cache_delete;
+       class DgsCache, ~.is_shared_enabled, ~.fetch, ~.store, ~.delete):
+   - added DGS-cache wrapper-class to support shared-memory cache
+     - added support to enable and disable DGS-cache allowing different implementations
+     - added cache-debugging with DBG_CACHE
+     - added support to use APC-based-cache
+
+   * scripts/index.php, scripts/apc_clear_cache.php:
+   - consolidated cache-admin scripts into cache-section, added APC-manager script
+   - apc_clear_cache-script: clear both cache-parts: op-code-cache & user-cache
+
+   * robots.txt:
+   - replaced "Disallow: /" blocking everything with Disallowing single directories and files,
+     tested with Google
+
+   * features/lib_votes.php (Feature.update_vote; FeatureVote.build_query_featurevote_list),
+     features/edit_feature.php:
+   - bugfix: fixed string-based order on feature-list myPoints to using numeric-based-order
+   - bugfix: jump to edit-feature of newly added new feature
+
+2012-09-22 juga
+
+   * include/db/bulletin.php (Bulletin.allow_bulletin_user_view),
+     skins/dragon/screen.css, list_bulletins.php:
+   - bulletin-list: add ID-column with button to view single bulletin
+     if status allows to view (SHOW|ARCHIVE-status) or else show status without a link
+
+   * features/lib_votes.php (FeatureVote.insert_feature_neutral_votes),
+     include/table_columns.php (Table.make_table_form),
+     features/list_features.php (features_vote_neutral_extend_table_form, handle_vote_neutral):
+   - feature-list: added neutral bulk-vote on unvoted features
+     - added toggle-marks button to toggle selection
+     - allow neutral bulk-vote only if voting allowed and not restricted
+     - show neutral bulk-vote only on view for UNVOTED features on VOTE-status
+
+   * scripts/updates/other_changes_1_0_14_to_1_0_15.txt,
+     images/wood1.png:
+   - removed unused image
+
+2012-09-21 juga
+
+   * specs/caching.txt:
+   - started analysis for candidates for caching + requirements
+
+   * robots.txt:
+   - forgot to allow index.php
+
+   * include/connect2mysql.php (db_query):
+   - added debug-code to log execution-time of db-query in ms and user-id/handle if available,
+     enabled with DBG_QUERY>2
+
+   * include/time_functions.php (getmicrotime):
+   - fixed getmicrotime(): splitting microtime() and adding sec+ms is 2-3 times slower
+     than using microtime(true) directly returning the same
+
+2012-09-20 juga
+
+   * include/globals.php (CSS_VERSION), skins/dragon/screen.css:
+   - use darker colors for feature-points
+
+   * include/page_functions.php (class HTMLPage, ~.set_meta_robots, ~.set_meta_keywords; class Page),
+     include/std_functions.php (DGS_DESCRIPTION, start_html),
+     robots.txt, sitemap.xml,
+     docs.php, faq.php, index.php, introduction.php, news.php, policy.php, rank_converter.php,
+     goodies/index.php:
+   - allow <meta>-tags with page-specific description, robots, keywords
+   - add sitemap and adjusted robots.txt with indexable pages for web-crawlers
+   - added meaningful content for meta-description/robots/keywords-directives for static pages:
+     index.php, introduction.php, rank_converter.php, faq.php, news.php,
+     policy.php, docs.php, goodies/index.php
+
+   * goodies/index.php, scripts/update_translation_pages.php,
+     skins/dragon/screen.css, docs.php:
+   - added link to goodies-page
+   - re-structured goodies-page to use standard DGS-layout
+
+2012-09-19 juga
+
+   * include/game_functions.php (GameNotify.get_text_game_result):
+   - adjusted text for reject-win-by-timeout: making it clearer that it is an automatic action
+
+   * tournaments/edit_director.php:
+   - bugfix: remove double textarea_safe()
+
+   * include/std_functions.php (textarea_safe):
+   - bugfix: PHP-function htmlspecialchars-func in textarea_safe() performs a double-encoding
+     of already encoded HTML-entities, e.g. for UTF-8 chars, so we fix it by reverting the
+     double-encode of &amp;#xx; to &#xx;
+
+   * include/message_functions.php (game_settings_form):
+   - bugfix: double-game must only be forbidden for ladder-tournament
+
+   * forum/forum_functions.php (class DisplayForum, ~.forum_start_table, ~.forum_end_table,
+       ~.echo_links, ~.get_new_string; ForumThread.load_posts),
+     forum/read.php:
+   - forum thread-post-view: show 'first new' also in top-bar if there are some
+
+   * include/faq_functions.php (faq_item_html),
+     skins/dragon/screen.css, faq.php:
+   - allow view of single FAQ-question/answer with section-title
+   - show FAQ-question on detail-view with link to copy (but as normal text)
+
+   * include/message_functions.php (message_info_table):
+   - bugfix: on preview keep select-box-choice to move message into folder
+
+   * forum/forum_functions.php (DisplayForum.draw_post):
+   - bugfix: do not show post-number in forum-search
+
+   * include/error_functions.php (DgsErrors.add_error),
+     include/error_codes.php (ErrorCode.init),
+     include/std_functions.php (is_logged_in),
+     error.php (handle_error),
+     scripts/check_block_ip.php, scripts/check_players_email.php, scripts/clear_datastore.php,
+     scripts/convert_from_old_forum.php, scripts/convert_posindex.php, scripts/data_export.php,
+     scripts/data_report.php, scripts/fix_game_snapshot.php, scripts/fix_games_timeleft.php,
+     scripts/forum_consistency.php, scripts/game_consistency.php, scripts/generate_translation_texts.php,
+     scripts/index.php, scripts/mailtest.php, scripts/message_consistency.php, scripts/player_consistency.php,
+     scripts/server-info.php, scripts/start_frozen_clocks.php, scripts/tournament_consistency.php,
+     scripts/translation_consistency.php, scripts/update_translation_pages.php, scripts/voting_consistency.php,
+     scripts/updates/fix_game_comments-1_0_15.php, scripts/updates/fix_message_thread-1_0_15.php,
+     features/edit_feature.php, features/list_features.php, features/list_votes.php, features/vote_feature.php,
+     forum/admin.php, forum/admin_show_forumlog.php, forum/index.php, forum/list.php, forum/read.php,
+     forum/search.php,
+     tournaments/edit_director.php, tournaments/edit_lock.php, tournaments/edit_news.php,
+     tournaments/edit_participant.php, tournaments/edit_properties.php, tournaments/edit_rules.php,
+     tournaments/edit_status.php, tournaments/edit_tournament.php, tournaments/game_admin.php,
+     tournaments/list_directors.php, tournaments/list_news.php, tournaments/list_participants.php,
+     tournaments/list_tournaments.php, tournaments/manage_tournament.php, tournaments/register.php,
+     tournaments/show_tournament_log.php, tournaments/view_news.php, tournaments/view_tournament.php,
+     tournaments/wizard.php, tournaments/ladder/admin.php, tournaments/ladder/challenge.php,
+     tournaments/ladder/edit_props.php, tournaments/ladder/retreat.php, tournaments/ladder/view.php,
+     tournaments/roundrobin/create_pools.php, tournaments/roundrobin/define_pools.php,
+     tournaments/roundrobin/edit_pairing.php, tournaments/roundrobin/edit_pools.php,
+     tournaments/roundrobin/edit_ranks.php, tournaments/roundrobin/edit_round_props.php,
+     tournaments/roundrobin/edit_round_status.php, tournaments/roundrobin/edit_rounds.php,
+     tournaments/roundrobin/view_pools.php,
+     admin.php, admin_admins.php, admin_bulletin.php, admin_faq.php, admin_game.php, admin_password.php,
+     admin_rating.php, admin_show_adminlog.php, admin_show_errorlog.php, admin_show_faqlog.php,
+     admin_show_users.php, admin_survey.php, admin_translators.php, admin_users.php, bookmark.php,
+     edit_bio.php, edit_bulletin.php, edit_contact.php, edit_folders.php, edit_password.php, edit_picture.php,
+     edit_profile.php, edit_rating.php, edit_shape.php, edit_vacation.php, game_calc.php, game_editor.php,
+     game_players.php, gameinfo.php, goban_editor.php, index.php, list_bulletins.php, list_contacts.php,
+     list_messages.php, list_shapes.php, list_surveys.php, login.php, message.php, message_thread.php,
+     new_game.php, old_goban_editor.php, opponents.php, ratinggraph.php, search_messages.php, show_games.php,
+     status.php, templates.php, translate.php, userinfo.php, users.php, view_bulletin.php, view_shape.php,
+     view_survey.php, waiting_room.php:
+   - jump to login-page if not logged-in for web-site pages
+     - redirecting and passing on "current" page through error()-call with special handling
+       for new error-code 'login_if_not_logged_in'
+     - show error-code on login-page indicating problem to user
+     - not done for
+       - pages that users can not directly view like follow-up-pages on form-actions,
+         game-comments or game-rematch-handling-page
+       - not done for pages that generate images
+       - not done for quick-suite or similar pages like quick-status, quick-play
+   - on fever-vault (user-web-access quota exceeded) log out and jump to login-page
+     with fever_vault-error
+
+   * include/std_functions.php (echo_dragon_top_bar):
+   - added Players.ID of logged-in user as tooltip on Handle top-bar at right-side
+
+   * features/lib_votes.php (Feature.build_query_featurevote_list, ~.formatPointsText),
+     features/vote_feature.php:
+   - overworked feature-voting:
+     - bugfix: fixed SQL-query for my-points value in feature-vote-result-list
+     - bugfix: allow to change or revoke points if remaining points-quota is 0
+     - always show current vote, put lastvoted-date directly above current-vote and vote-select-box
+     - minor changes
+
+2012-09-18 juga
+
+   * features/vote_feature.php:
+   - bugfix: correct var $is_numeric() to func-call without '$'
+
+   * include/quick/quick_game.php (QuickHandlerGame.process_cmd_play):
+   - bugfix: wrong reference to $my_id -> $this->my_id
+
+   * features/lib_votes.php (Feature.update_vote; FeatureVote.update_feature_vote, ~.getFeaturePointsText),
+     include/classlib_userquota.php (UserQuota.set_feature_points),
+     scripts/updates/database_changes_1_0_14_to_1_0_15.mysql,
+     features/vote_feature.php:
+   - bugfix: don't add negative voted points to available user-quota feature-points
+   - show positive/negative points in blue/red-color on feature-voting-view
+   - show last-voted only if voting allowed, which is not when user has no remaining feature-points
+   - cleanup: renamed FeatureVote.update_vote() -> update_feature_vote() to avoid name-clash
+-----------
+-- IMPORTANT NOTE: run this FIX ONLY if you have used the features-feature before on your server!!
+-- [FIX] fix negative voted points on UserQuota
+CREATE TEMPORARY TABLE fix_uq (
+   uid int NOT NULL,
+   sumP smallint NOT NULL
+   ) SELECT Voter_ID AS uid, SUM(ABS(Points)) AS sumP FROM FeatureVote GROUP BY Voter_ID ;
+SELECT * FROM fix_uq AS FIX WHERE FIX.sumP > 0 ;
+SELECT UQ.uid, UQ.FeaturePoints FROM UserQuota AS UQ INNER JOIN fix_uq AS FIX ON FIX.uid=UQ.uid WHERE FIX.sumP > 0 ;
+
+-- [FIX] NOTE: 29 is the initial start quota of 25 + 98 (=4*20 +x) days since live-server upgrade on 10-Jun-2012
+UPDATE UserQuota AS UQ INNER JOIN fix_uq AS FIX ON FIX.uid=UQ.uid
+   SET UQ.FeaturePoints= 29 - FIX.sumP WHERE FIX.sumP > 0;
+-----------
+
+   * features/lib_votes.php (FeatureVote.build_query_featurevote_list),
+     features/list_votes.php:
+   - add "my points" to feature-vote-results list
+
+   * features/vote_feature.php:
+   - feature-voting: show 0 (neutral) as default for voting points, only in edit-mode
+   - show "--- (no vote)" for Lastvoted-date for features on VOTE-status as voted-indicator
+
+2012-09-17 juga
+
+   * features/lib_votes.php (Feature.build_feature_notes_size),
+     specs/db/table-Voting.txt:
+   - increase wordwrap for feature-description: 80 -> 100
+   - adjusted feature-size: S (1->3d), M (3->7d), L (7->14d)
+
+   * features/lib_votes.php (Feature.build_feature_notes, ~.build_feature_notes_size),
+     features/edit_feature.php, features/list_features.php, features/list_votes.php:
+   - added notes about feature-size
+   - use wordwrap for feature-description: 80 chars
+
+   * features/edit_feature.php:
+   - bugfix: increase/decrease new-feature-count only for feature-status VOTE
+
+   * tournaments/include/tournament_ladder.php (TournamentLadder.load_tournament_ladder_by_user_rating,
+       ~.add_user_to_ladder, ~.add_participant_to_ladder_bottom, ~.add_participant_to_ladder_by_rating,
+       ~.add_participant_to_ladder_by_random, ~._add_participant_to_ladder_with_new_rank, ~.seed_ladder,
+       ~.build_tournament_ladder_iterator),
+     tournaments/include/tournament_ladder_props.php (class TournamentLadderProps, ~.setUserJoinOrder,
+       ~.fillEntityData, ~.build_notes_props, ~.new_from_row, ~.getUserJoinOrderText),
+     tournaments/include/tournament_gui_helper.php (TournamentGuiHelper.build_tournament_ladder_standings),
+     tournaments/include/tournament_properties.php (TournamentProperties.build_seed_order),
+     tournaments/include/tournament_globals.php (TLP_JOINORDER_...),
+     tournaments/ladder/edit_props.php (parse_edit_form),
+     tournaments/ladder/admin.php, tournaments/ladder/view.php,
+     tournaments/manage_tournament.php, tournaments/view_tournament.php,
+     scripts/updates/database_changes_1_0_14_to_1_0_15.mysql,
+     specs/db/table-Tournaments.txt, specs/db/dragon-ddl.sql:
+   - added option user-join-order to control position where user is entering ladder-tournament
+     - REGTIME = add new user at ladder-bottom
+     - RATING = add new user at ladder-position below user with same rating (current rating or
+       tournament-rating according to RatingUseMode)
+     - RANDOM = add new user at random ladder-position
+   - add column in tournament-ladder-view with tournament-rating
+   - show if no change on seed-ladder
+-----------
+-- determine ladder-position for new user
+ALTER TABLE TournamentLadderProps
+   ADD UserJoinOrder enum('REGTIME','RATING','RANDOM') NOT NULL default 'REGTIME' AFTER GameEndTimeoutLoss ;
+-----------
+
+   * tournaments/include/tournament_cache.php (TournamentCache.get_instance),
+     tournaments/include/tournament_helper.php (class TournamentHelper):
+   - use TournamentCache::get_instance() to get cache-singleton
+
+2012-09-16 juga
+
+   * tournaments/include/tournament_log_helper.php (TournamentLogHelper.log_create_tournament_director,
+       ~.log_change_tournament_director, ~.log_remove_tournament_director),
+     tournaments/include/tournament_director.php (TournamentDirector.formatFlags),
+     tournaments/include/tournament.php (Tournament.allow_edit_directors),
+     tournaments/include/tournament_log.php (TLOG_ACT_REMOVE),
+     tournaments/edit_director.php:
+   - write tournament-log for adding, updating, removing tournament-director
+
+   * include/make_translationfiles.php (translations_query), translate.php:
+   - added search for min. length on original translation-text
+   - cleanup: removed const TRANSL_ALLOW_FILTER
+
+   * tournaments/include/tournament_helper.php (TournamentHelper.build_tournament_join_restrictions),
+     tournaments/list_tournaments.php (build_restrictions),
+     skins/dragon/screen.css:
+   - tournament-list:
+     - add "Restrictions" to show suitable tournaments for joining.
+       check T-status, max-games-check, user-rating, T-rating-use-mode, T-rating-range,
+       T-max-participants, T-register-end-time, user min. finished/rated games, T-scope
+     - show tournament-registration-status column also for all tournaments view
+
+2012-09-15 juga
+
+   * tournaments/include/tournament_log_helper.php (TournamentLogHelper.log_tournament_game_end,
+       ~.log_tournament_game_add_time),
+     tournaments/include/tournament_globals.php (TLOG_TYPE_CRON, CHECK_TLOG_TYPES),
+     tournaments/include/tournament_games.php (TournamentGames.formatFlags),
+     tournaments/include/tournament_log.php (TLOG_ACT_ADDTIME),
+     skins/dragon/screen.css, specs/db/table-Tournaments.txt,
+     tournaments/game_admin.php:
+   - write tournament-log for tournament-game-admin actions:
+     - set tournament-game-score
+     - add time for tournament-game
+
+   * tournaments/show_tournament_log.php (format_tlog_message):
+   - replace special references in message with links to:
+     TG#id (tournament-game-admin), GID#id (game-page), UID#id (user-info-page)
+   - use short-form + rank for user + action-user, show tid after user, add tournament-link on tid
+
+   * tournaments/include/tournament_log_helper.php (class TournamentLogHelper, ~.log_create_tournament,
+       ~.log_change_tournament_status, ~.log_change_tournament_round_status, ~.log_tournament_lock),
+     tournaments/include/tournament_log.php (class Tournamentlog, ~.setType),
+     tournaments/include/tournament.php (Tournament.formatFlags, ~.allow_edit_tournaments),
+     tournaments/include/tournament_globals.php (TLOG_TYPE_...),
+     tournaments/include/tournament_template_ladder.php (TournamentTemplateLadder._createTournament),
+     tournaments/include/tournament_template_round_robin.php (TournamentTemplateRoundRobin._createTournament),
+     skins/dragon/screen.css, specs/db/table-Tournaments.txt,
+     tournaments/edit_lock.php (parse_edit_form), tournaments/edit_status.php,
+     tournaments/roundrobin/edit_round_status.php:
+   - write tournament-log for actions:
+     - create tournament
+     - change tournament-lock-flags/note
+     - change tournament-status
+     - change tournament-round-status
+
+   * tournaments/include/tournament_round_status.php (class TournamentRoundStatus):
+   - bugfix: wrong declared object-attribute
+
+   * tournaments/include/tournament_log.php (class TournamentLog, ~.to_string, ~.persist, ~.insert,
+       ~.update, ~.fillEntityData, ~.build_query_sql, ~.new_from_row, ~.load_tournament_logs),
+     scripts/updates/database_changes_1_0_14_to_1_0_15.mysql, scripts/data_export.php,
+     specs/db/dragon-ddl.sql, specs/db/table-Tournaments.txt,
+     tournaments/manage_tournament.php, tournaments/show_tournament_log.php,
+     admin.php:
+   - added tournament-log and log-viewer to log actions on tournaments
+     - allow admins to view log of all tournaments
+     - allow directors and owners to view log only of their tournaments
+     - introduced for more transparency on who did what
+-----------
+-- added tournament-log to log actions on tournaments
+CREATE TABLE Tournamentlog (
+  ID int NOT NULL auto_increment,
+  tid int NOT NULL,
+  uid int NOT NULL,
+  Date datetime NOT NULL default '0000-00-00 00:00:00',
+  Type char(2) NOT NULL,
+  Object varchar(16) NOT NULL default 'T',
+  Action varchar(16) NOT NULL,
+  actuid int NOT NULL default '0',
+  Message text NOT NULL,
+  PRIMARY KEY (ID),
+  KEY tid (tid)
+) ENGINE=MyISAM ;
+-----------
+
+2012-09-13 juga
+
+   * tournaments/include/tournament_ladder.php (TournamentLadder.add_participant_to_ladder,
+       ~.seed_ladder, ~.build_rank_diff),
+     js/common.js (buildRankDiff),
+     specs/db/table-Tournaments.txt:
+   - init TournamentLadder.PeriodRank/HistoryRank with 0 instead of StartRank,
+     show them as empty '---'
+
+2012-09-12 juga
+
+   * tournaments/include/tournament_games.php (TournamentGames.isScoreStatus, ~.getScoreForUser),
+     tournaments/include/tournament_pool_classes.php (PoolTables.fill_games),
+     tournaments/include/tournament_rules.php (TournamentRules.getJigoBehaviourText),
+     tournaments/game_admin.php (parse_edit_form, draw_game_end),
+     admin_game.php, gameinfo.php:
+   - tournament-game-admin:
+     - added warning about jigo-restrictions on setting game-score
+     - added checkbox to allow setting game-score violating jigo-restrictions
+     - show error if jigo-restrictions are violated by score
+     - show game and tournament-game score and if they differ
+   - bugfix: check detached-flag as TournamentGames.Score has only meaning if not "detached"
+
+   * tournaments/view_tournament.php:
+   - extend tournament-status for user in tournament-info:
+     - show user-result-state for round-robin-tournament (rank + pool + next-round icon)
+     - show tournament-participants game-count (finished, won, lost)
+
+   * rss/status.php (MONITOR_RSS_HANDLES):
+   - add monitoring-code to write RSS-cache-info to Apache error-log
+
+   * tournaments/game_admin.php (draw_game_end):
+   - show more defailed and condensed tournament-game-info and game-info
+   - show if user is authorised to end-game or add-time
+
+   * forum/forum_functions.php (class DisplayForum, ~.set_threadpost_view, ~.draw_post, ~.draw_overview,
+         ~.build_threadpostview_headlines, ~.create_navigation_tree;
+       class ForumPost, ~.to_string),
+     include/classlib_userconfig.php (class ConfigPages, ~.set_clear_forum_flags),
+     specs/forums.txt, forum/read.php:
+   - forum thread-post-view:
+     - added post-number in order of post-creation behind post-date to tree-overview and post-list
+     - added view-toggle to switch between: tree-view, flat-new-first, flat-old-first
+       - omit next/prev-answer navigation-icons in flat-view
+       - flatten post-view for flat-view omitting indent shown for tree-view
+       - added ConfigPages.ForumFlags to store view-mode
+
+2012-09-11 juga
+
+   * tournaments/list_tournaments.php:
+   - tournament-list: do not show tournaments with ADM|DEL-status for non-admins at start,
+     but allow to filter on these status
+
+   * edit_profile.php (handle_save_profile):
+   - bugfix: save user-profile in browser-settings stored in cookie
+
+   * include/faq_functions.php, include/game_functions.php, include/gui_functions.php,
+     include/message_functions.php, include/shape_control.php,
+     tournaments/include/tournament.php, tournaments/include/tournament_gui_helper.php,
+     tournaments/include/tournament_helper.php, tournaments/include/tournament_ladder.php,
+     tournaments/include/tournament_ladder_props.php, tournaments/include/tournament_limits.php,
+     tournaments/include/tournament_participant.php, tournaments/include/tournament_pool.php,
+     tournaments/include/tournament_pool_classes.php, tournaments/include/tournament_properties.php,
+     tournaments/include/tournament_round.php, tournaments/include/tournament_round_status.php,
+     tournaments/include/tournament_rules.php, tournaments/include/tournament_status.php,
+     tournaments/include/tournament_utils.php, tournaments/include/types/private_ladder.php,
+     tournaments/include/types/public_ladder.php,
+     features/edit_feature.php, features/list_features.php, features/list_votes.php,
+     forum/admin.php,
+     tournaments/edit_director.php, tournaments/edit_lock.php, tournaments/edit_news.php,
+     tournaments/edit_participant.php, tournaments/edit_properties.php, tournaments/edit_rules.php,
+     tournaments/edit_status.php, tournaments/edit_tournament.php, tournaments/game_admin.php,
+     tournaments/ladder/admin.php, tournaments/ladder/challenge.php, tournaments/ladder/edit_props.php,
+     tournaments/ladder/retreat.php, tournaments/ladder/view.php, tournaments/list_directors.php,
+     tournaments/list_news.php, tournaments/list_participants.php, tournaments/list_tournaments.php,
+     tournaments/manage_tournament.php, tournaments/register.php, tournaments/roundrobin/create_pools.php,
+     tournaments/roundrobin/define_pools.php, tournaments/roundrobin/edit_pairing.php,
+     tournaments/roundrobin/edit_pools.php, tournaments/roundrobin/edit_ranks.php,
+     tournaments/roundrobin/edit_round_props.php, tournaments/roundrobin/edit_round_status.php,
+     tournaments/roundrobin/edit_rounds.php, tournaments/roundrobin/view_pools.php,
+     tournaments/view_news.php, tournaments/view_tournament.php,
+     admin_bulletin.php, admin_game.php, admin_rating.php, admin_survey.php, edit_bulletin.php,
+     edit_shape.php, faq.php, game.php, game_players.php, gameinfo.php, goban_editor.php,
+     list_bulletins.php, list_shapes.php, list_surveys.php, message.php, message_thread.php,
+     new_game.php, people.php, show_games.php, site_map.php, templates.php, userinfo.php,
+     view_shape.php, waiting_room.php, translate.php:
+   - cleanup:
+     - consolidated T_()-translation-texts using less alternate texts with '#label'-suffix,
+       reduced by ca. 650 translations
+     - removed the '#label'-context when the context is clear by reading the text to translate
+     - added '#label'-context were unclear
+
+2012-09-10 juga
+
+   * tournaments/include/tournament_news.php (TournamentNews.build_tournament_news),
+     include/globals.php (CSS_VERSION),
+     tournaments/edit_news.php (parse_edit_form),
+     skins/dragon/screen.css:
+   - show flags of tournament-news, show flag-comment for editing T-news
+
+   * tournaments/include/tournament_pool_classes.php (class PoolGame, ~.get_user_col_map, ~.fill_games,
+         ~.calc_pool_summary, ~.calc_pool_games_count;
+       class PoolViewer, ~.init_pool_table, ~.make_pool_table, ~.make_single_pool_table, ~.echo_pool_table),
+     tournaments/include/tournament_rules.php (TournamentRules.convertEditForm_to_TournamentRules,
+       ~.determineJigoBehaviour, ~.create_tournament_games, ~.prepare_create_game_row,
+       ~.getHandicaptypeText, ~.convert_trule_handicaptype_to_stdhtype),
+     tournaments/include/tournament_helper.php (TournamentHelper.create_games_from_tournament_rules,
+       ~.determine_games_per_challenge, ~.start_tournament_round_games),
+     tournaments/include/tournament_pool.php (TournamentPool.count_tournament_pool_games,
+       ~.load_tournament_pools, ~.check_pools),
+     tournaments/include/tournament_games.php (TournamentGames.get_ordered_uids),
+     tournaments/include/tournament_utils.php (TournamentUtils.calc_pool_games),
+     include/message_functions.php (game_settings_form),
+     specs/db/table-Tournaments.txt,
+     tournaments/edit_rules.php (parse_edit_form),
+     tournaments/ladder/challenge.php,
+     tournaments/roundrobin/create_pools.php,
+     tournaments/roundrobin/define_pools.php (calc_suggestion, make_suggestions_table),
+     tournaments/roundrobin/edit_pairing.php,
+     tournaments/roundrobin/edit_pools.php,
+     tournaments/roundrobin/view_pools.php:
+   - added support for tournament DOUBLE-handicap-types with two games per user-pair
+     - allow DOUBLE-games for round-robin-tournaments, forbid for ladder-tournament
+     - extended view-pool game-result-matrix for DOUBLE-games
+     - PAIR: create DOUBLE-game for DOUBLE-handicap-type
+     - PAIR: check restart and continuation of stopped pairing
+   - bugfix: set TournamentGames.Challenger/Defender_rid on starting games
+   - refactorings, renaming methods, bugfixes and smaller changes
+
+   * include/std_classes.php (class ListIterator, ~.sortListIteratorCustom, ~.sortListIterator,
+       ~._compare_items_numeric, ~._compare_items_string, ~._compare_items_string_nocase):
+   - added sorting for ListIterator on known row-fields with sort-flags to support numerical,
+     case-sensitive and case-insensitive string sort
+
+   * include/gamelist_control.php (GameListControl.build_games_query),
+     show_games.php:
+   - bugfix: show TG-challenge-role only for USER-finished/running, not for ALL-view
+
+2012-09-09 juga
+
+   * tournaments/edit_rules.php (parse_edit_form):
+   - to edit tournament-rules use GameSetupChecker to verify and highlight errorneous
+     fields of game-settings-form
+
+   * tournaments/include/tournament_participant.php (TournamentParticipant.load_tournament_rating),
+     tournaments/ladder/challenge.php (add_form_user_info):
+   - show tournament-rating on ladder-challenge-page if RatingUseMode is configured to copy-rating
+   - show text for ladder-rank as description in users-table of ladder-challenge
+
+   * tournaments/roundrobin/edit_pools.php (pools_edit_col_actions, pools_unassigned_extend_table_form):
+   - added tooltips for pool-form to mark-user (checkbox) and assign pool (input-box)
+
+2012-09-08 juga
+
+   * tournaments/include/tournament_rules.php (TournamentRules.convertTournamentRules_to_GameSetup,
+       ~.create_tournament_game, ~.prepare_create_game_row),
+     tournaments/include/tournament_helper.php (TournamentHelper.create_game_from_tournament_rules,
+       ~.start_tournament_round_games, ~.create_pairing_game),
+     include/message_functions.php (game_info_table),
+     tournaments/ladder/challenge.php (show_game_info):
+   - bugfixes and cleanup for setup of tournament-game:
+     - fix wrong color for challenger-WHITE-handicap-type by set TournamentRules.TourneyType
+       for preparing game-row for game-info
+     - set correct GameSetup.uid for BLACK/WHITE-handicaptype fixing correct rematch from game-info
+     - use Handicaptype for subtype instead of Color in tournament-game-info on ladder-challenge
+     - use correct casting on TournamentRules.AdjKomi: int -> float
+
+   * tournaments/include/tournament.php (Tournament.build_query_sql, ~.load_tournament, ~.load_tournaments),
+     tournaments/include/tournament_cache.php,
+     tournaments/edit_tournament.php, tournaments/list_directors.php,
+     tournaments/list_tournaments.php, tournaments/manage_tournament.php:
+   - removed owner from tournament-list as T-director and not owner should be main-contact
+   - cleanup: don't force owner-data-load if owner-Handle already available
+
+   * tournaments/include/tournament_pool_classes.php (PoolViewer.make_pool_table),
+     tournaments/roundrobin/view_pools.php:
+   - round-robin-tournament: added link to my-pool-table
+
+   * admin_survey.php:
+   - add default <opt>-tag if survey-options-field empty to know format
+
+   * tournaments/include/tournament_ladder.php (TournamentLadder.build_linked_running_games,
+       ~.remove_user_from_ladder, ~.add_user_to_ladder, ~.fix_tournament_games_for_rejoin,
+       ~._process_game_end, ~.notify_user_removal, ~.process_user_absence, ~.get_notes_user_removed),
+     tournaments/include/tournament_ladder_props.php (TournamentLadderProps.check_properties,
+       ~.build_notes_props, ~.fill_ladder_running_games, ~.calc_game_end_action),
+     tournaments/include/tournament_games.php (TournamentGames.formatFlags,
+        ~.find_undetached_running_games, ~.getFlagsText, ~.buildStatusFilterArray),
+     tournaments/include/tournament_helper.php (TournamentHelper.process_tournament_ladder_game_end),
+     tournaments/include/tournament_globals.php (TG_FLAG_GAME_DETACHED),
+     include/quick/quick_game_info.php (QuickHandlerGameInfo.convertGameFlags),
+     include/gamelist_control.php (GameListControl.build_games_query),
+     include/db/games.php (Games.parseFlags, ~.buildFlags),
+     include/globals.php (GAMEFLAGS_TG_DETACHED),
+     scripts/updates/database_changes_1_0_14_to_1_0_15.mysql, specs/db/dragon-ddl.sql,
+     specs/db/table-Games.txt, specs/db/table-Tournaments.txt, skins/dragon/screen.css,
+     tournaments/ladder/admin.php (add_form_edit_user),
+     tournaments/ladder/retreat.php (build_retreat_notes),
+     tournaments/game_admin.php,
+     admin_game.php, game.php, gameinfo.php, show_games.php:
+   - overwork user-removal from ladder-tournament:
+     - always fully remove user from ladder including tourney-user-registration
+     - "detach" running games from tournament: set detach-flag, make game unrated, set SCORE-status
+     - no ladder-change on detached tournament-games on game-end-processing
+     - fix re-joining user with unprocessed detached tournament-games
+     - put more details in notification and notes about user-removal
+     - notify opponents in active running tournament-games with removed-user
+     - show detached-tournament-game flag on game-/game-info-/tourney-game-admin-page
+     - show detached games in ladder-view in red-color and without rank: [#x] -> [#]
+     - added link to running/finished tournament-games
+   - show tournament-game-role for ladder-tournament: Challenger or Defender
+   - tourney games-list: show only active non-finished tournament-games as default
+   - adjusted texts
+-----------
+-- added flag to store detached-tournament-game
+ALTER TABLE Games
+   MODIFY Flags SET('Ko','HiddenMsg','AdmResult','TGDetached') NOT NULL default '' ;
+-----------
+
+   * tournaments/include/tournament_globals.php (TLADDER_MAX_CHALLENGES):
+   - reduced max ladder challenges-out: 200 -> 50
+
+   * include/gamelist_control.php (GameListControl.build_games_query),
+     include/config.php, opponents.php:
+   - removed server-config ALLOW_SQL_UNION assuming UNION is allowed
+     with requirement of at least mysql 5.0
+
+   * tournaments/ladder/view.php:
+   - show last-access within one hour as '0h' instead of ''
+
+   * tournaments/register.php:
+   - bugfix: used wrong var for bulletin-new-reset after TP-update
+
+   * game.php:
+   - bugfix: download move-messages as well for eidogo-game-link
+
+   * specs/tournaments.txt:
+   - started docs/specs for tournament (specs from 2009)
+
+2012-09-07 juga
+
+   * show_games.php:
+   - bugfix: SEARCHing on ALL-finished/running games switched to MY-view, corrected 'uid'-parameter
+
+2012-09-06 juga
+
+   * include/gui_functions.php (echo_off_time),
+     tournaments/ladder/challenge.php:
+   - show vacation-icon for users on tournament-ladder-challenge
+
+   * tournaments/include/tournament_helper.php (TournamentHelper.load_ladder_absent_users),
+     scripts/updates/database_changes_1_0_14_to_1_0_15.mysql,
+     specs/db/dragon-ddl.sql, specs/db/table-Players.txt,
+     admin_users.php, edit_vacation.php:
+   - cleanup: removed not-needed Players.UseVacation for tournament-ladder user-absence-tracking
+   - bugfix: check Players.LastQuickAccess for tournament-ladder user-absence-checking
+-----------
+-- cleanup: removed not needed field for tournament-ladder user-absence-tracking
+ALTER TABLE Players
+   DROP COLUMN UseVacation ;
+-----------
+
+2012-09-03 juga
+
+   * game.php:
+   - added magnifying-glass-icon with link to EidoGo.com loading SGF from DGS
+     to browse game with JavaScript
+-----------
+# added icon for eidogo (magnifying glass)
+copy /images/eidogo.gif
+-----------
+
+   * include/std_functions.php (echo_dragon_top_bar):
+   - removed link on user-id
+
+   * include/std_functions.php (start_html),
+     include/globals.php (CSS_VERSION):
+   - use timestamp on screen.css to force autoload on changes
+
+   * scripts/updates/database_changes_1_0_14_to_1_0_15.mysql,
+     scripts/updates/other_changes_1_0_14_to_1_0_15.txt,
+     specs/db/dragon-ddl.sql, admin_faq.php:
+   - simplified FAQ-editor:
+     - added view: Show only categories, Expand all categories, Expand only one category
+     - added way to expand and collapse all categories to prevent loading all FAQ-entries
+     - added some keys for FAQ/Intro/Links for editing
+-----------
+-- added some keys for FAQ/Intro/Links for editing
+ALTER TABLE FAQ
+   ADD KEY Parent (Parent),
+   ADD KEY Level (Level) ;
+ALTER TABLE Links
+   ADD KEY Parent (Parent),
+   ADD KEY Level (Level) ;
+ALTER TABLE Intro
+   ADD KEY Parent (Parent),
+   ADD KEY Level (Level) ;
+
+# added view to expand/collapse tree-overview
+copy /images/expand.gif
+copy /images/collapse.gif
+-----------
+
+2012-09-02 juga
+
+   * include/std_functions.php ($html_code, $html_safe_preg):
+   - added markup <_http://...> to allow link opening in extra window,
+     same for <_(news|ftp)://...>
+
+   * game.php:
+   - allow toggle-observe also for players
+
+   * include/std_functions.php (make_menu):
+   - allow bottom-links with absolute (<0) or balanced (>0) number of links per line
+
+   * waiting_room.php:
+   - bugfix: waiting-room info for joining was broken
 
 2012-09-01 juga
 
