@@ -37,6 +37,7 @@ ChangeLog
      - check if filters form-field-name needs a prefix
 
    * include/db/bulletin.php (Bulletin.allow_bulletin_user_edit),
+     include/globals.php (CSS_VERSION),
      list_bulletins.php, skins/dragon/screen.css:
    - bugfix: always allow bulletin-edit for own bulletins
    - bulletin: add Fresh-status-view (NEW+PENDING) in status-filter for admin
