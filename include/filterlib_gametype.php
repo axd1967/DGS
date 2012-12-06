@@ -98,7 +98,7 @@ class FilterGameType extends FilterSelection
       if( $this->get_config(FC_MPGAME) )
       {
          $r .= $this->build_generic_checkbox_elem(
-               '', FGTNAME_MPGAME, $this->values[FGTNAME_MPGAME],
+               $prefix, FGTNAME_MPGAME, $this->values[FGTNAME_MPGAME],
                MINI_SPACING . echo_image_game_players(-1),
                T_('Show multi-player-games only#filter') );
       }

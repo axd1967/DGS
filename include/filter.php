@@ -395,11 +395,14 @@ class SearchFilter
          $pfx = ($filter->get_config(FC_FNAME)) ? '' : $this->Prefix;
          $elems = $filter->get_element_names();
          foreach( $elems as $fname )
-            $this->ProfileHandler->register_argnames( $pfx . $fname );
+         {
+            $pfx_fname = ( $pfx && $filter->use_prefix_fieldname($fname) ) ? $pfx : '';
+            $this->ProfileHandler->register_argnames( $pfx_fname . $fname );
+         }
       }
 
       return $filter;
-   }
+   }//add_filter
 
    /*! \brief Extracts optional filters form-name and sets up name-reference. */
    function extract_filter_formname( $filter )
@@ -1034,7 +1037,7 @@ class SearchFilter
       }
 
       return implode( URI_AMP, $arr_url );
-   }
+   }//get_url_parts
 
    /*! \brief Interface-func for Form-class if attached to get hiddens for filter-values. */
    function get_hiddens( &$arr_hiddens )
@@ -1648,7 +1651,7 @@ class Filter
          $val = $this->get_value( $name );
          if( (string)$val != '' ) // val can be 0(!), filters need ''<>0, so don't use empty(val)
          {
-            $fname = ($this->get_config(FC_FNAME)) ? $name : $prefix . $name;
+            $fname = ( $this->get_config(FC_FNAME) || !$this->use_prefix_fieldname($name) ) ? $name : $prefix . $name;
             if( is_array($arr_out) )
                $arr_out[$fname] = $val;
 
@@ -1664,7 +1667,7 @@ class Filter
       }
 
       return implode( URI_AMP, $arr_url );
-   }
+   }//get_url_parts
 
 
    // abstract interface (main-functions)
@@ -1860,7 +1863,7 @@ class Filter
       }
 
       return $query;
-   }
+   }//build_query_numeric
 
    /*!
     * \brief Builds QuerySQL for textual-syntax (exact, range or wildcard) from local vars
@@ -1902,7 +1905,7 @@ class Filter
       }
 
       return $query;
-   }
+   }//build_query_text
 
 
    /*!
@@ -1913,7 +1916,7 @@ class Filter
     */
    function build_generic_input_text_elem( $prefix, $name, $value, $title = '', $maxlen = 0, $size = '' )
    {
-      $fname = ($this->get_config(FC_FNAME)) ? $name : $prefix . $name;
+      $fname = ( $this->get_config(FC_FNAME) || !$this->use_prefix_fieldname($name) ) ? $name : $prefix . $name;
       $elem = "<input";
       $elem .= " name=\"{$fname}\"";
       $elem .= " type=\"text\"";
@@ -1950,7 +1953,7 @@ class Filter
     */
    function build_generic_selectbox_elem( $prefix, $name, $value, $index_start_keys, $values = null, $size = 1 )
    {
-      $fname = ($this->get_config(FC_FNAME)) ? $name : ($prefix . $name);
+      $fname = ( $this->get_config(FC_FNAME) || !$this->use_prefix_fieldname($name) ) ? $name : $prefix . $name;
       if( !is_numeric($size) )
          $size = 1;
       $is_multi = $this->get_config(FC_MULTIPLE);
@@ -2012,7 +2015,7 @@ class Filter
     */
    function build_generic_checkbox_elem( $prefix, $name, $value, $text, $title='' )
    {
-      $fname = ($this->get_config(FC_FNAME)) ? $name : ($prefix . $name);
+      $fname = ( $this->get_config(FC_FNAME) || !$this->use_prefix_fieldname($name) ) ? $name : $prefix . $name;
 
       $elem = "<input type=\"checkbox\" name=\"$fname\" value=\"1\"";
       if( !empty($title) )
