@@ -19,9 +19,45 @@ Developers INFO:
 ChangeLog
 ------------------------------------------------------------------
 
-2012-11-25 juga
+2012-12-06 juga
 
 ### ----- release-1_0_15-20120608 -----
+
+   * include/std_functions.php (echo_dragon_top_bar),
+     bookmark.php:
+   - added my-running-multi-player-games in topbars bookmark-selectbox
+
+   * include/filter.php (SearchFilter.add_filter;
+       Filter.get_url_parts, ~.build_generic_input_text_elem, ~.build_generic_selectbox_elem,
+         ~.build_generic_checkbox_elem),
+     include/filterlib_gametype.php (FilterGameType.get_input_element):
+   - bugfix:
+     - prefix-using SearchFilter did not work for GameType-filter checkbox
+       with unprefixed form-field-name
+     - check if filters form-field-name needs a prefix
+
+   * include/db/bulletin.php (Bulletin.allow_bulletin_user_edit),
+     list_bulletins.php, skins/dragon/screen.css:
+   - bugfix: always allow bulletin-edit for own bulletins
+   - bulletin: add Fresh-status-view (NEW+PENDING) in status-filter for admin
+
+   * admin_faq.php (show_preview):
+   - bugfixes for FAQ-editor:
+     - enforce expand-all on term-search
+     - mark search-term in preview of entry-edit
+
+   * halfhourly_cron.php:
+   - increase wordwrap for email-notification message: 47 -> 70
+
+2012-12-03 juga
+
+   * statistics.php (show_stats_default):
+   - bugfix: pass all URL-args from parent statistics-page to image-generating page (size, no_cache)
+
+   * specs/caching.txt, INSTALL:
+   - documented full specs for all kind of caching in use for DGS
+
+2012-11-25 juga
 
    * features/lib_votes.php (Feature.allow_edit),
      features/edit_feature.php:
