@@ -302,6 +302,8 @@ class Bulletin
 
       if( $this->Flags & BULLETIN_FLAG_USER_EDIT )
          return true;
+      if( $this->uid == $uid )
+         return true;
 
       return ($errmsg) ? error('bulletin_edit_not_allowed', "$errmsg.last_check") : false;
    }//allow_bulletin_user_edit
