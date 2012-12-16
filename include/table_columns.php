@@ -409,7 +409,7 @@ class Table
          //get the sort parameters from URL
          for( $i=TABLE_MAX_SORT; $i>0; $i--)
          {
-            if( $this->Is_Column_Displayed[$i] && ( $sd = (int)$this->get_saved_arg("sort$i") ) )
+            if( ( $sd = (int)$this->get_saved_arg("sort$i") ) && @$this->Is_Column_Displayed[$sd] )
                $s = array( abs($sd) => $sd ) + $s; // put new key first in array
          }
       }
@@ -431,13 +431,15 @@ class Table
       $cnt_args = func_num_args();
       for( $i=0; $i < $cnt_args; $i++ )
       {
-         if( !$this->Is_Column_Displayed[$i] ) // skip removed cols
-            continue;
          $sd = func_get_arg($i);
          if( is_string($sd) )
             error('assert', "Table.set_sort.old_way($sd)");
          if( $sd = (int)$sd )
-            $s[abs($sd)] = $sd;
+         {
+            $sk = abs($sd);
+            if( @$this->Is_Column_Displayed[$sd] )
+               $s[$sk] = $sd;
+         }
       }
       $this->Sort = $s;
    }//set_sort
@@ -896,7 +898,7 @@ class Table
       {
          if( $i >= TABLE_MAX_SORT )
             break;
-         if( !$sd || !$this->Is_Column_Displayed[$sd] ) // num && !removed-col
+         if( !$sd || !$this->Is_Column_Displayed[$sk] ) // num && !removed-col
             continue;
          $field = (string)@$this->Tableheads[$sk]['Sort_String'];
          if( !$field )
