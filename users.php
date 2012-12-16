@@ -141,7 +141,7 @@ require_once( 'include/classlib_userpicture.php' );
    $utable->add_tablehead( 3, T_('Userid#header'), 'User', 0, 'Handle+');
    $utable->add_tablehead(16, T_('Country#header'), 'Image', 0, 'Country+');
    $utable->add_tablehead( 4, T_('Rank info#header'), null, TABLE_NO_SORT );
-   $utable->add_tablehead( 5, T_('Rating#header'), 'Rating', 0, 'Rating2-');
+   $utable->add_tablehead( 5, T_('Rating#header'), 'Rating', TABLE_NO_HIDE, 'Rating2-');
    $utable->add_tablehead( 6, T_('Open for matches?#header'), null, TABLE_NO_SORT );
    $utable->add_tablehead( 7, T_('#Games#header'), 'Number', 0, 'Games-');
    $utable->add_tablehead( 8, T_('Running#header'), 'Number', 0, 'Running-');
