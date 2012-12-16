@@ -394,7 +394,7 @@ class Table
       $s = array();
       //even if TABLE_NO_SORT or TABLE_MAX_SORT == 0:
       $cnt_args = func_num_args();
-      for( $i=0; $i < $cnt_args; $i++ )
+      for( $i=0; $i < $cnt_args; $i++ ) // read defaults from func-args
       {
          $sd = func_get_arg($i);
          if( is_string($sd) )
@@ -403,12 +403,13 @@ class Table
             $s[abs($sd)] = $sd;
       }
 
+      // overwrite defaults with URL-sort-args
       if( TABLE_MAX_SORT > 0 && !($this->Mode & TABLE_NO_SORT) )
       {
          //get the sort parameters from URL
          for( $i=TABLE_MAX_SORT; $i>0; $i--)
          {
-            if( $sd = (int)$this->get_saved_arg("sort$i") )
+            if( $this->Is_Column_Displayed[$i] && ( $sd = (int)$this->get_saved_arg("sort$i") ) )
                $s = array( abs($sd) => $sd ) + $s; // put new key first in array
          }
       }
@@ -430,6 +431,8 @@ class Table
       $cnt_args = func_num_args();
       for( $i=0; $i < $cnt_args; $i++ )
       {
+         if( !$this->Is_Column_Displayed[$i] ) // skip removed cols
+            continue;
          $sd = func_get_arg($i);
          if( is_string($sd) )
             error('assert', "Table.set_sort.old_way($sd)");
@@ -883,7 +886,7 @@ class Table
    function make_sort_images()
    {
       if( !$this->Head_closed )
-         error('assert', "Table.current_order_string.!closed({$this->Head_closed})");
+         error('assert', "Table.make_sort_images.!closed({$this->Head_closed})");
       //if( TABLE_MAX_SORT <= 0 || $this->Mode & TABLE_NO_SORT ) return;
 
       //$this->Sortimg = array();
@@ -893,7 +896,7 @@ class Table
       {
          if( $i >= TABLE_MAX_SORT )
             break;
-         if( !$sd ) // num
+         if( !$sd || !$this->Is_Column_Displayed[$sd] ) // num && !removed-col
             continue;
          $field = (string)@$this->Tableheads[$sk]['Sort_String'];
          if( !$field )
@@ -914,6 +917,8 @@ class Table
    /*!
     * \brief Retrieve MySQL ORDER BY part from table and sets table-sort-images.
     * @param $sort_xtend is an extended-alias-name
+    *        IMPORTANT NOTE:
+    *           ensure, that the used db-fields/aliases are present in the overall db-query!!
     *        (ended by a '+' or '-' like in add_tablehead())
     *        added to the current sort list
     * works even if TABLE_NO_SORT or TABLE_MAX_SORT==0
