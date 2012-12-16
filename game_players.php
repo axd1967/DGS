@@ -835,7 +835,7 @@ function build_form_start_game( $gid, $cmd, $errors )
    {
       $form->add_empty_row();
       $form->add_row( array(
-            'TEXT', image( $base_path."images/msg.gif", T_('Send message'), null, 'class=InTextImage' ) . ' '
+            'TEXT', image( $base_path."images/send.gif", T_('Send message'), null, 'class=InTextImage' ) . ' '
                   . anchor( "message.php?mode=NewMessage".URI_AMP."mpgid=$gid"
                               . URI_AMP."mpmt=".MPGMSG_STARTGAME.URI_AMP."preview=1",
                             T_('Send message to all game-players#mpg') ), ));

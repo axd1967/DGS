@@ -373,7 +373,7 @@ $GLOBALS['ThePage'] = new Page('Game');
                   $grcol = ($Black_ID == $my_id) ? GPCOL_B : GPCOL_W;
                else
                   $grcol = ''; // all for ZenGo
-               $str = image( $base_path."images/msg.gif", T_('Send message'), null, 'class=InTextImage' ) . ' '
+               $str = image( $base_path."images/send.gif", T_('Send message'), null, 'class=InTextImage' ) . ' '
                   . anchor( "message.php?mode=NewMessage".URI_AMP."mpgid=$gid".URI_AMP."mpmt=".MPGMSG_RESIGN
                               . URI_AMP."mpcol=$grcol".URI_AMP."mpmove=$Moves".URI_AMP."preview=1",
                             T_('Ask your team-members') );
