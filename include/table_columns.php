@@ -409,8 +409,12 @@ class Table
          //get the sort parameters from URL
          for( $i=TABLE_MAX_SORT; $i>0; $i--)
          {
-            if( ( $sd = (int)$this->get_saved_arg("sort$i") ) && @$this->Is_Column_Displayed[$sd] )
-               $s = array( abs($sd) => $sd ) + $s; // put new key first in array
+            if( $sd = (int)$this->get_saved_arg("sort$i") )
+            {
+               $sk = abs($sd);
+               if( @$this->Is_Column_Displayed[$sk] )
+                  $s = array( $sk => $sd ) + $s; // put new key first in array
+            }
          }
       }
 
