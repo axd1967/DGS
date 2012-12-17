@@ -247,7 +247,7 @@ function check_consistency_faq( $dbtable, $commit )
    {
       echo BRLF, "[$dbtable] Checking TranslationFoundInGroup for $field ...", BRLF;
       $result = db_query("$dbgmsg.check.TFIG.QA.$field",
-         "SELECT D.ID, D.$field " .
+         "SELECT D.ID, D.$field, TFIG.Text_ID " .
          "FROM $dbtable AS D " .
             "INNER JOIN TranslationTexts AS TT ON TT.ID=D.$field " .
             "LEFT JOIN TranslationFoundInGroup AS TFIG ON TFIG.Text_ID=TT.ID AND TFIG.Group_ID=$group_id " .
@@ -256,9 +256,10 @@ function check_consistency_faq( $dbtable, $commit )
       {
          $errcnt++;
          $ID = $row['ID'];
-         echo ERR_CHECK, "[$dbtable] Found entry for $dbtable.$field with ID [$ID] ",
+         $text_id = $row['Text_ID'];
+         echo ERR_CHECK, "[$dbtable] Found entry with text-entry for $dbtable.$field with ID [$ID] ",
             "without expected translation-group [$group_id=$dbtable]: Needs manual fix! ", BRLF,
-            "-- INSERT INTO TranslationFoundInGroup SET Text_ID=$ID, Group_ID=$group_id ;", BRLF;
+            "-- INSERT INTO TranslationFoundInGroup SET Text_ID=$text_id, Group_ID=$group_id ;", BRLF;
       }
       mysql_free_result($result);
    }
