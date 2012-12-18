@@ -424,6 +424,7 @@ class Table
    /*!
     * \brief Overwrites table-sort (only one can be called: set_default_sort or set_sort).
     * \see for params see set_default_sort()-func
+    * \note IMPORTANT: table column to sort by MUST be visible!!
     */
    function set_sort( /* {$sort1 {,$sort2 [,...]}} */ )
    {
