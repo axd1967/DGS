@@ -43,6 +43,7 @@ define('VAL_CHECK', '<font color="blue">-- <b>Need Validate!:</b> </font>');
 
    $page = $_SERVER['PHP_SELF'];
    $page_args = array();
+   $page_args_faqrefs = array('faq_refs' => 1);
 
    start_html( 'translation_consistency', 0);
 
@@ -56,15 +57,20 @@ define('VAL_CHECK', '<font color="blue">-- <b>Need Validate!:</b> </font>');
       }
       echo "<p>*** Fixes errors ***"
          ."<br>".anchor(make_url($page, $page_args), 'Just show it')
+         ."<br>".anchor(make_url($page, $page_args_faqrefs), 'Just show it (FAQ-Reference checks only)')
          ."</p>";
    }
    else
    {
       function dbg_query($s) { echo " --- query:<BR>$s; ";}
       $tmp = array_merge($page_args,array('do_it' => 1));
+      $tmp_faqrefs = array_merge($page_args_faqrefs,array('do_it' => 1));
       echo "<p>(just show needed queries)"
          ."<br>".anchor(make_url($page, $page_args), 'Show it again')
+         ."<br>".anchor(make_url($page, $page_args_faqrefs), 'Show it again (FAQ-Reference checks only)')
+         ."<br>"
          ."<br>".anchor(make_url($page, $tmp), '[Validate it]')
+         ."<br>".anchor(make_url($page, $tmp_faqrefs), '[Validate it] (FAQ-Reference)')
          ."</p>";
    }
 
@@ -75,19 +81,26 @@ define('VAL_CHECK', '<font color="blue">-- <b>Need Validate!:</b> </font>');
    // - related tables: Translationlog, TranslationLanguages, TranslationPages, TranslationGroups
    $errcnt = 0;
 
-   // Checks on FAQ/Intro/Links-table
-   $errcnt += check_consistency_faq('FAQ', $do_it);
-   $errcnt += check_consistency_faq('Intro', $do_it);
-   $errcnt += check_consistency_faq('Links', $do_it);
+   if( @$_REQUEST['faq_refs'] )
+   {
+      $errcnt += check_consistency_faq_refs($do_it);
+   }
+   else
+   {
+      // Checks on FAQ/Intro/Links-table
+      $errcnt += check_consistency_faq('FAQ', $do_it);
+      $errcnt += check_consistency_faq('Intro', $do_it);
+      $errcnt += check_consistency_faq('Links', $do_it);
 
-   // Checks on TranslationFoundInGroup-table
-   $errcnt += check_consistency_tfig($do_it);
+      // Checks on TranslationFoundInGroup-table
+      $errcnt += check_consistency_tfig($do_it);
 
-   // Checks on Translations-table (must be called before TranslationTexts-checks)
-   $errcnt += check_consistency_transl($do_it);
+      // Checks on Translations-table (must be called before TranslationTexts-checks)
+      $errcnt += check_consistency_transl($do_it);
 
-   // Checks on TranslationTexts-table
-   $errcnt += check_consistency_texts($do_it);
+      // Checks on TranslationTexts-table
+      $errcnt += check_consistency_texts($do_it);
+   }
 
 
    echo SEP_CHECK, BRLF, "Found $errcnt errors.", BRLF, BRLF, "Done!!!\n";
@@ -103,7 +116,7 @@ function commit_query( $dbgmsg, $commit, $sql )
       echo "-- Fixed: $sql", BRLF;
    }
    else
-      echo VAL_CHECK, "$sql ;", BRLF;
+      echo VAL_CHECK, make_html_safe($sql), ' ;', BRLF;
 }//commit_query
 
 
@@ -673,5 +686,100 @@ function check_consistency_texts( $commit )
 
    return $errcnt;
 }//check_consistency_texts
+
+
+// search and replace references to FAQ with incorrect category for entries
+// which can happen after admin re-organizes entries into new categories.
+function check_consistency_faq_refs( $commit )
+{
+   global $faq_entries;
+
+   $dbgmsg = "check_consistency_faq_refs($commit)";
+   $errcnt = 0;
+
+   echo SEP_CHECK;
+
+   // load all FAQ-entries with category
+   $faq_entries = array(); // faq-entry-id -> faq-category-id
+   echo BRLF, "Loading all FAQ-entries with correct category ...", BRLF;
+   $result = db_query( "$dbgmsg.load.faq_cat",
+      "SELECT ID, Parent FROM FAQ WHERE Level=2");
+   while( $row = mysql_fetch_assoc($result) )
+      $faq_entries[$row['ID']] = $row['Parent'];
+   mysql_free_result($result);
+
+
+   // Actions:
+   //   1. search texts for FAQ-references like 'faq.php?read=t&cat=3[&e=364]#Entry364'
+   //   2. parse cat-arg and #-part and check if entry matches category
+   //   3. if wrong category -> update cat-arg with correct category
+
+   $errcnt += fix_faq_reference( $dbgmsg, $commit, 'Bio', 'Text', array( 'ID' ));
+   $errcnt += fix_faq_reference( $dbgmsg, $commit, 'Bulletin', 'Text', array( 'ID' ));
+   $errcnt += fix_faq_reference( $dbgmsg, $commit, 'Feature', 'Description', array( 'ID' ));
+   $errcnt += fix_faq_reference( $dbgmsg, $commit, 'GamesNotes', 'Notes', array( 'gid', 'uid' ));
+   $errcnt += fix_faq_reference( $dbgmsg, $commit, 'Messages', 'Text', array( 'ID' ));
+   $errcnt += fix_faq_reference( $dbgmsg, $commit, 'MoveMessages', 'Text', array( 'gid', 'MoveNr' ));
+   $errcnt += fix_faq_reference( $dbgmsg, $commit, 'Posts', 'Text', array( 'ID' ));
+   $errcnt += fix_faq_reference( $dbgmsg, $commit, 'Shape', 'Notes', array( 'ID' ));
+   $errcnt += fix_faq_reference( $dbgmsg, $commit, 'SurveyOption', 'Text', array( 'ID' ));
+   $errcnt += fix_faq_reference( $dbgmsg, $commit, 'Tournament', 'Description', array( 'ID' ));
+   $errcnt += fix_faq_reference( $dbgmsg, $commit, 'TournamentNews', 'Text', array( 'ID' ));
+   $errcnt += fix_faq_reference( $dbgmsg, $commit, 'TranslationTexts', 'Text', array( 'ID' ));
+   $errcnt += fix_faq_reference( $dbgmsg, $commit, 'Translations', 'Text', array( 'Original_ID', 'Language_ID' ));
+
+   return $errcnt;
+}//check_consistency_faq_refs
+
+function fix_faq_reference( $dbgmsg, $commit, $table, $text_field, $keys )
+{
+   $errcnt = $cnt = 0;
+   $sql_keys = implode(', ', $keys);
+
+   echo BRLF, "Fixing $table.$text_field for wrong FAQ-categories ...", BRLF;
+   $result = db_query( "$dbgmsg.check.$table.$text_field",
+      "SELECT $sql_keys, $text_field AS Text " .
+      "FROM $table " .
+      "WHERE $text_field LIKE '" . mysql_addslashes( "%faq.php?%cat=%#Entry%" ) . "'" );
+   while( $row = mysql_fetch_assoc($result) )
+   {
+      ++$cnt;
+      $new_text = preg_replace_callback(
+         "/(faq\\.php?[^#]+?cat=)(\\d+)([^#]*?#Entry)(\\d+)/S", // matches: cat=$2 entry=$4
+         'replace_faq_ref_text_callback', $row['Text'] );
+
+      if( strcmp($row['Text'], $new_text) )
+      {
+         $arr = array();
+         foreach( $keys as $key )
+            $arr[] = $key . '=' . $row[$key];
+         $sql_where = implode(' AND ', $arr);
+
+         ++$errcnt;
+         commit_query( "$dbgmsg.fix.$table.$text_field", $commit,
+            "UPDATE $table SET $text_field='" . mysql_addslashes($new_text) . "' " .
+            "WHERE $sql_where LIMIT 1" );
+      }
+   }
+   mysql_free_result($result);
+   echo "  ... ", ($commit ? 'fixed' : 'checked'), " $errcnt of $cnt entries", BRLF;
+
+   return $errcnt;
+}//fix_faq_reference
+
+function replace_faq_ref_text_callback( $matches )
+{
+   global $faq_entries;
+
+   // $1 = faq.php?...cat=
+   // $2 = CAT-ID
+   // $3 = ...#Entry
+   // $4 = ENTRY-ID
+
+   $eid = (int)$matches[4];
+   return ( isset($faq_entries[$eid]) )
+      ? $matches[1] . $faq_entries[$eid] . $matches[3] . $matches[4]
+      : $matches[0];
+}//replace_faq_ref_text_callback
 
 ?>
