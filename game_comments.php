@@ -24,6 +24,9 @@ require_once 'include/table_columns.php';
 require_once 'include/game_functions.php';
 require_once 'include/board.php';
 require_once 'include/dgs_cache.php';
+require_once 'include/classlib_goban.php';
+require_once 'include/classlib_userconfig.php';
+require_once 'include/goban_handler_gfx.php';
 
 $TheErrors->set_mode(ERROR_MODE_PRINT);
 
@@ -77,8 +80,19 @@ $TheErrors->set_mode(ERROR_MODE_PRINT);
 
    list( $arr_moves, $arr_movemsg ) = load_game_comments_data( $gid );
 
+   $style_str = null; // if set, <igoban>-tag present in one of the move-messages
+   foreach( $arr_movemsg as $mvmsg )
+   {
+      if( MarkupHandlerGoban::contains_goban($mvmsg) )
+      {
+         $cfg_board = ConfigBoard::load_config_board($my_id);
+         $style_str = GobanHandlerGfxBoard::style_string( $cfg_board->get_stone_size() );
+         break;
+      }
+   }
 
-   start_html(T_('Comments'), true, @$player_row['SkinName']);
+
+   start_html(T_('Comments'), true, @$player_row['SkinName'], $style_str );
 
    $str = game_reference( REF_LINK, 1, '', $gid, 0, $game )
       . " - #$gid - " . ( $gstatus == GAME_STATUS_FINISHED ? T_('Finished') : T_('Running') );
@@ -104,6 +118,8 @@ $TheErrors->set_mode(ERROR_MODE_PRINT);
       $Text = trim(make_html_safe( $Text, $row['Stone']==$my_color ? 'gameh' : $html_mode));
       if( empty($Text) )
          continue;
+      if( $style_str )
+         $Text = MarkupHandlerGoban::replace_igoban_tags( $Text );
       $cnt_comments++;
 
       $color_class = ' class="InTextStone"';

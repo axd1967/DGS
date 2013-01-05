@@ -44,6 +44,7 @@ require_once( 'include/classlib_user.php' );
 require_once( 'include/time_functions.php' );
 require_once( "include/rating.php" );
 require_once( 'include/table_infos.php' );
+require_once( 'include/classlib_goban.php' );
 if( ENABLE_STDHANDICAP ) {
    require_once( "include/sgf_parser.php" );
 }
@@ -595,7 +596,8 @@ $GLOBALS['ThePage'] = new Page('Game');
       $movemsg = make_html_safe($movemsg, $html_mode );
       $show_notes = false;
       $noteshide = 'Y';
-   }//notes
+   }
+   $movemsg = MarkupHandlerGoban::replace_igoban_tags( $movemsg );
 
    if( ENA_MOVENUMBERS )
    {
@@ -715,8 +717,9 @@ $GLOBALS['ThePage'] = new Page('Game');
 
          if( $preview )
          {
-            $prevmsg = make_html_safe( $message, 'gameh' );
-            $TheBoard->draw_move_message( $prevmsg );
+            $preview_msg = make_html_safe( $message, 'gameh' );
+            $preview_msg = MarkupHandlerGoban::replace_igoban_tags( $preview_msg );
+            $TheBoard->draw_move_message( $preview_msg );
          }
       }
    }

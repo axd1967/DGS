@@ -30,6 +30,8 @@ require_once 'include/error_codes.php';
 require_once 'include/shape_control.php';
 require_once 'include/make_game.php';
 require_once 'include/dgs_cache.php';
+require_once 'include/classlib_goban.php';
+require_once 'include/classlib_userconfig.php';
 
 
 // game-settings form-/table-style defs
@@ -682,6 +684,7 @@ function message_info_table($mid, $date, $to_me, //$mid==0 means preview
 
    $subject = make_html_safe( $subject, SUBJECT_HTML, $rx_term);
    $text = make_html_safe( $text, true, $rx_term);
+   $text = MarkupHandlerGoban::replace_igoban_tags( $text );
 
    // warn on empty subject
    $subj_fmt = $subject;

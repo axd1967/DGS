@@ -29,6 +29,7 @@ require_once 'include/make_game.php';
 require_once 'include/contacts.php';
 require_once 'include/classlib_user.php';
 require_once 'include/classlib_profile.php';
+require_once 'include/goban_handler_gfx.php';
 
 
 define('MSGBOXROWS_NORMAL', 12);
@@ -293,8 +294,15 @@ define('MSGBOXROWS_INVITE', 6);
 
    $has_errors = ( count($errors) > 0 );
 
+   if( MarkupHandlerGoban::contains_goban(@$Text) || MarkupHandlerGoban::contains_goban($default_message) )
+   {
+      $cfg_board = ConfigBoard::load_config_board($my_id);
+      $style_str = GobanHandlerGfxBoard::style_string( $cfg_board->get_stone_size() );
+   }
+   else
+      $style_str = '';
 
-   start_page("Message - $submode", true, $logged_in, $player_row );
+   start_page("Message - $submode", true, $logged_in, $player_row, $style_str );
 
    echo "<center>\n";
 

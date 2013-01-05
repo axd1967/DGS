@@ -23,6 +23,9 @@ require_once( 'include/std_functions.php' );
 require_once( 'include/std_classes.php' );
 require_once( 'include/table_columns.php' );
 require_once( 'include/message_functions.php' );
+require_once( 'include/classlib_goban.php' );
+require_once( 'include/classlib_userconfig.php' );
+require_once( 'include/goban_handler_gfx.php' );
 
 
 {
@@ -88,6 +91,7 @@ require_once( 'include/message_functions.php' );
    $result = db_query( "message_thread.find_msg.load($thread,$mid)", $query );
    $msg_thread = array(); // mid => ThreadList
    $roots = array(); // root-threads (should only be one, but with corrupt db this may be >1 )
+   $has_igoban = false;
    while( $row = mysql_fetch_array( $result ) )
    {
       $reply = $row['ReplyTo'];
@@ -102,14 +106,24 @@ require_once( 'include/message_functions.php' );
          $roots[] = $threadlist;
       }
       $msg_thread[$row['ID']] = $threadlist;
+      if( $with_text && MarkupHandlerGoban::contains_goban(@$row['Text']) )
+         $has_igoban = true;
    }
    mysql_free_result($result);
    $msg_count = count($msg_thread);
    unset($msg_thread);
 
+   if( $has_igoban )
+   {
+      $cfg_board = ConfigBoard::load_config_board($my_id);
+      $style_str = GobanHandlerGfxBoard::style_string( $cfg_board->get_stone_size() );
+   }
+   else
+      $style_str = null;
+
 
    $title = T_('Message thread');
-   start_page( $title, true, $logged_in, $player_row );
+   start_page( $title, true, $logged_in, $player_row, $style_str );
    echo "<h3 class=Header>$title</h3>\n";
 
    // thread-list can be very long, so add switch also on top
@@ -142,7 +156,7 @@ require_once( 'include/message_functions.php' );
 //callback for traversing threadlist
 function echo_message_row( $threadlist, &$mtable )
 {
-   global $base_path, $player_row, $my_folders, $arr_directions, $mid, $other_uid, $with_text;
+   global $base_path, $player_row, $my_folders, $arr_directions, $mid, $other_uid, $with_text, $has_igoban;
 
    $item = $threadlist->getItem();
    $level = $threadlist->getLevel();
@@ -172,12 +186,14 @@ function echo_message_row( $threadlist, &$mtable )
 
    if( $with_text )
    {
+      $txt = make_html_safe( $item['Text'], true );
+      if( $has_igoban )
+         $txt = MarkupHandlerGoban::replace_igoban_tags( $txt );
+
       $row_str['extra_row_class'] = 'MessageThread';
       $row_str['extra_row'] =
          '<td colspan="2" class="MessageThread">' . T_('Message') . ':</td>' .
-         '<td colspan="4"><div class="MessageBox">'
-            . make_html_safe( $item['Text'], true )
-            . '</div></td>';
+         '<td colspan="4"><div class="MessageBox">' . $txt . '</div></td>';
    }
 
    $mtable->add_row($row_str);
