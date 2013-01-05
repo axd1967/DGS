@@ -119,9 +119,8 @@ function get_executives( $level )
    $first = T_("Developer");
    foreach( array('rodival' => 'Rod Ival',
                   'JUG' => 'Jens-Uwe Gaspar',
-                  'jgrande' => 'Juan Grande',
-                  'ragou' => 'Ragnar Ouchterlony',
-                  4991 => 'Kris Van Hulle', //uid=4991 handle='uXd' ???
+                  //'ragou' => 'Ragnar Ouchterlony',
+                  //4991 => 'Kris Van Hulle', //uid=4991 handle='uXd' ???
                   ) as $uref => $name )
    {
       add_contributor( $first, $uref, $name);
@@ -305,25 +304,24 @@ function get_executives( $level )
    section( 'Other credits', T_('Other credits'), 'credits' );
 
    $images_str = // image + originating icon-name from silk-collection
-        build_icon('professional.gif', sprintf( T_('Professional created from [%s]'), 'user_suite + wand'))
-      . build_icon('teacher.gif', sprintf( T_('Teacher created from [%s]'), 'user_comment'))
-      . build_icon('robot.gif', sprintf( T_('Robot created from [%s]'), 'computer'))
-      . build_icon('team.gif', sprintf( T_('Team created from [%s]'), 'group'))
-      . build_icon('info.gif', sprintf( T_('Information created from [%s]'), 'info'))
-      . build_icon('picture.gif', sprintf( T_('User picture created from [%s]'), 'photo'))
-      . build_icon('admin.gif', sprintf( T_('Admin created from [%s]'), 'user_grey'))
-      . build_icon('online.gif', sprintf( T_('Being online (=in the house) created from [%s]'), 'house'))
-      . build_icon('wclock_stop.gif', sprintf( T_('Stopped clock created from [%s]'), 'clock_stop'))
-      . build_icon('table.gif', sprintf( T_('Table list created from [%s]'), 'application_view_list'))
-      . build_icon('thread.gif', sprintf( T_('Thread overview created from [%s]'), 'text_align_right'))
-      . build_icon('game_comment.gif', sprintf( T_('Hidden game comments created from [%s]'), 'user_comment'))
-      . build_icon('note.gif', sprintf( T_('Note created from [%s]'), 'script'))
-      . build_icon('newgame.gif', sprintf( T_('Plus created from [%s]'), 'add'))
+        build_icon('professional.gif', sprintf( 'Professional created from [%s]', 'user_suite + wand'))
+      . build_icon('teacher.gif', sprintf( 'Teacher created from [%s]', 'user_comment'))
+      . build_icon('robot.gif', sprintf( 'Robot created from [%s]', 'computer'))
+      . build_icon('team.gif', sprintf( 'Team created from [%s]', 'group'))
+      . build_icon('info.gif', sprintf( 'Information created from [%s]', 'info'))
+      . build_icon('picture.gif', sprintf( 'User picture created from [%s]', 'photo'))
+      . build_icon('admin.gif', sprintf( 'Admin created from [%s]', 'user_grey'))
+      . build_icon('online.gif', sprintf( 'Being online (=in the house) created from [%s]', 'house'))
+      . build_icon('wclock_stop.gif', sprintf( 'Stopped clock created from [%s]', 'clock_stop'))
+      . build_icon('table.gif', sprintf( 'Table list created from [%s]', 'application_view_list'))
+      . build_icon('thread.gif', sprintf( 'Thread overview created from [%s]', 'tex/*T_*/align_right'))
+      . build_icon('game_comment.gif', sprintf( 'Hidden game comments created from [%s]', 'user_comment'))
+      . build_icon('note.gif', sprintf( 'Note created from [%s]', 'script'))
+      . build_icon('newgame.gif', sprintf( 'Plus created from [%s]', 'add'))
       ;
    add_contributor_link(
-      sprintf( T_('Taken and modified some icons from Mark James\' silk icons '
-                . 'collection (version 1.3) under '
-                . 'Creative Commons Attribution 2.5 License: %s'), $images_str ),
+      'Taken and modified some icons from Mark James\' silk icons collection (version 1.3) under ' .
+         'Creative Commons Attribution 2.5 License: ' . $images_str,
       anchor('http://www.famfamfam.com/archive/silk-icons-thats-your-lot/') );
 
    add_contributor_link( T_('Other Icons'),
