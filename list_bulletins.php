@@ -240,9 +240,14 @@ $GLOBALS['ThePage'] = new Page('BulletinList');
       $row_str = array();
 
       if( $btable->Is_Column_Displayed[14] )
-         $row_str[14] = ($bulletin->allow_bulletin_user_view())
-            ? button_TD_anchor( "view_bulletin.php?bid=".$bulletin->ID, $bulletin->ID )
-            : "<a class=\"Button smaller\">{$bulletin->Status}</a>";
+      {
+         if( $bulletin->allow_bulletin_user_view() )
+            $row_str[14] = ( @$orow['B_View'] )
+               ? button_TD_anchor( "view_bulletin.php?bid=".$bulletin->ID, $bulletin->ID )
+               : button_TD_anchor( '', $bulletin->ID, T_('View restricted to specific users#bulletin') );
+         else
+            $row_str[14] = "<a class=\"Button smaller\">{$bulletin->Status}</a>";
+      }
       if( @$btable->Is_Column_Displayed[ 1] )
       {
          $links = '';
