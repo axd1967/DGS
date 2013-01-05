@@ -188,9 +188,6 @@ $info_box = '<br>When translating you should keep the following things in mind:
          or error('mysql_query_failed','translate.translation_query');
 
       $show_rows = (int)@mysql_num_rows($result);
-      if( $show_rows <= 0 && !$untranslated )
-         error('translation_bad_language_or_group', "translate.check.lang_group($translate_lang)");
-
       if( $show_rows > 0 )
          $found_rows = mysql_found_rows('translate.found_rows');
    }
