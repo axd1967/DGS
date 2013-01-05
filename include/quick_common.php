@@ -102,6 +102,7 @@ define('DATE_FMT3', 'Y-m-d&\n\b\s\p;H:i:s');
 define('DATE_FMT4', 'YmdHis');
 define('DATE_FMT5', 'D, Y-m-d H:i T');
 define('DATE_FMT6', 'd-M-Y H:i');
+define('DATE_FMT_TZ', 'd-M-Y H:i:s T (O)'); // with time-zone, e.g. "2013-01-05 23:00:00 CET (+0100)"
 define('GMDATE_FMT', 'D, d M Y H:i:s \G\M\T');
 define('DATE_FMT_YMD', 'Y-m-d');
 define('DATE_FMT_QUICK_YMD', 'Y-m-d'); // quick-suite date-format

@@ -266,7 +266,7 @@ else
 
    if( !$allow_exec )
    {
-      $wap_head = "Status of [$uhandle]";
+      $wap_head = "Status of [$uhandle] built at [" . gmdate(GMDATE_FMT, $NOW) . "]";
       $tit = "[DISABLED] $wap_head";
       $lnk = HOSTBASE.'status.php';
       wap_open( $tit );
@@ -338,6 +338,8 @@ else
       exit;
    }
 
+   setTZ( @$player_row['Timezone'] );
+
 
    //+logging stat adjustments
 
@@ -380,6 +382,7 @@ else
 
    // NOTE: keep static access-keys, no const-usage
    $card.= "<p><a accesskey=\"s\" href=\"$lnk\">Status of</a>: " .wap_safe($my_name). "</p>";
+   $card .= "Built at: " . date(DATE_FMT_TZ, $NOW). "<br/>";
    if( $countM>0 )
       $card.= "<a accesskey=\"m\" href=\"#M1\">Messages</a>: $countM<br/>";
    else

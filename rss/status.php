@@ -32,6 +32,7 @@ define('CHARSET_MODE', 'utf'); //'iso' or 'utf'
 
 define('CACHE_MIN', 10);
 
+
 // NOTE: must appear before includes
 function error( $err, $debugmsg=NULL, $log_error=true )
 {
@@ -218,11 +219,12 @@ function rss_open( $title, $description='', $html_clone='', $cache_minutes= CACH
       . ' '.rss_tag( 'title', rss_safe( $title))
       . ' '.rss_tag( 'link', rss_link( $html_clone))
       . ' '.rss_tag( 'pubDate', rss_date( $last_modified_stamp))
+      . ' '.rss_tag( 'lastBuildDate', rss_date( $last_modified_stamp))
       . ( is_numeric( $cache_minutes) ? ' '.rss_tag( 'ttl', $cache_minutes) : '')
       . ' '.rss_tag( 'language', 'en-us')
       . ' '.rss_tag( 'description', rss_safe( $description))
       ;
-}
+}//rss_open
 
 
 function rss_close( )
@@ -360,7 +362,8 @@ else
    disable_cache( $NOW, $NOW + CACHE_MIN * SECS_PER_MIN );
 
    $channel_title = "RSS-Status of $uhandle";
-   $channel_description = "Bulletins, Messages and Games for $uhandle";
+   $channel_description_fmt = "Bulletins, Messages and Games for $uhandle built at [%s]";
+   $channel_description = sprintf( $channel_description_fmt, rss_date($NOW) ); // no TZ set yet
    if( !$allow_exec )
    {
       rss_open( "[DISABLED] $channel_title", $channel_description, HOSTBASE.'status.php' );
@@ -445,7 +448,7 @@ else
 
    $tit= $channel_title;
    $lnk= HOSTBASE.'status.php';
-   $dsc= $channel_description;
+   $dsc= sprintf( $channel_description_fmt, date(DATE_FMT_TZ, $NOW) ); // with TZ
    rss_open( $tit, $dsc, $lnk);
 
    $nothing_found = true;
