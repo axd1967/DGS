@@ -967,7 +967,9 @@ class SgfBuilder
 
    function formatPlayerName( $arr )
    {
-      return (is_array($arr)) ? sprintf( '%s (%s)', $arr['Name'], $arr['Handle'] ) : '';
+      return (is_array($arr))
+         ? sprintf( '%s (%s), %s', $arr['Name'], $arr['Handle'], SgfBuilder::sgf_echo_rating($arr['Rating2']) )
+         : '';
    }
 
 } // end of 'SgfBuilder'
