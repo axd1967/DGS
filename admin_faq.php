@@ -153,6 +153,7 @@ $info_box = '<ul>
    $view_all = ( $view === 'all' );
    $view = (int)$view;
    if( $view < 0 ) $view = 0;
+   $view_val = ($view_all) ? 'all' : $view; // used in form-fields
 
    $objtype = (int)get_request_arg('ot');
    if( $objtype == TXTOBJTYPE_INTRO )
@@ -190,7 +191,7 @@ $info_box = '<ul>
 
    $show_list = true;
    $page_base = "admin_faq.php?ot=$objtype";
-   $page = $page_base . URI_AMP.'view='.$view;
+   $page = $page_base . URI_AMP.'view='.$view_val;
 
 
    // ***********        Move entry       ****************
@@ -211,6 +212,7 @@ $info_box = '<ul>
    // args: id, move=uu|dd
    elseif( ($action=@$_REQUEST['move']) == 'uu' || $action == 'dd' )
    {
+      $page = $page_base . URI_AMP.'view=all'; // expand all categories
       AdminFAQ::move_faq_entry_to_new_category( "admin_faq($action)", $dbtable, $fid, ($action == 'dd' ? 1 : -1 ) );
       jump_to($page.URI_AMP."id=$fid#e$fid"); //clean URL
    } //bigmove
@@ -329,7 +331,7 @@ $info_box = '<ul>
 
       $edit_form->add_row( array(
             'HIDDEN', 'type', $action,
-            'HIDDEN', 'view', $view,
+            'HIDDEN', 'view', $view_val,
             'HIDDEN', 'preview', 1,
             'HIDDEN', 'qterm', textarea_safe($sql_term),
             'SUBMITBUTTONX', 'do_edit', 'Save entry',
@@ -459,7 +461,7 @@ $info_box = '<ul>
       $edit_form->add_row( array(
             'HIDDEN', 'type', $action,
             'HIDDEN', 'preview', 1,
-            'HIDDEN', 'view', $view,
+            'HIDDEN', 'view', $view_val,
             'SUBMITBUTTONX', 'do_new', 'Add entry',
                   array( 'accesskey' => ACCKEY_ACT_EXECUTE, 'disabled' => count($errors) ),
             'SUBMITBUTTONX', 'new', 'Preview',
