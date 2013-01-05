@@ -115,7 +115,7 @@ $info_box = '<br>When translating you should keep the following things in mind:
 {
    connect2mysql();
 
-   $logged_in = who_is_logged( $player_row);
+   $logged_in = who_is_logged( $player_row, LOGIN_DEFAULT_OPTS|LOGIN_NO_QUOTA_HIT );
    if( !$logged_in )
       error('login_if_not_logged_in', 'translate');
    if( $player_row['ID'] <= GUESTS_ID_MAX )

@@ -2465,11 +2465,12 @@ define('VAULT_CNT_X', VAULT_CNT*10); //activity count (larger)
 define('VAULT_TIME_X', 2*SECS_PER_HOUR); //vault duration (smaller)
 
 // login-options
-define('LOGIN_QUICK_SUITE', 0x01);
+define('LOGIN_QUICK_SUITE',  0x01);
 define('LOGIN_UPD_ACTIVITY', 0x02);
 define('LOGIN_RESET_NOTIFY', 0x04); // set Players.Notify to NONE (nothing to notify, after user checked on GUI)
 define('LOGIN_SKIP_UPDATE',  0x08); // skips update & other checks for Players-table or main-menu; for error-page (to not decrease quota)
-define('LOGIN_QUICK_PLAY', 0x10);
+define('LOGIN_QUICK_PLAY',   0x10);
+define('LOGIN_NO_QUOTA_HIT', 0x20);
 define('LOGIN_DEFAULT_OPTS', (LOGIN_UPD_ACTIVITY|LOGIN_RESET_NOTIFY));
 
 /**
@@ -2582,7 +2583,8 @@ function is_logged_in($handle, $scode, &$player_row, $login_opts=LOGIN_DEFAULT_O
    }
 
    $vaultcnt= true; //no vault for anonymous or if disabled or if server-down
-   if( !$is_down && !$skip_update && VAULT_DELAY>0 && !$session_expired ) //exclude access deny from an other user
+   $quota_hit = !( $login_opts & LOGIN_NO_QUOTA_HIT );
+   if( !$is_down && !$skip_update && VAULT_DELAY>0 && $quota_hit && !$session_expired ) //exclude access deny from an other user
    {
       $vaultcnt = (int)@$player_row['VaultCnt'];
       $vaulttime = @$player_row['X_VaultTime'];
