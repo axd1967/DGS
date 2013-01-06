@@ -18,6 +18,11 @@ ChangeLog
 
 2013-01-05 juga
 
+   * snapshot.php:
+   - added notes how to create tarballs of code-snapshot, translation-data, images
+
+2013-01-05 juga
+
    * admin_faq.php:
    - bugfixes:
      - keep expand-all-view on editing entry and coming back to list,

@@ -22,6 +22,20 @@ $TranslateGroups[] = "Docs";
 require_once( "include/std_functions.php" );
 $GLOBALS['ThePage'] = new Page('Docs');
 
+/*
+ * IMPORTANT NOTES:
+ * - To create translation-data snapshot you may use (replace 'DBUSER' and 'DATABASE_NAME'):
+ *   mysqldump --quick --extended-insert --compress --no-create-info -hdragongoserver.net -uDBUSER -p DATABASE_NAME  TranslationLanguages TranslationGroups TranslationPages TranslationTexts TranslationFoundInGroup Translations | gzip -c > Translationdata.mysql.gz
+ *
+ * - To create stable-snapshot you may use (replace 'BRANCH_NAME' and 'CVS_USER'):
+ *   cvs -d CVSUSER@dragongoserver.cvs.sourceforge.net:/cvsroot/dragongoserver export -r BRANCH_NAME -d DragonGoServer-BRANCH_NAME DragonGoServer
+ *   tar czvf DragonGoServer-BRANCH_NAME.tar.gz DragonGoServer-BRANCH_NAME/
+ *
+ * - To create image-data you may use:
+ *   tar czf images.tar.gz  images 5 7 9 11 13 17 21 25 29 35 42 50
+ */
+
+
 {
    connect2mysql();
 
