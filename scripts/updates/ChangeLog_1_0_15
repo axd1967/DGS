@@ -1,14 +1,90 @@
 ==================================================================
 Release [2012-06-08] - DGS 1.0.15 - CVS-tag [release-1_0_15-20120608] on branch [DGS-stable-20120610]
+# CVS-tag branch started on [start-branch-1_0_15]
 
 # History:
 2012-06-10: release 1.0.15 (from CVS-HEAD)
 2012-12-06: final bugfixes for release DGS 1.0.15 (from CVS-HEAD)
+2012-12-06: started branch [DGS-stable-20120610]
+2012-12-16: bug fix update (by JUG) as DGS 1.0.15.a
+2012-12-17: bug fix update (by JUG) as DGS 1.0.15.b
+2012-12-18: bug fix update (by JUG) as DGS 1.0.15.c
+2013-01-06: bug fix update (by JUG) as DGS 1.0.15.d
 
-
-2012-12-06 juga
+2013-01-05 juga
 
 ### ----- release-1_0_15-20120608 -----
+
+   * admin_faq.php:
+   - bugfixes:
+     - keep expand-all-view on editing entry and coming back to list,
+       and on all other list-actions
+     - expand all categories on moving entry into new category up or down
+
+   * include/quick_common.php (DATE_FMT_TZ),
+     rss/status.php (rss_open),
+     wap/status.php:
+   - RSS-status: added RSS-channel-tag 'lastBuildDate'
+   - RSS-status: added human-readable built-date in channel-text
+   - WAP-status: added human-readable built-date in card-item
+
+   * include/message_functions.php (message_info_table),
+     game.php, game_comments.php, message.php,
+     message_thread.php (echo_message_row):
+   - show game-board for <igoban>-tag for
+     - private messages on send message, preview message, view message,
+       view message-thread
+     - game-move messages on preview move-message for submitting move,
+       view game, view game-comments
+
+   * include/std_functions.php (LOGIN_NO_QUOTA_HIT, is_logged_in),
+     admin_faq.php, translate.php:
+   - don't decrease quota on FAQ-editing & translating
+
+   * list_bulletins.php:
+   - bugfix bulletin-list: view-bulletin may only be allowed to specific user
+
+   * people.php:
+   - comment out older developers
+   - cleanup: avoid translations for unimportant texts describing origin of icons
+
+   * translate.php:
+   - bugfix for previous removed const TRANSL_ALLOW_FILTER:
+     interpreted if-expression with TRANSL_ALLOW_FILTER in wrong way
+
+   * include/sgf_builder.php (SgfBuilder.formatPlayerName):
+   - changed node-text for multi-player-game: added current rating of moving
+     player as well besides user-id to know who has moved
+
+2012-12-18 juga
+
+   * scripts/translation_consistency.php (check_consistency_faq_refs, fix_faq_reference,
+       replace_faq_ref_text_callback):
+   - added check to correct references to FAQ correcting category of moved entries
+     to new categories
+
+2012-12-17 juga
+
+   * include/table_columns.php (Table.set_default_sort):
+   - bugfix: sort-order reverse was not possible any more
+
+   * scripts/translation_consistency.php:
+   - bugfix: correct check on missing TranslationFoundInGroup reporting wrong-text-id
+
+2012-12-16 juga
+
+   * users.php:
+   - bugfix: enforce NO_HIDE for table-column Rating for show user-rating-pos
+
+   * game_players.php (build_form_start_game),
+     game.php:
+   - corrected wrong msg-icon for 'Send message' for MPG-message
+
+   * include/table_columns.php (Table.set_default_sort, ~.set_sort, ~.make_sort_images,
+       ~.current_order_string):
+   - bugfix: ensure, that used db-fields/aliases for sorting are only used for visible table-column
+
+2012-12-06 juga
 
    * include/std_functions.php (echo_dragon_top_bar),
      bookmark.php:

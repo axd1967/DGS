@@ -1107,7 +1107,7 @@ CREATE TABLE IF NOT EXISTS `TournamentLadderProps` (
 -- Table structure for table `Tournamentlog`
 --
 
-CREATE TABLE `TournamentLog` (
+CREATE TABLE `Tournamentlog` (
   `ID` int(11) NOT NULL auto_increment,
   `tid` int(11) NOT NULL,
   `uid` int(11) NOT NULL,
