@@ -468,7 +468,7 @@ Copyright (C) 2001-2012  Erik Ouchterlony, Jens-Uwe Gaspar
 
    * Markup tags and Images:
       * &lt;igoban SL1> : Added go-diagram using syntax from Sensei's Library (=SL1)
-         * Allow go-diagram with &lt;igoban>-tag in FAQ &amp; forums
+         * Allow go-diagram with &lt;igoban>-tag in FAQ &amp; forums, private messages, game-move messages
          * Show raw-format for &lt;igoban>-tag by adding URL-arg 'raw=1' on pages with go-diagrams
          * Syntax for SL1-format: <http://senseis.xmp.net/?HowDiagramsWork |How Diagrams Work (on Sensei&apos;s Library)>
             * Show board, markup, board-title, board-text (right side or below)
@@ -611,11 +611,13 @@ Copyright (C) 2001-2012  Erik Ouchterlony, Jens-Uwe Gaspar
          * Added minimum request-interval check returning error on excessive usage
          * Added links to all unread bulletins
          * Added game-type for status-game
+         * Added built-date
          * Use same next-game-order as configured on status-page
          * Use translated texts
 
       * <home wap/status.php>WAP status</home>:
          * Added minimum request-interval check returning error on excessive usage
+         * Added built-date
          * Use same next-game-order as configured on status-page
 
    * <home users.php>Users</home>:
