@@ -3227,7 +3227,7 @@ function check_for_observers( $gid, $uid, $check_user )
    if( is_null($result) )
    {
       $is_on_observe_list = ( is_null($check_user) ) ? is_on_observe_list( $gid, $uid ) : (bool)$check_user;
-      $has_observers = ( $is_on_observe_list ) ? false : has_observers( $gid );
+      $has_observers = ( $is_on_observe_list ) ? true : has_observers( $gid );
 
       $result = array( $has_observers, $is_on_observe_list );
       DgsCache::store( $dbgmsg, CACHE_GRP_GAME_OBSERVERS, $key, $result, 30*SECS_PER_MIN, "Observers.$gid" );
