@@ -75,6 +75,13 @@ require_once( 'include/wroom_control.php' );
       T_('No Fair Komi')   => "Handicaptype NOT IN ('auko_sec','auko_opn','div_ykic','div_ikyc')",
    );
 
+   $suitable_filter_array = array(
+      T_('All')      => new QuerySQL( SQLP_WHERE, "WR.uid<>$my_id" ),
+      T_('Suitable') => new QuerySQL( SQLP_WHERE, "WR.uid<>$my_id",
+                                      SQLP_HAVING, 'goodrating', 'goodmingames', 'haverating', 'goodsameopp' ),
+      T_('Mine')     => new QuerySQL( SQLP_WHERE, "WR.uid=$my_id" ),
+   );
+
    $game_type_filter_array = MultiPlayerGame::build_game_type_filter_array();
    $game_type_filter_array[T_('Shape-Game')] = "ShapeID>0";
    $game_type_filter_array[T_('No Shapes')] = "ShapeID=0";
@@ -111,10 +118,8 @@ require_once( 'include/wroom_control.php' );
    $wrfilter->add_filter( 5, 'Selection', $handi_filter_array, true);
    $wrfilter->add_filter( 6, 'Numeric',   'Komi', true, array( FC_SIZE => 4 ));
    $wrfilter->add_filter( 7, 'Numeric',   'Size', true, array( FC_SIZE => 4 ));
-   $wrfilter->add_filter( 8, 'Boolean',
-         new QuerySQL( SQLP_HAVING, 'goodrating', 'goodmingames', 'haverating', 'goodsameopp' ),
-         true,
-         array( FC_FNAME => 'good', FC_LABEL => T_('Only suitable'), FC_STATIC => 1, FC_DEFAULT => 1 ));
+   $wrfilter->add_filter( 8, 'Selection', $suitable_filter_array, true,
+         array( FC_FNAME => 'good', FC_STATIC => 1, FC_DEFAULT => 1 ));
    $wrfilter->add_filter( 9, 'Selection',
          array( T_('All') => '',
                 T_('Japanese') => sprintf( "Byotype='%s'", BYOTYPE_JAPANESE ),
@@ -130,8 +135,8 @@ require_once( 'include/wroom_control.php' );
    $wrfilter->add_filter(19, 'Selection', build_ruleset_filter_array(), true);
    $wrfilter->add_filter(20, 'Selection', $game_type_filter_array, true);
    $wrfilter->init();
-   $f_range =& $wrfilter->get_filter(8);
-   $suitable = $f_range->get_value(); // !suitable == all
+   $f_suitable =& $wrfilter->get_filter(8);
+   $suitable = ( $f_suitable->get_value() == 1 ); // all=0, suitable=1, mine=2
 
 
    // init table
@@ -177,7 +182,7 @@ require_once( 'include/wroom_control.php' );
    $baseURL = $baseURLMenu
       . $wrtable->current_filter_string(1)
       . $wrtable->current_from_string()
-      . SPURI_ARGS . @$_REQUEST[SP_OVERWRITE_ARGS] . URI_AMP; //end sep
+      . SPURI_ARGS . append_unique(@$_REQUEST[SP_OVERWRITE_ARGS], 'good') . URI_AMP; //end sep
 
    $qsql = WaitingroomControl::build_waiting_room_query( 0, /*with-player*/true, $suitable );
 
@@ -191,6 +196,8 @@ require_once( 'include/wroom_control.php' );
 
    if( $suitable )
       $title = T_('Suitable waiting games');
+   elseif( $f_suitable->get_value() == 2 )
+      $title = T_('My waiting games');
    else
       $title = T_('All waiting games');
 
@@ -266,7 +273,7 @@ require_once( 'include/wroom_control.php' );
          {
             $wrow_strings[ 8] = array( 'text' => $restrictions );
             if( !$joinable )
-               $wrow_strings[ 8]['attbs']= warning_cell_attb( T_('Out of range'), true);
+               $wrow_strings[ 8]['attbs']= warning_cell_attb( T_('Restricted#wroom'), true);
          }
          if( $wrtable->Is_Column_Displayed[ 9] )
             $wrow_strings[ 9] = TimeFormat::echo_time_limit(
@@ -332,9 +339,9 @@ require_once( 'include/wroom_control.php' );
 
 
    $menu_array = array();
-   $menu_array[T_('New Game')] = 'new_game.php';
-   $menu_array[T_('Show all waiting games')] = $baseURLMenu.'good=0'.SPURI_ARGS.'good';
-   $menu_array[T_('Show suitable games only')] = $baseURLMenu.'good=1'.SPURI_ARGS.'good';
+   $menu_array[T_('All waiting games')] = $baseURLMenu.'good=0'.SPURI_ARGS.'good';
+   $menu_array[T_('Suitable waiting games')] = $baseURLMenu.'good=1'.SPURI_ARGS.'good';
+   $menu_array[T_('My waiting games')] = $baseURLMenu.'good=2'.SPURI_ARGS.'good';
 
    end_page(@$menu_array);
 }

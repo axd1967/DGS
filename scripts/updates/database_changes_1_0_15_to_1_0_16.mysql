@@ -1,0 +1,20 @@
+# Release DGS 1.0.16 at ??-???-2013 from MAIN-branch:
+#
+# IMPORTANT NOTE:
+# * Do a full backup of all data in the database before performing (these) changes !!
+#   Note current space (phpmyadmin or 'show table status') for later comparison.
+# * Do NOT simply execute these SQL-statements as there are DROP-tables,
+#   some to-be-replaced templates and non-SQL-statements in it !!
+# * enable mysql-client warnings with: \W
+#
+# * Recommendation: Import it section by section manually taking comments into account !
+#
+
+-- change existing translation-text for waiting-room without losing translations
+UPDATE TranslationTexts
+   SET Text='All waiting games', Translatable='Y', Updated=NOW()
+   WHERE Text='Show all waiting games' LIMIT 1 ;
+UPDATE TranslationTexts
+   SET Text='Suitable waiting games', Translatable='Y', Updated=NOW()
+   WHERE Text='Show suitable games only' LIMIT 1 ;
+

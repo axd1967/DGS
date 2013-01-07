@@ -124,6 +124,11 @@ function itemL($text, $link='', $working=true, $last=false)
       } $item_level--;
 
       item(T_('Waiting room'), "waiting_room.php", true);
+      { $item_level++;
+         itemL(T_('All waiting games'), "waiting_room.php?good=0".SPURI_ARGS.'good', true);
+         itemL(T_('Suitable waiting games'), "waiting_room.php?good=1".SPURI_ARGS.'good', true);
+         itemL(T_('My waiting games'), "waiting_room.php?good=2".SPURI_ARGS.'good', true, true);
+      } $item_level--;
 
       if( ALLOW_TOURNAMENTS )
       {

@@ -1091,13 +1091,13 @@ function game_info_table( $tablestyle, $game_row, $player_row, $iamrated, $use_s
       if( $ratinglimit_str != NO_VALUE )
          $itable->add_sinfo(
             T_('Rating restrictions'), $ratinglimit_str,
-            ( ($goodrating && $goodmingames) ? '' : warning_cell_attb( T_('Out of range')) ) );
+            ( ($goodrating && $goodmingames) ? '' : warning_cell_attb( T_('Restricted#wroom')) ) );
 
       $same_opp_str = echo_accept_same_opponent($SameOpponent, $game_row);
       if( $SameOpponent != 0 )
          $itable->add_sinfo(
             T_('Accept same opponent'), $same_opp_str,
-            ( $goodsameopp ? '' : warning_cell_attb( T_('Out of range')) ) );
+            ( $goodsameopp ? '' : warning_cell_attb( T_('Restricted#wroom')) ) );
    }
 
 

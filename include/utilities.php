@@ -343,4 +343,14 @@ function build_path_dir( $src_path, $path_def )
    return ( substr($path_def,0,1) == '/' ) ? $path_def : $src_path . '/' . $path_def;
 }
 
+/*! \brief Appends $item to $str if not there already separated by $sep. */
+function append_unique( $str, $item, $sep=',' )
+{
+   if( (string)$str == '' )
+      $str = $item;
+   elseif( !preg_match("/\\b".preg_quote($item)."\\b/", $str) )
+      $str .= $sep . $item;
+   return $str;
+}
+
 ?>
