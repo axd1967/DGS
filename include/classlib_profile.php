@@ -410,7 +410,10 @@ class SearchProfile
 
       // parse overwrite-args
       foreach( explode(',', @$_REQUEST[$prefix.SP_OVERWRITE_ARGS]) as $arg )
-         $this->overwrite_args[$arg] = 1;
+      {
+         if( $arg )
+            $this->overwrite_args[$arg] = 1;
+      }
    }
 
    function set_forbid_default()
