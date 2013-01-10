@@ -670,19 +670,23 @@ class MultiPlayerGame
    /*!
     * \brief Updates player on end of MP-game for given game-id.
     * \param $game_in_setup_mode true, if Players.GamesMPG must be synchronized because game in setup-mode
+    * \param $del_game true=game is deleted; false=game is finished/ended normally
     */
-   function update_players_end_mpgame( $gid, $game_in_setup_mode )
+   function update_players_end_mpgame( $gid, $game_in_setup_mode, $del_game )
    {
+      $arr_set = ( $del_game )
+         ? array()
+         : array( 'P.Running=P.Running-1', 'P.Finished=P.Finished+1' ); // end-game
+
       // update Players for all game-players: GamesMPG-- if game in SETUP-mode (for joined or reserved-invitation)
-      $qpart_del = ($game_in_setup_mode)
-         ? ", P.GamesMPG=P.GamesMPG - IF( ( (GP.Flags & ".GPFLAG_JOINED.") OR " .
-               "((GP.Flags & ".GPFLAGS_RESERVED_INVITATION.")=".GPFLAGS_RESERVED_INVITATION.") ), 1, 0) "
-         : '';
+      if( $game_in_setup_mode )
+         $arr_set[] = "P.GamesMPG=P.GamesMPG - IF( ( (GP.Flags & ".GPFLAG_JOINED.") OR " .
+               "((GP.Flags & ".GPFLAGS_RESERVED_INVITATION.")=".GPFLAGS_RESERVED_INVITATION.") ), 1, 0)";
 
       // update Players for all game-players: Running--, Finished++;
       db_query( "MultiPlayerGame::update_players_end_mpgame($gid,$game_in_setup_mode)",
          "UPDATE Players AS P INNER JOIN GamePlayers AS GP ON GP.uid=P.ID "
-            . "SET P.Running=P.Running-1, P.Finished=P.Finished+1 $qpart_del WHERE GP.gid=$gid" );
+            . "SET " . implode(', ', $arr_set) . " WHERE GP.gid=$gid" );
    }//update_players_end_mpgame
 
    /*!
@@ -1058,7 +1062,7 @@ class GameHelper
                   "UPDATE Players SET Running=Running-1 WHERE ID IN ($Black_ID,$White_ID) LIMIT 2" );
             }
             else
-               MultiPlayerGame::update_players_end_mpgame( $gid, ($grow['Status'] == GAME_STATUS_SETUP) );
+               MultiPlayerGame::update_players_end_mpgame( $gid, ($grow['Status'] == GAME_STATUS_SETUP), /*del*/true );
          }
 
          GameHelper::_delete_base_game_tables( $gid );
@@ -1195,7 +1199,7 @@ class GameHelper
    }//update_players_start_game
 
    /*!
-    * \brief Updates game-stats in Players-table for simple or multi-player game.
+    * \brief Updates game-stats in Players-table for simple or multi-player game when game is finished.
     * \note IMPORTANT NOTE: caller needs to open TA with HOT-section!!
     */
    function update_players_end_game( $dbgmsg, $gid, $game_type, $rated_status, $score, $black_id, $white_id )
@@ -1218,7 +1222,7 @@ class GameHelper
              ). " WHERE ID=$black_id LIMIT 1" );
       }
       else // multi-player-go
-         MultiPlayerGame::update_players_end_mpgame( $gid, /*setup*/false );
+         MultiPlayerGame::update_players_end_mpgame( $gid, /*setup*/false, /*del*/false );
    }//update_players_end_game
 
    /*! \brief Returns number of started games (used for same-opponent-check). */
