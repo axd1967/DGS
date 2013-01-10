@@ -209,7 +209,8 @@ Copyright (C) 2001-2013  Erik Ouchterlony, Jens-Uwe Gaspar
       * Delete game on opponents turn (within first 10 moves)
       * Resign game on opponents turn
       * Added new game info page (marked by <image info.gif> on game-related-pages)
-      * Added new page to attach SGF to finished game (for reviews)
+      * Added new page to attach SGF to running and finished games (for reviews)
+         * allowed are one SGF per game and user
       * Preview game message (access-key [w]=Preview)
       * Show last-move capture in left info-box and mark (<image board/ex.gif>) on board
          * enable with option "Mark Last Move Capture" in user-profile

@@ -69,7 +69,7 @@ define('SGF_MAXSIZE_UPLOAD', 100*1024); // max. 100KB stored, keep factor of 102
    $game = Games::load_game( $gid );
    if( is_null($game) )
       error('unknown_game', "manage_sgf.check.gid($gid)");
-   if( $game->Status != GAME_STATUS_FINISHED )
+   if( !isRunningGame($game->Status) && $game->Status != GAME_STATUS_FINISHED )
       error('invalid_game_status', "manage_sgf.check.status($gid,{$game->Status})");
 
    $page = "manage_sgf.php";

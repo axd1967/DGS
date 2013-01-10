@@ -32,7 +32,7 @@ require_once 'include/coords.php';
  /*!
   * \class GameSgfControl
   *
-  * \brief Controller-Class to handle SGF-attachment for finished games.
+  * \brief Controller-Class to handle SGF-attachment for running and finished games.
   */
 class GameSgfControl
 {

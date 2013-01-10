@@ -856,8 +856,7 @@ $GLOBALS['ThePage'] = new Page('Game');
    $menu_array[T_('Show game info')] = "gameinfo.php?gid=$gid";
    if( $is_mp_game )
       $menu_array[T_('Show game-players')] = "game_players.php?gid=$gid";
-   if( $Status == GAME_STATUS_FINISHED )
-      $menu_array[T_('Attach SGF')] = "manage_sgf.php?gid=$gid";
+   $menu_array[T_('Attach SGF')] = "manage_sgf.php?gid=$gid";
 
    end_page(@$menu_array, -4);
 }// main
