@@ -1145,6 +1145,8 @@ class GameHelper
       NextGameOrder::delete_game_priorities($gid);
       db_query( "GameHelper::_delete_base_game_tables.observers($gid)",
          "DELETE FROM Observers WHERE ID=$gid" );
+      db_query( "GameHelper::_delete_base_game_tables.game_sgf($gid)",
+         "DELETE FROM GameSgf WHERE gid=$gid" );
       db_query( "GameHelper::_delete_base_game_tables.notes($gid)",
          "DELETE FROM GamesNotes WHERE gid=$gid" );
       db_query( "GameHelper::_delete_base_game_tables.movemsg($gid)",
