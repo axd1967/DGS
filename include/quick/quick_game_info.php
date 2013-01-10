@@ -35,8 +35,7 @@ require_once 'include/game_functions.php';
 // see specs/quick_suite.txt (3a)
 define('GAMEINFO_OPT_GID', 'gid');
 
-define('GAMECMD_GET_NOTES', 'get_notes');
-define('GAMEINFO_COMMANDS', 'info|get_notes');
+define('GAMEINFO_COMMANDS', 'info');
 
 
  /*!
@@ -50,7 +49,6 @@ class QuickHandlerGameInfo extends QuickHandler
 
    var $glc; // GameListControl
    var $game_row;
-   var $gamenotes;
 
    function QuickHandlerGameInfo( $quick_object )
    {
@@ -59,7 +57,6 @@ class QuickHandlerGameInfo extends QuickHandler
       $this->glc = null;
 
       $this->game_row = null;
-      $this->gamenotes = null;
    }
 
 
@@ -92,7 +89,7 @@ class QuickHandlerGameInfo extends QuickHandler
          error('unknown_game', "QuickHandlerGameInfo.check({$this->gid})");
       $gid = $this->gid;
 
-      // prepare command: info, get_notes
+      // prepare command: info
 
       if( $cmd == QCMD_INFO )
       {
@@ -110,12 +107,6 @@ class QuickHandlerGameInfo extends QuickHandler
          $this->game_row = mysql_single_fetch( "QuickHandlerGameInfo.prepare.find_game3($gid)", $qsql->get_select() )
                or error('unknown_game', "QuickHandlerGameInfo.prepare.find_game4($gid)");
       }
-      elseif( $cmd == GAMECMD_GET_NOTES )
-      {
-         $gn_row = GameHelper::load_cache_game_notes( 'QuickHandlerGameInfo.prepare', $gid, $uid );
-         if( is_array($gn_row) )
-            $this->gamenotes = @$gn_row['Notes'];
-      }
    }//prepare
 
    /*! \brief Processes command for object; may fire error(..) and perform db-operations. */
@@ -124,8 +115,6 @@ class QuickHandlerGameInfo extends QuickHandler
       $cmd = $this->quick_object->cmd;
       if( $cmd == QCMD_INFO )
          QuickHandlerGameInfo::fill_game_info($this, $this->glc, $this->quick_object->result, $this->game_row);
-      elseif( $cmd == GAMECMD_GET_NOTES )
-         $this->addResultKey( 'notes', (is_null($this->gamenotes) ? "" : $this->gamenotes) );
    }
 
 
@@ -204,7 +193,7 @@ class QuickHandlerGameInfo extends QuickHandler
 
          $out['prio'] = (int)@$row['X_Priority'];
          if( $quick_handler->is_with_option(QWITH_NOTES) )
-            $out['notes'] = strip_gamenotes( @$row['X_Note'] );
+            $out['notes'] = @$row['X_Note'];
       }
 
       foreach( array( BLACK, WHITE ) as $col )
