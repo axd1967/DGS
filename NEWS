@@ -209,6 +209,7 @@ Copyright (C) 2001-2013  Erik Ouchterlony, Jens-Uwe Gaspar
       * Delete game on opponents turn (within first 10 moves)
       * Resign game on opponents turn
       * Added new game info page (marked by <image info.gif> on game-related-pages)
+      * Added new page to attach SGF to finished game (for reviews)
       * Preview game message (access-key [w]=Preview)
       * Show last-move capture in left info-box and mark (<image board/ex.gif>) on board
          * enable with option "Mark Last Move Capture" in user-profile
@@ -248,6 +249,7 @@ Copyright (C) 2001-2013  Erik Ouchterlony, Jens-Uwe Gaspar
          * Show number of already started games with opponent
          * Show probable game-settings for challenger with color, handicap and komi
          * Simplified filter for "suitable" waiting games, added notes
+         * Put own waiting games into new view "My waiting games"
          * Additionally show "(FH)" (=free handicap) in Settings-column, if standard-placement is not used
          * Differ 'Even game' and 'Handicap game' for handicap-type NIGIRI in offer-info
          * Removed reply-box when joining waiting-room-game (greetings have to be on first move now)
@@ -552,7 +554,7 @@ Copyright (C) 2001-2013  Erik Ouchterlony, Jens-Uwe Gaspar
 
       * Added game-handler to
          * retrieve information about game, with nested user-objects
-         * retrieve own private notes of game
+         * retrieve and update own private notes of game, hide &amp; show notes
          * retrieve list of games with views: status, my/user running, my/user finished, observing, all observed;
            including filter for MPG
          * play game (set-handicap stones, move, pass)
