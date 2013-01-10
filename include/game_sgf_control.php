@@ -35,10 +35,17 @@ class GameSgfControl
 {
    // ------------ static functions ----------------------------
 
-   function delete_game_sgf( $gid, $uid )
+   // deletes own GameSgf
+   function delete_game_sgf( $gid )
    {
-      $game_sgf = new GameSgf( $gid, $uid );
-      return $game_sgf->delete();
+      global $player_row;
+      $uid = $player_row['ID'];
+
+      $game_sgf = GameSgf::load_game_sgf( $gid, $uid );
+      if( is_null($game_sgf) )
+         return true; // nothing to delete
+      else
+         return $game_sgf->delete();
    }//delete_game_sgf
 
    function save_game_sgf( $gid, $uid, $path_file )
@@ -47,8 +54,13 @@ class GameSgfControl
 
       // read SGF from uploaded file
       $sgf_data = read_from_file( $path_file );
-      $game_sgf = new GameSgf( $gid, $uid, $NOW, $sgf_data );
-      return $game_sgf->persist();
+      if( $sgf_data !== false )
+      {
+         $game_sgf = new GameSgf( $gid, $uid, $NOW, $sgf_data );
+         return $game_sgf->persist();
+      }
+      else // shouldn't happen as read-from-file quits on error
+         return false;
    }//save_game_sgf
 
    // $disposition_type : inline | attachment
