@@ -87,7 +87,7 @@ define('SGF_MAXSIZE_UPLOAD', 100*1024); // max. 100KB stored, keep factor of 102
    }
 
    // upload, check and save SGF
-   $errors = null;
+   $errors = array();
    $upload = null;
    if( @$_REQUEST['sgf_save'] && isset($_FILES['file_sgf']) )
    {
@@ -95,14 +95,15 @@ define('SGF_MAXSIZE_UPLOAD', 100*1024); // max. 100KB stored, keep factor of 102
       $upload = new FileUpload( $_FILES['file_sgf'], SGF_MAXSIZE_UPLOAD );
       if( $upload->is_uploaded && !$upload->has_error() )
       {
-         if( GameSgfControl::save_game_sgf( $gid, $my_id, $upload->file_src_tmpfile ) )
+         $errors = GameSgfControl::save_game_sgf( $game, $my_id, $upload->file_src_tmpfile );
+         if( count($errors) == 0 )
          {
             @$upload->cleanup();
             jump_to($baseURL."sysmsg=". urlencode(T_('SGF saved!')) );
          }
       }
       if( $upload->has_error() )
-         $errors = $upload->errors;
+         $errors = array_merge( $upload->errors, $errors );
       @$upload->cleanup();
    }
 
@@ -161,11 +162,11 @@ define('SGF_MAXSIZE_UPLOAD', 100*1024); // max. 100KB stored, keep factor of 102
       'DESCRIPTION', T_('Last move#header'),
       'TEXT', date(DATE_FMT3, @$game->Lastchanged), ));
 
-   if( $errors )
+   if( count($errors) )
    {
       $errstr = '';
       foreach( $errors as $err )
-         $errstr .= make_html_safe($err, 'line') . "\n";
+         $errstr .= make_html_safe($err, 'line') . "<br>\n";
       $form->add_empty_row();
       $form->add_row( array(
             'DESCRIPTION', T_('Errors'),

@@ -17,6 +17,7 @@ You should have received a copy of the GNU Affero General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
+$TranslateGroups[] = "Game";
 
 
 /*
@@ -100,13 +101,13 @@ function sgf_parser( $sgf, &$games)
       $i++;
       if( !sgf_skip_space( $sgf, $i, $sgf_len) )
       {
-         $err= 'bad end of file';
+         $err = T_('Bad end of file#sgf');
          break;
       }
 
       if( $sgf{$i} != SGF_NOD_BEG )
       {
-         $err= 'bad root node';
+         $err = T_('Bad root node#sgf');
          break;
       }
 
@@ -117,7 +118,7 @@ function sgf_parser( $sgf, &$games)
 
       if( !isset($node['GM']) || @$node['GM'][0] != 1 )
       {
-         $err = 'not a Go game (GM[1])';
+         $err = T_('Not a Go game (GM[1])#sgf');
          break;
       }
 
@@ -147,7 +148,7 @@ function sgf_parser( $sgf, &$games)
                $i++;
                if( SGF_NOD_BEG != sgf_skip_space( $sgf, $i, $sgf_len) )
                {
-                  $err= 'bad node start';
+                  $err = T_('Bad node start#sgf');
                   break;
                }
                if( $node_ivar <= $ivar )
@@ -161,7 +162,7 @@ function sgf_parser( $sgf, &$games)
                break;
 
             default :
-               $err= 'syntax error';
+               $err = T_('Syntax error#sgf');
                break;
          }
       }
@@ -170,7 +171,7 @@ function sgf_parser( $sgf, &$games)
 
       if( $ivar>=0 )
       {
-         $err= 'missing right parenthesis';
+         $err = T_('Missing right parenthesis#sgf');
          break;
       }
 
@@ -281,7 +282,7 @@ function sgf_parse_node( $sgf, &$i, $l, &$node)
    $c= $sgf{$i}; //sgf_skip_space( $sgf, $i, $l)
    if( $c != SGF_NOD_BEG &&  $c != SGF_VAR_BEG && $c != SGF_VAR_END )
    {
-      return 'syntax error';
+      return T_('Syntax error#sgf');
    }
    return '';
 }
@@ -304,7 +305,7 @@ function sgf_parse_args( $sgf, &$i, $l, &$args, $key)
          }
       }
       if( false === $j )
-         return 'missing right bracket';
+         return T_('Missing right bracket#sgf');
    }
    return '';
 }
@@ -351,11 +352,11 @@ function get_handicap_pattern( $size, $handicap, &$err)
    if( is_string($sgf) )
       $err = sgf_parser( $sgf, $game);
    else
-      $err = 'File not found';
+      $err = T_('File not found');
    if( $err ) {
       //Simply returning the error message will allow
       //the player to manually add his handicap stones.
-      $err= "Bad handicap pattern for size=$size h=$handicap err=$err";
+      $err= sprintf( T_('Bad handicap pattern for %s'), "size=$size h=$handicap err=[$err]" );
       return $stonestring;
    }
    $game= $game[0]; //keep the first game only
@@ -395,7 +396,7 @@ function get_handicap_pattern( $size, $handicap, &$err)
       }
    }
    //See previous error comment
-   $err= "Insufficient handicap pattern for size=$size h=$handicap n=$nb";
+   $err = sprintf( T_('Insufficient handicap pattern for %s'), "size=$size h=$handicap n=$nb" );
    return $stonestring;
 }
 
@@ -405,7 +406,7 @@ function get_handicap_pattern( $size, $handicap, &$err)
 /*! \brief Contains parsed properties from SGF for further processing. */
 class SgfParser
 {
-   var $Error; // error-message | '' (=success)
+   var $error; // error-message | '' (=success)
    var $Size;
    var $Handicap; // number of handicap-stones
    var $Komi;
@@ -426,6 +427,12 @@ class SgfParser
 
 
    // ------------ static functions ----------------------------
+
+   /*! Returns false if passed SGF-data does not rudimentary looking like a SGF. */
+   function might_be_sgf( $sgf_data )
+   {
+      return preg_match("/^\\s*\\(\\s*;\\s*[a-z]/si", $sgf_data);
+   }
 
    /*!
     * \brief Parses SGF-data into resulting-array (used to load SGF and flatten into Goban-objects for Shape-game).

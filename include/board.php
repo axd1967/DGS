@@ -48,6 +48,7 @@ class Board
    var $js_moves; //array($MoveNr,$Stone,$PosX,$PosY) to build moves for JS-game-editor
    var $moves_captures; //array: [$MoveNr] => array(sgfcoord-prisoners, ...)
    var $last_captures; //array: [sgfcoord] => 1 (if pos should be marked)
+   var $shape_arr_xy;
 
    //Last move shown ($movemrkx<0 if PASS, RESIGN or SCORE)
    var $movemrkx, $movemrky, $movecol, $movemsg;
@@ -77,6 +78,7 @@ class Board
       $this->js_moves = array();
       $this->moves_captures = NULL;
       $this->last_captures = array();
+      $this->shape_arr_xy = array();
 
       $this->movemrkx = $this->movemrky = -1;
       $this->movecol = DAME;
@@ -100,6 +102,7 @@ class Board
       $this->infos = array();
       $this->js_moves = array();
       $this->moves_captures = array();
+      $this->shape_arr_xy = array();
    }//init_board
 
    /*!
@@ -112,6 +115,7 @@ class Board
     *
     * \note fills $this->array with positions where the stones are (incl. handling of shape-game)
     * \note fills $this->moves with moves and coordinates.
+    * \note fills $this->shape_arr_xy with parsed shape-setup as returned by GameSnapshot::parse_stones_snapshot().
     * \note keep the coords, color and message of the move $move.
     */
    function load_from_db( $game_row, $move=0, $board_opts=0, $cache_ttl=0 )
@@ -161,6 +165,7 @@ class Board
       if( $shape_snapshot )
       {
          $arr_xy = GameSnapshot::parse_stones_snapshot( $this->size, $shape_snapshot, BLACK, WHITE );
+         $this->shape_arr_xy = $arr_xy;
          if( count($arr_xy) )
          {
             $this->moves[MOVE_SETUP] = array( BLACK, POSX_SETUP, 0 );
