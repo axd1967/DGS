@@ -16,7 +16,86 @@ Developers INFO:
 ChangeLog
 ------------------------------------------------------------------
 
+2013-01-10 juga
+
+   * include/quick/quick_game_notes.php (class QuickHandlerGameNotes, ~.canHandle,
+       ~.parseURL, ~.prepare, ~.process),
+     include/quick/quick_game_info.php (class QuickHandlerGameInfo, ~.prepare,
+       ~.process, ~.fill_game_info),
+     include/quick/quick_suite.php (QuickSuite.getQuickHandler),
+     specs/quick_suite.txt:
+   - added quick-commands for game-object: save_notes, hide_notes, show_notes
+   - refactored game-notes 'get_notes'-commands into separate class QuickHandlerGameNotes
+   - quick-game-info: return full game-notes instead of length-stripped notes
+
+   * include/game_sgf_control.php (GameSgfControl.delete_game_sgf, ~.save_game_sgf),
+     include/globals.php (CSS_VERSION),
+     skins/dragon/screen.css,
+     manage_sgf.php:
+   - ask for confirmation on removing own SGF
+   - added 'Refresh'-bottom-link to refresh page
+   - bugfix: check if file-read was successful for saving SGF
+
+   * include/db/game_sgf.php (class GameSgf, ~.to_string, ~.persist, ~.insert, ~.update, ~.delete,
+       ~.fillEntityData, ~.build_query_sql, ~.new_from_row, ~.load_game_sgf, ~.load_game_sgfs,
+       ~.count_game_sgfs),
+     include/game_sgf_control.php (class GameSgfControl, ~.delete_game_sgf, ~.save_game_sgf,
+       ~.download_game_sgf),
+     scripts/updates/database_changes_1_0_15_to_1_0_16.mysql,
+     scripts/updates/other_changes_1_0_15_to_1_0_16.txt,
+     specs/db/table-Games.txt, specs/db/dragon-ddl.sql,
+     game.php, manage_sgf.php, people.php, site_map.php:
+   - allow to upload SGFs for finished games
+     - added manage-sgf page to add, update, delete and download SGFs
+     - allow one SGF per game and user
+     - max. upload file-size 100KB
+     - game-page shows new sgf-icon if there are attached SGFs to download
+     - show 'Attach SGF' bottom-link on game-page for finished games
+-----------
+-- added table to store attached SGFs for games
+CREATE TABLE GameSgf (
+  gid int NOT NULL,
+  uid int NOT NULL,
+  Lastchanged datetime NOT NULL default '0000-00-00 00:00:00',
+  SgfData blob NOT NULL,
+  PRIMARY KEY (gid,uid)
+) ENGINE=MyISAM ;
+-----------
+
+   * include/game_functions.php (MultiPlayerGame.update_players_end_mpgame;
+       GameHelper.delete_running_game, ~.update_players_end_game):
+   - bugfix: deleting a multi-player-game changed wrongly Players.Running/Finished-fields
+
+2013-01-07 juga
+
+   * include/message_functions.php (game_info_table),
+     include/utilities.php (append_unique),
+     scripts/updates/database_changes_1_0_15_to_1_0_16.mysql,
+     site_map.php, waiting_room.php:
+   - changed waiting-room view:
+     - added view 'My waiting games' only showing own waiting games
+     - replaced boolean-filter for suitable with selectbox with All/Suitable/Mine
+     - All and Suitable waiting games do not show own games
+     - removed 'New Game' bottom-link
+     - adjusted tooltip-text 'Out of range' to the more general 'Restricted'
+     - changed existing bottom-link translation-texts without losing translations
+-----------
+-- change existing translation-text for waiting-room without losing translations
+UPDATE TranslationTexts
+   SET Text='All waiting games', Translatable='Y', Updated=NOW()
+   WHERE Text='Show all waiting games' LIMIT 1 ;
+UPDATE TranslationTexts
+   SET Text='Suitable waiting games', Translatable='Y', Updated=NOW()
+   WHERE Text='Show suitable games only' LIMIT 1 ;
+-----------
+
+   * include/classlib_profile.php (class SearchProfile):
+   - bugfix: initializing overwrite-args ignoring leading and trailing separators
+
 2013-01-05 juga
+
+   * include/std_functions.php (check_for_observers):
+   - bugfix: add 'show observers'-link if game is observed by myself
 
    * snapshot.php:
    - added notes how to create tarballs of code-snapshot, translation-data, images
