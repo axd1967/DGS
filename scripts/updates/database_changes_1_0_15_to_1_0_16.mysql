@@ -18,3 +18,14 @@ UPDATE TranslationTexts
    SET Text='Suitable waiting games', Translatable='Y', Updated=NOW()
    WHERE Text='Show suitable games only' LIMIT 1 ;
 
+
+-- added table to store attached SGFs for games
+CREATE TABLE GameSgf (
+  gid int NOT NULL,
+  uid int NOT NULL,
+  Lastchanged datetime NOT NULL default '0000-00-00 00:00:00',
+  SgfData blob NOT NULL,
+  PRIMARY KEY (gid,uid)
+) ENGINE=MyISAM ;
+
+

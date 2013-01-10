@@ -45,6 +45,7 @@ require_once( 'include/time_functions.php' );
 require_once( "include/rating.php" );
 require_once( 'include/table_infos.php' );
 require_once( 'include/classlib_goban.php' );
+require_once( 'include/db/game_sgf.php' );
 if( ENABLE_STDHANDICAP ) {
    require_once( "include/sgf_parser.php" );
 }
@@ -624,6 +625,12 @@ $GLOBALS['ThePage'] = new Page('Game');
    else
       $js = null;
 
+   if( $Status == GAME_STATUS_FINISHED )
+      $cnt_attached_sgf = GameSgf::count_game_sgfs( $gid );
+   else
+      $cnt_attached_sgf = 0;
+
+
    $title = T_("Game") ." #$gid,$arg_move";
    start_page($title, 0, $logged_in, $player_row, $TheBoard->style_string(), null, $js);
 
@@ -744,6 +751,14 @@ $GLOBALS['ThePage'] = new Page('Game');
          image( 'images/eidogo.gif', T_('EidoGo Game Player'), null, 'class=InTextImage' ),
          '', 'class=NoPrint' );
 
+   if( $cnt_attached_sgf > 0 )
+   {
+      echo SMALL_SPACING,
+         anchor( "manage_sgf.php?gid=$gid",
+            image( 'images/sgf.gif', sprintf( T_('There are %s attached game-SGFs available for download.'), $cnt_attached_sgf),
+               null, 'class="InTextImage"' ) );
+   }
+
    // observers may view the comments in the sgf files, so not restricted to own games
    if( $Status != GAME_STATUS_KOMI )
    {
@@ -841,6 +856,8 @@ $GLOBALS['ThePage'] = new Page('Game');
    $menu_array[T_('Show game info')] = "gameinfo.php?gid=$gid";
    if( $is_mp_game )
       $menu_array[T_('Show game-players')] = "game_players.php?gid=$gid";
+   if( $Status == GAME_STATUS_FINISHED )
+      $menu_array[T_('Attach SGF')] = "manage_sgf.php?gid=$gid";
 
    end_page(@$menu_array, -4);
 }// main

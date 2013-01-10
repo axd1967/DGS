@@ -119,7 +119,8 @@ function itemL($text, $link='', $working=true, $last=false)
                item(T_('Rematch'), "game_rematch.php?mode=".REMATCH_INVITE, false);
                item(T_('Copy as new game#rematch'), "game_rematch.php".REMATCH_NEWGAME, false, true);
             } $item_level--;
-            item(T_('Show game-players'), "game_players.php", false, true);
+            item(T_('Show game-players'), "game_players.php", false);
+            item(T_('Attach SGF'), "manage_sgf.php", false, true);
          } $item_level--;
       } $item_level--;
 

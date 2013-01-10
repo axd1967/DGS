@@ -453,6 +453,20 @@ CREATE TABLE IF NOT EXISTS `Games` (
 -- --------------------------------------------------------
 
 --
+-- Table structure for table `GamesSgf`
+--
+
+CREATE TABLE `GameSgf` (
+  `gid` int(11) NOT NULL,
+  `uid` int(11) NOT NULL,
+  `Lastchanged` datetime NOT NULL default '0000-00-00 00:00:00',
+  `SgfData` blob NOT NULL,
+  PRIMARY KEY  (`gid`,`uid`)
+) ENGINE=MyISAM DEFAULT CHARSET=latin1;
+
+-- --------------------------------------------------------
+
+--
 -- Table structure for table `GamesNotes`
 --
 

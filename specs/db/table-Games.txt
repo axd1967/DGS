@@ -557,3 +557,32 @@ Description:
 
 * Counter : number of moves per user done for a specific time-slot
 
+
+
+###########################################################################
+## --- GameSgf ---
+
+Description:
+   Table to store SGFs attached (saved) for finished game.
+   One SGF per user allowed.
+
+| Field       | Type                | Null | Key | Default             | Extra |
++-------------+---------------------+------+-----+---------------------+-------+
+| gid         | int(11)             | NO   | PRI | NULL                |       |
+| uid         | int(11)             | NO   | PRI | NULL                |       |
+| Flags       | tinyint(3) unsigned | NO   |     | 0                   |       |
+| Lastchanged | datetime            | NO   |     | 0000-00-00 00:00:00 |       |
+| SgfData     | blob                | NO   |     | NULL                |       |
+
+## Fields:
+
+* gid : foreign key to Games.ID
+
+* uid : foreign key to Players.ID
+
+* Flags : flags (currently none)
+
+* Lastchanged : date of last-update of shape
+
+* SgfData : binary-blob with raw SGF
+
