@@ -112,7 +112,7 @@ define('SGF_MAXSIZE_UPLOAD', 100*1024); // max. 100KB stored, keep factor of 102
    $gstable->use_show_rows( false );
 
    // add_tablehead($nr, $descr, $attbs=null, $mode=TABLE_NO_HIDE|TABLE_NO_SORT, $sortx='')
-   $gstable->add_tablehead( 1, T_('SGF#header'), 'Image', 0, '');
+   $gstable->add_tablehead( 1, T_('sgf#header'), 'Image', 0, '');
    $gstable->add_tablehead( 2, T_('Author#header'), 'User', 0, '');
    $gstable->add_tablehead( 3, T_('Last changed#header'), 'Date', 0, 'Lastchanged-');
 
