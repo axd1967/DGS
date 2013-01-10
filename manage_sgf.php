@@ -60,8 +60,10 @@ define('SGF_MAXSIZE_UPLOAD', 100*1024); // max. 100KB stored, keep factor of 102
 /* Actual REQUEST calls used:
      (no args)              : list attached SGFs, add/edit SGF
      sgf_save&file_userpic= : replace SGF
-     sgf_delete             : remove SGF
+     sgf_delete             : remove SGF, ask for confirmation
+     sgf_delete_confirm     : remove SGF
      sgf_download&uid=      : downloads SGF stored by user
+     cancel                 : cancel delete-SGF
 */
 
    $game = Games::load_game( $gid );
@@ -74,10 +76,13 @@ define('SGF_MAXSIZE_UPLOAD', 100*1024); // max. 100KB stored, keep factor of 102
    $baseURL = "$page?gid=$gid".URI_AMP;
 
 
+   if( @$_REQUEST['cancel'] )
+      jump_to($baseURL);
+
    // delete SGF
-   if( @$_REQUEST['sgf_delete'] )
+   if( @$_REQUEST['sgf_delete_confirm'] )
    {
-      GameSgfControl::delete_game_sgf( $gid, $my_id ); //TODO ask confirmation, only allowed by owner
+      GameSgfControl::delete_game_sgf( $gid );
       jump_to($baseURL."sysmsg=". urlencode(T_('SGF removed!')) );
    }
 
@@ -168,33 +173,49 @@ define('SGF_MAXSIZE_UPLOAD', 100*1024); // max. 100KB stored, keep factor of 102
    }
 
    $form->add_empty_row();
-   $form->add_row( array(
-      'DESCRIPTION', T_('Upload SGF'),
-      'FILE',        'file_sgf', 40, SGF_MAXSIZE_UPLOAD, 'application/x-go-sgf', true ));
+   if( $my_sgf_exists && @$_REQUEST['sgf_delete'] ) // ask for DEL-confirm
+   {
+      $form->add_row( array(
+         'CELL', 2, 'class="center darkred"',
+         'OWNHTML', T_('Please confirm, that you want to remove your SGF!'), ));
+      $form->add_row( array(
+         'SUBMITBUTTON', 'sgf_delete_confirm', T_('Remove SGF'),
+         'SUBMITBUTTON', 'cancel',  T_('Cancel') ));
+   }
+   else
+   {
+      $form->add_row( array(
+         'DESCRIPTION', T_('Upload SGF'),
+         'FILE',        'file_sgf', 40, SGF_MAXSIZE_UPLOAD, 'application/x-go-sgf', true ));
 
-   $form->add_empty_row();
-   $arr = array(
-      'TAB', 'CELL', 1, '', // align submit-buttons
-      'SUBMITBUTTON', 'sgf_save', T_('Save SGF'),
-      'TEXT', SMALL_SPACING );
-   if( $my_sgf_exists )
-      array_push( $arr,
-         'SUBMITBUTTON', 'sgf_delete', T_('Remove my SGF') );
-   $form->add_row( $arr );
+      $form->add_empty_row();
+      $arr = array(
+         'TAB', 'CELL', 1, '', // align submit-buttons
+         'SUBMITBUTTON', 'sgf_save', T_('Save SGF'),
+         'TEXT', SMALL_SPACING );
+      if( $my_sgf_exists && !@$_REQUEST['sgf_delete'] )
+         array_push( $arr,
+            'SUBMITBUTTON', 'sgf_delete', T_('Remove my SGF') );
+      $form->add_row( $arr );
+   }
 
 
    $form->add_row( array( 'HEADER', T_('Attached SGFs') ));
    $form->add_row( array(
       'CELL', 2, '',
       'OWNHTML', $gstable->make_table(), ));
+   if( count($arr_game_sgf) == 0 )
+   {
+      $form->add_row( array(
+         'CELL', 2, 'class="center"',
+         'OWNHTML', sprintf( '--- %s ---', T_('No SGF attachments stored') ), ));
+   }
 
 
    start_page( $title, true, $logged_in, $player_row );
    echo "<h3 class=Header>$title</h3>\n";
 
    $form->echo_string();
-   if( count($arr_game_sgf) == 0 )
-      echo sprintf( '--- %s ---', T_('No SGF attachments stored') );
 
 
    $notes = array();
@@ -202,6 +223,10 @@ define('SGF_MAXSIZE_UPLOAD', 100*1024); // max. 100KB stored, keep factor of 102
    $notes[] = sprintf( T_('Limit on uploaded SGF-file: max. %s KB'), ROUND(10*SGF_MAXSIZE_UPLOAD/1024)/10 );
    echo_notes( 'managesgf', T_('Manage SGF notes'), $notes );
 
-   end_page();
+
+   $menu_arr = array();
+   $menu_arr[T_('Refresh')] = $page."?gid=$gid";
+
+   end_page(@$menu_arr);
 }//main
 ?>
