@@ -16,7 +16,63 @@ Developers INFO:
 ChangeLog
 ------------------------------------------------------------------
 
+2013-01-11 juga
+
+   * manage_sgf.php:
+   - added "normal" SGF-download bottom-links to ease reviewing
+
+   * include/game_sgf_control.php (GameSgfControl.prepare_verify_game_sgf):
+   - bugfix: verify of SGFs with handicap-setup failed, so treat handicap-stones like shape-setup
+
+   * include/game_sgf_control.php (GameSgfControl. delete_game_sgf, ~.save_game_sgf,
+       ~.verify_game_sgf, ~.count_cache_game_sgfs, ~.delete_cache_game_sgfs_count),
+     include/cache_globals.php (CACHE_GRP_GAMESGF_COUNT, $ARR_CACHE_GROUP_NAMES,
+       $ARR_CACHE_GROUP_CLEANUP),
+     include/config.php ($DGS_CACHE_GROUPS),
+     specs/caching.txt, game.php:
+   - use caching to count attached-SGFs on game-page
+     - invalidate cache on changing 'AttachedSgf'-game-flags indicator,
+       that is on saving or deleting SGF
+
+   * include/game_sgf_control.php (GameSgfControl.delete_game_sgf, ~.save_game_sgf),
+     include/db/games.php (Games.parseFlags, ~.buildFlags, ~.update_game_flags),
+     include/quick/quick_game_info.php (QuickHandlerGameInfo.convertGameFlags),
+     include/gui_functions.php (echo_image_game_sgf),
+     include/globals.php (GAMEFLAGS_ATTACHED_SGF),
+     scripts/updates/database_changes_1_0_15_to_1_0_16.mysql,
+     specs/db/dragon-ddl.sql, specs/db/table-Games.txt, specs/quick_suite.txt,
+     game.php, show_games.php, site_map.php:
+   - added new column and search-filter for all game-lists for games with attached-SGFs
+     - maintain Games.Flags 'AttachedSgf' as indicator if game has attached SGF
+     - optimize game-page checking for attached-SGFs only if according game-flag set
+     - added special link in site-map to search for all finished games
+       with attached SGFs without game-list end-date-restriction
+     - refactored printing SGF-icon into echo_image_game_sgf()-function
+-----------
+-- added 'AttachedSgf'-flag as indicator for the presence of SGFs for game
+ALTER TABLE Games
+   MODIFY Flags set('Ko','HiddenMsg','AdmResult','TGDetached','AttachedSgf') NOT NULL default '' ;
+-----------
+
 2013-01-10 juga
+
+   * include/game_sgf_control.php,
+     game.php, manage_sgf.php:
+   - allow attaching SGFs also to running game
+
+   * include/game_functions.php (GameHelper._delete_base_game_tables):
+   - delete GameSgf-table-entries on game-deletion
+
+   * include/sgf_parser.php (sgf_parser, sgf_parse_node, sgf_parse_args, get_handicap_pattern;
+       class SgfParser, ~.might_be_sgf),
+     include/game_sgf_control.php (GameSgfControl, ~.save_game_sgf, ~.verify_game_sgf,
+       ~.prepare_verify_game_sgf),
+     include/board.php (class Board, ~.init_board, ~.load_from_db),
+     manage_sgf.php:
+   - parses, checks SGF and verifies that game from parsed SGF matches game in database
+     - parses and check for correct SGF-format
+     - verify for same board-size, handicap, komi, shape-setup and first 25 moves
+   - added translatable texts for parsing SGF
 
    * include/quick/quick_game_notes.php (class QuickHandlerGameNotes, ~.canHandle,
        ~.parseURL, ~.prepare, ~.process),
