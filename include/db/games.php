@@ -441,7 +441,7 @@ class Games
          if( $clear_flags )
             $qparts[] = " & ~".(int)$clear_flags;
 
-         db_query( "GameSgfControl.save_game_sgf.upd_flags($gid,$uid)",
+         db_query( "GameSgfControl.save_game_sgf.upd_flags($gid)",
             "UPDATE Games SET Flags=Flags " . implode('', $qparts) . " WHERE ID=$gid LIMIT 1" );
       }
    }//update_game_flags
