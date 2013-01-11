@@ -84,6 +84,7 @@ define('GAMEFLAGS_KO', 0x01);
 define('GAMEFLAGS_HIDDEN_MSG', 0x02);
 define('GAMEFLAGS_ADMIN_RESULT', 0x04);
 define('GAMEFLAGS_TG_DETACHED', 0x08);
+define('GAMEFLAGS_ATTACHED_SGF', 0x10);
 
 // enum Games.GameType
 define('GAMETYPE_GO',      'GO');

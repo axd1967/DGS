@@ -29,3 +29,8 @@ CREATE TABLE GameSgf (
 ) ENGINE=MyISAM ;
 
 
+-- added 'AttachedSgf'-flag as indicator for the presence of SGFs for game
+ALTER TABLE Games
+   MODIFY Flags set('Ko','HiddenMsg','AdmResult','TGDetached','AttachedSgf') NOT NULL default '' ;
+
+

@@ -35,7 +35,8 @@ Description:
 | Last_X             | tinyint(4)                                       | NO   |     | -1                  |                |
 | Last_Y             | tinyint(4)                                       | NO   |     | -1                  |                |
 | Last_Move          | char(2)                                          | NO   |     |                     |                |
-| Flags              | set('Ko','HiddenMsg','AdmResult','TGDetached')   | NO   | MUL |                     |                |
+| Flags              | set('Ko','HiddenMsg','AdmResult','TGDetached','AttachedSgf')
+                                                                        | NO   | MUL |                     |                |
 | Score              | decimal(5,1)                                     | NO   | MUL | 0.0                 |                |
 | Maintime           | smallint(6)                                      | NO   |     | 0                   |                |
 | Byotype            | enum('JAP','CAN','FIS')                          | NO   |     | JAP                 |                |
@@ -188,6 +189,7 @@ Description:
    - HiddenMsg: one of the game-messages contain a hidden message ("<h>...</h>")
    - AdmResult: game-result was set by admin
    - TGDetached: tournament-game detached from tournament (e.g. because user removed from T)
+   - AttachedSgf: indicates that there at least one SGF is attached to game
 
 * Score : score of game for finished game
    - 0 = jigo

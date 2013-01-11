@@ -254,6 +254,7 @@ function itemL($text, $link='', $working=true, $last=false)
          item(T_('My finished multi-player-games'), "show_games.php?uid=$id".URI_AMP."finished=1".URI_AMP."mp=1", true);
          item(T_('All running games'), "show_games.php?uid=all", true);
          item(T_('All finished games'), "show_games.php?uid=all".URI_AMP."finished=1", true);
+         item(T_('All finished games with attached SGFs (reviews)'), "show_games.php?uid=all".URI_AMP."finished=1".URI_AMP."sgfs=1", true);
          item(T_('Games I\'m observing'), "show_games.php?observe=$id", true);
          item(T_('All observed games'), "show_games.php?observe=all", true);
          item(T_('Show user info'), "userinfo.php?uid=$id", false);

@@ -129,6 +129,8 @@ class QuickHandlerGameInfo extends QuickHandler
          $out[] = 'ADMRESULT';
       if( $flags & GAMEFLAGS_TG_DETACHED )
          $out[] = 'TGDETACHED';
+      if( $flags & GAMEFLAGS_ATTACHED_SGF )
+         $out[] = 'ATTACHEDSGF';
       return implode(',', $out);
    }
 

@@ -410,7 +410,7 @@ CREATE TABLE IF NOT EXISTS `Games` (
   `Last_X` tinyint(4) NOT NULL default '-1',
   `Last_Y` tinyint(4) NOT NULL default '-1',
   `Last_Move` char(2) NOT NULL default '',
-  `Flags` set('Ko','HiddenMsg','AdmResult','TGDetached') NOT NULL default '',
+  `Flags` set('Ko','HiddenMsg','AdmResult','TGDetached','AttachedSgf') NOT NULL default '',
   `Score` decimal(5,1) NOT NULL default '0.0',
   `Maintime` smallint(6) NOT NULL default '0',
   `Byotype` enum('JAP','CAN','FIS') NOT NULL default 'JAP',

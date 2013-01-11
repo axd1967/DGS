@@ -588,7 +588,8 @@ Commands:
             "game_action" : 2,      # game-action as defined for [4.QST]
             "status" : "PLAY",      # game-status: KOMI | SETUP | PLAY | PASS | SCORE | SCORE2 | FINISHED
             "flags" : "HIDDENMSG",  # flags (comma-separated): HIDDENMSG (game contains hidden-messages), ADMRESULT (admin ended game),
-                                    #    TGDETACHED (detached tournament-game, see 'specs/db/table-Tournaments.txt')
+                                    #    TGDETACHED (detached tournament-game, see 'specs/db/table-Tournaments.txt'),
+                                    #    ATTACHEDSGF (there are SGFs attached to game)
             "score" : "",           # score for finished game only (same format as for game-object status_score-command); '' (=empty) if game not finished
 
             "game_type" : "GO",     # GO | TEAM_GO(N:M) | ZEN_GO (N); N,M >= 1

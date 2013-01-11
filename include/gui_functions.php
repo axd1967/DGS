@@ -353,6 +353,19 @@ function echo_image_gamecomment( $gid, $hidden_comments=true )
    return image( $base_path.'images/game_comment.gif', implode(', ', $arr), null, 'class="InTextImage"');
 }
 
+/*!
+ * \brief Returns image indicating that game has attached SGF(s) for given game-id.
+ * \param $cnt_attached_sgf 0=general image-text
+ */
+function echo_image_game_sgf( $gid, $cnt_attached_sgf=0 )
+{
+   global $base_path;
+   $text = ( $cnt_attached_sgf > 0 )
+      ? sprintf( T_('There are %s attached game-SGFs available for download.'), $cnt_attached_sgf)
+      : T_('Game has attached SGFs');
+   return anchor( "manage_sgf.php?gid=$gid", image( 'images/sgf.gif', $text, null, 'class="InTextImage"' ) );
+}
+
 /*! \brief Returns image indicating there's a note. */
 function echo_image_note( $text, $withSep=true )
 {

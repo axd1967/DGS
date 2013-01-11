@@ -148,13 +148,13 @@ $GLOBALS['ThePage'] = new Page('GamesList');
    $cfg_tblcols = ConfigTableColumns::load_config( $my_id, $column_set_name );
 
    $restrict_games = '';
-   if( RESTRICT_SHOW_GAMES_ALL && $all )
+   if( RESTRICT_SHOW_GAMES_ALL && $all && !@$_REQUEST['sgfs'] )
       $restrict_games = ($finished) ? min(30, 5*RESTRICT_SHOW_GAMES_ALL) : RESTRICT_SHOW_GAMES_ALL;
 
    // init search profile
    $search_profile = new SearchProfile( $my_id, $profile_type );
    $gfilter = new SearchFilter( $fprefix, $search_profile );
-   $named_filters = 'rated|won';
+   $named_filters = 'sgfs|rated|won';
    if( !$observe && !$all ) //FU+RU
       $named_filters .= '|opp_hdl';
    if( $allow_mpgame )
@@ -168,7 +168,9 @@ $GLOBALS['ThePage'] = new Page('GamesList');
    //Filter & add_filter(int id, string type, string dbfield, [bool active=false], [array config])
    $gfilter->add_filter( 1, 'Numeric', 'G.ID', true, array( FC_SIZE => 8 ) );
    if( $finished && !$all ) //FU
-      $gfilter->add_filter(41, 'Boolean', 'G.Flags>0 AND (G.Flags & 2)', true );
+      $gfilter->add_filter(41, 'Boolean', 'G.Flags>0 AND (G.Flags & '.GAMEFLAGS_HIDDEN_MSG.')', true );
+   $gfilter->add_filter(47, 'Boolean', 'G.Flags>0 AND (G.Flags & '.GAMEFLAGS_ATTACHED_SGF.')', true,
+      array( FC_FNAME => 'sgfs' ) );
    if( ALLOW_TOURNAMENTS )
       $gfilter->add_filter(32, 'Boolean', 'G.tid>0', true,
             array( FC_LABEL => echo_image_tournament_info(1, true, true) ));
@@ -423,6 +425,7 @@ $GLOBALS['ThePage'] = new Page('GamesList');
  * 44:    GameType + FairKomi-info
  * 45: >  FU+RU (TG_Challenge)
  * 46: >  RU (X_Priority)
+ * 47:    Indicator if there are attached SGFs
  *****/
 
    // add_tablehead($nr, $descr, $attbs=null, $mode=TABLE_NO_HIDE|TABLE_NO_SORT, $sortx='')
@@ -432,6 +435,7 @@ $GLOBALS['ThePage'] = new Page('GamesList');
    $gtable->add_tablehead(32, new TableHead( T_('Game information'), 'images/info.gif'), 'ImagesLeft', 0 ); // game-info
    if( $finished && !$all ) //FU
       $gtable->add_tablehead(41, new TableHead( T_('Hidden game comments'), 'images/game_comment.gif'), 'Image', 0 ); // game-comment
+   $gtable->add_tablehead(47, new TableHead( T_('Attached SGF'), 'images/sgf.gif'), 'Image', 0 );
    $gtable->add_tablehead( 2, T_('sgf#header'), 'Sgf', TABLE_NO_SORT);
    if( $glc->ext_tid )
    {
@@ -835,6 +839,9 @@ $GLOBALS['ThePage'] = new Page('GamesList');
          if( $gtable->Is_Column_Displayed[10] )
             $row_arr[10] = score2text($Score, false);
       }
+
+      if( $gtable->Is_Column_Displayed[47] && ($X_GameFlags & GAMEFLAGS_ATTACHED_SGF) )
+         $row_arr[47] = echo_image_game_sgf($ID);
 
       $gtable->add_row( $row_arr );
    }

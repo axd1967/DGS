@@ -625,10 +625,7 @@ $GLOBALS['ThePage'] = new Page('Game');
    else
       $js = null;
 
-   if( $Status == GAME_STATUS_FINISHED )
-      $cnt_attached_sgf = GameSgf::count_game_sgfs( $gid );
-   else
-      $cnt_attached_sgf = 0;
+   $cnt_attached_sgf = ( $GameFlags & GAMEFLAGS_ATTACHED_SGF ) ? GameSgf::count_game_sgfs( $gid ) : 0;
 
 
    $title = T_("Game") ." #$gid,$arg_move";
@@ -752,12 +749,7 @@ $GLOBALS['ThePage'] = new Page('Game');
          '', 'class=NoPrint' );
 
    if( $cnt_attached_sgf > 0 )
-   {
-      echo SMALL_SPACING,
-         anchor( "manage_sgf.php?gid=$gid",
-            image( 'images/sgf.gif', sprintf( T_('There are %s attached game-SGFs available for download.'), $cnt_attached_sgf),
-               null, 'class="InTextImage"' ) );
-   }
+      echo SMALL_SPACING, echo_image_game_sgf( $gid, $cnt_attached_sgf );
 
    // observers may view the comments in the sgf files, so not restricted to own games
    if( $Status != GAME_STATUS_KOMI )

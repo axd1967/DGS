@@ -51,7 +51,20 @@ class GameSgfControl
       if( is_null($game_sgf) )
          return true; // nothing to delete
       else
-         return $game_sgf->delete();
+      {
+         ta_begin();
+         {//HOT-section to delete SGF and update game-flags
+            $result = $game_sgf->delete();
+            if( $result && GameSgf::count_game_sgfs($gid) == 0 )
+            {
+               Games::update_game_flags( "GameSgfControl.delete_game_sgf.upd_flags($gid,$uid)",
+                  $gid, 0, GAMEFLAGS_ATTACHED_SGF );
+            }
+         }
+         ta_end();
+
+         return $result;
+      }
    }//delete_game_sgf
 
    /*!
@@ -75,8 +88,21 @@ class GameSgfControl
          if( count($errors) == 0 )
          {
             $game_sgf = new GameSgf( $gid, $uid, $NOW, $sgf_data );
-            if( !$game_sgf->persist() )
-               $errors[] = T_('Saving the SGF failed!');
+
+            ta_begin();
+            {//HOT-section to save SGF and update game-flags
+               if( $game_sgf->persist() )
+               {
+                  if( !($game->Flags & GAMEFLAGS_ATTACHED_SGF) )
+                  {
+                     Games::update_game_flags( "GameSgfControl.save_game_sgf.upd_flags($gid,$uid)",
+                        $gid, GAMEFLAGS_ATTACHED_SGF );
+                  }
+               }
+               else
+                  $errors[] = T_('Saving the SGF failed!');
+            }
+            ta_end();
          }
       }//else: shouldn't happen as read-from-file quits on error
 

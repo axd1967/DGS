@@ -313,10 +313,11 @@ class Games
    function parseFlags( $flags_str )
    {
       static $map_flags = array(
-         'KO'        => GAMEFLAGS_KO,
-         'HIDDENMSG' => GAMEFLAGS_HIDDEN_MSG,
-         'ADMRESULT' => GAMEFLAGS_ADMIN_RESULT,
-         'TGDETACHED' => GAMEFLAGS_TG_DETACHED,
+         'KO'           => GAMEFLAGS_KO,
+         'HIDDENMSG'    => GAMEFLAGS_HIDDEN_MSG,
+         'ADMRESULT'    => GAMEFLAGS_ADMIN_RESULT,
+         'TGDETACHED'   => GAMEFLAGS_TG_DETACHED,
+         'ATTACHEDSGF'  => GAMEFLAGS_ATTACHED_SGF,
       );
 
       $flags = 0;
@@ -340,6 +341,8 @@ class Games
          $arr[] = 'AdmResult';
       if( $flags & GAMEFLAGS_TG_DETACHED )
          $arr[] = 'TGDetached';
+      if( $flags & GAMEFLAGS_ATTACHED_SGF )
+         $arr[] = 'AttachedSgf';
       return implode(',', $arr);
    }
 
@@ -426,6 +429,22 @@ class Games
          $qsql->get_select() );
       return ($row) ? ( $return_row ? $row : Games::new_from_row($row) ) : NULL;
    }
+
+   /*! \brief Updates Games.Flags with $set_flags and $clear_flags. */
+   public static function update_game_flags( $dbgmsg, $gid, $set_flags=0, $clear_flags=0 )
+   {
+      if( $set_flags || $clear_flags )
+      {
+         $qparts = array();
+         if( $set_flags )
+            $qparts[] = " | ".(int)$set_flags;
+         if( $clear_flags )
+            $qparts[] = " & ~".(int)$clear_flags;
+
+         db_query( "GameSgfControl.save_game_sgf.upd_flags($gid,$uid)",
+            "UPDATE Games SET Flags=Flags " . implode('', $qparts) . " WHERE ID=$gid LIMIT 1" );
+      }
+   }//update_game_flags
 
    /*! \brief Returns status-text or all status-texts (if arg=null). */
    function getStatusText( $status=null )
