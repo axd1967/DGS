@@ -227,6 +227,8 @@ define('SGF_MAXSIZE_UPLOAD', 100*1024); // max. 100KB stored, keep factor of 102
 
    $menu_arr = array();
    $menu_arr[T_('Refresh')] = $page."?gid=$gid";
+   $menu_arr[T_('Download sgf')] = "sgf.php?gid=$gid";
+   $menu_arr[T_('Download sgf with all comments')] = "sgf.php/?gid=$gid".URI_AMP."owned_comments=1" ;
 
    end_page(@$menu_arr);
 }//main
