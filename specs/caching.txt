@@ -999,6 +999,22 @@ See "template" for new cache-group at end of this section.
    - Expire-time of each is 1 hour.
 
 
+* CACHE_GRP_GAMESGF_COUNT
+   - A game can have attached SGFs stored in the 'GamesNotes'-table.
+     If there are attached SGFs is indicated by a set 'AttachedSgf'-games-flag.
+
+     Currently (DGS 1.0.15) the game is frequently loaded to just browse
+     the move-history of a game by the same users within a shorter amount of
+     time, also the count of attached SGFs needs to be loaded.
+
+   - Cache-invalidation is needed if the Games.Flags 'AttachedSgf' is changed,
+     so there's only a dependency on game-id.
+
+   - As the caching is only meant to decrease server-load for the case
+     of browsing the move-history of a game, the expire-time for the cache
+     is only 30 minutes.
+
+
 * new cache-group CACHE_GRP_ ...
    - motivation, description, cache-invalidation, expire-time, special-handling ?
 

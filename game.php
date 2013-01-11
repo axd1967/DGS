@@ -45,7 +45,7 @@ require_once( 'include/time_functions.php' );
 require_once( "include/rating.php" );
 require_once( 'include/table_infos.php' );
 require_once( 'include/classlib_goban.php' );
-require_once( 'include/db/game_sgf.php' );
+require_once( 'include/game_sgf_control.php' );
 if( ENABLE_STDHANDICAP ) {
    require_once( "include/sgf_parser.php" );
 }
@@ -625,7 +625,7 @@ $GLOBALS['ThePage'] = new Page('Game');
    else
       $js = null;
 
-   $cnt_attached_sgf = ( $GameFlags & GAMEFLAGS_ATTACHED_SGF ) ? GameSgf::count_game_sgfs( $gid ) : 0;
+   $cnt_attached_sgf = ( $GameFlags & GAMEFLAGS_ATTACHED_SGF ) ? GameSgfControl::count_cache_game_sgfs( $gid ) : 0;
 
 
    $title = T_("Game") ." #$gid,$arg_move";

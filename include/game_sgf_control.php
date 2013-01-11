@@ -59,6 +59,8 @@ class GameSgfControl
             {
                Games::update_game_flags( "GameSgfControl.delete_game_sgf.upd_flags($gid,$uid)",
                   $gid, 0, GAMEFLAGS_ATTACHED_SGF );
+
+               GameSgfControl::delete_cache_game_sgfs_count( "GameSgfControl.delete_game_sgf($gid)", $gid );
             }
          }
          ta_end();
@@ -97,6 +99,8 @@ class GameSgfControl
                   {
                      Games::update_game_flags( "GameSgfControl.save_game_sgf.upd_flags($gid,$uid)",
                         $gid, GAMEFLAGS_ATTACHED_SGF );
+
+                     GameSgfControl::delete_cache_game_sgfs_count( "GameSgfControl.save_game_sgf($gid)", $gid );
                   }
                }
                else
@@ -145,26 +149,29 @@ class GameSgfControl
          // load some of the current game-moves and shape-setup from DB to compare with SGF
          list( $chk_cnt_moves, $db_shape_setup, $db_sgf_moves ) = GameSgfControl::prepare_verify_game_sgf( $game );
 
-         // compare shape-setup from DB with B/W-stone-setup parsed from SGF
-         foreach( array( BLACK, WHITE ) as $stone )
+         //TODO if( (string)$game->ShapeSnapshot != '' )
          {
-            $arr_coords = ( $stone == BLACK ) ? $sgf_parser->SetBlack : $sgf_parser->SetWhite;
-            foreach( $arr_coords as $sgf_coord )
+            // compare shape-setup from DB with B/W-stone-setup parsed from SGF
+            foreach( array( BLACK, WHITE ) as $stone )
             {
-               if( !isset($db_shape_setup[$sgf_coord]) || $db_shape_setup[$sgf_coord] != $stone )
+               $arr_coords = ( $stone == BLACK ) ? $sgf_parser->SetBlack : $sgf_parser->SetWhite;
+               foreach( $arr_coords as $sgf_coord )
                {
-                  $coord = sgf2board_coords( $sgf_coord, $gsize );
-                  $errors[] = sprintf( T_('Shape-Setup mismatch: found discrepancy at coord [%s]#sgf'), $coord );
+                  if( !isset($db_shape_setup[$sgf_coord]) || $db_shape_setup[$sgf_coord] != $stone )
+                  {
+                     $coord = sgf2board_coords( $sgf_coord, $gsize );
+                     $errors[] = sprintf( T_('Shape-Setup mismatch: found discrepancy at coord [%s]#sgf'), $coord );
+                  }
+                  unset($db_shape_setup[$sgf_coord]);
                }
-               unset($db_shape_setup[$sgf_coord]);
             }
-         }
-         if( count($db_shape_setup) > 0 )
-         {
-            $coords = array();
-            foreach( $db_shape_setup as $sgf_coord => $stone )
-               $coords[] = sgf2board_coords( $sgf_coord, $gsize );
-            $errors[] = sprintf( T_('Shape-Setup mismatch: missing setup stones in SGF [%s]#sgf'), implode(',', $coords) );
+            if( count($db_shape_setup) > 0 )
+            {
+               $coords = array();
+               foreach( $db_shape_setup as $sgf_coord => $stone )
+                  $coords[] = sgf2board_coords( $sgf_coord, $gsize );
+               $errors[] = sprintf( T_('Shape-Setup mismatch: missing setup stones in SGF [%s]#sgf'), implode(',', $coords) );
+            }
          }
 
          // compare some db-moves with moves parsed from SGF
@@ -271,6 +278,26 @@ class GameSgfControl
 
       echo $game_sgf->SgfData;
    }//download_game_sgf
+
+   public static function count_cache_game_sgfs( $gid )
+   {
+      $dbgmsg = "GameSgfControl::count_cache_game_sgfs($gid)";
+      $key = "GameSgfCount.$gid";
+
+      $count = DgsCache::fetch( $dbgmsg, CACHE_GRP_GAMESGF_COUNT, $key );
+      if( is_null($count) )
+      {
+         $count = GameSgf::count_game_sgfs( $gid );
+         DgsCache::store( $dbgmsg, CACHE_GRP_GAMESGF_COUNT, $key, $count, 30*SECS_PER_MIN );
+      }
+
+      return $count;
+   }//count_cache_game_sgfs
+
+   private static function delete_cache_game_sgfs_count( $dbgmsg, $gid )
+   {
+      DgsCache::delete( $dbgmsg, CACHE_GRP_GAMESGF_COUNT, "GameSgfCount.$gid" );
+   }
 
 } // end of 'GameSgfControl'
 ?>

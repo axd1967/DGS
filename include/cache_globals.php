@@ -72,8 +72,9 @@ define('CACHE_GRP_BULLETINS', 26);  // 8KB KB/user/bulletin * 1d -> 10 MB
 define('CACHE_GRP_MSGLIST', 27);    // 2KB/user/msg * 4h -> 5 MB
 define('CACHE_GRP_TGAMES', 28);     // 3KB/tourney/T-game * 1d -> 60 MB ?
 define('CACHE_GRP_TLADDER', 29);    // 4.5KB/tourney/T-ladder * 1h -> 23 MB ?
+define('CACHE_GRP_GAMESGF_COUNT', 30); // 0.5KB/game-id * 30min -> 500 KB
 // NOTE: keep as last def and adjust to MAX when adding a new cache-group
-define('MAX_CACHE_GRP', 29);
+define('MAX_CACHE_GRP', 30);
 
 // names for DGS-cache manager
 global $ARR_CACHE_GROUP_NAMES;
@@ -109,6 +110,7 @@ $ARR_CACHE_GROUP_NAMES = array(
       CACHE_GRP_MSGLIST        => 'Messages',
       CACHE_GRP_TGAMES         => 'TGames',
       CACHE_GRP_TLADDER        => 'TLadder',
+      CACHE_GRP_GAMESGF_COUNT  => 'GameSgfCount',
    );
 
 // configure cleanup for expired cache-entries (cache-groups not listed uses expire-time of CACHE_GRP_DEFAULT)
@@ -145,6 +147,7 @@ $ARR_CACHE_GROUP_CLEANUP = array(
       CACHE_GRP_MSGLIST       => 4*SECS_PER_HOUR,
       CACHE_GRP_TGAMES        => SECS_PER_DAY,
       CACHE_GRP_TLADDER       => SECS_PER_DAY, // 1h
+      CACHE_GRP_GAMESGF_COUNT => SECS_PER_HOUR, // 30min
    );
 
 ?>
