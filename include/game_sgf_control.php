@@ -149,29 +149,26 @@ class GameSgfControl
          // load some of the current game-moves and shape-setup from DB to compare with SGF
          list( $chk_cnt_moves, $db_shape_setup, $db_sgf_moves ) = GameSgfControl::prepare_verify_game_sgf( $game );
 
-         //TODO if( (string)$game->ShapeSnapshot != '' )
+         // compare shape-setup from DB with B/W-stone-setup parsed from SGF
+         foreach( array( BLACK, WHITE ) as $stone )
          {
-            // compare shape-setup from DB with B/W-stone-setup parsed from SGF
-            foreach( array( BLACK, WHITE ) as $stone )
+            $arr_coords = ( $stone == BLACK ) ? $sgf_parser->SetBlack : $sgf_parser->SetWhite;
+            foreach( $arr_coords as $sgf_coord )
             {
-               $arr_coords = ( $stone == BLACK ) ? $sgf_parser->SetBlack : $sgf_parser->SetWhite;
-               foreach( $arr_coords as $sgf_coord )
+               if( !isset($db_shape_setup[$sgf_coord]) || $db_shape_setup[$sgf_coord] != $stone )
                {
-                  if( !isset($db_shape_setup[$sgf_coord]) || $db_shape_setup[$sgf_coord] != $stone )
-                  {
-                     $coord = sgf2board_coords( $sgf_coord, $gsize );
-                     $errors[] = sprintf( T_('Shape-Setup mismatch: found discrepancy at coord [%s]#sgf'), $coord );
-                  }
-                  unset($db_shape_setup[$sgf_coord]);
+                  $coord = sgf2board_coords( $sgf_coord, $gsize );
+                  $errors[] = sprintf( T_('Shape-Setup mismatch: found discrepancy at coord [%s]#sgf'), $coord );
                }
+               unset($db_shape_setup[$sgf_coord]);
             }
-            if( count($db_shape_setup) > 0 )
-            {
-               $coords = array();
-               foreach( $db_shape_setup as $sgf_coord => $stone )
-                  $coords[] = sgf2board_coords( $sgf_coord, $gsize );
-               $errors[] = sprintf( T_('Shape-Setup mismatch: missing setup stones in SGF [%s]#sgf'), implode(',', $coords) );
-            }
+         }
+         if( count($db_shape_setup) > 0 )
+         {
+            $coords = array();
+            foreach( $db_shape_setup as $sgf_coord => $stone )
+               $coords[] = sgf2board_coords( $sgf_coord, $gsize );
+            $errors[] = sprintf( T_('Shape-Setup mismatch: missing setup stones in SGF [%s]#sgf'), implode(',', $coords) );
          }
 
          // compare some db-moves with moves parsed from SGF
@@ -228,6 +225,7 @@ class GameSgfControl
 
       // prepare to verify some moves: read some db-moves
       $db_sgf_moves = array(); // Baa, Wbb, ...
+      $count_handicap = $game->Handicap;
       foreach( $board->moves as $arr ) // arr: Stone,PosX,PosY
       {
          list( $Stone, $PosX, $PosY) = $arr;
@@ -239,7 +237,14 @@ class GameSgfControl
             $color = 'W';
          else
             continue;
-         $db_sgf_moves[] = $color . number2sgf_coords( $arr[1], $arr[2], $size, $size );
+
+         if( $count_handicap-- > 0 ) // put handicap-stones into shape-setup-arr
+         {
+            $sgf_coord = number2sgf_coords( $PosX, $PosY, $size, $size );
+            $db_shape_setup[$sgf_coord] = $Stone;
+         }
+         else
+            $db_sgf_moves[] = $color . number2sgf_coords( $arr[1], $arr[2], $size, $size );
       }
 
       return array( $chk_cnt_moves, $db_shape_setup, $db_sgf_moves );
