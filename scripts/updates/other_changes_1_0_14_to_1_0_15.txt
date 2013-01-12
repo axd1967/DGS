@@ -279,3 +279,7 @@ rm images/wood1.png
 # added hourly-cron-entry for file-cache-cleanup (see INSTALL-file)
 58 * * * *   wget -q -O - http://www.dragongoserver.net/hourly_cron.php
 
+-----------
+# added image to save-SGF
+copy /images/sgf.gif
+

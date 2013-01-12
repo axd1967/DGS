@@ -20,6 +20,7 @@ UPDATE TranslationTexts
 
 
 -- added table to store attached SGFs for games
+-- NOTE: sync'ed to DGS 1.0.15, so table could be existing already
 CREATE TABLE GameSgf (
   gid int NOT NULL,
   uid int NOT NULL,
@@ -30,6 +31,7 @@ CREATE TABLE GameSgf (
 
 
 -- added 'AttachedSgf'-flag as indicator for the presence of SGFs for game
+-- NOTE: sync'ed to DGS 1.0.15, so change could be done already
 ALTER TABLE Games
    MODIFY Flags set('Ko','HiddenMsg','AdmResult','TGDetached','AttachedSgf') NOT NULL default '' ;
 

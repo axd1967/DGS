@@ -2621,3 +2621,27 @@ UPDATE ConfigPages
    SET ColumnsGamesRunningUser2 = ColumnsGamesRunningUser2 & ~0x8000 ;
 
 
+-- change existing translation-text for waiting-room without losing translations
+UPDATE TranslationTexts
+   SET Text='All waiting games', Translatable='Y', Updated=NOW()
+   WHERE Text='Show all waiting games' LIMIT 1 ;
+UPDATE TranslationTexts
+   SET Text='Suitable waiting games', Translatable='Y', Updated=NOW()
+   WHERE Text='Show suitable games only' LIMIT 1 ;
+
+
+-- added table to store attached SGFs for games
+CREATE TABLE GameSgf (
+  gid int NOT NULL,
+  uid int NOT NULL,
+  Lastchanged datetime NOT NULL default '0000-00-00 00:00:00',
+  SgfData blob NOT NULL,
+  PRIMARY KEY (gid,uid)
+) ENGINE=MyISAM ;
+
+
+-- added 'AttachedSgf'-flag as indicator for the presence of SGFs for game
+ALTER TABLE Games
+   MODIFY Flags set('Ko','HiddenMsg','AdmResult','TGDetached','AttachedSgf') NOT NULL default '' ;
+
+

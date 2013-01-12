@@ -4,6 +4,6 @@
 7,22,37,52 * * * *   wget -q -O - http://your.url/tournaments/cron_tournaments.php
 
 -----------
-// added image to save-SGF
+# added image to save-SGF
 copy /images/sgf.gif
 
