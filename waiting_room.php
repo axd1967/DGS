@@ -75,6 +75,7 @@ require_once( 'include/wroom_control.php' );
       T_('No Fair Komi')   => "Handicaptype NOT IN ('auko_sec','auko_opn','div_ykic','div_ikyc')",
    );
 
+   // sync with QuickHandlerWaitingroom list-cmd
    $suitable_filter_array = array(
       T_('All')      => new QuerySQL( SQLP_WHERE, "WR.uid<>$my_id" ),
       T_('Suitable') => new QuerySQL( SQLP_WHERE, "WR.uid<>$my_id",
@@ -184,7 +185,7 @@ require_once( 'include/wroom_control.php' );
       . $wrtable->current_from_string()
       . SPURI_ARGS . append_unique(@$_REQUEST[SP_OVERWRITE_ARGS], 'good') . URI_AMP; //end sep
 
-   $qsql = WaitingroomControl::build_waiting_room_query( 0, /*with-player*/true, $suitable );
+   $qsql = WaitingroomControl::build_waiting_room_query( 0, $suitable );
 
    $qsql->merge( $wrtable->get_query() );
    $query = $qsql->get_select() . "$order$limit";
