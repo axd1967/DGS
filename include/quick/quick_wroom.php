@@ -85,10 +85,9 @@ class QuickHandlerWaitingroom extends QuickHandler
    function prepare()
    {
       global $player_row;
-      $uid = (int)@$player_row['ID'];
 
       // see specs/quick_suite.txt (3f)
-      $dbgmsg = "QuickHandlerWaitingroom.prepare($uid)";
+      $dbgmsg = "QuickHandlerWaitingroom.prepare({$this->my_id})";
       $this->checkCommand( $dbgmsg, WROOM_COMMANDS );
       $cmd = $this->quick_object->cmd;
 
@@ -111,10 +110,18 @@ class QuickHandlerWaitingroom extends QuickHandler
       }
       elseif( $cmd == QCMD_LIST )
       {
-         $filter_suitable = $this->filters[WROOM_FILTER_SUITABLE];
-         $qsql = WaitingroomControl::build_waiting_room_query( 0, $filter_suitable );
-         if( $filter_suitable )
-            $qsql->add_part( SQLP_HAVING, 'goodrating', 'goodmingames', 'haverating', 'goodsameopp' );
+         $filter_suitable = (int)$this->filters[WROOM_FILTER_SUITABLE]; // 0=all, 1=suitable, 2=mine
+         $qsql = WaitingroomControl::build_waiting_room_query( 0, ( $filter_suitable == 1 ) );
+         if( $filter_suitable == 2 ) // mine
+            $qsql->add_part( SQLP_WHERE, "WR.uid=".$this->my_id );
+         else // all | suitable
+         {
+            $qsql->add_part( SQLP_WHERE, "WR.uid<>".$this->my_id );
+            if( $filter_suitable == 1 ) // suitable
+               $qsql->add_part( SQLP_HAVING, 'goodrating', 'goodmingames', 'haverating', 'goodsameopp' );
+         }
+
+         $qsql->add_part( SQLP_ORDER, 'WRP_Rating2 DESC', 'WRP_Handle ASC', 'ID ASC' );
          $this->add_query_limits( $qsql, /*calc-rows*/true );
          $iterator = new ListIterator("$dbgmsg.list");
          $this->wroom_iterator = Waitingroom::load_waitingroom_entries( $qsql, $iterator );

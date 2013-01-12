@@ -1646,6 +1646,7 @@ Commands:
          - 'filter_suitable=VAL' :
             - VAL = '1' : only finding suitable game-offers (default)
             - VAL = '0' : find all game-offers
+            - VAL = '2' : find own game-offers
 
       - WITH-option:
          - 'user_id' : return additional user_id-data of game-offerer
