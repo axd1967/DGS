@@ -220,15 +220,21 @@ define('SGF_MAXSIZE_UPLOAD', 100*1024); // max. 100KB stored, keep factor of 102
 
 
    $notes = array();
+   $notes[] = array(
+      'text' => span('darkred bold', T_('To create a game review it\'s recommended to download the SGF without comments.')) . "<br>\n" .
+                span('darkred bold', T_('Otherwise it may happen that private comments or your game notes are published!')) . "<br>\n" .
+                T_('For instructions please read the FAQ how best to download a SGF.#sgf')
+      );
+   $notes[] = null;
    $notes[] = T_('Each user can upload only one SGF.' );
    $notes[] = sprintf( T_('Limit on uploaded SGF-file: max. %s KB'), ROUND(10*SGF_MAXSIZE_UPLOAD/1024)/10 );
    echo_notes( 'managesgf', T_('Manage SGF notes'), $notes );
 
 
    $menu_arr = array();
-   $menu_arr[T_('Download sgf WITHOUT comments')] = "sgf.php/?gid=$gid".URI_AMP."owned_comments=N" ;
+   $menu_arr[T_('Download sgf WITHOUT comments')] = "sgf.php?gid=$gid".URI_AMP."owned_comments=N" ;
    $menu_arr[T_('Download sgf')] = "sgf.php?gid=$gid";
-   $menu_arr[T_('Download sgf with all comments')] = "sgf.php/?gid=$gid".URI_AMP."owned_comments=1" ;
+   $menu_arr[T_('Download sgf with all comments')] = "sgf.php?gid=$gid".URI_AMP."owned_comments=1" ;
    $menu_arr[T_('Refresh')] = $page."?gid=$gid";
 
    end_page(@$menu_arr);
