@@ -828,7 +828,7 @@ $GLOBALS['ThePage'] = new Page('Game');
          $menu_array[T_('Download sgf')] = ( $has_sgf_alias ? "game$gid.sgf" : "sgf.php?gid=$gid" );
 
          if( $my_game && ($Moves>0 || $is_shape) && !$has_sgf_alias )
-            $menu_array[T_('Download sgf with all comments')] = "sgf.php/?gid=$gid".URI_AMP."owned_comments=1" ;
+            $menu_array[T_('Download sgf with all comments')] = "sgf.php?gid=$gid".URI_AMP."owned_comments=1" ;
       }
 
       if( !is_null($my_observe) )
