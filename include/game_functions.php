@@ -4311,6 +4311,8 @@ class NextGameOrder
    /*! \brief Builds basic QuerySQL for retrieving status-games. */
    function build_status_games_query( $uid, $game_status_op, $next_game_order, $load_ticks=false, $load_prio_field=false, $load_notes=false )
    {
+      if( is_numeric($next_game_order) )
+         $next_game_order = NextGameOrder::get_next_game_order( $next_game_order ); // int -> enum
       $sql_order = NextGameOrder::get_next_game_order( $next_game_order, 'Games', /*orderby*/false ); // enum -> order
       $load_prio = ($next_game_order == NGO_PRIO) || $load_prio_field;
 
