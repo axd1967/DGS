@@ -69,10 +69,10 @@ define('ACTBY_PLAYER', 0);
 define('ACTBY_ADMIN',  1);
 define('ACTBY_CRON',   2);
 global $MAP_ACTBY_SUBJECT; //PHP5;
-$MAP_ACTBY_SUBJECT = array(
-   ACTBY_PLAYER => 'player',
-   ACTBY_ADMIN  => 'ADMIN',
-   ACTBY_CRON   => 'CRON',
+$MAP_ACTBY_SUBJECT = array( // subject-action-by-part + sprintf-format for deletion/finalize-game-text (English only)
+   ACTBY_PLAYER => array( 'player', 'player %s' ),
+   ACTBY_ADMIN  => array( 'ADMIN',  'ADMIN %s' ),
+   ACTBY_CRON   => array( 'CRON',   'CRON' ),
 );
 
 // enum Waitingroom.JigoMode
@@ -2027,7 +2027,7 @@ class GameFinalizer
     */
    function finish_game( $dbgmsg, $do_delete, $upd_game, $game_score, $message='' )
    {
-      global $NOW;
+      global $NOW, $player_row;
       $gid = $this->gid;
       $dbgmsg = "GameFinalizer::finish_game($gid).$dbgmsg";
 
@@ -2086,7 +2086,8 @@ class GameFinalizer
          GameHelper::update_players_end_game( $dbgmsg,
             $gid, $this->GameType, $rated_status, $game_score, $this->Black_ID, $this->White_ID );
 
-         list( $Subject, $Text, $observerText ) = $game_notify->get_text_game_result( $this->action_by );
+         list( $Subject, $Text, $observerText ) = $game_notify->get_text_game_result( $this->action_by,
+            ($this->my_id > 0 ? $player_row : null) );
 
          // GamesPriority-entries are kept for running games only, delete for finished games too
          NextGameOrder::delete_game_priorities( $gid );
@@ -2212,7 +2213,7 @@ class GameNotify
    }
 
    /*! \brief Loads players (for simple-game B|W, for multi-player-game all players). */
-   function _load_players()
+   private function _load_players()
    {
       $this->players = array();
 
@@ -2234,7 +2235,7 @@ class GameNotify
       mysql_free_result($result);
    }//_load_players
 
-   function _build_text_players()
+   private function _build_text_players()
    {
       // NOTE: server messages does not allow a reply, so add an *in message* reference to players
       $arr = array();
@@ -2243,7 +2244,7 @@ class GameNotify
       return "<p>Send a message to:<center>" . implode('<br>', $arr) . "</center>";
    }//_build_text_players
 
-   function build_game_ref_array()
+   private function build_game_ref_array()
    {
       return array(
          'Blackname' => $this->black_name, 'Whitename' => $this->white_name,
@@ -2252,14 +2253,18 @@ class GameNotify
          );
    }
 
-   /*! \brief Returns subject and text for message to players if game got deleted. */
-   function get_text_game_deleted( $action_by=ACTBY_PLAYER )
+   /*!
+    * \brief Returns subject and text for message to players if game got deleted.
+    * \param $action_by ACTBY_...
+    */
+   function get_text_game_deleted( $action_by )
    {
       global $player_row, $MAP_ACTBY_SUBJECT;
+      $act_user_text = $MAP_ACTBY_SUBJECT[$action_by][0];
 
       $subject = 'Game deleted';
       if( $action_by == ACTBY_ADMIN || $action_by == ACTBY_CRON )
-         $subject .= sprintf(' (by %s)', $MAP_ACTBY_SUBJECT[$action_by]);
+         $subject .= sprintf(' (by %s)', $act_user_text );
       elseif( $action_by != ACTBY_PLAYER )
          $action_by = ACTBY_PLAYER;
 
@@ -2272,22 +2277,25 @@ class GameNotify
       else
          $gstatus = 'running ';
 
-      $text = "The ".$gstatus."game:<center>"
+      $text = "The {$gstatus}game:<center>"
             // game will be deleted => can't use <game>
             . game_reference( REF_LINK, 1, '', $this->gid, 0, $this->build_game_ref_array() )
-            . "</center>has been deleted by {$MAP_ACTBY_SUBJECT[$action_by]}:<center>"
+            . "</center>has been deleted by $act_user_text:<center>"
             . send_reference( REF_LINK, 1, '', $player_row )
             . "</center>"
             . $this->players_text;
 
       if( $this->message )
-         $text .= "<p>The {$MAP_ACTBY_SUBJECT[$action_by]} wrote:<p></p>" . $this->message;
+         $text .= "<p>The $act_user_text wrote:<p></p>" . $this->message;
 
       return array( $subject, $text );
    }//get_text_game_deleted
 
-   /*! \brief Returns subject and text (and observer-text) for message to players/observers with normal game-result. */
-   function get_text_game_result( $action_by=ACTBY_PLAYER )
+   /*!
+    * \brief Returns subject and text (and observer-text) for message to players/observers with normal game-result.
+    * \param $action_by ACTBY_...
+    */
+   function get_text_game_result( $action_by, $user_row=null )
    {
       global $MAP_ACTBY_SUBJECT;
       if( is_null($this->score) )
@@ -2295,7 +2303,7 @@ class GameNotify
 
       $subject = 'Game result';
       if( $action_by == ACTBY_ADMIN )
-         $subject .= sprintf(' (by %s)', $MAP_ACTBY_SUBJECT[$action_by]);
+         $subject .= sprintf(' (by %s)', $MAP_ACTBY_SUBJECT[$action_by][0]);
       elseif( $action_by != ACTBY_PLAYER && $action_by != ACTBY_CRON )
          $action_by = ACTBY_PLAYER;
 
@@ -2314,8 +2322,13 @@ class GameNotify
          $info_text .= "<p><b>Info:</b> Based on the winner's profile preference, " .
             "the win by timeout was automatically rejected and the game was changed to unrated!";
 
+      $act_user_text = ( is_array($user_row) )
+         ? sprintf( $MAP_ACTBY_SUBJECT[$action_by][1],
+                    user_reference(REF_LINK, 1, '', $user_row['ID'], $user_row['Handle'], '') )
+         : $MAP_ACTBY_SUBJECT[$action_by][0];
+
       $player_text = $this->players_text;
-      $msg_text = ( $this->message ) ? "<p>The {$MAP_ACTBY_SUBJECT[$action_by]} wrote:<p></p>" . $this->message : '';
+      $msg_text = ( $this->message ) ? "<p>The $act_user_text wrote:<p></p>" . $this->message : '';
 
       return array( $subject,
                     $text . $info_text . $this->players_text . $msg_text, // text for players
@@ -4311,8 +4324,11 @@ class NextGameOrder
    /*! \brief Builds basic QuerySQL for retrieving status-games. */
    function build_status_games_query( $uid, $game_status_op, $next_game_order, $load_ticks=false, $load_prio_field=false, $load_notes=false )
    {
-      if( is_numeric($next_game_order) )
-         $next_game_order = NextGameOrder::get_next_game_order( $next_game_order ); // int -> enum
+      $checked_order = ( is_numeric($next_game_order) )
+         ? NextGameOrder::get_next_game_order( $next_game_order ) // int -> enum
+         : $next_game_order;
+      $next_game_order = ( (string)$checked_order != '' ) ? $checked_order : NGO_LASTMOVED; // default on invalid order
+
       $sql_order = NextGameOrder::get_next_game_order( $next_game_order, 'Games', /*orderby*/false ); // enum -> order
       $load_prio = ($next_game_order == NGO_PRIO) || $load_prio_field;
 
