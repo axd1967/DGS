@@ -10,10 +10,189 @@ Release [2012-06-08] - DGS 1.0.15 - CVS-tag [release-1_0_15-20120608] on branch 
 2012-12-17: bug fix update (by JUG) as DGS 1.0.15.b
 2012-12-18: bug fix update (by JUG) as DGS 1.0.15.c
 2013-01-06: bug fix update (by JUG) as DGS 1.0.15.d
+2013-01-11: changes + bug fixes update (by JUG) as DGS 1.0.15.e
 
-2013-01-05 juga
+==================================================================
+
+2013-01-13 juga
 
 ### ----- release-1_0_15-20120608 -----
+
+   * game.php, manage_sgf.php:
+   - added notes with warning about SGF-download
+   - fix download-URL
+
+2013-01-12 juga
+
+   * manage_sgf.php:
+   - added bottom-link to download SGF WITHOUT any comments
+
+   * waiting_room.php:
+   - bugfix: wrong call-args to WaitingroomControl::build_waiting_room_query()
+
+   * include/quick/quick_wroom.php (QuickHandlerWaitingroom.prepare),
+     specs/quick_suite.txt:
+   - bugfix: added correct default order for waiting-room
+   - sync'ed suitable-filter with waiting-room behavior by adding my-waiting-games
+     with filter_suitable=2, and by filtering out own waiting-games for all and suitable filter
+
+2013-01-11 juga
+
+   * sync'ed in changes from CVS-HEAD since release 1.0.15.d (06-Jan-2013 .. 11-Jan-2013):
+   - allow to attach SGFs with game-reviews for running and finished games
+     - added save/delete/download of attached SGF, one SGF per game and user allowed
+     - check uploaded SGF to match DGS-game record and attributes on:
+       board-size, handicap, komi, shape-/handicap-setup and first 25 moves
+     - extended game-lists with search for games with attached SGF
+   - changed waiting-room view:
+     - added view 'My waiting games' only showing own waiting games
+     - replaced boolean-filter for suitable with selectbox with All/Suitable/Mine
+   - added quick-commands for game-object: save_notes, hide_notes, show_notes
+   - bugfix: deleting a multi-player-game changed wrongly Players.Running/Finished-fields
+   - bugfix: add 'show observers'-link if game is observed by myself
+   - bugfix: initializing overwrite-args of search-profile ignoring leading and trailing separators
+
+   2013-01-11 juga
+
+      * manage_sgf.php:
+      - added "normal" SGF-download bottom-links to ease reviewing
+
+      * include/game_sgf_control.php (GameSgfControl.prepare_verify_game_sgf):
+      - bugfix: verify of SGFs with handicap-setup failed, so treat handicap-stones like shape-setup
+
+      * include/game_sgf_control.php (GameSgfControl. delete_game_sgf, ~.save_game_sgf,
+          ~.verify_game_sgf, ~.count_cache_game_sgfs, ~.delete_cache_game_sgfs_count),
+        include/cache_globals.php (CACHE_GRP_GAMESGF_COUNT, $ARR_CACHE_GROUP_NAMES,
+          $ARR_CACHE_GROUP_CLEANUP),
+        include/config.php ($DGS_CACHE_GROUPS),
+        specs/caching.txt, game.php:
+      - use caching to count attached-SGFs on game-page
+        - invalidate cache on changing 'AttachedSgf'-game-flags indicator,
+          that is on saving or deleting SGF
+
+      * include/game_sgf_control.php (GameSgfControl.delete_game_sgf, ~.save_game_sgf),
+        include/db/games.php (Games.parseFlags, ~.buildFlags, ~.update_game_flags),
+        include/quick/quick_game_info.php (QuickHandlerGameInfo.convertGameFlags),
+        include/gui_functions.php (echo_image_game_sgf),
+        include/globals.php (GAMEFLAGS_ATTACHED_SGF),
+        scripts/updates/database_changes_1_0_15_to_1_0_16.mysql,
+        specs/db/dragon-ddl.sql, specs/db/table-Games.txt, specs/quick_suite.txt,
+        game.php, show_games.php, site_map.php:
+      - added new column and search-filter for all game-lists for games with attached-SGFs
+        - maintain Games.Flags 'AttachedSgf' as indicator if game has attached SGF
+        - optimize game-page checking for attached-SGFs only if according game-flag set
+        - added special link in site-map to search for all finished games
+          with attached SGFs without game-list end-date-restriction
+        - refactored printing SGF-icon into echo_image_game_sgf()-function
+-----------
+   -- added 'AttachedSgf'-flag as indicator for the presence of SGFs for game
+   ALTER TABLE Games
+      MODIFY Flags set('Ko','HiddenMsg','AdmResult','TGDetached','AttachedSgf') NOT NULL default '' ;
+-----------
+
+   2013-01-10 juga
+
+      * include/game_sgf_control.php,
+        game.php, manage_sgf.php:
+      - allow attaching SGFs also to running game
+
+      * include/game_functions.php (GameHelper._delete_base_game_tables):
+      - delete GameSgf-table-entries on game-deletion
+
+      * include/sgf_parser.php (sgf_parser, sgf_parse_node, sgf_parse_args, get_handicap_pattern;
+          class SgfParser, ~.might_be_sgf),
+        include/game_sgf_control.php (GameSgfControl, ~.save_game_sgf, ~.verify_game_sgf,
+          ~.prepare_verify_game_sgf),
+        include/board.php (class Board, ~.init_board, ~.load_from_db),
+        manage_sgf.php:
+      - parses, checks SGF and verifies that game from parsed SGF matches game in database
+        - parses and check for correct SGF-format
+        - verify for same board-size, handicap, komi, shape-setup and first 25 moves
+      - added translatable texts for parsing SGF
+
+      * include/quick/quick_game_notes.php (class QuickHandlerGameNotes, ~.canHandle,
+          ~.parseURL, ~.prepare, ~.process),
+        include/quick/quick_game_info.php (class QuickHandlerGameInfo, ~.prepare,
+          ~.process, ~.fill_game_info),
+        include/quick/quick_suite.php (QuickSuite.getQuickHandler),
+        specs/quick_suite.txt:
+      - added quick-commands for game-object: save_notes, hide_notes, show_notes
+      - refactored game-notes 'get_notes'-commands into separate class QuickHandlerGameNotes
+      - quick-game-info: return full game-notes instead of length-stripped notes
+
+      * include/game_sgf_control.php (GameSgfControl.delete_game_sgf, ~.save_game_sgf),
+        include/globals.php (CSS_VERSION),
+        skins/dragon/screen.css,
+        manage_sgf.php:
+      - ask for confirmation on removing own SGF
+      - added 'Refresh'-bottom-link to refresh page
+      - bugfix: check if file-read was successful for saving SGF
+
+      * include/db/game_sgf.php (class GameSgf, ~.to_string, ~.persist, ~.insert, ~.update, ~.delete,
+          ~.fillEntityData, ~.build_query_sql, ~.new_from_row, ~.load_game_sgf, ~.load_game_sgfs,
+          ~.count_game_sgfs),
+        include/game_sgf_control.php (class GameSgfControl, ~.delete_game_sgf, ~.save_game_sgf,
+          ~.download_game_sgf),
+        scripts/updates/database_changes_1_0_15_to_1_0_16.mysql,
+        scripts/updates/other_changes_1_0_15_to_1_0_16.txt,
+        specs/db/table-Games.txt, specs/db/dragon-ddl.sql,
+        game.php, manage_sgf.php, people.php, site_map.php:
+      - allow to upload SGFs for finished games
+        - added manage-sgf page to add, update, delete and download SGFs
+        - allow one SGF per game and user
+        - max. upload file-size 100KB
+        - game-page shows new sgf-icon if there are attached SGFs to download
+        - show 'Attach SGF' bottom-link on game-page for finished games
+-----------
+   -- added table to store attached SGFs for games
+   CREATE TABLE GameSgf (
+     gid int NOT NULL,
+     uid int NOT NULL,
+     Lastchanged datetime NOT NULL default '0000-00-00 00:00:00',
+     SgfData blob NOT NULL,
+     PRIMARY KEY (gid,uid)
+   ) ENGINE=MyISAM ;
+-----------
+
+      * include/game_functions.php (MultiPlayerGame.update_players_end_mpgame;
+          GameHelper.delete_running_game, ~.update_players_end_game):
+      - bugfix: deleting a multi-player-game changed wrongly Players.Running/Finished-fields
+
+   2013-01-07 juga
+
+      * include/message_functions.php (game_info_table),
+        include/utilities.php (append_unique),
+        scripts/updates/database_changes_1_0_15_to_1_0_16.mysql,
+        site_map.php, waiting_room.php:
+      - changed waiting-room view:
+        - added view 'My waiting games' only showing own waiting games
+        - replaced boolean-filter for suitable with selectbox with All/Suitable/Mine
+        - All and Suitable waiting games do not show own games
+        - removed 'New Game' bottom-link
+        - adjusted tooltip-text 'Out of range' to the more general 'Restricted'
+        - changed existing bottom-link translation-texts without losing translations
+-----------
+   -- change existing translation-text for waiting-room without losing translations
+   UPDATE TranslationTexts
+      SET Text='All waiting games', Translatable='Y', Updated=NOW()
+      WHERE Text='Show all waiting games' LIMIT 1 ;
+   UPDATE TranslationTexts
+      SET Text='Suitable waiting games', Translatable='Y', Updated=NOW()
+      WHERE Text='Show suitable games only' LIMIT 1 ;
+-----------
+
+      * include/classlib_profile.php (class SearchProfile):
+      - bugfix: initializing overwrite-args ignoring leading and trailing separators
+
+   2013-01-05 juga
+
+      * include/std_functions.php (check_for_observers):
+      - bugfix: add 'show observers'-link if game is observed by myself
+
+      * snapshot.php:
+      - added notes how to create tarballs of code-snapshot, translation-data, images
+
+2013-01-05 juga
 
    * admin_faq.php:
    - bugfixes:
