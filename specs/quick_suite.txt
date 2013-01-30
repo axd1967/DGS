@@ -2244,10 +2244,10 @@ Options:
    <ORDER> = (optional) sort-order for status-games
       - '' = use default order as configured on status-page
       - 0 = no-order (that's more gentle to the server, because less sorting)
-      - 1 = LASTMOVED = order by opponent-last-moved-date
-      - 2 = MOVES     = order by number of moves in game
-      - 3 = PRIO      = order by players priority set for game (on game-info page)
-      - 4 = TIMELEFT  = order by players remaining-time
+      - 1 or LASTMOVED = order by opponent-last-moved-date
+      - 2 or MOVES     = order by number of moves in game
+      - 3 or PRIO      = order by players priority set for game (on game-info page)
+      - 4 or TIMELEFT  = order by players remaining-time
 
 Response:
 
@@ -2341,7 +2341,9 @@ Response:
          game_prio       : priority set by user for game
                            - value-range: -32768..32767
                            - 0 = not-loaded or no prio
-                           - NOTE: prio is only loaded if next-game-order for status-games is priority
+                           - NOTE: prio is only loaded if next-game-order for status-games is priority or order was given as URL-argument.
+                             Please note, that requests with different 'order'-argument use the same cache-key and therefore you need to
+                             wait for cache-expiry to get the correct result.
          opponent_lastaccess_date : date of opponents last-access-date in format "YYYY-MM-DD hh:mm:ss[ GMT]" (timezone only if not logged-in)
          handicap        : number of handicap-stones
 
