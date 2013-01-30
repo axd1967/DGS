@@ -377,7 +377,7 @@ function check_passwd_method( $passwd_encrypted, $given_passwd, &$method)
 // Checks and eventually fixes (old-format) password
 function check_password( $uhandle, $passwd, $new_passwd, $given_passwd )
 {
-   if( !check_passwd_method( $passwd, $given_passwd, $method) )
+   if( !check_passwd_method( $passwd, $given_passwd, $method) ) // $method is set in check-func
    {
       // Check if there is a new password
       if( empty($new_passwd) ||
