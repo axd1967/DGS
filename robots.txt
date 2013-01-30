@@ -1,6 +1,7 @@
 # Syntax: http://en.wikipedia.org/wiki/Robots_Exclusion_Standard
 # NOTES: Allow is not known to all crawlers
 User-agent: *
+Crawl-delay: 5
 Allow: /index.php
 Allow: /docs.php
 # FAQ: what is this place?
