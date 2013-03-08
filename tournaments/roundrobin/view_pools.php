@@ -178,7 +178,7 @@ function build_pool_notes()
    $notes[] = sprintf( T_('[%s] = points calculated from wins, losses and jigo for user'), T_('Points#header') );
    $notes[] = sprintf( T_('[%s] = Tie-Breaker SODOS = Sum of Defeated Opponents Score'), T_('SODOS#tourney') );
    $notes[] = array(
-      sprintf( T_('[%s] = Rank of user within one pool (1=Highest rank); Format "R (CR) %s#tpool"'),
+      sprintf( T_('[%s] = Rank of user within one pool (1=Highest rank); Format "R (CR) %s"#tpool'),
                T_('Rank#tpool'), $img_next_round ),
       T_('R = (optional) rank set by tournament director, really final only at end of tournament round#tpool'),
       T_('R = \'---\' = user retreating from next round (temporary mark)#tpool'),
