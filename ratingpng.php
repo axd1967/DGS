@@ -308,14 +308,22 @@ function get_rating_data($uid)
    $query .=
       "InitialRating+200+GREATEST(1600-InitialRating,0)*2/15 AS RatingMax, " .
       "InitialRating-200-GREATEST(1600-InitialRating,0)*2/15 AS RatingMin, " .
-      "UNIX_TIMESTAMP(Registerdate) AS seconds " .
+      "UNIX_TIMESTAMP(Registerdate) AS reg_seconds " .
       "FROM Players WHERE ID=$uid LIMIT 1";
    $result = db_query( 'ratingpng.find_initial', $query );
-
    if( @mysql_num_rows($result) != 1 )
       exit;
 
    $min_row = mysql_fetch_assoc($result);
+
+   $result = db_query( 'ratingpng.find_min_max_time',
+      "SELECT UNIX_TIMESTAMP(MIN(Time)) AS min_seconds, UNIX_TIMESTAMP(MAX(Time)) AS seconds " .
+      "FROM Ratinglog WHERE uid=$uid LIMIT 1" );
+   $max_row = mysql_fetch_assoc($result);
+
+   // start time with first rated-game, otherwise registration-date
+   $min_row['seconds'] = ( @$max_row['min_seconds'] ) ? $max_row['min_seconds'] - SECS_PER_DAY : $min_row['reg_seconds'];
+
    if( $starttime < $min_row['seconds'] - $bound_interval )
       $starttime = $min_row['seconds'] - $bound_interval;
    if( $endtime < $min_row['seconds'] + $bound_interval)
@@ -326,10 +334,6 @@ function get_rating_data($uid)
       $owner_row = $min_row;
    }
 
-   $result = db_query( 'ratingpng.find_max_time',
-      "SELECT UNIX_TIMESTAMP(MAX(Time)) AS seconds FROM Ratinglog WHERE uid=$uid LIMIT 1" );
-
-   $max_row = mysql_fetch_assoc($result);
    if( $starttime > $max_row['seconds'] - $bound_interval )
       $starttime = $max_row['seconds'] - $bound_interval;
    if( $endtime > $max_row['seconds'] + $bound_interval)
