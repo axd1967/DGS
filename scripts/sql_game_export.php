@@ -74,15 +74,13 @@ function export_game( $gid )
    if( $sql_games[0] <= 0 )
       return array( false, $sql_games[1] );
 
-   // skip ID
    $sql_moves = insert_set( 'Moves', "SELECT * FROM Moves WHERE gid='$gid' ORDER BY ID", false, array( 'ID' ) );
    if( $sql_moves[0] <= 0 )
       return array( false, $sql_moves[1] );
 
-   // skip ID
    $sql_gp = insert_set( 'GamePlayers', "SELECT * FROM GamePlayers WHERE gid='$gid' ORDER BY ID", false, array( 'ID' ) );
-   if( $sql_gp[0] <= 0 )
-      return array( false, $gp[1] );
+   if( $sql_gp[0] < 0 ) // optional
+      return array( false, $sql_gp[1] );
 
    $sql_ratinglog = insert_set( 'Ratinglog', "SELECT * FROM Ratinglog WHERE gid='$gid' LIMIT 2", false, array( 'ID' ) );
    if( $sql_ratinglog[0] < 0 ) // optional
