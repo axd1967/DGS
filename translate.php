@@ -515,6 +515,7 @@ $info_box = '<br>When translating you should keep the following things in mind:
          if( in_array( $lang, $translator_array ) || in_array( $browsercode, $translator_array ) )
             $vals[$lang] = $langname;
       }
+      asort($vals);
 
       $langchoice_form->add_row( array(
             'CELL', $nbcol, '',
