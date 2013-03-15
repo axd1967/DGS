@@ -68,11 +68,13 @@ define('MPGMSG_INVITE', 3);
 define('ACTBY_PLAYER', 0);
 define('ACTBY_ADMIN',  1);
 define('ACTBY_CRON',   2);
+define('ACTBY_GAMEMASTER', 3);
 global $MAP_ACTBY_SUBJECT; //PHP5;
 $MAP_ACTBY_SUBJECT = array( // subject-action-by-part + sprintf-format for deletion/finalize-game-text (English only)
-   ACTBY_PLAYER => array( 'player', 'player %s' ),
-   ACTBY_ADMIN  => array( 'ADMIN',  'ADMIN %s' ),
-   ACTBY_CRON   => array( 'CRON',   'CRON' ),
+   ACTBY_PLAYER      => array( 'player', 'player %s' ),
+   ACTBY_ADMIN       => array( 'ADMIN',  'ADMIN %s' ),
+   ACTBY_CRON        => array( 'CRON',   'CRON' ),
+   ACTBY_GAMEMASTER  => array( 'game-master', 'game-master %s' ),
 );
 
 // enum Waitingroom.JigoMode
@@ -2263,7 +2265,7 @@ class GameNotify
       $act_user_text = $MAP_ACTBY_SUBJECT[$action_by][0];
 
       $subject = 'Game deleted';
-      if( $action_by == ACTBY_ADMIN || $action_by == ACTBY_CRON )
+      if( $action_by == ACTBY_ADMIN || $action_by == ACTBY_CRON || $action_by == ACTBY_GAMEMASTER )
          $subject .= sprintf(' (by %s)', $act_user_text );
       elseif( $action_by != ACTBY_PLAYER )
          $action_by = ACTBY_PLAYER;

@@ -136,6 +136,10 @@ Copyright (C) 2001-2013  Erik Ouchterlony, Jens-Uwe Gaspar
 
    Minor changes:
 
+   * Multi-Player-Game:
+      * Added deletion of multi-player-game on SETUP-status, only by game-master
+
+
    Bug fixes:
 
    * Fixed handling of default-profile and search of current filter-values

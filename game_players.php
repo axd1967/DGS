@@ -41,6 +41,7 @@ define('CMD_ADD_WAITINGROOM_GAME', 'wr_add'); // add game in waiting-room
 define('CMD_INVITE', 'inv'); // personal invitation
 define('CMD_CHANGE_COLOR', 'chg_col'); // set group-color
 define('CMD_CHANGE_ORDER', 'chg_ord'); // set group-order
+define('CMD_DELETE_GAME', 'delgame'); // delete game
 define('CMD_START_GAME', 'start'); // start game
 define('CMD_DEL_INVITE', 'delinv'); // delete reserved (not yet joined) invitation
 define('CMD_ACK_INVITE', 'ackinv'); // accept invitation
@@ -80,6 +81,10 @@ define('KEY_GROUP_ORDER', 'gpo');
 
      cmd=chg_ord&gid=&...      : show change-group-order settings
      cmd=chg_ord&gid=&save...  : update GroupOrder on change-group with args: gpo<ID>
+
+     cmd=delgame&gid=&...      : delete game on SETUP-status
+     cmd=delgame&gid=&save...  : confirm game-deletion
+     cmd=delgame&gid=&cancel.. : cancel operation
 
      cmd=start&gid=&...        : start game, check setup
 
@@ -192,6 +197,13 @@ define('KEY_GROUP_ORDER', 'gpo');
             else
                $extform = build_form_change_order( $grow, $gid, $cmd );
          }
+         elseif( $cmd == CMD_DELETE_GAME ) // delete game
+         {
+            if( $is_save )
+               delete_game_setup($gid);
+            else
+               $extform = build_form_delete_game( $grow, $gid, $cmd );
+         }
       }//allow_edit
 
       if( $cmd == CMD_START_GAME ) // check/start game
@@ -277,6 +289,7 @@ define('KEY_GROUP_ORDER', 'gpo');
             $menu_array[$chg_col_title] = "game_players.php?gid=$gid".URI_AMP.'cmd='.CMD_CHANGE_COLOR;
 
          $menu_array[T_('Change order')] = "game_players.php?gid=$gid".URI_AMP.'cmd='.CMD_CHANGE_ORDER;
+         $menu_array[T_('Delete game')] = "game_players.php?gid=$gid".URI_AMP.'cmd='.CMD_DELETE_GAME;
          $menu_array[T_('Start game')] = "game_players.php?gid=$gid".URI_AMP.'cmd='.CMD_START_GAME;
       }
       else
@@ -821,6 +834,25 @@ function build_form_change_order( $grow, $gid, $cmd, $edit_hk=false )
    $form->add_row( array( 'SUBMITBUTTON', FACT_SAVE, T_('Update') ));
    return $form;
 }//build_form_change_order
+
+function build_form_delete_game( $grow, $gid, $cmd )
+{
+   $form = new Form( 'delgame', 'game_players.php', FORM_GET, false );
+   $form->add_hidden( 'gid', $gid );
+   $form->add_hidden( 'cmd', $cmd );
+
+   $form->add_empty_row();
+   $form->add_row( array( 'HEADER', T_('Delete game#mpg') ));
+
+   $form->add_row( array( 'TEXT', T_('The other players will be notified about the deletion.#mpg'), ));
+   $form->add_row( array( 'TEXT', T_('Are you sure to delete this game now?#mpg') ));
+
+   $form->add_row( array( 'CELL', 1, '',
+                          'SUBMITBUTTON', FACT_SAVE, T_('Yes'),
+                          'SUBMITBUTTON', FACT_CANCEL, T_('No'), ));
+
+   return $form;
+}//build_form_delete_game
 
 function build_form_start_game( $gid, $cmd, $errors )
 {
@@ -1428,6 +1460,32 @@ function build_arr_group_color_texts( $arr_group_colors )
       $arr[] = GamePlayer::get_group_color_text($grcol);
    return $arr;
 }
+
+function delete_game_setup( $gid )
+{
+   global $grow, $arr_users;
+
+   // send message to all-players
+   $game_notify = new GameNotify( $gid, /*adm*/0, $grow['Status'], $grow['GameType'], $grow['GamePlayers'],
+      $grow['Flags'], 0, 0, 0, /*rej-timeout*/false, '' );
+
+   ta_begin();
+   {//HOT-section for deleting multi-player-game
+      if( GameHelper::delete_running_game($gid) )
+      {
+         // notify all players about deletion
+         list( $Subject, $Text ) = $game_notify->get_text_game_deleted( ACTBY_GAMEMASTER );
+         send_message( 'confirm', $Text, $Subject,
+            /*to*/$game_notify->get_recipients(), '',
+            /*notify*/true, /*system-msg*/0, MSGTYPE_RESULT, $gid );
+
+         clear_cache_quick_status( array_keys($arr_users), QST_CACHE_MPG );
+
+         jump_to("status.php?sysmsg=".urlencode(T_('Game deleted!')));
+      }
+   }
+   ta_end();
+}//delete_game_setup
 
 function start_multi_player_game( $grow, $upd_game_players )
 {

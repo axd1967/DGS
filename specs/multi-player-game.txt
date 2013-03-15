@@ -68,7 +68,7 @@ Restrictions:
      To compensate there is a special search to list multi-player-games.
    * Opponents-page is only supported for standard Go-games,
      but NOT for multi-player-games.
-   * Multi-player-game can NOT be deleted.
+   * Multi-player-game can NOT be deleted, except on SETUP-status by game-master.
    * Conditional moves are NOT supported for multi-player-games.
 
 
@@ -106,6 +106,7 @@ Described Use-cases:
    - Remove a joined player
    - Choose group-color and handicap for players
    - Choose group-order for players
+   - Delete game
    - Start game
 
 
@@ -143,7 +144,7 @@ Described Use-cases:
       - The "userinfo"-page shows the current number of MP-games in setup/running-mode,
         but only for oneself or viewed by admins
       - For MP-games in SETUP-mode the game-page and game-info-page are not available
-      - Game in SETUP-mode can not be deleted
+      - Game in SETUP-mode can only be deleted by game-master
 
 
 * Find users to play with with "game-players"-page:
@@ -271,6 +272,12 @@ Described Use-cases:
 
   Before the game can be started, the playing order for each team must be specified.
   This can be done following the "Change order" on the "game-players"-page.
+
+
+* Delete game:
+
+  While the game is on SETUP-status the game can be deleted, but only by the game-master.
+  The deletion must be confirmed. The other players are notified about the deletion.
 
 
 * Start game:
