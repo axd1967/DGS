@@ -16,6 +16,77 @@ Developers INFO:
 ChangeLog
 ------------------------------------------------------------------
 
+2013-03-15 juga
+
+   * new_game.php:
+   - bugfix: jump to my-waiting-room-games after creation of new game-offer
+
+   * include/classlib_profile.php (class SearchProfile, ~.get_arg, ~.handle_action, ~.to_string),
+     include/globals.php (SP_ARG_NO_DEF, SPURL_NO_DEF),
+     include/std_functions.php (make_dragon_main_menu),
+     features/edit_feature.php, features/list_features.php,
+     features/list_votes.php, features/vote_feature.php,
+     waiting_room.php (load_waitingroom_info),
+     list_shapes.php, site_map.php:
+   - bugfixes:
+     - fixed profile-handling to not use default-profile on showing "Info" or
+       normal "Search" preserving current filter-values
+     - fixed showing multi-player-game wroom-entry for correct my|all-view
+     - reverted change to add arg-overwriting with additional URL-arg SPURI_ARGS
+     - added option for profile-handling to forbid loading default-profile
+
+2013-03-08 juga
+
+   * ratingpng.php (get_rating_data):
+   - rating-graph: use 1st rated game as start-time instead of register-date (fallback)
+
+   * translate.php:
+   - translating: sort languages for selectbox
+
+   * scripts/sql_game_export.php (export_game):
+   - bugfix: handle empty GamePlayers-list
+
+   * tournaments/roundrobin/view_pools.php (build_pool_notes):
+   - typo translation-text
+
+2013-01-30 juga
+
+   * include/game_functions.php ($MAP_ACTBY_SUBJECT;
+       GameFinalizer.finish_game, ~.get_text_game_deleted, ~.get_text_game_result;
+       NextGameOrder.build_status_games_query),
+     specs/quick_suite.txt,
+     admin_game.php:
+   - add user-id and name of author of message in game-deletion and game-finalization message
+   - bugfix for quick-status: convert integer next-game-order into enum for loading
+     and sorting by manual given order
+
+   * include/game_functions.php (NextGameOrder.build_status_games_query):
+   - bugfix for quick-status: convert integer next-game-order into enum
+     for loading and sorting by manual given order
+
+   * robots.txt:
+   - added Crawl-delay 5s
+
+2013-01-13 juga
+
+   * game.php, manage_sgf.php:
+   - added notes with warning about SGF-download
+   - fix download-URL
+
+2013-01-12 juga
+
+   * manage_sgf.php:
+   - added bottom-link to download SGF WITHOUT any comments
+
+   * waiting_room.php:
+   - bugfix: wrong call-args to WaitingroomControl::build_waiting_room_query()
+
+   * include/quick/quick_wroom.php (QuickHandlerWaitingroom.prepare),
+     specs/quick_suite.txt:
+   - bugfix: added correct default order for waiting-room
+   - sync'ed suitable-filter with waiting-room behavior by adding my-waiting-games
+     with filter_suitable=2, and by filtering out own waiting-games for all and suitable filter
+
 2013-01-11 juga
 
    * manage_sgf.php:
@@ -155,8 +226,6 @@ UPDATE TranslationTexts
 
    * snapshot.php:
    - added notes how to create tarballs of code-snapshot, translation-data, images
-
-2013-01-05 juga
 
    * admin_faq.php:
    - bugfixes:
