@@ -11,12 +11,33 @@ Release [2012-06-08] - DGS 1.0.15 - CVS-tag [release-1_0_15-20120608] on branch 
 2012-12-18: bug fix update (by JUG) as DGS 1.0.15.c
 2013-01-06: bug fix update (by JUG) as DGS 1.0.15.d
 2013-01-11: changes + bug fixes update (by JUG) as DGS 1.0.15.e
+2013-03-08: changes + bug fixes update (by JUG) as DGS 1.0.15.f
 
 ==================================================================
 
-2013-01-13 juga
-
 ### ----- release-1_0_15-20120608 -----
+
+2013-03-08 juga
+
+   * ratingpng.php (get_rating_data):
+   - rating-graph: use 1st rated game as start-time instead of register-date (fallback)
+
+   * translate.php:
+   - translating: sort languages for selectbox
+
+   * scripts/sql_game_export.php (export_game):
+   - bugfix: handle empty GamePlayers-list
+
+   * tournaments/roundrobin/view_pools.php (build_pool_notes):
+   - typo translation-text
+
+2013-01-20 juga
+
+   * include/game_functions.php (NextGameOrder.build_status_games_query):
+   - bugfix for quick-status: convert integer next-game-order into enum
+     for loading and sorting by manual given order
+
+2013-01-13 juga
 
    * game.php, manage_sgf.php:
    - added notes with warning about SGF-download
