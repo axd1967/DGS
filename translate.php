@@ -289,24 +289,59 @@ $info_box = '<br>When translating you should keep the following things in mind:
                   'CELL', $nbcol, '',
                   'TEXT', "- $lang_string -" ) );
 
-      $table_links = '';
-      $tmp = $page_hiddens;
-      if( !$no_pages && $show_rows > 0 && $from_row > 0 )
+      // see also class Table.make_next_prev_links()
+      $curr_page = floor($from_row / TRANS_ROW_PER_PAGE) + 1;
+      if( $from_row > ($curr_page - 1) * TRANS_ROW_PER_PAGE )
+         $curr_page++;
+      if( $found_rows >= 0 )
       {
-         $tmp['from_row'] = max(0, $from_row-TRANS_ROW_PER_PAGE);
-         if( $table_links )
-            $table_links.= '&nbsp;|&nbsp;';
-         $table_links.= anchor( make_url($page, $tmp),
-               T_('Prev Page'), '', array( 'accesskey' => ACCKEY_ACT_PREV ));
+         $max_page = floor( ($found_rows + TRANS_ROW_PER_PAGE - 1) / TRANS_ROW_PER_PAGE );
+         if( $from_row > ($max_page - 1) * TRANS_ROW_PER_PAGE )
+            $max_page++;
       }
-      if( !$no_pages && $show_rows > TRANS_ROW_PER_PAGE )
+      else
+         $max_page = 0;
+
+      $table_links = '';
+      $align = 'align=bottom'; //'align=middle'
+      $tmp = $page_hiddens;
+      if( !$no_pages )
       {
-         $show_rows = TRANS_ROW_PER_PAGE;
-         $tmp['from_row'] = $from_row+TRANS_ROW_PER_PAGE;
-         if( $table_links )
-            $table_links.= '&nbsp;|&nbsp;';
-         $table_links.= anchor( make_url($page, $tmp),
-               T_('Next Page'), '', array( 'accesskey' => ACCKEY_ACT_NEXT ));
+         if( $from_row > 0 ) // start-link
+         {
+            $tmp['from_row'] = 0;
+            $table_links .= anchor( make_url($page, $tmp),
+               image( $base_path.'images/start.gif', '|<=', '', $align), T_('first page') );
+         }
+         if( $show_rows > 0 && $from_row > 0 ) // prev-link
+         {
+            $tmp['from_row'] = max(0, $from_row-TRANS_ROW_PER_PAGE);
+            if( $table_links )
+               $table_links.= MED_SPACING;
+            $table_links .= anchor( make_url($page, $tmp),
+                  image( $base_path.'images/prev.gif', '<=', '', $align),
+                  T_('Prev Page'), '', array( 'accesskey' => ACCKEY_ACT_PREV ));
+         }
+
+         $table_links .= SMALL_SPACING . sprintf( T_('Page %s of %s#tablenavi'), $curr_page, $max_page ) . SMALL_SPACING;
+
+         if( $show_rows > TRANS_ROW_PER_PAGE )
+         {
+            $show_rows = TRANS_ROW_PER_PAGE;
+            $tmp['from_row'] = $from_row+TRANS_ROW_PER_PAGE;
+            $table_links .= anchor( make_url($page, $tmp),
+                  image( $base_path.'images/next.gif', '=>', '', $align),
+                  T_('Next Page'), array( 'accesskey' => ACCKEY_ACT_NEXT ));
+
+            if( $found_rows > TRANS_ROW_PER_PAGE ) // end-link
+            {
+               $tmp['from_row'] = floor( $found_rows / TRANS_ROW_PER_PAGE) * TRANS_ROW_PER_PAGE;
+               if( $table_links )
+                  $table_links.= MED_SPACING;
+               $table_links .= anchor( make_url($page, $tmp),
+                    image( $base_path.'images/end.gif', '=>|', '', $align), T_('last page') );
+            }
+         }
       }
 
       $table_entries = ( $found_rows > 0 ) ? sprintf('(%s entries to translate)', $found_rows) : '';

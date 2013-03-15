@@ -156,6 +156,9 @@ Copyright (C) 2001-2013  Erik Ouchterlony, Jens-Uwe Gaspar
 
    Administrative changes:
 
+   * Changes for Translators:
+      * Added full page-navigation
+
    * Changes for Admins:
       * Added TOURNAMENT_ADMIN-role to fix problems with tournaments, show indicator in top-bar as reminder
 
