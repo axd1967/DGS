@@ -167,7 +167,7 @@ function translations_query( $translate_lang, $untranslated, $group, $from_row=-
 {
    /* Note: Some items appear two or more times within the untranslated set
       when from different groups. But we can't use:
-          ( $untranslated ? "DISTINCT " : "")
+          ( $untranslated == 1 ? "DISTINCT " : "")
       because the Group_ID column makes the rows distinct.
       Workaround: using "ORDER BY Original_ID LIMIT 50";
        and filter the rows on Original_ID while computing.
@@ -186,6 +186,7 @@ function translations_query( $translate_lang, $untranslated, $group, $from_row=-
       $limit = '';
 
    $sql_opts = ( ALLOW_SQL_CALC_ROWS ) ? 'SQL_CALC_FOUND_ROWS' : '';
+   $join_translations = ( $untranslated == 2 ) ? 'INNER' : 'LEFT'; // 2=translated-only
    $query = "SELECT $sql_opts Translations.Text"
           . ",TT.ID AS Original_ID"
           . ",TL.ID AS Language_ID"
@@ -201,7 +202,7 @@ function translations_query( $translate_lang, $untranslated, $group, $from_row=-
       . " INNER JOIN TranslationGroups AS TG"
       . " INNER JOIN TranslationFoundInGroup TFIG ON TFIG.Group_ID=TG.ID AND TFIG.Text_ID=TT.ID"
       . " INNER JOIN TranslationLanguages AS TL"
-      . " LEFT JOIN Translations ON Translations.Original_ID=TT.ID AND Translations.Language_ID=TL.ID"
+      . " $join_translations JOIN Translations ON Translations.Original_ID=TT.ID AND Translations.Language_ID=TL.ID"
    . " WHERE TL.Language='".mysql_addslashes($translate_lang)."'"
       . " AND TT.Text>''"
       . " AND TT.Translatable!='N'" ;
@@ -211,7 +212,7 @@ function translations_query( $translate_lang, $untranslated, $group, $from_row=-
    if( is_numeric($max_len) && $max_len > 0 )
       $query .= " AND LENGTH(TT.Text) <= $max_len";
 
-   if( $untranslated )
+   if( $untranslated == 1 ) // untranslated-only
    {
       // Translations.Translated IS NULL means "never translated" (LEFT JOIN fails).
       $query .= " AND (Translations.Translated IS NULL OR Translations.Translated='N')";

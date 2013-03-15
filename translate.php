@@ -140,7 +140,7 @@ $info_box = '<br>When translating you should keep the following things in mind:
       $profil_charset = 0;
 
    $group = get_request_arg('group');
-   $untranslated = (int)@$_REQUEST['untranslated'];
+   $untranslated = (int)@$_REQUEST['untranslated']; // 0=all, 1=untranslated-only, 2=translated-only
    $alpha_order = (int)@$_REQUEST['alpha_order'];
    $filter_en = trim(get_request_arg('filter_en'));
    $max_len = (int)@$_REQUEST['max_len'];
@@ -160,10 +160,16 @@ $info_box = '<br>When translating you should keep the following things in mind:
    ksort( $translation_groups);
    $translation_groups['allgroups'] = 'All groups';
 
+   $arr_translated = array(
+         1 => 'Untranslated',
+         2 => 'Translated',
+         0 => 'All texts',
+      );
+
    if( !$group || !array_key_exists( $group, $translation_groups) )
    {
       $group = 'allgroups';
-      $untranslated = 1;
+      $untranslated = 1; // default: show untranslated
    }
 
    if( count( $translator_array ) > 1 )
@@ -246,7 +252,7 @@ $info_box = '<br>When translating you should keep the following things in mind:
    if( $group )
       $page_hiddens['group'] = $group;
    if( $untranslated )
-      $page_hiddens['untranslated'] = 1;
+      $page_hiddens['untranslated'] = $untranslated;
    if( $alpha_order )
       $page_hiddens['alpha_order'] = 1;
    if( $filter_en )
@@ -525,9 +531,9 @@ $info_box = '<br>When translating you should keep the following things in mind:
             'HIDDEN', 'translate_lang', $translate_lang,
             'HIDDEN', 'profil_charset', $profil_charset,
             'HIDDEN', 'from_row', 0,
-            'SUBMITBUTTONX', 'just_group', T_('Just change group'),
-               array( 'accesskey' => ACCKEY_ACT_PREVIEW ),
-            'CHECKBOX', 'untranslated', 1, T_('untranslated'), $untranslated,
+            'SELECTBOX', 'untranslated', 1, $arr_translated, $untranslated, false,
+            'SUBMITBUTTON', 'just_group', T_('Show texts'),
+            'TEXT', MED_SPACING,
             'CHECKBOX', 'alpha_order', 1, T_('alpha order'), $alpha_order,
          ));
 
