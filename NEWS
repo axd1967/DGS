@@ -3,7 +3,7 @@ Copyright (C) 2001-2013  Erik Ouchterlony, Jens-Uwe Gaspar
 
 %TOC%
 
-#release DGS_1_0_16 [2012-???-??] - DGS 1.0.16  (Tournaments)
+#release DGS_1_0_16 [2013-???-??] - DGS 1.0.16  (Tournaments)
 
    New features and Major changes:
 
@@ -137,6 +137,9 @@ Copyright (C) 2001-2013  Erik Ouchterlony, Jens-Uwe Gaspar
    Minor changes:
 
    Bug fixes:
+
+   * Fixed handling of default-profile and search of current filter-values
+
 
    Code improvements:
 
