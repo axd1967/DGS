@@ -1168,7 +1168,8 @@ function draw_game_info( $game_row, $game_setup, $board, $tourney )
 
 
    //black rows
-   $blackOffTime = echo_off_time( ($to_move == BLACK), $game_row['Black_OnVacation'], $game_row['Black_ClockUsed'] );
+   $blackOffTime = echo_off_time( ($to_move == BLACK), $game_row['Black_OnVacation'], $game_row['Black_ClockUsed'],
+      $game_row['WeekendClock'] );
    echo '<tr id="blackInfo">', "\n";
    echo "<td class=Color>$icon_col_b</td>\n";
    echo '<td class=Name>',
@@ -1197,7 +1198,8 @@ function draw_game_info( $game_row, $game_setup, $board, $tourney )
 
 
    //white rows
-   $whiteOffTime = echo_off_time( ($to_move == WHITE), $game_row['White_OnVacation'], $game_row['White_ClockUsed'] );
+   $whiteOffTime = echo_off_time( ($to_move == WHITE), $game_row['White_OnVacation'], $game_row['White_ClockUsed'],
+      $game_row['WeekendClock'] );
    echo '<tr id="whiteInfo">', "\n";
    echo "<td class=Color>$icon_col_w</td>\n";
    echo '<td class=Name>',

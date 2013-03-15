@@ -108,21 +108,26 @@ function is_weekend_clock( $clock_id )
 /*! Returns true, if given clock-id is within non-ticking weekend-clock. */
 function is_weekend_clock_stopped( $clock_id, $timestamp=null )
 {
-   if( is_weekend_clock($clock_id) )
-      $clock_id -= WEEKEND_CLOCK_OFFSET;
-   if( $clock_id < 0 || $clock_id > 23 )
-      error('invalid_args', "is_weekend_clock_stopped($clock_id,$timestamp)");
-
-   if( is_weekend($timestamp) )
+   if( !is_weekend_clock($clock_id) ) // game-setting has clock running every day of the week
+      $clock_stopped = false; // independent from weekend
+   else // game-setting has clock running only on Mo-Fr
    {
-      // NOTE: this can be seen as bug, but MUCH easier if you don't!
-      //       BUG: weekend-clock is wrong, needs fixing; //is_hour_clock_run( $clock_id, $timestamp );
-      //      -> really ? just keep it and it's easy (keeping UTC-weekends)
-      $running_clock = false;
+      $clock_id -= WEEKEND_CLOCK_OFFSET;
+      if( $clock_id < 0 || $clock_id > 23 )
+         error('invalid_args', "is_weekend_clock_stopped($clock_id,$timestamp)");
+
+      if( is_weekend($timestamp) )
+      {
+         // NOTE: this can be seen as bug, but MUCH easier if you don't!
+         //       BUG: weekend-clock is wrong, needs fixing; //is_hour_clock_run( $clock_id, $timestamp );
+         //      -> really ? just keep it and it's easy (keeping UTC-weekends)
+         $clock_stopped = true;
+      }
+      else
+         $clock_stopped = false;
    }
-   else
-      $running_clock = true;
-   return !$running_clock;
+
+   return $clock_stopped;
 }
 
 /*! Returns true, if given clock-id is a vacation-clock, i.e. player to move in game is on vacation. */

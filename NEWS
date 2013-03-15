@@ -139,6 +139,7 @@ Copyright (C) 2001-2013  Erik Ouchterlony, Jens-Uwe Gaspar
    Bug fixes:
 
    * Fixed handling of default-profile and search of current filter-values
+   * Fixed showing of weekend-clock icon for games with running weekend-clock
 
 
    Code improvements:

@@ -232,8 +232,9 @@ function echo_image_online( $in_the_house=true, $last_access=0, $withSep=true )
  * \brief Returns off-time echo-string for certain player.
  * \param $on_vacation true|false | vacation-days
  * \param $player_clock_used null | int
+ * \param $game_weekendclock Games.WeekendClock, Y=clock-running, N=clock-stopped on weekend
  */
-function echo_off_time( $player_to_move, $on_vacation, $player_clock_used )
+function echo_off_time( $player_to_move, $on_vacation, $player_clock_used, $game_weekendclock )
 {
    if( $on_vacation === true )
       $vac_str = echo_image_vacation();
@@ -246,7 +247,8 @@ function echo_off_time( $player_to_move, $on_vacation, $player_clock_used )
    $game_str = '';
    if( !is_null($player_clock_used) )
    {
-      if( is_weekend_clock_stopped($player_clock_used) )
+      $game_clock = $player_clock_used + ( $game_weekendclock == 'Y' ? 0 : WEEKEND_CLOCK_OFFSET );
+      if( is_weekend_clock_stopped($game_clock) )
          $game_str .= MINI_SPACING . echo_image_weekendclock( true, $player_to_move );
       if( is_nighttime_clock($player_clock_used) )
          $game_str .= MINI_SPACING . echo_image_nighttime( 'in_text', $player_to_move );

@@ -265,8 +265,10 @@ function build_rating_diff( $rating_diff )
    $itable->add_sinfo(
          T_('Off-time'),
          array(
-            echo_off_time( ($to_move == BLACK), ($grow['Black_OnVacation'] > 0), $grow['Black_ClockUsed'] ),
-            echo_off_time( ($to_move == WHITE), ($grow['White_OnVacation'] > 0), $grow['White_ClockUsed'] ),
+            echo_off_time( ($to_move == BLACK), ($grow['Black_OnVacation'] > 0), $grow['Black_ClockUsed'],
+               $grow['WeekendClock'] ),
+            echo_off_time( ($to_move == WHITE), ($grow['White_OnVacation'] > 0), $grow['White_ClockUsed'],
+               $grow['WeekendClock'] ),
          ),
          'class="Images"' );
    $itable->add_sinfo(
