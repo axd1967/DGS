@@ -126,9 +126,9 @@ function itemL($text, $link='', $working=true, $last=false)
 
       item(T_('Waiting room'), "waiting_room.php", true);
       { $item_level++;
-         itemL(T_('All waiting games'), "waiting_room.php?good=0".SPURI_ARGS.'good', true);
-         itemL(T_('Suitable waiting games'), "waiting_room.php?good=1".SPURI_ARGS.'good', true);
-         itemL(T_('My waiting games'), "waiting_room.php?good=2".SPURI_ARGS.'good', true, true);
+         itemL(T_('All waiting games'), "waiting_room.php?good=0", true);
+         itemL(T_('Suitable waiting games'), "waiting_room.php?good=1", true);
+         itemL(T_('My waiting games'), "waiting_room.php?good=2", true, true);
       } $item_level--;
 
       if( ALLOW_TOURNAMENTS )
@@ -325,9 +325,9 @@ function itemL($text, $link='', $working=true, $last=false)
       {
          item(T_('Feature Vote Result'), "features/list_votes.php", true);
          { $item_level++;
-            item(T_('Vote on features'), "features/list_features.php?status=2".URI_AMP.'my_vote=1'.SPURI_ARGS.'status,my_vote', true);
-            item(T_('My feature votes'), "features/list_features.php?status=3".URI_AMP.'my_vote=2'.SPURI_ARGS.'status,my_vote', true);
-            item(T_('All features'),     "features/list_features.php?status=3".URI_AMP.'my_vote=0'.SPURI_ARGS.'status,my_vote', true, true);
+            item(T_('Vote on features'), "features/list_features.php?status=2".URI_AMP.'my_vote=1', true);
+            item(T_('My feature votes'), "features/list_features.php?status=3".URI_AMP.'my_vote=2', true);
+            item(T_('All features'),     "features/list_features.php?status=3".URI_AMP.'my_vote=0', true, true);
          } $item_level--;
       }
 

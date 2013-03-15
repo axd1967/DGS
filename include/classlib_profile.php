@@ -380,8 +380,6 @@ class SearchProfile
    var $saveargs;
    /*! \brief Set with registered arg-names [ argname => 1 ]. */
    var $argnames;
-   /*! \brief Map with arg-names that can be overwritten from $_REQUEST-values [ argname => 1 ]. */
-   var $overwrite_args;
    /*! \brief Map with values for args [ argname => argvalue ]. */
    var $args;
 
@@ -389,6 +387,10 @@ class SearchProfile
    var $need_reset;
    /*! \brief true, if args should be cleared (clear=make-empty). */
    var $need_clear;
+   /*! \brief true, if URL-args have precedence over profile-values (used for SPROF_CURR_VALUES). */
+   var $skip_profile_values;
+   /*! \brief true, if URL-args have precedence over profile-values (used for loading profile). */
+   var $use_url_args;
 
    /*! \brief Constructs SearchProfile for user and given profile-type. */
    function SearchProfile( $user_id, $proftype, $prefix='' )
@@ -396,24 +398,18 @@ class SearchProfile
       $this->user_id = $user_id;
       $this->profile_type = $proftype;
       $this->prefix = $prefix;
-      $this->forbid_default = false;
+      $this->forbid_default = get_request_arg(SP_ARG_NO_DEF, false);
 
+      $this->profile = NULL;
       $this->saveargs = array();
       $this->argnames = array();
-      $this->overwrite_args = array();
-      $this->profile = NULL;
       $this->args = NULL;
       $this->need_reset = false;
       $this->need_clear = false;
+      $this->skip_profile_values = false;
+      $this->use_url_args = false;
 
       $this->load_profile();
-
-      // parse overwrite-args
-      foreach( explode(',', @$_REQUEST[$prefix.SP_OVERWRITE_ARGS]) as $arg )
-      {
-         if( $arg )
-            $this->overwrite_args[$arg] = 1;
-      }
    }
 
    function set_forbid_default()
@@ -480,7 +476,7 @@ class SearchProfile
 
    /*!
     * \brief Returns value from saved-profile for given arg-name;
-    *        NULL, if arg has not been saved.
+    *        NULL, if arg has not been saved (using default-value).
     */
    function get_arg( $name )
    {
@@ -488,21 +484,29 @@ class SearchProfile
          $result = NULL;
       elseif( $this->need_clear )
          $result = '';
+      elseif( $this->skip_profile_values )
+      {
+         if( isset($_REQUEST[$name]) )
+            $result = get_request_arg($name);
+         else
+            $result = NULL;
+      }
       elseif( is_array($this->args) )
       {
-         if( isset($this->overwrite_args[$name]) && isset($_REQUEST[$name]) ) // overwrite allowed if value set
+         if( $this->use_url_args && isset($_REQUEST[$name]) ) // URL-args have precedence over profile-data
             $result = get_request_arg($name);
-         elseif( isset($this->args[$name]) )
+         elseif( isset($this->args[$name]) ) // profile-data
             $result = $this->args[$name];
          elseif( isset($this->argnames[$name]) )
             $result = ''; // overwrite (clear)
          else
-            $result = NULL; // need default-value
+            $result = NULL;
       }
       else
-         $result = NULL; // need default-value
+         $result = NULL;
+      #error_log("Profile.get_arg($name)=[".(is_null($result)?'NULL':$result)."]");
       return $result;
-   }
+   }//get_arg
 
    /*! \brief Builds map with data to save for profile. */
    function build_save_data( $arr_in )
@@ -522,19 +526,25 @@ class SearchProfile
     *        use current-values in _REQUEST-var,
     *        clear or reset values (needing additional external action),
     *        load, save or delete profile (keeping current form-values).
-    * NOTE: argnames not complete!!
+    * \param $prof_action null = use user-action from form
+    * \note NOTE: argnames not complete!!
     */
-   function handle_action()
+   function handle_action( $prof_action=null )
    {
-      // load default-profile (if no action set and allowed)
-      $prof_fname = $this->prefix . SPFORM_PROFILE_ACTION;
-      $default_action = ( $this->forbid_default ) ? SPROF_CURR_VALUES : SPROF_LOAD_DEFAULT;
-      $prof_action = (int)get_request_arg( $prof_fname, $default_action );
+      if( is_null($prof_action) )
+      {
+         // load default-profile (if no action set and allowed)
+         $default_action = ( $this->forbid_default ) ? SPROF_CURR_VALUES : SPROF_LOAD_DEFAULT;
+
+         $prof_fname = $this->prefix . SPFORM_PROFILE_ACTION;
+         $prof_action = (int)get_request_arg( $prof_fname, $default_action );
+      }
 
       $this->args = NULL;
       switch( (int)$prof_action )
       {
          case SPROF_CURR_VALUES:    // no-action, take values from _REQUEST
+            $this->skip_profile_values = true;
             break;
 
          case SPROF_RESET_VALUES:
@@ -561,6 +571,9 @@ class SearchProfile
          case SPROF_LOAD_PROFILE:   // load profile
          case SPROF_LOAD_DEFAULT:   // load (active) default profile
          default:
+            if( $prof_action == SPROF_LOAD_DEFAULT )
+               $this->use_url_args = true;
+
             $chk_active = ($prof_action != SPROF_LOAD_PROFILE);
             if( $this->has_profile($chk_active) )
                $this->args = $this->profile->get_text();
@@ -613,6 +626,8 @@ class SearchProfile
          . "argnames=[".implode(',', array_keys($this->argnames))."], "
          . "need_reset=[{$this->need_reset}], "
          . "need_clear=[{$this->need_clear}], "
+         . "skip_prof_vals=[{$this->skip_profile_values}], "
+         . "use_url_args=[{$this->use_url_args}], "
          . (is_null($this->profile) ? 'profile=[NULL]' : $this->profile->to_string() ) . ', '
          . 'args=['.substr($args_str,2).']';
    }

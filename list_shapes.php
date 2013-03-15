@@ -144,8 +144,8 @@ $GLOBALS['ThePage'] = new Page('ShapeList');
    //$no_prof = URI_AMP . $search_profile->get_request_params()->get_url_parts(); // add if not to load def-profile
    $menu_array = array();
    $menu_array[T_('Shapes')] = "list_shapes.php";
-   $menu_array[T_('All shapes')] = "list_shapes.php?pub=0".SPURI_ARGS.'pub';
-   $menu_array[T_('My shapes')] = "list_shapes.php?user=".urlencode($player_row['Handle']).URI_AMP.'pub=0'.SPURI_ARGS.'user,pub';
+   $menu_array[T_('All shapes')] = "list_shapes.php?pub=0";
+   $menu_array[T_('My shapes')] = "list_shapes.php?user=".urlencode($player_row['Handle']).URI_AMP.'pub=0';
    $menu_array[T_('New Shape (Goban Editor)')] = "goban_editor.php";
 
    end_page(@$menu_array);

@@ -97,12 +97,14 @@ require_once( 'include/wroom_control.php' );
    {
       $gid = (int)get_request_arg('gid');
       if( $gid > 0 )
-         $idinfo = load_waitingroom_info( $gid );
+      {
+         list( $idinfo, $wr_uid ) = load_waitingroom_info( $gid );
+         if( $idinfo )
+            set_request_arg('good', ( $wr_uid == $my_id ) ? 2 : 0 ); // my|all-wrgames-view
+      }
    }
 
-   $page = "waiting_room.php?";
-   if( $idinfo )
-      $page.= 'info='.$idinfo . URI_AMP;
+   $page = "waiting_room.php";
 
    // init search profile
    $search_profile = new SearchProfile( $my_id, PROFTYPE_FILTER_WAITINGROOM );
@@ -110,7 +112,7 @@ require_once( 'include/wroom_control.php' );
    $search_profile->register_regex_save_args( 'good' ); // named-filters FC_FNAME
    $wrtable = new Table( 'waitingroom', $page, $cfg_tblcols, '', TABLE_ROWS_NAVI );
    $wrtable->set_profile_handler( $search_profile );
-   $search_profile->handle_action();
+   $search_profile->handle_action( ( $idinfo ? SPROF_CURR_VALUES : null ) ); // special handling b/c info on same page
 
    // table filters
    $wrfilter->add_filter( 1, 'Text',      'WRP.Name', true);
@@ -182,8 +184,7 @@ require_once( 'include/wroom_control.php' );
       . $wrtable->current_sort_string(1); //end sep
    $baseURL = $baseURLMenu
       . $wrtable->current_filter_string(1)
-      . $wrtable->current_from_string()
-      . SPURI_ARGS . append_unique(@$_REQUEST[SP_OVERWRITE_ARGS], 'good') . URI_AMP; //end sep
+      . $wrtable->current_from_string(1); //end sep
 
    $qsql = WaitingroomControl::build_waiting_room_query( 0, $suitable );
 
@@ -340,9 +341,9 @@ require_once( 'include/wroom_control.php' );
 
 
    $menu_array = array();
-   $menu_array[T_('All waiting games')] = $baseURLMenu.'good=0'.SPURI_ARGS.'good';
-   $menu_array[T_('Suitable waiting games')] = $baseURLMenu.'good=1'.SPURI_ARGS.'good';
-   $menu_array[T_('My waiting games')] = $baseURLMenu.'good=2'.SPURI_ARGS.'good';
+   $menu_array[T_('All waiting games')] = $baseURLMenu.'good=0';
+   $menu_array[T_('Suitable waiting games')] = $baseURLMenu.'good=1';
+   $menu_array[T_('My waiting games')] = $baseURLMenu.'good=2'.SPURL_NO_DEF;
 
    end_page(@$menu_array);
 }
@@ -390,12 +391,12 @@ function add_old_game_form( $form_id, $game_row, $iamrated, $joinable )
    echo $html_out;
 }//add_old_game_form
 
-// find waiting-room-id for given game-id
+// find waiting-room-id with WR-owner-user-id for given game-id
 function load_waitingroom_info( $gid )
 {
    $row = mysql_single_fetch( "waiting_room.load_wroom($gid)",
-      "SELECT ID FROM Waitingroom WHERE gid=$gid LIMIT 1" );
-   return ($row) ? $row['ID'] : 0;
+      "SELECT ID, uid FROM Waitingroom WHERE gid=$gid LIMIT 1" );
+   return ($row) ? array( $row['ID'], $row['uid'] ) : array( 0, 0 );
 }//load_wroom
 
 ?>

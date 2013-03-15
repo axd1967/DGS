@@ -186,9 +186,9 @@ require_once( "features/lib_votes.php" );
 
 
    $menu_array = array();
-   $menu_array[T_('Vote on features')] = "features/list_features.php?status=2".URI_AMP.'my_vote=1'.SPURI_ARGS.'status,my_vote';
-   $menu_array[T_('My feature votes')] = "features/list_features.php?status=3".URI_AMP.'my_vote=2'.SPURI_ARGS.'status,my_vote';
-   $menu_array[T_('All features')]     = "features/list_features.php?status=3".URI_AMP.'my_vote=0'.SPURI_ARGS.'status,my_vote';
+   $menu_array[T_('Vote on features')] = "features/list_features.php?status=2".URI_AMP.'my_vote=1';
+   $menu_array[T_('My feature votes')] = "features/list_features.php?status=3".URI_AMP.'my_vote=2';
+   $menu_array[T_('All features')]     = "features/list_features.php?status=3".URI_AMP.'my_vote=0';
    if( $is_admin )
    {
       $menu_array[T_('Add new feature')] =
