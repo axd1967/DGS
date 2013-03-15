@@ -535,7 +535,7 @@ function handle_add_game( $my_id, $viewmode )
    if( $gid > 0 )
       jump_to("game_players.php?gid=$gid".URI_AMP."sysmsg=$msg");
    else
-      jump_to("waiting_room.php?showall=1".URI_AMP."sysmsg=$msg");
+      jump_to("waiting_room.php?good=2".URI_AMP."sysmsg=$msg"); // my-wr-games
    return array(); //for safety (no-errors)
 }//handle_add_game
 
