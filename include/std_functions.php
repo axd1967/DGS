@@ -505,7 +505,7 @@ function echo_dragon_top_bar( $logged_in, $user_handle )
 
    echo "\n\n<table id=\"pageHead\">",
       "\n <tr>",
-      "\n  <td class=\"ServerHome\"><A id=\"homeId\" href=\"".HOSTBASE."index.php\">",
+      "\n  <td class=\"ServerHome\"><A id=\"homeId\" href=\"".HOSTBASE."index.php\" title=\"", T_('Version'), ': ', DGS_VERSION, "\">",
       FRIENDLY_LONG_NAME."</A>";
 
    // show bookmarks
