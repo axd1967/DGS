@@ -135,9 +135,8 @@ define('FEA_SPANALLCOLS', 'SpanAllColumns');
 define('FEA_ATTBS',       'Attbs');
 
 
-//define('SMALL_SPACING', '&nbsp;&nbsp;&nbsp;');
 //format a text to be placed before/between input boxes
-//$seps: optionnaly add separations before=1 or after=2
+//$seps: optionaly add separations before=1 or after=2
 //&nbsp; are kept for text-only browsers
 function sptext( $text, $seps=0)
 {
