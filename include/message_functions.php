@@ -480,7 +480,7 @@ function game_settings_form(&$mform, $formstyle, $viewmode, $iamrated=true, $my_
 
       $max_handi_stones = build_arr_handicap_stones( /*def*/true );
       $txt_def_max_handi = ( $is_fstyle_invite )
-         ? ' ' . span('smaller', sprintf( T_('(%s for size %s)#defmaxhandi'), calc_def_max_handicap($Size), $Size ))
+         ? ' ' . span('smaller', sprintf( T_('(Def. is %s for size %s)#defmaxhandi'), calc_def_max_handicap($Size), $Size ))
          : '';
 
       $mform->add_row( array( 'SPACE' ) );
