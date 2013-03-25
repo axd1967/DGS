@@ -25,8 +25,8 @@ require_once 'include/config-local.php';
  * \brief Definitions and declarations of DGS globally used vars and constants.
  */
 
-define('DGS_VERSION', '1.0.15');
-define('CSS_VERSION', '20130110185500'); // take UTC-timestamp of skins/dragon/screen.css
+define('DGS_VERSION', '1.0.16');
+define('CSS_VERSION', '20130325230500'); // take UTC-timestamp of skins/dragon/screen.css
 
 // global version of quick-suite: increased with each release
 define('QUICK_VERSION', 3);
