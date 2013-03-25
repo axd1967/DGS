@@ -204,7 +204,7 @@ define('STONE_VALUE',13); // 2 * conventional komi (=DEFAULT_KOMIT), change with
 define('MIN_BOARD_SIZE',5);
 define('MAX_BOARD_SIZE',25);
 define('MAX_KOMI_RANGE',200);
-define('MAX_HANDICAP',21);
+define('MAX_HANDICAP',21); // should not be larger than biggest default-max-handicap, see calc_def_max_handicap()
 define('DEFAULT_MAX_HANDICAP', -1);
 
 // admin text-object-type, used in admin_faq.php
