@@ -16,7 +16,103 @@ Developers INFO:
 ChangeLog
 ------------------------------------------------------------------
 
+2013-03-25 juga
+
+   * include/game_functions.php (FairKomiNegotiation.echo_fairkomi_table;
+       GameSetup.set_defaults, ~.encode, ~.to_string, ~.format_handicap_type,
+         ~.new_from_game_setup, ~.parse_invitation_game_setup, ~.build_invitation_diffs;
+       GameSetupChecker.check_komi, ~.check_time, ~.check_adjust_komi, ~.check_min_rated_games,
+         ~.check_wroom_count;
+       GameSetupBuilder.fill_invite_from_game_setup, ~.fill_new_game_from_game,
+         ~.fill_new_game_from_game_setup, ~.build_url_adjustments;
+       class GameSettingsCalculator, ~.calculate_settings;
+       adjust_handicap, calc_def_max_handicap, get_gamesettings_viewmode,
+       append_form_add_waiting_room_game, build_arr_handicap_stones),
+     include/message_functions.php (game_settings_form, game_info_table, build_adjust_komi,
+       build_adjust_handicap),
+     include/wroom_control.php (WaitingroomOffer.calculate_offer_settings),
+     include/make_game.php (make_invite_game_setup, create_game),
+     include/game_texts.php (GameTexts.get_jigo_modes),
+     include/std_functions.php (DEFAULT_MAX_HANDICAP),
+     include/globals.php (GSETVIEW_STANDARD),
+     tournaments/include/tournament_rules.php (TournamentRules.convertTournamentRules_to_GameRow,
+       ~.convertTournamentRules_to_EditForm, ~.convertEditForm_to_TournamentRules),
+     tournaments/edit_rules.php (parse_edit_form),
+     tournaments/view_tournament.php (echo_tournament_rules),
+     scripts/updates/fix_default_max_handi-1_0_16.php (_echo, load_games_gamesetup,
+       load_profiles_gamesetup, handle_games_gamesetup, fix_game_invite_dispute,
+       fix_game_finished_running, handle_profiles_gamesetup, fix_profile,
+       handle_waiting_room_gamesetup, handle_tournament_rules_gamesetup),
+     scripts/updates/fix_new_game_expert_view-1_0_16.php (_echo,
+       load_profile_templates_new_game_expert_view),
+     scripts/updates/database_changes_1_0_15_to_1_0_16.mysql,
+     scripts/tests/Game_SettingsHelperTest.php,
+     specs/db/dragon-ddl.sql,
+     specs/db/table-Games.txt, specs/db/table-Tournaments.txt, specs/db/table-Waitingroom.txt,
+     specs/quick_suite.txt, scripts/index.php,
+     game_players.php (build_form_change_group, build_tableinfo_handicap_suggestion,
+       use_handicap_suggestion),
+     new_game.php (handle_add_game),
+     gameinfo.php, message.php, site_map.php, waiting_room.php:
+   - replaced default for max-handicap from former 21 to board-size-dependent max-handicap
+     - selecting "default" for max-handicap will limit the handicap-stones used to start-games
+       to a calculated max-default
+     - formula used to calculate default max-handicap discussed in DGS-forums:
+       round( 7.5 * ( handicapfactor($size) + 0.2 ) )
+     - added handicap- and komi-adjustments to invitation and tournament-rules as well
+     - merged jigo-check setting for fair-komi with and into jigo-mode setting of adjust-komi section
+     - adjust GameSetup-encoding to store handicap- and komi-adjustments
+       for all new-game views, invitations including their profiles
+     - added migration-script to fix MaxHandicap from old max-handicap-value to default-max-handicap
+       for running & finished games, invitation and new-game profiles, waiting-room and
+       tournament-rules entries
+     - merged simple and expert new-game view into one standard-view shown as default-view
+       - previous release 1.0.15 introduced splitted views because of MPG/fair-komi views
+       - reverting simple/expert-view split from previous release for easier support of handicap-
+         and komi-adjustments, and also to encourage users to use new expert-settings
+       - added migration-script to fix merge new-game expert-view with former simple-view
+         into merged standard-view for new-game profiles
+     - cleanup (minor changes, finer checks)
+   - bugfix for game-info-table: show shape-game info for tournament-ladders
+-----------
+-- added default max-handicap
+ALTER TABLE Waitingroom
+   MODIFY MaxHandicap tinyint signed NOT NULL default -1 ;
+ALTER TABLE TournamentRules
+   MODIFY MaxHandicap tinyint signed NOT NULL default -1 ;
+
+-- execute fix-script (with do_it=1) to merge new-game expert-view with standard-view:
+--    'scripts/updates/fix_default_max_handi-1_0_16.php'
+
+-- execute fix-script (with do_it=1) to merge new-game expert-view with standard-view:
+-- IMPORTANT NOTE: execute script 'fix_default_max_handi-1_0_16.php' before this one!!
+--    'scripts/updates/fix_merge_new_game_expert_view-1_0_16.php'
+-----------
+
 2013-03-15 juga
+
+   * include/make_translationfiles.php (translation_query),
+     translate.php:
+   - added selectbox to allow to search for translated-texts only,
+     changed 'untranslated'-checkbox to select-box including Untranslated/Translated/All-texts
+
+   * translate.php:
+   - added full page-navigation with jump to first/last-page and info with current/max-page
+
+   * include/std_functions.php (echo_dragon_top_bar):
+   - added server-version as tooltip in top-bar on DGS-link
+
+   * include/game_functions.php (GameNotify.get_text_game_deleted),
+     game_players.php (build_form_delete_game, delete_game_setup),
+     specs/multi-player-game.txt:
+   - added deletion of MP-game on SETUP-status, but only by game-master,
+     notify other players about deletion
+
+   * include/time_functions.php (is_weekend_clock_stopped),
+     include/gui_functions.php (echo_off_time),
+     game.php, gameinfo.php:
+   - bugfix: weekend-clock-icon was always shown on weekend independent from
+     game-WeekendClock-setting
 
    * new_game.php:
    - bugfix: jump to my-waiting-room-games after creation of new game-offer
