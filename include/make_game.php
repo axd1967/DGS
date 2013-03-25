@@ -148,19 +148,18 @@ function make_invite_game_setup( $my_urow, $opp_urow )
    if( $cat_handicap_type == CAT_HTYPE_MANUAL )
       $gs->Handicaptype = @$_REQUEST['color_m']; // handitype
    elseif( $cat_handicap_type == CAT_HTYPE_FAIR_KOMI )
-   {
       $gs->Handicaptype = @$_REQUEST['fk_htype'];
-      $gs->JigoMode = @$_REQUEST['jigo_mode'];
-      if( !preg_match("/^(".CHECK_JIGOMODE.")$/", $gs->JigoMode) )
-         error('invalid_args', "make_invite_game_setup.check.fk.jigomode({$gs->JigoMode})");
-   }
    else
       $gs->Handicaptype = $cat_handicap_type; // conv/proper
+
+   $size = min(MAX_BOARD_SIZE, max(MIN_BOARD_SIZE, (int)@$_REQUEST['size']));
 
    // check handi-type & cat-handi-type
    $check_cat_htype = get_category_handicaptype($gs->Handicaptype);
    if( !$check_cat_htype || $check_cat_htype !== $cat_handicap_type )
       error('invalid_args', "make_invite_game_setup.check.cat_htype({$gs->Handicaptype},$check_cat_htype,$cat_handicap_type)");
+   $is_fairkomi = ( $check_cat_htype == CAT_HTYPE_FAIR_KOMI );
+
 
    $my_rating = $my_urow['Rating2'];
    $iamrated = ( $my_urow['RatingStatus'] != RATING_NONE && is_numeric($my_rating) && $my_rating >= MIN_RATING );
@@ -218,6 +217,44 @@ function make_invite_game_setup( $my_urow, $opp_urow )
       $gs->ShapeID = 0;
       $gs->ShapeSnapshot = '';
    }
+
+   // komi adjustment
+   $adj_komi = (float)@$_REQUEST['adj_komi'];
+   if( $is_fairkomi )
+      $adj_komi = 0;
+   if( abs($adj_komi) > MAX_KOMI_RANGE )
+      $adj_komi = ($adj_komi<0 ? -1 : 1) * MAX_KOMI_RANGE;
+   if( floor(2 * $adj_komi) != 2 * $adj_komi ) // round to x.0|x.5
+      $adj_komi = ($adj_komi<0 ? -1 : 1) * round(2 * abs($adj_komi)) / 2.0;
+   $gs->AdjustKomi = $adj_komi;
+
+   $jigo_mode = (string)@$_REQUEST['jigo_mode'];
+   if( $jigo_mode == '' )
+      $jigo_mode = JIGOMODE_KEEP_KOMI;
+   elseif( !preg_match("/^(".CHECK_JIGOMODE.")$/", $jigo_mode) )
+      error('invalid_args', "make_invite_game_setup.check.jigo_mode($jigo_mode)");
+   $gs->JigoMode = $jigo_mode;
+
+   // handicap adjustment
+   $adj_handicap = (int)@$_REQUEST['adj_handicap'];
+   if( $is_fairkomi )
+      $adj_handicap = 0;
+   if( abs($adj_handicap) > MAX_HANDICAP )
+      $adj_handicap = ($adj_handicap<0 ? -1 : 1) * MAX_HANDICAP;
+   $gs->AdjustHandicap = $adj_handicap;
+
+   $min_handicap = min( MAX_HANDICAP, max( 0, (int)@$_REQUEST['min_handicap'] ));
+   if( $is_fairkomi )
+      $min_handicap = 0;
+
+   $max_handicap = min( MAX_HANDICAP, max( DEFAULT_MAX_HANDICAP, (int)@$_REQUEST['max_handicap'] ));
+   $def_max_handicap = calc_def_max_handicap( $gs->Size );
+   if( $max_handicap == DEFAULT_MAX_HANDICAP && $min_handicap > $def_max_handicap )
+      $min_handicap = $def_max_handicap;
+   elseif( $max_handicap >= 0 && $min_handicap > $max_handicap )
+      swap( $min_handicap, $max_handicap );
+   $gs->MinHandicap = $min_handicap;
+   $gs->MaxHandicap = $max_handicap;
 
 
    $gs->Ruleset = @$_REQUEST['ruleset'];
@@ -532,7 +569,7 @@ function create_game(&$black_row, &$white_row, &$game_info_row, $game_setup=null
    if( !ALLOW_RULESET_CHINESE && $game_info_row['Ruleset'] == RULESET_CHINESE )
       error('feature_disabled', "create_game.disabled.ruleset({$game_info_row['Ruleset']})");
 
-   $size = min(MAX_BOARD_SIZE, max(MIN_BOARD_SIZE, (int)$game_info_row["Size"]));
+   $size = min(MAX_BOARD_SIZE, max(MIN_BOARD_SIZE, (int)$game_info_row['Size']));
 
    $rated = ( $game_info_row['Rated'] === 'Y' && $black_rated && $white_rated );
    $game_info_row['Rated'] = ( $rated ) ? 'Y' : 'N';
@@ -547,10 +584,10 @@ function create_game(&$black_row, &$white_row, &$game_info_row, $game_setup=null
    $game_info_row['Komi'] = $komi; // write back
 
    // adjust handicap (Adj/Min/MaxHandicap may be unset)
-   $handicap = adjust_handicap( (int)$game_info_row['Handicap'],
+   $handicap = adjust_handicap( $size, (int)$game_info_row['Handicap'],
       (int)@$game_info_row['AdjHandicap'],
       (int)@$game_info_row['MinHandicap'],
-      ( isset($game_info_row['MaxHandicap']) ? (int)$game_info_row['MaxHandicap'] : -1 ));
+      ( isset($game_info_row['MaxHandicap']) ? (int)$game_info_row['MaxHandicap'] : DEFAULT_MAX_HANDICAP ) );
    $game_info_row['Handicap'] = $handicap; // write back
 
    $stdhandicap = $game_info_row['StdHandicap'];

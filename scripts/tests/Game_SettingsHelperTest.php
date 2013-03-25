@@ -76,33 +76,63 @@ class Game_SettingsHelperTest extends PHPUnit_Framework_TestCase {
 
    /** Tests adjust_handicap(). */
    public function test_adjust_handicap() {
-      // new_handicap = adjust_handicap( $handicap, $adj_handicap, $min_handicap=0, $max_handicap=MAX_HANDICAP )
+      // new_handicap = adjust_handicap( $size, $handicap, $adj_handicap, $min_handicap, $max_handicap )
+      $s = 19; $dmh = 9; // size + default-max-handi
 
-      $this->assertEquals( 0, adjust_handicap( 0, 0 ));
-      $this->assertEquals( MAX_HANDICAP, adjust_handicap( MAX_HANDICAP+10, 0 ));
-      $this->assertEquals( 0, adjust_handicap( -1, 0 ));
+      $this->assertEquals( 0, adjust_handicap( $s, 0, 0,  0, MAX_HANDICAP ));
+      $this->assertEquals( 0, adjust_handicap( $s, -1, 0,  0, MAX_HANDICAP ));
+      $this->assertEquals( MAX_HANDICAP, adjust_handicap( $s, MAX_HANDICAP+10, 0,  0, MAX_HANDICAP ));
+      $this->assertEquals( $dmh, adjust_handicap( $s, MAX_HANDICAP+10, 0,  0, DEFAULT_MAX_HANDICAP ));
 
       // valid limits
-      $this->assertEquals( MAX_HANDICAP, adjust_handicap( MAX_HANDICAP+10, 0 ));
-      $this->assertEquals( MAX_HANDICAP, adjust_handicap( MAX_HANDICAP, 10 ));
-      $this->assertEquals( 0, adjust_handicap( -30, 5, -10, 70 ));
-      $this->assertEquals( MAX_HANDICAP, adjust_handicap( 30, 5, -10, 70 ));
-      $this->assertEquals( 10, adjust_handicap( -30, 40, -10, 70 ));
-      $this->assertEquals( MAX_HANDICAP, adjust_handicap( MAX_HANDICAP+2, 0, MAX_HANDICAP+1, MAX_HANDICAP ));
-      $this->assertEquals( MAX_HANDICAP, adjust_handicap( MAX_HANDICAP+2, 0, MAX_HANDICAP+1, -7 ));
+      $this->assertEquals( MAX_HANDICAP, adjust_handicap( $s, MAX_HANDICAP+10, 0,  0, MAX_HANDICAP ));
+      $this->assertEquals( MAX_HANDICAP, adjust_handicap( $s, MAX_HANDICAP, 10,  0, MAX_HANDICAP ));
+      $this->assertEquals( 0, adjust_handicap( $s, -30, 5, -10, 70 ));
+      $this->assertEquals( MAX_HANDICAP, adjust_handicap( $s, 30, 5, -10, 70 ));
+      $this->assertEquals( 10, adjust_handicap( $s, -30, 40, -10, 70 ));
+      $this->assertEquals( MAX_HANDICAP, adjust_handicap( $s, MAX_HANDICAP+2, 0, MAX_HANDICAP+1, MAX_HANDICAP ));
+      $this->assertEquals( $dmh, adjust_handicap( $s, MAX_HANDICAP+2, 0, MAX_HANDICAP+1, DEFAULT_MAX_HANDICAP ));
+      $this->assertEquals( $dmh, adjust_handicap( $s, MAX_HANDICAP+2, 0, MAX_HANDICAP+1, -7 ));
 
       // swapped limits
-      $this->assertEquals( 5, adjust_handicap( 2, 3, 9, 4 ));
-      $this->assertEquals( 7, adjust_handicap( 2, 3, 9, 7 ));
-      $this->assertEquals( 4, adjust_handicap( 10, 2, 4, 2 ));
+      $this->assertEquals( 5, adjust_handicap( $s, 2, 3, 9, 4 ));
+      $this->assertEquals( 7, adjust_handicap( $s, 2, 3, 9, 7 ));
+      $this->assertEquals( 4, adjust_handicap( $s, 10, 2, 4, 2 ));
+      $this->assertEquals( $dmh, adjust_handicap( $s, 10, 2, 11, DEFAULT_MAX_HANDICAP ));
 
       // add + min/max
-      $this->assertEquals( 9, adjust_handicap( 2, 3, 9, 11 ));
-      $this->assertEquals( 4, adjust_handicap( 2, 3, 1, 4 ));
-      $this->assertEquals( 0, adjust_handicap( 0, -2 ));
-      $this->assertEquals( 3, adjust_handicap( 0, -2, 3 ));
-      $this->assertEquals( 2, adjust_handicap( 0, -2, 2, 9 ));
-      $this->assertEquals( 9, adjust_handicap( 5, 7, 2, 9 ));
+      $this->assertEquals( 9, adjust_handicap( $s, 2, 3, 9, 11 ));
+      $this->assertEquals( 4, adjust_handicap( $s, 2, 3, 1, 4 ));
+      $this->assertEquals( 0, adjust_handicap( $s, 0, -2, 0, MAX_HANDICAP ));
+      $this->assertEquals( 3, adjust_handicap( $s, 0, -2, 3, MAX_HANDICAP ));
+      $this->assertEquals( 2, adjust_handicap( $s, 0, -2, 2, 9 ));
+      $this->assertEquals( 9, adjust_handicap( $s, 5, 7, 2, 9 ));
+   }
+
+   /** Tests calc_def_max_handicap(). */
+   public function test_calc_def_max_handicap() {
+      $s = 5;
+      $this->assertEquals(  2, calc_def_max_handicap( $s++ )); // 5
+      $this->assertEquals(  2, calc_def_max_handicap( $s++ ));
+      $this->assertEquals(  2, calc_def_max_handicap( $s++ ));
+      $this->assertEquals(  2, calc_def_max_handicap( $s++ ));
+      $this->assertEquals(  3, calc_def_max_handicap( $s++ )); // 9
+      $this->assertEquals(  3, calc_def_max_handicap( $s++ ));
+      $this->assertEquals(  3, calc_def_max_handicap( $s++ ));
+      $this->assertEquals(  4, calc_def_max_handicap( $s++ ));
+      $this->assertEquals(  4, calc_def_max_handicap( $s++ )); // 13
+      $this->assertEquals(  5, calc_def_max_handicap( $s++ ));
+      $this->assertEquals(  6, calc_def_max_handicap( $s++ ));
+      $this->assertEquals(  6, calc_def_max_handicap( $s++ ));
+      $this->assertEquals(  7, calc_def_max_handicap( $s++ ));
+      $this->assertEquals(  8, calc_def_max_handicap( $s++ ));
+      $this->assertEquals(  9, calc_def_max_handicap( $s++ )); // 19
+      $this->assertEquals( 10, calc_def_max_handicap( $s++ ));
+      $this->assertEquals( 11, calc_def_max_handicap( $s++ ));
+      $this->assertEquals( 12, calc_def_max_handicap( $s++ ));
+      $this->assertEquals( 13, calc_def_max_handicap( $s++ ));
+      $this->assertEquals( 14, calc_def_max_handicap( $s++ ));
+      $this->assertEquals( 16, calc_def_max_handicap( $s++ )); // 25
    }
 
 }

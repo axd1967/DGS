@@ -251,7 +251,7 @@ class TournamentRules
       $grow['Handicap'] = (int)$this->Handicap;
       $grow['AdjHandicap'] = (int)$this->AdjHandicap;
       $grow['MinHandicap'] = (int)$this->MinHandicap;
-      $grow['MaxHandicap'] = min( MAX_HANDICAP, max( 0, (int)$this->MaxHandicap ));
+      $grow['MaxHandicap'] = min( MAX_HANDICAP, max( DEFAULT_MAX_HANDICAP, (int)$this->MaxHandicap ));
       $grow['StdHandicap'] = ($this->StdHandicap) ? 'Y' : 'N';
       $grow['Komi'] = (float)$this->Komi;
       $grow['AdjKomi'] = (float)$this->AdjKomi;
@@ -296,7 +296,7 @@ class TournamentRules
       $vars['jigo_mode'] = $this->JigoMode;
       $vars['adj_handicap'] = (int)$this->AdjHandicap;
       $vars['min_handicap'] = (int)$this->MinHandicap;
-      $vars['max_handicap'] = min( MAX_HANDICAP, max( 0, (int)$this->MaxHandicap ));
+      $vars['max_handicap'] = min( MAX_HANDICAP, max( DEFAULT_MAX_HANDICAP, (int)$this->MaxHandicap ));
       $vars['stdhandicap'] = ($this->StdHandicap) ? 'Y' : 'N';
 
       $vars['byoyomitype'] = $this->Byotype;
@@ -334,6 +334,8 @@ class TournamentRules
 
       if( !$this->TourneyType )
          error('invalid_args', "TournamentRules.convertEditForm_to_TournamentRules.miss_var.TourneyType({$this->tid})");
+
+      $size = min(MAX_BOARD_SIZE, max(MIN_BOARD_SIZE, (int)@$vars['size']));
 
       $cat_handicap_type = @$vars['cat_htype'];
       $color_m = @$vars['color_m'];
@@ -407,15 +409,13 @@ class TournamentRules
 
       $min_handicap = min( MAX_HANDICAP, max( 0, (int)@$vars['min_handicap'] ));
 
-      $max_handicap = (int)@$vars['max_handicap'];
-      if( $max_handicap > MAX_HANDICAP )
-         $max_handicap = -1; // don't save potentially changeable "default"
-
-      if( $max_handicap >= 0 && $min_handicap > $max_handicap )
+      $max_handicap = min( MAX_HANDICAP, max( DEFAULT_MAX_HANDICAP, (int)@$vars['max_handicap'] ));
+      $def_max_handicap = calc_def_max_handicap( $size );
+      if( $max_handicap == DEFAULT_MAX_HANDICAP && $min_handicap > $def_max_handicap )
+         $min_handicap = $def_max_handicap;
+      elseif( $max_handicap >= 0 && $min_handicap > $max_handicap )
          swap( $min_handicap, $max_handicap );
 
-
-      $size = min(MAX_BOARD_SIZE, max(MIN_BOARD_SIZE, (int)@$vars['size']));
 
       // time settings
       list( $hours, $byohours, $byoperiods ) = TournamentRules::convertFormTimeSettings( $vars );

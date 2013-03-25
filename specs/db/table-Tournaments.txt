@@ -344,7 +344,7 @@ Description:
 | Komi          | decimal(4,1)                                            | NO   |     | 6.5                 |                |
 | AdjHandicap   | tinyint(4)                                              | NO   |     | 0                   |                |
 | MinHandicap   | tinyint(3) unsigned                                     | NO   |     | 0                   |                |
-| MaxHandicap   | tinyint(3) unsigned                                     | NO   |     | 127                 |                |
+| MaxHandicap   | tinyint(4)                                              | NO   |     | -1                  |                |
 | StdHandicap   | enum('N','Y')                                           | NO   |     | N                   |                |
 | Maintime      | smallint(6)                                             | NO   |     | 0                   |                |
 | Byotype       | enum('JAP','CAN','FIS')                                 | NO   |     | JAP                 |                |

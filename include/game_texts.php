@@ -129,12 +129,10 @@ class GameTexts
          error('invalid_args', "GameTexts::get_fair_komi_types($handicap_type,$my_handle,$opp_handle)");
    }//get_fair_komi_types
 
-   function get_jigo_modes( $fair_komi=false, $jigo_mode=null )
+   function get_jigo_modes( $jigo_mode=null )
    {
       $arr = array(
-         JIGOMODE_KEEP_KOMI  => ($fair_komi)
-            ? T_('No Jigo restriction#jigo_mode_fairkomi')
-            : T_('Komi unchanged#jigo_mode'),
+         JIGOMODE_KEEP_KOMI  => T_('No Jigo restriction#jigo_mode'),
          JIGOMODE_ALLOW_JIGO => T_('Enforce Jigo#jigo_mode'),
          JIGOMODE_NO_JIGO    => T_('Forbid Jigo#jigo_mode'),
       );

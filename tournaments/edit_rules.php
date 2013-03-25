@@ -113,7 +113,7 @@ $GLOBALS['ThePage'] = new Page('TournamentRulesEdit');
    }
 
    $formstyle = ($tourney->Type == TOURNEY_TYPE_LADDER) ? GSET_TOURNAMENT_LADDER : GSET_TOURNAMENT_ROUNDROBIN;
-   game_settings_form( $trform, $formstyle, GSETVIEW_EXPERT, true/*$iamrated*/, 'redraw', $vars, null, $gsc );
+   game_settings_form( $trform, $formstyle, GSETVIEW_STANDARD, true/*$iamrated*/, 'redraw', $vars, null, $gsc );
 
    $trform->add_empty_row();
    $trform->add_row( array(
@@ -164,7 +164,7 @@ function parse_edit_form( &$trule )
 
    if( $is_posted )
    {
-      $gsc = GameSetupChecker::check_fields( GSETVIEW_EXPERT );
+      $gsc = GameSetupChecker::check_fields( GSETVIEW_STANDARD );
       if( $gsc->has_errors() )
          $gsc->add_default_values_info();
    }

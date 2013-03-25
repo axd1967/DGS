@@ -36,7 +36,7 @@ Important Note:
 | JigoMode      | enum('KEEP_KOMI','ALLOW_JIGO','NO_JIGO') | NO   |     | KEEP_KOMI           |                |
 | AdjHandicap   | tinyint(4)                               | NO   |     | 0                   |                |
 | MinHandicap   | tinyint(3) unsigned                      | NO   |     | 0                   |                |
-| MaxHandicap   | tinyint(3) unsigned                      | NO   |     | 127                 |                |
+| MaxHandicap   | tinyint(4)                               | NO   |     | -1                  |                |
 | Maintime      | smallint(6)                              | NO   |     | 0                   |                |
 | Byotype       | enum('JAP','CAN','FIS')                  | NO   |     | JAP                 |                |
 | Byotime       | smallint(6)                              | NO   |     | 0                   |                |
@@ -127,8 +127,9 @@ Important Note:
 
 * AdjHandicap, MinHandicap, MaxHandicap : Handicap stones adjustment
    - AdjHandicap: adjust number of handicap stone by reduction (if <0) or increase (>0)
-   - MinHandicap: minimum limitation of resulting handicap stones, set to limit if exceeding
-   - MaxHandicap: maximum limitation of resulting handicap stones, set to limit if exceeding
+   - MinHandicap: minimum limitation of resulting handicap stones, set to MAX_HANDICAP if exceeding
+   - MaxHandicap: maximum limitation of resulting handicap stones, set to MAX_HANDICAP if exceeding;
+     value -1 = default-max-handicap calculated by formula depending on board-size
 
 * Maintime : int, main-time for game
    - unit is one "tick" (=5 minutes); see 'TICK_FREQUENCY' in include/quick_common.php,

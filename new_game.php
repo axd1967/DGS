@@ -74,12 +74,12 @@ require_once 'include/utilities.php';
       $need_redraw = @$_REQUEST['rematch'];
    }
 
-   $viewmode = (int) get_request_arg('view', GSETVIEW_SIMPLE);
+   $viewmode = (int) get_request_arg('view', GSETVIEW_STANDARD);
    if( is_numeric($arg_viewmode) && $viewmode != (int)$arg_viewmode ) // view-URL-arg has prio over template
       $viewmode = (int)$arg_viewmode;
-   if( $viewmode < 0 || $viewmode > MAX_GSETVIEW )
-      $viewmode = GSETVIEW_SIMPLE;
-   if( $viewmode != GSETVIEW_SIMPLE && @$player_row['RatingStatus'] == RATING_NONE )
+   if( !preg_match( "/^(".CHECK_GSETVIEW.")$/", $viewmode ) )
+      $viewmode = GSETVIEW_STANDARD;
+   if( $viewmode == GSETVIEW_MPGAME && @$player_row['RatingStatus'] == RATING_NONE )
       error('multi_player_need_initial_rating', "new_game.check.viewmode_rating($my_id,$viewmode,{$player_row['RatingStatus']})");
 
    if( $handle_add_game )
@@ -134,14 +134,13 @@ require_once 'include/utilities.php';
 
 
    $menu_array = array();
-   $menu_array[T_('New Game')] = 'new_game.php?view='.GSETVIEW_SIMPLE . $shape_url_suffix . $tmpl_suffix;
-   $menu_array[T_('Shapes')] = 'list_shapes.php';
-   ProfileTemplate::add_menu_link( $menu_array );
-
-   $menu_array[T_('New expert game')] = 'new_game.php?view='.GSETVIEW_EXPERT . $shape_url_suffix . $tmpl_suffix;
+   $menu_array[T_('New Game')] = 'new_game.php?view='.GSETVIEW_STANDARD . $shape_url_suffix . $tmpl_suffix;
    $menu_array[T_('New fair-komi game')] = 'new_game.php?view='.GSETVIEW_FAIRKOMI . $shape_url_suffix . $tmpl_suffix;
    if( @$player_row['RatingStatus'] != RATING_NONE )
       $menu_array[T_('New multi-player-game')] = 'new_game.php?view='.GSETVIEW_MPGAME . $shape_url_suffix . $tmpl_suffix;
+
+   $menu_array[T_('Shapes')] = 'list_shapes.php';
+   ProfileTemplate::add_menu_link( $menu_array );
 
    end_page(@$menu_array);
 }//main
@@ -191,6 +190,8 @@ function handle_add_game( $my_id, $viewmode )
    $shape_id = (int)@$_REQUEST['shape'];
    $shape_snapshot = @$_REQUEST['snapshot'];
 
+   $size = min(MAX_BOARD_SIZE, max(MIN_BOARD_SIZE, (int)@$_REQUEST['size']));
+
    $cat_handicap_type = @$_REQUEST['cat_htype'];
    $is_fairkomi = false;
    switch( (string)$cat_handicap_type )
@@ -237,15 +238,15 @@ function handle_add_game( $my_id, $viewmode )
          break;
    }
 
-   if( !($komi <= MAX_KOMI_RANGE && $komi >= -MAX_KOMI_RANGE) )
+   if( abs($komi) > MAX_KOMI_RANGE )
       error('komi_range', "new_game.handle_add_game.check.komi($komi)");
    if( floor(2 * $komi) != 2 * $komi ) // check for x.0|x.5
       error('komi_bad_fraction', "new_game.handle_add_game.check.komi.fraction($komi)");
 
-   if( !($handicap <= MAX_HANDICAP && $handicap >= 0) )
+   if( $handicap < 0 || $handicap > MAX_HANDICAP )
       error('handicap_range', "new_game.handle_add_game.check.handicap($handicap)");
 
-   if( $viewmode < 0 || $viewmode > MAX_GSETVIEW )
+   if( !preg_match( "/^(".CHECK_GSETVIEW.")$/", $viewmode ) )
       error('invalid_args', "new_game.handle_add_game.check.viewmode($viewmode)");
 
    // ruleset
@@ -279,11 +280,11 @@ function handle_add_game( $my_id, $viewmode )
    if( $is_fairkomi )
       $min_handicap = 0;
 
-   $max_handicap = (int)@$_REQUEST['max_handicap'];
-   if( $max_handicap > MAX_HANDICAP )
-      $max_handicap = -1; // don't save potentially changeable "default"
-
-   if( $max_handicap >= 0 && $min_handicap > $max_handicap )
+   $max_handicap = min( MAX_HANDICAP, max( DEFAULT_MAX_HANDICAP, (int)@$_REQUEST['max_handicap'] ));
+   $def_max_handicap = calc_def_max_handicap( $size );
+   if( $max_handicap == DEFAULT_MAX_HANDICAP && $min_handicap > $def_max_handicap )
+      $min_handicap = $def_max_handicap;
+   elseif( $max_handicap >= 0 && $min_handicap > $max_handicap )
       swap( $min_handicap, $max_handicap );
 
    // multi-player
@@ -311,8 +312,6 @@ function handle_add_game( $my_id, $viewmode )
       error('invalid_args', "new_game.handle_add_game.check.nr_games($nrGames)");
    elseif( $nrGames > $max_games )
       error('max_games', "new_game.handle_add_game.check.max_games.nr_games($nrGames,$max_games)");
-
-   $size = min(MAX_BOARD_SIZE, max(MIN_BOARD_SIZE, (int)@$_REQUEST['size']));
 
    $byoyomitype = @$_REQUEST['byoyomitype'];
    $timevalue = @$_REQUEST['timevalue'];
@@ -408,7 +407,7 @@ function handle_add_game( $my_id, $viewmode )
       $gs->Handicap = $handicap;
       $gs->AdjustHandicap = $adj_handicap;
       $gs->MinHandicap = $min_handicap;
-      $gs->MaxHandicap = ( $max_handicap < 0 ) ? 0 : $max_handicap;
+      $gs->MaxHandicap = ( $max_handicap < DEFAULT_MAX_HANDICAP ) ? DEFAULT_MAX_HANDICAP : $max_handicap;
       $gs->Komi = $komi;
       $gs->AdjustKomi = $adj_komi;
       $gs->JigoMode = $jigo_mode; // JIGOMODE_...
@@ -492,7 +491,7 @@ function handle_add_game( $my_id, $viewmode )
          "JigoMode='" . mysql_addslashes($jigo_mode) . "', " .
          "AdjHandicap=$adj_handicap, " .
          "MinHandicap=$min_handicap, " .
-         ($max_handicap < 0 ? '' : "MaxHandicap=$max_handicap, " ) .
+         "MaxHandicap=$max_handicap, " .
          "Maintime=$hours, " .
          "Byotype='$byoyomitype', " .
          "Byotime=$byohours, " .

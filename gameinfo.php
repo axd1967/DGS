@@ -199,7 +199,7 @@ function build_rating_diff( $rating_diff )
    $itable->add_sinfo( T_('Komi'),
       ( $is_fairkomi_negotiation ? T_('negotiated by Fair Komi#fairkomi') : $grow['Komi'] ) );
    if( $is_fairkomi )
-      $itable->add_sinfo( T_('Jigo-Check#fairkomi'), GameTexts::get_jigo_modes(/*fairkomi*/true, $jigo_mode) );
+      $itable->add_sinfo( T_('Jigo mode'), GameTexts::get_jigo_modes($jigo_mode) );
    $itable->add_sinfo( T_('Rated'),       yesno($grow['X_Rated']) );
    $itable->add_sinfo( T_('Weekend Clock'),     yesno($grow['WeekendClock']) ); // Yes=clock runs on weekend
    $itable->add_sinfo( T_('Standard Handicap'), yesno($grow['StdHandicap']) );

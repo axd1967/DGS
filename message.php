@@ -467,9 +467,9 @@ define('MSGBOXROWS_INVITE', 6);
                             null, null, null, false, $rx_term);
 
          if( $preview )
-            game_settings_form($message_form, GSET_MSG_DISPUTE, GSETVIEW_SIMPLE, $iamrated, 'redraw', @$_POST, $map_ratings, $gsc);
+            game_settings_form($message_form, GSET_MSG_DISPUTE, GSETVIEW_STANDARD, $iamrated, 'redraw', @$_POST, $map_ratings, $gsc);
          else
-            game_settings_form($message_form, GSET_MSG_DISPUTE, GSETVIEW_SIMPLE, $iamrated, $my_id, $Game_ID, $map_ratings);
+            game_settings_form($message_form, GSET_MSG_DISPUTE, GSETVIEW_STANDARD, $iamrated, $my_id, $Game_ID, $map_ratings);
 
          // show dispute-diffs to opponent game-settings
          list( $my_gs, $opp_gs ) = GameSetup::parse_invitation_game_setup( $my_id, $msg_row['GameSetup'], $Game_ID );
@@ -512,9 +512,9 @@ define('MSGBOXROWS_INVITE', 6);
          echo $maxGamesCheck->get_warn_text();
 
          if( $preview )
-            game_settings_form($message_form, GSET_MSG_INVITE, GSETVIEW_SIMPLE, $iamrated, 'redraw', @$_REQUEST, $map_ratings, $gsc);
+            game_settings_form($message_form, GSET_MSG_INVITE, GSETVIEW_STANDARD, $iamrated, 'redraw', @$_REQUEST, $map_ratings, $gsc);
          else
-            game_settings_form($message_form, GSET_MSG_INVITE, GSETVIEW_SIMPLE, $iamrated, null, null, $map_ratings);
+            game_settings_form($message_form, GSET_MSG_INVITE, GSETVIEW_STANDARD, $iamrated, null, null, $map_ratings);
 
          $message_form->add_row( array(
                'HEADER', T_('Invitation message'),

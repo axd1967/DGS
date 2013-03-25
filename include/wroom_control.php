@@ -499,7 +499,7 @@ class WaitingroomOffer
       $settings_str = '';
       if( !$is_my_game && $game_type == GAMETYPE_GO && !$is_fairkomi )
       {
-         $this->resultHandicap = adjust_handicap( $infoHandi,
+         $this->resultHandicap = adjust_handicap( $this->row['Size'], $infoHandi,
             $this->row['AdjHandicap'], $this->row['MinHandicap'], $this->row['MaxHandicap'] );
          $this->resultKomi = adjust_komi( $infoKomi, $this->row['AdjKomi'], $this->row['JigoMode'] );
          $settings_str = ($this->resultHandicap > 0)

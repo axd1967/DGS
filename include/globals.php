@@ -103,11 +103,11 @@ define('RULESET_CHINESE',  'CHINESE'); // using territory-scoring
 define('CHECK_RULESETS', 'JAPANESE|CHINESE');
 
 // game-settings view-mode
-define('GSETVIEW_SIMPLE', 0);
-define('GSETVIEW_EXPERT', 1);
+define('GSETVIEW_STANDARD', 0);
+define('DEPRECATED_GSETVIEW_EXPERT', 1); // deprecated: merged with std-view -> migrate to 0
 define('GSETVIEW_MPGAME', 2); // multi-player
 define('GSETVIEW_FAIRKOMI', 3);
-define('MAX_GSETVIEW', 3);
+define('CHECK_GSETVIEW', '0|2|3');
 
 define('REMATCH_INVITE', 1);
 define('REMATCH_NEWGAME', 2);

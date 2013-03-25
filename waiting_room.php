@@ -255,14 +255,14 @@ require_once( 'include/wroom_control.php' );
          if( $wrtable->Is_Column_Displayed[14] ) // Handicap
          {
             $h_str = ( $calculated )
-               ? build_adjust_handicap( $AdjHandicap, $MinHandicap, $MaxHandicap )
+               ? build_adjust_handicap( $Size, $AdjHandicap, $MinHandicap, $MaxHandicap, /*short*/true )
                : $Handicap;
             $wrow_strings[14] = ( (string)$h_str != '' ) ? $h_str : NO_VALUE;
          }
          if( $wrtable->Is_Column_Displayed[ 6] ) // Komi
          {
             if( $calculated )
-               $k_str = build_adjust_komi( $AdjKomi, $JigoMode, true );
+               $k_str = build_adjust_komi( $AdjKomi, $JigoMode, /*short*/true );
             elseif( $is_fairkomi )
                $k_str = '';
             else
@@ -326,6 +326,10 @@ require_once( 'include/wroom_control.php' );
          $notes = array();
          $notes[] = T_('Column \'Settings\' shows the probable game-color, handicap and komi.')
                . sprintf( '<br>%s = %s', T_('(Free Handicap)#handicap_tablewr'), T_('indicator of free handicap stone placement') );
+         $notes[] = sprintf( T_('Column \'%s\' shows the handicap or its limitations, e.g. 5 or [0,9] or [0,D9] or %s#wroom'),
+                  T_('Handicap#header'), NO_VALUE )
+               . "<br>'D' = " . T_('indicator for calculated default max. handicap for board-size#wroom')
+               . '; '.NO_VALUE.' = ' . T_('calculated handicap#wroom');
          $notes[] = T_('A waiting game is <b>suitable</b> when a player matches the requested game restrictions on:')
                . "\n* " . implode(",\n* ", $restrictions);
          echo_notes( 'waitingroomnotes', T_('Waiting room notes'), $notes );

@@ -205,6 +205,7 @@ define('MIN_BOARD_SIZE',5);
 define('MAX_BOARD_SIZE',25);
 define('MAX_KOMI_RANGE',200);
 define('MAX_HANDICAP',21);
+define('DEFAULT_MAX_HANDICAP', -1);
 
 // admin text-object-type, used in admin_faq.php
 define('TXTOBJTYPE_FAQ',   0); // edit FAQ-table

@@ -74,8 +74,7 @@ function init_standard_folders()
  *     GSET_WAITINGROOM = for waiting_room.php / new_game.php
  *     GSET_TOURNAMENT_LADDER, GSET_TOURNAMENT_ROUNDROBIN = for tournaments/edit_rules.php
  * \param $viewmode:
- *     GSETVIEW_SIMPLE = simple view with some hidden settings
- *     GSETVIEW_EXPERT = advanced view with all possible settings (no multi-player-stuff); auto for tourney
+ *     GSETVIEW_STANDARD = standard game, view with all possible settings (no fair-komi/multi-player-stuff); auto for tourney
  *     GSETVIEW_FAIRKOMI = fair-komi view with restricted settings (even, no handicap, no adjustments, normal type)
  *     GSETVIEW_MPGAME = view with settings allowed for multi-player-game; auto for MP-game-type
  * \param $my_ID user-id for invite/dispute, then $gid is game-id;
@@ -91,10 +90,10 @@ function game_settings_form(&$mform, $formstyle, $viewmode, $iamrated=true, $my_
 {
    if( !preg_match( "/^(".CHECK_GSET.")$/", $formstyle ) )
       $formstyle = GSET_MSG_INVITE;
-   if( $viewmode < 0 || $viewmode > MAX_GSETVIEW )
-      $viewmode = GSETVIEW_SIMPLE;
+   if( !preg_match( "/^(".CHECK_GSETVIEW.")$/", $viewmode ) )
+      $viewmode = GSETVIEW_STANDARD;
    if( $viewmode == GSETVIEW_MPGAME && $formstyle != GSET_WAITINGROOM )
-      $viewmode = GSETVIEW_SIMPLE;
+      $viewmode = GSETVIEW_STANDARD;
 
    if( is_null($gsc) )
       $gsc = new GameSetupChecker( $viewmode );
@@ -102,7 +101,7 @@ function game_settings_form(&$mform, $formstyle, $viewmode, $iamrated=true, $my_
    $is_fstyle_tourney = ( $formstyle == GSET_TOURNAMENT_LADDER || $formstyle == GSET_TOURNAMENT_ROUNDROBIN );
    $is_fstyle_invite = ( $formstyle == GSET_MSG_INVITE || $formstyle == GSET_MSG_DISPUTE );
    if( $is_fstyle_tourney )
-      $viewmode = GSETVIEW_EXPERT;
+      $viewmode = GSETVIEW_STANDARD;
    $is_view_mpgame = ( $viewmode == GSETVIEW_MPGAME );
    $is_view_fairkomi = ( $viewmode == GSETVIEW_FAIRKOMI );
 
@@ -123,7 +122,7 @@ function game_settings_form(&$mform, $formstyle, $viewmode, $iamrated=true, $my_
    $Ruleset = RULESET_JAPANESE; // using territory-scoring
    $AdjustHandicap = 0;
    $MinHandicap = 0;
-   $MaxHandicap = MAX_HANDICAP;
+   $MaxHandicap = DEFAULT_MAX_HANDICAP;
    $GamePlayers = '';
    $Maintime = 30;
    $MaintimeUnit = 'days';
@@ -202,7 +201,7 @@ function game_settings_form(&$mform, $formstyle, $viewmode, $iamrated=true, $my_
       if( isset($gid['min_handicap']) )
          $MinHandicap = (int)$gid['min_handicap'];
       if( isset($gid['max_handicap']) )
-         $MaxHandicap = min( MAX_HANDICAP, max( 0, (int)$gid['max_handicap'] ));
+         $MaxHandicap = min( MAX_HANDICAP, max( DEFAULT_MAX_HANDICAP, (int)$gid['max_handicap'] ));
 
       if( isset($gid['game_players']) )
          $GamePlayers = $gid['game_players'];
@@ -425,7 +424,7 @@ function game_settings_form(&$mform, $formstyle, $viewmode, $iamrated=true, $my_
    }//conv/proper-HType
 
    // Manual game: nigiri, double, black, white
-   $handi_stones = build_arr_handicap_stones();
+   $handi_stones = build_arr_handicap_stones( /*def*/false );
    if( !$is_view_mpgame && !$is_view_fairkomi )
    {
       $color_arr = GameTexts::get_manual_handicap_types();
@@ -460,15 +459,17 @@ function game_settings_form(&$mform, $formstyle, $viewmode, $iamrated=true, $my_
       else
          array_push( $row_arr, 'RADIOBUTTONS', 'cat_htype', array( CAT_HTYPE_FAIR_KOMI => '' ), $CategoryHandiType );
       array_push( $row_arr,
-         'SELECTBOX', 'fk_htype', 1, GameTexts::get_fair_komi_types(), $Handitype, false,
-         'TEXT', sptext(T_('Jigo-Check#fairkomi'), 1),
-         'SELECTBOX', 'jigo_mode', 1, GameTexts::get_jigo_modes(/*fairkomi*/true), $JigoMode, false );
+         'SELECTBOX', 'fk_htype', 1, GameTexts::get_fair_komi_types(), $Handitype, false );
+      if( $is_fstyle_invite )
+         array_push( $row_arr,
+            'TEXT', T_('+ set Jigo mode (see below)#fairkomi') );
       $mform->add_row( $row_arr );
    }
 
 
-   $expert_view = ( $is_fstyle_tourney || ($formstyle == GSET_WAITINGROOM && $viewmode == GSETVIEW_EXPERT) );
-   if( $expert_view )
+   $adjustments_view = ( $is_fstyle_tourney || ($formstyle == GSET_WAITINGROOM && $viewmode == GSETVIEW_STANDARD)
+      || $is_fstyle_invite );
+   if( $adjustments_view )
    {
       // adjust handicap stones
       $adj_handi_stones = array();
@@ -476,6 +477,12 @@ function game_settings_form(&$mform, $formstyle, $viewmode, $iamrated=true, $my_
       for( $bs = -$HSTART; $bs <= $HSTART; $bs++ )
          $adj_handi_stones[$bs] = ($bs <= 0) ? $bs : "+$bs";
       $adj_handi_stones[0] = '&nbsp;0';
+
+      $max_handi_stones = build_arr_handicap_stones( /*def*/true );
+      $txt_def_max_handi = ( $is_fstyle_invite )
+         ? ' ' . span('smaller', sprintf( T_('(%s for size %s)#defmaxhandi'), calc_def_max_handicap($Size), $Size ))
+         : '';
+
       $mform->add_row( array( 'SPACE' ) );
       $mform->add_row( array( 'DESCRIPTION', T_('Handicap stones'),
                               'TEXT', sptext(T_('Adjust by#handi')),
@@ -483,7 +490,8 @@ function game_settings_form(&$mform, $formstyle, $viewmode, $iamrated=true, $my_
                               'TEXT', sptext(T_('Min.'), 1),
                               'SELECTBOX', 'min_handicap', 1, $handi_stones, $MinHandicap, false,
                               'TEXT', sptext(T_('Max.'), 1),
-                              'SELECTBOX', 'max_handicap', 1, $handi_stones, $MaxHandicap, false,
+                              'SELECTBOX', 'max_handicap', 1, $max_handi_stones, $MaxHandicap, false,
+                              'TEXT', $txt_def_max_handi,
                               ));
    }
    else
@@ -498,7 +506,7 @@ function game_settings_form(&$mform, $formstyle, $viewmode, $iamrated=true, $my_
    if( ENABLE_STDHANDICAP && !$is_view_fairkomi )
    {
       $arr = array();
-      if( $expert_view )
+      if( $adjustments_view )
          $arr[] = 'TAB';
       else
          array_push( $arr, 'DESCRIPTION', T_('Handicap stones') );
@@ -508,7 +516,7 @@ function game_settings_form(&$mform, $formstyle, $viewmode, $iamrated=true, $my_
       $mform->add_row($arr);
    }
 
-   if( $expert_view )
+   if( $adjustments_view )
    {
       // adjust komi
       $mform->add_row( array(
@@ -516,7 +524,16 @@ function game_settings_form(&$mform, $formstyle, $viewmode, $iamrated=true, $my_
             'TEXT', sptext(T_('Adjust by#komi')),
             'TEXTINPUTX', 'adj_komi', 5, 5, $AdjustKomi, $gsc->get_class_error_field('adj_komi'),
             'TEXT', sptext(T_('Jigo mode'), 1),
-            'SELECTBOX', 'jigo_mode', 1, GameTexts::get_jigo_modes(/*fairkomi*/false), $JigoMode, false,
+            'SELECTBOX', 'jigo_mode', 1, GameTexts::get_jigo_modes(), $JigoMode, false,
+         ));
+   }
+   elseif( $is_view_fairkomi )
+   {
+      $mform->add_hidden('adj_komi', $AdjustKomi);
+      $mform->add_row( array(
+            'DESCRIPTION', T_('Komi'),
+            'TEXT', sptext(T_('Jigo mode')),
+            'SELECTBOX', 'jigo_mode', 1, GameTexts::get_jigo_modes(), $JigoMode, false,
          ));
    }
    elseif( !$is_view_fairkomi && !$is_fstyle_invite )
@@ -549,44 +566,34 @@ function game_settings_form(&$mform, $formstyle, $viewmode, $iamrated=true, $my_
          'TEXTINPUTX', 'timevalue', 5, 5, $Maintime, $gsc->get_class_error_field('timevalue'),
          'SELECTBOX', 'timeunit', 1, $value_array, $MaintimeUnit, false ) );
 
-   $show_only_fischer_time = ( $formstyle == GSET_WAITINGROOM && $viewmode == GSETVIEW_SIMPLE );
-   if( !$show_only_fischer_time )
-   {
-      $mform->add_row( array(
-            'DESCRIPTION', T_('Japanese byoyomi'),
-            //'CELL', 1, 'nowrap',
-            'RADIOBUTTONS', 'byoyomitype', array( BYOTYPE_JAPANESE => '' ), $Byotype,
-            'TEXTINPUTX', 'byotimevalue_jap', 5, 5, $Byotime_jap, $gsc->get_class_error_field('byotimevalue_jap'),
-            'SELECTBOX', 'timeunit_jap', 1,$value_array, $ByotimeUnit_jap, false,
-            'TEXT', sptext(T_('with')),
-            'TEXTINPUTX', 'byoperiods_jap', 5, 5, $Byoperiods_jap, $gsc->get_class_error_field('byoperiods_jap'),
-            'TEXT', sptext(T_('extra periods')),
-         ));
+   $mform->add_row( array(
+         'DESCRIPTION', T_('Japanese byoyomi'),
+         //'CELL', 1, 'nowrap',
+         'RADIOBUTTONS', 'byoyomitype', array( BYOTYPE_JAPANESE => '' ), $Byotype,
+         'TEXTINPUTX', 'byotimevalue_jap', 5, 5, $Byotime_jap, $gsc->get_class_error_field('byotimevalue_jap'),
+         'SELECTBOX', 'timeunit_jap', 1,$value_array, $ByotimeUnit_jap, false,
+         'TEXT', sptext(T_('with')),
+         'TEXTINPUTX', 'byoperiods_jap', 5, 5, $Byoperiods_jap, $gsc->get_class_error_field('byoperiods_jap'),
+         'TEXT', sptext(T_('extra periods')),
+      ));
 
-      $mform->add_row( array(
-            'DESCRIPTION', T_('Canadian byoyomi'),
-            'RADIOBUTTONS', 'byoyomitype', array( BYOTYPE_CANADIAN => '' ), $Byotype,
-            'TEXTINPUTX', 'byotimevalue_can', 5, 5, $Byotime_can, $gsc->get_class_error_field('byotimevalue_can'),
-            'SELECTBOX', 'timeunit_can', 1,$value_array, $ByotimeUnit_can, false,
-            'TEXT', sptext(T_('for')),
-            'TEXTINPUTX', 'byoperiods_can', 5, 5, $Byoperiods_can, $gsc->get_class_error_field('byoperiods_can'),
-            'TEXT', sptext(T_('stones')),
-         ));
-   }
+   $mform->add_row( array(
+         'DESCRIPTION', T_('Canadian byoyomi'),
+         'RADIOBUTTONS', 'byoyomitype', array( BYOTYPE_CANADIAN => '' ), $Byotype,
+         'TEXTINPUTX', 'byotimevalue_can', 5, 5, $Byotime_can, $gsc->get_class_error_field('byotimevalue_can'),
+         'SELECTBOX', 'timeunit_can', 1,$value_array, $ByotimeUnit_can, false,
+         'TEXT', sptext(T_('for')),
+         'TEXTINPUTX', 'byoperiods_can', 5, 5, $Byoperiods_can, $gsc->get_class_error_field('byoperiods_can'),
+         'TEXT', sptext(T_('stones')),
+      ));
 
-   // Fischer-time
-   $row_fischer = array(
-         'DESCRIPTION', T_('Fischer time') );
-   if( $show_only_fischer_time )
-      $mform->add_hidden( 'byoyomitype', BYOTYPE_FISCHER );
-   else
-      array_push( $row_fischer,
-         'RADIOBUTTONS', 'byoyomitype', array( BYOTYPE_FISCHER => '' ), $Byotype );
-   array_push( $row_fischer,
+   $mform->add_row( array(
+         'DESCRIPTION', T_('Fischer time'),
+         'RADIOBUTTONS', 'byoyomitype', array( BYOTYPE_FISCHER => '' ), $Byotype,
          'TEXTINPUTX', 'byotimevalue_fis', 5, 5, $Byotime_fis, $gsc->get_class_error_field('byotimevalue_fis'),
          'SELECTBOX', 'timeunit_fis', 1,$value_array, $ByotimeUnit_fis, false,
-         'TEXT', sptext(T_('extra per move')) );
-   $mform->add_row( $row_fischer );
+         'TEXT', sptext(T_('extra per move')),
+      ));
 
    $mform->add_row( array( 'SPACE' ) );
 
@@ -798,7 +805,7 @@ function game_info_table( $tablestyle, $game_row, $player_row, $iamrated, $use_s
    $JigoMode = JIGOMODE_KEEP_KOMI;
    $AdjHandicap = 0;
    $MinHandicap = 0;
-   $MaxHandicap = MAX_HANDICAP;
+   $MaxHandicap = DEFAULT_MAX_HANDICAP;
 
    // $game_row containing:
    // - for GSET_WAITINGROOM: Waitingroom.*; WaitingroomJoined.JoinedCount; X_TotalCount
@@ -932,7 +939,7 @@ function game_info_table( $tablestyle, $game_row, $player_row, $iamrated, $use_s
    elseif( $tablestyle == GSET_TOURNAMENT_LADDER )
       $itable->add_scaption(T_('Game info'));
 
-   if( $ShapeID && ($tablestyle == GSET_MSG_INVITE || $tablestyle == GSET_WAITINGROOM) ) // invite & dispute, w-room
+   if( $ShapeID && ($tablestyle == GSET_MSG_INVITE || $tablestyle == GSET_WAITINGROOM || $tablestyle == GSET_TOURNAMENT_LADDER) ) // invite & dispute, w-room
       $itable->add_sinfo( T_('Shape Game'),
             ShapeControl::build_snapshot_info( $ShapeID, $Size, $ShapeSnapshot, $ShapeBlackFirst ));
 
@@ -1064,17 +1071,17 @@ function game_info_table( $tablestyle, $game_row, $player_row, $iamrated, $use_s
       }//case CAT_HTYPE_FAIR_KOMI
    }//switch $CategoryHandiType
 
-   if( $tablestyle == GSET_WAITINGROOM || $tablestyle == GSET_TOURNAMENT_LADDER ) // Handicap adjustment
+   if( $tablestyle == GSET_MSG_INVITE || $tablestyle == GSET_WAITINGROOM || $tablestyle == GSET_TOURNAMENT_LADDER ) // Handicap adjustment
    {
-      $adj_handi_str = build_adjust_handicap( $AdjHandicap, $MinHandicap, $MaxHandicap );
-      if( $adj_handi_str != '' )
+      $adj_handi_str = build_adjust_handicap( $Size, $AdjHandicap, $MinHandicap, $MaxHandicap );
+      if( (string)$adj_handi_str != '' )
          $itable->add_sinfo( T_('Handicap adjustment'), $adj_handi_str );
    }
 
    if( ENABLE_STDHANDICAP && !$is_fairkomi )
       $itable->add_sinfo( T_('Standard placement'), yesno( $StdHandicap) );
 
-   if( $tablestyle == GSET_WAITINGROOM || $tablestyle == GSET_TOURNAMENT_LADDER ) // Komi adjustment
+   if( $tablestyle == GSET_MSG_INVITE || $tablestyle == GSET_WAITINGROOM || $tablestyle == GSET_TOURNAMENT_LADDER ) // Komi adjustment
    {
       if( !$is_fairkomi )
       {
@@ -1156,16 +1163,16 @@ function game_info_table( $tablestyle, $game_row, $player_row, $iamrated, $use_s
          $itable->add_sinfo( T_('Komi'), $komi_text );
 
          if( $is_fairkomi )
-            $itable->add_sinfo( T_('Jigo-Check#fairkomi'), GameTexts::get_jigo_modes(/*fairkomi*/true, $JigoMode) );
+            $itable->add_sinfo( T_('Jigo mode'), GameTexts::get_jigo_modes($JigoMode) );
       }
    } //Probable settings
 
    $itable->echo_table();
 }//game_info_table
 
-// output (with optional parts): prefix +/-adj [jigomode] suffix
+// output (with optional parts): +/-adj [jigomode]
 // returns '' if no komi-adjustment; caller must format "empty" value
-function build_adjust_komi( $adj_komi, $jigo_mode, $short=false, $prefix='', $suffix='' )
+function build_adjust_komi( $adj_komi, $jigo_mode, $short=false )
 {
    $out = array();
    if( (float)$adj_komi != 0.0 )
@@ -1181,26 +1188,27 @@ function build_adjust_komi( $adj_komi, $jigo_mode, $short=false, $prefix='', $su
          $out[] = sprintf( '[%s]', $jigo_str );
    }
 
-   if( count($out) )
-      return $prefix . implode(' ',$out) . $suffix;
-   else
-      return '';
+   return ( count($out) ) ? implode(' ',$out) : '';
 }
 
-// output (with optional parts): prefix +/-adj [min,max] suffix
+// output (with optional parts): +/-adj [min,[D]max]
 // returns '' if no handicap; caller must format empty to NO_VALUE for example
-function build_adjust_handicap( $adj_handicap, $min_handicap, $max_handicap, $prefix='', $suffix='' )
+function build_adjust_handicap( $size, $adj_handicap, $min_handicap, $max_handicap, $short=false )
 {
    $out = array();
    if( $adj_handicap )
       $out[] = ($adj_handicap > 0 ? '+' : '') . $adj_handicap;
-   if( $min_handicap > 0 || $max_handicap < MAX_HANDICAP )
+   if( $max_handicap == DEFAULT_MAX_HANDICAP )
+   {
+      if( $short )
+         $out[] = sprintf( "[%d,D%d]", $min_handicap, calc_def_max_handicap($size) );
+      else
+         $out[] = sprintf( "[%d,%s %d]", $min_handicap, T_('Default'), calc_def_max_handicap($size) );
+   }
+   elseif( $min_handicap > 0 || $max_handicap < MAX_HANDICAP )
       $out[] = sprintf( "[%d,%d]", $min_handicap, min( MAX_HANDICAP, $max_handicap) );
 
-   if( count($out) )
-      return $prefix . implode(' ',$out) . $suffix;
-   else
-      return '';
+   return ( count($out) ) ? implode(' ',$out) : '';
 }
 
 /*!

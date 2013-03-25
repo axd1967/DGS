@@ -702,16 +702,16 @@ Commands:
          * The quick-suite game-list uses the same kind of views as the web-site does.
            So there is no list of ALL games, but only certain views on them, namely:
 
-               - 'status'-view = like 'status.php', running games of own (logged-in user) where to move in next
-               - 'running'-view = like 'show_games.php', user-specific running games
+               - 'status'-view   = like 'status.php', running games of own (logged-in user) where to move in next
+               - 'running'-view  = like 'show_games.php', user-specific running games
                - 'finished'-view = like 'show_games.php', user-specific finished games
-               - 'observe'-view = like 'show_games.php', games i'm observing, OR all observed games (by all users)
+               - 'observe'-view  = like 'show_games.php', games i'm observing, OR all observed games (by all users)
 
          * The views for ALL running or ALL finished games is not supported by the quick-suite,
            because the query is very expensive and would need to be restricted as the web-site is
            to make it efficient enough.
 
-         * The web-site show the data-fields differently for "my running games" and "my finished games".
+         * The web-site shows the data-fields differently for "my running games" and "my finished games".
            These views assume a fix "user" (logged-in user) and show only data-fields for the "opponent".
 
            Out of consistency-reasons the quick-suite does not return "opponent" and "user"-data,
@@ -1612,7 +1612,7 @@ Commands:
             "adjust_komi" : 0.0,       # komi-adjustment
             "adjust_handicap" : -2,    # handicap-adjustment
             "min_handicap" : 0,        # min. number of handicap-stones
-            "max_handicap" : 21,       # min. number of handicap-stones
+            "max_handicap" : 21,       # min. number of handicap-stones, -1 = default-max-handicap
 
             "time_weekend_clock" : 1,  # 1=time-running on weekend, 0=otherwise
             "time_mode" : "CAN",       # time-mode: FIS=Fischer-time, JAP=japanese-time, CAN=canadian-time

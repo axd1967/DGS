@@ -22,13 +22,14 @@ $TranslateGroups[] = "Game";
 require_once 'include/globals.php';
 require_once 'include/db/games.php';
 require_once 'include/board.php';
-require_once 'include/time_functions.php';
+require_once 'include/rating.php';
 require_once 'include/classlib_profile.php';
 require_once 'include/classlib_user.php';
 require_once 'include/utilities.php';
 require_once 'include/std_classes.php';
 require_once 'include/std_functions.php';
 require_once 'include/time_functions.php';
+require_once 'include/message_functions.php';
 require_once 'include/game_texts.php';
 require_once 'include/error_codes.php';
 require_once 'include/dgs_cache.php';
@@ -1675,7 +1676,7 @@ class FairKomiNegotiation
       echo "<table id=\"fairkomiTable\" class=\"Infos\">",
          "<tr><td class=Caption colspan=2>",
             span('Caption', $fk_type), "<br>\n",
-            '(', GameTexts::get_jigo_modes(true, $this->game_setup->JigoMode), ')',
+            '(', GameTexts::get_jigo_modes($this->game_setup->JigoMode), ')',
          "</td></tr>\n",
          "<tr class=Header><td>", T_('Player'), "</td><td>", T_('Komi Bid#fairkomi'), "</td></tr>\n",
          "<tr><td>", $user[0], "</td><td>", $show_bid[0], "</td></tr>\n",
@@ -2510,7 +2511,7 @@ class GameSetup
       $this->Handicap = 0;
       $this->AdjustHandicap = 0;
       $this->MinHandicap = 0;
-      $this->MaxHandicap = MAX_HANDICAP;
+      $this->MaxHandicap = DEFAULT_MAX_HANDICAP;
       $this->Komi = 0.0;
       $this->AdjustKomi = 0.0;
       $this->JigoMode = JIGOMODE_KEEP_KOMI;
@@ -2582,18 +2583,15 @@ class GameSetup
       $out[] = 'U'.(int)$this->uid; // user: U123
 
       // handicap-stuff: H21:-21:10:21
-      $out[] = 'H'.(int)$this->Handicap;
-      if( $invitation && !$is_template )
-         array_push($out, 0, 0, 0 );
-      else
-         array_push($out,
-            (int)$this->AdjustHandicap,
-            (int)$this->MinHandicap,
-            (int)$this->MaxHandicap );
+      array_push($out,
+         'H'.(int)$this->Handicap,
+         (int)$this->AdjustHandicap,
+         (int)$this->MinHandicap,
+         (int)$this->MaxHandicap );
 
       // komi-stuff: K-199.5:-199.5:J2:FK[7]
       $out[] = (is_null($this->Komi)) ? 'K' : sprintf('K%.1f', (float)$this->Komi);
-      $out[] = ( $invitation && !$is_template ) ? 0 : sprintf('%.1f', (float)$this->AdjustKomi);
+      $out[] = sprintf('%.1f', (float)$this->AdjustKomi);
       $out[] = $MAP_GAME_SETUP[$this->JigoMode]; // J<x>
       if( $invitation && !$is_template )
          $out[] = 'FK';
@@ -2687,7 +2685,7 @@ class GameSetup
    function to_string( $invitation=false )
    {
       $result = "GameSetup: U={$this->uid} T={$this->Handicaptype} " .
-         "H={$this->Handicap}/{$this->AdjustHandicap}/{$this->MinHandicap}-{$this->MaxHandicap} " .
+         "H={$this->Handicap}/{$this->AdjustHandicap}/{$this->MinHandicap}..{$this->MaxHandicap} " .
          "K={$this->Komi}/{$this->AdjustKomi} J={$this->JigoMode} FK={$this->OppKomi} " .
          "MBR=" . yesno($this->MustBeRated) . " Rating={$this->RatingMin}..{$this->RatingMax} " .
          "MRG={$this->MinRatedGames} SO={$this->SameOpponent} M=[{$this->Message}]";
@@ -2723,8 +2721,8 @@ class GameSetup
             $fk_type = ( is_htype_divide_choose($handicaptype) )
                ? GameTexts::get_fair_komi_types($handicaptype, null, $pivot_handle, $opp_handle )
                : GameTexts::get_fair_komi_types($handicaptype);
-            return sprintf( T_('Fair Komi of Type [%s], Jigo-Check [%s]'),
-                            $fk_type, GameTexts::get_jigo_modes(/*fk*/true, $this->JigoMode) );
+            return sprintf( T_('Fair Komi of Type [%s], Jigo mode [%s]'),
+                            $fk_type, GameTexts::get_jigo_modes($this->JigoMode) );
 
          case CAT_HTYPE_MANUAL:
          default:
@@ -2762,10 +2760,10 @@ class GameSetup
       // Standard:
       //   "T<htype>:U<uid>:H<handicap>:<adjH>:<minH>:<maxH>:K<komi>:<adjK>:J<jigomode>:R<mustBeRated>:<ratingMin>:<ratingMax>:<minRG>:<sameOpp>:C<msg>"
       // Invitation (standard-part shows example):
-      //   "T1:U2:H0:0:0:0:K6.5:0:J2:R0:0:0:0:0:C:I<size>:<rated>:r<ruleset>:<stdH>:t<byoType>:<mainT>:<byoTime>:<byoPeriods>:<wkclock>"
+      //   "T1:U2:H0:0:0:-1:K6.5:0.0:J2:R0:0:0:0:0:C:I<size>:<rated>:r<ruleset>:<stdH>:t<byoType>:<mainT>:<byoTime>:<byoPeriods>:<wkclock>"
       // NOTE: when adding new game-settings -> adjust regex also matching "old" syntaxes
       $rx_inv = ($invitation) ? ":I\\d+:[01]:r\\d+:[01]:t[JCF]:\\d+:\\d+:\\d+:[01]\$" : '';
-      $rx_gs = "/^T\\d+:U\\d+:H\\d+:-?\\d+:\\d+:\\d+:K$RX_KOMI2:$RX_KOMI:J[012]:FK$RX_KOMI2:R[01]:-?\\d+:-?\\d+:\\d+:-?\\d+:C$rx_inv/";
+      $rx_gs = "/^T\\d+:U\\d+:H\\d+:-?\\d+:\\d+:-?\\d+:K$RX_KOMI2:$RX_KOMI:J[012]:FK$RX_KOMI2:R[01]:-?\\d+:-?\\d+:\\d+:-?\\d+:C$rx_inv/";
       if( !preg_match($rx_gs, $game_setup) )
          error('invalid_args', "GameSetup::new_from_game_setup.check_gs($invitation,$game_setup)");
       $arr = explode(GS_SEP, $game_setup);
@@ -2827,6 +2825,8 @@ class GameSetup
 
    /*!
     * \brief Decodes Games.GameSetup of invitation-type with additional data to make diffs on disputes.
+    * \param $pivot_uid -1 = no match on uid in game-setup but just return found parts;
+    *        otherwise uid for 1st returned game-setup
     * \param $gid only for dbg-info, can be Games.ID
     * \return non-null array [ GameSetup-obj for pivot-uid, GameSetup-obj for opponent ],
     *         elemements may be null (if non-matching game-setup found)
@@ -2850,12 +2850,12 @@ class GameSetup
          array_push( $result, null, null );
       elseif( $cnt_gs == 1 )
       {
-         if( $result[0]->uid == $pivot_uid )
+         if( $pivot_uid < 0 || $result[0]->uid == $pivot_uid )
             $result[] = null;
          else
             array_unshift( $result, null );
       }
-      elseif( $cnt_gs == 2 )
+      elseif( $cnt_gs == 2 && $pivot_uid >= 0 )
       {
          if( $result[0]->uid != $pivot_uid && $result[1]->uid != $pivot_uid )
             error('internal_error', "GameSetup::parse_inv_gs.check.uid($pivot_uid,$gid)");
@@ -2935,8 +2935,18 @@ class GameSetup
       if( $htype_old_text !== $htype_new_text )
          $out[] = array( T_('Handicap Type#inv_diff'), $htype_old_text, $htype_new_text, 1 );
 
+      $old_adj_handi = build_adjust_handicap( $gs_old->Size, $gs_old->AdjustHandicap, $gs_old->MinHandicap, $gs_old->MaxHandicap );
+      $new_adj_handi = build_adjust_handicap( $gs_new->Size, $gs_new->AdjustHandicap, $gs_new->MinHandicap, $gs_new->MaxHandicap );
+      if( $old_adj_handi !== $new_adj_handi )
+         $out[] = array( T_('Adjust Handicap#inv_diff'), $old_adj_handi, $new_adj_handi );
+
       if( $gs_old->StdHandicap !== $gs_new->StdHandicap )
          $out[] = array( T_('Handicap stones placement#inv_diff'), $gs_old->format_std_handicap(), $gs_new->format_std_handicap() );
+
+      $old_adj_komi = build_adjust_komi( $gs_old->AdjustKomi, $gs_old->JigoMode );
+      $new_adj_komi = build_adjust_komi( $gs_new->AdjustKomi, $gs_new->JigoMode );
+      if( $old_adj_komi !== $new_adj_komi )
+         $out[] = array( T_('Adjust Komi#inv_diff'), $old_adj_komi, $new_adj_komi );
 
       // time
       $old_time = $gs_old->format_time();
@@ -3044,8 +3054,8 @@ class GameSetupChecker
 
    function check_komi()
    {
-      // komi-check only for: invite, simple/expert new-game
-      if( $this->view != GSC_VIEW_INVITE && $this->view != GSETVIEW_SIMPLE && $this->view != GSETVIEW_EXPERT )
+      // komi-check only for: invite, std new-game
+      if( $this->view != GSC_VIEW_INVITE && $this->view != GSETVIEW_STANDARD )
          return;
 
       $has_err = false;
@@ -3066,17 +3076,13 @@ class GameSetupChecker
 
    function check_time()
    {
-      static $check_fields = array( 'timevalue', // maintime
+      static $arr_check_fields = array( 'timevalue', // maintime
             'byotimevalue_jap', 'byoperiods_jap', // JAP
             'byotimevalue_can', 'byoperiods_can', // CAN
             'byotimevalue_fis', // FIS
          );
-      static $check_fields_simple = array( 'timevalue', // maintime
-            'byotimevalue_fis', // FIS
-         );
 
       $has_err = false;
-      $arr_check_fields = ( $this->view == GSETVIEW_SIMPLE ) ? $check_fields_simple : $check_fields;
       $ferrors = array();
       foreach( $arr_check_fields as $field )
       {
@@ -3124,8 +3130,8 @@ class GameSetupChecker
 
    function check_adjust_komi()
    {
-      // adj-komi-check only for: expert new-game
-      if( $this->view != GSETVIEW_EXPERT )
+      // adj-komi-check only for: std new-game
+      if( $this->view != GSETVIEW_STANDARD )
          return;
 
       $has_err = false;
@@ -3144,8 +3150,8 @@ class GameSetupChecker
 
    function check_min_rated_games()
    {
-      // min-rated-games only for: expert/fair-komi new-game
-      if( $this->view != GSETVIEW_EXPERT && $this->view != GSETVIEW_FAIRKOMI )
+      // min-rated-games only for: std/fair-komi new-game
+      if( $this->view != GSETVIEW_STANDARD && $this->view != GSETVIEW_FAIRKOMI )
          return;
 
       $min_rgames = @$_REQUEST['min_rated_games'];
@@ -3200,7 +3206,7 @@ class GameSetupChecker
       if( WROOM_MAX_ENTRIES <= 0 )
          return;
 
-      if( $view == GSETVIEW_SIMPLE || $view == GSETVIEW_EXPERT || $view == GSETVIEW_FAIRKOMI || $view == GSETVIEW_MPGAME )
+      if( $view == GSETVIEW_STANDARD || $view == GSETVIEW_FAIRKOMI || $view == GSETVIEW_MPGAME )
       {
          $row = mysql_single_fetch( "GameSetupChecker::check_wroom_count.count_wr($uid,$view)",
                "SELECT COUNT(*) AS X_Count FROM Waitingroom WHERE uid=$uid" );
@@ -3260,9 +3266,7 @@ class GameSetupBuilder
       $this->build_url_game_basics( $url );
       $this->build_url_cat_htype_manual( $url, $cat_htype, $this->game_setup->Handicaptype );
       $this->build_url_handi_komi_rated( $url );
-
-      $url['fk_htype'] = ($cat_htype === CAT_HTYPE_FAIR_KOMI) ? $this->game_setup->Handicaptype : DEFAULT_HTYPE_FAIRKOMI;
-      $url['jigo_mode'] = $this->game_setup->JigoMode;
+      $this->build_url_adjustments( $url, $cat_htype );
 
       if( !$this->is_template )
          $url['message'] = $this->game_setup->Message;
@@ -3271,7 +3275,7 @@ class GameSetupBuilder
 
    function fill_new_game_from_game( &$url )
    {
-      $url['view'] = ( $this->is_mpg ) ? GSETVIEW_MPGAME : GSETVIEW_EXPERT;
+      $url['view'] = ( $this->is_mpg ) ? GSETVIEW_MPGAME : GSETVIEW_STANDARD;
 
       $this->build_url_game_basics( $url );
       $url['game_players'] = $this->game->GamePlayers;
@@ -3293,20 +3297,14 @@ class GameSetupBuilder
          $url['view'] = $this->game_setup->ViewMode;
       }
       else
-         $url['view'] = ($cat_htype === CAT_HTYPE_FAIR_KOMI) ? GSETVIEW_FAIRKOMI : GSETVIEW_EXPERT;
+         $url['view'] = ($cat_htype === CAT_HTYPE_FAIR_KOMI) ? GSETVIEW_FAIRKOMI : GSETVIEW_STANDARD;
 
       $this->build_url_game_basics( $url );
       $url['game_players'] = $this->game->GamePlayers;
 
       $this->build_url_cat_htype_manual( $url, $cat_htype, $this->game_setup->Handicaptype );
       $this->build_url_handi_komi_rated( $url );
-
-      $url['fk_htype'] = ($cat_htype === CAT_HTYPE_FAIR_KOMI) ? $this->game_setup->Handicaptype : DEFAULT_HTYPE_FAIRKOMI;
-      $url['adj_komi'] = $this->game_setup->AdjustKomi;
-      $url['jigo_mode'] = $this->game_setup->JigoMode;
-      $url['adj_handicap'] = $this->game_setup->AdjustHandicap;
-      $url['min_handicap'] = $this->game_setup->MinHandicap;
-      $url['max_handicap'] = $this->game_setup->MaxHandicap;
+      $this->build_url_adjustments( $url, $cat_htype );
 
       $url['mb_rated'] = bool_YN( $this->game_setup->MustBeRated );
       if( $this->game_setup->RatingMin < OUT_OF_RATING )
@@ -3389,6 +3387,16 @@ class GameSetupBuilder
          $url['rated'] = ( $this->game->Rated == 'N' ) ? 'N' : 'Y';
    }//build_url_handi_komi_rated
 
+   function build_url_adjustments( &$url, $cat_htype )
+   {
+      $url['fk_htype'] = ($cat_htype === CAT_HTYPE_FAIR_KOMI) ? $this->game_setup->Handicaptype : DEFAULT_HTYPE_FAIRKOMI;
+      $url['adj_komi'] = $this->game_setup->AdjustKomi;
+      $url['jigo_mode'] = $this->game_setup->JigoMode;
+      $url['adj_handicap'] = $this->game_setup->AdjustHandicap;
+      $url['min_handicap'] = $this->game_setup->MinHandicap;
+      $url['max_handicap'] = $this->game_setup->MaxHandicap;
+   }//build_url_adjustments
+
    function build_url_invite_to( &$url )
    {
       if( $this->is_template ) // skip for template
@@ -3460,7 +3468,7 @@ class GameSettingsCalculator
       $this->is_tourney = $is_tourney;
 
       if( !isset($this->grow['MaxHandicap']) ) // set default
-         $this->grow['MaxHandicap'] = MAX_HANDICAP;
+         $this->grow['MaxHandicap'] = DEFAULT_MAX_HANDICAP;
 
       $this->calc_type = $this->calc_handicap = $this->calc_komi = 0;
       $this->calc_color = '';
@@ -3502,7 +3510,7 @@ class GameSettingsCalculator
 
       // adjust handicap
       $infoHandicap_old = $infoHandicap;
-      $infoHandicap = adjust_handicap( $infoHandicap, (int)@$this->grow['AdjHandicap'],
+      $infoHandicap = adjust_handicap( $this->grow['Size'], $infoHandicap, (int)@$this->grow['AdjHandicap'],
          (int)@$this->grow['MinHandicap'], $this->grow['MaxHandicap'] );
       $this->adjusted_handicap = ( $infoHandicap != $infoHandicap_old ) ? $infoHandicap_old : NULL;
 
@@ -4801,13 +4809,24 @@ function adjust_komi( $komi, $adj_komi, $jigo_mode )
 }
 
 // returns adjusted handicap within limits, also checking for valid limits
-function adjust_handicap( $handicap, $adj_handicap, $min_handicap=0, $max_handicap=MAX_HANDICAP )
+function adjust_handicap( $size, $handicap, $adj_handicap, $min_handicap, $max_handicap )
 {
    // assure valid limits
    $min_handicap = min( MAX_HANDICAP, max( 0, $min_handicap ));
-   $max_handicap = ( $max_handicap < 0 ) ? MAX_HANDICAP : min( MAX_HANDICAP, $max_handicap );
-   if( $min_handicap > $max_handicap )
-      swap( $min_handicap, $max_handicap );
+   $max_handicap = min( MAX_HANDICAP, max( DEFAULT_MAX_HANDICAP, $max_handicap ));
+
+   if( $max_handicap == DEFAULT_MAX_HANDICAP )
+   {
+      $chk_max_handicap = calc_def_max_handicap( $size );
+      if( $min_handicap > $chk_max_handicap )
+         $min_handicap = $chk_max_handicap;
+   }
+   else
+   {
+      if( $min_handicap > $max_handicap )
+         swap( $min_handicap, $max_handicap );
+      $chk_max_handicap = $max_handicap;
+   }
 
    // adjust
    if( $adj_handicap )
@@ -4815,13 +4834,28 @@ function adjust_handicap( $handicap, $adj_handicap, $min_handicap=0, $max_handic
 
    if( $handicap < $min_handicap )
       $handicap = $min_handicap;
-   elseif( $handicap > $max_handicap )
-      $handicap = $max_handicap;
+   elseif( $handicap > $chk_max_handicap )
+      $handicap = $chk_max_handicap;
 
    if( $handicap == 1 )
       $handicap = 0;
 
    return (int)$handicap;
+}//adjust_handicap
+
+// calculate default max-handicap for fiven board-size
+// some tested formulas from DGS-forums: http://www.dragongoserver.net/forum/read.php?forum=5&thread=34914#35577
+// last formula chosen as it's quadratic on board-size and results in acceptable and not too small default-handicaps.
+//   5   6   7   8   9  10  11  12  13  14  15  16  17  18  19  20  21  22  23  24  25  Size n
+//  -----------------------------------------------------------------------------------+-------------------------------
+//   2   3   3   4   4   5   5   6   6   7   7   8   8   9   9  10  10  11  11  12  12  floor(n/2)
+//   0   1   1   1   2   2   3   3   4   5   5   6   7   8   9  10  11  12  13  15  16  round(((n-1)/6)^2)
+//   0   0   1   1   2   3   3   4   5   5   6   7   7   8   9   9  10  11  11  12  13  floor((2n-11)/3)
+//   0   0   1   1   1   2   2   3   4   4   5   6   7   8   9  10  11  13  14  16  17  round(9 * (n-3)^2 / 256)
+//   2   2   2   2   3   3   3   4   4   5   6   6   7   8   9  10  11  12  13  14  16  round(7.5 * ((n-3)^2 / 256 + 0.2))
+function calc_def_max_handicap( $size )
+{
+   return round( 7.5 * ( handicapfactor($size) + 0.2 ) );
 }
 
 /*! \brief Determines who is to move (BLACK|WHITE), expects game-row with fields ID,Black_ID,White_ID,ToMove_ID. */
@@ -4987,8 +5021,7 @@ function get_gamesettings_viewmode( $viewmode )
    if( is_null($ARR) )
    {
       $ARR = array(
-         GSETVIEW_SIMPLE => T_('simple settings#gsview'),
-         GSETVIEW_EXPERT => T_('expert settings#gsview'),
+         GSETVIEW_STANDARD => T_('standard settings#gsview'),
          GSETVIEW_FAIRKOMI => T_('fair-komi settings#gsview'),
          GSETVIEW_MPGAME => T_('multi-player settings#gsview'),
       );
@@ -5078,15 +5111,12 @@ function append_form_add_waiting_room_game( &$mform, $viewmode, $read_args=false
                            'TEXT', sptext(T_('and')),
                            'SELECTBOX', 'rating2', 1, $rating_array, $rating_max, false ) );
 
-   if( $viewmode != GSETVIEW_SIMPLE )
-   {
-      $mform->add_row( array(
-            'DESCRIPTION', T_('Min. rated finished games'),
-            'TEXTINPUTX', 'min_rated_games', 5, 5, $min_rated_games, $gsc->get_class_error_field('min_rated_games'),
-            'TEXT', MINI_SPACING . T_('(optional)'), ));
-   }
+   $mform->add_row( array(
+         'DESCRIPTION', T_('Min. rated finished games'),
+         'TEXTINPUTX', 'min_rated_games', 5, 5, $min_rated_games, $gsc->get_class_error_field('min_rated_games'),
+         'TEXT', MINI_SPACING . T_('(optional)'), ));
 
-   if( $viewmode == GSETVIEW_EXPERT || $viewmode == GSETVIEW_FAIRKOMI )
+   if( $viewmode == GSETVIEW_STANDARD || $viewmode == GSETVIEW_FAIRKOMI )
    {
       $same_opp_array = build_accept_same_opponent_array(array( 0,  -101, -102, -103,  -1, -2, -3,  3, 7, 14 ));
       $mform->add_row( array( 'DESCRIPTION', T_('Accept same opponent'),
@@ -5163,9 +5193,12 @@ function build_accept_same_opponent_array( $arr )
    return $out;
 }
 
-function build_arr_handicap_stones()
+function build_arr_handicap_stones( $with_default )
 {
-   $handi_stones = array( 0 => 0 );
+   $handi_stones = array();
+   if( $with_default )
+      $handi_stones[-1] = T_('Default#maxhandi');
+   $handi_stones[0] = 0;
    for( $bs = 2; $bs <= MAX_HANDICAP; $bs++ )
       $handi_stones[$bs] = $bs;
    return $handi_stones;

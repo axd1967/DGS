@@ -173,14 +173,14 @@ define('KEY_GROUP_ORDER', 'gpo');
             if( get_request_arg(FACT_USE_CONV) || get_request_arg(FACT_USE_PROP) )
             {
                $is_preview = true;
-               use_handicap_suggestion( $grow );
+               use_handicap_suggestion( $grow, $grow['Size'] );
             }
             else
             {
                if( $is_preview || ($is_save && $game_type != GAMETYPE_ZEN_GO) )
                   change_group_color( $gid, $is_preview );
                if( $is_preview || $is_save )
-                  update_handicap_komi( $grow, $gid, $is_preview,
+                  update_handicap_komi( $grow, $gid, $is_preview, $grow['Size'],
                      get_request_arg('handicap', 0), get_request_arg('komi', 6.5) );
             }
 
@@ -809,7 +809,7 @@ function build_form_change_group( &$form, $grow, $cmd, $edit_hk=false )
 
    if( $edit_hk )
    {
-      $arr_handicap = build_arr_handicap_stones();
+      $arr_handicap = build_arr_handicap_stones( /*def*/false );
       $val_handicap = $grow['Handicap'];
       $form->add_row( array( 'TEXT', sptext(T_('Handicap'),1),
                              'SELECTBOX', 'handicap', 1, $arr_handicap, $val_handicap, false,
@@ -1146,11 +1146,11 @@ function build_tableinfo_handicap_suggestion( &$form, $group, $arr_conv_sugg, $a
    return $itable;
 }//build_tableinfo_handicap_suggestion
 
-function update_handicap_komi( &$grow, $gid, $preview, $handicap, $komi )
+function update_handicap_komi( &$grow, $gid, $preview, $size, $handicap, $komi )
 {
    global $NOW;
 
-   $handicap = adjust_handicap( (int)$handicap, 0 );
+   $handicap = adjust_handicap( $size, (int)$handicap, 0, 0, MAX_HANDICAP );
    $komi = adjust_komi( (float)$komi, 0, JIGOMODE_KEEP_KOMI );
 
    if( !$preview )
@@ -1164,7 +1164,7 @@ function update_handicap_komi( &$grow, $gid, $preview, $handicap, $komi )
    $grow['Lastchanged'] = $NOW;
 }//update_handicap_komi
 
-function use_handicap_suggestion( &$grow )
+function use_handicap_suggestion( &$grow, $size )
 {
    global $arr_game_players;
 
@@ -1195,7 +1195,7 @@ function use_handicap_suggestion( &$grow )
    }
 
    // 2. update H+K
-   $grow['Handicap'] = adjust_handicap( (int)get_request_arg($prefix.'h'), 0 );
+   $grow['Handicap'] = adjust_handicap( $size, (int)get_request_arg($prefix.'h'), 0, 0, MAX_HANDICAP );
    $grow['Komi'] = adjust_komi( (float)get_request_arg($prefix.'k'), 0, JIGOMODE_KEEP_KOMI );
 
    if( $need_reorder )

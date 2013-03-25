@@ -340,7 +340,8 @@ Description:
          - <uid> : user-id (=Players.ID), game started/initiated by given user
          - <handicap> : number of handicap-stones
          - <adj*> : [+|-] number
-         - <minH>, <maxH> : min/max handicap-stones
+         - <minH> : min handicap-stones
+         - <maxH> : max handicap-stones, -1 = calculated default-max-handicap
          - <komi> : komi-bid of user, can be empty, used for fair-komi
          - <jigomode> : jigo-mode
          - <oppkomi> : komi-bid of opponent, can be empty, used for fair-komi
@@ -365,7 +366,7 @@ Description:
             - <byoType> : J=japanese-byo-yomi, C=canadian-byo-yomi, F=Fischer-time
             - <mainT>, <byoTime>, <byoPeriods> : number (=hours)
             - <wkclock> : 0=clock-stopped-on-weekend, 1=clock-running-on-weekend
-      - Example: "T1:U12:H0:0:0:21:K6:0:J2:FK:R1:0:0:5:0:C:I19:1:r1:0:tF:60:15:0:1 T1:U12:H0:0:0:21:K6:0:J2:FK:R1:0:0:5:0:C:I19:1:r0:0:tF:45:15:0:0"
+      - Example: "T1:U12:H0:0:0:-1:K6:0:J2:FK:R1:0:0:5:0:C:I19:1:r1:0:tF:60:15:0:1 T1:U12:H0:0:0:21:K6:0:J2:FK:R1:0:0:5:0:C:I19:1:r0:0:tF:45:15:0:0"
 
 
 
