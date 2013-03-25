@@ -350,12 +350,14 @@ function echo_tournament_rules( $tourney, $trule )
    $use_max_handi = ( $trule->MaxHandicap == DEFAULT_MAX_HANDICAP )
       ? calc_def_max_handicap( $trule->Size )
       : min( MAX_HANDICAP, $trule->MaxHandicap );
-   if( $trule->MinHandicap > 0 )
+   if( $trule->MinHandicap > 0 && $use_max_handi < MAX_HANDICAP )
       $lim_handi = sprintf( T_('limited by min. %s and max. %s stones'), $trule->MinHandicap, $use_max_handi );
    elseif( $trule->MinHandicap > 0 )
       $lim_handi = sprintf( T_('limited by min. %s stones'), $trule->MinHandicap );
-   else
+   elseif( $use_max_handi < MAX_HANDICAP )
       $lim_handi = sprintf( T_('limited by max. %s stones'), $use_max_handi );
+   else
+      $lim_handi = '';
    if( $lim_handi )
    {
       if( $trule->MaxHandicap == DEFAULT_MAX_HANDICAP )
