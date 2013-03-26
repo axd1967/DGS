@@ -201,14 +201,14 @@ class QuickHandlerWaitingroom extends QuickHandler
       $result['ruleset'] = strtoupper($wr->Ruleset);
       $result['size'] = $wr->Size;
       $result['komi'] = $wr->Komi;
-      $result['jigo_mode'] = strtoupper($wr->JigoMode);
       $result['handicap'] = $wr->Handicap;
       $result['handicap_mode'] = ( $wr->StdHandicap ) ? 'STD' : 'FREE';
 
-      $result['adjust_komi'] = $wr->AdjKomi;
       $result['adjust_handicap'] = $wr->AdjHandicap;
       $result['min_handicap'] = $wr->MinHandicap;
       $result['max_handicap'] = $wr->MaxHandicap;
+      $result['adjust_komi'] = $wr->AdjKomi;
+      $result['jigo_mode'] = strtoupper($wr->JigoMode);
 
       $result['time_weekend_clock'] = ( $wr->WeekendClock ) ? 1 : 0;
       $result['time_mode'] = strtoupper($wr->Byotype);
