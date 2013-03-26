@@ -1166,13 +1166,15 @@ class Board
     */
    function mark_territory( $start_x, $start_y )
    {
-      $color = -1;  // color of territory
-
       $stack = array( array( $start_x, $start_y ) );
       $visited = array(); // marker if point already checked
+
+      // current point
       $visited[$start_x][$start_y] = 1;
+      $point_count = 1; // number of checked points, may be > count of visited points
 
       // scanning all directions starting at start-x/y building up a stack of adjacent points to check
+      $color = -1;  // color of territory
       while( $arr_xy = array_shift($stack) )
       {
          list( $x, $y ) = $arr_xy;
@@ -1189,6 +1191,7 @@ class Board
                {
                   $stack[] = array( $new_x, $new_y );
                   $visited[$new_x][$new_y] = 1;
+                  ++$point_count;
                }
                else //remains BLACK/WHITE/DAME/BLACK_TERRITORY/WHITE_TERRITORY and MARKED_DAME
                {
@@ -1203,12 +1206,11 @@ class Board
          }
       }
 
-      $point_count = count($visited);
       if( $color == -1 )
          $color = DAME ;
       else
-         $color |= OFFSET_TERRITORY ;
-      if( $color == DAME || $point_count > MAX_SEKI_MARK)
+         $color |= OFFSET_TERRITORY;
+      if( $color == DAME || $point_count > MAX_SEKI_MARK )
          $color |= FLAG_NOCLICK;
 
       foreach( $visited as $x => $arr_y )
@@ -1221,6 +1223,7 @@ class Board
          }
       }
 
+      //error_log("Board.mark_territory(".number2board_coords($start_x,$start_y,$this->size).") = $point_count");
       return $point_count;
    }//mark_territory
 
