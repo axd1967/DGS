@@ -312,9 +312,14 @@ class QuickHandlerMessage extends QuickHandler
                   'ruleset' => strtoupper($row['Ruleset']),
                   'size' => (int)$row['Size'],
                   'komi' => (float)$row['Komi'],
-                  'jigo_mode' => $jigo_mode,
                   'handicap' =>  (int)$row['Handicap'],
                   'handicap_mode' => ( ($row['StdHandicap'] == 'Y') ? 'STD' : 'FREE' ),
+
+                  'adjust_handicap' => (int)$my_gs->AdjustHandicap,
+                  'min_handicap' => (int)$my_gs->MinHandicap,
+                  'max_handicap' => (int)$my_gs->MaxHandicap,
+                  'adjust_komi' => (float)$my_gs->AdjustKomi,
+                  'jigo_mode' => $jigo_mode,
 
                   'time_weekend_clock' => ( ($row['WeekendClock'] == 'Y') ? 1 : 0 ),
                   'time_mode' => strtoupper($row['Byotype']),
