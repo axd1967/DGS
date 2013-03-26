@@ -1240,9 +1240,14 @@ Commands:
                "ruleset" : "JAPANESE",    # ruleset: JAPANESE | CHINESE
                "size" : 19,               # board-size
                "komi" : 6.5,              # komi
-               "jigo_mode" : "KEEP_KOMI", # only relevant for fair-komi: KEEP_KOMI, ALLOW_JIGO, NO_JIGO
                "handicap" : 0,            # handicap-stones
                "handicap_mode" : "FREE",  # STD=standard-handicap, FREE=free-handicap
+
+               "adjust_handicap" : -2,    # handicap-adjustment
+               "min_handicap" : 0,        # min. number of handicap-stones
+               "max_handicap" : -1,       # max. number of handicap-stones, -1 = default-max-handicap
+               "adjust_komi" : 0.0,       # komi-adjustment
+               "jigo_mode" : "KEEP_KOMI", # jigo-mode for adjusting-komi or fair-komi: KEEP_KOMI (=no jigo restriction), ALLOW_JIGO, NO_JIGO
 
                "time_weekend_clock" : 1,  # 1=time-running on weekend, 0=otherwise
                "time_mode" : "CAN",       # time-mode: FIS=Fischer-time, JAP=japanese-time, CAN=canadian-time
@@ -1605,14 +1610,14 @@ Commands:
             "ruleset" : "JAPANESE",    # ruleset: JAPANESE | CHINESE
             "size" : 19,               # board-size
             "komi" : 6.5,              # komi
-            "jigo_mode" : "KEEP_KOMI", # jigo-mode for adjusting-komi: KEEP_KOMI, ALLOW_JIGO, NO_JIGO
             "handicap" : 0,            # handicap-stones
             "handicap_mode" : "FREE",  # STD=standard-handicap, FREE=free-handicap
 
-            "adjust_komi" : 0.0,       # komi-adjustment
             "adjust_handicap" : -2,    # handicap-adjustment
             "min_handicap" : 0,        # min. number of handicap-stones
-            "max_handicap" : 21,       # min. number of handicap-stones, -1 = default-max-handicap
+            "max_handicap" : -1,       # max. number of handicap-stones, -1 = default-max-handicap
+            "adjust_komi" : 0.0,       # komi-adjustment
+            "jigo_mode" : "KEEP_KOMI", # jigo-mode for adjusting-komi or fair-komi: KEEP_KOMI (=no jigo restriction), ALLOW_JIGO, NO_JIGO
 
             "time_weekend_clock" : 1,  # 1=time-running on weekend, 0=otherwise
             "time_mode" : "CAN",       # time-mode: FIS=Fischer-time, JAP=japanese-time, CAN=canadian-time
