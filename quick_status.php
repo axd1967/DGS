@@ -254,7 +254,7 @@ function print_messages( $version, $player_id )
          "LEFT JOIN Players ON Players.ID=other.uid " .
       "WHERE me.uid=$player_id AND me.Folder_nr IN (".FOLDER_NEW.",".FOLDER_REPLY.") " .
          "AND me.Sender IN ('N','S') " . //exclude message to myself
-      "ORDER BY M.Time DESC";
+      "ORDER BY me.mid DESC"; // order on date (newest first), equiv to msg-id
 
    $result = db_query( 'quick_status.find_messages', $query );
 
