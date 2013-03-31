@@ -101,6 +101,7 @@ DGS "objects" represent different sections of the server:
    - wroom        : waitingroom, new-game
    - bulletin     : bulletins
    - forum        : forums, threads, posts
+   - tourney      : tournaments
    - help         : FAQ
 
 Each "object" has a different set of "commands", that can be executed to get
@@ -1111,10 +1112,10 @@ Purpose:
       - retrieve private message, send new message, reply to message;
         corresponding pages: "message.php"
 
-      - move message to other folder, delete message, list/search messages;
-        corresponding pages: "message.php", "list_messages.php", "search_messages.php"
+      - move message to other folder, delete message, list messages;
+        corresponding pages: "message.php", "list_messages.php",
 
-      - accept game-invitation message, decline game-invitation message;
+      - send new invitation, accept game-invitation message, decline game-invitation message;
         corresponding pages: "message.php"
 
 Request:
@@ -1124,15 +1125,25 @@ Request:
    # list
    quick_do.php?obj=message&cmd=list&with=<WITH>&filter_...=<FILTER>
 
+   # send new invitation
+   quick_do.php?obj=message&cmd=send_inv&to_uid=<TO_UID>&to_user=<TO_HANDLE>&msg=<MESSAGE>&folder=<FOLDER>&gs_...=<GAME_SETTINGS>
+
+   # dispute invitation
+   quick_do.php?obj=message&cmd=dispute_inv&mid=<MESSAGE_ID>&msg=<MESSAGE>&folder=<FOLDER>&gs_...=<GAME_SETTINGS>
+
 Options:
 
-   <COMMAND> = "info" | "send_msg" | "move_msg" | "delete_msg" | "accept_inv" | "decline_inv" | "list"
+   <COMMAND> = "info" | "list" | "send_msg" | "move_msg" | "delete_msg" | "accept_inv" | "decline_inv" | "send_inv" | "dispute_inv"
 
    <FILTER> = optional filter-options (see commands)
 
    <FOLDER> = integer
       - target folder
-      - standard folders: 1=MAIN, 2=NEW, 3=REPLY, 4=TRASHCAN, 5=SENT
+      - standard folders: 1=MAIN, 2=NEW, 3=REPLY, 4=TRASH, 5=SENT
+      - user-specific folders (only folder-id): >= 6
+
+   <GAME_SETTINGS> = game-settings for invitation or dispute
+      - see "send_inv"-command for list of game-settings
 
    <MESSAGE> = text-body of message
       - message-text for message-operation
@@ -1154,6 +1165,12 @@ Options:
 
    <SUBJECT> = title of message
 
+   <TO_UID> = integer
+   <TO_HANDLE> = string
+      - mutual exclusive options, one of them must be used though
+      - TO_UID : recipient user-id for sending invitation or dispute
+      - TO_HANDLE : recipient user-handle for sending invitation or dispute
+
    <WITH> = optional with-option to include additional data-fields (see commands)
 
 
@@ -1164,13 +1181,10 @@ Commands:
       - optional opts: OTHER_UID (for bulk-message), FOLDER, WITH
 
       - WITH-option:
-         - 'user_id' : additionally return user_id-data (handle + name) for message correspondent
+         - 'user_id' : additionally return user_id-data (handle + name + rating) for message correspondent
          - 'folder'  : additionally return folder-data (name + color_bg + color_fg) for message
 
       - Important Notes:
-         * message-type DISPUTED currently not supported by quick-suite,
-           because that needs game-settings as well => ignore them
-
          * using "info"-command will NOT mark message as read (like GUI on message-read),
            but with the FOLDER-option a target folder to move the message into can be given.
            If a target folder is given, but the message needs a reply (e.g. for invitations),
@@ -1186,7 +1200,7 @@ Commands:
             "id" : 1,          # message-id
             "user_from" : {
                "id" : 111,          # user-id of sender, 0=server-message
-               # the following fields only if WITH-option contains 'user_id'
+               # the following fields only if WITH-option contains 'user_id' and id > 0
                "handle" : "user1",  # USER_HANDLE
                "name" : "name1",    # user name
                "rating" : "5k (+46%)",            # DGS rating | "" (=no rating)
@@ -1194,18 +1208,16 @@ Commands:
             },
             "user_to" : {
                "id" : 222,          # user-id of receiver
-               # the following fields only if WITH-option contains 'user_id'
+               # the following fields only if WITH-option contains 'user_id' and id > 0
                "handle" : "user2",  # USER_HANDLE
                "name" : "name2",    # user name
                "rating" : "5k (+46%)",            # DGS rating | "" (=no rating)
                "rating_elo" : "1643.88952636719", # DGS elo-rating | "" (=no rating)
             },
-            "type" : "NORMAL", # message-type (see specs/db/):
-                               # types = NORMAL | INVITATION | DISPUTED | RESULT
-                               # not supported by quick-suite yet: | DISPUTED
+            "type" : "NORMAL", # message-type (see specs/db/): NORMAL | INVITATION | DISPUTED | RESULT
             "flags" : "",      # flags (comma-separated): BULK (multi-receiver bulk-message)
             "folder" : {
-               "id" : 2,                # folder-nr (<0, 0-5 system-folder, >= 6 user-folder)
+               "id" : 2,                # folder-nr (<0 destroyed, 0-5 system-folder, >= 6 user-folder)
                # the following fields only if WITH-option contains 'folder'
                "name" : "New",          # folder-name (lang-dependent)
                "system" : 1,            # 1=system-folder, 0=user-folder
@@ -1217,6 +1229,7 @@ Commands:
             "level" : 0,            # thread-level of message-thread (starting at 0)
             "message_prev" : 0,     # message-id of message that has been replied to
             "message_hasnext" : 1,  # 0=no-answer for current message, 1=there are answer(s) to this message
+                                    #   find answers with "list"-command and 'answers'-filter
             "can_reply" : 1,        # 1=reply allowed, 0=reply forbidden
             "need_reply" : 2,       # 2=message needs reply, 1=message has been replied, 0=no reply needed
             "game_id" : 0,          # game-id for game-related message (e.g. invitation); game may be deleted
@@ -1229,11 +1242,11 @@ Commands:
                                           # - "" (empty) = invitation declined, game-info deleted
                                           # - other-status = invitation accepted, normal game-status -> see (3a) 'status'-field for "info"-command
             "game_settings" : {           # 'game_settings' only present, if game_status == INVITED
-               "game_type" : "GO",        # always 'GO' for invitations
-               "game_players" : "1:1",    # always '1:1' for invitations
+               "game_type" : "GO",        # always 'GO' for invitations (e.g. no multi-player-games for invites)
+               "game_players" : "1:1",    # always '1:1' for invitations (e.g. no multi-player-games for invites)
                "handicap_type" : "conv",  # see HTYPE_... in 'include/game_functions.php':
                                           # conv, proper, nigiri, double, black, white, auko_sec, auko_opn, div_ykic, div_ikyc
-                                          # see also section (3c) message-object "info"-command "handicap_type"-field
+                                          # see also section (3f) wroom-object "info"-command "handicap_type"-field
                "shape_id" : 0,            # shape-id > 0 if game was started as shape-game
 
                "rated" : 1,               # 0=unrated, 1=rated
@@ -1264,6 +1277,45 @@ Commands:
                "calc_komi" : 6.5,         # probably/fix komi, empty "" for fairkomi
             },
          }
+
+
+   "list" : retrieve list of messages ordered by creation-date (newest first)
+      - required opts: FILTER-folders
+      - optional opts: WITH, FILTER, LIMIT
+
+      - WITH-option:
+         - 'user_id' : additionally return user_id-data (handle + name + rating) for message correspondent
+         - 'folder'  : additionally return folder-data (name + color_bg + color_fg) for message
+
+      - FILTER-options:
+         - 'filter_answers=VAL' : message-id of parent-message
+            - return message(s), that are replies to given message-id; can be used to traverse message-thread
+            - there can be more than one reply to a message
+            - no default
+            - overwrites 'filter_folders' with value 0 (=ALL)
+            - unlimited, implicit 'limit=all' in effect
+         - 'filter_folders=VAL' : 1,2,3
+            - return only messages from given folders
+            - comma-separated list of folder-ids or standard-folder-names
+            - default 0
+            - standard-folders have aliases: 1=MAIN, 2=NEW, 3=REPLY, 4=TRASH, 5=SENT
+            - special folder-values: 0=ALL (=all-received like website)
+            - user-specific folders can only given by folder-id: >= 6
+              see also (3d) folder-object
+
+      - Important Notes:
+         * messages from REPLY-folder can still need no-reply, for example if user moved
+           a no-reply-needed message into the Reply-folder.
+           So in order to know, if a reply is needed for a message, you have to inspect
+           the "can_reply" and the "need_reply"-field in the response.
+
+      - LIMIT-option:
+         - only when using messages for folders NEW and/or REPLY,
+           the LIMIT-option can be 'all' to return all those messages in one go
+
+      - Result (JSON) = result-list see section (2d) with list of objects:
+         - the fields content and semantics are the same as for the message-object "info"-command (see above (3c))
+
 
    "send_msg" : send new message, reply to message
       - required opts: OTHER_UID|OTHER_HANDLE (not for reply), SUBJECT
@@ -1347,20 +1399,10 @@ Commands:
          - all errors of: [E-LOGIN], [E-GEN], [E-GAMECREATE], [E-MSG], [E-MSGSEND]
 
    # NOT IMPLEMENTED: TODO
-   "list" : retrieve list of messages
-      - required opts: -
-      - optional opts: WITH, FILTER
+   "send_inv" : send new invitation
 
-      - WITH-option:
-         - WITH-options ? -> only msg-id (no texts, maybe subject included, text only in single-mode)
-
-      - FILTER-options:
-         - 'filter_type=VAL' : INVITATION (match values from "info")
-         - 'filter_folder=VAL' : 1,2, ... ; std-folders have aliases NEW, REPLY, MAIN, TRASH, DEL, ... ???
-         - 'filter_need_reply=VAL' :  0|1|all=empty
-
-      - Result (JSON) = result-list see section (2d) with list of objects:
-         - the fields content and semantics are the same as for the message-object "info"-command (see above (3c))
+   # NOT IMPLEMENTED: TODO
+   "dispute_inv" : dispute invitation
 
 
 Examples for message-commands:
@@ -1376,6 +1418,15 @@ Examples for message-commands:
 
    # retrieve bulk-message for certain recipient
    quick_do.php?obj=message&cmd=info&mid=1234567&ouid=2
+
+
+   # retrieve list of messages: for NEW & REPLY folders, for all received messages, for user-folders
+   do_quick.php?obj=message&cmd=list&filter_folders=NEW,REPLY&limit=all
+   do_quick.php?obj=message&cmd=list&with=user_id
+   do_quick.php?obj=message&cmd=list&with=folder&filter_folders=6,7,8
+
+   # retrieve list of answers for message
+   do_quick.php?obj=message&cmd=list&filter_answers=12345
 
 
 
@@ -1721,7 +1772,7 @@ Commands:
    "new_game" : create new game-offer in waiting-room
 
       - Notes:
-         - only one "view" (combining simple/expert/fair-komi/mpg in one)
+         - only one "view" (combining standard/fair-komi/mpg in one)
 
 
 Examples for wroom-commands:

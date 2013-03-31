@@ -24,6 +24,7 @@ require_once 'include/quick/quick_game_list.php';
 require_once 'include/quick/quick_game_notes.php';
 require_once 'include/quick/quick_user.php';
 require_once 'include/quick/quick_message.php';
+require_once 'include/quick/quick_message_list.php';
 require_once 'include/quick/quick_folder.php';
 require_once 'include/quick/quick_contact.php';
 require_once 'include/quick/quick_wroom.php';
@@ -63,6 +64,7 @@ class QuickSuite
          'QuickHandlerUser',        // user: info
          'QuickHandlerGameInfo',    // game: info
          'QuickHandlerGameList',    // game: list
+         'QuickHandlerMessageList', // message: list
          'QuickHandlerGameNotes',   // game: get_notes | save_notes | hide_notes | show_notes
          'QuickHandlerContact',     // contact: list
          'QuickHandlerFolder',      // folder: list

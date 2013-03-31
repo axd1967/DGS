@@ -65,7 +65,7 @@ class QuickHandlerMessage extends QuickHandler
    var $folders; //arr
    var $arr_msg_id;
 
-   function QuickHandlerMessage( $quick_object )
+   public function QuickHandlerMessage( $quick_object )
    {
       parent::QuickHandler( $quick_object );
       $this->mid = 0;
@@ -82,12 +82,12 @@ class QuickHandlerMessage extends QuickHandler
 
    // ---------- Interface ----------------------------------------
 
-   function canHandle( $obj, $cmd ) // static
+   public function canHandle( $obj, $cmd ) // static
    {
       return ( $obj == QOBJ_MESSAGE ) && QuickHandler::matchRegex(MESSAGE_COMMANDS, $cmd);
    }
 
-   function parseURL()
+   public function parseURL()
    {
       parent::checkArgsUnknown(QMESSAGE_OPTIONS);
       $this->mid = get_request_arg(MESSAGEOPT_MID);
@@ -96,7 +96,7 @@ class QuickHandlerMessage extends QuickHandler
       $this->folder_id = (int)get_request_arg(MESSAGEOPT_FOLDER);
    }
 
-   function prepare()
+   public function prepare()
    {
       $my_id = $this->my_id;
 
@@ -224,7 +224,7 @@ class QuickHandlerMessage extends QuickHandler
    }//prepare
 
    /*! \brief Processes command for object; may fire error(..) and perform db-operations. */
-   function process()
+   public function process()
    {
       $cmd = $this->quick_object->cmd;
       if( $cmd == QCMD_INFO )
@@ -237,120 +237,26 @@ class QuickHandlerMessage extends QuickHandler
          $this->process_cmd_send_msg();
    }
 
-   function process_cmd_info()
+   private function process_cmd_info()
    {
-      global $player_row;
-
-      $row = $this->msg_row;
-      $my_id = $this->my_id;
-      $other_uid = (int)$row['other_id'];
-      switch( $row['Sender'] ) // also see get_message_directions()
-      {
-         case 'M': $uid_from = $my_id; $uid_to = $my_id; break; // myself
-         case 'S': $uid_from = 0;      $uid_to = $my_id; break; // system
-         case 'Y': $uid_from = $my_id; $uid_to = $other_uid; break;
-         case 'N': $uid_from = $other_uid; $uid_to = $my_id; break;
-         default:  $uid_from = $uid_to = 0; break;
-      }
-      $gid = (int)$row['Game_ID'];
-      $mid = (int)$row['ID'];
-
-      $this->addResultKey( 'id', $mid );
-      $this->addResultKey( 'user_from', $this->build_obj_user($uid_from, @$this->user_rows[$uid_from], '', 'rating') );
-      $this->addResultKey( 'user_to',   $this->build_obj_user($uid_to, @$this->user_rows[$uid_to], '', 'rating') );
-      $this->addResultKey( 'type', strtoupper($row['Type']) );
-      $this->addResultKey( 'flags', QuickHandlerMessage::convertMessageFlags($row['Flags']) );
-      $this->addResultKey( 'folder',
-         QuickHandlerFolder::build_obj_folder(
-            (int)$row['Folder_nr'], $this->folder, $this->is_with_option(QWITH_FOLDER)) );
-      $this->addResultKey( 'created_at', QuickHandler::formatDate(@$row['X_Time']) );
-      $this->addResultKey( 'thread', (int)$row['Thread'] );
-      $this->addResultKey( 'level', (int)$row['Level'] );
-      $this->addResultKey( 'message_prev', (int)$row['ReplyTo'] );
-      $this->addResultKey( 'message_hasnext', ($row['X_Flow'] & FLOW_ANSWERED) ? 1 : 0 );
-      $this->addResultKey( 'can_reply', ($row['Sender'] == 'N' && $other_uid>0) ? 1 : 0 );
-      $this->addResultKey( 'need_reply', QuickHandlerMessage::convertMessageReplyStatus($row['Replied']) );
-      $this->addResultKey( 'game_id', $gid );
-      $this->addResultKey( 'subject', $row['Subject'] );
-      $this->addResultKey( 'text', $row['Text'] );
-
-      if( $row['Type'] == MSGTYPE_INVITATION )
-      {
-         $game_status = @$row['Status'];
-         if( is_null($game_status) )
-            $game_status = '';
-         $this->addResultKey( 'game_status', $game_status );
-
-         if( $game_status == GAME_STATUS_INVITED )
-         {
-            // ToMove_ID holds handitype for game on INVITATION-status
-            list( $my_gs, $opp_gs ) = GameSetup::parse_invitation_game_setup( $my_id, @$row['GameSetup'], $gid );
-            $my_color_black = ( $row['Black_ID'] == $my_id );
-            $Handitype = GameSetup::determine_handicaptype( $my_gs, $opp_gs, (int)$row['ToMove_ID'], $my_color_black );
-
-            $cat_htype = get_category_handicaptype( $Handitype );
-            $jigo_mode = GameSetup::parse_jigo_mode_from_game_setup( $cat_htype, $my_id, $my_gs, $gid );
-
-            $time_limit = TimeFormat::echo_time_limit(
-                  $row['Maintime'], $row['Byotype'], $row['Byotime'], $row['Byoperiods'],
-                  TIMEFMT_QUICK|TIMEFMT_ENGL|TIMEFMT_SHORT|TIMEFMT_ADDTYPE);
-
-            // NOTE: players have a rating if an invitation exists
-            $row['Handicaptype'] = $Handitype;
-            $row['JigoMode'] = $jigo_mode;
-            $gsc = new GameSettingsCalculator( $row, $player_row['Rating2'], $row['other_rating'] );
-            $gsc->calculate_settings();
-
-            $this->addResultKey( 'game_settings', array(
-                  'game_type' => GAMETYPE_GO,
-                  'game_players' => '1:1',
-                  'handicap_type' => $Handitype,
-                  'shape_id' => (int)$row['ShapeID'],
-                  'shape_snapshot' => $row['ShapeSnapshot'],
-
-                  'rated' => ( ($row['Rated'] == 'N') ? 0 : 1 ),
-                  'ruleset' => strtoupper($row['Ruleset']),
-                  'size' => (int)$row['Size'],
-                  'komi' => (float)$row['Komi'],
-                  'handicap' =>  (int)$row['Handicap'],
-                  'handicap_mode' => ( ($row['StdHandicap'] == 'Y') ? 'STD' : 'FREE' ),
-
-                  'adjust_handicap' => (int)$my_gs->AdjustHandicap,
-                  'min_handicap' => (int)$my_gs->MinHandicap,
-                  'max_handicap' => (int)$my_gs->MaxHandicap,
-                  'adjust_komi' => (float)$my_gs->AdjustKomi,
-                  'jigo_mode' => $jigo_mode,
-
-                  'time_weekend_clock' => ( ($row['WeekendClock'] == 'Y') ? 1 : 0 ),
-                  'time_mode' => strtoupper($row['Byotype']),
-                  'time_limit' => $time_limit,
-                  'time_main' => $row['Maintime'],
-                  'time_byo' => $row['Byotime'],
-                  'time_periods' => $row['Byoperiods'],
-
-                  'opp_started_games' => GameHelper::count_started_games( $my_id, $other_uid ),
-                  'calc_type' => $gsc->calc_type,
-                  'calc_color' => $gsc->calc_color,
-                  'calc_handicap' => $gsc->calc_handicap,
-                  'calc_komi' => $gsc->calc_komi,
-               ));
-         }
-      }//invitation-info
+      QuickHandlerMessage::fill_message_info( $this, $this->quick_object->result, $this->msg_row );
 
       // move message into target folder (if given)
       if( $this->folder_id > 0 )
       {
+         $my_id = $this->my_id;
+
          ta_begin();
          {//HOT-section to move message into target folder
             $updated = DgsMessage::update_message_folder( $mid, $my_id, /*Sender*/null, $this->folder_id, /*die*/false );
-            if( $updated && ($row['Folder_nr'] == FOLDER_NEW || $this->folder_id == FOLDER_NEW) )
+            if( $updated && ($this->msg_row['Folder_nr'] == FOLDER_NEW || $this->folder_id == FOLDER_NEW) )
                update_count_message_new( 'QuickHandlerMessage.process_cmd_info.upd_msg_folder', $my_id, COUNTNEW_RECALC );
          }
          ta_end();
       }
    }//process_cmd_info
 
-   function process_cmd_move_msg()
+   private function process_cmd_move_msg()
    {
       $moved_count = change_folders( $this->my_id, $this->folders, $this->arr_msg_id, $this->folder_id,
          /*curr-fold*/false, /*need-reply*/false, /*quick*/true );
@@ -358,7 +264,7 @@ class QuickHandlerMessage extends QuickHandler
       $this->addResultKey( 'failure_count', count($this->arr_msg_id) - $moved_count );
    }
 
-   function process_cmd_delete_msg()
+   private function process_cmd_delete_msg()
    {
       $moved_count = change_folders( $this->my_id, /*folders*/null, $this->arr_msg_id, FOLDER_DESTROYED,
          /*curr-fold*/false, /*need-reply*/false, /*quick*/true );
@@ -367,7 +273,7 @@ class QuickHandlerMessage extends QuickHandler
    }
 
    /*! \brief send_msg | accept_inv | decline_inv */
-   function process_cmd_send_msg()
+   private function process_cmd_send_msg()
    {
       $action = 'send_msg';
       $subject = trim(@$_REQUEST[MESSAGEOPT_SUBJECT]); // mandatory only for send_msg
@@ -411,13 +317,13 @@ class QuickHandlerMessage extends QuickHandler
       $this->addResultKey('error_texts', $error_texts);
    }//process_cmd_send_msg
 
-   function init_folders( $uid )
+   private function init_folders( $uid )
    {
       init_standard_folders();
       $this->folders = get_folders( $uid );
    }
 
-   function load_folder( $uid, $folder_id )
+   private function load_folder( $uid, $folder_id )
    {
       if( !$this->is_with_option(QWITH_FOLDER) )
          return null;
@@ -439,9 +345,111 @@ class QuickHandlerMessage extends QuickHandler
    }//load_folder
 
 
-   // ------------ static functions ----------------------------
+   // fills $out-array and return it, filled with message-data from row
+   // NOTE: quickh->user_rows/folders must be initialized
+   public static function fill_message_info( $quickh, &$out, $row )
+   {
+      global $player_row;
 
-   function convertMessageFlags( $flags )
+      $my_id = $quickh->my_id;
+      $other_uid = (int)$row['other_id'];
+      switch( $row['Sender'] ) // also see get_message_directions()
+      {
+         case 'M': $uid_from = $my_id; $uid_to = $my_id; break; // myself
+         case 'S': $uid_from = 0;      $uid_to = $my_id; break; // system
+         case 'Y': $uid_from = $my_id; $uid_to = $other_uid; break;
+         case 'N': $uid_from = $other_uid; $uid_to = $my_id; break;
+         default:  $uid_from = $uid_to = 0; break;
+      }
+      $gid = (int)$row['Game_ID'];
+      $mid = (int)$row['ID'];
+      $folder_id = (int)$row['Folder_nr'];
+
+      $out['id'] = $mid;
+      $out['user_from'] = $quickh->build_obj_user($uid_from, @$quickh->user_rows[$uid_from], '', 'country,rating');
+      $out['user_to']   = $quickh->build_obj_user($uid_to, @$quickh->user_rows[$uid_to], '', 'country,rating');
+      $out['type'] = strtoupper($row['Type']);
+      $out['flags'] = QuickHandlerMessage::convertMessageFlags($row['Flags']);
+      $out['folder'] = QuickHandlerFolder::build_obj_folder(
+            $folder_id, @$quickh->folders[$folder_id], $quickh->is_with_option(QWITH_FOLDER) );
+      $out['created_at'] = QuickHandler::formatDate(@$row['X_Time']);
+      $out['thread'] = (int)$row['Thread'];
+      $out['level'] = (int)$row['Level'];
+      $out['message_prev'] = (int)$row['ReplyTo'];
+      $out['message_hasnext'] = ($row['X_Flow'] & FLOW_ANSWERED) ? 1 : 0;
+      $out['can_reply'] = ($row['Sender'] == 'N' && $other_uid>0) ? 1 : 0;
+      $out['need_reply'] = QuickHandlerMessage::convertMessageReplyStatus($row['Replied']);
+      $out['game_id'] = $gid;
+      $out['subject'] = $row['Subject'];
+      $out['text'] = $row['Text'];
+
+      if( $row['Type'] == MSGTYPE_INVITATION )
+      {
+         $game_status = @$row['Status'];
+         if( is_null($game_status) )
+            $game_status = '';
+         $out['game_status'] = $game_status;
+
+         if( $game_status == GAME_STATUS_INVITED )
+         {
+            // ToMove_ID holds handitype for game on INVITATION-status
+            list( $my_gs, $opp_gs ) = GameSetup::parse_invitation_game_setup( $my_id, @$row['GameSetup'], $gid );
+            $my_color_black = ( $row['Black_ID'] == $my_id );
+            $Handitype = GameSetup::determine_handicaptype( $my_gs, $opp_gs, (int)$row['ToMove_ID'], $my_color_black );
+
+            $cat_htype = get_category_handicaptype( $Handitype );
+            $jigo_mode = GameSetup::parse_jigo_mode_from_game_setup( $cat_htype, $my_id, $my_gs, $gid );
+
+            $time_limit = TimeFormat::echo_time_limit(
+                  $row['Maintime'], $row['Byotype'], $row['Byotime'], $row['Byoperiods'],
+                  TIMEFMT_QUICK|TIMEFMT_ENGL|TIMEFMT_SHORT|TIMEFMT_ADDTYPE);
+
+            // NOTE: players have a rating if an invitation exists
+            $row['Handicaptype'] = $Handitype;
+            $row['JigoMode'] = $jigo_mode;
+            $gsc = new GameSettingsCalculator( $row, $player_row['Rating2'], $row['other_rating'] );
+            $gsc->calculate_settings();
+
+            $out['game_settings'] = array(
+                  'game_type' => GAMETYPE_GO,
+                  'game_players' => '1:1',
+                  'handicap_type' => $Handitype,
+                  'shape_id' => (int)$row['ShapeID'],
+                  'shape_snapshot' => $row['ShapeSnapshot'],
+
+                  'rated' => ( ($row['Rated'] == 'N') ? 0 : 1 ),
+                  'ruleset' => strtoupper($row['Ruleset']),
+                  'size' => (int)$row['Size'],
+                  'komi' => (float)$row['Komi'],
+                  'handicap' =>  (int)$row['Handicap'],
+                  'handicap_mode' => ( ($row['StdHandicap'] == 'Y') ? 'STD' : 'FREE' ),
+
+                  'adjust_handicap' => (int)$my_gs->AdjustHandicap,
+                  'min_handicap' => (int)$my_gs->MinHandicap,
+                  'max_handicap' => (int)$my_gs->MaxHandicap,
+                  'adjust_komi' => (float)$my_gs->AdjustKomi,
+                  'jigo_mode' => $jigo_mode,
+
+                  'time_weekend_clock' => ( ($row['WeekendClock'] == 'Y') ? 1 : 0 ),
+                  'time_mode' => strtoupper($row['Byotype']),
+                  'time_limit' => $time_limit,
+                  'time_main' => $row['Maintime'],
+                  'time_byo' => $row['Byotime'],
+                  'time_periods' => $row['Byoperiods'],
+
+                  'opp_started_games' => GameHelper::count_started_games( $my_id, $other_uid ),
+                  'calc_type' => $gsc->calc_type,
+                  'calc_color' => $gsc->calc_color,
+                  'calc_handicap' => $gsc->calc_handicap,
+                  'calc_komi' => $gsc->calc_komi,
+               );
+         }
+      }//invitation-info
+
+      return $out;
+   }//fill_message_info
+
+   private static function convertMessageFlags( $flags )
    {
       $out = array();
       if( $flags & MSGFLAG_BULK )
@@ -449,7 +457,7 @@ class QuickHandlerMessage extends QuickHandler
       return implode(',', $out);
    }
 
-   function convertMessageReplyStatus( $replied )
+   private static function convertMessageReplyStatus( $replied )
    {
       if( $replied == 'M' )
          return 2; // need reply
@@ -459,7 +467,7 @@ class QuickHandlerMessage extends QuickHandler
          return 0; // no reply needed
    }
 
-   function load_user_handle( $dbgmsg, $uid )
+   private static function load_user_handle( $dbgmsg, $uid )
    {
       $arr = User::load_quick_userinfo( array( $uid ) );
       if( count($arr) == 0 || !isset($arr[$uid]) )

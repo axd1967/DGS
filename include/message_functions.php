@@ -1315,6 +1315,7 @@ function interpret_time_limit_forms($byoyomitype, $timevalue, $timeunit,
 }
 
 // FOLDER_DESTROYED is NOT in standard-folders
+// return: [ folder_id => [ Name, BGColor, FGColor ], ...]
 function get_folders($uid, $remove_all_received=true, $user_folder_nr=null)
 {
    global $STANDARD_FOLDERS;
@@ -1377,6 +1378,16 @@ function load_cache_folders( $uid, $folder_nr=null )
 
    return $result;
 }//load_cache_folders
+
+// builds array with folder-ids without ALL_RECEIVED/SENT/DELETED-folder (i.e. normally all-received and user-folders)
+// param $folders folder-array in format as returned by get_folders()
+function build_folders_all_received( $folders )
+{
+   unset($folders[FOLDER_ALL_RECEIVED]);
+   unset($folders[FOLDER_SENT]);
+   unset($folders[FOLDER_DELETED]);
+   return array_keys($folders);
+}
 
 function change_folders_for_marked_messages($uid, $folders)
 {
@@ -1713,6 +1724,28 @@ class DgsMessage
     * \param $other_uid other-uid needed for bulk-message to identify correct message;
     *        optional for non-bulk-message
     * \param $with_fulldata true = load with other-player-info and game-info (if game-message)
+    * \return see build_message_base_query()-func
+    */
+   public static function load_message( $dbgmsg, $mid, $uid, $other_uid, $with_fulldata )
+   {
+      if( !is_numeric($mid) || $mid <= 0 )
+         error('unknown_message', "$dbgmsg.DgsMessage::load_message.check.mid($mid)");
+
+      $qsql = DgsMessage::build_message_base_query( $uid, $with_fulldata, /*single*/true, $mid );
+      if( $other_uid > 0 )
+         $qsql->add_part( SQLP_WHERE, "other.uid=$other_uid" );
+
+      $msg_row = mysql_single_fetch( "$dbgmsg.DgsMessage::load_message.find($mid)", $qsql->get_select() );
+      if( !$msg_row )
+         error('unknown_message', "$dbgmsg.DgsMessage::load_message.find.not_found($mid)");
+
+      return $msg_row;
+   }//load_message
+
+   /*!
+    * \brief Builds QuerySQL to load single message for message-id and current user-id, or list of user-id's messages.
+    * \param $with_fulldata true = build query with other-player-info and game-info (if game-message)
+    * \param $single_msg true = build query for single message
     * \return message-row; multi-receiver message determined by Flags-field
     *    message-row-fields:
     *       ID, Type, Flags, Thread, Level, ReplyTo, Game_ID, Time, Subject, Text,
@@ -1727,11 +1760,8 @@ class DgsMessage
     *
     * \note JigoMode must be calculated from Games.GameSetup, e.g. for fair-komi
     */
-   function load_message( $dbgmsg, $mid, $uid, $other_uid, $with_fulldata )
+   public static function build_message_base_query( $uid, $with_fulldata, $single_msg, $mid=0 )
    {
-      if( !is_numeric($mid) || $mid <= 0 )
-         error('unknown_message', "$dbgmsg.DgsMessage::load_message.check.mid($mid)");
-
       /**
        * Actually, the DGS-message-code does normally not support
        * multiple receivers (i.e. more than one "other" LEFT JOINed row).
@@ -1743,7 +1773,6 @@ class DgsMessage
        * See also: send_message()
        **/
 
-      /* see also the note about MessageCorrespondents.mid==0 in message_list_query() */
       $qsql = new QuerySQL(
          SQLP_FIELDS,
             'M.*',
@@ -1754,23 +1783,25 @@ class DgsMessage
             'other.uid AS other_id',
          SQLP_FROM,
             'Messages AS M',
-            "INNER JOIN MessageCorrespondents AS me ON me.mid=$mid and me.uid=$uid",
-            "LEFT JOIN MessageCorrespondents AS other ON other.mid=$mid AND other.Sender!=me.Sender",
-            "LEFT JOIN MessageCorrespondents AS prev ON M.ReplyTo>0 AND prev.mid=M.ReplyTo AND prev.uid=$uid",
-         SQLP_WHERE,
-            "M.ID=$mid",
-         // sort old messages to myself with Sender='N' first if both 'N' and 'Y' remains
-         SQLP_ORDER, 'Sender', // me.Sender
-         SQLP_LIMIT, '1'
+            "INNER JOIN MessageCorrespondents AS me ON me.mid=M.ID AND me.uid=$uid",
+            "LEFT JOIN MessageCorrespondents AS other ON other.mid=M.ID AND other.Sender!=me.Sender",
+            "LEFT JOIN MessageCorrespondents AS prev ON M.ReplyTo>0 AND prev.mid=M.ReplyTo AND prev.uid=$uid"
       );
-      if( $other_uid > 0 )
-         $qsql->add_part( SQLP_WHERE, "other.uid=$other_uid" );
+      if( $mid > 0 )
+         $qsql->add_part( SQLP_WHERE, "M.ID=$mid" );
 
+      if( $single_msg )
+      {
+         // sort old messages to myself with Sender='N' first if both 'N' and 'Y' remains
+         $qsql->add_part( SQLP_ORDER, 'Sender' ); // me.Sender
+         $qsql->add_part( SQLP_LIMIT, '1' );
+      }
       if( $with_fulldata )
       {
          $qsql->add_part( SQLP_FIELDS,
             'P.Handle AS other_handle', 'P.Name AS other_name',
             'P.Rating2 AS other_rating', 'P.RatingStatus AS other_ratingstatus',
+            'P.Country AS other_country',
             // from Games-table:
             'G.mid AS Game_mid', 'G.Status',
             'G.Black_ID', 'G.White_ID', // for invite/dispute fair-komi
@@ -1784,12 +1815,8 @@ class DgsMessage
             "LEFT JOIN Games AS G ON G.ID=M.Game_ID" );
       }
 
-      $msg_row = mysql_single_fetch( "$dbgmsg.DgsMessage::load_message.find($mid)", $qsql->get_select() );
-      if( !$msg_row )
-         error('unknown_message', "$dbgmsg.DgsMessage::load_message.find.not_found($mid)");
-
-      return $msg_row;
-   }//load_message
+      return $qsql;
+   }//build_message_base_query
 
    /*!
     * \brief Finds receivers of the message and make some validity-checks.
@@ -2128,7 +2155,7 @@ class MessageListBuilder
       if( $folderstring != "all" && $folderstring != '' )
          $qsql->add_part( SQLP_WHERE, "me.Folder_nr IN ($folderstring)" );
       $qsql->merge( $extra_querysql );
-      $query = $qsql->get_select() . "$order$limit";
+      $query = $qsql->get_select() . $order . $limit;
 
       $result = db_query( 'MLB.message_list_query', $query );
 
