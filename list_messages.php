@@ -111,17 +111,9 @@ require_once( "include/filter.php" );
    {
       $title = T_('Message list');
       if( $current_folder == FOLDER_ALL_RECEIVED )
-      {
-         $fldrs = $my_folders;
-         unset($fldrs[FOLDER_SENT]);
-         unset($fldrs[FOLDER_DELETED]);
-         $folderstring = implode(',', array_keys($fldrs));
-         //unset($fldrs);
-      }
+         $folderstring = implode(',', build_folders_all_received($my_folders));
       else
-      {
          $folderstring = (string)$current_folder;
-      }
    }
 
    $page.= URI_AMP.'current_folder=' . $current_folder ;
