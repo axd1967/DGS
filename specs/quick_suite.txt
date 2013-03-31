@@ -1313,6 +1313,11 @@ Commands:
          - only when using messages for folders NEW and/or REPLY,
            the LIMIT-option can be 'all' to return all those messages in one go
 
+      - Errors:
+         - all errors of: [E-LOGIN], [E-GEN]
+         - invalid_args : bad parameters (bad filters)
+         - folder_not_found : unknown folder specified in filters
+
       - Result (JSON) = result-list see section (2d) with list of objects:
          - the fields content and semantics are the same as for the message-object "info"-command (see above (3c))
 
