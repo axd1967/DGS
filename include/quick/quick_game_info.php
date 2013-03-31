@@ -136,12 +136,12 @@ class QuickHandlerGameInfo extends QuickHandler
 
    function fill_game_info( $quick_handler, $glc, &$out, $row )
    {
-      //$FU = $this->glc->is_finished();
-      //$all = $this->glc->is_all();
+      //$FU = $glc->is_finished();
+      //$all = $glc->is_all();
 
       // init init fields
       $color = ($row['ToMove_ID'] == $row['Black_ID']) ? BLACK : WHITE;
-      $is_my_game = ( $row['Black_ID'] == $this->my_id ) || ( $row['White_ID'] == $this->my_id );
+      $is_my_game = ( $row['Black_ID'] == $glc->my_id ) || ( $row['White_ID'] == $glc->my_id );
       $row['Blackhandle'] = @$row['BlackHandle']; // for FK-info
       $row['Whitehandle'] = @$row['WhiteHandle']; // for FK-info
       $game_setup = GameSetup::new_from_game_setup($row['GameSetup']);
