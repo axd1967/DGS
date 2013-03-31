@@ -16,6 +16,31 @@ Developers INFO:
 ChangeLog
 ------------------------------------------------------------------
 
+2013-03-31 juga
+
+   * include/quick/quick_message_list.php (class QuickHandlerMessageList, ~.canHandle,
+       ~.parseURL, ~.prepare, ~.prepare_filter_answers, ~.prepare_filter_folders,
+       ~.check_allow_limit_all, ~.collect_msg_users, ~.process),
+     include/message_functions.php (build_folders_all_received; DgsMessage.load_message,
+       ~.build_message_base_query),
+     include/quick/quick_message.php (class QuickMessage, ~.process_cmd_info, ~.fill_message_info),
+     include/quick/quick_suite.php (QuickSuite.getQuickHandler),
+     specs/quick_suite.txt, list_messages.php:
+   - quick-handler message-object: added 'list'-command with own quick-handler
+   - cleanup: added function-modifiers
+
+2013-03-26 juga
+
+   * include/quick/quick_message.php (QuickHandlerMessage.process_cmd_info),
+     include/quick/quick_wroom.php (QuickHandlerWaitingroom.fill_wroom_object),
+     specs/quick_suite.txt:
+   - quick-message info-handler: added handicap- and komi-adjustments
+   - quick-waiting-room info-handler: re-arranged handicap- and komi-adjustments
+     to match with invitation-info
+
+   * include/board.php (Board.mark_territory):
+   - bugfix: wrong count of visited points for seki-mark-check to find non-toggable-points
+
 2013-03-25 juga
 
    * include/game_functions.php (FairKomiNegotiation.echo_fairkomi_table;
@@ -74,6 +99,7 @@ ChangeLog
          into merged standard-view for new-game profiles
      - cleanup (minor changes, finer checks)
    - bugfix for game-info-table: show shape-game info for tournament-ladders
+   - bugfix: open fair-komi invitation-template in fair-komi-new-game view
 -----------
 -- added default max-handicap
 ALTER TABLE Waitingroom
