@@ -3662,7 +3662,8 @@ function clear_cache_quick_status( $arr_uids, $cache_key )
 
    if( !is_array($arr_uids) )
       $arr_uids = array( $arr_uids );
-   $arr_uids = array_unique($arr_uids);
+   else
+      $arr_uids = array_unique($arr_uids);
 
    $path = build_path_dir( $_SERVER['DOCUMENT_ROOT'], DATASTORE_FOLDER ) . '/qst/quick_status-';
    clearstatcache(); //FIXME since PHP5.3.0 with filename
