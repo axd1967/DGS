@@ -1423,6 +1423,8 @@ function send_message( $debugmsg, $text='', $subject=''
          $query = "UPDATE MessageCorrespondents SET Replied='Y'";
          if( $prev_folder > FOLDER_ALL_RECEIVED )
             $query .= ", Folder_nr=$prev_folder";
+         elseif( $prev_folder == MOVEMSG_REPLY_TO_MAIN_FOLDER )
+            $query .= ", Folder_nr=IF(Folder_nr=".FOLDER_REPLY.",".FOLDER_MAIN.",Folder_nr)";
          $query.= " WHERE mid=$prev_mid AND uid=$from_id AND Sender!='Y' LIMIT 1";
          db_query( "$debugmsg.reply_correspondent", $query );
 

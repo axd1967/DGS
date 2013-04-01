@@ -2413,7 +2413,9 @@ class MessageControl
          , $to_uids, '', /*notify: $opponent_row['Notify'] == 'NONE'*/true
          , $my_id, $msg_type, $msg_gid
          , $prev_mid, ($disputegid > 0 ? MSGTYPE_DISPUTED : '')
-         , isset($this->folders[$new_folder]) ? $new_folder : ( $invitation_step ? FOLDER_MAIN : FOLDER_NONE )
+         , isset($this->folders[$new_folder])
+               ? $new_folder
+               : ( $invitation_step ? FOLDER_MAIN : MOVEMSG_REPLY_TO_MAIN_FOLDER )
          );
 
       return ( $this->mpg_type == MPGMSG_INVITE && $msg_gid > 0 ) ? $msg_gid : 0;

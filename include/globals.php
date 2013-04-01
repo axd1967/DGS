@@ -139,6 +139,9 @@ define("FLAG_NOCLICK", 0x10); //keep it a power of 2
 // '-4'-value in regard to FOLDER_DELETED and to keep < FOLDER_NONE
 define('FOLDER_DESTROYED', -4);
 
+// value to specify to move message, but only from REPLY- to MAIN-folder
+define('MOVEMSG_REPLY_TO_MAIN_FOLDER', -2); // keep as folder-values
+
 define('FOLDER_NONE', -1); // pseudo-folder used for "selecting no folder"
 define('FOLDER_ALL_RECEIVED', 0); // pseudo-folder-nr to check for valid-folders
 //Valid folders must be > FOLDER_ALL_RECEIVED
