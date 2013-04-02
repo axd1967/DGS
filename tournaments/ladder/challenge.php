@@ -175,8 +175,8 @@ $GLOBALS['ThePage'] = new Page('TournamentLadderChallenge');
          'TEXT',        $tourney->build_info() ));
    $tform->add_empty_row();
 
-   add_form_user_info( $tform, T_('Defender#T_ladder'),   $user_df, $tladder_df );
-   add_form_user_info( $tform, T_('Challenger#T_ladder'), $user_ch, $tladder_ch );
+   add_form_user_info( $tform, T_('Defender#T_ladder'),   $user_df, $tladder_df, $trules );
+   add_form_user_info( $tform, T_('Challenger#T_ladder'), $user_ch, $tladder_ch, $trules );
 
    $has_errors = ( count($errors) > 0 );
    if( $has_errors )
@@ -226,7 +226,7 @@ $GLOBALS['ThePage'] = new Page('TournamentLadderChallenge');
 }
 
 
-function add_form_user_info( &$tform, $utype, $user, $tladder )
+function add_form_user_info( &$tform, $utype, $user, $tladder, $trules )
 {
    if( is_null($user) && is_null($tladder) )
       return '';
@@ -237,7 +237,7 @@ function add_form_user_info( &$tform, $utype, $user, $tladder )
       $tform->add_row( array(
             'DESCRIPTION', span('bold', $utype),
             'TEXT', $user->user_reference(),
-            'TEXT', echo_off_time( false, $user->urow['OnVacation'], null ),
+            'TEXT', echo_off_time( false, $user->urow['OnVacation'], null, @$trules->WeekendClock ),
             'TEXT', SEP_SPACING . echo_rating( $user->Rating, true, $user->ID), ));
       if( isset($user->urow['TP_Rating']) )
          $tform->add_row( array(
