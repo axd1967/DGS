@@ -98,6 +98,16 @@ class TournamentHelper
       if( is_null($tl_props) )
          return false;
 
+      // determine challenger (at game-end)
+      // NOTE: if determined at game-start -> TGame-challenger-role is correct
+      if( $tl_props->DetermineChallenger == TLP_DETERMINE_CHALL_GEND )
+      {
+         $tl_rank_ch = TournamentLadder::load_rank( $tid, $tgame->Challenger_rid );
+         $tl_rank_df = TournamentLadder::load_rank( $tid, $tgame->Defender_rid );
+         if( $tl_rank_ch > 0 && $tl_rank_df > 0 && $tl_rank_ch < $tl_rank_df ) // role of challenger and defender reversed
+            $tgame->Flags |= TG_FLAG_CH_DF_SWITCHED;
+      }
+
       // process game-end
       $game_end_action = $tl_props->calc_game_end_action( $tgame->Score, $tgame->Flags );
 

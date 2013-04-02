@@ -50,3 +50,8 @@ ALTER TABLE TournamentRules
 --    'scripts/updates/fix_merge_new_game_expert_view-1_0_16.php'
 
 
+-- determine challenger-role at game-start or game-end
+ALTER TABLE TournamentLadderProps
+   ADD DetermineChallenger enum('GAME_START','GAME_END') NOT NULL default 'GAME_END' AFTER MaxChallenges ;
+
+

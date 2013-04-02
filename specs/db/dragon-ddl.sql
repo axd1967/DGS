@@ -1102,6 +1102,7 @@ CREATE TABLE IF NOT EXISTS `TournamentLadderProps` (
   `MaxDefensesStart1` tinyint(3) unsigned NOT NULL default '0',
   `MaxDefensesStart2` tinyint(3) unsigned NOT NULL default '0',
   `MaxChallenges` tinyint(3) unsigned NOT NULL default '0',
+  `DetermineChallenger` enum('GAME_START','GAME_END') NOT NULL default 'GAME_END',
   `GameEndNormal` enum('CH_ABOVE','CH_BELOW','SWITCH','DF_BELOW','DF_LAST') NOT NULL default 'CH_ABOVE',
   `GameEndJigo` enum('NO_CHANGE','CH_ABOVE','CH_BELOW') NOT NULL default 'CH_BELOW',
   `GameEndTimeoutWin` enum('NO_CHANGE','CH_ABOVE','CH_BELOW','SWITCH','DF_BELOW','DF_LAST','DF_DEL') NOT NULL default 'DF_BELOW',

@@ -163,6 +163,15 @@ $GLOBALS['ThePage'] = new Page('TournamentLadderPropsEdit');
          'TEXT',        $t_limits->getLimitRangeTextAdmin(TLIMITS_TL_MAX_CH), ));
    $tform->add_empty_row();
 
+   // determine challenger
+   $arr_determine_challenger = array(
+         TLP_DETERMINE_CHALL_GEND   => sptext(T_('at game-end#T_ladder'), 2),
+         TLP_DETERMINE_CHALL_GSTART => sptext(T_('at game-start#T_ladder')),
+      );
+   $tform->add_row( array(
+         'DESCRIPTION', T_('Determine Challenger#T_ladder'),
+         'RADIOBUTTONS', 'det_chall', $arr_determine_challenger, $vars['det_chall'], ));
+
    // game-end
    $tform->add_row( array(
          'DESCRIPTION', T_('Game End handling'),
@@ -278,6 +287,7 @@ function parse_edit_form( &$tlp, $t_limits )
       'max_def_start1'  => $tlp->MaxDefensesStart1,
       'max_def_start2'  => $tlp->MaxDefensesStart2,
       'max_chall'       => $tlp->MaxChallenges,
+      'det_chall'       => $tlp->DetermineChallenger,
       'gend_normal'     => $tlp->GameEndNormal,
       'gend_jigo'       => $tlp->GameEndJigo,
       'gend_timeout_w'  => $tlp->GameEndTimeoutWin,
@@ -436,6 +446,7 @@ function parse_edit_form( &$tlp, $t_limits )
          $errors[] = $parsed_value;
 
 
+      $tlp->setDetermineChallenger( $vars['det_chall'] );
       $tlp->setGameEndNormal( $vars['gend_normal'] );
       $tlp->setGameEndTimeoutWin( $vars['gend_timeout_w'] );
       $tlp->setGameEndTimeoutLoss( $vars['gend_timeout_l'] );
@@ -454,6 +465,7 @@ function parse_edit_form( &$tlp, $t_limits )
       if( $old_vals['max_def_start1'] != $tlp->MaxDefensesStart1 ) $edits[] = T_('Max. Defenses#T_ladder');
       if( $old_vals['max_def_start2'] != $tlp->MaxDefensesStart2 ) $edits[] = T_('Max. Defenses#T_ladder');
       if( $old_vals['max_chall'] != $tlp->MaxChallenges ) $edits[] = T_('Max. Challenges#T_ladder');
+      if( $old_vals['det_chall'] != $tlp->DetermineChallenger ) $edits[] = T_('Determine Challenger#T_ladder');
       if( $old_vals['gend_normal'] != $tlp->GameEndNormal ) $edits[] = T_('Game End');
       if( $old_vals['gend_timeout_w'] != $tlp->GameEndTimeoutWin ) $edits[] = T_('Game End');
       if( $old_vals['gend_timeout_l'] != $tlp->GameEndTimeoutLoss ) $edits[] = T_('Game End');

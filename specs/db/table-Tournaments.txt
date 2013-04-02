@@ -547,6 +547,7 @@ Description:
 | MaxDefensesStart1      | tinyint(3) unsigned                                                            | NO   |     | 0                   |       |
 | MaxDefensesStart2      | tinyint(3) unsigned                                                            | NO   |     | 0                   |       |
 | MaxChallenges          | tinyint(3) unsigned                                                            | NO   |     | 0                   |       |
+| DetermineChallenger    | enum('GAME_START','GAME_END')                                                  | NO   |     | GAME_END            |       |
 | GameEndNormal          | enum('CH_ABOVE','CH_BELOW','SWITCH','DF_BELOW','DF_LAST')                      | NO   |     | CH_ABOVE            |       |
 | GameEndJigo            | enum('NO_CHANGE','CH_ABOVE','CH_BELOW')                                        | NO   |     | CH_BELOW            |       |
 | GameEndTimeoutWin      | enum('NO_CHANGE','CH_ABOVE','CH_BELOW','SWITCH','DF_BELOW','DF_LAST','DF_DEL') | NO   |     | DF_BELOW            |       |
@@ -605,6 +606,11 @@ Description:
 
 * MaxChallenges : max. number of outgoing challenges (for challenger)
    - 0 = unlimited
+
+* DetermineChallenger : determines role of challenger for applying game-end-process
+   - GAME_START : challenger is player with lower-ladder-position at game-start
+   - GAME_END   : challenger is player with lower-ladder-position determined at game-end (default),
+     leads to a more lively ladder
 
 * GameEndNormal : normal handling on game-end when challenger wins over defender
    - default = CH_ABOVE
@@ -683,13 +689,13 @@ Description:
 
    - Q: why is this field needed ?
      A: problem is that T-game is not unique for different rounds. Two players
-        could meet again in later rounds. T-game most often used to process
-        T-game-end. Round-no makes a bad index, so used TRound.ID
+        could meet again in later rounds. T-game most often be used to process
+        T-game-end. Round-number makes a bad index, so used TRound.ID
 
 * Pool : pool number
-   - 0 for ladder-type tournaments
+   - for ladder-type tournaments: 0
    - for round-robin-type tournaments: corresponding TournamentPool.Pool for T-game
-   - note: field is needed to speed up db-queries on filling-ranks of finished pools
+   - NOTE: field is needed to speed up db-queries on filling-ranks of finished pools
 
 * gid : FK to Games.ID, 0 = unset yet
 

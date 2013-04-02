@@ -131,8 +131,9 @@ define('TG_STATUS_WAIT',   'WAIT');
 define('TG_STATUS_DONE',   'DONE');
 define('CHECK_TG_STATUS', 'INIT|PLAY|SCORE|WAIT|DONE');
 
-define('TG_FLAG_GAME_END_TD',   0x0001); // T-game ended by TD
-define('TG_FLAG_GAME_DETACHED', 0x0002); // T-game "detached" (taken out of T)
+define('TG_FLAG_GAME_END_TD',    0x0001); // T-game ended by TD
+define('TG_FLAG_GAME_DETACHED',  0x0002); // T-game "detached" (taken out of T)
+define('TG_FLAG_CH_DF_SWITCHED', 0x0004); // role of challenger and defender is switched
 
 // ---------- Tournament News Stuff -------------------------------
 
@@ -164,6 +165,10 @@ define('CHECK_TGEND_NORMAL',        'CH_ABOVE|CH_BELOW|SWITCH|DF_BELOW|DF_LAST')
 define('CHECK_TGEND_JIGO',          'NO_CHANGE|CH_ABOVE|CH_BELOW');
 define('CHECK_TGEND_TIMEOUT_WIN',   'NO_CHANGE|CH_ABOVE|CH_BELOW|SWITCH|DF_BELOW|DF_LAST|DF_DEL');
 define('CHECK_TGEND_TIMEOUT_LOSS',  'NO_CHANGE|CH_LAST|CH_DEL');
+
+define('TLP_DETERMINE_CHALL_GSTART', 'GAME_START');
+define('TLP_DETERMINE_CHALL_GEND',   'GAME_END');
+define('CHECK_TLP_DETERMINE_CHALL', 'GAME_START|GAME_END');
 
 define('TLP_JOINORDER_REGTIME', 'REGTIME');
 define('TLP_JOINORDER_RATING',  'RATING');

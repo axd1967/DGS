@@ -429,7 +429,7 @@ class TournamentLadder
       return ( $row ) ? (int)@$row['X_Count'] : 0;
    }
 
-   /*! \brief Returns current Rank of given for given RID or else UID or else current player; 0 if user not on ladder. */
+   /*! \brief Returns current Rank for given RID or else UID or else current player; 0 if user not on ladder. */
    function load_rank( $tid, $rid=0, $uid=0 )
    {
       $qsql = TournamentLadder::build_query_sql( $tid );
@@ -942,9 +942,11 @@ class TournamentLadder
 
       $ch_rid = $tgame->Challenger_rid;
       $df_rid = $tgame->Defender_rid;
+      if( $tgame->Flags & TG_FLAG_CH_DF_SWITCHED )
+         swap($ch_rid, $df_rid); // reverse role of challenger and defender
 
       //HOT-section to update ladder (besides reading)
-      db_lock( "TournamentLadder.process_game_end($tid,$ch_rid,$df_rid,$game_end_action)",
+      db_lock( "TournamentLadder.process_game_end($tid,$ch_rid,$df_rid,{$tgame->Flags},$game_end_action)",
          "TournamentLadder WRITE, TournamentLadder AS TL READ" );
       {//LOCK TournamentLadder
          $success = TournamentLadder::_process_game_end( $tid, $ch_rid, $df_rid, $game_end_action );
@@ -958,9 +960,11 @@ class TournamentLadder
     * \brief (INTERNAL) processing tournament-game-end, called from process_game_end()-func with already locked TL-table.
     * \internal
     * \note IMPORTANT NOTE: caller needs to open TA with HOT-section!!
+    * \note $ch_rid and $df_rid must already reflect switched role of challenger/defender determined
+    *       by TournamentLadderProps.DetermineChallenger
     * \note Special change-user-rank, handling missing challenger/defender cases, also updating BestRank + RankChanged-fields
     */
-   function _process_game_end( $tid, $ch_rid, $df_rid, $game_end_action )
+   private static function _process_game_end( $tid, $ch_rid, $df_rid, $game_end_action )
    {
       $tladder_df = null;
       if( $game_end_action != TGEND_CHALLENGER_LAST && $game_end_action != TGEND_CHALLENGER_DELETE )

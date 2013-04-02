@@ -554,6 +554,7 @@ class TournamentGames
          $arr = array();
          $arr[TG_FLAG_GAME_END_TD] = T_('Game End by TD#TG_flag');
          $arr[TG_FLAG_GAME_DETACHED] = T_('Game Detached#TG_flag');
+         $arr[TG_FLAG_CH_DF_SWITCHED] = T_('Challenger/Defender switched#TG_flag');
          $ARR_GLOBALS_TOURNAMENT_GAMES[$key] = $arr;
       }
 

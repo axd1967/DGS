@@ -61,7 +61,8 @@ $ENTITY_TOURNAMENT_LADDER_PROPS = new Entity( 'TournamentLadderProps',
                   'MaxDefenses', 'MaxDefenses1', 'MaxDefenses2', 'MaxDefensesStart1', 'MaxDefensesStart2',
                   'MaxChallenges', 'UserAbsenceDays', 'RankPeriodLength', 'CrownKingHours',
       FTYPE_DATE, 'Lastchanged', 'CrownKingStart',
-      FTYPE_ENUM, 'GameEndNormal', 'GameEndJigo', 'GameEndTimeoutWin', 'GameEndTimeoutLoss', 'UserJoinOrder'
+      FTYPE_ENUM, 'DetermineChallenger', 'GameEndNormal', 'GameEndJigo', 'GameEndTimeoutWin', 'GameEndTimeoutLoss',
+                  'UserJoinOrder'
    );
 
 class TournamentLadderProps
@@ -79,6 +80,7 @@ class TournamentLadderProps
    var $MaxDefensesStart1;
    var $MaxDefensesStart2;
    var $MaxChallenges;
+   var $DetermineChallenger;
    var $GameEndNormal;
    var $GameEndJigo;
    var $GameEndTimeoutWin;
@@ -94,7 +96,7 @@ class TournamentLadderProps
          $challenge_range_abs=0, $challenge_range_rel=0, $challenge_range_rating=TLADDER_CHRNG_RATING_UNUSED,
          $challenge_rematch_wait_hours=0,
          $max_defenses=0, $max_defenses1=0, $max_defenses2=0, $max_defenses_start1=0, $max_defenses_start2=0,
-         $max_challenges=0,
+         $max_challenges=0, $determine_challenger=TLP_DETERMINE_CHALL_GEND,
          $game_end_normal=TGEND_CHALLENGER_ABOVE, $game_end_jigo=TGEND_CHALLENGER_BELOW,
          $game_end_timeout_win=TGEND_DEFENDER_BELOW, $game_end_timeout_loss=TGEND_CHALLENGER_LAST,
          $user_join_order=TLP_JOINORDER_REGTIME,
@@ -113,6 +115,7 @@ class TournamentLadderProps
       $this->MaxDefensesStart1 = (int)$max_defenses_start1;
       $this->MaxDefensesStart2 = (int)$max_defenses_start2;
       $this->MaxChallenges = (int)$max_challenges;
+      $this->setDetermineChallenger($determine_challenger);
       $this->setGameEndNormal($game_end_normal);
       $this->setGameEndJigo($game_end_jigo);
       $this->setGameEndTimeoutWin($game_end_timeout_win);
@@ -127,6 +130,13 @@ class TournamentLadderProps
    function to_string()
    {
       return print_r($this, true);
+   }
+
+   function setDetermineChallenger( $determine_challenger )
+   {
+      if( !preg_match( "/^(".CHECK_TLP_DETERMINE_CHALL.")$/", $determine_challenger ) )
+         error('invalid_args', "TournamentLadderProps.setDetermineChallenger($determine_challenger)");
+      $this->DetermineChallenger = $determine_challenger;
    }
 
    function setGameEndNormal( $game_end )
@@ -217,6 +227,7 @@ class TournamentLadderProps
       $data->set_value( 'MaxDefensesStart1', $this->MaxDefensesStart1 );
       $data->set_value( 'MaxDefensesStart2', $this->MaxDefensesStart2 );
       $data->set_value( 'MaxChallenges', $this->MaxChallenges );
+      $data->set_value( 'DetermineChallenger', $this->DetermineChallenger );
       $data->set_value( 'GameEndNormal', $this->GameEndNormal );
       $data->set_value( 'GameEndJigo', $this->GameEndJigo );
       $data->set_value( 'GameEndTimeoutWin', $this->GameEndTimeoutWin );
@@ -351,6 +362,12 @@ class TournamentLadderProps
                                  TournamentLadderProps::echo_rematch_wait($this->ChallengeRematchWaitHours) );
 
       $arr_props[] = T_('You may only have one running game per opponent.#T_ladder');
+
+      // determine challenger
+      if( $this->DetermineChallenger == TLP_DETERMINE_CHALL_GEND )
+         $arr_props[] = T_('The challenger is the player with the lower ladder-position at game-end.');
+      else
+         $arr_props[] = T_('The challenger is the player with the lower ladder-position at game-start.');
 
       // game-end handling
       $arr = array( T_('On game-end the following action is performed:#T_ladder') );
@@ -591,6 +608,9 @@ class TournamentLadderProps
       // Score only has meaning if game is not detached
       if( !($tgame_flags & TG_FLAG_GAME_DETACHED) )
       {
+         if( $tgame_flags & TG_FLAG_CH_DF_SWITCHED )
+            $score = -$score; // role of challenger and defender is reversed
+
          if( $score == -SCORE_TIME ) // game timeout (challenger won)
             $action = $this->GameEndTimeoutWin;
          elseif( $score == SCORE_TIME ) // game timeout (challenger lost)
@@ -658,6 +678,7 @@ class TournamentLadderProps
             @$row['MaxDefensesStart1'],
             @$row['MaxDefensesStart2'],
             @$row['MaxChallenges'],
+            @$row['DetermineChallenger'],
             @$row['GameEndNormal'],
             @$row['GameEndJigo'],
             @$row['GameEndTimeoutWin'],
