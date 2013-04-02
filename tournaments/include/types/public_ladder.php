@@ -48,7 +48,7 @@ class PublicLadderTournament extends TournamentTemplateLadder
    {
       parent::TournamentTemplateLadder(
          TOURNEY_WIZTYPE_PUBLIC_LADDER,
-         T_('Public Ladder (with game restrictions)#ttype') );
+         sprintf( '%s (%s)', T_('Public Ladder'), T_('with game restrictions#ttype')) );
 
       // overwrite tournament-type-specific properties
       $this->need_admin_create_tourney = false;

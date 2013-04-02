@@ -48,7 +48,7 @@ class DgsRoundRobinTournament extends TournamentTemplateRoundRobin
    {
       parent::TournamentTemplateRoundRobin(
          TOURNEY_WIZTYPE_DGS_ROUNDROBIN,
-         T_('DGS Round-Robin with multiple pools (only for Admin)#ttype') );
+         sprintf( '%s (%s)', T_('DGS Round-Robin with multiple pools'), T_('no restrictions, only for Admin#ttype')) );
 
       $this->limits->setLimits( TLIMITS_MAX_TP, true, 2, TP_MAX_COUNT );
    }

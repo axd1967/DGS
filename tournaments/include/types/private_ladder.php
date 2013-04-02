@@ -48,7 +48,7 @@ class PrivateLadderTournament extends TournamentTemplateLadder
    {
       parent::TournamentTemplateLadder(
          TOURNEY_WIZTYPE_PRIVATE_LADDER,
-         T_('Private Ladder (invite-only and with game restrictions)#ttype') );
+         sprintf( '%s (%s)', T_('Private Ladder'), T_('invite-only and with game restrictions#ttype')) );
 
       // overwrite tournament-type-specific properties
       $this->need_admin_create_tourney = false;
