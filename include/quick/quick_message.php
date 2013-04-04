@@ -245,6 +245,7 @@ class QuickHandlerMessage extends QuickHandler
       if( $this->folder_id > 0 )
       {
          $my_id = $this->my_id;
+         $mid = (int)$this->msg_row['ID'];
 
          ta_begin();
          {//HOT-section to move message into target folder
