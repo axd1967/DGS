@@ -31,6 +31,7 @@ require_once 'tournaments/include/tournament.php';
 require_once 'tournaments/include/tournament_cache.php';
 require_once 'tournaments/include/tournament_factory.php';
 require_once 'tournaments/include/tournament_helper.php';
+require_once 'tournaments/include/tournament_log_helper.php';
 require_once 'tournaments/include/tournament_participant.php';
 require_once 'tournaments/include/tournament_properties.php';
 require_once 'tournaments/include/tournament_status.php';
@@ -152,6 +153,7 @@ $GLOBALS['ThePage'] = new Page('TournamentEditParticipant');
    $old_flags = $tp->Flags;
    $old_rating = $tp->Rating;
    $old_start_round = $tp->StartRound;
+   $old_tp_log_str = $tp->build_log_string();
 
    // check + parse edit-form
    list( $vars, $edits, $input_errors ) = parse_edit_form( $tp, $tourney, $ttype );
@@ -198,6 +200,8 @@ $GLOBALS['ThePage'] = new Page('TournamentEditParticipant');
             TournamentParticipant::delete_tournament_participant( $tid, $rid );
             $sys_msg = send_register_notification( 'delete', $tp, $my_id );
             Bulletin::update_count_bulletin_new( "Tournament.edit_participant.del_tp($tid)", $uid );
+            TournamentLogHelper::log_tp_registration_by_director( TLOG_ACT_REMOVE,
+               $tid, $allow_edit_tourney, $uid, 'TournamentParticipant: ' . $tp->build_log_string() );
          }
          ta_end();
 
@@ -249,17 +253,34 @@ $GLOBALS['ThePage'] = new Page('TournamentEditParticipant');
 
             // send notification (if needed)
             if( $old_status == TP_STATUS_APPLY && $tp->Status == TP_STATUS_REGISTER ) // APPLY-ACK
+            {
                $sys_msg = send_register_notification( 'ack_apply', $tp, $my_id );
+               $tlog_chgtype = 'ack_apply';
+            }
             elseif( $old_status != $tp->Status && $tp->Status == TP_STATUS_INVITE ) // customized -> INVITE
             {
                $ntype = ( $rid ) ? $old_status.'_invite' : 'new_invite';
                $sys_msg = send_register_notification( $ntype, $tp, $my_id );
+               $tlog_chgtype = strtolower($ntype);
             }
             else
+            {
                $sys_msg = urlencode( T_('Tournament Registration saved!') );
+               $tlog_chgtype = 'edit';
+            }
 
             if( $rid == 0 ) // new TP
+            {
                Bulletin::update_count_bulletin_new( "Tournament.edit_participant.add_tp($tid)", $uid );
+               TournamentLogHelper::log_tp_registration_by_director( TLOG_ACT_CREATE,
+                  $tid, $allow_edit_tourney, $uid, $tp->build_log_string() );
+            }
+            else
+            {
+               TournamentLogHelper::log_tp_registration_by_director( TLOG_ACT_CHANGE,
+                  $tid, $allow_edit_tourney, $uid,
+                  sprintf('Changes(%s): %s -> %s', $tlog_chgtype, $old_tp_log_str, $tp->build_log_string() ) );
+            }
          }
          ta_end();
 

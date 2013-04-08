@@ -118,5 +118,11 @@ class TournamentLogHelper
       $tlog->insert();
    }
 
+   function log_tp_registration_by_director( $tlog_action, $tid, $tlog_type, $tp_uid, $msg )
+   {
+      $tlog = new Tournamentlog( 0, $tid, 0, 0, $tlog_type, 'TP_Reg', $tlog_action, $tp_uid, $msg );
+      $tlog->insert();
+   }
+
 } // end of 'TournamentLogHelper'
 ?>

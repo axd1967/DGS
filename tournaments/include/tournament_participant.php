@@ -132,14 +132,15 @@ class TournamentParticipant
 
    /*!
     * \brief Checks if tid and uid of this TournamentParticipant-object matches given $tid and $uid.
+    * \param $uid 0 to skip assertion on uid, e.g. for deletion
     * \see load_tournament_participant_by_id()
     */
    function assert_tournament_participant( $dbgmsg, $tid, $uid )
    {
       if( $this->tid != $tid )
-         error('tournament_register_edit_not_allowed', $dbgmsg.".TP.assert_tp.check.tid($tid,$uid,{$this->rid})");
-      if( $this->uid != $uid )
-         error('tournament_register_edit_not_allowed', $dbgmsg.".TP.assert_tp.check.uid($tid,$uid,{$this->rid})");
+         error('tournament_register_edit_not_allowed', $dbgmsg.".TP.assert_tp.check.tid($tid,$uid,{$this->ID})");
+      if( $uid > 0 && $this->uid != $uid )
+         error('tournament_register_edit_not_allowed', $dbgmsg.".TP.assert_tp.check.uid($tid,$uid,{$this->ID})");
    }
 
    function to_string()
@@ -165,6 +166,31 @@ class TournamentParticipant
             . ", Lost=[{$this->Lost}]"
          ;
    }
+
+   function build_log_string()
+   {
+      $out = array();
+      if( $this->ID > 0 )
+         $out[] = "ID=[{$this->ID}]";
+      $out[] = "Status=[{$this->Status}]";
+      $out[] = sprintf('Flags=[0x%x]', $this->Flags);
+      if( !is_null($this->Rating) )
+         $out[] = "Rating=[{$this->Rating}]";
+      $out[] = "StartRound=[{$this->StartRound}]";
+      if( $this->StartRound != $this->NextRound )
+         $out[] = "NextRound=[{$this->NextRound}]";
+      if( (string)$this->Comment != '' )
+         $out[] = "Comment=[{$this->Comment}]";
+      if( (string)$this->Notes != '' )
+         $out[] = "Notes=[{$this->Notes}]";
+      if( (string)$this->UserMessage != '' )
+         $out[] = "UserMsg=[{$this->UserMessage}]";
+      if( (string)$this->AdminMessage != '' )
+         $out[] = "AdmMsg=[{$this->AdminMessage}]";
+      if( $this->Finished + $this->Won + $this->Lost > 0 )
+         $out[] = "Fin/Won/Lost=[{$this->Finished}/{$this->Won}/{$this->Lost}]";
+      return implode(', ', $out);
+   }//build_log_string
 
    function calc_init_status( $rating_use_mode )
    {
@@ -387,6 +413,7 @@ class TournamentParticipant
 
    /*!
     * \brief Loads and returns TournamentParticipant-object for given registration-id ($rid, which is PK).
+    * \param $uid 0 to skip assertion on uid, e.g. for deletion
     * \return TournamentParticipant-object; or null if TP not found
     */
    function load_tournament_participant_by_id( $rid, $tid, $uid )
@@ -552,7 +579,7 @@ class TournamentParticipant
     */
    function delete_tournament_participant( $tid, $rid )
    {
-      $tp = TournamentParticipant::load_tournament_participant_by_id( $rid );
+      $tp = TournamentParticipant::load_tournament_participant_by_id( $rid, $tid, 0 );
       if( is_null($tp) )
          $result = true; // already deleted
       else
