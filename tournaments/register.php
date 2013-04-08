@@ -101,7 +101,7 @@ $GLOBALS['ThePage'] = new Page('TournamentRegistration');
       ta_begin();
       {//HOT-section to delete TP
          TournamentParticipant::delete_tournament_participant( $tid, $rid );
-         Bulletin::update_count_bulletin_new( "Tournament.register.del_tp($tid)", $uid );
+         Bulletin::update_count_bulletin_new( "Tournament.register.del_tp($tid)", $my_id );
       }
       ta_end();
 
