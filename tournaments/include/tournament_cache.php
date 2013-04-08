@@ -368,7 +368,7 @@ class TournamentCache
          $result = (is_null($tp)) ? false : $tp->Status;
       }
       else
-         $result = TournamentParticipants::isTournamentParticipant( $tid, $uid );
+         $result = TournamentParticipant::isTournamentParticipant( $tid, $uid );
 
       return $result;
    }//is_cache_tournament_participant
