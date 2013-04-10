@@ -102,6 +102,8 @@ $GLOBALS['ThePage'] = new Page('TournamentRegistration');
       {//HOT-section to delete TP
          TournamentParticipant::delete_tournament_participant( $tid, $rid );
          Bulletin::update_count_bulletin_new( "Tournament.register.del_tp($tid)", $my_id );
+         TournamentLogHelper::log_tp_registration_by_user( TLOG_ACT_REMOVE,
+            $tid, 'TournamentParticipant: ' . $tp->build_log_string() );
       }
       ta_end();
 
@@ -114,6 +116,7 @@ $GLOBALS['ThePage'] = new Page('TournamentRegistration');
    $old_status = $tp->Status;
    $old_rating = $tp->Rating;
    $old_start_round = $tp->StartRound;
+   $old_tp = clone $tp;
 
    // check + parse edit-form
    $reg_check_type = ( $rid ) ? TCHKTYPE_USER_EDIT : TCHKTYPE_USER_NEW;
@@ -163,6 +166,7 @@ $GLOBALS['ThePage'] = new Page('TournamentRegistration');
             $tp->Flags |= TP_FLAGS_ACK_INVITE;
             $ttype->joinTournament( $tourney, $tp ); // update
             TournamentParticipant::sync_tournament_registeredTP( $tid, $old_status, $tp->Status );
+            TournamentLogHelper::log_change_tp_registration_by_user( $tid, 'ack_invite', $edits, $old_tp, $tp );
          }
          ta_end();
 
@@ -179,6 +183,7 @@ $GLOBALS['ThePage'] = new Page('TournamentRegistration');
             $tp->Flags &= ~TP_FLAGS_ACK_APPLY;
             $tp->persist(); // update
             TournamentParticipant::sync_tournament_registeredTP( $tid, $old_status, $tp->Status );
+            TournamentLogHelper::log_change_tp_registration_by_user( $tid, 'edit_invite', $edits, $old_tp, $tp );
          }
          ta_end();
 
@@ -216,7 +221,15 @@ $GLOBALS['ThePage'] = new Page('TournamentRegistration');
          TournamentParticipant::sync_tournament_registeredTP( $tid, $old_status, $tp->Status );
 
          if( $rid == 0 ) // new TP
+         {
             Bulletin::update_count_bulletin_new( "Tournament.register.add_tp($tid)", $tp->uid );
+            TournamentLogHelper::log_tp_registration_by_user( TLOG_ACT_CREATE, $tid, $tp->build_log_string() );
+         }
+         else
+         {
+            $tlog_chtype = ( $tp->Status == TP_STATUS_APPLY ) ? 'apply' : 'register';
+            TournamentLogHelper::log_change_tp_registration_by_user( $tid, $tlog_chtype, $edits, $old_tp, $tp );
+         }
       }
       ta_end();
 
