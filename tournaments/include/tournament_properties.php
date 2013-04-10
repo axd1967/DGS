@@ -156,7 +156,7 @@ class TournamentProperties
 
       $entityData = $this->fillEntityData();
       $result = $entityData->update( "TournamentProperties::update(%s)" );
-      Tournament::delete_cache_tournament_properties( 'TournamentProperties.update', $this->tid );
+      TournamentProperties::delete_cache_tournament_properties( 'TournamentProperties.update', $this->tid );
       return $result;
    }
 
