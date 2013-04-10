@@ -28,6 +28,7 @@ require_once 'tournaments/include/tournament_cache.php';
 require_once 'tournaments/include/tournament_factory.php';
 require_once 'tournaments/include/tournament_globals.php';
 require_once 'tournaments/include/tournament_helper.php';
+require_once 'tournaments/include/tournament_log_helper.php';
 require_once 'tournaments/include/tournament_properties.php';
 require_once 'tournaments/include/tournament_status.php';
 require_once 'tournaments/include/tournament_utils.php';
@@ -63,7 +64,8 @@ $GLOBALS['ThePage'] = new Page('TournamentPropertiesEdit');
    $t_limits = $ttype->getTournamentLimits();
 
    // create/edit allowed?
-   if( !TournamentHelper::allow_edit_tournaments($tourney, $my_id) )
+   $allow_edit_tourney = TournamentHelper::allow_edit_tournaments($tourney, $my_id);
+   if( !$allow_edit_tourney )
       error('tournament_edit_not_allowed', "Tournament.edit_properties.edit_tournament($tid,$my_id)");
 
    $tprops = TournamentCache::load_cache_tournament_properties( 'Tournament.edit_properties', $tid );
@@ -76,6 +78,7 @@ $GLOBALS['ThePage'] = new Page('TournamentPropertiesEdit');
       $errors[] = $tourney->buildAdminLockText();
 
    // check + parse edit-form
+   $old_tprops = clone $tprops;
    list( $vars, $edits, $input_errors ) = parse_edit_form( $tprops, $t_limits );
    $errors = array_merge( $errors, $input_errors );
 
@@ -83,6 +86,8 @@ $GLOBALS['ThePage'] = new Page('TournamentPropertiesEdit');
    if( @$_REQUEST['tp_save'] && !@$_REQUEST['tp_preview'] && count($errors) == 0 )
    {
       $tprops->update();
+      TournamentLogHelper::log_change_tournament_props( $tid, $allow_edit_tourney, $edits, $old_tprops, $tprops );
+
       jump_to("tournaments/edit_properties.php?tid={$tid}".URI_AMP
             . "sysmsg=". urlencode(T_('Tournament Properties saved!')) );
    }
