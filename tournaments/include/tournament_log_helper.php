@@ -23,6 +23,7 @@ $TranslateGroups[] = "Tournament";
 
 require_once 'tournaments/include/tournament_director.php';
 require_once 'tournaments/include/tournament_log.php';
+require_once 'tournaments/include/tournament_participant.php';
 require_once 'tournaments/include/tournament_utils.php';
 
  /*!
@@ -89,6 +90,7 @@ class TournamentLogHelper
       $tlog->insert();
    }
 
+
    function log_create_tournament_director( $tid, $tlog_type, $director )
    {
       $tlog = new Tournamentlog( 0, $tid, 0, 0, $tlog_type, 'TD_User', TLOG_ACT_CREATE, $director->uid,
@@ -118,9 +120,65 @@ class TournamentLogHelper
       $tlog->insert();
    }
 
+
+   function build_diff_tournament_participant( $old_tp, $new_tp )
+   {
+      static $FMT = '%s [%s] -> [%s]';
+
+      $msg = array( "ID=[{$new_tp->ID}]" );
+      if( $old_tp->Status != $new_tp->Status )
+         $msg[] = sprintf($FMT, 'Status', $old_tp->Status, $new_tp->Status );
+      if( $old_tp->Flags != $new_tp->Flags )
+      {
+         $old_flags = TournamentParticipant::getFlagsText( $old_tp->Flags );
+         $new_flags = TournamentParticipant::getFlagsText( $new_tp->Flags );
+         $msg[] = sprintf($FMT, 'Flags', $old_flags, $new_flags );
+      }
+      if( $old_tp->Rating != $new_tp->Rating )
+         $msg[] = sprintf($FMT, 'Rating', $old_tp->Rating, $new_tp->Rating );
+      if( $old_tp->StartRound != $new_tp->StartRound )
+         $msg[] = sprintf($FMT, 'StartRound', $old_tp->StartRound, $new_tp->StartRound );
+      if( $old_tp->NextRound != $new_tp->NextRound )
+         $msg[] = sprintf($FMT, 'NextRound', $old_tp->NextRound, $new_tp->NextRound );
+      if( $old_tp->Comment != $new_tp->Comment )
+         $msg[] = sprintf($FMT, 'Comment', $old_tp->Comment, $new_tp->Comment );
+      if( $old_tp->Notes != $new_tp->Notes )
+         $msg[] = sprintf($FMT, 'Notes', $old_tp->Notes, $new_tp->Notes );
+      if( $old_tp->UserMessage != $new_tp->UserMessage )
+         $msg[] = sprintf($FMT, 'UserMsg', $old_tp->UserMessage, $new_tp->UserMessage );
+      if( $old_tp->AdminMessage != $new_tp->AdminMessage )
+         $msg[] = sprintf($FMT, 'AdmMsg', $old_tp->AdminMessage, $new_tp->AdminMessage );
+
+      return implode('; ', $msg);
+   }//build_diff_tournament_participant
+
    function log_tp_registration_by_director( $tlog_action, $tid, $tlog_type, $tp_uid, $msg )
    {
       $tlog = new Tournamentlog( 0, $tid, 0, 0, $tlog_type, 'TP_Reg', $tlog_action, $tp_uid, $msg );
+      $tlog->insert();
+   }
+
+   function log_change_tp_registration_by_director( $tid, $tlog_type, $tp_uid, $sub_action, $edits, $old_tp, $new_tp )
+   {
+      $msg = sprintf( 'Change(%s) of [%s]: %s', $sub_action, implode(', ', $edits),
+         TournamentLogHelper::build_diff_tournament_participant($old_tp, $new_tp) );
+
+      $tlog = new Tournamentlog( 0, $tid, 0, 0, $tlog_type, 'TP_Reg', TLOG_ACT_CHANGE, $tp_uid, $msg );
+      $tlog->insert();
+   }
+
+   function log_tp_registration_by_user( $tlog_action, $tid, $msg )
+   {
+      $tlog = new Tournamentlog( 0, $tid, 0, 0, TLOG_TYPE_USER, 'TP_Reg', $tlog_action, 0, $msg );
+      $tlog->insert();
+   }
+
+   function log_change_tp_registration_by_user( $tid, $sub_action, $edits, $old_tp, $new_tp )
+   {
+      $msg = sprintf( 'Change(%s) of [%s]: %s', $sub_action, implode(', ', $edits),
+         TournamentLogHelper::build_diff_tournament_participant($old_tp, $new_tp) );
+
+      $tlog = new Tournamentlog( 0, $tid, 0, 0, TLOG_TYPE_USER, 'TP_Reg', TLOG_ACT_CHANGE, 0, $msg );
       $tlog->insert();
    }
 
