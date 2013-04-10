@@ -16,6 +16,70 @@ Developers INFO:
 ChangeLog
 ------------------------------------------------------------------
 
+2013-04-10 juga
+
+   * tournaments/include/tournament_ladder.php (TournamentLadder.remove_user_from_ladder):
+   - bugfix: missed locking of nested read-access to db-tables TournamentParticipant & Players
+
+   * tournaments/include/tournament_log_helper.php (TournamentLogHelper.build_diff_tournament_participant,
+       ~.log_change_tp_registration_by_director, ~.log_tp_registration_by_user,
+       ~.log_change_tp_registration_by_user),
+     tournaments/edit_participant.php,
+     tournaments/register.php:
+   - added tournament-registration actions in tournament-log by user to register / apply /
+     ack-invite / reject-invite / remove registration
+   - changed tournament-log diff-format for change of tournament-participant by director
+
+   * include/quick/quick_game_notes.php (QuickHandlerGameNotes.prepare),
+     include/game_functions.php (GameHelper.update_game_notes):
+   - bugfix: use default non-hidden for Hidden-state on saving game-notes
+
+2013-04-08 juga
+
+   * tournaments/include/tournament_participant.php (TournamentParticipant.assert_tournament_participant,
+       ~.build_log_string, ~.delete_tournament_participant),
+     tournaments/include/tournament_log_helper.php (TournamentLogHelper.log_tp_registration_by_director),
+     tournaments/edit_participant.php:
+   - added tournament-log for actions by T-director to register / invite / edit-registration /
+     delete of user
+   - bugfix: don't assert user-id on removal of registration of tourney-user
+
+2013-04-05 juga
+
+   * include/quick/quick_message.php (QuickHandlerMessage.process_cmd_info):
+   - bugfix for previous refactoring: missed local var that have been refactored away
+
+2013-04-02 juga
+
+   * tournaments/include/tournament_ladder_props.php (class TournamentLadderProps,
+       ~.setDetermineChallenger, ~.fillEntityData, ~.build_notes_props, ~.calc_game_end_action,
+       ~.new_from_row),
+     tournaments/include/tournament_helper.php (TournamentHelper.process_tournament_ladder_game_end),
+     tournaments/include/tournament_ladder.php (TournamentLadder.process_game_end),
+     tournaments/include/tournament_games.php (TournamentGames.getFlagsText),
+     tournaments/include/tournament_globals.php,
+     scripts/updates/database_changes_1_0_15_to_1_0_16.mysql,
+     specs/db/dragon-ddl.sql, specs/db/table-Tournaments.txt,
+     tournaments/ladder/edit_props.php (parse_edit_form):
+   - ladder-tournament: added ladder-property to determine challenger-role at game-start or game-end
+-----------
+-- determine challenger-role at game-start or game-end
+ALTER TABLE TournamentLadderProps
+   ADD DetermineChallenger enum('GAME_START','GAME_END') NOT NULL default 'GAME_END' AFTER MaxChallenges ;
+-----------
+
+   * tournaments/ladder/challenge.php:
+   - bugfix: missed changed func-signature of echo_off_time() to fix: weekend-clock-icon
+     was always shown on weekend independent from game-WeekendClock-setting
+
+2013-04-01 juga
+
+   * include/message_functions.php (MessageControl.handle_send_message),
+     include/globals.php (MOVEMSG_REPLY_TO_MAIN_FOLDER),
+     include/std_functions.php (send_message):
+   - bugfix: move normal message on replying from Reply to Main-folder,
+     if no manual target folder selected
+
 2013-03-31 juga
 
    * include/quick/quick_message_list.php (class QuickHandlerMessageList, ~.canHandle,

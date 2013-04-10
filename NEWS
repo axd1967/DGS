@@ -70,6 +70,7 @@ Copyright (C) 2001-2013  Erik Ouchterlony, Jens-Uwe Gaspar
             * Challenge range (absolute, relative, rating)
             * Challenge rematch wait-time
             * Max. Defenses, Max. Challenges
+            * Challenger-role at game-start or game-end
             * Game-end handling
             * Long user-absence handling
             * Rank-History period-length [in months]
@@ -158,6 +159,7 @@ Copyright (C) 2001-2013  Erik Ouchterlony, Jens-Uwe Gaspar
 
    * Fixed handling of default-profile and search of current filter-values
    * Fixed showing of weekend-clock icon for games with running weekend-clock
+   * Fixed default folder-moving on replying of normal message in Reply-folder
 
 
    Code improvements:
