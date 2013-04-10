@@ -260,7 +260,7 @@ class TournamentLadder
       //HOT-section to remove user from ladder and eventually from TournamentParticipant-table
       db_lock( "$xdbgmsg.upd_tladder",
          "TournamentLadder WRITE, TournamentLadder AS TL READ, " .
-         "TournamentParticipant WRITE, " . // needed for nested-lock for process-game-end
+         "TournamentParticipant WRITE, TournamentParticipant AS TP READ, Players AS TPP READ, " . // for nested-lock for process-game-end
          "Tournament WRITE" ); // needed for nested-lock for delete-TP
       {//LOCK TournamentLadder
          $this->delete();
