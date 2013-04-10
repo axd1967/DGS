@@ -26,6 +26,7 @@ require_once 'tournaments/include/tournament_director.php';
 require_once 'tournaments/include/tournament_log.php';
 require_once 'tournaments/include/tournament_news.php';
 require_once 'tournaments/include/tournament_participant.php';
+require_once 'tournaments/include/tournament_properties.php';
 require_once 'tournaments/include/tournament_utils.php';
 
  /*!
@@ -200,7 +201,8 @@ class TournamentLogHelper
       }
       if( $old_t->StartTime != $new_t->StartTime )
          $msg[] = sprintf(self::$DIFF_FMT, 'StartTime',
-            date(DATE_FMT, $old_t->StartTime), date(DATE_FMT, $new_t->StartTime) );
+            ( $old_t->StartTime > 0 ? date(DATE_FMT, $old_t->StartTime) : ''),
+            ( $new_t->StartTime > 0 ? date(DATE_FMT, $new_t->StartTime) : '') );
       if( $old_t->Owner_ID != $new_t->Owner_ID )
          $msg[] = sprintf(self::$DIFF_FMT, 'Owner', $old_t->Owner_ID, $new_t->Owner_ID );
       if( $old_t->Title != $new_t->Title )
@@ -227,7 +229,8 @@ class TournamentLogHelper
       }
       if( $old_tn->Published != $new_tn->Published )
          $msg[] = sprintf(self::$DIFF_FMT, 'Published',
-            date(DATE_FMT, $old_tn->Published), date(DATE_FMT, $new_tn->Published) );
+            ( $old_tn->Published > 0 ? date(DATE_FMT, $old_tn->Published) : ''),
+            ( $new_tn->Published > 0 ? date(DATE_FMT, $new_tn->Published) : '') );
       if( $old_tn->Subject != $new_tn->Subject )
          $msg[] = sprintf(self::$DIFF_FMT, 'Subject', $old_tn->Subject, $new_tn->Subject );
       if( $old_tn->Text != $new_tn->Text )
@@ -237,6 +240,37 @@ class TournamentLogHelper
          sprintf( "Change of [%s]: %s", implode(', ', $edits), implode('; ', $msg) ));
       $tlog->insert();
    }//log_change_tournament_news
+
+   function log_change_tournament_props( $tid, $tlog_type, $edits, $old_tpr, $new_tpr )
+   {
+      $msg = array();
+      if( $old_tpr->Notes != $new_tpr->Notes )
+         $msg[] = sprintf(self::$DIFF_FMT, 'Notes', $old_tpr->Notes, $new_tpr->Notes );
+      if( $old_tpr->MinParticipants != $new_tpr->MinParticipants )
+         $msg[] = sprintf(self::$DIFF_FMT, 'MinParticipants', $old_tpr->MinParticipants, $new_tpr->MinParticipants );
+      if( $old_tpr->MaxParticipants != $new_tpr->MaxParticipants )
+         $msg[] = sprintf(self::$DIFF_FMT, 'MaxParticipants', $old_tpr->MaxParticipants, $new_tpr->MaxParticipants );
+      if( $old_tpr->RatingUseMode != $new_tpr->RatingUseMode )
+         $msg[] = sprintf(self::$DIFF_FMT, 'RatingUseMode', $old_tpr->RatingUseMode, $new_tpr->RatingUseMode );
+      if( $old_tpr->RegisterEndTime != $new_tpr->RegisterEndTime )
+         $msg[] = sprintf(self::$DIFF_FMT, 'RegEndTime',
+            ( $old_tpr->RegisterEndTime > 0 ? date(DATE_FMT, $old_tpr->RegisterEndTime) : ''),
+            ( $new_tpr->RegisterEndTime > 0 ? date(DATE_FMT, $new_tpr->RegisterEndTime) : '') );
+      if( $old_tpr->UserMinRating != $new_tpr->UserMinRating )
+         $msg[] = sprintf(self::$DIFF_FMT, 'UserMinRating', $old_tpr->UserMinRating, $new_tpr->UserMinRating );
+      if( $old_tpr->UserMaxRating != $new_tpr->UserMaxRating )
+         $msg[] = sprintf(self::$DIFF_FMT, 'UserMaxRating', $old_tpr->UserMaxRating, $new_tpr->UserMaxRating );
+      if( $old_tpr->UserRated != $new_tpr->UserRated )
+         $msg[] = sprintf(self::$DIFF_FMT, 'UserRated', $old_tpr->UserRated, $new_tpr->UserRated );
+      if( $old_tpr->UserMinGamesFinished != $new_tpr->UserMinGamesFinished )
+         $msg[] = sprintf(self::$DIFF_FMT, 'UserMinGamesFinished', $old_tpr->UserMinGamesFinished, $new_tpr->UserMinGamesFinished );
+      if( $old_tpr->UserMinGamesRated != $new_tpr->UserMinGamesRated )
+         $msg[] = sprintf(self::$DIFF_FMT, 'UserMinGamesRated', $old_tpr->UserMinGamesRated, $new_tpr->UserMinGamesRated );
+
+      $tlog = new Tournamentlog( 0, $tid, 0, 0, $tlog_type, 'TPR_Data', TLOG_ACT_CHANGE, 0,
+         sprintf( "Change of [%s]: %s", implode(', ', $edits), implode('; ', $msg) ));
+      $tlog->insert();
+   }//log_change_tournament_props
 
 } // end of 'TournamentLogHelper'
 ?>
