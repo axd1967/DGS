@@ -1402,8 +1402,8 @@ class GameHelper
    function update_game_notes( $dbgmsg, $gid, $uid, $hidden, $notes )
    {
       $dbgmsg = "GameHelper::update_game_notes($gid,$uid,$hidden).$dbgmsg";
-      if( $hidden != 'Y' && $hidden != 'N' )
-         error('invalid_args', $dbgmsg.'check.hidden');
+      if( $hidden != 'Y' )
+         $hidden = 'N'; // use default (not hidden) for invalid args
 
       ta_begin();
       {//HOT-section to update private game-notes

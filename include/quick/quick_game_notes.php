@@ -105,6 +105,8 @@ class QuickHandlerGameNotes extends QuickHandler
             $this->hidden = @$gn_row['Hidden'];
             $this->notes = @$gn_row['Notes'];
          }
+         else
+            $this->hidden = 'N'; // default for new game-notes
       }
    }//prepare
 
