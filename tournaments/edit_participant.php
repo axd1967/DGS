@@ -153,7 +153,7 @@ $GLOBALS['ThePage'] = new Page('TournamentEditParticipant');
    $old_flags = $tp->Flags;
    $old_rating = $tp->Rating;
    $old_start_round = $tp->StartRound;
-   $old_tp_log_str = $tp->build_log_string();
+   $old_tp = clone $tp;
 
    // check + parse edit-form
    list( $vars, $edits, $input_errors ) = parse_edit_form( $tp, $tourney, $ttype );
@@ -277,9 +277,8 @@ $GLOBALS['ThePage'] = new Page('TournamentEditParticipant');
             }
             else
             {
-               TournamentLogHelper::log_tp_registration_by_director( TLOG_ACT_CHANGE,
-                  $tid, $allow_edit_tourney, $uid,
-                  sprintf('Changes(%s): %s -> %s', $tlog_chgtype, $old_tp_log_str, $tp->build_log_string() ) );
+               TournamentLogHelper::log_change_tp_registration_by_director( $tid, $allow_edit_tourney, $uid,
+                  $tlog_chgtype, $edits, $old_tp, $tp );
             }
          }
          ta_end();
