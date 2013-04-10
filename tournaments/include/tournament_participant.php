@@ -173,7 +173,7 @@ class TournamentParticipant
       if( $this->ID > 0 )
          $out[] = "ID=[{$this->ID}]";
       $out[] = "Status=[{$this->Status}]";
-      $out[] = sprintf('Flags=[0x%x]', $this->Flags);
+      $out[] = sprintf('Flags=[%s]', TournamentParticipant::getFlagsText($this->Flags));
       if( !is_null($this->Rating) )
          $out[] = "Rating=[{$this->Rating}]";
       $out[] = "StartRound=[{$this->StartRound}]";
