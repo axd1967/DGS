@@ -24,6 +24,7 @@ $TranslateGroups[] = "Tournament";
 require_once 'tournaments/include/tournament.php';
 require_once 'tournaments/include/tournament_director.php';
 require_once 'tournaments/include/tournament_log.php';
+require_once 'tournaments/include/tournament_news.php';
 require_once 'tournaments/include/tournament_participant.php';
 require_once 'tournaments/include/tournament_utils.php';
 
@@ -211,6 +212,31 @@ class TournamentLogHelper
          sprintf( "Change of [%s]: %s", implode(', ', $edits), implode('; ', $msg) ));
       $tlog->insert();
    }//log_change_tournament
+
+
+   function log_change_tournament_news( $tlog_action, $tid, $tlog_type, $edits, $old_tn, $new_tn )
+   {
+      $msg = array( "ID=[{$new_tn->ID}]" );
+      if( $old_tn->Status != $new_tn->Status )
+         $msg[] = sprintf(self::$DIFF_FMT, 'Status', $old_tn->Status, $new_tn->Status );
+      if( $old_tn->Flags != $new_tn->Flags )
+      {
+         $old_flags = TournamentNews::getFlagsText( $old_tn->Flags );
+         $new_flags = TournamentNews::getFlagsText( $new_tn->Flags );
+         $msg[] = sprintf(self::$DIFF_FMT, 'Flags', $old_flags, $new_flags );
+      }
+      if( $old_tn->Published != $new_tn->Published )
+         $msg[] = sprintf(self::$DIFF_FMT, 'Published',
+            date(DATE_FMT, $old_tn->Published), date(DATE_FMT, $new_tn->Published) );
+      if( $old_tn->Subject != $new_tn->Subject )
+         $msg[] = sprintf(self::$DIFF_FMT, 'Subject', $old_tn->Subject, $new_tn->Subject );
+      if( $old_tn->Text != $new_tn->Text )
+         $msg[] = sprintf(self::$DIFF_FMT, 'Text', $old_tn->Text, $new_tn->Text );
+
+      $tlog = new Tournamentlog( 0, $tid, 0, 0, $tlog_type, 'TN_News', $tlog_action, 0,
+         sprintf( "Change of [%s]: %s", implode(', ', $edits), implode('; ', $msg) ));
+      $tlog->insert();
+   }//log_change_tournament_news
 
 } // end of 'TournamentLogHelper'
 ?>

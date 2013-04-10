@@ -25,6 +25,7 @@ require_once 'include/gui_functions.php';
 require_once 'include/form_functions.php';
 require_once 'tournaments/include/tournament.php';
 require_once 'tournaments/include/tournament_helper.php';
+require_once 'tournaments/include/tournament_log_helper.php';
 require_once 'tournaments/include/tournament_news.php';
 require_once 'tournaments/include/tournament_utils.php';
 
@@ -87,13 +88,17 @@ $GLOBALS['ThePage'] = new Page('TournamentNewsEdit');
    );
 
    // check + parse edit-form
+   $old_tnews = clone $tnews;
    list( $vars, $edits, $input_errors ) = parse_edit_form( $tnews );
    $errors = $input_errors;
 
    // save tournament-news-object with values from edit-form
    if( @$_REQUEST['tn_save'] && !@$_REQUEST['tn_preview'] && count($errors) == 0 )
    {
+      $tlog_action = ( $tnews->ID > 0 ) ? TLOG_ACT_CHANGE : TLOG_ACT_CREATE;
       $tnews->persist();
+      TournamentLogHelper::log_change_tournament_news( $tlog_action, $tid, $allow_edit_tourney, $edits, $old_tnews, $tnews );
+
       jump_to("tournaments/edit_news.php?tid=$tid".URI_AMP."tnid=$tnews_id".URI_AMP
             . "sysmsg=". urlencode(T_('Tournament News saved!')) );
    }
