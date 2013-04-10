@@ -903,7 +903,7 @@ class Table
       {
          if( $i >= TABLE_MAX_SORT )
             break;
-         if( !$sd || !$this->Is_Column_Displayed[$sk] ) // num && !removed-col
+         if( !$sd || !@$this->Is_Column_Displayed[$sk] ) // num && !removed-col
             continue;
          $field = (string)@$this->Tableheads[$sk]['Sort_String'];
          if( !$field )
