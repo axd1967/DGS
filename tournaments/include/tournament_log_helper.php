@@ -21,6 +21,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 $TranslateGroups[] = "Tournament";
 
+require_once 'tournaments/include/tournament.php';
 require_once 'tournaments/include/tournament_director.php';
 require_once 'tournaments/include/tournament_log.php';
 require_once 'tournaments/include/tournament_participant.php';
@@ -41,6 +42,8 @@ require_once 'tournaments/include/tournament_utils.php';
 
 class TournamentLogHelper
 {
+   private static $DIFF_FMT = '%s [%s] -> [%s]';
+
    // ------------ static functions ----------------------------
    //new Tournamentlog( $id=0, $tid=0, $uid=0, $date=0, $type='', $object='T', $action='', $actuid=0, $message='' )
 
@@ -82,7 +85,7 @@ class TournamentLogHelper
       $tlog = new Tournamentlog( 0, $tid, 0, 0, $tlog_type, 'TG_Data', TLOG_ACT_CHANGE, 0,
          sprintf("Change of [%s] for TG#%s with GID#%s:\n%s", implode(', ', $edits), $gid, $gid, implode('; ', $msg) ));
       $tlog->insert();
-   }
+   }//log_tournament_game_end
 
    function log_tournament_game_add_time( $tid, $tlog_type, $msg )
    {
@@ -105,14 +108,14 @@ class TournamentLogHelper
 
       $msg = array();
       if( $old_flags != $new_flags )
-         $msg[] = sprintf('TD-Flags [%s] -> [%s]', $old_flags, $new_flags );
+         $msg[] = sprintf(self::$DIFF_FMT, 'TD-Flags', $old_flags, $new_flags );
       if( $old_comment != $director->Comment )
-         $msg[] = sprintf('TD-Comment [%s] -> [%s]', $old_comment, $director->Comment );
+         $msg[] = sprintf(self::$DIFF_FMT, 'TD-Comment', $old_comment, $director->Comment );
 
       $tlog = new Tournamentlog( 0, $tid, 0, 0, $tlog_type, 'TD_Props', TLOG_ACT_CHANGE, $director->uid,
          sprintf( "Change of [%s]: %s", implode(', ', $edits), implode('; ', $msg) ));
       $tlog->insert();
-   }
+   }//log_change_tournament_director
 
    function log_remove_tournament_director( $tid, $tlog_type, $tdir_uid )
    {
@@ -123,31 +126,29 @@ class TournamentLogHelper
 
    function build_diff_tournament_participant( $old_tp, $new_tp )
    {
-      static $FMT = '%s [%s] -> [%s]';
-
       $msg = array( "ID=[{$new_tp->ID}]" );
       if( $old_tp->Status != $new_tp->Status )
-         $msg[] = sprintf($FMT, 'Status', $old_tp->Status, $new_tp->Status );
+         $msg[] = sprintf(self::$DIFF_FMT, 'Status', $old_tp->Status, $new_tp->Status );
       if( $old_tp->Flags != $new_tp->Flags )
       {
          $old_flags = TournamentParticipant::getFlagsText( $old_tp->Flags );
          $new_flags = TournamentParticipant::getFlagsText( $new_tp->Flags );
-         $msg[] = sprintf($FMT, 'Flags', $old_flags, $new_flags );
+         $msg[] = sprintf(self::$DIFF_FMT, 'Flags', $old_flags, $new_flags );
       }
       if( $old_tp->Rating != $new_tp->Rating )
-         $msg[] = sprintf($FMT, 'Rating', $old_tp->Rating, $new_tp->Rating );
+         $msg[] = sprintf(self::$DIFF_FMT, 'Rating', $old_tp->Rating, $new_tp->Rating );
       if( $old_tp->StartRound != $new_tp->StartRound )
-         $msg[] = sprintf($FMT, 'StartRound', $old_tp->StartRound, $new_tp->StartRound );
+         $msg[] = sprintf(self::$DIFF_FMT, 'StartRound', $old_tp->StartRound, $new_tp->StartRound );
       if( $old_tp->NextRound != $new_tp->NextRound )
-         $msg[] = sprintf($FMT, 'NextRound', $old_tp->NextRound, $new_tp->NextRound );
+         $msg[] = sprintf(self::$DIFF_FMT, 'NextRound', $old_tp->NextRound, $new_tp->NextRound );
       if( $old_tp->Comment != $new_tp->Comment )
-         $msg[] = sprintf($FMT, 'Comment', $old_tp->Comment, $new_tp->Comment );
+         $msg[] = sprintf(self::$DIFF_FMT, 'Comment', $old_tp->Comment, $new_tp->Comment );
       if( $old_tp->Notes != $new_tp->Notes )
-         $msg[] = sprintf($FMT, 'Notes', $old_tp->Notes, $new_tp->Notes );
+         $msg[] = sprintf(self::$DIFF_FMT, 'Notes', $old_tp->Notes, $new_tp->Notes );
       if( $old_tp->UserMessage != $new_tp->UserMessage )
-         $msg[] = sprintf($FMT, 'UserMsg', $old_tp->UserMessage, $new_tp->UserMessage );
+         $msg[] = sprintf(self::$DIFF_FMT, 'UserMsg', $old_tp->UserMessage, $new_tp->UserMessage );
       if( $old_tp->AdminMessage != $new_tp->AdminMessage )
-         $msg[] = sprintf($FMT, 'AdmMsg', $old_tp->AdminMessage, $new_tp->AdminMessage );
+         $msg[] = sprintf(self::$DIFF_FMT, 'AdmMsg', $old_tp->AdminMessage, $new_tp->AdminMessage );
 
       return implode('; ', $msg);
    }//build_diff_tournament_participant
@@ -181,6 +182,35 @@ class TournamentLogHelper
       $tlog = new Tournamentlog( 0, $tid, 0, 0, TLOG_TYPE_USER, 'TP_Reg', TLOG_ACT_CHANGE, 0, $msg );
       $tlog->insert();
    }
+
+
+   function log_change_tournament( $tid, $tlog_type, $edits, $old_t, $new_t )
+   {
+      $msg = array();
+      if( $old_t->Scope != $new_t->Scope )
+         $msg[] = sprintf(self::$DIFF_FMT, 'Scope', $old_t->Scope, $new_t->Scope );
+      if( $old_t->Status != $new_t->Status )
+         $msg[] = sprintf(self::$DIFF_FMT, 'Status', $old_t->Status, $new_t->Status );
+      if( $old_t->Flags != $new_t->Flags )
+      {
+         $old_flags = $old_t->formatFlags('', 0, /*short*/true, null, /*html*/false );
+         $new_flags = $new_t->formatFlags('', 0, /*short*/true, null, /*html*/false );
+         $msg[] = sprintf(self::$DIFF_FMT, 'Flags', $old_flags, $new_flags );
+      }
+      if( $old_t->StartTime != $new_t->StartTime )
+         $msg[] = sprintf(self::$DIFF_FMT, 'StartTime',
+            date(DATE_FMT, $old_t->StartTime), date(DATE_FMT, $new_t->StartTime) );
+      if( $old_t->Owner_ID != $new_t->Owner_ID )
+         $msg[] = sprintf(self::$DIFF_FMT, 'Owner', $old_t->Owner_ID, $new_t->Owner_ID );
+      if( $old_t->Title != $new_t->Title )
+         $msg[] = sprintf(self::$DIFF_FMT, 'Title', $old_t->Title, $new_t->Title );
+      if( $old_t->Description != $new_t->Description )
+         $msg[] = sprintf(self::$DIFF_FMT, 'Descr', $old_t->Description, $new_t->Description );
+
+      $tlog = new Tournamentlog( 0, $tid, 0, 0, $tlog_type, 'T_Data', TLOG_ACT_CHANGE, 0,
+         sprintf( "Change of [%s]: %s", implode(', ', $edits), implode('; ', $msg) ));
+      $tlog->insert();
+   }//log_change_tournament
 
 } // end of 'TournamentLogHelper'
 ?>
