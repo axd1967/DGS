@@ -27,6 +27,7 @@ require_once 'tournaments/include/tournament.php';
 require_once 'tournaments/include/tournament_cache.php';
 require_once 'tournaments/include/tournament_factory.php';
 require_once 'tournaments/include/tournament_helper.php';
+require_once 'tournaments/include/tournament_log_helper.php';
 require_once 'tournaments/include/tournament_status.php';
 require_once 'tournaments/include/tournament_utils.php';
 
@@ -81,6 +82,7 @@ $GLOBALS['ThePage'] = new Page('TournamentEdit');
       $errors[] = $tourney->buildAdminLockText();
 
    // check + parse edit-form
+   $old_tourney = clone $tourney;
    list( $vars, $edits, $input_errors ) = parse_edit_form( $tourney, $ttype, $is_admin );
    $errors = array_merge( $errors, $input_errors );
 
@@ -88,6 +90,8 @@ $GLOBALS['ThePage'] = new Page('TournamentEdit');
    if( @$_REQUEST['t_save'] && !@$_REQUEST['t_preview'] && count($errors) == 0 )
    {
       $tourney->update();
+      TournamentLogHelper::log_change_tournament( $tid, $allow_edit_tourney, $edits, $old_tourney, $tourney );
+
       jump_to("tournaments/edit_tournament.php?tid={$tourney->ID}".URI_AMP
             . "sysmsg=". urlencode(T_('Tournament saved!')) );
    }
