@@ -3039,7 +3039,7 @@ class GameSetupChecker
 
    function add_default_values_info()
    {
-      $this->errors[] = T_('Invalid values have been replaced with default-values!');
+      $this->errors[] = T_('Some invalid values may have been replaced with default-values!');
    }
 
    function is_error_field( $field )
@@ -3108,6 +3108,17 @@ class GameSetupChecker
       $timeunit_can = @$_REQUEST['timeunit_can'];
       $byoperiods_can = (int)@$_REQUEST['byoperiods_can'];
 
+      if( $byoyomitype == BYOTYPE_JAPANESE && $byoperiods_jap <= 0 )
+      {
+         $this->errors[] = T_('Invalid extra periods for Japanese byoyomi');
+         $this->error_fields['byoperiods_jap'] = $has_err = 1;
+      }
+      elseif( $byoyomitype == BYOTYPE_CANADIAN && $byoperiods_can <= 0 )
+      {
+         $this->errors[] = T_('Invalid number of stones for Canadian byoyomi');
+         $this->error_fields['byoperiods_can'] = $has_err = 1;
+      }
+
       $byotimevalue_fis = (int)@$_REQUEST['byotimevalue_fis'];
       $timeunit_fis = @$_REQUEST['timeunit_fis'];
 
@@ -3130,8 +3141,8 @@ class GameSetupChecker
 
    function check_adjust_komi()
    {
-      // adj-komi-check only for: std new-game
-      if( $this->view != GSETVIEW_STANDARD )
+      // komi-check only for: invite, std new-game
+      if( $this->view != GSC_VIEW_INVITE && $this->view != GSETVIEW_STANDARD )
          return;
 
       $has_err = false;
