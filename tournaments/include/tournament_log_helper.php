@@ -27,6 +27,7 @@ require_once 'tournaments/include/tournament_log.php';
 require_once 'tournaments/include/tournament_news.php';
 require_once 'tournaments/include/tournament_participant.php';
 require_once 'tournaments/include/tournament_properties.php';
+require_once 'tournaments/include/tournament_rules.php';
 require_once 'tournaments/include/tournament_utils.php';
 
  /*!
@@ -185,7 +186,6 @@ class TournamentLogHelper
       $tlog->insert();
    }
 
-
    function log_change_tournament( $tid, $tlog_type, $edits, $old_t, $new_t )
    {
       $msg = array();
@@ -215,7 +215,6 @@ class TournamentLogHelper
       $tlog->insert();
    }//log_change_tournament
 
-
    function log_change_tournament_news( $tlog_action, $tid, $tlog_type, $edits, $old_tn, $new_tn )
    {
       $msg = array( "ID=[{$new_tn->ID}]" );
@@ -240,6 +239,7 @@ class TournamentLogHelper
          sprintf( "Change of [%s]: %s", implode(', ', $edits), implode('; ', $msg) ));
       $tlog->insert();
    }//log_change_tournament_news
+
 
    function log_change_tournament_props( $tid, $tlog_type, $edits, $old_tpr, $new_tpr )
    {
@@ -271,6 +271,59 @@ class TournamentLogHelper
          sprintf( "Change of [%s]: %s", implode(', ', $edits), implode('; ', $msg) ));
       $tlog->insert();
    }//log_change_tournament_props
+
+   function log_change_tournament_rules( $tid, $tlog_type, $edits, $old_trule, $new_trule )
+   {
+      $msg = array( "ID=[{$new_trule->ID}]" );
+      if( $old_trule->Flags != $new_trule->Flags )
+      {
+         $old_flags = TournamentRules::getFlagsText( $old_trule->Flags );
+         $new_flags = TournamentRules::getFlagsText( $new_trule->Flags );
+         $msg[] = sprintf(self::$DIFF_FMT, 'Flags', $old_flags, $new_flags );
+      }
+      if( $old_trule->Notes != $new_trule->Notes )
+         $msg[] = sprintf(self::$DIFF_FMT, 'Notes', $old_trule->Notes, $new_trule->Notes );
+      if( $old_trule->Ruleset != $new_trule->Ruleset )
+         $msg[] = sprintf(self::$DIFF_FMT, 'Ruleset', $old_trule->Ruleset, $new_trule->Ruleset );
+      if( $old_trule->Size != $new_trule->Size )
+         $msg[] = sprintf(self::$DIFF_FMT, 'Size', $old_trule->Size, $new_trule->Size );
+      if( $old_trule->Handicaptype != $new_trule->Handicaptype )
+         $msg[] = sprintf(self::$DIFF_FMT, 'Handicaptype', $old_trule->Handicaptype, $new_trule->Handicaptype );
+      if( $old_trule->Handicap != $new_trule->Handicap )
+         $msg[] = sprintf(self::$DIFF_FMT, 'Handicap', $old_trule->Handicap, $new_trule->Handicap );
+      if( $old_trule->Komi != $new_trule->Komi )
+         $msg[] = sprintf(self::$DIFF_FMT, 'Komi', $old_trule->Komi, $new_trule->Komi );
+      if( $old_trule->AdjKomi != $new_trule->AdjKomi )
+         $msg[] = sprintf(self::$DIFF_FMT, 'AdjKomi', $old_trule->AdjKomi, $new_trule->AdjKomi );
+      if( $old_trule->JigoMode != $new_trule->JigoMode )
+         $msg[] = sprintf(self::$DIFF_FMT, 'JigoMode', $old_trule->JigoMode, $new_trule->JigoMode );
+      if( $old_trule->AdjHandicap != $new_trule->AdjHandicap )
+         $msg[] = sprintf(self::$DIFF_FMT, 'AdjHandicap', $old_trule->AdjHandicap, $new_trule->AdjHandicap );
+      if( $old_trule->MinHandicap != $new_trule->MinHandicap )
+         $msg[] = sprintf(self::$DIFF_FMT, 'MinHandicap', $old_trule->MinHandicap, $new_trule->MinHandicap );
+      if( $old_trule->MaxHandicap != $new_trule->MaxHandicap )
+         $msg[] = sprintf(self::$DIFF_FMT, 'MaxHandicap', $old_trule->MaxHandicap, $new_trule->MaxHandicap );
+      if( $old_trule->StdHandicap != $new_trule->StdHandicap )
+         $msg[] = sprintf(self::$DIFF_FMT, 'StdHandicap', $old_trule->StdHandicap, $new_trule->StdHandicap );
+      if( $old_trule->Maintime != $new_trule->Maintime )
+         $msg[] = sprintf(self::$DIFF_FMT, 'Maintime', $old_trule->Maintime, $new_trule->Maintime );
+      if( $old_trule->Byotype != $new_trule->Byotype )
+         $msg[] = sprintf(self::$DIFF_FMT, 'Byotype', $old_trule->Byotype, $new_trule->Byotype );
+      if( $old_trule->Byotime != $new_trule->Byotime )
+         $msg[] = sprintf(self::$DIFF_FMT, 'Byotime', $old_trule->Byotime, $new_trule->Byotime );
+      if( $old_trule->Byoperiods != $new_trule->Byoperiods )
+         $msg[] = sprintf(self::$DIFF_FMT, 'Byoperiods', $old_trule->Byoperiods, $new_trule->Byoperiods );
+      if( $old_trule->WeekendClock != $new_trule->WeekendClock )
+         $msg[] = sprintf(self::$DIFF_FMT, 'WeekendClock', $old_trule->WeekendClock, $new_trule->WeekendClock );
+      if( $old_trule->Rated != $new_trule->Rated )
+         $msg[] = sprintf(self::$DIFF_FMT, 'Rated', $old_trule->Rated, $new_trule->Rated );
+      if( $old_trule->ShapeID != $new_trule->ShapeID )
+         $msg[] = sprintf(self::$DIFF_FMT, 'ShapeID', $old_trule->ShapeID, $new_trule->ShapeID );
+
+      $tlog = new Tournamentlog( 0, $tid, 0, 0, $tlog_type, 'TRULE_Data', TLOG_ACT_CHANGE, 0,
+         sprintf( "Change of [%s]: %s", implode(', ', $edits), implode('; ', $msg) ));
+      $tlog->insert();
+   }//log_change_tournament_rules
 
 } // end of 'TournamentLogHelper'
 ?>
