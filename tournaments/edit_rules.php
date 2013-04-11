@@ -27,6 +27,7 @@ require_once 'include/message_functions.php';
 require_once 'include/db/shape.php';
 require_once 'tournaments/include/tournament_cache.php';
 require_once 'tournaments/include/tournament_helper.php';
+require_once 'tournaments/include/tournament_log_helper.php';
 require_once 'tournaments/include/tournament_participant.php';
 require_once 'tournaments/include/tournament_rules.php';
 require_once 'tournaments/include/tournament_status.php';
@@ -61,7 +62,8 @@ $GLOBALS['ThePage'] = new Page('TournamentRulesEdit');
    $tstatus = new TournamentStatus( $tourney );
 
    // create/edit allowed?
-   if( !TournamentHelper::allow_edit_tournaments($tourney, $my_id) )
+   $allow_edit_tourney = TournamentHelper::allow_edit_tournaments($tourney, $my_id);
+   if( !$allow_edit_tourney )
       error('tournament_edit_not_allowed', "Tournament.edit_rules.edit_tournament($tid,$my_id)");
 
    $trule = TournamentCache::load_cache_tournament_rules( 'Tournament.edit_rules', $tid );
@@ -72,6 +74,7 @@ $GLOBALS['ThePage'] = new Page('TournamentRulesEdit');
       $errors[] = $tourney->buildAdminLockText();
 
    // check + parse edit-form (notes)
+   $old_trule = clone $trule;
    list( $vars, $edits, $input_errors, $gsc ) = parse_edit_form( $trule );
    $errors = array_merge( $errors, $input_errors );
 
@@ -83,6 +86,8 @@ $GLOBALS['ThePage'] = new Page('TournamentRulesEdit');
    if( @$_REQUEST['tr_save'] && !@$_REQUEST['tr_preview'] && count($errors) == 0 )
    {
       $trule->update();
+      TournamentLogHelper::log_change_tournament_rules( $tid, $allow_edit_tourney, $edits, $old_trule, $trule );
+
       jump_to("tournaments/edit_rules.php?tid={$tid}".URI_AMP
             . "sysmsg=". urlencode(T_('Tournament Rules saved!')) );
    }
@@ -166,7 +171,10 @@ function parse_edit_form( &$trule )
    {
       $gsc = GameSetupChecker::check_fields( GSETVIEW_STANDARD );
       if( $gsc->has_errors() )
+      {
          $gsc->add_default_values_info();
+         $errors = array_merge( $errors, $gsc->get_errors() );
+      }
    }
    else
       $gsc = null;
