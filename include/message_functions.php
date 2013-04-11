@@ -80,6 +80,7 @@ function init_standard_folders()
  * \param $my_ID user-id for invite/dispute, then $gid is game-id;
  *     my_ID='redraw' for invite/dispute/tourney and $gid then is the $_POST[] of the form asking preview
  * \param $gid if null, shape + snapshot args are read from $_REQUEST (normally used for Invite and NewGame)
+ *     can be game-id, or array with URL-args, e.g. for tournament-rules (see also $my_ID)
  * \param $map_ratings:
  *     if set, contain map with keys (rating1, rating2) ->
  *     then add probable game-settings for conventional/proper-handicap-type
@@ -1285,6 +1286,8 @@ function interpret_time_limit_forms($byoyomitype, $timevalue, $timeunit,
          $byohours = 0;
 
       $byoperiods = (int)$byoperiods_jap;
+      if( $byoperiods < 1 )
+         $byoperiods = 1;
       if( $byohours * $byoperiods > $max )
          $byoperiods = floor($max/$byohours);
    }
@@ -1297,7 +1300,8 @@ function interpret_time_limit_forms($byoyomitype, $timevalue, $timeunit,
          $byohours = 0;
 
       $byoperiods = (int)$byoperiods_can;
-      if( $byoperiods < 1 ) $byoperiods = 1;
+      if( $byoperiods < 1 )
+         $byoperiods = 1;
    }
    else // if( $byoyomitype == BYOTYPE_FISCHER )
    {
