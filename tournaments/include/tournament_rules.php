@@ -299,14 +299,6 @@ class TournamentRules
       $vars['max_handicap'] = min( MAX_HANDICAP, max( DEFAULT_MAX_HANDICAP, (int)$this->MaxHandicap ));
       $vars['stdhandicap'] = ($this->StdHandicap) ? 'Y' : 'N';
 
-      $vars['byoyomitype'] = $this->Byotype;
-      if( $this->Byotype == BYOTYPE_JAPANESE )
-         $suffix = '_jap';
-      elseif( $this->Byotype == BYOTYPE_CANADIAN )
-         $suffix = '_can';
-      elseif( $this->Byotype == BYOTYPE_FISCHER )
-         $suffix = '_fis';
-
       $vars['timeunit'] = 'hours';
       $vars['timevalue'] = (int)$this->Maintime;
       time_convert_to_longer_unit( $vars['timevalue'], $vars['timeunit'] );
@@ -314,10 +306,14 @@ class TournamentRules
       $byo_timeunit  = 'hours';
       $byo_timevalue = (int)$this->Byotime;
       time_convert_to_longer_unit( $byo_timevalue, $byo_timeunit );
-      $vars["timeunit$suffix"] = $byo_timeunit;
-      $vars["byotimevalue$suffix"] = $byo_timevalue;
-      if( $this->Byotype != BYOTYPE_FISCHER )
-         $vars["byoperiods$suffix"] = (int)$this->Byoperiods;
+      $vars['byoyomitype'] = $this->Byotype;
+      foreach( array( 'jap', 'can', 'fis' ) as $suffix )
+      {
+         $vars["timeunit_$suffix"] = $byo_timeunit;
+         $vars["byotimevalue_$suffix"] = $byo_timevalue;
+         if( $suffix == 'jap' || $suffix == 'can' )
+            $vars["byoperiods_$suffix"] = (int)$this->Byoperiods;
+      }
 
       $vars['weekendclock'] = ($this->WeekendClock) ? 'Y' : 'N';
       $vars['rated'] = ($this->Rated) ? 'Y' : 'N';
@@ -437,7 +433,7 @@ class TournamentRules
       // handle shape-game
       $shape_id = trim(@$vars['shape']);
       $shape_snapshot = '';
-      if( (string)$shape_id != '' )
+      if( $shape_id )
       {
          if( !is_numeric($shape_id) || $shape_id < 0 )
             $errors[] = ErrorCode::get_error_text('bad_shape_id');
