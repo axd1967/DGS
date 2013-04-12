@@ -68,11 +68,21 @@ require_once 'tournaments/include/tournament_log.php';
    // init
    $page = 'show_tournament_log.php';
 
+   $types_arr = array(
+         T_('All') => '',
+         'CR' => "TLOG.Type='".TLOG_TYPE_CRON."'",
+         'TA' => "TLOG.Type='".TLOG_TYPE_ADMIN."'",
+         'TO' => "TLOG.Type='".TLOG_TYPE_OWNER."'",
+         'TD' => "TLOG.Type='".TLOG_TYPE_DIRECTOR."'",
+         'U'  => "TLOG.Type='".TLOG_TYPE_USER."'",
+      );
+
    // table filters
    $tlogfilter = new SearchFilter();
    $tlogfilter->add_filter( 1, 'Numeric', 'TLOG.ID', true);
    $tlogfilter->add_filter( 4, 'RelativeDate', 'TLOG.Date', true,
       array( FC_TIME_UNITS => FRDTU_ALL_ABS, FC_SIZE => 8 ));
+   $tlogfilter->add_filter( 5, 'Selection', $types_arr, true );
    $tlogfilter->init(); // parse current value from _GET
 
    $table = new Table( 'tournamentlog', $page );
@@ -99,7 +109,7 @@ require_once 'tournaments/include/tournament_log.php';
          'P.Handle AS P_Handle', 'P.Rating2 AS P_Rating',
          'AP.Handle AS AP_Handle', 'AP.Rating2 AS AP_Rating',
       SQLP_FROM,
-         'INNER JOIN Players AS P ON P.ID=TLOG.uid',
+         'LEFT JOIN Players AS P ON P.ID=TLOG.uid', // left-join for cron-user with uid 0
          'LEFT JOIN Players AS AP ON AP.ID=TLOG.actuid' ));
    if( $tid > 0 )
       $qsql->add_part( SQLP_WHERE, "TLOG.tid=$tid" );
@@ -123,8 +133,13 @@ require_once 'tournaments/include/tournament_log.php';
       if( $table->Is_Column_Displayed[2] )
          $row_str[2] = anchor($base_path."tournaments/view_tournament.php?tid=".$tlog->tid, $tlog->tid);
       if( $table->Is_Column_Displayed[3] )
-         $row_str[3] = user_reference( REF_LINK, 1, '', $tlog->uid, $orow['P_Handle'], '' ) . ', ' .
-            echo_rating($orow['P_Rating'], /*show%*/false, $tlog->uid, /*engl*/false, /*short*/true);
+      {
+         if( $tlog->uid > 0 )
+            $row_str[3] = user_reference( REF_LINK, 1, '', $tlog->uid, $orow['P_Handle'], '' ) . ', ' .
+               echo_rating($orow['P_Rating'], /*show%*/false, $tlog->uid, /*engl*/false, /*short*/true);
+         else
+            $row_str[3] = 'CRON';
+      }
       if( $table->Is_Column_Displayed[4] )
          $row_str[4] = ( $tlog->Date > 0 ) ? date(DATE_FMT3, $tlog->Date) : '';
       if( $table->Is_Column_Displayed[5] )
@@ -157,7 +172,7 @@ require_once 'tournaments/include/tournament_log.php';
 
    $notes = array();
    $notes[] = array( 'Types:',
-      '<b>TA</b> = tournament admin, <b>TO</b> = tournament owner, <b>TD</b> = tournament director, <b>U</b> = user',
+      '<b>CR</b> = CRON, <b>TA</b> = tournament admin, <b>TO</b> = tournament owner, <b>TD</b> = tournament director, <b>U</b> = user',
       );
    $notes[] = array( 'Object types:',
       '<b>T</b> = tournament, <b>TD</b> = tournament director, <b>TG</b> = tournament game',
