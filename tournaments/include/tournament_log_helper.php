@@ -325,5 +325,11 @@ class TournamentLogHelper
       $tlog->insert();
    }//log_change_tournament_rules
 
+   function log_retreat_from_tournament_ladder( $tid, $msg )
+   {
+      $tlog = new Tournamentlog( 0, $tid, 0, 0, TLOG_TYPE_USER, 'TL_User', TLOG_ACT_REMOVE, 0, 'Retreat from Ladder; ' . $msg );
+      $tlog->insert();
+   }
+
 } // end of 'TournamentLogHelper'
 ?>

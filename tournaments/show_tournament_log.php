@@ -167,7 +167,7 @@ require_once 'tournaments/include/tournament_log.php';
       '<b>TRR</b> = tournament round-robin, <b>TRND</b> = tournament round, <b>TRULE</b> = tournament rule',
       );
    $notes[] = array( 'Object subtypes:',
-      'Data, Game, Lock, News, NextRound, Pool, Props = Properties, Rank, Reg = Registration, Round, Status',
+      'Data, Game, Lock, News, NextRound, Pool, Props (=Properties), Rank, Reg (=Registration), Round, Status, User',
       );
    $notes[] = array( 'Actions:',
       'Add, Change, Clear, Create, Remove, Seed, Set, Start',

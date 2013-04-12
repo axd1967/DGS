@@ -154,6 +154,15 @@ class TournamentLadder
       return print_r($this, true);
    }
 
+   function build_log_string()
+   {
+      return sprintf("TournamentLadder: rid=[%s], uid=[%s], Created=[%s], RankChanged=[%s], Rank=[%s], BestRank=[%s], StartRank=[%s], PeriodRank=[%s], HistoryRank=[%s]",
+         $this->rid, $this->uid,
+         ($this->Created > 0 ? date(DATE_FMT, $this->Created) : ''),
+         ($this->RankChanged > 0 ? date(DATE_FMT, $this->RankChanged) : ''),
+         $this->Rank, $this->BestRank, $this->StartRank, $this->PeriodRank, $this->HistoryRank );
+   }
+
    function build_rank_kept( $timefmt=null, $zero_val='' )
    {
       if( $this->RankChanged <= 0 )

@@ -25,6 +25,7 @@ require_once 'include/form_functions.php';
 require_once 'tournaments/include/tournament_cache.php';
 require_once 'tournaments/include/tournament_status.php';
 require_once 'tournaments/include/tournament_ladder.php';
+require_once 'tournaments/include/tournament_log_helper.php';
 require_once 'tournaments/include/tournament_utils.php';
 
 $GLOBALS['ThePage'] = new Page('TournamentLadderRetreat');
@@ -78,6 +79,7 @@ $GLOBALS['ThePage'] = new Page('TournamentLadderRetreat');
          $tladder->remove_user_from_ladder( 'Tournament.ladder_retreat',
             /*upd-rank*/false, $my_id, $player_row['Handle'], /*nfy-user*/false,
             T_('User retreated from the ladder tournament.') );
+         TournamentLogHelper::log_retreat_from_tournament_ladder( $tid, $tladder->build_log_string() );
       }
       ta_end();
 
