@@ -1140,6 +1140,7 @@ function draw_game_info( $game_row, $game_setup, $board, $tourney )
 
    $cols = 4;
    $to_move = get_to_move( $game_row, 'game.bad_ToMove_ID' );
+   $img_tomove = SMALL_SPACING . image( $base_path.'images/backward.gif', T_('Player to move'), null, 'class="InTextImage"' );
 
    $color_class = 'class="InTextStone"';
    if( $game_row['Status'] == GAME_STATUS_KOMI )
@@ -1174,7 +1175,8 @@ function draw_game_info( $game_row, $game_setup, $board, $tourney )
    echo "<td class=Color>$icon_col_b</td>\n";
    echo '<td class=Name>',
       user_reference( REF_LINK, 1, '', $game_row['Black_ID'], $game_row['Blackname'], $game_row['Blackhandle']),
-      ( $blackOffTime ? SMALL_SPACING . $blackOffTime : '' ),
+      ( $to_move == BLACK ? $img_tomove : '' ),
+      ( $blackOffTime ? $blackOffTime : '' ),
       "</td>\n";
 
    echo '<td class=Ratings>'
@@ -1204,7 +1206,8 @@ function draw_game_info( $game_row, $game_setup, $board, $tourney )
    echo "<td class=Color>$icon_col_w</td>\n";
    echo '<td class=Name>',
       user_reference( REF_LINK, 1, '', $game_row['White_ID'], $game_row['Whitename'], $game_row['Whitehandle']),
-      ( $whiteOffTime ? SMALL_SPACING . $whiteOffTime : '' ),
+      ( $to_move == WHITE ? $img_tomove : '' ),
+      ( $whiteOffTime ? $whiteOffTime : '' ),
       "</td>\n";
 
    echo '<td class=Ratings>'
