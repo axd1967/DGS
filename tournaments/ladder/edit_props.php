@@ -29,6 +29,7 @@ require_once 'tournaments/include/tournament_helper.php';
 require_once 'tournaments/include/tournament_status.php';
 require_once 'tournaments/include/tournament_ladder.php';
 require_once 'tournaments/include/tournament_ladder_props.php';
+require_once 'tournaments/include/tournament_log_helper.php';
 require_once 'tournaments/include/tournament_utils.php';
 
 $GLOBALS['ThePage'] = new Page('TournamentLadderPropsEdit');
@@ -64,7 +65,8 @@ $GLOBALS['ThePage'] = new Page('TournamentLadderPropsEdit');
    $t_limits = $ttype->getTournamentLimits();
 
    // create/edit allowed?
-   if( !TournamentHelper::allow_edit_tournaments($tourney, $my_id) )
+   $allow_edit_tourney = TournamentHelper::allow_edit_tournaments($tourney, $my_id);
+   if( !$allow_edit_tourney )
       error('tournament_edit_not_allowed', "Tournament.ladder.edit_props.edit_tournament($tid,$my_id)");
 
    $tl_props = TournamentCache::load_cache_tournament_ladder_props( 'Tournament.ladder.edit_props', $tid );
@@ -75,6 +77,7 @@ $GLOBALS['ThePage'] = new Page('TournamentLadderPropsEdit');
       $errors[] = $tourney->buildAdminLockText();
 
    // check + parse edit-form
+   $old_tl_props = clone $tl_props;
    list( $vars, $edits, $input_errors ) = parse_edit_form( $tl_props, $t_limits );
    $errors = array_merge( $errors, $input_errors, $tl_props->check_properties() );
 
@@ -85,6 +88,7 @@ $GLOBALS['ThePage'] = new Page('TournamentLadderPropsEdit');
       {//HOT-section to update TournamentLadderProps
          $tl_props->update();
          TournamentLadder::delete_cache_tournament_ladder( "Tournament.ladder.edit_props($tid)", $tid );
+         TournamentLogHelper::log_change_tournament_ladder_props( $tid, $allow_edit_tourney, $edits, $old_tl_props, $tl_props );
       }
       ta_end();
       jump_to("tournaments/ladder/edit_props.php?tid={$tid}".URI_AMP

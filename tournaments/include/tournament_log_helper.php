@@ -24,6 +24,7 @@ $TranslateGroups[] = "Tournament";
 require_once 'tournaments/include/tournament.php';
 require_once 'tournaments/include/tournament_director.php';
 require_once 'tournaments/include/tournament_log.php';
+require_once 'tournaments/include/tournament_ladder_props.php';
 require_once 'tournaments/include/tournament_news.php';
 require_once 'tournaments/include/tournament_participant.php';
 require_once 'tournaments/include/tournament_properties.php';
@@ -324,6 +325,57 @@ class TournamentLogHelper
          sprintf( "Change of [%s]: %s", implode(', ', $edits), implode('; ', $msg) ));
       $tlog->insert();
    }//log_change_tournament_rules
+
+   function log_change_tournament_ladder_props( $tid, $tlog_type, $edits, $old_tlp, $new_tlp )
+   {
+      $msg = array();
+      if( $old_tlp->ChallengeRangeAbsolute != $new_tlp->ChallengeRangeAbsolute )
+         $msg[] = sprintf(self::$DIFF_FMT, 'ChallengeRangeAbsolute', $old_tlp->ChallengeRangeAbsolute, $new_tlp->ChallengeRangeAbsolute );
+      if( $old_tlp->ChallengeRangeRelative != $new_tlp->ChallengeRangeRelative )
+         $msg[] = sprintf(self::$DIFF_FMT, 'ChallengeRangeRelative', $old_tlp->ChallengeRangeRelative, $new_tlp->ChallengeRangeRelative );
+      if( $old_tlp->ChallengeRangeRating != $new_tlp->ChallengeRangeRating )
+         $msg[] = sprintf(self::$DIFF_FMT, 'ChallengeRangeRating', $old_tlp->ChallengeRangeRating, $new_tlp->ChallengeRangeRating );
+      if( $old_tlp->ChallengeRematchWaitHours != $new_tlp->ChallengeRematchWaitHours )
+         $msg[] = sprintf(self::$DIFF_FMT, 'ChallengeRematchWaitHours', $old_tlp->ChallengeRematchWaitHours, $new_tlp->ChallengeRematchWaitHours );
+      if( $old_tlp->MaxDefenses != $new_tlp->MaxDefenses )
+         $msg[] = sprintf(self::$DIFF_FMT, 'MaxDefenses', $old_tlp->MaxDefenses, $new_tlp->MaxDefenses );
+      if( $old_tlp->MaxDefenses1 != $new_tlp->MaxDefenses1 )
+         $msg[] = sprintf(self::$DIFF_FMT, 'MaxDefenses1', $old_tlp->MaxDefenses1, $new_tlp->MaxDefenses1 );
+      if( $old_tlp->MaxDefenses2 != $new_tlp->MaxDefenses2 )
+         $msg[] = sprintf(self::$DIFF_FMT, 'MaxDefenses2', $old_tlp->MaxDefenses2, $new_tlp->MaxDefenses2 );
+      if( $old_tlp->MaxDefensesStart1 != $new_tlp->MaxDefensesStart1 )
+         $msg[] = sprintf(self::$DIFF_FMT, 'MaxDefensesStart1', $old_tlp->MaxDefensesStart1, $new_tlp->MaxDefensesStart1 );
+      if( $old_tlp->MaxDefensesStart2 != $new_tlp->MaxDefensesStart2 )
+         $msg[] = sprintf(self::$DIFF_FMT, 'MaxDefensesStart2', $old_tlp->MaxDefensesStart2, $new_tlp->MaxDefensesStart2 );
+      if( $old_tlp->MaxChallenges != $new_tlp->MaxChallenges )
+         $msg[] = sprintf(self::$DIFF_FMT, 'MaxChallenges', $old_tlp->MaxChallenges, $new_tlp->MaxChallenges );
+      if( $old_tlp->DetermineChallenger != $new_tlp->DetermineChallenger )
+         $msg[] = sprintf(self::$DIFF_FMT, 'DetermineChallenger', $old_tlp->DetermineChallenger, $new_tlp->DetermineChallenger );
+      if( $old_tlp->GameEndNormal != $new_tlp->GameEndNormal )
+         $msg[] = sprintf(self::$DIFF_FMT, 'GameEndNormal', $old_tlp->GameEndNormal, $new_tlp->GameEndNormal );
+      if( $old_tlp->GameEndJigo != $new_tlp->GameEndJigo )
+         $msg[] = sprintf(self::$DIFF_FMT, 'GameEndJigo', $old_tlp->GameEndJigo, $new_tlp->GameEndJigo );
+      if( $old_tlp->GameEndTimeoutWin != $new_tlp->GameEndTimeoutWin )
+         $msg[] = sprintf(self::$DIFF_FMT, 'GameEndTimeoutWin', $old_tlp->GameEndTimeoutWin, $new_tlp->GameEndTimeoutWin );
+      if( $old_tlp->GameEndTimeoutLoss != $new_tlp->GameEndTimeoutLoss )
+         $msg[] = sprintf(self::$DIFF_FMT, 'GameEndTimeoutLoss', $old_tlp->GameEndTimeoutLoss, $new_tlp->GameEndTimeoutLoss );
+      if( $old_tlp->UserJoinOrder != $new_tlp->UserJoinOrder )
+         $msg[] = sprintf(self::$DIFF_FMT, 'UserJoinOrder', $old_tlp->UserJoinOrder, $new_tlp->UserJoinOrder );
+      if( $old_tlp->UserAbsenceDays != $new_tlp->UserAbsenceDays )
+         $msg[] = sprintf(self::$DIFF_FMT, 'UserAbsenceDays', $old_tlp->UserAbsenceDays, $new_tlp->UserAbsenceDays );
+      if( $old_tlp->RankPeriodLength != $new_tlp->RankPeriodLength )
+         $msg[] = sprintf(self::$DIFF_FMT, 'RankPeriodLength', $old_tlp->RankPeriodLength, $new_tlp->RankPeriodLength );
+      if( $old_tlp->CrownKingHours != $new_tlp->CrownKingHours )
+         $msg[] = sprintf(self::$DIFF_FMT, 'CrownKingHours', $old_tlp->CrownKingHours, $new_tlp->CrownKingHours );
+      if( $old_tlp->CrownKingStart != $new_tlp->CrownKingStart )
+         $msg[] = sprintf(self::$DIFF_FMT, 'CrownKingStart',
+            ( $old_tlp->CrownKingStart > 0 ? date(DATE_FMT, $old_tlp->CrownKingStart) : ''),
+            ( $new_tlp->CrownKingStart > 0 ? date(DATE_FMT, $new_tlp->CrownKingStart) : '') );
+
+      $tlog = new Tournamentlog( 0, $tid, 0, 0, $tlog_type, 'TLP_Data', TLOG_ACT_CHANGE, 0,
+         sprintf( "Change of [%s]: %s", implode(', ', $edits), implode('; ', $msg) ));
+      $tlog->insert();
+   }//log_change_tournament_ladder_props
 
 
    function log_retreat_from_tournament_ladder( $tid, $msg )
