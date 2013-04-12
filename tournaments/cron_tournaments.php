@@ -59,6 +59,7 @@ if( ALLOW_TOURNAMENTS && !$is_down )
 
    // ---------- BEGIN ------------------------------
 
+   $player_row['ID'] = 0; // for tourney-log
    $player_row['Handle'] = '#CRONT'; // for tourney-tables ChangedBy-fields
    $tg_order = "ORDER BY TG.tid ASC, TG.Lastchanged ASC, TG.ID ASC";
    $thelper = new TournamentHelper();

@@ -73,7 +73,7 @@ class Tournamentlog
 
    /*!
     * \brief Constructs Tournamentlog-object with specified arguments.
-    * \param $uid user-id, if <=0 use use my-id
+    * \param $uid user-id, if <=0 use my-id
     * \param $date creation-date, if <=0 use current date
     * \param $type TLOG_TYPE_..., if empty determine from players admin-level
     */
@@ -83,7 +83,7 @@ class Tournamentlog
 
       $this->ID = (int)$id;
       $this->tid = (int)$tid;
-      $this->uid = ( is_numeric($uid) && $uid > 0 ) ? (int)$uid : $player_row['ID'];
+      $this->uid = ( is_numeric($uid) && $uid > 0 ) ? (int)$uid : (int)@$player_row['ID'];
       $this->Date = ( is_numeric($date) && $date > 0 ) ? (int)$date : $NOW;
       $this->setType( $type );
       $this->Object = $object;
@@ -183,6 +183,8 @@ class Tournamentlog
             @$row['actuid'],
             @$row['Message']
          );
+      if( @$row['uid'] == 0 ) // special handling for CRON
+         $tlog->uid = 0;
       return $tlog;
    }
 

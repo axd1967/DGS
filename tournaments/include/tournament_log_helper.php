@@ -390,5 +390,11 @@ class TournamentLogHelper
       $tlog->insert();
    }
 
+   function log_tournament_ladder_game_end( $tid, $msg )
+   {
+      $tlog = new Tournamentlog( 0, $tid, 0, 0, TLOG_TYPE_CRON, 'TL_Data', TLOG_ACT_CHANGE, 0, $msg );
+      $tlog->insert();
+   }
+
 } // end of 'TournamentLogHelper'
 ?>

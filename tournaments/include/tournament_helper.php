@@ -32,6 +32,7 @@ require_once 'tournaments/include/tournament_games.php';
 require_once 'tournaments/include/tournament_globals.php';
 require_once 'tournaments/include/tournament_ladder.php';
 require_once 'tournaments/include/tournament_ladder_props.php';
+require_once 'tournaments/include/tournament_log_helper.php';
 require_once 'tournaments/include/tournament_participant.php';
 require_once 'tournaments/include/tournament_pool.php';
 require_once 'tournaments/include/tournament_pool_classes.php';
@@ -107,6 +108,8 @@ class TournamentHelper
          if( $tl_rank_ch > 0 && $tl_rank_df > 0 && $tl_rank_ch < $tl_rank_df ) // role of challenger and defender reversed
             $tgame->Flags |= TG_FLAG_CH_DF_SWITCHED;
       }
+      else
+         $challrole_uid = $tgame->Challenger_uid;
 
       // process game-end
       $game_end_action = $tl_props->calc_game_end_action( $tgame->Score, $tgame->Flags );
@@ -138,6 +141,15 @@ class TournamentHelper
             TournamentParticipant::update_game_end_stats( $tid, $tgame->Challenger_rid, $tgame->Challenger_uid, $tgame->Score );
             TournamentParticipant::update_game_end_stats( $tid, $tgame->Defender_rid, $tgame->Defender_uid, -$tgame->Score );
          }
+
+         TournamentLogHelper::log_tournament_ladder_game_end( $tid,
+            sprintf('Game End(game %s): Users role:rid/uid:Rank %s:%s/%s:%d vs %s:%s/%s:%s; T-Game(%s): Status=[%s], Flags=[%s], Score=[%s] => Action %s',
+               $tgame->gid,
+               ( $tgame->Flags & TG_FLAG_CH_DF_SWITCHED ? 'Defender' : 'Challenger' ),
+               $tgame->Challenger_rid, $tgame->Challenger_uid, $tl_rank_ch,
+               ( $tgame->Flags & TG_FLAG_CH_DF_SWITCHED ? 'Challenger' : 'Defender' ),
+               $tgame->Defender_rid, $tgame->Defender_uid, $tl_rank_df,
+               $tgame->ID, $tgame->Status, $tgame->formatFlags(), $tgame->Score, $game_end_action ));
       }
       ta_end();
 
