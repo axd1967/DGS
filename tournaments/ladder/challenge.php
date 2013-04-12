@@ -31,6 +31,7 @@ require_once 'tournaments/include/tournament_cache.php';
 require_once 'tournaments/include/tournament_helper.php';
 require_once 'tournaments/include/tournament_ladder.php';
 require_once 'tournaments/include/tournament_ladder_props.php';
+require_once 'tournaments/include/tournament_log_helper.php';
 require_once 'tournaments/include/tournament_rules.php';
 require_once 'tournaments/include/tournament_participant.php';
 require_once 'tournaments/include/tournament_properties.php';
@@ -156,6 +157,10 @@ $GLOBALS['ThePage'] = new Page('TournamentLadderChallenge');
          // clear caches
          TournamentGames::delete_cache_tournament_games( $dbgmsg, $tid );
          TournamentLadder::delete_cache_tournament_ladder( $dbgmsg, $tid );
+
+         TournamentLogHelper::log_tournament_ladder_challenge_user( $tid,
+            sprintf('Challenger: %s; Defender: %s -> game %s',
+               $tladder_ch->build_log_string(1), $tladder_df->build_log_string(1), $gid ));
       }
       ta_end();
 
