@@ -32,6 +32,7 @@ require_once 'tournaments/include/tournament_cache.php';
 require_once 'tournaments/include/tournament_games.php';
 require_once 'tournaments/include/tournament_globals.php';
 require_once 'tournaments/include/tournament_ladder_props.php';
+require_once 'tournaments/include/tournament_log_helper.php';
 require_once 'tournaments/include/tournament_participant.php';
 require_once 'tournaments/include/tournament_properties.php';
 require_once 'tournaments/include/tournament_utils.php';
@@ -257,6 +258,7 @@ class TournamentLadder
 
    /*!
     * \brief Removes user from ladder with given tournament tid, remove TP and notifies opponents of running games.
+    * \param $tlog_type TLOG_TYPE_...
     * \param $upd_rank false (normal), true = update TL.RankChanged-field
     * \param $nfy_user true = notify user, false = user not informed about own user-removal
     * \return is-deleted
@@ -265,14 +267,15 @@ class TournamentLadder
     * \note running games for tournament are "detached" (made unrated + detached-flag set)
     * \note IMPORTANT NOTE: expecting to run in HOT-section
     */
-   function remove_user_from_ladder( $dbgmsg, $upd_rank, $rm_uid, $rm_uhandle, $nfy_user, $reason=null )
+   function remove_user_from_ladder( $dbgmsg, $tlog_type, $tlog_msg, $upd_rank, $rm_uid, $rm_uhandle, $nfy_user, $reason=null )
    {
       $xdbgmsg = "$dbgmsg.TL.remove_user_from_ladder({$this->tid},{$this->rid},{$this->uid},$rm_uid,$nfy_user)";
 
       //HOT-section to remove user from ladder and eventually from TournamentParticipant-table
       db_lock( "$xdbgmsg.upd_tladder",
          "TournamentLadder WRITE, TournamentLadder AS TL READ, " .
-         "TournamentParticipant WRITE, TournamentParticipant AS TP READ, Players AS TPP READ, " . // for nested-lock for process-game-end
+         "TournamentParticipant WRITE, " .
+         "TournamentParticipant AS TP READ, Players AS TPP READ, " . // nested-lock for process-game-end
          "Tournament WRITE" ); // needed for nested-lock for delete-TP
       {//LOCK TournamentLadder
          $this->delete();
@@ -315,29 +318,32 @@ class TournamentLadder
             TournamentLadder::notify_user_removal( "$xdbgmsg.user_nfy", $this->tid, $rm_uid, $rm_uhandle, $reason );
 
          // reset Players.CountBulletinNew (as visibility of T-typed bulletins can change)
-         if( $is_deleted && $this->uid > 0 )
+         if( $this->uid > 0 )
             db_query( "$xdbgmsg.upd_cntbullnew",
                "UPDATE Players SET CountBulletinNew=-1 WHERE ID='{$this->uid}' LIMIT 1" );
+
+         TournamentLogHelper::log_delete_user_from_tournament_ladder( $this->tid, $tlog_type, $this, $arr_gid, $tlog_msg );
       }
 
       return $is_deleted;
    }//remove_user_from_ladder
 
    /*! \brief Changes rank of current user to new-rank (moving up or down). */
-   function change_user_rank( $new_rank )
+   function change_user_rank( $new_rank, $tlog_type )
    {
       if( $this->Rank == $new_rank ) // no rank-change
          return true;
       $dbgmsg = "TournamentLadder.change_user_rank({$this->tid},$new_rank)";
 
       //HOT-section to change user-rank
-      db_lock( $dbgmsg, "TournamentLadder WRITE, TournamentLadder AS TL READ" );
+      db_lock( $dbgmsg, "TournamentLadder WRITE, TournamentLadder AS TL READ, Tournamentlog WRITE" );
       {//LOCK TournamentLadder
          $tl2 = TournamentLadder::load_tournament_ladder_by_rank($this->tid, $new_rank);
          if( is_null($tl2) )
             error('bad_tournament', "$dbgmsg.load2");
 
          $success = false;
+         $old_rank = $this->Rank;
          if( abs($this->Rank - $tl2->Rank ) == 1 ) // switch direct neighbours
             $success = $this->switch_user_rank( $tl2, false );
          else
@@ -352,7 +358,10 @@ class TournamentLadder
          }
 
          if( $success )
+         {
             TournamentLadder::delete_cache_tournament_ladder( $dbgmsg, $this->tid );
+            TournamentLogHelper::log_change_rank_tournament_ladder( $this->tid, $tlog_type, $this->uid, $old_rank, $new_rank );
+         }
       }
       db_unlock();
 
@@ -548,7 +557,7 @@ class TournamentLadder
     * \brief Adds user given by User-object for tournament tid at bottom of ladder.
     * \note IMPORTANT NOTE: caller needs to open TA with HOT-section!!
     */
-   function add_user_to_ladder( $tid, $uid, $tl_props=null, $tprops=null )
+   function add_user_to_ladder( $tid, $uid, $tlog_type, $tl_props=null, $tprops=null )
    {
       if( $uid <= GUESTS_ID_MAX )
          error('invalid_user', "TournamentLadder::add_user_to_ladder.check_user($tid)");
@@ -585,7 +594,11 @@ class TournamentLadder
       if( $success )
       {
          $success = TournamentLadder::fix_tournament_games_for_rejoin( $tid, $tp->ID, $uid );
+
          TournamentLadder::delete_cache_tournament_ladder( "TournamentLadder::add_user_to_ladder($tid,$uid)", $tid );
+
+         $user_rank = TournamentLadder::load_rank($tid, 0, $uid);
+         TournamentLogHelper::log_add_user_tournament_ladder( $tid, $tlog_type, $tl_props->UserJoinOrder, $uid, $user_rank );
       }
 
       return $success;
@@ -946,7 +959,10 @@ class TournamentLadder
       return $tg;
    }
 
-   /*! \brief Processes tournament-game-end for given tournament-game $tgame and game-end-action. */
+   /*!
+    * \brief Processes tournament-game-end for given tournament-game $tgame and game-end-action.
+    * \note Only called from CRON! (for tournament-logging)
+    */
    function process_game_end( $tid, $tgame, $game_end_action )
    {
       if( $game_end_action == TGEND_NO_CHANGE )
@@ -975,6 +991,7 @@ class TournamentLadder
     * \note $ch_rid and $df_rid must already reflect switched role of challenger/defender determined
     *       by TournamentLadderProps.DetermineChallenger
     * \note Special change-user-rank, handling missing challenger/defender cases, also updating BestRank + RankChanged-fields
+    * \note Only called from CRON! (for tournament-logging)
     */
    private static function _process_game_end( $tid, $ch_rid, $df_rid, $game_end_action )
    {
@@ -1041,7 +1058,8 @@ class TournamentLadder
 
          case TGEND_CHALLENGER_DELETE:
          {
-            $success = $tladder_ch->remove_user_from_ladder( $dbgmsg, /*upd-rank*/true, $tladder_ch->uid, '', /*nfy-user*/true );
+            $success = $tladder_ch->remove_user_from_ladder( $dbgmsg, TLOG_TYPE_CRON, "Game-End[$game_end_action]",
+               /*upd-rank*/true, $tladder_ch->uid, '', /*nfy-user*/true );
             $logmsg = "CH.Rank={$tladder_ch->Rank}>DEL";
             break;
          }
@@ -1087,7 +1105,8 @@ class TournamentLadder
 
          case TGEND_DEFENDER_DELETE:
          {
-            $success = $tladder_df->remove_user_from_ladder( $dbgmsg, /*upd-rank*/true, $tladder_df->uid, '', /*nfy-user*/true );
+            $success = $tladder_df->remove_user_from_ladder( $dbgmsg, TLOG_TYPE_CRON, "Game-End[$game_end_action]",
+               /*upd-rank*/true, $tladder_df->uid, '', /*nfy-user*/true );
             $logmsg = "DF.Rank={$tladder_df->Rank}>DEL";
             break;
          }
@@ -1148,6 +1167,7 @@ class TournamentLadder
    /*!
     * \brief Processes long absence of user not being online by removing user from ladder.
     * \note IMPORTANT NOTE: expecting to run in HOT-section
+    * \note only called by CRON! (for tournament-logging)
     */
    function process_user_absence( $tid, $uid, $user_abs_days )
    {
@@ -1160,7 +1180,7 @@ class TournamentLadder
       $reason = sprintf( T_('The system has removed the user from the tournament due to inactivity for more than %s days as defined in the ladder-configurations.'),
                          $user_abs_days );
       $success = $tladder->remove_user_from_ladder( "TournamentLadder::process_user_absence($tid,$uid,$user_abs_days)",
-         /*upd-rank*/true, $uid, '', /*nfy-user*/true, $reason );
+         TLOG_TYPE_CRON, 'User-Absence', /*upd-rank*/true, $uid, '', /*nfy-user*/true, $reason );
       $logmsg = "U.Rank={$tladder->Rank}>DEL";
 
       if( DBG_QUERY )
