@@ -40,8 +40,6 @@ define('MAX_ADD_DAYS', 14); // max. amount of days that can be added to game by 
 
 define('MAX_GAME_PLAYERS', 16);
 
-define('WROOM_MAX_ENTRIES', 4); // max. waiting-room entries per user, only for new-game (not for MPGs)
-
 // GamePlayers.Flags
 define('GPFLAG_MASTER',      0x0001); // game-master
 define('GPFLAG_JOINED',      0x0002); // joined game, user set
@@ -2530,7 +2528,7 @@ class GameSetup
       $this->GameType = GAMETYPE_GO;
       $this->GamePlayers = '';
 
-      $this->Ruleset = RULESET_JAPANESE;
+      $this->Ruleset = get_default_ruleset();
       $this->Size = 19;
       $this->Rated = true;
       $this->StdHandicap = true;
@@ -3336,7 +3334,7 @@ class GameSetupBuilder
          $url['snapshot'] = $this->game->ShapeSnapshot;
       }
 
-      $url['ruleset'] = (ALLOW_RULESET_CHINESE) ? $this->game->Ruleset : RULESET_JAPANESE;
+      $url['ruleset'] = $this->game->Ruleset;
       $url['size'] = $this->game->Size;
       $url['stdhandicap'] = bool_YN( $this->game->StdHandicap );
 
@@ -4069,7 +4067,9 @@ class GameScore
       }
       else //if( $mode == GSMODE_AREA_SCORING )
       {
-         // "why H-1?": http://www.dragongoserver.net/forum/read.php?forum=4&thread=25182#25620
+         // "why H-1?": using rule #4 from AGA-rules http://www.cs.cmu.edu/~wjh/go/rules/AGA.html
+         //             "White receives an additional point of compensation for each Black handicap stone after the first."
+         // also see:   http://www.dragongoserver.net/forum/read.php?forum=4&thread=25182#25620
          //             http://senseis.xmp.net/?TerritoryAndAreaScoring#toc6 "Handicap Go"
          $handi_diff = ($this->handicap >= 2 ) ? $this->handicap - 1 : 0;
          $score_black = $this->stones[GSCOL_BLACK]
@@ -4996,8 +4996,12 @@ function getRulesetText( $ruleset=null )
    if( !isset($ARR_GLOBALS_GAME[$key]) )
    {
       $arr = array();
-      $arr[RULESET_JAPANESE] = T_('Japanese#ruleset');
-      $arr[RULESET_CHINESE]  = T_('Chinese#ruleset');
+      if( preg_match( "/^(".ALLOWED_RULESETS.")$/", RULESET_JAPANESE) )
+         $arr[RULESET_JAPANESE] = T_('Japanese#ruleset');
+      if( preg_match( "/^(".ALLOWED_RULESETS.")$/", RULESET_CHINESE) )
+         $arr[RULESET_CHINESE] = T_('Chinese#ruleset');
+      if( count($arr) == 0 )
+         error('internal_error', "getRulesetText.bad_config.must_not_be_empty(ALLOWED_RULESETS)");
       $ARR_GLOBALS_GAME[$key] = $arr;
    }
 
@@ -5010,11 +5014,14 @@ function getRulesetText( $ruleset=null )
 
 function build_ruleset_filter_array( $prefix='' )
 {
-   return array(
-      T_('All')                        => '',
-      getRulesetText(RULESET_JAPANESE) => $prefix."Ruleset='".RULESET_JAPANESE."'",
-      getRulesetText(RULESET_CHINESE)  => $prefix."Ruleset='".RULESET_CHINESE."'",
-   );
+   $arr = array( T_('All') => '' );
+   $arr_rulesets = getRulesetText();
+   foreach( $arr_rulesets as $ruleset => $tmp )
+   {
+      if( preg_match( "/^(".ALLOWED_RULESETS.")$/", $ruleset) )
+         $arr[getRulesetText($ruleset)] = "{$prefix}Ruleset='$ruleset'";
+   }
+   return $arr;
 }
 
 function getRulesetScoring( $ruleset )
@@ -5272,5 +5279,11 @@ function increaseMoveStats( $uid )
       "VALUES ($uid,$slot_time,$slot_wday,$slot_week,1) " .
       "ON DUPLICATE KEY UPDATE Counter=Counter+1" );
 }//increaseMoveStats
+
+function get_default_ruleset()
+{
+   $arr = explode('|', ALLOWED_RULESETS);
+   return ( count($arr) ) ? $arr[0] : RULESET_JAPANESE;
+}
 
 ?>

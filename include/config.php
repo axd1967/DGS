@@ -228,8 +228,11 @@ define('MAX_GAMESRUN', 200);
 // - must be <= MAX_GAMESRUN, no effect if MAX_GAMESRUN=0 or ALLOW_TOURNAMENTS=false
 define('MAX_GAMESRUN_TREG', 150);
 
-// TODO-area: forbid chinese-ruleset as long as implementation not fully evolved yet
-define('ALLOW_RULESET_CHINESE', false);
+// max. waiting-room entries per user (0=unlimited), only for new-game (not for MPGs)
+define('WROOM_MAX_ENTRIES', 4);
+
+// list of supported rulesets separated by '|', 1st is used as default; for list see Ruleset-enum in Games-table
+define('ALLOWED_RULESETS', 'JAPANESE|CHINESE');
 
 // Allow usage of tournaments
 define('ALLOW_TOURNAMENTS', false);
