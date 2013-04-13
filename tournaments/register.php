@@ -102,8 +102,7 @@ $GLOBALS['ThePage'] = new Page('TournamentRegistration');
       {//HOT-section to delete TP
          TournamentParticipant::delete_tournament_participant( $tid, $rid );
          Bulletin::update_count_bulletin_new( "Tournament.register.del_tp($tid)", $my_id );
-         TournamentLogHelper::log_tp_registration_by_user( TLOG_ACT_REMOVE,
-            $tid, 'TournamentParticipant: ' . $tp->build_log_string() );
+         TournamentLogHelper::log_tp_registration_by_user( TLOG_ACT_REMOVE, $tid, $tp->build_log_string() );
       }
       ta_end();
 

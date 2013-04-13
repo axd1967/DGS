@@ -200,8 +200,8 @@ $GLOBALS['ThePage'] = new Page('TournamentEditParticipant');
             TournamentParticipant::delete_tournament_participant( $tid, $rid );
             $sys_msg = send_register_notification( 'delete', $tp, $my_id );
             Bulletin::update_count_bulletin_new( "Tournament.edit_participant.del_tp($tid)", $uid );
-            TournamentLogHelper::log_tp_registration_by_director( TLOG_ACT_REMOVE,
-               $tid, $allow_edit_tourney, $uid, 'TournamentParticipant: ' . $tp->build_log_string() );
+            TournamentLogHelper::log_tp_registration_by_director(
+               TLOG_ACT_REMOVE, $tid, $allow_edit_tourney, $uid, $tp->build_log_string() );
          }
          ta_end();
 
@@ -272,8 +272,8 @@ $GLOBALS['ThePage'] = new Page('TournamentEditParticipant');
             if( $rid == 0 ) // new TP
             {
                Bulletin::update_count_bulletin_new( "Tournament.edit_participant.add_tp($tid)", $uid );
-               TournamentLogHelper::log_tp_registration_by_director( TLOG_ACT_CREATE,
-                  $tid, $allow_edit_tourney, $uid, $tp->build_log_string() );
+               TournamentLogHelper::log_tp_registration_by_director(
+                  TLOG_ACT_CREATE, $tid, $allow_edit_tourney, $uid, $tp->build_log_string() );
             }
             else
             {
