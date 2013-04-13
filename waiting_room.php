@@ -345,6 +345,7 @@ require_once( 'include/wroom_control.php' );
 
 
    $menu_array = array();
+   $menu_array[T_('New Game')] = 'new_game.php';
    $menu_array[T_('All waiting games')] = $baseURLMenu.'good=0';
    $menu_array[T_('Suitable waiting games')] = $baseURLMenu.'good=1';
    $menu_array[T_('My waiting games')] = $baseURLMenu.'good=2'.SPURL_NO_DEF;

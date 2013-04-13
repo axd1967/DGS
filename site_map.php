@@ -126,6 +126,7 @@ function itemL($text, $link='', $working=true, $last=false)
 
       item(T_('Waiting room'), "waiting_room.php", true);
       { $item_level++;
+         itemL(T_('New Game'), "new_game.php", true);
          itemL(T_('All waiting games'), "waiting_room.php?good=0", true);
          itemL(T_('Suitable waiting games'), "waiting_room.php?good=1", true);
          itemL(T_('My waiting games'), "waiting_room.php?good=2", true, true);
