@@ -26,6 +26,7 @@ require_once 'tournaments/include/tournament.php';
 require_once 'tournaments/include/tournament_cache.php';
 require_once 'tournaments/include/tournament_games.php';
 require_once 'tournaments/include/tournament_helper.php';
+require_once 'tournaments/include/tournament_log.php';
 require_once 'tournaments/include/tournament_news.php';
 
 $TheErrors->set_mode(ERROR_MODE_COLLECT);
@@ -223,7 +224,7 @@ function run_hourly()
 
          $thelper->tcache->release_tournament_cron_lock( $tid );
          if( $thelper->tcache->set_tournament_cron_lock( $tid ) )
-            TournamentHelper::process_tournament_ladder_crown_king( $orow );
+            TournamentHelper::process_tournament_ladder_crown_king( $orow, TLOG_TYPE_CRON );
       }
       $thelper->tcache->release_tournament_cron_lock();
    }

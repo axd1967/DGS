@@ -697,7 +697,7 @@ class TournamentHelper
     * \param $row map with fields: tid, uid, rid, Rank, X_RankChanged, CrownKingHours, Rating2, owner_uid
     * \see #load_ladder_crown_kings()
     */
-   function process_tournament_ladder_crown_king( $row, $by_tdir_uid=0 )
+   function process_tournament_ladder_crown_king( $row, $tlog_type, $by_tdir_uid=0 )
    {
       global $NOW;
 
@@ -745,6 +745,8 @@ class TournamentHelper
             $msg_text, sprintf( T_('King of the Hill crowned for tournament #%s'), $tid ),
             $nfy_uids, '', /*notify*/true,
             /*sys-msg*/0, MSGTYPE_NORMAL );
+
+         TournamentLogHelper::log_crown_king_tournament_ladder( $tid, $tlog_type, $tresult->uid );
       }
       ta_end();
    }//process_tournament_ladder_crown_king
