@@ -136,12 +136,14 @@ Copyright (C) 2001-2013  Erik Ouchterlony, Jens-Uwe Gaspar
 ##      * added playing game-moves with capturing of stones, update last-move-marker
 ##      * check for forbidden suicide of played-move
 
-##   * Game settings:
-##      * Added Ruleset option for Japanese rules (default) and Chinese rules
+   * Game settings:
+      * Added Ruleset option for
+         * Japanese rules (default) using territory scoring
+         * Chinese rules using area scoring
 
    * Game page:
       * Show player to move (marked by <image backwards.gif>)
-##      * Show hint about area-scoring before passing to avoid odd dame
+      * Show hint about area-scoring before passing to avoid odd dame
 
 
    Minor changes:
@@ -481,7 +483,6 @@ Copyright (C) 2001-2013  Erik Ouchterlony, Jens-Uwe Gaspar
       * Added Shape Viewer showing comparison of loaded shape-id and/or shape-pattern used in shape-game
       * Added handling of shape-games for invite, dispute, new-game, waiting-room, multi-player-game,
         game-lists, game-page, quick-suite, SGF-download
-##        tournaments, game-lists, game-page, quick-suite, SGF-download
       * Start invitation or new shape-game from view-shape-page
          * Shape-games imply game-settings: board-size, free handicap placement, unrated game
          * Add Black pass-move, if no handicap used and White starts first
@@ -519,7 +520,6 @@ Copyright (C) 2001-2013  Erik Ouchterlony, Jens-Uwe Gaspar
         &lt;_http://url.net ...> : allow external link opening in new window
         Link text must not contain a single quote "'" -> use "&amp;apos;" instead
       * &lt;strike><strike>text</strike></strike> : strike out text
-##      * &lt;tourney id> : showing link to corresponding tournament page
       * &lt;survey id> : showing link to survey with status & title
       * &lt;home_ page>DGS-page</home> : enhanced home-link to allow external link with '_'-tag suffix
         (e.g. &lt;home_ quick_status.php>Quick-Status&lt;/home>
@@ -535,7 +535,6 @@ Copyright (C) 2001-2013  Erik Ouchterlony, Jens-Uwe Gaspar
    * Games:
       * Added option in <home edit_profile.php>user-profile</home> to configure to reject game-win by timeout
       * Added restriction on max. running/started games per player
-##      * Added restriction on max. running/started games per player and for tournament-registration
          * Show warning or error if about to exceed limit on starting new games
       * Enhanced remaining-time format with extra-time-info
 
@@ -708,10 +707,8 @@ Copyright (C) 2001-2013  Erik Ouchterlony, Jens-Uwe Gaspar
 
    * Table Lists:
       * Can show row-number, e.g. on <home users.php>users page</home>
-##      * Can show row-number, e.g. on <home users.php>users page</home> or Tournament participants list
       * Added full page-navigation (experimental) with pages- & entries-info for pages (if enabled):
         Status games, Waiting room, Users, Contacts, Opponents, Games, Observed games, Votes, Features
-##        Status games, Waiting room, Tournaments, Tournament participants, Users, Contacts, Opponents, Games, Observed games, Votes, Features
       * Changed some default sort-directions
       * Used clearer header names
 
@@ -775,9 +772,6 @@ Copyright (C) 2001-2013  Erik Ouchterlony, Jens-Uwe Gaspar
       * Added caching to load ConfigPages, ConfigBoard, Clocks, game observers, private game notes, user_reference,
         main game- and moves statistics, message folders, tables search profile, game moves, game move messages,
         game-list & message-list & bulletins on status-page, game-info on game-page, forums-list, forum-names
-##      * Added caching to load tournament, tournament directors, tournament-ladder-props, tournament-properties,
-##        tournament-rules, tournament-round, tournament-news, tournament-participant-list & -count,
-##        tournament-results, tournament-games, tournament-ladder
 
    * Improvements of database queries
       * Users: faster Activity handling and Vacation handling
@@ -843,8 +837,6 @@ Copyright (C) 2001-2013  Erik Ouchterlony, Jens-Uwe Gaspar
 
    * Changes for Admins:
       * Added GAME_ADMIN-role to change game-settings
-##      * Added TOURNAMENT_ADMIN-role to fix problems with tournaments,
-##        Show indicator in top-bar as reminder
       * Added FEATURE_ADMIN-role to manage features to vote on
       * Added SURVEY_ADMIN-role to manage surveys to vote on
       * Removed ADMIN_ADD_ADMIN-role and merged with SUPERADMIN-role
@@ -853,7 +845,6 @@ Copyright (C) 2001-2013  Erik Ouchterlony, Jens-Uwe Gaspar
       * Admins (developer/forum/game) can send multi-receiver bulk-message
       * Developer-admin is implicit admin for surveys, FAQ, forum
 
-##      * Added admin-game-page to administrate game (incl. tournament-game & multi-player-game):
       * Added admin-game-page to administrate game (incl. multi-player-game):
          * Finish game by setting game-result, Change game rated-status, Delete running & finished game
          * Notify players about game-end and game-deletion
@@ -886,8 +877,6 @@ Copyright (C) 2001-2013  Erik Ouchterlony, Jens-Uwe Gaspar
 
       * Added admin-option DENY_FEATURE_VOTE to forbid user to vote on features
       * Added admin-option DENY_SURVEY_VOTE to forbid user to vote on surveys
-##      * Added admin-option DENY_TOURNEY_CREATE to forbid user to create new tournaments
-##      * Added admin-option DENY_TOURNEY_REGISTER to forbid user to register to new tournaments
       * Added admin-options DENY_FORUM_NO_POST/MOD_POST to replace MayPostOnForum, shown on administrated-users page
       * Admin-option DENY_HIDE_BIO and DENY_EDIT_BIO also denies user-pictures
 
