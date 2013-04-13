@@ -104,7 +104,7 @@ class Waitingroom
       $this->Created = (int)$created;
       $this->GameType = $game_type;
       $this->GamePlayers = $game_players;
-      $this->Ruleset = $ruleset;
+      $this->setRuleset( $ruleset );
       $this->Size = (int)$size;
       $this->Handicaptype = $htype;
       $this->Komi = (float)$komi;
@@ -132,6 +132,15 @@ class Waitingroom
       // non-DB fields
       $this->User = (is_a($user, 'User')) ? $user : new User( $this->uid );
       $this->wrow = null;
+   }
+
+   function setRuleset( $ruleset )
+   {
+      if( !preg_match( "/^(".CHECK_RULESETS.")$/", $ruleset ) )
+         error('invalid_args', "Waitingroom.setRuleset($ruleset)");
+      if( !ALLOW_RULESET_CHINESE && $ruleset == RULESET_CHINESE )
+         error('feature_disabled', "Waitingroom.setRuleset($ruleset)");
+      $this->Ruleset = $ruleset;
    }
 
    function to_string()

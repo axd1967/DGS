@@ -146,7 +146,7 @@ class TournamentRules
    {
       if( !preg_match( "/^(".CHECK_RULESETS.")$/", $ruleset ) )
          error('invalid_args', "TournamentRules.setRuleset($ruleset)");
-      if( !ALLOW_RULESET_CHINESE && $ruleset == RULESET_CHINESE )
+      if( !preg_match( "/^(".ALLOWED_RULESETS.")$/", $ruleset ) )
          error('feature_disabled', "TournamentRules.setRuleset($ruleset)");
       $this->Ruleset = $ruleset;
    }
@@ -384,7 +384,7 @@ class TournamentRules
       $ruleset = @$vars['ruleset'];
       if( !preg_match( "/^(".CHECK_RULESETS.")$/", $ruleset ) )
          $errors[] = ErrorCode::get_error_text('unknown_ruleset');
-      elseif( !ALLOW_RULESET_CHINESE && $ruleset == RULESET_CHINESE )
+      elseif( !preg_match( "/^(".ALLOWED_RULESETS.")$/", $ruleset ) )
          $errors[] = ErrorCode::get_error_text('unknown_ruleset');
 
       // komi adjustment

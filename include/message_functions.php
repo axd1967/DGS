@@ -120,7 +120,7 @@ function game_settings_form(&$mform, $formstyle, $viewmode, $iamrated=true, $my_
    $Komi_m = DEFAULT_KOMI;
    $AdjustKomi = 0.0;
    $JigoMode = JIGOMODE_KEEP_KOMI;
-   $Ruleset = RULESET_JAPANESE; // using territory-scoring
+   $Ruleset = get_default_ruleset();
    $AdjustHandicap = 0;
    $MinHandicap = 0;
    $MaxHandicap = DEFAULT_MAX_HANDICAP;
@@ -243,7 +243,7 @@ function game_settings_form(&$mform, $formstyle, $viewmode, $iamrated=true, $my_
    else if( $gid > 0 && $my_ID > 0 ) //'Dispute'
    {
       // If dispute, use values from game $gid tables
-      $query = "SELECT Black_ID,White_ID, Size,Komi,Handicap,ToMove_ID," .
+      $query = "SELECT Black_ID,White_ID, Ruleset,Size,Komi,Handicap,ToMove_ID," .
                  "Maintime,Byotype,Byotime,Byoperiods," .
                  "Rated,StdHandicap,WeekendClock, ShapeID,ShapeSnapshot, GameSetup " .
                  "FROM Games WHERE ID=$gid AND Status='".GAME_STATUS_INVITED."' LIMIT 1" ;
@@ -259,6 +259,7 @@ function game_settings_form(&$mform, $formstyle, $viewmode, $iamrated=true, $my_
       $ShapeSnapshot = $game_row['ShapeSnapshot'];
       $shape_init = false;
 
+      $Ruleset = $game_row['Ruleset'];
       $Size = $game_row['Size'];
       $Rated = ( $game_row['Rated'] == 'Y' );
       $StdHandicap = ( $game_row['StdHandicap'] == 'Y' );
@@ -304,7 +305,7 @@ function game_settings_form(&$mform, $formstyle, $viewmode, $iamrated=true, $my_
       }
    } //collecting datas
 
-   if( !ALLOW_RULESET_CHINESE && $Ruleset == RULESET_CHINESE )
+   if( !preg_match( "/^(".ALLOWED_RULESETS.")$/", $Ruleset ) )
       error('feature_disabled', "game_settings_form.disabled.ruleset($Ruleset)");
 
    // handle shape-game implicit settings (ShapeID unset if invalid shape used)
@@ -365,13 +366,18 @@ function game_settings_form(&$mform, $formstyle, $viewmode, $iamrated=true, $my_
       $mform->add_row( array( 'SPACE' ) );
    }
 
-   if( ALLOW_RULESET_CHINESE )
+   $arr_rulesets = getRulesetText(); // non-empty
+   if( count($arr_rulesets) > 1 )
    {
       $mform->add_row( array( 'DESCRIPTION', T_('Ruleset'),
-                              'SELECTBOX', 'ruleset', 1, getRulesetText(), $Ruleset, false ) );
+                              'SELECTBOX', 'ruleset', 1, $arr_rulesets, $Ruleset, false ) );
    }
-   else
-      $mform->add_hidden('ruleset', RULESET_JAPANESE);
+   else // one static ruleset
+   {
+      $ruleset_vals = array_values($arr_rulesets);
+      $mform->add_row( array( 'DESCRIPTION', T_('Ruleset'),
+                              'TEXT', $ruleset_vals[0], ));
+   }
 
    $value_array = array_value_to_key_and_value( range( MIN_BOARD_SIZE, MAX_BOARD_SIZE ));
    $mform->add_row( array( 'DESCRIPTION', T_('Board Size'),

@@ -251,7 +251,7 @@ function handle_add_game( $my_id, $viewmode )
 
    // ruleset
    $ruleset = @$_REQUEST['ruleset'];
-   if( !ALLOW_RULESET_CHINESE && $ruleset == RULESET_CHINESE )
+   if( !preg_match( "/^(".ALLOWED_RULESETS.")$/", $ruleset ) )
       error('feature_disabled', "new_game.disabled.ruleset($ruleset)");
 
    // komi adjustment

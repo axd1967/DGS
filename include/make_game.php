@@ -260,7 +260,7 @@ function make_invite_game_setup( $my_urow, $opp_urow )
    $gs->Ruleset = @$_REQUEST['ruleset'];
    if( !preg_match( "/^(".CHECK_RULESETS.")$/", $gs->Ruleset ) )
       error('unknown_ruleset', "make_invite_game_setup.check.ruleset({$gs->Ruleset})");
-   elseif( !ALLOW_RULESET_CHINESE && $gs->Ruleset == RULESET_CHINESE )
+   elseif( !preg_match( "/^(".ALLOWED_RULESETS.")$/", $gs->Ruleset ) )
       error('feature_disabled', "make_invite_game_setup.disabled.ruleset({$gs->Ruleset})");
 
    if( !($gs->Komi <= MAX_KOMI_RANGE && $gs->Komi >= -MAX_KOMI_RANGE) )
@@ -565,8 +565,8 @@ function create_game(&$black_row, &$white_row, &$game_info_row, $game_setup=null
    $white_rated = ( $white_row['RatingStatus'] != RATING_NONE && $rating_white >= MIN_RATING );
 
    if( !isset($game_info_row['Ruleset']) )
-      $game_info_row['Ruleset'] = RULESET_JAPANESE; // default
-   if( !ALLOW_RULESET_CHINESE && $game_info_row['Ruleset'] == RULESET_CHINESE )
+      $game_info_row['Ruleset'] = get_default_ruleset();
+   if( !preg_match( "/^(".ALLOWED_RULESETS.")$/", $game_info_row['Ruleset']) )
       error('feature_disabled', "create_game.disabled.ruleset({$game_info_row['Ruleset']})");
 
    $size = min(MAX_BOARD_SIZE, max(MIN_BOARD_SIZE, (int)$game_info_row['Size']));
