@@ -108,7 +108,7 @@ $GLOBALS['ThePage'] = new Page('TournamentLadderView');
          else
          {
             $old_rank = $tladder->Rank;
-            if( $tladder->change_user_rank($new_rank) )
+            if( $tladder->change_user_rank($new_rank, $allow_edit_tourney) )
             {
                $sys_msg = urlencode( sprintf( T_('Moved selected user from rank [%s] to [%s]!#T_ladder'),
                                               $old_rank, $new_rank ));

@@ -28,6 +28,7 @@ require_once 'tournaments/include/tournament_factory.php';
 require_once 'tournaments/include/tournament_helper.php';
 require_once 'tournaments/include/tournament_ladder.php';
 require_once 'tournaments/include/tournament_ladder_props.php';
+require_once 'tournaments/include/tournament_log_helper.php';
 require_once 'tournaments/include/tournament_participant.php';
 require_once 'tournaments/include/tournament_properties.php';
 require_once 'tournaments/include/tournament_status.php';
@@ -76,7 +77,8 @@ $GLOBALS['ThePage'] = new Page('TournamentLadderAdmin');
 
    // edit allowed?
    $is_admin = TournamentUtils::isAdmin();
-   if( !TournamentHelper::allow_edit_tournaments($tourney, $my_id) )
+   $allow_edit_tourney = TournamentHelper::allow_edit_tournaments($tourney, $my_id);
+   if( !$allow_edit_tourney )
       error('tournament_edit_not_allowed', "Tournament.ladder_admin.edit($tid,$my_id)");
 
    $tprops = TournamentCache::load_cache_tournament_properties( 'Tournament.ladder_admin', $tid );
@@ -133,6 +135,7 @@ $GLOBALS['ThePage'] = new Page('TournamentLadderAdmin');
       if( $is_delete && $authorise_seed && @$_REQUEST['confirm'] ) // confirm delete ladder
       {
          TournamentLadder::delete_ladder($tid);
+         TournamentLogHelper::log_delete_tournament_ladder( $tid, $allow_edit_tourney );
          $sys_msg = urlencode( T_('Ladder deleted!') );
          jump_to("tournaments/ladder/admin.php?tid=$tid".URI_AMP."sysmsg=$sys_msg");
       }
@@ -141,13 +144,16 @@ $GLOBALS['ThePage'] = new Page('TournamentLadderAdmin');
          $seed_order = (int)get_request_arg('seed_order');
          $seed_reorder = (bool)get_request_arg('seed_reorder');
          $cnt = TournamentLadder::seed_ladder( $tourney, $tprops, $seed_order, $seed_reorder );
+
+         if( $cnt > 0 )
+            TournamentLogHelper::log_seed_tournament_ladder( $tid, $allow_edit_tourney, $seed_order, $seed_reorder, $cnt );
          $sys_msg = urlencode( ( $cnt > 0 ? T_('Ladder seeded!') : T_('No change!') ) );
          jump_to("tournaments/ladder/admin.php?tid=$tid".URI_AMP."sysmsg=$sys_msg");
       }
       elseif( @$_REQUEST['ta_adduser'] && $authorise_add_user && !is_null($user) && is_null($tladder_user) )
       {
          ta_begin();
-         {//HOT-section to add user in ladder
+         {//HOT-section to re-add existing TournamentParticipant-user into ladder
             TournamentLadder::add_user_to_ladder( $tid, $user->ID, $tl_props, $tprops );
          }
          ta_end();
@@ -159,8 +165,9 @@ $GLOBALS['ThePage'] = new Page('TournamentLadderAdmin');
          $reason = sprintf( T_('Tournament-Director (or admin) %s has removed the user.'), "<user $my_id>" );
          ta_begin();
          {//HOT-section to remove user from ladder
-            if( $tladder_user->remove_user_from_ladder( 'Tournament.ladder_admin',
-                  /*upd-rank*/false, $uid, $user->Handle, /*nfy-user*/true, $reason ) )
+            $success = $tladder_user->remove_user_from_ladder( 'Tournament.ladder_admin',
+               $allow_edit_tourney, 'Ladder-Admin', /*upd-rank*/false, $uid, $user->Handle, /*nfy-user*/true, $reason );
+            if( $success )
             {
                $sys_msg = urlencode( sprintf( T_('User [%s] removed from this ladder-tournament!'), $user->Handle )
                   . ' ' . T_('User and opponents have been notified!') );
@@ -181,7 +188,7 @@ $GLOBALS['ThePage'] = new Page('TournamentLadderAdmin');
                'CrownKingHours'  => $tl_props->CrownKingHours,
                'Rating2'         => $user->Rating,
                'owner_uid'       => $tourney->Owner_ID, ),
-            $my_id );
+            $allow_edit_tourney, $my_id );
          $sys_msg = urlencode( sprintf( T_('User [%s] crowned as king for this ladder-tournament!'), $user->Handle ));
          jump_to("tournaments/ladder/admin.php?tid=$tid".URI_AMP."uid=$uid".URI_AMP."sysmsg=$sys_msg");
       }
