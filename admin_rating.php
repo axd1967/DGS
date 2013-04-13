@@ -271,4 +271,32 @@ function load_old_rating_changes( $uid )
    return $rcatable;
 }//load_old_rating_changes
 
+
+/* TODO TODO TODO
+function find_running_normal_games( $uid )
+{
+   // handle tid, FK, B/W
+   $result = db_query("admin_rating.find_running_normal_games($uid)",
+      "SELECT ID AS gid, Status, tid, Black_ID, White_ID FROM Games WHERE GameType='".GAMETYPE_GO."' AND Status ".IS_STARTED_GAME." AND ( (Black_ID=$uid AND Black_Start_Rating > -".OUT_OF_RATING.") OR (White_ID=$uid AND White_Start_Rating > -".OUT_OF_RATING.") )" );
+
+   //update Games set White_Start_Rating=-900 where GameType='GO' and White_ID=75273 and Status in ('play','pass','score','score2') and White_Start_Rating > -9999
+   //update Games set Black_Start_Rating=-900 where GameType='GO' and Black_ID=75273 and Status in ('play','pass','score','score2') and Black_Start_Rating > -9999
+}
+
+function find_running_multi_player_games( $uid )
+{
+   $result = db_query("admin_rating.find_running_multi_player_games($uid)",
+      "SELECT GP.gid, G.GameType, G.Status FROM GamePlayers AS GP INNER JOIN Games AS G ON G.ID=GP.gid WHERE GP.uid=$uid AND Status IN ('SETUP','PLAY','PASS','SCORE','SCORE2')" );
+
+   //select avg(Rating2) from GamePlayers as GP inner join Players as P on P.ID=GP.uid where gid=784456 and GroupColor ='W'
+   //update Games set  White_Start_Rating = -165.540034484907  where ID=784456 limit 1
+}
+
+function find_running_tournaments( $uid )
+{
+   $result = db_query("admin_rating.find_running_tournaments($uid)",
+      "SELECT TP.tid, T.Status FROM TournamentParticipant AS TP INNER JOIN Tournament AS T ON T.ID=TP.tid WHERE TP.uid=$uid AND T.Status IN ()" );
+}
+*/
+
 ?>
