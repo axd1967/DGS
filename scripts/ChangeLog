@@ -16,7 +16,101 @@ Developers INFO:
 ChangeLog
 ------------------------------------------------------------------
 
+2013-04-13 juga
+
+   * tournaments/include/tournament_log_helper.php (TournamentLogHelper.log_create_tournament_director,
+       ~.log_tp_registration_by_director, ~.log_tp_registration_by_user, ~.log_delete_tournament_ladder,
+       ~.log_seed_tournament_ladder, ~.log_delete_user_from_tournament_ladder,
+       ~.log_crown_king_tournament_ladder, ~.log_change_rank_tournament_ladder,
+       ~.log_add_user_tournament_ladder),
+     tournaments/include/tournament_ladder.php (TournamentLadder.remove_user_from_ladder,
+       ~.change_user_rank, ~.add_user_to_ladder, ~._process_game_end, ~.process_user_absence),
+     tournaments/include/tournament_helper.php (TournamentHelper.process_tournament_ladder_crown_king),
+     tournaments/include/tournament_log.php (TLOG_ACT_ADD, TLOG_ACT_SEED, TLOG_ACT_SET),
+     tournaments/ladder/admin.php, tournaments/ladder/retreat.php, tournaments/ladder/view.php,
+     tournaments/cron_tournaments.php (run_hourly),
+     tournaments/edit_participant.php, tournaments/register.php:
+   - added tournament-log for
+     - adding existing tournament-participant to ladder on joining or after incomplete removal
+     - removing user from ladder by retreat / director-removal / user-absence-handling
+     - seeding or deleting ladder on tournament PAIR-status
+     - changing ladder user-rank
+     - crowning-king for ladder-tournament by director or CRON
+   - removed double tournament-log for retreating from ladder, already covered by user-removal
+
+   * tournaments/include/tournament_gui_helper.php (TournamentGuiHelper.build_tournament_ladder_standings):
+   - bugfix: check for presence of optional table-column for tournament-rating
+
+2013-04-12 juga
+
+   * tournaments/include/tournament_helper.php (TournamentHelper.process_tournament_ladder_game_end),
+     tournaments/include/tournament_log_helper.php (TournamentLogHelper.log_tournament_ladder_game_end),
+     tournaments/include/tournament_log.php (class Tournamentlog, ~.new_from_row),
+     tournaments/cron_tournaments.php,
+     tournaments/show_tournament_log.php:
+   - added tournament-log for processing game-end for ladder-tournament
+   - added filter on Tournamentlog.Type showing tournament-log
+
+   * tournaments/include/tournament_log_helper.php (TournamentLogHelper.log_change_tournament_ladder_props),
+     tournaments/ladder/edit_props.php:
+   - added tournament-log for editing tournament-ladder-properties
+
+   * tournaments/include/tournament_log_helper.php (TournamentLogHelper.log_tournament_ladder_challenge_user),
+     tournaments/include/tournament_ladder.php (TournamentLadder.build_log_string),
+     tournaments/include/tournament_log.php (TLOG_ACT_START),
+     tournaments/ladder/challenge.php:
+   - added tournament-log for tournament-ladder user-challenge
+
+   * tournaments/include/tournament_log_helper.php (TournamentLogHelper.log_retreat_from_tournament_ladder),
+     tournaments/include/tournament_ladder.php (TournamentLadder.build_log_string),
+     tournaments/ladder/retreat.php,
+     tournaments/show_tournament_log.php:
+   - added tournament-log for user retreating from ladder
+
+   * game.php (draw_add_time):
+   - show arrow-image on player to move
+
+2013-04-11 juga
+
+   * include/game_functions.php (GameSetupChecker. add_default_values_info, ~.check_time,
+       ~.check_adjust_komi):
+   - bugfix: check for invalid japanese-byo-yomi extra-periods and canadian-byo-yomi stones
+   - bugfix: check adjust-komi value also for invitation
+
+   * include/message_functions.php (interpret_time_limit_forms):
+   - bugfix: use defaults for invalid japanese-byo-yomi extra-periods and canadian-byo-yomi stones
+
+   * tournaments/include/tournament_log_helper.php (TournamentLogHelper.log_change_tournament_rules),
+     tournaments/edit_rules.php:
+   - added tournament-log for changing tournament-rules
+   - bugfix: check for invalid japanese-byo-yomi extra-periods and canadian-byo-yomi stones
+
+   * tournaments/include/tournament_rules.php (TournamentRules.convertTournamentRules_to_EditForm,
+       ~.convertEditForm_to_TournamentRules):
+   - bugfix: always init time-values for all byo-yomi-types to parse all fields
+     in parsing-section of 'edit_rules.php'
+   - bugfix: remove shape-snapshot if shape-id is 0
+
 2013-04-10 juga
+
+   * tournaments/include/tournament_log_helper.php (TournamentLogHelper.log_change_tournament,
+       ~.log_change_tournament_news, ~.log_change_tournament_props),
+     tournaments/edit_properties.php:
+   - added tournament-log for changing tournament-registration-properties
+   - bugfix: for tournament-log check for an unset date
+
+   * tournaments/include/tournament_log_helper.php (TournamentLogHelper.log_change_tournament_news),
+     tournaments/edit_news.php:
+   - added tournament-log for creating and changing tournament-news
+
+   * tournaments/include/tournament_log_helper.php (class TournamentLogHelper,
+       ~.log_change_tournament_director, ~.build_diff_tournament_participant,
+       ~.log_change_tournament),
+     tournaments/edit_tournament.php:
+   - added tournament-log for editing tournament
+
+   * include/table_columns.php (Table.make_sort_images):
+   - bugfix: need check for unset arr-element
 
    * tournaments/include/tournament_ladder.php (TournamentLadder.remove_user_from_ladder):
    - bugfix: missed locking of nested read-access to db-tables TournamentParticipant & Players

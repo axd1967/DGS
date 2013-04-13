@@ -3,7 +3,7 @@ Copyright (C) 2001-2013  Erik Ouchterlony, Jens-Uwe Gaspar
 
 %TOC%
 
-#release DGS_1_0_16 [2013-???-??] - DGS 1.0.16  (Tournaments)
+#release DGS_1_0_16 [2013-???-??] - DGS 1.0.16  (Tournaments, Game settings)
 
    New features and Major changes:
 
@@ -139,7 +139,8 @@ Copyright (C) 2001-2013  Erik Ouchterlony, Jens-Uwe Gaspar
 ##   * Game settings:
 ##      * Added Ruleset option for Japanese rules (default) and Chinese rules
 
-##   * Game page:
+   * Game page:
+      * Show player to move (marked by <image backwards.gif>)
 ##      * Show hint about area-scoring before passing to avoid odd dame
 
 
