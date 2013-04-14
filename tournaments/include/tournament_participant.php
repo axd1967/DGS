@@ -105,7 +105,7 @@ class TournamentParticipant
       $this->Won = (int)$won;
       $this->Lost = (int)$lost;
       // non-DB fields
-      $this->User = (is_a($user, 'User')) ? $user : new User( $this->uid );
+      $this->User = ($user instanceof User) ? $user : new User( $this->uid );
    }
 
    function setStatus( $status )

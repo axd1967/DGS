@@ -318,7 +318,7 @@ function start_html( $title, $no_cache, $skinname=NULL, $style_string=NULL, $las
       disable_cache($last_modified_stamp);
 
    global $ThePage;
-   $has_thepage = ( is_a($ThePage, 'HTMLPage') );
+   $has_thepage = ( $ThePage instanceof HTMLPage );
    if( !$has_thepage )
       ob_start('ob_gzhandler');
 
@@ -402,7 +402,7 @@ function start_html( $title, $no_cache, $skinname=NULL, $style_string=NULL, $las
          echo "\n<script language=\"JavaScript\" type=\"text/javascript\">\n$javascript\n</script>";
    }
 
-   if( is_a($ThePage, 'HTMLPage') )
+   if( $ThePage instanceof HTMLPage )
    {
       $tmp = $ThePage->getClassCSS(); //may be multiple, i.e. 'Games Running'
       $tmp = ' class='.attb_quote($tmp);
@@ -867,7 +867,7 @@ function make_menu($menu_array, $with_accesskeys=true, $links_per_line=0 )
       $width = round($cumw - $cumwidth);
 
       echo "\n  <td width=\"$width%\">";
-      if( is_a($link, 'Form') )
+      if( $link instanceof Form )
          echo $link->echo_string();
       else
          echo make_menu_link( $text, $link, ($with_accesskeys ? $i % 10 : '') );

@@ -58,7 +58,7 @@ class TournamentRoundStatus
     */
    function TournamentRoundStatus( $tid, $round )
    {
-      if( is_a($tid, 'Tournament') )
+      if( $tid instanceof Tournament )
       {
          $this->tourney = $tid;
          $this->tid = $this->tourney->ID;
@@ -73,7 +73,7 @@ class TournamentRoundStatus
 
       $this->ttype = TournamentFactory::getTournament($this->tourney->WizardType);
 
-      if( is_a($round, 'TournamentRound') )
+      if( $round instanceof TournamentRound )
       {
          $this->tround = $round;
          $this->Round = $this->tround->Round;

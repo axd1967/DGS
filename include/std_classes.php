@@ -495,7 +495,7 @@ class QuerySQL
       if( is_null($qsql) || empty($qsql) )
          return true;
 
-      if( !is_a($qsql, 'QuerySQL') )
+      if( !($qsql instanceof QuerySQL) )
       {
          error('assert', "QuerySQL.merge.expect_obj.QuerySQL" );
          return false; // error may be func that go-on
@@ -711,7 +711,7 @@ class ListIterator
    /*! \brief Sets main QuerySQL. */
    function setQuerySQL( $qsql=null )
    {
-      if( !is_null($qsql) && !is_a($qsql, 'QuerySQL') )
+      if( !is_null($qsql) && !($qsql instanceof QuerySQL) )
          error('invalid_args', 'ListIterator.setQuerySQL');
       $this->QuerySQL = $qsql;
    }
@@ -721,7 +721,7 @@ class ListIterator
    {
       if( !is_null($qsql) )
       {
-         if( !is_a($qsql, 'QuerySQL') )
+         if( !($qsql instanceof QuerySQL) )
             error('invalid_args', 'ListIterator.addQuerySQLMerge');
          $this->QuerySQLMerge[] = $qsql;
       }

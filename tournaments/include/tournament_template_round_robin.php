@@ -70,13 +70,13 @@ class TournamentTemplateRoundRobin extends TournamentTemplate
       ta_begin();
       {//HOT-section to create various tables for new tournament
          // check args
-         if( !is_a($tourney, 'Tournament') )
+         if( !($tourney instanceof Tournament) )
             $this->create_error("TournamentTemplateRoundRobin._createTournament.tourney.check(%s)");
-         if( !is_a($tprops, 'TournamentProperties') )
+         if( !($tprops instanceof TournamentProperties) )
             $this->create_error("TournamentTemplateRoundRobin._createTournament.tprops.check(%s)");
-         if( !is_a($trules, 'TournamentRules') )
+         if( !($trules instanceof TournamentRules) )
             $this->create_error("TournamentTemplateRoundRobin._createTournament.trules.check(%s)");
-         if( !is_a($tround, 'TournamentRound') )
+         if( !($tround instanceof TournamentRound) )
             $this->create_error("TournamentTemplateRoundRobin._createTournament.tround.check(%s)");
 
          // insert tournament-related tables
@@ -127,7 +127,7 @@ class TournamentTemplateRoundRobin extends TournamentTemplate
    {
       $tid = $tourney->ID;
 
-      if( is_a($round, 'TournamentRound') )
+      if( $round instanceof TournamentRound )
       {
          $tround = $round;
          $round = $tround->Round;

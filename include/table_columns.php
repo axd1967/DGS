@@ -218,11 +218,8 @@ class Table
       else
          $this->Page = $_page . URI_AMP; //end_sep
 
-      if( !is_null($cfg_tblcols) && is_a($cfg_tblcols,'ConfigTableColumns')
-            && !($this->Mode & TABLE_NO_HIDE) )
-      {
+      if( !is_null($cfg_tblcols) && ($cfg_tblcols instanceof ConfigTableColumns) && !($this->Mode & TABLE_NO_HIDE) )
          $this->CfgTableCols = $cfg_tblcols;
-      }
       else
       {
          $this->Mode|= TABLE_NO_HIDE;
@@ -354,7 +351,7 @@ class Table
          $mode|= TABLE_NO_SORT;
       else
          $sort_xtend = $this->_parse_sort_extension( "add_tablehead", $sort_xtend );
-      $tableHead = (is_a($description, 'TableHead')) ? $description : new TableHead($description);
+      $tableHead = ($description instanceof TableHead) ? $description : new TableHead($description);
       $this->Tableheads[$nr] =
          array( 'Nr' => $nr,
                 'Description' => $tableHead,

@@ -66,13 +66,13 @@ class TournamentTemplateLadder extends TournamentTemplate
       ta_begin();
       {//HOT-section to create various tables for new tournament
          // check args
-         if( !is_a($tourney, 'Tournament') )
+         if( !($tourney instanceof Tournament) )
             $this->create_error("TournamentTemplateLadder._createTournament.tourney.check(%s)");
-         if( !is_a($tprops, 'TournamentProperties') )
+         if( !($tprops instanceof TournamentProperties) )
             $this->create_error("TournamentTemplateLadder._createTournament.tprops.check(%s)");
-         if( !is_a($t_rules, 'TournamentRules') )
+         if( !($t_rules instanceof TournamentRules) )
             $this->create_error("TournamentTemplateLadder._createTournament.t_rules.check(%s)");
-         if( !is_a($tl_props, 'TournamentLadderProps') )
+         if( !($tl_props instanceof TournamentLadderProps) )
             $this->create_error("TournamentTemplateLadder._createTournament.tl_props.check(%s)");
 
          // insert tournament-related tables

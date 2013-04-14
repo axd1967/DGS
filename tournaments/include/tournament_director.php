@@ -65,7 +65,7 @@ class TournamentDirector
       $this->uid = (int)$uid;
       $this->Flags = (int)$flags;
       $this->Comment = $comment;
-      $this->User = (is_a($user, 'User')) ? $user : new User( $this->uid );
+      $this->User = ($user instanceof User) ? $user : new User( $this->uid );
    }
 
    function formatFlags( $flags_val=null )

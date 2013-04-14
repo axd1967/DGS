@@ -279,7 +279,7 @@ class TournamentProperties
    /*! \brief (internally) loads User-object if user is only user-id and returns User-object. */
    function _load_user( $check_user )
    {
-      if( is_a($check_user, 'User') )
+      if( $check_user instanceof User )
          return $check_user;
       if( !is_numeric($check_user) )
          error('invalid_args', "TournamentProperties._load_user($check_user)");

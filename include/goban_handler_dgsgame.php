@@ -57,7 +57,7 @@ class GobanHandlerDgsGame
       $goban->setOptionsCoords( GOBB_MID, true );
 
       // parse board-text
-      if( !is_a($board_text, 'Board') )
+      if( !($board_text instanceof Board) )
       {
          if( !preg_match("/^<game\s+(\d+)(,(\d+))?>$/", $board_text, $matches) )
          {

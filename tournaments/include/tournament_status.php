@@ -62,7 +62,7 @@ class TournamentStatus
     */
    function TournamentStatus( $tid )
    {
-      if( is_a($tid, 'Tournament') )
+      if( $tid instanceof Tournament )
       {
          $this->tourney = $tid;
          $this->tid = $this->tourney->ID;

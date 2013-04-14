@@ -735,7 +735,7 @@ class ConfigTableColumns
 
    function set_bitset( $bitset )
    {
-      if( !is_a($bitset, 'BitSet') )
+      if( !($bitset instanceof BitSet) )
          error('invalid_args', 'ConfigTableColumns.set_bitset.check');
       $this->bitset = $bitset;
    }

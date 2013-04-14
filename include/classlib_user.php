@@ -204,7 +204,7 @@ class User
    function load_user_query( $query, $dbgmsg=NULL )
    {
       $result = NULL;
-      if( is_a($query, 'QuerySQL') )
+      if( $query instanceof QuerySQL )
       {
          $qsql = User::build_query_sql();
          $qsql->merge( $query );

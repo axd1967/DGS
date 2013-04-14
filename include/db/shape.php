@@ -83,7 +83,7 @@ class Shape
       $this->Created = (int)$created;
       $this->Lastchanged = (int)$lastchanged;
       // non-DB fields
-      $this->User = (is_a($user, 'User')) ? $user : new User( $this->uid );
+      $this->User = ($user instanceof User) ? $user : new User( $this->uid );
    }
 
    function to_string()

@@ -139,7 +139,7 @@ class Bulletin
       $this->Text = $text;
       $this->Lastchanged = (int)$lastchanged;
       // non-DB fields
-      $this->User = (is_a($user, 'User')) ? $user : new User( $this->uid );
+      $this->User = ($user instanceof User) ? $user : new User( $this->uid );
       $this->UserList = array();
       $this->UserListHandles = array();
       $this->UserListUserRefs = array();

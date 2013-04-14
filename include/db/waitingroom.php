@@ -130,7 +130,7 @@ class Waitingroom
       $this->ShapeSnapshot = $shape_snaphost;
       $this->Comment = $comment;
       // non-DB fields
-      $this->User = (is_a($user, 'User')) ? $user : new User( $this->uid );
+      $this->User = ($user instanceof User) ? $user : new User( $this->uid );
       $this->wrow = null;
    }
 

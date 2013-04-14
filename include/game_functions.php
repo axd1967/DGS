@@ -2874,7 +2874,7 @@ class GameSetup
 
       if( $cat_htype == CAT_HTYPE_FAIR_KOMI )
       {
-         if( is_a($game_setup, 'GameSetup') )
+         if( $game_setup instanceof GameSetup )
             $my_gs = $game_setup;
          else
             list( $my_gs, $opp_gs ) = GameSetup::parse_invitation_game_setup( $pivot_uid, $game_setup, $gid );
@@ -4234,7 +4234,7 @@ class GameScore
    /*! \brief [GUI] Draws table of given GameScore and scoring-mode using echo(). */
    function draw_score_box( $game_score, $scoring_mode )
    {
-      if( !is_a( $game_score, 'GameScore' ) )
+      if( !($game_score instanceof GameScore) )
          return;
 
       $game_score->recalculate_score($scoring_mode); // recalc if needed

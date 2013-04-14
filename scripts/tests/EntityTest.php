@@ -112,7 +112,7 @@ class EntityTest extends PHPUnit_Framework_TestCase {
 
    public function test_newQuerySQL() {
       $qsql = $this->entity->newQuerySQL('T');
-      $this->assertTrue( is_a($qsql, 'QuerySQL') );
+      $this->assertTrue( ($qsql instanceof QuerySQL) );
       $this->assertEquals(
          "SELECT T.*, UNIX_TIMESTAMP(T.d1) AS X_d1, UNIX_TIMESTAMP(T.d2) AS X_d2 FROM Table AS T",
          $qsql->get_select(), $qsql->to_string() );

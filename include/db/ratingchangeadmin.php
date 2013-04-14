@@ -140,7 +140,7 @@ class RatingChangeAdmin
     */
    function load_ratingchangeadmin_with_query( $query_qsql )
    {
-      if( !is_a($query_qsql, 'QuerySQL') )
+      if( !($query_qsql instanceof QuerySQL) )
          error('invalid_args', "RatingChangeAdmin.load_ratingchangeadmin_with_query");
 
       $qsql = RatingChangeAdmin::build_query_sql();

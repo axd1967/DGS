@@ -87,7 +87,7 @@ class TournamentPool
       $this->uid = (int)$uid;
       $this->Rank = (int)$rank;
       // non-DB fields
-      if( is_a($uid, 'User') )
+      if( $uid instanceof User )
       {
          $this->User = $uid;
          $this->uid = $this->User->ID;
@@ -495,7 +495,7 @@ class TournamentPool
       if( !is_numeric($tid) || $tid <= 0 )
          error('unknown_tournament', "TournamentPool::seed_pools.check_tid($tid)");
 
-      if( !is_a($tround, 'TournamentRound') )
+      if( !($tround instanceof TournamentRound) )
          error('invalid_args', "TournamentPool::seed_pools.check_tround($tid,$seed_order)");
       $round = $tround->Round;
 
@@ -576,7 +576,7 @@ class TournamentPool
       if( !is_numeric($tid) || $tid <= 0 )
          error('unknown_tournament', "TournamentPool::add_missing_registered_users.check_tid($tid)");
 
-      if( !is_a($tround, 'TournamentRound') )
+      if( !($tround instanceof TournamentRound) )
          error('invalid_args', "TournamentPool::add_missing_registered_users.check_tround($tid)");
       $round = $tround->Round;
 
@@ -615,7 +615,7 @@ class TournamentPool
       $seed_query = $entity_tpool->build_sql_insert_values(true, /*with-PK*/true) . implode(',', $arr_inserts)
          . " ON DUPLICATE KEY UPDATE Pool=VALUES(Pool) ";
 
-      db_lock( "TournamentPool::add_missing_registered_users($tid,$round)", 
+      db_lock( "TournamentPool::add_missing_registered_users($tid,$round)",
          "TournamentPool WRITE" );
       {//LOCK TournamentPool
          $result = db_query( "TournamentPool::add_missing_registered_users.insert($tid,$round,#$cnt)", $seed_query );

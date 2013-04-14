@@ -163,7 +163,7 @@ class Ratinglog
     */
    function load_ratinglog_with_query( $query_qsql )
    {
-      if( !is_a($query_qsql, 'QuerySQL') )
+      if( !($query_qsql instanceof QuerySQL) )
          error('invalid_args', "Ratinglog.load_ratinglog_with_query");
 
       $qsql = Ratinglog::build_query_sql();

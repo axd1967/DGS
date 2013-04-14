@@ -709,7 +709,7 @@ class SearchFilter
             continue;
 
          $merge_qsql = $filter->get_config(FC_QUERYSQL); // merge query
-         if( is_a($merge_qsql, 'QuerySQL') )
+         if( $merge_qsql instanceof QuerySQL )
             $fquery->merge( $merge_qsql );
 
          $groupname = $filter->get_config(FC_GROUP_SQL_OR);
@@ -1335,7 +1335,7 @@ class Filter
       if( is_array($obj) || empty($obj) )
          return NULL;
 
-      if( is_a($obj, 'QuerySQL') )
+      if( $obj instanceof QuerySQL )
       {
          $query = $obj;
          if( $use_tmpl && $query->has_part(SQLP_FNAMES) )
@@ -1380,7 +1380,7 @@ class Filter
    {
       if( $this->get_config(FC_SQL_TEMPLATE) )
          error('invalid_filter', "filter.check_forbid_sql_template.forbid_FC_SQL_TEMPLATE({$this->id})");
-      if( is_a($this->dbfield, 'QuerySQL') )
+      if( $this->dbfield instanceof QuerySQL )
       {
          if( $this->dbfield->has_part(SQLP_WHERETMPL) )
             error('invalid_filter', "filter.check_forbid_sql_template.QuerySQL_no_SQLP_WHERETMPL({$this->id})");

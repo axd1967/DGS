@@ -1364,7 +1364,7 @@ class Forum
     */
    function load_forum_list( $forum_opts )
    {
-      if( !is_a($forum_opts, 'ForumOptions') )
+      if( !($forum_opts instanceof ForumOptions) )
          error('invalid_args', "Forum::load_forum_list.check.forum_opts($forum_opts)");
       $user_id = $forum_opts->uid;
 

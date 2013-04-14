@@ -113,7 +113,7 @@ class TournamentLadder
    /*! \brief Adds TournamentGames-object to list of incoming challenge (running) games. */
    function add_running_game( $tgame )
    {
-      if( !is_a($tgame, 'TournamentGames') )
+      if( !($tgame instanceof TournamentGames) )
          error('invalid_args', "TournamentLadder.add_running_game({$this->tid},{$this->rid})");
       $this->RunningTourneyGames[$tgame->ID] = $tgame;
    }
@@ -821,7 +821,7 @@ class TournamentLadder
     */
    function seed_ladder( $tourney, $tprops, $seed_order, $reorder=false )
    {
-      if( !is_a($tourney, 'Tournament') && $tourney->ID <= 0 )
+      if( !($tourney instanceof Tournament) && $tourney->ID <= 0 )
          error('unknown_tournament', "TournamentLadder::seed_ladder.check_tid($seed_order)");
       $tid = $tourney->ID;
       $dbgmsg = "TournamentLadder::seed_ladder($tid,$seed_order)";
