@@ -204,7 +204,7 @@ $GLOBALS['ThePage'] = new Page('TournamentList');
    }
    $iterator = Tournament::load_tournaments( $iterator );
 
-   $show_rows = $ttable->compute_show_rows( $iterator->ResultRows );
+   $show_rows = $ttable->compute_show_rows( $iterator->getResultRows() );
    $ttable->set_found_rows( mysql_found_rows('Tournament.list_tournaments.found_rows') );
 
    $maxGamesCheck = new MaxGamesCheck();

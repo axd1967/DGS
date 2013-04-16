@@ -44,7 +44,7 @@ class TournamentFactory
    // ------------ static functions ----------------------------
 
    /*! \brief Constructs ConfigBoard-object with specified arguments. */
-   function getTournament( $wizard_type )
+   public static function getTournament( $wizard_type )
    {
       if( $wizard_type == TOURNEY_WIZTYPE_DGS_LADDER )
          return new DgsLadderTournament();
@@ -59,7 +59,7 @@ class TournamentFactory
    }
 
    /*! \brief Returns list with all defined wizard-types in order to be showed for tourney-wizard. */
-   function getTournamentTypes()
+   public static function getTournamentTypes()
    {
       $ttypes = array(
          TOURNEY_WIZTYPE_DGS_LADDER       => TWIZT_LADDER | TWIZ_DGS,

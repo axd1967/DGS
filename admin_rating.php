@@ -204,7 +204,7 @@ $GLOBALS['ThePage'] = new Page('RatingAdmin');
 
    $rform->echo_string();
 
-   if( !is_nulL($rcatable) )
+   if( !is_null($rcatable) )
    {
       section('old_ratingchanges', T_('Former rating-changes of user'));
       $rcatable->echo_table();

@@ -90,7 +90,7 @@ ErrorDocument 404 /DragonGoServer/error.php?err=page_not_found&redir=htaccess
             //.' 5='.getcwd()  # the root folder
             //.' 6='.@$_SERVER['REQUEST_URI']  #
             ;
-         list( $err, $uri)= err_log( $handle, $err, $debugmsg);
+         list( $err, $uri ) = DgsErrors::err_log( $handle, $err, $debugmsg);
          db_close();
          //must restart from the root else $base_path is not properly set
          jump_to($uri,0);

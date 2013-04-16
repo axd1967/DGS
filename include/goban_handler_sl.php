@@ -102,37 +102,36 @@ define('SL_HOSTBASE', "http://senseis.xmp.net/?");
   */
 class GobanHandlerSL1
 {
-   var $args; // key => val, #1..n => val
-   var $text; // text to parse
-   var $goban; // Goban
+   private $args; // key => val, #1..n => val
+   private $text = ''; // text to parse
+   private $goban; // Goban
 
-   var $showCoordinates; // bool
-   var $boardSize; // NULL or int
-   var $boardTitle; // NULL or string
-   var $startMoveBlack; // bool
-   var $startMoveNumber; // int
+   private $showCoordinates; // bool
+   private $boardSize; // NULL or int
+   private $boardTitle; // NULL or string
+   private $startMoveBlack; // bool
+   private $startMoveNumber; // int
 
-   var $borders; // GOBB_N/S/W/E (position) - board-line to clear at edges
-   var $lines; // lines to parse
-   var $borderLines; // border-lines to parse later; [ ypos => line, ... ]
-   var $lpos;  // line-pos to parse 0..
-   var $ypos;  // board-ypos 1..
-   var $erasePoints; // arr( x,y )
-   var $text_block;
-   var $emptyLines;
-   var $hoshiCount;
+   private $borders; // GOBB_N/S/W/E (position) - board-line to clear at edges
+   private $lines; // lines to parse
+   private $borderLines; // border-lines to parse later; [ ypos => line, ... ]
+   private $lpos;  // line-pos to parse 0..
+   private $ypos;  // board-ypos 1..
+   private $erasePoints; // arr( x,y )
+   private $text_block;
+   private $emptyLines;
+   private $hoshiCount;
 
    /*! \brief Constructs GobanHandler for igoban-type SL1. */
-   function GobanHandlerSL1( $arr_args=null )
+   public function __construct( $arr_args=null )
    {
       $this->args = (is_array($arr_args)) ? array() : $arr_args;
-      $this->text = '';
       $this->goban = new Goban();
    }
 
 
    /*! \brief (interface) Parses given text with SL1-syntax and returns Goban-object. */
-   function read_goban( $text )
+   public function read_goban( $text )
    {
       // init
       $this->text = preg_replace( "/<br>/i", "\n", $text );
@@ -212,8 +211,11 @@ class GobanHandlerSL1
       return $this->goban;
    }//read_goban
 
-   // internal, parse SL1-syntax for title
-   function parse_title_line( $line )
+   /*!
+    * \brief parse SL1-syntax for title.
+    * \internal
+    */
+   private function parse_title_line( $line )
    {
       // format: $$(B|W)?c?(size)?(m\d+)? (title)?
       if( preg_match( "/^([BW])?(c)?(\d+)?(m\d+)?\s*(\b.*)?$/i", $line, $matches ) )
@@ -237,8 +239,11 @@ class GobanHandlerSL1
       return false; // parse-error
    }//parse_title_line
 
-   // internal, parse SL1, parse text-block below diagram; started by empty-line or ^%%%%
-   function parse_text_block( $line )
+   /*!
+    * \brief parse SL1, parse text-block below diagram; started by empty-line or ^%%%% .
+    * \internal
+    */
+   private function parse_text_block( $line )
    {
       if( !is_null($this->text_block) )
          $this->text_block .= "$line\n";
@@ -260,8 +265,11 @@ class GobanHandlerSL1
       return true;
    }//parse_text_block
 
-   // internal, parse SL1, returns true if was only border-line (nothing more to parse)
-   function parse_borders( $line )
+   /*!
+    * \brief parse SL1, returns true if was only border-line (nothing more to parse).
+    * \internal
+    */
+   private function parse_borders( $line )
    {
       if( !preg_match("/^[-+|]+$/", $line) )
          return false;
@@ -270,8 +278,11 @@ class GobanHandlerSL1
       return true;
    }//parse_borders
 
-   // internal, parse saved border-lines after board-dimension is clear
-   function parse_border_lines()
+   /*!
+    * \brief parse saved border-lines after board-dimension is clear.
+    * \internal
+    */
+   private function parse_border_lines()
    {
       foreach( $this->borderLines as $ypos => $line )
       {
@@ -312,8 +323,8 @@ class GobanHandlerSL1
       }
    }//parse_border_lines
 
-   /*! \brief Clears border-bit for whole line. */
-   function clearLineBorderBit( $y, $bitvalue )
+   /*! \brief (\internal) Clears border-bit for whole line. */
+   private function clearLineBorderBit( $y, $bitvalue )
    {
       if( $y >=1 && $y <= $this->goban->max_y )
       {
@@ -322,8 +333,11 @@ class GobanHandlerSL1
       }
    }//clearLineBorderBit
 
-   // internal, parse SL1, returns true if was only a link (nothing more to parse)
-   function parse_links( $line )
+   /*!
+    * \brief parse SL1, returns true if was only a link (nothing more to parse).
+    * \internal
+    */
+   private function parse_links( $line )
    {
       // Ex05: consume line with diagram-links: [ref|link], link=dgs:dgsPage|http...|SL-topic; ignore remaining in line
       if( preg_match("/^\[\s*([^|])\s*\|\s*([^\]]+)\s*\]/", $line, $matches) )
@@ -342,8 +356,11 @@ class GobanHandlerSL1
       return false;
    }//parse_links
 
-   // internal, parse SL1-syntax line
-   function parse_line( $line )
+   /*!
+    * \brief parse SL1-syntax line.
+    * \internal
+    */
+   private function parse_line( $line )
    {
       //error_log("SL.parse_line($line)");
       if( (string)$line == '' )
@@ -495,8 +512,10 @@ class GobanHandlerSL1
     *    EC ES ET EX => <image board/c|s|t|x.gif>
     *    TA TV T~ T= => <image board/hb|hw|hg|hd.gif>  (DGS-only)
     *    !XYZ     => "XYZ" (=escaping XYZ)
+    *
+    * \internal
     */
-   function parse_SL_text( $text )
+   private function parse_SL_text( $text )
    {
       static $map_territory = array( 'A' => 'hb', 'V' => 'hw', '~' => 'hg', '=' => 'hd' ); // Ex11: map "T..."
       return preg_replace(
@@ -519,8 +538,11 @@ class GobanHandlerSL1
          ), $text );
    }//parse_SL_text
 
-   // sets borders of board according to this->borders
-   function setBoardBorders()
+   /*!
+    * \brief sets borders of board according to this->borders.
+    * \internal
+    */
+   private function setBoardBorders()
    {
       if( $this->borders == 0 )
          return;
@@ -540,8 +562,11 @@ class GobanHandlerSL1
             $this->goban->clearBoardLinesBit( $this->goban->max_x, $y, GOBB_EAST );
    }//setBoardBorders
 
-   // Ex07: set hoshi-points for board with at least one pair of perpendicular edges
-   function setHoshiPoints()
+   /*!
+    * \brief Ex07: set hoshi-points for board with at least one pair of perpendicular edges.
+    * \internal
+    */
+   private function setHoshiPoints()
    {
       // need at least one pair of perpendicular edges
       if( $this->borders == 0 )
@@ -571,7 +596,8 @@ class GobanHandlerSL1
       return true;
    }//setHoshiPoints
 
-   function drawHoshiPoints( $arr_hoshi, $chg_x, $chg_y )
+   // \internal
+   private function drawHoshiPoints( $arr_hoshi, $chg_x, $chg_y )
    {
       foreach( $arr_hoshi as $arr_xy )
       {
@@ -582,7 +608,7 @@ class GobanHandlerSL1
 
 
    /*! \brief (interface) Transforms given Goban-object into SL1-format. */
-   function write_goban( $goban )
+   public function write_goban( $goban )
    {
       $CONV_MAP = array( // GOBS_BITMASK | GOBM_BITMASK
             GOBS_BLACK                 => 'X',
@@ -692,7 +718,7 @@ class GobanHandlerSL1
       }
 
       return "<igoban SL1>\n" . implode("\n", $result) . "\n</igoban>";
-   }
+   }//write_goban
 
 } //end 'GobanHandlerSL1'
 

@@ -120,7 +120,7 @@ require_once 'tournaments/include/tournament_log.php';
          $table->current_limit_string() );
    $iterator = Tournamentlog::load_tournament_logs( $iterator );
 
-   $show_rows = $table->compute_show_rows( $iterator->ResultRows );
+   $show_rows = $table->compute_show_rows( $iterator->getResultRows() );
    //$table->set_found_rows( mysql_found_rows('Tournament.show_tlog.found_rows') );
 
    while( ($show_rows-- > 0) && list(,$arr_item) = $iterator->getListIterator() )

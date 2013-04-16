@@ -52,7 +52,6 @@ define('MSGBOXROWS_INVITE', 6);
    $logged_in = who_is_logged( $player_row);
    if( !$logged_in )
       error('login_if_not_logged_in', 'message');
-   $is_bulk_admin = ( @$player_row['admin_level'] & (ADMIN_DEVELOPER|ADMIN_FORUM|ADMIN_GAME) );
 
 /* Actual GET calls used (to identify the ways to handle them):
    if(message.php?mode=...) //with mode
@@ -145,8 +144,8 @@ define('MSGBOXROWS_INVITE', 6);
       $arg_to = read_user_from_request(); // single
 
    $msg_control = new MessageControl( $folders, /*allow-bulk*/true, $mpg_type, $mpg_gid, $mpg_col, $arr_mpg_users );
-   $maxGamesCheck = $msg_control->max_games_check;
-   $dgs_message = $msg_control->dgs_message;
+   $maxGamesCheck = $msg_control->get_max_games_check();
+   $dgs_message = $msg_control->get_dgs_message();
 
    $gsc = ( @$_REQUEST['gsc'] ) ? $gsc = GameSetupChecker::check_fields( GSC_VIEW_INVITE ) : NULL;
    if( !is_null($gsc) && $gsc->has_errors() )

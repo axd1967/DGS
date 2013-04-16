@@ -41,7 +41,7 @@ class WaitingroomControl
    // ------------ static functions ----------------------------
 
    /*! \brief Returns QuerySQL for waiting-room. */
-   function build_waiting_room_query( $wroom_id=0, $suitable=false )
+   public static function build_waiting_room_query( $wroom_id=0, $suitable=false )
    {
       global $player_row, $NOW;
 
@@ -131,7 +131,7 @@ class WaitingroomControl
     * \param $html false = no HTML-entities in restrictions
     * \return array( restrictions|NO_VALUE, joinable=true|false ); NO_VALUE = no restrictions found
     */
-   function get_waitingroom_restrictions( $row, $suitable, $html=true )
+   public static function get_waitingroom_restrictions( $row, $suitable, $html=true )
    {
       $restrictions = echo_game_restrictions( $row['MustBeRated'], $row['RatingMin'], $row['RatingMax'],
             $row['MinRatedGames'], $row['goodmaxgames'], $row['SameOpponent'],
@@ -142,7 +142,7 @@ class WaitingroomControl
    }//get_waitingroom_restrictions
 
    /*! \brief Joins waiting-room game. */
-   function join_waitingroom_game( $wr_id )
+   public static function join_waitingroom_game( $wr_id )
    {
       global $player_row, $NOW;
 
@@ -191,7 +191,7 @@ class WaitingroomControl
 
       //else... joining game
 
-      $opponent_row = mysql_single_fetch('join_waitingroom_game.find_players',
+      $opponent_row = mysql_single_fetch('WC.join_waitingroom_game.find_players',
             "SELECT ID, Name, Handle, Rating2, RatingStatus, ClockUsed, OnVacation " .
             "FROM Players WHERE ID=$opponent_ID LIMIT 1" );
       if( !$opponent_row )
@@ -310,13 +310,13 @@ class WaitingroomControl
             if( $gid <= 0 )
                error('internal_error', "WC.join_waitingroom_game.join_game.check.gid($wr_id,$gid,$my_id)");
 
-            MultiPlayerGame::join_waitingroom_game( "WC.join_waitingroom_game.join_game($wr_id)", $gid, $my_id );
+            MultiPlayerGame::join_waitingroom_mp_game( "WC.join_waitingroom_game.join_game($wr_id)", $gid, $my_id );
             $gids[] = $gid;
          }
 
          if( $is_std_go )
          {
-            GameHelper::update_players_start_game( 'join_waitingroom_game',
+            GameHelper::update_players_start_game( 'WC.join_waitingroom_game',
                $my_id, $opponent_ID, count($gids), ($game_row['Rated'] == 'Y') );
          }
 
@@ -325,12 +325,12 @@ class WaitingroomControl
 
          if( $game_row['nrGames'] > 1 )
          {
-            db_query( 'join_waitingroom_game.reduce',
+            db_query( 'WC.join_waitingroom_game.reduce',
                "UPDATE Waitingroom SET nrGames=nrGames-1 WHERE ID=$wr_id AND nrGames>0 LIMIT 1" );
          }
          else
          {
-            db_query( 'join_waitingroom_game.reduce_delete',
+            db_query( 'WC.join_waitingroom_game.reduce_delete',
                "DELETE FROM Waitingroom WHERE ID=$wr_id LIMIT 1" );
          }
 
@@ -372,7 +372,7 @@ class WaitingroomControl
          foreach( $gids as $gid )
             $message .= "* <game $gid>\n";
 
-         send_message( 'join_waitingroom_game', $message, $subject
+         send_message( 'WC.join_waitingroom_game', $message, $subject
             , $opponent_ID, '', /*notify*/true
             , 0, MSGTYPE_NORMAL );
       }
@@ -383,7 +383,7 @@ class WaitingroomControl
     * \brief Deletes waiting-room game.
     * \return $gid if it was multi-player-game; 0 otherwise
     */
-   function delete_waitingroom_game( $wr_id )
+   public static function delete_waitingroom_game( $wr_id )
    {
       global $player_row;
       $my_id = (int)@$player_row['ID'];
@@ -422,17 +422,17 @@ class WaitingroomControl
   */
 class WaitingroomOffer
 {
-   var $row;
-   var $CategoryHanditype;
-   var $mp_player_count;
-   var $iamrated;
+   private $row;
+   private $CategoryHanditype;
+   public $mp_player_count;
+   private $iamrated;
 
-   var $resultType; // 1=calculated, 2=fix, 3=mpg (see (3f) in quick-specs)
-   var $resultColor; // '' | double | mpg | fairkomi | nigiri | black | white (see quick-specs (3f))used for quick-suite)
-   var $resultHandicap;
-   var $resultKomi;
+   public $resultType; // 1=calculated, 2=fix, 3=mpg (see (3f) in quick-specs)
+   public $resultColor; // '' | double | mpg | fairkomi | nigiri | black | white (see quick-specs (3f))used for quick-suite)
+   public $resultHandicap;
+   public $resultKomi;
 
-   function WaitingroomOffer( $row )
+   public function __construct( $row )
    {
       $this->row = $row;
       $this->CategoryHanditype = get_category_handicaptype($row['Handicaptype']);
@@ -442,19 +442,19 @@ class WaitingroomOffer
       $this->iamrated = user_has_rating();
    }
 
-   function is_fairkomi()
+   public function is_fairkomi()
    {
       return ( $this->CategoryHanditype == CAT_HTYPE_FAIR_KOMI );
    }
 
-   function is_my_game()
+   public function is_my_game()
    {
       global $player_row;
       return ( $this->row['uid'] == $player_row['ID'] );
    }
 
    // calculate game-settings for waiting-room or quick-suite
-   function calculate_offer_settings()
+   public function calculate_offer_settings()
    {
       global $player_row;
 
@@ -492,7 +492,7 @@ class WaitingroomOffer
       else // fix-calculated
          $this->resultType = 2;
 
-      $colstr = WaitingroomOffer::determine_color(
+      $colstr = $this->determine_color(
          $game_type, $handitype, $this->CategoryHanditype, $is_my_game, $iamblack,
          $info_nigiri, $player_row['Handle'], $this->row['WRP_Handle'] );
 
@@ -527,10 +527,9 @@ class WaitingroomOffer
       return $settings_str;
    }//calculate_offer_settings
 
-
-   // ------------ static functions ----------------------------
-
-   function determine_color( $game_type, $Handicaptype, $CategoryHanditype, $is_my_game, $iamblack, $is_nigiri, $my_handle, $opp_handle )
+   // \internal
+   private function determine_color( $game_type, $Handicaptype, $CategoryHanditype, $is_my_game, $iamblack,
+         $is_nigiri, $my_handle, $opp_handle )
    {
       global $base_path;
 
@@ -593,7 +592,7 @@ class WaitingroomOffer
       return $colstr;
    }//determine_color
 
-   function check_joining_waitingroom( $html )
+   public function check_joining_waitingroom( $html )
    {
       global $player_row;
       $my_id = $player_row['ID'];
@@ -652,6 +651,9 @@ class WaitingroomOffer
 
       return array( $can_join, $html_out, $join_warning, implode(' / ', $join_errors) );
    }//check_joining_waitingroom
+
+
+   // ------------ static functions ----------------------------
 
 } // end of 'WaitingroomOffer'
 

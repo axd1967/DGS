@@ -91,7 +91,7 @@ abstract class AbstractCache
          $arr_group[] = $elem_id;
 
       return $this->cache_store( $group_id, $arr_group, $ttl, $cache_group );
-   }
+   }//cache_store_group
 
    /*! \brief Deletes all cache-entries of cache-group and group-id itself. */
    public function cache_delete_group( $group_id, $cache_group=0 )
@@ -105,7 +105,7 @@ abstract class AbstractCache
          $this->cache_delete( $group_id, $cache_group );
       }
       return $arr_group;
-   }
+   }//cache_delete_group
 
 } // end of 'AbstractCache'
 
@@ -150,7 +150,7 @@ class ApcCache extends AbstractCache
             ++$count_deleted;
       }
       return $count_deleted;
-   }
+   }//cache_cleanup
 
    public function cache_clear()
    {
@@ -261,6 +261,8 @@ class ApcCache extends AbstractCache
 
 
 /*!
+ * \class FileCache
+ *
  * \brief Cache-implementation for file-based cache.
  *
  * \note adapted source Sabre_Cache_Filesystem taken from http://www.rooftopsolutions.nl/blog/107
@@ -268,11 +270,11 @@ class ApcCache extends AbstractCache
  */
 class FileCache extends AbstractCache
 {
-   var $base_filepath;
-   var $unlink_expired; // true = unlink expired files on cache_fetch()
-   var $read_expired; // false = return NULL if data expired on cache_fetch()
+   private $base_filepath;
+   private $unlink_expired = true; // true = unlink expired files on cache_fetch()
+   private $read_expired = false; // false = return NULL if data expired on cache_fetch()
 
-   function FileCache()
+   public function __construct()
    {
       if( (string)DATASTORE_FOLDER == '' )
          error('internal_error', "FileCache.construct.miss.datastore");
@@ -287,10 +289,7 @@ class FileCache extends AbstractCache
                error('internal_error', "FileCache.construct.mkdir.datastore_dir(filecache,$cache_group)");
          }
       }
-
-      $this->unlink_expired = true;
-      $this->read_expired = false;
-   }
+   }//__construct
 
    public function set_unlink_expired( $unlink_expired )
    {
@@ -423,7 +422,7 @@ class FileCache extends AbstractCache
       list( $hits, $misses ) = ApcCache::getHitInfo( $cache_group );
 
       return array( 'count' => count($entries), 'size' => $totals[1], 'hits' => $hits, 'misses' => $misses );
-   }
+   }//cache_info
 
 
    /*!
@@ -499,15 +498,18 @@ class FileCache extends AbstractCache
   */
 class DgsCache
 {
-   var $cache_groups; // arr( CACHE_GRP_.. => CACHE_TYPE_.., ... )
-   var $cache_impl; // arr( CACHE_TYPE_.. => initialized-cache-instance(-singleton), ... )
+   /*! arr( CACHE_GRP_.. => CACHE_TYPE_.., ... ) */
+   private $cache_groups = array();
 
-   private function DgsCache()
+   /*! arr( CACHE_TYPE_.. => initialized-cache-instance(-singleton), ... ) */
+   private $cache_impl = array( CACHE_TYPE_NONE => null );
+
+
+   private function __construct()
    {
       global $DGS_CACHE_GROUPS;
 
       $arr_cache_types = array( DGS_CACHE => 1 );
-      $this->cache_groups = array();
       if( @is_array($DGS_CACHE_GROUPS) )
       {
          foreach( $DGS_CACHE_GROUPS as $cache_group => $cache_type )
@@ -517,12 +519,11 @@ class DgsCache
          }
       }
 
-      $this->cache_impl = array( CACHE_TYPE_NONE => null );
       if( isset($arr_cache_types[CACHE_TYPE_APC]) )
          $this->cache_impl[CACHE_TYPE_APC] = new ApcCache();
       if( isset($arr_cache_types[CACHE_TYPE_FILE]) )
          $this->cache_impl[CACHE_TYPE_FILE] = new FileCache();
-   }//constructor
+   }//__construct
 
    /*!
     * \brief Return cache-type to use for cache-group.
@@ -538,7 +539,7 @@ class DgsCache
       else
          $cache_type = DGS_CACHE; // use default if no special type set
       return $cache_type;
-   }
+   }//get_cache_type
 
    /*!
     * \brief Returns cache-implementation for given cache-type.
@@ -557,9 +558,9 @@ class DgsCache
     *        allowed for given cache-group.
     * \param $cache_group CACHE_GRP_...
     */
-   function is_persistent( $cache_group )
+   public static function is_persistent( $cache_group )
    {
-      $cache = DgsCache::get_cache( $cache_group );
+      $cache = self::get_cache( $cache_group );
       return ( is_null($cache) ) ? false : $cache->is_persistent_cache();
    }
 
@@ -569,7 +570,7 @@ class DgsCache
     * \param $cache_type optional, CACHE_TYPE_... can ask for specific cache-type regardless of cache-group
     * \return NULL if caching disabled for given cache-group
     */
-   function get_cache( $cache_group, $cache_type=null, $admin_mode=false )
+   public static function get_cache( $cache_group, $cache_type=null, $admin_mode=false )
    {
       global $DGS_CACHE;
       if( !@$DGS_CACHE )
@@ -593,25 +594,25 @@ class DgsCache
     * \brief Fetches cache-entry for cache-group with cache-key $id.
     * \param $cache_group CACHE_GRP_...
     */
-   function fetch( $dbgmsg, $cache_group, $id )
+   public static function fetch( $dbgmsg, $cache_group, $id )
    {
-      $cache = DgsCache::get_cache( $cache_group );
+      $cache = self::get_cache( $cache_group );
       if( !$cache )
          return null;
 
       $result = $cache->cache_fetch( $id, $cache_group );
-      if( DBG_CACHE ) error_log("DgsCache.fetch($cache_group,$id).$dbgmsg = [" . DgsCache::debug_result($result) . "]");
+      if( DBG_CACHE ) error_log("DgsCache.fetch($cache_group,$id).$dbgmsg = [" . self::debug_result($result) . "]");
       return $result;
-   }
+   }//fetch
 
    /*!
     * \brief Stores cache-entry for cache-group with cache-key $id and given $data and $ttl (TimeToLive in secs).
     * \param $cache_group CACHE_GRP_...
     * \param $group_id optional group-name to collect specific cache-keys for collective delete with DgsCache::delete_group()
     */
-   function store( $dbgmsg, $cache_group, $id, $data, $ttl, $group_id='' )
+   public static function store( $dbgmsg, $cache_group, $id, $data, $ttl, $group_id='' )
    {
-      $cache = DgsCache::get_cache( $cache_group );
+      $cache = self::get_cache( $cache_group );
       if( !$cache )
          return false;
 
@@ -621,45 +622,45 @@ class DgsCache
 
       if( DBG_CACHE ) error_log("DgsCache.store($cache_group,$id,$ttl,[$group_id]).$dbgmsg = [" . ($result ? 1 : 0) . "]");
       return $result;
-   }
+   }//store
 
    /*!
     * \brief Deletes cache-entry for cache-group with cache-key $id.
     * \param $cache_group CACHE_GRP_...
     */
-   function delete( $dbgmsg, $cache_group, $id )
+   public static function delete( $dbgmsg, $cache_group, $id )
    {
-      $cache = DgsCache::get_cache( $cache_group );
+      $cache = self::get_cache( $cache_group );
       if( !$cache )
          return true;
 
       $result = $cache->cache_delete( $id, $cache_group );
       if( DBG_CACHE ) error_log("DgsCache.delete($cache_group,$id).$dbgmsg = [" . ($result ? 1 : 0) . "]");
       return $result;
-   }
+   }//delete
 
    /*!
     * \brief Deletes multiple cache-entries collected under group $group_id for cache-group.
     * \param $cache_group CACHE_GRP_...
     * \param $group_id group-name under which specific cache-keys where collected, see $group_id for DgsCache::store()
     */
-   function delete_group( $dbgmsg, $cache_group, $group_id )
+   public static function delete_group( $dbgmsg, $cache_group, $group_id )
    {
-      $cache = DgsCache::get_cache( $cache_group );
+      $cache = self::get_cache( $cache_group );
       if( !$cache )
          return null;
 
       $arr_group = $cache->cache_delete_group( "GROUP_$group_id", $cache_group );
       if( DBG_CACHE ) error_log("DgsCache.delete_group($cache_group,$group_id).$dbgmsg: group [" . (is_null($arr_group) ? '-' : implode(' ', $arr_group)) . "]");
       return $arr_group;
-   }
+   }//delete_group
 
    /*!
     * \brief Purges expired cache-entries for all supported cache-groups.
     * \param $only_cache_group null = cleanup all cache-groups; otherwise only given one
     * \return return number of deleted cache-entries.
     */
-   function cleanup_cache( $only_cache_group=null )
+   public static function cleanup_cache( $only_cache_group=null )
    {
       global $NOW, $ARR_CACHE_GROUP_CLEANUP;
       if( !is_numeric($only_cache_group) || $only_cache_group < 0 || $only_cache_group > MAX_CACHE_GRP)
@@ -673,7 +674,7 @@ class DgsCache
       $start_group = (is_numeric($only_cache_group)) ? $only_cache_group : 0;
       for( $cache_group=$start_group; $cache_group <= MAX_CACHE_GRP; ++$cache_group )
       {
-         $cache = DgsCache::get_cache( $cache_group );
+         $cache = self::get_cache( $cache_group );
          if( !is_null($cache) )
          {
             $group_expire = ( isset($ARR_CACHE_GROUP_CLEANUP[$cache_group]) )
@@ -692,7 +693,7 @@ class DgsCache
    }//cleanup_cache
 
    // \internal
-   function debug_result( $value )
+   private static function debug_result( $value )
    {
       if( is_null($value) )
          return 'NULL';

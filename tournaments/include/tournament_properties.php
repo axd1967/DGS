@@ -43,10 +43,6 @@ require_once 'tournaments/include/tournament_participant.php';
   * \brief Class to manage TournamentProperties-table to restrict registration-phase
   */
 
-// lazy-init in TournamentProperties::get..Text()-funcs
-global $ARR_GLOBALS_TOURNAMENT_PROPERTIES; //PHP5
-$ARR_GLOBALS_TOURNAMENT_PROPERTIES = array();
-
 global $ENTITY_TOURNAMENT_PROPERTIES; //PHP5
 $ENTITY_TOURNAMENT_PROPERTIES = new Entity( 'TournamentProperties',
       FTYPE_PKEY, 'tid',
@@ -60,23 +56,22 @@ $ENTITY_TOURNAMENT_PROPERTIES = new Entity( 'TournamentProperties',
 
 class TournamentProperties
 {
-   var $tid;
-   var $Lastchanged;
-   var $ChangedBy;
-   var $Notes;
-   var $MinParticipants;
-   var $MaxParticipants;
-   var $RatingUseMode;
-   var $RegisterEndTime;
-   var $UserMinRating;
-   var $UserMaxRating;
-   var $UserRated;
-   var $UserMinGamesFinished;
-   var $UserMinGamesRated;
+   public $tid;
+   public $Lastchanged;
+   public $ChangedBy;
+   public $Notes;
+   public $MinParticipants;
+   public $MaxParticipants;
+   public $RatingUseMode;
+   public $RegisterEndTime;
+   public $UserMinRating;
+   public $UserMaxRating;
+   public $UserRated;
+   public $UserMinGamesFinished;
+   public $UserMinGamesRated;
 
    /*! \brief Constructs TournamentProperties-object with specified arguments. */
-   function TournamentProperties(
-         $tid=0, $lastchanged=0, $changed_by='', $notes='',
+   public function __construct( $tid=0, $lastchanged=0, $changed_by='', $notes='',
          $min_participants=2, $max_participants=0, $rating_use_mode=TPROP_RUMODE_COPY_CUSTOM,
          $reg_end_time=0, $user_min_rating=MIN_RATING, $user_max_rating=RATING_9DAN, $user_rated=false,
          $user_min_games_finished=0, $user_min_games_rated=0 )
@@ -96,79 +91,78 @@ class TournamentProperties
       $this->UserMinGamesRated = (int)$user_min_games_rated;
    }
 
-   function setRatingUseMode( $use_mode )
+   public function setRatingUseMode( $use_mode )
    {
       if( !is_null($use_mode) && !preg_match( "/^(".CHECK_TPROP_RUMODE.")$/", $use_mode ) )
          error('invalid_args', "TournamentProperties.setRatingUseMode($use_mode)");
       $this->RatingUseMode = $use_mode;
    }
 
-   function setUserMinRating( $rating )
+   public function setUserMinRating( $rating )
    {
       $this->UserMinRating = (int) TournamentUtils::normalizeRating( $rating );
    }
 
-   function setUserMaxRating( $rating )
+   public function setUserMaxRating( $rating )
    {
       $this->UserMaxRating = (int) TournamentUtils::normalizeRating( $rating );
    }
 
-   function to_string()
+   public function to_string()
    {
       return print_r( $this, true );
    }
 
    /*! \brief Returns true, if user-rating need to be copied. */
-   function need_rating_copy()
+   public function need_rating_copy()
    {
-      return ( $this->RatingUseMode == TPROP_RUMODE_COPY_CUSTOM
-            || $this->RatingUseMode == TPROP_RUMODE_COPY_FIX );
+      return ( $this->RatingUseMode == TPROP_RUMODE_COPY_CUSTOM || $this->RatingUseMode == TPROP_RUMODE_COPY_FIX );
    }
 
    /*! \brief Returns true, if customized T-rating can be specified. */
-   function allow_rating_edit()
+   public function allow_rating_edit()
    {
       return ( $this->RatingUseMode == TPROP_RUMODE_COPY_CUSTOM );
    }
 
 
    /*! \brief Inserts or updates tournament-properties in database. */
-   function persist()
+   public function persist()
    {
-      if( TournamentProperties::isTournamentProperties($this->tid) ) // async
+      if( self::isTournamentProperties($this->tid) ) // async
          $success = $this->update();
       else
          $success = $this->insert();
       return $success;
    }
 
-   function insert()
+   public function insert()
    {
       $this->Lastchanged = $GLOBALS['NOW'];
 
       $entityData = $this->fillEntityData();
-      return $entityData->insert( "TournamentProperties::insert(%s)" );
+      return $entityData->insert( "TournamentProperties.insert(%s)" );
    }
 
-   function update()
+   public function update()
    {
       $this->Lastchanged = $GLOBALS['NOW'];
 
       $entityData = $this->fillEntityData();
-      $result = $entityData->update( "TournamentProperties::update(%s)" );
-      TournamentProperties::delete_cache_tournament_properties( 'TournamentProperties.update', $this->tid );
+      $result = $entityData->update( "TournamentProperties.update(%s)" );
+      self::delete_cache_tournament_properties( 'TournamentProperties.update', $this->tid );
       return $result;
    }
 
-   function delete()
+   public function delete()
    {
       $entityData = $this->fillEntityData();
-      $result = $entityData->delete( "TournamentProperties::delete(%s)" );
+      $result = $entityData->delete( "TournamentProperties.delete(%s)" );
       Tournament::delete_cache_tournament_properties( 'TournamentProperties.delete', $this->tid );
       return $result;
    }
 
-   function fillEntityData( )
+   public function fillEntityData( )
    {
       // checked fields: RatingUseMode/UserMinRating/UserMaxRating
       $data = $GLOBALS['ENTITY_TOURNAMENT_PROPERTIES']->newEntityData();
@@ -191,13 +185,13 @@ class TournamentProperties
    /*!
     * \brief Checks potential registration by given user and returns non-null
     *        list of errors and warnings with matching criteria, that disallow registration.
-    * \note warnings only issued for set director_check
     * \param $tourney Tournament with set TP_Counts (loaded if not set)
     * \param $tp_has_rating true if customized-rating set for tourney
     * \param $check_user User-object or user-id
     * \param $check_type TCHKTYPE_TD|USER_NEW|USER_EDIT
+    * \note warnings only issued for set director_check
     */
-   function checkUserRegistration( $tourney, $tp_has_rating, $check_user, $check_type )
+   public function checkUserRegistration( $tourney, $tp_has_rating, $check_user, $check_type )
    {
       $errors = array();
       if( $check_type == TCHKTYPE_USER_NEW )
@@ -234,7 +228,7 @@ class TournamentProperties
       {// need user-rating or tournament-rating
          if( !$user->hasRating() )
             $errors[] = T_('User has no valid Dragon rating, which is needed for tournament rating mode.');
-               //. "\n" . TournamentProperties::getRatingUseModeText($this->RatingUseMode, false);
+               //. "\n" . self::getRatingUseModeText($this->RatingUseMode, false);
       }
       elseif( $this->RatingUseMode == TPROP_RUMODE_COPY_CUSTOM )
       {
@@ -274,10 +268,10 @@ class TournamentProperties
       return ($check_type == TCHKTYPE_USER_NEW)
          ? array( $errors, array() )
          : array( $errors, $warnings );
-   } //checkUserRegistration
+   }//checkUserRegistration
 
    /*! \brief (internally) loads User-object if user is only user-id and returns User-object. */
-   function _load_user( $check_user )
+   private function _load_user( $check_user )
    {
       if( $check_user instanceof User )
          return $check_user;
@@ -287,7 +281,7 @@ class TournamentProperties
    }
 
    /*! \brief Returns array with default and seed-order array for tournaments (ladder + round-robin). */
-   function build_seed_order()
+   public function build_seed_order()
    {
       $arr = array();
       $default = 0;
@@ -303,27 +297,27 @@ class TournamentProperties
          $arr[TOURNEY_SEEDORDER_TOURNEY_RATING] = T_('Tournament Rating');
       $arr[TOURNEY_SEEDORDER_RANDOM] = T_('Random#T_ladder');
       return array( $default, $arr );
-   }
+   }//build_seed_order
 
 
    // ------------ static functions ----------------------------
 
    /*! \brief Checks, if tournament property existing for given tournament. */
-   function isTournamentProperties( $tid )
+   public static function isTournamentProperties( $tid )
    {
-      return (bool)mysql_single_fetch( "TournamentProperties.isTournamentProperties($tid)",
+      return (bool)mysql_single_fetch( "TournamentProperties:isTournamentProperties($tid)",
          "SELECT 1 FROM TournamentProperties WHERE tid='$tid' LIMIT 1" );
    }
 
    /*! \brief Deletes TournamentProperties-entry for given tournament-id. */
-   function delete_tournament_properties( $tid )
+   public static function delete_tournament_properties( $tid )
    {
       $t_props = new TournamentProperties( $tid );
       return $t_props->delete();
    }
 
    /*! \brief Returns db-fields to be used for query of single TournamentProperties-object for given tournament-id. */
-   function build_query_sql( $tid )
+   public static function build_query_sql( $tid )
    {
       $qsql = $GLOBALS['ENTITY_TOURNAMENT_PROPERTIES']->newQuerySQL('TPR');
       $qsql->add_part( SQLP_WHERE, "TPR.tid='$tid'" );
@@ -332,7 +326,7 @@ class TournamentProperties
    }
 
    /*! \brief Returns TournamentProperties-object created from specified (db-)row. */
-   function new_from_row( $row )
+   public static function new_from_row( $row )
    {
       $tp = new TournamentProperties(
             // from TournamentProperties
@@ -353,61 +347,59 @@ class TournamentProperties
       return $tp;
    }
 
-   /*!
-    * \brief Loads and returns TournamentProperties-object for given tournament-ID.
-    */
-   function load_tournament_properties( $tid )
+   /*! \brief Loads and returns TournamentProperties-object for given tournament-ID. */
+   public static function load_tournament_properties( $tid )
    {
       $result = NULL;
       if( $tid > 0 )
       {
-         $qsql = TournamentProperties::build_query_sql( $tid );
-         $row = mysql_single_fetch( "TournamentProperties.load_tournament_properties($tid)",
+         $qsql = self::build_query_sql( $tid );
+         $row = mysql_single_fetch( "TournamentProperties:load_tournament_properties($tid)",
             $qsql->get_select() );
          if( $row )
-            $result = TournamentProperties::new_from_row( $row );
+            $result = self::new_from_row( $row );
       }
       return $result;
    }
 
    /*! \brief Returns status-text or all status-texts (if arg=null). */
-   function getRatingUseModeText( $use_mode=null, $short=true )
+   public static function getRatingUseModeText( $use_mode=null, $short=true )
    {
-      global $ARR_GLOBALS_TOURNAMENT_PROPERTIES;
+      static $ARR_RAT_USEMODES = array(); // [key][use-mode] => text
 
       // lazy-init of texts
       $key = 'USE_MODE';
-      if( !isset($ARR_GLOBALS_TOURNAMENT_PROPERTIES[$key]) )
+      if( !isset($ARR_RAT_USEMODES[$key]) )
       {
          $arr = array();
          $arr[TPROP_RUMODE_COPY_CUSTOM] = T_('Copy Custom#TP_usemode');
          $arr[TPROP_RUMODE_COPY_FIX]    = T_('Copy Fix#TP_usemode');
          $arr[TPROP_RUMODE_CURR_FIX]    = T_('Current Fix#TP_usemode');
-         $ARR_GLOBALS_TOURNAMENT_PROPERTIES[$key] = $arr;
+         $ARR_RAT_USEMODES[$key] = $arr;
 
          $arr = array();
          $arr[TPROP_RUMODE_COPY_CUSTOM] = T_('Dragon user rating is used for tournament registration, but can be customized by user.');
          $arr[TPROP_RUMODE_COPY_FIX]    = T_('Dragon user rating is copied on tournament registration and can not be changed.');
          $arr[TPROP_RUMODE_CURR_FIX]    = T_('Current Dragon user rating will be used during whole tournament.');
-         $ARR_GLOBALS_TOURNAMENT_PROPERTIES[$key.'_LONG'] = $arr;
+         $ARR_RAT_USEMODES[$key.'_LONG'] = $arr;
       }
 
       if( !$short )
          $key .= '_LONG';
       if( is_null($use_mode) )
-         return $ARR_GLOBALS_TOURNAMENT_PROPERTIES[$key];
-      if( !isset($ARR_GLOBALS_TOURNAMENT_PROPERTIES[$key][$use_mode]) )
+         return $ARR_RAT_USEMODES[$key];
+      if( !isset($ARR_RAT_USEMODES[$key][$use_mode]) )
          error('invalid_args', "TournamentProperties.getRatingUseModeText($use_mode,$key)");
-      return $ARR_GLOBALS_TOURNAMENT_PROPERTIES[$key][$use_mode];
-   }
+      return $ARR_RAT_USEMODES[$key][$use_mode];
+   }//getRatingUseModeText
 
-   function get_edit_tournament_status()
+   public static function get_edit_tournament_status()
    {
       static $statuslist = array( TOURNEY_STATUS_NEW );
       return $statuslist;
    }
 
-   function delete_cache_tournament_properties( $dbgmsg, $tid )
+   public static function delete_cache_tournament_properties( $dbgmsg, $tid )
    {
       DgsCache::delete( $dbgmsg, CACHE_GRP_TPROPS, "TProps.$tid" );
    }

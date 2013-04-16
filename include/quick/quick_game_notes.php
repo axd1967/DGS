@@ -48,38 +48,28 @@ define('GAMENOTES_COMMANDS', 'get_notes|save_notes|hide_notes|show_notes');
   */
 class QuickHandlerGameNotes extends QuickHandler
 {
-   var $gid;
-   var $arg_notes;
+   private $gid = 0;
+   private $arg_notes = null;
 
-   var $hidden; // Y|N
-   var $notes;
-
-   function QuickHandlerGameNotes( $quick_object )
-   {
-      parent::QuickHandler( $quick_object );
-      $this->gid = 0;
-      $this->arg_notes = null;
-
-      $this->hidden = null;
-      $this->notes = null;
-   }
+   private $hidden = null; // Y|N
+   private $notes = null;
 
 
    // ---------- Interface ----------------------------------------
 
-   function canHandle( $obj, $cmd ) // static
+   public static function canHandle( $obj, $cmd ) // static
    {
       return ( $obj == QOBJ_GAME ) && QuickHandler::matchRegex(GAMENOTES_COMMANDS, $cmd);
    }
 
-   function parseURL()
+   public function parseURL()
    {
       parent::checkArgsUnknown(QGAMENOTES_OPTIONS);
       $this->gid = (int)get_request_arg(GAMENOTES_OPT_GID);
       $this->arg_notes = rtrim( get_request_arg(GAMENOTES_OPT_NOTES) );
    }
 
-   function prepare()
+   public function prepare()
    {
       global $player_row;
       $uid = $this->my_id;
@@ -111,7 +101,7 @@ class QuickHandlerGameNotes extends QuickHandler
    }//prepare
 
    /*! \brief Processes command for object; may fire error(..) and perform db-operations. */
-   function process()
+   public function process()
    {
       $cmd = $this->quick_object->cmd;
       $dbgmsg = "QuickHandlerGameNotes.process($cmd)";
@@ -127,7 +117,7 @@ class QuickHandlerGameNotes extends QuickHandler
          GameHelper::update_game_notes( $dbgmsg, $this->gid, $this->my_id, 'Y', $this->notes );
       elseif( $cmd == GAMECMD_SHOW_NOTES )
          GameHelper::update_game_notes( $dbgmsg, $this->gid, $this->my_id, 'N', $this->notes );
-   }
+   }//process
 
 } // end of 'QuickHandlerGameNotes'
 

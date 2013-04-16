@@ -51,20 +51,20 @@ $ENTITY_TOURNAMENT_RESULT = new Entity( 'TournamentResult',
 
 class TournamentResult
 {
-   var $ID;
-   var $tid;
-   var $uid;
-   var $rid;
-   var $Rating;
-   var $Type;
-   var $StartTime;
-   var $EndTime;
-   var $Round;
-   var $Rank;
-   var $RankKept;
+   public $ID;
+   public $tid;
+   public $uid;
+   public $rid;
+   public $Rating;
+   public $Type;
+   public $StartTime;
+   public $EndTime;
+   public $Round;
+   public $Rank;
+   public $RankKept;
 
    /*! \brief Constructs TournamentResult-object with specified arguments. */
-   function TournamentResult( $id=0, $tid=0, $uid=0, $rid=0, $rating=NO_RATING, $type=0,
+   public function __construct( $id=0, $tid=0, $uid=0, $rid=0, $rating=NO_RATING, $type=0,
          $start_time=0, $end_time=0, $round=1, $rank=0, $rank_kept=0 )
    {
       $this->ID = (int)$id;
@@ -80,13 +80,13 @@ class TournamentResult
       $this->RankKept = (int)$rank_kept;
    }
 
-   function to_string()
+   public function to_string()
    {
       return print_r( $this, true );
    }
 
    /*! \brief Inserts or updates tournament-result in database. */
-   function persist()
+   public function persist()
    {
       if( $this->ID > 0 )
          $success = $this->update();
@@ -95,33 +95,33 @@ class TournamentResult
       return $success;
    }
 
-   function insert()
+   public function insert()
    {
       $entityData = $this->fillEntityData(true);
-      $result = $entityData->insert( "TournamentResult::insert(%s)" );
+      $result = $entityData->insert( "TournamentResult.insert(%s)" );
       if( $result )
          $this->ID = mysql_insert_id();
-      TournamentResult::delete_cache_tournament_result( 'TournamentResult.insert', $this->tid );
+      self::delete_cache_tournament_result( 'TournamentResult.insert', $this->tid );
       return $result;
    }
 
-   function update()
+   public function update()
    {
       $entityData = $this->fillEntityData();
-      $result = $entityData->update( "TournamentResult::update(%s)" );
-      TournamentResult::delete_cache_tournament_result( 'TournamentResult.update', $this->tid );
+      $result = $entityData->update( "TournamentResult.update(%s)" );
+      self::delete_cache_tournament_result( 'TournamentResult.update', $this->tid );
       return $result;
    }
 
-   function delete()
+   public function delete()
    {
       $entityData = $this->fillEntityData();
-      $result = $entityData->delete( "TournamentResult::delete(%s)" );
-      TournamentResult::delete_cache_tournament_result( 'TournamentResult.delete', $this->tid );
+      $result = $entityData->delete( "TournamentResult.delete(%s)" );
+      self::delete_cache_tournament_result( 'TournamentResult.delete', $this->tid );
       return $result;
    }
 
-   function fillEntityData()
+   public function fillEntityData()
    {
       // checked fields: Status
       $data = $GLOBALS['ENTITY_TOURNAMENT_RESULT']->newEntityData();
@@ -143,7 +143,7 @@ class TournamentResult
    // ------------ static functions ----------------------------
 
    /*! \brief Returns db-fields to be used for query of TournamentResult-objects for given tournament-id. */
-   function build_query_sql( $tid=0 )
+   public static function build_query_sql( $tid=0 )
    {
       $qsql = $GLOBALS['ENTITY_TOURNAMENT_RESULT']->newQuerySQL('TRS');
       if( $tid > 0 )
@@ -152,7 +152,7 @@ class TournamentResult
    }
 
    /*! \brief Returns TournamentResult-object created from specified (db-)row. */
-   function new_from_row( $row )
+   public static function new_from_row( $row )
    {
       $tres = new TournamentResult(
             // from TournamentResult
@@ -172,32 +172,32 @@ class TournamentResult
    }
 
    /*! \brief Returns enhanced (passed) ListIterator with TournamentResult-objects for given tournament-id. */
-   function load_tournament_results( $iterator, $tid=-1 )
+   public static function load_tournament_results( $iterator, $tid=-1 )
    {
-      $qsql = ( $tid >= 0 ) ? TournamentResult::build_query_sql($tid) : new QuerySQL();
+      $qsql = ( $tid >= 0 ) ? self::build_query_sql($tid) : new QuerySQL();
       $iterator->setQuerySQL( $qsql );
       $query = $iterator->buildQuery();
-      $result = db_query( "TournamentResult::load_tournament_results", $query );
+      $result = db_query( "TournamentResult:load_tournament_results", $query );
       $iterator->setResultRows( mysql_num_rows($result) );
 
       $iterator->clearItems();
       while( $row = mysql_fetch_array( $result ) )
       {
-         $tresult = TournamentResult::new_from_row( $row );
+         $tresult = self::new_from_row( $row );
          $iterator->addItem( $tresult, $row );
       }
       mysql_free_result($result);
 
       return $iterator;
-   }
+   }//load_tournament_results
 
-   function show_tournament_result( $t_status )
+   public static function show_tournament_result( $t_status )
    {
       static $statuslist = array( TOURNEY_STATUS_ADMIN, TOURNEY_STATUS_PLAY, TOURNEY_STATUS_CLOSED );
       return in_array( $t_status, $statuslist );
    }
 
-   function delete_cache_tournament_result( $dbgmsg, $tid )
+   public static function delete_cache_tournament_result( $dbgmsg, $tid )
    {
       DgsCache::delete( $dbgmsg, CACHE_GRP_TRESULT, "TResult.$tid" );
    }

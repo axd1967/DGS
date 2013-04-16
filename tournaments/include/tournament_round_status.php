@@ -40,15 +40,14 @@ require_once 'tournaments/include/tournament_utils.php';
   */
 class TournamentRoundStatus
 {
-   var $tid; // TournamentRound.tid
-   var $is_admin;
-   var $tourney; // Tournament-object
-   var $ttype; // specific typed TournamentTemplate-object
-   var $tround; // TournamentRound-object
-   var $Round; // TournamentRound.Round
-   var $curr_status;
-   var $new_status;
-   var $errors; // arr
+   private $tid; // TournamentRound.tid
+   private $tourney; // Tournament-object
+   private $ttype; // specific typed TournamentTemplate-object
+   private $tround; // TournamentRound-object
+   private $Round; // TournamentRound.Round
+   private $curr_status;
+   private $new_status;
+   private $errors; // arr
 
 
    /*!
@@ -56,7 +55,7 @@ class TournamentRoundStatus
     * \param $tid Tournament-object or tournament-id
     * \param $round TournamentRound-object or tournament-round
     */
-   function TournamentRoundStatus( $tid, $round )
+   public function __construct( $tid, $round )
    {
       if( $tid instanceof Tournament )
       {
@@ -84,17 +83,41 @@ class TournamentRoundStatus
          $this->tround = TournamentCache::load_cache_tournament_round( 'TournamentRoundStatus.find_tround', $this->tid, $this->Round );
       }
 
-      $this->is_admin = TournamentUtils::isAdmin();
       $this->curr_status = $this->new_status = $this->tround->Status;
       $this->errors = array();
+   }//__construct
+
+   public function get_tournament()
+   {
+      return $this->tourney;
    }
 
-   function has_error()
+   public function get_tournament_round()
+   {
+      return $this->tround;
+   }
+
+   public function get_current_status()
+   {
+      return $this->curr_status;
+   }
+
+   public function get_new_status()
+   {
+      return $this->new_status;
+   }
+
+   public function has_error()
    {
       return (bool)count($this->errors);
    }
 
-   function add_error( $str )
+   public function get_errors()
+   {
+      return $this->errors;
+   }
+
+   public function add_error( $str )
    {
       if( $str )
          $this->errors[] = $str;
@@ -102,7 +125,7 @@ class TournamentRoundStatus
 
 
    /*! \brief Checks change for new-status (writes also $this->errors). */
-   function check_status_change( $new_status )
+   public function check_status_change( $new_status )
    {
       $this->errors = array();
       $this->new_status = $new_status;
@@ -116,14 +139,14 @@ class TournamentRoundStatus
    }
 
    /*! \brief Check if change to INIT-tourney-status is allowed. */
-   function check_conditions_status_INIT()
+   public function check_conditions_status_INIT()
    {
       $this->errors[] = sprintf( T_('Change to Tournament Round Status [%s] only allowed by Tournament Admin.'),
                                  TournamentRound::getStatusText($this->new_status) );
    }
 
    /*! \brief Check if change to POOL-tourney-status is allowed. */
-   function check_conditions_status_POOL()
+   public function check_conditions_status_POOL()
    {
       if( $this->curr_status != TROUND_STATUS_INIT )
          $this->errors[] = $this->error_expected_status( TROUND_STATUS_INIT );
@@ -134,7 +157,7 @@ class TournamentRoundStatus
    }
 
    /*! \brief Check if change to PAIR-tourney-status is allowed. */
-   function check_conditions_status_PAIR()
+   public function check_conditions_status_PAIR()
    {
       if( $this->curr_status != TROUND_STATUS_POOL )
          $this->errors[] = $this->error_expected_status( TROUND_STATUS_POOL );
@@ -145,7 +168,7 @@ class TournamentRoundStatus
    }
 
    /*! \brief Check if change to PLAY-tourney-status is allowed. */
-   function check_conditions_status_PLAY()
+   public function check_conditions_status_PLAY()
    {
       if( $this->curr_status != TROUND_STATUS_PAIR )
          $this->errors[] = $this->error_expected_status( TROUND_STATUS_PAIR );
@@ -156,7 +179,7 @@ class TournamentRoundStatus
    }
 
    /*! \brief Check if change to DONE-tourney-status is allowed. */
-   function check_conditions_status_DONE()
+   public function check_conditions_status_DONE()
    {
       if( $this->curr_status != TROUND_STATUS_PLAY )
          $this->errors[] = $this->error_expected_status( TROUND_STATUS_PLAY );
@@ -166,7 +189,7 @@ class TournamentRoundStatus
    }
 
 
-   function error_expected_status( $status )
+   public function error_expected_status( $status )
    {
       if( is_array($status) )
       {
@@ -181,7 +204,7 @@ class TournamentRoundStatus
       return sprintf( T_('Expecting current tournament round status [%s] for change to status [%s]'),
                       $status_str,
                       TournamentRound::getStatusText($this->new_status) );
-   }
+   }//error_expected_status
 
 
    /*!
@@ -191,14 +214,14 @@ class TournamentRoundStatus
     * \param $allow_admin if true, admin can do anything; otherwise admin is treated like non-admin
     * \return error-list; empty if no error
     */
-   function check_action_status( $errmsgfmt, $arr_status, $allow_admin=true )
+   public function check_action_status( $errmsgfmt, $arr_status, $allow_admin=true )
    {
       $errors = array();
       if( !is_array($arr_status) )
          $arr_status = array( $arr_status );
 
       // T-Admin can do anything at any time
-      if( $allow_admin && $this->is_admin )
+      if( $allow_admin && TournamentUtils::isAdmin() )
          $allow = true;
       else
          $allow = in_array($this->tround->Status, $arr_status);
@@ -217,7 +240,7 @@ class TournamentRoundStatus
       return $errors;
    }//check_action_status
 
-   function check_edit_status( $arr_status, $allow_admin=true )
+   public function check_edit_status( $arr_status, $allow_admin=true )
    {
       return $this->check_action_status(
          T_('Edit is forbidden for tournament round on status [%s], only allowed for [%s] !'),

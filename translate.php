@@ -506,7 +506,7 @@ $info_box = '<br>When translating you should keep the following things in mind:
       }
 
       $translate_form->echo_string($tabindex);
-      $tabindex= $translate_form->tabindex;
+      $tabindex = $translate_form->get_tabindex();
 
       // end of $translate_form
 
@@ -538,7 +538,7 @@ $info_box = '<br>When translating you should keep the following things in mind:
          ));
 
       $groupchoice_form->echo_string($tabindex);
-      $tabindex= $groupchoice_form->tabindex;
+      $tabindex = $groupchoice_form->get_tabindex();
    }
 
    // show language-choice for admin or translator with >1 language

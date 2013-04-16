@@ -64,15 +64,15 @@ define('TLOG_ACT_START',   'Start');
 
 class Tournamentlog
 {
-   var $ID;
-   var $tid;
-   var $uid;
-   var $Date;
-   var $Type;
-   var $Object;
-   var $Action;
-   var $actuid;
-   var $Message;
+   public $ID;
+   public $tid;
+   public $uid;
+   public $Date;
+   public $Type;
+   public $Object;
+   public $Action;
+   public $actuid;
+   public $Message;
 
    /*!
     * \brief Constructs Tournamentlog-object with specified arguments.
@@ -80,7 +80,7 @@ class Tournamentlog
     * \param $date creation-date, if <=0 use current date
     * \param $type TLOG_TYPE_..., if empty determine from players admin-level
     */
-   function Tournamentlog( $id=0, $tid=0, $uid=0, $date=0, $type='', $object='T', $action='', $actuid=0, $message='' )
+   public function __construct( $id=0, $tid=0, $uid=0, $date=0, $type='', $object='T', $action='', $actuid=0, $message='' )
    {
       global $player_row, $NOW;
 
@@ -96,7 +96,7 @@ class Tournamentlog
    }
 
    /* \brief Sets type to TLOG_TYPE_..., if empty determine from players admin-level. */
-   function setType( $type )
+   public function setType( $type )
    {
       if( $type )
       {
@@ -110,15 +110,15 @@ class Tournamentlog
       }
 
       $this->Type = $type;
-   }
+   }//setType
 
-   function to_string()
+   public function to_string()
    {
       return print_r($this, true);
    }
 
    /*! \brief Inserts or updates tournament-log in database. */
-   function persist()
+   public function persist()
    {
       if( $this->ID > 0 )
          $success = $this->update();
@@ -127,24 +127,24 @@ class Tournamentlog
       return $success;
    }
 
-   function insert()
+   public function insert()
    {
       $this->Date = $GLOBALS['NOW'];
 
       $entityData = $this->fillEntityData();
-      $result = $entityData->insert( "Tournamentlog::insert(%s,{$this->tid})" );
+      $result = $entityData->insert( "Tournamentlog.insert(%s,{$this->tid})" );
       if( $result )
          $this->ID = mysql_insert_id();
       return $result;
    }
 
-   function update()
+   public function update()
    {
       $entityData = $this->fillEntityData();
-      return $entityData->update( "Tournamentlog::update(%s,{$this->tid})" );
+      return $entityData->update( "Tournamentlog.update(%s,{$this->tid})" );
    }
 
-   function fillEntityData()
+   public function fillEntityData()
    {
       $data = $GLOBALS['ENTITY_TOURNAMENT_LOG']->newEntityData();
       $data->set_value( 'ID', $this->ID );
@@ -163,7 +163,7 @@ class Tournamentlog
    // ------------ static functions ----------------------------
 
    /*! \brief Returns db-fields to be used for query of Tournamentlog-objects for given tournament-id. */
-   function build_query_sql( $tid=0 )
+   public static function build_query_sql( $tid=0 )
    {
       $qsql = $GLOBALS['ENTITY_TOURNAMENT_LOG']->newQuerySQL('TLOG');
       if( is_numeric($tid) && $tid > 0 )
@@ -172,7 +172,7 @@ class Tournamentlog
    }
 
    /*! \brief Returns Tournamentlog-object created from specified (db-)row. */
-   function new_from_row( $row )
+   public static function new_from_row( $row )
    {
       $tlog = new Tournamentlog(
             // from Tournamentlog
@@ -192,24 +192,24 @@ class Tournamentlog
    }
 
    /*! \brief Returns enhanced (passed) ListIterator with Tournamentlog-objects. */
-   function load_tournament_logs( $iterator )
+   public static function load_tournament_logs( $iterator )
    {
-      $qsql = Tournamentlog::build_query_sql();
+      $qsql = self::build_query_sql();
       $iterator->setQuerySQL( $qsql );
       $query = $iterator->buildQuery();
-      $result = db_query( "Tournamentlog::load_tournament_log", $query );
+      $result = db_query( "Tournamentlog:load_tournament_logs", $query );
       $iterator->setResultRows( mysql_num_rows($result) );
 
       $iterator->clearItems();
       while( $row = mysql_fetch_array( $result ) )
       {
-         $tourney = Tournamentlog::new_from_row( $row );
+         $tourney = self::new_from_row( $row );
          $iterator->addItem( $tourney, $row );
       }
       mysql_free_result($result);
 
       return $iterator;
-   }
+   }//load_tournament_logs
 
 } // end of 'Tournamentlog'
 ?>

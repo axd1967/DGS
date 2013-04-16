@@ -70,21 +70,21 @@ class BitSet
     * \brief int-array storing BitSet with 24-bit integers (see const BITSET_INTBITS);
     *        first int are lowest 24-bit, next int are next 24-bits, etc.
     */
-   var $store;
+   private $store;
 
    /*! \brief Constructs empty BitSet (all bits cleared with maximum num of bits). */
-   function BitSet()
+   public function __construct()
    {
-      $this->store = array_fill( 0, BitSet::_arrpos(BITSET_MAXSIZE) + 1, 0 );
+      $this->store = array_fill( 0, self::_arrpos(BITSET_MAXSIZE) + 1, 0 );
    }
 
    /*! \brief Clears (or sets) all bits in this BitSet; clear is default. */
-   function reset( $bitval=0 )
+   public function reset( $bitval=0 )
    {
       $bitval = ($bitval) ? 1 : 0;
       if( $bitval )
       {
-         $arrpos = BitSet::_arrpos(BITSET_MAXSIZE);
+         $arrpos = self::_arrpos(BITSET_MAXSIZE);
          $this->store[$arrpos] = (1 << ( ((BITSET_MAXSIZE-1) % BITSET_STORE_BITS) + 1 )) - 1;
          while( $arrpos-- > 0 )
             $this->store[$arrpos] = (1 << BITSET_STORE_BITS) - 1;
@@ -95,7 +95,7 @@ class BitSet
          for( $i=0; $i < $cnt_store; $i++)
             $this->store[$i] = 0;
       }
-   }
+   }//reset
 
    /*!
     * \brief Sets bit as pos (1..n) in this BitSet according to 2nd argument, return if valid bitpos used.
@@ -103,55 +103,55 @@ class BitSet
     * \param $setval set bit if true; otherwise clear bit
     * \return true if bitpos is valid; false otherwise
     */
-   function set_bit( $bitpos, $setval=true )
+   public function set_bit( $bitpos, $setval=true )
    {
       if( $bitpos >=1 && $bitpos <= BITSET_MAXSIZE )
       {
-         $arrpos = BitSet::_arrpos($bitpos);
+         $arrpos = self::_arrpos($bitpos);
          if( $setval )
-            $this->store[$arrpos] |= BitSet::_intmask($bitpos);
+            $this->store[$arrpos] |= self::_intmask($bitpos);
          else
-            $this->store[$arrpos] &= (~BitSet::_intmask($bitpos));
+            $this->store[$arrpos] &= (~self::_intmask($bitpos));
          return true;
       }
       else
          return false;
-   }
+   }//set_bit
 
    /*! \brief Clears bit at pos (1..n) in this BitSet; return if valid bitpos used. */
-   function clear_bit( $bitpos )
+   public function clear_bit( $bitpos )
    {
       return $this->set_bit( $bitpos, 0 );
    }
 
    /*! \brief Toggles bit at pos (1..n) in this BitSet; return if valid bitpos used. */
-   function toggle_bit( $bitpos )
+   public function toggle_bit( $bitpos )
    {
       if( $bitpos >=1 && $bitpos <= BITSET_MAXSIZE )
       {
-         $arrpos = BitSet::_arrpos($bitpos);
-         $this->store[$arrpos] ^= BitSet::_intmask($bitpos);
+         $arrpos = self::_arrpos($bitpos);
+         $this->store[$arrpos] ^= self::_intmask($bitpos);
          return true;
       }
       else
          return false;
-   }
+   }//toggle_bit
 
    /*! \brief Returns 1 if bit is set at given pos (1..n); 0 if pos out-of-range or if bit is not set. */
-   function get_bit( $bitpos )
+   public function get_bit( $bitpos )
    {
       $result = 0;
       if( $bitpos >=1 && $bitpos <= BITSET_MAXSIZE )
       {
-         $arrpos = BitSet::_arrpos($bitpos);
-         if( $this->store[$arrpos] & BitSet::_intmask($bitpos) )
+         $arrpos = self::_arrpos($bitpos);
+         if( $this->store[$arrpos] & self::_intmask($bitpos) )
             $result = 1;
       }
       return $result;
-   }
+   }//get_bit
 
    /*! \brief Returns maximum bit-position with set bit; 0 if no bit set. */
-   function get_size()
+   public function get_size()
    {
       $arrpos = count($this->store);
       while( $arrpos-- >= 0 )
@@ -160,10 +160,10 @@ class BitSet
             return $arrpos * BITSET_STORE_BITS + intval( floor(log($value) / log(2)) ) + 1;
       }
       return 0;
-   }
+   }//get_size
 
    /*! \brief Returns array with bit-positions with set bits (high-end first). */
-   function get_bitpos_array()
+   public function get_bitpos_array()
    {
       $out = array();
       for( $bitpos = $this->get_size(); $bitpos >= 1; $bitpos-- )
@@ -172,7 +172,7 @@ class BitSet
             $out[] = $bitpos;
       }
       return $out;
-   }
+   }//get_bitpos_array
 
    /*!
     * \brief Returns array with integers building BitSet (low-end first(!)), leading 0's are included per default.
@@ -180,7 +180,7 @@ class BitSet
     * \param $bits_per_int number of bits (<31) stored in one int-value (BITSET_EXPORT_INTBITS default)
     * \return null if $bits_per_int-argument invalid (too large)
     */
-   function get_int_array( $leading_zero=true, $bits_per_int=BITSET_EXPORT_INTBITS )
+   public function get_int_array( $leading_zero=true, $bits_per_int=BITSET_EXPORT_INTBITS )
    {
       if( $bits_per_int > 30 )
          return NULL;
@@ -195,10 +195,10 @@ class BitSet
          $out[] = $this->_get_intval_range( $s_bitpos, $e_bitpos );
       }
       return $out;
-   }
+   }//get_int_array
 
    /*! \brief Returns the BitSet in binary format (high-endian); 0 if all bits are cleared. */
-   function get_bin_format()
+   public function get_bin_format()
    {
       // NOTE: can't use base_convert(), because not '0'-prefixed
 
@@ -213,10 +213,10 @@ class BitSet
       }
       $out_str = ltrim($out_str, '0');
       return ($out_str != '') ? $out_str : '0';
-   }
+   }//get_bin_format
 
    /*! \brief Returns the BitSet in hexa-decimal format (lower-case is default, high-endian); 0 if all bits are cleared. */
-   function get_hex_format( $uppercase=false )
+   public function get_hex_format( $uppercase=false )
    {
       // NOTE: can't use base_convert(), because not '0'-prefixed
 
@@ -231,14 +231,14 @@ class BitSet
       }
       $out_str = ltrim($out_str, '0');
       return ($out_str != '') ? $out_str : '0';
-   }
+   }//get_hex_format
 
    /*!
     * \brief Returns the BitSet in mysql-SET-format with given prefix, assuming SET('b1','b2',..,'bN').
     * \param $prefix prefix for database-SET value-names, default='b'
     * \return Example: for bits #1,#3 set return 'b3,b1' (can be used as MySQL-SET value)
     */
-   function get_db_set( $prefix='b' )
+   public function get_db_set( $prefix='b' )
    {
       $func = create_function( '$v', 'return "'.$prefix.'".$v;' );
       return implode(',', array_map( $func, $this->get_bitpos_array()) );
@@ -248,7 +248,7 @@ class BitSet
    // ---------- internal non-static funcs -------------
 
    /*! \brief Access to store for outsiders independent from internal namings. */
-   function _get_store()
+   public function _get_store()
    {
       return $this->store;
    }
@@ -258,7 +258,7 @@ class BitSet
     * \return -1 on error (range too big)
     * \internal
     */
-   function _get_intval_range( $spos, $epos )
+   private function _get_intval_range( $spos, $epos )
    {
       // assure valid values for spos, epos; and spos <= epos
       if( $spos < 1 ) $spos = 1;
@@ -272,12 +272,12 @@ class BitSet
       $out_bitmask = 0x1;
       for( $bitpos = $spos; $bitpos <= $epos; $bitpos++, $out_bitmask <<= 1 )
       {
-         $arrpos = BitSet::_arrpos($bitpos);
-         if( $this->store[$arrpos] & BitSet::_intmask($bitpos) )
+         $arrpos = self::_arrpos($bitpos);
+         if( $this->store[$arrpos] & self::_intmask($bitpos) )
             $out_val |= $out_bitmask;
       }
       return $out_val;
-   }
+   }//_get_intval_range
 
    /*!
     * \brief Updates store from start- to end-bitpos range extracted from integer-value
@@ -285,7 +285,7 @@ class BitSet
     * \return false on error; otherwise true=success
     * \internal
     */
-   function _set_intval_range( $spos, $epos, $int_val )
+   private function _set_intval_range( $spos, $epos, $int_val )
    {
       // assure valid values for spos, epos; and spos <= epos
       if( $spos > $epos ) swap( $spos, $epos );
@@ -302,12 +302,12 @@ class BitSet
       {
          if( $int_val & $chk_bitmask )
          {
-            $arrpos = BitSet::_arrpos($bitpos);
-            $this->store[$arrpos] |= BitSet::_intmask($bitpos);
+            $arrpos = self::_arrpos($bitpos);
+            $this->store[$arrpos] |= self::_intmask($bitpos);
          }
       }
       return true;
-   }
+   }//_set_intval_range
 
 
    // ------------ static functions ----------------------------
@@ -317,7 +317,7 @@ class BitSet
     *        with given bits-per-int (<31); expect positive int-values
     *        (sign-bit of negative-values is inverted and not-fitting bits will be ignored).
     */
-   function read_from_int_array( $arr_ints, $bits_per_int=BITSET_EXPORT_INTBITS )
+   public static function read_from_int_array( $arr_ints, $bits_per_int=BITSET_EXPORT_INTBITS )
    {
       if( $bits_per_int < 1 )
          $bits_per_int = 1;
@@ -345,14 +345,14 @@ class BitSet
          $s_bitpos += $bits_per_int;
       }
       return $bitset;
-   }
+   }//read_from_int_array
 
    /*!
     * \brief Returns BitSet read from binary-string (if empty or null assume '0'),
     *        bits not fitting into BitSet are ignored.
     * \return NULL on bad input-args (bad binary-digit used)
     */
-   function read_from_bin( $bin_str )
+   public static function read_from_bin( $bin_str )
    {
       if( is_null($bin_str) || $bin_str == '' )
          return new BitSet();
@@ -371,15 +371,15 @@ class BitSet
          $binpart = substr($bin_str, -$spos, $bitstep);
          $hex_str = sprintf($hexfmt, base_convert($binpart,2,10), $hex_str);
       }
-      return BitSet::read_from_hex( $hex_str );
-   }
+      return self::read_from_hex( $hex_str );
+   }//read_from_bin
 
    /*!
     * \brief Returns BitSet read from hex-string; if empty or null assume '0',
     *        prefix '0x' is ignored, non-fitting bits are ignored.
     * \return NULL on bad input-args (used non-hex-digits)
     */
-   function read_from_hex( $hex_str )
+   public static function read_from_hex( $hex_str )
    {
       if( is_null($hex_str) || $hex_str == '' )
          return new BitSet();
@@ -410,14 +410,14 @@ class BitSet
          $s_bitpos += BITSET_STORE_BITS;
       }
       return $bitset;
-   }
+   }//read_from_hex
 
    /*!
     * \brief Returns BitSet read from database-SET value with given prefix,
     *        non-fitting bits are ignored.
     * \return NULL on bad input-args (empty, null or bad prefix used; or bad db-item used)
     */
-   function read_from_db_set( $db_set_str, $prefix='b' )
+   public static function read_from_db_set( $db_set_str, $prefix='b' )
    {
       if( is_null($prefix) || strlen($prefix) == 0 )
          return NULL;
@@ -439,7 +439,7 @@ class BitSet
          $bitset->set_bit( (int)$value );
       }
       return $bitset;
-   }
+   }//read_from_db_set
 
 
    // ---------- internal static funcs -------------
@@ -448,7 +448,7 @@ class BitSet
     * \brief Returns array-pos for given bit-position.
     * \internal
     */
-   function _arrpos( $bitpos )
+   private static function _arrpos( $bitpos )
    {
       return intval( ($bitpos-1) / BITSET_STORE_BITS );
    }
@@ -457,7 +457,7 @@ class BitSet
     * \brief Returns store-integer-pos for given bit-position.
     * \internal
     */
-   function _intpos( $bitpos )
+   private static function _intpos( $bitpos )
    {
       return ($bitpos-1) % BITSET_STORE_BITS;
    }
@@ -466,7 +466,7 @@ class BitSet
     * \brief Returns store-integer-pos for given bit-position.
     * \internal
     */
-   function _intmask( $bitpos )
+   private static function _intmask( $bitpos )
    {
       return 1 << (($bitpos-1) % BITSET_STORE_BITS);
    }

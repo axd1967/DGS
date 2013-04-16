@@ -38,26 +38,24 @@ if( !defined('UPLOAD_ERR_EXTENSION') )
 class FileUpload
 {
    /*! \brief original input for file-input from form. */
-   var $arr_file;
+   protected $arr_file;
    /*! \brief upper limit of file-size allowed to upload and stored. */
-   var $max_upload_size;
+   protected $max_upload_size;
    /*! \brief true, if image correctly uploaded. */
-   var $is_uploaded;
+   protected $is_uploaded = false;
    /*! \brief array of error-message; empty if no error. */
-   var $errors;
+   protected $errors = array();
 
    // browser-info about file-upload source (from $arr_file); size/type should be mistrusted
-   var $file_src_tmpfile;
-   var $file_src_clientfile;
-   var $file_src_size;
-   var $file_src_type;
+   protected $file_src_tmpfile;
+   protected $file_src_clientfile;
+   protected $file_src_size;
+   protected $file_src_type;
 
-   function FileUpload( $arr_file, $max_upload_size=0 )
+   public function __construct( $arr_file, $max_upload_size=0 )
    {
       $this->arr_file = $arr_file;
       $this->max_upload_size = $max_upload_size;
-      $this->is_uploaded = false;
-      $this->errors = array();
 
       $this->file_src_tmpfile = $arr_file['tmp_name'];
       $this->file_src_clientfile = $arr_file['name'];
@@ -66,6 +64,27 @@ class FileUpload
 
       // general check
       $this->checkFileUploadError( $arr_file['error'] );
+   }//__construct
+
+   public function is_uploaded()
+   {
+      return $this->is_uploaded;
+   }
+
+   /*! \brief Returns true, if error encountered during image-file-upload; false if no error occured. */
+   public function has_error()
+   {
+      return ( count($this->errors) > 0 );
+   }
+
+   public function get_errors()
+   {
+      return $this->errors;
+   }
+
+   public function get_file_src_tmpfile()
+   {
+      return $this->file_src_tmpfile;
    }
 
    /*!
@@ -74,7 +93,7 @@ class FileUpload
     * \note Sets $this->is_uploaded if no error with upload encountered.
     *       Fills $this->errors with error-messages on encountered errors.
     */
-   function checkFileUploadError( $errorcode )
+   private function checkFileUploadError( $errorcode )
    {
       $this->is_uploaded = false;
       switch( (int)$errorcode )
@@ -128,14 +147,8 @@ class FileUpload
          $this->is_uploaded = false;
    }//checkFileUploadError
 
-   /*! \brief Returns true, if error encountered during image-file-upload; false if no error occured. */
-   function has_error()
-   {
-      return ( count($this->errors) > 0 );
-   }
-
    /*! \brief Cleans up resources and temp-file. */
-   function cleanup()
+   public function cleanup()
    {
       if( file_exists($this->file_src_tmpfile) )
          @unlink($this->file_src_tmpfile);
@@ -146,69 +159,39 @@ class FileUpload
 
 
 
-// Sources (but stripped to 'image/*'-mime-types):
-// - http://de2.php.net/manual/en/function.image-type-to-mime-type.php
-// - http://de2.php.net/manual/en/function.image-type-to-extension.php#69994
-global $ARR_GLOBAL_UPLOAD_EXTENSION; //PHP5
-$ARR_GLOBAL_UPLOAD_EXTENSION = array(
-   IMAGETYPE_GIF     => 'gif',  // 1 = GIF, image/gif
-   IMAGETYPE_JPEG    => 'jpg',  // 2 = JPG, image/jpeg
-   IMAGETYPE_PNG     => 'png',  // 3 = PNG, image/png
-   //IMAGETYPE_SWF     => 'swf',  // 4 = SWF, application/x-shockwave-flash, (A. Duplicated MIME type)
-   IMAGETYPE_PSD     => 'psd',  // 5 = PSD, image/psd
-   IMAGETYPE_BMP     => 'bmp',  // 6 = BMP, image/bmp
-   IMAGETYPE_TIFF_II => 'tiff', // 7 = TIFF, image/tiff, (intel byte order)
-   IMAGETYPE_TIFF_MM => 'tiff', // 8 = TIFF, image/tiff, (motorola byte order)
-   //IMAGETYPE_JPC     => 'jpc',  // 9 = JPC, application/octet-stream, (B. Duplicated MIME type)
-   IMAGETYPE_JP2     => 'jp2',  // 10 = JP2, image/jp2
-   //IMAGETYPE_JPX     => 'jpf',  // 11 = JPX, application/octet-stream, (B. Duplicated MIME type)
-   //IMAGETYPE_JB2     => 'jb2',  // 12 = JB2, application/octet-stream, (B. Duplicated MIME type)
-   //IMAGETYPE_SWC     => 'swc',  // 13 = SWC, application/x-shockwave-flash, (A. Duplicated MIME type)
-   IMAGETYPE_IFF     => 'aiff', // 14 = IFF, image/iff
-   IMAGETYPE_WBMP    => 'wbmp', // 15 = WBMP, image/vnd.wap.wbmp
-   IMAGETYPE_XBM     => 'xbm',  // 16 = XBM, image/xbm
-   //IMAGETYPE_ICO     => 'ico',  // 17 = ICO, image/vnd.microsoft.icon; since PHP 5.3.0
-);
-
 /*!
  * \class ImageFileUpload
  *
  * \brief Class to manage the upload of image-files.
  *
- * Support types: JPG, GIF, PNG
- * Support operations: resize
+ * \note Support types: JPG, GIF, PNG
+ * \note Support operations: resize
  */
 class ImageFileUpload extends FileUpload
 {
    // image-related
-   var $max_x;
-   var $max_y;
-   var $image_type; // IMAGETYPE_..
-   var $image_mimetype;
-   var $image_x;
-   var $image_y;
-   var $image;
+   private $max_x;
+   private $max_y;
+   private $image_type = 0; // IMAGETYPE_..
+   private $image_mimetype = '';
+   private $image_x = 0;
+   private $image_y = 0;
+   private $image = null;
    /*! \brief true, if image is too large and needs resizing to fit save-limits. */
-   var $need_resize;
+   private $need_resize = false;
 
    /*!
     * \brief Constructs ImageFileUpload-object initializing vars with sizes and performing
     *        general checks on errorcode from file-upload, client-filename, and file-sizes
     *        and additional checks on image-properties image-type and dimensions (width/height).
     */
-   function ImageFileUpload( $arr_file, $max_upload_size=0, $max_x=0, $max_y=0 )
+   public function __construct( $arr_file, $max_upload_size=0, $max_x=0, $max_y=0 )
    {
-      parent::FileUpload( $arr_file, $max_upload_size );
+      parent::__construct( $arr_file, $max_upload_size );
 
       // image-related
       $this->max_x = round($max_x);
       $this->max_y = round($max_y);
-      $this->image = null;
-      $this->image_type = 0;
-      $this->image_mimetype = '';
-      $this->image_x = 0;
-      $this->image_y = 0;
-      $this->need_resize = false;
 
       // general check
       $this->checkImageFileUpload( array( IMAGETYPE_GIF, IMAGETYPE_JPEG, IMAGETYPE_PNG ) );
@@ -221,7 +204,7 @@ class ImageFileUpload extends FileUpload
     * \note Sets this->need_resize/image_x/image_y/image_type
     * \return true if no error; false otherwise (this->errors filled accordingly)
     */
-   function checkImageFileUpload( $expected_imagetypes )
+   private function checkImageFileUpload( $expected_imagetypes )
    {
       if( !$this->is_uploaded )
          return false;
@@ -243,7 +226,7 @@ class ImageFileUpload extends FileUpload
          $this->errors[] = sprintf( T_('The image-type [%s, %s] of the uploaded file [%s] '
                . 'does not match one of the expected image-types [%s].'),
                $this->image_type, $this->image_mimetype, $this->file_src_clientfile,
-               ImageFileUpload::getImageTypesText($expected_imagetypes) );
+               self::getImageTypesText($expected_imagetypes) );
       }
 
       // check image dimensions
@@ -261,23 +244,45 @@ class ImageFileUpload extends FileUpload
       }
 
       return !$this->has_error();
-   }
+   }//checkImageFileUpload
 
    /*! \brief Returns file-extension for current image-type. */
-   function determineFileExtension()
+   public function determineFileExtension()
    {
-      global $ARR_GLOBAL_UPLOAD_EXTENSION;
-      if( !isset($ARR_GLOBAL_UPLOAD_EXTENSION[$this->image_type]) )
+      // Sources (but stripped to 'image/*'-mime-types):
+      // - http://de2.php.net/manual/en/function.image-type-to-mime-type.php
+      // - http://de2.php.net/manual/en/function.image-type-to-extension.php#69994
+      static $ARR_UPLOAD_EXTENSIONS = array(
+         IMAGETYPE_GIF     => 'gif',  // 1 = GIF, image/gif
+         IMAGETYPE_JPEG    => 'jpg',  // 2 = JPG, image/jpeg
+         IMAGETYPE_PNG     => 'png',  // 3 = PNG, image/png
+         //IMAGETYPE_SWF     => 'swf',  // 4 = SWF, application/x-shockwave-flash, (A. Duplicated MIME type)
+         IMAGETYPE_PSD     => 'psd',  // 5 = PSD, image/psd
+         IMAGETYPE_BMP     => 'bmp',  // 6 = BMP, image/bmp
+         IMAGETYPE_TIFF_II => 'tiff', // 7 = TIFF, image/tiff, (intel byte order)
+         IMAGETYPE_TIFF_MM => 'tiff', // 8 = TIFF, image/tiff, (motorola byte order)
+         //IMAGETYPE_JPC     => 'jpc',  // 9 = JPC, application/octet-stream, (B. Duplicated MIME type)
+         IMAGETYPE_JP2     => 'jp2',  // 10 = JP2, image/jp2
+         //IMAGETYPE_JPX     => 'jpf',  // 11 = JPX, application/octet-stream, (B. Duplicated MIME type)
+         //IMAGETYPE_JB2     => 'jb2',  // 12 = JB2, application/octet-stream, (B. Duplicated MIME type)
+         //IMAGETYPE_SWC     => 'swc',  // 13 = SWC, application/x-shockwave-flash, (A. Duplicated MIME type)
+         IMAGETYPE_IFF     => 'aiff', // 14 = IFF, image/iff
+         IMAGETYPE_WBMP    => 'wbmp', // 15 = WBMP, image/vnd.wap.wbmp
+         IMAGETYPE_XBM     => 'xbm',  // 16 = XBM, image/xbm
+         //IMAGETYPE_ICO     => 'ico',  // 17 = ICO, image/vnd.microsoft.icon; since PHP 5.3.0
+      );
+
+      if( !isset($ARR_UPLOAD_EXTENSIONS[$this->image_type]) )
          error('invalid_args', "ImageFileUpload.determineFileExtension.unknown_type({$this->image_type})");
-      return $ARR_GLOBAL_UPLOAD_EXTENSION[$this->image_type];
-   }
+      return $ARR_UPLOAD_EXTENSIONS[$this->image_type];
+   }//determineFileExtension
 
    /*!
     * \brief Finally saves uploaded-file to destination path if everything ok.
     * \param path_dest absolute server-pathname (with filename) to store image to
     * \return true on success; false on error (this->errors filled accordingly)
     */
-   function uploadImageFile( $path_dest )
+   public function uploadImageFile( $path_dest )
    {
       if( !$this->is_uploaded || $this->has_error() )
          return false;
@@ -289,13 +294,10 @@ class ImageFileUpload extends FileUpload
       $this->errors[] = sprintf( T_('The uploaded file [%s] can not be stored.'),
             $this->file_src_clientfile );
       return false;
-   }
+   }//uploadImageFile
 
-   /*!
-    * \brief Loads image from temp-file as GD-image, store data in this->image
-    *        and dimensions in this->image_x/y.
-    */
-   function loadImage()
+   /*! \brief Loads image from temp-file as GD-image, store data in this->image and dimensions in this->image_x/y. */
+   public function loadImage()
    {
       switch( (int)$this->image_type )
       {
@@ -318,10 +320,10 @@ class ImageFileUpload extends FileUpload
       $this->image_y = imagesy($this->image);
 
       return !$this->has_error();
-   }
+   }//loadImage
 
    /*! \brief Cleans up GD-resource and temp-file. */
-   function cleanup()
+   public function cleanup()
    {
       if( !is_null($this->image) )
       {
@@ -329,16 +331,16 @@ class ImageFileUpload extends FileUpload
          $this->image = null;
       }
       parent::cleanup();
-   }
+   }//cleanup
+
 
    // ------------- static functions ---------------------------
 
    /*!
     * \brief Returns array with information about image expecting at given path.
-    * \return map with keys: x, y, size (bytes), size_kb (size in KB),
-    *         type (IMAGETYPE_..), mimetype
+    * \return map with keys: x, y, size (bytes), size_kb (size in KB), type (IMAGETYPE_..), mimetype
     */
-   function getImageInfo( $path_image )
+   public static function getImageInfo( $path_image )
    {
       if( !file_exists($path_image) )
          return null;
@@ -354,20 +356,20 @@ class ImageFileUpload extends FileUpload
             'type' => $type,
             'mimetype' => @$image_info['mime'],
          );
-   }
+   }//getImageInfo
 
    /*!
     * \brief Helper-method to return concattenated text of all image-types listed in arg.
     * \param imagetypes array with list of IMAGETYPE_..
     */
-   function getImageTypesText( $imagetypes )
+   private static function getImageTypesText( $imagetypes )
    {
       $arr = array();
       if( in_array(IMAGETYPE_GIF,  $imagetypes) ) $arr[] = T_('GIF#imagefmt');
       if( in_array(IMAGETYPE_JPEG, $imagetypes) ) $arr[] = T_('JPEG#imagefmt');
       if( in_array(IMAGETYPE_PNG,  $imagetypes) ) $arr[] = T_('PNG#imagefmt');
       return implode(', ', $arr);
-   }
+   }//getImageTypesText
 
 } // end of 'ImageFileUpload'
 

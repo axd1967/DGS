@@ -44,9 +44,9 @@ require_once 'tournaments/include/tournament_ladder_props.php';
   */
 class DgsLadderTournament extends TournamentTemplateLadder
 {
-   function DgsLadderTournament()
+   public function __construct()
    {
-      parent::TournamentTemplateLadder(
+      parent::__construct(
          TOURNEY_WIZTYPE_DGS_LADDER,
          sprintf( '%s (%s)', T_('DGS Ladder'), T_('no restrictions, only for Admin#ttype')) );
 
@@ -55,7 +55,7 @@ class DgsLadderTournament extends TournamentTemplateLadder
       $this->limits->setLimits( TLIMITS_TL_MAX_CH, true, 0, TLADDER_MAX_CHALLENGES );
    }
 
-   function createTournament()
+   public function createTournament()
    {
       $tourney = $this->make_tournament( TOURNEY_SCOPE_DRAGON, "DGS Ladder (19x19)" );
 
@@ -78,7 +78,7 @@ class DgsLadderTournament extends TournamentTemplateLadder
       $tl_props->MaxDefenses = 3;
 
       return $this->_createTournament( $tourney, $tprops, $trules, $tl_props );
-   }
+   }//createTournament
 
 } // end of 'DgsLadderTournament'
 

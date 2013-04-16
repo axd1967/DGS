@@ -170,7 +170,7 @@ require_once( 'include/classlib_userpicture.php' );
    $utable->add_or_del_column();
 
    // External-Form
-   $usform = new Form( $utable->Prefix, $page, FORM_GET, false);
+   $usform = new Form( $utable->get_prefix(), $page, FORM_GET, false);
    $usform->set_layout( FLAYOUT_GLOBAL, ( $opp ? '1,2|3' : '1' ) );
    $usform->set_config( FEC_EXTERNAL_FORM, true );
    $utable->set_externalform( $usform ); // also attach offset, sort, manage-filter as hidden (table) to ext-form

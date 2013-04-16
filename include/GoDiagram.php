@@ -20,20 +20,21 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 require_once( 'include/classlib_userconfig.php' );
 require_once( "include/coords.php" );
 
+
 class GoDiagram
 {
-   var $ConfigBoard;
+   private $ConfigBoard;
 
-   var $Size;
+   private $Size;
 
-   var $Left;
-   var $Right;
-   var $Down;
-   var $Up;
+   private $Left;
+   private $Right;
+   private $Down;
+   private $Up;
 
-   var $Data;
+   private $Data;
 
-   function GoDiagram( $cfg_board, $_Size=19, $_Left=1, $_Right=19, $_Down=1, $_Up=19, $_Data = null)
+   private function __construct( $cfg_board, $_Size=19, $_Left=1, $_Right=19, $_Down=1, $_Up=19, $_Data = null)
    {
       global $player_row;
       $this->ConfigBoard = (is_null($cfg_board)) ? new ConfigBoard($player_row['ID']) : $cfg_board;
@@ -45,7 +46,7 @@ class GoDiagram
          $this->clear_data();
    }
 
-   function set_geometry( $_Size=19, $_Left=1, $_Right=19, $_Down=1, $_Up=19 )
+   private function set_geometry( $_Size=19, $_Left=1, $_Right=19, $_Down=1, $_Up=19 )
    {
       $this->Size = limit($_Size, 2, MAX_BOARD_SIZE, 19);
       $this->Left = limit($_Left, 1, $this->Size - 1, 1);
@@ -54,25 +55,25 @@ class GoDiagram
       $this->Up = limit($_Up, $this->Down + 1, $this->Size, $this->Size);
    }
 
-   function set_data( $_Data )
+   private function set_data( $_Data )
    {
       $this->Data = $_Data;
 
       // TODO: Check data ?
    }
 
-   function clear_data()
+   private function clear_data()
    {
       $s = 'e' . str_repeat(',e', $this->Right - $this->Left);
       $this->Data = $s . str_repeat(";$s", $this->Up - $this->Down);
    }
 
-   function set_values_from_post( $ID )
+   public function set_values_from_post( $ID )
    {
       $this->set_data( $_REQUEST["data$ID"] );
    }
 
-   function set_values_from_database_row( $row )
+   public function set_values_from_database_row( $row )
    {
       $this->set_geometry($row['Size'],
                           $row['View_Left'], $row['View_Right'],
@@ -80,13 +81,13 @@ class GoDiagram
       $this->set_data( $row['Data'] );
    }
 
-   function set_values_from_goban_tag( $s )
+   public function set_values_from_goban_tag( $s )
    {
-      $size = extract_value($s, 'size', 2, MAX_BOARD_SIZE, $this->Size);
+      $size = self::extract_value($s, 'size', 2, MAX_BOARD_SIZE, $this->Size);
       $this->Size = $size;
       $this->set_geometry($this->Size);
 
-      $view = extract_value($s, 'view');
+      $view = self::extract_value($s, 'view');
       if(isset($view))
       {
          list($dl,$ur) = explode('-', strtolower($view));
@@ -95,10 +96,10 @@ class GoDiagram
       }
       else
       {
-         $l = extract_value($s, 'left',  1, $size - 1, 1);
-         $r = extract_value($s, 'right', 2, $size, $size);
-         $u = extract_value($s, 'down',  1, $size - 1, 1);
-         $d = extract_value($s, 'up',    2, $size, $size);
+         $l = self::extract_value($s, 'left',  1, $size - 1, 1);
+         $r = self::extract_value($s, 'right', 2, $size, $size);
+         $u = self::extract_value($s, 'down',  1, $size - 1, 1);
+         $d = self::extract_value($s, 'up',    2, $size, $size);
       }
 
       if( $l > $r ) swap($l, $r);
@@ -115,9 +116,9 @@ class GoDiagram
          $this->clear_data();
       else
          $this->clear_data(); // TODO: Modify data
-   }
+   }//set_values_from_goban_tag
 
-   function get_empty_image($x, $y, $sz)
+   private function get_empty_image($x, $y, $sz)
    {
       if( is_hoshi($x, $y, $sz) )
          $fig = 'h';
@@ -136,9 +137,9 @@ class GoDiagram
             $fig .= 'r';
       }
       return $fig;
-   }
+   }//get_empty_image
 
-   function echo_board()
+   public function echo_board()
    {
       global $player_row, $base_path, $woodbgcolors;
 
@@ -179,9 +180,9 @@ class GoDiagram
       $string .= '</table></td></tr></table>' . "\n";
 
       return $string;
-   }
+   }//echo_board
 
-   function echo_editor($nr)
+   public function echo_editor($nr)
    {
       $stonesize = $this->ConfigBoard->get_stone_size();
       if( empty($stonesize) ) $stonesize = 25;
@@ -196,21 +197,176 @@ class GoDiagram
          "</script>\n" .
          '<input type="hidden" name="altered'.$nr.'" value="">' .
          '<input type="hidden" name="data'.$nr.'" value="">' . "\n";
+   }//echo_editor
+
+
+   // ------------ static functions ----------------------------
+
+   public static function create_godiagrams( &$text, $cfg_board )
+   {
+      global $NOW;
+
+      $diagrams = array();
+
+      if( !preg_match_all('/<goban([^>]*)>/i', $text, $matches) )
+         return $diagrams;
+
+      $text = preg_replace('/<goban([^>]*)>/i','<goban id=#>', $text);
+
+
+      $old_diagrams = array();
+
+      foreach( $matches[1] as $m )
+      {
+         $ID = self::extract_value($m, 'id' );
+         $altered = @$_REQUEST["altered$ID"];
+         $save_data = false;
+
+         if( isset($ID) && $ID > 0 )
+         {
+            $result = db_query( 'GoDiagram:create_godiagrams.find',
+               "SELECT * FROM GoDiagrams WHERE ID=$ID" );
+
+            if( @mysql_num_rows($result) == 1 )
+            {
+               $row = mysql_fetch_array( $result );
+               $diagrams[$ID] = new GoDiagram( $cfg_board );
+               $diagrams[$ID]->set_values_from_database_row($row);
+            }
+         }
+
+
+         ta_begin();
+         {//HOT-section to create go-diagram
+            if( !($ID > 0) || empty($row['Saved']) ||
+                ($row['Saved']=='Y' && (!preg_match('/^\s*id=\d+\s*$/i', $m) || $altered=='Y')))
+            {
+               if( $ID > 0 )
+               {
+                  $diag = $diagrams[$ID];
+                  $diag->set_values_from_post($ID);
+               }
+               else
+               {
+                  $diag = new GoDiagram( $cfg_board );
+                  $diag->set_values_from_goban_tag($m);
+               }
+
+               db_query( 'GoDiagram:create_godiagrams.insert',
+                  "INSERT INTO GoDiagrams SET " .
+                           "Size={$diag->Size}, " .
+                           "View_Left={$diag->Left}, " .
+                           "View_Right={$diag->Right}, " .
+                           "View_Down={$diag->Down}, " .
+                           "View_Up={$diag->Up}, " .
+                           "Date=FROM_UNIXTIME($NOW)" );
+
+               $New_ID = mysql_insert_id();
+               $diagrams[$New_ID] = $diag;
+               if( $ID > 0 )
+                  unset($diagrams[$ID]);
+               $ID = $New_ID;
+
+               $save_data = true;
+            }
+            else
+            {
+               if( !preg_match('/^\s*id=\d+\s*$/i', $m) )
+               {
+                  $diagrams[$ID]->set_values_from_goban_tag($m);
+                  $save_data = true;
+               }
+
+               if( $altered == 'Y' )
+               {
+                  $diagrams[$ID]->set_values_from_post($ID);
+                  $save_data = true;
+               }
+            }
+
+            $text = preg_replace('/<goban id=#>/i',"<goban id=$ID>", $text, 1);
+
+            if( $save_data )
+            {
+               db_query( 'godiagram.create_godiagrams.save',
+                  'UPDATE GoDiagrams SET Data="' . $diagrams[$ID]->Data . '" ' .
+                  "WHERE ID=$ID AND Saved='N' LIMIT 1" );
+            }
+         }
+         ta_end();
+      } //endfor
+
+      return $diagrams;
+   }//create_godiagrams
+
+   public static function find_godiagrams( $text, $cfg_board )
+   {
+      $diagrams = array();
+      if( !preg_match_all('/<goban id=(\d+)>/i', $text, $matches) )
+         return $diagrams;
+
+      $diagram_IDs = array();
+      foreach( $matches[1] as $ID )
+      {
+         if( $ID > 0 ) $diagram_IDs[]= $ID;
+      }
+
+      $result = db_query( 'GoDiagram:find_godiagrams',
+         "SELECT * FROM GoDiagrams WHERE ID IN(" . implode(',',$diagram_IDs) .")" );
+
+      while( $row = mysql_fetch_array( $result ) )
+      {
+         $diagrams[$row['ID']] = new GoDiagram( $cfg_board );
+         $diagrams[$row['ID']]->set_values_from_database_row($row);
+      }
+
+      return $diagrams;
+   }//find_godiagrams
+
+   public static function save_diagrams( $GoDiagrams )
+   {
+      $IDs = array();
+      foreach( $GoDiagrams as $ID => $diagram )
+      {
+         if( $ID > 0 ) $IDs[]= $ID;
+      }
+
+      if( count($IDs) > 0 )
+         db_query( 'GoDiagram:save_diagrams',
+            "UPDATE GoDiagrams SET Saved='Y' WHERE ID IN (" . implode(',', $IDs) . ")" );
+   }//save_diagrams
+
+   public static function draw_editors( $GoDiagrams )
+   {
+      $string = '';
+      foreach( $GoDiagrams as $nr => $diagram )
+         $string .= $diagram->echo_editor($nr);
+      return $string;
+   }
+
+   public static function replace_goban_tags_with_boards( $text, $diagrams )
+   {
+      global $callback_diagrams, $callback_diag_nr;
+
+      $callback_diag_nr = 0;
+      $callback_diagrams = $diagrams;
+      return preg_replace_callback('/<goban id=(\d+)>/i', 'callback_godiagram_echo_board', $text);
+   }
+
+   // extract-value from goban-tag: <goban name=str ...>
+   private static function extract_value($string, $name, $minimum=null, $maximum=null, $default=null)
+   {
+      if( preg_match( "/ $name=([-\w]+)/i", $string, $matches) )
+         return limit( $matches[1], $minimum, $maximum, $default );
+      else
+         return $default;
    }
 
 } // end of 'GoDiagram'
 
 
-// extract-value from goban-tag: <goban name=str ...>
-function extract_value($string, $name, $minimum=null, $maximum=null, $default=null)
-{
-   if( preg_match( "/ $name=([-\w]+)/i", $string, $matches) )
-      return limit( $matches[1], $minimum, $maximum, $default );
-   else
-      return $default;
-}
 
-function callback_echo_board($matches)
+function callback_godiagram_echo_board($matches)
 {
    global $callback_diagrams, $callback_diag_nr;
 
@@ -220,158 +376,6 @@ function callback_echo_board($matches)
       return $callback_diagrams[$matches[1]]->echo_board();
    else
       return "[goban #".$matches[1]."]";
-}
-
-function replace_goban_tags_with_boards($text, $diagrams)
-{
-   global $callback_diagrams, $callback_diag_nr;
-
-   $callback_diag_nr = 0;
-   $callback_diagrams = $diagrams;
-   return preg_replace_callback('/<goban id=(\d+)>/i', 'callback_echo_board', $text);
-}
-
-function create_godiagrams( &$text, $cfg_board )
-{
-   global $NOW;
-
-   $diagrams = array();
-
-   if( !preg_match_all('/<goban([^>]*)>/i', $text, $matches) )
-      return $diagrams;
-
-   $text = preg_replace('/<goban([^>]*)>/i','<goban id=#>', $text);
-
-
-   $old_diagrams = array();
-
-   foreach( $matches[1] as $m )
-   {
-      $ID = extract_value($m, 'id' );
-      $altered = @$_REQUEST["altered$ID"];
-      $save_data = false;
-
-      if( isset($ID) && $ID > 0 )
-      {
-         $result = db_query( 'godiagram.create_godiagrams.find',
-            "SELECT * FROM GoDiagrams WHERE ID=$ID" );
-
-         if( @mysql_num_rows($result) == 1 )
-         {
-            $row = mysql_fetch_array( $result );
-            $diagrams[$ID] = new GoDiagram( $cfg_board );
-            $diagrams[$ID]->set_values_from_database_row($row);
-         }
-      }
-
-
-      ta_begin();
-      {//HOT-section to create go-diagram
-         if( !($ID > 0) || empty($row['Saved']) ||
-             ($row['Saved']=='Y' && (!preg_match('/^\s*id=\d+\s*$/i', $m) || $altered=='Y')))
-         {
-            if( $ID > 0 )
-            {
-               $diag = $diagrams[$ID];
-               $diag->set_values_from_post($ID);
-            }
-            else
-            {
-               $diag = new GoDiagram( $cfg_board );
-               $diag->set_values_from_goban_tag($m);
-            }
-
-            db_query( 'godiagram.create_godiagrams.insert',
-               "INSERT INTO GoDiagrams SET " .
-                        "Size={$diag->Size}, " .
-                        "View_Left={$diag->Left}, " .
-                        "View_Right={$diag->Right}, " .
-                        "View_Down={$diag->Down}, " .
-                        "View_Up={$diag->Up}, " .
-                        "Date=FROM_UNIXTIME($NOW)" );
-
-            $New_ID = mysql_insert_id();
-            $diagrams[$New_ID] = $diag;
-            if( $ID > 0 )
-               unset($diagrams[$ID]);
-            $ID = $New_ID;
-
-            $save_data = true;
-         }
-         else
-         {
-            if( !preg_match('/^\s*id=\d+\s*$/i', $m) )
-            {
-               $diagrams[$ID]->set_values_from_goban_tag($m);
-               $save_data = true;
-            }
-
-            if( $altered == 'Y' )
-            {
-               $diagrams[$ID]->set_values_from_post($ID);
-               $save_data = true;
-            }
-         }
-
-         $text = preg_replace('/<goban id=#>/i',"<goban id=$ID>", $text, 1);
-
-         if( $save_data )
-         {
-            db_query( 'godiagram.create_godiagrams.save',
-               'UPDATE GoDiagrams SET Data="' . $diagrams[$ID]->Data . '" ' .
-               "WHERE ID=$ID AND Saved='N' LIMIT 1" );
-         }
-      }
-      ta_end();
-   } //endfor
-
-   return $diagrams;
-} // create_godiagrams
-
-function find_godiagrams($text, $cfg_board)
-{
-   $diagrams = array();
-   if( !preg_match_all('/<goban id=(\d+)>/i', $text, $matches) )
-      return $diagrams;
-
-   $diagram_IDs = array();
-   foreach( $matches[1] as $ID )
-   {
-      if( $ID > 0 ) $diagram_IDs[]= $ID;
-   }
-
-   $result = db_query( 'godiagram.find_godiagrams',
-      "SELECT * FROM GoDiagrams WHERE ID IN(" . implode(',',$diagram_IDs) .")" );
-
-   while( $row = mysql_fetch_array( $result ) )
-   {
-      $diagrams[$row['ID']] = new GoDiagram( $cfg_board );
-      $diagrams[$row['ID']]->set_values_from_database_row($row);
-   }
-
-   return $diagrams;
-}
-
-
-function draw_editors($GoDiagrams)
-{
-   $string = '';
-   foreach( $GoDiagrams as $nr => $diagram )
-      $string .= $diagram->echo_editor($nr);
-   return $string;
-}
-
-function save_diagrams($GoDiagrams)
-{
-   $IDs = array();
-   foreach( $GoDiagrams as $ID => $diagram )
-   {
-      if( $ID > 0 ) $IDs[]= $ID;
-   }
-
-   if( count($IDs) > 0 )
-      db_query( 'godiagram.save_diagrams',
-         "UPDATE GoDiagrams SET Saved='Y' WHERE ID IN (" . implode(',', $IDs) . ")" );
-}
+}//callback_godiagram_echo_board
 
 ?>

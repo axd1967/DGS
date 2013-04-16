@@ -47,15 +47,15 @@ $ENTITY_TOURNAMENT_EXTENSION = new Entity( 'TournamentExtension',
 
 class TournamentExtension
 {
-   var $tid;
-   var $Property;
-   var $IntValue;
-   var $DateValue;
-   var $Lastchanged;
-   var $ChangedBy;
+   public $tid;
+   public $Property;
+   public $IntValue;
+   public $DateValue;
+   public $Lastchanged;
+   public $ChangedBy;
 
    /*! \brief Constructs TournamentExtension-object with specified arguments. */
-   function TournamentExtension( $tid=0, $property=0, $int_val=0, $date_val=0, $lastchanged=0, $changed_by='' )
+   public function __construct( $tid=0, $property=0, $int_val=0, $date_val=0, $lastchanged=0, $changed_by='' )
    {
       $this->tid = (int)$tid;
       $this->setProperty( $property );
@@ -65,7 +65,7 @@ class TournamentExtension
       $this->ChangedBy = $changed_by;
    }
 
-   function setProperty( $property )
+   public function setProperty( $property )
    {
       if( !is_numeric($property) || $property <= 0 || $property > TE_MAX_PROP )
          error('invalid_args', "TournamentExtension.setProperty($property)");
@@ -73,7 +73,7 @@ class TournamentExtension
    }
 
    /*! \brief Inserts or updates TournamentExtension in database. */
-   function persist()
+   public function persist()
    {
       $this->Lastchanged = $GLOBALS['NOW'];
 
@@ -85,29 +85,29 @@ class TournamentExtension
       return db_query( "TournamentExtension.persist.on_dupl_key({$this->tid},{$this->Property})", $query );
    }
 
-   function insert()
+   public function insert()
    {
       $this->Lastchanged = $GLOBALS['NOW'];
 
       $entityData = $this->fillEntityData();
-      return $entityData->insert( "TournamentExtension::insert(%s,{$this->tid},{$this->Property})" );
+      return $entityData->insert( "TournamentExtension.insert(%s,{$this->tid},{$this->Property})" );
    }
 
-   function update()
+   public function update()
    {
       $this->Lastchanged = $GLOBALS['NOW'];
 
       $entityData = $this->fillEntityData();
-      return $entityData->update( "TournamentExtension::update(%s,{$this->tid},{$this->Property})" );
+      return $entityData->update( "TournamentExtension.update(%s,{$this->tid},{$this->Property})" );
    }
 
-   function delete()
+   public function delete()
    {
       $entityData = $this->fillEntityData();
-      return $entityData->delete( "TournamentExtension::delete(%s,{$this->tid},{$this->Property})" );
+      return $entityData->delete( "TournamentExtension.delete(%s,{$this->tid},{$this->Property})" );
    }
 
-   function fillEntityData()
+   public function fillEntityData()
    {
       $data = $GLOBALS['ENTITY_TOURNAMENT_EXTENSION']->newEntityData();
       $data->set_value( 'tid', $this->tid );
@@ -119,10 +119,11 @@ class TournamentExtension
       return $data;
    }
 
+
    // ------------ static functions ----------------------------
 
    /*! \brief Returns db-fields to be used for query of TournamentExtension-object. */
-   function build_query_sql( $tid=0, $property=0 )
+   public static function build_query_sql( $tid=0, $property=0 )
    {
       $qsql = $GLOBALS['ENTITY_TOURNAMENT_EXTENSION']->newQuerySQL('TE');
       if( $tid > 0 )
@@ -133,7 +134,7 @@ class TournamentExtension
    }
 
    /*! \brief Returns TournamentExtension-object created from specified (db-)row. */
-   function new_from_row( $row )
+   public static function new_from_row( $row )
    {
       $t_ext = new TournamentExtension(
             // from TournamentExtension
@@ -147,30 +148,27 @@ class TournamentExtension
       return $t_ext;
    }
 
-   /*!
-    * \brief Loads and returns TournamentExtension-object for given
-    *        tournament-ID and property; NULL if nothing found.
-    */
-   function load_tournament_extension( $tid, $property )
+   /*! \brief Loads and returns TournamentExtension-object for given tournament-ID and property; NULL if nothing found. */
+   public static function load_tournament_extension( $tid, $property )
    {
       $result = NULL;
       if( $tid > 0 && $property > 0 )
       {
-         $qsql = TournamentExtension::build_query_sql( $tid, $property );
+         $qsql = self::build_query_sql( $tid, $property );
          $qsql->add_part( SQLP_LIMIT, '1' );
 
          $row = mysql_single_fetch( "TournamentExtension.load_tournament_extension($tid,$property)",
             $qsql->get_select() );
          if( $row )
-            $result = TournamentExtension::new_from_row( $row );
+            $result = self::new_from_row( $row );
       }
       return $result;
-   }
+   }//load_tournament_extension
 
    /*! \brief Returns enhanced (passed) ListIterator with TournamentExtension-objects. */
-   function load_tournament_extensions( $iterator )
+   public static function load_tournament_extensions( $iterator )
    {
-      $qsql = TournamentExtension::build_query_sql();
+      $qsql = self::build_query_sql();
       $iterator->setQuerySQL( $qsql );
       $query = $iterator->buildQuery();
       $result = db_query( "TournamentExtension.load_tournament_extensions", $query );
@@ -179,13 +177,13 @@ class TournamentExtension
       $iterator->clearItems();
       while( $row = mysql_fetch_array( $result ) )
       {
-         $tourney = TournamentExtension::new_from_row( $row );
+         $tourney = self::new_from_row( $row );
          $iterator->addItem( $tourney, $row );
       }
       mysql_free_result($result);
 
       return $iterator;
-   }
+   }//load_tournament_extensions
 
 } // end of 'TournamentExtension'
 

@@ -138,7 +138,7 @@ require_once( "features/lib_votes.php" );
                button_style($player_row['Button']) );
 
    echo "<h3 class=Header>$title</h3>\n",
-      FeatureVote::getFeaturePointsText( $user_quota->feature_points ),
+      FeatureVote::getFeaturePointsText( $user_quota->get_feature_points() ),
       "<br><br>\n";
 
    while( ($row = mysql_fetch_assoc( $result )) && $show_rows-- > 0 )

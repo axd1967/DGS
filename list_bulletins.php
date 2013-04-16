@@ -204,7 +204,7 @@ $GLOBALS['ThePage'] = new Page('BulletinList');
          $idxmap_ttypes[ $filter_target_type->get_value() ] ));
    $iterator = Bulletin::load_bulletins( $iterator );
 
-   $show_rows = $btable->compute_show_rows( $iterator->ResultRows );
+   $show_rows = $btable->compute_show_rows( $iterator->getResultRows() );
    $btable->set_found_rows( mysql_found_rows('Bulletin.list.found_rows') );
 
 

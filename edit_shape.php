@@ -36,7 +36,7 @@ $GLOBALS['ThePage'] = new Page('ShapeEdit');
    $my_id = $player_row['ID'];
    if( $my_id <= GUESTS_ID_MAX )
       error('not_allowed_for_guest', 'edit_shape');
-   $cfg_board = ConfigBoard::load_config_board($my_id);
+   ConfigBoard::load_config_board($my_id); // load for displaying board
 
    $page = "edit_shape.php";
 

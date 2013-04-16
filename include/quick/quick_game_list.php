@@ -60,34 +60,24 @@ define('GAMELIST_FILTERS', 'mpg|tid');
   */
 class QuickHandlerGameList extends QuickHandler
 {
-   var $opt_view;
-   var $opt_uid; // original option: int | 'all' | 'mine'
+   private $opt_view = '';
+   private $opt_uid = 0; // original option: int | 'all' | 'mine'
 
-   var $glc; // GameListControl
-   var $game_result_rows;
-
-   function QuickHandlerGameList( $quick_object )
-   {
-      parent::QuickHandler( $quick_object );
-      $this->opt_view = '';
-      $this->opt_uid = 0;
-
-      $this->glc = null;
-      $this->game_result_rows = null;
-   }
+   private $glc = null; // GameListControl
+   private $game_result_rows = null;
 
 
    // ---------- Interface ----------------------------------------
 
-   function canHandle( $obj, $cmd ) // static
+   public static function canHandle( $obj, $cmd ) // static
    {
       return ( $obj == QOBJ_GAME ) && QuickHandler::matchRegex(GAMELIST_COMMANDS, $cmd);
    }
 
-   function parseURL()
+   public function parseURL()
    {
       parent::checkArgsUnknown(QGAMELIST_OPTIONS);
-      parent::parseFilters(GAMELIST_FILTERS);
+      $this->parseFilters(GAMELIST_FILTERS);
 
       $this->opt_view = get_request_arg(GAMELIST_OPT_VIEW);
       $this->opt_uid = get_request_arg(GAMELIST_OPT_UID);
@@ -97,9 +87,9 @@ class QuickHandlerGameList extends QuickHandler
          $this->filters[GAMELIST_FILTER_MPG] = 0; // default: OFF
       if( !ALLOW_TOURNAMENTS || !isset($this->filters[GAMELIST_FILTER_TID]) )
          $this->filters[GAMELIST_FILTER_TID] = 0; // default: 0
-   }
+   }//parseURL
 
-   function prepare()
+   public function prepare()
    {
       global $player_row;
       $my_id = $player_row['ID'];
@@ -221,7 +211,7 @@ class QuickHandlerGameList extends QuickHandler
    }//prepare
 
    /*! \brief Processes command for object; may fire error(..) and perform db-operations. */
-   function process()
+   public function process()
    {
       $out = array();
 
@@ -239,7 +229,6 @@ class QuickHandlerGameList extends QuickHandler
 
 
    // ------------ static functions ----------------------------
-
 
 } // end of 'QuickHandlerGameList'
 

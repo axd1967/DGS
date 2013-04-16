@@ -47,27 +47,20 @@ define('USER_COMMANDS', 'info');
   */
 class QuickHandlerUser extends QuickHandler
 {
-   var $uid;
-   var $handle;
+   private $uid = 0;
+   private $handle = '';
 
-   var $user;
-
-   function QuickHandlerUser( $quick_object )
-   {
-      parent::QuickHandler( $quick_object );
-      $this->uid = 0;
-      $this->handle = '';
-   }
+   private $user;
 
 
    // ---------- Interface ----------------------------------------
 
-   function canHandle( $obj, $cmd ) // static
+   public static function canHandle( $obj, $cmd ) // static
    {
       return ( $obj == QOBJ_USER ) && QuickHandler::matchRegex(USER_COMMANDS, $cmd);
    }
 
-   function parseURL()
+   public function parseURL()
    {
       parent::checkArgsUnknown(QUSER_OPTIONS);
       $this->uid = (int)get_request_arg(USEROPT_UID);
@@ -76,7 +69,7 @@ class QuickHandlerUser extends QuickHandler
       $this->user = null;
    }
 
-   function prepare()
+   public function prepare()
    {
       global $player_row;
 
@@ -106,16 +99,15 @@ class QuickHandlerUser extends QuickHandler
          error('unknown_user', "$dbgmsg.find_user");
 
       // check for invalid-action
-
    }//prepare
 
    /*! \brief Processes command for object; may fire error(..) and perform db-operations. */
-   function process()
+   public function process()
    {
       $urow = $this->user->urow;
       $this->addResultKey( 'id', $this->user->ID );
       $this->addResultKey( 'handle', $this->user->Handle );
-      $this->addResultKey( 'type', QuickHandlerUser::convertUserType($this->user->Type) );
+      $this->addResultKey( 'type', self::convertUserType($this->user->Type) );
       $this->addResultKey( 'name', $this->user->Name );
       $this->addResultKey( 'country', $this->user->Country );
       $this->addResultKey( 'picture', $this->user->urow['UserPicture'] );
@@ -142,7 +134,7 @@ class QuickHandlerUser extends QuickHandler
 
    // ------------ static functions ----------------------------
 
-   function convertUserType( $usertype )
+   private static function convertUserType( $usertype )
    {
       $out = array();
       if( $usertype & USERTYPE_PRO )

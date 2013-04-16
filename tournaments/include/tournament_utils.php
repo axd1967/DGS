@@ -45,7 +45,7 @@ class TournamentUtils
    // ------------ static functions ----------------------------
 
    /*! \brief Returns true for tournament-admin. */
-   function isAdmin()
+   public static function isAdmin()
    {
       global $player_row;
       return ( @$player_row['admin_level'] & ADMIN_TOURNAMENT );
@@ -57,7 +57,7 @@ class TournamentUtils
     * \return >0 if user can create tournament (1=only-admin-is-allowed, 2=user-is-allowed-too),
     *         0 if user can not create tournament
     */
-   function check_create_tournament( $label='' )
+   public static function check_create_tournament( $label='' )
    {
       global $player_row;
 
@@ -89,7 +89,7 @@ class TournamentUtils
     * \brief Returns normalized rating within boundaries of
     *        -OUT_OF_RATING < MIN_RATING <= $rating < OUT_OF_RATING.
     */
-   function normalizeRating( $rating )
+   public static function normalizeRating( $rating )
    {
       if( is_null($rating) || !is_numeric($rating)
             || $rating <= -OUT_OF_RATING || $rating >= OUT_OF_RATING )
@@ -98,12 +98,13 @@ class TournamentUtils
          return limit( (double)$rating, MIN_RATING, OUT_OF_RATING-1, NO_RATING );
    }
 
-   function isNumberOrEmpty( $value, $allow_negative=false )
+   public static function isNumberOrEmpty( $value, $allow_negative=false )
    {
       return isNumber( $value, $allow_negative, /*allow-empty*/true );
    }
 
-   function getWizardTournamentType( $wizard_type )
+   // NOTE: not defined in TournamentFactory because of include-dependencies that would bring
+   public static function getWizardTournamentType( $wizard_type )
    {
       static $arr_map = array(
          TOURNEY_WIZTYPE_DGS_LADDER     => TOURNEY_TYPE_LADDER,
@@ -116,13 +117,13 @@ class TournamentUtils
       return $arr_map[$wizard_type];
    }
 
-   function buildLastchangedBy( $lastchanged, $changed_by )
+   public static function buildLastchangedBy( $lastchanged, $changed_by )
    {
       return date(DATE_FMT, $lastchanged) . MED_SPACING
            . sprintf( T_('( changed by %s )#tourney'), ( $changed_by ? trim($changed_by) : NO_VALUE ) );
    }
 
-   function build_num_range_sql_clause( $field, $min, $max, $prefix_op='' )
+   public static function build_num_range_sql_clause( $field, $min, $max, $prefix_op='' )
    {
       if( $min > 0 && $max > 0 )
       {
@@ -135,16 +136,16 @@ class TournamentUtils
       elseif( $max > 0 )
          return "$prefix_op $field <= $max";
       return '';
-   }
+   }//build_num_range_sql_clause
 
    // best_rank=0 (init-value)
-   function calc_best_rank( $best_rank, $rank )
+   public static function calc_best_rank( $best_rank, $rank )
    {
       return ($best_rank <= 0) ? $rank : min($best_rank, $rank);
    }
 
    /*! \brief Show all tournament-flags for admin in given Form-object. */
-   function show_tournament_flags( &$tform, $tourney )
+   public static function show_tournament_flags( &$tform, $tourney )
    {
       if( TournamentUtils::isAdmin() && $tourney->Flags > 0 )
       {
@@ -158,14 +159,14 @@ class TournamentUtils
     * \brief Calculates unix-timestamp for start of month.
     * \param $month_add 0=current month, -1=previous-month
     */
-   function get_month_start_time( $gm_time, $month_add=0 )
+   public static function get_month_start_time( $gm_time, $month_add=0 )
    {
        $arr = localtime( $gm_time, true);
        return gmmktime( /*hour*/ 1, 0, 0, /*month*/ $arr['tm_mon'] + 1 + $month_add,
                         /*day*/ 1, /*year*/ $arr['tm_year'] + 1900, $arr['tm_isdst'] );
    }
 
-   function calc_pool_count( $user_count, $pool_size )
+   public static function calc_pool_count( $user_count, $pool_size )
    {
       if( $pool_size == 0 )
          return 0;
@@ -174,12 +175,12 @@ class TournamentUtils
    }
 
    /*! Returns number of games that need to be played for a pool of given size: n*(n-1)/2 x games_per_round. */
-   function calc_pool_games( $pool_size, $games_per_challenge )
+   public static function calc_pool_games( $pool_size, $games_per_challenge )
    {
       return $games_per_challenge * floor( $pool_size * ( $pool_size - 1 ) / 2 );
    }
 
-   function get_tournament_ladder_notes_user_removed()
+   public static function get_tournament_ladder_notes_user_removed()
    {
       return T_('Running tournament games will be "detached", i.e. continued as normal games, without further effect to the tournament.');
    }

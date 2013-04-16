@@ -36,6 +36,7 @@ require_once( "include/translation_functions.php" );
   * \see   XmlTokenizer
   */
 
+
 define('TOK_TEXT',      1); // literal-token
 define('TOK_SEPARATOR', 2); // separator-token
 // for XML
@@ -57,26 +58,24 @@ define('TOKFLAG_QUOTED', 0x01); // token representing quoted-text
 class Token
 {
    /*! \brief type of token: TOK_TEXT | SEPARATOR | XMLTAG | XMLENTITY. */
-   var $type;
+   private $type;
    /*! \brief Object of type string | XmlTag, containing the parsed Token. */
-   var $token;
+   private $token;
    /*! \brief absolute starting pos of token in orig-text. */
-   var $spos;
+   private $spos;
    /*! \brief absolute end pos of token in orig-text; -1=not-set, then get_endpos() is calculated by spos + len of token. */
-   var $epos;
+   private $epos = -1;
    /*! \brief optional error detected while parsing token */
-   var $error;
+   private $error = '';
    /*! \brief flags indicating special type/state of token */
-   var $flags;
+   private $flags;
 
    /*! \brief Constructing Token( TOK_... type, int spos, string|object token) with specified $type, starting pos and token-value. */
-   function Token( $type, $spos, $token = '', $flags = 0 )
+   public function __construct( $type, $spos, $token = '', $flags = 0 )
    {
       $this->type  = $type;
       $this->token = $token;
       $this->spos  = $spos;
-      $this->epos  = -1;
-      $this->error = '';
       $this->flags = $flags;
    }
 
@@ -84,7 +83,7 @@ class Token
     * \brief Returning type of token.
     * signature: string|int get_type( [ bool as_text ] );
     */
-   function get_type( $as_text = false )
+   public function get_type( $as_text = false )
    {
       static $TOKEN_TYPES = array(
             TOK_TEXT       => 'TEXT',
@@ -93,46 +92,46 @@ class Token
             TOK_XMLENTITY  => 'XMLENT',
          );
       return ($as_text) ? $TOKEN_TYPES[$this->type] : $this->type;
-   }
+   }//get_type
 
    /*!
     * \brief Return token (as ref).
     * signature: Token get_token();
     */
-   function &get_token()
+   public function &get_token()
    {
       return $this->token;
    }
 
    /*! \brief Return error-string associated with this token. */
-   function get_error()
+   public function get_error()
    {
       return $this->error;
    }
 
    /*! \brief Returns true, if token has an assigned error. */
-   function has_error()
+   public function has_error()
    {
       return (bool)( $this->error != '' );
    }
 
    /*!
     * \brief Sets token-value.
-    * signature: set_token( Token token );
+    * \param $token Token-object
     */
-   function set_token( $token )
+   public function set_token( $token )
    {
       $this->token = $token;
    }
 
    /*! \brief Sets int end-position where token was found in orig-text. */
-   function set_endpos( $endpos )
+   public function set_endpos( $endpos )
    {
       $this->epos = $endpos;
    }
 
    /*! \brief Returns int end-position where token was found in orig-text. */
-   function get_endpos()
+   public function get_endpos()
    {
       if( $this->epos < 0 )
          return $this->spos + strlen($this->token) - 1;
@@ -141,7 +140,7 @@ class Token
    }
 
    /*! \brief Returns int the length of token as found in orig-text. */
-   function get_length()
+   public function get_length()
    {
       if( $this->epos < 0 )
          return strlen($this->token);
@@ -150,25 +149,25 @@ class Token
    }
 
    /*! \brief Gets flags for this token. */
-   function get_flags()
+   public function get_flags()
    {
       return $this->flags;
    }
 
    /*! \brief Adds flag for this token. */
-   function add_flags( $flags )
+   public function add_flags( $flags )
    {
       $this->flags |= $flags;
    }
 
    /*! \brief Sets error-string for this token. */
-   function set_error( $error )
+   public function set_error( $error )
    {
       $this->error = $error;
    }
 
    /*! \brief Returns string-representation of this token for debugging. */
-   function to_string()
+   public function to_string()
    {
       $v = (method_exists($this->token, 'to_string')) ? $this->token->to_string() : $this->token;
       return "{" . $this->get_type(true)
@@ -177,6 +176,7 @@ class Token
          . "[$v] "
          . ($this->error != '' ? ":" . T_('Error#filter') . " {$this->error}" : "") . "} ";
    }
+
 } // end of 'Token'
 
 
@@ -199,26 +199,25 @@ class Token
   *
   * \see code_examples/tokenizer_example.php
   */
-class BasicTokenizer
+abstract class BasicTokenizer
 {
    /*! \brief Additional config-array: ( key => val ). */
-   var $config;
+   protected $config = array();
 
    /*! \brief orig-text-value to parse and tokenize. */
-   var $value;
+   protected $value;
    /*! \brief Token[] */
-   var $tokens;
+   protected $tokens;
    /*! \brief string[] */
-   var $errors;
+   protected $errors;
 
-   function BasicTokenizer()
+   protected function __construct()
    {
-      $this->config = array();
       $this->init_parse("");
    }
 
    /*! \brief Re-inits parsing process with specified value-string. */
-   function init_parse( $value )
+   public function init_parse( $value )
    {
       $this->value = $value;
       $this->errors = array();
@@ -229,7 +228,7 @@ class BasicTokenizer
     * \brief Adds config as key-value-pair.
     * signature: add_config( string key, string val)
     */
-   function add_config( $key, $val )
+   public function add_config( $key, $val )
    {
       $this->config[$key] = $val;
    }
@@ -238,7 +237,7 @@ class BasicTokenizer
     * \brief Returns configuration for key; if not set, return empty string.
     * signature: mixed get_config( string key, [mixed defval=''] )
     */
-   function get_config( $key, $defval = '' )
+   public function get_config( $key, $defval = '' )
    {
       return (isset($this->config[$key])) ? $this->config[$key] : $defval;
    }
@@ -247,19 +246,19 @@ class BasicTokenizer
     * \brief Returns Token-array stored within this Tokenizer.
     * signature: Token[] tokens();
     */
-   function tokens()
+   public function tokens()
    {
       return $this->tokens;
    }
 
    /*! \brief Returns number-count of parsed token-entries. */
-   function size()
+   public function size()
    {
       return count($this->tokens);
    }
 
    /*! \brief Returns string-array with error-message if parse() failed. */
-   function errors()
+   public function get_errors()
    {
       return $this->errors;
    }
@@ -268,7 +267,7 @@ class BasicTokenizer
     * \brief abstract method to append Tokenizer-specifics for to_string()
     * \internal
     */
-   function to_string_local()
+   protected function to_string_local()
    {
       return '';
    }
@@ -277,7 +276,7 @@ class BasicTokenizer
     * \brief Returns string-representation showing internal-vars for Tokenizer.
     * \see to_string_local()
     */
-   function to_string()
+   public function to_string()
    {
       $arrtok = array();
       foreach( $this->tokens as $tok )
@@ -294,11 +293,8 @@ class BasicTokenizer
     * \brief Main function to parse specified $value into \see $tokens and $errors.
     * signature: interface abstract bool success = parse(string value);
     */
-   function parse( $value )
-   {
-      // concrete tokenizer needs to implement this abstract method
-      error('invalid_filter', "tokenizer.parse.miss_implementation(".get_class($this).")");
-   }
+   abstract public function parse( $value );
+
 } // end of 'BasicTokenizer'
 
 
@@ -358,20 +354,20 @@ define('STRTOK_CONF_RX_NO_SEP', 'strtokconf_rx_no_sep'); // regex that overrules
 class StringTokenizer extends BasicTokenizer
 {
    /*! \brief Escape-type used to quote special-chars. */
-   var $quote_type;
+   private $quote_type;
    /*! \brief additional parser-flags. */
-   var $flags;
+   private $flags;
    /*! \brief string with split-chars, splitting parsed-value into separate tokens; splitting-char parsed into TOK_SEP-token. */
-   var $split_chars;
+   private $split_chars;
    /*! \brief string with special-chars, included into parsed string, but need quoting of some kind. */
-   var $spec_chars;
+   private $spec_chars;
    /*! \brief string with start/end-quote-char, used to escape/quote values (if only one char, use same as end-quote). */
-   var $quote_chars;
+   private $quote_chars;
    /*! \brief two chars representing from- and to-escape-char to escape special/split-chars with. */
-   var $escape_chars;
+   private $escape_chars;
 
    /*! \brief regex for not-matching char of 'word' (considered as separator). */
-   var $rxsep;
+   private $rxsep = '';
 
    /*!
     * \brief Constructs StringTokenizer with specified args.
@@ -382,29 +378,28 @@ class StringTokenizer extends BasicTokenizer
     *    for QUOTE_ESCAPE: spec_chars are escaped, quote_chars contain prefix-char indicating need to escape
     *    optional flag ORed with quote_type: TOKENIZE_WORD_RX (split_chars contains char-regex forming a word, separator is negating those chars)
     */
-   function StringTokenizer( $quote_type, $split_chars, $spec_chars, $escape_chars = '\\\\', $quote_chars = '""' )
+   public function __construct( $quote_type, $split_chars, $spec_chars, $escape_chars = '\\\\', $quote_chars = '""' )
    {
-      parent::BasicTokenizer();
+      parent::__construct();
       $this->quote_type   = ( $quote_type & TOKENIZE_TYPEMASK );
       $this->flags        = $quote_type & ~TOKENIZE_TYPEMASK;
       $this->split_chars  = $split_chars;
       $this->spec_chars   = $spec_chars;
       $this->escape_chars = $escape_chars;
       $this->quote_chars  = $quote_chars;
-      $this->rxsep        = '';
 
       if( $this->flags & TOKENIZE_WORD_RX )
       {
          $this->rxsep = ($split_chars) ? "/[^{$split_chars}]/i" : '';
          $this->split_chars = '';
       }
-   }
+   }//__construct
 
    /*!
     * \brief Returns true, if parsing specified value into tokens was successful.
     * signature: interface bool success = parse(value);
     */
-   function parse( $value )
+   public function parse( $value )
    {
       $this->init_parse($value);
 
@@ -419,9 +414,9 @@ class StringTokenizer extends BasicTokenizer
          error('invalid_filter', "tokenizer.parse.unknown_quote_type({$this->quote_type})");
 
       return $success;
-   }
+   }//parse
 
-   function to_string_local()
+   protected function to_string_local()
    {
       return "(type={$this->quote_type}, flags=[{$this->flags}], split[{$this->split_chars}], special[{$this->spec_chars}], " .
          "quote[{$this->quote_chars}], esc[{$this->escape_chars}], rxsep=[{$this->rxsep}])\n";
@@ -435,21 +430,21 @@ class StringTokenizer extends BasicTokenizer
     *        no-sep-regex doesn't match on substring (must start at same
     *        pos as passed char).
     */
-   function is_split_char( $char, $substr )
+   private function is_split_char( $char, $substr )
    {
       if( (string)$this->rxsep != '')
          $is_splitter = preg_match($this->rxsep, $char);
       else
          $is_splitter = !(strpos($this->split_chars, $char) === false);
       return (bool) ( $is_splitter && !$this->match_rx_no_sep( $substr ) );
-   }
+   }//is_split_char
 
    /*!
     * \brief Returns true, if passed string matches optionally given
     *        case-insensitive regex-pattern to allow separator-char.
     * <p>Pattern specified with this->add_config(STRTOK_CONF_RX_NO_SEP, 'regex')
     */
-   function match_rx_no_sep( $str )
+   private function match_rx_no_sep( $str )
    {
       $rx = $this->get_config(STRTOK_CONF_RX_NO_SEP);
       return (bool) ( (string)$rx != '' && preg_match( "/^($rx)/i", $str ) );
@@ -457,14 +452,15 @@ class StringTokenizer extends BasicTokenizer
 
    /*!
     * \brief Escapes a string using double-quoting.
-    * \internal
-    *
     * Principle: quoting by doubling special-char
     * signature: bool success = parse_quote_double()
-    * note: using spec_chars, split_chars, escape_chars
+    *
+    * \note using spec_chars, split_chars, escape_chars
     * Example:  a--a-b  (sep='-')  -> tokens = ( TOK_TEXT(a-a), TOK_SEP(-), TOK_TEXT(b) )
+    *
+    * \internal
     */
-   function parse_quote_double()
+   private function parse_quote_double()
    {
       $spos = 0; // orig-start-pos
       $tok = ''; // current token
@@ -510,19 +506,20 @@ class StringTokenizer extends BasicTokenizer
       if( (string)$tok != '' )
          $this->tokens[]= new Token(TOK_TEXT, $spos, $tok);
       return true;
-   }
+   }//parse_quote_double
 
    /*!
     * \brief Escapes a string using quote-chars.
-    * \internal
-    *
     * Principle: quoting by quoting chars (using start/end-quote-char)
     * signature: bool success = parse_quote_quote();
-    * note: using spec_chars, split_chars, quote_chars, escape_chars
-    * note: double quote_start can be used to escape quote
+    *
+    * \note using spec_chars, split_chars, quote_chars, escape_chars
+    * \note double quote_start can be used to escape quote
     * Example:  "a-a"-b  (sep='-')  -> tokens = ( TOK_TEXT(a-a), TOK_SEP(-), TOK_TEXT(b) )
+    *
+    * \internal
     */
-   function parse_quote_quote()
+   private function parse_quote_quote()
    {
       $quote_start = $this->quote_chars[0];
       $quote_end = (strlen($this->quote_chars) > 1) ? $this->quote_chars[1] : $quote_start;
@@ -593,18 +590,19 @@ class StringTokenizer extends BasicTokenizer
       }
 
       return true;
-   }
+   }//parse_quote_quote
 
    /*!
     * \brief Escapes a string using escape-char.
-    * \internal
-    *
     * Principle: quoting by using escape-char
     * signature: bool success = parse_quote_double();
-    * note: using spec_chars, split_chars, quote_chars, escape_chars
+    *
+    * \note using spec_chars, split_chars, quote_chars, escape_chars
     * Example:  a\-a-b   (sep='-')  -> tokens = ( TOK_TEXT(a-a), TOK_SEP(-), TOK_TEXT(b) )
+    *
+    * \internal
     */
-   function parse_quote_escape()
+   private function parse_quote_escape()
    {
       $esc_char = $this->escape_chars[0];
       $spos = 0; // orig-start-pos
@@ -643,7 +641,8 @@ class StringTokenizer extends BasicTokenizer
       if( (string)$tok != '' )
          $this->tokens[]= new Token(TOK_TEXT, $spos, $tok);
       return true;
-   }
+   }//parse_quote_escape
+
 } // end of 'StringTokenizer'
 
 
@@ -656,7 +655,7 @@ class StringTokenizer extends BasicTokenizer
   * \class XmlTag
   *
   * \brief Representation of a XML-tag with name, attributes and if it's a start or end-tag.
-  * note: Used as Token-value in resulting tokens-array for XmlTokenizer
+  * \note Used as Token-value in resulting tokens-array for XmlTokenizer
   *
   * Example:
   *    '<tag a1=1>' -> XmlTag { name='tag', attributes=( a1 => 1), is_start=1, is_end=0 }
@@ -664,35 +663,28 @@ class StringTokenizer extends BasicTokenizer
 class XmlTag
 {
    /*! \brief tag-name. */
-   var $name;
+   public $name = '';
    /*! \brief array with only unique attributes allowed: ( attrname => attrvalue ). */
-   var $attributes;
+   public $attributes = array();
    /*! \brief true, if is a start-tag */ # for: <tag>  or <tag/>
-   var $is_start;
+   public $is_start = false;
    /*! \brief true, if is an end-tag  */ # for: </tag> or <tag/>
-   var $is_end;
-
-   function XmlTag()
-   {
-      $this->name = '';
-      $this->is_start = false;
-      $this->is_end   = false;
-      $this->attributes = array();
-   }
+   public $is_end = false;
 
    // signature: add_attribute( string attrname, string attrvalue );
-   function add_attribute( $attrname, $attrvalue )
+   public function add_attribute( $attrname, $attrvalue )
    {
       $this->attributes[$attrname] = $attrvalue;
    }
 
-   function to_string()
+   public function to_string()
    {
       $arr_attr = array();
       foreach( $this->attributes as $k => $v )
          $arr_attr[]= "$k=[$v]";
       return "XmlTag(name={$this->name}, is_start/end={$this->is_start}/{$this->is_end}, attributes=\{" . implode(", ", $arr_attr). "}) ";
    }
+
 } // end of 'XmlTag'
 
 
@@ -709,7 +701,7 @@ class XmlTag
   *    if($sucess)
   *       echo $tokenizer->to_string();
   *    else
-  *       echo implode( "\n", $tokenizer->errors() );
+  *       echo implode( "\n", $tokenizer->get_errors() );
   *
   * Parsing-Example:
   *    $tokenizer->parse( "some <xml>&quot;</xml> here" );
@@ -727,21 +719,21 @@ class XmlTag
 class XmlTokenizer extends BasicTokenizer
 {
    /*! \brief origingla start-pos for parsing within value. */
-   var $spos;
+   private $spos;
    /*! \brief current parsing-pos within value. */
-   var $pos;
+   private $pos;
    /*! \brief length of value. */
-   var $len;
+   private $len;
    /*! \brief current token-string. */
-   var $tok;
+   private $tok;
 
    /*! \brief Constructs XmlTokenizer. */
-   function XmlTokenizer()
+   public function __construct()
    {
-      parent::BasicTokenizer();
+      parent::__construct();
    }
 
-   function to_string_local()
+   protected function to_string_local()
    {
       return " pos={$this->pos}, ";
    }
@@ -809,11 +801,11 @@ class XmlTokenizer extends BasicTokenizer
          return false;
 
       return true;
-   }
+   }//parse
 
    // parsing XML-entity: "&xyz;", eat-up entity from current pos in parsing value
    // signature: Token eat_entity();
-   function eat_entity()
+   private function eat_entity()
    {
       static $rx_entity = '/^(\&[a-z0-9-_]*;)/i';
       $val = substr( $this->value, $this->pos );
@@ -835,13 +827,13 @@ class XmlTokenizer extends BasicTokenizer
          $this->pos += strlen($out[1]);
       }
       return $token;
-   }
+   }//eat_entity
 
    // eat-up tag from current pos in parsing value, returning null on fatal-error.
    //   parsing XML-tag: <tag [ attr=val|"val"|'val' ...]>  <tag/>
    // signature: Token(tagname,XmlTag)|null eat_tag();
    // note: also sets token-endpos
-   function eat_tag()
+   private function eat_tag()
    {
       $spos = $this->pos; // start-pos
       $token  = new Token(TOK_XMLTAG, $this->pos);
@@ -959,13 +951,13 @@ class XmlTokenizer extends BasicTokenizer
       $token->set_endpos( $this->pos - 1 );
       $token->set_token($xmltag);
       return $token;
-   }
+   }//eat_tag
 
    // parsing XML-tag-attribute: attr | attr=[val] | attr='val' | attr="val"
    //    eat-up attribute from current pos in parsing value
    // signature: bool success = eat_attribute(xmltag_token, $xmltag, tagstartpos);
    // note: no check for unique attributes
-   function eat_attribute( &$token, &$xmltag, $spos )
+   private function eat_attribute( &$token, &$xmltag, $spos )
    {
       $out = array();
       if( preg_match( '/^([^\s=\/>]*)?="([^"]*)"/', substr($this->value, $this->pos), $out ) != 0 ) // 1. key = "val"
@@ -989,7 +981,8 @@ class XmlTokenizer extends BasicTokenizer
       $this->pos += strlen($out[0]);
 
       return true;
-   }
+   }//eat_attribute
+
 } // end of 'XmlTokenizer'
 
 ?>

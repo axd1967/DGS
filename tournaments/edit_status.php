@@ -56,7 +56,7 @@ $GLOBALS['ThePage'] = new Page('TournamentStatusEdit');
    if( $tid < 0 ) $tid = 0;
 
    $tstatus = new TournamentStatus( $tid ); // existing tournament?
-   $tourney = $tstatus->tourney;
+   $tourney = $tstatus->get_tournament();
 
    // create/edit allowed?
    $allow_edit_tourney = TournamentHelper::allow_edit_tournaments($tourney, $my_id);
@@ -80,7 +80,7 @@ $GLOBALS['ThePage'] = new Page('TournamentStatusEdit');
       $tstatus->add_error( $tourney->buildAdminLockText() );
 
    // save tournament-object with values from edit-form (if no errors and something changed)
-   $allow_confirm = ( !$tstatus->has_error() || $tstatus->is_admin );
+   $allow_confirm = ( !$tstatus->has_error() || $is_admin );
    if( @$_REQUEST['t_confirm'] && count($edits) && $allow_confirm )
    {
       if( $tourney->Status == TOURNEY_STATUS_CLOSED ) // set end-time
@@ -90,7 +90,7 @@ $GLOBALS['ThePage'] = new Page('TournamentStatusEdit');
       {//HOT-section to change tournament-status
          $tourney->persist();
          TournamentLogHelper::log_change_tournament_status( $tid, $allow_edit_tourney,
-            sprintf('%s -> %s', $tstatus->curr_status, $tstatus->new_status ) );
+            sprintf('%s -> %s', $tstatus->get_current_status(), $tstatus->get_new_status() ) );
       }
       ta_end();
 
@@ -123,13 +123,13 @@ $GLOBALS['ThePage'] = new Page('TournamentStatusEdit');
    {
       $tform->add_row( array(
             'DESCRIPTION', T_('Error'),
-            'TEXT', buildErrorListString(T_('There are some errors'), $tstatus->errors) ));
+            'TEXT', buildErrorListString(T_('There are some errors'), $tstatus->get_errors()) ));
       $tform->add_empty_row();
    }
 
    $tform->add_row( array(
          'DESCRIPTION', T_('Current Status'),
-         'TEXT',        Tournament::getStatusText($tstatus->curr_status) ));
+         'TEXT',        Tournament::getStatusText($tstatus->get_current_status()) ));
    $tform->add_row( array(
          'TAB',
          'SELECTBOX',    'status', 1, $arr_status, $tourney->Status, false,
@@ -140,13 +140,13 @@ $GLOBALS['ThePage'] = new Page('TournamentStatusEdit');
       $confirm_notes = '';
       if( $tstatus->has_error() )
       {
-         if( $tstatus->is_admin )
+         if( $is_admin )
             $confirm_notes = T_('Confirm only, if you want to change the status regardless of the occured errors!');
       }
       else
       {
          $confirm_notes = T_('Are you still sure you want to change the status?');
-         if( !$tstatus->is_admin )
+         if( !$is_admin )
             $confirm_notes = // role_info comes here (see below)
                T_('Be aware, that only the status changes defined below are possible.')
                . "<br>\n"

@@ -42,15 +42,15 @@ define('EMPTY_SQL_QUERY', 'SELECT 1 FROM DUAL');
 class RequestParameters
 {
    /*! \brief array holding pairs of data: ( key => val ), val can be an array too representing multi-values. */
-   var $values;
+   private $values;
    /*! \brief false, if hidden-vars should not be exported (default: true). */
-   var $use_hidden;
+   private $use_hidden;
 
    /*!
     * \brief Constructs RequestParameters( [array( key => val)] )
     * \param $arr_src Copies values from optional passed source-arry.
     */
-   function RequestParameters( $arr_src = null, $use_hidden=true )
+   public function __construct( $arr_src = null, $use_hidden=true )
    {
       $this->values = array();
       if( is_array($arr_src) )
@@ -62,7 +62,7 @@ class RequestParameters
    }
 
    /*! \brief Sets var to determine if hiddens should be exported or not (default: true). */
-   function use_hidden( $use_hidden=true )
+   public function use_hidden( $use_hidden=true )
    {
       $this->use_hidden = (bool)$use_hidden;
    }
@@ -71,7 +71,7 @@ class RequestParameters
     * \brief Adds entry.
     * signature: add_entry( string key, string|array value );
     */
-   function add_entry( $key, $value )
+   public function add_entry( $key, $value )
    {
       $this->values[$key] = $value;
    }
@@ -83,7 +83,7 @@ class RequestParameters
     * note: used as interface for Form- or Table-class
     * note: returning elements don't handle multi-values correctly (if val is array), though not needed IMHO
     */
-   function get_hiddens( &$hiddens )
+   public function get_hiddens( &$hiddens )
    {
       if( !$this->use_hidden)
          return ''; // don't export hiddens
@@ -93,7 +93,7 @@ class RequestParameters
       else
          $hiddens = $this->values;
       return build_hidden( $this->values);
-   }
+   }//get_hiddens
 
    /*!
     * \brief Returns an URL-encoded URL-parts-string for all the key-value-pairs of this object.
@@ -101,13 +101,13 @@ class RequestParameters
     * note: used as interface for Form- or Table-class
     * note: also handle multi-values using 'varname[]'-notation
     */
-   function get_url_parts( $end_sep=false)
+   public function get_url_parts( $end_sep=false)
    {
       return build_url( $this->values, $end_sep);
    }
 
    /*! \brief Return entries as key-value array. */
-   function get_entries()
+   public function get_entries()
    {
       return $this->values;
    }
@@ -162,37 +162,35 @@ define('SQLP_UNION_WHERE', 'union_where');
 
 define('SQLOPT_CALC_ROWS', 'SQL_CALC_FOUND_ROWS'); // for SQLP_OPTS
 
-// sql-statements for part-types
-global $ARR_SQL_STATEMENTS; //PHP5
-$ARR_SQL_STATEMENTS = array(
-   SQLP_FIELDS    => 'SELECT',
-   SQLP_OPTS      => '',
-   SQLP_FROM      => 'FROM',
-   SQLP_WHERE     => 'WHERE',
-   SQLP_GROUP     => 'GROUP BY',
-   SQLP_HAVING    => 'HAVING',
-   SQLP_ORDER     => 'ORDER BY',
-   SQLP_LIMIT     => 'LIMIT',
-   SQLP_FNAMES    => NULL,
-   SQLP_WHERETMPL => NULL,
-   SQLP_UNION_WHERE => 'UNION',
-);
-
 class QuerySQL
 {
    /*! \brief array( type => array( part, ...), ...) */
-   var $parts;
-   var $use_union_all;
+   private $parts;
+   private $use_union_all;
+
+   // sql-statements for part-types
+   private static $ARR_SQL_STATEMENTS = array(
+         SQLP_FIELDS    => 'SELECT',
+         SQLP_OPTS      => '',
+         SQLP_FROM      => 'FROM',
+         SQLP_WHERE     => 'WHERE',
+         SQLP_GROUP     => 'GROUP BY',
+         SQLP_HAVING    => 'HAVING',
+         SQLP_ORDER     => 'ORDER BY',
+         SQLP_LIMIT     => 'LIMIT',
+         SQLP_FNAMES    => NULL,
+         SQLP_WHERETMPL => NULL,
+         SQLP_UNION_WHERE => 'UNION',
+      );
 
    /*!
     * \brief Constructs QuerySQL( part_type, part1, part2, ... part_type, ...) with var-args.
-    * param $part_type: one of SQLP_...-consts
+    * \param $part_type: one of SQLP_...-consts
     */
-   function QuerySQL()
+   public function __construct()
    {
-      global $ARR_SQL_STATEMENTS;
       $this->parts = array();
-      foreach( array_keys($ARR_SQL_STATEMENTS) as $type )
+      foreach( array_keys(self::$ARR_SQL_STATEMENTS) as $type )
          $this->parts[$type] = array();
       $this->use_union_all = false;
 
@@ -212,9 +210,9 @@ class QuerySQL
                $this->parts[$type][] = $arg;
          }
       }
-   }
+   }//__construct
 
-   function useUnionAll( $use=true )
+   public function useUnionAll( $use=true )
    {
       $this->use_union_all = $use;
    }
@@ -222,11 +220,11 @@ class QuerySQL
    /*!
     * \brief Adds SQL-part
     * signature: add_part( part_type, part1, part2, ...); var-args for one part-type
-    * param $type sql-part-type to add to QuerySQL: one of SQLP_...-consts
-    * param $parts allow variable number of parts (1..n); if part is an array its items are merged as if being parts
+    * \param $type sql-part-type to add to QuerySQL: one of SQLP_...-consts
+    * \param $parts allow variable number of parts (1..n); if part is an array its items are merged as if being parts
     *
-    * note: empty parts are skipped
-    * NOTE: Best practice is to use only ONE SQL-varname per SQLP_FIELDS-part
+    * \note empty parts are skipped
+    * \note Best practice is to use only ONE SQL-varname per SQLP_FIELDS-part
     *
     * Examples:
     *    add_part( SQLP_FIELDS,  'P.Name', 'P.Handle', 'P.ID' );
@@ -241,7 +239,7 @@ class QuerySQL
     *    add_part( SQLP_WHERETMPL, "(G.ID #OP #VAL OR G.ID2 #OP #VAL)" );
     *    add_part( SQLP_UNION_WHERE, 'Black_ID=4711', 'White_ID=4711' );
     */
-   function add_part( $type ) // var-args for parts
+   public function add_part( $type ) // var-args for parts
    {
       // check
       if( !isset($this->parts[$type]) )
@@ -267,16 +265,16 @@ class QuerySQL
          if( (string)$part != '' )
             $this->parts[$type][] = $part;
       }
-   }
+   }//add_part
 
    /*!
     * \brief Adds SQL-part, only for SQLP_FIELDS
     * signature: add_part_array( part_type, array( part1, part2, ...) );
-    * param $part_arr parts (1..n)
+    * \param $part_arr parts (1..n)
     *
-    * see also func add_part(type, ...)
+    * \see also func add_part(type, ...)
     */
-   function add_part_fields( $part_arr )
+   public function add_part_fields( $part_arr )
    {
       foreach( $part_arr as $part )
       {
@@ -284,13 +282,13 @@ class QuerySQL
          if( $part != '' )
             $this->parts[SQLP_FIELDS][] = $part;
       }
-   }
+   }//add_part_fields
 
    /*!
     * \brief Clears specified part-types (var-args)
-    * param $part_type SQLP_...
+    * \param $part_type SQLP_...
     */
-   function clear_parts() // var-args
+   public function clear_parts() // var-args
    {
       $args = func_get_args();
       foreach( $args as $type )
@@ -300,10 +298,10 @@ class QuerySQL
          if( isset($this->parts[$type]) )
             $this->parts[$type] = array();
       }
-   }
+   }//clear_parts
 
    /*! \brief Returns true, if sql-part existing */
-   function has_part( $type )
+   public function has_part( $type )
    {
       if( !isset($this->parts[$type]) )
          error('assert', "QuerySQL.has_part.unknown_type($type)");
@@ -311,13 +309,13 @@ class QuerySQL
    }
 
    /*! \brief Returns true, if query has a UNION-part. */
-   function has_union()
+   public function has_union()
    {
       return $this->has_part(SQLP_UNION_WHERE);
    }
 
    /*! \brief Returns parts-array for specified part_type */
-   function get_parts( $type )
+   public function get_parts( $type )
    {
       if( !isset($this->parts[$type]) )
          error('assert', "QuerySQL.get_parts.unknown_type($type)");
@@ -326,11 +324,11 @@ class QuerySQL
 
    /*!
     * \brief Returns typed part of select-statement; '' for none set.
-    * param incl_prefix: if true, preprend sql-part with according SQL-keyword, e.g. 'SELECT' for SQLP_FIELDS
+    * \param $incl_prefix: if true, preprend sql-part with according SQL-keyword, e.g. 'SELECT' for SQLP_FIELDS
     * \param $union_part -1 (no union = default), 0..n = part of union;
     *        for some union-parts certain SQL-options are forbidden
     */
-   function get_part( $type, $incl_prefix = false, $union_part=-1 )
+   public function get_part( $type, $incl_prefix = false, $union_part=-1 )
    {
       if( !$this->has_part($type) )
          return '';
@@ -363,16 +361,15 @@ class QuerySQL
       elseif( $type === SQLP_UNION_WHERE )
          $part = implode(' OR ', $arr);
 
-      global $ARR_SQL_STATEMENTS;
-      $prefix = ($incl_prefix) ? $ARR_SQL_STATEMENTS[$type] . ' ' : '';
+      $prefix = ($incl_prefix) ? self::$ARR_SQL_STATEMENTS[$type] . ' ' : '';
       return $prefix . $part;
-   }
+   }//get_part
 
    /*!
     * \brief Merges FROM-parts (could be Tables or JOIN-parts).
-    * note: "{ OJ ..}" not supported (mysql-specialty)
+    * \note "{ OJ ..}" not supported (mysql-specialty)
     */
-   function merge_from_parts( $arr )
+   public function merge_from_parts( $arr )
    {
       if( count($arr) == 0 )
          return '';
@@ -395,14 +392,15 @@ class QuerySQL
       }
 
       return $result;
-   }
+   }//merge_from_parts
 
    /*!
     * \brief Returns SQL-statement with current SQL-parts as one string.
-    * output: "SELECT [options] fields FROM from [WHERE where] [GROUP BY group] [HAVING having] [ORDER BY order] [LIMIT limit]"
-    * output: "(SELECT ...) UNION (SELECT ...) [ORDER BY order] [LIMIT limit]" if UNION_WHERE-part set
+    * \return query-string:
+    *    output: "SELECT [options] fields FROM from [WHERE where] [GROUP BY group] [HAVING having] [ORDER BY order] [LIMIT limit]"
+    *    output: "(SELECT ...) UNION (SELECT ...) [ORDER BY order] [LIMIT limit]" if UNION_WHERE-part set
     */
-   function get_select()
+   public function get_select()
    {
       if( !$this->has_union() )
          return $this->get_select_normal();
@@ -427,16 +425,16 @@ class QuerySQL
 
       $sql = implode(' ', $arrsql);
       return $sql;
-   }
+   }//get_select
 
    /*!
     * \brief Returns SQL-statement with current SQL-parts as one string.
     * \internal
     * \param $union_part -1 (no union = default), 0..n = union-part to add;
     *        then order + limit not added
-    * output: "SELECT [options] fields FROM from [WHERE where] [GROUP BY group] [HAVING having] [ORDER BY order] [LIMIT limit]"
+    * \return output: "SELECT [options] fields FROM from [WHERE where] [GROUP BY group] [HAVING having] [ORDER BY order] [LIMIT limit]"
     */
-   function get_select_normal( $union_part = -1 )
+   private function get_select_normal( $union_part = -1 )
    {
       $arrsql = array();
       $has_opts = $this->has_part(SQLP_OPTS);
@@ -478,7 +476,7 @@ class QuerySQL
 
       $sql = implode(' ', $arrsql);
       return $sql;
-   }
+   }//get_select_normal
 
    /*!
     * \brief Merges passed QuerySQL in current one.
@@ -489,7 +487,7 @@ class QuerySQL
     *
     * Example: bool success = merge( QuerySQL );
     */
-   function merge( $qsql )
+   public function merge( $qsql )
    {
       // checks
       if( is_null($qsql) || empty($qsql) )
@@ -513,15 +511,15 @@ class QuerySQL
       }
 
       return true;
-   }
+   }//merge
 
    /*!
     * \brief Merges passed QuerySQL with current one returning _NEW_ QuerySQL, if merging possible.
-    * Return NULL otherwise.
     * signature: QuerySQL merge_or( QuerySQL );
-    * note: merge WHERE and HAVING parts using OR-operation
+    * \return NULL otherwise.
+    * \note merge WHERE and HAVING parts using OR-operation
     */
-   function merge_or( $qsql )
+   public function merge_or( $qsql )
    {
       // normal merge into new one
       $query = $this->duplicate();
@@ -542,10 +540,10 @@ class QuerySQL
       }
 
       return $query;
-   }
+   }//merge_or
 
    /*! \brief Returns copy of this object */
-   function duplicate()
+   public function duplicate()
    {
       $q = new QuerySQL();
       $q->merge($this);
@@ -553,7 +551,7 @@ class QuerySQL
    }
 
    /*! \brief Returns String-representation of this object. */
-   function to_string()
+   public function to_string()
    {
       $arr = array();
       foreach( array_keys($this->parts) as $type )
@@ -562,7 +560,8 @@ class QuerySQL
             $arr[]= "$type={[" . implode( '], [', $this->parts[$type] ) . "]}";
       }
       return "QuerySQL: " . implode(', ', $arr);
-   }
+   }//to_string
+
 } // end of 'QuerySQL'
 
 
@@ -577,78 +576,73 @@ class QuerySQL
 class ListIterator
 {
    /*! \brief Name of list-iterator (type of items). */
-   var $Name;
+   private $Name;
 
    /*! \brief main QuerySQL | null */
-   var $QuerySQL;
+   private $QuerySQL;
    /*! \brief List of QuerySQL to be merged into main QuerySQL. */
-   var $QuerySQLMerge;
+   private $QuerySQLMerge = array();
    /*! \brief optional order string to be appended to query. */
-   var $QueryOrder;
+   private $QueryOrder;
    /*! \brief optional limit string to be appended to query. */
-   var $QueryLimit;
+   private $QueryLimit;
    /*! \brief field-name for comparison-function _compare_items_...() for sortListIterator(). */
-   var $SortField;
+   private $SortField = null;
 
    /*! \brief (internal) QuerySQL built from merging QuerySQL with list of QuerySQLMerge. */
-   var $MergedQuerySQL;
+   private $MergedQuerySQL = null;
    /*! \brief query-string for db-query (for debugging). */
-   var $Query;
+   private $Query = '';
 
    /*! \brief Number of rows resulting from db-query. */
-   var $ResultRows;
+   private $ResultRows = -1;
    /*! \brief List of array with objects and original row read from db-query: array( array( Obj, row), ...). */
-   var $Items;
+   private $Items;
    /*! \brief optional index mapping index-fields from query-result to items: array( field => [ val => (Obj,row) ], ...). */
-   var $Index;
+   private $Index = array();
+
 
    /*!
     * \brief Constructs ListIterator with name
     * \param $qsql will be added as merge-QuerySQL
     */
-   function ListIterator( $name, $qsql=null, $order='', $limit='' )
+   public function __construct( $name, $qsql=null, $order='', $limit='' )
    {
       $this->Name = $name;
       $this->QuerySQL = new QuerySQL();
-      $this->QuerySQLMerge = array();
       $this->addQuerySQLMerge( $qsql );
       $this->QueryOrder = $order;
       $this->QueryLimit = $limit;
-      $this->SortField = null;
 
-      $this->MergedQuerySQL = null;
-      $this->Query = '';
-      $this->ResultRows = -1; // not queried yet
       $this->clearItems();
-      $this->Index = array();
    }
 
    /*! \brief Clears list of items in this list-iterator. */
-   function clearItems()
+   public function clearItems()
    {
       $this->Items = array();
    }
 
    /*! \brief Returns number of stored items. */
-   function getItemCount()
+   public function getItemCount()
    {
       return count( $this->Items );
    }
 
    /*! \brief Returns each() from items-list of this ListIterator. */
-   function getListIterator()
+   public function getListIterator()
    {
       return each( $this->Items );
    }
 
    /*! \brief Resets iterating with getListIterator-func. */
-   function resetListIterator()
+   public function resetListIterator()
    {
       reset( $this->Items );
    }
 
    /*! \brief Sorts internal items-list by given compare-function $cmp_func. */
-   function sortListIteratorCustom( $cmp_func )
+   public function sortListIteratorCustom( $cmp_func )
    {
       return usort( $this->Items, $cmp_func );
    }
@@ -657,7 +651,7 @@ class ListIterator
     * \brief Sorts internal items-list by given $field (from row-data).
     * \param $sort_flags SORT_NUMERIC, SORT_STRING (case-sensitive), SORT_STRING|SORT_FLAG_CASE (case-insensitive)
     */
-   function sortListIterator( $field, $sort_flags=SORT_REGULAR )
+   public function sortListIterator( $field, $sort_flags=SORT_REGULAR )
    {
       if( count($this->Items) == 0 )
          return true;
@@ -677,10 +671,10 @@ class ListIterator
          error('invalid_args', "ListIterator.sortListIterator.bad_sort_flags($field,$sort_flags)");
 
       return usort( $this->Items, $cmp_func );
-   }
+   }//sortListIterator
 
    // \internal, see sortListIterator()
-   function _compare_items_numeric( $item1, $item2 )
+   private function _compare_items_numeric( $item1, $item2 )
    {
       $a = $item1[1][$this->SortField]; // row[field]
       $b = $item2[1][$this->SortField];
@@ -693,7 +687,7 @@ class ListIterator
    }
 
    // \internal, see sortListIterator()
-   function _compare_items_string( $item1, $item2 )
+   private function _compare_items_string( $item1, $item2 )
    {
       $a = $item1[1][$this->SortField]; // row[field]
       $b = $item2[1][$this->SortField];
@@ -701,7 +695,7 @@ class ListIterator
    }
 
    // \internal, see sortListIterator()
-   function _compare_items_string_nocase( $item1, $item2 )
+   private function _compare_items_string_nocase( $item1, $item2 )
    {
       $a = $item1[1][$this->SortField]; // row[field]
       $b = $item2[1][$this->SortField];
@@ -709,7 +703,7 @@ class ListIterator
    }
 
    /*! \brief Sets main QuerySQL. */
-   function setQuerySQL( $qsql=null )
+   public function setQuerySQL( $qsql=null )
    {
       if( !is_null($qsql) && !($qsql instanceof QuerySQL) )
          error('invalid_args', 'ListIterator.setQuerySQL');
@@ -717,7 +711,7 @@ class ListIterator
    }
 
    /*! \brief Adds QuerySQL for merging. */
-   function addQuerySQLMerge( $qsql=null )
+   public function addQuerySQLMerge( $qsql=null )
    {
       if( !is_null($qsql) )
       {
@@ -725,16 +719,16 @@ class ListIterator
             error('invalid_args', 'ListIterator.addQuerySQLMerge');
          $this->QuerySQLMerge[] = $qsql;
       }
-   }
+   }//addQuerySQLMerge
 
    /*! \brief Sets ORDER-string appended to resulting query built from merging QuerySQLs. */
-   function setQueryOrder( $order='' )
+   public function setQueryOrder( $order='' )
    {
       $this->QueryOrder = $order;
    }
 
    /*! \brief Sets LIMIT-string appended to resulting query built from merging QuerySQLs. */
-   function setQueryLimit( $limit='' )
+   public function setQueryLimit( $limit='' )
    {
       $this->QueryLimit = $limit;
    }
@@ -744,25 +738,30 @@ class ListIterator
     *        order and limit query-parts). Should contain the final query used
     *        to query database.
     */
-   function setQuery( $query_str )
+   public function setQuery( $query_str )
    {
       $this->Query = $query_str;
    }
 
+   public function getResultRows()
+   {
+      return $this->ResultRows;
+   }
+
    /*! \brief Sets number of rows from resulting db-query. */
-   function setResultRows( $result_rows )
+   public function setResultRows( $result_rows )
    {
       $this->ResultRows = $result_rows;
    }
 
    /*! \brief Clears list of indexes in this list-iterator. */
-   function clearIndex()
+   public function clearIndex()
    {
       $this->Index = array();
    }
 
    /*! \brief Adds index-field(s) to be generated on iterator. */
-   function addIndex( /*var-args*/ )
+   public function addIndex( /*var-args*/ )
    {
       $cnt_args = func_num_args();
       for( $i=0; $i < $cnt_args; $i++)
@@ -770,16 +769,16 @@ class ListIterator
          $field = func_get_arg($i);
          $this->Index[$field] = array();
       }
-   }
+   }//addIndex
 
    /*! \brief Returns true if field has filled index. */
-   function hasIndex( $field )
+   public function hasIndex( $field )
    {
       return ( count(@$this->Index[$field]) > 0 );
    }
 
    /*! \brief Returns index-map for indexed field; die with error on unknown field. */
-   function getIndexMap( $field )
+   public function getIndexMap( $field )
    {
       if( !isset($this->Index[$field]) )
          error('invalid_args', "ListIterator.getIndexMap({$this->Name},$field)");
@@ -791,7 +790,7 @@ class ListIterator
     * \brief Returns index-map-value for indexed field and key; null if undefined.
     * \param $ret_val -1 = return [item,row]; 0=return item, 1=return row
     */
-   function getIndexValue( $field, $key, $ret_val=-1 )
+   public function getIndexValue( $field, $key, $ret_val=-1 )
    {
       if( !isset($this->Index[$field][$key]) )
          return null;
@@ -802,10 +801,10 @@ class ListIterator
          return $arr_item[0];
       else
          return $arr_item[1];
-   }
+   }//getIndexValue
 
    /*! \brief Returns String-representation of this object. */
-   function to_string()
+   public function to_string()
    {
       $arr = array();
       if( !is_null($this->QuerySQL) )
@@ -828,7 +827,7 @@ class ListIterator
       $this->resetListIterator();
       $arr[] = 'Index=[' . print_r( $this->Index, true ) . ']';
       return "ListIterator({$this->Name}): " . implode(', ', $arr);
-   }
+   }//to_string
 
 
    /*!
@@ -837,7 +836,7 @@ class ListIterator
     * \note Sets QuerySQL if unset.
     * \note Sets MergedQuerySQL and Query with finalized SQL-query-string.
     */
-   function buildQuery()
+   public function buildQuery()
    {
       if( is_null($this->QuerySQL) )
          $this->QuerySQL = new QuerySQL();
@@ -851,20 +850,20 @@ class ListIterator
       $query = $merged_qsql->get_select() . ' ' . $this->QueryOrder . ' ' . $this->QueryLimit;
       $this->setQuery( $query );
       return $query;
-   }
+   }//buildQuery
 
    /*! \brief Adds item to item-list. */
-   function addItem( $item, $row )
+   public function addItem( $item, $row )
    {
       $arr_item = array( $item, $row );
       $this->Items[] = $arr_item;
 
       foreach( $this->Index as $field => $map )
          $this->Index[$field][$row[$field]] = $arr_item;
-   }
+   }//addItem
 
    /*! \brief Return array with list of objects (without extra-row). */
-   function getItems( $with_extra=false )
+   public function getItems( $with_extra=false )
    {
       if( $with_extra )
          return $this->Items;
@@ -873,10 +872,10 @@ class ListIterator
       foreach( $this->Items as $item )
          $out[] = $item[0];
       return $out;
-   }
+   }//getItems
 
    /*! \brief Return array with list of raw rows only. */
-   function getItemRows()
+   public function getItemRows()
    {
       $out = array();
       foreach( $this->Items as $arr_item )
@@ -886,7 +885,7 @@ class ListIterator
    }
 
    /*! \brief Rescans items and re-filling index. */
-   function rescanIndex()
+   public function rescanIndex()
    {
       foreach( array_keys($this->Index) as $field )
          $this->Index[$field] = array();
@@ -898,7 +897,7 @@ class ListIterator
             $this->Index[$field][$row[$field]] = $arr_item;
       }
       $this->resetListIterator();
-   }
+   }//rescanIndex
 
 } // end of 'ListIterator'
 
@@ -912,60 +911,59 @@ class ListIterator
 class ThreadList
 {
    /*! \brief Thread item of certain type equal for whole thread-list. */
-   var $item;
+   private $item;
    /*! \brief Level within thread, starting at 0. */
-   var $level;
+   private $level;
    /*! \brief Parent ThreadList, null if root-item. */
-   var $parent;
+   private $parent;
    /*! \brief List of ThreadList-objects being the children of current thread. */
-   var $children;
+   private $children = array();
 
-   function ThreadList( $item, $level=0, $parent=null )
+   public function __construct( $item, $level=0, $parent=null )
    {
       $this->item = $item;
       $this->level = $level;
       $this->parent = $parent;
-      $this->children = array();
    }
 
    /*! \brief Returns current item. */
-   function getItem()
+   public function getItem()
    {
       return $this->item;
    }
 
    /*! \brief Returns level of current item. */
-   function getLevel()
+   public function getLevel()
    {
       return $this->level;
    }
 
    /*! \brief Sets level for current item. */
-   function setLevel( $level )
+   public function setLevel( $level )
    {
       $this->level = $level;
    }
 
    /*! \brief Returns true, if current item has a parent item. */
-   function hasParent()
+   public function hasParent()
    {
       return !is_null($this->parent);
    }
 
    /*! \brief Returns true, if current item has children items. */
-   function hasChildren()
+   public function hasChildren()
    {
       return (count($this->children) > 0);
    }
 
    /*! \brief Returns children items. */
-   function getChildren()
+   public function getChildren()
    {
       return $this->children;
    }
 
    /*! \brief Adds child to current item. */
-   function addChild( $item )
+   public function addChild( $item )
    {
       $thread = new ThreadList( $item, $this->level + 1, $this );
       $this->children[] = $thread;
@@ -980,14 +978,14 @@ class ThreadList
     *                can be used as storage
     * \note Function is applied on each item first before applying it on its children.
     */
-   function traverse( $function, &$result )
+   public function traverse( $function, &$result )
    {
       $function( $this, $result );
       foreach( $this->children as $child_item )
       {
          $child_item->traverse( $function, $result );
       }
-   }
+   }//traverse
 
 } // end of 'ThreadList'
 

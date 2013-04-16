@@ -66,24 +66,24 @@ define('COORD_MASK', (COORD_UP|COORD_RIGHT|COORD_DOWN|COORD_LEFT));
 
 class ConfigBoard
 {
-   var $user_id;
-   var $stone_size;
-   var $wood_color;
-   var $board_flags;
-   var $board_coords;
-   var $move_numbers;
-   var $move_modulo;
-   var $notes_height; // arr[SMALL|LARGE] =
-   var $notes_width; // arr[SMALL|LARGE] =
-   var $notes_mode; // arr[SMALL|LARGE] =
-   var $notes_cutoff;
+   private $user_id;
+   private $stone_size;
+   private $wood_color;
+   private $board_flags;
+   private $board_coords;
+   private $move_numbers;
+   private $move_modulo;
+   private $notes_height; // arr[SMALL|LARGE] =
+   private $notes_width; // arr[SMALL|LARGE] =
+   private $notes_mode; // arr[SMALL|LARGE] =
+   private $notes_cutoff;
 
    /*! \brief Constructs ConfigBoard-object with specified arguments. */
-   function ConfigBoard( $user_id, $stone_size=25, $wood_color=1, $board_flags=0, $boardcoords=31,
-                         $move_numbers=0, $move_modulo=0,
-                         $notes_small_height=25, $notes_small_width=30, $notes_small_mode='RIGHT',
-                         $notes_large_height=25, $notes_large_width=30, $notes_large_mode='RIGHT',
-                         $notes_cutoff=13 )
+   public function __construct( $user_id, $stone_size=25, $wood_color=1, $board_flags=0, $boardcoords=31,
+         $move_numbers=0, $move_modulo=0,
+         $notes_small_height=25, $notes_small_width=30, $notes_small_mode='RIGHT',
+         $notes_large_height=25, $notes_large_width=30, $notes_large_mode='RIGHT',
+         $notes_cutoff=13 )
    {
       ConfigPages::_check_user_id( $user_id, 'ConfigBoard', /*allow-0*/true );
 
@@ -105,20 +105,20 @@ class ConfigBoard
       $this->set_notes_mode( CFGBOARD_NOTES_SMALL, $notes_small_mode );
       $this->set_notes_mode( CFGBOARD_NOTES_LARGE, $notes_large_mode );
       $this->set_notes_cutoff( (int)$notes_cutoff );
-   }
+   }//__construct
 
-   function get_user_id()
+   public function get_user_id()
    {
       return $this->user_id;
    }
 
-   function get_stone_size()
+   public function get_stone_size()
    {
       return $this->stone_size;
    }
 
    /*! \brief Sets valid stone size [5..50]; if invalid set to default 25. */
-   function set_stone_size( $stone_size=25 )
+   public function set_stone_size( $stone_size=25 )
    {
       if( is_numeric($stone_size) && $stone_size >= 5 && $stone_size <= 50 )
          $this->stone_size = (int)$stone_size;
@@ -126,13 +126,13 @@ class ConfigBoard
          $this->stone_size = 25;
    }
 
-   function get_wood_color()
+   public function get_wood_color()
    {
       return $this->wood_color;
    }
 
    /*! \brief Sets valid wood-color [1..5,11..15]; if invalid set to default 1. */
-   function set_wood_color( $wood_color=1 )
+   public function set_wood_color( $wood_color=1 )
    {
       if( ( $wood_color >= 1 && $wood_color <= 5 ) || ( $wood_color >= 11 && $wood_color <= 15 ) )
          $this->wood_color = (int)$wood_color;
@@ -140,22 +140,22 @@ class ConfigBoard
          $this->wood_color = 1;
    }
 
-   function get_board_flags()
+   public function get_board_flags()
    {
       return $this->board_flags;
    }
 
-   function set_board_flags( $board_flags )
+   public function set_board_flags( $board_flags )
    {
       $this->board_flags = (int)$board_flags;
    }
 
-   function get_board_coords()
+   public function get_board_coords()
    {
       return $this->board_coords;
    }
 
-   function set_board_coords( $board_coords=-1 )
+   public function set_board_coords( $board_coords=-1 )
    {
       if( is_numeric($board_coords) )
          $this->board_coords = (int)$board_coords;
@@ -163,85 +163,83 @@ class ConfigBoard
          $this->board_coords = COORD_MASK | SMOOTH_EDGE;
    }
 
-   function get_move_numbers()
+   public function get_move_numbers()
    {
       return $this->move_numbers;
    }
 
-   function set_move_numbers( $move_numbers )
+   public function set_move_numbers( $move_numbers )
    {
       $this->move_numbers = (int)$move_numbers;
    }
 
-   function get_move_modulo()
+   public function get_move_modulo()
    {
       return $this->move_modulo;
    }
 
-   function set_move_modulo( $move_modulo )
+   public function set_move_modulo( $move_modulo )
    {
       $this->move_modulo = (int)$move_modulo;
    }
 
    // size=CFGBOARD_NOTES_LARGE|CFGBOARD_NOTES_SMALL
-   function get_notes_height( $size )
+   public function get_notes_height( $size )
    {
       return @$this->notes_height[$size];
    }
 
    // size=CFGBOARD_NOTES_LARGE|CFGBOARD_NOTES_SMALL
-   function set_notes_height( $size, $notes_height )
+   public function set_notes_height( $size, $notes_height )
    {
       $this->notes_height[$size] = (int)$notes_height;
    }
 
    // size=CFGBOARD_NOTES_LARGE|CFGBOARD_NOTES_SMALL
-   function get_notes_width( $size )
+   public function get_notes_width( $size )
    {
       return @$this->notes_width[$size];
    }
 
    // size=CFGBOARD_NOTES_LARGE|CFGBOARD_NOTES_SMALL
-   function set_notes_width( $size, $notes_width )
+   public function set_notes_width( $size, $notes_width )
    {
       $this->notes_width[$size] = (int)$notes_width;
    }
 
    // size=CFGBOARD_NOTES_LARGE|CFGBOARD_NOTES_SMALL
-   function get_notes_mode( $size )
+   public function get_notes_mode( $size )
    {
       return @$this->notes_mode[$size];
    }
 
    // size=CFGBOARD_NOTES_LARGE|CFGBOARD_NOTES_SMALL
-   function set_notes_mode( $size, $notes_mode )
+   public function set_notes_mode( $size, $notes_mode )
    {
       $this->notes_mode[$size] = $notes_mode;
    }
 
-   function get_notes_cutoff()
+   public function get_notes_cutoff()
    {
       return $this->notes_cutoff;
    }
 
    // return config-type for notes: small or large
-   function get_cfgsize_notes( $size )
+   public function get_cfgsize_notes( $size )
    {
-      return ( $size >= $this->notes_cutoff )
-         ? CFGBOARD_NOTES_LARGE
-         : CFGBOARD_NOTES_SMALL;
+      return ( $size >= $this->notes_cutoff ) ? CFGBOARD_NOTES_LARGE : CFGBOARD_NOTES_SMALL;
    }
 
    // size=CFGBOARD_NOTES_LARGE|CFGBOARD_NOTES_SMALL
-   function set_notes_cutoff( $notes_cutoff )
+   public function set_notes_cutoff( $notes_cutoff )
    {
       $this->notes_cutoff = (int)$notes_cutoff;
    }
 
    /*! \brief Updates current ConfigBoard-data into database. */
-   function update_all()
+   public function update_all()
    {
-      ConfigPages::_check_user_id( $this->user_id, 'ConfigBoard::update_all', /*allow0*/false );
+      ConfigPages::_check_user_id( $this->user_id, 'ConfigBoard:update_all', /*allow0*/false );
 
       $update_query = 'UPDATE ConfigBoard SET'
          . '  Stonesize=' . $this->stone_size
@@ -259,12 +257,12 @@ class ConfigBoard
          . ', NotesCutoff=' . $this->notes_cutoff
          . " WHERE User_ID='{$this->user_id}' LIMIT 1";
          ;
-      db_query( "ConfigBoard::update_all.update({$this->user_id})", $update_query );
-      ConfigBoard::delete_cache_config_board( $this->user_id );
-   }
+      db_query( "ConfigBoard:update_all.update({$this->user_id})", $update_query );
+      self::delete_cache_config_board( $this->user_id );
+   }//update_all
 
    /*! \brief Fills current values into $player_row. */
-   function fill_player_row()
+   public function fill_player_row()
    {
       global $player_row;
       $player_row['Stonesize'] = $this->stone_size;
@@ -282,12 +280,13 @@ class ConfigBoard
       $player_row['NotesCutoff'] = $this->notes_cutoff;
    }
 
+
    // ------------ static functions ----------------------------
 
    /*! \brief (static) Loads ConfigBoard-data for given user. */
-   function load_config_board( $uid, $force_load=false, $upd_player_row=true )
+   public static function load_config_board( $uid, $force_load=false, $upd_player_row=true )
    {
-      ConfigPages::_check_user_id( $uid, 'ConfigBoard::load_config_board');
+      ConfigPages::_check_user_id( $uid, 'ConfigBoard:load_config_board');
 
       // read values from cookies if logged in
       global $player_row;
@@ -296,7 +295,7 @@ class ConfigBoard
 
       if( $force_load || $need_load )
       {
-         $dbgmsg = "ConfigBoard::load_config_board($uid)";
+         $dbgmsg = "ConfigBoard:load_config_board($uid)";
          $key = "ConfigBoard.$uid";
          $src_row = DgsCache::fetch( $dbgmsg, CACHE_GRP_CFG_BOARD, $key );
          if( is_null($src_row) )
@@ -330,16 +329,16 @@ class ConfigBoard
       return $config;
    }//load_config_board
 
-   function delete_cache_config_board( $uid )
+   public static function delete_cache_config_board( $uid )
    {
-      DgsCache::delete( "ConfigBoard::delete_cache_config_board($uid)", CACHE_GRP_CFG_BOARD, "ConfigBoard.$uid" );
+      DgsCache::delete( "ConfigBoard:delete_cache_config_board($uid)", CACHE_GRP_CFG_BOARD, "ConfigBoard.$uid" );
    }
 
    /*! \brief (static) Inserts default ConfigBoard. */
-   function insert_default( $user_id )
+   public static function insert_default( $user_id )
    {
-      ConfigPages::_check_user_id( $user_id, 'ConfigBoard::insert_default');
-      db_query( "ConfigBoard::insert_default.insert({$user_id})",
+      ConfigPages::_check_user_id( $user_id, 'ConfigBoard:insert_default');
+      db_query( "ConfigBoard:insert_default.insert({$user_id})",
          "INSERT INTO ConfigBoard SET User_ID='{$user_id}'" );
    }
 
@@ -398,31 +397,30 @@ define('CFGCOLS_TOURNAMENT_POOL_VIEW',    'ColumnsTournamentPoolView');
 
 class ConfigPages
 {
-   var $user_id;
-   var $status_flags;
-   var $status_folders;
-   var $forum_flags;
-   var $table_columns;
+   private $user_id;
+   private $status_flags;
+   private $status_folders;
+   private $forum_flags;
+   private $table_columns = null;
 
    /*! \brief Constructs ConfigPages-object with specified arguments. */
-   function ConfigPages( $user_id, $status_flags=DEFAULT_STATUSFLAG, $status_folders='',
-                         $forum_flags=FORUMFLAG_POSTVIEW_OVERVIEW )
+   public function __construct( $user_id, $status_flags=DEFAULT_STATUSFLAG, $status_folders='',
+         $forum_flags=FORUMFLAG_POSTVIEW_OVERVIEW )
    {
-      ConfigPages::_check_user_id( $user_id, 'ConfigPages');
+      self::_check_user_id( $user_id, 'ConfigPages');
 
       $this->user_id = (int)$user_id;
       $this->status_flags = $status_flags;
       $this->status_folders = $status_folders;
       $this->forum_flags = $forum_flags;
-      $this->table_columns = null;
    }
 
-   function get_user_id()
+   public function get_user_id()
    {
       return $this->user_id;
    }
 
-   function get_status_flags()
+   public function get_status_flags()
    {
       return $this->status_flags;
    }
@@ -433,7 +431,7 @@ class ConfigPages
     * \param $all true=also checks other folders
     * \return 1 if given folder should be shown or 0 if to hide; -1 if $all and folder != FOLDER_NEW|REPLY
     */
-   function get_status_folder_visibility( $folder_nr, $all=false )
+   public function get_status_folder_visibility( $folder_nr, $all=false )
    {
       if( $folder_nr == FOLDER_NEW )
          return ( $this->status_flags & STATUSFLAG_SHOW_FOLDER_NEW ) ? 1 : 0;
@@ -446,14 +444,14 @@ class ConfigPages
          else
             return -1;
       }
-   }
+   }//get_status_folder_visibility
 
    /*!
     * \brief Sets bit of StatusFlags for given folder.
     * \param $folder_nr FOLDER_NEW|REPLY
     * \param $value [bool]
     */
-   function set_status_flags_folderbit( $folder_nr, $value )
+   public function set_status_flags_folderbit( $folder_nr, $value )
    {
       if( $folder_nr == FOLDER_NEW )
          $bitmask = STATUSFLAG_SHOW_FOLDER_NEW;
@@ -466,25 +464,25 @@ class ConfigPages
          $this->status_flags |= $bitmask;
       else
          $this->status_flags &= ~$bitmask;
-   }
+   }//set_status_flags_folderbit
 
-   function set_status_flags( $status_flags )
+   public function set_status_flags( $status_flags )
    {
       $this->status_flags = $status_flags;
    }
 
-   function get_status_folders()
+   public function get_status_folders()
    {
       return $this->status_folders;
    }
 
-   function set_status_folders( $status_folders )
+   public function set_status_folders( $status_folders )
    {
       $this->status_folders = $status_folders;
    }
 
    /*! \brief Returns query-restriction on Folder_nr for user. */
-   function get_status_folders_querypart()
+   public function get_status_folders_querypart()
    {
       $folders = array();
       if( $this->status_flags & STATUSFLAG_SHOW_FOLDER_NEW )
@@ -496,42 +494,42 @@ class ConfigPages
          $folders[] = $this->status_folders; // ','-separated folder-list
 
       return implode(',', $folders);
-   }
+   }//get_status_folders_querypart
 
-   function get_forum_flags()
+   public function get_forum_flags()
    {
       return $this->forum_flags;
    }
 
-   function set_forum_flags( $forum_flags )
+   public function set_forum_flags( $forum_flags )
    {
       $this->forum_flags = $forum_flags;
    }
 
    /*! \brief Returns null if no table-columnset loaded. */
-   function &get_table_columns()
+   public function &get_table_columns()
    {
       return $this->table_columns;
    }
 
 
    /*! \brief Updates ConfigPages-data into database for field StatusFlags and StatusFolders only. */
-   function update_status_folders()
+   public function update_status_folders()
    {
-      ConfigPages::_check_user_id( $this->user_id, 'ConfigPages::update_status_folders');
+      self::_check_user_id( $this->user_id, 'ConfigPages:update_status_folders');
       $arr_write = array(
             'StatusFlags'   => $this->status_flags,
             'StatusFolders' => $this->status_folders,
          );
-      ConfigPages::_update_query(
-         "ConfigPages::update_status_folders.update({$this->user_id})",
+      self::_update_query(
+         "ConfigPages:update_status_folders.update({$this->user_id})",
          $this->user_id, $arr_write );
-   }
+   }//update_status_folders
+
 
    // ------------ static functions ----------------------------
 
-   /*! \internal (static) */
-   function _check_user_id( $user_id, $loc, $allow0=false )
+   public static function _check_user_id( $user_id, $loc, $allow0=false )
    {
       if( !is_numeric($user_id) || $user_id < 0 || ( !$allow0 && $user_id == 0 ) )
          error('invalid_user', "$loc.check.user_id($user_id)");
@@ -541,27 +539,27 @@ class ConfigPages
     * \brief Returns true if given folder-nr is system-folder FOLDER_NEW|REPLY
     *        for which hidden-state is managed in StatusFlags-field.
     */
-   function is_system_status_folder( $folder_nr )
+   public static function is_system_status_folder( $folder_nr )
    {
       return ( $folder_nr == FOLDER_NEW || $folder_nr == FOLDER_REPLY );
    }
 
    /*! \brief (static) Loads ConfigPages-data for given user (without column-sets). */
-   function load_config_pages( $uid, $col_name='' )
+   public static function load_config_pages( $uid, $col_name='' )
    {
-      $dbgmsg = "ConfigPages::load_config_pages($uid)";
-      ConfigPages::_check_user_id( $uid, $dbgmsg );
+      $dbgmsg = "ConfigPages:load_config_pages($uid)";
+      self::_check_user_id( $uid, $dbgmsg );
       $cfg_size = ($col_name) ? ConfigTableColumns::get_config_size($col_name, $dbgmsg) : 0;
 
       // need special handling to load only specific field or caching all fields
       if( DgsCache::is_persistent(CACHE_GRP_CFG_PAGES) )
-         $row = ConfigPages::load_cache_config_pages( $uid );
+         $row = self::load_cache_config_pages( $uid );
       else
       {
          $fieldset = 'User_ID,StatusFlags,StatusFolders,ForumFlags';
          if( $col_name )
             $fieldset .= ',' . ConfigTableColumns::build_fieldset( $col_name );
-         $row = mysql_single_fetch("ConfigPages::load_config_pages.find($uid,$col_name)",
+         $row = mysql_single_fetch("ConfigPages:load_config_pages.find($uid,$col_name)",
                "SELECT $fieldset FROM ConfigPages WHERE User_ID='$uid' LIMIT 1");
       }
       if( !$row )
@@ -583,9 +581,9 @@ class ConfigPages
       return $config;
    }//load_config_pages
 
-   function load_cache_config_pages( $uid )
+   public static function load_cache_config_pages( $uid )
    {
-      $dbgmsg = "ConfigPages::load_cache_config_pages($uid)";
+      $dbgmsg = "ConfigPages:load_cache_config_pages($uid)";
       $key = "ConfigPages.$uid";
       $row = DgsCache::fetch( $dbgmsg, CACHE_GRP_CFG_PAGES, $key );
       if( is_null($row) )
@@ -597,9 +595,9 @@ class ConfigPages
       return $row;
    }//load_cache_config_pages
 
-   function delete_cache_config_pages( $uid )
+   public static function delete_cache_config_pages( $uid )
    {
-      DgsCache::delete( "ConfigPages::delete_cache_config_pages($uid)", CACHE_GRP_CFG_PAGES, "ConfigPages.$uid" );
+      DgsCache::delete( "ConfigPages:delete_cache_config_pages($uid)", CACHE_GRP_CFG_PAGES, "ConfigPages.$uid" );
    }
 
    /*!
@@ -608,7 +606,7 @@ class ConfigPages
     *        or (correctly escaped) sql-SET-part ( 'f=v, f2=v2' )
     * \internal
     */
-   function _update_query( $errmsg, $user_id, $field_set_query )
+   public static function _update_query( $errmsg, $user_id, $field_set_query )
    {
       if( $field_set_query )
       {
@@ -625,42 +623,42 @@ class ConfigPages
          {
             db_query( $errmsg,
                "UPDATE ConfigPages SET $sqlpart WHERE User_ID='$user_id' LIMIT 1" );
-            ConfigPages::delete_cache_config_pages( $user_id );
+            self::delete_cache_config_pages( $user_id );
          }
       }
    }//_update_query
 
    /*! \brief (static) Inserts default ConfigPages. */
-   function insert_default( $user_id )
+   public static function insert_default( $user_id )
    {
-      ConfigPages::_check_user_id( $user_id, 'ConfigPages::insert_default');
-      db_query( "ConfigPages::insert_default.insert($user_id)",
+      self::_check_user_id( $user_id, 'ConfigPages:insert_default');
+      db_query( "ConfigPages:insert_default.insert($user_id)",
          "INSERT INTO ConfigPages SET User_ID='$user_id'" );
    }
 
    // returns 1 if toggle was needed; 0 otherwise
-   function toggle_forum_flags( $uid, $flag )
+   public static function toggle_forum_flags( $uid, $flag )
    {
       if( is_numeric($flag) && $flag > 0 )
       {
-         db_query( "ConfigPages::toggle_forum_flags.toggle_flag($uid,$flag)",
+         db_query( "ConfigPages:toggle_forum_flags.toggle_flag($uid,$flag)",
             "UPDATE ConfigPages SET ForumFlags=ForumFlags ^ $flag WHERE User_ID='$uid' LIMIT 1" );
-         ConfigPages::delete_cache_config_pages( $uid );
+         self::delete_cache_config_pages( $uid );
          return 1;
       }
       return 0;
-   }
+   }//toggle_forum_flags
 
-   function set_clear_forum_flags( $uid, $clear_flags, $set_flags )
+   public static function set_clear_forum_flags( $uid, $clear_flags, $set_flags )
    {
       if( is_numeric($clear_flags) && is_numeric($set_flags) && $clear_flags >= 0 && $set_flags >= 0
             && $clear_flags + $set_flags > 0 )
       {
-         db_query( "ConfigPages::set_clear_forum_flags.upd($uid,$clear_flags,$set_flags)",
+         db_query( "ConfigPages:set_clear_forum_flags.upd($uid,$clear_flags,$set_flags)",
             "UPDATE ConfigPages SET ForumFlags=(ForumFlags & ~$clear_flags) | $set_flags WHERE User_ID='$uid' LIMIT 1" );
-         ConfigPages::delete_cache_config_pages( $uid );
+         self::delete_cache_config_pages( $uid );
       }
-   }
+   }//set_clear_forum_flags
 
 } // end of 'ConfigPages'
 
@@ -678,17 +676,17 @@ class ConfigPages
   */
 class ConfigTableColumns
 {
-   var $user_id;
-   var $col_name; // ''=unset, don't save
-   var $bitset;
+   private $user_id;
+   private $col_name; // ''=unset, don't save
+   private $bitset;
    /*! \brief Maximum number of bits, that can be stored for column; BITSET_MAXSIZE if no column given. */
-   var $maxsize;
+   private $maxsize;
 
    /*!
     * \brief Constructs ConfigTableColumns-object with specified arguments.
     * \param $col_name field of ConfigPages-table; or '' for static (not stored) table-columns
     */
-   function ConfigTableColumns( $user_id, $col_name, $bitset )
+   public function __construct( $user_id, $col_name, $bitset )
    {
       ConfigPages::_check_user_id( $user_id, 'ConfigTableColumns');
 
@@ -696,7 +694,7 @@ class ConfigTableColumns
       $this->set_bitset( $bitset );
       if( $col_name )
       {
-         $cfg_size = ConfigTableColumns::get_config_size($col_name, 'constructor');
+         $cfg_size = self::get_config_size($col_name, 'constructor');
          $this->col_name = $col_name;
          $this->maxsize = $cfg_size * BITSET_EXPORT_INTBITS;
       }
@@ -705,35 +703,35 @@ class ConfigTableColumns
          $this->col_name = ''; // 0/false -> ''
          $this->maxsize = BITSET_MAXSIZE;
       }
-   }
+   }//__construct
 
-   function get_user_id()
+   public function get_user_id()
    {
       return $this->user_id;
    }
 
-   function get_col_name()
+   public function get_col_name()
    {
       return $this->col_name;
    }
 
-   function has_col_name()
+   public function has_col_name()
    {
       return !empty($this->col_name);
    }
 
    /*! \brief Returns maximum number of storeable bits for current column-set. */
-   function get_maxsize()
+   public function get_maxsize()
    {
       return $this->maxsize;
    }
 
-   function &get_bitset()
+   public function &get_bitset()
    {
       return $this->bitset;
    }
 
-   function set_bitset( $bitset )
+   public function set_bitset( $bitset )
    {
       if( !($bitset instanceof BitSet) )
          error('invalid_args', 'ConfigTableColumns.set_bitset.check');
@@ -741,29 +739,30 @@ class ConfigTableColumns
    }
 
    /*! \brief Updates ConfigPages-data into database for column-set of this object only; error if no col-name set. */
-   function update_config()
+   public function update_config()
    {
       if( empty($this->col_name) )
          error('invalid_args', "ConfigTableColumns.update_config.check.col_name({$this->col_name})");
-      ConfigPages::_check_user_id( $this->user_id, 'ConfigTableColumns::update_config');
+      ConfigPages::_check_user_id( $this->user_id, 'ConfigTableColumns:update_config');
 
-      $arr_write_columns = ConfigTableColumns::write_columns_bitset(
+      $arr_write_columns = self::write_columns_bitset(
             $this->col_name, $this->bitset );
       if( count($arr_write_columns) )
       {
          ConfigPages::_update_query(
-            "ConfigTableColumns::update_config.update({$this->user_id},{$this->col_name})",
+            "ConfigTableColumns:update_config.update({$this->user_id},{$this->col_name})",
             $this->user_id, $arr_write_columns );
       }
-   }
+   }//update_config
+
 
    // ------------ static functions ----------------------------
 
    /*! \brief (static) Loads ConfigPages-data for given user (with all column-sets if given otherwise). */
-   function load_config( $uid, $col_name )
+   public static function load_config( $uid, $col_name )
    {
-      ConfigPages::_check_user_id( $uid, 'ConfigTableColumns::load_config');
-      $cfg_size = ConfigTableColumns::get_config_size($col_name, "load_config($uid)");
+      ConfigPages::_check_user_id( $uid, 'ConfigTableColumns:load_config');
+      $cfg_size = self::get_config_size($col_name, "ConfigTableColumns:load_config($uid)");
 
       // need special handling to load only specific field or caching all fields
       if( DgsCache::is_persistent(CACHE_GRP_CFG_PAGES) )
@@ -771,35 +770,34 @@ class ConfigTableColumns
       else
       {
          $fieldset = 'User_ID';
-         $fieldset .= ',' . ConfigTableColumns::build_fieldset( $col_name );
-         $row = mysql_single_fetch("ConfigTableColumns::load_config.find($uid,$col_name)",
+         $fieldset .= ',' . self::build_fieldset( $col_name );
+         $row = mysql_single_fetch("ConfigTableColumns:load_config.find($uid,$col_name)",
                "SELECT $fieldset FROM ConfigPages WHERE User_ID='$uid' LIMIT 1");
       }
       if( !$row )
          return null;
 
       // read + parse column-set into BitSet and build config
-      $bitset = ConfigTableColumns::read_columns_bitset( $row, $col_name, $cfg_size );
+      $bitset = self::read_columns_bitset( $row, $col_name, $cfg_size );
       $config = new ConfigTableColumns( $uid, $col_name, $bitset );
       return $config;
-   }
+   }//load_config
 
    // return fieldset as SQL-fields-string
-   function build_fieldset( $col_name )
+   public static function build_fieldset( $col_name )
    {
-      $cfg_size = ConfigTableColumns::get_config_size($col_name, 'build_fieldset');
+      $cfg_size = self::get_config_size($col_name, 'build_fieldset');
       $fieldset = $col_name;
       for( $idx=2; $idx <= $cfg_size; $idx++ )
          $fieldset .= ",$col_name$idx";
       return $fieldset;
-   }
+   }//build_fieldset
 
    /*!
     * \brief (static) Reads and parses int-array from DB-fields into BitSet
     * \param count number of ints stored for field
-    * \internal
     */
-   function read_columns_bitset( $row, $col_name, $count )
+   public static function read_columns_bitset( $row, $col_name, $count )
    {
       $arr_parse = array();
       for( $idx = 1; $idx <= $count; $idx++)
@@ -811,16 +809,15 @@ class ConfigTableColumns
       $bitset = BitSet::read_from_int_array( $arr_parse );
       //error_log($bitset->get_hex_format());
       return $bitset;
-   }
+   }//read_columns_bitset
 
    /*!
     * \brief (static) Creates array ready for saving bitset: arr( db_field => int-value, ...)
-    * \internal
     */
-   function write_columns_bitset( $col_name, $bitset )
+   public static function write_columns_bitset( $col_name, $bitset )
    {
       $arr_write = $bitset->get_int_array();
-      $cfg_size = ConfigTableColumns::get_config_size($col_name, 'write_columns_bitset');
+      $cfg_size = self::get_config_size($col_name, 'write_columns_bitset');
       $result = array();
       for( $idx = 1; $idx <= $cfg_size; $idx++)
       {
@@ -828,13 +825,13 @@ class ConfigTableColumns
          $result[$fieldname] = (int)@$arr_write[$idx-1];
       }
       return $result;
-   }
+   }//write_columns_bitset
 
    /*!
     * \brief Returns number of integers in DB for given column-name in ConfigPages-table.
     * \param $col_name column-name in ConfigPages-table CFGCOLS_...; Throws error for undefined column
     */
-   function get_config_size( $col_name, $dbgmsg='' )
+   public static function get_config_size( $col_name, $dbgmsg='' )
    {
       static $cfg_size = array(
          // col_name => number of integers in DB (needed for writing)
@@ -861,7 +858,7 @@ class ConfigTableColumns
       );
 
       if( !isset($cfg_size[$col_name]) )
-         error('invalid_args', "ConfigTableColumns[$dbgmsg]::get_config_size.check.col($col_name)");
+         error('invalid_args', "ConfigTableColumns[$dbgmsg]:get_config_size.check.col($col_name)");
 
       return $cfg_size[$col_name];
    }//get_config_size

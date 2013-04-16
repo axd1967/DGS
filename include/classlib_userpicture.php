@@ -31,16 +31,15 @@ require_once( 'include/std_functions.php' );
  */
 
 
+define('USERPIC_MAXSIZE_UPLOAD', 30*1024); // max. 30KB stored, keep factor of 1024
+define('USERPIC_MAX_X', 800); // pixels
+define('USERPIC_MAX_Y', 800); // pixels
+
 /*!
  * \class UserPicture
  *
  * \brief Class to handle user-pictures.
  */
-
-define('USERPIC_MAXSIZE_UPLOAD', 30*1024); // max. 30KB stored, keep factor of 1024
-define('USERPIC_MAX_X', 800); // pixels
-define('USERPIC_MAX_Y', 800); // pixels
-
 class UserPicture
 {
 
@@ -62,7 +61,7 @@ class UserPicture
     *         NOTE: cache-suffix is to avoid browser-caching (stored in Players.UserPicture)
     * \note to display image use: getImageHtml( handle, false, pic-url-from-this-func, -1 )
     */
-   function getPicturePath( $user, $ext=null, $check=true )
+   public static function getPicturePath( $user, $ext=null, $check=true )
    {
       global $base_path;
 
@@ -106,7 +105,7 @@ class UserPicture
 
       $result = array( $pic_path, $path_part, $file_part, $pic_url, $pic_exists, $cache_suffix );
       return $result;
-   }
+   }//getPicturePath
 
    /*!
     * \brief Returns HTML-image for user-picture.
@@ -115,7 +114,7 @@ class UserPicture
     * \param size if pic_url not null: size=<0 (no restriction),
     *             otherwise size restriction for x/y
     */
-   function getImageHtml( $userhandle, $withLink=false, $pic_url=null, $size=17 )
+   public static function getImageHtml( $userhandle, $withLink=false, $pic_url=null, $size=17 )
    {
       global $base_path;
       if( is_null($pic_url) )
@@ -130,25 +129,25 @@ class UserPicture
          $img = image( $pic_src, $pic_title, null, '', $size, $size );
       }
       return ($withLink) ? anchor( $base_path.'userinfo.php?user='.$userhandle.'#pic', $img) : $img;
-   }
+   }//getImageHtml
 
    /*! \brief Deletes picture of current user if existing (from file and database). */
-   function delete_picture()
+   public static function delete_picture()
    {
       global $player_row;
-      list( $path_picture ) = UserPicture::getPicturePath($player_row);
+      list( $path_picture ) = self::getPicturePath($player_row);
       if( $path_picture && file_exists($path_picture) )
       {
          if( @unlink($path_picture) )
-            UserPicture::update_picture(''); // remove
+            self::update_picture(''); // remove
       }
-   }
+   }//delete_picture
 
    /*!
     * \brief Updates (replaces) picture of current user with given picture-filename
     *        and cache-suffix (to avoid browser-caching).
     */
-   function update_picture( $pic_file, $cache_suffix='' )
+   public static function update_picture( $pic_file, $cache_suffix='' )
    {
       global $player_row;
       $uid = @$player_row['ID'];
@@ -158,9 +157,9 @@ class UserPicture
          $update_query = 'UPDATE Players SET'
             . "  UserPicture='" . mysql_addslashes($pic_file_id) . "'"
             . " WHERE ID='{$uid}' LIMIT 1";
-         db_query( "UserPicture::update_picture($pic_file,$cache_suffix)", $update_query );
+         db_query( "UserPicture:update_picture($pic_file,$cache_suffix)", $update_query );
       }
-   }
+   }//update_picture
 
 } // end of 'UserPicture'
 

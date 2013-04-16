@@ -261,8 +261,7 @@ function parse_edit_form( &$tpr, $t_limits )
       }
       else
          $errors[] = sprintf( T_('Expecting number for maximum participants in range %s.'),
-            build_limit_range($t_limits) ); // check for general MAX, but show specific max
-            $t_limits->getLimitRangeText(TLIMITS_MAX_TP, TP_MAX_COUNT);
+            $t_limits->getLimitRangeText(TLIMITS_MAX_TP, TP_MAX_COUNT) ); // check for general MAX, but show specific max
 
       if( $tpr->MinParticipants > 0 && $tpr->MaxParticipants > 0 && $tpr->MinParticipants > $tpr->MaxParticipants )
          $errors[] = T_('Maximum participants must be greater than minimum participants');

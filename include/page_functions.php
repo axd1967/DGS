@@ -24,6 +24,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
  * \brief Functions for creating Dragon pages.
  */
 
+
 define('ROBOTS_NO_INDEX_NOR_FOLLOW', 'noindex, nofollow'); // default
 define('ROBOTS_NO_FOLLOW', 'nofollow');
 define('ROBOTS_NO_INDEX', 'noindex');
@@ -33,30 +34,26 @@ define('ROBOTS_NO_INDEX', 'noindex');
  *
  * \brief Class to ease the creation of simpler Dragon pages.
  */
-class HTMLPage
+abstract class HTMLPage
 {
-   /*! \privatesection */
-
    /*! \brief Id used for CSS differentiation. */
-   var $ClassCSS;
+   protected $ClassCSS;
 
    /*! \brief Script of the page relative to the root, e.g: 'forum/index.php' */
-   var $BaseName;
+   protected $BaseName;
 
    // HTML-head <meta>-tags should be added for the crawler-indexed pages (see sitemap.xml or robots.txt)
-   var $meta_description;
-   var $meta_robots; // ROBO_...
-   var $meta_keywords;
+   public $meta_description;
+   public $meta_robots; // ROBO_...
+   public $meta_keywords;
 
-
-   /*! \publicsection */
 
    /*!
     * \brief Constructor. Create a new page and initialize it.
     * \param $meta_robots '' (use default from start_html()-func); otherwise ROBO_...
     * \param $meta_description description for page-meta-tag; should be in enlish (not translatable)
     */
-   function HTMLPage( $_pageid=false, $meta_robots='', $meta_description='', $meta_keywords='' )
+   protected function __construct( $_pageid=false, $meta_robots='', $meta_description='', $meta_keywords='' )
    {
       $this->BaseName = substr( @$_SERVER['PHP_SELF'], strlen(SUB_PATH));
 
@@ -81,29 +78,30 @@ class HTMLPage
        * Or may be set in php.ini-file -> see http://de2.php.net/manual/en/zlib.configuration.php#ini.zlib.output-compression
        */
       ob_start('ob_gzhandler');
-   }
+   }//__construct
 
    /*!
     * \brief retrieve the CSS class.
     * \note may be multiple, i.e. 'Games Running'
     */
-   function getClassCSS( )
+   public function getClassCSS( )
    {
       return $this->ClassCSS;
    }
 
    // \param $meta_robots : ROBO_...
-   function set_meta_robots( $meta_robots )
+   public function set_meta_robots( $meta_robots )
    {
       $this->meta_robots = $meta_robots;
    }
 
-   function set_meta_keywords( $meta_keywords )
+   public function set_meta_keywords( $meta_keywords )
    {
       $this->meta_keywords = $meta_keywords;
    }
 
-} //class HTMLPage
+} // end 'HTMLPage'
+
 
 
 /*!
@@ -113,9 +111,9 @@ class HTMLPage
  */
 class Page extends HTMLPage
 {
-   function Page( $_pageid=false, $meta_robots='', $meta_description='', $meta_keywords='' )
+   public function __construct( $_pageid=false, $meta_robots='', $meta_description='', $meta_keywords='' )
    {
-      parent::HTMLPage( $_pageid, $meta_robots, $meta_description, $meta_keywords );
+      parent::__construct( $_pageid, $meta_robots, $meta_description, $meta_keywords );
    }
 } //class Page
 

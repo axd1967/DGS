@@ -92,18 +92,18 @@ function create_StringTokenizer( $tc, $spec_chars, $flags = 0 )
 class TokenizerConfig
 {
    /*! \brief quote-type. */
-   var $quotetype;
+   public $quotetype;
    /*! \brief separator, default is '-' */
-   var $sep;
+   public $sep;
    /*! \brief wildcard-char, default is '*' */
-   var $wild;
+   public $wild;
    /*! \brief chars used to quote; default are "" */
-   var $quote_chars;
+   public $quote_chars;
    /*! \brief chars to escape; default are \\ */
-   var $escape_chars;
+   public $escape_chars;
 
    /*! \brief Additional config-array: ( key => val ). */
-   var $config;
+   public $config = array();
 
    /*!
     * \brief Constructs TokenizerConfig( QUOTETYPE_..., [string separator-char='-'], [quote_chars="''"], [esc_chars='\\\\'] )
@@ -113,21 +113,20 @@ class TokenizerConfig
     * \param $quote_chars start- and end-quote-char; if null, default is "''" (single-quotes)
     * \param $esc_chars escape-from- and escape-to-char; if null, default is \\ (backslash)
     */
-   function TokenizerConfig( $quotetype, $sep = null, $wild = null, $quote_chars = null, $esc_chars = null )
+   public function __construct( $quotetype, $sep = null, $wild = null, $quote_chars = null, $esc_chars = null )
    {
       $this->quotetype = $quotetype;
       $this->sep       = (is_null($sep)) ? '-' : $sep;
       $this->wild      = (is_null($wild)) ? TEXT_WILD_M : $wild;
       $this->quote_chars  = (is_null($quote_chars)) ? "''" : $quote_chars;
       $this->escape_chars = (is_null($esc_chars)) ? '\\\\' : $esc_chars;
-      $this->config = array();
    }
 
    /*!
     * \brief Adds config as key-value-pair.
     * signature: add_config( string key, string val)
     */
-   function add_config( $key, $val )
+   public function add_config( $key, $val )
    {
       $this->config[$key] = $val;
    }
@@ -136,10 +135,11 @@ class TokenizerConfig
     * \brief Returns configuration for key; if not set, return empty string.
     * signature: mixed get_config( string key, [mixed defval=''] )
     */
-   function get_config( $key, $defval = '' )
+   public function get_config( $key, $defval = '' )
    {
       return (isset($this->config[$key])) ? $this->config[$key] : $defval;
    }
+
 } // end of 'TokenizerConfig'
 
 
@@ -149,7 +149,8 @@ class TokenizerConfig
   *
   * \brief abstract Basic-Parser providing some basic vars and functions used to support syntax for Filters.
   * Provides an interface-method 'parse(value,flags)' to parse a value follow some basic syntax.
-  * note: next layer of functions based on Tokenizers.
+  *
+  * \note next layer of functions based on Tokenizers.
   *
   * Basic principle of Parser:
   *    Parser is constructed with configuration needed for parsing.
@@ -158,32 +159,32 @@ class TokenizerConfig
   *    if( !$success )
   *       handle_errors( $parser->errormsg() );
   */
-class BasicParser
+abstract class BasicParser
 {
    /*! \brief orig-value to parse. */
-   var $value;
+   protected $value;
    /*! \brief TokenizerConfig */
-   var $tokconf;
+   protected $tokconf;
    /*! \brief Flags for parsing, e.g.: PARSER_NOSWAP_REVERSE, TEXTPARSER_... */
-   var $flags;
+   protected $flags;
 
    // parsed values and flags
 
    /*! \brief error-message if parsing-error occured; if non-empty, parsing-output is invalid. */
-   var $errormsg;
+   protected $errormsg;
    /*! \brief start-range (>=) */
-   var $p_start;
+   public $p_start;
    /*! \brief end-range (<=) */
-   var $p_end;
+   public $p_end;
    /*! \brief exact-value or wildcard-value */
-   var $p_value;
+   public $p_value;
    /*! \brief flags about parsed value: PFLAG_WILDCARD */
-   var $p_flags;
+   public $p_flags;
    /*! \brief non-null array with search rx_terms. */
-   var $p_terms;
+   public $p_terms;
 
    /*! \brief Constructs BasicParser for specified value, TokenizerConfig and flags. */
-   function BasicParser( $value, $tokconf, $flags = 0 )
+   protected function __construct( $value, $tokconf, $flags = 0 )
    {
       $this->init_parse( $value, $flags );
       $this->tokconf = $tokconf;
@@ -195,7 +196,7 @@ class BasicParser
     * \brief reset values for parsing; value is trimmed.
     * signature: init_parse(string val)
     */
-   function init_parse( $_value, $_flags = 0 )
+   protected function init_parse( $_value, $_flags = 0 )
    {
       $this->value = trim($_value);
       $this->flags = $_flags;
@@ -206,13 +207,13 @@ class BasicParser
       $this->p_value = '';
       $this->p_flags = 0;
       $this->p_terms = array();
-   }
+   }//init_parse
 
    /*!
     * \brief returns non-empty string, if parsing-error occured.
     * signature: string errormsg()
     */
-   function errormsg()
+   public function errormsg()
    {
       return $this->errormsg;
    }
@@ -221,7 +222,7 @@ class BasicParser
     * \brief Returns true, if specified flag in parsing-flags set.
     * signature: bool is_flags_set()
     */
-   function is_flags_set( $flag )
+   public function is_flags_set( $flag )
    {
       return (bool)( $this->flags & $flag );
    }
@@ -230,7 +231,7 @@ class BasicParser
     * \brief Returns null on error; otherwise bool indicating if specified flag in parsed-flags ($p_flags)
     * signature: bool|null = is_parsed_flags_set()
     */
-   function is_parsed_flags_set( $flag )
+   public function is_parsed_flags_set( $flag )
    {
       if( $this->errormsg != '' )
          return null;
@@ -244,11 +245,7 @@ class BasicParser
     * \brief parses value with specified flags, updates: value, flags, errormsg, p_start/p_end/p_value/p_flags.
     * signature: interface bool success = parse(string value, int flags)
     */
-   function parse( $value, $flags = 0 )
-   {
-      // concrete parser needs to implement this abstract method
-      error('invalid_filter', "filter_parser.parse.miss_implementation(".get_class($this).")");
-   }
+   abstract public function parse( $value, $flags = 0 );
 
 
    // help-functions
@@ -258,7 +255,7 @@ class BasicParser
     *        and returns true, if swapped; false otherwise.
     * signature: void handle_reverse_range([bool force = false])
     */
-   function handle_reverse_range( $force = false )
+   public function handle_reverse_range( $force = false )
    {
       $swapped = false;
       if( !$this->is_flags_set(PARSER_NOSWAP_REVERSE) || $force )
@@ -270,13 +267,13 @@ class BasicParser
          }
       }
       return $swapped;
-   }
+   }//handle_reverse_range
 
    /*!
     * \brief returns true, if p_start > p_end
     * signature: bool is_reverse_range()
     */
-   function is_reverse_range()
+   protected function is_reverse_range()
    {
       if( (string)$this->p_start != '' && (string)$this->p_end != '' )
          return ( $this->p_start > $this->p_end );
@@ -288,10 +285,11 @@ class BasicParser
     * \brief swaps p_start and p_end
     * signature: void swap_range_start_end()
     */
-   function swap_range_start_end()
+   protected function swap_range_start_end()
    {
       swap( $this->p_start, $this->p_end );
    }
+
 } // end of 'BasicParser'
 
 
@@ -309,9 +307,9 @@ class BasicParser
 class NumericParser extends BasicParser
 {
    /*! \brief Constructs NumericParser( string value, TokenizerConfig tok_config, int flags ). */
-   function NumericParser( $value, $tok_config, $flags = 0 )
+   public function __construct( $value, $tok_config, $flags = 0 )
    {
-      parent::BasicParser( $value, $tok_config, $flags );
+      parent::__construct( $value, $tok_config, $flags );
       $this->parse($value, $flags);
    }
 
@@ -319,7 +317,7 @@ class NumericParser extends BasicParser
     * \brief Parses value with specified $flags
     * signature: interface bool success = parse(string value, int flags)
     */
-   function parse( $value, $flags = 0 )
+   public function parse( $value, $flags = 0 )
    {
       $this->init_parse($value, $flags);
       if( $this->value == '' )
@@ -329,7 +327,7 @@ class NumericParser extends BasicParser
       $tokenizer = create_StringTokenizer( $this->tokconf, '', $this->flags);
       if( !$tokenizer->parse($value) )
       {
-         $this->errormsg = implode('; ', $tokenizer->errors());
+         $this->errormsg = implode('; ', $tokenizer->get_errors());
          return false;
       }
       $arr = $tokenizer->tokens();
@@ -379,7 +377,8 @@ class NumericParser extends BasicParser
       $this->handle_reverse_range();
 
       return true;
-   }
+   }//parse
+
 } // end of 'NumericParser'
 
 
@@ -408,7 +407,7 @@ class NumericParser extends BasicParser
 define('TEXT_WILD_M', '*'); // special char for wildcard (multi-char)
 
 define('TEXTPARSER_CONF_STARTWILD_MINCHARS', 'startwild_minchars');
-define('TEXTPARSER_CONF_RX_NO_SEP',      'txtpconf_rx_no_sep' ); // regex that overrules match for range-separator
+define('TEXTPARSER_CONF_RX_NO_SEP', 'txtpconf_rx_no_sep' ); // regex that overrules match for range-separator
 define('TEXTPARSER_CONF_PRECEDENCE_SEP', 'precedence_sep'); // flag to indicate, that separator has higher precedence than other special-chars (wildcard)
 
 define('STARTWILD_OPTMINCHARS', 4); // value for filter-config FC_START_WILD or above define (=no of chars to force when pattern starts with wildcard)
@@ -416,11 +415,11 @@ define('STARTWILD_OPTMINCHARS', 4); // value for filter-config FC_START_WILD or 
 class TextParser extends BasicParser
 {
    /*! \brief Constructs TextParser( string value, TokenizerConfig tok_config, int flags ). */
-   function TextParser( $value, $tok_config, $flags = 0 )
+   public function __construct( $value, $tok_config, $flags = 0 )
    {
       if( $flags & TEXTPARSER_IMPLICIT_WILD )
          $flags |= TEXTPARSER_FORBID_RANGE | TEXTPARSER_ALLOW_START_WILD;
-      parent::BasicParser( $value, $tok_config, $flags );
+      parent::__construct( $value, $tok_config, $flags );
       $this->parse($value, $this->flags);
    }
 
@@ -428,7 +427,7 @@ class TextParser extends BasicParser
     * \brief Parses value with specified $flags
     * signature: interface bool success = parse(string value, int flags)
     */
-   function parse( $value, $flags = 0 )
+   public function parse( $value, $flags = 0 )
    {
       $this->init_parse($value, $flags);
       if( $this->value == '' )
@@ -447,7 +446,7 @@ class TextParser extends BasicParser
       // tokenize
       if( !$tokenizer->parse($value) )
       {
-         $this->errormsg = implode('; ', $tokenizer->errors());
+         $this->errormsg = implode('; ', $tokenizer->get_errors());
          return false;
       }
       $arr = $tokenizer->tokens();
@@ -551,7 +550,8 @@ class TextParser extends BasicParser
       }
 
       return true;
-   }
+   }//parse
+
 } // end of 'TextParser'
 
 
@@ -571,64 +571,64 @@ class TextParser extends BasicParser
   * - ':'-char is skipped while parsing date
   */
 
-define('RANGE_START', 0); // indicating range-start for DateParser
-define('RANGE_END',   1); // indicating range-end for DateParser
+define('DP_RANGE_START', 0); // indicating range-start for DateParser
+define('DP_RANGE_END',   1); // indicating range-end for DateParser
 
 class DateParser
 {
    /*! \brief original date passed to constructor. */
-   var $origdate;
+   public $origdate;
    /*! \brief original range-type passed to constructor. */
-   var $rangetype;
+   private $rangetype;
    /*! \brief first error encountered while parsing. */
-   var $errormsg;
+   private $errormsg = '';
    /*! \brief =getdate() on constructor-time */
-   var $now;
+   private $now;
 
    // for parsing
 
    /*! \brief Working copy of date for parsing. */
-   var $datestr;
+   private $datestr;
    /*! \brief array with error-datepart. */
-   var $checkarr;
+   private $checkarr;
    /*! \brief resulting date, completed in format 'YYYY-MM-DD hh:mm:ss', only valid if no errormsg */
-   var $dateval;
+   private $dateval;
    /*! \brief unix-timestamp of completed-date without rangetype-processing (used for reverse-range-handling) */
-   var $rawdate;
+   public $rawdate;
 
    // respective values during parsing
-   var $year;
-   var $month;
-   var $day;
-   var $hour;
-   var $min;
-   var $sec;
+   private $year;
+   private $month;
+   private $day;
+   private $hour;
+   private $min;
+   private $sec;
+
 
    /*!
     * \brief Constructs DateParser( string datestr, int rangetype ).
-    * param $rangetype: RANGE_START | RANGE_END
+    * \param $rangetype: DP_RANGE_START | DP_RANGE_END
     */
-   function DateParser( $datestr, $rangetype )
+   public function __construct( $datestr, $rangetype )
    {
       // check args
-      if( $rangetype != RANGE_START && $rangetype != RANGE_END )
+      if( $rangetype != DP_RANGE_START && $rangetype != DP_RANGE_END )
          error('invalid_filter', "filter_parser.DateParser.invalid_arg.rangetype($rangetype)");
 
       $this->origdate = $datestr;
       $this->rangetype = $rangetype;
-      $this->errormsg = '';
       global $NOW;
       $this->now = getdate($NOW);
 
       if( $this->parse($this->origdate) )
          $this->complete_date();
-   }
+   }//__construct
 
    /*!
     * \brief Returns error-message; '' if no error.
     * signature: string errormsg()
     */
-   function errormsg()
+   public function errormsg()
    {
       return $this->errormsg;
    }
@@ -636,15 +636,14 @@ class DateParser
    /*!
     * \brief Returns resulting date in format 'YYYY-MM-DD hh:mm:ss' if no error occured, '' otherwise.
     * signature: string get_completed_date()
-    * NOTE: only valid if no errormsg
+    * \note only valid if no errormsg
     */
-   function get_completed_date()
+   public function get_completed_date()
    {
       return ( $this->errormsg ) ? '' : $this->dateval;
    }
 
-   // for debugging
-   function to_string()
+   public function to_string()
    {
       return "DateParser('{$this->origdate}',{$this->rangetype})={ err=[{$this->errormsg}], "
          . "date=[{$this->datestr}], val=[{$this->dateval}], rawdate=[{$this->rawdate}]"
@@ -656,7 +655,7 @@ class DateParser
     * \brief Creates unix-timestamp-snapshot of current year/month/day/hour/min/sec.
     * signature: void make_ts_snapshot()
     */
-   function make_ts_snapshot()
+   public function make_ts_snapshot()
    {
       return mktime($this->hour, $this->min, $this->sec, $this->month, $this->day, $this->year);
    }
@@ -666,7 +665,7 @@ class DateParser
     * \brief Checks passed value against specified range; if error -> add typepart in checkarr.
     * signature: bool error = check_datepart(string typepart, string datepart, int start, int end)
     */
-   function check_datepart($typepart, $dpart, $start, $end)
+   private function check_datepart($typepart, $dpart, $start, $end)
    {
       $error = 0;
       if( $dpart == '' )
@@ -678,13 +677,13 @@ class DateParser
       if( $error )
          $this->checkarr[]= $typepart;
       return (boolean)$error;
-   }
+   }//check_datepart
 
    /*!
     * \brief Parses date.
     * signature: bool success = parse(string date)
     */
-   function parse( $date )
+   public function parse( $date )
    {
       static $rxdate = '/^(\d{4})(\d\d)?(\d\d)?\s*(\d\d)?(\d\d)?(\d\d)?$/';
 
@@ -729,14 +728,14 @@ class DateParser
       }
 
       return true;
-   }
+   }//parse
 
    /*!
     * \brief Completes date according to rangetype, store in dateval; update of year/month/day/hour/min/sec if needed.
     * signature: void complete_date()
-    * NOTE: rangetype only RANGE_START|END
+    * \note rangetype only DP_RANGE_START|END
     */
-   function complete_date()
+   private function complete_date()
    {
       // missing year + remaining ('YMDhms') -> use current year
       if( $this->year == '' )
@@ -749,7 +748,7 @@ class DateParser
          $this->day = 1;
          $this->hour = $this->min = $this->sec = 0;
          $this->rawdate = $this->make_ts_snapshot();
-         if( $this->rangetype == RANGE_END)
+         if( $this->rangetype == DP_RANGE_END)
             $this->year++;
       }
       // missing day + remaining ('Dhms')
@@ -758,7 +757,7 @@ class DateParser
          $this->day = 1;
          $this->hour = $this->min = $this->sec = 0;
          $this->rawdate = $this->make_ts_snapshot();
-         if( $this->rangetype == RANGE_END)
+         if( $this->rangetype == DP_RANGE_END)
             $this->month++;
       }
       // missing hour + remaining ('hms')
@@ -766,7 +765,7 @@ class DateParser
       {
          $this->hour = $this->min = $this->sec = 0;
          $this->rawdate = $this->make_ts_snapshot();
-         if( $this->rangetype == RANGE_END)
+         if( $this->rangetype == DP_RANGE_END)
             $this->day++;
       }
       // missing minute + remaining ('ms')
@@ -774,7 +773,7 @@ class DateParser
       {
          $this->min = $this->sec = 0;
          $this->rawdate = $this->make_ts_snapshot();
-         if( $this->rangetype == RANGE_END)
+         if( $this->rangetype == DP_RANGE_END)
             $this->hour++;
       }
       // missing sec + remaining ('s')
@@ -782,14 +781,15 @@ class DateParser
       {
          $this->sec = 0;
          $this->rawdate = $this->make_ts_snapshot();
-         if( $this->rangetype == RANGE_END)
+         if( $this->rangetype == DP_RANGE_END)
             $this->min++;
       }
 
       // handle exceeding of limits by increasing of date-parts
       $unixtime = $this->make_ts_snapshot();
       $this->dateval = date("Y-m-d H:i:s", $unixtime);
-   }
+   }//complete_date
+
 } // end of 'DateParser'
 
 ?>

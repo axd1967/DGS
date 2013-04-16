@@ -39,10 +39,6 @@ require_once 'tournaments/include/tournament_globals.php';
   * \brief Class to manage TournamentDirector-table
   */
 
-// lazy-init in TournamentDirector::get..Text()-funcs
-global $ARR_GLOBALS_TOURNAMENT_DIRECTOR; //PHP5
-$ARR_GLOBALS_TOURNAMENT_DIRECTOR = array();
-
 global $ENTITY_TOURNAMENT_DIRECTOR; //PHP5
 $ENTITY_TOURNAMENT_DIRECTOR = new Entity( 'TournamentDirector',
       FTYPE_PKEY, 'tid', 'uid',
@@ -52,14 +48,14 @@ $ENTITY_TOURNAMENT_DIRECTOR = new Entity( 'TournamentDirector',
 
 class TournamentDirector
 {
-   var $tid;
-   var $uid;
-   var $Flags;
-   var $Comment;
-   var $User; // User-object
+   public $tid;
+   public $uid;
+   public $Flags;
+   public $Comment;
+   public $User; // User-object
 
    /*! \brief Constructs TournamentDirector-object with specified arguments. */
-   function TournamentDirector( $tid=0, $uid=0, $flags=0, $comment='', $user=NULL )
+   public function __construct( $tid=0, $uid=0, $flags=0, $comment='', $user=NULL )
    {
       $this->tid = (int)$tid;
       $this->uid = (int)$uid;
@@ -68,56 +64,56 @@ class TournamentDirector
       $this->User = ($user instanceof User) ? $user : new User( $this->uid );
    }
 
-   function formatFlags( $flags_val=null )
+   public function formatFlags( $flags_val=null )
    {
       if( is_null($flags_val) )
          $flags_val = $this->Flags;
 
       $arr = array();
-      $arr_flags = TournamentDirector::getFlagsText();
+      $arr_flags = self::getFlagsText();
       foreach( $arr_flags as $flag => $flagtext )
       {
          if( $flags_val & $flag )
             $arr[] = $flagtext;
       }
       return implode(', ', $arr);
-   }
+   }//formatFlags
 
    /*! \brief Inserts or updates TournamentDirector in database. */
-   function persist()
+   public function persist()
    {
-      if( !is_null(TournamentDirector::load_tournament_director($this->tid, $this->uid, /*with_user*/false)) )
+      if( !is_null(self::load_tournament_director($this->tid, $this->uid, /*with_user*/false)) )
          $success = $this->update();
       else
          $success = $this->insert();
       return $success;
    }
 
-   function insert()
+   public function insert()
    {
       $entityData = $this->fillEntityData();
-      $result = $entityData->insert( "TournamentDirector::insert(%s,{$this->uid})" );
-      TournamentDirector::delete_cache_tournament_director( 'TournamentDirector.insert', $this->tid );
+      $result = $entityData->insert( "TournamentDirector.insert(%s,{$this->uid})" );
+      self::delete_cache_tournament_director( 'TournamentDirector.insert', $this->tid );
       return $result;
    }
 
-   function update()
+   public function update()
    {
       $entityData = $this->fillEntityData();
-      $result = $entityData->update( "TournamentDirector::update(%s,{$this->uid})" );
-      TournamentDirector::delete_cache_tournament_director( 'TournamentDirector.update', $this->tid );
+      $result = $entityData->update( "TournamentDirector.update(%s,{$this->uid})" );
+      self::delete_cache_tournament_director( 'TournamentDirector.update', $this->tid );
       return $result;
    }
 
-   function delete()
+   public function delete()
    {
       $entityData = $this->fillEntityData();
-      $result = $entityData->delete( "TournamentDirector::delete(%s,{$this->uid})" );
-      TournamentDirector::delete_cache_tournament_director( 'TournamentDirector.delete', $this->tid );
+      $result = $entityData->delete( "TournamentDirector.delete(%s,{$this->uid})" );
+      self::delete_cache_tournament_director( 'TournamentDirector.delete', $this->tid );
       return $result;
    }
 
-   function fillEntityData()
+   public function fillEntityData()
    {
       $data = $GLOBALS['ENTITY_TOURNAMENT_DIRECTOR']->newEntityData();
       $data->set_value( 'tid', $this->tid );
@@ -127,10 +123,11 @@ class TournamentDirector
       return $data;
    }
 
+
    // ------------ static functions ----------------------------
 
    /*! \brief Returns db-fields to be used for query of TournamentDirector-object. */
-   function build_query_sql( $tid, $with_user=true )
+   public static function build_query_sql( $tid, $with_user=true )
    {
       $qsql = $GLOBALS['ENTITY_TOURNAMENT_DIRECTOR']->newQuerySQL('TD');
       if( $with_user )
@@ -148,7 +145,7 @@ class TournamentDirector
    }
 
    /*! \brief Returns TournamentDirector-object created from specified (db-)row. */
-   function new_from_row( $row, $with_user=true )
+   public static function new_from_row( $row, $with_user=true )
    {
       $director = new TournamentDirector(
             // from TournamentDirector
@@ -162,29 +159,26 @@ class TournamentDirector
       return $director;
    }
 
-   /*!
-    * \brief Loads and returns TournamentDirector-object for given
-    *        tournament-ID and user-id; NULL if nothing found.
-    */
-   function load_tournament_director( $tid, $uid, $with_user=true )
+   /*! \brief Loads and returns TournamentDirector-object for given tournament-ID and user-id; NULL if nothing found. */
+   public static function load_tournament_director( $tid, $uid, $with_user=true )
    {
       $result = NULL;
       if( $tid > 0 )
       {
-         $qsql = TournamentDirector::build_query_sql( $tid, $with_user );
+         $qsql = self::build_query_sql( $tid, $with_user );
          $qsql->add_part( SQLP_WHERE, "TD.uid='$uid'" );
          $qsql->add_part( SQLP_LIMIT, '1' );
 
          $row = mysql_single_fetch( "TournamentDirector.load_tournament_director($tid,$uid)",
             $qsql->get_select() );
          if( $row )
-            $result = TournamentDirector::new_from_row( $row, $with_user );
+            $result = self::new_from_row( $row, $with_user );
       }
       return $result;
-   }
+   }//load_tournament_director
 
    /*! \brief Returns true, if there is at least one TD. for given tournament. */
-   function has_tournament_director( $tid )
+   public static function has_tournament_director( $tid )
    {
       if( $tid > 0 )
       {
@@ -198,41 +192,41 @@ class TournamentDirector
             return true;
       }
       return false;
-   }
+   }//has_tournament_director
 
    /*! \brief Returns count of tournament-directors (TDs) for given tournament; 0 otherwise. */
-   function count_tournament_directors( $tid )
+   public static function count_tournament_directors( $tid )
    {
       if( $tid <= 0 )
-         error('invalid_args', "TournamentDirector::count_tournament_directors($tid)");
+         error('invalid_args', "TournamentDirector:count_tournament_directors.check.tid($tid)");
 
-      $row = mysql_single_fetch( "TournamentDirector::count_tournament_directors($tid)",
+      $row = mysql_single_fetch( "TournamentDirector:count_tournament_directors($tid)",
          "SELECT COUNT(*) AS X_Count FROM TournamentDirector WHERE tid=$tid" );
       return ($row) ? (int)@$row['X_Count'] : 0;
    }
 
    /*! \brief Returns enhanced (passed) ListIterator with TournamentDirector-objects. */
-   function load_tournament_directors( $iterator, $tid )
+   public static function load_tournament_directors( $iterator, $tid )
    {
-      $qsql = TournamentDirector::build_query_sql( $tid );
+      $qsql = self::build_query_sql( $tid );
       $iterator->setQuerySQL( $qsql );
       $query = $iterator->buildQuery();
-      $result = db_query( "TournamentDirector.load_tournament_directors($tid)", $query );
+      $result = db_query( "TournamentDirector:load_tournament_directors($tid)", $query );
       $iterator->setResultRows( mysql_num_rows($result) );
 
       $iterator->clearItems();
       while( $row = mysql_fetch_array( $result ) )
       {
-         $director = TournamentDirector::new_from_row( $row );
+         $director = self::new_from_row( $row );
          $iterator->addItem( $director, $row );
       }
       mysql_free_result($result);
 
       return $iterator;
-   }
+   }//load_tournament_directors
 
    /*! \brief Returns non-null arr( uid -> TournamentDirector.Flags, ... ) for given tournament-id. */
-   function load_tournament_directors_flags( $tid )
+   public static function load_tournament_directors_flags( $tid )
    {
       $db_result = db_query( "TournamentDirector.load_tournament_directors_flags($tid)",
          "SELECT uid, Flags FROM TournamentDirector WHERE tid=$tid" );
@@ -243,10 +237,10 @@ class TournamentDirector
       mysql_free_result($db_result);
 
       return $result;
-   }
+   }//load_tournament_directors_flags
 
    /*! \brief Returns list of uid of tournament-directors for given tournament. */
-   function load_tournament_directors_uid( $tid )
+   public static function load_tournament_directors_uid( $tid )
    {
       $qsql = $GLOBALS['ENTITY_TOURNAMENT_DIRECTOR']->newQuerySQL('TD');
       $qsql->clear_parts(SQLP_FIELDS);
@@ -260,13 +254,13 @@ class TournamentDirector
       mysql_free_result($result);
 
       return $out;
-   }
+   }//load_tournament_directors_uid
 
    /*!
     * \brief Identify user from given user-info (uid or handle).
     * \return row-array with ID/Name/Handle/Rating/X_Lastaccess; null if nothing found
     */
-   function load_user_row( $uid, $uhandle )
+   public static function load_user_row( $uid, $uhandle )
    {
       $player_query = 'SELECT ID, Name, Handle, Rating2, '
             . 'UNIX_TIMESTAMP(Lastaccess) AS X_Lastaccess FROM Players WHERE ';
@@ -290,54 +284,53 @@ class TournamentDirector
       }
 
       return null;
-   }
+   }//load_user_row
 
    /*!
     * \brief Assert with error (if $die set), that tourney has at least one TD.
     * \param $count_TDs give number of TDs (T-directors) or load count from DB if null
     * \return true if check is ok, false on error
     */
-   function assert_min_directors( $tid, $t_status, $die=true, $count_TDs=null )
+   public static function assert_min_directors( $tid, $t_status, $die=true, $count_TDs=null )
    {
       static $allowed_status = array( TOURNEY_STATUS_ADMIN, TOURNEY_STATUS_NEW, TOURNEY_STATUS_DELETE );
       $has_error = false;
       if( !in_array($t_status, $allowed_status) )
       {
          $cntTD = ( is_null($count_TDs) || !is_numeric($count_TDs) )
-            ? TournamentDirector::count_tournament_directors($tid)
+            ? self::count_tournament_directors($tid)
             : $count_TDs;
          if( $cntTD <= 1 )
             $has_error = true;
       }
 
       if( $die && $has_error )
-         error('tournament_director_min1', "TournamentDirector::assert_min_directors($tid,$t_status)");
+         error('tournament_director_min1', "TournamentDirector:assert_min_directors($tid,$t_status)");
       return !$has_error;
-   }
+   }//assert_min_directors
 
    /*! \brief Returns Flags-text or all Flags-texts (if arg=null). */
-   function getFlagsText( $flag=null )
+   public static function getFlagsText( $flag=null )
    {
-      global $ARR_GLOBALS_TOURNAMENT_DIRECTOR;
+      static $ARR_TDIR_FLAGS = null; // flag => text
 
       // lazy-init of texts
-      $key = 'FLAGS';
-      if( !isset($ARR_GLOBALS_TOURNAMENT_DIRECTOR[$key]) )
+      if( is_null($ARR_TDIR_FLAGS) )
       {
          $arr = array();
          $arr[TD_FLAG_GAME_END] = T_('Game End#TD_flag');
          $arr[TD_FLAG_GAME_ADD_TIME] = T_('Add Time#TD_flag');
-         $ARR_GLOBALS_TOURNAMENT_DIRECTOR[$key] = $arr;
+         $ARR_TDIR_FLAGS = $arr;
       }
 
       if( is_null($flag) )
-         return $ARR_GLOBALS_TOURNAMENT_DIRECTOR[$key];
-      if( !isset($ARR_GLOBALS_TOURNAMENT_DIRECTOR[$key][$flag]) )
-         error('invalid_args', "TournamentDirector::getFlagsText($flag)");
-      return $ARR_GLOBALS_TOURNAMENT_DIRECTOR[$key][$flag];
-   }
+         return $ARR_TDIR_FLAGS;
+      if( !isset($ARR_TDIR_FLAGS[$flag]) )
+         error('invalid_args', "TournamentDirector:getFlagsText($flag)");
+      return $ARR_TDIR_FLAGS[$flag];
+   }//getFlagsText
 
-   function get_edit_tournament_status()
+   public static function get_edit_tournament_status()
    {
       static $statuslist = array(
          TOURNEY_STATUS_NEW, TOURNEY_STATUS_REGISTER, TOURNEY_STATUS_PAIR,
@@ -346,7 +339,7 @@ class TournamentDirector
       return $statuslist;
    }
 
-   function delete_cache_tournament_director( $dbgmsg, $tid )
+   public static function delete_cache_tournament_director( $dbgmsg, $tid )
    {
       DgsCache::delete( $dbgmsg, CACHE_GRP_TDIRECTOR, "TDirector.$tid" );
    }

@@ -45,35 +45,26 @@ define('GAMEINFO_COMMANDS', 'info');
   */
 class QuickHandlerGameInfo extends QuickHandler
 {
-   var $gid;
+   private $gid = 0;
 
-   var $glc; // GameListControl
-   var $game_row;
-
-   function QuickHandlerGameInfo( $quick_object )
-   {
-      parent::QuickHandler( $quick_object );
-      $this->gid = 0;
-      $this->glc = null;
-
-      $this->game_row = null;
-   }
+   private $glc = null; // GameListControl
+   private $game_row = null;
 
 
    // ---------- Interface ----------------------------------------
 
-   function canHandle( $obj, $cmd ) // static
+   public static function canHandle( $obj, $cmd ) // static
    {
       return ( $obj == QOBJ_GAME ) && QuickHandler::matchRegex(GAMEINFO_COMMANDS, $cmd);
    }
 
-   function parseURL()
+   public function parseURL()
    {
       parent::checkArgsUnknown(GAMEINFO_OPT_GID);
       $this->gid = (int)get_request_arg(GAMEINFO_OPT_GID);
    }
 
-   function prepare()
+   public function prepare()
    {
       global $player_row;
       $uid = (int)@$player_row['ID'];
@@ -110,17 +101,17 @@ class QuickHandlerGameInfo extends QuickHandler
    }//prepare
 
    /*! \brief Processes command for object; may fire error(..) and perform db-operations. */
-   function process()
+   public function process()
    {
       $cmd = $this->quick_object->cmd;
       if( $cmd == QCMD_INFO )
-         QuickHandlerGameInfo::fill_game_info($this, $this->glc, $this->quick_object->result, $this->game_row);
+         self::fill_game_info($this, $this->glc, $this->quick_object->result, $this->game_row);
    }
 
 
    // ------------ static functions ----------------------------
 
-   function convertGameFlags( $flags )
+   private static function convertGameFlags( $flags )
    {
       $out = array();
       if( $flags & GAMEFLAGS_HIDDEN_MSG )
@@ -132,9 +123,9 @@ class QuickHandlerGameInfo extends QuickHandler
       if( $flags & GAMEFLAGS_ATTACHED_SGF )
          $out[] = 'ATTACHEDSGF';
       return implode(',', $out);
-   }
+   }//convertGameFlags
 
-   function fill_game_info( $quick_handler, $glc, &$out, $row )
+   public static function fill_game_info( $quick_handler, $glc, &$out, $row )
    {
       //$FU = $glc->is_finished();
       //$all = $glc->is_all();
@@ -158,7 +149,7 @@ class QuickHandlerGameInfo extends QuickHandler
          GameHelper::get_quick_game_action($row['Status'], (int)$row['Handicap'], (int)$row['Moves'],
             new FairKomiNegotiation( $game_setup, $row ) );
       $out['status'] = strtoupper($row['Status']);
-      $out['flags'] = QuickHandlerGameInfo::convertGameFlags($row['X_GameFlags']);
+      $out['flags'] = self::convertGameFlags($row['X_GameFlags']);
       $out['score'] = ( $row['Status'] == GAME_STATUS_FINISHED )
             ? score2text($row['Score'], /*verbose*/false, /*engl*/true, /*quick*/true)
             : "";

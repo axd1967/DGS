@@ -55,22 +55,22 @@ $ENTITY_SHAPE = new Entity( 'Shape',
 
 class Shape
 {
-   var $ID;
-   var $uid;
-   var $Name;
-   var $Size;
-   var $Flags;
-   var $Snapshot;
-   var $Notes;
-   var $Created;
-   var $Lastchanged;
+   public $ID;
+   public $uid;
+   public $Name;
+   public $Size;
+   public $Flags;
+   public $Snapshot;
+   public $Notes;
+   public $Created;
+   public $Lastchanged;
 
    // non-DB fields
 
-   var $User; // User-object
+   public $User; // User-object
 
    /*! \brief Constructs Bulletin-object with specified arguments. */
-   function Shape( $id=0, $uid=0, $user=null, $name='', $size=19, $flags=0, $snapshot='', $notes='',
+   public function __construct( $id=0, $uid=0, $user=null, $name='', $size=19, $flags=0, $snapshot='', $notes='',
          $created=0, $lastchanged=0 )
    {
       $this->ID = (int)$id;
@@ -84,15 +84,15 @@ class Shape
       $this->Lastchanged = (int)$lastchanged;
       // non-DB fields
       $this->User = ($user instanceof User) ? $user : new User( $this->uid );
-   }
+   }//__construct
 
-   function to_string()
+   public function to_string()
    {
       return print_r($this, true);
    }
 
    /*! \brief Inserts or updates Shape-entry in database. */
-   function persist()
+   public function persist()
    {
       if( $this->ID > 0 )
          $success = $this->update();
@@ -101,7 +101,7 @@ class Shape
       return $success;
    }
 
-   function insert()
+   public function insert()
    {
       $this->Created = $this->Lastchanged = $GLOBALS['NOW'];
 
@@ -112,7 +112,7 @@ class Shape
       return $result;
    }
 
-   function update()
+   public function update()
    {
       $this->Lastchanged = $GLOBALS['NOW'];
 
@@ -120,7 +120,7 @@ class Shape
       return $entityData->update( "Shape.update(%s)" );
    }
 
-   function fillEntityData( $data=null )
+   public function fillEntityData( $data=null )
    {
       if( is_null($data) )
          $data = $GLOBALS['ENTITY_SHAPE']->newEntityData();
@@ -140,7 +140,7 @@ class Shape
    // ------------ static functions ----------------------------
 
    /*! \brief Returns db-fields to be used for query of Shape-objects for given shape-id. */
-   function build_query_sql( $shape_id=0, $with_player=true )
+   public static function build_query_sql( $shape_id=0, $with_player=true )
    {
       $qsql = $GLOBALS['ENTITY_SHAPE']->newQuerySQL('SHP');
       if( $with_player )
@@ -155,10 +155,10 @@ class Shape
       if( $shape_id > 0 )
          $qsql->add_part( SQLP_WHERE, "SHP.ID=$shape_id" );
       return $qsql;
-   }
+   }//build_query_sql
 
    /*! \brief Returns Shape-object created from specified (db-)row. */
-   function new_from_row( $row )
+   public static function new_from_row( $row )
    {
       $shape = new Shape(
             // from Shape
@@ -174,52 +174,52 @@ class Shape
             @$row['X_Lastchanged']
          );
       return $shape;
-   }
+   }//new_from_row
 
    /*!
     * \brief Loads and returns Shape-object for given shape-id limited to 1 result-entry.
     * \param $shape_id Shape.ID
     * \return NULL if nothing found; Shape-object otherwise
     */
-   function load_shape( $shape_id, $with_player=true )
+   public static function load_shape( $shape_id, $with_player=true )
    {
-      $qsql = Shape::build_query_sql( $shape_id, $with_player );
+      $qsql = self::build_query_sql( $shape_id, $with_player );
       $qsql->add_part( SQLP_LIMIT, '1' );
 
-      $row = mysql_single_fetch( "Shape::load_shape.find_shape($shape_id)", $qsql->get_select() );
-      return ($row) ? Shape::new_from_row($row) : NULL;
-   }
+      $row = mysql_single_fetch( "Shape:load_shape.find_shape($shape_id)", $qsql->get_select() );
+      return ($row) ? self::new_from_row($row) : NULL;
+   }//load_shape
 
    /*! \brief Loads Shape by name; or return NULL if not found. */
-   function load_shape_by_name( $name, $with_player=false )
+   public static function load_shape_by_name( $name, $with_player=false )
    {
-      $qsql = Shape::build_query_sql( 0, $with_player );
+      $qsql = self::build_query_sql( 0, $with_player );
       $qsql->add_part( SQLP_WHERE, "SHP.Name='".mysql_addslashes($name)."'" );
       $qsql->add_part( SQLP_LIMIT, '1' );
 
-      $row = mysql_single_fetch( "Shape::load_shape_by_name.find_shape($name)", $qsql->get_select() );
-      return ($row) ? Shape::new_from_row($row) : NULL;
-   }
+      $row = mysql_single_fetch( "Shape:load_shape_by_name.find_shape($name)", $qsql->get_select() );
+      return ($row) ? self::new_from_row($row) : NULL;
+   }//load_shape_by_name
 
    /*! \brief Returns enhanced (passed) ListIterator with Shape-objects. */
-   function load_shapes( $iterator )
+   public static function load_shapes( $iterator )
    {
-      $qsql = Shape::build_query_sql();
+      $qsql = self::build_query_sql();
       $iterator->setQuerySQL( $qsql );
       $query = $iterator->buildQuery();
-      $result = db_query( "Shape.load_shapes", $query );
+      $result = db_query( "Shape:load_shapes", $query );
       $iterator->setResultRows( mysql_num_rows($result) );
 
       $iterator->clearItems();
       while( $row = mysql_fetch_array( $result ) )
       {
-         $shape = Shape::new_from_row( $row );
+         $shape = self::new_from_row( $row );
          $iterator->addItem( $shape, $row );
       }
       mysql_free_result($result);
 
       return $iterator;
-   }
+   }//load_shapes
 
 } // end of 'Shape'
 ?>

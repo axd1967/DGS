@@ -35,44 +35,38 @@ require_once 'include/goban_handler_gfx.php';
   *
   * \brief Controller-Class to handle shape-game-stuff.
   */
-
-// lazy-init in ShapeControl::get..Text()-funcs
-global $ARR_GLOBALS_SHAPE; //PHP5
-$ARR_GLOBALS_SHAPE = array();
-
 class ShapeControl
 {
    // ------------ static functions ----------------------------
 
    /*! \brief Returns Flags-text or all Flags-texts (if arg=null). */
-   function getFlagsText( $flag=null )
+   public static function getFlagsText( $flag=null )
    {
-      global $ARR_GLOBALS_SHAPE;
+      static $ARR_SHAPE_FLAGS = array(); // flag => text
 
       // lazy-init of texts
-      $key = 'FLAGS';
-      if( !isset($ARR_GLOBALS_SHAPE[$key]) )
+      if( is_null($ARR_SHAPE_FLAGS) )
       {
          $arr = array();
          $arr[SHAPE_FLAG_PLAYCOLOR_W] = T_('W-First#SHP_flag');
          $arr[SHAPE_FLAG_PUBLIC] = T_('Public#SHP_flag');
-         $ARR_GLOBALS_SHAPE[$key] = $arr;
+         $ARR_SHAPE_FLAGS = $arr;
       }
 
       if( is_null($flag) )
-         return $ARR_GLOBALS_SHAPE[$key];
-      if( !isset($ARR_GLOBALS_SHAPE[$key][$flag]) )
-         error('invalid_args', "ShapeControl::getFlagsText($flag,$short)");
-      return $ARR_GLOBALS_SHAPE[$key][$flag];
+         return $ARR_SHAPE_FLAGS;
+      if( !isset($ARR_SHAPE_FLAGS[$flag]) )
+         error('invalid_args', "ShapeControl:getFlagsText($flag,$short)");
+      return $ARR_SHAPE_FLAGS[$flag];
    }//getFlagsText
 
    /*! \brief Returns text-representation of shape-flags. */
-   function formatFlags( $flags, $zero_val='', $intersect_flags=0, $class=null )
+   public static function formatFlags( $flags, $zero_val='', $intersect_flags=0, $class=null )
    {
       $check_flags = ( $intersect_flags > 0 ) ? $flags & $intersect_flags : $flags;
 
       $arr = array();
-      $arr_flags = ShapeControl::getFlagsText();
+      $arr_flags = self::getFlagsText();
       foreach( $arr_flags as $flag => $flagtext )
       {
          if( $check_flags & $flag )
@@ -81,16 +75,16 @@ class ShapeControl
       return (count($arr)) ? implode(', ', $arr) : $zero_val;
    }//formatFlags
 
-   function newShape( $snapshot, $size, $flags )
+   public static function newShape( $snapshot, $size, $flags )
    {
       return new Shape( 0, 0, null, '', $size, $flags, $snapshot );
    }
 
    /*! \brief Returns HTML for given Shape-object parsing Snapshot. */
-   function build_view_shape( $shape, $stone_size=null )
+   public static function build_view_shape( $shape, $stone_size=null )
    {
       if( is_null($shape) )
-         error('invalid_args', "ShapeControl::build_view_shape.miss_shape()");
+         error('invalid_args', "ShapeControl:build_view_shape.miss_shape()");
 
       $arr_xy = GameSnapshot::parse_stones_snapshot( $shape->Size, $shape->Snapshot, GOBS_BLACK, GOBS_WHITE );
       $goban = Goban::create_goban_from_stones_snapshot( $shape->Size, $arr_xy );
@@ -99,12 +93,12 @@ class ShapeControl
       return $exporter->write_goban( $goban );
    }//build_view_shape
 
-   function is_shape_name_used( $name )
+   public static function is_shape_name_used( $name )
    {
       return !is_null( Shape::load_shape_by_name($name) );
    }//is_shape_name_used
 
-   function load_shape_name( $shape_id )
+   public static function load_shape_name( $shape_id )
    {
       if( $shape_id > 0 )
       {
@@ -115,9 +109,9 @@ class ShapeControl
       return '???';
    }//load_shape_name
 
-   function build_snapshot_info( $shape_id, $size, $snapshot, $b_first, $incl_image=true )
+   public static function build_snapshot_info( $shape_id, $size, $snapshot, $b_first, $incl_image=true )
    {
-      $shape_name = ShapeControl::load_shape_name($shape_id);
+      $shape_name = self::load_shape_name($shape_id);
       $colfirst_text = (is_null($b_first) || $b_first) ? '' : ' (' . T_('W-First#SHP_flag') . ')';
       return ($incl_image ? echo_image_shapeinfo( $shape_id, $size, $snapshot ) . ' ' : '') .
          sprintf( '%s #%s%s: %s', T_('Shape'), $shape_id, $colfirst_text, $shape_name );

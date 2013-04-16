@@ -66,20 +66,20 @@ function scale($x, $min, $max, $offset, $size)
 
 function gscale($x)
 {
- global $GSCALEMIN, $GSCALEMAX, $GSCALEOFFSET, $GSCALESIZE;
+   global $GSCALEMIN, $GSCALEMAX, $GSCALEOFFSET, $GSCALESIZE;
    if( $GSCALEMIN == $GSCALEMAX || $GSCALESIZE < 1 )
       return round( $GSCALEOFFSET);
    return round( $GSCALEOFFSET + (($x-$GSCALEMIN)/($GSCALEMAX-$GSCALEMIN))*$GSCALESIZE );
-} //gscale
+}//gscale
 
 function gscaleinit($min, $max, $offset, $size)
 {
- global $GSCALEMIN, $GSCALEMAX, $GSCALEOFFSET, $GSCALESIZE;
+   global $GSCALEMIN, $GSCALEMAX, $GSCALEOFFSET, $GSCALESIZE;
    $GSCALEMIN = $min;
    $GSCALEMAX = $max;
    $GSCALEOFFSET = $offset;
    $GSCALESIZE = $size;
-} //gscaleinit
+}//gscaleinit
 
 function getellipticpoint($x, $y, $w, $h, $radian)
 {
@@ -119,7 +119,7 @@ function getellipticpoint($x, $y, $w, $h, $radian)
       $y + ($sh<0 ?-$h :$h),
       );
 */
-} //getellipticpoint
+}//getellipticpoint
 
 
 function points_reverse( &$points, $xoff=0, $yoff=0)
@@ -133,7 +133,7 @@ function points_reverse( &$points, $xoff=0, $yoff=0)
       $n -= 2;
    }
    return $p;
-} //points_reverse
+}//points_reverse
 
 function points_join($pointX, $pointY)
 {
@@ -145,7 +145,7 @@ function points_join($pointX, $pointY)
       $points[]= $y;
    }
    return $points;
-} //points_join
+}//points_join
 
 function points_split(&$points, &$pointX, &$pointY)
 {
@@ -158,14 +158,14 @@ function points_split(&$points, &$pointX, &$pointY)
       $pointX[]= $x;
       $pointY[]= $y;
    }
-} //points_split
+}//points_split
 
 //callback must be a function($x, $y) and return f($x,$y)
 function points_map($callback, &$points)
 {
    points_split($points, $pointX, $pointY);
    return array_map($callback, $pointX, $pointY);
-} //points_map
+}//points_map
 
 //callback must be a function(&$x, &$y) and modify $x and $y
 function points_mapXY($callback, &$points)
@@ -181,7 +181,7 @@ function points_mapXY($callback, &$points)
       $p[]= $y;
    }
    return $p;
-} //points_mapXY
+}//points_mapXY
 
 
 /*! \brief Extract the RGB values from various types of colors.
@@ -223,7 +223,7 @@ function colortoRGB($r, $g=NULL, $b=NULL)
       $r >>= 8;
    }
    return array( $r&255, $g&255, $b&255);
-} //colortoRGB
+}//colortoRGB
 
 /*! \brief return a fixed pattern color.
  */
@@ -236,7 +236,7 @@ function patterncolor($n)
    $r = $x&2 ?0 :$y;
    $g = $x&4 ?0 :$y;
    return array( $r&255, $g&255, $b&255);
-} //patterncolor
+}//patterncolor
 
 function get_image_type( $filename)
 {
@@ -254,7 +254,7 @@ function get_image_type( $filename)
       default: return false;
    }
    return array($type, $mime);
-}
+}//get_image_type
 
 //writes an image file to the output buffer adding adjusted headers
 function image_passthru( $filename, $modified=null, $expire=null)
@@ -276,7 +276,7 @@ function image_passthru( $filename, $modified=null, $expire=null)
       }
    }
    return false; //error
-}
+}//image_passthru
 
 /*!
  * \class Graph
@@ -285,54 +285,51 @@ function image_passthru( $filename, $modified=null, $expire=null)
  */
 class Graph
 {
-   /*! \privatesection */
-
    /*! \brief this image. */
-   var $im;
+   public $im;
 
    /*! \brief image sizes. */
-   var $width;
-   var $height;
+   public $width;
+   public $height;
 
    /*! \brief background colorid. */
-   var $bkground;
+   private $bkground;
 
    /*! \brief border width. */
-   var $border;
+   public $border = 6;
 
    /*! \brief True Type Font file path, '' if disabled. */
-   var $TTFfile;
+   public $TTFfile;
 
-   /*! \brief Label metrics.
+   /*!
+    * \brief Label metrics.
     * HEIGHT => height of a character (pixels)
     * WIDTH => average width of a character (pixels)
     * ALIGN => vertical alignement to the upper left corner (pixels)
     * VSPACE => vertical spacing (pixels)
     * LINEH => total line height (pixels)
     */
-   var $labelMetrics;
+   public $labelMetrics;
 
    /*! \brief Bounds of X axis. */
-   var $offsetX;
-   var $sizeX;
-   var $boxleft;
-   var $boxright;
-   var $minX;
-   var $maxX;
+   public $offsetX;
+   public $sizeX;
+   public $boxleft;
+   public $boxright;
+   public $minX;
+   public $maxX;
 
    /*! \brief Bounds of Y axis. */
-   var $offsetY;
-   var $sizeY;
-   var $boxtop;
-   var $boxbottom;
-   var $minY;
-   var $maxY;
+   public $offsetY;
+   public $sizeY;
+   public $boxtop;
+   public $boxbottom;
+   public $minY;
+   public $maxY;
 
-
-   /*! \publicsection */
 
    /*! \brief Constructor. Create a new graphics and initialize it. */
-   function Graph( $width=640, $height=0, $bgcolor=0xffffff)
+   public function __construct( $width=640, $height=0, $bgcolor=0xffffff )
    {
       $width = (int)$width;
       if( $width <= 1 )
@@ -345,19 +342,15 @@ class Graph
       $this->height = $height;
       $this->im = imagecreate( $width, $height);
       $this->bkground = $this->colorallocate($bgcolor); //first=background color
-      $this->border = 6;
 
       if( !($x=(string)@$_GET['font']) )
          $x = TTF_NAME;
       $this->setfont($x);
+   }//__construct
 
-   } //Graph constructor
 
-
-   /*! \brief Set the TTF font used.
-    * 'FreeSans-Medium', 'ARIAL' or 'COUR'
-    */
-   function setfont( $font='')
+   /*! \brief Set the TTF font used; 'FreeSans-Medium', 'ARIAL' or 'COUR'. */
+   public function setfont( $font='')
    {
       //TTF need GD and Freetype.
       if( $font > '' && $font != '*' && function_exists('imagettftext') )
@@ -374,32 +367,32 @@ class Graph
       $this->TTFfile = '';
       EMBdefaultlabelMetrics($this);
       return false;
-   } //setfont
+   }//setfont
 
-   function labelbox($str)
+   public function labelbox($str)
    {
       if( $this->TTFfile > '' )
          return TTFlabelbox($this, $str);
       else
          return EMBlabelbox($this, $str);
-   } //labelbox
+   }//labelbox
 
    //$x,$y is the upper left corner
-   function label($x, $y, $str, $colorid)
+   public function label($x, $y, $str, $colorid)
    {
       if( $this->TTFfile > '' )
          return TTFlabel($this, $x, $y, $str, $colorid);
       else
          return EMBlabel($this, $x, $y, $str, $colorid);
-   } //label
+   }//label
 
 
 
-   function colorallocate($r, $g=NULL, $b=NULL)
+   public function colorallocate($r, $g=NULL, $b=NULL)
    {
       list($r,$g,$b) = colortoRGB($r, $g, $b);
       return imagecolorallocate($this->im, $r, $g, $b);
-   } //colorallocate
+   }//colorallocate
 
    /*!
     * \brief A way to get each time a colorid.
@@ -407,55 +400,54 @@ class Graph
     * If we don't have the exact color, we try to allocate it.
     * If we can't allocate it, we return the closest color in the image.
     */
-   function getcolor($r, $g=NULL, $b=NULL) {
+   public function getcolor($r, $g=NULL, $b=NULL)
+   {
       list($r,$g,$b) = colortoRGB($r, $g, $b);
       $c = imagecolorexact($this->im, $r, $g, $b);
       if( $c >= 0 ) return $c;
       $c = imagecolorallocate($this->im, $r, $g, $b);
       if( $c >= 0 ) return $c;
       return imagecolorclosest($this->im, $r, $g, $b);
-   } //getcolor
+   }//getcolor
 
-   function setdash($colorid)
+   public function setdash($colorid)
    {
       return imagesetstyle($this->im, array($colorid,$colorid,
                     IMG_COLOR_TRANSPARENT,IMG_COLOR_TRANSPARENT,
                     IMG_COLOR_TRANSPARENT,IMG_COLOR_TRANSPARENT));
-   } //setdash
+   }//setdash
 
-   function line($x1, $y1, $x2, $y2, $colorid)
+   public function line($x1, $y1, $x2, $y2, $colorid)
    {
       return imageline($this->im, $x1, $y1, $x2, $y2, $colorid);
-   } //line
+   }//line
 
-   function curve(&$pointX, &$pointY, $nr_points, $colorid)
+   public function curve(&$pointX, &$pointY, $nr_points, $colorid)
    {
       for( $i=1; $i<$nr_points; $i++)
          imageline($this->im,
             $pointX[$i-1],$pointY[$i-1],$pointX[$i],$pointY[$i],$colorid);
-   } //curve
+   }//curve
 
-   function polygon(&$points, $nr_points, $colorid)
+   public function polygon(&$points, $nr_points, $colorid)
    {
       imagepolygon($this->im, $points, $nr_points, $colorid);
-   } //polygon
+   }//polygon
 
    //like imagepolygon() but open
-   function polyline(&$points, $nr_points, $colorid)
+   public function polyline(&$points, $nr_points, $colorid)
    {
       for( $i=0; $i<$nr_points-1; $i++)
       {
          imageline($this->im, $points[2*$i], $points[2*$i+1],
                             $points[2*$i+2], $points[2*$i+3], $colorid);
       }
-   } //polyline
+   }//polyline
 
-   function filledpolygon(&$points, $nr_points, $colorid)
+   public function filledpolygon(&$points, $nr_points, $colorid)
    {
       if( $nr_points > 2 )
-      {
          imagefilledpolygon($this->im, $points, $nr_points, $colorid);
-      }
       if( $nr_points > 1 )
       {
          //also fix a strange bug of imagefilledpolygon() that
@@ -463,21 +455,19 @@ class Graph
          $this->polyline($points, $nr_points, $colorid);
       }
       else if( $nr_points > 0 )
-      {
          imagesetpixel($this->im, $points[0], $points[1], $colorid);
-      }
-   } //filledpolygon
+   }//filledpolygon
 
-   function polarline($x, $y, $length, $radian, $colorid)
+   public function polarline($x, $y, $length, $radian, $colorid)
    {
       //the Y axis is inversed, the rotation too (clockwise)
       list($px, $py) = getellipticpoint($x, $y, $length, $length, $radian);
       imageline($this->im, $x, $y, $px, $py, $colorid);
       return array($px, $py);
-   } //polarline
+   }//polarline
 
 
-   function imagesend()
+   public function send_image()
    {
       if( function_exists("imagepng") )
       {
@@ -507,38 +497,35 @@ class Graph
       }
       //imagedestroy($this->im);
       //unset($this->im);
-   } //imagesend
+   }//send_image
 
 
-   function scaleX($x)
+   public function scaleX($x)
    {
       return scale($x, $this->minX, $this->maxX, $this->offsetX, $this->sizeX);
-   } //scaleX
+   }//scaleX
 
-   function scaleY($y)
+   public function scaleY($y)
    {
       return scale($y, $this->minY, $this->maxY, $this->offsetY, $this->sizeY);
-   } //scaleY
+   }//scaleY
 
-   function mapscaleX(&$pointX)
+   public function mapscaleX(&$pointX)
    {
       gscaleinit($this->minX, $this->maxX, $this->offsetX, $this->sizeX);
       return array_map('gscale', $pointX);
       //return array_map(array(&$this, 'scaleX'), $pointX);
-   } //mapscaleX
+   }//mapscaleX
 
-   function mapscaleY(&$pointY)
+   public function mapscaleY(&$pointY)
    {
       gscaleinit($this->minY, $this->maxY, $this->offsetY, $this->sizeY);
       return array_map('gscale', $pointY);
       //return array_map(array(&$this, 'scaleY'), $pointY);
-   } //mapscaleY
+   }//mapscaleY
 
-   /*!
-    * \brief Set the graph box.
-    * values of two opposite corners of the rectangle
-    */
-   function setgraphbox($x1, $y1, $x2, $y2)
+   /*! \brief Set the graph box (values of two opposite corners of the rectangle). */
+   public function setgraphbox($x1, $y1, $x2, $y2)
    {
       if( $x1 > $x2 )
       {
@@ -564,52 +551,41 @@ class Graph
       }
       $this->boxtop = $this->offsetY;
       $this->boxbottom = $this->offsetY+$this->sizeY;
-   } //setgraphbox
+   }//setgraphbox
 
-   /*!
-    * \brief Set the graph mapping (oriented).
-    * values of (left,top,right,bottom) bounds
-    */
-   function setgraphview($xleft, $ytop, $xright, $ybottom)
+   /*! \brief Set the graph mapping (oriented); values of (left,top,right,bottom) bounds. */
+   public function setgraphview($xleft, $ytop, $xright, $ybottom)
    {
       $this->setgraphviewX($xleft, $xright);
       $this->setgraphviewY($ytop, $ybottom);
-   } //setgraphview
+   }//setgraphview
 
-   /*!
-    * \brief Set the X mapping (oriented).
-    * values of (left,right) bounds
-    */
-   function setgraphviewX($xleft, $xright)
+   /*! \brief Set the X mapping (oriented); values of (left,right) bounds. */
+   public function setgraphviewX($xleft, $xright)
    {
       $this->minX = $xleft;
       $this->maxX = $xright;
-   } //setgraphviewX
+   }//setgraphviewX
 
-   /*!
-    * \brief Set the Y mapping (oriented).
-    * values of (top,bottom) bounds
-    */
-   function setgraphviewY($ytop, $ybottom)
+   /*! \brief Set the Y mapping (oriented); values of (top,bottom) bounds. */
+   public function setgraphviewY($ytop, $ybottom)
    {
       $this->minY = $ytop; //correct the Y axis inversion
       $this->maxY = $ybottom;
-   } //setgraphviewY
+   }//setgraphviewY
 
 
    /*!
     * \brief Draw the X axis grid.
-    * $linefct is a function($s) that return the value of the $s step.
-    *   $s is one of the successive $start + N*$step
-    * $textfct is a function($v) that return the label text for the $v value.
-    *   $v is typically a value returned by $linefct($s)
-    * labels will be top aligned to $align
-    * $linetype: the grid will be 0=invisible, 1=solid, 2=dashed
+    * \param $linefct is a function($s) that return the value of the $s step.
+    *    $s is one of the successive $start + N*$step
+    * \param $textfct is a function($v) that return the label text for the $v value.
+    *    $v is typically a value returned by $linefct($s)
+    *    labels will be top aligned to $align
+    * \param $linetype: the grid will be 0=invisible, 1=solid, 2=dashed
     */
-   function gridX($start, $step, $align
-            , $textfct='', $textcolorid=NULL
-            , $linefct='', $linecolorid=NULL, $linetype=2
-            , $lbound=false, $ubound=false)
+   public function gridX( $start, $step, $align, $textfct='', $textcolorid=NULL, $linefct='', $linecolorid=NULL,
+         $linetype=2, $lbound=false, $ubound=false )
    {
       if( !isset($textfct) || !$textfct )
          $textfct = 'fnop';
@@ -662,9 +638,7 @@ class Graph
             $grid = gscale($value);
          }
          else if( $linetype )
-         {
             $this->line($grid, $slin, $grid, $elin, $linecolorid);
-         }
          $no_text = false;
          if( $grid < $lbound )
             continue;
@@ -677,21 +651,19 @@ class Graph
                            , $str, $textcolorid);
          $lbound = ceil($b['x'] + $this->labelMetrics['WIDTH']);
       }
-   } //gridX
+   }//gridX
 
    /*!
     * \brief Draw the Y axis grid.
-    * $linefct is a function($s) that return the value of the $s step.
-    *   $s is one of the successive $start + N*$step
-    * $textfct is a function($v) that return the label text for the $v value.
-    *   $v is typically a value returned by $linefct($s)
-    * labels will be left aligned to $align
-    * $linetype: the grid will be 0=invisible, 1=solid, 2=dashed
+    * \param $linefct is a function($s) that return the value of the $s step.
+    *    $s is one of the successive $start + N*$step
+    * \param $textfct is a function($v) that return the label text for the $v value.
+    *    $v is typically a value returned by $linefct($s)
+    *    labels will be left aligned to $align
+    * \param $linetype: the grid will be 0=invisible, 1=solid, 2=dashed
     */
-   function gridY($start, $step, $align
-            , $textfct='', $textcolorid=NULL
-            , $linefct='', $linecolorid=NULL, $linetype=2
-            , $lbound=false, $ubound=false)
+   public function gridY( $start, $step, $align, $textfct='', $textcolorid=NULL, $linefct='', $linecolorid=NULL,
+         $linetype=2, $lbound=false, $ubound=false )
    {
       if( !isset($textfct) || !$textfct )
          $textfct = 'fnop';
@@ -756,14 +728,14 @@ class Graph
                            , $str, $textcolorid);
          $lbound = ceil($b['y'] + $this->labelMetrics['ALIGN']);
       }
-   } //gridY
+   }//gridY
 
 
    /*!
     * \brief draw a filled pie portion.
     * supplied because imagefilledarc() need GD2. See GD2_ARC constant
     */
-   function filledarc($cx, $cy, $w, $h, $s, $e, $colorid)
+   public function filledarc($cx, $cy, $w, $h, $s, $e, $colorid)
    {
       $p = array();
       $n = arcpoints($p, $cx, $cy, $w, $h, $s, $e);
@@ -779,25 +751,25 @@ class Graph
       $p[] = $cx;
       $p[] = $cy;
       $this->filledpolygon($p, $n+1, $colorid);
-   } //filledarc
+   }//filledarc
 
    /*!
     * \brief draw an ellipse arc.
     * to keep a stroke similarity with our filledarc().
     */
-   function arc($cx, $cy, $w, $h, $s, $e, $colorid)
+   public function arc($cx, $cy, $w, $h, $s, $e, $colorid)
    {
       $p = array();
       $n = arcpoints($p, $cx, $cy, $w, $h, $s, $e);
       $this->polyline($p, $n, $colorid);
-   } //arc
+   }//arc
 
    /*!
     * \brief draw a pie.
-    * $datas[-1] is the empty portion.
-    * $colors: an array of r,g,b colors to be used (allocated if needed)
+    * \param $datas[-1] is the empty portion.
+    * \param $colors an array of r,g,b colors to be used (allocated if needed)
     */
-   function pie( &$datas, $cx, $cy, $sx, $sy, $sz=0, $colors=false)
+   public function pie( &$datas, $cx, $cy, $sx, $sy, $sz=0, $colors=false)
    {
       if( $sx == 0 || $sy == 0 )
          return;
@@ -922,9 +894,7 @@ class Graph
          $p[] = $cx; //add central point
          $p[] = $cy;
          if( $n > 1 )
-         {
             $this->filledpolygon($p, $n+1, $colors[$i]);
-         }
          else
          {
             if( $n <= 0 )
@@ -937,9 +907,9 @@ class Graph
             $this->polyline($p, $n+1, $colors[$i]);
          }
       } // draw portions
-   } //pie
+   }//pie
 
-} //class Graph
+} // end of 'Graph'
 
 
 

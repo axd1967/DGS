@@ -242,11 +242,6 @@ define('FC_SYNTAX_HELP', 'syntax_help');
 define('FC_BITMASK', 'bitmask');
 
 
-// globals with lazy-init for filter-specific translated texts
-global $ARR_GLOBALS_FILTERS; //PHP5
-$ARR_GLOBALS_FILTERS = array();
-
-
  /*!
   * \class SearchFilter
   * \brief Container managing list of filters.
@@ -254,46 +249,45 @@ $ARR_GLOBALS_FILTERS = array();
 class SearchFilter
 {
    /*! \brief array storing filters: arr( id => Filter ) */
-   var $Filters;
+   private $Filters = array();
    /*! \brief array of (optional) form-element-names for filters: arr( form-element-name => id ) */
-   var $FilterFormNames;
+   private $FilterFormNames = array();
    /*! \brief Prefix used to build vars for URL/form-names (without PFX_FILTER). */
-   var $Prefix;
+   private $Prefix;
    /*! \brief Profile-handler */
-   var $ProfileHandler;
+   private $ProfileHandler;
 
    /*! \brief List of filter-IDs additionally required (skipped on filter-reset): arr( id => 1 ) */
-   var $RequiredFilters;
+   private $RequiredFilters = array();
    /*! \brief previous hash-code to check if filter-values have changed. */
-   var $HashCode;
+   private $HashCode;
    /*! \brief true, if filter is initialized; false = no-search-started yet */
-   var $is_init;
+   private $is_init = false;
    /*! \brief true, if filter in reset-state */
-   var $is_reset;
+   private $is_reset = false;
 
    /*! \brief array with accesskeys used for filters: array( search, reset ); none set per default. */
-   var $accesskeys;
+   private $accesskeys;
 
    /*!
     * \brief Constructs SearchFilter with optional prefix to be able to use more than one.
     *        Sets default accesskeys.
     */
-   function SearchFilter( $prefix = '', $prof_handler=null )
+   public function __construct( $prefix = '', $prof_handler=null )
    {
-      $this->Filters  = array();
-      $this->Prefix   = $prefix;
-      $this->is_init  = false;
-      $this->is_reset = false;
+      $this->Prefix = $prefix;
       $this->set_accesskeys( ACCKEY_ACT_FILT_SEARCH, ACCKEY_ACT_FILT_RESET );
 
       $this->set_profile_handler( $prof_handler );
+   }
 
-      $this->FilterFormNames = array();
-      $this->RequiredFilters = array();
+   public function get_prefix()
+   {
+      return $this->Prefix;
    }
 
    /*! \brief Sets ProfileHandler managing search-profiles; use NULL to clear it. */
-   function set_profile_handler( $prof_handler )
+   public function set_profile_handler( $prof_handler )
    {
       $this->ProfileHandler = $prof_handler;
 
@@ -314,7 +308,7 @@ class SearchFilter
                $pfx, PFX_FILTER."\d+\w*", FNAME_INIT, FNAME_ACTIVE_SET, FNAME_HASHCODE,
                FNAME_INIT ));
       }
-   }
+   }//set_profile_handler
 
    /*!
     * \brief Returns string- or array-value read from potentially saved profile or
@@ -323,7 +317,7 @@ class SearchFilter
     * \internal
     * \see get_arg()
     */
-   function get_saved_arg( $name, $use_prefix = true )
+   private function get_saved_arg( $name, $use_prefix = true )
    {
       $fname = ( $use_prefix ) ? $this->Prefix . $name : $name;
 
@@ -334,7 +328,7 @@ class SearchFilter
 
       #error_log("get_saved_arg[$name,$use_prefix] = [". (is_null($value) ? 'NULL' : $value) ."]");
       return $value;
-   }
+   }//get_saved_arg
 
    /*!
     * \brief Returns string- or array-value parsed from _REQUEST-array stripped of slashes.
@@ -342,14 +336,14 @@ class SearchFilter
     * \internal
     * \see get_saved_arg()
     */
-   function get_arg( $name, $use_prefix = true )
+   private function get_arg( $name, $use_prefix = true )
    {
       $fname = ( $use_prefix ) ? $this->Prefix . $name : $name;
       return get_request_arg($fname);
    }
 
    /*! \brief Returns true, if filter-action search or reset has been chosen. */
-   function was_filter_submit_action()
+   public function was_filter_submit_action()
    {
       return ($this->get_arg(FFORM_RESET_ACTION, false) != '')
          || ($this->get_arg(FFORM_SEARCH_ACTION, false) != '');
@@ -365,24 +359,24 @@ class SearchFilter
     *               within a table, an inactive filter is hidden with a '+'-sign.
     * \param config array ( config_name => config_value ); filter-general and filter-specific configuration (see specs/filters.txt)
     */
-   function &add_filter($id, $type, $dbfield, $active = false, $config = null)
+   public function &add_filter($id, $type, $dbfield, $active = false, $config = null)
    {
       // checks: force unique filterid
       // note: don't force unique dbfields (so we are open to allow more filters on same field)
       if( strlen($type) == 0 )
-         error('invalid_filter', "filter.add_filter.bad_type($id,$type)"); // type non-empty
+         error('invalid_filter', "SearchFilter.add_filter.bad_type($id,$type)"); // type non-empty
       if( !is_numeric($id) )
-         error('invalid_filter', "filter.add_filter.bad_filter_id($id)");
+         error('invalid_filter', "SearchFilter.add_filter.bad_filter_id($id)");
       if( $id < 1 || $id > BITSET_MAXSIZE )
-         error('invalid_filter', "filter.add_filter.filter_id_out_of_range($id)");
+         error('invalid_filter', "SearchFilter.add_filter.filter_id_out_of_range($id)");
       if( isset($this->Filters[$id]) )
-         error('invalid_filter', "filter.add_filter.unique_filter_id($id,$type)");
+         error('invalid_filter', "SearchFilter.add_filter.unique_filter_id($id,$type)");
       if( count($this->Filters) > BITSET_MAXSIZE )
-         error('invalid_filter', "filter.add_filter.full($id,$type)");
+         error('invalid_filter', "SearchFilter.add_filter.full($id,$type)");
 
       $filter_class = 'Filter' . $type;
       $filter = new $filter_class($id, $dbfield, $config); // error if unknown class
-      $filter->SearchFilter = $this;
+      $filter->set_search_filter( $this );
       $this->Filters[$id] =& $filter; // need ref
       $this->extract_filter_formname($filter);
 
@@ -404,15 +398,18 @@ class SearchFilter
       return $filter;
    }//add_filter
 
-   /*! \brief Extracts optional filters form-name and sets up name-reference. */
-   function extract_filter_formname( $filter )
+   /*!
+    * \brief Extracts optional filters form-name and sets up name-reference.
+    * \internal
+    */
+   private function extract_filter_formname( $filter )
    {
       if( (string)($fname = $filter->get_config(FC_FNAME)) != '' )
          $this->FilterFormNames[$fname] = $filter->id;
    }
 
    /*! \brief Parses vars from _REQUEST to initialize filters with internal and filter-values. */
-   function init()
+   public function init()
    {
       $arr_keys = $this->get_filter_keys(GETFILTER_ALL);
       $is_init  = (bool)( $this->get_saved_arg(FNAME_INIT) );
@@ -424,9 +421,9 @@ class SearchFilter
       $need_clear = false;
       if( $this->ProfileHandler )
       {
-         if( $this->ProfileHandler->need_reset )
+         if( $this->ProfileHandler->need_reset() )
             $is_reset = true;
-         elseif( $this->ProfileHandler->need_clear )
+         elseif( $this->ProfileHandler->need_clear() )
             $is_init = $need_clear = true;
       }
 
@@ -470,7 +467,7 @@ class SearchFilter
                      $qvalue = null;
 
                   if( is_array($qvalue) && !$filter->get_config(FC_MULTIPLE) )
-                     error('invalid_filter', "filter.init.no_multi_value_support($id,$fname)");
+                     error('invalid_filter', "SearchFilter.init.no_multi_value_support($id,$fname)");
                   $filter->parse_value( $fname, $qvalue ); // ignore all parsing-errors and fill filter-vars
                }
                if( count($elems) > 1 && !$filter->has_error() ) // for multi-element-filters
@@ -483,15 +480,16 @@ class SearchFilter
    /*!
     * \brief Set access keys for search and reset of filters:
     * Normal would be ACCKEY_ACT_FILT_SEARCH for search and ACCKEY_ACT_FILT_RESET for reset.
+    * \internal
     */
-   function set_accesskeys( $acckey_search='', $acckey_reset='' )
+   private function set_accesskeys( $acckey_search='', $acckey_reset='' )
    {
       $this->accesskeys[0] = $acckey_search;
       $this->accesskeys[1] = $acckey_reset;
    }
 
    /*! \brief Parses vars from _REQUEST to update activity-state and required-IDs for filters (used for Table). */
-   function add_or_del_filter()
+   public function add_or_del_filter()
    {
       $act = (string) $this->get_arg(FFORM_TOGGLE_ACTION, true); // set if show-/hide-action needed
       $fid = (string) $this->get_arg(FFORM_TOGGLE_FID, true); // if act set: >0=Nr for thead[Nr], 0=hide-all, -1=show-all
@@ -511,10 +509,13 @@ class SearchFilter
          else // fname=0 (hide all)
             $this->setall_active(false);
       }
-   }
+   }//add_or_del_filter
 
-   /*! \brief parse additionally requested filter-IDs (from links for example). */
-   function parse_requested_filters()
+   /*!
+    * \brief parse additionally requested filter-IDs (from links for example).
+    * \internal
+    */
+   private function parse_requested_filters()
    {
       $freq_str = trim( (string) $this->get_arg(FNAME_REQUIRED, false) );
       if( (string)$freq_str != '' )
@@ -536,13 +537,13 @@ class SearchFilter
    }//parse_requested_filters
 
    /*! \brief Returns non-empty filter-id array, that are required for filtering (parsed from FNAME_REQUIRED-arg). */
-   function get_required_ids()
+   public function get_required_ids()
    {
       return array_keys($this->RequiredFilters);
    }
 
    /*! \brief Returns reference of specified filter or null if no filter defined for id. */
-   function &get_filter($id)
+   public function &get_filter($id)
    {
       // note: following check is needed, otherwise the call creates entries :(
       // note: MUST NOT use '?'-operator, or else copy is returned instead of ref :(
@@ -552,10 +553,10 @@ class SearchFilter
          $nullref = NULL;
          return $nullref;
       }
-   }
+   }//get_filter
 
    /*! \brief Returns value for given filter-id (wrapper). */
-   function get_filter_value( $id )
+   public function get_filter_value( $id )
    {
       $filter = $this->get_filter($id);
       if( is_null($filter) )
@@ -569,7 +570,7 @@ class SearchFilter
     * \param choice GETFILTER_NONE | ALL| ACTIVE| INACTIVE| USED| ERROR| VISIBLE |INVISIBLE
     * signature: string[] get_filter_keys([int getfilter_choice=GETFILTER_ALL])
     */
-   function get_filter_keys( $choice = GETFILTER_ALL )
+   public function get_filter_keys( $choice = GETFILTER_ALL )
    {
       $arr = array();
       if( $choice == GETFILTER_NONE )
@@ -615,22 +616,22 @@ class SearchFilter
          $arr[]= $id;
       }
       return $arr;
-   }
+   }//get_filter_keys
 
    /*! \brief Returns true, if SearchFilter initialized, or false if no search started yet. */
-   function is_init()
+   public function is_init()
    {
       return $this->is_init;
    }
 
    /*! \brief Returns true, if SearchFilter in reset-state. */
-   function is_reset()
+   public function is_reset()
    {
       return $this->is_reset;
    }
 
    /*! \brief Returns count of filters with optionally specified characteristic. */
-   function size( $choice = GETFILTER_ALL )
+   public function size( $choice = GETFILTER_ALL )
    {
       return count( $this->get_filter_keys( $choice ) );
    }
@@ -639,7 +640,7 @@ class SearchFilter
     * \brief Returns hashcode-string (CRC32-encoded) of stored active filter-values.
     * Used to check, if filter-values have been changed to be able to reset from_row in Table.
     */
-   function hashcode()
+   public function hashcode()
    {
       $arr = $this->get_filter_keys(GETFILTER_ACTIVE);
       $arrhash = array();
@@ -653,10 +654,15 @@ class SearchFilter
       $hashcode = crc32($hashstr);
       # $hashcode = crc32($hashstr) . '.' . md5($hashstr);
       return $hashcode;
+   }//hashcode
+
+   public function has_filters_changed()
+   {
+      return ( $this->HashCode != $this->hashcode() );
    }
 
    /*! \brief Returns string-representation of this object (for debugging purposes). */
-   function to_string( $short=false )
+   public function to_string( $short=false )
    {
       $out = "SearchFilter={ Prefix=[{$this->Prefix}], HashCode=[{$this->HashCode}], is_init=[{$this->is_init}], "
          . "is_reset=[{$this->is_reset}], ";
@@ -681,16 +687,17 @@ class SearchFilter
             $out .= "$cnt. " . $filter->to_string() . "\n";
       }
       return $out;
-   }
+   }//to_string
 
    /*!
     * \brief Returns non-null SQL-query for filters (but it could be empty).
     * signature: QuerySQL get_query([int getfilter_choice=GETFILTER_ACTIVE])
-    * note: joining all queries, OR-grouping filters with (FC_GROUP_SQL_OR-config)
-    * note: skipping filters with FC_SQL_SKIP-config set
-    * note: handle FC_IF-config on filters
+    *
+    * \note joining all queries, OR-grouping filters with (FC_GROUP_SQL_OR-config)
+    * \note skipping filters with FC_SQL_SKIP-config set
+    * \note handle FC_IF-config on filters
     */
-   function get_query( $choice = GETFILTER_ACTIVE )
+   public function get_query( $choice = GETFILTER_ACTIVE )
    {
       $arr_query = array(); // QuerySQLs for filters w/o grouping
       $arr_groupquery = array(); // map: groupname => OR-merged QuerySQLs
@@ -737,17 +744,18 @@ class SearchFilter
             $result_query->merge($query);
       }
       return $result_query;
-   }
+   }//get_query
 
    /*!
     * \brief Handle FC_IF-config with conditions and actions on filters.
-    * \internal
     * signature: bool success = handle_conditional_actions()
-    * note: return false, if one of the filters used in the conditions has an error
+    * \return false, if one of the filters used in the conditions has an error.
     *
     * Example: FC_IF => array( "Q2 or V4='1'", "SET_VAL F3,N1,1" )
+    *
+    * \internal
     */
-   function handle_conditional_actions()
+   private function handle_conditional_actions()
    {
       $arr_id = $this->get_filter_keys(GETFILTER_VISIBLE);
       foreach( $arr_id as $id )
@@ -782,27 +790,30 @@ class SearchFilter
                if( $act === 'BQ' )
                   $f->build_query();
                else
-                  error('invalid_filter', "filter.handle_conditional_actions.unknown_post_action($fid,$act)");
+                  error('invalid_filter', "SearchFilter.handle_conditional_actions.unknown_post_action($fid,$act)");
             }
          }
       }
 
       return true;
-   }
+   }//handle_conditional_actions
 
    /*!
     * \brief Evaluates condition set by FC_IF-config on filter.
-    * \internal
     * signature: bool success = eval_condition( string condition )
     * \param condition syntax:
     *        - Qnum => !filter[num]->has_error() and filter[num]->has_query()
     *        - Vnum => !filter[num]->has_error() and filter[num]->get_value()
     *        note: for comparison, quotes are allowed in condition
-    * note: return NULL, if one of the specified filters has an error
+    *
+    * \return NULL, if one of the specified filters has an error.
+    *
     * Example for condition:
     *    "Q2 or V4=='a z'" => filter #2 has a query OR value of filter #4 is 'a z'
+    *
+    * \internal
     */
-   function eval_condition( $condition )
+   private function eval_condition( $condition )
    {
       $aq = array(); // query-array: aq[fid] = !has_err and has_query
       $av = array(); // value-array: av[fid] = !has_err and get_val
@@ -828,7 +839,7 @@ class SearchFilter
 
       #error_log("eval_condition($condition): expression=[$expression], result=[$result]");
       return (bool)$result;
-   }
+   }//eval_condition
 
    /*!
     * \brief Only used by eval_condition-func: Performs action for filter-condition.
@@ -846,7 +857,7 @@ class SearchFilter
     *         but may return other values (see syntax-defs)
     * \internal
     */
-   function perform_conditional_action( $id, $action )
+   private function perform_conditional_action( $id, $action )
    {
       if( preg_match( "/^SET_VAL\s+F(\d+)?,N(\d+)?,(.*?)\s*$/i", $action, $out ) ) // out: f-num, name-num, val
       {
@@ -854,11 +865,11 @@ class SearchFilter
          $fid = (is_numeric($out[1])) ? $out[1] : $id;
          $f =& $this->get_filter($fid);
          if( is_null($f) )
-            error('invalid_filter', "filter.perform_conditional_action.unknown_filter($fid,$action)");
+            error('invalid_filter', "SearchFilter.perform_conditional_action.unknown_filter($fid,$action)");
          $nid = (is_numeric($out[2])) ? $out[2] : 1;
          $elems = $f->get_element_names();
          if( $nid < 1 || $nid > count($elems) )
-            error('invalid_filter', "filter.perform_conditional_action.unknown_name_num($nid,$action)");
+            error('invalid_filter', "SearchFilter.perform_conditional_action.unknown_name_num($nid,$action)");
          $name = $elems[$nid - 1];
 
          $f->parse_value( $name, $out[3] ); // ignore all parsing-errors
@@ -874,7 +885,7 @@ class SearchFilter
          $fid = (is_numeric($out[2])) ? $out[2] : $id;
          $f =& $this->get_filter($fid);
          if( is_null($f) )
-            error('invalid_filter', "filter.perform_conditional_action.unknown_filter2($fid,$action)");
+            error('invalid_filter', "SearchFilter.perform_conditional_action.unknown_filter2($fid,$action)");
          if( $out[1] === 'ACT' )
             $f->set_active((bool)$out[3]);
          else
@@ -882,8 +893,8 @@ class SearchFilter
          return true;
       }
 
-      error('invalid_filter', "filter.perform_conditional_action.unknown_filter3($fid,$action)");
-   }
+      error('invalid_filter', "SearchFilter.perform_conditional_action.unknown_filter3($fid,$action)");
+   }//perform_conditional_action
 
    /*!
     * \brief Returns true, if there is a query for the specified filters, i.e. has at least one non-empty where-clause.
@@ -893,7 +904,7 @@ class SearchFilter
     *               - if null or empty-array use choice GETFILTER_ACTIVE
     * \param $arr_exclude optional array with filter-IDs to exclude from check
     */
-   function has_query( $choice=null, $arr_exclude=null )
+   public function has_query( $choice=null, $arr_exclude=null )
    {
       if( is_null($choice) || ( is_array($choice) && count($choice) == 0 ) )
          $choice = GETFILTER_ACTIVE;
@@ -911,18 +922,21 @@ class SearchFilter
             return true;
       }
       return false;
-   }
+   }//has_query
 
 
    /*! \brief Returns true, if filter with specified id is in active-state; false for unknown filter. */
-   function is_active( $id )
+   public function is_active( $id )
    {
       $filter =& $this->get_filter($id);
       return ( isset($filter) ) ? $filter->is_active() : false;
    }
 
-   /*! \brief Returns BitSet for filters in active-state. */
-   function get_active_set()
+   /*!
+    * \brief Returns BitSet for filters in active-state.
+    * \internal
+    */
+   private function get_active_set()
    {
       $bitset = new BitSet();
       $arr = $this->get_filter_keys(GETFILTER_ACTIVE);
@@ -931,8 +945,11 @@ class SearchFilter
       return $bitset;
    }
 
-   /*! \brief Toggles active-state for speficied filter. */
-   function toggle_active( $id )
+   /*!
+    * \brief Toggles active-state for speficied filter.
+    * \internal
+    */
+   private function toggle_active( $id )
    {
       $filter =& $this->get_filter($id);
       if( isset($filter) )
@@ -940,7 +957,7 @@ class SearchFilter
    }
 
    /*! \brief Changes active-state of specified filter. */
-   function set_active( $id, $is_active )
+   public function set_active( $id, $is_active )
    {
       $filter =& $this->get_filter($id);
       if( isset($filter) )
@@ -948,7 +965,7 @@ class SearchFilter
    }
 
    /*! \brief Changes active-state for all managed filters. */
-   function setall_active( $is_active )
+   public function setall_active( $is_active )
    {
       $arr = $this->get_filter_keys(GETFILTER_ALL);
       foreach( $arr as $id )
@@ -960,7 +977,7 @@ class SearchFilter
     * \brief Resets specified filter to default-state (clear if no default-set),
     * unless filter is flagged as required.
     */
-   function reset_filter( $id )
+   public function reset_filter( $id )
    {
       if( !@$this->RequiredFilters[$id] )
       {
@@ -971,7 +988,7 @@ class SearchFilter
    }
 
    /*! \brief Resets specified choice (GETFILTER_...) of managed filters to their default-state. */
-   function reset_filters( $choice )
+   public function reset_filters( $choice )
    {
       $arr = $this->get_filter_keys($choice);
       foreach( $arr as $id )
@@ -979,7 +996,7 @@ class SearchFilter
    }
 
    /*! \brief Changes visible-state of specified filter; see var Filter->visible ! */
-   function set_visible( $id, $is_visible )
+   public function set_visible( $id, $is_visible )
    {
       $filter =& $this->get_filter($id);
       if( isset($filter) )
@@ -994,7 +1011,7 @@ class SearchFilter
     * \param arr_exclude array of filter-ids to exclude (skip filter-IDs in this array)
     * note: Func for SearchFilter-class.
     */
-   function get_url_parts( &$arr_out, $choice = GETFILTER_ACTIVE, $arr_exclude = null )
+   public function get_url_parts( &$arr_out, $choice = GETFILTER_ACTIVE, $arr_exclude = null )
    {
       $arr_url = array(); // for URL: arr( 'key=val' )
 
@@ -1040,7 +1057,7 @@ class SearchFilter
    }//get_url_parts
 
    /*! \brief Interface-func for Form-class if attached to get hiddens for filter-values. */
-   function get_hiddens( &$arr_hiddens )
+   public function get_hiddens( &$arr_hiddens )
    {
       $this->get_filter_hiddens( $arr_hiddens, GETFILTER_NONE );
    }
@@ -1049,7 +1066,7 @@ class SearchFilter
     * \brief Returns string with hidden-input strings for specified filter-choice and exclusions.
     * same args as for get_url_parts-func
     */
-   function get_filter_hiddens( &$hiddens, $choice = GETFILTER_ACTIVE, $arr_exclude = null)
+   public function get_filter_hiddens( &$hiddens, $choice = GETFILTER_ACTIVE, $arr_exclude = null)
    {
       $arr_parts = array();
       $this->get_url_parts( $arr_parts, $choice, $arr_exclude );
@@ -1061,7 +1078,7 @@ class SearchFilter
    }
 
    /*! \brief Returns RequestParameters for specified filter-choice and exclusions. */
-   function get_req_params( $choice = GETFILTER_ALL, $arr_exclude = null )
+   public function get_req_params( $choice = GETFILTER_ALL, $arr_exclude = null )
    {
       $arr_out = array();
       $this->get_url_parts( $arr_out, $choice, $arr_exclude );
@@ -1075,7 +1092,7 @@ class SearchFilter
     * \param $form instance of Form-class
     * \see set_accesskeys()
     */
-   function get_submit_elements( $form )
+   public function get_submit_elements( $form )
    {
       $search_elem = $form->print_insert_submit_buttonx(
          FFORM_SEARCH_ACTION,
@@ -1097,17 +1114,17 @@ class SearchFilter
          $form_elems = array( $profile_elems, $search_elem );
       }
       return $form_elems;
-   }
+   }//get_submit_elements
 
    /*! \brief Wrapper for get_filter(id)->get_input_element(prefix,attr); returns '' if filter not existing. */
-   function get_filter_input_element( $id, $prefix, $attr = array() )
+   public function get_filter_input_element( $id, $prefix, $attr = array() )
    {
       $filter = $this->get_filter($id);
       return ( isset($filter) ) ? $filter->get_input_element( $prefix, $attr ) : '';
    }
 
    /*! \brief Wrapper for QuerySQL|null get_filter(id)->get_query(); returns null if filter not existing. */
-   function get_filter_query( $id )
+   public function get_filter_query( $id )
    {
       $filter = $this->get_filter($id);
       return ( isset($filter) ) ? $filter->get_query() : NULL;
@@ -1118,7 +1135,7 @@ class SearchFilter
     *        with prefix and appended with syntax (if wanted) and a mandatory suffix;
     *        returns '' if no error occured for filter or unknown filter.
     */
-   function get_filter_errormsg( $id, $prefix = '', $suffix = '', $with_syntax = true )
+   public function get_filter_errormsg( $id, $prefix = '', $suffix = '', $with_syntax = true )
    {
       $filter = $this->get_filter($id);
       if( !isset($filter) || !$filter->has_error() )
@@ -1129,7 +1146,7 @@ class SearchFilter
    }
 
    /*! \brief Returns array( filter_id => error-msg for filter_id ), filter is only added if it has error. */
-   function get_filter_errors()
+   public function get_filter_errors()
    {
       $arr_keys = $this->get_filter_keys(GETFILTER_ERROR);
       $arr_errors = array();
@@ -1140,9 +1157,10 @@ class SearchFilter
             $arr_errors[$id] = $filter->errormsg();
       }
       return $arr_errors;
-   }
+   }//get_filter_errors
 
 } // end of 'SearchFilter'
+
 
 
 
@@ -1153,85 +1171,85 @@ class SearchFilter
   * \brief Abstract base class with interface- and utility-methods needed to
   *        represent a filter.
   */
-class Filter
+abstract class Filter
 {
+   protected static $ARR_FILTER_TEXTS = array(); // lazy-init for filter-specific translated texts: [key][id] => text
+
    // filter-specific vars
 
    /*! \brief Reference to managing SearchFilter-object; maybe null, but normally set. */
-   var $SearchFilter;
+   protected $SearchFilter = null;
 
    /*! \brief Filter-ID used for referencing, normally == SearchFilter(id) */
-   var $id;
+   public $id;
    /*! \brief base-name used for form-element-names; default is 'PFX_FILTER$id'; can be overwritten with FC_FNAME-config. */
-   var $name;
+   public $name;
    /*! \brief dbfield-specification used to build filter-query: dbfield, array, sql-template, QuerySQL (see specs/filters.txt). */
-   var $dbfield;
+   protected $dbfield;
    /*! \brief array with additional URL-keys for multiple form-elements associated with filter; default is '$id' (e.g. see FilterRelativeDate). */
-   var $elem_names;
+   protected $elem_names;
    /*! \brief default-values as array( name => value ), read from config in Filter-constructor. */
-   var $defvalues;
+   protected $defvalues;
    /*! \brief (abstract) value specifying type of Filter (directly corresponding to specific Filter-class like FilterText as example); mandatory. */
-   var $type;
+   public $type = null;
    /*! \brief (abstract) value containing syntax-description for specific filter. */
-   var $syntax_descr;
+   protected $syntax_descr = null;
    /*! \brief (abstract) value containing syntax-help (showed in hover-text as help-id for FAQ). */
-   var $syntax_help;
+   protected $syntax_help = null;
    /*!
     * \brief array containing config of filter: array( config_key => value );
     * keys are those with FC_-prefix.
-    * note: be aware, that there must be a default for configs being used, or else you get an error.
+    * \note be aware, that there must be a default for configs being used, or else you get an error.
     *       -> use @$config[key] to access config.
     */
-   var $config;
+   protected $config = array();
    /*! \brief store TokenizerConfig for parsing using a tokenizer. */
-   var $tok_config;
+   protected $tok_config = null;
    /*! \brief bitmask for holding additional parser-flags. */
-   var $parser_flags;
+   protected $parser_flags = 0;
 
    /*! \brief boolean active-state: true, if filter should be used to build query in SearchFilter->get_query(). */
-   var $active;
+   public $active = true;
    /*!
     * \brief boolean visible-state; true, if visible (default); false set by deactivate_filters() if column not displayed.
-    * note: var used to fix side-effect if FC_STATIC-config set which makes is_active() always true.
+    * \note public used to fix side-effect if FC_STATIC-config set which makes is_active() always true.
+    * \note used in get_query()
     */
-   var $visible;
+   public $visible = true;
 
    // parsing vars (see parse_value-func)
 
    /*! \brief original input-value. */
-   var $value;
+   public $value;
    /*! \brief original input-value for multiple form-elements: array( name => value ), see get_value-func(!). */
-   var $values;
+   protected $values = array();
    /*! \brief last parse error-msg; filter must be error-free to build query. */
-   var $errormsg;
+   protected $errormsg;
    /*! \brief last parse warning-msg; filter can show warnings, but still build query. */
-   var $warnmsg;
+   protected $warnmsg;
 
    // p_start, p_end, p_value containing safe SQL-values (against SQL-injection used mysql-escaping)
 
    /*! \brief range-start (from beginning if not set). */
-   var $p_start;
+   protected $p_start;
    /*! \brief range-end (until end if not set); for text used exclusive (=out-of-range). */
-   var $p_end;
+   protected $p_end;
    /*! \brief special search-value, e.g. regex or exact. */
-   var $p_value;
+   protected $p_value;
    /*! \brief flags(bitmask) for actually parsed values, e.g. PFLAG_WILDCARD. */
-   var $p_flags;
+   protected $p_flags;
    /*! \brief QuerySQL or NULL (unset). */
-   var $query;
+   protected $query;
    /*! \brief non-null array with search-terms. */
-   var $match_terms;
+   protected $match_terms;
 
 
    /*!
     * \brief Constructs Filter with ID, dbfield-spec, default-config-array and normal config-array.
     * \internal
     */
-   function Filter($id, $dbfield, $def_config = null, $config = null )
+   protected function __construct( $id, $dbfield, $def_config = null, $config = null )
    {
-      $this->SearchFilter = null;
-      $this->config = array();
-
       $this->id = $id;
       $this->dbfield = $dbfield;
       $this->add_config( $def_config );
@@ -1243,23 +1261,16 @@ class Filter
       $this->elem_names = array( $this->name );
       $this->read_defaults( $this->get_config(FC_DEFAULT) );
 
-      // abstract values:
-      $this->type = null; // abstract: to be defined in sub-class
-      $this->syntax_descr = null; // abstract: to be defined in sub-class
-      $this->syntax_help  = null; // abstract: to be defined in sub-class
-      $this->tok_config = null; // abstract (may be used)
-
-      $this->parser_flags = 0; // may be used
-
-      $this->active  = true;
-      $this->visible = true; // used in get_query()
-
-      $this->values = array();
       $this->init_parse('');
+   }//__construct
+
+   public function set_search_filter( $search_filter )
+   {
+      $this->SearchFilter = $search_filter;
    }
 
    /*! \brief Add config-array to local config (should be used only internal). */
-   function add_config( $arrconf = null )
+   protected function add_config( $arrconf = null )
    {
       if( is_array($arrconf) )
       {
@@ -1269,7 +1280,7 @@ class Filter
    }
 
    /*! \brief Adds config key-value-pair to local config. */
-   function set_config( $key, $value )
+   protected function set_config( $key, $value )
    {
       $this->config[$key] = $value;
    }
@@ -1278,7 +1289,7 @@ class Filter
     * \brief Returns string or array value for requested config-key; or passed non-null(!) default-value otherwise.
     * signature: string|array get_config( string key, [mixed defval=null])
     */
-   function get_config( $key, $defvalue = null )
+   public function get_config( $key, $defvalue = null )
    {
       if( isset($this->config[$key]) )
          return $this->config[$key];
@@ -1289,13 +1300,12 @@ class Filter
    }
 
    /*!
-    * \brief Returns non-null array with regex-search-terms (from parsing-process),
-    *        if filter supports it.
+    * \brief Returns non-null array with regex-search-terms (from parsing-process), if filter supports it.
     * <p>Mainly used to highlight text, though not exactly matching the same
     * terms using a regular-expression to mark the text.
     * \see parse_html_safe() in std_functions.php
     */
-   function get_rx_terms()
+   public function get_rx_terms()
    {
       if( $this->is_active() )
          return $this->match_terms;
@@ -1304,7 +1314,7 @@ class Filter
    }
 
    /*! \brief creates default TokenizerConfig with optional overruling by FC_QUOTETYPE-config. */
-   function create_TokenizerConfig()
+   protected function create_TokenizerConfig()
    {
       $qtype = $this->get_config(FC_QUOTETYPE);
       if( $qtype == '' )
@@ -1315,8 +1325,6 @@ class Filter
 
    /*!
     * \brief Returns (new) QuerySQL built from passed object (if string or QuerySQL) and local config.
-    * note: used to basic QuerySQL from various forms of dbfield.
-    * \internal
     * signature: QuerySQL|null build_base_query( mixed obj, bool is_clause, bool use_tmpl )
     * \param obj QuerySQL or string db-fieldname or where-clause (if FC_SQL_TEMPLATE set),
     * \param is_clause if true, obj is considered a fix SQL-clause that needs
@@ -1329,8 +1337,11 @@ class Filter
     *                 expects that check_forbid_sql_template() has been called
     * \return null, if obj is an array or empty; otherwise new non-empty QuerySQL
     *         prepared to be used to build query internally.
+    * \note used for basic QuerySQL from various forms of dbfield.
+    *
+    * \internal
     */
-   function build_base_query( $obj, $is_clause, $use_tmpl = true )
+   protected function build_base_query( $obj, $is_clause, $use_tmpl = true )
    {
       if( is_array($obj) || empty($obj) )
          return NULL;
@@ -1369,45 +1380,45 @@ class Filter
       }
 
       return $query;
-   }
+   }//build_base_query
 
    /*!
     * \brief Throws error, if FC_SQL_TEMPLATE or QuerySQL with SQLP_WHERETMPL is used, or there is no FNAMES-entry.
     * \internal
     * \see build_base_query()
     */
-   function check_forbid_sql_template( $max_fnames = -1 )
+   protected function check_forbid_sql_template( $max_fnames = -1 )
    {
       if( $this->get_config(FC_SQL_TEMPLATE) )
-         error('invalid_filter', "filter.check_forbid_sql_template.forbid_FC_SQL_TEMPLATE({$this->id})");
+         error('invalid_filter', "Filter.check_forbid_sql_template.forbid_FC_SQL_TEMPLATE({$this->id})");
       if( $this->dbfield instanceof QuerySQL )
       {
          if( $this->dbfield->has_part(SQLP_WHERETMPL) )
-            error('invalid_filter', "filter.check_forbid_sql_template.QuerySQL_no_SQLP_WHERETMPL({$this->id})");
+            error('invalid_filter', "Filter.check_forbid_sql_template.QuerySQL_no_SQLP_WHERETMPL({$this->id})");
 
          $cnt_fnames = count($this->dbfield->get_parts(SQLP_FNAMES));
          if( $max_fnames >= 0 && $cnt_fnames > $max_fnames )
-            error('invalid_filter', "filter.check_forbid_sql_template.QuerySQL.max_num.SQLP_FNAMES({$this->id},$max_fnames)");
+            error('invalid_filter', "Filter.check_forbid_sql_template.QuerySQL.max_num.SQLP_FNAMES({$this->id},$max_fnames)");
          if( $cnt_fnames < 1 )
-            error('invalid_filter', "filter.check_forbid_sql_template.QuerySQL.min1.SQLP_FNAMES({$this->id})");
+            error('invalid_filter', "Filter.check_forbid_sql_template.QuerySQL.min1.SQLP_FNAMES({$this->id})");
       }
-   }
+   }//check_forbid_sql_template
 
    /*! \brief Adds additional non-empty element-name (without prefix); used for multi-element-filters. */
-   function add_element_name( $name )
+   protected function add_element_name( $name )
    {
       if( $name != '' )
          $this->elem_names[]= $name;
    }
 
    /*! \brief Returns string-array with element_names of multi-element-filter; names (without Prefix) for form-elements and URL-keys. */
-   function get_element_names()
+   public function get_element_names()
    {
       return $this->elem_names;
    }
 
    /*! \brief Returns true, if prefix should be used for field-name. */
-   function use_prefix_fieldname( $fname )
+   public function use_prefix_fieldname( $fname )
    {
       return true;
    }
@@ -1419,7 +1430,7 @@ class Filter
     * \param arr_is_map set to false, if default-array (conf) should be
     *             treated as a map instead of scalar; default is true.
     */
-   function read_defaults( $conf, $arr_is_map = true )
+   protected function read_defaults( $conf, $arr_is_map = true )
    {
       $this->defvalues = array();
       if( !is_array($conf) && (string)$conf == '' )
@@ -1432,10 +1443,10 @@ class Filter
       }
       else
          $this->defvalues[$this->name] = $conf;
-   }
+   }//read_defaults
 
    /*! \brief Returns string|array default-value for specified filter-element-name; empty if none defined. */
-   function get_default( $name )
+   protected function get_default( $name )
    {
       if( isset($this->defvalues[$name]) )
          return $this->defvalues[$name];
@@ -1443,11 +1454,8 @@ class Filter
          return '';
    }
 
-   /*!
-    * \brief Returns default-value for filter-element-name if given value is null
-    * \internal
-    */
-   function handle_default( $name, $val )
+   /*! \brief Returns default-value for filter-element-name if given value is null */
+   protected function handle_default( $name, $val )
    {
       if( is_null($val) )
          $result = $this->get_default( $name );
@@ -1457,7 +1465,7 @@ class Filter
    }
 
    /*! \brief Returns string-representation of this filter (for debugging purposes). */
-   function to_string()
+   public function to_string()
    {
       return "Filter{$this->type}={ id=[{$this->id}], name=[{$this->name}], "
          . "dbf=[" .
@@ -1474,10 +1482,10 @@ class Filter
          . "parser-flags=[{$this->parser_flags}], "
          . "query=[" . (is_null($this->query) ? '' : $this->query->to_string()) . "], "
          . "config={" . map_to_string($this->config) . "}}";
-   }
+   }//to_string
 
    /*! \brief Resets filter-value back to the default-value if one set or else clear it. */
-   function reset()
+   public function reset()
    {
       // reset all elements to default-value
       $this->values = array();
@@ -1486,19 +1494,19 @@ class Filter
    }
 
    /*! \brief Returns main element-name for this filter. */
-   function get_name()
+   public function get_name()
    {
       return $this->name;
    }
 
    /*! \brief Returns error-message for last parsing of value; default is '' (no-error). */
-   function errormsg()
+   public function errormsg()
    {
       return $this->errormsg;
    }
 
    /*! \brief Returns true, if error occured during parsing of filter-value. */
-   function has_error()
+   public function has_error()
    {
       return ( (string)$this->errormsg != '' );
    }
@@ -1507,13 +1515,13 @@ class Filter
     * \brief Returns warning-message for last parsing of value; default is '' (no-warning).
     *        At the moment solely set by MySQLMatch-filter.
     */
-   function warnmsg()
+   public function warnmsg()
    {
       return $this->warnmsg;
    }
 
    /*! \brief Returns true, if warning occured during parsing of filter-value. */
-   function has_warn()
+   public function has_warn()
    {
       return ( (string)$this->warnmsg != '' );
    }
@@ -1521,9 +1529,9 @@ class Filter
    /*!
     * \brief Returns value for specified optional element-name.
     * \param name if omitted, return value for main filter-value
-    * note: name may be prefixed with PFX_FILTER if no FC_FNAME set
+    * \note name may be prefixed with PFX_FILTER if no FC_FNAME set
     */
-   function get_value( $name = '' ) {
+   public function get_value( $name = '' ) {
       if( $name == '' || $name === $this->name || $name === $this->id )
          return $this->value;
       else
@@ -1531,13 +1539,13 @@ class Filter
    }
 
    /*! \brief Returns true, if value empty or null. */
-   function is_empty() {
+   public function is_empty() {
       return (is_null($this->value) || $this->value == '');
    }
 
 
    /*! \brief Returns true, if filter is declared to be static (always shown and used). */
-   function is_static()
+   public function is_static()
    {
       // filter-config FC_HIDE overrules global static-force
       if( FILTER_CONF_FORCE_STATIC )
@@ -1547,19 +1555,19 @@ class Filter
    }
 
    /*! \brief Returns true, if filter is used to build query; always true for static filter. */
-   function is_active()
+   public function is_active()
    {
       return ( $this->is_static() ) ? true : $this->active;
    }
 
    /*! \brief Changes active-state of filter. */
-   function set_active( $active )
+   public function set_active( $active )
    {
       $this->active = (bool)$active;
    }
 
    /*! \brief Toggles active-state of filter; active always set to true for static-filter. */
-   function toggle_active()
+   public function toggle_active()
    {
       if( $this->is_static() )
          $this->active = true;
@@ -1568,19 +1576,19 @@ class Filter
    }
 
    /*! \brief Returns true, if filter visible or not (only used together with Table). */
-   function is_visible()
+   public function is_visible()
    {
       return $this->visible;
    }
 
    /*! \brief Sets visible-state for filter (only used with Table). */
-   function set_visible( $visible )
+   public function set_visible( $visible )
    {
       $this->visible = (bool)$visible;
    }
 
    /*! \brief Returns syntax-description for filter (maybe empty for some filters). */
-   function get_syntax_description()
+   public function get_syntax_description()
    {
       if( isset($this->syntax_descr) && !is_null($this->syntax_descr) )
       {
@@ -1594,11 +1602,11 @@ class Filter
          return $syntax;
       }
       else
-         error('invalid_filter', "filter.get_syntax_description.miss_syntax_descr({$this->type})");
-   }
+         error('invalid_filter', "Filter.get_syntax_description.miss_syntax_descr({$this->type})");
+   }//get_syntax_description
 
    /*! \brief Returns optional syntax-hint-text for $confkey and format with specified sprintf-format. */
-   function get_syntax_hint( $confkey, $format )
+   public function get_syntax_hint( $confkey, $format )
    {
       $arr = $this->get_config(FC_SYNTAX_HINT);
       if( is_array($arr) )
@@ -1608,7 +1616,7 @@ class Filter
    }
 
    /*! \brief Returns syntax-help-type: [help] */
-   function get_syntax_help()
+   public function get_syntax_help()
    {
       $help = $this->get_config(FC_SYNTAX_HELP);
       if( $help == '' )
@@ -1617,14 +1625,14 @@ class Filter
          return "[$help]";
       else
          return '';
-   }
+   }//get_syntax_help
 
    /*!
     * \brief Returns copy of query as QuerySQL-object for filter without
     *        parsing-error and with visible-state, if filter has a query built; null otherwise.
     * \param force if true, returns query also if filter in invisible-state.
     */
-   function get_query( $force = false )
+   public function get_query( $force = false )
    {
       if( $this->errormsg )
          return NULL; // invalid input
@@ -1632,17 +1640,17 @@ class Filter
          return $this->query;
       else
          return NULL;
-   }
+   }//get_query
 
    /*!
     * \brief Returns encoded URL-string for filter prefixing vars with given prefix.
     * \param prefix URL-varnames are prefixed with that except FC_FNAME-config used on filter
     * \param arr_out return URL-vars with values additionally in this array
-    * note: filter can also contain more than one element
-    * note: multi-values are saved as array-value in arr_out and as 'field[]=..' in URL
-    * note: Func for Filter-class
+    * \note filter can also contain more than one element
+    * \note multi-values are saved as array-value in arr_out and as 'field[]=..' in URL
+    * \note Func for Filter-class
     */
-   function get_url_parts( $prefix, &$arr_out )
+   public function get_url_parts( $prefix, &$arr_out )
    {
       $arr_url = array();
 
@@ -1684,17 +1692,13 @@ class Filter
     *   \see SearchFilter->init()
     * - val can be of type string or array (for multi-values)
     */
-   function parse_value( $name, $val )
-   {
-      // concrete filter needs to implement this abstract method
-      error('invalid_filter', "filter.parse_value.miss_implementation(".get_class($this).",{$this->type})");
-   }
+   abstract public function parse_value( $name, $val );
 
    /*!
     * \brief Builds SQL-query from saved filter-object-vars (mostly used internal to handle multi-element-filters)
-    * note: expects that filter has no error.
+    * \note expects that filter has no error.
     */
-   function build_query()
+   public function build_query()
    {
       // empty function, only used for multi-filter-elements, called in SearchFilters->init()
    }
@@ -1705,11 +1709,7 @@ class Filter
     *        suffixed with PFX_FILTER
     * \param attr optional array containing attributes used to build-up element
     */
-   function get_input_element($prefix, $attr = array() )
-   {
-      // concrete filter needs to implement this abstract method
-      error('invalid_filter', "filter.get_input_element.miss_implementation(".get_class($this).",{$this->type})");
-   }
+   abstract public function get_input_element($prefix, $attr = array() );
 
 
    // help functions
@@ -1722,7 +1722,7 @@ class Filter
     *             are resetted; otherwise set value for name in local values-array
     *             without resetting normal vars (for supporting multi-element-filters)
     */
-   function init_parse( $val, $name = '' )
+   protected function init_parse( $val, $name = '' )
    {
       if( $name == '' || $name === $this->name || $name == $this->id )
       {
@@ -1741,10 +1741,10 @@ class Filter
       {
          $this->values[$name] = $val;
       }
-   }
+   }//init_parse
 
    /*! \brief Copies p_start, p_end, p_value, p_flags from specified object into current filter. */
-   function copy_parsed( $obj )
+   protected function copy_parsed( $obj )
    {
       $this->p_start = $obj->p_start;
       $this->p_end   = $obj->p_end;
@@ -1753,7 +1753,7 @@ class Filter
    }
 
    /*! \brief Copies p_start, p_end, p_value, p_flags from current filter into given object. */
-   function copy_parsed_to( &$obj )
+   protected function copy_parsed_to( &$obj )
    {
       $obj->p_start = $this->p_start;
       $obj->p_end   = $this->p_end;
@@ -1762,7 +1762,7 @@ class Filter
    }
 
    /*! \brief Returns true, if specified flag in local p_flags. */
-   function is_flag_set( $pflag )
+   protected function is_flag_set( $pflag )
    {
       if( $this->errormsg )
          return '';
@@ -1775,7 +1775,7 @@ class Filter
     * \return false, if error occured during parsing; true for success.
     * \see NumericParser for supported modi and flags.
     */
-   function parse_numeric( $name, $val, $tok_config, $flags = 0 ) {
+   protected function parse_numeric( $name, $val, $tok_config, $flags = 0 ) {
       $this->init_parse($val, $name);
 
       $np = new NumericParser( $val, $tok_config, $flags );
@@ -1786,14 +1786,14 @@ class Filter
       }
       $this->copy_parsed($np);
       return true;
-   }
+   }//parse_numeric
 
    /*!
     * \brief Internal help-func to parse text values.
     * \return false, if error occured during parsing; true for success.
     * \see TextParser for supported modi and flags.
     */
-   function parse_text( $name, $val, $tok_config, $flags = 0) {
+   protected function parse_text( $name, $val, $tok_config, $flags = 0) {
       $this->init_parse($val, $name);
 
       $tp = new TextParser( $val, $tok_config, $flags );
@@ -1807,7 +1807,7 @@ class Filter
       if( count($tp->p_terms) > 0 )
          $this->match_terms = array_merge( $this->match_terms, $tp->p_terms );
       return true;
-   }
+   }//parse_text
 
 
    /*!
@@ -1815,7 +1815,7 @@ class Filter
     *        return tmplfield if FC_SQL_TEMPLATE-config set for filter
     * \param tmplfield if null or omitted, use this->dbfield instead
     */
-   function default_sql_template( $tmplfield = null)
+   protected function default_sql_template( $tmplfield = null)
    {
       if( is_null($tmplfield) )
          $tmplfield = $this->dbfield;
@@ -1826,10 +1826,11 @@ class Filter
     * \brief Builds QuerySQL for numeric-syntax (exact or range) from local vars
     *        p_start, p_end, p_value and used dbfield-specification.
     * \return null if parse-error occured.
-    * note: no mysql-escaping done on values (therefore local vars should be checked to contain numerics).
-    * note: exclusive comparators are used if PFLAG_EXCL_START|END set in p_flags.
+    * \note no mysql-escaping done on values (therefore local vars should be checked to contain numerics).
+    * \note exclusive comparators are used if PFLAG_EXCL_START|END set in p_flags.
     */
-   function build_query_numeric( $query = null, $num_factor = 1 ) {
+   protected function build_query_numeric( $query = null, $num_factor = 1 )
+   {
       if( $this->errormsg )
          return NULL;
 
@@ -1871,10 +1872,10 @@ class Filter
     * \brief Builds QuerySQL for textual-syntax from local vars p_start, p_end, p_value, p_flags
     *        and used dbfield-specification.
     * \return null if parse-error occured.
-    * note: p_end is treated as exclusive-range-value.
-    * note: SQL-LIKE only used if allow_wildcard is true and PFLAG_WILDCARD set in p_flags.
+    * \note p_end is treated as exclusive-range-value.
+    * \note SQL-LIKE only used if allow_wildcard is true and PFLAG_WILDCARD set in p_flags.
     */
-   function build_query_text( $allow_wildcard = true )
+   protected function build_query_text( $allow_wildcard = true )
    {
       if( $this->errormsg )
          return NULL;
@@ -1911,10 +1912,10 @@ class Filter
    /*!
     * \brief Builds generic text-input form-element using passed arguments with
     *        optional hover-help (title).
-    * param maxlen may be 0 (no maxlen used)
-    * note: element-name is built from 'prefix name' or FC_FNAME-config if set
+    * \param $maxlen may be 0 (no maxlen used)
+    * \note element-name is built from 'prefix name' or FC_FNAME-config if set
     */
-   function build_generic_input_text_elem( $prefix, $name, $value, $title = '', $maxlen = 0, $size = '' )
+   protected function build_generic_input_text_elem( $prefix, $name, $value, $title = '', $maxlen = 0, $size = '' )
    {
       $fname = ( $this->get_config(FC_FNAME) || !$this->use_prefix_fieldname($name) ) ? $name : $prefix . $name;
       $elem = "<input";
@@ -1929,14 +1930,14 @@ class Filter
          $elem .= " title=" . attb_quote($title);
       $elem .= ">";
       return $elem;
-   }
+   }//build_generic_input_text_elem
 
    /*!
     * \brief Help-function to build filter-typical text-input form-element
     *        including syntax-description.
     * \see build_generic_input_text_elem()
     */
-   function build_input_text_elem( $prefix, $attr = array(), $maxlen = 0, $size = '' )
+   protected function build_input_text_elem( $prefix, $attr = array(), $maxlen = 0, $size = '' )
    {
       return $this->build_generic_input_text_elem( $prefix, $this->name, $this->value,
          $this->get_syntax_description(), $maxlen, $size);
@@ -1944,14 +1945,14 @@ class Filter
 
    /*!
     * \brief Builds generic selectbox form-element using passed arguments.
-    * param index_start_keys:
+    * \param $index_start_keys:
     *     if numeric -> used as start-index using for option-value and description given in values-array;
     *     otherwise array( option-value => description ), values is null (ignored)
-    * param size number of lines shown (default is 1)
-    * note: builds multi-var selectbox if FC_MULTIPLE-config set on filter.
-    * note: element-name is built from 'prefix name' or FC_FNAME-config if set
+    * \param $size number of lines shown (default is 1)
+    * \note builds multi-var selectbox if FC_MULTIPLE-config set on filter.
+    * \note element-name is built from 'prefix name' or FC_FNAME-config if set
     */
-   function build_generic_selectbox_elem( $prefix, $name, $value, $index_start_keys, $values = null, $size = 1 )
+   protected function build_generic_selectbox_elem( $prefix, $name, $value, $index_start_keys, $values = null, $size = 1 )
    {
       $fname = ( $this->get_config(FC_FNAME) || !$this->use_prefix_fieldname($name) ) ? $name : $prefix . $name;
       if( !is_numeric($size) )
@@ -1988,17 +1989,17 @@ class Filter
          }
       }
       else
-         error('invalid_filter', "filter.build_generic_selectbox_elem.invalid_arg.index_start_keys($index_start_keys)");
+         error('invalid_filter', "Filter.build_generic_selectbox_elem.invalid_arg.index_start_keys($index_start_keys)");
 
       $elem .= "\n </select>";
       return $elem;
-   } //build_generic_selectbox_elem
+   }//build_generic_selectbox_elem
 
    /*!
     * \brief Help-function to build filter-typical selectbox form-element.
     * \see build_generic_selectbox_elem()
     */
-   function build_selectbox_elem( $prefix, $index_start_keys, $values = null )
+   protected function build_selectbox_elem( $prefix, $index_start_keys, $values = null )
    {
       $size = @$this->config[FC_SIZE];
       if( !is_numeric($size) )
@@ -2006,14 +2007,14 @@ class Filter
 
       return $this->build_generic_selectbox_elem(
          $prefix, $this->name, $this->value, $index_start_keys, $values, $size);
-   }
+   }//build_selectbox_elem
 
    /*!
     * \brief Builds generic checkbox form-element using passed arguments with
     *        optional hover-help (title).
-    * note: element-name is built from 'prefix name' or FC_FNAME-config if set
+    * \note element-name is built from 'prefix name' or FC_FNAME-config if set
     */
-   function build_generic_checkbox_elem( $prefix, $name, $value, $text, $title='' )
+   protected function build_generic_checkbox_elem( $prefix, $name, $value, $text, $title='' )
    {
       $fname = ( $this->get_config(FC_FNAME) || !$this->use_prefix_fieldname($name) ) ? $name : $prefix . $name;
 
@@ -2025,19 +2026,20 @@ class Filter
       $elem .= ">";
       $elem .= $text;
       return $elem;
-   }
+   }//build_generic_checkbox_elem
 
    /*!
     * \brief Help-function to build filter-typical checkbox form-element.
     * \see build_generic_checkbox_elem()
-    * note: text is also used for alt-attribute
+    * \note text is also used for alt-attribute
     */
-   function build_checkbox_elem( $prefix, $text )
+   protected function build_checkbox_elem( $prefix, $text )
    {
       return $this->build_generic_checkbox_elem( $prefix, $this->name, $this->value, $text );
    }
 
 } // end of 'Filter'
+
 
 
 // --------------------------------------------------------------------------
@@ -2069,13 +2071,14 @@ class Filter
 class FilterNumeric extends Filter
 {
    /*! \brief factor to multiplay value before using in query. */
-   var $num_factor;
+   protected $num_factor;
 
    /*! \brief Constructs Numeric-Filter. */
-   function FilterNumeric($name, $dbfield, $config)
+   public function __construct( $name, $dbfield, $config )
    {
       static $_default_config = array( FC_SIZE => 5 );
-      parent::Filter($name, $dbfield, $_default_config, $config);
+
+      parent::__construct($name, $dbfield, $_default_config, $config);
       $this->type = 'Numeric';
       $this->tok_config = $this->create_TokenizerConfig();
       $this->syntax_help = T_('NUM#filterhelp');
@@ -2092,10 +2095,10 @@ class FilterNumeric extends Filter
          $s = $this->tok_config->sep;
          $this->syntax_descr = "3, {$s}14, 1{$s}5, 9{$s}"; // pi
       }
-   }
+   }//__construct
 
    /*! \brief Parses numeric-value (float or integer) using NumericParser. */
-   function parse_value( $name, $val )
+   public function parse_value( $name, $val )
    {
       $val = $this->handle_default( $name, $val );
       if( !$this->parse_numeric( $name, $val, $this->tok_config, $this->parser_flags ) )
@@ -2106,11 +2109,12 @@ class FilterNumeric extends Filter
    }
 
    /*! \brief Returns input-text form-element. */
-   function get_input_element($prefix, $attr = array() )
+   public function get_input_element($prefix, $attr = array() )
    {
       return $this->build_input_text_elem(
          $prefix, $attr, @$this->config[FC_MAXLEN], @$this->config[FC_SIZE] );
    }
+
 } // end of 'FilterNumeric'
 
 
@@ -2151,10 +2155,11 @@ class FilterNumeric extends Filter
 class FilterText extends Filter
 {
    /*! \brief Constructs Text-Filter. */
-   function FilterText($name, $dbfield, $config)
+   public function __construct( $name, $dbfield, $config )
    {
       static $_default_config = array( FC_SIZE => 8 );
-      parent::Filter($name, $dbfield, $_default_config, $config);
+
+      parent::__construct($name, $dbfield, $_default_config, $config);
       $this->type = 'Text';
       $this->tok_config = $this->create_TokenizerConfig();
       $this->syntax_help = T_('TEXT#filterhelp');
@@ -2189,14 +2194,14 @@ class FilterText extends Filter
       if( $this->get_config(FC_SUBSTRING) )
       {
          if( !$minchars )
-            error('invalid_filter', "filter.FilterText.bad_config.FC_SUBSTRING_miss_FC_START_WILD({$this->id},$name)");
+            error('invalid_filter', "FilterText.bad_config.FC_SUBSTRING_miss_FC_START_WILD({$this->id},$name)");
          $this->parser_flags |= TEXTPARSER_IMPLICIT_WILD;
          $this->syntax_descr = '['. T_('substring#filter') . '] ' . $this->syntax_descr;
       }
-   }
+   }//__construct
 
    /*! \brief Parses text-value using TextParser with default TokenizerConfig. */
-   function parse_value( $name, $val )
+   public function parse_value( $name, $val )
    {
       $val = $this->handle_default( $name, $val );
       if( !$this->parse_text( $name, $val, $this->tok_config, $this->parser_flags ) )
@@ -2204,15 +2209,17 @@ class FilterText extends Filter
 
       $this->query = $this->build_query_text();
       return true;
-   }
+   }//parse_value
 
    /*! \brief Returns input-text form-element. */
-   function get_input_element($prefix, $attr = array() )
+   public function get_input_element($prefix, $attr = array() )
    {
       return $this->build_input_text_elem(
          $prefix, $attr, @$this->config[FC_MAXLEN], @$this->config[FC_SIZE] );
    }
+
 } // end of 'FilterText'
+
 
 
 
@@ -2243,10 +2250,11 @@ class FilterText extends Filter
 class FilterRating extends Filter
 {
    /*! \brief Constructs Rating-Filter. */
-   function FilterRating($name, $dbfield, $config)
+   public function __construct( $name, $dbfield, $config )
    {
       static $_default_config = array( FC_SIZE => 8 );
-      parent::Filter($name, $dbfield, $_default_config, $config);
+
+      parent::__construct($name, $dbfield, $_default_config, $config);
       $this->type = 'Rating';
       $this->tok_config = $this->create_TokenizerConfig();
       $this->syntax_help = T_('RATING#filterhelp');
@@ -2266,13 +2274,13 @@ class FilterRating extends Filter
          $this->tok_config->add_config( TEXTPARSER_CONF_RX_NO_SEP, '-\d+%' );
       }
       $this->syntax_descr = implode(', ', $arr_syntax);
-   }
+   }//__construct
 
    /*!
     * \brief Returns integer ELO-rating converted from rank-spec (7k, 3d).
-    * note: sets errormsg and resets filter-values on parse-error
+    * \note sets errormsg and resets filter-values on parse-error
     */
-   function convert_rank($rank)
+   private function convert_rank($rank)
    {
       $rating = read_rating($rank);
       if( is_null($rating) || $rating < MIN_RATING || $rating > OUT_OF_RATING )
@@ -2284,7 +2292,7 @@ class FilterRating extends Filter
    }
 
    /*! \brief Parses rank-value using modified TextParser. */
-   function parse_value( $name, $val )
+   public function parse_value( $name, $val )
    {
       $val = $this->handle_default( $name, $val );
       $this->init_parse($val);
@@ -2345,10 +2353,10 @@ class FilterRating extends Filter
 
       $this->query = $this->build_query_numeric();
       return true;
-   }
+   }//parse_value
 
    /*! Sets p_start or p_end and according p_flags to adjust rating and operation for range-filtering. */
-   function adjust_op_rating( $is_start=true, $orig_val )
+   private function adjust_op_rating( $is_start=true, $orig_val )
    {
       // something there to adjust?
       if( $is_start && (string)$this->p_start == '' )
@@ -2401,7 +2409,6 @@ class FilterRating extends Filter
             $opexcl = false;
          if( $opexcl )
             $this->p_flags |= PFLAG_EXCL_START;
-
       }
       else // is-end
       {
@@ -2438,14 +2445,15 @@ class FilterRating extends Filter
          if( $opexcl )
             $this->p_flags |= PFLAG_EXCL_END;
       }
-   }
+   }//adjust_op_rating
 
    /*! \brief Returns input-text form-element. */
-   function get_input_element($prefix, $attr = array() )
+   public function get_input_element($prefix, $attr = array() )
    {
       return $this->build_input_text_elem(
          $prefix, $attr, @$this->config[FC_MAXLEN], @$this->config[FC_SIZE] );
    }
+
 } // end of 'FilterRating'
 
 
@@ -2473,10 +2481,11 @@ class FilterRating extends Filter
 class FilterDate extends Filter
 {
    /*! \brief Constructs Date-Filter. */
-   function FilterDate($name, $dbfield, $config)
+   public function __construct( $name, $dbfield, $config )
    {
       static $_default_config = array( FC_SIZE => 16 );
-      parent::Filter($name, $dbfield, $_default_config, $config);
+
+      parent::__construct($name, $dbfield, $_default_config, $config);
       $this->type = 'Date';
       $this->tok_config = $this->create_TokenizerConfig();
       $this->parser_flags |= TEXTPARSER_FORBID_WILD | TEXTPARSER_END_INCL;
@@ -2492,10 +2501,10 @@ class FilterDate extends Filter
          $s = $this->tok_config->sep;
          $this->syntax_descr = "d, {$s}d, d{$s}, d1{$s}d2; d=Y(M(D(h(m(s";
       }
-   }
+   }//__construct
 
    /*! \brief Parses date-text-value using TextParser. */
-   function parse_value( $name, $val )
+   public function parse_value( $name, $val )
    {
       $val = $this->handle_default( $name, $val );
 
@@ -2515,18 +2524,18 @@ class FilterDate extends Filter
       $arr_err = array();
       if( (string)$this->p_start != '' )
       {
-         $dp_start = new DateParser($this->p_start, RANGE_START);
+         $dp_start = new DateParser($this->p_start, DP_RANGE_START);
          if( $dp_start->errormsg() )
-            $arr_err[]= $dp_start->errormsg;
+            $arr_err[]= $dp_start->errormsg();
          else
             $this->p_start = $dp_start->get_completed_date();
       }
 
       if( (string)$this->p_end != '' )
       {
-         $dp_end = new DateParser($this->p_end, RANGE_END);
+         $dp_end = new DateParser($this->p_end, DP_RANGE_END);
          if( $dp_end->errormsg() )
-            $arr_err[]= $dp_end->errormsg;
+            $arr_err[]= $dp_end->errormsg();
          else
             $this->p_end = $dp_end->get_completed_date();
       }
@@ -2544,12 +2553,12 @@ class FilterDate extends Filter
       {
          if( $dp_start->rawdate > $dp_end->rawdate )
          {
-            // swap needed and re-parsing (because date adjusted for RANGE_END)
+            // swap needed and re-parsing (because date adjusted for DP_RANGE_END)
             //   but skip already passed checks
             $orig_start = $dp_start->origdate;
             $orig_end   = $dp_end->origdate;
-            $dp_start = new DateParser($orig_end,   RANGE_START);
-            $dp_end   = new DateParser($orig_start, RANGE_END);
+            $dp_start = new DateParser($orig_end,   DP_RANGE_START);
+            $dp_end   = new DateParser($orig_start, DP_RANGE_END);
             $this->p_start = $dp_start->get_completed_date();
             $this->p_end   = $dp_end->get_completed_date();
          }
@@ -2557,14 +2566,15 @@ class FilterDate extends Filter
 
       $this->query = $this->build_query_text();
       return true;
-   }
+   }//parse_value
 
    /*! \brief Returns input-text form-element. */
-   function get_input_element($prefix, $attr = array() )
+   public function get_input_element($prefix, $attr = array() )
    {
       return $this->build_input_text_elem(
          $prefix, $attr, @$this->config[FC_MAXLEN], @$this->config[FC_SIZE] );
    }
+
 } // end of 'FilterDate'
 
 
@@ -2619,32 +2629,30 @@ define('FRD_RANGE_END',   3); // end-range
 class FilterRelativeDate extends Filter
 {
    /*! \brief array of used time-units. */
-   var $time_units;
+   protected $time_units = array();
    /*! \brief element-name for time-units selectbox. */
-   var $elem_tu;
+   protected $elem_tu;
    /*! \brief array with choices for select-box (excerpt from FRDTU_choices). */
-   var $choices_tu;
+   protected $choices_tu = array();
    /*! \brief FilterDate for absolute-choice (null if FRDTU_ABS not used). */
-   var $filterdate;
+   protected $filterdate = null;
 
    /*! \brief Indicating used range-mode; values: FRD_RANGE_ABS|START(default)|END */
-   var $range_mode;
+   protected $range_mode = 0;
 
    /*! \brief Constructs RelativeDate-Filter. */
-   function FilterRelativeDate($name, $dbfield, $config)
+   public function __construct( $name, $dbfield, $config )
    {
       static $_default_config = array( FC_SIZE => 4, FC_TIME_UNITS => FRDTU_ALL_REL );
 
-      parent::Filter($name, $dbfield, $_default_config, $config);
+      parent::__construct($name, $dbfield, $_default_config, $config);
       $this->type = 'RelativeDate';
       $this->syntax_descr = "30 (= <30), >30";
       $this->syntax_help = T_('RELDATE#filterhelp');
 
       // check & setup time-units
-      $this->time_units = array();
-      $this->choices_tu = array();
       $fc_time_units = $this->get_config(FC_TIME_UNITS);
-      $FRDTU_choices = FilterRelativeDate::getTimeUnitText();
+      $FRDTU_choices = self::getTimeUnitText();
       foreach( $FRDTU_choices as $tu => $descr )
       {
          if( $fc_time_units & $tu )
@@ -2655,10 +2663,9 @@ class FilterRelativeDate extends Filter
          }
       }
       if( count($this->time_units) == 0 )
-         error('invalid_filter', "filter.FilterRelativeDate.miss_time_unit({$this->id},$name)");
+         error('invalid_filter', "FilterRelativeDate.miss_time_unit({$this->id},$name)");
 
       // absolute filter
-      $this->filterdate = NULL;
       if( $fc_time_units & FRDTU_ABS )
       {
          $this->filterdate = new FilterDate( $name, $dbfield, $config );
@@ -2669,15 +2676,11 @@ class FilterRelativeDate extends Filter
       $this->add_element_name( $this->elem_tu );
 
       // set defaults
-      $this->range_mode = 0;
       $this->set_value_defaults( $this->elem_tu );
-   }
+   }//__construct
 
-   /*!
-    * \brief Sets default for time-unit-selectbox.
-    * \internal
-    */
-   function set_value_defaults( $name )
+   /*! \brief Sets default for time-unit-selectbox. */
+   protected function set_value_defaults( $name )
    {
       if( $name === $this->elem_tu )
       {
@@ -2685,21 +2688,20 @@ class FilterRelativeDate extends Filter
          $this->values[$this->elem_tu] =
             ( $this->get_config(FC_TIME_UNITS) & FRDTU_DAY ) ? FRDTU_DAY : $this->time_units[$defidx];
       }
-   }
+   }//set_value_defaults
 
    /*!
     * \brief Overloading method to return element-names in reverse order,
     *        which is needed so that parse_value-func has selectbox-element
     *        set before main-element is parsed.
-    * \internal
     */
-   function get_element_names()
+   public function get_element_names()
    {
       return array_reverse( $this->elem_names );
    }
 
    /*! \brief Parses date-text-value (absolute or relative) using FilterDate for absolute date. */
-   function parse_value( $name, $val )
+   public function parse_value( $name, $val )
    {
       $val = $this->handle_default( $name, $val );
       $this->init_parse($val, $name); // if elem, value for elem_tu saved
@@ -2714,7 +2716,7 @@ class FilterRelativeDate extends Filter
          if( $this->values[$this->elem_tu] == FRDTU_ABS )
          { // absolute
             if( is_null($this->filterdate) )
-               error('invalid_filter', "filter.FilterRelativeDate.bad_config_absolute_date({$this->id})");
+               error('invalid_filter', "FilterRelativeDate.bad_config_absolute_date({$this->id})");
 
             // parse val using FilterDate-syntax
             $this->range_mode = FRD_RANGE_ABS;
@@ -2759,16 +2761,16 @@ class FilterRelativeDate extends Filter
                ( $this->get_config(FC_TIME_UNITS) & FRDTU_DAY ) ? FRDTU_DAY : $this->time_units[0];
       }
       else
-         error('invalid_filter', "filter.RelativeDate.parse_value.invalid_arg.name({$this->id},$name,$val)");
+         error('invalid_filter', "FilterRelativeDate.parse_value.invalid_arg.name({$this->id},$name,$val)");
 
       return true;
-   }
+   }//parse_value
 
    /*!
     * \brief Builds query for multi-element filter.
     * expecting: p_value set or unset, range_mode set, values[elem_tu] with time-unit-choice
     */
-   function build_query()
+   public function build_query()
    {
       // check for parsed-value
       if( $this->p_value == '' )
@@ -2804,13 +2806,13 @@ class FilterRelativeDate extends Filter
       }
 
       $this->query = $query;
-   }
+   }//build_query
 
    /*!
     * \brief Returns input-text and select-box form-element.
-    * note: if only one time-unit, replace select-box with static text.
+    * \note if only one time-unit, replace select-box with static text.
     */
-   function get_input_element($prefix, $attr = array() )
+   public function get_input_element($prefix, $attr = array() )
    {
       // input-text for number of (time-units)
       $r = $this->build_input_text_elem( $prefix, $attr, @$this->config[FC_MAXLEN], @$this->config[FC_SIZE] );
@@ -2819,21 +2821,20 @@ class FilterRelativeDate extends Filter
       if( count($this->time_units) > 1 )
          $r .= $this->build_generic_selectbox_elem( $prefix, $this->elem_tu, $this->values[$this->elem_tu], $this->choices_tu );
       else
-         $r .= FilterRelativeDate::getTimeUnitText( $this->time_units[0] );
+         $r .= self::getTimeUnitText( $this->time_units[0] );
 
       return $r;
-   }
+   }//get_input_element
+
 
    // ----------- static funcs -----------
 
    /*! \brief Returns choice-text for time-units or all choice-texts (if arg=null). */
-   function getTimeUnitText( $timeunit=null )
+   private static function getTimeUnitText( $timeunit=null )
    {
-      global $ARR_GLOBALS_FILTERS;
-
       // lazy-init of texts
       $key = 'reldate_choices';
-      if( !isset($ARR_GLOBALS_FILTERS[$key]) )
+      if( !isset(self::$ARR_FILTER_TEXTS[$key]) )
       {
          $arr = array();
          // choices-array for time-units (for select-box)
@@ -2844,15 +2845,15 @@ class FilterRelativeDate extends Filter
          $arr[FRDTU_DAY]   = T_('days#reldate');
          $arr[FRDTU_HOUR]  = T_('hours#reldate');
          $arr[FRDTU_MIN]   = T_('minutes#reldate');
-         $ARR_GLOBALS_FILTERS[$key] = $arr;
+         self::$ARR_FILTER_TEXTS[$key] = $arr;
       }
 
       if( is_null($timeunit) )
-         return $ARR_GLOBALS_FILTERS[$key];
-      if( !isset($ARR_GLOBALS_FILTERS[$key][$timeunit]) )
-         error('invalid_args', "FilterRelativeDate.getTimeUnitText($timeunit)");
-      return $ARR_GLOBALS_FILTERS[$key][$timeunit];
-   }
+         return self::$ARR_FILTER_TEXTS[$key];
+      if( !isset(self::$ARR_FILTER_TEXTS[$key][$timeunit]) )
+         error('invalid_args', "FilterRelativeDate:getTimeUnitText($timeunit)");
+      return self::$ARR_FILTER_TEXTS[$key][$timeunit];
+   }//getTimeUnitText
 
 } // end of 'FilterRelativeDate'
 
@@ -2881,16 +2882,16 @@ class FilterRelativeDate extends Filter
 class FilterSelection extends Filter
 {
    /*! \brief array with choices for selectbox. */
-   var $choices;
+   protected $choices;
    /*! \brief choice-correspondent sql-clauses (single: string|QuerySQL; multi: values for query to build from dbfield) */
-   var $clauses;
+   protected $clauses;
    /*! \brief start-index (for multi: 1, for single: 0) */
-   var $idx_start;
+   protected $idx_start;
 
    /*! \brief Constructs Selection-Filter. */
-   function FilterSelection($name, $dbfield, $config)
+   public function __construct( $name, $dbfield, $config )
    {
-      parent::Filter($name, $dbfield, null, $config);
+      parent::__construct($name, $dbfield, null, $config);
       $this->type = 'Selection';
       $this->syntax_descr = ''; // action: select from choices
       $this->syntax_help = '';
@@ -2912,7 +2913,7 @@ class FilterSelection extends Filter
       else
       {
          if( !is_array($dbfield) )
-            error('invalid_filter', "filter.FilterSelection.expect_dbfield_array({$this->id},$name)");
+            error('invalid_filter', "FilterSelection.expect_dbfield_array({$this->id},$name)");
          $this->check_forbid_sql_template( 0 ); # no fieldnames
          $dbfield = $this->dbfield;
          $this->idx_start = 0;
@@ -2920,13 +2921,13 @@ class FilterSelection extends Filter
 
       $this->choices = array_keys($dbfield);
       $this->clauses = array_values($dbfield); # single (=where-clauses), multi (=values for dbfield-combining)
-   }
+   }//__construct
 
    /*!
     * \brief Parses single- and multi-value selection.
     * param val: string | array (only for multiple-support)
     */
-   function parse_value( $name, $val )
+   public function parse_value( $name, $val )
    {
       $val = $this->handle_default( $name, $val );
       $this->init_parse($val);
@@ -2934,7 +2935,7 @@ class FilterSelection extends Filter
       if( is_array($val) ) // multi-val
       {
          if( !$this->get_config(FC_MULTIPLE) )
-            error('invalid_filter', "filter.FilterSelection.parse_value.no_multi_value_support({$this->id})");
+            error('invalid_filter', "FilterSelection.parse_value.no_multi_value_support({$this->id})");
 
          // build SQL
          $query = $this->build_base_query($this->dbfield, false, true); // query with set SQLP_FNAMES
@@ -2965,13 +2966,14 @@ class FilterSelection extends Filter
          return false;
 
       return true;
-   }
+   }//parse_value
 
    /*! \brief Returns selectbox form-element. */
-   function get_input_element($prefix, $attr = array() )
+   public function get_input_element($prefix, $attr = array() )
    {
       return $this->build_selectbox_elem( $prefix, $this->idx_start, $this->choices );
    }
+
 } // end of 'FilterSelection'
 
 
@@ -2996,7 +2998,7 @@ class FilterSelection extends Filter
 class FilterBoolSelect extends FilterSelection
 {
    /*! \brief Constructs BoolSelect-Filter extending FilterSelection. */
-   function FilterBoolSelect($name, $dbfield, $config)
+   public function __construct( $name, $dbfield, $config )
    {
       $this->check_forbid_sql_template( 1 );
 
@@ -3015,10 +3017,12 @@ class FilterBoolSelect extends FilterSelection
          T_('All#boolsel') => '',
          T_('Yes#boolsel') => $query_yes,
          T_('No#boolsel')  => $query );
-      parent::FilterSelection($name, $choices, $config);
+
+      parent::__construct($name, $choices, $config);
       $this->type = 'BoolSelect';
       $this->syntax_descr = ''; // action: select from choices
-   }
+   }//__construct
+
 } // end of 'FilterBoolSelect'
 
 
@@ -3044,7 +3048,7 @@ class FilterBoolSelect extends FilterSelection
 class FilterRatedSelect extends FilterSelection
 {
    /*! \brief Constructs RatedSelect-Filter extending FilterSelection. */
-   function FilterRatedSelect($name, $dbfield, $config)
+   public function __construct( $name, $dbfield, $config )
    {
       $this->check_forbid_sql_template( 1 );
 
@@ -3063,10 +3067,12 @@ class FilterRatedSelect extends FilterSelection
          T_('All#ratedsel') => '',
          T_('Yes#ratedsel') => $query_yes,
          T_('No#ratedsel')  => $query );
-      parent::FilterSelection($name, $choices, $config);
+
+      parent::__construct($name, $choices, $config);
       $this->type = 'RatedSelect';
       $this->syntax_descr = ''; // action: select from choices
-   }
+   }//__construct
+
 } // end of 'FilterRatedSelect'
 
 
@@ -3090,17 +3096,18 @@ class FilterRatedSelect extends FilterSelection
 class FilterBoolean extends Filter
 {
    /*! \brief Constructs Boolean-Filter. */
-   function FilterBoolean($name, $dbfield, $config)
+   public function __construct( $name, $dbfield, $config )
    {
       static $_default_config = array( FC_DEFAULT => false ); // filter is ON or OFF (default)
-      parent::Filter($name, $dbfield, $_default_config, $config);
+
+      parent::__construct($name, $dbfield, $_default_config, $config);
       $this->type = 'Boolean';
       $this->syntax_descr = ''; // action: mark checkbox
       $this->syntax_help = '';
    }
 
    /*! \brief Handles check for checkbox. */
-   function parse_value( $name, $val )
+   public function parse_value( $name, $val )
    {
       $val = $this->handle_default( $name, $val );
       $this->init_parse($val);
@@ -3114,14 +3121,16 @@ class FilterBoolean extends Filter
          $clause = ($this->value) ? $this->dbfield : '';
       $this->query = $this->build_base_query( $clause, true );
       return true;
-   }
+   }//parse_value
 
    /*! \brief Returns checkbox form-element. */
-   function get_input_element( $prefix, $attr = array() )
+   public function get_input_element( $prefix, $attr = array() )
    {
       return $this->build_checkbox_elem( $prefix, $this->get_config(FC_LABEL) );
    }
+
 } // end of 'FilterBoolean'
+
 
 
 
@@ -3160,36 +3169,17 @@ define('FSCORE_B_SCORE',  8);
 define('FSCORE_W_SCORE',  9);
 define('FSCORE_JIGO',    10);
 
-// sql-templates for the corresponding score-mode, %s is replaced with db-field
-global $FSCORE_BUILD_SQL; //PHP5
-$FSCORE_BUILD_SQL = array(
-      '',
-      //'?+R', 'B+R', 'W+R',
-      '%s IN (-'.SCORE_RESIGN.','.SCORE_RESIGN.')',
-      '%s = -'.SCORE_RESIGN,
-      '%s = '.SCORE_RESIGN,
-      //'?+T', 'B+T', 'W+T',
-      '%s IN (-'.SCORE_TIME.','.SCORE_TIME.')',
-      '%s = -'.SCORE_TIME,
-      '%s = '.SCORE_TIME,
-      //'?+?', 'B+?', 'W+?',
-      'ABS(%s)',
-      '-%s',
-      '%s',
-      //Jigo
-      '%s = 0',
-   );
-
 class FilterScore extends Filter
 {
    /*! \brief element-name for result-selectbox */
-   var $elem_result;
+   protected $elem_result;
 
    /*! \brief Constructs Score-Filter. */
-   function FilterScore($name, $dbfield, $config)
+   public function __construct( $name, $dbfield, $config )
    {
       static $_default_config = array( FC_SIZE => 4 );
-      parent::Filter($name, $dbfield, $_default_config, $config);
+
+      parent::__construct($name, $dbfield, $_default_config, $config);
       $this->type = 'Score';
       $this->tok_config = $this->create_TokenizerConfig();
       $this->syntax_help = T_('SCORE#filterhelp');
@@ -3212,10 +3202,10 @@ class FilterScore extends Filter
       $this->elem_result = "{$this->name}r";
       $this->add_element_name( $this->elem_result );
       $this->values[$this->elem_result] = 0; // default (All)
-   }
+   }//__construct
 
    /*! \brief Parses score-value using NumericParser and handle selection. */
-   function parse_value( $name, $val )
+   public function parse_value( $name, $val )
    {
       $val = $this->handle_default( $name, $val );
       $this->init_parse($val, $name); // if elem, value for 2nd elem saved
@@ -3231,14 +3221,37 @@ class FilterScore extends Filter
          error('invalid_filter', "FilterScore.parse_value.unknown_key({$this->id},$name,$val)");
 
       return true;
-   }
+   }//parse_value
 
    /*!
     * \brief Builds query for multi-element filter.
     * expecting: values[elem_result] set, p_value, p_start, p_end set or unset
     */
-   function build_query()
+   public function build_query()
    {
+      // sql-templates for the corresponding score-mode, %s is replaced with db-field
+      static $FSCORE_BUILD_SQL = null;
+      if( is_null($FSCORE_BUILD_SQL) ) // lazy-init because of non-const-values
+      {
+         $FSCORE_BUILD_SQL = array(
+            '',
+            //'?+R', 'B+R', 'W+R',
+            '%s IN (-'.SCORE_RESIGN.','.SCORE_RESIGN.')',
+            '%s = -'.SCORE_RESIGN,
+            '%s = '.SCORE_RESIGN,
+            //'?+T', 'B+T', 'W+T',
+            '%s IN (-'.SCORE_TIME.','.SCORE_TIME.')',
+            '%s = -'.SCORE_TIME,
+            '%s = '.SCORE_TIME,
+            //'?+?', 'B+?', 'W+?',
+            'ABS(%s)',
+            '-%s',
+            '%s',
+            //Jigo
+            '%s = 0',
+         );
+      }
+
       // check for expected values
       //   idx 0: show all
       //   idx 1-3: '?+R', 'B+R', 'W+R',
@@ -3264,7 +3277,6 @@ class FilterScore extends Filter
       $arrfn = $query->get_parts(SQLP_FNAMES);
       $field = $arrfn[0];
 
-      global $FSCORE_BUILD_SQL;
       $clause = sprintf( $FSCORE_BUILD_SQL[$idx], $field );
       if( $idx >= FSCORE_SCORE && $idx <= FSCORE_W_SCORE )
       {
@@ -3277,10 +3289,10 @@ class FilterScore extends Filter
       $parttype = ($this->get_config(FC_ADD_HAVING)) ? SQLP_HAVING : SQLP_WHERE;
       $query->add_part( $parttype, $clause ); // use having to allow alias-FNAMES
       $this->query = $query;
-   }
+   }//build_query
 
    /*! \brief Returns selectbox and input-text form-element for score-mode-selection and score-value. */
-   function get_input_element($prefix, $attr = array() )
+   public function get_input_element($prefix, $attr = array() )
    {
       // choices-array for score-results (for selectbox)
       static $FSCORE_RESULT_choices = array(
@@ -3300,7 +3312,8 @@ class FilterScore extends Filter
          $prefix, $attr, @$this->config[FC_MAXLEN], @$this->config[FC_SIZE] );
 
       return $r;
-   }
+   }//get_input_element
+
 } // end of 'FilterScore'
 
 
@@ -3320,9 +3333,9 @@ class FilterScore extends Filter
 class FilterRatingDiff extends FilterNumeric
 {
    /*! \brief Constructs RatingDiff-Filter by extending FilterNumeric (using static num-factor and other syntax-description). */
-   function FilterRatingDiff($name, $dbfield, $config)
+   public function __construct( $name, $dbfield, $config )
    {
-      parent::FilterNumeric($name, $dbfield, $config);
+      parent::__construct($name, $dbfield, $config);
       $this->type = 'RatingDiff';
 
       $this->num_factor = 100;
@@ -3334,8 +3347,10 @@ class FilterRatingDiff extends FilterNumeric
          $s = $this->tok_config->sep;
          $this->syntax_descr = "0.3, {$s}0.14, .1{$s}.5, 0.9{$s}"; // pi
       }
-   }
+   }//__construct
+
 } // end of 'FilterRatingDiff'
+
 
 
 
@@ -3368,30 +3383,29 @@ class FilterCheckboxArray extends Filter
     * Example:
     *    array( '<td>%s Checkbox1</td>' => array( '10', 'text for visually impaired for checkbox1' ), ...)
     */
-   var $choices;
+   protected $choices;
    /*! \brief array( fname => value) needed to build query. */
-   var $clauses;
+   protected $clauses = array();
    /*! \brief start-index */
-   var $idx_start;
+   protected $idx_start = 1;
 
    /*! \brief Constructs CheckboxArray-Filter. */
-   function FilterCheckboxArray($name, $dbfield, $config)
+   public function __construct( $name, $dbfield, $config )
    {
       static $_default_config = array( FC_SIZE => 1 ); // FC_SIZE is nr of cols per row
-      parent::Filter($name, $dbfield, $_default_config, $config);
+
+      parent::__construct($name, $dbfield, $_default_config, $config);
       $this->type = 'CheckboxArray';
       $this->syntax_descr = T_('Select none, one or more elements');
       $this->syntax_help = '';
 
       $this->check_forbid_sql_template( 1 );
-      $this->idx_start = 1;
-      $this->clauses = array();
 
       $this->choices = $this->get_config(FC_MULTIPLE);
       if( $this->choices == '' )
-         error('invalid_filter', "filter.FilterCheckboxArray.miss_FC_MULTIPLE({$this->id})");
+         error('invalid_filter', "FilterCheckboxArray.miss_FC_MULTIPLE({$this->id})");
       if( !is_array($this->choices) )
-         error('invalid_filter', "filter.FilterCheckboxArray.expect_array_FC_MULTIPLE({$this->id})");
+         error('invalid_filter', "FilterCheckboxArray.expect_array_FC_MULTIPLE({$this->id})");
 
       // init field-names
       $idx = 0;
@@ -3406,7 +3420,7 @@ class FilterCheckboxArray extends Filter
          if( $is_bitmask && !is_numeric($value) )
          {
             // FC_BITMASK-config forces integer-values for FC_MULTIPLE-values
-            error('invalid_filter', "filter.FilterCheckboxArray.bad_array_FC_BITMASK({$this->id})");
+            error('invalid_filter', "FilterCheckboxArray.bad_array_FC_BITMASK({$this->id})");
          }
       }
 
@@ -3417,10 +3431,10 @@ class FilterCheckboxArray extends Filter
       foreach( $defarr as $idx )
          $newdef[ $suffix . $idx ] = 1;
       $this->read_defaults( $newdef );
-   }
+   }//__construct
 
    /*! \brief Handles multiple checkboxes. */
-   function parse_value( $name, $val )
+   public function parse_value( $name, $val )
    {
       if( !array_key_exists($name, $this->values) )
          return false;
@@ -3428,13 +3442,13 @@ class FilterCheckboxArray extends Filter
       $val = $this->handle_default( $name, $val );
       $this->init_parse($val, $name);
       return true;
-   }
+   }//parse_value
 
    /*!
     * \brief Builds query for multi-element filter combining values from checkboxes for one dbfield-spec.
     * expecting: values[elem_chkboxes] set 0|1
     */
-   function build_query()
+   public function build_query()
    {
       // build SQL
       $query = $this->build_base_query($this->dbfield, false, true); // query with set SQLP_FNAMES
@@ -3471,10 +3485,10 @@ class FilterCheckboxArray extends Filter
       $parttype = ($this->get_config(FC_ADD_HAVING)) ? SQLP_HAVING : SQLP_WHERE;
       $query->add_part( $parttype, $clause ); // use having to allow alias-FNAMES
       $this->query = $query;
-   }
+   }//build_query
 
    /*! \brief Returns matrix of checkbox form-elements with maximum FC_SIZE-columns. */
-   function get_input_element($prefix, $attr = array() )
+   public function get_input_element($prefix, $attr = array() )
    {
       $rows = array();
       $cols = array();
@@ -3509,14 +3523,14 @@ class FilterCheckboxArray extends Filter
       $r .= implode( "</tr><tr>\n", $rows );
       $r .= "</tr></table>\n";
       return $r;
-   }
+   }//get_input_element
 
    /*! \brief Internally used to build checkbox form-element-name. */
-   function build_fname( $idx )
+   private function build_fname( $idx )
    {
       return "{$this->name}_{$idx}";
    }
-} // end of 'FilterCheckboxArray'
 
+} // end of 'FilterCheckboxArray'
 
 ?>

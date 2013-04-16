@@ -70,28 +70,28 @@ define('SEP_PROFVAL', '&'); // separator of fields (text stored in DB)
 class Profile
 {
    /*! \brief ID (PK from db). */
-   var $id;
+   public $id;
    /*! \brief user-id for profile. */
-   var $uid;
+   public $uid;
    /*! \brief type (must be one of PROFTYPE_). */
-   var $Type;
+   public $Type;
    /*! \brief sort-order (1..n). */
-   var $SortOrder;
+   public $SortOrder;
    /*! \brief bool active (Y|N-enum in DB). */
-   var $Active;
+   public $Active;
    /*! \brief user-chosen name */
-   var $Name;
+   public $Name;
    /*! \brief Date when profile has been lastchanged (unix-time). */
-   var $Lastchanged;
+   public $Lastchanged;
    /*! \brief profile-content/url/address. */
-   var $Text;
+   public $Text;
 
    /*!
     * \brief Constructs Profile-object with specified arguments: lastchanged are in UNIX-time.
     *        $id may be 0 to add a new profile
     * \param $type must be non-0
     */
-   function Profile( $id=0, $uid=0, $type=0, $sortorder=1, $active=false, $name='', $lastchanged=0, $text='' )
+   public function __construct( $id=0, $uid=0, $type=0, $sortorder=1, $active=false, $name='', $lastchanged=0, $text='' )
    {
       // allowed for guests, but no DB-writing ops
       if( !is_numeric($uid) || $uid < 0 )
@@ -105,10 +105,10 @@ class Profile
       $this->Name = $name;
       $this->Lastchanged = (int) $lastchanged;
       $this->Text = $text;
-   }
+   }//__construct
 
    /*! \brief Sets valid profile-type (exception on invalid type). */
-   function set_type( $type )
+   public function set_type( $type )
    {
       if( !is_numeric($type) || $type < 1 || $type > MAX_PROFTYPE )
          error('invalid_args', "profile.set_type($type)");
@@ -119,7 +119,7 @@ class Profile
     * \brief Sets profile-content built from given array (URL-like) or raw-text (converted to string).
     * \param $arr null, array with key-values, or raw-text
     */
-   function set_text( $arr )
+   public function set_text( $arr )
    {
       if( is_null($arr) )
          $this->Text = '0'; // representation of NULL
@@ -127,12 +127,12 @@ class Profile
          $this->Text = build_url( $arr, false, SEP_PROFVAL );
       else
          $this->Text = (string)$arr; // raw-format
-   }
+   }//set_text
 
    /*!
     * \brief Returns parsed profile-content as array with splitted values, or as raw-text ($raw=true).
     */
-   function get_text( $raw=false )
+   public function get_text( $raw=false )
    {
       if( $raw )
          return $this->Text;
@@ -153,7 +153,7 @@ class Profile
     * \brief Inserts or updates current profile-data in database (may replace existing profile);
     *        Set id to 0 if you want an insert.
     */
-   function save_profile( $check_user=false )
+   public function save_profile( $check_user=false )
    {
       $dbgmsg = "profile.save_profile({$this->id},{$this->uid},{$this->Type})";
       if( $this->uid <= GUESTS_ID_MAX )
@@ -182,13 +182,13 @@ class Profile
       ta_begin();
       {//HOT-section to save game profile
          db_query( $dbgmsg.'.replace', "REPLACE INTO Profiles SET " . $upd->get_query() );
-         Profile::delete_profile_cache( $dbgmsg, $this->uid, $this->Type );
+         self::delete_profile_cache( $dbgmsg, $this->uid, $this->Type );
       }
       ta_end();
    }//save_profile
 
    /*! \brief Deletes current profile from database. */
-   function delete_profile()
+   public function delete_profile()
    {
       $dbgmsg = "profile.delete_profile({$this->id},{$this->uid},{$this->Type})";
       if( $this->uid <= GUESTS_ID_MAX )
@@ -199,14 +199,14 @@ class Profile
          ta_begin();
          {//HOT-section to delete game profile
             db_query( $dbgmsg.'.del', "DELETE FROM Profiles WHERE ID='{$this->id}' LIMIT 1" );
-            Profile::delete_profile_cache( $dbgmsg, $this->uid, $this->Type );
+            self::delete_profile_cache( $dbgmsg, $this->uid, $this->Type );
          }
          ta_end();
       }
-   }
+   }//delete_profile_cache
 
    /*! \brief Returns string-representation of this object (for debugging purposes). */
-   function to_string()
+   public function to_string()
    {
       return "Profile(id={$this->id}): "
          . "user_id=[{$this->uid}], "
@@ -216,13 +216,13 @@ class Profile
          . "name=[{$this->Name}], "
          . "lastchanged=[{$this->Lastchanged}], "
          . "text=[{$this->Text}]";
-   }
+   }//to_string
 
 
    // ---------- Static Class functions ----------------------------
 
    /*! \brief Returns db-fields to be used for query of Profile-object. */
-   function get_query_fields()
+   private static function get_query_fields()
    {
       return array(
          'ID', 'User_ID', 'Type', 'SortOrder', 'Active', 'Name', 'Lastchanged', 'Text',
@@ -234,7 +234,7 @@ class Profile
     * \brief Returns Profile-object for specified user and type set
     *        lastchanged=$NOW set and all others in default-state.
     */
-   function new_profile( $uid, $type, $prof_id=0 )
+   public static function new_profile( $uid, $type, $prof_id=0 )
    {
       // id=set, uid=?, Type=?, SortOrder=1, Active=false, Name='', Lastchanged=NOW, Text=''
       $profile = new Profile( $prof_id, $uid, $type );
@@ -243,7 +243,7 @@ class Profile
    }
 
    /*! \brief Returns Profile-object lastchanged from specified (db-)row with fields defined by func fields_profile. */
-   function new_from_row( $row )
+   private static function new_from_row( $row )
    {
       $profile = new Profile(
          @$row['ID'], @$row['User_ID'], @$row['Type'],
@@ -256,18 +256,18 @@ class Profile
     * \brief Returns single Profile-object for specified profile-id (must be owned by given user-id).
     * \return null if no profile found.
     */
-   function load_profile_by_id( $prof_id, $user_id )
+   public static function load_profile_by_id( $prof_id, $user_id )
    {
       if( !is_numeric($prof_id) || !is_numeric($user_id) )
-         error('invalid_args', "Profile::load_profile_by_id($prof_id,$user_id)");
+         error('invalid_args', "Profile:load_profile_by_id($prof_id,$user_id)");
 
-      $fields = implode(',', Profile::get_query_fields());
-      $row = mysql_single_fetch("Profile::load_profile_by_id.find($prof_id,$user_id)",
+      $fields = implode(',', self::get_query_fields());
+      $row = mysql_single_fetch("Profile:load_profile_by_id.find($prof_id,$user_id)",
             "SELECT $fields FROM Profiles WHERE ID='$prof_id' AND User_ID='$user_id' LIMIT 1");
       if( !$row )
          return NULL;
 
-      return Profile::new_from_row( $row );
+      return self::new_from_row( $row );
    }//load_profile_by_id
 
    /*!
@@ -276,30 +276,30 @@ class Profile
     * \param $load_templates true to order by profile-template related stuff
     * \return array( Profile, ...); otherwise empty-array if no profile found
     */
-   function load_profiles( $user_id, $types, $load_templates=false )
+   public static function load_profiles( $user_id, $types, $load_templates=false )
    {
       if( !is_numeric($user_id) )
-         error('invalid_args', "Profile::load_profiles.check.user($user_id)");
+         error('invalid_args', "Profile:load_profiles.check.user($user_id)");
       if( !is_array($types) )
       {
          if( !is_numeric($types) )
-            error('invalid_args', "Profile::load_profiles.check.type($user_id,$types)");
+            error('invalid_args', "Profile:load_profiles.check.type($user_id,$types)");
          else
             $types = array( $types );
       }
       $cnt_types = count($types);
       if( is_array($types) && $cnt_types == 0 )
-         error('invalid_args', "Profile::load_profiles.check.types($user_id,$types)");
+         error('invalid_args', "Profile:load_profiles.check.types($user_id,$types)");
 
       $use_cache = ( $cnt_types == 1 && !$load_templates );
       $sql_types = implode(',', $types);
-      $dbgmsg = "Profile::load_profiles($user_id,$load_templates,T[$sql_types])";
+      $dbgmsg = "Profile:load_profiles($user_id,$load_templates,T[$sql_types])";
       $key = "Profile.$user_id.$sql_types";
 
       $arr_profiles = ( $use_cache ) ? DgsCache::fetch( $dbgmsg, CACHE_GRP_PROFILE, $key ) : null;
       if( is_null($arr_profiles) )
       {
-         $fields = implode(',', Profile::get_query_fields());
+         $fields = implode(',', self::get_query_fields());
          $db_result = db_query( $dbgmsg,
                "SELECT $fields FROM Profiles " .
                "WHERE User_ID=$user_id AND Type IN ($sql_types) " .
@@ -307,7 +307,7 @@ class Profile
 
          $arr_profiles = array();
          while( ($row = mysql_fetch_assoc($db_result)) )
-            $arr_profiles[] = Profile::new_from_row($row);
+            $arr_profiles[] = self::new_from_row($row);
          mysql_free_result($db_result);
 
          if( $use_cache )
@@ -317,13 +317,13 @@ class Profile
       return $arr_profiles;
    }//load_profiles
 
-   function delete_profile_cache( $dbgmsg, $uid, $type )
+   public static function delete_profile_cache( $dbgmsg, $uid, $type )
    {
       DgsCache::delete( $dbgmsg, CACHE_GRP_PROFILE, "Profile.$uid.$type" );
    }
 
    /*! \brief Deletes all profiles for specific user-id and type from database. */
-   function delete_all_profiles( $uid, $type )
+   public static function delete_all_profiles( $uid, $type )
    {
       $dbgmsg = "profile.delete_all_profiles($uid,$type)";
       if( !is_numeric($uid) || $uid <= GUESTS_ID_MAX )
@@ -334,7 +334,7 @@ class Profile
       ta_begin();
       {//HOT-section to delete game profile
          db_query( $dbgmsg.'.del', "DELETE FROM Profiles WHERE User_ID=$uid AND Type=$type" );
-         Profile::delete_profile_cache( $dbgmsg, $uid, $type );
+         self::delete_profile_cache( $dbgmsg, $uid, $type );
       }
       ta_end();
    }//delete_all_profiles
@@ -366,59 +366,60 @@ define('SPFORM_PROFILE_ACTION', 'profact_sp');
 class SearchProfile
 {
    /*! \brief user ID */
-   var $user_id;
+   private $user_id;
    /*! \brief Profile-type defined by (PROFTYPE_) */
-   var $profile_type;
+   private $profile_type;
    /*! \brief Prefix to be used to read profile-action from _REQUEST. */
-   var $prefix;
+   private $prefix;
    /*! \brief if true, no default-profile is allowed to be used (normally false).  */
-   var $forbid_default;
+   private $forbid_default;
 
    /*! \brief single Profile-object read from DB or newly created (with id=0). */
-   var $profile;
+   private $profile = null;
    /*! \brief Array with regex-parts identifying arg-names to save profile for. */
-   var $saveargs;
+   private $saveargs = array();
    /*! \brief Set with registered arg-names [ argname => 1 ]. */
-   var $argnames;
+   private $argnames = array();
    /*! \brief Map with values for args [ argname => argvalue ]. */
-   var $args;
+   private $args = null;
 
    /*! \brief true, if an arg-reset should be done (reset=set-to-defaults). */
-   var $need_reset;
+   private $need_reset = false;
    /*! \brief true, if args should be cleared (clear=make-empty). */
-   var $need_clear;
+   private $need_clear = false;
    /*! \brief true, if URL-args have precedence over profile-values (used for SPROF_CURR_VALUES). */
-   var $skip_profile_values;
+   private $skip_profile_values = false;
    /*! \brief true, if URL-args have precedence over profile-values (used for loading profile). */
-   var $use_url_args;
+   private $use_url_args = false;
 
    /*! \brief Constructs SearchProfile for user and given profile-type. */
-   function SearchProfile( $user_id, $proftype, $prefix='' )
+   public function __construct( $user_id, $proftype, $prefix='' )
    {
       $this->user_id = $user_id;
       $this->profile_type = $proftype;
       $this->prefix = $prefix;
       $this->forbid_default = get_request_arg(SP_ARG_NO_DEF, false);
 
-      $this->profile = NULL;
-      $this->saveargs = array();
-      $this->argnames = array();
-      $this->args = NULL;
-      $this->need_reset = false;
-      $this->need_clear = false;
-      $this->skip_profile_values = false;
-      $this->use_url_args = false;
-
       $this->load_profile();
    }
 
-   function set_forbid_default()
+   public function set_forbid_default()
    {
       $this->forbid_default = true;
    }
 
+   public function need_reset()
+   {
+      return $this->need_reset;
+   }
+
+   public function need_clear()
+   {
+      return $this->need_clear;
+   }
+
    /*! \brief Sets profile-var, if profile found; false otherwise and profile-var is NULL. */
-   function load_profile()
+   public function load_profile()
    {
       $this->profile = NULL;
 
@@ -426,13 +427,13 @@ class SearchProfile
       $arr_profiles = Profile::load_profiles( $this->user_id, $this->profile_type );
       if( is_array($arr_profiles) && count($arr_profiles) > 0 )
          $this->profile = $arr_profiles[0];
-   }
+   }//load_profile
 
    /*!
     * \brief Registers argument-names as regex-parts to identify args to save.
     * \param $regex regex-part to identify arg-names needed to save profile
     */
-   function register_regex_save_args( $regex )
+   public function register_regex_save_args( $regex )
    {
       $this->saveargs[] = $regex;
    }
@@ -441,7 +442,7 @@ class SearchProfile
     * \brief Returns regex built from regex added by register_save_args-func.
     * \internal
     */
-   function _build_regex_save_args()
+   private function _build_regex_save_args()
    {
       $regex = (count($this->saveargs) > 0) ? implode('|', $this->saveargs) : "[a-z]\w*";
       return "/^($regex)$/i";
@@ -451,7 +452,7 @@ class SearchProfile
     * \brief Registers argument-names, that are provided as profile.
     * \param $arg_names array with arg-names or string
     */
-   function register_argnames( $arg_names )
+   public function register_argnames( $arg_names )
    {
       if( is_string($arg_names) )
       {
@@ -462,23 +463,23 @@ class SearchProfile
          foreach( $arg_names as $name )
             $this->argnames[$name] = 1;
       }
-   }
+   }//register_argnames
 
    /*! \brief Returns true, if user has a saved (and optionally active) profile. */
-   function has_profile( $chk_active=false )
+   public function has_profile( $chk_active=false )
    {
       if( !is_null($this->profile) && ($this->profile->id > 0) )
          $has_profile = ($chk_active) ? $this->profile->Active : true;
       else
          $has_profile = false;
       return $has_profile;
-   }
+   }//has_profile
 
    /*!
     * \brief Returns value from saved-profile for given arg-name;
     *        NULL, if arg has not been saved (using default-value).
     */
-   function get_arg( $name )
+   public function get_arg( $name )
    {
       if( $this->need_reset )
          $result = NULL;
@@ -509,7 +510,7 @@ class SearchProfile
    }//get_arg
 
    /*! \brief Builds map with data to save for profile. */
-   function build_save_data( $arr_in )
+   private function build_save_data( $arr_in )
    {
       $arrdata = array();
       $regex = $this->_build_regex_save_args();
@@ -519,7 +520,7 @@ class SearchProfile
             $arrdata[$key] = $val;
       }
       return $arrdata;
-   }
+   }//build_save_data
 
    /*!
     * \brief Handles profile-action read from according form-entry:
@@ -529,7 +530,7 @@ class SearchProfile
     * \param $prof_action null = use user-action from form
     * \note NOTE: argnames not complete!!
     */
-   function handle_action( $prof_action=null )
+   public function handle_action( $prof_action=null )
    {
       if( is_null($prof_action) )
       {
@@ -583,7 +584,7 @@ class SearchProfile
    }//handle_action
 
    /*! \brief Saves profile: save values from _REQUEST for registered arg-names. */
-   function save_profile( $save_default )
+   public function save_profile( $save_default )
    {
       // build profile-data to save
       $arr_savedata = $this->build_save_data( $_REQUEST );
@@ -600,16 +601,16 @@ class SearchProfile
       $this->set_sysmessage( (bool)$save_default
          ? T_('Profile saved as default!')
          : T_('Profile saved!') );
-   }
+   }//save_profile
 
    /*! \brief Sets sys-message. */
-   function set_sysmessage( $msg )
+   public function set_sysmessage( $msg )
    {
       $_REQUEST['sysmsg'] = ( get_magic_quotes_gpc() ) ? addslashes($msg) : $msg;
    }
 
    /*! \brief Returns string-representation of this object (for debugging purposes). */
-   function to_string()
+   public function to_string()
    {
       if( is_null($this->args) )
          $args_str = ', NULL';
@@ -630,10 +631,10 @@ class SearchProfile
          . "use_url_args=[{$this->use_url_args}], "
          . (is_null($this->profile) ? 'profile=[NULL]' : $this->profile->to_string() ) . ', '
          . 'args=['.substr($args_str,2).']';
-   }
+   }//to_string
 
    /*! \brief Returns RequestParameters with form-element-names (to be included into page-links). */
-   function get_request_params()
+   public function get_request_params()
    {
       $rp = new RequestParameters();
       $rp->add_entry( $this->prefix . SPFORM_PROFILE_ACTION, SPROF_CURR_VALUES );
@@ -645,7 +646,7 @@ class SearchProfile
     *        to be used with Table or External-Form (submit not included).
     * \param $form instance of Form-class
     */
-   function get_form_elements( $form )
+   public function get_form_elements( $form )
    {
       $arr_actions = array(
          SPROF_CURR_VALUES   => T_('Current values#filter'),
@@ -670,7 +671,7 @@ class SearchProfile
          SPROF_CURR_VALUES ); // curr-values is "normal"-action
 
       return $elems;
-   }
+   }//get_form_elements
 
 } // end of 'SearchProfile'
 

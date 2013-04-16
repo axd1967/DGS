@@ -28,65 +28,59 @@ $TranslateGroups[] = "Error";
   *
   * \brief Class to manage error-code and some attributes of additional logging with error-texts
   */
-
-// lazy-init in ErrorCode-funcs
-global $ARR_GLOBALS_ERRORS; //PHP5
-$ARR_GLOBALS_ERRORS = array();
-
 class ErrorCode
 {
+   private static $ARR_ERRORS = array(); // lazy-init in ErrorCode-funcs: [key][errorcode] => error-text
+
    // ------------ static functions ----------------------------
 
-   function echo_error_text( $error_code, $error_log_id )
+   public function echo_error_text( $error_code, $error_log_id )
    {
-      if( $error_log_id && ErrorCode::is_shown_error_log_id( $error_code ) )
+      if( $error_log_id && self::is_shown_error_log_id( $error_code ) )
          echo span('ErrorMsg', " [ERRLOG $error_log_id] ($error_code): ");
-      echo ErrorCode::get_error_text( $error_code );
+      echo self::get_error_text( $error_code );
    }
 
-   function get_error_text( $error_code )
+   public function get_error_text( $error_code )
    {
-      global $ARR_GLOBALS_ERRORS;
-
-      ErrorCode::init();
-      if( isset($ARR_GLOBALS_ERRORS['TEXT'][$error_code]) )
-         return $ARR_GLOBALS_ERRORS['TEXT'][$error_code];
+      self::init();
+      if( isset(self::$ARR_ERRORS['TEXT'][$error_code]) )
+         return self::$ARR_ERRORS['TEXT'][$error_code];
       else
-         return " ($error_code) " . @$ARR_GLOBALS_ERRORS['TEXT']['internal_error']; // default-error
+         return " ($error_code) " . @self::$ARR_ERRORS['TEXT']['internal_error']; // default-error
    }
 
-   function is_shown_error_log_id( $error_code )
+   // \internal
+   private function is_shown_error_log_id( $error_code )
    {
-      global $ARR_GLOBALS_ERRORS;
-
-      ErrorCode::init();
-      if( isset($ARR_GLOBALS_ERRORS['LOG_ID'][$error_code]) )
-         return $ARR_GLOBALS_ERRORS['LOG_ID'][$error_code];
+      self::init();
+      if( isset(self::$ARR_ERRORS['LOG_ID'][$error_code]) )
+         return self::$ARR_ERRORS['LOG_ID'][$error_code];
       else
          return true; // show error-log-id for unknown error-code
    }
 
-   function is_sensitive( $error_code )
+   /*! \brief Returns true, if error-code contains sensitive-data that is not meant for public eyes. */
+   public function is_sensitive( $error_code )
    {
-      global $ARR_GLOBALS_ERRORS;
-
-      ErrorCode::init();
-      if( isset($ARR_GLOBALS_ERRORS['SENSITIVE'][$error_code]) )
-         return $ARR_GLOBALS_ERRORS['SENSITIVE'][$error_code];
+      self::init();
+      if( isset(self::$ARR_ERRORS['SENSITIVE'][$error_code]) )
+         return self::$ARR_ERRORS['SENSITIVE'][$error_code];
       else
          return false; // default = non-sensitive data shown
    }
 
-   function init()
+   // \internal
+   private function init()
    {
-      global $ARR_GLOBALS_ERRORS, $base_path;
+      global $base_path;
 
       // NOTE: currently undefined error-codes:
       //   assert, couldnt_open_file, database_corrupted, mysql_insert_post, mysql_update_message,
       //   mysql_update_game, not_implemented
 
       // lazy-init of texts
-      if( !isset($ARR_GLOBALS_ERRORS['TEXT']) )
+      if( !isset(self::$ARR_ERRORS['TEXT']) )
       {
          $arr = array();
          $arr_logid = array();
@@ -129,7 +123,7 @@ class ErrorCode
          $arr_secret['mail_failure'] = 1; // contains email
 
          // IMPORTANT NOTE:
-         //   when adding new error-codes also check need_db_errorlog()-func in 'include/error_functions.php' !!
+         //   when adding new error-codes also check DgsErrors::need_db_errorlog()-func in 'include/error_functions.php' !!
 
          $arr['internal_error'] = // default-error-text
             T_("Unknown problem. This shouldn't happen. Please send the url of this page to the support, so that this doesn't happen again.");
@@ -664,11 +658,11 @@ class ErrorCode
          $arr['invalid_profile'] =
             T_("Sorry, this profile is not existing or is not suitable for this operation.");
 
-         $ARR_GLOBALS_ERRORS['TEXT'] = $arr;
-         $ARR_GLOBALS_ERRORS['LOG_ID'] = $arr_logid;
-         $ARR_GLOBALS_ERRORS['SENSITIVE'] = $arr_secret;
+         self::$ARR_ERRORS['TEXT'] = $arr;
+         self::$ARR_ERRORS['LOG_ID'] = $arr_logid;
+         self::$ARR_ERRORS['SENSITIVE'] = $arr_secret;
       }
-   } //init
+   }//init
 
 } // end of 'ErrorCode'
 

@@ -191,7 +191,7 @@ require_once( "include/message_functions.php" );
    echo "<center>\n";
 
    $form = new Form( 'folderform', 'edit_folders.php', FORM_POST );
-   $form->max_nr_columns = 11;
+   $form->set_max_nr_columns(11);
 
    $form->add_row( array( 'HEADER', T_('Edit message folders') ) );
 

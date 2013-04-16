@@ -76,7 +76,7 @@ else
 
    $sgf = new SgfBuilder( $gid, /*use_buf*/false );
    if( $opt_mpg & 1 )
-      $sgf->mpg_node_add_user = false;
+      $sgf->set_mpg_node_add_user(false);
 
    $row = $sgf->load_game_info();
    extract($row);
@@ -89,7 +89,7 @@ else
    {
       $owned_comments = DAME;
       $cookie_handle = safe_getcookie('handle');
-      if( $sgf->is_mpgame )
+      if( $sgf->is_mpgame() )
       {
          $sgf->find_mpg_user( $cookie_handle );
          if( is_array($sgf->mpg_active_user) )
@@ -123,7 +123,7 @@ else
       $owned_comments = DAME;
 
    // load GamesNotes for player
-   if( $sgf->include_games_notes && ($owned_comments != DAME) && ($owned_uid > 0) )
+   if( $sgf->is_include_games_notes() && ($owned_comments != DAME) && ($owned_uid > 0) )
       $sgf->load_player_game_notes( $owned_uid );
 
    $sgf->load_trimmed_moves( !$no_comments );

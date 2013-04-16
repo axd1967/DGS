@@ -51,7 +51,7 @@ class QuickSuite
     * \brief Returns QuickHandler for given object and command (or taken from URL if args==null).
     * \note Fires error if no handler found.
     */
-   function getQuickHandler( $obj=null, $cmd=null )
+   public static function getQuickHandler( $obj=null, $cmd=null )
    {
       // NOTE: Handler must implement static interface-method canHandle(obj,cmd)
       //   List of handlers is checked if obj/cmd is supported;
@@ -83,10 +83,10 @@ class QuickSuite
             $quick_handler = new $handler_class( $quick_obj );
       }
       if( is_null($quick_handler) )
-         error('invalid_args', "QuickSuite.getQuickHandler.no_handler($obj,$cmd)");
+         error('invalid_args', "QuickSuite:getQuickHandler.no_handler($obj,$cmd)");
 
       return $quick_handler;
-   }
+   }//getQuickHandler
 
 } // end of 'QuickSuite'
 ?>

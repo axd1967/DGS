@@ -164,7 +164,7 @@ $GLOBALS['ThePage'] = new Page('TournamentPoolCreate');
 
    list( $seed_order_def, $arr_seed_order ) = $tprops->build_seed_order();
    $seed_order_val = get_request_arg('seed_order', $seed_order_def);
-   list( $slice_mode_def, $arr_slice_mode ) = TournamentPool::build_slice_mode();
+   list( $slice_mode_def, $arr_slice_mode ) = TournamentPool::get_slice_modes();
    $slice_mode_val = get_request_arg('slice_mode', $slice_mode_def);
 
    $tform->add_row( array( 'HR' ));

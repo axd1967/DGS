@@ -36,25 +36,25 @@ require_once( 'include/std_functions.php' );
   */
 class User
 {
-   var $ID;
-   var $Name;
-   var $Handle;
-   var $Type;
-   var $Lastaccess;
-   var $Country;
-   var $Rating;
-   var $RatingStatus;
-   var $GamesRated;
-   var $GamesFinished;
-   var $AdminOptions;
-   var $AdminLevel;
+   public $ID;
+   public $Name;
+   public $Handle;
+   public $Type;
+   public $Lastaccess;
+   public $Country;
+   public $Rating;
+   public $RatingStatus;
+   public $GamesRated;
+   public $GamesFinished;
+   public $AdminOptions;
+   public $AdminLevel;
 
    // other DB-fields
 
-   var $urow;
+   public $urow = null;
 
    /*! \brief Constructs a User with specified args. */
-   function User( $id=0, $name='', $handle='', $type=0, $lastaccess=0, $country='', $rating=NULL,
+   public function __construct( $id=0, $name='', $handle='', $type=0, $lastaccess=0, $country='', $rating=NULL,
                   $rating_status=RATING_NONE, $games_rated=0, $games_finished=0, $admin_opts=0,
                   $admin_level=0 )
    {
@@ -70,11 +70,9 @@ class User
       $this->GamesFinished = (int)$games_finished;
       $this->AdminOptions = (int)$admin_opts;
       $this->AdminLevel = (int)$admin_level;
-      // other DB-fields
-      $this->urow = null;
-   }
+   }//__construct
 
-   function setRating( $rating )
+   public function setRating( $rating )
    {
       if( is_null($rating) || !is_numeric($rating) || abs($rating) >= OUT_OF_RATING )
          $this->Rating = NO_RATING;
@@ -83,13 +81,13 @@ class User
    }
 
    /*! \brief Returns true, if user set (id != 0). */
-   function is_set()
+   public function is_set()
    {
       return ( is_numeric($this->ID) && $this->ID > 0 );
    }
 
    /*! \brief Returns true, if user has set and valid rating. */
-   function hasRating( $check_rating_status=true )
+   public function hasRating( $check_rating_status=true )
    {
       if( $check_rating_status )
       {
@@ -100,10 +98,10 @@ class User
       }
       else
          return ( abs($this->Rating) < OUT_OF_RATING ); // valid rating
-   }
+   }//hasRating
 
    /*! \brief Returns true, if user-rating falls inbetween given rating range (+/- 50%). */
-   function matchRating( $min, $max, $fix=false )
+   public function matchRating( $min, $max, $fix=false )
    {
       if( !$fix )
       {
@@ -111,10 +109,10 @@ class User
          $max = limit( $max + 50, MIN_RATING, OUT_OF_RATING-1, $max );
       }
       return ( $min <= $this->Rating ) && ( $this->Rating <= $max );
-   }
+   }//matchRating
 
    /*! \brief Returns string-representation of this object (for debugging purposes). */
-   function to_string()
+   public function to_string()
    {
       return "User(ID={$this->ID}):"
          . "  Name=[{$this->Name}]"
@@ -130,20 +128,21 @@ class User
          . sprintf( ", AdminLevel=[0x%x]", $this->AdminLevel )
          . sprintf( ", urow={%s}", print_r($this->urow, true) )
          ;
-   }
+   }//to_string
 
    /*! \brief Returns user_reference for user in this object. */
-   function user_reference()
+   public function user_reference()
    {
       $name = ( (string)$this->Name != '' ) ? $this->Name : UNKNOWN_VALUE;
       $handle = ( (string)$this->Handle != '' ) ? $this->Handle : UNKNOWN_VALUE;
       return user_reference( REF_LINK, 1, '', $this->ID, $name, $handle );
-   }
+   }//user_reference
+
 
    // ------------ static functions ----------------------------
 
    /*! \brief Returns db-fields to be used for query of User-object. */
-   function build_query_sql()
+   public static function build_query_sql()
    {
       // Players: ID,Name,Handle,Type,Lastaccess,LastQuickAccess,LastMove,Registerdate,Country,
       //          Rating2,RatingStatus,RatedGames,Finished,AdminOptions,Adminlevel
@@ -156,10 +155,10 @@ class User
          'UNIX_TIMESTAMP(P.Registerdate) AS X_Registerdate' );
       $qsql->add_part( SQLP_FROM, 'Players AS P' );
       return $qsql;
-   }
+   }//build_query_sql
 
    /*! \brief Returns User-object created from specified (db-)row and given table-prefix. */
-   function new_from_row( $row, $prefix='', $urow_strip_prefix=false )
+   public static function new_from_row( $row, $prefix='', $urow_strip_prefix=false )
    {
       $user = new User(
             // expected from Players-table
@@ -192,7 +191,7 @@ class User
    }//new_from_row
 
    /*! \brief Constructs a User for forum-users. */
-   function newForumUser( $id=0, $name='', $handle='', $admin_level=0, $rating=null )
+   public static function newForumUser( $id=0, $name='', $handle='', $admin_level=0, $rating=null )
    {
       $user = new User( $id, $name, $handle );
       $user->AdminLevel = (int)$admin_level;
@@ -201,50 +200,50 @@ class User
    }
 
    /*! \brief Loads and returns User-object for given additional query; NULL if nothing found. */
-   function load_user_query( $query, $dbgmsg=NULL )
+   public static function load_user_query( $query, $dbgmsg=NULL )
    {
       $result = NULL;
       if( $query instanceof QuerySQL )
       {
-         $qsql = User::build_query_sql();
+         $qsql = self::build_query_sql();
          $qsql->merge( $query );
          $qsql->add_part( SQLP_LIMIT, '1' );
 
-         if( is_nulL($dbgmsg) )
-            $dbgmsg = "User.load_user_query()";
+         if( is_null($dbgmsg) )
+            $dbgmsg = "User:load_user_query()";
          $row = mysql_single_fetch( $dbgmsg, $qsql->get_select() );
          if( $row )
-            $result = User::new_from_row( $row );
+            $result = self::new_from_row( $row );
       }
       return $result;
-   }
+   }//load_user_query
 
    /*! \brief Loads and returns User-object for given user-ID; NULL if nothing found. */
-   function load_user( $uid )
+   public static function load_user( $uid )
    {
       $result = NULL;
       if( is_numeric($uid) && $uid > 0 )
       {
          $query_part = new QuerySQL( SQLP_WHERE, "P.ID=$uid" );
-         $result = User::load_user_query( $query_part, "User.load_user($uid)" );
+         $result = self::load_user_query( $query_part, "User:load_user($uid)" );
       }
       return $result;
-   }
+   }//load_user
 
    /*! \brief Loads and returns User-object for given user-Handle; NULL if nothing found. */
-   function load_user_by_handle( $handle )
+   public static function load_user_by_handle( $handle )
    {
       $result = NULL;
       if( (string)$handle != '' )
       {
          $query_part = new QuerySQL( SQLP_WHERE, sprintf( "P.Handle='%s'", mysql_addslashes($handle) ));
-         $result = User::load_user_query( $query_part, "User.load_user_by_handle($handle)" );
+         $result = self::load_user_query( $query_part, "User:load_user_by_handle($handle)" );
       }
       return $result;
-   }
+   }//load_user_by_handle
 
    /*! \brief Returns non-null array( uid => { ID/Handle/Name/Rating2/Country => val }, ... ) for given users. */
-   function load_quick_userinfo( $arr_uid )
+   public static function load_quick_userinfo( $arr_uid )
    {
       $out = array();
       $size = count($arr_uid);

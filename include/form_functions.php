@@ -30,6 +30,59 @@ require_once( 'include/std_functions.php' );
   * \brief Functions for creating a standard set of forms.
   */
 
+
+ /*!
+  * \example form_example.php
+  *
+  * Example of how to use the form functions.  Here is one textinput and
+  * nine checkboxes added plus the submitbutton.
+  *
+  * <b>In a textbased browser, the example will look something like this:</b>
+  *
+  * <pre>
+  * Description: default_description_____________________
+  *
+  *              [X] box1  [ ] box2  [ ] box3
+  *  Checkboxes: [X] box4  [ ] box5  [ ] box6
+  *              [X] box7  [ ] box8  [X] box9
+  *
+  *                    [ Go Ahead ]
+  * </pre>
+  */
+
+/*!
+  * \example form_example2.php
+  *
+  * Example of how to use the form functions with area-grouping layout.
+  */
+
+
+define('FORM_GET', 0);
+define('FORM_POST', 1);
+
+// form-layout-config
+define('FLAYOUT_GLOBAL', 'global'); // global layout for whole form (default is to use none)
+define('FLAYOUT_AREACONF', 'areaconf'); // area-config
+define('FAREA_ALL', 'all'); // form-area get area-config for 'all' areas
+define('FAC_TABLE', 'table'); // form-area-context for a TABLE
+define('FAC_ENVTABLE', 'td_table'); // form-area-context for a TD before a group-TABLE
+
+define('FAREA_ALLV', FAREA_ALL); // form-area get area-config for 'all' V-areas
+define('FAREA_ALLH', FAREA_ALL); // form-area get area-config for 'all' H-areas
+
+// form-element-config
+define('FEC_TR_ATTR', 'tr_attr'); // additional attributes for <tr>-element
+define('FEC_EXTERNAL_FORM', 'form_external_form'); // true, if form start/end externally printed
+define('FEC_BLOCK_FORM', 'block_form'); // true, if print form-items in blocks, clearing rows after printing
+
+// for overwriting form-element-attributes
+define('FEA_NUMARGS',     'NumArgs');
+define('FEA_NEWTD',       'NewTD');
+define('FEA_ENDTD',       'EndTD');
+define('FEA_STARTTD',     'StartTD');
+define('FEA_SPANALLCOLS', 'SpanAllColumns');
+define('FEA_ATTBS',       'Attbs');
+
  /*!
   * \class Form
   *
@@ -82,163 +135,72 @@ require_once( 'include/std_functions.php' );
   * <li> ROW       -- Force the class specified for the row.
   * </ul>
   */
-
- /*!
-  * \example form_example.php
-  *
-  * Example of how to use the form functions.  Here is one textinput and
-  * nine checkboxes added plus the submitbutton.
-  *
-  * <b>In a textbased browser, the example will look something like this:</b>
-  *
-  * <pre>
-  * Description: default_description_____________________
-  *
-  *              [X] box1  [ ] box2  [ ] box3
-  *  Checkboxes: [X] box4  [ ] box5  [ ] box6
-  *              [X] box7  [ ] box8  [X] box9
-  *
-  *                    [ Go Ahead ]
-  * </pre>
-  */
-
-/*!
-  * \example form_example2.php
-  *
-  * Example of how to use the form functions with area-grouping layout.
-  */
-
-define( "FORM_GET", 0 );
-define( "FORM_POST", 1 );
-
-// form-layout-config
-define('FLAYOUT_GLOBAL', 'global'); // global layout for whole form (default is to use none)
-define('FLAYOUT_AREACONF', 'areaconf'); // area-config
-define('FAREA_ALL', 'all'); // form-area get area-config for 'all' areas
-define('FAC_TABLE', 'table'); // form-area-context for a TABLE
-define('FAC_ENVTABLE', 'td_table'); // form-area-context for a TD before a group-TABLE
-
-define('FAREA_ALLV', FAREA_ALL); // form-area get area-config for 'all' V-areas
-define('FAREA_ALLH', FAREA_ALL); // form-area get area-config for 'all' H-areas
-
-// form-element-config
-define('FEC_TR_ATTR', 'tr_attr'); // additional attributes for <tr>-element
-define('FEC_EXTERNAL_FORM', 'form_external_form'); // true, if form start/end externally printed
-define('FEC_BLOCK_FORM', 'block_form'); // true, if print form-items in blocks, clearing rows after printing
-
-// for overwriting form-element-attributes
-define('FEA_NUMARGS',     'NumArgs');
-define('FEA_NEWTD',       'NewTD');
-define('FEA_ENDTD',       'EndTD');
-define('FEA_STARTTD',     'StartTD');
-define('FEA_SPANALLCOLS', 'SpanAllColumns');
-define('FEA_ATTBS',       'Attbs');
-
-
-//format a text to be placed before/between input boxes
-//$seps: optionaly add separations before=1 or after=2
-//&nbsp; are kept for text-only browsers
-function sptext( $text, $seps=0)
-{
-   return '<span class=BoxLabel'.($seps&3).'>'
-      . ($seps&1 ?SMALL_SPACING :'')
-      . $text
-      . ($seps&2 ?SMALL_SPACING :'')
-      . '</span>';
-}
-
 class Form
 {
    /*! \brief The form name (and ID prefix too). */
-   var $name;
+   private $name;
    /*! \brief The page to go to when submitting. */
-   var $action;
+   private $action;
    /*! \brief The method to send. should be FORM_GET or FORM_POST. */
-   var $method;
+   private $method;
    /*! \brief The form class, default 'FormClass'. */
-   var $fclass;
+   private $fclass;
    /*! \brief Additional form-attributes, default (). */
-   var $form_attributes;
+   private $form_attributes = array();
    /*! \brief Additional config for the form (with influence to layouting form-elements). */
-   var $config;
+   private $config = array();
 
    /*! \brief Internal variable to contain all the information on the rows of the form: rows[line] = ( safe, row-arr, area ). */
-   var $rows;
+   private $rows = array();
 
    /*! \brief Layout for grouping areas, \see set_layout(): key => value */
-   var $layout;
+   private $layout = array();
+   private $orig_layout = null; // for debugging only
    /*! \brief Layout for specific areas: areas[area] = ( layout => ...) */
-   var $areas;
+   private $areas = array( 1 => 1 );
    /*! \brief Current area (initial is 1). */
-   var $area;
+   private $area = 1;
    /*! \brief Config for group-layouting: ( area-num|0|FAREA_ALL => ( FAC_TABLE|... => attbs, )) */
-   var $areaconf;
+   private $areaconf = array();
 
    /*! \brief Holds the cached form of the form string. */
-   var $form_string;
+   private $form_string = '';
 
    /*! \brief If $rows has been changed since last time we updated $form_string. */
-   var $updated;
+   private $updated = false;
 
    /*! \brief The number that the lin number will be increased with with each new row. */
-   var $line_no_step;
-
-   /*! \brief A variable responsible for holding all different form elements. */
-   var $form_elements;
+   private $line_no_step = 10;
 
    /*! \brief Echo the <form ...> element immediately. */
-   var $echo_form_start_now;
+   private $echo_form_start_now;
 
    /*! \brief If set, the following input fields will have the 'disabled' attribut. */
-   var $disabled;
+   private $disabled;
 
    /*! \brief This handle the tabindex of input fields. Purely incremental. */
-   var $tabindex;
+   private $tabindex = 0;
 
    /*! \brief Construction variables. */
-   var $column_started;
-   var $nr_columns;
-   var $max_nr_columns;
+   private $column_started;
+   private $nr_columns;
+   private $max_nr_columns = 2; //actually build on the fly, it is often inadequate for the top rows of the form
    /*!
     * \brief texts of the row are raw. They must be converted if used in HTML parts.
     * boolean, default is true.
     */
-   var $make_texts_safe;
+   private $make_texts_safe;
 
+   private $attached = array();
+   private $hiddens = array();
+   private $hiddens_echoed = false;
 
-   /*! \brief Constructor. Initializes various variables. */
-   function Form( $name, $action_page, $method, $echo_form_start_now=false, $class='FormClass' )
-   {
-      $this->attached = array();
-      $this->hiddens_echoed = false;
-      $this->hiddens = array();
-      $this->tabindex = 0;
-
-      $this->name = $name;
-      $this->action = $action_page;
-      $this->method = $method;
-      $this->fclass = $class;
-      $this->form_attributes = array();
-      $this->config = array();
-      $this->echo_form_start_now = $echo_form_start_now;
-
-      $this->max_nr_columns = 2; //actually build on the fly, it is often inadequate for the top rows of the form
-      $this->rows = array();
-
-      $this->layout = array();
-      $this->areas = array( 1 => 1 );
-      $this->area = 1;
-      $this->areaconf = array();
-
-      $this->form_string = "";
-
-      $this->updated = false;
-
-      $this->line_no_step = 10;
-
-      //'SpanAllColumns' cancel 'NewTD', 'StartTD' and 'EndTD'.
-      //'Attbs' are the attributs of the <TD> if one is opened for the element
-      $this->form_elements = array(
+   /*!
+    * \brief A variable responsible for holding all different form elements.
+    *    'SpanAllColumns' cancel 'NewTD', 'StartTD' and 'EndTD'.
+    *    'Attbs' are the attributs of the <TD> if one is opened for the element
+    */
+   private $form_elements = array(
          'DESCRIPTION'  => array( FEA_NUMARGS => 1,
                                   FEA_NEWTD   => true,
                                   FEA_STARTTD => true,
@@ -421,37 +383,54 @@ class Form
                                   FEA_ATTBS   => array('class'=>'FormFilterWarning') ),
       );
 
+
+   /*! \brief Constructor. Initializes various variables. */
+   public function __construct( $name, $action_page, $method, $echo_form_start_now=false, $class='FormClass' )
+   {
+      $this->name = $name;
+      $this->action = $action_page;
+      $this->method = $method;
+      $this->fclass = $class;
+      $this->echo_form_start_now = $echo_form_start_now;
+
       if( $echo_form_start_now )
          echo $this->print_start_default();
-   } //Form
+   }//__construct
 
 
    /*! \brief Sets additional form-attributes. */
-   function set_form_attributes( $attributes )
+   public function set_form_attributes( $attributes )
    {
       assert( is_array($attributes) && !is_null($attributes) );
       $this->form_attributes = $attributes;
    }
 
    /*! \brief Adds additional form-attribute. */
-   function add_form_attribute( $key, $value )
+   public function add_form_attribute( $key, $value )
    {
       $this->form_attributes[$key] = $value;
    }
 
    /*! \brief add additional form-config. */
-   function set_config( $name, $value )
+   public function set_config( $name, $value )
    {
       $this->config[$name] = $value;
    }
 
    /*! \brief Returning additional non-null form-config, '' if unset. */
-   function get_config( $name )
+   public function get_config( $name )
    {
-      if( isset($this->config[$name]) )
-         return $this->config[$name];
-      else
-         return '';
+      return ( isset($this->config[$name]) ) ? $this->config[$name] : '';
+   }
+
+   public function set_max_nr_columns( $max_nr_columns )
+   {
+      $this->max_nr_columns = $max_nr_columns;
+   }
+
+   public function get_tabindex()
+   {
+      return $this->tabindex;
    }
 
    /*!
@@ -460,7 +439,7 @@ class Form
     * \param $attrname allowed attribute-names: FEA_STARTTD, FEA_NEWTD, FEA_ENDTD, FEA_SPANALLCOLS, FEA_ATTBS
     * \param $value    value for attribute
     */
-   function set_attr_form_element( $name, $attrname, $value )
+   public function set_attr_form_element( $name, $attrname, $value )
    {
       // known attribute-names for form-elements and read-only-state
       static $ARR_FORMELEM_READONLY = array(
@@ -476,14 +455,14 @@ class Form
 
       $name = strtoupper($name);
       if( !preg_match( $rx_attrs, $attrname ) )
-         error('internal_error', "form.set_attr_form_element.bad_attr_name($name,$attrname)");
+         error('internal_error', "Form.set_attr_form_element.bad_attr_name($name,$attrname)");
       if( @$ARR_FORMELEM_READONLY[$attrname] )
-         error('internal_error', "form.set_attr_form_element.readonly_attr($name,$attrname)");
+         error('internal_error', "Form.set_attr_form_element.readonly_attr($name,$attrname)");
       if( !isset($this->form_elements[$name]) )
-         error('internal_error', "form.set_attr_form_element.miss_form_element($name)");
+         error('internal_error', "Form.set_attr_form_element.miss_form_element($name)");
 
       $this->form_elements[$name][$attrname] = $value;
-   }
+   }//set_attr_form_element
 
    /*!
     * \brief Sets layout for areas
@@ -492,7 +471,7 @@ class Form
     * \param $value direct value for chosen key
     * \param $arr additional array for configuration of layout (depends on $key)
     */
-   function set_layout( $key, $value, $arr=NULL )
+   public function set_layout( $key, $value, $arr=NULL )
    {
       if( $key === FLAYOUT_GLOBAL )
          $this->parse_layout_global( $value );
@@ -500,7 +479,7 @@ class Form
          $this->parse_layout_areaconf( $value, $arr );
       else
          error('internal_error', "Form.set_layout.unknown_key($key)");
-   }
+   }//set_layout
 
    /*!
     * \brief Parses syntax for global-layout grouping areas.
@@ -510,7 +489,7 @@ class Form
     *            '(..)' = grouping because '(' has higher prio than '|' than ','
     * \internal
     */
-   function parse_layout_global( $layout ) // varargs: more args after value possible
+   private function parse_layout_global( $layout ) // varargs: more args after value possible
    {
       $this->orig_layout = $layout;
       $this->layout = array();
@@ -584,13 +563,13 @@ class Form
       while( is_array($result) && count($result) == 1 )
          $result = array_shift($result);
       $this->layout[FLAYOUT_GLOBAL] = $result;
-   }
+   }//parse_layout_global
 
    /*!
     * \brief Parses and sets area-config: area (=num|0|FAREA_ALL), config = array( context => ... )
     * \internal
     */
-   function parse_layout_areaconf( $area, $config )
+   private function parse_layout_areaconf( $area, $config )
    {
       if( !preg_match( "/^(\d+|".FAREA_ALL.")$/", $area) )
          error('assert', "Form.parse_layout_areaconf.area-num($area)");
@@ -602,11 +581,11 @@ class Form
          $this->areaconf[$area] = array();
       foreach( $config as $key => $val )
          $this->areaconf[$area][$key] = $val;
-   }
+   }//parse_layout_areaconf
 
 
    /*! \brief Get $form_string and update it if necessary. */
-   function get_form_string( $tabindex=0 )
+   public function get_form_string( $tabindex=0 )
    {
       $this->tabindex= $tabindex;
       $this->update_form_string();
@@ -614,20 +593,20 @@ class Form
    }
 
    /*! \brief Echo $form_string */
-   function echo_string( $tabindex=0 )
+   public function echo_string( $tabindex=0 )
    {
       echo $this->get_form_string($tabindex);
    }
 
    /*! \brief Changes current area (area-num must exist in specified layout \see set_layout ). */
-   function set_area( $area )
+   public function set_area( $area )
    {
       if( !isset($this->layout[FLAYOUT_GLOBAL]) )
          error('assert', "Form.set_area.unset_layout");
       if( !isset($this->areas[$area]) )
          error('assert', "Form.set_area.bad_area($area)");
       $this->area = $area;
-   }
+   }//set_area
 
    /*!
     * \brief Add a new row to the form.
@@ -637,7 +616,7 @@ class Form
     *
     * \return The line_number of the new row or -1 if failed.
     */
-   function add_row( $row_array, $line_no = -1, $make_texts_safe = true )
+   public function add_row( $row_array, $line_no = -1, $make_texts_safe = true )
    {
       if( $line_no != -1 )
       {
@@ -656,23 +635,23 @@ class Form
       $this->updated = false;
 
       return $line_no;
-   } //add_row
+   }//add_row
 
    /*! \brief wrapper to add empty-row. */
-   function add_empty_row()
+   public function add_empty_row()
    {
       //$this->add_row( array( 'TEXT', '&nbsp;' ));
       $this->add_row( array( 'SPACE' )); //better for colspan
    }
 
    /*! \brief Set $line_no_step */
-   function set_line_no_step( $step_size )
+   public function set_line_no_step( $step_size )
    {
       $this->line_no_step = $step_size;
    }
 
    /*! \brief Update $form_string with new $rows data. */
-   function update_form_string()
+   private function update_form_string()
    {
       if( $this->updated )
          return;
@@ -682,7 +661,7 @@ class Form
    }
 
    /*! \brief Create a string from the rows */
-   function create_form_string()
+   public function create_form_string()
    {
       $has_layout = isset($this->layout[FLAYOUT_GLOBAL]);
       $rootformstr = "";
@@ -831,7 +810,7 @@ class Form
          $this->rows = array();
 
       return $rootformstr;
-   } //create_form_string
+   }//create_form_string
 
    /*!
     * \brief Return form pressed into areas grouped as specified by layout (called recursively).
@@ -840,7 +819,7 @@ class Form
     * \param $TRlevel if true, put area into table-tr-element
     * \internal
     */
-   function build_areas( &$L, &$AR, $TRlevel=true )
+   private function build_areas( &$L, &$AR, $TRlevel=true )
    {
       $areastr = '';
 
@@ -928,13 +907,13 @@ class Form
       }
 
       return $areastr;
-   } //build_areas
+   }//build_areas
 
    /*!
     * \brief Returns area-config for specified area-num (num|0|FAREA_ALL) for context given.
     * \internal
     */
-   function get_areaconf( $area, $context )
+   private function get_areaconf( $area, $context )
    {
       if( isset($this->areaconf[$area][$context]) )
          return $this->areaconf[$area][$context]; // special first
@@ -944,13 +923,13 @@ class Form
             return $this->areaconf[FAREA_ALL][$context]; // all
       }
       return '';
-   }
+   }//get_areaconf
 
    /*!
     * \brief Function for making a description string in the standard form.
     * \internal
     */
-   function create_string_func_description( &$result, $args )
+   private function create_string_func_description( &$result, $args )
    {
       $result .= $args[ 0 ] . ':';
    }
@@ -959,7 +938,7 @@ class Form
     * \brief Function for making own html string in the standard form
     * \internal
     */
-   function create_string_func_ownhtml( &$result, $args )
+   private function create_string_func_ownhtml( &$result, $args )
    {
       $result .= $args[0];
    }
@@ -968,7 +947,7 @@ class Form
     * \brief Function for making header string in the standard form
     * \internal
     */
-   function create_string_func_header( &$result, $args )
+   private function create_string_func_header( &$result, $args )
    {
       $result .= "<h3 class=Header>" . $args[0] . ":</h3>";
    }
@@ -977,7 +956,7 @@ class Form
     * \brief Function for making chapter string in the standard form
     * \internal
     */
-   function create_string_func_chapter( &$result, $args )
+   private function create_string_func_chapter( &$result, $args )
    {
       $result .= "<b>" . $args[0] . ":</b>";
    }
@@ -986,7 +965,7 @@ class Form
     * \brief Function for making text string in the standard form
     * \internal
     */
-   function create_string_func_text( &$result, $args )
+   private function create_string_func_text( &$result, $args )
    {
       $result .= $args[0];
    }
@@ -995,17 +974,16 @@ class Form
     * \brief Function for making textinput string in the standard form
     * \internal
     */
-   function create_string_func_textinput( &$result, $args )
+   private function create_string_func_textinput( &$result, $args )
    {
       $result .= $this->print_insert_text_input( $args[0], $args[1], $args[2], $args[3], '' );
    }
 
    /*!
-    * \brief Function for making textinput string in the standard form
-    * with additional attributes
+    * \brief Function for making textinput string in the standard form with additional attributes.
     * \internal
     */
-   function create_string_func_textinputx( &$result, $args )
+   private function create_string_func_textinputx( &$result, $args )
    {
       $result .= $this->print_insert_text_input( $args[0], $args[1], $args[2], $args[3], $args[4] );
    }
@@ -1014,7 +992,7 @@ class Form
     * \brief Function for making password string in the standard form
     * \internal
     */
-   function create_string_func_password( &$result, $args )
+   private function create_string_func_password( &$result, $args )
    {
       $result .= $this->print_insert_password_input( $args[0], $args[1], $args[2], $args[3] );
    }
@@ -1023,7 +1001,7 @@ class Form
     * \brief Function for making hidden string in the standard form
     * \internal
     */
-   function create_string_func_hidden( &$result, $args )
+   private function create_string_func_hidden( &$result, $args )
    {
       //hiddens are delayed to the end of form
       $this->add_hidden( $args[0], $args[1] );
@@ -1033,7 +1011,7 @@ class Form
     * \brief Function for enabling/disabling fields in the standard form
     * \internal
     */
-   function create_string_func_enable( &$result, $args )
+   private function create_string_func_enable( &$result, $args )
    {
       $this->enable_input( $args[0] );
    }
@@ -1042,7 +1020,7 @@ class Form
     * \brief Function for making textarea string in the standard form
     * \internal
     */
-   function create_string_func_textarea( &$result, $args )
+   private function create_string_func_textarea( &$result, $args )
    {
       $result .= $this->print_insert_textarea( $args[0], $args[1], $args[2], $args[3] );
    }
@@ -1051,7 +1029,7 @@ class Form
     * \brief Function for making selectbox string in the standard form
     * \internal
     */
-   function create_string_func_selectbox( &$result, $args )
+   private function create_string_func_selectbox( &$result, $args )
    {
       $result .= $this->print_insert_select_boxx( $args[0], $args[1], $args[2], $args[3], $args[4], '' );
    }
@@ -1060,7 +1038,7 @@ class Form
     * \brief Function for making selectbox string extended with attributes in the standard form
     * \internal
     */
-   function create_string_func_selectboxx( &$result, $args )
+   private function create_string_func_selectboxx( &$result, $args )
    {
       $result .= $this->print_insert_select_boxx( $args[0], $args[1], $args[2], $args[3], $args[4], $args[5] );
    }
@@ -1069,7 +1047,7 @@ class Form
     * \brief Function for making radiobuttons string in the standard form
     * \internal
     */
-   function create_string_func_radiobuttons( &$result, $args )
+   private function create_string_func_radiobuttons( &$result, $args )
    {
       $result .= $this->print_insert_radio_buttonsx( $args[0], $args[1], $args[2], '', true );
    }
@@ -1078,7 +1056,7 @@ class Form
     * \brief Function for making radiobuttons string extended with attributes in the standard form
     * \internal
     */
-   function create_string_func_radiobuttonsx( &$result, $args )
+   private function create_string_func_radiobuttonsx( &$result, $args )
    {
       $result .= $this->print_insert_radio_buttonsx( $args[0], $args[1], $args[2], $args[3], false );
    }
@@ -1087,7 +1065,7 @@ class Form
     * \brief Function for making checkbox string in the standard form
     * \internal
     */
-   function create_string_func_checkbox( &$result, $args )
+   private function create_string_func_checkbox( &$result, $args )
    {
       $result .= $this->print_insert_checkbox( $args[0], $args[1], $args[2], $args[3] );
    }
@@ -1096,7 +1074,7 @@ class Form
     * \brief Function for making checkbox string extended with attributes in the standard form
     * \internal
     */
-   function create_string_func_checkboxx( &$result, $args )
+   private function create_string_func_checkboxx( &$result, $args )
    {
       $result .= $this->print_insert_checkbox( $args[0], $args[1], $args[2], $args[3], $args[4] );
    }
@@ -1105,7 +1083,7 @@ class Form
     * \brief Function for making submitbutton string in the standard form
     * \internal
     */
-   function create_string_func_submitbutton( &$result, $args )
+   private function create_string_func_submitbutton( &$result, $args )
    {
       $result .= $this->print_insert_submit_button( $args[0], $args[1] );
    }
@@ -1114,7 +1092,7 @@ class Form
     * \brief Function for making submitbuttonx string in the standard form
     * \internal
     */
-   function create_string_func_submitbuttonx( &$result, $args )
+   private function create_string_func_submitbuttonx( &$result, $args )
    {
       $result .= $this->print_insert_submit_buttonx( $args[0], $args[1], $args[2] );
    }
@@ -1123,7 +1101,7 @@ class Form
     * \brief Function for making file-upload string in the standard form
     * \internal
     */
-   function create_string_func_file( &$result, $args )
+   private function create_string_func_file( &$result, $args )
    {
       $this->add_form_attribute( 'enctype', 'multipart/form-data' );
       $result .= $this->print_insert_file( $args[0], $args[1], $args[2], $args[3], $args[4] );
@@ -1133,7 +1111,7 @@ class Form
     * \brief Function for making vertical space string in the standard form
     * \internal
     */
-   function create_string_func_space( &$result, $args )
+   private function create_string_func_space( &$result, $args )
    {
       $result .= "<td colspan=" .$this->max_nr_columns . " height=\"20px\"></td>";
       //$result .= "&nbsp;"; //if SPACE SpanAllColumns==true
@@ -1143,7 +1121,7 @@ class Form
     * \brief Function for making vertical separator string in the standard form
     * \internal
     */
-   function create_string_func_hr( &$result, $args )
+   private function create_string_func_hr( &$result, $args )
    {
       $result .= "<HR>";
    }
@@ -1152,7 +1130,7 @@ class Form
     * \brief Function for making horizontal space string in the standard form
     * \internal
     */
-   function create_string_func_tab( &$result, $args )
+   private function create_string_func_tab( &$result, $args )
    {
       //equal: $result .= "<td></td>";
    }
@@ -1161,7 +1139,7 @@ class Form
     * \brief Function for making break line string in the standard form
     * \internal
     */
-   function create_string_func_br( &$result, $args )
+   private function create_string_func_br( &$result, $args )
    {
       $result .= "<br>\n";
    }
@@ -1170,15 +1148,16 @@ class Form
     * \brief Function for ending td string in the standard form
     * \internal
     */
-   function create_string_func_td( &$result, $args )
+   private function create_string_func_td( &$result, $args )
    {
+      // nothing to do
    }
 
    /*!
     * \brief Function for making new td string in the standard form
     * \internal
     */
-   function create_string_func_cell( &$result, $args )
+   private function create_string_func_cell( &$result, $args )
    {
       $colspan = $args[0]>1 ? $args[0] : 1 ;
       $attribs = trim($args[1]) ;
@@ -1188,13 +1167,13 @@ class Form
          ">";
       $this->column_started = true;
       $this->nr_columns+= $colspan;
-   }
+   }//create_string_func_cell
 
    /*!
     * \brief Function for making new filter-element string in the standard form
     * \internal
     */
-   function create_string_func_filter( &$result, $args )
+   private function create_string_func_filter( &$result, $args )
    {
       // args: SearchFilters, filter-id
       // note: filter-attr could be implemented with additional 'FILTERX'-element
@@ -1205,7 +1184,7 @@ class Form
     * \brief Function to include filter-error-string in the standard form if filter has error, return '' otherwise
     * \internal
     */
-   function create_string_func_filtererror( &$result, $args )
+   private function create_string_func_filtererror( &$result, $args )
    {
       // args: SearchFilters, filter-id, prefix, suffix, with_syntax
       $result .= $this->print_insert_filtererror( $args[0], $args[1], $args[2], $args[3], $args[4] );
@@ -1215,11 +1194,12 @@ class Form
     * \brief Function to include filter-warn-string in the standard form if filter has warning, return '' otherwise
     * \internal
     */
-   function create_string_func_filterwarn( &$result, $args )
+   private function create_string_func_filterwarn( &$result, $args )
    {
       // args: SearchFilters, filter-id, prefix, suffix, with_syntax
       $result .= $this->print_insert_filterwarn( $args[0], $args[1], $args[2], $args[3], $args[4] );
    }
+
 
 
    /*!
@@ -1231,7 +1211,7 @@ class Form
     * \param $attributes  key-value array with additional form-attributes; or null
     * \param $class       CSS-class, default FormClass
     */
-   function print_start( $name, $action_page, $method, $attributes=null, $class='FormClass' )
+   public function print_start( $name, $action_page, $method, $attributes=null, $class='FormClass' )
    {
       assert( $method == FORM_GET || $method == FORM_POST );
       $pg_arr = array( FORM_GET => "GET", FORM_POST => "POST" );
@@ -1245,36 +1225,33 @@ class Form
 
       return "\n<FORM id=\"{$name}Form\" name=\"$name\" class=\"$class\"" .
          " action=\"$action_page\" method=\"" . $pg_arr[$method] . "\"$attrib_str>";
-   }
+   }//print_start
 
-   function print_start_default()
+   public function print_start_default()
    {
-      return $this->print_start( $this->name, $this->action,
-            $this->method, $this->form_attributes, $this->fclass);
+      return $this->print_start( $this->name, $this->action, $this->method, $this->form_attributes, $this->fclass);
    }
 
-   /*!
-    * \brief This will end a standard form.
-    */
-   function print_end()
+   /*! \brief This will end a standard form. */
+   public function print_end()
    {
       $formstr = '';
       if(!$this->hiddens_echoed)
          $formstr .= $this->get_hiddens_string();
 
       return $formstr."\n</FORM>";
-   }
+   }//print_end
 
 
    /*!
     * \brief Prints out start of a table cell.
     *
-    * \internal
-    *
     * \param $attbs    The attributs of the cell.
     * \param $colspan  How many columns this table should span.
+    *
+    * \internal
     */
-   function print_td_start( $attbs = 'class=left', $colspan = 1 )
+   private function print_td_start( $attbs = 'class=left', $colspan = 1 )
    {
       $attbs= attb_merge( attb_parse($attbs), array('colspan'=>$colspan), false);
       return "<TD" . attb_build( $attbs) . ">";
@@ -1282,10 +1259,9 @@ class Form
 
    /*!
     * \brief Prints out end of a table cell.
-    *
     * \internal
     */
-   function print_td_end()
+   private function print_td_end()
    {
       return "</TD>";
    }
@@ -1294,7 +1270,7 @@ class Form
     * \brief Prints a description.
     * \param $description The description.
     */
-   function print_description( $description )
+   public function print_description( $description )
    {
       //no safe-text needed here because it come from translators' strings
       return "<TD class=Description>$description:</TD>";
@@ -1303,14 +1279,13 @@ class Form
    /*!
     * \brief This will insert a text input box in a standard form.
     *
-    * \param $name          The field name that will be used as the variable name
-    *                       in the GET or POST.
+    * \param $name          The field name that will be used as the variable name in the GET or POST.
     * \param $size          The size of the text input box.
     * \param $maxlength     How many characters it is allowed to enter; not set if <0.
     * \param $initial_value Text that appears initially in the input box.
     * \param $attbs         optional attributes
     */
-   function print_insert_text_input( $name, $size, $maxlength, $initial_value, $attbs='' )
+   public function print_insert_text_input( $name, $size, $maxlength, $initial_value, $attbs='' )
    {
       if( $this->make_texts_safe )
          $initial_value = textarea_safe($initial_value);
@@ -1319,10 +1294,10 @@ class Form
          . $this->get_input_attbs() . " size=\"$size\"";
       if( $maxlength >= 0 )
          $str .= " maxlength=\"$maxlength\"";
-      $str .= Form::parse_input_standard_attributes( $attbs, 'type|name|value|size|maxlength' );
+      $str .= self::parse_input_standard_attributes( $attbs, 'type|name|value|size|maxlength' );
       $str .= ">";
       return $str;
-   }
+   }//print_insert_text_input
 
    /*!
     * \brief This will insert a text input box for entering passwords in a standard form.
@@ -1330,13 +1305,12 @@ class Form
     * \note There is no initial value on purpose since that would be a
     * security risk to send clear passwords to the user.
     *
-    * \param $name      The field name that will be used as the variable name
-    *                   in the GET or POST.
+    * \param $name      The field name that will be used as the variable name in the GET or POST.
     * \param $size      The size of the text input box.
     * \param $maxlength How many characters it is allowed to enter.
     * \param $initial_value Text that appears initially in the input box.
     */
-   function print_insert_password_input( $name, $size, $maxlength, $initival_value )
+   public function print_insert_password_input( $name, $size, $maxlength, $initival_value )
    {
       return "<INPUT type=\"password\" name=\"$name\"" .
          $this->get_input_attbs() . " size=\"$size\" maxlength=\"$maxlength\" value=\"$initival_value\">";
@@ -1345,11 +1319,10 @@ class Form
    /*!
     * \brief This will just insert a value to the form, invisible to the user.
     *
-    * \param $name  The field name that will be used as the variable name
-    *               in the GET or POST.
+    * \param $name  The field name that will be used as the variable name in the GET or POST.
     * \param $value The value of the hidden variable.
     */
-   function print_insert_hidden_input( $name, $value )
+   public function print_insert_hidden_input( $name, $value )
    {
       return "<INPUT type=\"hidden\" name=\"$name\" value=\"$value\">";
    }
@@ -1357,13 +1330,12 @@ class Form
    /*!
     * \brief This will insert a text inputarea in a standard form.
     *
-    * \param $name         The field name that will be used as the variable name
-    *                      in the GET or POST.
+    * \param $name         The field name that will be used as the variable name in the GET or POST.
     * \param $columns      The number of columns in the textarea.
     * \param $rows         The number of rows in the textarea.
     * \param $initial_text Text that appears initially in the textarea.
     */
-   function print_insert_textarea( $name, $columns, $rows, $initial_text )
+   public function print_insert_textarea( $name, $columns, $rows, $initial_text )
    {
       if( $this->make_texts_safe )
          $initial_text = textarea_safe($initial_text);
@@ -1371,7 +1343,7 @@ class Form
          $this->get_input_attbs() . " rows=\"$rows\">$initial_text</TEXTAREA>";
    }
 
-   function print_insert_select_box( $name, $size, $value_array, $selected, $multiple=0 )
+   public function print_insert_select_box( $name, $size, $value_array, $selected, $multiple=0 )
    {
       return $this->print_insert_select_boxx( $name, $size, $value_array, $selected, $multiple );
    }
@@ -1379,26 +1351,23 @@ class Form
    /*!
     * \brief This will insert a select box in a standard form.
     *
-    * \param $name        The field name that will be used as the variable name
-    *                     in the GET or POST.
+    * \param $name        The field name that will be used as the variable name in the GET or POST.
     * \param $size        the size of the box.
     * \param $value_array The array defining all values and their descriptions.
-    *                     the key will be used as value and the entry will
-    *                     be used as description, i.e.:
+    *                     the key will be used as value and the entry will be used as description, i.e.:
     *                     'value' => 'description'.
-    * \param $selected    If multiple this should be an array of all values
-    *                     that should be selected from start else the value
-    *                     of the selected value.
+    * \param $selected    If multiple this should be an array of all values that should be selected from start
+    *                     else the value of the selected value.
     * \param $multiple    If it should be possible to select more than one
     *                     value. $name will be extended to "$name[]"
     */
-   function print_insert_select_boxx( $name, $size, $value_array, $selected, $multiple=0, $attbs='' )
+   public function print_insert_select_boxx( $name, $size, $value_array, $selected, $multiple=0, $attbs='' )
    {
       $result = "<SELECT size=\"$size\" name=\"$name";
       //[] works for either GET or POST forms (else try %5b%5d ?)
       $result.= $multiple ? '[]" multiple' : '"';
       $result.= $this->get_input_attbs();
-      $result .= Form::parse_input_standard_attributes($attbs);
+      $result .= self::parse_input_standard_attributes($attbs);
       $result .= ">\n";
 
       foreach( $value_array as $value => $info )
@@ -1416,25 +1385,22 @@ class Form
       $result .= "</SELECT>";
 
       return $result;
-   }
+   }//print_insert_select_boxx
 
    /*!
     * \brief This will insert some connected radio buttons in a standard form.
     *
-    * \param $name        The field name that will be used as the variable name
-    *                     in the GET or POST.
+    * \param $name        The field name that will be used as the variable name in the GET or POST.
     * \param $value_array The array defining all values and their descriptions.
-    *                     the key will be used as value and the entry will
-    *                     be used as description, i.e.:
+    *                     the key will be used as value and the entry will be used as description, i.e.:
     *                     'value' => 'description'.
-    * \param $selected    If multiple this should be an array of all values
-    *                     that should be selected from start else the value
-    *                     of the selected value.
+    * \param $selected    If multiple this should be an array of all values that should be selected from start
+    *                     else the value of the selected value.
     * \param $attbs Additionnal attributes.
     * \param $use_disable false to restrict 'disabled'-attribute to $attbs-argument;
     *                     otherwise this->disabled is used.
     */
-   function print_insert_radio_buttonsx( $name, $value_array, $selected, $attbs='', $use_disable=true )
+   public function print_insert_radio_buttonsx( $name, $value_array, $selected, $attbs='', $use_disable=true )
    {
       $result = '';
       foreach( $value_array as $value => $info )
@@ -1444,45 +1410,43 @@ class Form
             $result .= " checked";
 
          $result .= $this->get_input_attbs($use_disable);
-         $result .= Form::parse_input_standard_attributes($attbs);
+         $result .= self::parse_input_standard_attributes($attbs);
          $result .= "> $info";
       }
 
       return $result;
-   }
+   }//print_insert_radio_buttonsx
 
 
    /*!
     * \brief This will insert some checkboxes.
     *
-    * \param $name        The field name that will be used as the variable name
-    *                     in the GET or POST.
+    * \param $name        The field name that will be used as the variable name in the GET or POST.
     * \param $value       The value of the variable if checked.
     * \param $description A description of the checkbox.
     * \param $selected    True if checked at beginning.
     * \param $attbs       optional attributes.
     */
-   function print_insert_checkbox( $name, $value, $description, $selected, $attbs='' )
+   public function print_insert_checkbox( $name, $value, $description, $selected, $attbs='' )
    {
       $result = "<INPUT type=\"checkbox\" name=\"$name\" value=\"$value\"";
       if($selected)
          $result .= " checked";
 
       $result .= $this->get_input_attbs();
-      $result .= Form::parse_input_standard_attributes($attbs);
+      $result .= self::parse_input_standard_attributes($attbs);
       $result .= ">$description";
 
       return $result;
-   }
+   }//print_insert_checkbox
 
    /*!
     * \brief This will insert a submit button in a standard form.
     *
-    * \param $name The field name that will be used as the variable name
-    *              in the GET or POST.
+    * \param $name The field name that will be used as the variable name in the GET or POST.
     * \param $text The text on the submit button.
     */
-   function print_insert_submit_button( $name, $text )
+   public function print_insert_submit_button( $name, $text )
    {
       return "<INPUT type=\"submit\" name=\"$name\" value=\"$text\"" .
          $this->get_input_attbs() . ">";
@@ -1491,14 +1455,13 @@ class Form
    /*!
     * \brief This will insert a submit button in a standard form.
     *
-    * \param $name The field name that will be used as the variable name
-    *              in the GET or POST.
+    * \param $name The field name that will be used as the variable name in the GET or POST.
     * \param $text The text on the submit button.
     * \param $attbs Additionnal attributes.
     */
-   function print_insert_submit_buttonx( $name, $text, $attbs )
+   public function print_insert_submit_buttonx( $name, $text, $attbs )
    {
-      $str = Form::parse_input_standard_attributes($attbs);
+      $str = self::parse_input_standard_attributes($attbs);
       return "<INPUT type=\"submit\" name=\"$name\" value=\"$text\"" .
          $this->get_input_attbs() . $str . ">";
    }
@@ -1506,7 +1469,7 @@ class Form
    /*!
     * \brief This will insert a file-upload input-box in a standard form.
     *
-    * NOTE:
+    * \note
     * - If you are build your own form using this function,
     *   you will need 'enctype="multipart/form-data"' as form-attribute
     *   to bring the file-upload correctly to work.
@@ -1514,18 +1477,16 @@ class Form
     * - Also this does not work automatically if Form is constructed
     *   with $echo_form_start_now=true.
     *
-    * \param $name     The field name that will be used as the variable name
-    *                  in the GET or POST.
+    * \param $name     The field name that will be used as the variable name in the GET or POST.
     * \param $size     field-box size
     * \param $maxlength maximum length of uploaded file (not implemented by most browser),
     *                  0 to use no maxlength (=default)
     * \param $accept   what MIME-types are accepted (not implemented by most browser),
     *                  e.g. 'image/*', 'text/*' (default is '')
-    * \param $with_maxsize if true, add hidden with name MAX_FILE_SIZE directly
-    *                  before file-upload according to
+    * \param $with_maxsize if true, add hidden with name MAX_FILE_SIZE directly before file-upload according to
     *                  http://de2.php.net/manual/en/features.file-upload.post-method.php
     */
-   function print_insert_file( $name, $size, $maxlength=0, $accept='', $with_maxsize=false )
+   public function print_insert_file( $name, $size, $maxlength=0, $accept='', $with_maxsize=false )
    {
       $result = '';
       $str = '';
@@ -1533,13 +1494,13 @@ class Form
       {
          $str .= sprintf( ' maxlength="%s"', $maxlength );
          if( $with_maxsize )
-            $result .= Form::print_insert_hidden_input( 'MAX_FILE_SIZE', $maxlength );
+            $result .= self::print_insert_hidden_input( 'MAX_FILE_SIZE', $maxlength );
       }
       if( $accept != '' )
          $str .= sprintf( ' accept="%s"', $accept );
       $result .= "<INPUT type=\"file\" name=\"$name\" size=\"$size\"" . $str . ">";
       return $result;
-   }
+   }//print_insert_file
 
    /*!
     * \brief This will insert filter-elements.
@@ -1548,11 +1509,11 @@ class Form
     * \param $fid     filter-id
     * \param $attr    additional attributes to print filter-form-elements, default empty-array
     */
-   function print_insert_filter( $filters, $fid, $attr = array() )
+   public function print_insert_filter( $filters, $fid, $attr = array() )
    {
       $filter = $filters->get_filter($fid);
       if( isset($filter) )
-         return $filter->get_input_element( $filters->Prefix, $attr );
+         return $filter->get_input_element( $filters->get_prefix(), $attr );
       else
          return '';
    }
@@ -1566,7 +1527,7 @@ class Form
     * \param $suffix    error-msg suffixed with, default ''
     * \param $with_syntax syntax-description appended to error-msg, default true
     */
-   function print_insert_filtererror( $filters, $fid, $prefix = '', $suffix = '', $with_syntax = true )
+   public function print_insert_filtererror( $filters, $fid, $prefix = '', $suffix = '', $with_syntax = true )
    {
       $filter = $filters->get_filter($fid);
       if( !isset($filter) || !$filter->has_error() )
@@ -1580,7 +1541,7 @@ class Form
             $msg.= "; $syntax";
       }
       return $prefix . T_('Error#filter') . ': ' . make_html_safe( $msg ) . $suffix;
-   }
+   }//print_insert_filtererror
 
    /*!
     * \brief This will insert filter-warning if filter has a warning.
@@ -1591,7 +1552,7 @@ class Form
     * \param $suffix    warn-msg suffixed with, default ''
     * \param $with_syntax syntax-description appended to warn-msg, default false
     */
-   function print_insert_filterwarn( $filters, $fid, $prefix = '', $suffix = '', $with_syntax = false )
+   public function print_insert_filterwarn( $filters, $fid, $prefix = '', $suffix = '', $with_syntax = false )
    {
       $filter = $filters->get_filter($fid);
       if( !isset($filter) || !$filter->has_warn() )
@@ -1605,14 +1566,95 @@ class Form
             $msg.= "; $syntax";
       }
       return $prefix . T_('Warning#filter') . ': ' . make_html_safe( $msg ) . $suffix;
+   }//print_insert_filterwarn
+
+
+   /*!
+    * \brief This will add or not the 'disabled' attribut to all the following input fields.
+    * \param $on if false, 'disabled' will be added.
+    */
+   public function enable_input( $on )
+   {
+      $this->disabled = ($on == false);
    }
+
+   /*! \brief Set the global tabindex attribut of input fields. */
+   public function set_tabindex( $tabindex )
+   {
+      $val = $this->tabindex;
+      $this->tabindex = $tabindex;
+      return $val;
+   }
+
+   /*! \brief Get the global attributs string of input fields. */
+   private function get_input_attbs( $use_disable=true )
+   {
+      return ($use_disable && $this->disabled)
+         ? ' disabled'
+         : ( $this->tabindex ? ' tabindex="'.($this->tabindex++).'"' : '');
+   }
+
+   /*! \brief Get the merged attributs string of a form part. */
+   private function get_form_attbs( $attbs='', $suffix='')
+   {
+      $attbs = attb_parse( $attbs);
+      $attbs = attb_merge( array( 'class' => $this->fclass.$suffix ), $attbs, ' ');
+      return attb_build( $attbs);
+   }
+
+
+   /* ******************************************************************** */
+
+   /*!
+    * \brief This will attach an object to the form. Then, the hiddens from the object are inserted when the form
+    *        is closed via the object get_hiddens() function.
+    *
+    * \param $obj The object with the get_hiddens()-interface.
+    */
+   public function attach_table( &$obj )
+   {
+      $this->attached[]= $obj;
+   }
+
+   public function add_hidden( $key, $val)
+   {
+      $this->hiddens[$key] = $val;
+   }
+
+   /*! \brief return the array of hiddens merged with owneds and attachments' ones. */
+   public function get_hiddens( &$hiddens)
+   {
+      if( is_array($hiddens) )
+         $hiddens = array_merge( $hiddens, $this->hiddens);
+      else
+         $hiddens = $this->hiddens;
+      foreach( $this->attached as $attach )
+      {
+         $attach->get_hiddens( $hiddens);
+      }
+   }//get_hiddens
+
+   /*! \brief return the form-string of owned hiddens merged with attachments' ones. */
+   public function get_hiddens_string()
+   {
+      $hiddens = $this->hiddens;
+      foreach( $this->attached as $attach )
+      {
+         $attach->get_hiddens( $hiddens);
+      }
+      $this->hiddens_echoed = true;
+      return build_hidden( $hiddens);
+   }//get_hiddens_string
+
+
+   // ------------ static functions ----------------------------
 
    /*!
     * \brief (static) Parses standard attributes: title, accesskey and
     *        return all as attribute string ready to be used within form element.
     * \param $attbs attributes (string or array)
     */
-   function parse_input_standard_attributes( $attbs, $rx_skipattr='' )
+   private static function parse_input_standard_attributes( $attbs, $rx_skipattr='' )
    {
       $str = '';
       $attbs = attb_parse($attbs);
@@ -1660,92 +1702,34 @@ class Form
          $str .= attb_build($attbs);
       }
       return $str;
-   }
+   }//parse_input_standard_attributes
 
-   /*!
-    * \brief This will add or not the 'disabled' attribut
-    *        to all the following input fields.
-    *
-    * \param $on if false, 'disabled' will be added.
-    */
-   function enable_input( $on)
+   // only used for debugging/code-examples
+   public static function echo_internal_layout( $form )
    {
-      $this->disabled = ($on == false);
-   }
-
-   /*! \brief Set the global tabindex attribut of input fields. */
-   function set_tabindex( $tabindex)
-   {
-      $val = $this->tabindex;
-      $this->tabindex = $tabindex;
-      return $val;
-   }
-
-   /*! \brief Get the global attributs string of input fields. */
-   function get_input_attbs( $use_disable=true )
-   {
-      return ($use_disable && $this->disabled)
-         ? ' disabled'
-         : ( $this->tabindex ? ' tabindex="'.($this->tabindex++).'"' : '');
-   }
-
-   /*! \brief Get the merged attributs string of a form part. */
-   function get_form_attbs( $attbs='', $suffix='')
-   {
-      $attbs = attb_parse( $attbs);
-      $attbs = attb_merge( array('class'=>$this->fclass.$suffix), $attbs, ' ');
-      return attb_build( $attbs);
-   }
-
-   /* ******************************************************************** */
-
-   var $attached;
-   var $hiddens;
-   var $hiddens_echoed;
-
-   /*!
-    * \brief This will attach an object to the form. Then, the hiddens
-    *        from the object are inserted when the form is closed
-    *        via the object get_hiddens() function.
-    *
-    * \param &$table The object.
-    */
-   function attach_table( &$table)
-   {
-      //if(isset($table))
-      $this->attached[]= $table;
-   }
-
-   function add_hidden( $key, $val)
-   {
-      $this->hiddens[$key] = $val;
-   }
-
-   // \brief return the array of hiddens merged with owneds and attachments' ones
-   function get_hiddens( &$hiddens)
-   {
-      if( is_array($hiddens) )
-         $hiddens = array_merge( $hiddens, $this->hiddens);
-      else
-         $hiddens = $this->hiddens;
-      foreach( $this->attached as $attach )
+      if( isset($form->layout[FLAYOUT_GLOBAL]) )
       {
-         $attach->get_hiddens( $hiddens);
+         echo "<br><br>\nvar_export:\n<font size=+2><pre>"
+            . "global-layout: " . var_export( $form->orig_layout, true ) ."\n\n"
+            . "layout-array (for debugging):\n" .
+               var_export( $form->layout[FLAYOUT_GLOBAL], true ) . "\n"
+            . "</pre></font>\n";
       }
-   }
-
-   // \brief return the form-string of owned hiddens merged with attachments' ones
-   function get_hiddens_string()
-   {
-      $hiddens = $this->hiddens;
-      foreach( $this->attached as $attach )
-      {
-         $attach->get_hiddens( $hiddens);
-      }
-      $this->hiddens_echoed = true;
-      return build_hidden( $hiddens);
-   }
+   }//echo_internal_layout
 
 } // end of class 'Form'
+
+
+//format a text to be placed before/between input boxes
+//$seps: optionaly add separations before=1 or after=2
+//&nbsp; are kept for text-only browsers
+function sptext( $text, $seps=0 )
+{
+   return '<span class="BoxLabel'.($seps&3).'">'
+      . ($seps&1 ?SMALL_SPACING :'')
+      . $text
+      . ($seps&2 ?SMALL_SPACING :'')
+      . '</span>';
+}//sptext
 
 ?>

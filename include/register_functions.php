@@ -36,22 +36,21 @@ define('USE_REGEXP_REGISTRATION', 1); // loose account name reject
   */
 class UserRegistration
 {
-   var $die_on_error;
-   var $errors;
+   private $die_on_error;
+   private $errors = array();
 
-   var $uhandle;
-   var $policy;
+   public $uhandle;
+   public $policy;
 
-   var $name;
-   var $password;
-   var $password2;
-   var $email;
-   var $comment;
+   public $name;
+   public $password;
+   public $password2;
+   public $email;
+   public $comment;
 
-   function UserRegistration( $die_on_error=true )
+   public function __construct( $die_on_error=true )
    {
       $this->die_on_error = $die_on_error;
-      $this->errors = array();
 
       // for both normal and blocked registration
       $this->uhandle = get_request_arg('userid');
@@ -65,10 +64,10 @@ class UserRegistration
 
       // only for blocked-registration
       $this->comment = trim(get_request_arg('comment'));
-   }
+   }//__construct
 
    // returns 0=no-error, array with error-texts otherwise or error thrown (depends on die-mode)
-   function check_registration_normal()
+   public function check_registration_normal()
    {
       $this->errors = array();
       $this->check_userid();
@@ -81,10 +80,10 @@ class UserRegistration
          $this->check_existing_user();
       $this->check_email();
       return (count($this->errors)) ? $this->errors : 0;
-   }
+   }//check_registration_normal
 
    // returns 0=no-error, array with error-texts otherwise or error thrown (depends on die-mode)
-   function check_registration_blocked()
+   public function check_registration_blocked()
    {
       $this->errors = array();
       $this->check_userid();
@@ -95,10 +94,10 @@ class UserRegistration
       if( $this->die_on_error )
          $this->check_existing_user();
       return (count($this->errors)) ? $this->errors : 0;
-   }
+   }//check_registration_blocked
 
 
-   function check_userid()
+   private function check_userid()
    {
       if( strlen( $this->uhandle ) < 3 )
          $this->_error('userid_too_short', "UserReg.check_userid({$this->uhandle})");
@@ -106,13 +105,13 @@ class UserRegistration
          $this->_error('userid_illegal_chars', "UserReg.check_userid({$this->uhandle})");
    }
 
-   function check_name()
+   private function check_name()
    {
       if( strlen( $this->name ) < 1 )
          $this->_error('name_not_given', "UserReg.check_name({$this->name})");
    }
 
-   function check_password()
+   private function check_password()
    {
       if( strlen($this->password) < 6 )
          $this->_error('password_too_short', 'UserReg.check_password');
@@ -121,16 +120,16 @@ class UserRegistration
 
       if( $this->password != $this->password2 )
          $this->_error('password_mismatch', 'UserReg.check_password');
-   }
+   }//check_password
 
-   function check_policy()
+   private function check_policy()
    {
       if( !$this->policy )
         $this->_error('registration_policy_not_checked', 'UserReg.check_policy');
    }
 
    // returns 0=no-error, array with error-texts otherwise or error thrown (depends on die-mode)
-   function check_email()
+   private function check_email()
    {
       if( (string)$this->email != '' )
       {
@@ -138,11 +137,11 @@ class UserRegistration
          if( $errorcode )
             $this->_error($errorcode, "UserReg.check_email2({$this->uhandle})");
       }
-   }
+   }//check_email
 
 
    // internal (throw error or add to error-list)
-   function _error( $error_code, $dbg_msg=null )
+   private function _error( $error_code, $dbg_msg=null )
    {
       if( $this->die_on_error )
          error($error_code, $dbg_msg);
@@ -151,7 +150,7 @@ class UserRegistration
    }
 
 
-   function check_existing_user()
+   private function check_existing_user()
    {
       if( (string)$this->uhandle == '' )
          return;
@@ -179,11 +178,11 @@ class UserRegistration
 
       if( @mysql_num_rows($result) > 0 )
          $this->_error('userid_in_use', "UserReg.check_existing_user({$this->uhandle})");
-   } //check_existing_user
+   }//check_existing_user
 
 
    // do the registration to the database
-   function register_user( $set_cookie=true )
+   public function register_user( $set_cookie=true )
    {
       global $NOW;
 
@@ -214,11 +213,11 @@ class UserRegistration
 
       if( $set_cookie )
          set_login_cookie( $this->uhandle, $code );
-   } //register_user
+   }//register_user
 
 
    // send request to Support-forum (moderated)
-   function register_blocked_user( $forum_id )
+   public function register_blocked_user( $forum_id )
    {
       global $NOW;
       if( !is_numeric($forum_id) || $forum_id <= 0 )
@@ -264,7 +263,7 @@ class UserRegistration
          add_forum_log( $new_id, $new_id, FORUMLOGACT_NEW_PEND_POST . ':new_thread' );
       }
       ta_end();
-   } //register_blocked_user
+   }//register_blocked_user
 
 } // end of 'UserRegistration'
 

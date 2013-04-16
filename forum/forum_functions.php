@@ -189,67 +189,47 @@ define('MASK_DRAWPOST_NO_BODY', 0x20); // no post-body shown
 class DisplayForum
 {
    /*! \brief Current logged in user */
-   var $user_id;
+   private $user_id;
    /*! \brief true, if in moderating-mode */
-   var $is_moderator;
+   public $is_moderator;
    /*! \brief current forum-id (maybe 0) */
-   var $forum_id;
+   private $forum_id;
    /*! \brief current thread-id (maybe 0) */
-   var $thread_id;
+   private $thread_id;
 
-   var $cols;
-   var $links;
-   var $headline;
-   var $link_array_left;
-   var $link_array_right;
-   var $found_rows;
-   var $count_new_posts; // for get_new_string() and echo_link() to support "first new"
-   var $new_count; // global new-counter for displaying
-   var $back_post_id;
-   var $cur_depth;
-   var $show_score; // used for forum-search
+   public $cols = 1;
+   public $links = 0;
+   public $headline = array();
+   private $link_array_left = array();
+   private $link_array_right = array();
+   private $found_rows = -1; // not shown
+   public $count_new_posts = 0; // for get_new_string() and echo_link() to support "first new"
+   private $new_count = 0; // global new-counter for displaying
+   public $back_post_id = 0;
+   public $cur_depth = -1;
+   public $show_score = false; // used for forum-search
    /*! \brief rx-terms (optionally array) that are to be highlighted in text. */
-   var $rx_term;
-   var $ConfigBoard;
-   var $forum_opts;
-   var $flat_view; // 0 = tree-view, -1 = flat-old-first (order Posts.Time ASC), 1 = flat-new-first (order Posts.Time DESC)
+   private $rx_term = '';
+   private $ConfigBoard = null;
+   private $forum_opts = null;
+   public $flat_view = 0; // 0 = tree-view, -1 = flat-old-first (order Posts.Time ASC), 1 = flat-new-first (order Posts.Time DESC)
 
    // consts
-   var $max_rows;
-   var $offset;
-   var $navi_img;
+   public $max_rows = MAXROWS_PER_PAGE_DEFAULT;
+   public $offset = 0;
+   private $navi_img = null;
 
    /*! \brief Constructs display handler for forum-pages. */
-   function DisplayForum( $user_id, $is_moderator, $forum_id=0, $thread_id=0 )
+   public function __construct( $user_id, $is_moderator, $forum_id=0, $thread_id=0 )
    {
       $this->user_id = $user_id;
       $this->is_moderator = $is_moderator;
       $this->forum_id = $forum_id;
       $this->thread_id = $thread_id;
-
-      $this->cols = 1;
-      $this->links = 0;
-      $this->headline = array();
-      $this->link_array_left = array();
-      $this->link_array_right = array();
-      $this->found_rows = -1; // not shown
-      $this->count_new_posts = 0;
-      $this->new_count = 0;
-      $this->back_post_id = 0;
-      $this->cur_depth = -1;
-      $this->show_score = false;
-      $this->rx_term = '';
-      $this->ConfigBoard = null;
-      $this->forum_opts = null;
-      $this->flat_view = 0; // tree-view
-
-      $this->max_rows = MAXROWS_PER_PAGE_DEFAULT;
-      $this->offset = 0;
-      $this->navi_img = null;
    }
 
    /*! \brief Setting rx-term (can be array or string). */
-   function set_rx_term( $rx_term='' )
+   public function set_rx_term( $rx_term='' )
    {
       // highlight terms (skipping XML-elements like tags & entities)
       if( is_array($rx_term) && count($rx_term) > 0 )
@@ -260,17 +240,17 @@ class DisplayForum
          $this->rx_term = $rx_term;
    }
 
-   function setConfigBoard( $cfg_board )
+   public function setConfigBoard( $cfg_board )
    {
       $this->ConfigBoard = $cfg_board;
    }
 
-   function set_forum_options( $forum_opts )
+   public function set_forum_options( $forum_opts )
    {
       $this->forum_opts = $forum_opts;
    }
 
-   function set_threadpost_view( $forum_flags )
+   public function set_threadpost_view( $forum_flags )
    {
       if( ($forum_flags & FORUMFLAGS_POSTVIEW_FLAT) == FORUMFLAG_POSTVIEW_FLAT_NEW_FIRST )
          $this->flat_view = 1;
@@ -280,13 +260,13 @@ class DisplayForum
          $this->flat_view = 0;
    }
 
-   function show_found_rows( $rows )
+   public function show_found_rows( $rows )
    {
       if( $rows >=0 )
          $this->found_rows = $rows;
    }
 
-   function print_moderation_note( $width )
+   public function print_moderation_note( $width )
    {
       if( $this->is_moderator)
          echo "<table width='$width'><tr><td align=right><font color=red>"
@@ -297,7 +277,7 @@ class DisplayForum
    //                 values: 'Index', 'List', 'Read', 'Search', 'Revision', 'Pending'
    // param ReqParam: optional object RequestParameters containing URL-parts to be included for paging
    // note: sets cur_depth=-1
-   function forum_start_table( $table_id, $ReqParam = null)
+   public function forum_start_table( $table_id, $ReqParam = null )
    {
       echo name_anchor('ftop'), "<table id='forum$table_id' class=Forum>\n";
       $this->make_link_array( $ReqParam );
@@ -310,7 +290,7 @@ class DisplayForum
       $this->cur_depth = -1;
    }
 
-   function print_headline( $headline=NULL )
+   public function print_headline( $headline=NULL )
    {
       if( is_null($headline) )
          $headline = $this->headline;
@@ -329,9 +309,9 @@ class DisplayForum
          echo "<td $attbs>$name</td>";
       }
       echo "</tr>\n";
-   }
+   }//print_headline
 
-   function forum_end_table( $bottom_bar=true )
+   public function forum_end_table( $bottom_bar=true )
    {
       if( $bottom_bar && $this->links & LINK_MASKS )
          $this->echo_links(NEWMODE_BOTTOM);
@@ -339,7 +319,7 @@ class DisplayForum
    }
 
    // return arr( headline1, headtitle2 )
-   function build_threadpostview_headlines( $base_url, $show_overview )
+   public function build_threadpostview_headlines( $base_url, $show_overview )
    {
       // build view-links "(tree | new/old first)"
       $arr = array();
@@ -391,7 +371,7 @@ class DisplayForum
    }//build_threadpostview_headlines
 
    // param ReqParam: optional object RequestParameters containing URL-parts to be included for paging
-   function make_link_array( $ReqParam = null )
+   public function make_link_array( $ReqParam = null )
    {
       global $NOW;
       $links = $this->links;
@@ -485,9 +465,9 @@ class DisplayForum
          $this->link_array_right[T_("Next Page")] =
             array( make_url( $href, $navi ), '', array( 'accesskey' => ACCKEY_ACT_NEXT ) );
       }
-   } //make_link_array
+   }//make_link_array
 
-   function echo_links( $new_mode )
+   public function echo_links( $new_mode )
    {
       if( ($new_mode & (NEWMODE_TOP|NEWMODE_BOTTOM)) == NEWMODE_TOP )
          $id = 'T';
@@ -535,14 +515,14 @@ class DisplayForum
       }
 
       echo "</div></td></tr>\n";
-   } //echo_links
+   }//echo_links
 
    /*!
     * \brief Increase global new counter, builds and returns current new-string.
     * param $mode bitmask of NEWMODE_TOP|BOTTOM ('new' for top/bottom-bar);
     *       NEWMODE_OVERVIEW, NEWMODE_NO_LINK
     */
-   function get_new_string( $mode=0 )
+   public function get_new_string( $mode=0 )
    {
       static $fmt_new = '<span class="NewFlag"><a name="%s%d"%s>%s</a></span>'; // anchor_prefix, new-idx, link-ref, new-text
 
@@ -572,11 +552,11 @@ class DisplayForum
          $new = sprintf( $fmt_new, $anchor_prefix, $this->new_count, $link, T_('new#forum') );
       }
       return $new;
-   } //get_new_string
+   }//get_new_string
 
    // \param $drawmode one of DRAWPOST_NORMAL | PREVIEW | EDIT | REPLY
    // \note checking for thread-read-only flag must be done at caller-side
-   function forum_message_box( $drawmode, $post_id, $GoDiagrams=null, $ErrorMsg='', $Subject='', $Text='', $Flags=0 )
+   public function forum_message_box( $drawmode, $post_id, $GoDiagrams=null, $ErrorMsg='', $Subject='', $Text='', $Flags=0 )
    {
       global $player_row;
       if( ($player_row['AdminOptions'] & ADMOPT_FORUM_NO_POST) ) // user not allowed to post
@@ -630,7 +610,7 @@ class DisplayForum
 /*
       if( ALLOW_GO_DIAGRAMS && is_javascript_enabled() && !is_null($GoDiagrams) )
       {
-         $diagrams_str = draw_editors($GoDiagrams);
+         $diagrams_str = GoDiagram::draw_editors($GoDiagrams);
          if( !empty($diagrams_str) )
          {
             $form->add_row( array( 'OWNHTML', "<td colspan=2>$diagrams_str</td>" ));
@@ -653,7 +633,7 @@ class DisplayForum
    // level 1: the header, body and footer TABLE of the list
    // level 2: the body of the list: one row per post managing its indent
    // level 3: the post cell TABLE
-   function change_depth( $new_depth )
+   public function change_depth( $new_depth )
    {
       if( $new_depth < 1 && $this->cur_depth < 1 )
          return;
@@ -697,10 +677,10 @@ class DisplayForum
 
       // finally, open the cell table
       echo "<td colspan=$c><table width=\"100%\" border=0 cellspacing=0 cellpadding=3>";
-   }
+   }//change_depth
 
    /*! \brief Inits and returns navigational images for draw_post if not initialized yet. */
-   function init_navi_images()
+   private function init_navi_images()
    {
       if( !is_array($this->navi_img) )
       {
@@ -723,7 +703,7 @@ class DisplayForum
          );
       }
       return $this->navi_img;
-   }
+   }//init_navi_images
 
 
    /*!
@@ -731,7 +711,7 @@ class DisplayForum
     * \param $drawmode DRAWPOST_..., MASK_DRAWPOST_...
     * \param $post: ForumPost-object to draw
     */
-   function draw_post( $drawmode, $post, $is_my_post, $GoDiagrams=null )
+   public function draw_post( $drawmode, $post, $is_my_post, $GoDiagrams=null )
    {
       global $NOW, $player_row;
 
@@ -752,7 +732,7 @@ class DisplayForum
       $sbj = make_html_safe( $post->subject, SUBJECT_HTML, $this->rx_term );
       $txt = make_html_safe( $post->text, true, $this->rx_term );
 //      if( ALLOW_GO_DIAGRAMS && is_javascript_enabled() && !is_null($GoDiagrams) )
-//         $txt = replace_goban_tags_with_boards($txt, $GoDiagrams);
+//         $txt = GoDiagram::replace_goban_tags_with_boards($txt, $GoDiagrams);
       $txt = MarkupHandlerGoban::replace_igoban_tags( $txt );
       if( strlen($txt) == 0 ) $txt = '&nbsp;';
 
@@ -961,10 +941,10 @@ class DisplayForum
       }//post-footer
 
       return $post_reference;
-   } //draw_post
+   }//draw_post
 
    /*! \brief Draw tree-overview for this thread. */
-   function draw_overview( $fthread )
+   public function draw_overview( $fthread )
    {
       global $base_path, $player_row;
       $this->new_count = 0;
@@ -1015,9 +995,9 @@ class DisplayForum
 
       $this->new_count = 0;
       $this->change_depth( -1 );
-   } //draw_overview
+   }//draw_overview
 
-   function get_post_edited_string( $post )
+   public function get_post_edited_string( $post )
    {
       if( $post->last_edited > 0 )
       {
@@ -1044,38 +1024,38 @@ class DisplayForum
 class Forum
 {
    /*! \brief Forums.ID : id */
-   var $id;
+   public $id;
    /*! \brief Forums.Name : str */
-   var $name;
+   public $name;
    /*! \brief Forums.Description : str */
-   var $description;
+   public $description;
    /*! \brief Forums.LastPost : id (=Posts.ID) */
-   var $last_post_id;
+   public $last_post_id;
    /*! \brief Forums.Updated (change-date for forum-thread-read) */
-   var $updated;
+   private $updated;
    /*! \brief Forums.ThreadsInForum : int */
-   var $count_threads;
+   public $count_threads;
    /*! \brief Forums.PostsInForum : int */
-   var $count_posts;
+   public $count_posts;
    /*! \brief Forums.SortOrder : int */
-   var $sort_order;
+   private $sort_order;
    /*! \brief Forums.Options : int, bit-values see FORUMOPT_MODERATED, etc. */
-   var $options;
+   public $options;
 
    // non-db vars
 
    /*! \brief partly filled ForumPost-object for last_post_id [default=null] */
-   var $last_post;
-   /*! \brief array of ForumThread-objects [default=null] */
-   var $threads;
+   public $last_post = null;
+   /*! \brief array of ForumPost-objects [default=null] */
+   public $threads = null;
    /*! \brief true, if there are more threads to page-navigate. */
-   var $navi_more_threads;
+   private $navi_more_threads;
    /*! \brief true if forum has new posts. */
-   var $has_new_posts;
+   public $has_new_posts = false;
 
 
    /*! \brief Constructs Forum with specified args. */
-   function Forum( $id=0, $name='', $description='', $last_post_id=0, $updated=0,
+   private function __construct( $id=0, $name='', $description='', $last_post_id=0, $updated=0,
          $count_threads=0, $count_posts=0, $sort_order=0, $options=0 )
    {
       $this->id = $id;
@@ -1087,14 +1067,10 @@ class Forum
       $this->count_posts = $count_posts;
       $this->sort_order = $sort_order;
       $this->options = $options;
-      // non-db
-      $this->last_post = null;
-      $this->threads = null;
-      $this->has_new_posts = false;
    }
 
    /*! \brief Returns string-representation of this object (for debugging purposes). */
-   function to_string()
+   public function to_string()
    {
       return "Forum(id={$this->id}): "
          . "name=[{$this->name}]"
@@ -1113,7 +1089,7 @@ class Forum
     * \brief Returns Forums.Options in text-form.
     * \param $forum_opts ForumOptions-object for specific user
     */
-   function build_options_text( $forum_opts, $formatted=true )
+   public function build_options_text( $forum_opts, $formatted=true )
    {
       $opt_prefix = ' &nbsp;&nbsp;[';
       $str = '';
@@ -1131,10 +1107,10 @@ class Forum
    }
 
    /*!
-    * \brief Loads threads for current forum into this object (threads-var).
+    * \brief Loads threads for current forum into this object (this->threads = ForumPost[]).
     * \return count of loaded rows
     */
-   function load_threads( $user_id, $is_moderator, $show_rows, $offset=0 )
+   public function load_threads( $user_id, $is_moderator, $show_rows, $offset=0 )
    {
       if( !is_numeric($user_id) )
          error('invalid_user', "Forum.load_threads($user_id)");
@@ -1192,14 +1168,14 @@ class Forum
 
       $this->threads = $thlist;
       return $rows;
-   } //load_threads
+   }//load_threads
 
    /*! \brief Returns true, if there are new posts in loaded thread-list. */
-   function has_new_posts_in_threads()
+   public function has_new_posts_in_threads()
    {
       if( !is_null($this->threads) )
       {
-         foreach( $this->threads as $thread )
+         foreach( $this->threads as $thread ) // $thread = ForumPost-obj
          {
             if( $thread->has_new_posts )
                return true;
@@ -1210,7 +1186,7 @@ class Forum
    }
 
    /*! \brief Use after call of load_threads() to check, if there are more threads to load. */
-   function has_more_threads()
+   public function has_more_threads()
    {
       return $this->navi_more_threads;
    }
@@ -1221,7 +1197,7 @@ class Forum
     * \note see section 'Calculated database fields' in 'specs/forums.txt'
     * \return number of updates
     */
-   function fix_forum( $debug, $debug_format="%s\n" )
+   public function fix_forum( $debug, $debug_format="%s\n" )
    {
       $upd_arr = array();
       $fid = $this->id;
@@ -1259,23 +1235,23 @@ class Forum
          if( !$debug )
             db_query( "Forum.fix_forum.update($fid)", $query );
 
-         Forum::delete_cache_forum( "Forum.fix_forum.update($fid)", $fid );
+         self::delete_cache_forum( "Forum.fix_forum.update($fid)", $fid );
       }
 
       return (count($upd_arr) > 0) ? 1 : 0;
-   } //fix_forum
+   }//fix_forum
 
 
    // ---------- Static Class functions ----------------------------
 
-   function is_admin()
+   public static function is_admin()
    {
       global $player_row;
       return ( @$player_row['admin_level'] & (ADMIN_FORUM|ADMIN_DEVELOPER) );
    }
 
    /*! \brief Returns true if "writing posts" is allowed for read-only forum for given user. */
-   function allow_posting( $user_row, $forum_opts )
+   public static function allow_posting( $user_row, $forum_opts )
    {
       if( is_null($forum_opts) )
          $forum_opts = FORUMOPT_READ_ONLY; // assuming read-only to be safe
@@ -1285,7 +1261,7 @@ class Forum
    }
 
    /*! \brief Returns db-fields to be used for query of Forum-object. */
-   function build_query_sql()
+   public static function build_query_sql()
    {
       // Forums: ID,Name,Description,LastPost,ThreadsInForum,PostsInForum,SortOrder,Options
       $qsql = new QuerySQL();
@@ -1297,7 +1273,7 @@ class Forum
    }
 
    /*! \brief Returns Forum-object created from specified (db-)row. */
-   function new_from_row( $row )
+   public static function new_from_row( $row )
    {
       $forum = new Forum(
             @$row['ID'],
@@ -1317,40 +1293,40 @@ class Forum
     * \brief Returns non-null Forum-object for specified forum-id.
     * Throws errors if forum cannot be found.
     */
-   function load_forum( $id )
+   public static function load_forum( $id )
    {
       if( !is_numeric($id) || $id <= 0 )
-         error('unknown_forum', "Forum::load_forum($id)");
+         error('unknown_forum', "Forum:load_forum($id)");
 
-      $qsql = Forum::build_query_sql();
+      $qsql = self::build_query_sql();
       $qsql->add_part( SQLP_WHERE, "ID='$id'" );
       $qsql->add_part( SQLP_LIMIT, '1' );
 
       $query = $qsql->get_select();
-      $row = mysql_single_fetch( "Forum::load_forum2($id)", $query );
+      $row = mysql_single_fetch( "Forum:load_forum2($id)", $query );
       if( !$row )
-         error('unknown_forum', "Forum::load_forum3($id)");
+         error('unknown_forum', "Forum:load_forum3($id)");
 
-      return Forum::new_from_row( $row );
+      return self::new_from_row( $row );
    }
 
-   // cached version of Forum::load_forum()
-   function load_cache_forum( $id )
+   // cached version of self::load_forum()
+   public static function load_cache_forum( $id )
    {
-      $dbgmsg = "Forum::load_cache_forum($id)";
+      $dbgmsg = "Forum:load_cache_forum($id)";
       $key = "Forum.$id";
 
       $forum = DgsCache::fetch( $dbgmsg, CACHE_GRP_FORUM, $key );
       if( is_null($forum) )
       {
-         $forum = Forum::load_forum( $id );
+         $forum = self::load_forum( $id );
          DgsCache::store( $dbgmsg, CACHE_GRP_FORUM, $key, $forum, SECS_PER_DAY );
       }
 
       return $forum;
    }
 
-   function delete_cache_forum( $dbgmsg, $fid )
+   public static function delete_cache_forum( $dbgmsg, $fid )
    {
       DgsCache::delete( $dbgmsg, CACHE_GRP_FORUM, "Forum.$fid" );
    }
@@ -1362,13 +1338,13 @@ class Forum
     * \note also sets Forum-field: has_new_posts
     * \note stores result for user in Forumreads-table
     */
-   function load_forum_list( $forum_opts )
+   public static function load_forum_list( $forum_opts )
    {
       if( !($forum_opts instanceof ForumOptions) )
-         error('invalid_args', "Forum::load_forum_list.check.forum_opts($forum_opts)");
+         error('invalid_args', "Forum:load_forum_list.check.forum_opts($forum_opts)");
       $user_id = $forum_opts->uid;
 
-      $qsql = Forum::build_query_sql();
+      $qsql = self::build_query_sql();
       $qsql->add_part( SQLP_FIELDS,
          'LP.Thread_ID AS LP_Thread',
          'UNIX_TIMESTAMP(LP.Time) AS LP_Time',
@@ -1385,13 +1361,13 @@ class Forum
       $qsql->add_part( SQLP_ORDER, 'SortOrder' );
 
       $query = $qsql->get_select();
-      $result = db_query( "Forum::load_forum_list($user_id)", $query );
+      $result = db_query( "Forum:load_forum_list($user_id)", $query );
 
       $fread = new ForumRead( $user_id );
       $flist = array();
       while( $row = mysql_fetch_array( $result ) )
       {
-         $forum = Forum::new_from_row( $row );
+         $forum = self::new_from_row( $row );
          if( !$forum_opts->is_visible_forum( $forum->options ) )
             continue;
 
@@ -1407,7 +1383,7 @@ class Forum
             if( $row['FR_X_Lastread'] <= 0 || $forum->updated > $row['FR_X_Lastread'] )
             {
                $forum->has_new_posts = ForumRead::has_new_posts_in_forums( $user_id, $fid );
-               $fread->replace_row_forumread( "Forum::load_forum_list.forum_read.upd",
+               $fread->replace_row_forumread( "Forum:load_forum_list.forum_read.upd",
                   $fid, 0, $forum->updated, $forum->has_new_posts );
             }
             else
@@ -1419,23 +1395,23 @@ class Forum
       mysql_free_result($result);
 
       return $flist;
-   } //load_forum_list
+   }//load_forum_list
 
    /*!
     * \brief Returns array of partial Forum-objects (only those visible to a player)
     *        with [ id => name ] entries.
-    * param forum_opts is object ForumOptions($player_row), load all forum names if omitted
+    * \param forum_opts is object ForumOptions($player_row), load all forum names if omitted
     */
-   function load_cache_forum_names( $forum_opts )
+   public static function load_cache_forum_names( $forum_opts )
    {
-      $dbgmsg = "Forum::load_cache_forum_names";
+      $dbgmsg = "Forum:load_cache_forum_names";
       $key = "ForumNames";
 
       $arr_forum_names = DgsCache::fetch( $dbgmsg, CACHE_GRP_FORUM_NAMES, $key );
       if( is_null($arr_forum_names) )
       {
          // build forum-array for filter: ( Name => Forum_ID )
-         $db_result = db_query( 'Forum::load_cache_forum_names',
+         $db_result = db_query( 'Forum:load_cache_forum_names',
                'SELECT ID, Name, Options FROM Forums ORDER BY SortOrder' );
 
          $arr_forum_names = array();
@@ -1461,22 +1437,22 @@ class Forum
       return $forum_names;
    }//load_cache_forum_names
 
-   function delete_cache_forum_names( $dbgmsg )
+   public static function delete_cache_forum_names( $dbgmsg )
    {
       DgsCache::delete( $dbgmsg, CACHE_GRP_FORUM_NAMES, "ForumNames" );
    }
 
    /*! \brief Returns array of Forum-objects with raw Forums-fields (for forum-fixes). */
-   function load_fix_forum_list()
+   public static function load_fix_forum_list()
    {
-      $qsql = Forum::build_query_sql();
+      $qsql = self::build_query_sql();
       $qsql->add_part( SQLP_ORDER, 'ID' );
 
-      $result = db_query( "Forum::load_fix_forum_list", $qsql->get_select() );
+      $result = db_query( "Forum:load_fix_forum_list", $qsql->get_select() );
       $flist = array();
       while( $row = mysql_fetch_array( $result ) )
       {
-         $forum = Forum::new_from_row( $row );
+         $forum = self::new_from_row( $row );
          $flist[] = $forum;
       }
       mysql_free_result($result);
@@ -1495,32 +1471,28 @@ class Forum
 class ForumThread
 {
    /*! \brief ForumRead-object to be used to mark posts as read. */
-   var $forum_read;
+   private $forum_read;
    /*! \brief array of posts in this thread: [ post->id => ForumPost ]. */
-   var $posts;
+   public $posts = array();
 
    /*! \brief Thread starter post [default=null]; null, if none found. */
-   var $thread_post;
+   public $thread_post = null;
    /*! \brief Timestamp of last created post; 0=no post. */
-   var $last_created;
+   public $last_created = 0;
 
-   function ForumThread( $forum_read=null )
+   public function __construct( $forum_read=null )
    {
       $this->forum_read = $forum_read;
-      $this->posts = array();
-
-      $this->thread_post = null;
-      $this->last_created = 0;
    }
 
    /*! \brief Returns post with given post-id from this ForumThread object; or NULL if not found. */
-   function get_post( $pid )
+   public function get_post( $pid )
    {
       return (isset($this->posts[$pid])) ? $this->posts[$pid] : NULL;
    }
 
    /*! \brief Returns thread-hits or 0 if thread has no posts. */
-   function get_thread_hits()
+   public function get_thread_hits()
    {
       return (is_null($this->thread_post)) ? 0 : $this->thread_post->count_hits;
    }
@@ -1532,9 +1504,9 @@ class ForumThread
     * \return number of new posts
     * \note sets ForumPost.is_read
     * \note sets this.last_created
-    * NOTE: Needs var forum_read set in this object!
+    * \note Needs attribute forum_read set in this object!
     */
-   function load_posts( $qsql2=null )
+   public function load_posts( $qsql2=null )
    {
       global $NOW;
       $qsql = ForumPost::build_query_sql();
@@ -1551,7 +1523,7 @@ class ForumThread
          $post = ForumPost::new_from_row( $row );
          if( $post->parent_id == 0 )
             $this->thread_post = $post;
-         $post->is_read = $post->is_post_read( $this->forum_read );
+         $post->set_post_is_read( $this->forum_read );
          if( !$post->is_read )
             ++$new_posts;
          if( $post->created > $this->last_created )
@@ -1571,7 +1543,7 @@ class ForumThread
     * \brief Loads and adds posts (to posts-arr), current active post stored
     *        in thread_post; Needs fresh object-instance.
     */
-   function load_revision_history( $post_id )
+   public function load_revision_history( $post_id )
    {
       global $NOW, $player_row;
 
@@ -1615,7 +1587,7 @@ class ForumThread
    }//load_revision_history
 
    /*! \brief Returns true, if one of loaded posts contains a go-diagram. */
-   function contains_goban()
+   public function contains_goban()
    {
       foreach( $this->posts as $post_id => $post )
       {
@@ -1626,7 +1598,7 @@ class ForumThread
    }
 
    /*! \brief Returns string-representation of this object (for debugging purposes). */
-   function to_string()
+   public function to_string()
    {
       $cnt = 0;
       $size = count($this->posts);
@@ -1638,16 +1610,17 @@ class ForumThread
 
    /*!
     * \brief Builds data-structure for navigation within post-list.
-    * param $set_in_posts if true, set navigation-links in ForumPosts in this object
+    * \param $set_in_posts if true, set navigation-links in ForumPosts in this object
     *
     * navtree[post_id] = map with keys: value=post-id or 0 (=no according node)
     *   prevP, nextP - prev/next-parent post
     *   prevA, nextA - prev/next-answer post for "parent"-thread
     *   child        - first-answer post
-    * NOTE: order of post_id's in navtree is same as in posts of this ForumThread,
+    *
+    * \note order of post_id's in navtree is same as in posts of this ForumThread,
     *       but is expecting tree-sort by PosIndex
     */
-   function create_navigation_tree( $set_in_posts=true )
+   public function create_navigation_tree( $set_in_posts=true )
    {
       // find out flat-order
       $arr_order = array();
@@ -1714,7 +1687,7 @@ class ForumThread
       }
 
       $this->navtree = $navtree;
-   } //create_navigation_tree
+   }//create_navigation_tree
 
 } // end of 'ForumThread'
 
@@ -1730,87 +1703,89 @@ class ForumPost
    // IDs
 
    /*! \brief Posts.ID */
-   var $id;
+   public $id;
    /*! \brief Posts.Forum_ID */
-   var $forum_id;
+   public $forum_id;
    /*! \brief Posts.Thread_ID */
-   var $thread_id;
+   public $thread_id;
 
    // Thread Meta
 
    /*! \brief Posts.PostsInThread */
-   var $count_posts;
+   public $count_posts;
    /*! \brief Posts.Hits */
-   var $count_hits;
+   public $count_hits;
    /*! \brief Posts.LastPost */
-   var $last_post_id;
+   public $last_post_id;
 
    // Post Meta & Content
 
    /*! \brief non-null User-object ( .ID = Posts.User_ID ) */
-   var $author;
+   public $author;
    /*! \brief Posts.Subject */
-   var $subject;
+   public $subject;
    /*! \brief Posts.Text */
-   var $text;
+   public $text;
    /*! \brief Posts.Flags */
-   var $flags;
+   public $flags;
 
    /*! \brief Posts.Parent_ID */
-   var $parent_id;
+   public $parent_id;
    /*! \brief Posts.AnswerNr */
-   var $answer_num;
+   private $answer_num;
    /*! \brief Posts.Depth */
-   var $depth;
+   public $depth;
    /*! \brief Posts.PosIndex : string */
-   var $posindex;
+   private $posindex;
 
    /*! \brief Posts.Approved : string (DB=Y|N|P); use is_approved/is_pending_approval-funcs. */
-   var $approved;
+   public $approved;
 
    /*! \brief Posts.Time */
-   var $created;
+   public $created;
    /*! \brief Posts.Lastchanged, SQL X_Lastchanged; date of last-post in thread */
-   var $last_changed;
+   public $last_changed;
    /*! \brief Posts.Lastedited */
-   var $last_edited;
+   public $last_edited;
 
    /*! \brief Posts.crc32 */
-   var $crc32;
+   private $crc32;
    /*! \brief Posts.old_ID */
-   var $old_id;
+   private $old_id;
 
    // non-db vars
 
    /*! \brief ref to thread ForumPost (set by ForumThread.load_posts). */
-   var $thread_post;
+   public $thread_post = null;
+   /*! \brief ref to last created visible ForumPost (set by Forum.load_threads). */
+   public $last_post = null;
 
    /*! \brief true, if for thread no link should be drawn (used in draw_post-func) [default=false] */
-   var $thread_no_link;
+   public $thread_no_link = false;
    /*! \brief [int] order in thread-view (1..n); 0 = unset. */
-   var $creation_order;
+   public $creation_order = 0;
 
    /*! \brief true if thread has new posts. */
-   var $has_new_posts;
+   public $has_new_posts = false;
    /*! \brief true if post marked as read. */
-   var $is_read;
+   public $is_read = true;
 
    /*! \brief for forum-search: forum-name */
-   var $forum_name;
+   public $forum_name;
    /*! \brief for forum-search: score */
-   var $score;
+   public $score = 0;
 
    // tree-navigation (set by ForumThread::create_navigation_tree-func), NULL=not-set
 
-   var $prev_parent_post;
-   var $next_parent_post;
-   var $prev_post;
-   var $next_post;
-   var $first_child_post;
+   public $prev_parent_post;
+   public $next_parent_post;
+   public $prev_post;
+   public $next_post;
+   public $first_child_post;
 
 
    /*! \brief Constructs ForumPost-object with specified arguments: dates are in UNIX-time. */
-   function ForumPost( $id=0, $forum_id=0, $thread_id=0, $author=null, $last_post_id=0,
+   public function __construct( $id=0, $forum_id=0, $thread_id=0, $author=null, $last_post_id=0,
          $count_posts=0, $count_hits=0, $subject='', $text='', $flags=0, $parent_id=0, $answer_num=0,
          $depth=0, $posindex='', $approved='Y',
          $created=0, $last_changed=0, $last_edited=0, $crc32=0, $old_id=0 )
@@ -1835,16 +1810,9 @@ class ForumPost
       $this->last_edited = (int) $last_edited;
       $this->crc32 = (int) $crc32;
       $this->old_id = (int) $old_id;
-      // non-db
-      $this->thread_post = null;
-      $this->thread_no_link = false;
-      $this->creation_order = 0;
-      $this->has_new_posts = false;
-      $this->is_read = true;
-      $this->score = 0;
    }
 
-   function copy_post()
+   public function copy_post()
    {
       global $player_row;
       return new ForumPost( 0, $this->forum_id, $this->thread_id, User::new_from_row($player_row), 0, 0, 0,
@@ -1852,35 +1820,35 @@ class ForumPost
    }
 
    /*! \brief Returns true, if post is thread-post. */
-   function is_thread_post()
+   public function is_thread_post()
    {
       return ( $this->id == $this->thread_id );
    }
 
    /*! \brief Returns true, if post is approved (Approved=Y). */
-   function is_approved()
+   public function is_approved()
    {
       return ( $this->approved === 'Y' );
    }
 
    /*! \brief Returns true, if post is pending-approval (Approved=P). */
-   function is_pending_approval()
+   public function is_pending_approval()
    {
       return ( $this->approved === 'P' );
    }
 
    /*! \brief Returns true, if authors post matches given user-id. */
-   function is_author( $uid )
+   public function is_author( $uid )
    {
       return ( $this->author->ID == $uid );
    }
 
-   function allow_post_reply()
+   public function allow_post_reply()
    {
-      return ( !($this->flags & FPOST_FLAG_READ_ONLY) || ForumPost::allow_post_read_only() );
+      return ( !($this->flags & FPOST_FLAG_READ_ONLY) || self::allow_post_read_only() );
    }
 
-   function format_flags( $flags=null )
+   public function format_flags( $flags=null )
    {
       if( is_null($flags) )
          $flags = $this->flags;
@@ -1893,7 +1861,7 @@ class ForumPost
    }
 
    /*! \brief Sets tree-navigation vars for this post (NULL=not-set). */
-   function set_navigation( $prev_parent_post, $next_parent_post, $prev_post, $next_post, $first_child_post )
+   public function set_navigation( $prev_parent_post, $next_parent_post, $prev_post, $next_post, $first_child_post )
    {
       $this->prev_parent_post = $prev_parent_post;
       $this->next_parent_post = $next_parent_post;
@@ -1904,9 +1872,9 @@ class ForumPost
 
    /*!
     * \brief Builds URL for forum-thread-post (without subdir-prefix) with specified anchor.
-    * param anchor anchorname to link to; if null use current post-id
+    * \param $anchor anchorname to link to; if null use current post-id
     */
-   function build_url_post( $anchor=null, $url_suffix='' )
+   public function build_url_post( $anchor=null, $url_suffix='' )
    {
       if( is_null($anchor) )
          $anchor = '#' . ((int)$this->id);
@@ -1920,10 +1888,10 @@ class ForumPost
       $url = sprintf( 'read.php?forum=%d'.URI_AMP.'thread=%d%s%s',
          $this->forum_id, $this->thread_id, $url_suffix, $anchor );
       return $url;
-   }
+   }//build_url_post
 
    /*! \brief Builds link to this post for specified date using given anchor-attribs. */
-   function build_link_postdate( $date, $attbs='' )
+   public function build_link_postdate( $date, $attbs='' )
    {
      if( empty($date) )
          return NO_VALUE;
@@ -1933,7 +1901,7 @@ class ForumPost
    }
 
    /*! \brief Returns string-representation of this object (for debugging purposes). */
-   function to_string()
+   public function to_string()
    {
       return "ForumPost(id={$this->id}): "
          . "forum_id=[{$this->forum_id}], "
@@ -1960,14 +1928,14 @@ class ForumPost
          . "has_new_posts=[{$this->has_new_posts}], "
          . "is_read=[{$this->is_read}], "
          . "score=[{$this->score}]";
-   }
+   }//to_string
 
    /*!
     * \brief Returns true, if user has read specified ForumPost,
     *        i.e. own post, newer than FORUM_WEEKS_NEW_END or has newer thread-read-date
     * \param $fread ForumRead-object pre-loaded for post
     */
-   function is_post_read( $fread )
+   public function is_post_read( $fread )
    {
       // own posts are always read
       if( $this->is_author($fread->uid) )
@@ -1986,10 +1954,17 @@ class ForumPost
       return false; // unread = new
    }
 
+   /*! \brief Sets this->is_read using is_post_read(fread). */
+   public function set_post_is_read( $fread )
+   {
+      $this->is_read = $this->is_post_read( $fread );
+   }
+
+
    // ---------- Static Class functions ----------------------------
 
    /*! \brief Builds basic QuerySQL to load post(s). */
-   function build_query_sql()
+   public static function build_query_sql()
    {
       // Posts: ID,Forum_ID,Time,Lastchanged,Lastedited,Subject,Text,User_ID,Parent_ID,Thread_ID,Flags,
       //        AnswerNr,Depth,crc32,PosIndex,old_ID,Approved,PostsInThread,LastPost
@@ -2011,7 +1986,7 @@ class ForumPost
    }
 
    /*! \brief Returns ForumPost-object created from specified (db-)row. */
-   function new_from_row( $row )
+   public static function new_from_row( $row )
    {
       $post = new ForumPost(
             @$row['ID'],
@@ -2041,7 +2016,7 @@ class ForumPost
    }
 
    /*! \brief Returns M(=pending approval), H=hidden, S=shown for given approved value P|N|Y. */
-   function get_approved_text( $approved )
+   public static function get_approved_text( $approved )
    {
       if( $approved == 'P' )
          return 'M';
@@ -2051,7 +2026,7 @@ class ForumPost
          return 'S';
    }
 
-   function allow_post_read_only()
+   public static function allow_post_read_only()
    {
       global $player_row;
       return ( @$player_row['admin_level'] & ADMINGROUP_EXECUTIVE );

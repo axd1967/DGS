@@ -36,10 +36,8 @@ define('TABLEOPT_LABEL_COLON', 0x0001); // append colon ':' to label
  */
 class Table_info
 {
-   /*! \privatesection */
-
    /*! \brief Id to be used in <table id='...'>. */
-   var $Id;
+   private $Id;
 
    /*! \brief Array of rows to be diplayed.
     * Each row should consist of an array like this:
@@ -67,29 +65,26 @@ class Table_info
     *    caption   = the unsafe extended cellule text (will be healed).
     *    cattbs    = the attributs of extended cellule.
     */
-   var $Tablerows;
+   private $Tablerows = array();
 
    /*! \brief Number of columns (dependent on info/sinfo). */
-   var $Columns;
+   private $Columns = 2; // default column-width
 
-   var $Options;
+   private $Options;
 
-
-   /*! \publicsection */
 
    /*! \brief Constructor. Create a new table and initialize it. */
-   function Table_info( $_tableid, $opts=0 )
+   public function __construct( $_tableid, $opts=0 )
    {
-      $this->Tablerows = array();
       $this->Id = $_tableid;
-      $this->Columns = 2; // default column-width
       $this->Options = $opts;
    }
 
-   /*! \brief Add a row to be displayed.
+   /*!
+    * \brief Add a row to be displayed.
     * \see $Tablerows
     */
-   function add_row( $row_array )
+   public function add_row( $row_array )
    {
       $this->Tablerows[]= $row_array;
 
@@ -97,11 +92,12 @@ class Table_info
       $this->check_cols( @$row_array['info'] );
    }
 
-   /*! \brief Add an caption row to be displayed.
-    *  assuming that the string is not yet "HTML safe"
+   /*!
+    * \brief Add an caption row to be displayed.
+    * \note assuming that the string is not yet "HTML safe"
     * \see $Tablerows
     */
-   function add_caption( $capt)
+   public function add_caption( $capt)
    {
       $this->Tablerows[]= array(
             'caption' => $capt,
@@ -109,11 +105,12 @@ class Table_info
          );
    }
 
-   /*! \brief Add an caption row to be displayed.
-    *  assuming that the string IS "HTML safe"
+   /*!
+    * \brief Add an caption row to be displayed.
+    * \note assuming that the string IS "HTML safe"
     * \see $Tablerows
     */
-   function add_scaption( $scapt='')
+   public function add_scaption( $scapt='')
    {
       $this->Tablerows[]= array(
             'scaption' => $scapt,
@@ -121,12 +118,13 @@ class Table_info
          );
    }
 
-   /*! \brief Add an info row to be displayed.
-    *  assuming that the strings are not yet "HTML safe"
+   /*!
+    * \brief Add an info row to be displayed.
     * \param $info value | array( col1, col2, ...) | array( col-arr=array( val, col-attr ), ... )
-    * \see $Tablerows
+    * \note assuming that the strings are not yet "HTML safe"
+    * \see Tablerows
     */
-   function add_info( $name='', $info='', $iattb='', $nattb='' )
+   public function add_info( $name='', $info='', $iattb='', $nattb='' )
    {
       $this->Tablerows[]= array(
             'name' => $this->_append_colon($name),
@@ -137,12 +135,13 @@ class Table_info
       $this->check_cols( $info );
    }
 
-   /*! \brief Add an info row to be displayed.
-    *  assuming that the strings ARE "HTML safe"
+   /*!
+    * \brief Add an info row to be displayed.
     * \param $sinfo value | array( col1, col2, ...) | array( col-arr=array( val, col-attr ), ... )
+    * \note assuming that the strings ARE "HTML safe"
     * \see $Tablerows
     */
-   function add_sinfo( $sname='', $sinfo='', $iattb='', $nattb='' )
+   public function add_sinfo( $sname='', $sinfo='', $iattb='', $nattb='' )
    {
       $this->Tablerows[]= array(
             'sname' => $this->_append_colon($sname),
@@ -157,20 +156,20 @@ class Table_info
     * \brief Appends colon ':' to label if flag TABLEOPT_LABEL_COLON is set.
     * \internal
     */
-   function _append_colon( $label )
+   private function _append_colon( $label )
    {
       return ( ($this->Options & TABLEOPT_LABEL_COLON) && substr($label,-1) != ':' ) ? $label . ':' : $label;
    }
 
    /*! \brief Checks if passed arg is array, and adjust column-count accordingly if needed. */
-   function check_cols( $arr )
+   private function check_cols( $arr )
    {
       if( is_array($arr) )
          $this->Columns = max( $this->Columns, count($arr) + 1 );
    }
 
    /*! \brief Create a string of the table. */
-   function make_table( $tattbs='class=Infos')
+   public function make_table( $tattbs='class=Infos')
    {
       /* Start of the table */
 
@@ -195,17 +194,15 @@ class Table_info
 
       $string .= "</table>\n";
       return $string;
-   }
+   }//make_table
 
    /*! \brief Echo the string of the table. */
-   function echo_table()
+   public function echo_table()
    {
       echo $this->make_table();
    }
 
-   /*! \privatesection */
-
-   function make_tablerow( $tablerow, $rattbs='', $rclass='')
+   private function make_tablerow( $tablerow, $rattbs='', $rclass='')
    {
       if( isset($tablerow['rattb']) )
       {
@@ -244,10 +241,12 @@ class Table_info
       return $string;
    }//make_tablerow
 
-   // Adds table-cell(s): one cell if $unsafe or $safe are non-arrays, multi-cells on arrays
-   // param $unsafe: has prio over $safe
-   // param $attbs: char '$' replaced with $start
-   function add_cell( $tablerow, $unsafe, $safe, $attbs_key, $start, $stop, $arymrg=NULL)
+   /*!
+    * \brief Adds table-cell(s): one cell if $unsafe or $safe are non-arrays, multi-cells on arrays.
+    * \param $unsafe has prio over $safe
+    * \param $attbs char '$' replaced with $start
+    */
+   private function add_cell( $tablerow, $unsafe, $safe, $attbs_key, $start, $stop, $arymrg=NULL)
    {
       $attbs = attb_parse(@$tablerow[$attbs_key]);
       if( isset($arymrg) )
@@ -279,7 +278,7 @@ class Table_info
    }//add_cell
 
    // build table-cell: cell can be scalar of array( value, attbs )
-   function build_cell_data( $cell, $start, $start_str, $attbs, $make_safe )
+   private function build_cell_data( $cell, $start, $start_str, $attbs, $make_safe )
    {
       if( is_array($cell) )
       {

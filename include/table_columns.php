@@ -60,65 +60,64 @@ define('TFORM_VAL_SHOWROWS', 'maxrows'); // form-elementname for Show-Rows
 define('TFORM_ACTION_SHOWROWS', 'showrows'); // form-submit for table-showrows-submit-action
 define('TFORM_ACTION_ADDCOL',   'addcol');   // form-submit for table-add/remove-columns-submit-action
 
-
 class Table
 {
-   /*! \privatesection */
-
    /*! \brief Id to be used in <table id='...'>. */
-   var $Id;
+   private $Id;
    /*! \brief Prefix to be used in _GET to avoid clashes with other tables and variables. */
-   var $Prefix;
+   private $Prefix;
    /*! \brief Intermediate Form-object, can be created before make_table() to be used for external form-purposes. */
-   var $TableForm;
+   public $TableForm = null;
    /*! \brief already opened Form class to be used by add_column and filters */
-   var $ExternalForm;
+   private $ExternalForm = null;
    /*! \brief optional callback-function expecting two arguments: this Table and table-Form objects. */
-   var $ExtendTableFormFunc;
+   private $ExtendTableFormFunc = null;
 
-   /*! \brief Array of the columns to sort on
-    *  $Sort= array( nr1 => +/-nr1, nr2 => +/-nr2, ...);
-    *  => +nr : sort the column nr with its default sort order
-    *  => -nr : sort the column nr with the reverse order of its default
-    *  nr1 will be the main sort, nr2 the second one... up to TABLE_MAX_SORT
+   /*!
+    * \brief Array of the columns to sort on
+    *    $Sort= array( nr1 => +/-nr1, nr2 => +/-nr2, ...);
+    *    => +nr : sort the column nr with its default sort order
+    *    => -nr : sort the column nr with the reverse order of its default
+    *    nr1 will be the main sort, nr2 the second one... up to TABLE_MAX_SORT
     */
-   var $Sort;
-   var $Sortimg;
+   private $Sort = array();
+   private $Sortimg = array();
 
    /*! \brief The page used in links within this table. */
-   var $Page;
+   private $Page;
    /*!
     * \brief ConfigTableColumns-object with column-name and bitset of the
     *        ConfigPages-table in the database to use as column-set for this table.
     */
-   var $CfgTableCols;
+   private $CfgTableCols;
    /*! \brief The columns that has been removed. */
-   var $Removed_Columns;
+   private $Removed_Columns = null;
    /*! \brief The number of columns displayed, known after make_tablehead() */
-   var $Shown_Columns;
+   private $Shown_Columns = null;
    /*! \brief The ID of previous column displayed, of head row at begining */
-   var $PrevColId;
+   private $PrevColId;
 
    /*! \brief Boolean array used to check if the column should be display. */
-   var $Is_Column_Displayed;
+   public $Is_Column_Displayed;
 
    /*!
     * \brief Array describing all tableheads:
     *        [ Nr, TableHead-obj, Sort_String, Desc_Default, Undeletable, attbs(Width) ]
-    * attbs is either:
-    * - an array of (attribut_name => attribut_value) for the column
-    * - a string supposed to be the class of the column
+    *    attbs is either:
+    *    - an array of (attribut_name => attribut_value) for the column
+    *    - a string supposed to be the class of the column
     */
-   var $Tableheads;
+   private $Tableheads = array();
    /*!
     * \brief var to make some asserts to clearly force the use of some functions
     *        before or after the table_head definitions.
     */
-   var $Head_closed;
+   private $Head_closed = 0;
    /*! \brief optional features of the table. */
-   var $Mode;
+   private $Mode;
 
-   /*! \brief Array of rows to be diplayed.
+   /*!
+    * \brief Array of rows to be diplayed.
     * Each row should consist of an array like this:
     * array( $column_nr1 => $column_elem1,
     *        $column_nr2 => $column_elem2 );
@@ -130,78 +129,76 @@ class Table
     *      (if 'owntd' is present, the rest of the array is ignored)
     *   'text' => the inner text for the cell
     *   'attbs' => the local attributs for the <td...>text</td> tag
+    *
     * \see make_tablerow()
     */
-   var $Tablerows;
-
-   /*! \brief The colors to alternate between for the rows. */
-   //N.B.: only used for folder transparency but CSS incompatible
-   var $Row_Colors;
-
-   /*! \brief The row number to start from.
-    * \see make_next_prev_links() */
-   var $From_Row;
-   /*! \brief If we are on the last page.
-    * \see make_next_prev_links() */
-   var $Last_Page;
-   /*! \brief The number of rows to be displayed (normally) on one page (read from player-row TableMaxRows).
-    * \see make_next_prev_links() */
-   var $Rows_Per_Page;
-   /*! \brief true, if number of rows to show should be configurable (otherwise use Players.TableMaxRows). */
-   var $Use_Show_Rows;
-   /*! \brief number of FOUND_ROWS by MySQL SQL_CALC_FOUND_ROWS, activated by table-option TABLE_ROWS_NAVI; -1 = not used. */
-   var $FoundRows;
-
-   /*! \brief add to row-num for showing TABLE_ROW_NUM; 0 = default, only (row_num + RowNumDiff) > 0 is shown. */
-   var $RowNumDiff;
-
-   /*! \brief true to use JavaScript features. */
-   var $JavaScript;
+   private $Tablerows = array();
 
    /*!
-    * \brief array of objects with external request-parameters,
-    *        expecting interfaces: get_hiddens() and get_url_parts()
+    * \brief The colors to alternate between for the rows.
+    * \note only used for folder transparency but CSS incompatible
+    */
+   private $Row_Colors;
+
+   /*!
+    * \brief The row number to start from.
+    * \see make_next_prev_links()
+    */
+   private $From_Row;
+   /*!
+    * \brief If we are on the last page.
+    * \see make_next_prev_links()
+    */
+   private $Last_Page = true;
+   /*!
+    * \brief The number of rows to be displayed (normally) on one page (read from player-row TableMaxRows).
+    * \see make_next_prev_links()
+    */
+   private $Rows_Per_Page;
+   /*! \brief true, if number of rows to show should be configurable (otherwise use Players.TableMaxRows). */
+   private $Use_Show_Rows = true;
+   /*! \brief number of FOUND_ROWS by MySQL SQL_CALC_FOUND_ROWS, activated by table-option TABLE_ROWS_NAVI; -1 = not used. */
+   private $FoundRows = -1;
+
+   /*! \brief add to row-num for showing TABLE_ROW_NUM; 0 = default, only (row_num + RowNumDiff) > 0 is shown. */
+   private $RowNumDiff = 0;
+
+   /*! \brief true to use JavaScript features. */
+   private $JavaScript;
+
+   /*!
+    * \brief array of objects with external request-parameters, expecting interfaces: get_hiddens() and get_url_parts()
     * \see RequestParameters
     */
-   var $ext_req_params;
+   private $ext_req_params = array();
    /*! \brief cache for current_extparams_string() storing: add_sep => string */
-   var $cache_curr_extparam;
+   private $cache_curr_extparam = array();
 
    /*! \brief Profile-handler */
-   var $ProfileHandler;
+   private $ProfileHandler;
 
    // filter-stuff
 
    /*! \brief non-null SearchFilter-instance containing attached filters */
-   var $Filters;
+   private $Filters;
    /*! \brief true to show filters within table */
-   var $UseFilters;
-   /*! \brief configuration-array for filters used with table: ( key => config-val )
-    *         keys are defined by consts FCONF_... */
-   var $ConfigFilters;
+   private $UseFilters = false;
+   /*! \brief configuration-array for filters used with table: ( key => config-val ) keys are defined by consts FCONF_... */
+   private $ConfigFilters = array( // set defaults
+         FCONF_SHOW_TOGGLE_FILTER => true,
+         FCONF_FILTER_TABLEHEAD   => LAYOUT_FILTER_IN_TABLEHEAD,
+         FCONF_EXTERNAL_SUBMITS   => false,
+      );
    /*! \brief The number of filter-columns displayed, known after make_table_filter-func */
-   var $Shown_Filters;
+   private $Shown_Filters = 0;
    /*! \brief cache for current_filter_string-func storing: ( filter-choice => string ) */
-   var $cache_curr_filter;
+   private $cache_curr_filter = array();
 
-
-   /*! \publicsection */
 
    /*! \brief Constructor. Create a new table and initialize it. */
-   function Table( $_tableid, $_page, $cfg_tblcols=null, $_prefix='', $_mode=0 )
+   public function __construct( $_tableid, $_page, $cfg_tblcols=null, $_prefix='', $_mode=0 )
    {
       global $player_row;
-
-      $this->ExternalForm = NULL;
-      $this->TableForm = NULL;
-      $this->ExtendTableFormFunc = NULL;
-      $this->Removed_Columns = NULL;
-      $this->Shown_Columns = 0;
-      $this->Tableheads = array();
-      $this->Head_closed = 0;
-      $this->Tablerows = array();
-      $this->Sort = array();
-      $this->Sortimg = array();
 
       $this->Id = (string)$_tableid;
       $this->Prefix = (string)$_prefix;
@@ -239,40 +236,30 @@ class Table
       $this->From_Row = (int)$this->get_arg('from_row'); // not in search-profile
       if( !is_numeric($this->From_Row) || $this->From_Row < 0 )
          $this->From_Row = 0;
-      $this->Last_Page = true;
-      $this->Use_Show_Rows = true;
       $this->Rows_Per_Page = $player_row['TableMaxRows'];
-      $this->FoundRows = -1;
-      $this->RowNumDiff = 0;
       $this->JavaScript = is_javascript_enabled();
 
       // filter-stuff
-      $this->ext_req_params = array();
-      $this->cache_curr_extparam = array();
-
       $this->Filters = new SearchFilter();
-      $this->UseFilters    = false;
-      $this->Shown_Filters = 0;
-      $this->ConfigFilters = array( // set defaults
-         FCONF_SHOW_TOGGLE_FILTER => true,
-         FCONF_FILTER_TABLEHEAD   => LAYOUT_FILTER_IN_TABLEHEAD,
-         FCONF_EXTERNAL_SUBMITS   => false,
-      );
-      $this->cache_curr_filter = array();
 
       if( $this->Mode & TABLE_ROW_NUM )
          $this->add_tablehead( 0, T_('##table'), 'Number', TABLE_ROW_NUM|TABLE_NO_SORT|TABLE_NO_HIDE );
-   } //Table
+   }//__construct
+
+   public function get_prefix()
+   {
+      return $this->Prefix;
+   }
 
    /*! \brief Disables certain mode in table-options. */
-   function disable_table_mode( $bitmask )
+   public function disable_table_mode( $bitmask )
    {
       if( $bitmask > 0 )
          $this->Mode &= ~$bitmask;
    }
 
    /*! \brief Sets external form for this table, $form is passed as reference */
-   function set_externalform( &$form )
+   public function set_externalform( &$form )
    {
       $this->ExternalForm = $form;
       $form->attach_table($this);
@@ -284,31 +271,31 @@ class Table
     * 1. this Table-instance
     * 2. Tables Form-instance
     */
-   function set_extend_table_form_function( $func )
+   public function set_extend_table_form_function( $func )
    {
       $this->ExtendTableFormFunc = $func;
    }
 
    /*! \brief Overwrites standard rows-per-page for this table; copy found_rows if null given. */
-   function set_rows_per_page( $rows )
+   public function set_rows_per_page( $rows )
    {
-      $this->Rows_Per_Page = (is_nulL($rows)) ? $this->FoundRows : $rows;
+      $this->Rows_Per_Page = (is_null($rows)) ? $this->FoundRows : $rows;
    }
 
    /*! \brief Overwrites standard from-rows offset for this table. */
-   function set_from_row( $from_row )
+   public function set_from_row( $from_row )
    {
       $this->From_Row = (int)$from_row;
    }
 
    /*! \brief if false, rows-selection is not shown (table using static number of maxrows); default is true. */
-   function use_show_rows( $use=true )
+   public function use_show_rows( $use=true )
    {
       $this->Use_Show_Rows = (bool)$use;
    }
 
    /*! \brief Sets the calculated rows from SQL_CALC_FOUND_ROWS option. */
-   function set_found_rows( $found_rows )
+   public function set_found_rows( $found_rows )
    {
       // handle SQL_CALC_FOUND_ROWS
       $this->FoundRows = -1;
@@ -316,25 +303,30 @@ class Table
          $this->FoundRows = $found_rows;
    }
 
+   public function set_row_num_diff( $row_num_diff )
+   {
+      $this->RowNumDiff = $row_num_diff;
+   }
+
    /*!
-    * @brief Adds a tablehead.
-    * @param $nr must be >0 but if higher than BITSET_MAXSIZE or the maxsize of
+    * \brief Adds a tablehead.
+    * \param $nr must be >0 but if higher than BITSET_MAXSIZE or the maxsize of
     *    Table-given ConfigTableColumns, the column will be static.
     *    $nr=0 is reserved for row-number, but can be equipped with additional attributes (see also add_row)
-    * @param $description either String with description or else TableHead-instance with more detail-info
-    * @param $attbs must be an array of attributs or a class-name for the column (td-element)
+    * \param $description either String with description or else TableHead-instance with more detail-info
+    * \param $attbs must be an array of attributs or a class-name for the column (td-element)
     *    default: no attributs or class (i.e. class "Text" left-aligned)
     *    Other known classes defined in CSS, most used are:
     *      ID, User, Date, Enum, Number, NumberC, Image, Button, Mark, MsgDir,
     *      Folder, Rating, Sgf, '' (=default)
     *
-    * @param $mode is a combination of TABLE_NO_HIDE and TABLE_NO_SORT
+    * \param $mode is a combination of TABLE_NO_HIDE and TABLE_NO_SORT
     *    default: TABLE_NO_HIDE|TABLE_NO_SORT
-    * @param $sort_xtend is the alias used as default to sort the column
+    * \param $sort_xtend is the alias used as default to sort the column
     *    ended by a '+' to sort it in the asc order or a '-' to sort it in the desc order
     *    default: no sort
     */
-   function add_tablehead( $nr, $description, $attbs = null, $mode = null, $sort_xtend = '' )
+   public function add_tablehead( $nr, $description, $attbs = null, $mode = null, $sort_xtend = '' )
    {
       if( $this->Head_closed )
          error('assert', "Table.add_tablehead.closed($nr)");
@@ -362,10 +354,10 @@ class Table
       $visible = $this->Is_Column_Displayed[$nr] = $this->is_column_displayed( $nr);
       if( $nr > 0 && $this->UseFilters ) // fix filter-visibility (especially for static cols)
          $this->Filters->set_visible($nr, $visible);
-   } //add_tablehead
+   }//add_tablehead
 
    // \internal
-   function _parse_sort_extension( $dbgmsg, $sort_xtend )
+   private function _parse_sort_extension( $dbgmsg, $sort_xtend )
    {
       if( !preg_match('/^[a-z_][\\w\\.]+[+-]?$/i', $sort_xtend) ) // check db-field-syntax
          error('invalid_args', "Table.{$dbgmsg}._parse_sort_extension({$this->Id},$sort_xtend)");
@@ -374,16 +366,16 @@ class Table
          $sort_xtend .= '+';
 
       return $sort_xtend;
-   }
+   }//_parse_sort_extension
 
    /*!
     * \brief records the default order of the table.
-    * (\)param $default_sorts are +/- $column_nbr
+    * \param $default_sorts are +/- $column_nbr
     * \note by the way, close and compute the headers definitions.
     * \note works even if TABLE_NO_SORT or TABLE_MAX_SORT==0
     *       (allowing a current_order_string() default usage)
     */
-   function set_default_sort( /* {$default_sort1 {,$default_sort2 [,...]}} */)
+   public function set_default_sort( /* {$default_sort1 {,$default_sort2 [,...]}} */)
    {
       if( $this->Head_closed )
          error('assert', "Table.set_default_sort.closed({$this->Head_closed})");
@@ -423,7 +415,7 @@ class Table
     * \see for params see set_default_sort()-func
     * \note IMPORTANT: table column to sort by MUST be visible!!
     */
-   function set_sort( /* {$sort1 {,$sort2 [,...]}} */ )
+   public function set_sort( /* {$sort1 {,$sort2 [,...]}} */ )
    {
       if( $this->Head_closed )
          error('assert', "Table.set_sort.closed({$this->Head_closed})");
@@ -447,7 +439,7 @@ class Table
    }//set_sort
 
    /*! \brief Returns 1=true, if column is displayed; 0=false otherwise. */
-   function is_column_displayed( $nr )
+   public function is_column_displayed( $nr )
    {
       if( $nr == 0 && ($this->Mode & TABLE_ROW_NUM) )
          return 1;
@@ -461,16 +453,16 @@ class Table
 
       $bitset = $this->CfgTableCols->get_bitset();
       return $bitset->get_bit($nr);
-   }
+   }//is_column_displayed
 
    /*! \brief Returns number of columns added so far to this Table. */
-   function get_column_count()
+   public function get_column_count()
    {
       return count($this->Tableheads);
    }
 
    /*! \brief Static func to create row-cell with text (and optional CSS-class). */
-   function build_row_cell( $text, $class=null )
+   public function build_row_cell( $text, $class=null )
    {
       if( is_null($class) )
          return $text;
@@ -484,7 +476,7 @@ class Table
     *        can be formatted differently: %1$s is replaced with row-number.
     * \see $Tablerows
     */
-   function add_row( $row_array )
+   public function add_row( $row_array )
    {
       $this->Tablerows[]= $row_array;
    }
@@ -493,7 +485,7 @@ class Table
     * \brief Adds one row with headline/title.
     * \see for params see: add_row_one_col()-func
     */
-   function add_row_title( $col_arr, $row_arr_attr=null )
+   public function add_row_title( $col_arr, $row_arr_attr=null )
    {
       $row_attr = ( is_null($row_arr_attr) ) ? array() : $row_arr_attr;
       if( isset($row_arr['extra_class']) )
@@ -507,7 +499,7 @@ class Table
     * \brief Adds table-header row.
     * \param $row_array optional array with attributes: mode1 = table-mode-to-set
     */
-   function add_row_thead( $row_arr_attr=null )
+   public function add_row_thead( $row_arr_attr=null )
    {
       $row_attr = ( is_null($row_arr_attr) ) ? array() : $row_arr_attr;
       $row_attr['add_thead'] = 1;
@@ -519,7 +511,7 @@ class Table
     * \param $col_arr_text expect scalar-text or else array with col-attributes 'text' or 'owntd' (+ 'attbs')
     * \param $row_arr_attr optional array row-attributes: 'extra_class'
     */
-   function add_row_one_col( $col_arr_text, $row_arr_attr=null )
+   public function add_row_one_col( $col_arr_text, $row_arr_attr=null )
    {
       reset($this->Tableheads);
       $first_col = each($this->Tableheads);
@@ -534,9 +526,9 @@ class Table
       $row_arr = ( is_null($row_arr_attr) ) ? array() : $row_arr_attr;
       $row_arr[$first_col] = $col_arr;
       $this->Tablerows[] = $row_arr;
-   }
+   }//add_row_one_col
 
-   function set_row_extra( $row_index, $arr_extra )
+   public function set_row_extra( $row_index, $arr_extra )
    {
       foreach( $arr_extra as $key => $value )
       {
@@ -545,9 +537,9 @@ class Table
          else
             $this->Tablerows[$row_index][$key] = $value;
       }
-   }
+   }//set_row_extra
 
-   function make_table_form( $need_form=true, $overwrite=false )
+   public function make_table_form( $need_form=true, $overwrite=false )
    {
       if( is_null($this->TableForm) || $overwrite )
       {
@@ -566,10 +558,10 @@ class Table
       }
 
       return $this->TableForm;
-   }
+   }//make_table_form
 
    /*! \brief Create a string of the table. */
-   function make_table()
+   public function make_table()
    {
       //if( !$this->Head_closed )
       //   error('assert', "Table.make_table.!closed({$this->Head_closed})");
@@ -666,19 +658,19 @@ class Table
       unset($table_form);
 
       return $string;
-   } //make_table
+   }//make_table
 
    /*! \brief Echo the string of the table. */
-   function echo_table()
+   public function echo_table()
    {
       echo $this->make_table();
-   } //echo_table
+   }
 
    /*!
     * \brief Passes back filter_row per ref and return true, if form needed because of filters.
     * signature: bool need_form = make_filter_row( &$filter_rows)
     */
-   function make_filter_row( &$filter_rows )
+   private function make_filter_row( &$filter_rows )
    {
       // make filter-rows
       $this->Shown_Filters = 0;
@@ -748,13 +740,13 @@ class Table
       }
 
       return $need_form;
-   } //make_filter_row
+   }//make_filter_row
 
    /*!
     * \brief Returns (locally cached) URL-parts for all filters (even if not used).
     * signature: string querystring = current_filter_string ([ choice = GETFILTER_ALL ])
     */
-   function current_filter_string( $end_sep=false, $filter_choice=GETFILTER_ALL )
+   public function current_filter_string( $end_sep=false, $filter_choice=GETFILTER_ALL )
    {
       if( !$this->UseFilters )
          return '';
@@ -768,13 +760,13 @@ class Table
       if( $url && $end_sep )
          $url.= URI_AMP;
       return $url;
-   }
+   }//current_filter_string
 
    /*!
     * \brief Add or delete a column from the column set and apply it to the database;
     *        Also handle to show or hide filters and parsing max-rows from URL.
     */
-   function add_or_del_column()
+   public function add_or_del_column()
    {
       if( ($i = count($this->Tableheads)) )
       {
@@ -854,11 +846,10 @@ class Table
          if( $old_bithex != $new_bithex )
             $this->CfgTableCols->update_config();
       }
-
-   } //add_or_del_column
+   }//add_or_del_column
 
    /*! \brief Sets Rows_Per_Page (according to changed Show-Rows-form-element or else cookie or players-row). */
-   function handle_show_rows()
+   private function handle_show_rows()
    {
       if( !$this->Use_Show_Rows )
          return;
@@ -866,10 +857,10 @@ class Table
       $rows = (int)$this->get_saved_arg(TFORM_VAL_SHOWROWS); // nr of rows
       if( $rows > 0 )
          $this->Rows_Per_Page = get_maxrows( $rows, MAXROWS_PER_PAGE, MAXROWS_PER_PAGE_DEFAULT );
-   }
+   }//handle_show_rows
 
    /*! \brief Compute the number of rows from mySQL result. */
-   function compute_show_rows( $num_rows_result)
+   public function compute_show_rows( $num_rows_result)
    {
       if( $this->Rows_Per_Page > 0 && $num_rows_result > $this->Rows_Per_Page )
       {
@@ -880,14 +871,14 @@ class Table
          $this->Last_Page = true;
 
       return $num_rows_result;
-   } //compute_show_rows
+   }//compute_show_rows
 
    /*!
     * \brief Sets the sort-images in the table-header.
     * \note Should be called, if current_order_string() is not used
     * \note To make this work add_tablehead()-calls for table must have a field-sort-order.
     */
-   function make_sort_images()
+   public function make_sort_images()
    {
       if( !$this->Head_closed )
          error('assert', "Table.make_sort_images.!closed({$this->Head_closed})");
@@ -916,11 +907,11 @@ class Table
       }
 
       return $str;
-   }
+   }//make_sort_images
 
    /*!
     * \brief Retrieve MySQL ORDER BY part from table and sets table-sort-images.
-    * @param $sort_xtend is an extended-alias-name
+    * \param $sort_xtend is an extended-alias-name
     *        IMPORTANT NOTE:
     *           ensure, that the used db-fields/aliases are present in the overall db-query!!
     *        (ended by a '+' or '-' like in add_tablehead())
@@ -928,7 +919,7 @@ class Table
     * works even if TABLE_NO_SORT or TABLE_MAX_SORT==0
     *   (computing the set_default_sort() datas)
     */
-   function current_order_string( $sort_xtend='')
+   public function current_order_string( $sort_xtend='')
    {
       if( !$this->Head_closed )
          error('assert', "Table.current_order_string.!closed({$this->Head_closed})");
@@ -951,10 +942,10 @@ class Table
          return '';
       $str = str_replace( array('-','+'), array(' DESC,',' ASC,'), $str); // replace all occurences
       return ' ORDER BY '.substr($str,0,-1); // remove trailing ','
-   } //current_order_string
+   }//current_order_string
 
    /*! \brief Retrieve mySQL LIMIT part from table. */
-   function current_limit_string()
+   public function current_limit_string()
    {
       if( $this->Rows_Per_Page <= 0 )
          return '';
@@ -962,7 +953,7 @@ class Table
    }
 
    /*! \brief Retrieve from part of url from table. */
-   function current_from_string( $end_sep=false )
+   public function current_from_string( $end_sep=false )
    {
       if( $this->From_Row > 0 )
       {
@@ -972,10 +963,10 @@ class Table
          return $str;
       }
       return '';
-   }
+   }//current_from_string
 
    /*! \brief Retrieves maxrows URL-part. */
-   function current_rows_string( $end_sep=false )
+   public function current_rows_string( $end_sep=false )
    {
       if( !$this->Use_Show_Rows )
          return '';
@@ -984,16 +975,16 @@ class Table
       if( $end_sep )
          $str.= URI_AMP;
       return $str;
-   }
+   }//current_rows_string
 
    /*! \brief Retrieve sort part of url from table. */
-   function current_sort_string( $end_sep=false)
+   public function current_sort_string( $end_sep=false)
    {
       return $this->make_sort_string( 0, $end_sep);
    }
 
    /*! \brief Retrieve hidden part from table as a form string. */
-   function get_hiddens_string( $filter_choice = GETFILTER_ALL )
+   public function get_hiddens_string( $filter_choice = GETFILTER_ALL )
    {
       $hiddens= array();
       $this->get_hiddens( $hiddens, $filter_choice );
@@ -1001,7 +992,7 @@ class Table
    }
 
    /*! \brief Retrieve hidden part from table. */
-   function get_hiddens( &$hiddens)
+   public function get_hiddens( &$hiddens)
    {
       $i=0;
       if( TABLE_MAX_SORT > 0 && !($this->Mode & TABLE_NO_SORT) )
@@ -1031,17 +1022,15 @@ class Table
       // include hiddens from external RequestParameters (only on set use_hidden)
       foreach( $this->ext_req_params as $rp )
          $rp->get_hiddens( $hiddens );
-   }
+   }//get_hiddens
 
-
-   /*! \privatesection */
 
    /*!
     * \brief Create table-header.
     * \param $arr_opts optional array with additional layout-config for table-header:
     *        mode1 = mode-flags to set
     */
-   function make_tablehead( $tablehead, $arr_opts=null )
+   private function make_tablehead( $tablehead, $arr_opts=null )
    {
       //if( !$this->Head_closed )
       //   error('assert', "Table.make_tablehead.!closed({$this->Head_closed})");
@@ -1069,7 +1058,7 @@ class Table
       $string = "\n  <th id=\"$curColId\" scope=col";
 
       $width = -1;
-      $string .= Table::parse_table_attbs( $tablehead, $width );
+      $string .= self::parse_table_attbs( $tablehead, $width );
       $string .= '><div>'; //<th> end bracket
 
       if( $width >= 0 )
@@ -1151,9 +1140,9 @@ class Table
 
       $this->PrevColId = $curColId;
       return $string;
-   }
+   }//make_tablehead
 
-   function parse_table_attbs( &$arr, &$width )
+   private static function parse_table_attbs( &$arr, &$width )
    {
       $string = '';
       if( isset($arr['attbs']) )
@@ -1175,13 +1164,13 @@ class Table
          }
       }
       return $string;
-   }
+   }//parse_table_attbs
 
    /*!
     * \brief Returns html for filter of passed TableHead
     * \internal
     */
-   function make_table_filter( $thead )
+   private function make_table_filter( $thead )
    {
       global $base_path;
 
@@ -1205,7 +1194,7 @@ class Table
       $togglestr_hide = '';
       if( $this->ConfigFilters[FCONF_SHOW_TOGGLE_FILTER] )
       {
-         $fprefix = $this->Filters->Prefix;
+         $fprefix = $this->Filters->get_prefix();
          $query =
             make_url( $this->Page, array(
                   $fprefix . FFORM_TOGGLE_ACTION => 1,
@@ -1250,26 +1239,25 @@ class Table
       if( $class )
          $class= " class=\"$class\"";
       $result = "\n  <td$class><div>";
-      $result .= $filter->get_input_element( $this->Filters->Prefix, $thead );
+      $result .= $filter->get_input_element( $this->Filters->get_prefix(), $thead );
       if( !$filter->is_static() )
          $result .= $togglestr_hide;
       $result .= "</div></td>";
 
       return $result;
-   } //make_table_filter
+   }//make_table_filter
 
 
    //{ N.B.: only used for folder transparency but CSS incompatible
-   function blend_next_row_color_hex( $col=false )
-      {
-         $rowcol = substr($this->Row_Colors[
-                     count($this->Tablerows) % count($this->Row_Colors)
-                   ], 2, 6);
-         if( $col )
-            return blend_alpha_hex( $col, $rowcol);
-         else
-            return $rowcol;
-      }
+   public function blend_next_row_color_hex( $col=false )
+   {
+      $idx = count($this->Tablerows) % count($this->Row_Colors);
+      $rowcol = substr($this->Row_Colors[$idx], 2, 6);
+      if( $col )
+         return blend_alpha_hex( $col, $rowcol);
+      else
+         return $rowcol;
+   }
    //}
 
    // tablerow additional keys:
@@ -1277,7 +1265,7 @@ class Table
    //    extra_row (=row-html), extra_row_class (=class for extra-row)
    // cell of table-row additional keys:
    //    owntd (=own TD-format), text (=content), attbs (=td-attributes)
-   function make_tablerow( $tablerow, $row_num, $rclass='Row1' )
+   private function make_tablerow( $tablerow, $row_num, $rclass='Row1' )
    {
       if( isset($tablerow['class']) )
          $rclass = $tablerow['class'];
@@ -1338,12 +1326,12 @@ class Table
       }
 
       return $string;
-   }
+   }//make_tablerow
 
    // build cell with table row-number, expecting
    // - array( 'owntd' => .., 'text' => .., 'attbs' => .. )
    // - text with '%s' or empty text
-   function build_cell_rownum( &$cell, $orig_row_num )
+   private function build_cell_rownum( &$cell, $orig_row_num )
    {
       $row_num = $orig_row_num + $this->RowNumDiff;
       if( $row_num > 0 )
@@ -1359,13 +1347,13 @@ class Table
             $cell = sprintf( $cellfmt, $row_num );
          }
       }
-   }
+   }//build_cell_rownum
 
    /*!
     * \brief Add next and prev links.
     * \param $id T=top, B=bottom
     *
-    * NOTE on SQL_CALC_FOUND_ROWS:
+    * \note on SQL_CALC_FOUND_ROWS:
     * To show the page index: page number / number of pages
     *    mysql> SELECT SQL_CALC_FOUND_ROWS * FROM tbl_name WHERE ... LIMIT 10;
     *    mysql> SELECT FOUND_ROWS();
@@ -1373,9 +1361,9 @@ class Table
     * Be aware that using SQL_CALC_FOUND_ROWS and FOUND_ROWS() "disables" LIMIT optimizations,
     * but is faster than doing the same query twice.
     *
-    * Doc-Reference: http://dev.mysql.com/doc/refman/5.0/en/information-functions.html#function_found-rows
+    * \see Doc-Reference: http://dev.mysql.com/doc/refman/5.0/en/information-functions.html#function_found-rows
     */
-   function make_next_prev_links($id)
+   private function make_next_prev_links($id)
    {
       global $base_path;
 
@@ -1488,14 +1476,14 @@ class Table
          $string = "\n <tr class=Links$id>\n$string\n </tr>";
 
       return $string;
-   } //make_next_prev_links
+   }//make_next_prev_links
 
    /*!
     * \brief Make sort part of URL
     * \param $add_sort [+-]table-col-id giving sort-direction; or 0 (=don't add col-sort)
     * \note does not modify $this->Sort
     */
-   function make_sort_string( $add_sort=0, $end_sep=false )
+   private function make_sort_string( $add_sort=0, $end_sep=false )
    {
       if( TABLE_MAX_SORT <= 0 || $this->Mode & TABLE_NO_SORT )
          return '';
@@ -1532,10 +1520,10 @@ class Table
       if( $str && $end_sep )
          $str .= URI_AMP;
       return $str;
-   } //make_sort_string
+   }//make_sort_string
 
    /*! \brief Adds a form for adding columns. */
-   function make_add_column_form( &$ac_form)
+   private function make_add_column_form( &$ac_form)
    {
       // add-column-elements
       $ac_string = '';
@@ -1582,10 +1570,10 @@ class Table
       }
 
       return $string;
-   }
+   }//make_add_column_form
 
    /*! \brief Builds select-box and submit-button to be able to change 'show-max-rows' */
-   function make_show_rows( &$form )
+   private function make_show_rows( &$form )
    {
       if( !$this->Use_Show_Rows )
          return '';
@@ -1596,15 +1584,15 @@ class Table
       $elems.= $form->print_insert_submit_button(
             $this->Prefix.TFORM_ACTION_SHOWROWS, T_('Show Rows'));
       return $elems;
-   }
+   }//make_show_rows
 
    /*! \brief Returns (potentially profile-saved) arg or from _REQUEST-var with optional default-value. */
-   function get_saved_arg( $name, $def='' )
+   private function get_saved_arg( $name, $def='' )
    {
       $fname = $this->Prefix . $name;
       if( $this->ProfileHandler )
       {
-         if( $this->ProfileHandler->need_reset || $this->ProfileHandler->need_clear )
+         if( $this->ProfileHandler->need_reset() || $this->ProfileHandler->need_clear() )
             $value = ''; // reset = clear
          else
             $value = $this->ProfileHandler->get_arg( $fname ); // get from saved profile
@@ -1612,22 +1600,22 @@ class Table
       else
          $value = NULL; // no profile-handler
       return (is_null($value)) ? get_request_arg( $fname, $def) : $value;
-   }
+   }//get_saved_arg
 
    /*! \brief Returns arg from _REQUEST-var with optional default-value. */
-   function get_arg( $name, $def='')
+   private function get_arg( $name, $def='')
    {
       return get_request_arg( $this->Prefix . $name, $def);
    }
 
    /*! \brief Returns true, if table-action show-rows or add/del-column has been chosen. */
-   function was_table_submit_action()
+   public function was_table_submit_action()
    {
       return $this->get_arg(TFORM_ACTION_SHOWROWS) || $this->get_arg(TFORM_ACTION_ADDCOL);
    }
 
    /*! \brief Sets ProfileHandler managing search-profiles; use NULL to clear it. */
-   function set_profile_handler( $prof_handler )
+   public function set_profile_handler( $prof_handler )
    {
       $this->ProfileHandler = $prof_handler;
 
@@ -1646,14 +1634,14 @@ class Table
          // add link-vars
          $this->add_external_parameters( $this->ProfileHandler->get_request_params(), false );
       }
-   }
+   }//set_profile_handler
 
    /*!
     * \brief Attaches SearchFilter to this table.
     * \param $searchfilter SearchFilter-object to attach to table.
     * \param $config array with configuration for table used with filters, \see $ConfigFilters
     */
-   function register_filter( &$searchfilter, $config = null )
+   public function register_filter( &$searchfilter, $config = null )
    {
       $this->Filters = &$searchfilter;
       $this->UseFilters = true;
@@ -1664,21 +1652,21 @@ class Table
       }
 
       // reset from-row if filters have changed
-      if( $this->UseFilters && ($this->Filters->HashCode != $this->Filters->hashcode()) )
+      if( $this->UseFilters && $this->Filters->has_filters_changed() )
          $this->From_Row = 0;
-   }
+   }//register_filter
 
    /*!
     * \brief Returns non-null merged QuerySQL for all active filters (if $UseFilters is true).
     * signature: QuerySQL get_query()
     */
-   function get_query()
+   public function get_query()
    {
       $qsql = ( $this->UseFilters ) ? $this->Filters->get_query() : new QuerySQL();
       if( $this->Mode & TABLE_ROWS_NAVI )
          $qsql->add_part( SQLP_OPTS, SQLOPT_CALC_ROWS );
       return $qsql;
-   }
+   }//get_query
 
    /*!
     * \brief Adds external-parameters included into URL
@@ -1688,7 +1676,7 @@ class Table
     *        state is stored in $rp-structure;
     *        giving no default is with intent!
     */
-   function add_external_parameters( $rp, $use_hidden )
+   public function add_external_parameters( $rp, $use_hidden )
    {
       if( is_object($rp) && method_exists($rp, 'get_hiddens') && method_exists($rp, 'get_url_parts') )
       {
@@ -1701,10 +1689,10 @@ class Table
          error('internal_error', 'Table.add_external_parameters.bad_object');
       }
       $this->cache_curr_extparam = array();
-   }
+   }//add_external_parameters
 
    /*! \brief Retrieves additional / external URL-part for table. */
-   function current_extparams_string( $end_sep=false )
+   public function current_extparams_string( $end_sep=false )
    {
       if( !isset($this->cache_curr_extparam[$end_sep]) )
       {
@@ -1718,7 +1706,7 @@ class Table
          $this->cache_curr_extparam[$end_sep] = $url_str;
       }
       return $this->cache_curr_extparam[$end_sep];
-   }
+   }//current_extparams_string
 
 } // end of 'Table'
 
@@ -1731,14 +1719,14 @@ class Table
  */
 class TableHead
 {
-   var $description;
-   var $image_url;
-   var $image_alt;
-   var $image_title;
-   var $image_attbs;
+   public $description;
+   private $image_url;
+   private $image_alt;
+   private $image_title;
+   private $image_attbs;
 
    /*! \brief Constructs TableHead-instance. */
-   function TableHead( $description, $image_url=null, $image_title=null, $image_attbs=null )
+   public function __construct( $description, $image_url=null, $image_title=null, $image_attbs=null )
    {
       $this->description = $description;
       $this->image_url = $image_url;
@@ -1747,12 +1735,12 @@ class TableHead
       $this->image_attbs = $image_attbs;
    }
 
-   function isImage()
+   public function isImage()
    {
       return !(is_null($this->image_url));
    }
 
-   function getDescriptionHtml()
+   public function getDescriptionHtml()
    {
       global $base_path;
       return ($this->isImage())
@@ -1760,7 +1748,7 @@ class TableHead
          : $this->description;
    }
 
-   function getDescriptionAddCol()
+   public function getDescriptionAddCol()
    {
       return ( $this->isImage() ) ? "({$this->description})" : $this->description;
    }

@@ -31,36 +31,34 @@ require_once( 'include/goban_handler_gfx.php' );
   */
 
 
-// register of all known GobanHandlers, each must implement the interface-methods
-// - constructor( $args_map )
-// - Goban  read_goban( $text )
-// - String write_goban( Goban )
-global $ARR_GOBAN_HANDLERS_READER; //PHP5
-$ARR_GOBAN_HANDLERS_READER = array(
-   // uppercase(igoban_type) => GobanHandler-class
-   'SL1' => 'GobanHandlerSL1',
-);
-
-global $ARR_GOBAN_HANDLERS_WRITER; //PHP5
-$ARR_GOBAN_HANDLERS_WRITER = array(
-   // uppercase(Goban-Writer-type) => GobanHandler-class
-   'GFX' => 'GobanHandlerGfxBoard',
-);
-
  /*!
   * \class MarkupHandlerGoban
   * \brief Static helper class managing parsing and formatting of <igoban...>-tag.
+  *
   * \note TODO later integrate <goban...>-tag as well (integrating GoDiagram.php)
   */
 class MarkupHandlerGoban
 {
+   // register of all known GobanHandlers, each must implement the interface-methods
+   // - constructor( $args_map )
+   // - Goban  read_goban( $text )
+   // - String write_goban( Goban )
+   private static $ARR_GOBAN_HANDLERS_READER = array(
+         // uppercase(igoban_type) => GobanHandler-class
+         'SL1' => 'GobanHandlerSL1',
+      );
+
+   private static $ARR_GOBAN_HANDLERS_WRITER = array(
+         // uppercase(Goban-Writer-type) => GobanHandler-class
+         'GFX' => 'GobanHandlerGfxBoard',
+      );
 
    // ---------- Static Class functions ----------------------------
 
    /*! \brief Replaces igoban-tags with graphical-board. */
-   function replace_igoban_tags( $text )
+   public static function replace_igoban_tags( $text )
    {
-      $repl_text = MarkupHandlerGoban::replace_igoban_tags_collect_goban( $text );
+      $repl_text = self::replace_igoban_tags_collect_goban( $text );
       return $repl_text[0];
    }
 
@@ -68,7 +66,7 @@ class MarkupHandlerGoban
     * \brief Replaces igoban-tags with graphical-board but also collecting parsed Goban-objects.
     * \return array( replaced tag-string, array of parsed Goban-objects )
     */
-   function replace_igoban_tags_collect_goban( $text )
+   public static function replace_igoban_tags_collect_goban( $text )
    {
       $arr_gobans = array();
 
@@ -76,13 +74,13 @@ class MarkupHandlerGoban
       $repl_text = preg_replace( "/<igoban +([\w\s=]+) *>(.*?)<\/igoban *>/ise",
                            "MarkupHandlerGoban::parse_igoban('\\0','\\1','\\2','GFX',\$arr_gobans)", $text );
       return array( $repl_text, $arr_gobans );
-   }
+   }//replace_igoban_tags_collect_goban
 
    /*!
     * \brief Returns true, if given text contains a Go-diagram (igoban-tag);
     *        then ConfigBoard must be loaded for woodcolor/stone-size etc.
     */
-   function contains_goban( $text )
+   public static function contains_goban( $text )
    {
       return preg_match( "/<igoban +([\w\s=]+) *>(.*?)<\/igoban *>/ise", $text );
    }
@@ -93,23 +91,22 @@ class MarkupHandlerGoban
     * \param $attbs attribute-string of <igoban>-tag with syntax, separated by spaces: (k=v|v)*
     * \param $text payload between start- and end-igoban-tags, can include LFs
     */
-   function parse_igoban( $rawtext, $attbs, $text, $writer_type='GFX', &$arr_gobans )
+   private static function parse_igoban( $rawtext, $attbs, $text, $writer_type='GFX', &$arr_gobans )
    {
       // attributes: key=value
-      $map_args = MarkupHandlerGoban::attribute_split( $attbs );
+      $map_args = self::attribute_split( $attbs );
 
       // parse igoban-type (1st attribute); no type-default
-      $igoban_type = MarkupHandlerGoban::extract_igoban_type( $map_args );
+      $igoban_type = self::extract_igoban_type( $map_args );
       if( is_null($igoban_type) )
          return $rawtext;
 
-      global $ARR_GOBAN_HANDLERS_READER, $ARR_GOBAN_HANDLERS_WRITER;
-      $readerClass = @$ARR_GOBAN_HANDLERS_READER[strtoupper($igoban_type)];
-      $writerClass = @$ARR_GOBAN_HANDLERS_WRITER[strtoupper($writer_type)];
+      $readerClass = @self::$ARR_GOBAN_HANDLERS_READER[strtoupper($igoban_type)];
+      $writerClass = @self::$ARR_GOBAN_HANDLERS_WRITER[strtoupper($writer_type)];
       if( !$readerClass )
-         error('invalid_args', "MarkupHandlerGoban::parse_igoban.check.igoban_type($igoban_type)");
+         error('invalid_args', "MarkupHandlerGoban:parse_igoban.check.igoban_type($igoban_type)");
       if( !$writerClass )
-         error('invalid_args', "MarkupHandlerGoban::parse_igoban.check.writer_type($writer_type)");
+         error('invalid_args', "MarkupHandlerGoban:parse_igoban.check.writer_type($writer_type)");
 
       $goban_reader = new $readerClass( $map_args );
       $goban = $goban_reader->read_goban( $text );
@@ -119,10 +116,10 @@ class MarkupHandlerGoban
       $result = $goban_writer->write_goban( $goban );
 
       return $result;
-   }
+   }//parse_igoban
 
    // Extracts type from: <igoban [t|type=]...>
-   function extract_igoban_type( $args )
+   private static function extract_igoban_type( $args )
    {
       if( isset($args['#1']) ) // first arg
          return $args['#1'];
@@ -132,13 +129,13 @@ class MarkupHandlerGoban
          return $args['t'];
       else
          return null;
-   }
+   }//extract_igoban_type
 
    /*!
     * \brief Returns attribute-string parsed into map( key => value ).
     * \note: map additionally contains entries: '#n' => value, with '#n' arg-pos in attbs starting with 1
     */
-   function attribute_split( $attbs )
+   public static function attribute_split( $attbs )
    {
       $arr = preg_split( "/\s+/", trim($attbs) );
       $result = array();
@@ -153,7 +150,7 @@ class MarkupHandlerGoban
             $result["#$arg_idx"] = $part;
       }
       return $result;
-   }
+   }//attribute_split
 
 } //end 'MarkupHandlerGoban'
 
@@ -219,8 +216,8 @@ define('GOBMATRIX_LABEL', 'L' ); // label for GOBM_NUMBER|LETTER
 class Goban
 {
    /*! \brief bitmask using GOBB_NORTH|SOUTH|WEST|EAST enabling coordinates on that side of the go-board. */
-   var $opts_coords;
-   var $show_coords; // true to show coordinates
+   public $opts_coords = 0;
+   public $show_coords = true; // true to show coordinates
 
    /*!
     * \brief Board matrix
@@ -228,33 +225,21 @@ class Goban
     *    [y][x] = int-bitmask |
     *           = array( layer => int-bitmask, label => number|letter )
     */
-   var $matrix;
-   var $max_x; // 1..max_x/y really HAS something on board, can be partial board of size_x/y
-   var $max_y;
-   var $size_x;
-   var $size_y; // for starting y-coordinates-label
+   private $matrix = array();
 
-   var $BoardTitle;
-   var $BoardText;
-   var $BoardTextInline; // true = float text on right of diagram, false = text below diagram
-   var $BoardLinks; // [ label => link, ... ]
+   public $max_x = 1; // 1..max_x/y really HAS something on board, can be partial board of size_x/y
+   public $max_y = 1;
+   public $size_x = 1;
+   public $size_y = 1; // for starting y-coordinates-label
 
-   /*! \brief Constructs Goban. */
-   function Goban()
-   {
-      $this->matrix = array();
-      $this->opts_coords = 0;
-      $this->show_coords = true;
-      $this->max_x = $this->max_y = $this->size_x = $this->size_y = 1;
+   public $BoardTitle = null;
+   public $BoardText = null;
+   public $BoardTextInline = true; // true = float text on right of diagram, false = text below diagram
+   public $BoardLinks = array(); // [ label => link, ... ]
 
-      $this->BoardTitle = null;
-      $this->BoardText = null;
-      $this->BoardTextInline = true;
-      $this->BoardLinks = array();
-   }
 
    /*! \brief Returns String-representation of most important fields of this object. */
-   function to_string()
+   public function to_string()
    {
       $out = array();
       $out[] = sprintf("opts_coords=0x%x", $this->opts_coords);
@@ -263,55 +248,55 @@ class Goban
          for($x=1; $x <= $this->max_x; $x++)
          {
             $arr = $this->getValue( $x, $y );
-            $val_text = Goban::value_to_string( $arr[GOBMATRIX_VALUE] );
+            $val_text = self::value_to_string( $arr[GOBMATRIX_VALUE] );
             $out[] = sprintf("[%2d,%2d]: V=%03x L=%1s  ( %s )", $x,$y, $arr[GOBMATRIX_VALUE], $arr[GOBMATRIX_LABEL], $val_text );
          }
       }
       return "Goban(max={$this->max_x}x{$this->max_y},size={$this->size_x}x{$this->size_y})={\n  ".implode("\n  ", $out)." }\n\n";
-   }
+   }//to_string
 
-   function setOptionsCoords( $coords, $showCoords )
+   public function setOptionsCoords( $coords, $showCoords )
    {
       $this->opts_coords = ($coords & GOBB_BITMASK);
       $this->show_coords = (bool)$showCoords;
    }
 
-   function getOptionsCoords()
+   public function getOptionsCoords()
    {
       return ($this->show_coords) ? $this->opts_coords : 0;
    }
 
-   function setSize( $size_x, $size_y )
+   public function setSize( $size_x, $size_y )
    {
       $this->size_x = $size_x;
       $this->size_y = $size_y;
    }
 
 
-   // internal, overwriting layer-value
-   function setValue( $x, $y, $value, $label=NULL )
+   // overwriting layer-value
+   public function setValue( $x, $y, $value, $label=NULL )
    {
       $this->max_x = max( $x, $this->max_x );
       $this->max_y = max( $y, $this->max_y );
-      //error_log("Goban.setValue($x,$y,$value,$label): (".(is_array($value) ? Goban::value_to_string($value[GOBMATRIX_VALUE]) : '').") max_x/y={$this->max_x}/{$this->max_y}");
+      //error_log("Goban.setValue($x,$y,$value,$label): (".(is_array($value) ? self::value_to_string($value[GOBMATRIX_VALUE]) : '').") max_x/y={$this->max_x}/{$this->max_y}");
 
       if( is_array($value) )
          $this->matrix[$y][$x] = $value;
       elseif( !is_numeric($value) )
-         error('invalid_args', "Goban::setValue($x,$y,$value)");
+         error('invalid_args', "Goban:setValue($x,$y,$value)");
       elseif( is_null($label) )
          $this->matrix[$y][$x] = $value; // optimization to avoid too many object-instances
       else
          $this->matrix[$y][$x] = array( GOBMATRIX_VALUE => $value, GOBMATRIX_LABEL => $label );
-   }
+   }//setValue
 
-   function hasValue( $x, $y )
+   public function hasValue( $x, $y )
    {
       return isset($this->matrix[$y][$x]);
    }
 
    // internal, always return non-null layer-value-array
-   function getValue( $x, $y )
+   public function getValue( $x, $y )
    {
       $arrval = @$this->matrix[$y][$x];
       if( is_array($arrval) )
@@ -321,36 +306,36 @@ class Goban
       else
          $result = array( GOBMATRIX_VALUE => 0, GOBMATRIX_LABEL => '' );
       return $result;
-   }
+   }//getValue
 
 
-   function addLink( $label, $href )
+   public function addLink( $label, $href )
    {
       $this->BoardLinks[$label] = $href;
    }
 
-   function getLink( $label )
+   public function getLink( $label )
    {
       return @$this->BoardLinks[$label];
    }
 
 
-   function setBoardLines( $x, $y, $board_value, $hoshi_value=null )
+   public function setBoardLines( $x, $y, $board_value, $hoshi_value=null )
    {
       $upd_arr = $this->getValue($x,$y);
       $upd_arr[GOBMATRIX_VALUE] = ($upd_arr[GOBMATRIX_VALUE] & ~GOBB_BITMASK) | ($board_value & GOBB_BITMASK);
       if( !is_null($hoshi_value) )
          $upd_arr[GOBMATRIX_VALUE] = ($upd_arr[GOBMATRIX_VALUE] & ~GOBO_HOSHI) | ($hoshi_value ? GOBB_BITMASK : 0);
       $this->setValue( $x, $y, $upd_arr );
-   }
+   }//setBoardLines
 
-   function getBoardLines( $x, $y )
+   public function getBoardLines( $x, $y )
    {
       $current_arr = $this->getValue($x,$y);
       return ($current_arr[GOBMATRIX_VALUE] & GOBB_BITMASK);
    }
 
-   function eraseBoardPoint( $x, $y )
+   public function eraseBoardPoint( $x, $y )
    {
       $this->setBoardLines( $x, $y, 0, /*hoshi*/false );
 
@@ -363,51 +348,49 @@ class Goban
          $this->clearBoardLinesBit( $x, $y-1, GOBB_SOUTH );
       if( $this->hasValue( $x, $y+1 ) )
          $this->clearBoardLinesBit( $x, $y+1, GOBB_NORTH );
-   }
+   }//eraseBoardPoint
 
-   function clearBoardLinesBit( $x, $y, $value )
+   public function clearBoardLinesBit( $x, $y, $value )
    {
       $value &= GOBB_BITMASK;
       $upd_arr = $this->getValue($x,$y);
       $upd_arr[GOBMATRIX_VALUE] &= ~$value;
       $this->setValue( $x, $y, $upd_arr );
-   }
+   }//clearBoardLinesBit
 
-   function setHoshi( $x, $y, $hoshi_set, $check=false )
+   public function setHoshi( $x, $y, $hoshi_set, $check=false )
    {
       if( $check && ( $x < 1 || $x > $this->max_x || $y < 1 || $y > $this->max_y ) )
          return;
 
       $upd_arr = $this->getValue($x,$y);
-      $upd_arr[GOBMATRIX_VALUE] =
-         ($upd_arr[GOBMATRIX_VALUE] & ~GOBO_HOSHI) | ( (bool)$hoshi_set ? GOBO_HOSHI : 0 );
+      $upd_arr[GOBMATRIX_VALUE] = ($upd_arr[GOBMATRIX_VALUE] & ~GOBO_HOSHI) | ( (bool)$hoshi_set ? GOBO_HOSHI : 0 );
       $this->setValue( $x, $y, $upd_arr );
-   }
+   }//setHoshi
 
    // bool getHoshi(x,y)
-   function getHoshi( $x, $y )
+   public function getHoshi( $x, $y )
    {
       $current_arr = $this->getValue($x,$y);
       return (bool)($current_arr[GOBMATRIX_VALUE] & GOBO_HOSHI);
    }
 
 
-   function setStone( $x, $y, $stone_value )
+   public function setStone( $x, $y, $stone_value )
    {
       $upd_arr = $this->getValue($x,$y);
-      $upd_arr[GOBMATRIX_VALUE] = ($upd_arr[GOBMATRIX_VALUE] & ~GOBS_BITMASK)
-            | ($stone_value & GOBS_BITMASK);
+      $upd_arr[GOBMATRIX_VALUE] = ($upd_arr[GOBMATRIX_VALUE] & ~GOBS_BITMASK) | ($stone_value & GOBS_BITMASK);
       $this->setValue( $x, $y, $upd_arr );
    }
 
-   function getStone( $x, $y )
+   public function getStone( $x, $y )
    {
       $current_arr = $this->getValue($x,$y);
       return ($current_arr[GOBMATRIX_VALUE] & GOBS_BITMASK);
    }
 
    /*! \brief Switches BLACK/WHITE stone-color. */
-   function switchStoneColor( $x, $y )
+   public function switchStoneColor( $x, $y )
    {
       $upd_arr = $this->getValue($x,$y);
       $stone = ( $upd_arr[GOBMATRIX_VALUE] & GOBS_BITMASK );
@@ -417,12 +400,13 @@ class Goban
          $stone = GOBS_BLACK;
       else
          return;
+
       $upd_arr[GOBMATRIX_VALUE] = ($upd_arr[GOBMATRIX_VALUE] & ~GOBS_BITMASK) | $stone;
       $this->setValue( $x, $y, $upd_arr );
-   }
+   }//switchStoneColor
 
 
-   function setMarker( $x, $y, $marker_value, $label=NULL )
+   public function setMarker( $x, $y, $marker_value, $label=NULL )
    {
       $marker_value &= GOBM_BITMASK;
       $upd_arr = $this->getValue($x,$y);
@@ -431,25 +415,25 @@ class Goban
       $upd_arr[GOBMATRIX_LABEL] =
          (is_null($label)) ? '' : $label;
       $this->setValue( $x, $y, $upd_arr );
-   }
+   }//setMarker
 
-   function getMarker( $x, $y, $with_label=false )
+   public function getMarker( $x, $y, $with_label=false )
    {
       $current_arr = $this->getValue($x,$y);
       $value = ($current_arr[GOBMATRIX_VALUE] & GOBM_BITMASK);
       return ( $with_label ) ? array( $value, $current_arr[GOBMATRIX_LABEL] ) : $value;
    }
 
-   function getMarkerLabel( $x, $y )
+   public function getMarkerLabel( $x, $y )
    {
       $current_arr = $this->getValue($x,$y);
       return $current_arr[GOBMATRIX_LABEL];
    }
 
-   function makeBoard( $width, $height, $withHoshi=true )
+   public function makeBoard( $width, $height, $withHoshi=true )
    {
       if( $width < 2 || $height < 2 )
-         error('invalid_args', "Goban::makeBoard.check($width,$height)");
+         error('invalid_args', "Goban:makeBoard.check($width,$height)");
 
       for( $y=1; $y <= $height; $y++)
       {
@@ -476,7 +460,7 @@ class Goban
 
       $this->max_x = $width;
       $this->max_y = $height;
-   }
+   }//makeBoard
 
 
    /*!
@@ -484,7 +468,7 @@ class Goban
     * \return 0/1/2/3 for given goban-pos x/y=0..size-1, 0=empty, 1=black, 2=white, 3=dead
     * \see GameSnapshot#make_game_snapshot()
     */
-   function read_stone_value( $x, $y, $with_dead=true )
+   public function read_stone_value( $x, $y, $with_dead=true )
    {
       static $VAL_MAP = array(
             GOBS_BLACK  => 1, // 01 (black)
@@ -501,7 +485,7 @@ class Goban
       return (int)@$VAL_MAP[ $value & GOBS_BITMASK ]; // undef = 00 (empty-field)
    }//read_stone_value
 
-   function switch_colors()
+   public function switch_colors()
    {
       for( $y = 1; $y <= $this->max_y; $y++ )
       {
@@ -514,7 +498,7 @@ class Goban
     * \brief Flattens Goban for shape-game: quadratic board, remove hoshi (use auto-hoshi),
     *        no irregular boards, only full (not part) boards, remove all markup.
     */
-   function flatten_for_shape_game()
+   public function flatten_for_shape_game()
    {
       // no part-board, no irregular board
       $size = max( $this->size_x, $this->size_y, $this->max_x, $this->max_y );
@@ -550,7 +534,7 @@ class Goban
     * \brief Creates Goban from Games-Snapshot, prepared with GameSnapshot::parse_stones_snapshot().
     * \param $arr_pos_xy array of [ GOBS_BLACK|WHITE, x, y ] with x/y=0..n
     */
-   function create_goban_from_stones_snapshot( $size, $arr_pos_xy )
+   public static function create_goban_from_stones_snapshot( $size, $arr_pos_xy )
    {
       $goban = new Goban();
       $goban->setOptionsCoords( GOBB_MID, true );
@@ -567,7 +551,7 @@ class Goban
    }//create_goban_from_stones_snapshot
 
    // static, see also to_string()-func
-   function value_to_string( $val )
+   private static function value_to_string( $val )
    {
       $out = array();
       if( $val & GOBB_BITMASK )

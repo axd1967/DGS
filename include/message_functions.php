@@ -1138,35 +1138,35 @@ function game_info_table( $tablestyle, $game_row, $player_row, $iamrated, $use_s
    {
       $game_row['Handicaptype'] = $Handitype;
       $game_row['JigoMode'] = $JigoMode;
-      $gsc = new GameSettingsCalculator( $game_row, $player_row['Rating2'], $other_rating, $calculated,
+      $gs_calc = new GameSettingsCalculator( $game_row, $player_row['Rating2'], $other_rating, $calculated,
          ( $tablestyle == GSET_TOURNAMENT_LADDER ) );
-      $gsc->calculate_settings();
+      $gs_calc->calculate_settings();
 
-      $adj_handi_str = (is_null($gsc->adjusted_handicap)) ? '' : sprintf( T_('adjusted from %d'), $gsc->adjusted_handicap);
-      $adj_komi_str = (is_null($gsc->adjusted_komi)) ? '' : sprintf( T_('adjusted from %.1f'), $gsc->adjusted_komi);
+      $adj_handi_str = (is_null($gs_calc->adjusted_handicap)) ? '' : sprintf( T_('adjusted from %d'), $gs_calc->adjusted_handicap);
+      $adj_komi_str = (is_null($gs_calc->adjusted_komi)) ? '' : sprintf( T_('adjusted from %.1f'), $gs_calc->adjusted_komi);
 
       if( $tablestyle == GSET_WAITINGROOM && !$is_my_game )
          $itable->add_sinfo( T_('Started games'), (int)@$game_row['X_TotalCount'] );
 
-      if( $gsc->calc_type == 2 || $adj_handi_str || $adj_komi_str || $is_fairkomi )
+      if( $gs_calc->calc_type == 2 || $adj_handi_str || $adj_komi_str || $is_fairkomi )
       {
          // determine color
-         if( $gsc->calc_color == GSC_COL_DOUBLE )
+         if( $gs_calc->calc_color == GSC_COL_DOUBLE )
             $colortxt = build_image_double_game( true, $color_class );
-         elseif( $gsc->calc_color == GSC_COL_FAIRKOMI )
+         elseif( $gs_calc->calc_color == GSC_COL_FAIRKOMI )
             $colortxt = image( $base_path.'17/y.gif', $color_note, NULL, $color_class ) . MED_SPACING . $color_note;
          else
-            $colortxt = get_colortext_probable( ($gsc->calc_color == GSC_COL_BLACK), ($gsc->calc_color == GSC_COL_NIGIRI) );
+            $colortxt = get_colortext_probable( ($gs_calc->calc_color == GSC_COL_BLACK), ($gs_calc->calc_color == GSC_COL_NIGIRI) );
 
-         $itable->add_scaption( ($gsc->calc_type == 1) ? T_('Probable game settings') : T_('Game settings') );
+         $itable->add_scaption( ($gs_calc->calc_type == 1) ? T_('Probable game settings') : T_('Game settings') );
 
          $itable->add_sinfo( T_('Color'), $colortxt );
          $itable->add_sinfo( T_('Handicap'),
-               $gsc->calc_handicap . ($adj_handi_str ? MED_SPACING."($adj_handi_str)" : '' ) );
+               $gs_calc->calc_handicap . ($adj_handi_str ? MED_SPACING."($adj_handi_str)" : '' ) );
 
          $komi_text = ( $is_fairkomi )
             ? T_('negotiated by Fair Komi#fairkomi')
-            : sprintf("%.1f", $gsc->calc_komi) . ($adj_komi_str ? MED_SPACING."($adj_komi_str)" : '' );
+            : sprintf("%.1f", $gs_calc->calc_komi) . ($adj_komi_str ? MED_SPACING."($adj_komi_str)" : '' );
          $itable->add_sinfo( T_('Komi'), $komi_text );
 
          if( $is_fairkomi )
@@ -1660,54 +1660,48 @@ function get_message_directions()
  */
 class DgsMessage
 {
-   var $recipients;
-   var $errors;
-
-   function DgsMessage()
-   {
-      $this->recipients = array();
-      $this->errors = array();
-   }
+   private $recipients = array();
+   private $errors = array();
 
    /*! \brief Returns true, if there is exactly ONE recipient. */
-   function has_recipient()
+   public function has_recipient()
    {
       return (count($this->recipients) == 1);
    }
 
-   function count_recipients()
+   public function count_recipients()
    {
       return count($this->recipients);
    }
 
-   function get_recipient()
+   public function get_recipient()
    {
       return ($this->has_recipient()) ? $this->recipients[0] : null;
    }
 
-   function add_recipient( $user_row )
+   public function add_recipient( $user_row )
    {
       $this->recipients[] = $user_row;
    }
 
-   function clear_errors()
+   public function clear_errors()
    {
       $this->errors = array();
    }
 
-   function count_errors()
+   public function count_errors()
    {
       return count($this->errors);
    }
 
-   function add_error( $error )
+   public function add_error( $error )
    {
       if( $error )
          $this->errors[] = $error;
       return $error;
    }
 
-   function add_errors( $errors )
+   public function add_errors( $errors )
    {
       if( is_array($errors) )
       {
@@ -1716,7 +1710,12 @@ class DgsMessage
       }
    }
 
-   function build_recipient_user_row()
+   public function get_errors()
+   {
+      return $this->errors;
+   }
+
+   public function build_recipient_user_row()
    {
       $user_row = $this->get_recipient();
       if( is_null($user_row) )
@@ -1739,15 +1738,15 @@ class DgsMessage
    public static function load_message( $dbgmsg, $mid, $uid, $other_uid, $with_fulldata )
    {
       if( !is_numeric($mid) || $mid <= 0 )
-         error('unknown_message', "$dbgmsg.DgsMessage::load_message.check.mid($mid)");
+         error('unknown_message', "$dbgmsg.DgsMessage:load_message.check.mid($mid)");
 
-      $qsql = DgsMessage::build_message_base_query( $uid, $with_fulldata, /*single*/true, $mid );
+      $qsql = self::build_message_base_query( $uid, $with_fulldata, /*single*/true, $mid );
       if( $other_uid > 0 )
          $qsql->add_part( SQLP_WHERE, "other.uid=$other_uid" );
 
-      $msg_row = mysql_single_fetch( "$dbgmsg.DgsMessage::load_message.find($mid)", $qsql->get_select() );
+      $msg_row = mysql_single_fetch( "$dbgmsg.DgsMessage:load_message.find($mid)", $qsql->get_select() );
       if( !$msg_row )
-         error('unknown_message', "$dbgmsg.DgsMessage::load_message.find.not_found($mid)");
+         error('unknown_message', "$dbgmsg.DgsMessage:load_message.find.not_found($mid)");
 
       return $msg_row;
    }//load_message
@@ -1835,12 +1834,12 @@ class DgsMessage
     * \param $to_handles non-empty (unique) array with user-id of recipients
     * \return array( [ handle => user-row, ... ], error|empty-array )
     */
-   function load_message_receivers( $type, $invitation_step, $to_handles )
+   public static function load_message_receivers( $type, $invitation_step, $to_handles )
    {
       global $player_row;
       $my_id = (int)@$player_row['ID']; // sender
       if( !is_array($to_handles) || count($to_handles) == 0 )
-         error('invalid_args', "DgsMessage::load_message_receivers.check.to($my_id,$type,$invitation_step)");
+         error('invalid_args', "DgsMessage:load_message_receivers.check.to($my_id,$type,$invitation_step)");
       $to_handles = array_unique($to_handles);
       $to_handles = explode(' ', strtolower(implode(' ', $to_handles))); // lower-case to find all handles
       $arr_receivers = array();
@@ -1868,7 +1867,7 @@ class DgsMessage
       $ctmp = ( $type == MSGTYPE_INVITATION )
          ? CSYSFLAG_REJECT_INVITE
          : ( $invitation_step ? 0 : CSYSFLAG_REJECT_MESSAGE );
-      $result = db_query( "DgsMessage::load_message_receivers.find($my_id,$type,$invitation_step)",
+      $result = db_query( "DgsMessage:load_message_receivers.find($my_id,$type,$invitation_step)",
             "SELECT P.ID, P.Handle, P.Name, P.ClockUsed, P.OnVacation, P.Rating2, P.RatingStatus, " .
                "(P.Running + P.GamesMPG) AS X_OppGamesCount, " .
                "IF(ISNULL(C.uid),0,C.SystemFlags & $ctmp) AS C_denied " .
@@ -1907,7 +1906,7 @@ class DgsMessage
     * \param $Sender additional query-check; if null omitted in query (combination of mid/uid should be unique anyway)
     * \note Throws error if no update is generated.
     */
-   function update_message_folder( $mid, $uid, $Sender, $new_folder, $die=true )
+   public static function update_message_folder( $mid, $uid, $Sender, $new_folder, $die=true )
    {
       $dbgmsg = "DgsMessage.update_message_folder($mid,$uid,$Sender,$new_folder)";
       db_query( "$dbgmsg.1",
@@ -1924,15 +1923,18 @@ class DgsMessage
 
 
 
+/*!
+ * \brief Helper class to display message-list.
+ */
 class MessageListBuilder
 {
-   var $table;
-   var $current_folder;
-   var $no_mark;
-   var $full_details;
+   private $table;
+   private $current_folder;
+   private $no_mark;
+   private $full_details;
 
    // \param full_details: if true, show additional fields for message-search
-   function MessageListBuilder( &$table, $current_folder, $no_mark=true, $full_details=false )
+   public function __construct( &$table, $current_folder, $no_mark=true, $full_details=false )
    {
       $this->table = $table;
       $this->current_folder = $current_folder;
@@ -1940,7 +1942,7 @@ class MessageListBuilder
       $this->full_details = $full_details;
    }
 
-   function message_list_head()
+   public function message_list_head()
    {
       global $base_path, $msg_icones;
 
@@ -1975,7 +1977,7 @@ class MessageListBuilder
    // param $arr_msg: typically coming from message_list_query()
    // param rx_terms: rx with terms to be marked within text
    // NOTE: frees given mysql $result
-   function message_list_body( $arr_msg, $show_rows, $my_folders, $toggle_marks=false, $rx_term='' )
+   public function message_list_body( $arr_msg, $show_rows, $my_folders, $toggle_marks=false, $rx_term='' )
    {
       global $base_path, $msg_icones, $player_row;
 
@@ -2017,7 +2019,7 @@ class MessageListBuilder
             'owntd' => echo_folder_box($my_folders, $folder_nr, $bgcolor) );
 
          // link to user
-         $str = MessageListBuilder::message_build_user_string( $row, $player_row, $this->full_details );
+         $str = self::message_build_user_string( $row, $player_row, $this->full_details );
          if( !$this->full_details && ($row['Sender'] === 'Y') )
             $str = T_('To') . ': ' . $str;
          $mrow_strings[ 2] = $str;
@@ -2068,7 +2070,7 @@ class MessageListBuilder
             elseif( !isset($arr_marks[$mid]) ) // normal|bulk (for bulk-msg only mark first)
             {
                $can_move_messages = true;
-               $n = $this->table->Prefix."mark$mid";
+               $n = $this->table->get_prefix() . "mark$mid";
                $checked = (('Y'==(string)@$_REQUEST[$n]) xor (bool)$toggle_marks);
                //if( $checked ) $page.= "$n=Y".URI_AMP;
                $mrow_strings[ 5] = "<input type='checkbox' name='$n' value='Y'" . ($checked ? ' checked' : '') . '>';
@@ -2083,12 +2085,6 @@ class MessageListBuilder
          $this->table->add_row( $mrow_strings );
       }
 
-      // NOTE:
-      // insertion of the marks in the URL of sort, page move and add/del column.
-      // it's useless to add marks to the URLs while they are only used with actions
-      // that change the order or the page because the marks will not stay on display.
-      //$this->table->Page.= $page ;
-
       return $can_move_messages;
    }//message_list_body
 
@@ -2100,7 +2096,7 @@ class MessageListBuilder
     * \param $row expected fields: Sender, other_ID, other_name, other_handle
     * \param $my_row most often $player_row
     */
-   function message_build_user_string( &$row, $my_row, $full_details )
+   public static function message_build_user_string( &$row, $my_row, $full_details )
    {
       if( $row['Sender'] === 'M' ) // Message to myself
          $row['other_name'] = '(' . T_('Myself') . ')';
@@ -2126,14 +2122,13 @@ class MessageListBuilder
       return $user_str;
    }//message_build_user_string
 
-
-   // ------------ static functions ----------------------------
-
-   // param extra_querysql: QuerySQL-object to extend query
-   // return arr( msg-row, ... )
-   // NOTE: $order (default sort on me.mid equals to sort on date) !!
-   // \static
-   function message_list_query( $my_id, $folderstring='all', $order=' ORDER BY me.mid', $limit='', $extra_querysql=null )
+   /*!
+    * \brief Read message-list.
+    * \param $order (default sort on me.mid equals to sort on date) !!
+    * \param $extra_querysql QuerySQL-object to extend query
+    * \return arr( msg-row, ... )
+    */
+   public static function message_list_query( $my_id, $folderstring='all', $order=' ORDER BY me.mid', $limit='', $extra_querysql=null )
    {
       /**
        * N.B.: On 2007-10-15, we have found, in the DGS database,
@@ -2177,16 +2172,16 @@ class MessageListBuilder
       return $arr_msg;
    }//message_list_query
 
-   function load_cache_message_list( $dbgmsg, $uid, $folderstring='all', $order=' ORDER BY me.mid', $arg_limit=0 )
+   public static function load_cache_message_list( $dbgmsg, $uid, $folderstring='all', $order=' ORDER BY me.mid', $arg_limit=0 )
    {
-      $dbgmsg .= ".MLB::load_cache_message_list($uid,$folderstring,$order,$arg_limit)";
+      $dbgmsg .= ".MLB:load_cache_message_list($uid,$folderstring,$order,$arg_limit)";
       $key = "Messages.$uid";
 
       $arr_msg = DgsCache::fetch( $dbgmsg, CACHE_GRP_MSGLIST, $key );
       if( is_null($arr_msg) )
       {
          $limit = ( $arg_limit ) ? ' LIMIT '.((int)$arg_limit) : '';
-         $arr_msg = MessageListBuilder::message_list_query( $uid, $folderstring, $order, $limit );
+         $arr_msg = self::message_list_query( $uid, $folderstring, $order, $limit );
          DgsCache::store( $dbgmsg, CACHE_GRP_MSGLIST, $key, $arr_msg, 4*SECS_PER_HOUR );
       }
 
@@ -2204,17 +2199,17 @@ class MessageListBuilder
   */
 class MessageControl
 {
-   var $folders;
-   var $allow_bulk;
-   var $mpg_type;
-   var $mpg_gid;
-   var $mpg_col;
-   var $arr_mpg_users;
+   private $folders;
+   private $allow_bulk;
+   private $mpg_type;
+   private $mpg_gid;
+   private $mpg_col;
+   private $arr_mpg_users;
 
-   var $dgs_message;
-   var $maxGamesCheck;
+   private $dgs_message;
+   private $max_games_check;
 
-   function MessageControl( $folders, $allow_bulk, $mpg_type=0, $mpg_gid=0, $mpg_col='', $arr_mpg_users=null )
+   public function __construct( $folders, $allow_bulk, $mpg_type=0, $mpg_gid=0, $mpg_col='', $arr_mpg_users=null )
    {
       $this->folders = $folders;
       $this->allow_bulk = $allow_bulk;
@@ -2227,13 +2222,23 @@ class MessageControl
       $this->max_games_check = new MaxGamesCheck();
    }
 
+   public function get_dgs_message()
+   {
+      return $this->dgs_message;
+   }
+
+   public function get_max_games_check()
+   {
+      return $this->max_games_check;
+   }
+
    // return: false=success, otherwise true on failure
-   function read_message_receivers( &$dgs_msg, $msg_type, $invitation_step, &$to_handles )
+   public function read_message_receivers( &$dgs_msg, $msg_type, $invitation_step, &$to_handles )
    {
       global $player_row;
       static $cache = array();
       $my_id = (int)@$player_row['ID'];
-      $is_bulk_admin = MessageControl::is_bulk_admin();
+      $is_bulk_admin = self::is_bulk_admin();
 
       $to_handles = strtolower( str_replace(',', ' ', trim($to_handles)) );
       $arr_to = array_unique( preg_split( "/\s+/", $to_handles, null, PREG_SPLIT_NO_EMPTY ) );
@@ -2318,7 +2323,7 @@ class MessageControl
     *         msg_gid (>0) = success for sending bulk-mpg-message;
     *         otherwise array with error-texts on check-failure
     */
-   function handle_send_message( $arg_to, $msg_type, $input )
+   public function handle_send_message( $arg_to, $msg_type, $input )
    {
       global $player_row;
 
@@ -2346,7 +2351,7 @@ class MessageControl
 
       // find receiver of the message
       if( $this->read_message_receivers( $this->dgs_message, $msg_type, $invitation_step, $arg_to ) )
-         return $this->dgs_message->errors;
+         return $this->dgs_message->get_errors();
 
       // check own/opp max-games
       $opponent_row = $this->dgs_message->get_recipient();
@@ -2357,7 +2362,7 @@ class MessageControl
          {
             foreach( $chk_errors as $err )
                $this->dgs_message->add_error( $err );
-            return $this->dgs_message->errors;
+            return $this->dgs_message->get_errors();
          }
       }
 
@@ -2367,7 +2372,7 @@ class MessageControl
       if( (string)$subject == '' )
       {
          $this->dgs_message->add_error( T_('Missing message subject') );
-         return $this->dgs_message->errors;
+         return $this->dgs_message->get_errors();
       }
 
       // Update database
@@ -2409,7 +2414,7 @@ class MessageControl
          if( !$this->allow_bulk )
          {
             $this->dgs_message->add_error( ErrorCode::get_error_text('bulkmessage_forbidden') );
-            return $this->dgs_message->errors;
+            return $this->dgs_message->get_errors();
          }
 
          $to_uids = array();
@@ -2432,7 +2437,7 @@ class MessageControl
    }//handle_send_message
 
    // return non-null error-arr checking on OWN/opponents max-games
-   function check_max_games( $opp_row )
+   public function check_max_games( $opp_row )
    {
       $errors = array();
 
@@ -2452,7 +2457,7 @@ class MessageControl
 
    // ------------ static functions ----------------------------
 
-   function is_bulk_admin()
+   private static function is_bulk_admin()
    {
       global $player_row;
       return ( @$player_row['admin_level'] & (ADMIN_DEVELOPER|ADMIN_FORUM|ADMIN_GAME) );

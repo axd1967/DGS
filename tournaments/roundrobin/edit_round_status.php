@@ -61,7 +61,7 @@ $GLOBALS['ThePage'] = new Page('TournamentRoundStatusEdit');
 
    // load tourney and T-round
    $tr_status = new TournamentRoundStatus( $tid, $round ); // existing tournament-round?
-   $tourney = $tr_status->tourney;
+   $tourney = $tr_status->get_tournament();
    $tstatus = new TournamentStatus( $tourney );
    $ttype = TournamentFactory::getTournament($tourney->WizardType);
    if( !$ttype->need_rounds )
@@ -72,7 +72,7 @@ $GLOBALS['ThePage'] = new Page('TournamentRoundStatusEdit');
    if( !$allow_edit_tourney )
       error('tournament_edit_not_allowed', "Tournament.edit_round_status.edit_tournament($tid,$round,$my_id)");
 
-   $tround = $tr_status->tround;
+   $tround = $tr_status->get_tournament_round();
    $is_admin = TournamentUtils::isAdmin();
 
    if( @$_REQUEST['t_cancel'] ) // cancel status-change
@@ -102,7 +102,7 @@ $GLOBALS['ThePage'] = new Page('TournamentRoundStatusEdit');
       {//HOT-section to change tournament-round-status
          $tround->persist();
          TournamentLogHelper::log_change_tournament_round_status( $tid, $allow_edit_tourney,
-            sprintf('%s -> %s', $tr_status->curr_status, $tr_status->new_status ) );
+            sprintf('%s -> %s', $tr_status->get_current_status(), $tr_status->get_new_status() ) );
       }
       ta_end();
 
@@ -139,13 +139,13 @@ $GLOBALS['ThePage'] = new Page('TournamentRoundStatusEdit');
    {
       $tform->add_row( array(
             'DESCRIPTION', T_('Error'),
-            'TEXT', buildErrorListString(T_('There are some errors'), $tr_status->errors) ));
+            'TEXT', buildErrorListString(T_('There are some errors'), $tr_status->get_errors()) ));
       $tform->add_empty_row();
    }
 
    $tform->add_row( array(
          'DESCRIPTION', T_('Current Round Status#tourney'),
-         'TEXT',        TournamentRound::getStatusText($tr_status->curr_status) ));
+         'TEXT',        TournamentRound::getStatusText($tr_status->get_current_status()) ));
    $tform->add_row( array(
          'TAB',
          'SELECTBOX',    'status', 1, $arr_status, $tround->Status, false,

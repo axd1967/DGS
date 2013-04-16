@@ -129,7 +129,7 @@ require_once( "include/std_functions.php" );
             $query = 'UPDATE Bio SET ' .
                //', Text="'.mysql_addslashes($row['Text']).'"' .
                //', Category="'.mysql_addslashes($row['Category']).'"' .
-               ', SortOrder="'.$row['newpos'].'"' .
+               'SortOrder="'.$row['newpos'].'"' .
                " WHERE ID=$bid AND uid=$my_id LIMIT 1";
          }
 

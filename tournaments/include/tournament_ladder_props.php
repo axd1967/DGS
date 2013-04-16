@@ -48,10 +48,6 @@ define('TGE_TIMEOUT_LOSS', 4);
   * \brief Class to manage TournamentLadderProps-table for ladder-specific properties
   */
 
-// lazy-init in Tournament::get..Text()-funcs
-global $ARR_GLOBALS_TOURNAMENT_LADDER_PROPS; //PHP5
-$ARR_GLOBALS_TOURNAMENT_LADDER_PROPS = array();
-
 global $ENTITY_TOURNAMENT_LADDER_PROPS; //PHP5
 $ENTITY_TOURNAMENT_LADDER_PROPS = new Entity( 'TournamentLadderProps',
       FTYPE_PKEY, 'tid',
@@ -67,32 +63,34 @@ $ENTITY_TOURNAMENT_LADDER_PROPS = new Entity( 'TournamentLadderProps',
 
 class TournamentLadderProps
 {
-   var $tid;
-   var $Lastchanged;
-   var $ChangedBy;
-   var $ChallengeRangeAbsolute;
-   var $ChallengeRangeRelative;
-   var $ChallengeRangeRating;
-   var $ChallengeRematchWaitHours;
-   var $MaxDefenses;
-   var $MaxDefenses1;
-   var $MaxDefenses2;
-   var $MaxDefensesStart1;
-   var $MaxDefensesStart2;
-   var $MaxChallenges;
-   var $DetermineChallenger;
-   var $GameEndNormal;
-   var $GameEndJigo;
-   var $GameEndTimeoutWin;
-   var $GameEndTimeoutLoss;
-   var $UserJoinOrder;
-   var $UserAbsenceDays;
-   var $RankPeriodLength;
-   var $CrownKingHours;
-   var $CrownKingStart;
+   private static $ARR_TLPROPS_TEXTS = array(); // lazy-init in Tournament::get..Text()-funcs: [key][id] => text
+
+   public $tid;
+   public $Lastchanged;
+   public $ChangedBy;
+   public $ChallengeRangeAbsolute;
+   public $ChallengeRangeRelative;
+   public $ChallengeRangeRating;
+   public $ChallengeRematchWaitHours;
+   public $MaxDefenses;
+   public $MaxDefenses1;
+   public $MaxDefenses2;
+   public $MaxDefensesStart1;
+   public $MaxDefensesStart2;
+   public $MaxChallenges;
+   public $DetermineChallenger;
+   public $GameEndNormal;
+   public $GameEndJigo;
+   public $GameEndTimeoutWin;
+   public $GameEndTimeoutLoss;
+   public $UserJoinOrder;
+   public $UserAbsenceDays;
+   public $RankPeriodLength;
+   public $CrownKingHours;
+   public $CrownKingStart;
 
    /*! \brief Constructs TournamentLadderProps-object with specified arguments. */
-   function TournamentLadderProps( $tid=0, $lastchanged=0, $changed_by='',
+   public function __construct( $tid=0, $lastchanged=0, $changed_by='',
          $challenge_range_abs=0, $challenge_range_rel=0, $challenge_range_rating=TLADDER_CHRNG_RATING_UNUSED,
          $challenge_rematch_wait_hours=0,
          $max_defenses=0, $max_defenses1=0, $max_defenses2=0, $max_defenses_start1=0, $max_defenses_start2=0,
@@ -125,49 +123,49 @@ class TournamentLadderProps
       $this->RankPeriodLength = limit( (int)$rank_period_len, 1, 255, 1 );
       $this->CrownKingHours = (int)$crown_king_hours;
       $this->CrownKingStart = (int)$crown_king_start;
-   }
+   }//__construct
 
-   function to_string()
+   public function to_string()
    {
       return print_r($this, true);
    }
 
-   function setDetermineChallenger( $determine_challenger )
+   public function setDetermineChallenger( $determine_challenger )
    {
       if( !preg_match( "/^(".CHECK_TLP_DETERMINE_CHALL.")$/", $determine_challenger ) )
          error('invalid_args', "TournamentLadderProps.setDetermineChallenger($determine_challenger)");
       $this->DetermineChallenger = $determine_challenger;
    }
 
-   function setGameEndNormal( $game_end )
+   public function setGameEndNormal( $game_end )
    {
       if( !preg_match( "/^(".CHECK_TGEND_NORMAL.")$/", $game_end ) )
          error('invalid_args', "TournamentLadderProps.setGameEndNormal($game_end)");
       $this->GameEndNormal = $game_end;
    }
 
-   function setGameEndJigo( $game_end )
+   public function setGameEndJigo( $game_end )
    {
       if( !preg_match( "/^(".CHECK_TGEND_JIGO.")$/", $game_end ) )
          error('invalid_args', "TournamentLadderProps.setGameEndJigo($game_end)");
       $this->GameEndJigo = $game_end;
    }
 
-   function setGameEndTimeoutWin( $game_end )
+   public function setGameEndTimeoutWin( $game_end )
    {
       if( !preg_match( "/^(".CHECK_TGEND_TIMEOUT_WIN.")$/", $game_end ) )
          error('invalid_args', "TournamentLadderProps.setGameEndTimeoutWin($game_end)");
       $this->GameEndTimeoutWin = $game_end;
    }
 
-   function setGameEndTimeoutLoss( $game_end )
+   public function setGameEndTimeoutLoss( $game_end )
    {
       if( !preg_match( "/^(".CHECK_TGEND_TIMEOUT_LOSS.")$/", $game_end ) )
          error('invalid_args', "TournamentLadderProps.setGameEndTimeoutLoss($game_end)");
       $this->GameEndTimeoutLoss = $game_end;
    }
 
-   function setUserJoinOrder( $user_join_order )
+   public function setUserJoinOrder( $user_join_order )
    {
       if( !preg_match( "/^(".CHECK_TLP_JOINORDER.")$/", $user_join_order ) )
          error('invalid_args', "TournamentLadderProps.setUserJoinOrder($user_join_order)");
@@ -175,16 +173,16 @@ class TournamentLadderProps
    }
 
    /*! \brief Inserts or updates tournament-ladder-props in database. */
-   function persist()
+   public function persist()
    {
-      if( TournamentLadderProps::isTournamentLadderProps($tid) )
+      if( self::isTournamentLadderProps($tid) )
          $success = $this->update();
       else
          $success = $this->insert();
       return $success;
    }
 
-   function insert()
+   public function insert()
    {
       $this->Lastchanged = $GLOBALS['NOW'];
 
@@ -192,25 +190,25 @@ class TournamentLadderProps
       return $entityData->insert( "TournamentLadderProps.insert(%s)" );
    }
 
-   function update()
+   public function update()
    {
       $this->Lastchanged = $GLOBALS['NOW'];
 
       $entityData = $this->fillEntityData();
       $result = $entityData->update( "TournamentLadderProps.update(%s)" );
-      TournamentLadderProps::delete_cache_tournament_ladder_props( 'TournamentLadderProps.update', $this->tid );
+      self::delete_cache_tournament_ladder_props( 'TournamentLadderProps.update', $this->tid );
       return $result;
    }
 
-   function delete()
+   public function delete()
    {
       $entityData = $this->fillEntityData();
       $result = $entityData->delete( "TournamentLadderProps.delete(%s)" );
-      TournamentLadderProps::delete_cache_tournament_ladder_props( 'TournamentLadderProps.delete', $this->tid );
+      self::delete_cache_tournament_ladder_props( 'TournamentLadderProps.delete', $this->tid );
       return $result;
    }
 
-   function fillEntityData( $data=null )
+   public function fillEntityData( $data=null )
    {
       if( is_null($data) )
          $data = $GLOBALS['ENTITY_TOURNAMENT_LADDER_PROPS']->newEntityData();
@@ -241,7 +239,7 @@ class TournamentLadderProps
    }
 
    /*! \brief Checks if all ladder-properties are valid; return error-list, empty if ok. */
-   function check_properties()
+   public function check_properties()
    {
       $errors = array();
 
@@ -302,7 +300,7 @@ class TournamentLadderProps
    }//check_properties
 
    /*! \brief Returns array( header, notes-array ) with this properties in textual form. */
-   function build_notes_props()
+   public function build_notes_props()
    {
       $arr_props = array();
 
@@ -359,7 +357,7 @@ class TournamentLadderProps
       // challenge-rematch
       if( $this->ChallengeRematchWaitHours > 0 )
          $arr_props[] = sprintf( T_('Before a rematch with the same user you will have to wait %s.#T_ladder'),
-                                 TournamentLadderProps::echo_rematch_wait($this->ChallengeRematchWaitHours) );
+                                 self::echo_rematch_wait($this->ChallengeRematchWaitHours) );
 
       $arr_props[] = T_('You may only have one running game per opponent.#T_ladder');
 
@@ -372,16 +370,16 @@ class TournamentLadderProps
       // game-end handling
       $arr = array( T_('On game-end the following action is performed:#T_ladder') );
       $arr[] = sprintf( '%s: %s', T_('if challenger wins by score or resignation#T_ladder'),
-                        TournamentLadderProps::getGameEndText($this->GameEndNormal) );
+                        self::getGameEndText($this->GameEndNormal) );
       $arr[] = sprintf( '%s: %s', T_('if challenger wins by timeout#T_ladder'),
-                        TournamentLadderProps::getGameEndText($this->GameEndTimeoutWin) );
+                        self::getGameEndText($this->GameEndTimeoutWin) );
       $arr[] = sprintf( '%s: %s', T_('if challenger loses by timeout#T_ladder'),
-                        TournamentLadderProps::getGameEndText($this->GameEndTimeoutLoss) );
-      $arr[] = sprintf( '%s: %s', T_('on Jigo'), TournamentLadderProps::getGameEndText($this->GameEndJigo) );
+                        self::getGameEndText($this->GameEndTimeoutLoss) );
+      $arr[] = sprintf( '%s: %s', T_('on Jigo'), self::getGameEndText($this->GameEndJigo) );
       $arr_props[] = $arr;
 
       // user-join-order
-      $arr_props[] = TournamentLadderProps::getUserJoinOrderText($this->UserJoinOrder, /*short*/false);
+      $arr_props[] = self::getUserJoinOrderText($this->UserJoinOrder, /*short*/false);
 
       // user absence handling
       if( $this->UserAbsenceDays > 0 )
@@ -411,7 +409,7 @@ class TournamentLadderProps
     * \param $iterator ListIterator on ordered TournamentLadder with iterator-Index on Rank & uid
     * \return (modified) TournamentLadder of given user or null if not in ladder.
     */
-   function fill_ladder_challenge_range( &$iterator, $uid )
+   public function fill_ladder_challenge_range( &$iterator, $uid )
    {
       list( $tl_user, $tl_user_orow ) = $iterator->getIndexValue( 'uid', $uid );
       if( is_null($tl_user) )
@@ -449,7 +447,7 @@ class TournamentLadderProps
     * \param $iterator ListIterator on ordered TournamentLadder with iterator-Index on uid
     * \param $tgame_iterator ListIterator on TournamentGames
     */
-   function fill_ladder_running_games( &$iterator, $tgame_iterator, $my_id )
+   public function fill_ladder_running_games( &$iterator, $tgame_iterator, $my_id )
    {
       while( list(,$arr_item) = $tgame_iterator->getListIterator() )
       {
@@ -486,7 +484,7 @@ class TournamentLadderProps
     * \note sync with TournamentLadder::find_ladder_rating_pos()
     * \note purpose of this method is to avoid db-query using pre-loaded iterator on TournamentLadder instead
     */
-   function determine_ladder_rating_pos( $iterator, $rating )
+   public function determine_ladder_rating_pos( $iterator, $rating )
    {
       if( $this->ChallengeRangeRating == TLADDER_CHRNG_RATING_UNUSED || (string)$rating == '' || (int)$rating <= NO_RATING )
          return 0;
@@ -512,7 +510,7 @@ class TournamentLadderProps
     * \param $ch_rank challenger-rank
     * \note wording: 1 is "higher" than 2 in ladder.
     */
-   function calc_highest_challenge_rank( $ch_rank, $rating_pos=0 )
+   public function calc_highest_challenge_rank( $ch_rank, $rating_pos=0 )
    {
       if( $this->ChallengeRangeAbsolute < 0 )
          $abs_high_rank = 1;
@@ -538,7 +536,7 @@ class TournamentLadderProps
    }//calc_highest_challenge_rank
 
    /*! \brief Returns non-0 number of max. defenses for given ladder-rank. */
-   function calc_max_defenses( $rank )
+   public function calc_max_defenses( $rank )
    {
       if( $this->MaxDefenses1 > 0 && $rank <= $this->MaxDefensesStart1 )
          $max_defenses = $this->MaxDefenses1;
@@ -554,7 +552,7 @@ class TournamentLadderProps
     * \param $tladder_ch TournamentLadder from challenger
     * \param $tladder_df TournamentLadder from defender
     */
-   function verify_challenge( $tladder_ch, $tladder_df, $rating_pos )
+   public function verify_challenge( $tladder_ch, $tladder_df, $rating_pos )
    {
       $errors = array();
 
@@ -569,7 +567,7 @@ class TournamentLadderProps
          {
             // should normally not be reached by link from ladder-view, so don't calc remaing-hours
             $errors[] = sprintf( T_('Before a rematch with the same user you will have to wait %s.#T_ladder'),
-                                 TournamentLadderProps::echo_rematch_wait($this->ChallengeRematchWaitHours) );
+                                 self::echo_rematch_wait($this->ChallengeRematchWaitHours) );
          }
          elseif( $tgame->Status != TG_STATUS_DONE )
             $errors[] = T_('You may only have one running game per opponent.');
@@ -601,7 +599,7 @@ class TournamentLadderProps
     * \return TGEND_NO_CHANGE if no action needed; otherwise TGEND_..-action
     * \internal
     */
-   function calc_game_end_action( $score, $tgame_flags )
+   private function calc_game_end_action( $score, $tgame_flags )
    {
       $action = TGEND_NO_CHANGE;
 
@@ -628,7 +626,7 @@ class TournamentLadderProps
    }//calc_game_end_action
 
    /*! \brief Returns TicksDue for rematch-wait, anchored on half-hourly-clock. */
-   function calc_ticks_due_rematch_wait()
+   public function calc_ticks_due_rematch_wait()
    {
       $clock_ticks = get_clock_ticks( "TournamentLadderProps.calc_ticks_due_rematch_wait({$this->tid})",
          CLOCK_TOURNEY_GAME_WAIT );
@@ -638,7 +636,7 @@ class TournamentLadderProps
    }
 
    /*! \brief Returns remaining hours to wait for rematch. */
-   function calc_rematch_wait_remaining_hours( $tgame )
+   public function calc_rematch_wait_remaining_hours( $tgame )
    {
       $wait_ticks = get_clock_ticks( "TournamentLadderProps.calc_rematch_wait_remaining_hours({$this->tid},{$tgame->ID})",
          CLOCK_TOURNEY_GAME_WAIT);
@@ -653,7 +651,7 @@ class TournamentLadderProps
    // ------------ static functions ----------------------------
 
    /*! \brief Returns db-fields to be used for query of TournamentLadderProps-objects for given tournament-id. */
-   function build_query_sql( $tid )
+   public static function build_query_sql( $tid )
    {
       $qsql = $GLOBALS['ENTITY_TOURNAMENT_LADDER_PROPS']->newQuerySQL('TLP');
       $qsql->add_part( SQLP_WHERE, "TLP.tid='$tid'" );
@@ -661,7 +659,7 @@ class TournamentLadderProps
    }
 
    /*! \brief Returns TournamentLadderProps-object created from specified (db-)row. */
-   function new_from_row( $row )
+   public static function new_from_row( $row )
    {
       $tlp = new TournamentLadderProps(
             // from TournamentLadderProps
@@ -693,9 +691,9 @@ class TournamentLadderProps
    }//new_from_row
 
    /*! \brief Checks, if tournament ladder-props existing for given tournament. */
-   function isTournamentLadderProps( $tid )
+   public static function isTournamentLadderProps( $tid )
    {
-      return (bool)mysql_single_fetch( "TournamentLadderProps::isTournamentLadderProps($tid)",
+      return (bool)mysql_single_fetch( "TournamentLadderProps:isTournamentLadderProps($tid)",
          "SELECT 1 FROM TournamentLadderProps WHERE tid='$tid' LIMIT 1" );
    }
 
@@ -703,21 +701,21 @@ class TournamentLadderProps
     * \brief Loads and returns TournamentLadderProps-object for given tournament-ID.
     * \return NULL if nothing found; TournamentLadderProps otherwise
     */
-   function load_tournament_ladder_props( $tid )
+   public static function load_tournament_ladder_props( $tid )
    {
       if( $tid <=0 )
          return NULL;
 
-      $qsql = TournamentLadderProps::build_query_sql( $tid );
+      $qsql = self::build_query_sql( $tid );
       $qsql->add_part( SQLP_LIMIT, '1' );
 
-      $row = mysql_single_fetch( "TournamentLadderProps::load_tournament_ladder_props($tid)",
+      $row = mysql_single_fetch( "TournamentLadderProps:load_tournament_ladder_props($tid)",
          $qsql->get_select() );
-      return ($row) ? TournamentLadderProps::new_from_row($row) : NULL;
-   }
+      return ($row) ? self::new_from_row($row) : NULL;
+   }//load_tournament_ladder_props
 
    /*! \brief Returns game-end-text, or all game-end-texts for given game-end-type TGE_.. (if game_end=null). */
-   function getGameEndText( $game_end=null, $game_end_type=TGE_NORMAL )
+   public static function getGameEndText( $game_end=null, $game_end_type=TGE_NORMAL )
    {
       static $arr_tgame_end = array(
          // NOTE: all enum-values:
@@ -732,11 +730,10 @@ class TournamentLadderProps
                                     TGEND_DEFENDER_DELETE ),
          TGE_TIMEOUT_LOSS => array( TGEND_NO_CHANGE, TGEND_CHALLENGER_LAST, TGEND_CHALLENGER_DELETE ),
       );
-      global $ARR_GLOBALS_TOURNAMENT_LADDER_PROPS;
 
       // lazy-init of texts
       $key = 'TGAMEEND';
-      if( !isset($ARR_GLOBALS_TOURNAMENT_LADDER_PROPS[$key]) )
+      if( !isset(self::$ARR_TLPROPS_TEXTS[$key]) )
       {
          $arr = array();
          $arr[TGEND_NO_CHANGE]         = T_('No change#TG_end');
@@ -748,12 +745,12 @@ class TournamentLadderProps
          $arr[TGEND_DEFENDER_BELOW]    = T_('Move defender below challenger#TG_end');
          $arr[TGEND_DEFENDER_LAST]     = T_('Move defender to ladder-bottom#TG_end');
          $arr[TGEND_DEFENDER_DELETE]   = T_('Remove defender from ladder#TG_end');
-         $ARR_GLOBALS_TOURNAMENT_LADDER_PROPS[$key] = $arr;
+         self::$ARR_TLPROPS_TEXTS[$key] = $arr;
       }
 
       if( is_null($game_end) )
       {
-         $arr = $ARR_GLOBALS_TOURNAMENT_LADDER_PROPS[$key]; // clone
+         $arr = self::$ARR_TLPROPS_TEXTS[$key]; // clone
          if( !isset($arr_tgame_end[$game_end_type]) )
             error('invalid_args', "TournamentLadderProps.getGameEndText.check_type($game_end,$game_end_type)");
          $arr_intersect = $arr_tgame_end[$game_end_type];
@@ -761,58 +758,56 @@ class TournamentLadderProps
             $arr = array_intersect_key_values( $arr, $arr_intersect );
          return $arr;
       }
-      if( !isset($ARR_GLOBALS_TOURNAMENT_LADDER_PROPS[$key][$game_end]) )
+      if( !isset(self::$ARR_TLPROPS_TEXTS[$key][$game_end]) )
          error('invalid_args', "TournamentLadderProps.getGameEndText($game_end)");
-      return $ARR_GLOBALS_TOURNAMENT_LADDER_PROPS[$key][$game_end];
+      return self::$ARR_TLPROPS_TEXTS[$key][$game_end];
    }//getGameEndText
 
-   function getUserJoinOrderText( $join_order=null, $short=true )
+   public static function getUserJoinOrderText( $join_order=null, $short=true )
    {
-      global $ARR_GLOBALS_TOURNAMENT_LADDER_PROPS;
-
       // lazy-init of texts
       $key = 'UJOINORDER';
-      if( !isset($ARR_GLOBALS_TOURNAMENT_LADDER_PROPS[$key]) )
+      if( !isset(self::$ARR_TLPROPS_TEXTS[$key]) )
       {
          $arr = array();
          $arr[TLP_JOINORDER_REGTIME] = T_('Tournament Registration Time');
          $arr[TLP_JOINORDER_RATING]  = T_('Current User Rating#T_ladder');
          $arr[TLP_JOINORDER_RANDOM]  = T_('Random#T_ladder');
-         $ARR_GLOBALS_TOURNAMENT_LADDER_PROPS[$key] = $arr;
+         self::$ARR_TLPROPS_TEXTS[$key] = $arr;
 
          $arr = array();
          $arr[TLP_JOINORDER_REGTIME] = T_('Add new user in position ordered by tournament registration time (bottom of ladder).#T_ladder');
          $arr[TLP_JOINORDER_RATING]  = T_('Add new user in ladder at position below user with same user rating.#T_ladder');
          $arr[TLP_JOINORDER_RANDOM]  = T_('Add new user at random position in the ladder.#T_ladder');
-         $ARR_GLOBALS_TOURNAMENT_LADDER_PROPS[$key.'_LONG'] = $arr;
+         self::$ARR_TLPROPS_TEXTS[$key.'_LONG'] = $arr;
       }
 
       if( !$short )
          $key .= '_LONG';
       if( is_null($join_order) )
-         return array() + $ARR_GLOBALS_TOURNAMENT_LADDER_PROPS[$key]; // cloned
-      if( !isset($ARR_GLOBALS_TOURNAMENT_LADDER_PROPS[$key][$join_order]) )
+         return array() + self::$ARR_TLPROPS_TEXTS[$key]; // cloned
+      if( !isset(self::$ARR_TLPROPS_TEXTS[$key][$join_order]) )
          error('invalid_args', "TournamentLadderProps.getUserJoinOrderText($join_order,$short)");
-      return $ARR_GLOBALS_TOURNAMENT_LADDER_PROPS[$key][$join_order];
+      return self::$ARR_TLPROPS_TEXTS[$key][$join_order];
    }//getUserJoinOrderText
 
-   function echo_rematch_wait( $hours, $short=false )
+   public static function echo_rematch_wait( $hours, $short=false )
    {
       return TimeFormat::_echo_time( $hours, 24, TIMEFMT_ZERO | ($short ? TIMEFMT_SHORT : 0), 0 );
    }
 
-   function formatChallengeRangeRating( $ch_range_rating )
+   public static function formatChallengeRangeRating( $ch_range_rating )
    {
       return ($ch_range_rating == TLADDER_CHRNG_RATING_UNUSED) ? '' : $ch_range_rating;
    }
 
-   function get_edit_tournament_status()
+   public static function get_edit_tournament_status()
    {
       static $statuslist = array( TOURNEY_STATUS_NEW );
       return $statuslist;
    }
 
-   function delete_cache_tournament_ladder_props( $dbgmsg, $tid )
+   public static function delete_cache_tournament_ladder_props( $dbgmsg, $tid )
    {
       DgsCache::delete( $dbgmsg, CACHE_GRP_TLPROPS, "TLadderProps.$tid" );
    }

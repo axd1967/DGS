@@ -30,7 +30,7 @@ class GameTexts
 {
    // ------------ static functions ----------------------------
 
-   function get_game_type( $game_type=null )
+   public static function get_game_type( $game_type=null )
    {
       static $ARR_GAME_TYPES = null;
       if( is_null($ARR_GAME_TYPES) )
@@ -44,7 +44,7 @@ class GameTexts
       return is_null($game_type) ? $ARR_GAME_TYPES : @$ARR_GAME_TYPES[$game_type];
    }//get_game_type
 
-   function get_manual_handicap_types( $htype=null )
+   public static function get_manual_handicap_types( $htype=null )
    {
       static $ARR_GAME_MAN_HTYPES = null;
       if( is_null($ARR_GAME_MAN_HTYPES) )
@@ -59,17 +59,17 @@ class GameTexts
       return is_null($htype) ? $ARR_GAME_MAN_HTYPES : @$ARR_GAME_MAN_HTYPES[$htype];
    }//get_manual_handicap_types
 
-   function format_game_type( $game_type, $game_players, $quick=false )
+   public static function format_game_type( $game_type, $game_players, $quick=false )
    {
       if( $game_type == GAMETYPE_GO )
-         return ($quick) ? $game_type : GameTexts::get_game_type($game_type);
+         return ($quick) ? $game_type : self::get_game_type($game_type);
       else
          return ($quick)
             ? "$game_type($game_players)" // see quick-suite
-            : sprintf( '%s (%s)', GameTexts::get_game_type($game_type), $game_players );
+            : sprintf( '%s (%s)', self::get_game_type($game_type), $game_players );
    }//format_game_type
 
-   function build_fairkomi_gametype( $game_status, $rss=false )
+   public static function build_fairkomi_gametype( $game_status, $rss=false )
    {
       if( $game_status != GAME_STATUS_KOMI )
          return '';
@@ -79,7 +79,7 @@ class GameTexts
          return MINI_SPACING . span('GameTypeFairKomi', '(' . T_('Fair Komi#fairkomi') . ')');
    }
 
-   function get_fair_komi_types( $handicap_type=null, $with_note=false, $my_handle=null, $opp_handle=null )
+   public static function get_fair_komi_types( $handicap_type=null, $with_note=false, $my_handle=null, $opp_handle=null )
    {
       $arr = array(
             HTYPE_AUCTION_OPEN   => T_('Open Auction Komi#fairkomi'),
@@ -126,10 +126,10 @@ class GameTexts
             return sprintf( T_('I (%s) choose Komi, You (%s) choose Color#fairkomi'), $my_handle, $opp_handle );
       }
       else
-         error('invalid_args', "GameTexts::get_fair_komi_types($handicap_type,$my_handle,$opp_handle)");
+         error('invalid_args', "GameTexts:get_fair_komi_types($handicap_type,$my_handle,$opp_handle)");
    }//get_fair_komi_types
 
-   function get_jigo_modes( $jigo_mode=null )
+   public static function get_jigo_modes( $jigo_mode=null )
    {
       $arr = array(
          JIGOMODE_KEEP_KOMI  => T_('No Jigo restriction#jigo_mode'),

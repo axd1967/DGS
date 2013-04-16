@@ -25,7 +25,7 @@ function error($err, $debugmsg=NULL)
 {
    global $uhandle;
 
-   list( $xerr, $uri)= err_log( $uhandle, $err, $debugmsg);
+   list( $xerr, $uri ) = DgsErrors::err_log( $uhandle, $err, $debugmsg);
 
    global $wap_opened;
    if( !$wap_opened )

@@ -58,9 +58,9 @@ require_once 'tournaments/include/tournament_utils.php';
   */
 class TournamentHelper
 {
-   var $tcache;
+   public $tcache;
 
-   function TournamentHelper()
+   public function __construct()
    {
       $this->tcache = TournamentCache::get_instance();
    }
@@ -70,7 +70,7 @@ class TournamentHelper
     *
     * \note caller needs to take care of clearing caches.
     */
-   function process_tournament_game_end( $tourney, $tgame, $check_only )
+   public function process_tournament_game_end( $tourney, $tgame, $check_only )
    {
       $tid = $tourney->ID;
       if( $tourney->Type != TOURNEY_TYPE_LADDER && $tourney->Type != TOURNEY_TYPE_ROUND_ROBIN )
@@ -90,9 +90,10 @@ class TournamentHelper
          $result = false;
 
       return $result;
-   }
+   }//process_tournament_game_end
 
-   function process_tournament_ladder_game_end( $tourney, $tgame )
+   // \internal
+   private function process_tournament_ladder_game_end( $tourney, $tgame )
    {
       $tid = $tourney->ID;
       $tl_props = TournamentCache::load_cache_tournament_ladder_props( 'process_tournament_ladder_game_end', $tid, /*check*/false );
@@ -156,7 +157,8 @@ class TournamentHelper
       return $success;
    }//process_tournament_ladder_game_end
 
-   function process_tournament_round_robin_game_end( $tourney, $tgame )
+   // \internal
+   private function process_tournament_round_robin_game_end( $tourney, $tgame )
    {
       $tid = $tourney->ID;
 
@@ -172,13 +174,13 @@ class TournamentHelper
       ta_end();
 
       return true;
-   }
+   }//process_tournament_round_robin_game_end
 
    /*!
     * \brief Updates TournamentLadder.Period/History-Rank when rank-update is due, set next update-date.
     * \note IMPORTANT NOTE: caller needs to open TA with HOT-section!!
     */
-   function process_rank_period( $t_ext )
+   public function process_rank_period( $t_ext )
    {
       $tid = $t_ext->tid;
       $tl_props = TournamentCache::load_cache_tournament_ladder_props( 'process_rank_period', $tid, /*check*/false );
@@ -193,7 +195,7 @@ class TournamentHelper
          $success = TournamentLadder::process_rank_period( $tid );
 
       return $success;
-   }
+   }//process_rank_period
 
 
    // ------------ static functions ----------------------------
@@ -203,7 +205,7 @@ class TournamentHelper
     *        or if user can admin tournament-game (if tournament-director-flag given).
     * \return false if not allowed; otherwise !false with one of TLOG_TYPE_ADMIN/OWNER/DIRECTOR
     */
-   function allow_edit_tournaments( $tourney, $uid, $td_flag=0 )
+   public static function allow_edit_tournaments( $tourney, $uid, $td_flag=0 )
    {
       if( $uid <= GUESTS_ID_MAX ) // forbidden for guests
          return false;
@@ -230,25 +232,25 @@ class TournamentHelper
     * \brief Wrapper to TournamentRules.create_tournament_games() creating game(s) between two users.
     * \return array of Games.ID (e.g. for DOUBLE-tourney)
     */
-   function create_games_from_tournament_rules( $tid, $tourney_type, $user_ch, $user_df )
+   public static function create_games_from_tournament_rules( $tid, $tourney_type, $user_ch, $user_df )
    {
-      $trules = TournamentCache::load_cache_tournament_rules( 'TournamentHelper::create_game_from_tournament_rules', $tid );
+      $trules = TournamentCache::load_cache_tournament_rules( 'TournamentHelper:create_game_from_tournament_rules', $tid );
       $trules->TourneyType = $tourney_type;
 
-      $tprops = TournamentCache::load_cache_tournament_properties( 'TournamentHelper::create_game_from_tournament_rules', $tid );
+      $tprops = TournamentCache::load_cache_tournament_properties( 'TournamentHelper:create_game_from_tournament_rules', $tid );
 
       // set challenger & defender rating according to rating-use-mode
       $ch_uid = $user_ch->ID;
-      $ch_rating = TournamentHelper::get_tournament_rating( $tid, $user_ch, $tprops->RatingUseMode );
+      $ch_rating = self::get_tournament_rating( $tid, $user_ch, $tprops->RatingUseMode );
       $user_ch->urow['Rating2'] = $ch_rating;
 
       $df_uid = $user_df->ID;
-      $df_rating = TournamentHelper::get_tournament_rating( $tid, $user_df, $tprops->RatingUseMode );
+      $df_rating = self::get_tournament_rating( $tid, $user_df, $tprops->RatingUseMode );
       $user_df->urow['Rating2'] = $df_rating;
 
       $gids = $trules->create_tournament_games( $user_ch, $user_df );
       return $gids;
-   }
+   }//create_game_from_tournament_rules
 
    /*!
     * \brief Start all tournament games needed for current round, prints progress by printing and flushing on STDOUT.
@@ -256,7 +258,7 @@ class TournamentHelper
     *
     * \return arr( number of started games, expected number of games) or NULL on lock-error.
     */
-   function start_tournament_round_games( $tourney, $tround )
+   public static function start_tournament_round_games( $tourney, $tround )
    {
       global $NOW;
       $tid = $tourney->ID;
@@ -268,16 +270,16 @@ class TournamentHelper
          return null;
 
       // read T-rule
-      $trules = TournamentCache::load_cache_tournament_rules( 'TournamentHelper::start_tournament_round_games', $tid );
+      $trules = TournamentCache::load_cache_tournament_rules( 'TournamentHelper:start_tournament_round_games', $tid );
       $trules->TourneyType = $tourney->Type;
-      $games_per_challenge = TournamentHelper::determine_games_per_challenge( $tid, $trules );
+      $games_per_challenge = self::determine_games_per_challenge( $tid, $trules );
 
       // read T-props
-      $tprops = TournamentCache::load_cache_tournament_properties( 'TournamentHelper::start_tournament_round_games', $tid );
+      $tprops = TournamentCache::load_cache_tournament_properties( 'TournamentHelper:start_tournament_round_games', $tid );
 
       // read T-games: read all existing TGames to check if creation has been partly done
       $check_tgames = array(); // uid.uid => game-count
-      $tg_iterator = new ListIterator( "TournamentHelper::start_tournament_round_games.find_tgames($tid,$round)" );
+      $tg_iterator = new ListIterator( "TournamentHelper:start_tournament_round_games.find_tgames($tid,$round)" );
       $tg_iterator = TournamentGames::load_tournament_games( $tg_iterator, $tid, $tround->ID );
       while( list(,$arr_item) = $tg_iterator->getListIterator() )
       {
@@ -295,14 +297,14 @@ class TournamentHelper
       foreach( $check_tgames as $fkey => $cnt )
       {
          if( $cnt != $games_per_challenge )
-            error('bad_tournament', "TournamentHelper::start_tournament_round_games.check_gper_chall($tid,[$fkey])");
+            error('bad_tournament', "TournamentHelper:start_tournament_round_games.check_gper_chall($tid,[$fkey])");
       }
 
       // read all pools with all users and TPs (if needed for T-rating), need TP_ID for TG.*_rid
       $load_opts_tpool = TPOOL_LOADOPT_TP_ID | TPOOL_LOADOPT_USER | TPOOL_LOADOPT_ONLY_RATING | TPOOL_LOADOPT_UROW_RATING;
       if( $tprops->RatingUseMode != TPROP_RUMODE_CURR_FIX )
          $load_opts_tpool |= TPOOL_LOADOPT_TRATING;
-      $tpool_iterator = new ListIterator( "TournamentHelper::start_tournament_round_games.load_pools($tid,$round)" );
+      $tpool_iterator = new ListIterator( "TournamentHelper:start_tournament_round_games.load_pools($tid,$round)" );
       $tpool_iterator->addIndex( 'uid' );
       $tpool_iterator = TournamentPool::load_tournament_pools( $tpool_iterator, $tid, $round, 0, $load_opts_tpool );
 
@@ -338,7 +340,7 @@ class TournamentHelper
                   $count_old_games += $cnt_exist_tgames;
                else // NEW
                {
-                  $arr_tg = TournamentHelper::create_pairing_games( $trules, $tround->ID, $pool, $user_ch, $df_tpool->User );
+                  $arr_tg = self::create_pairing_games( $trules, $tround->ID, $pool, $user_ch, $df_tpool->User );
                   if( is_array($arr_tg) )
                      $count_games += count($arr_tg);
                }
@@ -356,7 +358,7 @@ class TournamentHelper
       echo_message("</ul></td></tr></table>\n");
 
       // clear cache
-      TournamentGames::delete_cache_tournament_games( "TournamentHelper::start_tournament_round_games($tid,$round)", $tid );
+      TournamentGames::delete_cache_tournament_games( "TournamentHelper:start_tournament_round_games($tid,$round)", $tid );
 
       // check expected games-count
       $count_games += $count_old_games;
@@ -375,6 +377,7 @@ class TournamentHelper
 
    /*!
     * \brief Creates tournament game (or games for DOUBLE) for specific pairing of two users for round-robin-tourneys.
+    * \internal
     * \param $trules TournamentRules-object containing tourney-id tid
     * \param $tround_id TournamentRound-ID
     * \param $pool TournamentPool.Pool number
@@ -384,7 +387,7 @@ class TournamentHelper
     *
     * \note IMPORTANT NOTE: caller needs to open TA with HOT-section!!
     */
-   function create_pairing_games( $trules, $tround_id, $pool, $user_ch, $user_df )
+   private static function create_pairing_games( $trules, $tround_id, $pool, $user_ch, $user_df )
    {
       $gids = $trules->create_tournament_games( $user_ch, $user_df );
       if( !$gids )
@@ -417,15 +420,15 @@ class TournamentHelper
     * \param $RatingUseMode TournamentProperties.RatingUseMode
     * \param $strict_tp_rating true = return null if rating taken from $user
     */
-   function get_tournament_rating( $tid, $user, $RatingUseMode, $strict_tp_rating=false )
+   public static function get_tournament_rating( $tid, $user, $RatingUseMode, $strict_tp_rating=false )
    {
       if( $RatingUseMode == TPROP_RUMODE_CURR_FIX )
          $rating = ($strict_tp_rating) ? null : $user->Rating;
       else //if( $RatingUseMode == TPROP_RUMODE_COPY_CUSTOM || $RatingUseMode == TPROP_RUMODE_COPY_FIX )
       {
-         $tp = TournamentCache::load_cache_tournament_participant( 'TournamentHelper::get_tournament_rating', $tid, $user->ID );
+         $tp = TournamentCache::load_cache_tournament_participant( 'TournamentHelper:get_tournament_rating', $tid, $user->ID );
          if( is_null($tp) )
-            error('tournament_participant_unknown', "TournamentHelper::get_tournament_rating($tid,{$user->ID},$RatingUseMode)");
+            error('tournament_participant_unknown', "TournamentHelper:get_tournament_rating($tid,{$user->ID},$RatingUseMode)");
          $rating = $tp->Rating;
       }
 
@@ -433,17 +436,17 @@ class TournamentHelper
    }//get_tournament_rating
 
    /*! \brief Finds out games-per-challenge from various sources for given tournament. */
-   function determine_games_per_challenge( $tid, $trule=null )
+   public static function determine_games_per_challenge( $tid, $trule=null )
    {
       // load T-rules (need HandicapType for games-count)
       if( !($trule instanceof TournamentRules) )
-         $trule = TournamentCache::load_cache_tournament_rules( 'TournamentHelper::determine_games_per_challenge', $tid );
+         $trule = TournamentCache::load_cache_tournament_rules( 'TournamentHelper:determine_games_per_challenge', $tid );
 
       $games_per_challenge = ( $trule->Handicaptype == TRULE_HANDITYPE_DOUBLE ) ? 2 : 1;
       return $games_per_challenge;
    }
 
-   function load_ladder_absent_users( $iterator=null )
+   public static function load_ladder_absent_users( $iterator=null )
    {
       $qsql = new QuerySQL(
          SQLP_FIELDS,
@@ -464,12 +467,12 @@ class TournamentHelper
          );
 
       if( is_null($iterator) )
-         $iterator = new ListIterator( 'TournamentHelper::load_ladder_absent_users' );
+         $iterator = new ListIterator( 'TournamentHelper:load_ladder_absent_users' );
       $iterator->addQuerySQLMerge( $qsql );
       return TournamentLadder::load_tournament_ladder( $iterator );
    }//load_ladder_absent_users
 
-   function load_ladder_rank_period_update( $iterator = null )
+   public static function load_ladder_rank_period_update( $iterator = null )
    {
       global $NOW;
 
@@ -485,13 +488,13 @@ class TournamentHelper
          );
 
       if( is_null($iterator) )
-         $iterator = new ListIterator( 'TournamentHelper::load_ladder_rank_period_update' );
+         $iterator = new ListIterator( 'TournamentHelper:load_ladder_rank_period_update' );
       $iterator->addQuerySQLMerge( $qsql );
       return TournamentExtension::load_tournament_extensions( $iterator );
    }//load_ladder_rank_period_update
 
    /*! \brief Adds new tournament-round and updates Tournament.Rounds, returning new TournamentRound-object. */
-   function add_new_tournament_round( $tourney, &$errors, $check_only )
+   public static function add_new_tournament_round( $tourney, &$errors, $check_only )
    {
       $errors = array();
       $ttype = TournamentFactory::getTournament($tourney->WizardType);
@@ -515,7 +518,7 @@ class TournamentHelper
    }//add_new_tournament_round
 
    /*! \brief Deletes tournament-round and updates Tournament.Rounds. */
-   function remove_tournament_round( $tourney, $tround, &$errors, $check_only )
+   public static function remove_tournament_round( $tourney, $tround, &$errors, $check_only )
    {
       $errors = array();
       if( $tourney->CurrentRound == $tround->Round )
@@ -542,7 +545,7 @@ class TournamentHelper
    }//remove_tournament_round
 
    /*! \brief Sets current tournament-round updating Tournament.CurrentRound. */
-   function set_tournament_round( $tourney, $new_round, &$errors, $check_only )
+   public static function set_tournament_round( $tourney, $new_round, &$errors, $check_only )
    {
       $tround = TournamentCache::load_cache_tournament_round( 'TournamentHelper.set_tournament_round',
          $tourney->ID, $tourney->CurrentRound );
@@ -579,7 +582,7 @@ class TournamentHelper
     * \param $tround TournamentRound-object
     * \return array of actions taken
     */
-   function fill_ranks_tournament_pool( $tround )
+   public static function fill_ranks_tournament_pool( $tround )
    {
       $tid = $tround->tid;
       $round = $tround->Round;
@@ -649,9 +652,9 @@ class TournamentHelper
    /*!
     * \brief Checks if a king is to be crowned for a ladder-tournament.
     * \return ListIterator with data to crown ladder-king.
-    * \see #process_tournament_ladder_crown_king()
+    * \see TournamentHelper.process_tournament_ladder_crown_king()
     */
-   function load_ladder_crown_kings( $iterator=null )
+   public static function load_ladder_crown_kings( $iterator=null )
    {
       global $NOW;
       $qsql = new QuerySQL(
@@ -680,9 +683,9 @@ class TournamentHelper
          );
 
       if( is_null($iterator) )
-         $iterator = new ListIterator( 'TournamentHelper::load_ladder_crown_kings' );
+         $iterator = new ListIterator( 'TournamentHelper:load_ladder_crown_kings' );
       $iterator->addQuerySQLMerge( $qsql );
-      $result = db_query( "TournamentHelper::load_ladder_crown_kings", $iterator->buildQuery() );
+      $result = db_query( "TournamentHelper:load_ladder_crown_kings", $iterator->buildQuery() );
       $iterator->setResultRows( mysql_num_rows($result) );
 
       while( $row = mysql_fetch_array($result) )
@@ -695,17 +698,17 @@ class TournamentHelper
    /*!
     * \brief Crowns King with information given in $row.
     * \param $row map with fields: tid, uid, rid, Rank, X_RankChanged, CrownKingHours, Rating2, owner_uid
-    * \see #load_ladder_crown_kings()
+    * \see TournamentHelper.load_ladder_crown_kings()
     */
-   function process_tournament_ladder_crown_king( $row, $tlog_type, $by_tdir_uid=0 )
+   public static function process_tournament_ladder_crown_king( $row, $tlog_type, $by_tdir_uid=0 )
    {
       global $NOW;
 
       $tid = (int)$row['tid'];
       if( !is_numeric($tid) || $tid <= 0 )
-         error('invalid_args', "TournamentHelper::process_tournament_ladder_crown_king.check.tid($tid)");
+         error('invalid_args', "TournamentHelper:process_tournament_ladder_crown_king.check.tid($tid)");
       if( !is_numeric($by_tdir_uid) || $by_tdir_uid < 0 )
-         error('invalid_args', "TournamentHelper::process_tournament_ladder_crown_king.check.tdir_uid($tid,$by_tdir_uid)");
+         error('invalid_args', "TournamentHelper:process_tournament_ladder_crown_king.check.tdir_uid($tid,$by_tdir_uid)");
 
       $rank_kept_hours = (int)( ($NOW - $row['X_RankChanged']) / SECS_PER_HOUR);
       $tresult = new TournamentResult( 0, $tid, $row['uid'], $row['rid'], $row['Rating2'],
@@ -741,7 +744,7 @@ class TournamentHelper
          TournamentLadder::process_crown_king_reset_rank( $tid, $row['rid'] );
 
          // notify TDs + owner
-         send_message( "TournamentHelper::process_tournament_ladder_crown_king.check.tid($tid)",
+         send_message( "TournamentHelper:process_tournament_ladder_crown_king.check.tid($tid)",
             $msg_text, sprintf( T_('King of the Hill crowned for tournament #%s'), $tid ),
             $nfy_uids, '', /*notify*/true,
             /*sys-msg*/0, MSGTYPE_NORMAL );
@@ -764,7 +767,7 @@ class TournamentHelper
     *       I = INV  -> T cannot be joined, TP must be invited (no restrictions, if no WARNing)
     *       '' = OK  -> T can be joined, no restrictions
     */
-   function build_tournament_join_restrictions( $tourney, $maxGamesCheck, $row )
+   public static function build_tournament_join_restrictions( $tourney, $maxGamesCheck, $row )
    {
       global $NOW, $player_row;
       $out = array(); // restrictions

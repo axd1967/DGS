@@ -109,7 +109,7 @@ $GLOBALS['ThePage'] = new Page('SurveyList');
    $iterator->addQuerySQLMerge( SurveyControl::build_view_query_sql($is_admin) );
    $iterator = Survey::load_surveys( $iterator );
 
-   $show_rows = $table->compute_show_rows( $iterator->ResultRows );
+   $show_rows = $table->compute_show_rows( $iterator->getResultRows() );
    $table->set_found_rows( mysql_found_rows('Survey.list.found_rows') );
 
 

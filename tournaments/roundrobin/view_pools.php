@@ -59,7 +59,6 @@ $GLOBALS['ThePage'] = new Page('TournamentPoolView');
    $edit = (get_request_arg('edit', 0)) ? 1 : 0;
 
    $tourney = TournamentCache::load_cache_tournament( 'Tournament.pool_view.find_tournament', $tid );
-   $tstatus = new TournamentStatus( $tourney );
    $ttype = TournamentFactory::getTournament($tourney->WizardType);
    if( !$ttype->need_rounds )
       error('tournament_edit_rounds_not_allowed', "Tournament.pool_view.find_tournament($tid)");

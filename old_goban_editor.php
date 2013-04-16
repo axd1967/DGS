@@ -108,12 +108,12 @@ EOF_GOBAN;
 
       // create new entries for <goban> (without ID) in GoDiagrams-table
       // and replace <goban> tag with <goban id=#>
-      $GoDiagrams = create_godiagrams($goban_text, $cfg_board);
+      $GoDiagrams = GoDiagram::create_godiagrams($goban_text, $cfg_board);
       if( !is_null($GoDiagrams) )
       {
-         $goban_preview_old = replace_goban_tags_with_boards($goban_text, $GoDiagrams);
+         $goban_preview_old = GoDiagram::replace_goban_tags_with_boards($goban_text, $GoDiagrams);
          $arr_dump_diagrams = array();
-         $go_diagrams_str = draw_editors($GoDiagrams);
+         $go_diagrams_str = GoDiagram::draw_editors($GoDiagrams);
          if( !empty($go_diagrams_str) )
          {
             // needs to be added to "Save"-submits to summon edited data
@@ -126,8 +126,8 @@ EOF_GOBAN;
       }
 
       // pure preview (without editing): show go-boards for previewing
-      //$PreviewGoDiagrams = find_godiagrams($goban_preview, $cfg_board);
-      //$goban_preview_oldt= replace_goban_tags_with_boards($goban_preview, $PreviewGoDiagrams);
+      //$PreviewGoDiagrams = GoDiagram::find_godiagrams($goban_preview, $cfg_board);
+      //$goban_preview_oldt= GoDiagram::replace_goban_tags_with_boards($goban_preview, $PreviewGoDiagrams);
    }
 
 
@@ -143,7 +143,7 @@ EOF_GOBAN;
       // TODO insert or update
       if( !is_null($GoDiagrams) )
       {
-         // save_diagrams($GoDiagrams); // <goban>-tags
+         // GoDiagram::save_diagrams($GoDiagrams); // <goban>-tags
       }
       //jump_to("goban_editor.php?sysmsg=". urlencode(T_('Goban saved!')) );
    }

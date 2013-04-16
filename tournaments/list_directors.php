@@ -105,7 +105,7 @@ $GLOBALS['ThePage'] = new Page('TournamentDirectorList');
    echo "<br>\n";
 
 
-   $show_rows = $tdtable->compute_show_rows( $iterator->ResultRows );
+   $show_rows = $tdtable->compute_show_rows( $iterator->getResultRows() );
    while( ($show_rows-- > 0) && list(,$arr_item) = $iterator->getListIterator() )
    {
       list( $director, $orow ) = $arr_item;

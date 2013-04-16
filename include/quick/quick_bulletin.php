@@ -41,32 +41,24 @@ define('BULLETIN_COMMANDS', 'list|mark_read');
   */
 class QuickHandlerBulletin extends QuickHandler
 {
-   var $bulletin_iterator;
-   var $mark_bulletins;
-
-   function QuickHandlerBulletin( $quick_object )
-   {
-      parent::QuickHandler( $quick_object );
-
-      $this->bulletin_iterator = null;
-      $this->mark_bulletins = null;
-   }
+   private $bulletin_iterator = null;
+   private $mark_bulletins = null;
 
 
    // ---------- Interface ----------------------------------------
 
-   function canHandle( $obj, $cmd ) // static
+   public static function canHandle( $obj, $cmd ) // static
    {
       return ( $obj == QOBJ_BULLETIN ) && QuickHandler::matchRegex(BULLETIN_COMMANDS, $cmd);
    }
 
-   function parseURL()
+   public function parseURL()
    {
       parent::checkArgsUnknown('bid');
       $this->mark_bulletins = array_unique( explode(',', get_request_arg('bid')) );
    }
 
-   function prepare()
+   public function prepare()
    {
       global $player_row;
       $uid = (int)@$player_row['ID'];
@@ -105,7 +97,7 @@ class QuickHandlerBulletin extends QuickHandler
    }//prepare
 
    /*! \brief Processes command for object; may fire error(..) and perform db-operations. */
-   function process()
+   public function process()
    {
       $cmd = $this->quick_object->cmd;
       if( $cmd == QCMD_LIST )
@@ -114,7 +106,7 @@ class QuickHandlerBulletin extends QuickHandler
          $this->process_cmd_mark_read();
    }
 
-   function process_cmd_list()
+   private function process_cmd_list()
    {
       $out = array();
 
@@ -126,7 +118,7 @@ class QuickHandlerBulletin extends QuickHandler
                'target_type' => strtoupper($bulletin->TargetType),
                'status' => strtoupper($bulletin->Status),
                'category' => strtoupper($bulletin->Category),
-               'flags' => QuickHandlerBulletin::convertBulletinFlags($bulletin->Flags),
+               'flags' => self::convertBulletinFlags($bulletin->Flags),
                'time_published' => QuickHandler::formatDate(@$bulletin->PublishTime),
                'time_expires' => QuickHandler::formatDate(@$bulletin->ExpireTime),
                'time_updated' => QuickHandler::formatDate(@$bulletin->Lastchanged),
@@ -143,7 +135,7 @@ class QuickHandlerBulletin extends QuickHandler
       $this->add_list( QOBJ_BULLETIN, $out, 'time_published-' );
    }//process_cmd_list
 
-   function process_cmd_mark_read()
+   private function process_cmd_mark_read()
    {
       if( is_array($this->mark_bulletins) )
       {
@@ -155,7 +147,7 @@ class QuickHandlerBulletin extends QuickHandler
 
    // ------------ static functions ----------------------------
 
-   function convertBulletinFlags( $flags )
+   private static function convertBulletinFlags( $flags )
    {
       $out = array();
       if( $flags & BULLETIN_FLAG_ADMIN_CREATED )

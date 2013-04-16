@@ -334,9 +334,9 @@ function load_igoban_from_sgf( $file_sgf_arr )
    $errors = NULL;
    $board_text = NULL;
    $upload = new FileUpload( $file_sgf_arr, SGF_MAXSIZE_UPLOAD );
-   if( $upload->is_uploaded && !$upload->has_error() )
+   if( $upload->is_uploaded() && !$upload->has_error() )
    {
-      $sgf_data = @read_from_file( $upload->file_src_tmpfile );
+      $sgf_data = @read_from_file( $upload->get_file_src_tmpfile() );
       if( $sgf_data !== false )
       {
          $do_preview = true;
@@ -347,7 +347,7 @@ function load_igoban_from_sgf( $file_sgf_arr )
       }
    }
    if( $upload->has_error() )
-      $errors = $upload->errors;
+      $errors = $upload->get_errors();
    @$upload->cleanup();
 
    return array( $errors, $board_text );

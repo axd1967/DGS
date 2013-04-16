@@ -53,10 +53,6 @@ define('TRULE_HANDITYPE_WHITE',  'WHITE');
 define('TRULE_HANDITYPE_DOUBLE', 'DOUBLE');
 define('CHECK_TRULE_HANDITYPE', 'CONV|PROPER|NIGIRI|BLACK|WHITE|DOUBLE');
 
-// lazy-init in TournamentRules::get..Text()-funcs
-global $ARR_GLOBALS_TOURNAMENT_RULES; //PHP5
-$ARR_GLOBALS_TOURNAMENT_RULES = array();
-
 global $ENTITY_TOURNAMENT_RULES; //PHP5
 $ENTITY_TOURNAMENT_RULES = new Entity( 'TournamentRules',
       FTYPE_PKEY, 'ID',
@@ -72,41 +68,43 @@ $ENTITY_TOURNAMENT_RULES = new Entity( 'TournamentRules',
 
 class TournamentRules
 {
-   var $ID;
-   var $tid;
-   var $Lastchanged;
-   var $ChangedBy;
-   var $Flags;
-   var $Notes;
+   private static $ARR_TRULES_TEXTS = array(); // lazy-init in TournamentRules::get..Text()-funcs: [key][id] => text
+
+   public $ID;
+   public $tid;
+   public $Lastchanged;
+   public $ChangedBy;
+   public $Flags;
+   public $Notes;
 
    // keep fields in "sync" with waiting-room functionality:
 
-   var $Ruleset;
-   var $Size;
-   var $Handicaptype;
-   var $Handicap;
-   var $Komi;
-   var $AdjKomi;
-   var $JigoMode;
-   var $AdjHandicap;
-   var $MinHandicap;
-   var $MaxHandicap;
-   var $StdHandicap;
-   var $Maintime;
-   var $Byotype;
-   var $Byotime;
-   var $Byoperiods;
-   var $WeekendClock;
-   var $Rated;
-   var $ShapeID;
-   var $ShapeSnapshot;
+   public $Ruleset;
+   public $Size;
+   public $Handicaptype;
+   public $Handicap;
+   public $Komi;
+   public $AdjKomi;
+   public $JigoMode;
+   public $AdjHandicap;
+   public $MinHandicap;
+   public $MaxHandicap;
+   public $StdHandicap;
+   public $Maintime;
+   public $Byotype;
+   public $Byotime;
+   public $Byoperiods;
+   public $WeekendClock;
+   public $Rated;
+   public $ShapeID;
+   public $ShapeSnapshot;
 
    // non-DB fields
 
-   var $TourneyType;
+   public $TourneyType = '';
 
    /*! \brief Constructs TournamentRules-object with specified arguments. */
-   function TournamentRules( $id=0, $tid=0, $lastchanged=0, $changed_by='', $flags=0, $notes='',
+   public function __construct( $id=0, $tid=0, $lastchanged=0, $changed_by='', $flags=0, $notes='',
          $ruleset=RULESET_JAPANESE, $size=19, $handicaptype=TRULE_HANDITYPE_CONV,
          $handicap=0, $komi=DEFAULT_KOMI, $adj_komi=0.0, $jigo_mode=JIGOMODE_KEEP_KOMI,
          $adj_handicap=0, $min_handicap=0, $max_handicap=127, $std_handicap=true,
@@ -138,11 +136,9 @@ class TournamentRules
       $this->Rated = (bool)$rated;
       $this->ShapeID = (int)$shape_id;
       $this->ShapeSnapshot = $shape_snapshot;
-      // non-DB fields
-      $this->TourneyType = '';
-   }
+   }//__construct
 
-   function setRuleset( $ruleset )
+   public function setRuleset( $ruleset )
    {
       if( !preg_match( "/^(".CHECK_RULESETS.")$/", $ruleset ) )
          error('invalid_args', "TournamentRules.setRuleset($ruleset)");
@@ -151,13 +147,13 @@ class TournamentRules
       $this->Ruleset = $ruleset;
    }
 
-   function to_string()
+   public function to_string()
    {
       return print_r($this, true);
    }
 
    /*! \brief Inserts or updates tournament-rules in database. */
-   function persist()
+   public function persist()
    {
       if( $this->ID > 0 )
          $success = $this->update();
@@ -166,38 +162,39 @@ class TournamentRules
       return $success;
    }
 
-   function insert()
+   public function insert()
    {
       $this->Lastchanged = $GLOBALS['NOW'];
       $this->checkData();
 
       $entityData = $this->fillEntityData();
-      $result = $entityData->insert( "TournamentRules::insert(%s,{$this->tid})" );
+      $result = $entityData->insert( "TournamentRules.insert(%s,{$this->tid})" );
       if( $result )
          $this->ID = mysql_insert_id();
       return $result;
    }
 
-   function update()
+   public function update()
    {
       $this->Lastchanged = $GLOBALS['NOW'];
       $this->checkData();
 
       $entityData = $this->fillEntityData();
-      $result = $entityData->update( "TournamentRules::update(%s,{$this->tid})" );
-      TournamentRules::delete_cache_tournament_rules( 'TournamentRules.update', $this->ID );
+      $result = $entityData->update( "TournamentRules.update(%s,{$this->tid})" );
+      self::delete_cache_tournament_rules( 'TournamentRules.update', $this->ID );
       return $result;
    }
 
-   function delete()
+   public function delete()
    {
       $entityData = $this->fillEntityData();
-      $result = $entityData->delete( "TournamentRules::delete(%s,{$this->tid})" );
-      TournamentRules::delete_cache_tournament_rules( 'TournamentRules.delete', $this->ID );
+      $result = $entityData->delete( "TournamentRules.delete(%s,{$this->tid})" );
+      self::delete_cache_tournament_rules( 'TournamentRules.delete', $this->ID );
       return $result;
    }
 
-   function checkData()
+   // \internal
+   private function checkData()
    {
       if( !preg_match( "/^(".CHECK_TRULE_HANDITYPE.")$/", $this->Handicaptype ) )
          error('invalid_args', "TournamentRules.checkData.Handicaptype({$this->tid},{$this->Handicaptype})");
@@ -205,7 +202,7 @@ class TournamentRules
          error('invalid_args', "TournamentRules.checkData.Byotype({$this->tid},{$this->Byotype})");
    }
 
-   function fillEntityData()
+   public function fillEntityData()
    {
       // checked fields: Handicaptype/Byotype
       $data = $GLOBALS['ENTITY_TOURNAMENT_RULES']->newEntityData();
@@ -238,7 +235,7 @@ class TournamentRules
    }
 
    /*! \brief Converts this TournamentRules-object to hashmap to be used as game-row to create game. */
-   function convertTournamentRules_to_GameRow()
+   public function convertTournamentRules_to_GameRow()
    {
       // NOTE: keep "sync'ed" with new-game handle_add_game()-func
       // NOTE: see also create_game() in 'include/make_game.php'
@@ -273,7 +270,7 @@ class TournamentRules
     * \brief Converts this TournamentRules-object to hashmap to be used as
     *        form-value-hash for tournaments/edit_rules.php.
     */
-   function convertTournamentRules_to_EditForm( &$vars )
+   public function convertTournamentRules_to_EditForm( &$vars )
    {
       // NOTE: keep "sync'ed" with new-game handle_add_game()-func
 
@@ -281,7 +278,7 @@ class TournamentRules
 
       $vars['ruleset'] = $this->Ruleset;
       $vars['size'] = (int)$this->Size;
-      $std_htype = TournamentRules::convert_trule_handicaptype_to_stdhtype($this->Handicaptype);
+      $std_htype = self::convert_trule_handicaptype_to_stdhtype($this->Handicaptype);
       $cat_htype = get_category_handicaptype($std_htype);
       $vars['cat_htype'] = $cat_htype;
       $vars['color_m'] = $std_htype;
@@ -324,7 +321,7 @@ class TournamentRules
    }//convertTournamentRules_to_EditForm
 
    /*! \brief Converts and sets (parsed) form-values in this TournamentRules-object. */
-   function convertEditForm_to_TournamentRules( $vars, &$errors )
+   public function convertEditForm_to_TournamentRules( $vars, &$errors )
    {
       // NOTE: keep "sync'ed" with new-game handle_add_game()-func
 
@@ -414,7 +411,7 @@ class TournamentRules
 
 
       // time settings
-      list( $hours, $byohours, $byoperiods ) = TournamentRules::convertFormTimeSettings( $vars );
+      list( $hours, $byohours, $byoperiods ) = self::convertFormTimeSettings( $vars );
       $byoyomitype = @$vars['byoyomitype'];
 
       if( $hours < 1 && ($byohours < 1 || $byoyomitype == BYOTYPE_FISCHER) )
@@ -479,7 +476,7 @@ class TournamentRules
    } //convertTournamentRules_to_EditForm
 
    // returns array [ $main_hours, $byohours, $byoperiods ]
-   function convertFormTimeSettings( $map )
+   public function convertFormTimeSettings( $map )
    {
       // time settings
       $byoyomitype = @$map['byoyomitype'];
@@ -502,14 +499,14 @@ class TournamentRules
                                     $byotimevalue_jap, $timeunit_jap, $byoperiods_jap,
                                     $byotimevalue_can, $timeunit_can, $byoperiods_can,
                                     $byotimevalue_fis, $timeunit_fis);
-   }
+   }//convertFormTimeSettings
 
    /*! \brief Converts this TournamentRules-object to GameSetup-object to be used to create game; uid must be set later. */
-   function convertTournamentRules_to_GameSetup()
+   public function convertTournamentRules_to_GameSetup()
    {
       // store only fields that are no Games-fields already
       $gs = new GameSetup( /*uid*/0 );
-      $gs->Handicaptype = TournamentRules::convert_trule_handicaptype_to_stdhtype($this->Handicaptype);
+      $gs->Handicaptype = self::convert_trule_handicaptype_to_stdhtype($this->Handicaptype);
       $gs->Handicap = (int)$this->Handicap;
       $gs->Komi = (float)$this->Komi;
       $gs->AdjKomi = (float)$this->AdjKomi;
@@ -521,14 +518,14 @@ class TournamentRules
    }//convertTournamentRules_to_GameSetup
 
    /*! \brief Returns true, if handicap needs to be calculated for this ruleset. */
-   function needsCalculatedHandicap()
+   public function needsCalculatedHandicap()
    {
       return ( $this->Handicaptype == TRULE_HANDITYPE_CONV
             || $this->Handicaptype == TRULE_HANDITYPE_PROPER );
    }
 
    /*! \brief Returns true, if komi needs to be calculated for this ruleset. */
-   function needsCalculatedKomi()
+   public function needsCalculatedKomi()
    {
       return ( $this->Handicaptype == TRULE_HANDITYPE_CONV
             || $this->Handicaptype == TRULE_HANDITYPE_PROPER );
@@ -537,9 +534,9 @@ class TournamentRules
    /*!
     * \brief Checks what score for tournament-game with this tournamet-rules is allowed.
     * \return Returns 0 if only x.0 is allowed, 1 if x.5 allowed, otherwise -1 if x.5 and x.0 allowed.
-    * \see getJigoBehaviourText()
+    * \see TournamentRules.getJigoBehaviourText()
     */
-   function determineJigoBehaviour()
+   public function determineJigoBehaviour()
    {
       if( $this->JigoMode == JIGOMODE_ALLOW_JIGO )
          return 0;
@@ -574,7 +571,7 @@ class TournamentRules
     * \note IMPORTANT NOTE: caller needs to open TA with HOT-section if used with other db-writes!!
     * \note Expect filled var this->TourneyType
     */
-   function create_tournament_games( $user_ch, $user_df )
+   public function create_tournament_games( $user_ch, $user_df )
    {
       $ch_uid = $user_ch->ID;
       $df_uid = $user_df->ID;
@@ -616,12 +613,12 @@ class TournamentRules
     * \brief Prepares game_row and game_setup setting fields: game_row (Handicap/Komi), game_setup (uid).
     * \return true if challenger is black.
     */
-   function prepare_create_game_row( &$game_row, &$game_setup, $ch_uid, $ch_rating, $df_uid, $df_rating )
+   public function prepare_create_game_row( &$game_row, &$game_setup, $ch_uid, $ch_rating, $df_uid, $df_rating )
    {
       if( !$this->TourneyType )
          error('invalid_args', "TournamentRules.prepare_create_game_row.miss_var.TourneyType($ch_uid,$df_uid)");
 
-      $game_row['Handicaptype'] = TournamentRules::convert_trule_handicaptype_to_stdhtype($this->Handicaptype);
+      $game_row['Handicaptype'] = self::convert_trule_handicaptype_to_stdhtype($this->Handicaptype);
       $gs_uid = $ch_uid; // default
 
       switch( (string)$this->Handicaptype )
@@ -678,14 +675,14 @@ class TournamentRules
    // ------------ static functions ----------------------------
 
    /*! \brief Deletes TournamentRules-entry for given id. */
-   function delete_tournament_rules( $id )
+   public static function delete_tournament_rules( $id )
    {
       $t_rules = new TournamentRules( $id );
-      return $t_rules->delete( "TournamentRules::delete_tournament_rules(%s)" );
+      return $t_rules->delete( "TournamentRules:delete_tournament_rules(%s)" );
    }
 
    /*! \brief Returns db-fields to be used for query of TournamentRules-objects for given tournament-id. */
-   function build_query_sql( $tid )
+   public static function build_query_sql( $tid )
    {
       $qsql = $GLOBALS['ENTITY_TOURNAMENT_RULES']->newQuerySQL('TR');
       $qsql->add_part( SQLP_WHERE, "TR.tid='$tid'" );
@@ -693,7 +690,7 @@ class TournamentRules
    }
 
    /*! \brief Returns TournamentRules-object created from specified (db-)row. */
-   function new_from_row( $row )
+   public static function new_from_row( $row )
    {
       $tp = new TournamentRules(
             // from TournamentRules
@@ -726,58 +723,54 @@ class TournamentRules
       return $tp;
    }
 
-   /*!
-    * \brief Loads and returns TournamentRules-object for given tournament-ID.
-    */
-   function load_tournament_rule( $tid )
+   /*! \brief Loads and returns TournamentRules-object for given tournament-ID. */
+   public static function load_tournament_rule( $tid )
    {
       $result = NULL;
       if( $tid > 0 )
       {
-         $qsql = TournamentRules::build_query_sql( $tid );
+         $qsql = self::build_query_sql( $tid );
          $qsql->add_part( SQLP_LIMIT, '1' );
          $qsql->add_part( SQLP_ORDER, 'TR.ID DESC' );
-         $row = mysql_single_fetch( "TournamentRules::load_tournament_rule($tid)",
+         $row = mysql_single_fetch( "TournamentRules:load_tournament_rule($tid)",
             $qsql->get_select() );
          if( $row )
-            $result = TournamentRules::new_from_row( $row );
+            $result = self::new_from_row( $row );
       }
       return $result;
-   }
+   }//load_tournament_rule
 
    /*! \brief Returns enhanced (passed) ListIterator with Tournament-objects for given tournament-id. */
-   function load_tournament_rules( $iterator, $tid )
+   public static function load_tournament_rules( $iterator, $tid )
    {
-      $qsql = TournamentRules::build_query_sql( $tid );
+      $qsql = self::build_query_sql( $tid );
       $iterator->setQuerySQL( $qsql );
       $query = $iterator->buildQuery();
-      $result = db_query( "TournamentRules::load_tournament_rules($tid)", $query );
+      $result = db_query( "TournamentRules:load_tournament_rules($tid)", $query );
       $iterator->setResultRows( mysql_num_rows($result) );
 
       $iterator->clearItems();
       while( $row = mysql_fetch_array( $result ) )
       {
-         $tourney = TournamentRules::new_from_row( $row );
+         $tourney = self::new_from_row( $row );
          $iterator->addItem( $tourney, $row );
       }
       mysql_free_result($result);
 
       return $iterator;
-   }
+   }//load_tournament_rules
 
    /*! \brief Returns flags-text for given int-bitmask or all flags-texts (if arg=null). */
-   function getFlagsText( $flags=null )
+   public static function getFlagsText( $flags=null )
    {
-      global $ARR_GLOBALS_TOURNAMENT_RULES;
-
       // lazy-init of texts
-      if( !isset($ARR_GLOBALS_TOURNAMENT_RULES['FLAGS']) )
+      if( !isset(self::$ARR_TRULES_TEXTS['FLAGS']) )
       {
          $arr = array();
-         $ARR_GLOBALS_TOURNAMENT_RULES['FLAGS'] = $arr;
+         self::$ARR_TRULES_TEXTS['FLAGS'] = $arr;
       }
       else
-         $arr = $ARR_GLOBALS_TOURNAMENT_RULES['FLAGS'];
+         $arr = self::$ARR_TRULES_TEXTS['FLAGS'];
       if( is_null($flags) )
          return $arr;
 
@@ -785,16 +778,14 @@ class TournamentRules
       foreach( $arr as $flagmask => $flagtext )
          if( $flags & $flagmask ) $out[] = $flagtext;
       return implode(', ', $out);
-   }
+   }//getFlagsText
 
    /*! \brief Returns type-text. */
-   function getHandicaptypeText( $type, $tourney_type )
+   public static function getHandicaptypeText( $type, $tourney_type )
    {
-      global $ARR_GLOBALS_TOURNAMENT_RULES;
-
       // lazy-init of texts
       $key = 'HANDICAPTYPE'.$tourney_type;
-      if( !isset($ARR_GLOBALS_TOURNAMENT_RULES[$key]) )
+      if( !isset(self::$ARR_TRULES_TEXTS[$key]) )
       {
          $arr = array();
          $arr[TRULE_HANDITYPE_CONV]   = T_('Conventional handicap');
@@ -805,23 +796,23 @@ class TournamentRules
             $arr[TRULE_HANDITYPE_BLACK] = T_('Manual game with Challenger getting Black#T_ladder');
             $arr[TRULE_HANDITYPE_WHITE] = T_('Manual game with Challenger getting White#T_ladder');
          }
-         else //TOURNEY_TYPE_ROUND_ROBIN
+         elseif( $tourney_type == TOURNEY_TYPE_ROUND_ROBIN )
          {
             $arr[TRULE_HANDITYPE_BLACK] = T_('Manual game with stronger player getting Black#tourney');
             $arr[TRULE_HANDITYPE_WHITE] = T_('Manual game with stronger player getting White#tourney');
             $arr[TRULE_HANDITYPE_DOUBLE] = T_('Double game');
          }
-         $ARR_GLOBALS_TOURNAMENT_RULES[$key] = $arr;
+         self::$ARR_TRULES_TEXTS[$key] = $arr;
       }
 
       if( is_null($type) )
-         return $ARR_GLOBALS_TOURNAMENT_RULES[$key];
-      if( !isset($ARR_GLOBALS_TOURNAMENT_RULES[$key][$type]) )
-         error('invalid_args', "TournamentRules::getHandicaptypeText($type)");
-      return $ARR_GLOBALS_TOURNAMENT_RULES[$key][$type];
-   }
+         return self::$ARR_TRULES_TEXTS[$key];
+      if( !isset(self::$ARR_TRULES_TEXTS[$key][$type]) )
+         error('invalid_args', "TournamentRules:getHandicaptypeText($type)");
+      return self::$ARR_TRULES_TEXTS[$key][$type];
+   }//getHandicaptypeText
 
-   function convert_trule_handicaptype_to_stdhtype( $trule_htype )
+   public static function convert_trule_handicaptype_to_stdhtype( $trule_htype )
    {
       static $map_trule_htype_stdhtype = array(
          TRULE_HANDITYPE_CONV    => HTYPE_CONV,
@@ -834,15 +825,15 @@ class TournamentRules
       return (isset($map_trule_htype_stdhtype[$trule_htype]))
          ? $map_trule_htype_stdhtype[$trule_htype]
          : HTYPE_NIGIRI; // default
-   }
+   }//convert_trule_handicaptype_to_stdhtype
 
-   function get_edit_tournament_status()
+   public static function get_edit_tournament_status()
    {
       static $statuslist = array( TOURNEY_STATUS_NEW );
       return $statuslist;
    }
 
-   function getJigoBehaviourText( $jigo_behaviour )
+   public static function getJigoBehaviourText( $jigo_behaviour )
    {
       if( $jigo_behaviour == 0 )
          return T_('Tournament-rules enforces Jigo, so game score must be an integer, not ending on .5');
@@ -852,7 +843,7 @@ class TournamentRules
          return '';
    }
 
-   function delete_cache_tournament_rules( $dbgmsg, $tid )
+   public static function delete_cache_tournament_rules( $dbgmsg, $tid )
    {
       DgsCache::delete( $dbgmsg, CACHE_GRP_TRULES, "TRules.$tid" );
    }

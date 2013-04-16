@@ -116,7 +116,7 @@ $GLOBALS['ThePage'] = new Page('TournamentNewsList');
          $allow_edit_tourney, $is_participant ) );
    $iterator = TournamentNews::load_tournament_news( $iterator, $tid );
 
-   $show_rows = $tntable->compute_show_rows( $iterator->ResultRows );
+   $show_rows = $tntable->compute_show_rows( $iterator->getResultRows() );
    $tntable->set_found_rows( mysql_found_rows('Tournament.list_news.found_rows') );
 
 

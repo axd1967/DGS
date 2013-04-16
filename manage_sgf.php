@@ -93,9 +93,9 @@ define('SGF_MAXSIZE_UPLOAD', 100*1024); // max. 100KB stored, keep factor of 102
    {
       // update SGF in db with values from edit-form
       $upload = new FileUpload( $_FILES['file_sgf'], SGF_MAXSIZE_UPLOAD );
-      if( $upload->is_uploaded && !$upload->has_error() )
+      if( $upload->is_uploaded() && !$upload->has_error() )
       {
-         $errors = GameSgfControl::save_game_sgf( $game, $my_id, $upload->file_src_tmpfile );
+         $errors = GameSgfControl::save_game_sgf( $game, $my_id, $upload->get_file_src_tmpfile() );
          if( count($errors) == 0 )
          {
             @$upload->cleanup();
@@ -103,7 +103,7 @@ define('SGF_MAXSIZE_UPLOAD', 100*1024); // max. 100KB stored, keep factor of 102
          }
       }
       if( $upload->has_error() )
-         $errors = array_merge( $upload->errors, $errors );
+         $errors = array_merge( $upload->get_errors(), $errors );
       @$upload->cleanup();
    }
 

@@ -43,7 +43,6 @@ require_once 'tournaments/include/tournament_utils.php';
   *
   * \brief Class to create tournament log-entries.
   */
-
 class TournamentLogHelper
 {
    private static $DIFF_FMT = '%s [%s] -> [%s]';
@@ -51,31 +50,31 @@ class TournamentLogHelper
    // ------------ static functions ----------------------------
    //new Tournamentlog( $id=0, $tid=0, $uid=0, $date=0, $type='', $object='T', $action='', $actuid=0, $message='' )
 
-   function log_create_tournament( $tid, $wiz_type, $title )
+   public static function log_create_tournament( $tid, $wiz_type, $title )
    {
       $tlog = new Tournamentlog( 0, $tid, 0, 0, 0, 'T_Data', TLOG_ACT_CREATE, 0, $title );
       $tlog->insert();
    }
 
-   function log_change_tournament_status( $tid, $tlog_type, $msg )
+   public static function log_change_tournament_status( $tid, $tlog_type, $msg )
    {
       $tlog = new Tournamentlog( 0, $tid, 0, 0, $tlog_type, 'T_Status', TLOG_ACT_CHANGE, 0, $msg );
       $tlog->insert();
    }
 
-   function log_change_tournament_round_status( $tid, $tlog_type, $msg )
+   public static function log_change_tournament_round_status( $tid, $tlog_type, $msg )
    {
       $tlog = new Tournamentlog( 0, $tid, 0, 0, $tlog_type, 'TRND_Status', TLOG_ACT_CHANGE, 0, $msg );
       $tlog->insert();
    }
 
-   function log_tournament_lock( $tid, $tlog_type, $msg )
+   public static function log_tournament_lock( $tid, $tlog_type, $msg )
    {
       $tlog = new Tournamentlog( 0, $tid, 0, 0, $tlog_type, 'T_Lock', TLOG_ACT_CHANGE, 0, $msg );
       $tlog->insert();
    }
 
-   function log_tournament_game_end( $tid, $tlog_type, $gid, $edits, $old_score, $new_score, $old_flags, $new_flags, $old_status, $new_status )
+   public static function log_tournament_game_end( $tid, $tlog_type, $gid, $edits, $old_score, $new_score, $old_flags, $new_flags, $old_status, $new_status )
    {
       $msg = array();
       if( $old_score !== $new_score )
@@ -91,21 +90,21 @@ class TournamentLogHelper
       $tlog->insert();
    }//log_tournament_game_end
 
-   function log_tournament_game_add_time( $tid, $tlog_type, $msg )
+   public static function log_tournament_game_add_time( $tid, $tlog_type, $msg )
    {
       $tlog = new Tournamentlog( 0, $tid, 0, 0, $tlog_type, 'TG_Data', TLOG_ACT_ADDTIME, 0, $msg );
       $tlog->insert();
    }
 
 
-   function log_create_tournament_director( $tid, $tlog_type, $director )
+   public static function log_create_tournament_director( $tid, $tlog_type, $director )
    {
       $tlog = new Tournamentlog( 0, $tid, 0, 0, $tlog_type, 'TD_User', TLOG_ACT_ADD, $director->uid,
          sprintf( "TD-Flags [%s]; TD-Comment [%s]", $director->formatFlags(), $director->Comment ) );
       $tlog->insert();
    }
 
-   function log_change_tournament_director( $tid, $tlog_type, $edits, $director, $old_flags_val, $old_comment )
+   public static function log_change_tournament_director( $tid, $tlog_type, $edits, $director, $old_flags_val, $old_comment )
    {
       $old_flags = $director->formatFlags($old_flags_val);
       $new_flags = $director->formatFlags();
@@ -121,14 +120,15 @@ class TournamentLogHelper
       $tlog->insert();
    }//log_change_tournament_director
 
-   function log_remove_tournament_director( $tid, $tlog_type, $tdir_uid )
+   public static function log_remove_tournament_director( $tid, $tlog_type, $tdir_uid )
    {
       $tlog = new Tournamentlog( 0, $tid, 0, 0, $tlog_type, 'TD_User', TLOG_ACT_REMOVE, $tdir_uid );
       $tlog->insert();
    }
 
 
-   function build_diff_tournament_participant( $old_tp, $new_tp )
+   // \internal
+   private static function build_diff_tournament_participant( $old_tp, $new_tp )
    {
       $msg = array( "ID=[{$new_tp->ID}]" );
       if( $old_tp->Status != $new_tp->Status )
@@ -157,39 +157,39 @@ class TournamentLogHelper
       return implode('; ', $msg);
    }//build_diff_tournament_participant
 
-   function log_tp_registration_by_director( $tlog_action, $tid, $tlog_type, $tp_uid, $msg )
+   public static function log_tp_registration_by_director( $tlog_action, $tid, $tlog_type, $tp_uid, $msg )
    {
       $tlog = new Tournamentlog( 0, $tid, 0, 0, $tlog_type, 'TP_Reg', $tlog_action, $tp_uid,
          'TournamentParticipant: ' . $msg );
       $tlog->insert();
    }
 
-   function log_change_tp_registration_by_director( $tid, $tlog_type, $tp_uid, $sub_action, $edits, $old_tp, $new_tp )
+   public static function log_change_tp_registration_by_director( $tid, $tlog_type, $tp_uid, $sub_action, $edits, $old_tp, $new_tp )
    {
       $msg = sprintf( 'Change(%s) of [%s]: %s', $sub_action, implode(', ', $edits),
-         TournamentLogHelper::build_diff_tournament_participant($old_tp, $new_tp) );
+         self::build_diff_tournament_participant($old_tp, $new_tp) );
 
       $tlog = new Tournamentlog( 0, $tid, 0, 0, $tlog_type, 'TP_Reg', TLOG_ACT_CHANGE, $tp_uid, $msg );
       $tlog->insert();
    }
 
-   function log_tp_registration_by_user( $tlog_action, $tid, $msg )
+   public static function log_tp_registration_by_user( $tlog_action, $tid, $msg )
    {
       $tlog = new Tournamentlog( 0, $tid, 0, 0, TLOG_TYPE_USER, 'TP_Reg', $tlog_action, 0,
          'TournamentParticipant: ' . $msg );
       $tlog->insert();
    }
 
-   function log_change_tp_registration_by_user( $tid, $sub_action, $edits, $old_tp, $new_tp )
+   public static function log_change_tp_registration_by_user( $tid, $sub_action, $edits, $old_tp, $new_tp )
    {
       $msg = sprintf( 'Change(%s) of [%s]: %s', $sub_action, implode(', ', $edits),
-         TournamentLogHelper::build_diff_tournament_participant($old_tp, $new_tp) );
+         self::build_diff_tournament_participant($old_tp, $new_tp) );
 
       $tlog = new Tournamentlog( 0, $tid, 0, 0, TLOG_TYPE_USER, 'TP_Reg', TLOG_ACT_CHANGE, 0, $msg );
       $tlog->insert();
    }
 
-   function log_change_tournament( $tid, $tlog_type, $edits, $old_t, $new_t )
+   public static function log_change_tournament( $tid, $tlog_type, $edits, $old_t, $new_t )
    {
       $msg = array();
       if( $old_t->Scope != $new_t->Scope )
@@ -218,7 +218,7 @@ class TournamentLogHelper
       $tlog->insert();
    }//log_change_tournament
 
-   function log_change_tournament_news( $tlog_action, $tid, $tlog_type, $edits, $old_tn, $new_tn )
+   public static function log_change_tournament_news( $tlog_action, $tid, $tlog_type, $edits, $old_tn, $new_tn )
    {
       $msg = array( "ID=[{$new_tn->ID}]" );
       if( $old_tn->Status != $new_tn->Status )
@@ -244,7 +244,7 @@ class TournamentLogHelper
    }//log_change_tournament_news
 
 
-   function log_change_tournament_props( $tid, $tlog_type, $edits, $old_tpr, $new_tpr )
+   public static function log_change_tournament_props( $tid, $tlog_type, $edits, $old_tpr, $new_tpr )
    {
       $msg = array();
       if( $old_tpr->Notes != $new_tpr->Notes )
@@ -275,7 +275,7 @@ class TournamentLogHelper
       $tlog->insert();
    }//log_change_tournament_props
 
-   function log_change_tournament_rules( $tid, $tlog_type, $edits, $old_trule, $new_trule )
+   public static function log_change_tournament_rules( $tid, $tlog_type, $edits, $old_trule, $new_trule )
    {
       $msg = array( "ID=[{$new_trule->ID}]" );
       if( $old_trule->Flags != $new_trule->Flags )
@@ -328,7 +328,7 @@ class TournamentLogHelper
       $tlog->insert();
    }//log_change_tournament_rules
 
-   function log_change_tournament_ladder_props( $tid, $tlog_type, $edits, $old_tlp, $new_tlp )
+   public static function log_change_tournament_ladder_props( $tid, $tlog_type, $edits, $old_tlp, $new_tlp )
    {
       $msg = array();
       if( $old_tlp->ChallengeRangeAbsolute != $new_tlp->ChallengeRangeAbsolute )
@@ -380,34 +380,34 @@ class TournamentLogHelper
    }//log_change_tournament_ladder_props
 
 
-   function log_tournament_ladder_challenge_user( $tid, $msg )
+   public static function log_tournament_ladder_challenge_user( $tid, $msg )
    {
       $tlog = new Tournamentlog( 0, $tid, 0, 0, TLOG_TYPE_USER, 'TL_Game', TLOG_ACT_START, 0, $msg );
       $tlog->insert();
    }
 
-   function log_tournament_ladder_game_end( $tid, $msg )
+   public static function log_tournament_ladder_game_end( $tid, $msg )
    {
       $tlog = new Tournamentlog( 0, $tid, 0, 0, TLOG_TYPE_CRON, 'TL_Data', TLOG_ACT_CHANGE, 0, $msg );
       $tlog->insert();
    }
 
 
-   function log_delete_tournament_ladder( $tid, $tlog_type )
+   public static function log_delete_tournament_ladder( $tid, $tlog_type )
    {
       $tlog = new Tournamentlog( 0, $tid, 0, 0, $tlog_type, 'TL_Data', TLOG_ACT_REMOVE, 0,
          'Prepare-Ladder: Delete all ladder-entries' );
       $tlog->insert();
    }
 
-   function log_seed_tournament_ladder( $tid, $tlog_type, $seed_order, $seed_reorder, $cnt )
+   public static function log_seed_tournament_ladder( $tid, $tlog_type, $seed_order, $seed_reorder, $cnt )
    {
       $tlog = new Tournamentlog( 0, $tid, 0, 0, $tlog_type, 'TL_Data', TLOG_ACT_SEED, 0,
          "Seed ladder: seed-order=[$seed_order], seed-reorder=[$seed_reorder] -> added $cnt entries" );
       $tlog->insert();
    }
 
-   function log_delete_user_from_tournament_ladder( $tid, $tlog_type, $tladder, $arr_detached_gid, $msg )
+   public static function log_delete_user_from_tournament_ladder( $tid, $tlog_type, $tladder, $arr_detached_gid, $msg )
    {
       $msg .= "; Removed user: " . $tladder->build_log_string();
       if( count($arr_detached_gid) > 0 )
@@ -419,20 +419,20 @@ class TournamentLogHelper
       $tlog->insert();
    }
 
-   function log_crown_king_tournament_ladder( $tid, $tlog_type, $king_uid )
+   public static function log_crown_king_tournament_ladder( $tid, $tlog_type, $king_uid )
    {
       $tlog = new Tournamentlog( 0, $tid, 0, 0, $tlog_type, 'TL_User', TLOG_ACT_SET, $king_uid, 'Crown king of the hill' );
       $tlog->insert();
    }
 
-   function log_change_rank_tournament_ladder( $tid, $tlog_type, $act_uid, $old_rank, $new_rank )
+   public static function log_change_rank_tournament_ladder( $tid, $tlog_type, $act_uid, $old_rank, $new_rank )
    {
       $tlog = new Tournamentlog( 0, $tid, 0, 0, $tlog_type, 'TL_User', TLOG_ACT_SET, $act_uid,
          sprintf('Set new ladder-rank: %s -> %s', $old_rank, $new_rank ));
       $tlog->insert();
    }
 
-   function log_add_user_tournament_ladder( $tid, $tlog_type, $join_order, $act_uid, $rank )
+   public static function log_add_user_tournament_ladder( $tid, $tlog_type, $join_order, $act_uid, $rank )
    {
       $tlog = new Tournamentlog( 0, $tid, 0, 0, $tlog_type, 'TL_User', TLOG_ACT_ADD, $act_uid,
          sprintf('Added user to ladder: JoinOrder=[%s], Rank=[%s]', $join_order, $rank ));

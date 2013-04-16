@@ -70,7 +70,7 @@ require_once( "features/lib_votes.php" );
    $has_vote = !is_null($fvote);
 
    // determine max-points user can spend or revoke
-   $check_maxp = max( 0, $user_quota->feature_points ); // max points to give
+   $check_maxp = max( 0, $user_quota->get_feature_points() ); // max points to give
    if( $has_vote )
       $check_maxp += abs($fvote->points); // max points to revoke
    $max_points = min( FEATVOTE_MAXPOINTS, $check_maxp );
@@ -177,7 +177,7 @@ require_once( "features/lib_votes.php" );
 
    start_page( $title, true, $logged_in, $player_row );
    echo "<h3 class=Header>$title</h3>\n",
-      FeatureVote::getFeaturePointsText( $user_quota->feature_points ),
+      FeatureVote::getFeaturePointsText( $user_quota->get_feature_points() ),
       "<br><br>\n";
    if( !is_null($user_vote_reason) )
       echo span('ErrorMsg', $user_vote_reason), "<br><br>\n";

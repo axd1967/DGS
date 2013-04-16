@@ -42,11 +42,11 @@ require_once 'tournaments/include/tournament_ladder_props.php';
   *
   * \brief Template-pattern for general Ladder-tournaments
   */
-class TournamentTemplateLadder extends TournamentTemplate
+abstract class TournamentTemplateLadder extends TournamentTemplate
 {
-   function TournamentTemplateLadder( $wizard_type, $title )
+   protected function __construct( $wizard_type, $title )
    {
-      parent::TournamentTemplate( $wizard_type, $title );
+      parent::__construct( $wizard_type, $title );
 
       // overwrite tournament-type-specific properties
       $this->allow_register_tourney_status = array( TOURNEY_STATUS_REGISTER, TOURNEY_STATUS_PLAY );
@@ -56,10 +56,10 @@ class TournamentTemplateLadder extends TournamentTemplate
    }
 
    /*!
-    * \brief Abstract function to persist create tournament-tables.
+    * \brief Function to persist create tournament-tables.
     * \internal
     */
-   function _createTournament( $tourney, $tprops, $t_rules, $tl_props )
+   protected function _createTournament( $tourney, $tprops, $t_rules, $tl_props )
    {
       global $NOW;
 
@@ -102,9 +102,9 @@ class TournamentTemplateLadder extends TournamentTemplate
       ta_end();
 
       return $tid;
-   }
+   }//_createTournament
 
-   function checkProperties( $tourney, $t_status )
+   public function checkProperties( $tourney, $t_status )
    {
       $tid = $tourney->ID;
       $errors = array();
@@ -116,19 +116,24 @@ class TournamentTemplateLadder extends TournamentTemplate
       }
 
       return $errors;
+   }//checkProperties
+
+   public function checkPooling( $tourney, $round )
+   {
+      return array(); // no check for ladder
    }
 
-   function checkParticipantRegistrations( $tid, $arr_TPs )
+   public function checkParticipantRegistrations( $tid, $arr_TPs )
    {
       return TournamentLadder::check_participant_registrations( $tid, $arr_TPs );
    }
 
-   function checkGamesStarted( $tid )
+   public function checkGamesStarted( $tid )
    {
       return array(); // games need not be started
    }
 
-   function joinTournament( $tourney, $tp )
+   public function joinTournament( $tourney, $tp )
    {
       ta_begin();
       {//HOT-section to save TournamentParticipant and add user in ladder

@@ -47,14 +47,14 @@ $ENTITY_RATING_CHANGE_ADMIN = new Entity( 'RatingChangeAdmin',
 
 class RatingChangeAdmin
 {
-   var $ID;
-   var $uid;
-   var $Created;
-   var $Changes;
-   var $Rating;
+   public $ID;
+   public $uid;
+   public $Created;
+   public $Changes;
+   public $Rating;
 
    /*! \brief Constructs RatingChangeAdmin-object with specified arguments. */
-   function RatingChangeAdmin( $id=0, $uid=0, $created=0, $changes=0, $rating=NO_RATING )
+   public function __construct( $id=0, $uid=0, $created=0, $changes=0, $rating=NO_RATING )
    {
       $this->ID = (int)$id;
       $this->uid = (int)$uid;
@@ -63,13 +63,13 @@ class RatingChangeAdmin
       $this->Rating = is_null($rating) ? null : (float)$rating;
    }
 
-   function to_string()
+   public function to_string()
    {
       return print_r($this, true);
    }
 
    /*! \brief Inserts or updates RatingChangeAdmin-entry in database. */
-   function persist()
+   public function persist()
    {
       if( $this->ID > 0 )
          $success = $this->update();
@@ -78,7 +78,7 @@ class RatingChangeAdmin
       return $success;
    }
 
-   function insert()
+   public function insert()
    {
       $this->Created = $GLOBALS['NOW'];
 
@@ -89,13 +89,13 @@ class RatingChangeAdmin
       return $result;
    }
 
-   function update()
+   public function update()
    {
       $entityData = $this->fillEntityData();
       return $entityData->update( "RatingChangeAdmin.update(%s)" );
    }
 
-   function fillEntityData( $data=null )
+   public function fillEntityData( $data=null )
    {
       if( is_null($data) )
          $data = $GLOBALS['ENTITY_RATING_CHANGE_ADMIN']->newEntityData();
@@ -111,7 +111,7 @@ class RatingChangeAdmin
    // ------------ static functions ----------------------------
 
    /*! \brief Returns db-fields to be used for query of RatingChangeAdmin-objects for given game-id. */
-   function build_query_sql( $uid=0 )
+   public static function build_query_sql( $uid=0 )
    {
       $qsql = $GLOBALS['ENTITY_RATING_CHANGE_ADMIN']->newQuerySQL('RCA');
       if( $uid > 0 )
@@ -120,7 +120,7 @@ class RatingChangeAdmin
    }
 
    /*! \brief Returns RatingChangeAdmin-object created from specified (db-)row. */
-   function new_from_row( $row )
+   public static function new_from_row( $row )
    {
       $rca = new RatingChangeAdmin(
             // from RatingChangeAdmin
@@ -131,46 +131,46 @@ class RatingChangeAdmin
             @$row['Rating']
          );
       return $rca;
-   }
+   }//new_from_row
 
    /*!
     * \brief Loads and returns RatingChangeAdmin-object for given games-id limited to 1 result-entry.
     * \param $query_qsql QuerySQL restricting entries, expecting one result
     * \return NULL if nothing found; RatingChangeAdmin otherwise
     */
-   function load_ratingchangeadmin_with_query( $query_qsql )
+   public static function load_ratingchangeadmin_with_query( $query_qsql )
    {
       if( !($query_qsql instanceof QuerySQL) )
-         error('invalid_args', "RatingChangeAdmin.load_ratingchangeadmin_with_query");
+         error('invalid_args', "RatingChangeAdmin:load_ratingchangeadmin_with_query");
 
-      $qsql = RatingChangeAdmin::build_query_sql();
+      $qsql = self::build_query_sql();
       $qsql->merge( $query_qsql );
       $qsql->add_part( SQLP_LIMIT, '1' );
 
-      $row = mysql_single_fetch( "RatingChangeAdmin::load_ratingchangeadmin_with_query.find_RatingChangeAdmin()",
+      $row = mysql_single_fetch( "RatingChangeAdmin:load_ratingchangeadmin_with_query.find_RatingChangeAdmin()",
          $qsql->get_select() );
-      return ($row) ? RatingChangeAdmin::new_from_row($row) : NULL;
-   }
+      return ($row) ? self::new_from_row($row) : NULL;
+   }//load_ratingchangeadmin_with_query
 
    /*! \brief Returns enhanced (passed) ListIterator with RatingChangeAdmin-objects. */
-   function load_ratingchangeadmin( $iterator, $uid=0 )
+   public static function load_ratingchangeadmin( $iterator, $uid=0 )
    {
-      $qsql = RatingChangeAdmin::build_query_sql( $uid );
+      $qsql = self::build_query_sql( $uid );
       $iterator->setQuerySQL( $qsql );
       $query = $iterator->buildQuery();
-      $result = db_query( "RatingChangeAdmin.load_ratingchangeadmin", $query );
+      $result = db_query( "RatingChangeAdmin:load_ratingchangeadmin", $query );
       $iterator->setResultRows( mysql_num_rows($result) );
 
       $iterator->clearItems();
       while( $row = mysql_fetch_array( $result ) )
       {
-         $rca = RatingChangeAdmin::new_from_row( $row );
+         $rca = self::new_from_row( $row );
          $iterator->addItem( $rca, $row );
       }
       mysql_free_result($result);
 
       return $iterator;
-   }
+   }//load_ratingchangeadmin
 
 } // end of 'RatingChangeAdmin'
 ?>

@@ -73,10 +73,8 @@ $has_sgf_alias = false;
  * with ADMIN_PASSWORD privileges
  */
 global $GUESTPASS; //PHP5
-if( FRIENDLY_SHORT_NAME == 'DGS' )
-   $GUESTPASS = 'guest'.'pass';
-else
-   $GUESTPASS = 'guest';
+$GUESTPASS = ( FRIENDLY_SHORT_NAME == 'DGS' ) ? 'guestpass' : 'guest';
+
 define('GUESTS_ID_MAX', 1); //minimum 1 because hard-coded in init.mysql
 
 define('LAYOUT_FILTER_IN_TABLEHEAD', true); // default is to show filters within tablehead (not below rows)
@@ -1776,7 +1774,7 @@ function parse_atbs_safe( &$trail, &$bad)
  * \param $html_code, $html_code_closed seems to be refs because of speed !?
  **/
 global $parse_mark_regex; //PHP5
-$parse_mark_regex = ''; //global because parse_tags_safe() is recursive
+$parse_mark_regex = ''; //global because parse_tags_safe() is recursive -> FIXME better to refactor into class-instance-attribute
 define('PARSE_MARK_TERM',
       ALLOWED_LT.'span class=MarkTerm'.ALLOWED_GT.'\\1'.ALLOWED_LT.'/span'.ALLOWED_GT);
 define('PARSE_MARK_TAGTERM',
@@ -2612,7 +2610,7 @@ function is_logged_in($handle, $scode, &$player_row, $login_opts=LOGIN_DEFAULT_O
          $upd->upd_num('VaultCnt', $vaultcnt );
          $upd->upd_time('VaultTime', $vaulttime );
 
-         err_log( $handle, 'fever_vault');
+         DgsErrors::err_log( $handle, 'fever_vault');
 
          // send notifications to owner
          $subject= T_('Temporary access restriction');

@@ -32,20 +32,19 @@ require_once( "include/countries.php" );
   *    FC_FNAME, FC_STATIC, FC_GROUP_SQL_OR, FC_DEFAULT (country-code),
   *    FC_SQL_TEMPLATE, FC_ADD_HAVING, FC_HIDE
   */
-
 class FilterCountry extends Filter
 {
    /*! \brief Constructs Country-Filter. */
-   function FilterCountry($name, $dbfield, $config)
+   public function __construct( $name, $dbfield, $config )
    {
-      parent::Filter($name, $dbfield, null, $config);
+      parent::__construct($name, $dbfield, null, $config);
       $this->type = 'Country';
       $this->syntax_help = T_('COUNTRY#filterhelp');
       $this->syntax_descr = ''; // action: select country
    }
 
    /*! \brief Handles index to select all or specific country. */
-   function parse_value( $name, $val )
+   public function parse_value( $name, $val )
    {
       $val = $this->handle_default( $name, $val );
       $this->init_parse($val);
@@ -56,9 +55,9 @@ class FilterCountry extends Filter
    }
 
    /*! \brief Returns selectbox form-element. */
-   function get_input_element( $prefix, $attr = array() )
+   public function get_input_element( $prefix, $attr = array() )
    {
-      return $this->build_selectbox_elem( $prefix, FilterCountry::getFilterCountries() );
+      return $this->build_selectbox_elem( $prefix, self::getFilterCountries() );
    }
 
    // ------------------ static functions ---------------------
@@ -67,16 +66,16 @@ class FilterCountry extends Filter
     * \brief Static (lazy-init) of filter-countries.
     * \internal
     */
-   function getFilterCountries()
+   private static function getFilterCountries()
    {
-      static $ARR_GLOBALS_FILTER_COUNTRY = null;
+      static $ARR_FILTER_COUNTRIES = null;
 
       // lazy-init
-      if( !is_array($ARR_GLOBALS_FILTER_COUNTRY) )
+      if( is_null($ARR_FILTER_COUNTRIES) )
       {
-         $arr = getCountryText();
+         $arr = getCountryText(); // get all countries
 
-         // some shorter countries
+         // overwrite to allow some shorter countries
          $arr['io'] = T_('British Indian Ocean#ccfilter');
          $arr['pm'] = T_('St. Pierre & Miquelon#ccfilter');
          $arr['vc'] = T_('St. Vincent & Grenadines#ccfilter');
@@ -87,10 +86,10 @@ class FilterCountry extends Filter
          asort($arr);
          array_unshift( $arr, '0');
          $arr['0'] = T_('All countries#filter');
-         $ARR_GLOBALS_FILTER_COUNTRY = $arr;
+         $ARR_FILTER_COUNTRIES = $arr;
       }
-      return $ARR_GLOBALS_FILTER_COUNTRY;
-   }
+      return $ARR_FILTER_COUNTRIES;
+   }//getFilterCountries
 
 } // end of 'FilterCountry'
 

@@ -125,7 +125,7 @@ $GLOBALS['ThePage'] = new Page('TournamentParticipantList');
          $tptable->current_limit_string() );
    $iterator = TournamentParticipant::load_tournament_participants( $iterator, $tid );
 
-   $show_rows = $tptable->compute_show_rows( $iterator->ResultRows );
+   $show_rows = $tptable->compute_show_rows( $iterator->getResultRows() );
    $tptable->set_found_rows( mysql_found_rows('Tournament.list_participants.found_rows') );
 
 

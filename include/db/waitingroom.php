@@ -31,6 +31,7 @@ require_once 'include/classlib_user.php';
   * \see specs/db/table-Waitingroom.txt
   */
 
+
  /*!
   * \class Waitingroom
   *
@@ -51,46 +52,46 @@ $ENTITY_WROOM = new Entity( 'Waitingroom',
 
 class Waitingroom
 {
-   var $ID;
-   var $uid;
-   var $gid;
-   var $CountOffers;
-   var $Created;
-   var $GameType;
-   var $GamePlayers;
-   var $Ruleset;
-   var $Size;
-   var $Handicaptype;
-   var $Komi;
-   var $Handicap;
-   var $AdjKomi;
-   var $JigoMode;
-   var $AdjHandicap;
-   var $MinHandicap;
-   var $MaxHandicap;
-   var $Maintime;
-   var $Byotype;
-   var $Byotime;
-   var $Byoperiods;
-   var $WeekendClock;
-   var $Rated;
-   var $StdHandicap;
-   var $MustBeRated;
-   var $RatingMin;
-   var $RatingMax;
-   var $MinRatedGames;
-   var $SameOpponent;
-   var $ShapeID;
-   var $ShapeSnapshot;
-   var $Comment;
+   public $ID;
+   public $uid;
+   public $gid;
+   public $CountOffers;
+   public $Created;
+   public $GameType;
+   public $GamePlayers;
+   public $Ruleset;
+   public $Size;
+   public $Handicaptype;
+   public $Komi;
+   public $Handicap;
+   public $AdjKomi;
+   public $JigoMode;
+   public $AdjHandicap;
+   public $MinHandicap;
+   public $MaxHandicap;
+   public $Maintime;
+   public $Byotype;
+   public $Byotime;
+   public $Byoperiods;
+   public $WeekendClock;
+   public $Rated;
+   public $StdHandicap;
+   public $MustBeRated;
+   public $RatingMin;
+   public $RatingMax;
+   public $MinRatedGames;
+   public $SameOpponent;
+   public $ShapeID;
+   public $ShapeSnapshot;
+   public $Comment;
 
    // non-DB fields
 
-   var $User; // User-object
-   var $wrow; // remaining fields from larger query
+   public $User; // User-object
+   public $wrow = null; // remaining fields from larger query
 
    /*! \brief Constructs Waitingroom-object with specified arguments. */
-   function Waitingroom( $id=0, $uid=0, $user=null, $gid=0, $count_offers=0, $created=0,
+   public function __construct( $id=0, $uid=0, $user=null, $gid=0, $count_offers=0, $created=0,
          $game_type=GAMETYPE_GO, $game_players='1:1', $ruleset=RULESET_JAPANESE, $size=19, $htype=HTYPE_NIGIRI, $komi=0,
          $handicap=0, $adj_komi=0, $jigo_mode=JIGOMODE_KEEP_KOMI, $adj_handicap=0, $min_handicap=0, $max_handicap=0,
          $maintime=0, $byotype=BYOTYPE_FISCHER, $byotime=0, $byoperiods=0, $weekendclock=true,
@@ -131,25 +132,24 @@ class Waitingroom
       $this->Comment = $comment;
       // non-DB fields
       $this->User = ($user instanceof User) ? $user : new User( $this->uid );
-      $this->wrow = null;
-   }
+   }//__construct
 
-   function setRuleset( $ruleset )
+   public function setRuleset( $ruleset )
    {
       if( !preg_match( "/^(".CHECK_RULESETS.")$/", $ruleset ) )
          error('invalid_args', "Waitingroom.setRuleset($ruleset)");
-      if( !ALLOW_RULESET_CHINESE && $ruleset == RULESET_CHINESE )
+      if( !preg_match( "/^(".ALLOWED_RULESETS.")$/", $ruleset ) )
          error('feature_disabled', "Waitingroom.setRuleset($ruleset)");
       $this->Ruleset = $ruleset;
    }
 
-   function to_string()
+   public function to_string()
    {
       return print_r($this, true);
    }
 
    /*! \brief Inserts or updates Waitingroom-entry in database. */
-   function persist()
+   public function persist()
    {
       if( $this->ID > 0 )
          $success = $this->update();
@@ -158,7 +158,7 @@ class Waitingroom
       return $success;
    }
 
-   function insert()
+   public function insert()
    {
       $entityData = $this->fillEntityData();
       $result = $entityData->insert( "Waitingroom.insert(%s)" );
@@ -167,13 +167,13 @@ class Waitingroom
       return $result;
    }
 
-   function update()
+   public function update()
    {
       $entityData = $this->fillEntityData();
       return $entityData->update( "Waitingroom.update(%s)" );
    }
 
-   function fillEntityData( $data=null )
+   public function fillEntityData( $data=null )
    {
       if( is_null($data) )
          $data = $GLOBALS['ENTITY_WROOM']->newEntityData();
@@ -210,13 +210,13 @@ class Waitingroom
       $data->set_value( 'ShapeSnapshot', $this->ShapeSnapshot );
       $data->set_value( 'Comment', $this->Comment );
       return $data;
-   }
+   }//fillEntityData
 
 
    // ------------ static functions ----------------------------
 
    /*! \brief Returns db-fields to be used for query of Waitingroom-objects for given wroom-id. */
-   function build_query_sql( $wroom_id=0, $with_player=true )
+   public static function build_query_sql( $wroom_id=0, $with_player=true )
    {
       $qsql = $GLOBALS['ENTITY_WROOM']->newQuerySQL('WR');
       if( $with_player )
@@ -235,10 +235,10 @@ class Waitingroom
       if( $wroom_id > 0 )
          $qsql->add_part( SQLP_WHERE, "WR.ID=$wroom_id" );
       return $qsql;
-   }
+   }//build_query_sql
 
    /*! \brief Returns Waitingroom-object created from specified (db-)row. */
-   function new_from_row( $row )
+   public static function new_from_row( $row )
    {
       $wroom = new Waitingroom(
             // from Waitingroom
@@ -278,51 +278,51 @@ class Waitingroom
          );
       $wroom->wrow = $row;
       return $wroom;
-   }
+   }//new_from_row
 
    /*!
     * \brief Loads and returns Waitingroom-object for given waiting-room-id limited to 1 result-entry.
     * \param $wroom_id Waitingroom.ID
     * \return NULL if nothing found; Waitingroom-object otherwise
     */
-   function load_waitingroom( $wroom_id, $with_player=true )
+   public static function load_waitingroom( $wroom_id, $with_player=true )
    {
-      $qsql = Waitingroom::build_query_sql( $wroom_id, $with_player );
+      $qsql = self::build_query_sql( $wroom_id, $with_player );
       $qsql->add_part( SQLP_LIMIT, '1' );
 
-      $row = mysql_single_fetch( "Waitingroom::load_wroom.find_wroom($wroom_id)", $qsql->get_select() );
-      return ($row) ? Waitingroom::new_from_row($row) : NULL;
-   }
+      $row = mysql_single_fetch( "Waitingroom:load_wroom.find_wroom($wroom_id)", $qsql->get_select() );
+      return ($row) ? self::new_from_row($row) : NULL;
+   }//load_waitingroom
 
    /*!
     * \brief Loads and returns Waitingroom-object for given QuerySQL limited to 1 result-entry.
     */
-   function load_waitingroom_by_query( $qsql )
+   public static function load_waitingroom_by_query( $qsql )
    {
       $qsql->add_part( SQLP_LIMIT, '1' );
 
-      $row = mysql_single_fetch( "Waitingroom::load_wroom_by_query.find_wroom()", $qsql->get_select() );
-      return ($row) ? Waitingroom::new_from_row($row) : NULL;
-   }
+      $row = mysql_single_fetch( "Waitingroom:load_wroom_by_query.find_wroom()", $qsql->get_select() );
+      return ($row) ? self::new_from_row($row) : NULL;
+   }//load_waitingroom_by_query
 
    /*! \brief Returns enhanced (passed) ListIterator with Waitingroom-objects. */
-   function load_waitingroom_entries( $qsql, $iterator )
+   public static function load_waitingroom_entries( $qsql, $iterator )
    {
       $iterator->setQuerySQL( $qsql );
       $query = $iterator->buildQuery();
-      $result = db_query( "Waitingroom::load_waitingroom_entries", $query );
+      $result = db_query( "Waitingroom:load_waitingroom_entries", $query );
       $iterator->setResultRows( mysql_num_rows($result) );
 
       $iterator->clearItems();
       while( $row = mysql_fetch_array( $result ) )
       {
-         $survey = Waitingroom::new_from_row( $row );
+         $survey = self::new_from_row( $row );
          $iterator->addItem( $survey, $row );
       }
       mysql_free_result($result);
 
       return $iterator;
-   }
+   }//load_waitingroom_entries
 
 } // end of 'Waitingroom'
 ?>

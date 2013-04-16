@@ -157,7 +157,7 @@ $GLOBALS['ThePage'] = new Page('TournamentLadderView');
       $iterator = TournamentLadder::load_cache_tournament_ladder( 'Tournament.ladder_view', $tid, $need_tp_rating, 0, /*idx*/true );
       $ltable->set_found_rows( $iterator->getItemCount() );
       $ltable->set_rows_per_page( null ); // no navigating
-      $show_rows = $ltable->compute_show_rows( $iterator->ResultRows );
+      $show_rows = $ltable->compute_show_rows( $iterator->getResultRows() );
 
       if( $admin_mode )
       {
@@ -221,7 +221,7 @@ $GLOBALS['ThePage'] = new Page('TournamentLadderView');
          if( $ltable->Is_Column_Displayed[ 6] )
             $row_str[ 6] = echo_rating( $user->Rating, true, $uid);
          if( $ltable->Is_Column_Displayed[ 7] ) // actions
-            $row_str[ 7] = build_action_row_str( $tladder, $is_mine, $rid,
+            $row_str[ 7] = build_action_row_str( $tladder, $tform, $is_mine, $rid,
                ( $ltable->Is_Column_Displayed[12] ? '' : $run_games_str) );
          if( $ltable->Is_Column_Displayed[ 8] )
             $row_str[ 8] = implode(' ', $tladder->build_linked_running_games());
@@ -382,7 +382,7 @@ function build_rank_change( $tladder )
    return $result;
 }
 
-function build_action_row_str( &$tladder, $is_mine, $rid, $run_games_str )
+function build_action_row_str( &$tladder, &$form, $is_mine, $rid, $run_games_str )
 {
    global $base_path, $admin_mode, $allow_play, $allow_admin;
    $tid = $tladder->tid;
@@ -390,7 +390,6 @@ function build_action_row_str( &$tladder, $is_mine, $rid, $run_games_str )
    $row_str = '';
    if( $admin_mode )
    {
-      global $tform;
       if( !$allow_admin )
          $row_str = span('LadderWarn', T_('Edit prohibited#T_ladder'));
       else
@@ -399,7 +398,7 @@ function build_action_row_str( &$tladder, $is_mine, $rid, $run_games_str )
             anchor( $base_path."tournaments/ladder/admin.php?tid=$tid".URI_AMP."uid={$tladder->uid}",
                   image( $base_path.'images/edit.gif', 'E', '', 'class="Action InTextImage"' ), T_('Admin user') )
             . ' '
-            . $tform->print_insert_radio_buttonsx( 'rid', array( $tladder->rid => '' ), ($rid == $tladder->rid) );
+            . $form->print_insert_radio_buttonsx( 'rid', array( $tladder->rid => '' ), ($rid == $tladder->rid) );
       }
    }
    elseif( $is_mine )

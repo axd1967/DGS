@@ -60,9 +60,8 @@ require_once( 'include/gui_functions.php' );
    if( @$_REQUEST['pic_save'] && isset($_FILES['file_userpic']) )
    {
       // update picture and db with values from edit-form
-      $upload = new ImageFileUpload( $_FILES['file_userpic'],
-            USERPIC_MAXSIZE_UPLOAD, USERPIC_MAX_X, USERPIC_MAX_Y );
-      if( $upload->is_uploaded && !$upload->has_error() )
+      $upload = new ImageFileUpload( $_FILES['file_userpic'], USERPIC_MAXSIZE_UPLOAD, USERPIC_MAX_X, USERPIC_MAX_Y );
+      if( $upload->is_uploaded() && !$upload->has_error() )
       {
          $pic_ext = $upload->determineFileExtension();
          list( $path_dest, $_picdir, $pic_file, $_picurl, $_picexists, $cache_suffix )
@@ -76,7 +75,7 @@ require_once( 'include/gui_functions.php' );
          }
       }
       if( $upload->has_error() )
-         $errors = $upload->errors;
+         $errors = $upload->get_errors();
       @$upload->cleanup();
    }
 

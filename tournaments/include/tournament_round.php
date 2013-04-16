@@ -39,11 +39,6 @@ require_once 'tournaments/include/tournament_utils.php';
   * \brief Class to manage TournamentRound-table with pairing-related tournament-settings
   */
 
-
-// lazy-init in TournamentRound::get..Text()-funcs
-global $ARR_GLOBALS_TOURNAMENT_ROUND; //PHP5
-$ARR_GLOBALS_TOURNAMENT_ROUND = array();
-
 global $ENTITY_TOURNAMENT_ROUND; //PHP5
 $ENTITY_TOURNAMENT_ROUND = new Entity( 'TournamentRound',
    FTYPE_PKEY,  'ID',
@@ -57,20 +52,20 @@ $ENTITY_TOURNAMENT_ROUND = new Entity( 'TournamentRound',
 
 class TournamentRound
 {
-   var $ID;
-   var $tid;
-   var $Round;
-   var $Status;
-   var $MinPoolSize;
-   var $MaxPoolSize;
-   var $MaxPoolCount;
-   var $Pools;
-   var $PoolSize;
-   var $Lastchanged;
-   var $ChangedBy;
+   public $ID;
+   public $tid;
+   public $Round;
+   public $Status;
+   public $MinPoolSize;
+   public $MaxPoolSize;
+   public $MaxPoolCount;
+   public $Pools;
+   public $PoolSize;
+   public $Lastchanged;
+   public $ChangedBy;
 
    /*! \brief Constructs TournamentRound-object with specified arguments. */
-   function TournamentRound( $id=0, $tid=0, $round=1, $status=TROUND_STATUS_INIT,
+   public function __construct( $id=0, $tid=0, $round=1, $status=TROUND_STATUS_INIT,
          $min_pool_size=2, $max_pool_size=2, $max_pool_count=0, $pool_count=0, $pool_size=0,
          $lastchanged=0, $changed_by='' )
    {
@@ -87,7 +82,7 @@ class TournamentRound
       $this->ChangedBy = $changed_by;
    }
 
-   function setStatus( $status, $check_only=false )
+   public function setStatus( $status, $check_only=false )
    {
       if( !preg_match( "/^(".CHECK_TROUND_STATUS.")$/", $status ) )
          error('invalid_args', "TournamentRound.setStatus($status)");
@@ -95,13 +90,13 @@ class TournamentRound
          $this->Status = $status;
    }
 
-   function to_string()
+   public function to_string()
    {
       return print_r( $this, true );
    }
 
    /*! \brief Inserts or updates tournament-round in database. */
-   function persist()
+   public function persist()
    {
       if( $this->ID > 0 )
          $success = $this->update();
@@ -110,37 +105,37 @@ class TournamentRound
       return $success;
    }
 
-   function insert()
+   public function insert()
    {
       $this->Lastchanged = $GLOBALS['NOW'];
 
       $entityData = $this->fillEntityData(true);
-      $result = $entityData->insert( "TournamentRound::insert(%s)" );
+      $result = $entityData->insert( "TournamentRound.insert(%s)" );
       if( $result )
          $this->ID = mysql_insert_id();
-      TournamentRound::delete_cache_tournament_round( 'TournamentRound.insert', $this->tid, $this->Round );
+      self::delete_cache_tournament_round( 'TournamentRound.insert', $this->tid, $this->Round );
       return $result;
    }
 
-   function update()
+   public function update()
    {
       $this->Lastchanged = $GLOBALS['NOW'];
 
       $entityData = $this->fillEntityData();
-      $result = $entityData->update( "TournamentRound::update(%s)" );
-      TournamentRound::delete_cache_tournament_round( 'TournamentRound.update', $this->tid, $this->Round );
+      $result = $entityData->update( "TournamentRound.update(%s)" );
+      self::delete_cache_tournament_round( 'TournamentRound.update', $this->tid, $this->Round );
       return $result;
    }
 
-   function delete()
+   public function delete()
    {
       $entityData = $this->fillEntityData();
-      $result = $entityData->delete( "TournamentRound::delete(%s)" );
-      TournamentRound::delete_cache_tournament_round( 'TournamentRound.delete', $this->tid, $this->Round );
+      $result = $entityData->delete( "TournamentRound.delete(%s)" );
+      self::delete_cache_tournament_round( 'TournamentRound.delete', $this->tid, $this->Round );
       return $result;
    }
 
-   function fillEntityData()
+   public function fillEntityData()
    {
       // checked fields: Status
       $data = $GLOBALS['ENTITY_TOURNAMENT_ROUND']->newEntityData();
@@ -159,7 +154,7 @@ class TournamentRound
    }
 
    /*! \brief Checks if all round-properties are valid; return error-list, empty if ok. */
-   function check_properties()
+   public function check_properties()
    {
       $errors = array();
 
@@ -177,16 +172,15 @@ class TournamentRound
             build_range_text(2, TROUND_MAX_POOLCOUNT) );
 
       return $errors;
-   }
+   }//check_properties
 
    /*! \brief Returns array( header, notes-array ) with this properties in textual form. */
-   function build_notes_props()
+   public function build_notes_props()
    {
       $arr_props = array();
 
       // status / pool-size / pool-count
-      $arr_props[] = sprintf( '%s: %s', T_('Tournament Round Status'),
-         TournamentRound::getStatusText($this->Status) );
+      $arr_props[] = sprintf( '%s: %s', T_('Tournament Round Status'), self::getStatusText($this->Status) );
       $arr_props[] = sprintf( '%s: %s', T_('Min. Pool Size'), $this->MinPoolSize );
       $arr_props[] = sprintf( '%s: %s', T_('Max. Pool Size'), $this->MaxPoolSize );
       if( $this->MaxPoolCount > 0 )
@@ -194,7 +188,7 @@ class TournamentRound
 
       // general conditions
       $arr_props[] = sprintf( T_("You may only retreat from the tournament round while not in status [%s]."),
-         TournamentRound::getStatusText(TROUND_STATUS_PLAY) );
+         self::getStatusText(TROUND_STATUS_PLAY) );
 
       $arr_props[] = sprintf( '%s: %s', T_('Pool Count'), $this->Pools );
 
@@ -206,9 +200,9 @@ class TournamentRound
    // ------------ static functions ----------------------------
 
    /*! \brief Checks, if there is a tournament-round for given tournament-id and round. */
-   function isTournamentRound( $tid, $round )
+   public static function isTournamentRound( $tid, $round )
    {
-      return (bool)mysql_single_fetch( "TournamentRound::isTournamentRound($tid,$round)",
+      return (bool)mysql_single_fetch( "TournamentRound:isTournamentRound($tid,$round)",
          "SELECT 1 FROM TournamentRound WHERE tid='$tid' AND Round='$Round' LIMIT 1" );
    }
 
@@ -216,7 +210,7 @@ class TournamentRound
     * \brief Adds new tournament-round with defaults for given tournament-id,
     *        returning new TournamentRound-object added or null on error.
     */
-   function add_tournament_round( $tid )
+   public static function add_tournament_round( $tid )
    {
       global $player_row, $NOW;
       $tround = null;
@@ -225,28 +219,28 @@ class TournamentRound
       $changed_by = EntityData::build_sql_value_changed_by( $player_row['Handle'] );
       $query = "INSERT INTO TournamentRound (tid,Round,Lastchanged,ChangedBy) "
              . "SELECT $tid, MAX(Round)+1, FROM_UNIXTIME($NOW), $changed_by FROM TournamentRound WHERE tid=$tid";
-      if( db_query( "TournamentRound::add_tournament_round.insert($tid)", $query ) )
+      if( db_query( "TournamentRound:add_tournament_round.insert($tid)", $query ) )
       {
          $new_id = mysql_insert_id();
-         $tround = TournamentRound::load_tournament_round_by_id($new_id);
+         $tround = self::load_tournament_round_by_id($new_id);
       }
       return $tround;
-   }
+   }//add_tournament_round
 
    /*! \brief Deletes TournamentRound-entry for given id. */
-   function delete_tournament_round( $tid, $round )
+   public static function delete_tournament_round( $tid, $round )
    {
       $tid = (int)$tid;
       $round = (int)$round;
 
-      $result = db_query( "TournamentRound::delete_tournament_round($tid,$round)",
+      $result = db_query( "TournamentRound:delete_tournament_round($tid,$round)",
          "DELETE FROM TournamentRound WHERE tid=$tid AND Round=$round LIMIT 1" );
-      TournamentRound::delete_cache_tournament_round( 'TournamentRound.delete_tournament_round', $tid, $round );
+      self::delete_cache_tournament_round( 'TournamentRound.delete_tournament_round', $tid, $round );
       return $result;
    }
 
    /*! \brief Returns db-fields to be used for query of TournamentRound-objects for given tournament-id. */
-   function build_query_sql( $tid=0 )
+   public static function build_query_sql( $tid=0 )
    {
       $qsql = $GLOBALS['ENTITY_TOURNAMENT_ROUND']->newQuerySQL('TRD');
       if( $tid > 0 )
@@ -255,7 +249,7 @@ class TournamentRound
    }
 
    /*! \brief Returns TournamentRound-object created from specified (db-)row. */
-   function new_from_row( $row )
+   public static function new_from_row( $row )
    {
       $trd = new TournamentRound(
             // from TournamentRound
@@ -275,12 +269,12 @@ class TournamentRound
    }
 
    /*! \brief Loads and returns TournamentRound-object for given tournament-ID and round [1..n]. */
-   function load_tournament_round( $tid, $round )
+   public static function load_tournament_round( $tid, $round )
    {
       $result = NULL;
       if( $tid > 0 )
       {
-         $qsql = TournamentRound::build_query_sql( $tid );
+         $qsql = self::build_query_sql( $tid );
          $qsql->add_part( SQLP_LIMIT, '1' );
 
          if( $round > 0 ) // get specific round
@@ -288,54 +282,53 @@ class TournamentRound
          else // get latest round
             $qsql->add_part( SQLP_ORDER, "TRD.Round DESC'" );
 
-         $row = mysql_single_fetch( "TournamentRound::load_tournament_round($tid,$round)",
+         $row = mysql_single_fetch( "TournamentRound:load_tournament_round($tid,$round)",
             $qsql->get_select() );
          if( $row )
-            $result = TournamentRound::new_from_row( $row );
+            $result = self::new_from_row( $row );
       }
       return $result;
-   }
+   }//load_tournament_round
 
    /*! \brief Loads TournamentRound-object for given tournament-round-ID. */
-   function load_tournament_round_by_id( $id )
+   public static function load_tournament_round_by_id( $id )
    {
       $id = (int)$id;
-      $qsql = TournamentRound::build_query_sql();
+      $qsql = self::build_query_sql();
       $qsql->add_part( SQLP_WHERE, "ID=$id" );
       $qsql->add_part( SQLP_LIMIT, '1' );
 
-      $row = mysql_single_fetch( "TournamentRound::load_tournament_round_by_id($id)", $qsql->get_select() );
-      return ( $row ) ? TournamentRound::new_from_row( $row ) : null;
-   }
+      $row = mysql_single_fetch( "TournamentRound:load_tournament_round_by_id($id)", $qsql->get_select() );
+      return ( $row ) ? self::new_from_row( $row ) : null;
+   }//load_tournament_round_by_id
 
    /*! \brief Returns enhanced (passed) ListIterator with TournamentRound-objects for given tournament-id. */
-   function load_tournament_rounds( $iterator, $tid )
+   public static function load_tournament_rounds( $iterator, $tid )
    {
-      $qsql = TournamentRound::build_query_sql( $tid );
+      $qsql = self::build_query_sql( $tid );
       $iterator->setQuerySQL( $qsql );
       $query = $iterator->buildQuery();
-      $result = db_query( "TournamentRound::load_tournament_rounds", $query );
+      $result = db_query( "TournamentRound:load_tournament_rounds", $query );
       $iterator->setResultRows( mysql_num_rows($result) );
 
       $iterator->clearItems();
       while( $row = mysql_fetch_array( $result ) )
       {
-         $tourney = TournamentRound::new_from_row( $row );
+         $tourney = self::new_from_row( $row );
          $iterator->addItem( $tourney, $row );
       }
       mysql_free_result($result);
 
       return $iterator;
-   }
+   }//load_tournament_rounds
 
    /*! \brief Returns status-text or all status-texts (if arg=null). */
-   function getStatusText( $status=null )
+   public static function getStatusText( $status=null )
    {
-      global $ARR_GLOBALS_TOURNAMENT_ROUND;
+      static $ARR_TROUND_STATUS = null; // status => text
 
       // lazy-init of texts
-      $key = 'STATUS';
-      if( !isset($ARR_GLOBALS_TOURNAMENT_ROUND[$key]) )
+      if( is_null($ARR_TROUND_STATUS) )
       {
          $arr = array();
          $arr[TROUND_STATUS_INIT] = T_('Init#trd_status');
@@ -343,17 +336,17 @@ class TournamentRound
          $arr[TROUND_STATUS_PAIR] = T_('Pair#trd_status');
          $arr[TROUND_STATUS_PLAY] = T_('Play#trd_status');
          $arr[TROUND_STATUS_DONE] = T_('Done#trd_status');
-         $ARR_GLOBALS_TOURNAMENT_ROUND[$key] = $arr;
+         $ARR_TROUND_STATUS = $arr;
       }
 
       if( is_null($status) )
-         return $ARR_GLOBALS_TOURNAMENT_ROUND[$key];
-      if( !isset($ARR_GLOBALS_TOURNAMENT_ROUND[$key][$status]) )
-         error('invalid_args', "Tournament.getStatusText($status)");
-      return $ARR_GLOBALS_TOURNAMENT_ROUND[$key][$status];
-   }
+         return $ARR_TROUND_STATUS;
+      if( !isset($ARR_TROUND_STATUS[$status]) )
+         error('invalid_args', "Tournament:getStatusText($status)");
+      return $ARR_TROUND_STATUS[$status];
+   }//getStatusText
 
-   function get_edit_tournament_status()
+   public static function get_edit_tournament_status()
    {
       static $statuslist = array(
          TOURNEY_STATUS_NEW, TOURNEY_STATUS_REGISTER, TOURNEY_STATUS_PAIR
@@ -362,12 +355,12 @@ class TournamentRound
    }
 
    /*! \brief Authorise setting/switching of T-round depending on tourney-status. */
-   function authorise_set_tround( $t_status )
+   public static function authorise_set_tround( $t_status )
    {
       return ( $t_status == TOURNEY_STATUS_PAIR || TournamentUtils::isAdmin() );
    }
 
-   function delete_cache_tournament_round( $dbgmsg, $tid, $round )
+   public static function delete_cache_tournament_round( $dbgmsg, $tid, $round )
    {
       DgsCache::delete( $dbgmsg, CACHE_GRP_TROUND, "TRound.$tid.$round" );
    }

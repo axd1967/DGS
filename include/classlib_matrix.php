@@ -43,27 +43,18 @@ define('MATRIX_NUM_ENTRIES', 'numEntries');
 class Matrix
 {
    /*! \brief array of arrays with object-entries (first is array on x-axis). */
-   var $entries_x;
+   private $entries_x = array();
    /*! \brief array of arrays with value '1' (first is array on y-axis). */
-   var $entries_y;
+   private $entries_y = array();
    /*! \brief array with infos about matrix-characteristics. */
-   var $infos;
+   private $infos = array( MATRIX_NUM_ENTRIES => 0 );
 
-   /*! \brief Constructs Matrix. */
-   function Matrix()
-   {
-      $this->entries_x = array();
-      $this->entries_y = array();
-      $this->infos = array(
-         MATRIX_NUM_ENTRIES => 0,
-      );
-   }
 
    /*!
     * \brief Adds non-NULL object with coordinates ($x,$y) to Matrix.
-    * NOTE: NULL is reserved as marker for non-existing entry in get_entry(x,y)-function!
+    * \note NULL is reserved as marker for non-existing entry in get_entry(x,y)-function!
     */
-   function add( $x, $y, $obj )
+   public function add( $x, $y, $obj )
    {
       if( is_null($this->get_entry($x,$y)) )
          $this->infos[MATRIX_NUM_ENTRIES]++;
@@ -79,32 +70,32 @@ class Matrix
          $this->infos[MATRIX_MIN_Y] = $y;
       if( !isset($this->infos[MATRIX_MAX_Y]) || $y > @$this->infos[MATRIX_MAX_Y] )
          $this->infos[MATRIX_MAX_Y] = $y;
-   }
+   }//add
 
    /*! \brief Returns added entry at specific position or NULL otherwise. */
-   function get_entry( $x, $y )
+   public function get_entry( $x, $y )
    {
       return ( isset($this->entries_x[$x][$y]) ) ? $this->entries_x[$x][$y] : NULL;
    }
 
    /*! \brief Returns array with all x-coordinates. */
-   function get_x_axis()
+   public function get_x_axis()
    {
       return array_keys( $this->entries_x );
    }
 
    /*! \brief Returns array with all y-coordinates. */
-   function get_y_axis()
+   public function get_y_axis()
    {
       return array_keys( $this->entries_y );
    }
 
    /*!
     * \brief Returns entries for specified x-coordinate as non-null array.
-    * param sortflag 0 to keep original order;
+    * \param $sortflag 0 to keep original order;
     *       otherwise sortflag like for PHP sort()-func: SORT_REGULAR, SORT_NUMERIC, SORT_STRING
     */
-   function get_y_entries( $x, $sortflag=0 )
+   public function get_y_entries( $x, $sortflag=0 )
    {
       if( !isset($this->entries_x[$x]) )
          return array();
@@ -112,14 +103,14 @@ class Matrix
       if( $sortflag )
          sort($result, $sortflag);
       return $result;
-   }
+   }//get_y_entries
 
    /*!
     * \brief Returns entries for specified y-coordinate as non-null array.
-    * param sortflag 0 to keep original order;
+    * \param $sortflag 0 to keep original order;
     *       otherwise sortflag like for PHP sort()-func: SORT_REGULAR, SORT_NUMERIC, SORT_STRING
     */
-   function get_x_entries( $y, $sortflag=0 )
+   public function get_x_entries( $y, $sortflag=0 )
    {
       if( !isset($this->entries_y[$y]) )
          return array();
@@ -127,16 +118,16 @@ class Matrix
       if( $sortflag )
          sort($result, $sortflag);
       return $result;
-   }
+   }//get_x_entries
 
    /*! \brief Returns infos-array (some keys may be unset, so use @$arr[key] to check values). */
-   function get_infos()
+   public function get_infos()
    {
       return $this->infos;
    }
 
    /*! \brief Returns info for specified key; return NULL if key is unset. */
-   function get_info( $key )
+   public function get_info( $key )
    {
       return ( isset($this->infos[$key]) ) ? $this->infos[$key] : NULL;
    }

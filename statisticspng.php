@@ -260,7 +260,7 @@ require_once( "include/graph.php" );
 
    if( $cache_it )
       grab_output_start();
-   $gr->imagesend();
+   $gr->send_image();
    if( $cache_it )
       grab_output_end( $cache_name);
 }

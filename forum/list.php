@@ -111,7 +111,7 @@ require_once( 'forum/forum_functions.php' );
    $disp_forum->forum_start_table('List');
 
    $c=0;
-   foreach( $forum->threads as $thread )
+   foreach( $forum->threads as $thread ) // $thread = ForumPost-obj
    {
       if( $thread->count_posts > 0 || $is_moderator )
       {

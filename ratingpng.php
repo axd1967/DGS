@@ -280,7 +280,7 @@ function interpolate($val1, $val3, $time1, $time2, $time3)
       $gr->label($gr->offsetX, 0,
                  sprintf('%0.2f ms', (getmicrotime()-$page_microtime)*1000), $black);
 
-   $gr->imagesend();
+   $gr->send_image();
 }
 
 

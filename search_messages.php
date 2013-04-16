@@ -126,7 +126,7 @@ require_once( "include/classlib_profile.php" );
    $mtable->set_default_sort( 4); //on 'date'
 
    // External-Search-Form
-   $smform = new Form( $mtable->Prefix, $page, FORM_GET, false, 'FormTable' );
+   $smform = new Form( $mtable->get_prefix(), $page, FORM_GET, false, 'FormTable' );
    $smform->set_tabindex(1);
    $smform->set_config( FEC_EXTERNAL_FORM, true );
    $mtable->set_externalform( $smform );

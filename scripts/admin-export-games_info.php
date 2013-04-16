@@ -20,7 +20,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 function error( $err, $debugmsg=NULL )
 {
    $title = str_replace('_',' ',$err);
-   list( $xerr, $uri ) = err_log( $uhandle, $err, $debugmsg );
+   list( $xerr, $uri ) = DgsErrors::err_log( $uhandle, $err, $debugmsg );
    exit;
 }
 

@@ -44,11 +44,11 @@ require_once 'tournaments/include/tournament_log_helper.php';
   *
   * \brief Template-pattern for general (pooled) round-robin-tournaments
   */
-class TournamentTemplateRoundRobin extends TournamentTemplate
+abstract class TournamentTemplateRoundRobin extends TournamentTemplate
 {
-   function TournamentTemplateRoundRobin( $wizard_type, $title )
+   protected function __construct( $wizard_type, $title )
    {
-      parent::TournamentTemplate( $wizard_type, $title );
+      parent::__construct( $wizard_type, $title );
 
       // overwrite tournament-type-specific properties
       $this->need_rounds = true;
@@ -60,10 +60,10 @@ class TournamentTemplateRoundRobin extends TournamentTemplate
    }
 
    /*!
-    * \brief Abstract function to persist create tournament-tables.
+    * \brief Function to persist create tournament-tables.
     * \internal
     */
-   function _createTournament( $tourney, $tprops, $trules, $tround )
+   protected function _createTournament( $tourney, $tprops, $trules, $tround )
    {
       global $NOW;
 
@@ -101,14 +101,14 @@ class TournamentTemplateRoundRobin extends TournamentTemplate
       ta_end();
 
       return $tid;
-   }
+   }//_createTournament
 
-   function calcTournamentMinParticipants( $tprops, $tround=null )
+   public function calcTournamentMinParticipants( $tprops, $tround=null )
    {
       return max( $tprops->MinParticipants, $tround->MinPoolSize );
    }
 
-   function checkProperties( $tourney, $t_status )
+   public function checkProperties( $tourney, $t_status )
    {
       $tid = $tourney->ID;
       $round = $tourney->CurrentRound;
@@ -121,9 +121,9 @@ class TournamentTemplateRoundRobin extends TournamentTemplate
       //TODO TODO check, that there are enough TPs, taking care users of with TPs.StartRound > 1
 
       return $errors;
-   }
+   }//checkProperties
 
-   function checkPooling( $tourney, $round )
+   public function checkPooling( $tourney, $round )
    {
       $tid = $tourney->ID;
 
@@ -139,14 +139,14 @@ class TournamentTemplateRoundRobin extends TournamentTemplate
       return $check_errors;
    }//checkPooling
 
-   function checkParticipantRegistrations( $tid, $arr_TPs )
+   public function checkParticipantRegistrations( $tid, $arr_TPs )
    {
       // see also tournament_status.php:
       // - no check for round-robin-tourneys, because participants already seeded in pools
       return array();
    }
 
-   function checkGamesStarted( $tid )
+   public function checkGamesStarted( $tid )
    {
       // see also tournament_status.php
       $errors = array();
@@ -172,7 +172,7 @@ class TournamentTemplateRoundRobin extends TournamentTemplate
             $expected_games, $count_games_started );
 
       return $errors;
-   }
+   }//checkGamesStarted
 
 } // end of 'TournamentTemplateRoundRobin'
 

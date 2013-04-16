@@ -48,13 +48,13 @@ $ENTITY_GAME_SGF = new Entity( 'GameSgf',
 
 class GameSgf
 {
-   var $gid;
-   var $uid;
-   var $Lastchanged;
-   var $SgfData;
+   public $gid;
+   public $uid;
+   public $Lastchanged;
+   public $SgfData;
 
    /*! \brief Constructs GameSgf-object with specified arguments. */
-   function GameSgf( $gid, $uid, $lastchanged=0, $sgf_data='' )
+   public function __construct( $gid, $uid, $lastchanged=0, $sgf_data='' )
    {
       $this->gid = (int)$gid;
       $this->uid = (int)$uid;
@@ -62,13 +62,13 @@ class GameSgf
       $this->SgfData = $sgf_data;
    }
 
-   function to_string()
+   public function to_string()
    {
       return print_r($this, true);
    }
 
    /*! \brief Inserts or updates GameSgf in database. */
-   function persist()
+   public function persist()
    {
       $entityData = $this->fillEntityData();
       $query = $entityData->build_sql_insert_values(true)
@@ -77,25 +77,25 @@ class GameSgf
       return db_query( "GameSgf.persist.on_dupl_key({$this->gid},{$this->uid})", $query );
    }
 
-   function insert()
+   public function insert()
    {
       $entityData = $this->fillEntityData();
       return $entityData->insert( "GameSgf.insert(%s)" );
    }
 
-   function update()
+   public function update()
    {
       $entityData = $this->fillEntityData();
       return $entityData->update( "GameSgf.update(%s)" );
    }
 
-   function delete()
+   public function delete()
    {
       $entityData = $this->fillEntityData();
       return $entityData->delete( "GameSgf.delete(%s)" );
    }
 
-   function fillEntityData( $data=null )
+   public function fillEntityData( $data=null )
    {
       if( is_null($data) )
          $data = $GLOBALS['ENTITY_GAME_SGF']->newEntityData();
@@ -110,7 +110,7 @@ class GameSgf
    // ------------ static functions ----------------------------
 
    /*! \brief Returns db-fields to be used for query of GameSgf-objects for given game-id and uid. */
-   function build_query_sql( $gid, $uid=0 )
+   public static function build_query_sql( $gid, $uid=0 )
    {
       $qsql = $GLOBALS['ENTITY_GAME_SGF']->newQuerySQL('GSGF');
       $qsql->add_part( SQLP_WHERE, "GSGF.gid=$gid" );
@@ -120,7 +120,7 @@ class GameSgf
    }
 
    /*! \brief Returns GameSgf-object created from specified (db-)row. */
-   function new_from_row( $row )
+   public static function new_from_row( $row )
    {
       $game_sgf = new GameSgf(
             // from GameSgf
@@ -138,34 +138,34 @@ class GameSgf
     * \param $uid Players.ID (SGF-author)
     * \return NULL if nothing found; GameSgf-object otherwise
     */
-   function load_game_sgf( $gid, $uid )
+   public static function load_game_sgf( $gid, $uid )
    {
-      $qsql = GameSgf::build_query_sql( $gid, $uid );
+      $qsql = self::build_query_sql( $gid, $uid );
       $qsql->add_part( SQLP_LIMIT, '1' );
 
-      $row = mysql_single_fetch( "GameSgf::load_game_sgf.find($gid,$uid)", $qsql->get_select() );
-      return ($row) ? GameSgf::new_from_row($row) : NULL;
-   }
+      $row = mysql_single_fetch( "GameSgf:load_game_sgf.find($gid,$uid)", $qsql->get_select() );
+      return ($row) ? self::new_from_row($row) : NULL;
+   }//load_game_sgf
 
    /*! \brief Returns non-null array of GameSgf-objects for given game-id. */
-   function load_game_sgfs( $gid )
+   public static function load_game_sgfs( $gid )
    {
-      $qsql = GameSgf::build_query_sql( $gid );
+      $qsql = self::build_query_sql( $gid );
       $qsql->add_part( SQLP_ORDER, "Lastchanged ASC" );
       $query = $qsql->get_select();
-      $db_result = db_query( "GameSgf.load_game_sgfs($gid)", $query );
+      $db_result = db_query( "GameSgf:load_game_sgfs($gid)", $query );
 
       $result = array();
       while( $row = mysql_fetch_array($db_result) )
-         $result[] = GameSgf::new_from_row( $row );
+         $result[] = self::new_from_row( $row );
       mysql_free_result($db_result);
 
       return $result;
-   }
+   }//load_game_sgfs
 
-   function count_game_sgfs( $gid )
+   public static function count_game_sgfs( $gid )
    {
-      $row = mysql_single_fetch( "GameSgf.count_game_sgfs($gid)",
+      $row = mysql_single_fetch( "GameSgf:count_game_sgfs($gid)",
          "SELECT COUNT(*) AS X_Count FROM GameSgf WHERE gid=$gid" );
       return ($row) ? (int)$row['X_Count'] : 0;
    }

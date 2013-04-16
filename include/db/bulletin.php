@@ -89,35 +89,35 @@ $ENTITY_BULLETIN = new Entity( 'Bulletin',
 
 class Bulletin
 {
-   var $ID;
-   var $uid;
-   var $LockVersion;
-   var $Category;
-   var $Status;
-   var $TargetType;
-   var $Flags;
-   var $PublishTime;
-   var $ExpireTime;
-   var $tid;
-   var $gid;
-   var $CountReads;
-   var $AdminNote;
-   var $Subject;
-   var $Text;
-   var $Lastchanged;
+   public $ID;
+   public $uid;
+   public $LockVersion;
+   public $Category;
+   public $Status;
+   public $TargetType;
+   public $Flags;
+   public $PublishTime;
+   public $ExpireTime;
+   public $tid;
+   public $gid;
+   public $CountReads;
+   public $AdminNote;
+   public $Subject;
+   public $Text;
+   public $Lastchanged;
 
    // non-DB fields
 
-   var $User; // User-object
-   var $UserList; // [ uid, ...] for TargetType=UL
-   var $UserListHandles; // [ Handle, =1234, ...] for TargetType=UL (with '='-prefix for numeric handles)
-   var $UserListUserRefs; // [ uid => [ ID/Handle/Name/C_RejectMsg => val ], ... ]
-   var $Tournament; // Tournament-object for $tid | null
+   public $User; // User-object
+   public $UserList = array(); // [ uid, ...] for TargetType=UL
+   public $UserListHandles = array(); // [ Handle, =1234, ...] for TargetType=UL (with '='-prefix for numeric handles)
+   public $UserListUserRefs = array(); // [ uid => [ ID/Handle/Name/C_RejectMsg => val ], ... ]
+   public $Tournament = null; // Tournament-object for $tid | null
 
-   var $ReadState; // 0 = unread, 1 = marked as read, false = unset
+   public $ReadState = false; // 0 = unread, 1 = marked as read, false = unset
 
    /*! \brief Constructs Bulletin-object with specified arguments. */
-   function Bulletin( $id=0, $uid=0, $user=null, $category=BULLETIN_CAT_ADMIN_MSG,
+   public function __construct( $id=0, $uid=0, $user=null, $category=BULLETIN_CAT_ADMIN_MSG,
             $status=BULLETIN_STATUS_NEW, $target_type=BULLETIN_TRG_UNSET, $flags=0,
             $publish_time=0, $expire_time=0, $tid=0, $gid=0, $count_reads=0, $admin_note='',
             $subject='', $text='', $lastchanged=0 )
@@ -140,15 +140,10 @@ class Bulletin
       $this->Lastchanged = (int)$lastchanged;
       // non-DB fields
       $this->User = ($user instanceof User) ? $user : new User( $this->uid );
-      $this->UserList = array();
-      $this->UserListHandles = array();
-      $this->UserListUserRefs = array();
-      $this->Tournament = null;
-      $this->ReadState = false;
-   }
+   }//__construct
 
    /*! \brief Returns true if LockVersion for optimistic-locking does not match latest version. */
-   function is_optimistic_lock_clash()
+   public function is_optimistic_lock_clash()
    {
       if( $this->ID == 0 || is_null($this->LockVersion) || mysql_affected_rows() >= 1 ) //multi-update not supported
          return false;
@@ -157,46 +152,46 @@ class Bulletin
       return ( !$row || (int)$row[FIELD_LOCKVERSION] != $this->LockVersion );
    }
 
-   function readLockVersion()
+   public function readLockVersion()
    {
       $lock_version = @$_REQUEST[FORMFIELD_LOCKVERSION];
       if( (string)$lock_version != '' )
          $this->LockVersion = (int)$lock_version;
    }
 
-   function to_string()
+   public function to_string()
    {
       return print_r($this, true);
    }
 
-   function setCategory( $category )
+   public function setCategory( $category )
    {
       if( !preg_match( "/^(".CHECK_BULLETIN_CATEGORY.")$/", $category ) )
          error('invalid_args', "Bulletin.setCategory($category)");
       $this->Category = $category;
    }
 
-   function setStatus( $status )
+   public function setStatus( $status )
    {
       if( !preg_match( "/^(".CHECK_BULLETIN_STATUS.")$/", $status ) )
          error('invalid_args', "Bulletin.setStatus($status)");
       $this->Status = $status;
    }
 
-   function setTargetType( $target_type )
+   public function setTargetType( $target_type )
    {
       if( !preg_match( "/^(".CHECK_BULLETIN_TARGET_TYPE.")$/", $target_type ) )
          error('invalid_args', "Bulletin.setTargetType($target_type)");
       $this->TargetType = $target_type;
    }
 
-   function is_user_bulletin()
+   public function is_user_bulletin()
    {
       return ($this->Flags & BULLETIN_FLAG_USER_EDIT);
    }
 
    /*! \brief Inserts or updates Bulletin-entry in database. */
-   function persist()
+   public function persist()
    {
       if( $this->ID > 0 )
          $success = $this->update();
@@ -205,7 +200,7 @@ class Bulletin
       return $success;
    }
 
-   function insert()
+   public function insert()
    {
       $this->Lastchanged = $GLOBALS['NOW'];
 
@@ -216,7 +211,7 @@ class Bulletin
       return $result;
    }
 
-   function update()
+   public function update()
    {
       $this->Lastchanged = $GLOBALS['NOW'];
 
@@ -224,7 +219,7 @@ class Bulletin
       return $entityData->update( "Bulletin.update(%s)" );
    }
 
-   function fillEntityData( $data=null )
+   public function fillEntityData( $data=null )
    {
       if( is_null($data) )
          $data = $GLOBALS['ENTITY_BULLETIN']->newEntityData();
@@ -246,9 +241,9 @@ class Bulletin
       $data->set_value( 'Text', $this->Text );
       $data->set_value( 'Lastchanged', $this->Lastchanged );
       return $data;
-   }
+   }//fillEntityData
 
-   function loadUserList()
+   public function loadUserList()
    {
       $this->UserList = array();
       $this->UserListHandles = array();
@@ -273,9 +268,9 @@ class Bulletin
    }//loadUserList
 
    /*! \brief Wrapper to update_bulletin_count_players()-func for this bulletin. */
-   function update_count_players( $dbgmsg, $uid=0 )
+   public function update_count_players( $dbgmsg, $uid=0 )
    {
-      return Bulletin::update_bulletin_count_players( $dbgmsg, $this->Status, $this->TargetType,
+      return self::update_bulletin_count_players( $dbgmsg, $this->Status, $this->TargetType,
          $uid, $this->ID, $this->tid, $this->gid );
    }
 
@@ -283,7 +278,7 @@ class Bulletin
     * \brief Returns true if this Bulletin can be edited by user.
     * \param $errmsg if set and edit is not allowed, throw error(), otherwise return just false instead
     */
-   function allow_bulletin_user_edit( $uid, $errmsg='' )
+   public function allow_bulletin_user_edit( $uid, $errmsg='' )
    {
       if( $errmsg )
          $errmsg .= "({$this->ID},{$this->Status},{$this->Flags},$uid)";
@@ -308,13 +303,13 @@ class Bulletin
       return ($errmsg) ? error('bulletin_edit_not_allowed', "$errmsg.last_check") : false;
    }//allow_bulletin_user_edit
 
-   function allow_bulletin_user_view()
+   public function allow_bulletin_user_view()
    {
       return ( $this->Status == BULLETIN_STATUS_SHOW || $this->Status == BULLETIN_STATUS_ARCHIVE );
    }
 
    /*! \brief Returns true if this Bulletin.Category should be skipped according to Players.SkipBulletin-flags. */
-   function skipCategory()
+   public function skipCategory()
    {
       global $player_row;
 
@@ -337,7 +332,7 @@ class Bulletin
    // ------------ static functions ----------------------------
 
    /*! \brief Returns db-fields to be used for query of Bulletin-objects for given game-id. */
-   function build_query_sql( $bid=0, $with_player=true )
+   public static function build_query_sql( $bid=0, $with_player=true )
    {
       $qsql = $GLOBALS['ENTITY_BULLETIN']->newQuerySQL('B');
       if( $with_player )
@@ -352,10 +347,10 @@ class Bulletin
       if( $bid > 0 )
          $qsql->add_part( SQLP_WHERE, "B.ID=$bid" );
       return $qsql;
-   }
+   }//build_query_sql
 
    /*! \brief Returns Bulletin-object created from specified (db-)row. */
-   function new_from_row( $row )
+   public static function new_from_row( $row )
    {
       $bull = new Bulletin(
             // from Bulletin
@@ -380,7 +375,7 @@ class Bulletin
       if( isset($row['BR_Read']) )
          $bull->ReadState = (int)@$row['BR_Read'];
       return $bull;
-   }
+   }//new_from_row
 
    /*!
     * \brief Returns QuerySQL with restrictions to view bulletins to what current user is allowed to view,
@@ -391,12 +386,12 @@ class Bulletin
     *        'B_View'-field indicating if bulletin is shown or not, values: 0 = don't show, 1 = show entry
     * \param $check if true, don't restrict on viewable (B_View > 0)
     */
-   function build_view_query_sql( $is_admin, $count_new, $show_target_type='', $check=false )
+   public static function build_view_query_sql( $is_admin, $count_new, $show_target_type='', $check=false )
    {
       global $player_row;
       $uid = (int)@$player_row['ID'];
       if( $uid <= 0 )
-         error('invalid_args', "Bulletin::build_view_query_sql.check.uid($is_admin,$count_new,$show_target_type)");
+         error('invalid_args', "Bulletin:build_view_query_sql.check.uid($is_admin,$count_new,$show_target_type)");
 
       $qsql = new QuerySQL();
       if( $count_new )
@@ -523,45 +518,45 @@ class Bulletin
     * \param $bid Bulletin.ID
     * \return NULL if nothing found; Bulletin-object otherwise
     */
-   function load_bulletin( $bid, $with_player=true )
+   public static function load_bulletin( $bid, $with_player=true )
    {
-      $qsql = Bulletin::build_query_sql( $bid, $with_player );
+      $qsql = self::build_query_sql( $bid, $with_player );
       $qsql->add_part( SQLP_LIMIT, '1' );
 
-      $row = mysql_single_fetch( "Bulletin::load_bulletin.find_Bulletin($bid)", $qsql->get_select() );
-      return ($row) ? Bulletin::new_from_row($row) : NULL;
-   }
+      $row = mysql_single_fetch( "Bulletin:load_bulletin.find_Bulletin($bid)", $qsql->get_select() );
+      return ($row) ? self::new_from_row($row) : NULL;
+   }//load_bulletin
 
    /*! \brief Loads and returns Bulletin-object for given bulletin-QuerySQL; NULL if nothing found. */
-   function load_bulletin_by_query( $qsql, $with_row=false )
+   public static function load_bulletin_by_query( $qsql, $with_row=false )
    {
       $qsql->add_part( SQLP_LIMIT, '1' );
-      $row = mysql_single_fetch( "Bulletin::load_bulletin_by_query()", $qsql->get_select() );
+      $row = mysql_single_fetch( "Bulletin:load_bulletin_by_query()", $qsql->get_select() );
       if( $with_row )
-         return ($row) ? array( Bulletin::new_from_row($row), $row ) : array( NULL, NULL );
+         return ($row) ? array( self::new_from_row($row), $row ) : array( NULL, NULL );
       else
-         return ($row) ? Bulletin::new_from_row($row) : NULL;
-   }
+         return ($row) ? self::new_from_row($row) : NULL;
+   }//load_bulletin_by_query
 
    /*! \brief Returns enhanced (passed) ListIterator with Bulletin-objects. */
-   function load_bulletins( $iterator )
+   public static function load_bulletins( $iterator )
    {
-      $qsql = Bulletin::build_query_sql();
+      $qsql = self::build_query_sql();
       $iterator->setQuerySQL( $qsql );
       $query = $iterator->buildQuery();
-      $result = db_query( "Bulletin.load_bulletins", $query );
+      $result = db_query( "Bulletin:load_bulletins", $query );
       $iterator->setResultRows( mysql_num_rows($result) );
 
       $iterator->clearItems();
       while( $row = mysql_fetch_array( $result ) )
       {
-         $rca = Bulletin::new_from_row( $row );
+         $rca = self::new_from_row( $row );
          $iterator->addItem( $rca, $row );
       }
       mysql_free_result($result);
 
       return $iterator;
-   }
+   }//load_bulletins
 
    /*!
     * \brief Returns new Bulletin-object for user and args.
@@ -569,22 +564,22 @@ class Bulletin
     * \param $tid if set, creates TP-target-type bulletin
     * \param $new_uid if set, creates new bulletin for user
     */
-   function new_bulletin( $is_admin, $gid=0, $tid=0, $new_uid=0 )
+   public static function new_bulletin( $is_admin, $gid=0, $tid=0, $new_uid=0 )
    {
       global $player_row;
 
       $uid = (int)@$player_row['ID'];
       if( !is_numeric($uid) || $uid <= GUESTS_ID_MAX )
-         error('invalid_args', "Bulletin.new_bulletin.check.uid($uid,$is_admin,$gid,$tid,$new_uid)");
+         error('invalid_args', "Bulletin:new_bulletin.check.uid($uid,$is_admin,$gid,$tid,$new_uid)");
 
       if( !is_numeric($gid) || $gid < 0 )
-         error('invalid_args', "Bulletin.new_bulletin.check.gid($uid,$is_admin,$gid)");
+         error('invalid_args', "Bulletin:new_bulletin.check.gid($uid,$is_admin,$gid)");
       if( !is_numeric($tid) || $tid < 0 )
-         error('invalid_args', "Bulletin.new_bulletin.check.tid($uid,$is_admin,$tid)");
+         error('invalid_args', "Bulletin:new_bulletin.check.tid($uid,$is_admin,$tid)");
       if( !is_numeric($new_uid) || ($new_uid != 0 && $new_uid <= GUESTS_ID_MAX) )
-         error('invalid_args', "Bulletin.new_bulletin.check.new_uid_guest($uid,$is_admin,$new_uid)");
+         error('invalid_args', "Bulletin:new_bulletin.check.new_uid_guest($uid,$is_admin,$new_uid)");
       if( !$is_admin && $new_uid > 0 )
-         error('invalid_args', "Bulletin.new_bulletin.check.new_uid0($uid,$is_admin,$new_uid)");
+         error('invalid_args', "Bulletin:new_bulletin.check.new_uid0($uid,$is_admin,$new_uid)");
 
       if( $new_uid == $uid || $new_uid == 0 )
          $user = new User( $uid, @$player_row['Name'], @$player_row['Handle'] );
@@ -592,7 +587,7 @@ class Bulletin
       {
          $user = User::load_user( $new_uid );
          if( is_null($user) )
-            error('unknown_user', "Bulletin.new_bulletin.check.find_user($uid,$new_uid)");
+            error('unknown_user', "Bulletin:new_bulletin.check.find_user($uid,$new_uid)");
          $uid = $new_uid;
       }
 
@@ -636,33 +631,33 @@ class Bulletin
       return $bulletin;
    }//new_bulletin
 
-   function mark_bulletin_as_read( $bid )
+   public static function mark_bulletin_as_read( $bid )
    {
       global $player_row;
       if( !is_numeric($bid) || $bid <= 0 )
-         error('invalid_args', "Bulletin::mark_bulletin_as_read.check.bid($bid)");
+         error('invalid_args', "Bulletin:mark_bulletin_as_read.check.bid($bid)");
       $uid = (int)$player_row['ID'];
 
       ta_begin();
       {//HOT-section to mark bulletin as read
-         db_query( "Bulletin::mark_bulletin_as_read($bid,$uid)",
+         db_query( "Bulletin:mark_bulletin_as_read($bid,$uid)",
             "INSERT IGNORE BulletinRead (bid,uid) " .
             "SELECT ID, $uid FROM Bulletin WHERE ID=$bid AND Status IN ('".BULLETIN_STATUS_SHOW."','".BULLETIN_STATUS_ARCHIVE."') LIMIT 1" );
 
          if( mysql_affected_rows() > 0 ) // increase read-counter
          {
-            $bulletin = Bulletin::load_bulletin( $bid, /*with_player*/false );
+            $bulletin = self::load_bulletin( $bid, /*with_player*/false );
             if( !is_null($bulletin) )
             {
-               $bulletin->update_count_players( 'Bulletin::mark_bulletin_as_read', $uid );
-               Bulletin::update_count_bulletin_new( "Bulletin::mark_bulletin_as_read($bid,$uid)", COUNTNEW_RECALC );
+               $bulletin->update_count_players( 'Bulletin:mark_bulletin_as_read', $uid );
+               self::update_count_bulletin_new( "Bulletin:mark_bulletin_as_read($bid,$uid)", COUNTNEW_RECALC );
 
-               db_query( "Bulletin::mark_bulletin_as_read.inc_read($bid)",
+               db_query( "Bulletin:mark_bulletin_as_read.inc_read($bid)",
                   "UPDATE Bulletin SET CountReads=CountReads+1 WHERE ID=$bid LIMIT 1" );
             }
 
             clear_cache_quick_status( $uid, QST_CACHE_BULLETIN );
-            Bulletin::delete_cache_bulletins( "Bulletin::mark_bulletin_as_read($bid)", $uid );
+            self::delete_cache_bulletins( "Bulletin:mark_bulletin_as_read($bid)", $uid );
          }
       }
       ta_end();
@@ -673,36 +668,36 @@ class Bulletin
     *
     * \note IMPORTANT NOTE: caller needs to open TA with HOT-section!!
     */
-   function persist_bulletin_userlist( $bid, $uids )
+   public static function persist_bulletin_userlist( $bid, $uids )
    {
       if( !is_numeric($bid) || $bid <= 0 )
-         error('invalid_args', "Bulletin::persist_bulletin_userlist.check.bid($bid)");
+         error('invalid_args', "Bulletin:persist_bulletin_userlist.check.bid($bid)");
       if( !is_array($uids) || count($uids) == 0 )
-         error('invalid_args', "Bulletin::persist_bulletin_userlist.check.uids($bid)");
+         error('invalid_args', "Bulletin:persist_bulletin_userlist.check.uids($bid)");
 
       $uids = array_unique($uids);
       foreach( $uids as $uid )
       {
          if( !is_numeric($uid) || $uid <= GUESTS_ID_MAX )
-            error('invalid_args', "Bulletin::persist_bulletin_userlist.check.uids.bad_uid($bid,$uid)");
+            error('invalid_args', "Bulletin:persist_bulletin_userlist.check.uids.bad_uid($bid,$uid)");
       }
       $uids_sql = implode(',', $uids);
 
-      db_query( "Bulletin::persist_bulletin_userlist.del($bid)",
+      db_query( "Bulletin:persist_bulletin_userlist.del($bid)",
          "DELETE FROM BulletinTarget WHERE bid=$bid AND uid NOT IN ($uids_sql)" );
 
       $cnt_uids = count($uids);
-      db_query( "Bulletin::persist_bulletin_userlist.add($bid,$cnt_uids)",
+      db_query( "Bulletin:persist_bulletin_userlist.add($bid,$cnt_uids)",
          "INSERT IGNORE BulletinTarget (bid,uid) " .
          "SELECT $bid, ID FROM Players WHERE ID IN ($uids_sql) LIMIT $cnt_uids" );
    }//persist_bulletin_userlist
 
    /*! \brief Change status of expired bulletins of all target-types. */
-   function process_expired_bulletins()
+   public static function process_expired_bulletins()
    {
       global $NOW;
 
-      db_query( "Bulletin::process_expired_bulletins.upd_bulletin()",
+      db_query( "Bulletin:process_expired_bulletins.upd_bulletin()",
          "UPDATE Bulletin SET " .
             "Status='".BULLETIN_STATUS_ARCHIVE."', " .
             "AdminNote=TRIM(CONCAT('EXPIRED ',AdminNote)) " .
@@ -710,7 +705,7 @@ class Bulletin
             "ExpireTime > 0 AND ExpireTime < FROM_UNIXTIME($NOW)" );
 
       if( mysql_affected_rows() > 0 )
-         Bulletin::update_bulletin_count_players( 'Bulletin::process_expired_bulletins',
+         self::update_bulletin_count_players( 'Bulletin:process_expired_bulletins',
             BULLETIN_STATUS_SHOW, BULLETIN_TRG_ALL );
    }//process_expire_bulletins
 
@@ -720,13 +715,13 @@ class Bulletin
     * \param $diff null|omit to reset to -1 (=recalc later); COUNTNEW_RECALC to recalc now;
     *        otherwise increase or decrease counter
     */
-   function update_count_bulletin_new( $dbgmsg, $uid=0, $diff=null )
+   public static function update_count_bulletin_new( $dbgmsg, $uid=0, $diff=null )
    {
       global $player_row;
 
       if( $uid <= 0 )
          $uid = (int)@$player_row['ID'];
-      $dbgmsg .= "Bulletin::update_count_bulletin_new($uid,$diff)";
+      $dbgmsg .= "Bulletin:update_count_bulletin_new($uid,$diff)";
       if( $uid <= 0 )
          error( 'invalid_args', "$dbgmsg.check.uid" );
 
@@ -743,13 +738,13 @@ class Bulletin
       }
       elseif( (string)$diff == COUNTNEW_RECALC )
       {
-         $count_new = Bulletin::count_bulletin_new( -1 );
+         $count_new = self::count_bulletin_new( -1 );
          $player_row['CountBulletinNew'] = $count_new;
          db_query( "$dbgmsg.recalc",
             "UPDATE Players SET CountBulletinNew=$count_new WHERE ID='$uid' LIMIT 1" );
       }
 
-      Bulletin::delete_cache_bulletins( $dbgmsg, $uid );
+      self::delete_cache_bulletins( $dbgmsg, $uid );
    }//update_count_bulletin_new
 
    /*!
@@ -757,15 +752,15 @@ class Bulletin
     * \param $curr_count force counting if <0 or omitted
     * \return new bulletin count (>=0) for given user-id; or -1 on error
     */
-   function count_bulletin_new( $curr_count=-1 )
+   public static function count_bulletin_new( $curr_count=-1 )
    {
       if( $curr_count >= 0 )
          return $curr_count;
 
-      $qsql = Bulletin::build_view_query_sql( /*adm*/false, /*count*/true );
-      $row = mysql_single_fetch( 'Bulletin::count_bulletin_new', $qsql->get_select() );
+      $qsql = self::build_view_query_sql( /*adm*/false, /*count*/true );
+      $row = mysql_single_fetch( 'Bulletin:count_bulletin_new', $qsql->get_select() );
       return ($row) ? (int)@$row['X_Count'] : -1;
-   }
+   }//count_bulletin_new
 
    /*!
     * \brief Updates Players.CountBulletinNew according for given Bulletin-data (only updated on SHOW-status).
@@ -780,12 +775,12 @@ class Bulletin
     *       up to session-expire, and login.php resets counter too on session-expire
     * \see also count_bulletin_new() in 'include/std_functions.php'
     */
-   function update_bulletin_count_players( $dbgmsg, $status, $target_type, $uid=0, $bid=0, $tid=0, $gid=0 )
+   public static function update_bulletin_count_players( $dbgmsg, $status, $target_type, $uid=0, $bid=0, $tid=0, $gid=0 )
    {
       global $NOW;
-      $dbgmsg .= "Bulletin::update_bulletin_count_players($status,$target_type,$uid)";
+      $dbgmsg .= "Bulletin:update_bulletin_count_players($status,$target_type,$uid)";
 
-      Bulletin::update_cache_bulletins_global( $dbgmsg );
+      self::update_cache_bulletins_global( $dbgmsg );
 
       if( $status != BULLETIN_STATUS_SHOW )
          return false;
@@ -838,30 +833,30 @@ class Bulletin
    }//update_bulletin_count_players
 
    /*! \brief Deletes all existing BulletinRead-entries for given bulletin-id. */
-   function reset_bulletin_read( $bid )
+   public static function reset_bulletin_read( $bid )
    {
-      db_query( "Bulletin::reset_bulletin_read($bid)",
+      db_query( "Bulletin:reset_bulletin_read($bid)",
          "DELETE FROM BulletinRead WHERE bid=$bid" );
    }//reset_bulletin_read
 
    /*! \brief Returns row-arr or null if no game found. */
-   function load_multi_player_game( $gid )
+   public static function load_multi_player_game( $gid )
    {
-      $game_row = mysql_single_fetch( "Bulletin::load_multi_player_game($gid)",
+      $game_row = mysql_single_fetch( "Bulletin:load_multi_player_game($gid)",
          "SELECT ID, GameType, Status FROM Games where ID=$gid LIMIT 1" );
       return ($game_row) ? $game_row : null;
    }
 
    /*! \brief Returns true if current players is bulletin-admin. */
-   function is_bulletin_admin()
+   public static function is_bulletin_admin()
    {
       global $player_row;
       return (@$player_row['admin_level'] & ADMIN_DEVELOPER);
    }
 
-   function load_cache_bulletins( $dbgmsg, $uid )
+   public static function load_cache_bulletins( $dbgmsg, $uid )
    {
-      $dbgmsg = $dbgmsg.".Bulletin::load_cache_bulletins($uid)";
+      $dbgmsg = $dbgmsg.".Bulletin:load_cache_bulletins($uid)";
       $gkey = "Bulletins.global";
       $key = "Bulletins.$uid";
 
@@ -892,8 +887,8 @@ class Bulletin
                   "BR.bid IS NULL", // only unread
                   "B.Status='".BULLETIN_STATUS_SHOW."'" ),
             'ORDER BY B.PublishTime DESC' );
-         $iterator->addQuerySQLMerge( Bulletin::build_view_query_sql( /*adm*/false, /*count*/false ) );
-         $iterator = Bulletin::load_bulletins( $iterator );
+         $iterator->addQuerySQLMerge( self::build_view_query_sql( /*adm*/false, /*count*/false ) );
+         $iterator = self::load_bulletins( $iterator );
 
          $cache_result = array( $GLOBALS['NOW'] ); // bulletin-cache-entry creation-time
          while( list(,$arr_item) = $iterator->getListIterator() )
@@ -908,18 +903,18 @@ class Bulletin
       else // transform cache-stored row-arr into Bulletin-arr
       {
          foreach( $arr_rows as $row )
-            $result[] = Bulletin::new_from_row( $row );
+            $result[] = self::new_from_row( $row );
       }
 
       return $result;
    }//load_cache_bulletins
 
-   function delete_cache_bulletins( $dbgmsg, $uid )
+   public static function delete_cache_bulletins( $dbgmsg, $uid )
    {
       DgsCache::delete( $dbgmsg, CACHE_GRP_BULLETINS, "Bulletins.$uid" );
    }
 
-   function update_cache_bulletins_global( $dbgmsg )
+   public static function update_cache_bulletins_global( $dbgmsg )
    {
       DgsCache::store( $dbgmsg, CACHE_GRP_BULLETINS, "Bulletins.global", $GLOBALS['NOW'], 7*SECS_PER_DAY );
    }

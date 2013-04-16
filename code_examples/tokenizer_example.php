@@ -77,7 +77,7 @@ END_DATA;
 
    // print tokenized result and/or errors
    echo get_class($t) . ": success=$success, value=[$value]\n";
-   echo "Errors:\n" . implode("\n  ", $t->errors)."\n";
+   echo "Errors:\n" . implode("\n  ", $t->get_errors())."\n";
    echo "\n";
    $cnt = 0;
    foreach( $arr as $token ) {

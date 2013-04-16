@@ -28,9 +28,6 @@ require_once 'include/dgs_cache.php';
   * \brief Container and function to cache Clock-db-data.
   */
 
-global $CACHE_CLOCK;
-$CACHE_CLOCK = new ClockCache();
-
 
  /*!
   * \class ClockCache
@@ -40,14 +37,10 @@ $CACHE_CLOCK = new ClockCache();
 class ClockCache
 {
    /*! \brief array( clock_id => ticks ) */
-   var $cache_clock_ticks;
+   private $cache_clock_ticks = array();
 
-   function ClockCache()
-   {
-      $this->cache_clock_ticks = array();
-   }
 
-   function load_clock_ticks( $dbgmsg, $clock_id, $use_cache=true )
+   public function load_clock_ticks( $dbgmsg, $clock_id, $use_cache=true )
    {
       if( !is_numeric($clock_id) || $clock_id > MAX_CLOCK )
          error('invalid_args', "$dbgmsg.load_clock_ticks.check($clock_id)");
@@ -59,7 +52,7 @@ class ClockCache
          // need special handling to load all or only one clock-entry (if cache disabled)
          if( DgsCache::is_persistent(CACHE_GRP_CLOCKS) )
          {
-            $arr_clocks = ClockCache::load_cache_clocks( !$use_cache );
+            $arr_clocks = self::load_cache_clocks( !$use_cache );
             if( is_null($arr_clocks) || !isset($arr_clocks[$clock_id]) )
                error('invalid_args', "$dbgmsg.load_clock_ticks.cache.bad_clock($clock_id)");
             $this->cache_clock_ticks = $arr_clocks;
@@ -77,21 +70,23 @@ class ClockCache
 
       $ticks = (int)@$this->cache_clock_ticks[$clock_id];
       return $ticks;
-   }
+   }//load_clock_ticks
 
 
    // ------------ static functions ----------------------------
 
-   /*! \brief Returns singleton of clock-cache. */
-   function get_clock_cache()
+   /*! \brief Returns ClockCache-singleton. */
+   public static function get_instance()
    {
-      global $CACHE_CLOCK;
-      return $CACHE_CLOCK;
+      static $CLOCK_CACHE = null;
+      if( is_null($CLOCK_CACHE) )
+         $CLOCK_CACHE = new ClockCache();
+      return $CLOCK_CACHE;
    }
 
-   function load_cache_clocks( $reload=false )
+   private static function load_cache_clocks( $reload=false )
    {
-      $dbgmsg = "ClockCache::load_cache_clocks()";
+      $dbgmsg = "ClockCache:load_cache_clocks()";
       $key = "Clocks";
       $result = DgsCache::fetch( $dbgmsg, CACHE_GRP_CLOCKS, $key );
       if( $reload || is_null($result) )
@@ -105,11 +100,11 @@ class ClockCache
          DgsCache::store( $dbgmsg, CACHE_GRP_CLOCKS, $key, $result, 10*SECS_PER_MIN );
       }
       return $result;
-   }
+   }//load_cache_clocks
 
-   function delete_cache_clocks()
+   public static function delete_cache_clocks()
    {
-      DgsCache::delete( "ClockCache::delete_cache_clocks()", CACHE_GRP_CLOCKS, "Clocks" );
+      DgsCache::delete( "ClockCache:delete_cache_clocks()", CACHE_GRP_CLOCKS, "Clocks" );
    }
 
 } // end of 'ClockCache'

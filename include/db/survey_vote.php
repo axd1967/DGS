@@ -46,25 +46,25 @@ $ENTITY_SURVEY_VOTE = new Entity( 'SurveyVote',
 
 class SurveyVote
 {
-   var $soid; // SurveyOption.ID
-   var $uid;
-   var $Points;
+   public $soid; // SurveyOption.ID
+   public $uid;
+   public $Points;
 
    /*! \brief Constructs SurveyVote-object with specified arguments. */
-   function SurveyVote( $soid=0, $uid=0, $points=0 )
+   public function __construct( $soid=0, $uid=0, $points=0 )
    {
       $this->soid = (int)$soid;
       $this->uid = (int)$uid;
       $this->Points = (int)$points;
    }
 
-   function to_string()
+   public function to_string()
    {
       return print_r($this, true);
    }
 
    /*! \brief Inserts or updates SurveyVote in database. */
-   function persist()
+   public function persist()
    {
       $entityData = $this->fillEntityData();
       $query = $entityData->build_sql_insert_values(true)
@@ -73,19 +73,19 @@ class SurveyVote
       return db_query( "SurveyVote.persist.on_dupl_key({$this->soid},{$this->uid},{$this->Points})", $query );
    }
 
-   function insert()
+   public function insert()
    {
       $entityData = $this->fillEntityData();
       return $entityData->insert( "SurveyVote.insert(%s)" );
    }
 
-   function update()
+   public function update()
    {
       $entityData = $this->fillEntityData();
       return $entityData->update( "SurveyVote.update(%s)" );
    }
 
-   function fillEntityData( $data=null )
+   public function fillEntityData( $data=null )
    {
       if( is_null($data) )
          $data = $GLOBALS['ENTITY_SURVEY_VOTE']->newEntityData();
@@ -99,7 +99,7 @@ class SurveyVote
    // ------------ static functions ----------------------------
 
    /*! \brief Returns db-fields to be used for query of SurveyVote-objects for given survey-option-id, uid. */
-   function build_query_sql( $soid=0, $uid=0 )
+   public static function build_query_sql( $soid=0, $uid=0 )
    {
       $qsql = $GLOBALS['ENTITY_SURVEY_VOTE']->newQuerySQL('SV');
       if( $soid > 0 )
@@ -110,7 +110,7 @@ class SurveyVote
    }
 
    /*! \brief Returns SurveyVote-object created from specified (db-)row. */
-   function new_from_row( $row )
+   public static function new_from_row( $row )
    {
       $s_vote = new SurveyVote(
             // from SurveyVote
@@ -127,41 +127,41 @@ class SurveyVote
     * \param $uid Players.ID (voting user)
     * \return NULL if nothing found; SurveyVote-object otherwise
     */
-   function load_survey_vote( $soid, $uid )
+   public static function load_survey_vote( $soid, $uid )
    {
-      $qsql = SurveyVote::build_query_sql( $soid, $uid );
+      $qsql = self::build_query_sql( $soid, $uid );
       $qsql->add_part( SQLP_LIMIT, '1' );
 
-      $row = mysql_single_fetch( "SurveyVote::load_survey_vote.find_surveyvote($soid,$uid)", $qsql->get_select() );
-      return ($row) ? SurveyVote::new_from_row($row) : NULL;
-   }
+      $row = mysql_single_fetch( "SurveyVote:load_survey_vote.find_surveyvote($soid,$uid)", $qsql->get_select() );
+      return ($row) ? self::new_from_row($row) : NULL;
+   }//load_survey_vote
 
    /*! \brief Returns enhanced (passed) ListIterator with SurveyVote-objects. */
-   function load_survey_votes( $iterator, $soid, $uid=0 )
+   public static function load_survey_votes( $iterator, $soid, $uid=0 )
    {
-      $qsql = SurveyVote::build_query_sql( $soid, $uid );
+      $qsql = self::build_query_sql( $soid, $uid );
       $iterator->setQuerySQL( $qsql );
       $query = $iterator->buildQuery();
-      $result = db_query( "SurveyVote.load_survey_votes($soid,$uid)", $query );
+      $result = db_query( "SurveyVote:load_survey_votes($soid,$uid)", $query );
       $iterator->setResultRows( mysql_num_rows($result) );
 
       $iterator->clearItems();
       while( $row = mysql_fetch_array( $result ) )
       {
-         $s_vote = SurveyVote::new_from_row( $row );
+         $s_vote = self::new_from_row( $row );
          $iterator->addItem( $s_vote, $row );
       }
       mysql_free_result($result);
 
       return $iterator;
-   }
+   }//load_survey_votes
 
    /*!
     * \brief Adds/updates SurveyVote-table-entries.
     * \param $sid only for error-log
     * \param $arr_upd [ soid => Points, ... ]
     */
-   function persist_survey_votes( $sid, $uid, $arr_upd )
+   public static function persist_survey_votes( $sid, $uid, $arr_upd )
    {
       if( !is_array($arr_upd) || count($arr_upd) == 0 )
          return false;
@@ -181,7 +181,7 @@ class SurveyVote
          . implode(',', $arr_inserts)
          . ' ON DUPLICATE KEY UPDATE Points=VALUES(Points)';
 
-      return db_query( "SurveyOption::persist_survey_votes.on_dupl_key($sid,$uid)", $query );
+      return db_query( "SurveyOption:persist_survey_votes.on_dupl_key($sid,$uid)", $query );
    }//persist_survey_votes
 
 } // end of 'SurveyVote'

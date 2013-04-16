@@ -29,6 +29,11 @@ require_once( 'include/utilities.php' );
 
 
 
+define('FEATURE_POINTS_MAX_VALUE', 50);
+define('FEATURE_POINTS_DAYS_LASTMOVED', (6*7) ); // increase feature-points only if user last-moved within X weeks
+define('FEATURE_POINTS_INC_DAYS', 20); // increase feature-points every X days
+define('FEATURE_POINTS_INC_VALUE', 1); // increase by amount of X points
+
  /*!
   * \class UserQuota
   *
@@ -41,30 +46,29 @@ require_once( 'include/utilities.php' );
   *    $uq->modify_feature_points( -1 );
   *    $uq->update();
   */
-
-define('FEATURE_POINTS_MAX_VALUE', 50);
-define('FEATURE_POINTS_DAYS_LASTMOVED', (6*7) ); // increase feature-points only if user last-moved within X weeks
-define('FEATURE_POINTS_INC_DAYS', 20); // increase feature-points every X days
-define('FEATURE_POINTS_INC_VALUE', 1); // increase by amount of X points
-
 class UserQuota
 {
-   var $user_id;
-   var $feature_points;
-   var $feature_points_updated;
+   private $user_id;
+   private $feature_points;
+   private $feature_points_updated;
 
    /*! \brief Constructs UserQuota-object with specified arguments. */
-   function UserQuota( $user_id, $feature_points=25, $feature_points_updated=0 )
+   public function __construct( $user_id, $feature_points=25, $feature_points_updated=0 )
    {
-      UserQuota::_check_user_id( $user_id, 'UserQuota');
+      self::_check_user_id( $user_id, 'UserQuota');
 
       $this->user_id = (int)$user_id;
       $this->set_feature_points( $feature_points );
       $this->feature_points_updated = $feature_points_updated;
    }
 
+   public function get_feature_points()
+   {
+      return $this->feature_points;
+   }
+
    /*! \brief Sets feature points within allowed limits -infinity..FEATURE_POINTS_MAX_VALUE. */
-   function set_feature_points( $points )
+   public function set_feature_points( $points )
    {
       if( !is_numeric($points) )
          $points = 25; // start-value
@@ -74,40 +78,40 @@ class UserQuota
    }
 
    /*!
-    * \brief Increases or decreases amount of feature-points by given count
-    *        within defined limits.
+    * \brief Increases or decreases amount of feature-points by given count within defined limits.
     */
-   function modify_feature_points( $count )
+   public function modify_feature_points( $count )
    {
       $this->set_feature_points( $this->feature_points + $count );
    }
 
 
    /*! \brief Updates all current UserQuota-data into database. */
-   function update_feature_points()
+   public function update_feature_points()
    {
-      UserQuota::_check_user_id( $this->user_id, 'UserQuota::update_feature_points');
+      self::_check_user_id( $this->user_id, 'UserQuota:update_feature_points');
       if( $this->user_id <= GUESTS_ID_MAX )
-         error('not_allowed_for_guest', "UserQuota::update_feature_points({$this->user_id})");
+         error('not_allowed_for_guest', "UserQuota:update_feature_points({$this->user_id})");
 
       $update_query = 'UPDATE UserQuota SET'
          . '  FeaturePoints=' . $this->feature_points
          . " WHERE uid='{$this->user_id}' LIMIT 1";
          ;
-      db_query( "UserQuota::update.update_feature_points({$this->user_id})", $update_query );
-   }
+      db_query( "UserQuota:update.update_feature_points({$this->user_id})", $update_query );
+   }//update_feature_points
+
 
    // ------------ static functions ----------------------------
 
    /*! \internal (static) check for valid user-id */
-   function _check_user_id( $user_id, $loc )
+   private static function _check_user_id( $user_id, $loc )
    {
       if( !is_numeric($user_id) || $user_id <= 0 )
          error('invalid_user', "$loc.check.user_id($user_id)");
    }
 
    /*! \brief Returns UserQuota-object created from specified (db-)row. */
-   function new_from_row( $row )
+   public static function new_from_row( $row )
    {
       $uq = new UserQuota(
             @$row['uid'],
@@ -118,29 +122,29 @@ class UserQuota
    }
 
    /*! \brief (static) Loads UserQuota-data for given user and returns UserQuota-object or null if not found. */
-   function load_user_quota( $user_id )
+   public static function load_user_quota( $user_id )
    {
-      UserQuota::_check_user_id( $user_id, 'UserQuota::load_user_quota');
+      self::_check_user_id( $user_id, 'UserQuota:load_user_quota');
 
-      $row = mysql_single_fetch("UserQuota::load_user_quota.find($user_id)",
+      $row = mysql_single_fetch("UserQuota:load_user_quota.find($user_id)",
             "SELECT * FROM UserQuota WHERE uid='$user_id' LIMIT 1");
       if( !$row )
          return null;
-      return UserQuota::new_from_row( $row );
-   }
+      return self::new_from_row( $row );
+   }//load_user_quota
 
    /*! \brief (static) Inserts default UserQuota. */
-   function insert_default( $user_id )
+   public static function insert_default( $user_id )
    {
       global $NOW;
-      UserQuota::_check_user_id( $user_id, 'UserQuota::insert_default');
-      db_query( "UserQuota::insert_default.insert({$user_id})",
+      self::_check_user_id( $user_id, 'UserQuota:insert_default');
+      db_query( "UserQuota:insert_default.insert({$user_id})",
          "INSERT INTO UserQuota SET uid='{$user_id}'"
          . ', FeaturePointsUpdated=FROM_UNIXTIME(' . $NOW . ')' );
    }
 
    /*! \brief Increases feature-points for all users, that match the update-criteria. */
-   function increase_update_feature_points()
+   public static function increase_update_feature_points()
    {
       global $NOW;
       $lastmoved_date  = $NOW - FEATURE_POINTS_DAYS_LASTMOVED * 86400;
@@ -154,8 +158,8 @@ class UserQuota
          . " WHERE UQ.FeaturePointsUpdated < FROM_UNIXTIME($update_due_date)"
          .   " AND P.LastMove >= FROM_UNIXTIME($lastmoved_date)"
          ;
-      db_query( "UserQuota::increase_update_feature_points.update($NOW)", $update_query );
-   }
+      db_query( "UserQuota:increase_update_feature_points.update($NOW)", $update_query );
+   }//increase_update_feature_points
 
 } // end of 'UserQuota'
 

@@ -44,16 +44,16 @@ require_once 'tournaments/include/tournament_round.php';
   */
 class DgsRoundRobinTournament extends TournamentTemplateRoundRobin
 {
-   function DgsRoundRobinTournament()
+   public function __construct()
    {
-      parent::TournamentTemplateRoundRobin(
+      parent::__construct(
          TOURNEY_WIZTYPE_DGS_ROUNDROBIN,
          sprintf( '%s (%s)', T_('DGS Round-Robin with multiple pools'), T_('no restrictions, only for Admin#ttype')) );
 
       $this->limits->setLimits( TLIMITS_MAX_TP, true, 2, TP_MAX_COUNT );
    }
 
-   function createTournament()
+   public function createTournament()
    {
       $tourney = $this->make_tournament( TOURNEY_SCOPE_DRAGON, "DGS pooled Round-Robin (19x19)" );
 
@@ -71,7 +71,7 @@ class DgsRoundRobinTournament extends TournamentTemplateRoundRobin
       $tround->MaxPoolCount = 0;
 
       return $this->_createTournament( $tourney, $tprops, $trules, $tround );
-   }
+   }//createTournament
 
 } // end of 'DgsRoundRobinTournament'
 

@@ -40,10 +40,6 @@ require_once 'tournaments/include/tournament_utils.php';
   * \brief Class to manage Tournament-table
   */
 
-// lazy-init in Tournament::get..Text()-funcs
-global $ARR_GLOBALS_TOURNAMENT; //PHP5
-$ARR_GLOBALS_TOURNAMENT = array();
-
 global $ENTITY_TOURNAMENT; //PHP5
 $ENTITY_TOURNAMENT = new Entity( 'Tournament',
       FTYPE_PKEY, 'ID',
@@ -57,32 +53,34 @@ $ENTITY_TOURNAMENT = new Entity( 'Tournament',
 
 class Tournament
 {
-   var $ID;
-   var $Scope;
-   var $Type;
-   var $WizardType;
-   var $Title;
-   var $Description;
-   var $Owner_ID;
-   var $Status;
-   var $Flags;
-   var $Created;
-   var $Lastchanged;
-   var $ChangedBy;
-   var $StartTime;
-   var $EndTime;
-   var $Rounds;
-   var $CurrentRound;
-   var $RegisteredTP;
-   var $LockNote;
+   private static $ARR_TOURNEY_TEXTS = array(); // lazy-init in Tournament::get..Text()-funcs: [key][id] => text
+
+   public $ID;
+   public $Scope;
+   public $Type;
+   public $WizardType;
+   public $Title;
+   public $Description;
+   public $Owner_ID;
+   public $Status;
+   public $Flags;
+   public $Created;
+   public $Lastchanged;
+   public $ChangedBy;
+   public $StartTime;
+   public $EndTime;
+   public $Rounds;
+   public $CurrentRound;
+   public $RegisteredTP;
+   public $LockNote;
 
    // non-DB vars
 
-   var $Owner_Handle;
-   var $TP_Counts;
+   public $Owner_Handle = '';
+   public $TP_Counts = null;
 
    /*! \brief Constructs ConfigBoard-object with specified arguments. */
-   function Tournament( $id=0, $scope=TOURNEY_SCOPE_PUBLIC, $type=TOURNEY_TYPE_LADDER,
+   public function __construct( $id=0, $scope=TOURNEY_SCOPE_PUBLIC, $type=TOURNEY_TYPE_LADDER,
                         $wizard_type=TOURNEY_WIZTYPE_PUBLIC_LADDER, $title='', $description='',
                         $owner_id=0, $status=TOURNEY_STATUS_NEW, $flags=0,
                         $created=0, $lastchanged=0, $changed_by='', $starttime=0, $endtime=0,
@@ -106,31 +104,28 @@ class Tournament
       $this->CurrentRound = (int)$current_round;
       $this->RegisteredTP = (int)$registeredTP;
       $this->LockNote = $lock_note;
-      // non-DB
-      $this->Owner_Handle = '';
-      $this->TP_Counts = NULL;
-   }
+   }//__construct
 
-   function to_string()
+   public function to_string()
    {
       return print_r( $this, true );
    }
 
-   function setScope( $scope )
+   public function setScope( $scope )
    {
       if( !preg_match( "/^(".CHECK_TOURNEY_SCOPE.")$/", $scope ) )
          error('invalid_args', "Tournament.setScope($scope)");
       $this->Scope = $scope;
    }
 
-   function setType( $type )
+   public function setType( $type )
    {
       if( !preg_match( "/^(".CHECK_TOURNEY_TYPE.")$/", $type ) )
          error('invalid_args', "Tournament.setType($type)");
       $this->Type = $type;
    }
 
-   function setWizardType( $wizard_type )
+   public function setWizardType( $wizard_type )
    {
       if( !is_numeric($wizard_type) || $wizard_type < 1 || $wizard_type > MAX_TOURNEY_WIZARD_TYPE )
          error('invalid_args', "Tournament.setWizardType($wizard_type)");
@@ -138,7 +133,7 @@ class Tournament
       $this->setType( TournamentUtils::getWizardTournamentType($wizard_type) );
    }
 
-   function setStatus( $status, $check_only=false )
+   public function setStatus( $status, $check_only=false )
    {
       if( !preg_match( "/^(".CHECK_TOURNEY_STATUS.")$/", $status ) )
          error('invalid_args', "Tournament.setStatus($status)");
@@ -146,12 +141,12 @@ class Tournament
          $this->Status = $status;
    }
 
-   function isFlagSet( $flag )
+   public function isFlagSet( $flag )
    {
       return ($this->Flags & $flag);
    }
 
-   function formatFlags( $zero_val='', $intersect_flags=0, $short=false, $class=null, $html=true, $flags_val=null )
+   public function formatFlags( $zero_val='', $intersect_flags=0, $short=false, $class=null, $html=true, $flags_val=null )
    {
       if( is_null($class) )
          $class = 'TLockWarn';
@@ -161,7 +156,7 @@ class Tournament
          $check_flags &= $intersect_flags;
 
       $arr = array();
-      $arr_flags = Tournament::getFlagsText(null, ($short ? 'SHORT' : true));
+      $arr_flags = self::getFlagsText(null, ($short ? 'SHORT' : true));
       foreach( $arr_flags as $flag => $flagtext )
       {
          if( $check_flags & $flag )
@@ -170,25 +165,25 @@ class Tournament
                : $flagtext;
       }
       return (count($arr)) ? implode(', ', $arr) : $zero_val;
-   }
+   }//formatFlags
 
-   function buildMaintenanceLockText( $intersect_flags=0, $suffix='.' )
+   public function buildMaintenanceLockText( $intersect_flags=0, $suffix='.' )
    {
       $check_flags = ($intersect_flags > 0)
          ? $intersect_flags
          : TOURNEY_FLAG_LOCK_ADMIN | TOURNEY_FLAG_LOCK_TDWORK;
-      $str = sprintf( Tournament::getFlagsText(TOURNEY_FLAG_LOCK_ADMIN, 'LOCK') . $suffix,
+      $str = sprintf( self::getFlagsText(TOURNEY_FLAG_LOCK_ADMIN, 'LOCK') . $suffix,
                       $this->formatFlags('', $check_flags) );
       return span('TLockWarn', $str);
    }
 
-   function buildAdminLockText()
+   public function buildAdminLockText()
    {
       return $this->buildMaintenanceLockText( TOURNEY_FLAG_LOCK_ADMIN, ': ' . T_('Edit prohibited.') );
    }
 
    // current-round / rounds|*
-   function formatRound( $short=false )
+   public function formatRound( $short=false )
    {
       $rounds_str = ($this->Rounds > 0) ? $this->Rounds : '*';
       if( $this->Type == TOURNEY_TYPE_ROUND_ROBIN )
@@ -202,9 +197,9 @@ class Tournament
       }
       else //if( $this->Type == TOURNEY_TYPE_LADDER )
          return ( $short ) ? 1 : T_('1 round#tourney');
-   }
+   }//formatRound
 
-   function getRoundLimitText()
+   public function getRoundLimitText()
    {
       if( $this->Rounds > 0 )
          return sprintf( T_('(max. %s rounds)#tourney'), $this->Rounds );
@@ -212,12 +207,12 @@ class Tournament
          return T_('(unlimited rounds)#tourney');
    }
 
-   function setTP_Counts( $arr )
+   public function setTP_Counts( $arr )
    {
       $this->TP_Counts = array_merge( array(), $arr );
    }
 
-   function persist()
+   public function persist()
    {
       if( $this->ID > 0 )
          $success = $this->update();
@@ -226,36 +221,36 @@ class Tournament
       return $success;
    }
 
-   function insert()
+   public function insert()
    {
       $this->Created = $this->Lastchanged = $this->StartTime = $GLOBALS['NOW'];
 
       $entityData = $this->fillEntityData(true);
-      $result = $entityData->insert( "Tournament::insert(%s)" );
+      $result = $entityData->insert( "Tournament.insert(%s)" );
       if( $result )
          $this->ID = mysql_insert_id();
       return $result;
    }
 
-   function update()
+   public function update()
    {
       $this->Lastchanged = $GLOBALS['NOW'];
 
       $entityData = $this->fillEntityData(false /*-Created*/);
-      $result = $entityData->update( "Tournament::update(%s)" );
-      Tournament::delete_cache_tournament( 'Tournament.update', $this->ID );
+      $result = $entityData->update( "Tournament.update(%s)" );
+      self::delete_cache_tournament( 'Tournament.update', $this->ID );
       return $result;
    }
 
-   function delete()
+   public function delete()
    {
       $entityData = $this->fillEntityData(false);
-      $result = $entityData->delete( "Tournament::delete(%s)" );
-      Tournament::delete_cache_tournament( 'Tournament.update', $this->ID );
+      $result = $entityData->delete( "Tournament.delete(%s)" );
+      self::delete_cache_tournament( 'Tournament.update', $this->ID );
       return $result;
    }
 
-   function fillEntityData( $withCreated=false )
+   public function fillEntityData( $withCreated=false )
    {
       // checked fields: Scope/Type/Status
       $data = $GLOBALS['ENTITY_TOURNAMENT']->newEntityData();
@@ -286,7 +281,7 @@ class Tournament
     * \brief Updates given tournament-flag.
     * \param $set_flag true = set flag, false = clear flag
     */
-   function update_flags( $flag, $set_flag )
+   public function update_flags( $flag, $set_flag )
    {
       if( $flag > 0 )
       {
@@ -300,15 +295,15 @@ class Tournament
          $data->set_value( 'Flags', $this->Flags );
          $query = $data->build_sql_update( 1, false, false );
          $result = db_query( "Tournament.update_flags({$this->ID},$flag,$set_flag)", $query );
-         Tournament::delete_cache_tournament( 'Tournament.update_flags', $this->ID );
+         self::delete_cache_tournament( 'Tournament.update_flags', $this->ID );
          return $result;
       }
       else
          return false;
-   }
+   }//update_flags
 
    /*! \brief Updates Tournament.Rounds/CurrentRound. */
-   function update_rounds( $change_rounds, $curr_round=0 )
+   public function update_rounds( $change_rounds, $curr_round=0 )
    {
       if( !is_numeric($change_rounds) )
          error('invalid_args', "Tournament.update_rounds.check.change_rounds({$this->ID},$change_rounds)");
@@ -324,12 +319,12 @@ class Tournament
       $data->set_value( 'Lastchanged', $GLOBALS['NOW'] );
       $data->set_value( 'ChangedBy', $this->ChangedBy );
       $result = $data->update( "Tournament.update_rounds(%s,$change_rounds,$curr_round)" );
-      Tournament::delete_cache_tournament( 'Tournament.update_rounds', $this->ID );
+      self::delete_cache_tournament( 'Tournament.update_rounds', $this->ID );
       return $result;
-   }
+   }//update_rounds
 
    /*! \brief Returns TLOG_TYPE_... if given user can edit tournament directors; false otherwise. */
-   function allow_edit_directors( $uid )
+   public function allow_edit_directors( $uid )
    {
       if( $uid <= GUESTS_ID_MAX ) // forbidden for guests
          return false;
@@ -342,10 +337,10 @@ class Tournament
          return TLOG_TYPE_OWNER;
 
       return false;
-   }
+   }//allow_edit_directors
 
    /*! \brief Returns info about tournament with linked ID, scope, type and title; version=1..3. */
-   function build_info( $version=1, $extra='' )
+   public function build_info( $version=1, $extra='' )
    {
       global $base_path;
 
@@ -353,33 +348,33 @@ class Tournament
          return anchor( $base_path."tournaments/view_tournament.php?tid=".$this->ID, $this->ID )
             . SMALL_SPACING
             . sprintf( '(%s %s)',
-                       Tournament::getScopeText($this->Scope),
-                       Tournament::getTypeText($this->Type) )
+                       self::getScopeText($this->Scope),
+                       self::getTypeText($this->Type) )
             . SMALL_SPACING . '[' . make_html_safe( $this->Title, true ) . ']';
 
       if( $version == 2 ) // (scope type) Tournament #ID - title
          return sprintf( '(%s %s) %s #%s - %s',
-                         Tournament::getScopeText($this->Scope),
-                         Tournament::getTypeText($this->Type),
+                         self::getScopeText($this->Scope),
+                         self::getTypeText($this->Type),
                          T_('Tournament'),
                          $this->ID,
                          make_html_safe( $this->Title, true) );
 
       if( $version == 3 ) // (scope type) title [- extra]
          return sprintf( '(%s %s) %s' . ($extra ? ' - %s' : ''),
-                         Tournament::getScopeText($this->Scope),
-                         Tournament::getTypeText($this->Type),
+                         self::getScopeText($this->Scope),
+                         self::getTypeText($this->Type),
                          make_html_safe( $this->Title, true),
                          $extra );
 
       if( $version == 4 )
          return sprintf( '(%s %s) %s #%s - %s: %s', // (scope type) Tournament #ID - status
-                         Tournament::getScopeText($this->Scope),
-                         Tournament::getTypeText($this->Type),
+                         self::getScopeText($this->Scope),
+                         self::getTypeText($this->Type),
                          T_('Tournament'),
                          $this->ID,
                          T_('Status#tourney'),
-                         Tournament::getStatusText($this->Status) );
+                         self::getStatusText($this->Status) );
 
       //if( $version == 5 ) // extra=max-title-len
       return sprintf( '%s %s - %s', // linked: (img) Tournament - Title
@@ -388,7 +383,7 @@ class Tournament
                       make_html_safe( (is_numeric($extra) ? cut_str($this->Title, $extra) : $this->Title), true) );
    }//build_info
 
-   function build_role_info()
+   public function build_role_info()
    {
       if( TournamentUtils::isAdmin() )
          return T_('You are a tournament admin.');
@@ -399,14 +394,14 @@ class Tournament
 
       // "normal" user
       return T_('You are a director of this tournament.');
-   }
+   }//build_role_info
 
    /*!
     * \brief Checks tournament-locks and returns non-null
     *        list of errors and warnings, that disallow registration.
     * \param $check_type TCHKTYPE_TD|USER_NEW|USER_EDIT
     */
-   function checkRegistrationLocks( $check_type, $with_admin_check=true )
+   public function checkRegistrationLocks( $check_type, $with_admin_check=true )
    {
       $regerr = T_('Registration/Edit prohibited at the moment#tourney');
       $errors = array();
@@ -436,25 +431,25 @@ class Tournament
             $errors[] = $errmsg;
       }
       if( $this->isFlagSet(TOURNEY_FLAG_LOCK_CLOSE) )
-         $errors[] = Tournament::getLockText(TOURNEY_FLAG_LOCK_CLOSE);
+         $errors[] = self::getLockText(TOURNEY_FLAG_LOCK_CLOSE);
 
       return ($check_type == TCHKTYPE_USER_NEW)
          ? array( $errors, array() )
          : array( $errors, $warnings );
-   }
+   }//checkRegistrationLocks
 
 
    // ------------ static functions ----------------------------
 
    /*! \brief Returns db-fields to be used for query of Tournament-object. */
-   function build_query_sql()
+   public static function build_query_sql()
    {
       $qsql = $GLOBALS['ENTITY_TOURNAMENT']->newQuerySQL('T');
       return $qsql;
    }
 
    /*! \brief Returns Tournament-object created from specified (db-)row. */
-   function new_from_row( $row )
+   public static function new_from_row( $row )
    {
       $tournament = new Tournament(
             @$row['ID'],
@@ -480,26 +475,26 @@ class Tournament
    }
 
    /*! \brief Loads and returns Tournament-object for given tournament-ID; NULL if nothing found. */
-   function load_tournament( $tid )
+   public static function load_tournament( $tid )
    {
       $result = NULL;
       if( $tid > 0 )
       {
-         $qsql = Tournament::build_query_sql();
+         $qsql = self::build_query_sql();
          $qsql->add_part( SQLP_WHERE, "T.ID='$tid'" );
          $qsql->add_part( SQLP_LIMIT, '1' );
 
          $row = mysql_single_fetch( "Tournament.load_tournament($tid)", $qsql->get_select() );
          if( $row )
-            $result = Tournament::new_from_row( $row );
+            $result = self::new_from_row( $row );
       }
       return $result;
-   }
+   }//load_tournament
 
    /*! \brief Returns enhanced (passed) ListIterator with Tournament-objects. */
-   function load_tournaments( $iterator )
+   public static function load_tournaments( $iterator )
    {
-      $qsql = Tournament::build_query_sql();
+      $qsql = self::build_query_sql();
       $iterator->setQuerySQL( $qsql );
       $query = $iterator->buildQuery();
       $result = db_query( "Tournament.load_tournaments", $query );
@@ -508,108 +503,100 @@ class Tournament
       $iterator->clearItems();
       while( $row = mysql_fetch_array( $result ) )
       {
-         $tourney = Tournament::new_from_row( $row );
+         $tourney = self::new_from_row( $row );
          $iterator->addItem( $tourney, $row );
       }
       mysql_free_result($result);
 
       return $iterator;
-   }
+   }//load_tournaments
 
    /*!
     * \brief Increases/decreases Tournament.RegisteredTP for given tournament.
     *
     * \note IMPORTANT NOTE: caller needs to open TA with HOT-section!!
     */
-   function update_tournament_registeredTP( $tid, $diff )
+   public static function update_tournament_registeredTP( $tid, $diff )
    {
       if( !is_numeric($tid) || !is_numeric($diff) )
-         error('invalid_args', "Tournament::update_tournament_registeredTP($tid,$diff)");
+         error('invalid_args', "Tournament:update_tournament_registeredTP($tid,$diff)");
       if( $diff )
       {
-         db_query( "Tournament::update_tournament_registeredTP($tid,$diff)",
+         db_query( "Tournament:update_tournament_registeredTP($tid,$diff)",
             "UPDATE Tournament SET RegisteredTP=RegisteredTP+($diff) WHERE ID=$tid LIMIT 1" );
-         Tournament::delete_cache_tournament( 'Tournament.update_tournament_registeredTP', $tid );
+         self::delete_cache_tournament( 'Tournament.update_tournament_registeredTP', $tid );
       }
    }
 
    /*! \brief Returns scope-text or all scope-texts (if arg=null). */
-   function getScopeText( $scope=null )
+   public static function getScopeText( $scope=null )
    {
-      global $ARR_GLOBALS_TOURNAMENT;
-
       // lazy-init of texts
       $key = 'SCOPE';
-      if( !isset($ARR_GLOBALS_TOURNAMENT[$key]) )
+      if( !isset(self::$ARR_TOURNEY_TEXTS[$key]) )
       {
          $arr = array();
          $arr[TOURNEY_SCOPE_DRAGON]  = T_('Dragon#T_scope');
          $arr[TOURNEY_SCOPE_PUBLIC]  = T_('Public#T_scope');
          $arr[TOURNEY_SCOPE_PRIVATE] = T_('Private#T_scope');
-         $ARR_GLOBALS_TOURNAMENT[$key] = $arr;
+         self::$ARR_TOURNEY_TEXTS[$key] = $arr;
       }
 
       if( is_null($scope) )
-         return $ARR_GLOBALS_TOURNAMENT[$key];
-      if( !isset($ARR_GLOBALS_TOURNAMENT[$key][$scope]) )
+         return self::$ARR_TOURNEY_TEXTS[$key];
+      if( !isset(self::$ARR_TOURNEY_TEXTS[$key][$scope]) )
          error('invalid_args', "Tournament.getScopeText($scope)");
-      return $ARR_GLOBALS_TOURNAMENT[$key][$scope];
-   }
+      return self::$ARR_TOURNEY_TEXTS[$key][$scope];
+   }//getScopeText
 
    /*! \brief Returns type-text or all type-texts (if arg=null). */
-   function getTypeText( $type=null )
+   public static function getTypeText( $type=null )
    {
-      global $ARR_GLOBALS_TOURNAMENT;
-
       // lazy-init of texts
       $key = 'TYPE';
-      if( !isset($ARR_GLOBALS_TOURNAMENT[$key]) )
+      if( !isset(self::$ARR_TOURNEY_TEXTS[$key]) )
       {
          $arr = array();
          $arr[TOURNEY_TYPE_LADDER] = T_('Ladder#T_type');
          $arr[TOURNEY_TYPE_ROUND_ROBIN] = T_('Round Robin#T_type');
-         $ARR_GLOBALS_TOURNAMENT[$key] = $arr;
+         self::$ARR_TOURNEY_TEXTS[$key] = $arr;
       }
 
       if( is_null($type) )
-         return $ARR_GLOBALS_TOURNAMENT[$key];
-      if( !isset($ARR_GLOBALS_TOURNAMENT[$key][$type]) )
+         return self::$ARR_TOURNEY_TEXTS[$key];
+      if( !isset(self::$ARR_TOURNEY_TEXTS[$key][$type]) )
          error('invalid_args', "Tournament.getTypeText($type)");
-      return $ARR_GLOBALS_TOURNAMENT[$key][$type];
-   }
+      return self::$ARR_TOURNEY_TEXTS[$key][$type];
+   }//getTypeText
 
    /*! \brief Returns wizard-type-text or all type-texts (if arg=null). */
-   function getWizardTypeText( $wiztype=null )
+   public static function getWizardTypeText( $wiztype=null )
    {
-      global $ARR_GLOBALS_TOURNAMENT;
-
       // lazy-init of texts
       $key = 'WIZARDTYPE';
-      if( !isset($ARR_GLOBALS_TOURNAMENT[$key]) )
+      if( !isset(self::$ARR_TOURNEY_TEXTS[$key]) )
       {
          $arr = array();
          $arr[TOURNEY_WIZTYPE_DGS_LADDER] = T_('DGS Ladder');
          $arr[TOURNEY_WIZTYPE_PUBLIC_LADDER] = T_('Public Ladder');
          $arr[TOURNEY_WIZTYPE_PRIVATE_LADDER] = T_('Private Ladder');
          $arr[TOURNEY_WIZTYPE_DGS_ROUNDROBIN] = T_('DGS Round-Robin');
-         $ARR_GLOBALS_TOURNAMENT[$key] = $arr;
+         self::$ARR_TOURNEY_TEXTS[$key] = $arr;
       }
 
       if( is_null($wiztype) )
-         return $ARR_GLOBALS_TOURNAMENT[$key];
-      if( !isset($ARR_GLOBALS_TOURNAMENT[$key][$wiztype]) )
+         return self::$ARR_TOURNEY_TEXTS[$key];
+      if( !isset(self::$ARR_TOURNEY_TEXTS[$key][$wiztype]) )
          error('invalid_args', "Tournament.getWizardTypeText($wiztype)");
-      return $ARR_GLOBALS_TOURNAMENT[$key][$wiztype];
-   }
+      return self::$ARR_TOURNEY_TEXTS[$key][$wiztype];
+   }//getWizardTypeText
 
    /*! \brief Returns status-text or all status-texts (if arg=null). */
-   function getStatusText( $status=null )
+   public static function getStatusText( $status=null )
    {
-      global $ARR_GLOBALS_TOURNAMENT;
-
       // lazy-init of texts
       $key = 'STATUS';
-      if( !isset($ARR_GLOBALS_TOURNAMENT[$key]) )
+      if( !isset(self::$ARR_TOURNEY_TEXTS[$key]) )
       {
          $arr = array();
          $arr[TOURNEY_STATUS_ADMIN]    = T_('Admin#T_status');
@@ -619,30 +606,28 @@ class Tournament
          $arr[TOURNEY_STATUS_PLAY]     = T_('Play#T_status');
          $arr[TOURNEY_STATUS_CLOSED]   = T_('Finished#T_status');
          $arr[TOURNEY_STATUS_DELETE]   = T_('Delete#T_status');
-         $ARR_GLOBALS_TOURNAMENT[$key] = $arr;
+         self::$ARR_TOURNEY_TEXTS[$key] = $arr;
       }
 
       if( is_null($status) )
       {
-         return array() + $ARR_GLOBALS_TOURNAMENT[$key]; // cloned
-         //$arrout = array() + $ARR_GLOBALS_TOURNAMENT[$key];
+         return array() + self::$ARR_TOURNEY_TEXTS[$key]; // cloned
+         //$arrout = array() + self::$ARR_TOURNEY_TEXTS[$key];
          //if( !TournamentUtils::isAdmin() )
             //unset($arrout[TOURNEY_STATUS_ADMIN]);
          //return $arrout;
       }
-      if( !isset($ARR_GLOBALS_TOURNAMENT[$key][$status]) )
+      if( !isset(self::$ARR_TOURNEY_TEXTS[$key][$status]) )
          error('invalid_args', "Tournament.getStatusText($status)");
-      return $ARR_GLOBALS_TOURNAMENT[$key][$status];
-   }
+      return self::$ARR_TOURNEY_TEXTS[$key][$status];
+   }//getStatusText
 
    /*! \brief Returns Flags-text or all Flags-texts (if arg=null). */
-   function getFlagsText( $flag=null, $short=true )
+   public static function getFlagsText( $flag=null, $short=true )
    {
-      global $ARR_GLOBALS_TOURNAMENT;
-
       // lazy-init of texts
       $key = 'FLAGS';
-      if( !isset($ARR_GLOBALS_TOURNAMENT[$key]) )
+      if( !isset(self::$ARR_TOURNEY_TEXTS[$key]) )
       {
          $arr = array();
          $arr[TOURNEY_FLAG_LOCK_ADMIN]    = T_('Admin-Lock#T_flag');
@@ -650,7 +635,7 @@ class Tournament
          $arr[TOURNEY_FLAG_LOCK_TDWORK]   = T_('Director-Work-Lock#T_flag');
          $arr[TOURNEY_FLAG_LOCK_CRON]     = T_('Cron-Lock#T_flag');
          $arr[TOURNEY_FLAG_LOCK_CLOSE]    = T_('Close-Lock#T_flag');
-         $ARR_GLOBALS_TOURNAMENT[$key] = $arr;
+         self::$ARR_TOURNEY_TEXTS[$key] = $arr;
 
          $arr = array();
          $arr[TOURNEY_FLAG_LOCK_ADMIN]    = T_('Prohibits all writing operations on tournament for non-admins.#T_locktxt');
@@ -658,7 +643,7 @@ class Tournament
          $arr[TOURNEY_FLAG_LOCK_TDWORK]   = T_('Provides exclusive write-access to tournament directors on certain tournament-data.#T_locktxt');
          $arr[TOURNEY_FLAG_LOCK_CRON]     = T_('Provides exclusive write-access to tounament-cron on certain tournament-data.#T_locktxt');
          $arr[TOURNEY_FLAG_LOCK_CLOSE]    = T_('Prohibits users to join tournament or start challenges (preparation to finish tournament).#T_locktxt');
-         $ARR_GLOBALS_TOURNAMENT[$key.'_LONG'] = $arr;
+         self::$ARR_TOURNEY_TEXTS[$key.'_LONG'] = $arr;
 
          $arr = array();
          $arr[TOURNEY_FLAG_LOCK_ADMIN]    = T_('Tournament is in Maintenance-mode (%s)#T_lock');
@@ -666,7 +651,7 @@ class Tournament
          $arr[TOURNEY_FLAG_LOCK_TDWORK]   = T_('Edit of ladder needs %s.#T_lock');
          $arr[TOURNEY_FLAG_LOCK_CRON]     = T_('Edit of ladder is prohibited by set %s. Please wait a moment.#T_lock');
          $arr[TOURNEY_FLAG_LOCK_CLOSE]    = T_('%s is set prohibiting users to join tournament or start challenges.#T_lock');
-         $ARR_GLOBALS_TOURNAMENT[$key.'_LOCK'] = $arr;
+         self::$ARR_TOURNEY_TEXTS[$key.'_LOCK'] = $arr;
 
          $arr = array();
          $arr[TOURNEY_FLAG_LOCK_ADMIN]    = 'ADMIN';
@@ -674,7 +659,7 @@ class Tournament
          $arr[TOURNEY_FLAG_LOCK_TDWORK]   = 'TDWORK';
          $arr[TOURNEY_FLAG_LOCK_CRON]     = 'CRON';
          $arr[TOURNEY_FLAG_LOCK_CLOSE]    = 'CLOSE';
-         $ARR_GLOBALS_TOURNAMENT[$key.'_SHORT'] = $arr;
+         self::$ARR_TOURNEY_TEXTS[$key.'_SHORT'] = $arr;
       }
 
       if( $short === false )
@@ -682,30 +667,30 @@ class Tournament
       elseif( $short !== true )
          $key .= '_' . $short;
       if( is_null($flag) )
-         return $ARR_GLOBALS_TOURNAMENT[$key];
-      if( !isset($ARR_GLOBALS_TOURNAMENT[$key][$flag]) )
-         error('invalid_args', "Tournament::getFlagsText($flag,$short)");
-      return $ARR_GLOBALS_TOURNAMENT[$key][$flag];
+         return self::$ARR_TOURNEY_TEXTS[$key];
+      if( !isset(self::$ARR_TOURNEY_TEXTS[$key][$flag]) )
+         error('invalid_args', "Tournament:getFlagsText($flag,$short)");
+      return self::$ARR_TOURNEY_TEXTS[$key][$flag];
    }//getFlagsText
 
-   function getLockText( $flag )
+   public static function getLockText( $flag )
    {
-      return span('TLockWarn', sprintf( Tournament::getFlagsText($flag, 'LOCK'), Tournament::getFlagsText($flag)) );
+      return span('TLockWarn', sprintf( self::getFlagsText($flag, 'LOCK'), self::getFlagsText($flag)) );
    }
 
-   function get_edit_tournament_status()
+   public static function get_edit_tournament_status()
    {
       static $statuslist = array( TOURNEY_STATUS_NEW );
       return $statuslist;
    }
 
-   function get_edit_lock_tournament_status()
+   public static function get_edit_lock_tournament_status()
    {
       static $statuslist = array( TOURNEY_STATUS_PAIR, TOURNEY_STATUS_REGISTER, TOURNEY_STATUS_PLAY );
       return $statuslist;
    }
 
-   function delete_cache_tournament( $dbgmsg, $tid )
+   public static function delete_cache_tournament( $dbgmsg, $tid )
    {
       DgsCache::delete( $dbgmsg, CACHE_GRP_TOURNAMENT, "Tournament.$tid" );
    }

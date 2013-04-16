@@ -32,10 +32,6 @@ require_once( 'include/utilities.php' );
  *     (plus some international languages (ISO 639 code))
  */
 
-// use lazy-init to assure, that translation-language has been initialized !!
-global $ARR_GLOBALS_COUNTRIES; //PHP5
-$ARR_GLOBALS_COUNTRIES = array();
-
 
 /*!
  * \brief Returns country-text or all countries (if code=null); '' if code is unknown country.
@@ -60,18 +56,17 @@ $ARR_GLOBALS_COUNTRIES = array();
  */
 function getCountryText( $code=null )
 {
-   global $ARR_GLOBALS_COUNTRIES;
+   static $ARR_COUNTRIES = null; // country => text
 
    // lazy-init of texts
-   $key = 'COUNTRIES';
-   if( !isset($ARR_GLOBALS_COUNTRIES[$key]) )
+   if( is_null($ARR_COUNTRIES) )
    {
       // Legend for flag:
       // - "[country]" = territory of given country
       // - "same as" = same flag as other [country],
       // - "(unofficial)" = most likely unofficial flag, keep flag because of separate country-code
 
-      $arr = array(
+      $ARR_COUNTRIES = array(
          'af' => T_('Afghanistan'),
          'ax' => T_('Aaland Islands'), // [FI] (unofficial)
          'al' => T_('Albania'),
@@ -328,16 +323,13 @@ function getCountryText( $code=null )
          'xi' => T_('Interlingua'), // DGS-language
          'xk' => T_('Klingon Empire'), // fierce fighters, not a nation ... but who knows for sure?
          'xf' => T_('United Federation of Planets'), // calm folk, not a nation ... but soon?
-      );
-      $ARR_GLOBALS_COUNTRIES[$key] = $arr;
+      );//ARR_COUNTRIES
    }
 
    if( is_null($code) )
-      return $ARR_GLOBALS_COUNTRIES[$key];
+      return $ARR_COUNTRIES;
 
-   return ( isset($ARR_GLOBALS_COUNTRIES[$key][$code]) )
-      ? $ARR_GLOBALS_COUNTRIES[$key][$code]
-      : '';
+   return ( isset($ARR_COUNTRIES[$code]) ) ? $ARR_COUNTRIES[$code] : '';
 }//getCountryText
 
 /*! \brief Returns image-tag; '' if unknown country-code used. */

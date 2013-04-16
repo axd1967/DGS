@@ -35,7 +35,6 @@ require_once 'tournaments/include/tournament_log_helper.php';
 require_once 'tournaments/include/tournament_rules.php';
 require_once 'tournaments/include/tournament_participant.php';
 require_once 'tournaments/include/tournament_properties.php';
-require_once 'tournaments/include/tournament_status.php';
 require_once 'tournaments/include/tournament_utils.php';
 
 $GLOBALS['ThePage'] = new Page('TournamentLadderChallenge');
@@ -71,8 +70,6 @@ $GLOBALS['ThePage'] = new Page('TournamentLadderChallenge');
       jump_to("tournaments/ladder/view.php?tid=$tid");
 
    $tourney = TournamentCache::load_cache_tournament( 'Tournament.ladder.challenge.find_tournament', $tid );
-   $tstatus = new TournamentStatus( $tourney );
-
    if( $tourney->Status != TOURNEY_STATUS_PLAY )
       error('tournament_wrong_status', "Tournament.ladder.challenge.check_status($tid,{$tourney->Status})");
 

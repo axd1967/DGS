@@ -45,16 +45,16 @@ define('FORUMOPTS_GROUPS_HIDDEN', FORUMOPT_GROUP_ADMIN|FORUMOPT_GROUP_DEV);
 class ForumOptions
 {
    /*! \brief Players.ID */
-   var $uid;
+   public $uid;
    /*! \brief from Players.Adminlevel */
-   var $admin_level;
+   private $admin_level;
    /*! \brief true if admin-option ADMOPT_FGROUP_ADMIN for user set [bool] */
-   var $view_admin;
+   private $view_admin;
    /*! \brief true if admin-option ADMOPT_FGROUP_DEV for user set [bool] */
-   var $view_dev;
+   private $view_dev;
 
    /*! \brief Constructs ForumOptions from specified player_row. */
-   function ForumOptions( $urow )
+   public function __construct( $urow )
    {
       $this->uid = (int)@$urow['ID'];
       $this->admin_level = (int)@$urow['admin_level'];
@@ -62,13 +62,13 @@ class ForumOptions
       $this->view_dev = (@$urow['AdminOptions'] & ADMOPT_FGROUP_DEV);
    }
 
-   function is_executive_admin()
+   public function is_executive_admin()
    {
       return ($this->admin_level & ADMINGROUP_EXECUTIVE);
    }
 
    /*! \brief returns true if forum with given Options can be seen by user. */
-   function is_visible_forum( $fopts )
+   public function is_visible_forum( $fopts )
    {
       $show = true;
 
@@ -84,10 +84,10 @@ class ForumOptions
       }
 
       return $show;
-   }
+   }//is_visible_forum
 
    /*! \brief Returns bit-mask to use on Forum.Options to select only matching forums for user. */
-   function build_db_options_exclude()
+   public function build_db_options_exclude()
    {
       // choose mask, so that: Forums.Options & exclude_mask = 0 !!
       $mask = 0;

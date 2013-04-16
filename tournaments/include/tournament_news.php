@@ -40,10 +40,6 @@ require_once 'tournaments/include/tournament.php';
   * \brief Class to manage TournamentNews-table
   */
 
-// lazy-init in TournamentNews::get..Text()-funcs
-global $ARR_GLOBALS_TOURNAMENT_NEWS; //PHP5
-$ARR_GLOBALS_TOURNAMENT_NEWS = array();
-
 global $ENTITY_TOURNAMENT_NEWS; //PHP5
 $ENTITY_TOURNAMENT_NEWS = new Entity( 'TournamentNews',
       FTYPE_PKEY, 'ID',
@@ -57,23 +53,25 @@ $ENTITY_TOURNAMENT_NEWS = new Entity( 'TournamentNews',
 
 class TournamentNews
 {
-   var $ID;
-   var $tid;
-   var $uid;
-   var $Status; // null | TNEWS_STATUS_...
-   var $Flags; // TNEWS_FLAG_...
-   var $Published;
-   var $Subject;
-   var $Text;
-   var $Lastchanged;
-   var $ChangedBy;
+   private static $ARR_TNEWS_TEXTS = array(); // lazy-init in TournamentNews::get..Text()-funcs: [key][id] => text
+
+   public $ID;
+   public $tid;
+   public $uid;
+   public $Status; // null | TNEWS_STATUS_...
+   public $Flags; // TNEWS_FLAG_...
+   public $Published;
+   public $Subject;
+   public $Text;
+   public $Lastchanged;
+   public $ChangedBy;
 
    // non-DB fields
 
-   var $User; // User-object
+   public $User; // User-object
 
    /*! \brief Constructs TournamentNews-object with specified arguments. */
-   function TournamentNews( $id=0, $tid=0, $uid=0, $user=null, $status=TNEWS_STATUS_NEW, $flags=0,
+   public function __construct( $id=0, $tid=0, $uid=0, $user=null, $status=TNEWS_STATUS_NEW, $flags=0,
          $published=0, $subject='', $text='', $lastchanged=0, $changed_by='' )
    {
       $this->ID = (int)$id;
@@ -90,14 +88,14 @@ class TournamentNews
       $this->User = ($user instanceof User) ? $user : new User( $this->uid );
    }
 
-   function setStatus( $status )
+   public function setStatus( $status )
    {
       if( !preg_match( "/^(".CHECK_TNEWS_STATUS.")$/", $status ) )
          error('invalid_args', "TournamentNews.setStatus($status)");
       $this->Status = $status;
    }
 
-   function to_string()
+   public function to_string()
    {
       return " ID=[{$this->ID}]"
             . ", tid=[{$this->tid}]"
@@ -114,7 +112,7 @@ class TournamentNews
    }
 
    /*! \brief Inserts or updates tournament-news in database. */
-   function persist()
+   public function persist()
    {
       if( $this->ID > 0 )
          $success = $this->update();
@@ -123,45 +121,46 @@ class TournamentNews
       return $success;
    }
 
-   function insert()
+   public function insert()
    {
       $this->Lastchanged = $GLOBALS['NOW'];
 
       $this->checkData();
       $entityData = $this->fillEntityData(true);
-      $result = $entityData->insert( "TournamentNews::insert(%s)" );
+      $result = $entityData->insert( "TournamentNews.insert(%s)" );
       if( $result )
          $this->ID = mysql_insert_id();
-      TournamentNews::delete_cache_tournament_news( 'TournamentNews.insert', $this->tid );
+      self::delete_cache_tournament_news( 'TournamentNews.insert', $this->tid );
       return $result;
    }
 
-   function update()
+   public function update()
    {
       $this->Lastchanged = $GLOBALS['NOW'];
 
       $this->checkData();
       $entityData = $this->fillEntityData();
-      $result = $entityData->update( "TournamentNews::update(%s)" );
-      TournamentNews::delete_cache_tournament_news( 'TournamentNews.update', $this->tid );
+      $result = $entityData->update( "TournamentNews.update(%s)" );
+      self::delete_cache_tournament_news( 'TournamentNews.update', $this->tid );
       return $result;
    }
 
-   function delete()
+   public function delete()
    {
       $entityData = $this->fillEntityData();
-      $result = $entityData->delete( "TournamentNews::delete(%s)" );
-      TournamentNews::delete_cache_tournament_news( 'TournamentNews.delete', $this->tid );
+      $result = $entityData->delete( "TournamentNews.delete(%s)" );
+      self::delete_cache_tournament_news( 'TournamentNews.delete', $this->tid );
       return $result;
    }
 
-   function checkData()
+   // \internal
+   private function checkData()
    {
       if( is_null($this->Status) )
          error('invalid_args', "TournamentNews.checkData.miss_status({$this->ID},{$this->tid})");
    }
 
-   function fillEntityData()
+   public function fillEntityData()
    {
       $data = $GLOBALS['ENTITY_TOURNAMENT_NEWS']->newEntityData();
       $data->set_value( 'ID', $this->ID );
@@ -177,10 +176,11 @@ class TournamentNews
       return $data;
    }
 
+
    // ------------ static functions ----------------------------
 
    /*! \brief Returns db-fields to be used for query of TournamentNews-object for given IDs. */
-   function build_query_sql( $tnews_id=0, $tid=0 )
+   public static function build_query_sql( $tnews_id=0, $tid=0 )
    {
       $qsql = $GLOBALS['ENTITY_TOURNAMENT_NEWS']->newQuerySQL('TN');
       $qsql->add_part( SQLP_FIELDS,
@@ -204,7 +204,7 @@ class TournamentNews
     * \param $is_admin true, if user is TD/T-owner/T-admin; false = normal user
     * \param $is_tparticipant true, if user is TP
     */
-   function build_view_query_sql( $tnews_id, $tid, $tnews_status, $is_admin, $is_tparticipant )
+   public static function build_view_query_sql( $tnews_id, $tid, $tnews_status, $is_admin, $is_tparticipant )
    {
       $qsql = new QuerySQL();
       if( $tnews_id > 0 )
@@ -222,10 +222,10 @@ class TournamentNews
       if( !is_null($tnews_status) )
          $qsql->add_part( SQLP_WHERE, "TN.Status='$tnews_status'" );
       return $qsql;
-   }
+   }//build_view_query_sql
 
    /*! \brief Returns TournamentNews-object created from specified (db-)row. */
-   function new_from_row( $row )
+   public static function new_from_row( $row )
    {
       $tn = new TournamentNews(
             // from TournamentNews
@@ -245,18 +245,18 @@ class TournamentNews
    }
 
    /*! \brief Loads and returns TournamentNews-object for given tournament-news-QuerySQL; NULL if nothing found. */
-   function load_tournament_news_entry_by_query( $qsql )
+   public static function load_tournament_news_entry_by_query( $qsql )
    {
       $qsql->add_part( SQLP_LIMIT, '1' );
       $row = mysql_single_fetch( "TournamentNews.load_tournament_news_entry_by_query()",
          $qsql->get_select() );
-      return ( $row ) ? TournamentNews::new_from_row( $row ) : NULL;
+      return ( $row ) ? self::new_from_row( $row ) : NULL;
    }
 
    /*! \brief Returns enhanced (passed) ListIterator with TournamentNews-objects of given tournament. */
-   function load_tournament_news( $iterator, $tid )
+   public static function load_tournament_news( $iterator, $tid )
    {
-      $qsql = TournamentNews::build_query_sql( 0, $tid );
+      $qsql = self::build_query_sql( 0, $tid );
       $iterator->setQuerySQL( $qsql );
       $query = $iterator->buildQuery();
       $result = db_query( "TournamentNews.load_tournament_news($tid)", $query );
@@ -265,20 +265,20 @@ class TournamentNews
       $iterator->clearItems();
       while( $row = mysql_fetch_array( $result ) )
       {
-         $tourney = TournamentNews::new_from_row( $row );
+         $tourney = self::new_from_row( $row );
          $iterator->addItem( $tourney, $row );
       }
       mysql_free_result($result);
 
       return $iterator;
-   }
+   }//load_tournament_news
 
    /*! \brief Deletes all tournament-news on DELETE-status older than given number days (can be negative). */
-   function process_tournament_news_deleted( $days_age )
+   public static function process_tournament_news_deleted( $days_age )
    {
       global $NOW;
       if( !is_numeric($days_age) )
-         error('invalid_args', "TournamentNews::process_tournament_news_deleted($days_age)");
+         error('invalid_args', "TournamentNews:process_tournament_news_deleted($days_age)");
 
       $query = "FROM TournamentNews WHERE Status='".TNEWS_STATUS_DELETE."' AND " .
             "Lastchanged < FROM_UNIXTIME($NOW) - INTERVAL $days_age DAY";
@@ -287,59 +287,55 @@ class TournamentNews
       {//HOT-section to delete old tournament-news
          // find tournament-id to clear cache for
          $arr_tids = array();
-         $result = db_query( "TournamentNews.process_tournament_news_deleted.find_tourney($days_age)",
+         $result = db_query( "TournamentNews:process_tournament_news_deleted.find_tourney($days_age)",
             "SELECT tid $query" );
          while( $row = mysql_fetch_array($result) )
             $arr_tids[] = $row['tid'];
          mysql_free_result($result);
 
-         db_query( "TournamentNews.process_tournament_news_deleted($days_age)", "DELETE $query" );
+         db_query( "TournamentNews:process_tournament_news_deleted($days_age)", "DELETE $query" );
          foreach( $arr_tids as $tid )
-            TournamentNews::delete_cache_tournament_news( 'TournamentNews::process_tournament_news_deleted', $tid );
+            self::delete_cache_tournament_news( 'TournamentNews:process_tournament_news_deleted', $tid );
       }
       ta_end();
    }//process_tournament_news_deleted
 
    /*! \brief Returns status-text or all status-texts (if arg=null). */
-   function getStatusText( $status=null )
+   public static function getStatusText( $status=null )
    {
-      global $ARR_GLOBALS_TOURNAMENT_NEWS;
-
       // lazy-init of texts
-      if( !isset($ARR_GLOBALS_TOURNAMENT_NEWS['STATUS']) )
+      if( !isset(self::$ARR_TNEWS_TEXTS['STATUS']) )
       {
          $arr = array();
          $arr[TNEWS_STATUS_NEW]     = T_('New#TN_status');
          $arr[TNEWS_STATUS_SHOW]    = T_('Show#TN_status');
          $arr[TNEWS_STATUS_ARCHIVE] = T_('Archive#TN_status');
          $arr[TNEWS_STATUS_DELETE]  = T_('Delete#TN_status');
-         $ARR_GLOBALS_TOURNAMENT_NEWS['STATUS'] = $arr;
+         self::$ARR_TNEWS_TEXTS['STATUS'] = $arr;
       }
 
       $key = 'STATUS';
       if( is_null($status) )
-         return $ARR_GLOBALS_TOURNAMENT_NEWS[$key];
+         return self::$ARR_TNEWS_TEXTS[$key];
 
-      if( !isset($ARR_GLOBALS_TOURNAMENT_NEWS[$key][$status]) )
+      if( !isset(self::$ARR_TNEWS_TEXTS[$key][$status]) )
          error('invalid_args', "TournamentNews.getStatusText($status,$key)");
-      return $ARR_GLOBALS_TOURNAMENT_NEWS[$key][$status];
-   }
+      return self::$ARR_TNEWS_TEXTS[$key][$status];
+   }//getStatusText
 
    /*! \brief Returns flags-text for given int-bitmask or all flags-texts (if arg=null). */
-   function getFlagsText( $flags=null )
+   public static function getFlagsText( $flags=null )
    {
-      global $ARR_GLOBALS_TOURNAMENT_NEWS;
-
       // lazy-init of texts
-      if( !isset($ARR_GLOBALS_TOURNAMENT_NEWS['FLAGS']) )
+      if( !isset(self::$ARR_TNEWS_TEXTS['FLAGS']) )
       {
          $arr = array();
          $arr[TNEWS_FLAG_HIDDEN]    = T_('Hidden#TN_flag');
          $arr[TNEWS_FLAG_PRIVATE]   = T_('Private#TN_flag');
-         $ARR_GLOBALS_TOURNAMENT_NEWS['FLAGS'] = $arr;
+         self::$ARR_TNEWS_TEXTS['FLAGS'] = $arr;
       }
       else
-         $arr = $ARR_GLOBALS_TOURNAMENT_NEWS['FLAGS'];
+         $arr = self::$ARR_TNEWS_TEXTS['FLAGS'];
       if( is_null($flags) )
          return $arr;
 
@@ -347,19 +343,19 @@ class TournamentNews
       foreach( $arr as $flagmask => $flagtext )
          if( $flags & $flagmask ) $out[] = $flagtext;
       return implode(', ', $out);
-   }
+   }//getFlagsText
 
    /*! \brief Prints formatted tournament-news with CSS-style with title, publish-date, author and text. */
-   function build_tournament_news( $tnews )
+   public static function build_tournament_news( $tnews )
    {
       $title = make_html_safe($tnews->Subject, true);
       $text = make_html_safe($tnews->Text, true);
 
       $fout = array();
       if( $tnews->Flags & TNEWS_FLAG_HIDDEN )
-         $fout[] = TournamentNews::getFlagsText(TNEWS_FLAG_HIDDEN);
+         $fout[] = self::getFlagsText(TNEWS_FLAG_HIDDEN);
       if( $tnews->Flags & TNEWS_FLAG_PRIVATE )
-         $fout[] = TournamentNews::getFlagsText(TNEWS_FLAG_PRIVATE);
+         $fout[] = self::getFlagsText(TNEWS_FLAG_PRIVATE);
       $publish_text = ( count($fout) ) ? span('TNewsFlags', implode(', ', $fout), '(%s) ') : '';
 
       $publish_text .= sprintf( T_('[%s] by %s#tnews_publish'),
@@ -371,9 +367,9 @@ class TournamentNews
             "<div class=\"Published\">$publish_text</div>\n" .
             "<div class=\"Text\">$text</div>" .
          "</div>\n";
-   }
+   }//build_tournament_news
 
-   function delete_cache_tournament_news( $dbgmsg, $tid )
+   public static function delete_cache_tournament_news( $dbgmsg, $tid )
    {
       DgsCache::delete_group( $dbgmsg, CACHE_GRP_TNEWS, "TNews.$tid" );
    }

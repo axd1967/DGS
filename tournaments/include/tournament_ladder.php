@@ -60,34 +60,34 @@ $ENTITY_TOURNAMENT_LADDER = new Entity( 'TournamentLadder',
 
 class TournamentLadder
 {
-   var $tid;
-   var $rid;
-   var $uid;
-   var $Created;
-   var $RankChanged;
-   var $Rank;
-   var $BestRank;
-   var $StartRank;
-   var $PeriodRank;
-   var $HistoryRank;
-   var $ChallengesIn;
-   var $ChallengesOut;
+   public $tid;
+   public $rid;
+   public $uid;
+   public $Created;
+   public $RankChanged;
+   public $Rank;
+   public $BestRank;
+   public $StartRank;
+   public $PeriodRank;
+   public $HistoryRank;
+   public $ChallengesIn;
+   public $ChallengesOut;
 
    // non-DB fields
 
    /*! \brief true if challenge allowed on this user, also if max. outgoing challenges reached. */
-   var $AllowChallenge;
+   public $AllowChallenge = false;
    /*! \brief true, if max. number of incoming challenges reached for ladder-user. */
-   var $MaxChallengedIn;
+   public $MaxChallengedIn = false;
    /*! \brief true, if max. number of outgoing challenges reached for ladder-user. */
-   var $MaxChallengedOut;
+   public $MaxChallengedOut = false;
    /*! \brief array of TournamentGames-object of incoming-challenges: arr( TG.ID => TG ); TG with TG.RankRef added. */
-   var $RunningTourneyGames;
+   public $RunningTourneyGames = array();
    /*! \brief how many hours to wait till rematch allowed with same user; -1=rematch allowed, 0=TG still on WAIT-status but due. */
-   var $RematchWait;
+   public $RematchWait = -1;
 
    /*! \brief Constructs TournamentLadder-object with specified arguments. */
-   function TournamentLadder( $tid=0, $rid=0, $uid=0, $created=0, $rank_changed=0, $rank=0, $best_rank=0,
+   public function __construct( $tid=0, $rid=0, $uid=0, $created=0, $rank_changed=0, $rank=0, $best_rank=0,
          $start_rank=0, $period_rank=0, $history_rank=0, $challenges_in=0, $challenges_out=0 )
    {
       $this->tid = (int)$tid;
@@ -102,16 +102,10 @@ class TournamentLadder
       $this->HistoryRank = (int)$history_rank;
       $this->ChallengesIn = (int)$challenges_in;
       $this->ChallengesOut = (int)$challenges_out;
-      // non-DB fields
-      $this->AllowChallenge = false;
-      $this->MaxChallengedIn = false;
-      $this->MaxChallengedOut = false;
-      $this->RunningTourneyGames = array();
-      $this->RematchWait = -1;
    }
 
    /*! \brief Adds TournamentGames-object to list of incoming challenge (running) games. */
-   function add_running_game( $tgame )
+   public function add_running_game( $tgame )
    {
       if( !($tgame instanceof TournamentGames) )
          error('invalid_args', "TournamentLadder.add_running_game({$this->tid},{$this->rid})");
@@ -119,7 +113,7 @@ class TournamentLadder
    }
 
    /*! \brief Returns list of running TournamentGames-objects ordered by TG.ID, that is creation-order (first=first-created). */
-   function get_running_games()
+   public function get_running_games()
    {
       ksort( $this->RunningTourneyGames, SORT_NUMERIC );
       return $this->RunningTourneyGames;
@@ -129,7 +123,7 @@ class TournamentLadder
     * \brief Returns non-null array with "[#Rank]" linked to game-id for running tourney-games.
     * \see fill_ladder_running_games()
     */
-   function build_linked_running_games()
+   public function build_linked_running_games()
    {
       $arr = array();
       if( count($this->RunningTourneyGames) )
@@ -148,14 +142,14 @@ class TournamentLadder
          }
       }
       return $arr;
-   }
+   }//build_linked_running_games
 
-   function to_string()
+   public function to_string()
    {
       return print_r($this, true);
    }
 
-   function build_log_string( $fmt=0 )
+   public function build_log_string( $fmt=0 )
    {
       if( $fmt == 1 )
          return sprintf("rid=[%s], uid=[%s], Rank=[%s]", $this->rid, $this->uid, $this->Rank );
@@ -167,7 +161,7 @@ class TournamentLadder
             $this->Rank, $this->BestRank, $this->StartRank, $this->PeriodRank, $this->HistoryRank );
    }
 
-   function build_rank_kept( $timefmt=null, $zero_val='' )
+   public function build_rank_kept( $timefmt=null, $zero_val='' )
    {
       if( $this->RankChanged <= 0 )
          return $zero_val;
@@ -178,7 +172,7 @@ class TournamentLadder
          (int)(($GLOBALS['NOW'] - $this->RankChanged)/SECS_PER_HOUR), 24, $timefmt, '0' );
    }
 
-   function insert()
+   public function insert()
    {
       $this->Created = $GLOBALS['NOW'];
 
@@ -186,19 +180,19 @@ class TournamentLadder
       return $entityData->insert( "TournamentLadder.insert(%s)" );
    }
 
-   function update()
+   public function update()
    {
       $entityData = $this->fillEntityData();
       return $entityData->update( "TournamentLadder.update(%s)" );
    }
 
-   function delete()
+   public function delete()
    {
       $entityData = $this->fillEntityData();
       return $entityData->delete( "TournamentLadder.delete(%s)" );
    }
 
-   function fillEntityData( $data=null )
+   public function fillEntityData( $data=null )
    {
       if( is_null($data) )
          $data = $GLOBALS['ENTITY_TOURNAMENT_LADDER']->newEntityData();
@@ -218,7 +212,7 @@ class TournamentLadder
    }
 
    /*! \brief Updates this TournamentLadder-instance with new rank, BestRank, RankChanged and persist into DB. */
-   function update_rank( $new_rank, $upd_rank=true )
+   public function update_rank( $new_rank, $upd_rank=true )
    {
       $this->Rank = (int)$new_rank;
       if( $this->Rank < $this->BestRank )
@@ -229,7 +223,7 @@ class TournamentLadder
    }
 
    /*! \brief Increases or decreases TournamentLadder.ChallengesIn by given amount. */
-   function update_incoming_challenges( $diff )
+   public function update_incoming_challenges( $diff )
    {
       if( !is_numeric($diff) || $diff == 0 )
          error('invalid_args', "TournamentLadder.update_incoming_challenges.check.diff({$this->rid},$diff)");
@@ -243,7 +237,7 @@ class TournamentLadder
    }
 
    /*! \brief Increases or decreases TournamentLadder.ChallengesOut by given amount. */
-   function update_outgoing_challenges( $diff )
+   public function update_outgoing_challenges( $diff )
    {
       if( !is_numeric($diff) || $diff == 0 )
          error('invalid_args', "TournamentLadder.update_outgoing_challenges.check.diff({$this->rid},$diff)");
@@ -267,7 +261,7 @@ class TournamentLadder
     * \note running games for tournament are "detached" (made unrated + detached-flag set)
     * \note IMPORTANT NOTE: expecting to run in HOT-section
     */
-   function remove_user_from_ladder( $dbgmsg, $tlog_type, $tlog_msg, $upd_rank, $rm_uid, $rm_uhandle, $nfy_user, $reason=null )
+   public function remove_user_from_ladder( $dbgmsg, $tlog_type, $tlog_msg, $upd_rank, $rm_uid, $rm_uhandle, $nfy_user, $reason=null )
    {
       $xdbgmsg = "$dbgmsg.TL.remove_user_from_ladder({$this->tid},{$this->rid},{$this->uid},$rm_uid,$nfy_user)";
 
@@ -279,13 +273,13 @@ class TournamentLadder
          "Tournament WRITE" ); // needed for nested-lock for delete-TP
       {//LOCK TournamentLadder
          $this->delete();
-         $is_deleted = ( TournamentLadder::load_rank($this->tid, $this->rid) == 0 );
+         $is_deleted = ( self::load_rank($this->tid, $this->rid) == 0 );
          if( $is_deleted )
          {
-            TournamentLadder::move_up_ladder_part($this->tid, $upd_rank, $this->Rank, 0);
+            self::move_up_ladder_part($this->tid, $upd_rank, $this->Rank, 0);
             TournamentParticipant::delete_tournament_participant($this->tid, $this->rid);
 
-            TournamentLadder::delete_cache_tournament_ladder( $xdbgmsg, $this->tid );
+            self::delete_cache_tournament_ladder( $xdbgmsg, $this->tid );
          }
       }
       db_unlock();
@@ -312,10 +306,10 @@ class TournamentLadder
          }
 
          // notify opponents about user-removal (if there are running games)
-         TournamentLadder::notify_user_removal( "$xdbgmsg.opp_nfy", $this->tid, $rm_uid, $rm_uhandle, $reason, $arr_opp );
+         self::notify_user_removal( "$xdbgmsg.opp_nfy", $this->tid, $rm_uid, $rm_uhandle, $reason, $arr_opp );
 
          if( $nfy_user ) // notify removed user
-            TournamentLadder::notify_user_removal( "$xdbgmsg.user_nfy", $this->tid, $rm_uid, $rm_uhandle, $reason );
+            self::notify_user_removal( "$xdbgmsg.user_nfy", $this->tid, $rm_uid, $rm_uhandle, $reason );
 
          // reset Players.CountBulletinNew (as visibility of T-typed bulletins can change)
          if( $this->uid > 0 )
@@ -329,7 +323,7 @@ class TournamentLadder
    }//remove_user_from_ladder
 
    /*! \brief Changes rank of current user to new-rank (moving up or down). */
-   function change_user_rank( $new_rank, $tlog_type )
+   public function change_user_rank( $new_rank, $tlog_type )
    {
       if( $this->Rank == $new_rank ) // no rank-change
          return true;
@@ -338,7 +332,7 @@ class TournamentLadder
       //HOT-section to change user-rank
       db_lock( $dbgmsg, "TournamentLadder WRITE, TournamentLadder AS TL READ, Tournamentlog WRITE" );
       {//LOCK TournamentLadder
-         $tl2 = TournamentLadder::load_tournament_ladder_by_rank($this->tid, $new_rank);
+         $tl2 = self::load_tournament_ladder_by_rank($this->tid, $new_rank);
          if( is_null($tl2) )
             error('bad_tournament', "$dbgmsg.load2");
 
@@ -350,26 +344,26 @@ class TournamentLadder
          {
             //HOT-section to update ladder
             if( $this->Rank > $new_rank ) // user-move-up
-               TournamentLadder::move_down_ladder_part( $this->tid, false, $new_rank, $this->Rank - 1 );
+               self::move_down_ladder_part( $this->tid, false, $new_rank, $this->Rank - 1 );
             else // user-move-down
-               TournamentLadder::move_up_ladder_part( $this->tid, false, $this->Rank + 1, $new_rank );
+               self::move_up_ladder_part( $this->tid, false, $this->Rank + 1, $new_rank );
 
             $success = $this->update_rank( $new_rank, false );
          }
 
          if( $success )
          {
-            TournamentLadder::delete_cache_tournament_ladder( $dbgmsg, $this->tid );
+            self::delete_cache_tournament_ladder( $dbgmsg, $this->tid );
             TournamentLogHelper::log_change_rank_tournament_ladder( $this->tid, $tlog_type, $this->uid, $old_rank, $new_rank );
          }
       }
       db_unlock();
 
       return $success;
-   }
+   }//change_user_rank
 
    /*! \brief Switch ranks of two users (this and given TournamentLadder-object). */
-   function switch_user_rank( $tlsw, $upd_rank )
+   public function switch_user_rank( $tlsw, $upd_rank )
    {
       if( $this->tid != $tlsw->tid )
          error('invalid_args', "TournamentLadder.switch_user_rank.diff_tid({$this->tid},{$tlsw->tid})");
@@ -395,13 +389,13 @@ class TournamentLadder
 
       return db_query( "TournamentLadder.switch_user_rank.save" .
                        "({$this->tid},{$this->rid}:{$tlsw->rid},{$this->Rank}:{$tlsw->Rank})", $query );
-   }
+   }//switch_user_rank
 
 
    // ------------ static functions ----------------------------
 
    /*! \brief Returns db-fields to be used for query of TournamentLadder-objects for given tournament-id. */
-   function build_query_sql( $tid=0 )
+   public static function build_query_sql( $tid=0 )
    {
       $qsql = $GLOBALS['ENTITY_TOURNAMENT_LADDER']->newQuerySQL('TL');
       if( $tid > 0 )
@@ -410,7 +404,7 @@ class TournamentLadder
    }
 
    /*! \brief Returns TournamentLadder-object created from specified (db-)row. */
-   function new_from_row( $row )
+   public static function new_from_row( $row )
    {
       $tl = new TournamentLadder(
             // from TournamentLadder
@@ -431,29 +425,29 @@ class TournamentLadder
    }
 
    /*! \brief Returns max Rank of TournamentLadder for given tournament-id; 0 if no entries found. */
-   function load_max_rank( $tid )
+   public static function load_max_rank( $tid )
    {
-      $qsql = TournamentLadder::build_query_sql( $tid );
+      $qsql = self::build_query_sql( $tid );
       $qsql->clear_parts( SQLP_FIELDS );
       $qsql->add_part( SQLP_FIELDS, 'IFNULL(MAX(TL.Rank),0) AS X_Rank' );
-      $row = mysql_single_fetch( "TournamentLadder::load_max_rank($tid)", $qsql->get_select() );
+      $row = mysql_single_fetch( "TournamentLadder:load_max_rank($tid)", $qsql->get_select() );
       return ( $row ) ? (int)@$row['X_Rank'] : 0;
    }
 
    /*! \brief Count TournamentLadder-entries for given tournament-id; 0 if no entries found. */
-   function count_tournament_ladder( $tid )
+   public static function count_tournament_ladder( $tid )
    {
-      $qsql = TournamentLadder::build_query_sql( $tid );
+      $qsql = self::build_query_sql( $tid );
       $qsql->clear_parts( SQLP_FIELDS );
       $qsql->add_part( SQLP_FIELDS, 'COUNT(*) AS X_Count' );
-      $row = mysql_single_fetch( "TournamentLadder::count_tournament_ladder($tid)", $qsql->get_select() );
+      $row = mysql_single_fetch( "TournamentLadder:count_tournament_ladder($tid)", $qsql->get_select() );
       return ( $row ) ? (int)@$row['X_Count'] : 0;
    }
 
    /*! \brief Returns current Rank for given RID or else UID or else current player; 0 if user not on ladder. */
-   function load_rank( $tid, $rid=0, $uid=0 )
+   public static function load_rank( $tid, $rid=0, $uid=0 )
    {
-      $qsql = TournamentLadder::build_query_sql( $tid );
+      $qsql = self::build_query_sql( $tid );
       $qsql->clear_parts( SQLP_FIELDS );
       $qsql->add_part( SQLP_FIELDS, 'TL.Rank' );
       if( $rid > 0 )
@@ -464,45 +458,45 @@ class TournamentLadder
          $qsql->add_part( SQLP_WHERE, 'TL.uid=' . (int)@$GLOBALS['player_row']['ID'] );
       $qsql->add_part( SQLP_LIMIT, '1');
 
-      $row = mysql_single_fetch( "TournamentLadder::load_rank($tid,$rid,$uid)", $qsql->get_select() );
+      $row = mysql_single_fetch( "TournamentLadder:load_rank($tid,$rid,$uid)", $qsql->get_select() );
       return ( $row ) ? (int)@$row['Rank'] : 0;
-   }
+   }//load_rank
 
    /*!
     * \brief Loads and returns TournamentLadder-object for given tournament-ID and user-id;
     * \return NULL if nothing found; TournamentLadder otherwise
     */
-   function load_tournament_ladder_by_user( $tid, $uid, $rid=0 )
+   public static function load_tournament_ladder_by_user( $tid, $uid, $rid=0 )
    {
       if( $tid <=0 || ($uid <= GUESTS_ID_MAX && $rid <= 0) )
          return NULL;
 
-      $qsql = TournamentLadder::build_query_sql( $tid );
+      $qsql = self::build_query_sql( $tid );
       if( $uid > GUESTS_ID_MAX )
          $qsql->add_part( SQLP_WHERE, "TL.uid=$uid" );
       else
          $qsql->add_part( SQLP_WHERE, "TL.rid=$rid" );
       $qsql->add_part( SQLP_LIMIT, '1' );
 
-      $row = mysql_single_fetch( "TournamentLadder::load_tournament_ladder_by_user($tid,$uid,$rid)",
+      $row = mysql_single_fetch( "TournamentLadder:load_tournament_ladder_by_user($tid,$uid,$rid)",
          $qsql->get_select() );
-      return ($row) ? TournamentLadder::new_from_row($row) : NULL;
-   }
+      return ($row) ? self::new_from_row($row) : NULL;
+   }//load_tournament_ladder_by_user
 
    /*! \brief Loads and returns TournamentLadder-object for given tournament-ID and rank; NULL if nothing found. */
-   function load_tournament_ladder_by_rank( $tid, $rank )
+   public static function load_tournament_ladder_by_rank( $tid, $rank )
    {
       if( $tid <=0 || $rank <= 0 )
          return NULL;
 
-      $qsql = TournamentLadder::build_query_sql( $tid );
+      $qsql = self::build_query_sql( $tid );
       $qsql->add_part( SQLP_WHERE, "TL.Rank=$rank" );
       $qsql->add_part( SQLP_LIMIT, '1' );
 
-      $row = mysql_single_fetch( "TournamentLadder::load_tournament_ladder_by_rank($tid,$rank)",
+      $row = mysql_single_fetch( "TournamentLadder:load_tournament_ladder_by_rank($tid,$rank)",
          $qsql->get_select() );
-      return ($row) ? TournamentLadder::new_from_row($row) : NULL;
-   }
+      return ($row) ? self::new_from_row($row) : NULL;
+   }//load_tournament_ladder_by_rank
 
    /*!
     * \brief Loads and returns TournamentLadder-object for given tournament-ID:
@@ -511,9 +505,9 @@ class TournamentLadder
     *        false = compare given $user_rating with ladder users Players.Rating2
     * \return found TournamentLadder-object; or null if ladder contains only users with weaker user-rating.
     */
-   function load_tournament_ladder_by_user_rating( $tid, $user_rating, $use_tourney_rating )
+   public static function load_tournament_ladder_by_user_rating( $tid, $user_rating, $use_tourney_rating )
    {
-      $qsql = TournamentLadder::build_query_sql( $tid );
+      $qsql = self::build_query_sql( $tid );
       if( $use_tourney_rating )
       {
          $qsql->add_part( SQLP_FROM, "INNER JOIN TournamentParticipant AS TP ON TP.tid=TL.tid AND TP.ID=TL.rid" );
@@ -528,76 +522,76 @@ class TournamentLadder
       }
       $qsql->add_part( SQLP_LIMIT, '1' );
 
-      $row = mysql_single_fetch( "TournamentLadder::load_tournament_ladder_by_user_rating($tid,$user_rating,$use_tourney_rating)",
+      $row = mysql_single_fetch( "TournamentLadder:load_tournament_ladder_by_user_rating($tid,$user_rating,$use_tourney_rating)",
          $qsql->get_select() );
-      return ($row) ? TournamentLadder::new_from_row($row) : null;
-   }
+      return ($row) ? self::new_from_row($row) : null;
+   }//load_tournament_ladder_by_user_rating
 
    /*! \brief Returns enhanced (passed) ListIterator with TournamentLadder-objects for given tournament-id. */
-   function load_tournament_ladder( $iterator, $tid=-1 )
+   public static function load_tournament_ladder( $iterator, $tid=-1 )
    {
-      $qsql = ( $tid >= 0 ) ? TournamentLadder::build_query_sql( $tid ) : new QuerySQL();
+      $qsql = ( $tid >= 0 ) ? self::build_query_sql( $tid ) : new QuerySQL();
       $iterator->setQuerySQL( $qsql );
       $query = $iterator->buildQuery();
-      $result = db_query( "TournamentLadder::load_tournament_ladder", $query );
+      $result = db_query( "TournamentLadder:load_tournament_ladder", $query );
       $iterator->setResultRows( mysql_num_rows($result) );
 
       $iterator->clearItems();
       while( $row = mysql_fetch_array( $result ) )
       {
-         $tladder = TournamentLadder::new_from_row( $row );
+         $tladder = self::new_from_row( $row );
          $iterator->addItem( $tladder, $row );
       }
       mysql_free_result($result);
 
       return $iterator;
-   }
+   }//load_tournament_ladder
 
    /*!
     * \brief Adds user given by User-object for tournament tid at bottom of ladder.
     * \note IMPORTANT NOTE: caller needs to open TA with HOT-section!!
     */
-   function add_user_to_ladder( $tid, $uid, $tlog_type, $tl_props=null, $tprops=null )
+   public static function add_user_to_ladder( $tid, $uid, $tlog_type, $tl_props=null, $tprops=null )
    {
       if( $uid <= GUESTS_ID_MAX )
-         error('invalid_user', "TournamentLadder::add_user_to_ladder.check_user($tid)");
+         error('invalid_user', "TournamentLadder:add_user_to_ladder.check_user($tid)");
 
-      $tp = TournamentCache::load_cache_tournament_participant( 'TournamentLadder::add_user_to_ladder', $tid, $uid );
+      $tp = TournamentCache::load_cache_tournament_participant( 'TournamentLadder:add_user_to_ladder', $tid, $uid );
       if( is_null($tp) )
-         error('internal_error', "TournamentLadder::add_user_to_ladder.load_tp($tid,$uid)");
+         error('internal_error', "TournamentLadder:add_user_to_ladder.load_tp($tid,$uid)");
 
       // check pre-conditions
-      if( TournamentLadder::load_rank($tid, 0, $uid) > 0 )
+      if( self::load_rank($tid, 0, $uid) > 0 )
          return true; // already joined ladder
       if( $tp->Status != TP_STATUS_REGISTER )
          error('tournament_participant_invalid_status',
-               "TournamentLadder::add_user_to_ladder.check_tp_status($tid,$uid,{$tp->Status})");
+               "TournamentLadder:add_user_to_ladder.check_tp_status($tid,$uid,{$tp->Status})");
 
       // init
       if( is_null($tl_props) )
-         $tl_props = TournamentCache::load_cache_tournament_ladder_props( 'TournamentLadder::add_user_to_ladder', $tid );
+         $tl_props = TournamentCache::load_cache_tournament_ladder_props( 'TournamentLadder:add_user_to_ladder', $tid );
 
       // add user to ladder
       if( $tl_props->UserJoinOrder == TLP_JOINORDER_REGTIME )
-         $success = TournamentLadder::add_participant_to_ladder_bottom( $tp );
+         $success = self::add_participant_to_ladder_bottom( $tp );
       elseif( $tl_props->UserJoinOrder == TLP_JOINORDER_RATING )
       {
          if( is_null($tprops) )
-            $tprops = TournamentCache::load_cache_tournament_properties( 'TournamentLadder::add_user_to_ladder', $tid );
-         $success = TournamentLadder::add_participant_to_ladder_by_rating( $tp, $tprops->need_rating_copy() );
+            $tprops = TournamentCache::load_cache_tournament_properties( 'TournamentLadder:add_user_to_ladder', $tid );
+         $success = self::add_participant_to_ladder_by_rating( $tp, $tprops->need_rating_copy() );
       }
       elseif( $tl_props->UserJoinOrder == TLP_JOINORDER_RANDOM )
-         $success = TournamentLadder::add_participant_to_ladder_by_random( $tp );
+         $success = self::add_participant_to_ladder_by_random( $tp );
       else
-         error('invalid_args', "TournamentLadder::add_user_to_ladder.check_tlp_joinorder($tid,{$tl_props->UserJoinOrder})");
+         error('invalid_args', "TournamentLadder:add_user_to_ladder.check_tlp_joinorder($tid,{$tl_props->UserJoinOrder})");
 
       if( $success )
       {
-         $success = TournamentLadder::fix_tournament_games_for_rejoin( $tid, $tp->ID, $uid );
+         $success = self::fix_tournament_games_for_rejoin( $tid, $tp->ID, $uid );
 
-         TournamentLadder::delete_cache_tournament_ladder( "TournamentLadder::add_user_to_ladder($tid,$uid)", $tid );
+         self::delete_cache_tournament_ladder( "TournamentLadder:add_user_to_ladder($tid,$uid)", $tid );
 
-         $user_rank = TournamentLadder::load_rank($tid, 0, $uid);
+         $user_rank = self::load_rank($tid, 0, $uid);
          TournamentLogHelper::log_add_user_tournament_ladder( $tid, $tlog_type, $tl_props->UserJoinOrder, $uid, $user_rank );
       }
 
@@ -609,7 +603,7 @@ class TournamentLadder
     * \return success
     * \internal
     */
-   function add_participant_to_ladder_bottom( $tp )
+   private static function add_participant_to_ladder_bottom( $tp )
    {
       global $NOW;
       static $query_next_rank = "IFNULL(MAX(TL.Rank),0)+1"; // must result in 1 result-row
@@ -624,7 +618,7 @@ class TournamentLadder
                   . "$query_next_rank AS BestRank, "
                   . "$query_next_rank AS StartRank "
              . "FROM TournamentLadder AS TL WHERE TL.tid=$tid";
-      return db_query( "TournamentLadder::add_participant_to_ladder_bottom.insert(tid[$tid],rid[$rid],uid[$uid])", $query );
+      return db_query( "TournamentLadder:add_participant_to_ladder_bottom.insert(tid[$tid],rid[$rid],uid[$uid])", $query );
    }//add_participant_to_ladder_bottom
 
    /*!
@@ -632,7 +626,7 @@ class TournamentLadder
     * \return success
     * \internal
     */
-   function add_participant_to_ladder_by_rating( $tp, $use_tourney_rating )
+   private static function add_participant_to_ladder_by_rating( $tp, $use_tourney_rating )
    {
       global $player_row;
       $tid = $tp->tid;
@@ -648,20 +642,20 @@ class TournamentLadder
       {
          $arr = User::load_quick_userinfo( array( $uid ) );
          if( count($arr) == 0 )
-            error('invalid_args', "TournamentLadder::add_participant_to_ladder_by_rating.check.bad_uid($tid,$rid,$uid)");
+            error('invalid_args', "TournamentLadder:add_participant_to_ladder_by_rating.check.bad_uid($tid,$rid,$uid)");
          $user_rating = $arr[$uid]['Rating2'];
       }
 
       $extra_lock = ( $use_tourney_rating ) //see load_tournament_ladder_by_user_rating()
          ? ', TournamentParticipant AS TP READ'
          : ', Players AS P READ';
-      db_lock( "TournamentLadder::add_participant_to_ladder_by_rating($tid,$rid,$uid)",
+      db_lock( "TournamentLadder:add_participant_to_ladder_by_rating($tid,$rid,$uid)",
          "TournamentLadder WRITE, TournamentLadder AS TL READ $extra_lock" );
       {//LOCK TournamentLadder (to avoid race-conditions)
-         $cnt_tp = TournamentLadder::count_tournament_ladder( $tid );
+         $cnt_tp = self::count_tournament_ladder( $tid );
          if( $cnt_tp > 0 )
          {
-            $tladder_rating = TournamentLadder::load_tournament_ladder_by_user_rating( $tid, $user_rating, $use_tourney_rating );
+            $tladder_rating = self::load_tournament_ladder_by_user_rating( $tid, $user_rating, $use_tourney_rating );
             if( is_null($tladder_rating) )
                $new_rank = 1; // all ladder-users are weaker
             else
@@ -670,7 +664,7 @@ class TournamentLadder
          else
             $new_rank = 1;
 
-         $result = TournamentLadder::_add_participant_to_ladder_with_new_rank( $tp, $cnt_tp, $new_rank );
+         $result = self::_add_participant_to_ladder_with_new_rank( $tp, $cnt_tp, $new_rank );
       }
       db_unlock();
 
@@ -682,19 +676,19 @@ class TournamentLadder
     * \return success
     * \internal
     */
-   function add_participant_to_ladder_by_random( $tp )
+   private static function add_participant_to_ladder_by_random( $tp )
    {
       $tid = $tp->tid;
       $rid = $tp->ID;
       $uid = $tp->uid;
 
-      db_lock( "TournamentLadder::add_participant_to_ladder_by_random($tid,$rid,$uid)",
+      db_lock( "TournamentLadder:add_participant_to_ladder_by_random($tid,$rid,$uid)",
          "TournamentLadder WRITE, TournamentLadder AS TL READ" );
       {//LOCK TournamentLadder (to avoid race-conditions)
-         $cnt_tp = TournamentLadder::count_tournament_ladder( $tid );
+         $cnt_tp = self::count_tournament_ladder( $tid );
          $new_rank = mt_rand( 1, $cnt_tp + 1 );
 
-         $result = TournamentLadder::_add_participant_to_ladder_with_new_rank( $tp, $cnt_tp, $new_rank );
+         $result = self::_add_participant_to_ladder_with_new_rank( $tp, $cnt_tp, $new_rank );
       }
       db_unlock();
 
@@ -706,17 +700,17 @@ class TournamentLadder
     * \note IMPORTANT: needs DB-lock on writing tables
     * \internal
     */
-   function _add_participant_to_ladder_with_new_rank( $tp, $cnt_tp, $new_rank )
+   private static function _add_participant_to_ladder_with_new_rank( $tp, $cnt_tp, $new_rank )
    {
       if( $cnt_tp == 0 || $new_rank > $cnt_tp )
       {
          // add at bottom for empty ladder or last rank
-         $result = TournamentLadder::add_participant_to_ladder_bottom( $tp );
+         $result = self::add_participant_to_ladder_bottom( $tp );
       }
       else
       {
          // insert at new ladder-pos
-         TournamentLadder::move_down_ladder_part( $tp->tid, false, $new_rank, 0 );
+         self::move_down_ladder_part( $tp->tid, false, $new_rank, 0 );
 
          $tladder = new TournamentLadder( $tp->tid, $tp->ID, $tp->uid, 0, 0, $new_rank, $new_rank, $new_rank );
          $result = $tladder->insert();
@@ -739,9 +733,9 @@ class TournamentLadder
     *       in/out-limits on the ladder-users (the next run of the tourney-cron should fix this).
     * \see remove_user_from_ladder()
     */
-   function fix_tournament_games_for_rejoin( $tid, $rid, $uid )
+   private static function fix_tournament_games_for_rejoin( $tid, $rid, $uid )
    {
-      $dbgmsg = "TournamentLadder::fix_tournament_games_for_rejoin($tid,$rid,$uid)";
+      $dbgmsg = "TournamentLadder:fix_tournament_games_for_rejoin($tid,$rid,$uid)";
       $query_part = "SELECT COUNT(*) AS X_Count FROM TournamentGames WHERE tid=$tid AND " .
          "Status IN ('".TG_STATUS_PLAY."','".TG_STATUS_SCORE."') AND ";
 
@@ -772,10 +766,10 @@ class TournamentLadder
     * \brief Moves all tourney-users one rank up for incl. rank-range; min/max=0 separately or both for all.
     * \param $upd_rank true if RankChanged should be set too
     */
-   function move_up_ladder_part( $tid, $upd_rank, $min_rank, $max_rank )
+   public static function move_up_ladder_part( $tid, $upd_rank, $min_rank, $max_rank )
    {
       if( !is_numeric($tid) || !is_numeric($min_rank) || !is_numeric($max_rank) )
-         error('invalid_args', "TournamentLadder::move_up_ladder_part.check_tid($tid,$min_rank,$max_rank)");
+         error('invalid_args', "TournamentLadder:move_up_ladder_part.check_tid($tid,$min_rank,$max_rank)");
 
       global $NOW;
       $query = "UPDATE TournamentLadder SET Rank=Rank-1, "
@@ -783,17 +777,17 @@ class TournamentLadder
             . ( $upd_rank ? ", RankChanged=FROM_UNIXTIME($NOW) " : '' )
             . "WHERE tid=$tid "
             . TournamentUtils::build_num_range_sql_clause('Rank', $min_rank, $max_rank, 'AND');
-      return db_query( "TournamentLadder::move_up_ladder_part.update($tid,$upd_rank,$min_rank,$max_rank)", $query );
-   }
+      return db_query( "TournamentLadder:move_up_ladder_part.update($tid,$upd_rank,$min_rank,$max_rank)", $query );
+   }//move_up_ladder_part
 
    /*!
     * \brief Moves all tourney-users one rank down for incl. rank-range; min/max=0 separately or both for all.
     * \param $upd_rank true if RankChanged should be set too
     */
-   function move_down_ladder_part( $tid, $upd_rank, $min_rank, $max_rank )
+   public static function move_down_ladder_part( $tid, $upd_rank, $min_rank, $max_rank )
    {
       if( !is_numeric($tid) || !is_numeric($min_rank) || !is_numeric($max_rank) )
-         error('invalid_args', "TournamentLadder::move_down_ladder_part.check_tid($tid,$min_rank,$max_rank)");
+         error('invalid_args', "TournamentLadder:move_down_ladder_part.check_tid($tid,$min_rank,$max_rank)");
 
       global $NOW;
       $query = "UPDATE TournamentLadder SET Rank=Rank+1, "
@@ -801,15 +795,15 @@ class TournamentLadder
             . ( $upd_rank ? ", RankChanged=FROM_UNIXTIME($NOW) " : '' )
             . "WHERE tid=$tid "
             . TournamentUtils::build_num_range_sql_clause('Rank', $min_rank, $max_rank, 'AND');
-      return db_query( "TournamentLadder::move_down_ladder_part.update($tid,$upd_rank,$min_rank,$max_rank)", $query );
-   }
+      return db_query( "TournamentLadder:move_down_ladder_part.update($tid,$upd_rank,$min_rank,$max_rank)", $query );
+   }//move_down_ladder_part
 
    /*! \brief Delete complete ladder for given tournament-id. */
-   function delete_ladder( $tid )
+   public static function delete_ladder( $tid )
    {
       $query = "DELETE FROM TournamentLadder WHERE tid=$tid";
-      $result = db_query( "TournamentLadder::delete_ladder($tid)", $query );
-      TournamentLadder::delete_cache_tournament_ladder( "TournamentLadder::delete_ladder($tid)", $tid );
+      $result = db_query( "TournamentLadder:delete_ladder($tid)", $query );
+      self::delete_cache_tournament_ladder( "TournamentLadder:delete_ladder($tid)", $tid );
       return $result;
    }
 
@@ -819,12 +813,12 @@ class TournamentLadder
     *        false = append new users below existing users
     * \return count of updated/inserted entries
     */
-   function seed_ladder( $tourney, $tprops, $seed_order, $reorder=false )
+   public static function seed_ladder( $tourney, $tprops, $seed_order, $reorder=false )
    {
       if( !($tourney instanceof Tournament) && $tourney->ID <= 0 )
-         error('unknown_tournament', "TournamentLadder::seed_ladder.check_tid($seed_order)");
+         error('unknown_tournament', "TournamentLadder:seed_ladder.check_tid($seed_order)");
       $tid = $tourney->ID;
-      $dbgmsg = "TournamentLadder::seed_ladder($tid,$seed_order)";
+      $dbgmsg = "TournamentLadder:seed_ladder($tid,$seed_order)";
 
       list( $def, $arr_seed_order ) = $tprops->build_seed_order();
       if( !isset($arr_seed_order[$seed_order]) )
@@ -833,7 +827,7 @@ class TournamentLadder
       // load already joined ladder-users
       $tl_iterator = new ListIterator( $dbgmsg.'.load_ladder' );
       $tl_iterator->addIndex( 'uid' );
-      $tl_iterator = TournamentLadder::load_tournament_ladder( $tl_iterator, $tid );
+      $tl_iterator = self::load_tournament_ladder( $tl_iterator, $tid );
 
       // find all registered TPs (optimized)
       $arr_TPs = TournamentParticipant::load_registered_users_in_seedorder( $tid, $seed_order );
@@ -845,7 +839,7 @@ class TournamentLadder
 
       db_lock( $dbgmsg, "TournamentLadder WRITE, TournamentLadder AS TL READ" );
       {//LOCK TournamentLadder
-         $rank = ($reorder) ? 1 : TournamentLadder::load_max_rank($tid) + 1;
+         $rank = ($reorder) ? 1 : self::load_max_rank($tid) + 1;
          foreach( $arr_TPs as $row )
          {
             $uid = $row['uid'];
@@ -885,7 +879,7 @@ class TournamentLadder
             $result = db_query( $dbgmsg.".insert($reorder,#$cnt)", $seed_query );
          }
 
-         TournamentLadder::delete_cache_tournament_ladder( $dbgmsg, $tid );
+         self::delete_cache_tournament_ladder( $dbgmsg, $tid );
       }
       db_unlock();
 
@@ -896,13 +890,13 @@ class TournamentLadder
     * \brief Checks if all participants (arr_TPS[rid=>uid]) are registered in ladder;
     *        auto-removing bad registrations.
     */
-   function check_participant_registrations( $tid, $arr_TPs )
+   public static function check_participant_registrations( $tid, $arr_TPs )
    {
       $qsql = new QuerySQL();
       $qsql->add_part( SQLP_FIELDS, 'rid', 'uid' );
       $qsql->add_part( SQLP_FROM,   'TournamentLadder' );
       $qsql->add_part( SQLP_WHERE,  "tid=$tid" );
-      $result = db_query( "TournamentLadder::check_participant_registrations.load_ladder($tid)",
+      $result = db_query( "TournamentLadder:check_participant_registrations.load_ladder($tid)",
          $qsql->get_select() );
 
       $arr_miss = array() + $arr_TPs; // registered TP, but not in ladder
@@ -943,13 +937,13 @@ class TournamentLadder
             $tladder = new TournamentLadder( $tid, $rid );
             $tladder->delete();
          }
-         TournamentLadder::delete_cache_tournament_ladder( "TournamentLadder::check_participant_registrations.fix_bad($tid,$rid)", $tid );
+         self::delete_cache_tournament_ladder( "TournamentLadder:check_participant_registrations.fix_bad($tid,$rid)", $tid );
          */
       }
       return $errors;
    }//check_participant_registrations
 
-   function new_tournament_game( $tid, $tladder_ch, $tladder_df )
+   public static function new_tournament_game( $tid, $tladder_ch, $tladder_df )
    {
       $tg = new TournamentGames( 0, $tid );
       $tg->Challenger_uid = $tladder_ch->uid;
@@ -963,7 +957,7 @@ class TournamentLadder
     * \brief Processes tournament-game-end for given tournament-game $tgame and game-end-action.
     * \note Only called from CRON! (for tournament-logging)
     */
-   function process_game_end( $tid, $tgame, $game_end_action )
+   public static function process_game_end( $tid, $tgame, $game_end_action )
    {
       if( $game_end_action == TGEND_NO_CHANGE )
          return true;
@@ -974,10 +968,10 @@ class TournamentLadder
          swap($ch_rid, $df_rid); // reverse role of challenger and defender
 
       //HOT-section to update ladder (besides reading)
-      db_lock( "TournamentLadder.process_game_end($tid,$ch_rid,$df_rid,{$tgame->Flags},$game_end_action)",
+      db_lock( "TournamentLadder:process_game_end($tid,$ch_rid,$df_rid,{$tgame->Flags},$game_end_action)",
          "TournamentLadder WRITE, TournamentLadder AS TL READ" );
       {//LOCK TournamentLadder
-         $success = TournamentLadder::_process_game_end( $tid, $ch_rid, $df_rid, $game_end_action );
+         $success = self::_process_game_end( $tid, $ch_rid, $df_rid, $game_end_action );
       }
       db_unlock();
 
@@ -998,7 +992,7 @@ class TournamentLadder
       $tladder_df = null;
       if( $game_end_action != TGEND_CHALLENGER_LAST && $game_end_action != TGEND_CHALLENGER_DELETE )
       {
-         $tladder_df = TournamentLadder::load_tournament_ladder_by_user($tid, 0, $df_rid);
+         $tladder_df = self::load_tournament_ladder_by_user($tid, 0, $df_rid);
          if( is_null($tladder_df) ) // defender not longer on ladder -> nothing to do
             return true;
       }
@@ -1006,7 +1000,7 @@ class TournamentLadder
       $tladder_ch = null;
       if( $game_end_action != TGEND_DEFENDER_LAST && $game_end_action != TGEND_DEFENDER_DELETE )
       {
-         $tladder_ch = TournamentLadder::load_tournament_ladder_by_user($tid, 0, $ch_rid);
+         $tladder_ch = self::load_tournament_ladder_by_user($tid, 0, $ch_rid);
          if( is_null($tladder_ch) ) // challenger not longer on ladder -> nothing to do
             return true;
       }
@@ -1022,7 +1016,7 @@ class TournamentLadder
             $ch_new_rank = $tladder_df->Rank;
             if( $tladder_ch->Rank > $ch_new_rank ) // challenger below new pos
             {
-               TournamentLadder::move_down_ladder_part( $tid, true, $ch_new_rank, $tladder_ch->Rank - 1 );
+               self::move_down_ladder_part( $tid, true, $ch_new_rank, $tladder_ch->Rank - 1 );
                $success = $tladder_ch->update_rank( $ch_new_rank );
                $logmsg .= ">$ch_new_rank";
             }
@@ -1036,7 +1030,7 @@ class TournamentLadder
             if( $tladder_ch->Rank > $ch_new_rank ) // challenger below new pos
             {
                if( abs($tladder_ch->Rank - $tladder_df->Rank) > 1 ) // direct neighbours?
-                  TournamentLadder::move_down_ladder_part( $tid, true, $ch_new_rank, $tladder_ch->Rank - 1 );
+                  self::move_down_ladder_part( $tid, true, $ch_new_rank, $tladder_ch->Rank - 1 );
                $success = $tladder_ch->update_rank( $ch_new_rank );
                $logmsg .= ">$ch_new_rank";
             }
@@ -1046,10 +1040,10 @@ class TournamentLadder
          case TGEND_CHALLENGER_LAST:
          {
             $logmsg = "CH.Rank={$tladder_ch->Rank}";
-            $ch_new_rank = TournamentLadder::load_max_rank( $tid ); // get last ladder-rank
+            $ch_new_rank = self::load_max_rank( $tid ); // get last ladder-rank
             if( $tladder_ch->Rank < $ch_new_rank ) // challenger above new (last) ladder-pos
             {
-               TournamentLadder::move_up_ladder_part( $tid, true, $tladder_ch->Rank + 1, $ch_new_rank );
+               self::move_up_ladder_part( $tid, true, $tladder_ch->Rank + 1, $ch_new_rank );
                $success = $tladder_ch->update_rank( $ch_new_rank );
                $logmsg .= ">LAST$ch_new_rank";
             }
@@ -1083,7 +1077,7 @@ class TournamentLadder
             if( $tladder_df->Rank < $df_new_rank ) // defender above new pos
             {
                if( abs($tladder_ch->Rank - $tladder_df->Rank) > 1 ) // direct neighbours?
-                  TournamentLadder::move_up_ladder_part( $tid, true, $tladder_df->Rank + 1, $df_new_rank );
+                  self::move_up_ladder_part( $tid, true, $tladder_df->Rank + 1, $df_new_rank );
                $success = $tladder_df->update_rank( $df_new_rank );
                $logmsg .= ">$df_new_rank";
             }
@@ -1093,10 +1087,10 @@ class TournamentLadder
          case TGEND_DEFENDER_LAST:
          {
             $logmsg = "DF.Rank={$tladder_df->Rank}";
-            $df_new_rank = TournamentLadder::load_max_rank( $tid ); // get last ladder-rank
+            $df_new_rank = self::load_max_rank( $tid ); // get last ladder-rank
             if( $tladder_df->Rank < $df_new_rank ) // defender above new (last) ladder-pos
             {
-               TournamentLadder::move_up_ladder_part( $tid, true, $tladder_df->Rank + 1, $df_new_rank );
+               self::move_up_ladder_part( $tid, true, $tladder_df->Rank + 1, $df_new_rank );
                $success = $tladder_df->update_rank( $df_new_rank );
                $logmsg .= ">LAST$df_new_rank";
             }
@@ -1125,7 +1119,7 @@ class TournamentLadder
     * \param $reason null (default on processing game-end); or text instead
     * \param $arr_uid null = send msg to removed-user; otherwise send msg to opponents-uids from $arr_uid (if not empty)
     */
-   function notify_user_removal( $dbgmsg, $tid, $rm_uid, $rm_uhandle, $reason=null, $arr_uid=null )
+   public static function notify_user_removal( $dbgmsg, $tid, $rm_uid, $rm_uhandle, $reason=null, $arr_uid=null )
    {
       $is_user = !is_array($arr_uid);
       if( !$is_user && count($arr_uid) == 0 )
@@ -1169,50 +1163,50 @@ class TournamentLadder
     * \note IMPORTANT NOTE: expecting to run in HOT-section
     * \note only called by CRON! (for tournament-logging)
     */
-   function process_user_absence( $tid, $uid, $user_abs_days )
+   public static function process_user_absence( $tid, $uid, $user_abs_days )
    {
       // reload TL because Rank could have been changed in the meantime !!
-      $tladder = TournamentLadder::load_tournament_ladder_by_user( $tid, $uid );
+      $tladder = self::load_tournament_ladder_by_user( $tid, $uid );
       if( is_null($tladder) )
          return true;
 
       // remove user from ladder
       $reason = sprintf( T_('The system has removed the user from the tournament due to inactivity for more than %s days as defined in the ladder-configurations.'),
                          $user_abs_days );
-      $success = $tladder->remove_user_from_ladder( "TournamentLadder::process_user_absence($tid,$uid,$user_abs_days)",
+      $success = $tladder->remove_user_from_ladder( "TournamentLadder:process_user_absence($tid,$uid,$user_abs_days)",
          TLOG_TYPE_CRON, 'User-Absence', /*upd-rank*/true, $uid, '', /*nfy-user*/true, $reason );
       $logmsg = "U.Rank={$tladder->Rank}>DEL";
 
       if( DBG_QUERY )
-         error_log("TournamentLadder::process_user_absence($tid,$uid,$user_abs_days): $logmsg");
+         error_log("TournamentLadder:process_user_absence($tid,$uid,$user_abs_days): $logmsg");
 
       return $success;
    }//process_user_absence
 
    /*! \brief Copies PeriodRank over to HistoryRank-field and Rank to PeriodRank-field. */
-   function process_rank_period( $tid )
+   public static function process_rank_period( $tid )
    {
       if( !is_numeric($tid) || $tid <= 0 )
-         error('invalid_args', "TournamentLadder::process_rank_period.check.tid($tid)");
+         error('invalid_args', "TournamentLadder:process_rank_period.check.tid($tid)");
 
-      return db_query( "TournamentLadder::process_rank_period($tid)",
+      return db_query( "TournamentLadder:process_rank_period($tid)",
          "UPDATE TournamentLadder SET HistoryRank=PeriodRank, PeriodRank=Rank WHERE tid=$tid" );
    }
 
-   function process_crown_king_reset_rank( $tid, $rid )
+   public static function process_crown_king_reset_rank( $tid, $rid )
    {
       global $NOW;
       if( !is_numeric($tid) || $tid <= 0 )
-         error('invalid_args', "TournamentLadder::process_crown_king.check.tid($tid,$rid)");
+         error('invalid_args', "TournamentLadder:process_crown_king.check.tid($tid,$rid)");
       if( !is_numeric($rid) || $rid <= 0 )
-         error('invalid_args', "TournamentLadder::process_crown_king.check.rid($tid,$rid)");
+         error('invalid_args', "TournamentLadder:process_crown_king.check.rid($tid,$rid)");
 
-      return db_query( "TournamentLadder::process_crown_king($tid,$rid)",
+      return db_query( "TournamentLadder:process_crown_king($tid,$rid)",
          "UPDATE TournamentLadder SET RankChanged=FROM_UNIXTIME($NOW) WHERE tid=$tid AND rid=$rid LIMIT 1" );
    }
 
    /*! \brief Returns true if edit-ladder is allowed concerning tourney-locks. */
-   function allow_edit_ladder( $tourney, &$return_errors )
+   public static function allow_edit_ladder( $tourney, &$return_errors )
    {
       $errors = array();
 
@@ -1234,10 +1228,10 @@ class TournamentLadder
 
       $return_errors = array_merge( $return_errors, $errors );
       return ( count($errors) == 0 );
-   }
+   }//allow_edit_ladder
 
    /*! \brief Returns rank-diff-info for given prev-rank (relative to rank) and format, NO_VALUE if prev-rank is 0. */
-   function build_rank_diff( $rank, $prev_rank, $fmt='%s. (%s)' )
+   public static function build_rank_diff( $rank, $prev_rank, $fmt='%s. (%s)' )
    {
       // also see 'js/common.js buildRankDiff()'
       if( $prev_rank == 0 ) // nothing to compare
@@ -1250,9 +1244,9 @@ class TournamentLadder
       else //$rank > $prev_rank
          $rank_diff = '-' . ($rank - $prev_rank);
       return sprintf( $fmt, $prev_rank, $rank_diff );
-   }
+   }//build_rank_diff
 
-   function get_rank_info_format()
+   public static function get_rank_info_format()
    {
       return
          sprintf( "%s: %%s.<br>%s: %%s.<br>%s: %%s<br>%s: %%s",
@@ -1262,13 +1256,13 @@ class TournamentLadder
             basic_safe(T_('Previous Period (Change)#T_ladder')) );
    }
 
-   function get_edit_tournament_status()
+   public static function get_edit_tournament_status()
    {
       static $statuslist = array( TOURNEY_STATUS_PAIR, TOURNEY_STATUS_PLAY );
       return $statuslist;
    }
 
-   function get_view_ladder_status( $isTD=false )
+   public static function get_view_ladder_status( $isTD=false )
    {
       static $statuslist_TD   = array( TOURNEY_STATUS_PAIR, TOURNEY_STATUS_PLAY, TOURNEY_STATUS_CLOSED );
       static $statuslist_user = array( TOURNEY_STATUS_PLAY, TOURNEY_STATUS_CLOSED );
@@ -1276,11 +1270,11 @@ class TournamentLadder
    }
 
    /*! \brief Loads and caches TournamentLadder-entries for given tournament-id. */
-   function load_cache_tournament_ladder( $dbgmsg, $tid, $with_tp_rating, $limit=0, $with_index=false )
+   public static function load_cache_tournament_ladder( $dbgmsg, $tid, $with_tp_rating, $limit=0, $with_index=false )
    {
       $with_tp_rating = ( $with_tp_rating ) ? 1 : 0;
 
-      $dbgmsg .= ".TL::load_cache_tournament_ladder($tid,$with_tp_rating,$limit)";
+      $dbgmsg .= ".TL:load_cache_tournament_ladder($tid,$with_tp_rating,$limit)";
       $group_id = "TLadder.$tid";
       $allkey = "TLadder.$tid.$with_tp_rating.L0";
       $key = "TLadder.$tid.$with_tp_rating.L$limit";
@@ -1305,7 +1299,7 @@ class TournamentLadder
                ));
          if( $with_index )
             $tl_iterator->addIndex( 'uid', 'Rank' );
-         $tl_iterator = TournamentLadder::load_tournament_ladder( $tl_iterator, $tid );
+         $tl_iterator = self::load_tournament_ladder( $tl_iterator, $tid );
 
          DgsCache::store( $dbgmsg, CACHE_GRP_TLADDER, $key, $tl_iterator->getItemRows(), SECS_PER_HOUR, $group_id );
       }
@@ -1318,7 +1312,7 @@ class TournamentLadder
          {
             if( $limit > 0 && $show_rows-- <= 0 ) // need only $limit rows
                break;
-            $tladder = TournamentLadder::new_from_row( $row );
+            $tladder = self::new_from_row( $row );
             $tl_iterator->addItem( $tladder, $row );
          }
       }
@@ -1327,7 +1321,7 @@ class TournamentLadder
    }//load_cache_tournament_ladder
 
    /*! \brief Returns TournamentLadder.Rank for given user. */
-   function determine_ladder_rank( $iterator, $uid )
+   public static function determine_ladder_rank( $iterator, $uid )
    {
       $result_rank = 0;
       while( list(,$arr_item) = $iterator->getListIterator() )
@@ -1344,7 +1338,7 @@ class TournamentLadder
       return $result_rank;
    }//determine_ladder_rank
 
-   function delete_cache_tournament_ladder( $dbgmsg, $tid )
+   public static function delete_cache_tournament_ladder( $dbgmsg, $tid )
    {
       DgsCache::delete_group( $dbgmsg, CACHE_GRP_TLADDER, "TLadder.$tid" );
    }
@@ -1355,14 +1349,14 @@ class TournamentLadder
     *
     * \note sync with TournamentLadderProps.determine_ladder_rating_pos()
     */
-   function find_ladder_rating_pos( $dbgmsg, $tid, $tl_props, $rating )
+   public static function find_ladder_rating_pos( $dbgmsg, $tid, $tl_props, $rating )
    {
       if( $tl_props->ChallengeRangeRating == TLADDER_CHRNG_RATING_UNUSED
             || (string)$rating == '' || (int)$rating <= NO_RATING )
          return 0;
 
       // count of ladder-users with rating >= given-rating
-      $row = mysql_single_fetch( $dbgmsg.".TL::find_ladder_rating_pos($tid,$rating)",
+      $row = mysql_single_fetch( $dbgmsg.".TL:find_ladder_rating_pos($tid,$rating)",
          "SELECT COUNT(*) AS X_Count FROM TournamentLadder AS TL INNER JOIN Players AS TLP ON TLP.ID=TL.uid " .
          "WHERE TL.tid=$tid AND TLP.Rating2 >= $rating" );
       return ($row) ? (int)$row['X_Count'] : 0;

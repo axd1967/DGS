@@ -93,15 +93,16 @@ define('MYSQL_MATCH_STOPWORDS', "a's|able|about|above|according|accordingly|acro
 class FilterMysqlMatch extends Filter
 {
    /*! \brief element-name for boolean-mode-checkbox. */
-   var $elem_boolmode;
+   protected $elem_boolmode;
    /*! \brief clause-part containing MATCH-command. */
-   var $match_query_part;
+   protected $match_query_part = '';
 
    /*! \brief Constructs MysqlMatch-Filter. */
-   function FilterMysqlMatch($name, $dbfield, $config)
+   public function __construct( $name, $dbfield, $config )
    {
       static $_default_config = array( FC_SIZE => 30 );
-      parent::Filter($name, $dbfield, $_default_config, $config);
+
+      parent::__construct($name, $dbfield, $_default_config, $config);
       $this->type = 'MysqlMatch';
       $this->syntax_help = T_('MATCHINDEX#filterhelp');
 
@@ -118,14 +119,13 @@ class FilterMysqlMatch extends Filter
       $this->values[$this->elem_boolmode] = ''; // default (unchecked)
 
       $this->build_sql_option(); // check match-mode
-      $this->match_query_part = '';
-   }
+   }//__construct
 
    /*!
     * \brief Parses match-term-value and handle checkbox for boolean-mode (if used).
     * <p>Also updates filter var: match_terms
     */
-   function parse_value( $name, $val )
+   public function parse_value( $name, $val )
    {
       $val = $this->handle_default( $name, $val );
       $this->init_parse($val, $name); // if elem, value for elem_boolmode saved
@@ -154,14 +154,14 @@ class FilterMysqlMatch extends Filter
          error('invalid_filter', "FilterMysqlMatch.parse_value.unknown_key({$this->id},$name,$val)");
 
       return true;
-   }
+   }//parse_value
 
    /*!
     * \brief Builds query for multi-element filter.
     * expecting: values[elem_boolmode] set, p_value set, handling FC_MATCH_MODE-config
     * <p>Also updates local var: match_query_part
     */
-   function build_query()
+   public function build_query()
    {
       // check
       if( $this->p_value == '' )
@@ -181,10 +181,10 @@ class FilterMysqlMatch extends Filter
       $parttype = ($this->get_config(FC_ADD_HAVING)) ? SQLP_HAVING : SQLP_WHERE;
       $query->add_part( $parttype, "MATCH($fields) AGAINST ( '$valsql' $sql_option )" );
       $this->query = $query;
-   }
+   }//build_query
 
    /*! \brief Returns input-text and optional checkbox form-element below (for handling of boolean-mode). */
-   function get_input_element($prefix, $attr = array() )
+   public function get_input_element($prefix, $attr = array() )
    {
       // input-text for terms
       $r = $this->build_input_text_elem(
@@ -201,14 +201,14 @@ class FilterMysqlMatch extends Filter
       }
 
       return $r;
-   }
+   }//get_input_element
 
    /*!
     * \brief Returns SQL-part for mysql-match according to FC_MATCH_MODE;
     * throws error for unknown match-mode.
     * \internal
     */
-   function build_sql_option()
+   private function build_sql_option()
    {
       // handle boolean-mode
       $match_mode = $this->get_config(FC_MATCH_MODE);
@@ -221,10 +221,10 @@ class FilterMysqlMatch extends Filter
       elseif( $match_mode === MATCH_QUERY_EXPANSION )
          $sql_option = 'WITH QUERY EXPANSION';
       else
-         error('invalid_filter', "FilterMysqlMatch.build_query.unknown_FC_MATCH_MODE({$this->id},$match_mode)");
+         error('invalid_filter', "FilterMysqlMatch.build_sql_option.unknown_FC_MATCH_MODE({$this->id},$match_mode)");
 
       return $sql_option;
-   }
+   }//build_sql_option
 
    /*!
     * \brief Returns arrays with words to search for in mysql-match search-terms,
@@ -233,7 +233,7 @@ class FilterMysqlMatch extends Filter
     * elements are well-formed for a (p)reg_exp using '/' as delimiter
     * \internal
     */
-   function extract_match_terms( $terms )
+   private function extract_match_terms( $terms )
    {
       // extract words, especially "quoted literals" using StringTokenizer
       // Syntax: word: [a-z0-9'_]+   +must -mustnot opt >more-important <less-important (grouping) ~negate-relevance trunc* "literal phrase"
@@ -243,7 +243,7 @@ class FilterMysqlMatch extends Filter
 
       if( !$tokenizer->parse($terms) )
       {
-         $this->errormsg = implode(", ", $tokenizer->errors());
+         $this->errormsg = implode(", ", $tokenizer->get_errors());
          return null;
       }
 
@@ -281,7 +281,7 @@ class FilterMysqlMatch extends Filter
       }
 
       return array( $arr, $stopwords );
-   }
+   }//extract_match_terms
 
    /*!
     * \brief Returns the query-part used for the MATCH, which can be added as
@@ -289,10 +289,11 @@ class FilterMysqlMatch extends Filter
     * <p>According to \see http://dev.mysql.com/doc/refman/4.1/en/fulltext-search.html#c1502
     * this doesn't contain the boolean-option even if used for the where-clause.
     */
-   function get_match_query_part()
+   public function get_match_query_part()
    {
       return $this->match_query_part;
    }
+
 } // end of 'FilterMysqlMatch'
 
 ?>

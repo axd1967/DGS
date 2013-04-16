@@ -30,7 +30,7 @@ class AdminFAQ
 {
    // ------------ static functions ----------------------------
 
-   function get_faq_group_id( $dbgmsg, $tr_group )
+   public static function get_faq_group_id( $dbgmsg, $tr_group )
    {
       $row = mysql_single_fetch( "$dbgmsg.get_faq_group_id($tr_group)",
          "SELECT ID FROM TranslationGroups WHERE Groupname='$tr_group' LIMIT 1" );
@@ -40,9 +40,9 @@ class AdminFAQ
    }
 
    // returns row with fields: FAQ/Links/Intro.* + Q + A + (Q|A)Translatable + (Q|A)Updated
-   function get_faq_entry_row( $dbtable, $id )
+   public static function get_faq_entry_row( $dbtable, $id )
    {
-      $row = mysql_single_fetch( "AdminFAQ::get_faq_entry_row($id)",
+      $row = mysql_single_fetch( "AdminFAQ:get_faq_entry_row($id)",
            "SELECT DBT.*, Question.Text AS Q, Answer.Text AS A".
                ", Question.Translatable AS QTranslatable".
                ", UNIX_TIMESTAMP(Question.Updated) AS QUpdated".
@@ -52,14 +52,17 @@ class AdminFAQ
                "INNER JOIN TranslationTexts AS Question ON Question.ID=DBT.Question " .
                "LEFT JOIN TranslationTexts AS Answer ON Answer.ID=DBT.Answer " .
            "WHERE DBT.ID='$id' LIMIT 1" )
-         or error('internal_error', "AdminFAQ::get_faq_entry_row($id)");
+         or error('internal_error', "AdminFAQ:get_faq_entry_row($id)");
 
       return $row;
-   }
+   }//get_faq_entry_row
 
-   // fid: parent entry, 1=root
-   // chk_mode: 0=std-entry (Answer), 1=Question, 2=reference (for Links)
-   function save_new_faq_entry( $dbgmsg, $dbtable, $tr_group, $fid, $is_cat, $question, $answer, $reference,
+   /*!
+    * \brief Saves new FAQ-entry.
+    * \param $fid parent entry, 1=root
+    * \param $chk_mode 0=std-entry (Answer), 1=Question, 2=reference (for Links)
+    */
+   public static function save_new_faq_entry( $dbgmsg, $dbtable, $tr_group, $fid, $is_cat, $question, $answer, $reference,
          $append=false, $translatable='N', $do_log=true, $chk_mode=0 )
    {
       global $NOW, $player_row;
@@ -69,7 +72,7 @@ class AdminFAQ
          error('invalid_args', "$dbgmsg.check.bad_dbtable");
       $db_type = strtoupper($dbtable);
 
-      $tr_group_id = AdminFAQ::get_faq_group_id( $dbgmsg, $tr_group );
+      $tr_group_id = self::get_faq_group_id( $dbgmsg, $tr_group );
 
       $ReferenceSql = ($reference) ? mysql_addslashes($reference) : $reference;
       if( $chk_mode == 2 && $reference )
@@ -205,7 +208,7 @@ class AdminFAQ
       return $faq_id;
    }//save_new_faq_entry
 
-   function move_faq_entry_same_level( $dbgmsg, $dbtable, $fid, $direction )
+   public static function move_faq_entry_same_level( $dbgmsg, $dbtable, $fid, $direction )
    {
       $dbgmsg .= ".move_faq_entry_same_level($dbtable,$fid,$direction)";
 
@@ -244,7 +247,7 @@ class AdminFAQ
       }
    }//move_faq_entry_same_level
 
-   function move_faq_entry_to_new_category( $dbgmsg, $dbtable, $fid, $direction )
+   public static function move_faq_entry_to_new_category( $dbgmsg, $dbtable, $fid, $direction )
    {
       $dbgmsg .= ".move_faq_entry_to_new_category($dbtable,$fid,$direction)";
 
@@ -292,7 +295,7 @@ class AdminFAQ
    }//move_faq_entry_to_new_category
 
    //$row = row from AdminFAQ::get_faq_entry_row()
-   function transl_toggle_state( $row )
+   public static function transl_toggle_state( $row )
    {
       //Warning: for toggle, Answer follow Question
       //         but they could be translated independently
@@ -312,11 +315,11 @@ class AdminFAQ
       return ''; //can't be toggled
    }//transl_toggle_state
 
-   function toggle_hidden_faq_entry( $dbgmsg, $dbtable, $fid )
+   public static function toggle_hidden_faq_entry( $dbgmsg, $dbtable, $fid )
    {
       $dbgmsg .= ".toggle_hidden_faq_entry($dbtable,$fid)";
 
-      $row = AdminFAQ::get_faq_entry_row( $dbtable, $fid );
+      $row = self::get_faq_entry_row( $dbtable, $fid );
       $faqhide = ( @$row['Hidden'] == 'Y' );
 
       ta_begin();
@@ -325,7 +328,7 @@ class AdminFAQ
          db_query( "$dbgmsg.upd_entry",
             "UPDATE $dbtable SET Hidden='" . ( $faqhide ? 'N' : 'Y' ) . "' WHERE ID=$fid LIMIT 1" );
 
-         $transl = AdminFAQ::transl_toggle_state($row);
+         $transl = self::transl_toggle_state($row);
          if( $faqhide && $transl == 'Y' )
          {
             //remove it from translation. No need to adjust Translations.Translated
@@ -340,7 +343,7 @@ class AdminFAQ
       ta_end();
    }//toggle_hidden_faq_entry
 
-   function toggle_translatable_faq_entry( $dbgmsg, $dbtable, $row, $curr_translatable )
+   public static function toggle_translatable_faq_entry( $dbgmsg, $dbtable, $row, $curr_translatable )
    {
       $dbgmsg .= ".toggle_translatable_faq_entry($dbtable)";
 
@@ -354,7 +357,7 @@ class AdminFAQ
    }//toggle_translatable_faq_entry
 
    //$row = row from AdminFAQ::get_faq_entry_row()
-   function delete_faq_entry( $dbgmsg, $dbtable, $fid, $row )
+   public static function delete_faq_entry( $dbgmsg, $dbtable, $fid, $row )
    {
       $dbgmsg .= ".delete_faq_entry($dbtable,$fid)";
       $QID = $row['Question'];
@@ -384,7 +387,7 @@ class AdminFAQ
    }//delete_faq_entry
 
    //$row = row from AdminFAQ::get_faq_entry_row()
-   function update_faq_entry( $dbgmsg, $dbtable, $fid, $row, $q_change, $a_change, $question, $answer, $reference )
+   public static function update_faq_entry( $dbgmsg, $dbtable, $fid, $row, $q_change, $a_change, $question, $answer, $reference )
    {
       global $NOW, $player_row;
 

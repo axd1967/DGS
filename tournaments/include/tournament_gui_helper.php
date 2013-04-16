@@ -51,7 +51,7 @@ class TournamentGuiHelper
    // ------------ static functions ----------------------------
 
    /*! \brief Returns tournament-standings of ladder, or null for none. */
-   function build_tournament_ladder_standings( $iterator, $page, $need_tp_rating )
+   public static function build_tournament_ladder_standings( $iterator, $page, $need_tp_rating )
    {
       global $player_row;
       $my_id = $player_row['ID'];
@@ -105,7 +105,7 @@ class TournamentGuiHelper
       return $ltable->make_table();
    }//build_tournament_ladder_standings
 
-   function build_tournament_results( $page, $tourney )
+   public static function build_tournament_results( $page, $tourney )
    {
       global $player_row;
       $my_id = $player_row['ID'];
@@ -175,7 +175,7 @@ class TournamentGuiHelper
    }//build_tournament_results
 
    /*! \brief Returns roles (text) of user in tournament: owner, tournament-director, tournament-admin. */
-   function getTournamentRoleText( $tourney, $uid )
+   public static function getTournamentRoleText( $tourney, $uid )
    {
       $arr = array();
 
@@ -193,7 +193,7 @@ class TournamentGuiHelper
    }//getTournamentRoleText
 
    /*! \brief Returns (cached) registration-link-text for given user; return empty string if user-registration is denied. */
-   function getLinkTextRegistration( $tid, $reg_user_status=null )
+   public static function getLinkTextRegistration( $tid, $reg_user_status=null )
    {
       global $player_row;
 

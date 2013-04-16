@@ -28,22 +28,18 @@ $TranslateGroups[] = "Languages";
  * http://en.wikipedia.org/wiki/List_of_official_languages
  */
 
-// use lazy-init to assure, that translation-language has been initialized !!
-$ARR_GLOBALS_LANGUAGES = array();
-
 /*! \brief Returns language-text or all languages (if code=null). */
 function getLanguageText( $code=null )
 {
-   global $ARR_GLOBALS_LANGUAGES;
+   static $ARR_LANGUAGES = null; // language-id => language-text
 
    // lazy-init of texts
-   $key = 'LANGUAGES';
-   if( !isset($ARR_GLOBALS_LANGUAGES[$key]) )
+   if( is_null($ARR_LANGUAGES) )
    {
       // index => language-text
       // NOTE: index must be unique and in range (1..62), index added in array for clarity
       // NOTE: stored in two signed ints as bitmask (Players.KnownLanguages1/2)
-      $arr = array(
+      $ARR_LANGUAGES = array(
           1 => T_('English#lang'),
           2 => T_('French#lang'),
           3 => T_('Arabic#lang'),
@@ -96,15 +92,14 @@ function getLanguageText( $code=null )
          50 => T_('Persian#lang'),
          51 => T_('Pashto#lang'),
       );
-      $ARR_GLOBALS_LANGUAGES[$key] = $arr;
    }
 
    if( is_null($code) )
-      return $ARR_GLOBALS_LANGUAGES[$key];
+      return $ARR_LANGUAGES;
 
-   if( !isset($ARR_GLOBALS_LANGUAGES[$key][$code]) )
+   if( !isset($ARR_LANGUAGES[$code]) )
       error('invalid_args', "Countries.getLanguageText($code)");
-   return $ARR_GLOBALS_LANGUAGES[$key][$code];
-} //getLanguageText
+   return $ARR_LANGUAGES[$code];
+}//getLanguageText
 
 ?>

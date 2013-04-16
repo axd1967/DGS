@@ -40,30 +40,23 @@ define('FOLDER_COMMANDS', 'list');
   */
 class QuickHandlerFolder extends QuickHandler
 {
-   var $folders;
-   var $cfg_pages;
-
-   function QuickHandlerFolder( $quick_object )
-   {
-      parent::QuickHandler( $quick_object );
-      $this->folders = null;
-      $this->cfg_pages = null;
-   }
+   private $folders = null;
+   private $cfg_pages = null;
 
 
    // ---------- Interface ----------------------------------------
 
-   function canHandle( $obj, $cmd ) // static
+   public static function canHandle( $obj, $cmd ) // static
    {
       return ( $obj == QOBJ_FOLDER ) && QuickHandler::matchRegex(FOLDER_COMMANDS, $cmd);
    }
 
-   function parseURL()
+   public function parseURL()
    {
       parent::checkArgsUnknown();
    }
 
-   function prepare()
+   public function prepare()
    {
       global $player_row;
       $uid = (int)@$player_row['ID'];
@@ -86,20 +79,20 @@ class QuickHandlerFolder extends QuickHandler
    }//prepare
 
    /*! \brief Processes command for object; may fire error(..) and perform db-operations. */
-   function process()
+   public function process()
    {
       $cmd = $this->quick_object->cmd;
       if( $cmd == QCMD_LIST )
          $this->process_cmd_list();
    }
 
-   function process_cmd_list()
+   private function process_cmd_list()
    {
       $out = array();
       if( is_array($this->folders) )
       {
          foreach( $this->folders as $folder_id => $arr )
-            $out[] = QuickHandlerFolder::build_obj_folder( $folder_id, $arr, /*with*/true, $this->cfg_pages );
+            $out[] = self::build_obj_folder( $folder_id, $arr, /*with*/true, $this->cfg_pages );
       }
 
       $this->add_list( QOBJ_FOLDER, $out, 'id+' );
@@ -108,7 +101,7 @@ class QuickHandlerFolder extends QuickHandler
 
    // ------------ static functions ----------------------------
 
-   function build_obj_folder( $folder_id, $arr, $with=true, $cfg_pages=null )
+   public static function build_obj_folder( $folder_id, $arr, $with=true, $cfg_pages=null )
    {
       if( !$with )
          return array( 'id' => $folder_id );
@@ -126,7 +119,7 @@ class QuickHandlerFolder extends QuickHandler
          'color_fg'  => $arr[2],
       );
       if( !is_null($cfg_pages) )
-         $out['on_status'] = ($this->cfg_pages->get_status_folder_visibility($folder_id) > 0) ? 1 : 0;
+         $out['on_status'] = ($cfg_pages->get_status_folder_visibility($folder_id) > 0) ? 1 : 0;
       return $out;
    }//build_obj_folder
 

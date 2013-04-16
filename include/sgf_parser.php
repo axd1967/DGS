@@ -406,30 +406,24 @@ function get_handicap_pattern( $size, $handicap, &$err)
 /*! \brief Contains parsed properties from SGF for further processing. */
 class SgfParser
 {
-   var $error; // error-message | '' (=success)
-   var $Size;
-   var $Handicap; // number of handicap-stones
-   var $Komi;
-   var $SetWhite; // [ sgf-coord, ... ]
-   var $SetBlack;
-   var $Moves; // [ 'B|W'.sgf-coord, ... ], for example: [ 'Baa', ... ]
+   public $error; // error-message | '' (=success)
+   public $Size = 0;
+   public $Handicap = 0; // number of handicap-stones
+   public $Komi = 0;
+   public $SetWhite = array(); // [ sgf-coord, ... ]
+   public $SetBlack = array();
+   public $Moves = array(); // [ 'B|W'.sgf-coord, ... ], for example: [ 'Baa', ... ]
 
-   function SgfParser( $error )
+   public function __construct( $error )
    {
       $this->error = $error;
-      $this->Size = 0;
-      $this->Handicap = 0;
-      $this->Komi = 0;
-      $this->SetWhite = array();
-      $this->SetBlack = array();
-      $this->Moves = array();
    }
 
 
    // ------------ static functions ----------------------------
 
    /*! Returns false if passed SGF-data does not rudimentary looking like a SGF. */
-   function might_be_sgf( $sgf_data )
+   public static function might_be_sgf( $sgf_data )
    {
       return preg_match("/^\\s*\\(\\s*;\\s*[a-z]/si", $sgf_data);
    }
@@ -438,14 +432,14 @@ class SgfParser
     * \brief Parses SGF-data into resulting-array (used to load SGF and flatten into Goban-objects for Shape-game).
     * \return SgfParser-instance with filled properties; parsing-error in SgfParser->Error or '' if ok
     */
-   function parse_sgf( $sgf_data )
+   public static function parse_sgf( $sgf_data )
    {
       $game = array();
       $error = sgf_parser( $sgf_data, $game );
 
-      $out = new SgfParser( $error );
+      $sgf_parser = new SgfParser( $error );
       if( $error )
-         return $out;
+         return $sgf_parser;
 
       $game = $game[0]; // check 1st game only
       $movenum = 0; // current move-number
@@ -470,29 +464,29 @@ class SgfParser
             {
                $key = ( isset($node['B']) ) ? 'B' : 'W';
                $sgf_coord = @$node[$key][0];
-               $out->Moves[] = $key . $sgf_coord;
+               $sgf_parser->Moves[] = $key . $sgf_coord;
                $movenum++;
             }
             if( isset($node['AB']) )
             {
                foreach( @$node['AB'] as $sgf_coord )
-                  $out->SetBlack[] = $sgf_coord;
+                  $sgf_parser->SetBlack[] = $sgf_coord;
             }
             if( isset($node['AW']) )
             {
                foreach( @$node['AW'] as $sgf_coord )
-                  $out->SetWhite[] = $sgf_coord;
+                  $sgf_parser->SetWhite[] = $sgf_coord;
             }
-            if( isset($node['SZ']) && !$out->Size )
-               $out->Size = (int)$node['SZ'][0];
+            if( isset($node['SZ']) && !$sgf_parser->Size )
+               $sgf_parser->Size = (int)$node['SZ'][0];
             if( isset($node['HA']) && is_null($parsed_HA) )
-               $out->Handicap = $parsed_HA = (int)$node['HA'][0];
+               $sgf_parser->Handicap = $parsed_HA = (int)$node['HA'][0];
             if( isset($node['KM']) && is_null($parsed_KM) )
-               $out->Komi = $parsed_KM = (float)$node['KM'][0];
+               $sgf_parser->Komi = $parsed_KM = (float)$node['KM'][0];
          }
       }
 
-      return $out;
+      return $sgf_parser;
    }//parse_sgf
 
 }//end 'SgfParser'

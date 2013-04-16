@@ -33,64 +33,46 @@ define('BOARDOPT_USE_CACHE',     0x08);
 
 class Board
 {
-   var $gid;
-   var $size;
-   var $max_moves;
-   var $coord_borders;
-   var $board_flags;
-   var $stone_size;
-   var $woodcolor;
+   public $gid;
+   public $size;
+   public $max_moves;
+   private $coord_borders = -1;
+   private $board_flags = 0;
+   private $stone_size = 25;
+   private $woodcolor = 1;
 
-   var $array; //2D array: [$PosX][$PosY] => $Stone
-   var $moves; //array: [$MoveNr] => array($Stone,$PosX,$PosY); first MoveNr=MOVE_SETUP ('S') for shape-game
-   var $marks; //array: [$sgf_coord] => $mark
-   var $captures; //array: [$MoveNr] => array($Stone,$PosX,$PosY,$mark)
-   var $js_moves; //array($MoveNr,$Stone,$PosX,$PosY) to build moves for JS-game-editor
-   var $moves_captures; //array: [$MoveNr] => array(sgfcoord-prisoners, ...)
-   var $last_captures; //array: [sgfcoord] => 1 (if pos should be marked)
-   var $shape_arr_xy;
+   public $array = null; //2D array: [$PosX][$PosY] => $Stone
+   public $moves = array(); //array: [$MoveNr] => array($Stone,$PosX,$PosY); first MoveNr=MOVE_SETUP ('S') for shape-game
+   private $marks = null; //array: [$sgf_coord] => $mark
+   private $captures = null; //array: [$MoveNr] => array($Stone,$PosX,$PosY,$mark)
+   private $js_moves = array(); //array($MoveNr,$Stone,$PosX,$PosY) to build moves for JS-game-editor
+   private $moves_captures = null; //array: [$MoveNr] => array(sgfcoord-prisoners, ...)
+   private $last_captures = array(); //array: [sgfcoord] => 1 (if pos should be marked)
+   public $shape_arr_xy = array();
 
    //Last move shown ($movemrkx<0 if PASS, RESIGN or SCORE)
-   var $movemrkx, $movemrky, $movecol, $movemsg;
+   private $movemrkx = -1;
+   private $movemrky = -1;
+   public $movecol = DAME;
+   public $movemsg = '';
 
-   var $infos; //extra-infos collected
+   public $infos = array(); //extra-infos collected
 
-   var $dirx, $diry; //directions arrays
-   var $visited_points; // visited coords arr[x][y] set after run of has_liberty_check()-call
+   // directions arrays
+   private $dirx = array( -1,0,1,0 );
+   private $diry = array( 0,-1,0,1 );
+   public $visited_points = null; // visited coords arr[x][y] set after run of has_liberty_check()-call
 
 
-   // Constructor. Create a new board array and initialize it.
-   function Board( $gid=0, $size=19, $max_moves=0 )
+   /*! \brief Constructor. Create a new board array and initialize it. */
+   public function __construct( $gid=0, $size=19, $max_moves=0 )
    {
       $this->gid = $gid;
       $this->size = $size;
       $this->max_moves = $max_moves;
-
-      $this->coord_borders = -1;
-      $this->board_flags = 0;
-      $this->stone_size = 25;
-      $this->woodcolor = 1;
-
-      $this->array = NULL;
-      $this->moves = array();
-      $this->marks = NULL;
-      $this->captures = NULL;
-      $this->js_moves = array();
-      $this->moves_captures = NULL;
-      $this->last_captures = array();
-      $this->shape_arr_xy = array();
-
-      $this->movemrkx = $this->movemrky = -1;
-      $this->movecol = DAME;
-      $this->movemsg = '';
-      $this->infos = array();
-
-      $this->dirx = array( -1,0,1,0 );
-      $this->diry = array( 0,-1,0,1 );
-      $this->visited_points = NULL;
    }
 
-   function init_board()
+   public function init_board()
    {
       $this->array = array();
       $this->moves = array();
@@ -118,7 +100,7 @@ class Board
     * \note fills $this->shape_arr_xy with parsed shape-setup as returned by GameSnapshot::parse_stones_snapshot().
     * \note keep the coords, color and message of the move $move.
     */
-   function load_from_db( $game_row, $move=0, $board_opts=0, $cache_ttl=0 )
+   public function load_from_db( $game_row, $move=0, $board_opts=0, $cache_ttl=0 )
    {
       $this->init_board();
 
@@ -150,7 +132,7 @@ class Board
 
       // load moves
       $use_cache = (bool)( $board_opts & BOARDOPT_USE_CACHE );
-      $arr_moves = Board::load_cache_game_moves( 'load_from_db', $gid, $use_cache, $use_cache, $cache_ttl );
+      $arr_moves = self::load_cache_game_moves( 'load_from_db', $gid, $use_cache, $use_cache, $cache_ttl );
       if( $arr_moves === false )
          return FALSE;
       $cnt_moves = count($arr_moves);
@@ -208,7 +190,7 @@ class Board
                if( $fix_stop )
                   return FALSE;
                else
-                  $this->fix_corrupted_move_table( $gid);
+                  self::fix_corrupted_move_table( $gid);
                break;
             }
             continue;
@@ -255,18 +237,17 @@ class Board
       {
          list($this->movecol, $this->movemrkx, $this->movemrky) = $this->moves[$move];
 
-         $move_text = Board::load_cache_game_move_message( 'load_from_db', $gid, $move, $use_cache, $use_cache, $cache_ttl );
+         $move_text = self::load_cache_game_move_message( 'load_from_db', $gid, $move, $use_cache, $use_cache, $cache_ttl );
          if( $move_text !== false && !is_array($move_text) )
             $this->movemsg = $move_text;
       }
 
       return TRUE;
-   } //load_from_db
+   }//load_from_db
 
-   // static
-   function load_cache_game_moves( $dbgmsg, $gid, $fetch_cache, $store_cache, $cache_ttl=0 )
+   public static function load_cache_game_moves( $dbgmsg, $gid, $fetch_cache, $store_cache, $cache_ttl=0 )
    {
-      $dbgmsg = "board.load_cache_game_moves($gid,$fetch_cache,$store_cache).$dbgmsg";
+      $dbgmsg = "Board:load_cache_game_moves($gid,$fetch_cache,$store_cache).$dbgmsg";
       $key = "Game.moves.$gid";
 
       $arr_moves = ( $fetch_cache && DgsCache::is_persistent(CACHE_GRP_GAME_MOVES) )
@@ -297,16 +278,17 @@ class Board
       return $arr_moves;
    }//load_cache_game_moves
 
-   // static
-   function delete_cache_game_moves( $dbgmsg, $gid )
+   public static function delete_cache_game_moves( $dbgmsg, $gid )
    {
       DgsCache::delete( $dbgmsg, CACHE_GRP_GAME_MOVES, "Game.moves.$gid" );
    }
 
-   // static
-   // \param $move null = load all moves, otherwise MoveNr for text
-   // \return false = nothing found; Text (if $move>0 and entry found); arr( MoveNr => Text, ...) otherwise (arr can be empty)
-   function load_cache_game_move_message( $dbgmsg, $gid, $move, $fetch_cache, $store_cache, $cache_ttl=0 )
+   /*!
+    * \brief Loads game move-messages.
+    * \param $move null = load all moves, otherwise MoveNr for text
+    * \return false = nothing found; Text (if $move>0 and entry found); arr( MoveNr => Text, ...) otherwise (arr can be empty)
+    */
+   public static function load_cache_game_move_message( $dbgmsg, $gid, $move, $fetch_cache, $store_cache, $cache_ttl=0 )
    {
       $dbgmsg = "board.load_cache_game_move_message($gid,$move,$fetch_cache,$store_cache).$dbgmsg";
       $key = "Game.movemsg.$gid";
@@ -349,15 +331,16 @@ class Board
       return $result;
    }//load_cache_game_move_message
 
-   // static
-   function delete_cache_game_move_messages( $dbgmsg, $gid )
+   public static function delete_cache_game_move_messages( $dbgmsg, $gid )
    {
       DgsCache::delete( $dbgmsg, CACHE_GRP_GAME_MOVEMSG, "Game.movemsg.$gid" );
    }
 
-   // fills $array with positions where the stones are (incl. handling of shape-game)
-   // NOTE: only used for shape-checking, not to control board
-   function build_from_shape_snapshot( $size, $shape_snapshot )
+   /*!
+    * \brief Fills $array with positions where the stones are (incl. handling of shape-game).
+    * \note only used for shape-checking, not to control board
+    */
+   public function build_from_shape_snapshot( $size, $shape_snapshot )
    {
       $this->init_board();
       $this->size = $size;
@@ -379,7 +362,7 @@ class Board
     * \brief Adds handicap stones to board-array.
     * \param $coords list with coordinates-array: [ (x,y), ... ]
     */
-   function add_handicap_stones( $coords )
+   public function add_handicap_stones( $coords )
    {
       foreach( $coords as $coord )
       {
@@ -389,17 +372,17 @@ class Board
 
          $this->array[$x][$y] = BLACK;
       }
-   }
+   }//add_handicap_stones
 
 
-   function set_move_mark( $x=-1, $y=-1)
+   public function set_move_mark( $x=-1, $y=-1)
    {
       $this->movemrkx= $x;
       $this->movemrky= $y;
    }
 
 
-   function move_marks( $start, $end, $mark=0)
+   public function move_marks( $start, $end, $mark=0)
    {
       if( is_string( $mark) )
          $mod = 0;
@@ -462,9 +445,9 @@ class Board
             }
          }
       }
-   }// move_marks
+   }//move_marks
 
-   function draw_captures_box( $caption)
+   public function draw_captures_box( $caption)
    {
       if( !is_array($this->captures) )
          return false;
@@ -523,10 +506,10 @@ class Board
       echo "</table>\n";
 
       return true;
-   } //draw_captures_box
+   }//draw_captures_box
 
 
-   function mark_last_captures( $move )
+   public function mark_last_captures( $move )
    {
       $this->last_captures = array();
       if( is_array($this->moves_captures) && isset($this->moves_captures[$move]) )
@@ -537,7 +520,7 @@ class Board
       return count($this->last_captures);
    }//mark_last_captures
 
-   function draw_last_captures_box( $caption )
+   public function draw_last_captures_box( $caption )
    {
       if( !is_array($this->last_captures) )
          return false;
@@ -564,7 +547,7 @@ class Board
    }//draw_last_captures_box
 
 
-   function set_style( $cfg_board )
+   public function set_style( $cfg_board )
    {
       $board_coords = $cfg_board->get_board_coords();
       if( is_numeric($board_coords) )
@@ -575,11 +558,11 @@ class Board
       $this->board_flags = $cfg_board->get_board_flags();
       $this->stone_size = $cfg_board->get_stone_size();
       $this->woodcolor = $cfg_board->get_wood_color();
-   }
+   }//set_style
 
 
    // keep in sync with GobanHandlerGfxBoard
-   function style_string()
+   public function style_string()
    {
       $stone_size = $this->stone_size;
       $coord_width = floor($stone_size*31/25);
@@ -596,11 +579,11 @@ class Board
            . sprintf( $tmp, 'brdn', $coord_width, $stone_size) //num coords
            ;
       return $str;
-   }
+   }//style_string
 
 
    // keep in sync with GobanHandlerGfxBoard
-   function draw_coord_row( $coord_start_letter, $coord_alt, $coord_end, $coord_left, $coord_right )
+   private function draw_coord_row( $coord_start_letter, $coord_alt, $coord_end, $coord_left, $coord_right )
    {
       echo "<tr>\n";
 
@@ -620,11 +603,11 @@ class Board
          echo $coord_right;
 
       echo "</tr>\n";
-   }
+   }//draw_coord_row
 
 
    // keep in sync with GobanHandlerGfxBoard
-   function draw_edge_row( $edge_start, $edge_coord, $border_start, $border_imgs, $border_rem )
+   private function draw_edge_row( $edge_start, $edge_coord, $border_start, $border_imgs, $border_rem )
    {
       echo "<tr>\n";
 
@@ -647,12 +630,12 @@ class Board
          echo $edge_coord;
 
       echo "</tr>\n";
-   }
+   }//draw_edge_row
 
 
    // keep in sync with GobanHandlerGfxBoard
    // board: img.alt-attr mapping: B>X W>O, last-move B># W>@, dead B>x W>o, terr B>+ W>-, dame>. seki-dame>s hoshi>, else>.
-   function draw_board( $may_play=false, $action='', $stonestring='')
+   public function draw_board( $may_play=false, $action='', $stonestring='')
    {
       global $woodbgcolors;
 
@@ -955,11 +938,11 @@ class Board
          echo '</tbody>';
          echo "</table>\n";
       } //goban
-   } //draw_board
+   }//draw_board
 
 
    //$coord_borders and $movemsg stay local.
-   function draw_ascii_board( $movemsg='', $coord_borders=COORD_MASK)
+   public function draw_ascii_board( $movemsg='', $coord_borders=COORD_MASK)
    {
       $out = "\n";
 
@@ -1071,9 +1054,9 @@ class Board
       }
 
       return $out;
-   } //draw_ascii_board
+   }//draw_ascii_board
 
-   function draw_move_message( $msg )
+   public function draw_move_message( $msg )
    {
       echo "<table id=\"gameMessage\" class=MessageBox><tr>" . //align=center
            "<td width=\"" . $this->stone_size*19 . "\" align=left>$msg</td></tr></table><BR>\n";
@@ -1086,7 +1069,7 @@ class Board
     * \param $remove if true, remove captured stones
     * \note fill this.visited_points if set as an array
     */
-   function has_liberty_check( $start_x, $start_y, &$prisoners, $remove )
+   public function has_liberty_check( $start_x, $start_y, &$prisoners, $remove )
    {
       $color = @$this->array[$start_x][$start_y]; // Color of this stone
 
@@ -1140,9 +1123,11 @@ class Board
    }//has_liberty_check
 
 
-   // checks if stone/move at [colnr/rownr] captures some stone(s)
-   // returns true, if some stones captured (in which case $prisoners-arg contains the x/y-coords of the prisoners)
-   function check_prisoners( $colnr, $rownr, $col, &$prisoners )
+   /*!
+    * \brief Checks if stone/move at [colnr/rownr] captures some stone(s).
+    * \return true, if some stones captured (in which case $prisoners-arg contains the x/y-coords of the prisoners)
+    */
+   public function check_prisoners( $colnr, $rownr, $col, &$prisoners )
    {
       $some = false;
       for($i=0; $i<4; $i++) // determine captured stones for ALL directions
@@ -1157,14 +1142,14 @@ class Board
          }
       }
       return $some;
-   } //check_prisoners
+   }//check_prisoners
 
 
    /*!
     * \brief Returns number of marked territory points at position (x,y).
     * \param $start_x/y board-position to check, 0..n
     */
-   function mark_territory( $start_x, $start_y )
+   public function mark_territory( $start_x, $start_y )
    {
       $stack = array( array( $start_x, $start_y ) );
       $visited = array(); // marker if point already checked
@@ -1234,7 +1219,7 @@ class Board
     * \return if $with_coords is false, return null; otherwise returns
     *         [ territory-array, prisoners-array ] with [ coords => SGF-prop, ...] for SGF-download
     */
-   function fill_game_score( &$game_score, $with_coords=false, $with_board_status=false )
+   public function fill_game_score( &$game_score, $with_coords=false, $with_board_status=false )
    {
       // mark territory
       for( $x=0; $x<$this->size; $x++)
@@ -1309,7 +1294,7 @@ class Board
       //error_log($game_score->to_string());
 
       return ( $with_coords ) ? array( $territory, $prisoners ) : null;
-   } //fill_game_score
+   }//fill_game_score
 
 
    /*!
@@ -1318,7 +1303,7 @@ class Board
     * \param $marked pass-back marked x/y-points
     * \param $toggled array[x][y] with toggled points to avoid re-toggling (used for unique-toggle-mode of quick-suite)
     */
-   function toggle_marked_area( $start_x, $start_y, &$marked, &$toggled, $companion_groups=true )
+   public function toggle_marked_area( $start_x, $start_y, &$marked, &$toggled, $companion_groups=true )
    {
       $color = @$this->array[$start_x][$start_y]; // Color of this stone
 
@@ -1339,7 +1324,7 @@ class Board
 
       $has_toggle = is_array($toggled);
       if( $has_toggle )
-         Board::toggle_xy($toggled, $start_x, $start_y);
+         self::toggle_xy($toggled, $start_x, $start_y);
 
       // scanning all directions starting at start-x/y building up a stack of adjacent points to check
       while( $arr_xy = array_shift($stack) )
@@ -1359,7 +1344,7 @@ class Board
                   $stack[] = array( $new_x, $new_y, $color );
                   $visited[$new_x][$new_y] = array( $new_x, $new_y );
                   if( $has_toggle )
-                     Board::toggle_xy($toggled, $new_x, $new_y);
+                     self::toggle_xy($toggled, $new_x, $new_y);
                }
                elseif( $new_color == $opposite_dead )
                {
@@ -1384,8 +1369,7 @@ class Board
       }
    }//toggle_marked_area
 
-   // static
-   function toggle_xy( &$arr, $x, $y )
+   private static function toggle_xy( &$arr, $x, $y )
    {
       if( isset($arr[$x][$y]) )
          $arr[$x][$y]++;
@@ -1397,7 +1381,7 @@ class Board
    // If move update was interupted between two mysql queries, there may
    // be extra entries in the Moves and MoveMessages tables.
    // \internal
-   function fix_corrupted_move_table( $gid)
+   private static function fix_corrupted_move_table( $gid)
    {
       $row= mysql_single_fetch( "board.fix_corrupted_move_table.moves: $gid",
          "SELECT Moves FROM Games WHERE ID=$gid" );
@@ -1424,8 +1408,8 @@ class Board
          db_query( "board.fix_corrupted_move_table.delete_move_mess($gid)",
             "DELETE FROM MoveMessages WHERE gid=$gid AND MoveNr=$max_movenr" );
 
-         Board::delete_cache_game_moves( "board.fix_corrupted_move_table.delete_moves($gid)", $gid );
-         Board::delete_cache_game_move_messages( "board.fix_corrupted_move_table.delete_move_mess($gid)", $gid );
+         self::delete_cache_game_moves( "board.fix_corrupted_move_table.delete_moves($gid)", $gid );
+         self::delete_cache_game_move_messages( "board.fix_corrupted_move_table.delete_move_mess($gid)", $gid );
       }
       ta_end();
    }//fix_corrupted_move_table
@@ -1435,7 +1419,7 @@ class Board
     * \return 0/1/2/3 for given board-pos x/y=0..size-1, 0=empty, 1=black, 2=white, 3=dead
     * \see GameSnapshot#make_game_snapshot()
     */
-   function read_stone_value( $x, $y, $with_dead=true )
+   public function read_stone_value( $x, $y, $with_dead=true )
    {
       static $VAL_MAP = array(
             BLACK       => 1, // 01 (black)
@@ -1454,7 +1438,7 @@ class Board
     * \return space-separate string with moves, for syntax see GameEditor.parseMoves() in 'js/game-editor.js'
     * \note prisoners will be calculated, handicap is either done as SETUP or as MOVE
     */
-   function make_js_game_moves()
+   public function make_js_game_moves()
    {
       $out = array();
       foreach( $this->js_moves as $arr )

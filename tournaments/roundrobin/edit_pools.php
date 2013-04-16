@@ -426,7 +426,7 @@ function load_and_fill_pool_unassigned( $tid, $round, &$uatable )
    $tpool0_iterator = TournamentPool::load_tournament_pools(
       $tpool0_iterator, $tid, $round, 0, $load_opts_tpool );
 
-   $show_rows = $uatable->compute_show_rows( $tpool0_iterator->ResultRows );
+   $show_rows = $uatable->compute_show_rows( $tpool0_iterator->getResultRows() );
    $uatable->set_found_rows( mysql_found_rows('Tournament.edit_pools.pools_unassigned.found_rows') );
 
    while( ($show_rows-- > 0) && list(,$arr_item) = $tpool0_iterator->getListIterator() )

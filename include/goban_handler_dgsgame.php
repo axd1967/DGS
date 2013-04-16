@@ -38,14 +38,12 @@ require_once 'include/board.php';
   */
 class GobanHandlerDgsGame
 {
-   /*! \brief Constructs GobanHandler for DGS-game-reader. */
-   function GobanHandlerDgsGame() { }
 
    /*!
     * \brief (interface) Parses given text or board returning Goban-object.
     * \param $text syntax "<game gid[,move]>" or a Board-object
     */
-   function read_goban( $board_text )
+   public function read_goban( $board_text )
    {
       static $VAL_MAP = array(
             BLACK => GOBS_BLACK,
@@ -91,7 +89,8 @@ class GobanHandlerDgsGame
       return $goban;
    }//read_goban
 
-   function load_board( $gid, $movenum )
+   // \internal
+   private function load_board( $gid, $movenum )
    {
       $game_row = mysql_single_fetch( "GobanHandlerDgsGame.load_board($gid,$movenum)",
          "SELECT ID, Size, Moves, ShapeSnapshot FROM Games WHERE ID=$gid LIMIT 1" );
@@ -105,7 +104,7 @@ class GobanHandlerDgsGame
    }//load_board
 
    /*! \brief (interface) Transforms given Goban-object into DGS-game. */
-   function write_goban( $goban )
+   public function write_goban( $goban )
    {
       error('invalid_method', "GobanHandlerDgsGame.write_goban()");
    }

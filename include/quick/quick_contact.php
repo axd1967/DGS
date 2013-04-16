@@ -39,28 +39,22 @@ define('CONTACT_COMMANDS', 'list');
   */
 class QuickHandlerContact extends QuickHandler
 {
-   var $contacts;
-
-   function QuickHandlerContact( $quick_object )
-   {
-      parent::QuickHandler( $quick_object );
-      $this->contacts = null;
-   }
+   private $contacts = null;
 
 
    // ---------- Interface ----------------------------------------
 
-   function canHandle( $obj, $cmd ) // static
+   public static function canHandle( $obj, $cmd ) // static
    {
       return ( $obj == QOBJ_CONTACT ) && QuickHandler::matchRegex(CONTACT_COMMANDS, $cmd);
    }
 
-   function parseURL()
+   public function parseURL()
    {
       parent::checkArgsUnknown();
    }
 
-   function prepare()
+   public function prepare()
    {
       global $player_row;
       $uid = (int)@$player_row['ID'];
@@ -83,14 +77,14 @@ class QuickHandlerContact extends QuickHandler
    }//prepare
 
    /*! \brief Processes command for object; may fire error(..) and perform db-operations. */
-   function process()
+   public function process()
    {
       $cmd = $this->quick_object->cmd;
       if( $cmd == QCMD_LIST )
          $this->process_cmd_list();
    }//process
 
-   function process_cmd_list()
+   private function process_cmd_list()
    {
       $out = array();
       if( is_array($this->contacts) )
@@ -102,7 +96,7 @@ class QuickHandlerContact extends QuickHandler
       $this->add_list( QOBJ_CONTACT, $out, 'contact_user.name+' );
    }//process_cmd_list
 
-   function build_obj_contact( $contact )
+   private function build_obj_contact( $contact )
    {
       return array(
          'contact_user' => $this->build_obj_contact_user($contact),
@@ -114,7 +108,7 @@ class QuickHandlerContact extends QuickHandler
       );
    }//build_obj_contact
 
-   function build_obj_contact_user( $contact )
+   private function build_obj_contact_user( $contact )
    {
       $with_fields = ( $this->is_with_option(QWITH_USER_ID) ) ? 'country,rating,lastacc' : '';
       $urow = $contact->contact_user_row;

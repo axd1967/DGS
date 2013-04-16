@@ -49,18 +49,18 @@ $ENTITY_RATINGLOG = new Entity( 'Ratinglog',
 
 class Ratinglog
 {
-   var $ID;
-   var $uid;
-   var $gid;
-   var $Time;
-   var $Rating;
-   var $RatingMin;
-   var $RatingMax;
-   var $RatingDiff;
+   public $ID;
+   public $uid;
+   public $gid;
+   public $Time;
+   public $Rating;
+   public $RatingMin;
+   public $RatingMax;
+   public $RatingDiff;
 
    /*! \brief Constructs Ratinglog-object with specified arguments. */
-   function Ratinglog( $id=0, $uid=0, $gid=0, $time=0,
-                   $rating=null, $rating_min=null, $rating_max=null, $rating_diff=null )
+   public function __construct( $id=0, $uid=0, $gid=0, $time=0,
+         $rating=null, $rating_min=null, $rating_max=null, $rating_diff=null )
    {
       $this->ID = (int)$id;
       $this->uid = (int)$uid;
@@ -72,13 +72,13 @@ class Ratinglog
       $this->RatingDiff = is_null($rating_diff) ? null : (float)$rating_diff;
    }
 
-   function to_string()
+   public function to_string()
    {
       return print_r($this, true);
    }
 
    /*! \brief Inserts or updates Ratinglog-entry in database. */
-   function persist()
+   public function persist()
    {
       if( $this->ID > 0 )
          $success = $this->update();
@@ -87,7 +87,7 @@ class Ratinglog
       return $success;
    }
 
-   function insert()
+   public function insert()
    {
       $this->Time = $GLOBALS['NOW'];
 
@@ -98,19 +98,19 @@ class Ratinglog
       return $result;
    }
 
-   function update()
+   public function update()
    {
       $entityData = $this->fillEntityData();
       return $entityData->update( "Ratinglog.update(%s)" );
    }
 
-   function delete()
+   public function delete()
    {
       $entityData = $this->fillEntityData();
       return $entityData->delete( "Ratinglog.delete(%s)" );
    }
 
-   function fillEntityData( $data=null )
+   public function fillEntityData( $data=null )
    {
       if( is_null($data) )
          $data = $GLOBALS['ENTITY_RATINGLOG']->newEntityData();
@@ -129,7 +129,7 @@ class Ratinglog
    // ------------ static functions ----------------------------
 
    /*! \brief Returns db-fields to be used for query of Ratinglog-objects for given game-id. */
-   function build_query_sql( $gid=0, $uid=0 )
+   public static function build_query_sql( $gid=0, $uid=0 )
    {
       $qsql = $GLOBALS['ENTITY_RATINGLOG']->newQuerySQL('RL');
       if( $gid > 0 )
@@ -140,7 +140,7 @@ class Ratinglog
    }
 
    /*! \brief Returns Ratinglog-object created from specified (db-)row. */
-   function new_from_row( $row )
+   public static function new_from_row( $row )
    {
       $rl = new Ratinglog(
             // from Ratinglog
@@ -161,39 +161,39 @@ class Ratinglog
     * \param $query_qsql QuerySQL restricting entries, expecting one result
     * \return NULL if nothing found; Games otherwise
     */
-   function load_ratinglog_with_query( $query_qsql )
+   public static function load_ratinglog_with_query( $query_qsql )
    {
       if( !($query_qsql instanceof QuerySQL) )
          error('invalid_args', "Ratinglog.load_ratinglog_with_query");
 
-      $qsql = Ratinglog::build_query_sql();
+      $qsql = self::build_query_sql();
       $qsql->merge( $query_qsql );
       $qsql->add_part( SQLP_LIMIT, '1' );
 
-      $row = mysql_single_fetch( "Ratinglog::load_ratinglog_with_query.find_ratinglog()",
+      $row = mysql_single_fetch( "Ratinglog:load_ratinglog_with_query.find_ratinglog()",
          $qsql->get_select() );
-      return ($row) ? Ratinglog::new_from_row($row) : NULL;
-   }
+      return ($row) ? self::new_from_row($row) : NULL;
+   }//load_ratinglog_with_query
 
    /*! \brief Returns enhanced (passed) ListIterator with Ratinglog-objects. */
-   function load_ratinglogs( $iterator, $gid=0, $uid=0 )
+   public static function load_ratinglogs( $iterator, $gid=0, $uid=0 )
    {
-      $qsql = Ratinglog::build_query_sql( $gid, $uid );
+      $qsql = self::build_query_sql( $gid, $uid );
       $iterator->setQuerySQL( $qsql );
       $query = $iterator->buildQuery();
-      $result = db_query( "Ratinglog.load_ratinglogs", $query );
+      $result = db_query( "Ratinglog:load_ratinglogs", $query );
       $iterator->setResultRows( mysql_num_rows($result) );
 
       $iterator->clearItems();
       while( $row = mysql_fetch_array( $result ) )
       {
-         $rlog = RatingLog::new_from_row( $row );
+         $rlog = self::new_from_row( $row );
          $iterator->addItem( $rlog, $row );
       }
       mysql_free_result($result);
 
       return $iterator;
-   }
+   }//load_ratinglogs
 
 } // end of 'Ratinglog'
 ?>

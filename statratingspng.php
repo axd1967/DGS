@@ -189,7 +189,7 @@ define('MIN_RANK', round(MIN_RATING/100.0));
 
    if( $cache_it )
       grab_output_start();
-   $gr->imagesend();
+   $gr->send_image();
    if( $cache_it )
       grab_output_end( $cache_name);
 }

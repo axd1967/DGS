@@ -120,7 +120,7 @@ require_once( 'forum/post.php' );
       if( !($edit > 0) )
          $reply = @$_REQUEST['parent']+0;
 //      if( ALLOW_GO_DIAGRAMS && is_javascript_enabled() )
-//         $preview_GoDiagrams = create_godiagrams($preview_Text, $cfg_board);
+//         $preview_GoDiagrams = GoDiagram::create_godiagrams($preview_Text, $cfg_board);
    }
 
    $disp_forum = new DisplayForum( $my_id, $is_moderator, $forum_id, $thread );
@@ -285,7 +285,7 @@ require_once( 'forum/post.php' );
       // draw current post
       $GoDiagrams = NULL;
 //      if( ALLOW_GO_DIAGRAMS && is_javascript_enabled() )
-//         $GoDiagrams = find_godiagrams($post->text, $cfg_board);
+//         $GoDiagrams = GoDiagram::find_godiagrams($post->text, $cfg_board);
       $post_reference = $disp_forum->draw_post( $drawmode, $post, $is_my_post, $GoDiagrams );
 
       // preview of new or existing post (within existing thread)
@@ -380,7 +380,7 @@ function load_revision_history( $post_id )
    $revhist_thread->load_revision_history( $post_id );
    $revhist_thread->thread_post->last_edited = 0; // don't show last-edit
    return $revhist_thread;
-}//load_revision_history
+}
 
 // use-case U04: show revision history of post
 function show_revision_history( $revhist_thread, $display_forum, $post_id )

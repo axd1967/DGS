@@ -26,13 +26,14 @@ require_once 'include/rating.php';
 
  /*!
   * \class RankConverter
+  *
   * \brief Class to manage rank-converter
   */
 class RankConverter
 {
    // ------------ static functions ----------------------------
 
-   function buildForm( $page, $method=FORM_GET )
+   public static function buildForm( $page, $method=FORM_GET )
    {
       // build Rank Converter Form
       $rcform = new Form( 'convrank', $page, $method );

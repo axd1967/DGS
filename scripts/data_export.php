@@ -609,14 +609,14 @@ function comment_block( $str)
 
 class dbTable
 {
-   var $qpath;
-   var $qdatabase;
-   var $qname;
-   var $uname;
-   var $xname;
-   var $engine;
+   private $qpath;
+   private $qdatabase;
+   private $qname;
+   private $uname;
+   private $xname;
+   private $engine = '';
 
-   function dbTable( $database, $name)
+   public function __construct( $database, $name)
    {
       $this->qdatabase = quoteit( $database);
       $this->qname = quoteit( $name);
@@ -624,8 +624,6 @@ class dbTable
       $this->uname = substr( $this->qname, 1, -1);
 
       $this->xname = quoteit( $name, ( QUOTE_NAME ? QUOTE :'') );
-
-      $this->engine = '';
    }
 
    function structure()

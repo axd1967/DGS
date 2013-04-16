@@ -60,7 +60,7 @@ class GameSgfControl
                Games::update_game_flags( "GameSgfControl.delete_game_sgf.upd_flags($gid,$uid)",
                   $gid, 0, GAMEFLAGS_ATTACHED_SGF );
 
-               GameSgfControl::delete_cache_game_sgfs_count( "GameSgfControl.delete_game_sgf($gid)", $gid );
+               self::delete_cache_game_sgfs_count( "GameSgfControl.delete_game_sgf($gid)", $gid );
             }
          }
          ta_end();
@@ -86,7 +86,7 @@ class GameSgfControl
       $sgf_data = read_from_file( $path_file );
       if( $sgf_data !== false )
       {
-         $errors = GameSgfControl::verify_game_sgf( $game, $sgf_data );
+         $errors = self::verify_game_sgf( $game, $sgf_data );
          if( count($errors) == 0 )
          {
             $game_sgf = new GameSgf( $gid, $uid, $NOW, $sgf_data );
@@ -100,7 +100,7 @@ class GameSgfControl
                      Games::update_game_flags( "GameSgfControl.save_game_sgf.upd_flags($gid,$uid)",
                         $gid, GAMEFLAGS_ATTACHED_SGF );
 
-                     GameSgfControl::delete_cache_game_sgfs_count( "GameSgfControl.save_game_sgf($gid)", $gid );
+                     self::delete_cache_game_sgfs_count( "GameSgfControl.save_game_sgf($gid)", $gid );
                   }
                }
                else
@@ -147,7 +147,7 @@ class GameSgfControl
       if( count($errors) == 0 )
       {
          // load some of the current game-moves and shape-setup from DB to compare with SGF
-         list( $chk_cnt_moves, $db_shape_setup, $db_sgf_moves ) = GameSgfControl::prepare_verify_game_sgf( $game );
+         list( $chk_cnt_moves, $db_shape_setup, $db_sgf_moves ) = self::prepare_verify_game_sgf( $game );
 
          // compare shape-setup from DB with B/W-stone-setup parsed from SGF
          foreach( array( BLACK, WHITE ) as $stone )
@@ -286,7 +286,7 @@ class GameSgfControl
 
    public static function count_cache_game_sgfs( $gid )
    {
-      $dbgmsg = "GameSgfControl::count_cache_game_sgfs($gid)";
+      $dbgmsg = "GameSgfControl:count_cache_game_sgfs($gid)";
       $key = "GameSgfCount.$gid";
 
       $count = DgsCache::fetch( $dbgmsg, CACHE_GRP_GAMESGF_COUNT, $key );

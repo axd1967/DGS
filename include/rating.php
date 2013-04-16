@@ -30,48 +30,6 @@ define('RCADM_RESET_CONFIDENCE', 0x01);
 define('RCADM_CHANGE_RATING',    0x02);
 
 
-// table for interpolating rating
-global $IGS_TABLE; //PHP5
-$IGS_TABLE = array(
-   array( 'KEY' =>  200, 'VAL' =>  100 ), // 19k +1
-   array( 'KEY' =>  700, 'VAL' =>  600 ), // 14k +1
-   array( 'KEY' =>  800, 'VAL' =>  800 ), // 13k =
-   array( 'KEY' => 1300, 'VAL' => 1300 ), // 8k =
-   array( 'KEY' => 1400, 'VAL' => 1300 ), // 7k +1
-   array( 'KEY' => 2400, 'VAL' => 2300 ), // 4d -1 DGS
-);
-
-// table for interpolating rating
-global $KGS_TABLE; //PHP5
-$KGS_TABLE = array(
-   array( 'KEY' =>  100, 'VAL' => -700 ), // 20k +8
-   array( 'KEY' =>  600, 'VAL' =>    0 ), // 15k +6
-   array( 'KEY' => 1400, 'VAL' => 1000 ), // 7k +4
-   array( 'KEY' => 1500, 'VAL' => 1200 ), // 6k +3
-   array( 'KEY' => 2400, 'VAL' => 2200 ), // 4d -2
-   array( 'KEY' => 2700, 'VAL' => 2600 ), // 7d -1 DGS
-);
-
-global $A_TABLE; //PHP5
-$A_TABLE = array(
-   array( 'KEY' =>   100, 'VAL' =>  200 ),
-   array( 'KEY' =>  2700, 'VAL' =>   70 ),
-   array( 'KEY' => 10000, 'VAL' =>   70 ),   //higher, should be constant
-);
-
-global $CON_TABLE; //PHP5
-$CON_TABLE = array(
-   array( 'KEY' =>   100, 'VAL' => 116 ),
-   array( 'KEY' =>   200, 'VAL' => 110 ),
-   array( 'KEY' =>  1300, 'VAL' =>  55 ),
-   array( 'KEY' =>  2000, 'VAL' =>  27 ),
-   array( 'KEY' =>  2400, 'VAL' =>  15 ),
-   array( 'KEY' =>  2600, 'VAL' =>  11 ),
-   array( 'KEY' =>  2700, 'VAL' =>  10 ),
-   array( 'KEY' => 10000, 'VAL' =>  10 ),   //higher, should be constant
-);
-
-
 function table_interpolate($value, $table, $extrapolate=false)
 {
    foreach( $table as $x )
@@ -109,13 +67,28 @@ function table_interpolate($value, $table, $extrapolate=false)
 
 function con_value($rating)
 {
-   global $CON_TABLE;
+   static $CON_TABLE = array(
+      array( 'KEY' =>   100, 'VAL' => 116 ),
+      array( 'KEY' =>   200, 'VAL' => 110 ),
+      array( 'KEY' =>  1300, 'VAL' =>  55 ),
+      array( 'KEY' =>  2000, 'VAL' =>  27 ),
+      array( 'KEY' =>  2400, 'VAL' =>  15 ),
+      array( 'KEY' =>  2600, 'VAL' =>  11 ),
+      array( 'KEY' =>  2700, 'VAL' =>  10 ),
+      array( 'KEY' => 10000, 'VAL' =>  10 ),   //higher, should be constant
+   );
+
    return table_interpolate($rating, $CON_TABLE, true);
 }
 
 function a_value($rating)
 {
-   global $A_TABLE;
+   static $A_TABLE = array(
+      array( 'KEY' =>   100, 'VAL' =>  200 ),
+      array( 'KEY' =>  2700, 'VAL' =>   70 ),
+      array( 'KEY' => 10000, 'VAL' =>   70 ),   //higher, should be constant
+   );
+
    return table_interpolate($rating, $A_TABLE, true);
 }
 
@@ -576,6 +549,26 @@ function getRatingTypes()
 // check RATING_PATTERN for syntax, this func must be kept synchron with read_rating-func
 function convert_to_rating($string, $type, $no_error=false)
 {
+   // tables for interpolating rating IGS/KGS
+   static $IGS_TABLE = array(
+         array( 'KEY' =>  200, 'VAL' =>  100 ), // 19k +1
+         array( 'KEY' =>  700, 'VAL' =>  600 ), // 14k +1
+         array( 'KEY' =>  800, 'VAL' =>  800 ), // 13k =
+         array( 'KEY' => 1300, 'VAL' => 1300 ), // 8k =
+         array( 'KEY' => 1400, 'VAL' => 1300 ), // 7k +1
+         array( 'KEY' => 2400, 'VAL' => 2300 ), // 4d -1 DGS
+      );
+
+   static $KGS_TABLE = array(
+      array( 'KEY' =>  100, 'VAL' => -700 ), // 20k +8
+      array( 'KEY' =>  600, 'VAL' =>    0 ), // 15k +6
+      array( 'KEY' => 1400, 'VAL' => 1000 ), // 7k +4
+      array( 'KEY' => 1500, 'VAL' => 1200 ), // 6k +3
+      array( 'KEY' => 2400, 'VAL' => 2200 ), // 4d -2
+      array( 'KEY' => 2700, 'VAL' => 2600 ), // 7d -1 DGS
+   );
+
+
    $rating = NO_RATING;
    if( (string)$string == '' )
       return $rating;
@@ -659,10 +652,7 @@ function convert_to_rating($string, $type, $no_error=false)
          {
             $rating = rank_to_rating($val, $kyu);
             if( $rating != NO_RATING )
-            {
-               global $IGS_TABLE;
                $rating = table_interpolate($rating, $IGS_TABLE, true);
-            }
          }
          break;
 
@@ -671,7 +661,6 @@ function convert_to_rating($string, $type, $no_error=false)
          $needrank = 0;
          if( $kyu <= 0 )
          {
-             global $IGS_TABLE;
              $rating = $val*100 - 1130 ;
              $rating = table_interpolate($rating, $IGS_TABLE, true);
          }
@@ -697,10 +686,7 @@ function convert_to_rating($string, $type, $no_error=false)
          {
             $rating = rank_to_rating($val, $kyu);
             if( $rating != NO_RATING )
-            {
-               global $KGS_TABLE;
                $rating = table_interpolate($rating, $KGS_TABLE, true);
-            }
          }
          break;
 

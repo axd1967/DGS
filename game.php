@@ -670,7 +670,7 @@ $GLOBALS['ThePage'] = new Page('Game');
    }
    echo "</td><td>";
 
-   $TheBoard->movemsg= $movemsg;
+   $TheBoard->movemsg = $movemsg;
    if( $is_fairkomi_negotiation )
       draw_fairkomi_negotiation( $my_id, $gform, $game_row, $game_setup );
    else

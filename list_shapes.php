@@ -90,7 +90,7 @@ $GLOBALS['ThePage'] = new Page('ShapeList');
          $table->current_limit_string() );
    $iterator = Shape::load_shapes( $iterator );
 
-   $show_rows = $table->compute_show_rows( $iterator->ResultRows );
+   $show_rows = $table->compute_show_rows( $iterator->getResultRows() );
    $table->set_found_rows( mysql_found_rows('Shape.list.found_rows') );
 
 

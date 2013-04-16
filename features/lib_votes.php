@@ -73,34 +73,34 @@ define('VOTE_MIN_DAYS_LASTMOVED', 30); // #days
 class Feature
 {
    /*! \brief ID (PK from db). */
-   var $id;
+   public $id;
    /*! \brief Status (can be one of FEATSTAT_). */
-   var $status;
+   public $status;
    /*! \brief Size of feature (can be one of FEATSIZE_). */
-   var $size;
+   public $size;
    /*! \brief Subject-description of feature. */
-   var $subject;
+   public $subject;
    /*! \brief Long description of feature. */
-   var $description;
+   public $description;
    /*! \brief user-id of feature-editor. */
-   var $editor;
+   private $editor;
    /*! \brief Date when feature has been added (unix-time). */
-   var $created;
+   public $created;
    /*! \brief Date when feature has been last updated (unix-time). */
-   var $lastchanged;
+   public $lastchanged;
 
    /*! \brief FeatureVote-object, see func load_featurevote. */
-   var $featurevote;
+   private $featurevote;
 
    /*!
     * \brief Constructs Feature-object with specified arguments: created and lastchanged are in UNIX-time.
     *        $id may be 0 to add a new feature
     */
-   function Feature( $id=0, $status=FEATSTAT_NEW, $size=FEATSIZE_UNSET, $subject='', $description='', $editor=0,
-                     $created=0, $lastchanged=0 )
+   public function __construct( $id=0, $status=FEATSTAT_NEW, $size=FEATSIZE_UNSET, $subject='', $description='', $editor=0,
+         $created=0, $lastchanged=0 )
    {
       if( !is_numeric($editor) || $editor < 0 )
-         error('invalid_user', "feature.Feature.check.editor($id,$editor)");
+         error('invalid_user', "feature.construct.check.editor($id,$editor)");
       $this->id = (int) $id;
       $this->set_status( $status );
       $this->set_size( $size );
@@ -112,7 +112,7 @@ class Feature
    }
 
    /*! \brief Sets valid status */
-   function set_status( $status )
+   public function set_status( $status )
    {
       if( !preg_match( "/^(NEW|VOTE|WORK|DONE|LIVE|NACK)$/", $status ) )
          error('invalid_args', "feature.set_status($status)");
@@ -121,7 +121,7 @@ class Feature
    }
 
    /*! \brief Sets valid size */
-   function set_size( $size )
+   public function set_size( $size )
    {
       if( !preg_match( "/^(\\?|EPIC|XXL|XL|L|M|S)$/", $size ) )
          error('invalid_args', "feature.set_size($size)");
@@ -130,7 +130,7 @@ class Feature
    }
 
    /*! \brief Returns true, if changing status is allowed. */
-   function edit_status_allowed( $is_super_admin, $new_status=null )
+   public function edit_status_allowed( $is_super_admin, $new_status=null )
    {
       if( $this->status == FEATSTAT_LIVE ) // final-status; NACK-status may be revived
          return false;
@@ -143,10 +143,10 @@ class Feature
          return true;
       else
          return ( $new_status == FEATSTAT_NEW || $new_status == FEATSTAT_VOTE );
-   }
+   }//edit_status_allowed
 
    /*! \brief Sets description */
-   function set_description( $description )
+   public function set_description( $description )
    {
       if( is_null($description) )
          $this->description = '';
@@ -158,7 +158,7 @@ class Feature
     * \brief Sets subject after doing some replacements
     *        (remove double-LFs, remove starting/trailing whitespaces and LFs, cut length to 255).
     */
-   function set_subject( $subject )
+   public function set_subject( $subject )
    {
       if( is_null($subject) )
          $this->subject = '';
@@ -167,7 +167,7 @@ class Feature
    }
 
    /*! \brief Returns true, if feature can be voted on; no user-specific checks. */
-   function allow_vote()
+   public function allow_vote()
    {
       return (bool) ( $this->status == FEATSTAT_VOTE );
    }
@@ -176,11 +176,11 @@ class Feature
     * \brief Returns true, if current (admin) user is allowed to edit this feature (NEW status).
     *        Always allowed for super-admin.
     */
-   function allow_edit()
+   public function allow_edit()
    {
-      if( Feature::is_super_admin() && $this->status != FEATSTAT_LIVE ) // feature-super-admin can always edit non-LIVE feature
+      if( self::is_super_admin() && $this->status != FEATSTAT_LIVE ) // feature-super-admin can always edit non-LIVE feature
          return true;
-      if( !Feature::is_admin() ) // only admin can edit
+      if( !self::is_admin() ) // only admin can edit
          return false;
 
       return (bool) ( $this->status == FEATSTAT_NEW );
@@ -191,7 +191,7 @@ class Feature
     * \brief Updates current Feature-data into database (may replace existing feature
     *        and set editor=current-user and lastchanged=NOW).
     */
-   function update_feature()
+   public function update_feature()
    {
       global $player_row, $NOW;
       $this->editor = @$player_row['ID'];
@@ -211,10 +211,10 @@ class Feature
       if( $result == 1 && !$this->id )
          $this->id = mysql_insert_id();
       return $result;
-   }
+   }//update_feature
 
    /*! \brief Returns true, if delete-feature allowed (checks constraints). */
-   function can_delete_feature()
+   public function can_delete_feature()
    {
       // check if there are votes for this feature to delete
       if( $this->id )
@@ -227,15 +227,15 @@ class Feature
          $has_votes = false;
 
       return !$has_votes;
-   }
+   }//can_delete_feature
 
    /*!
     * \brief Deletes current Feature from database if no votes found (only as admin).
     * \return number of deleted rows
     */
-   function delete_feature()
+   public function delete_feature()
    {
-      if( !Feature::is_admin() )
+      if( !self::is_admin() )
          error('feature_edit_not_allowed', "feature.delete_feature({$this->id})");
 
       if( !$this->can_delete_feature() )
@@ -244,14 +244,14 @@ class Feature
       $delete_query = "DELETE FROM Feature WHERE ID='{$this->id}' LIMIT 1";
       db_query( "feature.delete_feature({$this->id})", $delete_query );
       return mysql_affected_rows();
-   }
+   }//delete_feature
 
 
    /*!
     * \brief Loads featurevote for this Feature-object (if existing).
-    *        Returns null if no feature-vote found for feature.
+    * \return null if no feature-vote found for feature.
     */
-   function load_featurevote( $voter )
+   public function load_featurevote( $voter )
    {
       $fvote = FeatureVote::load_featurevote( $this->id, $voter );
       $this->featurevote = $fvote;
@@ -264,7 +264,7 @@ class Feature
     *
     * \return number of points to add to UserQuota-feature-points (can be negative)
     */
-   function update_vote( $voter, $points )
+   public function update_vote( $voter, $points )
    {
       $fpoints = 0; // consumed feature-points
       if( is_null($this->featurevote) )
@@ -283,7 +283,7 @@ class Feature
       //error_log("F.update_vote: " . $this->to_string());
       $this->featurevote->update_feature_vote();
       return $fpoints;
-   }
+   }//update_vote
 
    /*!
     * \brief Fixes user user-quota feature-points on feature-status change.
@@ -296,7 +296,7 @@ class Feature
     * \note "return" min(own-vote,average-vote) of feature-points if feature: !LIVE -> LIVE
     * \return sum of all "returned" feature-points
     */
-   function fix_user_quota_feature_points( $old_status, $new_status )
+   public function fix_user_quota_feature_points( $old_status, $new_status )
    {
       if( $old_status == $new_status ) // no status-change
          return 0;
@@ -320,11 +320,11 @@ class Feature
       }
 
       return 0;
-   }
+   }//fix_user_quota_feature_points
 
 
    /*! \brief Returns string-representation of this object (for debugging purposes). */
-   function to_string()
+   public function to_string()
    {
       return "Feature(id={$this->id}): "
          . "status=[{$this->status}], "
@@ -343,7 +343,7 @@ class Feature
     * \brief Returns true, if current player has admin-rights for feature-functionality.
     * \param $superadmin true=superadmin has ALL rights, false=feature-admin has add-rights
     */
-   function is_admin( $superadmin=false )
+   public static function is_admin( $superadmin=false )
    {
       global $player_row;
       $chk_adminlevel = ( $superadmin ) ? ADMIN_DEVELOPER : (ADMIN_FEATURE|ADMIN_DEVELOPER);
@@ -353,13 +353,13 @@ class Feature
    }
 
    /*! \brief Returns true, if current player has super-admin-rights for feature-functionality. */
-   function is_super_admin()
+   public static function is_super_admin()
    {
-      return Feature::is_admin(true);
+      return self::is_admin(true);
    }
 
    /*! \brief Returns array used for filter on status for feature/votes-list. */
-   function build_filter_selection_status( $fname )
+   public static function build_filter_selection_status( $fname )
    {
       return array(
          T_('All#featstat')      => '',
@@ -374,7 +374,7 @@ class Feature
    }
 
    /*! \brief Returns array used for filter on size for feature/votes-list. */
-   function build_filter_selection_size( $fname )
+   public static function build_filter_selection_size( $fname )
    {
       return array(
          T_('All#featsize') => '',
@@ -389,7 +389,7 @@ class Feature
    }
 
    /*! \brief Returns array with notes about feature-voting. */
-   function build_feature_notes( $deny_reason=null, $with_size=true, $intro=true )
+   public static function build_feature_notes( $deny_reason=null, $with_size=true, $intro=true )
    {
       $notes = array();
       if( !is_null($deny_reason) )
@@ -419,12 +419,12 @@ class Feature
       $notes[] = $notes_fstatus;
 
       if( $with_size )
-         $notes[] = Feature::build_feature_notes_size();
+         $notes[] = self::build_feature_notes_size();
 
       return $notes;
    }//build_feature_notes
 
-   function build_feature_notes_size()
+   public static function build_feature_notes_size()
    {
       $day_work = T_('ca. %s day(s) work#feature');
       $month_work = T_('ca. %s month(s) work#feature');
@@ -445,7 +445,7 @@ class Feature
     * \brief Returns null if current user ($player_row) is allowed to participate in voting;
     *        otherwise return deny-reason.
     */
-   function allow_vote_check()
+   public static function allow_vote_check()
    {
       global $player_row, $NOW;
 
@@ -466,21 +466,21 @@ class Feature
 
       //return 'testing'; // for easy testing
       return null;
-   }
+   }//allow_vote_check
 
    /*!
     * \brief Returns QuerySQL for feature-list page.
-    * param ftable: Table object
-    * param user_id: id of current logged-in user
+    * \param $ftable: Table object
+    * \param $user_id: id of current logged-in user
     */
-   function build_query_feature_list( $ftable, $user_id )
+   public static function build_query_feature_list( $ftable, $user_id )
    {
       if( !is_numeric($user_id) )
-         error('invalid_user', "Feature::build_query_feature_list($user_id)");
+         error('invalid_user', "Feature:build_query_feature_list($user_id)");
 
       // build SQL-query
       $qsql = new QuerySQL();
-      $qsql->add_part_fields( Feature::get_query_fields() );
+      $qsql->add_part_fields( self::get_query_fields() );
       $qsql->add_part_fields( FeatureVote::get_query_fields() );
       $qsql->add_part( SQLP_FROM, 'Feature AS F' );
       $qsql->add_part( SQLP_FROM, "LEFT JOIN FeatureVote AS FV ON F.ID=FV.fid AND FV.Voter_ID='$user_id'" );
@@ -488,10 +488,10 @@ class Feature
       $qsql->merge( $query_ffilter );
 
       return $qsql;
-   }
+   }//build_query_feature_list
 
    /*! \brief Returns db-fields to be used for query of Feature-object. */
-   function get_query_fields( $short=false )
+   public static function get_query_fields( $short=false )
    {
       if( $short )
          return array( 'F.ID', 'F.Status', 'F.Size', 'F.Subject' );
@@ -503,11 +503,8 @@ class Feature
       );
    }
 
-   /*!
-    * \brief Returns Feature-object for specified user $editor,
-    *        created=$NOW set and all others in default-state.
-    */
-   function new_feature( $editor, $fid=0 )
+   /*! \brief Returns Feature-object for specified user $editor, created=$NOW set and all others in default-state. */
+   public static function new_feature( $editor, $fid=0 )
    {
       global $NOW;
 
@@ -519,7 +516,7 @@ class Feature
    }
 
    /*! \brief Returns Feature-object created from specified (db-)row with fields defined by func fields_feature. */
-   function new_from_row( $row )
+   public static function new_from_row( $row )
    {
       $feature = new Feature(
             $row['ID'], $row['Status'], $row['Size'], $row['Subject'], @$row['Description'],
@@ -528,22 +525,22 @@ class Feature
    }
 
    /*!
-    * \brief Returns Feature-object for specified feature-id $id;
-    *        returns null if no feature found.
+    * \brief Returns Feature-object for specified feature-id $id.
+    * \return null if no feature found.
     */
-   function load_feature( $id )
+   public static function load_feature( $id )
    {
       if( !is_numeric($id) )
-         error('invalid_args', "feature::load_feature.check.id($id)");
+         error('invalid_args', "Feature:load_feature.check.id($id)");
 
-      $fields = implode(',', Feature::get_query_fields());
-      $row = mysql_single_fetch("feature::load_feature2($id)",
+      $fields = implode(',', self::get_query_fields());
+      $row = mysql_single_fetch("Feature:load_feature.find($id)",
             "SELECT $fields FROM Feature AS F WHERE F.ID='$id' LIMIT 1");
       if( !$row )
          return null;
 
-      return Feature::new_from_row( $row );
-   }
+      return self::new_from_row( $row );
+   }//load_feature
 
    /*!
     * \brief Updates or resets Players.CountFeatNew.
@@ -552,12 +549,12 @@ class Feature
     *        COUNTNEW_RECALC to recalc now (for specific user-id only);
     *        otherwise increase or decrease counter
     */
-   function update_count_feature_new( $dbgmsg, $uid=0, $diff=null )
+   public static function update_count_feature_new( $dbgmsg, $uid=0, $diff=null )
    {
       if( !ALLOW_FEATURE_VOTE )
          return;
 
-      $dbgmsg .= "Feature.update_count_feature_new($uid,$diff)";
+      $dbgmsg .= "Feature:update_count_feature_new($uid,$diff)";
       if( !is_numeric($uid) )
          error( 'invalid_args', "$dbgmsg.check.uid" );
 
@@ -598,23 +595,23 @@ class Feature
 class FeatureVote
 {
    /*! \brief feature-id (FK). */
-   var $fid;
+   private $fid;
    /*! \brief user-id of feature-voter. */
-   var $voter;
+   private $voter;
    /*! \brief vote points on feature: 0=neutral, 1=low, 9=high points, -1=not-wanted. */
-   var $points;
+   public $points;
    /*! \brief Date when feature has been last updated (unix-time). */
-   var $lastchanged;
+   public $lastchanged;
 
 
    /*!
     * \brief Constructs Feature-object with specified arguments: created and lastchanged are in UNIX-time.
     *        $id may be 0 to add a new feature
     */
-   function FeatureVote( $fid=0, $voter=0, $points=0, $lastchanged=0 )
+   public function __construct( $fid=0, $voter=0, $points=0, $lastchanged=0 )
    {
       if( !is_numeric($voter) || !is_numeric($voter) || $voter < 0 )
-         error('invalid_user', "featurevote.FeatureVote($fid,$voter)");
+         error('invalid_user', "featurevote.construct($fid,$voter)");
       $this->fid = (int) $fid;
       $this->voter = (int) $voter;
       $this->set_points( $points );
@@ -622,7 +619,7 @@ class FeatureVote
    }
 
    /*! \brief Sets valid points (<0,0,>0). */
-   function set_points( $points )
+   public function set_points( $points )
    {
       if( !is_numeric($points) || abs($points) > FEATVOTE_MAXPOINTS )
          error('invalid_args', "featurevote.set_points($points)");
@@ -631,14 +628,14 @@ class FeatureVote
    }
 
    /*! \brief Returns points. */
-   function get_points()
+   public function get_points()
    {
       return $this->points;
    }
 
 
    /*! \brief Updates current FeatureVote-data into database (may replace existing featurevote, set lastchanged=NOW). */
-   function update_feature_vote()
+   public function update_feature_vote()
    {
       global $NOW;
       $this->lastchanged = $NOW;
@@ -650,11 +647,11 @@ class FeatureVote
          . ', Lastchanged=FROM_UNIXTIME(' . $this->lastchanged .')'
          ;
       db_query( "feature.update_feature_vote({$this->fid},{$this->voter},{$this->points})", $update_query );
-   }
+   }//update_feature_vote
 
 
    /*! \brief Returns string-representation of this object (for debugging purposes). */
-   function to_string()
+   public function to_string()
    {
       return "FeatureVote(fid={$this->fid}): "
          . "voter=[{$this->voter}], "
@@ -667,12 +664,11 @@ class FeatureVote
 
    /*!
     * \brief Returns error-message if points are invalid; otherwise return null (=points ok).
-    * \param points the points to check
-    * \param max_points max. amount of feature-points that can be used for voting;
-    *                   used if user less than FEATVOTE_MAXPOINTS remaining feature-points
-    *                   restricted by his quota.
+    * \param $points the points to check
+    * \param $max_points max. amount of feature-points that can be used for voting;
+    *        used if user less than FEATVOTE_MAXPOINTS remaining feature-points restricted by his quota.
     */
-   function check_points( $points, $max_points=FEATVOTE_MAXPOINTS )
+   public static function check_points( $points, $max_points=FEATVOTE_MAXPOINTS )
    {
       if( !is_numeric($points) )
          return sprintf( T_('points [%s] must be numeric'), $points );
@@ -683,15 +679,14 @@ class FeatureVote
          return sprintf( T_('points [%1$s] must be in range [%2$s,%3$s] (restricted by feature-points quota)'),
                          $points, -$max_points, $max_points );
       return null;
-   }
+   }//check_points
 
    /*!
     * \brief Returns QuerySQL for feature-vote-list page.
-    * \param mquery QuerySQL object to merge
+    * \param $mquery QuerySQL object to merge
     */
-   function build_query_featurevote_list( $mquery=null, $my_id )
+   public static function build_query_featurevote_list( $mquery=null, $my_id )
    {
-
       // build SQL-query
       $qsql = new QuerySQL();
       $qsql->add_part_fields( Feature::get_query_fields(true) );
@@ -713,17 +708,17 @@ class FeatureVote
          $qsql->merge( $mquery );
 
       return $qsql;
-   }
+   }//build_query_featurevote_list
 
    /*!
     * \brief Returns row-array with summary about feature-votes for given feature-id.
     * \return for avgPoints=0: row( avgAbsPoints => average, sumAbsPoints => sum-points, cntVotes => vote-count )
     *         for avgPoints>0: row( sumAvgPoints => sum-points )
     */
-   function load_featurevote_summary( $fid, $avgPoints=0 )
+   public static function load_featurevote_summary( $fid, $avgPoints=0 )
    {
       if( !is_numeric($fid) || $fid < 0 )
-         error('invalid_args', "FeatureVote::load_featurevote_summary($fid)");
+         error('invalid_args', "FeatureVote:load_featurevote_summary.check.fid($fid)");
 
       $qsql = new QuerySQL();
       if( $avgPoints > 0 )
@@ -740,12 +735,12 @@ class FeatureVote
          'FV.Points<>0' ); // abstention from voting
       $query = $qsql->get_select() . ' LIMIT 1';
 
-      $row = mysql_single_fetch( "FeatureVote::load_featurevote_summary($fid)", $query );
+      $row = mysql_single_fetch( "FeatureVote:load_featurevote_summary($fid)", $query );
       return $row;
-   }
+   }//load_featurevote_summary
 
    /*! \brief Returns db-fields to be used for query of Feature-object. */
-   function get_query_fields()
+   public static function get_query_fields()
    {
       return array(
          'FV.fid', 'FV.Voter_ID', 'FV.Points',
@@ -757,7 +752,7 @@ class FeatureVote
     * \brief Returns FeatureVote-object for specified feature-id, user $voter and points,
     *        lastchanged=$NOW set and all others in default-state.
     */
-   function new_featurevote( $fid, $voter, $points )
+   public static function new_featurevote( $fid, $voter, $points )
    {
       // fid=set, voter=$voter, points=$points, lastchanged
       $fvote = new FeatureVote( $fid, $voter, $points );
@@ -766,10 +761,10 @@ class FeatureVote
    }
 
    /*!
-    * \brief Returns Feature-object created from specified (db-)row with fields defined by func fields_feature;
-    *        returns null if row['fid']=0.
+    * \brief Returns Feature-object created from specified (db-)row with fields defined by func fields_feature.
+    * \return null if row['fid']=0
     */
-   function new_from_row( $row )
+   public static function new_from_row( $row )
    {
       if( $row['fid'] != 0 )
          $fvote = new FeatureVote( $row['fid'], $row['Voter_ID'], $row['Points'], $row['FVLastchangedU'] );
@@ -780,24 +775,24 @@ class FeatureVote
 
    /*!
     * \brief Returns FeatureVote-object for specified feature-id $id and voter $voter;
-    *        returns null if no feature found.
+    * \return null if no feature found.
     */
-   function load_featurevote( $fid, $voter )
+   public static function load_featurevote( $fid, $voter )
    {
       if( !is_numeric($fid) )
-         error('invalid_args', "featurevote::load_feature.check.fid($fid,$voter)");
+         error('invalid_args', "FeatureVote:load_featurevote.check.fid($fid,$voter)");
 
-      $fields = implode(',', FeatureVote::get_query_fields());
-      $row = mysql_single_fetch("featurevote::load_feature2($fid,$voter)",
+      $fields = implode(',', self::get_query_fields());
+      $row = mysql_single_fetch("FeatureVote:load_featurevote($fid,$voter)",
             "SELECT $fields FROM FeatureVote AS FV WHERE FV.fid='$fid' and FV.Voter_ID='$voter' LIMIT 1");
       if( !$row )
          return null;
 
-      return FeatureVote::new_from_row( $row );
-   }
+      return self::new_from_row( $row );
+   }//load_featurevote
 
    /*! \brief Inserts new FeatureVote-entries into database with 0 points (neutral vote). */
-   function insert_feature_neutral_votes( $uid, $feature_ids )
+   public static function insert_feature_neutral_votes( $uid, $feature_ids )
    {
       global $NOW;
 
@@ -809,13 +804,13 @@ class FeatureVote
             $val_sets[] = sprintf('(%s,%s,0,FROM_UNIXTIME(%s))', $fid, $uid, $NOW );
 
          // NOTE: must not use REPLACE as then we would need to handle existing Points<>0
-         db_query( "featurevote::insert_feature_neutral_votes($uid)",
+         db_query( "FeatureVote:insert_feature_neutral_votes($uid)",
             'INSERT INTO FeatureVote (fid,Voter_ID,Points,Lastchanged) VALUES ' . implode(', ', $val_sets) );
       }
-   }
+   }//insert_feature_neutral_votes
 
    /*! \brief Returns text informing about remaining feature-points. */
-   function getFeaturePointsText( $points )
+   public static function getFeaturePointsText( $points )
    {
       if( $points > 0 )
          $points = span('Positive', $points);
@@ -824,7 +819,7 @@ class FeatureVote
       return sprintf( T_('You have %s points available for voting on features.'), $points );
    }
 
-   function formatPoints( $points )
+   public static function formatPoints( $points )
    {
       if( $points < 0 )
          return span('Negative', $points);
@@ -834,7 +829,7 @@ class FeatureVote
          return MINI_SPACING . $points;
    }
 
-   function formatPointsText( $points )
+   public static function formatPointsText( $points )
    {
       if( !is_numeric($points) )
          return sprintf( T_('%s (no vote)'), NO_VALUE );
@@ -845,7 +840,7 @@ class FeatureVote
       elseif( $points < 0 )
          $point_str = span('Negative', $point_str);
       return $point_str;
-   }
+   }//formatPointsText
 
 } // end of 'FeatureVote'
 

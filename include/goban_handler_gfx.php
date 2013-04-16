@@ -40,32 +40,30 @@ require_once( 'include/classlib_userconfig.php' ); // consts SMOOTH_EDGE
 if( !defined('EDGE_SIZE') )
    define('EDGE_SIZE', 10);
 
-// see init_statics()
-global $MAP_FORM_MARKERS, $MAP_TERRITORY_MARKERS, $MAP_BOARDLINES; //PHP5
-$MAP_FORM_MARKERS = NULL;
-$MAP_TERRITORY_MARKERS = NULL;
-$MAP_BOARDLINES = NULL;
-
 class GobanHandlerGfxBoard
 {
-   var $rawtext;
+   private $rawtext;
 
-   var $stone_size;
-   var $coord_borders; // use smooth-edge
-   var $woodcolor;
-   var $imageAttribute; // e.g. "onClick=\"click('%s','%s')\"" ); // x,y
-   var $enable_id; // add CSS-id on board <td>-cells
+   private $stone_size;
+   private $coord_borders; // use smooth-edge
+   private $woodcolor;
+   private $imageAttribute = ''; // e.g. "onClick=\"click('%s','%s')\"" ); // x,y
+   public $enable_id = false; // add CSS-id on board <td>-cells
 
-   var $goban;
-   var $result; // array
+   private $goban;
+   private $result; // array
+
+   // see init_statics()
+   private static $MAP_FORM_MARKERS = NULL;
+   private static $MAP_TERRITORY_MARKERS = NULL;
+   private static $MAP_BOARDLINES = NULL;
 
    /*! \brief Constructs GobanHandler for outputting DGS go-board. */
-   function GobanHandlerGfxBoard( $rawtext='', $stone_size=null )
+   public function __construct( $rawtext='', $stone_size=null )
    {
-      GobanHandlerGfxBoard::init_statics();
+      self::init_statics();
 
       $this->rawtext = $rawtext;
-      $this->enable_id = false;
 
       global $player_row;
       if( @$player_row['Stonesize'] )
@@ -82,17 +80,14 @@ class GobanHandlerGfxBoard
       }
       if( is_numeric($stone_size) )
          $this->stone_size = $stone_size;
-
-      $this->imageAttribute = '';
-   }
+   }//__construct
 
    // static, init in static-method to fix include-priority (avoids declaring of this file in "client" before classlib_goban.php)
-   function init_statics()
+   private static function init_statics()
    {
-      global $MAP_BOARDLINES, $MAP_TERRITORY_MARKERS, $MAP_FORM_MARKERS;
-      if( is_null($MAP_TERRITORY_MARKERS) )
+      if( is_null(self::$MAP_TERRITORY_MARKERS) )
       {
-         $MAP_TERRITORY_MARKERS = array(
+         self::$MAP_TERRITORY_MARKERS = array(
             GOBM_TERR_B       => 'b',
             GOBM_TERR_W       => 'w',
             GOBM_TERR_NEUTRAL => 'g',
@@ -100,9 +95,9 @@ class GobanHandlerGfxBoard
          );
       }
 
-      if( is_null($MAP_FORM_MARKERS) )
+      if( is_null(self::$MAP_FORM_MARKERS) )
       {
-         $MAP_FORM_MARKERS = array(
+         self::$MAP_FORM_MARKERS = array(
             GOBM_CIRCLE    => 'c',
             GOBM_SQUARE    => 's',
             GOBM_TRIANGLE  => 't',
@@ -110,7 +105,7 @@ class GobanHandlerGfxBoard
          );
       }
 
-      if( is_null($MAP_BOARDLINES) )
+      if( is_null(self::$MAP_BOARDLINES) )
       {
          /*
           *  SE  SWE  SW             ul u ur
@@ -118,7 +113,7 @@ class GobanHandlerGfxBoard
           *  NE  NWE  NW             dl d dr
           *  0 , NS           ->     '', du
           */
-         $MAP_BOARDLINES = array(
+         self::$MAP_BOARDLINES = array(
             GOBB_NORTH | GOBB_SOUTH | GOBB_WEST | GOBB_EAST => 'e',  // middle
             GOBB_NORTH | GOBB_SOUTH | GOBB_WEST             => 'er', // =W
             GOBB_NORTH | GOBB_SOUTH             | GOBB_EAST => 'el', // =E
@@ -139,14 +134,14 @@ class GobanHandlerGfxBoard
       }
    }//init_statics
 
-   function setImageAttribute( $image_attr )
+   public function setImageAttribute( $image_attr )
    {
       $this->imageAttribute = $image_attr;
    }
 
 
    /*! \brief Returns empty goban, because no graphical input supported. */
-   function read_goban( $text )
+   public function read_goban( $text )
    {
       return new Goban(); // unsupported
    }
@@ -156,7 +151,7 @@ class GobanHandlerGfxBoard
     * \param $skeleton if true create only skeleton (used for JavaScript-based game-editor)
     * \note keep in sync with Board->draw_board(), though this implementation has some specialities!
     */
-   function write_goban( $goban, $skeleton=false )
+   public function write_goban( $goban, $skeleton=false )
    {
       global $base_path;
       $this->goban = $goban;
@@ -331,7 +326,8 @@ class GobanHandlerGfxBoard
          ;
    }//write_goban
 
-   function write_image( $x, $y, $value, $label='', $link=null )
+   // \internal
+   private function write_image( $x, $y, $value, $label='', $link=null )
    {
       if( !($value & (GOBB_BITMASK|GOBS_BITMASK|GOBO_HOSHI|GOBM_BITMASK)) )
          return ''; // TODO bug? set everything to EMPTY board-cell
@@ -346,7 +342,6 @@ class GobanHandlerGfxBoard
 
       $alt = '';
 
-      global $MAP_TERRITORY_MARKERS, $MAP_FORM_MARKERS;
       // mapping and prioritize goban-layer-values to actual images available on DGS
       // starting with most special ... ending with most generalized images
       $type = ''; // unknown mapping
@@ -365,14 +360,14 @@ class GobanHandlerGfxBoard
          $type = 'wb';
       elseif( $lMarker == GOBM_TERR_W && $lStone == GOBS_BLACK )
          $type = 'bw';
-      elseif( ($territoryMarker = @$MAP_TERRITORY_MARKERS[$lMarker]) != '' && $lStone == 0 && $bLineType != '' )
+      elseif( ($territoryMarker = @self::$MAP_TERRITORY_MARKERS[$lMarker]) != '' && $lStone == 0 && $bLineType != '' )
          $type = $bLineType . $territoryMarker;
-      elseif( ($formMarker = @$MAP_FORM_MARKERS[$lMarker]) != '' && $isStoneBW )
+      elseif( ($formMarker = @self::$MAP_FORM_MARKERS[$lMarker]) != '' && $isStoneBW )
       {
          $type = ($lStone == GOBS_BLACK) ? 'b' : 'w';
          $type .= $formMarker;
       }
-      elseif( ($formMarker = @$MAP_FORM_MARKERS[$lMarker]) != '' && $lStone == 0 && $lHoshi )
+      elseif( ($formMarker = @self::$MAP_FORM_MARKERS[$lMarker]) != '' && $lStone == 0 && $lHoshi )
          $type = 'h' . $formMarker;
       elseif( $lMarker == 0 && $isStoneBW )
          $type = ($lStone == GOBS_BLACK) ? 'b' : 'w';
@@ -383,7 +378,7 @@ class GobanHandlerGfxBoard
          if( $label >= 'a' && $label <= 'z' )
             $type = 'l' . $label;
       }
-      elseif( ($formMarker = @$MAP_FORM_MARKERS[$lMarker]) != '' && $lStone == 0 && $bLineType != '' )
+      elseif( ($formMarker = @self::$MAP_FORM_MARKERS[$lMarker]) != '' && $lStone == 0 && $bLineType != '' )
          $type = $bLineType . $formMarker;
       elseif( $lMarker == 0 && $lStone == 0 )
          $type = $this->getBoardLineType($lBoard, false);
@@ -399,9 +394,10 @@ class GobanHandlerGfxBoard
       }
       else
          return '';
-   } //write_image
+   }//write_image
 
-   function getBoardLineType( $board_lines, $mixed=true )
+   // \internal
+   private function getBoardLineType( $board_lines, $mixed=true )
    {
       $board_lines &= GOBB_BITMASK;
       if( !$mixed )
@@ -410,12 +406,12 @@ class GobanHandlerGfxBoard
             return 'du';
       }
 
-      global $MAP_BOARDLINES;
-      return @$MAP_BOARDLINES[$board_lines];
+      return @self::$MAP_BOARDLINES[$board_lines];
    }//getBoardLineType
 
    // keep in sync with Board
-   function draw_coord_row( $start_val, $coord_start_letter, $coord_alt, $coord_end, $coord_left, $coord_right )
+   // \internal
+   private function draw_coord_row( $start_val, $coord_start_letter, $coord_alt, $coord_end, $coord_left, $coord_right )
    {
       $out = "<tr>\n";
 
@@ -438,7 +434,8 @@ class GobanHandlerGfxBoard
    }//draw_coord_row
 
    // keep in sync with Board
-   function draw_edge_row( $goban, $edge_start, $edge_coord, $border_start, $border_imgs, $border_rem )
+   // \internal
+   private function draw_edge_row( $goban, $edge_start, $edge_coord, $border_start, $border_imgs, $border_rem )
    {
       $out = "<tr>\n";
 
@@ -468,8 +465,7 @@ class GobanHandlerGfxBoard
    }//draw_edge_row
 
    // keep in sync with Board
-   // (static)
-   function style_string( $stone_size )
+   public static function style_string( $stone_size )
    {
       $coord_width = floor($stone_size*31/25);
 
@@ -488,7 +484,7 @@ class GobanHandlerGfxBoard
    }//style_string
 
    /*! \brief (Ex06) Returns raw-text if URL-arg raw=1 or DBG_TEST bit #1 is set, though raw=0 overrules DBG_TEST. */
-   function build_rawtext()
+   private function build_rawtext()
    {
       $arg_raw = ( isset($_REQUEST['raw']) ) ? (int)@$_REQUEST['raw'] : null;
       $orig = preg_replace("/<br>/i", "\n", $this->rawtext);

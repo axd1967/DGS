@@ -49,40 +49,31 @@ define('WROOM_FILTERS', 'suitable');
   */
 class QuickHandlerWaitingroom extends QuickHandler
 {
-   var $wroom_id;
-   var $wroom;
-   var $wroom_iterator;
-
-   function QuickHandlerWaitingroom( $quick_object )
-   {
-      parent::QuickHandler( $quick_object );
-
-      $this->wroom_id = 0;
-      $this->wroom = null;
-      $this->wroom_iterator = null;
-   }
+   private $wroom_id = 0;
+   private $wroom = null;
+   private $wroom_iterator = null;
 
 
    // ---------- Interface ----------------------------------------
 
-   function canHandle( $obj, $cmd ) // static
+   public static function canHandle( $obj, $cmd ) // static
    {
       return ( $obj == QOBJ_WROOM ) && QuickHandler::matchRegex(WROOM_COMMANDS, $cmd);
    }
 
-   function parseURL()
+   public function parseURL()
    {
       parent::checkArgsUnknown('wrid');
-      parent::parseFilters(WROOM_FILTERS);
+      $this->parseFilters(WROOM_FILTERS);
 
       $this->wroom_id = (int)get_request_arg('wrid');
 
       // filter-defaults
       if( !isset($this->filters[WROOM_FILTER_SUITABLE]) )
          $this->filters[WROOM_FILTER_SUITABLE] = 1; // default: suitable=ON
-   }
+   }//parseURL
 
-   function prepare()
+   public function prepare()
    {
       global $player_row;
 
@@ -130,7 +121,7 @@ class QuickHandlerWaitingroom extends QuickHandler
    }//prepare
 
    /*! \brief Processes command for object; may fire error(..) and perform db-operations. */
-   function process()
+   public function process()
    {
       $cmd = $this->quick_object->cmd;
       if( $cmd == QCMD_INFO )
@@ -141,9 +132,9 @@ class QuickHandlerWaitingroom extends QuickHandler
          WaitingroomControl::delete_waitingroom_game( $this->wroom_id );
       elseif( $cmd == WROOMCMD_JOIN )
          WaitingroomControl::join_waitingroom_game( $this->wroom_id );
-   }
+   }//process
 
-   function process_cmd_list()
+   private function process_cmd_list()
    {
       $out = array();
       if( !is_null($this->wroom_iterator) )
@@ -159,7 +150,7 @@ class QuickHandlerWaitingroom extends QuickHandler
       $this->add_list( QOBJ_WROOM, $out, 'user.rating-,user.handle+' );
    }//process_cmd_list
 
-   function fill_wroom_object( &$result, $wr, $is_list )
+   private function fill_wroom_object( &$result, $wr, $is_list )
    {
       $wro = new WaitingroomOffer( $wr->wrow );
       $wro->calculate_offer_settings(); // probable game settings

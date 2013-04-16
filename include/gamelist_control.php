@@ -38,30 +38,23 @@ define('GAMEVIEW_INFO', 5);
   */
 class GameListControl
 {
-   var $view; // GAMEVIEW_...
-   var $view_all; // bool (has precedence over view_uid), only for finished/running-games
-   var $view_uid; // $uid
+   private $view = GAMEVIEW_RUNNING; // GAMEVIEW_...; default: my running games
+   private $view_all = false; // bool (has precedence over view_uid), only for finished/running-games
+   public $view_uid; // $uid
 
-   var $my_id;
-   var $is_quick; // quick-suite?
+   public $my_id;
+   private $is_quick; // quick-suite?
 
-   var $load_notes;
-   var $mp_game;
-   var $ext_tid;
+   public $load_notes = false;
+   public $mp_game = 0;
+   public $ext_tid = 0;
 
-   function GameListControl( $quick_suite=false )
+   public function __construct( $quick_suite=false )
    {
       global $player_row;
       $this->my_id = (int)$player_row['ID'];
       $this->is_quick = $quick_suite;
-
-      $this->view = GAMEVIEW_RUNNING; // default: my running games
-      $this->view_all = false;
       $this->view_uid = $this->my_id;
-
-      $this->load_notes = false;
-      $this->mp_game = 0;
-      $this->ext_tid = 0;
    }
 
    /*!
@@ -69,7 +62,7 @@ class GameListControl
     * \param $view one of GAMEVIEW_...
     * \param $view_uid 'all' or numeric uid
     */
-   function setView( $view, $view_uid )
+   public function setView( $view, $view_uid )
    {
       $this->view = $view;
       $this->view_uid = $this->my_id; // default
@@ -90,44 +83,44 @@ class GameListControl
       }
    }//setView
 
-   function is_observe() // OA+OU
+   public function is_observe() // OA+OU
    {
       return ($this->view == GAMEVIEW_OBSERVE_MINE || $this->view == GAMEVIEW_OBSERVE_ALL);
    }
 
-   function is_running() // RA+RU
+   public function is_running() // RA+RU
    {
       return ($this->view == GAMEVIEW_RUNNING);
    }
 
-   function is_finished() // FA+FU
+   public function is_finished() // FA+FU
    {
       return ($this->view == GAMEVIEW_FINISHED);
    }
 
-   function is_all() // FA+RA
+   public function is_all() // FA+RA
    {
       return $this->view_all;
    }
 
-   function is_observe_all() // OA
+   public function is_observe_all() // OA
    {
       return ($this->view == GAMEVIEW_OBSERVE_ALL);
    }
 
-   function is_status() // ST
+   public function is_status() // ST
    {
       return ($this->view == GAMEVIEW_STATUS);
    }
 
-   function is_info() // INFO
+   public function is_info() // INFO
    {
       return ($this->view == GAMEVIEW_INFO);
    }
 
 
    /*! \brief Returns QuerySQL for games-list. */
-   function build_games_query( $load_user_ratingdiff, $load_remaining_time, $load_game_prio )
+   public function build_games_query( $load_user_ratingdiff, $load_remaining_time, $load_game_prio )
    {
       if( $this->is_status() )
          error('invalid_action', "GameListControl.build_games_query({$this->view},{$this->view_all},{$this->view_uid})");
@@ -288,7 +281,7 @@ class GameListControl
       }//FU+RU
 
       if( $need_bw_user_info )
-         GameListControl::extend_game_list_query_with_user_info( $qsql, 'G' );
+         self::extend_game_list_query_with_user_info( $qsql, 'G' );
       if( $need_ticks )
       {
          $qsql->add_part( SQLP_FIELDS, "COALESCE(Clock.Ticks,0) AS X_Ticks" );
@@ -329,7 +322,7 @@ class GameListControl
 
    // ------------ static functions ----------------------------
 
-   function build_game_list_query_status_view( $uid, $load_notes, $load_prio, $is_mpg, $ext_tid )
+   public static function build_game_list_query_status_view( $uid, $load_notes, $load_prio, $is_mpg, $ext_tid )
    {
       global $player_row;
       $my_id = $player_row['ID'];
@@ -347,7 +340,7 @@ class GameListControl
       return $qsql;
    }//build_game_list_query_status_view
 
-   function extend_game_list_query_with_user_info( &$qsql, $tablename='Games' )
+   public static function extend_game_list_query_with_user_info( &$qsql, $tablename='Games' )
    {
       $qsql->add_part( SQLP_FIELDS,
          'black.ID AS blackID',

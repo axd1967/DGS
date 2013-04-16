@@ -33,23 +33,18 @@ require_once 'tournaments/include/tournament_cache.php';
   *
   * \brief Class to handle Bulletin-GUI-stuff
   */
-
-// lazy-init in Bulletin::get..Text()-funcs
-global $ARR_GLOBALS_BULLETIN; //PHP5
-$ARR_GLOBALS_BULLETIN = array();
-
 class GuiBulletin
 {
+   private static $ARR_BULLETIN_TEXTS = array(); // lazy-init in Bulletin::get..Text()-funcs: [key][id] => text
+
    // ------------ static functions ----------------------------
 
    /*! \brief Returns category-text or all category-texts (if arg=null). */
-   function getCategoryText( $category=null )
+   public static function getCategoryText( $category=null )
    {
-      global $ARR_GLOBALS_BULLETIN;
-
       // lazy-init of texts
       $key = 'CAT';
-      if( !isset($ARR_GLOBALS_BULLETIN[$key]) )
+      if( !isset(self::$ARR_BULLETIN_TEXTS[$key]) )
       {
          $arr = array();
          $arr[BULLETIN_CAT_MAINT]            = T_('Maintenance#B_cat');
@@ -59,25 +54,23 @@ class GuiBulletin
          $arr[BULLETIN_CAT_FEATURE]          = T_('Feature Info#B_cat');
          $arr[BULLETIN_CAT_PRIVATE_MSG]      = T_('Private Announcement#B_cat');
          $arr[BULLETIN_CAT_SPAM]             = T_('Advertisement#B_cat');
-         $ARR_GLOBALS_BULLETIN[$key] = $arr;
+         self::$ARR_BULLETIN_TEXTS[$key] = $arr;
       }
 
       if( is_null($category) )
-         return $ARR_GLOBALS_BULLETIN[$key];
+         return self::$ARR_BULLETIN_TEXTS[$key];
 
-      if( !isset($ARR_GLOBALS_BULLETIN[$key][$category]) )
-         error('invalid_args', "GuiBulletin::getCategoryText($category,$key)");
-      return $ARR_GLOBALS_BULLETIN[$key][$category];
-   }
+      if( !isset(self::$ARR_BULLETIN_TEXTS[$key][$category]) )
+         error('invalid_args', "GuiBulletin:getCategoryText($category,$key)");
+      return self::$ARR_BULLETIN_TEXTS[$key][$category];
+   }//getCategoryText
 
    /*! \brief Returns status-text or all status-texts (if arg=null). */
-   function getStatusText( $status=null )
+   public static function getStatusText( $status=null )
    {
-      global $ARR_GLOBALS_BULLETIN;
-
       // lazy-init of texts
       $key = 'STATUS';
-      if( !isset($ARR_GLOBALS_BULLETIN[$key]) )
+      if( !isset(self::$ARR_BULLETIN_TEXTS[$key]) )
       {
          $arr = array();
          $arr[BULLETIN_STATUS_NEW]        = T_('New#B_status');
@@ -86,25 +79,23 @@ class GuiBulletin
          $arr[BULLETIN_STATUS_SHOW]       = T_('Show#B_status');
          $arr[BULLETIN_STATUS_ARCHIVE]    = T_('Archive#B_status');
          $arr[BULLETIN_STATUS_DELETE]     = T_('Delete#B_status');
-         $ARR_GLOBALS_BULLETIN[$key] = $arr;
+         self::$ARR_BULLETIN_TEXTS[$key] = $arr;
       }
 
       if( is_null($status) )
-         return $ARR_GLOBALS_BULLETIN[$key];
+         return self::$ARR_BULLETIN_TEXTS[$key];
 
-      if( !isset($ARR_GLOBALS_BULLETIN[$key][$status]) )
-         error('invalid_args', "GuiBulletin::getStatusText($status,$key)");
-      return $ARR_GLOBALS_BULLETIN[$key][$status];
-   }
+      if( !isset(self::$ARR_BULLETIN_TEXTS[$key][$status]) )
+         error('invalid_args', "GuiBulletin:getStatusText($status,$key)");
+      return self::$ARR_BULLETIN_TEXTS[$key][$status];
+   }//getStatusText
 
    /*! \brief Returns target-type-text or all target-type-texts (if arg=null). */
-   function getTargetTypeText( $trg_type=null )
+   public static function getTargetTypeText( $trg_type=null )
    {
-      global $ARR_GLOBALS_BULLETIN;
-
       // lazy-init of texts
       $key = 'TRGTYPE';
-      if( !isset($ARR_GLOBALS_BULLETIN[$key]) )
+      if( !isset(self::$ARR_BULLETIN_TEXTS[$key]) )
       {
          $arr = array();
          $arr[BULLETIN_TRG_UNSET]    = NO_VALUE;
@@ -113,46 +104,44 @@ class GuiBulletin
          $arr[BULLETIN_TRG_TP]       = T_('T-Participant#B_trg');
          $arr[BULLETIN_TRG_USERLIST] = T_('UserList#B_trg');
          $arr[BULLETIN_TRG_MPG]      = T_('MP-Game#B_trg');
-         $ARR_GLOBALS_BULLETIN[$key] = $arr;
+         self::$ARR_BULLETIN_TEXTS[$key] = $arr;
       }
 
       if( is_null($trg_type) )
-         return $ARR_GLOBALS_BULLETIN[$key];
+         return self::$ARR_BULLETIN_TEXTS[$key];
 
-      if( !isset($ARR_GLOBALS_BULLETIN[$key][$trg_type]) )
-         error('invalid_args', "GuiBulletin::getTargetTypeText($trg_type,$key)");
-      return $ARR_GLOBALS_BULLETIN[$key][$trg_type];
-   }
+      if( !isset(self::$ARR_BULLETIN_TEXTS[$key][$trg_type]) )
+         error('invalid_args', "GuiBulletin:getTargetTypeText($trg_type,$key)");
+      return self::$ARR_BULLETIN_TEXTS[$key][$trg_type];
+   }//getTargetTypeText
 
    /*! \brief Returns Flags-text or all Flags-texts (if arg=null). */
-   function getFlagsText( $flag=null )
+   public static function getFlagsText( $flag=null )
    {
-      global $ARR_GLOBALS_BULLETIN;
-
       // lazy-init of texts
       $key = 'FLAGS';
-      if( !isset($ARR_GLOBALS_BULLETIN[$key]) )
+      if( !isset(self::$ARR_BULLETIN_TEXTS[$key]) )
       {
          $arr = array();
          $arr[BULLETIN_FLAG_ADMIN_CREATED] = T_('Admin-Created#B_flag');
          $arr[BULLETIN_FLAG_USER_EDIT]     = T_('User-Changeable#B_flag');
-         $ARR_GLOBALS_BULLETIN[$key] = $arr;
+         self::$ARR_BULLETIN_TEXTS[$key] = $arr;
       }
 
       if( is_null($flag) )
-         return $ARR_GLOBALS_BULLETIN[$key];
-      if( !isset($ARR_GLOBALS_BULLETIN[$key][$flag]) )
-         error('invalid_args', "GuiBulletin::getFlagsText($flag,$short)");
-      return $ARR_GLOBALS_BULLETIN[$key][$flag];
+         return self::$ARR_BULLETIN_TEXTS[$key];
+      if( !isset(self::$ARR_BULLETIN_TEXTS[$key][$flag]) )
+         error('invalid_args', "GuiBulletin:getFlagsText($flag,$short)");
+      return self::$ARR_BULLETIN_TEXTS[$key][$flag];
    }//getFlagsText
 
    /*! \brief Returns text-representation of bulletin-flags. */
-   function formatFlags( $flags, $zero_val='', $intersect_flags=0, $class=null )
+   public static function formatFlags( $flags, $zero_val='', $intersect_flags=0, $class=null )
    {
       $check_flags = ( $intersect_flags > 0 ) ? $flags & $intersect_flags : $flags;
 
       $arr = array();
-      $arr_flags = GuiBulletin::getFlagsText();
+      $arr_flags = self::getFlagsText();
       foreach( $arr_flags as $flag => $flagtext )
       {
          if( $check_flags & $flag )
@@ -162,11 +151,11 @@ class GuiBulletin
    }//formatFlags
 
    /*! \brief Prints formatted Bulletin with CSS-style with author, publish-time, text. */
-   function build_view_bulletin( $bulletin, $mark_url='' )
+   public static function build_view_bulletin( $bulletin, $mark_url='' )
    {
       global $rx_term;
 
-      $category = span('Category', GuiBulletin::getCategoryText($bulletin->Category), '%s:' );
+      $category = span('Category', self::getCategoryText($bulletin->Category), '%s:' );
       $title = make_html_safe($bulletin->Subject, true, $rx_term);
       $title = preg_replace( "/[\r\n]+/", '<br>', $title ); //reduce multiple LF to one <br>
       $text = make_html_safe($bulletin->Text, true, $rx_term);
@@ -177,7 +166,7 @@ class GuiBulletin
       if( $bulletin->tid > 0 )
       {
          if( is_null($bulletin->Tournament) )
-            $bulletin->Tournament = TournamentCache::load_cache_tournament( 'GuiBulletin::build_view_bulletin',
+            $bulletin->Tournament = TournamentCache::load_cache_tournament( 'GuiBulletin:build_view_bulletin',
                $bulletin->tid, /*check*/false );
 
          $ref_text = span('Reference',
@@ -215,7 +204,7 @@ class GuiBulletin
          "</div>\n";
    }//build_view_bulletin
 
-   function check_expiretime( $bulletin, $parsed_expiretime, &$errors )
+   public static function check_expiretime( $bulletin, $parsed_expiretime, &$errors )
    {
       static $mindays = 7, $maxdays = 100;
 

@@ -68,49 +68,30 @@ define('GAMEACT_PASS', 'pass');
   */
 class QuickHandlerGame extends QuickHandler
 {
-   var $gid;
-   var $move_id;
-   var $message;
-   var $url_moves; // if null, expect 'moves' and 'is_pass_move' correctly initialized
-   var $toggle_mode; // all|uniq
-   var $agree; // 0|1
+   private $gid = 0;
+   private $move_id = 0;
+   private $message = '';
+   private $url_moves = ''; // if null, expect 'moves' and 'is_pass_move' correctly initialized
+   private $toggle_mode = GAMEOPTVAL_TOGGLE_ALL; // all|uniq
+   private $agree = 0; // 0|1
 
-   var $moves; // coords-array [ (x,y), ... ], if null -> parse from url_moves
-   var $is_pass_move;
+   private $moves = null; // coords-array [ (x,y), ... ], if null -> parse from url_moves
+   private $is_pass_move = false;
 
-   var $game_row;
-   var $TheBoard;
-   var $to_move;
-   var $action;
-
-   function QuickHandlerGame( $quick_object )
-   {
-      parent::QuickHandler( $quick_object );
-      $this->gid = 0;
-      $this->move_id = 0;
-      $this->message = '';
-      $this->url_moves = '';
-      $this->toggle_mode = GAMEOPTVAL_TOGGLE_ALL;
-      $this->agree = 0;
-
-      $this->moves = null;
-      $this->is_pass_move = false;
-
-      $this->game_row = null;
-      $this->TheBoard = null;
-      $this->to_move = null;
-      $this->action = null;
-   }
+   private $game_row = null;
+   private $TheBoard = null;
+   private $to_move = null;
+   private $action = null;
 
 
    // ---------- Interface ----------------------------------------
 
-   function canHandle( $obj, $cmd ) // static
+   public static function canHandle( $obj, $cmd ) // static
    {
       return ( $obj == QOBJ_GAME ) && QuickHandler::matchRegex(GAME_COMMANDS, $cmd);
    }
 
-   function parseURL()
+   public function parseURL()
    {
       parent::checkArgsUnknown(QGAME_OPTIONS);
       $this->gid = (int)get_request_arg(GAMEOPT_GID);
@@ -121,7 +102,7 @@ class QuickHandlerGame extends QuickHandler
       $this->agree = get_request_arg(GAMEOPT_AGREE);
    }
 
-   function prepare()
+   public function prepare()
    {
       $uid = (int) @$this->my_id;
 
@@ -243,7 +224,7 @@ class QuickHandlerGame extends QuickHandler
    }//prepare
 
    /*! \brief Processes command for object; may fire error(..) and perform db-operations. */
-   function process()
+   public function process()
    {
       $cmd = $this->quick_object->cmd;
       if( $cmd == GAMECMD_STATUS_SCORE )
@@ -252,7 +233,7 @@ class QuickHandlerGame extends QuickHandler
          $this->process_cmd_play();
    }
 
-   function process_cmd_play()
+   private function process_cmd_play()
    {
       static $MOVE_INSERT_QUERY = "INSERT INTO Moves ( gid, MoveNr, Stone, PosX, PosY, Hours ) VALUES ";
       global $player_row, $NOW, $ActivityMax, $ActivityForMove;
@@ -565,7 +546,7 @@ class QuickHandlerGame extends QuickHandler
       ta_end();
    }//process_cmd_play
 
-   function process_cmd_status_score()
+   private function process_cmd_status_score()
    {
       // NOTE: moves = coords to toggle, toggle = toggle-mode, fmt = coordinate-format for output
       $gid = $this->gid;
@@ -584,18 +565,18 @@ class QuickHandlerGame extends QuickHandler
       // board-status
       $fmt = get_request_arg(GAMEOPT_FORMAT, 'sgf');
       $bs = $game_score->get_board_status();
-      $this->addResultKey( 'dame', QuickHandlerGame::convert_coords( $bs->get_coords(DAME), $fmt, $Size ) );
-      $this->addResultKey( 'neutral', QuickHandlerGame::convert_coords( $bs->get_coords(MARKED_DAME), $fmt, $Size ) );
-      $this->addResultKey( 'white_stones', QuickHandlerGame::convert_coords( $bs->get_coords(WHITE), $fmt, $Size ) );
-      $this->addResultKey( 'black_stones', QuickHandlerGame::convert_coords( $bs->get_coords(BLACK), $fmt, $Size ) );
-      $this->addResultKey( 'white_dead', QuickHandlerGame::convert_coords( $bs->get_coords(WHITE_DEAD), $fmt, $Size ) );
-      $this->addResultKey( 'black_dead', QuickHandlerGame::convert_coords( $bs->get_coords(BLACK_DEAD), $fmt, $Size ) );
-      $this->addResultKey( 'white_territory', QuickHandlerGame::convert_coords( $bs->get_coords(WHITE_TERRITORY), $fmt, $Size ) );
-      $this->addResultKey( 'black_territory', QuickHandlerGame::convert_coords( $bs->get_coords(BLACK_TERRITORY), $fmt, $Size ) );
+      $this->addResultKey( 'dame', self::convert_coords( $bs->get_coords(DAME), $fmt, $Size ) );
+      $this->addResultKey( 'neutral', self::convert_coords( $bs->get_coords(MARKED_DAME), $fmt, $Size ) );
+      $this->addResultKey( 'white_stones', self::convert_coords( $bs->get_coords(WHITE), $fmt, $Size ) );
+      $this->addResultKey( 'black_stones', self::convert_coords( $bs->get_coords(BLACK), $fmt, $Size ) );
+      $this->addResultKey( 'white_dead', self::convert_coords( $bs->get_coords(WHITE_DEAD), $fmt, $Size ) );
+      $this->addResultKey( 'black_dead', self::convert_coords( $bs->get_coords(BLACK_DEAD), $fmt, $Size ) );
+      $this->addResultKey( 'white_territory', self::convert_coords( $bs->get_coords(WHITE_TERRITORY), $fmt, $Size ) );
+      $this->addResultKey( 'black_territory', self::convert_coords( $bs->get_coords(BLACK_TERRITORY), $fmt, $Size ) );
    }//process_cmd_status_score
 
    /*! \brief Builds coordinates-array for scoring. */
-   function build_arr_coords( $size )
+   private function build_arr_coords( $size )
    {
       $arr_coords = array();
       foreach( $this->moves as $arr_xy )
@@ -607,7 +588,7 @@ class QuickHandlerGame extends QuickHandler
    }//build_arr_coords
 
    /*! \brief Checks syntax and splits moves into array this->moves removing double coords, or detect pass-move. */
-   function prepareMoves()
+   private function prepareMoves()
    {
       if( is_null($this->url_moves) )
          return;
@@ -626,7 +607,7 @@ class QuickHandlerGame extends QuickHandler
       $is_label_format = preg_match("/\\d/", $this->url_moves); // label | sgf format
 
       $arr_double = array(); // check for doublettes
-      $arr_coords = QuickHandlerGame::parse_coords( $this->url_moves );
+      $arr_coords = self::parse_coords( $this->url_moves );
       foreach( $arr_coords as $coord )
       {
          $xy_arr = ($is_label_format) ? board2number_coords($coord, $size) : sgf2number_coords($coord, $size);
@@ -643,7 +624,7 @@ class QuickHandlerGame extends QuickHandler
    // ---------- static funcs ----------------------
 
    /*! \brief Converts string of SGF-coords (without comma) into other coordinate-format. */
-   function convert_coords( $coord_str, $fmt, $size )
+   private static function convert_coords( $coord_str, $fmt, $size )
    {
       if( $fmt == 'sgf' )
          return $coord_str;
@@ -666,7 +647,7 @@ class QuickHandlerGame extends QuickHandler
    }//convert_coords
 
    /*! \brief Returns array of coordinate-strings (supported formats: sgf, sgf-comma, board). */
-   function parse_coords( $move_str )
+   private static function parse_coords( $move_str )
    {
       if( strpos($move_str, ',') !== false || preg_match("/\\d/", $move_str) )
          return explode(',', $move_str);

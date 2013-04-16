@@ -54,20 +54,20 @@ define('FGTNAME_MPGAME', 'mp'); // field-name for mp-game-option
   */
 class FilterGameType extends FilterSelection
 {
-   /*! \brief Constructs Selection-Filter. */
-   function FilterGameType($name, $dbfield, $config)
+   /*! \brief Constructs Game-type Selection-Filter. */
+   public function __construct( $name, $dbfield, $config )
    {
-      parent::FilterSelection($name, $dbfield, $config);
+      parent::__construct($name, $dbfield, $config);
       $this->type = 'GameType';
 
       if( $this->get_config(FC_MULTIPLE) )
-         error('invalid_filter', "filter.FilterGameType.conf.no_multiple({$this->id},$name)");
+         error('invalid_filter', "FilterGameType.conf.no_multiple({$this->id},$name)");
 
       $this->add_element_name( FGTNAME_MPGAME );
       $this->values[FGTNAME_MPGAME] = ''; // default (unchecked)
    }
 
-   function use_prefix_fieldname( $fname )
+   public function use_prefix_fieldname( $fname )
    {
       return ( $fname != FGTNAME_MPGAME );
    }
@@ -76,7 +76,7 @@ class FilterGameType extends FilterSelection
     * \brief Parses single- and multi-value selection, and mp-game-checkbox.
     * param val: string | array (only for multiple-support)
     */
-   function parse_value( $name, $val )
+   public function parse_value( $name, $val )
    {
       if( $name == FGTNAME_MPGAME )
       {
@@ -89,7 +89,7 @@ class FilterGameType extends FilterSelection
    }
 
    /*! \brief Returns selectbox form-element. */
-   function get_input_element($prefix, $attr = array() )
+   public function get_input_element($prefix, $attr = array() )
    {
       // selectbox
       $r = parent::get_input_element($prefix, $attr);
@@ -103,7 +103,8 @@ class FilterGameType extends FilterSelection
                T_('Show multi-player-games only#filter') );
       }
       return $r;
-   }
+   }//get_input_element
+
 } // end of 'FilterGameType'
 
 ?>

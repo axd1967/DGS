@@ -68,33 +68,32 @@ $ENTITY_SURVEY = new Entity( 'Survey',
 
 class Survey
 {
-   var $ID;
-   var $uid;
-   var $Type;
-   var $Status;
-   var $Flags;
-   var $MinPoints;
-   var $MaxPoints;
-   var $UserCount;
-   var $Title;
-   var $Header;
-   var $Created;
-   var $Lastchanged;
+   public $ID;
+   public $uid;
+   public $Type;
+   public $Status;
+   public $Flags;
+   public $MinPoints;
+   public $MaxPoints;
+   public $UserCount;
+   public $Title;
+   public $Header;
+   public $Created;
+   public $Lastchanged;
 
    // non-DB fields
 
-   var $User; // User-object
-   var $SurveyOptions; // SurveyOption-objects
-   var $UserVoted; // Boolean: null=unset, true = there are votes in DB, false = not voted yet
+   public $User; // User-object
+   public $SurveyOptions = array(); // SurveyOption-objects
+   public $UserVoted = null; // Boolean: null=unset, true = there are votes in DB, false = not voted yet
 
-   var $UserList; // [ uid, ...]
-   var $UserListHandles; // [ Handle, =1234, ...] (with '='-prefix for numeric handles)
-   var $UserListUserRefs; // [ uid => [ ID/Handle/Name/C_RejectMsg => val ], ... ]
+   public $UserList = array(); // [ uid, ...]
+   public $UserListHandles = array(); // [ Handle, =1234, ...] (with '='-prefix for numeric handles)
+   public $UserListUserRefs = array(); // [ uid => [ ID/Handle/Name/C_RejectMsg => val ], ... ]
 
    /*! \brief Constructs Survey-object with specified arguments. */
-   function Survey( $id=0, $uid=0, $user=null, $type=SURVEY_TYPE_POINTS, $status=SURVEY_STATUS_NEW,
-                    $flags=0, $min_points=0, $max_points=0, $user_count=0, $title='', $header='',
-                    $created=0, $lastchanged=0 )
+   public function __construct( $id=0, $uid=0, $user=null, $type=SURVEY_TYPE_POINTS, $status=SURVEY_STATUS_NEW,
+         $flags=0, $min_points=0, $max_points=0, $user_count=0, $title='', $header='', $created=0, $lastchanged=0 )
    {
       $this->ID = (int)$id;
       $this->uid = (int)$uid;
@@ -110,33 +109,28 @@ class Survey
       $this->Lastchanged = (int)$lastchanged;
       // non-DB fields
       $this->User = ($user instanceof User) ? $user : new User( $this->uid );
-      $this->SurveyOptions = array();
-      $this->UserVoted = null;
-      $this->UserList = array();
-      $this->UserListHandles = array();
-      $this->UserListUserRefs = array();
-   }
+   }//__construct
 
-   function to_string()
+   public function to_string()
    {
       return print_r($this, true);
    }
 
-   function setType( $type )
+   public function setType( $type )
    {
       if( !preg_match( "/^(".CHECK_SURVEY_TYPE.")$/", $type ) )
          error('invalid_args', "Survey.setType($type)");
       $this->Type = $type;
    }
 
-   function setStatus( $status )
+   public function setStatus( $status )
    {
       if( !preg_match( "/^(".CHECK_SURVEY_STATUS.")$/", $status ) )
          error('invalid_args', "Survey.setStatus($status)");
       $this->Status = $status;
    }
 
-   function setFlag( $flagmask, $value )
+   public function setFlag( $flagmask, $value )
    {
       if( $flagmask > 0 )
       {
@@ -145,10 +139,10 @@ class Survey
          else
             $this->Flags &= ~$flagmask;
       }
-   }
+   }//setFlag
 
    /*! \brief Inserts or updates Survey-entry in database. */
-   function persist()
+   public function persist()
    {
       if( $this->ID > 0 )
          $success = $this->update();
@@ -157,7 +151,7 @@ class Survey
       return $success;
    }
 
-   function insert()
+   public function insert()
    {
       $this->Created = $this->Lastchanged = $GLOBALS['NOW'];
 
@@ -168,7 +162,7 @@ class Survey
       return $result;
    }
 
-   function update()
+   public function update()
    {
       $this->Lastchanged = $GLOBALS['NOW'];
 
@@ -176,7 +170,7 @@ class Survey
       return $entityData->update( "Survey.update(%s)" );
    }
 
-   function fillEntityData( $data=null )
+   public function fillEntityData( $data=null )
    {
       if( is_null($data) )
          $data = $GLOBALS['ENTITY_SURVEY']->newEntityData();
@@ -195,17 +189,17 @@ class Survey
       return $data;
    }
 
-   function hasUserVotes()
+   public function hasUserVotes()
    {
       return ( $this->UserCount > 0 );
    }
 
-   function need_option_minpoints()
+   public function need_option_minpoints()
    {
       return ( $this->Type == SURVEY_TYPE_SINGLE || $this->Type == SURVEY_TYPE_MULTI );
    }
 
-   function loadUserList()
+   public function loadUserList()
    {
       $this->UserList = array();
       $this->UserListHandles = array();
@@ -231,7 +225,7 @@ class Survey
    // ------------ static functions ----------------------------
 
    /*! \brief Returns db-fields to be used for query of Survey-objects for given survey-id. */
-   function build_query_sql( $sid=0, $with_player=true )
+   public static function build_query_sql( $sid=0, $with_player=true )
    {
       $qsql = $GLOBALS['ENTITY_SURVEY']->newQuerySQL('S');
       if( $with_player )
@@ -246,10 +240,10 @@ class Survey
       if( $sid > 0 )
          $qsql->add_part( SQLP_WHERE, "S.ID=$sid" );
       return $qsql;
-   }
+   }//build_query_sql
 
    /*! \brief Returns Survey-object created from specified (db-)row. */
-   function new_from_row( $row )
+   public static function new_from_row( $row )
    {
       $survey = new Survey(
             // from Survey
@@ -268,83 +262,83 @@ class Survey
             @$row['X_Lastchanged']
          );
       return $survey;
-   }
+   }//new_from_row
 
    /*!
     * \brief Loads and returns Survey-object for given survey-id limited to 1 result-entry.
     * \param $sid Survey.ID
     * \return NULL if nothing found; Survey-object otherwise
     */
-   function load_survey( $sid, $with_player=true )
+   public static function load_survey( $sid, $with_player=true )
    {
-      $qsql = Survey::build_query_sql( $sid, $with_player );
+      $qsql = self::build_query_sql( $sid, $with_player );
       $qsql->add_part( SQLP_LIMIT, '1' );
 
-      $row = mysql_single_fetch( "Survey::load_survey.find_survey($sid)", $qsql->get_select() );
-      return ($row) ? Survey::new_from_row($row) : NULL;
-   }
+      $row = mysql_single_fetch( "Survey:load_survey.find_survey($sid)", $qsql->get_select() );
+      return ($row) ? self::new_from_row($row) : NULL;
+   }//load_survey
 
    /*! \brief Loads and returns Survey-object for given survey-QuerySQL; NULL if nothing found. */
-   function load_survey_by_query( $qsql, $with_row=false )
+   public static function load_survey_by_query( $qsql, $with_row=false )
    {
       $qsql->add_part( SQLP_LIMIT, '1' );
-      $row = mysql_single_fetch( "Bulletin::load_survey_by_query()", $qsql->get_select() );
+      $row = mysql_single_fetch( "Survey:load_survey_by_query()", $qsql->get_select() );
       if( $with_row )
-         return ($row) ? array( Survey::new_from_row($row), $row ) : array( NULL, NULL );
+         return ($row) ? array( self::new_from_row($row), $row ) : array( NULL, NULL );
       else
-         return ($row) ? Survey::new_from_row($row) : NULL;
-   }
+         return ($row) ? self::new_from_row($row) : NULL;
+   }//load_survey_by_query
 
    /*! \brief Returns enhanced (passed) ListIterator with Survey-objects. */
-   function load_surveys( $iterator )
+   public static function load_surveys( $iterator )
    {
-      $qsql = Survey::build_query_sql();
+      $qsql = self::build_query_sql();
       $iterator->setQuerySQL( $qsql );
       $query = $iterator->buildQuery();
-      $result = db_query( "Survey.load_surveys", $query );
+      $result = db_query( "Survey:load_surveys", $query );
       $iterator->setResultRows( mysql_num_rows($result) );
 
       $iterator->clearItems();
       while( $row = mysql_fetch_array( $result ) )
       {
-         $survey = Survey::new_from_row( $row );
+         $survey = self::new_from_row( $row );
          $iterator->addItem( $survey, $row );
       }
       mysql_free_result($result);
 
       return $iterator;
-   }
+   }//load_surveys
 
-   function is_status_viewable( $status )
+   public static function is_status_viewable( $status )
    {
       return ( $status == SURVEY_STATUS_ACTIVE || $status == SURVEY_STATUS_CLOSED );
    }
 
-   function is_point_type( $type )
+   public static function is_point_type( $type )
    {
       return ( $type == SURVEY_TYPE_POINTS || $type == SURVEY_TYPE_SUM );
    }
 
-   function update_user_count( $sid, $diff )
+   public static function update_user_count( $sid, $diff )
    {
       if( !is_numeric($diff) )
          error('invalid_args', "Survey.updateUserCount.check.diff($sid,$diff)");
 
       return db_query( "Survey.updateUserCount.upd($sid,$diff)",
          "UPDATE Survey SET UserCount=UserCount+($diff) WHERE ID=$sid LIMIT 1" );
-   }
+   }//update_user_count
 
    /*!
     * \brief Persists user-list for survey in SurveyUser-table.
     *
     * \note IMPORTANT NOTE: caller needs to open TA with HOT-section!!
     */
-   function persist_survey_userlist( $sid, $uids )
+   public static function persist_survey_userlist( $sid, $uids )
    {
       if( !is_numeric($sid) || $sid <= 0 )
-         error('invalid_args', "Survey::persist_survey_userlist.check.sid($sid)");
+         error('invalid_args', "Survey:persist_survey_userlist.check.sid($sid)");
       if( !is_array($uids) )
-         error('invalid_args', "Survey::persist_survey_userlist.check.uids($sid)");
+         error('invalid_args', "Survey:persist_survey_userlist.check.uids($sid)");
 
       $cnt_uids = count($uids);
       if( $cnt_uids > 0 )
@@ -353,31 +347,31 @@ class Survey
          foreach( $uids as $uid )
          {
             if( !is_numeric($uid) || $uid <= GUESTS_ID_MAX )
-               error('invalid_args', "Survey::persist_survey_userlist.check.uids.bad_uid($sid,$uid)");
+               error('invalid_args', "Survey:persist_survey_userlist.check.uids.bad_uid($sid,$uid)");
          }
          $uids_sql = implode(',', $uids);
       }
 
-      db_query( "Survey::persist_survey_userlist.del($sid,$cnt_uids)",
+      db_query( "Survey:persist_survey_userlist.del($sid,$cnt_uids)",
          "DELETE FROM SurveyUser WHERE sid=$sid" . ( $cnt_uids > 0 ? " AND uid NOT IN ($uids_sql)" : '' ) );
 
       if( $cnt_uids > 0 )
       {
-         db_query( "Survey::persist_survey_userlist.add($sid,$cnt_uids)",
+         db_query( "Survey:persist_survey_userlist.add($sid,$cnt_uids)",
             "INSERT IGNORE SurveyUser (sid,uid) " .
             "SELECT $sid, ID FROM Players WHERE ID IN ($uids_sql) LIMIT $cnt_uids" );
       }
    }//persist_survey_userlist
 
    /*! \brief Returns true if user is on Survey-userlist. */
-   function exists_survey_user( $sid, $uid )
+   public static function exists_survey_user( $sid, $uid )
    {
       if( !is_numeric($sid) || $sid <= 0 )
-         error('invalid_args', "Survey::exists_survey_user.check.sid($sid,$uid)");
+         error('invalid_args', "Survey:exists_survey_user.check.sid($sid,$uid)");
       if( !is_numeric($uid) || $uid <= GUESTS_ID_MAX )
-         error('invalid_args', "Survey::exists_survey_user.check.uid($sid,$uid)");
+         error('invalid_args', "Survey:exists_survey_user.check.uid($sid,$uid)");
 
-      $row = mysql_single_fetch( "Survey::exists_survey_user($sid,$uid)",
+      $row = mysql_single_fetch( "Survey:exists_survey_user($sid,$uid)",
          "SELECT 1 FROM SurveyUser WHERE sid=$sid AND uid=$uid LIMIT 1" );
       return (bool) $row;
    }//exists_survey_user

@@ -50,7 +50,6 @@ require_once( "include/filterlib_mysqlmatch.php" );
    $disp_forum->links = LINKPAGE_SEARCH | LINK_SEARCH;
 
    $page = "search.php";
-   $f_opts = new ForumOptions( $player_row );
 
    if( $is_admin_moderator )
       $disp_forum->links |= LINK_TOGGLE_MODERATOR;

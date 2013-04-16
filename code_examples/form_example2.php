@@ -248,14 +248,7 @@ $the_form->echo_string();
 
 
 // present some internal vars from Form
-if( isset($the_form->layout[FLAYOUT_GLOBAL]) )
-{
-   echo "<br><br>\nvar_export:\n<font size=+2><pre>"
-      . "global-layout: " . var_export( $the_form->orig_layout, true ) ."\n\n"
-      . "layout-array (for debugging):\n" .
-         var_export( $the_form->layout[FLAYOUT_GLOBAL], true ) . "\n"
-      . "</pre></font>\n";
-}
+Form::echo_internal_layout($the_form);
 
 loc_end_html();
 exit;

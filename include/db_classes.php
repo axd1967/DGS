@@ -68,34 +68,28 @@ define('FORMFIELD_LOCKVERSION', '_lock_version'); // for optimistic-locking
 class Entity
 {
    /*! \brief table of entity. */
-   var $table;
+   public $table;
    /*! \brief array with field-info: [ fieldname => type ] */
-   var $fields;
+   public $fields = array();
    /*! \brief array with primary-keys: [ fieldname => 1 ] */
-   var $pkeys;
+   public $pkeys = array();
    /*! \brief fieldname with auto-increment. */
-   var $field_autoinc;
+   public $field_autoinc = null;
    /*! \brief true, if entity has a ChangedBy-field. */
-   var $has_changedby;
+   public $has_changedby = false;
    /*! \brief true, if entity has a LockVersion-field. */
-   var $has_optimistic_locking;
+   public $has_optimistic_locking = false;
 
    /*! \brief array with date-fields: [ fieldname, ... ] */
-   var $date_fields;
+   public $date_fields = array();
 
    /*!
     * \brief Constructs Entity( table_name, type, field, field, ..., type, ... ).
-    * \param type: one of FTYPE_...-consts
+    * \param $type one of FTYPE_...-consts (var-args)
     */
-   function Entity( $table )
+   public function __construct( $table )
    {
       $this->table = $table;
-      $this->fields = array();
-      $this->pkeys = array();
-      $this->date_fields = array();
-      $this->field_autoinc = null;
-      $this->has_changedby = false;
-      $this->has_optimistic_locking = false;
 
       // skip arg #0=type-arg to add var-args: fields
       $type = 0;
@@ -148,24 +142,24 @@ class Entity
       // reserved-fieldname for optimistic-locking
       if( isset($this->fields[FIELD_LOCKVERSION]) && !$this->has_optimistic_locking )
          init_error('entity_init_error', "Entity.miss_optlock($table,".FIELD_LOCKVERSION.")");
-   } //constructor Entity
+   }//__construct
 
-   function to_string()
+   public function to_string()
    {
       return print_r( $this, true );
    }
 
-   function is_field( $field )
+   public function is_field( $field )
    {
       return isset($this->fields[$field]);
    }
 
-   function is_primary_key( $field )
+   public function is_primary_key( $field )
    {
       return isset($this->pkeys[$field]);
    }
 
-   function is_auto_increment( $field )
+   public function is_auto_increment( $field )
    {
       if( is_null($this->field_autoinc) )
          return false;
@@ -173,7 +167,7 @@ class Entity
    }
 
    /*! \brief Returns db-fields to be used for query of entity. */
-   function newQuerySQL( $table_alias='' )
+   public function newQuerySQL( $table_alias='' )
    {
       $tbl = ($table_alias) ? $table_alias : $this->table;
 
@@ -189,9 +183,9 @@ class Entity
       $qsql->add_part_fields( $arr_dates );
 
       return $qsql;
-   }
+   }//newQuerySQL
 
-   function newEntityData()
+   public function newEntityData()
    {
       return new EntityData( $this );
    }
@@ -208,41 +202,39 @@ class Entity
 class EntityData
 {
    /*! \brief Entity-object for this data-set.*/
-   var $entity;
+   public $entity;
    /*! \brief Array with values: [ fieldname => value ] */
-   var $values;
+   public $values = array();
    /*! \brief Array with query-part-clauses: [ fieldname => field-based-query-part ] */
-   var $query_values;
+   public $query_values = array();
 
-   function EntityData( $entity )
+   public function __construct( $entity )
    {
       $this->entity = $entity;
-      $this->values = array();
-      $this->query_values = array();
    }
 
-   function to_string()
+   public function to_string()
    {
       return print_r( $this, true );
    }
 
-   function get_pkey_string()
+   public function get_pkey_string()
    {
       $arr = array();
       foreach( $this->entity->pkeys as $field => $tmp )
          $arr[] = sprintf( '%s[%s]', $field,
             ( isset($this->values[$field]) ? $this->values[$field] : '' ));
       return implode(',', $arr);
-   }
+   }//get_pkey_string
 
-   function set_value( $field, $value )
+   public function set_value( $field, $value )
    {
       if( !$this->entity->is_field($field) )
          error('assert', "EntityData.set_value.unknown_field({$this->entity->table},$field)");
       $this->values[$field] = $value;
    }
 
-   function set_query_value( $field, $query_value )
+   public function set_query_value( $field, $query_value )
    {
       if( !$this->entity->is_field($field) )
          error('assert', "EntityData.set_query_value.unknown_field({$this->entity->table},$field)");
@@ -250,7 +242,7 @@ class EntityData
    }
 
    /*! \brief Returns array with valid field-names for current entity. */
-   function get_fields( $dbgmsg )
+   public function get_fields( $dbgmsg )
    {
       $arr = array();
       foreach( $this->values as $field => $tmp )
@@ -271,32 +263,32 @@ class EntityData
          unset($arr[FIELD_LOCKVERSION]);
 
       return array_keys( $arr );
-   }
+   }//get_fields
 
    /*! \brief Returns cloned array with values (without query-values). */
-   function make_row( $clone=false )
+   public function make_row( $clone=false )
    {
       return ($clone) ? array() + $this->values : $this->values;
    }
 
-   function get_value( $field, $default=null )
+   public function get_value( $field, $default=null )
    {
       return (isset($this->values[$field])) ? $this->values[$field] : $default;
    }
 
-   function get_query_value( $field, $default=null )
+   public function get_query_value( $field, $default=null )
    {
       return (isset($this->query_values[$field])) ? $this->query_values[$field] : $default;
    }
 
-   function remove_value( $field, $with_queryval=true )
+   public function remove_value( $field, $with_queryval=true )
    {
       unset($this->values[$field]);
       if( $with_queryval )
          unset($this->query_values[$field]);
    }
 
-   function get_sql_value( $field, $default=null )
+   public function get_sql_value( $field, $default=null )
    {
       if( $field == FIELD_CHANGEDBY )
          return "RTRIM('" . mysql_addslashes( $this->build_changed_by() ) . "')";
@@ -320,9 +312,9 @@ class EntityData
          return $this->get_query_value( $field, $default );
       else
          return $default;
-   }
+   }//get_sql_value
 
-   function build_changed_by( $value=null )
+   public function build_changed_by( $value=null )
    {
       global $player_row;
       $handle = ( (string)@$player_row['Handle'] != '' ) ? @$player_row['Handle'] : UNKNOWN_VALUE;
@@ -334,9 +326,9 @@ class EntityData
       if( strncmp($value, $changed_by, strlen($changed_by)) != 0 )
          $value = "$changed_by $value";
       return $value;
-   }
+   }//build_changed_by
 
-   function build_sql_insert()
+   public function build_sql_insert()
    {
       // primary-key field values must exist
       foreach( $this->entity->pkeys as $field => $tmp )
@@ -357,9 +349,9 @@ class EntityData
 
       $query = 'INSERT INTO ' . $this->entity->table . ' SET ' . implode(', ', $arr);
       return $query;
-   }
+   }//build_sql_insert
 
-   function build_sql_insert_values( $header=false, $with_PK=false, $skip_fields=null )
+   public function build_sql_insert_values( $header=false, $with_PK=false, $skip_fields=null )
    {
       $arr = array();
       if( $header ) // header
@@ -386,10 +378,10 @@ class EntityData
 
       $query = sprintf( $query_fmt, implode(',', $arr) );
       return $query;
-   }
+   }//build_sql_insert_values
 
    /*! \brief Returns update-query as query-string or array( update-part, where-part, after-where-part ). */
-   function build_sql_update( $limit=1, $as_arr=false, $incl_chby=true, $incl_optlock=true, $skip_fields=null )
+   public function build_sql_update( $limit=1, $as_arr=false, $incl_chby=true, $incl_optlock=true, $skip_fields=null )
    {
       // primary-key field values must exist
       $arr_pkeys = array();
@@ -424,9 +416,9 @@ class EntityData
          $arr_query[] = sprintf( 'AND %s=%s', FIELD_LOCKVERSION, (int)$this->values[FIELD_LOCKVERSION] );
       $arr_query[] = ( is_numeric($limit) && $limit > 0 ) ? "LIMIT $limit" : '';
       return ($as_arr) ? $arr_query : rtrim(implode(' ', $arr_query));
-   }
+   }//build_sql_update
 
-   function build_sql_delete( $limit=1, $incl_optlock=true )
+   public function build_sql_delete( $limit=1, $incl_optlock=true )
    {
       $arr = array();
       foreach( $this->entity->pkeys as $field => $tmp )
@@ -444,19 +436,19 @@ class EntityData
       if( is_numeric($limit) && $limit > 0 )
          $query .= " LIMIT $limit";
       return $query;
-   }
+   }//build_sql_delete
 
-   function insert( $msgfmt )
+   public function insert( $msgfmt )
    {
       return db_query( sprintf($msgfmt, $this->get_pkey_string()), $this->build_sql_insert() );
    }
 
-   function update( $msgfmt, $limit=1 )
+   public function update( $msgfmt, $limit=1 )
    {
       return db_query( sprintf($msgfmt, $this->get_pkey_string()), $this->build_sql_update($limit) );
    }
 
-   function delete( $msgfmt, $limit=1 )
+   public function delete( $msgfmt, $limit=1 )
    {
       return db_query( sprintf($msgfmt, $this->get_pkey_string()), $this->build_sql_delete($limit) );
    }
@@ -464,12 +456,12 @@ class EntityData
 
    // ------------ static functions ----------------------------
 
-   function build_update_part_changed_by( $handle )
+   public static function build_update_part_changed_by( $handle )
    {
       return "ChangedBy=RTRIM(CONCAT('[" . mysql_addslashes($handle) . "] ',ChangedBy))";
    }
 
-   function build_sql_value_changed_by( $handle )
+   public static function build_sql_value_changed_by( $handle )
    {
       return "'[" . mysql_addslashes($handle) . "]'";
    }

@@ -45,29 +45,23 @@ define('MSGLIST_FILTERS', 'folders|answers');
   */
 class QuickHandlerMessageList extends QuickHandler
 {
-   var $filter_folders; // [ folder-id, ... ] or empty-arr for all-folders
-   var $filter_answers_mid;
+   private $filter_folders = array(); // [ folder-id, ... ] or empty-arr for all-folders
+   private $filter_answers_mid = 0;
 
-   var $user_rows;
-   var $folders;
-   var $msg_result_rows;
+   private $user_rows;
+   private $folders = null;
+   private $msg_result_rows = null;
 
-   public function QuickHandlerMessageList( $quick_object )
+   public function __construct( $quick_object )
    {
-      parent::QuickHandler( $quick_object );
-
-      $this->filter_folders = array();
-      $this->filter_answers_mid = 0;
-
+      parent::__construct( $quick_object );
       $this->user_rows = array( $this->my_id => $GLOBALS['player_row'] );
-      $this->folders = null;
-      $this->msg_result_rows = null;
    }
 
 
    // ---------- Interface ----------------------------------------
 
-   public function canHandle( $obj, $cmd ) // static
+   public static function canHandle( $obj, $cmd ) // static
    {
       return ( $obj == QOBJ_MESSAGE ) && QuickHandler::matchRegex(MSGLIST_COMMANDS, $cmd);
    }
@@ -75,14 +69,14 @@ class QuickHandlerMessageList extends QuickHandler
    public function parseURL()
    {
       parent::checkArgsUnknown();
-      parent::parseFilters(MSGLIST_FILTERS);
+      $this->parseFilters(MSGLIST_FILTERS);
 
       // filter-defaults
       if( !isset($this->filters[MSGLIST_FILTER_FOLDERS]) )
          $this->filters[MSGLIST_FILTER_FOLDERS] = ''; // default all-received
       if( !isset($this->filters[MSGLIST_FILTER_ANSWERS]) )
          $this->filters[MSGLIST_FILTER_ANSWERS] = ''; // no default (filter-disabled)
-   }
+   }//parseURL
 
    public function prepare()
    {
@@ -231,7 +225,7 @@ class QuickHandlerMessageList extends QuickHandler
          foreach( $this->msg_result_rows as $msg_row )
          {
             $arr = array();
-            $out[] = QuickHandlerMessage::fill_message_info( $this, $arr, $msg_row );
+            $out[] = QuickHandlerMessage::fill_message_info( $this, $arr, $msg_row, $this->user_rows, $this->folders );
          }
       }
 

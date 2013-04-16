@@ -264,7 +264,7 @@ define('SEPLINE', "\n<p><hr>\n");
 function update_forum_global_post_update( $do_it, $time )
 {
    if( !$do_it ) echo "... SKIP ";
-   echo "... triggered forum global update with ForumRead::trigger_recalc_global_post_update()<br>\n";
+   echo "... triggered forum global update with ForumRead.trigger_recalc_global_post_update()<br>\n";
    if( $do_it ) ForumRead::trigger_recalc_global_post_update( $time );
 }
 

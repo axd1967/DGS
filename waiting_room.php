@@ -219,7 +219,7 @@ require_once( 'include/wroom_control.php' );
       {
          $WRP_Rating2 = NULL;
          $wro = new WaitingroomOffer( $row );
-         $wro->calculate_offer_settings();
+         $wro_settings = $wro->calculate_offer_settings();
          $is_fairkomi = $wro->is_fairkomi();
          extract($row); //including $calculated, $haverating, $goodrating, $goodmingames, $goodmaxgames, $goodsameopp, $X_Time
 
@@ -294,7 +294,7 @@ require_once( 'include/wroom_control.php' );
          if( $wrtable->Is_Column_Displayed[16] )
             $wrow_strings[16] = build_usertype_text($WRP_Type, ARG_USERTYPE_NO_TEXT, true, '');
          if( $wrtable->Is_Column_Displayed[18] ) // Settings (resulting Color + Handi + Komi)
-            $wrow_strings[18] = $wro->calculate_offer_settings();
+            $wrow_strings[18] = $wro_settings;
          if( $wrtable->Is_Column_Displayed[19] )
             $wrow_strings[19] = getRulesetText($Ruleset);
          if( $wrtable->Is_Column_Displayed[20] )

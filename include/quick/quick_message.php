@@ -55,34 +55,20 @@ define('MESSAGE_COMMANDS', 'info|move_msg|delete_msg|send_msg|accept_inv|decline
   */
 class QuickHandlerMessage extends QuickHandler
 {
-   var $mid;
-   var $oid; // for bulk-msg
-   var $folder_id;
+   private $mid = 0;
+   private $other_uid = 0; // for bulk-msg
+   private $folder_id = 0;
 
-   var $msg_row;
-   var $user_rows;
-   var $folder; //arr
-   var $folders; //arr
-   var $arr_msg_id;
-
-   public function QuickHandlerMessage( $quick_object )
-   {
-      parent::QuickHandler( $quick_object );
-      $this->mid = 0;
-      $this->other_uid = 0;
-      $this->folder_id = 0;
-
-      $this->msg_row = null;
-      $this->user_rows = null;
-      $this->folder = null;
-      $this->folders = null;
-      $this->arr_msg_id = null;
-   }
+   private $msg_row = null;
+   private $user_rows = null;
+   private $folder = null; //arr
+   private $folders = null; //arr; 'public' needed for var-scope
+   private $arr_msg_id = null;
 
 
    // ---------- Interface ----------------------------------------
 
-   public function canHandle( $obj, $cmd ) // static
+   public static function canHandle( $obj, $cmd ) // static
    {
       return ( $obj == QOBJ_MESSAGE ) && QuickHandler::matchRegex(MESSAGE_COMMANDS, $cmd);
    }
@@ -235,11 +221,11 @@ class QuickHandlerMessage extends QuickHandler
          $this->process_cmd_delete_msg();
       elseif( $cmd == MESSAGECMD_SEND_MSG || $cmd == MESSAGECMD_ACCEPT_INVITATION || $cmd == MESSAGECMD_DECLINE_INVITATION )
          $this->process_cmd_send_msg();
-   }
+   }//process
 
    private function process_cmd_info()
    {
-      QuickHandlerMessage::fill_message_info( $this, $this->quick_object->result, $this->msg_row );
+      self::fill_message_info( $this, $this->quick_object->result, $this->msg_row, $this->user_rows, $this->folders );
 
       // move message into target folder (if given)
       if( $this->folder_id > 0 )
@@ -347,12 +333,12 @@ class QuickHandlerMessage extends QuickHandler
 
 
    // fills $out-array and return it, filled with message-data from row
-   // NOTE: quickh->user_rows/folders must be initialized
-   public static function fill_message_info( $quickh, &$out, $row )
+   // NOTE: $user_rows, $folders must be initialized; or else be null
+   public static function fill_message_info( $quickh, &$out, $row, $user_rows, $folders )
    {
       global $player_row;
 
-      $my_id = $quickh->my_id;
+      $my_id = $player_row['ID'];
       $other_uid = (int)$row['other_id'];
       switch( $row['Sender'] ) // also see get_message_directions()
       {
@@ -367,19 +353,19 @@ class QuickHandlerMessage extends QuickHandler
       $folder_id = (int)$row['Folder_nr'];
 
       $out['id'] = $mid;
-      $out['user_from'] = $quickh->build_obj_user($uid_from, @$quickh->user_rows[$uid_from], '', 'country,rating');
-      $out['user_to']   = $quickh->build_obj_user($uid_to, @$quickh->user_rows[$uid_to], '', 'country,rating');
+      $out['user_from'] = $quickh->build_obj_user($uid_from, @$user_rows[$uid_from], '', 'country,rating');
+      $out['user_to']   = $quickh->build_obj_user($uid_to, @$user_rows[$uid_to], '', 'country,rating');
       $out['type'] = strtoupper($row['Type']);
-      $out['flags'] = QuickHandlerMessage::convertMessageFlags($row['Flags']);
+      $out['flags'] = self::convertMessageFlags($row['Flags']);
       $out['folder'] = QuickHandlerFolder::build_obj_folder(
-            $folder_id, @$quickh->folders[$folder_id], $quickh->is_with_option(QWITH_FOLDER) );
+            $folder_id, @$folders[$folder_id], $quickh->is_with_option(QWITH_FOLDER) );
       $out['created_at'] = QuickHandler::formatDate(@$row['X_Time']);
       $out['thread'] = (int)$row['Thread'];
       $out['level'] = (int)$row['Level'];
       $out['message_prev'] = (int)$row['ReplyTo'];
       $out['message_hasnext'] = ($row['X_Flow'] & FLOW_ANSWERED) ? 1 : 0;
       $out['can_reply'] = ($row['Sender'] == 'N' && $other_uid>0) ? 1 : 0;
-      $out['need_reply'] = QuickHandlerMessage::convertMessageReplyStatus($row['Replied']);
+      $out['need_reply'] = self::convertMessageReplyStatus($row['Replied']);
       $out['game_id'] = $gid;
       $out['subject'] = $row['Subject'];
       $out['text'] = $row['Text'];
@@ -408,8 +394,8 @@ class QuickHandlerMessage extends QuickHandler
             // NOTE: players have a rating if an invitation exists
             $row['Handicaptype'] = $Handitype;
             $row['JigoMode'] = $jigo_mode;
-            $gsc = new GameSettingsCalculator( $row, $player_row['Rating2'], $row['other_rating'] );
-            $gsc->calculate_settings();
+            $gs_calc = new GameSettingsCalculator( $row, $player_row['Rating2'], $row['other_rating'] );
+            $gs_calc->calculate_settings();
 
             $out['game_settings'] = array(
                   'game_type' => GAMETYPE_GO,
@@ -439,10 +425,10 @@ class QuickHandlerMessage extends QuickHandler
                   'time_periods' => $row['Byoperiods'],
 
                   'opp_started_games' => GameHelper::count_started_games( $my_id, $other_uid ),
-                  'calc_type' => $gsc->calc_type,
-                  'calc_color' => $gsc->calc_color,
-                  'calc_handicap' => $gsc->calc_handicap,
-                  'calc_komi' => $gsc->calc_komi,
+                  'calc_type' => $gs_calc->calc_type,
+                  'calc_color' => $gs_calc->calc_color,
+                  'calc_handicap' => $gs_calc->calc_handicap,
+                  'calc_komi' => $gs_calc->calc_komi,
                );
          }
       }//invitation-info

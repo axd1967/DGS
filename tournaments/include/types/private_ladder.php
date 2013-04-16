@@ -44,9 +44,9 @@ require_once 'tournaments/include/tournament_ladder_props.php';
   */
 class PrivateLadderTournament extends TournamentTemplateLadder
 {
-   function PrivateLadderTournament()
+   public function __construct()
    {
-      parent::TournamentTemplateLadder(
+      parent::__construct(
          TOURNEY_WIZTYPE_PRIVATE_LADDER,
          sprintf( '%s (%s)', T_('Private Ladder'), T_('invite-only and with game restrictions#ttype')) );
 
@@ -57,7 +57,7 @@ class PrivateLadderTournament extends TournamentTemplateLadder
       $this->limits->setLimits( TLIMITS_TL_MAX_CH, false, 1, 10 );
    }
 
-   function createTournament()
+   public function createTournament()
    {
       global $player_row;
       $tourney = $this->make_tournament( TOURNEY_SCOPE_PRIVATE,
@@ -75,7 +75,7 @@ class PrivateLadderTournament extends TournamentTemplateLadder
       $tl_props->MaxDefenses = 3;
 
       return $this->_createTournament( $tourney, $tprops, $trules, $tl_props );
-   }
+   }//createTournament
 
 } // end of 'PrivateLadderTournament'
 

@@ -40,9 +40,6 @@ require_once 'tournaments/include/tournament_rules.php';
   * \brief Container and function to cache tournament-objects.
   */
 
-global $TOURNAMENT_CACHE;
-$TOURNAMENT_CACHE = new TournamentCache();
-
 
  /*!
   * \class TournamentCache
@@ -52,25 +49,21 @@ $TOURNAMENT_CACHE = new TournamentCache();
 class TournamentCache
 {
    /*! \brief array( tid => Tournament-object ); fallback if shared-mem-cache disabled. */
-   var $cache_tournament;
-
+   private $cache_tournament = array();
    /*! \brief locked Tournament-object (mostly used for cron-locking). */
-   var $lock_tourney;
+   private $lock_tourney = null;
 
-
-   function TournamentCache()
+   private function __construct()
    {
-      $this->cache_tournament = array();
-      $this->lock_tourney = null;
    }
 
-   function is_tournament_locked()
+   public function is_tournament_locked()
    {
       return !is_null($this->lock_tourney);
    }
 
    /*! \brief Releases (previously) cron-locked tournament. */
-   function release_tournament_cron_lock( $tid=0 )
+   public function release_tournament_cron_lock( $tid=0 )
    {
       // release (previous) lock when handling NEW tourney-ID
       if( $this->is_tournament_locked() && ($tid != $this->lock_tourney->ID) )
@@ -79,7 +72,7 @@ class TournamentCache
          $this->lock_tourney->update_flags( TOURNEY_FLAG_LOCK_CRON, 0 );
          $this->lock_tourney = null;
 
-         TournamentCache::delete_cache_tournament( $lock_tid );
+         self::delete_cache_tournament( $lock_tid );
       }
    }
 
@@ -88,9 +81,9 @@ class TournamentCache
     * \param $tid tournament-ID
     * \param true if lock was successful; false otherwise
     */
-   function set_tournament_cron_lock( $tid )
+   public function set_tournament_cron_lock( $tid )
    {
-      $tourney = TournamentCache::load_cache_tournament( 'TCache.set_tournament_cron_lock.find', $tid );
+      $tourney = self::load_cache_tournament( 'TCache.set_tournament_cron_lock.find', $tid );
 
       if( $tourney->isFlagSet(TOURNEY_FLAG_LOCK_ADMIN | TOURNEY_FLAG_LOCK_TDWORK) )
          return false;
@@ -103,14 +96,17 @@ class TournamentCache
       }
 
       return true;
-   }
+   }//set_tournament_cron_lock
 
 
    // ------------ static functions ----------------------------
 
-   function get_instance()
+   /*! \brief Returns TournamentCache-singleton. */
+   public static function get_instance()
    {
-      global $TOURNAMENT_CACHE;
+      static $TOURNAMENT_CACHE = null;
+      if( is_null($TOURNAMENT_CACHE) )
+         $TOURNAMENT_CACHE = new TournamentCache();
       return $TOURNAMENT_CACHE;
    }
 
@@ -118,7 +114,7 @@ class TournamentCache
     * \brief Loads and caches tournament for given tournament-id (fallback to run-cache if shared-mem-cache unavailable).
     * \param $check_exist true = die if tournament cannot be found
     */
-   function load_cache_tournament( $dbgmsg, $tid, $check_exist=true )
+   public static function load_cache_tournament( $dbgmsg, $tid, $check_exist=true )
    {
       $tid = (int)$tid;
       $dbgmsg .= ".TCache::load_cache_tournament($tid,$check_exist)";
@@ -131,7 +127,7 @@ class TournamentCache
          $tourney = DgsCache::fetch( $dbgmsg, CACHE_GRP_TOURNAMENT, $key );
       else
       {
-         $tcache = TournamentCache::get_instance();
+         $tcache = self::get_instance();
          if( isset($tcache->cache_tournament[$tid]) )
             $tourney = $tcache->cache_tournament[$tid];
       }
@@ -154,12 +150,12 @@ class TournamentCache
       return $tourney;
    }//load_cache_tournament
 
-   function delete_cache_tournament( $tid )
+   public static function delete_cache_tournament( $tid )
    {
-      DgsCache::delete( "TCache.delete_cache_tournament($tid)", CACHE_GRP_TOURNAMENT, "Tournament.$tid" );
+      DgsCache::delete( "TCache:delete_cache_tournament($tid)", CACHE_GRP_TOURNAMENT, "Tournament.$tid" );
 
       // delete run-cache
-      $tcache = TournamentCache::get_instance();
+      $tcache = self::get_instance();
       unset($tcache->cache_tournament[$tid]);
    }
 
@@ -169,11 +165,11 @@ class TournamentCache
     * \return TournamentDirector-object (with Flags set, but without Comment) for matching director;
     *         or null if user is not tournament-director
     */
-   function is_cache_tournament_director( $dbgmsg, $tid, $uid, $flags=0 )
+   public static function is_cache_tournament_director( $dbgmsg, $tid, $uid, $flags=0 )
    {
       $tid = (int)$tid;
       $uid = (int)$uid;
-      $dbgmsg .= ".TCache::is_cache_tournament_director($tid,$uid,$flags)";
+      $dbgmsg .= ".TCache:is_cache_tournament_director($tid,$uid,$flags)";
       $key = "TDirector.$tid";
 
       $arr_tdir = DgsCache::fetch( $dbgmsg, CACHE_GRP_TDIRECTOR, $key );
@@ -198,10 +194,10 @@ class TournamentCache
     * \brief Loads and caches TournamentLadderProps for given tournament-id.
     * \param $check_exist true = die if db-entry cannot be found
     */
-   function load_cache_tournament_ladder_props( $dbgmsg, $tid, $check_exist=true )
+   public static function load_cache_tournament_ladder_props( $dbgmsg, $tid, $check_exist=true )
    {
       $tid = (int)$tid;
-      $dbgmsg .= ".TCache::load_cache_tlp($tid,$check_exist)";
+      $dbgmsg .= ".TCache:load_cache_tlp($tid,$check_exist)";
       $key = "TLadderProps.$tid";
 
       $tl_props = DgsCache::fetch( $dbgmsg, CACHE_GRP_TLPROPS, $key );
@@ -222,10 +218,10 @@ class TournamentCache
     * \brief Loads and caches TournamentProperties for given tournament-id.
     * \param $check_exist true = die if db-entry cannot be found
     */
-   function load_cache_tournament_properties( $dbgmsg, $tid, $check_exist=true )
+   public static function load_cache_tournament_properties( $dbgmsg, $tid, $check_exist=true )
    {
       $tid = (int)$tid;
-      $dbgmsg .= ".TCache::load_cache_tprops($tid,$check_exist)";
+      $dbgmsg .= ".TCache:load_cache_tprops($tid,$check_exist)";
       $key = "TProps.$tid";
 
       $tprops = DgsCache::fetch( $dbgmsg, CACHE_GRP_TPROPS, $key );
@@ -246,10 +242,10 @@ class TournamentCache
     * \brief Loads and caches TournamentRules for given tournament-id.
     * \param $check_exist true = die if db-entry cannot be found
     */
-   function load_cache_tournament_rules( $dbgmsg, $tid, $check_exist=true )
+   public static function load_cache_tournament_rules( $dbgmsg, $tid, $check_exist=true )
    {
       $tid = (int)$tid;
-      $dbgmsg .= ".TCache::load_cache_trules($tid,$check_exist)";
+      $dbgmsg .= ".TCache:load_cache_trules($tid,$check_exist)";
       $key = "TRules.$tid";
 
       $trule = DgsCache::fetch( $dbgmsg, CACHE_GRP_TRULES, $key );
@@ -270,11 +266,11 @@ class TournamentCache
     * \brief Loads and caches TournamentRound for given tournament-id and round.
     * \param $check_exist true = die if db-entry cannot be found
     */
-   function load_cache_tournament_round( $dbgmsg, $tid, $round, $check_exist=true )
+   public static function load_cache_tournament_round( $dbgmsg, $tid, $round, $check_exist=true )
    {
       $tid = (int)$tid;
       $round = (int)$round;
-      $dbgmsg .= ".TCache::load_cache_tround($tid,$round,$check_exist)";
+      $dbgmsg .= ".TCache:load_cache_tround($tid,$round,$check_exist)";
       $key = "TRound.$tid.$round";
 
       $tround = DgsCache::fetch( $dbgmsg, CACHE_GRP_TROUND, $key );
@@ -292,10 +288,10 @@ class TournamentCache
    }//load_cache_tournament_round
 
    /*! \brief Loads and caches TournamentNews for view_tournament.php-page for given combination of tournament-id/is-admin/is-TP. */
-   function load_cache_tournament_news( $dbgmsg, $tid, $is_admin, $is_tp )
+   public static function load_cache_tournament_news( $dbgmsg, $tid, $is_admin, $is_tp )
    {
       $tid = (int)$tid;
-      $dbgmsg .= ".TCache::load_cache_tnews($tid,$is_admin,$is_tp)";
+      $dbgmsg .= ".TCache:load_cache_tnews($tid,$is_admin,$is_tp)";
       $key = sprintf( "TNews.%s.%s.%s", $tid, ($is_admin ? 1 : 0), ($is_tp ? 1 : 0) );
 
       $arr_tnews = DgsCache::fetch( $dbgmsg, CACHE_GRP_TNEWS, $key );
@@ -320,10 +316,10 @@ class TournamentCache
     * \brief Returns non-null array with count of TournamentParticipants for given tournament and TP-status.
     * \note if caching is activated, all stati are returned even if $status != null
     */
-   function count_cache_tournament_participants( $tid, $status=null )
+   public static function count_cache_tournament_participants( $tid, $status=null )
    {
       $tid = (int)$tid;
-      $dbgmsg = "TCache::count_cache_tp($tid,$status)";
+      $dbgmsg = "TCache:count_cache_tp($tid,$status)";
       $key = "TPCount.$tid";
 
       $arr_counts = DgsCache::fetch( $dbgmsg, CACHE_GRP_TP_COUNT, $key );
@@ -337,11 +333,11 @@ class TournamentCache
    }//count_cache_tournament_participants
 
    /*! \brief Loads and caches TournamentParticipant for given tournament-id and user-id. */
-   function load_cache_tournament_participant( $dbgmsg, $tid, $uid )
+   public static function load_cache_tournament_participant( $dbgmsg, $tid, $uid )
    {
       $tid = (int)$tid;
       $uid = (int)$uid;
-      $dbgmsg .= ".TCache::load_cache_tp($tid,$uid)";
+      $dbgmsg .= ".TCache:load_cache_tp($tid,$uid)";
       $key = "TParticipant.$tid.$uid";
 
       $tp = DgsCache::fetch( $dbgmsg, CACHE_GRP_TPARTICIPANT, $key );
@@ -359,12 +355,12 @@ class TournamentCache
       return $tp;
    }//load_cache_tournament_participant
 
-   function is_cache_tournament_participant( $dbgmsg, $tid, $uid )
+   public static function is_cache_tournament_participant( $dbgmsg, $tid, $uid )
    {
       if( DgsCache::is_persistent(CACHE_GRP_TPARTICIPANT) )
       {
-         $dbgmsg .= ".TCache::is_cache_tp";
-         $tp = TournamentCache::load_cache_tournament_participant( $dbgmsg, $tid, $uid );
+         $dbgmsg .= ".TCache:is_cache_tp";
+         $tp = self::load_cache_tournament_participant( $dbgmsg, $tid, $uid );
          $result = (is_null($tp)) ? false : $tp->Status;
       }
       else
@@ -374,10 +370,10 @@ class TournamentCache
    }//is_cache_tournament_participant
 
    /*! \brief Loads and caches TournamentResults for given tournament-id and type. */
-   function load_cache_tournament_results( $dbgmsg, $tid, $tourney_type )
+   public static function load_cache_tournament_results( $dbgmsg, $tid, $tourney_type )
    {
       $tid = (int)$tid;
-      $dbgmsg .= ".TCache::load_cache_tresults($tid,$tourney_type)";
+      $dbgmsg .= ".TCache:load_cache_tresults($tid,$tourney_type)";
       $key = "TResult.$tid";
 
       $arr_tresult = DgsCache::fetch( $dbgmsg, CACHE_GRP_TRESULT, $key );
@@ -409,12 +405,12 @@ class TournamentCache
    }//load_cache_tournament_results
 
    /*! \brief Loads and caches TournamentGames for given tournament-id. */
-   function load_cache_tournament_games( $dbgmsg, $tid, $round_id=0, $pool=0, $status=null )
+   public static function load_cache_tournament_games( $dbgmsg, $tid, $round_id=0, $pool=0, $status=null )
    {
       $tid = (int)$tid;
       $pool_info = (is_array($pool)) ? implode(',', $pool) : $pool;
 
-      $dbgmsg .= ".TCache::load_cache_tgames($tid)";
+      $dbgmsg .= ".TCache:load_cache_tgames($tid)";
       $group_id = "TGames.$tid";
       $key = "TGames.$tid.$round_id.$pool_info";
       $tg_iterator = new ListIterator( $dbgmsg );

@@ -39,35 +39,33 @@ define('CUSERFLAG_MISC',    0x00000080); // miscellaneous relationship contact (
  * \brief Class to handle contact-list for user with system and user categories,
  *        like "deny game", "friend" etc.
  */
-
-// lazy-init in Contact::get..Flags()-funcs
-global $ARR_GLOBALS_CONTACT; //PHP5
-$ARR_GLOBALS_CONTACT = array();
-
 class Contact
 {
-   /*! \brief That's me. */
-   var $uid;
-   /*! \brief That's my contact. */
-   var $cid;
-   /*! \brief System flags (categories), that prevents or allows certain action between me (uid) and contact (cid). */
-   var $sysflags;
-   /*! \brief User flags to categorize contacts (no system influence). */
-   var $userflags;
-   /*! \brief Date when contact have been created (unix-time). */
-   var $created;
-   /*! \brief Lastchange-date for contact (unix-time). */
-   var $lastchanged;
-   /*! \brief User-customized note about contact (max 255 chars, linefeeds allowed). */
-   var $note;
+   private static $ARR_CONTACT_TEXTS = array(); // lazy-init in Contact::get..Flags()-funcs: [key][id] => text
 
-   var $contact_user_row;
+   /*! \brief That's me. */
+   public $uid;
+   /*! \brief That's my contact. */
+   public $cid;
+   /*! \brief System flags (categories), that prevents or allows certain action between me (uid) and contact (cid). */
+   public $sysflags;
+   /*! \brief User flags to categorize contacts (no system influence). */
+   public $userflags;
+   /*! \brief Date when contact have been created (unix-time). */
+   public $created;
+   /*! \brief Lastchange-date for contact (unix-time). */
+   public $lastchanged;
+   /*! \brief User-customized note about contact (max 255 chars, linefeeds allowed). */
+   public $note;
+
+   public $contact_user_row = null;
+
 
    /*!
     * \brief Constructs Contact-object with specified arguments: created and lastchanged are in UNIX-time.
     *        $cid may be 0 to add a new contact
     */
-   function Contact( $uid, $cid, $sysflags, $userflags, $created, $lastchanged, $note )
+   public function __construct( $uid, $cid, $sysflags, $userflags, $created, $lastchanged, $note )
    {
       if( !is_numeric($uid) || !is_numeric($cid) || $uid <= 0 || $cid < 0 || $uid == $cid )
          error('invalid_user', "contacts.Contact($uid,$cid)");
@@ -78,15 +76,13 @@ class Contact
       $this->created = (int) $created;
       $this->lastchanged = (int) $lastchanged;
       $this->set_note( $note );
-
-      $this->contact_user_row = null;
-   }
+   }//__construct
 
    /*!
     * \brief Returns Contact-object for specified user $uid with fields
     *        uid, created=$NOW set and all others in default-state.
     */
-   function new_contact( $uid, $cid = 0 )
+   public function new_contact( $uid, $cid = 0 )
    {
       global $NOW;
 
@@ -99,7 +95,7 @@ class Contact
     * \brief Sets note after doing some replacements
     *        (remove double-LFs, remove starting/trailing whitespaces).
     */
-   function set_note( $note )
+   public function set_note( $note )
    {
       if( is_null($note) )
          $this->note = '';
@@ -108,13 +104,13 @@ class Contact
    }
 
    /*! \brief Returns true, if specified system flag is set. */
-   function is_sysflag_set( $flag )
+   public function is_sysflag_set( $flag )
    {
       return (bool) ( $this->sysflags & $flag);
    }
 
    /*! \brief Returns true, if specified user flag is set. */
-   function is_userflag_set( $flag )
+   public function is_userflag_set( $flag )
    {
       return (bool) ( $this->userflags & $flag);
    }
@@ -123,35 +119,35 @@ class Contact
     * \brief Parses system-flags from _REQUEST-array into current object:
     *        expecting vars like 'sfl_..' as declared in getContactSystemFlags().
     */
-   function parse_system_flags()
+   public function parse_system_flags()
    {
       $this->sysflags = 0;
-      foreach( Contact::getContactSystemFlags() as $sysflag => $arr )
+      foreach( self::getContactSystemFlags() as $sysflag => $arr )
       {
          if( @$_REQUEST[$arr[0]] )
             $this->sysflags |= $sysflag;
       }
-   }
+   }//parse_system_flags
 
    /*!
     * \brief Parses user-flags from _REQUEST-array into current object:
     *        expecting vars like 'ufl_..' as declared in getContactUserFlags().
     */
-   function parse_user_flags()
+   public function parse_user_flags()
    {
       $this->userflags = 0;
-      foreach( Contact::getContactUserFlags() as $userflag => $arr )
+      foreach( self::getContactUserFlags() as $userflag => $arr )
       {
          if( @$_REQUEST[$arr[0]] )
             $this->userflags |= $userflag;
       }
-   }
+   }//parse_user_flags
 
    /*!
     * \brief Updates current Contact-data into database (may replace existing contact
     *        and set lastchanged=NOW).
     */
-   function update_contact()
+   public function update_contact()
    {
       if( !is_numeric($this->uid) || !is_numeric($this->cid)
             || $this->uid <= 0 || $this->cid <= 0
@@ -179,10 +175,10 @@ class Contact
          . ", Notes='" . mysql_addslashes($this->note) . "'"
          ;
       $result = db_query( "contact.update_contact2({$this->uid},{$this->cid})", $update_query );
-   }
+   }//update_contact
 
    /*! \brief Deletes current Contact from database. */
-   function delete_contact()
+   public function delete_contact()
    {
       if( !is_numeric($this->uid) || !is_numeric($this->cid)
             || $this->uid <= 0 || $this->cid <= 0
@@ -192,21 +188,21 @@ class Contact
       $delete_query = "DELETE FROM Contacts "
          . "WHERE uid='{$this->uid}' AND cid='{$this->cid}' LIMIT 1";
       $result = db_query( 'contacts.delete_contact', $delete_query );
-   }
+   }//delete_contact
 
    /*! \brief Returns string-representation of this object (for debugging purposes). */
-   function to_string()
+   public function to_string()
    {
       return "Contact(u={$this->uid},c={$this->cid}): "
-         . "sysflags=[".Contact::format_system_flags($this->sysflags)."], "
-         . "userflags=[".Contact::format_user_flags($this->userflags)."], "
+         . "sysflags=[".self::format_system_flags($this->sysflags)."], "
+         . "userflags=[".self::format_user_flags($this->userflags)."], "
          . "created=[{$this->created}], lastchanged=[{$this->lastchanged}], note=[{$this->note}]";
    }
 
 
    // ---------- Static Class functions ----------------------------
 
-   function build_querysql_contact( $uid )
+   public static function build_querysql_contact( $uid )
    {
       $qsql = new QuerySQL();
       $qsql->add_part( SQLP_FIELDS,
@@ -224,13 +220,13 @@ class Contact
       $qsql->add_part( SQLP_WHERE,
          "C.uid=$uid AND C.cid>".GUESTS_ID_MAX ); //exclude guest
       return $qsql;
-   }
+   }//build_querysql_contact
 
    /*!
     * \brief Returns Contact-object for specified user $uid and contact $cid;
     *        returns null if no contact listed for user.
     */
-   function load_contact( $uid, $cid )
+   public static function load_contact( $uid, $cid )
    {
       if( !is_numeric($uid) || !is_numeric($cid) )
          error('invalid_user', "contact.load_contact($uid,$cid)");
@@ -250,13 +246,13 @@ class Contact
             $row['Notes'] );
 
       return $contact;
-   }
+   }//load_contact
 
    /*!
     * \brief Returns array of Contact-objects for quick-suite.
-    * \see #build_querysql_contact()
+    * \see Contact::build_querysql_contact()
     */
-   function load_quick_contacts( $uid, $qsql )
+   public static function load_quick_contacts( $uid, $qsql )
    {
       static $arr_userfields = array( 'Type', 'Name', 'Handle', 'Country', 'X_Lastaccess', 'X_LastMove', 'Rating2' );
 
@@ -282,40 +278,41 @@ class Contact
       return $out;
    }//load_quick_contacts
 
-   /*! \brief Static function returning
+   /*!
+    * \brief Static function returning
     *   1: $cid is a defined contact of $uid.
     *   0: $cid is not yet a contact of $uid, but he may become.
     *  -1: $cid and $uid can't have contacts.
     */
-   function has_contact( $uid, $cid )
+   public static function has_contact( $uid, $cid )
    {
       if( $uid == $cid || $cid <= GUESTS_ID_MAX || $uid <= GUESTS_ID_MAX ) //exclude guest
          return -1;
-      $result = db_query( 'Contact::has_contact',
+      $result = db_query( "Contact:has_contact($uid,$cid)",
          "SELECT cid FROM Contacts WHERE uid='$uid' AND cid='$cid' LIMIT 1");
       if( !$result )
          return 0;
       $res = (int)( @mysql_num_rows($result) > 0 );
       mysql_free_result($result);
       return $res;
-   }
+   }//has_contact
 
    /*!
     * \brief Returns separated list of translated texts for specified system-flags;
     *        separator specified as $sep.
     */
-   function format_system_flags( $flagmask, $sep=', ', $quick=false )
+   public static function format_system_flags( $flagmask, $sep=', ', $quick=false )
    {
-      return Contact::format_flags( Contact::getContactSystemFlags($quick), $flagmask, $sep );
+      return self::format_flags( self::getContactSystemFlags($quick), $flagmask, $sep );
    }
 
    /*!
     * \brief Returns separated list of translated texts for specified user-flags;
     *        separator specified as $sep.
     */
-   function format_user_flags( $flagmask, $sep=', ', $quick=false )
+   public static function format_user_flags( $flagmask, $sep=', ', $quick=false )
    {
-      return Contact::format_flags( Contact::getContactUserFlags($quick), $flagmask, $sep );
+      return self::format_flags( self::getContactUserFlags($quick), $flagmask, $sep );
    }
 
    /*!
@@ -323,7 +320,7 @@ class Contact
     *        flags-array and flag-bitmask.
     * \internal
     */
-   function format_flags( $flags_array, $flagmask, $sep )
+   private static function format_flags( $flags_array, $flagmask, $sep )
    {
       $out = array();
       foreach( $flags_array as $flag => $arr )
@@ -333,13 +330,11 @@ class Contact
    }
 
    /*! \brief Returns globals (lazy init) for contact-user-flags. */
-   function getContactUserFlags( $quick=false )
+   public static function getContactUserFlags( $quick=false )
    {
-      global $ARR_GLOBALS_CONTACT;
-
       // lazy-init of texts
       $key = 'USERFLAGS' . ($quick ? '_QUICK' : '');
-      if( !isset($ARR_GLOBALS_CONTACT[$key]) )
+      if( !isset(self::$ARR_CONTACT_TEXTS[$key]) )
       {
          $arr = array();
          // userflag => ( form_elem_name, translation )
@@ -365,20 +360,18 @@ class Contact
             $arr[CUSERFLAG_ADMIN]   = array( 'ufl_admin',   T_('Site Crew') );
             $arr[CUSERFLAG_MISC]    = array( 'ufl_misc',    T_('Miscellaneous') );
          }
-         $ARR_GLOBALS_CONTACT[$key] = $arr;
+         self::$ARR_CONTACT_TEXTS[$key] = $arr;
       }
 
-      return $ARR_GLOBALS_CONTACT[$key];
-   }
+      return self::$ARR_CONTACT_TEXTS[$key];
+   }//getContactUserFlags
 
    /*! \brief Returns globals (lazy init) for contact-system-flags. */
-   function getContactSystemFlags( $quick=false )
+   public static function getContactSystemFlags( $quick=false )
    {
-      global $ARR_GLOBALS_CONTACT;
-
       // lazy-init of texts
       $key = 'SYSTEMFLAGS' . ($quick ? '_QUICK' : '');
-      if( !isset($ARR_GLOBALS_CONTACT[$key]) )
+      if( !isset(self::$ARR_CONTACT_TEXTS[$key]) )
       {
          $arr = array();
          // sysflag => ( form_elem_name, translation )
@@ -396,11 +389,11 @@ class Contact
             $arr[CSYSFLAG_REJECT_MESSAGE] = array( 'sfl_reject_msg', T_('Reject messages') );
             $arr[CSYSFLAG_REJECT_INVITE]  = array( 'sfl_reject_inv', T_('Reject invitations') );
          }
-         $ARR_GLOBALS_CONTACT[$key] = $arr;
+         self::$ARR_CONTACT_TEXTS[$key] = $arr;
       }
 
-      return $ARR_GLOBALS_CONTACT[$key];
-   }
+      return self::$ARR_CONTACT_TEXTS[$key];
+   }//getContactSystemFlags
 
 } // end of 'Contact'
 

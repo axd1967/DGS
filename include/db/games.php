@@ -39,10 +39,6 @@ require_once 'include/time_functions.php';
   * \brief Class to manage normal games
   */
 
-// lazy-init in Games::get..Text()-funcs
-global $ARR_GLOBALS_GAMES; //PHP5
-$ARR_GLOBALS_GAMES = array();
-
 global $ENTITY_GAMES; //PHP5
 $ENTITY_GAMES = new Entity( 'Games',
       FTYPE_PKEY, 'ID',
@@ -61,71 +57,71 @@ $ENTITY_GAMES = new Entity( 'Games',
 
 class Games
 {
-   var $ID;
-   var $tid;
-   var $ShapeID;
-   var $Starttime; // not the typical entity-created, but start-time of game (after setup)
-   var $Lastchanged; // not the typical entity-lastchanged, but "LastMoved"
-   var $mid;
-   var $DoubleGame_ID;
-   var $Black_ID;
-   var $White_ID;
-   var $ToMove_ID;
-   var $GameType;
-   var $GamePlayers;
-   var $Ruleset;
-   var $Size;
-   var $Komi;
-   var $Handicap;
-   var $Status;
-   var $Moves;
-   var $Black_Prisoners;
-   var $White_Prisoners;
-   var $Last_X;
-   var $Last_Y;
-   var $Last_Move;
-   var $Flags;
-   var $Score;
-   var $Maintime;
-   var $Byotype;
-   var $Byotime;
-   var $Byoperiods;
-   var $Black_Maintime;
-   var $White_Maintime;
-   var $Black_Byotime;
-   var $White_Byotime;
-   var $Black_Byoperiods;
-   var $White_Byoperiods;
-   var $LastTicks;
-   var $ClockUsed;
-   var $TimeOutDate;
-   var $Rated;
-   var $StdHandicap;
-   var $WeekendClock;
-   var $Black_Start_Rating;
-   var $White_Start_Rating;
-   var $Black_End_Rating;
-   var $White_End_Rating;
-   var $Snapshot;
-   var $ShapeSnapshot;
-   var $GameSetup;
+   public $ID;
+   public $tid;
+   public $ShapeID;
+   public $Starttime; // not the typical entity-created, but start-time of game (after setup)
+   public $Lastchanged; // not the typical entity-lastchanged, but "LastMoved"
+   public $mid;
+   public $DoubleGame_ID;
+   public $Black_ID;
+   public $White_ID;
+   public $ToMove_ID;
+   public $GameType;
+   public $GamePlayers;
+   public $Ruleset;
+   public $Size;
+   public $Komi;
+   public $Handicap;
+   public $Status;
+   public $Moves;
+   public $Black_Prisoners;
+   public $White_Prisoners;
+   public $Last_X;
+   public $Last_Y;
+   public $Last_Move;
+   public $Flags;
+   public $Score;
+   public $Maintime;
+   public $Byotype;
+   public $Byotime;
+   public $Byoperiods;
+   public $Black_Maintime;
+   public $White_Maintime;
+   public $Black_Byotime;
+   public $White_Byotime;
+   public $Black_Byoperiods;
+   public $White_Byoperiods;
+   public $LastTicks;
+   public $ClockUsed;
+   public $TimeOutDate;
+   public $Rated;
+   public $StdHandicap;
+   public $WeekendClock;
+   public $Black_Start_Rating;
+   public $White_Start_Rating;
+   public $Black_End_Rating;
+   public $White_End_Rating;
+   public $Snapshot;
+   public $ShapeSnapshot;
+   public $GameSetup;
 
    // other DB-fields
 
-   var $grow;
+   public $grow = null;
 
    /*! \brief Constructs Games-object with specified arguments. */
-   function Games( $id=0, $tid=0, $shape_id=0, $starttime=0, $lastchanged=0, $mid=0, $double_gid=0,
-                   $black_id=0, $white_id=0, $tomove_id=0, $game_type=GAMETYPE_GO, $game_players='',
-                   $ruleset=RULESET_JAPANESE, $size=19, $komi=6.5, $handicap=0,
-                   $status=GAME_STATUS_INVITED, $moves=0, $black_prisoners=0, $white_prisoners=0,
-                   $last_x=-1, $last_y=-1, $last_move='', $flags=0, $score=0.0, $maintime=0,
-                   $byotype=BYOTYPE_JAPANESE, $byotime=0, $byoperiods=0, $black_maintime=0,
-                   $white_maintime=0, $black_byotime=0, $white_byotime=0, $black_byoperiods=0,
-                   $white_byoperiods=0, $lastticks=0, $clockused=0, $timeoutdate=0, $rated='N',
-                   $stdhandicap=true, $weekendclock=true, $black_start_rating=NO_RATING,
-                   $white_start_rating=NO_RATING, $black_end_rating=NO_RATING,
-                   $white_end_rating=NO_RATING, $snapshot='', $shape_snapshot='', $game_setup='' )
+   public function __construct( $id=0, $tid=0, $shape_id=0, $starttime=0, $lastchanged=0, $mid=0, $double_gid=0,
+         $black_id=0, $white_id=0, $tomove_id=0, $game_type=GAMETYPE_GO, $game_players='',
+         $ruleset=RULESET_JAPANESE, $size=19, $komi=6.5, $handicap=0,
+         $status=GAME_STATUS_INVITED, $moves=0, $black_prisoners=0, $white_prisoners=0,
+         $last_x=-1, $last_y=-1, $last_move='', $flags=0, $score=0.0, $maintime=0,
+         $byotype=BYOTYPE_JAPANESE, $byotime=0, $byoperiods=0, $black_maintime=0,
+         $white_maintime=0, $black_byotime=0, $white_byotime=0, $black_byoperiods=0,
+         $white_byoperiods=0, $lastticks=0, $clockused=0, $timeoutdate=0, $rated='N',
+         $stdhandicap=true, $weekendclock=true, $black_start_rating=NO_RATING,
+         $white_start_rating=NO_RATING, $black_end_rating=NO_RATING,
+         $white_end_rating=NO_RATING, $snapshot='', $shape_snapshot='', $game_setup='' )
    {
       $this->ID = (int)$id;
       $this->tid = (int)$tid;
@@ -175,25 +171,23 @@ class Games
       $this->Snapshot = $snapshot;
       $this->ShapeSnapshot = $shape_snapshot;
       $this->GameSetup = $game_setup;
-      // other DB-fields
-      $this->grow = null;
-   }//constructor
+   }//__construct
 
-   function setStatus( $status )
+   public function setStatus( $status )
    {
       if( !preg_match( "/^(".CHECK_GAME_STATUS.")$/", $status ) )
          error('invalid_args', "Games.setStatus($status)");
       $this->Status = $status;
    }
 
-   function setGameType( $game_type )
+   public function setGameType( $game_type )
    {
       if( !preg_match( "/^(".CHECK_GAMETYPE.")$/", $game_type ) )
          error('invalid_args', "Games.setGameType($game_type)");
       $this->GameType = $game_type;
    }
 
-   function setRuleset( $ruleset )
+   public function setRuleset( $ruleset )
    {
       if( !preg_match( "/^(".CHECK_RULESETS.")$/", $ruleset ) )
          error('invalid_args', "Games.setRuleset($ruleset)");
@@ -202,27 +196,27 @@ class Games
       $this->Ruleset = $ruleset;
    }
 
-   function setByotype( $byotype )
+   public function setByotype( $byotype )
    {
       if( !preg_match( "/^".REGEX_BYOTYPES."$/", $byotype ) )
          error('invalid_args', "Games.setByotype($byotype)");
       $this->Byotype = $byotype;
    }
 
-   function setRated( $rated )
+   public function setRated( $rated )
    {
       if( !preg_match( "/^(Y|N|Done)$/", $rated ) )
          error('invalid_args', "Games.setRated($rated)");
       $this->Rated = $rated;
    }
 
-   function to_string()
+   public function to_string()
    {
       return print_r($this, true);
    }
 
    /*! \brief Inserts or updates Games-entry in database. */
-   function persist()
+   public function persist()
    {
       if( $this->ID > 0 )
          $success = $this->update();
@@ -231,7 +225,7 @@ class Games
       return $success;
    }
 
-   function insert()
+   public function insert()
    {
       $entityData = $this->fillEntityData();
       $result = $entityData->insert( "Games.insert(%s)" );
@@ -240,19 +234,19 @@ class Games
       return $result;
    }
 
-   function update()
+   public function update()
    {
       $entityData = $this->fillEntityData();
       return $entityData->update( "Games.update(%s)" );
    }
 
-   function delete()
+   public function delete()
    {
       $entityData = $this->fillEntityData();
       return $entityData->delete( "Games.delete(%s)" );
    }
 
-   function fillEntityData( $data=null )
+   public function fillEntityData( $data=null )
    {
       if( is_null($data) )
          $data = $GLOBALS['ENTITY_GAMES']->newEntityData();
@@ -279,7 +273,7 @@ class Games
       $data->set_value( 'Last_X', $this->Last_X );
       $data->set_value( 'Last_Y', $this->Last_Y );
       $data->set_value( 'Last_Move', $this->Last_Move );
-      $data->set_value( 'Flags', Games::buildFlags($this->Flags) );
+      $data->set_value( 'Flags', self::buildFlags($this->Flags) );
       $data->set_value( 'Score', $this->Score );
       $data->set_value( 'Maintime', $this->Maintime );
       $data->set_value( 'Byotype', $this->Byotype );
@@ -310,7 +304,7 @@ class Games
 
    // ------------ static functions ----------------------------
 
-   function parseFlags( $flags_str )
+   public static function parseFlags( $flags_str )
    {
       static $map_flags = array(
          'KO'           => GAMEFLAGS_KO,
@@ -328,9 +322,9 @@ class Games
             $flags |= $map_flags[strtoupper($flagkey)];
       }
       return $flags;
-   }
+   }//parseFlags
 
-   function buildFlags( $flags )
+   public static function buildFlags( $flags )
    {
       $arr = array();
       if( $flags & GAMEFLAGS_KO )
@@ -344,10 +338,10 @@ class Games
       if( $flags & GAMEFLAGS_ATTACHED_SGF )
          $arr[] = 'AttachedSgf';
       return implode(',', $arr);
-   }
+   }//buildFlags
 
    /*! \brief Returns db-fields to be used for query of Games-objects for given game-id. */
-   function build_query_sql( $gid=0 )
+   public static function build_query_sql( $gid=0 )
    {
       $qsql = $GLOBALS['ENTITY_GAMES']->newQuerySQL('G');
       if( $gid > 0 )
@@ -356,7 +350,7 @@ class Games
    }
 
    /*! \brief Returns Games-object created from specified (db-)row. */
-   function new_from_row( $row )
+   public static function new_from_row( $row )
    {
       $g = new Games(
             // from Games
@@ -383,7 +377,7 @@ class Games
             @$row['Last_X'],
             @$row['Last_Y'],
             @$row['Last_Move'],
-            Games::parseFlags( @$row['Flags'] ),
+            self::parseFlags( @$row['Flags'] ),
             @$row['Score'],
             @$row['Maintime'],
             @$row['Byotype'],
@@ -417,18 +411,18 @@ class Games
     * \brief Loads and returns Games-object for given games-ID.
     * \return NULL if nothing found; Games otherwise
     */
-   function load_game( $gid, $return_row=false )
+   public static function load_game( $gid, $return_row=false )
    {
       if( !is_numeric($gid) || $gid <= 0 )
-         error('invalid_args', "Games.load_game.check_gid($gid)");
+         error('invalid_args', "Games:load_game.check_gid($gid)");
 
-      $qsql = Games::build_query_sql( $gid );
+      $qsql = self::build_query_sql( $gid );
       $qsql->add_part( SQLP_LIMIT, '1' );
 
-      $row = mysql_single_fetch( "Games::load_game.find_game($gid)",
+      $row = mysql_single_fetch( "Games:load_game.find_game($gid)",
          $qsql->get_select() );
-      return ($row) ? ( $return_row ? $row : Games::new_from_row($row) ) : NULL;
-   }
+      return ($row) ? ( $return_row ? $row : self::new_from_row($row) ) : NULL;
+   }//load_game
 
    /*! \brief Updates Games.Flags with $set_flags and $clear_flags. */
    public static function update_game_flags( $dbgmsg, $gid, $set_flags=0, $clear_flags=0 )
@@ -441,19 +435,18 @@ class Games
          if( $clear_flags )
             $qparts[] = " & ~".(int)$clear_flags;
 
-         db_query( "GameSgfControl.save_game_sgf.upd_flags($gid)",
+         db_query( "Games:update_game_flags($gid)",
             "UPDATE Games SET Flags=Flags " . implode('', $qparts) . " WHERE ID=$gid LIMIT 1" );
       }
    }//update_game_flags
 
    /*! \brief Returns status-text or all status-texts (if arg=null). */
-   function getStatusText( $status=null )
+   public static function getStatusText( $status=null )
    {
-      global $ARR_GLOBALS_GAMES;
+      static $ARR_GAMESTATUS = null; // status => text
 
       // lazy-init of texts
-      $key = 'STATUS';
-      if( !isset($ARR_GLOBALS_GAMES[$key]) )
+      if( is_null($ARR_GAMESTATUS) )
       {
          $arr = array();
          $arr[GAME_STATUS_KOMI] = T_('Fair Komi Negotiation#G_status');
@@ -464,14 +457,14 @@ class Games
          $arr[GAME_STATUS_SCORE] = T_('Score#G_status');
          $arr[GAME_STATUS_SCORE2] = T_('Score#G_status'); //=Score-text
          $arr[GAME_STATUS_FINISHED] = T_('Finished#G_status');
-         $ARR_GLOBALS_GAMES[$key] = $arr;
+         $ARR_GAMESTATUS = $arr;
       }
 
       if( is_null($status) )
-         return $ARR_GLOBALS_GAMES[$key];
-      if( !isset($ARR_GLOBALS_GAMES[$key][$status]) )
-         error('invalid_args', "Games.getStatusText($status)");
-      return $ARR_GLOBALS_GAMES[$key][$status];
+         return $ARR_GAMESTATUS;
+      if( !isset($ARR_GAMESTATUS[$status]) )
+         error('invalid_args', "Games:getStatusText($status)");
+      return $ARR_GAMESTATUS[$status];
    }//getStatusText
 
 } // end of 'Games'

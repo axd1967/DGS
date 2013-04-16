@@ -34,52 +34,48 @@ require_once 'tournaments/include/tournament_limits.php';
   *
   * \brief Template for different tournament-types
   */
-class TournamentTemplate
+abstract class TournamentTemplate
 {
-   var $wizard_type;
-   var $title;
-   var $uid;
+   public $wizard_type;
+   public $title;
+   public $uid;
 
-   var $need_rounds;
-   var $allow_register_tourney_status;
-   var $need_admin_create_tourney;
-   var $showcount_tournament_standings;
-   var $limits;
+   // tournament-type-specific properties
+
+   public $need_rounds = false;
+   public $allow_register_tourney_status = array( TOURNEY_STATUS_REGISTER );
+   public $need_admin_create_tourney = true;
+   public $showcount_tournament_standings = 0;
+   public $limits;
 
    /*! \brief Constructs template for different tournament-types. */
-   function TournamentTemplate( $wizard_type, $title )
+   protected function __construct( $wizard_type, $title )
    {
       global $player_row;
       $this->wizard_type = $wizard_type;
       $this->title = $title;
       $this->uid = (int)@$player_row['ID'];
       $this->limits = new TournamentLimits();
-
-      // tournament-type-specific properties
-      $this->need_rounds = false;
-      $this->allow_register_tourney_status = array( TOURNEY_STATUS_REGISTER );
-      $this->need_admin_create_tourney = true;
-      $this->showcount_tournament_standings = 0;
       $this->limits->setLimits( TLIMITS_MAX_TP, false, 2, TP_MAX_COUNT );
    }
 
-   function getTournamentLimits()
+   public function getTournamentLimits()
    {
       return $this->limits;
    }
 
-   function to_string()
+   public function to_string()
    {
       return print_r( $this, true );
    }
 
-   function create_error( $msgfmt )
+   public function create_error( $msgfmt )
    {
       error('tournament_create_error', sprintf( $msgfmt, $this->uid ) );
    }
 
    /*! \brief Creates Tournament object with given arguments. */
-   function make_tournament( $scope, $title )
+   public function make_tournament( $scope, $title )
    {
       $tourney = new Tournament();
       $tourney->setScope( $scope );
@@ -90,7 +86,7 @@ class TournamentTemplate
    }
 
    /*! \brief Returns number of standings to show for tournament. */
-   function getCountTournamentStandings( $t_status )
+   public function getCountTournamentStandings( $t_status )
    {
       return ( $t_status == TOURNEY_STATUS_PLAY || $t_status == TOURNEY_STATUS_CLOSED )
          ? $this->showcount_tournament_standings : 0;
@@ -100,46 +96,26 @@ class TournamentTemplate
    // ---------- Interface ----------------------------------------
 
    /*! \brief Returns inserted Tournament.ID if successful; 0 otherwise. */
-   function createTournament()
-   {
-      error('invalid_method', "TournamentTemplate.createTournament({$this->wizard_type})");
-      return 0;
-   }
+   abstract public function createTournament();
 
    /*! \brief Returns calculated min-participants required for specific tournament-type. */
-   function calcTournamentMinParticipants( $tprops, $tround=null )
+   public function calcTournamentMinParticipants( $tprops, $tround=null )
    {
       return $tprops->MinParticipants;
    }
 
-   /*! \brief Returns list with error from checking tournament-type-speficic properties for specific target-tourney-status; empty if ok. */
-   function checkProperties( $tourney, $t_status )
-   {
-      error('invalid_method', "TournamentTemplate.checkProperties({$this->wizard_type},{$tourney->ID})");
-      return 0;
-   }
+   /*! \brief Returns list with errors from checking tournament-type-speficic properties for specific target-tourney-status; empty if ok. */
+   abstract public function checkProperties( $tourney, $t_status );
 
-   /*! \brief Returns list with error from checking pooling for tournament; empty if ok. */
-   function checkPooling( $tourney, $round )
-   {
-      error('invalid_method', "TournamentTemplate.checkPooling({$this->wizard_type},{$tourney->ID},$round)");
-      return 0;
-   }
+   /*! \brief Returns list with errors from checking pooling for tournament; empty if ok. */
+   abstract public function checkPooling( $tourney, $round );
 
-   function checkParticipantRegistrations( $tid, $arr_TPs )
-   {
-      error('invalid_method', "TournamentTemplate.checkParticipantRegistrations({$this->wizard_type},$tid)");
-      return 0;
-   }
+   abstract public function checkParticipantRegistrations( $tid, $arr_TPs );
 
-   function checkGamesStarted( $tid )
-   {
-      error('invalid_method', "TournamentTemplate.checkGamesStarted({$this->wizard_type},$tid)");
-      return 0;
-   }
+   abstract public function checkGamesStarted( $tid );
 
    /*! \brief Saves given TournamentParticipant in HOT-section and joins (running) tournament if not already joined. */
-   function joinTournament( $tourney, $tp )
+   public function joinTournament( $tourney, $tp )
    {
       return $tp->persist();
    }

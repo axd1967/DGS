@@ -40,7 +40,7 @@ function error( $err, $debugmsg=NULL, $log_error=true )
 
    $title= str_replace('_',' ',$err);
    if( $log_error )
-      list($xerr, $uri) = err_log( $uhandle, $err, $debugmsg);
+      list( $xerr, $uri ) = DgsErrors::err_log( $uhandle, $err, $debugmsg);
    else
       $xerr = $err;
 
