@@ -12,10 +12,22 @@ Release [2012-06-08] - DGS 1.0.15 - CVS-tag [release-1_0_15-20120608] on branch 
 2013-01-06: bug fix update (by JUG) as DGS 1.0.15.d
 2013-01-11: changes + bug fixes update (by JUG) as DGS 1.0.15.e
 2013-03-08: changes + bug fixes update (by JUG) as DGS 1.0.15.f
+2013-04-10: bug fixes update (by JUG) as DGS 1.0.15.g
+2013-04-16: changes update (by JUG) as DGS 1.0.15.h
 
 ==================================================================
 
 ### ----- release-1_0_15-20120608 -----
+
+2013-04-16 juga
+
+   * site_map.php, waiting_room.php:
+   - re-added 'New Game' bottom-link in waiting-room
+
+2013-04-10 juga
+
+   * include/quick/quick_game_notes.php (QuickHandlerGameNotes.prepare):
+   - bugfix: use default non-hidden for Hidden-state on saving game-notes
 
 2013-03-08 juga
 
