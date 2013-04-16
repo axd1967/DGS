@@ -16,7 +16,69 @@ Developers INFO:
 ChangeLog
 ------------------------------------------------------------------
 
+2013-04-16 juga
+
+   * ALL php-files,
+     include/db/*.php, include/quick/*.php, include/*.php,
+     code_examples/*.php, features/*.php, forum/*.php, scripts/*.php,
+     tournaments/include/types/*.php, tournaments/include/*.php,
+     tournaments/ladder/*.php, tournaments/roundrobin/*.php, tournaments/*.php,
+     rss/status.php, wap/status.php, *.php:
+   - cleanup:
+      - fix wrong PHP-statements
+      - replace PHP4-constructors with PHP5-__constructor()-function
+      - added public/protected/private + static modifiers for class-functions,
+        tried to identify private attributes as such, used public only if attribute is already public
+      - replaced class-own-static reference to self::func
+      - moved default-value for class-attributes from constructor into attribute-declaration
+      - used abstract-modifier for classes and functions instead of throwing error()
+      - moved some global vars related to class as static declaration to class or function
+      - avoid public class-attributes if used sparsely
+      - moved some global funcs into classes
+      - adjusted some error-labels
+      - removed unused or double code
+      - clarified some function/var-names
+      - clarified some comments/docs
+      - layouting
+   - fixed some smaller bugfixes during cleanup (SQL, misspelling, minor bad code-smells)
+
+2013-04-14 juga
+
+   * forum/forum_functions.php, include/classlib_user.php, include/classlib_userconfig.php,
+     include/filter.php, include/game_functions.php, include/goban_handler_dgsgame.php,
+     include/std_classes.php, include/std_functions.php, include/table_columns.php,
+     include/db/bulletin.php, include/db/ratingchangeadmin.php, include/db/ratinglog.php,
+     include/db/shape.php, include/db/survey.php, include/db/waitingroom.php,
+     scripts/tests/EntityTest.php, tournaments/include/tournament_director.php,
+     tournaments/include/tournament_ladder.php, tournaments/include/tournament_news.php,
+     tournaments/include/tournament_participant.php, tournaments/include/tournament_pool.php,
+     tournaments/include/tournament_properties.php, tournaments/include/tournament_round_status.php,
+     tournaments/include/tournament_status.php, tournaments/include/tournament_template_ladder.php,
+     tournaments/include/tournament_template_round_robin.php:
+   - cleanup: replaced is_a() -> instanceof
+
 2013-04-13 juga
+
+   * include/game_functions.php (GameSetup.set_defaults;
+       GameSetupBuilder.build_url_game_basics;
+       GameScore.calculate_score;
+       getRulesetText, get_default_ruleset),
+     tournaments/include/tournament_rules.php (TournamentRules.setRuleset,
+       ~.convertEditForm_to_TournamentRules),
+     include/make_game.php (make_invite_game_setup, create_game),
+     include/message_functions.php (game_settings_form),
+     include/config.php (WROOM_MAX_ENTRIES, ALLOWED_RULESETS),
+     include/db/waitingroom.php (Waitingroom.setRuleset),
+     include/db/games.php (Games.setRuleset),
+     game.php, new_game.php:
+   - enabled DGS-Chinese ruleset using area-scoring:
+     - allow to configure available rulesets in server-config
+     - extracting default ruleset from server-config
+     - game-page: detailed text about area-scoring on passing
+   - moved max. number of waiting-room-entries to server-config-file
+
+   * site_map.php, waiting_room.php:
+   - re-added new-game-link in waiting-room
 
    * tournaments/include/tournament_log_helper.php (TournamentLogHelper.log_create_tournament_director,
        ~.log_tp_registration_by_director, ~.log_tp_registration_by_user, ~.log_delete_tournament_ladder,
