@@ -18,8 +18,8 @@ class Calculate {
     private static final int IDXCNT = 7;
 
     public static float perc(long value, long sum) {
-       float result = (float) Math.floor((float)value / (float)sum * 10000) / 100;
-       return result;
+        float result = (float) Math.floor((float)value / (float)sum * 10000) / 100;
+        return result;
     }
 
     public static void main(String[] args) throws Exception {

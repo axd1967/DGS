@@ -8,8 +8,8 @@ import java.util.regex.*;
 
 class CountUrls {
     public static float perc(long value, long sum) {
-       float result = (float) Math.floor((float)value / (float)sum * 10000) / 100;
-       return result;
+        float result = (float) Math.floor((float)value / (float)sum * 10000) / 100;
+        return result;
     }
 
     static class Data {
