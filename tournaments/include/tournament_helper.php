@@ -215,14 +215,14 @@ class TournamentHelper
          return TLOG_TYPE_ADMIN;
 
       if( is_null($tourney) )
-         error('invalid_args', "TournamentHelper.allow_edit_tournaments.check.tney_null($uid,$td_flag)");
+         error('invalid_args', "TournamentHelper:allow_edit_tournaments.check.tney_null($uid,$td_flag)");
 
       // edit/admin-game allowed for T-owner or TD
       if( $tourney->Owner_ID == $uid )
          return TLOG_TYPE_OWNER;
 
       // admin-game allowed for TD with respective right (td_flag)
-      if( TournamentCache::is_cache_tournament_director('TournamentHelper.allow_edit_tournaments', $tourney->ID, $uid, $td_flag) )
+      if( TournamentCache::is_cache_tournament_director('TournamentHelper:allow_edit_tournaments', $tourney->ID, $uid, $td_flag) )
          return TLOG_TYPE_DIRECTOR;
 
       return false;

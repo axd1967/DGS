@@ -77,7 +77,7 @@ class QuickHandlerGameInfo extends QuickHandler
       // check gid
       QuickHandler::checkArgMandatory( $dbgmsg, GAMEOPT_GID, $this->gid );
       if( !is_numeric($this->gid) || $this->gid <= 0 )
-         error('unknown_game', "QuickHandlerGameInfo.check({$this->gid})");
+         error('unknown_game', "$dbgmsg.check.gid");
       $gid = $this->gid;
 
       // prepare command: info

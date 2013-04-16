@@ -95,7 +95,7 @@ class Profile
    {
       // allowed for guests, but no DB-writing ops
       if( !is_numeric($uid) || $uid < 0 )
-         error('invalid_user', "profile.Profile($id,$uid,$type)");
+         error('invalid_user', "Profile.construct($id,$uid,$type)");
 
       $this->set_type( $type );
       $this->id = (int) $id;
@@ -111,7 +111,7 @@ class Profile
    public function set_type( $type )
    {
       if( !is_numeric($type) || $type < 1 || $type > MAX_PROFTYPE )
-         error('invalid_args', "profile.set_type($type)");
+         error('invalid_args', "Profile.set_type($type)");
       $this->Type = (int) $type;
    }
 
@@ -155,7 +155,7 @@ class Profile
     */
    public function save_profile( $check_user=false )
    {
-      $dbgmsg = "profile.save_profile({$this->id},{$this->uid},{$this->Type})";
+      $dbgmsg = "Profile.save_profile({$this->id},{$this->uid},{$this->Type})";
       if( $this->uid <= GUESTS_ID_MAX )
          error('not_allowed_for_guest', $dbgmsg.'.check.uid');
 
@@ -190,7 +190,7 @@ class Profile
    /*! \brief Deletes current profile from database. */
    public function delete_profile()
    {
-      $dbgmsg = "profile.delete_profile({$this->id},{$this->uid},{$this->Type})";
+      $dbgmsg = "Profile.delete_profile({$this->id},{$this->uid},{$this->Type})";
       if( $this->uid <= GUESTS_ID_MAX )
          error('not_allowed_for_guest', $dbgmsg.'check.uid');
 
@@ -325,7 +325,7 @@ class Profile
    /*! \brief Deletes all profiles for specific user-id and type from database. */
    public static function delete_all_profiles( $uid, $type )
    {
-      $dbgmsg = "profile.delete_all_profiles($uid,$type)";
+      $dbgmsg = "Profile:delete_all_profiles($uid,$type)";
       if( !is_numeric($uid) || $uid <= GUESTS_ID_MAX )
          error('not_allowed_for_guest', $dbgmsg.'.check.uid');
       if( !is_numeric($type) || $type < 0 || $type > MAX_PROFTYPE )

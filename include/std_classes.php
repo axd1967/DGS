@@ -205,7 +205,7 @@ class QuerySQL
          else
          {
             if( $type == '')
-               error('assert', "QuerySQL.miss_type($arg)"); // missing part-type for part
+               error('assert', "QuerySQL.construct.miss_type($arg)"); // missing part-type for part
             if( $arg != '' )
                $this->parts[$type][] = $arg;
          }

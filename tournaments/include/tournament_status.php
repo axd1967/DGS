@@ -69,10 +69,11 @@ class TournamentStatus
       elseif( is_numeric($tid) && $tid > 0 )
       {
          $this->tid = (int)$tid;
-         $this->tourney = TournamentCache::load_cache_tournament( 'TournamentStatus.find_tournament', $this->tid );
+         $this->tourney = TournamentCache::load_cache_tournament(
+            'TournamentStatus.constructfind_tournament.find_tournament', $this->tid );
       }
       if( is_null($this->tourney) || (int)$this->tid <= 0 )
-         error('unknown_tournament', "TournamentStatus.find_tournament({$this->tid})");
+         error('unknown_tournament', "TournamentStatus.construct.find_tournament2({$this->tid})");
 
       $this->ttype = TournamentFactory::getTournament($this->tourney->WizardType);
       $this->tprops = null;

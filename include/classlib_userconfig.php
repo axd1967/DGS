@@ -532,7 +532,7 @@ class ConfigPages
    public static function _check_user_id( $user_id, $loc, $allow0=false )
    {
       if( !is_numeric($user_id) || $user_id < 0 || ( !$allow0 && $user_id == 0 ) )
-         error('invalid_user', "$loc.check.user_id($user_id)");
+         error('invalid_user', "$loc._check_user_id($user_id)");
    }
 
    /*!

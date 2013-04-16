@@ -2194,7 +2194,7 @@ class FilterText extends Filter
       if( $this->get_config(FC_SUBSTRING) )
       {
          if( !$minchars )
-            error('invalid_filter', "FilterText.bad_config.FC_SUBSTRING_miss_FC_START_WILD({$this->id},$name)");
+            error('invalid_filter', "FilterText.construct.bad_config.FC_SUBSTRING_miss_FC_START_WILD({$this->id},$name)");
          $this->parser_flags |= TEXTPARSER_IMPLICIT_WILD;
          $this->syntax_descr = '['. T_('substring#filter') . '] ' . $this->syntax_descr;
       }
@@ -2663,7 +2663,7 @@ class FilterRelativeDate extends Filter
          }
       }
       if( count($this->time_units) == 0 )
-         error('invalid_filter', "FilterRelativeDate.miss_time_unit({$this->id},$name)");
+         error('invalid_filter', "FilterRelativeDate.construct.miss_time_unit({$this->id},$name)");
 
       // absolute filter
       if( $fc_time_units & FRDTU_ABS )
@@ -2716,7 +2716,7 @@ class FilterRelativeDate extends Filter
          if( $this->values[$this->elem_tu] == FRDTU_ABS )
          { // absolute
             if( is_null($this->filterdate) )
-               error('invalid_filter', "FilterRelativeDate.bad_config_absolute_date({$this->id})");
+               error('invalid_filter', "FilterRelativeDate.construct.bad_config_absolute_date({$this->id})");
 
             // parse val using FilterDate-syntax
             $this->range_mode = FRD_RANGE_ABS;
@@ -2913,7 +2913,7 @@ class FilterSelection extends Filter
       else
       {
          if( !is_array($dbfield) )
-            error('invalid_filter', "FilterSelection.expect_dbfield_array({$this->id},$name)");
+            error('invalid_filter', "FilterSelection.construct.expect_dbfield_array({$this->id},$name)");
          $this->check_forbid_sql_template( 0 ); # no fieldnames
          $dbfield = $this->dbfield;
          $this->idx_start = 0;
@@ -3403,9 +3403,9 @@ class FilterCheckboxArray extends Filter
 
       $this->choices = $this->get_config(FC_MULTIPLE);
       if( $this->choices == '' )
-         error('invalid_filter', "FilterCheckboxArray.miss_FC_MULTIPLE({$this->id})");
+         error('invalid_filter', "FilterCheckboxArray.construct.miss_FC_MULTIPLE({$this->id})");
       if( !is_array($this->choices) )
-         error('invalid_filter', "FilterCheckboxArray.expect_array_FC_MULTIPLE({$this->id})");
+         error('invalid_filter', "FilterCheckboxArray.construct.expect_array_FC_MULTIPLE({$this->id})");
 
       // init field-names
       $idx = 0;
@@ -3420,7 +3420,7 @@ class FilterCheckboxArray extends Filter
          if( $is_bitmask && !is_numeric($value) )
          {
             // FC_BITMASK-config forces integer-values for FC_MULTIPLE-values
-            error('invalid_filter', "FilterCheckboxArray.bad_array_FC_BITMASK({$this->id})");
+            error('invalid_filter', "FilterCheckboxArray.construct.bad_array_FC_BITMASK({$this->id})");
          }
       }
 

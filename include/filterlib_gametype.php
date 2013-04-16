@@ -61,7 +61,7 @@ class FilterGameType extends FilterSelection
       $this->type = 'GameType';
 
       if( $this->get_config(FC_MULTIPLE) )
-         error('invalid_filter', "FilterGameType.conf.no_multiple({$this->id},$name)");
+         error('invalid_filter', "FilterGameType.construct.conf.no_multiple({$this->id},$name)");
 
       $this->add_element_name( FGTNAME_MPGAME );
       $this->values[FGTNAME_MPGAME] = ''; // default (unchecked)

@@ -212,7 +212,7 @@ class GameSgfControl
       );
       $board = new Board();
       if( !$board->load_from_db( $game_row, $chk_cnt_moves, BOARDOPT_USE_CACHE ) )
-         error('internal_error', "GameSgfControl.prepare_verify_game_sgf.check.moves($gid,$chk_cnt_moves)");
+         error('internal_error', "GameSgfControl:prepare_verify_game_sgf.check.moves($gid,$chk_cnt_moves)");
 
       // prepare shape-setup from db
       $db_shape_setup = array(); // arr( SGF-coord => BLACK|WHITE, ... )

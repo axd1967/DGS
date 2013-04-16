@@ -114,7 +114,7 @@ class QuickHandlerGame extends QuickHandler
       // check gid
       QuickHandler::checkArgMandatory( $dbgmsg, GAMEOPT_GID, $this->gid );
       if( !is_numeric($this->gid) || $this->gid <= 0 )
-         error('unknown_game', "QuickHandlerGame.check({$this->gid})");
+         error('unknown_game', "QuickHandlerGame.prepare.check({$this->gid})");
       $gid = $this->gid;
 
       // prepare command: del, resign; set_handi, move, score

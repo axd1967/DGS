@@ -283,7 +283,7 @@ class Goban
       if( is_array($value) )
          $this->matrix[$y][$x] = $value;
       elseif( !is_numeric($value) )
-         error('invalid_args', "Goban:setValue($x,$y,$value)");
+         error('invalid_args', "Goban.setValue($x,$y,$value)");
       elseif( is_null($label) )
          $this->matrix[$y][$x] = $value; // optimization to avoid too many object-instances
       else
@@ -433,7 +433,7 @@ class Goban
    public function makeBoard( $width, $height, $withHoshi=true )
    {
       if( $width < 2 || $height < 2 )
-         error('invalid_args', "Goban:makeBoard.check($width,$height)");
+         error('invalid_args', "Goban.makeBoard.check($width,$height)");
 
       for( $y=1; $y <= $height; $y++)
       {

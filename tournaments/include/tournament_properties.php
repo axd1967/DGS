@@ -389,7 +389,7 @@ class TournamentProperties
       if( is_null($use_mode) )
          return $ARR_RAT_USEMODES[$key];
       if( !isset($ARR_RAT_USEMODES[$key][$use_mode]) )
-         error('invalid_args', "TournamentProperties.getRatingUseModeText($use_mode,$key)");
+         error('invalid_args', "TournamentProperties:getRatingUseModeText($use_mode,$key)");
       return $ARR_RAT_USEMODES[$key][$use_mode];
    }//getRatingUseModeText
 

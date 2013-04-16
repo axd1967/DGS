@@ -107,7 +107,7 @@ class UserQuota
    private static function _check_user_id( $user_id, $loc )
    {
       if( !is_numeric($user_id) || $user_id <= 0 )
-         error('invalid_user', "$loc.check.user_id($user_id)");
+         error('invalid_user', "$loc:_check_user_id($user_id)");
    }
 
    /*! \brief Returns UserQuota-object created from specified (db-)row. */

@@ -148,14 +148,14 @@ class WaitingroomControl
 
       $my_id = (int)@$player_row['ID'];
       if( $my_id <= GUESTS_ID_MAX )
-         error('not_allowed_for_guest', "WC.join_waitingroom_game($wr_id)");
+         error('not_allowed_for_guest', "WC:join_waitingroom_game($wr_id)");
 
       if( !is_numeric($wr_id) || $wr_id <= 0 )
-         error('waitingroom_game_not_found', "WC.join_waitingroom_game.bad_id($wr_id)");
+         error('waitingroom_game_not_found', "WC:join_waitingroom_game.bad_id($wr_id)");
 
       $maxGamesCheck = new MaxGamesCheck();
       if( !$maxGamesCheck->allow_game_start() )
-         error('max_games', "WC.join_waitingroom_game.max_games($wr_id,{$maxGamesCheck->count_games})");
+         error('max_games', "WC:join_waitingroom_game.max_games($wr_id,{$maxGamesCheck->count_games})");
 
       $my_rated_games = (int)$player_row['RatedGames'];
       $sql_goodmingames = "IF(W.MinRatedGames>0,($my_rated_games >= W.MinRatedGames),1)";
@@ -179,9 +179,9 @@ class WaitingroomControl
                . " LEFT JOIN WaitingroomJoined AS WRJ ON WRJ.opp_id=$my_id AND WRJ.wroom_id=W.ID"
             . " WHERE W.ID=$wr_id AND W.nrGames>0"
             . " HAVING C_denied=0";
-      $game_row = mysql_single_fetch( "WC.join_waitingroom_game.find_game($wr_id,$my_id)", $query);
+      $game_row = mysql_single_fetch( "WC:join_waitingroom_game.find_game($wr_id,$my_id)", $query);
       if( !$game_row )
-         error('waitingroom_game_not_found', "WC.join_waitingroom_game.find_game2($wr_id,$my_id)");
+         error('waitingroom_game_not_found', "WC:join_waitingroom_game.find_game2($wr_id,$my_id)");
 
       $opponent_ID = $game_row['uid'];
       $gid = (int)@$game_row['gid'];
@@ -191,33 +191,33 @@ class WaitingroomControl
 
       //else... joining game
 
-      $opponent_row = mysql_single_fetch('WC.join_waitingroom_game.find_players',
+      $opponent_row = mysql_single_fetch('WC:join_waitingroom_game.find_players',
             "SELECT ID, Name, Handle, Rating2, RatingStatus, ClockUsed, OnVacation " .
             "FROM Players WHERE ID=$opponent_ID LIMIT 1" );
       if( !$opponent_row )
-         error('waitingroom_game_not_found', "WC.join_waitingroom_game.find_players.opp($wr_id,$opponent_ID)");
+         error('waitingroom_game_not_found', "WC:join_waitingroom_game.find_players.opp($wr_id,$opponent_ID)");
       if( $my_id == $opponent_ID )
-         error('waitingroom_own_game', "WC.join_waitingroom_game.check.opp($wr_id)");
+         error('waitingroom_own_game', "WC:join_waitingroom_game.check.opp($wr_id)");
 
       if( $game_row['MustBeRated'] == 'Y' &&
           !($player_row['Rating2'] >= $game_row['RatingMin'] && $player_row['Rating2'] <= $game_row['RatingMax']) )
-         error('waitingroom_not_in_rating_range', "WC.join_waitingroom_game.check.rating($wr_id)");
+         error('waitingroom_not_in_rating_range', "WC:join_waitingroom_game.check.rating($wr_id)");
 
       if( !$game_row['goodmingames'] )
          error('waitingroom_not_enough_rated_fin_games',
-            "WC.join_waitingroom_game.min_rated_fin_games($gid,$my_id,{$game_row['MinRatedGames']})");
+            "WC:join_waitingroom_game.min_rated_fin_games($gid,$my_id,{$game_row['MinRatedGames']})");
 
       if( !$game_row['goodmaxgames'] )
-         error('max_games_opp', "WC.join_waitingroom_game.opp_max_games($gid,$my_id,{$game_row['X_OppGamesCount']})");
+         error('max_games_opp', "WC:join_waitingroom_game.opp_max_games($gid,$my_id,{$game_row['X_OppGamesCount']})");
 
       if( !$game_row['goodsameopp'] )
          error('waitingroom_not_same_opponent',
-            "WC.join_waitingroom_game.same_opponent($gid,$my_id,{$game_row['SameOpponent']})");
+            "WC:join_waitingroom_game.same_opponent($gid,$my_id,{$game_row['SameOpponent']})");
 
       if( $game_row['GameType'] != GAMETYPE_GO ) // user can join mp-game only once
       {
          if( GamePlayer::exists_game_player($gid, $my_id) )
-            error('waitingroom_not_same_opponent', "WC.join_waitingroom_game.mpg_same_opponent($gid,$my_id)");
+            error('waitingroom_not_same_opponent', "WC:join_waitingroom_game.mpg_same_opponent($gid,$my_id)");
       }
 
       $size = limit( $game_row['Size'], MIN_BOARD_SIZE, MAX_BOARD_SIZE, 19 );
@@ -232,14 +232,14 @@ class WaitingroomControl
       {
          case HTYPE_CONV:
             if( !$iamrated || !$opprated )
-               error('no_initial_rating', "WC.join_waitingroom_game.conv($wr_id)");
+               error('no_initial_rating', "WC:join_waitingroom_game.conv($wr_id)");
             list( $game_row['Handicap'], $game_row['Komi'], $i_am_black, $is_nigiri ) =
                suggest_conventional( $my_rating, $opprating, $size);
             break;
 
          case HTYPE_PROPER:
             if( !$iamrated || !$opprated )
-               error('no_initial_rating', "WC.join_waitingroom_game.proper($wr_id)");
+               error('no_initial_rating', "WC:join_waitingroom_game.proper($wr_id)");
             list( $game_row['Handicap'], $game_row['Komi'], $i_am_black, $is_nigiri ) =
                suggest_proper( $my_rating, $opprating, $size);
             break;
@@ -300,7 +300,7 @@ class WaitingroomControl
                $double_gid2 = create_game($opponent_row, $player_row, $game_row, $game_setup);
                $gids[] = $double_gid2;
 
-               db_query( "WC.join_waitingroom_game.update_double2($gid)",
+               db_query( "WC:join_waitingroom_game.update_double2($gid)",
                   "UPDATE Games SET DoubleGame_ID=$double_gid2 WHERE ID=$gid LIMIT 1" );
             }
          }
@@ -308,15 +308,15 @@ class WaitingroomControl
          {
             $gid = $game_row['gid']; // use existing game for Team-/Zen-Go
             if( $gid <= 0 )
-               error('internal_error', "WC.join_waitingroom_game.join_game.check.gid($wr_id,$gid,$my_id)");
+               error('internal_error', "WC:join_waitingroom_game.join_game.check.gid($wr_id,$gid,$my_id)");
 
-            MultiPlayerGame::join_waitingroom_mp_game( "WC.join_waitingroom_game.join_game($wr_id)", $gid, $my_id );
+            MultiPlayerGame::join_waitingroom_mp_game( "WC:join_waitingroom_game.join_game($wr_id)", $gid, $my_id );
             $gids[] = $gid;
          }
 
          if( $is_std_go )
          {
-            GameHelper::update_players_start_game( 'WC.join_waitingroom_game',
+            GameHelper::update_players_start_game( 'WC:join_waitingroom_game',
                $my_id, $opponent_ID, count($gids), ($game_row['Rated'] == 'Y') );
          }
 
@@ -325,12 +325,12 @@ class WaitingroomControl
 
          if( $game_row['nrGames'] > 1 )
          {
-            db_query( 'WC.join_waitingroom_game.reduce',
+            db_query( 'WC:join_waitingroom_game.reduce',
                "UPDATE Waitingroom SET nrGames=nrGames-1 WHERE ID=$wr_id AND nrGames>0 LIMIT 1" );
          }
          else
          {
-            db_query( 'WC.join_waitingroom_game.reduce_delete',
+            db_query( 'WC:join_waitingroom_game.reduce_delete',
                "DELETE FROM Waitingroom WHERE ID=$wr_id LIMIT 1" );
          }
 
@@ -358,7 +358,7 @@ class WaitingroomControl
                $query_so = 'INSERT INTO ' . $query_wrjexp . ", opp_id=$my_id, wroom_id=$wr_id";
          }
          if( $query_so )
-            db_query( "WC.join_waitingroom_game.wroom_joined.save(u$my_id,wr$wr_id)", $query_so );
+            db_query( "WC:join_waitingroom_game.wroom_joined.save(u$my_id,wr$wr_id)", $query_so );
 
 
          // Send message to notify opponent
@@ -372,7 +372,7 @@ class WaitingroomControl
          foreach( $gids as $gid )
             $message .= "* <game $gid>\n";
 
-         send_message( 'WC.join_waitingroom_game', $message, $subject
+         send_message( 'WC:join_waitingroom_game', $message, $subject
             , $opponent_ID, '', /*notify*/true
             , 0, MSGTYPE_NORMAL );
       }
@@ -388,19 +388,19 @@ class WaitingroomControl
       global $player_row;
       $my_id = (int)@$player_row['ID'];
 
-      $game_row = mysql_single_fetch( "WC.delete_waitingroom_game.find_game($wr_id,$my_id)",
+      $game_row = mysql_single_fetch( "WC:delete_waitingroom_game.find_game($wr_id,$my_id)",
             "SELECT uid, gid, nrGames FROM Waitingroom WHERE ID=$wr_id LIMIT 1" );
       if( !$game_row )
-         error('waitingroom_game_not_found', "WC.delete_waitingroom_game.find_game2($wr_id,$my_id)");
+         error('waitingroom_game_not_found', "WC:delete_waitingroom_game.find_game2($wr_id,$my_id)");
 
       $uid = $game_row['uid'];
       if( $my_id != $uid )
-         error('waitingroom_delete_not_own', "WC.delete_waitingroom_game.check.user($wr_id,$uid)");
+         error('waitingroom_delete_not_own', "WC:delete_waitingroom_game.check.user($wr_id,$uid)");
       $gid = $game_row['gid'];
 
       ta_begin();
       {//HOT-section to delete waiting-room offer
-         db_query( "WC.delete_waitingroom_game.delete($wr_id,$gid)",
+         db_query( "WC:delete_waitingroom_game.delete($wr_id,$gid)",
             "DELETE FROM Waitingroom WHERE ID=$wr_id LIMIT 1" );
 
          if( $gid )

@@ -531,7 +531,7 @@ class TournamentGames
       if( is_null($status) )
          return self::$ARR_TGAME_TEXTS[$key];
       if( !isset(self::$ARR_TGAME_TEXTS[$key][$status]) )
-         error('invalid_args', "TournamentGames.getStatusText($status)");
+         error('invalid_args', "TournamentGames:getStatusText($status)");
       return self::$ARR_TGAME_TEXTS[$key][$status];
    }//getStatusText
 

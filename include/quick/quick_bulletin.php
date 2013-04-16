@@ -92,8 +92,6 @@ class QuickHandlerBulletin extends QuickHandler
                error('invalid_args', "$dbgmsg.check.invalid_bid($bid)");
          }
       }
-
-      // check for invalid-action
    }//prepare
 
    /*! \brief Processes command for object; may fire error(..) and perform db-operations. */

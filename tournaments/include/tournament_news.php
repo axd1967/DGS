@@ -319,7 +319,7 @@ class TournamentNews
          return self::$ARR_TNEWS_TEXTS[$key];
 
       if( !isset(self::$ARR_TNEWS_TEXTS[$key][$status]) )
-         error('invalid_args', "TournamentNews.getStatusText($status,$key)");
+         error('invalid_args', "TournamentNews:getStatusText($status,$key)");
       return self::$ARR_TNEWS_TEXTS[$key][$status];
    }//getStatusText
 

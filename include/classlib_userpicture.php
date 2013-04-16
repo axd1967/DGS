@@ -87,7 +87,7 @@ class UserPicture
          elseif( is_numeric($user) )
             $uid = $user;
          else
-            error('invalid_args', "UserPicture.getPicturePath.check.uid($uid,$ext)");
+            error('invalid_args', "UserPicture:getPicturePath.check.uid($uid,$ext)");
          $file_part = "$uid.$ext";
       }
 

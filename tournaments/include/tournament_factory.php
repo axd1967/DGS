@@ -55,7 +55,7 @@ class TournamentFactory
       elseif( $wizard_type == TOURNEY_WIZTYPE_DGS_ROUNDROBIN )
          return new DgsRoundRobinTournament();
       else
-         error('invalid_args', "TournamentFactory.getTournament($wizard_type)");
+         error('invalid_args', "TournamentFactory:getTournament($wizard_type)");
    }
 
    /*! \brief Returns list with all defined wizard-types in order to be showed for tourney-wizard. */

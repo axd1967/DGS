@@ -117,7 +117,7 @@ class TournamentCache
    public static function load_cache_tournament( $dbgmsg, $tid, $check_exist=true )
    {
       $tid = (int)$tid;
-      $dbgmsg .= ".TCache::load_cache_tournament($tid,$check_exist)";
+      $dbgmsg .= ".TCache:load_cache_tournament($tid,$check_exist)";
       $key = "Tournament.$tid";
 
       $use_dgs_cache = DgsCache::is_persistent( CACHE_GRP_TOURNAMENT );

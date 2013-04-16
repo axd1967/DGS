@@ -545,7 +545,7 @@ class Tournament
       if( is_null($scope) )
          return self::$ARR_TOURNEY_TEXTS[$key];
       if( !isset(self::$ARR_TOURNEY_TEXTS[$key][$scope]) )
-         error('invalid_args', "Tournament.getScopeText($scope)");
+         error('invalid_args', "Tournament:getScopeText($scope)");
       return self::$ARR_TOURNEY_TEXTS[$key][$scope];
    }//getScopeText
 
@@ -565,7 +565,7 @@ class Tournament
       if( is_null($type) )
          return self::$ARR_TOURNEY_TEXTS[$key];
       if( !isset(self::$ARR_TOURNEY_TEXTS[$key][$type]) )
-         error('invalid_args', "Tournament.getTypeText($type)");
+         error('invalid_args', "Tournament:getTypeText($type)");
       return self::$ARR_TOURNEY_TEXTS[$key][$type];
    }//getTypeText
 
@@ -587,7 +587,7 @@ class Tournament
       if( is_null($wiztype) )
          return self::$ARR_TOURNEY_TEXTS[$key];
       if( !isset(self::$ARR_TOURNEY_TEXTS[$key][$wiztype]) )
-         error('invalid_args', "Tournament.getWizardTypeText($wiztype)");
+         error('invalid_args', "Tournament:getWizardTypeText($wiztype)");
       return self::$ARR_TOURNEY_TEXTS[$key][$wiztype];
    }//getWizardTypeText
 
@@ -618,7 +618,7 @@ class Tournament
          //return $arrout;
       }
       if( !isset(self::$ARR_TOURNEY_TEXTS[$key][$status]) )
-         error('invalid_args', "Tournament.getStatusText($status)");
+         error('invalid_args', "Tournament:getStatusText($status)");
       return self::$ARR_TOURNEY_TEXTS[$key][$status];
    }//getStatusText
 

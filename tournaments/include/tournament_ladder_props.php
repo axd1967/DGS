@@ -752,14 +752,14 @@ class TournamentLadderProps
       {
          $arr = self::$ARR_TLPROPS_TEXTS[$key]; // clone
          if( !isset($arr_tgame_end[$game_end_type]) )
-            error('invalid_args', "TournamentLadderProps.getGameEndText.check_type($game_end,$game_end_type)");
+            error('invalid_args', "TournamentLadderProps:getGameEndText.check_type($game_end,$game_end_type)");
          $arr_intersect = $arr_tgame_end[$game_end_type];
          if( is_array($arr_intersect) )
             $arr = array_intersect_key_values( $arr, $arr_intersect );
          return $arr;
       }
       if( !isset(self::$ARR_TLPROPS_TEXTS[$key][$game_end]) )
-         error('invalid_args', "TournamentLadderProps.getGameEndText($game_end)");
+         error('invalid_args', "TournamentLadderProps:getGameEndText($game_end)");
       return self::$ARR_TLPROPS_TEXTS[$key][$game_end];
    }//getGameEndText
 
@@ -787,7 +787,7 @@ class TournamentLadderProps
       if( is_null($join_order) )
          return array() + self::$ARR_TLPROPS_TEXTS[$key]; // cloned
       if( !isset(self::$ARR_TLPROPS_TEXTS[$key][$join_order]) )
-         error('invalid_args', "TournamentLadderProps.getUserJoinOrderText($join_order,$short)");
+         error('invalid_args', "TournamentLadderProps:getUserJoinOrderText($join_order,$short)");
       return self::$ARR_TLPROPS_TEXTS[$key][$join_order];
    }//getUserJoinOrderText
 

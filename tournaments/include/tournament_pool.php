@@ -785,17 +785,17 @@ class TournamentPool
    public static function execute_rank_action( $tid, $round, $action, $uid, $rank_from=null, $rank_to=null, $pool=null )
    {
       if( !is_numeric($action) && ($action < 1 || $action > 4) )
-         error('invalid_args', "TournamentPool.execute_rank_action.check.action($tid,$round,$action)");
+         error('invalid_args', "TournamentPool:execute_rank_action.check.action($tid,$round,$action)");
       if( !is_numeric($uid) && $uid <= GUESTS_ID_MAX )
-         error('invalid_args', "TournamentPool.execute_rank_action.check.uid($tid,$round,$uid)");
+         error('invalid_args', "TournamentPool:execute_rank_action.check.uid($tid,$round,$uid)");
       if( $uid == 0 )
       {
          if( (string)$rank_from != '' && ( !is_numeric($rank_from) || $rank_from < 0 ))
-            error('invalid_args', "TournamentPool.execute_rank_action.check.rank_from($tid,$round,$rank_from)");
+            error('invalid_args', "TournamentPool:execute_rank_action.check.rank_from($tid,$round,$rank_from)");
          if( (string)$rank_to != '' && ( !is_numeric($rank_to) || $rank_to < 0 ))
-            error('invalid_args', "TournamentPool.execute_rank_action.check.rank_to($tid,$round,$rank_to)");
+            error('invalid_args', "TournamentPool:execute_rank_action.check.rank_to($tid,$round,$rank_to)");
          if( (string)$pool != '' && !is_numeric($pool) )
-            error('invalid_args', "TournamentPool.execute_rank_action.check.pool($tid,$round,$pool)");
+            error('invalid_args', "TournamentPool:execute_rank_action.check.pool($tid,$round,$pool)");
       }
 
       $qpart_rank = ''; // where-clause

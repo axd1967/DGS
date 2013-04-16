@@ -65,10 +65,11 @@ class TournamentRoundStatus
       elseif( is_numeric($tid) && $tid > 0 )
       {
          $this->tid = (int)$tid;
-         $this->tourney = TournamentCache::load_cache_tournament( 'TournamentRoundStatus.find_tournament', $this->tid );
+         $this->tourney = TournamentCache::load_cache_tournament(
+            'TournamentRoundStatus.construct.find_tournament', $this->tid );
       }
       if( is_null($this->tourney) || (int)$this->tid <= 0 )
-         error('unknown_tournament', "TournamentRoundStatus.find_tournament({$this->tid},{$this->Round})");
+         error('unknown_tournament', "TournamentRoundStatus.construct.find_tournament2({$this->tid},{$this->Round})");
 
       $this->ttype = TournamentFactory::getTournament($this->tourney->WizardType);
 
@@ -80,7 +81,8 @@ class TournamentRoundStatus
       else
       {
          $this->Round = (int)$round;
-         $this->tround = TournamentCache::load_cache_tournament_round( 'TournamentRoundStatus.find_tround', $this->tid, $this->Round );
+         $this->tround = TournamentCache::load_cache_tournament_round(
+            'TournamentRoundStatus.construct.find_tround', $this->tid, $this->Round );
       }
 
       $this->curr_status = $this->new_status = $this->tround->Status;

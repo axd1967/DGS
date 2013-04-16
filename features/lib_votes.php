@@ -100,7 +100,7 @@ class Feature
          $created=0, $lastchanged=0 )
    {
       if( !is_numeric($editor) || $editor < 0 )
-         error('invalid_user', "feature.construct.check.editor($id,$editor)");
+         error('invalid_user', "Feature.construct.check.editor($id,$editor)");
       $this->id = (int) $id;
       $this->set_status( $status );
       $this->set_size( $size );
@@ -115,7 +115,7 @@ class Feature
    public function set_status( $status )
    {
       if( !preg_match( "/^(NEW|VOTE|WORK|DONE|LIVE|NACK)$/", $status ) )
-         error('invalid_args', "feature.set_status($status)");
+         error('invalid_args', "Feature.set_status($status)");
 
       $this->status = $status;
    }
@@ -124,7 +124,7 @@ class Feature
    public function set_size( $size )
    {
       if( !preg_match( "/^(\\?|EPIC|XXL|XL|L|M|S)$/", $size ) )
-         error('invalid_args', "feature.set_size($size)");
+         error('invalid_args', "Feature.set_size($size)");
 
       $this->size = $size;
    }
@@ -236,10 +236,10 @@ class Feature
    public function delete_feature()
    {
       if( !self::is_admin() )
-         error('feature_edit_not_allowed', "feature.delete_feature({$this->id})");
+         error('feature_edit_not_allowed', "Feature.delete_feature({$this->id})");
 
       if( !$this->can_delete_feature() )
-         error('constraint_votes_delete_feature', "feature.delete_feature({$this->id})");
+         error('constraint_votes_delete_feature', "Feature.delete_feature({$this->id})");
 
       $delete_query = "DELETE FROM Feature WHERE ID='{$this->id}' LIMIT 1";
       db_query( "feature.delete_feature({$this->id})", $delete_query );
@@ -556,7 +556,7 @@ class Feature
 
       $dbgmsg .= "Feature:update_count_feature_new($uid,$diff)";
       if( !is_numeric($uid) )
-         error( 'invalid_args', "$dbgmsg.check.uid" );
+         error('invalid_args', "$dbgmsg.check.uid" );
 
       if( is_null($diff) )
       {
@@ -611,7 +611,7 @@ class FeatureVote
    public function __construct( $fid=0, $voter=0, $points=0, $lastchanged=0 )
    {
       if( !is_numeric($voter) || !is_numeric($voter) || $voter < 0 )
-         error('invalid_user', "featurevote.construct($fid,$voter)");
+         error('invalid_user', "FeatureVote.construct($fid,$voter)");
       $this->fid = (int) $fid;
       $this->voter = (int) $voter;
       $this->set_points( $points );
@@ -622,7 +622,7 @@ class FeatureVote
    public function set_points( $points )
    {
       if( !is_numeric($points) || abs($points) > FEATVOTE_MAXPOINTS )
-         error('invalid_args', "featurevote.set_points($points)");
+         error('invalid_args', "FeatureVote.set_points($points)");
 
       $this->points = $points;
    }

@@ -82,14 +82,14 @@ class QuickHandlerGameNotes extends QuickHandler
       // check gid
       QuickHandler::checkArgMandatory( $dbgmsg, GAMEOPT_GID, $this->gid );
       if( !is_numeric($this->gid) || $this->gid <= 0 )
-         error('unknown_game', "QuickHandlerGameNotes.check({$this->gid})");
+         error('unknown_game', "$dbgmsg.check.gid");
       $gid = $this->gid;
 
       // prepare command: get_notes, save_notes, hide_notes, show_notes
 
       if( $cmd == GAMECMD_GET_NOTES || $cmd == GAMECMD_SAVE_NOTES || $cmd == GAMECMD_HIDE_NOTES || $cmd == GAMECMD_SHOW_NOTES )
       {
-         $gn_row = GameHelper::load_cache_game_notes( 'QuickHandlerGameNotes.prepare', $gid, $uid );
+         $gn_row = GameHelper::load_cache_game_notes( $dbgmsg, $gid, $uid );
          if( is_array($gn_row) )
          {
             $this->hidden = @$gn_row['Hidden'];
