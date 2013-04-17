@@ -47,6 +47,7 @@ class GameCheckMove
 
    /*!
     * \brief Checks move on given board adjusting black/white-prisoners.
+    * \param $coord can be arr(x,y) or one sgf-coord (e.g. 'aa')
     * \note adjusted globals: $Black_Prisoners, $White_Prisoners
     * \note sets $this->prisoners with array of the captured stones of play (or suicided stones if, a day, $suicide_allowed==true)
     * \note sets $this->nr_prisoners, colnr/rownr (of given $coord)
