@@ -183,7 +183,7 @@ function handle_game_timeouts()
       if( time() > $max_run_time ) break; // stop script if running too long to avoid concurrent runs
       extract($row);
 
-      //$game_clause (lock) needed. See *** HOT_SECTION *** in confirm.php
+      //$game_clause (lock) needed. See *** HOT_SECTION *** in GameActionHelper.init_query()
       $game_clause = " WHERE ID=$gid AND Status".IS_STARTED_GAME." AND Moves=$Moves LIMIT 1";
 
       $hours = ticks_to_hours($ticks - $LastTicks);

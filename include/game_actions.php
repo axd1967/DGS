@@ -63,6 +63,35 @@ class GameActionHelper
       $this->is_quick = $is_quick;
    }
 
+   public function init_query( $moves, $mp_query, $time_query )
+   {
+      /* **********************
+      >>> See also confirm.php, quick_play.php, include/quick/quick_game.php and clock_tick.php
+
+      Various dirty things (like duplicated moves) could appear
+      in case of multiple calls with the same move number. This could
+      happen in case of multi-players account with simultaneous logins
+      or if one player hit twice the validation button during a net lag
+      and/or if the opponent had already played between the two calls.
+
+      Because the LOCK query is not implemented with MySQL < 4.0 (and despite that),
+      we use the Moves field of the Games table to check those
+      possible multiple queries using "optimistic locking".
+
+      This is why:
+      - the arguments are checked against the current state of the Games table
+      - the current Games table give the current Moves value
+      - the Games table is always modified while checking its Moves field (see $game_clause)
+      - the Games table modification must always modify the Moves field (see $game_query)
+      - this modification is always done in first place and checked before continuation
+      *********************** */
+      $this->game_clause = " WHERE ID={$this->gid} AND Status".IS_RUNNING_GAME." AND Moves=$moves LIMIT 1";
+
+      $this->mp_query = $mp_query;
+      $this->time_query = $time_query;
+   }//init_query
+
+
    // \param $board Board-object
    // \param $orig_stonestring must be for non-quick-suite
    // \param $quick_moves must be set for quick-suite; ignored for non-quick-suite

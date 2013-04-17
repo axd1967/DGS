@@ -112,7 +112,7 @@ else
    if( $move_color != ($to_move==WHITE ? 'W' : 'B') )
       error('not_your_turn', "quick_play.err4($gid)");
 
-   $action = 'domove'; //$action = always 'domove'
+   $action = GAMEACT_DO_MOVE; //$action = always 'domove'
 
    $next_to_move = WHITE+BLACK-$to_move;
    $next_to_move_ID = ( $next_to_move == BLACK ? $Black_ID : $White_ID );
@@ -129,7 +129,7 @@ else
 
    $mp_query = '';
    $is_mpgame = ($GameType != GAMETYPE_GO);
-   if( $is_mpgame && $action == 'domove' )
+   if( $is_mpgame && $action == GAMEACT_DO_MOVE )
    {
       list( $group_color, $group_order, $gpmove_color )
          = MultiPlayerGame::calc_game_player_for_move( $GamePlayers, $Moves, $Handicap, 2 );
@@ -147,34 +147,14 @@ else
       $GameFlags |= GAMEFLAGS_HIDDEN_MSG;
 
 
-/* **********************
-*** HOT_SECTION ***
->>> See also confirm.php, quick_play.php and clock_tick.php
-Various dirty things (like duplicated moves) could appear
-in case of multiple calls with the same move number. This could
-happen in case of multi-players account with simultaneous logins
-or if one player hit twice the validation button during a net lag
-and/or if the opponent had already played between the two calls.
-
-Because the LOCK query is not implemented with MySQL < 4.0,
-we use the Moves field of the Games table to check those
-possible multiple queries.
-This is why:
-- the arguments are checked against the current state of the Games table
-- the current Games table give the current Moves value
-- the Games table is always modified while checking its Moves field (see $game_clause)
-- the Games table modification must always modify the Moves field (see $game_query)
-- this modification is always done in first place and checked before continuation
-*********************** */
-
+   // ***** HOT_SECTION *****
+   // >>> See also: confirm.php, quick_play.php, include/quick/quick_game.php, clock_tick.php (for timeout)
    $gah = new GameActionHelper( $my_id, $gid, $action, /*quick*/true );
-   $gah->game_clause = " WHERE ID=$gid AND Status".IS_RUNNING_GAME." AND Moves=$Moves LIMIT 1";
-   $gah->mp_query = $mp_query;
-   $gah->time_query = $time_query;
+   $gah->init_query( $Moves, $mp_query, $time_query );
 
    $Moves++;
 
-   //case 'domove':
+   //case GAMEACT_DO_MOVE:
    {
       if( $Status != GAME_STATUS_PLAY )
          error('invalid_action', "quick_play.err5($gid)");
