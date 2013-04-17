@@ -247,14 +247,8 @@ function make_invite_game_setup( $my_urow, $opp_urow )
    if( $is_fairkomi )
       $min_handicap = 0;
 
-   $max_handicap = min( MAX_HANDICAP, max( DEFAULT_MAX_HANDICAP, (int)@$_REQUEST['max_handicap'] ));
-   $def_max_handicap = calc_def_max_handicap( $gs->Size );
-   if( $max_handicap == DEFAULT_MAX_HANDICAP && $min_handicap > $def_max_handicap )
-      $min_handicap = $def_max_handicap;
-   elseif( $max_handicap >= 0 && $min_handicap > $max_handicap )
-      swap( $min_handicap, $max_handicap );
-   $gs->MinHandicap = $min_handicap;
-   $gs->MaxHandicap = $max_handicap;
+   list( $gs->MinHandicap, $gs->MaxHandicap ) =
+      DefaultMaxHandicap::limit_min_max_with_def_handicap( $gs->Size, $min_handicap, (int)@$_REQUEST['max_handicap'] );
 
 
    $gs->Ruleset = @$_REQUEST['ruleset'];

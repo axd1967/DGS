@@ -280,12 +280,8 @@ function handle_add_game( $my_id, $viewmode )
    if( $is_fairkomi )
       $min_handicap = 0;
 
-   $max_handicap = min( MAX_HANDICAP, max( DEFAULT_MAX_HANDICAP, (int)@$_REQUEST['max_handicap'] ));
-   $def_max_handicap = calc_def_max_handicap( $size );
-   if( $max_handicap == DEFAULT_MAX_HANDICAP && $min_handicap > $def_max_handicap )
-      $min_handicap = $def_max_handicap;
-   elseif( $max_handicap >= 0 && $min_handicap > $max_handicap )
-      swap( $min_handicap, $max_handicap );
+   list( $min_handicap, $max_handicap ) =
+      DefaultMaxHandicap::limit_min_max_with_def_handicap( $size, $min_handicap, (int)@$_REQUEST['max_handicap'] );
 
    // multi-player
    $game_players = (string)@$_REQUEST['game_players'];

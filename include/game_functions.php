@@ -4787,6 +4787,87 @@ class GameSnapshot
 
 
 
+
+ /*!
+  * \class DefaultMaxHandicap
+  *
+  * \brief Helper-class to check and calculate default max-handicap for game-settings
+  *        of new-game, invitations and tournament-rules.
+  */
+class DefaultMaxHandicap
+{
+
+   /*!
+    * \brief Calculate default max-handicap for fiven board-size.
+    *
+    * \note some tested formulas from DGS-forums: http://www.dragongoserver.net/forum/read.php?forum=5&thread=34914#35577
+    * last formula chosen as it's quadratic on board-size and results in acceptable and not too small default-handicaps.
+    *   5   6   7   8   9  10  11  12  13  14  15  16  17  18  19  20  21  22  23  24  25  Size n
+    *  -----------------------------------------------------------------------------------+-------------------------------
+    *   2   3   3   4   4   5   5   6   6   7   7   8   8   9   9  10  10  11  11  12  12  floor(n/2)
+    *   0   1   1   1   2   2   3   3   4   5   5   6   7   8   9  10  11  12  13  15  16  round(((n-1)/6)^2)
+    *   0   0   1   1   2   3   3   4   5   5   6   7   7   8   9   9  10  11  11  12  13  floor((2n-11)/3)
+    *   0   0   1   1   1   2   2   3   4   4   5   6   7   8   9  10  11  13  14  16  17  round(9 * (n-3)^2 / 256)
+    *   2   2   2   2   3   3   3   4   4   5   6   6   7   8   9  10  11  12  13  14  16  round(7.5 * ((n-3)^2 / 256 + 0.2))
+    */
+   public static function calc_def_max_handicap( $board_size )
+   {
+      return round( 7.5 * ( handicapfactor($board_size) + 0.2 ) );
+   }
+
+   /*! \brief Limits passed max-handicap to min/max absolute limits for max-handicap. */
+   public static function limit_max_handicap( $max_handicap )
+   {
+      return min( MAX_HANDICAP, max( DEFAULT_MAX_HANDICAP, (int)$max_handicap ));
+   }
+
+   /*!
+    * \brief Returns checked and limited min- and max-handicap in regard to default-max-handicap.
+    * \return arr( $min_h, $max_h )
+    */
+   public static function limit_min_max_with_def_handicap( $board_size, $min_handicap, $orig_max_handicap )
+   {
+      $max_handicap = self::limit_max_handicap( $orig_max_handicap );
+      $def_max_handicap = self::calc_def_max_handicap( $board_size );
+
+      if( $max_handicap == DEFAULT_MAX_HANDICAP && $min_handicap > $def_max_handicap )
+         $min_handicap = $def_max_handicap;
+      elseif( $max_handicap >= 0 && $min_handicap > $max_handicap )
+         swap( $min_handicap, $max_handicap );
+
+      return array( $min_handicap, $max_handicap );
+   }//limit_min_max_with_def_handicap
+
+   /*! \brief Returns limitation-text for min/max-handicap stones (used for tournament-rules). */
+   public static function build_text_handicap_limits( $board_size, $min_handicap, $max_handicap )
+   {
+      $use_max_handi = ( $max_handicap == DEFAULT_MAX_HANDICAP )
+         ? self::calc_def_max_handicap( $board_size )
+         : min( MAX_HANDICAP, $max_handicap );
+
+      if( $min_handicap > 0 && $use_max_handi < MAX_HANDICAP )
+         $lim_handi = sprintf( T_('limited by min. %s and max. %s stones'), $min_handicap, $use_max_handi );
+      elseif( $min_handicap > 0 )
+         $lim_handi = sprintf( T_('limited by min. %s stones'), $min_handicap );
+      elseif( $use_max_handi < MAX_HANDICAP )
+         $lim_handi = sprintf( T_('limited by max. %s stones'), $use_max_handi );
+      else
+         $lim_handi = '';
+
+      if( $lim_handi )
+      {
+         if( $max_handicap == DEFAULT_MAX_HANDICAP )
+            $lim_handi .= sprintf(' [%s]', T_('Default Max.#handi') );
+      }
+
+      return $lim_handi;
+   }//build_text_handicap_limits
+
+} //end 'DefaultMaxHandicap'
+
+
+
+
 // returns adjusted komi within limits, also checking for valid limits
 function adjust_komi( $komi, $adj_komi, $jigo_mode )
 {
@@ -4822,11 +4903,11 @@ function adjust_handicap( $size, $handicap, $adj_handicap, $min_handicap, $max_h
 {
    // assure valid limits
    $min_handicap = min( MAX_HANDICAP, max( 0, $min_handicap ));
-   $max_handicap = min( MAX_HANDICAP, max( DEFAULT_MAX_HANDICAP, $max_handicap ));
+   $max_handicap = DefaultMaxHandicap::limit_max_handicap( $max_handicap );
 
    if( $max_handicap == DEFAULT_MAX_HANDICAP )
    {
-      $chk_max_handicap = calc_def_max_handicap( $size );
+      $chk_max_handicap = DefaultMaxHandicap::calc_def_max_handicap( $size );
       if( $min_handicap > $chk_max_handicap )
          $min_handicap = $chk_max_handicap;
    }
@@ -4851,21 +4932,6 @@ function adjust_handicap( $size, $handicap, $adj_handicap, $min_handicap, $max_h
 
    return (int)$handicap;
 }//adjust_handicap
-
-// calculate default max-handicap for fiven board-size
-// some tested formulas from DGS-forums: http://www.dragongoserver.net/forum/read.php?forum=5&thread=34914#35577
-// last formula chosen as it's quadratic on board-size and results in acceptable and not too small default-handicaps.
-//   5   6   7   8   9  10  11  12  13  14  15  16  17  18  19  20  21  22  23  24  25  Size n
-//  -----------------------------------------------------------------------------------+-------------------------------
-//   2   3   3   4   4   5   5   6   6   7   7   8   8   9   9  10  10  11  11  12  12  floor(n/2)
-//   0   1   1   1   2   2   3   3   4   5   5   6   7   8   9  10  11  12  13  15  16  round(((n-1)/6)^2)
-//   0   0   1   1   2   3   3   4   5   5   6   7   7   8   9   9  10  11  11  12  13  floor((2n-11)/3)
-//   0   0   1   1   1   2   2   3   4   4   5   6   7   8   9  10  11  13  14  16  17  round(9 * (n-3)^2 / 256)
-//   2   2   2   2   3   3   3   4   4   5   6   6   7   8   9  10  11  12  13  14  16  round(7.5 * ((n-3)^2 / 256 + 0.2))
-function calc_def_max_handicap( $size )
-{
-   return round( 7.5 * ( handicapfactor($size) + 0.2 ) );
-}
 
 /*! \brief Determines who is to move (BLACK|WHITE), expects game-row with fields ID,Black_ID,White_ID,ToMove_ID. */
 function get_to_move( $grow, $errmsg )

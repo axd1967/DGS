@@ -248,7 +248,7 @@ class TournamentRules
       $grow['Handicap'] = (int)$this->Handicap;
       $grow['AdjHandicap'] = (int)$this->AdjHandicap;
       $grow['MinHandicap'] = (int)$this->MinHandicap;
-      $grow['MaxHandicap'] = min( MAX_HANDICAP, max( DEFAULT_MAX_HANDICAP, (int)$this->MaxHandicap ));
+      $grow['MaxHandicap'] = DefaultMaxHandicap::limit_max_handicap( (int)$this->MaxHandicap );
       $grow['StdHandicap'] = ($this->StdHandicap) ? 'Y' : 'N';
       $grow['Komi'] = (float)$this->Komi;
       $grow['AdjKomi'] = (float)$this->AdjKomi;
@@ -293,7 +293,7 @@ class TournamentRules
       $vars['jigo_mode'] = $this->JigoMode;
       $vars['adj_handicap'] = (int)$this->AdjHandicap;
       $vars['min_handicap'] = (int)$this->MinHandicap;
-      $vars['max_handicap'] = min( MAX_HANDICAP, max( DEFAULT_MAX_HANDICAP, (int)$this->MaxHandicap ));
+      $vars['max_handicap'] = DefaultMaxHandicap::limit_max_handicap( (int)$this->MaxHandicap );
       $vars['stdhandicap'] = ($this->StdHandicap) ? 'Y' : 'N';
 
       $vars['timeunit'] = 'hours';
@@ -401,14 +401,8 @@ class TournamentRules
          $adj_handicap = ($adj_handicap<0 ? -1 : 1) * MAX_HANDICAP;
 
       $min_handicap = min( MAX_HANDICAP, max( 0, (int)@$vars['min_handicap'] ));
-
-      $max_handicap = min( MAX_HANDICAP, max( DEFAULT_MAX_HANDICAP, (int)@$vars['max_handicap'] ));
-      $def_max_handicap = calc_def_max_handicap( $size );
-      if( $max_handicap == DEFAULT_MAX_HANDICAP && $min_handicap > $def_max_handicap )
-         $min_handicap = $def_max_handicap;
-      elseif( $max_handicap >= 0 && $min_handicap > $max_handicap )
-         swap( $min_handicap, $max_handicap );
-
+      list( $min_handicap, $max_handicap ) =
+         DefaultMaxHandicap::limit_min_max_with_def_handicap( $size, $min_handicap, (int)@$vars['max_handicap'] );
 
       // time settings
       list( $hours, $byohours, $byoperiods ) = self::convertFormTimeSettings( $vars );

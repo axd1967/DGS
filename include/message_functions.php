@@ -202,7 +202,7 @@ function game_settings_form(&$mform, $formstyle, $viewmode, $iamrated=true, $my_
       if( isset($gid['min_handicap']) )
          $MinHandicap = (int)$gid['min_handicap'];
       if( isset($gid['max_handicap']) )
-         $MaxHandicap = min( MAX_HANDICAP, max( DEFAULT_MAX_HANDICAP, (int)$gid['max_handicap'] ));
+         $MaxHandicap = DefaultMaxHandicap::limit_max_handicap( (int)$gid['max_handicap'] );
 
       if( isset($gid['game_players']) )
          $GamePlayers = $gid['game_players'];
@@ -487,7 +487,8 @@ function game_settings_form(&$mform, $formstyle, $viewmode, $iamrated=true, $my_
 
       $max_handi_stones = build_arr_handicap_stones( /*def*/true );
       $txt_def_max_handi = ( $is_fstyle_invite )
-         ? ' ' . span('smaller', sprintf( T_('(Def. is %s for size %s)#defmaxhandi'), calc_def_max_handicap($Size), $Size ))
+         ? ' ' . span('smaller', sprintf( T_('(Def. is %s for size %s)#defmaxhandi'),
+                                          DefaultMaxHandicap::calc_def_max_handicap($Size), $Size ))
          : '';
 
       $mform->add_row( array( 'SPACE' ) );
@@ -1207,10 +1208,11 @@ function build_adjust_handicap( $size, $adj_handicap, $min_handicap, $max_handic
       $out[] = ($adj_handicap > 0 ? '+' : '') . $adj_handicap;
    if( $max_handicap == DEFAULT_MAX_HANDICAP )
    {
+      $def_max_handicap = DefaultMaxHandicap::calc_def_max_handicap($size);
       if( $short )
-         $out[] = sprintf( "[%d,D%d]", $min_handicap, calc_def_max_handicap($size) );
+         $out[] = sprintf( "[%d,D%d]", $min_handicap, $def_max_handicap );
       else
-         $out[] = sprintf( "[%d,%s %d]", $min_handicap, T_('Default'), calc_def_max_handicap($size) );
+         $out[] = sprintf( "[%d,%s %d]", $min_handicap, T_('Default'), $def_max_handicap );
    }
    elseif( $min_handicap > 0 || $max_handicap < MAX_HANDICAP )
       $out[] = sprintf( "[%d,%d]", $min_handicap, min( MAX_HANDICAP, $max_handicap) );

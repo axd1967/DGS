@@ -109,32 +109,6 @@ class Game_SettingsHelperTest extends PHPUnit_Framework_TestCase {
       $this->assertEquals( 9, adjust_handicap( $s, 5, 7, 2, 9 ));
    }
 
-   /** Tests calc_def_max_handicap(). */
-   public function test_calc_def_max_handicap() {
-      $s = 5;
-      $this->assertEquals(  2, calc_def_max_handicap( $s++ )); // 5
-      $this->assertEquals(  2, calc_def_max_handicap( $s++ ));
-      $this->assertEquals(  2, calc_def_max_handicap( $s++ ));
-      $this->assertEquals(  2, calc_def_max_handicap( $s++ ));
-      $this->assertEquals(  3, calc_def_max_handicap( $s++ )); // 9
-      $this->assertEquals(  3, calc_def_max_handicap( $s++ ));
-      $this->assertEquals(  3, calc_def_max_handicap( $s++ ));
-      $this->assertEquals(  4, calc_def_max_handicap( $s++ ));
-      $this->assertEquals(  4, calc_def_max_handicap( $s++ )); // 13
-      $this->assertEquals(  5, calc_def_max_handicap( $s++ ));
-      $this->assertEquals(  6, calc_def_max_handicap( $s++ ));
-      $this->assertEquals(  6, calc_def_max_handicap( $s++ ));
-      $this->assertEquals(  7, calc_def_max_handicap( $s++ ));
-      $this->assertEquals(  8, calc_def_max_handicap( $s++ ));
-      $this->assertEquals(  9, calc_def_max_handicap( $s++ )); // 19
-      $this->assertEquals( 10, calc_def_max_handicap( $s++ ));
-      $this->assertEquals( 11, calc_def_max_handicap( $s++ ));
-      $this->assertEquals( 12, calc_def_max_handicap( $s++ ));
-      $this->assertEquals( 13, calc_def_max_handicap( $s++ ));
-      $this->assertEquals( 14, calc_def_max_handicap( $s++ ));
-      $this->assertEquals( 16, calc_def_max_handicap( $s++ )); // 25
-   }
-
 }
 
 // Call Game_SettingsHelperTest::main() if this source file is executed directly.

@@ -30,6 +30,7 @@ require_once 'Game_SettingsHelperTest.php';
 require_once 'EntityTest.php';
 require_once 'EntityDataTest.php';
 require_once 'Game_SetupTest.php';
+require_once 'DefaultMaxHandicapTest.php';
 
 /*!
  * \class AllTests
@@ -55,6 +56,7 @@ class AllTests
       $suite->addTestSuite('EntityTest');
       $suite->addTestSuite('EntityDataTest');
       $suite->addTestSuite('Game_SetupTest');
+      $suite->addTestSuite('DefaultMaxHandicapTest');
 
       return $suite;
    }

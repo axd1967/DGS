@@ -204,7 +204,7 @@ function fix_game_finished_running( $row )
    if( is_null($gs) )
       return false;
 
-   $def_max_handi = calc_def_max_handicap( $row['Size'] );
+   $def_max_handi = DefaultMaxHandicap::calc_def_max_handicap( $row['Size'] );
    $update = false;
    if( $gs->MaxHandicap == 0 )
       $update = true;
