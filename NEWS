@@ -7,8 +7,8 @@ Copyright (C) 2001-2013  Erik Ouchterlony, Jens-Uwe Gaspar
 
    New features and Major changes:
 
-   * Reduced default for max-handicap from 21 to board-size-dependent calculated max-handicap
-      * Merged simple and expert new-game view into one standard-view,
+   * Changed default for max-handicap from 21 to board-size-dependent calculated max-handicap
+      * Merged simple and expert new-game view into one <home new_game.php>new-game standard-view</home>,
         Merged jigo-check setting for fair-komi with adjust-komi setting
       * Added handicap- and komi-adjustments for invitations to support default max-handicap
 
@@ -142,7 +142,7 @@ Copyright (C) 2001-2013  Erik Ouchterlony, Jens-Uwe Gaspar
          * Chinese rules using area scoring
 
    * Game page:
-      * Show player to move (marked by <image backwards.gif>)
+      * Show player to move (marked by <image backward.gif>)
       * Show hint about area-scoring before passing to avoid odd dame
 
 
@@ -192,12 +192,13 @@ Copyright (C) 2001-2013  Erik Ouchterlony, Jens-Uwe Gaspar
    Server config:
 
       * Added config-switches:
-         * ALLOW_TOURNAMENTS                 - disabled
+         * ALLOW_TOURNAMENTS                 - enabled
          * ALLOW_TOURNAMENTS_ROUND_ROBIN     - disabled
          * ALLOW_TOURNAMENTS_CREATE_BY_USER  - disabled
 ##         * ALLOW_GAME_EDITOR                 - disabled (needs JavaScript)
 ##         * ENABLE_GAME_VIEWER                - disabled (needs JavaScript)
          * Added restriction on max. running games for tournament-registration (150)
+         * ALLOWED_RULESETS                  - enabled with: JAPANESE (default) + CHINESE
 
 
 #release DGS_1_0_15 [2012-Jun-08] - DGS 1.0.15  (Game types & settings, Users, Forum, Voting)

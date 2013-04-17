@@ -16,6 +16,21 @@ Developers INFO:
 ChangeLog
 ------------------------------------------------------------------
 
+2013-04-17 juga
+
+   * include/game_functions.php (class DefaultMaxHandicap, ~.calc_def_max_handicap,
+       ~.limit_max_handicap, ~.limit_min_max_with_def_handicap, ~.build_text_handicap_limits;
+       adjust_handicap),
+     tournaments/include/tournament_rules.php (TournamentRules.convertTournamentRules_to_GameRow,
+       ~.convertTournamentRules_to_EditForm, ~.convertEditForm_to_TournamentRules),
+     include/message_functions.php (game_settings_form, build_adjust_handicap),
+     include/make_game.php (make_invite_game_setup),
+     scripts/tests/DefaultMaxHandicapTest.php, scripts/tests/Game_SettingsHelperTest.php,
+     scripts/tests/AllTests.php, scripts/updates/fix_default_max_handi-1_0_16.php,
+     tournaments/view_tournament.php, new_game.php:
+   - cleanup: refactored redundant code to handle default-max-handicap
+     into new class DefaultMaxHandicap
+
 2013-04-16 juga
 
    * ALL php-files,
