@@ -237,7 +237,6 @@ class QuickHandlerGame extends QuickHandler
 
    private function process_cmd_play()
    {
-      static $MOVE_INSERT_QUERY = "INSERT INTO Moves ( gid, MoveNr, Stone, PosX, PosY, Hours ) VALUES ";
       global $player_row, $NOW, $ActivityMax, $ActivityForMove;
       $cmd = $this->quick_object->cmd;
       $gid = $this->gid;
@@ -249,7 +248,8 @@ class QuickHandlerGame extends QuickHandler
       $next_to_move_ID = ( $next_to_move == BLACK ) ? $Black_ID : $White_ID;
 
       // update clock
-      list( $hours, $upd_clock ) = GameHelper::update_clock( "QHGame.play($gid)", $this->game_row, $this->to_move, $next_to_move );
+      list( $hours, $upd_clock ) = GameHelper::update_clock( "QHGame.play($gid)",
+         $this->game_row, $this->to_move, $next_to_move );
       $time_query = $upd_clock->get_query(false, true);
 
       $mp_query = '';
@@ -275,7 +275,7 @@ class QuickHandlerGame extends QuickHandler
       // ***** HOT_SECTION *****
       // >>> See also: confirm.php, quick_play.php, include/quick/quick_game.php, clock_tick.php (for timeout)
       $gah = new GameActionHelper( $this->my_id, $gid, $this->action, /*quick*/true );
-      $gah->init_query( $Moves, $mp_query, $time_query, $this->game_row );
+      $gah->init_query( $Moves, $mp_query, $time_query );
 
       $score = null;
       $Moves++;
@@ -328,53 +328,12 @@ class QuickHandlerGame extends QuickHandler
          case GAMEACT_SCORE:
          {
             // NOTE: moves = coords to toggle for disagreement, toggle = toggle-mode, agree = agreement to finish game
-            $stonestring = '';
-            $gchkscore = new GameCheckScore( $this->TheBoard, $stonestring, $Handicap, $Komi, $Black_Prisoners, $White_Prisoners );
-            if( $this->toggle_mode == GAMEOPTVAL_TOGGLE_UNIQUE )
-               $gchkscore->set_toggle_unique();
+            $toggle_uniq = ( $this->toggle_mode == GAMEOPTVAL_TOGGLE_UNIQUE );
             $arr_coords = $this->build_arr_coords($Size);
-            $game_score = $gchkscore->check_remove( getRulesetScoring($Ruleset), $arr_coords );
-            $gchkscore->update_stonestring( $stonestring );
-            $score = $game_score->calculate_score();
-
-            $l = strlen( $stonestring );
-            if( $Status == GAME_STATUS_SCORE2 && $l < 2 )
-            {
-               if( !$this->agree )
-                  error('invalid_action', "QuickHandlerGame.process.expect_agree({$this->agree})");
-               $next_status = GAME_STATUS_FINISHED;
-               $game_finished = true;
-            }
-            else
-            {
-               if( $this->agree )
-                  error('invalid_action', "QuickHandlerGame.process.expect_disagree({$this->agree})");
-               $next_status = GAME_STATUS_SCORE2;
-            }
-
-            $gah->move_query = $MOVE_INSERT_QUERY; // gid,MoveNr,Stone,PosX,PosY,Hours
-            $mark_stone = ( $this->to_move == BLACK ) ? MARKED_BY_BLACK : MARKED_BY_WHITE;
-            for( $i=0; $i < $l; $i += 2 )
-            {
-               list($x,$y) = sgf2number_coords(substr($stonestring, $i, 2), $Size);
-               $gah->move_query .= "($gid, $Moves, $mark_stone, $x, $y, 0), ";
-            }
-            $gah->move_query .= "($gid, $Moves, {$this->to_move}, ".POSX_SCORE.", 0, $hours) ";
-
-            $gah->game_query = "UPDATE Games SET Moves=$Moves, " . //See *** HOT_SECTION ***
-                "Last_X=".POSX_SCORE.", " .
-                "Status='$next_status', " .
-                "Score=$score, " .
-                //"Last_Move='$Last_Move', " . //Not a move, re-use last one
-                "Flags=$GameFlags, " . //Don't reset KO-Flag else SCORE,RESUME could break a Ko
-                "Snapshot='" . GameSnapshot::make_game_snapshot($Size, $this->TheBoard) . "', ";
-
-            if( $next_status != GAME_STATUS_FINISHED )
-               $gah->game_query .= "ToMove_ID=$next_to_move_ID, ";
-            else
-               $gah->game_query .= "ToMove_ID=0, ";
+            $score = $gah->prepare_game_action_score( $dbgmsg,
+               $this->TheBoard, '', $toggle_uniq, $this->agree, $arr_coords );
             break;
-         }//score
+         }
 
          default:
             error('invalid_action', "QuickHandlerGame.process.noaction($gid,{$this->action},$Status)");

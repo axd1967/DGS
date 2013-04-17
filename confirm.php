@@ -90,7 +90,7 @@ require_once( "include/rating.php" );
       error('database_corrupted', "confirm.bad_ToMove_ID($gid)");
 
    $action = @$_REQUEST['action'];
-   if( $Moves < $Handicap && $action == 'domove' )
+   if( $Moves < $Handicap && $action == GAMEACT_DO_MOVE )
       error('invalid_action', "confirm.check.miss_handicap($gid,$my_id,$action,$Moves,$Handicap)");
 
    $my_game = ( $my_id == $Black_ID || $my_id == $White_ID );
@@ -118,7 +118,7 @@ require_once( "include/rating.php" );
    $fk_start_game = (bool)@$_REQUEST['fk_start'];
    if( @$_REQUEST['komi_save'] || $fk_start_game )
       do_komi_save( $game_row, $my_id, $fk_start_game );
-   elseif( $Status == GAME_STATUS_KOMI && $action != 'delete' )
+   elseif( $Status == GAME_STATUS_KOMI && $action != GAMEACT_DELETE )
       error('invalid_action', "confirm.check.status.fairkomi($gid,$action)");
 
 
@@ -134,7 +134,7 @@ require_once( "include/rating.php" );
    list( $hours, $upd_clock ) = GameHelper::update_clock( "confirm($gid)", $game_row, $to_move, $next_to_move );
    $time_query = $upd_clock->get_query(false, true);
 
-   $no_marked_dead = ( $Status == GAME_STATUS_PLAY || $Status == GAME_STATUS_PASS || $action == 'domove' );
+   $no_marked_dead = ( $Status == GAME_STATUS_PLAY || $Status == GAME_STATUS_PASS || $action == GAMEACT_DO_MOVE );
    $board_opts = ( $no_marked_dead ? 0 : BOARDOPT_MARK_DEAD );
 
    $TheBoard = new Board();
@@ -142,7 +142,7 @@ require_once( "include/rating.php" );
       error('internal_error', "confirm.board.load_from_db($gid)");
 
    $mp_query = '';
-   if( $is_mpgame && ($action == 'domove' || $action == 'pass' || $action == GAMEACT_SET_HANDICAP || $action == 'done') )
+   if( $is_mpgame && ($action == GAMEACT_DO_MOVE || $action == GAMEACT_PASS || $action == GAMEACT_SET_HANDICAP || $action == GAMEACT_SCORE) )
    {
       list( $group_color, $group_order, $gpmove_color )
          = MultiPlayerGame::calc_game_player_for_move( $GamePlayers, $Moves, $Handicap, 2 );
@@ -213,52 +213,16 @@ require_once( "include/rating.php" );
          break;
       }
 
-      case 'done':
+      case GAMEACT_SCORE: // ='done'
       {
          if( $Status != GAME_STATUS_SCORE && $Status != GAME_STATUS_SCORE2 )
             error('invalid_action', "confirm.done.check_status($gid,$Status)");
 
          $stonestring = (string)@$_REQUEST['stonestring']; //stonestring is the list of toggled points
-         $gchkscore = new GameCheckScore( $TheBoard, $stonestring, $Handicap, $Komi, $Black_Prisoners, $White_Prisoners );
-         $game_score = $gchkscore->check_remove( getRulesetScoring($Ruleset) );
-         $gchkscore->update_stonestring( $stonestring );
-         $score = $game_score->calculate_score();
-
-         $l = strlen( $stonestring );
-         if( $Status == GAME_STATUS_SCORE2 &&  $l < 2 )
-         {
-            $next_status = GAME_STATUS_FINISHED;
-            $game_finished = true;
-         }
-         else
-            $next_status = GAME_STATUS_SCORE2;
-
-         $gah->move_query = "INSERT INTO Moves ( gid, MoveNr, Stone, PosX, PosY, Hours ) VALUES ";
-
-         for( $i=0; $i < $l; $i += 2 )
-         {
-            list($x,$y) = sgf2number_coords(substr($stonestring, $i, 2), $Size);
-            $gah->move_query .= "($gid, $Moves, " . ($to_move == BLACK ? MARKED_BY_BLACK : MARKED_BY_WHITE ) . ", $x, $y, 0), ";
-         }
-
-         $gah->move_query .= "($gid, $Moves, $to_move, ".POSX_SCORE.", 0, $hours) ";
-
-         $gah->game_query = "UPDATE Games SET Moves=$Moves, " . //See *** HOT_SECTION ***
-             "Last_X=".POSX_SCORE.", " .
-             "Status='$next_status', ";
-
-         if( $next_status != GAME_STATUS_FINISHED )
-            $gah->game_query .= "ToMove_ID=$next_to_move_ID, ";
-         else
-            $gah->game_query .= "ToMove_ID=0, ";
-
-         $gah->game_query .=
-             "Score=$score, " .
-             "Last_Move='$Last_Move', " . //Not a move, re-use last one
-             "Flags=$GameFlags, " . //Don't reset KO-Flag else SCORE,RESUME could break a Ko
-             "Snapshot='" . GameSnapshot::make_game_snapshot($Size, $TheBoard) . "', ";
+         $score = $gah->prepare_game_action_score( 'confirm',
+            $TheBoard, $stonestring, /*uniq-toggle*/false, /*agree*/true );
          break;
-      }//switch for 'done'
+      }
 
       default:
          error('invalid_action', "confirm.noaction($gid,$action,$Status)");

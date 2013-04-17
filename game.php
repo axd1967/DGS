@@ -180,7 +180,7 @@ $GLOBALS['ThePage'] = new Page('Game');
 
    // allow validation
    $just_looking = !$may_play;
-   if( $just_looking && ( $action == 'add_time' || $action == GAMEACT_DELETE || $action == 'resign' ) )
+   if( $just_looking && ( $action == 'add_time' || $action == GAMEACT_DELETE || $action == GAMEACT_RESIGN ) )
       $just_looking = false;
 
    $my_game = ( $logged_in && ( $my_id == $Black_ID || $my_id == $White_ID ) );
@@ -215,7 +215,7 @@ $GLOBALS['ThePage'] = new Page('Game');
    else if( $ToMove_ID )
       error('database_corrupted', "game.bad_ToMove_ID($gid,$ToMove_ID,$Black_ID,$White_ID)");
 
-   if( $Moves < $Handicap && ($action == 'choose_move' || $action == 'domove' ) )
+   if( $Moves < $Handicap && ($action == 'choose_move' || $action == GAMEACT_DO_MOVE ) )
       error('invalid_action', "game.check.miss_handicap($gid,$my_id,$action,$Moves,$Handicap)");
 
    if( $Status != GAME_STATUS_FINISHED && ($Maintime > 0 || $Byotime > 0) )
@@ -242,7 +242,7 @@ $GLOBALS['ThePage'] = new Page('Game');
 
 
    $no_marked_dead = ( $Status == GAME_STATUS_KOMI || $Status == GAME_STATUS_PLAY || $Status == GAME_STATUS_PASS ||
-                       $action == 'choose_move' || $action == 'domove' );
+                       $action == 'choose_move' || $action == GAMEACT_DO_MOVE );
    $board_opts = ( $no_marked_dead ? 0 : BOARDOPT_MARK_DEAD ) | BOARDOPT_LOAD_LAST_MSG | BOARDOPT_USE_CACHE;
    $cache_ttl = ( $Status == GAME_STATUS_KOMI || $Status == GAME_STATUS_FINISHED )
       ? 5*SECS_PER_MIN
@@ -296,7 +296,7 @@ $GLOBALS['ThePage'] = new Page('Game');
             break;
          }
 
-         case 'domove': //for validation after 'choose_move' and for normal move on board
+         case GAMEACT_DO_MOVE: //for validation after 'choose_move' and for normal move on board
          {
             if( !$is_running_game ) //after resume
                error('invalid_action',"game.domove.check_status($gid,$Status)");
@@ -437,7 +437,7 @@ $GLOBALS['ThePage'] = new Page('Game');
             break;
          }// case 'remove'
 
-         case 'done': //for validation after 'remove', done marking dead-stones in scoring-mode
+         case GAMEACT_SCORE: // ='done': for validation after 'remove', done marking dead-stones in scoring-mode
          {
             if( $Status != GAME_STATUS_SCORE && $Status != GAME_STATUS_SCORE2 )
                error('invalid_action', "game.done.check_status($gid,$Status)");

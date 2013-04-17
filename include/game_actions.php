@@ -258,6 +258,68 @@ class GameActionHelper
    }//prepare_game_action_resign
 
 
+   // \param $agree ignored for non-quick-suite; boolean value
+   // \param $arr_coords ignored for non-quick-suite; use false | array of coord-moves [(x,y), ...]
+   public function prepare_game_action_score( $dbgmsg, $board, $stonestring, $toggle_uniq, $agree, $arr_coords )
+   {
+      global $Handicap, $Komi, $Black_Prisoners, $White_Prisoners, $Ruleset, $Status, $to_move, $Moves, $hours,
+             $GameFlags, $next_to_move_ID;
+      if( $this->is_quick && $this->game_row ) extract($this->game_row);
+
+      $dbgmsg .= ".GAH.prepare_game_action_score({$this->gid},{$this->action})";
+
+      $board_size = $board->size;
+      if( !$this->is_quick )
+         $arr_coords = false;
+
+      $gchkscore = new GameCheckScore( $board, $stonestring, $Handicap, $Komi, $Black_Prisoners, $White_Prisoners );
+      if( $toggle_uniq )
+         $gchkscore->set_toggle_unique();
+      $game_score = $gchkscore->check_remove( getRulesetScoring($Ruleset), $arr_coords );
+      $gchkscore->update_stonestring( $stonestring );
+      $score = $game_score->calculate_score();
+
+      $l = strlen( $stonestring );
+      if( $Status == GAME_STATUS_SCORE2 && $l < 2 )
+      {
+         if( $this->is_quick && !$agree )
+            error('invalid_action', "$dbgmsg.expect_agree($agree)");
+         $next_status = GAME_STATUS_FINISHED;
+         $game_finished = true;
+      }
+      else
+      {
+         if( $this->is_quick && $agree )
+            error('invalid_action', "$dbgmsg.expect_disagree($agree)");
+         $next_status = GAME_STATUS_SCORE2;
+      }
+
+      $this->move_query = self::$MOVE_INSERT_QUERY; // gid,MoveNr,Stone,PosX,PosY,Hours
+      $mark_stone = ( $to_move == BLACK ) ? MARKED_BY_BLACK : MARKED_BY_WHITE;
+      for( $i=0; $i < $l; $i += 2 )
+      {
+         list($x,$y) = sgf2number_coords(substr($stonestring, $i, 2), $board_size);
+         $this->move_query .= "({$this->gid}, $Moves, $mark_stone, $x, $y, 0), ";
+      }
+      $this->move_query .= "({$this->gid}, $Moves, $to_move, ".POSX_SCORE.", 0, $hours) ";
+
+      $this->game_query = "UPDATE Games SET Moves=$Moves, " . //See *** HOT_SECTION ***
+          "Last_X=".POSX_SCORE.", " .
+          "Status='$next_status', " .
+          "Score=$score, " .
+          //"Last_Move='$Last_Move', " . //Not a move, re-use last one
+          "Flags=$GameFlags, " . //Don't reset KO-Flag else SCORE,RESUME could break a Ko
+          "Snapshot='" . GameSnapshot::make_game_snapshot($board_size, $board) . "', ";
+
+      if( $next_status != GAME_STATUS_FINISHED )
+         $this->game_query .= "ToMove_ID=$next_to_move_ID, ";
+      else
+         $this->game_query .= "ToMove_ID=0, ";
+
+      return $score;
+   }//prepare_game_action_score
+
+
    public function prepare_game_action_generic( $message )
    {
       global $Handicap, $Moves, $NOW;
