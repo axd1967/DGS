@@ -27,6 +27,9 @@ require_once 'include/game_functions.php';
 
 
 define('GAHACT_DELETE', 'delete');
+define('GAHACT_PASS',   'pass');
+define('GAHACT_RESIGN', 'resign');
+define('GAHACT_SET_HANDICAP', 'set_handicap');
 
 /*!
  * \class GameActionHelper
@@ -51,6 +54,11 @@ class GameActionHelper
    public $game_query = '';
    public $move_query = '';
    public $message_query = '';
+   public $mp_query = '';
+   public $time_query = '';
+
+   private static $MOVE_INSERT_QUERY = "INSERT INTO Moves ( gid, MoveNr, Stone, PosX, PosY, Hours ) VALUES ";
+
 
    public function __construct( $my_id, $gid, $action, $is_quick )
    {
@@ -59,6 +67,53 @@ class GameActionHelper
       $this->action = $action;
       $this->is_quick = $is_quick;
    }
+
+   public function prepare_game_action_pass( $dbgmsg )
+   {
+      //TODO TODO TODO
+      global $Moves, $Handicap, $Status, $to_move, $hours, $next_to_move_ID, $Last_Move, $GameFlags, $NOW;
+
+      $dbgmsg .= ".GAH.prepare_game_action_pass({$this->gid},{$this->action},$Status,$Moves,$Handicap)";
+
+      if( $Moves < $Handicap )
+         error('early_pass', "$dbgmsg.check.moves");
+
+      if( $Status == GAME_STATUS_PLAY )
+         $next_status = GAME_STATUS_PASS;
+      else if( $Status == GAME_STATUS_PASS )
+         $next_status = GAME_STATUS_SCORE;
+      else
+         error('invalid_action', "$dbgmsg.check_status");
+
+      $this->move_query = self::$MOVE_INSERT_QUERY; // gid,MoveNr,Stone,PosX,PosY,Hours
+      $this->move_query .= "({$this->gid}, $Moves, $to_move, ".POSX_PASS.", 0, $hours)";
+
+      $this->game_query = "UPDATE Games SET Moves=$Moves, " . //See *** HOT_SECTION ***
+          "Last_X=".POSX_PASS.", " .
+          "Status='$next_status', " .
+          "ToMove_ID=$next_to_move_ID, " .
+          //"Last_Move='$Last_Move', " . //Not a move, re-use last one
+          "Flags=$GameFlags, "; //Don't reset KO-Flag else PASS,PASS,RESUME could break a Ko
+   }//prepare_game_action_pass
+
+   public function prepare_game_action_generic( $message )
+   {
+      //TODO TODO TODO
+      global $Handicap, $Moves, $NOW;
+
+      if( $this->action != GAHACT_DELETE )
+      {
+         if( $this->action != GAHACT_RESIGN )
+            $this->game_query .= $this->mp_query;
+         $this->game_query .= $this->time_query . "Lastchanged=FROM_UNIXTIME($NOW)" ;
+
+         if( $message )
+         {
+            $move_nr = ( $this->action == GAHACT_SET_HANDICAP ) ? $Handicap : $Moves;
+            $this->message_query = "INSERT INTO MoveMessages SET gid={$this->gid}, MoveNr=$move_nr, Text=\"$message\"";
+         }
+      }
+   }//prepare_game_action_generic
 
    public function update_game( $dbgmsg, $game_finished )
    {

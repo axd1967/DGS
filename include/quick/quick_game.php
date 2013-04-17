@@ -291,14 +291,22 @@ class QuickHandlerGame extends QuickHandler
       *********************** */
       $action = $this->action;
 
+      // compatibility statements for GameActionHelper
       static $ARR_GAH_ACTIONS = array(
-            GAMECMD_DELETE => GAHACT_DELETE,
+            GAMECMD_DELETE       => GAHACT_DELETE,
+            GAMEACT_PASS         => GAHACT_PASS,
+            GAMECMD_RESIGN       => GAHACT_RESIGN,
+            GAMECMD_SET_HANDICAP => GAHACT_SET_HANDICAP,
          );
       $gah_action = ( isset($ARR_GAH_ACTIONS[$action]) ) ? $ARR_GAH_ACTIONS[$action] : $action;
       $game_row = $this->game_row;
+      $to_move = $this->to_move;
 
       $gah = new GameActionHelper( $this->my_id, $gid, $gah_action, /*quick*/true );
       $gah->game_clause = " WHERE ID=$gid AND Status".IS_RUNNING_GAME." AND Moves=$Moves LIMIT 1";
+      $gah->mp_query = $mp_query;
+      $gah->time_query = $time_query;
+
       $score = null;
       $Moves++;
       $game_finished = false;
@@ -388,20 +396,7 @@ class QuickHandlerGame extends QuickHandler
          case GAMEACT_PASS:
          {
             // NOTE: moves = "pass" for passing move
-            if( $Status == GAME_STATUS_PLAY )
-               $next_status = GAME_STATUS_PASS;
-            else if( $Status == GAME_STATUS_PASS )
-               $next_status = GAME_STATUS_SCORE;
-
-            $gah->move_query = $MOVE_INSERT_QUERY; // gid,MoveNr,Stone,PosX,PosY,Hours
-            $gah->move_query .= "($gid, $Moves, {$this->to_move}, ".POSX_PASS.", 0, $hours)";
-
-            $gah->game_query = "UPDATE Games SET Moves=$Moves, " . //See *** HOT_SECTION ***
-                "Last_X=".POSX_PASS.", " .
-                "Status='$next_status', " .
-                "ToMove_ID=$next_to_move_ID, " .
-                //"Last_Move='$Last_Move', " . //Not a move, re-use last one
-                "Flags=$GameFlags, "; //Don't reset KO-Flag else PASS,PASS,RESUME could break a Ko
+            $gah->prepare_game_action_pass( 'QuickHandlerGame.process' );
             break;
          }//pass
 
@@ -480,17 +475,7 @@ class QuickHandlerGame extends QuickHandler
             break;
       }//switch $action
 
-      if( $cmd != GAMECMD_DELETE )
-      {
-         $gah->game_query .= $mp_query . $time_query . "Lastchanged=FROM_UNIXTIME($NOW)" ;
-
-         if( $message )
-         {
-            $move_nr = ( $cmd == GAMECMD_SET_HANDICAP ) ? $Handicap : $Moves;
-            $gah->message_query = "INSERT INTO MoveMessages SET gid=$gid, MoveNr=$move_nr, Text=\"$message\"";
-         }
-      }
-
+      $gah->prepare_game_action_generic( $message );
       $gah->update_game( 'QuickHandlerGame.process', $game_finished );
    }//process_cmd_play
 

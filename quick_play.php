@@ -166,8 +166,12 @@ This is why:
 - the Games table modification must always modify the Moves field (see $game_query)
 - this modification is always done in first place and checked before continuation
 *********************** */
+
    $gah = new GameActionHelper( $my_id, $gid, $action, /*quick*/true );
    $gah->game_clause = " WHERE ID=$gid AND Status".IS_RUNNING_GAME." AND Moves=$Moves LIMIT 1";
+   $gah->mp_query = $mp_query;
+   $gah->time_query = $time_query;
+
    $Moves++;
 
 
@@ -200,9 +204,6 @@ This is why:
 
       $gah->move_query .= "($gid, $Moves, $to_move, {$gchkmove->colnr}, {$gchkmove->rownr}, $hours) ";
 
-      if( $message )
-         $gah->message_query = "INSERT INTO MoveMessages SET gid=$gid, MoveNr=$Moves, Text='$message'";
-
       $gah->game_query = "UPDATE Games SET Moves=$Moves, " . //See *** HOT_SECTION ***
           "Last_X={$gchkmove->colnr}, " . //used with mail notifications
           "Last_Y={$gchkmove->rownr}, " .
@@ -224,10 +225,10 @@ This is why:
 
       $gah->game_query .= "ToMove_ID=$next_to_move_ID, " .
           "Flags=$GameFlags, " .
-          "Snapshot='" . GameSnapshot::make_game_snapshot($Size, $TheBoard) . "', " .
-          $mp_query . $time_query . "Lastchanged=FROM_UNIXTIME($NOW)" ;
+          "Snapshot='" . GameSnapshot::make_game_snapshot($Size, $TheBoard) . "', ";
    }//domove
 
+   $gah->prepare_game_action_generic( $message );
    $gah->update_game( 'quick_play', /*game-finished*/false );
 
 // No Jump somewhere

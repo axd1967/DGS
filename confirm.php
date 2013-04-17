@@ -142,7 +142,7 @@ require_once( "include/rating.php" );
       error('internal_error', "confirm.board.load_from_db($gid)");
 
    $mp_query = '';
-   if( $is_mpgame && ($action == 'domove' || $action == 'pass' || $action == 'handicap' || $action == 'done') )
+   if( $is_mpgame && ($action == 'domove' || $action == 'pass' || $action == GAHACT_SET_HANDICAP || $action == 'done') )
    {
       list( $group_color, $group_order, $gpmove_color )
          = MultiPlayerGame::calc_game_player_for_move( $GamePlayers, $Moves, $Handicap, 2 );
@@ -183,8 +183,12 @@ This is why:
 - the Games table modification must always modify the Moves field (see $game_query)
 - this modification is always done in first place and checked before continuation
 *********************** */
+
    $gah = new GameActionHelper( $my_id, $gid, $action, /*quick*/false );
    $gah->game_clause = " WHERE ID=$gid AND Status".IS_RUNNING_GAME." AND Moves=$Moves LIMIT 1";
+   $gah->mp_query = $mp_query;
+   $gah->time_query = $time_query;
+
    $score = null;
    $Moves++;
 
@@ -222,9 +226,6 @@ This is why:
 
          $gah->move_query .= "($gid, $Moves, $to_move, {$gchkmove->colnr}, {$gchkmove->rownr}, $hours) ";
 
-         if( $message )
-            $gah->message_query = "INSERT INTO MoveMessages SET gid=$gid, MoveNr=$Moves, Text=\"$message\"";
-
          $gah->game_query = "UPDATE Games SET Moves=$Moves, " . //See *** HOT_SECTION ***
              "Last_X={$gchkmove->colnr}, " . //used with mail notifications
              "Last_Y={$gchkmove->rownr}, " .
@@ -246,45 +247,17 @@ This is why:
 
          $gah->game_query .= "ToMove_ID=$next_to_move_ID, " .
              "Flags=$GameFlags, " .
-             "Snapshot='" . GameSnapshot::make_game_snapshot($Size, $TheBoard) . "', " .
-             $mp_query . $time_query . "Lastchanged=FROM_UNIXTIME($NOW)" ;
+             "Snapshot='" . GameSnapshot::make_game_snapshot($Size, $TheBoard) . "', ";
          break;
       }//switch for 'domove'
 
-      case 'pass':
+      case GAHACT_PASS:
       {
-         if( $Moves < $Handicap )
-            error('early_pass', "confirm.pass($gid,$Moves,$Handicap)");
-
-         if( $Status == GAME_STATUS_PLAY )
-            $next_status = GAME_STATUS_PASS;
-         else if( $Status == GAME_STATUS_PASS )
-            $next_status = GAME_STATUS_SCORE;
-         else
-            error('invalid_action', "confirm.pass.check_status($gid,$Status)");
-
-
-         $gah->move_query = "INSERT INTO Moves SET " .
-             "gid=$gid, " .
-             "MoveNr=$Moves, " .
-             "Stone=$to_move, " .
-             "PosX=".POSX_PASS.", PosY=0, " .
-             "Hours=$hours";
-
-         if( $message )
-            $gah->message_query = "INSERT INTO MoveMessages SET gid=$gid, MoveNr=$Moves, Text=\"$message\"";
-
-         $gah->game_query = "UPDATE Games SET Moves=$Moves, " . //See *** HOT_SECTION ***
-             "Last_X=".POSX_PASS.", " .
-             "Status='$next_status', " .
-             "ToMove_ID=$next_to_move_ID, " .
-             "Last_Move='$Last_Move', " . //Not a move, re-use last one
-             "Flags=$GameFlags, " . //Don't reset KO-Flag else PASS,PASS,RESUME could break a Ko
-             $mp_query . $time_query . "Lastchanged=FROM_UNIXTIME($NOW)" ;
+         $gah->prepare_game_action_pass( 'confirm' );
          break;
       }//switch for 'pass'
 
-      case 'handicap': //stonestring is the list of handicap stones
+      case GAHACT_SET_HANDICAP: //stonestring is the list of handicap stones
       {
          if( $Status != GAME_STATUS_PLAY || !( $Handicap>1 && $Moves==1 ) )
             error('invalid_action', "confirm.handicap.check_status($gid,$Status,$Handicap,$Moves)");
@@ -306,9 +279,6 @@ This is why:
                ($i == $Handicap ? "$hours)" : "0), " );
          }
 
-         if( $message )
-            $gah->message_query = "INSERT INTO MoveMessages SET gid=$gid, MoveNr=$Handicap, Text=\"$message\"";
-
 
          $gah->game_query = "UPDATE Games SET Moves=$Handicap, " . //See *** HOT_SECTION ***
              "Last_X=$colnr, " .
@@ -316,8 +286,7 @@ This is why:
              "Last_Move='" . number2sgf_coords($colnr, $rownr, $Size) . "', " .
              "ToMove_ID=$White_ID, " .
              "Flags=$GameFlags, " .
-             "Snapshot='" . GameSnapshot::make_game_snapshot($Size, $TheBoard) . "', " .
-             $mp_query . $time_query . "Lastchanged=FROM_UNIXTIME($NOW)" ;
+             "Snapshot='" . GameSnapshot::make_game_snapshot($Size, $TheBoard) . "', ";
          break;
       }//switch for 'handicap'
 
@@ -330,9 +299,6 @@ This is why:
              "PosX=".POSX_RESIGN.", PosY=0, " .
              "Hours=$hours";
 
-         if( $message )
-            $gah->message_query = "INSERT INTO MoveMessages SET gid=$gid, MoveNr=$Moves, Text=\"$message\"";
-
          $score = ( $to_move == BLACK ) ? SCORE_RESIGN : -SCORE_RESIGN;
 
          $gah->game_query = "UPDATE Games SET Moves=$Moves, " . //See *** HOT_SECTION ***
@@ -340,8 +306,7 @@ This is why:
              "Status='".GAME_STATUS_FINISHED."', " .
              "ToMove_ID=0, " .
              "Score=$score, " .
-             "Flags=$GameFlags, " .
-             $time_query . "Lastchanged=FROM_UNIXTIME($NOW)" ;
+             "Flags=$GameFlags, ";
 
          $game_finished = true;
          break;
@@ -386,9 +351,6 @@ This is why:
 
          $gah->move_query .= "($gid, $Moves, $to_move, ".POSX_SCORE.", 0, $hours) ";
 
-         if( $message )
-            $gah->message_query = "INSERT INTO MoveMessages SET gid=$gid, MoveNr=$Moves, Text=\"$message\"";
-
          $gah->game_query = "UPDATE Games SET Moves=$Moves, " . //See *** HOT_SECTION ***
              "Last_X=".POSX_SCORE.", " .
              "Status='$next_status', ";
@@ -402,8 +364,7 @@ This is why:
              "Score=$score, " .
              "Last_Move='$Last_Move', " . //Not a move, re-use last one
              "Flags=$GameFlags, " . //Don't reset KO-Flag else SCORE,RESUME could break a Ko
-             "Snapshot='" . GameSnapshot::make_game_snapshot($Size, $TheBoard) . "', " .
-             $mp_query . $time_query . "Lastchanged=FROM_UNIXTIME($NOW)" ;
+             "Snapshot='" . GameSnapshot::make_game_snapshot($Size, $TheBoard) . "', ";
          break;
       }//switch for 'done'
 
@@ -412,6 +373,7 @@ This is why:
          break;
    }//switch $action
 
+   $gah->prepare_game_action_generic( $message );
    $gah->update_game( 'confirm', $game_finished );
 
 

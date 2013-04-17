@@ -166,7 +166,7 @@ $GLOBALS['ThePage'] = new Page('Game');
             if( $Status == GAME_STATUS_PLAY )
             {
                if( $Handicap>1 && $Moves==0 )
-                  $action = 'handicap';
+                  $action = GAHACT_SET_HANDICAP;
                else
                   $action = 'choose_move';
             }
@@ -326,7 +326,7 @@ $GLOBALS['ThePage'] = new Page('Game');
             break;
          }//case 'domove'
 
-         case 'handicap': //multiple input step + validation, to input free handicap-stones
+         case GAHACT_SET_HANDICAP: //multiple input step + validation, to input free handicap-stones
          {
             if( $Status != GAME_STATUS_PLAY || !( $Handicap>1 && $Moves==0 ) )
                error('invalid_action',"game.handicap.check_status($gid,$Status)");
@@ -359,7 +359,7 @@ $GLOBALS['ThePage'] = new Page('Game');
             else
                $validation_step = true;
             $coord = ''; // already processed/stored in $stonestring
-         }//case 'handicap'
+         }//case GAHACT_SET_HANDICAP
          break;
 
          case 'resign': //for validation
@@ -391,7 +391,7 @@ $GLOBALS['ThePage'] = new Page('Game');
             $validation_step = true;
             break;
 
-         case 'pass': //for validation, pass-move
+         case GAHACT_PASS: //for validation, pass-move
             if( $Status != GAME_STATUS_PLAY && $Status != GAME_STATUS_PASS )
                error('invalid_action', "game.pass.check_status($gid,$Status)");
 
@@ -798,7 +798,7 @@ $GLOBALS['ThePage'] = new Page('Game');
       if( $action == 'choose_move' )
       {
          if( $Status != GAME_STATUS_SCORE && $Status != GAME_STATUS_SCORE2 )
-            $menu_array[T_('Pass')] = "game.php?gid=$gid".URI_AMP."a=pass";
+            $menu_array[T_('Pass')] = "game.php?gid=$gid".URI_AMP."a=".GAHACT_PASS;
       }
       else if( $action == 'remove' )
       {
@@ -807,7 +807,7 @@ $GLOBALS['ThePage'] = new Page('Game');
 
          $menu_array[T_('Resume playing')] = "game.php?gid=$gid".URI_AMP."a=choose_move";
       }
-      else if( $action == 'handicap' )
+      else if( $action == GAHACT_SET_HANDICAP )
       {
          ; // none (at the moment)
       }
