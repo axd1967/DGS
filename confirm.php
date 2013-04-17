@@ -142,7 +142,7 @@ require_once( "include/rating.php" );
       error('internal_error', "confirm.board.load_from_db($gid)");
 
    $mp_query = '';
-   if( $is_mpgame && ($action == 'domove' || $action == 'pass' || $action == GAHACT_SET_HANDICAP || $action == 'done') )
+   if( $is_mpgame && ($action == 'domove' || $action == 'pass' || $action == GAH_ACT_SET_HANDICAP || $action == 'done') )
    {
       list( $group_color, $group_order, $gpmove_color )
          = MultiPlayerGame::calc_game_player_for_move( $GamePlayers, $Moves, $Handicap, 2 );
@@ -251,46 +251,19 @@ This is why:
          break;
       }//switch for 'domove'
 
-      case GAHACT_PASS:
+      case GAH_ACT_PASS:
       {
          $gah->prepare_game_action_pass( 'confirm' );
          break;
       }//switch for 'pass'
 
-      case GAHACT_SET_HANDICAP: //stonestring is the list of handicap stones
+      case GAH_ACT_SET_HANDICAP: //stonestring is the list of handicap stones
       {
-         if( $Status != GAME_STATUS_PLAY || !( $Handicap>1 && $Moves==1 ) )
-            error('invalid_action', "confirm.handicap.check_status($gid,$Status,$Handicap,$Moves)");
-
-         $stonestring = check_handicap( $TheBoard, (string)@$_REQUEST['stonestring'] );
-         if( strlen( $stonestring ) != 2 * $Handicap )
-            error('wrong_number_of_handicap_stone', "confirm.check.handicap($gid,$Handicap,$stonestring)");
-
-         $gah->move_query = "INSERT INTO Moves ( gid, MoveNr, Stone, PosX, PosY, Hours ) VALUES ";
-
-         for( $i=1; $i <= $Handicap; $i++ )
-         {
-            list($colnr,$rownr) = sgf2number_coords(substr($stonestring, $i*2-2, 2), $Size);
-
-            if( !isset($rownr) || !isset($colnr) )
-               error('illegal_position', "confirm.check_pos($gid,#$i,$Handicap)");
-
-            $gah->move_query .= "($gid, $i, " . BLACK . ", $colnr, $rownr, " .
-               ($i == $Handicap ? "$hours)" : "0), " );
-         }
-
-
-         $gah->game_query = "UPDATE Games SET Moves=$Handicap, " . //See *** HOT_SECTION ***
-             "Last_X=$colnr, " .
-             "Last_Y=$rownr, " .
-             "Last_Move='" . number2sgf_coords($colnr, $rownr, $Size) . "', " .
-             "ToMove_ID=$White_ID, " .
-             "Flags=$GameFlags, " .
-             "Snapshot='" . GameSnapshot::make_game_snapshot($Size, $TheBoard) . "', ";
+         $gah->prepare_game_action_set_handicap( 'confirm', $TheBoard, (string)@$_REQUEST['stonestring'], null );
          break;
       }//switch for 'handicap'
 
-      case 'resign':
+      case GAH_ACT_RESIGN:
       {
          $gah->move_query = "INSERT INTO Moves SET " .
              "gid=$gid, " .
@@ -312,7 +285,7 @@ This is why:
          break;
       }//switch for 'resign'
 
-      case GAHACT_DELETE:
+      case GAH_ACT_DELETE:
       {
          if( !$may_del_game )
             error('invalid_action', "confirm.delete($gid,$my_id,$Status)");

@@ -293,10 +293,10 @@ class QuickHandlerGame extends QuickHandler
 
       // compatibility statements for GameActionHelper
       static $ARR_GAH_ACTIONS = array(
-            GAMECMD_DELETE       => GAHACT_DELETE,
-            GAMEACT_PASS         => GAHACT_PASS,
-            GAMECMD_RESIGN       => GAHACT_RESIGN,
-            GAMECMD_SET_HANDICAP => GAHACT_SET_HANDICAP,
+            GAMECMD_DELETE       => GAH_ACT_DELETE,
+            GAMEACT_PASS         => GAH_ACT_PASS,
+            GAMECMD_RESIGN       => GAH_ACT_RESIGN,
+            GAMECMD_SET_HANDICAP => GAH_ACT_SET_HANDICAP,
          );
       $gah_action = ( isset($ARR_GAH_ACTIONS[$action]) ) ? $ARR_GAH_ACTIONS[$action] : $action;
       $game_row = $this->game_row;
@@ -322,22 +322,7 @@ class QuickHandlerGame extends QuickHandler
          case GAMECMD_SET_HANDICAP:
          {
             // NOTE: moves = list of coordinates of the handicap-stone placement
-            $this->TheBoard->add_handicap_stones( $this->moves ); // check coords
-
-            $gah->move_query = $MOVE_INSERT_QUERY; // gid,MoveNr,Stone,PosX,PosY,Hours
-            for( $i=1; $i <= $Handicap; $i++ )
-            {
-               list( $x, $y ) = $this->moves[$i-1];
-               $gah->move_query .= "($gid, $i, ".BLACK.", $x, $y, " . ($i == $Handicap ? "$hours)" : "0), " );
-            }
-
-            $gah->game_query = "UPDATE Games SET Moves=$Handicap, " . //See *** HOT_SECTION ***
-                "Last_X=$x, " .
-                "Last_Y=$y, " .
-                "Last_Move='" . number2sgf_coords($x, $y, $Size) . "', " .
-                "Flags=$GameFlags, " .
-                "Snapshot='" . GameSnapshot::make_game_snapshot($Size, $this->TheBoard) . "', " .
-                "ToMove_ID=$White_ID, ";
+            $gah->prepare_game_action_set_handicap( 'confirm', $TheBoard, null, $this->moves );
             break;
          }//set_handicap
 

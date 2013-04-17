@@ -133,6 +133,12 @@ define("WHITE_DEAD", OFFSET_MARKED+WHITE);
 define("FLAG_NOCLICK", 0x10); //keep it a power of 2
 //----- Board(end)
 
+// game-actions
+define('GAH_ACT_DELETE', 'delete');
+define('GAH_ACT_PASS',   'pass');
+define('GAH_ACT_RESIGN', 'resign');
+define('GAH_ACT_SET_HANDICAP', 'handicap');
+
 // ---------- Folder & Message stuff ------------------------------
 
 // folder for "destroyed" messages (former was: Folder_nr=NULL)
