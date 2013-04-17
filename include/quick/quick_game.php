@@ -93,7 +93,7 @@ class QuickHandlerGame extends QuickHandler
    {
       parent::checkArgsUnknown(QGAME_OPTIONS);
       $this->gid = (int)get_request_arg(GAMEOPT_GID);
-      $this->move_id = (int)get_request_arg(GAMEOPT_MOVEID);
+      $this->move_id = get_request_arg(GAMEOPT_MOVEID); // no cast, must be able to check for non-existence != 0
       $this->message = trim( get_request_arg(GAMEOPT_MESSAGE) );
       $this->url_moves = strtolower( trim( get_request_arg(GAMEOPT_MOVES) ) );
       $this->toggle_mode = get_request_arg(GAMEOPT_TOGGLE, GAMEOPTVAL_TOGGLE_ALL);
@@ -122,7 +122,11 @@ class QuickHandlerGame extends QuickHandler
 
       // check move(s) + context (move-id)
       if( $cmd == GAMECMD_DELETE || $cmd == GAMECMD_SET_HANDICAP || $cmd == GAMECMD_MOVE || $cmd == GAMECMD_RESIGN || $cmd == GAMECMD_SCORE )
+      {
          QuickHandler::checkArgMandatory( $dbgmsg, GAMEOPT_MOVEID, $this->move_id );
+         if( !is_numeric($this->move_id) )
+            error('invalid_args', "QuickHandlerGame.prepare.check.move_id($gid,{$this->move_id})");
+      }
       if( $cmd == GAMECMD_SET_HANDICAP || $cmd == GAMECMD_MOVE )
          QuickHandler::checkArgMandatory( $dbgmsg, GAMEOPT_MOVES, $this->url_moves );
       if( $cmd == GAMECMD_SET_HANDICAP || $cmd == GAMECMD_MOVE || $cmd == GAMECMD_STATUS_SCORE || $cmd == GAMECMD_SCORE )
@@ -267,18 +271,23 @@ class QuickHandlerGame extends QuickHandler
       if( $message && preg_match( "#</?h(idden)?>#is", $message) )
          $GameFlags |= GAMEFLAGS_HIDDEN_MSG;
 
-      $game_row = $this->game_row; // for GameActionHelper
-      $to_move = $this->to_move;
-
 
       // ***** HOT_SECTION *****
       // >>> See also: confirm.php, quick_play.php, include/quick/quick_game.php, clock_tick.php (for timeout)
       $gah = new GameActionHelper( $this->my_id, $gid, $this->action, /*quick*/true );
-      $gah->init_query( $Moves, $mp_query, $time_query );
+      $gah->init_query( $Moves, $mp_query, $time_query, $this->game_row );
 
       $score = null;
       $Moves++;
       $game_finished = false;
+
+      // pass-in "globals" for GameActionHelper
+      $this->game_row['to_move'] = $this->to_move;
+      $this->game_row['next_to_move_ID'] = $next_to_move_ID;
+      $this->game_row['hours'] = $hours;
+      $this->game_row['GameFlags'] = $GameFlags;
+      $this->game_row['Moves'] = $Moves;
+      $gah->game_row = $this->game_row;
 
       switch( (string)$this->action )
       {
@@ -311,22 +320,10 @@ class QuickHandlerGame extends QuickHandler
 
          case GAMEACT_RESIGN:
          {
-            $next_status = GAME_STATUS_FINISHED;
-            $score = ( $this->to_move == BLACK ) ? SCORE_RESIGN : -SCORE_RESIGN;
-
-            $gah->move_query = $MOVE_INSERT_QUERY; // gid,MoveNr,Stone,PosX,PosY,Hours
-            $gah->move_query .= "($gid, $Moves, {$this->to_move}, ".POSX_RESIGN.", 0, $hours)";
-
-            $gah->game_query = "UPDATE Games SET Moves=$Moves, " . //See *** HOT_SECTION ***
-                "Last_X=".POSX_RESIGN.", " .
-                "Status='$next_status', " .
-                "ToMove_ID=0, " .
-                "Score=$score, " .
-                "Flags=$GameFlags, ";
-
+            $score = $gah->prepare_game_action_resign( $dbgmsg );
             $game_finished = true;
             break;
-         }//resign
+         }
 
          case GAMEACT_SCORE:
          {
@@ -385,7 +382,7 @@ class QuickHandlerGame extends QuickHandler
       }//switch $this->action
 
       $gah->prepare_game_action_generic( $message );
-      $gah->update_game( $dbgmsg, $game_finished );
+      $gah->update_game( $dbgmsg, $game_finished, $score );
    }//process_cmd_play
 
    private function process_cmd_status_score()
@@ -478,7 +475,7 @@ class QuickHandlerGame extends QuickHandler
             //GAMECMD_STATUS_SCORE => GAMECMD_STATUS_SCORE,
          );
 
-      $game_action = ( isset($ARR_GAME_ACTIONS[$cmd]) ) ? $ARR_GAH_ACTIONS[$cmd] : $cmd;
+      $game_action = ( isset($ARR_GAME_ACTIONS[$cmd]) ) ? $ARR_GAME_ACTIONS[$cmd] : $cmd;
       return $game_action;
    }//convert_game_cmd_to_action
 
