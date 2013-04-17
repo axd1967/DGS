@@ -635,7 +635,7 @@ class Board
 
    // keep in sync with GobanHandlerGfxBoard
    // board: img.alt-attr mapping: B>X W>O, last-move B># W>@, dead B>x W>o, terr B>+ W>-, dame>. seki-dame>s hoshi>, else>.
-   // \param $action GAMEACT_...
+   // \param $action GAMEACT_SET_HANDICAP, 'remove', or other text
    public function draw_board( $may_play=false, $action='', $stonestring='')
    {
       global $woodbgcolors;
