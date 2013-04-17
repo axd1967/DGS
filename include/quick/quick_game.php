@@ -58,9 +58,6 @@ define('GAMECMD_STATUS_SCORE', 'status_score');
 define('GAMECMD_SCORE',  'score');
 define('GAME_COMMANDS', 'delete|set_handicap|move|resign|status_score|score');
 
-// cmd => action
-define('GAMEACT_PASS', 'pass');
-
 
  /*!
   * \class QuickHandlerGame
@@ -164,7 +161,7 @@ class QuickHandlerGame extends QuickHandler
       // check for invalid-action
 
       $is_mpgame = ($GameType != GAMETYPE_GO);
-      $this->action = $cmd;
+      $this->action = self::convert_game_cmd_to_action( $cmd );
       if( $cmd == GAMECMD_DELETE )
       {
          $too_few_moves = ( $Moves < DELETE_LIMIT + $Handicap );
@@ -218,7 +215,7 @@ class QuickHandlerGame extends QuickHandler
 
       // load board with moves
       $this->TheBoard = new Board();
-      $no_marked_dead = ( $this->action == GAMECMD_MOVE || $Status == GAME_STATUS_PLAY || $Status == GAME_STATUS_PASS );
+      $no_marked_dead = ( $cmd == GAMECMD_MOVE || $Status == GAME_STATUS_PLAY || $Status == GAME_STATUS_PASS );
       $board_opts = ( $no_marked_dead ? 0 : BOARDOPT_MARK_DEAD );
       if( !$this->TheBoard->load_from_db( $this->game_row, 0, $board_opts) )
          error('internal_error', "$dbgmsg.load_board($no_marked_dead)");
@@ -241,6 +238,8 @@ class QuickHandlerGame extends QuickHandler
       $cmd = $this->quick_object->cmd;
       $gid = $this->gid;
       extract($this->game_row);
+
+      $dbgmsg = 'QuickHandlerGame.process';
 
       $next_to_move = WHITE + BLACK - $this->to_move;
       $next_to_move_ID = ( $next_to_move == BLACK ) ? $Black_ID : $White_ID;
@@ -289,20 +288,12 @@ class QuickHandlerGame extends QuickHandler
       - the Games table modification must always modify the Moves field (see $game_query)
       - this modification is always done in first place and checked before continuation
       *********************** */
-      $action = $this->action;
 
       // compatibility statements for GameActionHelper
-      static $ARR_GAH_ACTIONS = array(
-            GAMECMD_DELETE       => GAH_ACT_DELETE,
-            GAMEACT_PASS         => GAH_ACT_PASS,
-            GAMECMD_RESIGN       => GAH_ACT_RESIGN,
-            GAMECMD_SET_HANDICAP => GAH_ACT_SET_HANDICAP,
-         );
-      $gah_action = ( isset($ARR_GAH_ACTIONS[$action]) ) ? $ARR_GAH_ACTIONS[$action] : $action;
       $game_row = $this->game_row;
       $to_move = $this->to_move;
 
-      $gah = new GameActionHelper( $this->my_id, $gid, $gah_action, /*quick*/true );
+      $gah = new GameActionHelper( $this->my_id, $gid, $this->action, /*quick*/true );
       $gah->game_clause = " WHERE ID=$gid AND Status".IS_RUNNING_GAME." AND Moves=$Moves LIMIT 1";
       $gah->mp_query = $mp_query;
       $gah->time_query = $time_query;
@@ -311,81 +302,36 @@ class QuickHandlerGame extends QuickHandler
       $Moves++;
       $game_finished = false;
 
-      switch( (string)$action )
+      switch( (string)$this->action )
       {
-         case GAMECMD_DELETE:
+         case GAMEACT_DELETE:
          {
             $game_finished = true;
             break;
-         }//delete
+         }
 
-         case GAMECMD_SET_HANDICAP:
+         case GAMEACT_SET_HANDICAP:
          {
             // NOTE: moves = list of coordinates of the handicap-stone placement
-            $gah->prepare_game_action_set_handicap( 'confirm', $TheBoard, null, $this->moves );
+            $gah->prepare_game_action_set_handicap( $dbgmsg, $this->TheBoard, null, $this->moves );
             break;
-         }//set_handicap
+         }
 
-         case GAMECMD_MOVE:
+         case GAMEACT_DO_MOVE:
          {
             // NOTE: moves = single move to submit (non "pass"-move)
-            $next_status = GAME_STATUS_PLAY;
-
-            {//to fix the old way Ko detect. Could be removed when no more old way games.
-               if( !@$Last_Move ) $Last_Move = number2sgf_coords($Last_X, $Last_Y, $Size);
-            }
-            $gchkmove = new GameCheckMove( $this->TheBoard );
-            $gchkmove->check_move( /*(x,y)*/$this->moves[0], $this->to_move, $Last_Move, $GameFlags );
-            $gchkmove->update_prisoners( $Black_Prisoners, $White_Prisoners );
-
-            $gah->move_query = $MOVE_INSERT_QUERY; // gid,MoveNr,Stone,PosX,PosY,Hours
-
-            $prisoner_string = '';
-            foreach($gchkmove->prisoners as $coord)
-            {
-               list( $x, $y ) = $coord;
-               $gah->move_query .= "($gid, $Moves, ".NONE.", $x, $y, 0), ";
-               $prisoner_string .= number2sgf_coords($x, $y, $Size);
-            }
-
-            if( strlen($prisoner_string) != $gchkmove->nr_prisoners*2 )
-               error('move_problem', "QuickHandlerGame.process.move.prisoner($gid,{$gchkmove->nr_prisoners},$prisoner_string)");
-
-            $gah->move_query .= "($gid, $Moves, {$this->to_move}, {$gchkmove->colnr}, {$gchkmove->rownr}, $hours) ";
-
-            $gah->game_query = "UPDATE Games SET Moves=$Moves, " . //See *** HOT_SECTION ***
-                "Last_X={$gchkmove->colnr}, " . //used with mail notifications
-                "Last_Y={$gchkmove->rownr}, " .
-                "Last_Move='" . number2sgf_coords($gchkmove->colnr, $gchkmove->rownr, $Size) . "', " . //used to detect Ko
-                "Status='$next_status', ";
-
-            if( $gchkmove->nr_prisoners > 0 )
-            {
-               if( $this->to_move == BLACK )
-                  $gah->game_query .= "Black_Prisoners=$Black_Prisoners, ";
-               else
-                  $gah->game_query .= "White_Prisoners=$White_Prisoners, ";
-            }
-
-            if( $gchkmove->nr_prisoners == 1 )
-               $GameFlags |= GAMEFLAGS_KO;
-            else
-               $GameFlags &= ~GAMEFLAGS_KO;
-
-            $gah->game_query .= "ToMove_ID=$next_to_move_ID, " .
-               "Flags=$GameFlags, " .
-               "Snapshot='" . GameSnapshot::make_game_snapshot($Size, $this->TheBoard) . "', ";
+            $gah->prepare_game_action_do_move( $dbgmsg, $this->TheBoard, /*(x,y)*/$this->moves[0] );
             break;
-         }//move
+         }
 
          case GAMEACT_PASS:
          {
             // NOTE: moves = "pass" for passing move
-            $gah->prepare_game_action_pass( 'QuickHandlerGame.process' );
+            $gah->prepare_game_action_pass( $dbgmsg );
             break;
-         }//pass
+         }
 
-         case GAMECMD_RESIGN:
+         case GAMEACT_RESIGN:
          {
             $next_status = GAME_STATUS_FINISHED;
             $score = ( $this->to_move == BLACK ) ? SCORE_RESIGN : -SCORE_RESIGN;
@@ -404,7 +350,7 @@ class QuickHandlerGame extends QuickHandler
             break;
          }//resign
 
-         case GAMECMD_SCORE:
+         case GAMEACT_SCORE:
          {
             // NOTE: moves = coords to toggle for disagreement, toggle = toggle-mode, agree = agreement to finish game
             $stonestring = '';
@@ -456,12 +402,12 @@ class QuickHandlerGame extends QuickHandler
          }//score
 
          default:
-            error('invalid_action', "QuickHandlerGame.process.noaction($gid,$action,$Status)");
+            error('invalid_action', "QuickHandlerGame.process.noaction($gid,{$this->action},$Status)");
             break;
-      }//switch $action
+      }//switch $this->action
 
       $gah->prepare_game_action_generic( $message );
-      $gah->update_game( 'QuickHandlerGame.process', $game_finished );
+      $gah->update_game( $dbgmsg, $game_finished );
    }//process_cmd_play
 
    private function process_cmd_status_score()
@@ -540,6 +486,23 @@ class QuickHandlerGame extends QuickHandler
 
 
    // ---------- static funcs ----------------------
+
+   /*! \brief Converts game-command to action needed by GameActionHelper. */
+   private static function convert_game_cmd_to_action( $cmd )
+   {
+      static $ARR_GAME_ACTIONS = array(
+            GAMECMD_DELETE  => GAMEACT_DELETE,
+            GAMECMD_MOVE    => GAMEACT_DO_MOVE,
+            //GAMEACT_PASS    => GAMEACT_PASS,
+            GAMECMD_RESIGN  => GAMEACT_RESIGN,
+            GAMECMD_SCORE   => GAMEACT_SCORE,
+            GAMECMD_SET_HANDICAP => GAMEACT_SET_HANDICAP,
+            //GAMECMD_STATUS_SCORE => GAMECMD_STATUS_SCORE,
+         );
+
+      $game_action = ( isset($ARR_GAME_ACTIONS[$cmd]) ) ? $ARR_GAH_ACTIONS[$cmd] : $cmd;
+      return $game_action;
+   }//convert_game_cmd_to_action
 
    /*! \brief Converts string of SGF-coords (without comma) into other coordinate-format. */
    private static function convert_coords( $coord_str, $fmt, $size )

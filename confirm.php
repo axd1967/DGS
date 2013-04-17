@@ -142,7 +142,7 @@ require_once( "include/rating.php" );
       error('internal_error', "confirm.board.load_from_db($gid)");
 
    $mp_query = '';
-   if( $is_mpgame && ($action == 'domove' || $action == 'pass' || $action == GAH_ACT_SET_HANDICAP || $action == 'done') )
+   if( $is_mpgame && ($action == 'domove' || $action == 'pass' || $action == GAMEACT_SET_HANDICAP || $action == 'done') )
    {
       list( $group_color, $group_order, $gpmove_color )
          = MultiPlayerGame::calc_game_player_for_move( $GamePlayers, $Moves, $Handicap, 2 );
@@ -195,75 +195,31 @@ This is why:
 
    switch( (string)$action )
    {
-      case 'domove': //stonestring is the list of prisoners
+      case GAMEACT_DO_MOVE:
       {
          if( !$is_running_game ) //after resume
             error('invalid_action', "confirm.domove.check_status($gid,$Status)");
 
          $coord = @$_REQUEST['coord'];
-         $stonestring = @$_REQUEST['stonestring'];
-
-         {//to fix the old way Ko detect. Could be removed when no more old way games.
-            if( !@$Last_Move ) $Last_Move= number2sgf_coords($Last_X, $Last_Y, $Size);
-         }
-         $gchkmove = new GameCheckMove( $TheBoard );
-         $gchkmove->check_move( $coord, $to_move, $Last_Move, $GameFlags );
-         $gchkmove->update_prisoners( $Black_Prisoners, $White_Prisoners );
-
-         $gah->move_query = "INSERT INTO Moves (gid, MoveNr, Stone, PosX, PosY, Hours) VALUES ";
-
-         $prisoner_string = '';
-         foreach($gchkmove->prisoners as $tmp)
-         {
-            list($x,$y) = $tmp;
-            $gah->move_query .= "($gid, $Moves, ".NONE.", $x, $y, 0), ";
-            $prisoner_string .= number2sgf_coords($x, $y, $Size);
-         }
-
-
-         if( strlen($prisoner_string) != $gchkmove->nr_prisoners*2 || ( $stonestring && $prisoner_string != $stonestring) )
-            error('move_problem', "confirm.domove.prisoner($gid)");
-
-         $gah->move_query .= "($gid, $Moves, $to_move, {$gchkmove->colnr}, {$gchkmove->rownr}, $hours) ";
-
-         $gah->game_query = "UPDATE Games SET Moves=$Moves, " . //See *** HOT_SECTION ***
-             "Last_X={$gchkmove->colnr}, " . //used with mail notifications
-             "Last_Y={$gchkmove->rownr}, " .
-             "Last_Move='" . number2sgf_coords($gchkmove->colnr, $gchkmove->rownr, $Size) . "', " . //used to detect Ko
-             "Status='".GAME_STATUS_PLAY."', ";
-
-         if( $gchkmove->nr_prisoners > 0 )
-         {
-            if( $to_move == BLACK )
-               $gah->game_query .= "Black_Prisoners=$Black_Prisoners, ";
-            else
-               $gah->game_query .= "White_Prisoners=$White_Prisoners, ";
-         }
-
-         if( $gchkmove->nr_prisoners == 1 )
-            $GameFlags |= GAMEFLAGS_KO;
-         else
-            $GameFlags &= ~GAMEFLAGS_KO;
-
-         $gah->game_query .= "ToMove_ID=$next_to_move_ID, " .
-             "Flags=$GameFlags, " .
-             "Snapshot='" . GameSnapshot::make_game_snapshot($Size, $TheBoard) . "', ";
+         $stonestring = @$_REQUEST['stonestring']; //stonestring is the list of prisoners
+         $gah->prepare_game_action_do_move( 'confirm', $TheBoard, $coord, $stonestring );
          break;
-      }//switch for 'domove'
+      }
 
-      case GAH_ACT_PASS:
+      case GAMEACT_PASS:
       {
          $gah->prepare_game_action_pass( 'confirm' );
          break;
-      }//switch for 'pass'
+      }
 
-      case GAH_ACT_SET_HANDICAP: //stonestring is the list of handicap stones
+      case GAMEACT_SET_HANDICAP: //stonestring is the list of handicap stones
       {
-         $gah->prepare_game_action_set_handicap( 'confirm', $TheBoard, (string)@$_REQUEST['stonestring'], null );
+         $stonestring = @$_REQUEST['stonestring']; //stonestring is the list of prisoners
+         $gah->prepare_game_action_set_handicap( 'confirm', $TheBoard, $stonestring, null );
          break;
-      }//switch for 'handicap'
+      }
 
-      case GAH_ACT_RESIGN:
+      case GAMEACT_RESIGN:
       {
          $gah->move_query = "INSERT INTO Moves SET " .
              "gid=$gid, " .
@@ -285,14 +241,14 @@ This is why:
          break;
       }//switch for 'resign'
 
-      case GAH_ACT_DELETE:
+      case GAMEACT_DELETE:
       {
          if( !$may_del_game )
             error('invalid_action', "confirm.delete($gid,$my_id,$Status)");
 
          $game_finished = true;
          break;
-      }//switch for 'delete'
+      }
 
       case 'done': //stonestring is the list of toggled points
       {

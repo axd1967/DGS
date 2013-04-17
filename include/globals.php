@@ -134,10 +134,13 @@ define("FLAG_NOCLICK", 0x10); //keep it a power of 2
 //----- Board(end)
 
 // game-actions
-define('GAH_ACT_DELETE', 'delete');
-define('GAH_ACT_PASS',   'pass');
-define('GAH_ACT_RESIGN', 'resign');
-define('GAH_ACT_SET_HANDICAP', 'handicap');
+// NOTE: don't change values to keep compatibility with old dgs-clients using confirm-page directly
+define('GAMEACT_DELETE',  'delete');
+define('GAMEACT_DO_MOVE', 'domove');
+define('GAMEACT_PASS',    'pass');
+define('GAMEACT_RESIGN',  'resign');
+define('GAMEACT_SCORE',   'done');
+define('GAMEACT_SET_HANDICAP', 'handicap');
 
 // ---------- Folder & Message stuff ------------------------------
 

@@ -114,6 +114,66 @@ class GameActionHelper
           "ToMove_ID=$White_ID, ";
    }//prepare_game_action_set_handicap
 
+
+   // \param $move_coord arr(x,y) or sgf-coord of move
+   // \param $chk_stonestring if given check against calculated prisonerstring
+   public function prepare_game_action_do_move( $dbgmsg, $board, $move_coord, $chk_stonestring='' )
+   {
+      //TODO TODO TODO
+      global $Last_Move, $Last_X, $Last_Y, $Size, $to_move, $GameFlags, $Black_Prisoners, $White_Prisoners, $Moves, $hours, $next_to_move_ID;
+
+      $dbgmsg .= ".GAH.prepare_game_action_do_move({$this->gid},{$this->action})";
+
+      $next_status = GAME_STATUS_PLAY;
+
+      {//to fix the old way Ko detect. Could be removed when no more old way games.
+         if( !@$Last_Move ) $Last_Move = number2sgf_coords($Last_X, $Last_Y, $Size);
+      }
+      $gchkmove = new GameCheckMove( $board );
+      $gchkmove->check_move( $move_coord, $to_move, $Last_Move, $GameFlags );
+      $gchkmove->update_prisoners( $Black_Prisoners, $White_Prisoners );
+
+      $this->move_query = self::$MOVE_INSERT_QUERY; // gid,MoveNr,Stone,PosX,PosY,Hours
+
+      $prisoner_string = '';
+      foreach( $gchkmove->prisoners as $coord )
+      {
+         list( $x, $y ) = $coord;
+         $this->move_query .= "({$this->gid}, $Moves, ".NONE.", $x, $y, 0), ";
+         $prisoner_string .= number2sgf_coords($x, $y, $Size);
+      }
+
+      if( ( strlen($prisoner_string) != $gchkmove->nr_prisoners*2 )
+            || ( $chk_stonestring && $prisoner_string != $chk_stonestring) )
+         error('move_problem', "$dbgmsg.prisoner({$gchkmove->nr_prisoners},$prisoner_string,$chk_stonestring)");
+
+      $this->move_query .= "({$this->gid}, $Moves, $to_move, {$gchkmove->colnr}, {$gchkmove->rownr}, $hours) ";
+
+      $this->game_query = "UPDATE Games SET Moves=$Moves, " . //See *** HOT_SECTION ***
+          "Last_X={$gchkmove->colnr}, " . //used with mail notifications
+          "Last_Y={$gchkmove->rownr}, " .
+          "Last_Move='" . number2sgf_coords($gchkmove->colnr, $gchkmove->rownr, $Size) . "', " . //used to detect Ko
+          "Status='$next_status', ";
+
+      if( $gchkmove->nr_prisoners > 0 )
+      {
+         if( $to_move == BLACK )
+            $this->game_query .= "Black_Prisoners=$Black_Prisoners, ";
+         else
+            $this->game_query .= "White_Prisoners=$White_Prisoners, ";
+      }
+
+      if( $gchkmove->nr_prisoners == 1 )
+         $GameFlags |= GAMEFLAGS_KO;
+      else
+         $GameFlags &= ~GAMEFLAGS_KO;
+
+      $this->game_query .= "ToMove_ID=$next_to_move_ID, " .
+         "Flags=$GameFlags, " .
+         "Snapshot='" . GameSnapshot::make_game_snapshot($Size, $board) . "', ";
+   }//prepare_game_action_do_move
+
+
    public function prepare_game_action_pass( $dbgmsg )
    {
       //TODO TODO TODO
@@ -147,15 +207,15 @@ class GameActionHelper
       //TODO TODO TODO
       global $Handicap, $Moves, $NOW;
 
-      if( $this->action != GAH_ACT_DELETE )
+      if( $this->action != GAMEACT_DELETE )
       {
-         if( $this->action != GAH_ACT_RESIGN )
+         if( $this->action != GAMEACT_RESIGN )
             $this->game_query .= $this->mp_query;
          $this->game_query .= $this->time_query . "Lastchanged=FROM_UNIXTIME($NOW)" ;
 
          if( $message )
          {
-            $move_nr = ( $this->action == GAH_ACT_SET_HANDICAP ) ? $Handicap : $Moves;
+            $move_nr = ( $this->action == GAMEACT_SET_HANDICAP ) ? $Handicap : $Moves;
             $this->message_query = "INSERT INTO MoveMessages SET gid={$this->gid}, MoveNr=$move_nr, Text=\"$message\"";
          }
       }
@@ -184,7 +244,7 @@ class GameActionHelper
          if( $this->move_query )
          {
             $result = db_query( "$dbgmsg.upd_moves1", $this->move_query );
-            if( mysql_affected_rows() < 1 && $this->action != GAH_ACT_DELETE )
+            if( mysql_affected_rows() < 1 && $this->action != GAMEACT_DELETE )
                error('mysql_insert_move', "$dbgmsg.upd_moves2");
 
             clear_cache_quick_status( array( $ToMove_ID, $next_to_move_ID ), QST_CACHE_GAMES );
@@ -195,7 +255,7 @@ class GameActionHelper
          if( $this->message_query )
          {
             $result = db_query( "$dbgmsg.upd_msg1", $this->message_query );
-            if( mysql_affected_rows() < 1 && $this->action != GAH_ACT_DELETE )
+            if( mysql_affected_rows() < 1 && $this->action != GAMEACT_DELETE )
                error('mysql_insert_move', "$dbgmsg.upd_msg2");
 
             Board::delete_cache_game_move_messages( "$dbgmsg.upd_msg3", $this->gid );
@@ -206,7 +266,7 @@ class GameActionHelper
             $game_finalizer = new GameFinalizer( ACTBY_PLAYER, $this->my_id, $this->gid, $tid, $Status,
                $GameType, $GamePlayers, $GameFlags, $Black_ID, $White_ID, $Moves, ($game_row['Rated'] != 'N') );
 
-            $do_delete = ( $this->action == GAH_ACT_DELETE );
+            $do_delete = ( $this->action == GAMEACT_DELETE );
 
             $game_finalizer->skip_game_query();
             $game_finalizer->finish_game( "confirm", $do_delete, null, $score, $message_raw );

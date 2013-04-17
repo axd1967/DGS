@@ -174,58 +174,13 @@ This is why:
 
    $Moves++;
 
-
    //case 'domove':
    {
       if( $Status != GAME_STATUS_PLAY )
          error('invalid_action', "quick_play.err5($gid)");
 
       $coord = number2sgf_coords( $query_X, $query_Y, $Size);
-
-      {//to fix the old way Ko detect. Could be removed when no more old way games.
-         if( !@$Last_Move ) $Last_Move= number2sgf_coords($Last_X, $Last_Y, $Size);
-      }
-      $gchkmove = new GameCheckMove( $TheBoard );
-      $gchkmove->check_move( $coord, $to_move, $Last_Move, $GameFlags );
-      $gchkmove->update_prisoners( $Black_Prisoners, $White_Prisoners );
-
-      $gah->move_query = "INSERT INTO Moves (gid, MoveNr, Stone, PosX, PosY, Hours) VALUES ";
-
-      $prisoner_string = '';
-      foreach($gchkmove->prisoners as $tmp)
-      {
-         list($x,$y) = $tmp;
-         $gah->move_query .= "($gid, $Moves, ".NONE.", $x, $y, 0), ";
-         $prisoner_string .= number2sgf_coords($x, $y, $Size);
-      }
-
-      if( strlen($prisoner_string) != $gchkmove->nr_prisoners*2 )
-         error('move_problem', "quick_play.domove.prisoner($gid)");
-
-      $gah->move_query .= "($gid, $Moves, $to_move, {$gchkmove->colnr}, {$gchkmove->rownr}, $hours) ";
-
-      $gah->game_query = "UPDATE Games SET Moves=$Moves, " . //See *** HOT_SECTION ***
-          "Last_X={$gchkmove->colnr}, " . //used with mail notifications
-          "Last_Y={$gchkmove->rownr}, " .
-          "Last_Move='" . number2sgf_coords($gchkmove->colnr, $gchkmove->rownr, $Size) . "', " . //used to detect Ko
-          "Status='".GAME_STATUS_PLAY."', ";
-
-      if( $gchkmove->nr_prisoners > 0 )
-      {
-         if( $to_move == BLACK )
-            $gah->game_query .= "Black_Prisoners=$Black_Prisoners, ";
-         else
-            $gah->game_query .= "White_Prisoners=$White_Prisoners, ";
-      }
-
-      if( $gchkmove->nr_prisoners == 1 )
-         $GameFlags |= GAMEFLAGS_KO;
-      else
-         $GameFlags &= ~GAMEFLAGS_KO;
-
-      $gah->game_query .= "ToMove_ID=$next_to_move_ID, " .
-          "Flags=$GameFlags, " .
-          "Snapshot='" . GameSnapshot::make_game_snapshot($Size, $TheBoard) . "', ";
+      $gah->prepare_game_action_do_move( 'quick_play', $TheBoard, $coord );
    }//domove
 
    $gah->prepare_game_action_generic( $message );

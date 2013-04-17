@@ -635,7 +635,7 @@ class Board
 
    // keep in sync with GobanHandlerGfxBoard
    // board: img.alt-attr mapping: B>X W>O, last-move B># W>@, dead B>x W>o, terr B>+ W>-, dame>. seki-dame>s hoshi>, else>.
-   // \param $action GAH_ACT_...
+   // \param $action GAMEACT_...
    public function draw_board( $may_play=false, $action='', $stonestring='')
    {
       global $woodbgcolors;
@@ -698,10 +698,10 @@ class Board
       {
          switch( (string)$action )
          {
-            case GAH_ACT_SET_HANDICAP:
+            case GAMEACT_SET_HANDICAP:
                $on_not_empty = false;
                $on_empty = true;
-               $move_start = "<td id=%s class=brdx><a href=\"game.php?g=$gid".URI_AMP."a=".GAH_ACT_SET_HANDICAP.URI_AMP."c=";
+               $move_start = "<td id=%s class=brdx><a href=\"game.php?g=$gid".URI_AMP."a=".GAMEACT_SET_HANDICAP.URI_AMP."c=";
                $move_alt = "\"><img class=brdx alt=\"";
                if( $stonestring )
                   $move_alt = URI_AMP."s=$stonestring".$move_alt;

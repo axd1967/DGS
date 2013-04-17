@@ -166,7 +166,7 @@ $GLOBALS['ThePage'] = new Page('Game');
             if( $Status == GAME_STATUS_PLAY )
             {
                if( $Handicap>1 && $Moves==0 )
-                  $action = GAH_ACT_SET_HANDICAP;
+                  $action = GAMEACT_SET_HANDICAP;
                else
                   $action = 'choose_move';
             }
@@ -180,7 +180,7 @@ $GLOBALS['ThePage'] = new Page('Game');
 
    // allow validation
    $just_looking = !$may_play;
-   if( $just_looking && ( $action == 'add_time' || $action == GAH_ACT_DELETE || $action == 'resign' ) )
+   if( $just_looking && ( $action == 'add_time' || $action == GAMEACT_DELETE || $action == 'resign' ) )
       $just_looking = false;
 
    $my_game = ( $logged_in && ( $my_id == $Black_ID || $my_id == $White_ID ) );
@@ -326,7 +326,7 @@ $GLOBALS['ThePage'] = new Page('Game');
             break;
          }//case 'domove'
 
-         case GAH_ACT_SET_HANDICAP: //multiple input step + validation, to input free handicap-stones
+         case GAMEACT_SET_HANDICAP: //multiple input step + validation, to input free handicap-stones
          {
             if( $Status != GAME_STATUS_PLAY || !( $Handicap>1 && $Moves==0 ) )
                error('invalid_action',"game.handicap.check_status($gid,$Status)");
@@ -391,7 +391,7 @@ $GLOBALS['ThePage'] = new Page('Game');
             $validation_step = true;
             break;
 
-         case GAH_ACT_PASS: //for validation, pass-move
+         case GAMEACT_PASS: //for validation, pass-move
             if( $Status != GAME_STATUS_PLAY && $Status != GAME_STATUS_PASS )
                error('invalid_action', "game.pass.check_status($gid,$Status)");
 
@@ -405,7 +405,7 @@ $GLOBALS['ThePage'] = new Page('Game');
             }
             break;
 
-         case GAH_ACT_DELETE: //for validation, delete-game
+         case GAMEACT_DELETE: //for validation, delete-game
             if( !$may_del_game )
                error('invalid_action',"game.delete.check_status($gid,$Status,$my_id)");
 
@@ -798,7 +798,7 @@ $GLOBALS['ThePage'] = new Page('Game');
       if( $action == 'choose_move' )
       {
          if( $Status != GAME_STATUS_SCORE && $Status != GAME_STATUS_SCORE2 )
-            $menu_array[T_('Pass')] = "game.php?gid=$gid".URI_AMP."a=".GAH_ACT_PASS;
+            $menu_array[T_('Pass')] = "game.php?gid=$gid".URI_AMP."a=".GAMEACT_PASS;
       }
       else if( $action == 'remove' )
       {
@@ -807,7 +807,7 @@ $GLOBALS['ThePage'] = new Page('Game');
 
          $menu_array[T_('Resume playing')] = "game.php?gid=$gid".URI_AMP."a=choose_move";
       }
-      else if( $action == GAH_ACT_SET_HANDICAP )
+      else if( $action == GAMEACT_SET_HANDICAP )
       {
          ; // none (at the moment)
       }
@@ -821,7 +821,7 @@ $GLOBALS['ThePage'] = new Page('Game');
          $menu_array[T_('Resign')] = "game.php?gid=$gid".URI_AMP."a=resign";
 
       if( $may_del_game )
-         $menu_array[T_('Delete game')] = "game.php?gid=$gid".URI_AMP."a=".GAH_ACT_DELETE;
+         $menu_array[T_('Delete game')] = "game.php?gid=$gid".URI_AMP."a=".GAMEACT_DELETE;
 
       if( $action != 'add_time' && $may_add_time )
          $menu_array[T_('Add time for opponent')] = "game.php?gid=$gid".URI_AMP."a=add_time#addtime";
