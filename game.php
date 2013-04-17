@@ -206,7 +206,7 @@ $GLOBALS['ThePage'] = new Page('Game');
 
    $is_running_game = isRunningGame($Status);
    $may_resign_game = ( $action == 'choose_move')
-      || ( $my_game && $is_running_game && ( $action == '' || $action == 'resign' ) );
+      || ( $my_game && $is_running_game && ( $action == '' || $action == GAMEACT_RESIGN ) );
 
    if( $Black_ID == $ToMove_ID )
       $to_move = BLACK;
@@ -362,7 +362,7 @@ $GLOBALS['ThePage'] = new Page('Game');
          }//case set-handicap
          break;
 
-         case 'resign': //for validation
+         case GAMEACT_RESIGN: //for validation
             if( !$may_resign_game )
                error('invalid_action', "game.resign.check_status($gid,$Status,$my_id)");
 
@@ -818,7 +818,7 @@ $GLOBALS['ThePage'] = new Page('Game');
       }
 
       if( $may_resign_game )
-         $menu_array[T_('Resign')] = "game.php?gid=$gid".URI_AMP."a=resign";
+         $menu_array[T_('Resign')] = "game.php?gid=$gid".URI_AMP."a=".GAMEACT_RESIGN;
 
       if( $may_del_game )
          $menu_array[T_('Delete game')] = "game.php?gid=$gid".URI_AMP."a=".GAMEACT_DELETE;

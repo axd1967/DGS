@@ -164,7 +164,7 @@ else
    }//domove
 
    $gah->prepare_game_action_generic( $message );
-   $gah->update_game( 'quick_play', /*game-finished*/false );
+   $gah->update_game( 'quick_play', /*game-finished*/false, /*score*/null );
 
 // No Jump somewhere
 

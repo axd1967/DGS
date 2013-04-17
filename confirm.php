@@ -101,7 +101,7 @@ require_once( "include/rating.php" );
 
    $is_running_game = isRunningGame($Status);
    $may_resign_game = $my_game && $is_running_game;
-   if( $action == 'resign' )
+   if( $action == GAMEACT_RESIGN )
    {
       if( !$may_resign_game )
          error('invalid_action', "confirm.resign($gid,$Status)");
@@ -199,25 +199,10 @@ require_once( "include/rating.php" );
 
       case GAMEACT_RESIGN:
       {
-         $gah->move_query = "INSERT INTO Moves SET " .
-             "gid=$gid, " .
-             "MoveNr=$Moves, " .
-             "Stone=$to_move, " .
-             "PosX=".POSX_RESIGN.", PosY=0, " .
-             "Hours=$hours";
-
-         $score = ( $to_move == BLACK ) ? SCORE_RESIGN : -SCORE_RESIGN;
-
-         $gah->game_query = "UPDATE Games SET Moves=$Moves, " . //See *** HOT_SECTION ***
-             "Last_X=".POSX_RESIGN.", " .
-             "Status='".GAME_STATUS_FINISHED."', " .
-             "ToMove_ID=0, " .
-             "Score=$score, " .
-             "Flags=$GameFlags, ";
-
+         $score = $gah->prepare_game_action_resign( 'confirm' );
          $game_finished = true;
          break;
-      }//switch for 'resign'
+      }
 
       case GAMEACT_DELETE:
       {
@@ -228,12 +213,12 @@ require_once( "include/rating.php" );
          break;
       }
 
-      case 'done': //stonestring is the list of toggled points
+      case 'done':
       {
          if( $Status != GAME_STATUS_SCORE && $Status != GAME_STATUS_SCORE2 )
             error('invalid_action', "confirm.done.check_status($gid,$Status)");
 
-         $stonestring = (string)@$_REQUEST['stonestring'];
+         $stonestring = (string)@$_REQUEST['stonestring']; //stonestring is the list of toggled points
          $gchkscore = new GameCheckScore( $TheBoard, $stonestring, $Handicap, $Komi, $Black_Prisoners, $White_Prisoners );
          $game_score = $gchkscore->check_remove( getRulesetScoring($Ruleset) );
          $gchkscore->update_stonestring( $stonestring );
@@ -276,12 +261,12 @@ require_once( "include/rating.php" );
       }//switch for 'done'
 
       default:
-         error('invalid_action', "confirm.noaction($gid,$Status)");
+         error('invalid_action', "confirm.noaction($gid,$action,$Status)");
          break;
    }//switch $action
 
    $gah->prepare_game_action_generic( $message );
-   $gah->update_game( 'confirm', $game_finished );
+   $gah->update_game( 'confirm', $game_finished, $score );
 
 
    // Jump somewhere
