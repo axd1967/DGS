@@ -26,6 +26,7 @@ require_once 'include/time_functions.php';
 require_once 'include/rating.php';
 require_once 'include/classlib_user.php';
 require_once 'include/game_functions.php';
+require_once 'include/game_actions.php';
 
  /*!
   * \file quick_game.php
@@ -288,13 +289,20 @@ class QuickHandlerGame extends QuickHandler
       - the Games table modification must always modify the Moves field (see $game_query)
       - this modification is always done in first place and checked before continuation
       *********************** */
-      $game_clause = " WHERE ID=$gid AND Status".IS_RUNNING_GAME." AND Moves=$Moves LIMIT 1";
-      $game_query = $doublegame_query = $move_query = $message_query = '';
+      $action = $this->action;
+
+      static $ARR_GAH_ACTIONS = array(
+            GAMECMD_DELETE => GAHACT_DELETE,
+         );
+      $gah_action = ( isset($ARR_GAH_ACTIONS[$action]) ) ? $ARR_GAH_ACTIONS[$action] : $action;
+      $game_row = $this->game_row;
+
+      $gah = new GameActionHelper( $this->my_id, $gid, $gah_action, /*quick*/true );
+      $gah->game_clause = " WHERE ID=$gid AND Status".IS_RUNNING_GAME." AND Moves=$Moves LIMIT 1";
       $score = null;
       $Moves++;
       $game_finished = false;
 
-      $action = $this->action;
       switch( (string)$action )
       {
          case GAMECMD_DELETE:
@@ -308,14 +316,14 @@ class QuickHandlerGame extends QuickHandler
             // NOTE: moves = list of coordinates of the handicap-stone placement
             $this->TheBoard->add_handicap_stones( $this->moves ); // check coords
 
-            $move_query = $MOVE_INSERT_QUERY; // gid,MoveNr,Stone,PosX,PosY,Hours
+            $gah->move_query = $MOVE_INSERT_QUERY; // gid,MoveNr,Stone,PosX,PosY,Hours
             for( $i=1; $i <= $Handicap; $i++ )
             {
                list( $x, $y ) = $this->moves[$i-1];
-               $move_query .= "($gid, $i, ".BLACK.", $x, $y, " . ($i == $Handicap ? "$hours)" : "0), " );
+               $gah->move_query .= "($gid, $i, ".BLACK.", $x, $y, " . ($i == $Handicap ? "$hours)" : "0), " );
             }
 
-            $game_query = "UPDATE Games SET Moves=$Handicap, " . //See *** HOT_SECTION ***
+            $gah->game_query = "UPDATE Games SET Moves=$Handicap, " . //See *** HOT_SECTION ***
                 "Last_X=$x, " .
                 "Last_Y=$y, " .
                 "Last_Move='" . number2sgf_coords($x, $y, $Size) . "', " .
@@ -337,22 +345,22 @@ class QuickHandlerGame extends QuickHandler
             $gchkmove->check_move( /*(x,y)*/$this->moves[0], $this->to_move, $Last_Move, $GameFlags );
             $gchkmove->update_prisoners( $Black_Prisoners, $White_Prisoners );
 
-            $move_query = $MOVE_INSERT_QUERY; // gid,MoveNr,Stone,PosX,PosY,Hours
+            $gah->move_query = $MOVE_INSERT_QUERY; // gid,MoveNr,Stone,PosX,PosY,Hours
 
             $prisoner_string = '';
             foreach($gchkmove->prisoners as $coord)
             {
                list( $x, $y ) = $coord;
-               $move_query .= "($gid, $Moves, ".NONE.", $x, $y, 0), ";
+               $gah->move_query .= "($gid, $Moves, ".NONE.", $x, $y, 0), ";
                $prisoner_string .= number2sgf_coords($x, $y, $Size);
             }
 
             if( strlen($prisoner_string) != $gchkmove->nr_prisoners*2 )
                error('move_problem', "QuickHandlerGame.process.move.prisoner($gid,{$gchkmove->nr_prisoners},$prisoner_string)");
 
-            $move_query .= "($gid, $Moves, {$this->to_move}, {$gchkmove->colnr}, {$gchkmove->rownr}, $hours) ";
+            $gah->move_query .= "($gid, $Moves, {$this->to_move}, {$gchkmove->colnr}, {$gchkmove->rownr}, $hours) ";
 
-            $game_query = "UPDATE Games SET Moves=$Moves, " . //See *** HOT_SECTION ***
+            $gah->game_query = "UPDATE Games SET Moves=$Moves, " . //See *** HOT_SECTION ***
                 "Last_X={$gchkmove->colnr}, " . //used with mail notifications
                 "Last_Y={$gchkmove->rownr}, " .
                 "Last_Move='" . number2sgf_coords($gchkmove->colnr, $gchkmove->rownr, $Size) . "', " . //used to detect Ko
@@ -361,9 +369,9 @@ class QuickHandlerGame extends QuickHandler
             if( $gchkmove->nr_prisoners > 0 )
             {
                if( $this->to_move == BLACK )
-                  $game_query .= "Black_Prisoners=$Black_Prisoners, ";
+                  $gah->game_query .= "Black_Prisoners=$Black_Prisoners, ";
                else
-                  $game_query .= "White_Prisoners=$White_Prisoners, ";
+                  $gah->game_query .= "White_Prisoners=$White_Prisoners, ";
             }
 
             if( $gchkmove->nr_prisoners == 1 )
@@ -371,7 +379,7 @@ class QuickHandlerGame extends QuickHandler
             else
                $GameFlags &= ~GAMEFLAGS_KO;
 
-            $game_query .= "ToMove_ID=$next_to_move_ID, " .
+            $gah->game_query .= "ToMove_ID=$next_to_move_ID, " .
                "Flags=$GameFlags, " .
                "Snapshot='" . GameSnapshot::make_game_snapshot($Size, $this->TheBoard) . "', ";
             break;
@@ -385,10 +393,10 @@ class QuickHandlerGame extends QuickHandler
             else if( $Status == GAME_STATUS_PASS )
                $next_status = GAME_STATUS_SCORE;
 
-            $move_query = $MOVE_INSERT_QUERY; // gid,MoveNr,Stone,PosX,PosY,Hours
-            $move_query .= "($gid, $Moves, {$this->to_move}, ".POSX_PASS.", 0, $hours)";
+            $gah->move_query = $MOVE_INSERT_QUERY; // gid,MoveNr,Stone,PosX,PosY,Hours
+            $gah->move_query .= "($gid, $Moves, {$this->to_move}, ".POSX_PASS.", 0, $hours)";
 
-            $game_query = "UPDATE Games SET Moves=$Moves, " . //See *** HOT_SECTION ***
+            $gah->game_query = "UPDATE Games SET Moves=$Moves, " . //See *** HOT_SECTION ***
                 "Last_X=".POSX_PASS.", " .
                 "Status='$next_status', " .
                 "ToMove_ID=$next_to_move_ID, " .
@@ -402,10 +410,10 @@ class QuickHandlerGame extends QuickHandler
             $next_status = GAME_STATUS_FINISHED;
             $score = ( $this->to_move == BLACK ) ? SCORE_RESIGN : -SCORE_RESIGN;
 
-            $move_query = $MOVE_INSERT_QUERY; // gid,MoveNr,Stone,PosX,PosY,Hours
-            $move_query .= "($gid, $Moves, {$this->to_move}, ".POSX_RESIGN.", 0, $hours)";
+            $gah->move_query = $MOVE_INSERT_QUERY; // gid,MoveNr,Stone,PosX,PosY,Hours
+            $gah->move_query .= "($gid, $Moves, {$this->to_move}, ".POSX_RESIGN.", 0, $hours)";
 
-            $game_query = "UPDATE Games SET Moves=$Moves, " . //See *** HOT_SECTION ***
+            $gah->game_query = "UPDATE Games SET Moves=$Moves, " . //See *** HOT_SECTION ***
                 "Last_X=".POSX_RESIGN.", " .
                 "Status='$next_status', " .
                 "ToMove_ID=0, " .
@@ -443,16 +451,16 @@ class QuickHandlerGame extends QuickHandler
                $next_status = GAME_STATUS_SCORE2;
             }
 
-            $move_query = $MOVE_INSERT_QUERY; // gid,MoveNr,Stone,PosX,PosY,Hours
+            $gah->move_query = $MOVE_INSERT_QUERY; // gid,MoveNr,Stone,PosX,PosY,Hours
             $mark_stone = ( $this->to_move == BLACK ) ? MARKED_BY_BLACK : MARKED_BY_WHITE;
             for( $i=0; $i < $l; $i += 2 )
             {
                list($x,$y) = sgf2number_coords(substr($stonestring, $i, 2), $Size);
-               $move_query .= "($gid, $Moves, $mark_stone, $x, $y, 0), ";
+               $gah->move_query .= "($gid, $Moves, $mark_stone, $x, $y, 0), ";
             }
-            $move_query .= "($gid, $Moves, {$this->to_move}, ".POSX_SCORE.", 0, $hours) ";
+            $gah->move_query .= "($gid, $Moves, {$this->to_move}, ".POSX_SCORE.", 0, $hours) ";
 
-            $game_query = "UPDATE Games SET Moves=$Moves, " . //See *** HOT_SECTION ***
+            $gah->game_query = "UPDATE Games SET Moves=$Moves, " . //See *** HOT_SECTION ***
                 "Last_X=".POSX_SCORE.", " .
                 "Status='$next_status', " .
                 "Score=$score, " .
@@ -461,9 +469,9 @@ class QuickHandlerGame extends QuickHandler
                 "Snapshot='" . GameSnapshot::make_game_snapshot($Size, $this->TheBoard) . "', ";
 
             if( $next_status != GAME_STATUS_FINISHED )
-               $game_query .= "ToMove_ID=$next_to_move_ID, ";
+               $gah->game_query .= "ToMove_ID=$next_to_move_ID, ";
             else
-               $game_query .= "ToMove_ID=0, ";
+               $gah->game_query .= "ToMove_ID=0, ";
             break;
          }//score
 
@@ -474,76 +482,16 @@ class QuickHandlerGame extends QuickHandler
 
       if( $cmd != GAMECMD_DELETE )
       {
-         $game_query .= $mp_query . $time_query . "Lastchanged=FROM_UNIXTIME($NOW)" ;
+         $gah->game_query .= $mp_query . $time_query . "Lastchanged=FROM_UNIXTIME($NOW)" ;
 
          if( $message )
          {
             $move_nr = ( $cmd == GAMECMD_SET_HANDICAP ) ? $Handicap : $Moves;
-            $message_query = "INSERT INTO MoveMessages SET gid=$gid, MoveNr=$move_nr, Text=\"$message\"";
+            $gah->message_query = "INSERT INTO MoveMessages SET gid=$gid, MoveNr=$move_nr, Text=\"$message\"";
          }
       }
 
-
-      ta_begin();
-      {//HOT-section to update game-action
-
-         //See *** HOT_SECTION *** above
-         if( $game_query )
-         {
-            $result = db_query( "QuickHandlerGame.process.update_game($gid,$action})", $game_query . $game_clause );
-            if( mysql_affected_rows() != 1 )
-               error('mysql_update_game', "QuickHandlerGame.process.update_game2($gid,$action})");
-
-            GameHelper::delete_cache_game_row( "QuickHandlerGame.process.update_game3($gid,$action)", $gid );
-         }
-
-         if( $move_query )
-         {
-            $result = db_query( "QuickHandlerGame.process.update_moves($gid,$action})", $move_query );
-            if( mysql_affected_rows() < 1 && $this->action != GAMECMD_DELETE )
-               error('mysql_insert_move', "QuickHandlerGame.process.update_moves2($gid,$action})");
-
-            clear_cache_quick_status( array( $ToMove_ID, $next_to_move_ID ), QST_CACHE_GAMES );
-            GameHelper::delete_cache_status_games( "QuickHandlerGame.process.update_moves($gid,$action})", $ToMove_ID, $next_to_move_ID );
-            Board::delete_cache_game_moves( "QuickHandlerGame.process.update_moves($gid,$action})", $gid );
-         }
-
-         if( $message_query )
-         {
-            $result = db_query( "QuickHandlerGame.process.insert_movemessage($gid,$action})", $message_query );
-            if( mysql_affected_rows() < 1 && $this->action != GAMECMD_DELETE )
-               error('mysql_insert_move', "QuickHandlerGame.process.insert_movemessage2($gid,$action})");
-
-            Board::delete_cache_game_move_messages( "QuickHandlerGame.process.insert_movemessage($gid,$action})", $gid );
-         }
-
-         if( $game_finished )
-         {
-            $game_finalizer = new GameFinalizer( ACTBY_PLAYER, $this->my_id, $gid, $tid,
-               $Status, $GameType, $GamePlayers, $GameFlags, $Black_ID, $White_ID, $Moves, ($Rated != 'N') );
-
-            $do_delete = ( $this->action == GAMECMD_DELETE );
-
-            $game_finalizer->skip_game_query();
-            $game_finalizer->finish_game( "QuickHandlerGame.process", $do_delete, null, $score, $message_raw );
-         }
-         else
-            $do_delete = false;
-
-         // Notify opponent about move
-         if( !$do_delete )
-            notify( "QuickHandlerGame.process.notify_opponent($gid,$action,$next_to_move_ID})", $next_to_move_ID );
-
-         // Increase moves and activity
-         db_query( "QuickHandlerGame.process.update_activity($gid,$action})",
-            "UPDATE Players SET Moves=Moves+1" . // NOTE: count also delete + set-handicap as one move
-               ",Activity=LEAST($ActivityMax,$ActivityForMove+Activity)" .
-               ",LastMove=FROM_UNIXTIME($NOW)" .
-            " WHERE ID={$this->my_id} LIMIT 1" );
-
-         increaseMoveStats( $this->my_id );
-      }
-      ta_end();
+      $gah->update_game( 'QuickHandlerGame.process', $game_finished );
    }//process_cmd_play
 
    private function process_cmd_status_score()

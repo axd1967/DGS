@@ -19,6 +19,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 require_once( "include/std_functions.php" );
 require_once( "include/game_functions.php" );
+require_once( "include/game_actions.php" );
 require_once( "include/board.php" );
 require_once( "include/move.php" );
 //require_once( "include/rating.php" );
@@ -165,8 +166,8 @@ This is why:
 - the Games table modification must always modify the Moves field (see $game_query)
 - this modification is always done in first place and checked before continuation
 *********************** */
-   $game_clause = " WHERE ID=$gid AND Status".IS_RUNNING_GAME." AND Moves=$Moves LIMIT 1";
-   $message_query = '';
+   $gah = new GameActionHelper( $my_id, $gid, $action, /*quick*/true );
+   $gah->game_clause = " WHERE ID=$gid AND Status".IS_RUNNING_GAME." AND Moves=$Moves LIMIT 1";
    $Moves++;
 
 
@@ -184,25 +185,25 @@ This is why:
       $gchkmove->check_move( $coord, $to_move, $Last_Move, $GameFlags );
       $gchkmove->update_prisoners( $Black_Prisoners, $White_Prisoners );
 
-      $move_query = "INSERT INTO Moves (gid, MoveNr, Stone, PosX, PosY, Hours) VALUES ";
+      $gah->move_query = "INSERT INTO Moves (gid, MoveNr, Stone, PosX, PosY, Hours) VALUES ";
 
       $prisoner_string = '';
       foreach($gchkmove->prisoners as $tmp)
       {
          list($x,$y) = $tmp;
-         $move_query .= "($gid, $Moves, ".NONE.", $x, $y, 0), ";
+         $gah->move_query .= "($gid, $Moves, ".NONE.", $x, $y, 0), ";
          $prisoner_string .= number2sgf_coords($x, $y, $Size);
       }
 
       if( strlen($prisoner_string) != $gchkmove->nr_prisoners*2 )
          error('move_problem', "quick_play.domove.prisoner($gid)");
 
-      $move_query .= "($gid, $Moves, $to_move, {$gchkmove->colnr}, {$gchkmove->rownr}, $hours) ";
+      $gah->move_query .= "($gid, $Moves, $to_move, {$gchkmove->colnr}, {$gchkmove->rownr}, $hours) ";
 
       if( $message )
-         $message_query = "INSERT INTO MoveMessages SET gid=$gid, MoveNr=$Moves, Text='$message'";
+         $gah->message_query = "INSERT INTO MoveMessages SET gid=$gid, MoveNr=$Moves, Text='$message'";
 
-      $game_query = "UPDATE Games SET Moves=$Moves, " . //See *** HOT_SECTION ***
+      $gah->game_query = "UPDATE Games SET Moves=$Moves, " . //See *** HOT_SECTION ***
           "Last_X={$gchkmove->colnr}, " . //used with mail notifications
           "Last_Y={$gchkmove->rownr}, " .
           "Last_Move='" . number2sgf_coords($gchkmove->colnr, $gchkmove->rownr, $Size) . "', " . //used to detect Ko
@@ -211,9 +212,9 @@ This is why:
       if( $gchkmove->nr_prisoners > 0 )
       {
          if( $to_move == BLACK )
-            $game_query .= "Black_Prisoners=$Black_Prisoners, ";
+            $gah->game_query .= "Black_Prisoners=$Black_Prisoners, ";
          else
-            $game_query .= "White_Prisoners=$White_Prisoners, ";
+            $gah->game_query .= "White_Prisoners=$White_Prisoners, ";
       }
 
       if( $gchkmove->nr_prisoners == 1 )
@@ -221,54 +222,13 @@ This is why:
       else
          $GameFlags &= ~GAMEFLAGS_KO;
 
-      $game_query .= "ToMove_ID=$next_to_move_ID, " .
+      $gah->game_query .= "ToMove_ID=$next_to_move_ID, " .
           "Flags=$GameFlags, " .
           "Snapshot='" . GameSnapshot::make_game_snapshot($Size, $TheBoard) . "', " .
           $mp_query . $time_query . "Lastchanged=FROM_UNIXTIME($NOW)" ;
    }//domove
 
-
-   ta_begin();
-   {//HOT-section to play move in game
-      //See *** HOT_SECTION *** above
-      $result = db_query( "quick_play.update_game($gid)", $game_query . $game_clause );
-      if( mysql_affected_rows() != 1 )
-         error('mysql_update_game', "quick_play.update_game2($gid)");
-
-      GameHelper::delete_cache_game_row( "quick_play.update_game3($gid)", $gid );
-
-      $result = db_query( "quick_play.update_moves($gid,$action)", $move_query );
-      if( mysql_affected_rows() < 1 && $action != 'delete' )
-         error('mysql_insert_move', "quick_play.update_moves2($gid,$action)");
-
-      clear_cache_quick_status( array( $ToMove_ID, $next_to_move_ID ), QST_CACHE_GAMES );
-      GameHelper::delete_cache_status_games( "quick_play.update_moves3($gid,$action)", $ToMove_ID, $next_to_move_ID );
-      Board::delete_cache_game_moves( "quick_play.update_moves4($gid,$action)", $gid );
-
-      if( $message_query )
-      {
-         $result = db_query( "quick_play.update_movemessage1($gid)", $message_query );
-         if( mysql_affected_rows() < 1 && $action != 'delete' )
-            error('mysql_insert_move', "quick_play.update_movemessage2($gid,$action)");
-
-         Board::delete_cache_game_move_messages( "quick_play.update_movemessage3($gid)", $gid );
-      }
-
-      // Notify opponent about move
-      notify( "quick_play.notify_opponent($gid,$next_to_move_ID)", $next_to_move_ID );
-
-      // Increase moves and activity
-      db_query( "quick_play.update_player($gid,$my_id)",
-         "UPDATE Players SET Moves=Moves+1"
-            .",LastQuickAccess=FROM_UNIXTIME($NOW)"
-            .",Activity=LEAST($ActivityMax,$ActivityForMove+Activity)"
-            .",LastMove=FROM_UNIXTIME($NOW)"
-         ." WHERE ID=$my_id LIMIT 1" );
-
-      increaseMoveStats( $my_id );
-   }
-   ta_end();
-
+   $gah->update_game( 'quick_play', /*game-finished*/false );
 
 // No Jump somewhere
 

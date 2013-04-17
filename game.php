@@ -37,6 +37,7 @@ require_once( "include/std_functions.php" );
 require_once( 'include/gui_functions.php' );
 require_once( 'include/classlib_userconfig.php' );
 require_once( "include/game_functions.php" );
+require_once( "include/game_actions.php" );
 require_once( "include/form_functions.php" );
 require_once( "include/board.php" );
 require_once( "include/move.php" );
@@ -179,7 +180,7 @@ $GLOBALS['ThePage'] = new Page('Game');
 
    // allow validation
    $just_looking = !$may_play;
-   if( $just_looking && ( $action == 'add_time' || $action == 'delete' || $action == 'resign' ) )
+   if( $just_looking && ( $action == 'add_time' || $action == GAHACT_DELETE || $action == 'resign' ) )
       $just_looking = false;
 
    $my_game = ( $logged_in && ( $my_id == $Black_ID || $my_id == $White_ID ) );
@@ -404,7 +405,7 @@ $GLOBALS['ThePage'] = new Page('Game');
             }
             break;
 
-         case 'delete': //for validation, delete-game
+         case GAHACT_DELETE: //for validation, delete-game
             if( !$may_del_game )
                error('invalid_action',"game.delete.check_status($gid,$Status,$my_id)");
 
@@ -820,7 +821,7 @@ $GLOBALS['ThePage'] = new Page('Game');
          $menu_array[T_('Resign')] = "game.php?gid=$gid".URI_AMP."a=resign";
 
       if( $may_del_game )
-         $menu_array[T_('Delete game')] = "game.php?gid=$gid".URI_AMP."a=delete";
+         $menu_array[T_('Delete game')] = "game.php?gid=$gid".URI_AMP."a=".GAHACT_DELETE;
 
       if( $action != 'add_time' && $may_add_time )
          $menu_array[T_('Add time for opponent')] = "game.php?gid=$gid".URI_AMP."a=add_time#addtime";

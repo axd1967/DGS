@@ -22,6 +22,7 @@ $TranslateGroups[] = "Game"; // same as for game.php
 require_once( "include/std_functions.php" );
 require_once( "include/std_classes.php" );
 require_once( "include/game_functions.php" );
+require_once( "include/game_actions.php" );
 require_once( "include/board.php" );
 require_once( "include/move.php" );
 require_once( "include/rating.php" );
@@ -182,8 +183,8 @@ This is why:
 - the Games table modification must always modify the Moves field (see $game_query)
 - this modification is always done in first place and checked before continuation
 *********************** */
-   $game_clause = " WHERE ID=$gid AND Status".IS_RUNNING_GAME." AND Moves=$Moves LIMIT 1";
-   $game_query = $doublegame_query = $move_query = $message_query = '';
+   $gah = new GameActionHelper( $my_id, $gid, $action, /*quick*/false );
+   $gah->game_clause = " WHERE ID=$gid AND Status".IS_RUNNING_GAME." AND Moves=$Moves LIMIT 1";
    $score = null;
    $Moves++;
 
@@ -205,13 +206,13 @@ This is why:
          $gchkmove->check_move( $coord, $to_move, $Last_Move, $GameFlags );
          $gchkmove->update_prisoners( $Black_Prisoners, $White_Prisoners );
 
-         $move_query = "INSERT INTO Moves (gid, MoveNr, Stone, PosX, PosY, Hours) VALUES ";
+         $gah->move_query = "INSERT INTO Moves (gid, MoveNr, Stone, PosX, PosY, Hours) VALUES ";
 
          $prisoner_string = '';
          foreach($gchkmove->prisoners as $tmp)
          {
             list($x,$y) = $tmp;
-            $move_query .= "($gid, $Moves, ".NONE.", $x, $y, 0), ";
+            $gah->move_query .= "($gid, $Moves, ".NONE.", $x, $y, 0), ";
             $prisoner_string .= number2sgf_coords($x, $y, $Size);
          }
 
@@ -219,12 +220,12 @@ This is why:
          if( strlen($prisoner_string) != $gchkmove->nr_prisoners*2 || ( $stonestring && $prisoner_string != $stonestring) )
             error('move_problem', "confirm.domove.prisoner($gid)");
 
-         $move_query .= "($gid, $Moves, $to_move, {$gchkmove->colnr}, {$gchkmove->rownr}, $hours) ";
+         $gah->move_query .= "($gid, $Moves, $to_move, {$gchkmove->colnr}, {$gchkmove->rownr}, $hours) ";
 
          if( $message )
-            $message_query = "INSERT INTO MoveMessages SET gid=$gid, MoveNr=$Moves, Text=\"$message\"";
+            $gah->message_query = "INSERT INTO MoveMessages SET gid=$gid, MoveNr=$Moves, Text=\"$message\"";
 
-         $game_query = "UPDATE Games SET Moves=$Moves, " . //See *** HOT_SECTION ***
+         $gah->game_query = "UPDATE Games SET Moves=$Moves, " . //See *** HOT_SECTION ***
              "Last_X={$gchkmove->colnr}, " . //used with mail notifications
              "Last_Y={$gchkmove->rownr}, " .
              "Last_Move='" . number2sgf_coords($gchkmove->colnr, $gchkmove->rownr, $Size) . "', " . //used to detect Ko
@@ -233,9 +234,9 @@ This is why:
          if( $gchkmove->nr_prisoners > 0 )
          {
             if( $to_move == BLACK )
-               $game_query .= "Black_Prisoners=$Black_Prisoners, ";
+               $gah->game_query .= "Black_Prisoners=$Black_Prisoners, ";
             else
-               $game_query .= "White_Prisoners=$White_Prisoners, ";
+               $gah->game_query .= "White_Prisoners=$White_Prisoners, ";
          }
 
          if( $gchkmove->nr_prisoners == 1 )
@@ -243,7 +244,7 @@ This is why:
          else
             $GameFlags &= ~GAMEFLAGS_KO;
 
-         $game_query .= "ToMove_ID=$next_to_move_ID, " .
+         $gah->game_query .= "ToMove_ID=$next_to_move_ID, " .
              "Flags=$GameFlags, " .
              "Snapshot='" . GameSnapshot::make_game_snapshot($Size, $TheBoard) . "', " .
              $mp_query . $time_query . "Lastchanged=FROM_UNIXTIME($NOW)" ;
@@ -263,7 +264,7 @@ This is why:
             error('invalid_action', "confirm.pass.check_status($gid,$Status)");
 
 
-         $move_query = "INSERT INTO Moves SET " .
+         $gah->move_query = "INSERT INTO Moves SET " .
              "gid=$gid, " .
              "MoveNr=$Moves, " .
              "Stone=$to_move, " .
@@ -271,9 +272,9 @@ This is why:
              "Hours=$hours";
 
          if( $message )
-            $message_query = "INSERT INTO MoveMessages SET gid=$gid, MoveNr=$Moves, Text=\"$message\"";
+            $gah->message_query = "INSERT INTO MoveMessages SET gid=$gid, MoveNr=$Moves, Text=\"$message\"";
 
-         $game_query = "UPDATE Games SET Moves=$Moves, " . //See *** HOT_SECTION ***
+         $gah->game_query = "UPDATE Games SET Moves=$Moves, " . //See *** HOT_SECTION ***
              "Last_X=".POSX_PASS.", " .
              "Status='$next_status', " .
              "ToMove_ID=$next_to_move_ID, " .
@@ -292,7 +293,7 @@ This is why:
          if( strlen( $stonestring ) != 2 * $Handicap )
             error('wrong_number_of_handicap_stone', "confirm.check.handicap($gid,$Handicap,$stonestring)");
 
-         $move_query = "INSERT INTO Moves ( gid, MoveNr, Stone, PosX, PosY, Hours ) VALUES ";
+         $gah->move_query = "INSERT INTO Moves ( gid, MoveNr, Stone, PosX, PosY, Hours ) VALUES ";
 
          for( $i=1; $i <= $Handicap; $i++ )
          {
@@ -301,15 +302,15 @@ This is why:
             if( !isset($rownr) || !isset($colnr) )
                error('illegal_position', "confirm.check_pos($gid,#$i,$Handicap)");
 
-            $move_query .= "($gid, $i, " . BLACK . ", $colnr, $rownr, " .
+            $gah->move_query .= "($gid, $i, " . BLACK . ", $colnr, $rownr, " .
                ($i == $Handicap ? "$hours)" : "0), " );
          }
 
          if( $message )
-            $message_query = "INSERT INTO MoveMessages SET gid=$gid, MoveNr=$Handicap, Text=\"$message\"";
+            $gah->message_query = "INSERT INTO MoveMessages SET gid=$gid, MoveNr=$Handicap, Text=\"$message\"";
 
 
-         $game_query = "UPDATE Games SET Moves=$Handicap, " . //See *** HOT_SECTION ***
+         $gah->game_query = "UPDATE Games SET Moves=$Handicap, " . //See *** HOT_SECTION ***
              "Last_X=$colnr, " .
              "Last_Y=$rownr, " .
              "Last_Move='" . number2sgf_coords($colnr, $rownr, $Size) . "', " .
@@ -322,7 +323,7 @@ This is why:
 
       case 'resign':
       {
-         $move_query = "INSERT INTO Moves SET " .
+         $gah->move_query = "INSERT INTO Moves SET " .
              "gid=$gid, " .
              "MoveNr=$Moves, " .
              "Stone=$to_move, " .
@@ -330,11 +331,11 @@ This is why:
              "Hours=$hours";
 
          if( $message )
-            $message_query = "INSERT INTO MoveMessages SET gid=$gid, MoveNr=$Moves, Text=\"$message\"";
+            $gah->message_query = "INSERT INTO MoveMessages SET gid=$gid, MoveNr=$Moves, Text=\"$message\"";
 
          $score = ( $to_move == BLACK ) ? SCORE_RESIGN : -SCORE_RESIGN;
 
-         $game_query = "UPDATE Games SET Moves=$Moves, " . //See *** HOT_SECTION ***
+         $gah->game_query = "UPDATE Games SET Moves=$Moves, " . //See *** HOT_SECTION ***
              "Last_X=".POSX_RESIGN.", " .
              "Status='".GAME_STATUS_FINISHED."', " .
              "ToMove_ID=0, " .
@@ -346,7 +347,7 @@ This is why:
          break;
       }//switch for 'resign'
 
-      case 'delete':
+      case GAHACT_DELETE:
       {
          if( !$may_del_game )
             error('invalid_action', "confirm.delete($gid,$my_id,$Status)");
@@ -375,29 +376,29 @@ This is why:
          else
             $next_status = GAME_STATUS_SCORE2;
 
-         $move_query = "INSERT INTO Moves ( gid, MoveNr, Stone, PosX, PosY, Hours ) VALUES ";
+         $gah->move_query = "INSERT INTO Moves ( gid, MoveNr, Stone, PosX, PosY, Hours ) VALUES ";
 
          for( $i=0; $i < $l; $i += 2 )
          {
             list($x,$y) = sgf2number_coords(substr($stonestring, $i, 2), $Size);
-            $move_query .= "($gid, $Moves, " . ($to_move == BLACK ? MARKED_BY_BLACK : MARKED_BY_WHITE ) . ", $x, $y, 0), ";
+            $gah->move_query .= "($gid, $Moves, " . ($to_move == BLACK ? MARKED_BY_BLACK : MARKED_BY_WHITE ) . ", $x, $y, 0), ";
          }
 
-         $move_query .= "($gid, $Moves, $to_move, ".POSX_SCORE.", 0, $hours) ";
+         $gah->move_query .= "($gid, $Moves, $to_move, ".POSX_SCORE.", 0, $hours) ";
 
          if( $message )
-            $message_query = "INSERT INTO MoveMessages SET gid=$gid, MoveNr=$Moves, Text=\"$message\"";
+            $gah->message_query = "INSERT INTO MoveMessages SET gid=$gid, MoveNr=$Moves, Text=\"$message\"";
 
-         $game_query = "UPDATE Games SET Moves=$Moves, " . //See *** HOT_SECTION ***
+         $gah->game_query = "UPDATE Games SET Moves=$Moves, " . //See *** HOT_SECTION ***
              "Last_X=".POSX_SCORE.", " .
              "Status='$next_status', ";
 
          if( $next_status != GAME_STATUS_FINISHED )
-            $game_query .= "ToMove_ID=$next_to_move_ID, ";
+            $gah->game_query .= "ToMove_ID=$next_to_move_ID, ";
          else
-            $game_query .= "ToMove_ID=0, ";
+            $gah->game_query .= "ToMove_ID=0, ";
 
-         $game_query .=
+         $gah->game_query .=
              "Score=$score, " .
              "Last_Move='$Last_Move', " . //Not a move, re-use last one
              "Flags=$GameFlags, " . //Don't reset KO-Flag else SCORE,RESUME could break a Ko
@@ -411,67 +412,7 @@ This is why:
          break;
    }//switch $action
 
-
-   ta_begin();
-   {//HOT-section to update game-action
-
-      //See *** HOT_SECTION *** above
-      if( $game_query )
-      {
-         $result = db_query( "confirm.update_game($gid,$action)", $game_query . $game_clause );
-         if( mysql_affected_rows() != 1 )
-            error('mysql_update_game', "confirm.update_game2($gid,$action)");
-
-         GameHelper::delete_cache_game_row( "confirm.update_game3($gid,$action)", $gid );
-      }
-
-      if( $move_query )
-      {
-         $result = db_query( "confirm.update_moves($gid,$action)", $move_query );
-         if( mysql_affected_rows() < 1 && $action != 'delete' )
-            error('mysql_insert_move', "confirm.update_moves2($gid,$action)");
-
-         clear_cache_quick_status( array( $ToMove_ID, $next_to_move_ID ), QST_CACHE_GAMES );
-         GameHelper::delete_cache_status_games( "confirm.update_moves3($gid,$action)", $ToMove_ID, $next_to_move_ID );
-         Board::delete_cache_game_moves( "confirm.update_moves4($gid,$action)", $gid );
-      }
-
-      if( $message_query )
-      {
-         $result = db_query( "confirm.message_query($gid,$action)", $message_query );
-         if( mysql_affected_rows() < 1 && $action != 'delete' )
-            error('mysql_insert_move', "confirm.message_query2($gid,$action)");
-
-         Board::delete_cache_game_move_messages( "confirm.message_query3($gid,$action)", $gid );
-      }
-
-      $do_delete = false;
-      if( $game_finished )
-      {
-         $game_finalizer = new GameFinalizer( ACTBY_PLAYER, $my_id, $gid, $tid, $Status, $GameType, $GamePlayers,
-            $GameFlags, $Black_ID, $White_ID, $Moves, ($game_row['Rated'] != 'N') );
-
-         $do_delete = ( $action == 'delete' );
-
-         $game_finalizer->skip_game_query();
-         $game_finalizer->finish_game( "confirm", $do_delete, null, $score, $message_raw );
-      }
-
-      // Notify opponent about move
-      if( !$do_delete )
-         notify( "confirm.notify_opponent($gid,$next_to_move_ID)", $next_to_move_ID );
-
-      // Increase moves and activity
-      db_query( 'confirm.activity',
-            "UPDATE Players SET Moves=Moves+1" // NOTE: count also delete + set-handicap as one move
-            .",Activity=LEAST($ActivityMax,$ActivityForMove+Activity)"
-            .",LastMove=FROM_UNIXTIME($NOW)"
-            ." WHERE ID=$my_id LIMIT 1" );
-
-      increaseMoveStats( $my_id );
-   }
-   ta_end();
-
+   $gah->update_game( 'confirm', $game_finished );
 
 
    // Jump somewhere
