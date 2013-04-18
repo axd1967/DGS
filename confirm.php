@@ -94,7 +94,6 @@ require_once( "include/rating.php" );
       error('invalid_action', "confirm.check.miss_handicap($gid,$my_id,$action,$Moves,$Handicap)");
 
    $my_game = ( $my_id == $Black_ID || $my_id == $White_ID );
-   $is_mpgame = ( $GameType != GAMETYPE_GO );
 
    $too_few_moves = ( $Moves < DELETE_LIMIT+$Handicap );
    $may_del_game = $my_game && $too_few_moves && isStartedGame($Status) && ( $tid == 0 ) && ($GameType == GAMETYPE_GO);
@@ -130,9 +129,6 @@ require_once( "include/rating.php" );
       error('already_played', "confirm.check.move($gid,$qry_move,$Moves)");
 
 
-   // update clock
-   list( $hours, $upd_clock ) = GameHelper::update_clock( "confirm($gid)", $game_row, $to_move, $next_to_move );
-   $time_query = $upd_clock->get_query(false, true);
 
    $no_marked_dead = ( $Status == GAME_STATUS_PLAY || $Status == GAME_STATUS_PASS || $action == GAMEACT_DO_MOVE );
    $board_opts = ( $no_marked_dead ? 0 : BOARDOPT_MARK_DEAD );
@@ -141,35 +137,15 @@ require_once( "include/rating.php" );
    if( !$TheBoard->load_from_db( $game_row, 0, $board_opts) )
       error('internal_error', "confirm.board.load_from_db($gid)");
 
-   $mp_query = '';
-   if( $is_mpgame && ($action == GAMEACT_DO_MOVE || $action == GAMEACT_PASS || $action == GAMEACT_SET_HANDICAP || $action == GAMEACT_SCORE) )
-   {
-      list( $group_color, $group_order, $gpmove_color )
-         = MultiPlayerGame::calc_game_player_for_move( $GamePlayers, $Moves, $Handicap, 2 );
-      $mp_gp = GamePlayer::load_game_player( $gid, $group_color, $group_order );
-      $mp_uid = $mp_gp->uid;
-      $mp_query = (( $ToMove_ID == $Black_ID ) ? 'Black_ID' : 'White_ID' ) . "=$mp_uid, ";
-   }
-
-   $message_raw = trim(get_request_arg('message'));
-   if( preg_match( "/^<c>\s*<\\/c>$/si", $message_raw ) ) // remove empty comment-only tags
-      $message_raw = '';
-   $message = mysql_addslashes($message_raw);
-
-   if( $message && preg_match( "#</?h(idden)?>#is", $message) )
-      $GameFlags |= GAMEFLAGS_HIDDEN_MSG;
-
-   $game_finished = false;
-
 
    // ***** HOT_SECTION *****
    // >>> See also: confirm.php, quick_play.php, include/quick/quick_game.php, clock_tick.php (for timeout)
    $gah = new GameActionHelper( $my_id, $gid, $action, /*quick*/false );
-   $gah->init_query( $Moves, $mp_query, $time_query );
+   $gah->init_query( 'confirm', $Moves, $game_row, $to_move, $next_to_move );
+   $gah->init_mp_query( $GameType, $GamePlayers, $Moves, $Handicap, $ToMove_ID, $Black_ID );
+   $gah->set_game_move_message( get_request_arg('message'), $GameFlags );
 
-   $score = null;
    $Moves++;
-
 
    switch( (string)$action )
    {
@@ -199,8 +175,7 @@ require_once( "include/rating.php" );
 
       case GAMEACT_RESIGN:
       {
-         $score = $gah->prepare_game_action_resign( 'confirm' );
-         $game_finished = true;
+         $gah->prepare_game_action_resign( 'confirm' );
          break;
       }
 
@@ -209,7 +184,7 @@ require_once( "include/rating.php" );
          if( !$may_del_game )
             error('invalid_action', "confirm.delete($gid,$my_id,$Status)");
 
-         $game_finished = true;
+         $gah->set_game_finished( true );
          break;
       }
 
@@ -219,8 +194,7 @@ require_once( "include/rating.php" );
             error('invalid_action', "confirm.done.check_status($gid,$Status)");
 
          $stonestring = (string)@$_REQUEST['stonestring']; //stonestring is the list of toggled points
-         $score = $gah->prepare_game_action_score( 'confirm',
-            $TheBoard, $stonestring, /*uniq-toggle*/false, /*agree*/true );
+         $gah->prepare_game_action_score( 'confirm', $TheBoard, $stonestring );
          break;
       }
 
@@ -229,8 +203,8 @@ require_once( "include/rating.php" );
          break;
    }//switch $action
 
-   $gah->prepare_game_action_generic( $message );
-   $gah->update_game( 'confirm', $game_finished, $score );
+   $gah->prepare_game_action_generic();
+   $gah->update_game( 'confirm' );
 
 
    // Jump somewhere

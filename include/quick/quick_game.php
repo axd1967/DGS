@@ -247,44 +247,18 @@ class QuickHandlerGame extends QuickHandler
       $next_to_move = WHITE + BLACK - $this->to_move;
       $next_to_move_ID = ( $next_to_move == BLACK ) ? $Black_ID : $White_ID;
 
-      // update clock
-      list( $hours, $upd_clock ) = GameHelper::update_clock( "QHGame.play($gid)",
-         $this->game_row, $this->to_move, $next_to_move );
-      $time_query = $upd_clock->get_query(false, true);
-
-      $mp_query = '';
-      $is_mpgame = ($GameType != GAMETYPE_GO);
-      if( $is_mpgame && ($cmd == GAMECMD_MOVE || $cmd == GAMECMD_SET_HANDICAP || $cmd == GAMECMD_SCORE) )
-      {
-         list( $group_color, $group_order, $gpmove_color )
-            = MultiPlayerGame::calc_game_player_for_move( $GamePlayers, $Moves, $Handicap, 2 );
-         $mp_gp = GamePlayer::load_game_player( $gid, $group_color, $group_order );
-         $mp_uid = $mp_gp->uid;
-         $mp_query = (( $ToMove_ID == $Black_ID ) ? 'Black_ID' : 'White_ID' ) . "=$mp_uid, ";
-      }
-
-      $message_raw = trim($this->message);
-      if( preg_match( "/^<c>\s*<\\/c>$/si", $message_raw ) ) // remove empty comment-only tags
-         $message_raw = '';
-      $message = mysql_addslashes($message_raw);
-
-      if( $message && preg_match( "#</?h(idden)?>#is", $message) )
-         $GameFlags |= GAMEFLAGS_HIDDEN_MSG;
-
 
       // ***** HOT_SECTION *****
       // >>> See also: confirm.php, quick_play.php, include/quick/quick_game.php, clock_tick.php (for timeout)
       $gah = new GameActionHelper( $this->my_id, $gid, $this->action, /*quick*/true );
-      $gah->init_query( $Moves, $mp_query, $time_query );
+      $gah->init_query( $dbgmsg, $Moves, $this->game_row, $this->to_move, $next_to_move );
+      $gah->init_mp_query( $GameType, $GamePlayers, $Moves, $Handicap, $ToMove_ID, $Black_ID );
+      $gah->set_game_move_message( $this->message, $GameFlags );
 
-      $score = null;
       $Moves++;
-      $game_finished = false;
 
       // pass-in "globals" for GameActionHelper
-      $this->game_row['to_move'] = $this->to_move;
       $this->game_row['next_to_move_ID'] = $next_to_move_ID;
-      $this->game_row['hours'] = $hours;
       $this->game_row['GameFlags'] = $GameFlags;
       $this->game_row['Moves'] = $Moves;
       $gah->game_row = $this->game_row;
@@ -293,7 +267,7 @@ class QuickHandlerGame extends QuickHandler
       {
          case GAMEACT_DELETE:
          {
-            $game_finished = true;
+            $gah->set_game_finished( true );
             break;
          }
 
@@ -320,8 +294,7 @@ class QuickHandlerGame extends QuickHandler
 
          case GAMEACT_RESIGN:
          {
-            $score = $gah->prepare_game_action_resign( $dbgmsg );
-            $game_finished = true;
+            $gah->prepare_game_action_resign( $dbgmsg );
             break;
          }
 
@@ -330,8 +303,8 @@ class QuickHandlerGame extends QuickHandler
             // NOTE: moves = coords to toggle for disagreement, toggle = toggle-mode, agree = agreement to finish game
             $toggle_uniq = ( $this->toggle_mode == GAMEOPTVAL_TOGGLE_UNIQUE );
             $arr_coords = $this->build_arr_coords($Size);
-            $score = $gah->prepare_game_action_score( $dbgmsg,
-               $this->TheBoard, '', $toggle_uniq, $this->agree, $arr_coords );
+            $gah->prepare_game_action_score( $dbgmsg,
+               $this->TheBoard, /*stonestr*/'', $toggle_uniq, $this->agree, $arr_coords );
             break;
          }
 
@@ -340,8 +313,8 @@ class QuickHandlerGame extends QuickHandler
             break;
       }//switch $this->action
 
-      $gah->prepare_game_action_generic( $message );
-      $gah->update_game( $dbgmsg, $game_finished, $score );
+      $gah->prepare_game_action_generic();
+      $gah->update_game( $dbgmsg );
    }//process_cmd_play
 
    private function process_cmd_status_score()
