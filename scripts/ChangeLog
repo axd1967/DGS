@@ -16,7 +16,49 @@ Developers INFO:
 ChangeLog
 ------------------------------------------------------------------
 
+2013-04-19 juga
+
+   * include/game_actions.php (class GameActionHelper, ~.set_game_action, ~.load_game,
+       ~.init_globals, ~.load_game_board, ~.init_query, ~.increase_moves, ~.get_moves,
+       ~.calculate_game_score),
+     include/quick/quick_game.php (class QuickHandlerGame, ~.prepare, ~.process_cmd_play),
+     confirm.php, game.php, quick_play.php:
+   - cleanup: refactored redundant code from confirm-page/quick_play-page/quick-do-game-handler
+     - step #7: refactored handling for loading-game, loading-board, setting to-move/next-to-move,
+       handling GameFlags
+     - step #8: removed globals in functions replacing by access to class-attributes/funcs
+     - step #9: refactored handling of score-calculation for game-page
+   - bugfix for quick-game-handler: corrected to_move on resign-if-not-your-turn,
+     it was possible to win by own resignation
+
+2013-04-18 juga
+
+   * include/game_actions.php (class GameActionHelper, ~.set_game_finished, ~.init_query,
+       ~.init_mp_query, ~.set_game_move_message),
+     include/quick/quick_game.php (QuickHandlerGame.process_cmd_play),
+     confirm.php, quick_play.php:
+   - cleanup: refactored redundant code from confirm-page/quick_play-page/quick-do-game-handler
+     - step #6: refactored handling for MPG, time, message, game-finish, score
+
 2013-04-17 juga
+
+   * include/game_actions.php (class GameActionHelper, ~.init_query,
+       ~.prepare_game_action_set_handicap, ~.prepare_game_action_do_move,
+       ~.prepare_game_action_pass, ~.prepare_game_action_resign,
+       ~.prepare_game_action_generic, ~.prepare_game_action_score, ~.update_game)
+     include/quick/quick_game.php (QuickHandlerGame.prepare, ~.process_cmd_play,
+       ~.convert_game_cmd_to_action),
+     include/board.php (Board.draw_board),
+     include/globals.php (GAMEACT_...),
+     confirm.php, game.php, quick_play.php:
+   - cleanup: refactored redundant code from game-page/confirm-page/quick_play-page/quick-do-game-handler
+     for moving and other game-actions into new class GameActionHelper
+     - step #1: refactored update-game query-code
+     - step #2: refactored "pass"-move-code + generically handled MPG/time/message-query-part
+     - step #3: refactored "set_handicap"-move-code
+     - step #4: refactored "domove"-move-code
+     - step #5: refactored "done"-scoring-code
+   - bugfix: check for empty move-id for quick-game-handler
 
    * include/game_functions.php (class DefaultMaxHandicap, ~.calc_def_max_handicap,
        ~.limit_max_handicap, ~.limit_min_max_with_def_handicap, ~.build_text_handicap_limits;
