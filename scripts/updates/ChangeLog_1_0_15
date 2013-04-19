@@ -14,10 +14,16 @@ Release [2012-06-08] - DGS 1.0.15 - CVS-tag [release-1_0_15-20120608] on branch 
 2013-03-08: changes + bug fixes update (by JUG) as DGS 1.0.15.f
 2013-04-10: bug fixes update (by JUG) as DGS 1.0.15.g
 2013-04-16: changes update (by JUG) as DGS 1.0.15.h
+2013-04-19: bug fix update (by JUG) as DGS 1.0.15.i
 
 ==================================================================
 
 ### ----- release-1_0_15-20120608 -----
+
+2013-04-19 juga
+
+   * include/quick/quick_game.php (QuickHandlerGame.prepare):
+   - bugfix: correct to_move on resign-if-not-your-turn, was possible to resign for opponent
 
 2013-04-16 juga
 
