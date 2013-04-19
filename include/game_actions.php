@@ -233,12 +233,13 @@ class GameActionHelper
    // \param $quick_moves must be set for quick-suite; ignored for non-quick-suite
    public function prepare_game_action_set_handicap( $dbgmsg, $orig_stonestring, $quick_moves )
    {
-      global $Moves, $Handicap, $Status, $White_ID;
+      $Moves = $this->get_moves();
+      $Handicap = $this->game_row['Handicap'];
+      $Status = $this->game_row['Status'];
+      $White_ID = $this->game_row['White_ID'];
       $GameFlags = $this->game_row['GameFlags'];
-      if( $this->is_quick && $this->game_row ) extract($this->game_row);
-
+      $Size = $this->game_row['Size'];
       $dbgmsg .= ".GAH.prepare_game_action_set_handicap({$this->gid},{$this->action},$Status,$Moves,$Handicap)";
-      $board_size = $this->board->size;
 
       $this->move_query = self::$MOVE_INSERT_QUERY; // gid,MoveNr,Stone,PosX,PosY,Hours
 
@@ -250,13 +251,13 @@ class GameActionHelper
             error('invalid_action', "$dbgmsg.check_status");
 
          $stonestring = check_handicap( $this->board, $orig_stonestring );
-         if( strlen( $stonestring ) != 2 * $Handicap )
+         if( strlen($stonestring) != 2 * $Handicap )
             error('wrong_number_of_handicap_stone', "$dbgmsg.check.handicap($stonestring)");
 
          $quick_moves = array();
          for( $i=1; $i <= $Handicap; $i++ )
          {
-            list( $x, $y ) = sgf2number_coords( substr($stonestring, $i*2-2, 2), $board_size );
+            list( $x, $y ) = sgf2number_coords( substr($stonestring, $i*2-2, 2), $Size );
             if( !isset($x) || !isset($y) )
                error('illegal_position', "$dbgmsg.check_pos(#$i,$x,$y)");
             else
@@ -274,9 +275,9 @@ class GameActionHelper
       $this->game_query = "UPDATE Games SET Moves=$Handicap, " . //See *** HOT_SECTION ***
           "Last_X=$x, " .
           "Last_Y=$y, " .
-          "Last_Move='" . number2sgf_coords($x, $y, $board_size) . "', " .
+          "Last_Move='" . number2sgf_coords($x, $y, $Size) . "', " .
           "Flags=$GameFlags, " .
-          "Snapshot='" . GameSnapshot::make_game_snapshot($board_size, $this->board) . "', " .
+          "Snapshot='" . GameSnapshot::make_game_snapshot($Size, $this->board) . "', " .
           "ToMove_ID=$White_ID, ";
    }//prepare_game_action_set_handicap
 
@@ -285,10 +286,14 @@ class GameActionHelper
    // \param $chk_stonestring if given check against calculated prisonerstring
    public function prepare_game_action_do_move( $dbgmsg, $move_coord, $chk_stonestring='' )
    {
-      global $Last_Move, $Last_X, $Last_Y, $Size, $Black_Prisoners, $White_Prisoners, $Moves;
+      $Last_Move = $this->game_row['Last_Move'];
+      $Last_X = $this->game_row['Last_X'];
+      $Last_Y = $this->game_row['Last_Y'];
+      $Size = $this->game_row['Size'];
+      $Black_Prisoners = $this->game_row['Black_Prisoners'];
+      $White_Prisoners = $this->game_row['White_Prisoners'];
+      $Moves = $this->get_moves();
       $GameFlags = $this->game_row['GameFlags'];
-      if( $this->is_quick && $this->game_row ) extract($this->game_row);
-
       $dbgmsg .= ".GAH.prepare_game_action_do_move({$this->gid},{$this->action})";
 
       $next_status = GAME_STATUS_PLAY;
@@ -343,10 +348,11 @@ class GameActionHelper
 
    public function prepare_game_action_pass( $dbgmsg )
    {
-      global $Moves, $Handicap, $Status, $Last_Move;
+      $Moves = $this->get_moves();
+      $Handicap = $this->game_row['Handicap'];
+      $Status = $this->game_row['Status'];
+      $Last_Move = $this->game_row['Last_Move'];
       $GameFlags = $this->game_row['GameFlags'];
-      if( $this->is_quick && $this->game_row ) extract($this->game_row);
-
       $dbgmsg .= ".GAH.prepare_game_action_pass({$this->gid},{$this->action},$Status,$Moves,$Handicap)";
 
       if( $Moves < $Handicap )
@@ -373,10 +379,8 @@ class GameActionHelper
 
    public function prepare_game_action_resign( $dbgmsg )
    {
-      global $Moves;
+      $Moves = $this->get_moves();
       $GameFlags = $this->game_row['GameFlags'];
-      if( $this->is_quick && $this->game_row ) extract($this->game_row);
-
       $dbgmsg .= ".GAH.prepare_game_action_resign({$this->gid},{$this->action})";
 
       $next_status = GAME_STATUS_FINISHED;
@@ -400,13 +404,17 @@ class GameActionHelper
    // \param $arr_coords ignored for non-quick-suite; use false | array of coord-moves [(x,y), ...]
    public function prepare_game_action_score( $dbgmsg, $stonestring, $toggle_uniq=false, $agree=true, $arr_coords=false )
    {
-      global $Handicap, $Komi, $Black_Prisoners, $White_Prisoners, $Ruleset, $Status, $Moves;
+      $Moves = $this->get_moves();
+      $Handicap = $this->game_row['Handicap'];
+      $Komi = $this->game_row['Komi'];
+      $Black_Prisoners = $this->game_row['Black_Prisoners'];
+      $White_Prisoners = $this->game_row['White_Prisoners'];
+      $Ruleset = $this->game_row['Ruleset'];
+      $Status = $this->game_row['Status'];
+      $Size = $this->game_row['Size'];
       $GameFlags = $this->game_row['GameFlags'];
-      if( $this->is_quick && $this->game_row ) extract($this->game_row);
-
       $dbgmsg .= ".GAH.prepare_game_action_score({$this->gid},{$this->action})";
 
-      $board_size = $this->board->size;
       if( !$this->is_quick )
          $arr_coords = false;
 
@@ -417,7 +425,7 @@ class GameActionHelper
       $gchkscore->update_stonestring( $stonestring );
       $this->score = $game_score->calculate_score();
 
-      $l = strlen( $stonestring );
+      $l = strlen($stonestring);
       if( $Status == GAME_STATUS_SCORE2 && $l < 2 )
       {
          if( $this->is_quick && !$agree )
@@ -436,7 +444,7 @@ class GameActionHelper
       $mark_stone = ( $this->to_move == BLACK ) ? MARKED_BY_BLACK : MARKED_BY_WHITE;
       for( $i=0; $i < $l; $i += 2 )
       {
-         list($x,$y) = sgf2number_coords(substr($stonestring, $i, 2), $board_size);
+         list($x,$y) = sgf2number_coords(substr($stonestring, $i, 2), $Size);
          $this->move_query .= "({$this->gid}, $Moves, $mark_stone, $x, $y, 0), ";
       }
       $this->move_query .= "({$this->gid}, $Moves, {$this->to_move}, ".POSX_SCORE.", 0, {$this->hours}) ";
@@ -447,7 +455,7 @@ class GameActionHelper
           "Score={$this->score}, " .
           //"Last_Move='$Last_Move', " . //Not a move, re-use last one
           "Flags=$GameFlags, " . //Don't reset KO-Flag else SCORE,RESUME could break a Ko
-          "Snapshot='" . GameSnapshot::make_game_snapshot($board_size, $this->board) . "', ";
+          "Snapshot='" . GameSnapshot::make_game_snapshot($Size, $this->board) . "', ";
 
       if( $next_status != GAME_STATUS_FINISHED )
          $this->game_query .= "ToMove_ID={$this->next_to_move_ID}, ";
@@ -458,8 +466,10 @@ class GameActionHelper
 
    public function prepare_game_action_generic()
    {
-      global $Handicap, $Moves, $NOW;
-      if( $this->is_quick && $this->game_row ) extract($this->game_row);
+      global $NOW;
+      $Moves = $this->get_moves();
+      $Handicap = $this->game_row['Handicap'];
+      $Komi = $this->game_row['Komi'];
 
       if( $this->action != GAMEACT_DELETE )
       {
@@ -479,11 +489,17 @@ class GameActionHelper
 
    public function update_game( $dbgmsg )
    {
-      global $tid, $Status, $GameType, $GamePlayers, $Black_ID, $White_ID, $Moves, $Rated,
-             $ActivityMax, $ActivityForMove, $NOW, $ToMove_ID;
+      global $ActivityMax, $ActivityForMove, $NOW;
+      $Moves = $this->get_moves();
+      $tid = $this->game_row['tid'];
+      $Status = $this->game_row['Status'];
+      $GameType = $this->game_row['GameType'];
+      $GamePlayers = $this->game_row['GamePlayers'];
+      $Black_ID = $this->game_row['Black_ID'];
+      $White_ID = $this->game_row['White_ID'];
+      $Rated = $this->game_row['Rated'];
+      $ToMove_ID = $this->game_row['ToMove_ID'];
       $GameFlags = $this->game_row['GameFlags'];
-      if( $this->is_quick && $this->game_row ) extract($this->game_row);
-
       $dbgmsg .= ".GAH.update_game({$this->gid},{$this->action})";
 
       ta_begin();
