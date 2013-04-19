@@ -212,7 +212,7 @@ class QuickHandlerGame extends QuickHandler
 
       $this->gah->set_game_action( $this->action );
       $this->gah->init_globals( $dbgmsg );
-      $this->TheBoard = $gah->load_game_board( $dbgmsg ); // load board with moves
+      $this->TheBoard = $this->gah->load_game_board( $dbgmsg ); // load board with moves
    }//prepare
 
    /*! \brief Processes command for object; may fire error(..) and perform db-operations. */
