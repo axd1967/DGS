@@ -76,6 +76,7 @@ class QuickHandlerGame extends QuickHandler
    private $moves = null; // coords-array [ (x,y), ... ], if null -> parse from url_moves
    private $is_pass_move = false;
 
+   private $gah = null;
    private $game_row = null;
    private $TheBoard = null;
    private $to_move = null;
@@ -117,7 +118,8 @@ class QuickHandlerGame extends QuickHandler
 
       // prepare command: del, resign; set_handi, move, score
 
-      $this->game_row = GameHelper::load_game_row( "$dbgmsg.find_game", $gid );
+      $this->gah = new GameActionHelper( $this->my_id, $gid, /*quick*/true );
+      $this->game_row = $this->gah->load_game( $dbgmsg );
       extract($this->game_row);
 
       // check move(s) + context (move-id)
@@ -143,15 +145,6 @@ class QuickHandlerGame extends QuickHandler
       elseif( !isRunningGame($Status) )
          error('invalid_game_status', "$dbgmsg.check.game_status($Status)");
 
-      if( $ToMove_ID == 0 )
-         error('game_finished', "$dbgmsg.bad_ToMove_ID.gamend");
-      if( $Black_ID == $ToMove_ID )
-         $this->to_move = BLACK;
-      elseif( $White_ID == $ToMove_ID )
-         $this->to_move = WHITE;
-      else
-         error('database_corrupted', "$dbgmsg.check.to_move");
-
       if( $uid != $Black_ID && $uid != $White_ID )
          error('not_game_player', "dbgmsg.check.not_your_game($uid)");
 
@@ -175,7 +168,7 @@ class QuickHandlerGame extends QuickHandler
       }
       elseif( $cmd == GAMECMD_SET_HANDICAP )
       {
-         if( $Status != GAME_STATUS_PLAY || $Handicap == 0 || $Moves > 0 || $this->to_move != BLACK )
+         if( $Status != GAME_STATUS_PLAY || $Handicap == 0 || $Moves > 0 || $ToMove_ID != $Black_ID )
             error('invalid_action', "$dbgmsg.check.status($cmd,$Status,$Handicap,$Moves)");
          if( count($this->moves) != $Handicap )
             error('wrong_number_of_handicap_stone', "$dbgmsg.check.move_count($cmd,$Handicap,{$this->url_moves})");
@@ -217,12 +210,9 @@ class QuickHandlerGame extends QuickHandler
          }
       }
 
-      // load board with moves
-      $this->TheBoard = new Board();
-      $no_marked_dead = ( $cmd == GAMECMD_MOVE || $Status == GAME_STATUS_PLAY || $Status == GAME_STATUS_PASS );
-      $board_opts = ( $no_marked_dead ? 0 : BOARDOPT_MARK_DEAD );
-      if( !$this->TheBoard->load_from_db( $this->game_row, 0, $board_opts) )
-         error('internal_error', "$dbgmsg.load_board($no_marked_dead)");
+      $this->gah->set_game_action( $this->action );
+      $this->gah->init_globals( $dbgmsg );
+      $this->TheBoard = $gah->load_game_board( $dbgmsg ); // load board with moves
    }//prepare
 
    /*! \brief Processes command for object; may fire error(..) and perform db-operations. */
@@ -244,77 +234,52 @@ class QuickHandlerGame extends QuickHandler
 
       $dbgmsg = 'QuickHandlerGame.process';
 
-      $next_to_move = WHITE + BLACK - $this->to_move;
-      $next_to_move_ID = ( $next_to_move == BLACK ) ? $Black_ID : $White_ID;
-
 
       // ***** HOT_SECTION *****
       // >>> See also: confirm.php, quick_play.php, include/quick/quick_game.php, clock_tick.php (for timeout)
-      $gah = new GameActionHelper( $this->my_id, $gid, $this->action, /*quick*/true );
-      $gah->init_query( $dbgmsg, $Moves, $this->game_row, $this->to_move, $next_to_move );
-      $gah->init_mp_query( $GameType, $GamePlayers, $Moves, $Handicap, $ToMove_ID, $Black_ID );
-      $gah->set_game_move_message( $this->message, $GameFlags );
-
-      $Moves++;
-
-      // pass-in "globals" for GameActionHelper
-      $this->game_row['next_to_move_ID'] = $next_to_move_ID;
-      $this->game_row['GameFlags'] = $GameFlags;
-      $this->game_row['Moves'] = $Moves;
-      $gah->game_row = $this->game_row;
+      $this->gah->init_query( $dbgmsg );
+      $this->gah->set_game_move_message( $this->message );
+      $this->gah->increase_moves();
 
       switch( (string)$this->action )
       {
          case GAMEACT_DELETE:
-         {
-            $gah->set_game_finished( true );
+            $this->gah->set_game_finished( true );
             break;
-         }
 
          case GAMEACT_SET_HANDICAP:
-         {
             // NOTE: moves = list of coordinates of the handicap-stone placement
-            $gah->prepare_game_action_set_handicap( $dbgmsg, $this->TheBoard, null, $this->moves );
+            $this->gah->prepare_game_action_set_handicap( $dbgmsg, /*orig-stonestr*/null, $this->moves );
             break;
-         }
 
          case GAMEACT_DO_MOVE:
-         {
             // NOTE: moves = single move to submit (non "pass"-move)
-            $gah->prepare_game_action_do_move( $dbgmsg, $this->TheBoard, /*(x,y)*/$this->moves[0] );
+            $this->gah->prepare_game_action_do_move( $dbgmsg, /*(x,y)*/$this->moves[0] );
             break;
-         }
 
          case GAMEACT_PASS:
-         {
             // NOTE: moves = "pass" for passing move
-            $gah->prepare_game_action_pass( $dbgmsg );
+            $this->gah->prepare_game_action_pass( $dbgmsg );
             break;
-         }
 
          case GAMEACT_RESIGN:
-         {
-            $gah->prepare_game_action_resign( $dbgmsg );
+            $this->gah->prepare_game_action_resign( $dbgmsg );
             break;
-         }
 
          case GAMEACT_SCORE:
-         {
             // NOTE: moves = coords to toggle for disagreement, toggle = toggle-mode, agree = agreement to finish game
             $toggle_uniq = ( $this->toggle_mode == GAMEOPTVAL_TOGGLE_UNIQUE );
             $arr_coords = $this->build_arr_coords($Size);
-            $gah->prepare_game_action_score( $dbgmsg,
-               $this->TheBoard, /*stonestr*/'', $toggle_uniq, $this->agree, $arr_coords );
+            $this->gah->prepare_game_action_score( $dbgmsg, /*stonestr*/'', $toggle_uniq, $this->agree, $arr_coords );
             break;
-         }
 
          default:
             error('invalid_action', "QuickHandlerGame.process.noaction($gid,{$this->action},$Status)");
             break;
       }//switch $this->action
 
-      $gah->prepare_game_action_generic();
-      $gah->update_game( $dbgmsg );
+      $this->gah->prepare_game_action_generic();
+      $this->gah->update_game( $dbgmsg );
    }//process_cmd_play
 
    private function process_cmd_status_score()

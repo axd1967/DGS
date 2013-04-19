@@ -51,23 +51,20 @@ else
    $uhandle = $player_row['Handle'];
    $my_id = $player_row['ID'];
 
-   $game_row = GameHelper::load_game_row( 'quick_play.find_game', $gid );
-   $Last_X = $Last_Y = -1;
-   extract($game_row);
 
-   if( $Status == GAME_STATUS_FINISHED )
+   $gah = new GameActionHelper( $my_id, $gid, /*quick*/true );
+   $gah->set_game_action( GAMEACT_DO_MOVE ); // always 'domove'
+   $game_row = $gah->load_game( 'quick_play' );
+   extract($game_row);
+   list( $to_move ) = $gah->init_globals( 'quick_play' );
+
+   // affirm, that game is running
+   if( $Status == GAME_STATUS_INVITED || $Status == GAME_STATUS_SETUP )
+      error('game_not_started', "quick_play.check.status($gid,$Status)");
+   elseif( $Status == GAME_STATUS_FINISHED )
       error('game_finished', "quick_play.check_status.finished($gid)");
    elseif( !isRunningGame($Status) )
-      error('game_not_started', "quick_play.check_status.bad($gid,$Status)");
-
-   if( $ToMove_ID == 0 )
-      error('game_finished', "quick_play.bad_ToMove_ID.gamend($gid)");
-   if( $Black_ID == $ToMove_ID )
-      $to_move = BLACK;
-   else if( $White_ID == $ToMove_ID )
-      $to_move = WHITE;
-   else
-      error('database_corrupted', "quick_play.check_tomove($gid,$ToMove_ID,$Black_ID,$White_ID)");
+      error('invalid_game_status', "quick_play.check_status.bad($gid,$Status)");
 
    if( $Moves < $Handicap )
       error('invalid_action', "quick_play.check.set_handicap.not_supported($gid,$my_id,$Moves,$Handicap)");
@@ -83,8 +80,6 @@ else
    }
 
 
-
-   //See *** HOT_SECTION *** below
    if( isset($_REQUEST['sgf_move']) )
       list( $query_X, $query_Y) = sgf2number_coords($_REQUEST['sgf_move'], $Size);
    elseif( isset($_REQUEST['board_move']) )
@@ -112,36 +107,17 @@ else
    if( $move_color != ($to_move==WHITE ? 'W' : 'B') )
       error('not_your_turn', "quick_play.err4($gid)");
 
-   $action = GAMEACT_DO_MOVE; //$action = always 'domove'
-
-   $next_to_move = WHITE+BLACK-$to_move;
-   $next_to_move_ID = ( $next_to_move == BLACK ? $Black_ID : $White_ID );
-
-
-   $TheBoard = new Board( );
-   if( !$TheBoard->load_from_db($game_row) )
-      error('internal_error', "quick_play.load_from_db($gid)");
-
-   //$too_few_moves = ($Moves < DELETE_LIMIT+$Handicap) ;
-
 
    // ***** HOT_SECTION *****
    // >>> See also: confirm.php, quick_play.php, include/quick/quick_game.php, clock_tick.php (for timeout)
-   $gah = new GameActionHelper( $my_id, $gid, $action, /*quick*/true );
-   $gah->init_query( 'quick_play', $Moves, $game_row, $to_move, $next_to_move );
-   $gah->init_mp_query( $GameType, $GamePlayers, $Moves, $Handicap, $ToMove_ID, $Black_ID );
-   $gah->set_game_move_message( @$_REQUEST['message'], $GameFlags );
-
-   $Moves++;
+   $gah->load_game_board( 'quick_play' );
+   $gah->init_query( 'quick_play' );
+   $gah->set_game_move_message( @$_REQUEST['message'] );
+   $gah->increase_moves();
 
    //case GAMEACT_DO_MOVE:
-   {
-      if( $Status != GAME_STATUS_PLAY )
-         error('invalid_action', "quick_play.err5($gid)");
-
-      $coord = number2sgf_coords( $query_X, $query_Y, $Size);
-      $gah->prepare_game_action_do_move( 'quick_play', $TheBoard, $coord );
-   }//domove
+   $coord = number2sgf_coords( $query_X, $query_Y, $Size);
+   $gah->prepare_game_action_do_move( 'quick_play', $coord );
 
    $gah->prepare_game_action_generic();
    $gah->update_game( 'quick_play' );

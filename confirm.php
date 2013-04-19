@@ -66,8 +66,13 @@ require_once( "include/rating.php" );
    if( $my_id <= GUESTS_ID_MAX )
       error('not_allowed_for_guest', 'confirm');
 
-   $game_row = GameHelper::load_game_row( 'confirm.find_game', $gid );
+   $action = @$_REQUEST['action'];
+   $gah = new GameActionHelper( $my_id, $gid, /*quick*/false );
+   $gah->set_game_action( $action );
+   $game_row = $gah->load_game( 'confirm' );
    extract($game_row);
+   $gah->init_globals( 'confirm' );
+
 
    if( @$_REQUEST['nextskip'] )
       jump_to_next_game( $my_id, $Lastchanged, $Moves, $TimeOutDate, $gid);
@@ -75,21 +80,14 @@ require_once( "include/rating.php" );
    if( @$_REQUEST['nextaddtime'] )
       do_add_time( $game_row, $my_id); // jump back
 
+   // affirm, that game is started
    if( $Status == GAME_STATUS_INVITED || $Status == GAME_STATUS_SETUP )
       error('game_not_started', "confirm.check.bad_status($gid,$Status)");
    elseif( $Status == GAME_STATUS_FINISHED )
       error('game_finished', "confirm.check.finished($gid)");
+   elseif( !isStartedGame($Status) )
+      error('invalid_game_status', "confirm.check.game_status($gid,$Status)");
 
-   if( $ToMove_ID == 0 )
-      error('game_finished', "confirm.bad_ToMove_ID.gamend($gid)");
-   if( $Black_ID == $ToMove_ID )
-      $to_move = BLACK;
-   elseif( $White_ID == $ToMove_ID )
-      $to_move = WHITE;
-   else
-      error('database_corrupted', "confirm.bad_ToMove_ID($gid)");
-
-   $action = @$_REQUEST['action'];
    if( $Moves < $Handicap && $action == GAMEACT_DO_MOVE )
       error('invalid_action', "confirm.check.miss_handicap($gid,$my_id,$action,$Moves,$Handicap)");
 
@@ -100,16 +98,8 @@ require_once( "include/rating.php" );
 
    $is_running_game = isRunningGame($Status);
    $may_resign_game = $my_game && $is_running_game;
-   if( $action == GAMEACT_RESIGN )
-   {
-      if( !$may_resign_game )
-         error('invalid_action', "confirm.resign($gid,$Status)");
-
-      if( $my_id != $ToMove_ID )
-         $to_move = WHITE+BLACK-$to_move;
-   }
-   $next_to_move = WHITE+BLACK-$to_move;
-   $next_to_move_ID = ( $next_to_move == BLACK ? $Black_ID : $White_ID );
+   if( $action == GAMEACT_RESIGN && !$may_resign_game )
+      error('invalid_action', "confirm.resign($gid,$Status)");
 
    if( $my_id != $ToMove_ID && !$may_del_game && !$may_resign_game )
       error('not_your_turn', "confirm.check_tomove($gid,$ToMove_ID,$may_del_game,$may_resign_game)");
@@ -121,31 +111,19 @@ require_once( "include/rating.php" );
       error('invalid_action', "confirm.check.status.fairkomi($gid,$action)");
 
 
-   //See *** HOT_SECTION *** below
    if( !isset($_REQUEST['move']) )
       error('move_problem', "confirm.check.miss_move($gid)");
    $qry_move = @$_REQUEST['move'];
-   if( $qry_move != $Moves )
+   if( $qry_move != $Moves ) // check move-id
       error('already_played', "confirm.check.move($gid,$qry_move,$Moves)");
-
-
-
-   $no_marked_dead = ( $Status == GAME_STATUS_PLAY || $Status == GAME_STATUS_PASS || $action == GAMEACT_DO_MOVE );
-   $board_opts = ( $no_marked_dead ? 0 : BOARDOPT_MARK_DEAD );
-
-   $TheBoard = new Board();
-   if( !$TheBoard->load_from_db( $game_row, 0, $board_opts) )
-      error('internal_error', "confirm.board.load_from_db($gid)");
 
 
    // ***** HOT_SECTION *****
    // >>> See also: confirm.php, quick_play.php, include/quick/quick_game.php, clock_tick.php (for timeout)
-   $gah = new GameActionHelper( $my_id, $gid, $action, /*quick*/false );
-   $gah->init_query( 'confirm', $Moves, $game_row, $to_move, $next_to_move );
-   $gah->init_mp_query( $GameType, $GamePlayers, $Moves, $Handicap, $ToMove_ID, $Black_ID );
-   $gah->set_game_move_message( get_request_arg('message'), $GameFlags );
-
-   $Moves++;
+   $gah->load_game_board( 'confirm' );
+   $gah->init_query( 'confirm' );
+   $gah->set_game_move_message( get_request_arg('message') );
+   $gah->increase_moves();
 
    switch( (string)$action )
    {
@@ -156,28 +134,22 @@ require_once( "include/rating.php" );
 
          $coord = @$_REQUEST['coord'];
          $stonestring = @$_REQUEST['stonestring']; //stonestring is the list of prisoners
-         $gah->prepare_game_action_do_move( 'confirm', $TheBoard, $coord, $stonestring );
+         $gah->prepare_game_action_do_move( 'confirm', $coord, $stonestring );
          break;
       }
 
       case GAMEACT_PASS:
-      {
          $gah->prepare_game_action_pass( 'confirm' );
          break;
-      }
 
       case GAMEACT_SET_HANDICAP: //stonestring is the list of handicap stones
-      {
          $stonestring = @$_REQUEST['stonestring']; //stonestring is the list of prisoners
-         $gah->prepare_game_action_set_handicap( 'confirm', $TheBoard, $stonestring, null );
+         $gah->prepare_game_action_set_handicap( 'confirm', $stonestring, null );
          break;
-      }
 
       case GAMEACT_RESIGN:
-      {
          $gah->prepare_game_action_resign( 'confirm' );
          break;
-      }
 
       case GAMEACT_DELETE:
       {
@@ -194,7 +166,7 @@ require_once( "include/rating.php" );
             error('invalid_action', "confirm.done.check_status($gid,$Status)");
 
          $stonestring = (string)@$_REQUEST['stonestring']; //stonestring is the list of toggled points
-         $gah->prepare_game_action_score( 'confirm', $TheBoard, $stonestring );
+         $gah->prepare_game_action_score( 'confirm', $stonestring );
          break;
       }
 
@@ -212,7 +184,7 @@ require_once( "include/rating.php" );
    if( /*submit-move*/@$_REQUEST['nextstatus'] )
       jump_to("status.php");
    elseif( /*submit-move*/@$_REQUEST['nextgame'] )
-      jump_to_next_game( $my_id, $Lastchanged, $Moves, $TimeOutDate, $gid);
+      jump_to_next_game( $my_id, $Lastchanged, $gah->get_moves(), $TimeOutDate, $gid);
 
    jump_to("game.php?gid=$gid");
 }//main
@@ -239,7 +211,7 @@ function do_add_time( $game_row, $my_id)
       . '#boardInfos');
 }//do_add_time
 
-function jump_to_next_game($uid, $Lastchanged, $Moves, $TimeOutDate, $gid)
+function jump_to_next_game($uid, $Lastchanged, $moves, $TimeOutDate, $gid)
 {
    global $player_row;
 
@@ -260,7 +232,7 @@ function jump_to_next_game($uid, $Lastchanged, $Moves, $TimeOutDate, $gid)
    {
       case NGO_MOVES:
          $qsql->add_part( SQLP_WHERE,
-            "( Moves < $Moves OR (Moves=$Moves AND $def_where_nextgame ))" );
+            "( Moves < $moves OR (Moves=$moves AND $def_where_nextgame ))" );
          break;
       case NGO_PRIO:
          $prio = NextGameOrder::load_game_priority( $gid, $uid );
