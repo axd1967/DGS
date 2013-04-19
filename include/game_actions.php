@@ -564,6 +564,21 @@ class GameActionHelper
       ta_end();
    }//update_game
 
+
+   // ------------ static functions ----------------------------
+
+   public static function calculate_game_score( &$board, &$stonestring, $coord=false )
+   {
+      global $Handicap, $Komi, $Black_Prisoners, $White_Prisoners;
+
+      $gchkscore = new GameCheckScore( $board, $stonestring, $Handicap, $Komi, $Black_Prisoners, $White_Prisoners );
+      $game_score = $gchkscore->check_remove( $score_mode, $coord );
+      $gchkscore->update_stonestring( $stonestring );
+      $score = $game_score->calculate_score();
+
+      return $score;
+   }//calculate_game_score
+
 } //end 'GameActionHelper'
 
 ?>

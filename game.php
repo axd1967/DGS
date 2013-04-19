@@ -266,10 +266,7 @@ $GLOBALS['ThePage'] = new Page('Game');
          if( abs($Score) <= SCORE_MAX && $move == $Moves ) // don't calc for resign/time-out
          {
             $score_board = clone $TheBoard;
-            $gchkscore = new GameCheckScore( $score_board, $stonestring, $Handicap, $Komi, $Black_Prisoners, $White_Prisoners );
-            $game_score = $gchkscore->check_remove( $score_mode, $coord );
-            $gchkscore->update_stonestring( $stonestring );
-            $game_score->calculate_score();
+            GameActionHelper::calculate_game_score( $score_board, $stonestring, $coord );
          }
          $admResult = ( $GameFlags & GAMEFLAGS_ADMIN_RESULT ) ? sprintf(' (%s)', T_('set by admin#game')) : '';
          $extra_infos[score2text($Score, true) . $admResult] = 'Score';
@@ -277,10 +274,7 @@ $GLOBALS['ThePage'] = new Page('Game');
       elseif( $move == $Moves && ($Status == GAME_STATUS_SCORE || $Status == GAME_STATUS_SCORE2) )
       {
          $score_board = clone $TheBoard;
-         $gchkscore = new GameCheckScore( $score_board, $stonestring, $Handicap, $Komi, $Black_Prisoners, $White_Prisoners );
-         $game_score = $gchkscore->check_remove( $score_mode );
-         $gchkscore->update_stonestring( $stonestring );
-         $score = $game_score->calculate_score();
+         $score = GameActionHelper::calculate_game_score( $score_board, $stonestring );
       }
    }
    else
@@ -345,14 +339,13 @@ $GLOBALS['ThePage'] = new Page('Game');
             }
 
             $stonestring = check_handicap( $TheBoard, $stonestring, $coord); //adjust $stonestring
-            if( (strlen($stonestring)/2) < $Handicap )
+            if( strlen($stonestring) < 2*$Handicap )
             {
                $validation_step = false;
                $extra_infos[T_('Place your handicap stones, please!')] = 'Info';
                if( ENABLE_STDHANDICAP && !$patdone && strlen($stonestring)<2 )
                {
-                  $strtmp = "<a href=\"game.php?gid=$gid".URI_AMP."stdhandicap=t\">"
-                     . T_('Standard placement') . "</a>";
+                  $strtmp = "<a href=\"game.php?gid=$gid".URI_AMP."stdhandicap=t\">" . T_('Standard placement') . "</a>";
                   $extra_infos[$strtmp] = '';
                }
             }
@@ -419,10 +412,7 @@ $GLOBALS['ThePage'] = new Page('Game');
                error('invalid_action', "game.remove.check_status($gid,$Status)");
 
             $validation_step = false;
-            $gchkscore = new GameCheckScore( $TheBoard, $stonestring, $Handicap, $Komi, $Black_Prisoners, $White_Prisoners );
-            $game_score = $gchkscore->check_remove( $score_mode, $coord );
-            $gchkscore->update_stonestring( $stonestring );
-            $score = $game_score->calculate_score();
+            $score = GameActionHelper::calculate_game_score( $TheBoard, $stonestring, $coord );
 
             $done_url = "game.php?gid=$gid".URI_AMP."a=done"
                . ( $stonestring ? URI_AMP."stonestring=$stonestring" : '' );
@@ -443,10 +433,7 @@ $GLOBALS['ThePage'] = new Page('Game');
                error('invalid_action', "game.done.check_status($gid,$Status)");
 
             $validation_step = true;
-            $gchkscore = new GameCheckScore( $TheBoard, $stonestring, $Handicap, $Komi, $Black_Prisoners, $White_Prisoners );
-            $game_score = $gchkscore->check_remove( $score_mode );
-            $gchkscore->update_stonestring( $stonestring );
-            $score = $game_score->calculate_score();
+            $score = GameActionHelper::calculate_game_score( $TheBoard, $stonestring );
 
             $extra_infos[T_('Score') . ": " . score2text($score, true)] = 'Score';
             break;
