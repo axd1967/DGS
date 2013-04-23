@@ -34,6 +34,7 @@ require_once 'include/game_functions.php';
  *    - set handicap stones
  *    - play normal move
  *    - pass move
+ *    - scoring steps
  *
  *    - resign game
  *    - delete game
