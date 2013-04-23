@@ -16,6 +16,20 @@ Developers INFO:
 ChangeLog
 ------------------------------------------------------------------
 
+2013-04-23 juga
+
+   * include/game_actions.php (class GameActionHelper),
+     game.php:
+   - bugfix for previous refactoring: missed $score_mode argument on calculating game-score
+
+2013-04-22 juga
+
+   * include/game_actions.php (class GameActionHelper, ~.init_query, ~.set_game_move_message,
+       ~.prepare_game_action_set_handicap, ~.prepare_game_action_do_move,
+       ~.prepare_game_action_pass, ~.prepare_game_action_resign, ~.prepare_game_action_score,
+       ~.prepare_game_action_generic, ~.update_game):
+   - cleanup: refactored using UpdateQuery-class for building SQL-updates/inserts
+
 2013-04-19 juga
 
    * include/game_actions.php (class GameActionHelper, ~.set_game_action, ~.load_game,
