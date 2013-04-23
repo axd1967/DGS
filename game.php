@@ -266,7 +266,7 @@ $GLOBALS['ThePage'] = new Page('Game');
          if( abs($Score) <= SCORE_MAX && $move == $Moves ) // don't calc for resign/time-out
          {
             $score_board = clone $TheBoard;
-            GameActionHelper::calculate_game_score( $score_board, $stonestring, $coord );
+            GameActionHelper::calculate_game_score( $score_board, $stonestring, $score_mode, $coord );
          }
          $admResult = ( $GameFlags & GAMEFLAGS_ADMIN_RESULT ) ? sprintf(' (%s)', T_('set by admin#game')) : '';
          $extra_infos[score2text($Score, true) . $admResult] = 'Score';
@@ -274,7 +274,7 @@ $GLOBALS['ThePage'] = new Page('Game');
       elseif( $move == $Moves && ($Status == GAME_STATUS_SCORE || $Status == GAME_STATUS_SCORE2) )
       {
          $score_board = clone $TheBoard;
-         $score = GameActionHelper::calculate_game_score( $score_board, $stonestring );
+         $score = GameActionHelper::calculate_game_score( $score_board, $stonestring, $score_mode );
       }
    }
    else
@@ -412,7 +412,7 @@ $GLOBALS['ThePage'] = new Page('Game');
                error('invalid_action', "game.remove.check_status($gid,$Status)");
 
             $validation_step = false;
-            $score = GameActionHelper::calculate_game_score( $TheBoard, $stonestring, $coord );
+            $score = GameActionHelper::calculate_game_score( $TheBoard, $stonestring, $score_mode, $coord );
 
             $done_url = "game.php?gid=$gid".URI_AMP."a=done"
                . ( $stonestring ? URI_AMP."stonestring=$stonestring" : '' );
@@ -433,7 +433,7 @@ $GLOBALS['ThePage'] = new Page('Game');
                error('invalid_action', "game.done.check_status($gid,$Status)");
 
             $validation_step = true;
-            $score = GameActionHelper::calculate_game_score( $TheBoard, $stonestring );
+            $score = GameActionHelper::calculate_game_score( $TheBoard, $stonestring, $score_mode );
 
             $extra_infos[T_('Score') . ": " . score2text($score, true)] = 'Score';
             break;

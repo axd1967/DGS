@@ -76,6 +76,10 @@ class GameActionHelper
    private $move_query = ''; // (gid,MoveNr,Stone,PosX,PosY,Hours)
 
 
+   /*!
+    * Constructs GameActionHelper-object.
+    * \param $is_quick set to true for usage by quick-do-suite and quick-play.
+    */
    public function __construct( $my_id, $gid, $is_quick )
    {
       $this->my_id = $my_id;
@@ -96,6 +100,7 @@ class GameActionHelper
       $this->game_finished = $game_finished;
    }
 
+   /*! \brief Loads Games-table for this->gid, returning copy from game_row. */
    public function load_game( $dbgmsg )
    {
       $this->game_row = GameHelper::load_game_row( "$dbgmsg.load_game", $this->gid );
@@ -151,6 +156,7 @@ class GameActionHelper
    }//load_game_board
 
 
+   /*! \brief Inits query-parts and SQL-clauses for updating game-data. */
    public function init_query( $dbgmsg )
    {
       if( is_null($this->game_row) || is_null($this->action) || $this->to_move == 0 )
@@ -209,6 +215,7 @@ class GameActionHelper
    }//init_query
 
 
+   /*! \brief Strips away empty comments from message and set game-flags if there are embedded hidden messages. */
    public function set_game_move_message( $message_raw )
    {
       if( is_null($this->game_row) )
@@ -235,8 +242,11 @@ class GameActionHelper
    }
 
 
-   // \param $orig_stonestring must be for non-quick-suite
-   // \param $quick_moves must be set for quick-suite; ignored for non-quick-suite
+   /*!
+    * \brief Sets handicap-stones for game using either $orig_stonestring OR $quick_moves depending on $this->is_quick.
+    * \param $orig_stonestring set if used by non-quick-suite (e.g. confirm-page)
+    * \param $quick_moves must be set for quick-suite; ignored for non-quick-suite
+    */
    public function prepare_game_action_set_handicap( $dbgmsg, $orig_stonestring, $quick_moves )
    {
       $Moves = $this->get_moves();
@@ -286,8 +296,11 @@ class GameActionHelper
    }//prepare_game_action_set_handicap
 
 
-   // \param $move_coord arr(x,y) or sgf-coord of move
-   // \param $chk_stonestring if given check against calculated prisonerstring
+   /*!
+    * \brief Executes normal "move" (placing of a stone) on the board.
+    * \param $move_coord arr(x,y) OR sgf-coord of move
+    * \param $chk_stonestring if given check against calculated prisonerstring
+    */
    public function prepare_game_action_do_move( $dbgmsg, $move_coord, $chk_stonestring='' )
    {
       $Last_Move = $this->game_row['Last_Move'];
@@ -346,6 +359,7 @@ class GameActionHelper
    }//prepare_game_action_do_move
 
 
+   /*! \brief Executes PASS-"move" on the board. */
    public function prepare_game_action_pass( $dbgmsg )
    {
       $Moves = $this->get_moves();
@@ -377,6 +391,7 @@ class GameActionHelper
    }//prepare_game_action_pass
 
 
+   /*! \brief Resigns game by logged-in player. */
    public function prepare_game_action_resign( $dbgmsg )
    {
       $Moves = $this->get_moves();
@@ -399,8 +414,12 @@ class GameActionHelper
    }//prepare_game_action_resign
 
 
-   // \param $agree ignored for non-quick-suite; boolean value
-   // \param $arr_coords ignored for non-quick-suite; use false | array of coord-moves [(x,y), ...]
+   /*!
+    * \brief Executes 1st and 2nd scoring-steps for the board depend on current game-state.
+    * \param $toggle_uniq see quick-game-handler GAMEOPTVAL_TOGGLE_UNIQUE
+    * \param $agree ignored for non-quick-suite; boolean value
+    * \param $arr_coords ignored for non-quick-suite; use false | array of coord-moves [(x,y), ...]
+    */
    public function prepare_game_action_score( $dbgmsg, $stonestring, $toggle_uniq=false, $agree=true, $arr_coords=false )
    {
       $Moves = $this->get_moves();
@@ -476,6 +495,11 @@ class GameActionHelper
    }//prepare_game_action_generic
 
 
+   /*!
+    * \brief Executes SQL-statements prepared by this->prepare_game_action_...()-functions for the game.
+    * \note updating Games-table, insert moves/prisoners and move-message;
+    *       may delete or finish game, update players-stats and moves-stats
+    */
    public function update_game( $dbgmsg )
    {
       global $ActivityMax, $ActivityForMove, $NOW;
@@ -558,7 +582,7 @@ class GameActionHelper
 
    // ------------ static functions ----------------------------
 
-   public static function calculate_game_score( &$board, &$stonestring, $coord=false )
+   public static function calculate_game_score( &$board, &$stonestring, $score_mode, $coord=false )
    {
       global $Handicap, $Komi, $Black_Prisoners, $White_Prisoners;
 
