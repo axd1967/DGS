@@ -7,3 +7,7 @@
 # added image to save-SGF
 copy /images/sgf.gif
 
+-----------
+# fixed player-consistency for MPGs
+execute 'scripts/player_consistency.php'
+
