@@ -44,7 +44,8 @@ require_once( "include/std_functions.php" );
          "Translations" => 0,
             'update_translation_pages.php'   => "1. scan pages for translate-groups",
             'generate_translation_texts.php' => "2. scan pages for translation-texts",
-            'make_all_translationfiles.php'  => "3. export translations-dir",
+            'translation_consistency.php'    => "3. Check consistency of Translation-data",
+            'make_all_translationfiles.php'  => "4. export translations-dir",
 
          "Cache admin" => 0,
             'dgs_cache_admin.php'      => "DGS Cache Administration (clear caches, cleanup, view file-cache)",
@@ -69,7 +70,6 @@ require_once( "include/std_functions.php" );
             'message_consistency.php'     => "Check consistency of Message-data",
             'tournament_consistency.php'  => "Check consistency of Tournament-data",
             'voting_consistency.php'      => "Check consistency of Feature- & Survey-data",
-            'translation_consistency.php' => "Check consistency of Translation-data",
             'fix_game_snapshot.php'       => "Fix Games.Snapshot",
             'fix_games_timeleft.php'      => "Fix Games.TimeOutDate for running games (after long maintenance)",
 
