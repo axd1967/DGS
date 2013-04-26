@@ -25,195 +25,9 @@ require_once 'include/std_functions.php';
 require_once 'include/classlib_userconfig.php';
 require_once 'include/classlib_userquota.php';
 require_once 'include/game_functions.php';
+require_once "include/table_columns.php";
 
 define('DEBUG',0);
-
-//---------------
-require_once( "include/table_columns.php" );
-
-
-function echo_query( $dbgmsg, $query, $rowhdr=20, $colsize=80, $colwrap='cut' )
-{
-   $result = db_query( "player_consistency.echo_query.$dbgmsg", $query );
-
-   $mysqlerror = @mysql_error();
-   if( $mysqlerror )
-   {
-      echo "Error: $mysqlerror<p></p>";
-      return -1;
-   }
-
-   if( !$result  )
-      return 0;
-   $numrows = 0+@mysql_num_rows($result);
-   if( $numrows<=0 )
-   {
-      mysql_free_result($result);
-      return 0;
-   }
-
-   $c=0;
-   $i=0;
-   echo "\n<table title='$numrows rows' class=Table cellpadding=4 cellspacing=1>\n";
-   while( $row = mysql_fetch_assoc( $result ) )
-   {
-      $c=($c % LIST_ROWS_MODULO)+1;
-      $i++;
-      if( $i==1 || ($rowhdr>1 && ($i%$rowhdr)==1) )
-      {
-         echo "<tr>\n";
-         foreach( $row as $key => $val )
-         {
-            echo "<th>$key</th>";
-         }
-         echo "\n</tr>";
-      }
-      echo "<tr class=\"Row$c\" ondblclick=\"toggle_class(this,'Row$c','HilRow$c')\">\n";
-      foreach( $row as $key => $val )
-      {
-         //remove sensible fields from a query like "SELECT * FROM Players"
-         switch( (string)$key )
-         {
-            case 'Password':
-            case 'Sessioncode':
-            case 'Email':
-               if( $val ) $val= '***';
-               break;
-
-            case 'Debug':
-               if( $val )
-                  $val= preg_replace( "%(passwd=)[^&]*%is", "\\1***", $val);
-               break;
-         }
-         $val= textarea_safe($val);
-         if( $colsize>0 )
-         {
-            if( $colwrap==='wrap' )
-               $val= wordwrap( $val, $colsize, '<br>', 1);
-            elseif( $colwrap==='cut' )
-               $val= substr( $val, 0, $colsize);
-         }
-         echo "<td title='$key#$i' nowrap>$val</td>";
-      }
-      echo "\n</tr>";
-   }
-   mysql_free_result($result);
-   echo "\n</table><br>\n";
-
-   return $numrows;
-}//echo_query
-
-function explain_query( $dbgmsg, $s ) {
-   if(DEBUG)
-   {
-     echo "<BR>EXPLAIN $s;<BR>";
-     echo_query( $dbgmsg, "EXPLAIN $s" );
-     echo_query( $dbgmsg, $s); // show contents
-   }
-   return db_query( "player_consistency.explain_query.$dbgmsg", $s); // return query-results
-}
-//---------------
-
-
-function uid_clause( $fld, $oper)
-{
-   global $uid1, $uid2;
-   if( $uid1>'' && $uid2>'' )
-      return " $oper ($fld>=$uid1 AND $fld<=$uid2)";
-   elseif( $uid1>'' )
-      return " $oper ($fld=$uid1)";
-   else
-      return '';
-}
-
-
-/*!
- * \brief Counts and returns player-ids with incorrect counts for given query-restrictions.
- * \param $pfld Players-table field to check count for
- * \param $gwhr game-WHERE clause restricting query (e.g. on Status/Rated or other field)
- * \param $gwhrB game-WHERE clause restricting query for Black-player
- * \param $gwhrW game-WHERE clause restricting query for White-player
- * \note multi-player-games are counted in automatically for Players-field $pfld 'Running' and 'Finished' only,
- *       because MPG is not a rated games and 'RatedGames/Won/Lost' are only counted for rated games!
- * \return entries only for players with incorrect counts found:
- *       arr( Players.ID => arry( Players.<$pfld> count, real games-count )
- */
-function cnt_diff( $nam, $pfld, $gwhr, $gwhrB='', $gwhrW='')
-{
-   $tstart = getmicrotime();
-   $diff = array();
-
-   global $limit, $sqlbuf;
-
-   $query = "SELECT $sqlbuf Black_ID AS idB, COUNT(*) AS cntB"
-          . " FROM Games"
-          . " WHERE ".$gwhr.$gwhrB.uid_clause( 'Black_ID', 'AND')
-            . " AND GameType='".GAMETYPE_GO."'" // no MPG
-          . " GROUP BY Black_ID"
-          ;
-   $resB = explain_query( "$nam.B1", $query)
-      or die( "$nam.B2: " . mysql_error());
-
-   $plB = array(); // Players.ID => games-count
-   while( $rowB = mysql_fetch_assoc($resB) )
-      $plB[$rowB['idB']] = $rowB['cntB'];
-   mysql_free_result($resB);
-
-
-   $query = "SELECT $sqlbuf White_ID AS idW, COUNT(*) AS cntW"
-          . " FROM Games"
-          . " WHERE ".$gwhr.$gwhrW.uid_clause( 'White_ID', 'AND')
-            . " AND GameType='".GAMETYPE_GO."'" // no MPG
-          . " GROUP BY White_ID"
-          ;
-   $resW = explain_query( "$name.W1", $query)
-      or die( "$nam.W2: " . mysql_error());
-
-   $plW = array(); // Players.ID => games-count
-   while( $rowW = mysql_fetch_assoc($resW) )
-      $plW[$rowW['idW']] = $rowW['cntW'];
-   mysql_free_result($resW);
-
-
-   $plMPG = array(); // Players.ID => games-count
-   if( $pfld == 'Running' || $pfld == 'Finished' ) // count MPGs
-   {
-      $query = "SELECT $sqlbuf GP.uid, COUNT(*) AS cntMPG"
-             . " FROM GamePlayers AS GP  INNER JOIN Games AS G ON G.ID=GP.gid"
-             . " WHERE ".$gwhr.uid_clause( 'GP.uid', 'AND')
-             . " GROUP BY GP.uid"
-             ;
-      $resMPG = explain_query( "$name.MPG1", $query)
-         or die( "$nam.MPG2: " . mysql_error());
-
-      while( $rowMPG = mysql_fetch_assoc($resMPG) )
-         $plMPG[$rowMPG['uid']] = $rowW['cntMPG'];
-      mysql_free_result($resMPG);
-   }
-
-
-   $query = "SELECT $sqlbuf ID AS idP, $pfld AS cntP FROM Players".uid_clause( 'ID', 'WHERE');
-   $resP = explain_query( "$nam.P1", $query)
-      or die( "$nam.P2: " . mysql_error());
-
-   while( $rowP = mysql_fetch_assoc($resP) )
-   {
-      extract($rowP);
-      $sum = @$plB[$idP] + @$plW[$idP] + @$plMPG[$idP];
-      if(DEBUG)
-         echo "\n<br>P:$idP/$cntP/$sum  B:".@$plB[$idP]." W:".@$plW[$idP]." MPG:".@$plMPG[$idP];;
-      if( $cntP != $sum )
-         $diff[$idP] = array( $cntP, $sum );
-   }
-   mysql_free_result($resP);
-
-   krsort($diff, SORT_NUMERIC);
-
-   echo "\n<br>Needed ($nam): " . sprintf("%1.3fs", (getmicrotime() - $tstart));
-   return $diff;
-}//cnt_diff
-
-
 
 
 // ---------- MAIN --------------------------------------------------
@@ -643,5 +457,187 @@ function cnt_diff( $nam, $pfld, $gwhr, $gwhrB='', $gwhrW='')
    echo "<hr>Done!!!\n";
    end_html();
 }//main
+
+
+
+function echo_query( $dbgmsg, $query, $rowhdr=20, $colsize=80, $colwrap='cut' )
+{
+   $result = db_query( "player_consistency.echo_query.$dbgmsg", $query );
+
+   $mysqlerror = @mysql_error();
+   if( $mysqlerror )
+   {
+      echo "Error: $mysqlerror<p></p>";
+      return -1;
+   }
+
+   if( !$result  )
+      return 0;
+   $numrows = 0+@mysql_num_rows($result);
+   if( $numrows<=0 )
+   {
+      mysql_free_result($result);
+      return 0;
+   }
+
+   $c=0;
+   $i=0;
+   echo "\n<table title='$numrows rows' class=Table cellpadding=4 cellspacing=1>\n";
+   while( $row = mysql_fetch_assoc( $result ) )
+   {
+      $c=($c % LIST_ROWS_MODULO)+1;
+      $i++;
+      if( $i==1 || ($rowhdr>1 && ($i%$rowhdr)==1) )
+      {
+         echo "<tr>\n";
+         foreach( $row as $key => $val )
+         {
+            echo "<th>$key</th>";
+         }
+         echo "\n</tr>";
+      }
+      echo "<tr class=\"Row$c\" ondblclick=\"toggle_class(this,'Row$c','HilRow$c')\">\n";
+      foreach( $row as $key => $val )
+      {
+         //remove sensible fields from a query like "SELECT * FROM Players"
+         switch( (string)$key )
+         {
+            case 'Password':
+            case 'Sessioncode':
+            case 'Email':
+               if( $val ) $val= '***';
+               break;
+
+            case 'Debug':
+               if( $val )
+                  $val= preg_replace( "%(passwd=)[^&]*%is", "\\1***", $val);
+               break;
+         }
+         $val= textarea_safe($val);
+         if( $colsize>0 )
+         {
+            if( $colwrap==='wrap' )
+               $val= wordwrap( $val, $colsize, '<br>', 1);
+            elseif( $colwrap==='cut' )
+               $val= substr( $val, 0, $colsize);
+         }
+         echo "<td title='$key#$i' nowrap>$val</td>";
+      }
+      echo "\n</tr>";
+   }
+   mysql_free_result($result);
+   echo "\n</table><br>\n";
+
+   return $numrows;
+}//echo_query
+
+function explain_query( $dbgmsg, $s ) {
+   if(DEBUG)
+   {
+     echo "<BR>EXPLAIN $s;<BR>";
+     echo_query( $dbgmsg, "EXPLAIN $s" );
+     echo_query( $dbgmsg, $s); // show contents
+   }
+   return db_query( "player_consistency.explain_query.$dbgmsg", $s); // return query-results
+}
+
+
+function uid_clause( $fld, $oper)
+{
+   global $uid1, $uid2;
+   if( $uid1>'' && $uid2>'' )
+      return " $oper ($fld>=$uid1 AND $fld<=$uid2)";
+   elseif( $uid1>'' )
+      return " $oper ($fld=$uid1)";
+   else
+      return '';
+}
+
+
+/*!
+ * \brief Counts and returns player-ids with incorrect counts for given query-restrictions.
+ * \param $pfld Players-table field to check count for
+ * \param $gwhr game-WHERE clause restricting query (e.g. on Status/Rated or other field)
+ * \param $gwhrB game-WHERE clause restricting query for Black-player
+ * \param $gwhrW game-WHERE clause restricting query for White-player
+ * \note multi-player-games are counted in automatically for Players-field $pfld 'Running' and 'Finished' only,
+ *       because MPG is not a rated games and 'RatedGames/Won/Lost' are only counted for rated games!
+ * \return entries only for players with incorrect counts found:
+ *       arr( Players.ID => arry( Players.<$pfld> count, real games-count )
+ */
+function cnt_diff( $nam, $pfld, $gwhr, $gwhrB='', $gwhrW='')
+{
+   $tstart = getmicrotime();
+   $diff = array();
+
+   global $limit, $sqlbuf;
+
+   $query = "SELECT $sqlbuf Black_ID AS idB, COUNT(*) AS cntB"
+          . " FROM Games"
+          . " WHERE ".$gwhr.$gwhrB.uid_clause( 'Black_ID', 'AND')
+            . " AND GameType='".GAMETYPE_GO."'" // no MPG
+          . " GROUP BY Black_ID"
+          ;
+   $resB = explain_query( "$nam.B1", $query)
+      or die( "$nam.B2: " . mysql_error());
+
+   $plB = array(); // Players.ID => games-count
+   while( $rowB = mysql_fetch_assoc($resB) )
+      $plB[$rowB['idB']] = $rowB['cntB'];
+   mysql_free_result($resB);
+
+
+   $query = "SELECT $sqlbuf White_ID AS idW, COUNT(*) AS cntW"
+          . " FROM Games"
+          . " WHERE ".$gwhr.$gwhrW.uid_clause( 'White_ID', 'AND')
+            . " AND GameType='".GAMETYPE_GO."'" // no MPG
+          . " GROUP BY White_ID"
+          ;
+   $resW = explain_query( "$name.W1", $query)
+      or die( "$nam.W2: " . mysql_error());
+
+   $plW = array(); // Players.ID => games-count
+   while( $rowW = mysql_fetch_assoc($resW) )
+      $plW[$rowW['idW']] = $rowW['cntW'];
+   mysql_free_result($resW);
+
+
+   $plMPG = array(); // Players.ID => games-count
+   if( $pfld == 'Running' || $pfld == 'Finished' ) // count MPGs
+   {
+      $query = "SELECT $sqlbuf GP.uid, COUNT(*) AS cntMPG"
+             . " FROM GamePlayers AS GP  INNER JOIN Games AS G ON G.ID=GP.gid"
+             . " WHERE ".$gwhr.uid_clause( 'GP.uid', 'AND')
+             . " GROUP BY GP.uid"
+             ;
+      $resMPG = explain_query( "$name.MPG1", $query)
+         or die( "$nam.MPG2: " . mysql_error());
+
+      while( $rowMPG = mysql_fetch_assoc($resMPG) )
+         $plMPG[$rowMPG['uid']] = $rowW['cntMPG'];
+      mysql_free_result($resMPG);
+   }
+
+
+   $query = "SELECT $sqlbuf ID AS idP, $pfld AS cntP FROM Players".uid_clause( 'ID', 'WHERE');
+   $resP = explain_query( "$nam.P1", $query)
+      or die( "$nam.P2: " . mysql_error());
+
+   while( $rowP = mysql_fetch_assoc($resP) )
+   {
+      extract($rowP);
+      $sum = @$plB[$idP] + @$plW[$idP] + @$plMPG[$idP];
+      if(DEBUG)
+         echo "\n<br>P:$idP/$cntP/$sum  B:".@$plB[$idP]." W:".@$plW[$idP]." MPG:".@$plMPG[$idP];;
+      if( $cntP != $sum )
+         $diff[$idP] = array( $cntP, $sum );
+   }
+   mysql_free_result($resP);
+
+   krsort($diff, SORT_NUMERIC);
+
+   echo "\n<br>Needed ($nam): " . sprintf("%1.3fs", (getmicrotime() - $tstart));
+   return $diff;
+}//cnt_diff
 
 ?>
