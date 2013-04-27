@@ -59,7 +59,7 @@ define('SEPLINE', "\n<p><hr>\n");
    $form->add_row( array(
          'DESCRIPTION', 'tid',
          'TEXTINPUT',   'tid', 12, 12, $tid,
-         'TEXT',        'tournament-id required!', ));
+         'TEXT',        '0 (=all) | tournament-id', ));
    $form->add_empty_row();
    $form->add_row( array(
          'SUBMITBUTTON', 'check_it', 'Check Only',
@@ -74,12 +74,13 @@ define('SEPLINE', "\n<p><hr>\n");
    echo "On ", date(DATE_FMT5, $NOW);
 
    $cnt_err = 0;
-   if( $tid > 0 )
+
+   if( @$_REQUEST['check_it'] || $do_it )
    {
       if( $do_it )
          echo "<p>*** Fixes errors ***</p>";
 
-      $cnt_err += fix_tournament_RegisteredTP( $do_it );
+      $cnt_err += fix_tournament_RegisteredTP( $tid, $do_it );
    }
 
    echo SEPLINE;
@@ -107,21 +108,27 @@ function do_updates( $dbgmsg, $upd_arr, $do_it )
    echo '</pre>';
 }//do_updates
 
+function tid_clause( $field_tid, $tid, $with_op=true )
+{
+   $op = ($with_op) ? 'AND' : '';
+   return ( $tid > 0 ) ? " $op $field_tid=$tid " : '';
+}
 
-// Fix Tournament.RegisteredTP
-function fix_tournament_RegisteredTP( $do_it )
+
+function fix_tournament_RegisteredTP( $tid, $do_it )
 {
    $begin = getmicrotime();
+   $cnt_err = 0;
    echo SEPLINE;
    echo "Fix Tournament.RegisteredTP ...<br>\n";
 
    // note: join slightly faster than using subquery: Posts where User_ID not in (select ID from Players)
-   $result = db_query( 'tournament_consistency.fix_tournament_registered_tp.check_authors',
+   $result = db_query( "tournament_consistency.fix_tournament_RegisteredTP($tid)",
       "SELECT TP.tid, T.RegisteredTP, COUNT(*) AS X_Count " .
       "FROM TournamentParticipant AS TP INNER JOIN Tournament AS T ON T.ID=TP.tid " .
-      "WHERE TP.Status='".TP_STATUS_REGISTER."' GROUP BY TP.tid HAVING T.RegisteredTP <> X_Count" );
+      "WHERE TP.Status='".TP_STATUS_REGISTER."' " . tid_clause('TP.tid', $tid) .
+      "GROUP BY TP.tid HAVING T.RegisteredTP <> X_Count" );
    $upd_arr = array();
-   $cnt_err = 0;
    while( $row = mysql_fetch_array($result) )
    {
       $tid = $row['tid'];
@@ -139,6 +146,6 @@ function fix_tournament_RegisteredTP( $do_it )
       , " - Tournament.RegisteredTP check Done.";
 
    return $cnt_err;
-}//fix_tournament_registered_tp
+}//fix_tournament_RegisteredTP
 
 ?>
