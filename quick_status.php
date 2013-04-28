@@ -39,6 +39,13 @@ $language_used = 'en'.LANG_CHARSET_CHAR.$encoding_used; //lowercase
 
 header('Access-Control-Allow-Origin: *');
 
+/* REQUEST calls used:    for details see section (4.QST) in 'specs/quick_suite.txt'
+     version=0|1        : version controls different data and output
+     no_cache=0|1|2     : controls caching
+     userid=&passwd=    : authentication
+     order=..           : controls next-game-order for status-games output
+*/
+
 if( $is_down )
 {
    //recover_language(); //set $language_used and $encoding_used
