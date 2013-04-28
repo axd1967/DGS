@@ -81,6 +81,7 @@ define('SEPLINE', "\n<p><hr>\n");
          echo "<p>*** Fixes errors ***</p>";
 
       $cnt_err += fix_tournament_RegisteredTP( $tid, $do_it );
+      $cnt_err += fix_tournament_participant_game_count( $tid, $do_it );
    }
 
    echo SEPLINE;
@@ -144,6 +145,100 @@ function fix_tournament_RegisteredTP( $tid, $do_it )
 
    echo "\n<br>Needed: " . sprintf("%1.3fs", (getmicrotime() - $begin))
       , " - Tournament.RegisteredTP check Done.";
+
+   return $cnt_err;
+}//fix_tournament_RegisteredTP
+
+
+function fix_tournament_participant_game_count( $arg_tid, $do_it )
+{
+   $begin = getmicrotime();
+   $cnt_err = 0;
+   echo SEPLINE;
+   echo "Fix TournamentParticipant.Finished/Won/Lost ...<br>\n";
+
+   // find finished/won/lost tournament-games for challenger
+   $result = db_query( "tournament_consistency.fix_tournament_participant_game_count.challenger($arg_tid)",
+      "SELECT TG.tid, TP.ID AS rid, TP.Finished, TP.Won, TP.Lost, COUNT(*) AS X_Finished, " .
+         "SUM(IF(TG.Score<0,1,0)) AS X_ChallengerWon, SUM(IF(TG.Score>0,1,0)) AS X_ChallengerLost " .
+      "FROM TournamentGames AS TG INNER JOIN TournamentParticipant AS TP ON TP.ID=TG.Challenger_rid " .
+      "WHERE TG.Status IN ('".TG_STATUS_WAIT."','".TG_STATUS_DONE."') " . tid_clause('TG.tid', $arg_tid) .
+      "GROUP BY TG.tid, TP.ID" );
+   $chk = array(); // arr( tid => arr( rid => arr( Finished/Won/Lost/X_Finished/X_ChallengerWon/X_ChallengerLost => count )))
+   while( $row = mysql_fetch_array($result) )
+   {
+      extract($row);
+      if( !isset($chk[$tid]) )
+         $chk[$tid] = array();
+      if( !isset($chk[$tid][$rid]) )
+         $chk[$tid][$rid] = $row;
+   }
+   mysql_free_result($result);
+
+   // find finished/won/lost tournament-games for defender
+   $result = db_query( "tournament_consistency.fix_tournament_participant_game_count.defender($arg_tid)",
+      "SELECT TG.tid, TP.ID AS rid, TP.Finished, TP.Won, TP.Lost, COUNT(*) AS X_Finished, " .
+         "SUM(IF(TG.Score>0,1,0)) AS X_DefenderWon, SUM(IF(TG.Score<0,1,0)) AS X_DefenderLost " .
+      "FROM TournamentGames AS TG INNER JOIN TournamentParticipant AS TP ON TP.ID=TG.Defender_rid " .
+      "WHERE TG.Status IN ('".TG_STATUS_WAIT."','".TG_STATUS_DONE."') " . tid_clause('TG.tid', $arg_tid) .
+      "GROUP BY TG.tid, TP.ID " .
+      "ORDER BY TG.tid, TP.ID" ); // also order
+   while( $row = mysql_fetch_array($result) )
+   {
+      extract($row);
+      if( !isset($chk[$tid]) )
+         $chk[$tid] = array();
+      if( !isset($chk[$tid][$rid]) )
+         $chk[$tid][$rid] = $row;
+      else
+      {
+         $chk[$tid][$rid]['X_Finished'] += $X_Finished;
+         $chk[$tid][$rid]['X_DefenderWon'] = $X_DefenderWon;
+         $chk[$tid][$rid]['X_DefenderLost'] = $X_DefenderLost;
+      }
+   }
+   mysql_free_result($result);
+
+   // find descrepancies to fix on TP.Finished/Won/Lost
+   $upd_arr = array();
+   foreach( $chk as $tid => $arr_rid )
+   {
+      foreach( $arr_rid as $rid => $arr )
+      {
+         $upd = array();
+         $diff = array();
+         $cnt_won  = (int)@$arr['X_ChallengerWon']  + (int)@$arr['X_DefenderWon'];
+         $cnt_lost = (int)@$arr['X_ChallengerLost'] + (int)@$arr['X_DefenderLost'];
+         if( $arr['Finished'] != $arr['X_Finished'] )
+         {
+            $upd[] = 'Finished=' . $arr['X_Finished'];
+            $diff[] = sprintf('Finished %s -> %s', $arr['Finished'], $arr['X_Finished'] );
+         }
+         if( $arr['Won'] != $cnt_won )
+         {
+            $upd[] = "Won=$cnt_won";
+            $diff[] = sprintf('Won %s -> %s', $arr['Won'], $cnt_won );
+         }
+         if( $arr['Lost'] != $cnt_lost )
+         {
+            $upd[] = "Lost=$cnt_lost";
+            $diff[] = sprintf('Lost %s -> %s', $arr['Lost'], $cnt_lost );
+         }
+         if( count($upd) )
+         {
+            $upd_arr[] = "UPDATE TournamentParticipant SET ".implode(', ', $upd)." WHERE ID=$rid LIMIT 1";
+            echo sprintf( "Tournament #%s: found wrong counts for TP [%s]: %s<br>\n",
+               $tid, $rid, implode(', ', $diff) );
+         }
+      }
+   }
+
+   $cnt_err += count($upd_arr);
+
+   do_updates( 'tournament_consistency.fix_tournament_participant_game_count', $upd_arr, $do_it );
+
+   echo "\n<br>Needed: " . sprintf("%1.3fs", (getmicrotime() - $begin))
+      , " - TournamentParticipant.Finished/Won/Lost check Done.";
 
    return $cnt_err;
 }//fix_tournament_RegisteredTP
