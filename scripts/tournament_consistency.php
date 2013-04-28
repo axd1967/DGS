@@ -82,6 +82,7 @@ define('SEPLINE', "\n<p><hr>\n");
 
       $cnt_err += fix_tournament_RegisteredTP( $tid, $do_it );
       $cnt_err += fix_tournament_participant_game_count( $tid, $do_it );
+      $cnt_err += fix_tournament_ladder_challenge_count( $tid, $do_it );
    }
 
    echo SEPLINE;
@@ -241,6 +242,67 @@ function fix_tournament_participant_game_count( $arg_tid, $do_it )
       , " - TournamentParticipant.Finished/Won/Lost check Done.";
 
    return $cnt_err;
-}//fix_tournament_RegisteredTP
+}//fix_tournament_participant_game_count
+
+
+function fix_tournament_ladder_challenge_count( $arg_tid, $do_it )
+{
+   $begin = getmicrotime();
+   $cnt_err = 0;
+   echo SEPLINE;
+   echo "Fix TournamentLadder.ChallengesIn/-Out ...<br>\n";
+
+   // fix TournamentLadder.ChallengesIn
+   $upd_arr = array();
+   $result = db_query( "tournament_consistency.fix_tournament_ladder_challenge_count.challenges_in($arg_tid)",
+      "SELECT TL.tid, TL.rid, TL.ChallengesIn, SUM(IF(ISNULL(TG.ID),0,1)) AS X_Count " .
+      "FROM TournamentLadder AS TL " .
+         // NOTE: only TG.uid has index, but join on TG.rid is the important one (as user could have retreated from ladder),
+         //       so join on TG.uid for index-use and join TG.rid for real-join
+         // NOTE: left-join needed to also correct wrong 0-count
+         "LEFT JOIN TournamentGames AS TG ON TG.Defender_uid=TL.uid AND TG.Defender_rid=TL.rid " .
+            "AND TG.Status IN ('".TG_STATUS_PLAY."','".TG_STATUS_SCORE."') " .
+      ( $arg_tid > 0 ? 'WHERE ' . tid_clause('TL.tid', $arg_tid, 0) : '' ) .
+      "GROUP BY TL.tid, TL.rid " .
+      "HAVING ChallengesIn <> X_Count " .
+      "ORDER BY TL.tid, TL.rid" );
+   while( $row = mysql_fetch_array($result) )
+   {
+      extract($row);
+      $upd_arr[] = "UPDATE TournamentLadder SET ChallengesIn=$X_Count WHERE tid=$tid AND rid=$rid LIMIT 1";
+      echo sprintf( "Tournament #%s: found wrong TL.ChallengesIn for rid [%s]: %s -> %s<br>\n",
+         $tid, $rid, $ChallengesIn, $X_Count );
+   }
+   mysql_free_result($result);
+
+
+   // fix TournamentLadder.ChallengesOut
+   $result = db_query( "tournament_consistency.fix_tournament_ladder_challenge_count.challenges_out($arg_tid)",
+      "SELECT TL.tid, TL.rid, TL.ChallengesOut, SUM(IF(ISNULL(TG.ID),0,1)) AS X_Count " .
+      "FROM TournamentLadder AS TL " .
+         "LEFT JOIN TournamentGames AS TG ON TG.Challenger_uid=TL.uid AND TG.Challenger_rid=TL.rid " .
+            "AND TG.Status IN ('".TG_STATUS_PLAY."','".TG_STATUS_SCORE."') " .
+      ( $arg_tid > 0 ? 'WHERE ' . tid_clause('TL.tid', $arg_tid, 0) : '' ) .
+      "GROUP BY TL.tid, TL.rid " .
+      "HAVING ChallengesOut <> X_Count " .
+      "ORDER BY TL.tid, TL.rid" );
+   while( $row = mysql_fetch_array($result) )
+   {
+      extract($row);
+      $upd_arr[] = "UPDATE TournamentLadder SET ChallengesOut=$X_Count WHERE tid=$tid AND rid=$rid LIMIT 1";
+      echo sprintf( "Tournament #%s: found wrong TL.ChallengesOut for rid [%s]: %s -> %s<br>\n",
+         $tid, $rid, $ChallengesOut, $X_Count );
+   }
+   mysql_free_result($result);
+
+   $cnt_err += count($upd_arr);
+
+   do_updates( 'tournament_consistency.fix_tournament_ladder_challenge_count', $upd_arr, $do_it );
+
+   echo "\n<br>Needed: " . sprintf("%1.3fs", (getmicrotime() - $begin))
+      , " - TournamentLadder.ChallengesIn/-Out check Done.";
+
+   return $cnt_err;
+}//fix_tournament_ladder_challenge_count
 
 ?>
