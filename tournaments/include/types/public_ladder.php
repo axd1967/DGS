@@ -47,13 +47,13 @@ class PublicLadderTournament extends TournamentTemplateLadder
    public function __construct()
    {
       parent::__construct( TOURNEY_WIZTYPE_PUBLIC_LADDER,
-         T_('Public Ladder'), TOURNEY_TITLE_GAME_RESTRICTION );
+         T_('Public Ladder#tourney'), TOURNEY_TITLE_GAME_RESTRICTION );
 
       // overwrite tournament-type-specific properties
       $this->need_admin_create_tourney = false;
       $this->limits->setLimits( TLIMITS_MAX_TP, false, 2, 300 );
-      $this->limits->setLimits( TLIMITS_TL_MAX_DF, false, 0, 10 );
-      $this->limits->setLimits( TLIMITS_TL_MAX_CH, false, 1, 10 );
+      $this->limits->setLimits( TLIMITS_TL_MAX_DF, false, 0, 8 );
+      $this->limits->setLimits( TLIMITS_TL_MAX_CH, false, 1, 8 );
    }
 
    public function createTournament()
