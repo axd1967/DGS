@@ -462,7 +462,7 @@ class Table
    }
 
    /*! \brief Static func to create row-cell with text (and optional CSS-class). */
-   public function build_row_cell( $text, $class=null )
+   public static function build_row_cell( $text, $class=null )
    {
       if( is_null($class) )
          return $text;

@@ -187,7 +187,7 @@ class ApcCache extends AbstractCache
    // NOTE: not thread-save, but must only be roughly accurate to get an idea about hits and misses of other cache-types
    // \static
    // \param $hit true = cache-hit, false = cache-miss
-   public function saveHit( $cache_group, $hit )
+   public static function saveHit( $cache_group, $hit )
    {
       global $DGS_CACHE_GROUPS;
       if( !function_exists('apc_fetch') )
