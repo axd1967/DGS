@@ -112,14 +112,14 @@ class TournamentPool
          return abs($this->Rank);
    }
 
-   public function formatRank( $incl_calc_rank=false )
+   public function formatRank( $incl_calc_rank=false, $unset_rank='' )
    {
       if( $this->Rank == TPOOLRK_RETREAT )
          $s = NO_VALUE;
       elseif( $this->Rank > TPOOLRK_RANK_ZONE )
          $s = abs($this->Rank);
-      else
-         $s = '';
+      else // rank unset
+         $s = $unset_rank;
 
       if( $incl_calc_rank && $this->CalcRank > 0 && $this->CalcRank != abs($this->Rank) )
          $s .= ' ' . span('Calc', sprintf( '(%s)', $this->CalcRank ));
