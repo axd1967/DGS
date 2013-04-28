@@ -225,7 +225,7 @@ define('ALLOW_JAVASCRIPT', true);
 define('MAX_GAMESRUN', 200);
 
 // Number of running games to accept tourney-registration
-// - must be <= MAX_GAMESRUN, no effect if MAX_GAMESRUN=0 or ALLOW_TOURNAMENTS=false
+// - must be <= MAX_GAMESRUN, no effect if MAX_GAMESRUN=0 or ALLOW_TOURNAMENTS=''
 define('MAX_GAMESRUN_TREG', 150);
 
 // max. waiting-room entries per user (0=unlimited), only for new-game (not for MPGs)
@@ -234,9 +234,8 @@ define('WROOM_MAX_ENTRIES', 4);
 // list of supported rulesets separated by '|', 1st is used as default; for list see Ruleset-enum in Games-table
 define('ALLOWED_RULESETS', 'JAPANESE|CHINESE');
 
-// Allow usage of tournaments
-define('ALLOW_TOURNAMENTS', false);
-define('ALLOW_TOURNAMENTS_ROUND_ROBIN', false); // disable in prod, unfinished impl.
+// list of supported tournament-types separated by '|'; for list see Type-enum in Tournament-table; ''=disable tournaments
+define('ALLOW_TOURNAMENTS', '');
 
 // Allow creation of tournaments only to Tournament-Admin (false) or every user (true)
 define('ALLOW_TOURNAMENTS_CREATE_BY_USER', false);

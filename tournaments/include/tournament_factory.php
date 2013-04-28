@@ -61,14 +61,15 @@ class TournamentFactory
    /*! \brief Returns list with all defined wizard-types in order to be showed for tourney-wizard. */
    public static function getTournamentTypes()
    {
-      $ttypes = array(
-         TOURNEY_WIZTYPE_DGS_LADDER       => TWIZT_LADDER | TWIZ_DGS,
-         TOURNEY_WIZTYPE_PUBLIC_LADDER    => TWIZT_LADDER | TWIZ_PUBLIC,
-         TOURNEY_WIZTYPE_PRIVATE_LADDER   => TWIZT_LADDER | TWIZ_PRIVATE,
-         TOURNEY_WIZTYPE_DGS_ROUNDROBIN   => TWIZT_ROUND_ROBIN | TWIZ_DGS,
-      );
-      if( !ALLOW_TOURNAMENTS_ROUND_ROBIN )
-         unset($ttypes[TOURNEY_WIZTYPE_DGS_ROUNDROBIN]);
+      $ttypes = array();
+      if( preg_match("/^(".ALLOW_TOURNAMENTS.")$/", TOURNEY_TYPE_LADDER) )
+      {
+         $ttypes[TOURNEY_WIZTYPE_DGS_LADDER]     = TWIZT_LADDER | TWIZ_DGS;
+         $ttypes[TOURNEY_WIZTYPE_PUBLIC_LADDER]  = TWIZT_LADDER | TWIZ_PUBLIC;
+         $ttypes[TOURNEY_WIZTYPE_PRIVATE_LADDER] = TWIZT_LADDER | TWIZ_PRIVATE;
+      }
+      if( preg_match("/^(".ALLOW_TOURNAMENTS.")$/", TOURNEY_TYPE_ROUND_ROBIN) )
+         $ttypes[TOURNEY_WIZTYPE_DGS_ROUNDROBIN] = TWIZT_ROUND_ROBIN | TWIZ_DGS;
       return $ttypes;
    }
 
