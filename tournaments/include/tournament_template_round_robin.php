@@ -46,9 +46,9 @@ require_once 'tournaments/include/tournament_log_helper.php';
   */
 abstract class TournamentTemplateRoundRobin extends TournamentTemplate
 {
-   protected function __construct( $wizard_type, $title )
+   protected function __construct( $wizard_type, $title_main, $title_extras )
    {
-      parent::__construct( $wizard_type, $title );
+      parent::__construct( $wizard_type, $title_main, $title_extras );
 
       // overwrite tournament-type-specific properties
       $this->need_rounds = true;

@@ -28,6 +28,12 @@ require_once 'tournaments/include/tournament_limits.php';
   * \brief "Interface" / template-pattern for different Tournament-type-classes
   */
 
+// bitmask for tournament-template title extra-parts
+define('TOURNEY_TITLE_INVITE_ONLY',       0x0001);
+define('TOURNEY_TITLE_ADMIN_ONLY',        0x0002);
+define('TOURNEY_TITLE_NO_RESTRICTION',    0x0004);
+define('TOURNEY_TITLE_GAME_RESTRICTION',  0x0008);
+
 
  /*!
   * \class TournamentTemplate
@@ -48,12 +54,17 @@ abstract class TournamentTemplate
    public $showcount_tournament_standings = 0;
    public $limits;
 
-   /*! \brief Constructs template for different tournament-types. */
-   protected function __construct( $wizard_type, $title )
+   /*!
+    * \brief Constructs template for different tournament-types.
+    * \param $wizard_type TOURNEY_WIZTYPE_...
+    * \param $title_main main title-part, used to build title
+    * \param $title_extras bitmask of TOURNEY_TITLE_.. = additional extra-information including in title
+    */
+   protected function __construct( $wizard_type, $title_main, $title_extras )
    {
       global $player_row;
       $this->wizard_type = $wizard_type;
-      $this->title = $title;
+      $this->title = self::build_tournament_template_title( $title_main, $title_extras );
       $this->uid = (int)@$player_row['ID'];
       $this->limits = new TournamentLimits();
       $this->limits->setLimits( TLIMITS_MAX_TP, false, 2, TP_MAX_COUNT );
@@ -74,7 +85,7 @@ abstract class TournamentTemplate
       error('tournament_create_error', sprintf( $msgfmt, $this->uid ) );
    }
 
-   /*! \brief Creates Tournament object with given arguments. */
+   /*! \brief Creates default Tournament object with given arguments. */
    public function make_tournament( $scope, $title )
    {
       $tourney = new Tournament();
@@ -122,6 +133,21 @@ abstract class TournamentTemplate
 
 
    // ------------ static functions ----------------------------
+
+   // see _construct() for arguments
+   private static function build_tournament_template_title( $main_part, $extras )
+   {
+      $out = array();
+      if( $extras & TOURNEY_TITLE_INVITE_ONLY )
+         $out[] = T_('invite-only#ttype');
+      if( $extras & TOURNEY_TITLE_ADMIN_ONLY )
+         $out[] = T_('only for admin#ttype');
+      if( $extras & TOURNEY_TITLE_NO_RESTRICTION )
+         $out[] = T_('no restrictions#ttype');
+      if( $extras & TOURNEY_TITLE_GAME_RESTRICTION )
+         $out[] = T_('with game restrictions#ttype');
+      return ( count($out) == 0 ) ? $main_part : sprintf('%s (%s)', $main_part, implode(', ', $out) );
+   }//build_tournament_template_title
 
 } // end of 'TournamentTemplate'
 

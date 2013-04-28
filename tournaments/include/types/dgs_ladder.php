@@ -46,9 +46,8 @@ class DgsLadderTournament extends TournamentTemplateLadder
 {
    public function __construct()
    {
-      parent::__construct(
-         TOURNEY_WIZTYPE_DGS_LADDER,
-         sprintf( '%s (%s)', T_('DGS Ladder'), T_('no restrictions, only for Admin#ttype')) );
+      parent::__construct( TOURNEY_WIZTYPE_DGS_LADDER,
+         T_('DGS Ladder'), TOURNEY_TITLE_NO_RESTRICTION|TOURNEY_TITLE_ADMIN_ONLY );
 
       $this->limits->setLimits( TLIMITS_MAX_TP, true, 2, TP_MAX_COUNT );
       $this->limits->setLimits( TLIMITS_TL_MAX_DF, false, 0, TLADDER_MAX_DEFENSES );

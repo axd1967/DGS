@@ -44,9 +44,9 @@ require_once 'tournaments/include/tournament_ladder_props.php';
   */
 abstract class TournamentTemplateLadder extends TournamentTemplate
 {
-   protected function __construct( $wizard_type, $title )
+   protected function __construct( $wizard_type, $title_main, $title_extras )
    {
-      parent::__construct( $wizard_type, $title );
+      parent::__construct( $wizard_type, $title_main, $title_extras );
 
       // overwrite tournament-type-specific properties
       $this->allow_register_tourney_status = array( TOURNEY_STATUS_REGISTER, TOURNEY_STATUS_PLAY );
