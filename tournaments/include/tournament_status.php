@@ -145,6 +145,8 @@ class TournamentStatus
       }
    }
 
+
+
    /*! \brief Check if change to ADM-tourney-status is allowed. */
    public function check_conditions_status_ADM()
    {
@@ -258,6 +260,7 @@ class TournamentStatus
    }
 
 
+
    /*! \brief Checks basic conditions for change of tourney-status: title/description/TD. */
    public function check_basic_conditions_status_change()
    {
@@ -296,7 +299,7 @@ class TournamentStatus
       return sprintf( T_('Expecting current Tournament Status [%s] for change to status [%s]'),
                       $status_str,
                       Tournament::getStatusText($this->new_status) );
-   }
+   }//error_expected_status
 
    /*!
     * \brief Checks if current tournament-status allows certain action.

@@ -331,7 +331,7 @@ class TournamentPool
       }
       else
          return null;
-   }//load_tournament_pools
+   }//load_tournament_pool_user
 
    /*!
     * \brief Returns enhanced (passed) ListIterator with TournamentPool-objects for given tournament-id.
