@@ -23,6 +23,8 @@ require_once( "include/std_classes.php" );
 require_once( "include/time_functions.php" );
 require_once( "include/game_functions.php" );
 
+$GLOBALS['ThePage'] = new Page('Script', PAGEFLAG_IMPLICIT_FLUSH );
+
 
 {
    connect2mysql();
@@ -52,24 +54,22 @@ require_once( "include/game_functions.php" );
         if( !mysql_query( $s) )
            die("<BR>$s;<BR>" . ($msg ? "; -- $msg" : '') . mysql_error() );
       }
-      _echo(
-         "<p>*** Fixes Games.TimeOutDate ***"
+      echo "<p>*** Fixes Games.TimeOutDate ***"
          ."<br>".anchor(make_url($page, $page_args), 'Just show it')
-         ."</p>" );
+         ."</p>";
    }
    else
    {
-      function dbg_query($s, $msg='') { _echo( "<BR>$s" . ($msg ? "; -- $msg" : '')); }
+      function dbg_query($s, $msg='') { echo "<BR>$s" . ($msg ? "; -- $msg" : ''); }
       $tmp = array_merge($page_args,array('do_it' => 1));
-      _echo(
-         "<p>(just show needed queries)"
+      echo "<p>(just show needed queries)"
          ."<br>".anchor(make_url($page, $page_args), 'Show it again')
          ."<br>".anchor(make_url($page, $tmp), '[Validate it]')
-         ."</p>" );
+         ."</p>";
    }
 
 
-   _echo( "<hr>Find running games ..." );
+   echo "<hr>Find running games ...";
 
    $qsql = new QuerySQL(
          SQLP_FIELDS,
@@ -86,12 +86,12 @@ require_once( "include/game_functions.php" );
    //$qsql->add_part( SQLP_WHERE, "TimeOutDate=0" ); // unset games
 
    $query = $qsql->get_select();
-   //_echo($query);
+   //echo $query;
    $result = mysql_query( $query ) or die(mysql_error());
 
    $games_cnt = @mysql_num_rows($result);
    $curr_cnt = 0;
-   _echo( "<br>Found $games_cnt games to process and calculate time left ...\n" );
+   echo "<br>Found $games_cnt games to process and calculate time left ...\n";
 
    // update Games.TimeOutDate
    while( $row = mysql_fetch_assoc($result) )
@@ -107,25 +107,19 @@ require_once( "include/game_functions.php" );
    mysql_free_result($result);
 
    if( $do_it )
-      _echo('Running games remaining-time fix for Games.TimeOutDate finished.');
+      echo 'Running games remaining-time fix for Games.TimeOutDate finished.';
 
-   _echo( "<p></p>Done." );
+   echo "<p></p>Done.";
 
    end_html();
-}
+}//main
 
-function _echo($msg)
-{
-   echo $msg;
-   ob_flush();
-   flush();
-}
 
 function update_games_timeoutdate( $gid, $timeout_date, $curr_timeout_date )
 {
    global $games_cnt, $curr_cnt;
    if( ($curr_cnt++ % 50) == 0 )
-      _echo( "<br><br>... $curr_cnt of $games_cnt updated ...\n" );
+      echo "<br><br>... $curr_cnt of $games_cnt updated ...\n";
    $update_query = "UPDATE Games SET TimeOutDate=$timeout_date WHERE ID='$gid' LIMIT 1";
    dbg_query($update_query, "$curr_timeout_date -> $timeout_date");
    GameHelper::delete_cache_game_row( "scripts.fix_games_timeleft($gid)", $gid );

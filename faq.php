@@ -23,7 +23,7 @@ require_once( "include/std_functions.php" );
 require_once( "include/faq_functions.php" );
 require_once( "include/form_functions.php" );
 
-$GLOBALS['ThePage'] = new Page('FAQ', ROBOTS_NO_FOLLOW,
+$GLOBALS['ThePage'] = new Page('FAQ', 0, ROBOTS_NO_FOLLOW,
    "Help pages (FAQ) for the Dragon Go Server (DGS), where you can play turn-based Go (aka Baduk or Weichi).",
    'help, support, search, FAQ, questions, features, user guide' );
 

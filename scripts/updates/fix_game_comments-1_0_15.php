@@ -20,6 +20,9 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 chdir( '../../' );
 require_once( "include/std_functions.php" );
 
+$GLOBALS['ThePage'] = new Page('Script', PAGEFLAG_IMPLICIT_FLUSH );
+
+
 {
    disable_cache();
    connect2mysql();
@@ -49,30 +52,28 @@ require_once( "include/std_functions.php" );
            die("<BR>$s;<BR>" . mysql_error() );
          if( DBG_QUERY>1 ) error_log("dbg_query(DO_IT): $s");
       }
-      _echo(
-         "<p>*** Fixes hidden game comments flag ***"
+      echo "<p>*** Fixes hidden game comments flag ***"
          ."<br>".anchor(make_url($page, $page_args), 'Just show it')
-         ."</p>" );
+         ."</p>";
    }
    else
    {
       function dbg_query($s) {
-         _echo( "<BR>$s; ");
+         echo "<BR>$s; ";
          if( DBG_QUERY>1 ) error_log("dbg_query(SIMUL): $s");
       }
       $tmp = array_merge($page_args,array('do_it' => 1));
-      _echo(
-         "<p>(just show needed queries)"
+      echo "<p>(just show needed queries)"
          ."<br>".anchor(make_url($page, $page_args), 'Show it again')
          ."<br>".anchor(make_url($page, $tmp), '[Validate it]')
-         ."</p>" );
+         ."</p>";
    }
 
 
    // NOTE: Using a GROUP-BY SQL-statement may run into memory problems,
    //       so scan MoveMessages for hidden game-comments separatly for each game.
 
-   _echo( "<hr>Find games with hidden game comments ..." );
+   echo "<hr>Find games with hidden game comments ...";
 
    $arr_games = load_games_with_hidden_comment( GAMEFLAGS_HIDDEN_MSG ); // gid => 1
 
@@ -81,7 +82,7 @@ require_once( "include/std_functions.php" );
 
    $games_cnt = @mysql_num_rows($result);
    $curr_cnt = 0;
-   _echo( "<br>Found $games_cnt games to check and potentially set hidden-comments-flag ...\n" );
+   echo "<br>Found $games_cnt games to check and potentially set hidden-comments-flag ...\n";
 
    // update Games.Flags
    $cnt_fix = 0;
@@ -93,26 +94,20 @@ require_once( "include/std_functions.php" );
    }
    mysql_free_result($result);
 
-   _echo( "<br>Found $cnt_fix games that required fixing ...\n" );
+   echo "<br>Found $cnt_fix games that required fixing ...\n";
 
    if( $do_it )
-      _echo('Games hidden-comments-flag fix finished.');
+      echo 'Games hidden-comments-flag fix finished.';
 
    end_html();
-}
+}//main
 
-function _echo($msg)
-{
-   echo $msg;
-   ob_flush();
-   flush();
-}
 
 function update_games_flags( $gid, $flagval )
 {
    global $games_cnt, $curr_cnt;
    if( ($curr_cnt++ % 50) == 0 )
-      _echo( "<br><br>... $curr_cnt of $games_cnt updated ...\n" );
+      echo "<br><br>... $curr_cnt of $games_cnt updated ...\n";
    $update_query = "UPDATE Games SET Flags=Flags | $flagval WHERE ID='$gid' LIMIT 1";
    dbg_query($update_query);
    return 1;

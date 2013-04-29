@@ -23,6 +23,9 @@ require_once( "include/std_classes.php" );
 require_once( "include/time_functions.php" );
 require_once( "include/game_functions.php" );
 
+
+$GLOBALS['ThePage'] = new Page('Script', PAGEFLAG_IMPLICIT_FLUSH );
+
 {
    connect2mysql();
 
@@ -41,7 +44,7 @@ require_once( "include/game_functions.php" );
 
    start_html( 'check_players_email', true/*no-cache*/ );
 
-   _echo( "<hr>Find players with invalid email ..." );
+   echo "<hr>Find players with invalid email ...";
 
    $qsql = new QuerySQL(
          SQLP_FIELDS,
@@ -56,7 +59,7 @@ require_once( "include/game_functions.php" );
    $result = db_query("scripts.check_players_email", $query ) or die(mysql_error());
 
    $p_cnt = @mysql_num_rows($result);
-   _echo( "<br>Found $p_cnt players with email ...<br><br>\n" );
+   echo "<br>Found $p_cnt players with email ...<br><br>\n";
 
    $curr_cnt = 0;
    while( $row = mysql_fetch_assoc($result) )
@@ -67,24 +70,17 @@ require_once( "include/game_functions.php" );
       if( verify_invalid_email("scripts.check_players_email($uid)", $email, /*err-die*/false) )
       {
          $curr_cnt++;
-         _echo( sprintf("#%s. Player %6d [%s] : Email [%s] INVALID, SendEmail [%s]<br>\n",
-                        $curr_cnt, $uid, $row['Handle'], $email, $send_email ) );
+         echo sprintf("#%s. Player %6d [%s] : Email [%s] INVALID, SendEmail [%s]<br>\n",
+                      $curr_cnt, $uid, $row['Handle'], $email, $send_email );
       }
    }
    mysql_free_result($result);
 
-   _echo('<br><br>Checking players email finished.');
+   echo '<br><br>Checking players email finished.';
 
-   _echo( "<p></p>Done." );
+   echo "<p></p>Done.";
 
    end_html();
-}
-
-function _echo($msg)
-{
-   echo $msg;
-   ob_flush();
-   flush();
-}
+}//main
 
 ?>

@@ -22,7 +22,7 @@ $TranslateGroups[] = "Intro";
 require_once 'include/std_functions.php';
 require_once 'include/admin_faq_functions.php';
 
-$GLOBALS['ThePage'] = new Page('Intro', ROBOTS_NO_FOLLOW, DGS_DESCRIPTION );
+$GLOBALS['ThePage'] = new Page('Intro', 0, ROBOTS_NO_FOLLOW, DGS_DESCRIPTION );
 
 
 {

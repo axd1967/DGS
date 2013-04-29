@@ -21,6 +21,9 @@ chdir( '../../' );
 require_once( "include/std_functions.php" );
 require_once( "include/game_functions.php" );
 
+$GLOBALS['ThePage'] = new Page('Script', PAGEFLAG_IMPLICIT_FLUSH );
+
+
 {
    disable_cache();
    connect2mysql();
@@ -50,41 +53,39 @@ require_once( "include/game_functions.php" );
            die("<BR>$s;<BR>" . mysql_error() );
          if( DBG_QUERY>1 ) error_log("dbg_query(DO_IT): $s");
       }
-      _echo(
-         "<p>*** Fixes new-game-profiles with expert-view (old ".DEPRECATED_GSETVIEW_EXPERT.") ***"
+      echo "<p>*** Fixes new-game-profiles with expert-view (old ".DEPRECATED_GSETVIEW_EXPERT.") ***"
          ."<br>".anchor(make_url($page, $page_args), 'Just show it')
-         ."</p>" );
+         ."</p>";
    }
    else
    {
       function dbg_query($s) {
-         _echo( "<BR>$s; ");
+         echo "<BR>$s; ";
          if( DBG_QUERY>1 ) error_log("dbg_query(SIMUL): $s");
       }
       $tmp = array_merge($page_args,array('do_it' => 1));
-      _echo(
-         "<p><b><font color=red>Important Note:</font></b> Ensure, that script 'fix_default_max_handi-1_0_16.php' has run first (once only)!"
+      echo "<p><b><font color=red>Important Note:</font></b> Ensure, that script 'fix_default_max_handi-1_0_16.php' has run first (once only)!"
          ."<p>(just show needed queries)"
          ."<br>".anchor(make_url($page, $page_args), 'Show it again')
          ."<br>".anchor(make_url($page, $tmp), '[Validate it]')
-         ."</p>" );
+         ."</p>";
    }
 
 
-   _echo( "<hr>Find new-game profiles with deprecated expert-view ..." );
+   echo "<hr>Find new-game profiles with deprecated expert-view ...";
 
    $arr_templates = load_profile_templates_new_game_expert_view(); // arr( Profiles.ID => ProfileTemplate, ...)
 
    $all_cnt = count($arr_templates);
    $curr_cnt = 0;
-   _echo( "<br>Found $all_cnt profiles to fix ...\n" );
+   echo "<br>Found $all_cnt profiles to fix ...\n";
 
    // fix view-mode
    $cnt_fix = 0;
    foreach( $arr_templates as $profile_id => $tmpl )
    {
       if( ($curr_cnt++ % 50) == 0 )
-         _echo( "<br><br>... $curr_cnt of $all_cnt updated ...\n" );
+         echo "<br><br>... $curr_cnt of $all_cnt updated ...\n";
 
       $tmpl->GameSetup->ViewMode = GSETVIEW_STANDARD;
       $fix_text = $tmpl->encode();
@@ -92,20 +93,14 @@ require_once( "include/game_functions.php" );
       $cnt_fix++;
    }
 
-   _echo( "<br>Found $cnt_fix profiles that required fixing ...\n" );
+   echo "<br>Found $cnt_fix profiles that required fixing ...\n";
 
    if( $do_it )
-      _echo('Fix by merging profile deprecated expert-view finished.');
+      echo 'Fix by merging profile deprecated expert-view finished.';
 
    end_html();
-}
+}//main
 
-function _echo($msg)
-{
-   echo $msg;
-   ob_flush();
-   flush();
-}
 
 function load_profile_templates_new_game_expert_view()
 {

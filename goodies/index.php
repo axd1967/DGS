@@ -22,7 +22,7 @@ $TranslateGroups[] = "Docs";
 chdir('..');
 require_once 'include/std_functions.php';
 
-$GLOBALS['ThePage'] = new Page('Goodies', ROBOTS_NO_FOLLOW,
+$GLOBALS['ThePage'] = new Page('Goodies', 0, ROBOTS_NO_FOLLOW,
    "GreaseMonkey scripts for the Dragon Go Server (DGS).",
    'greasemonkey, scripts, goodies, tools, utilities' );
 

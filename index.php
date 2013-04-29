@@ -23,7 +23,7 @@ require_once( "include/std_functions.php" );
 require_once( "include/form_functions.php" );
 require_once( "include/error_codes.php" );
 
-$GLOBALS['ThePage'] = new Page('Start', ROBOTS_NO_FOLLOW, DGS_DESCRIPTION,
+$GLOBALS['ThePage'] = new Page('Start', 0, ROBOTS_NO_FOLLOW, DGS_DESCRIPTION,
    'forums, discussions, multi-player-go, zen go, rengo, team-go, pair-go, shape-go' );
 
 {

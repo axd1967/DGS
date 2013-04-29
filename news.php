@@ -41,7 +41,7 @@ function build_TOC( $text )
 
 
 {
-   $GLOBALS['ThePage'] = new Page('News', ROBOTS_NO_FOLLOW,
+   $GLOBALS['ThePage'] = new Page('News', 0, ROBOTS_NO_FOLLOW,
       "Release notes with the list of features for the Dragon Go Server (DGS), where you can play turn-based Go (aka Baduk or Weichi).",
       'release notes, new features, features, news' );
 

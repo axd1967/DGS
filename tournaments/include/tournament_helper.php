@@ -255,6 +255,7 @@ class TournamentHelper
    /*!
     * \brief Start all tournament games needed for current round, prints progress by printing and flushing on STDOUT.
     * \note IMPORTANT NOTE: caller needs to open TA with HOT-section!!
+    * \note to make flushing work, PAGEFLAG_IMPLICIT_FLUSH is required on using page!
     *
     * \return arr( number of started games, expected number of games) or NULL on lock-error.
     */
@@ -319,7 +320,7 @@ class TournamentHelper
       $cnt_pools = count($arr_poolusers);
       foreach( $arr_poolusers as $pool => $arr_users )
       {
-         echo_message( "<br>\n<li>" . sprintf( T_('Pool %s of %s'), $pool, $cnt_pools ) . ":<br>\n" );
+         echo "<br>\n<li>", sprintf( T_('Pool %s of %s'), $pool, $cnt_pools ), ":<br>\n";
 
          $count_game_curr = $count_games;
          while( count($arr_users) )
@@ -346,16 +347,15 @@ class TournamentHelper
                }
 
                if( !(++$progress % 25) )
-                  echo_message( sprintf( T_('Created %s games so far ...') . "<br>\n", $count_games ));
+                  echo sprintf( T_('Created %s games so far ...') . "<br>\n", $count_games );
             }
          }
 
-         echo_message( sprintf( T_('Created %s games for pool #%s') . "</li>",
-            ($count_games - $count_game_curr), $pool ));
+         echo sprintf( T_('Created %s games for pool #%s'), ($count_games - $count_game_curr), $pool ), "</li>";
       }
       if( $count_old_games > 0 )
-         echo_message( "<br>\n<li>" . sprintf( T_('%s games already existed') . '</li>', $count_old_games ));
-      echo_message("</ul></td></tr></table>\n");
+         echo "<br>\n<li>", sprintf( T_('%s games already existed'), $count_old_games ), '</li>';
+      echo "</ul></td></tr></table>\n";
 
       // clear cache
       TournamentGames::delete_cache_tournament_games( "TournamentHelper:start_tournament_round_games($tid,$round)", $tid );

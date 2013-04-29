@@ -21,7 +21,7 @@ $TranslateGroups[] = "Game";
 
 require_once 'include/rank_converter.php';
 
-$GLOBALS['ThePage'] = new Page('RankConverter', ROBOTS_NO_FOLLOW,
+$GLOBALS['ThePage'] = new Page('RankConverter', 0, ROBOTS_NO_FOLLOW,
    "Converting ranks for the board game Go (aka Baduk or Weichi) between ranks from different Go servers.",
    'rank, rating, dan, kyu, gup, aga, euro, japanese, chinese, korean, igs, kgs, ogs, ficgs, iyt, tygem, wbaduk' );
 

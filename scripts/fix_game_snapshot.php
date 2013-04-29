@@ -29,6 +29,8 @@ require_once( "include/form_functions.php" );
 
 define('SEPLINE', "\n<p><hr>\n");
 
+$GLOBALS['ThePage'] = new Page('Script', PAGEFLAG_IMPLICIT_FLUSH );
+
 
 {
    connect2mysql();
@@ -203,7 +205,7 @@ function bulk_fix_missing_game_snapshots( $status, $uid, $startgid, $limit, $sle
 
    $result = db_query( "fix_game_snapshost.find_games($status,$uid,$limit,$sleep)", $qsql->get_select() );
    $count_rows = (int)@mysql_num_rows($result);
-   _echo( sprintf( "<br>Found %d games to fix ...<br>\n", $count_rows ) );
+   echo sprintf( "<br>Found %d games to fix ...<br>\n", $count_rows );
 
    $cnt = $cnt_err = $lasterr_gid = 0;
    $error_gids = array();
@@ -222,7 +224,7 @@ function bulk_fix_missing_game_snapshots( $status, $uid, $startgid, $limit, $sle
 
          db_query( "fix_game_snapshost.bulkfix.upd_game_snapshot($gid)",
             "UPDATE Games SET Snapshot='$new_snapshot' WHERE ID=$gid LIMIT 1" );
-         _echo( sprintf( "Game #%s -> fixed %d. of %d<br>\n", $gid, $cnt, $count_rows ) );
+         echo sprintf( "Game #%s -> fixed %d. of %d<br>\n", $gid, $cnt, $count_rows );
 
          if( $sleep > 0 )
             sleep($sleep);
@@ -246,12 +248,5 @@ function bulk_fix_missing_game_snapshots( $status, $uid, $startgid, $limit, $sle
    echo "\n<br>Needed: " . sprintf("%1.3fs", (getmicrotime() - $begin))
       , " - Bulk-Fix Done.";
 }//bulk_fix_missing_game_snapshots
-
-function _echo( $msg )
-{
-   echo $msg;
-   //ob_flush();
-   flush();
-}//_echo
 
 ?>

@@ -30,6 +30,8 @@ require_once 'include/form_functions.php';
 
 define('DEBUG',0);
 
+$GLOBALS['ThePage'] = new Page('Script', PAGEFLAG_IMPLICIT_FLUSH );
+
 
 // ---------- MAIN --------------------------------------------------
 
@@ -82,13 +84,13 @@ define('DEBUG',0);
       function dbg_query($s) {
         if( !mysql_query( $s) )
            die("<BR>$s;<BR>" . mysql_error() );
-        _echo(" --- fixed. ");
+        echo " --- fixed. ";
       }
-      _echo( "<p>*** Fixes errors ***</p>" );
+      echo "<p>*** Fixes errors ***</p>";
    }
    else
    {
-      function dbg_query($s) { _echo( " --- query:<BR>$s; " ); }
+      function dbg_query($s) { echo " --- query:<BR>$s; "; }
    }
 
 
@@ -133,7 +135,7 @@ define('DEBUG',0);
 //-----------------
 
    $C = 'red';
-   _echo( "\n<br>Check for bad players (bad White_ID and/or Black_ID) ...\n<br>", $C );
+   echo span($C, "\n<br>Check for bad players (bad White_ID and/or Black_ID) ...\n<br>");
 
    $begin = getmicrotime();
    //First search for games with bad player ID
@@ -151,7 +153,7 @@ define('DEBUG',0);
    {
       extract($row);
       $msg = ( $row['White_ID'] == $row['Black_ID'] ) ? ' (same ID)' : '';
-      _echo( "\n<br>Game: $ID  White_ID: $White_ID  Black_ID: $Black_ID $msg" );
+      echo "\n<br>Game: $ID  White_ID: $White_ID  Black_ID: $Black_ID $msg";
       $err++;
    }
    mysql_free_result($result);
@@ -159,66 +161,66 @@ define('DEBUG',0);
       echo "\n<br>--- $err error(s). Must be fixed by hand.";
 
    echo "\n<br>Needed: " . sprintf("%1.3fs", (getmicrotime() - $begin));
-   _echo( "\n<br>PlayerID Done." );
+   echo "\n<br>PlayerID Done.";
 
 
 //-----------------
 
-   _echo( "\n<br><br>Check game-counts of players ...\n<br>", $C );
+   echo span($C, "\n<br><br>Check game-counts of players ...\n<br>");
 
    $diff = cnt_diff( 'Run', 'Running', 'Status'.IS_STARTED_GAME);
    foreach( $diff as $ID => $ary )
    {
       list( $cnt, $sum) = $ary;
-      _echo( "\n<br>ID: $ID  Running: $cnt  Should be: $sum" );
+      echo "\n<br>ID: $ID  Running: $cnt  Should be: $sum";
 
       dbg_query("UPDATE Players SET Running=$sum WHERE ID=$ID LIMIT 1");
    }
-   _echo( "\n<br>Running Done.<br>\n" );
+   echo "\n<br>Running Done.<br>\n";
 
 
    $diff = cnt_diff( 'Fin', 'Finished', "Status='".GAME_STATUS_FINISHED."'");
    foreach( $diff as $ID => $ary )
    {
       list( $cnt, $sum) = $ary;
-      _echo( "\n<br>ID: $ID  Finished: $cnt  Should be: $sum" );
+      echo "\n<br>ID: $ID  Finished: $cnt  Should be: $sum";
 
       dbg_query("UPDATE Players SET Finished=$sum WHERE ID=$ID LIMIT 1");
    }
-   _echo( "\n<br>Finished Done.<br>\n" );
+   echo "\n<br>Finished Done.<br>\n";
 
 
    $diff = cnt_diff( 'Rat', 'RatedGames', "Status='".GAME_STATUS_FINISHED."' $is_rated");
    foreach( $diff as $ID => $ary )
    {
       list( $cnt, $sum) = $ary;
-      _echo( "\n<br>ID: $ID  RatedGames: $cnt  Should be: $sum" );
+      echo "\n<br>ID: $ID  RatedGames: $cnt  Should be: $sum";
 
       dbg_query("UPDATE Players SET RatedGames=$sum WHERE ID=$ID LIMIT 1");
    }
-   _echo( "\n<br>RatedGames Done.<br>\n" );
+   echo "\n<br>RatedGames Done.<br>\n";
 
 
    $diff = cnt_diff( 'Won', 'Won', "Status='".GAME_STATUS_FINISHED."' $is_rated", " AND Score<0", " AND Score>0");
    foreach( $diff as $ID => $ary )
    {
       list( $cnt, $sum) = $ary;
-      _echo( "\n<br>ID: $ID  Won: $cnt  Should be: $sum" );
+      echo "\n<br>ID: $ID  Won: $cnt  Should be: $sum";
 
       dbg_query("UPDATE Players SET Won=$sum WHERE ID=$ID LIMIT 1");
    }
-   _echo( "\n<br>Won Done.<br>\n" );
+   echo "\n<br>Won Done.<br>\n";
 
 
    $diff = cnt_diff( 'Los', 'Lost', "Status='".GAME_STATUS_FINISHED."'$is_rated", " AND Score>0", " AND Score<0");
    foreach( $diff as $ID => $ary )
    {
       list( $cnt, $sum) = $ary;
-      _echo( "\n<br>ID: $ID  Lost: $cnt  Should be: $sum" );
+      echo "\n<br>ID: $ID  Lost: $cnt  Should be: $sum";
 
       dbg_query("UPDATE Players SET Lost=$sum WHERE ID=$ID LIMIT 1");
    }
-   _echo( "\n<br>Lost Done.<br>\n" );
+   echo "\n<br>Lost Done.<br>\n";
 
 
    //RatedGames = Won + Lost + Jigo consistency
@@ -227,18 +229,18 @@ define('DEBUG',0);
    foreach( $diff as $ID => $ary )
    {
       list( $cnt, $sum) = $ary;
-      _echo( "\n<br>ID: $ID  Jigo: $cnt  Should be: $sum" );
+      echo "\n<br>ID: $ID  Jigo: $cnt  Should be: $sum";
 
       $err++;
    }
    if( $err )
       echo "\n<br>--- $err error(s). MAYBE fixed with: scripts/recalculate_ratings2.php";
-   _echo( "\n<br>Jigo Done.<br>\n" );
+   echo "\n<br>Jigo Done.<br>\n";
 
 
 //-----------------
 
-   _echo( "\n<br><br>Check Ratinglog vs RatedGames of players ...\n<br>", $C );
+   echo span($C, "\n<br><br>Check Ratinglog vs RatedGames of players ...\n<br>");
 
    $begin = getmicrotime();
    //check consistency: RatedGames && Ratinglog
@@ -267,7 +269,7 @@ define('DEBUG',0);
 
 //-----------------
 
-   _echo( "\n<br><br>Check Rating & ClockUsed of players ...\n<br>", $C );
+   echo span($C, "\n<br><br>Check Rating & ClockUsed of players ...\n<br>");
 
    $begin = getmicrotime();
    //Various checks: Rating2 within boundaries of RatingMin/Max (if user RATED), valid ClockUsed
@@ -306,7 +308,7 @@ define('DEBUG',0);
 
 //-----------------
 
-   _echo( "\n<br><br>Check multi-player-game count of players ...\n<br>", $C );
+   echo span($C, "\n<br><br>Check multi-player-game count of players ...\n<br>");
 
    $begin = getmicrotime();
    echo "\n<br>";
@@ -331,7 +333,7 @@ define('DEBUG',0);
       if( $cntG != $cntP )
       {
          $err++;
-         _echo( "\n<br>ID: $uid  GamesMPG: $cntP  Should be: $cntG" );
+         echo "\n<br>ID: $uid  GamesMPG: $cntP  Should be: $cntG";
          dbg_query("UPDATE Players SET GamesMPG=$cntG WHERE ID=$uid LIMIT 1");
       }
    }
@@ -343,7 +345,7 @@ define('DEBUG',0);
 
 //----------------- Player-related tables (ConfigBoard, ConfigPages, UserQuota)
 
-   _echo( "\n<br><br>Check foreign-keys of players-data (ConfigBoard, ConfigPages, UserQuota) ...\n<br>", $C );
+   echo span($C, "\n<br><br>Check foreign-keys of players-data (ConfigBoard, ConfigPages, UserQuota) ...\n<br>");
 
    $begin = getmicrotime();
 
@@ -368,21 +370,21 @@ define('DEBUG',0);
       if( $row['XCB_uid'] == 0 )
       {
          $err++;
-         _echo( "Inserting ConfigBoard for user-id [$uid] ...\n<br>" );
+         echo "Inserting ConfigBoard for user-id [$uid] ...\n<br>";
          if( $do_it )
             ConfigBoard::insert_default( $uid );
       }
       if( $row['XCP_uid'] == 0 )
       {
          $err++;
-         _echo( "Inserting ConfigPages for user-id [$uid] ...\n<br>" );
+         echo "Inserting ConfigPages for user-id [$uid] ...\n<br>";
          if( $do_it )
             ConfigPages::insert_default( $uid );
       }
       if( $row['XUQ_uid'] == 0 )
       {
          $err++;
-         _echo( "Inserting UserQuota for user-id [$uid] ...\n<br>" );
+         echo "Inserting UserQuota for user-id [$uid] ...\n<br>";
          if( $do_it )
             UserQuota::insert_default( $uid );
       }
@@ -396,7 +398,7 @@ define('DEBUG',0);
 
 //----------------- counters
 
-   _echo( "\n<br><br>Check message/feature/bulletin new-counters of players ...\n<br>", $C );
+   echo span($C, "\n<br><br>Check message/feature/bulletin new-counters of players ...\n<br>");
 
    $begin = getmicrotime();
 
@@ -415,7 +417,7 @@ define('DEBUG',0);
       $count_msg_new = count_messages_new( $uid ); // force-recalc
       if( $count_msg_new >= 0 && $count_msg_new != $CountMsgNew )
       {
-         _echo( "\n<br>ID: $uid fix CountMsgNew [$CountMsgNew] -> [$count_msg_new]." );
+         echo "\n<br>ID: $uid fix CountMsgNew [$CountMsgNew] -> [$count_msg_new].";
          dbg_query("UPDATE Players SET CountMsgNew=$count_msg_new WHERE ID=$uid LIMIT 1");
          $err++;
       }
@@ -424,7 +426,7 @@ define('DEBUG',0);
    if( $err )
       echo "\n<br>--- $err error(s) found.";
 
-   _echo( "\n<br>MessageNew count Done." );
+   echo "\n<br>MessageNew count Done.";
    echo "\n<br>";
 
 
@@ -455,7 +457,7 @@ define('DEBUG',0);
       echo "\n<br>--- $err error(s) found.";
    }
 
-   _echo( "\n<br>FeatureNew count Done." );
+   echo "\n<br>FeatureNew count Done.";
    echo "\n<br>";
 
 
@@ -490,12 +492,12 @@ define('DEBUG',0);
 
 
    echo "\n<br>Needed: " . sprintf("%1.3fs", (getmicrotime() - $begin));
-   _echo( "\n<br>Players main-menu counts Done." );
+   echo "\n<br>Players main-menu counts Done.";
 
 //-----------------
 
 
-   _echo( "\n<br><br>Needed (all): " . sprintf("%1.3fs", (getmicrotime() - $beginall)), 'red' );
+   echo span( "\n<br><br>Needed (all): " . sprintf("%1.3fs", (getmicrotime() - $beginall)) );
    echo "<hr>Done!!!\n";
    end_html();
 }//main
@@ -568,7 +570,7 @@ function echo_query( $dbgmsg, $query, $rowhdr=20, $colsize=80, $colwrap='cut' )
       echo "\n</tr>";
    }
    mysql_free_result($result);
-   _echo( "\n</table><br>\n" );
+   echo "\n</table><br>\n";
 
    return $numrows;
 }//echo_query
@@ -670,7 +672,7 @@ function cnt_diff( $name, $pfld, $gwhr, $gwhrB='', $gwhrW='')
       extract($rowP);
       $sum = @$plB[$idP] + @$plW[$idP] + @$plMPG[$idP];
       if(DEBUG)
-         _echo( "\n<br>P:$idP/$cntP/$sum  B:".@$plB[$idP]." W:".@$plW[$idP]." MPG:".@$plMPG[$idP] );
+         echo "\n<br>P:$idP/$cntP/$sum  B:".@$plB[$idP]." W:".@$plW[$idP]." MPG:".@$plMPG[$idP];
       if( $cntP != $sum )
          $diff[$idP] = array( $cntP, $sum );
    }
@@ -681,15 +683,5 @@ function cnt_diff( $name, $pfld, $gwhr, $gwhrB='', $gwhrW='')
    echo "\n<br>Needed ($name): " . sprintf("%1.3fs", (getmicrotime() - $tstart));
    return $diff;
 }//cnt_diff
-
-function _echo( $msg, $color='' )
-{
-   if( $color )
-      echo span($color, $msg);
-   else
-      echo $msg;
-   //ob_flush();
-   flush();
-}//_echo
 
 ?>

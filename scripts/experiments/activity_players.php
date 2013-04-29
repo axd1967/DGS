@@ -24,6 +24,9 @@ require_once( "include/std_functions.php" );
 
 $TheErrors->set_mode(ERROR_MODE_PRINT);
 
+$GLOBALS['ThePage'] = new Page('Script', PAGEFLAG_IMPLICIT_FLUSH );
+
+
 {
    $tid= get_request_arg( 'test', '1' );
 
@@ -111,7 +114,6 @@ $TheErrors->set_mode(ERROR_MODE_PRINT);
 
    $rfrshtim= $starttim= getmicrotime();
    echo "<pre># Activity factor=$factor ";
-   flush(); #ob_flush();
 
    $tsts= array(
       'F' => array( 'nam' => 'float',
@@ -150,7 +152,7 @@ $TheErrors->set_mode(ERROR_MODE_PRINT);
       $t= getmicrotime();
       if( $t-$rfrshtim > 5 )
       {
-         echo '.'; flush(); #ob_flush(); //the browser won't freeze... hoping so
+         echo '.'; //the browser won't freeze... hoping so
          $rfrshtim= $t;
       }
    }

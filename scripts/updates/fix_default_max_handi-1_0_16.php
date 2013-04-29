@@ -21,6 +21,9 @@ chdir( '../../' );
 require_once( "include/std_functions.php" );
 require_once( "include/game_functions.php" );
 
+$GLOBALS['ThePage'] = new Page('Script', PAGEFLAG_IMPLICIT_FLUSH );
+
+
 {
    disable_cache();
    connect2mysql();
@@ -50,23 +53,21 @@ require_once( "include/game_functions.php" );
            die("<BR>$s;<BR>" . mysql_error() );
          if( DBG_QUERY>1 ) error_log("dbg_query(DO_IT): $s");
       }
-      _echo(
-         "<p>*** Fixes default max-handicap ***"
+      echo "<p>*** Fixes default max-handicap ***"
          ."<br>".anchor(make_url($page, $page_args), 'Just show it')
-         ."</p>" );
+         ."</p>";
    }
    else
    {
       function dbg_query($s) {
-         _echo( "<BR>$s; ");
+         echo "<BR>$s; ";
          if( DBG_QUERY>1 ) error_log("dbg_query(SIMUL): $s");
       }
       $tmp = array_merge($page_args,array('do_it' => 1));
-      _echo(
-         "<p>(just show needed queries)"
+      echo "<p>(just show needed queries)"
          ."<br>".anchor(make_url($page, $page_args), 'Show it again')
          ."<br>".anchor(make_url($page, $tmp), '[Validate it]')
-         ."</p>" );
+         ."</p>";
    }
 
 
@@ -84,23 +85,17 @@ require_once( "include/game_functions.php" );
       $cnt_fix += $cnt_arr[1];
    }
 
-   _echo( "<br><br>Found $cnt_all entries in total to fix ...\n" );
+   echo "<br><br>Found $cnt_all entries in total to fix ...\n";
 
    if( $do_it )
    {
-      _echo( "<br>Found $cnt_fix entries in total that required fixing ...\n" );
-      _echo('Fix by setting default-max-handicap finished.');
+      echo "<br>Found $cnt_fix entries in total that required fixing ...\n";
+      echo 'Fix by setting default-max-handicap finished.';
    }
 
    end_html();
-}
+}//main
 
-function _echo($msg)
-{
-   echo $msg;
-   ob_flush();
-   flush();
-}
 
 // return: arr( [ID/Status/Size/Handicap/Komi/GameSetup/ShapeID => ...], ... )
 function load_games_gamesetup()
@@ -137,20 +132,20 @@ function load_profiles_gamesetup( $template_type )
 
 function handle_games_gamesetup()
 {
-   _echo( "<hr>Find game-setup for games ..." );
+   echo "<hr>Find game-setup for games ...";
 
    // load Games.GameSetup: arr( [ID/Status/Size/Handicap/Komi/GameSetup/ShapeID => ...], ... )
    $arr_games = load_games_gamesetup();
 
    $all_cnt = count($arr_games);
    $curr_cnt = 0;
-   _echo( "<br>Found $all_cnt games to fix ...\n" );
+   echo "<br>Found $all_cnt games to fix ...\n";
 
    $cnt_fix = 0;
    foreach( $arr_games as $grow )
    {
       if( ($curr_cnt++ % 50) == 0 )
-         _echo( "<br><br>... $curr_cnt of $all_cnt updated ...\n" );
+         echo "<br><br>... $curr_cnt of $all_cnt updated ...\n";
 
       if( $grow['Status'] == GAME_STATUS_INVITED ) // invitation or dispute
       {
@@ -164,7 +159,7 @@ function handle_games_gamesetup()
       }
    }
 
-   _echo( "<br>Found $cnt_fix games that required fixing ...\n" );
+   echo "<br>Found $cnt_fix games that required fixing ...\n";
 
    return array( $all_cnt, $cnt_fix );
 }//handle_games_gamesetup
@@ -226,26 +221,26 @@ function fix_game_finished_running( $row )
 
 function handle_profiles_gamesetup( $templ_type )
 {
-   _echo( "<hr>Find game-setup for profiles of type [$templ_type] ..." );
+   echo "<hr>Find game-setup for profiles of type [$templ_type] ...";
 
    // load Profiles.Text: arr( Profiles.ID => ProfileTemplate-obj, ... )
    $arr_templates = load_profiles_gamesetup( $templ_type );
 
    $all_cnt = count($arr_templates);
    $curr_cnt = 0;
-   _echo( "<br>Found $all_cnt profiles type [$templ_type] to fix ...\n" );
+   echo "<br>Found $all_cnt profiles type [$templ_type] to fix ...\n";
 
    $cnt_fix = 0;
    foreach( $arr_templates as $profile_id => $tmpl )
    {
       if( ($curr_cnt++ % 50) == 0 )
-         _echo( "<br><br>... $curr_cnt of $all_cnt updated ...\n" );
+         echo "<br><br>... $curr_cnt of $all_cnt updated ...\n";
 
       if( fix_profile( $templ_type, $profile_id, $tmpl ) )
          $cnt_fix++;
    }
 
-   _echo( "<br>Found $cnt_fix profiles that required fixing ...\n" );
+   echo "<br>Found $cnt_fix profiles that required fixing ...\n";
 
    return array( $all_cnt, $cnt_fix );
 }//handle_profiles_gamesetup
@@ -282,12 +277,12 @@ function handle_waiting_room_gamesetup()
 {
    global $do_it;
 
-   _echo( "<hr>Fix waiting-room entries ..." );
+   echo "<hr>Fix waiting-room entries ...";
 
    dbg_query( "UPDATE Waitingroom SET MaxHandicap=".DEFAULT_MAX_HANDICAP." WHERE MaxHandicap IN (".MAX_HANDICAP.",127)" );
    $cnt_fix = ( $do_it ) ? mysql_affected_rows(): 0;
 
-   _echo( "<br>Found $cnt_fix waiting-room entries that required fixing ...\n" );
+   echo "<br>Found $cnt_fix waiting-room entries that required fixing ...\n";
 
    return array( $cnt_fix, $cnt_fix );
 }//handle_waiting_room_gamesetup
@@ -296,12 +291,12 @@ function handle_tournament_rules_gamesetup()
 {
    global $do_it;
 
-   _echo( "<hr>Fix tournament-rules entries ..." );
+   echo "<hr>Fix tournament-rules entries ...";
 
    dbg_query( "UPDATE TournamentRules SET MaxHandicap=".DEFAULT_MAX_HANDICAP." WHERE MaxHandicap IN (".MAX_HANDICAP.",127)" );
    $cnt_fix = ( $do_it ) ? mysql_affected_rows(): 0;
 
-   _echo( "<br>Found $cnt_fix tournament-rules entries that required fixing ...\n" );
+   echo "<br>Found $cnt_fix tournament-rules entries that required fixing ...\n";
 
    return array( $cnt_fix, $cnt_fix );
 }//handle_tournament_rules_gamesetup

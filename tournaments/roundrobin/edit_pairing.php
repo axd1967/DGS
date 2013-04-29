@@ -41,7 +41,8 @@ require_once 'tournaments/include/tournament_round_status.php';
 require_once 'tournaments/include/tournament_status.php';
 require_once 'tournaments/include/tournament_utils.php';
 
-$GLOBALS['ThePage'] = new Page('TournamentPairEdit');
+$GLOBALS['ThePage'] = new Page('TournamentPairEdit', PAGEFLAG_IMPLICIT_FLUSH ); // flushing for progress-output
+
 
 {
    connect2mysql();

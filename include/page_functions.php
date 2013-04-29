@@ -24,6 +24,8 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
  * \brief Functions for creating Dragon pages.
  */
 
+define('PAGEFLAG_NO_BUFFERING',   0x01); // no output-buffering
+define('PAGEFLAG_IMPLICIT_FLUSH', 0x02); // implicit flushing on every output; implicitly includes no-buffering-page-flag
 
 define('ROBOTS_NO_INDEX_NOR_FOLLOW', 'noindex, nofollow'); // default
 define('ROBOTS_NO_FOLLOW', 'nofollow');
@@ -43,6 +45,7 @@ abstract class HTMLPage
    protected $BaseName;
 
    // HTML-head <meta>-tags should be added for the crawler-indexed pages (see sitemap.xml or robots.txt)
+   public $page_flags;
    public $meta_description;
    public $meta_robots; // ROBO_...
    public $meta_keywords;
@@ -50,10 +53,11 @@ abstract class HTMLPage
 
    /*!
     * \brief Constructor. Create a new page and initialize it.
+    * \param $page_flags PAGEFLAG_...
     * \param $meta_robots '' (use default from start_html()-func); otherwise ROBO_...
     * \param $meta_description description for page-meta-tag; should be in enlish (not translatable)
     */
-   protected function __construct( $_pageid=false, $meta_robots='', $meta_description='', $meta_keywords='' )
+   protected function __construct( $_pageid=false, $page_flags=0, $meta_robots='', $meta_description='', $meta_keywords='' )
    {
       $this->BaseName = substr( @$_SERVER['PHP_SELF'], strlen(SUB_PATH));
 
@@ -62,6 +66,7 @@ abstract class HTMLPage
       //make it CSS compatible, just allowing the space (see getCSSclass())
       $this->ClassCSS = preg_replace('%[^ a-zA-Z0-9]+%', '-', $_pageid);
 
+      $this->page_flags = $page_flags;
       $this->meta_description = $meta_description;
       $this->meta_robots = $meta_robots;
       $this->meta_keywords = $meta_keywords;
@@ -77,7 +82,13 @@ abstract class HTMLPage
        * Default-level for ZLib-compression is 6, but 3 gives less load on web-server.
        * Or may be set in php.ini-file -> see http://de2.php.net/manual/en/zlib.configuration.php#ini.zlib.output-compression
        */
-      ob_start('ob_gzhandler');
+      if( $this->page_flags & PAGEFLAG_IMPLICIT_FLUSH )
+      {
+         ob_implicit_flush(true);
+         $this->page_flags |= PAGEFLAG_NO_BUFFERING; // flushing works only with no-buffering
+      }
+      if( !($this->page_flags & PAGEFLAG_NO_BUFFERING) )
+         ob_start('ob_gzhandler');
    }//__construct
 
    /*!
@@ -89,7 +100,7 @@ abstract class HTMLPage
       return $this->ClassCSS;
    }
 
-   // \param $meta_robots : ROBO_...
+   // \param $meta_robots ROBOTS_...
    public function set_meta_robots( $meta_robots )
    {
       $this->meta_robots = $meta_robots;
@@ -111,9 +122,9 @@ abstract class HTMLPage
  */
 class Page extends HTMLPage
 {
-   public function __construct( $_pageid=false, $meta_robots='', $meta_description='', $meta_keywords='' )
+   public function __construct( $_pageid=false, $page_flags=0, $meta_robots='', $meta_description='', $meta_keywords='' )
    {
-      parent::__construct( $_pageid, $meta_robots, $meta_description, $meta_keywords );
+      parent::__construct( $_pageid, $page_flags, $meta_robots, $meta_description, $meta_keywords );
    }
 } //class Page
 
