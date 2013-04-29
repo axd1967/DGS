@@ -16,6 +16,60 @@ Developers INFO:
 ChangeLog
 ------------------------------------------------------------------
 
+2013-04-29 juga
+
+   * include/page_functions.php (PAGEFLAG_IMPLICIT_FLUSH, PAGEFLAG_NO_BUFFERING;
+       class HTMLPage; class Page),
+     tournaments/include/tournament_helper.php (TournamentHelper.start_tournament_round_games),
+     include/error_functions.php (DgsErrors.dump_exit),
+     include/std_functions.php (start_html, end_html),
+     scripts/experiments/flush_test.php, scripts/experiments/activity_players.php,
+     scripts/updates/fix_default_max_handi-1_0_16.php,
+     scripts/updates/fix_game_comments-1_0_15.php,
+     scripts/updates/fix_message_thread-1_0_15.php,
+     scripts/updates/fix_new_game_expert_view-1_0_16.php,
+     scripts/check_players_email.php, scripts/fix_game_snapshot.php,
+     scripts/fix_games_timeleft.php, scripts/player_consistency.php,
+     tournaments/roundrobin/edit_pairing.php,
+     goodies/index.php, docs.php, faq.php, index.php, introduction.php, news.php,
+     policy.php, rank_converter.php:
+   - fix flushing of output using implicit-flush without output-buffering
+
+2013-04-28 juga
+
+   * tournaments/include/tournament_factory.php (TournamentFactory.getTournamentTypes),
+     include/config.php (ALLOW_TOURNAMENTS):
+   - changed server-config ALLOW_TOURNAMENTS from boolean to regex listing allowed tournament-types
+
+   * tournaments/view_tournament.php:
+   - bugfix: don't show user-result-state for user in unassigned-pool
+
+   * tournaments/include/tournament_pool.php (TournamentPool.formatRank):
+   - bugfix: allow to show other value for empty pool-rank
+
+   * tournaments/include/tournament_template.php (class TournamentTemplate,
+       ~.build_tournament_template_title),
+     tournaments/include/tournament_template_round_robin.php (class TournamentTemplateRoundRobin),
+     tournaments/include/tournament_template_ladder.php (class TournamentTemplateLadder),
+     tournaments/include/types/dgs_round_robin.php (class DgsRoundRobinTournament),
+     tournaments/include/types/private_ladder.php (class PrivateLadderTournament),
+     tournaments/include/types/public_ladder.php (class PublicLadderTournament),
+     tournaments/include/types/dgs_ladder.php (class DgsLadderTournament):
+   - cleanup: refactored building of template-title into base-class
+   - reduced max ladder-challenges/defenses from 10 -> 8 for private/public ladders
+
+   * scripts/tournament_consistency.php (tid_clause, fix_tournament_RegisteredTP):
+   - overworked and extended consistency-checks
+   - allow to check specific or all tournaments
+   - added checks for TournamentParticipant.Finished/Won/Lost
+   - added checks for TournamentLadder.ChallengesIn/Out for ladder-tourneys
+
+2013-04-26 juga
+
+   * scripts/player_consistency.php (echo_query, explain_query, cnt_diff),
+     scripts/updates/other_changes_1_0_15_to_1_0_16.txt:
+   - added consistency-checks/fixes on Players-table for multi-player-games
+
 2013-04-23 juga
 
    * include/game_actions.php (class GameActionHelper),

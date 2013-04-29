@@ -187,13 +187,13 @@ Copyright (C) 2001-2013  Erik Ouchterlony, Jens-Uwe Gaspar
       * Added admin-option DENY_TOURNEY_REGISTER to forbid user to register to new tournaments
 
       * Added tournament consistency script
+      * Extended player consistency script for multi-player-games
 
 
    Server config:
 
       * Added config-switches:
-         * ALLOW_TOURNAMENTS                 - enabled
-         * ALLOW_TOURNAMENTS_ROUND_ROBIN     - disabled
+         * ALLOW_TOURNAMENTS                 - enabled with: LADDER (ROUNDROBIN disabled)
          * ALLOW_TOURNAMENTS_CREATE_BY_USER  - disabled
 ##         * ALLOW_GAME_EDITOR                 - disabled (needs JavaScript)
 ##         * ENABLE_GAME_VIEWER                - disabled (needs JavaScript)
