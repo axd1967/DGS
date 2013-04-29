@@ -276,6 +276,7 @@ function get_tables( $database)
             'Forumreads',
             'Forums',
             'GamePlayers',
+            'GameSgf',
             'Games',
             'GamesNotes',
             'GamesPriority',
