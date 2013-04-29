@@ -257,10 +257,7 @@ exit;
 
 function loc_start_html( $style_string='')
 {
-   ob_start("ob_gzhandler");
-
    $encoding_used = 'utf-8';
-
    header('Content-Type: text/html;charset='.$encoding_used);
 
    echo '<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"'
@@ -277,7 +274,6 @@ function loc_start_html( $style_string='')
 function loc_end_html()
 {
    echo "\n</BODY>\n</HTML>";
-   ob_end_flush();
 }
 
 ?>
