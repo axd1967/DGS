@@ -335,7 +335,7 @@ function start_html( $title, $no_cache, $skinname=NULL, $style_string=NULL, $las
 
    $meta_description = ( $has_thepage && $ThePage->meta_description )
       ? $ThePage->meta_description
-      : 'Play the board game Go on a turn by turn basis.';
+      : 'Play the board game Go on a turn by turn basis.'; // keep in English
    echo "\n <meta name=\"description\" content=\"$meta_description\">";
 
    $meta_robots = ( $has_thepage && $ThePage->meta_robots ) ? $ThePage->meta_robots : ROBOTS_NO_INDEX_NOR_FOLLOW;
@@ -400,14 +400,10 @@ function start_html( $title, $no_cache, $skinname=NULL, $style_string=NULL, $las
          echo "\n<script language=\"JavaScript\" type=\"text/javascript\">\n$javascript\n</script>";
    }
 
-   if( $ThePage instanceof HTMLPage )
-   {
-      $tmp = $ThePage->getClassCSS(); //may be multiple, i.e. 'Games Running'
-      $tmp = ' class='.attb_quote($tmp);
-   }
-   else
-      $tmp='';
-   echo "\n</HEAD>\n<BODY id=\"".FRIENDLY_SHORT_NAME."\"$tmp>\n";
+   $tmp_class = ( $has_thepage )
+      ? ' class='.attb_quote( $ThePage->getClassCSS() ) //may be multiple, i.e. 'Games Running'
+      : '';
+   echo "\n</HEAD>\n<BODY id=\"".FRIENDLY_SHORT_NAME."\"$tmp_class>\n";
    echo "<div id=\"InfoBox\"></div>\n";
 } //start_html
 
@@ -759,7 +755,10 @@ function end_html()
          echo $TheErrors->list_string('garbage', 1);
    }
    echo "\n</BODY>\n</HTML>";
-   ob_end_flush();
+
+   global $ThePage;
+   if( !($ThePage instanceof HTMLPage) )
+      ob_end_flush();
 } //end_html
 
 //push a level in the output stack
@@ -783,17 +782,6 @@ function grab_output_end( $filename='')
    $tmp= ob_get_contents();//grab it
    ob_end_flush(); //also copy it
    return write_to_file( $filename, $tmp);
-}
-
-// prints message and flushing output-buffer
-function echo_message( $msg, $flush=true )
-{
-   echo $msg;
-   if( $flush && ob_get_length() )
-   {
-      @ob_flush();
-      @flush();
-   }
 }
 
 /*!
