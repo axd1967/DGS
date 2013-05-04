@@ -256,7 +256,7 @@ function db_query( $debugmsg, $query, $errorcode='mysql_query_failed' )
    if( is_string($debugmsg) )
       error( $errorcode, $debugmsg.'='.$query);
    return false;
-}
+}//db_query
 
 // Returns calculated rows from previous SELECT, or -1 on error
 // needs preceeding SELECT with SQL_CALC_FOUND_ROWS, see also QuerySQL-class
