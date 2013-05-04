@@ -385,11 +385,11 @@ function echo_image_table( $url, $title, $withSep=true )
          $title );
 }
 
-/*! \brief Returns image-tag for tournament-round (next-round). */
-function echo_image_tourney_next_round()
+/*! \brief Returns image-tag for tournament-round (pool-winner = next-round). */
+function echo_image_tourney_pool_winner()
 {
    global $base_path;
-   return image( $base_path.'images/next.gif', T_('Next Round#tourney'), null, 'class="InTextImage"' );
+   return image( $base_path.'images/next.gif', T_('Pool Winner#tourney'), null, 'class="InTextImage"' );
 }
 
 /*! \brief Returns image-tag for MP-game (linked to game-players-page if game-id > 0 given). */

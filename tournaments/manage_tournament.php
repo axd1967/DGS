@@ -258,7 +258,7 @@ function make_links_ttype_specific( $tourney, $tstat )
             . subList( array( T_('End game, Add time#t_mng') ))
             . '<li>'
             . make_menu_link( T_('Edit ranks#tpool'), array( 'url' => "tournaments/roundrobin/edit_ranks.php?tid=$tid", 'class' => 'TAdmin' ))
-            . subList( array( T_('Set pool-ranks, next-round flagging#t_mng') ));
+            . subList( array( T_('Set pool-ranks, pool-winners (next-round flagging)#t_mng') ));
    }
 
    return '';

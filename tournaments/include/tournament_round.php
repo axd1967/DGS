@@ -44,7 +44,7 @@ $ENTITY_TOURNAMENT_ROUND = new Entity( 'TournamentRound',
    FTYPE_PKEY,  'ID',
    FTYPE_AUTO,  'ID',
    FTYPE_CHBY,
-   FTYPE_INT,   'ID', 'tid', 'Round', 'MinPoolSize', 'MaxPoolSize', 'MaxPoolCount',
+   FTYPE_INT,   'ID', 'tid', 'Round', 'MinPoolSize', 'MaxPoolSize', 'MaxPoolCount', 'PoolWinnerRanks',
                 'Pools', 'PoolSize',
    FTYPE_DATE,  'Lastchanged',
    FTYPE_ENUM,  'Status'
@@ -59,6 +59,7 @@ class TournamentRound
    public $MinPoolSize;
    public $MaxPoolSize;
    public $MaxPoolCount;
+   public $PoolWinnerRanks;
    public $Pools;
    public $PoolSize;
    public $Lastchanged;
@@ -66,7 +67,7 @@ class TournamentRound
 
    /*! \brief Constructs TournamentRound-object with specified arguments. */
    public function __construct( $id=0, $tid=0, $round=1, $status=TROUND_STATUS_INIT,
-         $min_pool_size=2, $max_pool_size=2, $max_pool_count=0, $pool_count=0, $pool_size=0,
+         $min_pool_size=2, $max_pool_size=2, $poolwinner_ranks=1, $max_pool_count=0, $pool_count=0, $pool_size=0,
          $lastchanged=0, $changed_by='' )
    {
       $this->ID = (int)$id;
@@ -76,6 +77,7 @@ class TournamentRound
       $this->MinPoolSize = (int)$min_pool_size;
       $this->MaxPoolSize = (int)$max_pool_size;
       $this->MaxPoolCount = (int)$max_pool_count;
+      $this->PoolWinnerRanks = (int)$poolwinner_ranks;
       $this->Pools = (int)$pool_count;
       $this->PoolSize = (int)$pool_size;
       $this->Lastchanged = (int)$lastchanged;
@@ -146,6 +148,7 @@ class TournamentRound
       $data->set_value( 'MinPoolSize', $this->MinPoolSize );
       $data->set_value( 'MaxPoolSize', $this->MaxPoolSize );
       $data->set_value( 'MaxPoolCount', $this->MaxPoolCount );
+      $data->set_value( 'PoolWinnerRanks', $this->PoolWinnerRanks );
       $data->set_value( 'Pools', $this->Pools );
       $data->set_value( 'PoolSize', $this->PoolSize );
       $data->set_value( 'Lastchanged', $this->Lastchanged );
@@ -167,6 +170,12 @@ class TournamentRound
       if( $this->MinPoolSize > $this->MaxPoolSize )
          $errors[] = T_('Tournament Round min. pool size must be smaller than max. pool size.');
 
+      // NOTE: to enforce that pools of next-round get smaller, pool winner ranks must be < max-pool-size,
+      //       otherwise all pool-players could proceed and the tournament will not end or will be prolonged.
+      if( $this->PoolWinnerRanks < 1 || $this->PoolWinnerRanks >= $this->MaxPoolSize )
+         $errors[] = sprintf( T_('Tournament Round pool winner ranks must be in range %s and smaller max. pool size.'),
+            build_range_text(1, TROUND_MAX_POOLSIZE) );
+
       if( $this->MaxPoolCount < 0 || $this->MaxPoolCount > TROUND_MAX_POOLCOUNT )
          $errors[] = sprintf( T_('Tournament Round max. pool count must be in range %s.'),
             build_range_text(2, TROUND_MAX_POOLCOUNT) );
@@ -186,11 +195,13 @@ class TournamentRound
       if( $this->MaxPoolCount > 0 )
          $arr_props[] = sprintf( '%s: %s', T_('Maximum Pool count'), $this->MaxPoolCount );
 
-      // general conditions
-      $arr_props[] = sprintf( T_("You may only retreat from the tournament round while not in status [%s]."),
-         self::getStatusText(TROUND_STATUS_PLAY) );
-
       $arr_props[] = sprintf( '%s: %s', T_('Pool Count'), $this->Pools );
+
+      // general conditions
+      $arr_props[] = sprintf( T_('For the current round, the players with ranks %s are pool winners.'),
+         '1..' . $this->PoolWinnerRanks );
+      $arr_props[] = sprintf( T_("You may only retreat from the tournament round while not in round status [%s]."),
+         self::getStatusText(TROUND_STATUS_PLAY) );
 
       return array( sprintf( T_('Configuration of the current tournament round #%s'), $this->Round )
             . ':', $arr_props );
@@ -202,8 +213,9 @@ class TournamentRound
    /*! \brief Checks, if there is a tournament-round for given tournament-id and round. */
    public static function isTournamentRound( $tid, $round )
    {
+      $round = (int)$round;
       return (bool)mysql_single_fetch( "TournamentRound:isTournamentRound($tid,$round)",
-         "SELECT 1 FROM TournamentRound WHERE tid='$tid' AND Round='$Round' LIMIT 1" );
+         "SELECT 1 FROM TournamentRound WHERE tid='$tid' AND Round=$Round LIMIT 1" );
    }
 
    /*!
@@ -260,6 +272,7 @@ class TournamentRound
             @$row['MinPoolSize'],
             @$row['MaxPoolSize'],
             @$row['MaxPoolCount'],
+            @$row['PoolWinnerRanks'],
             @$row['Pools'],
             @$row['PoolSize'],
             @$row['X_Lastchanged'],

@@ -98,7 +98,7 @@ class PoolGame
       {
          $chk_score = $this->get_score($uid);
 
-         //TODO for Mego/Hahn use score instead +-score
+         //TODO for Mego/Hahn use score instead +-score (S18)
          if( $chk_score < 0 )
          {
             $points = 2; // won
@@ -958,10 +958,10 @@ class RankSummary
    public function build_notes()
    {
       $notes = array();
-      $notes[] = T_('Rank \'TP\' = tournament-participants registered for next-round');
+      $notes[] = T_('Rank \'TP\' = tournament-participants registered to start in next round');
       $notes[] = sprintf( T_('Rank \'%s\' = rank not set yet for pool-users'), T_('unset#tpool') );
-      $notes[] = sprintf( T_('%s = count of users with given rank set#tpool'), T_('Count#ranksum_header') );
-      $notes[] = sprintf( T_('%s = count of users advancing to Next-Round, or marked for final result#tourney'),
+      $notes[] = sprintf( T_('%s = count of users with a set rank#tpool'), T_('Count#ranksum_header') );
+      $notes[] = sprintf( T_('%s = count of pool-winners (playing in next round, or marked for final result)#tourney'),
          T_('NR-Count#ranksum_header') );
       return $notes;
    }

@@ -55,3 +55,8 @@ ALTER TABLE TournamentLadderProps
    ADD DetermineChallenger enum('GAME_START','GAME_END') NOT NULL default 'GAME_END' AFTER MaxChallenges ;
 
 
+-- added number of top ranks for pool winners
+ALTER TABLE TournamentRound
+   ADD PoolWinnerRanks tinyint unsigned NOT NULL DEFAULT '0' AFTER MaxPoolCount ;
+
+

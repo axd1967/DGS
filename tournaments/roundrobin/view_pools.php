@@ -134,7 +134,7 @@ $GLOBALS['ThePage'] = new Page('TournamentPoolView');
    if( $allow_edit_tourney )
    {
       if( $tround->Status == TROUND_STATUS_POOL )
-         $menu_array[T_('Edit pools#TPool')] =
+         $menu_array[T_('Edit pools#tpool')] =
             array( 'url' => "tournaments/roundrobin/edit_pools.php?tid=$tid", 'class' => 'TAdmin' );
       if( $tround->Status == TROUND_STATUS_PLAY )
          $menu_array[T_('Edit ranks#tpool')] =
@@ -163,7 +163,7 @@ function build_pool_notes()
       implode(', ', array( T_('Points#tourney'), T_('SODOS#tourney') ) ));
 
    $mfmt = MINI_SPACING . '%s' . MINI_SPACING;
-   $img_next_round = echo_image_tourney_next_round();
+   $img_pool_winner = echo_image_tourney_pool_winner();
    $notes[] =
       sprintf( T_('[%s] 1..n: \'#\' = running game, \'-\' = no game, %s#tpool'),
          T_('Place#tourney'), span('MatrixSelf', T_('self#tpool_table'), $mfmt) )
@@ -178,11 +178,11 @@ function build_pool_notes()
    $notes[] = sprintf( T_('[%s] = Tie-Breaker SODOS = Sum of Defeated Opponents Score'), T_('SODOS#tourney') );
    $notes[] = array(
       sprintf( T_('[%s] = Rank of user within one pool (1=Highest rank); Format "R (CR) %s"#tpool'),
-               T_('Rank#tpool'), $img_next_round ),
+               T_('Rank#tpool'), $img_pool_winner ),
       T_('R = (optional) rank set by tournament director, really final only at end of tournament round#tpool'),
       T_('R = \'---\' = user retreating from next round (temporary mark)#tpool'),
       T_('CR = preliminary calculated rank, omitted when it can\'t be calculated or identical to rank R#tpool'),
-      sprintf( T_('%s = marks user to advance to next round, or mark for final result#tpool'), $img_next_round ),
+      sprintf( T_('%s = marks user as pool winner (to advance to next round, or mark for final result)#tpool'), $img_pool_winner ),
    );
 
    return $notes;

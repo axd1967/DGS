@@ -69,6 +69,7 @@ class DgsRoundRobinTournament extends TournamentTemplateRoundRobin
       $tround->MinPoolSize = 0; // 0's provoke error, so change by TD enforced
       $tround->MaxPoolSize = 0;
       $tround->MaxPoolCount = 0;
+      $tround->PoolWinnerRanks = 0;
 
       return $this->_createTournament( $tourney, $tprops, $trules, $tround );
    }//createTournament

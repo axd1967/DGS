@@ -128,7 +128,7 @@ class TournamentPool
 
    public function echoRankImage( $default='' )
    {
-      return ( $this->Rank > 0 ) ? echo_image_tourney_next_round() : $default;
+      return ( $this->Rank > 0 ) ? echo_image_tourney_pool_winner() : $default;
    }
 
    /*! \brief Inserts or updates tournament-pool in database. */
@@ -772,10 +772,30 @@ class TournamentPool
    }//update_tournament_pool_ranks
 
    /*!
+    * \brief Updates TournamentPool.Rank setting pool-winners determined by tround->PoolWinnerRanks.
+    * \param $tround TournamentRound-object
+    * \return number of affected rows
+    * \note expecting TournamentPool.Rank already set, either manually by TD or TournamentHelper::fill_ranks_tournament_pool()
+    * \note already set pool-winners are not touched
+    */
+   public static function update_tournament_pool_set_pool_winners( $tround )
+   {
+      $tid = (int)$tround->tid;
+      $round = (int)$tround->Round;
+      $poolwinner_ranks = (int)$tround->PoolWinnerRanks;
+
+      $result = db_query( "TournamentPool:update_tournament_pool_set_pool_winners.update($tid,{$tround->ID},$round,$poolwinner_ranks)",
+         "UPDATE TournamentPool SET Rank=ABS(Rank) " .
+         "WHERE tid=$tid AND Round=$round AND Rank < 0 AND Rank >= ".TPOOLRK_RANK_ZONE . // rank safety-checks
+            " AND Rank >= -$poolwinner_ranks" );
+      return mysql_affected_rows();
+   }//update_tournament_pool_set_pool_winners
+
+   /*!
     * \brief Executes rank-actions on TournamentPool.Rank for specified tournament-round.
-    * \param $action one of RKACT_... to set/clear next-round-flag, clear/reset rank;
-    *        RKACT_SET_NEXT_RND   = sets next-round-flag = ABS(Rank) for Ranks < 0
-    *        RKACT_CLEAR_NEXT_RND = clears next-round-flags = -ABS(Rank) for Ranks > 0
+    * \param $action one of RKACT_... to set/clear pool-winner (=next-round-"flag"), clear/reset rank;
+    *        RKACT_SET_POOL_WIN   = sets pool-winner = ABS(Rank) for Ranks < 0
+    *        RKACT_CLEAR_POOL_WIN = clears pool-winner = -ABS(Rank) for Ranks > 0
     *        RKACT_CLEAR_RANKS    = sets Rank=0
     *        RKACT_REMOVE_RANKS   = sets Rank=TPOOLRK_NO_RANK to allow filling ranks anew
     * \param $rank_from ''=all ranks, otherwise numeric rank
@@ -801,16 +821,16 @@ class TournamentPool
       $qpart_rank = ''; // where-clause
       if( $uid ) // has uid
       {
-         if( $action == RKACT_SET_NEXT_RND )
+         if( $action == RKACT_SET_POOL_WIN )
             $qpart_rank = " AND Rank < 0";
-         elseif( $action == RKACT_CLEAR_NEXT_RND )
+         elseif( $action == RKACT_CLEAR_POOL_WIN )
             $qpart_rank = " AND Rank > 0";
       }
       else // no uid
       {
          if( is_numeric($rank_from) && !is_numeric($rank_to) )
             $rank_to = $rank_from;
-         if( $action == RKACT_SET_NEXT_RND )
+         if( $action == RKACT_SET_POOL_WIN )
          {
             if( !is_numeric($rank_from) )
                $qpart_rank = " AND Rank < 0";
@@ -820,7 +840,7 @@ class TournamentPool
                $rank_to = -$rank_to;
             }
          }
-         elseif( $action == RKACT_CLEAR_NEXT_RND && !is_numeric($rank_from) )
+         elseif( $action == RKACT_CLEAR_POOL_WIN && !is_numeric($rank_from) )
             $qpart_rank = " AND Rank > 0";
          elseif( ($action == RKACT_CLEAR_RANKS || $action == RKACT_REMOVE_RANKS) && is_numeric($rank_from) )
          {
@@ -849,9 +869,9 @@ class TournamentPool
          }
       }//no uid
 
-      if( $action == RKACT_SET_NEXT_RND )
+      if( $action == RKACT_SET_POOL_WIN )
          $rankval = 'ABS(Rank)'; // where Rank < 0
-      elseif( $action == RKACT_CLEAR_NEXT_RND )
+      elseif( $action == RKACT_CLEAR_POOL_WIN )
          $rankval = '-ABS(Rank)'; // where Rank > 0
       elseif( $action == RKACT_CLEAR_RANKS )
          $rankval = '0';

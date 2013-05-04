@@ -611,13 +611,13 @@ class TournamentHelper
       // 2. calculate ranks for users of identified (finished) pools
       if( $count_finish )
       {
-         $tpool_iterator = new ListIterator( 'Tournament.edit_ranks.load_pools' );
+         $tpool_iterator = new ListIterator( 'Tournament.edit_ranks.fill_ranks_tournament_pool.load_pools' );
          $tpool_iterator = TournamentPool::load_tournament_pools( $tpool_iterator, $tid, $round,
             $arr_pools_to_finish, /*load-opts*/0 );
          $poolTables = new PoolTables( $tround->Pools );
          $poolTables->fill_pools( $tpool_iterator );
 
-         $tg_iterator = new ListIterator( 'Tournament.edit_ranks.load_tgames' );
+         $tg_iterator = new ListIterator( 'Tournament.edit_ranks.fill_ranks_tournament_pool.load_tgames' );
          $tg_iterator = TournamentGames::load_tournament_games( $tg_iterator, $tid, $tround->ID,
             $arr_pools_to_finish, /*all-stati*/null );
          $poolTables->fill_games( $tg_iterator );
@@ -648,6 +648,24 @@ class TournamentHelper
       return $result;
    }//fill_ranks_tournament_pool
 
+   /*!
+    * \brief Sets pool-winners for finished pools updating TournamentPool.Rank for given tourney-round.
+    * \note also executes TournamentHelper::fill_ranks_tournament_pool() to finish pools.
+    * \param $tround TournamentRound-object
+    * \return array of actions taken
+    */
+   public static function fill_pool_winners_tournament_pool( $tround )
+   {
+      $tid = $tround->tid;
+      $round = $tround->Round;
+      $arr_pools_to_finish = array(); // [ pool, ... ]
+      $result = self::fill_ranks_tournament_pool( $tround );
+
+      $cnt_upd = TournamentPool::update_tournament_pool_set_pool_winners( $tround );
+      $result[] = sprintf( T_('%s players set as pool winners for finished pools.'), $cnt_upd );
+
+      return $result;
+   }//fill_pool_winners_tournament_pool
 
    /*!
     * \brief Checks if a king is to be crowned for a ladder-tournament.

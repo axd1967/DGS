@@ -133,6 +133,10 @@ $GLOBALS['ThePage'] = new Page('TournamentRoundEdit');
          'DESCRIPTION', T_('Max. Pool Count'),
          'TEXTINPUT',   'max_pool_count', 5, 5, $vars['max_pool_count'],
          'TEXT',        $t_limits->getLimitRangeTextAdmin(TLIMITS_TRD_MAX_POOLCOUNT), ));
+   $trform->add_empty_row();
+   $trform->add_row( array(
+         'DESCRIPTION', T_('Pool Winner Ranks'),
+         'TEXTINPUT',   'poolwinner_ranks', 3, 3, $vars['poolwinner_ranks'], ));
 
    $trform->add_empty_row();
    $trform->add_row( array(
@@ -161,7 +165,8 @@ $GLOBALS['ThePage'] = new Page('TournamentRoundEdit');
          array( 'url' => "tournaments/manage_tournament.php?tid=$tid", 'class' => 'TAdmin' );
 
    end_page(@$menu_array);
-}
+}//main
+
 
 // return [ vars-hash, edits-arr, errorlist ]
 function parse_edit_form( &$trd, $t_limits )
@@ -174,6 +179,7 @@ function parse_edit_form( &$trd, $t_limits )
       'min_pool_size'   => $trd->MinPoolSize,
       'max_pool_size'   => $trd->MaxPoolSize,
       'max_pool_count'  => $trd->MaxPoolCount,
+      'poolwinner_ranks' => $trd->PoolWinnerRanks,
    );
 
    // copy to determine edit-changes
@@ -224,12 +230,21 @@ function parse_edit_form( &$trd, $t_limits )
          $errors[] = sprintf( T_('Expecting number for max. pool count in range %s.'),
             $t_limits->getLimitRangeText(TLIMITS_TRD_MAX_POOLCOUNT) ); // check for general MAX, but show specific max
 
+      $new_value = $vars['poolwinner_ranks'];
+      if( isNumber($new_value, /*neg*/false, /*empty*/false) )
+         $trd->PoolWinnerRanks = $new_value;
+      else
+         $errors[] = sprintf( T_('Expecting number for pool winner ranks in range %s and smaller max. pool size.'),
+            build_range_text( 1, $t_limits->getMaxLimit(TLIMITS_TRD_MAX_POOLSIZE)) );
+
       // determine edits
       if( $old_vals['min_pool_size'] != $trd->MinPoolSize ) $edits[] = T_('Pool Size');
       if( $old_vals['max_pool_size'] != $trd->MaxPoolSize ) $edits[] = T_('Pool Size');
       if( $old_vals['max_pool_count'] != $trd->MaxPoolCount ) $edits[] = T_('Pool Count');
+      if( $old_vals['poolwinner_ranks'] != $trd->PoolWinnerRanks ) $edits[] = T_('Pool Winner Ranks');
    }
 
    return array( $vars, array_unique($edits), $errors );
 }//parse_edit_form
+
 ?>

@@ -175,6 +175,7 @@ $GLOBALS['ThePage'] = new Page('TournamentRoundEditor');
       $tform->add_empty_row();
    }
 
+
    // GUI: Edit rounds -----------------
 
    $arr_rounds = array_value_to_key_and_value( range(1, $tourney->Rounds) );
@@ -226,6 +227,7 @@ $GLOBALS['ThePage'] = new Page('TournamentRoundEditor');
          'TAB', 'CELL', 1, '',
          'SUBMITBUTTON', 'tre_stat', T_('Change Round Status#tourney'), ));
 
+
    // GUI: show round info -------------
 
    if( !is_null($tround) )
@@ -250,6 +252,9 @@ $GLOBALS['ThePage'] = new Page('TournamentRoundEditor');
       $tform->add_row( array(
             'DESCRIPTION', T_('Max. Pool Count'),
             'TEXT', ( $tround->MaxPoolCount > 0 ? $tround->MaxPoolCount : NO_VALUE ), ));
+      $tform->add_row( array(
+            'DESCRIPTION', T_('Pool Winner Ranks'),
+            'TEXT', $tround->PoolWinnerRanks, ));
    }
 
 

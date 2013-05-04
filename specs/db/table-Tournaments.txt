@@ -426,19 +426,20 @@ Description:
 Description:
    Pool-setup for one tournament round.
 
-| Field        | Type                                     | Null | Key | Default             | Extra          |
-+--------------+------------------------------------------+------+-----+---------------------+----------------+
-| ID           | int(11)                                  | NO   | PRI | NULL                | auto_increment |
-| tid          | int(11)                                  | NO   | MUL | NULL                |                |
-| Round        | tinyint(3) unsigned                      | NO   |     | 1                   |                |
-| Status       | enum('INIT','POOL','PAIR','PLAY','DONE') | NO   |     | INIT                |                |
-| MinPoolSize  | tinyint(3) unsigned                      | NO   |     | 0                   |                |
-| MaxPoolSize  | tinyint(3) unsigned                      | NO   |     | 0                   |                |
-| MaxPoolCount | smallint(5) unsigned                     | NO   |     | 0                   |                |
-| Pools        | smallint(5) unsigned                     | NO   |     | 0                   |                |
-| PoolSize     | tinyint(3) unsigned                      | NO   |     | 0                   |                |
-| Lastchanged  | datetime                                 | NO   |     | 0000-00-00 00:00:00 |                |
-| ChangedBy    | varchar(54)                              | NO   |     |                     |                |
+| Field           | Type                                     | Null | Key | Default             | Extra          |
++-----------------+------------------------------------------+------+-----+---------------------+----------------+
+| ID              | int(11)                                  | NO   | PRI | NULL                | auto_increment |
+| tid             | int(11)                                  | NO   | MUL | NULL                |                |
+| Round           | tinyint(3) unsigned                      | NO   |     | 1                   |                |
+| Status          | enum('INIT','POOL','PAIR','PLAY','DONE') | NO   |     | INIT                |                |
+| MinPoolSize     | tinyint(3) unsigned                      | NO   |     | 0                   |                |
+| MaxPoolSize     | tinyint(3) unsigned                      | NO   |     | 0                   |                |
+| MaxPoolCount    | smallint(5) unsigned                     | NO   |     | 0                   |                |
+| PoolWinnerRanks | tinyint(3) unsigned                      | NO   |     | 0                   |                |
+| Pools           | smallint(5) unsigned                     | NO   |     | 0                   |                |
+| PoolSize        | tinyint(3) unsigned                      | NO   |     | 0                   |                |
+| Lastchanged     | datetime                                 | NO   |     | 0000-00-00 00:00:00 |                |
+| ChangedBy       | char(54)                                 | NO   |     |                     |                |
 
 
 ## Fields:
@@ -458,6 +459,8 @@ Description:
 
 * MaxPoolCount : how many pools are being used at maximum
    - minimum pool-count is implicitly = 1
+
+* PoolWinnerRanks : what top ranks make pool winners to either proceed to next round or win the tournament
 
 * Pools : number of pools actually used for tournament-round
 
@@ -785,19 +788,18 @@ Description:
 ## --- TournamentPool ---
 
 Description:
-   Table to store pool for round-robin tournaments with assigned users.
+   Table to store pool-entries for round-robin tournaments with assigned users.
 
 Notes:
-   - number of running tournament-games :
-     restricted by const TROUND_MAX_POOLSIZE (=max. number of opponents for a pool-user + 1)
-     and number of games per round for the same user (later e.g. double or triple round-robin),
-     so for 25 max. poolsize and triple-round-robin it would be max. 24 * 3 games
-
    - TournamentPool-table is actually keeping track of user-assignment in a pool along with
      the users pool-rank. A better table-name would be TournamentPoolEntry, but TournamentPool
      is used as it is shorter.
      Also to note is, that the table is only in 2NF containing some redundancies (tid+Round_ID+Pool
      could be extracted as FK for example), but these fields are kept out of performance-reasons.
+
+   - number of running tournament-games :
+     restricted by const TROUND_MAX_POOLSIZE (=max. number of opponents for a pool-user + 1)
+     and number of games per round for the same user (single- or double round-robin).
 
 | Field | Type                 | Null | Key | Default | Extra          |
 +-------+----------------------+------+-----+---------+----------------+
@@ -823,12 +825,10 @@ Notes:
 * Rank : place of users within one pool
    - -100 = Rank not set yet, not shown
    -    0 = no rank, shown as NO_VALUE
-   -   <0 = Rank, user does not proceed to next round or appears in T-result,
-            shown as abs(Rank)
-   -   >0 = Rank, user does proceed to next round or appears in T-result
-   - abs(Rank) 1 is highest rank
-      - used to specify next pool in next-round if tourney continued
-      - used to specify final place if tourney ends
+   -   <0 = Rank, user is no pool-winner (so DOES NOT proceed to next round or appear in T-result),
+            shown as ABS(Rank)
+   -   >0 = Rank, user is a pool-winner (so DOES proceed to next round or appear in T-result)
+   - ABS(Rank) = 1 is highest rank
 
 
 ###########################################################################

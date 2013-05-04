@@ -1267,6 +1267,7 @@ CREATE TABLE IF NOT EXISTS `TournamentRound` (
   `MinPoolSize` tinyint(3) unsigned NOT NULL default '0',
   `MaxPoolSize` tinyint(3) unsigned NOT NULL default '0',
   `MaxPoolCount` smallint(5) unsigned NOT NULL default '0',
+  `PoolWinnerRanks` tinyint(3) unsigned NOT NULL default '0',
   `Pools` smallint(5) unsigned NOT NULL default '0',
   `PoolSize` tinyint(3) unsigned NOT NULL default '0',
   `Lastchanged` datetime NOT NULL default '0000-00-00 00:00:00',
