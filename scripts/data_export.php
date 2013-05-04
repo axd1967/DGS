@@ -380,30 +380,6 @@ $defs_rep['*']['*']
    ['%\s+character\s+set\s+latin1\b%is'] = '';
 
 
-// correct field-order
-/* FIXME not needed(?) after DB-sync for DGS 1.0.15 release
-//$defs_{move}[{table}][{src}] = {dst};
-switch( (string)FRIENDLY_SHORT_NAME )
-{
-   case 'dDGS':
-      //$defs_aft['GoDiagrams']['Date'] = 'SGF';
-      //$defs_aft['Adminlog']['IP'] = 'Date';
-      //$defs_aft['Errorlog']['IP'] = 'Date';
-      break;
-
-   case 'DGS':
-      //$defs_???['Messages']['To_ID'] = ''; //still exist in DGS
-      //$defs_???['Messages']['From_ID'] = ''; //still exist in DGS
-      //$defs_aft['Players']['Rating2'] = 'Rating';
-      //$defs_bef['ConfigPages']['StatusFolders'] = 'Running';
-      //$defs_aft['Waitingroom']['Handicap'] = 'Komi';
-      break;
-} //FRIENDLY_SHORT_NAME
-//$defs_aft['GamesNotes']['Notes'] = 'Hidden';
-//$defs_bef['GamesNotes']['Notes'] = 'PRIMARY';
-*/
-
-
 function definitions_fix( $table, $keys)
 {
    global $defs_bef, $defs_aft, $defs_rep;
