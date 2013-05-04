@@ -115,7 +115,7 @@ abstract class TournamentTemplate
       return $tprops->MinParticipants;
    }
 
-   /*! \brief Returns list with errors from checking tournament-type-speficic properties for specific target-tourney-status; empty if ok. */
+   /*! \brief Returns list with errors from checking tournament-type-specific properties for specific target-tourney-status; empty if ok. */
    abstract public function checkProperties( $tourney, $t_status );
 
    /*! \brief Returns list with errors from checking pooling for tournament; empty if ok. */
