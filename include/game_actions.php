@@ -454,8 +454,10 @@ class GameActionHelper
       }
       else
       {
-         if( $this->is_quick && $agree )
-            error('invalid_action', "$dbgmsg.expect_disagree($agree)");
+         if( $this->is_quick && $l < 2 && !$agree )
+            error('invalid_action', "$dbgmsg.no_dispute_but_miss_agree($agree)");
+         elseif( $this->is_quick && $l >=2 && $agree )
+            error('invalid_action', "$dbgmsg.dispute_expect_disagree($agree)");
          $next_status = GAME_STATUS_SCORE2;
       }
 
