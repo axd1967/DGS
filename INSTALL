@@ -2,6 +2,18 @@
 Installation instructions
 -------------------------
 
+Help with installation:
+
+   If you need assistance or have questions about the install procedure,
+   please ask in the Support-forum of the LIVE-server:
+
+      http://www.dragongoserver.net/forum/list.php?forum=2
+
+   For developers there's also a normally hidden development-forum on the
+   LIVE-server. If you want to have access, please file a request in the
+   Support-forum on the LIVE-server.
+
+
 Requirements:
 
 *) A webserver which can use php, e.g., apache <http://httpd.apache.org>
@@ -111,9 +123,9 @@ and then unzipped ):
 
 
 (( This could be delayed until you need it:
-Add at least one admin user then give him the full set of priviledges
-by manually setting his Adminlevel field to 0xffff (setting all bits)
-in the Players table.
+Add at least one admin user by registering a user via the website and
+then give him the full set of priviledges by manually setting his
+Adminlevel field to 0xffff (setting all bits) in the Players table.
 
 > mysql -D dragondb
 
