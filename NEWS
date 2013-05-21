@@ -88,6 +88,7 @@ Copyright (C) 2001-2013  Erik Ouchterlony, Jens-Uwe Gaspar
          * Crown "King of the Hill" for ladder-tournaments as tournament-result
 
 ##    * Tournament-type specific pages for Pooled Round-Robin Tournament:
+##       * Allow to register players for higher start rounds
 ##       * Tournament Rounds Editor
 ##       * Tournament Round Properties Editor for round-robin-specific properties
 ##       * Tournament Round Status Editor
@@ -95,7 +96,7 @@ Copyright (C) 2001-2013  Erik Ouchterlony, Jens-Uwe Gaspar
 ##       * Tournament Round Pool Setup (define pool parameters, add pool, remove pool)
 ##       * Tournament Round Pool Manager (seed pools, delete pools, add missing registered users)
 ##       * Tournament Round Pool Editor (edit pools)
-##       * Tournament Round Pairing Editor
+##       * Tournament Round Pairing Editor (start games)
 ##       * Tournament Round Rank Editor (finishing pools)
 ##       * Tournament Pool view page with crosstables
 ##          * Tie-Breaker (static): Points, SODOS
@@ -163,6 +164,7 @@ Copyright (C) 2001-2013  Erik Ouchterlony, Jens-Uwe Gaspar
    * Fixed handling of default-profile and search of current filter-values
    * Fixed showing of weekend-clock icon for games with running weekend-clock
    * Fixed default folder-moving on replying of normal message in Reply-folder
+   * Fixed quick-game-handler properly checking agree-parameter on first players scoring
 
 
    Code improvements:

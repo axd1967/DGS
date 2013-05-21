@@ -16,6 +16,102 @@ Developers INFO:
 ChangeLog
 ------------------------------------------------------------------
 
+2013-05-21 juga
+
+   * tournaments/include/tournament_round_status.php (TournamentRoundStatus.check_round_status_change,
+       ~.check_conditions_round_status_POOL, ~.check_conditions_round_status_PAIR,
+       ~.check_conditions_round_status_PLAY, ~.check_conditions_round_status_DONE,
+       ~.check_expected_round_round_status, ~.check_action_round_status, ~.check_edit_round_status),
+     tournaments/include/tournament_status.php (TournamentStatus.check_status_change,
+       ~.check_conditions_status_REG, ~.check_conditions_status_PAIR, ~.check_conditions_status_PLAY,
+       ~.check_conditions_status_CLOSED, ~.check_expected_status, ~.check_action_status),
+     tournaments/include/tournament_participant.php (TournamentParticipant.count_TPs, ~.count_all_TPs,
+       ~.load_tournament_participants_registered, ~.load_registered_users_in_seedorder),
+     tournaments/include/tournament_pool.php (TournamentPool.load_tournament_participants_with_pools,
+       ~.seed_pools, ~.add_missing_registered_users),
+     tournaments/include/tournament_helper.php (TournamentHelper.start_tournament_round_games,
+       ~.remove_tournament_round, ~.set_tournament_round),
+     tournaments/include/tournament_template_round_robin.php (TournamentTemplateRoundRobin.checkProperties,
+       ~.calcTournamentMinParticipants),
+     tournaments/include/tournament_properties.php (TournamentProperties.getMaxParticipants,
+       ~.checkUserRegistration),
+     tournaments/include/tournament_round.php (class TournamentRound, ~.check_properties,
+       ~.authorise_set_tround),
+     tournaments/include/tournament_ladder.php (TournamentLadder.seed_ladder),
+     tournaments/include/tournament.php (class Tournament, ~.formatRound),
+     tournaments/include/tournament_template_ladder.php, tournaments/include/tournament_template.php,
+     tournaments/include/tournament_globals.php, tournaments/include/tournament_cache.php,
+     include/gui_functions.php (echo_image_tourney_pool_winner),
+     include/utilities.php (build_text_list),
+     scripts/updates/database_changes_1_0_15_to_1_0_16.mysql,
+     specs/db/table-Tournaments.txt, specs/db/dragon-ddl.sql,
+     specs/tournaments.txt, skins/dragon/screen.css,
+     tournaments/roundrobin/create_pools.php, tournaments/roundrobin/define_pools.php,
+     tournaments/roundrobin/edit_pairing.php, tournaments/roundrobin/edit_pools.php,
+     tournaments/roundrobin/edit_ranks.php, tournaments/roundrobin/edit_round_props.php,
+     tournaments/roundrobin/edit_round_status.php, tournaments/roundrobin/edit_rounds.php,
+     tournaments/view_tournament.php (make_table_tournament_participant_counts),
+     tournaments/edit_participant.php, tournaments/register.php,
+     tournaments/ladder/admin.php:
+   - round-robin-tournament:
+     - added handling of tournament-participants start-round,
+       differ between handling of StartRound from registration and NextRound from pool-win
+     - check on change of tournament-status:
+       generalized check for all tournament-types done in TournamentStatus-class,
+       specialized check for done in specific tournament-type TournamentTemplate-implementation
+     - added checks on max-participants for higher start-rounds
+     - added checks to allow change of current tournament-round
+     - allow editing of round-stuff only for specific tournament-status
+     - started handling of pool-winners to advance to next round or mark for final result
+     - added consistency-checks and fixed displaying-bug on pairing to start tournament-games
+     - added checks of current tournament-status on changes of tournament-round-status
+     - view-tournament-page: show count of tournament-participant for all rounds and all TP-stati
+   - various bug-fixes & code cleanup:
+     - refactored building of text-list calling function on list-items
+     - renamed some function into more meaningful names
+     - removed unused code, refactored redundant code
+     - added comments
+-----------
+-- added index for checking tournament-participant-registrations
+ALTER TABLE TournamentParticipant
+   ADD INDEX tidStartRound (tid,StartRound) ;
+-----------
+
+   * INSTALL:
+   - clarified how to get help and how to create admin-user
+
+2013-05-09 juga
+
+   * include/game_actions.php (GameActionHelper.prepare_game_action_score):
+   - bugfix for quick-game-handler: added check for agree=1 on 1st players scoring
+
+2013-05-04 juga
+
+   * tournaments/include/tournament_round.php (class TournamentRound, ~.fillEntityData,
+       ~.check_properties, ~.build_notes_props, ~.new_from_row),
+     tournaments/include/tournament_pool.php (TournamentPool.update_tournament_pool_set_pool_winners),
+     tournaments/include/tournament_helper.php (TournamentHelper.fill_pool_winners_tournament_pool),
+     tournaments/include/types/dgs_round_robin.php (DgsRoundRobinTournament.createTournament),
+     tournaments/include/tournament_globals.php (RKACT_SET_POOL_WIN, RKACT_CLEAR_POOL_WIN),
+     tournaments/include/tournament_pool_classes.php (RankSummary.build_notes),
+     include/gui_functions.php (echo_image_tourney_pool_winner),
+     scripts/updates/database_changes_1_0_15_to_1_0_16.mysql,
+     specs/db/dragon-ddl.sql, specs/db/table-Tournaments.txt,
+     tournaments/manage_tournament.php (make_links_ttype_specific),
+     tournaments/roundrobin/edit_ranks.php (parse_edit_form),
+     tournaments/roundrobin/edit_round_props.php (parse_edit_form),
+     tournaments/roundrobin/edit_rounds.php, tournaments/roundrobin/view_pools.php:
+   - added tournament-round-property PoolWinnerRanks to configure number of top ranks
+     making pool-winners to either advance to next round or win the tournament
+     - added action in edit-ranks-page to set-pool-winners for finished pools
+     - clarified "next-round" term replacing it with "pool-winner",
+       which can mean advancing to next-round as well as marking for final result
+-----------
+-- added number of top ranks for pool winners
+ALTER TABLE TournamentRound
+   ADD PoolWinnerRanks tinyint unsigned NOT NULL DEFAULT '0' AFTER MaxPoolCount ;
+-----------
+
 2013-04-29 juga
 
    * include/page_functions.php (PAGEFLAG_IMPLICIT_FLUSH, PAGEFLAG_NO_BUFFERING;
