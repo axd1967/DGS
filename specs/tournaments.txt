@@ -38,14 +38,14 @@ Topics:
    X. Design, Classes and Files (implementation details)
 
    * Tournament = tourney = T : what it is, what it not is
-   * types of tournaments : Ladders, Round Robin
+   * types of tournaments : Ladders, Round Robin, Matrix (=TRR with 1 pool & 1 round)
    * scope of Ts: Dragon, Public, Private
    * tournament-process + status: ADM,NEW,REG,PAIR,PLAY,CLOSED,DEL
    * tournament-editing: locks
    * tables -> ddl-description
-   * roles of T: T-Adm, TD, TP, TV(viewers)
+   * roles of T: T-Adm, Owner, TD, TP, TV
 
-   * GUI for T-Adm, for TD, for TP, for TV
+   * GUI for T-Adm, Owner, TD, TP, TV
       * page T-wizard: How to create new T (setting defaults)
       * page T-list
       * page T-info
@@ -59,6 +59,7 @@ Topics:
          -> specifics for tournament-round_robin.txt : def-pools, create-pools, edit-pools, edit-game-pairings
          -> common managing: admin-TG
          -> specifics for tournament-round_robin.txt : edit-ranks
+         -> common managing: show tournament-log
       * page T-game-list
       * page TP-list
       * page TP-reg, TD-edit-reg
@@ -81,7 +82,10 @@ Topics:
       * notify sent to opponents of running games
 
    * Requirements / Backlog / Ideas:
-      * see (local) specs/Tournaments.txt
+      * see below 'Wanted features'
+
+   * Consistency script
+
 
 #-------- (1) Introduction ----------------------------------------------------
 
@@ -113,12 +117,76 @@ T-use-cases / pages:
    - list Ts
    - view T
 
+#--------------
+# checks on TP-count:
+
+T-types: TL | TRR
+T-status: REG | PAIR | PLAY
+StartRound: 1 | 2 (= >1)
+Use-Cases:
+   - U1. user-reg-new      (TP-status ->REG)
+   - U2. user-edit-reg     (meaning TP-status is not changed from APPLY/INV <-> REG)
+   - U3. user-ack-invite   (TP-status INV->REG)
+   - U4. user-new-apply    (TP-status ->APP)
+   - D1. td-invite         (TP-status *->INV)
+   - D2. td-ack-apply      (TP-status APP->REG)
+   - D3. td-edit-tp        (meaning TP-status is not changed from APPLY/INV <-> REG)
+   - C1. T-stat-chg REG->PAIR
+   - C2. T-stat-chg PAIR->PLAY
+   - C3. T-stat-chg PLAY->PAIR (next-round);    (only for admin?)
+   - C4. TRR next-round-change                  (implicit C3)
+
+NOTES:
+   - MaxTP may be 0 (=unlimited), then use db-MaxTP instead for checks
+   - for NOW, edit-TP is ONLY allowed for REG/PLAY (TL) or REG (TRR), i.e. all TPs must be properly REGed for PAIR-status (no user can be removed if he wishes for TRR, for TL it's possible by retreat or remove-user) -> for TRR it would be special use-case to remove-TP (or edit-TP) after T already started !!
+
+Features:
+   - F1. T has MinTP/MaxTP-limits, but MaxTP can be unlimited (=0)
+   - F2. T can have multiple rounds, also with some Max-TP-limits based on MaxTP
+   - F3. TP should NOT be able to apply/register if MaxTP reached (not to overload TD with TPs to handle, and to allow first-come-first-serve)
+   - F4. TP should be able to edit his application once he is on INVITE/APPLY-TP-status
+   - F5. TD can not invite TPs exceeding the MaxTP-limit (first take care of APPLY/INVITE'd TPs -> REG or REMOVE)
+   - F6. TD must sort it out to keep all TPs registered before T can start (precondition on T-stat changes)
+
+General Check:
+   - if StartRound > 1 and MaxTP = 0 -> use MaxTP = DB-max-allowed instead    [F1]
+   - MaxTP for StartRound > 1 calc'ed by: ROUND( MaxTP / 2^(StartRound-1) )   [F2]
+   - assure, that T-status REG ONLY possible with Round=1
+
+What checks are needed on TPs:
+   - TL: StartRound = 1 (always), MaxRounds = 1
+      - U1-4/D1-3. error like (TRR.U1-4/D1-3)
+      - C1. T-stat-chg REG->PAIR: like (TRR.C1)
+      - C2. T-stat-chg PAIR->PLAY: like (TRR.C2)
+
+   - TRR:
+      - Round N:
+         - T-stat REG: (only round 1)
+            - U1. user-new-reg: error; reg not allowed if #TP[Status=ALL,StartRound=i] >= MaxTP/2^(i-1)
+            - U2. user-edit-reg: error like (U1)
+            - U3. user-ack-invite: error like (U1)
+            - U4. user-new-apply: error; apply not allowed if #TP[Status=ALL,StartRound=i] >= MaxTP/2^(i-1)
+            - D1. td-invite: error like (U4)
+            - D2. td-ack-apply: error like (U3)
+            - D3. td-edit-tp: error like (U2)
+            - C1. T-stat-chg REG->PAIR: for round i=1..MaxRounds: #TP[Status=ALL,StartRound=i] <= MaxTP; #TP[Status=APPLY|INV] == 0; #TP[StartRound>1] <= MaxTP / 2^(i-1); do NOT check on TP.NextRound but StartRound!!
+         - T-stat PAIR:
+            - C2. T-stat-chg PAIR->PLAY: no TP-checks
+         - T-stat PLAY:
+            - C3. T-stat-chg PLAY->PAIR: like (C1)-checks
+            - C4. #TP[Status=REG,StartRound=CurrentRound+1] + #PoolWinners[CurrentRound] >= 2
+
+What can be expected for T-status:
+   REG:  #TP[Status=ALL,StartRound=i] <= MaxTP / 2^(i-1)
+   PAIR: #TP[Status=ALL,StartRound=i] <= MaxTP / 2^(i-1); and there are no TPs on Status = APPLY|INVITE
+   PLAY: like PAIR for TRR; like REG for TL (allowed to join on PLAY-status for ladders)
 
 #-------- Wanted features --------------------------------------
 
 Tournament-types:
    - Ladder, King of the hill
    - Round-Robin
+      - Matrix = round-robin single or double with 1 round & 1 pool
    - League-T (pyramid-like structure), connection to next/prev Ts
    - Championship (ala IYT): http://www.itsyourturn.com/pp?tournmain
    - K.O. variations (rounded T):
@@ -167,8 +235,8 @@ Features / Processes:
    - setup: winner-calculation (wins/tie-breaker/rounds)
    - (TRR) rules: tie-breaker, http://senseis.xmp.net/?TieBreaker
    - (TRR) rules: score of a "bye" 0 or 0.5
-   - (TRR) handling odd participant-count
-   - (TRR) handling tournament-escapers (odd <-> even TPs, pooling)
+   - (TRR) handling different participant-counts in pools towards points-rank
+      - (TRR) handling tournament-escapers (odd <-> even TPs, pooling)
    - T-scoring / pairing: McMahon, Swiss, Round-Robin, Hahn-System (http://senseis.xmp.net/?HahnSystem)
    - T-scoring: http://senseis.xmp.net/?TournamentScoring
 
