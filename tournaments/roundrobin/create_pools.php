@@ -88,7 +88,7 @@ $GLOBALS['ThePage'] = new Page('TournamentPoolCreate');
 
    // init
    $errors = $tstatus->check_edit_status( TournamentPool::get_edit_tournament_status() );
-   $errors = array_merge( $errors, $trstatus->check_edit_status( TROUND_STATUS_POOL ) );
+   $errors = array_merge( $errors, $trstatus->check_edit_round_status( TROUND_STATUS_POOL ) );
    if( !TournamentUtils::isAdmin() && $tourney->isFlagSet(TOURNEY_FLAG_LOCK_ADMIN) )
       $errors[] = $tourney->buildAdminLockText();
    if( $tround->PoolSize == 0 || $tround->Pools == 0 )
@@ -99,8 +99,7 @@ $GLOBALS['ThePage'] = new Page('TournamentPoolCreate');
          $errors[] = T_('There are no pools existing for deletion');
    }
 
-   $tp_counts = TournamentCache::count_cache_tournament_participants($tid, TP_STATUS_REGISTER); //TODO only for current-round
-   $reg_count = (int)@$tp_counts[TPCOUNT_STATUS_ALL];
+   $reg_count = TournamentParticipant::count_TPs( $tid, TP_STATUS_REGISTER, $round, /*NextR*/true );
 
    // ---------- Process actions ------------------------------------------------
 

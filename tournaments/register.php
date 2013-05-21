@@ -120,8 +120,7 @@ $GLOBALS['ThePage'] = new Page('TournamentRegistration');
    // check + parse edit-form
    $reg_check_type = ( $rid ) ? TCHKTYPE_USER_EDIT : TCHKTYPE_USER_NEW;
    list( $vars, $edits, $input_errors ) = parse_edit_form( $tp, $tourney, $ttype, $tprops );
-   list( $reg_errors, $reg_warnings ) =
-      $tprops->checkUserRegistration( $tourney, $tp->hasRating(), $my_id, $reg_check_type );
+   list( $reg_errors, $reg_warnings ) = $tprops->checkUserRegistration( $tourney, $tp, $my_id, $reg_check_type );
 
    // check own max-games
    $maxGamesCheck = new MaxGamesCheck();

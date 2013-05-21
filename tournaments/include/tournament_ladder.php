@@ -830,7 +830,7 @@ class TournamentLadder
       $tl_iterator = self::load_tournament_ladder( $tl_iterator, $tid );
 
       // find all registered TPs (optimized)
-      $arr_TPs = TournamentParticipant::load_registered_users_in_seedorder( $tid, $seed_order );
+      $arr_TPs = TournamentParticipant::load_registered_users_in_seedorder( $tid, /*round*/1, $seed_order );
 
       // add all TPs to ladder
       $NOW = $GLOBALS['NOW'];

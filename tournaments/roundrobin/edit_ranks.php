@@ -87,8 +87,8 @@ $GLOBALS['ThePage'] = new Page('TournamentRankEditor');
 
 
    // init
-   $errors = $tstatus->check_edit_status( TournamentPool::get_edit_ranks_tournament_status() );
-   $errors = array_merge( $errors, $trstatus->check_edit_status( TROUND_STATUS_PLAY ) );
+   $errors = $tstatus->check_edit_status( array( TOURNEY_STATUS_PLAY ) );
+   $errors = array_merge( $errors, $trstatus->check_edit_round_status( TROUND_STATUS_PLAY ) );
    if( !TournamentUtils::isAdmin() && $tourney->isFlagSet(TOURNEY_FLAG_LOCK_ADMIN) )
       $errors[] = $tourney->buildAdminLockText();
 
@@ -140,11 +140,11 @@ $GLOBALS['ThePage'] = new Page('TournamentRankEditor');
 
       if( @$_REQUEST['t_stats'] || @$_REQUEST['t_exec'] || @$_REQUEST['t_userexec'] || @$_REQUEST['t_setrank'] )
       {
-         $tp_count = 0; //TODO load #next-round-TPs (TP.StartRound = CurrRound+1 !?)
+         $tp_regcount = TournamentParticipant::count_TPs( $tid, TP_STATUS_REGISTER, $round + 1, /*NextR*/false );
 
          // count ranks for current round over all pools
          $rank_counts = TournamentPool::count_tournament_pool_ranks( $tid, $round );
-         $rank_summary = new RankSummary( $page, $rank_counts, $tp_count );
+         $rank_summary = new RankSummary( $page, $rank_counts, $tp_regcount );
          $rstable = $rank_summary->make_table_rank_summary();
          $result_notes = $rank_summary->build_notes();
       }
@@ -166,6 +166,9 @@ $GLOBALS['ThePage'] = new Page('TournamentRankEditor');
    $tform->add_row( array(
          'DESCRIPTION', T_('Tournament ID'),
          'TEXT',        $tourney->build_info() ));
+   $tform->add_row( array(
+         'DESCRIPTION', T_('Tournament Status'),
+         'TEXT',        Tournament::getStatusText($tourney->Status), ));
    $tform->add_row( array(
          'DESCRIPTION', T_('Tournament Round'),
          'TEXT',        $tourney->formatRound(), ));

@@ -1031,7 +1031,7 @@ table.Table td.Center {
    text-align: center;
 }
 
-table.Table td.TRank {
+table.Table td.TRank, table.Table td.BoldC {
    text-align: center;
    font-weight: bold;
 }
@@ -3157,6 +3157,17 @@ div.TournamentNews div.Text {
 span.TNewsFlags {
    color: teal;
    font-weight: normal;
+}
+
+table#TPCountSummaryTable tr.Sum td {
+   font-weight: bold;
+   background: #bbddff;
+   border: 1px dotted black;
+}
+table#TPCountSummaryTable th,
+table#TPCountSummaryTable td {
+   border-left: 1px dotted black;
+   border-right: 1px dotted black;
 }
 
 ul.TAdminLinks {

@@ -81,7 +81,7 @@ $GLOBALS['ThePage'] = new Page('TournamentRoundStatusEdit');
 
    // init
    $arr_status = TournamentRound::getStatusText();
-   $status_errors = $tstatus->check_edit_status( TournamentRound::get_edit_tournament_status() );
+   $status_errors = $tstatus->check_edit_status( array( TOURNEY_STATUS_PAIR, TOURNEY_STATUS_PLAY ) );
    foreach( $status_errors as $errmsg )
       $tr_status->add_error( $errmsg );
 
@@ -89,7 +89,7 @@ $GLOBALS['ThePage'] = new Page('TournamentRoundStatusEdit');
    list( $vars, $edits ) = parse_edit_form( $tround );
 
    $new_status = $vars['status'];
-   $tr_status->check_status_change($new_status);
+   $tr_status->check_round_status_change($new_status);
    $tround->setStatus($new_status);
    if( !$is_admin && $tourney->isFlagSet(TOURNEY_FLAG_LOCK_ADMIN) )
       $tr_status->add_error( $tourney->buildAdminLockText() );
@@ -124,6 +124,9 @@ $GLOBALS['ThePage'] = new Page('TournamentRoundStatusEdit');
          'DESCRIPTION', T_('Tournament ID'),
          'TEXT',        $tourney->build_info() ));
    TournamentUtils::show_tournament_flags( $tform, $tourney );
+   $tform->add_row( array(
+         'DESCRIPTION', T_('Tournament Status'),
+         'TEXT', $tourney->getStatusText($tourney->Status) ));
    $tform->add_row( array(
          'DESCRIPTION', T_('Tournament Round'),
          'TEXT',        $tround->Round, ));
@@ -270,8 +273,8 @@ function build_status_notes()
    $arrst[TROUND_STATUS_INIT] = T_('Tournament round setup phase (set properties needed for pooling, pairing and playing)#trd_status');
    $arrst[TROUND_STATUS_POOL] = T_('Tournament round pooling phase (create pools, assign users to pools)#trd_status');
    $arrst[TROUND_STATUS_PAIR] = T_('Tournament game setup phase (prepare all tournament games)#trd_status');
-   $arrst[TROUND_STATUS_PLAY] = T_('Tournament playing phase (tournament game can be played)#trd_status');
-   $arrst[TROUND_STATUS_DONE] = T_('Tournament finalizing phase (prepare next round, announce results, tournament round is finished)#trd_status');
+   $arrst[TROUND_STATUS_PLAY] = T_('Tournament playing phase (tournament game can be played, set pool winners for next round or final results)#trd_status');
+   $arrst[TROUND_STATUS_DONE] = T_('Tournament finalizing phase (tournament round is finished)#trd_status');
    $narr = array( T_('Tournament Round Status') );
    foreach( $arrst as $status => $descr )
       $narr[] = sprintf( "%s = %s", TournamentRound::getStatusText($status), $descr );

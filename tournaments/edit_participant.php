@@ -158,7 +158,7 @@ $GLOBALS['ThePage'] = new Page('TournamentEditParticipant');
    // check + parse edit-form
    list( $vars, $edits, $input_errors ) = parse_edit_form( $tp, $tourney, $ttype );
    list( $reg_errors, $reg_warnings ) = ( !is_null($tprops) )
-      ? $tprops->checkUserRegistration($tourney, $tp->hasRating(), $user, TCHKTYPE_TD)
+      ? $tprops->checkUserRegistration( $tourney, $tp, $user, TCHKTYPE_TD )
       : array( array(), array() );
 
    // check user max-games

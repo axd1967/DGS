@@ -77,14 +77,13 @@ class Tournament
    // non-DB vars
 
    public $Owner_Handle = '';
-   public $TP_Counts = null;
 
    /*! \brief Constructs ConfigBoard-object with specified arguments. */
    public function __construct( $id=0, $scope=TOURNEY_SCOPE_PUBLIC, $type=TOURNEY_TYPE_LADDER,
-                        $wizard_type=TOURNEY_WIZTYPE_PUBLIC_LADDER, $title='', $description='',
-                        $owner_id=0, $status=TOURNEY_STATUS_NEW, $flags=0,
-                        $created=0, $lastchanged=0, $changed_by='', $starttime=0, $endtime=0,
-                        $rounds=1, $current_round=1, $registeredTP=0, $lock_note='' )
+         $wizard_type=TOURNEY_WIZTYPE_PUBLIC_LADDER, $title='', $description='',
+         $owner_id=0, $status=TOURNEY_STATUS_NEW, $flags=0,
+         $created=0, $lastchanged=0, $changed_by='', $starttime=0, $endtime=0,
+         $rounds=1, $current_round=1, $registeredTP=0, $lock_note='' )
    {
       $this->ID = (int)$id;
       $this->setScope( $scope );
@@ -188,8 +187,6 @@ class Tournament
       $rounds_str = ($this->Rounds > 0) ? $this->Rounds : '*';
       if( $this->Type == TOURNEY_TYPE_ROUND_ROBIN )
       {
-         if( $this->Rounds == 1 )
-            return ( $short ) ? 1 : T_('1 round#tourney');
          if( $short )
             return $this->CurrentRound . ' / ' . $rounds_str;
          else
@@ -205,11 +202,6 @@ class Tournament
          return sprintf( T_('(max. %s rounds)#tourney'), $this->Rounds );
       else
          return T_('(unlimited rounds)#tourney');
-   }
-
-   public function setTP_Counts( $arr )
-   {
-      $this->TP_Counts = array_merge( array(), $arr );
    }
 
    public function persist()
@@ -610,13 +602,7 @@ class Tournament
       }
 
       if( is_null($status) )
-      {
          return array() + self::$ARR_TOURNEY_TEXTS[$key]; // cloned
-         //$arrout = array() + self::$ARR_TOURNEY_TEXTS[$key];
-         //if( !TournamentUtils::isAdmin() )
-            //unset($arrout[TOURNEY_STATUS_ADMIN]);
-         //return $arrout;
-      }
       if( !isset(self::$ARR_TOURNEY_TEXTS[$key][$status]) )
          error('invalid_args', "Tournament:getStatusText($status)");
       return self::$ARR_TOURNEY_TEXTS[$key][$status];

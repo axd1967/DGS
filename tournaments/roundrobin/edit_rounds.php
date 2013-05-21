@@ -83,8 +83,6 @@ $GLOBALS['ThePage'] = new Page('TournamentRoundEditor');
    if( !TournamentHelper::allow_edit_tournaments($tourney, $my_id) )
       error('tournament_edit_not_allowed', "Tournament.edit_rounds.edit($tid,$my_id)");
 
-   $authorise_set_tround = TournamentRound::authorise_set_tround( $tourney->Status );
-
    $t_limits = $ttype->getTournamentLimits();
    $max_rounds = $t_limits->getMaxLimit(TLIMITS_TRD_MAX_ROUNDS);
    if( $round < 1 || $round > $max_rounds )
@@ -94,9 +92,11 @@ $GLOBALS['ThePage'] = new Page('TournamentRoundEditor');
       : null;
 
    // init
-   $errors = $tstatus->check_edit_status( TournamentRound::get_edit_tournament_status() );
+   $errors = $tstatus->check_edit_status(
+      array( TOURNEY_STATUS_NEW, TOURNEY_STATUS_REGISTER, TOURNEY_STATUS_PAIR, TOURNEY_STATUS_PLAY ) );
    if( !TournamentUtils::isAdmin() && $tourney->isFlagSet(TOURNEY_FLAG_LOCK_ADMIN) )
       $errors[] = $tourney->buildAdminLockText();
+   $authorise_set_tround = !TournamentRound::authorise_set_tround( $tourney->Status );
 
 
    // ---------- Process actions ------------------------------------------------
@@ -211,21 +211,22 @@ $GLOBALS['ThePage'] = new Page('TournamentRoundEditor');
          'TAB', 'CELL', 1, '',
          'SUBMITBUTTON', 'tre_edit', T_('Edit Round Properties#tourney'), ));
 
+   $tform->add_row( array(
+         'TAB', 'CELL', 1, '',
+         'SUBMITBUTTON', 'tre_stat', T_('Change Round Status#tourney'), ));
+
    if( $authorise_set_tround && ($tourney->Rounds > 1) ) // valid to set current T-round
    {
       $tform->add_row( array(
             'TAB', 'CELL', 1, '',
-            'SUBMITBUTTON', 'tre_set', T_('Set Current Round#tourney'), ));
+            'SUBMITBUTTON', 'tre_set', T_('Set Current Round#tourney'),
+            'TEXT', sptext(T_('Switch to next round#tourney'), 1), ));
       if( @$_REQUEST['tre_set'] && !$has_action_error )
          echo_confirm( $tform,
             sprintf( T_('Please confirm setting the current tournament round from #%s to #%s'),
                      $tourney->CurrentRound, $round ),
-            'tre_set', T_('Confirm setting') );
+            'tre_set', T_('Confirm setting#tround') );
    }
-
-   $tform->add_row( array(
-         'TAB', 'CELL', 1, '',
-         'SUBMITBUTTON', 'tre_stat', T_('Change Round Status#tourney'), ));
 
 
    // GUI: show round info -------------

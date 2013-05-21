@@ -413,7 +413,8 @@ class TournamentPool
    }//load_tournament_pools
 
    /*!
-    * \brief Returns ListIterator with array-items: uncomplete TPool(tid,round,pool) + orow.
+    * \brief Returns ListIterator of tournament-participants with NextRound=$round with array-items:
+    *       incomplete TPool(tid,round,pool) + orow.
     * \return orow: array( 'uid' => X, 'Pool' => Y, 'X_HasPool' => 0|1 (0=TP without pool-entry) ).
     * \note TPool returned is incomplete, so don't update() from that object
     */
@@ -433,12 +434,13 @@ class TournamentPool
                'TP.uid',
                'TPOOL.ID', 'TPOOL.Pool', 'IFNULL(TPOOL.ID,0) AS X_HasPool',
             SQLP_FROM,
-               'TournamentParticipant AS TP', //TODO load only for current-round !?
+               'TournamentParticipant AS TP',
                "LEFT JOIN TournamentPool AS TPOOL ON TPOOL.uid=TP.uid "
                   . "AND TPOOL.tid=$tid AND TPOOL.Round=$round", // must not be in main-WHERE
             SQLP_WHERE,
                "TP.tid=$tid",
-               "TP.Status='".TP_STATUS_REGISTER."'"
+               "TP.Status='".TP_STATUS_REGISTER."'",
+               "TP.NextRound=$round" // load only TPs for given round
             );
       }
 
@@ -498,7 +500,7 @@ class TournamentPool
       $tpool_iterator = self::load_tournament_pools( $tpool_iterator, $tid, $round );
 
       // find all registered TPs (optimized)
-      $arr_TPs = TournamentParticipant::load_registered_users_in_seedorder( $tid, $seed_order ); // TODO only for current-round
+      $arr_TPs = TournamentParticipant::load_registered_users_in_seedorder( $tid, $round, $seed_order );
 
       // add all TPs to pools
       $NOW = $GLOBALS['NOW'];
@@ -571,7 +573,7 @@ class TournamentPool
       $tpool_iterator = self::load_tournament_pools( $tpool_iterator, $tid, $round );
 
       // find all registered TPs (optimized)
-      $arr_TPs = TournamentParticipant::load_registered_users_in_seedorder( $tid, TOURNEY_SEEDORDER_NONE ); //TODO only for current-round
+      $arr_TPs = TournamentParticipant::load_registered_users_in_seedorder( $tid, $round, TOURNEY_SEEDORDER_NONE );
 
       // add all missing TPs to pools
       $NOW = $GLOBALS['NOW'];
@@ -910,12 +912,6 @@ class TournamentPool
    public static function get_edit_tournament_status()
    {
       static $statuslist = array( TOURNEY_STATUS_PAIR );
-      return $statuslist;
-   }
-
-   public static function get_edit_ranks_tournament_status()
-   {
-      static $statuslist = array( TOURNEY_STATUS_PLAY );
       return $statuslist;
    }
 

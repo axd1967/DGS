@@ -85,20 +85,20 @@ $GLOBALS['ThePage'] = new Page('TournamentPairEdit', PAGEFLAG_IMPLICIT_FLUSH ); 
 
    // init
    $errors = $tstatus->check_edit_status( TournamentPool::get_edit_tournament_status() );
-   $errors = array_merge( $errors, $trstatus->check_edit_status( TROUND_STATUS_PAIR ) );
+   $errors = array_merge( $errors, $trstatus->check_edit_round_status( TROUND_STATUS_PAIR ) );
    if( !TournamentUtils::isAdmin() && $tourney->isFlagSet(TOURNEY_FLAG_LOCK_ADMIN) )
       $errors[] = $tourney->buildAdminLockText();
 
    // check for pairing-"lock" (stored in T-extension)
    $t_ext = TournamentExtension::load_tournament_extension( $tid, TE_PROP_TROUND_START_TGAMES );
+   $lock_errtext = T_("If an error occured during creation of the tournament-games or it was stopped manually,<br>\n" .
+      "the tournament is broken and must be fixed by a tournament-admin.");
    if( !is_null($t_ext) )
    {
       $errors[] =
          sprintf( T_('Creating tournament games is in work already (started at [%s] by %s ).'),
                   date(DATE_FMT, $t_ext->DateValue), $t_ext->ChangedBy ) .
-         "<br>\n" .
-         T_("If an error occured during creation of the tournament-games or it was stopped manually,<br>\n" .
-            "the tournament is broken and must be fixed by a tournament-admin.");
+         "<br><br>\n" . $lock_errtext;
    }
 
    $arr_pool_summary = null;
@@ -179,14 +179,20 @@ $GLOBALS['ThePage'] = new Page('TournamentPairEdit', PAGEFLAG_IMPLICIT_FLUSH ); 
       ta_begin();
       {//HOT-section to start all T-games for T-round
          $thelper = new TournamentHelper();
-         $arr_result = $thelper->start_tournament_round_games( $tourney, $tround );
+         $result = $thelper->start_tournament_round_games( $tourney, $tround );
       }
       ta_end();
 
       echo "<br><br>\n";
-      if( !is_null($arr_result) )
+      if( is_string($result) )
       {
-         list( $count_games, $expected_games ) = $arr_result;
+         $has_errors = true;
+         echo span('ErrorMsg', T_('A critical error has occured#tourney') . ': ' . $result), "<br><br>\n",
+            span('ErrorMsg', $lock_errtext);
+      }
+      elseif( is_array($result) )
+      {
+         list( $count_games, $expected_games ) = $result;
          if( $count_games == $expected_games )
          {
             echo sprintf( T_('All %s pool games have been started. Tournament-Round Status has been changed to [%s].'),

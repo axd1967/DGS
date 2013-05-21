@@ -243,6 +243,7 @@ Description:
 
 * NextRound : Round user is going to play in for T
    - player is included in pooling for round: TP.NextRound == T.CurrentRound
+   - assert: NextRound always >= StartRound
 
 * Created : date of initial application/registration/invitation for T
 

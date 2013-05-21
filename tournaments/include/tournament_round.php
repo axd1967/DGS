@@ -67,7 +67,7 @@ class TournamentRound
 
    /*! \brief Constructs TournamentRound-object with specified arguments. */
    public function __construct( $id=0, $tid=0, $round=1, $status=TROUND_STATUS_INIT,
-         $min_pool_size=2, $max_pool_size=2, $poolwinner_ranks=1, $max_pool_count=0, $pool_count=0, $pool_size=0,
+         $min_pool_size=2, $max_pool_size=2, $max_pool_count=0, $poolwinner_ranks=1, $pool_count=0, $pool_size=0,
          $lastchanged=0, $changed_by='' )
    {
       $this->ID = (int)$id;
@@ -173,8 +173,8 @@ class TournamentRound
       // NOTE: to enforce that pools of next-round get smaller, pool winner ranks must be < max-pool-size,
       //       otherwise all pool-players could proceed and the tournament will not end or will be prolonged.
       if( $this->PoolWinnerRanks < 1 || $this->PoolWinnerRanks >= $this->MaxPoolSize )
-         $errors[] = sprintf( T_('Tournament Round pool winner ranks must be in range %s and smaller max. pool size.'),
-            build_range_text(1, TROUND_MAX_POOLSIZE) );
+         $errors[] = sprintf( T_('Tournament Round pool winner ranks must be in range %s and smaller max. pool size [%s].'),
+            build_range_text(1, TROUND_MAX_POOLSIZE), $this->MaxPoolSize );
 
       if( $this->MaxPoolCount < 0 || $this->MaxPoolCount > TROUND_MAX_POOLCOUNT )
          $errors[] = sprintf( T_('Tournament Round max. pool count must be in range %s.'),
@@ -359,19 +359,18 @@ class TournamentRound
       return $ARR_TROUND_STATUS[$status];
    }//getStatusText
 
-   public static function get_edit_tournament_status()
-   {
-      static $statuslist = array(
-         TOURNEY_STATUS_NEW, TOURNEY_STATUS_REGISTER, TOURNEY_STATUS_PAIR
-      );
-      return $statuslist;
-   }
-
-   /*! \brief Authorise setting/switching of T-round depending on tourney-status. */
+   /*! \brief Authorise setting/switching of T-round depending on tourney-status; return error-msg or false (=ok). */
    public static function authorise_set_tround( $t_status )
    {
-      return ( $t_status == TOURNEY_STATUS_PAIR || TournamentUtils::isAdmin() );
-   }
+      static $ARR_TSTATUS = array( TOURNEY_STATUS_PAIR, TOURNEY_STATUS_PLAY );
+      if( TournamentUtils::isAdmin() || in_array($t_status, $ARR_TSTATUS) )
+         return false;
+      else
+      {
+         return sprintf( T_('Setting current tournament round is only allowed on tournament status [%s].'),
+            build_text_list('Tournament::getStatusText', $ARR_TSTATUS) );
+      }
+   }//authorise_set_tround
 
    public static function delete_cache_tournament_round( $dbgmsg, $tid, $round )
    {

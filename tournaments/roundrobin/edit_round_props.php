@@ -71,7 +71,7 @@ $GLOBALS['ThePage'] = new Page('TournamentRoundEdit');
    $tround = TournamentCache::load_cache_tournament_round( 'Tournament.edit_round_props', $tid, $round );
 
    // init
-   $errors = $tstatus->check_edit_status( TournamentRound::get_edit_tournament_status() );
+   $errors = $tstatus->check_edit_status( array( TOURNEY_STATUS_NEW, TOURNEY_STATUS_REGISTER, TOURNEY_STATUS_PAIR ) );
    if( !TournamentUtils::isAdmin() && $tourney->isFlagSet(TOURNEY_FLAG_LOCK_ADMIN) )
       $errors[] = $tourney->buildAdminLockText();
 
@@ -234,8 +234,8 @@ function parse_edit_form( &$trd, $t_limits )
       if( isNumber($new_value, /*neg*/false, /*empty*/false) )
          $trd->PoolWinnerRanks = $new_value;
       else
-         $errors[] = sprintf( T_('Expecting number for pool winner ranks in range %s and smaller max. pool size.'),
-            build_range_text( 1, $t_limits->getMaxLimit(TLIMITS_TRD_MAX_POOLSIZE)) );
+         $errors[] = sprintf( T_('Expecting number for pool winner ranks in range %s and smaller max. pool size [%s].'),
+            build_range_text( 1, $t_limits->getMaxLimit(TLIMITS_TRD_MAX_POOLSIZE)), $trd->MaxPoolSize );
 
       // determine edits
       if( $old_vals['min_pool_size'] != $trd->MinPoolSize ) $edits[] = T_('Pool Size');

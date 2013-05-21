@@ -198,7 +198,10 @@ class TournamentParticipant
    }
 
 
-   /*! \brief Returns true if removal of tournament-participant is authorised; t_status is tournament-status. */
+   /*!
+    * \brief Returns true if removal of tournament-participant is authorised.
+    * \param $t_status TOURNEY_STATUS_...
+    */
    public function authorise_delete( $t_status )
    {
       if( $t_status == TOURNEY_STATUS_REGISTER )
@@ -208,7 +211,10 @@ class TournamentParticipant
       return false;
    }
 
-   /*! \brief Returns true if editing customized fields is authorised; t_status is tournament-status. */
+   /*!
+    * \brief Returns true if editing customized fields is authorised.
+    * \param $t_status TOURNEY_STATUS_...
+    */
    public function authorise_edit_customized( $t_status )
    {
       if( $t_status == TOURNEY_STATUS_REGISTER )
@@ -221,7 +227,10 @@ class TournamentParticipant
       return false;
    }
 
-   /*! \brief Returns true if TP-status-change from TP-REGISTER is authorised; t_status is tournament-status. */
+   /*!
+    * \brief Returns true if TP-status-change from TP-REGISTER is authorised.
+    * \param $t_status TOURNEY_STATUS_...
+    */
    public function authorise_edit_register_status( $t_status, $tp_status_old, &$errors )
    {
       $allowed = false;
@@ -325,9 +334,72 @@ class TournamentParticipant
    // ------------ static functions ----------------------------
 
    /*!
+    * \brief Returns count of TournamentParticipants for given tournament, TP-status and NextRound.
+    * \param $tp_status one of TP_STATUS_... or array of TP_STATUS_... or null (=count all TP-stati)
+    * \param $round 0 (=count all rounds), >0 (=count only given round)
+    * \param $use_next_round true = match $next_round on TP.NextRound; false = match on TP.StartRound
+    */
+   //TODO TODO rename properly
+   public static function count_TPs( $tid, $tp_status, $round, $use_next_round )
+   {
+      $qsql = new QuerySQL(
+         SQLP_OPTS,   'SQL_SMALL_RESULT',
+         SQLP_FIELDS, 'COUNT(*) AS X_Count',
+         SQLP_FROM,   'TournamentParticipant',
+         SQLP_WHERE,  "tid=$tid" );
+
+      $stat_out = array();
+      if( is_array($tp_status) )
+      {
+         foreach( $tp_status as $tp_stat )
+            $stat_out[] = mysql_addslashes($tp_stat);
+         if( count($stat_out) )
+            $qsql->add_part( SQLP_WHERE, "Status IN ('" . implode("','", $stat_out) . "')" );
+      }
+      elseif( !is_null($tp_status) )
+         $qsql->add_part( SQLP_WHERE, "Status='" . mysql_addslashes($tp_status) . "'" );
+
+      $round_field = ($use_next_round) ? 'NextRound' : 'StartRound';
+      if( is_numeric($round) && $round > 0 )
+         $qsql->add_part( SQLP_WHERE, "$round_field=$round" );
+
+      $row = mysql_single_fetch( "TournamentParticipant:count_TPs($tid,".implode('/',$stat_out).",$round_field=$round)",
+            $qsql->get_select() );
+      return ($row) ? (int)$row['X_Count'] : 0;
+   }//count_TPs
+
+   /*!
+    * \brief Returns non-null array with count of TournamentParticipants for all (start-)rounds and TP-stati.
+    * \return array( TPCOUNT_STATUS_ALL => sum-count for all rounds,
+    *                TP.StartRound      => array( TP_STATUS_... => count, ... ))
+    */
+   //TODO TODO rename properly
+   public static function count_all_TPs( $tid )
+   {
+      $result = db_query( "TournamentParticipant:count_all_TPs($tid)",
+            "SELECT SQL_SMALL_RESULT Status, StartRound, COUNT(*) AS X_Count FROM TournamentParticipant " .
+            "WHERE tid=$tid GROUP BY Status, StartRound" );
+
+      $out = array();
+      while( $row = mysql_fetch_array($result) )
+      {
+         $status = @$row['Status'];
+         $round = (int)@$row['StartRound'];
+         $cnt = (int)@$row['X_Count'];
+         if( !isset($out[$round]) )
+            $out[$round] = array();
+         $out[$round][$status] = $cnt;
+      }
+      mysql_free_result($result);
+
+      return $out;
+   }//count_all_TPs
+
+   /*!
     * \brief Returns non-null array with count of TournamentParticipants for given tournament and TP-status.
     * \return array( TP_STATUS_... => count, TPCOUNT_STATUS_ALL => summary-count )
     */
+   //TODO TODO obsolete !?
    public static function count_tournament_participants( $tid, $status=NULL )
    {
       $query_status = (is_null($status)) ? '' : " AND Status='".mysql_addslashes($status)."'";
@@ -482,30 +554,38 @@ class TournamentParticipant
       return $iterator;
    }//load_tournament_participants
 
-   /*! \brief Returns array( ID=>uid ) with TournamentParticipant.ID for given tournament. */
-   public static function load_tournament_participants_registered( $tid )
+   /*! \brief Returns array( ID=>uid ) with TournamentParticipant.ID for given tournament and round. */
+   public static function load_tournament_participants_registered( $tid, $round )
    {
-      $query = "SELECT ID, uid FROM TournamentParticipant WHERE tid=$tid AND Status='".TP_STATUS_REGISTER."'";
-      $result = db_query( "TournamentParticipant:load_tournament_participants_registered($tid)", $query );
+      $query = "SELECT ID, uid FROM TournamentParticipant " .
+         "WHERE tid=$tid AND Status='".TP_STATUS_REGISTER."' AND NextRound=$round";
+      $result = db_query( "TournamentParticipant:load_tournament_participants_registered($tid,$round)", $query );
 
       $arr = array();
       while( $row = mysql_fetch_array( $result ) )
          $arr[$row['ID']] = $row['uid'];
       mysql_free_result($result);
       return $arr;
-   }
+   }//load_tournament_participants_registered
 
    /*!
     * \brief Returns array of row-arrays with [ rid=> TP.ID, uid => TP.uid ]
-    *        for given tournament ordered according to given tourney-seed-order.
+    *        for given tournament and round ordered according to given tourney-seed-order.
     */
-   public static function load_registered_users_in_seedorder( $tid, $seed_order )
+   public static function load_registered_users_in_seedorder( $tid, $round, $seed_order )
    {
       // find all registered TPs (optimized)
-      $qsql = new QuerySQL();
-      $qsql->add_part( SQLP_FIELDS, 'TP.ID AS rid', 'TP.uid' );
-      $qsql->add_part( SQLP_FROM,   "TournamentParticipant AS TP" );
-      $qsql->add_part( SQLP_WHERE,  "TP.tid=$tid", "TP.Status='".TP_STATUS_REGISTER."'" );
+      $qsql = new QuerySQL(
+         SQLP_FIELDS,
+            'TP.ID AS rid', 'TP.uid',
+         SQLP_FROM,
+            'TournamentParticipant AS TP',
+         SQLP_WHERE,
+            "TP.tid=$tid",
+            "TP.Status='".TP_STATUS_REGISTER."'",
+            "TP.NextRound=$round"
+         );
+
       if( $seed_order == TOURNEY_SEEDORDER_CURRENT_RATING )
       {
          $qsql->add_part( SQLP_FROM,  'INNER JOIN Players AS TPP ON TPP.ID=TP.uid' );
@@ -517,7 +597,7 @@ class TournamentParticipant
          $qsql->add_part( SQLP_ORDER, 'TP.Rating DESC' );
 
       // load all registered TPs (optimized = no TournamentParticipant-objects)
-      $result = db_query( "TournamentParticipant:load_registered_users_ordered.find_TPs($tid,$seed_order)",
+      $result = db_query( "TournamentParticipant:load_registered_users_in_seedorder.find_TPs($tid,$seed_order)",
          $qsql->get_select() );
       $arr_TPs = array();
       while( $row = mysql_fetch_array($result) )
@@ -528,7 +608,7 @@ class TournamentParticipant
          shuffle( $arr_TPs );
 
       return $arr_TPs;
-   }//load_registered_users_ordered
+   }//load_registered_users_in_seedorder
 
    /*! \brief Returns false, if there is at least one TP, that does not have a user-rating. */
    public static function check_rated_tournament_participants( $tid )
@@ -566,7 +646,7 @@ class TournamentParticipant
    {
       if( $old_tp_status != TP_STATUS_REGISTER && $new_tp_status == TP_STATUS_REGISTER )
          Tournament::update_tournament_registeredTP( $tid, 1 );
-      elseif( $old_tp_status == TP_STATUS_REGISTER && $new_tp_status != $old_tp_status )
+      elseif( $old_tp_status == TP_STATUS_REGISTER && $new_tp_status != TP_STATUS_REGISTER )
          Tournament::update_tournament_registeredTP( $tid, -1 );
    }
 

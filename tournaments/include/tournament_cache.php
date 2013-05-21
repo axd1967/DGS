@@ -316,6 +316,7 @@ class TournamentCache
     * \brief Returns non-null array with count of TournamentParticipants for given tournament and TP-status.
     * \note if caching is activated, all stati are returned even if $status != null
     */
+   //TODO TODO obsolete !?
    public static function count_cache_tournament_participants( $tid, $status=null )
    {
       $tid = (int)$tid;

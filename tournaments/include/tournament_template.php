@@ -109,13 +109,21 @@ abstract class TournamentTemplate
    /*! \brief Returns inserted Tournament.ID if successful; 0 otherwise. */
    abstract public function createTournament();
 
-   /*! \brief Returns calculated min-participants required for specific tournament-type. */
-   public function calcTournamentMinParticipants( $tprops, $tround=null )
+   /*!
+    * \brief Returns calculated min-participants required for specific tournament-type.
+    * \param $tround TournamentRound, can be null
+    */
+   public function calcTournamentMinParticipants( $tprops, $tround )
    {
       return $tprops->MinParticipants;
    }
 
-   /*! \brief Returns list with errors from checking tournament-type-specific properties for specific target-tourney-status; empty if ok. */
+   /*!
+    * \brief Returns list with errors from checking tournament-type-specific properties for specific target-tourney-status; empty if ok.
+    * \note Used on tournament-status and tournament-round-status changes.
+    *
+    * \note IMPORTANT NOTE: implementation should decide, if it is allowed to have TPs with APPLY/INVITE-status!
+    */
    abstract public function checkProperties( $tourney, $t_status );
 
    /*! \brief Returns list with errors from checking pooling for tournament; empty if ok. */

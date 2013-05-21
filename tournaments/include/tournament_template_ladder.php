@@ -115,6 +115,8 @@ abstract class TournamentTemplateLadder extends TournamentTemplate
          $errors = $tl_props->check_properties();
       }
 
+      // IMPORTANT NOTE for $t_status == PAIR: TPs on APPLY/INVITE-status are allowed!
+
       return $errors;
    }//checkProperties
 

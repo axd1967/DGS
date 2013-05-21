@@ -108,6 +108,11 @@ class TournamentProperties
       $this->UserMaxRating = (int) TournamentUtils::normalizeRating( $rating );
    }
 
+   public function getMaxParticipants( $real_val=false )
+   {
+      return ( $real_val || $this->MaxParticipants > 0 ) ? $this->MaxParticipants : TP_MAX_COUNT;
+   }
+
    public function to_string()
    {
       return print_r( $this, true );
@@ -185,21 +190,26 @@ class TournamentProperties
    /*!
     * \brief Checks potential registration by given user and returns non-null
     *        list of errors and warnings with matching criteria, that disallow registration.
-    * \param $tourney Tournament with set TP_Counts (loaded if not set)
-    * \param $tp_has_rating true if customized-rating set for tourney
+    * \param $tourney Tournament-object
+    * \param $tp TournamentParticipant-object to check: $tp->ID =0 for new-user; $tp->StartRound set;
+    *        $tp->Rating set if customized-rating wanted for tourney
     * \param $check_user User-object or user-id
-    * \param $check_type TCHKTYPE_TD|USER_NEW|USER_EDIT
-    * \note warnings only issued for set director_check
+    * \param $check_type TCHKTYPE_USER_NEW | TCHKTYPE_USER_EDIT | TCHKTYPE_TD describing use-case/scope for checks
+    * \return arr( reg-error-array, reg-warning-error )
+    * \note some checks are reported as warnings, because T-directors can ignore some checks while a
+    *       new-user-registration (TCHKTYPE_USER_NEW) returns also the warnings as errors.
     */
-   public function checkUserRegistration( $tourney, $tp_has_rating, $check_user, $check_type )
+   public function checkUserRegistration( $tourney, $tp, $check_user, $check_type )
    {
+      $is_new_tp = ( $tp->ID == 0 ); // >0 = edit-existing-TP
+
       $errors = array();
-      if( $check_type == TCHKTYPE_USER_NEW )
+      if( $is_new_tp )
          $warnings =& $errors;
       else
          $warnings = array();
 
-      if( $check_type == TCHKTYPE_USER_NEW && $tourney->Scope == TOURNEY_SCOPE_PRIVATE )
+      if( $is_new_tp && $check_type == TCHKTYPE_USER_NEW && $tourney->Scope == TOURNEY_SCOPE_PRIVATE )
          $errors[] = T_('This is a private tournament, so you must be invited to participate.');
 
       // limit register end-time
@@ -208,16 +218,14 @@ class TournamentProperties
          $warnings[] = sprintf( T_('Registration phase ended on [%s].#tourney'), formatDate($this->RegisterEndTime) );
 
       // limit participants
-      if( $this->MaxParticipants > 0 )
-      {
-         if( is_null($tourney->TP_Counts) ) //TODO check for TP.StartRound=1 !?
-            $tourney->setTP_Counts(
-               TournamentCache::count_cache_tournament_participants($this->tid, TP_STATUS_REGISTER) );
-
-         if( (int)@$tourney->TP_Counts[TPCOUNT_STATUS_ALL] >= $this->MaxParticipants )
-            $warnings[] = sprintf( T_('Tournament max. participant limit (%s users) is reached.'),
-                                   $this->MaxParticipants );
-      }
+      $maxTP = $this->getMaxParticipants();
+      $round_max_tps = ( $tp->StartRound > 1 ) ? round( $maxTP / pow(2, $tp->StartRound - 1) ) : $maxTP;
+      $tp_count = TournamentParticipant::count_TPs( $this->tid, /*TP-stat-ALL*/null, $tp->StartRound, /*NextR*/false ); //TODO TODO must cache this!! ... or store locally or helper
+      if( $is_new_tp )
+         ++$tp_count;
+      if( $tp_count > $round_max_tps )
+         $errors[] = sprintf( T_('Tournament max. participant limit (%s users) for Start-Round %s is reached.'),
+            $round_max_tps, $tp->StartRound );
 
       // ----- user-specific checks -----
 
@@ -232,7 +240,7 @@ class TournamentProperties
       }
       elseif( $this->RatingUseMode == TPROP_RUMODE_COPY_CUSTOM )
       {
-         if( !$tp_has_rating && !$user->hasRating() )
+         if( !$tp->hasRating() && !$user->hasRating() )
             $errors[] = T_('User needs valid Dragon rating or customized rating, which is required by tournament rating mode.#tourney');
       }
 
@@ -265,7 +273,7 @@ class TournamentProperties
                $this->UserMinGamesRated, $user->GamesRated );
       }
 
-      return ($check_type == TCHKTYPE_USER_NEW)
+      return ( $is_new_tp )
          ? array( $errors, array() )
          : array( $errors, $warnings );
    }//checkUserRegistration

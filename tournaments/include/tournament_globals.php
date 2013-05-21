@@ -120,7 +120,7 @@ define('TP_FLAGS_ACK_INVITE',    0x0002); // invite by TD approved by user
 define('TP_FLAGS_ACK_APPLY',     0x0004); // user-application approved by TD
 define('TP_FLAGS_VIOLATE',       0x0008); // user-registration violates T-restrictions
 
-define('TP_MAX_COUNT', 32767);
+define('TP_MAX_COUNT', 32000); //actually 32767 is max limit of signed int from DB-table, but 32K makes a rounder number
 
 // ---------- Tournament Games Stuff ------------------------------
 
@@ -196,7 +196,7 @@ define('CHECK_TROUND_STATUS', 'INIT|POOL|PAIR|PLAY|DONE');
 
 // tournament-round limits
 define('TROUND_MAX_COUNT', 255);
-define('TROUND_MAX_POOLSIZE', 25);
+define('TROUND_MAX_POOLSIZE', 25); // must be < 100 (see TPOOLRK_NO_RANK)
 define('TROUND_MAX_POOLCOUNT', 1000);
 
 define('TROUND_SLICE_ROUND_ROBIN', 1);

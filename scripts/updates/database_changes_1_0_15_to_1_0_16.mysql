@@ -60,3 +60,8 @@ ALTER TABLE TournamentRound
    ADD PoolWinnerRanks tinyint unsigned NOT NULL DEFAULT '0' AFTER MaxPoolCount ;
 
 
+-- added index for checking tournament-participant-registrations
+ALTER TABLE TournamentParticipant
+   ADD INDEX tidStartRound (tid,StartRound) ;
+
+

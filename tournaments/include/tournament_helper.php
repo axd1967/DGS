@@ -257,13 +257,17 @@ class TournamentHelper
     * \note IMPORTANT NOTE: caller needs to open TA with HOT-section!!
     * \note to make flushing work, PAGEFLAG_IMPLICIT_FLUSH is required on using page!
     *
-    * \return arr( number of started games, expected number of games) or NULL on lock-error.
+    * \return NULL on lock-error,
+    *       or error-text on severe consistency-error (which also prohibits game-pairing till it's fixed by keeping
+    *             existing tournament-extension-entry),
+    *       or on success: arr( number of started games, expected number of games)
     */
    public static function start_tournament_round_games( $tourney, $tround )
    {
       global $NOW;
       $tid = $tourney->ID;
       $round = $tround->Round;
+      $dbgmsg = "TournamentHelper:start_tournament_round_games($tid,$round)";
 
       // lock T-ext
       $t_ext = new TournamentExtension( $tid, TE_PROP_TROUND_START_TGAMES, 0, $NOW );
@@ -271,16 +275,16 @@ class TournamentHelper
          return null;
 
       // read T-rule
-      $trules = TournamentCache::load_cache_tournament_rules( 'TournamentHelper:start_tournament_round_games', $tid );
+      $trules = TournamentCache::load_cache_tournament_rules( $dbgmsg, $tid );
       $trules->TourneyType = $tourney->Type;
       $games_per_challenge = self::determine_games_per_challenge( $tid, $trules );
 
       // read T-props
-      $tprops = TournamentCache::load_cache_tournament_properties( 'TournamentHelper:start_tournament_round_games', $tid );
+      $tprops = TournamentCache::load_cache_tournament_properties( $dbgmsg, $tid );
 
       // read T-games: read all existing TGames to check if creation has been partly done
       $check_tgames = array(); // uid.uid => game-count
-      $tg_iterator = new ListIterator( "TournamentHelper:start_tournament_round_games.find_tgames($tid,$round)" );
+      $tg_iterator = new ListIterator( "$dbgmsg.find_tgames" );
       $tg_iterator = TournamentGames::load_tournament_games( $tg_iterator, $tid, $tround->ID );
       while( list(,$arr_item) = $tg_iterator->getListIterator() )
       {
@@ -298,14 +302,17 @@ class TournamentHelper
       foreach( $check_tgames as $fkey => $cnt )
       {
          if( $cnt != $games_per_challenge )
-            error('bad_tournament', "TournamentHelper:start_tournament_round_games.check_gper_chall($tid,[$fkey])");
+         {
+            return sprintf( T_('Inconsistency found: for tournament #%s in round %s there is a mismatch of games per challenge (%s) for user-pair [%s].'),
+               $tid, $round, "$games_per_challenge <-> $cnt", $fkey );
+         }
       }
 
       // read all pools with all users and TPs (if needed for T-rating), need TP_ID for TG.*_rid
       $load_opts_tpool = TPOOL_LOADOPT_TP_ID | TPOOL_LOADOPT_USER | TPOOL_LOADOPT_ONLY_RATING | TPOOL_LOADOPT_UROW_RATING;
       if( $tprops->RatingUseMode != TPROP_RUMODE_CURR_FIX )
          $load_opts_tpool |= TPOOL_LOADOPT_TRATING;
-      $tpool_iterator = new ListIterator( "TournamentHelper:start_tournament_round_games.load_pools($tid,$round)" );
+      $tpool_iterator = new ListIterator( "$dbgmsg.load_pools" );
       $tpool_iterator->addIndex( 'uid' );
       $tpool_iterator = TournamentPool::load_tournament_pools( $tpool_iterator, $tid, $round, 0, $load_opts_tpool );
 
@@ -320,6 +327,12 @@ class TournamentHelper
       $cnt_pools = count($arr_poolusers);
       foreach( $arr_poolusers as $pool => $arr_users )
       {
+         if( $pool == 0 )
+         {
+            return sprintf( T_('Inconsistency found: there are %s unassigned pool-users for tournament #%s in round %s.'),
+               count($arr_users), $tid, $round );
+         }
+
          echo "<br>\n<li>", sprintf( T_('Pool %s of %s'), $pool, $cnt_pools ), ":<br>\n";
 
          $count_game_curr = $count_games;
@@ -493,6 +506,7 @@ class TournamentHelper
       return TournamentExtension::load_tournament_extensions( $iterator );
    }//load_ladder_rank_period_update
 
+
    /*! \brief Adds new tournament-round and updates Tournament.Rounds, returning new TournamentRound-object. */
    public static function add_new_tournament_round( $tourney, &$errors, $check_only )
    {
@@ -530,6 +544,12 @@ class TournamentHelper
          $errors[] = T_('There must be at least one tournament round.');
       if( $tround->Round != $tourney->Rounds )
          $errors[] = sprintf( T_('You can only remove the last tournament round #%s.'), $tourney->Rounds );
+
+      $tp_count = TournamentParticipant::count_TPs( $tourney->ID, /*all-stat*/null, $tround->Round, /*NextR*/true );
+      if( $tp_count > 0 )
+         $errors[] = sprintf( T_('There are %s tournament participants registered to play in round %s.'),
+            $tp_count, $tround->Round );
+
       if( count($errors) || $check_only )
          return false;
 
@@ -551,9 +571,8 @@ class TournamentHelper
          $tourney->ID, $tourney->CurrentRound );
 
       $errors = array();
-      if( !TournamentRound::authorise_set_tround($tourney->Status) )
-         $errors[] = sprintf( T_('Setting current tournament round is only allowed on tournament status %s.'),
-            Tournament::getStatusText(TOURNEY_STATUS_PAIR) );
+      if( $errmsg = TournamentRound::authorise_set_tround($tourney->Status) )
+         $errors[] = $errmsg;
       if( $new_round < 1 || $new_round > $tourney->Rounds )
          $errors[] = sprintf( T_('Selected tournament round must be an existing round in range %s.'),
             build_range_text(1, $tourney->Rounds) );
@@ -565,6 +584,10 @@ class TournamentHelper
       if( $tround->Status == TROUND_STATUS_DONE && $new_round != $tround->Round + 1 )
          $errors[] = sprintf( T_('You are only allowed to switch to the next tournament round %s.'),
             $tround->Round + 1 );
+
+      //TODO TODO set-T-rnd: automatically check + do switch T-status back to PLAY->PAIR !? YES ... if so, have to do the same checks as in REG->PAIR T-status-change !? ;; perhaps better to put this into separate use-case "switch to next-round" => check if TStatus->check_status_change() can be used here (may need CurrRound already changed)
+      //TODO TODO set-T-rnd: do: set TP.NextRound for all pool-winners -> not here, but separately (only doing checks here): checked HERE, but not filled (but in edit_ranks-page -> add check there as well with warnings if TPool.Rank > PoolWinnersRank)
+
       if( count($errors) || $check_only )
          return false;
 

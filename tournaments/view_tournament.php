@@ -65,10 +65,7 @@ $GLOBALS['ThePage'] = new Page('Tournament');
    $show_tresult = TournamentResult::show_tournament_result( $tourney->Status );
 
    // TP-count
-   $tp_counts = TournamentCache::count_cache_tournament_participants($tid);
-   $tourney->setTP_Counts($tp_counts);
-   $tp_count_all = (int)@$tp_counts[TPCOUNT_STATUS_ALL];
-   unset($tp_counts[TPCOUNT_STATUS_ALL]);
+   $tp_all_counts = TournamentParticipant::count_all_TPs($tid); //TODO TODO cache it
 
    $my_tp = TournamentCache::load_cache_tournament_participant( 'Tournament.view_tournament', $tid, $my_id );
    $reg_user_status = ( $my_tp ) ? $my_tp->Status : false;
@@ -89,7 +86,7 @@ $GLOBALS['ThePage'] = new Page('Tournament');
          $tid, $tprops->need_rating_copy(), $cnt_tstandings );
       $tl_rank = TournamentLadder::determine_ladder_rank( $tl_iterator, $my_id );
       $tt_user_state = ( $tl_rank > 0 )
-         ? sprintf( T_('Your current ladder rank is #%s out of %s.'), $tl_rank, (int)@$tp_counts[TP_STATUS_REGISTER] )
+         ? sprintf( T_('Your current ladder rank is #%s out of %s.'), $tl_rank, (int)@$tp_all_counts[1][TP_STATUS_REGISTER] )
          : NO_VALUE;
    }
    elseif( $tourney->Type == TOURNEY_TYPE_ROUND_ROBIN )
@@ -136,7 +133,7 @@ $GLOBALS['ThePage'] = new Page('Tournament');
             ? "\n<li>" . anchor( "$base_page_tourney#standings", T_('Tournament Standings') )
             : ''),
          "\n<li>", anchor( "$base_page_tourney#rules", T_('Tournament Rules') ),
-         "\n<li>", anchor( "$base_page_tourney#registration", T_('Tournament Registration Information') ),
+         "\n<li>", anchor( "$base_page_tourney#registration", T_('Tournament Registration') ),
          "\n<li>", anchor( "$base_page_tourney#games", T_('Tournament Games') ),
          ( $show_tresult
             ? "\n<li>" . anchor( "$base_page_tourney#result", T_('Tournament Results') )
@@ -243,17 +240,9 @@ $GLOBALS['ThePage'] = new Page('Tournament');
 
    echo_tournament_registration( $tprops );
 
-   // number of registered users
-   echo sprintf( T_('Registrations for this tournament: %s user(s)'), $tp_count_all ),
-      "<br>\n<ul>";
-   //TODO(RR) show also count of users for round > 1 !?
-   foreach( $tp_counts as $t_status => $cnt )
-   {
-      echo "  <li>",
-         sprintf( T_('%3d users on status [%s]#tourney'), $cnt, TournamentParticipant::getStatusText($t_status) ),
-         "\n";
-   }
-   echo "</ul>\n";
+   // number of registered users for all rounds and TP-stati
+   $table = make_table_tournament_participant_counts( $page, $tourney, $tp_all_counts, $ttype->need_rounds );
+   echo T_('Registrations for this tournament'), ":<br>\n", $table->make_table(), "<br>\n";
 
    // ------------- Section Menu
 
@@ -432,4 +421,60 @@ function echo_tournament_registration( $tprops )
    if( $tprops->Notes != '' )
       echo make_html_safe($tprops->Notes, true), "<br><br>\n";
 }//echo_tournament_registration
+
+/*!
+ * \brief make table with counts of tournament-participants for all rounds and TP-stati.
+ * \param $arr_tp_cnt =[ round => [ TP_STATUS_... => cnt, ... ] ]
+ * \param $show_single_round false = do not include round-1-row if only one round but only show summary-line
+ */
+function make_table_tournament_participant_counts( $page, $tourney, $arr_tp_cnt, $show_single_round )
+{
+   static $ARR_TP_STATUS = array( TP_STATUS_REGISTER, TP_STATUS_INVITE, TP_STATUS_APPLY );
+
+   $table = new Table( 'TPCountSummary', $page, null, 'tpcs',
+      TABLE_NO_SORT|TABLE_NO_HIDE|TABLE_NO_PAGE|TABLE_NO_SIZE );
+
+   // add_tablehead($nr, $descr, $attbs=null, $mode=TABLE_NO_HIDE|TABLE_NO_SORT, $sortx='')
+   $table->add_tablehead( 1, T_('Status#header').':', 'BoldC' );
+   $col = 2;
+   $arr_rndcnt = array();
+   foreach( $ARR_TP_STATUS as $tp_status )
+   {
+      $table->add_tablehead( $col++, TournamentParticipant::getStatusText($tp_status), 'NumberC' );
+      $arr_rndcnt[$tp_status] = 0;
+   }
+   $table->add_tablehead( $col, T_('Sum#header'), 'NumberC' );
+
+   // fill rounds
+   $sum_all = 0;
+   $has_only_one_round = ( count($arr_tp_cnt) == 1 );
+   foreach( $arr_tp_cnt as $round => $arr )
+   {
+      $row_arr = array( 1 => sprintf( T_('Round %s#header'), $round ) );
+      $col = 2;
+      $round_sum = 0;
+      foreach( $ARR_TP_STATUS as $tp_status )
+      {
+         $row_arr[$col++] = @$arr[$tp_status]; // empty if not set
+         $cnt = (int)@$arr[$tp_status];
+         $round_sum += $cnt;
+         $sum_all += $cnt;
+         $arr_rndcnt[$tp_status] += $cnt;
+      }
+      $row_arr[$col++] = $round_sum;
+      if( !$has_only_one_round || $show_single_round )
+         $table->add_row( $row_arr );
+   }
+
+   // summary row
+   $row_arr = array( 1 => T_('Sum#header'), 'extra_class' => 'Sum' );
+   $col = 2;
+   foreach( $ARR_TP_STATUS as $tp_status )
+      $row_arr[$col++] = $arr_rndcnt[$tp_status];
+   $row_arr[$col++] = $sum_all;
+   $table->add_row( $row_arr );
+
+   return $table;
+}//make_table_tournament_participant_counts
+
 ?>

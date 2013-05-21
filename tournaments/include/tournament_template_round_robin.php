@@ -26,6 +26,7 @@ require_once 'tournaments/include/tournament_template.php';
 
 require_once 'tournaments/include/tournament_cache.php';
 require_once 'tournaments/include/tournament_games.php';
+require_once 'tournaments/include/tournament_participant.php';
 require_once 'tournaments/include/tournament_pool.php';
 require_once 'tournaments/include/tournament_pool_classes.php';
 require_once 'tournaments/include/tournament_properties.php';
@@ -103,22 +104,42 @@ abstract class TournamentTemplateRoundRobin extends TournamentTemplate
       return $tid;
    }//_createTournament
 
-   public function calcTournamentMinParticipants( $tprops, $tround=null )
+   public function calcTournamentMinParticipants( $tprops, $tround )
    {
-      return max( $tprops->MinParticipants, $tround->MinPoolSize );
+      if( is_null($tround) )
+         return 2;
+      elseif( $tround->Round > 1 )
+         return $tround->MinPoolSize;
+      else
+         return max( $tprops->MinParticipants, $tround->MinPoolSize );
    }
 
+   // NOTE: called on changes of T-status and T-round-status
+   // \param $t_status target T-status TOURNEY_STATUS_...
    public function checkProperties( $tourney, $t_status )
    {
       $tid = $tourney->ID;
-      $round = $tourney->CurrentRound;
+      $curr_round = $tourney->CurrentRound;
       $errors = array();
 
-      $tround = TournamentCache::load_cache_tournament_round( 'TournamentTemplateRoundRobin.checkProperties', $tid, $round );
+      $tround = TournamentCache::load_cache_tournament_round( 'TournamentTemplateRoundRobin.checkProperties',
+         $tid, $curr_round );
       if( $t_status == TOURNEY_STATUS_REGISTER || $t_status == TOURNEY_STATUS_PAIR )
          $errors = array_merge( $errors, $tround->check_properties() );
 
-      //TODO TODO check, that there are enough TPs, taking care users of with TPs.StartRound > 1
+      if( $t_status == TOURNEY_STATUS_PAIR ) // extra-checks for PAIR-status
+      {
+         // TPs on APPLY/INVITE-status are not allowed!
+         static $ARR_TPSTATUS = array( TP_STATUS_APPLY, TP_STATUS_INVITE );
+         $tp_nonreg_count = TournamentParticipant::count_TPs( $tid, $ARR_TPSTATUS, /*all-rounds*/0, /*NextR*/false );
+         if( $tp_nonreg_count > 0 )
+         {
+            $errors[] = sprintf(
+               T_('Found %s non-registered tournament participants on status [%s]: they must be either registered or being removed.'),
+               $tp_nonreg_count,
+               build_text_list( 'TournamentParticipant::getStatusText', $ARR_TPSTATUS) );
+         }
+      }
 
       return $errors;
    }//checkProperties
