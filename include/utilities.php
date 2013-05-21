@@ -353,4 +353,18 @@ function append_unique( $str, $item, $sep=',' )
    return $str;
 }
 
+/*!
+ * \brief Returns build_text_list( 'f', array( 'a', 'b' ), '|' ) == f(a) .'|'. f(b)
+ * \param $arr array( items, ...) or string-item
+ */
+function build_text_list( $funcname, $arr, $sep=',' )
+{
+   $out = array();
+   if( !is_array($arr) )
+      $arr = array( $arr );
+   foreach( $arr as $item )
+      $out[] = call_user_func( $funcname, $item );
+   return implode($sep, $out);
+}
+
 ?>
