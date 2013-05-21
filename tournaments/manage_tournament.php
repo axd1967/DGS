@@ -95,7 +95,7 @@ $GLOBALS['ThePage'] = new Page('TournamentManage');
             'DESCRIPTION', T_('Lock Note'),
             'TEXT',        make_html_safe($tourney->LockNote, true), ));
    $tform->add_row( array(
-         'DESCRIPTION', T_('Status#tourney'),
+         'DESCRIPTION', T_('Tournament Status'),
          'TEXT', $tourney->getStatusText($tourney->Status) . SEP_SPACING .
                  make_menu_link( T_('Change Status'),
                      array( 'url' => "tournaments/edit_status.php?tid=$tid", 'class' => 'TAdmin' )) ));
