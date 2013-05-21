@@ -433,7 +433,7 @@ General instructions for developers:
    The 'and' and '&&' does not have the same precedence facing
    the assignment operator(s) and the '?:' operator.
 
-      $res = true and false;  <=>  $res = true) and (false);
+      $res = true and false;  <=>  ($res = true) and (false);
 
    so $res results in true (not in false as you might have expected).
 
