@@ -107,16 +107,26 @@ $TheErrors->set_mode(ERROR_MODE_PRINT);
       $ctable->add_tablehead(3, T_('Player') );
    $ctable->add_tablehead(2, T_('Comments'), 'Comment');
 
-   $cnt_comments = 0;
+   $cnt_comments = $mpg_user = 0;
    foreach( $arr_moves as $row )
    {
       $move_nr = (int)$row['MoveNr'];
       $Text = @$arr_movemsg[$move_nr];
 
+      if( $is_mp_game )
+      {
+         list( $group_color, $group_order, $move_color ) =
+            MultiPlayerGame::calc_game_player_for_move( $game_players, $move_nr, $handicap, -1 );
+         $mpg_user = GamePlayer::get_user_info( $arr_users, $group_color, $group_order );
+
+         $move_html_mode = ( $my_id == @$mpg_user['uid'] ) ? 'gameh' : $html_mode;
+      }
+      else
+         $move_html_mode = ( $row['Stone'] == $my_color ) ? 'gameh' : $html_mode;
       if( !$my_game && !$my_mpgame )
          $Text = game_tag_filter( $Text);
-      $Text = trim(make_html_safe( $Text, $row['Stone']==$my_color ? 'gameh' : $html_mode));
-      if( empty($Text) )
+      $Text = trim( make_html_safe($Text, $move_html_mode) );
+      if( (string)$Text == '' )
          continue;
       if( $style_str )
          $Text = MarkupHandlerGoban::replace_igoban_tags( $Text );
@@ -131,14 +141,8 @@ $TheErrors->set_mode(ERROR_MODE_PRINT);
       $crow_strings = array();
       $crow_strings[1] = "$move_nr&nbsp;$colortxt";
       $crow_strings[2] = $Text;
-      if( $is_mp_game )
-      {
-         list( $group_color, $group_order, $move_color ) =
-            MultiPlayerGame::calc_game_player_for_move( $game_players, $move_nr, $handicap, -1 );
-         $mpg_user = GamePlayer::get_user_info( $arr_users, $group_color, $group_order );
-         if( is_array($mpg_user) )
-            $crow_strings[3] = user_reference( REF_LINK, 1, '', $mpg_user['uid'], $mpg_user['Handle'], '' );
-      }
+      if( $is_mp_game && is_array($mpg_user) )
+         $crow_strings[3] = user_reference( REF_LINK, 1, '', $mpg_user['uid'], $mpg_user['Handle'], '' );
 
       $ctable->add_row( $crow_strings );
    }
