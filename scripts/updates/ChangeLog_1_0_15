@@ -15,10 +15,16 @@ Release [2012-06-08] - DGS 1.0.15 - CVS-tag [release-1_0_15-20120608] on branch 
 2013-04-10: bug fixes update (by JUG) as DGS 1.0.15.g
 2013-04-16: changes update (by JUG) as DGS 1.0.15.h
 2013-04-19: bug fix update (by JUG) as DGS 1.0.15.i
+2013-05-26: bug fix (by JUG) as DGS 1.0.15.j
 
 ==================================================================
 
 ### ----- release-1_0_15-20120608 -----
+
+2013-05-26 juga
+
+   * game_comments.php:
+   - bugfix: show hidden game-comments in multi-player-games only for comment-author
 
 2013-04-19 juga
 
