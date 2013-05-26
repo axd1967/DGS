@@ -32,11 +32,11 @@ require_once 'include/game_functions.php';
    set_time_limit(0); // don't want script-break during "transaction" with multi-db-queries or for large-datasets
 
    $logged_in = who_is_logged( $player_row);
-   if( !$logged_in )
+   if ( !$logged_in )
       error('login_if_not_logged_in', 'scripts.game_consistency');
-   if( $player_row['ID'] <= GUESTS_ID_MAX )
+   if ( $player_row['ID'] <= GUESTS_ID_MAX )
       error('not_allowed_for_guest', 'scripts.game_consistency');
-   if( !(@$player_row['admin_level'] & ADMIN_DATABASE) )
+   if ( !(@$player_row['admin_level'] & ADMIN_DATABASE) )
       error('adminlevel_too_low', 'scripts.game_consistency');
 
 
@@ -47,9 +47,9 @@ require_once 'include/game_functions.php';
    // or '12,27' meaning from game=12 to game=27
    @list( $gid1, $gid2) = explode( ',', @$_REQUEST['gid']);
    $gid1= (int)$gid1; $gid2= (int)$gid2;
-   if( $gid1 > 0 )
+   if ( $gid1 > 0 )
    {
-      if( $gid2 > 0 )
+      if ( $gid2 > 0 )
       {
          $page_args['gid'] = $gid1.','.$gid2;
          $where = " AND (Games.ID>=$gid1 AND Games.ID<=$gid2)";
@@ -64,7 +64,7 @@ require_once 'include/game_functions.php';
       $where = "";
 
    //limit could be '10' or '55,10'
-   if( ($lim=@$_REQUEST['limit']) > '' )
+   if ( ($lim=@$_REQUEST['limit']) > '' )
    {
       $page_args['limit'] = $lim;
       $limit = " LIMIT $lim";
@@ -73,7 +73,7 @@ require_once 'include/game_functions.php';
       $limit = "";
 
    //since could be "2 DAY", "12 MONTH", ...
-   if( ($since=@$_REQUEST['since']) > '' )
+   if ( ($since=@$_REQUEST['since']) > '' )
    {
       $page_args['since'] = $since;
       $where.= " AND DATE_ADD(Games.Lastchanged,INTERVAL $since) > FROM_UNIXTIME($NOW)";
@@ -83,10 +83,10 @@ require_once 'include/game_functions.php';
 
 //echo ">>>> One shot fix. Do not run it again."; end_html(); exit;
 echo ">>>> Most of them needs manual fixes.";
-   if( $do_it=@$_REQUEST['do_it'] )
+   if ( $do_it=@$_REQUEST['do_it'] )
    {
       function dbg_query($s) {
-        if( !mysql_query( $s) )
+        if ( !mysql_query( $s) )
            die("<BR>$s;<BR>" . mysql_error() );
         echo " --- fixed. ";
       }
@@ -108,11 +108,11 @@ echo ">>>> Most of them needs manual fixes.";
 //---------
    echo "\n<hr>check_consistency() on all running and finished games.\n";
 
-   if( $do_it )
+   if ( $do_it )
    {
       echo "<br> >>> CAN'T BE FIXED\n";
    }
-   else if( 1 ) //long... could be skipped to check the others
+   else if ( 1 ) //long... could be skipped to check the others
    {
       $query = "SELECT ID"
          . " FROM Games WHERE Status ".not_in_clause( $ENUM_GAMES_STATUS, GAME_STATUS_KOMI, GAME_STATUS_SETUP, GAME_STATUS_INVITED )
@@ -125,12 +125,12 @@ echo ">>>> Most of them needs manual fixes.";
       $n= (int)@mysql_num_rows($result);
       echo "\n<br>=&gt; result: $n rows\n";
 
-      if( $n > 0 )
-      while( $row = mysql_fetch_assoc( $result ) )
+      if ( $n > 0 )
+      while ( $row = mysql_fetch_assoc( $result ) )
       {
          //echo ' ' . $row['ID'];
          $gid = $row['ID'];
-         if( ($err=check_consistency($gid)) )
+         if ( ($err=check_consistency($gid)) )
          {
             echo "<br>Game $gid: "
                . str_replace("\n","<br>\n&nbsp;- ",trim($err))."\n";
@@ -158,10 +158,10 @@ echo ">>>> Most of them needs manual fixes.";
    $n= (int)@mysql_num_rows($result);
    echo "\n<br>=&gt; result: $n rows\n";
 
-   if( $n > 0 )
-   while( $row = mysql_fetch_assoc( $result ) )
+   if ( $n > 0 )
+   while ( $row = mysql_fetch_assoc( $result ) )
    {
-      if( $do_it )
+      if ( $do_it )
       {
          echo "<br> >>> CAN'T BE FIXED\n";
          break;
@@ -190,8 +190,8 @@ echo ">>>> Most of them needs manual fixes.";
    $n= (int)@mysql_num_rows($result);
    echo "\n<br>=&gt; result: $n rows\n";
 
-   if( $n > 0 )
-   while( $row = mysql_fetch_assoc( $result ) )
+   if ( $n > 0 )
+   while ( $row = mysql_fetch_assoc( $result ) )
    {
       $GID= $row['ID'];
       $date= $row['Starttime'];
@@ -222,10 +222,10 @@ echo ">>>> Most of them needs manual fixes.";
    $n= (int)@mysql_num_rows($result);
    echo "\n<br>=&gt; result: $n rows\n";
 
-   if( $n > 0 )
-   while( $row = mysql_fetch_assoc( $result ) )
+   if ( $n > 0 )
+   while ( $row = mysql_fetch_assoc( $result ) )
    {
-      if( $do_it )
+      if ( $do_it )
       {
          echo "<br> >>> CAN'T BE FIXED\n";
          break;
@@ -251,19 +251,19 @@ echo ">>>> Most of them needs manual fixes.";
    $n= (int)@mysql_num_rows($result);
    echo "\n<br>=&gt; result: $n rows\n";
 
-   if( $n > 0 )
-   while( $row = mysql_fetch_assoc( $result ) )
+   if ( $n > 0 )
+   while ( $row = mysql_fetch_assoc( $result ) )
    {
       $gid = $row['gid'];
       $missgame_gid = $row['X_MissGame'];
       $status = $row['Status'];
 
       $errmsg = '';
-      if( $missgame_gid == 0 )
+      if ( $missgame_gid == 0 )
          $errmsg = "Found GamesPriority without Games-entry -> removing";
-      elseif( !isStartedGame($status) )
+      elseif ( !isStartedGame($status) )
          $errmsg = "Found GamesPriority in non-started Games-status -> removing";
-      if( $errmsg )
+      if ( $errmsg )
       {
          echo "<br>Game $gid: $errmsg\n";
          dbg_query("DELETE FROM GamesPriority WHERE gid=$gid");
@@ -283,9 +283,9 @@ function check_consistency( $gid)
 
    //echo "Game $gid: ";
    $result = mysql_query("SELECT * FROM Games WHERE ID=$gid");
-   if( @mysql_num_rows($result) != 1 )
+   if ( @mysql_num_rows($result) != 1 )
    {
-      if( $result )
+      if ( $result )
          mysql_free_result($result);
       return "Doesn't exist?";
    }
@@ -300,7 +300,7 @@ function check_consistency( $gid)
    $games_Last_X = $Last_X;
    $games_Last_Y = $Last_Y;
 {//to fix the old way Ko detect. Could be removed when no more old way games.
-  if( !@$Last_Move ) $Last_Move= number2sgf_coords($Last_X, $Last_Y, $Size);
+  if ( !@$Last_Move ) $Last_Move= number2sgf_coords($Last_X, $Last_Y, $Size);
 }
    $games_Last_Move = $Last_Move;
    $games_Flags = ( $Flags ? GAMEFLAGS_KO : 0 );
@@ -314,47 +314,47 @@ function check_consistency( $gid)
    $Black_Prisoners = $White_Prisoners = $nr_prisoners = 0;
    $moves_Black_Prisoners = $moves_White_Prisoners = 0;
    $ID = 0;
-   while( $row = mysql_fetch_assoc($result) )
+   while ( $row = mysql_fetch_assoc($result) )
    {
-      if( !isset($row['ID']) )
+      if ( !isset($row['ID']) )
          return "'ID' absent after ID=$ID!";
       $ID = $row['ID'];
-      if( !isset($row['MoveNr']) )
+      if ( !isset($row['MoveNr']) )
          return "'MoveNr' absent at ID=$ID!";
       $MoveNr = $row['MoveNr'];
-      if( !isset($row['Stone']) )
+      if ( !isset($row['Stone']) )
          return "'Stone' absent at ID=$ID!";
       $Stone = $row['Stone'];
-      if( !isset($row['PosX']) )
+      if ( !isset($row['PosX']) )
          return "'PosX' absent at ID=$ID!";
       $PosX = $row['PosX'];
-      if( !isset($row['PosY']) )
+      if ( !isset($row['PosY']) )
          return "'PosY' absent at ID=$ID!";
       $PosY = $row['PosY'];
-      if( !isset($row['Hours']) )
+      if ( !isset($row['Hours']) )
          return "'Hours' absent at ID=$ID!";
       $Hours = $row['Hours'];
 
-      if( !($Stone == WHITE || $Stone == BLACK ) || $PosX<0 )
+      if ( !($Stone == WHITE || $Stone == BLACK ) || $PosX<0 )
       {
-         if( $PosX == POSX_ADDTIME )
+         if ( $PosX == POSX_ADDTIME )
          {
             //TODO(if SGF supports): include time-info, fields see const-def
             continue;
          }
 
-         if( $Stone == NONE )
+         if ( $Stone == NONE )
          {
             $nr_prisoners++;
          }
-         elseif( $PosX < 0 )
+         elseif ( $PosX < 0 )
          {
-            if( $move_nr != $MoveNr )
+            if ( $move_nr != $MoveNr )
             {
                return "Wrong move number in Moves table!"
                   . "\n$MoveNr should be $move_nr";
             }
-            if( $to_move != $Stone )
+            if ( $to_move != $Stone )
             {
                return "Wrong color in Moves table!"
                   . "\nMove $MoveNr should be $to_move";
@@ -364,35 +364,35 @@ function check_consistency( $gid)
             $Last_Y = $PosY;
 
             $move_nr++;
-            if( $move_nr > $Handicap )
+            if ( $move_nr > $Handicap )
                $to_move = WHITE+BLACK-$to_move;
          }
 
          continue;
       }
 
-      if( $move_nr != $MoveNr )
+      if ( $move_nr != $MoveNr )
       {
          return "Wrong move number in Moves table!"
             . "\n$MoveNr should be $move_nr";
       }
-      if( $to_move != $Stone )
+      if ( $to_move != $Stone )
       {
          return "Wrong color in Moves table!"
             . "\nMove $MoveNr should be $to_move";
       }
 
-      if( $to_move == BLACK )
+      if ( $to_move == BLACK )
          $moves_Black_Prisoners += $nr_prisoners;
       else
          $moves_White_Prisoners += $nr_prisoners;
 
       $coord = number2sgf_coords( $PosX, $PosY, $Size);
-      if( ($err = $gchkmove->check_move( $coord, $to_move, $Last_Move, $GameFlags, false)) )
+      if ( ($err = $gchkmove->check_move( $coord, $to_move, $Last_Move, $GameFlags, false)) )
          return "Problem at move $move_nr: $err";
       $gchkmove->update_prisoners( $Black_Prisoners, $White_Prisoners );
 
-      if( $gchkmove->nr_prisoners == 1 )
+      if ( $gchkmove->nr_prisoners == 1 )
          $GameFlags |= GAMEFLAGS_KO;
       else
          $GameFlags &= ~GAMEFLAGS_KO;
@@ -402,18 +402,18 @@ function check_consistency( $gid)
       $nr_prisoners = 0;
 
       $move_nr++;
-      if( $move_nr > $Handicap )
+      if ( $move_nr > $Handicap )
          $to_move = WHITE+BLACK-$to_move;
    }
    mysql_free_result($result);
 
    $move_nr--;
-   if( $Moves != $move_nr )
+   if ( $Moves != $move_nr )
    {
       return "Wrong number of moves!";
    }
 
-   if( $Black_Prisoners != $games_Black_Prisoners ||
+   if ( $Black_Prisoners != $games_Black_Prisoners ||
        $White_Prisoners != $games_White_Prisoners )
    {
       return "Wrong number of prisoners in Games table!"
@@ -421,24 +421,24 @@ function check_consistency( $gid)
          . "\nWhite: $games_White_Prisoners should be $White_Prisoners";
    }
 
-   if( $Black_Prisoners != $moves_Black_Prisoners ||
+   if ( $Black_Prisoners != $moves_Black_Prisoners ||
        $White_Prisoners != $moves_White_Prisoners )
    {
       return "Wrong number of prisoners removed!";
    }
 
-   if( isRunningGame($Status) || $Status == GAME_STATUS_INVITED )
+   if ( isRunningGame($Status) || $Status == GAME_STATUS_INVITED )
    {
       //TODO handle shape-games W-to-start
       $handinr = ($Handicap < 2 ? 1 : $Handicap );
       $black_to_move = (($Moves < $handinr) || ($Moves-$handinr)%2 == 1 );
       $to_move = ( $black_to_move ? $Black_ID : $White_ID );
-      if( $ToMove_ID!=$to_move )
+      if ( $ToMove_ID!=$to_move )
       {
          return "Wrong Player to move! Should be $to_move.";
       }
 
-      if( $games_Flags!=$GameFlags
+      if ( $games_Flags!=$GameFlags
         || ( ($GameFlags & GAMEFLAGS_KO) && $games_Last_Move!=$Last_Move ) )
       {
          return "Wrong Ko status!"
@@ -446,28 +446,28 @@ function check_consistency( $gid)
             . "\nFlags: $games_Flags should be $GameFlags";
       }
 
-      if(  !($ClockUsed>=0 && $ClockUsed<24)
+      if (  !($ClockUsed>=0 && $ClockUsed<24)
         && !($ClockUsed>=0+WEEKEND_CLOCK_OFFSET && $ClockUsed<24+WEEKEND_CLOCK_OFFSET)
         && !($ClockUsed==VACATION_CLOCK || $ClockUsed==VACATION_CLOCK+WEEKEND_CLOCK_OFFSET) )
       {
          return "Wrong ClockUsed! Can't be $ClockUsed.";
       }
    }
-   elseif( $Status == GAME_STATUS_FINISHED )
+   elseif ( $Status == GAME_STATUS_FINISHED )
    {
 /* TODO? see time-out cleanup in clock_tick.php
       $few_moves = DELETE_LIMIT+$Handicap;
-      if( $Moves < $few_moves )
+      if ( $Moves < $few_moves )
       {
          return "Too few moves ($Moves &lt; $few_moves)! Should be deleted.";
       }
 */
    }
-   elseif( $Status == GAME_STATUS_SETUP )
+   elseif ( $Status == GAME_STATUS_SETUP )
    {
       //TODO handle MP-game
    }
-   elseif( $Status == GAME_STATUS_KOMI )
+   elseif ( $Status == GAME_STATUS_KOMI )
    {
       //TODO handle MP-game
    }

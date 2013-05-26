@@ -28,11 +28,11 @@ require_once 'include/form_functions.php';
    connect2mysql();
 
    $logged_in = who_is_logged( $player_row);
-   if( !$logged_in )
+   if ( !$logged_in )
       error('login_if_not_logged_in', 'admin_users');
-   if( $player_row['ID'] <= GUESTS_ID_MAX )
+   if ( $player_row['ID'] <= GUESTS_ID_MAX )
       error('not_allowed_for_guest', 'admin_users');
-   if( !(@$player_row['admin_level'] & ADMIN_DEVELOPER) )
+   if ( !(@$player_row['admin_level'] & ADMIN_DEVELOPER) )
       error('adminlevel_too_low', 'admin_users');
 
 /* URL-syntax for this page:
@@ -44,13 +44,13 @@ require_once 'include/form_functions.php';
 
    // init
    $page = 'admin_users.php';
-   if( @$_REQUEST['cancel'] )
+   if ( @$_REQUEST['cancel'] )
       jump_to($page);
 
    $user = trim(get_request_arg('user'));
    $uid  = (int) get_request_arg('uid', 0);
 
-   if( @$_REQUEST['refresh'] )
+   if ( @$_REQUEST['refresh'] )
       jump_to($page.'?show_user=1'.URI_AMP.'user='.urlencode($user));
 
    // note: '*' marks field that may have changed while editing (because of cron-jobs)
@@ -99,35 +99,35 @@ require_once 'include/form_functions.php';
 
    // set field-values to change
    $fvalues = array();
-   foreach( $attributes_edit as $field => $type )
+   foreach ( $attributes_edit as $field => $type )
       $fvalues[$field] = ( $uid ) ? trim(get_request_arg("f_$field", '')) : '';
 
    $bitmask = 0;
-   foreach( $arr_mask_type as $maskval => $arr )
+   foreach ( $arr_mask_type as $maskval => $arr )
    {
       $flagname = $arr[0];
       $fvalues[$flagname] = ( $uid ) ? trim(get_request_arg($flagname, '')) : '';
-      if( $fvalues[$flagname] )
+      if ( $fvalues[$flagname] )
          $bitmask |= $maskval;
    }
    $fvalues['Type'] = ( $uid ) ? $bitmask : '';
 
    $bitmask = 0;
-   foreach( $arr_mask_admopts as $maskval => $arr )
+   foreach ( $arr_mask_admopts as $maskval => $arr )
    {
       $flagname = $arr[0];
       $fvalues[$flagname] = ( $uid ) ? trim(get_request_arg($flagname, '')) : '';
-      if( $fvalues[$flagname] )
+      if ( $fvalues[$flagname] )
          $bitmask |= $maskval;
    }
    $fvalues['AdminOptions'] = ( $uid ) ? $bitmask : '';
 
    // update user
    $errmsg = '';
-   if( @$_REQUEST['save_user'] )
+   if ( @$_REQUEST['save_user'] )
    {
       $errmsg = update_user( $uid, $user, $fvalues );
-      if( $errmsg === 0 )
+      if ( $errmsg === 0 )
       {
          $msg = sprintf('User [%s] updated!', $user);
          // show updated user
@@ -137,7 +137,7 @@ require_once 'include/form_functions.php';
 
    // load user
    $urow = null; // row-arr=on user-found, false=if no user-found, null=no-user-specified
-   if( (string)$user != '' )
+   if ( (string)$user != '' )
    {
       $urow = mysql_single_fetch( 'admin_users.find_user',
          "SELECT ID,$user_fields FROM Players WHERE Handle='".mysql_addslashes($user)."' LIMIT 1" );
@@ -150,7 +150,7 @@ require_once 'include/form_functions.php';
    $uform->add_row( array(
       'HEADER', T_('Modify user attributes') ));
 
-   if( (@$_REQUEST['show_user'] || (string)$user != '' ) && is_array($urow) )
+   if ( (@$_REQUEST['show_user'] || (string)$user != '' ) && is_array($urow) )
    {
       $uform->add_row( array(
          'HIDDEN', 'user', $user,
@@ -168,17 +168,17 @@ require_once 'include/form_functions.php';
       $uform->add_row( array( 'SPACE' ));
    }
 
-   if( $urow === false )
+   if ( $urow === false )
    { // unknown user
       $uform->add_row( array( 'TAB', 'TEXT',
          make_html_safe( '<color darkred>'
             . sprintf('Found no user with handle [%s]', $user)
             . '</color>', true ) ));
    }
-   elseif( is_array($urow) )
+   elseif ( is_array($urow) )
    { // show known user
       // show error-message from (optional) update
-      if( $errmsg && !is_numeric($errmsg) )
+      if ( $errmsg && !is_numeric($errmsg) )
       {
          $uform->add_row( array(
             'TAB', 'TEXT', make_html_safe(
@@ -191,28 +191,28 @@ require_once 'include/form_functions.php';
          'TEXT',        $urow['ID'] . ' = ' . user_reference( REF_LINK, 1, '', $urow ) ));
 
       // read-write fields
-      foreach( $attributes_edit as $field => $type )
+      foreach ( $attributes_edit as $field => $type )
       {
          $fname = "f_$field";
          $fval = ( (string)$fvalues[$field] != '' ) ? $fvalues[$field] : @$urow[$field];
 
-         if( is_array($type) )
+         if ( is_array($type) )
          { // selectbox
             $uform->add_row( array(
                'DESCRIPTION', $field,
                'SELECTBOX',   $fname, 1, $type, $fval, false,
                'TEXT',        sprintf(' [%s]', @$urow[$field]) ));
          }
-         elseif( $type === 'mask' && ($field === 'Type' || $field === 'AdminOptions') )
+         elseif ( $type === 'mask' && ($field === 'Type' || $field === 'AdminOptions') )
          { // bitmask -> checkboxes
-            if( $field === 'Type' )
+            if ( $field === 'Type' )
                $arr_src = $arr_mask_type;
-            elseif( $field === 'AdminOptions' )
+            elseif ( $field === 'AdminOptions' )
                $arr_src = $arr_mask_admopts;
 
             $fval = ( (string)$fvalues[$field] != '' ) ? $fvalues[$field] : @$urow[$field];
             $arr_formrow = array( 'DESCRIPTION', $field, 'TEXT', sprintf('[0x%x]', $fval+0) );
-            foreach( $arr_src as $maskval => $arr )
+            foreach ( $arr_src as $maskval => $arr )
             {
                list( $flagname, $opttext, $descr) = $arr;
                array_push( $arr_formrow,
@@ -222,11 +222,11 @@ require_once 'include/form_functions.php';
             }
             $uform->add_row( $arr_formrow );
          }
-         elseif( preg_match( "/^textarea:/", $type ) )
+         elseif ( preg_match( "/^textarea:/", $type ) )
          {
             $args = array();
             $width = 60; $height = 6;
-            if( preg_match( "/:(\d+),(\d+)/", $type, $args ) )
+            if ( preg_match( "/:(\d+),(\d+)/", $type, $args ) )
                list( $dummy, $width, $height ) = $args;
 
             $uform->add_row( array(
@@ -239,7 +239,7 @@ require_once 'include/form_functions.php';
             $fieldtext = ( strpos($type,"*") === false ) ? $field : "(*) $field";
             $args = array();
             $wid = 20; $maxlen = -1;
-            if( preg_match( "/:(\d+),(-?\d+)/", $type, $args ) )
+            if ( preg_match( "/:(\d+),(-?\d+)/", $type, $args ) )
                list( $dummy, $wid, $maxlen ) = $args;
 
             $uform->add_row( array(
@@ -259,14 +259,14 @@ require_once 'include/form_functions.php';
       $uform->add_row( array( 'OWNHTML', '<td colspan="2"><hr></td>' ));
 
       // read-only fields
-      foreach( $attributes_show as $field )
+      foreach ( $attributes_show as $field )
       {
          $fval = @$urow[$field];
-         if( $field == 'UserFlags' )
+         if ( $field == 'UserFlags' )
          {
             $out = array();
             $out[] = sprintf( 'JavaScript=%s', ( $fval & USERFLAG_JAVASCRIPT_ENABLED ) ? 'ON' : 'OFF' );
-            if( $fval & USERFLAG_NFY_BUT_NO_OR_INVALID_EMAIL )
+            if ( $fval & USERFLAG_NFY_BUT_NO_OR_INVALID_EMAIL )
                $out[] = 'UserFlag_NFY_but_no_or_invalid_Email';
             $fval = implode(', ', $out);
          }
@@ -280,7 +280,7 @@ require_once 'include/form_functions.php';
 
    $menu_array = array();
    $menu_array[T_('Show Administrated Users')] = 'admin_show_users.php';
-   if( @$player_row['admin_level'] & (ADMIN_DEVELOPER|ADMIN_DATABASE) )
+   if ( @$player_row['admin_level'] & (ADMIN_DEVELOPER|ADMIN_DATABASE) )
       $menu_array[T_('Check Block-IP config')] = 'scripts/check_block_ip.php';
 
    end_page(@$menu_array);
@@ -298,53 +298,53 @@ function update_user( $uid, $user, $fv )
 {
    global $user_fields;
 
-   if( (string)$user == '' || !is_numeric($uid) || $uid <= 1 )
+   if ( (string)$user == '' || !is_numeric($uid) || $uid <= 1 )
       return 'Missing user id to update';
 
    // check vars for update
    global $player_row;
-   if( strlen( $fv['Handle'] ) < 3 )
+   if ( strlen( $fv['Handle'] ) < 3 )
       return 'Handle is too short';
-   if( illegal_chars( $fv['Handle'] ) )
+   if ( illegal_chars( $fv['Handle'] ) )
       return sprintf( 'Handle contains illegal chars (begin with letter, allowed [%s])', HANDLE_LEGAL_REGS );
-   if( $user == $player_row['Handle'] && $user != $fv['Handle'] )
+   if ( $user == $player_row['Handle'] && $user != $fv['Handle'] )
       return 'Forbidden to rename Handle of yourself! That would end your session.';
 
-   if( (string)$fv['Name'] == '' )
+   if ( (string)$fv['Name'] == '' )
       return 'Missing Name-field';
 
-   if( !preg_match( "/^\d+$/", $fv['VaultCnt'] ) )
+   if ( !preg_match( "/^\d+$/", $fv['VaultCnt'] ) )
       return 'Bad syntax for VaultCnt-field (must be positive number)';
 
-   if( !preg_match( "/^\d{4}-\d\d-\d\d \d\d:\d\d:\d\d$/", $fv['VaultTime'] ) )
+   if ( !preg_match( "/^\d{4}-\d\d-\d\d \d\d:\d\d:\d\d$/", $fv['VaultTime'] ) )
       return 'Bad syntax for VaultTime-field (must be a date of format [YYYY-MM-DD hh:mm:ss])';
 
-   if( !preg_match( "/^(\d+|\d+\.\d+)$/", $fv['VacationDays'] ) || (double)$fv['VacationDays'] >= 31.0 )
+   if ( !preg_match( "/^(\d+|\d+\.\d+)$/", $fv['VacationDays'] ) || (double)$fv['VacationDays'] >= 31.0 )
       return 'Bad syntax for VacationDays-field (must be positive real number below 31 days)';
 
    global $arr_mask_type;
    $bitmaskall = 0;
-   foreach( $arr_mask_type as $maskval => $arr )
+   foreach ( $arr_mask_type as $maskval => $arr )
       $bitmaskall |= $maskval;
    $chk_bitmask = (int)($fv['Type']+0) & ~$bitmaskall;
-   if( $chk_bitmask != 0 )
+   if ( $chk_bitmask != 0 )
       return sprintf( 'Unknown bit-mask value [0x%x] used for Type-field', $chk_bitmask );
 
    global $arr_mask_admopts;
    $bitmaskall = 0;
-   foreach( $arr_mask_admopts as $maskval => $arr )
+   foreach ( $arr_mask_admopts as $maskval => $arr )
       $bitmaskall |= $maskval;
    $chk_bitmask = (int)($fv['AdminOptions']+0) & ~$bitmaskall;
-   if( $chk_bitmask != 0 )
+   if ( $chk_bitmask != 0 )
       return sprintf( 'Unknown bit-mask value [0x%x] used for AdminOptions-field', $chk_bitmask );
    $chk_arr = @$arr_mask_admopts[ADMOPT_DENY_LOGIN];
-   if( is_array($chk_arr) && $fv[$chk_arr[0]] && $uid == $player_row['ID'] )
+   if ( is_array($chk_arr) && $fv[$chk_arr[0]] && $uid == $player_row['ID'] )
       return 'Forbidden to change admin option DENY_LOGIN for yourself! That would kick you from the server.';
 
    // check for user
    $row = mysql_single_fetch( "admin_users.save_user_find($user)",
       "SELECT ID,$user_fields FROM Players WHERE Handle='".mysql_addslashes($user)."' LIMIT 1" );
-   if( $row === false )
+   if ( $row === false )
       return sprintf( 'Found no user with handle [%s]', $user );
 
    $arrdiff = array();
@@ -352,37 +352,37 @@ function update_user( $uid, $user, $fv )
    // update user in DB
    $arr_sql = array();
    global $attributes_edit;
-   foreach( $attributes_edit as $field => $type )
+   foreach ( $attributes_edit as $field => $type )
    {
       $hasdiff = ( strcmp( @$row[$field], $fv[$field] ) != 0 );
-      if( $hasdiff )
+      if ( $hasdiff )
          $arr_sql[] = "$field='".mysql_addslashes($fv[$field])."'";
 
       // create diffs for admin-log
-      if( $type === 'mask' && ($field === 'Type' || $field === 'AdminOptions') )
+      if ( $type === 'mask' && ($field === 'Type' || $field === 'AdminOptions') )
       {
-         if( $field === 'Type' )
+         if ( $field === 'Type' )
             $arr_src = $arr_mask_type;
-         elseif( $field === 'AdminOptions' )
+         elseif ( $field === 'AdminOptions' )
             $arr_src = $arr_mask_admopts;
 
          $optdiff = array();
-         foreach( $arr_src as $maskval => $arr )
+         foreach ( $arr_src as $maskval => $arr )
          {
             $old = (@$row[$field] & $maskval);
             $new = ($fv[$field] & $maskval);
-            if( $old != $new )
+            if ( $old != $new )
                $optdiff[] = (( $old && !$new ) ? '-' : '+') . $arr[1];
          }
-         if( count($optdiff) > 0 )
+         if ( count($optdiff) > 0 )
             $arrdiff[] = sprintf( '%s[%s]', $field, implode(' ', $optdiff) );
       }
       else {
-         if( $hasdiff )
+         if ( $hasdiff )
             $arrdiff[] = sprintf( '%s[%s]>[%s]', $field, @$row[$field], $fv[$field] );
       }
    }
-   if( count($arr_sql) == 0 )
+   if ( count($arr_sql) == 0 )
       return -1; // no update
 
    $dbgmsg = "admin_users.save_user($user)";

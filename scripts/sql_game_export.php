@@ -37,7 +37,7 @@ define('SPACE', '&nbsp;&nbsp;&nbsp;');
 
    $gid = get_request_arg('gid');
 
-   if( @$_REQUEST['export'] && is_numeric($gid) && $gid > 0 )
+   if ( @$_REQUEST['export'] && is_numeric($gid) && $gid > 0 )
    {
       export_game($gid);
    }
@@ -71,19 +71,19 @@ function export_game( $gid )
    global $NOW;
 
    $sql_games = insert_set( 'Games', "SELECT * FROM Games WHERE ID='$gid' LIMIT 1", true );
-   if( $sql_games[0] <= 0 )
+   if ( $sql_games[0] <= 0 )
       return array( false, $sql_games[1] );
 
    $sql_moves = insert_set( 'Moves', "SELECT * FROM Moves WHERE gid='$gid' ORDER BY ID", false, array( 'ID' ) );
-   if( $sql_moves[0] <= 0 )
+   if ( $sql_moves[0] <= 0 )
       return array( false, $sql_moves[1] );
 
    $sql_gp = insert_set( 'GamePlayers', "SELECT * FROM GamePlayers WHERE gid='$gid' ORDER BY ID", false, array( 'ID' ) );
-   if( $sql_gp[0] < 0 ) // optional
+   if ( $sql_gp[0] < 0 ) // optional
       return array( false, $sql_gp[1] );
 
    $sql_ratinglog = insert_set( 'Ratinglog', "SELECT * FROM Ratinglog WHERE gid='$gid' LIMIT 2", false, array( 'ID' ) );
-   if( $sql_ratinglog[0] < 0 ) // optional
+   if ( $sql_ratinglog[0] < 0 ) // optional
       return array( false, $sql_ratinglog[1] );
 
    // direct output
@@ -117,39 +117,39 @@ function export_game( $gid )
 function insert_set( $table, $query, $replace=true, $skip_fields=null )
 {
    $result = mysql_query($query);
-   if( !$result )
+   if ( !$result )
       return array( -1, "MySQL-error: " . mysql_error(), '' );
 
    $mysqlerror = @mysql_error();
-   if( $mysqlerror )
+   if ( $mysqlerror )
       return array( -1, "Error: ".textarea_safe($mysqlerror), '' );
-   if( !$result )
+   if ( !$result )
       return array( 0, "No rows found for table [$table] for query [$query]", '' );
 
-   if( @mysql_num_rows($result) <= 0 )
+   if ( @mysql_num_rows($result) <= 0 )
    {
       $output = array( 0, "No rows found for table [$table] for query [$query]", '' );
    }
    else
    {
-      if( is_null($skip_fields) )
+      if ( is_null($skip_fields) )
          $skip_fields = array();
       $skip_norm = array(); // normalized
-      foreach( $skip_fields as $field )
+      foreach ( $skip_fields as $field )
          $skip_norm[strtolower($field)] = 1;
 
       $text = '';
       $rowcnt = 0;
-      while( $row = mysql_fetch_assoc( $result ) )
+      while ( $row = mysql_fetch_assoc( $result ) )
       {
          $rowcnt++;
          $str = '';
-         foreach( $row as $key => $val )
+         foreach ( $row as $key => $val )
          {
-            if( !isset($skip_norm[strtolower($key)]) )
+            if ( !isset($skip_norm[strtolower($key)]) )
                $str .= ',' . $key.'='.safe_value($val);
          }
-         if( $str )
+         if ( $str )
             $text .= ($replace ? 'REPLACE' : 'INSERT' )
                . ' INTO ' . quoteit($table,QUOTE) . ' SET ' . substr($str,1) . ";\n";
       }
@@ -162,9 +162,9 @@ function insert_set( $table, $query, $replace=true, $skip_fields=null )
 
 function safe_value( $val=NULL )
 {
-   if( is_null($val) )
+   if ( is_null($val) )
       return 'NULL';
-   elseif( !is_numeric($val) )
+   elseif ( !is_numeric($val) )
       return "'".mysql_addslashes($val)."'";
    else
       return $val;
@@ -172,14 +172,14 @@ function safe_value( $val=NULL )
 
 function quoteit( $mixed, $quote='`' )
 {
-   if( is_array( $mixed ) )
+   if ( is_array( $mixed ) )
    {
       $result = array();
-      foreach( $mixed AS $key => $val)
+      foreach ( $mixed AS $key => $val)
          $result[$key] = quoteit($val);
       return $result;
    }
-   if( !empty($mixed) || is_numeric($mixed) )
+   if ( !empty($mixed) || is_numeric($mixed) )
       return $quote . trim($mixed, " '`$quote") . $quote;
    return $mixed;
 }

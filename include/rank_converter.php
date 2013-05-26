@@ -44,7 +44,7 @@ class RankConverter
 
       $converted_rank = '';
       $conv_rating = trim( get_request_arg('conv_rating') );
-      if( @$_REQUEST['convert'] && (string)$conv_rating != '' )
+      if ( @$_REQUEST['convert'] && (string)$conv_rating != '' )
       {
          $conv_ratingtype = get_request_arg('conv_ratingtype');
          $conv_newrating = convert_to_rating($conv_rating, $conv_ratingtype);
@@ -59,7 +59,7 @@ class RankConverter
             'TEXTINPUT', 'conv_rating', 16, 16, get_request_arg('conv_rating'),
             'SELECTBOX', 'conv_ratingtype', 1, getRatingTypes(), get_request_arg('conv_ratingtype'), false,
             'SUBMITBUTTON', 'convert', T_('Convert'), ));
-      if( $converted_rank )
+      if ( $converted_rank )
          $rcform->add_row( array( 'TEXT', $converted_rank, ));
 
       return $rcform;

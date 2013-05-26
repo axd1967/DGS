@@ -44,13 +44,13 @@ $GLOBALS['ThePage'] = new Page('TournamentLadderChallenge');
    connect2mysql();
 
    $logged_in = who_is_logged( $player_row);
-   if( !$logged_in )
+   if ( !$logged_in )
       error('login_if_not_logged_in', 'Tournament.ladder.challenge');
-   if( !ALLOW_TOURNAMENTS )
+   if ( !ALLOW_TOURNAMENTS )
       error('feature_disabled', 'Tournament.ladder.challenge');
    $my_id = $player_row['ID'];
 
-   if( $my_id <= GUESTS_ID_MAX )
+   if ( $my_id <= GUESTS_ID_MAX )
       error('not_allowed_for_guest', 'Tournament.ladder.challenge');
 
    $page = "challenge.php";
@@ -63,38 +63,38 @@ $GLOBALS['ThePage'] = new Page('TournamentLadderChallenge');
 
    $tid = (int)@$_REQUEST['tid'];
    $rid = (int)@$_REQUEST['rid'];
-   if( $tid < 0 ) $tid = 0;
-   if( $rid < 0 ) $rid = 0;
+   if ( $tid < 0 ) $tid = 0;
+   if ( $rid < 0 ) $rid = 0;
 
-   if( @$_REQUEST['tl_cancel'] ) // cancel delete
+   if ( @$_REQUEST['tl_cancel'] ) // cancel delete
       jump_to("tournaments/ladder/view.php?tid=$tid");
 
    $tourney = TournamentCache::load_cache_tournament( 'Tournament.ladder.challenge.find_tournament', $tid );
-   if( $tourney->Status != TOURNEY_STATUS_PLAY )
+   if ( $tourney->Status != TOURNEY_STATUS_PLAY )
       error('tournament_wrong_status', "Tournament.ladder.challenge.check_status($tid,{$tourney->Status})");
 
    // checks
    $errors = array();
-   if( $tourney->isFlagSet(TOURNEY_FLAG_LOCK_ADMIN|TOURNEY_FLAG_LOCK_TDWORK) )
+   if ( $tourney->isFlagSet(TOURNEY_FLAG_LOCK_ADMIN|TOURNEY_FLAG_LOCK_TDWORK) )
       $errors[] = $tourney->buildMaintenanceLockText();
-   if( $tourney->isFlagSet(TOURNEY_FLAG_LOCK_CLOSE) )
+   if ( $tourney->isFlagSet(TOURNEY_FLAG_LOCK_CLOSE) )
       $errors[] = Tournament::getLockText(TOURNEY_FLAG_LOCK_CLOSE);
 
    $tladder_ch = TournamentLadder::load_tournament_ladder_by_user($tid, $my_id); // challenger
-   if( is_null($tladder_ch) )
+   if ( is_null($tladder_ch) )
       $errors[] = T_('Challenger is not participating on ladder');
    $user_ch = User::new_from_row( $player_row );
 
    $tladder_df = TournamentLadder::load_tournament_ladder_by_user($tid, 0, $rid); // defender
    $user_df = null;
-   if( is_null($tladder_df) )
+   if ( is_null($tladder_df) )
       $errors[] = T_('Defender is not participating on ladder');
    else
       $user_df = User::load_user( $tladder_df->uid );
 
    // check if challenge is valid
    $trules = $tprops = null;
-   if( !is_null($tladder_ch) && !is_null($tladder_df) )
+   if ( !is_null($tladder_ch) && !is_null($tladder_df) )
    {
       $tl_props = TournamentCache::load_cache_tournament_ladder_props( 'Tournament.ladder.challenge', $tid );
 
@@ -106,9 +106,9 @@ $GLOBALS['ThePage'] = new Page('TournamentLadderChallenge');
       // prep TP_Rating for add_form_user_info()
       $tp_rating_ch = TournamentHelper::get_tournament_rating( $tid, $user_ch, $tprops->RatingUseMode, /*strict*/true );
       $tp_rating_df = TournamentHelper::get_tournament_rating( $tid, $user_df, $tprops->RatingUseMode, /*strict*/true );
-      if( !is_null($tp_rating_ch) )
+      if ( !is_null($tp_rating_ch) )
          $user_ch->urow['TP_Rating'] = $tp_rating_ch;
-      if( !is_null($tp_rating_df) )
+      if ( !is_null($tp_rating_df) )
          $user_df->urow['TP_Rating'] = $tp_rating_df;
 
       $rating_pos = TournamentLadder::find_ladder_rating_pos( 'Tournament.ladder.challenge',
@@ -120,7 +120,7 @@ $GLOBALS['ThePage'] = new Page('TournamentLadderChallenge');
 
    // ---------- Process actions ------------------------------------------------
 
-   if( @$_REQUEST['confirm'] && !is_null($tladder_ch) && !is_null($tladder_df) && count($errors) == 0 ) // confirm challange
+   if ( @$_REQUEST['confirm'] && !is_null($tladder_ch) && !is_null($tladder_df) && count($errors) == 0 ) // confirm challange
    {
       ta_begin();
       {//HOT-section to start T-game
@@ -130,7 +130,7 @@ $GLOBALS['ThePage'] = new Page('TournamentLadderChallenge');
 
          $gids = TournamentHelper::create_games_from_tournament_rules( $tid, $tourney->Type, $user_ch, $user_df );
          $cnt_gids = count($gids);
-         if( $cnt_gids != 1 )
+         if ( $cnt_gids != 1 )
             error('internal_error', "$dbgmsg.create_game($cnt_gids)");
          $gid = $gids[0];
 
@@ -181,7 +181,7 @@ $GLOBALS['ThePage'] = new Page('TournamentLadderChallenge');
    add_form_user_info( $tform, T_('Challenger#T_ladder'), $user_ch, $tladder_ch, $trules );
 
    $has_errors = ( count($errors) > 0 );
-   if( $has_errors )
+   if ( $has_errors )
    {
       $tform->add_row( array( 'HR' ));
       $tform->add_row( array(
@@ -196,7 +196,7 @@ $GLOBALS['ThePage'] = new Page('TournamentLadderChallenge');
          'CELL', 2, '',
          'TEXT', T_('Please confirm if you want to challenge this user!#T_ladder') . "<br>\n" . T_('(also see notes below)'), ));
 
-   if( !$has_errors )
+   if ( !$has_errors )
       $tform->add_hidden( 'confirm', 1 );
    $tform->add_row( array(
          'CELL', 2, '',
@@ -230,24 +230,24 @@ $GLOBALS['ThePage'] = new Page('TournamentLadderChallenge');
 
 function add_form_user_info( &$tform, $utype, $user, $tladder, $trules )
 {
-   if( is_null($user) && is_null($tladder) )
+   if ( is_null($user) && is_null($tladder) )
       return '';
 
    $tform->add_row( array( 'HR' ));
-   if( !is_null($user) )
+   if ( !is_null($user) )
    {
       $tform->add_row( array(
             'DESCRIPTION', span('bold', $utype),
             'TEXT', $user->user_reference(),
             'TEXT', echo_off_time( false, $user->urow['OnVacation'], null, @$trules->WeekendClock ),
             'TEXT', SEP_SPACING . echo_rating( $user->Rating, true, $user->ID), ));
-      if( isset($user->urow['TP_Rating']) )
+      if ( isset($user->urow['TP_Rating']) )
          $tform->add_row( array(
                'DESCRIPTION', T_('Tournament Rating'),
                'TEXT', echo_rating( $user->urow['TP_Rating'], true, $user->ID ), ));
    }
 
-   if( !is_null($tladder) )
+   if ( !is_null($tladder) )
    {
       $tform->add_row( array(
             'DESCRIPTION', T_('Ladder Rank'),
@@ -263,7 +263,7 @@ function add_form_user_info( &$tform, $utype, $user, $tladder, $trules )
 // show game-info-table for challenge
 function show_game_info( $tid, $user_ch, $user_df, $trules, $tprops )
 {
-   if( is_null($user_ch) || is_null($user_df) )
+   if ( is_null($user_ch) || is_null($user_df) )
       return;
 
    $ch_rating = TournamentHelper::get_tournament_rating( $tid, $user_ch, $tprops->RatingUseMode );
@@ -275,7 +275,7 @@ function show_game_info( $tid, $user_ch, $user_df, $trules, $tprops )
 
    $game_row = $trules->convertTournamentRules_to_GameRow();
    $game_row['X_Handitype'] = TournamentRules::convert_trule_handicaptype_to_stdhtype($trules->Handicaptype);
-   if( $trules->Handicaptype == TRULE_HANDITYPE_NIGIRI )
+   if ( $trules->Handicaptype == TRULE_HANDITYPE_NIGIRI )
       $game_row['X_Color'] = HTYPE_NIGIRI;
    else
       $game_row['X_Color'] = ($ch_is_black) ? HTYPE_BLACK : HTYPE_WHITE;

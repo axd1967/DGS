@@ -29,11 +29,11 @@ $GLOBALS['ThePage'] = new Page('Script', PAGEFLAG_IMPLICIT_FLUSH );
    set_time_limit(300); //max. 5min
 
    $logged_in = who_is_logged( $player_row);
-   if( !$logged_in )
+   if ( !$logged_in )
       error('login_if_not_logged_in', 'scripts.fix_message_thread-1_0_15');
-   if( $player_row['ID'] <= GUESTS_ID_MAX )
+   if ( $player_row['ID'] <= GUESTS_ID_MAX )
       error('not_allowed_for_guest', 'scripts.fix_message_thread-1_0_15');
-   if( !(@$player_row['admin_level'] & ADMIN_DATABASE) )
+   if ( !(@$player_row['admin_level'] & ADMIN_DATABASE) )
       error('adminlevel_too_low', 'scripts.fix_message_thread-1_0_15');
 
    $page = $_SERVER['PHP_SELF'];
@@ -45,10 +45,10 @@ $GLOBALS['ThePage'] = new Page('Script', PAGEFLAG_IMPLICIT_FLUSH );
 //echo ">>>> One shot fix. Do not run it again."; end_html(); exit;
 
    $do_it = @$_REQUEST['do_it'];
-   if( $do_it )
+   if ( $do_it )
    {
       function dbg_query($s) {
-        if( !mysql_query( $s) )
+        if ( !mysql_query( $s) )
            die("<BR>$s;<BR>" . mysql_error() );
       }
       echo "<p>*** Fixes message threads ***"
@@ -82,14 +82,14 @@ $GLOBALS['ThePage'] = new Page('Script', PAGEFLAG_IMPLICIT_FLUSH );
    $threads = array();    // msg-id => thread
    $levels = array();     // msg-id => level
    $todo_msgs = array();
-   while( ($row = mysql_fetch_assoc( $result )) )
+   while ( ($row = mysql_fetch_assoc( $result )) )
    {
       $mid    = $row['mid'];
       $reply  = $row['ReplyTo'];
       $thread = $row['Thread'];
       $level  = $row['Level'];
 
-      if( $thread > 0 )
+      if ( $thread > 0 )
       {
          $threads[$reply] = $thread;
          $threads[$mid] = $thread;
@@ -111,15 +111,15 @@ $GLOBALS['ThePage'] = new Page('Script', PAGEFLAG_IMPLICIT_FLUSH );
 
    // process all
    $last_count = -1;
-   while( count($todo_msgs) != $last_count )
+   while ( count($todo_msgs) != $last_count )
    {
       $last_count = count($todo_msgs);
       echo "<br>... $last_count rows left to resolve ...\n";
 
       $arr = array(); // one run should suffice normally
-      foreach( $todo_msgs as $mid => $reply )
+      foreach ( $todo_msgs as $mid => $reply )
       {
-         if( isset($threads[$reply]) )
+         if ( isset($threads[$reply]) )
          {
             $threads[$mid] = $threads[$reply];
             $levels[$mid]  = $levels[$reply] + 1;
@@ -131,7 +131,7 @@ $GLOBALS['ThePage'] = new Page('Script', PAGEFLAG_IMPLICIT_FLUSH );
       $todo_msgs = $arr;
    }
 
-   if( $do_it )
+   if ( $do_it )
       echo 'Message thread fix finished.';
 
    end_html();
@@ -143,7 +143,7 @@ function update_all_messages( $arr_update )
    global $msg_cnt, $curr_cnt;
    echo sprintf( "<br><br>%s remaining updates on Messages ...\n", $msg_cnt - $curr_cnt );
 
-   foreach( $arr_update as $mid => $arr )
+   foreach ( $arr_update as $mid => $arr )
    {
       list( $thread, $level ) = $arr;
       update_message( $mid, $thread, $level );
@@ -153,7 +153,7 @@ function update_all_messages( $arr_update )
 function update_message( $mid, $thread, $level )
 {
    global $msg_cnt, $curr_cnt;
-   if( ($curr_cnt++ % 100) == 0 )
+   if ( ($curr_cnt++ % 100) == 0 )
       echo "<br><br>... $curr_cnt of $msg_cnt updated ...\n";
    $update_query = "UPDATE Messages SET Thread='$thread', Level='$level' WHERE ID='$mid' LIMIT 1";
    dbg_query($update_query);

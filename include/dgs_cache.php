@@ -28,9 +28,9 @@ require_once 'include/utilities.php';
   * \brief Container and function to handle caching using different cache methods on DGS.
   */
 
-if( !defined('DGS_CACHE') )
+if ( !defined('DGS_CACHE') )
    define('DGS_CACHE', CACHE_TYPE_NONE);
-if( !defined('DBG_CACHE') )
+if ( !defined('DBG_CACHE') )
    define('DBG_CACHE', 0);
 
 
@@ -56,7 +56,7 @@ abstract class AbstractCache
     */
    public function cache_store_array( $arr_data, $ttl, $cache_group=0 )
    {
-      foreach( $arr_data as $id => $data )
+      foreach ( $arr_data as $id => $data )
          $this->cache_store( $id, $data, $ttl, $cache_group );
    }
 
@@ -85,9 +85,9 @@ abstract class AbstractCache
    public function cache_store_group( $group_id, $elem_id, $ttl, $cache_group=0 )
    {
       $arr_group = $this->cache_fetch( $group_id, $cache_group );
-      if( is_null($arr_group) )
+      if ( is_null($arr_group) )
          $arr_group = array( $elem_id );
-      else if( !in_array($elem_id, $arr_group) ) // keep unique
+      else if ( !in_array($elem_id, $arr_group) ) // keep unique
          $arr_group[] = $elem_id;
 
       return $this->cache_store( $group_id, $arr_group, $ttl, $cache_group );
@@ -97,10 +97,10 @@ abstract class AbstractCache
    public function cache_delete_group( $group_id, $cache_group=0 )
    {
       $arr_group = $this->cache_fetch( $group_id, $cache_group );
-      if( !is_null($arr_group) )
+      if ( !is_null($arr_group) )
       {
          $arr_group = array_unique( $arr_group );
-         foreach( $arr_group as $elem_id )
+         foreach ( $arr_group as $elem_id )
             $this->cache_delete( $elem_id, $cache_group );
          $this->cache_delete( $group_id, $cache_group );
       }
@@ -144,9 +144,9 @@ class ApcCache extends AbstractCache
    {
       $entries = $this->get_cache_entries( $cache_group, $expire_time );
       $count_deleted = 0;
-      foreach( $entries as $id )
+      foreach ( $entries as $id )
       {
-         if( apc_delete($id) )
+         if ( apc_delete($id) )
             ++$count_deleted;
       }
       return $count_deleted;
@@ -165,14 +165,14 @@ class ApcCache extends AbstractCache
       $count = $size = $hits = $misses = 0;
 
       $group_name = @$ARR_CACHE_GROUP_NAMES[$cache_group];
-      if( $group_name )
+      if ( $group_name )
       {
          $info = apc_cache_info('user');
          $misses = 0; // only global for cache-lifetime, so not available
 
-         foreach( $info['cache_list'] as $entry )
+         foreach ( $info['cache_list'] as $entry )
          {
-            if( stristr($entry['info'], $group_name) === false )
+            if ( stristr($entry['info'], $group_name) === false )
                continue;
             ++$count;
             $size += $entry['mem_size'];
@@ -190,18 +190,18 @@ class ApcCache extends AbstractCache
    public static function saveHit( $cache_group, $hit )
    {
       global $DGS_CACHE_GROUPS;
-      if( !function_exists('apc_fetch') )
+      if ( !function_exists('apc_fetch') )
          return;
 
       $cache_type = ( isset($DGS_CACHE_GROUPS[$cache_group]) ) ? $DGS_CACHE_GROUPS[$cache_group] : DGS_CACHE;
-      if( $cache_type != CACHE_TYPE_APC && $cache_type != CACHE_TYPE_NONE )
+      if ( $cache_type != CACHE_TYPE_APC && $cache_type != CACHE_TYPE_NONE )
       {
          $cache_id = "CacheGroups";
          $arr_key = sprintf('%s%02d', ($hit ? 'H' : 'M'), $cache_group );
          $arr_info = apc_fetch($cache_id);
-         if( is_array($arr_info) )
+         if ( is_array($arr_info) )
          {
-            if( isset($arr_info[$arr_key]) )
+            if ( isset($arr_info[$arr_key]) )
                ++$arr_info[$arr_key];
             else
                $arr_info[$arr_key] = 1;
@@ -216,11 +216,11 @@ class ApcCache extends AbstractCache
    function getHitInfo( $cache_group )
    {
       $hits = $miss = 0;
-      if( function_exists('apc_fetch') )
+      if ( function_exists('apc_fetch') )
       {
          $cache_id = "CacheGroups";
          $arr_info = apc_fetch($cache_id);
-         if( is_array($arr_info) )
+         if ( is_array($arr_info) )
          {
             $key_hit  = sprintf('H%02d', $cache_group );
             $key_miss = sprintf('M%02d', $cache_group );
@@ -240,14 +240,14 @@ class ApcCache extends AbstractCache
       $result = array();
 
       $group_name = @$ARR_CACHE_GROUP_NAMES[$cache_group];
-      if( $group_name )
+      if ( $group_name )
       {
          $info = apc_cache_info('user');
-         foreach( $info['cache_list'] as $entry )
+         foreach ( $info['cache_list'] as $entry )
          {
-            if( stristr($entry['info'], $group_name) !== false )
+            if ( stristr($entry['info'], $group_name) !== false )
             {
-               if( $expire_time == 0 || $entry['mtime'] <= $expire_time ) // entry expired?
+               if ( $expire_time == 0 || $entry['mtime'] <= $expire_time ) // entry expired?
                   $result[] = $entry['info'];
             }
          }
@@ -276,16 +276,16 @@ class FileCache extends AbstractCache
 
    public function __construct()
    {
-      if( (string)DATASTORE_FOLDER == '' )
+      if ( (string)DATASTORE_FOLDER == '' )
          error('internal_error', "FileCache.construct.miss.datastore");
 
       $this->base_filepath = build_path_dir( $_SERVER['DOCUMENT_ROOT'], DATASTORE_FOLDER ) . 'filecache';
-      for( $cache_group=0; $cache_group <= MAX_CACHE_GRP; ++$cache_group )
+      for ( $cache_group=0; $cache_group <= MAX_CACHE_GRP; ++$cache_group )
       {
          $path = $this->build_cache_filename( 0, $cache_group, /*dir*/true );
-         if( !is_dir($path) )
+         if ( !is_dir($path) )
          {
-            if( !mkdir($path, 0777, /*recursive*/true) )
+            if ( !mkdir($path, 0777, /*recursive*/true) )
                error('internal_error', "FileCache.construct.mkdir.datastore_dir(filecache,$cache_group)");
          }
       }
@@ -317,14 +317,14 @@ class FileCache extends AbstractCache
    public function cache_fetch( $id, $cache_group=0 )
    {
       $filename = $this->build_cache_filename( $id, $cache_group );
-      if( !file_exists($filename) )
+      if ( !file_exists($filename) )
       {
          ApcCache::saveHit( $cache_group, false );
          return null;
       }
 
       $file_handle = fopen($filename, 'r'); // open read-only
-      if( !$file_handle )
+      if ( !$file_handle )
       {
          ApcCache::saveHit( $cache_group, false );
          return null;
@@ -335,18 +335,18 @@ class FileCache extends AbstractCache
       fclose($file_handle);
 
       $result = null;
-      if( $raw_data )
+      if ( $raw_data )
       {
          $file_data = @unserialize($raw_data);
-         if( $file_data )
+         if ( $file_data )
          {
             list( $expire, $data ) = $file_data;
-            if( $this->read_expired || $GLOBALS['NOW'] <= $expire )
+            if ( $this->read_expired || $GLOBALS['NOW'] <= $expire )
                $result = $data;
          }
       }
 
-      if( $this->unlink_expired && is_null($result) )
+      if ( $this->unlink_expired && is_null($result) )
       {
          @unlink($filename); // delete file if loading or unserialize failed, or file expired
          ApcCache::saveHit( $cache_group, false );
@@ -362,7 +362,7 @@ class FileCache extends AbstractCache
       $filename = $this->build_cache_filename( $id, $cache_group );
 
       $file_handle = fopen($filename, 'a+'); // open read-write (append) to get lock of potentially existing file
-      if( !$file_handle )
+      if ( !$file_handle )
          return false;
 
       flock($file_handle, LOCK_EX); // get exclusive lock
@@ -392,25 +392,25 @@ class FileCache extends AbstractCache
       $arr_files = glob("$dir_path/*");
 
       $cnt = 0;
-      foreach( $arr_files as $file )
+      foreach ( $arr_files as $file )
       {
-         if( !is_file($file) )
+         if ( !is_file($file) )
             continue;
-         if( $expire_time == 0 || (int)@filemtime($file) <= $expire_time ) // file expired?
+         if ( $expire_time == 0 || (int)@filemtime($file) <= $expire_time ) // file expired?
          {
-            if( unlink($file) )
+            if ( unlink($file) )
                ++$cnt;
          }
       }
 
-      if( DBG_CACHE && $cnt > 0 ) error_log("FileCache.cache_cleanup($cache_group): purged $cnt entries");
+      if ( DBG_CACHE && $cnt > 0 ) error_log("FileCache.cache_cleanup($cache_group): purged $cnt entries");
       return $cnt;
    }//cache_cleanup
 
    public function cache_clear()
    {
       $cnt = 0;
-      for( $cache_group=0; $cache_group <= MAX_CACHE_GRP; ++$cache_group )
+      for ( $cache_group=0; $cache_group <= MAX_CACHE_GRP; ++$cache_group )
          $cnt += $this->cache_cleanup( $cache_group, 0 );
       return $cnt;
    }
@@ -439,12 +439,12 @@ class FileCache extends AbstractCache
 
       $result = array();
       $total_size = 0;
-      foreach( $arr_files as $file )
+      foreach ( $arr_files as $file )
       {
-         if( is_file($file) )
+         if ( is_file($file) )
          {
             $stat = stat($file);
-            if( $stat !== false )
+            if ( $stat !== false )
             {
                $result[] = array( substr($file, $len_dir), $stat['size'], $stat['mtime'], $stat['atime'] );
                $total_size += $stat['size'];
@@ -465,13 +465,13 @@ class FileCache extends AbstractCache
    {
       $content = $this->cache_fetch( $id, $cache_group );
       $result = null;
-      if( !is_null($content) )
+      if ( !is_null($content) )
       {
          $file_path = $this->build_cache_filename( $id, $cache_group );
-         if( is_file($file_path) )
+         if ( is_file($file_path) )
          {
             $stat = stat($file_path);
-            if( $stat !== false )
+            if ( $stat !== false )
                $result = array( $content, (int)@$stat['size'], (int)@$stat['mtime'], (int)@$stat['atime'] );
             else
                $result = array( $content, 0, 0, 0 );
@@ -510,18 +510,18 @@ class DgsCache
       global $DGS_CACHE_GROUPS;
 
       $arr_cache_types = array( DGS_CACHE => 1 );
-      if( @is_array($DGS_CACHE_GROUPS) )
+      if ( @is_array($DGS_CACHE_GROUPS) )
       {
-         foreach( $DGS_CACHE_GROUPS as $cache_group => $cache_type )
+         foreach ( $DGS_CACHE_GROUPS as $cache_group => $cache_type )
          {
             $this->cache_groups[$cache_group] = $cache_type;
             $arr_cache_types[$cache_type] = 1;
          }
       }
 
-      if( isset($arr_cache_types[CACHE_TYPE_APC]) )
+      if ( isset($arr_cache_types[CACHE_TYPE_APC]) )
          $this->cache_impl[CACHE_TYPE_APC] = new ApcCache();
-      if( isset($arr_cache_types[CACHE_TYPE_FILE]) )
+      if ( isset($arr_cache_types[CACHE_TYPE_FILE]) )
          $this->cache_impl[CACHE_TYPE_FILE] = new FileCache();
    }//__construct
 
@@ -531,10 +531,10 @@ class DgsCache
     */
    public function get_cache_type( $cache_group )
    {
-      if( !is_numeric($cache_group) )
+      if ( !is_numeric($cache_group) )
          error('invalid_args', "DgsCache.get_cache_type.check.cache_group($cache_group)");
 
-      if( isset($this->cache_groups[$cache_group]) )
+      if ( isset($this->cache_groups[$cache_group]) )
          $cache_type = $this->cache_groups[$cache_group];
       else
          $cache_type = DGS_CACHE; // use default if no special type set
@@ -573,12 +573,12 @@ class DgsCache
    public static function get_cache( $cache_group, $cache_type=null, $admin_mode=false )
    {
       global $DGS_CACHE;
-      if( !@$DGS_CACHE )
+      if ( !@$DGS_CACHE )
          $DGS_CACHE = new DgsCache();
 
-      if( !$admin_mode && $GLOBALS['is_maintenance'] ) // caching disabled during maintenance-mode
+      if ( !$admin_mode && $GLOBALS['is_maintenance'] ) // caching disabled during maintenance-mode
          $cache = null;
-      else if( is_null($cache_type) )
+      else if ( is_null($cache_type) )
       {
          $cache_type = $DGS_CACHE->get_cache_type( $cache_group );
          $cache = $DGS_CACHE->get_cache_impl( $cache_type );
@@ -597,11 +597,11 @@ class DgsCache
    public static function fetch( $dbgmsg, $cache_group, $id )
    {
       $cache = self::get_cache( $cache_group );
-      if( !$cache )
+      if ( !$cache )
          return null;
 
       $result = $cache->cache_fetch( $id, $cache_group );
-      if( DBG_CACHE ) error_log("DgsCache.fetch($cache_group,$id).$dbgmsg = [" . self::debug_result($result) . "]");
+      if ( DBG_CACHE ) error_log("DgsCache.fetch($cache_group,$id).$dbgmsg = [" . self::debug_result($result) . "]");
       return $result;
    }//fetch
 
@@ -613,14 +613,14 @@ class DgsCache
    public static function store( $dbgmsg, $cache_group, $id, $data, $ttl, $group_id='' )
    {
       $cache = self::get_cache( $cache_group );
-      if( !$cache )
+      if ( !$cache )
          return false;
 
       $result = $cache->cache_store( $id, $data, $ttl, $cache_group );
-      if( $group_id )
+      if ( $group_id )
          $cache->cache_store_group( "GROUP_$group_id", $id, $ttl, $cache_group );
 
-      if( DBG_CACHE ) error_log("DgsCache.store($cache_group,$id,$ttl,[$group_id]).$dbgmsg = [" . ($result ? 1 : 0) . "]");
+      if ( DBG_CACHE ) error_log("DgsCache.store($cache_group,$id,$ttl,[$group_id]).$dbgmsg = [" . ($result ? 1 : 0) . "]");
       return $result;
    }//store
 
@@ -631,11 +631,11 @@ class DgsCache
    public static function delete( $dbgmsg, $cache_group, $id )
    {
       $cache = self::get_cache( $cache_group );
-      if( !$cache )
+      if ( !$cache )
          return true;
 
       $result = $cache->cache_delete( $id, $cache_group );
-      if( DBG_CACHE ) error_log("DgsCache.delete($cache_group,$id).$dbgmsg = [" . ($result ? 1 : 0) . "]");
+      if ( DBG_CACHE ) error_log("DgsCache.delete($cache_group,$id).$dbgmsg = [" . ($result ? 1 : 0) . "]");
       return $result;
    }//delete
 
@@ -647,11 +647,11 @@ class DgsCache
    public static function delete_group( $dbgmsg, $cache_group, $group_id )
    {
       $cache = self::get_cache( $cache_group );
-      if( !$cache )
+      if ( !$cache )
          return null;
 
       $arr_group = $cache->cache_delete_group( "GROUP_$group_id", $cache_group );
-      if( DBG_CACHE ) error_log("DgsCache.delete_group($cache_group,$group_id).$dbgmsg: group [" . (is_null($arr_group) ? '-' : implode(' ', $arr_group)) . "]");
+      if ( DBG_CACHE ) error_log("DgsCache.delete_group($cache_group,$group_id).$dbgmsg: group [" . (is_null($arr_group) ? '-' : implode(' ', $arr_group)) . "]");
       return $arr_group;
    }//delete_group
 
@@ -663,7 +663,7 @@ class DgsCache
    public static function cleanup_cache( $only_cache_group=null )
    {
       global $NOW, $ARR_CACHE_GROUP_CLEANUP;
-      if( !is_numeric($only_cache_group) || $only_cache_group < 0 || $only_cache_group > MAX_CACHE_GRP)
+      if ( !is_numeric($only_cache_group) || $only_cache_group < 0 || $only_cache_group > MAX_CACHE_GRP)
          $only_cache_group = null;
 
       $default_expire = ( isset($ARR_CACHE_GROUP_CLEANUP[CACHE_GRP_DEFAULT]) )
@@ -672,30 +672,30 @@ class DgsCache
 
       $cnt_deleted = 0;
       $start_group = (is_numeric($only_cache_group)) ? $only_cache_group : 0;
-      for( $cache_group=$start_group; $cache_group <= MAX_CACHE_GRP; ++$cache_group )
+      for ( $cache_group=$start_group; $cache_group <= MAX_CACHE_GRP; ++$cache_group )
       {
          $cache = self::get_cache( $cache_group );
-         if( !is_null($cache) )
+         if ( !is_null($cache) )
          {
             $group_expire = ( isset($ARR_CACHE_GROUP_CLEANUP[$cache_group]) )
                ? $NOW - $ARR_CACHE_GROUP_CLEANUP[$cache_group]
                : $default_expire;
             $cnt_cleanup = $cache->cache_cleanup( $cache_group, $group_expire );
-            if( is_numeric($cnt_cleanup) )
+            if ( is_numeric($cnt_cleanup) )
                $cnt_deleted += $cnt_cleanup;
          }
-         if( is_numeric($only_cache_group) )
+         if ( is_numeric($only_cache_group) )
             break;
       }
 
-      if( DBG_CACHE && $cnt_deleted > 0 ) error_log("DgsCache.cleanup_cache(SUM): purged $cnt_deleted total entries");
+      if ( DBG_CACHE && $cnt_deleted > 0 ) error_log("DgsCache.cleanup_cache(SUM): purged $cnt_deleted total entries");
       return $cnt_deleted;
    }//cleanup_cache
 
    // \internal
    private static function debug_result( $value )
    {
-      if( is_null($value) )
+      if ( is_null($value) )
          return 'NULL';
       else
          return gettype($value) . ':' . ( is_object($value) ? get_class($value) : $value );

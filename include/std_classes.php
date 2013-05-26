@@ -53,9 +53,9 @@ class RequestParameters
    public function __construct( $arr_src = null, $use_hidden=true )
    {
       $this->values = array();
-      if( is_array($arr_src) )
+      if ( is_array($arr_src) )
       {
-         foreach( $arr_src as $key => $val )
+         foreach ( $arr_src as $key => $val )
             $this->values[$key] = $val;
       }
       $this->use_hidden = $use_hidden;
@@ -85,10 +85,10 @@ class RequestParameters
     */
    public function get_hiddens( &$hiddens )
    {
-      if( !$this->use_hidden)
+      if ( !$this->use_hidden)
          return ''; // don't export hiddens
 
-      if( is_array($hiddens) )
+      if ( is_array($hiddens) )
          $hiddens = array_merge( $hiddens, $this->values);
       else
          $hiddens = $this->values;
@@ -190,23 +190,23 @@ class QuerySQL
    public function __construct()
    {
       $this->parts = array();
-      foreach( array_keys(self::$ARR_SQL_STATEMENTS) as $type )
+      foreach ( array_keys(self::$ARR_SQL_STATEMENTS) as $type )
          $this->parts[$type] = array();
       $this->use_union_all = false;
 
       // skip arg #0=type-arg to add var-args: parts
       $type = '';
       $cnt_args = func_num_args();
-      for( $i=0; $i < $cnt_args; $i++)
+      for ( $i=0; $i < $cnt_args; $i++)
       {
          $arg = trim(func_get_arg($i));
-         if( isset($this->parts[$arg]) )
+         if ( isset($this->parts[$arg]) )
             $type = $arg;
          else
          {
-            if( $type == '')
+            if ( $type == '')
                error('assert', "QuerySQL.construct.miss_type($arg)"); // missing part-type for part
-            if( $arg != '' )
+            if ( $arg != '' )
                $this->parts[$type][] = $arg;
          }
       }
@@ -242,13 +242,13 @@ class QuerySQL
    public function add_part( $type ) // var-args for parts
    {
       // check
-      if( !isset($this->parts[$type]) )
+      if ( !isset($this->parts[$type]) )
          error('assert', "QuerySQL.add_part.unknown_type($type)");
-      if( ($type === SQLP_GROUP || $type === SQLP_LIMIT) && $this->has_part($type) )
+      if ( ($type === SQLP_GROUP || $type === SQLP_LIMIT) && $this->has_part($type) )
       {
          // allow only once, except same part-value
          $arg = ( func_num_args() > 1 ) ? func_get_arg(1) : null;
-         if( !is_null($arg) && !empty($arg) && $this->get_part($type) != $arg )
+         if ( !is_null($arg) && !empty($arg) && $this->get_part($type) != $arg )
          {
             // type can only be set once (except the same value), part1=$arg
             error('assert', "QuerySQL.add_part.set_type_once($type,$arg)");
@@ -259,10 +259,10 @@ class QuerySQL
 
       // skip arg #0=type-arg to add var-args: parts
       $cnt_args = func_num_args();
-      for( $i=1; $i < $cnt_args; $i++)
+      for ( $i=1; $i < $cnt_args; $i++)
       {
          $part = trim(func_get_arg($i));
-         if( (string)$part != '' )
+         if ( (string)$part != '' )
             $this->parts[$type][] = $part;
       }
    }//add_part
@@ -276,10 +276,10 @@ class QuerySQL
     */
    public function add_part_fields( $part_arr )
    {
-      foreach( $part_arr as $part )
+      foreach ( $part_arr as $part )
       {
          $part = trim($part);
-         if( $part != '' )
+         if ( $part != '' )
             $this->parts[SQLP_FIELDS][] = $part;
       }
    }//add_part_fields
@@ -291,11 +291,11 @@ class QuerySQL
    public function clear_parts() // var-args
    {
       $args = func_get_args();
-      foreach( $args as $type )
+      foreach ( $args as $type )
       {
-         if( !isset($this->parts[$type]) )
+         if ( !isset($this->parts[$type]) )
             error('assert', "QuerySQL.clear_parts.unknown_type($type)");
-         if( isset($this->parts[$type]) )
+         if ( isset($this->parts[$type]) )
             $this->parts[$type] = array();
       }
    }//clear_parts
@@ -303,7 +303,7 @@ class QuerySQL
    /*! \brief Returns true, if sql-part existing */
    public function has_part( $type )
    {
-      if( !isset($this->parts[$type]) )
+      if ( !isset($this->parts[$type]) )
          error('assert', "QuerySQL.has_part.unknown_type($type)");
       return ( count($this->parts[$type]) > 0 );
    }
@@ -317,7 +317,7 @@ class QuerySQL
    /*! \brief Returns parts-array for specified part_type */
    public function get_parts( $type )
    {
-      if( !isset($this->parts[$type]) )
+      if ( !isset($this->parts[$type]) )
          error('assert', "QuerySQL.get_parts.unknown_type($type)");
       return $this->parts[$type];
    }
@@ -330,35 +330,35 @@ class QuerySQL
     */
    public function get_part( $type, $incl_prefix = false, $union_part=-1 )
    {
-      if( !$this->has_part($type) )
+      if ( !$this->has_part($type) )
          return '';
 
       // make unique: SQLP_FIELDS|OPTS|FROM|WHERE|HAVING|ORDER
       $arr = array_unique( $this->parts[$type] );
-      if( $type === SQLP_FIELDS || $type === SQLP_ORDER || $type === SQLP_GROUP )
+      if ( $type === SQLP_FIELDS || $type === SQLP_ORDER || $type === SQLP_GROUP )
          $part = implode(', ', $arr);
-      elseif( $type === SQLP_WHERE || $type === SQLP_HAVING || $type === SQLP_WHERETMPL )
+      elseif ( $type === SQLP_WHERE || $type === SQLP_HAVING || $type === SQLP_WHERETMPL )
          $part = implode(' AND ', $arr);
-      elseif( $type === SQLP_FROM )
+      elseif ( $type === SQLP_FROM )
          $part = $this->merge_from_parts( $arr );
-      elseif( $type === SQLP_LIMIT )
+      elseif ( $type === SQLP_LIMIT )
          $part = (count($arr) > 0) ? $arr[0] : '';
-      elseif( $type === SQLP_FNAMES )
+      elseif ( $type === SQLP_FNAMES )
          $part = implode(',', $arr);
-      elseif( $type === SQLP_OPTS )
+      elseif ( $type === SQLP_OPTS )
       {
          $skiparr = array(
             'HIGH_PRIORITY'  => ($union_part >= 0), // forbidden with UNION
             SQLOPT_CALC_ROWS => ($union_part > 0), // only allowed in 1st SELECT of UNION-clause
          );
          $part = '';
-         foreach( $arr as $val )
+         foreach ( $arr as $val )
          {
-            if( !@$skiparr[$val] )
+            if ( !@$skiparr[$val] )
                $part .= ' ' . $val;
          }
       }
-      elseif( $type === SQLP_UNION_WHERE )
+      elseif ( $type === SQLP_UNION_WHERE )
          $part = implode(' OR ', $arr);
 
       $prefix = ($incl_prefix) ? self::$ARR_SQL_STATEMENTS[$type] . ' ' : '';
@@ -371,11 +371,11 @@ class QuerySQL
     */
    public function merge_from_parts( $arr )
    {
-      if( count($arr) == 0 )
+      if ( count($arr) == 0 )
          return '';
 
       $result = array_shift($arr);
-      foreach( $arr as $part )
+      foreach ( $arr as $part )
       {
          // valid JOIN-Syntax (mysql 4.0):
          //    STRAIGHT_JOIN, [INNER | CROSS] JOIN, [NATURAL] LEFT|RIGHT [OUTER] JOIN
@@ -386,7 +386,7 @@ class QuerySQL
          // - fix: -> replace ','-join with 'INNER JOIN' (could also use CROSS JOIN),
          //   because join has higher precedence than ','-join
          //   see referenced URL above(!)
-         if( !preg_match( "/^(STRAIGHT_JOIN|((INNER|CROSS)\s+)?JOIN|(NATURAL\s+)?(LEFT|RIGHT)\s+(OUTER\s+)?JOIN)\s/i", $part ) )
+         if ( !preg_match( "/^(STRAIGHT_JOIN|((INNER|CROSS)\s+)?JOIN|(NATURAL\s+)?(LEFT|RIGHT)\s+(OUTER\s+)?JOIN)\s/i", $part ) )
             $result .= ' INNER JOIN';
          $result .= " $part";
       }
@@ -402,14 +402,14 @@ class QuerySQL
     */
    public function get_select()
    {
-      if( !$this->has_union() )
+      if ( !$this->has_union() )
          return $this->get_select_normal();
 
       // handle UNION-syntax
       $arr_union = array();
       $union_parts = $this->get_parts(SQLP_UNION_WHERE);
       $cnt_uparts = count($union_parts);
-      for( $idx=0; $idx < $cnt_uparts; $idx++)
+      for ( $idx=0; $idx < $cnt_uparts; $idx++)
       {
          $arr_union[]= $this->get_select_normal($idx);
       }
@@ -418,9 +418,9 @@ class QuerySQL
       $union_cmd = ($this->use_union_all) ? 'UNION ALL' : 'UNION DISTINCT';
       $arrsql[]= '(' . implode(") $union_cmd (", $arr_union) . ')';
 
-      if( $this->has_part(SQLP_ORDER) )
+      if ( $this->has_part(SQLP_ORDER) )
          $arrsql[]= $this->get_part(SQLP_ORDER, true);
-      if( $this->has_part(SQLP_LIMIT) )
+      if ( $this->has_part(SQLP_LIMIT) )
          $arrsql[]= $this->get_part(SQLP_LIMIT, true);
 
       $sql = implode(' ', $arrsql);
@@ -438,17 +438,17 @@ class QuerySQL
    {
       $arrsql = array();
       $has_opts = $this->has_part(SQLP_OPTS);
-      if( $this->has_part(SQLP_FIELDS) || $has_opts )
+      if ( $this->has_part(SQLP_FIELDS) || $has_opts )
          $arrsql[]= 'SELECT';
-      if( $has_opts )
+      if ( $has_opts )
          $arrsql[]= $this->get_part(SQLP_OPTS, false, $union_part );
       $arrsql[]= $this->get_part(SQLP_FIELDS);
       $arrsql[]= $this->get_part(SQLP_FROM, true);
 
       // handle UNION-WHERE and WHERE
-      if( $union_part < 0 )
+      if ( $union_part < 0 )
       {
-         if( $this->has_part(SQLP_WHERE) )
+         if ( $this->has_part(SQLP_WHERE) )
             $arrsql[]= $this->get_part(SQLP_WHERE, true);
       }
       else
@@ -456,21 +456,21 @@ class QuerySQL
          $union_parts = $this->get_parts(SQLP_UNION_WHERE); // non-empty
          $arrsql[]= 'WHERE ' . $union_parts[$union_part];
 
-         if( $this->has_part(SQLP_WHERE) )
+         if ( $this->has_part(SQLP_WHERE) )
             $arrsql[]= 'AND ' . $this->get_part(SQLP_WHERE);
       }
 
-      if( $this->has_part(SQLP_GROUP) )
+      if ( $this->has_part(SQLP_GROUP) )
          $arrsql[]= $this->get_part(SQLP_GROUP, true);
-      if( $this->has_part(SQLP_HAVING) )
+      if ( $this->has_part(SQLP_HAVING) )
          $arrsql[]= $this->get_part(SQLP_HAVING, true);
 
       // ORDER and LIMIT only for non-union-select
-      if( $union_part < 0 )
+      if ( $union_part < 0 )
       {
-         if( $this->has_part(SQLP_ORDER) )
+         if ( $this->has_part(SQLP_ORDER) )
             $arrsql[]= $this->get_part(SQLP_ORDER, true);
-         if( $this->has_part(SQLP_LIMIT) )
+         if ( $this->has_part(SQLP_LIMIT) )
             $arrsql[]= $this->get_part(SQLP_LIMIT, true);
       }
 
@@ -490,10 +490,10 @@ class QuerySQL
    public function merge( $qsql )
    {
       // checks
-      if( is_null($qsql) || empty($qsql) )
+      if ( is_null($qsql) || empty($qsql) )
          return true;
 
-      if( !($qsql instanceof QuerySQL) )
+      if ( !($qsql instanceof QuerySQL) )
       {
          error('assert', "QuerySQL.merge.expect_obj.QuerySQL" );
          return false; // error may be func that go-on
@@ -503,10 +503,10 @@ class QuerySQL
       $this->add_part( SQLP_GROUP, $qsql->get_part(SQLP_GROUP) );
       $this->add_part( SQLP_LIMIT, $qsql->get_part(SQLP_LIMIT) );
 
-      foreach( array_keys( $this->parts ) as $type )
+      foreach ( array_keys( $this->parts ) as $type )
       {
-         if( $qsql->has_part($type) )
-            if( $type != SQLP_GROUP && $type != SQLP_LIMIT )
+         if ( $qsql->has_part($type) )
+            if ( $type != SQLP_GROUP && $type != SQLP_LIMIT )
                $this->parts[$type] = array_merge( $this->parts[$type], $qsql->get_parts($type) );
       }
 
@@ -523,19 +523,19 @@ class QuerySQL
    {
       // normal merge into new one
       $query = $this->duplicate();
-      if( !$query->merge($qsql) )
+      if ( !$query->merge($qsql) )
          return NULL;
 
       // manual merge of WHERE and HAVING
       $query->clear_parts( SQLP_WHERE, SQLP_HAVING );
-      foreach( array( SQLP_WHERE, SQLP_HAVING ) as $type )
+      foreach ( array( SQLP_WHERE, SQLP_HAVING ) as $type )
       {
          $arr = array();
-         if( $this->has_part($type) )
+         if ( $this->has_part($type) )
             $arr[]= $this->get_part($type);
-         if( $qsql->has_part($type) )
+         if ( $qsql->has_part($type) )
             $arr[]= $qsql->get_part($type);
-         if( count($arr) > 0 )
+         if ( count($arr) > 0 )
             $query->add_part( $type, '(' . implode(') OR (', $arr) . ')' );
       }
 
@@ -554,9 +554,9 @@ class QuerySQL
    public function to_string()
    {
       $arr = array();
-      foreach( array_keys($this->parts) as $type )
+      foreach ( array_keys($this->parts) as $type )
       {
-         if( $this->has_part($type) )
+         if ( $this->has_part($type) )
             $arr[]= "$type={[" . implode( '], [', $this->parts[$type] ) . "]}";
       }
       return "QuerySQL: " . implode(', ', $arr);
@@ -653,19 +653,19 @@ class ListIterator
     */
    public function sortListIterator( $field, $sort_flags=SORT_REGULAR )
    {
-      if( count($this->Items) == 0 )
+      if ( count($this->Items) == 0 )
          return true;
 
-      if( !isset($this->Items[0][1][$field]) ) // 1st item, row[field]
+      if ( !isset($this->Items[0][1][$field]) ) // 1st item, row[field]
          error('invalid_args', "ListIterator.sortListIterator.unknown_field($field,$sort_flags)");
       $this->SortField = $field;
 
       $cmp_func = array( $this );
-      if( $sort_flags == SORT_NUMERIC )
+      if ( $sort_flags == SORT_NUMERIC )
          $cmp_func[] = '_compare_items_numeric';
-      elseif( $sort_flags & SORT_STRING )
+      elseif ( $sort_flags & SORT_STRING )
          $cmp_func[] = '_compare_items_string';
-      elseif( ($sort_flags & (SORT_STRING|SORT_FLAG_CASE)) == (SORT_STRING|SORT_FLAG_CASE) )
+      elseif ( ($sort_flags & (SORT_STRING|SORT_FLAG_CASE)) == (SORT_STRING|SORT_FLAG_CASE) )
          $cmp_func[] = '_compare_items_string_nocase';
       else
          error('invalid_args', "ListIterator.sortListIterator.bad_sort_flags($field,$sort_flags)");
@@ -705,7 +705,7 @@ class ListIterator
    /*! \brief Sets main QuerySQL. */
    public function setQuerySQL( $qsql=null )
    {
-      if( !is_null($qsql) && !($qsql instanceof QuerySQL) )
+      if ( !is_null($qsql) && !($qsql instanceof QuerySQL) )
          error('invalid_args', 'ListIterator.setQuerySQL');
       $this->QuerySQL = $qsql;
    }
@@ -713,9 +713,9 @@ class ListIterator
    /*! \brief Adds QuerySQL for merging. */
    public function addQuerySQLMerge( $qsql=null )
    {
-      if( !is_null($qsql) )
+      if ( !is_null($qsql) )
       {
-         if( !($qsql instanceof QuerySQL) )
+         if ( !($qsql instanceof QuerySQL) )
             error('invalid_args', 'ListIterator.addQuerySQLMerge');
          $this->QuerySQLMerge[] = $qsql;
       }
@@ -764,7 +764,7 @@ class ListIterator
    public function addIndex( /*var-args*/ )
    {
       $cnt_args = func_num_args();
-      for( $i=0; $i < $cnt_args; $i++)
+      for ( $i=0; $i < $cnt_args; $i++)
       {
          $field = func_get_arg($i);
          $this->Index[$field] = array();
@@ -780,7 +780,7 @@ class ListIterator
    /*! \brief Returns index-map for indexed field; die with error on unknown field. */
    public function getIndexMap( $field )
    {
-      if( !isset($this->Index[$field]) )
+      if ( !isset($this->Index[$field]) )
          error('invalid_args', "ListIterator.getIndexMap({$this->Name},$field)");
 
       return $this->Index[$field];
@@ -792,12 +792,12 @@ class ListIterator
     */
    public function getIndexValue( $field, $key, $ret_val=-1 )
    {
-      if( !isset($this->Index[$field][$key]) )
+      if ( !isset($this->Index[$field][$key]) )
          return null;
       $arr_item = $this->Index[$field][$key];
-      if( $ret_val < 0 )
+      if ( $ret_val < 0 )
          return $arr_item;
-      elseif( $ret_val == 0 )
+      elseif ( $ret_val == 0 )
          return $arr_item[0];
       else
          return $arr_item[1];
@@ -807,10 +807,10 @@ class ListIterator
    public function to_string()
    {
       $arr = array();
-      if( !is_null($this->QuerySQL) )
+      if ( !is_null($this->QuerySQL) )
          $arr[] = "QuerySQL={" . $this->QuerySQL->to_string() . '}';
       $idx = 1;
-      foreach( $this->QuerySQLMerge as $qsql )
+      foreach ( $this->QuerySQLMerge as $qsql )
          $arr[] = sprintf( "QuerySQLMerge.%d=[%s]", $idx++, $qsql->to_string() );
       $arr[] = "QueryOrder=[{$this->QueryOrder}]";
       $arr[] = "QueryLimit=[{$this->QueryLimit}]";
@@ -818,7 +818,7 @@ class ListIterator
       $arr[] = "ResultRows=[{$this->ResultRows}]";
       $arr[] = '#Items=[' . count($this->Items) . ']';
       $idx = 1;
-      foreach( $this->Items as $arr_item )
+      foreach ( $this->Items as $arr_item )
       {
          list( $item, $row ) = $arr_item;
          $arr[] = sprintf( "Item.%d=[%s]", $idx++,
@@ -838,12 +838,12 @@ class ListIterator
     */
    public function buildQuery()
    {
-      if( is_null($this->QuerySQL) )
+      if ( is_null($this->QuerySQL) )
          $this->QuerySQL = new QuerySQL();
 
       // merge all QuerySQLs
       $merged_qsql = $this->QuerySQL;
-      foreach( $this->QuerySQLMerge as $m_qsql )
+      foreach ( $this->QuerySQLMerge as $m_qsql )
          $merged_qsql->merge( $m_qsql );
       $this->MergedQuerySQL = $merged_qsql;
 
@@ -858,18 +858,18 @@ class ListIterator
       $arr_item = array( $item, $row );
       $this->Items[] = $arr_item;
 
-      foreach( $this->Index as $field => $map )
+      foreach ( $this->Index as $field => $map )
          $this->Index[$field][$row[$field]] = $arr_item;
    }//addItem
 
    /*! \brief Return array with list of objects (without extra-row). */
    public function getItems( $with_extra=false )
    {
-      if( $with_extra )
+      if ( $with_extra )
          return $this->Items;
 
       $out = array();
-      foreach( $this->Items as $item )
+      foreach ( $this->Items as $item )
          $out[] = $item[0];
       return $out;
    }//getItems
@@ -878,7 +878,7 @@ class ListIterator
    public function getItemRows()
    {
       $out = array();
-      foreach( $this->Items as $arr_item )
+      foreach ( $this->Items as $arr_item )
          $out[] = $arr_item[1];
       $this->resetListIterator();
       return $out;
@@ -887,13 +887,13 @@ class ListIterator
    /*! \brief Rescans items and re-filling index. */
    public function rescanIndex()
    {
-      foreach( array_keys($this->Index) as $field )
+      foreach ( array_keys($this->Index) as $field )
          $this->Index[$field] = array();
 
-      foreach( $this->Items as $arr_item )
+      foreach ( $this->Items as $arr_item )
       {
          $row = $arr_item[1];
-         foreach( $this->Index as $field => $map )
+         foreach ( $this->Index as $field => $map )
             $this->Index[$field][$row[$field]] = $arr_item;
       }
       $this->resetListIterator();
@@ -981,7 +981,7 @@ class ThreadList
    public function traverse( $function, &$result )
    {
       $function( $this, $result );
-      foreach( $this->children as $child_item )
+      foreach ( $this->children as $child_item )
       {
          $child_item->traverse( $function, $result );
       }

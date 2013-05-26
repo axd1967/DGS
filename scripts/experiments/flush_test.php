@@ -33,11 +33,11 @@ $GLOBALS['ThePage'] = new Page('Flush', PAGEFLAG_IMPLICIT_FLUSH );
    //set_time_limit(0); // don't want script-break during "transaction" with multi-db-queries
 
    $logged_in = who_is_logged( $player_row);
-   if( !$logged_in )
+   if ( !$logged_in )
       error('login_if_not_logged_in', 'scripts.flush_test');
-   if( $player_row['ID'] <= GUESTS_ID_MAX )
+   if ( $player_row['ID'] <= GUESTS_ID_MAX )
       error('not_allowed_for_guest', 'scripts.flush_test');
-   if( !(@$player_row['admin_level'] & ADMIN_DATABASE) )
+   if ( !(@$player_row['admin_level'] & ADMIN_DATABASE) )
       error('adminlevel_too_low', 'scripts.flush_test');
 
    start_html( 'flush_test', 0, '',
@@ -50,10 +50,10 @@ $GLOBALS['ThePage'] = new Page('Flush', PAGEFLAG_IMPLICIT_FLUSH );
 
    echo "Start ", date(DATE_FMT5, $NOW), "<br><br>\n";
 
-   for( $i=1; $i <= 8; $i++ )
+   for ( $i=1; $i <= 8; $i++ )
    {
       echo "Entry $i<br>\n";
-      for( $j=1; $j <= 3000000; $j++ ) ; // wait a bit (without using sleep()-func)
+      for ( $j=1; $j <= 3000000; $j++ ) ; // wait a bit (without using sleep()-func)
    }
 
    end_html();

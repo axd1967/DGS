@@ -40,28 +40,28 @@ require_once 'tournaments/include/tournament_log.php';
    connect2mysql();
 
    $logged_in = who_is_logged( $player_row );
-   if( !$logged_in )
+   if ( !$logged_in )
       error('login_if_not_logged_in', 'Tournament.show_tlog');
-   if( !ALLOW_TOURNAMENTS )
+   if ( !ALLOW_TOURNAMENTS )
       error('feature_disabled', 'Tournament.show_tlog');
    $my_id = $player_row['ID'];
-   if( $my_id <= GUESTS_ID_MAX )
+   if ( $my_id <= GUESTS_ID_MAX )
       error('not_allowed_for_guest', 'Tournament.show_tlog');
 
    $tid = (int)@$_REQUEST['tid'];
-   if( $tid < 0 ) $tid = 0;
+   if ( $tid < 0 ) $tid = 0;
 
    // check view-rights
    $is_admin = ( @$player_row['admin_level'] & (ADMIN_DEVELOPER|ADMIN_TOURNAMENT) );
    $tourney = null;
    $allow_view = false;
-   if( $tid )
+   if ( $tid )
    {
       $tourney = TournamentCache::load_cache_tournament( 'Tournament.show_tlog', $tid, /*check*/false );
-      if( !is_null($tourney) ) // deleted tournament perhaps (so no error)
+      if ( !is_null($tourney) ) // deleted tournament perhaps (so no error)
          $allow_view = TournamentHelper::allow_edit_tournaments($tourney, $my_id);
    }
-   if( !($is_admin || $allow_view) )
+   if ( !($is_admin || $allow_view) )
       error('adminlevel_too_low', 'Tournament.show_tlog');
 
 
@@ -111,7 +111,7 @@ require_once 'tournaments/include/tournament_log.php';
       SQLP_FROM,
          'LEFT JOIN Players AS P ON P.ID=TLOG.uid', // left-join for cron-user with uid 0
          'LEFT JOIN Players AS AP ON AP.ID=TLOG.actuid' ));
-   if( $tid > 0 )
+   if ( $tid > 0 )
       $qsql->add_part( SQLP_WHERE, "TLOG.tid=$tid" );
 
    $iterator = new ListIterator( 'Tournamentlog',
@@ -123,39 +123,39 @@ require_once 'tournaments/include/tournament_log.php';
    $show_rows = $table->compute_show_rows( $iterator->getResultRows() );
    //$table->set_found_rows( mysql_found_rows('Tournament.show_tlog.found_rows') );
 
-   while( ($show_rows-- > 0) && list(,$arr_item) = $iterator->getListIterator() )
+   while ( ($show_rows-- > 0) && list(,$arr_item) = $iterator->getListIterator() )
    {
       list( $tlog, $orow ) = $arr_item;
       $row_str = array();
 
-      if( $table->Is_Column_Displayed[1] )
+      if ( $table->Is_Column_Displayed[1] )
          $row_str[1] = $tlog->ID;
-      if( $table->Is_Column_Displayed[2] )
+      if ( $table->Is_Column_Displayed[2] )
          $row_str[2] = anchor($base_path."tournaments/view_tournament.php?tid=".$tlog->tid, $tlog->tid);
-      if( $table->Is_Column_Displayed[3] )
+      if ( $table->Is_Column_Displayed[3] )
       {
-         if( $tlog->uid > 0 )
+         if ( $tlog->uid > 0 )
             $row_str[3] = user_reference( REF_LINK, 1, '', $tlog->uid, $orow['P_Handle'], '' ) . ', ' .
                echo_rating($orow['P_Rating'], /*show%*/false, $tlog->uid, /*engl*/false, /*short*/true);
          else
             $row_str[3] = 'CRON';
       }
-      if( $table->Is_Column_Displayed[4] )
+      if ( $table->Is_Column_Displayed[4] )
          $row_str[4] = ( $tlog->Date > 0 ) ? date(DATE_FMT3, $tlog->Date) : '';
-      if( $table->Is_Column_Displayed[5] )
+      if ( $table->Is_Column_Displayed[5] )
          $row_str[5] = $tlog->Type;
-      if( $table->Is_Column_Displayed[6] )
+      if ( $table->Is_Column_Displayed[6] )
          $row_str[6] = $tlog->Object;
-      if( $table->Is_Column_Displayed[7] )
+      if ( $table->Is_Column_Displayed[7] )
          $row_str[7] = $tlog->Action;
-      if( $table->Is_Column_Displayed[8] )
+      if ( $table->Is_Column_Displayed[8] )
       {
          $row_str[8] = ( $tlog->actuid > 0 )
             ? user_reference( REF_LINK, 1, '', $tlog->actuid, $orow['AP_Handle'], '' ) . ', ' .
                   echo_rating($orow['AP_Rating'], /*show%*/false, $tlog->actuid, /*engl*/false, /*short*/true)
             : NO_VALUE;
       }
-      if( $table->Is_Column_Displayed[9] )
+      if ( $table->Is_Column_Displayed[9] )
          $row_str[9] = format_tlog_message( $tlog );
 
       $table->add_row( $row_str );
@@ -165,7 +165,7 @@ require_once 'tournaments/include/tournament_log.php';
    start_page(T_('Show Tournament Log'), true, $logged_in, $player_row);
    section( 'tournamentlog', T_('Tournament Log') );
 
-   if( !is_null($tourney) )
+   if ( !is_null($tourney) )
       echo $tourney->build_info(2), "<br><br>\n";
 
    $table->echo_table();

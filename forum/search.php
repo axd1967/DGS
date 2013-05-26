@@ -30,7 +30,7 @@ require_once 'include/filterlib_mysqlmatch.php';
    connect2mysql();
 
    $logged_in = who_is_logged( $player_row);
-   if( !$logged_in )
+   if ( !$logged_in )
       error('login_if_not_logged_in', 'forum.search');
    $my_id = $player_row['ID'];
 
@@ -43,7 +43,7 @@ require_once 'include/filterlib_mysqlmatch.php';
    $arr_fnames = Forum::load_cache_forum_names( $f_opts ); // id => name
    $farr_vis = array_keys($arr_fnames); // IDs of visible forums
    $arr_forum = array( T_('All#forum') => '' );
-   foreach( $arr_fnames as $id => $name )
+   foreach ( $arr_fnames as $id => $name )
       $arr_forum[$name] = 'P.Forum_ID=' . $id;
 
    $disp_forum = new DisplayForum( $my_id, $is_moderator );
@@ -51,7 +51,7 @@ require_once 'include/filterlib_mysqlmatch.php';
 
    $page = "search.php";
 
-   if( $is_admin_moderator )
+   if ( $is_admin_moderator )
       $disp_forum->links |= LINK_TOGGLE_MODERATOR;
    else
       $disp_forum->is_moderator = 0;
@@ -60,7 +60,7 @@ require_once 'include/filterlib_mysqlmatch.php';
    start_page($title, true, $logged_in, $player_row);
    echo "<h3 class=Header>$title</h3>\n";
 
-   if( @$_REQUEST[FFORM_RESET_ACTION] )
+   if ( @$_REQUEST[FFORM_RESET_ACTION] )
    {
       $offset = 0;
       $order = 0;
@@ -87,7 +87,7 @@ require_once 'include/filterlib_mysqlmatch.php';
       3 => 'X_MaxEdit DESC',
       4 => 'X_MaxEdit ASC',
    );
-   if( !is_numeric($order) || $order < 0 || $order >= count($arr_order) )
+   if ( !is_numeric($order) || $order < 0 || $order >= count($arr_order) )
       $order = 0;
    $sql_order = $arr_sql_order[$order];
 
@@ -111,9 +111,9 @@ require_once 'include/filterlib_mysqlmatch.php';
          array( FC_TIME_UNITS => FRDTU_ALL_ABS, FC_SIZE => 12 ) );
 
    // guest is not allowed to see hidden guest posts with emails from others
-   if( $my_id > GUESTS_ID_MAX )
+   if ( $my_id > GUESTS_ID_MAX )
    {
-      if( $is_admin_moderator )
+      if ( $is_admin_moderator )
       {
          $ffilter->add_filter( 6, 'Selection',
             array( T_('All shown messages#forum') => "P.Approved='Y'",
@@ -157,7 +157,7 @@ require_once 'include/filterlib_mysqlmatch.php';
          'DESCRIPTION', T_('Message scope#forum'),
          'FILTER',      $ffilter, 4,
       );
-   if( $my_id > GUESTS_ID_MAX )
+   if ( $my_id > GUESTS_ID_MAX )
    {
       $filter6_str = ($is_admin_moderator)
          ? sprintf( '<span class="AdminOption">%s</span>', T_('(moderator only)') )
@@ -191,22 +191,22 @@ require_once 'include/filterlib_mysqlmatch.php';
    $findposts = array();
    $nr_rows = 0;
    $has_query = false;
-   if( $ffilter->is_init() && !$ffilter->is_reset() )
+   if ( $ffilter->is_init() && !$ffilter->is_reset() )
    {
       // get clause-part for mysql-match as select-col
       $has_query = true;
-      if( is_null($filter2->get_query()) )
+      if ( is_null($filter2->get_query()) )
          $query_match = '1';
       else
          $query_match = $filter2->get_match_query_part();
 
       $qsql = ForumPost::build_query_sql();
-      if( ALLOW_SQL_CALC_ROWS )
+      if ( ALLOW_SQL_CALC_ROWS )
          $qsql->add_part( SQLP_OPTS, SQLOPT_CALC_ROWS );
       $qsql->add_part( SQLP_FIELDS, "$query_match AS Score" );
 
       // need approved-state for non-moderators (see filter6 above)
-      if( $my_id <= GUESTS_ID_MAX )
+      if ( $my_id <= GUESTS_ID_MAX )
          $qsql->add_part( SQLP_WHERE, "P.Approved='Y'" );
       $qsql->add_part( SQLP_WHERE, "P.PosIndex>''" ); // '' == inactivated (edited)
 
@@ -217,7 +217,7 @@ require_once 'include/filterlib_mysqlmatch.php';
       $query_filter = $ffilter->get_query(); // clause-parts for filter
       $qsql->merge($query_filter);
 
-      if( $sql_order)
+      if ( $sql_order)
          $qsql->add_part( SQLP_ORDER, $sql_order );
       $qsql->add_part( SQLP_LIMIT, "$offset," . ($maxrows+1) ); // +1 for next-page detection
       $query = $qsql->get_select();
@@ -225,11 +225,11 @@ require_once 'include/filterlib_mysqlmatch.php';
       $result = db_query( 'forum_search.find', $query );
       $nr_rows = mysql_num_rows($result);
       $found_rows = mysql_found_rows('forum_search.found_rows');
-      if( $found_rows >= 0 )
+      if ( $found_rows >= 0 )
          $disp_forum->show_found_rows( $found_rows );
 
       $cnt_rows = $maxrows; // read only what is needed (nr_rows maybe +1)
-      while( ($row = mysql_fetch_array( $result )) && $cnt_rows-- > 0 )
+      while ( ($row = mysql_fetch_array( $result )) && $cnt_rows-- > 0 )
       {
          $post = ForumPost::new_from_row($row);
          $post->forum_name = @$arr_fnames[$post->forum_id];
@@ -245,9 +245,9 @@ require_once 'include/filterlib_mysqlmatch.php';
    $disp_forum->headline = array( T_('Search result') => "colspan=$cols" );
 
    $disp_forum->links |= LINK_FORUMS;
-   if( $offset > 0 )
+   if ( $offset > 0 )
       $disp_forum->links |= LINK_PREV_PAGE;
-   if( $nr_rows > $maxrows )
+   if ( $nr_rows > $maxrows )
       $disp_forum->links |= LINK_NEXT_PAGE;
 
    // build navi-URL for paging (offset/maxrows set in forum_start_table/make_link_array-func)
@@ -264,15 +264,15 @@ require_once 'include/filterlib_mysqlmatch.php';
    $disp_forum->forum_start_table('Search', $rp);
    echo "<tr><td colspan=$cols><table width=\"100%\" cellpadding=2 cellspacing=0 border=0>\n";
 
-   foreach( $findposts as $post )
+   foreach ( $findposts as $post )
    {
       $is_my_post = $post->is_author($my_id);
       $hidden = !$post->is_approved();
-      if( $hidden && !$is_admin_moderator && !$is_my_post )
+      if ( $hidden && !$is_admin_moderator && !$is_my_post )
          continue;
 
       $drawmode = DRAWPOST_SEARCH;
-      if( $hidden )
+      if ( $hidden )
          $drawmode |= MASK_DRAWPOST_HIDDEN;
 
       $disp_forum->draw_post( $drawmode, $post, $is_my_post, null );

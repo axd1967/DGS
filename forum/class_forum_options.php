@@ -73,11 +73,11 @@ class ForumOptions
       $show = true;
 
       // hidden forums has precedence (overwriting other forum-visibility)
-      if( $fopts & FORUMOPTS_GROUPS_HIDDEN )
+      if ( $fopts & FORUMOPTS_GROUPS_HIDDEN )
       {// is hidden forum
-         if( ($fopts & FORUMOPT_GROUP_DEV) && $this->view_dev )
+         if ( ($fopts & FORUMOPT_GROUP_DEV) && $this->view_dev )
             $show = true;
-         elseif( ($fopts & FORUMOPT_GROUP_ADMIN) && $this->view_admin )
+         elseif ( ($fopts & FORUMOPT_GROUP_ADMIN) && $this->view_admin )
             $show = true;
          else
             $show = false;
@@ -91,9 +91,9 @@ class ForumOptions
    {
       // choose mask, so that: Forums.Options & exclude_mask = 0 !!
       $mask = 0;
-      if( !$this->view_admin )
+      if ( !$this->view_admin )
          $mask |= FORUMOPT_GROUP_ADMIN;
-      if( !$this->view_dev )
+      if ( !$this->view_dev )
          $mask |= FORUMOPT_GROUP_DEV;
       return $mask;
    }

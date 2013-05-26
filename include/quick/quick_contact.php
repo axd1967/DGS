@@ -66,7 +66,7 @@ class QuickHandlerContact extends QuickHandler
 
       // prepare command: list
 
-      if( $cmd == QCMD_LIST )
+      if ( $cmd == QCMD_LIST )
       {
          $qsql = Contact::build_querysql_contact( $uid );
          $qsql->add_part( SQLP_ORDER, "P.Name ASC" );
@@ -80,16 +80,16 @@ class QuickHandlerContact extends QuickHandler
    public function process()
    {
       $cmd = $this->quick_object->cmd;
-      if( $cmd == QCMD_LIST )
+      if ( $cmd == QCMD_LIST )
          $this->process_cmd_list();
    }//process
 
    private function process_cmd_list()
    {
       $out = array();
-      if( is_array($this->contacts) )
+      if ( is_array($this->contacts) )
       {
-         foreach( $this->contacts as $contact )
+         foreach ( $this->contacts as $contact )
             $out[] = $this->build_obj_contact($contact);
       }
 
@@ -113,7 +113,7 @@ class QuickHandlerContact extends QuickHandler
       $with_fields = ( $this->is_with_option(QWITH_USER_ID) ) ? 'country,rating,lastacc' : '';
       $urow = $contact->contact_user_row;
       $out = $this->build_obj_user( $contact->cid, $urow, '', $with_fields, /*always*/true );
-      if( $with_fields )
+      if ( $with_fields )
       {
          $out['last_move'] = QuickHandler::formatDate($urow['X_LastMove']);
          $out['type'] = QuickHandlerUser::convertUserType($urow['Type']);

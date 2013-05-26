@@ -32,16 +32,16 @@ define('RCADM_CHANGE_RATING',    0x02);
 
 function table_interpolate($value, $table, $extrapolate=false)
 {
-   foreach( $table as $x )
+   foreach ( $table as $x )
    {
-      if( !empty($tmpprev) )
+      if ( !empty($tmpprev) )
          $prev=$tmpprev;
 
-      if( $value <= $x['KEY'] )
+      if ( $value <= $x['KEY'] )
       {
-         if( empty($prev) )
+         if ( empty($prev) )
          {
-            if( !$extrapolate )
+            if ( !$extrapolate )
                error('value_out_of_range','table_interpolate1');
          }
          else
@@ -55,7 +55,7 @@ function table_interpolate($value, $table, $extrapolate=false)
       $tmpprev = $x;
    }
 
-   if( !$extrapolate )
+   if ( !$extrapolate )
       error('value_out_of_range','table_interpolate2');
 
    // extrapolate
@@ -112,7 +112,7 @@ function change_rating(&$rating_W, &$rating_B, $result, $size, $komi, $handicap,
 
    $D = $old_D = $rating_W - $rating_B;
 
-   if( $handicap < 1 )
+   if ( $handicap < 1 )
       $handicap = 1;
 
    $H = ( $handicap - 0.5 - $komi / STONE_VALUE );
@@ -122,18 +122,18 @@ function change_rating(&$rating_W, &$rating_B, $result, $size, $komi, $handicap,
 
    $D -= 100.0 * $H;
 
-   if( $D >= 0 ) //ratW-ratB
+   if ( $D >= 0 ) //ratW-ratB
    {
       $SEB = 1.0/(1.0+exp($D/a_value($rating_B)));
       $SEW = 1.0-$SEB;
-      if( $result != 0.5 )
+      if ( $result != 0.5 )
          $SEW-= $e;
    }
    else
    {
       $SEW = 1.0/(1.0+exp(-$D/a_value($rating_W)));
       $SEB = 1.0-$SEW;
-      if( $result != 0.5 )
+      if ( $result != 0.5 )
          $SEB-= $e;
    }
 
@@ -147,7 +147,7 @@ function change_rating(&$rating_W, &$rating_B, $result, $size, $komi, $handicap,
    $rating_W += $conW * ($result - $SEW);
    $rating_B += $conB * (1-$result - $SEB);
 
-   if( DBG_RATING )
+   if ( DBG_RATING )
    {
       static $fmt = "   %s: SE=%1.6f, con=%3.6f, rating=[%4.6f -> %4.6f], diff = %3.6f\n";
       echo sprintf("change_rating: factor=%1.6f, sizefactor=%1.6f, result=%s, H=%1.6f, old_D=%3.6f, D=%3.6f\n",
@@ -172,17 +172,17 @@ function suggest_proper($rating_W, $rating_B, $size, $positive_komi=false)
    $handicap = ( $positive_komi ? ceil($H) : round($H) );
    // temporary, there is no 0 handicap stone game in this calculus. An equal
    // game is a 1 stone game where black play his handicap stone where he want.
-   if( $handicap < 1 ) $handicap = 1;
+   if ( $handicap < 1 ) $handicap = 1;
 
    $is_nigiri = ( $rating_B == $rating_W );
-   if( $is_nigiri )
+   if ( $is_nigiri )
       $iamblack = mt_rand(0,1); // nigiri on same rating
    else
       $iamblack = ( $rating_B > $rating_W );
 
    $komi = round( 2.0 * STONE_VALUE * ( $handicap - $H ) ) / 2.0;
 
-   if( $handicap == 1 ) $handicap = 0; //back to the 0 handicap habit
+   if ( $handicap == 1 ) $handicap = 0; //back to the 0 handicap habit
 
    return array( $handicap, $komi, ($iamblack ? 1:0), ($is_nigiri ? 1:0) );
 }//suggest_proper
@@ -197,7 +197,7 @@ function suggest_conventional($rating_W, $rating_B, $size, $positive_komi=false)
    $H *= handicapfactor( $size);
    $handicap = round($H);
 
-   if( $handicap == 0 ) // even-game
+   if ( $handicap == 0 ) // even-game
    {
       $komi = STONE_VALUE / 2.0;
       $is_nigiri = true;
@@ -205,7 +205,7 @@ function suggest_conventional($rating_W, $rating_B, $size, $positive_komi=false)
    }
    else // handicap-game
    {
-      if( $handicap == 1 ) $handicap = 0;
+      if ( $handicap == 1 ) $handicap = 0;
       $komi = 0.5;
       $is_nigiri = false;
       $iamblack = ( $rating_B > $rating_W );
@@ -243,21 +243,21 @@ function update_rating2($gid, $check_done=true, $simul=false, $game_row=null)
          "INNER JOIN Players AS black ON black.ID=G.Black_ID " .
          "INNER JOIN Players AS white ON white.ID=G.White_ID " .
       "WHERE G.ID=$gid";
-   if( $simul )
+   if ( $simul )
       $query .= " AND G.Status='".GAME_STATUS_FINISHED."'";
-   if( $check_done )
+   if ( $check_done )
       $query .= " AND G.Rated!='Done'";
 
    $result = db_query( 'update_rating2.find_game', $query );
-   if( @mysql_num_rows($result) != 1 )
+   if ( @mysql_num_rows($result) != 1 )
       return -1; //error or game not found or rate already done
    $row = mysql_fetch_assoc( $result );
    extract($row);
 
-   if( !is_null($game_row) ) // overwrite (for simul-mode & MP-game)
+   if ( !is_null($game_row) ) // overwrite (for simul-mode & MP-game)
       extract($game_row);
 
-   if( DBG_RATING )
+   if ( DBG_RATING )
    {
       static $fmt2 = "   uid [%6d] %s-Rating: Game-Current [%1.6f], Min [%1.6f], Max [%1.6f], Start(unused) [%1.6f]\n";
       echo "Rating Init ...\n",
@@ -268,10 +268,10 @@ function update_rating2($gid, $check_done=true, $simul=false, $game_row=null)
    }
 
    $too_few_moves = ( $tid == 0 && !$simul ) ? ( $Moves < DELETE_LIMIT + $Handicap ) : false;
-   if( $too_few_moves || $Rated == 'N' || $wRatingStatus != RATING_RATED || $bRatingStatus != RATING_RATED
+   if ( $too_few_moves || $Rated == 'N' || $wRatingStatus != RATING_RATED || $bRatingStatus != RATING_RATED
          || $GameType != GAMETYPE_GO )
    {
-      if( !$simul )
+      if ( !$simul )
       {
          db_query( 'update_rating2.set_rated_N',
             "UPDATE Games SET Rated='N'" .
@@ -280,15 +280,15 @@ function update_rating2($gid, $check_done=true, $simul=false, $game_row=null)
                   " WHERE ID=$gid LIMIT 1" );
       }
 
-      if( $too_few_moves )
+      if ( $too_few_moves )
          return RATEDSTATUS_DELETABLE; //not rated game, deletable
       else
          return RATEDSTATUS_UNRATED; //not rated game
    }
 
    $game_result = 0.5;
-   if( $Score > 0 ) $game_result = 1.0;
-   if( $Score < 0 ) $game_result = 0.0;
+   if ( $Score > 0 ) $game_result = 1.0;
+   if ( $Score < 0 ) $game_result = 0.0;
 
    $bOld = $bRating;
    $wOld = $wRating;
@@ -312,38 +312,38 @@ function update_rating2($gid, $check_done=true, $simul=false, $game_row=null)
    $wFactor = 1/$bFactor;
    $maxminFactor = 0.5;
 
-   if( DBG_RATING ) echo sprintf("   White-Rating-Factor [%1.6f]\n   Black-Rating-Factor [%1.6f]\n", $wFactor, $bFactor );
+   if ( DBG_RATING ) echo sprintf("   White-Rating-Factor [%1.6f]\n   Black-Rating-Factor [%1.6f]\n", $wFactor, $bFactor );
 
    // Update ratings
 
-   if( DBG_RATING ) echo "\nWhite-Rating ...\n";
+   if ( DBG_RATING ) echo "\nWhite-Rating ...\n";
    $bTmp = $bOld;
    change_rating($wRating, $bTmp, $game_result, $Size, $Komi, $Handicap, $wFactor);
-   if( $wRating < MIN_RATING )
+   if ( $wRating < MIN_RATING )
       $wRating = MIN_RATING;
 
-   if( DBG_RATING ) echo "White-RatingMax...\n";
+   if ( DBG_RATING ) echo "White-RatingMax...\n";
    $wFactor *= $maxminFactor;
    $bTmp = $bOld;
    change_rating($wRatingMax, $bTmp, $game_result, $Size, $Komi, $Handicap, $wFactor);
 
-   if( DBG_RATING ) echo "White-RatingMin...\n";
+   if ( DBG_RATING ) echo "White-RatingMin...\n";
    $bTmp = $bOld;
    change_rating($wRatingMin, $bTmp, $game_result, $Size, $Komi, $Handicap, $wFactor);
 
 
-   if( DBG_RATING ) echo "\nBlack-Rating ...\n";
+   if ( DBG_RATING ) echo "\nBlack-Rating ...\n";
    $wTmp = $wOld;
    change_rating($wTmp, $bRating, $game_result, $Size, $Komi, $Handicap, $bFactor);
-   if( $bRating < MIN_RATING )
+   if ( $bRating < MIN_RATING )
       $bRating = MIN_RATING;
 
-   if( DBG_RATING ) echo "Black-Rating-Max ...\n";
+   if ( DBG_RATING ) echo "Black-Rating-Max ...\n";
    $bFactor *= $maxminFactor;
    $wTmp = $wOld;
    change_rating($wTmp, $bRatingMax, $game_result, $Size, $Komi, $Handicap, $bFactor);
 
-   if( DBG_RATING ) echo "Black-Rating-Min ...\n";
+   if ( DBG_RATING ) echo "Black-Rating-Min ...\n";
    $wTmp = $wOld;
    change_rating($wTmp, $bRatingMin, $game_result, $Size, $Komi, $Handicap, $bFactor);
 
@@ -353,22 +353,22 @@ function update_rating2($gid, $check_done=true, $simul=false, $game_row=null)
    $k = (1-$WithinPercent)/2;
    $Dist = ($bRatingMax - $bRatingMin) * $k;
 
-   if( $bRating > $bRatingMax - $Dist )
+   if ( $bRating > $bRatingMax - $Dist )
       $bRatingMax = ($bRating - $bRatingMin * $k) / (1-$k);
 
-   if( $bRating < $bRatingMin + $Dist )
+   if ( $bRating < $bRatingMin + $Dist )
       $bRatingMin = ($bRating - $bRatingMax * $k) / (1-$k);
 
    $Dist = ($wRatingMax - $wRatingMin) * $k;
 
-   if( $wRating > $wRatingMax - $Dist )
+   if ( $wRating > $wRatingMax - $Dist )
       $wRatingMax = ($wRating - $wRatingMin * $k) / (1-$k);
 
-   if( $wRating < $wRatingMin + $Dist )
+   if ( $wRating < $wRatingMin + $Dist )
       $wRatingMin = ($wRating - $wRatingMax * $k) / (1-$k);
 
 
-   if( !$simul )
+   if ( !$simul )
    {
       db_query( 'update_rating2.set_rated_Done',
          "UPDATE Games SET Rated='Done', " .
@@ -394,7 +394,7 @@ function update_rating2($gid, $check_done=true, $simul=false, $game_row=null)
                ($wRating - $wOld) . ", '$Lastchanged') " );
    }
 
-   if( DBG_RATING )
+   if ( DBG_RATING )
    {
       static $fmt = "   Result %s-Rating: Start [%1.6f] => <b>End [%1.6f], Diff [%3.6f]</b>,  Min [%1.6f], Max [%1.6f]\n";
       echo "<b>Rating Results of update_rating2():</b>\n",
@@ -410,7 +410,7 @@ function update_rating2($gid, $check_done=true, $simul=false, $game_row=null)
 // returns true, if given DGS-rating is valid
 function is_valid_rating( $dgs_rating, $check_min=true )
 {
-   if( isset($dgs_rating) && is_numeric($dgs_rating) && abs($dgs_rating) < OUT_OF_RATING )
+   if ( isset($dgs_rating) && is_numeric($dgs_rating) && abs($dgs_rating) < OUT_OF_RATING )
       return ( $check_min ) ? ( $dgs_rating >= MIN_RATING ) : true;
    else
       return false;
@@ -421,10 +421,10 @@ function getRatingArray()
 {
    $rating_array = array();
    $s = ' ' . T_('dan');
-   for($i=9; $i>0; $i--)
+   for ($i=9; $i>0; $i--)
       $rating_array["$i dan"] = $i . $s;
    $s = ' ' . T_('kyu');
-   for($i=1; $i<=30; $i++) //30 = (2100-MIN_RATING)/100
+   for ($i=1; $i<=30; $i++) //30 = (2100-MIN_RATING)/100
       $rating_array["$i kyu"] = $i . $s;
    return $rating_array;
 }
@@ -435,7 +435,7 @@ function getRatingArray()
 // return '' for invalid rating
 function echo_rating($rating, $show_percent=true, $graph_uid=0, $keep_english=false, $short=false)
 {
-   if( !is_valid_rating($rating) )
+   if ( !is_valid_rating($rating) )
       return '';
 
    $T_= ( $keep_english ? 'fnop' : 'T_' );
@@ -444,18 +444,18 @@ function echo_rating($rating, $show_percent=true, $graph_uid=0, $keep_english=fa
    $rank_val = round($rating/100.0);
 
    $string = '';
-   if( $rank_val > 20.5 )
+   if ( $rank_val > 20.5 )
       $string .= ( $rank_val - 20 ) . ( $short === true ? $T_('dan#short') : ($short ? 'd' : $spc . $T_('dan')) );
    else
       $string .= ( 21 - $rank_val ) . ( $short === true ? $T_('kyu#short') : ($short ? 'k' : $spc . $T_('kyu')) );
 
-   if( $show_percent )
+   if ( $show_percent )
    {
       $percent = $rating - $rank_val*100.0;
       $string .= $spc . '('. ($percent > 0 ? '+' :'') . round($percent) . '%)';
    }
 
-   if( $graph_uid > 0 )
+   if ( $graph_uid > 0 )
    {
       global $base_path;
       $elo_str = T_('ELO#rating') . sprintf( ' %1.2f', $rating );
@@ -480,7 +480,7 @@ function read_rating($string)
 {
    $string = strtolower($string);
 
-   if( !preg_match(RATING_PATTERN, $string, $matches) )
+   if ( !preg_match(RATING_PATTERN, $string, $matches) )
       return NO_RATING;
 
    $kyu = ( $matches[2] == 'dan' || $matches[2] == 'd' ) ? 2 : 1;
@@ -491,9 +491,9 @@ function read_rating($string)
 //need $kyu=1 (kyu) or $kyu=2 (dan)
 function rank_to_rating($val, $kyu)
 {
-   if( $kyu == 1 )
+   if ( $kyu == 1 )
       return 2100 - $val*100;
-   else if( $kyu == 2 )
+   else if ( $kyu == 2 )
       return $val*100 + 2000;
    else
       return NO_RATING;
@@ -508,11 +508,11 @@ function get_rating_at_date($uid, $date)
                "WHERE uid='$uid' AND Time<='$date' " .
                "ORDER BY Time DESC LIMIT 1" );
 
-   if( !$row )
+   if ( !$row )
       $row = mysql_single_fetch( "get_rating_at.initial_rating($uid)",
          "SELECT InitialRating AS Rating FROM Players WHERE ID='$uid' LIMIT 1" );
 
-   if( isset($row['Rating']) )
+   if ( isset($row['Rating']) )
       return $row['Rating'];
    return NO_RATING; //not ranked
 }
@@ -570,7 +570,7 @@ function convert_to_rating($string, $type, $no_error=false)
 
 
    $rating = NO_RATING;
-   if( (string)$string == '' )
+   if ( (string)$string == '' )
       return $rating;
 
    $string = strtolower($string);
@@ -579,9 +579,9 @@ function convert_to_rating($string, $type, $no_error=false)
    $val = doubleval($string);
 
    // check, if input is rank (with some dan/kyu/gup-grade) or rating (nums only)
-   if( strpos($string, 'k') > 0 || strpos($string, 'gup') > 0 )
+   if ( strpos($string, 'k') > 0 || strpos($string, 'gup') > 0 )
       $kyu = 1; // kyu rank
-   else if( strpos($string, 'd') > 0 )
+   else if ( strpos($string, 'd') > 0 )
       $kyu = 2; // dan rank
    else
       $kyu = 0; // no grad found => rating assumed
@@ -589,58 +589,58 @@ function convert_to_rating($string, $type, $no_error=false)
    // determine rating from input
    // also see http://senseis.xmp.net/?RankWorldwideComparison
    $needrank = true; // true if rating-type needs rank; false=need-rating
-   switch( (string)$type )
+   switch ( (string)$type )
    {
       case 'dragonrank':
-         if( $kyu > 0 )
+         if ( $kyu > 0 )
             $rating = read_rating($string);
          break;
 
       case 'dragonrating':
          $needrank = false;
-         if( $kyu <= 0 )
+         if ( $kyu <= 0 )
             $rating = $val;
          break;
 
       case 'eurorating':
          $needrank = false;
-         if( $kyu <= 0 )
+         if ( $kyu <= 0 )
             $rating = $val;
-         if( $rating != NO_RATING )
+         if ( $rating != NO_RATING )
          {
-            if( $rating >= -400 && $rating <= 300 ) // 25k..18k
+            if ( $rating >= -400 && $rating <= 300 ) // 25k..18k
                $rating -= 100.0;
-            elseif( $rating >=800 && $rating <= 1200 ) // 13k-9k
+            elseif ( $rating >=800 && $rating <= 1200 ) // 13k-9k
                $rating += 100.0;
          }
          break;
 
       case 'eurorank':
-         if( $kyu > 0 )
+         if ( $kyu > 0 )
          {
             $rating = rank_to_rating($val, $kyu);
-            if( $rating != NO_RATING )
+            if ( $rating != NO_RATING )
             {
-               if( $rating >= -400 && $rating <= 300 ) // 25k..18k
+               if ( $rating >= -400 && $rating <= 300 ) // 25k..18k
                   $rating -= 100.0;
-               elseif( $rating >=800 && $rating <= 1200 ) // 13k-9k
+               elseif ( $rating >=800 && $rating <= 1200 ) // 13k-9k
                   $rating += 100.0;
             }
          }
          break;
 
       case 'aga':
-         if( $kyu > 0 )
+         if ( $kyu > 0 )
          {
             $rating = rank_to_rating($val, $kyu);
-            if( $rating != NO_RATING )
+            if ( $rating != NO_RATING )
                $rating -= 300.0;  // aga three stones weaker ?
          }
          break;
 
       case 'agarating':
          $needrank = false;
-         if( $kyu <= 0 )
+         if ( $kyu <= 0 )
          {
             $rating = $val*100 + ( $val > 0 ? 1950 : 2150 ); // 1k : 2d
             $rating -= 300.0;  // aga three stones weaker ?
@@ -648,10 +648,10 @@ function convert_to_rating($string, $type, $no_error=false)
          break;
 
       case 'igs':
-         if( $kyu > 0 )
+         if ( $kyu > 0 )
          {
             $rating = rank_to_rating($val, $kyu);
-            if( $rating != NO_RATING )
+            if ( $rating != NO_RATING )
                $rating = table_interpolate($rating, $IGS_TABLE, true);
          }
          break;
@@ -659,7 +659,7 @@ function convert_to_rating($string, $type, $no_error=false)
       /*
       case 'igsrating':
          $needrank = 0;
-         if( $kyu <= 0 )
+         if ( $kyu <= 0 )
          {
              $rating = $val*100 - 1130 ;
              $rating = table_interpolate($rating, $IGS_TABLE, true);
@@ -668,86 +668,86 @@ function convert_to_rating($string, $type, $no_error=false)
       */
 
       case 'iytgg':
-         if( $kyu > 0 )
+         if ( $kyu > 0 )
          {
             $rating = rank_to_rating($val, $kyu);
-            if( $rating != NO_RATING )
+            if ( $rating != NO_RATING )
                $rating += 100;  // one stone stronger
          }
          break;
 
       case 'ficgs':
-         if( $kyu > 0 )
+         if ( $kyu > 0 )
             $rating = rank_to_rating($val, $kyu);
          break;
 
       case 'kgs': // rank
-         if( $kyu > 0 )
+         if ( $kyu > 0 )
          {
             $rating = rank_to_rating($val, $kyu);
-            if( $rating != NO_RATING )
+            if ( $rating != NO_RATING )
                $rating = table_interpolate($rating, $KGS_TABLE, true);
          }
          break;
 
       case 'ogs':
-         if( $kyu > 0 )
+         if ( $kyu > 0 )
          {
             $rating = rank_to_rating($val, $kyu);
-            if( $rating != NO_RATING )
+            if ( $rating != NO_RATING )
                $rating -= 100;
          }
          break;
 
       case 'ogsrating':
          $needrank = false;
-         if( $kyu <= 0 )
+         if ( $kyu <= 0 )
             $rating = $val - 100.0;
          break;
 
       case 'tygem':
-         if( $kyu > 0 )
+         if ( $kyu > 0 )
          {
             $rating = rank_to_rating($val, $kyu);
-            if( $rating != NO_RATING )
+            if ( $rating != NO_RATING )
                $rating -= 100;
          }
          break;
 
       case 'wbaduk':
-         if( $kyu > 0 )
+         if ( $kyu > 0 )
          {
             $rating = rank_to_rating($val, $kyu);
-            if( $rating != NO_RATING )
+            if ( $rating != NO_RATING )
                $rating -= 200;
          }
          break;
 
       case 'japan':
-         if( $kyu > 0 )
+         if ( $kyu > 0 )
          {
             $rating = rank_to_rating($val, $kyu);
-            if( $rating != NO_RATING )
+            if ( $rating != NO_RATING )
                $rating -= 300;  // three stones weaker
          }
          break;
 
       case 'china':
-         if( $kyu > 0 )
+         if ( $kyu > 0 )
          {
             $rating = rank_to_rating($val, $kyu);
-            if( $rating != NO_RATING && ($rating <= 400 || $rating >= 1400) ) // <=17k, >=7k
+            if ( $rating != NO_RATING && ($rating <= 400 || $rating >= 1400) ) // <=17k, >=7k
                $rating -= 100;  // one stone weaker <=17k | >=7k
          }
          break;
 
       case 'korea':
-         if( $kyu > 0 )
+         if ( $kyu > 0 )
          {
             $rating = rank_to_rating($val, $kyu);
-            if( $rating != NO_RATING )
+            if ( $rating != NO_RATING )
             {
-               if( $rating > 1100 )
+               if ( $rating > 1100 )
                   $rating += 100; // one stone stronger >10k
                else
                   $rating += 200; // two stones stronger <=10k
@@ -760,24 +760,24 @@ function convert_to_rating($string, $type, $no_error=false)
          break;
    }
 
-   if( $rating == NO_RATING )
+   if ( $rating == NO_RATING )
    {
-      if( $no_error )
+      if ( $no_error )
          return $rating;
       error($needrank ? 'rank_not_rating' : 'rating_not_rank',
          "convert_to_rating.check.rating($type,$string,$val,$kyu,$needrank)");
    }
 
    //valid rating, so ends with a limited bound corrections, else error
-   if( $rating-50 > MAX_START_RATING )
+   if ( $rating-50 > MAX_START_RATING )
       $rating = MAX_START_RATING;
-   if( $rating+50 < MIN_RATING )
+   if ( $rating+50 < MIN_RATING )
       $rating = MIN_RATING;
 
-   if( $rating >= MIN_RATING && $rating <= MAX_START_RATING )
+   if ( $rating >= MIN_RATING && $rating <= MAX_START_RATING )
       return $rating;
 
-   if( $no_error )
+   if ( $no_error )
       return $rating;
    error('rating_out_of_range', "convert_to_rating.error($type,$string,$val,$kyu,$needrank)");
    return NO_RATING;
@@ -792,9 +792,9 @@ function convert_to_rating($string, $type, $no_error=false)
 function change_user_rating( $uid, $changes, $rating, $rating_min, $rating_max, $with_rca=true )
 {
    global $NOW;
-   if( !is_numeric($changes) || !($changes & (RCADM_RESET_CONFIDENCE|RCADM_CHANGE_RATING)) )
+   if ( !is_numeric($changes) || !($changes & (RCADM_RESET_CONFIDENCE|RCADM_CHANGE_RATING)) )
       error('invalid_args', "change_user_rating.check.changes($uid,$changes,$rating)");
-   if( !is_valid_rating($rating) )
+   if ( !is_valid_rating($rating) )
       error('invalid_args', "change_user_rating.check.rating($uid,$changes,$rating)");
 
    db_query( "change_user_rating.update_players($uid,$rating)",
@@ -802,7 +802,7 @@ function change_user_rating( $uid, $changes, $rating, $rating_min, $rating_max, 
       "Rating2=$rating, RatingMin=$rating_min, RatingMax=$rating_max " .
       "WHERE ID=$uid LIMIT 1" );
 
-   if( $with_rca )
+   if ( $with_rca )
    {
       $new_rating = ( $changes & RCADM_CHANGE_RATING ) ? $rating : NO_RATING;
       db_query( "change_user_rating.insert_rating_chg($uid,$rating,$reset_confidence)",
@@ -815,9 +815,9 @@ function change_user_rating( $uid, $changes, $rating, $rating_min, $rating_max, 
 function format_ratingchangeadmin_changes( $changes, $sep=', ' )
 {
    $out = array();
-   if( $changes & RCADM_RESET_CONFIDENCE )
+   if ( $changes & RCADM_RESET_CONFIDENCE )
       $out[] = 'RESET_CONFIDENCE';
-   if( $changes & RCADM_CHANGE_RATING )
+   if ( $changes & RCADM_CHANGE_RATING )
       $out[] = 'CHANGE_RATING';
    return implode($sep, $out);
 }
@@ -827,11 +827,11 @@ function format_ratingchangeadmin_changes( $changes, $sep=', ' )
 // IMPORTANT NOTE: no check, if RatingStatus != RATING_RATED !! (must be done before)
 function update_player_rating( $uid, $new_rating=null, $upd_players=null )
 {
-   if( !is_numeric($uid) || $uid <= 0 )
+   if ( !is_numeric($uid) || $uid <= 0 )
       error('invalid_args', "update_player_rating.check.uid($uid,$new_rating)");
 
    $upd = ( is_null($upd_players) ) ? new UpdateQuery('Players') : $upd_players;
-   if( !is_null($new_rating) && is_numeric($new_rating) && $new_rating >= MIN_RATING )
+   if ( !is_null($new_rating) && is_numeric($new_rating) && $new_rating >= MIN_RATING )
    {
       $upd->upd_num('Rating', $new_rating);
       $upd->upd_num('InitialRating', $new_rating);
@@ -848,7 +848,7 @@ function update_player_rating( $uid, $new_rating=null, $upd_players=null )
 
 function user_has_rating( $row=NULL, $prefix='' )
 {
-   if( is_null($row) )
+   if ( is_null($row) )
       $row = $GLOBALS['player_row'];
    $rating = $row[$prefix.'Rating2'];
    $is_rated = ( $row[$prefix.'RatingStatus'] != RATING_NONE && is_numeric($rating) && $rating >= MIN_RATING );

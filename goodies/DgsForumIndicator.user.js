@@ -53,17 +53,17 @@ var getUserHandle = function()
    var snap;
    
    snap = xPath(document.documentElement, "//table[@id='page_head']");
-   if( snap.snapshotLength > 0 )
+   if ( snap.snapshotLength > 0 )
       snap = xPath(snap.snapshotItem(0), "*//td[last()]//*[text()]");
 
-   if( snap.snapshotLength <= 0 )
+   if ( snap.snapshotLength <= 0 )
       snap = xPath(document.documentElement, "//a[@id='loggedId']");
 
-   if( snap.snapshotLength <= 0 )
+   if ( snap.snapshotLength <= 0 )
       return '';
    snap = snap.snapshotItem(0).textContent;
    snap = snap.match(/([\-\+_a-zA-Z0-9]+)\s*$/);
-   if( !snap )
+   if ( !snap )
       return '';
    return snap[1];
 } //getUserHandle
@@ -78,9 +78,9 @@ var forumid = function(name)
 var DGSfi_eventhandler = function(event) {
     var flink = event.currentTarget; //children[0].getElementsByTagName('a')[0]; // HACK
     var gmvar = DGSfi_forumlinks[flink][0];
-    if( gmvar == undefined ) return;
+    if ( gmvar == undefined ) return;
     var stamp = DGSfi_forumlinks[flink][1];
-    if( stamp == undefined ) return;
+    if ( stamp == undefined ) return;
 //window.alert('gmvar='+gmvar+' stamp='+stamp+' t='+typeof(stamp));
     GM_setValue(gmvar, stamp);
 } //DGSfi_eventhandler
@@ -91,11 +91,11 @@ var DGSfi_init = function()
    var forumTRs, children, gmvar, stamp, flink;
    forumTRs = xPath(document.documentElement,
                "//table[@id='forumIndex']//tr[count(td)=3]");
-   if( forumTRs.snapshotLength <= 0 )
+   if ( forumTRs.snapshotLength <= 0 )
       forumTRs = xPath(document.documentElement,
                   "//table[@bgcolor='#e0e8ed']//tr[count(td)=3]");
 
-   for( var i = 0; i < forumTRs.snapshotLength; i++)
+   for ( var i = 0; i < forumTRs.snapshotLength; i++)
    {
       children = forumTRs.snapshotItem(i).getElementsByTagName('td');
 
@@ -104,13 +104,13 @@ var DGSfi_init = function()
       //children[0].innerHTML +=' stamp='+stamp;
       stamp = stamp.match(/\d+-\d+-\d+[^\d]+\d+:\d+/);
       //children[0].innerHTML +=' match='+stamp[0];
-      if( !stamp )
+      if ( !stamp )
          stamp = '';
       else
          stamp = stamp[0];
 
       //children[0].innerHTML +=' gmvar='+gmvar+' stamp='+stamp;
-      if( stamp > GM_getValue(gmvar, '') )
+      if ( stamp > GM_getValue(gmvar, '') )
          children[0].innerHTML +=
             '<font color="#ff0000" size="-1">&nbsp;&nbsp;new</font>';
 

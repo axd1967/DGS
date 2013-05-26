@@ -81,16 +81,16 @@ class QuickHandlerGameNotes extends QuickHandler
 
       // check gid
       QuickHandler::checkArgMandatory( $dbgmsg, GAMEOPT_GID, $this->gid );
-      if( !is_numeric($this->gid) || $this->gid <= 0 )
+      if ( !is_numeric($this->gid) || $this->gid <= 0 )
          error('unknown_game', "$dbgmsg.check.gid");
       $gid = $this->gid;
 
       // prepare command: get_notes, save_notes, hide_notes, show_notes
 
-      if( $cmd == GAMECMD_GET_NOTES || $cmd == GAMECMD_SAVE_NOTES || $cmd == GAMECMD_HIDE_NOTES || $cmd == GAMECMD_SHOW_NOTES )
+      if ( $cmd == GAMECMD_GET_NOTES || $cmd == GAMECMD_SAVE_NOTES || $cmd == GAMECMD_HIDE_NOTES || $cmd == GAMECMD_SHOW_NOTES )
       {
          $gn_row = GameHelper::load_cache_game_notes( $dbgmsg, $gid, $uid );
-         if( is_array($gn_row) )
+         if ( is_array($gn_row) )
          {
             $this->hidden = @$gn_row['Hidden'];
             $this->notes = @$gn_row['Notes'];
@@ -106,16 +106,16 @@ class QuickHandlerGameNotes extends QuickHandler
       $cmd = $this->quick_object->cmd;
       $dbgmsg = "QuickHandlerGameNotes.process($cmd)";
 
-      if( $cmd == GAMECMD_GET_NOTES )
+      if ( $cmd == GAMECMD_GET_NOTES )
       {
          $this->addResultKey( 'hidden', ( $this->hidden == 'Y' ? 1 : 0 ) );
          $this->addResultKey( 'notes', (is_null($this->notes) ? "" : $this->notes) );
       }
-      elseif( $cmd == GAMECMD_SAVE_NOTES )
+      elseif ( $cmd == GAMECMD_SAVE_NOTES )
          GameHelper::update_game_notes( $dbgmsg, $this->gid, $this->my_id, $this->hidden, $this->arg_notes );
-      elseif( $cmd == GAMECMD_HIDE_NOTES )
+      elseif ( $cmd == GAMECMD_HIDE_NOTES )
          GameHelper::update_game_notes( $dbgmsg, $this->gid, $this->my_id, 'Y', $this->notes );
-      elseif( $cmd == GAMECMD_SHOW_NOTES )
+      elseif ( $cmd == GAMECMD_SHOW_NOTES )
          GameHelper::update_game_notes( $dbgmsg, $this->gid, $this->my_id, 'N', $this->notes );
    }//process
 

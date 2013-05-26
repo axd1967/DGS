@@ -67,12 +67,12 @@ class UserPicture
 
       // determine pic-filename
       $old_cache_suffix = '';
-      if( is_null($ext) )
+      if ( is_null($ext) )
       {
-         if( is_array($user) )
+         if ( is_array($user) )
          {
             $str = @$user['UserPicture'];
-            if( strpos($str, '?') !== FALSE )
+            if ( strpos($str, '?') !== FALSE )
                list( $file_part, $old_cache_suffix) = explode( '?', $str );
             else
                $file_part = $str;
@@ -82,9 +82,9 @@ class UserPicture
       }
       else
       {
-         if( is_array($user) )
+         if ( is_array($user) )
             $uid = @$user['ID'];
-         elseif( is_numeric($user) )
+         elseif ( is_numeric($user) )
             $uid = $user;
          else
             error('invalid_args', "UserPicture:getPicturePath.check.uid($uid,$ext)");
@@ -98,7 +98,7 @@ class UserPicture
       // avoid browser-caching, with suffix file-part-len still <48
       global $NOW;
       $cache_suffix = '?t=' . date(DATE_FMT4, $NOW); // avoid caching with new URL
-      if( $old_cache_suffix != '' )
+      if ( $old_cache_suffix != '' )
          $pic_url = $file_part . '?' . $old_cache_suffix; // use saved URL
       else
          $pic_url = $file_part . $cache_suffix;
@@ -117,7 +117,7 @@ class UserPicture
    public static function getImageHtml( $userhandle, $withLink=false, $pic_url=null, $size=17 )
    {
       global $base_path;
-      if( is_null($pic_url) )
+      if ( is_null($pic_url) )
       {
          $pic_title = sprintf( T_('User [%s] has a picture'), $userhandle );
          $img = image( $base_path.'images/picture.gif', $pic_title, null );
@@ -136,9 +136,9 @@ class UserPicture
    {
       global $player_row;
       list( $path_picture ) = self::getPicturePath($player_row);
-      if( $path_picture && file_exists($path_picture) )
+      if ( $path_picture && file_exists($path_picture) )
       {
-         if( @unlink($path_picture) )
+         if ( @unlink($path_picture) )
             self::update_picture(''); // remove
       }
    }//delete_picture
@@ -151,7 +151,7 @@ class UserPicture
    {
       global $player_row;
       $uid = @$player_row['ID'];
-      if( $uid > 0 && is_numeric($uid) )
+      if ( $uid > 0 && is_numeric($uid) )
       {
          $pic_file_id = $pic_file . ( $pic_file != '' ? $cache_suffix : '' );
          $update_query = 'UPDATE Players SET'

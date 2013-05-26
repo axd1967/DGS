@@ -11,11 +11,11 @@ error_reporting(E_ALL);
 //Warning: Filename must be 8.3
 $BASENAME=explode('.',$argv[0]); $BASENAME=$BASENAME[0];
 $BASENAME=strtolower(str_replace('\\','/',$BASENAME));
-if(1){
+if (1){
   $BASEDIR= $BASENAME;
   $BASENAME= strrchr($BASEDIR,'/');
   //if( !$BASENAME ) $BASENAME= strrchr($BASEDIR,'\\');
-  if( !$BASENAME ) $BASENAME= '/'.$BASEDIR;
+  if ( !$BASENAME ) $BASENAME= '/'.$BASEDIR;
 //echo CR.$BASENAME;
   $BASENAME= $BASEDIR.$BASENAME;
 }else{
@@ -25,12 +25,12 @@ if(1){
 
 define('SNAP_OUT',1); //copy the screen output in $BASENAME.'.lst'
 
-if(0) {
+if (0) {
 $CONTEXT_FILE= $BASENAME.'.ini';
 //@copy( $CONTEXT_FILE, tempnam($BASEDIR,'tmp') );
 //noms de variables GLOBALES (sans $) (array=>no define())
 //init: $CONTEXT_VARS= array('forum_date','forum_time','verif_num');
-//init: foreach($CONTEXT_VARS as $key) { $$key=''; }
+//init: foreach ($CONTEXT_VARS as $key) { $$key=''; }
 //default $CONTEXT_VARS:
 //$games= array();
 $Logfp= fopen($BASENAME.'.rpt', 'w');
@@ -91,28 +91,28 @@ function Myarg( $help, &$i, $key, $arg)
    $args= $arg[2];
    $val= array();
    $full= 1;
-   if( !is_array( $var) )
+   if ( !is_array( $var) )
       $tmp= array($var);
    else
       $tmp= $var;
    reset( $tmp);
    //if( !$help ) echo CR."1.i=$i f=$full t=".var_export($tmp,true);
-   foreach( $args as $aname => $aunit )
+   foreach ( $args as $aname => $aunit )
    {
       $str.= " <$aname>";
-      if( $s=each($tmp) )
+      if ( $s=each($tmp) )
          $str.= ' ['.$s['value'].']';
          //$str.= '['.var_export($s['value'],true).']';
-      if( $aunit )
+      if ( $aunit )
          $str.= " ($aunit)";
-      if( $help || !$full )
+      if ( $help || !$full )
          continue;
-      if( ++$i < $argc )
+      if ( ++$i < $argc )
       {
          $s= (string)$argv[$i];
-         if( substr($s,0,2)=='--' )
+         if ( substr($s,0,2)=='--' )
             $val[]= substr($s,1);
-         else if( $s[0]!='-' )
+         else if ( $s[0]!='-' )
             $val[]= $s;
          else
             $full= 0;
@@ -121,19 +121,19 @@ function Myarg( $help, &$i, $key, $arg)
          $full= 0;
    }
    //if( !$help ) echo CR."2.i=$i f=$full v=".var_export($val,true);
-   if( $help || !$full )
+   if ( $help || !$full )
    {
-      if( !$help )
+      if ( !$help )
          $desc= 'missing argument';
       echo CR.' '.$str.': '.$desc;
-      if( $help )
+      if ( $help )
          return 0; //continue;
       // !$full
       $i--;
       return 1; //break;
    }
    // !$help && $full
-   switch( count($args) )
+   switch ( count($args) )
    {
       case 0: $var= !$var; break;
       case 1: $var= $val[0]; break;
@@ -192,12 +192,12 @@ function Myarg( $help, &$i, $key, $arg)
 
    $help= 0;
    //echo CR."n=$argc";
-   for($i=1 ; $i<$argc ; $i++)
+   for ($i=1 ; $i<$argc ; $i++)
    {
       //echo CR."i=$i ".$argv[$i];
-      if( $arg=@$args[$k=$argv[$i]] )
+      if ( $arg=@$args[$k=$argv[$i]] )
       {
-         if( !Myarg( $help, $i, $k, $arg) )
+         if ( !Myarg( $help, $i, $k, $arg) )
             continue;
       }
       else
@@ -205,20 +205,20 @@ function Myarg( $help, &$i, $key, $arg)
       $help= 1;
       break;
    }
-   if( $help )
+   if ( $help )
    {
       echo CR.'Usage: [-h] [-s <sec>] [-v] [-max_duration <sec>]'
          .' [-query_len <len>]'
          .CR.'  [-skip_missing_date] [-min_date <date>] [-max_date <date>]'
          .CR.'  [-i <infile>] [-o <outfile>] [-type <typ>]';
-      foreach( $args as $k => $arg )
-         if( Myarg( $help, $i, $k, $arg) ) break;
+      foreach ( $args as $k => $arg )
+         if ( Myarg( $help, $i, $k, $arg) ) break;
       exit;
    }
    unset($args);
    define('VERBOSE', $verbose);
 
-   if( $sleep > 0 )
+   if ( $sleep > 0 )
    {
       echo CR."Pause for $sleep secondes... ";
       ob_flushx();
@@ -240,7 +240,7 @@ function Myarg( $help, &$i, $key, $arg)
    define('GROUP_BY', (string)0); //Y|M|D|H or 0
 
    //slow log - IO files:
-   switch( (string)RES_TYPE )
+   switch ( (string)RES_TYPE )
    {
    case 'csv':
    case 'mysql':
@@ -248,10 +248,10 @@ function Myarg( $help, &$i, $key, $arg)
       break;
 /*
    case 'database':
-      if( !$dbcnx) {
+      if ( !$dbcnx) {
          Myerror("localMySQL (EasyPHP?) absent. Can't continue. Open it and retry.");
       }
-      if( !@mysql_select_db($DB_NAME) )
+      if ( !@mysql_select_db($DB_NAME) )
       {
          @mysql_close( $dbcnx);
          $dbcnx= 0;
@@ -272,7 +272,7 @@ if (!function_exists('fputcsv')) {
    function fputcsv($h, $row, $separator=',', $enclosure='"')
    {
       foreach ($row as $idx => $cell)
-         if( !is_numeric($cell) )
+         if ( !is_numeric($cell) )
             $row[$idx] = $enclosure
                .str_replace($enclosure, $enclosure.$enclosure, $cell)
                .$enclosure;
@@ -286,14 +286,14 @@ if (!function_exists('fputcsv')) {
 
    $e= error_reporting(E_ALL & ~E_WARNING);
    $slowfp= fopen(SLOW_FILE, 'r');
-   if(!$slowfp)
+   if (!$slowfp)
       Myerror("File not found: ".SLOW_FILE);
    echo CR."Read: ".SLOW_FILE;
 
-   if(RES_FILE)
+   if (RES_FILE)
    {
       $resfp= fopen(RES_FILE, 'w');
-      if(!$resfp)
+      if (!$resfp)
          Myerror("File write error: ".RES_FILE);
       echo CR."Write: ".RES_FILE;
    }
@@ -301,7 +301,7 @@ if (!function_exists('fputcsv')) {
       $resfp= false;
    error_reporting($e);
 
-   switch( (string)RES_TYPE )
+   switch ( (string)RES_TYPE )
    {
    case 'csv':
       fputcsv($resfp, array(
@@ -378,14 +378,14 @@ SELECT... (QUERY_ZON)
    $chunk_start= 1; $chunk_closed= 1;
    $zon= 0;
    $query= $qdat= ''; $qrow= array();
-   for(;;)
+   for (;;)
    { //foreach(input lines)
-      if(!feof($slowfp))
+      if (!feof($slowfp))
       {
          $str = trim(fgets($slowfp, MY_GETBUFSIZ));
-         if(!$str) continue;
+         if (!$str) continue;
       }
-      else if( $zon == QUERY_ZON )
+      else if ( $zon == QUERY_ZON )
       {
          $str = ENTRY_HDR; //add a fake stop line
       }
@@ -393,15 +393,15 @@ SELECT... (QUERY_ZON)
          break;
 
       //if($rescnt<1) echo CR.$rescnt.': '.$str;
-      if( !strcasecmp(ENTRY_HDR, substr($str,0,ENTRY_HDR_LEN)) )
+      if ( !strcasecmp(ENTRY_HDR, substr($str,0,ENTRY_HDR_LEN)) )
       {
-         if( strcasecmp(ENTRY_HDR.' admin', substr($str,0, 6+ENTRY_HDR_LEN))
+         if ( strcasecmp(ENTRY_HDR.' admin', substr($str,0, 6+ENTRY_HDR_LEN))
             &&  $zon == QUERY_ZON && $qdat>'' )
          { //end of the variable QUERY_ZON => end of the entry
-            if( count($qrow)<4 ) Myerror('qrow_too_small');
+            if ( count($qrow)<4 ) Myerror('qrow_too_small');
             $rescnt++;
             //if( $rescnt > 20 ) break;
-            if( VERBOSE )
+            if ( VERBOSE )
             {
                echo CR.sprintf('%06d> %s',(int)$rescnt, $qdat)
                   .vsprintf(' qt=%s lt=%s rs=%s re=%s', $qrow);
@@ -413,7 +413,7 @@ SELECT... (QUERY_ZON)
             $query= trim(preg_replace( "%[\\x1-\\x20\\x80-\\xff]+%", ' ', $query));
             $query= substr($query,0,QUERY_LEN);
             $query= strtoupper( $query);
-            switch( (string)RES_TYPE )
+            switch ( (string)RES_TYPE )
             {
             case 'csv':
                //Date,Query_time,Lock_time,Lock_time,Rows_sent,Rows_examined,Query
@@ -422,7 +422,7 @@ SELECT... (QUERY_ZON)
                fputcsv($resfp, $qrow);
                break;
             case 'mysql':
-               if( $chunk_closed && ($rescnt % $CHUNK_SIZE) == 1 )
+               if ( $chunk_closed && ($rescnt % $CHUNK_SIZE) == 1 )
                {
                   fputs($resfp, $CHUNK_OPEN);
                   $chunk_start= 1;
@@ -433,7 +433,7 @@ SELECT... (QUERY_ZON)
                $tmp.= sprintf(",'%s')", Myslashes($query));
                fputs($resfp, $tmp);
                $chunk_closed= 0;
-               if( !$chunk_closed && ($rescnt % $CHUNK_SIZE) == 0 )
+               if ( !$chunk_closed && ($rescnt % $CHUNK_SIZE) == 0 )
                {
                   fputs($resfp, $CHUNK_CLOSE);
                   $chunk_closed= 1;
@@ -442,18 +442,18 @@ SELECT... (QUERY_ZON)
             } //switch( RES_TYPE )
             $chunk_start= 0;
             $qrow= array();
-            if( SKIP_MISSING_DATE ) $qdat= '';
+            if ( SKIP_MISSING_DATE ) $qdat= '';
             $zon= 0;
          }
          $tmp= trim(substr($str, ENTRY_HDR_LEN));
-         foreach( array(
+         foreach ( array(
             'Time:' => 1,
             'User@Host:' => 2,
             'Query_time:' => 3,
             'administrator' => 4,
             //Query_zone => QUERY_ZON
             ) as $key => $val) {
-            if( !strcasecmp( $key, substr($tmp,0, $k=strlen($key))) )
+            if ( !strcasecmp( $key, substr($tmp,0, $k=strlen($key))) )
             {
                $zon= $val;
                $str= trim(substr($tmp, $k));
@@ -461,15 +461,15 @@ SELECT... (QUERY_ZON)
             }
          }
       } //ENTRY_HDR header
-      switch($zon)
+      switch ($zon)
       {
       case 1:
-         if( preg_match(
+         if ( preg_match(
             '%^(\d\d)(\d\d)(\d\d)\s+(\d+):(\d+):(\d+)%i'
             , $str, $m ))
          {
             array_shift($m);
-            switch( (string)GROUP_BY )
+            switch ( (string)GROUP_BY )
             {
             case 'Y': $m[1]=1;
             case 'M': $m[2]=1;
@@ -478,7 +478,7 @@ SELECT... (QUERY_ZON)
             default: break;
             }
             $str= vsprintf("20%02d-%02d-%02d %02d:%02d:%02d",$m);
-            if( $str >= MIN_DATE && $str < MAX_DATE )
+            if ( $str >= MIN_DATE && $str < MAX_DATE )
             {
                $qdat= $str;
                break;
@@ -491,11 +491,11 @@ SELECT... (QUERY_ZON)
          break;
       case 3:
          $query= '';
-         if( preg_match(
+         if ( preg_match(
             '%^(\d+)\s*Lock_time:\s*(\d+)\s*Rows_sent:\s*(\d+)\s*Rows_examined:\s*(\d+)%i'
             , $str, $m ))
          {
-            if( $m[1] < MAX_DURATION )
+            if ( $m[1] < MAX_DURATION )
             {
                array_shift($m);
                //$m[0]= 0; //cnt
@@ -520,13 +520,13 @@ SELECT... (QUERY_ZON)
       //if( $qdat == '2008-01-02 23:36:02' ) break;
    } //foreach(input lines)
 
-   switch( (string)RES_TYPE )
+   switch ( (string)RES_TYPE )
    {
    case 'csv':
       break;
    case 'mysql':
       //echo CR."$rescnt>0 && !$chunk_closed && !$chunk_start";
-      if( !$chunk_closed && !$chunk_start )
+      if ( !$chunk_closed && !$chunk_start )
       {
          fputs($resfp, $CHUNK_CLOSE);
          $chunk_closed= 1;
@@ -547,7 +547,7 @@ if (SNAP_OUT) {
    $src=$BASENAME.'.tmp'; //see above $Scrfp filename
    $dst=$BASENAME.'.lst';
    ob_end_flush(); fclose($Scrfp);
-   if( file_exists($dst) ) unlink($dst);
+   if ( file_exists($dst) ) unlink($dst);
    rename($src,$dst);
 } //SNAP_OUT
 

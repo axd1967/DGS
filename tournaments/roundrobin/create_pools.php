@@ -41,13 +41,13 @@ $GLOBALS['ThePage'] = new Page('TournamentPoolCreate');
    connect2mysql();
 
    $logged_in = who_is_logged( $player_row);
-   if( !$logged_in )
+   if ( !$logged_in )
       error('login_if_not_logged_in', 'Tournament.roundrobin.create_pools');
-   if( !ALLOW_TOURNAMENTS )
+   if ( !ALLOW_TOURNAMENTS )
       error('feature_disabled', 'Tournament.roundrobin.create_pools');
    $my_id = $player_row['ID'];
 
-   if( $my_id <= GUESTS_ID_MAX )
+   if ( $my_id <= GUESTS_ID_MAX )
       error('not_allowed_for_guest', 'Tournament.roundrobin.create_pools');
 
    $page = "create_pools.php";
@@ -62,19 +62,19 @@ $GLOBALS['ThePage'] = new Page('TournamentPoolCreate');
 */
 
    $tid = (int) @$_REQUEST['tid'];
-   if( $tid < 0 ) $tid = 0;
+   if ( $tid < 0 ) $tid = 0;
 
-   if( @$_REQUEST['t_cancel'] ) // cancel delete
+   if ( @$_REQUEST['t_cancel'] ) // cancel delete
       jump_to("tournaments/roundrobin/create_pools.php?tid=$tid");
 
    $tourney = TournamentCache::load_cache_tournament( 'Tournament.create_pools.find_tournament', $tid );
    $tstatus = new TournamentStatus( $tourney );
    $ttype = TournamentFactory::getTournament($tourney->WizardType);
-   if( !$ttype->need_rounds )
+   if ( !$ttype->need_rounds )
       error('tournament_edit_rounds_not_allowed', "Tournament.create_pools.need_rounds($tid)");
 
    // create/edit allowed?
-   if( !TournamentHelper::allow_edit_tournaments($tourney, $my_id) )
+   if ( !TournamentHelper::allow_edit_tournaments($tourney, $my_id) )
       error('tournament_edit_not_allowed', "Tournament.create_pools.edit_tournament($tid,$my_id)");
 
    // load existing T-round
@@ -89,13 +89,13 @@ $GLOBALS['ThePage'] = new Page('TournamentPoolCreate');
    // init
    $errors = $tstatus->check_edit_status( TournamentPool::get_edit_tournament_status() );
    $errors = array_merge( $errors, $trstatus->check_edit_round_status( TROUND_STATUS_POOL ) );
-   if( !TournamentUtils::isAdmin() && $tourney->isFlagSet(TOURNEY_FLAG_LOCK_ADMIN) )
+   if ( !TournamentUtils::isAdmin() && $tourney->isFlagSet(TOURNEY_FLAG_LOCK_ADMIN) )
       $errors[] = $tourney->buildAdminLockText();
-   if( $tround->PoolSize == 0 || $tround->Pools == 0 )
+   if ( $tround->PoolSize == 0 || $tround->Pools == 0 )
       $errors[] = T_('Pool parameters must be defined first before you can manage pools!');
-   if( @$_REQUEST['t_del_confirm'] )
+   if ( @$_REQUEST['t_del_confirm'] )
    {
-      if( $count_poolrows == 0 )
+      if ( $count_poolrows == 0 )
          $errors[] = T_('There are no pools existing for deletion');
    }
 
@@ -103,29 +103,29 @@ $GLOBALS['ThePage'] = new Page('TournamentPoolCreate');
 
    // ---------- Process actions ------------------------------------------------
 
-   if( count($errors) == 0 )
+   if ( count($errors) == 0 )
    {
-      if( @$_REQUEST['t_seed'] && $count_poolrows == 0 )
+      if ( @$_REQUEST['t_seed'] && $count_poolrows == 0 )
       {
          $seed_order = (int)get_request_arg('seed_order');
          $slice_mode = (int)get_request_arg('slice_mode');
-         if( TournamentPool::seed_pools( $tid, $tprops, $tround, $seed_order, $slice_mode ) )
+         if ( TournamentPool::seed_pools( $tid, $tprops, $tround, $seed_order, $slice_mode ) )
          {
             $sys_msg = urlencode( T_('Tournament Pools seeded!') );
             jump_to("tournaments/roundrobin/create_pools.php?tid=$tid".URI_AMP."sysmsg=$sys_msg");
          }
       }
-      elseif( @$_REQUEST['t_del_confirm'] && $count_poolrows > 0 )
+      elseif ( @$_REQUEST['t_del_confirm'] && $count_poolrows > 0 )
       {
-         if( TournamentPool::delete_pools($tid, $round) )
+         if ( TournamentPool::delete_pools($tid, $round) )
          {
             $sys_msg = urlencode( T_('Tournament Pools removed!') );
             jump_to("tournaments/roundrobin/create_pools.php?tid=$tid".URI_AMP."sysmsg=$sys_msg");
          }
       }
-      elseif( @$_REQUEST['t_add_miss'] && $reg_count > $count_poolrows )
+      elseif ( @$_REQUEST['t_add_miss'] && $reg_count > $count_poolrows )
       {
-         if( TournamentPool::add_missing_registered_users( $tid, $tround ) )
+         if ( TournamentPool::add_missing_registered_users( $tid, $tround ) )
          {
             $sys_msg = urlencode( T_('Tournament Default Pool filled with missing users!') );
             jump_to("tournaments/roundrobin/create_pools.php?tid=$tid".URI_AMP."sysmsg=$sys_msg");
@@ -150,7 +150,7 @@ $GLOBALS['ThePage'] = new Page('TournamentPoolCreate');
          'TEXT',        TournamentRound::getStatusText($tround->Status), ));
 
    $has_errors = count($errors);
-   if( $has_errors )
+   if ( $has_errors )
    {
       $tform->add_row( array( 'HR' ));
       $tform->add_row( array(
@@ -170,7 +170,7 @@ $GLOBALS['ThePage'] = new Page('TournamentPoolCreate');
    $tform->add_row( array( 'HEADER', T_('Prepare Pools') ));
 
    $disable_submit = ($has_errors) ? 'disabled=1' : '';
-   if( $count_poolrows > 0 )
+   if ( $count_poolrows > 0 )
    {
       $tform->add_row( array(
             'CELL', 2, '',
@@ -181,7 +181,7 @@ $GLOBALS['ThePage'] = new Page('TournamentPoolCreate');
             'TEXT', T_('Delete all existing pools') . MED_SPACING,
             'SUBMITBUTTONX', 't_delete', T_('Delete Pools'), $disable_submit ));
 
-      if( @$_REQUEST['t_delete'] && !$has_errors )
+      if ( @$_REQUEST['t_delete'] && !$has_errors )
       {
          $tform->add_row( array(
                'CELL', 2, '',
@@ -217,7 +217,7 @@ $GLOBALS['ThePage'] = new Page('TournamentPoolCreate');
             'TEXT', T_('This may take a while, so please be patient!'), ));
    }
 
-   if( $reg_count > $count_poolrows )
+   if ( $reg_count > $count_poolrows )
    {
       $tform->add_empty_row();
       $tform->add_row( array(

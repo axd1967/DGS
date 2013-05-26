@@ -38,7 +38,7 @@ $GLOBALS['ThePage'] = new Page('Links');
    $link_class = 'DocLinkNarrow';
 
    // show Links from database, or static links if no entries found in db
-   if( !load_links() )
+   if ( !load_links() )
    {
       ta_begin();
       {//HOT-section to seed database with link-texts
@@ -55,7 +55,7 @@ $GLOBALS['ThePage'] = new Page('Links');
 
 function make_static_links( $create=false )
 {
-   if( $create )
+   if ( $create )
    {
       $sect = 'save_link_section';
       $link = 'save_link_entry';
@@ -183,19 +183,19 @@ function load_links()
       "ORDER BY CatOrder, entry.Level, entry.SortOrder" );
 
    $last_level = 0;
-   while( $row = mysql_fetch_assoc($result) )
+   while ( $row = mysql_fetch_assoc($result) )
    {
-      if( $last_level > 0 && $row['Level'] != $last_level )
+      if ( $last_level > 0 && $row['Level'] != $last_level )
          add_link_page_link();
 
-      if( $row['Level'] == 1 ) // section
+      if ( $row['Level'] == 1 ) // section
          section( 'LinkTitle'.$row['SortOrder'], $TW_($row['Q']) );
-      elseif( $row['Level'] == 2 ) // link-entry
+      elseif ( $row['Level'] == 2 ) // link-entry
          add_link_page_link( $row['Reference'], $TW_($row['Q']), $TW_($row['A']) );
 
       $last_level = $row['Level'];
    }
-   if( $last_level > 0 )
+   if ( $last_level > 0 )
       add_link_page_link();
    mysql_free_result($result);
 

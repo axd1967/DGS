@@ -145,7 +145,7 @@ class Bulletin
    /*! \brief Returns true if LockVersion for optimistic-locking does not match latest version. */
    public function is_optimistic_lock_clash()
    {
-      if( $this->ID == 0 || is_null($this->LockVersion) || mysql_affected_rows() >= 1 ) //multi-update not supported
+      if ( $this->ID == 0 || is_null($this->LockVersion) || mysql_affected_rows() >= 1 ) //multi-update not supported
          return false;
       $row = mysql_single_fetch( "Bulletin.is_optimistic_lock_clash({$this->ID},{$this->LockVersion})",
          "SELECT ".FIELD_LOCKVERSION." FROM Bulletin WHERE ID={$this->ID} LIMIT 1" );
@@ -155,7 +155,7 @@ class Bulletin
    public function readLockVersion()
    {
       $lock_version = @$_REQUEST[FORMFIELD_LOCKVERSION];
-      if( (string)$lock_version != '' )
+      if ( (string)$lock_version != '' )
          $this->LockVersion = (int)$lock_version;
    }
 
@@ -166,21 +166,21 @@ class Bulletin
 
    public function setCategory( $category )
    {
-      if( !preg_match( "/^(".CHECK_BULLETIN_CATEGORY.")$/", $category ) )
+      if ( !preg_match( "/^(".CHECK_BULLETIN_CATEGORY.")$/", $category ) )
          error('invalid_args', "Bulletin.setCategory($category)");
       $this->Category = $category;
    }
 
    public function setStatus( $status )
    {
-      if( !preg_match( "/^(".CHECK_BULLETIN_STATUS.")$/", $status ) )
+      if ( !preg_match( "/^(".CHECK_BULLETIN_STATUS.")$/", $status ) )
          error('invalid_args', "Bulletin.setStatus($status)");
       $this->Status = $status;
    }
 
    public function setTargetType( $target_type )
    {
-      if( !preg_match( "/^(".CHECK_BULLETIN_TARGET_TYPE.")$/", $target_type ) )
+      if ( !preg_match( "/^(".CHECK_BULLETIN_TARGET_TYPE.")$/", $target_type ) )
          error('invalid_args', "Bulletin.setTargetType($target_type)");
       $this->TargetType = $target_type;
    }
@@ -193,7 +193,7 @@ class Bulletin
    /*! \brief Inserts or updates Bulletin-entry in database. */
    public function persist()
    {
-      if( $this->ID > 0 )
+      if ( $this->ID > 0 )
          $success = $this->update();
       else
          $success = $this->insert();
@@ -206,7 +206,7 @@ class Bulletin
 
       $entityData = $this->fillEntityData();
       $result = $entityData->insert( "Bulletin.insert(%s)" );
-      if( $result )
+      if ( $result )
          $this->ID = mysql_insert_id();
       return $result;
    }
@@ -221,11 +221,11 @@ class Bulletin
 
    public function fillEntityData( $data=null )
    {
-      if( is_null($data) )
+      if ( is_null($data) )
          $data = $GLOBALS['ENTITY_BULLETIN']->newEntityData();
       $data->set_value( 'ID', $this->ID );
       $data->set_value( 'uid', $this->uid );
-      if( !is_null($this->LockVersion) )
+      if ( !is_null($this->LockVersion) )
          $data->set_value( FIELD_LOCKVERSION, $this->LockVersion );
       $data->set_value( 'Category', $this->Category );
       $data->set_value( 'Status', $this->Status );
@@ -249,7 +249,7 @@ class Bulletin
       $this->UserListHandles = array();
       $this->UserListUserRefs = array();
 
-      if( $this->ID > 0 )
+      if ( $this->ID > 0 )
       {
          $result = db_query( "Bulletin.loadUserList({$this->ID})",
             "SELECT BT.uid as ID, P.Handle, P.Name, IFNULL(C.uid,0) AS C_RejectMsg " .
@@ -257,7 +257,7 @@ class Bulletin
                "INNER JOIN Players AS P ON P.ID=BT.uid " .
                "LEFT JOIN Contacts AS C ON C.uid=BT.uid AND C.cid={$this->uid} AND (C.SystemFlags & ".CSYSFLAG_REJECT_MESSAGE.") " .
             "WHERE BT.bid={$this->ID} ORDER BY BT.uid" );
-         while( $row = mysql_fetch_array( $result ) )
+         while ( $row = mysql_fetch_array( $result ) )
          {
             $this->UserList[] = $row['ID'];
             $this->UserListHandles[] = ( is_numeric($row['Handle']) ? '=' : '' ) . $row['Handle'];
@@ -280,24 +280,24 @@ class Bulletin
     */
    public function allow_bulletin_user_edit( $uid, $errmsg='' )
    {
-      if( $errmsg )
+      if ( $errmsg )
          $errmsg .= "({$this->ID},{$this->Status},{$this->Flags},$uid)";
 
-      if( $this->uid != $uid ) // not author
+      if ( $this->uid != $uid ) // not author
          return ($errmsg) ? error('bulletin_edit_not_allowed', "$errmsg.author") : false;
-      if( $this->Status == BULLETIN_STATUS_ARCHIVE || $this->Status == BULLETIN_STATUS_DELETE )
+      if ( $this->Status == BULLETIN_STATUS_ARCHIVE || $this->Status == BULLETIN_STATUS_DELETE )
          return ($errmsg) ? error('bulletin_edit_not_allowed', "$errmsg.status") : false;
 
       // check despite easier check on user-edit-flag
-      if( $this->TargetType == BULLETIN_TRG_MPG && $this->Category == BULLETIN_CAT_PRIVATE_MSG && $this->gid > 0 )
+      if ( $this->TargetType == BULLETIN_TRG_MPG && $this->Category == BULLETIN_CAT_PRIVATE_MSG && $this->gid > 0 )
          return true;
-      if( ($this->TargetType == BULLETIN_TRG_TP || $this->TargetType == BULLETIN_TRG_TD )
+      if ( ($this->TargetType == BULLETIN_TRG_TP || $this->TargetType == BULLETIN_TRG_TD )
             && $this->Category == BULLETIN_CAT_TOURNAMENT_NEWS && $this->tid > 0 )
          return true;
 
-      if( $this->Flags & BULLETIN_FLAG_USER_EDIT )
+      if ( $this->Flags & BULLETIN_FLAG_USER_EDIT )
          return true;
-      if( $this->uid == $uid )
+      if ( $this->uid == $uid )
          return true;
 
       return ($errmsg) ? error('bulletin_edit_not_allowed', "$errmsg.last_check") : false;
@@ -314,15 +314,15 @@ class Bulletin
       global $player_row;
 
       $skip_bullcat = (int)$player_row['SkipBulletin'];
-      if( $skip_bullcat > 0 )
+      if ( $skip_bullcat > 0 )
       {
-         if( $this->Category == BULLETIN_CAT_TOURNAMENT )
+         if ( $this->Category == BULLETIN_CAT_TOURNAMENT )
             return ( $skip_bullcat & BULLETIN_SKIPCAT_TOURNAMENT );
-         if( $this->Category == BULLETIN_CAT_FEATURE )
+         if ( $this->Category == BULLETIN_CAT_FEATURE )
             return ( $skip_bullcat & BULLETIN_SKIPCAT_FEATURE );
-         if( $this->Category == BULLETIN_CAT_PRIVATE_MSG )
+         if ( $this->Category == BULLETIN_CAT_PRIVATE_MSG )
             return ( $skip_bullcat & BULLETIN_SKIPCAT_PRIVATE_MSG );
-         if( $this->Category == BULLETIN_CAT_SPAM )
+         if ( $this->Category == BULLETIN_CAT_SPAM )
             return ( $skip_bullcat & BULLETIN_SKIPCAT_SPAM );
       }
       return false;
@@ -335,7 +335,7 @@ class Bulletin
    public static function build_query_sql( $bid=0, $with_player=true )
    {
       $qsql = $GLOBALS['ENTITY_BULLETIN']->newQuerySQL('B');
-      if( $with_player )
+      if ( $with_player )
       {
          $qsql->add_part( SQLP_FIELDS,
             'B.uid AS BP_ID',
@@ -344,7 +344,7 @@ class Bulletin
          $qsql->add_part( SQLP_FROM,
             'INNER JOIN Players AS BP ON BP.ID=B.uid' );
       }
-      if( $bid > 0 )
+      if ( $bid > 0 )
          $qsql->add_part( SQLP_WHERE, "B.ID=$bid" );
       return $qsql;
    }//build_query_sql
@@ -372,7 +372,7 @@ class Bulletin
             @$row['X_Lastchanged']
          );
       $bull->LockVersion = (int)@$row[FIELD_LOCKVERSION];
-      if( isset($row['BR_Read']) )
+      if ( isset($row['BR_Read']) )
          $bull->ReadState = (int)@$row['BR_Read'];
       return $bull;
    }//new_from_row
@@ -390,14 +390,14 @@ class Bulletin
    {
       global $player_row;
       $uid = (int)@$player_row['ID'];
-      if( $uid <= 0 )
+      if ( $uid <= 0 )
          error('invalid_args', "Bulletin:build_view_query_sql.check.uid($is_admin,$count_new,$show_target_type)");
 
       $qsql = new QuerySQL();
-      if( $count_new )
+      if ( $count_new )
          $show_target_type = '';
 
-      if( $count_new )
+      if ( $count_new )
       {
          $qsql->add_part( SQLP_FROM, "Bulletin AS B" );
          $qsql->add_part( SQLP_WHERE,
@@ -406,33 +406,33 @@ class Bulletin
       }
       else
       {
-         if( !$is_admin ) // hide some bulletins
+         if ( !$is_admin ) // hide some bulletins
             $qsql->add_part( SQLP_WHERE, "B.Status IN ('".BULLETIN_STATUS_SHOW."','".BULLETIN_STATUS_ARCHIVE."')" );
       }
 
       // ignore all bulletins user configured to skip
       $skip_bullcat = (int)$player_row['SkipBulletin'];
-      if( !$is_admin && $skip_bullcat > 0 )
+      if ( !$is_admin && $skip_bullcat > 0 )
       {
          $find_categories = array( BULLETIN_CAT_MAINT, BULLETIN_CAT_ADMIN_MSG, BULLETIN_CAT_TOURNAMENT_NEWS );
-         if( !($skip_bullcat & BULLETIN_SKIPCAT_TOURNAMENT) )
+         if ( !($skip_bullcat & BULLETIN_SKIPCAT_TOURNAMENT) )
             $find_categories[] = BULLETIN_CAT_TOURNAMENT;
-         if( !($skip_bullcat & BULLETIN_SKIPCAT_FEATURE ) )
+         if ( !($skip_bullcat & BULLETIN_SKIPCAT_FEATURE ) )
             $find_categories[] = BULLETIN_CAT_FEATURE;
-         if( !($skip_bullcat & BULLETIN_SKIPCAT_PRIVATE_MSG) )
+         if ( !($skip_bullcat & BULLETIN_SKIPCAT_PRIVATE_MSG) )
             $find_categories[] = BULLETIN_CAT_PRIVATE_MSG;
-         if( !($skip_bullcat & BULLETIN_SKIPCAT_SPAM) )
+         if ( !($skip_bullcat & BULLETIN_SKIPCAT_SPAM) )
             $find_categories[] = BULLETIN_CAT_SPAM;
          $qsql->add_part( SQLP_WHERE, "B.Category IN ('".implode("','", $find_categories)."')" );
       }
 
       // BR_Read = 1 = mark-as-read, 0 = unread (=BR.bid IS NULL)
       $qsql->add_part( SQLP_FROM, "LEFT JOIN BulletinRead AS BR ON BR.bid=B.ID AND BR.uid=$uid" );
-      if( !$count_new )
+      if ( !$count_new )
          $qsql->add_part( SQLP_FIELDS, 'IFNULL(BR.bid,0) AS BR_Read' );
 
       // handle target-types (UNSET not possible)
-      if( $show_target_type == BULLETIN_TRG_TP ) // restricted to TargetType=TP (tournament-participant)
+      if ( $show_target_type == BULLETIN_TRG_TP ) // restricted to TargetType=TP (tournament-participant)
       {
          $qsql->add_part( SQLP_FIELDS, "1 AS B_View" );
          $qsql->add_part( SQLP_FROM,   "INNER JOIN TournamentParticipant AS BTP ON BTP.tid=B.tid AND BTP.uid=$uid" );
@@ -440,7 +440,7 @@ class Bulletin
             "B.TargetType='$show_target_type'",
             "B.tid > 0" );
       }
-      elseif( $show_target_type == BULLETIN_TRG_TD ) // restricted to TargetType=DL (tournament-owner & director)
+      elseif ( $show_target_type == BULLETIN_TRG_TD ) // restricted to TargetType=DL (tournament-owner & director)
       {
          $qsql->add_part( SQLP_FIELDS, "1 AS B_View" );
          $qsql->add_part( SQLP_FROM,
@@ -451,17 +451,17 @@ class Bulletin
             "B.tid > 0",
             "(BTD.tid IS NOT NULL OR BTN.ID IS NOT NULL)" );
       }
-      elseif( $show_target_type == BULLETIN_TRG_USERLIST ) // restricted to TargetType=UL (userlist)
+      elseif ( $show_target_type == BULLETIN_TRG_USERLIST ) // restricted to TargetType=UL (userlist)
       {
          $qsql->add_part( SQLP_FIELDS, "1 AS B_View" );
          $qsql->add_part( SQLP_FROM,   "INNER JOIN BulletinTarget AS BT ON BT.bid=B.ID AND BT.uid=$uid" );
          $qsql->add_part( SQLP_WHERE,  "B.TargetType='$show_target_type'" );
       }
-      elseif( $show_target_type == BULLETIN_TRG_ALL ) // restricted to TargetType=ALL (all-users)
+      elseif ( $show_target_type == BULLETIN_TRG_ALL ) // restricted to TargetType=ALL (all-users)
       {
          $qsql->add_part( SQLP_FIELDS, "1 AS B_View" );
       }
-      elseif( $show_target_type == BULLETIN_TRG_MPG ) // restricted to TargetType=MPG (multi-player-game)
+      elseif ( $show_target_type == BULLETIN_TRG_MPG ) // restricted to TargetType=MPG (multi-player-game)
       {
          $qsql->add_part( SQLP_FIELDS, "1 AS B_View" );
          $qsql->add_part( SQLP_FROM,
@@ -482,7 +482,7 @@ class Bulletin
                "WHEN '".BULLETIN_TRG_USERLIST."' THEN IF(BT.bid IS NULL,0,1) " .
                "WHEN '".BULLETIN_TRG_MPG."' THEN IF(GP.gid IS NULL,0,1) " .
                "ELSE 0 END";
-         if( $count_new )
+         if ( $count_new )
             $qsql->add_part( SQLP_FIELDS, "SUM($view_sql) AS X_Count" );
          else
             $qsql->add_part( SQLP_FIELDS, "($view_sql) AS B_View" );
@@ -507,7 +507,7 @@ class Bulletin
                "ON GP.gid=G.ID AND GP.uid=$uid AND B.gid > 0" );
       }
 
-      if( !$count_new && !$is_admin && !$check )
+      if ( !$count_new && !$is_admin && !$check )
          $qsql->add_part( SQLP_HAVING, "B_View > 0" );
 
       return $qsql;
@@ -532,7 +532,7 @@ class Bulletin
    {
       $qsql->add_part( SQLP_LIMIT, '1' );
       $row = mysql_single_fetch( "Bulletin:load_bulletin_by_query()", $qsql->get_select() );
-      if( $with_row )
+      if ( $with_row )
          return ($row) ? array( self::new_from_row($row), $row ) : array( NULL, NULL );
       else
          return ($row) ? self::new_from_row($row) : NULL;
@@ -548,7 +548,7 @@ class Bulletin
       $iterator->setResultRows( mysql_num_rows($result) );
 
       $iterator->clearItems();
-      while( $row = mysql_fetch_array( $result ) )
+      while ( $row = mysql_fetch_array( $result ) )
       {
          $rca = self::new_from_row( $row );
          $iterator->addItem( $rca, $row );
@@ -569,24 +569,24 @@ class Bulletin
       global $player_row;
 
       $uid = (int)@$player_row['ID'];
-      if( !is_numeric($uid) || $uid <= GUESTS_ID_MAX )
+      if ( !is_numeric($uid) || $uid <= GUESTS_ID_MAX )
          error('invalid_args', "Bulletin:new_bulletin.check.uid($uid,$is_admin,$gid,$tid,$new_uid)");
 
-      if( !is_numeric($gid) || $gid < 0 )
+      if ( !is_numeric($gid) || $gid < 0 )
          error('invalid_args', "Bulletin:new_bulletin.check.gid($uid,$is_admin,$gid)");
-      if( !is_numeric($tid) || $tid < 0 )
+      if ( !is_numeric($tid) || $tid < 0 )
          error('invalid_args', "Bulletin:new_bulletin.check.tid($uid,$is_admin,$tid)");
-      if( !is_numeric($new_uid) || ($new_uid != 0 && $new_uid <= GUESTS_ID_MAX) )
+      if ( !is_numeric($new_uid) || ($new_uid != 0 && $new_uid <= GUESTS_ID_MAX) )
          error('invalid_args', "Bulletin:new_bulletin.check.new_uid_guest($uid,$is_admin,$new_uid)");
-      if( !$is_admin && $new_uid > 0 )
+      if ( !$is_admin && $new_uid > 0 )
          error('invalid_args', "Bulletin:new_bulletin.check.new_uid0($uid,$is_admin,$new_uid)");
 
-      if( $new_uid == $uid || $new_uid == 0 )
+      if ( $new_uid == $uid || $new_uid == 0 )
          $user = new User( $uid, @$player_row['Name'], @$player_row['Handle'] );
       else
       {
          $user = User::load_user( $new_uid );
-         if( is_null($user) )
+         if ( is_null($user) )
             error('unknown_user', "Bulletin:new_bulletin.check.find_user($uid,$new_uid)");
          $uid = $new_uid;
       }
@@ -595,7 +595,7 @@ class Bulletin
       $bulletin->PublishTime = $GLOBALS['NOW'];
       $bulletin->ExpireTime = $bulletin->PublishTime + 30 * SECS_PER_DAY; // default +30d
 
-      if( $is_admin )
+      if ( $is_admin )
       {
          $bulletin->setCategory( BULLETIN_CAT_ADMIN_MSG );
          $bulletin->Flags = BULLETIN_FLAG_ADMIN_CREATED;
@@ -606,20 +606,20 @@ class Bulletin
          $bulletin->Flags = BULLETIN_FLAG_USER_EDIT;
       }
 
-      if( $gid > 0 ) // MPG-bulletin
+      if ( $gid > 0 ) // MPG-bulletin
       {
          $bulletin->setStatus( BULLETIN_STATUS_SHOW ); // no admin-ACK needed
          $bulletin->setTargetType( BULLETIN_TRG_MPG );
          $bulletin->gid = $gid;
       }
-      elseif( $tid > 0 ) // TP-bulletin
+      elseif ( $tid > 0 ) // TP-bulletin
       {
          $bulletin->setCategory( BULLETIN_CAT_TOURNAMENT_NEWS );
          $bulletin->setStatus( BULLETIN_STATUS_SHOW ); // no admin-ACK needed
          $bulletin->setTargetType( BULLETIN_TRG_TP );
          $bulletin->tid = $tid;
       }
-      elseif( $new_uid > 0 ) // prepare bulletin for user
+      elseif ( $new_uid > 0 ) // prepare bulletin for user
       {
          $bulletin->setCategory( BULLETIN_CAT_PRIVATE_MSG );
          $bulletin->setTargetType( BULLETIN_TRG_ALL );
@@ -634,7 +634,7 @@ class Bulletin
    public static function mark_bulletin_as_read( $bid )
    {
       global $player_row;
-      if( !is_numeric($bid) || $bid <= 0 )
+      if ( !is_numeric($bid) || $bid <= 0 )
          error('invalid_args', "Bulletin:mark_bulletin_as_read.check.bid($bid)");
       $uid = (int)$player_row['ID'];
 
@@ -644,10 +644,10 @@ class Bulletin
             "INSERT IGNORE BulletinRead (bid,uid) " .
             "SELECT ID, $uid FROM Bulletin WHERE ID=$bid AND Status IN ('".BULLETIN_STATUS_SHOW."','".BULLETIN_STATUS_ARCHIVE."') LIMIT 1" );
 
-         if( mysql_affected_rows() > 0 ) // increase read-counter
+         if ( mysql_affected_rows() > 0 ) // increase read-counter
          {
             $bulletin = self::load_bulletin( $bid, /*with_player*/false );
-            if( !is_null($bulletin) )
+            if ( !is_null($bulletin) )
             {
                $bulletin->update_count_players( 'Bulletin:mark_bulletin_as_read', $uid );
                self::update_count_bulletin_new( "Bulletin:mark_bulletin_as_read($bid,$uid)", COUNTNEW_RECALC );
@@ -670,15 +670,15 @@ class Bulletin
     */
    public static function persist_bulletin_userlist( $bid, $uids )
    {
-      if( !is_numeric($bid) || $bid <= 0 )
+      if ( !is_numeric($bid) || $bid <= 0 )
          error('invalid_args', "Bulletin:persist_bulletin_userlist.check.bid($bid)");
-      if( !is_array($uids) || count($uids) == 0 )
+      if ( !is_array($uids) || count($uids) == 0 )
          error('invalid_args', "Bulletin:persist_bulletin_userlist.check.uids($bid)");
 
       $uids = array_unique($uids);
-      foreach( $uids as $uid )
+      foreach ( $uids as $uid )
       {
-         if( !is_numeric($uid) || $uid <= GUESTS_ID_MAX )
+         if ( !is_numeric($uid) || $uid <= GUESTS_ID_MAX )
             error('invalid_args', "Bulletin:persist_bulletin_userlist.check.uids.bad_uid($bid,$uid)");
       }
       $uids_sql = implode(',', $uids);
@@ -704,7 +704,7 @@ class Bulletin
          "WHERE Status='".BULLETIN_STATUS_SHOW."' AND " .
             "ExpireTime > 0 AND ExpireTime < FROM_UNIXTIME($NOW)" );
 
-      if( mysql_affected_rows() > 0 )
+      if ( mysql_affected_rows() > 0 )
          self::update_bulletin_count_players( 'Bulletin:process_expired_bulletins',
             BULLETIN_STATUS_SHOW, BULLETIN_TRG_ALL );
    }//process_expire_bulletins
@@ -719,24 +719,24 @@ class Bulletin
    {
       global $player_row;
 
-      if( $uid <= 0 )
+      if ( $uid <= 0 )
          $uid = (int)@$player_row['ID'];
       $dbgmsg .= "Bulletin:update_count_bulletin_new($uid,$diff)";
-      if( $uid <= 0 )
+      if ( $uid <= 0 )
          error( 'invalid_args', "$dbgmsg.check.uid" );
 
-      if( is_null($diff) )
+      if ( is_null($diff) )
       {
          db_query( "$dbgmsg.reset",
             "UPDATE Players SET CountBulletinNew=-1 WHERE ID='$uid' LIMIT 1" );
       }
-      elseif( is_numeric($diff) && $diff != 0 )
+      elseif ( is_numeric($diff) && $diff != 0 )
       {
          db_query( "$dbgmsg.upd",
             "UPDATE Players SET CountBulletinNew=CountBulletinNew+($diff) " .
             "WHERE CountBulletinNew>=0 AND ID='$uid' LIMIT 1" );
       }
-      elseif( (string)$diff == COUNTNEW_RECALC )
+      elseif ( (string)$diff == COUNTNEW_RECALC )
       {
          $count_new = self::count_bulletin_new( -1 );
          $player_row['CountBulletinNew'] = $count_new;
@@ -754,7 +754,7 @@ class Bulletin
     */
    public static function count_bulletin_new( $curr_count=-1 )
    {
-      if( $curr_count >= 0 )
+      if ( $curr_count >= 0 )
          return $curr_count;
 
       $qsql = self::build_view_query_sql( /*adm*/false, /*count*/true );
@@ -782,18 +782,18 @@ class Bulletin
 
       self::update_cache_bulletins_global( $dbgmsg );
 
-      if( $status != BULLETIN_STATUS_SHOW )
+      if ( $status != BULLETIN_STATUS_SHOW )
          return false;
 
       // NOTE: no sql-'LIMIT' allowed with multi-table-UPDATE
-      if( is_numeric($uid) && $uid > 0 )
+      if ( is_numeric($uid) && $uid > 0 )
          $qpart_uid = " AND P.ID=$uid";
-      elseif( is_array($uid) && count($uid) > 0 )
+      elseif ( is_array($uid) && count($uid) > 0 )
          $qpart_uid = " AND P.ID IN (".implode(',', $uid).")";
       else
          $qpart_uid = '';
 
-      if( $target_type == BULLETIN_TRG_TD && $tid > 0 )
+      if ( $target_type == BULLETIN_TRG_TD && $tid > 0 )
       {
          db_query( "$dbgmsg.upd_td($tid)",
             "UPDATE Players AS P INNER JOIN TournamentDirector AS TD ON TD.uid=P.ID " .
@@ -802,25 +802,25 @@ class Bulletin
             "UPDATE Players AS P INNER JOIN Tournament AS T ON T.Owner_ID=P.ID " .
             "SET P.CountBulletinNew=-1 WHERE T.ID=$tid $qpart_uid" );
       }
-      elseif( $target_type == BULLETIN_TRG_TP && $tid > 0 )
+      elseif ( $target_type == BULLETIN_TRG_TP && $tid > 0 )
       {
          db_query( "$dbgmsg.upd_tp($tid)",
             "UPDATE Players AS P INNER JOIN TournamentParticipant AS TP ON TP.uid=P.ID " .
             "SET P.CountBulletinNew=-1 WHERE TP.tid=$tid $qpart_uid" );
       }
-      elseif( $target_type == BULLETIN_TRG_USERLIST && $bid > 0 )
+      elseif ( $target_type == BULLETIN_TRG_USERLIST && $bid > 0 )
       {
          db_query( "$dbgmsg.upd_userlist($bid)",
             "UPDATE Players AS P INNER JOIN BulletinTarget AS BT ON BT.uid=P.ID " .
             "SET P.CountBulletinNew=-1 WHERE BT.bid=$bid $qpart_uid" );
       }
-      elseif( $target_type == BULLETIN_TRG_MPG && $gid > 0 )
+      elseif ( $target_type == BULLETIN_TRG_MPG && $gid > 0 )
       {
          db_query( "$dbgmsg.upd_mpg($gid)",
             "UPDATE Players AS P INNER JOIN GamePlayers AS GP ON GP.uid=P.ID " .
             "SET P.CountBulletinNew=-1 WHERE GP.gid=$gid $qpart_uid" );
       }
-      elseif( $target_type == BULLETIN_TRG_UNSET ) // should not occur
+      elseif ( $target_type == BULLETIN_TRG_UNSET ) // should not occur
          error('invalid_args', "$dbgmsg.check.target_type($target_type)");
       else //if( $target_type == BULLETIN_TRG_ALL || $tid/bid/gid <=0 for respective target-type
       {
@@ -862,17 +862,17 @@ class Bulletin
 
       // time of last new or changed bulletin
       $lastchange_bulletin = DgsCache::fetch( $dbgmsg, CACHE_GRP_BULLETINS, $gkey );
-      if( !is_numeric($lastchange_bulletin) )
+      if ( !is_numeric($lastchange_bulletin) )
          $lastchange_bulletin = 0;
 
       $arr_rows = DgsCache::fetch( $dbgmsg, CACHE_GRP_BULLETINS, $key );
-      if( is_array($arr_rows) )
+      if ( is_array($arr_rows) )
       {
          // check if cache-entry creation-date is older than that of global bulletin-change-time
-         if( count($arr_rows) > 0 )
+         if ( count($arr_rows) > 0 )
          {
             $stored_creation_time = array_shift($arr_rows); // remove time for final result
-            if( $lastchange_bulletin > 0 && $stored_creation_time < $lastchange_bulletin )
+            if ( $lastchange_bulletin > 0 && $stored_creation_time < $lastchange_bulletin )
                $arr_rows = null; // outdated -> reload
          }
          else
@@ -880,7 +880,7 @@ class Bulletin
       }
 
       $result = array();
-      if( is_null($arr_rows) )
+      if ( is_null($arr_rows) )
       {
          $iterator = new ListIterator( $dbgmsg.'.list_bulletin.unread',
             new QuerySQL( SQLP_WHERE,
@@ -891,7 +891,7 @@ class Bulletin
          $iterator = self::load_bulletins( $iterator );
 
          $cache_result = array( $GLOBALS['NOW'] ); // bulletin-cache-entry creation-time
-         while( list(,$arr_item) = $iterator->getListIterator() )
+         while ( list(,$arr_item) = $iterator->getListIterator() )
          {
             $result[] = $arr_item[0]; // Bulletin-obj
             $cache_result[] = $arr_item[1]; // only cache row-data
@@ -902,7 +902,7 @@ class Bulletin
       }
       else // transform cache-stored row-arr into Bulletin-arr
       {
-         foreach( $arr_rows as $row )
+         foreach ( $arr_rows as $row )
             $result[] = self::new_from_row( $row );
       }
 

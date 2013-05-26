@@ -27,7 +27,7 @@ $TranslateGroups[] = "Common";
  * \brief Functions to upload files to server, especially images (ImageFileUpload) at first.
  */
 
-if( !defined('UPLOAD_ERR_EXTENSION') )
+if ( !defined('UPLOAD_ERR_EXTENSION') )
    define('UPLOAD_ERR_EXTENSION', 8); // since PHP 5.2.0
 
 /*!
@@ -96,12 +96,12 @@ class FileUpload
    private function checkFileUploadError( $errorcode )
    {
       $this->is_uploaded = false;
-      switch( (int)$errorcode )
+      switch ( (int)$errorcode )
       {
          case UPLOAD_ERR_OK:
-            if( $this->file_src_clientfile == '' )
+            if ( $this->file_src_clientfile == '' )
                $this->errors[] = T_('No file specified to upload.');
-            elseif( is_uploaded_file($this->file_src_tmpfile) )
+            elseif ( is_uploaded_file($this->file_src_tmpfile) )
                $this->is_uploaded = true;
             break;
          case UPLOAD_ERR_INI_SIZE:
@@ -135,7 +135,7 @@ class FileUpload
 
       // check file-size (max. upload-size)
       $filesize = filesize($this->file_src_tmpfile);
-      if( $errorcode != UPLOAD_ERR_FORM_SIZE && $this->max_upload_size > 0
+      if ( $errorcode != UPLOAD_ERR_FORM_SIZE && $this->max_upload_size > 0
             && $filesize > $this->max_upload_size )
       {
          $this->errors[] = sprintf( T_('The uploaded file [%s] exceeds the max. file size of [%s bytes] specified for the input-form.'),
@@ -143,14 +143,14 @@ class FileUpload
          $this->need_resize = true;
       }
 
-      if( $this->has_error() )
+      if ( $this->has_error() )
          $this->is_uploaded = false;
    }//checkFileUploadError
 
    /*! \brief Cleans up resources and temp-file. */
    public function cleanup()
    {
-      if( file_exists($this->file_src_tmpfile) )
+      if ( file_exists($this->file_src_tmpfile) )
          @unlink($this->file_src_tmpfile);
    }
 
@@ -206,12 +206,12 @@ class ImageFileUpload extends FileUpload
     */
    private function checkImageFileUpload( $expected_imagetypes )
    {
-      if( !$this->is_uploaded )
+      if ( !$this->is_uploaded )
          return false;
 
       // check for image and get image-infos
       $img_info = getimagesize($this->file_src_tmpfile);
-      if( !is_array($img_info) )
+      if ( !is_array($img_info) )
       {
          $this->errors[] = sprintf( T_('The uploaded file [%s] has an unknown image format.'),
                $this->file_src_clientfile );
@@ -221,7 +221,7 @@ class ImageFileUpload extends FileUpload
       $this->image_mimetype = @$img_info['mime'];
 
       // check image type
-      if( !in_array($this->image_type, $expected_imagetypes) )
+      if ( !in_array($this->image_type, $expected_imagetypes) )
       {
          $this->errors[] = sprintf( T_('The image-type [%s, %s] of the uploaded file [%s] '
                . 'does not match one of the expected image-types [%s].'),
@@ -230,13 +230,13 @@ class ImageFileUpload extends FileUpload
       }
 
       // check image dimensions
-      if( $this->max_x > 0 && $this->image_x > $this->max_x )
+      if ( $this->max_x > 0 && $this->image_x > $this->max_x )
       {
          $this->errors[] = sprintf( T_('The width [%s] of the uploaded image [%s] exceeds the limit of [%s pixels].'),
                $this->image_x, $this->file_src_clientfile, $this->max_x );
          $this->need_resize = true;
       }
-      if( $this->max_y > 0 && $this->image_y > $this->max_y )
+      if ( $this->max_y > 0 && $this->image_y > $this->max_y )
       {
          $this->errors[] = sprintf( T_('The height [%s] of the uploaded image [%s] exceeds the limit of [%s pixels].'),
                $this->image_y, $this->file_src_clientfile, $this->max_y );
@@ -272,7 +272,7 @@ class ImageFileUpload extends FileUpload
          //IMAGETYPE_ICO     => 'ico',  // 17 = ICO, image/vnd.microsoft.icon; since PHP 5.3.0
       );
 
-      if( !isset($ARR_UPLOAD_EXTENSIONS[$this->image_type]) )
+      if ( !isset($ARR_UPLOAD_EXTENSIONS[$this->image_type]) )
          error('invalid_args', "ImageFileUpload.determineFileExtension.unknown_type({$this->image_type})");
       return $ARR_UPLOAD_EXTENSIONS[$this->image_type];
    }//determineFileExtension
@@ -284,11 +284,11 @@ class ImageFileUpload extends FileUpload
     */
    public function uploadImageFile( $path_dest )
    {
-      if( !$this->is_uploaded || $this->has_error() )
+      if ( !$this->is_uploaded || $this->has_error() )
          return false;
 
       // no conversion needed, just store image
-      if( move_uploaded_file($this->file_src_tmpfile, $path_dest) )
+      if ( move_uploaded_file($this->file_src_tmpfile, $path_dest) )
          return true;
 
       $this->errors[] = sprintf( T_('The uploaded file [%s] can not be stored.'),
@@ -299,7 +299,7 @@ class ImageFileUpload extends FileUpload
    /*! \brief Loads image from temp-file as GD-image, store data in this->image and dimensions in this->image_x/y. */
    public function loadImage()
    {
-      switch( (int)$this->image_type )
+      switch ( (int)$this->image_type )
       {
          case IMAGETYPE_GIF:
             $this->image = @imagecreatefromgif($this->file_src_tmpfile);
@@ -325,7 +325,7 @@ class ImageFileUpload extends FileUpload
    /*! \brief Cleans up GD-resource and temp-file. */
    public function cleanup()
    {
-      if( !is_null($this->image) )
+      if ( !is_null($this->image) )
       {
          @imagedestroy($this->image);
          $this->image = null;
@@ -342,7 +342,7 @@ class ImageFileUpload extends FileUpload
     */
    public static function getImageInfo( $path_image )
    {
-      if( !file_exists($path_image) )
+      if ( !file_exists($path_image) )
          return null;
 
       $image_info = @getimagesize($path_image);
@@ -365,9 +365,9 @@ class ImageFileUpload extends FileUpload
    private static function getImageTypesText( $imagetypes )
    {
       $arr = array();
-      if( in_array(IMAGETYPE_GIF,  $imagetypes) ) $arr[] = T_('GIF#imagefmt');
-      if( in_array(IMAGETYPE_JPEG, $imagetypes) ) $arr[] = T_('JPEG#imagefmt');
-      if( in_array(IMAGETYPE_PNG,  $imagetypes) ) $arr[] = T_('PNG#imagefmt');
+      if ( in_array(IMAGETYPE_GIF,  $imagetypes) ) $arr[] = T_('GIF#imagefmt');
+      if ( in_array(IMAGETYPE_JPEG, $imagetypes) ) $arr[] = T_('JPEG#imagefmt');
+      if ( in_array(IMAGETYPE_PNG,  $imagetypes) ) $arr[] = T_('PNG#imagefmt');
       return implode(', ', $arr);
    }//getImageTypesText
 

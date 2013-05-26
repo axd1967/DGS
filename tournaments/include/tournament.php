@@ -112,21 +112,21 @@ class Tournament
 
    public function setScope( $scope )
    {
-      if( !preg_match( "/^(".CHECK_TOURNEY_SCOPE.")$/", $scope ) )
+      if ( !preg_match( "/^(".CHECK_TOURNEY_SCOPE.")$/", $scope ) )
          error('invalid_args', "Tournament.setScope($scope)");
       $this->Scope = $scope;
    }
 
    public function setType( $type )
    {
-      if( !preg_match( "/^(".CHECK_TOURNEY_TYPE.")$/", $type ) )
+      if ( !preg_match( "/^(".CHECK_TOURNEY_TYPE.")$/", $type ) )
          error('invalid_args', "Tournament.setType($type)");
       $this->Type = $type;
    }
 
    public function setWizardType( $wizard_type )
    {
-      if( !is_numeric($wizard_type) || $wizard_type < 1 || $wizard_type > MAX_TOURNEY_WIZARD_TYPE )
+      if ( !is_numeric($wizard_type) || $wizard_type < 1 || $wizard_type > MAX_TOURNEY_WIZARD_TYPE )
          error('invalid_args', "Tournament.setWizardType($wizard_type)");
       $this->WizardType = $wizard_type;
       $this->setType( TournamentUtils::getWizardTournamentType($wizard_type) );
@@ -134,9 +134,9 @@ class Tournament
 
    public function setStatus( $status, $check_only=false )
    {
-      if( !preg_match( "/^(".CHECK_TOURNEY_STATUS.")$/", $status ) )
+      if ( !preg_match( "/^(".CHECK_TOURNEY_STATUS.")$/", $status ) )
          error('invalid_args', "Tournament.setStatus($status)");
-      if( !$check_only )
+      if ( !$check_only )
          $this->Status = $status;
    }
 
@@ -147,18 +147,18 @@ class Tournament
 
    public function formatFlags( $zero_val='', $intersect_flags=0, $short=false, $class=null, $html=true, $flags_val=null )
    {
-      if( is_null($class) )
+      if ( is_null($class) )
          $class = 'TLockWarn';
 
       $check_flags = ( is_null($flags_val) ) ? $this->Flags : $flags_val;
-      if( $intersect_flags > 0 )
+      if ( $intersect_flags > 0 )
          $check_flags &= $intersect_flags;
 
       $arr = array();
       $arr_flags = self::getFlagsText(null, ($short ? 'SHORT' : true));
-      foreach( $arr_flags as $flag => $flagtext )
+      foreach ( $arr_flags as $flag => $flagtext )
       {
-         if( $check_flags & $flag )
+         if ( $check_flags & $flag )
             $arr[] = ( $html && ( $class || ($flag & (TOURNEY_FLAG_LOCK_ADMIN|TOURNEY_FLAG_LOCK_TDWORK)) ) ) // emphasize
                ? span($class, $flagtext)
                : $flagtext;
@@ -185,9 +185,9 @@ class Tournament
    public function formatRound( $short=false )
    {
       $rounds_str = ($this->Rounds > 0) ? $this->Rounds : '*';
-      if( $this->Type == TOURNEY_TYPE_ROUND_ROBIN )
+      if ( $this->Type == TOURNEY_TYPE_ROUND_ROBIN )
       {
-         if( $short )
+         if ( $short )
             return $this->CurrentRound . ' / ' . $rounds_str;
          else
             return sprintf( T_('%s of %s rounds#tourney'), $this->CurrentRound, $rounds_str );
@@ -198,7 +198,7 @@ class Tournament
 
    public function getRoundLimitText()
    {
-      if( $this->Rounds > 0 )
+      if ( $this->Rounds > 0 )
          return sprintf( T_('(max. %s rounds)#tourney'), $this->Rounds );
       else
          return T_('(unlimited rounds)#tourney');
@@ -206,7 +206,7 @@ class Tournament
 
    public function persist()
    {
-      if( $this->ID > 0 )
+      if ( $this->ID > 0 )
          $success = $this->update();
       else
          $success = $this->insert();
@@ -219,7 +219,7 @@ class Tournament
 
       $entityData = $this->fillEntityData(true);
       $result = $entityData->insert( "Tournament.insert(%s)" );
-      if( $result )
+      if ( $result )
          $this->ID = mysql_insert_id();
       return $result;
    }
@@ -255,12 +255,12 @@ class Tournament
       $data->set_value( 'Owner_ID', $this->Owner_ID );
       $data->set_value( 'Status', $this->Status );
       $data->set_value( 'Flags', $this->Flags );
-      if( $withCreated )
+      if ( $withCreated )
          $data->set_value( 'Created', $this->Created );
       $data->set_value( 'Lastchanged', $this->Lastchanged );
       $data->set_value( 'ChangedBy', $this->ChangedBy );
       $data->set_value( 'StartTime', $this->StartTime );
-      if( $this->EndTime > 0 )
+      if ( $this->EndTime > 0 )
          $data->set_value( 'EndTime', $this->EndTime );
       $data->set_value( 'Rounds', $this->Rounds );
       $data->set_value( 'CurrentRound', $this->CurrentRound );
@@ -275,9 +275,9 @@ class Tournament
     */
    public function update_flags( $flag, $set_flag )
    {
-      if( $flag > 0 )
+      if ( $flag > 0 )
       {
-         if( $set_flag )
+         if ( $set_flag )
             $this->Flags |= $flag;
          else
             $this->Flags &= ~$flag;
@@ -297,16 +297,16 @@ class Tournament
    /*! \brief Updates Tournament.Rounds/CurrentRound. */
    public function update_rounds( $change_rounds, $curr_round=0 )
    {
-      if( !is_numeric($change_rounds) )
+      if ( !is_numeric($change_rounds) )
          error('invalid_args', "Tournament.update_rounds.check.change_rounds({$this->ID},$change_rounds)");
-      if( !is_numeric($curr_round) )
+      if ( !is_numeric($curr_round) )
          error('invalid_args', "Tournament.update_rounds.check.curr_rounds({$this->ID},$curr_round)");
 
       $data = $GLOBALS['ENTITY_TOURNAMENT']->newEntityData();
       $data->set_value( 'ID', $this->ID );
-      if( $change_rounds )
+      if ( $change_rounds )
          $data->set_query_value( 'Rounds', "Rounds+($change_rounds)" );
-      if( $curr_round > 0 )
+      if ( $curr_round > 0 )
          $data->set_value( 'CurrentRound', $curr_round );
       $data->set_value( 'Lastchanged', $GLOBALS['NOW'] );
       $data->set_value( 'ChangedBy', $this->ChangedBy );
@@ -318,14 +318,14 @@ class Tournament
    /*! \brief Returns TLOG_TYPE_... if given user can edit tournament directors; false otherwise. */
    public function allow_edit_directors( $uid )
    {
-      if( $uid <= GUESTS_ID_MAX ) // forbidden for guests
+      if ( $uid <= GUESTS_ID_MAX ) // forbidden for guests
          return false;
 
       // only admin or owner can create/delete TDs, or edit all TDs
-      if( TournamentUtils::isAdmin() )
+      if ( TournamentUtils::isAdmin() )
          return TLOG_TYPE_ADMIN;
 
-      if( $this->Owner_ID == $uid )
+      if ( $this->Owner_ID == $uid )
          return TLOG_TYPE_OWNER;
 
       return false;
@@ -336,7 +336,7 @@ class Tournament
    {
       global $base_path;
 
-      if( $version == 1 ) // ID-link (scope type) [title]
+      if ( $version == 1 ) // ID-link (scope type) [title]
          return anchor( $base_path."tournaments/view_tournament.php?tid=".$this->ID, $this->ID )
             . SMALL_SPACING
             . sprintf( '(%s %s)',
@@ -344,7 +344,7 @@ class Tournament
                        self::getTypeText($this->Type) )
             . SMALL_SPACING . '[' . make_html_safe( $this->Title, true ) . ']';
 
-      if( $version == 2 ) // (scope type) Tournament #ID - title
+      if ( $version == 2 ) // (scope type) Tournament #ID - title
          return sprintf( '(%s %s) %s #%s - %s',
                          self::getScopeText($this->Scope),
                          self::getTypeText($this->Type),
@@ -352,14 +352,14 @@ class Tournament
                          $this->ID,
                          make_html_safe( $this->Title, true) );
 
-      if( $version == 3 ) // (scope type) title [- extra]
+      if ( $version == 3 ) // (scope type) title [- extra]
          return sprintf( '(%s %s) %s' . ($extra ? ' - %s' : ''),
                          self::getScopeText($this->Scope),
                          self::getTypeText($this->Type),
                          make_html_safe( $this->Title, true),
                          $extra );
 
-      if( $version == 4 )
+      if ( $version == 4 )
          return sprintf( '(%s %s) %s #%s - %s: %s', // (scope type) Tournament #ID - status
                          self::getScopeText($this->Scope),
                          self::getTypeText($this->Type),
@@ -377,11 +377,11 @@ class Tournament
 
    public function build_role_info()
    {
-      if( TournamentUtils::isAdmin() )
+      if ( TournamentUtils::isAdmin() )
          return T_('You are a tournament admin.');
 
       global $player_row;
-      if( $player_row['ID'] == $this->Owner_ID )
+      if ( $player_row['ID'] == $this->Owner_ID )
          return T_('You are the owner of this tournament.');
 
       // "normal" user
@@ -397,16 +397,16 @@ class Tournament
    {
       $regerr = T_('Registration/Edit prohibited at the moment#tourney');
       $errors = array();
-      if( $check_type != TCHKTYPE_TD )
+      if ( $check_type != TCHKTYPE_TD )
          $warnings =& $errors;
       else
          $warnings = array();
 
       // check admin-lock
-      if( $with_admin_check && $this->isFlagSet(TOURNEY_FLAG_LOCK_ADMIN) )
+      if ( $with_admin_check && $this->isFlagSet(TOURNEY_FLAG_LOCK_ADMIN) )
       {
          $errmsg = $this->buildAdminLockText();
-         if( ($check_type == TCHKTYPE_TD) && TournamentUtils::isAdmin() )
+         if ( ($check_type == TCHKTYPE_TD) && TournamentUtils::isAdmin() )
             $warnings[] = $errmsg;
          else
             $errors[] = $errmsg;
@@ -414,15 +414,15 @@ class Tournament
 
       // check other locks
       $chk_flags = TOURNEY_FLAG_LOCK_REGISTER | TOURNEY_FLAG_LOCK_TDWORK;
-      if( $this->isFlagSet($chk_flags) )
+      if ( $this->isFlagSet($chk_flags) )
       {
          $errmsg = span('TLockWarn', sprintf( '%s (%s).', $regerr, $this->formatFlags('', $chk_flags) ));
-         if( $check_type == TCHKTYPE_TD )
+         if ( $check_type == TCHKTYPE_TD )
             $warnings[] = $errmsg;
          else
             $errors[] = $errmsg;
       }
-      if( $this->isFlagSet(TOURNEY_FLAG_LOCK_CLOSE) )
+      if ( $this->isFlagSet(TOURNEY_FLAG_LOCK_CLOSE) )
          $errors[] = self::getLockText(TOURNEY_FLAG_LOCK_CLOSE);
 
       return ($check_type == TCHKTYPE_USER_NEW)
@@ -470,14 +470,14 @@ class Tournament
    public static function load_tournament( $tid )
    {
       $result = NULL;
-      if( $tid > 0 )
+      if ( $tid > 0 )
       {
          $qsql = self::build_query_sql();
          $qsql->add_part( SQLP_WHERE, "T.ID='$tid'" );
          $qsql->add_part( SQLP_LIMIT, '1' );
 
          $row = mysql_single_fetch( "Tournament.load_tournament($tid)", $qsql->get_select() );
-         if( $row )
+         if ( $row )
             $result = self::new_from_row( $row );
       }
       return $result;
@@ -493,7 +493,7 @@ class Tournament
       $iterator->setResultRows( mysql_num_rows($result) );
 
       $iterator->clearItems();
-      while( $row = mysql_fetch_array( $result ) )
+      while ( $row = mysql_fetch_array( $result ) )
       {
          $tourney = self::new_from_row( $row );
          $iterator->addItem( $tourney, $row );
@@ -510,9 +510,9 @@ class Tournament
     */
    public static function update_tournament_registeredTP( $tid, $diff )
    {
-      if( !is_numeric($tid) || !is_numeric($diff) )
+      if ( !is_numeric($tid) || !is_numeric($diff) )
          error('invalid_args', "Tournament:update_tournament_registeredTP($tid,$diff)");
-      if( $diff )
+      if ( $diff )
       {
          db_query( "Tournament:update_tournament_registeredTP($tid,$diff)",
             "UPDATE Tournament SET RegisteredTP=RegisteredTP+($diff) WHERE ID=$tid LIMIT 1" );
@@ -525,7 +525,7 @@ class Tournament
    {
       // lazy-init of texts
       $key = 'SCOPE';
-      if( !isset(self::$ARR_TOURNEY_TEXTS[$key]) )
+      if ( !isset(self::$ARR_TOURNEY_TEXTS[$key]) )
       {
          $arr = array();
          $arr[TOURNEY_SCOPE_DRAGON]  = T_('Dragon#T_scope');
@@ -534,9 +534,9 @@ class Tournament
          self::$ARR_TOURNEY_TEXTS[$key] = $arr;
       }
 
-      if( is_null($scope) )
+      if ( is_null($scope) )
          return self::$ARR_TOURNEY_TEXTS[$key];
-      if( !isset(self::$ARR_TOURNEY_TEXTS[$key][$scope]) )
+      if ( !isset(self::$ARR_TOURNEY_TEXTS[$key][$scope]) )
          error('invalid_args', "Tournament:getScopeText($scope)");
       return self::$ARR_TOURNEY_TEXTS[$key][$scope];
    }//getScopeText
@@ -546,7 +546,7 @@ class Tournament
    {
       // lazy-init of texts
       $key = 'TYPE';
-      if( !isset(self::$ARR_TOURNEY_TEXTS[$key]) )
+      if ( !isset(self::$ARR_TOURNEY_TEXTS[$key]) )
       {
          $arr = array();
          $arr[TOURNEY_TYPE_LADDER] = T_('Ladder#T_type');
@@ -554,9 +554,9 @@ class Tournament
          self::$ARR_TOURNEY_TEXTS[$key] = $arr;
       }
 
-      if( is_null($type) )
+      if ( is_null($type) )
          return self::$ARR_TOURNEY_TEXTS[$key];
-      if( !isset(self::$ARR_TOURNEY_TEXTS[$key][$type]) )
+      if ( !isset(self::$ARR_TOURNEY_TEXTS[$key][$type]) )
          error('invalid_args', "Tournament:getTypeText($type)");
       return self::$ARR_TOURNEY_TEXTS[$key][$type];
    }//getTypeText
@@ -566,7 +566,7 @@ class Tournament
    {
       // lazy-init of texts
       $key = 'WIZARDTYPE';
-      if( !isset(self::$ARR_TOURNEY_TEXTS[$key]) )
+      if ( !isset(self::$ARR_TOURNEY_TEXTS[$key]) )
       {
          $arr = array();
          $arr[TOURNEY_WIZTYPE_DGS_LADDER] = T_('DGS Ladder');
@@ -576,9 +576,9 @@ class Tournament
          self::$ARR_TOURNEY_TEXTS[$key] = $arr;
       }
 
-      if( is_null($wiztype) )
+      if ( is_null($wiztype) )
          return self::$ARR_TOURNEY_TEXTS[$key];
-      if( !isset(self::$ARR_TOURNEY_TEXTS[$key][$wiztype]) )
+      if ( !isset(self::$ARR_TOURNEY_TEXTS[$key][$wiztype]) )
          error('invalid_args', "Tournament:getWizardTypeText($wiztype)");
       return self::$ARR_TOURNEY_TEXTS[$key][$wiztype];
    }//getWizardTypeText
@@ -588,7 +588,7 @@ class Tournament
    {
       // lazy-init of texts
       $key = 'STATUS';
-      if( !isset(self::$ARR_TOURNEY_TEXTS[$key]) )
+      if ( !isset(self::$ARR_TOURNEY_TEXTS[$key]) )
       {
          $arr = array();
          $arr[TOURNEY_STATUS_ADMIN]    = T_('Admin#T_status');
@@ -601,9 +601,9 @@ class Tournament
          self::$ARR_TOURNEY_TEXTS[$key] = $arr;
       }
 
-      if( is_null($status) )
+      if ( is_null($status) )
          return array() + self::$ARR_TOURNEY_TEXTS[$key]; // cloned
-      if( !isset(self::$ARR_TOURNEY_TEXTS[$key][$status]) )
+      if ( !isset(self::$ARR_TOURNEY_TEXTS[$key][$status]) )
          error('invalid_args', "Tournament:getStatusText($status)");
       return self::$ARR_TOURNEY_TEXTS[$key][$status];
    }//getStatusText
@@ -613,7 +613,7 @@ class Tournament
    {
       // lazy-init of texts
       $key = 'FLAGS';
-      if( !isset(self::$ARR_TOURNEY_TEXTS[$key]) )
+      if ( !isset(self::$ARR_TOURNEY_TEXTS[$key]) )
       {
          $arr = array();
          $arr[TOURNEY_FLAG_LOCK_ADMIN]    = T_('Admin-Lock#T_flag');
@@ -648,13 +648,13 @@ class Tournament
          self::$ARR_TOURNEY_TEXTS[$key.'_SHORT'] = $arr;
       }
 
-      if( $short === false )
+      if ( $short === false )
          $key .= '_LONG';
-      elseif( $short !== true )
+      elseif ( $short !== true )
          $key .= '_' . $short;
-      if( is_null($flag) )
+      if ( is_null($flag) )
          return self::$ARR_TOURNEY_TEXTS[$key];
-      if( !isset(self::$ARR_TOURNEY_TEXTS[$key][$flag]) )
+      if ( !isset(self::$ARR_TOURNEY_TEXTS[$key][$flag]) )
          error('invalid_args', "Tournament:getFlagsText($flag,$short)");
       return self::$ARR_TOURNEY_TEXTS[$key][$flag];
    }//getFlagsText

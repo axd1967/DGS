@@ -37,9 +37,9 @@ $GLOBALS['ThePage'] = new Page('TournamentDirectorList');
    connect2mysql();
 
    $logged_in = who_is_logged( $player_row);
-   if( !$logged_in )
+   if ( !$logged_in )
       error('login_if_not_logged_in', 'Tournament.list_directors');
-   if( !ALLOW_TOURNAMENTS )
+   if ( !ALLOW_TOURNAMENTS )
       error('feature_disabled', 'Tournament.list_directors');
    $my_id = $player_row['ID'];
 
@@ -106,14 +106,14 @@ $GLOBALS['ThePage'] = new Page('TournamentDirectorList');
 
 
    $show_rows = $tdtable->compute_show_rows( $iterator->getResultRows() );
-   while( ($show_rows-- > 0) && list(,$arr_item) = $iterator->getListIterator() )
+   while ( ($show_rows-- > 0) && list(,$arr_item) = $iterator->getListIterator() )
    {
       list( $director, $orow ) = $arr_item;
       $uid = $director->uid;
       $row_str = array();
 
       $userURL = "userinfo.php?uid=$uid";
-      if( $tdtable->Is_Column_Displayed[1] )
+      if ( $tdtable->Is_Column_Displayed[1] )
       {
          $msg_subj = urlencode( sprintf( T_('[Tournament #%d]'), $tid ));
          $msg_text = urlencode( sprintf(
@@ -123,23 +123,23 @@ $GLOBALS['ThePage'] = new Page('TournamentDirectorList');
          $links[] = anchor( $base_path."message.php?mode=NewMessage".URI_AMP."uid=$uid".URI_AMP."subject=$msg_subj" .
                             URI_AMP."message=$msg_text",
             image( $base_path.'images/send.gif', 'M', '', 'class="Action"' ), T_('Send a message'));
-         if( $allow_edit || $my_id == $uid )
+         if ( $allow_edit || $my_id == $uid )
             $links[] = anchor( $base_path."tournaments/edit_director.php?tid=$tid".URI_AMP."uid=$uid",
                image( $base_path.'images/edit.gif', 'E', '', 'class="Action"' ), T_('Edit tournament director'));
-         if( $allow_edit )
+         if ( $allow_edit )
             $links[] = anchor( $base_path."tournaments/edit_director.php?tid=$tid".URI_AMP."uid=$uid".URI_AMP."td_delete=1",
                image( $base_path.'images/trashcan.gif', 'X', '', 'class="Action"' ), T_('Remove Tournament Director'));
          $row_str[1] = implode(' ', $links);
       }
-      if( $tdtable->Is_Column_Displayed[2] )
+      if ( $tdtable->Is_Column_Displayed[2] )
          $row_str[2] = $director->User->user_reference();
-      if( $tdtable->Is_Column_Displayed[3] )
+      if ( $tdtable->Is_Column_Displayed[3] )
          $row_str[3] = echo_rating( $director->User->Rating, true, $uid );
-      if( $tdtable->Is_Column_Displayed[4] )
+      if ( $tdtable->Is_Column_Displayed[4] )
          $row_str[4] = ($director->User->Lastaccess > 0) ? date(DATE_FMT2, $director->User->Lastaccess) : '';
-      if( $tdtable->Is_Column_Displayed[5] )
+      if ( $tdtable->Is_Column_Displayed[5] )
          $row_str[5] = make_html_safe( $director->Comment, true );
-      if( $tdtable->Is_Column_Displayed[6] )
+      if ( $tdtable->Is_Column_Displayed[6] )
          $row_str[6] = span('TInfo', $director->formatFlags());
 
       $tdtable->add_row( $row_str );
@@ -151,10 +151,10 @@ $GLOBALS['ThePage'] = new Page('TournamentDirectorList');
 
    $menu_array = array();
    $menu_array[T_('Tournament info')] = "tournaments/view_tournament.php?tid=$tid";
-   if( $allow_edit )
+   if ( $allow_edit )
       $menu_array[T_('Add tournament director')] =
          array( 'url' => "tournaments/edit_director.php?tid=$tid", 'class' => 'TAdmin' );
-   if( TournamentHelper::allow_edit_tournaments($tourney, $my_id) )
+   if ( TournamentHelper::allow_edit_tournaments($tourney, $my_id) )
       $menu_array[T_('Manage tournament')] =
          array( 'url' => "tournaments/manage_tournament.php?tid=$tid", 'class' => 'TAdmin' );
 

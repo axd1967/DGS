@@ -38,7 +38,7 @@ require_once 'include/classlib_userpicture.php';
    connect2mysql();
 
    $logged_in = who_is_logged( $player_row);
-   if( !$logged_in )
+   if ( !$logged_in )
       error('login_if_not_logged_in', 'opponents');
 
    /*
@@ -52,17 +52,17 @@ require_once 'include/classlib_userpicture.php';
    $my_id = $player_row['ID'];
    $uid = (int)@$_REQUEST['uid'];
    $opp = (int)@$_REQUEST['opp'];
-   if( empty($uid) )
+   if ( empty($uid) )
       $uid = $my_id;
-   if( $uid <= 0 )
+   if ( $uid <= 0 )
       error('invalid_user', "opponents.bad_user($uid)");
-   if( $opp < 0 || $opp == $uid )
+   if ( $opp < 0 || $opp == $uid )
    {
       $opp = 0;
       //error('invalid_opponent', "opponents.bad_opponent($opp)");
    }
    $tid = (int)get_request_arg('tid'); // convenience for tourney-invites
-   if( !ALLOW_TOURNAMENTS || $tid < 0 ) $tid = 0;
+   if ( !ALLOW_TOURNAMENTS || $tid < 0 ) $tid = 0;
 
    $cfg_tblcols = ConfigTableColumns::load_config( $my_id, CFGCOLS_OPPONENTS );
 
@@ -75,13 +75,13 @@ require_once 'include/classlib_userpicture.php';
       . ",UNIX_TIMESTAMP(LastMove) AS LastMoveU"
       . " FROM Players WHERE ID".( $opp ?" IN('$uid','$opp')" :"='$uid'");
    $result = db_query( "opponents.find_users($uid,$opp)", $query );
-   while( $row = mysql_fetch_assoc( $result ) )
+   while ( $row = mysql_fetch_assoc( $result ) )
       $players[ $row['ID'] ] = $row;
    mysql_free_result($result);
 
-   if( !isset($players[$uid]) )
+   if ( !isset($players[$uid]) )
       error('unknown_user', "opponents.load_user($uid)");
-   if( $opp && !isset($players[$opp]) )
+   if ( $opp && !isset($players[$opp]) )
       error('unknown_user', "opponents.load_opponent($opp)");
 
    // config for usertype-filter
@@ -98,7 +98,7 @@ require_once 'include/classlib_userpicture.php';
    $page = "opponents.php?";
 
    // init search profile
-   if( $uid == $my_id )
+   if ( $uid == $my_id )
       $profile_type = PROFTYPE_FILTER_OPPONENTS_MY;
    else
       $profile_type = PROFTYPE_FILTER_OPPONENTS_OTHER;
@@ -179,9 +179,9 @@ require_once 'include/classlib_userpicture.php';
    // page-vars
    $page_vars = new RequestParameters();
    $page_vars->add_entry( 'uid', $uid );
-   if( $opp )
+   if ( $opp )
       $page_vars->add_entry( 'opp', $opp );
-   if( $tid ) $page_vars->add_entry( 'tid', $tid );
+   if ( $tid ) $page_vars->add_entry( 'tid', $tid );
    $usform->attach_table( $page_vars ); // for page-vars as hiddens in form
 
    // attach external URL-parameters from static filter and page-vars for table-links
@@ -197,7 +197,7 @@ require_once 'include/classlib_userpicture.php';
    $utable->add_tablehead(21, new TableHead( T_('Opponent games#header'),
       'images/table.gif', T_('Link to games with opponent') ), 'Image', TABLE_NO_SORT );
    $utable->add_tablehead(18, T_('Type#header'), 'Enum', 0, 'Type+');
-   if( USERPIC_FOLDER != '' )
+   if ( USERPIC_FOLDER != '' )
       $utable->add_tablehead(19, new TableHead( T_('User picture#header'),
          'images/picture.gif', T_('Indicator for existing user picture') ), 'Image', 0, 'UserPicture+' );
    $utable->add_tablehead( 2, T_('Name#header'), 'User', 0, 'Name+');
@@ -247,7 +247,7 @@ require_once 'include/classlib_userpicture.php';
          'DESCRIPTION', T_('Last changed'),
          'FILTER',      $usfilter, 3,
          'FILTERERROR', $usfilter, 3, '<br>'.$FERR1, $FERR2, true ));
-   if( $opp )
+   if ( $opp )
    {
       $usform->add_row( array(
             'TAB',
@@ -295,7 +295,7 @@ require_once 'include/classlib_userpicture.php';
    $qsql->add_part( SQLP_FROM, 'Games AS G' );
    $qsql->merge ( $query_usfilter ); // clause-parts for filter
 
-   if( $opp )
+   if ( $opp )
    {
       // uid is black
       $qsql_black = new QuerySQL( SQLP_WHERE, "G.Black_ID=$uid", "G.White_ID=$opp" );
@@ -341,7 +341,7 @@ require_once 'include/classlib_userpicture.php';
    }
 
    // query database for user-table
-   if( $opp )
+   if ( $opp )
       $result = NULL;
    else
    {
@@ -355,7 +355,7 @@ require_once 'include/classlib_userpicture.php';
       ? T_('Link to finished games with opponent [%s]')
       : T_('Link to running games with opponent [%s]'); // running + all
 
-   if( $opp )
+   if ( $opp )
    {
       //players infos
       $usform->set_area( 2 );
@@ -382,72 +382,72 @@ require_once 'include/classlib_userpicture.php';
    // static filter-values
    $arrtmp = array();
    $filterURL = $usfilter->get_url_parts( $arrtmp );
-   if( $filterURL )
+   if ( $filterURL )
       $filterURL .= URI_AMP;
 
    // build user-table
-   if( !is_null($result) )
+   if ( !is_null($result) )
    {
-      while( ($row = mysql_fetch_assoc( $result )) && $show_rows-- > 0 )
+      while ( ($row = mysql_fetch_assoc( $result )) && $show_rows-- > 0 )
       {
          $ID = $row['ID'];
 
          $urow_strings = array();
-         if( $utable->Is_Column_Displayed[ 1] )
+         if ( $utable->Is_Column_Displayed[ 1] )
          {
             $ulink = ( $tid )
                ? "tournaments/edit_participant.php?tid=$tid".URI_AMP."uid=$ID"
                : "{$page}{$filterURL}uid=$uid".URI_AMP."opp=$ID";
             $urow_strings[1] = button_TD_anchor( $ulink, $ID );
          }
-         if( $utable->Is_Column_Displayed[ 2] )
+         if ( $utable->Is_Column_Displayed[ 2] )
             $urow_strings[ 2] = "<A href=\"userinfo.php?uid=$ID\">" .
                make_html_safe($row['Name']) . "</A>";
-         if( $utable->Is_Column_Displayed[ 3] )
+         if ( $utable->Is_Column_Displayed[ 3] )
             $urow_strings[ 3] = "<A href=\"userinfo.php?uid=$ID\">" . $row['Handle'] . "</A>";
-         if( $utable->Is_Column_Displayed[16] )
+         if ( $utable->Is_Column_Displayed[16] )
             $urow_strings[16] = getCountryFlagImage( @$row['Country'] );
-         if( $utable->Is_Column_Displayed[ 4] )
+         if ( $utable->Is_Column_Displayed[ 4] )
             $urow_strings[ 4] = make_html_safe(@$row['Rankinfo'],INFO_HTML);
-         if( $utable->Is_Column_Displayed[ 5] )
+         if ( $utable->Is_Column_Displayed[ 5] )
             $urow_strings[ 5] = echo_rating(@$row['Rating2'],true,$ID);
-         if( $utable->Is_Column_Displayed[ 6] )
+         if ( $utable->Is_Column_Displayed[ 6] )
             $urow_strings[ 6] = make_html_safe($row['Open'],INFO_HTML);
-         if( $utable->Is_Column_Displayed[ 7] )
+         if ( $utable->Is_Column_Displayed[ 7] )
             $urow_strings[ 7] = $row['Games'];
-         if( $utable->Is_Column_Displayed[ 8] )
+         if ( $utable->Is_Column_Displayed[ 8] )
             $urow_strings[ 8] = $row['Running'];
-         if( $utable->Is_Column_Displayed[ 9] )
+         if ( $utable->Is_Column_Displayed[ 9] )
             $urow_strings[ 9] = $row['Finished'];
-         if( $utable->Is_Column_Displayed[17] )
+         if ( $utable->Is_Column_Displayed[17] )
             $urow_strings[17] = $row['RatedGames'];
-         if( $utable->Is_Column_Displayed[10] )
+         if ( $utable->Is_Column_Displayed[10] )
             $urow_strings[10] = $row['Won'];
-         if( $utable->Is_Column_Displayed[11] )
+         if ( $utable->Is_Column_Displayed[11] )
             $urow_strings[11] = $row['Lost'];
-         if( $utable->Is_Column_Displayed[12] )
+         if ( $utable->Is_Column_Displayed[12] )
             $urow_strings[12] = ( is_numeric($row['Percent']) ? $row['Percent'].'%' : '' );
-         if( $utable->Is_Column_Displayed[13] )
+         if ( $utable->Is_Column_Displayed[13] )
             $urow_strings[13] = activity_string( $row['ActivityLevel']);
-         if( $utable->Is_Column_Displayed[14] )
+         if ( $utable->Is_Column_Displayed[14] )
             $urow_strings[14] = ($row['LastaccessU'] > 0 ? date(DATE_FMT2, $row['LastaccessU']) : '' );
-         if( $utable->Is_Column_Displayed[15] )
+         if ( $utable->Is_Column_Displayed[15] )
             $urow_strings[15] = ($row['LastMoveU'] > 0 ? date(DATE_FMT2, $row['LastMoveU']) : '' );
-         if( $utable->Is_Column_Displayed[18] )
+         if ( $utable->Is_Column_Displayed[18] )
             $urow_strings[18] = build_usertype_text($row['Type'], ARG_USERTYPE_NO_TEXT, true, ' ');
-         if( @$row['UserPicture'] && $utable->Is_Column_Displayed[19] )
+         if ( @$row['UserPicture'] && $utable->Is_Column_Displayed[19] )
             $urow_strings[19] = UserPicture::getImageHtml( @$row['Handle'], true );
-         if( $utable->Is_Column_Displayed[20] )
+         if ( $utable->Is_Column_Displayed[20] )
          {
             $is_online = ($NOW - @$row['LastaccessU']) < SPAN_ONLINE_MINS * SECS_PER_MIN; // online up to X mins ago
             $urow_strings[20] = echo_image_online( $is_online, @$row['LastaccessU'], false );
          }
-         if( $utable->Is_Column_Displayed[21] )
+         if ( $utable->Is_Column_Displayed[21] )
          {
             // don't use full selection of filter-values to link to opponent-games
             $urow_strings[21] = build_opp_games_link( $uid, $row['Handle'], $finished );
          }
-         if( $utable->Is_Column_Displayed[22] )
+         if ( $utable->Is_Column_Displayed[22] )
             $urow_strings[22] = ($row['X_Registerdate'] > 0 ? date(DATE_FMT_YMD, $row['X_Registerdate']) : '' );
 
          $utable->add_row( $urow_strings );
@@ -456,7 +456,7 @@ require_once 'include/classlib_userpicture.php';
    }//user-list
 
    // print form with user-table
-   if( $opp ) // has opp
+   if ( $opp ) // has opp
    {
       // print static-filter, player-info, stats-table
       echo "<h3 class=Header>$title2</h3>\n"
@@ -479,22 +479,22 @@ require_once 'include/classlib_userpicture.php';
    // end of table
 
    $menu_array = array();
-   if( $tid )
+   if ( $tid )
       $menu_array[ T_('Show users') ] = "users.php?tid=$tid";
-   if( $opp )
+   if ( $opp )
       $menu_array[ T_('Show opponents') ] = "{$page}{$filterURL}uid=$uid";
 
-   if( $uid != $my_id ) // other opponents
+   if ( $uid != $my_id ) // other opponents
    {
       $menu_array[ T_('Show my opponents') ]   = "{$page}{$filterURL}uid=$my_id";
-      if( $opp != $my_id )
+      if ( $opp != $my_id )
       {
          $menu_array[ T_('Show me as opponent') ] = "{$page}{$filterURL}uid=$uid".URI_AMP."opp=$my_id";
          $menu_array[ T_('Show as my opponent') ] = "{$page}{$filterURL}uid=$my_id".URI_AMP."opp=$uid";
       }
    }
 
-   if( $opp )
+   if ( $opp )
       $menu_array[ T_('Switch opponent role') ] = "{$page}{$filterURL}uid=$opp".URI_AMP."opp=$uid";
 
    end_page(@$menu_array);
@@ -523,20 +523,20 @@ function extract_user_stats( $color, $query = null )
    );
 
    $arr = array();
-   if( !is_null($query) )
+   if ( !is_null($query) )
    {
       $result = db_query( "opponents.extract_user_stats($color)", $query );
-      if( $row = mysql_fetch_assoc( $result ) )
+      if ( $row = mysql_fetch_assoc( $result ) )
       {
-         foreach( $ARR_DBFIELDKEYS as $key )
+         foreach ( $ARR_DBFIELDKEYS as $key )
             $arr[$key] = $row[$key];
       }
       mysql_free_result($result);
    }
 
-   foreach( $ARR_DBFIELDKEYS as $key )
+   foreach ( $ARR_DBFIELDKEYS as $key )
    {
-      if( @$arr[$key] == '' )
+      if ( @$arr[$key] == '' )
          $arr[$key] = 0;
    }
 
@@ -643,7 +643,7 @@ function print_stats_table( $p, $B, $W, $fin )
    $won_games  = $B['cntWon'] + $W['cntWon'];
    $jigo_games = $B['cntJigo'] + $W['cntJigo'];
 
-   if( $fin )
+   if ( $fin )
    {
       // stats: win/lost-ratio
       $ratio = ( $cnt_games == 0) ? 0 : round( 100 * ( $won_games + $jigo_games/2 ) / $cnt_games );
@@ -661,7 +661,7 @@ function print_stats_table( $p, $B, $W, $fin )
       $W['cntGames'],
       $cnt_games );
 
-   if( $fin )
+   if ( $fin )
    {
       // stats: won + lost games
       $r .= sprintf( $rowpatt2,

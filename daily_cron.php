@@ -27,10 +27,10 @@ require_once 'include/db/bulletin.php';
 $TheErrors->set_mode(ERROR_MODE_COLLECT);
 
 
-if( !$is_down )
+if ( !$is_down )
 {
    $daily_diff = SECS_PER_DAY;
-   if( $chained )
+   if ( $chained )
       $chained = $daily_diff;
    else
       connect2mysql();
@@ -42,9 +42,9 @@ if( !$is_down )
    $row = mysql_single_fetch( 'daily_cron.check_frequency',
       "SELECT ($NOW-UNIX_TIMESTAMP(Lastchanged)) AS timediff"
       ." FROM Clock WHERE ID=".CLOCK_CRON_DAY." LIMIT 1" );
-   if( !$row )
+   if ( !$row )
       $TheErrors->dump_exit('daily_cron');
-   if( $row['timediff'] < $daily_diff )
+   if ( $row['timediff'] < $daily_diff )
       $TheErrors->dump_exit('daily_cron');
 
    db_query( 'daily_cron.set_lastchanged',
@@ -57,7 +57,7 @@ if( !$is_down )
    $delete_waitingroom_entries = true;
    $waitingroom_timelimit = 30; //days
 
-   if( $delete_waitingroom_entries )
+   if ( $delete_waitingroom_entries )
    {
       ta_begin();
       {//HOT-section to delete old waitingroom entries
@@ -74,14 +74,14 @@ if( !$is_down )
                "INNER JOIN Games AS G ON G.ID=WR.gid " .
             "$wroom_query AND WR.gid>0 AND WR.nrGames>0 AND " .
                "WR.GameType<>'".GAMETYPE_GO."' AND G.Status='".GAME_STATUS_SETUP."'" );
-         while( $row = mysql_fetch_assoc($result) )
+         while ( $row = mysql_fetch_assoc($result) )
          {
             $wr_id = (int)$row['ID'];
             $gid = (int)$row['gid'];
             $nrGames = (int)$row['nrGames'];
             $master_uid = (int)$row['uid'];
 
-            if( MultiPlayerGame::revoke_offer_game_players($gid, $nrGames, GPFLAG_WAITINGROOM) )
+            if ( MultiPlayerGame::revoke_offer_game_players($gid, $nrGames, GPFLAG_WAITINGROOM) )
             {
                db_query( "daily_cron.waitingroom.del_mpg($wr_id,$gid)",
                   "DELETE FROM Waitingroom WHERE ID=$wr_id AND GameType<>'".GAMETYPE_GO."' LIMIT 1" );
@@ -128,7 +128,7 @@ SELECT * FROM Statistics ORDER BY ID DESC LIMIT 2
 if num_rows==2 {compute differences and checks}
 */
    $today_stats= array();
-   foreach( array(
+   foreach ( array(
       'finished' =>
          "SELECT SUM(Moves) AS MovesFinished, COUNT(*) AS GamesFinished FROM Games WHERE Status='".GAME_STATUS_FINISHED."'",
       'running' =>
@@ -138,7 +138,7 @@ if num_rows==2 {compute differences and checks}
       ) as $key => $query )
    {
       $row = mysql_single_fetch( "daily_cron.statistics.$key", $query);
-      if( $row )
+      if ( $row )
          $today_stats = array_merge( $today_stats, $row);
    }
 
@@ -147,7 +147,7 @@ if num_rows==2 {compute differences and checks}
       "Games=({$today_stats['GamesFinished']}+{$today_stats['GamesRunning']})",
       "Time=FROM_UNIXTIME($NOW)",
       );
-   foreach( $today_stats as $key => $val )
+   foreach ( $today_stats as $key => $val )
       $row[] = "$key=$val";
    $query = implode(',', $row);
 
@@ -174,10 +174,10 @@ if num_rows==2 {compute differences and checks}
       "SELECT ID, Timezone, Nightstart, ClockUsed FROM Players WHERE ClockChanged='Y'" );
    // note: DST-adjustments are checked in include/std_functions.php is_logged_in()
 
-   if( @mysql_num_rows( $result) > 0 )
+   if ( @mysql_num_rows( $result) > 0 )
    {
       $otz= setTZ(); //reset to default
-      while( $row = mysql_fetch_assoc($result) )
+      while ( $row = mysql_fetch_assoc($result) )
       {
          setTZ( $row['Timezone']); //for get_clock_used()
          $newclock = get_clock_used($row['Nightstart']);
@@ -210,7 +210,7 @@ if num_rows==2 {compute differences and checks}
 
    $loctime = get_utc_timeinfo(); // need UTC to equalize all users on time-slot
    $old_week = floor( $loctime['tm_yday'] / 7 ) - 4; // keep 4 weeks
-   if( $old_week >= 0 )
+   if ( $old_week >= 0 )
       $where_clause = "SlotWeek <= $old_week";
    else
       $where_clause = "SlotWeek > " . (52 + $old_week);
@@ -222,7 +222,7 @@ if num_rows==2 {compute differences and checks}
 
 // Cleanup old invitations
 
-   if( (int)GAME_INVITATIONS_EXPIRE_MONTHS > 0 )
+   if ( (int)GAME_INVITATIONS_EXPIRE_MONTHS > 0 )
    {
       db_query( "daily_cron.cleanup_old_invitations.delete",
          "DELETE FROM Games " .
@@ -240,7 +240,7 @@ if num_rows==2 {compute differences and checks}
    db_query( 'daily_cron.reset_tick',
          "UPDATE Clock SET Ticks=0, Finished=FROM_UNIXTIME(".time().") WHERE ID=".CLOCK_CRON_DAY." LIMIT 1" );
 
-   if( !$chained )
+   if ( !$chained )
       $TheErrors->dump_exit('daily_cron');
 
 }//$is_down

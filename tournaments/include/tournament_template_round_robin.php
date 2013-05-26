@@ -71,30 +71,30 @@ abstract class TournamentTemplateRoundRobin extends TournamentTemplate
       ta_begin();
       {//HOT-section to create various tables for new tournament
          // check args
-         if( !($tourney instanceof Tournament) )
+         if ( !($tourney instanceof Tournament) )
             $this->create_error("TournamentTemplateRoundRobin._createTournament.tourney.check(%s)");
-         if( !($tprops instanceof TournamentProperties) )
+         if ( !($tprops instanceof TournamentProperties) )
             $this->create_error("TournamentTemplateRoundRobin._createTournament.tprops.check(%s)");
-         if( !($trules instanceof TournamentRules) )
+         if ( !($trules instanceof TournamentRules) )
             $this->create_error("TournamentTemplateRoundRobin._createTournament.trules.check(%s)");
-         if( !($tround instanceof TournamentRound) )
+         if ( !($tround instanceof TournamentRound) )
             $this->create_error("TournamentTemplateRoundRobin._createTournament.tround.check(%s)");
 
          // insert tournament-related tables
-         if( !$tourney->persist() )
+         if ( !$tourney->persist() )
             $this->create_error("TournamentTemplateRoundRobin._createTournament.tourney.insert(%s)");
          $tid = $tourney->ID;
 
          $tprops->tid = $tid;
-         if( !$tprops->insert() )
+         if ( !$tprops->insert() )
             $this->create_error("TournamentTemplateRoundRobin._createTournament.tprops.insert(%s,$tid)");
 
          $trules->tid = $tid;
-         if( !$trules->insert() )
+         if ( !$trules->insert() )
             $this->create_error("TournamentTemplateRoundRobin._createTournament.trules.insert(%s,$tid)");
 
          $tround->tid = $tid;
-         if( !$tround->insert() )
+         if ( !$tround->insert() )
             $this->create_error("TournamentTemplateRoundRobin._createTournament.tround.insert(%s,$tid)");
 
          TournamentLogHelper::log_create_tournament( $tid, $tourney->WizardType, $tourney->Title );
@@ -106,9 +106,9 @@ abstract class TournamentTemplateRoundRobin extends TournamentTemplate
 
    public function calcTournamentMinParticipants( $tprops, $tround )
    {
-      if( is_null($tround) )
+      if ( is_null($tround) )
          return 2;
-      elseif( $tround->Round > 1 )
+      elseif ( $tround->Round > 1 )
          return $tround->MinPoolSize;
       else
          return max( $tprops->MinParticipants, $tround->MinPoolSize );
@@ -124,15 +124,15 @@ abstract class TournamentTemplateRoundRobin extends TournamentTemplate
 
       $tround = TournamentCache::load_cache_tournament_round( 'TournamentTemplateRoundRobin.checkProperties',
          $tid, $curr_round );
-      if( $t_status == TOURNEY_STATUS_REGISTER || $t_status == TOURNEY_STATUS_PAIR )
+      if ( $t_status == TOURNEY_STATUS_REGISTER || $t_status == TOURNEY_STATUS_PAIR )
          $errors = array_merge( $errors, $tround->check_properties() );
 
-      if( $t_status == TOURNEY_STATUS_PAIR ) // extra-checks for PAIR-status
+      if ( $t_status == TOURNEY_STATUS_PAIR ) // extra-checks for PAIR-status
       {
          // TPs on APPLY/INVITE-status are not allowed!
          static $ARR_TPSTATUS = array( TP_STATUS_APPLY, TP_STATUS_INVITE );
          $tp_nonreg_count = TournamentParticipant::count_TPs( $tid, $ARR_TPSTATUS, /*all-rounds*/0, /*NextR*/false );
-         if( $tp_nonreg_count > 0 )
+         if ( $tp_nonreg_count > 0 )
          {
             $errors[] = sprintf(
                T_('Found %s non-registered tournament participants on status [%s]: they must be either registered or being removed.'),
@@ -148,7 +148,7 @@ abstract class TournamentTemplateRoundRobin extends TournamentTemplate
    {
       $tid = $tourney->ID;
 
-      if( $round instanceof TournamentRound )
+      if ( $round instanceof TournamentRound )
       {
          $tround = $round;
          $round = $tround->Round;
@@ -176,7 +176,7 @@ abstract class TournamentTemplateRoundRobin extends TournamentTemplate
       $round = $tourney->CurrentRound;
 
       $tround = TournamentCache::load_cache_tournament_round( 'TournamentTemplateRoundRobin.checkGamesStarted', $tid, $round );
-      if( $tround->Status != TROUND_STATUS_PLAY )
+      if ( $tround->Status != TROUND_STATUS_PLAY )
          $errors[] = sprintf( T_('Expecting current tournament round status [%s] for status-change'),
                               TournamentRound::getStatusText(TROUND_STATUS_PLAY) );
 
@@ -185,10 +185,10 @@ abstract class TournamentTemplateRoundRobin extends TournamentTemplate
       $count_tgames = TournamentGames::count_tournament_games( $tid, $tround->ID, array() );
       $count_games_started = TournamentGames::count_games_started( $tid, $tround->ID );
 
-      if( $count_tgames != $expected_games )
+      if ( $count_tgames != $expected_games )
          $errors[] = sprintf( T_('Expected %s tournament-games (TG), but found %s games: Start remaining games first!'),
             $expected_games, $count_tgames );
-      if( $count_games_started != $expected_games )
+      if ( $count_games_started != $expected_games )
          $errors[] = sprintf( T_('Expected %s games (G), but found %s games: Contact tournament-admin for fix!'),
             $expected_games, $count_games_started );
 

@@ -26,27 +26,27 @@ require_once 'include/std_functions.php';
    set_time_limit(0); // don't want script-break during "transaction" with multi-db-queries or for large-datasets
 
    $logged_in = who_is_logged( $player_row);
-   if( !$logged_in )
+   if ( !$logged_in )
       error('login_if_not_logged_in', 'scripts.message_consistency');
-   if( $player_row['ID'] <= GUESTS_ID_MAX )
+   if ( $player_row['ID'] <= GUESTS_ID_MAX )
       error('not_allowed_for_guest', 'scripts.message_consistency');
-   if( !(@$player_row['admin_level'] & ADMIN_DATABASE) )
+   if ( !(@$player_row['admin_level'] & ADMIN_DATABASE) )
       error('adminlevel_too_low', 'scripts.message_consistency');
 
    $uid = (int)@$_REQUEST['uid'];
 
    $page = $_SERVER['PHP_SELF'];
    $page_args = array();
-   if( $uid > 0 )
+   if ( $uid > 0 )
       $page_args['uid'] = $uid;
 
    start_html( 'message_consistency', 0);
 
 //echo ">>>> One shot fix. Do not run it again."; end_html(); exit;
-   if( $do_it=@$_REQUEST['do_it'] )
+   if ( $do_it=@$_REQUEST['do_it'] )
    {
       function dbg_query($s) {
-        if( !mysql_query( $s) )
+        if ( !mysql_query( $s) )
            die("<BR>$s;<BR>" . mysql_error() );
         echo " --- fixed. ";
       }
@@ -65,17 +65,17 @@ require_once 'include/std_functions.php';
    }
 
 
-   if( $uid > 0 )
+   if ( $uid > 0 )
       check_myself_message( $uid);
    else
       check_myself_message();
 
-   if( $uid > 0 )
+   if ( $uid > 0 )
       check_system_message( $uid);
    else
       check_system_message();
 
-   if( $uid > 0 )
+   if ( $uid > 0 )
       check_result_message( $uid);
    else
       check_result_message();
@@ -93,7 +93,7 @@ require_once 'include/std_functions.php';
       "ORDER BY org.ID";
    $result = mysql_query( $query ) or die(mysql_error());
 
-   while( ($row = mysql_fetch_assoc( $result )) )
+   while ( ($row = mysql_fetch_assoc( $result )) )
    {
       echo '<br>mid='.$row['ID'] .' &lt;-'.$row['rid'];
       dbg_query("UPDATE MessageCorrespondents SET Replied='Y' " .
@@ -114,9 +114,9 @@ require_once 'include/std_functions.php';
       ." ORDER BY M.ID";
    $result = mysql_query( $query ) or die(mysql_error());
 
-   while( ($row = mysql_fetch_assoc( $result )) )
+   while ( ($row = mysql_fetch_assoc( $result )) )
    {
-      if( $do_it )
+      if ( $do_it )
       {
          echo "<br> >>> CAN'T BE FIXED\n";
          break;
@@ -142,9 +142,9 @@ require_once 'include/std_functions.php';
       ." ORDER BY me.ID";
    $result = mysql_query( $query ) or die(mysql_error());
 
-   while( ($row = mysql_fetch_assoc( $result )) )
+   while ( ($row = mysql_fetch_assoc( $result )) )
    {
-      if( $do_it )
+      if ( $do_it )
       {
          echo "<br> >>> CAN'T BE FIXED\n";
          break;
@@ -185,17 +185,17 @@ function check_myself_message( $user_id=false)
    $result = mysql_query( $query ) or die(mysql_error());
 
    ta_begin();
-   while( ($row = mysql_fetch_assoc( $result )) )
+   while ( ($row = mysql_fetch_assoc( $result )) )
    {
       echo '<br>uid='.$row['uid'] .' mid='.$row['mid'];
 
       $folder = @$row['folder'];
-      if( !isset($folder) ) $folder = @$row['other_folder'];
-      if( !isset($folder) ) $folder = FOLDER_MAIN; /* or simply FOLDER_DESTROYED */
+      if ( !isset($folder) ) $folder = @$row['other_folder'];
+      if ( !isset($folder) ) $folder = FOLDER_MAIN; /* or simply FOLDER_DESTROYED */
 
       $replied = @$row['replied'];
-      if( !isset($replied) || $replied=='N' ) $replied = @$row['other_replied'];
-      if( !isset($replied) ) $replied = 'N';
+      if ( !isset($replied) || $replied=='N' ) $replied = @$row['other_replied'];
+      if ( !isset($replied) ) $replied = 'N';
 
       $mcID = $row['me_mcID'];
       dbg_query("UPDATE MessageCorrespondents SET Sender='M', Folder_nr=$folder, Replied='$replied' " .
@@ -229,15 +229,15 @@ function check_system_message( $user_id=false)
    $result = mysql_query( $query )
       or die(mysql_error());
 
-   while( ($row = mysql_fetch_assoc( $result )) )
+   while ( ($row = mysql_fetch_assoc( $result )) )
    {
       echo '<br>uid='.$row['uid'] .' mid='.$row['mid'];
 
       $folder = @$row['folder'];
-      if( !isset($folder) ) $folder = FOLDER_DESTROYED; //keep it deleted
+      if ( !isset($folder) ) $folder = FOLDER_DESTROYED; //keep it deleted
 
       $replied = @$row['replied'];
-      if( !isset($replied) ) $replied = 'N';
+      if ( !isset($replied) ) $replied = 'N';
 
       $mcID = $row['me_mcID'];
       dbg_query("UPDATE MessageCorrespondents SET Sender='S', Folder_nr=$folder, Replied='$replied' " .
@@ -269,7 +269,7 @@ function check_result_message( $user_id=false)
    $result = mysql_query( $query )
       or die(mysql_error());
 
-   while( ($row = mysql_fetch_assoc( $result )) )
+   while ( ($row = mysql_fetch_assoc( $result )) )
    {
       echo '<br>uid='.@$row['uid'] .' mid='.$row['mid'];
          echo ' gid='.$row['gid'] .' ='.$row['Score'];

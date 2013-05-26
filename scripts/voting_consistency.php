@@ -37,11 +37,11 @@ define('SEPLINE', "\n<p><hr>\n");
    set_time_limit(0); // don't want script-break during "transaction" with multi-db-queries or for large-datasets
 
    $logged_in = who_is_logged( $player_row);
-   if( !$logged_in )
+   if ( !$logged_in )
       error('login_if_not_logged_in', 'scripts.voting_consistency');
-   if( $player_row['ID'] <= GUESTS_ID_MAX )
+   if ( $player_row['ID'] <= GUESTS_ID_MAX )
       error('not_allowed_for_guest', 'scripts.voting_consistency');
-   if( !(@$player_row['admin_level'] & ADMIN_DATABASE) )
+   if ( !(@$player_row['admin_level'] & ADMIN_DATABASE) )
       error('adminlevel_too_low', 'scripts.voting_consistency');
 
    $page = $_SERVER['PHP_SELF'];
@@ -54,7 +54,7 @@ define('SEPLINE', "\n<p><hr>\n");
       "  tr.Row2 { background: #dddddd; }\n" .
       "  tr.hil { background: #ffb010; }" );
 
-   if( $do_it = @$_REQUEST['do_it'] )
+   if ( $do_it = @$_REQUEST['do_it'] )
    {
       echo "<p>*** Fixes errors ***"
          ."<br>".anchor(make_url($page, $page_args), 'Just show it')
@@ -89,7 +89,7 @@ define('SEPLINE', "\n<p><hr>\n");
       "WHERE S.Status IN ('".SURVEY_STATUS_NEW."','".SURVEY_STATUS_ACTIVE."','".SURVEY_STATUS_CLOSED."') " .
       "GROUP BY S.ID HAVING S.UserCount <> X_Count" );
    $upd_arr = array();
-   while( $row = mysql_fetch_array( $result ) )
+   while ( $row = mysql_fetch_array( $result ) )
    {
       $cnt_err++;
       $sid = $row['sid'];
@@ -120,7 +120,7 @@ define('SEPLINE', "\n<p><hr>\n");
       "WHERE S.Status IN ('".SURVEY_STATUS_NEW."','".SURVEY_STATUS_ACTIVE."','".SURVEY_STATUS_CLOSED."') " .
       "GROUP BY SOPT.ID HAVING SOPT.Score <> X_Score" );
    $upd_arr = array();
-   while( $row = mysql_fetch_array( $result ) )
+   while ( $row = mysql_fetch_array( $result ) )
    {
       $cnt_err++;
       $sopt_id = $row['sopt_id'];
@@ -152,14 +152,14 @@ define('SEPLINE', "\n<p><hr>\n");
 
 function do_updates( $dbgmsg, $upd_arr, $do_it )
 {
-   if( count($upd_arr) == 0 )
+   if ( count($upd_arr) == 0 )
       return;
 
    echo '<pre>';
-   foreach( $upd_arr as $query )
+   foreach ( $upd_arr as $query )
    {
       echo $query, "\n";
-      if( $do_it )
+      if ( $do_it )
          db_query( $dbgmsg, $query );
    }
    echo '</pre>';

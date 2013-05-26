@@ -55,9 +55,9 @@ class GobanHandlerDgsGame
       $goban->setOptionsCoords( GOBB_MID, true );
 
       // parse board-text
-      if( !($board_text instanceof Board) )
+      if ( !($board_text instanceof Board) )
       {
-         if( !preg_match("/^<game\s+(\d+)(,(\d+))?>$/", $board_text, $matches) )
+         if ( !preg_match("/^<game\s+(\d+)(,(\d+))?>$/", $board_text, $matches) )
          {
             $goban->setSize( 9, 9 );
             $goban->makeBoard( 9, 9, /*withHoshi*/true );
@@ -75,13 +75,13 @@ class GobanHandlerDgsGame
       $goban->setSize( $size, $size );
       $goban->makeBoard( $size, $size, /*withHoshi*/true );
 
-      for( $y = 0; $y < $size; $y++ )
+      for ( $y = 0; $y < $size; $y++ )
       {
-         for( $x = 0; $x < $size; $x++ )
+         for ( $x = 0; $x < $size; $x++ )
          {
             $stone = (int)@$board->array[$x][$y];
             $goban_stone = (int)@$VAL_MAP[$stone]; // undef = 00 (empty-field)
-            if( $goban_stone )
+            if ( $goban_stone )
                $goban->setStone( $x + 1, $y + 1, $goban_stone );
          }
       }
@@ -94,11 +94,11 @@ class GobanHandlerDgsGame
    {
       $game_row = mysql_single_fetch( "GobanHandlerDgsGame.load_board($gid,$movenum)",
          "SELECT ID, Size, Moves, ShapeSnapshot FROM Games WHERE ID=$gid LIMIT 1" );
-      if( !$game_row )
+      if ( !$game_row )
          error('unknown_game', "GobanHandlerDgsGame.load_board($gid,$movenum)");
 
       $board = new Board();
-      if( !$board->load_from_db($game_row, $movenum) )
+      if ( !$board->load_from_db($game_row, $movenum) )
          error('internal_error', "GobanHandlerDgsGame.load_board2($gid,$movenum)");
       return $board;
    }//load_board

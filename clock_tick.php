@@ -25,10 +25,10 @@ require_once 'include/cache_clock.php';
 
 $TheErrors->set_mode(ERROR_MODE_COLLECT);
 
-if( !$is_down )
+if ( !$is_down )
 {
    $tick_diff = floor(SECS_PER_HOUR / TICK_FREQUENCY); // called every 5 minutes (300s)
-   if( $chained )
+   if ( $chained )
       $chained = $tick_diff;
    else
       connect2mysql();
@@ -42,9 +42,9 @@ if( !$is_down )
    $row = mysql_single_fetch( 'clock_tick.check_frequency',
       "SELECT ($NOW-UNIX_TIMESTAMP(Lastchanged)) AS timediff"
       ." FROM Clock WHERE ID=".CLOCK_CRON_TICK." LIMIT 1" );
-   if( !$row )
+   if ( !$row )
       $TheErrors->dump_exit('clock_tick');
-   if( $row['timediff'] < $tick_diff )
+   if ( $row['timediff'] < $tick_diff )
       $TheErrors->dump_exit('clock_tick');
 
    db_query( 'clock_tick.set_lastchanged',
@@ -56,7 +56,7 @@ if( !$is_down )
 
 // Handle game timeouts
 
-   if( !$clocks_stopped )
+   if ( !$clocks_stopped )
       handle_game_timeouts();
 
 
@@ -66,7 +66,7 @@ if( !$is_down )
    db_query( 'clock_tick.reset_tick',
          "UPDATE Clock SET Ticks=0, Finished=FROM_UNIXTIME(".time().") WHERE ID=".CLOCK_CRON_TICK." LIMIT 1" );
 
-   if( !$chained )
+   if ( !$chained )
       $TheErrors->dump_exit('clock_tick');
 
 }//$is_down
@@ -77,12 +77,12 @@ if( !$is_down )
 // from $s to $e on a 24 clocks basis with the offset $o
 function clkrng( $n, $s, $e, $o=0)
 {
-   if( $s>23 ) $s-= 24;
-   if( $e>23 ) $e-= 24;
-   if( $s>$e )
+   if ( $s>23 ) $s-= 24;
+   if ( $e>23 ) $e-= 24;
+   if ( $s>$e )
       return clkrng($n,0,$e,$o)." OR ".clkrng($n,$s,23,$o);
    $s+= $o; $e+= $o;
-   if( $s==$e )
+   if ( $s==$e )
       return "$n=$s";
    return "($n BETWEEN $s AND $e)"; // ($n>=$s AND $n<=$e)
 }//clkrng
@@ -123,7 +123,7 @@ function handle_game_timeouts()
     */
 
    $clock_modified = clkrng( 'Clock.ID', $hour+1, $hour+24-NIGHT_LEN);
-   if( $day_of_week > 0 && $day_of_week < 6 )
+   if ( $day_of_week > 0 && $day_of_week < 6 )
       $clock_modified.= " OR ".
          clkrng( 'Clock.ID', $hour+1, $hour+24-NIGHT_LEN, WEEKEND_CLOCK_OFFSET);
 
@@ -178,9 +178,9 @@ function handle_game_timeouts()
    /* TODO: The following UPDATE should be optimized, splited in smaller chunk?
             use TEMPORARY TABLEs for generated UPDATEs ??? */
 
-   while($row = mysql_fetch_assoc($result))
+   while ($row = mysql_fetch_assoc($result))
    {
-      if( time() > $max_run_time ) break; // stop script if running too long to avoid concurrent runs
+      if ( time() > $max_run_time ) break; // stop script if running too long to avoid concurrent runs
       extract($row);
 
       //$game_clause (lock) needed. See *** HOT_SECTION *** in GameActionHelper.init_query()
@@ -188,14 +188,14 @@ function handle_game_timeouts()
 
       $hours = ticks_to_hours($ticks - $LastTicks);
 
-      if( $ToMove_ID == $Black_ID )
+      if ( $ToMove_ID == $Black_ID )
       {
          time_remaining( $hours, $Black_Maintime, $Black_Byotime, $Black_Byoperiods,
             $Maintime, $Byotype, $Byotime, $Byoperiods, false);
 
          $time_is_up = ( $Black_Maintime == 0 && $Black_Byotime == 0 );
       }
-      else if( $ToMove_ID == $White_ID )
+      else if ( $ToMove_ID == $White_ID )
       {
          time_remaining( $hours, $White_Maintime, $White_Byotime, $White_Byoperiods,
             $Maintime, $Byotype, $Byotime, $Byoperiods, false);
@@ -206,7 +206,7 @@ function handle_game_timeouts()
          continue;
 
 
-      if( $time_is_up )
+      if ( $time_is_up )
       {
          //TODO(feature): Delete games with too few moves ??? (if so -> send delete-game-msg)
 

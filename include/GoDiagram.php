@@ -40,7 +40,7 @@ class GoDiagram
       $this->ConfigBoard = (is_null($cfg_board)) ? new ConfigBoard($player_row['ID']) : $cfg_board;
 
       $this->set_geometry($_Size, $_Left, $_Right, $_Down, $_Up);
-      if( !empty($_Data ) )
+      if ( !empty($_Data ) )
          $this->set_data($_Data);
       else
          $this->clear_data();
@@ -88,7 +88,7 @@ class GoDiagram
       $this->set_geometry($this->Size);
 
       $view = self::extract_value($s, 'view');
-      if(isset($view))
+      if (isset($view))
       {
          list($dl,$ur) = explode('-', strtolower($view));
          list($l,$d) = board2number_coords($dl, $size);
@@ -102,8 +102,8 @@ class GoDiagram
          $d = self::extract_value($s, 'up',    2, $size, $size);
       }
 
-      if( $l > $r ) swap($l, $r);
-      if( $u < $d ) swap($u, $d);
+      if ( $l > $r ) swap($l, $r);
+      if ( $u < $d ) swap($u, $d);
 
       //FIXME: why restricting within existing view-box ? -> used set_geometry() now
       $this->set_geometry( $this->Size, $l, $r, $d, $u );
@@ -112,7 +112,7 @@ class GoDiagram
       //$this->Down = 1 + limit($d, 0, $size-2, $this->Down-1);
       //$this->Up = 1 + limit($u, $d, $size-1, $this->Up-1);
 
-      if( empty($this->Data) )
+      if ( empty($this->Data) )
          $this->clear_data();
       else
          $this->clear_data(); // TODO: Modify data
@@ -120,20 +120,20 @@ class GoDiagram
 
    private function get_empty_image($x, $y, $sz)
    {
-      if( is_hoshi($x, $y, $sz) )
+      if ( is_hoshi($x, $y, $sz) )
          $fig = 'h';
       else
       {
-         if( $y == 0 )
+         if ( $y == 0 )
             $fig = 'u';
-         elseif( $y == $sz-1 )
+         elseif ( $y == $sz-1 )
             $fig = 'd';
          else
             $fig = 'e';
 
-         if( $x == 0 )
+         if ( $x == 0 )
             $fig .= 'l';
-         elseif( $x == $sz-1 )
+         elseif ( $x == $sz-1 )
             $fig .= 'r';
       }
       return $fig;
@@ -155,17 +155,17 @@ class GoDiagram
 
       $string .= "<table border=0 cellpadding=0 cellspacing=0 $woodstring><tr><td valign=top><table border=0 cellpadding=0 cellspacing=0 align=center valign=center background=\"\">";
 
-      for( $y = $this->Down-1; $y < $this->Up; $y++)
+      for ( $y = $this->Down-1; $y < $this->Up; $y++)
       {
          $row = explode(',', $data_rows[$y-$this->Down+1]);
 
          $string .= "<tr>\n";
-         for( $x = $this->Left-1; $x < $this->Right; $x++)
+         for ( $x = $this->Left-1; $x < $this->Right; $x++)
          {
             $str = $row[$x-$this->Left+1];
-            if( $str[0] === 'e' )
+            if ( $str[0] === 'e' )
             {
-               if( strlen($str)>2 && $str[1] === 'l' ) //empty+letter
+               if ( strlen($str)>2 && $str[1] === 'l' ) //empty+letter
                   $str = substr($str, 1);
                else
                   $str = $this->get_empty_image($x, $y, $this->Size) . substr($str, 1);
@@ -185,10 +185,10 @@ class GoDiagram
    public function echo_editor($nr)
    {
       $stonesize = $this->ConfigBoard->get_stone_size();
-      if( empty($stonesize) ) $stonesize = 25;
+      if ( empty($stonesize) ) $stonesize = 25;
 
       $woodcolor = $this->ConfigBoard->get_wood_color();
-      if( empty($woodcolor) ) $woodcolor = 1;
+      if ( empty($woodcolor) ) $woodcolor = 1;
 
       global $base_path;
       return '<script language="JavaScript" type="text/javascript">' . "\n" .
@@ -208,7 +208,7 @@ class GoDiagram
 
       $diagrams = array();
 
-      if( !preg_match_all('/<goban([^>]*)>/i', $text, $matches) )
+      if ( !preg_match_all('/<goban([^>]*)>/i', $text, $matches) )
          return $diagrams;
 
       $text = preg_replace('/<goban([^>]*)>/i','<goban id=#>', $text);
@@ -216,18 +216,18 @@ class GoDiagram
 
       $old_diagrams = array();
 
-      foreach( $matches[1] as $m )
+      foreach ( $matches[1] as $m )
       {
          $ID = self::extract_value($m, 'id' );
          $altered = @$_REQUEST["altered$ID"];
          $save_data = false;
 
-         if( isset($ID) && $ID > 0 )
+         if ( isset($ID) && $ID > 0 )
          {
             $result = db_query( 'GoDiagram:create_godiagrams.find',
                "SELECT * FROM GoDiagrams WHERE ID=$ID" );
 
-            if( @mysql_num_rows($result) == 1 )
+            if ( @mysql_num_rows($result) == 1 )
             {
                $row = mysql_fetch_array( $result );
                $diagrams[$ID] = new GoDiagram( $cfg_board );
@@ -238,10 +238,10 @@ class GoDiagram
 
          ta_begin();
          {//HOT-section to create go-diagram
-            if( !($ID > 0) || empty($row['Saved']) ||
+            if ( !($ID > 0) || empty($row['Saved']) ||
                 ($row['Saved']=='Y' && (!preg_match('/^\s*id=\d+\s*$/i', $m) || $altered=='Y')))
             {
-               if( $ID > 0 )
+               if ( $ID > 0 )
                {
                   $diag = $diagrams[$ID];
                   $diag->set_values_from_post($ID);
@@ -263,7 +263,7 @@ class GoDiagram
 
                $New_ID = mysql_insert_id();
                $diagrams[$New_ID] = $diag;
-               if( $ID > 0 )
+               if ( $ID > 0 )
                   unset($diagrams[$ID]);
                $ID = $New_ID;
 
@@ -271,13 +271,13 @@ class GoDiagram
             }
             else
             {
-               if( !preg_match('/^\s*id=\d+\s*$/i', $m) )
+               if ( !preg_match('/^\s*id=\d+\s*$/i', $m) )
                {
                   $diagrams[$ID]->set_values_from_goban_tag($m);
                   $save_data = true;
                }
 
-               if( $altered == 'Y' )
+               if ( $altered == 'Y' )
                {
                   $diagrams[$ID]->set_values_from_post($ID);
                   $save_data = true;
@@ -286,7 +286,7 @@ class GoDiagram
 
             $text = preg_replace('/<goban id=#>/i',"<goban id=$ID>", $text, 1);
 
-            if( $save_data )
+            if ( $save_data )
             {
                db_query( 'godiagram.create_godiagrams.save',
                   'UPDATE GoDiagrams SET Data="' . $diagrams[$ID]->Data . '" ' .
@@ -302,19 +302,19 @@ class GoDiagram
    public static function find_godiagrams( $text, $cfg_board )
    {
       $diagrams = array();
-      if( !preg_match_all('/<goban id=(\d+)>/i', $text, $matches) )
+      if ( !preg_match_all('/<goban id=(\d+)>/i', $text, $matches) )
          return $diagrams;
 
       $diagram_IDs = array();
-      foreach( $matches[1] as $ID )
+      foreach ( $matches[1] as $ID )
       {
-         if( $ID > 0 ) $diagram_IDs[]= $ID;
+         if ( $ID > 0 ) $diagram_IDs[]= $ID;
       }
 
       $result = db_query( 'GoDiagram:find_godiagrams',
          "SELECT * FROM GoDiagrams WHERE ID IN(" . implode(',',$diagram_IDs) .")" );
 
-      while( $row = mysql_fetch_array( $result ) )
+      while ( $row = mysql_fetch_array( $result ) )
       {
          $diagrams[$row['ID']] = new GoDiagram( $cfg_board );
          $diagrams[$row['ID']]->set_values_from_database_row($row);
@@ -326,12 +326,12 @@ class GoDiagram
    public static function save_diagrams( $GoDiagrams )
    {
       $IDs = array();
-      foreach( $GoDiagrams as $ID => $diagram )
+      foreach ( $GoDiagrams as $ID => $diagram )
       {
-         if( $ID > 0 ) $IDs[]= $ID;
+         if ( $ID > 0 ) $IDs[]= $ID;
       }
 
-      if( count($IDs) > 0 )
+      if ( count($IDs) > 0 )
          db_query( 'GoDiagram:save_diagrams',
             "UPDATE GoDiagrams SET Saved='Y' WHERE ID IN (" . implode(',', $IDs) . ")" );
    }//save_diagrams
@@ -339,7 +339,7 @@ class GoDiagram
    public static function draw_editors( $GoDiagrams )
    {
       $string = '';
-      foreach( $GoDiagrams as $nr => $diagram )
+      foreach ( $GoDiagrams as $nr => $diagram )
          $string .= $diagram->echo_editor($nr);
       return $string;
    }
@@ -356,7 +356,7 @@ class GoDiagram
    // extract-value from goban-tag: <goban name=str ...>
    private static function extract_value($string, $name, $minimum=null, $maximum=null, $default=null)
    {
-      if( preg_match( "/ $name=([-\w]+)/i", $string, $matches) )
+      if ( preg_match( "/ $name=([-\w]+)/i", $string, $matches) )
          return limit( $matches[1], $minimum, $maximum, $default );
       else
          return $default;
@@ -370,7 +370,7 @@ function callback_godiagram_echo_board($matches)
 {
    global $callback_diagrams, $callback_diag_nr;
 
-   if( isset($callback_diagrams[$matches[1]])
+   if ( isset($callback_diagrams[$matches[1]])
          && is_object($callback_diagrams[$matches[1]])
          && method_exists($callback_diagrams[$matches[1]], 'echo_board') )
       return $callback_diagrams[$matches[1]]->echo_board();

@@ -61,18 +61,18 @@ class TournamentStatus
     */
    public function __construct( $tid )
    {
-      if( $tid instanceof Tournament )
+      if ( $tid instanceof Tournament )
       {
          $this->tourney = $tid;
          $this->tid = $this->tourney->ID;
       }
-      elseif( is_numeric($tid) && $tid > 0 )
+      elseif ( is_numeric($tid) && $tid > 0 )
       {
          $this->tid = (int)$tid;
          $this->tourney = TournamentCache::load_cache_tournament(
             'TournamentStatus.constructfind_tournament.find_tournament', $this->tid );
       }
-      if( is_null($this->tourney) || (int)$this->tid <= 0 )
+      if ( is_null($this->tourney) || (int)$this->tid <= 0 )
          error('unknown_tournament', "TournamentStatus.construct.find_tournament2({$this->tid})");
 
       $this->ttype = TournamentFactory::getTournament($this->tourney->WizardType);
@@ -100,7 +100,7 @@ class TournamentStatus
 
    public function add_error( $str )
    {
-      if( $str )
+      if ( $str )
          $this->errors[] = $str;
    }
 
@@ -117,14 +117,14 @@ class TournamentStatus
    /*! \internal to load TournamentProperties. */
    private function _load_tprops()
    {
-      if( is_null($this->tprops) )
+      if ( is_null($this->tprops) )
          $this->tprops = TournamentCache::load_cache_tournament_properties( 'TournamentStatus.find_tprops', $this->tid );
    }
 
    /*! \internal to load TournamentRound (if needed). */
    private function _load_tround()
    {
-      if( is_null($this->tround) && $this->ttype->need_rounds )
+      if ( is_null($this->tround) && $this->ttype->need_rounds )
       {
          $round = $this->tourney->CurrentRound;
          $this->tround = TournamentCache::load_cache_tournament_round( 'TournamentStatus.find_tround', $this->tid, $round );
@@ -136,7 +136,7 @@ class TournamentStatus
    {
       $this->new_status = $new_status;
 
-      if( $this->curr_status != $new_status )
+      if ( $this->curr_status != $new_status )
       {
          // expected status is: TOURNEY_STATUS_(ADM|NEW|REG|PAIR|PLAY|CLOSED|DEL)
          $check_funcname = 'check_conditions_status_' . strtoupper($new_status);
@@ -180,7 +180,7 @@ class TournamentStatus
       $this->check_expected_status( TOURNEY_STATUS_NEW );
       $this->check_basic_conditions_status_change();
 
-      if( $this->tourney->CurrentRound > 1 )
+      if ( $this->tourney->CurrentRound > 1 )
          $this->errors[] = sprintf( T_('Tournament-Status [%s] is only allowed for first round.'),
             Tournament::getStatusText(TOURNEY_STATUS_REGISTER) );
 
@@ -211,13 +211,13 @@ class TournamentStatus
       $min_participants = $this->ttype->calcTournamentMinParticipants( $this->tprops, $this->tround );
       $max_participants = $this->tprops->getMaxParticipants();
       $tp_reg_count = TournamentParticipant::count_TPs( $this->tid, TP_STATUS_REGISTER, $curr_round, /*NextR*/true );
-      if( $min_participants > 0 && $tp_reg_count < $min_participants )
+      if ( $min_participants > 0 && $tp_reg_count < $min_participants )
       {
          $this->errors[] = sprintf(
             T_('Tournament min. participant limit (%s users) for round %s has not been reached yet: %s registrations are missing.'),
             $min_participants, $curr_round, $min_participants - $tp_reg_count );
       }
-      if( $curr_round == 1 && $tp_reg_count > $max_participants ) // no MAX-TP-check for higher rounds
+      if ( $curr_round == 1 && $tp_reg_count > $max_participants ) // no MAX-TP-check for higher rounds
          $this->errors[] = sprintf( T_('Tournament max. participant limit (%s users) has been exceeded by %s registrations.'),
             $max_participants, $tp_reg_count - $max_participants );
 
@@ -227,22 +227,22 @@ class TournamentStatus
             new QuerySQL( SQLP_WHERE, "TP.Status='".TP_STATUS_REGISTER."'" )); // only registered TPs
       $iterator = TournamentParticipant::load_tournament_participants($iterator, $this->tid);
       $err_count = $limit_err_count = 50; // check all, but limit error-output to some users
-      while( list(,$arr_item) = $iterator->getListIterator() )
+      while ( list(,$arr_item) = $iterator->getListIterator() )
       {
          list( $tp, $orow ) = $arr_item;
          list( $reg_errors, $reg_warnings ) =
             $this->tprops->checkUserRegistration( $this->tourney, $tp, $tp->User, TCHKTYPE_TD );
-         foreach( $reg_errors as $err )
+         foreach ( $reg_errors as $err )
          {
             $err_link = anchor( $base_path."tournaments/edit_participant.php?tid={$this->tid}".URI_AMP."uid={$tp->uid}", $tp->User->Handle );
             $this->errors[] = make_html_safe( sprintf( T_('Error for user %s'), "[$err_link]"), 'line') . ": $err";
-            if( $err_count-- <= 0 )
+            if ( $err_count-- <= 0 )
                break;
          }
-         if( $err_count < 0 )
+         if ( $err_count < 0 )
             break;
       }
-      if( $err_count < 0 )
+      if ( $err_count < 0 )
          $this->errors[] = sprintf( T_('Actually more than %s errors occured, but output was limited.'), $limit_err_count );
 
       // check tournament-type specific checks
@@ -263,7 +263,7 @@ class TournamentStatus
       // check that all registered TPs are added
       $arr_TPs = TournamentParticipant::load_tournament_participants_registered( $this->tid, $this->tourney->CurrentRound );
       $check_errors = $this->ttype->checkParticipantRegistrations( $this->tid, $arr_TPs );
-      if( count($check_errors) )
+      if ( count($check_errors) )
          $this->errors = array_merge( $this->errors, $check_errors );
 
       // check that all games have been started
@@ -302,11 +302,11 @@ class TournamentStatus
    /*! \brief Checks basic conditions for change of tourney-status: title/description/TD. */
    public function check_basic_conditions_status_change()
    {
-      if( strlen($this->tourney->Title) < 8 )
+      if ( strlen($this->tourney->Title) < 8 )
          $this->errors[] = T_('Tournament title missing or too short');
-      if( strlen($this->tourney->Description) < 4 )
+      if ( strlen($this->tourney->Description) < 4 )
          $this->errors[] = T_('Tournament description missing or too short');
-      if( !TournamentDirector::has_tournament_director($this->tid) )
+      if ( !TournamentDirector::has_tournament_director($this->tid) )
          $this->errors[] = T_('Missing at least one tournament director');
    }
 
@@ -315,7 +315,7 @@ class TournamentStatus
    {
       // check for not-DONE T-games
       $tg_count_running = TournamentGames::count_tournament_games( $this->tid );
-      if( $tg_count_running > 0 )
+      if ( $tg_count_running > 0 )
       {
          $this->errors[] = sprintf( T_('Tournament has %s unfinished tournament games, that must be ended first.'),
             $tg_count_running );
@@ -325,10 +325,10 @@ class TournamentStatus
 
    private function check_expected_status( $arr_status )
    {
-      if( !is_array($arr_status) )
+      if ( !is_array($arr_status) )
          $arr_status = array( $arr_status );
 
-      if( !in_array( $this->curr_status, $arr_status ) )
+      if ( !in_array( $this->curr_status, $arr_status ) )
       {
          $this->errors[] = sprintf( T_('Expecting current Tournament Status [%s] for change to status [%s]'),
             build_text_list( 'Tournament::getStatusText', $arr_status, ' | ' ),
@@ -348,12 +348,12 @@ class TournamentStatus
       $errors = array();
 
       // T-Admin can do anything at any time
-      if( $allow_admin && TournamentUtils::isAdmin() )
+      if ( $allow_admin && TournamentUtils::isAdmin() )
          $allow = true;
       else
          $allow = in_array($this->tourney->Status, $arr_status);
 
-      if( !$allow )
+      if ( !$allow )
       {
          $errors[] = sprintf( $errmsgfmt,
                               Tournament::getStatusText($this->tourney->Status),

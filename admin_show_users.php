@@ -32,11 +32,11 @@ require_once 'include/table_columns.php';
    connect2mysql();
 
    $logged_in = who_is_logged( $player_row);
-   if( !$logged_in )
+   if ( !$logged_in )
       error('login_if_not_logged_in', 'admin_show_users');
-   if( $player_row['ID'] <= GUESTS_ID_MAX )
+   if ( $player_row['ID'] <= GUESTS_ID_MAX )
       error('not_allowed_for_guest', 'admin_show_users');
-   if( !(@$player_row['admin_level'] & ADMINGROUP_EXECUTIVE) )
+   if ( !(@$player_row['admin_level'] & ADMINGROUP_EXECUTIVE) )
       error('adminlevel_too_low', 'admin_show_users');
    $edit_user = (@$player_row['admin_level'] & ADMIN_DEVELOPER);
 
@@ -103,7 +103,7 @@ require_once 'include/table_columns.php';
 
    $aform->set_area(2);
    $aform->set_layout( FLAYOUT_AREACONF, 2, array( 'title' => T_('Legend for admin levels') ));
-   foreach( $ARR_ADMLEVELS as $maskval => $arr )
+   foreach ( $ARR_ADMLEVELS as $maskval => $arr )
    {
       $aform->add_row( array(
          'TEXT', sprintf( '<span class="LegendItem">%s</span>', $arr[0]), 'TAB',
@@ -113,7 +113,7 @@ require_once 'include/table_columns.php';
 
    $aform->set_area(3);
    $aform->set_layout( FLAYOUT_AREACONF, 3, array( 'title' => T_('Legend for admin options') ));
-   foreach( $ARR_ADMOPTS as $maskval => $arr )
+   foreach ( $ARR_ADMOPTS as $maskval => $arr )
    {
       $aform->add_row( array(
          'TEXT', sprintf( '<span class="LegendItem">%s</span>', $arr[0]), 'TAB',
@@ -123,7 +123,7 @@ require_once 'include/table_columns.php';
    $aform->echo_string();
 
    $menu_array = array();
-   if( $edit_user )
+   if ( $edit_user )
       $menu_array[T_('Edit User Attributes')] = 'admin_users.php';
 
    end_page(@$menu_array);
@@ -138,7 +138,7 @@ function create_table( $show_edit_user, $page, $with_adminlevel, $query_msg, $qu
    // add_tablehead($nr, $descr, $attbs=null, $mode=TABLE_NO_HIDE|TABLE_NO_SORT, $sortx='')
    $atable->add_tablehead( 1, T_('User#header'), 'User');
    $atable->add_tablehead( 2, T_('Last access#header'), 'Date');
-   if( $with_adminlevel )
+   if ( $with_adminlevel )
       $atable->add_tablehead( 3, T_('Admin level#header'));
    $atable->add_tablehead( 4, T_('Admin options#header'));
    $atable->add_tablehead( 5, T_('Admin note#header'));
@@ -146,12 +146,12 @@ function create_table( $show_edit_user, $page, $with_adminlevel, $query_msg, $qu
    $result = db_query( $query_msg, $query );
 
    $edit_link = '';
-   while( $row = mysql_fetch_assoc( $result ) )
+   while ( $row = mysql_fetch_assoc( $result ) )
    {
       $arow_str = array();
-      if( $atable->Is_Column_Displayed[1] )
+      if ( $atable->Is_Column_Displayed[1] )
       {
-         if( $show_edit_user )
+         if ( $show_edit_user )
          {
             $edit_link = anchor( 'admin_users.php?show_user=1'.URI_AMP.'user='.urlencode(@$row['Handle']),
                image( 'images/edit.gif', 'E'),
@@ -159,15 +159,15 @@ function create_table( $show_edit_user, $page, $with_adminlevel, $query_msg, $qu
          }
          $arow_str[1] = $edit_link . user_reference( REF_LINK, 1, '', $row );
       }
-      if( $atable->Is_Column_Displayed[2] )
+      if ( $atable->Is_Column_Displayed[2] )
          $arow_str[2] = ($row['X_Lastaccess'] > 0 ? date(DATE_FMT2, $row['X_Lastaccess']) : NULL );
-      if( $with_adminlevel && $atable->Is_Column_Displayed[3] )
+      if ( $with_adminlevel && $atable->Is_Column_Displayed[3] )
          $arow_str[3] = '<span class="Flags">'
             . build_admin_flags( $ARR_ADMLEVELS, @$row['Adminlevel']+0 ) . '</span>';
-      if( $atable->Is_Column_Displayed[4] )
+      if ( $atable->Is_Column_Displayed[4] )
          $arow_str[4] = '<span class="Flags">'
             . build_admin_flags( $ARR_ADMOPTS, @$row['AdminOptions']+0 ) . '</span>';
-      if( $atable->Is_Column_Displayed[5] )
+      if ( $atable->Is_Column_Displayed[5] )
          $arow_str[5] = @$row['AdminNote'];
       $atable->add_row( $arow_str );
    }
@@ -186,9 +186,9 @@ function build_admin_flags( $arr_desc, $value )
    $maxflags = 2; // max flags per column
    $arrout = array();
    $cnt = 0;
-   foreach( $arr_desc as $maskval => $arr )
+   foreach ( $arr_desc as $maskval => $arr )
    {
-      if( $value & $maskval )
+      if ( $value & $maskval )
          $arrout[] = $arr[0] . ((++$cnt % $maxflags) == 0 ? ',<br>' : ', ');
    }
    return (count($arrout) > 0)

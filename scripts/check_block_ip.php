@@ -27,11 +27,11 @@ require_once 'include/form_functions.php';
    connect2mysql();
 
    $logged_in = who_is_logged( $player_row);
-   if( !$logged_in )
+   if ( !$logged_in )
       error('login_if_not_logged_in', 'scripts.check_block_ip');
-   if( $player_row['ID'] <= GUESTS_ID_MAX )
+   if ( $player_row['ID'] <= GUESTS_ID_MAX )
       error('not_allowed_for_guest', 'scripts.check_block_ip');
-   if( !(@$player_row['admin_level'] & (ADMIN_DEVELOPER|ADMIN_DATABASE)) )
+   if ( !(@$player_row['admin_level'] & (ADMIN_DEVELOPER|ADMIN_DATABASE)) )
       error('adminlevel_too_low', 'scripts.check_block_ip');
 
 
@@ -59,34 +59,34 @@ require_once 'include/form_functions.php';
    $extra = array();
    $error = '';
    $subnet_chk = null;
-   if( @$_REQUEST['chk_syntax'] )
+   if ( @$_REQUEST['chk_syntax'] )
    {
-      if( (string)$val_syntax == '' )
+      if ( (string)$val_syntax == '' )
          $error = 'Missing Syntax';
-      if( preg_match( "/^[^\/].+\//", $val_syntax ) )
+      if ( preg_match( "/^[^\/].+\//", $val_syntax ) )
          $subnet_chk = check_subnet_ip( $val_syntax, $val_ip );
 
       $is_blocked = is_blocked_ip( $val_ip, array( $val_syntax ) );
       $action = $val_syntax;
    }
-   elseif( @$_REQUEST['chk_conf'] )
+   elseif ( @$_REQUEST['chk_conf'] )
    {
       $is_blocked = is_blocked_ip( $val_ip );
       $action = "read include/config.php";
    }
 
    global $ARR_BLOCK_IPLIST;
-   if( count($ARR_BLOCK_IPLIST) == 0 )
+   if ( count($ARR_BLOCK_IPLIST) == 0 )
       $extra[] = "Block-IP-config empty.";
    else
    {
       $extra[] = "<u>Block-IP-config:</u>";
-      foreach( $ARR_BLOCK_IPLIST as $blockarg )
+      foreach ( $ARR_BLOCK_IPLIST as $blockarg )
          $extra[] = $blockarg;
    }
 
    // print result
-   if( !is_null($action) )
+   if ( !is_null($action) )
    {
       $ipform->add_row( array(
          'DESCRIPTION', 'Block Syntax',
@@ -94,7 +94,7 @@ require_once 'include/form_functions.php';
       $ipform->add_row( array(
          'DESCRIPTION', 'Checked IP',
          'TEXT',        $val_ip ));
-      if( $error )
+      if ( $error )
       {
          $ipform->add_row( array(
             'DESCRIPTION', 'Error',
@@ -109,7 +109,7 @@ require_once 'include/form_functions.php';
                      ($is_blocked ? 'darkred' : 'darkgreen'),
                      ($is_blocked ? 'IP blocked' : 'IP ok (not blocked)' )) ));
 
-      if( count($extra) > 0 )
+      if ( count($extra) > 0 )
       {
          $ipform->add_row( array( 'SPACE' ));
          $ipform->add_row( array( 'SPACE' ));

@@ -20,8 +20,8 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 function number2sgf_coords($x, $y, $SizeX, $SizeY=null)
 {
-   if( is_null($SizeY) ) $SizeY = $SizeX;
-   if( !(is_numeric($x) && is_numeric($y) && $x>=0 && $y>=0 && $x<$SizeX && $y<$SizeY) )
+   if ( is_null($SizeY) ) $SizeY = $SizeX;
+   if ( !(is_numeric($x) && is_numeric($y) && $x>=0 && $y>=0 && $x<$SizeX && $y<$SizeY) )
       return NULL;
 
    return chr(ord('a')+$x) . chr(ord('a')+$y);
@@ -29,13 +29,13 @@ function number2sgf_coords($x, $y, $SizeX, $SizeY=null)
 
 function sgf2number_coords($coord, $Size)
 {
-   if( !is_string($coord) || strlen($coord)!=2 )
+   if ( !is_string($coord) || strlen($coord)!=2 )
       return array(NULL,NULL);
 
    $x = ord($coord[0])-ord('a');
    $y = ord($coord[1])-ord('a');
 
-   if( !($x<$Size && $y<$Size && $x>=0 && $y>=0) )
+   if ( !($x<$Size && $y<$Size && $x>=0 && $y>=0) )
       return array(NULL,NULL);
 
    return array($x, $y);
@@ -43,12 +43,12 @@ function sgf2number_coords($coord, $Size)
 
 function sgf2board_coords($coord, $Size)
 {
-   if( !is_string($coord) || strlen($coord)!=2 )
+   if ( !is_string($coord) || strlen($coord)!=2 )
       return '';
 
    $x = ord($coord[0]) - ord('a');
    $y = ord($coord[1]) - ord('a');
-   if( !($x<$Size && $y<$Size && $x>=0 && $y>=0) )
+   if ( !($x<$Size && $y<$Size && $x>=0 && $y>=0) )
       return '';
 
    $col = chr( $x + ($x>=8?1:0) + ord('a') );
@@ -57,7 +57,7 @@ function sgf2board_coords($coord, $Size)
 
 function number2board_coords($x, $y, $Size)
 {
-   if( !(is_numeric($x) && is_numeric($y) && $x>=0 && $y>=0 && $x<$Size && $y<$Size) )
+   if ( !(is_numeric($x) && is_numeric($y) && $x>=0 && $y>=0 && $x<$Size && $y<$Size) )
      return NULL;
 
    $col = chr( $x + ($x>=8?1:0) + ord('a') );
@@ -66,16 +66,16 @@ function number2board_coords($x, $y, $Size)
 
 function board2number_coords($coord, $Size)
 {
-   if( is_string($coord) && strlen($coord)>=2 )
+   if ( is_string($coord) && strlen($coord)>=2 )
    {
       $x = ord($coord[0]) - ord('a');
-      if( $x != 8 )
+      if ( $x != 8 )
       {
-         if( $x > 8 ) $x--;
+         if ( $x > 8 ) $x--;
 
          $y = $Size - substr($coord, 1);
 
-         if( $x<$Size && $y<$Size && $x>=0 && $y>=0 )
+         if ( $x<$Size && $y<$Size && $x>=0 && $y>=0 )
             return  array($x, $y);
       }
    }
@@ -92,13 +92,13 @@ function is_hoshi($x, $y, $sz, $szy=null)
 {
    global $hoshi_dist, $hoshi_pos;
 
-   if( is_null($szy) ) $szy = $sz;
+   if ( is_null($szy) ) $szy = $sz;
 
    //board letter:     - a b c d e f g h j k l m n o p q r s t u v w x y z
-   if( $sz == $szy )
+   if ( $sz == $szy )
    {
       $hd = $hoshi_dist[$sz];
-      if( $h  = ( ($x*2+1 == $sz) ? 1 : ( ($x == $hd-1 || $x == $sz-$hd) ? 2 : 0 ) ) )
+      if ( $h  = ( ($x*2+1 == $sz) ? 1 : ( ($x == $hd-1 || $x == $sz-$hd) ? 2 : 0 ) ) )
           $h *=   ($y*2+1 == $sz) ? 1 : ( ($y == $hd-1 || $y == $sz-$hd) ? 2 : 0 );
       return $hoshi_pos[$sz] & $h;
    }
@@ -118,7 +118,7 @@ function get_hoshi_coords( $size_x, $size_y, $start=0 )
 {
    global $hoshi_dist, $hoshi_pos;
 
-   if( $size_x < 1 || $size_x > 25 || $size_y < 1 || $size_y > 25 ) // unknown sizes
+   if ( $size_x < 1 || $size_x > 25 || $size_y < 1 || $size_y > 25 ) // unknown sizes
       return array();
 
    $hdx = $hoshi_dist[$size_x];
@@ -135,19 +135,19 @@ function get_hoshi_coords( $size_x, $size_y, $start=0 )
 
    $arr = array();
 
-   if( ($hpx & 1) && ($hpy & 1) ) // center
+   if ( ($hpx & 1) && ($hpy & 1) ) // center
       $arr[] = array( $xmid, $ymid );
-   if( $hpx & 2 ) // side
+   if ( $hpx & 2 ) // side
    {
       $arr[] = array( $xmid, $yN );
       $arr[] = array( $xmid, $yS );
    }
-   if( $hpy & 2 ) // side
+   if ( $hpy & 2 ) // side
    {
       $arr[] = array( $xW, $ymid );
       $arr[] = array( $xE, $ymid );
    }
-   if( ($hpx & 4) && ($hpy & 4) ) // corners
+   if ( ($hpx & 4) && ($hpy & 4) ) // corners
    {
       $arr[] = array( $xW, $yN );
       $arr[] = array( $xW, $yS );

@@ -16,7 +16,7 @@ disable_cache();
    $result = mysql_query( $query ) 
 	or die(mysql_error() . '<p>' . $query);
 	
-   while( $row = mysql_fetch_array($result) )	
+   while ( $row = mysql_fetch_array($result) )	
    {
 	extract( $row);	
    	if( !($Moves>0) )

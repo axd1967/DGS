@@ -71,12 +71,12 @@ class UserRegistration
    {
       $this->errors = array();
       $this->check_userid();
-      if( !$this->die_on_error )
+      if ( !$this->die_on_error )
          $this->check_existing_user();
       $this->check_name();
       $this->check_password();
       $this->check_policy();
-      if( $this->die_on_error )
+      if ( $this->die_on_error )
          $this->check_existing_user();
       $this->check_email();
       return (count($this->errors)) ? $this->errors : 0;
@@ -87,11 +87,11 @@ class UserRegistration
    {
       $this->errors = array();
       $this->check_userid();
-      if( !$this->die_on_error )
+      if ( !$this->die_on_error )
          $this->check_existing_user();
       $this->check_email();
       $this->check_policy();
-      if( $this->die_on_error )
+      if ( $this->die_on_error )
          $this->check_existing_user();
       return (count($this->errors)) ? $this->errors : 0;
    }//check_registration_blocked
@@ -99,42 +99,42 @@ class UserRegistration
 
    private function check_userid()
    {
-      if( strlen( $this->uhandle ) < 3 )
+      if ( strlen( $this->uhandle ) < 3 )
          $this->_error('userid_too_short', "UserReg.check_userid({$this->uhandle})");
-      if( illegal_chars( $this->uhandle ) )
+      if ( illegal_chars( $this->uhandle ) )
          $this->_error('userid_illegal_chars', "UserReg.check_userid({$this->uhandle})");
    }
 
    private function check_name()
    {
-      if( strlen( $this->name ) < 1 )
+      if ( strlen( $this->name ) < 1 )
          $this->_error('name_not_given', "UserReg.check_name({$this->name})");
    }
 
    private function check_password()
    {
-      if( strlen($this->password) < 6 )
+      if ( strlen($this->password) < 6 )
          $this->_error('password_too_short', 'UserReg.check_password');
-      if( illegal_chars( $this->password, true ) )
+      if ( illegal_chars( $this->password, true ) )
          $this->_error('password_illegal_chars', 'UserReg.check_password');
 
-      if( $this->password != $this->password2 )
+      if ( $this->password != $this->password2 )
          $this->_error('password_mismatch', 'UserReg.check_password');
    }//check_password
 
    private function check_policy()
    {
-      if( !$this->policy )
+      if ( !$this->policy )
         $this->_error('registration_policy_not_checked', 'UserReg.check_policy');
    }
 
    // returns 0=no-error, array with error-texts otherwise or error thrown (depends on die-mode)
    private function check_email()
    {
-      if( (string)$this->email != '' )
+      if ( (string)$this->email != '' )
       {
          $errorcode = verify_invalid_email( "UserReg.check_email({$this->uhandle})", $this->email, $this->die_on_error );
-         if( $errorcode )
+         if ( $errorcode )
             $this->_error($errorcode, "UserReg.check_email2({$this->uhandle})");
       }
    }//check_email
@@ -143,7 +143,7 @@ class UserRegistration
    // internal (throw error or add to error-list)
    private function _error( $error_code, $dbg_msg=null )
    {
-      if( $this->die_on_error )
+      if ( $this->die_on_error )
          error($error_code, $dbg_msg);
       else
          $this->errors[] = ErrorCode::get_error_text($error_code);
@@ -152,10 +152,10 @@ class UserRegistration
 
    private function check_existing_user()
    {
-      if( (string)$this->uhandle == '' )
+      if ( (string)$this->uhandle == '' )
          return;
 
-      if( !USE_REGEXP_REGISTRATION )
+      if ( !USE_REGEXP_REGISTRATION )
       {
          //if foO exist, reject foo but accept fo0 (with a zero instead of uppercase o)
          $result = db_query( "UserReg.check_existing_user.find_player({$this->uhandle})",
@@ -176,7 +176,7 @@ class UserRegistration
             "SELECT Handle FROM Players WHERE Handle REGEXP '$regx'" );
       }
 
-      if( @mysql_num_rows($result) > 0 )
+      if ( @mysql_num_rows($result) > 0 )
          $this->_error('userid_in_use', "UserReg.check_existing_user({$this->uhandle})");
    }//check_existing_user
 
@@ -202,7 +202,7 @@ class UserRegistration
 
          $new_id = mysql_insert_id();
 
-         if( mysql_affected_rows() != 1 )
+         if ( mysql_affected_rows() != 1 )
             error('mysql_insert_player', "UserReg.register_user.insert_player2({$this->uhandle})");
 
          ConfigPages::insert_default( $new_id );
@@ -211,7 +211,7 @@ class UserRegistration
       }
       ta_end();
 
-      if( $set_cookie )
+      if ( $set_cookie )
          set_login_cookie( $this->uhandle, $code );
    }//register_user
 
@@ -220,7 +220,7 @@ class UserRegistration
    public function register_blocked_user( $forum_id )
    {
       global $NOW;
-      if( !is_numeric($forum_id) || $forum_id <= 0 )
+      if ( !is_numeric($forum_id) || $forum_id <= 0 )
          error('invalid_args', "UserReg.register_blocked_user($forum_id)");
 
       $ip = (string)@$_SERVER['REMOTE_ADDR'];
@@ -251,13 +251,13 @@ class UserRegistration
       ta_begin();
       {//HOT-section to register blocked user
          $result = db_query( "UserReg.register_blocked_user.insert_new_post({$this->uhandle})", $query );
-         if( mysql_affected_rows() != 1)
+         if ( mysql_affected_rows() != 1)
             error('mysql_insert_post', "UserReg.register_blocked_user.insert_new_post2({$this->uhandle})");
 
          $new_id = mysql_insert_id();
          db_query( "UserReg.register_blocked_user.new_thread($new_id)",
             "UPDATE Posts SET Thread_ID=ID, LastPost=ID WHERE ID=$new_id LIMIT 1" );
-         if( mysql_affected_rows() != 1)
+         if ( mysql_affected_rows() != 1)
             error('mysql_insert_post', "UserReg.register_blocked_user.new_thread2($new_id)");
 
          add_forum_log( $new_id, $new_id, FORUMLOGACT_NEW_PEND_POST . ':new_thread' );

@@ -41,13 +41,13 @@ $GLOBALS['ThePage'] = new Page('TournamentPoolDefine');
    connect2mysql();
 
    $logged_in = who_is_logged( $player_row);
-   if( !$logged_in )
+   if ( !$logged_in )
       error('login_if_not_logged_in', 'Tournament.roundrobin.define_pools');
-   if( !ALLOW_TOURNAMENTS )
+   if ( !ALLOW_TOURNAMENTS )
       error('feature_disabled', 'Tournament.roundrobin.define_pools');
    $my_id = $player_row['ID'];
 
-   if( $my_id <= GUESTS_ID_MAX )
+   if ( $my_id <= GUESTS_ID_MAX )
       error('not_allowed_for_guest', 'Tournament.roundrobin.define_pools');
 
    $page = "define_pools.php";
@@ -63,16 +63,16 @@ $GLOBALS['ThePage'] = new Page('TournamentPoolDefine');
 */
 
    $tid = (int) @$_REQUEST['tid'];
-   if( $tid < 0 ) $tid = 0;
+   if ( $tid < 0 ) $tid = 0;
 
    $tourney = TournamentCache::load_cache_tournament( 'Tournament.define_pools.find_tournament', $tid );
    $tstatus = new TournamentStatus( $tourney );
    $ttype = TournamentFactory::getTournament($tourney->WizardType);
-   if( !$ttype->need_rounds )
+   if ( !$ttype->need_rounds )
       error('tournament_edit_rounds_not_allowed', "Tournament.define_pools.need_rounds($tid)");
 
    // create/edit allowed?
-   if( !TournamentHelper::allow_edit_tournaments($tourney, $my_id) )
+   if ( !TournamentHelper::allow_edit_tournaments($tourney, $my_id) )
       error('tournament_edit_not_allowed', "Tournament.define_pools.edit_tournament($tid,$my_id)");
 
    // load existing T-round
@@ -80,7 +80,7 @@ $GLOBALS['ThePage'] = new Page('TournamentPoolDefine');
    $tround = TournamentCache::load_cache_tournament_round( 'Tournament.define_pools', $tid, $round );
    $trstatus = new TournamentRoundStatus( $tourney, $tround );
 
-   if( @$_REQUEST['t_cancel'] )
+   if ( @$_REQUEST['t_cancel'] )
       jump_to("tournaments/roundrobin/define_pools.php?tid=$tid".URI_AMP."round=$round");
 
 
@@ -88,7 +88,7 @@ $GLOBALS['ThePage'] = new Page('TournamentPoolDefine');
    $old_poolcount = $tround->Pools;
    $errors = $tstatus->check_edit_status( TournamentPool::get_edit_tournament_status() );
    $errors = array_merge( $errors, $trstatus->check_edit_round_status( TROUND_STATUS_POOL ) );
-   if( !TournamentUtils::isAdmin() && $tourney->isFlagSet(TOURNEY_FLAG_LOCK_ADMIN) )
+   if ( !TournamentUtils::isAdmin() && $tourney->isFlagSet(TOURNEY_FLAG_LOCK_ADMIN) )
       $errors[] = $tourney->buildAdminLockText();
 
    $reg_count = TournamentParticipant::count_TPs( $tid, TP_STATUS_REGISTER, $round, /*NextR*/true );
@@ -100,20 +100,20 @@ $GLOBALS['ThePage'] = new Page('TournamentPoolDefine');
    $errors = array_merge( $errors, $input_errors );
 
    $adjust_pool = '';
-   if( @$_REQUEST['t_save'] || @$_REQUEST['t_preview'] )
+   if ( @$_REQUEST['t_save'] || @$_REQUEST['t_preview'] )
    {
       // NOTE: add/del-pools checkboxes don't show up under 'edits'
-      if( $tround->Status == TROUND_STATUS_POOL && $old_poolcount > 0 && count($edits) == 0 )
+      if ( $tround->Status == TROUND_STATUS_POOL && $old_poolcount > 0 && count($edits) == 0 )
       {
-         if( $vars['addpool'] )
+         if ( $vars['addpool'] )
          {
             $adjust_pool = '+1';
             $tround->Pools++;
          }
-         elseif( $vars['delpool'] )
+         elseif ( $vars['delpool'] )
          {
             $adjust_pool = '-1';
-            if( TournamentPool::exists_tournament_pool($tid, $round, $tround->Pools) )
+            if ( TournamentPool::exists_tournament_pool($tid, $round, $tround->Pools) )
                $errors[] = sprintf( T_('Last Pool [%s] must be empty to allow deletion!'), $tround->Pools );
             else
                $tround->Pools--;
@@ -121,7 +121,7 @@ $GLOBALS['ThePage'] = new Page('TournamentPoolDefine');
       }
       else
       {
-         if( TournamentPool::exists_tournament_pool($tid, $round) )
+         if ( TournamentPool::exists_tournament_pool($tid, $round) )
             $errors[] = T_('Pool parameters can only be directly changed if all pools have been removed!');
       }
    }
@@ -135,7 +135,7 @@ $GLOBALS['ThePage'] = new Page('TournamentPoolDefine');
    $sugg_order_val = get_request_arg('sugg_order', 1);
 
    $ttable = null;
-   if( @$_REQUEST['t_suggest'] || @$_REQUEST['t_save'] || @$_REQUEST['t_preview'] )
+   if ( @$_REQUEST['t_suggest'] || @$_REQUEST['t_save'] || @$_REQUEST['t_preview'] )
    {
       $games_per_challenge = TournamentHelper::determine_games_per_challenge( $tid );
       $ttable = make_suggestions_table( $tround, $reg_count, $errors, $games_per_challenge,
@@ -145,7 +145,7 @@ $GLOBALS['ThePage'] = new Page('TournamentPoolDefine');
       $games_per_challenge = 1;
 
    // save tournament-round-object with values from edit-form
-   if( @$_REQUEST['t_save'] && count($errors) == 0 )
+   if ( @$_REQUEST['t_save'] && count($errors) == 0 )
    {
       $tround->update();
       jump_to("tournaments/roundrobin/define_pools.php?tid=$tid".URI_AMP."round=$round".URI_AMP
@@ -169,7 +169,7 @@ $GLOBALS['ThePage'] = new Page('TournamentPoolDefine');
          'DESCRIPTION', T_('Round Status#tourney'),
          'TEXT',        TournamentRound::getStatusText($tround->Status), ));
 
-   if( count($errors) )
+   if ( count($errors) )
    {
       $tform->add_row( array( 'HR' ));
       $tform->add_row( array(
@@ -189,13 +189,13 @@ $GLOBALS['ThePage'] = new Page('TournamentPoolDefine');
          'TEXT',        ( $adjust_pool ? "<b>$adjust_pool</b>" . SMALL_SPACING : ''),
          'TEXT',        build_range_text( $min_pool_count, $max_pool_count ), ));
 
-   if( $tround->Status == TROUND_STATUS_POOL && $old_poolcount > 0 )
+   if ( $tround->Status == TROUND_STATUS_POOL && $old_poolcount > 0 )
    {
-      if( $old_poolcount < $max_pool_count )
+      if ( $old_poolcount < $max_pool_count )
          $tform->add_row( array(
                'TAB',
                'CHECKBOX', 'addpool', 1, T_('Add Pool (possible if no violation)'), $vars['addpool'], ));
-      if( $old_poolcount > $min_pool_count - 1 )
+      if ( $old_poolcount > $min_pool_count - 1 )
          $tform->add_row( array(
                'TAB',
                'CHECKBOX', 'delpool', 1, T_('Delete last Pool (possible if pool empty and no violation)'), $vars['delpool'], ));
@@ -229,7 +229,7 @@ $GLOBALS['ThePage'] = new Page('TournamentPoolDefine');
 
    $tform->echo_string();
 
-   if( !is_null($ttable) )
+   if ( !is_null($ttable) )
    {
       section( 'suggestions', T_('Pool Suggestions') );
       echo "<p>\n",
@@ -295,40 +295,40 @@ function parse_edit_form( &$trd )
    // copy to determine edit-changes
    $old_vals = array_merge( array(), $vars );
    // read URL-vals into vars
-   foreach( $vars as $key => $val )
+   foreach ( $vars as $key => $val )
       $vars[$key] = get_request_arg( $key, $val );
    // handle checkboxes having no key/val in _POST-hash
-   if( $is_posted )
+   if ( $is_posted )
    {
-      foreach( array('addpool','delpool') as $key )
+      foreach ( array('addpool','delpool') as $key )
          $vars[$key] = get_request_arg( $key, false );
    }
 
    // parse URL-vars
-   if( $is_posted )
+   if ( $is_posted )
    {
       global $min_pool_count, $max_pool_count;
 
       $new_value = $vars['pool_size'];
-      if( TournamentUtils::isNumberOrEmpty($new_value) && $new_value >= $trd->MinPoolSize && $new_value <= $trd->MaxPoolSize )
+      if ( TournamentUtils::isNumberOrEmpty($new_value) && $new_value >= $trd->MinPoolSize && $new_value <= $trd->MaxPoolSize )
          $trd->PoolSize = $new_value;
       else
          $errors[] = sprintf( T_('Expecting number for pool size in range %s.'),
             build_range_text($trd->MinPoolSize, $trd->MaxPoolSize) );
 
       $new_value = $vars['pool_count'];
-      if( TournamentUtils::isNumberOrEmpty($new_value) && $new_value >= $min_pool_count && $new_value <= $max_pool_count )
+      if ( TournamentUtils::isNumberOrEmpty($new_value) && $new_value >= $min_pool_count && $new_value <= $max_pool_count )
          $trd->Pools = $new_value;
       else
          $errors[] = sprintf( T_('Expecting number for pool count in range %s.'),
             build_range_text( $min_pool_count, $max_pool_count ) );
 
-      if( $vars['addpool'] && $vars['delpool'] )
+      if ( $vars['addpool'] && $vars['delpool'] )
          $errors[] = T_('Adding and deleting pool are mutual exclusive actions: Choose only one.');
 
       // determine edits
-      if( $old_vals['pool_size'] != $trd->PoolSize ) $edits[] = T_('Pool Size');
-      if( $old_vals['pool_count'] != $trd->Pools ) $edits[] = T_('Pool Count');
+      if ( $old_vals['pool_size'] != $trd->PoolSize ) $edits[] = T_('Pool Size');
+      if ( $old_vals['pool_count'] != $trd->Pools ) $edits[] = T_('Pool Count');
    }
 
    return array( $vars, array_unique($edits), $errors );
@@ -348,7 +348,7 @@ function calc_suggestion( $reg_count, $pool_size, $pool_count, $chall_games, $us
    $games_count = $pool_count_base * TournamentUtils::calc_pool_games( $pool_size_base, $chall_games )
               + $pool_count_remain * TournamentUtils::calc_pool_games( $pool_size_base + 1, $chall_games );
 
-   if( $pool_count_remain > 0 )
+   if ( $pool_count_remain > 0 )
       $distribution = sprintf( '%d x %d + %d x %d', //==reg_count, PC_base + PC_remain = pool_count
          $pool_count_base, $pool_size_base, $pool_count_remain, $pool_size_base + 1 );
    else
@@ -362,24 +362,24 @@ function make_suggestions_table( $tround, $reg_count, &$errors, $games_per_chall
 {
    $arr_check = array();
    $arr_uniq = array();
-   if( $user_pool_size > 0 && $user_pool_count > 0 )
+   if ( $user_pool_size > 0 && $user_pool_count > 0 )
    {
       $old_user_pool_size = $user_pool_size;
       $arr_sugg = calc_suggestion( $reg_count, $user_pool_size, $user_pool_count, $games_per_challenge, 1 );
-      if( $arr_sugg[4] > 0 && $arr_sugg[3] + 1 != $user_pool_size )
+      if ( $arr_sugg[4] > 0 && $arr_sugg[3] + 1 != $user_pool_size )
          $user_pool_size = $arr_sugg[3] + 1;
-      elseif( $arr_sugg[4] == 0 && $arr_sugg[3] != $user_pool_size )
+      elseif ( $arr_sugg[4] == 0 && $arr_sugg[3] != $user_pool_size )
          $user_pool_size = $arr_sugg[3];
-      if( $old_user_pool_size != $user_pool_size )
+      if ( $old_user_pool_size != $user_pool_size )
          $arr_sugg = calc_suggestion( $reg_count, $user_pool_size, $user_pool_count, $games_per_challenge, 2 );
       $arr_uniq["$user_pool_size:$user_pool_count"] = 1;
       $arr_check[] = $arr_sugg;
    }
-   for( $pool_size = $tround->MinPoolSize; $pool_size <= $tround->MaxPoolSize; $pool_size++ )
+   for ( $pool_size = $tround->MinPoolSize; $pool_size <= $tround->MaxPoolSize; $pool_size++ )
    {
       $pool_count = TournamentUtils::calc_pool_count( $reg_count, $pool_size );
       $key_uniq = "$pool_size:$pool_count";
-      if( !isset($arr_uniq[$key_uniq]) )
+      if ( !isset($arr_uniq[$key_uniq]) )
          $arr_check[] = calc_suggestion( $reg_count, $pool_size, $pool_count, $games_per_challenge );
       $arr_uniq[$key_uniq] = 1;
    }
@@ -399,7 +399,7 @@ function make_suggestions_table( $tround, $reg_count, &$errors, $games_per_chall
    $table->add_tablehead( 7, T_('Suggestion Note#tpool_sugg'), 'Note');
 
    $arr_best = array();
-   foreach( $arr_check as $arr_item )
+   foreach ( $arr_check as $arr_item )
    {
       list( $pool_size, $pool_count, $user_capacity, $pool_size_base, $pool_count_remain,
             $pool_count_base, $games_count, $distribution, $user_choice ) = $arr_item;
@@ -418,19 +418,19 @@ function make_suggestions_table( $tround, $reg_count, &$errors, $games_per_chall
       // check for violations
       $pool_size_check = ( $pool_count_remain > 0 ) ? $pool_size_base + 1 : $pool_size_base;
       $violation = '';
-      if( $pool_size_check < $tround->MinPoolSize )
+      if ( $pool_size_check < $tround->MinPoolSize )
       {
          $violation = T_('Violates min. pool-size on slicing!');
          $errors[] = sprintf( T_('Pool count [%s] is too large, the min. pool size [%s] would be violated on slicing.'),
             $pool_count, $tround->MinPoolSize );
       }
-      elseif( $pool_size_check > $tround->MaxPoolSize )
+      elseif ( $pool_size_check > $tround->MaxPoolSize )
       {
          $violation = T_('Violates max. pool-size!');
          $errors[] = sprintf( T_('Pool count [%s] is too small, the max. pool size [%s] would be violated.'),
             $pool_count, $tround->MaxPoolSize );
       }
-      elseif( $user_capacity < $reg_count )
+      elseif ( $user_capacity < $reg_count )
       {
          $violation = T_('Pool-size or count too small!');
          $errors[] = sprintf( T_('Either the pool size [%s] or pool count [%s] is too small to cover all %s registered users.'),
@@ -439,22 +439,22 @@ function make_suggestions_table( $tround, $reg_count, &$errors, $games_per_chall
 
       $extra_class = '';
       $arr_note = array();
-      if( $user_choice )
+      if ( $user_choice )
       {
          $extra_class .= ' UserChoice';
          $arr_note[] = T_('TD-Choice#tpool_sugg');
       }
-      if( $violation )
+      if ( $violation )
       {
          $extra_class .= ' Violation';
          $arr_note[] = $violation;
       }
-      if( count($arr_note) )
+      if ( count($arr_note) )
          $row_str[7] = implode(', ', $arr_note);
-      if( $extra_class )
+      if ( $extra_class )
          $row_str['extra_class'] = trim($extra_class);
 
-      if( $pool_count_remain > 0 )
+      if ( $pool_count_remain > 0 )
       {
          $r1 = $pool_count_base * $pool_size_base;
          $r2 = $pool_count_remain * ( $pool_size_base + 1 );
@@ -469,15 +469,15 @@ function make_suggestions_table( $tround, $reg_count, &$errors, $games_per_chall
    usort( $arr_best, 'compare_suggestions' );
    $row_idx = 0;
    $break_val = 0;
-   foreach( $arr_best as $arr )
+   foreach ( $arr_best as $arr )
    {
       list(, $user_diff, $ratio, $pool_size, $pool_count, $has_violation ) = $arr;
       $row_str =& $arr_best[$row_idx++][0];
-      if( $has_violation )
+      if ( $has_violation )
          continue;
 
       $stop_val = ( $user_diff + 1 ) * ( $ratio + 1 );
-      if( $break_val > 0 && $break_val != $stop_val )
+      if ( $break_val > 0 && $break_val != $stop_val )
          break;
       $break_val = $stop_val;
 
@@ -486,10 +486,10 @@ function make_suggestions_table( $tround, $reg_count, &$errors, $games_per_chall
    }
 
    global $sugg_order_val;
-   if( $sugg_order_val == 1 ) // order by pool-size
+   if ( $sugg_order_val == 1 ) // order by pool-size
       usort( $arr_best, 'compare_pool_parameters' );
 
-   foreach( $arr_best as $arr )
+   foreach ( $arr_best as $arr )
       $table->add_row( $arr[0] );
 
    return $table;
@@ -498,7 +498,7 @@ function make_suggestions_table( $tround, $reg_count, &$errors, $games_per_chall
 // $a/$b are arrays with key/vals: 0:row_str, 1:user_diff, 2:ratio, 3:pool_size, 4:pool_count, 5:has_violation
 function compare_pool_parameters( $a, $b )
 {
-   if( $a[3] == $b[3] ) // pool-size
+   if ( $a[3] == $b[3] ) // pool-size
       return ($a[5] > $b[5]) ? -1 : 1; // pool-count
    else
       return ($a[3] < $b[3]) ? -1 : 1;
@@ -507,9 +507,9 @@ function compare_pool_parameters( $a, $b )
 // $a/$b are arrays with key/vals: 0:row_str, 1:user_diff, 2:ratio, 3:pool_size, 4:pool_count, 5:has_violation
 function compare_suggestions( $a, $b )
 {
-   if( $a[1] == $b[1] ) // user-diff
+   if ( $a[1] == $b[1] ) // user-diff
    {
-      if( $a[2] == $b[2] ) // ratio1
+      if ( $a[2] == $b[2] ) // ratio1
          return ($a[3] < $b[3]) ? -1 : 1; // pool-size
       else
          return ($a[2] < $b[2]) ? -1 : 1;

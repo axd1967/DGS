@@ -48,13 +48,13 @@ $GLOBALS['ThePage'] = new Page('TournamentPairEdit', PAGEFLAG_IMPLICIT_FLUSH ); 
    connect2mysql();
 
    $logged_in = who_is_logged( $player_row);
-   if( !$logged_in )
+   if ( !$logged_in )
       error('login_if_not_logged_in', 'Tournament.roundrobin.edit_pairing');
-   if( !ALLOW_TOURNAMENTS )
+   if ( !ALLOW_TOURNAMENTS )
       error('feature_disabled', 'Tournament.roundrobin.edit_pairing');
    $my_id = $player_row['ID'];
 
-   if( $my_id <= GUESTS_ID_MAX )
+   if ( $my_id <= GUESTS_ID_MAX )
       error('not_allowed_for_guest', 'Tournament.roundrobin.edit_pairing');
 
    $page = "edit_pairing.php";
@@ -65,17 +65,17 @@ $GLOBALS['ThePage'] = new Page('TournamentPairEdit', PAGEFLAG_IMPLICIT_FLUSH ); 
 */
 
    $tid = (int) @$_REQUEST['tid'];
-   if( $tid < 0 ) $tid = 0;
+   if ( $tid < 0 ) $tid = 0;
    $do_pair = (bool)@$_REQUEST['t_pair'];
 
    $tourney = TournamentCache::load_cache_tournament( 'Tournament.edit_pairing.find_tournament', $tid );
    $tstatus = new TournamentStatus( $tourney );
    $ttype = TournamentFactory::getTournament($tourney->WizardType);
-   if( !$ttype->need_rounds )
+   if ( !$ttype->need_rounds )
       error('tournament_edit_rounds_not_allowed', "Tournament.edit_pairing.need_rounds($tid)");
 
    // create/edit allowed?
-   if( !TournamentHelper::allow_edit_tournaments($tourney, $my_id) )
+   if ( !TournamentHelper::allow_edit_tournaments($tourney, $my_id) )
       error('tournament_edit_not_allowed', "Tournament.edit_pairing.edit_tournament($tid,$my_id)");
 
    // load existing T-round
@@ -86,14 +86,14 @@ $GLOBALS['ThePage'] = new Page('TournamentPairEdit', PAGEFLAG_IMPLICIT_FLUSH ); 
    // init
    $errors = $tstatus->check_edit_status( TournamentPool::get_edit_tournament_status() );
    $errors = array_merge( $errors, $trstatus->check_edit_round_status( TROUND_STATUS_PAIR ) );
-   if( !TournamentUtils::isAdmin() && $tourney->isFlagSet(TOURNEY_FLAG_LOCK_ADMIN) )
+   if ( !TournamentUtils::isAdmin() && $tourney->isFlagSet(TOURNEY_FLAG_LOCK_ADMIN) )
       $errors[] = $tourney->buildAdminLockText();
 
    // check for pairing-"lock" (stored in T-extension)
    $t_ext = TournamentExtension::load_tournament_extension( $tid, TE_PROP_TROUND_START_TGAMES );
    $lock_errtext = T_("If an error occured during creation of the tournament-games or it was stopped manually,<br>\n" .
       "the tournament is broken and must be fixed by a tournament-admin.");
-   if( !is_null($t_ext) )
+   if ( !is_null($t_ext) )
    {
       $errors[] =
          sprintf( T_('Creating tournament games is in work already (started at [%s] by %s ).'),
@@ -102,7 +102,7 @@ $GLOBALS['ThePage'] = new Page('TournamentPairEdit', PAGEFLAG_IMPLICIT_FLUSH ); 
    }
 
    $arr_pool_summary = null;
-   if( count($errors) == 0 && !$do_pair )
+   if ( count($errors) == 0 && !$do_pair )
       list( $errors, $arr_pool_summary ) = TournamentPool::check_pools( $tround, /*only-sum*/true );
 
 
@@ -124,7 +124,7 @@ $GLOBALS['ThePage'] = new Page('TournamentPairEdit', PAGEFLAG_IMPLICIT_FLUSH ); 
 
    $disable_create = '';
    $has_errors = (bool)count($errors);
-   if( $has_errors )
+   if ( $has_errors )
    {
       $disable_create = 'disabled=1';
 
@@ -137,7 +137,7 @@ $GLOBALS['ThePage'] = new Page('TournamentPairEdit', PAGEFLAG_IMPLICIT_FLUSH ); 
 
    $tform->add_row( array( 'HR' ));
 
-   if( !$do_pair )
+   if ( !$do_pair )
    {
       $tform->add_row( array(
             'CELL', 2, '', // align submit-buttons
@@ -162,7 +162,7 @@ $GLOBALS['ThePage'] = new Page('TournamentPairEdit', PAGEFLAG_IMPLICIT_FLUSH ); 
 
    $tform->echo_string();
 
-   if( !is_null($arr_pool_summary) )
+   if ( !is_null($arr_pool_summary) )
    {
       $pool_sum = new PoolSummary( $page, $arr_pool_summary );
       $pstable = $pool_sum->make_table_pool_summary();
@@ -174,7 +174,7 @@ $GLOBALS['ThePage'] = new Page('TournamentPairEdit', PAGEFLAG_IMPLICIT_FLUSH ); 
       $pstable->echo_table();
    }
 
-   if( $do_pair && !$has_errors )
+   if ( $do_pair && !$has_errors )
    {
       ta_begin();
       {//HOT-section to start all T-games for T-round
@@ -184,16 +184,16 @@ $GLOBALS['ThePage'] = new Page('TournamentPairEdit', PAGEFLAG_IMPLICIT_FLUSH ); 
       ta_end();
 
       echo "<br><br>\n";
-      if( is_string($result) )
+      if ( is_string($result) )
       {
          $has_errors = true;
          echo span('ErrorMsg', T_('A critical error has occured#tourney') . ': ' . $result), "<br><br>\n",
             span('ErrorMsg', $lock_errtext);
       }
-      elseif( is_array($result) )
+      elseif ( is_array($result) )
       {
          list( $count_games, $expected_games ) = $result;
-         if( $count_games == $expected_games )
+         if ( $count_games == $expected_games )
          {
             echo sprintf( T_('All %s pool games have been started. Tournament-Round Status has been changed to [%s].'),
                $count_games, TournamentRound::getStatusText(TROUND_STATUS_PLAY) );
@@ -213,7 +213,7 @@ $GLOBALS['ThePage'] = new Page('TournamentPairEdit', PAGEFLAG_IMPLICIT_FLUSH ); 
    $menu_array = array();
    $menu_array[T_('Tournament info')] = "tournaments/view_tournament.php?tid=$tid";
    $menu_array[T_('View Pools')] = "tournaments/roundrobin/view_pools.php?tid=$tid";
-   if( $has_errors )
+   if ( $has_errors )
       $menu_array[T_('Edit game pairing')] =
          array( 'url' => "tournaments/roundrobin/edit_pairing.php?tid=$tid", 'class' => 'TAdmin' );
    $menu_array[T_('Manage tournament')] =

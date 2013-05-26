@@ -33,7 +33,7 @@ $GLOBALS['ThePage'] = new Page('ShapeList');
    connect2mysql();
 
    $logged_in = who_is_logged( $player_row);
-   if( !$logged_in )
+   if ( !$logged_in )
       error('login_if_not_logged_in', 'list_shapes');
    $my_id = $player_row['ID'];
 
@@ -99,39 +99,39 @@ $GLOBALS['ThePage'] = new Page('ShapeList');
 
    section('Shape', $title );
 
-   while( ($show_rows-- > 0) && list(,$arr_item) = $iterator->getListIterator() )
+   while ( ($show_rows-- > 0) && list(,$arr_item) = $iterator->getListIterator() )
    {
       list( $shape, $orow ) = $arr_item;
       $shape_id = $shape->ID;
       $uid = $shape->uid;
       $row_str = array();
 
-      if( @$table->Is_Column_Displayed[ 1] )
+      if ( @$table->Is_Column_Displayed[ 1] )
          $row_str[ 1] = button_TD_anchor( "view_shape.php?shape=$shape_id", $shape_id);
-      if( @$table->Is_Column_Displayed[ 2] )
+      if ( @$table->Is_Column_Displayed[ 2] )
       {
          $links = echo_image_shapeinfo($shape_id, $shape->Size, $shape->Snapshot, /*edit-goban*/true );
-         if( $my_id == $shape->uid )
+         if ( $my_id == $shape->uid )
             $links .= ' ' . anchor( "edit_shape.php?shape=$shape_id",
                image( 'images/edit.gif', 'E', '', 'class="Action InTextImage"' ), T_('Edit Shape'));
          $row_str[ 2] = $links;
       }
-      if( @$table->Is_Column_Displayed[ 3] )
+      if ( @$table->Is_Column_Displayed[ 3] )
          $row_str[ 3] = user_reference( REF_LINK, 1, '', $uid, $shape->User->Handle, '');
-      if( @$table->Is_Column_Displayed[ 4] )
+      if ( @$table->Is_Column_Displayed[ 4] )
       {
          $str = make_html_safe( $shape->Name, false, $rx_term );
-         if( strlen($shape->Notes) )
+         if ( strlen($shape->Notes) )
             $str .= echo_image_note( $shape->Notes );
          $row_str[ 4] = $str;
       }
-      if( @$table->Is_Column_Displayed[ 5] )
+      if ( @$table->Is_Column_Displayed[ 5] )
          $row_str[ 5] = $shape->Size;
-      if( @$table->Is_Column_Displayed[ 6] )
+      if ( @$table->Is_Column_Displayed[ 6] )
          $row_str[ 6] = ShapeControl::formatFlags($shape->Flags);
-      if( @$table->Is_Column_Displayed[ 7] )
+      if ( @$table->Is_Column_Displayed[ 7] )
          $row_str[ 7] = formatDate($shape->Created);
-      if( @$table->Is_Column_Displayed[ 8] )
+      if ( @$table->Is_Column_Displayed[ 8] )
          $row_str[ 8] = formatDate($shape->Lastchanged);
 
       $table->add_row( $row_str );

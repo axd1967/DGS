@@ -292,7 +292,7 @@ class SearchFilter
       $this->ProfileHandler = $prof_handler;
 
       // register standard arg-names for filters
-      if( $this->ProfileHandler )
+      if ( $this->ProfileHandler )
       {
          $pfx = $this->Prefix;
          $this->ProfileHandler->register_argnames( array(
@@ -323,7 +323,7 @@ class SearchFilter
 
       // NOTE: clear & reset handled in init-func
       $value = ( $this->ProfileHandler ) ? $this->ProfileHandler->get_arg( $fname ) : NULL;
-      if( is_null($value) )
+      if ( is_null($value) )
          $value = get_request_arg($fname);
 
       #error_log("get_saved_arg[$name,$use_prefix] = [". (is_null($value) ? 'NULL' : $value) ."]");
@@ -363,15 +363,15 @@ class SearchFilter
    {
       // checks: force unique filterid
       // note: don't force unique dbfields (so we are open to allow more filters on same field)
-      if( strlen($type) == 0 )
+      if ( strlen($type) == 0 )
          error('invalid_filter', "SearchFilter.add_filter.bad_type($id,$type)"); // type non-empty
-      if( !is_numeric($id) )
+      if ( !is_numeric($id) )
          error('invalid_filter', "SearchFilter.add_filter.bad_filter_id($id)");
-      if( $id < 1 || $id > BITSET_MAXSIZE )
+      if ( $id < 1 || $id > BITSET_MAXSIZE )
          error('invalid_filter', "SearchFilter.add_filter.filter_id_out_of_range($id)");
-      if( isset($this->Filters[$id]) )
+      if ( isset($this->Filters[$id]) )
          error('invalid_filter', "SearchFilter.add_filter.unique_filter_id($id,$type)");
-      if( count($this->Filters) > BITSET_MAXSIZE )
+      if ( count($this->Filters) > BITSET_MAXSIZE )
          error('invalid_filter', "SearchFilter.add_filter.full($id,$type)");
 
       $filter_class = 'Filter' . $type;
@@ -384,11 +384,11 @@ class SearchFilter
       $filter->set_active($active);
 
       // register arg-names to profile-handler (regex-parts set in set_profile_handler)
-      if( $this->ProfileHandler )
+      if ( $this->ProfileHandler )
       {
          $pfx = ($filter->get_config(FC_FNAME)) ? '' : $this->Prefix;
          $elems = $filter->get_element_names();
-         foreach( $elems as $fname )
+         foreach ( $elems as $fname )
          {
             $pfx_fname = ( $pfx && $filter->use_prefix_fieldname($fname) ) ? $pfx : '';
             $this->ProfileHandler->register_argnames( $pfx_fname . $fname );
@@ -404,7 +404,7 @@ class SearchFilter
     */
    private function extract_filter_formname( $filter )
    {
-      if( (string)($fname = $filter->get_config(FC_FNAME)) != '' )
+      if ( (string)($fname = $filter->get_config(FC_FNAME)) != '' )
          $this->FilterFormNames[$fname] = $filter->id;
    }
 
@@ -419,11 +419,11 @@ class SearchFilter
 
       // handle reset or clear induced by profile-handler
       $need_clear = false;
-      if( $this->ProfileHandler )
+      if ( $this->ProfileHandler )
       {
-         if( $this->ProfileHandler->need_reset() )
+         if ( $this->ProfileHandler->need_reset() )
             $is_reset = true;
-         elseif( $this->ProfileHandler->need_clear() )
+         elseif ( $this->ProfileHandler->need_clear() )
             $is_init = $need_clear = true;
       }
 
@@ -437,40 +437,40 @@ class SearchFilter
 
       // 1. parse active-set if initialized
       // 2. parse values from args-array into filters
-      foreach( $arr_keys as $id )
+      foreach ( $arr_keys as $id )
       {
          $filter =& $this->get_filter($id);
-         if( isset($filter) )
+         if ( isset($filter) )
          {
             // parse active-set
-            if( $this->is_init )
+            if ( $this->is_init )
                $filter->set_active( $bitset_active->get_bit($id) );
 
             // parse values if active and not a reset
-            if( $filter->is_active() )
+            if ( $filter->is_active() )
             {
-               if( $this->is_reset || !$this->is_init )
+               if ( $this->is_reset || !$this->is_init )
                   $filter->reset();
 
                $use_prefix = !((bool) $filter->get_config(FC_FNAME));
                $elems = $filter->get_element_names();
-               foreach( $elems as $fname )
+               foreach ( $elems as $fname )
                {
                   $use_prefix_field = ( $use_prefix ) ? $filter->use_prefix_fieldname($fname) : $use_prefix;
-                  if( $this->is_reset )
+                  if ( $this->is_reset )
                      $qvalue = null; // reset value, independent from is_init(!)
                   else
                      $qvalue = $this->get_saved_arg( $fname, $use_prefix_field ); // string | array
 
                   // reset to default, if no value and in init-state
-                  if( $qvalue == '' && !$this->is_init && !$need_clear )
+                  if ( $qvalue == '' && !$this->is_init && !$need_clear )
                      $qvalue = null;
 
-                  if( is_array($qvalue) && !$filter->get_config(FC_MULTIPLE) )
+                  if ( is_array($qvalue) && !$filter->get_config(FC_MULTIPLE) )
                      error('invalid_filter', "SearchFilter.init.no_multi_value_support($id,$fname)");
                   $filter->parse_value( $fname, $qvalue ); // ignore all parsing-errors and fill filter-vars
                }
-               if( count($elems) > 1 && !$filter->has_error() ) // for multi-element-filters
+               if ( count($elems) > 1 && !$filter->has_error() ) // for multi-element-filters
                   $filter->build_query();
             }
          }
@@ -493,15 +493,15 @@ class SearchFilter
    {
       $act = (string) $this->get_arg(FFORM_TOGGLE_ACTION, true); // set if show-/hide-action needed
       $fid = (string) $this->get_arg(FFORM_TOGGLE_FID, true); // if act set: >0=Nr for thead[Nr], 0=hide-all, -1=show-all
-      if( $act && (string)$fid != '' )
+      if ( $act && (string)$fid != '' )
       {
-         if( $fid > 0 ) // show or hide single filter
+         if ( $fid > 0 ) // show or hide single filter
          {
-            if( !$this->is_active($fid) )
+            if ( !$this->is_active($fid) )
                $this->reset_filter($fid);
             $this->toggle_active($fid);
          }
-         elseif( $fid < 0 ) // -1 (show all)
+         elseif ( $fid < 0 ) // -1 (show all)
          {
             $this->reset_filters(GETFILTER_INACTIVE);
             $this->setall_active(true);
@@ -518,19 +518,19 @@ class SearchFilter
    private function parse_requested_filters()
    {
       $freq_str = trim( (string) $this->get_arg(FNAME_REQUIRED, false) );
-      if( (string)$freq_str != '' )
+      if ( (string)$freq_str != '' )
       {
          $arr_freq = explode(',', $freq_str);
-         foreach( $arr_freq as $req_fid )
+         foreach ( $arr_freq as $req_fid )
          {
-            if( !is_numeric($req_fid) && isset($this->FilterFormNames[$req_fid]) )
+            if ( !is_numeric($req_fid) && isset($this->FilterFormNames[$req_fid]) )
                $req_fid = $this->FilterFormNames[$req_fid];
-            if( !is_numeric($req_fid) || !isset($this->Filters[$req_fid]) )
+            if ( !is_numeric($req_fid) || !isset($this->Filters[$req_fid]) )
                error('invalid_filter', "SearchFilter.add_or_del_filter($req_fid)");
 
             $this->RequiredFilters[$req_fid] = 1;
 
-            if( !$this->is_active($req_fid) ) // show requested filter
+            if ( !$this->is_active($req_fid) ) // show requested filter
                $this->toggle_active($req_fid);
          }
       }
@@ -547,7 +547,7 @@ class SearchFilter
    {
       // note: following check is needed, otherwise the call creates entries :(
       // note: MUST NOT use '?'-operator, or else copy is returned instead of ref :(
-      if( isset($this->Filters[$id]) ) {
+      if ( isset($this->Filters[$id]) ) {
          return $this->Filters[$id];
       } else {
          $nullref = NULL;
@@ -559,7 +559,7 @@ class SearchFilter
    public function get_filter_value( $id )
    {
       $filter = $this->get_filter($id);
-      if( is_null($filter) )
+      if ( is_null($filter) )
          error('invalid_args', "SearchFilter.get_filter_value($id)");
       return $filter->get_value();
    }
@@ -573,43 +573,43 @@ class SearchFilter
    public function get_filter_keys( $choice = GETFILTER_ALL )
    {
       $arr = array();
-      if( $choice == GETFILTER_NONE )
+      if ( $choice == GETFILTER_NONE )
          return $arr;
 
-      foreach( $this->Filters as $id => $filter )
+      foreach ( $this->Filters as $id => $filter )
       {
          // in order of mostly used in code
-         if( $choice == GETFILTER_ALL )
+         if ( $choice == GETFILTER_ALL )
             ; // all
-         elseif( $choice == GETFILTER_ACTIVE )
+         elseif ( $choice == GETFILTER_ACTIVE )
          {
-            if( !$filter->is_active() ) continue; // only active
+            if ( !$filter->is_active() ) continue; // only active
          }
-         elseif( $choice == GETFILTER_INACTIVE )
+         elseif ( $choice == GETFILTER_INACTIVE )
          {
-            if( $filter->is_active() ) continue; // only inactive
+            if ( $filter->is_active() ) continue; // only inactive
          }
-         elseif( $choice == GETFILTER_VISIBLE )
+         elseif ( $choice == GETFILTER_VISIBLE )
          {
-            if( !$filter->is_visible() ) continue; // only visible
+            if ( !$filter->is_visible() ) continue; // only visible
          }
-         elseif( $choice == GETFILTER_INVISIBLE )
+         elseif ( $choice == GETFILTER_INVISIBLE )
          {
-            if( $filter->is_visible() ) continue; // only invisbile
+            if ( $filter->is_visible() ) continue; // only invisbile
          }
-         elseif( $choice == GETFILTER_USED )
+         elseif ( $choice == GETFILTER_USED )
          {
-            if( !$filter->is_active() || $filter->is_empty() )
+            if ( !$filter->is_active() || $filter->is_empty() )
                continue; // only active and with non-empty value
          }
-         elseif( $choice == GETFILTER_ERROR )
+         elseif ( $choice == GETFILTER_ERROR )
          {
-            if( !$filter->is_active() || $filter->is_empty() || !$filter->has_error() )
+            if ( !$filter->is_active() || $filter->is_empty() || !$filter->has_error() )
                continue; // only active and with non-empty value and with error-message
          }
-         elseif( $choice == GETFILTER_WARNING )
+         elseif ( $choice == GETFILTER_WARNING )
          {
-            if( !$filter->is_active() || $filter->is_empty() || !$filter->has_warn() )
+            if ( !$filter->is_active() || $filter->is_empty() || !$filter->has_warn() )
                continue; // only active and with non-empty value and with warng-message
          } // else: all
 
@@ -644,10 +644,10 @@ class SearchFilter
    {
       $arr = $this->get_filter_keys(GETFILTER_ACTIVE);
       $arrhash = array();
-      foreach( $arr as $id )
+      foreach ( $arr as $id )
       {
          $filter = $this->get_filter($id);
-         foreach( $filter->get_element_names() as $name )
+         foreach ( $filter->get_element_names() as $name )
             $arrhash[]= "$name=". $filter->get_value($name);
       }
       $hashstr = implode( ',', $arrhash );
@@ -668,7 +668,7 @@ class SearchFilter
          . "is_reset=[{$this->is_reset}], ";
 
       $nout = array();
-      foreach( $this->FilterFormNames as $fname => $fid )
+      foreach ( $this->FilterFormNames as $fname => $fid )
          $nout[] = "$fname=$fid";
       $out .= 'FilterFormNames=[' . implode(' ', $nout) . '], ';
 
@@ -677,10 +677,10 @@ class SearchFilter
       $cnt = 0;
       $arr_filters = $this->Filters;
       ksort($arr_filters, SORT_NUMERIC);
-      foreach( $arr_filters as $fid => $filter )
+      foreach ( $arr_filters as $fid => $filter )
       {
          $cnt++;
-         if( $short )
+         if ( $short )
             $out .= sprintf( "%s. Filter.%s: type=%s, name=%s, vis=%s, act=%s, value=[%s]\n",
                $cnt, $filter->id, $filter->type, $filter->name, $filter->visible, $filter->active, $filter->value );
          else
@@ -705,42 +705,42 @@ class SearchFilter
       $this->handle_conditional_actions( $choice );
 
       $arr_id = $this->get_filter_keys( $choice );
-      foreach( $arr_id as $id )
+      foreach ( $arr_id as $id )
       {
          $filter = $this->get_filter($id);
-         if( $filter->get_config(FC_SQL_SKIP) ) // skip
+         if ( $filter->get_config(FC_SQL_SKIP) ) // skip
             continue;
 
          $fquery = $filter->get_query(); // use copy
-         if( is_null($fquery) ) // no query
+         if ( is_null($fquery) ) // no query
             continue;
 
          $merge_qsql = $filter->get_config(FC_QUERYSQL); // merge query
-         if( $merge_qsql instanceof QuerySQL )
+         if ( $merge_qsql instanceof QuerySQL )
             $fquery->merge( $merge_qsql );
 
          $groupname = $filter->get_config(FC_GROUP_SQL_OR);
-         if( $groupname == '' )
+         if ( $groupname == '' )
          { // collect queries without OR-grouping
             $arr_query[]= $fquery;
          }
          else
          { // merge queries to-be-grouped by OR'ing them together
-            if( !isset($arr_groupquery[$groupname]) )
+            if ( !isset($arr_groupquery[$groupname]) )
                $arr_groupquery[$groupname] = new QuerySQL();
             $arr_groupquery[$groupname] = $arr_groupquery[$groupname]->merge_or($fquery);
          }
       }
 
       // handling OR'ed queries
-      foreach( $arr_groupquery as $group => $query )
+      foreach ( $arr_groupquery as $group => $query )
          $arr_query[]= $query;
 
       // AND'ing all queries
       $result_query = new QuerySQL();
-      if( count($arr_query) > 0 )
+      if ( count($arr_query) > 0 )
       {
-         foreach( $arr_query as $query )
+         foreach ( $arr_query as $query )
             $result_query->merge($query);
       }
       return $result_query;
@@ -758,36 +758,36 @@ class SearchFilter
    private function handle_conditional_actions()
    {
       $arr_id = $this->get_filter_keys(GETFILTER_VISIBLE);
-      foreach( $arr_id as $id )
+      foreach ( $arr_id as $id )
       {
          $filter = $this->get_filter($id);
          $if_arr = $filter->get_config(FC_IF);
-         if( !is_array($if_arr) )
+         if ( !is_array($if_arr) )
             continue;
 
          $cond = array_shift($if_arr);
          $eval_cond = $this->eval_condition( $cond );
-         if( is_null($eval_cond) )
+         if ( is_null($eval_cond) )
             return false; // error
-         if( !$eval_cond )
+         if ( !$eval_cond )
             continue;
 
          $arr_post_act = array(); // fid -> array of post-action
-         foreach( $if_arr as $action )
+         foreach ( $if_arr as $action )
          {
             $r = $this->perform_conditional_action( $id, $action );
-            if( is_array($r) )
+            if ( is_array($r) )
                $arr_post_act[$r[1]][] = $r[0];
          }
 
          // do post-actions
-         foreach( $arr_post_act as $fid => $arr_fid_act )
+         foreach ( $arr_post_act as $fid => $arr_fid_act )
          {
             $arr = array_unique( $arr_fid_act );
             $f =& $this->get_filter($fid);
-            foreach( $arr as $act )
+            foreach ( $arr as $act )
             {
-               if( $act === 'BQ' )
+               if ( $act === 'BQ' )
                   $f->build_query();
                else
                   error('invalid_filter', "SearchFilter.handle_conditional_actions.unknown_post_action($fid,$act)");
@@ -817,12 +817,12 @@ class SearchFilter
    {
       $aq = array(); // query-array: aq[fid] = !has_err and has_query
       $av = array(); // value-array: av[fid] = !has_err and get_val
-      if( preg_match_all( "/\b[QV](\d+)/", $condition, $out, PREG_PATTERN_ORDER) )
+      if ( preg_match_all( "/\b[QV](\d+)/", $condition, $out, PREG_PATTERN_ORDER) )
       {
-         foreach( $out[1] as $fid )
+         foreach ( $out[1] as $fid )
          {
             $f = $this->get_filter($fid);
-            if( $f->has_error() )
+            if ( $f->has_error() )
                return NULL;
 
             $aq[$fid] = !is_null($f->get_query());
@@ -859,34 +859,34 @@ class SearchFilter
     */
    private function perform_conditional_action( $id, $action )
    {
-      if( preg_match( "/^SET_VAL\s+F(\d+)?,N(\d+)?,(.*?)\s*$/i", $action, $out ) ) // out: f-num, name-num, val
+      if ( preg_match( "/^SET_VAL\s+F(\d+)?,N(\d+)?,(.*?)\s*$/i", $action, $out ) ) // out: f-num, name-num, val
       {
          // handle SET_VAL
          $fid = (is_numeric($out[1])) ? $out[1] : $id;
          $f =& $this->get_filter($fid);
-         if( is_null($f) )
+         if ( is_null($f) )
             error('invalid_filter', "SearchFilter.perform_conditional_action.unknown_filter($fid,$action)");
          $nid = (is_numeric($out[2])) ? $out[2] : 1;
          $elems = $f->get_element_names();
-         if( $nid < 1 || $nid > count($elems) )
+         if ( $nid < 1 || $nid > count($elems) )
             error('invalid_filter', "SearchFilter.perform_conditional_action.unknown_name_num($nid,$action)");
          $name = $elems[$nid - 1];
 
          $f->parse_value( $name, $out[3] ); // ignore all parsing-errors
-         if( count($elems) > 1 && !$f->has_error() ) // for multi-element-filters
+         if ( count($elems) > 1 && !$f->has_error() ) // for multi-element-filters
             return array( 'BQ', $fid );
          else
             return true;
       }
 
-      if( preg_match( "/^SET_(ACT|VIS)\s+F(\d+)?,(0|1)\s*$/i", $action, $out ) ) // out: ACT|VIS, f-num, val
+      if ( preg_match( "/^SET_(ACT|VIS)\s+F(\d+)?,(0|1)\s*$/i", $action, $out ) ) // out: ACT|VIS, f-num, val
       {
          // handle SET_ACT + SET_VIS
          $fid = (is_numeric($out[2])) ? $out[2] : $id;
          $f =& $this->get_filter($fid);
-         if( is_null($f) )
+         if ( is_null($f) )
             error('invalid_filter', "SearchFilter.perform_conditional_action.unknown_filter2($fid,$action)");
-         if( $out[1] === 'ACT' )
+         if ( $out[1] === 'ACT' )
             $f->set_active((bool)$out[3]);
          else
             $f->set_visible((bool)$out[3]);
@@ -906,19 +906,19 @@ class SearchFilter
     */
    public function has_query( $choice=null, $arr_exclude=null )
    {
-      if( is_null($choice) || ( is_array($choice) && count($choice) == 0 ) )
+      if ( is_null($choice) || ( is_array($choice) && count($choice) == 0 ) )
          $choice = GETFILTER_ACTIVE;
-      if( is_array($choice) )
+      if ( is_array($choice) )
          $arr_id = $choice;
       else
          $arr_id = $this->get_filter_keys( $choice );
 
-      foreach( $arr_id as $id )
+      foreach ( $arr_id as $id )
       {
          $filter = $this->get_filter($id);
-         if( is_array($arr_exclude) && in_array($id, $arr_exclude) )
+         if ( is_array($arr_exclude) && in_array($id, $arr_exclude) )
             continue;
-         if( isset($filter) && !is_null($filter->get_query()) )
+         if ( isset($filter) && !is_null($filter->get_query()) )
             return true;
       }
       return false;
@@ -940,7 +940,7 @@ class SearchFilter
    {
       $bitset = new BitSet();
       $arr = $this->get_filter_keys(GETFILTER_ACTIVE);
-      foreach( $arr as $id )
+      foreach ( $arr as $id )
          $bitset->set_bit($id);
       return $bitset;
    }
@@ -952,7 +952,7 @@ class SearchFilter
    private function toggle_active( $id )
    {
       $filter =& $this->get_filter($id);
-      if( isset($filter) )
+      if ( isset($filter) )
          $filter->toggle_active();
    }
 
@@ -960,7 +960,7 @@ class SearchFilter
    public function set_active( $id, $is_active )
    {
       $filter =& $this->get_filter($id);
-      if( isset($filter) )
+      if ( isset($filter) )
          $filter->set_active($is_active);
    }
 
@@ -968,7 +968,7 @@ class SearchFilter
    public function setall_active( $is_active )
    {
       $arr = $this->get_filter_keys(GETFILTER_ALL);
-      foreach( $arr as $id )
+      foreach ( $arr as $id )
          $this->set_active($id, $is_active);
    }
 
@@ -979,10 +979,10 @@ class SearchFilter
     */
    public function reset_filter( $id )
    {
-      if( !@$this->RequiredFilters[$id] )
+      if ( !@$this->RequiredFilters[$id] )
       {
          $filter =& $this->get_filter($id);
-         if( isset($filter) )
+         if ( isset($filter) )
             $filter->reset();
       }
    }
@@ -991,7 +991,7 @@ class SearchFilter
    public function reset_filters( $choice )
    {
       $arr = $this->get_filter_keys($choice);
-      foreach( $arr as $id )
+      foreach ( $arr as $id )
          $this->reset_filter($id);
    }
 
@@ -999,7 +999,7 @@ class SearchFilter
    public function set_visible( $id, $is_visible )
    {
       $filter =& $this->get_filter($id);
-      if( isset($filter) )
+      if ( isset($filter) )
          $filter->set_visible($is_visible);
    }
 
@@ -1017,14 +1017,14 @@ class SearchFilter
 
       $arr_keys = $this->get_filter_keys($choice);
       $arr_parts = array(); // 'key' => val, key with(!) Prefix (except filters with FC_FNAME)
-      foreach( $arr_keys as $id )
+      foreach ( $arr_keys as $id )
       {
-         if( is_array($arr_exclude) && isset($arr_exclude[$id]) )
+         if ( is_array($arr_exclude) && isset($arr_exclude[$id]) )
             continue; // exclude id
 
          $filter = $this->get_filter($id);
          $qstr = $filter->get_url_parts( $this->Prefix, $arr_parts );
-         if( $qstr != '' )
+         if ( $qstr != '' )
             $arr_url[]= $qstr; // qstr may contain >1 URL-parts
       }
 
@@ -1034,10 +1034,10 @@ class SearchFilter
       $arr[FNAME_INIT] = '1'; // already initialized
       $arr[FNAME_ACTIVE_SET] = $bitset_active->get_hex_format();
       $arr[FNAME_HASHCODE] = $this->hashcode(); // to check, if filter-values have changed
-      foreach( $arr as $key => $value )
+      foreach ( $arr as $key => $value )
       {
          // filters need ''<>0, so don't use empty(val)
-         if( (string)$value == '' || !is_string($key) || empty($key) )
+         if ( (string)$value == '' || !is_string($key) || empty($key) )
             continue;
          $pkey = $this->Prefix . $key; // no prefix PFX_FILTER to avoid clashes with non-numeric keys
          $pval = urlencode($value);
@@ -1047,9 +1047,9 @@ class SearchFilter
       }
 
       // return arr-out per call-by-ref
-      if( is_array($arr_out) )
+      if ( is_array($arr_out) )
       {
-         foreach( $arr_parts as $key => $value )
+         foreach ( $arr_parts as $key => $value )
             $arr_out[$key] = $value;
       }
 
@@ -1070,7 +1070,7 @@ class SearchFilter
    {
       $arr_parts = array();
       $this->get_url_parts( $arr_parts, $choice, $arr_exclude );
-      if( is_array($hiddens) )
+      if ( is_array($hiddens) )
          $hiddens = array_merge( $hiddens, $arr_parts);
       else
          $hiddens = $arr_parts;
@@ -1098,7 +1098,7 @@ class SearchFilter
          FFORM_SEARCH_ACTION,
          T_('Search#filter'), array( 'accesskey' => $this->accesskeys[0] ));
 
-      if( is_null($this->ProfileHandler) )
+      if ( is_null($this->ProfileHandler) )
       {
          // normal reset-element
          $reset_elem = $form->print_insert_submit_buttonx(
@@ -1138,7 +1138,7 @@ class SearchFilter
    public function get_filter_errormsg( $id, $prefix = '', $suffix = '', $with_syntax = true )
    {
       $filter = $this->get_filter($id);
-      if( !isset($filter) || !$filter->has_error() )
+      if ( !isset($filter) || !$filter->has_error() )
          return '';
 
       $syntax = ( $with_syntax ) ? "; " . $filter->get_syntax_description() : '';
@@ -1150,10 +1150,10 @@ class SearchFilter
    {
       $arr_keys = $this->get_filter_keys(GETFILTER_ERROR);
       $arr_errors = array();
-      foreach( $arr_keys as $id )
+      foreach ( $arr_keys as $id )
       {
          $filter = $this->get_filter($id);
-         if( isset($filter) && $filter->has_error() )
+         if ( isset($filter) && $filter->has_error() )
             $arr_errors[$id] = $filter->errormsg();
       }
       return $arr_errors;
@@ -1272,9 +1272,9 @@ abstract class Filter
    /*! \brief Add config-array to local config (should be used only internal). */
    protected function add_config( $arrconf = null )
    {
-      if( is_array($arrconf) )
+      if ( is_array($arrconf) )
       {
-         foreach( $arrconf as $key => $value )
+         foreach ( $arrconf as $key => $value )
             $this->config[$key] = $value;
       }
    }
@@ -1291,9 +1291,9 @@ abstract class Filter
     */
    public function get_config( $key, $defvalue = null )
    {
-      if( isset($this->config[$key]) )
+      if ( isset($this->config[$key]) )
          return $this->config[$key];
-      elseif( !is_null($defvalue) )
+      elseif ( !is_null($defvalue) )
          return $defvalue;
       else
          return '';
@@ -1307,7 +1307,7 @@ abstract class Filter
     */
    public function get_rx_terms()
    {
-      if( $this->is_active() )
+      if ( $this->is_active() )
          return $this->match_terms;
       else
          return array();
@@ -1317,7 +1317,7 @@ abstract class Filter
    protected function create_TokenizerConfig()
    {
       $qtype = $this->get_config(FC_QUOTETYPE);
-      if( $qtype == '' )
+      if ( $qtype == '' )
          $qtype = null;
       $tokconf = createTokenizerConfig( $qtype ); // defined in filter_functions.php
       return $tokconf;
@@ -1343,13 +1343,13 @@ abstract class Filter
     */
    protected function build_base_query( $obj, $is_clause, $use_tmpl = true )
    {
-      if( is_array($obj) || empty($obj) )
+      if ( is_array($obj) || empty($obj) )
          return NULL;
 
-      if( $obj instanceof QuerySQL )
+      if ( $obj instanceof QuerySQL )
       {
          $query = $obj;
-         if( $use_tmpl && $query->has_part(SQLP_FNAMES) )
+         if ( $use_tmpl && $query->has_part(SQLP_FNAMES) )
          {
             $query->clear_parts(SQLP_WHERETMPL); // overwrite template
             $query->add_part( SQLP_WHERETMPL,
@@ -1360,13 +1360,13 @@ abstract class Filter
 
       // obj (dbfield) is string (fieldnames or sql-clause or sql-template)
       $query = new QuerySQL();
-      if( !$use_tmpl )
+      if ( !$use_tmpl )
          $query->add_part( SQLP_FNAMES, $obj );
-      elseif( $this->get_config(FC_SQL_TEMPLATE) )
+      elseif ( $this->get_config(FC_SQL_TEMPLATE) )
          $query->add_part( SQLP_WHERETMPL, $obj ); // obj is sql-template
       else
       {
-         if( $is_clause )
+         if ( $is_clause )
          {
             $parttype = ($this->get_config(FC_ADD_HAVING)) ? SQLP_HAVING : SQLP_WHERE;
             $query->add_part( $parttype, $obj ); // obj is SQL-clause
@@ -1389,17 +1389,17 @@ abstract class Filter
     */
    protected function check_forbid_sql_template( $max_fnames = -1 )
    {
-      if( $this->get_config(FC_SQL_TEMPLATE) )
+      if ( $this->get_config(FC_SQL_TEMPLATE) )
          error('invalid_filter', "Filter.check_forbid_sql_template.forbid_FC_SQL_TEMPLATE({$this->id})");
-      if( $this->dbfield instanceof QuerySQL )
+      if ( $this->dbfield instanceof QuerySQL )
       {
-         if( $this->dbfield->has_part(SQLP_WHERETMPL) )
+         if ( $this->dbfield->has_part(SQLP_WHERETMPL) )
             error('invalid_filter', "Filter.check_forbid_sql_template.QuerySQL_no_SQLP_WHERETMPL({$this->id})");
 
          $cnt_fnames = count($this->dbfield->get_parts(SQLP_FNAMES));
-         if( $max_fnames >= 0 && $cnt_fnames > $max_fnames )
+         if ( $max_fnames >= 0 && $cnt_fnames > $max_fnames )
             error('invalid_filter', "Filter.check_forbid_sql_template.QuerySQL.max_num.SQLP_FNAMES({$this->id},$max_fnames)");
-         if( $cnt_fnames < 1 )
+         if ( $cnt_fnames < 1 )
             error('invalid_filter', "Filter.check_forbid_sql_template.QuerySQL.min1.SQLP_FNAMES({$this->id})");
       }
    }//check_forbid_sql_template
@@ -1407,7 +1407,7 @@ abstract class Filter
    /*! \brief Adds additional non-empty element-name (without prefix); used for multi-element-filters. */
    protected function add_element_name( $name )
    {
-      if( $name != '' )
+      if ( $name != '' )
          $this->elem_names[]= $name;
    }
 
@@ -1433,12 +1433,12 @@ abstract class Filter
    protected function read_defaults( $conf, $arr_is_map = true )
    {
       $this->defvalues = array();
-      if( !is_array($conf) && (string)$conf == '' )
+      if ( !is_array($conf) && (string)$conf == '' )
          return;
 
-      if( $arr_is_map && is_array($conf) )
+      if ( $arr_is_map && is_array($conf) )
       {
-         foreach( $conf as $k => $val )
+         foreach ( $conf as $k => $val )
             $this->defvalues["{$this->name}$k"] = $val;
       }
       else
@@ -1448,7 +1448,7 @@ abstract class Filter
    /*! \brief Returns string|array default-value for specified filter-element-name; empty if none defined. */
    protected function get_default( $name )
    {
-      if( isset($this->defvalues[$name]) )
+      if ( isset($this->defvalues[$name]) )
          return $this->defvalues[$name];
       else
          return '';
@@ -1457,7 +1457,7 @@ abstract class Filter
    /*! \brief Returns default-value for filter-element-name if given value is null */
    protected function handle_default( $name, $val )
    {
-      if( is_null($val) )
+      if ( is_null($val) )
          $result = $this->get_default( $name );
       else
          $result = $val;
@@ -1489,7 +1489,7 @@ abstract class Filter
    {
       // reset all elements to default-value
       $this->values = array();
-      foreach( $this->get_element_names() as $name )
+      foreach ( $this->get_element_names() as $name )
          $this->init_parse( null, $name );
    }
 
@@ -1532,7 +1532,7 @@ abstract class Filter
     * \note name may be prefixed with PFX_FILTER if no FC_FNAME set
     */
    public function get_value( $name = '' ) {
-      if( $name == '' || $name === $this->name || $name === $this->id )
+      if ( $name == '' || $name === $this->name || $name === $this->id )
          return $this->value;
       else
          return @$this->values[$name];
@@ -1548,7 +1548,7 @@ abstract class Filter
    public function is_static()
    {
       // filter-config FC_HIDE overrules global static-force
-      if( FILTER_CONF_FORCE_STATIC )
+      if ( FILTER_CONF_FORCE_STATIC )
          return !( (bool) @$this->config[FC_HIDE] );
       else
          return (bool) @$this->config[FC_STATIC];
@@ -1569,7 +1569,7 @@ abstract class Filter
    /*! \brief Toggles active-state of filter; active always set to true for static-filter. */
    public function toggle_active()
    {
-      if( $this->is_static() )
+      if ( $this->is_static() )
          $this->active = true;
       else
          $this->active = !$this->active;
@@ -1590,14 +1590,14 @@ abstract class Filter
    /*! \brief Returns syntax-description for filter (maybe empty for some filters). */
    public function get_syntax_description()
    {
-      if( isset($this->syntax_descr) && !is_null($this->syntax_descr) )
+      if ( isset($this->syntax_descr) && !is_null($this->syntax_descr) )
       {
          $addinfo = $this->get_syntax_hint(FCV_SYNHINT_ADDINFO, " (%s)" );
-         if( $this->syntax_descr == '' && $addinfo == '' )
+         if ( $this->syntax_descr == '' && $addinfo == '' )
             return '';
 
          $syntax = T_('Syntax#filter') . $this->get_syntax_help() . $addinfo;
-         if( $this->syntax_descr != '' )
+         if ( $this->syntax_descr != '' )
             $syntax .= ': ' . $this->syntax_descr;
          return $syntax;
       }
@@ -1609,7 +1609,7 @@ abstract class Filter
    public function get_syntax_hint( $confkey, $format )
    {
       $arr = $this->get_config(FC_SYNTAX_HINT);
-      if( is_array($arr) )
+      if ( is_array($arr) )
          return sprintf( $format, $arr[$confkey] );
       else
          return '';
@@ -1619,9 +1619,9 @@ abstract class Filter
    public function get_syntax_help()
    {
       $help = $this->get_config(FC_SYNTAX_HELP);
-      if( $help == '' )
+      if ( $help == '' )
          $help = $this->syntax_help;
-      if( $help != '' )
+      if ( $help != '' )
          return "[$help]";
       else
          return '';
@@ -1634,9 +1634,9 @@ abstract class Filter
     */
    public function get_query( $force = false )
    {
-      if( $this->errormsg )
+      if ( $this->errormsg )
          return NULL; // invalid input
-      elseif( $force || $this->is_visible() )
+      elseif ( $force || $this->is_visible() )
          return $this->query;
       else
          return NULL;
@@ -1654,19 +1654,19 @@ abstract class Filter
    {
       $arr_url = array();
 
-      foreach( $this->get_element_names() as $name )
+      foreach ( $this->get_element_names() as $name )
       {
          $val = $this->get_value( $name );
-         if( (string)$val != '' ) // val can be 0(!), filters need ''<>0, so don't use empty(val)
+         if ( (string)$val != '' ) // val can be 0(!), filters need ''<>0, so don't use empty(val)
          {
             $fname = ( $this->get_config(FC_FNAME) || !$this->use_prefix_fieldname($name) ) ? $name : $prefix . $name;
-            if( is_array($arr_out) )
+            if ( is_array($arr_out) )
                $arr_out[$fname] = $val;
 
-            if( is_array($val) )
+            if ( is_array($val) )
             {
                $akey = $fname . '%5b%5d='; //encoded []
-               foreach( $val as $v )
+               foreach ( $val as $v )
                   $arr_url[]= $akey . urlencode($v);
             }
             else
@@ -1724,7 +1724,7 @@ abstract class Filter
     */
    protected function init_parse( $val, $name = '' )
    {
-      if( $name == '' || $name === $this->name || $name == $this->id )
+      if ( $name == '' || $name === $this->name || $name == $this->id )
       {
          $this->value = $val;
          $this->errormsg = '';
@@ -1737,7 +1737,7 @@ abstract class Filter
          $this->query = NULL;
          $this->match_terms = array();
       }
-      elseif( $name != '' ) // multi-element-filter
+      elseif ( $name != '' ) // multi-element-filter
       {
          $this->values[$name] = $val;
       }
@@ -1764,7 +1764,7 @@ abstract class Filter
    /*! \brief Returns true, if specified flag in local p_flags. */
    protected function is_flag_set( $pflag )
    {
-      if( $this->errormsg )
+      if ( $this->errormsg )
          return '';
       else
          return (bool)( $this->p_flags & $pflag );
@@ -1779,7 +1779,7 @@ abstract class Filter
       $this->init_parse($val, $name);
 
       $np = new NumericParser( $val, $tok_config, $flags );
-      if( $np->errormsg() )
+      if ( $np->errormsg() )
       {
          $this->errormsg = $np->errormsg();
          return false;
@@ -1797,14 +1797,14 @@ abstract class Filter
       $this->init_parse($val, $name);
 
       $tp = new TextParser( $val, $tok_config, $flags );
-      if( $tp->errormsg() )
+      if ( $tp->errormsg() )
       {
          $this->errormsg = $tp->errormsg();
          return false;
       }
       $this->copy_parsed($tp);
 
-      if( count($tp->p_terms) > 0 )
+      if ( count($tp->p_terms) > 0 )
          $this->match_terms = array_merge( $this->match_terms, $tp->p_terms );
       return true;
    }//parse_text
@@ -1817,7 +1817,7 @@ abstract class Filter
     */
    protected function default_sql_template( $tmplfield = null)
    {
-      if( is_null($tmplfield) )
+      if ( is_null($tmplfield) )
          $tmplfield = $this->dbfield;
       return ( $this->get_config(FC_SQL_TEMPLATE) ) ? $tmplfield : "$tmplfield #OP #VAL";
    }
@@ -1831,33 +1831,33 @@ abstract class Filter
     */
    protected function build_query_numeric( $query = null, $num_factor = 1 )
    {
-      if( $this->errormsg )
+      if ( $this->errormsg )
          return NULL;
 
-      if( is_null($query) )
+      if ( is_null($query) )
          $query = $this->build_base_query($this->dbfield, false);
       $sql_templ = $query->get_part(SQLP_WHERETMPL);
       $parttype = ($this->get_config(FC_ADD_HAVING)) ? SQLP_HAVING : SQLP_WHERE;
 
       // note: use quotes (like 'num') as SQL-values to avoid empty-value-error
-      if( (string)$this->p_value != '' ) // exact search
+      if ( (string)$this->p_value != '' ) // exact search
          $query->add_part( $parttype,
             fill_sql_template( $sql_templ, '=', "'" . ( $num_factor * $this->p_value ) ."'" ) );
       else
       { // range search
          $arr = array(); // start/end
-         if( (string)$this->p_start != '' )
+         if ( (string)$this->p_start != '' )
          {
             $op = ($this->is_flag_set(PFLAG_EXCL_START) ? '>' : '>=');
             $arr[]= fill_sql_template( $sql_templ, $op, "'" . ( $num_factor * $this->p_start ) . "'" );
          }
-         if( (string)$this->p_end != '' )
+         if ( (string)$this->p_end != '' )
          {
             $op = ($this->is_flag_set(PFLAG_EXCL_END) ? '<' : '<=');
             $arr[]= fill_sql_template( $sql_templ, $op, "'" . ( $num_factor * $this->p_end ) . "'" );
          }
 
-         if( count($arr) > 0 )
+         if ( count($arr) > 0 )
             $query->add_part( $parttype, implode(" AND ", $arr) );
          else
             $query = NULL;
@@ -1877,17 +1877,17 @@ abstract class Filter
     */
    protected function build_query_text( $allow_wildcard = true )
    {
-      if( $this->errormsg )
+      if ( $this->errormsg )
          return NULL;
 
       $query = $this->build_base_query($this->dbfield, false);
       $sql_templ = $query->get_part(SQLP_WHERETMPL);
       $parttype = ($this->get_config(FC_ADD_HAVING)) ? SQLP_HAVING : SQLP_WHERE;
 
-      if( (string)$this->p_value != '' )
+      if ( (string)$this->p_value != '' )
       { // exact or wildcard
          $v = mysql_addslashes($this->p_value);
-         if( $allow_wildcard && $this->is_flag_set(PFLAG_WILDCARD) ) // SQL-wildcard search
+         if ( $allow_wildcard && $this->is_flag_set(PFLAG_WILDCARD) ) // SQL-wildcard search
             $query->add_part( $parttype, fill_sql_template( $sql_templ, 'LIKE', "'$v'" ) );
          else // exact search
             $query->add_part( $parttype, fill_sql_template( $sql_templ, '=', "'$v'" ) );
@@ -1895,11 +1895,11 @@ abstract class Filter
       else
       { // range-search
          $arr = array();
-         if( (string)$this->p_start != '' )
+         if ( (string)$this->p_start != '' )
             $arr[]= fill_sql_template( $sql_templ, '>=', "'" . mysql_addslashes($this->p_start) . "'" );
-         if( (string)$this->p_end != '' )
+         if ( (string)$this->p_end != '' )
             $arr[]= fill_sql_template( $sql_templ, '<', "'" . mysql_addslashes($this->p_end) . "'" );
-         if( count($arr) > 0 )
+         if ( count($arr) > 0 )
             $query->add_part( $parttype, implode(" AND ", $arr) );
          else
             $query = NULL;
@@ -1921,12 +1921,12 @@ abstract class Filter
       $elem = "<input";
       $elem .= " name=\"{$fname}\"";
       $elem .= " type=\"text\"";
-      if( $maxlen > 0)
+      if ( $maxlen > 0)
          $elem .= " maxlength=\"{$maxlen}\"";
-      if( $size )
+      if ( $size )
          $elem .= " size=\"{$size}\"";
       $elem .= " value=" . attb_quote($value);
-      if( $title != '' )
+      if ( $title != '' )
          $elem .= " title=" . attb_quote($title);
       $elem .= ">";
       return $elem;
@@ -1955,7 +1955,7 @@ abstract class Filter
    protected function build_generic_selectbox_elem( $prefix, $name, $value, $index_start_keys, $values = null, $size = 1 )
    {
       $fname = ( $this->get_config(FC_FNAME) || !$this->use_prefix_fieldname($name) ) ? $name : $prefix . $name;
-      if( !is_numeric($size) )
+      if ( !is_numeric($size) )
          $size = 1;
       $is_multi = $this->get_config(FC_MULTIPLE);
 
@@ -1963,24 +1963,24 @@ abstract class Filter
       $elem .= ( $is_multi ) ? '[]" multiple' : '"';
       $elem .= " size=\"$size\">";
 
-      if( is_array($index_start_keys) ) // key-value-array (not multi)
+      if ( is_array($index_start_keys) ) // key-value-array (not multi)
       {
-         foreach( $index_start_keys as $optval => $descr )
+         foreach ( $index_start_keys as $optval => $descr )
          {
             $selected = ($value == $optval) ? ' selected' : '';
             $descr = basic_safe($descr); //basic_safe() because inside <option></option>
             $elem .= "\n  <option value=\"$optval\"$selected>$descr</option>";
          }
       }
-      elseif( is_numeric($index_start_keys) )
+      elseif ( is_numeric($index_start_keys) )
       {
-         if( $is_multi && !is_array($value) )
+         if ( $is_multi && !is_array($value) )
             $value = array();
          $cnt_values = count($values);
-         for( $i=0; $i < $cnt_values; $i++ )
+         for ( $i=0; $i < $cnt_values; $i++ )
          {
             $optval = $index_start_keys + $i;
-            if( $is_multi )
+            if ( $is_multi )
                $selected = (in_array($optval, $value)) ? ' selected' : ''; # optval(idx) found in val-arr
             else
                $selected = ($value == $optval) ? ' selected' : '';
@@ -2002,7 +2002,7 @@ abstract class Filter
    protected function build_selectbox_elem( $prefix, $index_start_keys, $values = null )
    {
       $size = @$this->config[FC_SIZE];
-      if( !is_numeric($size) )
+      if ( !is_numeric($size) )
          $size = 1;
 
       return $this->build_generic_selectbox_elem(
@@ -2019,9 +2019,9 @@ abstract class Filter
       $fname = ( $this->get_config(FC_FNAME) || !$this->use_prefix_fieldname($name) ) ? $name : $prefix . $name;
 
       $elem = "<input type=\"checkbox\" name=\"$fname\" value=\"1\"";
-      if( !empty($title) )
+      if ( !empty($title) )
          $elem .= " title=" . attb_quote($title);
-      if( $value )
+      if ( $value )
          $elem .= " checked";
       $elem .= ">";
       $elem .= $text;
@@ -2085,7 +2085,7 @@ class FilterNumeric extends Filter
 
       $factor = $this->num_factor = $this->get_config(FC_NUM_FACTOR, 1);
 
-      if( $this->get_config(FC_NO_RANGE) )
+      if ( $this->get_config(FC_NO_RANGE) )
       {
          $this->parser_flags |= TEXTPARSER_FORBID_RANGE;
          $this->syntax_descr = '314';
@@ -2101,7 +2101,7 @@ class FilterNumeric extends Filter
    public function parse_value( $name, $val )
    {
       $val = $this->handle_default( $name, $val );
-      if( !$this->parse_numeric( $name, $val, $this->tok_config, $this->parser_flags ) )
+      if ( !$this->parse_numeric( $name, $val, $this->tok_config, $this->parser_flags ) )
          return false;
 
       $this->query = $this->build_query_numeric( null, $this->num_factor );
@@ -2165,7 +2165,7 @@ class FilterText extends Filter
       $this->syntax_help = T_('TEXT#filterhelp');
 
       $arr_syntax = array();
-      if( $this->get_config(FC_NO_RANGE) || $this->get_config(FC_SUBSTRING) )
+      if ( $this->get_config(FC_NO_RANGE) || $this->get_config(FC_SUBSTRING) )
       { // substring forcing no-range
          $arr_syntax[]= 'foo';
          $this->parser_flags |= TEXTPARSER_FORBID_RANGE;
@@ -2177,13 +2177,13 @@ class FilterText extends Filter
       }
 
       $allow_wild = !$this->get_config(FC_NO_WILD);
-      if( $allow_wild )
+      if ( $allow_wild )
          $arr_syntax[]= 'fa*z*';
       else
          $this->parser_flags |= TEXTPARSER_FORBID_WILD;
 
       $minchars = (int) $this->get_config(FC_START_WILD);
-      if( $allow_wild && $minchars )
+      if ( $allow_wild && $minchars )
       {
          $arr_syntax[]= "*goo" . ($minchars > 1 ? " ($minchars)" : '');
          $this->parser_flags |= TEXTPARSER_ALLOW_START_WILD;
@@ -2191,9 +2191,9 @@ class FilterText extends Filter
       }
 
       $this->syntax_descr = implode(', ', $arr_syntax);
-      if( $this->get_config(FC_SUBSTRING) )
+      if ( $this->get_config(FC_SUBSTRING) )
       {
-         if( !$minchars )
+         if ( !$minchars )
             error('invalid_filter', "FilterText.construct.bad_config.FC_SUBSTRING_miss_FC_START_WILD({$this->id},$name)");
          $this->parser_flags |= TEXTPARSER_IMPLICIT_WILD;
          $this->syntax_descr = '['. T_('substring#filter') . '] ' . $this->syntax_descr;
@@ -2204,7 +2204,7 @@ class FilterText extends Filter
    public function parse_value( $name, $val )
    {
       $val = $this->handle_default( $name, $val );
-      if( !$this->parse_text( $name, $val, $this->tok_config, $this->parser_flags ) )
+      if ( !$this->parse_text( $name, $val, $this->tok_config, $this->parser_flags ) )
          return false;
 
       $this->query = $this->build_query_text();
@@ -2260,7 +2260,7 @@ class FilterRating extends Filter
       $this->syntax_help = T_('RATING#filterhelp');
 
       $arr_syntax = array();
-      if( $this->get_config(FC_NO_RANGE) )
+      if ( $this->get_config(FC_NO_RANGE) )
       {
          $arr_syntax[]= "2d, 8k (+28%), 4k-59%"; // e
          $this->parser_flags |= TEXTPARSER_FORBID_RANGE;
@@ -2283,7 +2283,7 @@ class FilterRating extends Filter
    private function convert_rank($rank)
    {
       $rating = read_rating($rank);
-      if( is_null($rating) || $rating < MIN_RATING || $rating > OUT_OF_RATING )
+      if ( is_null($rating) || $rating < MIN_RATING || $rating > OUT_OF_RATING )
       { // min=30k (-900), max=9999 (ominous limit)
          $this->init_parse($this->value); // reset all parsed-vars
          $this->errormsg = "[$rank] " . T_('invalid rank');
@@ -2300,7 +2300,7 @@ class FilterRating extends Filter
       // need textparser for conversion below
       $tp = new TextParser( $val, $this->tok_config,
             $this->parser_flags | TEXTPARSER_FORBID_WILD | TEXTPARSER_END_INCL );
-      if( $tp->errormsg() )
+      if ( $tp->errormsg() )
       {
          $this->errormsg = $tp->errormsg();
          return false;
@@ -2310,34 +2310,34 @@ class FilterRating extends Filter
       $orig_pval   = $tp->p_value;
       $orig_pstart = $tp->p_start;
       $orig_pend   = $tp->p_end;
-      if( (string)$tp->p_start != '' )
+      if ( (string)$tp->p_start != '' )
       {
          $rat_start = $this->convert_rank($tp->p_start);
-         if( $this->errormsg )
+         if ( $this->errormsg )
             return false;
          $tp->p_start = $rat_start;
       }
-      if( (string)$tp->p_end != '' )
+      if ( (string)$tp->p_end != '' )
       {
          $rat_end = $this->convert_rank($tp->p_end);
-         if( $this->errormsg )
+         if ( $this->errormsg )
             return false;
          $tp->p_end = $rat_end;
       }
-      if( (string)$tp->p_value != '' )
+      if ( (string)$tp->p_value != '' )
       {
          $rat_value = $this->convert_rank($tp->p_value);
-         if( $this->errormsg )
+         if ( $this->errormsg )
             return false;
          $tp->p_value = $rat_value;
       }
 
-      if( $tp->handle_reverse_range(true) ) // forced swap
+      if ( $tp->handle_reverse_range(true) ) // forced swap
          swap( $orig_pstart, $orig_pend ); // swap orig start & end too
       $this->copy_parsed($tp);
 
       // adjust rank-range and used operations
-      if( (string)$this->p_value != '' )
+      if ( (string)$this->p_value != '' )
       {
          // replace single value by start/end-search if not an accurate rank
          $this->p_start = $this->p_end = $this->p_value;
@@ -2359,9 +2359,9 @@ class FilterRating extends Filter
    private function adjust_op_rating( $is_start=true, $orig_val )
    {
       // something there to adjust?
-      if( $is_start && (string)$this->p_start == '' )
+      if ( $is_start && (string)$this->p_start == '' )
          return;
-      if( !$is_start && (string)$this->p_end == '' )
+      if ( !$is_start && (string)$this->p_end == '' )
          return;
 
       // full or percentaged rank?
@@ -2369,80 +2369,80 @@ class FilterRating extends Filter
       // negative percentage?
       $has_negperc = $has_percent && !( strpos($orig_val, '-') === false );
 
-      if( $has_percent )
+      if ( $has_percent )
          $adjust_range = 0.5; // percentaged rank: 9k+44% ->  >= 9k(+44%) and < 9k(+45%)
       else
          $adjust_range = 50;  // full rank: 9k ->  >= 9k(-50%) and < 9k(+50%)
 
       // adjust (flags depends on sign because of rounding effects)
-      if( $is_start )
+      if ( $is_start )
       {
          $perc_is0 = false; // percentage is [+/-]0%
-         if( $this->p_start % 100 == 0 ) // handle '-0%' as non-negative
+         if ( $this->p_start % 100 == 0 ) // handle '-0%' as non-negative
          {
             $has_negperc = false;
             $perc_is0 = true;
          }
 
-         if( $has_negperc && abs($this->p_start) % 100 == 50 ) // -50%
+         if ( $has_negperc && abs($this->p_start) % 100 == 50 ) // -50%
             $adjust_range = 0;
          $this->p_start -= $adjust_range; // -50 | -0.5
-         if( $this->p_start < MIN_RATING )
+         if ( $this->p_start < MIN_RATING )
             $this->p_start = MIN_RATING;
 
          $opexcl = true; // '>'-comparison, false -> '>='
-         if( !$perc_is0 && !$has_negperc ) // perc > 0% (not 0 and no '-')
+         if ( !$perc_is0 && !$has_negperc ) // perc > 0% (not 0 and no '-')
             $opexcl = false;
-         if( $this->p_start <= 0 )
+         if ( $this->p_start <= 0 )
          {
-            if( !$has_percent )
+            if ( !$has_percent )
                $opexcl = true;
          }
          else
          {
-            if( $adjust_range == 0 )
+            if ( $adjust_range == 0 )
                $opexcl = false;
-            if( !$has_percent )
+            if ( !$has_percent )
                $opexcl = false;
          }
-         if( $this->p_start <= MIN_RATING )
+         if ( $this->p_start <= MIN_RATING )
             $opexcl = false;
-         if( $opexcl )
+         if ( $opexcl )
             $this->p_flags |= PFLAG_EXCL_START;
       }
       else // is-end
       {
          $perc_is0 = false; // percentage is [+/-]0%
-         if( $this->p_end % 100 == 0 ) // handle '-0%' as non-negative
+         if ( $this->p_end % 100 == 0 ) // handle '-0%' as non-negative
          {
             $has_negperc = false;
             $perc_is0 = true;
          }
 
-         if( !$has_negperc && abs($this->p_end) % 100 == 50 ) // +50%
+         if ( !$has_negperc && abs($this->p_end) % 100 == 50 ) // +50%
             $adjust_range = 0;
          $this->p_end += $adjust_range; // +50 | +0.5
-         if( $this->p_end < MIN_RATING )
+         if ( $this->p_end < MIN_RATING )
             $this->p_end = MIN_RATING;
 
          $opexcl = false; // '<='-comparison, true -> '<'
-         if( !$has_negperc ) // perc >= 0% (no '-')
+         if ( !$has_negperc ) // perc >= 0% (no '-')
             $opexcl = true;
-         if( $this->p_end < 0 )
+         if ( $this->p_end < 0 )
          {
-            if( $adjust_range == 0 )
+            if ( $adjust_range == 0 )
                $opexcl = false;
-            if( !$has_percent )
+            if ( !$has_percent )
                $opexcl = false;
          }
          else
          {
-            if( !$has_percent )
+            if ( !$has_percent )
                $opexcl = true;
          }
-         if( $this->p_end <= MIN_RATING )
+         if ( $this->p_end <= MIN_RATING )
             $opexcl = false;
-         if( $opexcl )
+         if ( $opexcl )
             $this->p_flags |= PFLAG_EXCL_END;
       }
    }//adjust_op_rating
@@ -2491,7 +2491,7 @@ class FilterDate extends Filter
       $this->parser_flags |= TEXTPARSER_FORBID_WILD | TEXTPARSER_END_INCL;
       $this->syntax_help = T_('DATE#filterhelp');
 
-      if( $this->get_config(FC_NO_RANGE) )
+      if ( $this->get_config(FC_NO_RANGE) )
       {
          $this->parser_flags |= TEXTPARSER_FORBID_RANGE;
          $this->syntax_descr = "d=Y(M(D(h(m(s";
@@ -2509,11 +2509,11 @@ class FilterDate extends Filter
       $val = $this->handle_default( $name, $val );
 
       // use text-parser to parse range-syntax
-      if( !$this->parse_text( $name, $val, $this->tok_config, $this->parser_flags ) )
+      if ( !$this->parse_text( $name, $val, $this->tok_config, $this->parser_flags ) )
          return false;
 
       // check & completes dates
-      if( (string)$this->p_value != '' )
+      if ( (string)$this->p_value != '' )
       { // handle like range (start-end) to allow '1999' searching for 1999 <= x < 2000
          $this->p_start = $this->p_value;
          $this->p_end   = $this->p_value;
@@ -2522,26 +2522,26 @@ class FilterDate extends Filter
 
       $dp_start = null;
       $arr_err = array();
-      if( (string)$this->p_start != '' )
+      if ( (string)$this->p_start != '' )
       {
          $dp_start = new DateParser($this->p_start, DP_RANGE_START);
-         if( $dp_start->errormsg() )
+         if ( $dp_start->errormsg() )
             $arr_err[]= $dp_start->errormsg();
          else
             $this->p_start = $dp_start->get_completed_date();
       }
 
-      if( (string)$this->p_end != '' )
+      if ( (string)$this->p_end != '' )
       {
          $dp_end = new DateParser($this->p_end, DP_RANGE_END);
-         if( $dp_end->errormsg() )
+         if ( $dp_end->errormsg() )
             $arr_err[]= $dp_end->errormsg();
          else
             $this->p_end = $dp_end->get_completed_date();
       }
 
       // handling error (start + end date)
-      if( count($arr_err) > 0 )
+      if ( count($arr_err) > 0 )
       {
          $this->init_parse($this->value); // reset all parsed-vars
          $this->errormsg = implode( "; ", array_unique($arr_err) );
@@ -2549,9 +2549,9 @@ class FilterDate extends Filter
       }
 
       // handle reverse-range (only if both start+end used)
-      if( (string)$this->p_end != '' && is_object($dp_start) )
+      if ( (string)$this->p_end != '' && is_object($dp_start) )
       {
-         if( $dp_start->rawdate > $dp_end->rawdate )
+         if ( $dp_start->rawdate > $dp_end->rawdate )
          {
             // swap needed and re-parsing (because date adjusted for DP_RANGE_END)
             //   but skip already passed checks
@@ -2653,20 +2653,20 @@ class FilterRelativeDate extends Filter
       // check & setup time-units
       $fc_time_units = $this->get_config(FC_TIME_UNITS);
       $FRDTU_choices = self::getTimeUnitText();
-      foreach( $FRDTU_choices as $tu => $descr )
+      foreach ( $FRDTU_choices as $tu => $descr )
       {
-         if( $fc_time_units & $tu )
+         if ( $fc_time_units & $tu )
          {
-            if( $tu != FRDTU_ABS ) // skip for absolute
+            if ( $tu != FRDTU_ABS ) // skip for absolute
                $this->time_units[]= $tu;
             $this->choices_tu[$tu] = $descr;
          }
       }
-      if( count($this->time_units) == 0 )
+      if ( count($this->time_units) == 0 )
          error('invalid_filter', "FilterRelativeDate.construct.miss_time_unit({$this->id},$name)");
 
       // absolute filter
-      if( $fc_time_units & FRDTU_ABS )
+      if ( $fc_time_units & FRDTU_ABS )
       {
          $this->filterdate = new FilterDate( $name, $dbfield, $config );
          $this->syntax_descr .= '; ' . T_('absolute#filter') . ': ' . $this->filterdate->syntax_descr;
@@ -2682,7 +2682,7 @@ class FilterRelativeDate extends Filter
    /*! \brief Sets default for time-unit-selectbox. */
    protected function set_value_defaults( $name )
    {
-      if( $name === $this->elem_tu )
+      if ( $name === $this->elem_tu )
       {
          $defidx = ( is_null($this->filterdate) ) ? 0 : 1;
          $this->values[$this->elem_tu] =
@@ -2706,22 +2706,22 @@ class FilterRelativeDate extends Filter
       $val = $this->handle_default( $name, $val );
       $this->init_parse($val, $name); // if elem, value for elem_tu saved
 
-      if( $name === $this->name )
+      if ( $name === $this->name )
       {
          $v = preg_replace( "/\\s+/", "", $val); // remove all spaces
-         if( $v == '' )
+         if ( $v == '' )
             return true;
 
          // note: expecting elem_tu parsed first (reached by overloading get_element_names-method)
-         if( $this->values[$this->elem_tu] == FRDTU_ABS )
+         if ( $this->values[$this->elem_tu] == FRDTU_ABS )
          { // absolute
-            if( is_null($this->filterdate) )
+            if ( is_null($this->filterdate) )
                error('invalid_filter', "FilterRelativeDate.construct.bad_config_absolute_date({$this->id})");
 
             // parse val using FilterDate-syntax
             $this->range_mode = FRD_RANGE_ABS;
 
-            if( !$this->filterdate->parse_value( $name, $val ) )
+            if ( !$this->filterdate->parse_value( $name, $val ) )
             {
                $this->errormsg = $this->filterdate->errormsg;
                return false;
@@ -2732,20 +2732,20 @@ class FilterRelativeDate extends Filter
             // parse val: 30 <30 >30
             $this->range_mode = FRD_RANGE_START;
 
-            if( substr($v, 0, 1) == ">" ) // >30
+            if ( substr($v, 0, 1) == ">" ) // >30
             {
                $v = substr($v, 1);
                $this->range_mode = FRD_RANGE_END;
             }
-            elseif( substr($v, 0, 1) == "<" ) // <30 (same as '30')
+            elseif ( substr($v, 0, 1) == "<" ) // <30 (same as '30')
             {
                $v = substr($v, 1);
             }
 
-            if( !is_numeric($v) )
+            if ( !is_numeric($v) )
             {
                $this->errormsg = "[$v] " . T_('not numeric');
-               if( !is_null($this->filterdate) )
+               if ( !is_null($this->filterdate) )
                   $this->errormsg .= ' (' . T_('maybe you want to choose absolute#reldate') . ')';
                return false;
             }
@@ -2753,10 +2753,10 @@ class FilterRelativeDate extends Filter
 
          $this->p_value = $v; // indicator of correctly parsed value
       }
-      elseif( $name === $this->elem_tu )
+      elseif ( $name === $this->elem_tu )
       {
          // set default (days) or else first list-item
-         if( $val == '' )
+         if ( $val == '' )
             $this->values[$this->elem_tu] =
                ( $this->get_config(FC_TIME_UNITS) & FRDTU_DAY ) ? FRDTU_DAY : $this->time_units[0];
       }
@@ -2773,10 +2773,10 @@ class FilterRelativeDate extends Filter
    public function build_query()
    {
       // check for parsed-value
-      if( $this->p_value == '' )
+      if ( $this->p_value == '' )
          return;
 
-      if( $this->values[$this->elem_tu] == FRDTU_ABS )
+      if ( $this->values[$this->elem_tu] == FRDTU_ABS )
       { // parse absolute date
          $query = $this->filterdate->query;
       }
@@ -2818,7 +2818,7 @@ class FilterRelativeDate extends Filter
       $r = $this->build_input_text_elem( $prefix, $attr, @$this->config[FC_MAXLEN], @$this->config[FC_SIZE] );
 
       // select-box for unit of time (or fix if no choice)
-      if( count($this->time_units) > 1 )
+      if ( count($this->time_units) > 1 )
          $r .= $this->build_generic_selectbox_elem( $prefix, $this->elem_tu, $this->values[$this->elem_tu], $this->choices_tu );
       else
          $r .= self::getTimeUnitText( $this->time_units[0] );
@@ -2834,7 +2834,7 @@ class FilterRelativeDate extends Filter
    {
       // lazy-init of texts
       $key = 'reldate_choices';
-      if( !isset(self::$ARR_FILTER_TEXTS[$key]) )
+      if ( !isset(self::$ARR_FILTER_TEXTS[$key]) )
       {
          $arr = array();
          // choices-array for time-units (for select-box)
@@ -2848,9 +2848,9 @@ class FilterRelativeDate extends Filter
          self::$ARR_FILTER_TEXTS[$key] = $arr;
       }
 
-      if( is_null($timeunit) )
+      if ( is_null($timeunit) )
          return self::$ARR_FILTER_TEXTS[$key];
-      if( !isset(self::$ARR_FILTER_TEXTS[$key][$timeunit]) )
+      if ( !isset(self::$ARR_FILTER_TEXTS[$key][$timeunit]) )
          error('invalid_args', "FilterRelativeDate:getTimeUnitText($timeunit)");
       return self::$ARR_FILTER_TEXTS[$key][$timeunit];
    }//getTimeUnitText
@@ -2896,7 +2896,7 @@ class FilterSelection extends Filter
       $this->syntax_descr = ''; // action: select from choices
       $this->syntax_help = '';
 
-      if( $this->get_config(FC_MULTIPLE) )
+      if ( $this->get_config(FC_MULTIPLE) )
       {
          $this->check_forbid_sql_template( 1 ); # max. one fieldname
          $dbfield = $this->get_config(FC_MULTIPLE); # array-index gives value for according choice
@@ -2904,7 +2904,7 @@ class FilterSelection extends Filter
 
          // check FC_SIZE
          $fc_size = $this->get_config(FC_SIZE);
-         if( empty($fc_size) || $fc_size <= 1 )
+         if ( empty($fc_size) || $fc_size <= 1 )
             $this->set_config( FC_SIZE, 2 ); // default FC_SIZE for multi-val
 
          // handle FC_DEFAULT as index-array
@@ -2912,7 +2912,7 @@ class FilterSelection extends Filter
       }
       else
       {
-         if( !is_array($dbfield) )
+         if ( !is_array($dbfield) )
             error('invalid_filter', "FilterSelection.construct.expect_dbfield_array({$this->id},$name)");
          $this->check_forbid_sql_template( 0 ); # no fieldnames
          $dbfield = $this->dbfield;
@@ -2932,9 +2932,9 @@ class FilterSelection extends Filter
       $val = $this->handle_default( $name, $val );
       $this->init_parse($val);
 
-      if( is_array($val) ) // multi-val
+      if ( is_array($val) ) // multi-val
       {
-         if( !$this->get_config(FC_MULTIPLE) )
+         if ( !$this->get_config(FC_MULTIPLE) )
             error('invalid_filter', "FilterSelection.parse_value.no_multi_value_support({$this->id})");
 
          // build SQL
@@ -2943,15 +2943,15 @@ class FilterSelection extends Filter
          $field = $arrfn[0];
 
          $arr_in = array();
-         foreach( $val as $v ) # v is index into clauses-arr
+         foreach ( $val as $v ) # v is index into clauses-arr
          {
             $idx = $v - $this->idx_start;
-            if( !isset($this->clauses[$idx]) )
+            if ( !isset($this->clauses[$idx]) )
                error('invalid_filter', "FilterSelection.parse_value.bad_index({$this->id},$name,$v)");
             $arr_in[]= "'" . mysql_addslashes( $this->clauses[$idx] ) . "'";
          }
 
-         if( count($arr_in) > 0 )
+         if ( count($arr_in) > 0 )
          {
             $clause = "$field IN (" . implode(',', $arr_in) . ")";
 
@@ -2960,7 +2960,7 @@ class FilterSelection extends Filter
          }
          $this->query = $query;
       }
-      elseif( is_numeric($val) ) // single-val
+      elseif ( is_numeric($val) ) // single-val
          $this->query = $this->build_base_query( $this->clauses[$val], true );
       else
          return false;
@@ -3112,7 +3112,7 @@ class FilterBoolean extends Filter
       $val = $this->handle_default( $name, $val );
       $this->init_parse($val);
 
-      if( is_array($this->dbfield) )
+      if ( is_array($this->dbfield) )
       {
          $key = (bool)($this->value);
          $clause = (isset($this->dbfield[$key])) ? $this->dbfield[$key] : '';
@@ -3187,7 +3187,7 @@ class FilterScore extends Filter
       // checks
       $this->check_forbid_sql_template( 1 );
 
-      if( $this->get_config(FC_NO_RANGE) )
+      if ( $this->get_config(FC_NO_RANGE) )
       {
          $this->parser_flags |= TEXTPARSER_FORBID_RANGE;
          $this->syntax_descr = '314';
@@ -3210,12 +3210,12 @@ class FilterScore extends Filter
       $val = $this->handle_default( $name, $val );
       $this->init_parse($val, $name); // if elem, value for 2nd elem saved
 
-      if( $name === $this->name )
+      if ( $name === $this->name )
       { // parse val: numeric-range
-         if( !$this->parse_numeric( $name, $val, $this->tok_config, $this->parser_flags ) )
+         if ( !$this->parse_numeric( $name, $val, $this->tok_config, $this->parser_flags ) )
             return false;
       }
-      elseif( $name === $this->elem_result )
+      elseif ( $name === $this->elem_result )
          ; // default-behaviour: this->values[elem_result] = $val;
       else
          error('invalid_filter', "FilterScore.parse_value.unknown_key({$this->id},$name,$val)");
@@ -3231,7 +3231,7 @@ class FilterScore extends Filter
    {
       // sql-templates for the corresponding score-mode, %s is replaced with db-field
       static $FSCORE_BUILD_SQL = null;
-      if( is_null($FSCORE_BUILD_SQL) ) // lazy-init because of non-const-values
+      if ( is_null($FSCORE_BUILD_SQL) ) // lazy-init because of non-const-values
       {
          $FSCORE_BUILD_SQL = array(
             '',
@@ -3259,11 +3259,11 @@ class FilterScore extends Filter
       //   idx 7-9: '?+?', 'B+?', 'W+?',  expecting p_value, p_start, p_end set according to range
       //   idx 10:  'Jigo'
       $idx = $this->values[$this->elem_result];
-      if( $idx == FSCORE_ALL )
+      if ( $idx == FSCORE_ALL )
          return;
-      if( $idx >= FSCORE_SCORE && $idx <= FSCORE_W_SCORE )
+      if ( $idx >= FSCORE_SCORE && $idx <= FSCORE_W_SCORE )
       {
-         if( $this->p_value == '' && $this->p_start == '' && $this->p_end == '' )
+         if ( $this->p_value == '' && $this->p_start == '' && $this->p_end == '' )
          {
             // use default to search for scoring without time + resignation
             $this->p_flags |= PFLAG_EXCL_START | PFLAG_EXCL_END;
@@ -3278,7 +3278,7 @@ class FilterScore extends Filter
       $field = $arrfn[0];
 
       $clause = sprintf( $FSCORE_BUILD_SQL[$idx], $field );
-      if( $idx >= FSCORE_SCORE && $idx <= FSCORE_W_SCORE )
+      if ( $idx >= FSCORE_SCORE && $idx <= FSCORE_W_SCORE )
       {
          // here $clause is field-part
          $q = $this->build_query_numeric(
@@ -3340,7 +3340,7 @@ class FilterRatingDiff extends FilterNumeric
 
       $this->num_factor = 100;
 
-      if( $this->get_config(FC_NO_RANGE) )
+      if ( $this->get_config(FC_NO_RANGE) )
          $this->syntax_descr = '0.314';
       else
       {
@@ -3402,22 +3402,22 @@ class FilterCheckboxArray extends Filter
       $this->check_forbid_sql_template( 1 );
 
       $this->choices = $this->get_config(FC_MULTIPLE);
-      if( $this->choices == '' )
+      if ( $this->choices == '' )
          error('invalid_filter', "FilterCheckboxArray.construct.miss_FC_MULTIPLE({$this->id})");
-      if( !is_array($this->choices) )
+      if ( !is_array($this->choices) )
          error('invalid_filter', "FilterCheckboxArray.construct.expect_array_FC_MULTIPLE({$this->id})");
 
       // init field-names
       $idx = 0;
       $is_bitmask = $this->get_config(FC_BITMASK);
-      foreach( $this->choices as $elemtd => $value )
+      foreach ( $this->choices as $elemtd => $value )
       {
          $idx++;
          $fname = $this->build_fname($idx);
          $this->add_element_name( $fname );
          $this->values[$fname] = 0; // init
          $this->clauses[$fname] = $value;
-         if( $is_bitmask && !is_numeric($value) )
+         if ( $is_bitmask && !is_numeric($value) )
          {
             // FC_BITMASK-config forces integer-values for FC_MULTIPLE-values
             error('invalid_filter', "FilterCheckboxArray.construct.bad_array_FC_BITMASK({$this->id})");
@@ -3428,7 +3428,7 @@ class FilterCheckboxArray extends Filter
       $newdef = array();
       $defarr = $this->get_config(FC_DEFAULT, array());
       $suffix = substr( $this->build_fname( '' ), strlen($this->name) );
-      foreach( $defarr as $idx )
+      foreach ( $defarr as $idx )
          $newdef[ $suffix . $idx ] = 1;
       $this->read_defaults( $newdef );
    }//__construct
@@ -3436,7 +3436,7 @@ class FilterCheckboxArray extends Filter
    /*! \brief Handles multiple checkboxes. */
    public function parse_value( $name, $val )
    {
-      if( !array_key_exists($name, $this->values) )
+      if ( !array_key_exists($name, $this->values) )
          return false;
 
       $val = $this->handle_default( $name, $val );
@@ -3455,15 +3455,15 @@ class FilterCheckboxArray extends Filter
       $arrfn = $query->get_parts(SQLP_FNAMES);
       $field = $arrfn[0];
 
-      if( $this->get_config(FC_BITMASK) )
+      if ( $this->get_config(FC_BITMASK) )
       {
          $bitmask = 0;
-         foreach( $this->values as $fname => $val )
+         foreach ( $this->values as $fname => $val )
          {
-            if( $val && isset($this->clauses[$fname]) )
+            if ( $val && isset($this->clauses[$fname]) )
                $bitmask |= (int) $this->clauses[$fname];
          }
-         if( $bitmask == 0 )
+         if ( $bitmask == 0 )
             return;
 
          $clause = "($field & $bitmask)<>0";
@@ -3471,12 +3471,12 @@ class FilterCheckboxArray extends Filter
       else {
          // regular values to be joined with OR (respective IN-syntax)
          $arr_in = array();
-         foreach( $this->values as $fname => $val )
+         foreach ( $this->values as $fname => $val )
          {
-            if( $val && isset($this->clauses[$fname]) )
+            if ( $val && isset($this->clauses[$fname]) )
                $arr_in[]= "'" . mysql_addslashes( $this->clauses[$fname] ) . "'";
          }
-         if( count($arr_in) == 0 )
+         if ( count($arr_in) == 0 )
             return;
 
          $clause = "$field IN (" . implode(',', $arr_in) . ")";
@@ -3494,7 +3494,7 @@ class FilterCheckboxArray extends Filter
       $cols = array();
       $idx = 0;
       $cnt_cols = $this->get_config(FC_SIZE);
-      foreach( $this->choices as $elem_td => $value )
+      foreach ( $this->choices as $elem_td => $value )
       {
          $idx++;
          $fname = $this->build_fname( $idx );
@@ -3504,7 +3504,7 @@ class FilterCheckboxArray extends Filter
          $cols[]= $td;
 
          $cnt_cols--;
-         if( $cnt_cols == 0 )
+         if ( $cnt_cols == 0 )
          {
             $rows[]= implode( '', $cols );
             $cnt_cols = $this->get_config(FC_SIZE);
@@ -3512,7 +3512,7 @@ class FilterCheckboxArray extends Filter
          }
       }
 
-      if( count($cols) > 0 )
+      if ( count($cols) > 0 )
       {
          $cols = array_pad( $cols, $this->get_config(FC_SIZE), '<td></td>');
          $rows[]= implode( '', $cols );

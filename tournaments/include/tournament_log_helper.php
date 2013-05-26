@@ -77,12 +77,12 @@ class TournamentLogHelper
    public static function log_tournament_game_end( $tid, $tlog_type, $gid, $edits, $old_score, $new_score, $old_flags, $new_flags, $old_status, $new_status )
    {
       $msg = array();
-      if( $old_score !== $new_score )
+      if ( $old_score !== $new_score )
          $msg[] = sprintf('TG-Score [%s] -> [%s]',
             (is_null($old_score) ? NO_VALUE : $old_score), (is_null($new_score) ? NO_VALUE : $new_score) );
-      if( $old_flags != $new_flags )
+      if ( $old_flags != $new_flags )
          $msg[] = sprintf('TG-Flags [%s] -> [%s]', $old_flags, $new_flags );
-      if( $old_status != $new_status )
+      if ( $old_status != $new_status )
          $msg[] = sprintf('TG-Status [%s] -> [%s]', $old_status, $new_status );
 
       $tlog = new Tournamentlog( 0, $tid, 0, 0, $tlog_type, 'TG_Data', TLOG_ACT_CHANGE, 0,
@@ -110,9 +110,9 @@ class TournamentLogHelper
       $new_flags = $director->formatFlags();
 
       $msg = array();
-      if( $old_flags != $new_flags )
+      if ( $old_flags != $new_flags )
          $msg[] = sprintf(self::$DIFF_FMT, 'TD-Flags', $old_flags, $new_flags );
-      if( $old_comment != $director->Comment )
+      if ( $old_comment != $director->Comment )
          $msg[] = sprintf(self::$DIFF_FMT, 'TD-Comment', $old_comment, $director->Comment );
 
       $tlog = new Tournamentlog( 0, $tid, 0, 0, $tlog_type, 'TD_Props', TLOG_ACT_CHANGE, $director->uid,
@@ -131,27 +131,27 @@ class TournamentLogHelper
    private static function build_diff_tournament_participant( $old_tp, $new_tp )
    {
       $msg = array( "ID=[{$new_tp->ID}]" );
-      if( $old_tp->Status != $new_tp->Status )
+      if ( $old_tp->Status != $new_tp->Status )
          $msg[] = sprintf(self::$DIFF_FMT, 'Status', $old_tp->Status, $new_tp->Status );
-      if( $old_tp->Flags != $new_tp->Flags )
+      if ( $old_tp->Flags != $new_tp->Flags )
       {
          $old_flags = TournamentParticipant::getFlagsText( $old_tp->Flags );
          $new_flags = TournamentParticipant::getFlagsText( $new_tp->Flags );
          $msg[] = sprintf(self::$DIFF_FMT, 'Flags', $old_flags, $new_flags );
       }
-      if( $old_tp->Rating != $new_tp->Rating )
+      if ( $old_tp->Rating != $new_tp->Rating )
          $msg[] = sprintf(self::$DIFF_FMT, 'Rating', $old_tp->Rating, $new_tp->Rating );
-      if( $old_tp->StartRound != $new_tp->StartRound )
+      if ( $old_tp->StartRound != $new_tp->StartRound )
          $msg[] = sprintf(self::$DIFF_FMT, 'StartRound', $old_tp->StartRound, $new_tp->StartRound );
-      if( $old_tp->NextRound != $new_tp->NextRound )
+      if ( $old_tp->NextRound != $new_tp->NextRound )
          $msg[] = sprintf(self::$DIFF_FMT, 'NextRound', $old_tp->NextRound, $new_tp->NextRound );
-      if( $old_tp->Comment != $new_tp->Comment )
+      if ( $old_tp->Comment != $new_tp->Comment )
          $msg[] = sprintf(self::$DIFF_FMT, 'Comment', $old_tp->Comment, $new_tp->Comment );
-      if( $old_tp->Notes != $new_tp->Notes )
+      if ( $old_tp->Notes != $new_tp->Notes )
          $msg[] = sprintf(self::$DIFF_FMT, 'Notes', $old_tp->Notes, $new_tp->Notes );
-      if( $old_tp->UserMessage != $new_tp->UserMessage )
+      if ( $old_tp->UserMessage != $new_tp->UserMessage )
          $msg[] = sprintf(self::$DIFF_FMT, 'UserMsg', $old_tp->UserMessage, $new_tp->UserMessage );
-      if( $old_tp->AdminMessage != $new_tp->AdminMessage )
+      if ( $old_tp->AdminMessage != $new_tp->AdminMessage )
          $msg[] = sprintf(self::$DIFF_FMT, 'AdmMsg', $old_tp->AdminMessage, $new_tp->AdminMessage );
 
       return implode('; ', $msg);
@@ -192,25 +192,25 @@ class TournamentLogHelper
    public static function log_change_tournament( $tid, $tlog_type, $edits, $old_t, $new_t )
    {
       $msg = array();
-      if( $old_t->Scope != $new_t->Scope )
+      if ( $old_t->Scope != $new_t->Scope )
          $msg[] = sprintf(self::$DIFF_FMT, 'Scope', $old_t->Scope, $new_t->Scope );
-      if( $old_t->Status != $new_t->Status )
+      if ( $old_t->Status != $new_t->Status )
          $msg[] = sprintf(self::$DIFF_FMT, 'Status', $old_t->Status, $new_t->Status );
-      if( $old_t->Flags != $new_t->Flags )
+      if ( $old_t->Flags != $new_t->Flags )
       {
          $old_flags = $old_t->formatFlags('', 0, /*short*/true, null, /*html*/false );
          $new_flags = $new_t->formatFlags('', 0, /*short*/true, null, /*html*/false );
          $msg[] = sprintf(self::$DIFF_FMT, 'Flags', $old_flags, $new_flags );
       }
-      if( $old_t->StartTime != $new_t->StartTime )
+      if ( $old_t->StartTime != $new_t->StartTime )
          $msg[] = sprintf(self::$DIFF_FMT, 'StartTime',
             ( $old_t->StartTime > 0 ? date(DATE_FMT, $old_t->StartTime) : ''),
             ( $new_t->StartTime > 0 ? date(DATE_FMT, $new_t->StartTime) : '') );
-      if( $old_t->Owner_ID != $new_t->Owner_ID )
+      if ( $old_t->Owner_ID != $new_t->Owner_ID )
          $msg[] = sprintf(self::$DIFF_FMT, 'Owner', $old_t->Owner_ID, $new_t->Owner_ID );
-      if( $old_t->Title != $new_t->Title )
+      if ( $old_t->Title != $new_t->Title )
          $msg[] = sprintf(self::$DIFF_FMT, 'Title', $old_t->Title, $new_t->Title );
-      if( $old_t->Description != $new_t->Description )
+      if ( $old_t->Description != $new_t->Description )
          $msg[] = sprintf(self::$DIFF_FMT, 'Descr', $old_t->Description, $new_t->Description );
 
       $tlog = new Tournamentlog( 0, $tid, 0, 0, $tlog_type, 'T_Data', TLOG_ACT_CHANGE, 0,
@@ -221,21 +221,21 @@ class TournamentLogHelper
    public static function log_change_tournament_news( $tlog_action, $tid, $tlog_type, $edits, $old_tn, $new_tn )
    {
       $msg = array( "ID=[{$new_tn->ID}]" );
-      if( $old_tn->Status != $new_tn->Status )
+      if ( $old_tn->Status != $new_tn->Status )
          $msg[] = sprintf(self::$DIFF_FMT, 'Status', $old_tn->Status, $new_tn->Status );
-      if( $old_tn->Flags != $new_tn->Flags )
+      if ( $old_tn->Flags != $new_tn->Flags )
       {
          $old_flags = TournamentNews::getFlagsText( $old_tn->Flags );
          $new_flags = TournamentNews::getFlagsText( $new_tn->Flags );
          $msg[] = sprintf(self::$DIFF_FMT, 'Flags', $old_flags, $new_flags );
       }
-      if( $old_tn->Published != $new_tn->Published )
+      if ( $old_tn->Published != $new_tn->Published )
          $msg[] = sprintf(self::$DIFF_FMT, 'Published',
             ( $old_tn->Published > 0 ? date(DATE_FMT, $old_tn->Published) : ''),
             ( $new_tn->Published > 0 ? date(DATE_FMT, $new_tn->Published) : '') );
-      if( $old_tn->Subject != $new_tn->Subject )
+      if ( $old_tn->Subject != $new_tn->Subject )
          $msg[] = sprintf(self::$DIFF_FMT, 'Subject', $old_tn->Subject, $new_tn->Subject );
-      if( $old_tn->Text != $new_tn->Text )
+      if ( $old_tn->Text != $new_tn->Text )
          $msg[] = sprintf(self::$DIFF_FMT, 'Text', $old_tn->Text, $new_tn->Text );
 
       $tlog = new Tournamentlog( 0, $tid, 0, 0, $tlog_type, 'TN_News', $tlog_action, 0,
@@ -247,27 +247,27 @@ class TournamentLogHelper
    public static function log_change_tournament_props( $tid, $tlog_type, $edits, $old_tpr, $new_tpr )
    {
       $msg = array();
-      if( $old_tpr->Notes != $new_tpr->Notes )
+      if ( $old_tpr->Notes != $new_tpr->Notes )
          $msg[] = sprintf(self::$DIFF_FMT, 'Notes', $old_tpr->Notes, $new_tpr->Notes );
-      if( $old_tpr->MinParticipants != $new_tpr->MinParticipants )
+      if ( $old_tpr->MinParticipants != $new_tpr->MinParticipants )
          $msg[] = sprintf(self::$DIFF_FMT, 'MinParticipants', $old_tpr->MinParticipants, $new_tpr->MinParticipants );
-      if( $old_tpr->MaxParticipants != $new_tpr->MaxParticipants )
+      if ( $old_tpr->MaxParticipants != $new_tpr->MaxParticipants )
          $msg[] = sprintf(self::$DIFF_FMT, 'MaxParticipants', $old_tpr->MaxParticipants, $new_tpr->MaxParticipants );
-      if( $old_tpr->RatingUseMode != $new_tpr->RatingUseMode )
+      if ( $old_tpr->RatingUseMode != $new_tpr->RatingUseMode )
          $msg[] = sprintf(self::$DIFF_FMT, 'RatingUseMode', $old_tpr->RatingUseMode, $new_tpr->RatingUseMode );
-      if( $old_tpr->RegisterEndTime != $new_tpr->RegisterEndTime )
+      if ( $old_tpr->RegisterEndTime != $new_tpr->RegisterEndTime )
          $msg[] = sprintf(self::$DIFF_FMT, 'RegEndTime',
             ( $old_tpr->RegisterEndTime > 0 ? date(DATE_FMT, $old_tpr->RegisterEndTime) : ''),
             ( $new_tpr->RegisterEndTime > 0 ? date(DATE_FMT, $new_tpr->RegisterEndTime) : '') );
-      if( $old_tpr->UserMinRating != $new_tpr->UserMinRating )
+      if ( $old_tpr->UserMinRating != $new_tpr->UserMinRating )
          $msg[] = sprintf(self::$DIFF_FMT, 'UserMinRating', $old_tpr->UserMinRating, $new_tpr->UserMinRating );
-      if( $old_tpr->UserMaxRating != $new_tpr->UserMaxRating )
+      if ( $old_tpr->UserMaxRating != $new_tpr->UserMaxRating )
          $msg[] = sprintf(self::$DIFF_FMT, 'UserMaxRating', $old_tpr->UserMaxRating, $new_tpr->UserMaxRating );
-      if( $old_tpr->UserRated != $new_tpr->UserRated )
+      if ( $old_tpr->UserRated != $new_tpr->UserRated )
          $msg[] = sprintf(self::$DIFF_FMT, 'UserRated', $old_tpr->UserRated, $new_tpr->UserRated );
-      if( $old_tpr->UserMinGamesFinished != $new_tpr->UserMinGamesFinished )
+      if ( $old_tpr->UserMinGamesFinished != $new_tpr->UserMinGamesFinished )
          $msg[] = sprintf(self::$DIFF_FMT, 'UserMinGamesFinished', $old_tpr->UserMinGamesFinished, $new_tpr->UserMinGamesFinished );
-      if( $old_tpr->UserMinGamesRated != $new_tpr->UserMinGamesRated )
+      if ( $old_tpr->UserMinGamesRated != $new_tpr->UserMinGamesRated )
          $msg[] = sprintf(self::$DIFF_FMT, 'UserMinGamesRated', $old_tpr->UserMinGamesRated, $new_tpr->UserMinGamesRated );
 
       $tlog = new Tournamentlog( 0, $tid, 0, 0, $tlog_type, 'TPR_Data', TLOG_ACT_CHANGE, 0,
@@ -278,49 +278,49 @@ class TournamentLogHelper
    public static function log_change_tournament_rules( $tid, $tlog_type, $edits, $old_trule, $new_trule )
    {
       $msg = array( "ID=[{$new_trule->ID}]" );
-      if( $old_trule->Flags != $new_trule->Flags )
+      if ( $old_trule->Flags != $new_trule->Flags )
       {
          $old_flags = TournamentRules::getFlagsText( $old_trule->Flags );
          $new_flags = TournamentRules::getFlagsText( $new_trule->Flags );
          $msg[] = sprintf(self::$DIFF_FMT, 'Flags', $old_flags, $new_flags );
       }
-      if( $old_trule->Notes != $new_trule->Notes )
+      if ( $old_trule->Notes != $new_trule->Notes )
          $msg[] = sprintf(self::$DIFF_FMT, 'Notes', $old_trule->Notes, $new_trule->Notes );
-      if( $old_trule->Ruleset != $new_trule->Ruleset )
+      if ( $old_trule->Ruleset != $new_trule->Ruleset )
          $msg[] = sprintf(self::$DIFF_FMT, 'Ruleset', $old_trule->Ruleset, $new_trule->Ruleset );
-      if( $old_trule->Size != $new_trule->Size )
+      if ( $old_trule->Size != $new_trule->Size )
          $msg[] = sprintf(self::$DIFF_FMT, 'Size', $old_trule->Size, $new_trule->Size );
-      if( $old_trule->Handicaptype != $new_trule->Handicaptype )
+      if ( $old_trule->Handicaptype != $new_trule->Handicaptype )
          $msg[] = sprintf(self::$DIFF_FMT, 'Handicaptype', $old_trule->Handicaptype, $new_trule->Handicaptype );
-      if( $old_trule->Handicap != $new_trule->Handicap )
+      if ( $old_trule->Handicap != $new_trule->Handicap )
          $msg[] = sprintf(self::$DIFF_FMT, 'Handicap', $old_trule->Handicap, $new_trule->Handicap );
-      if( $old_trule->Komi != $new_trule->Komi )
+      if ( $old_trule->Komi != $new_trule->Komi )
          $msg[] = sprintf(self::$DIFF_FMT, 'Komi', $old_trule->Komi, $new_trule->Komi );
-      if( $old_trule->AdjKomi != $new_trule->AdjKomi )
+      if ( $old_trule->AdjKomi != $new_trule->AdjKomi )
          $msg[] = sprintf(self::$DIFF_FMT, 'AdjKomi', $old_trule->AdjKomi, $new_trule->AdjKomi );
-      if( $old_trule->JigoMode != $new_trule->JigoMode )
+      if ( $old_trule->JigoMode != $new_trule->JigoMode )
          $msg[] = sprintf(self::$DIFF_FMT, 'JigoMode', $old_trule->JigoMode, $new_trule->JigoMode );
-      if( $old_trule->AdjHandicap != $new_trule->AdjHandicap )
+      if ( $old_trule->AdjHandicap != $new_trule->AdjHandicap )
          $msg[] = sprintf(self::$DIFF_FMT, 'AdjHandicap', $old_trule->AdjHandicap, $new_trule->AdjHandicap );
-      if( $old_trule->MinHandicap != $new_trule->MinHandicap )
+      if ( $old_trule->MinHandicap != $new_trule->MinHandicap )
          $msg[] = sprintf(self::$DIFF_FMT, 'MinHandicap', $old_trule->MinHandicap, $new_trule->MinHandicap );
-      if( $old_trule->MaxHandicap != $new_trule->MaxHandicap )
+      if ( $old_trule->MaxHandicap != $new_trule->MaxHandicap )
          $msg[] = sprintf(self::$DIFF_FMT, 'MaxHandicap', $old_trule->MaxHandicap, $new_trule->MaxHandicap );
-      if( $old_trule->StdHandicap != $new_trule->StdHandicap )
+      if ( $old_trule->StdHandicap != $new_trule->StdHandicap )
          $msg[] = sprintf(self::$DIFF_FMT, 'StdHandicap', $old_trule->StdHandicap, $new_trule->StdHandicap );
-      if( $old_trule->Maintime != $new_trule->Maintime )
+      if ( $old_trule->Maintime != $new_trule->Maintime )
          $msg[] = sprintf(self::$DIFF_FMT, 'Maintime', $old_trule->Maintime, $new_trule->Maintime );
-      if( $old_trule->Byotype != $new_trule->Byotype )
+      if ( $old_trule->Byotype != $new_trule->Byotype )
          $msg[] = sprintf(self::$DIFF_FMT, 'Byotype', $old_trule->Byotype, $new_trule->Byotype );
-      if( $old_trule->Byotime != $new_trule->Byotime )
+      if ( $old_trule->Byotime != $new_trule->Byotime )
          $msg[] = sprintf(self::$DIFF_FMT, 'Byotime', $old_trule->Byotime, $new_trule->Byotime );
-      if( $old_trule->Byoperiods != $new_trule->Byoperiods )
+      if ( $old_trule->Byoperiods != $new_trule->Byoperiods )
          $msg[] = sprintf(self::$DIFF_FMT, 'Byoperiods', $old_trule->Byoperiods, $new_trule->Byoperiods );
-      if( $old_trule->WeekendClock != $new_trule->WeekendClock )
+      if ( $old_trule->WeekendClock != $new_trule->WeekendClock )
          $msg[] = sprintf(self::$DIFF_FMT, 'WeekendClock', $old_trule->WeekendClock, $new_trule->WeekendClock );
-      if( $old_trule->Rated != $new_trule->Rated )
+      if ( $old_trule->Rated != $new_trule->Rated )
          $msg[] = sprintf(self::$DIFF_FMT, 'Rated', $old_trule->Rated, $new_trule->Rated );
-      if( $old_trule->ShapeID != $new_trule->ShapeID )
+      if ( $old_trule->ShapeID != $new_trule->ShapeID )
          $msg[] = sprintf(self::$DIFF_FMT, 'ShapeID', $old_trule->ShapeID, $new_trule->ShapeID );
 
       $tlog = new Tournamentlog( 0, $tid, 0, 0, $tlog_type, 'TRULE_Data', TLOG_ACT_CHANGE, 0,
@@ -331,45 +331,45 @@ class TournamentLogHelper
    public static function log_change_tournament_ladder_props( $tid, $tlog_type, $edits, $old_tlp, $new_tlp )
    {
       $msg = array();
-      if( $old_tlp->ChallengeRangeAbsolute != $new_tlp->ChallengeRangeAbsolute )
+      if ( $old_tlp->ChallengeRangeAbsolute != $new_tlp->ChallengeRangeAbsolute )
          $msg[] = sprintf(self::$DIFF_FMT, 'ChallengeRangeAbsolute', $old_tlp->ChallengeRangeAbsolute, $new_tlp->ChallengeRangeAbsolute );
-      if( $old_tlp->ChallengeRangeRelative != $new_tlp->ChallengeRangeRelative )
+      if ( $old_tlp->ChallengeRangeRelative != $new_tlp->ChallengeRangeRelative )
          $msg[] = sprintf(self::$DIFF_FMT, 'ChallengeRangeRelative', $old_tlp->ChallengeRangeRelative, $new_tlp->ChallengeRangeRelative );
-      if( $old_tlp->ChallengeRangeRating != $new_tlp->ChallengeRangeRating )
+      if ( $old_tlp->ChallengeRangeRating != $new_tlp->ChallengeRangeRating )
          $msg[] = sprintf(self::$DIFF_FMT, 'ChallengeRangeRating', $old_tlp->ChallengeRangeRating, $new_tlp->ChallengeRangeRating );
-      if( $old_tlp->ChallengeRematchWaitHours != $new_tlp->ChallengeRematchWaitHours )
+      if ( $old_tlp->ChallengeRematchWaitHours != $new_tlp->ChallengeRematchWaitHours )
          $msg[] = sprintf(self::$DIFF_FMT, 'ChallengeRematchWaitHours', $old_tlp->ChallengeRematchWaitHours, $new_tlp->ChallengeRematchWaitHours );
-      if( $old_tlp->MaxDefenses != $new_tlp->MaxDefenses )
+      if ( $old_tlp->MaxDefenses != $new_tlp->MaxDefenses )
          $msg[] = sprintf(self::$DIFF_FMT, 'MaxDefenses', $old_tlp->MaxDefenses, $new_tlp->MaxDefenses );
-      if( $old_tlp->MaxDefenses1 != $new_tlp->MaxDefenses1 )
+      if ( $old_tlp->MaxDefenses1 != $new_tlp->MaxDefenses1 )
          $msg[] = sprintf(self::$DIFF_FMT, 'MaxDefenses1', $old_tlp->MaxDefenses1, $new_tlp->MaxDefenses1 );
-      if( $old_tlp->MaxDefenses2 != $new_tlp->MaxDefenses2 )
+      if ( $old_tlp->MaxDefenses2 != $new_tlp->MaxDefenses2 )
          $msg[] = sprintf(self::$DIFF_FMT, 'MaxDefenses2', $old_tlp->MaxDefenses2, $new_tlp->MaxDefenses2 );
-      if( $old_tlp->MaxDefensesStart1 != $new_tlp->MaxDefensesStart1 )
+      if ( $old_tlp->MaxDefensesStart1 != $new_tlp->MaxDefensesStart1 )
          $msg[] = sprintf(self::$DIFF_FMT, 'MaxDefensesStart1', $old_tlp->MaxDefensesStart1, $new_tlp->MaxDefensesStart1 );
-      if( $old_tlp->MaxDefensesStart2 != $new_tlp->MaxDefensesStart2 )
+      if ( $old_tlp->MaxDefensesStart2 != $new_tlp->MaxDefensesStart2 )
          $msg[] = sprintf(self::$DIFF_FMT, 'MaxDefensesStart2', $old_tlp->MaxDefensesStart2, $new_tlp->MaxDefensesStart2 );
-      if( $old_tlp->MaxChallenges != $new_tlp->MaxChallenges )
+      if ( $old_tlp->MaxChallenges != $new_tlp->MaxChallenges )
          $msg[] = sprintf(self::$DIFF_FMT, 'MaxChallenges', $old_tlp->MaxChallenges, $new_tlp->MaxChallenges );
-      if( $old_tlp->DetermineChallenger != $new_tlp->DetermineChallenger )
+      if ( $old_tlp->DetermineChallenger != $new_tlp->DetermineChallenger )
          $msg[] = sprintf(self::$DIFF_FMT, 'DetermineChallenger', $old_tlp->DetermineChallenger, $new_tlp->DetermineChallenger );
-      if( $old_tlp->GameEndNormal != $new_tlp->GameEndNormal )
+      if ( $old_tlp->GameEndNormal != $new_tlp->GameEndNormal )
          $msg[] = sprintf(self::$DIFF_FMT, 'GameEndNormal', $old_tlp->GameEndNormal, $new_tlp->GameEndNormal );
-      if( $old_tlp->GameEndJigo != $new_tlp->GameEndJigo )
+      if ( $old_tlp->GameEndJigo != $new_tlp->GameEndJigo )
          $msg[] = sprintf(self::$DIFF_FMT, 'GameEndJigo', $old_tlp->GameEndJigo, $new_tlp->GameEndJigo );
-      if( $old_tlp->GameEndTimeoutWin != $new_tlp->GameEndTimeoutWin )
+      if ( $old_tlp->GameEndTimeoutWin != $new_tlp->GameEndTimeoutWin )
          $msg[] = sprintf(self::$DIFF_FMT, 'GameEndTimeoutWin', $old_tlp->GameEndTimeoutWin, $new_tlp->GameEndTimeoutWin );
-      if( $old_tlp->GameEndTimeoutLoss != $new_tlp->GameEndTimeoutLoss )
+      if ( $old_tlp->GameEndTimeoutLoss != $new_tlp->GameEndTimeoutLoss )
          $msg[] = sprintf(self::$DIFF_FMT, 'GameEndTimeoutLoss', $old_tlp->GameEndTimeoutLoss, $new_tlp->GameEndTimeoutLoss );
-      if( $old_tlp->UserJoinOrder != $new_tlp->UserJoinOrder )
+      if ( $old_tlp->UserJoinOrder != $new_tlp->UserJoinOrder )
          $msg[] = sprintf(self::$DIFF_FMT, 'UserJoinOrder', $old_tlp->UserJoinOrder, $new_tlp->UserJoinOrder );
-      if( $old_tlp->UserAbsenceDays != $new_tlp->UserAbsenceDays )
+      if ( $old_tlp->UserAbsenceDays != $new_tlp->UserAbsenceDays )
          $msg[] = sprintf(self::$DIFF_FMT, 'UserAbsenceDays', $old_tlp->UserAbsenceDays, $new_tlp->UserAbsenceDays );
-      if( $old_tlp->RankPeriodLength != $new_tlp->RankPeriodLength )
+      if ( $old_tlp->RankPeriodLength != $new_tlp->RankPeriodLength )
          $msg[] = sprintf(self::$DIFF_FMT, 'RankPeriodLength', $old_tlp->RankPeriodLength, $new_tlp->RankPeriodLength );
-      if( $old_tlp->CrownKingHours != $new_tlp->CrownKingHours )
+      if ( $old_tlp->CrownKingHours != $new_tlp->CrownKingHours )
          $msg[] = sprintf(self::$DIFF_FMT, 'CrownKingHours', $old_tlp->CrownKingHours, $new_tlp->CrownKingHours );
-      if( $old_tlp->CrownKingStart != $new_tlp->CrownKingStart )
+      if ( $old_tlp->CrownKingStart != $new_tlp->CrownKingStart )
          $msg[] = sprintf(self::$DIFF_FMT, 'CrownKingStart',
             ( $old_tlp->CrownKingStart > 0 ? date(DATE_FMT, $old_tlp->CrownKingStart) : ''),
             ( $new_tlp->CrownKingStart > 0 ? date(DATE_FMT, $new_tlp->CrownKingStart) : '') );
@@ -410,7 +410,7 @@ class TournamentLogHelper
    public static function log_delete_user_from_tournament_ladder( $tid, $tlog_type, $tladder, $arr_detached_gid, $msg )
    {
       $msg .= "; Removed user: " . $tladder->build_log_string();
-      if( count($arr_detached_gid) > 0 )
+      if ( count($arr_detached_gid) > 0 )
          $msg .= '; detached games: ' . implode(', ', $arr_detached_gid);
       else
          $msg .= '; no detached games';

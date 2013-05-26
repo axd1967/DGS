@@ -55,7 +55,7 @@ class DgsErrors
    {
       $p= $this->mode;
       $m= (int)$m;
-      switch( (int)$m )
+      switch ( (int)$m )
       {
          case ERROR_MODE_PRINT:
             $this->mode = $m;
@@ -112,21 +112,21 @@ class DgsErrors
    public function list_string($prefix='', $html_mode=false)
    {
       $str = '';
-      foreach( $this->error_list as $ary )
+      foreach ( $this->error_list as $ary )
       {
          list($err, $debugmsg, $warn) = $ary;
          $warn= ($warn ?'Warning' :'Error' );
-         if( $html_mode )
+         if ( $html_mode )
          {
             $tmp = @htmlspecialchars($debugmsg, ENT_QUOTES);
-            if( $tmp ) $debugmsg = $tmp;
+            if ( $tmp ) $debugmsg = $tmp;
             $str.= "\n<dt class=$warn>#$warn: $err</dt>"
                . "\n<dd>debugmsg: $prefix-$debugmsg</dd>";
          }
          else
             $str.= "#$warn: $err\ndebugmsg: $prefix-$debugmsg\n\n";
       }
-      if( $str && $html_mode )
+      if ( $str && $html_mode )
          $str= "\n<dl class=ErrorList>$str\n</dl>";
       return $str;
    }//list_string
@@ -145,11 +145,11 @@ class DgsErrors
    {
       echo $this->list_string($prefix, $html_mode);
       $this->error_clear();
-      if( $html_mode )
+      if ( $html_mode )
          echo "\n</BODY></HTML>\n"; // at least
 
       global $ThePage;
-      if( !($ThePage instanceof HTMLPage) && ob_get_level() > 0 )
+      if ( !($ThePage instanceof HTMLPage) && ob_get_level() > 0 )
          ob_end_flush();
 
       exit;
@@ -159,36 +159,36 @@ class DgsErrors
    public function add_error($err, $debugmsg=NULL, $warn=false, $allow_log_error=true )
    {
       global $player_row;
-      if( isset($player_row) && isset($player_row['Handle']) )
+      if ( isset($player_row) && isset($player_row['Handle']) )
          $handle = $player_row['Handle'];
       else
          $handle = safe_getcookie('handle');
 
       $err= trim(preg_replace( "%[\\x1-\\x20\\x80-\\xff<&>_]+%", "_", $err));
-      if( $allow_log_error && $this->log_errors && !$warn )
+      if ( $allow_log_error && $this->log_errors && !$warn )
          list( $err, $uri ) = self::err_log( $handle, $err, $debugmsg);
       else
       {
          $uri = "error.php?err=" . urlencode($err);
-         if( !is_null($debugmsg) ) $uri .= URI_AMP . 'debugmsg=' . urlencode($debugmsg);
+         if ( !is_null($debugmsg) ) $uri .= URI_AMP . 'debugmsg=' . urlencode($debugmsg);
       }
 
-      if( $this->collect_errors )
+      if ( $this->collect_errors )
          $this->error_list[] = array($err, $debugmsg, $warn);
 
-      if( $this->print_errors || $warn )
+      if ( $this->print_errors || $warn )
       {
-         if( $this->error_header == ERROR_HEADER_JSON )
+         if ( $this->error_header == ERROR_HEADER_JSON )
             header('Content-Type: application/json');
-         elseif( $this->error_header == ERROR_HEADER_TEXT )
+         elseif ( $this->error_header == ERROR_HEADER_TEXT )
             header('Content-Type: text/plain;charset=utf-8');
          //else //if( $this->error_header == ERROR_HEADER_DEFAULT )
 
-         if( $this->error_format == ERROR_FORMAT_TEXT )
+         if ( $this->error_format == ERROR_FORMAT_TEXT )
             echo '[', ( $warn ? "#Warning" : "#Error" ), ": $err; $debugmsg]\n";
          else //if( $this->error_format == ERROR_FORMAT_JSON )
          {
-            if( !$warn )
+            if ( !$warn )
             {
                $err_arr = array(
                      'version' => QUICK_SUITE_VERSION,
@@ -202,14 +202,14 @@ class DgsErrors
          }
       }
 
-      if( !$warn && $this->mode == ERROR_MODE_JUMP )
+      if ( !$warn && $this->mode == ERROR_MODE_JUMP )
       {
          $page_url = ( $err == 'login_if_not_logged_in' ) ? URI_AMP.'page='.urlencode(get_request_url()) : '';
          disable_cache();
          jump_to( $uri . $page_url );
       }
 
-      if( $this->errors_are_fatal && !$warn )
+      if ( $this->errors_are_fatal && !$warn )
          exit;
       return false;
    }//add_error
@@ -224,7 +224,7 @@ class DgsErrors
       $mysqlerror = @mysql_error();
 
       $uri = "error.php?err=" . urlencode($err);
-      if( !is_null($debugmsg) ) $uri .= URI_AMP . 'debugmsg=' . urlencode($debugmsg);
+      if ( !is_null($debugmsg) ) $uri .= URI_AMP . 'debugmsg=' . urlencode($debugmsg);
 
       $uid = (int)@$player_row['ID'];
       $ip = (string)@$_SERVER['REMOTE_ADDR'];
@@ -234,15 +234,15 @@ class DgsErrors
       $request = @$_SERVER['REQUEST_URI']; //@$_SERVER['PHP_SELF'];
       $request = substr( $request, strlen(SUB_PATH));
 
-      if( !empty($mysqlerror) )
+      if ( !empty($mysqlerror) )
       {
          $uri .= URI_AMP."mysqlerror=" . urlencode($mysqlerror);
          $err.= ' / '. $mysqlerror;
       }
 
-      if( !$is_down && self::need_db_errorlog($err) )
+      if ( !$is_down && self::need_db_errorlog($err) )
       {
-         if( !@$dbcnx )
+         if ( !@$dbcnx )
             connect2mysql(true);
 
          $errorlog_query = "INSERT INTO Errorlog SET"
@@ -251,14 +251,14 @@ class DgsErrors
                         . ", Message='".mysql_addslashes($err)."'"
                         . ", Request='".mysql_addslashes($request)."'"
                         . ", IP='".mysql_addslashes($ip)."'" ; //+ Date= timestamp
-         if( !empty($mysqlerror) )
+         if ( !empty($mysqlerror) )
             $errorlog_query .= ", MysqlError='".mysql_addslashes($mysqlerror)."'";
-         if( is_string($debugmsg) )
+         if ( is_string($debugmsg) )
             $errorlog_query .= ", Debug='".mysql_addslashes($debugmsg)."'";
 
-         if( $dbcnx )
+         if ( $dbcnx )
          {
-            if( @mysql_query( $errorlog_query ) !== false )
+            if ( @mysql_query( $errorlog_query ) !== false )
                $uri .= URI_AMP."eid=" . mysql_insert_id();
          }
       }
@@ -315,7 +315,7 @@ class DgsErrors
 global $TheErrors; //PHP5
 $TheErrors = new DgsErrors();
 
-if( !function_exists('error') )
+if ( !function_exists('error') )
 {
    function error($err, $debugmsg=NULL, $log_error=true )
    {
@@ -324,7 +324,7 @@ if( !function_exists('error') )
    }
 }
 
-if( !function_exists('warning') )
+if ( !function_exists('warning') )
 {
    function warning($err, $debugmsg=NULL )
    {

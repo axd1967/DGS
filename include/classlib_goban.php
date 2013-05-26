@@ -98,14 +98,14 @@ class MarkupHandlerGoban
 
       // parse igoban-type (1st attribute); no type-default
       $igoban_type = self::extract_igoban_type( $map_args );
-      if( is_null($igoban_type) )
+      if ( is_null($igoban_type) )
          return $rawtext;
 
       $readerClass = @self::$ARR_GOBAN_HANDLERS_READER[strtoupper($igoban_type)];
       $writerClass = @self::$ARR_GOBAN_HANDLERS_WRITER[strtoupper($writer_type)];
-      if( !$readerClass )
+      if ( !$readerClass )
          error('invalid_args', "MarkupHandlerGoban:parse_igoban.check.igoban_type($igoban_type)");
-      if( !$writerClass )
+      if ( !$writerClass )
          error('invalid_args', "MarkupHandlerGoban:parse_igoban.check.writer_type($writer_type)");
 
       $goban_reader = new $readerClass( $map_args );
@@ -121,11 +121,11 @@ class MarkupHandlerGoban
    // Extracts type from: <igoban [t|type=]...>
    private static function extract_igoban_type( $args )
    {
-      if( isset($args['#1']) ) // first arg
+      if ( isset($args['#1']) ) // first arg
          return $args['#1'];
-      elseif( isset($args['type']) )
+      elseif ( isset($args['type']) )
          return $args['type'];
-      elseif( isset($args['t']) )
+      elseif ( isset($args['t']) )
          return $args['t'];
       else
          return null;
@@ -140,11 +140,11 @@ class MarkupHandlerGoban
       $arr = preg_split( "/\s+/", trim($attbs) );
       $result = array();
       $arg_idx = 0;
-      foreach( $arr as $part )
+      foreach ( $arr as $part )
       {
-         if( $part === '' ) continue;
+         if ( $part === '' ) continue;
          $arg_idx++;
-         if( preg_match( "/^([^=]+)=(\S*)$/", $part, $matches) )
+         if ( preg_match( "/^([^=]+)=(\S*)$/", $part, $matches) )
             $result["#$arg_idx"] = $result[$matches[1]] = $matches[2];
          else
             $result["#$arg_idx"] = $part;
@@ -243,9 +243,9 @@ class Goban
    {
       $out = array();
       $out[] = sprintf("opts_coords=0x%x", $this->opts_coords);
-      for($y=1; $y <= $this->max_y; $y++)
+      for ($y=1; $y <= $this->max_y; $y++)
       {
-         for($x=1; $x <= $this->max_x; $x++)
+         for ($x=1; $x <= $this->max_x; $x++)
          {
             $arr = $this->getValue( $x, $y );
             $val_text = self::value_to_string( $arr[GOBMATRIX_VALUE] );
@@ -280,11 +280,11 @@ class Goban
       $this->max_y = max( $y, $this->max_y );
       //error_log("Goban.setValue($x,$y,$value,$label): (".(is_array($value) ? self::value_to_string($value[GOBMATRIX_VALUE]) : '').") max_x/y={$this->max_x}/{$this->max_y}");
 
-      if( is_array($value) )
+      if ( is_array($value) )
          $this->matrix[$y][$x] = $value;
-      elseif( !is_numeric($value) )
+      elseif ( !is_numeric($value) )
          error('invalid_args', "Goban.setValue($x,$y,$value)");
-      elseif( is_null($label) )
+      elseif ( is_null($label) )
          $this->matrix[$y][$x] = $value; // optimization to avoid too many object-instances
       else
          $this->matrix[$y][$x] = array( GOBMATRIX_VALUE => $value, GOBMATRIX_LABEL => $label );
@@ -299,7 +299,7 @@ class Goban
    public function getValue( $x, $y )
    {
       $arrval = @$this->matrix[$y][$x];
-      if( is_array($arrval) )
+      if ( is_array($arrval) )
          $result = $arrval;
       elseif ( is_numeric($arrval) )
          $result = array( GOBMATRIX_VALUE => $arrval, GOBMATRIX_LABEL => '' );
@@ -324,7 +324,7 @@ class Goban
    {
       $upd_arr = $this->getValue($x,$y);
       $upd_arr[GOBMATRIX_VALUE] = ($upd_arr[GOBMATRIX_VALUE] & ~GOBB_BITMASK) | ($board_value & GOBB_BITMASK);
-      if( !is_null($hoshi_value) )
+      if ( !is_null($hoshi_value) )
          $upd_arr[GOBMATRIX_VALUE] = ($upd_arr[GOBMATRIX_VALUE] & ~GOBO_HOSHI) | ($hoshi_value ? GOBB_BITMASK : 0);
       $this->setValue( $x, $y, $upd_arr );
    }//setBoardLines
@@ -340,13 +340,13 @@ class Goban
       $this->setBoardLines( $x, $y, 0, /*hoshi*/false );
 
       // adjust neighbour points
-      if( $x > 1 )
+      if ( $x > 1 )
          $this->clearBoardLinesBit( $x-1, $y, GOBB_EAST );
-      if( $this->hasValue( $x+1, $y ) )
+      if ( $this->hasValue( $x+1, $y ) )
          $this->clearBoardLinesBit( $x+1, $y, GOBB_WEST );
-      if( $y > 1 )
+      if ( $y > 1 )
          $this->clearBoardLinesBit( $x, $y-1, GOBB_SOUTH );
-      if( $this->hasValue( $x, $y+1 ) )
+      if ( $this->hasValue( $x, $y+1 ) )
          $this->clearBoardLinesBit( $x, $y+1, GOBB_NORTH );
    }//eraseBoardPoint
 
@@ -360,7 +360,7 @@ class Goban
 
    public function setHoshi( $x, $y, $hoshi_set, $check=false )
    {
-      if( $check && ( $x < 1 || $x > $this->max_x || $y < 1 || $y > $this->max_y ) )
+      if ( $check && ( $x < 1 || $x > $this->max_x || $y < 1 || $y > $this->max_y ) )
          return;
 
       $upd_arr = $this->getValue($x,$y);
@@ -394,9 +394,9 @@ class Goban
    {
       $upd_arr = $this->getValue($x,$y);
       $stone = ( $upd_arr[GOBMATRIX_VALUE] & GOBS_BITMASK );
-      if( $stone == GOBS_BLACK )
+      if ( $stone == GOBS_BLACK )
          $stone = GOBS_WHITE;
-      elseif( $stone == GOBS_WHITE )
+      elseif ( $stone == GOBS_WHITE )
          $stone = GOBS_BLACK;
       else
          return;
@@ -432,26 +432,26 @@ class Goban
 
    public function makeBoard( $width, $height, $withHoshi=true )
    {
-      if( $width < 2 || $height < 2 )
+      if ( $width < 2 || $height < 2 )
          error('invalid_args', "Goban.makeBoard.check($width,$height)");
 
-      for( $y=1; $y <= $height; $y++)
+      for ( $y=1; $y <= $height; $y++)
       {
          $board_lines = GOBB_MID;
-         if( $y == 1 )
+         if ( $y == 1 )
             $board_lines &= ~GOBB_NORTH;
-         elseif( $y == $height )
+         elseif ( $y == $height )
             $board_lines &= ~GOBB_SOUTH;
 
-         for( $x=1; $x <= $width; $x++)
+         for ( $x=1; $x <= $width; $x++)
          {
             $val = $board_lines;
-            if( $x == 1 )
+            if ( $x == 1 )
                $val &= ~GOBB_WEST;
-            elseif( $x == $width )
+            elseif ( $x == $width )
                $val &= ~GOBB_EAST;
 
-            if( $withHoshi && is_hoshi($x-1, $y-1, $width, $height) )
+            if ( $withHoshi && is_hoshi($x-1, $y-1, $width, $height) )
                $val |= GOBO_HOSHI;
 
             $this->matrix[$y][$x] = $val;
@@ -480,16 +480,16 @@ class Goban
       $arrval = $this->getValue($x+1,$y+1);
       $value = $arrval[GOBMATRIX_VALUE];
       $marker = (int)@$VAL_MAP[ $value & GOBM_BITMASK ];
-      if( $marker )
+      if ( $marker )
          return ($with_dead) ? $marker : 0;
       return (int)@$VAL_MAP[ $value & GOBS_BITMASK ]; // undef = 00 (empty-field)
    }//read_stone_value
 
    public function switch_colors()
    {
-      for( $y = 1; $y <= $this->max_y; $y++ )
+      for ( $y = 1; $y <= $this->max_y; $y++ )
       {
-         for( $x = 1; $x <= $this->max_x; $x++ )
+         for ( $x = 1; $x <= $this->max_x; $x++ )
             $this->switchStoneColor( $x, $y );
       }
    }//switch_colors
@@ -505,20 +505,20 @@ class Goban
       $this->size_x = $this->size_y = $this->max_x = $this->max_y;
 
       // reset board-lines, no irregular board
-      for( $y = 1; $y <= $size; $y++ )
+      for ( $y = 1; $y <= $size; $y++ )
       {
          $board_lines = GOBB_MID;
-         if( $y == 1 )
+         if ( $y == 1 )
             $board_lines &= ~GOBB_NORTH;
-         elseif( $y == $size )
+         elseif ( $y == $size )
             $board_lines &= ~GOBB_SOUTH;
 
-         for( $x = 1; $x <= $size; $x++ )
+         for ( $x = 1; $x <= $size; $x++ )
          {
             $val = $board_lines;
-            if( $x == 1 )
+            if ( $x == 1 )
                $val &= ~GOBB_WEST;
-            elseif( $x == $size )
+            elseif ( $x == $size )
                $val &= ~GOBB_EAST;
 
             $arrval = $this->getValue($x,$y);
@@ -541,7 +541,7 @@ class Goban
       $goban->setSize( $size, $size );
       $goban->makeBoard( $size, $size, /*withHoshi*/true );
 
-      foreach( $arr_pos_xy as $arr )
+      foreach ( $arr_pos_xy as $arr )
       {
          list( $stone, $x, $y ) = $arr;
          $goban->setStone( $x + 1, $y + 1, $stone );
@@ -554,48 +554,48 @@ class Goban
    private static function value_to_string( $val )
    {
       $out = array();
-      if( $val & GOBB_BITMASK )
+      if ( $val & GOBB_BITMASK )
       {
          $v = $val & GOBB_BITMASK;
-         if( $v == GOBB_EMPTY )
+         if ( $v == GOBB_EMPTY )
             $out[] = '.';
-         elseif( $v == GOBB_MID )
+         elseif ( $v == GOBB_MID )
             $out[] = '+';
          else
          {
-            if( $v & GOBB_NORTH ) $out[] = 'N';
-            if( $v & GOBB_SOUTH ) $out[] = 'S';
-            if( $v & GOBB_WEST ) $out[] = 'W';
-            if( $v & GOBB_EAST ) $out[] = 'E';
+            if ( $v & GOBB_NORTH ) $out[] = 'N';
+            if ( $v & GOBB_SOUTH ) $out[] = 'S';
+            if ( $v & GOBB_WEST ) $out[] = 'W';
+            if ( $v & GOBB_EAST ) $out[] = 'E';
          }
       }
-      if( $val & GOBO_HOSHI )
+      if ( $val & GOBO_HOSHI )
          $out[] = 'Ho';
-      if( $val & GOBS_BITMASK )
+      if ( $val & GOBS_BITMASK )
       {
          $v = $val & GOBS_BITMASK;
-         if( $v == GOBS_EMPTY )
+         if ( $v == GOBS_EMPTY )
             $out[] = '-';
-         elseif( $v == GOBS_BLACK )
+         elseif ( $v == GOBS_BLACK )
             $out[] = 'b';
-         elseif( $v == GOBS_WHITE )
+         elseif ( $v == GOBS_WHITE )
             $out[] = 'w';
       }
-      if( $val & GOBM_BITMASK )
+      if ( $val & GOBM_BITMASK )
       {
          $v = $val & GOBM_BITMASK;
-         if( $v == GOBM_EMPTY ) $out[] = ':';
-         if( $v == GOBM_NUMBER ) $out[] = '9';
-         if( $v == GOBM_LETTER ) $out[] = 'L';
-         if( $v == GOBM_MARK )   $out[] = 'M';
-         if( $v == GOBM_CIRCLE ) $out[] = 'C';
-         if( $v == GOBM_SQUARE ) $out[] = 'S';
-         if( $v == GOBM_TRIANGLE ) $out[] = 'T';
-         if( $v == GOBM_CROSS )  $out[] = 'X';
-         if( $v == GOBM_TERR_W ) $out[] = 'wT';
-         if( $v == GOBM_TERR_B ) $out[] = 'bT';
-         if( $v == GOBM_TERR_NEUTRAL ) $out[] = 'nT';
-         if( $v == GOBM_TERR_DAME ) $out[] = 'dT';
+         if ( $v == GOBM_EMPTY ) $out[] = ':';
+         if ( $v == GOBM_NUMBER ) $out[] = '9';
+         if ( $v == GOBM_LETTER ) $out[] = 'L';
+         if ( $v == GOBM_MARK )   $out[] = 'M';
+         if ( $v == GOBM_CIRCLE ) $out[] = 'C';
+         if ( $v == GOBM_SQUARE ) $out[] = 'S';
+         if ( $v == GOBM_TRIANGLE ) $out[] = 'T';
+         if ( $v == GOBM_CROSS )  $out[] = 'X';
+         if ( $v == GOBM_TERR_W ) $out[] = 'wT';
+         if ( $v == GOBM_TERR_B ) $out[] = 'bT';
+         if ( $v == GOBM_TERR_NEUTRAL ) $out[] = 'nT';
+         if ( $v == GOBM_TERR_DAME ) $out[] = 'dT';
       }
       return implode(' ', $out);
    }//value_to_string

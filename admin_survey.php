@@ -34,16 +34,16 @@ $GLOBALS['ThePage'] = new Page('SurveyAdmin');
    connect2mysql();
 
    $logged_in = who_is_logged( $player_row);
-   if( !$logged_in )
+   if ( !$logged_in )
       error('login_if_not_logged_in', 'admin_survey');
-   if( !ALLOW_SURVEY_VOTE )
+   if ( !ALLOW_SURVEY_VOTE )
       error('feature_disabled', 'admin_survey');
    $my_id = $player_row['ID'];
-   if( $my_id <= GUESTS_ID_MAX )
+   if ( $my_id <= GUESTS_ID_MAX )
       error('not_allowed_for_guest', 'admin_survey');
 
    $is_admin = SurveyControl::is_survey_admin();
-   if( !$is_admin )
+   if ( !$is_admin )
       error('adminlevel_too_low', 'admin_survey');
 
 /* Actual REQUEST calls used:
@@ -54,13 +54,13 @@ $GLOBALS['ThePage'] = new Page('SurveyAdmin');
 */
 
    $sid = (int) get_request_arg('sid');
-   if( $sid < 0 ) $sid = 0;
+   if ( $sid < 0 ) $sid = 0;
 
    // init
    $survey = ( $sid > 0 ) ? Survey::load_survey($sid) : null;
-   if( is_null($survey) )
+   if ( is_null($survey) )
       $survey = SurveyControl::new_survey();
-   elseif( !SurveyControl::allow_survey_edit($survey) )
+   elseif ( !SurveyControl::allow_survey_edit($survey) )
       error('survey_edit_not_allowed', "admin_survey.check.edit($sid)");
    else
    {
@@ -80,9 +80,9 @@ $GLOBALS['ThePage'] = new Page('SurveyAdmin');
    $errors = $input_errors;
 
    // save survey-object with values from edit-form
-   if( @$_REQUEST['save'] && !@$_REQUEST['preview'] && count($errors) == 0 )
+   if ( @$_REQUEST['save'] && !@$_REQUEST['preview'] && count($errors) == 0 )
    {
-      if( count($edits) == 0 )
+      if ( count($edits) == 0 )
          $errors[] = T_('Sorry, there\'s nothing to save.');
       else
       {
@@ -103,7 +103,7 @@ $GLOBALS['ThePage'] = new Page('SurveyAdmin');
    }
 
    // default for <opt>-tag
-   if( empty($vars['survey_opts']) )
+   if ( empty($vars['survey_opts']) )
       $vars['survey_opts'] = '<opt tag [min_points] "title">description</tt>';
 
    $page = "admin_survey.php";
@@ -124,22 +124,22 @@ $GLOBALS['ThePage'] = new Page('SurveyAdmin');
    $sform->add_row( array(
          'DESCRIPTION', T_('Survey Author'),
          'TEXT',        $survey->User->user_reference(), ));
-   if( $survey->Created > 0 )
+   if ( $survey->Created > 0 )
       $sform->add_row( array(
             'DESCRIPTION', T_('Created'),
             'TEXT',        formatDate($survey->Created), ));
-   if( $survey->Lastchanged > 0 )
+   if ( $survey->Lastchanged > 0 )
       $sform->add_row( array(
             'DESCRIPTION', T_('Last changed'),
             'TEXT',        formatDate($survey->Lastchanged), ));
-   if( $sid )
+   if ( $sid )
       $sform->add_row( array(
             'DESCRIPTION', T_('Vote User Count#survey'),
             'TEXT',        $survey->hasUserVotes() ? span('FormWarning', $survey->UserCount) : $survey->UserCount, ));
 
    $sform->add_row( array( 'HR' ));
 
-   if( count($errors) )
+   if ( count($errors) )
    {
       $sform->add_row( array(
             'DESCRIPTION', T_('Error'),
@@ -192,16 +192,16 @@ $GLOBALS['ThePage'] = new Page('SurveyAdmin');
          'SUBMITBUTTON', 'preview', T_('Preview'),
       ));
 
-   if( @$_REQUEST['preview'] || $survey->Title != '' || count($survey->SurveyOptions) > 0 )
+   if ( @$_REQUEST['preview'] || $survey->Title != '' || count($survey->SurveyOptions) > 0 )
    {
       $sform->add_empty_row();
       $sform->add_row( array(
             'DESCRIPTION', T_('Preview'),
             'OWNHTML', '<td class="Preview">' . SurveyControl::build_view_survey($survey) . '</td>', ));
-      if( (string)$vars['user_list'] != '' && is_array($survey->UserListUserRefs) )
+      if ( (string)$vars['user_list'] != '' && is_array($survey->UserListUserRefs) )
       {
          $arr = array();
-         foreach( $survey->UserListUserRefs as $uid => $urow )
+         foreach ( $survey->UserListUserRefs as $uid => $urow )
             $arr[] = user_reference( REF_LINK, 1, '', $urow ) . "<br>\n";
 
          $sform->add_row( array(
@@ -219,7 +219,7 @@ $GLOBALS['ThePage'] = new Page('SurveyAdmin');
 
    $menu_array = array();
    $menu_array[T_('Surveys')] = "list_surveys.php";
-   if( $survey->ID && Survey::is_status_viewable($s_old_status) )
+   if ( $survey->ID && Survey::is_status_viewable($s_old_status) )
       $menu_array[T_('View survey')] = "view_survey.php?sid=$sid";
    $menu_array[T_('New survey')] = array( 'url' => "admin_survey.php", 'class' => 'AdminLink' );
 
@@ -237,9 +237,9 @@ function check_survey_options( $survey, $sopt_text )
    $sopt_text = str_replace("\r", '', $sopt_text); // remove CR
 
    // preconditional checks before parsing can start
-   if( !preg_match("/<opt\\b/", $sopt_text) )
+   if ( !preg_match("/<opt\\b/", $sopt_text) )
       $errors[] = T_('Missing &lt;opt>-tag in survey-options-text.');
-   if( count($errors) )
+   if ( count($errors) )
       return array( $arr_so, $errors );
 
    $sid = $survey->ID;
@@ -251,7 +251,7 @@ function check_survey_options( $survey, $sopt_text )
    $arr_tags = array(); # tag => 1
 
    // eat text before first <opt> as header-text
-   if( preg_match("/^(.*?)(<opt.*)$/is", $rem_text, $matches) )
+   if ( preg_match("/^(.*?)(<opt.*)$/is", $rem_text, $matches) )
    {
       $header_text = trim($matches[1]);
       $rem_text = $matches[2];
@@ -262,7 +262,7 @@ function check_survey_options( $survey, $sopt_text )
    // matches: $1=prev-opt-text, $2=tag, [ $3=points ], $4=title, $5=remaining
    $regex = "%^(.*?)<opt\\s+(\\S+)\\s+(?:(\S+)\s+)?\"([^\"]*?)\"\\s*>(.*)$%s";
 
-   while( preg_match($regex, $rem_text, $matches) )
+   while ( preg_match($regex, $rem_text, $matches) )
    {
       list( , $prev_text, $tag, $points, $title, $rem_text ) = $matches;
       unset($matches);
@@ -270,18 +270,18 @@ function check_survey_options( $survey, $sopt_text )
       $title = trim($title);
       $sort_order++;
 
-      if( preg_match("/<opt/i", $prev_text) )
+      if ( preg_match("/<opt/i", $prev_text) )
          $errors[] = sprintf( T_('Bad syntax around %s. &lt;opt> found: &lt;opt> incomplete'), $sort_order );
 
-      if( !is_null($last_so) && (string)$prev_text != '' )
+      if ( !is_null($last_so) && (string)$prev_text != '' )
          $last_so->Text = trim($prev_text);
 
       // checks
       $sopt = $last_so = new SurveyOption( 0, $sid, 0, $sort_order ); // $sid=0 for NEW
 
-      if( isNumber($tag, false) && $tag >= 1 && $tag <= 255 )
+      if ( isNumber($tag, false) && $tag >= 1 && $tag <= 255 )
       {
-         if( !isset($arr_tags[$tag]) )
+         if ( !isset($arr_tags[$tag]) )
             $sopt->Tag = (int)$tag;
          else
             $errors[] = sprintf( T_('Tag-label [%s] in %s. &lt;opt> already used.'), $tag, $sort_order );
@@ -291,22 +291,22 @@ function check_survey_options( $survey, $sopt_text )
          $errors[] = sprintf( T_('Expecting number for tag-label in %s. &lt;opt> in range %s, but was [%s].'),
             $sort_order, build_range_text(1,255), $tag );
 
-      if( (string)$points == '' )
+      if ( (string)$points == '' )
          $sopt->MinPoints = ($need_points) ? 1 : 0; // default
-      elseif( isNumber($points) && abs($points) <= SURVEY_POINTS_MAX )
+      elseif ( isNumber($points) && abs($points) <= SURVEY_POINTS_MAX )
          $sopt->MinPoints = (int)$points;
       else
          $errors[] = sprintf( T_('Expecting number for min-points in %s. &lt;opt> to be in range %s or empty for default, but was [%s].'),
             $sort_order, build_range_text(-SURVEY_POINTS_MAX, SURVEY_POINTS_MAX), $points );
 
-      if( Survey::is_point_type($survey->Type) && $sopt->MinPoints != 0 )
+      if ( Survey::is_point_type($survey->Type) && $sopt->MinPoints != 0 )
          $errors[] = sprintf( T_('Only value 0 is allowed for min-points in %s. &lt;opt>.'), $sort_order );
-      elseif( $survey->Type == SURVEY_TYPE_MULTI && $sopt->MinPoints == 0 )
+      elseif ( $survey->Type == SURVEY_TYPE_MULTI && $sopt->MinPoints == 0 )
          $errors[] = sprintf( T_('Value 0 is not allowed for min-points in %s. &lt;opt>.'), $sort_order );
-      elseif( $survey->Type == SURVEY_TYPE_SINGLE && $sopt->MinPoints != 1 )
+      elseif ( $survey->Type == SURVEY_TYPE_SINGLE && $sopt->MinPoints != 1 )
          $errors[] = sprintf( T_('Only value 1 is allowed for min-points in %s. &lt;opt>.'), $sort_order );
 
-      if( strlen($title) > 0 )
+      if ( strlen($title) > 0 )
          $sopt->Title = $title;
       else
          $errors[] = sprintf( T_('Survey-option-title in %s. &lt;opt> is missing.'), $sort_order );
@@ -314,20 +314,20 @@ function check_survey_options( $survey, $sopt_text )
       $arr_so[] = $sopt;
    }//while
 
-   if( preg_match("/<opt/i", $rem_text) )
+   if ( preg_match("/<opt/i", $rem_text) )
       $errors[] = T_('Incomplete &lt;opt> found in remaining text');
-   if( !is_null($last_so) && (string)$rem_text != '' )
+   if ( !is_null($last_so) && (string)$rem_text != '' )
       $last_so->Text = trim($rem_text);
 
    $arr_tag_keys = array_keys($arr_tags);
-   if( count($arr_tag_keys) > 0 ) // needed for min/max()
+   if ( count($arr_tag_keys) > 0 ) // needed for min/max()
    {
-      if( min($arr_tag_keys) != 1 || max($arr_tag_keys) != count($arr_so) )
+      if ( min($arr_tag_keys) != 1 || max($arr_tag_keys) != count($arr_so) )
          $errors[] = sprintf( T_('Expecting tag-labels to be in range %s.'), build_range_text(1, count($arr_so)) );
    }
 
    $cnt_so = count($arr_so);
-   if( $cnt_so < 1 || $cnt_so > MAX_SURVEY_OPTIONS )
+   if ( $cnt_so < 1 || $cnt_so > MAX_SURVEY_OPTIONS )
       $errors[] = sprintf( T_('Expecting %s survey-options, but there are [%s].'),
          build_range_text(1, MAX_SURVEY_OPTIONS), $cnt_so );
 
@@ -344,29 +344,29 @@ function merge_survey_options( $survey, $arr_survey_opts )
    $arr_tags = array(); # tag => 1
    $arr_merged_so = array();
    $upd_forbidden = false;
-   foreach( $arr_survey_opts as $so ) // check updates
+   foreach ( $arr_survey_opts as $so ) // check updates
    {
       $s_so = SurveyControl::findMatchingSurveyOption($survey, $so->Tag);
-      if( is_null($s_so) )
+      if ( is_null($s_so) )
          $arr_merged_so[] = $so;
       else
       {
-         if( $has_votes && $s_so->copyValues($so, /*check*/true) ) // SOPT changed?
+         if ( $has_votes && $s_so->copyValues($so, /*check*/true) ) // SOPT changed?
             $upd_forbidden = true;
          $s_so->copyValues( $so );
          $arr_merged_so[] = $s_so;
       }
       $arr_tags[$so->Tag] = 1;
    }
-   if( $upd_forbidden )
+   if ( $upd_forbidden )
       $errors[] = T_('Update of survey-options not possible: there are user-votes.');
 
    $arr_del_so = array();
-   foreach( $survey->SurveyOptions as $so ) // check deletes
+   foreach ( $survey->SurveyOptions as $so ) // check deletes
    {
-      if( isset($arr_tags[$so->Tag]) )
+      if ( isset($arr_tags[$so->Tag]) )
          continue;
-      if( $has_votes )
+      if ( $has_votes )
          $errors[] = sprintf( T_('Delete of survey-option with tag [%s] not possible: it already has user-votes.'), $so->Tag );
       else
          $arr_del_so[] = $so;
@@ -398,20 +398,20 @@ function parse_edit_form( &$survey )
 
    $old_vals = array() + $vars; // copy to determine edit-changes
    // read URL-vals into vars
-   foreach( $vars as $key => $val )
+   foreach ( $vars as $key => $val )
       $vars[$key] = get_request_arg( $key, $val );
 
    // parse URL-vars
-   if( $is_posted )
+   if ( $is_posted )
    {
       $survey->setType($vars['type']);
       $survey->setStatus($vars['status']);
 
-      if( $survey->Type == SURVEY_TYPE_POINTS || $survey->Type == SURVEY_TYPE_SUM )
+      if ( $survey->Type == SURVEY_TYPE_POINTS || $survey->Type == SURVEY_TYPE_SUM )
       {
          $new_value = $vars['min_points'];
          $min_value = ( $survey->Type == SURVEY_TYPE_POINTS ) ? -SURVEY_POINTS_MAX : 0;
-         if( isNumber($new_value) && $new_value >= $min_value && $new_value <= SURVEY_POINTS_MAX )
+         if ( isNumber($new_value) && $new_value >= $min_value && $new_value <= SURVEY_POINTS_MAX )
             $survey->MinPoints = (int)$new_value;
          else
             $errors[] = sprintf( T_('Expecting number for min-points in range %s.'),
@@ -419,83 +419,83 @@ function parse_edit_form( &$survey )
 
          $new_value = $vars['max_points'];
          $min_value = ( $survey->Type == SURVEY_TYPE_POINTS ) ? -SURVEY_POINTS_MAX : 1;
-         if( isNumber($new_value) && $new_value >= $min_value && $new_value <= SURVEY_POINTS_MAX )
+         if ( isNumber($new_value) && $new_value >= $min_value && $new_value <= SURVEY_POINTS_MAX )
             $survey->MaxPoints = (int)$new_value;
          else
             $errors[] = sprintf( T_('Expecting number for max-points in range %s.'),
                                  build_range_text($min_value, SURVEY_POINTS_MAX) );
 
-         if( $survey->MinPoints > $survey->MaxPoints )
+         if ( $survey->MinPoints > $survey->MaxPoints )
             $errors[] = T_('Min-points must be smaller than max-points.');
 
-         if( $survey->Type == SURVEY_TYPE_POINTS )
+         if ( $survey->Type == SURVEY_TYPE_POINTS )
          {
-            if( $survey->MinPoints == $survey->MaxPoints )
+            if ( $survey->MinPoints == $survey->MaxPoints )
                $errors[] = sprintf( T_('Use %s-type instead if min-points equals max-points.'),
                   SurveyControl::getTypeText(SURVEY_TYPE_MULTI) );
-            if( $survey->MaxPoints - $survey->MinPoints == 1 )
+            if ( $survey->MaxPoints - $survey->MinPoints == 1 )
                $errors[] = sprintf( T_('Use %s-type instead if difference between min- & max-points is only 1.'),
                   SurveyControl::getTypeText(SURVEY_TYPE_SINGLE) .'|'. SurveyControl::getTypeText(SURVEY_TYPE_MULTI) );
          }
-         if( $survey->Type == SURVEY_TYPE_SUM && $survey->MaxPoints == 1 )
+         if ( $survey->Type == SURVEY_TYPE_SUM && $survey->MaxPoints == 1 )
             $errors[] = sprintf( T_('Use %s-type instead if max-points is only 1.'),
                SurveyControl::getTypeText(SURVEY_TYPE_SINGLE) );
       }
-      elseif( $survey->Type == SURVEY_TYPE_MULTI )
+      elseif ( $survey->Type == SURVEY_TYPE_MULTI )
       {
          $new_value = $vars['min_points'];
-         if( isNumber($new_value) && $new_value >= 0 && $new_value <= MAX_SURVEY_OPTIONS )
+         if ( isNumber($new_value) && $new_value >= 0 && $new_value <= MAX_SURVEY_OPTIONS )
             $survey->MinPoints = (int)$new_value;
          else
             $errors[] = sprintf( T_('Expecting number for min-selections in range %s.'),
                                  build_range_text(0, MAX_SURVEY_OPTIONS) );
 
          $new_value = $vars['max_points'];
-         if( isNumber($new_value) && $new_value >= 0 && $new_value <= MAX_SURVEY_OPTIONS )
+         if ( isNumber($new_value) && $new_value >= 0 && $new_value <= MAX_SURVEY_OPTIONS )
             $survey->MaxPoints = (int)$new_value;
          else
             $errors[] = sprintf( T_('Expecting number for max-selections in range %s.'),
                                  build_range_text(0, MAX_SURVEY_OPTIONS) );
 
-         if( $survey->MaxPoints > 0 )
+         if ( $survey->MaxPoints > 0 )
          {
-            if( $survey->MinPoints > $survey->MaxPoints )
+            if ( $survey->MinPoints > $survey->MaxPoints )
                $errors[] = T_('Min-selections must be smaller than max-selections.');
-            if( $survey->MinPoints == $survey->MaxPoints )
+            if ( $survey->MinPoints == $survey->MaxPoints )
                $errors[] = T_('Min-selections must not be equal to max-selections: it makes no sense to select all options');
          }
 
-         if( $survey->MaxPoints == 1 )
+         if ( $survey->MaxPoints == 1 )
             $errors[] = sprintf( T_('Use %s-type instead if max-selections is only 1.'),
                SurveyControl::getTypeText(SURVEY_TYPE_SINGLE) );
       }
-      elseif( $survey->Type == SURVEY_TYPE_SINGLE )
+      elseif ( $survey->Type == SURVEY_TYPE_SINGLE )
       {
          $new_value = $vars['min_points'];
-         if( !isNumber($new_value) || $new_value )
+         if ( !isNumber($new_value) || $new_value )
             $errors[] = sprintf( T_('Expecting value 0 for min-points, but was [%s].'), $new_value );
 
          $new_value = $vars['max_points'];
-         if( !isNumber($new_value) || $new_value )
+         if ( !isNumber($new_value) || $new_value )
             $errors[] = sprintf( T_('Expecting value 0 for max-points, but was [%s].'), $new_value );
       }
 
       $new_value = trim($vars['title']);
-      if( strlen($new_value) < 6 )
+      if ( strlen($new_value) < 6 )
          $errors[] = T_('Survey title missing or too short');
       else
          $survey->Title = $new_value;
 
       $new_value = trim($vars['survey_opts']);
-      if( (string)$new_value != '' )
+      if ( (string)$new_value != '' )
       {
          list( $header_text, $arr_survey_opts, $check_errors ) = check_survey_options( $survey, $new_value );
-         if( count($check_errors) == 0 )
+         if ( count($check_errors) == 0 )
             list( $arr_survey_opts, $arr_del_sopts, $check_errors ) = merge_survey_options( $survey, $arr_survey_opts );
          else
             $arr_del_sopts = array();
 
-         if( count($check_errors) > 0 )
+         if ( count($check_errors) > 0 )
             $errors = array_merge( $errors, $check_errors );
          else
          {
@@ -506,17 +506,17 @@ function parse_edit_form( &$survey )
          }
       }
 
-      if( $survey->Type == SURVEY_TYPE_MULTI )
+      if ( $survey->Type == SURVEY_TYPE_MULTI )
       {
          $cnt_sopts = count($survey->SurveyOptions);
-         if( $survey->MaxPoints > $cnt_sopts )
+         if ( $survey->MaxPoints > $cnt_sopts )
             $errors[] = sprintf( T_('Value for max-selections [%s] can not exceed number of survey-options [%s].'),
                $survey->MaxPoints, $cnt_sopts );
       }
 
       $new_value = trim($vars['user_list']);
       list( $arr_handles, $arr_uids, $arr_urefs, $arr_rejected, $check_errors ) = check_user_list( $new_value, 0 );
-      if( count($check_errors) > 0 )
+      if ( count($check_errors) > 0 )
          $errors = array_merge( $errors, $check_errors );
       else
       {
@@ -531,16 +531,16 @@ function parse_edit_form( &$survey )
 
       // determine edits
       $has_upd_status = ( $old_vals['status'] != $survey->Status );
-      if( $old_vals['type'] != $survey->Type ) $edits[] = T_('Type#survey');
-      if( $has_upd_status ) $edits[] = T_('Status');
-      if( $old_vals['flags'] != $survey->Flags ) $edits[] = T_('Flags');
-      if( $old_vals['min_points'] != $survey->MinPoints ) $edits[] = T_('Min-Points');
-      if( $old_vals['max_points'] != $survey->MaxPoints ) $edits[] = T_('Max-Points');
-      if( $old_vals['title'] != $survey->Title ) $edits[] = T_('Title');
-      if( $old_vals['survey_opts'] != $vars['survey_opts'] ) $edits[] = T_('Survey-Options');
-      if( $old_vals['user_list'] != $vars['user_list'] ) $edits[] = T_('User List');
+      if ( $old_vals['type'] != $survey->Type ) $edits[] = T_('Type#survey');
+      if ( $has_upd_status ) $edits[] = T_('Status');
+      if ( $old_vals['flags'] != $survey->Flags ) $edits[] = T_('Flags');
+      if ( $old_vals['min_points'] != $survey->MinPoints ) $edits[] = T_('Min-Points');
+      if ( $old_vals['max_points'] != $survey->MaxPoints ) $edits[] = T_('Max-Points');
+      if ( $old_vals['title'] != $survey->Title ) $edits[] = T_('Title');
+      if ( $old_vals['survey_opts'] != $vars['survey_opts'] ) $edits[] = T_('Survey-Options');
+      if ( $old_vals['user_list'] != $vars['user_list'] ) $edits[] = T_('User List');
 
-      if( $survey->hasUserVotes() && count($edits) > 0 && !( count($edits) == 1 && $has_upd_status ) )
+      if ( $survey->hasUserVotes() && count($edits) > 0 && !( count($edits) == 1 && $has_upd_status ) )
          $errors[] = T_('Update of survey not allowed, because there are user-votes.');
    }
 

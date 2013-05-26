@@ -48,7 +48,7 @@ $TheErrors->set_mode(ERROR_MODE_PRINT);
    $n= $repeat;
    sleep(1);
    $stim= getmicrotime();
-   while( --$n >= 0 )
+   while ( --$n >= 0 )
    {
       $str.="loop("
          .$n
@@ -65,7 +65,7 @@ $TheErrors->set_mode(ERROR_MODE_PRINT);
    $n= $repeat;
    sleep(1);
    $stim= getmicrotime();
-   while( --$n >= 0 )
+   while ( --$n >= 0 )
    {
        echo "loop("
          ,$n //=> commas
@@ -84,7 +84,7 @@ $TheErrors->set_mode(ERROR_MODE_PRINT);
    var_export($res);
    echo "</pre>";
 
-   if(   $res['str']['len'] != $res['out']['len']
+   if (   $res['str']['len'] != $res['out']['len']
          || $res['str']['md5'] != $res['out']['md5'] )
    {
       echo "<br>Error: results different!";

@@ -155,29 +155,29 @@ class GobanHandlerSL1
       $this->emptyLines = 0;
       $this->hoshiCount = 0;
 
-      foreach( $this->lines as $line )
+      foreach ( $this->lines as $line )
       {
          $this->lpos++;
          $line = preg_replace( "/\s/", " ", $line ); // replace tabs -> space
 
          // Ex02: line-prefix '$$' can be omitted
-         if( substr($line,0,2) === '$$' )
+         if ( substr($line,0,2) === '$$' )
             $line = substr($line,2);
 
          // Ex01: trim leading/trailing white-spaces
          $line = trim($line);
-         if( $this->lpos == 1 )
+         if ( $this->lpos == 1 )
             $this->parse_title_line( $line );
          else
          {
-            if( !$this->parse_text_block($line) )
+            if ( !$this->parse_text_block($line) )
             {
                $line = trim( preg_replace( "/&nbsp;/", " ", $line ) );
-               if( preg_match( "/^{/", $line ) )
+               if ( preg_match( "/^{/", $line ) )
                   ; // Ex09: Arrows/Lines not supported
-               elseif( preg_match( "/^\[/", $line ) )
+               elseif ( preg_match( "/^\[/", $line ) )
                   $this->parse_links($line);
-               elseif( !$this->parse_borders($line) )
+               elseif ( !$this->parse_borders($line) )
                   $this->parse_line( $line );
             }
          }
@@ -188,7 +188,7 @@ class GobanHandlerSL1
       $this->setBoardBorders();
 
       $xSize = $ySize = ( !is_null($this->boardSize) ) ? $this->boardSize : 19;
-      if( is_null($this->boardSize) && $this->borders == GOBB_MID )
+      if ( is_null($this->boardSize) && $this->borders == GOBB_MID )
       {
          $xSize = $this->goban->max_x;
          $ySize = $this->goban->max_y;
@@ -196,16 +196,16 @@ class GobanHandlerSL1
       }
       $this->goban->setSize( $xSize, $ySize );
 
-      if( !is_null($this->boardTitle) && (string)$this->boardTitle != '' )
+      if ( !is_null($this->boardTitle) && (string)$this->boardTitle != '' )
          $this->goban->BoardTitle = $this->parse_SL_text( $this->boardTitle ); // wrapping by fixed table-width
 
-      if( !is_null($this->text_block) )
+      if ( !is_null($this->text_block) )
          $this->goban->BoardText = $this->parse_SL_text( $this->text_block );
 
-      if( !$this->hoshiCount )
+      if ( !$this->hoshiCount )
          $this->setHoshiPoints();
 
-      foreach( $this->erasePoints as $arr )
+      foreach ( $this->erasePoints as $arr )
          $this->goban->eraseBoardPoint( $arr[0], $arr[1] ); //x,y
 
       return $this->goban;
@@ -218,19 +218,19 @@ class GobanHandlerSL1
    private function parse_title_line( $line )
    {
       // format: $$(B|W)?c?(size)?(m\d+)? (title)?
-      if( preg_match( "/^([BW])?(c)?(\d+)?(m\d+)?\s*(\b.*)?$/i", $line, $matches ) )
+      if ( preg_match( "/^([BW])?(c)?(\d+)?(m\d+)?\s*(\b.*)?$/i", $line, $matches ) )
       {
-         if( @$matches[1] ) // B|W
+         if ( @$matches[1] ) // B|W
             $this->startMoveBlack = (bool)( strtoupper($matches[1]) === 'B' );
-         if( @$matches[2] ) // c
+         if ( @$matches[2] ) // c
             $this->showCoordinates = true;
-         if( @$matches[3] ) // 99
+         if ( @$matches[3] ) // 99
             $this->boardSize = (int)$matches[3];
-         if( @$matches[4] ) // m99
+         if ( @$matches[4] ) // m99
             $this->startMoveNumber = (int)substr($matches[4], 1);
 
          $title = trim(@$matches[5]);
-         if( $title != '' )
+         if ( $title != '' )
             $this->boardTitle = $title;
 
          return true;
@@ -245,18 +245,18 @@ class GobanHandlerSL1
     */
    private function parse_text_block( $line )
    {
-      if( !is_null($this->text_block) )
+      if ( !is_null($this->text_block) )
          $this->text_block .= "$line\n";
       else
       {
-         if( preg_match("/^(&nbsp;|\s)*$/", $line) )
+         if ( preg_match("/^(&nbsp;|\s)*$/", $line) )
             $this->emptyLines++;
-         elseif( preg_match("/^%%%%/", $line) )
+         elseif ( preg_match("/^%%%%/", $line) )
          {
             $this->text_block = '';
             $this->goban->BoardTextInline = false;
          }
-         elseif( $this->emptyLines > 0 )
+         elseif ( $this->emptyLines > 0 )
             $this->text_block = "$line\n";
          else
             return false;
@@ -271,7 +271,7 @@ class GobanHandlerSL1
     */
    private function parse_borders( $line )
    {
-      if( !preg_match("/^[-+|]+$/", $line) )
+      if ( !preg_match("/^[-+|]+$/", $line) )
          return false;
 
       $this->borderLines[$this->ypos] = $line;
@@ -284,38 +284,38 @@ class GobanHandlerSL1
     */
    private function parse_border_lines()
    {
-      foreach( $this->borderLines as $ypos => $line )
+      foreach ( $this->borderLines as $ypos => $line )
       {
          $clearLineBorder = false;
-         if( $ypos == 1 )
+         if ( $ypos == 1 )
             $gobb_vmask = GOBB_NORTH;
-         elseif( $ypos >= $this->goban->max_y )
+         elseif ( $ypos >= $this->goban->max_y )
             $gobb_vmask = GOBB_SOUTH;
          else
             continue; // in-between separation-lines for irregular boards not supported
 
          // consume line with border-info
-         if( preg_match("/^\+/", $line) ) // Ex04: ^+
+         if ( preg_match("/^\+/", $line) ) // Ex04: ^+
          {
             $this->borders |= $gobb_vmask | GOBB_WEST;
-            if( !$gobb_vmask )
+            if ( !$gobb_vmask )
                $clearLineBorder = true;
          }
-         if( preg_match("/[-+]\+$/", $line) ) // Ex04: -+$   ++$
+         if ( preg_match("/[-+]\+$/", $line) ) // Ex04: -+$   ++$
          {
             $this->borders |= $gobb_vmask | GOBB_EAST;
-            if( !$gobb_vmask )
+            if ( !$gobb_vmask )
                $clearLineBorder = true;
          }
-         if( preg_match("/-+/", $line) ) // ...----...
+         if ( preg_match("/-+/", $line) ) // ...----...
          {
-            if( $gobb_vmask )
+            if ( $gobb_vmask )
                $this->borders |= $gobb_vmask;
             else
                $clearLineBorder = true;
          }
 
-         if( $clearLineBorder )
+         if ( $clearLineBorder )
          {
             $this->clearLineBorderBit( $ypos - 1, GOBB_SOUTH );
             $this->clearLineBorderBit( $ypos, GOBB_NORTH );
@@ -326,9 +326,9 @@ class GobanHandlerSL1
    /*! \brief (\internal) Clears border-bit for whole line. */
    private function clearLineBorderBit( $y, $bitvalue )
    {
-      if( $y >=1 && $y <= $this->goban->max_y )
+      if ( $y >=1 && $y <= $this->goban->max_y )
       {
-         for( $x=1; $x < $this->goban->max_x; $x++ )
+         for ( $x=1; $x < $this->goban->max_x; $x++ )
             $this->goban->clearBoardLinesBit( $x, $y, $bitvalue );
       }
    }//clearLineBorderBit
@@ -340,13 +340,13 @@ class GobanHandlerSL1
    private function parse_links( $line )
    {
       // Ex05: consume line with diagram-links: [ref|link], link=dgs:dgsPage|http...|SL-topic; ignore remaining in line
-      if( preg_match("/^\[\s*([^|])\s*\|\s*([^\]]+)\s*\]/", $line, $matches) )
+      if ( preg_match("/^\[\s*([^|])\s*\|\s*([^\]]+)\s*\]/", $line, $matches) )
       {
          $label = $matches[1];
          $link = $matches[2];
-         if( preg_match("/^dgs:(.*)$/i", $link, $matches) )
+         if ( preg_match("/^dgs:(.*)$/i", $link, $matches) )
             $link = HOSTBASE . $matches[1];
-         elseif( !preg_match("/^(#|http)/", $link) )
+         elseif ( !preg_match("/^(#|http)/", $link) )
             $link = SL_HOSTBASE . $link; // SL-topic
 
          $this->goban->addLink( $label, $link );
@@ -363,7 +363,7 @@ class GobanHandlerSL1
    private function parse_line( $line )
    {
       //error_log("SL.parse_line($line)");
-      if( (string)$line == '' )
+      if ( (string)$line == '' )
          return false;
 
       $x = 0; // 1..n
@@ -372,120 +372,120 @@ class GobanHandlerSL1
       $expect_sep = true;
 
       $prev_item = '';
-      for( $idx=0; $idx < $linelen; $idx++, $prev_item = $item )
+      for ( $idx=0; $idx < $linelen; $idx++, $prev_item = $item )
       {
          $item = $line[$idx];
          $next_item = ($idx + 1 < $linelen ) ? $line[$idx + 1] : '';
 
          $expect_sep = !$expect_sep;
-         if( $expect_sep && $item == ' ' )
+         if ( $expect_sep && $item == ' ' )
             continue;
 
-         if( $item == '|' ) // v-edge
+         if ( $item == '|' ) // v-edge
          {
             // in first or last col?
-            if( $x == 0 )
+            if ( $x == 0 )
                $this->borders |= GOBB_WEST;
-            elseif( substr($line,-1,1) == '|' )
+            elseif ( substr($line,-1,1) == '|' )
                $this->borders |= GOBB_EAST;
             continue;
          }
 
          $x++;
          $this->goban->setBoardLines( $x, $y, GOBB_MID );
-         if( $prev_item == '|' )
+         if ( $prev_item == '|' )
             $this->goban->clearBoardLinesBit( $x, $y, GOBB_WEST );
-         if( $next_item == '|' )
+         if ( $next_item == '|' )
             $this->goban->clearBoardLinesBit( $x, $y, GOBB_EAST );
 
-         if( $item == '.' ) // empty intersection
+         if ( $item == '.' ) // empty intersection
          {
             ; // no stone, but board-lines
          }
-         elseif( $item == '-' || $item == '_' || $item == ' ' ) // empty cell
+         elseif ( $item == '-' || $item == '_' || $item == ' ' ) // empty cell
          {
             $this->goban->setValue( $x, $y, 0 ); // to have x,y in matrix
             $this->erasePoints[] = array( $x,$y );
          }
-         elseif( $item == ',' ) // hoshi
+         elseif ( $item == ',' ) // hoshi
          {
             $this->goban->setHoshi( $x, $y, true );
             $this->hoshiCount++;
          }
-         elseif( $item == 'X' ) // black stone
+         elseif ( $item == 'X' ) // black stone
             $this->goban->setStone( $x, $y, GOBS_BLACK );
-         elseif( $item == 'O' ) // white stone
+         elseif ( $item == 'O' ) // white stone
             $this->goban->setStone( $x, $y, GOBS_WHITE );
-         elseif( $item == 'B' ) // black stone (circle)
+         elseif ( $item == 'B' ) // black stone (circle)
          {
             $this->goban->setStone( $x, $y, GOBS_BLACK );
             $this->goban->setMarker( $x, $y, GOBM_CIRCLE, $item );
          }
-         elseif( $item == 'W' ) // white stone (circle)
+         elseif ( $item == 'W' ) // white stone (circle)
          {
             $this->goban->setStone( $x, $y, GOBS_WHITE );
             $this->goban->setMarker( $x, $y, GOBM_CIRCLE, $item );
          }
-         elseif( $item == '#' ) // black stone (square)
+         elseif ( $item == '#' ) // black stone (square)
          {
             $this->goban->setStone( $x, $y, GOBS_BLACK );
             $this->goban->setMarker( $x, $y, GOBM_SQUARE, $item );
          }
-         elseif( $item == '@' ) // white stone (square)
+         elseif ( $item == '@' ) // white stone (square)
          {
             $this->goban->setStone( $x, $y, GOBS_WHITE );
             $this->goban->setMarker( $x, $y, GOBM_SQUARE, $item );
          }
-         elseif( $item == 'Y' ) // black stone (triangle)
+         elseif ( $item == 'Y' ) // black stone (triangle)
          {
             $this->goban->setStone( $x, $y, GOBS_BLACK );
             $this->goban->setMarker( $x, $y, GOBM_TRIANGLE, $item );
          }
-         elseif( $item == 'Q' ) // white stone (triangle)
+         elseif ( $item == 'Q' ) // white stone (triangle)
          {
             $this->goban->setStone( $x, $y, GOBS_WHITE );
             $this->goban->setMarker( $x, $y, GOBM_TRIANGLE, $item );
          }
-         elseif( $item == 'Z' ) // black stone (cross)
+         elseif ( $item == 'Z' ) // black stone (cross)
          {
             $this->goban->setStone( $x, $y, GOBS_BLACK );
             $this->goban->setMarker( $x, $y, GOBM_CROSS, $item );
          }
-         elseif( $item == 'P' ) // white stone (cross)
+         elseif ( $item == 'P' ) // white stone (cross)
          {
             $this->goban->setStone( $x, $y, GOBS_WHITE );
             $this->goban->setMarker( $x, $y, GOBM_CROSS, $item );
          }
-         elseif( $item == 'C' ) // circle
+         elseif ( $item == 'C' ) // circle
             $this->goban->setMarker( $x, $y, GOBM_CIRCLE, $item );
-         elseif( $item == 'S' ) // square
+         elseif ( $item == 'S' ) // square
             $this->goban->setMarker( $x, $y, GOBM_SQUARE, $item );
-         elseif( $item == 'T' ) // triangle
+         elseif ( $item == 'T' ) // triangle
             $this->goban->setMarker( $x, $y, GOBM_TRIANGLE, $item );
-         elseif( $item == 'M' ) // cross = mark
+         elseif ( $item == 'M' ) // cross = mark
             $this->goban->setMarker( $x, $y, GOBM_CROSS, $item );
          // Ex10: DGS-only board-markers ------
-         elseif( $item == 'A' ) // black territory (black filled box)
+         elseif ( $item == 'A' ) // black territory (black filled box)
             $this->goban->setMarker( $x, $y, GOBM_TERR_B, $item );
-         elseif( $item == 'V' ) // white territory (white filled box)
+         elseif ( $item == 'V' ) // white territory (white filled box)
             $this->goban->setMarker( $x, $y, GOBM_TERR_W, $item );
-         elseif( $item == '~' ) // neutral territory (green filled box)
+         elseif ( $item == '~' ) // neutral territory (green filled box)
             $this->goban->setMarker( $x, $y, GOBM_TERR_NEUTRAL, $item );
-         elseif( $item == '=' ) // dame territory (red filled box)
+         elseif ( $item == '=' ) // dame territory (red filled box)
             $this->goban->setMarker( $x, $y, GOBM_TERR_DAME, $item );
          // END Ex10 ------
-         elseif( is_numeric($item) ) // numbered stone
+         elseif ( is_numeric($item) ) // numbered stone
          {
             $num = (int)$item;
             $move_num = $this->startMoveNumber + $num - 1 + ( $num == 0 ? 10 : 0 );
-            if( $num & 1 ) //odd
+            if ( $num & 1 ) //odd
                $move_col = ($this->startMoveBlack) ? GOBS_BLACK : GOBS_WHITE;
             else
                $move_col = ($this->startMoveBlack) ? GOBS_WHITE : GOBS_BLACK;
             $this->goban->setStone( $x, $y, $move_col );
             $this->goban->setMarker( $x, $y, GOBM_NUMBER, $move_num );
          }
-         elseif( preg_match( "/^[a-z]$/", $item) ) // letter a..z
+         elseif ( preg_match( "/^[a-z]$/", $item) ) // letter a..z
             $this->goban->setMarker( $x, $y, GOBM_LETTER, strtolower($item) );
          else // unknown item
          {
@@ -544,21 +544,21 @@ class GobanHandlerSL1
     */
    private function setBoardBorders()
    {
-      if( $this->borders == 0 )
+      if ( $this->borders == 0 )
          return;
 
-      if( $this->borders & GOBB_NORTH ) // first row
-         for( $x=1; $x <= $this->goban->max_x; $x++)
+      if ( $this->borders & GOBB_NORTH ) // first row
+         for ( $x=1; $x <= $this->goban->max_x; $x++)
             $this->goban->clearBoardLinesBit( $x, 1, GOBB_NORTH );
-      if( ($this->borders & GOBB_SOUTH) || (!is_null($this->boardSize) && $this->goban->max_y >= $this->boardSize) ) // last row
-         for( $x=1; $x <= $this->goban->max_x; $x++)
+      if ( ($this->borders & GOBB_SOUTH) || (!is_null($this->boardSize) && $this->goban->max_y >= $this->boardSize) ) // last row
+         for ( $x=1; $x <= $this->goban->max_x; $x++)
             $this->goban->clearBoardLinesBit( $x, $this->goban->max_y, GOBB_SOUTH );
 
-      if( $this->borders & GOBB_WEST ) // first col
-         for( $y=1; $y <= $this->goban->max_y; $y++)
+      if ( $this->borders & GOBB_WEST ) // first col
+         for ( $y=1; $y <= $this->goban->max_y; $y++)
             $this->goban->clearBoardLinesBit( 1, $y, GOBB_WEST );
-      if( ($this->borders & GOBB_EAST) || (!is_null($this->boardSize) && $this->goban->max_x >= $this->boardSize) ) // last col
-         for( $y=1; $y <= $this->goban->max_y; $y++)
+      if ( ($this->borders & GOBB_EAST) || (!is_null($this->boardSize) && $this->goban->max_x >= $this->boardSize) ) // last col
+         for ( $y=1; $y <= $this->goban->max_y; $y++)
             $this->goban->clearBoardLinesBit( $this->goban->max_x, $y, GOBB_EAST );
    }//setBoardBorders
 
@@ -569,26 +569,26 @@ class GobanHandlerSL1
    private function setHoshiPoints()
    {
       // need at least one pair of perpendicular edges
-      if( $this->borders == 0 )
+      if ( $this->borders == 0 )
          return false;
-      elseif( $this->borders == (GOBB_WEST|GOBB_EAST) || $this->borders == (GOBB_NORTH|GOBB_SOUTH) )
+      elseif ( $this->borders == (GOBB_WEST|GOBB_EAST) || $this->borders == (GOBB_NORTH|GOBB_SOUTH) )
          return false;
-      elseif( $this->borders == (1 << floor(log($this->borders, 2))) )
+      elseif ( $this->borders == (1 << floor(log($this->borders, 2))) )
          return false;
 
       $size_x = (is_null($this->boardSize)) ? $this->goban->size_x : $this->boardSize;
       $size_y = (is_null($this->boardSize)) ? $this->goban->size_y : $this->boardSize;
-      if( ($this->borders & (GOBB_WEST|GOBB_EAST)) == (GOBB_WEST|GOBB_EAST) )
+      if ( ($this->borders & (GOBB_WEST|GOBB_EAST)) == (GOBB_WEST|GOBB_EAST) )
          $size_x = $this->goban->max_x;
-      if( ($this->borders & (GOBB_NORTH|GOBB_SOUTH)) == (GOBB_NORTH|GOBB_SOUTH) )
+      if ( ($this->borders & (GOBB_NORTH|GOBB_SOUTH)) == (GOBB_NORTH|GOBB_SOUTH) )
          $size_y = $this->goban->max_y;
 
       $arr_hoshi = get_hoshi_coords( $size_x, $size_y, 1 );
-      if( ($this->borders & (GOBB_NORTH|GOBB_WEST)) == (GOBB_NORTH|GOBB_WEST) ) // |^^
+      if ( ($this->borders & (GOBB_NORTH|GOBB_WEST)) == (GOBB_NORTH|GOBB_WEST) ) // |^^
          $this->drawHoshiPoints( $arr_hoshi, 0, 0 );
-      elseif( ($this->borders & (GOBB_NORTH|GOBB_EAST)) == (GOBB_NORTH|GOBB_EAST) ) // ^^|
+      elseif ( ($this->borders & (GOBB_NORTH|GOBB_EAST)) == (GOBB_NORTH|GOBB_EAST) ) // ^^|
          $this->drawHoshiPoints( $arr_hoshi, $this->goban->max_x + 1, 0 );
-      elseif( ($this->borders & (GOBB_SOUTH|GOBB_WEST)) == (GOBB_SOUTH|GOBB_WEST) ) // |__
+      elseif ( ($this->borders & (GOBB_SOUTH|GOBB_WEST)) == (GOBB_SOUTH|GOBB_WEST) ) // |__
          $this->drawHoshiPoints( $arr_hoshi, 0, $this->goban->max_y + 1 );
       else //if( ($this->borders & (GOBB_SOUTH|GOBB_EAST)) == (GOBB_SOUTH|GOBB_EAST) ) // __|
          $this->drawHoshiPoints( $arr_hoshi, $this->goban->max_x + 1, $this->goban->max_y + 1 );
@@ -599,7 +599,7 @@ class GobanHandlerSL1
    // \internal
    private function drawHoshiPoints( $arr_hoshi, $chg_x, $chg_y )
    {
-      foreach( $arr_hoshi as $arr_xy )
+      foreach ( $arr_hoshi as $arr_xy )
       {
          list( $x, $y ) = $arr_xy;
          $this->goban->setHoshi( ($chg_x ? $chg_x - $x : $x), ($chg_y ? $chg_y - $y : $y), true, /*chk*/true );
@@ -640,15 +640,15 @@ class GobanHandlerSL1
 
       // find start-move-number for number-labels
       $arr_nums = array(); // label-num => is-black
-      for( $y=1; $y <= $goban->max_y; $y++ )
+      for ( $y=1; $y <= $goban->max_y; $y++ )
       {
-         for( $x=1; $x <= $goban->max_x; $x++ )
+         for ( $x=1; $x <= $goban->max_x; $x++ )
          {
             $arrval = $goban->getValue($x,$y);
-            if( $arrval[GOBMATRIX_VALUE] & GOBM_NUMBER )
+            if ( $arrval[GOBMATRIX_VALUE] & GOBM_NUMBER )
             {
                $label = $arrval[GOBMATRIX_LABEL];
-               if( $label )
+               if ( $label )
                   $arr_nums[$label] = ($arrval[GOBMATRIX_VALUE] & GOBS_BLACK);
             }
          }
@@ -658,10 +658,10 @@ class GobanHandlerSL1
       $firstmove_color = ( $min_num > 0 && !$arr_nums[$min_num] ) ? 'W' : '';
 
       $result[] = '$$ ++';
-      for( $y=1; $y <= $goban->max_y; $y++ )
+      for ( $y=1; $y <= $goban->max_y; $y++ )
       {
          $line = '$$';
-         for( $x=1; $x <= $goban->max_x; $x++ )
+         for ( $x=1; $x <= $goban->max_x; $x++ )
          {
             $arrval = $goban->getValue($x,$y);
             $val = $arrval[GOBMATRIX_VALUE];
@@ -672,15 +672,15 @@ class GobanHandlerSL1
             $hoshi = ($val & GOBO_HOSHI);
             $num_label = ($marker == GOBM_NUMBER) ? $label - $min_num + 1 : 0;
 
-            if( $stone != GOBS_EMPTY && $marker == GOBM_NUMBER && $num_label >= 1 && $num_label <= 10 )
+            if ( $stone != GOBS_EMPTY && $marker == GOBM_NUMBER && $num_label >= 1 && $num_label <= 10 )
                $line .= ' ' . ($num_label == 10 ? 0 : $num_label);
-            elseif( $stone == GOBS_EMPTY && $marker == GOBM_LETTER && $label >= 'a' && $label <= 'z' )
+            elseif ( $stone == GOBS_EMPTY && $marker == GOBM_LETTER && $label >= 'a' && $label <= 'z' )
                $line .= ' ' . $label;
-            elseif( $conv_val = @$CONV_MAP[$stone | $marker] )
+            elseif ( $conv_val = @$CONV_MAP[$stone | $marker] )
                $line .= ' ' . $conv_val;
-            elseif( $conv_val = @$CONV_MAP[$stone] )
+            elseif ( $conv_val = @$CONV_MAP[$stone] )
                $line .= ' ' . $conv_val;
-            elseif( $stone == GOBS_EMPTY )
+            elseif ( $stone == GOBS_EMPTY )
                $line .= ' ' . ($hoshi ? ',' : '.');
          }
          $result[] = $line;
@@ -688,31 +688,31 @@ class GobanHandlerSL1
       $result[] = '$$ ++';
 
       // LINKS
-      foreach( $goban->BoardLinks as $label => $link )
+      foreach ( $goban->BoardLinks as $label => $link )
       {
-         if( strpos($link, HOSTBASE) === 0 )
+         if ( strpos($link, HOSTBASE) === 0 )
             $link = 'dgs:' . substr($link, strlen(HOSTBASE));
-         elseif( strpos($link, SL_HOSTBASE) === 0 )
+         elseif ( strpos($link, SL_HOSTBASE) === 0 )
             $link = substr($link, strlen(SL_HOSTBASE));
          $result[] = "\$\$ [$label|$link]";
       }
 
       // TITLE-line
-      if( $firstmove_color )
+      if ( $firstmove_color )
          $result[0] .= $firstmove_color;
-      if( $goban->show_coords && $goban->opts_coords != GOBB_EMPTY )
+      if ( $goban->show_coords && $goban->opts_coords != GOBB_EMPTY )
          $result[0] .= 'c';
-      if( $goban->size_x == $goban->size_y && $goban->max_x == $goban->max_y && $goban->size_x == $goban->max_x )
+      if ( $goban->size_x == $goban->size_y && $goban->max_x == $goban->max_y && $goban->size_x == $goban->max_x )
          $result[0] .= $goban->size_x;
-      if( $min_num > 1 )
+      if ( $min_num > 1 )
          $result[0] .= 'm' . $min_num;
-      if( !is_null($goban->BoardTitle) )
+      if ( !is_null($goban->BoardTitle) )
          $result[0] .= ' ' . $goban->BoardTitle;
 
       // TEXT-block
-      if( !is_null($goban->BoardText) )
+      if ( !is_null($goban->BoardText) )
       {
-         if( !$goban->BoardTextInline )
+         if ( !$goban->BoardTextInline )
             $result[] = '%%%%';
          $result[] = $goban->BoardText;
       }

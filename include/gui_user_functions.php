@@ -39,12 +39,12 @@ function check_user_list( $user_list, $author_uid )
    $arr_handle = array();
    $arr_miss = array();
 
-   foreach( preg_split("/[\\s,;]+/", $user_list) as $u )
+   foreach ( preg_split("/[\\s,;]+/", $user_list) as $u )
    {
-      if( strlen($u) == 0 )
+      if ( strlen($u) == 0 )
          continue;
 
-      if( $u[0] == '=' ) // =1234 (support for numeric handle), allowed for non-numeric-handle too
+      if ( $u[0] == '=' ) // =1234 (support for numeric handle), allowed for non-numeric-handle too
       {
          $is_handle = true;
          $u = substr($u, 1);
@@ -52,11 +52,11 @@ function check_user_list( $user_list, $author_uid )
       else
          $is_handle = false;
 
-      if( !is_numeric($u) && illegal_chars($u) )
+      if ( !is_numeric($u) && illegal_chars($u) )
          $errors[] = sprintf( T_('Illegal characters used in user [%s]#userlist'), $u );
       else
       {
-         if( $is_handle || !is_numeric($u) )
+         if ( $is_handle || !is_numeric($u) )
             $arr_handle[] = $u;
          else
             $arr_uid[] = $u;
@@ -73,7 +73,7 @@ function check_user_list( $user_list, $author_uid )
    $qsql = new QuerySQL(
       SQLP_FIELDS, 'P.ID', 'P.Handle', 'P.Name', 'P.AdminOptions',
       SQLP_FROM,   'Players AS P' );
-   if( $author_uid > 0 )
+   if ( $author_uid > 0 )
    {
       $qsql->add_part( SQLP_FIELDS, 'IFNULL(C.uid,0) AS C_RejectMsg');
       $qsql->add_part( SQLP_FROM,
@@ -81,39 +81,39 @@ function check_user_list( $user_list, $author_uid )
    }
    $user_sql = $qsql->get_select();
 
-   if( count($arr_uid) > 0 )
+   if ( count($arr_uid) > 0 )
    {
       $result = db_query( "check_user_list.uids($author_uid)",
          "$user_sql WHERE P.ID IN (".implode(',', $arr_uid).") LIMIT " . count($arr_uid) );
-      while( $row = mysql_fetch_array( $result ) )
+      while ( $row = mysql_fetch_array( $result ) )
       {
          $uid = $row['ID'];
          $uids[] = $uid;
          $handles[$uid] = $view_handle = ( (is_numeric($row['Handle'])) ? '=' : '' ) . $row['Handle'];
          $urefs[$uid] = $row;
-         if( $author_uid > 0 && @$row['C_RejectMsg'] )
+         if ( $author_uid > 0 && @$row['C_RejectMsg'] )
             $rejectmsg[$view_handle] = 1;
-         if( $author_uid == 0 && (@$row['AdminOptions'] & ADMOPT_DENY_SURVEY_VOTE) )
+         if ( $author_uid == 0 && (@$row['AdminOptions'] & ADMOPT_DENY_SURVEY_VOTE) )
             $deny_survey[$view_handle] = 1;
          unset($arr_miss[$uid]);
       }
       mysql_free_result($result);
    }
 
-   if( count($arr_handle) > 0 )
+   if ( count($arr_handle) > 0 )
    {
       $result = db_query( "check_user_list.handles($author_uid)",
          "$user_sql WHERE P.Handle IN ('".implode("','", $arr_handle)."') LIMIT " . count($arr_handle) );
-      while( $row = mysql_fetch_array( $result ) )
+      while ( $row = mysql_fetch_array( $result ) )
       {
          $uid = $row['ID'];
          $handle = $row['Handle'];
          $uids[] = $uid;
          $handles[$uid] = $view_handle = ( (is_numeric($handle)) ? '=' : '' ) . $handle;
          $urefs[$uid] = $row;
-         if( $author_uid > 0 && @$row['C_RejectMsg'] )
+         if ( $author_uid > 0 && @$row['C_RejectMsg'] )
             $rejectmsg[$view_handle] = 1;
-         if( $author_uid == 0 && (@$row['AdminOptions'] & ADMOPT_DENY_SURVEY_VOTE) )
+         if ( $author_uid == 0 && (@$row['AdminOptions'] & ADMOPT_DENY_SURVEY_VOTE) )
             $deny_survey[$view_handle] = 1;
          unset($arr_miss[strtolower($handle)]);
       }
@@ -125,21 +125,21 @@ function check_user_list( $user_list, $author_uid )
    ksort( $uids, SORT_NUMERIC );
    ksort( $urefs, SORT_NUMERIC );
 
-   if( count($arr_miss) > 0 )
+   if ( count($arr_miss) > 0 )
       $errors[] = sprintf( T_('Unknown users found [%s]#userlist'), implode(', ', array_keys($arr_miss) ));
-   if( $author_uid > 0 && count($uids) == 1 )
+   if ( $author_uid > 0 && count($uids) == 1 )
       $errors[] = T_('Userlist must contain at least two recipients, otherwise send a private message instead.#userlist');
-   if( count($deny_survey) > 0 )
+   if ( count($deny_survey) > 0 )
       $errors[] = sprintf( T_('Users [%s] are denied to vote on surveys by admin.#userlist'),
          implode(' ', array_keys($deny_survey)) );
 
    $guests = array();
-   for( $g_uid=1; $g_uid <= GUESTS_ID_MAX; $g_uid++)
+   for ( $g_uid=1; $g_uid <= GUESTS_ID_MAX; $g_uid++)
    {
-      if( isset($handles[$g_uid]) )
+      if ( isset($handles[$g_uid]) )
          $guests[] = $handles[$g_uid];
    }
-   if( count($guests) > 0 )
+   if ( count($guests) > 0 )
       $errors[] = sprintf( T_('Guest users [%s] are not allowed in user-list.#userlist'), implode(' ', $guests) );
 
    return array( array_unique(array_values($handles)), $uids, $urefs, array_keys($rejectmsg), $errors );

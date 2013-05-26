@@ -54,11 +54,11 @@ $GLOBALS['ThePage'] = new Page('FAQ', 0, ROBOTS_NO_FOLLOW,
    $orig = ( get_request_arg('orig', '') ) ? 1 : 0;
    $err_search = '';
    $rx_term = '';
-   if( $is_search )
+   if ( $is_search )
    {
       $err_search = check_faq_search_terms( $qterm );
       $rx_term = build_regex_term( $qterm );
-      if( (string)$err_search != '' || (string)$rx_term == '' )
+      if ( (string)$err_search != '' || (string)$rx_term == '' )
          $is_search = false;
    }
 
@@ -72,7 +72,7 @@ $GLOBALS['ThePage'] = new Page('FAQ', 0, ROBOTS_NO_FOLLOW,
                         array( 'accesskey' => ACCKEY_ACT_FILT_SEARCH ),
       'TEXT',           ' ' . sprintf( T_('in language (%s)'), $arr_languages[$lang] ),
       ));
-   if( $err_search )
+   if ( $err_search )
       $faq_form->add_row( array( 'TAB', 'TEXT', "<span class=ErrMsg>($err_search)</span>" ));
    $faq_form->add_row( array(
       'TAB',
@@ -83,19 +83,19 @@ $GLOBALS['ThePage'] = new Page('FAQ', 0, ROBOTS_NO_FOLLOW,
    echo "<br>\n";
 
    $cat = @$_GET['cat'];
-   if( $cat !== 'all' && !is_numeric($cat) ) $cat = 0;
+   if ( $cat !== 'all' && !is_numeric($cat) ) $cat = 0;
    $entry = (int)@$_GET['e'];
 
-   if( $cat <= 0 )
+   if ( $cat <= 0 )
       $q_part = '';
-   elseif( $entry )
+   elseif ( $entry )
       $q_part = "AND entry.ID IN ($cat,$entry)";
    else
       $q_part = "AND (entry.ID=$cat OR entry.Parent=$cat)";
 
    $href_base = 'href="faq.php?read=t'.URI_AMP.'cat=';
 
-   if( $is_search )
+   if ( $is_search )
    { // show matching faq-entries
       // NOTES:
       // - read whole FAQ from DB, then match on translations read from file.
@@ -115,7 +115,7 @@ $GLOBALS['ThePage'] = new Page('FAQ', 0, ROBOTS_NO_FOLLOW,
       $result = db_query( 'faq.search_entries', $query );
 
       $found_entries = 0;
-      if( mysql_num_rows($result) > 0 )
+      if ( mysql_num_rows($result) > 0 )
       {
          echo "</td></tr><tr><td class=FAQsearch>\n";
          $qterm_url = 'qterm='.urlencode($qterm).URI_AMP.'search=1';
@@ -123,10 +123,10 @@ $GLOBALS['ThePage'] = new Page('FAQ', 0, ROBOTS_NO_FOLLOW,
          echo faq_item_html( 0);
          $outbuf = '';
          $cntmatch = 0; // count of matches for level1-section
-         while( $row = mysql_fetch_assoc( $result ) )
+         while ( $row = mysql_fetch_assoc( $result ) )
          { //expand answers
             $level = $row['Level'];
-            if( $orig )
+            if ( $orig )
             { // no language-translation (use orig-texts from DB)
                $question = $row['Q'];
                $answer   = $row['A'];
@@ -138,7 +138,7 @@ $GLOBALS['ThePage'] = new Page('FAQ', 0, ROBOTS_NO_FOLLOW,
             }
 
             $match = search_faq_match_terms( $question, $answer, $rx_term );
-            if( $level == 1 || $match )
+            if ( $level == 1 || $match )
             {
                $href = ( $row['Level'] == 1 )
                   ? $href_base.$row['ID'].URI_AMP.$qterm_url."#Title{$row['ID']}\""
@@ -149,32 +149,32 @@ $GLOBALS['ThePage'] = new Page('FAQ', 0, ROBOTS_NO_FOLLOW,
             else
                $faqtext = '';
 
-            if( $level == 1 )
+            if ( $level == 1 )
             {
-               if( $cntmatch > 0 )
+               if ( $cntmatch > 0 )
                   echo $outbuf;
                $cntmatch = 0;
                $outbuf = $faqtext;
             }
-            else if( (string)$faqtext != '' )
+            else if ( (string)$faqtext != '' )
             {
                $outbuf .= $faqtext;
                $cntmatch++;
                $found_entries++;
             }
          }
-         if( $cntmatch > 0 )
+         if ( $cntmatch > 0 )
             echo $outbuf;
          echo faq_item_html(-1);
       }
       mysql_free_result($result);
 
-      if( $found_entries == 0 )
+      if ( $found_entries == 0 )
          echo '<strong>' . T_('No matching entries found in FAQ.') . "</strong>\n";
 
       $menu_array[T_('Go back to the FAQ index')]= "faq.php";
    }
-   elseif( @$_GET["read"] == 't' )
+   elseif ( @$_GET["read"] == 't' )
    { // show one or all faq-section(s) with all entries expanded
       $result = db_query( 'faq.find_entries',
          "SELECT entry.*, parent.SortOrder AS ParentOrder, " .
@@ -187,19 +187,19 @@ $GLOBALS['ThePage'] = new Page('FAQ', 0, ROBOTS_NO_FOLLOW,
          "WHERE $faqhide $q_part " .
          "ORDER BY CatOrder,ParentOrder,entry.SortOrder" );
 
-      if( mysql_num_rows($result) > 0 )
+      if ( mysql_num_rows($result) > 0 )
       {
          echo "</td></tr><tr><td class=FAQread>\n";
 
          echo faq_item_html( 0);
-         while( $row = mysql_fetch_assoc( $result ) )
+         while ( $row = mysql_fetch_assoc( $result ) )
          { //expand answers
             $href = ( $row['Level'] == 1 )
                ? "href=\"faq.php#Title{$row['ID']}\""
                : $href_base.$row['Parent'].URI_AMP.'e='.$row['ID'].'#Entry'.$row['ID'].'"';
             $attb = "name=\"Entry{$row['ID']}\"";
             echo faq_item_html( $row['Level'], $TW_( $row['Q'] ), $TW_( $row['A'] ), $href, $attb );
-            if( $row['Level'] == 1 )
+            if ( $row['Level'] == 1 )
                echo name_anchor("Entry{$row['ID']}");
          }
          echo faq_item_html(-1);
@@ -219,18 +219,18 @@ $GLOBALS['ThePage'] = new Page('FAQ', 0, ROBOTS_NO_FOLLOW,
          "WHERE $faqhide AND entry.Level<3 AND entry.Level>0 " .
          "ORDER BY CatOrder,entry.Level,entry.SortOrder" );
 
-      if( mysql_num_rows($result) > 0 )
+      if ( mysql_num_rows($result) > 0 )
       {
          echo "</td></tr><tr><td class=FAQindex>\n";
 
          echo faq_item_html( 0);
-         while( $row = mysql_fetch_assoc( $result ) )
+         while ( $row = mysql_fetch_assoc( $result ) )
          { //titles only
             $href = ( $row['Level'] == 1 )
                ? $href_base.$row['ID'].'#Entry'.$row['ID'].'"'
                : $href_base.$row['Parent'].'#Entry'.$row['ID'].'"';
             echo faq_item_html( $row['Level'], $TW_( $row['Q'] ), '', $href );
-            if( $row['Level'] == 1 )
+            if ( $row['Level'] == 1 )
                echo name_anchor("Title{$row['ID']}");
          }
          echo faq_item_html(-1);
@@ -239,7 +239,7 @@ $GLOBALS['ThePage'] = new Page('FAQ', 0, ROBOTS_NO_FOLLOW,
    }
    echo "</td></tr></table>\n";
 
-   if( $cat !== 'all' )
+   if ( $cat !== 'all' )
       $menu_array[T_('Show the whole FAQ in one page')]= "faq.php?read=t".URI_AMP."cat=all";
 
    end_page(@$menu_array);

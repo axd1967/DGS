@@ -52,7 +52,7 @@ function init_standard_folders()
 {
    global $STANDARD_FOLDERS;
 
-   if( !isset($STANDARD_FOLDERS[FOLDER_NEW]) )
+   if ( !isset($STANDARD_FOLDERS[FOLDER_NEW]) )
    {
       $STANDARD_FOLDERS = array(  // arr=( Name, BGColor, FGColor ); $bg_color value (#f7f5e3)
          //FOLDER_DESTROYED => array(T_//('Destroyed'), 'ff88ee00', '000000'), // non-visible folder!!
@@ -89,19 +89,19 @@ function init_standard_folders()
 function game_settings_form(&$mform, $formstyle, $viewmode, $iamrated=true, $my_ID=NULL, $gid=NULL,
       $map_ratings=NULL, $gsc=NULL )
 {
-   if( !preg_match( "/^(".CHECK_GSET.")$/", $formstyle ) )
+   if ( !preg_match( "/^(".CHECK_GSET.")$/", $formstyle ) )
       $formstyle = GSET_MSG_INVITE;
-   if( !preg_match( "/^(".CHECK_GSETVIEW.")$/", $viewmode ) )
+   if ( !preg_match( "/^(".CHECK_GSETVIEW.")$/", $viewmode ) )
       $viewmode = GSETVIEW_STANDARD;
-   if( $viewmode == GSETVIEW_MPGAME && $formstyle != GSET_WAITINGROOM )
+   if ( $viewmode == GSETVIEW_MPGAME && $formstyle != GSET_WAITINGROOM )
       $viewmode = GSETVIEW_STANDARD;
 
-   if( is_null($gsc) )
+   if ( is_null($gsc) )
       $gsc = new GameSetupChecker( $viewmode );
 
    $is_fstyle_tourney = ( $formstyle == GSET_TOURNAMENT_LADDER || $formstyle == GSET_TOURNAMENT_ROUNDROBIN );
    $is_fstyle_invite = ( $formstyle == GSET_MSG_INVITE || $formstyle == GSET_MSG_DISPUTE );
-   if( $is_fstyle_tourney )
+   if ( $is_fstyle_tourney )
       $viewmode = GSETVIEW_STANDARD;
    $is_view_mpgame = ( $viewmode == GSETVIEW_MPGAME );
    $is_view_fairkomi = ( $viewmode == GSETVIEW_FAIRKOMI );
@@ -141,106 +141,106 @@ function game_settings_form(&$mform, $formstyle, $viewmode, $iamrated=true, $my_
    $StdHandicap = true;
    $Rated = true;
 
-   if( $is_view_mpgame ) // defaults for MP-game
+   if ( $is_view_mpgame ) // defaults for MP-game
    {
       $GamePlayers = '2:2'; //rengo
       $Handitype = HTYPE_NIGIRI;
       $CategoryHandiType = CAT_HTYPE_MANUAL;
       $Rated = false;
    }
-   if( is_null($gid) ) // handle shape-game
+   if ( is_null($gid) ) // handle shape-game
    {
-      if( ($shape_id = (int)@$_REQUEST['shape']) > 0 )
+      if ( ($shape_id = (int)@$_REQUEST['shape']) > 0 )
       {
          $ShapeID = $shape_id;
          $ShapeSnapshot = @$_REQUEST['snapshot'];
       }
    }
 
-   if( $my_ID==='redraw' && is_array($gid) )
+   if ( $my_ID==='redraw' && is_array($gid) )
    {
       // If redraw, use values from array $gid
       // ($gid[] is the $_POST[] of the form asking the preview (i.e. this form))
 
-      if( isset($gid['shape']) )
+      if ( isset($gid['shape']) )
       {
          $orig_shape_id = trim($gid['shape']);
          $ShapeID = (int)$gid['shape'];
-         if( $ShapeID > 0 && isset($gid['snapshot']) )
+         if ( $ShapeID > 0 && isset($gid['snapshot']) )
             $ShapeSnapshot = $gid['snapshot'];
       }
 
-      if( isset($gid['ruleset']) )
+      if ( isset($gid['ruleset']) )
          $Ruleset = $gid['ruleset'];
-      if( isset($gid['size']) )
+      if ( isset($gid['size']) )
          $Size = (int)$gid['size'];
 
-      if( isset($gid['cat_htype']) )
+      if ( isset($gid['cat_htype']) )
          $CategoryHandiType = (string)$gid['cat_htype'];
-      if( isset($gid['color_m']) )
+      if ( isset($gid['color_m']) )
          $Color_m = $gid['color_m'];
 
-      if( $CategoryHandiType === CAT_HTYPE_MANUAL )
+      if ( $CategoryHandiType === CAT_HTYPE_MANUAL )
          $Handitype = $Color_m;
-      elseif( $CategoryHandiType === CAT_HTYPE_FAIR_KOMI )
+      elseif ( $CategoryHandiType === CAT_HTYPE_FAIR_KOMI )
          $Handitype = ( isset($gid['fk_htype']) ) ? $gid['fk_htype'] : DEFAULT_HTYPE_FAIRKOMI;
       else
          $Handitype = $CategoryHandiType;
 
-      if( isset($gid['handicap_m']) )
+      if ( isset($gid['handicap_m']) )
          $Handicap_m = (int)$gid['handicap_m'];
-      if( isset($gid['komi_m']) )
+      if ( isset($gid['komi_m']) )
          $Komi_m = (float)$gid['komi_m'];
 
-      if( isset($gid['adj_komi']) )
+      if ( isset($gid['adj_komi']) )
          $AdjustKomi = (float)$gid['adj_komi'];
-      if( isset($gid['jigo_mode']) )
+      if ( isset($gid['jigo_mode']) )
          $JigoMode = $gid['jigo_mode'];
 
-      if( isset($gid['adj_handicap']) )
+      if ( isset($gid['adj_handicap']) )
          $AdjustHandicap = (int)$gid['adj_handicap'];
-      if( isset($gid['min_handicap']) )
+      if ( isset($gid['min_handicap']) )
          $MinHandicap = (int)$gid['min_handicap'];
-      if( isset($gid['max_handicap']) )
+      if ( isset($gid['max_handicap']) )
          $MaxHandicap = DefaultMaxHandicap::limit_max_handicap( (int)$gid['max_handicap'] );
 
-      if( isset($gid['game_players']) )
+      if ( isset($gid['game_players']) )
          $GamePlayers = $gid['game_players'];
 
       // NOTE on time-hours: 36 hours eval to 2d + 6h (because of sleeping time)
 
-      if( isset($gid['byoyomitype']) )
+      if ( isset($gid['byoyomitype']) )
          $Byotype = $gid['byoyomitype'];
 
-      if( isset($gid['timevalue']) )
+      if ( isset($gid['timevalue']) )
          $Maintime = (int)$gid['timevalue'];
-      if( isset($gid['timeunit']) )
+      if ( isset($gid['timeunit']) )
          $MaintimeUnit = (string)$gid['timeunit'];
 
-      if( isset($gid['byotimevalue_jap']) )
+      if ( isset($gid['byotimevalue_jap']) )
          $Byotime_jap = (int)$gid['byotimevalue_jap'];
-      if( isset($gid['timeunit_jap']) )
+      if ( isset($gid['timeunit_jap']) )
          $ByotimeUnit_jap = (string)$gid['timeunit_jap'];
-      if( isset($gid['byoperiods_jap']) )
+      if ( isset($gid['byoperiods_jap']) )
          $Byoperiods_jap = (int)$gid['byoperiods_jap'];
 
-      if( isset($gid['byotimevalue_can']) )
+      if ( isset($gid['byotimevalue_can']) )
          $Byotime_can = (int)$gid['byotimevalue_can'];
-      if( isset($gid['timeunit_can']) )
+      if ( isset($gid['timeunit_can']) )
          $ByotimeUnit_can = (string)$gid['timeunit_can'];
-      if( isset($gid['byoperiods_can']) )
+      if ( isset($gid['byoperiods_can']) )
          $Byoperiods_can = (int)$gid['byoperiods_can'];
 
-      if( isset($gid['byotimevalue_fis']) )
+      if ( isset($gid['byotimevalue_fis']) )
          $Byotime_fis = (int)$gid['byotimevalue_fis'];
-      if( isset($gid['timeunit_fis']) )
+      if ( isset($gid['timeunit_fis']) )
          $ByotimeUnit_fis = $gid['timeunit_fis'];
 
       $WeekendClock = ( @$gid['weekendclock'] == 'Y' );
       $StdHandicap = ( @$gid['stdhandicap'] == 'Y' );
       $Rated = ( @$gid['rated'] == 'Y' );
    }
-   else if( $gid > 0 && $my_ID > 0 ) //'Dispute'
+   else if ( $gid > 0 && $my_ID > 0 ) //'Dispute'
    {
       // If dispute, use values from game $gid tables
       $query = "SELECT Black_ID,White_ID, Ruleset,Size,Komi,Handicap,ToMove_ID," .
@@ -248,10 +248,10 @@ function game_settings_form(&$mform, $formstyle, $viewmode, $iamrated=true, $my_
                  "Rated,StdHandicap,WeekendClock, ShapeID,ShapeSnapshot, GameSetup " .
                  "FROM Games WHERE ID=$gid AND Status='".GAME_STATUS_INVITED."' LIMIT 1" ;
       $game_row = mysql_single_fetch( "game_settings_form($gid)", $query );
-      if( !$game_row )
+      if ( !$game_row )
          error('unknown_game', "game_settings_form($gid)");
       $black_id = (int)$game_row['Black_ID'];
-      if( $black_id != $my_ID && (int)$game_row['White_ID'] != $my_ID )
+      if ( $black_id != $my_ID && (int)$game_row['White_ID'] != $my_ID )
          error('wrong_dispute_game', "game_settings_form.find_gameinv.check.dispute($gid,$my_ID)");
 
       // shape-game
@@ -283,7 +283,7 @@ function game_settings_form(&$mform, $formstyle, $viewmode, $iamrated=true, $my_
       time_convert_to_longer_unit($game_row['Byotime'], $game_row['ByotimeUnit']);
 
       $Byotype = $game_row['Byotype'];
-      switch( (string)$Byotype )
+      switch ( (string)$Byotype )
       {
          case BYOTYPE_JAPANESE:
             $Byotime_jap = $game_row['Byotime'];
@@ -305,17 +305,17 @@ function game_settings_form(&$mform, $formstyle, $viewmode, $iamrated=true, $my_
       }
    } //collecting datas
 
-   if( !preg_match( "/^(".ALLOWED_RULESETS.")$/", $Ruleset ) )
+   if ( !preg_match( "/^(".ALLOWED_RULESETS.")$/", $Ruleset ) )
       error('feature_disabled', "game_settings_form.disabled.ruleset($Ruleset)");
 
    // handle shape-game implicit settings (ShapeID unset if invalid shape used)
-   if( $ShapeID > 0 )
+   if ( $ShapeID > 0 )
    {
       $arr_shape = GameSnapshot::parse_check_extended_snapshot($ShapeSnapshot);
-      if( is_array($arr_shape) ) // overwrite with defaults
+      if ( is_array($arr_shape) ) // overwrite with defaults
       {
          $ShapeBlackFirst = (bool)@$arr_shape['PlayColorB'];
-         if( $shape_init )
+         if ( $shape_init )
          {
             $Size = (int)$arr_shape['Size'];
             $StdHandicap = false;
@@ -336,15 +336,15 @@ function game_settings_form(&$mform, $formstyle, $viewmode, $iamrated=true, $my_
    $mform->add_hidden('gsc', 1); // signal for game-setup-checker
 
    // shape-game
-   if( $is_fstyle_tourney )
+   if ( $is_fstyle_tourney )
    {
       $mform->add_row( array(
             'DESCRIPTION', T_('Shape-Game ID'),
             'TEXTINPUT', 'shape', 5, 10, $orig_shape_id, ));
    }
-   if( $ShapeID && $ShapeSnapshot )
+   if ( $ShapeID && $ShapeSnapshot )
    {
-      if( !$is_fstyle_tourney )
+      if ( !$is_fstyle_tourney )
          $mform->add_hidden( 'shape', $ShapeID );
       $mform->add_hidden( 'snapshot', $ShapeSnapshot );
 
@@ -354,7 +354,7 @@ function game_settings_form(&$mform, $formstyle, $viewmode, $iamrated=true, $my_
       $mform->add_empty_row();
    }
 
-   if( $formstyle == GSET_WAITINGROOM && !$is_view_mpgame )
+   if ( $formstyle == GSET_WAITINGROOM && !$is_view_mpgame )
    {
       $maxGamesCheck = new MaxGamesCheck();
       $max_games = $maxGamesCheck->get_allowed_games(NEWGAME_MAX_GAMES);
@@ -367,7 +367,7 @@ function game_settings_form(&$mform, $formstyle, $viewmode, $iamrated=true, $my_
    }
 
    $arr_rulesets = getRulesetText(); // non-empty
-   if( count($arr_rulesets) > 1 )
+   if ( count($arr_rulesets) > 1 )
    {
       $mform->add_row( array( 'DESCRIPTION', T_('Ruleset'),
                               'SELECTBOX', 'ruleset', 1, $arr_rulesets, $Ruleset, false ) );
@@ -386,15 +386,15 @@ function game_settings_form(&$mform, $formstyle, $viewmode, $iamrated=true, $my_
    $mform->add_row( array( 'SPACE' ) );
 
    // Conventional & Proper handicap
-   if( !$is_view_mpgame && !$is_view_fairkomi )
+   if ( !$is_view_mpgame && !$is_view_fairkomi )
    {
       $trc = T_('Conventional handicap (komi 0.5 if not even)');
       $trp = T_('Proper handicap (komi adjusted by system)');
-      if( $iamrated )
+      if ( $iamrated )
       {// user has a rating
          $sugg_conv = '';
          $sugg_prop = '';
-         if( is_array($map_ratings) )
+         if ( is_array($map_ratings) )
          {
             $r1 = $map_ratings['rating1'];
             $r2 = $map_ratings['rating2'];
@@ -417,7 +417,7 @@ function game_settings_form(&$mform, $formstyle, $viewmode, $iamrated=true, $my_
       }
       else
       {// user-unrated
-         if( $formstyle == GSET_MSG_DISPUTE && ( $Handitype == HTYPE_CONV || $Handitype == HTYPE_PROPER ) )
+         if ( $formstyle == GSET_MSG_DISPUTE && ( $Handitype == HTYPE_CONV || $Handitype == HTYPE_PROPER ) )
          {
             $descr_str = ( $Handitype == HTYPE_CONV ) ? $trc : $rtp; // No initial rating
             $mform->add_row( array(
@@ -432,15 +432,15 @@ function game_settings_form(&$mform, $formstyle, $viewmode, $iamrated=true, $my_
 
    // Manual game: nigiri, double, black, white
    $handi_stones = build_arr_handicap_stones( /*def*/false );
-   if( !$is_view_mpgame && !$is_view_fairkomi )
+   if ( !$is_view_mpgame && !$is_view_fairkomi )
    {
       $color_arr = GameTexts::get_manual_handicap_types();
-      if( ( $formstyle == GSET_TOURNAMENT_LADDER ) || $is_view_mpgame )
+      if ( ( $formstyle == GSET_TOURNAMENT_LADDER ) || $is_view_mpgame )
          unset($color_arr[HTYPE_DOUBLE]);
 
-      if( $formstyle == GSET_TOURNAMENT_LADDER )
+      if ( $formstyle == GSET_TOURNAMENT_LADDER )
          $color_txt = T_('Color Challenger#T_ladder');
-      elseif( $formstyle == GSET_TOURNAMENT_ROUNDROBIN )
+      elseif ( $formstyle == GSET_TOURNAMENT_ROUNDROBIN )
          $color_txt = T_('Color Stronger#T_RRobin');
       else
          $color_txt = T_('My color');
@@ -458,16 +458,16 @@ function game_settings_form(&$mform, $formstyle, $viewmode, $iamrated=true, $my_
 
 
    // Fair-komi
-   if( $is_view_fairkomi || $is_fstyle_invite )
+   if ( $is_view_fairkomi || $is_fstyle_invite )
    {
       $row_arr = array( 'DESCRIPTION', T_('Fair Komi (even game)') );
-      if( $is_view_fairkomi )
+      if ( $is_view_fairkomi )
          $mform->add_hidden('cat_htype', CAT_HTYPE_FAIR_KOMI);
       else
          array_push( $row_arr, 'RADIOBUTTONS', 'cat_htype', array( CAT_HTYPE_FAIR_KOMI => '' ), $CategoryHandiType );
       array_push( $row_arr,
          'SELECTBOX', 'fk_htype', 1, GameTexts::get_fair_komi_types(), $Handitype, false );
-      if( $is_fstyle_invite )
+      if ( $is_fstyle_invite )
          array_push( $row_arr,
             'TEXT', T_('+ set Jigo mode (see below)#fairkomi') );
       $mform->add_row( $row_arr );
@@ -476,12 +476,12 @@ function game_settings_form(&$mform, $formstyle, $viewmode, $iamrated=true, $my_
 
    $adjustments_view = ( $is_fstyle_tourney || ($formstyle == GSET_WAITINGROOM && $viewmode == GSETVIEW_STANDARD)
       || $is_fstyle_invite );
-   if( $adjustments_view )
+   if ( $adjustments_view )
    {
       // adjust handicap stones
       $adj_handi_stones = array();
       $HSTART = max(5, (int)(MAX_HANDICAP/3));
-      for( $bs = -$HSTART; $bs <= $HSTART; $bs++ )
+      for ( $bs = -$HSTART; $bs <= $HSTART; $bs++ )
          $adj_handi_stones[$bs] = ($bs <= 0) ? $bs : "+$bs";
       $adj_handi_stones[0] = '&nbsp;0';
 
@@ -511,10 +511,10 @@ function game_settings_form(&$mform, $formstyle, $viewmode, $iamrated=true, $my_
             ));
    }
 
-   if( ENABLE_STDHANDICAP && !$is_view_fairkomi )
+   if ( ENABLE_STDHANDICAP && !$is_view_fairkomi )
    {
       $arr = array();
-      if( $adjustments_view )
+      if ( $adjustments_view )
          $arr[] = 'TAB';
       else
          array_push( $arr, 'DESCRIPTION', T_('Handicap stones') );
@@ -524,7 +524,7 @@ function game_settings_form(&$mform, $formstyle, $viewmode, $iamrated=true, $my_
       $mform->add_row($arr);
    }
 
-   if( $adjustments_view )
+   if ( $adjustments_view )
    {
       // adjust komi
       $mform->add_row( array(
@@ -535,7 +535,7 @@ function game_settings_form(&$mform, $formstyle, $viewmode, $iamrated=true, $my_
             'SELECTBOX', 'jigo_mode', 1, GameTexts::get_jigo_modes(), $JigoMode, false,
          ));
    }
-   elseif( $is_view_fairkomi )
+   elseif ( $is_view_fairkomi )
    {
       $mform->add_hidden('adj_komi', $AdjustKomi);
       $mform->add_row( array(
@@ -544,14 +544,14 @@ function game_settings_form(&$mform, $formstyle, $viewmode, $iamrated=true, $my_
             'SELECTBOX', 'jigo_mode', 1, GameTexts::get_jigo_modes(), $JigoMode, false,
          ));
    }
-   elseif( !$is_view_fairkomi && !$is_fstyle_invite )
+   elseif ( !$is_view_fairkomi && !$is_fstyle_invite )
    {
       $mform->add_hidden('adj_komi', $AdjustKomi);
       $mform->add_hidden('jigo_mode', $JigoMode);
    }
 
 
-   if( $formstyle == GSET_WAITINGROOM && $is_view_mpgame )
+   if ( $formstyle == GSET_WAITINGROOM && $is_view_mpgame )
    {
       $mform->add_row( array( 'HEADER', T_('Multi-player settings') ) );
 
@@ -610,17 +610,17 @@ function game_settings_form(&$mform, $formstyle, $viewmode, $iamrated=true, $my_
          'CHECKBOX', 'weekendclock', 'Y', "", $WeekendClock,
          'TEXT', sprintf( '(%s)', T_('UTC timezone') ), ));
 
-   if( !$is_view_mpgame )
+   if ( !$is_view_mpgame )
    {
-      if( $formstyle == GSET_WAITINGROOM )
+      if ( $formstyle == GSET_WAITINGROOM )
          $mform->add_row( array( 'HEADER', T_('Restrictions') ) );
 
-      if( $iamrated )
+      if ( $iamrated )
       {
          $mform->add_row( array( 'DESCRIPTION', T_('Rated game'),
                                  'CHECKBOXX', 'rated', 'Y', "", $Rated, array( 'disabled' => $ShapeID ) ) );
       }
-      else if( $formstyle == GSET_MSG_DISPUTE && $Rated )
+      else if ( $formstyle == GSET_MSG_DISPUTE && $Rated )
       {// user unrated
          $mform->add_row( array(
                'DESCRIPTION', T_('Rated game'),
@@ -631,7 +631,7 @@ function game_settings_form(&$mform, $formstyle, $viewmode, $iamrated=true, $my_
       }//rated
    }
 
-   if( $formstyle == GSET_WAITINGROOM && !$is_view_mpgame )
+   if ( $formstyle == GSET_WAITINGROOM && !$is_view_mpgame )
    {
       // read init-vals from URL for rematch or profile-template
       append_form_add_waiting_room_game( $mform, $viewmode, ( $my_ID === 'redraw' ), $gsc );
@@ -662,25 +662,25 @@ function message_info_table($mid, $date, $to_me, //$mid==0 means preview
 {
    global $msg_icones, $bg_color, $base_path;
 
-   if( is_array($other_id) ) // multi-receiver (bulk) message
+   if ( is_array($other_id) ) // multi-receiver (bulk) message
    {
       $arr = array();
-      foreach( $other_id as $urow )
+      foreach ( $other_id as $urow )
          $arr[] = user_reference( REF_LINK, 0, '', $urow );
       $name = implode("<br>\n", $arr);
    }
-   elseif( $other_id > 0 )
+   elseif ( $other_id > 0 )
       $name = user_reference( REF_LINK, 0, '', $other_id, $other_name, $other_handle) ;
    else
       $name = $other_name; //i.e. T_("Server message"); or T_('Receiver not found');
 
    $oid_url = ''; // other-uid URL-part
    $is_bulk = ($flags & MSGFLAG_BULK);
-   if( $is_bulk && $mid > 0 )
+   if ( $is_bulk && $mid > 0 )
    {
       $oid_url = ($other_id > 0) ? URI_AMP."oid=$other_id" : '';
       $bulk_info = T_('Bulk-Message with other receivers');
-      if( $thread > 0 )
+      if ( $thread > 0 )
          $bulk_info = anchor( "message_thread.php?thread=$thread".URI_AMP."mid=$mid$oid_url#mid$mid", $bulk_info );
       $bulk_info = SMALL_SPACING . "[ $bulk_info ]";
    }
@@ -703,7 +703,7 @@ function message_info_table($mid, $date, $to_me, //$mid==0 means preview
 
    // warn on empty subject
    $subj_fmt = $subject;
-   if( (string)$subject == '' )
+   if ( (string)$subject == '' )
       $subj_fmt = span('InlineWarning', T_('(no subject)') );
 
    echo "<tr class=Subject>",
@@ -713,27 +713,27 @@ function message_info_table($mid, $date, $to_me, //$mid==0 means preview
       "<td class=Rubric>", T_('Message'), ":" ;
 
    $str0 = $str = '';
-   if( ($flow & FLOW_ANSWER) && $reply_mid > 0 )
+   if ( ($flow & FLOW_ANSWER) && $reply_mid > 0 )
    {
       list($ico,$alt) = $msg_icones[FLOW_ANSWER];
       $str.= "<a href=\"message.php?mode=ShowMessage".URI_AMP."mid=$reply_mid\">" .
              "<img border=0 alt='$alt' src='$ico' title=\"" . T_("Previous message") . "\"></a>&nbsp;";
    }
-   if( ($flow & FLOW_ANSWERED) && $mid > 0)
+   if ( ($flow & FLOW_ANSWERED) && $mid > 0)
    {
       list($ico,$alt) = $msg_icones[FLOW_ANSWERED];
       $str.= "<a href=\"list_messages.php?find_answers=$mid\">" .
              "<img border=0 alt='$alt' src='$ico' title=\"" . T_("Next messages") . "\"></a>&nbsp;";
    }
-   if( ($str || $is_bulk) && $thread > 0 ) // $str set if msg is answer or has answer
+   if ( ($str || $is_bulk) && $thread > 0 ) // $str set if msg is answer or has answer
       $str0 .= anchor( "message_thread.php?thread=$thread".URI_AMP."mid=$mid$oid_url#mid$mid",
          image( $base_path.'images/thread.gif', T_('Message thread') ),
          T_('Show message thread') ) . MINI_SPACING;
-   if( $thread > 0 && $thread != $mid )
+   if ( $thread > 0 && $thread != $mid )
       $str0 .= anchor( 'message.php?mode=ShowMessage'.URI_AMP.'mid='.$thread,
          image( $base_path.'images/msg_first.gif', T_('First message in thread') ),
          T_('Show initial message in thread') ) . MINI_SPACING;
-   if( $str0 || $str )
+   if ( $str0 || $str )
      echo "<div class=MessageFlow>$str0$str</div>";
 
    echo "</td>\n"
@@ -745,7 +745,7 @@ function message_info_table($mid, $date, $to_me, //$mid==0 means preview
 
    echo "</td></tr>\n";
 
-   if( isset($folders) && $mid > 0 )
+   if ( isset($folders) && $mid > 0 )
    {
       echo "<tr class=Folder>\n";
 
@@ -756,24 +756,24 @@ function message_info_table($mid, $date, $to_me, //$mid==0 means preview
 
       echo "<td>";
       $deleted = ( $folder_nr == FOLDER_DESTROYED );
-      if( !$deleted )
+      if ( !$deleted )
       {
          $fldrs = array('' => '');
-         foreach( $folders as $key => $val )
+         foreach ( $folders as $key => $val )
          {
-            if( $key != $folder_nr && $key != FOLDER_NEW && (!$to_me || $key != FOLDER_SENT) )
+            if ( $key != $folder_nr && $key != FOLDER_NEW && (!$to_me || $key != FOLDER_SENT) )
                $fldrs[$key] = $val[0];
          }
 
          $arg_folder = @$_REQUEST['folder'];
          echo $form->print_insert_select_box('folder', '1', $fldrs, $arg_folder, '');
-         if( $delayed_move )
+         if ( $delayed_move )
             echo T_('Move to folder when replying');
          else
             echo $form->print_insert_submit_button('foldermove', T_('Move to folder'));
 
          echo $form->print_insert_hidden_input("mark$mid", 'Y') ;
-         if( $folder_nr > FOLDER_ALL_RECEIVED )
+         if ( $folder_nr > FOLDER_ALL_RECEIVED )
             echo $form->print_insert_hidden_input("current_folder", $folder_nr) ;
 
          $follow = (bool)@$_REQUEST['follow']; // follow into target folder?
@@ -825,10 +825,10 @@ function game_info_table( $tablestyle, $game_row, $player_row, $iamrated, $use_s
    extract($game_row);
 
    // handle shape-games
-   if( $ShapeID > 0 )
+   if ( $ShapeID > 0 )
    {
       $arr_shape = GameSnapshot::parse_check_extended_snapshot($ShapeSnapshot);
-      if( !is_array($arr_shape) )
+      if ( !is_array($arr_shape) )
          error('invalid_snapshot', "msg_func.game_info_table($tablestyle,$ShapeID,$ShapeSnapshot)");
 
       $ShapeBlackFirst = (bool)@$arr_shape['PlayColorB'];
@@ -837,19 +837,19 @@ function game_info_table( $tablestyle, $game_row, $player_row, $iamrated, $use_s
    $my_id = $player_row['ID'];
    $is_my_game = ( $game_row['other_id'] == $my_id ); // used for waiting-room-checks only
 
-   if( $tablestyle == GSET_WAITINGROOM )
+   if ( $tablestyle == GSET_WAITINGROOM )
    {
       $Handitype = $Handicaptype;
       $CategoryHandiType = get_category_handicaptype( $Handitype );
-      if( $CategoryHandiType == CAT_HTYPE_MANUAL )
+      if ( $CategoryHandiType == CAT_HTYPE_MANUAL )
          $Color = $Handitype;
 
       // switch colors for challenger, so $Color represents My-Color of current user
-      if( !$is_my_game )
+      if ( !$is_my_game )
       {
-         if( $Color == HTYPE_BLACK )
+         if ( $Color == HTYPE_BLACK )
             $Color = HTYPE_WHITE;
-         elseif( $Color == HTYPE_WHITE )
+         elseif ( $Color == HTYPE_WHITE )
             $Color = HTYPE_BLACK;
       }
 
@@ -858,7 +858,7 @@ function game_info_table( $tablestyle, $game_row, $player_row, $iamrated, $use_s
          : true;
       //$haverating passed in from $game_row
    }
-   elseif( $is_tourney )
+   elseif ( $is_tourney )
    {
       // for transparency put following into separate fields (see tournaments/ladder/challenge.php)
       // - for GSET_TOURNAMENT_LADDER: TournamentRules.*, X_Handitype, X_Color, X_Calculated, X_ChallengerIsBlack
@@ -873,7 +873,7 @@ function game_info_table( $tablestyle, $game_row, $player_row, $iamrated, $use_s
    }
    else // invite|dispute
    {
-      if( is_null($use_src_opp) )
+      if ( is_null($use_src_opp) )
          error('invalid_args', "msg_func.game_info_table.miss_srcopp($tablestyle)");
 
       $tablestyle = GSET_MSG_INVITE;
@@ -885,7 +885,7 @@ function game_info_table( $tablestyle, $game_row, $player_row, $iamrated, $use_s
       list( $my_gs, $opp_gs ) = GameSetup::parse_invitation_game_setup( $my_id, @$game_row['GameSetup'], $game_row['ID'] );
       $Handitype = GameSetup::determine_handicaptype( $my_gs, $opp_gs, (int)$game_row['ToMove_ID'], $my_color_black );
 
-      switch( (string)$Handitype )
+      switch ( (string)$Handitype )
       {
          case HTYPE_CONV:
          case HTYPE_PROPER:
@@ -924,7 +924,7 @@ function game_info_table( $tablestyle, $game_row, $player_row, $iamrated, $use_s
 
    $itable = new Table_info('game'); //==> ID='gameTableInfos'
 
-   if( $tablestyle == GSET_WAITINGROOM )
+   if ( $tablestyle == GSET_WAITINGROOM )
    {
       $itable->add_scaption(T_('Info'));
       $itable->add_sinfo(
@@ -936,7 +936,7 @@ function game_info_table( $tablestyle, $game_row, $player_row, $iamrated, $use_s
 
       $itable->add_sinfo( T_('Rating'), echo_rating($other_rating,true,$other_id) );
    }
-   elseif( $tablestyle == GSET_MSG_INVITE )
+   elseif ( $tablestyle == GSET_MSG_INVITE )
    {
       $itable->add_scaption(T_('Opponent info'));
       $itable->add_sinfo( T_('Rating'), echo_rating($other_rating,true,$other_id) );
@@ -944,14 +944,14 @@ function game_info_table( $tablestyle, $game_row, $player_row, $iamrated, $use_s
 
       $itable->add_scaption(T_('Game info'));
    }
-   elseif( $tablestyle == GSET_TOURNAMENT_LADDER )
+   elseif ( $tablestyle == GSET_TOURNAMENT_LADDER )
       $itable->add_scaption(T_('Game info'));
 
-   if( $ShapeID && ($tablestyle == GSET_MSG_INVITE || $tablestyle == GSET_WAITINGROOM || $tablestyle == GSET_TOURNAMENT_LADDER) ) // invite & dispute, w-room
+   if ( $ShapeID && ($tablestyle == GSET_MSG_INVITE || $tablestyle == GSET_WAITINGROOM || $tablestyle == GSET_TOURNAMENT_LADDER) ) // invite & dispute, w-room
       $itable->add_sinfo( T_('Shape Game'),
             ShapeControl::build_snapshot_info( $ShapeID, $Size, $ShapeSnapshot, $ShapeBlackFirst ));
 
-   if( $tablestyle == GSET_WAITINGROOM )
+   if ( $tablestyle == GSET_WAITINGROOM )
       $itable->add_sinfo( T_('Game Type'), GameTexts::format_game_type($GameType, $GamePlayers) );
 
    $itable->add_sinfo( T_('Ruleset'), getRulesetText($Ruleset) );
@@ -959,7 +959,7 @@ function game_info_table( $tablestyle, $game_row, $player_row, $iamrated, $use_s
 
    $color_class = 'class=InTextImage';
    $color_note = '';
-   switch( (string)$CategoryHandiType )
+   switch ( (string)$CategoryHandiType )
    {
       case CAT_HTYPE_CONV: // Conventional handicap
          $itable->add_sinfo(
@@ -975,9 +975,9 @@ function game_info_table( $tablestyle, $game_row, $player_row, $iamrated, $use_s
 
       case CAT_HTYPE_MANUAL: // Manual game: Nigiri/Double/Black/White
       {
-         if( $Handitype == HTYPE_NIGIRI )
+         if ( $Handitype == HTYPE_NIGIRI )
          {
-            if( $GameType == GAMETYPE_GO )
+            if ( $GameType == GAMETYPE_GO )
             {
                $subtype = ($Handicap == 0) ? T_('Even game with nigiri') : T_('Handicap game with nigiri');
                $colortxt = image( $base_path.'17/y.gif', T_('Nigiri'), null, $color_class );
@@ -989,7 +989,7 @@ function game_info_table( $tablestyle, $game_row, $player_row, $iamrated, $use_s
                   T_('Color set by game-master for multi-player-game#color'), null, $color_class );
             }
          }
-         elseif( $Handitype == HTYPE_DOUBLE )
+         elseif ( $Handitype == HTYPE_DOUBLE )
          {
             $subtype = T_('Double game');
             $colortxt = build_image_double_game( true, $color_class );
@@ -999,7 +999,7 @@ function game_info_table( $tablestyle, $game_row, $player_row, $iamrated, $use_s
             // determine user-white/black
             // NOTE: my-color (for waiting-room color is switched above in this case)
             //       so use same choices for waitingroom/invite/dispute
-            if( $tablestyle == GSET_WAITINGROOM && $is_my_game )
+            if ( $tablestyle == GSET_WAITINGROOM && $is_my_game )
             {
                $subtype = ( $Color == HTYPE_BLACK ) ? T_('Color Black') : T_('Color White');
                $colortxt =
@@ -1010,7 +1010,7 @@ function game_info_table( $tablestyle, $game_row, $player_row, $iamrated, $use_s
             }
             else // for wroom & invitation
             {
-               if( $Color == HTYPE_BLACK )
+               if ( $Color == HTYPE_BLACK )
                {
                   $subtype = ($tablestyle == GSET_MSG_INVITE) ? T_('Color Black') : T_('Color White');
                   $user_w = array( 'ID' => $other_id, 'Handle' => $other_handle, 'Name' => $other_name );
@@ -1024,9 +1024,9 @@ function game_info_table( $tablestyle, $game_row, $player_row, $iamrated, $use_s
                }
 
                // overwrite subtype
-               if( $tablestyle == GSET_TOURNAMENT_LADDER )
+               if ( $tablestyle == GSET_TOURNAMENT_LADDER )
                   $subtype = ($Handitype == HTYPE_BLACK) ? T_('Color Challenger Black#T_ladder') : T_('Color Challenger White#T_ladder');
-               elseif( $tablestyle == GSET_TOURNAMENT_ROUNDROBIN )
+               elseif ( $tablestyle == GSET_TOURNAMENT_ROUNDROBIN )
                   $subtype = ($Handitype == HTYPE_BLACK) ? T_('Color Stronger Black#T_RRobin') : T_('Color Stronger White#T_RRobin');
 
                $colortxt = image( $base_path.'17/w.gif', T_('White'), null, $color_class) . MINI_SPACING
@@ -1047,25 +1047,25 @@ function game_info_table( $tablestyle, $game_row, $player_row, $iamrated, $use_s
 
       case CAT_HTYPE_FAIR_KOMI: // Fair Komi
       {
-         if( $tablestyle == GSET_WAITINGROOM )
+         if ( $tablestyle == GSET_WAITINGROOM )
          {
             $color_note = ( $is_my_game )
                ? GameTexts::get_fair_komi_types( $Handitype, NULL, $player_row['Handle'], /*opp*/NULL )
                : GameTexts::get_fair_komi_types( $Handitype, NULL, $other_handle, $player_row['Handle'] );
          }
-         elseif( $tablestyle == GSET_MSG_INVITE && is_htype_divide_choose($Handitype) ) // invite|dispute Div&Choose
+         elseif ( $tablestyle == GSET_MSG_INVITE && is_htype_divide_choose($Handitype) ) // invite|dispute Div&Choose
          {
             // parse htype/init/opp-handles from game-setup for game on INVITED or KOMI|STARTED status
             $fk_gid = (int)@$game_row['Game_ID'];
             list( $init_gs, $opp_gs ) = GameSetup::parse_invitation_game_setup( $my_id, @$game_row['GameSetup'], $fk_gid );
-            if( is_null($init_gs) )
+            if ( is_null($init_gs) )
                error('invite_bad_gamesetup', "game_info_table.fk_inv($tablestyle,$my_id,$fk_gid)");
 
             $fk_htype = $init_gs->Handicaptype;
-            if( $game_row['Status'] == GAME_STATUS_INVITED )
+            if ( $game_row['Status'] == GAME_STATUS_INVITED )
             {
                $curr_tomove = (int)$game_row['ToMove_ID'];
-               if( $curr_tomove == INVITE_HANDI_DIV_CHOOSE && !is_htype_divide_choose($fk_htype) )
+               if ( $curr_tomove == INVITE_HANDI_DIV_CHOOSE && !is_htype_divide_choose($fk_htype) )
                   $fk_htype = GameSetup::swap_htype_black_white($opp_gs->Handicaptype);
             }
 
@@ -1079,37 +1079,37 @@ function game_info_table( $tablestyle, $game_row, $player_row, $iamrated, $use_s
       }//case CAT_HTYPE_FAIR_KOMI
    }//switch $CategoryHandiType
 
-   if( $tablestyle == GSET_MSG_INVITE || $tablestyle == GSET_WAITINGROOM || $tablestyle == GSET_TOURNAMENT_LADDER ) // Handicap adjustment
+   if ( $tablestyle == GSET_MSG_INVITE || $tablestyle == GSET_WAITINGROOM || $tablestyle == GSET_TOURNAMENT_LADDER ) // Handicap adjustment
    {
       $adj_handi_str = build_adjust_handicap( $Size, $AdjHandicap, $MinHandicap, $MaxHandicap );
-      if( (string)$adj_handi_str != '' )
+      if ( (string)$adj_handi_str != '' )
          $itable->add_sinfo( T_('Handicap adjustment'), $adj_handi_str );
    }
 
-   if( ENABLE_STDHANDICAP && !$is_fairkomi )
+   if ( ENABLE_STDHANDICAP && !$is_fairkomi )
       $itable->add_sinfo( T_('Standard placement'), yesno( $StdHandicap) );
 
-   if( $tablestyle == GSET_MSG_INVITE || $tablestyle == GSET_WAITINGROOM || $tablestyle == GSET_TOURNAMENT_LADDER ) // Komi adjustment
+   if ( $tablestyle == GSET_MSG_INVITE || $tablestyle == GSET_WAITINGROOM || $tablestyle == GSET_TOURNAMENT_LADDER ) // Komi adjustment
    {
-      if( !$is_fairkomi )
+      if ( !$is_fairkomi )
       {
          $adj_komi_str = build_adjust_komi( $AdjKomi, $JigoMode );
-         if( (string)$adj_komi_str != '' )
+         if ( (string)$adj_komi_str != '' )
             $itable->add_sinfo( T_('Komi adjustment'), $adj_komi_str );
       }
    }
 
-   if( $tablestyle == GSET_WAITINGROOM ) // Restrictions
+   if ( $tablestyle == GSET_WAITINGROOM ) // Restrictions
    {
       $ratinglimit_str = echo_game_restrictions($MustBeRated, $RatingMin, $RatingMax,
          $MinRatedGames, null, null, null, true);
-      if( $ratinglimit_str != NO_VALUE )
+      if ( $ratinglimit_str != NO_VALUE )
          $itable->add_sinfo(
             T_('Rating restrictions'), $ratinglimit_str,
             ( ($goodrating && $goodmingames) ? '' : warning_cell_attb( T_('Restricted#wroom')) ) );
 
       $same_opp_str = echo_accept_same_opponent($SameOpponent, $game_row);
-      if( $SameOpponent != 0 )
+      if ( $SameOpponent != 0 )
          $itable->add_sinfo(
             T_('Accept same opponent'), $same_opp_str,
             ( $goodsameopp ? '' : warning_cell_attb( T_('Restricted#wroom')) ) );
@@ -1126,7 +1126,7 @@ function game_info_table( $tablestyle, $game_row, $player_row, $iamrated, $use_s
          ( $iamrated || $Rated != 'Y' ? '' : warning_cell_attb( T_('No initial rating')) ) );
    $itable->add_sinfo( T_('Clock runs on weekends'), yesno( $WeekendClock) );
 
-   if( $tablestyle == GSET_WAITINGROOM ) // Comment
+   if ( $tablestyle == GSET_WAITINGROOM ) // Comment
    {
       $itable->add_row( array(
             'sname' => T_('Comment'),
@@ -1135,7 +1135,7 @@ function game_info_table( $tablestyle, $game_row, $player_row, $iamrated, $use_s
    }
 
    // compute the probable game settings
-   if( $haverating && $goodrating && $goodmingames && ( !$is_my_game || $tablestyle != GSET_WAITINGROOM ) )
+   if ( $haverating && $goodrating && $goodmingames && ( !$is_my_game || $tablestyle != GSET_WAITINGROOM ) )
    {
       $game_row['Handicaptype'] = $Handitype;
       $game_row['JigoMode'] = $JigoMode;
@@ -1146,15 +1146,15 @@ function game_info_table( $tablestyle, $game_row, $player_row, $iamrated, $use_s
       $adj_handi_str = (is_null($gs_calc->adjusted_handicap)) ? '' : sprintf( T_('adjusted from %d'), $gs_calc->adjusted_handicap);
       $adj_komi_str = (is_null($gs_calc->adjusted_komi)) ? '' : sprintf( T_('adjusted from %.1f'), $gs_calc->adjusted_komi);
 
-      if( $tablestyle == GSET_WAITINGROOM && !$is_my_game )
+      if ( $tablestyle == GSET_WAITINGROOM && !$is_my_game )
          $itable->add_sinfo( T_('Started games'), (int)@$game_row['X_TotalCount'] );
 
-      if( $gs_calc->calc_type == 2 || $adj_handi_str || $adj_komi_str || $is_fairkomi )
+      if ( $gs_calc->calc_type == 2 || $adj_handi_str || $adj_komi_str || $is_fairkomi )
       {
          // determine color
-         if( $gs_calc->calc_color == GSC_COL_DOUBLE )
+         if ( $gs_calc->calc_color == GSC_COL_DOUBLE )
             $colortxt = build_image_double_game( true, $color_class );
-         elseif( $gs_calc->calc_color == GSC_COL_FAIRKOMI )
+         elseif ( $gs_calc->calc_color == GSC_COL_FAIRKOMI )
             $colortxt = image( $base_path.'17/y.gif', $color_note, NULL, $color_class ) . MED_SPACING . $color_note;
          else
             $colortxt = get_colortext_probable( ($gs_calc->calc_color == GSC_COL_BLACK), ($gs_calc->calc_color == GSC_COL_NIGIRI) );
@@ -1170,7 +1170,7 @@ function game_info_table( $tablestyle, $game_row, $player_row, $iamrated, $use_s
             : sprintf("%.1f", $gs_calc->calc_komi) . ($adj_komi_str ? MED_SPACING."($adj_komi_str)" : '' );
          $itable->add_sinfo( T_('Komi'), $komi_text );
 
-         if( $is_fairkomi )
+         if ( $is_fairkomi )
             $itable->add_sinfo( T_('Jigo mode'), GameTexts::get_jigo_modes($JigoMode) );
       }
    } //Probable settings
@@ -1183,16 +1183,16 @@ function game_info_table( $tablestyle, $game_row, $player_row, $iamrated, $use_s
 function build_adjust_komi( $adj_komi, $jigo_mode, $short=false )
 {
    $out = array();
-   if( (float)$adj_komi != 0.0 )
+   if ( (float)$adj_komi != 0.0 )
       $out[] = ($adj_komi > 0 ? '+' : '') . (float)$adj_komi;
-   if( $jigo_mode != JIGOMODE_KEEP_KOMI )
+   if ( $jigo_mode != JIGOMODE_KEEP_KOMI )
    {
       $jigo_str = '';
-      if( $jigo_mode == JIGOMODE_ALLOW_JIGO )
+      if ( $jigo_mode == JIGOMODE_ALLOW_JIGO )
          $jigo_str = ($short) ? T_('.0#wroomshort') : T_('Allow Jigo#wroom');
-      elseif( $jigo_mode == JIGOMODE_NO_JIGO )
+      elseif ( $jigo_mode == JIGOMODE_NO_JIGO )
          $jigo_str = ($short) ? T_('.5#wroomshort') : T_('No Jigo#wroom');
-      if( $jigo_str )
+      if ( $jigo_str )
          $out[] = sprintf( '[%s]', $jigo_str );
    }
 
@@ -1204,17 +1204,17 @@ function build_adjust_komi( $adj_komi, $jigo_mode, $short=false )
 function build_adjust_handicap( $size, $adj_handicap, $min_handicap, $max_handicap, $short=false )
 {
    $out = array();
-   if( $adj_handicap )
+   if ( $adj_handicap )
       $out[] = ($adj_handicap > 0 ? '+' : '') . $adj_handicap;
-   if( $max_handicap == DEFAULT_MAX_HANDICAP )
+   if ( $max_handicap == DEFAULT_MAX_HANDICAP )
    {
       $def_max_handicap = DefaultMaxHandicap::calc_def_max_handicap($size);
-      if( $short )
+      if ( $short )
          $out[] = sprintf( "[%d,D%d]", $min_handicap, $def_max_handicap );
       else
          $out[] = sprintf( "[%d,%s %d]", $min_handicap, T_('Default'), $def_max_handicap );
    }
-   elseif( $min_handicap > 0 || $max_handicap < MAX_HANDICAP )
+   elseif ( $min_handicap > 0 || $max_handicap < MAX_HANDICAP )
       $out[] = sprintf( "[%d,%d]", $min_handicap, min( MAX_HANDICAP, $max_handicap) );
 
    return ( count($out) ) ? implode(' ',$out) : '';
@@ -1234,38 +1234,38 @@ function echo_game_restrictions($MustBeRated, $RatingMin, $RatingMax, $MinRatedG
 {
    $out = array();
 
-   if( $MustBeRated == 'Y')
+   if ( $MustBeRated == 'Y')
    {
       // +/-50 reverse the inflation from new-game handle_add_game()-func
       $r1 = echo_rating( $RatingMin + 50, false, 0, false, $short );
       $r2 = echo_rating( $RatingMax - 50, false, 0, false, $short );
-      if( $r1 == $r2 )
+      if ( $r1 == $r2 )
          $Ratinglimit = sprintf( T_('%s only'), $r1);
       else
          $Ratinglimit = $r1 . ' - ' . $r2;
       $out[] = $Ratinglimit;
    }
 
-   if( $MinRatedGames > 0 )
+   if ( $MinRatedGames > 0 )
    {
       $rg_str = ($short) ? T_('Rated Games[%s]#short') : T_('Rated finished Games[&gt;=%s]');
       $out[] = sprintf( $rg_str, $MinRatedGames );
    }
 
-   if( !is_null($OppGoodMaxGames) && !$OppGoodMaxGames )
+   if ( !is_null($OppGoodMaxGames) && !$OppGoodMaxGames )
       $out[] = 'MXG';
 
-   if( !is_null($SameOpponent) )
+   if ( !is_null($SameOpponent) )
    {
-      if( $SameOpponent < SAMEOPP_TOTAL )
+      if ( $SameOpponent < SAMEOPP_TOTAL )
          $out[] = sprintf( 'SOT[%s]', -$SameOpponent + SAMEOPP_TOTAL ); // N total times
-      elseif( $SameOpponent < 0 )
+      elseif ( $SameOpponent < 0 )
          $out[] = sprintf( 'SO[%sx]', -$SameOpponent ); // N times
-      elseif( $SameOpponent > 0 )
+      elseif ( $SameOpponent > 0 )
          $out[] = sprintf( 'SO[&gt;%sd]', $SameOpponent ); // after N days
    }
 
-   if( !is_null($Hidden) && $Hidden )
+   if ( !is_null($Hidden) && $Hidden )
       $out[] = sprintf( '[%s]', T_('Hidden#wroom') );
 
    return ( count($out) ) ? preg_replace("/\\&gt;/", '>', implode(', ', $out)) : NO_VALUE;
@@ -1280,44 +1280,44 @@ function interpret_time_limit_forms($byoyomitype, $timevalue, $timeunit,
    $max = time_convert_to_hours( 365, 'days');
 
    $mainhours = time_convert_to_hours($timevalue, $timeunit);
-   if( $mainhours > $max )
+   if ( $mainhours > $max )
       $mainhours = $max;
-   elseif( $mainhours < 0 )
+   elseif ( $mainhours < 0 )
       $mainhours = 0;
 
-   if( $byoyomitype == BYOTYPE_JAPANESE )
+   if ( $byoyomitype == BYOTYPE_JAPANESE )
    {
       $byohours = time_convert_to_hours($byotimevalue_jap, $timeunit_jap);
-      if( $byohours > $max )
+      if ( $byohours > $max )
          $byohours = $max;
-      elseif( $byohours < 0 )
+      elseif ( $byohours < 0 )
          $byohours = 0;
 
       $byoperiods = (int)$byoperiods_jap;
-      if( $byoperiods < 1 )
+      if ( $byoperiods < 1 )
          $byoperiods = 1;
-      if( $byohours * $byoperiods > $max )
+      if ( $byohours * $byoperiods > $max )
          $byoperiods = floor($max/$byohours);
    }
-   else if( $byoyomitype == BYOTYPE_CANADIAN )
+   else if ( $byoyomitype == BYOTYPE_CANADIAN )
    {
       $byohours = time_convert_to_hours($byotimevalue_can, $timeunit_can);
-      if( $byohours > $max )
+      if ( $byohours > $max )
          $byohours = $max;
-      elseif( $byohours < 0 )
+      elseif ( $byohours < 0 )
          $byohours = 0;
 
       $byoperiods = (int)$byoperiods_can;
-      if( $byoperiods < 1 )
+      if ( $byoperiods < 1 )
          $byoperiods = 1;
    }
-   else // if( $byoyomitype == BYOTYPE_FISCHER )
+   else // if ( $byoyomitype == BYOTYPE_FISCHER )
    {
       $byoyomitype = BYOTYPE_FISCHER;
       $byohours = time_convert_to_hours($byotimevalue_fis, $timeunit_fis);
-      if( $byohours > $mainhours )
+      if ( $byohours > $mainhours )
          $byohours = $mainhours;
-      elseif( $byohours < 0 )
+      elseif ( $byohours < 0 )
          $byohours = 0;
 
       $byoperiods = 0;
@@ -1335,14 +1335,14 @@ function get_folders($uid, $remove_all_received=true, $user_folder_nr=null)
    $arr_folders = load_cache_folders( $uid, $user_folder_nr );
    $fldrs = $STANDARD_FOLDERS;
 
-   foreach( $arr_folders as $folder_nr => $row )
+   foreach ( $arr_folders as $folder_nr => $row )
    {
-      if( empty($row['Name']))
+      if ( empty($row['Name']))
          $row['Name'] = ( $folder_nr < USER_FOLDERS ) ? $STANDARD_FOLDERS[$folder_nr][0] : T_('Folder name');
       $fldrs[$folder_nr] = array( $row['Name'], $row['BGColor'], $row['FGColor'] );
    }
 
-   if( $remove_all_received )
+   if ( $remove_all_received )
       unset($fldrs[FOLDER_ALL_RECEIVED]);
 
    return $fldrs;
@@ -1360,32 +1360,32 @@ function load_cache_folders( $uid, $folder_nr=null )
    $query = false;
 
    // need special handling to load only specific folder or caching all
-   if( $use_cache )
+   if ( $use_cache )
    {
       $result = DgsCache::fetch( $dbgmsg, CACHE_GRP_FOLDERS, $key );
-      if( is_null($result) )
+      if ( is_null($result) )
          $query = $query_all_folders;
    }
-   elseif( $load_single_folder )
+   elseif ( $load_single_folder )
       $query = "SELECT $fields FROM Folders WHERE uid=$uid AND Folder_nr=$folder_nr LIMIT 1";
    else // load all folders
       $query = $query_all_folders;
 
-   if( $query ) // load and collect folders
+   if ( $query ) // load and collect folders
    {
       $db_result = db_query( $dbgmsg, $query );
 
       $result = array();
-      while( $row = mysql_fetch_assoc($db_result) )
+      while ( $row = mysql_fetch_assoc($db_result) )
          $result[$row['Folder_nr']] = $row;
       mysql_free_result($db_result);
 
-      if( $use_cache )
+      if ( $use_cache )
          DgsCache::store( $dbgmsg, CACHE_GRP_FOLDERS, $key, $result, SECS_PER_DAY );
    }
 
    // extract single folder from all folders
-   if( $use_cache && $load_single_folder && count($result) > 0 && isset($result[$folder_nr]) )
+   if ( $use_cache && $load_single_folder && count($result) > 0 && isset($result[$folder_nr]) )
       $result = array( $folder_nr => $result[$folder_nr] );
 
    return $result;
@@ -1403,21 +1403,21 @@ function build_folders_all_received( $folders )
 
 function change_folders_for_marked_messages($uid, $folders)
 {
-   if( isset($_GET['move_marked']) )
+   if ( isset($_GET['move_marked']) )
    {
-      if( !isset($_GET['folder']) )
+      if ( !isset($_GET['folder']) )
          return -1; //i.e. no move query
       $new_folder = (int)$_GET['folder'];
    }
-   else if( isset($_GET['destroy_marked'] ) )
+   else if ( isset($_GET['destroy_marked'] ) )
       $new_folder = FOLDER_DESTROYED;
    else
       return -1; //i.e. no move query
 
    $message_ids = array();
-   foreach( $_GET as $key => $val )
+   foreach ( $_GET as $key => $val )
    {
-      if( preg_match("/^mark(\d+)$/", $key, $matches) )
+      if ( preg_match("/^mark(\d+)$/", $key, $matches) )
          $message_ids[]= $matches[1];
    }
 
@@ -1429,12 +1429,12 @@ function change_folders_for_marked_messages($uid, $folders)
 //                      true = change only message that need NO reply
 function change_folders($uid, $folders, $message_ids, $new_folder, $current_folder=false, $need_replied=false, $quick_suite=false)
 {
-   if( count($message_ids) <= 0 )
+   if ( count($message_ids) <= 0 )
       return 0;
 
-   if( $new_folder == FOLDER_DESTROYED )
+   if ( $new_folder == FOLDER_DESTROYED )
    {
-      if( $quick_suite )
+      if ( $quick_suite )
          $where_clause = '';
       else
       {
@@ -1444,23 +1444,23 @@ function change_folders($uid, $folders, $message_ids, $new_folder, $current_fold
    }
    else
    {
-      if( !isset($new_folder) || !isset($folders[$new_folder])
+      if ( !isset($new_folder) || !isset($folders[$new_folder])
             || $new_folder == FOLDER_NEW || $new_folder == FOLDER_ALL_RECEIVED )
          error('folder_not_found', "change_folders.check.new_folder($uid,$new_folder)");
 
-      if( $new_folder == FOLDER_SENT )
+      if ( $new_folder == FOLDER_SENT )
          $where_clause = "AND Sender IN('Y','M') ";
-      else if( $new_folder == FOLDER_REPLY )
+      else if ( $new_folder == FOLDER_REPLY )
          $where_clause = "AND Sender IN('N','M','S') ";
       else
          $where_clause = '';
 
-      if( $current_folder > FOLDER_ALL_RECEIVED && isset($folders[$current_folder])
+      if ( $current_folder > FOLDER_ALL_RECEIVED && isset($folders[$current_folder])
             && $current_folder != FOLDER_DESTROYED )
          $where_clause.= "AND Folder_nr='$current_folder' ";
    }
 
-   if( $need_replied )
+   if ( $need_replied )
       $where_clause.= "AND Replied='Y' ";
    else
       $where_clause.= "AND Replied!='M' ";
@@ -1476,7 +1476,7 @@ function change_folders($uid, $folders, $message_ids, $new_folder, $current_fold
                   "LIMIT " . count($message_ids) );
       $rows_updated = mysql_affected_rows() ;
 
-      if( $rows_updated > 0 )
+      if ( $rows_updated > 0 )
          update_count_message_new( "change_folders.update.upd_cnt_msg_new", $uid, COUNTNEW_RECALC );
    }
    ta_end();
@@ -1490,7 +1490,7 @@ function change_folders($uid, $folders, $message_ids, $new_folder, $current_fold
 // returns count of updated messages
 function fix_invitations_replied( $dbgmsg, $limit )
 {
-   if( !is_numeric($limit) || $limit < 1 )
+   if ( !is_numeric($limit) || $limit < 1 )
       $limit = 100;
 
    // fix invitation-messages without game, that cannot be replied any more
@@ -1503,11 +1503,11 @@ function fix_invitations_replied( $dbgmsg, $limit )
       "LIMIT $limit" );
 
    $msg_ids = array();
-   while( $row = mysql_fetch_assoc($result) )
+   while ( $row = mysql_fetch_assoc($result) )
       $msg_ids[] = $row['mid'];
    mysql_free_result($result);
 
-   if( count($msg_ids) )
+   if ( count($msg_ids) )
    {
       db_query( "$dbgmsg.fix_invitations_replied.upd(".count($msg_ids).")",
          "UPDATE MessageCorrespondents SET Replied='N' " .
@@ -1528,24 +1528,24 @@ function fix_invitations_replied( $dbgmsg, $limit )
 function update_count_message_new( $dbgmsg, $uid, $diff=null )
 {
    $dbgmsg .= "update_count_message_new($uid,$diff)";
-   if( !is_numeric($uid) )
+   if ( !is_numeric($uid) )
       error( 'invalid_args', "$dbgmsg.check.uid" );
 
-   if( is_null($diff) )
+   if ( is_null($diff) )
    {
       db_query( "$dbgmsg.reset",
          "UPDATE Players SET CountMsgNew=-1 WHERE ID='$uid' LIMIT 1" );
    }
-   elseif( is_numeric($diff) && $diff != 0 )
+   elseif ( is_numeric($diff) && $diff != 0 )
    {
       db_query( "$dbgmsg.upd",
          "UPDATE Players SET CountMsgNew=CountMsgNew+($diff) WHERE CountMsgNew>=0 AND ID='$uid' LIMIT 1" );
    }
-   elseif( (string)$diff == COUNTNEW_RECALC )
+   elseif ( (string)$diff == COUNTNEW_RECALC )
    {
       global $player_row;
       $count_new = count_messages_new( $uid );
-      if( @$player_row['ID'] == $uid )
+      if ( @$player_row['ID'] == $uid )
          $player_row['CountMsgNew'] = $count_new;
       db_query( "$dbgmsg.recalc",
          "UPDATE Players SET CountMsgNew=$count_new WHERE ID='$uid' LIMIT 1" );
@@ -1572,9 +1572,9 @@ function echo_folders( $folders, $current_folder, $curr_linked=true )
    ksort($folders);
 
    $i = 0;
-   foreach( $folders as $nr => $val )
+   foreach ( $folders as $nr => $val )
    {
-      if( $i > 0 && ($i % FOLDER_COLS_MODULO) == 0 )
+      if ( $i > 0 && ($i % FOLDER_COLS_MODULO) == 0 )
           $string .= "</tr>\n<tr><td></td>"; //empty cell under title
       $i++;
 
@@ -1584,10 +1584,10 @@ function echo_folders( $folders, $current_folder, $curr_linked=true )
       $string .= echo_folder_box( $folders, $val, null, 'class='.$fclass, $link_fmt );
    }
    $i = ($i % FOLDER_COLS_MODULO);
-   if( $i > 0 ) //empty cells of last line
+   if ( $i > 0 ) //empty cells of last line
    {
       $i = FOLDER_COLS_MODULO - $i;
-      if( $i > 1 )
+      if ( $i > 1 )
          $string .= "<td colspan=$i></td>";
       else
          $string .= "<td></td>";
@@ -1604,30 +1604,30 @@ function echo_folder_box( $folders, $folder_nr, $bgcolor=null, $attbs='', $layou
 {
    global $STANDARD_FOLDERS;
 
-   if( $folder_nr == FOLDER_DESTROYED ) //case of $deleted messages
+   if ( $folder_nr == FOLDER_DESTROYED ) //case of $deleted messages
      list($foldername, $folderbgcolor, $folderfgcolor) = array(NO_VALUE,0,0);
-   else if( is_array($folder_nr) )
+   else if ( is_array($folder_nr) )
      list($foldername, $folderbgcolor, $folderfgcolor) = $folder_nr;
    else
      list($foldername, $folderbgcolor, $folderfgcolor) = @$folders[$folder_nr];
 
-   if( empty($foldername) )
+   if ( empty($foldername) )
    {
-     if( $folder_nr < USER_FOLDERS )
+     if ( $folder_nr < USER_FOLDERS )
        list($foldername, $folderbgcolor, $folderfgcolor) = $STANDARD_FOLDERS[$folder_nr];
      else
        $foldername = T_('Folder name');
    }
 
    $folderbgcolor = blend_alpha_hex($folderbgcolor, $bgcolor);
-   if( empty($folderfgcolor) )
+   if ( empty($folderfgcolor) )
       $folderfgcolor = "000000" ;
 
    $foldername= "<font color=\"#$folderfgcolor\">" . make_html_safe($foldername) . "</font>";
-   if( $layout_fmt )
+   if ( $layout_fmt )
       $foldername= sprintf( $layout_fmt, $foldername);
 
-   if( !$attbs )
+   if ( !$attbs )
       $attbs = 'class=FolderBox';
 
    return "<td bgcolor=\"#$folderbgcolor\" $attbs>$foldername</td>";
@@ -1698,16 +1698,16 @@ class DgsMessage
 
    public function add_error( $error )
    {
-      if( $error )
+      if ( $error )
          $this->errors[] = $error;
       return $error;
    }
 
    public function add_errors( $errors )
    {
-      if( is_array($errors) )
+      if ( is_array($errors) )
       {
-         foreach( $errors as $err )
+         foreach ( $errors as $err )
             $this->add_error($err);
       }
    }
@@ -1720,7 +1720,7 @@ class DgsMessage
    public function build_recipient_user_row()
    {
       $user_row = $this->get_recipient();
-      if( is_null($user_row) )
+      if ( is_null($user_row) )
          $user_row = array( 'ID' => 0, 'Handle' => '', 'Name' => span('InlineWarning', T_('Receiver not found')) );
       else
          $user_row['Name'] = make_html_safe($user_row['Name']);
@@ -1739,15 +1739,15 @@ class DgsMessage
     */
    public static function load_message( $dbgmsg, $mid, $uid, $other_uid, $with_fulldata )
    {
-      if( !is_numeric($mid) || $mid <= 0 )
+      if ( !is_numeric($mid) || $mid <= 0 )
          error('unknown_message', "$dbgmsg.DgsMessage:load_message.check.mid($mid)");
 
       $qsql = self::build_message_base_query( $uid, $with_fulldata, /*single*/true, $mid );
-      if( $other_uid > 0 )
+      if ( $other_uid > 0 )
          $qsql->add_part( SQLP_WHERE, "other.uid=$other_uid" );
 
       $msg_row = mysql_single_fetch( "$dbgmsg.DgsMessage:load_message.find($mid)", $qsql->get_select() );
-      if( !$msg_row )
+      if ( !$msg_row )
          error('unknown_message', "$dbgmsg.DgsMessage:load_message.find.not_found($mid)");
 
       return $msg_row;
@@ -1798,16 +1798,16 @@ class DgsMessage
             "LEFT JOIN MessageCorrespondents AS other ON other.mid=M.ID AND other.Sender!=me.Sender",
             "LEFT JOIN MessageCorrespondents AS prev ON M.ReplyTo>0 AND prev.mid=M.ReplyTo AND prev.uid=$uid"
       );
-      if( $mid > 0 )
+      if ( $mid > 0 )
          $qsql->add_part( SQLP_WHERE, "M.ID=$mid" );
 
-      if( $single_msg )
+      if ( $single_msg )
       {
          // sort old messages to myself with Sender='N' first if both 'N' and 'Y' remains
          $qsql->add_part( SQLP_ORDER, 'Sender' ); // me.Sender
          $qsql->add_part( SQLP_LIMIT, '1' );
       }
-      if( $with_fulldata )
+      if ( $with_fulldata )
       {
          $qsql->add_part( SQLP_FIELDS,
             'P.Handle AS other_handle', 'P.Name AS other_name',
@@ -1840,7 +1840,7 @@ class DgsMessage
    {
       global $player_row;
       $my_id = (int)@$player_row['ID']; // sender
-      if( !is_array($to_handles) || count($to_handles) == 0 )
+      if ( !is_array($to_handles) || count($to_handles) == 0 )
          error('invalid_args', "DgsMessage:load_message_receivers.check.to($my_id,$type,$invitation_step)");
       $to_handles = array_unique($to_handles);
       $to_handles = explode(' ', strtolower(implode(' ', $to_handles))); // lower-case to find all handles
@@ -1849,19 +1849,19 @@ class DgsMessage
 
       $chk_guest = $chk_invself = false;
       $arr_qhandles = array();
-      foreach( $to_handles as $handle )
+      foreach ( $to_handles as $handle )
       {
-         if( $handle == 'guest' ) // check strtolower(handle)
+         if ( $handle == 'guest' ) // check strtolower(handle)
             $chk_guest = true;
-         if( $type == MSGTYPE_INVITATION && $player_row['Handle'] == $handle )
+         if ( $type == MSGTYPE_INVITATION && $player_row['Handle'] == $handle )
             $chk_invself = true;
          $arr_qhandles[] = mysql_addslashes($handle);
       }
-      if( $chk_guest )
+      if ( $chk_guest )
          $errors[] = ErrorCode::get_error_text('guest_may_not_receive_messages');
-      if( $chk_invself )
+      if ( $chk_invself )
          $errors[] = ErrorCode::get_error_text('invite_self');
-      if( count($errors) )
+      if ( count($errors) )
          return array( $arr_receivers, $errors );
 
       // CSYSFLAG_REJECT_INVITE only blocks the invitations at starting point
@@ -1877,20 +1877,20 @@ class DgsMessage
                "LEFT JOIN Contacts AS C ON C.uid=P.ID AND C.cid=$my_id " .
             "WHERE P.Handle IN ('" . implode("','", $arr_qhandles) . "') " .
             "LIMIT " . count($to_handles) );
-      while( $row = mysql_fetch_assoc($result) )
+      while ( $row = mysql_fetch_assoc($result) )
          $arr_receivers[strtolower($row['Handle'])] = $row;
       mysql_free_result($result);
 
       // checks for unknown users and rejects-msg/inv
-      foreach( $to_handles as $handle )
+      foreach ( $to_handles as $handle )
       {
-         if( !isset($arr_receivers[$handle]) ) // handle must be lower-case to check
+         if ( !isset($arr_receivers[$handle]) ) // handle must be lower-case to check
             $errors[] = sprintf( T_('Unknown message receiver [%s]'), $handle );
          else
          {
             // message can not be rejected coming from some admins
             $user_row = $arr_receivers[$handle];
-            if( $user_row['C_denied'] && !($player_row['admin_level'] & (ADMIN_DEVELOPER|ADMIN_FORUM|ADMIN_GAME)) )
+            if ( $user_row['C_denied'] && !($player_row['admin_level'] & (ADMIN_DEVELOPER|ADMIN_FORUM|ADMIN_GAME)) )
             {
                $msgtmpl = ( $type == MSGTYPE_INVITATION )
                   ? T_('Invitation rejected by user [%s] !')
@@ -1915,7 +1915,7 @@ class DgsMessage
          "UPDATE MessageCorrespondents SET Folder_nr=$new_folder " .
          "WHERE mid=$mid AND uid=$uid" . (is_null($Sender) ? '' : " AND Sender='$Sender'") . " LIMIT 1" );
       $upd_count = mysql_affected_rows();
-      if( $die && $upd_count != 1)
+      if ( $die && $upd_count != 1)
          error('mysql_update_message', "$dbgmsg.2" );
       return $upd_count;
    }//update_message_folder
@@ -1954,7 +1954,7 @@ class MessageListBuilder
       $this->table->add_tablehead( 9, new TableHead( T_('Message thread#header'),
             'images/thread.gif', T_('Show message thread') ), 'Image', 0, 'Thread+' );
 
-      if( $this->full_details )
+      if ( $this->full_details )
       {
          // additional fields for search-messages
          $this->table->add_tablehead( 6, T_('Type#header'), '', TABLE_NO_HIDE, 'M.Type+');
@@ -1972,7 +1972,7 @@ class MessageListBuilder
       $this->table->add_tablehead(10, new TableHead( T_('First message in thread#header'),
             'images/msg_first.gif', T_('Show initial message in thread') ), 'Image', TABLE_NO_SORT );
       $this->table->add_tablehead( 4, T_('Created#header'), 'Date', 0, 'me.mid-'); // order of me.mid == order of msg-date
-      if( !$this->no_mark )
+      if ( !$this->no_mark )
          $this->table->add_tablehead( 5, T_('Mark#header'), 'Mark', TABLE_NO_HIDE|TABLE_NO_SORT);
    }//message_list_head
 
@@ -1999,9 +1999,9 @@ class MessageListBuilder
       $url_terms = ($rx_term != '') ? URI_AMP."xterm=".urlencode($rx_term) : '';
       $arr_marks = array(); // mid => 1
 
-      foreach( $arr_msg as $row )
+      foreach ( $arr_msg as $row )
       {
-         if( $show_rows-- <= 0 )
+         if ( $show_rows-- <= 0 )
             break;
          $mid = $row["mid"];
          $oid = $row['other_ID'];
@@ -2022,7 +2022,7 @@ class MessageListBuilder
 
          // link to user
          $str = self::message_build_user_string( $row, $player_row, $this->full_details );
-         if( !$this->full_details && ($row['Sender'] === 'Y') )
+         if ( !$this->full_details && ($row['Sender'] === 'Y') )
             $str = T_('To') . ': ' . $str;
          $mrow_strings[ 2] = $str;
 
@@ -2036,7 +2036,7 @@ class MessageListBuilder
          $mrow_strings[ 4] = date(DATE_FMT, $row["Time"]);
 
          // additional fields for search-messages
-         if( $this->full_details )
+         if ( $this->full_details )
          {
             static $MSG_TYPES = array( // keep them untranslated(!)
                   MSGTYPE_NORMAL     => 'Normal',
@@ -2051,25 +2051,25 @@ class MessageListBuilder
 
          $mrow_strings[ 9] = '';
          $mrow_strings[10] = '';
-         if( $thread )
+         if ( $thread )
          {
             $mrow_strings[ 9] = anchor( "message_thread.php?thread=$thread".URI_AMP."mid=$mid$oid_url",
                   image( $base_path.'images/thread.gif', T_('Message thread') ),
                   T_('Show message thread') );
 
-            if( $thread != $mid )
+            if ( $thread != $mid )
                $mrow_strings[10] = anchor( 'message.php?mode=ShowMessage'.URI_AMP."mid=$thread",
                      image( $base_path.'images/msg_first.gif', T_('First message in thread') ),
                      T_('Show initial message in thread') );
          }
 
-         if( !$this->no_mark )
+         if ( !$this->no_mark )
          {
-            if( $row['Replied'] == 'M' )
+            if ( $row['Replied'] == 'M' )
             {// message needs reply (so forbid marking and force inspection); invitation, not-replied yet, valid game
                $mrow_strings[ 5] = '';
             }
-            elseif( !isset($arr_marks[$mid]) ) // normal|bulk (for bulk-msg only mark first)
+            elseif ( !isset($arr_marks[$mid]) ) // normal|bulk (for bulk-msg only mark first)
             {
                $can_move_messages = true;
                $n = $this->table->get_prefix() . "mark$mid";
@@ -2078,7 +2078,7 @@ class MessageListBuilder
                $mrow_strings[ 5] = "<input type='checkbox' name='$n' value='Y'" . ($checked ? ' checked' : '') . '>';
                $arr_marks[$mid] = 1;
             }
-            else if( $is_bulk )
+            else if ( $is_bulk )
             {
                $mrow_strings[ 5] = image( $base_path.'images/up_bulk.gif',
                      T_('Use toggle above for this bulk-message'), null );
@@ -2100,22 +2100,22 @@ class MessageListBuilder
     */
    public static function message_build_user_string( &$row, $my_row, $full_details )
    {
-      if( $row['Sender'] === 'M' ) // Message to myself
+      if ( $row['Sender'] === 'M' ) // Message to myself
          $row['other_name'] = '(' . T_('Myself') . ')';
-      else if( $row['other_ID'] <= 0 )
+      else if ( $row['other_ID'] <= 0 )
          $row['other_name'] = '[' . T_('Server message') . ']';
-      if( empty($row['other_name']) )
+      if ( empty($row['other_name']) )
          $row['other_name'] = NO_VALUE;
 
       // link to user
-      if( $row['Sender'] === 'M' ) // Message to myself
+      if ( $row['Sender'] === 'M' ) // Message to myself
       {
-         if( $full_details )
+         if ( $full_details )
             $user_str = user_reference( REF_LINK, 1, '', $my_row );
          else
             $user_str = $row['other_name'];
       }
-      else if( $row['other_ID'] > 0 )
+      else if ( $row['other_ID'] > 0 )
          $user_str = user_reference( REF_LINK, 1, '',
             $row['other_ID'], $row['other_name'], $row['other_handle'] );
       else
@@ -2159,7 +2159,7 @@ class MessageListBuilder
          'LEFT JOIN Players AS otherP ON otherP.ID=other.uid',
          'LEFT JOIN MessageCorrespondents AS previous ON M.ReplyTo>0 AND previous.mid=M.ReplyTo AND previous.uid='.$my_id );
       $qsql->add_part( SQLP_WHERE, "me.uid=$my_id" );
-      if( $folderstring != "all" && $folderstring != '' )
+      if ( $folderstring != "all" && $folderstring != '' )
          $qsql->add_part( SQLP_WHERE, "me.Folder_nr IN ($folderstring)" );
       $qsql->merge( $extra_querysql );
       $query = $qsql->get_select() . $order . $limit;
@@ -2167,7 +2167,7 @@ class MessageListBuilder
       $result = db_query( 'MLB.message_list_query', $query );
 
       $arr_msg = array();
-      while( $row = mysql_fetch_assoc($result) )
+      while ( $row = mysql_fetch_assoc($result) )
          $arr_msg[] = $row;
       mysql_free_result($result);
 
@@ -2180,7 +2180,7 @@ class MessageListBuilder
       $key = "Messages.$uid";
 
       $arr_msg = DgsCache::fetch( $dbgmsg, CACHE_GRP_MSGLIST, $key );
-      if( is_null($arr_msg) )
+      if ( is_null($arr_msg) )
       {
          $limit = ( $arg_limit ) ? ' LIMIT '.((int)$arg_limit) : '';
          $arr_msg = self::message_list_query( $uid, $folderstring, $order, $limit );
@@ -2249,17 +2249,17 @@ class MessageControl
       $to_handles = implode(' ', $arr_to); // lower-case
       $dgs_msg->clear_errors();
 
-      if( !isset($cache[$to_handles]) ) // need lower-case for check
+      if ( !isset($cache[$to_handles]) ) // need lower-case for check
       {
          $cache[$to_handles] = 1; // handle(s) checked
 
-         if( $cnt_to < 1 )
+         if ( $cnt_to < 1 )
             return $dgs_msg->add_error( T_('Missing message receiver') );
-         elseif( $cnt_to > MAX_MSG_RECEIVERS )
+         elseif ( $cnt_to > MAX_MSG_RECEIVERS )
             return $dgs_msg->add_error( sprintf( T_('Too much receivers (max. %s)'), MAX_MSG_RECEIVERS ) );
          else // single | multi
          {
-            if( $cnt_to > 1 && $msg_type == MSGTYPE_INVITATION )
+            if ( $cnt_to > 1 && $msg_type == MSGTYPE_INVITATION )
                return $dgs_msg->add_error( T_('Only one receiver for invitation allowed!') );
 
             $sender_uid = $my_id; // sender
@@ -2267,27 +2267,27 @@ class MessageControl
                DgsMessage::load_message_receivers( $msg_type, $invitation_step, $arr_to );
             $dgs_msg->add_errors( $errors );
 
-            if( $this->mpg_type > 0 && $this->mpg_gid > 0 && is_null($this->arr_mpg_users) )
+            if ( $this->mpg_type > 0 && $this->mpg_gid > 0 && is_null($this->arr_mpg_users) )
                $this->arr_mpg_users = GamePlayer::load_users_for_mpgame(
                   $this->mpg_gid, $this->mpg_col, /*skip-myself*/true, $tmp_arr );
 
             $arr_handles = array();
-            foreach( $arr_receivers as $handle => $user_row )
+            foreach ( $arr_receivers as $handle => $user_row )
             {
                $uid = $user_row['ID'];
-               if( $uid == $sender_uid && $cnt_to > 1 )
+               if ( $uid == $sender_uid && $cnt_to > 1 )
                   $dgs_msg->add_error( ErrorCode::get_error_text('bulkmessage_self') );
 
                $dgs_msg->add_recipient( $user_row );
                $arr_handles[] = $user_row['Handle']; // original case
 
                // MPG-message only allows MPG-players as recipients
-               if( $this->mpg_type > 0 && $this->mpg_gid > 0 )
+               if ( $this->mpg_type > 0 && $this->mpg_gid > 0 )
                {
                   $is_mpg_player = ( is_array($this->arr_mpg_users) )
                      ? isset($this->arr_mpg_users[$uid])
                      : GamePlayer::exists_game_player($this->mpg_gid, $uid); // fallback-check
-                  if( !$is_mpg_player )
+                  if ( !$is_mpg_player )
                      $dgs_msg->add_error(
                         sprintf( T_('User [%s] is no participant of multi-player-game.'), $user_row['Handle'] ));
                }
@@ -2295,10 +2295,10 @@ class MessageControl
             $to_handles = implode(' ', $arr_handles); // reset original case
 
             // bulk-message only allowed for MPG|admin as sender
-            if( $dgs_msg->count_recipients() > 1 )
+            if ( $dgs_msg->count_recipients() > 1 )
             {
                $check_flags = ( $this->mpg_type == MPGMSG_INVITE ) ? GPFLAG_MASTER : 0;
-               if( !$is_bulk_admin && !( $this->mpg_type > 0 && GamePlayer::exists_game_player($this->mpg_gid, $sender_uid, $check_flags) ) )
+               if ( !$is_bulk_admin && !( $this->mpg_type > 0 && GamePlayer::exists_game_player($this->mpg_gid, $sender_uid, $check_flags) ) )
                   $dgs_msg->add_error( ErrorCode::get_error_text('bulkmessage_forbidden') );
             }
          }
@@ -2330,39 +2330,39 @@ class MessageControl
       global $player_row;
 
       $my_id = (int)@$player_row['ID'];
-      if( $my_id <= GUESTS_ID_MAX )
+      if ( $my_id <= GUESTS_ID_MAX )
          return array( ErrorCode::get_error_text('not_allowed_for_guest') );
 
       $new_folder = (int)@$input['folder'];
 
       $sender_id = (int)@$input['senderid'];
-      if( $sender_id > 0 && $my_id != $sender_id )
+      if ( $sender_id > 0 && $my_id != $sender_id )
          return array( ErrorCode::get_error_text('user_mismatch') );
 
       $prev_mid = max( 0, (int)@$input['reply']); //ID of message replied.
       $accepttype = ( @$input['action'] == 'accept_inv' );
       $declinetype = ( @$input['action'] == 'decline_inv' );
       $disputegid = -1;
-      if( $msg_type == MSGTYPE_INVITATION )
+      if ( $msg_type == MSGTYPE_INVITATION )
       {
          $disputegid = (int)@$input['disputegid'];
-         if( $disputegid < 0 )
+         if ( $disputegid < 0 )
             $disputegid = 0;
       }
       $invitation_step = $accepttype || $declinetype || ($disputegid > 0); //not needed: || ($msg_type == MSGTYPE_INVITATION)
 
       // find receiver of the message
-      if( $this->read_message_receivers( $this->dgs_message, $msg_type, $invitation_step, $arg_to ) )
+      if ( $this->read_message_receivers( $this->dgs_message, $msg_type, $invitation_step, $arg_to ) )
          return $this->dgs_message->get_errors();
 
       // check own/opp max-games
       $opponent_row = $this->dgs_message->get_recipient();
-      if( ($msg_type == MSGTYPE_INVITATION) || $accepttype )
+      if ( ($msg_type == MSGTYPE_INVITATION) || $accepttype )
       {
          $chk_errors = $this->check_max_games($opponent_row);
-         if( count($chk_errors) )
+         if ( count($chk_errors) )
          {
-            foreach( $chk_errors as $err )
+            foreach ( $chk_errors as $err )
                $this->dgs_message->add_error( $err );
             return $this->dgs_message->get_errors();
          }
@@ -2371,7 +2371,7 @@ class MessageControl
       $subject = trim(@$input['subject']);
       $message = @$input['message'];
 
-      if( (string)$subject == '' )
+      if ( (string)$subject == '' )
       {
          $this->dgs_message->add_error( T_('Missing message subject') );
          return $this->dgs_message->get_errors();
@@ -2380,31 +2380,31 @@ class MessageControl
       // Update database
 
       $msg_gid = 0;
-      if( $this->dgs_message->has_recipient() ) // single-receiver
+      if ( $this->dgs_message->has_recipient() ) // single-receiver
       {
          $opponent_ID = $opponent_row['ID'];
 
-         if( $msg_type == MSGTYPE_INVITATION )
+         if ( $msg_type == MSGTYPE_INVITATION )
          {
             $msg_gid = make_invite_game($player_row, $opponent_row, $disputegid);
             $subject = ( $disputegid > 0 ) ? 'Game invitation dispute' : 'Game invitation';
          }
-         else if( $accepttype )
+         else if ( $accepttype )
          {
             $msg_gid = (int)@$input['gid'];
             $gids = accept_invite_game( $msg_gid, $player_row, $opponent_row );
             $msg_gid = $gids[0];
             $subject = 'Game invitation accepted';
          }
-         else if( $declinetype )
+         else if ( $declinetype )
          {
             // game will be deleted
             $msg_gid = (int)@$input['gid'];
-            if( !GameHelper::delete_invitation_game( 'send_message.decline', $msg_gid, $my_id, $opponent_ID ) )
+            if ( !GameHelper::delete_invitation_game( 'send_message.decline', $msg_gid, $my_id, $opponent_ID ) )
                exit;
             $subject = 'Game invitation decline';
          }
-         else if( $this->mpg_type == MPGMSG_INVITE )
+         else if ( $this->mpg_type == MPGMSG_INVITE )
          {
             $msg_gid = (int)@$input['mpgid'];
          }
@@ -2413,14 +2413,14 @@ class MessageControl
       }
       else // multi-receiver (bulk)
       {
-         if( !$this->allow_bulk )
+         if ( !$this->allow_bulk )
          {
             $this->dgs_message->add_error( ErrorCode::get_error_text('bulkmessage_forbidden') );
             return $this->dgs_message->get_errors();
          }
 
          $to_uids = array();
-         foreach( $this->dgs_message->recipients as $user_row )
+         foreach ( $this->dgs_message->recipients as $user_row )
             $to_uids[] = (int)@$user_row['ID'];
       }
 
@@ -2443,13 +2443,13 @@ class MessageControl
    {
       $errors = array();
 
-      if( !$this->max_games_check->allow_game_start() )
+      if ( !$this->max_games_check->allow_game_start() )
          $errors[] = $this->max_games_check->get_error_text(false);
 
-      if( !is_null($opp_row) )
+      if ( !is_null($opp_row) )
       {
          $oppMaxGamesCheck = new MaxGamesCheck( (int)@$opp_row['X_OppGamesCount'] );
-         if( !$oppMaxGamesCheck->allow_game_start() )
+         if ( !$oppMaxGamesCheck->allow_game_start() )
             $errors[] = ErrorCode::get_error_text('max_games_opp');
       }
 

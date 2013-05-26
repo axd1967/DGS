@@ -116,25 +116,25 @@ $info_box = '<br>When translating you should keep the following things in mind:
    connect2mysql();
 
    $logged_in = who_is_logged( $player_row, LOGIN_DEFAULT_OPTS|LOGIN_NO_QUOTA_HIT );
-   if( !$logged_in )
+   if ( !$logged_in )
       error('login_if_not_logged_in', 'translate');
-   if( $player_row['ID'] <= GUESTS_ID_MAX )
+   if ( $player_row['ID'] <= GUESTS_ID_MAX )
       error('not_allowed_for_guest', 'translate');
 
    $lang_desc = get_language_descriptions_translated(true);
-   if( TRANS_FULL_ADMIN && (@$player_row['admin_level'] & ADMIN_TRANSLATORS))
+   if ( TRANS_FULL_ADMIN && (@$player_row['admin_level'] & ADMIN_TRANSLATORS))
       $translator_array = array_keys( $lang_desc);
    else
    {
       $translator_set = @$player_row['Translator'];
-      if( !$translator_set )
+      if ( !$translator_set )
          error('not_translator', 'translate');
       $translator_array = explode( LANG_TRANSL_CHAR, $translator_set);
    }
 
 
    $translate_lang = get_request_arg('translate_lang');
-   if( ALLOW_PROFIL_CHARSET && (@$player_row['admin_level'] & ADMIN_TRANSLATORS) )
+   if ( ALLOW_PROFIL_CHARSET && (@$player_row['admin_level'] & ADMIN_TRANSLATORS) )
       $profil_charset = (int)@$_REQUEST['profil_charset'];
    else
       $profil_charset = 0;
@@ -144,17 +144,17 @@ $info_box = '<br>When translating you should keep the following things in mind:
    $alpha_order = (int)@$_REQUEST['alpha_order'];
    $filter_en = trim(get_request_arg('filter_en'));
    $max_len = (int)@$_REQUEST['max_len'];
-   if( $max_len < 0 )
+   if ( $max_len < 0 )
       $max_len = 0;
    $no_pages = (int)@$_REQUEST['no_pages'];
-   if( $no_pages )
+   if ( $no_pages )
       $from_row = -1;
    else
       $from_row = max(0,(int)@$_REQUEST['from_row']);
 
    $result = db_query( 'translate.groups_query', "SELECT Groupname FROM TranslationGroups" );
    $translation_groups = array();
-   while( ($row = mysql_fetch_row($result)) )
+   while ( ($row = mysql_fetch_row($result)) )
       $translation_groups[$row[0]] = $row[0];
    mysql_free_result( $result);
    ksort( $translation_groups);
@@ -166,18 +166,18 @@ $info_box = '<br>When translating you should keep the following things in mind:
          0 => 'All texts',
       );
 
-   if( !$group || !array_key_exists( $group, $translation_groups) )
+   if ( !$group || !array_key_exists( $group, $translation_groups) )
    {
       $group = 'allgroups';
       $untranslated = 1; // default: show untranslated
    }
 
-   if( count( $translator_array ) > 1 )
+   if ( count( $translator_array ) > 1 )
       $lang_choice = true;
    else
    {
       $lang_choice = false;
-      if( !$translate_lang && count( $translator_array ) == 1 )
+      if ( !$translate_lang && count( $translator_array ) == 1 )
          $translate_lang = $translator_array[0];
    }
 
@@ -185,22 +185,22 @@ $info_box = '<br>When translating you should keep the following things in mind:
    $is_preview = @$_REQUEST['preview'];
 
    $show_rows = $found_rows = 0;
-   if( $translate_lang )
+   if ( $translate_lang )
    {
-      if( !in_array( $translate_lang, $translator_array ) )
+      if ( !in_array( $translate_lang, $translator_array ) )
          error('not_correct_transl_language', "translate.check.language($translate_lang)");
 
       $result = translations_query( $translate_lang, $untranslated, $group, $from_row, $alpha_order, $filter_en, $max_len)
          or error('mysql_query_failed','translate.translation_query');
 
       $show_rows = (int)@mysql_num_rows($result);
-      if( $show_rows > 0 )
+      if ( $show_rows > 0 )
          $found_rows = mysql_found_rows('translate.found_rows');
    }
 
-   if( $is_save )
+   if ( $is_save )
    {
-      if( $show_rows > TRANS_ROW_PER_PAGE )
+      if ( $show_rows > TRANS_ROW_PER_PAGE )
          $show_rows = TRANS_ROW_PER_PAGE;
       update_translation( $translate_lang, $result, $show_rows );
 
@@ -215,58 +215,58 @@ $info_box = '<br>When translating you should keep the following things in mind:
    }
 
 
-   if( $translate_lang )
+   if ( $translate_lang )
    {
       $lang_string = '';
-      foreach( $known_languages as $browsercode => $array )
+      foreach ( $known_languages as $browsercode => $array )
       {
-         foreach( $array as $charenc => $langname )
+         foreach ( $array as $charenc => $langname )
          {
-            if( $browsercode . LANG_CHARSET_CHAR . $charenc == $translate_lang)
+            if ( $browsercode . LANG_CHARSET_CHAR . $charenc == $translate_lang)
                $lang_string .= ",$langname";
          }
       }
-      if( $lang_string )
+      if ( $lang_string )
          $lang_string = substr( $lang_string, 1);
       else
          $lang_string = $translate_lang;
 
       @list($browsercode,$translate_encoding) = explode( LANG_CHARSET_CHAR, $translate_lang, 2);
 
-      if( !$profil_charset )
+      if ( !$profil_charset )
          $encoding_used = $translate_encoding; // before start_page()
 
       $lang_string.= ' / ' . $browsercode;
       $lang_string.= ' / ' . $translate_encoding;
-      if( ALLOW_PROFIL_CHARSET )
+      if ( ALLOW_PROFIL_CHARSET )
         $lang_string.=  ' / ' . $encoding_used;
    }
 
 
    $page = 'translate.php';
    $page_hiddens = array();
-   if( $translate_lang )
+   if ( $translate_lang )
       $page_hiddens['translate_lang'] = $translate_lang;
-   if( $profil_charset )
+   if ( $profil_charset )
       $page_hiddens['profil_charset'] = 1;
-   if( $group )
+   if ( $group )
       $page_hiddens['group'] = $group;
-   if( $untranslated )
+   if ( $untranslated )
       $page_hiddens['untranslated'] = $untranslated;
-   if( $alpha_order )
+   if ( $alpha_order )
       $page_hiddens['alpha_order'] = 1;
-   if( $filter_en )
+   if ( $filter_en )
       $page_hiddens['filter_en'] = $filter_en;
-   if( $max_len )
+   if ( $max_len )
       $page_hiddens['max_len'] = $max_len;
-   if( $from_row > 0 )
+   if ( $from_row > 0 )
       $page_hiddens['from_row'] = $from_row;
 
    $tabindex= 1;
 
    start_page(T_('Translate'), true, $logged_in, $player_row);
    $str = T_('Read this before translating');
-   if( @$_REQUEST['infos'] )
+   if ( @$_REQUEST['infos'] )
    {
       echo "<h3 class=Header>$str:</h3>\n"
          . "<table class=InfoBox><tr><td>\n"
@@ -282,7 +282,7 @@ $info_box = '<br>When translating you should keep the following things in mind:
    }
 
 
-   if( $translate_lang )
+   if ( $translate_lang )
    {
       $nbcol = 2;
 
@@ -297,12 +297,12 @@ $info_box = '<br>When translating you should keep the following things in mind:
 
       // see also class Table.make_next_prev_links()
       $curr_page = floor($from_row / TRANS_ROW_PER_PAGE) + 1;
-      if( $from_row > ($curr_page - 1) * TRANS_ROW_PER_PAGE )
+      if ( $from_row > ($curr_page - 1) * TRANS_ROW_PER_PAGE )
          $curr_page++;
-      if( $found_rows >= 0 )
+      if ( $found_rows >= 0 )
       {
          $max_page = floor( ($found_rows + TRANS_ROW_PER_PAGE - 1) / TRANS_ROW_PER_PAGE );
-         if( $from_row > ($max_page - 1) * TRANS_ROW_PER_PAGE )
+         if ( $from_row > ($max_page - 1) * TRANS_ROW_PER_PAGE )
             $max_page++;
       }
       else
@@ -311,18 +311,18 @@ $info_box = '<br>When translating you should keep the following things in mind:
       $table_links = '';
       $align = 'align=bottom'; //'align=middle'
       $tmp = $page_hiddens;
-      if( !$no_pages )
+      if ( !$no_pages )
       {
-         if( $from_row > 0 ) // start-link
+         if ( $from_row > 0 ) // start-link
          {
             $tmp['from_row'] = 0;
             $table_links .= anchor( make_url($page, $tmp),
                image( $base_path.'images/start.gif', '|<=', '', $align), T_('first page') );
          }
-         if( $show_rows > 0 && $from_row > 0 ) // prev-link
+         if ( $show_rows > 0 && $from_row > 0 ) // prev-link
          {
             $tmp['from_row'] = max(0, $from_row-TRANS_ROW_PER_PAGE);
-            if( $table_links )
+            if ( $table_links )
                $table_links.= MED_SPACING;
             $table_links .= anchor( make_url($page, $tmp),
                   image( $base_path.'images/prev.gif', '<=', '', $align),
@@ -331,7 +331,7 @@ $info_box = '<br>When translating you should keep the following things in mind:
 
          $table_links .= SMALL_SPACING . sprintf( T_('Page %s of %s#tablenavi'), $curr_page, $max_page ) . SMALL_SPACING;
 
-         if( $show_rows > TRANS_ROW_PER_PAGE )
+         if ( $show_rows > TRANS_ROW_PER_PAGE )
          {
             $show_rows = TRANS_ROW_PER_PAGE;
             $tmp['from_row'] = $from_row+TRANS_ROW_PER_PAGE;
@@ -339,10 +339,10 @@ $info_box = '<br>When translating you should keep the following things in mind:
                   image( $base_path.'images/next.gif', '=>', '', $align),
                   T_('Next Page'), array( 'accesskey' => ACCKEY_ACT_NEXT ));
 
-            if( $found_rows > TRANS_ROW_PER_PAGE ) // end-link
+            if ( $found_rows > TRANS_ROW_PER_PAGE ) // end-link
             {
                $tmp['from_row'] = floor( $found_rows / TRANS_ROW_PER_PAGE) * TRANS_ROW_PER_PAGE;
-               if( $table_links )
+               if ( $table_links )
                   $table_links.= MED_SPACING;
                $table_links .= anchor( make_url($page, $tmp),
                     image( $base_path.'images/end.gif', '=>|', '', $align), T_('last page') );
@@ -351,7 +351,7 @@ $info_box = '<br>When translating you should keep the following things in mind:
       }
 
       $table_entries = ( $found_rows > 0 ) ? sprintf('(%s entries to translate)', $found_rows) : '';
-      if( $table_links || $table_entries )
+      if ( $table_links || $table_entries )
       {
          $translate_form->add_row( array( 'ROW', 'LinksT',
                'CELL', 1, 'class=PageLinksL',
@@ -368,17 +368,17 @@ $info_box = '<br>When translating you should keep the following things in mind:
       $translate_form->add_row( array( 'HR' ) );
 
       $oid= -1;
-      while( ($row = mysql_fetch_assoc($result)) && $show_rows-- > 0 )
+      while ( ($row = mysql_fetch_assoc($result)) && $show_rows-- > 0 )
       {
          /* see the translations_query() function for the constraints
           * on the "ORDER BY" clause associated with this "$oid" filter:
           */
-         if( $oid == $row['Original_ID'] )
+         if ( $oid == $row['Original_ID'] )
             continue;
          $oid = $row['Original_ID'];
 
          $orig_string = $row['Original'];
-         if( $is_preview )
+         if ( $is_preview )
          {
             $translation = trim( get_request_arg("transl$oid") );
             $transl_untranslated = ( @$_REQUEST["same$oid"] === 'Y' );
@@ -392,7 +392,7 @@ $info_box = '<br>When translating you should keep the following things in mind:
          }
 
          //$debuginfo must be html_safe.
-         if( (@$player_row['admin_level'] & ADMIN_DEVELOPER) /* && @$_REQUEST['debug'] */ )
+         if ( (@$player_row['admin_level'] & ADMIN_DEVELOPER) /* && @$_REQUEST['debug'] */ )
             $debuginfo = "<br><span class=\"DebugInfo Smaller\">"
                . "L=".$row['Language_ID']
                . ", G=".$row['Group_ID']
@@ -445,7 +445,7 @@ $info_box = '<br>When translating you should keep the following things in mind:
             a minor correction that does not involve a translation modification.
             Else one can't remove the entry from the untranslated group.
          */
-         if( $row['Translated'] === 'N' ) //exclude not yet translated items
+         if ( $row['Translated'] === 'N' ) //exclude not yet translated items
             array_push( $form_row,
                   'TEXT', MED_SPACING,
                   'CHECKBOX', "unch$oid", 'Y', T_('unchanged'), $transl_unchanged
@@ -456,7 +456,7 @@ $info_box = '<br>When translating you should keep the following things in mind:
             );
 
          // allow some space on the right
-         if( $nbcol > 2 )
+         if ( $nbcol > 2 )
             array_push( $form_row, 'CELL', $nbcol-2, '');
 
          $translate_form->add_row( $form_row);
@@ -472,7 +472,7 @@ $info_box = '<br>When translating you should keep the following things in mind:
       }
       mysql_free_result( $result);
 
-      if( $table_links )
+      if ( $table_links )
       {
          $translate_form->add_row( array( 'ROW', 'LinksB',
                'CELL', 1, 'class=PageLinksL',
@@ -482,7 +482,7 @@ $info_box = '<br>When translating you should keep the following things in mind:
              ));
       }
 
-      if( $oid > 0 ) //not empty table
+      if ( $oid > 0 ) //not empty table
       {
          $translate_form->add_row( array( 'SPACE' ) );
          $translate_form->add_row( array( 'ROW', 'SubmitTransl',
@@ -542,7 +542,7 @@ $info_box = '<br>When translating you should keep the following things in mind:
    }
 
    // show language-choice for admin or translator with >1 language
-   if( $lang_choice )
+   if ( $lang_choice )
    {
       $nbcol = 1;
       $langchoice_form = new Form( 'selectlang', $page, FORM_POST );
@@ -550,10 +550,10 @@ $info_box = '<br>When translating you should keep the following things in mind:
             'HEADER', T_('Select language to translate to') )); //$nbcol
 
       $vals = array();
-      foreach( $lang_desc as $lang => $langname )
+      foreach ( $lang_desc as $lang => $langname )
       {
          @list( $browsercode, $charenc) = explode( LANG_CHARSET_CHAR, $lang, 2);
-         if( in_array( $lang, $translator_array ) || in_array( $browsercode, $translator_array ) )
+         if ( in_array( $lang, $translator_array ) || in_array( $browsercode, $translator_array ) )
             $vals[$lang] = $langname;
       }
       asort($vals);
@@ -570,7 +570,7 @@ $info_box = '<br>When translating you should keep the following things in mind:
             'SUBMITBUTTON', 'cl', T_('Select'),
          ));
 
-      if( ALLOW_PROFIL_CHARSET && (@$player_row['admin_level'] & ADMIN_TRANSLATORS) )
+      if ( ALLOW_PROFIL_CHARSET && (@$player_row['admin_level'] & ADMIN_TRANSLATORS) )
       {
          $langchoice_form->add_row( array( 'ROW', 'DebugInfo',
                'CELL', $nbcol, '',
@@ -594,12 +594,12 @@ function update_translation( $transl_lang, $result, $show_rows )
    $log_set = '';
    $done_set = '';
    $oid= -1;
-   while( ($row = mysql_fetch_assoc($result)) && $show_rows-- > 0 )
+   while ( ($row = mysql_fetch_assoc($result)) && $show_rows-- > 0 )
    {
       /* see the translations_query() function for the constraints
        * on the "ORDER BY" clause associated with this "$oid" filter:
        */
-      if( $oid == $row['Original_ID'] )
+      if ( $oid == $row['Original_ID'] )
          continue;
       $oid = $row['Original_ID'];
       $tlangID = (int)@$row['Language_ID'];
@@ -609,10 +609,10 @@ function update_translation( $transl_lang, $result, $show_rows )
       $unchanged = ( @$_REQUEST["unch$oid"] === 'Y' );
 
 
-      if( $unchanged && $row['Translated'] === 'N' ) //exclude not yet translated items
+      if ( $unchanged && $row['Translated'] === 'N' ) //exclude not yet translated items
       { //unchanged item
          //UPDATE TranslationTexts SET Translatable='Done' WHERE ID IN
-         if( @$row['Translatable'] !== 'N' && @$row['Translatable'] !== 'Done' )
+         if ( @$row['Translatable'] !== 'N' && @$row['Translatable'] !== 'Done' )
             $done_set .= ",$oid";
 
          $translation = ( $same ) ? '' : mysql_addslashes($translation);
@@ -622,10 +622,10 @@ function update_translation( $transl_lang, $result, $show_rows )
 
          //no $log_set
       }
-      elseif( ( $same && $row['Text'] !== '' ) || ( !empty($translation) && $row['Text'] !== $translation ) )
+      elseif ( ( $same && $row['Text'] !== '' ) || ( !empty($translation) && $row['Text'] !== $translation ) )
       { //same or modified item
          //UPDATE TranslationTexts SET Translatable='Done' WHERE ID IN
-         if( @$row['Translatable'] !== 'N' && @$row['Translatable'] !== 'Done' )
+         if ( @$row['Translatable'] !== 'N' && @$row['Translatable'] !== 'Done' )
             $done_set .= ",$oid";
 
          $translation = ( $same ) ? '' : mysql_addslashes($translation);
@@ -640,7 +640,7 @@ function update_translation( $transl_lang, $result, $show_rows )
 
    ta_begin();
    {//HOT-section to update translations
-      if( $replace_set )
+      if ( $replace_set )
       {
          // NOTE: Translations needs PRIMARY KEY (Language_ID,Original_ID):
          db_query( 'translate.update_translation.replace',
@@ -648,14 +648,14 @@ function update_translation( $transl_lang, $result, $show_rows )
                "(Original_ID,Language_ID,Text,Translated,Updated) VALUES " . substr($replace_set,1) );
       }
 
-      if( $log_set )
+      if ( $log_set )
       {
          db_query( 'translate.update_translation.log',
             "INSERT INTO Translationlog " .
                "(Player_ID,Original_ID,Language_ID,Translation) VALUES " . substr($log_set,1) ); //+ Date= timestamp
       }
 
-      if( $done_set )
+      if ( $done_set )
       {
          db_query( 'translate.update_translation.done',
             "UPDATE TranslationTexts SET Translatable='Done' WHERE ID IN (" . substr($done_set,1) . ')' );

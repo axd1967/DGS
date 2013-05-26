@@ -79,23 +79,23 @@ class QuickHandlerUser extends QuickHandler
       $cmd = $this->quick_object->cmd;
 
       // check uid | user
-      if( ($this->uid == 0 || (string)$this->uid == '') && (string)$this->handle == '' )
+      if ( ($this->uid == 0 || (string)$this->uid == '') && (string)$this->handle == '' )
       {
          // use logged-in user as default
          $this->uid = (int)@$player_row['ID'];
-         if( $this->uid <= 0 )
+         if ( $this->uid <= 0 )
             error('invalid_args', "$dbgmsg.miss_user");
       }
-      if( (string)$this->uid != '' && is_numeric($this->uid) && $this->uid > 0 )
+      if ( (string)$this->uid != '' && is_numeric($this->uid) && $this->uid > 0 )
          $this->user = User::load_user( $this->uid );
-      elseif( (string)$this->handle != '' )
+      elseif ( (string)$this->handle != '' )
          $this->user = User::load_user_by_handle( $this->handle );
       else
          error('invalid_args', "$dbgmsg.bad_user");
 
       // prepare command: info
 
-      if( is_null($this->user) )
+      if ( is_null($this->user) )
          error('unknown_user', "$dbgmsg.find_user");
 
       // check for invalid-action
@@ -137,13 +137,13 @@ class QuickHandlerUser extends QuickHandler
    private static function convertUserType( $usertype )
    {
       $out = array();
-      if( $usertype & USERTYPE_PRO )
+      if ( $usertype & USERTYPE_PRO )
          $out[] = 'pro';
-      if( $usertype & USERTYPE_TEACHER )
+      if ( $usertype & USERTYPE_TEACHER )
          $out[] = 'teacher';
-      if( $usertype & USERTYPE_ROBOT )
+      if ( $usertype & USERTYPE_ROBOT )
          $out[] = 'bot';
-      if( $usertype & USERTYPE_TEAM )
+      if ( $usertype & USERTYPE_TEAM )
          $out[] = 'team';
       return implode(',', $out);
    }

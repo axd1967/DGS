@@ -31,11 +31,11 @@ $GLOBALS['ThePage'] = new Page('Script', PAGEFLAG_IMPLICIT_FLUSH );
 
 
    $logged_in = who_is_logged($player_row);
-   if( !$logged_in )
+   if ( !$logged_in )
       error('login_if_not_logged_in', 'scripts.check_players_email');
-   if( $player_row['ID'] <= GUESTS_ID_MAX )
+   if ( $player_row['ID'] <= GUESTS_ID_MAX )
       error('not_allowed_for_guest', 'scripts.check_players_email');
-   if( !(@$player_row['admin_level'] & ADMIN_DATABASE) )
+   if ( !(@$player_row['admin_level'] & ADMIN_DATABASE) )
       error('adminlevel_too_low', 'scripts.check_players_email');
 
    $page = $_SERVER['PHP_SELF'];
@@ -62,12 +62,12 @@ $GLOBALS['ThePage'] = new Page('Script', PAGEFLAG_IMPLICIT_FLUSH );
    echo "<br>Found $p_cnt players with email ...<br><br>\n";
 
    $curr_cnt = 0;
-   while( $row = mysql_fetch_assoc($result) )
+   while ( $row = mysql_fetch_assoc($result) )
    {
       $uid = $row['ID'];
       $email = $row['Email'];
       $send_email = $row['SendEmail'];
-      if( verify_invalid_email("scripts.check_players_email($uid)", $email, /*err-die*/false) )
+      if ( verify_invalid_email("scripts.check_players_email($uid)", $email, /*err-die*/false) )
       {
          $curr_cnt++;
          echo sprintf("#%s. Player %6d [%s] : Email [%s] INVALID, SendEmail [%s]<br>\n",

@@ -94,7 +94,7 @@ class Profile
    public function __construct( $id=0, $uid=0, $type=0, $sortorder=1, $active=false, $name='', $lastchanged=0, $text='' )
    {
       // allowed for guests, but no DB-writing ops
-      if( !is_numeric($uid) || $uid < 0 )
+      if ( !is_numeric($uid) || $uid < 0 )
          error('invalid_user', "Profile.construct($id,$uid,$type)");
 
       $this->set_type( $type );
@@ -110,7 +110,7 @@ class Profile
    /*! \brief Sets valid profile-type (exception on invalid type). */
    public function set_type( $type )
    {
-      if( !is_numeric($type) || $type < 1 || $type > MAX_PROFTYPE )
+      if ( !is_numeric($type) || $type < 1 || $type > MAX_PROFTYPE )
          error('invalid_args', "Profile.set_type($type)");
       $this->Type = (int) $type;
    }
@@ -121,9 +121,9 @@ class Profile
     */
    public function set_text( $arr )
    {
-      if( is_null($arr) )
+      if ( is_null($arr) )
          $this->Text = '0'; // representation of NULL
-      elseif( is_array($arr) )
+      elseif ( is_array($arr) )
          $this->Text = build_url( $arr, false, SEP_PROFVAL );
       else
          $this->Text = (string)$arr; // raw-format
@@ -134,11 +134,11 @@ class Profile
     */
    public function get_text( $raw=false )
    {
-      if( $raw )
+      if ( $raw )
          return $this->Text;
       else
       {
-         if( is_null($this->Text) || (string)$this->Text == '0' )
+         if ( is_null($this->Text) || (string)$this->Text == '0' )
             return NULL;
          else
          {
@@ -156,14 +156,14 @@ class Profile
    public function save_profile( $check_user=false )
    {
       $dbgmsg = "Profile.save_profile({$this->id},{$this->uid},{$this->Type})";
-      if( $this->uid <= GUESTS_ID_MAX )
+      if ( $this->uid <= GUESTS_ID_MAX )
          error('not_allowed_for_guest', $dbgmsg.'.check.uid');
 
-      if( $check_user )
+      if ( $check_user )
       {
          $row = mysql_single_fetch( $dbgmsg.'.find_user',
             "SELECT ID FROM Players WHERE ID={$this->uid} LIMIT 1" );
-         if( !$row )
+         if ( !$row )
             error('unknown_user', $dbgmsg.'.find_user2');
       }
 
@@ -191,10 +191,10 @@ class Profile
    public function delete_profile()
    {
       $dbgmsg = "Profile.delete_profile({$this->id},{$this->uid},{$this->Type})";
-      if( $this->uid <= GUESTS_ID_MAX )
+      if ( $this->uid <= GUESTS_ID_MAX )
          error('not_allowed_for_guest', $dbgmsg.'check.uid');
 
-      if( $this->id > 0 )
+      if ( $this->id > 0 )
       {
          ta_begin();
          {//HOT-section to delete game profile
@@ -258,13 +258,13 @@ class Profile
     */
    public static function load_profile_by_id( $prof_id, $user_id )
    {
-      if( !is_numeric($prof_id) || !is_numeric($user_id) )
+      if ( !is_numeric($prof_id) || !is_numeric($user_id) )
          error('invalid_args', "Profile:load_profile_by_id($prof_id,$user_id)");
 
       $fields = implode(',', self::get_query_fields());
       $row = mysql_single_fetch("Profile:load_profile_by_id.find($prof_id,$user_id)",
             "SELECT $fields FROM Profiles WHERE ID='$prof_id' AND User_ID='$user_id' LIMIT 1");
-      if( !$row )
+      if ( !$row )
          return NULL;
 
       return self::new_from_row( $row );
@@ -278,17 +278,17 @@ class Profile
     */
    public static function load_profiles( $user_id, $types, $load_templates=false )
    {
-      if( !is_numeric($user_id) )
+      if ( !is_numeric($user_id) )
          error('invalid_args', "Profile:load_profiles.check.user($user_id)");
-      if( !is_array($types) )
+      if ( !is_array($types) )
       {
-         if( !is_numeric($types) )
+         if ( !is_numeric($types) )
             error('invalid_args', "Profile:load_profiles.check.type($user_id,$types)");
          else
             $types = array( $types );
       }
       $cnt_types = count($types);
-      if( is_array($types) && $cnt_types == 0 )
+      if ( is_array($types) && $cnt_types == 0 )
          error('invalid_args', "Profile:load_profiles.check.types($user_id,$types)");
 
       $use_cache = ( $cnt_types == 1 && !$load_templates );
@@ -297,7 +297,7 @@ class Profile
       $key = "Profile.$user_id.$sql_types";
 
       $arr_profiles = ( $use_cache ) ? DgsCache::fetch( $dbgmsg, CACHE_GRP_PROFILE, $key ) : null;
-      if( is_null($arr_profiles) )
+      if ( is_null($arr_profiles) )
       {
          $fields = implode(',', self::get_query_fields());
          $db_result = db_query( $dbgmsg,
@@ -306,11 +306,11 @@ class Profile
                "ORDER BY " . ( $load_templates ? "Type,Name,ID" : "SortOrder,ID LIMIT 1" ) );
 
          $arr_profiles = array();
-         while( ($row = mysql_fetch_assoc($db_result)) )
+         while ( ($row = mysql_fetch_assoc($db_result)) )
             $arr_profiles[] = self::new_from_row($row);
          mysql_free_result($db_result);
 
-         if( $use_cache )
+         if ( $use_cache )
             DgsCache::store( $dbgmsg, CACHE_GRP_PROFILE, $key, $arr_profiles, SECS_PER_DAY );
       }
 
@@ -326,9 +326,9 @@ class Profile
    public static function delete_all_profiles( $uid, $type )
    {
       $dbgmsg = "Profile:delete_all_profiles($uid,$type)";
-      if( !is_numeric($uid) || $uid <= GUESTS_ID_MAX )
+      if ( !is_numeric($uid) || $uid <= GUESTS_ID_MAX )
          error('not_allowed_for_guest', $dbgmsg.'.check.uid');
-      if( !is_numeric($type) || $type < 0 || $type > MAX_PROFTYPE )
+      if ( !is_numeric($type) || $type < 0 || $type > MAX_PROFTYPE )
          error('invalid_args', $dbgmsg.'.check.type');
 
       ta_begin();
@@ -425,7 +425,7 @@ class SearchProfile
 
       // load first profile (should only be one)
       $arr_profiles = Profile::load_profiles( $this->user_id, $this->profile_type );
-      if( is_array($arr_profiles) && count($arr_profiles) > 0 )
+      if ( is_array($arr_profiles) && count($arr_profiles) > 0 )
          $this->profile = $arr_profiles[0];
    }//load_profile
 
@@ -454,13 +454,13 @@ class SearchProfile
     */
    public function register_argnames( $arg_names )
    {
-      if( is_string($arg_names) )
+      if ( is_string($arg_names) )
       {
          $this->argnames[$arg_names] = 1;
       }
-      elseif( is_array($arg_names) )
+      elseif ( is_array($arg_names) )
       {
-         foreach( $arg_names as $name )
+         foreach ( $arg_names as $name )
             $this->argnames[$name] = 1;
       }
    }//register_argnames
@@ -468,7 +468,7 @@ class SearchProfile
    /*! \brief Returns true, if user has a saved (and optionally active) profile. */
    public function has_profile( $chk_active=false )
    {
-      if( !is_null($this->profile) && ($this->profile->id > 0) )
+      if ( !is_null($this->profile) && ($this->profile->id > 0) )
          $has_profile = ($chk_active) ? $this->profile->Active : true;
       else
          $has_profile = false;
@@ -481,24 +481,24 @@ class SearchProfile
     */
    public function get_arg( $name )
    {
-      if( $this->need_reset )
+      if ( $this->need_reset )
          $result = NULL;
-      elseif( $this->need_clear )
+      elseif ( $this->need_clear )
          $result = '';
-      elseif( $this->skip_profile_values )
+      elseif ( $this->skip_profile_values )
       {
-         if( isset($_REQUEST[$name]) )
+         if ( isset($_REQUEST[$name]) )
             $result = get_request_arg($name);
          else
             $result = NULL;
       }
-      elseif( is_array($this->args) )
+      elseif ( is_array($this->args) )
       {
-         if( $this->use_url_args && isset($_REQUEST[$name]) ) // URL-args have precedence over profile-data
+         if ( $this->use_url_args && isset($_REQUEST[$name]) ) // URL-args have precedence over profile-data
             $result = get_request_arg($name);
-         elseif( isset($this->args[$name]) ) // profile-data
+         elseif ( isset($this->args[$name]) ) // profile-data
             $result = $this->args[$name];
-         elseif( isset($this->argnames[$name]) )
+         elseif ( isset($this->argnames[$name]) )
             $result = ''; // overwrite (clear)
          else
             $result = NULL;
@@ -514,9 +514,9 @@ class SearchProfile
    {
       $arrdata = array();
       $regex = $this->_build_regex_save_args();
-      foreach( $arr_in as $key => $val )
+      foreach ( $arr_in as $key => $val )
       {
-         if( preg_match( $regex, $key ) )
+         if ( preg_match( $regex, $key ) )
             $arrdata[$key] = $val;
       }
       return $arrdata;
@@ -532,7 +532,7 @@ class SearchProfile
     */
    public function handle_action( $prof_action=null )
    {
-      if( is_null($prof_action) )
+      if ( is_null($prof_action) )
       {
          // load default-profile (if no action set and allowed)
          $default_action = ( $this->forbid_default ) ? SPROF_CURR_VALUES : SPROF_LOAD_DEFAULT;
@@ -542,7 +542,7 @@ class SearchProfile
       }
 
       $this->args = NULL;
-      switch( (int)$prof_action )
+      switch ( (int)$prof_action )
       {
          case SPROF_CURR_VALUES:    // no-action, take values from _REQUEST
             $this->skip_profile_values = true;
@@ -557,14 +557,14 @@ class SearchProfile
             break;
 
          case SPROF_SAVE_DEFAULT:   // save profile (active=default or inactive)
-            if( $this->forbid_default )
+            if ( $this->forbid_default )
                error('invalid_args', "SearchProfile.handle_action.save_default.forbidden({$this->profile_type})");
          case SPROF_SAVE_PROFILE:
             $this->save_profile( ($prof_action == SPROF_SAVE_DEFAULT) );
             break;
 
          case SPROF_DEL_PROFILE:    // delete profile(s) for user
-            if( !is_null($this->profile) )
+            if ( !is_null($this->profile) )
                Profile::delete_all_profiles( $this->user_id, $this->profile_type );
             $this->load_profile();
             break;
@@ -572,11 +572,11 @@ class SearchProfile
          case SPROF_LOAD_PROFILE:   // load profile
          case SPROF_LOAD_DEFAULT:   // load (active) default profile
          default:
-            if( $prof_action == SPROF_LOAD_DEFAULT )
+            if ( $prof_action == SPROF_LOAD_DEFAULT )
                $this->use_url_args = true;
 
             $chk_active = ($prof_action != SPROF_LOAD_PROFILE);
-            if( $this->has_profile($chk_active) )
+            if ( $this->has_profile($chk_active) )
                $this->args = $this->profile->get_text();
             break;
       }
@@ -589,7 +589,7 @@ class SearchProfile
       // build profile-data to save
       $arr_savedata = $this->build_save_data( $_REQUEST );
 
-      if( $this->has_profile() )
+      if ( $this->has_profile() )
          $profile = $this->profile;
       else
          $profile = Profile::new_profile( $this->user_id, $this->profile_type );
@@ -612,12 +612,12 @@ class SearchProfile
    /*! \brief Returns string-representation of this object (for debugging purposes). */
    public function to_string()
    {
-      if( is_null($this->args) )
+      if ( is_null($this->args) )
          $args_str = ', NULL';
       else
       {
          $args_str = '';
-         foreach( $this->args as $k => $v )
+         foreach ( $this->args as $k => $v )
             $args_str .= ", $k=[$v]";
       }
 
@@ -657,9 +657,9 @@ class SearchProfile
          SPROF_SAVE_PROFILE  => T_('Save profile#filter'),
          SPROF_DEL_PROFILE   => T_('Delete profile#filter'),
       );
-      if( $this->forbid_default )
+      if ( $this->forbid_default )
          unset($arr_actions[SPROF_SAVE_DEFAULT]);
-      if( !$this->has_profile() ) // has no saved profile
+      if ( !$this->has_profile() ) // has no saved profile
       {
          unset($arr_actions[SPROF_LOAD_PROFILE]);
          unset($arr_actions[SPROF_DEL_PROFILE]);

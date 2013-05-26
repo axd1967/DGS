@@ -24,10 +24,10 @@ require_once 'include/board.php';
 
 $TheErrors->set_mode(ERROR_MODE_COLLECT);
 
-if( !$is_down )
+if ( !$is_down )
 {
    $half_diff = SECS_PER_HOUR / 2;
-   if( $chained )
+   if ( $chained )
       $chained = $half_diff;
    else
       connect2mysql();
@@ -42,20 +42,20 @@ if( !$is_down )
       "SELECT ($NOW-UNIX_TIMESTAMP(Lastchanged)) AS timediff, Ticks " .
       "FROM Clock " .
       "WHERE ID=".CLOCK_CRON_HALFHOUR." LIMIT 1" );
-   if( !$row )
+   if ( !$row )
       $TheErrors->dump_exit('halfhourly_cron.find_clock');
-   if( $row['timediff'] < $half_diff )
+   if ( $row['timediff'] < $half_diff )
       $TheErrors->dump_exit('halfhourly_cron.timediff');
 
    // check for concurrent-runs as script may run longer than 30mins
    $clock_ticks = (int)@$row['Ticks'];
-   if( $clock_ticks > 0 )
+   if ( $clock_ticks > 0 )
    {
       db_query( "halfhourly_cron.inc_ticks($clock_ticks)",
             "UPDATE Clock SET Ticks=Ticks+1 WHERE ID=".CLOCK_CRON_HALFHOUR." AND Ticks=$clock_ticks LIMIT 1" )
          or $TheErrors->dump_exit("halfhourly_cron.inc_ticks2($clock_ticks)");
 
-      if( EMAIL_ADMINS )
+      if ( EMAIL_ADMINS )
       {
          send_email("halfhourly_cron.concurrent_run($clock_ticks)", EMAIL_ADMINS, 0,
             sprintf("Detected concurrent runs (Ticks=%s) of the halfhourly-cron-script running on [%s].\n" .
@@ -68,7 +68,7 @@ if( !$is_down )
    db_query( 'halfhourly_cron.set_lastchanged',
          "UPDATE Clock SET Ticks=1, Lastchanged=FROM_UNIXTIME($NOW) WHERE ID=".CLOCK_CRON_HALFHOUR." AND Ticks=0 LIMIT 1" )
       or $TheErrors->dump_exit('halfhourly_cron.lock.1');
-   if( mysql_affected_rows() != 1 )
+   if ( mysql_affected_rows() != 1 )
       $TheErrors->dump_exit('halfhourly_cron.lock.2');
 
 
@@ -98,7 +98,7 @@ if( !$is_down )
 
    ta_begin();
    {
-      while( $prow = mysql_fetch_assoc( $result ) )
+      while ( $prow = mysql_fetch_assoc( $result ) )
       {
          $uid = $prow['ID'];
          $ClockUsed = $prow['ClockUsed'];
@@ -169,22 +169,22 @@ if( !$is_down )
          "WHERE Notify='NOW' AND FIND_IN_SET('ON',SendEmail) " .
          "ORDER BY Lastaccess ASC"); // oldest-access users first (as newer-access-users can see new games/messages anyway)
    $nfyuser_iterator = new ListIterator( "halfhourly_cron.load_nfyuser" );
-   while( $row = mysql_fetch_array( $result ) )
+   while ( $row = mysql_fetch_array( $result ) )
       $nfyuser_iterator->addItem( null, $row );
    mysql_free_result($result);
 
    // loop over users to notify
-   while( list(, $arr_item) = $nfyuser_iterator->getListIterator() )
+   while ( list(, $arr_item) = $nfyuser_iterator->getListIterator() )
    {
-      if( time() > $max_run_time ) break; // stop script if running too long to avoid chance of concurrent runs
+      if ( time() > $max_run_time ) break; // stop script if running too long to avoid chance of concurrent runs
       $row = $arr_item[1];
       extract($row);
 
       // check for valid email
       $Email = trim($Email);
-      if( !$Email || verify_invalid_email("halfhourly_cron($uid)", $Email, /*err-die-collect-errors*/true) )
+      if ( !$Email || verify_invalid_email("halfhourly_cron($uid)", $Email, /*err-die-collect-errors*/true) )
       {
-         if( !($UserFlags & USERFLAG_NFY_BUT_NO_OR_INVALID_EMAIL) )
+         if ( !($UserFlags & USERFLAG_NFY_BUT_NO_OR_INVALID_EMAIL) )
          {
             send_message( "halfhourly_cron.notify.bad_email($uid)",
                sprintf( T_("You have enabled email notifications, which requires a valid email, " .
@@ -210,7 +210,7 @@ if( !$is_down )
 
       // Find games
 
-      if( strpos($SendEmail, 'MOVE') !== false ) // game: move + optional board
+      if ( strpos($SendEmail, 'MOVE') !== false ) // game: move + optional board
       {
          $query = "SELECT Games.*, " .
             "black.Name AS Blackname, " .
@@ -225,19 +225,19 @@ if( !$is_down )
 
          // pre-load all games of user to notify (to free db-result as soon as possible)
          $games_iterator = new ListIterator( "halfhourly_cron.find_games($uid)" );
-         if( @mysql_num_rows($gres) > 0 )
+         if ( @mysql_num_rows($gres) > 0 )
          {
-            while( $row = mysql_fetch_array( $gres ) )
+            while ( $row = mysql_fetch_array( $gres ) )
                $games_iterator->addItem( null, $row );
          }
          mysql_free_result($gres);
 
          // loop over games of user
-         if( $games_iterator->getItemCount() > 0 )
+         if ( $games_iterator->getItemCount() > 0 )
          {
             $msg .= str_pad('', 47, '-') . "\n  Games:\n";
 
-            while( list(, $arr_item) = $games_iterator->getListIterator() )
+            while ( list(, $arr_item) = $games_iterator->getListIterator() )
             {
                $game_row = $arr_item[1];
                $gid = @$game_row['ID'];
@@ -248,14 +248,14 @@ if( !$is_down )
                $msg .= "White: ".mail_strip_html("{$game_row['Whitename']} ({$game_row['Whitehandle']})")."\n";
 
                $tmp = number2board_coords($game_row['Last_X'], $game_row['Last_Y'], $game_row['Size']);
-               if( empty($tmp) )
+               if ( empty($tmp) )
                   $tmp = 'lead to '.$game_row['Status'].' step';
                $msg .= 'Move '.$game_row['Moves'].": $tmp\n";
 
-               if( strpos($SendEmail, 'BOARD') !== false )
+               if ( strpos($SendEmail, 'BOARD') !== false )
                {
                   $TheBoard = new Board();
-                  if( !$TheBoard->load_from_db($game_row, 0, BOARDOPT_MARK_DEAD|BOARDOPT_LOAD_LAST_MSG|BOARDOPT_STOP_ON_FIX) )
+                  if ( !$TheBoard->load_from_db($game_row, 0, BOARDOPT_MARK_DEAD|BOARDOPT_LOAD_LAST_MSG|BOARDOPT_STOP_ON_FIX) )
                      error('internal_error', "halfhourly_cron.game.load_from_db($gid,$uid)");
 
                   // remove all tags
@@ -277,7 +277,7 @@ if( !$is_down )
       // Find new messages
 
       // only load if notify-flag set (to avoid too many slow-queries)
-      if( strpos($SendEmail, 'MESSAGE') !== false && ($NotifyFlags & NOTIFYFLAG_NEW_MSG) )
+      if ( strpos($SendEmail, 'MESSAGE') !== false && ($NotifyFlags & NOTIFYFLAG_NEW_MSG) )
       {
          $folderstring = FOLDER_NEW;
          $query = "SELECT Messages.ID,Subject,Text, " .
@@ -294,10 +294,10 @@ if( !$is_down )
             "ORDER BY me.mid DESC"; // me.mid (=Messages.ID) has same order as Messages.Time (but does not use temp-table-sort)
 
          $res3 = db_query( "halfhourly_cron.find_new_messages($uid)", $query );
-         if( @mysql_num_rows($res3) > 0 )
+         if ( @mysql_num_rows($res3) > 0 )
          {
             $msg .= str_pad('', 47, '-') . "\n  New messages:\n";
-            while( $msg_row = mysql_fetch_array( $res3 ) )
+            while ( $msg_row = mysql_fetch_array( $res3 ) )
             {
                $From = ( $msg_row['FromName'] && $msg_row['FromHandle'] )
                   ? mail_strip_html("{$msg_row['FromName']} ({$msg_row['FromHandle']})")
@@ -322,7 +322,7 @@ if( !$is_down )
       // do not stop on mail-failure (but collect mail-errors)
       $nfy_done = send_email("halfhourly_cron($uid)", $Email, EMAILFMT_SKIP_WORDWRAP/*msg already wrapped*/, $msg );
       $time_mail = time();
-      if( $nfy_done )
+      if ( $nfy_done )
       {
          // if loop fails, everyone would be notified again on next start -> so mark user as notified
          // Setting Notify to 'DONE' stop notifications until the player's next visit
@@ -341,7 +341,7 @@ if( !$is_down )
    db_query( 'halfhourly_cron.reset_tick',
          "UPDATE Clock SET Ticks=0, Finished=FROM_UNIXTIME(".time().") WHERE ID=".CLOCK_CRON_HALFHOUR." LIMIT 1" );
 
-   if( !$chained )
+   if ( !$chained )
       $TheErrors->dump_exit('halfhourly_cron');
 
 }//$is_down

@@ -25,16 +25,16 @@ window.DGS = {
 
 // supporting %s %x %b
 function sprintf() {
-   if( sprintf.arguments.length < 1 )
+   if ( sprintf.arguments.length < 1 )
       throw "sprintf(): Missing arguments ["+arguments.join(',')+"]";
 
    var data = sprintf.arguments[0];
-   for( var i=1; i < sprintf.arguments.length; ++i ) {
+   for ( var i=1; i < sprintf.arguments.length; ++i ) {
       var arg = sprintf.arguments[i];
       data = data.replace(/(%[sxb])/, function(m) {
-         if( m == '%x' )
+         if ( m == '%x' )
             return arg.toString(16);
-         else if( m == '%b' )
+         else if ( m == '%b' )
             return arg.toString(2);
          else
             return arg;
@@ -43,7 +43,7 @@ function sprintf() {
 
    return data;
 }
-if( !String.sprintf )
+if ( !String.sprintf )
    String.sprintf = sprintf;
 
 function toggle_class( obj, cl1, cl2 ) {
@@ -55,7 +55,7 @@ function showInfo( e, contentHTML, y_add ) {
    infoBoxElem.innerHTML = contentHTML;
 
    var x, y;
-   if( document.all ) {
+   if ( document.all ) {
       x = event.clientX + document.body.scrollLeft;
       y = event.clientY + document.body.scrollTop;
    } else {
@@ -90,13 +90,13 @@ function showTLRankInfo( e, rank, best_rank, period_rank, history_rank )
 // see PHP TournamentLadder::build_rank_diff()
 function buildRankDiff( rank, prev_rank )
 {
-   if( prev_rank == 0 )
+   if ( prev_rank == 0 )
       return '---';
 
    var rank_diff;
-   if( rank == prev_rank )
+   if ( rank == prev_rank )
       rank_diff = '=';
-   else if( rank < prev_rank )
+   else if ( rank < prev_rank )
       rank_diff = '+' + (prev_rank - rank);
    else //rank > prev_rank
       rank_diff = '-' + (rank - prev_rank);
@@ -126,23 +126,23 @@ function showGameThumbnail( e, size, snapshot )
    var data, data1, data2, data3, repcount;
    var p = 0; // board-pos
    var psize = size * size;
-   for( var i=0; p < psize && i < snapshot.length; i++ ) {
+   for ( var i=0; p < psize && i < snapshot.length; i++ ) {
       var ch = snapshot.charAt(i);
-      if( ch == ' ' ) // stop for extended snapshot
+      if ( ch == ' ' ) // stop for extended snapshot
          break;
 
       data = 0;
-      if( ch == 'A' ) // 1xA
+      if ( ch == 'A' ) // 1xA
          repcount = 1;
-      else if( ch == ':' ) // 2xA
+      else if ( ch == ':' ) // 2xA
          repcount = 2;
-      else if( ch == '%' ) // 3xA
+      else if ( ch == '%' ) // 3xA
          repcount = 3;
-      else if( ch == '#' ) // 4xA
+      else if ( ch == '#' ) // 4xA
          repcount = 4;
-      else if( ch == '@' ) // 8xA
+      else if ( ch == '@' ) // 8xA
          repcount = 8;
-      else if( ch == '*' ) // 16xA
+      else if ( ch == '*' ) // 16xA
          repcount = 16;
       else {
          data = DGS.data.BASE64_CHARS.indexOf(ch);
@@ -151,27 +151,27 @@ function showGameThumbnail( e, size, snapshot )
          data3 = data & 0x3;
       }
 
-      if( data == 0 ) {
-         for( var j=0; j < 3 * repcount; j++ ) {
+      if ( data == 0 ) {
+         for ( var j=0; j < 3 * repcount; j++ ) {
             output += SPC;
-            if( ++p % size == 0 ) output += LF;
-            if( p >= psize ) break;
+            if ( ++p % size == 0 ) output += LF;
+            if ( p >= psize ) break;
          }
       } else {
          output += DGS.data.ARR_THUMBNAIL[data1];
-         if( ++p % size == 0 ) output += LF;
-         if( p >= psize ) break;
+         if ( ++p % size == 0 ) output += LF;
+         if ( p >= psize ) break;
          output += DGS.data.ARR_THUMBNAIL[data2];
-         if( ++p % size == 0 ) output += LF;
-         if( p >= psize ) break;
+         if ( ++p % size == 0 ) output += LF;
+         if ( p >= psize ) break;
          output += DGS.data.ARR_THUMBNAIL[data3];
-         if( ++p % size == 0 ) output += LF;
+         if ( ++p % size == 0 ) output += LF;
       }
    }
 
    var first = true;
-   while( p < psize ) { // append empties
-      if( (p++ % size == 0) && !first ) output += LF;
+   while ( p < psize ) { // append empties
+      if ( (p++ % size == 0) && !first ) output += LF;
       first = false;
       output += SPC;
    }

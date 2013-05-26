@@ -32,9 +32,9 @@ $GLOBALS['ThePage'] = new Page('GameEditor');
    connect2mysql();
 
    $logged_in = who_is_logged( $player_row);
-   if( !$logged_in )
+   if ( !$logged_in )
       error('login_if_not_logged_in', 'game_editor');
-   if( !ALLOW_GAME_EDITOR || !is_javascript_enabled() )
+   if ( !ALLOW_GAME_EDITOR || !is_javascript_enabled() )
       error('feature_disabled', 'game_editor');
    $my_id = $player_row['ID'];
    $cfg_board = ConfigBoard::load_config_board($my_id);

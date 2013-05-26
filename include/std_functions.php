@@ -29,7 +29,7 @@ require_once 'include/dgs_cache.php';
 require_once 'include/time_functions.php';
 
 global $page_microtime, $main_path, $base_path, $printable; //PHP5
-if( !isset($page_microtime) )
+if ( !isset($page_microtime) )
 {
    $page_microtime = getmicrotime();
    //std_functions.php must be called from the main dir
@@ -88,7 +88,7 @@ $bg_color='"#f7f5e3"';
 
 //$menu_fg_color='"#FFFC70"';
 global $menu_bg_color; //PHP5
-if( FRIENDLY_SHORT_NAME == 'DGS' )
+if ( FRIENDLY_SHORT_NAME == 'DGS' )
    $menu_bg_color='"#0C41C9"'; //live server
 else
    $menu_bg_color='"#C9410C"'; //devel server
@@ -265,35 +265,35 @@ function build_usertype_text( $usertype, $short=false, $img=true, $sep=', ' )
 {
    global $base_path;
    $out = array();
-   if( $usertype & USERTYPE_PRO )
+   if ( $usertype & USERTYPE_PRO )
    {
       $text = T_('Professional');
       $tmp = ($img) ? image( "{$base_path}images/professional.gif", $text, null ) : '';
-      if( $short !== ARG_USERTYPE_NO_TEXT )
+      if ( $short !== ARG_USERTYPE_NO_TEXT )
          $tmp .= ($img ? ' ' : '') . ($short ? T_('Pro#utype_short') : $text);
       $out[] = $tmp;
    }
-   if( $usertype & USERTYPE_TEACHER )
+   if ( $usertype & USERTYPE_TEACHER )
    {
       $text = T_('Teacher');
       $tmp = ($img) ? image( "{$base_path}images/teacher.gif", $text, null ) : '';
-      if( $short !== ARG_USERTYPE_NO_TEXT )
+      if ( $short !== ARG_USERTYPE_NO_TEXT )
          $tmp .= ($img ? ' ' : '') . ($short ? T_('Teacher#utype_short') : $text);
       $out[] = $tmp;
    }
-   if( $usertype & USERTYPE_ROBOT )
+   if ( $usertype & USERTYPE_ROBOT )
    {
       $text = T_('Robot');
       $tmp = ($img) ? image( "{$base_path}images/robot.gif", $text, null ) : '';
-      if( $short !== ARG_USERTYPE_NO_TEXT )
+      if ( $short !== ARG_USERTYPE_NO_TEXT )
          $tmp .= ($img ? ' ' : '') . ($short ? T_('Bot#utype_short') : $text);
       $out[] = $tmp;
    }
-   if( $usertype & USERTYPE_TEAM )
+   if ( $usertype & USERTYPE_TEAM )
    {
       $text = T_('Team');
       $tmp = ($img) ? image( "{$base_path}images/team.gif", $text, null ) : '';
-      if( $short !== ARG_USERTYPE_NO_TEXT )
+      if ( $short !== ARG_USERTYPE_NO_TEXT )
          $tmp .= ($img ? ' ' : '') . ($short ? T_('Team#utype_short') : $text);
       $out[] = $tmp;
    }
@@ -312,15 +312,15 @@ function start_html( $title, $no_cache, $skinname=NULL, $style_string=NULL, $las
 {
    global $base_path, $encoding_used, $printable, $main_path;
 
-   if( $no_cache )
+   if ( $no_cache )
       disable_cache($last_modified_stamp);
 
    global $ThePage;
    $has_thepage = ( $ThePage instanceof HTMLPage );
-   if( !$has_thepage )
+   if ( !$has_thepage )
       ob_start('ob_gzhandler');
 
-   if( empty($encoding_used) )
+   if ( empty($encoding_used) )
       $encoding_used = LANG_DEF_CHARSET;
 
    header('Content-Type: text/html;charset='.$encoding_used); // Character-encoding
@@ -342,7 +342,7 @@ function start_html( $title, $no_cache, $skinname=NULL, $style_string=NULL, $las
    echo "\n <meta name=\"robots\" content=\"$meta_robots\">";
 
    $meta_keywords = 'dgs, dragon, dragon go server, go server, go, igo, weiqi, weichi, baduk, board game, boardgame, turn-based, correspondence';
-   if( $has_thepage && $ThePage->meta_keywords )
+   if ( $has_thepage && $ThePage->meta_keywords )
       $meta_keywords .= ', ' . $ThePage->meta_keywords;
    echo "\n <meta name=\"keywords\" content=\"$meta_keywords\">";
 
@@ -351,7 +351,7 @@ function start_html( $title, $no_cache, $skinname=NULL, $style_string=NULL, $las
    //because of old browsers favicon.ico should always stay in the root folder
    echo "\n <link rel=\"shortcut icon\" type=\"image/x-icon\" href=\"".HOSTBASE."favicon.ico\">";
 
-   if( !isset($skinname) || !$skinname )
+   if ( !isset($skinname) || !$skinname )
       $skinname = 'dragon';
    $skin_screen = ( file_exists("{$main_path}skins/$skinname/screen.css") ) ? $skinname : 'dragon';
    echo "\n <link rel=\"stylesheet\" type=\"text/css\" media=\"screen\" href=\"{$base_path}skins/$skin_screen/screen.css?t=".CSS_VERSION."\">";
@@ -359,7 +359,7 @@ function start_html( $title, $no_cache, $skinname=NULL, $style_string=NULL, $las
    echo "\n <link rel=\"stylesheet\" type=\"text/css\" media=\"print\" href=\"{$base_path}skins/$skin_print/print.css?t=".CSS_VERSION."\">";
 
    $enable_js_game = false;
-   switch( (string)substr( @$_SERVER['PHP_SELF'], strlen(SUB_PATH)) )
+   switch ( (string)substr( @$_SERVER['PHP_SELF'], strlen(SUB_PATH)) )
    {
       case 'status.php':
          // RSS Autodiscovery:
@@ -374,29 +374,29 @@ function start_html( $title, $no_cache, $skinname=NULL, $style_string=NULL, $las
          break;
    }
 
-   if( $style_string )
+   if ( $style_string )
       echo "\n <STYLE TYPE=\"text/css\">\n",$style_string,"\n </STYLE>";
 
-   if( is_javascript_enabled() )
+   if ( is_javascript_enabled() )
    {
       $js_base_path = add_js_var( 'base_path', $base_path );
       echo "\n<script language=\"JavaScript\" type=\"text/javascript\">\n$js_base_path\n</script>";
       echo "\n<script language=\"JavaScript\" type=\"text/javascript\" src=\"{$base_path}js/common.js\"></script>";
 
-      if( $enable_js_game )
+      if ( $enable_js_game )
       {
          $ts = date(DATE_FMT4, $GLOBALS['NOW']);
-         if( ALLOW_GAME_EDITOR || ENABLE_GAME_VIEWER )
+         if ( ALLOW_GAME_EDITOR || ENABLE_GAME_VIEWER )
          {
             echo "\n<script language=\"JavaScript\" type=\"text/javascript\" src=\"{$base_path}js/jquery-1.6.1.min.js\"></script>";
             echo "\n<script language=\"JavaScript\" type=\"text/javascript\" src=\"{$base_path}js/jquery-ui-1.8.13.custom.min.js\"></script>";
             echo "\n<script language=\"JavaScript\" type=\"text/javascript\" src=\"{$base_path}js/game-editor.js?t=$ts\"></script>";
          }
-         if( ALLOW_GO_DIAGRAMS )
+         if ( ALLOW_GO_DIAGRAMS )
             echo "\n<script language=\"JavaScript\" type=\"text/javascript\" src=\"{$base_path}js/goeditor.js\"></script>";
       }
 
-      if( !is_null($javascript) && is_string($javascript) )
+      if ( !is_null($javascript) && is_string($javascript) )
          echo "\n<script language=\"JavaScript\" type=\"text/javascript\">\n$javascript\n</script>";
    }
 
@@ -413,11 +413,11 @@ function start_page( $title, $no_cache, $logged_in, &$player_row,
    global $base_path, $is_down, $is_down_message, $ARR_USERS_MAINTENANCE, $printable;
 
    $user_handle = @$player_row['Handle'];
-   if( $is_down && $logged_in )
+   if ( $is_down && $logged_in )
       check_maintenance( $user_handle );
 
    /* NOTE: prep for UTF-8 migration:
-   if( $logged_in )
+   if ( $logged_in )
       error_log(sprintf("START_PAGE: U[%s] L[%s] AL[%s] ACH[%s]", @$player_row['Handle'], @$player_row['Lang'], @$_SERVER['HTTP_ACCEPT_LANGUAGE'], @$_SERVER['HTTP_ACCEPT_CHARSET']));
     */
 
@@ -425,9 +425,9 @@ function start_page( $title, $no_cache, $logged_in, &$player_row,
 
    echo_dragon_top_bar( $logged_in, $user_handle );
 
-   if( !$printable ) // main-menu
+   if ( !$printable ) // main-menu
    {
-      if( $logged_in )
+      if ( $logged_in )
          $menu = make_dragon_main_menu( $player_row );
       else
       {
@@ -438,14 +438,14 @@ function start_page( $title, $no_cache, $logged_in, &$player_row,
       $tools_array = make_dragon_tools();
    }
 
-   if( $is_down || $printable )
+   if ( $is_down || $printable )
    {
       //layout like menu_horizontal without menu
       $player_row['MenuDirection'] = 'HORIZONTAL';
       echo "\n<table id='pageLayout'>" //layout table
          . "\n <tr class=LayoutHorizontal>";
    }
-   elseif( $player_row['MenuDirection'] == 'HORIZONTAL' )
+   elseif ( $player_row['MenuDirection'] == 'HORIZONTAL' )
    {
       //echo "\n  <td class=Menu>\n";
       make_menu_horizontal($menu); //outside layout table
@@ -467,9 +467,9 @@ function start_page( $title, $no_cache, $logged_in, &$player_row,
    echo "\n  <td id=\"pageBody\">\n\n";
 
    sysmsg(get_request_arg('sysmsg'));
-   if( isset($player_row['VaultCnt']) && $player_row['VaultCnt'] <= 11 )
+   if ( isset($player_row['VaultCnt']) && $player_row['VaultCnt'] <= 11 )
    {
-      if( $player_row['VaultCnt'] > 0 )
+      if ( $player_row['VaultCnt'] > 0 )
       {
          $block_hours = ( (int)@$player_row['ID'] > GUESTS_ID_MAX ? VAULT_TIME : VAULT_TIME_X ) / SECS_PER_HOUR;
          sysmsg( sprintf( T_('Your access quota is running low.<br>You only got %s hits left before you get blocked for %s !!'),
@@ -482,7 +482,7 @@ function start_page( $title, $no_cache, $logged_in, &$player_row,
       }
    }
 
-   if( $is_down )
+   if ( $is_down )
    {
       echo "<br><br>\n", $is_down_message, "<br><br><br>\n";
       end_page();
@@ -495,7 +495,7 @@ function echo_dragon_top_bar( $logged_in, $user_handle )
    global $base_path, $is_down, $printable, $is_maintenance, $player_row;
 
    // forum for bookmark (around table for formatting)
-   if( !$printable )
+   if ( !$printable )
       echo '<form name="bookmarkForm" action="'.$base_path.'bookmark.php" method="GET">';
 
    echo "\n\n<table id=\"pageHead\">",
@@ -504,7 +504,7 @@ function echo_dragon_top_bar( $logged_in, $user_handle )
       FRIENDLY_LONG_NAME."</A>";
 
    // show bookmarks
-   if( !$printable && $logged_in && !$is_down )
+   if ( !$printable && $logged_in && !$is_down )
    {
       echo SEP_SPACING,
          '<select name="jumpto" size="1"',
@@ -521,15 +521,15 @@ function echo_dragon_top_bar( $logged_in, $user_handle )
          ;
    }
 
-   if( $is_maintenance ) // mark also for maintainers
+   if ( $is_maintenance ) // mark also for maintainers
       echo SEP_MEDSPACING . span('Maintenance', '[MAINTENANCE]');
-   if( @$player_row['admin_level'] & ADMIN_TOURNAMENT ) // remind of mighty T-Admin
+   if ( @$player_row['admin_level'] & ADMIN_TOURNAMENT ) // remind of mighty T-Admin
       echo SEP_MEDSPACING . span('AdminTournament', '[Tournament-Admin]');
 
    echo "</td>";
    echo "\n  <td class='LoginBox'>";
 
-   if( $logged_in && !$is_down )
+   if ( $logged_in && !$is_down )
       echo T_("Logged in as"), ': <a id="loggedId" title="' . $player_row['ID'] . '">', $user_handle, '</a>';
    else
       echo T_("Not logged in");
@@ -537,7 +537,7 @@ function echo_dragon_top_bar( $logged_in, $user_handle )
    echo "</td>",
       "\n </tr>\n</table>\n";
 
-   if( !$printable )
+   if ( !$printable )
       echo '</form>';
 } //echo_dragon_top_bar
 
@@ -573,12 +573,12 @@ function make_dragon_main_menu( $player_row )
    // NOTE: multi-text per matrix-entry possible: use list of arrays with arr( itemtext ..) or sep-str
    $menu->add( 1,1, array( T_('Status'),       'status.php',       array( 'accesskey' => ACCKEY_MENU_STATUS, 'class' => 'strong' )));
    $menu->add( 1,2, array( T_('Waiting room'), 'waiting_room.php', array( 'accesskey' => ACCKEY_MENU_WAITROOM )));
-   if( ALLOW_TOURNAMENTS )
+   if ( ALLOW_TOURNAMENTS )
       $menu->add( 1,3, array( T_('Tournaments'), 'tournaments/list_tournaments.php', array( 'accesskey' => ACCKEY_MENU_TOURNAMENT )));
    $menu->add( 1,4, array( T_('User info'),    'userinfo.php',     array( 'accesskey' => ACCKEY_MENU_USERINFO )));
 
    $arr_msgs = array( array( T_('Messages'), 'list_messages.php', array( 'accesskey' => ACCKEY_MENU_MESSAGES ) ));
-   if( $cnt_msg_new > 0 )
+   if ( $cnt_msg_new > 0 )
    {
       $arr_msgs[] = MINI_SPACING;
       $arr_msgs[] = array( span('MainMenuCount', $cnt_msg_new, '(%s)' ),
@@ -599,24 +599,24 @@ function make_dragon_main_menu( $player_row )
    $menu->add( 4,4, array( T_('Docs'),     'docs.php',        array( 'accesskey' => ACCKEY_MENU_DOCS )));
 
    $arr_forums = array( array( T_('Forums'), 'forum/index.php', array( 'accesskey' => ACCKEY_MENU_FORUMS )) );
-   if( $has_forum_new )
+   if ( $has_forum_new )
    {
       $arr_forums[] = MINI_SPACING;
       $arr_forums[] = array( span('MainMenuCount', '(*)'), 'bookmark.php?jumpto=S1', array( 'class' => 'MainMenuCount' ) );
    }
    $menu->add( 5,1, $arr_forums );
    $arr_bulletins = array( array( T_('Bulletins'), 'list_bulletins.php?read=2'.URI_AMP.'no_adm=1', array()) );
-   if( $cnt_bulletin_new > 0 )
+   if ( $cnt_bulletin_new > 0 )
    {
       $arr_bulletins[] = MINI_SPACING;
       $arr_bulletins[] = array( span('MainMenuCount', $cnt_bulletin_new, '(%s)' ),
          'list_bulletins.php?text=1'.URI_AMP.'view=1'.URI_AMP.'no_adm=1', array( 'class' => 'MainMenuCount' ) );
    }
    $menu->add( 5,2, $arr_bulletins );
-   if( ALLOW_FEATURE_VOTE )
+   if ( ALLOW_FEATURE_VOTE )
    {
       $arr_feats = array( array( T_('Features'), 'features/list_votes.php', array( 'accesskey' => ACCKEY_MENU_VOTE )) );
-      if( $cnt_feat_new > 0 )
+      if ( $cnt_feat_new > 0 )
       {
          $arr_feats[] = MINI_SPACING;
          $arr_feats[] = array( span('MainMenuCount', $cnt_feat_new, '(%s)' ),
@@ -625,7 +625,7 @@ function make_dragon_main_menu( $player_row )
       }
       $menu->add( 5,3, $arr_feats );
    }
-   if( ALLOW_GAME_EDITOR )
+   if ( ALLOW_GAME_EDITOR )
       $menu->add( 5,4, array( T_('Game Editor'), 'game_editor.php', array()));
    $menu->add( 5,5, array( T_('Goban Editor'), 'goban_editor.php', array()));
 
@@ -638,11 +638,11 @@ function make_dragon_tools()
 
    $tools_array = array(); //$url => array($img,$alt,$title)
    $page = substr( @$_SERVER['PHP_SELF'], strlen(SUB_PATH));
-   switch( (string)$page )
+   switch ( (string)$page )
    {
       case 'status.php':
       {
-         if( ENABLE_DONATIONS )
+         if ( ENABLE_DONATIONS )
          {
             $tools_array['donation.php'] = array(
                $base_path.'images/donate.gif',
@@ -668,7 +668,7 @@ function end_page( $menu_array=NULL, $links_per_line=0 )
 
    echo "\n  </td>"; //close the pageBody
 
-   if( $menu_array && !$printable )
+   if ( $menu_array && !$printable )
    {
       echo "\n </tr><tr class=Links>"
          . "\n  <td class=Links>";
@@ -680,7 +680,7 @@ function end_page( $menu_array=NULL, $links_per_line=0 )
    echo "\n </tr>\n</table>\n";
 
    { //hostlink build
-      if( HOSTNAME == "dragongoserver.sourceforge.net" ) //for devel server
+      if ( HOSTNAME == "dragongoserver.sourceforge.net" ) //for devel server
          $hostlink= '<A href="http://sourceforge.net" target="_blank"><IMG src="http://sourceforge.net/sflogo.php?group_id=29933&amp;type=1" alt="SourceForge.net Logo" width=88 height=31 border=0 align=middle></A>';
       else //for live server
          $hostlink= '<a href="http://www.samurajdata.se" target="_blank"><img src="'.$base_path.'images/samurajlogo.gif" alt="Samuraj Logo" width=160 height=20 border=0 align=middle></a>';
@@ -697,10 +697,10 @@ function end_page( $menu_array=NULL, $links_per_line=0 )
         . T_("Page time") . ' <span id="pageTime">' . date(DATE_FMT, $NOW)
         . "</span>";
 
-   if( !$printable )
+   if ( !$printable )
    {
       echo "<span class=NoPrint>";
-      if( isset($player_row['VaultCnt']) && isset($player_row['X_VaultTime']) )
+      if ( isset($player_row['VaultCnt']) && isset($player_row['X_VaultTime']) )
       {
          echo '<br>', span('PageQuota',
             sprintf( "%s: %s / %s", T_('Quota#user'), $player_row['VaultCnt'], date(DATE_FMT, $player_row['X_VaultTime']) ));
@@ -713,14 +713,14 @@ function end_page( $menu_array=NULL, $links_per_line=0 )
 
    echo "</td>";
 
-   if( !$printable )
+   if ( !$printable )
    {
       echo "\n  <td class=LoginBox>";
 
-      if( @$player_row['admin_level'] && !$printable )
+      if ( @$player_row['admin_level'] && !$printable )
          echo "<a href=\"{$base_path}admin.php\">", T_('Admin'), "</a>", SMALL_SPACING;
 
-      if( @$player_row['Translator'] && !$printable )
+      if ( @$player_row['Translator'] && !$printable )
          echo anchor( $base_path.'translate.php',
                       T_('Translate'), '', array( 'accesskey' => ACCKEY_MENU_TRANSLATE ))
             , SMALL_SPACING;
@@ -749,22 +749,22 @@ function end_page( $menu_array=NULL, $links_per_line=0 )
 
 function end_html()
 {
-   if( isset($TheErrors) )
+   if ( isset($TheErrors) )
    {
-      if( $TheErrors->error_count() )
+      if ( $TheErrors->error_count() )
          echo $TheErrors->list_string('garbage', 1);
    }
    echo "\n</BODY>\n</HTML>";
 
    global $ThePage;
-   if( !($ThePage instanceof HTMLPage) )
+   if ( !($ThePage instanceof HTMLPage) )
       ob_end_flush();
 } //end_html
 
 //push a level in the output stack
 function grab_output_start( $compressed=0)
 {
-   if( $compressed )
+   if ( $compressed )
       return ob_start('ob_gzhandler');
    else
       return ob_start();
@@ -774,7 +774,7 @@ function grab_output_start( $compressed=0)
 //also copy it in the previous level of the output stack
 function grab_output_end( $filename='')
 {
-   if( !$filename )
+   if ( !$filename )
    {
       ob_end_flush(); //also copy it
       return false;
@@ -795,7 +795,7 @@ function check_maintenance( $user_handle )
    global $is_down, $ARR_USERS_MAINTENANCE;
 
    $is_maint_user = ( is_array($ARR_USERS_MAINTENANCE) && in_array( $user_handle, $ARR_USERS_MAINTENANCE ) );
-   if( $is_down && $is_maint_user )
+   if ( $is_down && $is_maint_user )
       $is_down = false;
    return $is_maint_user;
 }
@@ -803,7 +803,7 @@ function check_maintenance( $user_handle )
 // shows maintenance page if server down
 function show_maintenance_page()
 {
-   if( @$GLOBALS['is_down'] )
+   if ( @$GLOBALS['is_down'] )
    {
       global $player_row;
       start_page('Server down', true, false, $player_row);
@@ -823,13 +823,13 @@ function make_menu($menu_array, $with_accesskeys=true, $links_per_line=0 )
    global $base_path, $max_links_in_main_menu;
 
    $balanced = ( $links_per_line >= 0 );
-   if( $links_per_line == 0 )
+   if ( $links_per_line == 0 )
       $links_per_line = $max_links_in_main_menu;
-   elseif( !$balanced )
+   elseif ( !$balanced )
       $links_per_line = -$links_per_line;
 
    $nr_menu_links = count($menu_array);
-   if( $nr_menu_links == 0 )
+   if ( $nr_menu_links == 0 )
       return;
 
    $menu_levels = ceil( $nr_menu_links / $links_per_line );
@@ -840,9 +840,9 @@ function make_menu($menu_array, $with_accesskeys=true, $links_per_line=0 )
 
    $cumwidth = $cumw = 0;
    $i = 0;
-   foreach( $menu_array as $text => $link )
+   foreach ( $menu_array as $text => $link )
    {
-      if( ($i % $menu_width)==0 && $i>0 )
+      if ( ($i % $menu_width)==0 && $i>0 )
       {
          echo "\n </tr>\n <tr>";
          $cumw = 0;
@@ -853,7 +853,7 @@ function make_menu($menu_array, $with_accesskeys=true, $links_per_line=0 )
       $width = round($cumw - $cumwidth);
 
       echo "\n  <td width=\"$width%\">";
-      if( $link instanceof Form )
+      if ( $link instanceof Form )
          echo $link->echo_string();
       else
          echo make_menu_link( $text, $link, ($with_accesskeys ? $i % 10 : '') );
@@ -872,9 +872,9 @@ function make_menu_link( $text, $link, $accesskey='' )
    global $base_path;
 
    $attbs = array();
-   if( (string)$accesskey != '' )
+   if ( (string)$accesskey != '' )
       $attbs['accesskey'] = $accesskey;
-   if( is_array($link) )
+   if ( is_array($link) )
    {
       $url = $link['url'];
       unset( $link['url'] );
@@ -912,20 +912,20 @@ function make_menu_horizontal($menu)
       "\n  <td width=\"%d%%\" class=\"%s\" rowspan=\"%d\"><img src=\"{$base_path}images/%s\" alt=\"Dragon\"></td>";
    echo sprintf( $logo_line, $b, 'Logo1', $rows, 'dragonlogo_bl.jpg');
 
-   for( $row=1; $row <= $rows; $row++ )
+   for ( $row=1; $row <= $rows; $row++ )
    {
-      for( $col=1; $col <= $cols; $col++ )
+      for ( $col=1; $col <= $cols; $col++ )
       {
          $menuitem = $menu->get_entry( $col, $row );
-         if( !is_null($menuitem) ) // matrix-point unset
+         if ( !is_null($menuitem) ) // matrix-point unset
          {
-            if( is_array($menuitem[0]) )
+            if ( is_array($menuitem[0]) )
             {
                // object = arr( sep-string | arr( itemtext, itemlink [, arr( accesskey/class => value ) ] ), ...) for multi-items
                $content = '';
-               foreach( $menuitem as $mitem )
+               foreach ( $menuitem as $mitem )
                {
-                  if( is_array($mitem) )
+                  if ( is_array($mitem) )
                   {//item-arr
                      @list( $text, $link, $attbs ) = $mitem;
                      $content .= anchor( $base_path.$link, $text, '', $attbs);
@@ -947,9 +947,9 @@ function make_menu_horizontal($menu)
       }
 
       // right logo
-      if( $row == 1 )
+      if ( $row == 1 )
          echo sprintf( $logo_line, $w, 'Logo2', $rows, 'dragonlogo_br.jpg');
-      if( $row < $rows )
+      if ( $row < $rows )
          echo "\n </tr><tr>";
    }
 
@@ -984,9 +984,9 @@ function make_menu_vertical($menu)
       . "\n  <td align=left nowrap>";
 
    $cntX = $menu->get_info(MATRIX_MAX_X);
-   for( $x=1; $x <= $cntX; $x++ )
+   for ( $x=1; $x <= $cntX; $x++ )
    {
-      if( $x > 1 )
+      if ( $x > 1 )
           echo '</td>'
              . "\n </tr><tr>"
              . "\n  <td height=1><img height=1 src=\"{$base_path}images/dot.gif\" alt=\"\"></td>"
@@ -994,14 +994,14 @@ function make_menu_vertical($menu)
              . "\n  <td align=left nowrap>";
 
       $menuitems = $menu->get_y_entries( $x );
-      foreach( $menuitems as $menuitem )
+      foreach ( $menuitems as $menuitem )
       {
-         if( is_array($menuitem[0]) )
+         if ( is_array($menuitem[0]) )
          {
             // object = arr( sep-string | arr( itemtext, itemlink [, arr( accesskey/class => value ) ] ), ...) for multi-items
-            foreach( $menuitem as $mitem )
+            foreach ( $menuitem as $mitem )
             {
-               if( is_array($mitem) )
+               if ( is_array($mitem) )
                {//item-arr
                   @list( $text, $link, $attbs ) = $mitem;
                   echo anchor( $base_path.$link, $text, '', $attbs);
@@ -1035,15 +1035,15 @@ function make_menu_vertical($menu)
 
 function echo_menu_tools( $array, $width=0)
 {
-   if( !is_array($array) || count($array)==0 )
+   if ( !is_array($array) || count($array)==0 )
       return;
    echo "<table class=NotPrintable id='pageTools'>\n<tr>\n";
    $c= 0;
    $r= 1;
-   foreach( $array as $lnk => $sub )
+   foreach ( $array as $lnk => $sub )
    {
       list( $src, $alt, $tit) = $sub;
-      if( $width>0 && $c>=$width )
+      if ( $width>0 && $c>=$width )
       {
          echo "</tr><tr>\n";
          $c= 1;
@@ -1054,9 +1054,9 @@ function echo_menu_tools( $array, $width=0)
       echo '<td>'.anchor( $lnk, image( $src, $alt, $tit))."</td>\n";
    }
    $c= $width-$c;
-   if( $r>1 && $c>0 )
+   if ( $r>1 && $c>0 )
    {
-      if( $c>1 )
+      if ( $c>1 )
          echo "<td colspan=$c></td>\n";
       else
          echo "<td></td>\n";
@@ -1076,7 +1076,7 @@ function help($topic)
 
 function sysmsg($msg, $class='SysMsg')
 {
-   if( isset($msg) && ($msg=trim(make_html_safe($msg,'msg'))) )
+   if ( isset($msg) && ($msg=trim(make_html_safe($msg,'msg'))) )
       echo "\n<p class=\"$class\">$msg</p><hr class=SysMsg>\n";
 }
 
@@ -1090,7 +1090,7 @@ define('PASSWORD_LEGAL_REGS', HANDLE_LEGAL_REGS.'\\.\\?\\*\\+,;:!%');
 
 function illegal_chars( $string, $punctuation=false )
 {
-   if( $punctuation )
+   if ( $punctuation )
       $regs = PASSWORD_LEGAL_REGS;
    else
       $regs = 'a-zA-Z]['.HANDLE_LEGAL_REGS; //begins with a letter
@@ -1102,9 +1102,9 @@ function illegal_chars( $string, $punctuation=false )
 function is_legal_handle( $handle )
 {
    $len = strlen($handle);
-   if( !preg_match( "/^[a-zA-Z][\\+".HANDLE_LEGAL_REGS."]+\$/", $handle) )
+   if ( !preg_match( "/^[a-zA-Z][\\+".HANDLE_LEGAL_REGS."]+\$/", $handle) )
       return false;
-   elseif( $len == 0 || $len > 16 )
+   elseif ( $len == 0 || $len > 16 )
       return false;
    else
       return true;
@@ -1115,7 +1115,7 @@ function make_session_code()
    mt_srand((double)microtime()*1000000);
    $n = 41; //size of the MySQL 4.1 PASSWORD() result.
    $s = '';
-   for( $i=$n; $i>0; $i-=6 )
+   for ( $i=$n; $i>0; $i-=6 )
       $s.= sprintf("%06X",mt_rand(0,0xffffff));
    return substr($s, 0, $n);
 }
@@ -1123,9 +1123,9 @@ function make_session_code()
 function random_letter()
 {
    $c = mt_rand(0,61);
-   if( $c < 10 )
+   if ( $c < 10 )
       return chr( $c + ord('0'));
-   elseif( $c < 36 )
+   elseif ( $c < 36 )
       return chr( $c - 10 + ord('a'));
    else
       return chr( $c - 36 + ord('A'));
@@ -1135,7 +1135,7 @@ function generate_random_password()
 {
    $return = '';
    mt_srand((double)microtime()*1000000);
-   for( $i=0; $i<8; $i++ )
+   for ( $i=0; $i<8; $i++ )
       $return .= random_letter();
 
    return $return;
@@ -1165,9 +1165,9 @@ function verify_invalid_email( $debugmsg, $email, $die_on_error=true )
    static $atext = "[-+_a-z0-9]";
    $regexp = "/^($atext+)(\\.$atext+)*@([-a-z0-9]+)(\\.[-a-z0-9]+)*(\\.[-a-z0-9]{2,63})\$/i";
    $res= preg_match($regexp, $email);
-   if( !$res ) // invalid email
+   if ( !$res ) // invalid email
    {
-      if( $die_on_error && is_string($debugmsg) )
+      if ( $die_on_error && is_string($debugmsg) )
          error('bad_mail_address', "verify_invalid_email.$debugmsg($email)"); // can fall-through if errors collected
       return 'bad_mail_address';
    }
@@ -1199,18 +1199,18 @@ function send_email( $debugmsg, $email, $formatopts, $text, $subject='', $header
 {
    // NOTE: mail-format of header and text see http://de3.php.net/manual/en/function.mail.php
 
-   if( !$subject )
+   if ( !$subject )
       $subject = FRIENDLY_LONG_NAME.' notification';
    $subject= preg_replace("/[\\x01-\\x20]+/", ' ', $subject);
 
    // EOL for message-body should be LF
    $text = str_replace( array("\r\n", "\r"), "\n", $text );
-   if( !($formatopts & EMAILFMT_SKIP_WORDWRAP) )
+   if ( !($formatopts & EMAILFMT_SKIP_WORDWRAP) )
       $text= wordwrap( $text, 70, "\n", 1);
    $text = trim($text) . "\n";
 
    $headers= trim($headers);
-   if( !$headers )
+   if ( !$headers )
    {
       $headers = 'From: '.EMAIL_FROM;
       //if HTML in mail allowed:
@@ -1225,13 +1225,13 @@ function send_email( $debugmsg, $email, $formatopts, $text, $subject='', $header
    $headers = preg_replace( $rgx, $eol, trim($headers)); //.$eol;
 
    $params= trim(SENDMAIL_PARAMETERS . ' ' . $params);
-   if( $params )
+   if ( $params )
       $params = preg_replace( $rgx, $eol, trim($params)); //.$eol;
 
-   if( is_array($email) )
+   if ( is_array($email) )
       $email = trim( implode( ',', $email) );
 
-   if( function_exists('mail') )
+   if ( function_exists('mail') )
    {
       $begin_time = time();
       $res = @mail( $email, $subject, $text, $headers, $params);
@@ -1240,7 +1240,7 @@ function send_email( $debugmsg, $email, $formatopts, $text, $subject='', $header
    else
       $res = false;
 
-   if( is_string($debugmsg) && !$res )
+   if ( is_string($debugmsg) && !$res )
       error('mail_failure', "send_email.$debugmsg($email,[$subject])");
    return $res;
 } //send_email
@@ -1263,68 +1263,68 @@ function send_message( $debugmsg, $text='', $subject=''
 {
    global $NOW;
 
-   if( is_string($debugmsg) )
+   if ( is_string($debugmsg) )
       $debugmsg.= '.send_message';
 
    $text = mysql_addslashes(trim($text));
    $subject = mysql_addslashes(trim($subject));
-   if( (string)$subject == '' )
+   if ( (string)$subject == '' )
       $subject = T_('(no subject)');
 
-   if( !isset($type) || !is_string($type) || !$type )
+   if ( !isset($type) || !is_string($type) || !$type )
       $type = MSGTYPE_NORMAL;
-   if( !isset($gid) || !is_numeric($gid) || $gid<0 )
+   if ( !isset($gid) || !is_numeric($gid) || $gid<0 )
       $gid = 0;
-   if( !isset($from_id) || !is_numeric($from_id) || $from_id <= GUESTS_ID_MAX ) //exclude guest
+   if ( !isset($from_id) || !is_numeric($from_id) || $from_id <= GUESTS_ID_MAX ) //exclude guest
       $from_id = 0; //i.e. server message
-   if( !isset($prev_mid) || !is_numeric($prev_mid) || $prev_mid < 0 )
+   if ( !isset($prev_mid) || !is_numeric($prev_mid) || $prev_mid < 0 )
       $prev_mid = 0;
 
    $to_myself = false;
    $receivers = array();
-   foreach( array( 'ID' => &$to_ids, 'Handle' => &$to_handles ) as $field => $var )
+   foreach ( array( 'ID' => &$to_ids, 'Handle' => &$to_handles ) as $field => $var )
    {
-      if( is_null($var) || (string)$var == '' )
+      if ( is_null($var) || (string)$var == '' )
          continue;
-      if( !is_array($var) )
+      if ( !is_array($var) )
          $var = preg_split('/[\s,]+/', $var);
       $varcnt = count($var);
-      if( $varcnt <= 0 )
+      if ( $varcnt <= 0 )
          continue;
 
       $var = implode("','", ( $field == 'ID' ? $var : array_map('mysql_addslashes', $var) ));
-      if( !$var )
+      if ( !$var )
          continue;
 
       // make receivers unique, exclude guests
       $query = "SELECT ID,Notify,SendEmail FROM Players WHERE $field IN ('$var') LIMIT $varcnt";
       $result = db_query( "$debugmsg.get$field($var)", $query);
-      while( $row = mysql_fetch_assoc($result) )
+      while ( $row = mysql_fetch_assoc($result) )
       {
          $uid = $row['ID'];
-         if( $from_id > 0 && $uid == $from_id )
+         if ( $from_id > 0 && $uid == $from_id )
             $to_myself = true;
-         elseif( $uid > GUESTS_ID_MAX ) //exclude guest
+         elseif ( $uid > GUESTS_ID_MAX ) //exclude guest
             $receivers[$uid] = $row;
       }
       mysql_free_result($result);
    }
    $reccnt = count($receivers);
-   if( !$to_myself && $reccnt <= 0 )
+   if ( !$to_myself && $reccnt <= 0 )
       error('receiver_not_found', "$debugmsg.rec0($from_id,$subject)");
 
    // not supported: sending a bulk-message to myself and other in the same pack
-   if( $to_myself && $reccnt > 0 )
+   if ( $to_myself && $reccnt > 0 )
       error('bulkmessage_self', "$debugmsg.rec2($from_id,$subject)");
 
    // determine message-thread info
    $thread = 0;
    $thread_level = 0;
-   if( $prev_mid > 0 )
+   if ( $prev_mid > 0 )
    {
       $prev_msgrow = mysql_single_fetch( "$debugmsg.find_prev($from_id,$prev_mid)",
          "SELECT Thread, Level FROM Messages WHERE ID=$prev_mid LIMIT 1" );
-      if( is_array($prev_msgrow) )
+      if ( is_array($prev_msgrow) )
       {
          $thread = $prev_msgrow['Thread'];
          $thread_level = $prev_msgrow['Level'] + 1;
@@ -1342,7 +1342,7 @@ function send_message( $debugmsg, $text='', $subject=''
              .", ReplyTo=$prev_mid, Game_ID=$gid"
              .", Subject='$subject', Text='$text'" ;
       db_query( "$debugmsg.message", $query);
-      if( mysql_affected_rows() != 1 )
+      if ( mysql_affected_rows() != 1 )
          error('mysql_insert_message', "$debugmsg.message");
 
       $mid = mysql_insert_id();
@@ -1350,9 +1350,9 @@ function send_message( $debugmsg, $text='', $subject=''
 
       $query= array();
       $receivers_folder_new = array();
-      if( $from_id > 0 ) //exclude system messages (no sender)
+      if ( $from_id > 0 ) //exclude system messages (no sender)
       {
-         if( $to_myself )
+         if ( $to_myself )
          {
             $query[]= "$mid,$from_id,'M','N',".FOLDER_NEW;
             $receivers_folder_new[] = $from_id;
@@ -1361,16 +1361,16 @@ function send_message( $debugmsg, $text='', $subject=''
             $query[]= "$mid,$from_id,'Y','N',".FOLDER_SENT;
       }
 
-      if( $from_id > 0 && $thread == 0 )
+      if ( $from_id > 0 && $thread == 0 )
       {
          db_query( "$debugmsg.upd_thread($mid,$from_id)",
             "UPDATE Messages SET Thread='$mid', Level=0 WHERE ID='$mid' LIMIT 1" );
       }
 
       $need_reply_val = ( $from_id > 0 && $type == MSGTYPE_INVITATION ) ? 'M' : 'N';
-      foreach( $receivers as $uid => $row ) //exclude to myself
+      foreach ( $receivers as $uid => $row ) //exclude to myself
       {
-         if( $from_id > 0 )
+         if ( $from_id > 0 )
             $query[]= "$mid,$uid,'N','$need_reply_val',".FOLDER_NEW;
          else //system messages
             $query[]= "$mid,$uid,'S','N',".FOLDER_NEW;
@@ -1378,18 +1378,18 @@ function send_message( $debugmsg, $text='', $subject=''
       }
 
       $cnt= count($query);
-      if( $cnt > 0 )
+      if ( $cnt > 0 )
       {
          $query= "INSERT INTO MessageCorrespondents"
                 ." (mid,uid,Sender,Replied,Folder_nr) VALUES"
                 .' ('.implode('),(', $query).")";
          db_query( "$debugmsg.correspondent", $query );
-         if( mysql_affected_rows() != $cnt )
+         if ( mysql_affected_rows() != $cnt )
             error('mysql_insert_message', "$debugmsg.correspondent");
       }
 
       // update receivers new-message counter
-      if( $cnt_fnew = count($receivers_folder_new) )
+      if ( $cnt_fnew = count($receivers_folder_new) )
       {
          $ids = implode( ',', $receivers_folder_new );
          db_query( "$debugmsg.count_msg_new([$ids])",
@@ -1398,44 +1398,44 @@ function send_message( $debugmsg, $text='', $subject=''
 
       //records the last message of the invitation/dispute sequence
       //the type of the previous messages will be changed to 'DISPUTED'
-      if( $gid > 0 && $type == MSGTYPE_INVITATION )
+      if ( $gid > 0 && $type == MSGTYPE_INVITATION )
       {
          db_query( "$debugmsg.game_message($gid)",
             "UPDATE Games SET mid='$mid' WHERE ID='$gid' LIMIT 1" );
       }
 
-      if( $from_id > 0 && $prev_mid > 0 ) //is this an answer?
+      if ( $from_id > 0 && $prev_mid > 0 ) //is this an answer?
       {
          $query = "UPDATE MessageCorrespondents SET Replied='Y'";
-         if( $prev_folder > FOLDER_ALL_RECEIVED )
+         if ( $prev_folder > FOLDER_ALL_RECEIVED )
             $query .= ", Folder_nr=$prev_folder";
-         elseif( $prev_folder == MOVEMSG_REPLY_TO_MAIN_FOLDER )
+         elseif ( $prev_folder == MOVEMSG_REPLY_TO_MAIN_FOLDER )
             $query .= ", Folder_nr=IF(Folder_nr=".FOLDER_REPLY.",".FOLDER_MAIN.",Folder_nr)";
          $query.= " WHERE mid=$prev_mid AND uid=$from_id AND Sender!='Y' LIMIT 1";
          db_query( "$debugmsg.reply_correspondent", $query );
 
-         if( $prev_type )
+         if ( $prev_type )
          {
             db_query( "$debugmsg.reply_message",
                "UPDATE Messages SET Type='$prev_type' WHERE ID=$prev_mid LIMIT 1" );
          }
       }
 
-      if( $notify ) //about message!
+      if ( $notify ) //about message!
       {
          $ids= array();
-         foreach( $receivers as $uid => $row )
+         foreach ( $receivers as $uid => $row )
          {
-            if( $row['Notify'] == 'NONE' && ( strpos($row['SendEmail'], 'ON') !== false ) )
+            if ( $row['Notify'] == 'NONE' && ( strpos($row['SendEmail'], 'ON') !== false ) )
                $ids[]= $uid; // optimize: notify only eligible
          }
-         if( count($ids) > 0 )
+         if ( count($ids) > 0 )
             notify( $debugmsg, $ids, '', NOTIFYFLAG_NEW_MSG );
       }
 
       // clear caches for sender & receivers
       $clear_uids = array_keys($receivers);
-      if( $from_id > GUESTS_ID_MAX )
+      if ( $from_id > GUESTS_ID_MAX )
          $clear_uids[] = $from_id;
       clear_cache_quick_status( $clear_uids, QST_CACHE_MSG );
       delete_cache_message_list( $debugmsg, $clear_uids );
@@ -1450,9 +1450,9 @@ function send_message( $debugmsg, $text='', $subject=''
 // NOTE: can't put in 'include/message_functions.php' because needed in send_message() and circular dependency
 function delete_cache_message_list( $dbgmsg, $uids )
 {
-   if( !is_array($uids) )
+   if ( !is_array($uids) )
       $uids = array( $uids );
-   foreach( $uids as $uid )
+   foreach ( $uids as $uid )
       DgsCache::delete( $dbgmsg, CACHE_GRP_MSGLIST, "Messages.$uid" );
 }
 
@@ -1469,20 +1469,20 @@ define('NOTIFYFLAG_NEW_MSG', 0x01 ); // new-message awaiting for mail-notificati
  */
 function notify( $debugmsg, $ids, $type='', $nfy_flags=0 )
 {
-   if( !is_array($ids) )
+   if ( !is_array($ids) )
       $ids= array( $ids);
    $query = array();
-   foreach( $ids as $cnt )
+   foreach ( $ids as $cnt )
       $query = array_merge( $query, explode(',', $cnt));
    $ids = array();
-   foreach( $query as $cnt )
+   foreach ( $query as $cnt )
    {
-      if( ($cnt=(int)$cnt) > GUESTS_ID_MAX ) //exclude guest
+      if ( ($cnt=(int)$cnt) > GUESTS_ID_MAX ) //exclude guest
          $ids[$cnt] = $cnt; //unique
    }
 
    $cnt= count($ids);
-   if( $cnt <= 0 )
+   if ( $cnt <= 0 )
       return 'no IDs';
 
    $ids= implode(',', $ids);
@@ -1507,12 +1507,12 @@ function safe_setcookie( $name, $value='', $rel_expire=-3600 ) //-SECS_PER_HOUR
    $name= COOKIE_PREFIX.$name;
 
    //remove duplicated cookies sometime occuring with some browsers
-   if( $tmp= @$_SERVER['HTTP_COOKIE'] )
+   if ( $tmp= @$_SERVER['HTTP_COOKIE'] )
       $n= preg_match_all(';'.$name.'[\\x01-\\x20]*=;i', $tmp, $dummy);
    else
       $n= 0;
 
-   while( $n>1 )
+   while ( $n>1 )
    {
       setcookie( $name, '', $NOW-SECS_PER_HOUR, SUB_PATH);
       $n--;
@@ -1524,7 +1524,7 @@ function safe_setcookie( $name, $value='', $rel_expire=-3600 ) //-SECS_PER_HOUR
 
 function set_login_cookie($handl, $code, $delete=false)
 {
-   if( $delete || !$handl || !$code)
+   if ( $delete || !$handl || !$code)
    {
       safe_setcookie('handle');
       safe_setcookie('sessioncode');
@@ -1540,11 +1540,11 @@ function set_cookie_prefs(&$player_row, $delete=false)
 {
    $uid = (int)@$player_row['ID'];
    //assert('$uid>0');
-   if( $uid <= 0 ) return;
+   if ( $uid <= 0 ) return;
 
    global $cookie_prefs;
 
-   if( $delete )
+   if ( $delete )
       safe_setcookie("prefs$uid");
    else
       safe_setcookie("prefs$uid", serialize($cookie_prefs), SECS_PER_HOUR*12*61 * 12*5); //5 years
@@ -1554,17 +1554,17 @@ function get_cookie_prefs(&$player_row)
 {
    $uid = (int)@$player_row['ID'];
    //assert('$uid>0');
-   if( $uid <= 0 ) return;
+   if ( $uid <= 0 ) return;
 
    global $cookie_prefs, $cookie_pref_rows;
 
    $cookie_prefs = unserialize( safe_getcookie("prefs$uid") );
-   if( !is_array( $cookie_prefs ) )
+   if ( !is_array( $cookie_prefs ) )
       $cookie_prefs = array();
 
-   foreach( $cookie_prefs as $key => $value )
+   foreach ( $cookie_prefs as $key => $value )
    {
-      if( in_array($key, $cookie_pref_rows) )
+      if ( in_array($key, $cookie_pref_rows) )
          $player_row[$key] = $value;
    }
 } //get_cookie_prefs
@@ -1582,37 +1582,37 @@ function switch_admin_status(&$player_row, $mask=0, $cmd='')
 {
    $uid = (int)@$player_row['ID'];
    //assert('$uid>0');
-   if( $uid <= 0 ) return -3;
+   if ( $uid <= 0 ) return -3;
 
    $cookie = "status$uid";
    $level = (int)@$player_row['admin_level'];
-   if( !$mask )
+   if ( !$mask )
    {
       $status = $level & (int)safe_getcookie($cookie);
       $player_row['admin_status'] = $status;
       return -2;
    }
-   if( ($level & $mask) == 0 )
+   if ( ($level & $mask) == 0 )
       return -1; //not granted
 
    $status = $level & (int)@$player_row['admin_status'];
    $old = $status;
-   switch( (string)strtolower($cmd) )
+   switch ( (string)strtolower($cmd) )
    {
       case 'y': case '+': $status |= $mask; break; //set
       case 'n': case '-': $status &=~$mask; break; //unset
       case 'x': case '*': $status ^= $mask; break; //toggle
       //default: break; //just return status
    }
-   if( $old != $status )
+   if ( $old != $status )
    {
-      if( $status )
+      if ( $status )
          safe_setcookie( $cookie, $status, SECS_PER_HOUR);
       else
          safe_setcookie( $cookie);
       $player_row['admin_status'] = $status;
    }
-   if( ($status & $mask) == $mask )
+   if ( ($status & $mask) == $mask )
       return 1; //active
    return 0; //granted but inactive
 } //switch_admin_status
@@ -1626,7 +1626,7 @@ function add_line_breaks( $str)
    $str=preg_replace('/[\\x01-\\x09\\x0B-\\x20]*\\x0A/','<BR>', $str);
 
    // Handle collapsed vertical white spaces
-   for( $i=0; $i<2; $i++)
+   for ( $i=0; $i<2; $i++)
       $str = preg_replace('%[\\x01-\\x20]*<(BR|P)[\\x01-\\x20]*/?\>[\\x01-\\x20]*<(BR|P)[\\x01-\\x20]*/?\>%i','<\\1>&nbsp;<\\2>', $str);
 
    return $str;
@@ -1685,24 +1685,24 @@ function parse_atbs_safe( &$trail, &$bad)
          "'"   => "'",
       );
 
-   while( !$bad )
+   while ( !$bad )
    {
       $i = strcspn($trail, $seps[$quote]);
       $c = substr($trail,$i,1);
-      if( $c=='' || $c=='<' )
+      if ( $c=='' || $c=='<' )
       {
          $head.= substr($trail,0,$i);
          $trail = substr($trail,$i);
          $bad = 1;
          break;
       }
-      elseif( $c=='>' )
+      elseif ( $c=='>' )
       {
          $head.= substr($trail,0,$i);
          $trail = substr($trail,$i+1);
          break;
       }
-      elseif( $quote )
+      elseif ( $quote )
       {
          $quote.= substr($trail,0,$i+1);
          $quote = str_replace('"', ALLOWED_QUOT, $quote);
@@ -1718,12 +1718,12 @@ function parse_atbs_safe( &$trail, &$bad)
          $quote = $c;
       }
    }
-   if( $quote )
+   if ( $quote )
    {
       $head.= $quote;
       $bad = 1;
    }
-   if( !$bad && $head )
+   if ( !$bad && $head )
    {
       /* TODO check for newer/more attributes!
       This part fix a security hole. One was able to execute a javascript code
@@ -1738,10 +1738,10 @@ function parse_atbs_safe( &$trail, &$bad)
          .'|\\beval\\s*\\('      //eval() can split most of the keywords
          .'|\\bstyle\\s*='       //disabling style= is not bad too
          ;
-      if( /*$quote &&*/  preg_match( "%($quote)%i", preg_replace( "/[\\x01-\\x1f]+/", '', $head)) )
+      if ( /*$quote &&*/  preg_match( "%($quote)%i", preg_replace( "/[\\x01-\\x1f]+/", '', $head)) )
          $bad = 2;
    }
-   if( $bad )
+   if ( $bad )
    {
       $head = str_replace(ALLOWED_QUOT, '"', $head);
       $head = str_replace(ALLOWED_APOS, "'", $head);
@@ -1769,46 +1769,46 @@ define('PARSE_MARK_TAGTERM',
       ALLOWED_LT.'span class=MarkTagTerm'.ALLOWED_GT.'&lt;\\1&gt;'.ALLOWED_LT.'/span'.ALLOWED_GT);
 function parse_tags_safe( &$trail, &$bad, &$html_code, &$html_code_closed, $stop)
 {
-   if( !$trail )
+   if ( !$trail )
       return '';
 
    global $parse_mark_regex;
    $before = '';
    //$stop = preg_quote($stop, '%');
    $reg = ( $html_code ) ? ( $stop ? $stop.'|' : '' ) . $html_code : $stop;
-   if( !$reg )
+   if ( !$reg )
       return '';
    //enclosed by '%' because $html_code may contain '/'
    //FIXME(?) ... and $html_code can not contain '%' too ?
    $reg = "%^(.*?)<($reg)\\b(.*)$%is";
 
-   while( preg_match($reg, $trail, $matches) )
+   while ( preg_match($reg, $trail, $matches) )
    {
       $marks = $matches[1] ;
-      if( $parse_mark_regex && PARSE_MARK_TERM && $marks )
+      if ( $parse_mark_regex && PARSE_MARK_TERM && $marks )
          $marks = preg_replace( $parse_mark_regex, PARSE_MARK_TERM, $marks);
       $before.= $marks;
       $tag = strtolower($matches[2]) ; //Warning: same case as $html_code
-      if( $tag == '/br' ) $tag = 'br' ; //historically used in end game messages.
+      if ( $tag == '/br' ) $tag = 'br' ; //historically used in end game messages.
       $endtag = ( substr($tag,-1,1) == '_' ) ? substr($tag,0,-1) : $tag;
       $trail = $matches[3] ;
       unset($matches);
 
       $head = $tag . parse_atbs_safe( $trail, $bad) ;
       $marks = '';
-      if( $parse_mark_regex && PARSE_MARK_TAGTERM && $head )
+      if ( $parse_mark_regex && PARSE_MARK_TAGTERM && $head )
       {
-         if( preg_match_all( $parse_mark_regex, $head, $tmp) )
+         if ( preg_match_all( $parse_mark_regex, $head, $tmp) )
          {
             $marks = textarea_safe( implode('|', $tmp[1]), 'iso-8859-1'); //LANG_DEF_CHARSET);
             $marks = str_replace( '\\1', $marks, PARSE_MARK_TAGTERM);
          }
       }
-      if( $bad)
+      if ( $bad)
          return $before .$marks .'<'. $head .'>' ;
 
       $head = preg_replace('/[\\x01-\\x20]+/', ' ', $head);
-      if( in_array($tag, array(
+      if ( in_array($tag, array(
             //as a first set/choice of <ul>-like tags
             'quote','code','pre','center',
             'dl','/dt','/dd','ul','ol','/li',
@@ -1816,7 +1816,7 @@ function parse_tags_safe( &$trail, &$bad, &$html_code, &$html_code_closed, $stop
       { //remove all the following newlines (to avoid inserted <br>)
          $trail= preg_replace( "/^[\\r\\n]+/", '', $trail);
       }
-      elseif( in_array($tag, array(
+      elseif ( in_array($tag, array(
             //as a first set/choice of </ul>-like tags
             '/quote','/code','/pre','/center',
             '/dl','/ul','/ol','/note','/div',
@@ -1825,17 +1825,17 @@ function parse_tags_safe( &$trail, &$bad, &$html_code, &$html_code_closed, $stop
          $trail= preg_replace( "/^(\\r\\n|\\r|\\n)/", '', $trail);
       }
 
-      if( $stop == $tag )
+      if ( $stop == $tag )
          return $before .ALLOWED_LT. $head .ALLOWED_GT .$marks; //mark after
 
       $before.= $marks; //mark before
       $to_be_closed = is_numeric(strpos($html_code_closed,'|'.$tag.'|')) ;
-      if( $tag == 'code' )
+      if ( $tag == 'code' )
       {
          // does not allow inside HTML
          $tmp= '';
          $inside = parse_tags_safe( $trail, $bad, $tmp, $tmp, '/'.$tag);
-         if( $bad)
+         if ( $bad)
             return $before .'<'. $head .'>'. $inside ;
          $inside = str_replace('&', '&amp;', $inside);
          //TODO: fix possible corrupted marks... to be reviewed
@@ -1845,13 +1845,13 @@ function parse_tags_safe( &$trail, &$bad, &$html_code, &$html_code_closed, $stop
             '\\1&\\2&\\3',
             $inside);
       }
-      elseif( $tag == 'tt' )
+      elseif ( $tag == 'tt' )
       {
          // TT is mainly designed to be used when $some_html=='cell'
          // does not allow inside HTML and remove line breaks
          $tmp= '';
          $inside = parse_tags_safe( $trail, $bad, $tmp, $tmp, '/'.$tag);
-         if( $bad)
+         if ( $bad)
             return $before .'<'. $head .'>'. $inside ;
          //$inside = str_replace('&', '&amp;', $inside);
          $inside = preg_replace('/[\\x09\\x20]/', '&nbsp;', $inside);
@@ -1859,10 +1859,10 @@ function parse_tags_safe( &$trail, &$bad, &$html_code, &$html_code_closed, $stop
          //TODO: fix possible corrupted marks... to be reviewed
          $inside = preg_replace('/&nbsp;class=Mark/', ' class=Mark', $inside);
       }
-      elseif( $to_be_closed )
+      elseif ( $to_be_closed )
       {
          $inside = parse_tags_safe( $trail, $bad, $html_code, $html_code_closed, '/'.$endtag);
-         if( $bad)
+         if ( $bad)
             return $before .'<'. $head .'>'. $inside ;
       }
       else
@@ -1872,7 +1872,7 @@ function parse_tags_safe( &$trail, &$bad, &$html_code, &$html_code_closed, $stop
 
       $before.= ALLOWED_LT. $head .ALLOWED_GT. $inside ;
    }
-   if( $stop )
+   if ( $stop )
       $bad = 1;
    return $before ;
 }//parse_tags_safe
@@ -1900,14 +1900,14 @@ function parse_html_safe( $msg, $some_html, $mark_terms='')
    //set the regexp (escaped for the '/' delimiter) to the first match level (parenthesis)
    $parse_mark_regex = !$mark_terms ? '' : "/($mark_terms)/is";
    $bad = 0;
-   if( !$some_html )
+   if ( !$some_html )
       $str = '';
    else
       $str = parse_tags_safe( $msg, $bad,
                   $html_code[$some_html],
                   $html_code_closed[$some_html],
                   '') ;
-   if( $parse_mark_regex && PARSE_MARK_TERM && $msg )
+   if ( $parse_mark_regex && PARSE_MARK_TERM && $msg )
       $msg = preg_replace( $parse_mark_regex, PARSE_MARK_TERM, $msg);
    $str.= $msg;
    $parse_mark_regex = '';
@@ -2036,12 +2036,12 @@ $html_safe_preg = array(
  **/
 function make_html_safe( $msg, $some_html=false, $mark_terms='')
 {
-   if( $some_html )
+   if ( $some_html )
    {
       // make sure the <, > replacements: ALLOWED_LT, ALLOWED_GT are removed from the string
       $msg= reverse_allowed( $msg);
 
-      switch( (string)$some_html )
+      switch ( (string)$some_html )
       {
          case 'gameh':
             $gameh = 1 ;
@@ -2063,10 +2063,10 @@ function make_html_safe( $msg, $some_html=false, $mark_terms='')
 
 
       // formats legal html code
-      if( $some_html == 'game' )
+      if ( $some_html == 'game' )
       {
          $tmp = "<\\1>"; // "<\\1>"=show tag, ""=hide tag, "\\0"=html error
-         if( $gameh ) // show hidden sgf comments
+         if ( $gameh ) // show hidden sgf comments
          {
             $msg = preg_replace('%'.ALLOWED_LT.'(h(idden)?) *'.ALLOWED_GT.'%i',
                      ALLOWED_LT."span class=GameTagH".ALLOWED_GT.$tmp, $msg);
@@ -2093,7 +2093,7 @@ function make_html_safe( $msg, $some_html=false, $mark_terms='')
       $msg= preg_replace( array_keys($html_safe_preg), $html_safe_preg, $msg);
 
    }
-   elseif( $mark_terms )
+   elseif ( $mark_terms )
    {
       $msg = parse_html_safe( $msg, '', $mark_terms) ;
    }
@@ -2108,12 +2108,12 @@ function make_html_safe( $msg, $some_html=false, $mark_terms='')
 
    $msg = basic_safe( $msg);
 
-   if( $some_html || $mark_terms )
+   if ( $some_html || $mark_terms )
    {
       // change back to <, > from ALLOWED_LT, ALLOWED_GT
       $msg= reverse_allowed( $msg);
 
-      if( $some_html && $some_html != 'cell' && $some_html != 'line' )
+      if ( $some_html && $some_html != 'cell' && $some_html != 'line' )
          $msg = add_line_breaks($msg);
    }
 
@@ -2123,7 +2123,7 @@ function make_html_safe( $msg, $some_html=false, $mark_terms='')
 function textarea_safe( $msg, $charenc=false)
 {
    global $encoding_used;
-   if( !$charenc)
+   if ( !$charenc)
       $charenc = $encoding_used;
    //else 'iso-8859-1' LANG_DEF_CHARSET
 
@@ -2144,7 +2144,7 @@ function remove_hidden_game_tags( $msg )
 //keep the parts readable by an observer
 function game_tag_filter( $msg, $includeTags=true )
 {
-   if( $includeTags )
+   if ( $includeTags )
    {
       $idx_c = 1;
       $idx_h = 5;
@@ -2160,12 +2160,12 @@ function game_tag_filter( $msg, $includeTags=true )
          "|(<h(idden)? *>(.*?)</h(idden)? *>)%is"
          , $msg, $matches );
    $str = '';
-   for($i=0; $i<$nr_matches; $i++)
+   for ($i=0; $i<$nr_matches; $i++)
    {
       $msg = trim($matches[$idx_c][$i]);
-      if( (string)$msg == '' )
+      if ( (string)$msg == '' )
          $msg = trim($matches[$idx_h][$i]);
-      if( (string)$msg != '' )
+      if ( (string)$msg != '' )
          $str .= "\n" . $msg ;
    }
    return trim($str);
@@ -2179,22 +2179,22 @@ function yesno( $yes)
 
 function score2text($score, $verbose, $keep_english=false, $quick=false)
 {
-   if( $quick ) $verbose = false;
+   if ( $quick ) $verbose = false;
    $T_= ( $keep_english ? 'fnop' : 'T_' );
 
-   if( is_null($score) || !isset($score) || abs($score) > SCORE_TIME )
+   if ( is_null($score) || !isset($score) || abs($score) > SCORE_TIME )
       return ($quick) ? "" : "?";
 
-   if( $score == 0 )
+   if ( $score == 0 )
       return ($quick) ? '0' : ( $keep_english ? 'Draw' : ( $verbose ? T_('Jigo') : 'Jigo' ));
 
    $color = ($verbose
              ? ( $score > 0 ? $T_('White') : $T_('Black') )
              : ( $score > 0 ? 'W' : 'B' ));
 
-   if( abs($score) == SCORE_TIME )
+   if ( abs($score) == SCORE_TIME )
       return ( $verbose ? sprintf( $T_("%s wins on time"), $color) : $color . ($quick ? "+T" : "+Time") );
-   elseif( abs($score) == SCORE_RESIGN )
+   elseif ( abs($score) == SCORE_RESIGN )
       return ( $verbose ? sprintf( $T_("%s wins by resign"), $color) : $color . ($quick ? "+R" : "+Resign") );
    else
       return ( $verbose ? sprintf( $T_("%s wins by %.1f"), $color, abs($score))
@@ -2214,9 +2214,9 @@ function build_maxrows_array( $maxrows, $rows_limit = MAXROWS_PER_PAGE )
 {
    $maxrows = get_maxrows( $maxrows, $rows_limit );
    $arr_maxrows = array();
-   foreach( array( 5, 10, 15, 20, 25, 30, 40, 50, 75, 100 ) as $k)
+   foreach ( array( 5, 10, 15, 20, 25, 30, 40, 50, 75, 100 ) as $k)
    {
-      if( $k <= $rows_limit )
+      if ( $k <= $rows_limit )
          $arr_maxrows[$k] = $k;
    }
    $arr_maxrows[$maxrows] = $maxrows; // add manually added value
@@ -2246,63 +2246,63 @@ function make_url( $url, $args, $end_sep=false)
    $url= clean_url($url);
    $sep= ( is_numeric( strpos( $url, '?')) ? URI_AMP : '?' );
    $args= build_url( $args, $end_sep);
-   if( $args || $end_sep )
+   if ( $args || $end_sep )
       return $url . $sep . $args;
    return $url;
 } //make_url
 
 function build_url( $args, $end_sep=false, $sep=URI_AMP )
 {
-   if( !is_array( $args) )
+   if ( !is_array( $args) )
       return '';
    $arr_str = array();
-   foreach( $args as $key => $value )
+   foreach ( $args as $key => $value )
    {
       // some clients need ''<>0, so don't use empty(val)
-      if( (string)$value == '' || !is_string($key) || empty($key) )
+      if ( (string)$value == '' || !is_string($key) || empty($key) )
          continue;
-      if( !is_array($value) )
+      if ( !is_array($value) )
       {
          $arr_str[]= $key . '=' . urlencode($value);
          continue;
       }
       $key.= '%5b%5d='; //encoded []
-      foreach( $value as $val )
+      foreach ( $value as $val )
       {
          // some clients need ''<>0, so don't use empty(val)
-         if( (string)$val != '' )
+         if ( (string)$val != '' )
             $arr_str[]= $key . urlencode($val);
       }
    }
-   if( count($arr_str) )
+   if ( count($arr_str) )
       return implode( $sep, $arr_str) . ( $end_sep ? $sep : '' );
    return '';
 } //build_url
 
 function build_hidden( $args)
 {
-   if( !is_array( $args) )
+   if ( !is_array( $args) )
       return '';
    $arr_str = array();
-   foreach( $args as $key => $value )
+   foreach ( $args as $key => $value )
    {
       // some clients need ''<>0, so don't use empty(val)
-      if( (string)$value == '' || !is_string($key) || empty($key) )
+      if ( (string)$value == '' || !is_string($key) || empty($key) )
          continue;
-      if( !is_array($value) )
+      if ( !is_array($value) )
       {
          $arr_str[]= "name=\"$key\" value=" . attb_quote($value);
          continue;
       }
       $key.= '[]'; //%5b%5d encoded []
-      foreach( $value as $val )
+      foreach ( $value as $val )
       {
          // some clients need ''<>0, so don't use empty(val)
-         if( (string)$val != '' )
+         if ( (string)$val != '' )
             $arr_str[]=  "name=\"$key\" value=" . attb_quote($val);
       }
    }
-   if( count($arr_str) )
+   if ( count($arr_str) )
       return "\n<input type=\"hidden\" ".implode( ">\n<input type=\"hidden\" ", $arr_str) .">";
    return '';
 } //build_hidden
@@ -2311,19 +2311,19 @@ function build_hidden( $args)
 //this one use URI_AMP by default to be the make_url() mirror
 function split_url($url, &$page, &$args, $sep='')
 {
-   if( !$sep ) $sep = URI_AMP;
+   if ( !$sep ) $sep = URI_AMP;
    $url = preg_split( "/([?#]|$sep)/", $url );
    list( , $page ) = each( $url );
    $args = array();
-   while( list( , $query ) = each( $url ) )
+   while ( list( , $query ) = each( $url ) )
    {
-      if( !empty( $query ) )
+      if ( !empty( $query ) )
       {
          @list( $var, $value ) = explode( '=', $query );
-         if( (string)@$value != '' ) // can be '0' (which is <> unset/false)
+         if ( (string)@$value != '' ) // can be '0' (which is <> unset/false)
          {
             $var = urldecode($var);
-            if( substr($var,-2) != '[]' ) //'%5B%5D'
+            if ( substr($var,-2) != '[]' ) //'%5B%5D'
             {
                $args[$var] = urldecode($value);
             }
@@ -2342,16 +2342,16 @@ function split_url($url, &$page, &$args, $sep='')
 // chop off all trailing URI_AMP and '?' from passed url/query
 function clean_url( $url, $sep='' )
 {
-   if( !$sep ) $sep = URI_AMP;
+   if ( !$sep ) $sep = URI_AMP;
    $l = -strlen($sep);
    do
    {
       $stop=1;
-      while( substr( $url, $l ) == $sep ) // strip '&'
+      while ( substr( $url, $l ) == $sep ) // strip '&'
          $url = substr( $url, $stop=0, $l );
-      while( substr( $url, -1 ) == '?' ) // strip '?'
+      while ( substr( $url, -1 ) == '?' ) // strip '?'
          $url = substr( $url, $stop=0, -1);
-   } while( !$stop );
+   } while ( !$stop );
    return $url;
 }
 
@@ -2361,10 +2361,10 @@ function rel_base_dir()
 {
    $dir = str_replace('\\','/',$_SERVER['PHP_SELF']);
    $rel = '';
-   while( $i=strrpos($dir,'/') )
+   while ( $i=strrpos($dir,'/') )
    {
       $dir= substr($dir,0,$i);
-      if( !strcasecmp( $dir.'/' , SUB_PATH ) )
+      if ( !strcasecmp( $dir.'/' , SUB_PATH ) )
          break;
       $rel.= '../';
    }
@@ -2377,10 +2377,10 @@ function get_request_url( $absolute=false)
 //if there is a redirection, _URI==requested, while _SELF==reached (running one)
    $url = str_replace('\\','/',@$_SERVER['REQUEST_URI']); //contains URI_AMP_IN and still urlencoded
    $len = strlen(SUB_PATH);
-   if(!strcasecmp( SUB_PATH, substr($url,0,$len) ))
+   if (!strcasecmp( SUB_PATH, substr($url,0,$len) ))
       $url = substr($url,$len);
    $url = str_replace( URI_AMP_IN, URI_AMP, $url);
-   if( $absolute )
+   if ( $absolute )
       $url = HOSTBASE . $url;
    return $url;
 }
@@ -2394,28 +2394,28 @@ function get_request_user( &$uid, &$uhandle, $from_referer=false)
    $uid_name = 'uid';
    $uid = (int)@$_REQUEST[$uid_name];
    $uhandle = '';
-   if( $uid > 0 )
+   if ( $uid > 0 )
       return 1; //bit0
    $uid = 0;
    $uhandle = (string)@$_REQUEST[UHANDLE_NAME];
-   if( $uhandle )
+   if ( $uhandle )
       return 2; //bit1
-   if( $from_referer && ($refer=@$_SERVER['HTTP_REFERER']) )
+   if ( $from_referer && ($refer=@$_SERVER['HTTP_REFERER']) )
    {
       //default user = last referenced user
       //(ex: message.php from userinfo.php by menu link)
-      if( preg_match('/[?'.URI_AMP_IN.']'.$uid_name.'=([0-9]+)/i', $refer, $eres) )
+      if ( preg_match('/[?'.URI_AMP_IN.']'.$uid_name.'=([0-9]+)/i', $refer, $eres) )
       {
          $uid = (int)$eres[1];
-         if( $uid > 0 )
+         if ( $uid > 0 )
             return 5; //bit0,2
       }
       $uid = 0;
       //adding '+' to HANDLE_LEGAL_REGS because of old DGS users having it in their Handle
-      if( preg_match('/[?'.URI_AMP_IN.']'.UHANDLE_NAME.'=([+'.HANDLE_LEGAL_REGS.']+)/i', $refer, $eres) )
+      if ( preg_match('/[?'.URI_AMP_IN.']'.UHANDLE_NAME.'=([+'.HANDLE_LEGAL_REGS.']+)/i', $refer, $eres) )
       {
          $uhandle = (string)$eres[1];
-         if( $uhandle )
+         if ( $uhandle )
             return 6; //bit1,2
       }
    }
@@ -2474,17 +2474,17 @@ function is_logged_in($handle, $scode, &$player_row, $login_opts=LOGIN_DEFAULT_O
 {
    global $hostname_jump, $NOW, $dbcnx, $ActivityForHit, $ActivityMax, $is_down;
 
-   if( $login_opts & LOGIN_QUICK_PLAY )
+   if ( $login_opts & LOGIN_QUICK_PLAY )
       $login_opts |= LOGIN_QUICK_SUITE;
    $is_quick_suite = ($login_opts & LOGIN_QUICK_SUITE);
    $skip_update = ($login_opts & LOGIN_SKIP_UPDATE);
 
    $player_row = array( 'ID' => 0 );
 
-   if( $hostname_jump && preg_replace("/:.*\$/",'', @$_SERVER['HTTP_HOST']) != HOSTNAME )
+   if ( $hostname_jump && preg_replace("/:.*\$/",'', @$_SERVER['HTTP_HOST']) != HOSTNAME )
    {
       list($protocol) = explode(HOSTNAME, HOSTBASE);
-      if( $is_quick_suite )
+      if ( $is_quick_suite )
       {
          error('bad_host', "is_logged_in($handle)");
          return 0; // should not be reached normally
@@ -2493,7 +2493,7 @@ function is_logged_in($handle, $scode, &$player_row, $login_opts=LOGIN_DEFAULT_O
          jump_to( $protocol . HOSTNAME . $_SERVER['PHP_SELF'], true );
    }
 
-   if( empty($handle) || empty($dbcnx) )
+   if ( empty($handle) || empty($dbcnx) )
    {
       include_all_translate_groups(); //must be called from main dir
       return 0;
@@ -2509,9 +2509,9 @@ function is_logged_in($handle, $scode, &$player_row, $login_opts=LOGIN_DEFAULT_O
           ." FROM Players WHERE Handle='".mysql_addslashes($handle)."' LIMIT 1";
 
    $result = db_query( 'is_logged_in.find_player', $query );
-   if( $result )
+   if ( $result )
    {
-      if( @mysql_num_rows($result) == 1 )
+      if ( @mysql_num_rows($result) == 1 )
       {
          $player_row = mysql_fetch_assoc($result);
          unset($player_row['Adminlevel']);
@@ -2519,11 +2519,11 @@ function is_logged_in($handle, $scode, &$player_row, $login_opts=LOGIN_DEFAULT_O
       mysql_free_result($result);
    }
 
-   if( !$skip_update && $is_quick_suite ) // NOTE: for now only for quick-suite
+   if ( !$skip_update && $is_quick_suite ) // NOTE: for now only for quick-suite
       writeIpStats( (($login_opts & LOGIN_QUICK_PLAY) ? 'QPL' : ($is_quick_suite ? 'QDO' : 'WEB')) );
 
    $uid = (int)@$player_row['ID'];
-   if( $uid <= 0 )
+   if ( $uid <= 0 )
    {
       include_all_translate_groups(); //must be called from main dir
       $player_row['ID'] = 0;
@@ -2531,7 +2531,7 @@ function is_logged_in($handle, $scode, &$player_row, $login_opts=LOGIN_DEFAULT_O
    }
    include_all_translate_groups($player_row); //must be called from main dir
 
-   if( (@$player_row['AdminOptions'] & ADMOPT_DENY_LOGIN) )
+   if ( (@$player_row['AdminOptions'] & ADMOPT_DENY_LOGIN) )
       error('login_denied', "is_logged_in($uid)");
 
    setTZ( $player_row['Timezone']);
@@ -2543,27 +2543,27 @@ function is_logged_in($handle, $scode, &$player_row, $login_opts=LOGIN_DEFAULT_O
    $upd->upd_raw('Hits', 'Hits+1' );
 
    $ip = (string)@$_SERVER['REMOTE_ADDR'];
-   if( !$skip_update && !$is_quick_suite && $ip && $player_row['IP'] !== $ip )
+   if ( !$skip_update && !$is_quick_suite && $ip && $player_row['IP'] !== $ip )
    {
       $upd->upd_txt('IP', $ip );
       $player_row['IP'] = $ip;
    }
 
-   if( !$skip_update && !$session_expired )
+   if ( !$skip_update && !$session_expired )
    {
-      if( $login_opts & LOGIN_UPD_ACTIVITY )
+      if ( $login_opts & LOGIN_UPD_ACTIVITY )
          $upd->upd_raw('Activity', "LEAST($ActivityMax,$ActivityForHit+Activity)" );
-      if( $login_opts & LOGIN_RESET_NOTIFY )
+      if ( $login_opts & LOGIN_RESET_NOTIFY )
          $upd->upd_txt('Notify', 'NONE' );
 
-      if( $is_quick_suite )
+      if ( $is_quick_suite )
          $upd->upd_time('LastQuickAccess');
       else
       {
          $upd->upd_time('Lastaccess');
 
          $browser = substr(@$_SERVER['HTTP_USER_AGENT'], 0, 150);
-         if( $player_row['Browser'] !== $browser )
+         if ( $player_row['Browser'] !== $browser )
          {
             $upd->upd_txt('Browser', $browser );
             $player_row['Browser'] = $browser;
@@ -2573,22 +2573,22 @@ function is_logged_in($handle, $scode, &$player_row, $login_opts=LOGIN_DEFAULT_O
 
    $vaultcnt= true; //no vault for anonymous or if disabled or if server-down
    $quota_hit = !( $login_opts & LOGIN_NO_QUOTA_HIT );
-   if( !$is_down && !$skip_update && VAULT_DELAY>0 && $quota_hit && !$session_expired ) //exclude access deny from an other user
+   if ( !$is_down && !$skip_update && VAULT_DELAY>0 && $quota_hit && !$session_expired ) //exclude access deny from an other user
    {
       $vaultcnt = (int)@$player_row['VaultCnt'];
       $vaulttime = @$player_row['X_VaultTime'];
       $vault_fmt = T_("The activity of the account '%s' grew too high and swallowed up our bandwidth and resources.\n" .
          "Please, correct this behaviour.\nThis account is blocked until %s.");
-      if( $NOW >= $vaulttime ) // fever cool enough (expire-date passed -> reset quota for another period)
+      if ( $NOW >= $vaulttime ) // fever cool enough (expire-date passed -> reset quota for another period)
       {
          $vaultcnt = ( $uid > GUESTS_ID_MAX ) ? VAULT_CNT : VAULT_CNT_X; //multi-user account?
          $vaulttime = $NOW + VAULT_DELAY;
          $upd->upd_num('VaultCnt', $vaultcnt );
          $upd->upd_time('VaultTime', $vaulttime );
       } //from here: $NOW < $vaulttime
-      else if( $vaultcnt <= 0 ) // inside fever vault?
+      else if ( $vaultcnt <= 0 ) // inside fever vault?
          $vaultcnt = 0; // stay in fever vault... quota-block in place till expire-date
-      elseif( $vaultcnt > 1 ) //measuring fever
+      elseif ( $vaultcnt > 1 ) //measuring fever
          $upd->upd_num('VaultCnt', (--$vaultcnt) );
       else //if( $vaulttime == 1 ) // quota up, but not expired (fever too high)
       {
@@ -2604,13 +2604,13 @@ function is_logged_in($handle, $scode, &$player_row, $login_opts=LOGIN_DEFAULT_O
          $subject= T_('Temporary access restriction');
          $text= 'On '.date(DATE_FMT, $NOW).":\n" . sprintf($vault_fmt, $handle, date(DATE_FMT,$vaulttime));
 
-         if( $uid > GUESTS_ID_MAX )
+         if ( $uid > GUESTS_ID_MAX )
             $handles[]= $handle;
-         if( count($handles) > 0 )
+         if ( count($handles) > 0 )
             send_message("fever_vault.msg($uid,$ip)", $text, $subject, '', $handles, /*notify*/false );
 
          $email = $player_row['Email'];
-         if( $uid > GUESTS_ID_MAX && !verify_invalid_email(false, $email) )
+         if ( $uid > GUESTS_ID_MAX && !verify_invalid_email(false, $email) )
             send_email("fever_vault.email($handle)", $email, 0, $text, FRIENDLY_LONG_NAME.' - '.$subject);
       }
 
@@ -2619,30 +2619,30 @@ function is_logged_in($handle, $scode, &$player_row, $login_opts=LOGIN_DEFAULT_O
       $player_row['X_VaultTime'] = $vaulttime;
    }//fever-fault check
 
-   if( !$skip_update )
+   if ( !$skip_update )
    {
       // DST-check if the player's clock need an adjustment from/to summertime
-      if( $player_row['ClockChanged'] != 'Y' && $player_row['ClockUsed'] != get_clock_used($player_row['Nightstart']) )
+      if ( $player_row['ClockChanged'] != 'Y' && $player_row['ClockUsed'] != get_clock_used($player_row['Nightstart']) )
          $upd->upd_bool('ClockChanged', true ); // ClockUsed is updated once a day...
    }
 
-   if( $is_down )
+   if ( $is_down )
       check_maintenance( @$player_row['Handle'] ); // revoke is_down for maintenance-users
 
    // check aggregated counts
-   if( !$is_down && !$is_quick_suite && !$skip_update )
+   if ( !$is_down && !$is_quick_suite && !$skip_update )
    {
       $count_msg_new = count_messages_new( $uid, $player_row['CountMsgNew'] );
-      if( $count_msg_new >= 0 )
+      if ( $count_msg_new >= 0 )
       {
          $upd->upd_num('CountMsgNew', $count_msg_new );
          $player_row['CountMsgNew'] = $count_msg_new;
       }
 
-      if( ALLOW_FEATURE_VOTE )
+      if ( ALLOW_FEATURE_VOTE )
       {
          $count_feat_new = count_feature_new( $uid, $player_row['CountFeatNew'] );
-         if( $count_msg_new >= 0 )
+         if ( $count_msg_new >= 0 )
          {
             $upd->upd_num('CountFeatNew', $count_feat_new );
             $player_row['CountFeatNew'] = $count_feat_new;
@@ -2650,7 +2650,7 @@ function is_logged_in($handle, $scode, &$player_row, $login_opts=LOGIN_DEFAULT_O
       }
 
       $count_bulletin_new = Bulletin::count_bulletin_new( $player_row['CountBulletinNew'] );
-      if( $count_bulletin_new >= 0 )
+      if ( $count_bulletin_new >= 0 )
       {
          $upd->upd_num('CountBulletinNew', $count_bulletin_new );
          $player_row['CountBulletinNew'] = $count_bulletin_new;
@@ -2659,19 +2659,19 @@ function is_logged_in($handle, $scode, &$player_row, $login_opts=LOGIN_DEFAULT_O
 
 
    // $updok will be false if server is down, or skip-update-option is enabled, or an error occurs and error() is set to 'no exit'
-   if( $is_down || $skip_update )
+   if ( $is_down || $skip_update )
       $updok = false;
    else
    {
       $updok = db_query( "is_logged_in.update_player($uid)",
          "UPDATE Players SET " . $upd->get_query() . " WHERE ID=$uid LIMIT 1" );
-      if( @mysql_affected_rows() != 1 )
+      if ( @mysql_affected_rows() != 1 )
          $updok = false;
    }
 
-   if( !$vaultcnt ) //vault entered
+   if ( !$vaultcnt ) //vault entered
    {
-      switch( (string)substr( @$_SERVER['PHP_SELF'], strlen(SUB_PATH)) )
+      switch ( (string)substr( @$_SERVER['PHP_SELF'], strlen(SUB_PATH)) )
       {
          case 'index.php':
             $text = sprintf($vault_fmt, $handle, date(DATE_FMT,$vaulttime));
@@ -2681,13 +2681,13 @@ function is_logged_in($handle, $scode, &$player_row, $login_opts=LOGIN_DEFAULT_O
 
          default:
             error('fever_vault', "is_logged_in($uid,$handle)");
-            if( $is_quick_suite )
+            if ( $is_quick_suite )
                return 0; // should not be reached normally
             break;
       }
    }
 
-   if( $session_expired || ( !$skip_update && !$updok ) )
+   if ( $session_expired || ( !$skip_update && !$updok ) )
    {
       $player_row['ID'] = 0;
       return 0;
@@ -2706,9 +2706,9 @@ function is_logged_in($handle, $scode, &$player_row, $login_opts=LOGIN_DEFAULT_O
  */
 function count_messages_new( $uid, $curr_count=-1 )
 {
-   if( $curr_count >= 0 )
+   if ( $curr_count >= 0 )
       return $curr_count;
-   if( !is_numeric($uid) || $uid <= 0 )
+   if ( !is_numeric($uid) || $uid <= 0 )
       error( 'invalid_args', "count_messages_new.check.uid($uid)" );
 
    $row = mysql_single_fetch( "count_messages_new($uid)",
@@ -2723,11 +2723,11 @@ function count_messages_new( $uid, $curr_count=-1 )
  */
 function count_feature_new( $uid, $curr_count=-1 )
 {
-   if( !ALLOW_FEATURE_VOTE )
+   if ( !ALLOW_FEATURE_VOTE )
       return -1;
-   if( $curr_count >= 0 )
+   if ( $curr_count >= 0 )
       return $curr_count;
-   if( !is_numeric($uid) || $uid <= 0 )
+   if ( !is_numeric($uid) || $uid <= 0 )
       error( 'invalid_args', "count_features_new.check.uid($uid)" );
 
    $row = mysql_single_fetch( "count_features_new($uid)",
@@ -2755,12 +2755,12 @@ function load_global_forum_new()
 function write_to_file($filename, $data, $quit_on_error=true )
 {
    $num= @file_put_contents($filename, $data);
-   if( is_int($num) )
+   if ( is_int($num) )
    {
       @chmod( $filename, 0666);
       return $num;
    }
-   if( $quit_on_error )
+   if ( $quit_on_error )
       error( 'couldnt_open_file', "write_to_file($filename)");
    trigger_error("write_to_file($filename) failed to write stream", E_USER_WARNING);
    return false;
@@ -2769,9 +2769,9 @@ function write_to_file($filename, $data, $quit_on_error=true )
 function read_from_file( $filename, $quit_on_error=true, $incpath=false )
 {
    $data = @file_get_contents( $filename, ($incpath ? FILE_USE_INCLUDE_PATH : 0) );
-   if( is_string($data) )
+   if ( is_string($data) )
       return $data;
-   if( $quit_on_error )
+   if ( $quit_on_error )
       error( 'couldnt_open_file', "read_from_file.err1($filename)");
    trigger_error("read_from_file($filename) failed to open stream", E_USER_WARNING);
    return false;
@@ -2781,12 +2781,12 @@ function centered_container( $open=true)
 {
    //the container must be a centered one which can be left or right aligned
    static $opened = false;
-   if( $opened )
+   if ( $opened )
    { //opened, close it
       echo "</td></tr></table>\n";
       $opened = false;
    }
-   if( $open )
+   if ( $open )
    { //open a new one
       echo "\n<table class=Container><tr><td class=Container>";
       $opened = true;
@@ -2798,22 +2798,22 @@ function section( $id='', $header='', $anchorName='', $with_hr_sep=false )
    static $section = '';
 
    centered_container( false);
-   if( $section )
+   if ( $section )
    { //section opened, close it
       echo "</div>\n";
       $section = '';
-      if( $id )
+      if ( $id )
          echo "<hr class=Section>\n";
    }
-   if( $id )
+   if ( $id )
    { //section request, open it
       $section = attb_quote('sect'.$id);
       echo "\n<div id=$section class=Section>";
-      if( $with_hr_sep )
+      if ( $with_hr_sep )
          echo "<hr>\n";
-      if( $anchorName )
+      if ( $anchorName )
          echo name_anchor($anchorName);
-      if( $header )
+      if ( $header )
          echo "<h3 class=Header>$header</h3>";
       else
          echo '<br class=Section>';
@@ -2826,27 +2826,27 @@ function add_link_page_link( $link=false, $linkdesc='', $extra='', $active=true)
    global $link_class;
    static $started = false;
 
-   if( $link === false )
+   if ( $link === false )
    {
-      if( $started )
+      if ( $started )
          echo "</dl>\n";
       $started = false;
       return 0;
    }
 
-   if( !$started )
+   if ( !$started )
    {
       $class = (@$link_class) ? $link_class : 'DocLink';
       echo "<dl class=\"$class\">\n";
       $started = true;
    }
 
-   if( $active )
+   if ( $active )
    {
-      if( is_array($link) )
+      if ( is_array($link) )
       {
          $arr = array();
-         foreach( $link as $link_url => $link_desc )
+         foreach ( $link as $link_url => $link_desc )
             $arr[] = "<a href=\"$link_url\">$link_desc</a>";
          echo '<dd>', implode($linkdesc, $arr);
       }
@@ -2855,14 +2855,14 @@ function add_link_page_link( $link=false, $linkdesc='', $extra='', $active=true)
    }
    else
       echo "<dd class=Inactive><span>$linkdesc</span>";
-   if( !empty($extra) )
+   if ( !empty($extra) )
       echo " --- $extra";
    echo "</dd>\n";
 }
 
 function activity_string( $act_lvl)
 {
-   switch( (int)$act_lvl )
+   switch ( (int)$act_lvl )
    {
       case 1: $img = 'star2.gif'; break; // orange
       case 2: $img = 'star.gif'; break;  // green
@@ -2891,9 +2891,9 @@ function game_reference( $link, $safe_it, $class, $gid, $move=0, $extra=null )
       : ( is_numeric($move) ? (int)$move : 0 );
 
    $legal = ( $gid > 0 );
-   if( !is_array($extra) )
+   if ( !is_array($extra) )
       $extra = array();
-   if( $legal && count($extra) < 5 )
+   if ( $legal && count($extra) < 5 )
    {
       $game_row = mysql_single_fetch( "game_reference.find_game($gid)",
          'SELECT G.GameType, G.Status, G.GamePlayers, black.Name AS Blackname, white.Name AS Whitename ' .
@@ -2901,11 +2901,11 @@ function game_reference( $link, $safe_it, $class, $gid, $move=0, $extra=null )
             'INNER JOIN Players as black ON black.ID=G.Black_ID ' .
             'LEFT JOIN Players as white ON white.ID=G.White_ID ' . // LEFT-join for MP-game
          "WHERE G.ID=$gid LIMIT 1" );
-      if( $game_row )
+      if ( $game_row )
       {
-         foreach( array( 'Blackname', 'Whitename', 'GameType', 'GamePlayers', 'Status' ) as $key )
+         foreach ( array( 'Blackname', 'Whitename', 'GameType', 'GamePlayers', 'Status' ) as $key )
          {
-            if( !@$extra[$key] )
+            if ( !@$extra[$key] )
                $extra[$key] = $game_row[$key];
          }
          $safe_it = true;
@@ -2918,37 +2918,37 @@ function game_reference( $link, $safe_it, $class, $gid, $move=0, $extra=null )
    $game_type = @$extra['GameType'];
    $is_std_go = !$game_type || ($game_type == GAMETYPE_GO);
 
-   if( $blackname )
+   if ( $blackname )
       $blackname = "$blackname (B)";
-   if( $whitename )
+   if ( $whitename )
       $whitename = "$whitename (W)";
 
    $gtype_text = ($game_type)
       ? GameTexts::format_game_type( $game_type, @$extra['GamePlayers'] )
       : '';
-   if( !$whitename && !$blackname )
+   if ( !$whitename && !$blackname )
       $text = ($gtype_text ? "{$gtype_text}-" : '') . "game #$gid" ;
-   elseif( $whitename && $blackname )
+   elseif ( $whitename && $blackname )
       $text = ($gtype_text ? "{$gtype_text}: " : '') . "$whitename vs. $blackname";
    else
       $text = ($gtype_text ? "{$gtype_text}: " : '') . "$whitename$blackname";
 
-   if( $safe_it )
+   if ( $safe_it )
       $text = make_html_safe($text);
-   if( $move === MOVE_SETUP )
+   if ( $move === MOVE_SETUP )
       $text .= ', ' . T_('Shape-Setup#gametag');
-   elseif( $move > 0 )
+   elseif ( $move > 0 )
       $text .= sprintf( ', %s #%s', T_('Move#gametag'), $move );
 
-   if( $link && $legal )
+   if ( $link && $legal )
    {
       $url = ( $is_std_go || @$extra['Status'] != GAME_STATUS_SETUP )
          ? "game.php?gid=$gid" . (( $move > 0 || $move === MOVE_SETUP) ? URI_AMP."move=$move" : "")
          : "game_players.php?gid=$gid";
       $url = "A href=\"$base_path$url\" class=Game$class";
-      if( $link & REF_LINK_BLANK )
+      if ( $link & REF_LINK_BLANK )
          $url .= ' target="_blank"';
-      if( $link & REF_LINK_ALLOWED )
+      if ( $link & REF_LINK_ALLOWED )
       {
          $url = str_replace('"', ALLOWED_QUOT, $url);
          $text = ALLOWED_LT.$url.ALLOWED_GT.$text.ALLOWED_LT."/A".ALLOWED_GT ;
@@ -2966,10 +2966,10 @@ function tournament_reference( $link, $safe_it, $class, $tid )
 
    $tid = (int)$tid;
    $legal = ( $tid > 0 );
-   if( $legal )
+   if ( $legal )
    {
       $query = "SELECT Title FROM Tournament WHERE ID=$tid LIMIT 1";
-      if( $row = mysql_single_fetch( "tournament_reference.find_tournament($tid)", $query ) )
+      if ( $row = mysql_single_fetch( "tournament_reference.find_tournament($tid)", $query ) )
       {
          $title = trim(@$row['Title']);
          $safe_it = true;
@@ -2979,19 +2979,19 @@ function tournament_reference( $link, $safe_it, $class, $tid )
    }
 
    $tourney = sprintf( T_('Tournament #%s [%s]'), $tid, ( $legal ? $title : T_('???#tournament') ));
-   if( $safe_it )
+   if ( $safe_it )
       $tourney = make_html_safe($tourney);
 
-   if( $link && $legal )
+   if ( $link && $legal )
    {
       $url = $base_path."tournaments/view_tournament.php?tid=$tid";
       $url = 'A href="' . $url . '"';
-      if( $link & REF_LINK_BLANK )
+      if ( $link & REF_LINK_BLANK )
          $url .= ' target="_blank"';
       $class = 'Tournament'.$class;
-      if( $class )
+      if ( $class )
         $url .= " class=$class";
-      if( $link & REF_LINK_ALLOWED )
+      if ( $link & REF_LINK_ALLOWED )
       {
          $url = str_replace('"', ALLOWED_QUOT, $url);
          $tourney = ALLOWED_LT.$url.ALLOWED_GT.$tourney.ALLOWED_LT."/A".ALLOWED_GT ;
@@ -3010,10 +3010,10 @@ function survey_reference( $link, $safe_it, $class, $sid )
 
    $sid = (int)$sid;
    $legal = ( $sid > 0 );
-   if( $legal )
+   if ( $legal )
    {
       $query = "SELECT Status, Title FROM Survey WHERE ID='$sid' LIMIT 1";
-      if( $row = mysql_single_fetch( "survey_reference.find_survey($sid)", $query ) )
+      if ( $row = mysql_single_fetch( "survey_reference.find_survey($sid)", $query ) )
       {
          $status = @$row['Status'];
          $title = trim(@$row['Title']);
@@ -3026,19 +3026,19 @@ function survey_reference( $link, $safe_it, $class, $sid )
    $survey = ($legal)
       ? sprintf( T_('Survey #%s (%s) [%s]'), $sid, SurveyControl::getStatusText($status), $title )
       : sprintf( T_('Survey #%s [%s]'), $sid, T_('???#survey') );
-   if( $safe_it )
+   if ( $safe_it )
       $survey = make_html_safe($survey);
 
-   if( $link && $legal )
+   if ( $link && $legal )
    {
       $url = $base_path."view_survey.php?sid=$sid";
       $url = 'A href="' . $url . '"';
-      if( $link & REF_LINK_BLANK )
+      if ( $link & REF_LINK_BLANK )
          $url .= ' target="_blank"';
       $class = 'Survey'.$class;
-      if( $class )
+      if ( $class )
         $url .= " class=$class";
-      if( $link & REF_LINK_ALLOWED )
+      if ( $link & REF_LINK_ALLOWED )
       {
          $url = str_replace('"', ALLOWED_QUOT, $url);
          $survey = ALLOWED_LT.$url.ALLOWED_GT.$survey.ALLOWED_LT."/A".ALLOWED_GT ;
@@ -3052,7 +3052,7 @@ function survey_reference( $link, $safe_it, $class, $sid )
 
 function send_reference( $link, $safe_it, $class, $player_ref, $player_name=false, $player_handle=false)
 {
-   if( is_numeric($link) ) //not owned reference
+   if ( is_numeric($link) ) //not owned reference
       $link = -$link; //make it a send_reference
    return user_reference( $link, $safe_it, $class, $player_ref, $player_name, $player_handle);
 }
@@ -3079,11 +3079,11 @@ function send_reference( $link, $safe_it, $class, $player_ref, $player_name=fals
 function user_reference( $link, $safe_it, $class, $player_ref, $player_name=false, $player_handle=false)
 {
    global $base_path;
-   if( is_array($player_ref) ) //i.e. $player_row
+   if ( is_array($player_ref) ) //i.e. $player_row
    {
-      if( !$player_name )
+      if ( !$player_name )
          $player_name = $player_ref['Name'];
-      if( !$player_handle )
+      if ( !$player_handle )
          $player_handle = $player_ref['Handle'];
       $player_ref = (int)$player_ref['ID'];
       $byid = true;
@@ -3094,10 +3094,10 @@ function user_reference( $link, $safe_it, $class, $player_ref, $player_name=fals
       $byid = is_numeric($player_ref);
       $legal = ( substr($player_ref,0,1) == HANDLE_TAG_CHAR );
    }
-   if( !$byid || $legal )
+   if ( !$byid || $legal )
    {
       $byid = false;
-      if( $legal )
+      if ( $legal )
          $player_ref = substr($player_ref,1);
 
       //because of old DGS users having a pure numeric Handle
@@ -3111,14 +3111,14 @@ function user_reference( $link, $safe_it, $class, $player_ref, $player_name=fals
       $player_ref = (int)$player_ref;
       $legal = ( $player_ref > 0 );
    }
-   if( $legal && ($player_name===false || $player_handle===false) )
+   if ( $legal && ($player_name===false || $player_handle===false) )
    {
       $row = load_cache_user_reference( 'user_reference', $byid, $player_ref );
-      if( $row )
+      if ( $row )
       {
-         if( $player_name === false )
+         if ( $player_name === false )
             $player_name = $row['Name'];
-         if( $player_handle === false )
+         if ( $player_handle === false )
             $player_handle = $row['Handle'];
          $safe_it = true;
       }
@@ -3127,21 +3127,21 @@ function user_reference( $link, $safe_it, $class, $player_ref, $player_name=fals
    }
    $player_name = trim($player_name);
    $player_handle = trim($player_handle);
-   if( !$player_name )
+   if ( !$player_name )
       $player_name = "User#$player_ref";
-   if( $player_handle )
+   if ( $player_handle )
       $player_name.= " ($player_handle)" ;
-   if( $safe_it )
+   if ( $safe_it )
       $player_name = make_html_safe($player_name) ;
-   if( $link && $legal )
+   if ( $link && $legal )
    {
-      if( is_string($link) ) //owned reference. Must end with '?' or URI_AMP
+      if ( is_string($link) ) //owned reference. Must end with '?' or URI_AMP
       {
          $url = $link;
          $link = 0;
          $class = 'Ref'.$class;
       }
-      elseif( $link<0 ) //send_reference
+      elseif ( $link<0 ) //send_reference
       {
          $url = "message.php?mode=NewMessage".URI_AMP;
          $link = -$link;
@@ -3156,11 +3156,11 @@ function user_reference( $link, $safe_it, $class, $player_ref, $player_name=fals
       //encoding '+' to %2B because of old DGS users having it in their Handle
       $url .= ( $byid ? "uid=$player_ref" : UHANDLE_NAME."=".str_replace('+','%2B',$player_ref) );
       $url = 'A href="' . $base_path. $url . '"';
-      if( $class )
+      if ( $class )
          $url .= " class=\"$class\"";
-      if( $link & REF_LINK_BLANK )
+      if ( $link & REF_LINK_BLANK )
          $url .= ' target="_blank"';
-      if( $link & REF_LINK_ALLOWED )
+      if ( $link & REF_LINK_ALLOWED )
       {
          $url = str_replace('"', ALLOWED_QUOT, $url);
          $player_name = ALLOWED_LT.$url.ALLOWED_GT.$player_name.ALLOWED_LT."/A".ALLOWED_GT ;
@@ -3181,7 +3181,7 @@ function load_cache_user_reference( $dbgmsg, $by_id, $player_ref )
    $key = 'user_ref.' . strtolower($qfield) . '.' . $player_ref;
 
    $row = DgsCache::fetch( $dbgmsg, CACHE_GRP_USER_REF, $key );
-   if( is_null($row) )
+   if ( is_null($row) )
    {
       $row = mysql_single_fetch( $dbgmsg, "SELECT Name, Handle FROM Players WHERE $qfield = $qvalue LIMIT 1" );
       DgsCache::store( $dbgmsg, CACHE_GRP_USER_REF, $key, $row, SECS_PER_DAY );
@@ -3194,7 +3194,7 @@ function delete_cache_user_reference( $dbgmsg, $uid, $uhandle, $uhandle_new=null
 {
    DgsCache::delete( $dbgmsg, CACHE_GRP_USER_REF, "user_ref.id.$uid" );
    DgsCache::delete( $dbgmsg, CACHE_GRP_USER_REF, "user_ref.handle." . strtolower($uhandle) );
-   if( !is_null($uhandle_new) && strcasecmp($uhandle, $uhandle_new) != 0 )
+   if ( !is_null($uhandle_new) && strcasecmp($uhandle, $uhandle_new) != 0 )
       DgsCache::delete( $dbgmsg, CACHE_GRP_USER_REF, "user_ref.handle." . strtolower($uhandle_new) );
 }
 
@@ -3213,7 +3213,7 @@ function check_for_observers( $gid, $uid, $check_user )
    $key = "Observers.$gid.$uid";
 
    $result = DgsCache::fetch( $dbgmsg, CACHE_GRP_GAME_OBSERVERS, $key );
-   if( is_null($result) )
+   if ( is_null($result) )
    {
       $is_on_observe_list = ( is_null($check_user) ) ? is_on_observe_list( $gid, $uid ) : (bool)$check_user;
       $has_observers = ( $is_on_observe_list ) ? true : has_observers( $gid );
@@ -3230,7 +3230,7 @@ function has_observers( $gid )
 {
    $result = db_query( 'has_observers',
       "SELECT ID FROM Observers WHERE gid=$gid LIMIT 1");
-   if( !$result )
+   if ( !$result )
       return false;
    $res = ( @mysql_num_rows($result) > 0 );
    mysql_free_result($result);
@@ -3241,7 +3241,7 @@ function is_on_observe_list( $gid, $uid )
 {
    $result = db_query( 'is_on_observe_list',
       "SELECT ID FROM Observers WHERE gid=$gid AND uid=$uid LIMIT 1");
-   if( !$result )
+   if ( !$result )
       return false;
    $res = ( @mysql_num_rows($result) > 0 );
    mysql_free_result($result);
@@ -3253,11 +3253,11 @@ function toggle_observe_list( $gid, $uid, $toggle_yes )
    $dbgmsg = "toggle_observe_list($gid,$uid,$toggle_yes)";
 
    $my_observe = is_on_observe_list( $gid, $uid );
-   if( $toggle_yes == ($my_observe ? 'N' : 'Y') )
+   if ( $toggle_yes == ($my_observe ? 'N' : 'Y') )
    {
       ta_begin();
       {//HOT-section to update observers
-         if( $my_observe )
+         if ( $my_observe )
             db_query( $dbgmsg.'.delete', "DELETE FROM Observers WHERE gid=$gid AND uid=$uid LIMIT 1");
          else
             db_query( $dbgmsg.'.insert', "INSERT INTO Observers SET gid=$gid, uid=$uid");
@@ -3277,19 +3277,19 @@ function delete_all_observers( $gid, $notify, $Text='' )
    global $NOW;
    $dbgmsg = "delete_all_observers($gid,$notify)";
 
-   if( $notify )
+   if ( $notify )
    {
       $result = db_query( $dbgmsg.'.find',
          "SELECT Observers.uid AS pid " .
          "FROM Observers " .
          "WHERE gid=$gid AND Observers.uid>".GUESTS_ID_MAX ); //exclude guest
 
-      if( @mysql_num_rows($result) > 0 )
+      if ( @mysql_num_rows($result) > 0 )
       {
          $Subject = 'An observed game has finished';
 
          $to_ids = array();
-         while( $row = mysql_fetch_array( $result ) )
+         while ( $row = mysql_fetch_array( $result ) )
             $to_ids[] = $row['pid'];
          mysql_free_result($result);
 
@@ -3330,7 +3330,7 @@ function not_in_clause( $arr_enum )
 
 function RGBA($r, $g, $b, $a=NULL)
 {
-   if( is_null($a) )
+   if ( is_null($a) )
       return sprintf("%02x%02x%02x", $r, $g, $b);
    else
       return sprintf("%02x%02x%02x%02x", $r, $g, $b, $a);
@@ -3359,7 +3359,7 @@ function split_RGBA($color, $alpha=NULL)
 // param bgcolor: if null, use default
 function blend_alpha_hex($color, $bgcolor=null)
 {
-   if( is_null($bgcolor) )
+   if ( is_null($bgcolor) )
       $bgcolor = "f7f5e3"; //$bg_color value (#f7f5e3)
    list($r,$g,$b,$a)= split_RGBA($color, 0);
    list($br,$bg,$bb,$ba)= split_RGBA($bgcolor);
@@ -3369,7 +3369,7 @@ function blend_alpha_hex($color, $bgcolor=null)
 function blend_warning_cell_attb( $title='', $bgcolor='f7f5e3', $col='ff000033')
 {
    $str= ' bgcolor="#' . blend_alpha_hex( $col, $bgcolor) . '"';
-   if( $title )
+   if ( $title )
       $str.= ' title="' . $title . '"';
    return $str;
 }
@@ -3382,9 +3382,9 @@ function attb_quote( $str)
 //return an array of the attributs $attbs
 function attb_parse( $attbs)
 {
-   if( is_array($attbs) )
+   if ( is_array($attbs) )
       return array_change_key_case( $attbs, CASE_LOWER);
-   if( !is_string($attbs) )
+   if ( !is_string($attbs) )
       return array();
 
    $nr_matches = preg_match_all(
@@ -3392,13 +3392,13 @@ function attb_parse( $attbs)
       , $attbs, $matches );
 
    $attbs = array();
-   for($i=0; $i<$nr_matches; $i++)
+   for ($i=0; $i<$nr_matches; $i++)
    {
       $key = $matches[1][$i];
-      if( !$key )
+      if ( !$key )
          continue;
       $val = $matches[6][$i];
-      if( !$val )
+      if ( !$val )
          $val = $matches[5][$i];
       $attbs[strtolower($key)]= $val;
    }
@@ -3409,18 +3409,18 @@ function attb_parse( $attbs)
 function attb_build( $attbs)
 {
    $attbs= attb_parse( $attbs);
-   if( is_array($attbs) )
+   if ( is_array($attbs) )
    {
       $str= '';
-      foreach( $attbs as $key => $val )
+      foreach ( $attbs as $key => $val )
       {
-         if( $key == 'colspan' && $val < 2 )
+         if ( $key == 'colspan' && $val < 2 )
             continue;
          $str .= ' '.$key.'=';
 
          // don't quote values of JavaScript-attributes
          //if( preg_match( "/^(on((dbl)?click|mouse(down|up|over|move)|key(press|down|up)))$/i", $key ) )
-         if( strncasecmp($key,'on',2) == 0 ) // begins with 'on'
+         if ( strncasecmp($key,'on',2) == 0 ) // begins with 'on'
             $str .= "\"$val\"";
          else
             $str .= attb_quote($val);
@@ -3438,9 +3438,9 @@ function attb_merge( $attb1, $attb2, $class_sep='')
    $attb1 = attb_parse( $attb1);
    $attb2 = attb_parse( $attb2);
 */
-   if( isset($attb1['class']) && isset($attb2['class']) )
+   if ( isset($attb1['class']) && isset($attb2['class']) )
    {
-      if( is_string($class_sep) )
+      if ( is_string($class_sep) )
          $attb2['class'] = $attb1['class'].$class_sep.$attb2['class'];
       //as other CSS items, the priority is for the last in the CSS file.
       unset($attb1['class']);
@@ -3452,13 +3452,13 @@ function attb_merge( $attb1, $attb2, $class_sep='')
 function image( $src, $alt, $title='', $attbs='', $height=-1, $width=-1)
 {
    $str = "<img src=\"$src\" alt=".attb_quote($alt);
-   if( $title )
+   if ( $title )
       $str.= ' title='.attb_quote($title);
-   elseif( is_null($title) )
+   elseif ( is_null($title) )
       $str.= ' title='.attb_quote($alt);
-   if( $height>=0 )
+   if ( $height>=0 )
       $str.= " height=\"$height\"";
-   if( $width>=0 )
+   if ( $width>=0 )
       $str.= " width=\"$width\"";
    $str.= attb_build($attbs);
    return $str.'>';
@@ -3466,15 +3466,15 @@ function image( $src, $alt, $title='', $attbs='', $height=-1, $width=-1)
 
 function anchor( $href, $text=null, $title='', $attbs='')
 {
-   if( is_null($text) ) $text = $href;
+   if ( is_null($text) ) $text = $href;
    $str = "<a href=\"$href\"";
-   if( is_array($attbs) )
+   if ( is_array($attbs) )
    {
-      if( isset($attbs['accesskey']) )
+      if ( isset($attbs['accesskey']) )
       {
          $xkey = trim($attbs['accesskey']);
          unset($attbs['accesskey']);
-         if( (string)$xkey != '' ) // can be '0'
+         if ( (string)$xkey != '' ) // can be '0'
          {
             $xkey = substr($xkey,0,1);
             $title.= " [&amp;$xkey]";
@@ -3482,7 +3482,7 @@ function anchor( $href, $text=null, $title='', $attbs='')
          }
       }
    }
-   if( $title )
+   if ( $title )
       $str.= ' title='.attb_quote($title);
    $str.= attb_build($attbs);
    return $str.">$text</a>";
@@ -3499,9 +3499,9 @@ function anchor( $href, $text=null, $title='', $attbs='')
 function insert_width( $width=1, $height=0, $use_minwid=false )
 {
    global $base_path;
-   if( !is_numeric($width) )
+   if ( !is_numeric($width) )
       $width = 1;
-   if( !is_numeric($height) )
+   if ( !is_numeric($height) )
       $height = 0;
    $img_class = ($use_minwid) ? ' class="MinWidth"' : '';
    return "<img{$img_class} src=\"{$base_path}images/dot.gif\" width=\"$width\" height=\"$height\" alt=''>";
@@ -3516,15 +3516,15 @@ function strip_gamenotes( $note )
 
 function buildErrorListString( $errmsg, $errors, $colspan=0, $safe=true, $lineclass='TWarning' )
 {
-   if( count($errors) == 0 )
+   if ( count($errors) == 0 )
       return '';
 
-   if( $colspan <= 0 )
+   if ( $colspan <= 0 )
       return span('ErrorMsg', ( $errmsg ? "$errmsg:" : '') . "<br>\n* " . implode("<br>\n* ", $errors));
    else
    {
       $out = "\n<ul>";
-      foreach( $errors as $err )
+      foreach ( $errors as $err )
          $out .= "<li>" . span($lineclass, ($safe ? make_html_safe($err, 'line') : $err)) . "\n";
       $out .= "</ul>\n";
       $out = span('ErrorMsg', ( $errmsg ? "$errmsg:<br>\n" : '' )) . $out;
@@ -3541,9 +3541,9 @@ function parseDate( $msg, $date_str )
 {
    $result = 0;
    $date_str = trim($date_str);
-   if( $date_str != '' )
+   if ( $date_str != '' )
    {
-      if( preg_match( "/^(\d{4})-?(\d+)-?(\d+)(?:\s+(\d+)(?::(\d+)))$/", $date_str, $matches ) )
+      if ( preg_match( "/^(\d{4})-?(\d+)-?(\d+)(?:\s+(\d+)(?::(\d+)))$/", $date_str, $matches ) )
       {// (Y)=1, (M)=2, (D)=3, (h)=4, (m)=5
          list(, $year, $month, $day, $hour, $min ) = $matches;
          $result = mktime( 0+$hour, 0+$min, 0, 0+$month, 0+$day, 0+$year );
@@ -3573,17 +3573,17 @@ function enforce_min_timeinterval( $subdir, $filename, $min_interval, $max_inter
 {
    global $NOW;
 
-   if( $min_interval < 1 ) // check disabled
+   if ( $min_interval < 1 ) // check disabled
       return array( true, 0 );
-   if( (string)DATASTORE_FOLDER == '' )
+   if ( (string)DATASTORE_FOLDER == '' )
       error('internal_error', "enforce_min_timeinterval.miss.datastore");
 
    $path = build_path_dir( $_SERVER['DOCUMENT_ROOT'], DATASTORE_FOLDER );
-   if( $subdir )
+   if ( $subdir )
       $path .= '/' . $subdir;
-   if( !is_dir($path) )
+   if ( !is_dir($path) )
    {
-      if( !mkdir($path, 0777, /*recursive*/true) )
+      if ( !mkdir($path, 0777, /*recursive*/true) )
          error('internal_error', "enforce_min_timeinterval.miss.datastore_dir");
    }
 
@@ -3592,13 +3592,13 @@ function enforce_min_timeinterval( $subdir, $filename, $min_interval, $max_inter
 
    $last_check_time = 0;
    $header = $body = '';
-   if( file_exists($file_path) )
+   if ( file_exists($file_path) )
    {
-      if( $max_interval > 0 || $read_content )
+      if ( $max_interval > 0 || $read_content )
       {
          $file_data = read_from_file( $file_path, /*err-quit*/false );
          $pos_lf = strpos($file_data, "\n");
-         if( $pos_lf === false )
+         if ( $pos_lf === false )
             $header = $file_data;
          else
          {
@@ -3607,7 +3607,7 @@ function enforce_min_timeinterval( $subdir, $filename, $min_interval, $max_inter
          }
       }
 
-      if( $max_interval > 0 )
+      if ( $max_interval > 0 )
       {
          $last_ok_time = (int)$header;
          $no_max_trigger = ( $last_ok_time <= 0 ) || ( $NOW - $last_ok_time < $max_interval );
@@ -3615,15 +3615,15 @@ function enforce_min_timeinterval( $subdir, $filename, $min_interval, $max_inter
       else
          $no_max_trigger = true;
 
-      if( $no_max_trigger )
+      if ( $no_max_trigger )
       {
          $mtime = (int)@filemtime( $file_path );
-         if( $NOW - $mtime <= $min_interval )
+         if ( $NOW - $mtime <= $min_interval )
             $last_check_time = $mtime;
       }
    }
 
-   if( $last_check_time > 0 ) // not-ok
+   if ( $last_check_time > 0 ) // not-ok
    {
       touch($file_path);
       $result = array( false, $last_check_time );
@@ -3635,7 +3635,7 @@ function enforce_min_timeinterval( $subdir, $filename, $min_interval, $max_inter
       $result = array( ($cnt > 0), 0 );
    }
 
-   if( $read_content )
+   if ( $read_content )
       array_push( $result, $file_path, $header, $body );
    return $result;
 }//enforce_min_timeinterval
@@ -3643,10 +3643,10 @@ function enforce_min_timeinterval( $subdir, $filename, $min_interval, $max_inter
 // $cache_key : QST_CACHE_...
 function clear_cache_quick_status( $arr_uids, $cache_key )
 {
-   if( (string)DATASTORE_FOLDER == '' )
+   if ( (string)DATASTORE_FOLDER == '' )
       return;
 
-   if( !is_array($arr_uids) )
+   if ( !is_array($arr_uids) )
       $arr_uids = array( $arr_uids );
    else
       $arr_uids = array_unique($arr_uids);
@@ -3654,16 +3654,16 @@ function clear_cache_quick_status( $arr_uids, $cache_key )
    $path = build_path_dir( $_SERVER['DOCUMENT_ROOT'], DATASTORE_FOLDER ) . '/qst/quick_status-';
    clearstatcache(); //FIXME since PHP5.3.0 with filename
 
-   foreach( $arr_uids as $uid )
+   foreach ( $arr_uids as $uid )
    {
-      if( !is_numeric($uid) || $uid <= GUESTS_ID_MAX )
+      if ( !is_numeric($uid) || $uid <= GUESTS_ID_MAX )
          continue;
 
       $file_path = $path . $uid;
-      if( file_exists($file_path) )
+      if ( file_exists($file_path) )
       {
          $mtime = (int)@filemtime( $file_path );
-         if( $GLOBALS['NOW'] - $mtime > SECS_PER_HOUR ) // delete if older than 1h
+         if ( $GLOBALS['NOW'] - $mtime > SECS_PER_HOUR ) // delete if older than 1h
             @unlink($file_path);
          else
             @file_put_contents($file_path, "CLEAR $cache_key\n", FILE_APPEND); // block-specific-clearing

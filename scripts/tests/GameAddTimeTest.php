@@ -80,7 +80,7 @@ class GameAddTimeTest extends PHPUnit_Framework_TestCase {
       // T=JAP, M=210, B=15, P=10; B(111): m=210,b=0,p=-1, W(222): m=210,b=0,p=-1
       $gat = $this->createGAT( BYOTYPE_JAPANESE, 111 );
       $arr_invalid_values = array( 'abc', -7, time_convert_to_hours( MAX_ADD_DAYS, 'days') + 1 );
-      foreach( $arr_invalid_values as $chk )
+      foreach ( $arr_invalid_values as $chk )
          $this->assertEquals( "Invalid value for add_hours [$chk]", $gat->add_time( $chk ));
 
       // mess around with data

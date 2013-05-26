@@ -29,16 +29,16 @@ require_once 'features/lib_votes.php';
    connect2mysql();
 
    $logged_in = who_is_logged( $player_row);
-   if( !$logged_in )
+   if ( !$logged_in )
       error('login_if_not_logged_in', 'vote_feature');
-   if( !ALLOW_FEATURE_VOTE )
+   if ( !ALLOW_FEATURE_VOTE )
       error('feature_disabled', 'vote_feature');
 
    $my_id = (int)@$player_row['ID'];
 
    $is_admin = Feature::is_admin();
    $user_quota = UserQuota::load_user_quota($my_id);
-   if( is_null($user_quota) )
+   if ( is_null($user_quota) )
       error('miss_user_quota', "vote_feature.user_quota.check($my_id)");
 
 /* Actual REQUEST calls used:
@@ -48,48 +48,48 @@ require_once 'features/lib_votes.php';
 */
 
    $fid = get_request_arg('fid'); //feature-ID
-   if( $fid < 0 )
+   if ( $fid < 0 )
       $fid = 0;
    $points = get_request_arg('points', '');
    $viewmode = get_request_arg('view', ''); // can be forced
 
    // load feature + vote
    $feature = $fvote = null;
-   if( $fid )
+   if ( $fid )
    {
       $feature = Feature::load_feature( $fid );
-      if( !is_null($feature) )
+      if ( !is_null($feature) )
       {
          $fvote = $feature->load_featurevote( $my_id );
-         if( !is_null($fvote) && (string)$points == '' )
+         if ( !is_null($fvote) && (string)$points == '' )
             $points = $fvote->get_points();
       }
    }
-   if( is_null($feature) )
+   if ( is_null($feature) )
       error('invalid_args', "vote_feature.no_featureid($fid)");
    $has_vote = !is_null($fvote);
 
    // determine max-points user can spend or revoke
    $check_maxp = max( 0, $user_quota->get_feature_points() ); // max points to give
-   if( $has_vote )
+   if ( $has_vote )
       $check_maxp += abs($fvote->points); // max points to revoke
    $max_points = min( FEATVOTE_MAXPOINTS, $check_maxp );
 
    // error-check on feature to save
    $errormsg = null;
-   if( @$_REQUEST['vote_save'] )
+   if ( @$_REQUEST['vote_save'] )
       $errormsg = FeatureVote::check_points( $points, $max_points );
 
    // check user pre-conditions
    $user_vote_reason = Feature::allow_vote_check();
    $allow_vote_edit = is_null($user_vote_reason) && $feature->allow_vote();
-   if( $viewmode )
+   if ( $viewmode )
       $allow_vote_edit = false;
-   if( $allow_vote_edit && (string)$points == '' ) // set default for edit-mode
+   if ( $allow_vote_edit && (string)$points == '' ) // set default for edit-mode
       $points = 0;
 
    // insert/update feature-vote-object with values from edit-form if no error
-   if( is_null($errormsg) && @$_REQUEST['vote_save'] && $allow_vote_edit && is_numeric($points) )
+   if ( is_null($errormsg) && @$_REQUEST['vote_save'] && $allow_vote_edit && is_numeric($points) )
    {
       ta_begin();
       {//HOT-section to update feature-vote
@@ -97,7 +97,7 @@ require_once 'features/lib_votes.php';
          $user_quota->modify_feature_points( $add_fpoints );
          $user_quota->update_feature_points();
 
-         if( !$has_vote ) // is new vote by user
+         if ( !$has_vote ) // is new vote by user
             Feature::update_count_feature_new( "vote_feature.save_vote($fid)", $my_id, -1 ); // one NEW less
       }
       ta_end();
@@ -120,7 +120,7 @@ require_once 'features/lib_votes.php';
    $fform->add_row( array(
       'DESCRIPTION',  T_('Size#feature'),
       'TEXT',         $feature->size ));
-   if( $is_admin )
+   if ( $is_admin )
    {
       $fform->add_row( array(
          'DESCRIPTION', T_('Editor'),
@@ -139,13 +139,13 @@ require_once 'features/lib_votes.php';
       'DESCRIPTION', T_('Description'),
       'TEXT',        make_html_safe( wordwrap($feature->description, FEAT_DESCRIPTION_WRAPLEN), true) ));
 
-   if( !is_null($errormsg) )
+   if ( !is_null($errormsg) )
       $fform->add_row( array(
          'DESCRIPTION', T_('Error'),
          'TEXT',        span('ErrorMsg', $errormsg), ));
 
    $fform->add_empty_row();
-   if( $has_vote && $fvote->lastchanged > 0 )
+   if ( $has_vote && $fvote->lastchanged > 0 )
    {
       $fform->add_row( array(
          'DESCRIPTION',  T_('Lastvoted'),
@@ -157,10 +157,10 @@ require_once 'features/lib_votes.php';
       'DESCRIPTION', T_('Current Vote'),
       'TEXT',        FeatureVote::formatPointsText($curr_points), ));
 
-   if( $allow_vote_edit ) // NEW, EDIT vote (spend or revoke points)
+   if ( $allow_vote_edit ) // NEW, EDIT vote (spend or revoke points)
    {
       $vote_values = array();
-      for( $i = +$max_points; $i >= -$max_points; $i--)
+      for ( $i = +$max_points; $i >= -$max_points; $i--)
          $vote_values[$i] = (($i > 0) ? '+' : '') . $i;
       $vote_values['0'] = '=0';
 
@@ -179,7 +179,7 @@ require_once 'features/lib_votes.php';
    echo "<h3 class=Header>$title</h3>\n",
       FeatureVote::getFeaturePointsText( $user_quota->get_feature_points() ),
       "<br><br>\n";
-   if( !is_null($user_vote_reason) )
+   if ( !is_null($user_vote_reason) )
       echo span('ErrorMsg', $user_vote_reason), "<br><br>\n";
 
    $fform->echo_string();
@@ -189,11 +189,11 @@ require_once 'features/lib_votes.php';
    $menu_array[T_('Vote on features')] = "features/list_features.php?status=2".URI_AMP.'my_vote=1';
    $menu_array[T_('My feature votes')] = "features/list_features.php?status=3".URI_AMP.'my_vote=2';
    $menu_array[T_('All features')]     = "features/list_features.php?status=3".URI_AMP.'my_vote=0';
-   if( $is_admin )
+   if ( $is_admin )
    {
       $menu_array[T_('Add new feature')] =
          array( 'url' => "features/edit_feature.php", 'class' => 'AdminLink' );
-      if( $fid > 0 && $feature->allow_edit() )
+      if ( $fid > 0 && $feature->allow_edit() )
          $menu_array[T_('Edit this feature')] =
             array( 'url' => "features/edit_feature.php?fid=$fid", 'class' => 'AdminLink' );
    }

@@ -35,19 +35,19 @@ $GLOBALS['ThePage'] = new Page('Status');
    connect2mysql();
 
    $logged_in = who_is_logged( $player_row);
-   if( !$logged_in )
+   if ( !$logged_in )
       error('login_if_not_logged_in', 'status');
    $my_id = $uid = $player_row['ID'];
 
    $page = 'status.php';
 
-   if( get_request_arg('set_order') ) // change NextGameOrder for user
+   if ( get_request_arg('set_order') ) // change NextGameOrder for user
    {
       $value = get_request_arg('stg_order', 1);
       $next_game_order = NextGameOrder::get_next_game_order( $value );
-      if( !$next_game_order )
+      if ( !$next_game_order )
          error('invalid_args', "status.check.stg_order($value)");
-      if( $player_row['NextGameOrder'] != $next_game_order )
+      if ( $player_row['NextGameOrder'] != $next_game_order )
       {
          db_query( "status.update.next_game_order($uid,$value)",
             "UPDATE Players SET NextGameOrder='".mysql_addslashes($next_game_order) .
@@ -61,7 +61,7 @@ $GLOBALS['ThePage'] = new Page('Status');
 
    // mark bulletin as read + reload (for recount of remaining bulletins)
    $markread = (int)get_request_arg('mr');
-   if( $markread > 0 )
+   if ( $markread > 0 )
    {
       Bulletin::mark_bulletin_as_read( $markread );
       jump_to($page);
@@ -87,7 +87,7 @@ $GLOBALS['ThePage'] = new Page('Status');
       ));
 
 { // show user infos
-   if( $player_row['OnVacation'] > 0 )
+   if ( $player_row['OnVacation'] > 0 )
    {
       $itable= new Table_info('user');
 
@@ -107,26 +107,26 @@ $GLOBALS['ThePage'] = new Page('Status');
 } // show user infos
 
 
-if( @$player_row['CountBulletinNew'] > 0 )
+if ( @$player_row['CountBulletinNew'] > 0 )
 { // show unread bulletins
    $limit = 3;
    $arr_bulletins = Bulletin::load_cache_bulletins( 'status', $my_id );
 
    $cnt_bulletins = count($arr_bulletins);
-   if( $cnt_bulletins > 0 )
+   if ( $cnt_bulletins > 0 )
    {
       section('bulletin', T_('Message of the Day (unread bulletins)'));
 
       $show_rows = $limit;
-      foreach( $arr_bulletins as $bulletin )
+      foreach ( $arr_bulletins as $bulletin )
       {
-         if( $show_rows-- <= 0 )
+         if ( $show_rows-- <= 0 )
             break;
          $mark_as_read_url = ( !$bulletin->ReadState && $bulletin->Status == BULLETIN_STATUS_SHOW ) ? $page : '';
          echo GuiBulletin::build_view_bulletin($bulletin, $mark_as_read_url);
       }
 
-      if( $cnt_bulletins > $limit )
+      if ( $cnt_bulletins > $limit )
       {
          echo "<font size=\"+1\">...</font>\n";
          $sectmenu = array();
@@ -139,7 +139,7 @@ if( @$player_row['CountBulletinNew'] > 0 )
 
 
 $folder_nr_querystr = $cfg_pages->get_status_folders_querypart();
-if( (string)$folder_nr_querystr != '' )
+if ( (string)$folder_nr_querystr != '' )
 { // show messages
 
    // NOTE: msg-list can't allow TABLE-SORT, because of the fixed LIMIT and no prev/next feature
@@ -157,7 +157,7 @@ if( (string)$folder_nr_querystr != '' )
 
    $arr_msg = MessageListBuilder::load_cache_message_list('status', $my_id, $folder_nr_querystr, $order, $limit + 1);
    $cnt_msg = count($arr_msg);
-   if( $cnt_msg > 0 )
+   if ( $cnt_msg > 0 )
    {
       init_standard_folders();
       $my_folders = get_folders($my_id);
@@ -167,7 +167,7 @@ if( (string)$folder_nr_querystr != '' )
       $msglist_builder->message_list_body( $arr_msg, $limit, $my_folders) ; // also frees $result
       $mtable->echo_table();
 
-      if( $cnt_msg > $limit )
+      if ( $cnt_msg > $limit )
       {
          echo "<font size=\"+1\">...</font>\n";
          make_menu( array( T_('Show all messages') => 'list_messages.php' ), false );
@@ -179,7 +179,7 @@ if( (string)$folder_nr_querystr != '' )
 
 { // show games
    section( 'Games', T_('Your turn to move in the following games:'));
-   if( $cnt_game_rows > 0 )
+   if ( $cnt_game_rows > 0 )
       $gtable->echo_table();
    else
       echo T_('No games found');
@@ -187,7 +187,7 @@ if( (string)$folder_nr_querystr != '' )
 
 
 
-if( $player_row['GamesMPG'] > 0 )
+if ( $player_row['GamesMPG'] > 0 )
 { // show multi-player-games
    $mpgtable = new Table( 'mpgame', $page, null, '', $table_mode|TABLE_ROWS_NAVI );
 
@@ -212,18 +212,18 @@ if( $player_row['GamesMPG'] > 0 )
       . $order;
 
    $result = db_query( "status.find_mp_games($uid)", $query );
-   if( @mysql_num_rows($result) > 0 )
+   if ( @mysql_num_rows($result) > 0 )
    {
       section( 'MPGames', T_('Your multi-player-games to manage:'));
 
       $cnt_rows = 0;
-      while( $row = mysql_fetch_assoc( $result ) )
+      while ( $row = mysql_fetch_assoc( $result ) )
       {
          $cnt_rows++;
 
          $cnt_players = MultiPlayerGame::determine_player_count($row['GamePlayers']);
          $joined_players = sprintf( '%d / %d', $row['X_Joined'], $cnt_players );
-         if( $row['X_Joined'] == $cnt_players )
+         if ( $row['X_Joined'] == $cnt_players )
             $joined_players = span('MPGWarning', $joined_players);
 
          $row_arr = array(
@@ -245,7 +245,7 @@ if( $player_row['GamesMPG'] > 0 )
 
 
 { // show pending posts
-   if( (@$player_row['admin_level'] & ADMIN_FORUM) )
+   if ( (@$player_row['admin_level'] & ADMIN_FORUM) )
    {
       section( 'Pending', '');
       require_once 'forum/forum_functions.php'; // NOTE: always included, but only executed here !!
@@ -260,7 +260,7 @@ if( $player_row['GamesMPG'] > 0 )
          T_('My finished games') => "show_games.php?uid=$my_id".URI_AMP."finished=1",
          T_('Games I\'m observing') => "show_games.php?observe=$my_id",
       );
-   if( ALLOW_TOURNAMENTS )
+   if ( ALLOW_TOURNAMENTS )
       $menu_array[T_('My tournaments')] = "tournaments/list_tournaments.php?uid=$my_id";
 
    end_page(@$menu_array);
@@ -289,7 +289,7 @@ function load_games_to_move( $uid, &$gtable )
    $gtable->add_tablehead( 1, T_('Game ID#header'), 'Button', TABLE_NO_HIDE, 'ID-');
    $gtable->add_tablehead(15, new TableHead( T_('Game information'), 'images/info.gif'), 'ImagesLeft', 0 );
    $gtable->add_tablehead( 2, T_('sgf#header'), 'Sgf', TABLE_NO_SORT );
-   if( $show_notes )
+   if ( $show_notes )
       $gtable->add_tablehead(12, T_('Notes#header'), '', 0, 'X_Note-');
    $gtable->add_tablehead( 3, T_('Opponent#header'), 'User', 0, 'opp_Name+');
    $gtable->add_tablehead( 4, T_('Userid#header'), 'User', 0, 'opp_Handle+');
@@ -310,13 +310,13 @@ function load_games_to_move( $uid, &$gtable )
    $gtable->add_tablehead(10, T_('Time remaining#header'), null, 0, 'TimeOutDate+');
 
    // static order for status-games (coupled with "next game" on game-page); for table-sort-indicators
-   if( $next_game_order == NGO_LASTMOVED )
+   if ( $next_game_order == NGO_LASTMOVED )
       $gtable->set_default_sort( 13, 1); //on Lastchanged,ID
-   elseif( $next_game_order == NGO_MOVES )
+   elseif ( $next_game_order == NGO_MOVES )
       $gtable->set_default_sort( 9, 13); //on Moves,Lastchanged
-   elseif( $next_game_order == NGO_PRIO )
+   elseif ( $next_game_order == NGO_PRIO )
       $gtable->set_default_sort( 17, 13); //on GamesPriority.Priority,Lastchanged
-   elseif( $next_game_order == NGO_TIMELEFT )
+   elseif ( $next_game_order == NGO_TIMELEFT )
       $gtable->set_default_sort( 10, 13); //on TimeRemaining,Lastchanged
    $gtable->make_sort_images();
    $gtable->use_show_rows(false);
@@ -324,13 +324,13 @@ function load_games_to_move( $uid, &$gtable )
    $game_rows = GameHelper::load_cache_status_games( 'status', $next_game_order, 'X_Lastaccess', $load_prio, $load_notes );
 
    $cnt_rows = count($game_rows);
-   if( $cnt_rows > 0 )
+   if ( $cnt_rows > 0 )
    {
       $arr_titles_colors = get_color_titles();
       $gtable->set_extend_table_form_function( 'status_games_extend_table_form' ); //func
 
       $timefmt = TIMEFMT_ADDTYPE | TIMEFMT_SHORT | TIMEFMT_ZERO;
-      foreach( $game_rows as $row )
+      foreach ( $game_rows as $row )
       {
          $Rating = NULL;
          extract($row);
@@ -338,23 +338,23 @@ function load_games_to_move( $uid, &$gtable )
          $row_arr = array();
          //if( $gtable->Is_Column_Displayed[0] )
             $row_arr[ 1] = button_TD_anchor( "game.php?gid=$ID", $ID);
-         if( $gtable->Is_Column_Displayed[2] )
+         if ( $gtable->Is_Column_Displayed[2] )
             $row_arr[ 2] = "<A href=\"sgf.php?gid=$ID\">" . T_('sgf') . "</A>";
-         if( $gtable->Is_Column_Displayed[3] )
+         if ( $gtable->Is_Column_Displayed[3] )
             $row_arr[ 3] = "<A href=\"userinfo.php?uid=$opp_ID\">" .
                make_html_safe($opp_Name) . "</a>";
-         if( $gtable->Is_Column_Displayed[4] )
+         if ( $gtable->Is_Column_Displayed[4] )
             $row_arr[ 4] = "<A href=\"userinfo.php?uid=$opp_ID\">$opp_Handle</a>";
-         if( $load_notes && $gtable->Is_Column_Displayed[12] )
+         if ( $load_notes && $gtable->Is_Column_Displayed[12] )
          {
             // keep the first line up to LIST_GAMENOTE_LEN chars
             $row_arr[12] = make_html_safe( strip_gamenotes($X_Note) );
          }
-         if( $gtable->Is_Column_Displayed[16] )
+         if ( $gtable->Is_Column_Displayed[16] )
             $row_arr[16] = echo_rating($opp_Rating, true, $opp_ID);
-         if( $gtable->Is_Column_Displayed[5] )
+         if ( $gtable->Is_Column_Displayed[5] )
          {
-            if( $Status == GAME_STATUS_KOMI )
+            if ( $Status == GAME_STATUS_KOMI )
             {
                $colors = 'y';
                $hover_title = sprintf( T_('Fair Komi Negotiation#fairkomi'), $player_row['Handle'] );
@@ -366,40 +366,40 @@ function load_games_to_move( $uid, &$gtable )
             }
             $row_arr[ 5] = image( $base_path."17/$colors.gif", $colors, $hover_title );
          }
-         if( $gtable->Is_Column_Displayed[6] )
+         if ( $gtable->Is_Column_Displayed[6] )
             $row_arr[ 6] = $Size;
-         if( $gtable->Is_Column_Displayed[7] )
+         if ( $gtable->Is_Column_Displayed[7] )
             $row_arr[ 7] = $Handicap;
-         if( $gtable->Is_Column_Displayed[8] )
+         if ( $gtable->Is_Column_Displayed[8] )
             $row_arr[ 8] = $Komi;
-         if( $gtable->Is_Column_Displayed[9] )
+         if ( $gtable->Is_Column_Displayed[9] )
             $row_arr[ 9] = $Moves;
-         if( $gtable->Is_Column_Displayed[14] )
+         if ( $gtable->Is_Column_Displayed[14] )
             $row_arr[14] = ($X_Rated == 'N' ? T_('No') : T_('Yes') );
-         if( $gtable->Is_Column_Displayed[13] )
+         if ( $gtable->Is_Column_Displayed[13] )
             $row_arr[13] = date(DATE_FMT, $X_Lastchanged);
-         if( $gtable->Is_Column_Displayed[10] )
+         if ( $gtable->Is_Column_Displayed[10] )
          {
             $my_col = ( $X_Color & 2 ) ? WHITE : BLACK;
             $row_arr[10] = build_time_remaining( $row, $my_col, /*is_to_move*/true, $timefmt );
          }
-         if( $gtable->Is_Column_Displayed[11] )
+         if ( $gtable->Is_Column_Displayed[11] )
          {
             $is_online = ($NOW - @$opp_Lastaccess) < SPAN_ONLINE_MINS * SECS_PER_MIN; // online up to X mins ago
             $row_arr[11] = echo_image_online( $is_online, @$opp_Lastaccess, false );
          }
-         if( $gtable->Is_Column_Displayed[15] )
+         if ( $gtable->Is_Column_Displayed[15] )
          {
             $snapshot = ($Snapshot) ? $Snapshot : null;
             $row_arr[15] = echo_image_gameinfo($ID, /*sep*/false, $Size, $snapshot)
                . echo_image_shapeinfo( $ShapeID, $Size, $ShapeSnapshot, false, true)
                . echo_image_tournament_info($tid, true);
          }
-         if( $gtable->Is_Column_Displayed[17] )
+         if ( $gtable->Is_Column_Displayed[17] )
             $row_arr[17] = ($X_Priority) ? $X_Priority : ''; // don't show 0
-         if( $gtable->Is_Column_Displayed[18] )
+         if ( $gtable->Is_Column_Displayed[18] )
             $row_arr[18] = getRulesetText($Ruleset);
-         if( $gtable->Is_Column_Displayed[19] )
+         if ( $gtable->Is_Column_Displayed[19] )
             $row_arr[19] = GameTexts::format_game_type( $GameType, $GamePlayers )
                . ($GameType == GAMETYPE_GO ? '' : MINI_SPACING . echo_image_game_players( $ID ) )
                . GameTexts::build_fairkomi_gametype($Status);

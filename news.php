@@ -25,13 +25,13 @@ function build_TOC( $text )
 {
    $lines = explode("\n", $text);
    $headers = preg_grep("/^#release/i", $lines);
-   foreach( $headers as $header )
+   foreach ( $headers as $header )
    {
       $toc_entries[] = preg_replace( "/^#release\\s+(\w+?)\\s+(.*?)\\s*$/i",
          "<li><a href=\"#\\1\">\\2</a>",
          $header);
    }
-   if( count($toc_entries) > 0 )
+   if ( count($toc_entries) > 0 )
       return '<div class="ReleaseTOC"><h2>' . T_('Table of contents') . '</h2>'
          . "<ul>\n" . implode("\n", $toc_entries) . "</ul></div>\n"
          . '<hr noshade="1" size="1">';

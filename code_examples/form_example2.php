@@ -48,7 +48,7 @@ $arr_layouts = array(
    array( 'layout' => '(4,5)|(3,5)|(2,5)|(1,5)' ),
 );
 $form_layouts = array(); # for action-form
-foreach( $arr_layouts as $idx => $arr )
+foreach ( $arr_layouts as $idx => $arr )
    $form_layouts[$idx] = $arr['layout'] . "  ";
 
 $col1 = 'grey';
@@ -61,11 +61,11 @@ function ff( $col, $msg ) {
 }
 
 $layout = (int)get_request_arg('layout', '1');
-if( !isset($arr_layouts[$layout]) )
+if ( !isset($arr_layouts[$layout]) )
    $layout = 1;
 $align = (int)@$_REQUEST['align'];
 $center = (bool)@$_REQUEST['center'];
-if( $center ) $align= 0;
+if ( $center ) $align= 0;
 $border = (bool)@$_REQUEST['border'];
 $title = (bool)@$_REQUEST['title'];
 
@@ -100,7 +100,7 @@ td.FormClassC span.Rubric {font-weight: bold;}
 #tblWarn1 {background: #c0ffc0;}
 table.TblWarn2 {background: #c0c0ff;}
 ';
-if( !$border )
+if ( !$border )
    $page_style.='
 table.FormClass,
 table.FormClassV,
@@ -111,7 +111,7 @@ td.FormClassV,
 td.FormClassH,
 td.FormClassC {border-width: 0px;}
 ';
-if( $align > 0 )
+if ( $align > 0 )
 { //right align
    $page_style.='
 table.FormClass,
@@ -124,7 +124,7 @@ td.FormClassH,
 td.FormClassC {text-align: right;}
 ';
 }
-else if( $align < 0 )
+else if ( $align < 0 )
 { //left align
    $page_style.='
 table.FormClass,
@@ -176,7 +176,7 @@ $actform->echo_string();
 $the_form = new Form( "myname", "form_example2.php", FORM_POST );
 
 // set layout
-if( $layout )
+if ( $layout )
    $the_form->set_layout( FLAYOUT_GLOBAL, $arr_layouts[$layout]['layout'] );
 
 // set config for layout
@@ -198,13 +198,13 @@ $the_form->add_row( array(
    'TEXT', ff($col1, 'Area 1 - Row 2 - Col 1'),
    'TD',
    'TEXT', ff($col1, 'Area 1 - Row 2 - Col 2'), ) );
-if( $title )
+if ( $title )
 $the_form->set_layout( FLAYOUT_AREACONF, 1,
    array(
       'title' => 'Title 1',
    ) );
 
-if( $layout ) $the_form->set_area( 2 );
+if ( $layout ) $the_form->set_area( 2 );
 $the_form->add_row( array( 'TEXT', ff($col2, 'Area 2 - Row 1') ) );
 $the_form->add_row( array( 'TEXT', ff($col2, 'Area 2 - Row 2') ) );
 $the_form->add_row( array( 'TEXT', ff($col2, 'Area 2 - Row 3') ) );
@@ -215,7 +215,7 @@ $the_form->set_layout( FLAYOUT_AREACONF, 2,
       FAC_TABLE => 'id=tblWarn1',
    ) );
 
-if( $layout ) $the_form->set_area( 3 );
+if ( $layout ) $the_form->set_area( 3 );
 $the_form->add_row( array( 'TEXT', ff($col3, 'Area 3 - Row 1') ) );
 $the_form->add_row( array( 'TEXT', ff($col3, 'Area 3 - Row 2') ) );
 $the_form->add_row( array( 'TEXT', ff($col3, 'Area 3 - Row 3') ) );
@@ -225,7 +225,7 @@ $the_form->set_layout( FLAYOUT_AREACONF, 3,
       FAC_TABLE => 'class=TblWarn2',
    ) );
 
-if( $layout ) $the_form->set_area( 4 );
+if ( $layout ) $the_form->set_area( 4 );
 $the_form->add_row( array( 'TEXT', ff($col4, 'Area 4 - Row 1') ) );
 $the_form->add_row( array( 'TEXT', ff($col4, 'Area 4 - Row 2') ) );
 $the_form->set_layout( FLAYOUT_AREACONF, 4,
@@ -234,11 +234,11 @@ $the_form->set_layout( FLAYOUT_AREACONF, 4,
       FAC_TABLE => 'bgcolor="#ffc0c0"',
    ) );
 
-if( $layout ) $the_form->set_area( 5 );
+if ( $layout ) $the_form->set_area( 5 );
 $the_form->add_row( array( 'TEXT', ff($col5, 'Area 5 - Row 1') ) );
 $the_form->add_row( array( 'TEXT', ff($col5, 'Area 5 - Row 2') ) );
 $the_form->add_row( array( 'TEXT', ff($col5, 'Area 5 - Row 3') ) );
-if( $title )
+if ( $title )
 $the_form->set_layout( FLAYOUT_AREACONF, 5,
    array(
       'title' => 'Title 5',
@@ -265,7 +265,7 @@ function loc_start_html( $style_string='')
 
    echo "\n<HTML>\n<HEAD>";
 
-   if( $style_string )
+   if ( $style_string )
       echo "\n <STYLE TYPE=\"text/css\">\n" .$style_string . "\n </STYLE>";
 
    echo "\n</HEAD>\n<BODY>\n";

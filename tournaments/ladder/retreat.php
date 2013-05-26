@@ -34,13 +34,13 @@ $GLOBALS['ThePage'] = new Page('TournamentLadderRetreat');
    connect2mysql();
 
    $logged_in = who_is_logged( $player_row);
-   if( !$logged_in )
+   if ( !$logged_in )
       error('login_if_not_logged_in', 'Tournament.ladder.retreat');
-   if( !ALLOW_TOURNAMENTS )
+   if ( !ALLOW_TOURNAMENTS )
       error('feature_disabled', 'Tournament.ladder.retreat');
    $my_id = $player_row['ID'];
 
-   if( $my_id <= GUESTS_ID_MAX )
+   if ( $my_id <= GUESTS_ID_MAX )
       error('not_allowed_for_guest', 'Tournament.ladder.retreat');
 
    $page = "retreat.php";
@@ -52,26 +52,26 @@ $GLOBALS['ThePage'] = new Page('TournamentLadderRetreat');
 */
 
    $tid = (int)@$_REQUEST['tid'];
-   if( $tid < 0 ) $tid = 0;
+   if ( $tid < 0 ) $tid = 0;
 
-   if( @$_REQUEST['tu_cancel'] ) // cancel delete
+   if ( @$_REQUEST['tu_cancel'] ) // cancel delete
       jump_to("tournaments/ladder/view.php?tid=$tid");
 
    $tourney = TournamentCache::load_cache_tournament( 'Tournament.ladder_retreat.find_tournament', $tid );
    $tstatus = new TournamentStatus( $tourney );
 
    $errors = $tstatus->check_edit_status( TournamentLadder::get_view_ladder_status(false) );
-   if( $tourney->isFlagSet(TOURNEY_FLAG_LOCK_ADMIN|TOURNEY_FLAG_LOCK_TDWORK) )
+   if ( $tourney->isFlagSet(TOURNEY_FLAG_LOCK_ADMIN|TOURNEY_FLAG_LOCK_TDWORK) )
       $errors[] = $tourney->buildMaintenanceLockText();
 
    $tladder = TournamentLadder::load_tournament_ladder_by_user($tid, $my_id);
-   if( is_null($tladder) )
+   if ( is_null($tladder) )
       $errors[] = T_('Retreat from this ladder is not possible, because you didn\'t join it.');
 
 
    // ---------- Process actions ------------------------------------------------
 
-   if( @$_REQUEST['confirm'] && !is_null($tladder) && count($errors) == 0 ) // confirm retreat
+   if ( @$_REQUEST['confirm'] && !is_null($tladder) && count($errors) == 0 ) // confirm retreat
    {
       ta_begin();
       {//HOT-section to remove user
@@ -99,7 +99,7 @@ $GLOBALS['ThePage'] = new Page('TournamentLadderRetreat');
          'TEXT',        user_reference( REF_LINK, 1, '', $player_row ) ));
 
    $has_errors = ( count($errors) > 0 );
-   if( $has_errors )
+   if ( $has_errors )
    {
       $tform->add_row( array( 'HR' ));
       $tform->add_row( array(

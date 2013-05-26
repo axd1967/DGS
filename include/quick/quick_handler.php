@@ -97,7 +97,7 @@ class QuickObject
    /*! \brief Inits result-array for special handling of nested using of QuickHandlers. */
    public function initResult( $standardResult )
    {
-      if( $standardResult )
+      if ( $standardResult )
       {
          $this->result = array(
             'version' => QUICK_SUITE_VERSION,
@@ -150,12 +150,12 @@ abstract class QuickHandler
       // parse option: with
       $this->with = array();
       $with_arr = explode(',', @$_REQUEST[QOPT_WITH]);
-      foreach( $with_arr as $opt )
+      foreach ( $with_arr as $opt )
          $this->with[$opt] = 1;
 
       // parse option: lstyle
       $this->list_style = @$_REQUEST[QOPT_LIST_STYLE];
-      if( $this->list_style != QLIST_STYLE_JSON && $this->list_style != QLIST_STYLE_TABLE )
+      if ( $this->list_style != QLIST_STYLE_JSON && $this->list_style != QLIST_STYLE_TABLE )
          $this->list_style = QLIST_STYLE_TABLE;
 
       // parse option: limit
@@ -170,12 +170,12 @@ abstract class QuickHandler
 
       // parse option: fields
       $field_opt = @$_REQUEST[QOPT_FIELDS];
-      if( (string)$field_opt == '' )
+      if ( (string)$field_opt == '' )
          $this->rx_keep_fields = '';
       else
       {
          static $RXK = '[a-z_][a-z0-9_]*\\*?'; // varname (with optional *-suffix)
-         if( !preg_match("/^$RXK(|(,$RXK)+)$/", $field_opt) ) // lower-case only
+         if ( !preg_match("/^$RXK(|(,$RXK)+)$/", $field_opt) ) // lower-case only
             error('invalid_args', "QuickHandler.opt.fields.bad_syntax($field_opt)");
          $rx_fields = str_replace('*', '.*', str_replace(',', '|', $field_opt)); // , * -> | .*
          $this->rx_keep_fields = "/^(version|error.*|quota_.+|list_.+|id|$rx_fields)$/"; // +std-fields
@@ -185,7 +185,7 @@ abstract class QuickHandler
    /*! \brief Returns result (processed to keep only expected fields). */
    public function getProcessedResult()
    {
-      if( $this->quick_object->cmd != QCMD_LIST )
+      if ( $this->quick_object->cmd != QCMD_LIST )
          $this->clear_unexpected_fields( $this->quick_object->result );
       return $this->quick_object->result;
    }
@@ -209,9 +209,9 @@ abstract class QuickHandler
    /*! \brief Resets parts of WITH-option given as elements in array. */
    protected function clear_with_options( $arr )
    {
-      if( is_array($arr) )
+      if ( is_array($arr) )
       {
-         foreach( $arr as $opt )
+         foreach ( $arr as $opt )
             unset($this->with[$opt]);
       }
    }
@@ -225,7 +225,7 @@ abstract class QuickHandler
    protected function checkCommand( $dbgmsg, $regex_cmds )
    {
       $cmd = $this->quick_object->cmd;
-      if( !self::matchRegex($regex_cmds, $cmd) )
+      if ( !self::matchRegex($regex_cmds, $cmd) )
          error('invalid_command', "QuickHandler.checkCommand.bad_cmd($dbgmsg,$cmd))");
    }
 
@@ -233,12 +233,12 @@ abstract class QuickHandler
    {
       $regex = sprintf( "/^filter_(%s)\$/", $rx_filters );
       $matches = array();
-      foreach( $_REQUEST as $key => $val )
+      foreach ( $_REQUEST as $key => $val )
       {
-         if( strncmp($key, 'filter_', 7) )
+         if ( strncmp($key, 'filter_', 7) )
             continue;
 
-         if( !preg_match($regex, $key, $matches) )
+         if ( !preg_match($regex, $key, $matches) )
             error('invalid_args', "QuickHandler:parseFilters.unknown($key,allowed=[$rx_filters])");
          $fkey = $matches[1];
          $this->filters[$fkey] = $val;
@@ -252,17 +252,17 @@ abstract class QuickHandler
    public function build_obj_user( $uid, $user_row=null, $prefix='', $inclkeys='', $always=false )
    {
       $userinfo = array( 'id' => $uid );
-      if( ($always || $this->is_with_option(QWITH_USER_ID)) && is_array($user_row) )
+      if ( ($always || $this->is_with_option(QWITH_USER_ID)) && is_array($user_row) )
       {
          $userinfo['handle'] = @$user_row[$prefix.'Handle'];
          $userinfo['name'] = @$user_row[$prefix.'Name'];
 
-         if( strpos($inclkeys, 'country') !== false )
+         if ( strpos($inclkeys, 'country') !== false )
             $userinfo['country'] = @$user_row[$prefix.'Country'];
 
-         if( strpos($inclkeys, 'rating') !== false )
+         if ( strpos($inclkeys, 'rating') !== false )
          {
-            if( isset($user_row[$prefix.'Rating2']) )
+            if ( isset($user_row[$prefix.'Rating2']) )
             {
                $rating = $user_row[$prefix.'Rating2'];
                $userinfo['rating'] = echo_rating($rating, /*perc*/1, /*uid*/0, /*engl*/true, /*short*/1 );
@@ -272,7 +272,7 @@ abstract class QuickHandler
                $userinfo['rating'] = $userinfo['rating_elo'] = '';
          }
 
-         if( strpos($inclkeys, 'lastacc') !== false )
+         if ( strpos($inclkeys, 'lastacc') !== false )
             $userinfo['last_access'] = self::formatDate( @$user_row[$prefix.'X_Lastaccess'] );
       }
       return $userinfo;
@@ -280,9 +280,9 @@ abstract class QuickHandler
 
    protected function add_query_limits( &$qsql, $calc_rows )
    {
-      if( $calc_rows )
+      if ( $calc_rows )
          $qsql->add_part( SQLP_OPTS, SQLOPT_CALC_ROWS );
-      if( $this->list_limit > 0 )
+      if ( $this->list_limit > 0 )
          $qsql->add_part( SQLP_LIMIT,
             sprintf('%s,%s', $this->list_offset, $this->list_limit + 1) ); //+1 to check for has-next
    }
@@ -297,12 +297,12 @@ abstract class QuickHandler
    protected function add_list( $object_name, $list, $ordered_by='' )
    {
       $has_next = 0;
-      if( $this->list_limit > 0 && count($list) == $this->list_limit + 1 )
+      if ( $this->list_limit > 0 && count($list) == $this->list_limit + 1 )
       {
          $has_next = 1;
          array_pop( $list ); // remove last element to determine has-next
       }
-      elseif( $this->list_limit == 0 && $this->list_totals < 0 )
+      elseif ( $this->list_limit == 0 && $this->list_totals < 0 )
       {
          $this->list_totals = count($list);
       }
@@ -316,21 +316,21 @@ abstract class QuickHandler
       $this->addResultKey( 'list_order', ( $ordered_by ? $ordered_by : $this->list_order ) );
 
       // build "processed" list
-      if( count($list) && $this->check_list_style() ) // list-style = table
+      if ( count($list) && $this->check_list_style() ) // list-style = table
       {
          $this->addResultKey( 'list_header',
             self::buildObjectArray( $list[0], /*keys*/true, $this->rx_keep_fields ) );
 
          $out = array();
-         foreach( $list as $item )
+         foreach ( $list as $item )
             $out[] = self::buildObjectArray( $item, /*keys*/false, $this->rx_keep_fields );
       }
       else // list-style = json
       {
-         if( $this->rx_keep_fields )
+         if ( $this->rx_keep_fields )
          {
             $out = array();
-            foreach( $list as $elem )
+            foreach ( $list as $elem )
             {
                $this->clear_unexpected_fields( $elem );
                $out[] = $elem;
@@ -344,11 +344,11 @@ abstract class QuickHandler
 
    private function clear_unexpected_fields( &$arr )
    {
-      if( $this->rx_keep_fields )
+      if ( $this->rx_keep_fields )
       {
-         foreach( $arr as $key => $val )
+         foreach ( $arr as $key => $val )
          {
-            if( !preg_match($this->rx_keep_fields, $key) )
+            if ( !preg_match($this->rx_keep_fields, $key) )
                unset($arr[$key]);
          }
       }
@@ -391,12 +391,12 @@ abstract class QuickHandler
    protected static function checkArgsUnknown( $rx_opts='' )
    {
       $rx_chk_opts = QUICK_STD_OPTIONS;
-      if( (string)$rx_opts != '' )
+      if ( (string)$rx_opts != '' )
          $rx_chk_opts .= '|' . $rx_opts;
       $regex = sprintf( "/^(%s)\$/", $rx_chk_opts );
-      foreach( $_REQUEST as $key => $val )
+      foreach ( $_REQUEST as $key => $val )
       {
-         if( !isset($_COOKIE[$key]) && !preg_match($regex, $key) )
+         if ( !isset($_COOKIE[$key]) && !preg_match($regex, $key) )
             error('invalid_args', "QuickHandler:checkArgsUnknown.unknown_arg($key,allowed=[$rx_chk_opts])");
       }
    }//checkArgsUnknown
@@ -410,9 +410,9 @@ abstract class QuickHandler
    /*! \brief Ensures, that given args appear in URL-args; throw error if arg missing. */
    protected static function checkArgMandatory( $dbgmsg, $key, $val, $allow_empty=false )
    {
-      if( is_null($val) )
+      if ( is_null($val) )
          error('invalid_args', "QuickHandler:checkArgMandatory.miss_arg($dbgmsg,$key)");
-      elseif( !$allow_empty && (string)$val == '' )
+      elseif ( !$allow_empty && (string)$val == '' )
          error('invalid_args', "QuickHandler:checkArgMandatory.empty_arg($dbgmsg,$key)");
    }
 
@@ -432,17 +432,17 @@ abstract class QuickHandler
    protected static function buildObjectArray( $obj, $get_keys, $rx_keep_fields='', $prefix='' )
    {
       $out = array();
-      foreach( array_keys($obj) as $key )
+      foreach ( array_keys($obj) as $key )
       {
          $pkey = $prefix.$key;
-         if( $rx_keep_fields && !preg_match($rx_keep_fields, $pkey) )
+         if ( $rx_keep_fields && !preg_match($rx_keep_fields, $pkey) )
             continue;
 
          $val = $obj[$key];
-         if( is_array($val) )
+         if ( is_array($val) )
          {
             $arr = self::buildObjectArray($val, $get_keys, $rx_keep_fields, $pkey.'.' );
-            foreach( $arr as $elem )
+            foreach ( $arr as $elem )
                $out[] = $elem;
          }
          else

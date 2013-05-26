@@ -35,16 +35,16 @@ $GLOBALS['ThePage'] = new Page('TournamentNewsView');
    connect2mysql();
 
    $logged_in = who_is_logged( $player_row);
-   if( !$logged_in )
+   if ( !$logged_in )
       error('login_if_not_logged_in', 'Tournament.view_news');
-   if( !ALLOW_TOURNAMENTS )
+   if ( !ALLOW_TOURNAMENTS )
       error('feature_disabled', 'Tournament.view_news');
    $my_id = $player_row['ID'];
 
    $tid = (int) @$_REQUEST['tid'];
-   if( $tid < 0 ) $tid = 0;
+   if ( $tid < 0 ) $tid = 0;
    $tnews_id = (int) @$_REQUEST['tn'];
-   if( $tid == 0 || $tnews_id < 0 )
+   if ( $tid == 0 || $tnews_id < 0 )
       error('invalid_args', "Tournament.view_news.check_args($tid,$tnews_id)");
 
    $tourney = TournamentCache::load_cache_tournament( 'Tournament.view_news.find_tournament', $tid );
@@ -60,7 +60,7 @@ $GLOBALS['ThePage'] = new Page('TournamentNewsView');
       $allow_edit_tourney, $is_participant );
    $qsql->merge( TournamentNews::build_query_sql() );
    $tnews = TournamentNews::load_tournament_news_entry_by_query( $qsql );
-   if( is_null($tnews) )
+   if ( is_null($tnews) )
       error('unknown_tournament_news', "Tournament.view_news.find_tournament_news($tid,$tnews_id)");
 
    $page = "view_news.php?";
@@ -77,7 +77,7 @@ $GLOBALS['ThePage'] = new Page('TournamentNewsView');
    $menu_array = array();
    $menu_array[T_('Tournament info')] = "tournaments/view_tournament.php?tid=$tid";
    $menu_array[T_('Tournament news archive')] = "tournaments/list_news.php?tid=$tid";
-   if( $allow_edit_tourney ) # for TD
+   if ( $allow_edit_tourney ) # for TD
    {
       $menu_array[T_('Add news#tnews')] =
          array( 'url' => "tournaments/edit_news.php?tid=$tid", 'class' => 'TAdmin' );

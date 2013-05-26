@@ -34,7 +34,7 @@ function getLanguageText( $code=null )
    static $ARR_LANGUAGES = null; // language-id => language-text
 
    // lazy-init of texts
-   if( is_null($ARR_LANGUAGES) )
+   if ( is_null($ARR_LANGUAGES) )
    {
       // index => language-text
       // NOTE: index must be unique and in range (1..62), index added in array for clarity
@@ -94,10 +94,10 @@ function getLanguageText( $code=null )
       );
    }
 
-   if( is_null($code) )
+   if ( is_null($code) )
       return $ARR_LANGUAGES;
 
-   if( !isset($ARR_LANGUAGES[$code]) )
+   if ( !isset($ARR_LANGUAGES[$code]) )
       error('invalid_args', "Countries.getLanguageText($code)");
    return $ARR_LANGUAGES[$code];
 }//getLanguageText

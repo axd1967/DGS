@@ -35,7 +35,7 @@ $GLOBALS['ThePage'] = new Page('BulletinList');
    connect2mysql();
 
    $logged_in = who_is_logged( $player_row);
-   if( !$logged_in )
+   if ( !$logged_in )
       error('login_if_not_logged_in', 'list_bulletins');
    $my_id = $player_row['ID'];
    $cfg_tblcols = ConfigTableColumns::load_config( $my_id, CFGCOLS_BULLETIN_LIST );
@@ -43,7 +43,7 @@ $GLOBALS['ThePage'] = new Page('BulletinList');
    $was_admin = $is_admin = Bulletin::is_bulletin_admin();
    $mine = (@$_REQUEST['mine']) ? 1 : 0;
    $no_adm = ($mine || @$_REQUEST['no_adm']) ? 1 : 0;
-   if( $no_adm )
+   if ( $no_adm )
       $is_admin = false;
    $view_edit = $is_admin || $mine;
 
@@ -61,20 +61,20 @@ $GLOBALS['ThePage'] = new Page('BulletinList');
 
    // mark bulletin as read
    $markread = (int)get_request_arg('mr');
-   if( $markread > 0 )
+   if ( $markread > 0 )
       Bulletin::mark_bulletin_as_read( $markread );
 
    // config for filters
    $status_filter_array = array( T_('All') => '' );
    $idx_status_default = 0;
-   if( $view_edit )
+   if ( $view_edit )
    {
       $status_filter_array[T_('Changeable#B_status')] =
          "B.Status IN ('".BULLETIN_STATUS_NEW."','".BULLETIN_STATUS_PENDING."','" .
             BULLETIN_STATUS_REJECTED."','".BULLETIN_STATUS_SHOW."')";
       $status_filter_array[T_('Viewable#B_status')] =
          "B.Status IN ('".BULLETIN_STATUS_SHOW."','".BULLETIN_STATUS_ARCHIVE."')";
-      if( $is_admin )
+      if ( $is_admin )
       {
          $status_filter_array[T_('Admin#B_status')] =
             "B.Status IN ('".BULLETIN_STATUS_PENDING."','".BULLETIN_STATUS_SHOW."')";
@@ -87,11 +87,11 @@ $GLOBALS['ThePage'] = new Page('BulletinList');
       $status_filter_array[NO_VALUE] = ''; //sep
    }
    $cnt = count($status_filter_array);
-   foreach( GuiBulletin::getStatusText() as $status => $text )
+   foreach ( GuiBulletin::getStatusText() as $status => $text )
    {
-      if( $view_edit || $status == BULLETIN_STATUS_SHOW || $status == BULLETIN_STATUS_ARCHIVE )
+      if ( $view_edit || $status == BULLETIN_STATUS_SHOW || $status == BULLETIN_STATUS_ARCHIVE )
       {
-         if( $idx_status_default == 0 && $status == BULLETIN_STATUS_SHOW )
+         if ( $idx_status_default == 0 && $status == BULLETIN_STATUS_SHOW )
             $idx_status_default = $cnt;
          $cnt++;
          $status_filter_array[$text] = "B.Status='$status'";
@@ -99,15 +99,15 @@ $GLOBALS['ThePage'] = new Page('BulletinList');
    }
 
    $category_filter_array = array( T_('All') => '' );
-   foreach( GuiBulletin::getCategoryText() as $category => $text )
+   foreach ( GuiBulletin::getCategoryText() as $category => $text )
       $category_filter_array[$text] = "B.Category='$category'";
 
    $targettype_filter_array = array( T_('All Types#B_trg') => '' );
    $idxmap_ttypes = array( '' => '', 0 => '' ); // first-entry = all
    $cnt = 1;
-   foreach( GuiBulletin::getTargetTypeText() as $ttype => $text )
+   foreach ( GuiBulletin::getTargetTypeText() as $ttype => $text )
    {
-      if( $ttype == BULLETIN_TRG_UNSET )
+      if ( $ttype == BULLETIN_TRG_UNSET )
          continue;
       $idxmap_ttypes[$cnt++] = $ttype;
       $targettype_filter_array[$text] = "B.TargetType='$ttype'";
@@ -148,13 +148,13 @@ $GLOBALS['ThePage'] = new Page('BulletinList');
    $bfilter->add_filter( 8, 'Selection', $targettype_filter_array, true );
    $bfilter->add_filter(10, 'Selection', $read_filter_array, true,
          array( FC_FNAME => 'read', FC_STATIC => 1, FC_DEFAULT => 0 ) );
-   if( $view_edit )
+   if ( $view_edit )
       $bfilter->add_filter(12, 'Selection', $adminview_filter_array, true,
             array( FC_FNAME => 'view', FC_STATIC => 1, FC_ADD_HAVING => 1 ) );
    $bfilter->add_filter(14, 'Numeric', 'B.ID', true);
    $bfilter->init();
 
-   if( $mine )
+   if ( $mine )
    {
       $filter_handle =& $bfilter->get_filter(2);
       $filter_handle->parse_value( 'handle', @$player_row['Handle'] );
@@ -179,12 +179,12 @@ $GLOBALS['ThePage'] = new Page('BulletinList');
    $btable->add_tablehead( 8, T_('Target#bulletin'), 'Enum', TABLE_NO_HIDE, 'TargetType+');
    $btable->add_tablehead( 3, T_('Status#header'), 'Enum', TABLE_NO_HIDE, 'Status+');
    $btable->add_tablehead( 4, T_('Category#bulletin'), 'Enum', TABLE_NO_HIDE, 'Category+');
-   if( $view_edit )
+   if ( $view_edit )
       $btable->add_tablehead( 1, new TableHead( T_('Edit Bulletin#bulletin'), 'images/edit.gif'), 'ImagesLeft', TABLE_NO_HIDE);
    $btable->add_tablehead( 2, T_('Author#header'), 'User', 0, 'Handle+');
    $btable->add_tablehead( 5, T_('Published#header'), 'Date', TABLE_NO_HIDE, 'PublishTime-');
    $btable->add_tablehead(10, T_('Read#bulletin'), 'Image', TABLE_NO_HIDE, 'BR_Read+' );
-   if( $view_edit )
+   if ( $view_edit )
       $btable->add_tablehead(12, T_('View#bulletin'), 'Image', TABLE_NO_HIDE, 'B_View+' );
    $btable->add_tablehead(13, new TableHead( T_('Information#bulletin'), 'images/info.gif'), 'ImagesLeft', 0);
    $btable->add_tablehead( 6, T_('Subject#header'), null, TABLE_NO_SORT);
@@ -212,11 +212,11 @@ $GLOBALS['ThePage'] = new Page('BulletinList');
    start_page($title, true, $logged_in, $player_row,
                button_style($player_row['Button']) );
 
-   if( $is_admin )
+   if ( $is_admin )
       $title .= sprintf( ' - %s', span('AdminTitle', T_('Admin View#bulletin')) );
-   elseif( $was_admin )
+   elseif ( $was_admin )
       $title .= sprintf( ' - %s', span('AdminTitle', T_('Admin User-View#bulletin')) );
-   if( $mine )
+   if ( $mine )
       $title .= ' - ' . T_('My Bulletins#bulletin');
    section('Bulletin', $title );
 
@@ -226,49 +226,49 @@ $GLOBALS['ThePage'] = new Page('BulletinList');
       $btable->current_sort_string(1) .
       $btable->current_filter_string(1) .
       $btable->current_from_string(1);
-   if( $with_text )
+   if ( $with_text )
       $menu[T_('Hide texts')] = $baseURLMenu.'text=0';
    else
       $menu[T_('Show texts')] = $baseURLMenu.'text=1';
    make_menu( $menu, false);
 
 
-   while( ($show_rows-- > 0) && list(,$arr_item) = $iterator->getListIterator() )
+   while ( ($show_rows-- > 0) && list(,$arr_item) = $iterator->getListIterator() )
    {
       list( $bulletin, $orow ) = $arr_item;
       $uid = $bulletin->uid;
       $row_str = array();
 
-      if( $btable->Is_Column_Displayed[14] )
+      if ( $btable->Is_Column_Displayed[14] )
       {
-         if( $bulletin->allow_bulletin_user_view() )
+         if ( $bulletin->allow_bulletin_user_view() )
             $row_str[14] = ( @$orow['B_View'] )
                ? button_TD_anchor( "view_bulletin.php?bid=".$bulletin->ID, $bulletin->ID )
                : button_TD_anchor( '', $bulletin->ID, T_('View restricted to specific users#bulletin') );
          else
             $row_str[14] = "<a class=\"Button smaller\">{$bulletin->Status}</a>";
       }
-      if( @$btable->Is_Column_Displayed[ 1] )
+      if ( @$btable->Is_Column_Displayed[ 1] )
       {
          $links = '';
-         if( $is_admin )
+         if ( $is_admin )
          {
             $links .= span('AdminLink',
                anchor( $base_path."admin_bulletin.php?bid={$bulletin->ID}",
                   image( $base_path.'images/edit.gif', 'E', '', 'class="Action"' ), T_('Admin Bulletin')) );
          }
-         if( $uid == $my_id && $bulletin->allow_bulletin_user_edit($my_id) )
+         if ( $uid == $my_id && $bulletin->allow_bulletin_user_edit($my_id) )
          {
             $links .= anchor( $base_path."edit_bulletin.php?bid={$bulletin->ID}",
                image( $base_path.'images/edit.gif', 'E', '', 'class="Action"' ), T_('Edit Bulletin'));
          }
          $row_str[ 1] = $links;
       }
-      if( @$btable->Is_Column_Displayed[ 2] )
+      if ( @$btable->Is_Column_Displayed[ 2] )
          $row_str[ 2] = user_reference( REF_LINK, 1, '', $uid, $bulletin->User->Handle, '');
-      if( @$btable->Is_Column_Displayed[ 3] )
+      if ( @$btable->Is_Column_Displayed[ 3] )
          $row_str[ 3] = GuiBulletin::getStatusText( $bulletin->Status );
-      if( @$btable->Is_Column_Displayed[ 4] )
+      if ( @$btable->Is_Column_Displayed[ 4] )
       {
          $category = GuiBulletin::getCategoryText( $bulletin->Category );
          $row_str[4] = ( $bulletin->skipCategory() )
@@ -276,45 +276,45 @@ $GLOBALS['ThePage'] = new Page('BulletinList');
                    image( $base_path.'images/info.gif', T_('Category skipped#bulletin'), null) )
             : $category;
       }
-      if( @$btable->Is_Column_Displayed[ 5] )
+      if ( @$btable->Is_Column_Displayed[ 5] )
          $row_str[ 5] = formatDate($bulletin->PublishTime);
-      if( @$btable->Is_Column_Displayed[ 6] )
+      if ( @$btable->Is_Column_Displayed[ 6] )
       {
          $subject = make_html_safe( wordwrap($bulletin->Subject, 60), true, $rx_term );
          $row_str[ 6] = preg_replace( "/[\r\n]+/", '<br>', $subject ); //reduce multiple LF to one <br>
       }
-      if( @$btable->Is_Column_Displayed[ 7] )
+      if ( @$btable->Is_Column_Displayed[ 7] )
          $row_str[ 7] = formatDate($bulletin->Lastchanged);
-      if( @$btable->Is_Column_Displayed[ 8] )
+      if ( @$btable->Is_Column_Displayed[ 8] )
          $row_str[ 8] = GuiBulletin::getTargetTypeText( $bulletin->TargetType );
-      if( @$btable->Is_Column_Displayed[ 9] )
+      if ( @$btable->Is_Column_Displayed[ 9] )
          $row_str[ 9] = formatDate($bulletin->ExpireTime, NO_VALUE);
-      if( @$btable->Is_Column_Displayed[10] )
+      if ( @$btable->Is_Column_Displayed[10] )
       {
          $row_str[10] = (@$orow['BR_Read'])
             ? image( $base_path.'images/yes.gif', T_('Bulletin marked as read'), null, 'class="InTextImage"' )
             : image( $base_path.'images/no.gif', T_('Bulletin unread'), null, 'class="InTextImage"' );
       }
-      if( @$btable->Is_Column_Displayed[11] )
+      if ( @$btable->Is_Column_Displayed[11] )
          $row_str[11] = $bulletin->CountReads;
-      if( $view_edit && @$btable->Is_Column_Displayed[12] )
+      if ( $view_edit && @$btable->Is_Column_Displayed[12] )
       {
          $row_str[12] = (@$orow['B_View'])
             ? image( $base_path.'images/yes.gif', T_('Viewable as user#bulletin'), null, 'class="InTextImage"' )
             : image( $base_path.'images/no.gif', T_('Viewable by admin, but not by you as user#bulletin'), null, 'class="InTextImage"' );
       }
-      if( @$btable->Is_Column_Displayed[13] )
+      if ( @$btable->Is_Column_Displayed[13] )
       {
-         if( $bulletin->tid > 0 )
+         if ( $bulletin->tid > 0 )
             $info = echo_image_tournament_info($bulletin->tid);
-         elseif( $bulletin->gid > 0 )
+         elseif ( $bulletin->gid > 0 )
             $info = echo_image_game_players($bulletin->gid);
          else
             $info = '';
          $row_str[13] = $info;
       }
 
-      if( $with_text )
+      if ( $with_text )
       {
          $mark_as_read_url = ( !@$orow['BR_Read'] && $bulletin->Status == BULLETIN_STATUS_SHOW )
             ? $baseURLMenu.'text='.$with_text
@@ -336,7 +336,7 @@ $GLOBALS['ThePage'] = new Page('BulletinList');
    $menu_array = array();
    $menu_array[T_('Unread Bulletins')] = "list_bulletins.php?text=1".URI_AMP."view=1".URI_AMP."no_adm=1";
    $menu_array[T_('My Bulletins')] = "list_bulletins.php?text=0".URI_AMP."read=2".URI_AMP."mine=1".URI_AMP."no_adm=1";
-   if( $was_admin )
+   if ( $was_admin )
    {
       $menu_array[T_('All Bulletins')] =
          array( 'url' => "list_bulletins.php?read=2", 'class' => 'AdminLink' );

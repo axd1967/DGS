@@ -39,13 +39,13 @@ function error( $err, $debugmsg=NULL, $log_error=true )
    global $uhandle;
 
    $title= str_replace('_',' ',$err);
-   if( $log_error )
+   if ( $log_error )
       list( $xerr, $uri ) = DgsErrors::err_log( $uhandle, $err, $debugmsg);
    else
       $xerr = $err;
 
    global $rss_opened;
-   if( !$rss_opened )
+   if ( !$rss_opened )
       rss_open( 'ERROR');
    rss_error( $xerr, $title);
    rss_close();
@@ -91,11 +91,11 @@ Some examples:
 
 /*
 $xmltrans = get_html_translation_table(HTML_ENTITIES, ENT_QUOTES); //ENT_COMPAT
-foreach( $xmltrans as $key => $value )
+foreach ( $xmltrans as $key => $value )
    $xmltrans[$key] = '&#'.ord($key).';';
 */
 $xmltrans = array();
-for( $i=1; $i<0x20; $i++ )
+for ( $i=1; $i<0x20; $i++ )
    $xmltrans[chr($i)] = ''; //"&#$i;";
 unset( $xmltrans["\t"]);
 unset( $xmltrans["\n"]);
@@ -121,19 +121,19 @@ $xmltrans['$\''] = '$&quot;';
 //$xmltrans['$'] = '\$';
 //$xmltrans['\''] = '&#'.ord('\'').';';
 
-switch( (string)CHARSET_MODE )
+switch ( (string)CHARSET_MODE )
 {
    case 'iso':
       $encoding_used = 'iso-8859-1';
 
-      for( $i=0x80; $i<0x100 ; $i++ )
+      for ( $i=0x80; $i<0x100 ; $i++ )
          $xmltrans[chr($i)] = "&#$i;";
       break;
 
    case 'utf':
       $encoding_used = 'utf-8';
 
-      for( $i=0x80; $i<0x100 ; $i++ )
+      for ( $i=0x80; $i<0x100 ; $i++ )
          $xmltrans[chr($i)] = "&#$i;";
       break;
 
@@ -151,7 +151,7 @@ function rss_safe( $str )
 
    $arr = ( is_array($str) ) ? $str : array( $str );
    $out = array();
-   foreach( $arr as $line )
+   foreach ( $arr as $line )
    {
       $rline = reverse_htmlentities($line);
       $out[] = strtr($rline, $cdata_trans); // replace xml-chars (including '<')
@@ -179,7 +179,7 @@ function rss_date( $dat=0 )
 // $tag must be valid and $str must be safe
 function rss_tag( $tag, $str, $attr='')
 {
-   if( $attr )
+   if ( $attr )
       $attr = ' ' . $attr;
    return "<$tag$attr>$str</$tag>\n";
 }
@@ -195,16 +195,16 @@ function rss_open( $title, $description='', $html_clone='', $cache_minutes= CACH
 
    $last_modified_stamp= $NOW;
 
-   if( empty($encoding_used) )
+   if ( empty($encoding_used) )
    {
       $encoding_used = 'UTF-8'; //really better for RSS feeders
       //$encoding_used = 'iso-8859-1';
    }
 
-   if( empty($html_clone) )
+   if ( empty($html_clone) )
       $html_clone = HOSTBASE;
 
-   if( empty($description) )
+   if ( empty($description) )
       $description = $title;
 
    header('Content-Type: text/xml; charset='.$encoding_used);
@@ -237,18 +237,18 @@ function rss_close( )
 // $description : string | array( strings )
 function rss_item( $title, $link, $description='', $pubDate='', $category='', $guid='')
 {
-   if( empty($description) )
+   if ( empty($description) )
       $description = $title;
-   if( !is_null($guid) && empty($guid) )
+   if ( !is_null($guid) && empty($guid) )
       $guid = $link;
 
    $str = "  <item>\n";
    $str.= '   '.rss_tag( 'title', rss_safe( $title));
-   if( $link )
+   if ( $link )
       $str.= '   '.rss_tag( 'link', rss_link( $link));
-   if( !is_null($guid) && $guid )
+   if ( !is_null($guid) && $guid )
       $str.= '   '.rss_tag( 'guid', rss_link( $guid));
-   if( $category )
+   if ( $category )
       $str.= '   '.rss_tag( 'category', rss_safe( $category));
    //if( $pubDate )
       $str.= '   '.rss_tag( 'pubDate', rss_date( $pubDate));
@@ -261,9 +261,9 @@ function rss_item( $title, $link, $description='', $pubDate='', $category='', $g
 
 function rss_error( $str, $title='', $link='')
 {
-   if( !$link )
+   if ( !$link )
       $link= HOSTBASE;
-   if( !$title )
+   if ( !$title )
       $title= 'ERROR';
    else
       $title= 'ERROR: '.$title;
@@ -274,9 +274,9 @@ function rss_error( $str, $title='', $link='')
 
 function rss_warning( $str, $title='', $link='')
 {
-   if( !$link )
+   if ( !$link )
       $link= HOSTBASE;
-   if( !$title )
+   if ( !$title )
       $title= 'Warning';
    else
       $title= 'Warning: '.$title;
@@ -309,7 +309,7 @@ function rss_auth( $cancel_str, $uhandle='')
 
 // ------------ MAIN -----------------
 
-if( $is_down )
+if ( $is_down )
 {
    rss_open( 'WARNING');
    rss_warning($is_down_message, 'The server is down');
@@ -321,23 +321,23 @@ else
    $loggin_mode = '';
    $uhandle = get_request_arg('userid');
    $passwd = get_request_arg('passwd');
-   if( $uhandle && $passwd )
+   if ( $uhandle && $passwd )
       $loggin_mode = 'password';
-   else if( ALLOW_AUTH )
+   else if ( ALLOW_AUTH )
    {
       $uhandle = arg_stripslashes((string)@$_SERVER['PHP_AUTH_USER']);
       $passwd = arg_stripslashes((string)@$_SERVER['PHP_AUTH_PW']);
       $authid = get_request_arg('authid');
-      if( $authid && strcasecmp($authid,$uhandle) != 0 )
+      if ( $authid && strcasecmp($authid,$uhandle) != 0 )
       {
          $uhandle = $authid;
          $passwd = '';
          $loggin_mode = 'authenticate';
       }
-      else if( $uhandle && $passwd )
+      else if ( $uhandle && $passwd )
          $loggin_mode = 'password';
    }
-   if( !$loggin_mode )
+   if ( !$loggin_mode )
    {
       $uhandle= safe_getcookie('handle');
       $loggin_mode = 'cookie';
@@ -347,15 +347,15 @@ else
    // check for excessive usage
    // NOTE: Without checking DB, this can be abused to block other users. But that should be punished by an admin as abuse.
    //       Advantage like this is to avoid DB-requests.
-   if( (string)$uhandle == '' )
+   if ( (string)$uhandle == '' )
       error('invalid_user', "rss_status.check.miss_handle()", /*log-err*/false );
-   elseif( !is_legal_handle($uhandle) ) // check userid to avoid exploits as it's used in filename
+   elseif ( !is_legal_handle($uhandle) ) // check userid to avoid exploits as it's used in filename
       error('invalid_user', "rss_status.check.handle(".substr($uhandle,0,50).")");
    list( $allow_exec, $last_call_time ) =
       enforce_min_timeinterval( 'rss', 'rss_status-'.strtolower($uhandle), RSS_CHECK_MIN, RSS_CHECK_MAX );
 
    define('MONITOR_RSS_HANDLES', '');
-   if( MONITOR_RSS_HANDLES && preg_match("/^(".MONITOR_RSS_HANDLES.")$/i", $uhandle) )
+   if ( MONITOR_RSS_HANDLES && preg_match("/^(".MONITOR_RSS_HANDLES.")$/i", $uhandle) )
       error_log("[MONITOR-RSS] user=[$uhandle]: allow=[".($allow_exec?1:0)."] last_call=[".($last_call_time > 0 ? date(DATE_FMT_QUICK, $last_call_time) : 0)."]");
 
    //disabling caches make some RSS feeders to instantaneously refresh.
@@ -364,7 +364,7 @@ else
    $channel_title = "RSS-Status of $uhandle";
    $channel_description_fmt = "Bulletins, Messages and Games for $uhandle built at [%s]";
    $channel_description = sprintf( $channel_description_fmt, rss_date($NOW) ); // no TZ set yet
-   if( !$allow_exec )
+   if ( !$allow_exec )
    {
       rss_open( "[DISABLED] $channel_title", $channel_description, HOSTBASE.'status.php' );
 
@@ -386,7 +386,7 @@ else
 
    connect2mysql();
 
-   if( $loggin_mode=='password' )
+   if ( $loggin_mode=='password' )
    {
       // temp password?
 
@@ -394,21 +394,21 @@ else
          "SELECT *, UNIX_TIMESTAMP(Sessionexpire) AS Expire ".
          "FROM Players WHERE Handle='".mysql_addslashes($uhandle)."' LIMIT 1" );
 
-      if( @mysql_num_rows($result) == 1 )
+      if ( @mysql_num_rows($result) == 1 )
       {
          $player_row = mysql_fetch_array($result);
 
-         if( check_password( $uhandle, $player_row["Password"], $player_row["Newpassword"], $passwd ) )
+         if ( check_password( $uhandle, $player_row["Password"], $player_row["Newpassword"], $passwd ) )
             $logged_in = true;
          else
             error('wrong_password', "rss_status.check_password($uhandle)");
 
-         if( (@$player_row['AdminOptions'] & ADMOPT_DENY_LOGIN) )
+         if ( (@$player_row['AdminOptions'] & ADMOPT_DENY_LOGIN) )
             error('login_denied', "rss_status.check.user($uhandle)");
       }
       //else error('wrong_userid', "rss_status.check_user($uhandle)");
    }
-   elseif( $loggin_mode=='cookie' )
+   elseif ( $loggin_mode=='cookie' )
    {
       // logged in?
 
@@ -416,23 +416,23 @@ else
          "SELECT *, UNIX_TIMESTAMP(Sessionexpire) AS Expire ".
          "FROM Players WHERE Handle='".mysql_addslashes($uhandle)."' LIMIT 1" );
 
-      if( @mysql_num_rows($result) == 1 )
+      if ( @mysql_num_rows($result) == 1 )
       {
          $player_row = mysql_fetch_assoc($result);
 
-         if( $player_row['Sessioncode'] === safe_getcookie('sessioncode') && $player_row["Expire"] >= $NOW )
+         if ( $player_row['Sessioncode'] === safe_getcookie('sessioncode') && $player_row["Expire"] >= $NOW )
             $logged_in = true;
 
-         if( (@$player_row['AdminOptions'] & ADMOPT_DENY_LOGIN) )
+         if ( (@$player_row['AdminOptions'] & ADMOPT_DENY_LOGIN) )
             error('login_denied', "wap_status.check.cookie.user($uhandle)");
       }
    }
 
    writeIpStats('RSS');
 
-   if( !$logged_in )
+   if ( !$logged_in )
    {
-      if( ALLOW_AUTH ) //or $loggin_mode=='authenticate'
+      if ( ALLOW_AUTH ) //or $loggin_mode=='authenticate'
          rss_auth( 'Unauthorized access forbidden!', $uhandle);
       error('not_logged_in', "rss_status.check_login($uhandle)");
    }
@@ -455,17 +455,17 @@ else
 
    // Unread Bulletins
 
-   if( $player_row['CountBulletinNew'] < 0 )
+   if ( $player_row['CountBulletinNew'] < 0 )
       Bulletin::update_count_bulletin_new( 'rss_status', $my_id, COUNTNEW_RECALC );
 
-   if( $player_row['CountBulletinNew'] > 0 )
+   if ( $player_row['CountBulletinNew'] > 0 )
    {
       $arr_bulletins = Bulletin::load_cache_bulletins( 'quick_status', $my_id );
-      if( count($arr_bulletins) > 0 )
+      if ( count($arr_bulletins) > 0 )
          $nothing_found = false;
 
       $cat = 'Status/Bulletin';
-      foreach( $arr_bulletins as $bulletin )
+      foreach ( $arr_bulletins as $bulletin )
       {
          $tit= sprintf( T_('Bulletin to %s with "%s"#rss'),
                         GuiBulletin::getTargetTypeText($bulletin->TargetType),
@@ -494,11 +494,11 @@ else
    $result = db_query( 'rss3', $query );
 
    $cat= 'Status/Message';
-   while( $row = mysql_fetch_assoc($result) )
+   while ( $row = mysql_fetch_assoc($result) )
    {
       $nothing_found = false;
       $sendname = @$row['sender'];
-      if( !$sendname )
+      if ( !$sendname )
          $sendname = '[Server message]';
       else
          $sendname.= " (".@$row['sendhndl'].")";
@@ -523,7 +523,7 @@ else
    $result = db_query( 'rss.find_games', $qsql->get_select() );
    $cat= 'Status/Game';
    $clrs="BW"; //player's color... so color to play.
-   while( $row = mysql_fetch_assoc($result) )
+   while ( $row = mysql_fetch_assoc($result) )
    {
       $nothing_found = false;
       $opponame = @$row['opp_Name'];
@@ -533,7 +533,7 @@ else
       $move = (int)@$row['Moves'];
       $game_status = @$row['Status'];
       $game_type = GameTexts::format_game_type($row['GameType'], $row['GamePlayers']);
-      if( $game_status == GAME_STATUS_KOMI )
+      if ( $game_status == GAME_STATUS_KOMI )
           $game_type .= GameTexts::build_fairkomi_gametype($game_status, /*raw*/true);
 
       $tit= sprintf( T_('Game of %s with %s#rss'), $game_type, $opponame );
@@ -549,7 +549,7 @@ else
    mysql_free_result($result);
 
 
-   if( $nothing_found )
+   if ( $nothing_found )
    {
       //rss_warning('empty lists', 'empty lists', HOSTBASE.'status.php');
       $tit= T_('Empty lists#rss');

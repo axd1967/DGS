@@ -76,7 +76,7 @@ class CountUrls {
 
         System.out.println();
         System.out.println("     COUNT                         TIME             URL");
-        for( Map.Entry<String,Data> e : sortMAP.entrySet() ) {
+        for ( Map.Entry<String,Data> e : sortMAP.entrySet() ) {
             Data data = e.getValue();
             print( e.getKey(), data.cnt, data.rtime, cnt, timeall );
         }
@@ -87,7 +87,7 @@ class CountUrls {
 
     public static void inc( String url, long rtime ) {
         Data data = MAP.get(url);
-        if( data == null ) {
+        if ( data == null ) {
             data = new Data(rtime);
             MAP.put(url, data);
         } else {

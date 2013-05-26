@@ -38,11 +38,11 @@ define('SEPLINE', "\n<p><hr>\n");
 
 
    $logged_in = who_is_logged( $player_row);
-   if( !$logged_in )
+   if ( !$logged_in )
       error('login_if_not_logged_in', 'scripts.forum_consistency');
-   if( $player_row['ID'] <= GUESTS_ID_MAX )
+   if ( $player_row['ID'] <= GUESTS_ID_MAX )
       error('not_allowed_for_guest', 'scripts.forum_consistency');
-   if( !(@$player_row['admin_level'] & ADMIN_DATABASE) )
+   if ( !(@$player_row['admin_level'] & ADMIN_DATABASE) )
       error('adminlevel_too_low', 'scripts.forum_consistency');
 
    $page = $_SERVER['PHP_SELF'];
@@ -56,7 +56,7 @@ define('SEPLINE', "\n<p><hr>\n");
       "  tr.hil { background: #ffb010; }" );
 
    $withnew = get_request_arg('withnew');
-   if( $do_it = @$_REQUEST['do_it'] )
+   if ( $do_it = @$_REQUEST['do_it'] )
    {
       echo "<p>*** Fixes errors ***"
          ."<br>".anchor(make_url($page, $page_args), 'Just show it')
@@ -84,7 +84,7 @@ define('SEPLINE', "\n<p><hr>\n");
    echo SEPLINE;
 
    $forumlist = Forum::load_fix_forum_list();
-   foreach( $forumlist as $forum )
+   foreach ( $forumlist as $forum )
    {
       echo sprintf( "Check forum ID [%s] Name [%s]: LastPost=%s, PostsInThread=%s, ThreadsInForum=%s :<br>\n",
             $forum->id, $forum->name, $forum->last_post_id, $forum->count_posts, $forum->count_threads );
@@ -106,7 +106,7 @@ define('SEPLINE', "\n<p><hr>\n");
       'FROM Posts ' .
       "WHERE Thread_ID>0 AND Parent_ID=0" );
    $threads = array(); # ID => ID,Forum_ID,PostsInThread,LastPost,X_Lastchanged
-   while( $row = mysql_fetch_array( $result ) )
+   while ( $row = mysql_fetch_array( $result ) )
    {
       $threads[$row['ID']] = $row;
    }
@@ -121,10 +121,10 @@ define('SEPLINE', "\n<p><hr>\n");
       "WHERE Thread_ID>0 AND Approved='Y' AND PosIndex>'' " .
       "GROUP BY Thread_ID" );
    $upd_arr = array();
-   while( $row = mysql_fetch_array( $result ) )
+   while ( $row = mysql_fetch_array( $result ) )
    {
       $tid = $row['Thread_ID'];
-      if( isset($threads[$tid]) && ($threads[$tid]['PostsInThread'] != $row['X_CountPosts']) )
+      if ( isset($threads[$tid]) && ($threads[$tid]['PostsInThread'] != $row['X_CountPosts']) )
          $upd_arr[] = "UPDATE Posts SET PostsInThread={$row['X_CountPosts']} WHERE ID='$tid' LIMIT 1";
    }
    mysql_free_result($result);
@@ -138,27 +138,27 @@ define('SEPLINE', "\n<p><hr>\n");
 
    $upd_arr = array();
    $upd_freads = array(); // fid => 1
-   foreach( $threads as $tid => $thread )
+   foreach ( $threads as $tid => $thread )
    {
       $row = mysql_single_fetch( "forum_consistency.read_thread.LastPost_Lastchanged($tid)",
          "SELECT ID AS X_LastPost, Forum_ID, UNIX_TIMESTAMP(Time) AS X_Lastchanged " .
          "FROM Posts " .
          "WHERE Thread_ID='$tid' AND Approved='Y' AND PosIndex>'' " .
          "ORDER BY Time DESC LIMIT 1" );
-      if( $row && ($row['X_LastPost'] != $thread['LastPost']
+      if ( $row && ($row['X_LastPost'] != $thread['LastPost']
                 || $row['X_Lastchanged'] != $thread['X_Lastchanged'] ))
       {
          $upd_arr[] = "UPDATE Posts SET LastPost={$row['X_LastPost']}, " .
             "Lastchanged=FROM_UNIXTIME({$row['X_Lastchanged']}) WHERE ID='$tid' LIMIT 1";
 
-         if( $row['X_Lastchanged'] != $thread['X_Lastchanged'] )
+         if ( $row['X_Lastchanged'] != $thread['X_Lastchanged'] )
             $upd_freads[$row['Forum_ID']] = 1;
       }
    }
 
-   if( count($upd_freads) )
+   if ( count($upd_freads) )
    {
-      foreach( $upd_freads as $fid => $tmp )
+      foreach ( $upd_freads as $fid => $tmp )
          $upd_arr[] = "UPDATE Forums SET Updated=GREATEST(Updated,FROM_UNIXTIME($NOW)) "
             . "WHERE ID=$fid LIMIT 1";
 
@@ -169,7 +169,7 @@ define('SEPLINE', "\n<p><hr>\n");
 
    do_updates( 'forum_consistency.update_thread.LastPost_Lastchanged', $upd_arr, $do_it );
 
-   foreach( $upd_freads as $fid => $tmp )
+   foreach ( $upd_freads as $fid => $tmp )
       Forum::delete_cache_forum( 'forum_consistency.update_thread.LastPost_Lastchanged', $fid );
 
 
@@ -184,10 +184,10 @@ define('SEPLINE', "\n<p><hr>\n");
       "GROUP BY Thread_ID " .
       "HAVING X_Count > 1" );
    $upd_arr = array();
-   while( $row = mysql_fetch_array( $result ) )
+   while ( $row = mysql_fetch_array( $result ) )
    {
       $tid = $row['Thread_ID'];
-      if( isset($threads[$tid]) )
+      if ( isset($threads[$tid]) )
       {
          $fix_fid = $threads[$tid]['Forum_ID'];
          $upd_arr[] = "UPDATE Posts SET Forum_ID='$fix_fid' " .
@@ -213,10 +213,10 @@ define('SEPLINE', "\n<p><hr>\n");
    $upd_arr = array();
    $upd_arr[] = "DELETE FROM Forumreads WHERE Thread_ID=0";
 
-   if( $withnew )
+   if ( $withnew )
       update_forum_global_post_update( $do_it, $NOW );
 
-   if( !$withnew )
+   if ( !$withnew )
       echo "... will be SKIPPED!<br>\n(need NEW-fix switch to be executed) !!<br>\n";
    do_updates( 'forum_consistency.forum.forum_reads.delete', $upd_arr, ($do_it && $withnew) );
 
@@ -235,9 +235,9 @@ define('SEPLINE', "\n<p><hr>\n");
       "FROM Posts LEFT JOIN Players AS PL ON PL.ID=Posts.User_ID " .
       "HAVING ISNULL(Author)" );
    $result_count = @mysql_num_rows($result);
-   if( $result_count > 0)
+   if ( $result_count > 0)
       echo "<p><font color=darkred><b>NOTE: The following errors can't be fixed automatically!!</b></font><br>\n";
-   while( $row = mysql_fetch_array( $result ) )
+   while ( $row = mysql_fetch_array( $result ) )
    {
       $cnt_err++;
       echo sprintf( "Found post with User_ID=%s for: Posts WHERE ID=%s AND Forum_ID=%s AND Thread_ID=%s<br>\n",
@@ -263,21 +263,21 @@ define('SEPLINE', "\n<p><hr>\n");
 
 function update_forum_global_post_update( $do_it, $time )
 {
-   if( !$do_it ) echo "... SKIP ";
+   if ( !$do_it ) echo "... SKIP ";
    echo "... triggered forum global update with ForumRead.trigger_recalc_global_post_update()<br>\n";
-   if( $do_it ) ForumRead::trigger_recalc_global_post_update( $time );
+   if ( $do_it ) ForumRead::trigger_recalc_global_post_update( $time );
 }
 
 function do_updates( $dbgmsg, $upd_arr, $do_it )
 {
-   if( count($upd_arr) == 0 )
+   if ( count($upd_arr) == 0 )
       return;
 
    echo '<pre>';
-   foreach( $upd_arr as $query )
+   foreach ( $upd_arr as $query )
    {
       echo $query, "\n";
-      if( $do_it )
+      if ( $do_it )
          db_query( $dbgmsg, $query );
    }
    echo '</pre>';

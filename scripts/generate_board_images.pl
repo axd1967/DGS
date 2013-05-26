@@ -141,7 +141,7 @@ sub draw_number
          $w = gimp_drawable_width ($newLayer);
      }
 #     $w = gimp_drawable_width ($newLayer);
-#     if( int($text) % 10 == 1 )
+#     if ( int($text) % 10 == 1 )
 #     {
 #         $w += $size * 0.06;
 #     }
@@ -216,7 +216,7 @@ sub save_image
 {
     my ($name, $delete) = @_;
     print "$name ";
-    if( $size != $final_size )
+    if ( $size != $final_size )
     {
         resize($final_size, $final_size);
     }
@@ -318,7 +318,7 @@ $letter_font='URW Bookman L,';
 
 @Sizes = grep { $_ > 0 } @ARGV;
 
-if( $#Sizes < 0 )
+if ( $#Sizes < 0 )
 {
     @Sizes = (5, 7, 9, 11, 13, 17, 21, 25, 29, 35, 42, 50);
 #    @Sizes = (5, 7, 9, 11, 13, 15, 17, 19, 21, 25, 29, 35, 42, 50, 58, 70, 84, 100);
@@ -346,11 +346,11 @@ foreach $final_size (@Sizes)
                 (0.04 * ($final_size - 13) + 0.07 * (21 - $final_size)) / (21 - 13) :
                 0.04 );
 
-    if( $ARGV[0] ne 'board' )
+    if ( $ARGV[0] ne 'board' )
     {
         for $color ('b', 'w')
         {
-            if( $color eq 'b' )
+            if ( $color eq 'b' )
             {
                 $file='BigBlack.png';
                 $markfile='BigBlackMark.png';
@@ -396,7 +396,7 @@ foreach $final_size (@Sizes)
             save_image ($color."x", 0);
 
 
-            if( $color eq 'b' )
+            if ( $color eq 'b' )
             {
                 paste_into_layer($final_size * 8, [255, 255, 255]);
                 draw_filled_square (0.41);
@@ -421,7 +421,7 @@ foreach $final_size (@Sizes)
             print "$number_font_size \n";
             $number_font_height = get_font_height ($number_font);
             print "$number_font_height \n";
-            for($k=1; $k <= $HIGHEST_STONE_NUMBER; $k++)
+            for ($k=1; $k <= $HIGHEST_STONE_NUMBER; $k++)
             {
                 paste_into_layer($final_size * 8, $foreground_color);
                 draw_number( $k );
@@ -465,7 +465,7 @@ foreach $final_size (@Sizes)
 
 
 
-    if( $ARGV[0] ne 'stones' )
+    if ( $ARGV[0] ne 'stones' )
     {
 
 
@@ -477,11 +477,11 @@ foreach $final_size (@Sizes)
         $rightchars = ['l','','r'];
         $hoshi = 0;
 
-        for( $up=-1; $up < 2; $up++ )
+        for ( $up=-1; $up < 2; $up++ )
         {
             $upchar = $upchars->[$up+1];
 
-            for( $right=-1; $right < 2; $right++ )
+            for ( $right=-1; $right < 2; $right++ )
             {
                 $rightchar = $rightchars->[$right+1];
 
@@ -538,9 +538,9 @@ foreach $final_size (@Sizes)
                 draw_filled_square (0.41);
                 save_image ($upchar.$rightchar."g", 0);
 
-                if( $right == 0 and $up == 0 )
+                if ( $right == 0 and $up == 0 )
                 {
-                    if( $upchar eq "e" )
+                    if ( $upchar eq "e" )
                     {
                         $upchar = "h";
                         $hoshi = ($final_size >= 44 ? 3
@@ -593,7 +593,7 @@ foreach $final_size (@Sizes)
         resize ($final_size, $final_size);
         $letters = "abcdefghijklmnopqrstuvwxyz";
 
-        for($k=0; $k < 26; $k++)
+        for ($k=0; $k < 26; $k++)
         {
             $letter = substr($letters, $k, 1);
             clear_image ();
@@ -624,7 +624,7 @@ foreach $final_size (@Sizes)
         resize ($final_size, $final_size);
         $letters = "abcdefghjklmnopqrstuvwxyz";
 
-        for($k=0; $k < 25; $k++)
+        for ($k=0; $k < 25; $k++)
         {
             $letter = substr($letters, $k, 1);
             bg_fill_image ();
@@ -635,7 +635,7 @@ foreach $final_size (@Sizes)
         $size_x = round($final_size * 31 / 25 - 0.5);
         resize ($size_x, $final_size);
 
-        for($k=1; $k < 26; $k++)
+        for ($k=1; $k < 26; $k++)
         {
             bg_fill_image ();
             draw_letter ("0    ".$k."    0", $size_x, $size);

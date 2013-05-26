@@ -46,7 +46,7 @@ define('TTF_HEIGHT', 10); //Font height
 //if( function_exists('imagefilledarc') && defined('IMG_ARC_PIE') )
 define('GD2_ARC',function_exists('imagefilledarc') && defined('IMG_ARC_PIE'));
 
-if( !defined('M_2PI') )
+if ( !defined('M_2PI') )
    define('M_2PI', 2*M_PI);
 
 //For IMG_COLOR_STYLED alignment = count of imagesetstyle() arrays.
@@ -59,7 +59,7 @@ define('PIE_SHADOW_FACTOR', .70);
 
 function scale($x, $min, $max, $offset, $size)
 {
-   if( $min == $max || $size < 1 )
+   if ( $min == $max || $size < 1 )
       return round( $offset);
    return round( $offset + (($x-$min)/($max-$min))*$size );
 } //scale
@@ -67,7 +67,7 @@ function scale($x, $min, $max, $offset, $size)
 function gscale($x)
 {
    global $GSCALEMIN, $GSCALEMAX, $GSCALEOFFSET, $GSCALESIZE;
-   if( $GSCALEMIN == $GSCALEMAX || $GSCALESIZE < 1 )
+   if ( $GSCALEMIN == $GSCALEMAX || $GSCALESIZE < 1 )
       return round( $GSCALEOFFSET);
    return round( $GSCALEOFFSET + (($x-$GSCALEMIN)/($GSCALEMAX-$GSCALEMIN))*$GSCALESIZE );
 }//gscale
@@ -89,25 +89,25 @@ function getellipticpoint($x, $y, $w, $h, $radian)
          $y + round( sin($radian) * $h),
       );
 /* Must follow this charter:
-   while( $radian >= M_2PI ) $radian-= M_2PI;
-   while( $radian < 0 ) $radian+= M_2PI;
+   while ( $radian >= M_2PI ) $radian-= M_2PI;
+   while ( $radian < 0 ) $radian+= M_2PI;
    $sw = $sh = 1;
-   if( $radian > M_PI )
+   if ( $radian > M_PI )
    {
       $radian = M_2PI-$radian;
       $sh = -$sh;
    }
-   if( $radian > M_PI_2 )
+   if ( $radian > M_PI_2 )
    {
       $radian = M_PI-$radian;
       $sw = -$sw;
    }
-   if( $h < 0 )
+   if ( $h < 0 )
    {
       $h = -$h;
       $sh = -$sh;
    }
-   if( $w < 0 )
+   if ( $w < 0 )
    {
       $w = -$w;
       $sw = -$sw;
@@ -126,7 +126,7 @@ function points_reverse( &$points, $xoff=0, $yoff=0)
 {
    $n = (count($points)&-2)-1;
    $p = array();
-   while( $n > 0 )
+   while ( $n > 0 )
    {
       $p[] = $points[$n-1] + $xoff;
       $p[] = $points[$n] + $yoff;
@@ -138,7 +138,7 @@ function points_reverse( &$points, $xoff=0, $yoff=0)
 function points_join($pointX, $pointY)
 {
    $points = array();
-   while( (list($dummy, $x)=each( $pointX))
+   while ( (list($dummy, $x)=each( $pointX))
        && (list($dummy, $y)=each( $pointY)) )
    {
       $points[]= $x;
@@ -152,7 +152,7 @@ function points_split(&$points, &$pointX, &$pointY)
    reset( $points);
    $pointX = array();
    $pointY = array();
-   while( (list($dummy, $x)=each( $points))
+   while ( (list($dummy, $x)=each( $points))
        && (list($dummy, $y)=each( $points)) )
    {
       $pointX[]= $x;
@@ -172,7 +172,7 @@ function points_mapXY($callback, &$points)
 {
    reset( $points);
    $p = array();
-   while( (list($dummy, $x)=each( $points))
+   while ( (list($dummy, $x)=each( $points))
        && (list($dummy, $y)=each( $points)) )
    {
       //call_user_func($callback, &$x, &$y); //does not pass references
@@ -198,25 +198,25 @@ function points_mapXY($callback, &$points)
  */
 function colortoRGB($r, $g=NULL, $b=NULL)
 {
-   if( is_array($r) )
+   if ( is_array($r) )
    {
       $tmp = $r;
       @list($r,$g,$b) = $tmp;
    }
-   if( is_string($r) ) // i.e. 'ff802a'
+   if ( is_string($r) ) // i.e. 'ff802a'
    {
-      if( substr($r,0,1) == '#' )
+      if ( substr($r,0,1) == '#' )
          $r = substr($r,1,6);
       else
          $r = substr($r,0,6);
       $r = base_convert($r, 16, 10);
    }
-   if( !isset($g) )
+   if ( !isset($g) )
    {
       $g = $r & 255;
       $r >>= 8;
    }
-   if( !isset($b) )
+   if ( !isset($b) )
    {
       $b = $g;
       $g = $r & 255;
@@ -241,10 +241,10 @@ function patterncolor($n)
 function get_image_type( $filename)
 {
    $type= @getimagesize($filename);
-   if( !is_array($type) )
+   if ( !is_array($type) )
       return false;
    $type=(int)$type[2];
-   switch( (int)$type )
+   switch ( (int)$type )
    {
       case IMAGETYPE_GIF:  $mime= 'image/gif'; break;
       case IMAGETYPE_JPEG: $mime= 'image/jpeg'; break;
@@ -260,14 +260,14 @@ function get_image_type( $filename)
 function image_passthru( $filename, $modified=null, $expire=null)
 {
    $type= get_image_type($filename);
-   if( is_array($type) )
+   if ( is_array($type) )
    {
       $img= @read_from_file($filename);
-      if( $img )
+      if ( $img )
       {
-         if( isset($modified) )
+         if ( isset($modified) )
             header('Last-Modified: ' . gmdate(GMDATE_FMT, $modified));
-         if( isset($expire) )
+         if ( isset($expire) )
             header('Expires: ' . gmdate(GMDATE_FMT, $expire));
          header('Content-type: '.$type[1]);
          header('Content-Length: '.strlen($img));
@@ -332,10 +332,10 @@ class Graph
    public function __construct( $width=640, $height=0, $bgcolor=0xffffff )
    {
       $width = (int)$width;
-      if( $width <= 1 )
+      if ( $width <= 1 )
          $width = 640;
       $height = (int)$height;
-      if( $height <= 0 )
+      if ( $height <= 0 )
          $height = (int)($width * 3 / 4);
 
       $this->width = $width;
@@ -343,7 +343,7 @@ class Graph
       $this->im = imagecreate( $width, $height);
       $this->bkground = $this->colorallocate($bgcolor); //first=background color
 
-      if( !($x=(string)@$_GET['font']) )
+      if ( !($x=(string)@$_GET['font']) )
          $x = TTF_NAME;
       $this->setfont($x);
    }//__construct
@@ -353,10 +353,10 @@ class Graph
    public function setfont( $font='')
    {
       //TTF need GD and Freetype.
-      if( $font > '' && $font != '*' && function_exists('imagettftext') )
+      if ( $font > '' && $font != '*' && function_exists('imagettftext') )
       {
          $file = sprintf(TTF_PATH, $font);
-         if( is_file($file) //file_exists() may return false because of safe_mode
+         if ( is_file($file) //file_exists() may return false because of safe_mode
                && is_readable($file) ) //...and access rights check if needed
          {
             $this->TTFfile = $file;
@@ -371,7 +371,7 @@ class Graph
 
    public function labelbox($str)
    {
-      if( $this->TTFfile > '' )
+      if ( $this->TTFfile > '' )
          return TTFlabelbox($this, $str);
       else
          return EMBlabelbox($this, $str);
@@ -380,7 +380,7 @@ class Graph
    //$x,$y is the upper left corner
    public function label($x, $y, $str, $colorid)
    {
-      if( $this->TTFfile > '' )
+      if ( $this->TTFfile > '' )
          return TTFlabel($this, $x, $y, $str, $colorid);
       else
          return EMBlabel($this, $x, $y, $str, $colorid);
@@ -404,9 +404,9 @@ class Graph
    {
       list($r,$g,$b) = colortoRGB($r, $g, $b);
       $c = imagecolorexact($this->im, $r, $g, $b);
-      if( $c >= 0 ) return $c;
+      if ( $c >= 0 ) return $c;
       $c = imagecolorallocate($this->im, $r, $g, $b);
-      if( $c >= 0 ) return $c;
+      if ( $c >= 0 ) return $c;
       return imagecolorclosest($this->im, $r, $g, $b);
    }//getcolor
 
@@ -424,7 +424,7 @@ class Graph
 
    public function curve(&$pointX, &$pointY, $nr_points, $colorid)
    {
-      for( $i=1; $i<$nr_points; $i++)
+      for ( $i=1; $i<$nr_points; $i++)
          imageline($this->im,
             $pointX[$i-1],$pointY[$i-1],$pointX[$i],$pointY[$i],$colorid);
    }//curve
@@ -437,7 +437,7 @@ class Graph
    //like imagepolygon() but open
    public function polyline(&$points, $nr_points, $colorid)
    {
-      for( $i=0; $i<$nr_points-1; $i++)
+      for ( $i=0; $i<$nr_points-1; $i++)
       {
          imageline($this->im, $points[2*$i], $points[2*$i+1],
                             $points[2*$i+2], $points[2*$i+3], $colorid);
@@ -446,15 +446,15 @@ class Graph
 
    public function filledpolygon(&$points, $nr_points, $colorid)
    {
-      if( $nr_points > 2 )
+      if ( $nr_points > 2 )
          imagefilledpolygon($this->im, $points, $nr_points, $colorid);
-      if( $nr_points > 1 )
+      if ( $nr_points > 1 )
       {
          //also fix a strange bug of imagefilledpolygon() that
          //does not cover every frontier lines.
          $this->polyline($points, $nr_points, $colorid);
       }
-      else if( $nr_points > 0 )
+      else if ( $nr_points > 0 )
          imagesetpixel($this->im, $points[0], $points[1], $colorid);
    }//filledpolygon
 
@@ -469,23 +469,23 @@ class Graph
 
    public function send_image()
    {
-      if( function_exists("imagepng") )
+      if ( function_exists("imagepng") )
       {
          header("Content-type: image/png");
          //header('Content-Length: ' . strlen($img));
          imagepng($this->im);
       }
-      elseif( function_exists("imagegif") )
+      elseif ( function_exists("imagegif") )
       {
          header("Content-type: image/gif");
          imagegif($this->im);
       }
-      elseif( function_exists("imagejpeg") )
+      elseif ( function_exists("imagejpeg") )
       {
          header("Content-type: image/jpeg");
          imagejpeg($this->im, '', 0.5);
       }
-      elseif( function_exists("imagewbmp") )
+      elseif ( function_exists("imagewbmp") )
       { //for wap devices
          header("Content-type: image/vnd.wap.wbmp");
          imagewbmp($this->im);
@@ -527,7 +527,7 @@ class Graph
    /*! \brief Set the graph box (values of two opposite corners of the rectangle). */
    public function setgraphbox($x1, $y1, $x2, $y2)
    {
-      if( $x1 > $x2 )
+      if ( $x1 > $x2 )
       {
          $this->offsetX = $x2;
          $this->sizeX = $x1-$x2;
@@ -539,7 +539,7 @@ class Graph
       }
       $this->boxleft = $this->offsetX;
       $this->boxright = $this->offsetX+$this->sizeX;
-      if( $y1 > $y2 )
+      if ( $y1 > $y2 )
       {
          $this->offsetY = $y2;
          $this->sizeY = $y1-$y2;
@@ -587,15 +587,15 @@ class Graph
    public function gridX( $start, $step, $align, $textfct='', $textcolorid=NULL, $linefct='', $linecolorid=NULL,
          $linetype=2, $lbound=false, $ubound=false )
    {
-      if( !isset($textfct) || !$textfct )
+      if ( !isset($textfct) || !$textfct )
          $textfct = 'fnop';
-      if( !isset($linefct) || !$linefct )
+      if ( !isset($linefct) || !$linefct )
          $linefct = 'fnop';
-      if( !isset($textcolorid) )
+      if ( !isset($textcolorid) )
          $textcolorid = $this->getcolor(0);
-      if( !isset($linecolorid) )
+      if ( !isset($linecolorid) )
          $linecolorid = $textcolorid;
-      if( $linetype == 2 )
+      if ( $linetype == 2 )
       {
          $this->setdash($linecolorid);
          $linecolorid = IMG_COLOR_STYLED;
@@ -604,21 +604,21 @@ class Graph
 
 
       $align = min( $this->width - $this->border, max( $this->border, $align));
-      if( @$lbound <= 0 )
+      if ( @$lbound <= 0 )
          $lbound = floor($this->offsetX - $this->labelMetrics['WIDTH']);
       $lbound = min( $this->offsetX + $this->sizeX, max( $this->border, $lbound));
-      if( @$ubound <= 0 )
+      if ( @$ubound <= 0 )
          $ubound = $this->offsetX + $this->sizeX;
       $ubound = min( $this->width - $this->border, max( $lbound, $ubound));
 
       //check to avoid infinite loops
       $grid = gscale($linefct($start));
-      if( gscale($linefct($start+$step)) <= $grid )
+      if ( gscale($linefct($start+$step)) <= $grid )
          $step = -$step;
-      if( gscale($linefct($start+$step)) <= $grid )
+      if ( gscale($linefct($start+$step)) <= $grid )
          return;
-      do { $start -= $step; } while( gscale($linefct($start)) >= $lbound );
-      do { $start += $step; } while( gscale($linefct($start)) < $lbound );
+      do { $start -= $step; } while ( gscale($linefct($start)) >= $lbound );
+      do { $start += $step; } while ( gscale($linefct($start)) < $lbound );
 
       //grid line bounds
       $slin = max( $this->border, $this->boxtop -6);
@@ -627,25 +627,25 @@ class Graph
       $slin += ($elin-$slin) % DASH_MODULO +1;
 
       $no_text = true;
-      for( ;; $start += $step )
+      for ( ;; $start += $step )
       {
          $value = $linefct($start);
          $grid = gscale($value);
-         if( $grid > $ubound )
+         if ( $grid > $ubound )
          {
-            if( !$no_text ) break;
+            if ( !$no_text ) break;
             $value = $this->minX;
             $grid = gscale($value);
          }
-         else if( $linetype )
+         else if ( $linetype )
             $this->line($grid, $slin, $grid, $elin, $linecolorid);
          $no_text = false;
-         if( $grid < $lbound )
+         if ( $grid < $lbound )
             continue;
          //$str = call_user_func($textfct, $start);
          $str = $textfct($value);
          $b = $this->labelbox($str);
-         if( $grid+$b['x'] > $ubound )
+         if ( $grid+$b['x'] > $ubound )
             continue;
          $b = $this->label($grid, $align
                            , $str, $textcolorid);
@@ -665,15 +665,15 @@ class Graph
    public function gridY( $start, $step, $align, $textfct='', $textcolorid=NULL, $linefct='', $linecolorid=NULL,
          $linetype=2, $lbound=false, $ubound=false )
    {
-      if( !isset($textfct) || !$textfct )
+      if ( !isset($textfct) || !$textfct )
          $textfct = 'fnop';
-      if( !isset($linefct) || !$linefct )
+      if ( !isset($linefct) || !$linefct )
          $linefct = 'fnop';
-      if( !isset($textcolorid) )
+      if ( !isset($textcolorid) )
          $textcolorid = $this->getcolor(0);
-      if( !isset($linecolorid) )
+      if ( !isset($linecolorid) )
          $linecolorid = $textcolorid;
-      if( $linetype == 2 )
+      if ( $linetype == 2 )
       {
          $this->setdash($linecolorid);
          $linecolorid = IMG_COLOR_STYLED;
@@ -682,21 +682,21 @@ class Graph
 
 
       $align = min( $this->height - $this->border, max( $this->border, $align));
-      if( @$lbound <= 0 )
+      if ( @$lbound <= 0 )
          $lbound = floor($this->offsetY - $this->labelMetrics['HEIGHT']);
       $lbound = min( $this->offsetY + $this->sizeY, max( $this->border, $lbound));
-      if( @$ubound <= 0 )
+      if ( @$ubound <= 0 )
          $ubound = $this->offsetY + $this->sizeY;
       $ubound = min( $this->height - $this->border, max( $lbound, $ubound));
 
       //check to avoid infinite loops
       $grid = gscale($linefct($start));
-      if( gscale($linefct($start+$step)) <= $grid )
+      if ( gscale($linefct($start+$step)) <= $grid )
          $step = -$step;
-      if( gscale($linefct($start+$step)) <= $grid )
+      if ( gscale($linefct($start+$step)) <= $grid )
          return;
-      do { $start -= $step; } while( gscale($linefct($start)) >= $lbound );
-      do { $start += $step; } while( gscale($linefct($start)) < $lbound );
+      do { $start -= $step; } while ( gscale($linefct($start)) >= $lbound );
+      do { $start += $step; } while ( gscale($linefct($start)) < $lbound );
 
       //grid line bounds
       $slin = max( $this->border, $this->boxleft -4);
@@ -705,22 +705,22 @@ class Graph
       $elin -= ($elin-$slin) % DASH_MODULO +1;
 
       $no_text = true;
-      for( ;; $start += $step )
+      for ( ;; $start += $step )
       {
          $value = $linefct($start);
          $grid = gscale($value);
-         if( $grid > $ubound )
+         if ( $grid > $ubound )
          {
-            if( !$no_text ) break;
+            if ( !$no_text ) break;
             $value = $this->minY;
             $grid = gscale($value);
          }
-         else if( $linetype )
+         else if ( $linetype )
          {
             $this->line($slin, $grid, $elin, $grid, $linecolorid);
          }
          $no_text = false;
-         if( $grid < $lbound )
+         if ( $grid < $lbound )
             continue;
          //$str = call_user_func($textfct, $start);
          $str = $textfct($value);
@@ -739,7 +739,7 @@ class Graph
    {
       $p = array();
       $n = arcpoints($p, $cx, $cy, $w, $h, $s, $e);
-      if( $n <= 0 )
+      if ( $n <= 0 )
       {
          $w /= 2.;
          $h /= 2.;
@@ -771,21 +771,21 @@ class Graph
     */
    public function pie( &$datas, $cx, $cy, $sx, $sy, $sz=0, $colors=false)
    {
-      if( $sx == 0 || $sy == 0 )
+      if ( $sx == 0 || $sy == 0 )
          return;
 
       //convert to angles.
 
       $sum = array_sum($datas);
-      if( $sum <= 0 )
+      if ( $sum <= 0 )
          return;
 
       $angles[-1] = 0.; //needed for indice purpose
       $ang = 0.;
       $nbval = 0;
-      foreach( $datas as $x => $y )
+      foreach ( $datas as $x => $y )
       {
-         if( $x < 0)
+         if ( $x < 0)
             continue;
          $ang += $y * 360. / $sum;
          $angles[$nbval++] = $ang;
@@ -794,15 +794,15 @@ class Graph
       $im = $this->im;
 
       //colors
-      if( !is_array($colors) )
+      if ( !is_array($colors) )
          $colors = array();
       $colord = array();
 
       $ang = -1.;
       $n = 0;
-      for( $i=0; $i<$nbval; $i++ )
+      for ( $i=0; $i<$nbval; $i++ )
       {
-         if( isset($colors[$i]) )
+         if ( isset($colors[$i]) )
             list($r,$g,$b) = colortoRGB($colors[$i]);
          else
             list($r,$g,$b) = patterncolor($n++);
@@ -810,7 +810,7 @@ class Graph
          $colors[$i] = $this->getcolor($r, $g, $b);
 
          // front edge colors
-         if( $ang <= 180. && $sz > 0 )
+         if ( $ang <= 180. && $sz > 0 )
          {
             $colord[$i] = $this->getcolor($r*PIE_SHADOW_FACTOR
                                         , $g*PIE_SHADOW_FACTOR
@@ -819,11 +819,11 @@ class Graph
          }
       }
 
-      if( $sz > 0 )
+      if ( $sz > 0 )
       {
          //draw edge of incomplete pie
          $ang = $angles[$nbval-1];
-         if( ($ang > 270 && $ang < 360) || ($ang < 90  && $ang >= 0 ) )
+         if ( ($ang > 270 && $ang < 360) || ($ang < 90  && $ang >= 0 ) )
          {
             $p = array();
             $p[] = $cx;
@@ -847,27 +847,27 @@ class Graph
          $nedge = -1;
 
       // draw portions
-      for( $i=0; $i<$nbval; $i++ )
+      for ( $i=0; $i<$nbval; $i++ )
       {
          $p = array();
          $s = $angles[$i-1];
          $e = $angles[$i];
          $n = arcpoints($p, $cx, $cy, $sx, $sy, $s, $e);
-         if( $n > 0 && $i < $nedge )
+         if ( $n > 0 && $i < $nedge )
          {
             //draw portion front edge
-            if( $e > 180 && $n > 0 )
+            if ( $e > 180 && $n > 0 )
             {
 
                // the arc must be properly oriented
                $pt = array();
                $pt[] = $p[0];
                $pt[] = $p[1];
-               for( $nt=1; $nt<$n; $nt++ )
+               for ( $nt=1; $nt<$n; $nt++ )
                {
                   $x = $p[2*$nt];
                   $y = $p[2*$nt+1];
-                  if( $y <= $cy ) {
+                  if ( $y <= $cy ) {
                      $pt[] = $x;
                      $pt[] = $cy;
                      break;
@@ -882,7 +882,7 @@ class Graph
                $pt = $p;
                $nt = $n;
             }
-            if( $nt > 0 )
+            if ( $nt > 0 )
             {
                $pt = array_merge( $pt, points_reverse( $pt, 0, $sz));
                $this->filledpolygon($pt, $nt+$nt, $colord[$i]);
@@ -893,11 +893,11 @@ class Graph
 
          $p[] = $cx; //add central point
          $p[] = $cy;
-         if( $n > 1 )
+         if ( $n > 1 )
             $this->filledpolygon($p, $n+1, $colors[$i]);
          else
          {
-            if( $n <= 0 )
+            if ( $n <= 0 )
             {
                list($x, $y) = getellipticpoint($cx, $cy, $sx/2., $sy/2., deg2rad($e));
                $p[] = $x;
@@ -915,9 +915,9 @@ class Graph
 
 /*! \privatesection */
 
-if( function_exists('imagettftext') ) //TTF need GD and Freetype.
+if ( function_exists('imagettftext') ) //TTF need GD and Freetype.
 {
-   if( function_exists('imagettfbbox') ) //TTF need GD and Freetype.
+   if ( function_exists('imagettfbbox') ) //TTF need GD and Freetype.
    {
       /*!
        * \brief return the metrics of the True Type font
@@ -945,7 +945,7 @@ if( function_exists('imagettftext') ) //TTF need GD and Freetype.
       {
          $txt = explode("\n", $str);
          $x = $y = 0;
-         foreach( $txt as $str )
+         foreach ( $txt as $str )
          {
             /* imagettfbbox return:
                   0=>X, 1=>Y ;bottom left
@@ -989,7 +989,7 @@ if( function_exists('imagettftext') ) //TTF need GD and Freetype.
       {
          $txt = explode("\n", $str);
          $x = $y = 0;
-         foreach( $txt as $str )
+         foreach ( $txt as $str )
          {
             //IMG_COLOR_TRANSPARENT does not work, so draw it out of bound
             $b= imagettftext($gr->im,
@@ -1011,7 +1011,7 @@ if( function_exists('imagettftext') ) //TTF need GD and Freetype.
    {
       $txt = explode("\n", $str);
       $l = $x;
-      foreach( $txt as $str )
+      foreach ( $txt as $str )
       {
          /* to compare with embedded fonts
             $f = 2;
@@ -1077,7 +1077,7 @@ function EMBlabelbox(&$gr, $str)
 {
    $txt = explode("\n", $str);
    $x = $y = 0;
-   foreach( $txt as $str )
+   foreach ( $txt as $str )
    {
       $x = max($x, strlen($str)*$gr->labelMetrics['WIDTH']);
       $y += $gr->labelMetrics['LINEH'];
@@ -1095,7 +1095,7 @@ function EMBlabel(&$gr, $x, $y, $str, $colorid)
    //$str = str_replace("\r","",$str);
    $txt = explode("\n", $str);
    $l = $x;
-   foreach( $txt as $str )
+   foreach ( $txt as $str )
    {
       imagestring($gr->im, LABEL_FONT, $l, $y, $str, $colorid);
       $x = max($x, $l + strlen($str)*$gr->labelMetrics['WIDTH']);
@@ -1108,14 +1108,14 @@ function EMBlabel(&$gr, $x, $y, $str, $colorid)
 
 function arcpoints(&$p, $cx, $cy, $w, $h, $s, $e)
 {
-   if( $s == $e )
+   if ( $s == $e )
       return 0;
 
    //the Y axis is inversed, the rotation too! (clockwise)
-   while( $s >= 360 ) $s -= 360;
-   while( $s < 0 ) $s += 360;
-   while( $e > 360 ) $e -= 360;
-   while( $e <= $s ) $e += 360;
+   while ( $s >= 360 ) $s -= 360;
+   while ( $s < 0 ) $s += 360;
+   while ( $e > 360 ) $e -= 360;
+   while ( $e <= $s ) $e += 360;
 
    $w /= 2.;
    $h /= 2.;
@@ -1137,11 +1137,11 @@ function arcpoints(&$p, $cx, $cy, $w, $h, $s, $e)
    $p[] = $py;
    $nb = 1;
 
-   for( $i=1; $i<$n; $i++ )
+   for ( $i=1; $i<$n; $i++ )
    {
       $s += $a;
       list($px, $py) = getellipticpoint($cx, $cy, $w, $h, $s);
-      if( $px != $ox || $py != $oy )
+      if ( $px != $ox || $py != $oy )
       {
          $ox = $px;
          $oy = $py;
@@ -1152,7 +1152,7 @@ function arcpoints(&$p, $cx, $cy, $w, $h, $s, $e)
    }
 
    list($px, $py) = getellipticpoint($cx, $cy, $w, $h, $e);
-   if( $px != $ox || $py != $oy )
+   if ( $px != $ox || $py != $oy )
    {
       $ox = $px;
       $oy = $py;

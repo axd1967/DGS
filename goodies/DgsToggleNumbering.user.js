@@ -55,17 +55,17 @@ var getUserHandle = function()
    var snap;
 
    snap = xPath(document.documentElement, "//table[@id='page_head']");
-   if( snap.snapshotLength > 0 )
+   if ( snap.snapshotLength > 0 )
       snap = xPath(snap.snapshotItem(0), "*//td[last()]//*[text()]");
 
-   if( snap.snapshotLength <= 0 )
+   if ( snap.snapshotLength <= 0 )
       snap = xPath(document.documentElement, "//a[@id='loggedId']");
 
-   if( snap.snapshotLength <= 0 )
+   if ( snap.snapshotLength <= 0 )
       return '';
    snap = snap.snapshotItem(0).textContent;
    snap = snap.match(/([\-\+_a-zA-Z0-9]+)\s*$/);
-   if( !snap )
+   if ( !snap )
       return '';
    return snap[1];
 } //getUserHandle
@@ -75,17 +75,17 @@ var DGStn_toggle = function(event)
 {
 //alert('toggle');
    var elt;
-   if( event != undefined )
+   if ( event != undefined )
    {
       event.preventDefault();
       event.stopPropagation();
    }
    DGStn_hidden = !DGStn_hidden;
    GM_setValue(DGStn_prefix+'hidden', DGStn_hidden);
-   for( var i=DGStn_stones.length-1; i >= 0; i-- )
+   for ( var i=DGStn_stones.length-1; i >= 0; i-- )
    {
       elt = DGStn_stones[i];
-      if( DGStn_hidden )
+      if ( DGStn_hidden )
          elt.src = elt.getAttribute('xsrc');
       else
          elt.src = elt.getAttribute('nsrc');
@@ -104,18 +104,18 @@ var DGStn_init = function()
    //   "//form/table//table[@style]//img[@class='brdx' and (@alt='X' or @alt='O')]"
       "//form/table//table//img[@class='brdx' and (@alt='X' or @alt='O')]"
       );
-   if( snapshot.snapshotLength <= 0 )
+   if ( snapshot.snapshotLength <= 0 )
       return 1;
 
 
    //then only keep the numbered stones
    num = 0;
-   for( var i=snapshot.snapshotLength-1; i >= 0; i-- )
+   for ( var i=snapshot.snapshotLength-1; i >= 0; i-- )
    {
       elt = snapshot.snapshotItem(i);
       nsrc = elt.src;
       xsrc = nsrc.replace( /\x2F(b|w)\d+\./i , '/$1.');
-      if( nsrc == xsrc )
+      if ( nsrc == xsrc )
          continue;
       elt.setAttribute('nsrc', nsrc);
       elt.setAttribute('xsrc', xsrc);
@@ -123,7 +123,7 @@ var DGStn_init = function()
       num++;
    }
 //alert('num='+num);
-   if( num <= 0 )
+   if ( num <= 0 )
       return 2;
 
 
@@ -131,20 +131,20 @@ var DGStn_init = function()
    //this is difficult because of the various pages and layouts
    snapshot = xPath(document.documentElement, "//select[@name='gotomove']");
    where = DGStn_stones[0];
-   while( where=where.parentNode )
-      if( where.tagName.toUpperCase() == 'TABLE' )
+   while ( where=where.parentNode )
+      if ( where.tagName.toUpperCase() == 'TABLE' )
          break;
-   if( where )
+   if ( where )
    {
-      if( where.parentNode.tagName.toUpperCase() == 'DIV' )
+      if ( where.parentNode.tagName.toUpperCase() == 'DIV' )
          where = where.parentNode;
       where = where.nextSibling;
    }
-   else if( snapshot.snapshotLength > 0 )
+   else if ( snapshot.snapshotLength > 0 )
    {
       where = snapshot.snapshotItem(0);
    }
-   if( !where )
+   if ( !where )
       return 3;
 
 
@@ -162,11 +162,11 @@ var DGStn_init = function()
    //elt.addEventListener('mouseup', DGStn_toggle, true);
    elt.addEventListener('click', DGStn_toggle, true);
 
-   while( where.nodeName == '#text' )
+   while ( where.nodeName == '#text' )
       where = where.nextSibling;
 //alert('where='+where.nodeName);
    /*
-   if( where.tagName.toUpperCase() == 'BR' )
+   if ( where.tagName.toUpperCase() == 'BR' )
       where.parentNode.replaceChild(elt, where);
    else
    */
@@ -193,9 +193,9 @@ var DGStn_init = function()
 DGStn_prefix = getUserHandle()+':'+window.location.hostname+':';
 //alert('prefix='+DGStn_prefix);
 
-if( !DGStn_init() ) //if goes bad, keep the numbered stones
+if ( !DGStn_init() ) //if goes bad, keep the numbered stones
 {
-   if( DGStn_hidden != GM_getValue(DGStn_prefix+'hidden', false) )
+   if ( DGStn_hidden != GM_getValue(DGStn_prefix+'hidden', false) )
       DGStn_toggle();
 }
 //else alert('Toggle number: board not found!');

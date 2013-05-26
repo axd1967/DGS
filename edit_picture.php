@@ -29,16 +29,16 @@ require_once 'include/gui_functions.php';
    connect2mysql();
 
    $logged_in = who_is_logged( $player_row);
-   if( !$logged_in )
+   if ( !$logged_in )
       error('login_if_not_logged_in', 'edit_picture');
-   if( USERPIC_FOLDER == '' )
+   if ( USERPIC_FOLDER == '' )
       error('feature_disabled', 'edit_picture');
 
    $my_id = $player_row['ID'];
-   if( $my_id <= GUESTS_ID_MAX )
+   if ( $my_id <= GUESTS_ID_MAX )
       error('not_allowed_for_guest', 'edit_picture');
 
-   if( (@$player_row['AdminOptions'] & ADMOPT_DENY_EDIT_BIO) )
+   if ( (@$player_row['AdminOptions'] & ADMOPT_DENY_EDIT_BIO) )
       error('edit_bio_denied', 'edit_picture');
 
 /* Actual REQUEST calls used:
@@ -48,7 +48,7 @@ require_once 'include/gui_functions.php';
 */
 
    // delete picture
-   if( @$_REQUEST['pic_delete'] )
+   if ( @$_REQUEST['pic_delete'] )
    {
       UserPicture::delete_picture();
       jump_to("edit_picture.php?sysmsg=". urlencode(T_('User picture removed!')) );
@@ -57,24 +57,24 @@ require_once 'include/gui_functions.php';
    // upload, check and save picture
    $errors = null;
    $upload = null;
-   if( @$_REQUEST['pic_save'] && isset($_FILES['file_userpic']) )
+   if ( @$_REQUEST['pic_save'] && isset($_FILES['file_userpic']) )
    {
       // update picture and db with values from edit-form
       $upload = new ImageFileUpload( $_FILES['file_userpic'], USERPIC_MAXSIZE_UPLOAD, USERPIC_MAX_X, USERPIC_MAX_Y );
-      if( $upload->is_uploaded() && !$upload->has_error() )
+      if ( $upload->is_uploaded() && !$upload->has_error() )
       {
          $pic_ext = $upload->determineFileExtension();
          list( $path_dest, $_picdir, $pic_file, $_picurl, $_picexists, $cache_suffix )
             = UserPicture::getPicturePath( $my_id, $pic_ext, false);
 
-         if( $upload->uploadImageFile($path_dest) )
+         if ( $upload->uploadImageFile($path_dest) )
          {
             @$upload->cleanup();
             UserPicture::update_picture($pic_file, $cache_suffix);
             jump_to("edit_picture.php?sysmsg=". urlencode(T_('User picture saved!')) );
          }
       }
-      if( $upload->has_error() )
+      if ( $upload->has_error() )
          $errors = $upload->get_errors();
       @$upload->cleanup();
    }
@@ -84,7 +84,7 @@ require_once 'include/gui_functions.php';
    list( $pic_path, $tmp,$tmp, $pic_url, $pic_exists ) = UserPicture::getPicturePath($player_row);
    $curr_picture_str = NO_VALUE;
    $img_info_str = '';
-   if( $pic_exists )
+   if ( $pic_exists )
    {
       $curr_picture_str = UserPicture::getImageHtml(
          $player_row['Handle'], false, $player_row['UserPicture'], -1 );
@@ -104,10 +104,10 @@ require_once 'include/gui_functions.php';
       'DESCRIPTION', T_('Upload picture'),
       'FILE',        'file_userpic', 40, USERPIC_MAXSIZE_UPLOAD, 'image/*', true ));
 
-   if( $errors )
+   if ( $errors )
    {
       $errstr = '';
-      foreach( $errors as $err )
+      foreach ( $errors as $err )
          $errstr .= make_html_safe($err, 'line') . "\n";
       $pform->add_empty_row();
       $pform->add_row( array(
@@ -126,7 +126,7 @@ require_once 'include/gui_functions.php';
       'TAB', 'CELL', 1, '', // align submit-buttons
       'SUBMITBUTTON', 'pic_save', T_('Save picture'),
       'TEXT', SMALL_SPACING );
-   if( $pic_exists )
+   if ( $pic_exists )
       array_push( $arr,
          'SUBMITBUTTON', 'pic_delete', T_('Remove picture') );
    $pform->add_row( $arr );

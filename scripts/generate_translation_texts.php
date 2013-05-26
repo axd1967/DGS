@@ -27,11 +27,11 @@ require_once 'include/make_translationfiles.php';
    connect2mysql();
 
    $logged_in = who_is_logged( $player_row);
-   if( !$logged_in )
+   if ( !$logged_in )
       error('login_if_not_logged_in', 'scripts.generate_translation_texts');
-   if( $player_row['ID'] <= GUESTS_ID_MAX )
+   if ( $player_row['ID'] <= GUESTS_ID_MAX )
       error('not_allowed_for_guest', 'scripts.generate_translation_texts');
-   if( !(@$player_row['admin_level'] & ADMIN_TRANSLATORS) )
+   if ( !(@$player_row['admin_level'] & ADMIN_TRANSLATORS) )
       error('adminlevel_too_low', 'scripts.generate_translation_texts');
 
    $page = $_SERVER['PHP_SELF'];
@@ -41,7 +41,7 @@ require_once 'include/make_translationfiles.php';
 
    start_html('generate_translation_texts', 0);
 
-   if( $do_it=@$_REQUEST['do_it'] )
+   if ( $do_it=@$_REQUEST['do_it'] )
    {
       echo "<p>*** Fixes errors ***"
          ."<br>".anchor(make_url($page, $page_args), 'Just show it')

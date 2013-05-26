@@ -32,11 +32,11 @@ require_once 'include/table_columns.php';
    connect2mysql();
 
    $logged_in = who_is_logged( $player_row);
-   if( !$logged_in )
+   if ( !$logged_in )
       error('login_if_not_logged_in', 'admin_show_faqlog');
-   if( $player_row['ID'] <= GUESTS_ID_MAX )
+   if ( $player_row['ID'] <= GUESTS_ID_MAX )
       error('not_allowed_for_guest', 'admin_show_faqlog');
-   if( !(@$player_row['admin_level'] & (ADMIN_FAQ|ADMIN_DEVELOPER)) )
+   if ( !(@$player_row['admin_level'] & (ADMIN_FAQ|ADMIN_DEVELOPER)) )
       error('adminlevel_too_low', 'admin_show_faqlog');
 
    // init
@@ -70,16 +70,16 @@ require_once 'include/table_columns.php';
 
    $show_rows = $atable->compute_show_rows(mysql_num_rows($result));
 
-   while( $show_rows-- > 0 && ($row = mysql_fetch_assoc( $result )) )
+   while ( $show_rows-- > 0 && ($row = mysql_fetch_assoc( $result )) )
    {
       $arow_str = array();
-      if( $atable->Is_Column_Displayed[1] )
+      if ( $atable->Is_Column_Displayed[1] )
          $arow_str[1] = @$row['ID'];
-      if( $atable->Is_Column_Displayed[2] )
+      if ( $atable->Is_Column_Displayed[2] )
          $arow_str[2] = ((string)@$row['PUser_Handle'] != '') ? $row['PUser_Handle'] : '';
-      if( $atable->Is_Column_Displayed[3] )
+      if ( $atable->Is_Column_Displayed[3] )
          $arow_str[3] = ($row['X_Date'] > 0 ? date(DATE_FMT2, $row['X_Date']) : NULL );
-      if( $atable->Is_Column_Displayed[4] )
+      if ( $atable->Is_Column_Displayed[4] )
       {
          $objtype = (@$row['Type'] == 'FAQ')
             ? TXTOBJTYPE_FAQ
@@ -88,12 +88,12 @@ require_once 'include/table_columns.php';
          $edit_link = 'admin_faq.php?ot='.$objtype.URI_AMP.'edit=1'.URI_AMP.'type='.$typechar.URI_AMP.'id='.@$row['Ref_ID'];
          $arow_str[4] = '<a href="' . $edit_link . '">' . sprintf( T_('Edit(%s)#faq'), @$row['Ref_ID']) . '</a>';
       }
-      if( $atable->Is_Column_Displayed[5] )
+      if ( $atable->Is_Column_Displayed[5] )
          $arow_str[5] = make_html_safe( @$row['Question'], 'cell' )
             . (@$row['Reference'] ? "<br>\n" . $row['Reference'] : '' );
-      if( $atable->Is_Column_Displayed[6] )
+      if ( $atable->Is_Column_Displayed[6] )
          $arow_str[6] = make_html_safe( wordwrap(@$row['Answer'], 60, "\n", false), 'faq' );
-      if( $atable->Is_Column_Displayed[7] )
+      if ( $atable->Is_Column_Displayed[7] )
          $arow_str[7] = @$row['Type'];
       $atable->add_row( $arow_str );
    }

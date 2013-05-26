@@ -204,28 +204,28 @@ class SgfBuilder
 
    private function echo_sgf( $sgf_text, $last_prop=0 )
    {
-      if( $this->use_buffer )
+      if ( $this->use_buffer )
          $this->SGF .= $sgf_text;
       else
          echo $sgf_text;
-      if( $last_prop )
+      if ( $last_prop )
          $this->last_prop = $last_prop;
    }//echo_sgf
 
    private function sgf_echo_prop( $prop )
    {
       //if( stristr('-B-W-MN-BL-WL-KO-BM-DO-IT-OB-OW-TE-', $prop.'-') )
-      if( stristr('-B-W-MN-', '-'.$prop.'-') )
+      if ( stristr('-B-W-MN-', '-'.$prop.'-') )
       {
-         if( $this->prop_type == 'setup' || $this->prop_type == 'force_node' )
+         if ( $this->prop_type == 'setup' || $this->prop_type == 'force_node' )
             $this->echo_sgf( "\n;" . $prop );
          else
             $this->echo_sgf( $prop );
          $this->prop_type = 'move';
       }
-      else if( stristr('-AB-AE-AW-PL-', '-'.$prop.'-') )
+      else if ( stristr('-AB-AE-AW-PL-', '-'.$prop.'-') )
       {
-         if( $this->prop_type == 'move' || $this->prop_type == 'force_node' )
+         if ( $this->prop_type == 'move' || $this->prop_type == 'force_node' )
             $this->echo_sgf( "\n;" . $prop );
          else
             $this->echo_sgf( $prop );
@@ -239,11 +239,11 @@ class SgfBuilder
    private function sgf_echo_comment( $comment, $check_empty=true )
    {
       $comment = trim($comment);
-      if( (string)$comment == '' )
+      if ( (string)$comment == '' )
       {
-         if( $check_empty )
+         if ( $check_empty )
             return false;
-         elseif( $this->last_prop == 'C' )
+         elseif ( $this->last_prop == 'C' )
             return false;
       }
       $this->echo_sgf( "\nC[" .
@@ -261,10 +261,10 @@ class SgfBuilder
     */
    private function sgf_echo_point( $points, $overwrite_prop=false )
    {
-      if( count($points) <= 0 )
+      if ( count($points) <= 0 )
          return false;
 
-      if( $overwrite_prop )
+      if ( $overwrite_prop )
       {
          $prop = $overwrite_prop;
          $this->echo_sgf( "\n" );
@@ -276,11 +276,11 @@ class SgfBuilder
          $prop = false;
       }
 
-      foreach($points as $coord => $point_prop)
+      foreach ($points as $coord => $point_prop)
       {
-         if( !$overwrite_prop && $prop !== $point_prop )
+         if ( !$overwrite_prop && $prop !== $point_prop )
          {
-            if( !$point_prop )
+            if ( !$point_prop )
                continue;
             $prop = $point_prop;
             $this->echo_sgf( "\n" );
@@ -317,25 +317,25 @@ class SgfBuilder
             'LEFT JOIN Players AS white ON white.ID=Games.White_ID ' .
          "WHERE Games.ID={$this->gid} LIMIT 1"
          );
-      if( @mysql_num_rows($result) != 1 )
+      if ( @mysql_num_rows($result) != 1 )
          error('unknown_game', "SgfBuilder.load_game_info2({$this->gid})");
       $grow = mysql_fetch_array($result);
 
       $status = $grow['Status'];
-      if( !isRunningGame($status) && $status != GAME_STATUS_FINISHED ) // not for fair-komi
+      if ( !isRunningGame($status) && $status != GAME_STATUS_FINISHED ) // not for fair-komi
          error('invalid_game_status', "SgfBuilder.load_game_info.check.status({$this->gid},$status)");
 
       $this->game_row = $grow;
       $this->is_mpgame = ( $this->game_row['GameType'] != GAMETYPE_GO );
-      if( $this->is_mpgame )
+      if ( $this->is_mpgame )
          GamePlayer::load_users_for_mpgame( $this->gid, '', false, $this->mpg_users );
 
       $shape_snapshot = $this->game_row['ShapeSnapshot'];
-      if( $shape_snapshot )
+      if ( $shape_snapshot )
       {
          $shape_id = $this->game_row['ShapeID'];
          $arr_shape = GameSnapshot::parse_check_extended_snapshot($shape_snapshot);
-         if( !is_array($arr_shape) )
+         if ( !is_array($arr_shape) )
             error('invalid_snapshot', "SgfBuilder.load_game_info.check.shape({$this->gid},$shape_id,$shape_snapshot)");
 
          $b_first = (bool)@$arr_shape['PlayColorB'];
@@ -349,9 +349,9 @@ class SgfBuilder
    public function find_mpg_user( $handle )
    {
       $result = null;
-      foreach( $this->mpg_users as $key => $arr )
+      foreach ( $this->mpg_users as $key => $arr )
       {
-         if( $arr['Handle'] == $handle )
+         if ( $arr['Handle'] == $handle )
          {
             $result = $arr;
             break;
@@ -365,10 +365,10 @@ class SgfBuilder
    {
       // load GamesNotes for player
       $this->player_notes = '';
-      if( $this->include_games_notes )
+      if ( $this->include_games_notes )
       {
          $gn_row = GameHelper::load_cache_game_notes( 'SgfBuilder.load_player_game_notes', $this->gid, $uid );
-         if( is_array($gn_row) )
+         if ( is_array($gn_row) )
             $this->player_notes = @$gn_row['Notes'];
       }
    }//load_player_game_notes
@@ -377,15 +377,15 @@ class SgfBuilder
    {
       // load moves
       $arr_moves = Board::load_cache_game_moves( 'SgfBuilder.load_trimmed_moves', $this->gid, /*fetch*/true, /*store*/false );
-      if( !is_array($arr_moves) )
+      if ( !is_array($arr_moves) )
          $arr_moves = array();
 
       // load move-messages
-      if( $with_comments )
+      if ( $with_comments )
       {
          $arr_movemsg = Board::load_cache_game_move_message( 'SgfBuilder.load_trimmed_moves',
             $this->gid, /*move*/null, /*fetch*/true, /*store*/false );
-         if( !is_array($arr_movemsg) )
+         if ( !is_array($arr_movemsg) )
             $arr_movemsg = array();
       }
       else
@@ -396,30 +396,30 @@ class SgfBuilder
 
       // possibly skip some moves
       $this->sgf_trim_nr = $this->moves_iterator->getResultRows() - 1 ;
-      if( $this->game_row['Status'] == GAME_STATUS_FINISHED && isset($this->game_row['Score']) )
+      if ( $this->game_row['Status'] == GAME_STATUS_FINISHED && isset($this->game_row['Score']) )
       {
          $score = $this->game_row['Score'];
 
          //skip the ending moves where PosX <= $sgf_trim_level
          //-1=POSX_PASS= skip ending pass, -2=POSX_SCORE= keep them ... -999= keep everything
-         if( abs($score) < SCORE_RESIGN ) // real-point-score
+         if ( abs($score) < SCORE_RESIGN ) // real-point-score
             $sgf_trim_level = POSX_SCORE; // keep PASSes for better SGF=DGS-move-numbering
-         else if( abs($score) == SCORE_TIME )
+         else if ( abs($score) == SCORE_TIME )
             $sgf_trim_level = POSX_RESIGN; // keep PASSes and SCORing
          else // resignation
             $sgf_trim_level = POSX_SCORE;
 
-         while( $this->sgf_trim_nr >= 0 )
+         while ( $this->sgf_trim_nr >= 0 )
          {
             $row = $arr_moves[$this->sgf_trim_nr];
-            if( $row['PosX'] > $sgf_trim_level && ($row['Stone'] == WHITE || $row['Stone'] == BLACK) )
+            if ( $row['PosX'] > $sgf_trim_level && ($row['Stone'] == WHITE || $row['Stone'] == BLACK) )
                break;
             $this->sgf_trim_nr-- ;
          }
       }
 
       $this->moves_iterator->clearItems();
-      foreach( $arr_moves as $row )
+      foreach ( $arr_moves as $row )
       {
          $row['Text'] = @$arr_movemsg[$row['MoveNr']];
          $this->moves_iterator->addItem( null, $row );
@@ -428,7 +428,7 @@ class SgfBuilder
 
    public function build_filename_sgf( $bulk_filename )
    {
-      if( $bulk_filename )
+      if ( $bulk_filename )
       {
          // DGS-<gid>_YYYY-MM-DD_<rated=R|F><size>(H<handi>)K<komi>(=<result>)_<white>-<black>.sgf
          $f_rated = ( $this->game_row['Rated'] == 'N' ) ? 'F' : 'R';
@@ -436,12 +436,12 @@ class SgfBuilder
          $f_handi = ( $this->game_row['Handicap'] > 0 ) ? 'H' . $this->game_row['Handicap'] : '';
          $f_komi = 'K' . str_replace( '.', ',', $this->game_row['Komi'] );
          $f_result = '';
-         if( $this->game_row['Status'] == GAME_STATUS_FINISHED )
+         if ( $this->game_row['Status'] == GAME_STATUS_FINISHED )
          {
             $f_result = '=' . ( $this->game_row['Score'] < 0 ? 'B' : 'W' );
-            if( abs($this->game_row['Score']) == SCORE_TIME )
+            if ( abs($this->game_row['Score']) == SCORE_TIME )
                $f_result .= 'T';
-            elseif( abs($this->game_row['Score']) == SCORE_RESIGN )
+            elseif ( abs($this->game_row['Score']) == SCORE_RESIGN )
                $f_result .= 'R';
             else
                $f_result .= str_replace( '.', ',', abs($this->game_row['Score']) );
@@ -490,25 +490,25 @@ class SgfBuilder
          "\nBR[" . self::sgf_echo_rating($Blackrating) . ']' .
          "\nWR[" . self::sgf_echo_rating($Whiterating) . ']'
          );
-      if( $this->is_mpgame )
+      if ( $this->is_mpgame )
       {
          $teams = array(); // group-color => [ user, ... ]
          $mpg_general_comment = "\n\nGame Players (Order. Color: Name (Handle), Current Rating):";
          $last_order = 0;
-         foreach( $this->mpg_users as $key => $arr )
+         foreach ( $this->mpg_users as $key => $arr )
          {
             $gr_col = $arr['GroupColor'];
             $gr_order = $arr['GroupOrder'];
             $teams[$gr_col][] = $arr['Handle'];
 
-            if( $gr_order <= $last_order )
+            if ( $gr_order <= $last_order )
                $mpg_general_comment .= "\n";
             $last_order = $gr_order;
             $mpg_general_comment .=
                sprintf( "\n   %d. %s: %s (%s), %s - ELO %d", $gr_order, $gr_col, $arr['Name'], $arr['Handle'],
                         self::sgf_echo_rating($arr['Rating2'],true), $arr['Rating2'] );
          }
-         if( $GameType == GAMETYPE_ZEN_GO )
+         if ( $GameType == GAMETYPE_ZEN_GO )
             $this->echo_sgf("\nWT[" . self::sgf_simpletext(implode(' ', $teams[GPCOL_BW])) . ']');
          else //TEAM_GO
          {
@@ -538,7 +538,7 @@ class SgfBuilder
                ? sprintf( "\nBlack Start Rating: %s - ELO %d",
                             self::sgf_echo_rating($Black_Start_Rating,true), $Black_Start_Rating )
                : "\nBlack Start Rating: ?" );
-      if( $Status == GAME_STATUS_FINISHED && isset($Score) )
+      if ( $Status == GAME_STATUS_FINISHED && isset($Score) )
       {
          $general_comment .=
             ( is_valid_rating($White_End_Rating)
@@ -550,23 +550,23 @@ class SgfBuilder
                             self::sgf_echo_rating($Black_End_Rating,true), $Black_End_Rating )
                : "\nBlack End Rating: ?" );
       }
-      if( $this->shape_info )
+      if ( $this->shape_info )
          $general_comment .= "\n\n" . $this->shape_info;
-      if( $this->is_mpgame )
+      if ( $this->is_mpgame )
          $general_comment .= $mpg_general_comment;
       $this->echo_sgf( "\nGC[$general_comment]" );
 
       // NOTE: time-properties are noted in seconds, which on turn-based servers
       //       can get very big numbers, disturbing SGF-viewers.
       //       Therefore time-info not included at the moment.
-      if( $this->sgf_version >= 4 )
+      if ( $this->sgf_version >= 4 )
       {// overtime
          $timeprop = TimeFormat::echo_time_limit($Maintime, $Byotype, $Byotime, $Byoperiods, TIMEFMT_ENGL);
          $this->echo_sgf( "\nOT[" . self::sgf_simpletext($timeprop) . "]" );
       }
 
       $rules = self::sgf_get_ruleset($Ruleset); //Mandatory for Go (GM[1])
-      if( $rules )
+      if ( $rules )
          $this->echo_sgf( "\nRU[$rules]" );
 
       $this->echo_sgf(
@@ -574,10 +574,10 @@ class SgfBuilder
          "\nKM[$Komi]",
          /*lastprop*/'KM' );
 
-      if( $Handicap > 0 && $this->use_HA )
+      if ( $Handicap > 0 && $this->use_HA )
          $this->echo_sgf( "\nHA[$Handicap]", /*lastprop*/'HA' );
 
-      if( $Status == GAME_STATUS_FINISHED && isset($Score) )
+      if ( $Status == GAME_STATUS_FINISHED && isset($Score) )
       {
          $this->echo_sgf( "\nRE[" . self::sgf_simpletext( $Score==0 ? '0' : score2text($Score, false, true)) . "]",
             /*lastprop*/'RE' );
@@ -589,13 +589,13 @@ class SgfBuilder
    {
       $shape_id = (int)$this->game_row['ShapeID'];
       $shape_snapshot = $this->game_row['ShapeSnapshot'];
-      if( $shape_id <= 0 || !$shape_snapshot )
+      if ( $shape_id <= 0 || !$shape_snapshot )
          return;
 
       $arr_xy = GameSnapshot::parse_stones_snapshot( $this->game_row['Size'], $shape_snapshot, 'AB', 'AW' );
-      if( count($arr_xy) )
+      if ( count($arr_xy) )
       {
-         foreach( $arr_xy as $arr_setup )
+         foreach ( $arr_xy as $arr_setup )
          {
             list( $prop, $PosX, $PosY ) = $arr_setup;
             $sgf_coord = chr($PosX + ord('a')) . chr($PosY + ord('a'));
@@ -606,11 +606,11 @@ class SgfBuilder
          $this->points = array();
 
          $comments = array();
-         if( $this->shape_info )
+         if ( $this->shape_info )
             $comments[] = sprintf( '%s: %s', T_('Shape-Game Setup#sgf'), $this->shape_info );
-         if( $shape_id )
+         if ( $shape_id )
             $comments[] = HOSTBASE."view_shape.php?shape={$shape_id}";
-         if( count($comments) )
+         if ( count($comments) )
             $this->sgf_echo_comment( implode("\n", $comments) );
 
          $this->prop_type = 'force_node';
@@ -638,25 +638,25 @@ class SgfBuilder
       $movesync = 0;
 
       $this->moves_iterator->resetListIterator();
-      while( list(, $arr_item) = $this->moves_iterator->getListIterator() )
+      while ( list(, $arr_item) = $this->moves_iterator->getListIterator() )
       {
          $row = $arr_item[1];
          $Text = '';
          extract($row); // fields: MoveNr,Stone,PosX,PosY,Hours; Text
          $coord = chr($PosX + ord('a')) . chr($PosY + ord('a'));
 
-         switch( (int)$Stone )
+         switch ( (int)$Stone )
          {
             case MARKED_BY_WHITE:
             case MARKED_BY_BLACK:
             { // toggle marks
                //record last skipped SCORE/SCORE2 marked points
-               if( $this->sgf_trim_nr < 0 )
+               if ( $this->sgf_trim_nr < 0 )
                   @$this->array[$PosX][$PosY] ^= OFFSET_MARKED;
 
-               if( isset($this->points[$coord]) )
+               if ( isset($this->points[$coord]) )
                   unset($this->points[$coord]);
-               elseif( $this->sgf_trim_nr < 0 )
+               elseif ( $this->sgf_trim_nr < 0 )
                {
                   $this->points[$coord] = ( @$this->array[$PosX][$PosY] == MARKED_DAME )
                      ? $marked_dame_prop
@@ -680,7 +680,7 @@ class SgfBuilder
             case WHITE:
             case BLACK:
             {
-               if( $PosX <= POSX_ADDTIME ) //configuration actions
+               if ( $PosX <= POSX_ADDTIME ) //configuration actions
                {
                   //TODO: include time-info, fields see const-def
                   break;
@@ -689,9 +689,9 @@ class SgfBuilder
                $this->array[$PosX][$PosY] = $Stone;
 
                //keep comments even if in ending pass, SCORE, SCORE2 or resign steps.
-               if( $Handicap == 0 || $MoveNr >= $Handicap )
+               if ( $Handicap == 0 || $MoveNr >= $Handicap )
                {
-                  if( $this->is_mpgame )
+                  if ( $this->is_mpgame )
                   {
                      // get player of current move
                      list( $group_color, $group_order, $move_color ) =
@@ -699,53 +699,53 @@ class SgfBuilder
                      $mpg_user = GamePlayer::get_user_info( $this->mpg_users, $group_color, $group_order );
                      $player_txt = self::formatPlayerName($mpg_user);
 
-                     if( is_array($this->mpg_active_user) ) // is game-player of MP-game
+                     if ( is_array($this->mpg_active_user) ) // is game-player of MP-game
                      {
                         $is_move_player = ( is_array($mpg_user) && $mpg_user['uid'] == $this->mpg_active_user['uid'] );
-                        if( $Status != GAME_STATUS_FINISHED && !$is_move_player )
+                        if ( $Status != GAME_STATUS_FINISHED && !$is_move_player )
                            $Text = remove_hidden_game_tags($Text);
 
-                        if( (string)$Text != '' )
+                        if ( (string)$Text != '' )
                            $this->node_com .= "\n$player_txt: $Text";
-                        else if( $this->mpg_node_add_user )
+                        else if ( $this->mpg_node_add_user )
                            $this->node_com .= "\n$player_txt";
                      }
                      else // observer
                      {
-                        if( $Status != GAME_STATUS_FINISHED )
+                        if ( $Status != GAME_STATUS_FINISHED )
                            $Text = remove_hidden_game_tags($Text);
 
                         $Text = game_tag_filter( $Text, /*incl-tags*/false );
-                        if( (string)$Text != '' )
+                        if ( (string)$Text != '' )
                            $this->node_com .= "\n$player_txt: $Text";
-                        else if( $this->mpg_node_add_user )
+                        else if ( $this->mpg_node_add_user )
                            $this->node_com .= "\n$player_txt";
                      }
                   }
-                  else if( $owned_comments == BLACK || $owned_comments == WHITE )
+                  else if ( $owned_comments == BLACK || $owned_comments == WHITE )
                   {
-                     if( $Status != GAME_STATUS_FINISHED && $owned_comments != $Stone )
+                     if ( $Status != GAME_STATUS_FINISHED && $owned_comments != $Stone )
                         $Text = remove_hidden_game_tags($Text);
 
-                     if( (string)$Text != '' )
+                     if ( (string)$Text != '' )
                         $this->node_com .= "\n" . $this->buildPlayerName($Stone, false) . ': ' . $Text;
                   }
                   else //SGF query from an observer
                   {
-                     if( $Status != GAME_STATUS_FINISHED )
+                     if ( $Status != GAME_STATUS_FINISHED )
                         $Text = remove_hidden_game_tags($Text);
 
                      $Text = game_tag_filter( $Text, /*incl-tags*/false );
-                     if( (string)$Text != '' )
+                     if ( (string)$Text != '' )
                         $this->node_com .= "\n" . $this->buildPlayerName($Stone, false) . ': ' . $Text;
                   }
                   $Text = '';
                }//move-msg
 
-               if( $MoveNr <= $Handicap && $this->use_AB_for_handicap )
+               if ( $MoveNr <= $Handicap && $this->use_AB_for_handicap )
                {// handicap
                   $this->points[$coord] = 'AB'; //setup property
-                  if( $MoveNr < $Handicap)
+                  if ( $MoveNr < $Handicap)
                      break; //switch-break
 
                   $this->sgf_echo_point( $this->points);
@@ -754,10 +754,10 @@ class SgfBuilder
                   $this->sgf_echo_comment( $this->node_com );
                   $this->node_com = '';
                }
-               elseif( $this->sgf_trim_nr >= 0 )
+               elseif ( $this->sgf_trim_nr >= 0 )
                {// move
                   $color = ( $Stone == WHITE ) ? 'W' : 'B';
-                  if( $this->next_color != $color )
+                  if ( $this->next_color != $color )
                   {
                      $this->sgf_echo_prop('PL'); //setup property
                      $this->echo_sgf( "[$color]" );
@@ -768,10 +768,10 @@ class SgfBuilder
                   $this->prop_type = '';
 
                   // sync move-number
-                  if( $MoveNr > $Handicap && $PosX >= POSX_PASS )
+                  if ( $MoveNr > $Handicap && $PosX >= POSX_PASS )
                   {
                      $movenum++;
-                     if( $MoveNr != $movenum + $movesync )
+                     if ( $MoveNr != $movenum + $movesync )
                      {
                         //useful when "non AB handicap" or "resume after SCORE"
                         $this->sgf_echo_prop('MN'); //move property
@@ -780,16 +780,16 @@ class SgfBuilder
                      }
                   }
 
-                  if( $PosX < POSX_PASS )
+                  if ( $PosX < POSX_PASS )
                   { //score steps, others filtered by sgf_trim_level
                      $this->sgf_echo_prop($color);
                      $this->echo_sgf( "[]" ); // add 3rd pass
                      $this->next_color = self::switch_move_color( $color );
 
-                     if( $this->sgf_score_highlight & 1 )
+                     if ( $this->sgf_score_highlight & 1 )
                         $this->echo_sgf( "N[$color SCORE]", /*lastprop*/'N' );
 
-                     if( $this->sgf_score_highlight & 2 )
+                     if ( $this->sgf_score_highlight & 2 )
                         $this->node_com .= "\n$color SCORE";
 
                      $this->sgf_echo_point( $this->points );
@@ -797,15 +797,15 @@ class SgfBuilder
                   else
                   { //pass, normal move or non AB handicap
 
-                     if( $PosX == POSX_PASS )
+                     if ( $PosX == POSX_PASS )
                      {
                         $this->sgf_echo_prop($color); //move property
                         $this->echo_sgf( "[]" ); //do not use [tt]
 
-                        if( $this->sgf_pass_highlight & 1 )
+                        if ( $this->sgf_pass_highlight & 1 )
                            $this->echo_sgf( "N[$color PASS]", /*lastprop*/'N' );
 
-                        if( $this->sgf_pass_highlight & 2 )
+                        if ( $this->sgf_pass_highlight & 2 )
                            $this->node_com .= "\n$color PASS";
                      }
                      else //move or non AB handicap
@@ -830,25 +830,25 @@ class SgfBuilder
 
    private function build_sgf_result()
    {
-      if( $this->game_row['Status'] != GAME_STATUS_FINISHED )
+      if ( $this->game_row['Status'] != GAME_STATUS_FINISHED )
          return;
 
       $this->echo_sgf( "\n;" ); // Node start
       $this->sgf_echo_prop($this->next_color);
       $this->echo_sgf( "[]" ); // add 3rd pass
 
-      if( $this->include_node_name )
+      if ( $this->include_node_name )
          $this->echo_sgf( "N[RESULT]", /*lastprop*/'N' ); //Node start
       $this->prop_type = '';
 
       // highlighting result in last comments:
-      if( !isset($this->game_row['Score']) )
+      if ( !isset($this->game_row['Score']) )
          return;
 
       $score = $this->game_row['Score'];
       $this->node_com .= "\n";
 
-      if( abs($score) < SCORE_RESIGN ) // scor-able
+      if ( abs($score) < SCORE_RESIGN ) // scor-able
       {
          $scoring_mode = getRulesetScoring( $this->game_row['Ruleset'] );
          $game_score = new GameScore( $scoring_mode, $this->game_row['Handicap'], $this->game_row['Komi'] );
@@ -859,26 +859,26 @@ class SgfBuilder
          list( $arr_territory, $arr_prisoners ) = $board->fill_game_score( $game_score, /*with-coords*/true );
 
          //Last dead stones mark
-         if( $this->dead_stone_prop )
+         if ( $this->dead_stone_prop )
             $this->sgf_echo_point( $arr_prisoners, $this->dead_stone_prop );
 
          //$points from last skipped SCORE/SCORE2 marked points
          $this->sgf_echo_point( array_merge( $this->points, $arr_territory ) );
 
          $game_score->calculate_score( null, 'sgf' );
-         foreach( array_reverse($game_score->scoring_info['sgf_texts']) as $key => $info )
+         foreach ( array_reverse($game_score->scoring_info['sgf_texts']) as $key => $info )
             $this->node_com .= "\n$key: $info";
       }
 
       $this->node_com .= "\nResult: " . score2text($score, false, true);
-      if( $this->game_row['X_GameFlags'] & GAMEFLAGS_ADMIN_RESULT )
+      if ( $this->game_row['X_GameFlags'] & GAMEFLAGS_ADMIN_RESULT )
          $this->node_com .= " (set by admin)";
    }//build_sgf_result
 
    private function build_sgf_end( $owned_comments )
    {
       $notes = ( $owned_comments == BLACK || $owned_comments == WHITE ) ? trim($this->player_notes) : '';
-      if( (string)$notes != '' )
+      if ( (string)$notes != '' )
       {
          $player_txt = $this->buildPlayerName( $owned_comments, $this->is_mpgame );
          $this->node_com .= "\n\nNotes - $player_txt:\n" . $notes ;
@@ -892,7 +892,7 @@ class SgfBuilder
 
    private function buildPlayerName( $stone=DAME, $is_mpgame )
    {
-      if( $is_mpgame )
+      if ( $is_mpgame )
       {
          return (is_array($this->mpg_active_user))
             ? sprintf( '%s (%s)', $this->mpg_active_user['Name'], $this->mpg_active_user['Handle'] )
@@ -926,7 +926,7 @@ class SgfBuilder
    private static function sgf_echo_rating( $rating, $show_percent=false )
    {
       $rating_str = echo_rating( $rating, $show_percent, /*uid*/0, /*engl*/true, /*short*/1 );
-      if( (string)$rating_str == '' )
+      if ( (string)$rating_str == '' )
          return '?';
       $rating_str = str_ireplace( 'dan#short', 'd', $rating_str );
       $rating_str = str_ireplace( 'kyu#short', 'k', $rating_str );

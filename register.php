@@ -30,7 +30,7 @@ require_once 'include/register_functions.php';
 
    // logout if still logged-in
    $logged_in = who_is_logged( $player_row);
-   if( $logged_in )
+   if ( $logged_in )
    {
       set_login_cookie("","", true);
       $logged_in = who_is_logged( $player_row);
@@ -38,12 +38,12 @@ require_once 'include/register_functions.php';
 
    $reg = new UserRegistration( /*die_on_error*/false );
    $errors = 0;
-   if( @$_REQUEST['register'] ) // register user
+   if ( @$_REQUEST['register'] ) // register user
    {
       ta_begin();
       {//HOT-section to register user
          $errors = $reg->check_registration_normal();
-         if( !$errors )
+         if ( !$errors )
          {
             $reg->register_user();
             jump_to("status.php");
@@ -62,7 +62,7 @@ require_once 'include/register_functions.php';
    $reg_form->set_area(1);
    $reg_form->add_row( array( 'HEADER', T_('Please enter data') ) );
 
-   if( is_array($errors) )
+   if ( is_array($errors) )
    {
       $error_str = format_array( $errors, "\n<li>%s</li>" );
 

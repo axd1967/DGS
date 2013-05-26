@@ -92,114 +92,114 @@ class QuickHandlerMessage extends QuickHandler
       $cmd = $this->quick_object->cmd;
 
       // check mid
-      if( !is_numeric($this->other_uid) || $this->other_uid < 0 )
+      if ( !is_numeric($this->other_uid) || $this->other_uid < 0 )
          error('invalid_args', "$dbgmsg.bad_uid.oid({$this->other_uid})");
-      if( !is_numeric($this->folder_id) || $this->folder_id < FOLDER_ALL_RECEIVED )
+      if ( !is_numeric($this->folder_id) || $this->folder_id < FOLDER_ALL_RECEIVED )
          error('invalid_args', "$dbgmsg.bad_folder({$this->folder_id})");
       $mid = $this->mid;
 
       // prepare command: info
 
-      if( $cmd == QCMD_INFO )
+      if ( $cmd == QCMD_INFO )
       {
-         if( $mid == 0 )
+         if ( $mid == 0 )
             error('invalid_args', "$dbgmsg.bad_message.miss_mid");
 
          /* see also the note about MessageCorrespondents.mid==0 in message_list_query() */
          $this->msg_row = DgsMessage::load_message( $dbgmsg, $mid, $my_id, $this->other_uid, /*full*/true );
 
-         if( $this->is_with_option(QWITH_USER_ID) )
+         if ( $this->is_with_option(QWITH_USER_ID) )
             $this->user_rows = User::load_quick_userinfo( array(
                $my_id, (int)$this->msg_row['other_id'] ));
 
-         if( $this->folder_id > 0 ) // check folder to move message into after "reading"
+         if ( $this->folder_id > 0 ) // check folder to move message into after "reading"
          {
             $this->init_folders( $this->my_id );
-            if( !isset($this->folders[$this->folder_id]) )
+            if ( !isset($this->folders[$this->folder_id]) )
                error('invalid_args', "$dbgmsg.bad_folder({$this->folder_id})");
-            if( $this->msg_row['Replied'] == 'M' && $this->folder_id != FOLDER_REPLY )
+            if ( $this->msg_row['Replied'] == 'M' && $this->folder_id != FOLDER_REPLY )
                $this->folder_id = FOLDER_REPLY; // correct to reply-folder if msg needs reply
          }
          $this->folder = $this->load_folder( $my_id, $this->msg_row['Folder_nr'] );
       }
-      elseif( $cmd == MESSAGECMD_MOVE_MESSAGE || $cmd == MESSAGECMD_DELETE_MESSAGE )
+      elseif ( $cmd == MESSAGECMD_MOVE_MESSAGE || $cmd == MESSAGECMD_DELETE_MESSAGE )
       {
-         if( !preg_match("/^(\\d+)(,\\d+)*$/", $this->mid) )
+         if ( !preg_match("/^(\\d+)(,\\d+)*$/", $this->mid) )
             error('invalid_args', "$dbgmsg.bad_message_id");
 
-         if( $cmd == MESSAGECMD_MOVE_MESSAGE )
+         if ( $cmd == MESSAGECMD_MOVE_MESSAGE )
          {
             $this->init_folders( $this->my_id );
-            if( $this->folder_id == 0 )
+            if ( $this->folder_id == 0 )
                error('invalid_args', "$dbgmsg.miss_folder");
-            if( $this->folder_id > FOLDER_ALL_RECEIVED && !isset($this->folders[$this->folder_id]) )
+            if ( $this->folder_id > FOLDER_ALL_RECEIVED && !isset($this->folders[$this->folder_id]) )
                error('folder_not_found', "$dbgmsg.bad_folder({$this->folder_id})");
          }
 
          $this->arr_msg_id = explode(',', $this->mid);
-         foreach( $this->arr_msg_id as $msg_id )
+         foreach ( $this->arr_msg_id as $msg_id )
          {
             $msg_row = DgsMessage::load_message( $dbgmsg, $msg_id, $my_id, 0, /*full*/false ); // msg exists and is mine
-            if( $msg_row['Replied'] == 'M' )
+            if ( $msg_row['Replied'] == 'M' )
                error('invalid_args', "$dbgmsg.need_reply($msg_id)");
-            if( $msg_row['Folder_nr'] == FOLDER_DESTROYED )
+            if ( $msg_row['Folder_nr'] == FOLDER_DESTROYED )
                error('invalid_args', "$dbgmsg.already_destroyed($msg_id)");
          }
       }
-      elseif( $cmd == MESSAGECMD_SEND_MSG || $cmd == MESSAGECMD_ACCEPT_INVITATION || $cmd == MESSAGECMD_DECLINE_INVITATION )
+      elseif ( $cmd == MESSAGECMD_SEND_MSG || $cmd == MESSAGECMD_ACCEPT_INVITATION || $cmd == MESSAGECMD_DECLINE_INVITATION )
       {
-         if( $cmd == MESSAGECMD_SEND_MSG )
+         if ( $cmd == MESSAGECMD_SEND_MSG )
          {
             // mid is optional (or mid=0 for new msg), if present then must be numeric>0 for reply
-            if( $this->mid && ( !is_numeric($this->mid) || $this->mid < 0 ) )
+            if ( $this->mid && ( !is_numeric($this->mid) || $this->mid < 0 ) )
                error('invalid_args', "$dbgmsg.bad_message_id");
          }
          else // accept|decline-invitation
          {
-            if( !is_numeric($this->mid) || $this->mid < 0 )
+            if ( !is_numeric($this->mid) || $this->mid < 0 )
                error('invalid_args', "$dbgmsg.bad_message_id");
          }
 
-         if( $this->mid > 0 ) // reply
+         if ( $this->mid > 0 ) // reply
          {
-            if( $this->other_uid != 0 || (string)$this->other_handle != '' )
+            if ( $this->other_uid != 0 || (string)$this->other_handle != '' )
                error('reply_invalid', "$dbgmsg.implicit_recipient({$this->other_uid},{$this->other_handle})");
          }
          else // new message
          {
-            if( $cmd == MESSAGECMD_ACCEPT_INVITATION || $cmd == MESSAGECMD_DECLINE_INVITATION )
+            if ( $cmd == MESSAGECMD_ACCEPT_INVITATION || $cmd == MESSAGECMD_DECLINE_INVITATION )
                error('invalid_args', "$dbgmsg.miss_mid");
-            if( $this->other_uid > 0 && (string)$this->other_handle == '' )
+            if ( $this->other_uid > 0 && (string)$this->other_handle == '' )
                $this->other_handle = $this->load_user_handle( $dbgmsg, $this->other_uid );
-            if( $this->other_uid == 0 && (string)$this->other_handle == '' )
+            if ( $this->other_uid == 0 && (string)$this->other_handle == '' )
                error('receiver_not_found', $dbgmsg);
          }
 
          $this->init_folders( $this->my_id );
-         if( $this->folder_id > FOLDER_ALL_RECEIVED && !isset($this->folders[$this->folder_id]) )
+         if ( $this->folder_id > FOLDER_ALL_RECEIVED && !isset($this->folders[$this->folder_id]) )
             error('folder_not_found', "$dbgmsg.bad_folder({$this->folder_id})");
-         if( $this->folder_id == FOLDER_NEW || $this->folder_id == FOLDER_SENT )
+         if ( $this->folder_id == FOLDER_NEW || $this->folder_id == FOLDER_SENT )
             error('folder_forbidden', "$dbgmsg.forbidden_target_folder({$this->folder_id})");
 
-         if( $this->mid > 0 ) // check reply
+         if ( $this->mid > 0 ) // check reply
          {
             // check that user is indeed a receiver of reply-msg -> otherwise unknown-msg
             $msg_row = DgsMessage::load_message( $dbgmsg, $mid, $my_id, 0, /*full*/false );
             $this->msg_row = $msg_row;
 
-            if( $msg_row['Sender'] == 'M' ) // reply to message from myself forbidden
+            if ( $msg_row['Sender'] == 'M' ) // reply to message from myself forbidden
                error('reply_invalid', "$dbgmsg.reply_to_myself_forbidden");
-            if( $msg_row['Sender'] != 'N' || !($msg_row['other_id'] > 0) ) // can not reply
+            if ( $msg_row['Sender'] != 'N' || !($msg_row['other_id'] > 0) ) // can not reply
                error('reply_invalid', "$dbgmsg.message_can_not_be_replied");
 
-            if( $cmd == MESSAGECMD_SEND_MSG )
+            if ( $cmd == MESSAGECMD_SEND_MSG )
             {
-               if( $msg_row['Type'] != MSGTYPE_NORMAL ) // only reply to NORMAL-messages
+               if ( $msg_row['Type'] != MSGTYPE_NORMAL ) // only reply to NORMAL-messages
                   error('reply_invalid', "$dbgmsg.only_normal({$msg_row['Type']})");
             }
-            elseif( $cmd == MESSAGECMD_ACCEPT_INVITATION || $cmd == MESSAGECMD_DECLINE_INVITATION )
+            elseif ( $cmd == MESSAGECMD_ACCEPT_INVITATION || $cmd == MESSAGECMD_DECLINE_INVITATION )
             {
-               if( $msg_row['Type'] != MSGTYPE_INVITATION )
+               if ( $msg_row['Type'] != MSGTYPE_INVITATION )
                   error('reply_invalid', "$dbgmsg.no_invitation({$msg_row['Type']})");
             }
 
@@ -213,13 +213,13 @@ class QuickHandlerMessage extends QuickHandler
    public function process()
    {
       $cmd = $this->quick_object->cmd;
-      if( $cmd == QCMD_INFO )
+      if ( $cmd == QCMD_INFO )
          $this->process_cmd_info();
-      elseif( $cmd == MESSAGECMD_MOVE_MESSAGE )
+      elseif ( $cmd == MESSAGECMD_MOVE_MESSAGE )
          $this->process_cmd_move_msg();
-      elseif( $cmd == MESSAGECMD_DELETE_MESSAGE )
+      elseif ( $cmd == MESSAGECMD_DELETE_MESSAGE )
          $this->process_cmd_delete_msg();
-      elseif( $cmd == MESSAGECMD_SEND_MSG || $cmd == MESSAGECMD_ACCEPT_INVITATION || $cmd == MESSAGECMD_DECLINE_INVITATION )
+      elseif ( $cmd == MESSAGECMD_SEND_MSG || $cmd == MESSAGECMD_ACCEPT_INVITATION || $cmd == MESSAGECMD_DECLINE_INVITATION )
          $this->process_cmd_send_msg();
    }//process
 
@@ -228,7 +228,7 @@ class QuickHandlerMessage extends QuickHandler
       self::fill_message_info( $this, $this->quick_object->result, $this->msg_row, $this->user_rows, $this->folders );
 
       // move message into target folder (if given)
-      if( $this->folder_id > 0 )
+      if ( $this->folder_id > 0 )
       {
          $my_id = $this->my_id;
          $mid = (int)$this->msg_row['ID'];
@@ -236,7 +236,7 @@ class QuickHandlerMessage extends QuickHandler
          ta_begin();
          {//HOT-section to move message into target folder
             $updated = DgsMessage::update_message_folder( $mid, $my_id, /*Sender*/null, $this->folder_id, /*die*/false );
-            if( $updated && ($this->msg_row['Folder_nr'] == FOLDER_NEW || $this->folder_id == FOLDER_NEW) )
+            if ( $updated && ($this->msg_row['Folder_nr'] == FOLDER_NEW || $this->folder_id == FOLDER_NEW) )
                update_count_message_new( 'QuickHandlerMessage.process_cmd_info.upd_msg_folder', $my_id, COUNTNEW_RECALC );
          }
          ta_end();
@@ -267,13 +267,13 @@ class QuickHandlerMessage extends QuickHandler
       $gid = 0;
 
       $cmd = $this->quick_object->cmd;
-      if( $cmd == MESSAGECMD_ACCEPT_INVITATION )
+      if ( $cmd == MESSAGECMD_ACCEPT_INVITATION )
       {
          $action = 'accept_inv';
          $subject = 1; // non-empty
          $gid = $this->msg_row['Game_ID'];
       }
-      elseif( $cmd == MESSAGECMD_DECLINE_INVITATION )
+      elseif ( $cmd == MESSAGECMD_DECLINE_INVITATION )
       {
          $action = 'decline_inv';
          $subject = 1; // non-empty
@@ -293,7 +293,7 @@ class QuickHandlerMessage extends QuickHandler
             'disputegid'   => 0,
          );
       $result = $msg_control->handle_send_message( $this->other_handle, MSGTYPE_NORMAL, $input );
-      if( is_array($result) && count($result) )
+      if ( is_array($result) && count($result) )
       {
          $this->setError('invalid_action');
          $error_texts = $result;
@@ -312,20 +312,20 @@ class QuickHandlerMessage extends QuickHandler
 
    private function load_folder( $uid, $folder_id )
    {
-      if( !$this->is_with_option(QWITH_FOLDER) )
+      if ( !$this->is_with_option(QWITH_FOLDER) )
          return null;
 
-      if( $folder_id == FOLDER_DESTROYED ) // invisible-folder
+      if ( $folder_id == FOLDER_DESTROYED ) // invisible-folder
          $arr = array( T_('Destroyed#folder'), 'FF88EE00', '000000' );
-      elseif( $folder_id == FOLDER_ALL_RECEIVED ) // pseudo folder
+      elseif ( $folder_id == FOLDER_ALL_RECEIVED ) // pseudo folder
          $arr = array( T_('All Received'), '00000000', '000000' );
       else
       {
          init_standard_folders();
          $arr = get_folders( $uid, true, $folder_id );
-         if( is_array($arr) && isset($arr[$folder_id]) )
+         if ( is_array($arr) && isset($arr[$folder_id]) )
             $arr = $arr[$folder_id];
-         if( !is_array($arr) )
+         if ( !is_array($arr) )
             $arr = array( T_('Unknown#folder'), '00000000', '000000' );
       }
       return $arr;
@@ -340,7 +340,7 @@ class QuickHandlerMessage extends QuickHandler
 
       $my_id = $player_row['ID'];
       $other_uid = (int)$row['other_id'];
-      switch( $row['Sender'] ) // also see get_message_directions()
+      switch ( $row['Sender'] ) // also see get_message_directions()
       {
          case 'M': $uid_from = $my_id; $uid_to = $my_id; break; // myself
          case 'S': $uid_from = 0;      $uid_to = $my_id; break; // system
@@ -370,14 +370,14 @@ class QuickHandlerMessage extends QuickHandler
       $out['subject'] = $row['Subject'];
       $out['text'] = $row['Text'];
 
-      if( $row['Type'] == MSGTYPE_INVITATION )
+      if ( $row['Type'] == MSGTYPE_INVITATION )
       {
          $game_status = @$row['Status'];
-         if( is_null($game_status) )
+         if ( is_null($game_status) )
             $game_status = '';
          $out['game_status'] = $game_status;
 
-         if( $game_status == GAME_STATUS_INVITED )
+         if ( $game_status == GAME_STATUS_INVITED )
          {
             // ToMove_ID holds handitype for game on INVITATION-status
             list( $my_gs, $opp_gs ) = GameSetup::parse_invitation_game_setup( $my_id, @$row['GameSetup'], $gid );
@@ -439,16 +439,16 @@ class QuickHandlerMessage extends QuickHandler
    private static function convertMessageFlags( $flags )
    {
       $out = array();
-      if( $flags & MSGFLAG_BULK )
+      if ( $flags & MSGFLAG_BULK )
          $out[] = 'BULK';
       return implode(',', $out);
    }
 
    private static function convertMessageReplyStatus( $replied )
    {
-      if( $replied == 'M' )
+      if ( $replied == 'M' )
          return 2; // need reply
-      elseif( $replied == 'Y' )
+      elseif ( $replied == 'Y' )
          return 1; // has replied
       else
          return 0; // no reply needed
@@ -457,7 +457,7 @@ class QuickHandlerMessage extends QuickHandler
    private static function load_user_handle( $dbgmsg, $uid )
    {
       $arr = User::load_quick_userinfo( array( $uid ) );
-      if( count($arr) == 0 || !isset($arr[$uid]) )
+      if ( count($arr) == 0 || !isset($arr[$uid]) )
          error('receiver_not_found', "$dbgmsg.miss_recipient($uid)");
       return $arr[$uid]['Handle'];
    }

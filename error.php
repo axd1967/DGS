@@ -25,19 +25,19 @@ require_once 'include/error_codes.php';
 
 
 {
-   if( !$is_down )
+   if ( !$is_down )
       connect2mysql(true);
 
    $BlockReason = '';
    $userid = '???';
    $is_admin = false;
-   if( !$is_down && $dbcnx )
+   if ( !$is_down && $dbcnx )
    {
       $tmp= $TheErrors->set_mode(ERROR_MODE_COLLECT);
       //may call error() again:
       $logged_in = who_is_logged( $player_row, LOGIN_DEFAULT_OPTS|LOGIN_SKIP_UPDATE );
       $TheErrors->set_mode($tmp);
-      if( !is_null($player_row) )
+      if ( !is_null($player_row) )
       {
          $userid = @$player_row['Handle'];
          $BlockReason = @$player_row['BlockReason'];
@@ -69,16 +69,16 @@ ErrorDocument 404 /DragonGoServer/error.php?err=page_not_found&redir=htaccess
 */
 
    $redir = get_request_arg('redir');
-   if( $dbcnx && $redir /* && @$_SERVER['REDIRECT_STATUS'] != 401 */ )
+   if ( $dbcnx && $redir /* && @$_SERVER['REDIRECT_STATUS'] != 401 */ )
    { //need to be recorded
       //temporary hide an unsolved DGS problem, waiting better:
-      if(!( @$_SERVER['REDIRECT_STATUS'] == 404
+      if (!( @$_SERVER['REDIRECT_STATUS'] == 404
             && in_array(
                substr( @$_SERVER['REDIRECT_URL'], strlen(SUB_PATH)),
                array('phorum/post.php','favicon.ico'))
          ))
       {
-         if( isset($player_row) && isset($player_row['Handle']) )
+         if ( isset($player_row) && isset($player_row['Handle']) )
             $handle = $player_row['Handle'];
          else
             $handle = safe_getcookie('handle');
@@ -109,17 +109,17 @@ ErrorDocument 404 /DragonGoServer/error.php?err=page_not_found&redir=htaccess
    //   e.g. not for errors indicating a false behaviour of a user
 
    $hide_dbgmsg = handle_error( $err, $errorlog_id, $userid, $is_admin, $BlockReason );
-   if( $hide_dbgmsg )
+   if ( $hide_dbgmsg )
       $debugmsg = NULL;
 
    db_close();
 
    // also output detailed debug-msg
-   if( !is_null($debugmsg) && !$hide_dbgmsg && (string)$debugmsg != '' )
+   if ( !is_null($debugmsg) && !$hide_dbgmsg && (string)$debugmsg != '' )
       echo '<p>', span('ErrorMsg', 'Error details: '), basic_safe($debugmsg), '</p>';
 
    $mysqlerror = get_request_arg('mysqlerror');
-   if( $mysqlerror )
+   if ( $mysqlerror )
    {
       $mysqlerror = str_replace(
          array( MYSQLHOST, DB_NAME, MYSQLUSER, MYSQLPASSWORD),
@@ -138,18 +138,18 @@ function handle_error( $error_code, $errorlog_id, $userid, $is_admin, $block_rea
 {
    $jump_to_login = ( isset($_REQUEST['page']) && $error_code == 'login_if_not_logged_in' );
 
-   if( !$jump_to_login )
+   if ( !$jump_to_login )
       ErrorCode::echo_error_text($error_code, $errorlog_id);
 
    $hide_debugmsg = false;
-   if( ErrorCode::is_sensitive($error_code) )
+   if ( ErrorCode::is_sensitive($error_code) )
       $hide_debugmsg = true;
 
-   switch( (string)$error_code )
+   switch ( (string)$error_code )
    {
       case('login_if_not_logged_in'):
          // show login-page passing on error-code-info and "original" page for later redirect after login
-         if( $jump_to_login )
+         if ( $jump_to_login )
             jump_to('index.php?err=not_logged_in'.URI_AMP.'eid='.urlencode($errorlog_id).URI_AMP.'page='.urlencode($_REQUEST['page']));
          break;
 
@@ -159,10 +159,10 @@ function handle_error( $error_code, $errorlog_id, $userid, $is_admin, $block_rea
 
       case('login_denied'):
       {
-         if( (string)$userid != '' )
+         if ( (string)$userid != '' )
             admin_log( 0, $userid, 'login_denied');
 
-         if( (string)$block_reason != '' )
+         if ( (string)$block_reason != '' )
          {
             ErrorCode::echo_error_text( 'login_denied:blocked_with_reason', $errorlog_id );
             echo "<br><br>\n",
@@ -176,12 +176,12 @@ function handle_error( $error_code, $errorlog_id, $userid, $is_admin, $block_rea
       }//login_denied
 
       case('mysql_query_failed'):
-         if( !$is_admin ) $hide_debugmsg = true; // contains DB-query
+         if ( !$is_admin ) $hide_debugmsg = true; // contains DB-query
          break;
 
       case('edit_bio_denied'):
       case('adminlevel_too_low'):
-         if( (string)$userid != '' )
+         if ( (string)$userid != '' )
             admin_log( 0, $userid, $error_code );
          break;
 

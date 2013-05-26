@@ -61,13 +61,13 @@ define('KEY_GROUP_ORDER', 'gpo');
    connect2mysql();
 
    $logged_in = who_is_logged($player_row);
-   if( !$logged_in )
+   if ( !$logged_in )
       error('login_if_not_logged_in', 'game_players');
 
    $my_id = $player_row['ID'];
 
    $gid = (int) get_request_arg('gid', 0);
-   if( $gid <= 0 )
+   if ( $gid <= 0 )
       error('unknown_game', "game_players.check.game($gid)");
 
 /* Actual REQUEST calls used:
@@ -103,9 +103,9 @@ define('KEY_GROUP_ORDER', 'gpo');
 
 */
    $cmd = get_request_arg('cmd');
-   if( get_request_arg(FACT_CANCEL) )
+   if ( get_request_arg(FACT_CANCEL) )
       jump_to("game_players.php?gid=$gid");
-   if( $cmd && ($my_id <= GUESTS_ID_MAX) )
+   if ( $cmd && ($my_id <= GUESTS_ID_MAX) )
       error('not_allowed_for_guest', 'game_players.cmd');
 
 
@@ -127,106 +127,106 @@ define('KEY_GROUP_ORDER', 'gpo');
 
    $form = $extform = null;
    $errors = null;
-   if( $status == GAME_STATUS_SETUP )
+   if ( $status == GAME_STATUS_SETUP )
    {
       $is_preview = get_request_arg(FACT_PREVIEW);
       $is_save = get_request_arg(FACT_SAVE);
 
-      if( $allow_edit )
+      if ( $allow_edit )
       {
-         if( $cmd == CMD_ADD_WAITINGROOM_GAME && $cnt_free_slots > 0 ) // add to waiting-room
+         if ( $cmd == CMD_ADD_WAITINGROOM_GAME && $cnt_free_slots > 0 ) // add to waiting-room
          {
-            if( $is_save && !$has_wroom_entry )
+            if ( $is_save && !$has_wroom_entry )
                add_waiting_room_mpgame( $grow, $my_id );
             else
                $form = build_form_add_waiting_room( $gid, $cnt_free_slots, $cmd, $has_wroom_entry );
          }
-         elseif( $cmd == CMD_INVITE ) // invitation
+         elseif ( $cmd == CMD_INVITE ) // invitation
          {
             $to_handle = trim(get_request_arg('to'));
             list( $errors, $to_uid, $to_handle ) = check_invite( $to_handle );
-            if( $is_save && count($errors) == 0 )
+            if ( $is_save && count($errors) == 0 )
                add_invitation_mpgame( $gid, $to_uid );
             else
                $form = build_form_invite( $gid, $to_handle, $errors );
          }
-         elseif( $cmd == CMD_DEL_INVITE ) // delete-reservation of user-invitation
+         elseif ( $cmd == CMD_DEL_INVITE ) // delete-reservation of user-invitation
          {
             $uid = (int)get_request_arg('uid');
             $errors = check_delete_invite( $uid );
-            if( $is_save && count($errors) == 0 )
+            if ( $is_save && count($errors) == 0 )
                delete_invite( $gid, $uid );
             else
                $form = build_form_delete_invite( $gid, $uid, $errors );
          }
-         elseif( $cmd == CMD_DEL_JOINED ) // delete joined player
+         elseif ( $cmd == CMD_DEL_JOINED ) // delete joined player
          {
             $uid = (int)get_request_arg('uid');
             $errors = check_delete_joined_player( $uid );
-            if( $is_save && count($errors) == 0 )
+            if ( $is_save && count($errors) == 0 )
                delete_joined_player( $gid, $uid );
             else
                $form = build_form_delete_joined_player( $gid, $uid, $errors );
          }
-         elseif( $cmd == CMD_CHANGE_COLOR ) // change groups (color)
+         elseif ( $cmd == CMD_CHANGE_COLOR ) // change groups (color)
          {
-            if( get_request_arg(FACT_USE_CONV) || get_request_arg(FACT_USE_PROP) )
+            if ( get_request_arg(FACT_USE_CONV) || get_request_arg(FACT_USE_PROP) )
             {
                $is_preview = true;
                use_handicap_suggestion( $grow, $grow['Size'] );
             }
             else
             {
-               if( $is_preview || ($is_save && $game_type != GAMETYPE_ZEN_GO) )
+               if ( $is_preview || ($is_save && $game_type != GAMETYPE_ZEN_GO) )
                   change_group_color( $gid, $is_preview );
-               if( $is_preview || $is_save )
+               if ( $is_preview || $is_save )
                   update_handicap_komi( $grow, $gid, $is_preview, $grow['Size'],
                      get_request_arg('handicap', 0), get_request_arg('komi', 6.5) );
             }
 
-            if( !$is_save )
+            if ( !$is_save )
             {
                $extform = new Form( 'changegroupcolor', 'game_players.php', FORM_GET, false );
                $itable_handicap_suggestion = build_form_change_group_with_handicap( $extform, $grow, $cmd, $enable_edit_HK );
             }
          }
-         elseif( $cmd == CMD_CHANGE_ORDER ) // change groups (order)
+         elseif ( $cmd == CMD_CHANGE_ORDER ) // change groups (order)
          {
-            if( $is_save )
+            if ( $is_save )
                change_group_order($gid, $grow['GameType']);
             else
                $extform = build_form_change_order( $grow, $gid, $cmd );
          }
-         elseif( $cmd == CMD_DELETE_GAME ) // delete game
+         elseif ( $cmd == CMD_DELETE_GAME ) // delete game
          {
-            if( $is_save )
+            if ( $is_save )
                delete_game_setup($gid);
             else
                $extform = build_form_delete_game( $grow, $gid, $cmd );
          }
       }//allow_edit
 
-      if( $cmd == CMD_START_GAME ) // check/start game
+      if ( $cmd == CMD_START_GAME ) // check/start game
       {
          list( $errors, $new_game_players ) = check_game_setup( $game_type, $grow['GamePlayers'] );
          $cnt_err = count($errors);
-         if( $allow_edit && $is_save && $cnt_err == 0 )
+         if ( $allow_edit && $is_save && $cnt_err == 0 )
             start_multi_player_game( $grow, $new_game_players );
          else
             $extform = build_form_start_game( $gid, $cmd, $errors );
       }
-      elseif( $cmd == CMD_ACK_INVITE ) // accept user-invite
+      elseif ( $cmd == CMD_ACK_INVITE ) // accept user-invite
       {
          $errors = check_accept_invite( $my_id );
          $cnt_err = count($errors);
-         if( $cnt_err == 0 && $is_save )
+         if ( $cnt_err == 0 && $is_save )
             accept_invite( $gid, $my_id );
-         elseif( $cnt_err == 0 && get_request_arg(FACT_REJECT) )
+         elseif ( $cnt_err == 0 && get_request_arg(FACT_REJECT) )
             reject_invite( $gid, $my_id );
          else
             $form = build_form_accept_invite( $gid, $my_id, $errors );
       }
-      elseif( $ack_invite_uid == $my_id ) // accept user-invite (show form)
+      elseif ( $ack_invite_uid == $my_id ) // accept user-invite (show form)
       {
          $form = build_form_accept_invite( $gid, $my_id );
       }
@@ -248,35 +248,35 @@ define('KEY_GROUP_ORDER', 'gpo');
    echo $itable_game_settings->make_table(), "<br>\n";
 
    // use extform | form
-   if( !is_null($extform) )
+   if ( !is_null($extform) )
       echo $extform->print_start_default();
-   if( !is_null($utable) )
+   if ( !is_null($utable) )
       $utable->echo_table();
 
-   if( @$itable_handicap_suggestion )
+   if ( @$itable_handicap_suggestion )
       echo "<br>\n", $itable_handicap_suggestion->make_table();
 
-   if( !is_null($extform) )
+   if ( !is_null($extform) )
       echo $extform->get_form_string(), $extform->print_end();
-   elseif( !is_null($form) )
+   elseif ( !is_null($form) )
       $form->echo_string();
 
 
    $menu_array = array();
-   if( $status != GAME_STATUS_SETUP )
+   if ( $status != GAME_STATUS_SETUP )
    {
       $menu_array[T_('Show game')] = "game.php?gid=$gid";
       $menu_array[T_('Show game info')] = "gameinfo.php?gid=$gid";
    }
    $menu_array[T_('Show game-players')] = "game_players.php?gid=$gid";
-   if( $status == GAME_STATUS_SETUP )
+   if ( $status == GAME_STATUS_SETUP )
    {
-      if( $has_wroom_entry && $cnt_free_slots == 0 )
+      if ( $has_wroom_entry && $cnt_free_slots == 0 )
          $menu_array[T_('Show waiting-room entry#mpg')] = "waiting_room.php?gid=$gid#joingameForm";
 
-      if( $allow_edit )
+      if ( $allow_edit )
       {
-         if( $cnt_free_slots )
+         if ( $cnt_free_slots )
          {
             $menu_array[T_('Add to waiting room')] = "game_players.php?gid=$gid".URI_AMP.'cmd='.CMD_ADD_WAITINGROOM_GAME;
             $menu_array[T_('Invite')] = "game_players.php?gid=$gid".URI_AMP.'cmd='.CMD_INVITE;
@@ -285,7 +285,7 @@ define('KEY_GROUP_ORDER', 'gpo');
          $chg_col_title = ($enable_edit_HK)
             ? ( $game_type == GAMETYPE_ZEN_GO ? T_('Change handicap') : T_('Change color & handicap') )
             : T_('Change color');
-         if( $enable_edit_HK || $game_type == GAMETYPE_TEAM_GO )
+         if ( $enable_edit_HK || $game_type == GAMETYPE_TEAM_GO )
             $menu_array[$chg_col_title] = "game_players.php?gid=$gid".URI_AMP.'cmd='.CMD_CHANGE_COLOR;
 
          $menu_array[T_('Change order')] = "game_players.php?gid=$gid".URI_AMP.'cmd='.CMD_CHANGE_ORDER;
@@ -296,12 +296,12 @@ define('KEY_GROUP_ORDER', 'gpo');
          $menu_array[T_('Check game')] = "game_players.php?gid=$gid".URI_AMP.'cmd='.CMD_START_GAME;
    }
    // admin-stuff
-   if( @$arr_users[$my_id] )
+   if ( @$arr_users[$my_id] )
       $menu_array[T_('New bulletin')] = "edit_bulletin.php?n_gid=$gid";
-   if( Bulletin::is_bulletin_admin() )
+   if ( Bulletin::is_bulletin_admin() )
       $menu_array[T_('New admin bulletin')] =
          array( 'url' => "admin_bulletin.php?n_gid=$gid", 'class' => 'AdminLink' );
-   if( $status == GAME_STATUS_SETUP && ( @$player_row['admin_level'] & ADMIN_GAME ) )
+   if ( $status == GAME_STATUS_SETUP && ( @$player_row['admin_level'] & ADMIN_GAME ) )
       $menu_array[T_('Admin game')] = array( 'url' => "admin_game.php?gid=$gid", 'class' => 'AdminLink' );
 
    end_page(@$menu_array);
@@ -313,7 +313,7 @@ function build_game_settings( $grow )
    global $arr_ratings;
 
    $itable = new Table_info('game_settings', TABLEOPT_LABEL_COLON);
-   if( @$grow['ShapeID'] > 0 )
+   if ( @$grow['ShapeID'] > 0 )
    {
       $arr_shape = GameSnapshot::parse_check_extended_snapshot($grow['ShapeSnapshot']);
       $ShapeBlackFirst = ( is_array($arr_shape) ) ? (bool)@$arr_shape['PlayColorB'] : true;
@@ -345,7 +345,7 @@ function build_game_settings( $grow )
                ( $grow['WeekendClock'] == 'Y' ? T_('Clock runs on weekend') : T_('Clock stopped on weekend') )
          ));
 
-   if( count($arr_ratings) )
+   if ( count($arr_ratings) )
    {
       $itable->add_sinfo(
             T_('Group ratings'), implode("<br>\n", build_group_rating()) );
@@ -358,9 +358,9 @@ function build_group_rating()
    global $arr_ratings;
 
    $arr = array();
-   foreach( array( GPCOL_B, GPCOL_W, GPCOL_G1, GPCOL_G2, GPCOL_BW ) as $gr_col )
+   foreach ( array( GPCOL_B, GPCOL_W, GPCOL_G1, GPCOL_G2, GPCOL_BW ) as $gr_col )
    {
-      if( isset($arr_ratings[$gr_col]) )
+      if ( isset($arr_ratings[$gr_col]) )
       {
          $arr[] = sprintf( "<b>%s:</b> %s",
                   ( $gr_col != GPCOL_BW ? GamePlayer::get_group_color_text($gr_col) : T_('All#gpcol') ),
@@ -373,15 +373,15 @@ function build_group_rating()
 function build_user_flags( $gp )
 {
    $arr = array();
-   if( $gp->Flags & GPFLAG_MASTER )
+   if ( $gp->Flags & GPFLAG_MASTER )
       $arr[] = T_('Master#gpflag');
-   if( $gp->Flags & GPFLAG_RESERVED )
+   if ( $gp->Flags & GPFLAG_RESERVED )
       $arr[] = sprintf( '%s[%s]', T_('Reserved#gpflag'), ($gp->Flags & GPFLAG_WAITINGROOM ? 'WR' : 'INV') );
-   elseif( $gp->Flags & GPFLAG_JOINED )
+   elseif ( $gp->Flags & GPFLAG_JOINED )
    {
-      if( $gp->Flags & GPFLAG_WAITINGROOM )
+      if ( $gp->Flags & GPFLAG_WAITINGROOM )
          $arr[] = sprintf( '%s[%s]', T_('Joined#gpflag'), 'WR' );
-      elseif( $gp->Flags & GPFLAG_INVITATION )
+      elseif ( $gp->Flags & GPFLAG_INVITATION )
          $arr[] = sprintf( '%s[%s]', T_('Joined#gpflag'), 'INV' );
       else
          $arr[] = T_('Joined#gpflag');
@@ -395,15 +395,15 @@ function build_user_actions( $gp )
 
    $arr = array();
    $uid = $gp->uid;
-   if( $uid > 0 )
+   if ( $uid > 0 )
    {
       $gid = $gp->gid;
-      if( $my_id != $uid )
+      if ( $my_id != $uid )
          $arr[] = anchor("message.php?mode=NewMessage".URI_AMP."uid=$uid",
             image( $base_path.'images/send.gif', 'M', '', 'class="Action"' ), T_('Send message'));
-      if( $allow_edit && !($gp->Flags & GPFLAG_MASTER) )
+      if ( $allow_edit && !($gp->Flags & GPFLAG_MASTER) )
       {
-         if( ($gp->Flags & GPFLAGS_RESERVED_INVITATION) == GPFLAGS_RESERVED_INVITATION )
+         if ( ($gp->Flags & GPFLAGS_RESERVED_INVITATION) == GPFLAGS_RESERVED_INVITATION )
          {
             $arr[] = anchor("message.php?mode=NewMessage".URI_AMP."mpgid=$gid".URI_AMP."mpmt=".MPGMSG_INVITE .
                      URI_AMP."mpuid=$uid".URI_AMP."preview=1",
@@ -411,7 +411,7 @@ function build_user_actions( $gp )
             $arr[] = anchor("game_players.php?gid=$gid".URI_AMP."cmd=".CMD_DEL_INVITE.URI_AMP."uid=$uid",
                image( $base_path.'images/trashcan.gif', 'X', '', 'class="Action"' ), T_('Delete reservation#mpg'));
          }
-         if( $gp->Flags & GPFLAG_JOINED )
+         if ( $gp->Flags & GPFLAG_JOINED )
          {
             $arr[] = anchor("game_players.php?gid=$gid".URI_AMP."cmd=".CMD_DEL_JOINED.URI_AMP."uid=$uid",
                image( $base_path.'images/trashcan.gif', 'X', '', 'class="Action"' ), T_('Delete joined player#mpg'));
@@ -430,12 +430,12 @@ function load_game( $gid )
    $query = $qsql->get_select() . ' LIMIT 1';
 
    $grow = mysql_single_fetch( "game_players.find.game($gid)", $query );
-   if( !$grow )
+   if ( !$grow )
       error('unknown_game', "game_players.find.game2($gid)");
    $status = $grow['Status'];
-   if( $status == GAME_STATUS_INVITED || $status == GAME_STATUS_KOMI )
+   if ( $status == GAME_STATUS_INVITED || $status == GAME_STATUS_KOMI )
       error('invalid_game_status', "game_players.find.game3($gid,$status)");
-   if( $grow['GameType'] != GAMETYPE_TEAM_GO && $grow['GameType'] != GAMETYPE_ZEN_GO )
+   if ( $grow['GameType'] != GAMETYPE_TEAM_GO && $grow['GameType'] != GAMETYPE_ZEN_GO )
       error('invalid_game_status', "game_players.find.std_gametype($gid,{$grow['GameType']})");
 
    return $grow;
@@ -460,10 +460,10 @@ function load_game_players( $gid )
       "WHERE gid=$gid ORDER BY GroupColor ASC, GroupOrder ASC" );
 
    $arr_gp = array();
-   while( $row = mysql_fetch_assoc($result) )
+   while ( $row = mysql_fetch_assoc($result) )
    {
       $uid = (int)$row['uid'];
-      if( $uid > 0 )
+      if ( $uid > 0 )
       {
          $user = new User( $uid, $row['Name'], $row['Handle'], 0, $row['X_Lastaccess'],
             $row['Country'], $row['Rating2'], $row['RatingStatus'] );
@@ -479,17 +479,17 @@ function load_game_players( $gid )
          $row['GroupOrder'], $row['Flags'], $uid, $user );
       $arr_gp[] = $gp;
 
-      if( $uid > 0 )
+      if ( $uid > 0 )
       {
          $arr_users[$uid] = $gp;
-         if( $my_id == $uid && ($gp->Flags & GPFLAGS_RESERVED_INVITATION) == GPFLAGS_RESERVED_INVITATION )
+         if ( $my_id == $uid && ($gp->Flags & GPFLAGS_RESERVED_INVITATION) == GPFLAGS_RESERVED_INVITATION )
             $ack_invite_uid = $uid;
-         if( $master_uid == 0 && $gp->Flags & GPFLAG_MASTER )
+         if ( $master_uid == 0 && $gp->Flags & GPFLAG_MASTER )
             $master_uid = $uid;
       }
-      if( ($gp->Flags & GPFLAGS_SLOT_TAKEN) == 0 )
+      if ( ($gp->Flags & GPFLAGS_SLOT_TAKEN) == 0 )
          $arr_free_slots[] = $gp;
-      if( ($gp->Flags & GPFLAGS_RESERVED_WAITINGROOM) == GPFLAGS_RESERVED_WAITINGROOM )
+      if ( ($gp->Flags & GPFLAGS_RESERVED_WAITINGROOM) == GPFLAGS_RESERVED_WAITINGROOM )
          $has_wroom_entry = true;
    }
    mysql_free_result($result);
@@ -503,7 +503,7 @@ function count_group_colors()
    global $arr_game_players;
 
    $arr = array();
-   foreach( $arr_game_players as $gp )
+   foreach ( $arr_game_players as $gp )
       $arr[$gp->GroupColor] = 1;
    return array_keys($arr);
 }//count_group_colors
@@ -520,10 +520,10 @@ function build_table_game_players( $grow, $cmd, &$form )
 
    $utable = new Table( 'GamePlayers', 'game_players.php' );
    $utable->use_show_rows( false );
-   if( $chg_group_order )
+   if ( $chg_group_order )
       $utable->add_tablehead(10, T_('Set Order#header'), '', TABLE_NO_HIDE, '');
    $utable->add_tablehead( 1, '#', 'Number' );
-   if( $chg_group_color )
+   if ( $chg_group_color )
       $utable->add_tablehead( 9, T_('Set Group#header'), '', TABLE_NO_HIDE, '');
    $utable->add_tablehead( 2, T_('Color#header'), 'ImageGroupColor' );
    $utable->add_tablehead( 3, T_('Player#header'), 'User' );
@@ -537,26 +537,26 @@ function build_table_game_players( $grow, $cmd, &$form )
 
    $idx = 0;
    $last_group = null;
-   foreach( $arr_game_players as $gp )
+   foreach ( $arr_game_players as $gp )
    {
       $idx++;
-      if( !is_null($last_group) && $gp->GroupColor != $last_group )
+      if ( !is_null($last_group) && $gp->GroupColor != $last_group )
       {//add some separator with 2 rows, so without changing row-col for next content-row
          $utable->add_row_one_col( '', array( 'extra_class' => 'Empty' ) );
          $utable->add_row_one_col( '', array( 'extra_class' => 'Empty' ) );
       }
 
       $imgstr = '';
-      if( isRunningGame($grow['Status']) )
+      if ( isRunningGame($grow['Status']) )
       {
-         if( $gp->uid == $grow['ToMove_ID'] )
+         if ( $gp->uid == $grow['ToMove_ID'] )
          {
             $img = ($grow['ToMove_ID'] == $grow['Black_ID']) ? 'bm.gif' : 'wm.gif';
             $imgstr = image( $base_path.'17/'.$img, T_('Player to move'), null, 'class="InTextImage"' );
          }
-         elseif( $gp->GroupColor == $next_gr_col && $gp->GroupOrder == $next_gr_order )
+         elseif ( $gp->GroupColor == $next_gr_col && $gp->GroupOrder == $next_gr_order )
             $imgstr = image( $base_path.'images/forward.gif', T_('Next player'), null, 'class="InTextImage"' );
-         if( $imgstr )
+         if ( $imgstr )
             $imgstr .= MED_SPACING;
       }
 
@@ -565,7 +565,7 @@ function build_table_game_players( $grow, $cmd, &$form )
          2 => GamePlayer::build_image_group_color($gp->GroupColor) .
               MINI_SPACING . GamePlayer::get_group_color_text($gp->GroupColor),
       );
-      if( $gp->uid )
+      if ( $gp->uid )
       {
          $row_str[3] = $gp->user->user_reference();
          $row_str[4] = echo_rating( $gp->user->Rating, true, $gp->uid );
@@ -577,15 +577,15 @@ function build_table_game_players( $grow, $cmd, &$form )
       $row_str[7] = build_user_flags( $gp );
       $row_str[8] = build_user_actions( $gp );
 
-      if( $chg_group_color && $gp->uid > GUESTS_ID_MAX ) // command: set-group-color
+      if ( $chg_group_color && $gp->uid > GUESTS_ID_MAX ) // command: set-group-color
       {
          $gpkey = KEY_GROUP_COLOR.$gp->id;
          $row_str[9] = $form->print_insert_select_box( $gpkey, 1, $arr_group_colors,
             get_request_arg($gpkey, $gp->GroupColor) );
       }
-      if( $chg_group_order && $gp->uid > GUESTS_ID_MAX ) // command: set-group-order
+      if ( $chg_group_order && $gp->uid > GUESTS_ID_MAX ) // command: set-group-order
       {
-         if( allow_change_group_order($grow['GameType'], $gp->GroupColor) )
+         if ( allow_change_group_order($grow['GameType'], $gp->GroupColor) )
          {
             $gpkey = KEY_GROUP_ORDER.$gp->id;
             $arr_group_order = array( 0 => NO_VALUE ) + build_num_range_map( 1, $group_max_players );
@@ -615,11 +615,11 @@ function build_form_add_waiting_room( $gid, $slot_count, $cmd, $has_wroom_entry 
    $form->add_empty_row();
    $form->add_row( array( 'HEADER', T_('Add new game to waiting room#mpg') ));
 
-   if( $has_wroom_entry )
+   if ( $has_wroom_entry )
    {
       $wrow = mysql_single_fetch( "game_players.build_form_add_waiting_room.find_wroom($gid)",
          "SELECT ID FROM Waitingroom WHERE gid=$gid LIMIT 1" );
-      if( $wrow )
+      if ( $wrow )
       {
          $wr_id = (int)$wrow['ID'];
          $form->add_row( array( 'TEXT',
@@ -671,7 +671,7 @@ function build_form_invite( $gid, $to_handle, $errors )
 function build_form_delete_invite( $gid, $uid, $errors )
 {
    $cnt_err = show_errors( $form, $errors );
-   if( $cnt_err > 0 )
+   if ( $cnt_err > 0 )
       return null;
 
    $form = new Form( 'delinvite', 'game_players.php', FORM_POST );
@@ -696,7 +696,7 @@ function build_form_delete_invite( $gid, $uid, $errors )
 function build_form_delete_joined_player( $gid, $uid, $errors )
 {
    $cnt_err = show_errors( $form, $errors );
-   if( $cnt_err > 0 )
+   if ( $cnt_err > 0 )
       return null;
 
    $form = new Form( 'deljoined', 'game_players.php', FORM_POST );
@@ -723,7 +723,7 @@ function build_form_accept_invite( $gid, $uid, $errors=null )
    global $master_uid;
 
    $cnt_err = show_errors( $form, $errors );
-   if( $cnt_err > 0 )
+   if ( $cnt_err > 0 )
       return null;
 
    $form = new Form( 'ackinvite', 'game_players.php', FORM_POST );
@@ -759,7 +759,7 @@ function build_form_change_group_with_handicap( &$form, $grow, $cmd, $enable_edi
    $arr_color_keys = count_group_colors();
 
    $itable = null;
-   if( $enable_edit_HK && $game_type == GAMETYPE_TEAM_GO && count($arr_color_keys) == 2 )
+   if ( $enable_edit_HK && $game_type == GAMETYPE_TEAM_GO && count($arr_color_keys) == 2 )
    {
       global $arr_game_players;
 
@@ -788,7 +788,7 @@ function build_form_change_group_with_handicap( &$form, $grow, $cmd, $enable_edi
       $itable = build_tableinfo_handicap_suggestion( $form, $arr_color_keys[0],
          $arr_conv_sugg, $arr_prop_sugg );
    }
-   elseif( $enable_edit_HK && $game_type == GAMETYPE_ZEN_GO && count($arr_color_keys) == 1 )
+   elseif ( $enable_edit_HK && $game_type == GAMETYPE_ZEN_GO && count($arr_color_keys) == 1 )
       $show_edit_hk = true;
    else
       $show_edit_hk = false;
@@ -807,7 +807,7 @@ function build_form_change_group( &$form, $grow, $cmd, $edit_hk=false )
 
    $form->add_empty_row();
 
-   if( $edit_hk )
+   if ( $edit_hk )
    {
       $arr_handicap = build_arr_handicap_stones( /*def*/false );
       $val_handicap = $grow['Handicap'];
@@ -863,7 +863,7 @@ function build_form_start_game( $gid, $cmd, $errors )
    $form->add_hidden( 'cmd', $cmd );
 
    $cnt_err = show_errors( $form, $errors );
-   if( $cnt_err == 0 ) // allowed to start game
+   if ( $cnt_err == 0 ) // allowed to start game
    {
       $form->add_empty_row();
       $form->add_row( array(
@@ -872,7 +872,7 @@ function build_form_start_game( $gid, $cmd, $errors )
                               . URI_AMP."mpmt=".MPGMSG_STARTGAME.URI_AMP."preview=1",
                             T_('Send message to all game-players#mpg') ), ));
 
-      if( $allow_edit )
+      if ( $allow_edit )
       {
          $form->add_empty_row();
          $form->add_row( array(
@@ -925,7 +925,7 @@ function add_waiting_room_mpgame( $grow, $uid )
 
    // update free slots: set RESERVED + WR; change flags in table
    $arr_upd = array();
-   for( $i=0; $i < $slots; $i++ )
+   for ( $i=0; $i < $slots; $i++ )
    {
       $arr_free_slots[$i]->Flags |= GPFLAGS_RESERVED_WAITINGROOM;
       $arr_upd[] = $arr_free_slots[$i]->id;
@@ -1076,12 +1076,12 @@ function change_group_color( $gid, $preview )
    // if changed, update group-color in database + table
    $cnt_upd = 0;
    $need_reorder = false;
-   foreach( $arr_game_players as $gp )
+   foreach ( $arr_game_players as $gp )
    {
       $new_grcol = get_request_arg(KEY_GROUP_COLOR.$gp->id);
-      if( (string)$new_grcol != '' && $gp->uid > GUESTS_ID_MAX && $new_grcol != $gp->GroupColor )
+      if ( (string)$new_grcol != '' && $gp->uid > GUESTS_ID_MAX && $new_grcol != $gp->GroupColor )
       {
-         if( !$preview )
+         if ( !$preview )
          {
             db_query( "game_players.change_group_color.gp_upd($gid)",
                "UPDATE GamePlayers SET GroupColor='" . mysql_addslashes($new_grcol) . "' " .
@@ -1093,9 +1093,9 @@ function change_group_color( $gid, $preview )
       }
    }
 
-   if( $cnt_upd > 0 )
+   if ( $cnt_upd > 0 )
       set_request_arg('sysmsg', T_('Groups updated!') );
-   if( $need_reorder )
+   if ( $need_reorder )
       reorder_game_players();
 }//change_group_color
 
@@ -1105,10 +1105,10 @@ function change_group_order( $gid, $gametype )
 
    // if changed, update group-order in database + table
    $cnt_upd = 0;
-   foreach( $arr_game_players as $gp )
+   foreach ( $arr_game_players as $gp )
    {
       $new_order = (int)get_request_arg(KEY_GROUP_ORDER.$gp->id);
-      if( $gp->uid > GUESTS_ID_MAX && $new_order != $gp->GroupOrder
+      if ( $gp->uid > GUESTS_ID_MAX && $new_order != $gp->GroupOrder
             && allow_change_group_order($gametype, $gp->GroupColor) )
       {
          db_query( "game_players.change_group_order.gp_upd($gid)",
@@ -1118,7 +1118,7 @@ function change_group_order( $gid, $gametype )
       }
    }
 
-   if( $cnt_upd > 0 ) // reload to get new order
+   if ( $cnt_upd > 0 ) // reload to get new order
    {
       set_request_arg('sysmsg', T_('Groups updated!') );
       reorder_game_players();
@@ -1153,7 +1153,7 @@ function update_handicap_komi( &$grow, $gid, $preview, $size, $handicap, $komi )
    $handicap = adjust_handicap( $size, (int)$handicap, 0, 0, MAX_HANDICAP );
    $komi = adjust_komi( (float)$komi, 0, JIGOMODE_KEEP_KOMI );
 
-   if( !$preview )
+   if ( !$preview )
    {
       db_query( "game_players.update_handicap_komi.games_upd($gid,$handicap,$komi)",
          "UPDATE Games SET Handicap=$handicap, Komi=$komi, Lastchanged=FROM_UNIXTIME($NOW) "
@@ -1168,26 +1168,26 @@ function use_handicap_suggestion( &$grow, $size )
 {
    global $arr_game_players;
 
-   if( get_request_arg(FACT_USE_CONV) )
+   if ( get_request_arg(FACT_USE_CONV) )
       $prefix = 'conv_';
-   elseif( get_request_arg(FACT_USE_PROP) )
+   elseif ( get_request_arg(FACT_USE_PROP) )
       $prefix = 'prop_';
    else
       return;
 
    // 1. update color: use conv_b/w = GRCOL: change GRCOL -> b/w
    $arr = array();
-   foreach( explode(',', get_request_arg($prefix.'b')) as $gp_id )
+   foreach ( explode(',', get_request_arg($prefix.'b')) as $gp_id )
       $arr[$gp_id] = GPCOL_B;
-   foreach( explode(',', get_request_arg($prefix.'w')) as $gp_id )
+   foreach ( explode(',', get_request_arg($prefix.'w')) as $gp_id )
       $arr[$gp_id] = GPCOL_W;
 
    $need_reorder = false;
-   foreach( $arr_game_players as $gp )
+   foreach ( $arr_game_players as $gp )
    {
-      if( isset($arr[$gp->id]) )
+      if ( isset($arr[$gp->id]) )
       {
-         if( $gp->GroupColor != $arr[$gp->id] )
+         if ( $gp->GroupColor != $arr[$gp->id] )
             $need_reorder = true;
          $gp->GroupColor = $arr[$gp->id];
          set_request_arg( KEY_GROUP_COLOR.$gp->id, $gp->GroupColor );
@@ -1198,7 +1198,7 @@ function use_handicap_suggestion( &$grow, $size )
    $grow['Handicap'] = adjust_handicap( $size, (int)get_request_arg($prefix.'h'), 0, 0, MAX_HANDICAP );
    $grow['Komi'] = adjust_komi( (float)get_request_arg($prefix.'k'), 0, JIGOMODE_KEEP_KOMI );
 
-   if( $need_reorder )
+   if ( $need_reorder )
       reorder_game_players();
 }//use_handicap_suggestion
 
@@ -1207,9 +1207,9 @@ function get_group_color_game_player_id( $group_color )
    global $arr_game_players;
 
    $arr = array();
-   foreach( $arr_game_players as $gp )
+   foreach ( $arr_game_players as $gp )
    {
-      if( $gp->GroupColor == $group_color )
+      if ( $gp->GroupColor == $group_color )
          $arr[] = $gp->id;
    }
    return $arr;
@@ -1234,7 +1234,7 @@ function check_invite( $invite_handle )
    global $arr_game_players;
 
    $errors = array();
-   if( (string)$invite_handle == '' ) // nothing to check
+   if ( (string)$invite_handle == '' ) // nothing to check
    {
       $errors[] = ErrorCode::get_error_text('unknown_user');
       return array( $errors, 0, $invite_handle );
@@ -1242,9 +1242,9 @@ function check_invite( $invite_handle )
 
    // load user
    $invite_user = User::load_user_by_handle( $invite_handle );
-   if( is_null($invite_user) && is_numeric($invite_handle) )
+   if ( is_null($invite_user) && is_numeric($invite_handle) )
       $invite_user = User::load_user( (int)$invite_handle );
-   if( is_null($invite_user) )
+   if ( is_null($invite_user) )
    {
       $errors[] = ErrorCode::get_error_text('unknown_user');
       return array( $errors, 0, $invite_handle );
@@ -1254,20 +1254,20 @@ function check_invite( $invite_handle )
 
    // CHECKS: need free slot, only join game once, rated user, no guest, not game-master
    $arr_uid = array(); // uid => 1
-   foreach( $arr_game_players as $gp )
+   foreach ( $arr_game_players as $gp )
    {
-      if( $gp->uid > 0 )
+      if ( $gp->uid > 0 )
          $arr_uid[$gp->uid] = 1;
-      if( $gp->uid == $invite_uid && ($gp->Flags & GPFLAG_MASTER) )
+      if ( $gp->uid == $invite_uid && ($gp->Flags & GPFLAG_MASTER) )
          $errors[] = T_('Game-master already joined the game and can not be invited.#mpg');
    }
-   if( count($arr_uid) == count($arr_game_players) )
+   if ( count($arr_uid) == count($arr_game_players) )
       $errors[] = T_('No free slot available for invitation of user#mpg');
-   if( $invite_uid <= GUESTS_ID_MAX )
+   if ( $invite_uid <= GUESTS_ID_MAX )
       $errors[] = ErrorCode::get_error_text('guest_no_invite');
-   if( !$invite_user->hasRating() )
+   if ( !$invite_user->hasRating() )
       $errors[] = sprintf( T_('User [%s] has no rating#mpg'), $invite_handle );
-   if( isset($arr_uid[$invite_uid]) )
+   if ( isset($arr_uid[$invite_uid]) )
       $errors[] = sprintf( T_('User [%s] already invited or joined the game#mpg'), $invite_handle );
 
    return array( $errors, $invite_uid, $invite_handle );
@@ -1283,20 +1283,20 @@ function check_delete_invite( $uid )
 
    // CHECKS for delete: invite-reservation exists, user not joined yet, not game-master
    $found = false;
-   foreach( $arr_game_players as $gp )
+   foreach ( $arr_game_players as $gp )
    {
-      if( $gp->uid == $uid )
+      if ( $gp->uid == $uid )
       {
          $found = true;
-         if( $gp->Flags & GPFLAG_MASTER )
+         if ( $gp->Flags & GPFLAG_MASTER )
             $errors[] = T_('Game-master should not have reservation and can not be deleted.#mpg');
-         if( $gp->Flags & GPFLAG_JOINED )
+         if ( $gp->Flags & GPFLAG_JOINED )
             $errors[] = T_('User to delete has already joined the game.#mpg');
-         if( ($gp->Flags & GPFLAGS_RESERVED_INVITATION) != GPFLAGS_RESERVED_INVITATION )
+         if ( ($gp->Flags & GPFLAGS_RESERVED_INVITATION) != GPFLAGS_RESERVED_INVITATION )
             $errors[] = T_('No reserved invitation found for user.#mpg');
       }
    }
-   if( !$found )
+   if ( !$found )
       $errors[] = T_('Reservation of user to be deleted can not be found.#mpg');
 
    return $errors;
@@ -1310,7 +1310,7 @@ function check_accept_invite( $uid )
 
    // CHECKS for approval: need invitation-reservation-slot
    $errors = array();
-   if( $ack_invite_uid == 0 || $ack_invite_uid != $uid )
+   if ( $ack_invite_uid == 0 || $ack_invite_uid != $uid )
       $errors[] = T_('There is no reserved invitation for you to approve.#mpg');
 
    return $errors;
@@ -1326,18 +1326,18 @@ function check_delete_joined_player( $uid )
 
    // CHECKS for delete: player is joined, not game-master
    $found = false;
-   foreach( $arr_game_players as $gp )
+   foreach ( $arr_game_players as $gp )
    {
-      if( $gp->uid == $uid )
+      if ( $gp->uid == $uid )
       {
          $found = true;
-         if( $gp->Flags & GPFLAG_MASTER )
+         if ( $gp->Flags & GPFLAG_MASTER )
             $errors[] = T_('Game-master is required and can not be deleted with this action.#mpg');
-         if( !($gp->Flags & GPFLAG_JOINED) )
+         if ( !($gp->Flags & GPFLAG_JOINED) )
             $errors[] = T_('User to delete has not joined the game.#mpg');
       }
    }
-   if( !$found )
+   if ( !$found )
       $errors[] = T_('Joined player to be deleted can not be found.#mpg');
 
    return $errors;
@@ -1356,22 +1356,22 @@ function check_game_setup( $game_type, $game_players )
    $arr_uid = array(); // uid => count
    $arr_grcol = array(); // groupcolor => count
    $arr_order = array(); // groupcolor => [ group-orders, ... ] (ordered)
-   foreach( $arr_game_players as $gp )
+   foreach ( $arr_game_players as $gp )
    {
-      if( $gp->uid > 0 )
+      if ( $gp->uid > 0 )
       {
-         if( $gp->Flags & GPFLAG_JOINED )
+         if ( $gp->Flags & GPFLAG_JOINED )
             $cnt_joined++;
-         if( $gp->Flags & GPFLAG_RESERVED )
+         if ( $gp->Flags & GPFLAG_RESERVED )
             $cnt_reserved++;
-         if( !$gp->user->hasRating() ) // CHECK: all users must have a rating
+         if ( !$gp->user->hasRating() ) // CHECK: all users must have a rating
             $errors[] = sprintf( T_('User [%s] has no rating#mpg'), $gp->user->Handle );
-         if( isset($arr_uid[$gp->uid]) )
+         if ( isset($arr_uid[$gp->uid]) )
             $arr_uid[$gp->uid]++;
          else
             $arr_uid[$gp->uid] = 1;
       }
-      if( isset($arr_grcol[$gp->GroupColor]) )
+      if ( isset($arr_grcol[$gp->GroupColor]) )
          $arr_grcol[$gp->GroupColor]++;
       else
          $arr_grcol[$gp->GroupColor] = 1;
@@ -1379,15 +1379,15 @@ function check_game_setup( $game_type, $game_players )
    }
 
    // CHECK: all users must be joined, no reserved slots any more
-   if( $cnt_joined != count($arr_game_players) )
+   if ( $cnt_joined != count($arr_game_players) )
       $errors[] = T_('Some game-players are missing#mpg');
-   if( $cnt_reserved > 0 )
+   if ( $cnt_reserved > 0 )
       $errors[] = T_('Not all reservation-slots have been joined by players#mpg');
 
    // CHECK: error, if same user appears more than once
-   foreach( $arr_uid as $uid => $cnt )
+   foreach ( $arr_uid as $uid => $cnt )
    {
-      if( $arr_uid[$uid] > 1 )
+      if ( $arr_uid[$uid] > 1 )
          $errors[] = sprintf( T_('Player [%s] joined the game more than once#mpg'),
             $arr_users[$uid]->user->Handle );
    }
@@ -1396,13 +1396,13 @@ function check_game_setup( $game_type, $game_players )
    $arr_grcol_vals = array_values( $arr_grcol );
    $arr_grcol_keys = array_keys( $arr_grcol );
    $arr_grcol_keys_text = build_arr_group_color_texts( $arr_grcol_keys );
-   if( $game_type == GAMETYPE_TEAM_GO )
+   if ( $game_type == GAMETYPE_TEAM_GO )
    {
       // CHECK: need both group-colors: B + W
-      if( count($arr_grcol) == 2 && isset($arr_grcol[GPCOL_B]) && isset($arr_grcol[GPCOL_W]) )
+      if ( count($arr_grcol) == 2 && isset($arr_grcol[GPCOL_B]) && isset($arr_grcol[GPCOL_W]) )
       {
          // CHECK: GroupColor-count per group must match GamePlayers-config
-         if( min($arr_grcol_vals) != $arr_group_cnt[0] || max($arr_grcol_vals) != $arr_group_cnt[1] )
+         if ( min($arr_grcol_vals) != $arr_group_cnt[0] || max($arr_grcol_vals) != $arr_group_cnt[1] )
             $errors[] = sprintf( T_('Numbers of players (%s for %s, %s for %s) do not match the game-config [%s]#mpg'),
                $arr_grcol[GPCOL_B], GamePlayer::get_group_color_text(GPCOL_B),
                $arr_grcol[GPCOL_W], GamePlayer::get_group_color_text(GPCOL_W),
@@ -1410,7 +1410,7 @@ function check_game_setup( $game_type, $game_players )
          else
          {
             // determine new 'GamePlayers'-info in order B:W (needed for playing)
-            if( $arr_group_cnt[0] != $arr_group_cnt[1] && $arr_grcol[GPCOL_B] != $arr_group_cnt[0] )
+            if ( $arr_group_cnt[0] != $arr_group_cnt[1] && $arr_grcol[GPCOL_B] != $arr_group_cnt[0] )
                $new_game_players = sprintf( '%d:%d', $arr_group_cnt[1], $arr_group_cnt[0] );
          }
       }
@@ -1423,10 +1423,10 @@ function check_game_setup( $game_type, $game_players )
    else //if( $game_type == GAMETYPE_ZEN_GO )
    {
       // CHECK: need one group-color: BW
-      if( count($arr_grcol) == 1 && isset($arr_grcol[GPCOL_BW]) )
+      if ( count($arr_grcol) == 1 && isset($arr_grcol[GPCOL_BW]) )
       {
          // CHECK: GroupColor-count per group must match GamePlayers-config
-         if( $arr_grcol_vals[0] != $arr_group_cnt[0] )
+         if ( $arr_grcol_vals[0] != $arr_group_cnt[0] )
             $errors[] = sprintf( T_('Number of players (%s for %s) does not match the game-config [%s]#mpg'),
                $arr_grcol[GPCOL_BW], GamePlayer::get_group_color_text(GPCOL_BW),
                GameTexts::format_game_type($game_type, $game_players) );
@@ -1438,15 +1438,15 @@ function check_game_setup( $game_type, $game_players )
    }
 
    // CHECK: GroupOrder must be consecutive (1,2,3,4...), starting at 1, unique per group(s)
-   foreach( $arr_order as $grcol => $arr )
+   foreach ( $arr_order as $grcol => $arr )
    {
       $cnt = count($arr);
       $grcol_text = GamePlayer::get_group_color_text($grcol);
-      if( $arr[0] == 0 )
+      if ( $arr[0] == 0 )
          $errors[] = sprintf( T_('Order of group [%s] must be set#mpg'), $grcol_text );
-      elseif( $arr[0] != 1 )
+      elseif ( $arr[0] != 1 )
          $errors[] = sprintf( T_('Order of group [%s] must start at 1#mpg'), $grcol_text );
-      elseif( array_sum($arr) != ($cnt * ($cnt+1) / 2) )
+      elseif ( array_sum($arr) != ($cnt * ($cnt+1) / 2) )
          $errors[] = sprintf( T_('Order of group [%s] must be unique and consecutive: 1,2,3, ...#mpg'), $grcol_text );
    }
 
@@ -1456,7 +1456,7 @@ function check_game_setup( $game_type, $game_players )
 function build_arr_group_color_texts( $arr_group_colors )
 {
    $arr = array();
-   foreach( $arr_group_colors as $grcol )
+   foreach ( $arr_group_colors as $grcol )
       $arr[] = GamePlayer::get_group_color_text($grcol);
    return $arr;
 }
@@ -1471,7 +1471,7 @@ function delete_game_setup( $gid )
 
    ta_begin();
    {//HOT-section for deleting multi-player-game
-      if( GameHelper::delete_running_game($gid) )
+      if ( GameHelper::delete_running_game($gid) )
       {
          // notify all players about deletion
          list( $Subject, $Text ) = $game_notify->get_text_game_deleted( ACTBY_GAMEMASTER );
@@ -1531,7 +1531,7 @@ function build_start_game_user_row( $uid )
 {
    global $arr_users;
 
-   if( !isset($arr_users[$uid]) )
+   if ( !isset($arr_users[$uid]) )
       error('internal_error', "game_players.build_start_game_user_row($uid)");
    $gp = $arr_users[$uid];
 
@@ -1546,9 +1546,9 @@ function build_start_game_user_row( $uid )
 
 function build_page_title( $title, $status )
 {
-   if( $status == GAME_STATUS_SETUP )
+   if ( $status == GAME_STATUS_SETUP )
       $status_str = T_('Game setup');
-   elseif( $status == GAME_STATUS_FINISHED )
+   elseif ( $status == GAME_STATUS_FINISHED )
       $status_str = T_('Game finished');
    else
       $status_str = T_('Game running');
@@ -1557,11 +1557,11 @@ function build_page_title( $title, $status )
 
 function show_errors( &$form, $errors )
 {
-   if( is_null($errors) )
+   if ( is_null($errors) )
       return 0;
 
    $cnt_err = count($errors);
-   if( $cnt_err )
+   if ( $cnt_err )
    {
       $form->add_empty_row();
       $form->add_row( array(

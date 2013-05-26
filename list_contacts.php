@@ -37,7 +37,7 @@ require_once 'include/classlib_userpicture.php';
    connect2mysql();
 
    $logged_in = who_is_logged( $player_row);
-   if( !$logged_in )
+   if ( !$logged_in )
       error('login_if_not_logged_in', 'list_contacts');
    $my_id = (int)@$player_row['ID'];
    $cfg_tblcols = ConfigTableColumns::load_config( $my_id, CFGCOLS_CONTACTS );
@@ -45,17 +45,17 @@ require_once 'include/classlib_userpicture.php';
    $page = "list_contacts.php?";
 
    $tid = (int)get_request_arg('tid'); // convenience for tourney-invites
-   if( !ALLOW_TOURNAMENTS || $tid < 0 ) $tid = 0;
+   if ( !ALLOW_TOURNAMENTS || $tid < 0 ) $tid = 0;
 
    $arr_chk_sysflags = array();
-   foreach( Contact::getContactSystemFlags() as $sysflag => $arr ) // arr=( form_elem_name, flag-text )
+   foreach ( Contact::getContactSystemFlags() as $sysflag => $arr ) // arr=( form_elem_name, flag-text )
    {
       $td_flagtext = "<td>%s{$arr[1]}</td>";
       $arr_chk_sysflags[$td_flagtext] = $sysflag;
    }
    $arr_chk_userflags = array();
 
-   foreach( Contact::getContactUserFlags() as $userflag => $arr ) // arr=( form_elem_name, flag-text )
+   foreach ( Contact::getContactUserFlags() as $userflag => $arr ) // arr=( form_elem_name, flag-text )
    {
       $td_flagtext = "<td>%s{$arr[1]}</td>";
       $arr_chk_userflags[$td_flagtext] = $userflag;
@@ -106,7 +106,7 @@ require_once 'include/classlib_userpicture.php';
    // add_tablehead($nr, $descr, $attbs=null, $mode=TABLE_NO_HIDE|TABLE_NO_SORT, $sortx='')
    $ctable->add_tablehead( 9, T_('Actions#header'), 'Image', TABLE_NO_HIDE, '');
    $ctable->add_tablehead(12, T_('Type#header'), 'Enum', 0, 'P.Type+');
-   if( USERPIC_FOLDER != '' )
+   if ( USERPIC_FOLDER != '' )
       $ctable->add_tablehead(13, new TableHead( T_('User picture#header'),
          'images/picture.gif', T_('Indicator for existing user picture') ), 'Image', 0, 'P.UserPicture+' );
    $ctable->add_tablehead( 1, T_('Name#header'), 'User', 0, 'P.Name+');
@@ -134,7 +134,7 @@ require_once 'include/classlib_userpicture.php';
 
    // attach external URL-parameters to table (for links)
    $ctable->add_external_parameters( $scfilter->get_req_params(), false );
-   if( $tid )
+   if ( $tid )
    {
       $page_vars = new RequestParameters();
       $page_vars->add_entry( 'tid', $tid );
@@ -182,12 +182,12 @@ require_once 'include/classlib_userpicture.php';
    echo "<h3 class=Header>$title</h3>\n";
 
 
-   while( ($row = mysql_fetch_assoc( $result )) && $show_rows-- > 0 )
+   while ( ($row = mysql_fetch_assoc( $result )) && $show_rows-- > 0 )
    {
       $crow_strings = array();
       $cid = $row['cid'];
 
-      if( $ctable->Is_Column_Displayed[ 9] )
+      if ( $ctable->Is_Column_Displayed[ 9] )
       {
          $uinvlink = ( $tid )
             ? "tournaments/edit_participant.php?tid=$tid".URI_AMP."uid=$cid"
@@ -203,44 +203,44 @@ require_once 'include/classlib_userpicture.php';
                image( 'images/trashcan.gif', 'X', '', 'class="Action"' ), T_('Remove contact'));
          $crow_strings[ 9] = $links;
       }
-      if( $ctable->Is_Column_Displayed[ 1] )
+      if ( $ctable->Is_Column_Displayed[ 1] )
          $crow_strings[ 1] = "<A href=\"userinfo.php?uid=$cid\">" .
             make_html_safe($row['Name']) . "</A>";
-      if( $ctable->Is_Column_Displayed[12] )
+      if ( $ctable->Is_Column_Displayed[12] )
          $crow_strings[12] = build_usertype_text(@$row['Type'], ARG_USERTYPE_NO_TEXT, true, ' ');
-      if( @$row['UserPicture'] && $ctable->Is_Column_Displayed[13] )
+      if ( @$row['UserPicture'] && $ctable->Is_Column_Displayed[13] )
          $crow_strings[13] = UserPicture::getImageHtml( @$row['Handle'], true );
-      if( $ctable->Is_Column_Displayed[ 2] )
+      if ( $ctable->Is_Column_Displayed[ 2] )
          $crow_strings[ 2] = "<A href=\"userinfo.php?uid=$cid\">" .
             $row['Handle'] . "</A>";
-      if( $ctable->Is_Column_Displayed[ 3] )
+      if ( $ctable->Is_Column_Displayed[ 3] )
          $crow_strings[ 3] = getCountryFlagImage( @$row['Country'] );
-      if( $ctable->Is_Column_Displayed[ 4] )
+      if ( $ctable->Is_Column_Displayed[ 4] )
          $crow_strings[ 4] = echo_rating(@$row['Rating2'],true,$cid);
-      if( $ctable->Is_Column_Displayed[ 5] )
+      if ( $ctable->Is_Column_Displayed[ 5] )
          $crow_strings[ 5] = ($row['X_Lastaccess']>0 ? date(DATE_FMT2, $row['X_Lastaccess']) : '');
-      if( $ctable->Is_Column_Displayed[ 6] )
+      if ( $ctable->Is_Column_Displayed[ 6] )
       {
          $str = Contact::format_system_flags($row['SystemFlags'], ',<br>');
          $crow_strings[ 6] = ($str == '' ? NO_VALUE : $str);
       }
-      if( $ctable->Is_Column_Displayed[ 7] )
+      if ( $ctable->Is_Column_Displayed[ 7] )
       {
          $str = Contact::format_user_flags($row['ContactsUserFlags'], ',<br>');
          $crow_strings[ 7] = ($str == '' ? NO_VALUE : $str);
       }
-      if( $ctable->Is_Column_Displayed[ 8] )
+      if ( $ctable->Is_Column_Displayed[ 8] )
       {
          $note = make_html_safe( $row['Notes'], false, $rx_term);
          //reduce multiple LF to one <br>
          $note = preg_replace( "/[\r\n]+/", '<br>', $note );
          $crow_strings[ 8] = $note;
       }
-      if( $ctable->Is_Column_Displayed[10] )
+      if ( $ctable->Is_Column_Displayed[10] )
          $crow_strings[10] = ($row['CX_Created']>0 ? date(DATE_FMT2, $row['CX_Created']) : '');
-      if( $ctable->Is_Column_Displayed[11] )
+      if ( $ctable->Is_Column_Displayed[11] )
          $crow_strings[11] = ($row['CX_Lastchanged']>0 ? date(DATE_FMT2, $row['CX_Lastchanged']) : '');
-      if( $ctable->Is_Column_Displayed[14] )
+      if ( $ctable->Is_Column_Displayed[14] )
       {
          $is_online = ($NOW - @$row['X_Lastaccess']) < SPAN_ONLINE_MINS * SECS_PER_MIN; // online up to X mins ago
          $crow_strings[14] = echo_image_online( $is_online, @$row['X_Lastaccess'], false );

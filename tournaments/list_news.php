@@ -38,9 +38,9 @@ $GLOBALS['ThePage'] = new Page('TournamentNewsList');
    connect2mysql();
 
    $logged_in = who_is_logged( $player_row);
-   if( !$logged_in )
+   if ( !$logged_in )
       error('login_if_not_logged_in', 'Tournament.list_news');
-   if( !ALLOW_TOURNAMENTS )
+   if ( !ALLOW_TOURNAMENTS )
       error('feature_disabled', 'Tournament.list_news');
    $my_id = $player_row['ID'];
 
@@ -57,7 +57,7 @@ $GLOBALS['ThePage'] = new Page('TournamentNewsList');
 
    // config for filters
    $status_filter_array = array( T_('All') => '' );
-   foreach( TournamentNews::getStatusText() as $status => $text )
+   foreach ( TournamentNews::getStatusText() as $status => $text )
       $status_filter_array[$text] = "TN.Status='$status'";
 
    $with_text = get_request_arg('text', 0);
@@ -70,7 +70,7 @@ $GLOBALS['ThePage'] = new Page('TournamentNewsList');
    $search_profile->handle_action();
 
    // table filters
-   if( $allow_edit_tourney )
+   if ( $allow_edit_tourney )
    {
       $tnfilter->add_filter( 2, 'Text', 'TNP.Handle', true);
       $tnfilter->add_filter( 3, 'Selection', $status_filter_array, true);
@@ -91,10 +91,10 @@ $GLOBALS['ThePage'] = new Page('TournamentNewsList');
    $tntable->add_external_parameters( $page_vars, true ); // add as hiddens
 
    // add_tablehead($nr, $descr, $attbs=null, $mode=TABLE_NO_HIDE|TABLE_NO_SORT, $sortx='')
-   if( $allow_edit_tourney )
+   if ( $allow_edit_tourney )
       $tntable->add_tablehead( 1, T_('Actions#header'), 'Image', TABLE_NO_HIDE, '');
    $tntable->add_tablehead( 2, T_('Author#header'), 'User', 0, 'Handle+');
-   if( $allow_edit_tourney )
+   if ( $allow_edit_tourney )
    {
       $tntable->add_tablehead( 3, T_('Status#header'), 'Enum', TABLE_NO_HIDE, 'Status+');
       $tntable->add_tablehead( 4, T_('Flags#header'), 'Enum', 0, 'Flags+');
@@ -132,7 +132,7 @@ $GLOBALS['ThePage'] = new Page('TournamentNewsList');
       $tntable->current_sort_string(1) .
       $tntable->current_filter_string(1) .
       $tntable->current_from_string(1);
-   if( $with_text )
+   if ( $with_text )
       $menu[T_('Hide news texts#tnews')] = $baseURLMenu.'text=0';
    else
       $menu[T_('Show news texts#tnews')] = $baseURLMenu.'text=1';
@@ -140,35 +140,35 @@ $GLOBALS['ThePage'] = new Page('TournamentNewsList');
 
 
    $img_str = image( $base_path.'images/info.gif', T_('View Tournament News'), null, 'class="InTextImage"');
-   while( ($show_rows-- > 0) && list(,$arr_item) = $iterator->getListIterator() )
+   while ( ($show_rows-- > 0) && list(,$arr_item) = $iterator->getListIterator() )
    {
       list( $tnews, $orow ) = $arr_item;
       $uid = $tnews->uid;
       $row_str = array();
 
-      if( $allow_edit_tourney && @$tntable->Is_Column_Displayed[1] )
+      if ( $allow_edit_tourney && @$tntable->Is_Column_Displayed[1] )
       {
          $links = anchor( $base_path."tournaments/edit_news.php?tid=$tid".URI_AMP."tnid={$tnews->ID}",
                image( $base_path.'images/edit.gif', 'E', '', 'class="Action"' ), T_('Edit tournament news'));
          $row_str[1] = $links;
       }
 
-      if( @$tntable->Is_Column_Displayed[ 2] )
+      if ( @$tntable->Is_Column_Displayed[ 2] )
          $row_str[ 2] = user_reference( REF_LINK, 1, '', $uid, $tnews->User->Handle, '');
-      if( @$tntable->Is_Column_Displayed[ 3] )
+      if ( @$tntable->Is_Column_Displayed[ 3] )
          $row_str[ 3] = TournamentNews::getStatusText( $tnews->Status );
-      if( @$tntable->Is_Column_Displayed[ 4] )
+      if ( @$tntable->Is_Column_Displayed[ 4] )
          $row_str[ 4] = TournamentNews::getFlagsText( $tnews->Flags );
-      if( @$tntable->Is_Column_Displayed[ 5] )
+      if ( @$tntable->Is_Column_Displayed[ 5] )
          $row_str[ 5] = ($tnews->Published > 0) ? date(DATE_FMT2, $tnews->Published) : '';
-      if( @$tntable->Is_Column_Displayed[ 6] )
+      if ( @$tntable->Is_Column_Displayed[ 6] )
          $row_str[ 6] = make_html_safe(wordwrap($tnews->Subject, 60), true);
-      if( @$tntable->Is_Column_Displayed[ 7] )
+      if ( @$tntable->Is_Column_Displayed[ 7] )
          $row_str[ 7] = ($tnews->Lastchanged > 0) ? date(DATE_FMT2, $tnews->Lastchanged) : '';
-      if( @$tntable->Is_Column_Displayed[ 8] )
+      if ( @$tntable->Is_Column_Displayed[ 8] )
          $row_str[ 8] = anchor( $base_path."tournaments/view_news.php?tid=$tid".URI_AMP."tn={$tnews->ID}", $img_str );
 
-      if( $with_text )
+      if ( $with_text )
       {
          $row_str['extra_row_class'] = 'TournamentNewsList';
          $row_str['extra_row'] =
@@ -186,7 +186,7 @@ $GLOBALS['ThePage'] = new Page('TournamentNewsList');
 
    $menu_array = array();
    $menu_array[T_('Tournament info')] = "tournaments/view_tournament.php?tid=$tid";
-   if( $allow_edit_tourney ) # for TD
+   if ( $allow_edit_tourney ) # for TD
    {
       $menu_array[T_('Add news#tnews')] =
          array( 'url' => "tournaments/edit_news.php?tid=$tid", 'class' => 'TAdmin' );

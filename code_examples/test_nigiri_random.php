@@ -37,22 +37,22 @@ chdir("code_examples/");
         "\n\n\n";
 
    $loop = (int)get_request_arg('l', '10');
-   if( empty($loop) || $loop <= 0 )
+   if ( empty($loop) || $loop <= 0 )
       $loop = 10;
-   if( $loop > 100 )
+   if ( $loop > 100 )
       $loop = 100;
 
    $bcnt = (int)get_request_arg('b', '20');
-   if( empty($bcnt) || $bcnt <= 0 )
+   if ( empty($bcnt) || $bcnt <= 0 )
       $bcnt = 20;
-   if( $bcnt > 100 )
+   if ( $bcnt > 100 )
       $bcnt = 100;
 
-   for( $j=1; $j <= $loop; $j++)
+   for ( $j=1; $j <= $loop; $j++)
    {
       $r = array( 0 => 0, 1 => 0 );
       $s = '';
-      for( $i=0; $i < $bcnt; $i++)
+      for ( $i=0; $i < $bcnt; $i++)
       {
          mt_srand ((double) microtime() * 1000000);
          $c = mt_rand(0,1);

@@ -27,13 +27,13 @@ require_once 'include/form_functions.php';
 
    $logged_in = who_is_logged( $player_row);
 
-   if( !$logged_in )
+   if ( !$logged_in )
       error('login_if_not_logged_in', 'ratinggraph');
 
    get_request_user( $uid, $uhandle, true);
-   if( $uhandle )
+   if ( $uhandle )
       $where = "Handle='".mysql_addslashes($uhandle)."'";
-   elseif( $uid > 0 )
+   elseif ( $uid > 0 )
       $where = "ID=$uid";
    else
       error('no_uid', 'ratinggraph');
@@ -41,7 +41,7 @@ require_once 'include/form_functions.php';
    $result = db_query( "ratinggraph.find_player($uid,$uhandle)",
       "SELECT ID,Name,Handle FROM Players WHERE $where LIMIT 1" );
 
-   if( @mysql_num_rows($result) != 1 )
+   if ( @mysql_num_rows($result) != 1 )
       error('unknown_user', "ratinggraph.find_player2($uid,$uhandle)");
 
    $user_row = mysql_fetch_array($result);
@@ -57,33 +57,33 @@ require_once 'include/form_functions.php';
    $endyear = (int)get_request_arg( 'endyear', $CURRENTYEAR );
    $endmonth = (int)get_request_arg( 'endmonth', $CURRENTMONTH );
 
-   if( $startyear < BEGINYEAR
+   if ( $startyear < BEGINYEAR
       || ( $startyear == BEGINYEAR && $startmonth < BEGINMONTH ) )
    {
       $startmonth = BEGINMONTH;
       $startyear = BEGINYEAR;
    }
-   else if( $startyear > $CURRENTYEAR
+   else if ( $startyear > $CURRENTYEAR
       || ( $startyear == $CURRENTYEAR && $startmonth > $CURRENTMONTH ) )
    {
       $startmonth = $CURRENTMONTH;
       $startyear = $CURRENTYEAR;
    }
 
-   if( $endyear > $CURRENTYEAR
+   if ( $endyear > $CURRENTYEAR
       || ( $endyear == $CURRENTYEAR && $endmonth > $CURRENTMONTH ) )
    {
       $endmonth = $CURRENTMONTH;
       $endyear = $CURRENTYEAR;
    }
-   else if( $endyear < BEGINYEAR
+   else if ( $endyear < BEGINYEAR
       || ( $endyear == BEGINYEAR && $endmonth < BEGINMONTH ) )
    {
       $endmonth = BEGINMONTH;
       $endyear = BEGINYEAR;
    }
 
-   if( $endyear < $startyear
+   if ( $endyear < $startyear
       || ( $endyear == $startyear && $endmonth < $startmonth ) )
    {
       swap($startmonth, $endmonth);
@@ -99,7 +99,7 @@ require_once 'include/form_functions.php';
 
    $result = db_query( "ratinggraph.find_rating_data($uid)",
          "SELECT Rating FROM Ratinglog WHERE uid=$uid LIMIT 2" );
-   if( @mysql_num_rows($result) < 1 )
+   if ( @mysql_num_rows($result) < 1 )
       echo T_("Sorry, too few rated games to draw a graph") ,"\n";
    else
    {
@@ -126,7 +126,7 @@ require_once 'include/form_functions.php';
                       5 => T_('May'), 6 => T_('Jun'), 7 => T_('Jul'), 8 => T_('Aug'),
                       9 => T_('Sep'), 10=> T_('Oct'), 11=> T_('Nov'), 12=> T_('Dec') );
 
-      for( $y = BEGINYEAR; $y <= $CURRENTYEAR; $y++ )
+      for ( $y = BEGINYEAR; $y <= $CURRENTYEAR; $y++ )
         $years[$y] = $y;
 
       $row = array( 'DESCRIPTION', T_('From#2'),
@@ -141,7 +141,7 @@ require_once 'include/form_functions.php';
                    'HIDDEN', 'winpie', $winpie,
                    'HIDDEN', 'show_time', $show_time,
                    'SUBMITBUTTON', 'submit', T_('Change interval') );
-      if( GRAPH_RATING_BY_NUM_ENABLED )
+      if ( GRAPH_RATING_BY_NUM_ENABLED )
       {
         array_push($row,
                   'OWNHTML', '&nbsp;&nbsp;',

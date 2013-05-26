@@ -59,7 +59,7 @@ function getCountryText( $code=null )
    static $ARR_COUNTRIES = null; // country => text
 
    // lazy-init of texts
-   if( is_null($ARR_COUNTRIES) )
+   if ( is_null($ARR_COUNTRIES) )
    {
       // Legend for flag:
       // - "[country]" = territory of given country
@@ -326,7 +326,7 @@ function getCountryText( $code=null )
       );//ARR_COUNTRIES
    }
 
-   if( is_null($code) )
+   if ( is_null($code) )
       return $ARR_COUNTRIES;
 
    return ( isset($ARR_COUNTRIES[$code]) ) ? $ARR_COUNTRIES[$code] : '';

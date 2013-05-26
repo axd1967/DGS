@@ -34,7 +34,7 @@ require_once 'include/rating.php';
    disable_cache();
 
    $gid = (int)@$_REQUEST['gid'] ;
-   if( $gid <= 0 )
+   if ( $gid <= 0 )
       error('unknown_game', "confirm($gid)");
 
 /* Actual REQUEST calls used:  g=gid (mandatory), a=action, m=move, s=stonestring, c=coord
@@ -55,15 +55,15 @@ require_once 'include/rating.php';
      a=resign           : execute resignation of game
 */
 
-   if( @$_REQUEST['cancel'] )
+   if ( @$_REQUEST['cancel'] )
       jump_to("game.php?gid=$gid");
 
    connect2mysql();
    $logged_in = who_is_logged( $player_row);
-   if( !$logged_in )
+   if ( !$logged_in )
       error('not_logged_in', "confirm($gid)");
    $my_id = $player_row['ID'];
-   if( $my_id <= GUESTS_ID_MAX )
+   if ( $my_id <= GUESTS_ID_MAX )
       error('not_allowed_for_guest', 'confirm');
 
    $action = @$_REQUEST['action'];
@@ -74,21 +74,21 @@ require_once 'include/rating.php';
    $gah->init_globals( 'confirm' );
 
 
-   if( @$_REQUEST['nextskip'] )
+   if ( @$_REQUEST['nextskip'] )
       jump_to_next_game( $my_id, $Lastchanged, $Moves, $TimeOutDate, $gid);
 
-   if( @$_REQUEST['nextaddtime'] )
+   if ( @$_REQUEST['nextaddtime'] )
       do_add_time( $game_row, $my_id); // jump back
 
    // affirm, that game is started
-   if( $Status == GAME_STATUS_INVITED || $Status == GAME_STATUS_SETUP )
+   if ( $Status == GAME_STATUS_INVITED || $Status == GAME_STATUS_SETUP )
       error('game_not_started', "confirm.check.bad_status($gid,$Status)");
-   elseif( $Status == GAME_STATUS_FINISHED )
+   elseif ( $Status == GAME_STATUS_FINISHED )
       error('game_finished', "confirm.check.finished($gid)");
-   elseif( !isStartedGame($Status) )
+   elseif ( !isStartedGame($Status) )
       error('invalid_game_status', "confirm.check.game_status($gid,$Status)");
 
-   if( $Moves < $Handicap && $action == GAMEACT_DO_MOVE )
+   if ( $Moves < $Handicap && $action == GAMEACT_DO_MOVE )
       error('invalid_action', "confirm.check.miss_handicap($gid,$my_id,$action,$Moves,$Handicap)");
 
    $my_game = ( $my_id == $Black_ID || $my_id == $White_ID );
@@ -98,23 +98,23 @@ require_once 'include/rating.php';
 
    $is_running_game = isRunningGame($Status);
    $may_resign_game = $my_game && $is_running_game;
-   if( $action == GAMEACT_RESIGN && !$may_resign_game )
+   if ( $action == GAMEACT_RESIGN && !$may_resign_game )
       error('invalid_action', "confirm.resign($gid,$Status)");
 
-   if( $my_id != $ToMove_ID && !$may_del_game && !$may_resign_game )
+   if ( $my_id != $ToMove_ID && !$may_del_game && !$may_resign_game )
       error('not_your_turn', "confirm.check_tomove($gid,$ToMove_ID,$may_del_game,$may_resign_game)");
 
    $fk_start_game = (bool)@$_REQUEST['fk_start'];
-   if( @$_REQUEST['komi_save'] || $fk_start_game )
+   if ( @$_REQUEST['komi_save'] || $fk_start_game )
       do_komi_save( $game_row, $my_id, $fk_start_game );
-   elseif( $Status == GAME_STATUS_KOMI && $action != GAMEACT_DELETE )
+   elseif ( $Status == GAME_STATUS_KOMI && $action != GAMEACT_DELETE )
       error('invalid_action', "confirm.check.status.fairkomi($gid,$action)");
 
 
-   if( !isset($_REQUEST['move']) )
+   if ( !isset($_REQUEST['move']) )
       error('move_problem', "confirm.check.miss_move($gid)");
    $qry_move = @$_REQUEST['move'];
-   if( $qry_move != $Moves ) // check move-id
+   if ( $qry_move != $Moves ) // check move-id
       error('already_played', "confirm.check.move($gid,$qry_move,$Moves)");
 
 
@@ -125,11 +125,11 @@ require_once 'include/rating.php';
    $gah->set_game_move_message( get_request_arg('message') );
    $gah->increase_moves();
 
-   switch( (string)$action )
+   switch ( (string)$action )
    {
       case GAMEACT_DO_MOVE:
       {
-         if( !$is_running_game ) //after resume
+         if ( !$is_running_game ) //after resume
             error('invalid_action', "confirm.domove.check_status($gid,$Status)");
 
          $coord = @$_REQUEST['coord'];
@@ -153,7 +153,7 @@ require_once 'include/rating.php';
 
       case GAMEACT_DELETE:
       {
-         if( !$may_del_game )
+         if ( !$may_del_game )
             error('invalid_action', "confirm.delete($gid,$my_id,$Status)");
 
          $gah->set_game_finished( true );
@@ -162,7 +162,7 @@ require_once 'include/rating.php';
 
       case GAMEACT_SCORE: // ='done'
       {
-         if( $Status != GAME_STATUS_SCORE && $Status != GAME_STATUS_SCORE2 )
+         if ( $Status != GAME_STATUS_SCORE && $Status != GAME_STATUS_SCORE2 )
             error('invalid_action', "confirm.done.check_status($gid,$Status)");
 
          $stonestring = (string)@$_REQUEST['stonestring']; //stonestring is the list of toggled points
@@ -181,9 +181,9 @@ require_once 'include/rating.php';
 
    // Jump somewhere
 
-   if( /*submit-move*/@$_REQUEST['nextstatus'] )
+   if ( /*submit-move*/@$_REQUEST['nextstatus'] )
       jump_to("status.php");
-   elseif( /*submit-move*/@$_REQUEST['nextgame'] )
+   elseif ( /*submit-move*/@$_REQUEST['nextgame'] )
       jump_to_next_game( $my_id, $Lastchanged, $gah->get_moves(), $TimeOutDate, $gid);
 
    jump_to("game.php?gid=$gid");
@@ -201,7 +201,7 @@ function do_add_time( $game_row, $my_id)
    ta_begin();
    {//HOT-section to add time
       $add_hours = GameAddTime::add_time_opponent( $game_row, $my_id, $add_days_hours, $reset_byo );
-      if( !is_numeric($add_hours) )
+      if ( !is_numeric($add_hours) )
          error('invalid_args', "confirm.do_add_time($gid,$my_id,$add_days,$reset_byo,$add_hours)");
    }
    ta_end();
@@ -228,7 +228,7 @@ function jump_to_next_game($uid, $Lastchanged, $moves, $TimeOutDate, $gid)
    // like for status-games on status-page
    $def_where_nextgame =
       "( Lastchanged > '$Lastchanged' OR ( Lastchanged = '$Lastchanged' AND ID>$gid ))";
-   switch( (string)$player_row['NextGameOrder'] )
+   switch ( (string)$player_row['NextGameOrder'] )
    {
       case NGO_MOVES:
          $qsql->add_part( SQLP_WHERE,
@@ -253,7 +253,7 @@ function jump_to_next_game($uid, $Lastchanged, $moves, $TimeOutDate, $gid)
    }
 
    $row = mysql_single_fetch( "confirm.jump_to_next_game($gid,$uid)", $qsql->get_select() );
-   if( !$row )
+   if ( !$row )
       jump_to("status.php");
 
    jump_to("game.php?gid=" . $row['ID']);
@@ -268,17 +268,17 @@ function do_komi_save( $game_row, $my_id, $start_game=false )
    // checks
    $Status = $game_row['Status'];
    $is_fairkomi = $game_setup->is_fairkomi();
-   if( $Status == GAME_STATUS_KOMI && !$is_fairkomi )
+   if ( $Status == GAME_STATUS_KOMI && !$is_fairkomi )
       error('internal_error', "confirm.check.status.no_fairkomi($gid,$Status,{$game_setup->Handicaptype})");
-   if( $is_fairkomi && $Status != GAME_STATUS_KOMI )
+   if ( $is_fairkomi && $Status != GAME_STATUS_KOMI )
       error('internal_error', "confirm.check.fairkomi.bad_status($gid,$Status,{$game_setup->Handicaptype})");
 
    // check + process komi-save
    $req_komibid = @$_REQUEST['komibid'];
    $fk = new FairKomiNegotiation($game_setup, $game_row);
-   if( $start_game )
+   if ( $start_game )
    {
-      if( !$fk->allow_start_game($my_id) )
+      if ( !$fk->allow_start_game($my_id) )
          error('invalid_action', "confirm.check.start_game($gid,$Status,{$game_setup->Handicaptype})");
 
       $errors = ( is_htype_divide_choose($fk->game_setup->Handicaptype) )
@@ -287,7 +287,7 @@ function do_komi_save( $game_row, $my_id, $start_game=false )
    }
    else
       $errors = $fk->check_komibid($req_komibid, $my_id);
-   if( count($errors) )
+   if ( count($errors) )
       jump_to("game.php?gid=$gid".URI_AMP."komibid=".urlencode($req_komibid));
 
 
@@ -297,13 +297,13 @@ function do_komi_save( $game_row, $my_id, $start_game=false )
    }
    ta_end();
 
-   if( $fk_result == 0 )
+   if ( $fk_result == 0 )
       $sysmsg = T_('Komi-Bid saved successfully!#fairkomi');
-   elseif( $fk_result == 1 )
+   elseif ( $fk_result == 1 )
       $sysmsg = T_('Komi-Bid saved successfully, komi & color determined and game started!#fairkomi');
    else
       $sysmsg = '';
-   if( $sysmsg )
+   if ( $sysmsg )
       $sysmsg = 'sysmsg='.urlencode($sysmsg);
 
    jump_to("game.php?gid=$gid".URI_AMP.$sysmsg);

@@ -32,11 +32,11 @@ require_once 'include/table_columns.php';
    connect2mysql();
 
    $logged_in = who_is_logged( $player_row);
-   if( !$logged_in )
+   if ( !$logged_in )
       error('login_if_not_logged_in', 'admin_show_adminlog');
-   if( $player_row['ID'] <= GUESTS_ID_MAX )
+   if ( $player_row['ID'] <= GUESTS_ID_MAX )
       error('not_allowed_for_guest', 'admin_show_adminlog');
-   if( !(@$player_row['admin_level'] & ADMIN_DEVELOPER) )
+   if ( !(@$player_row['admin_level'] & ADMIN_DEVELOPER) )
       error('adminlevel_too_low', 'admin_show_adminlog');
    $show_ip = ( @$player_row['admin_level'] & ADMIN_DEVELOPER ); // only for adm-dev!
 
@@ -57,7 +57,7 @@ require_once 'include/table_columns.php';
    $atable->add_tablehead( 3, T_('User#header'), 'User');
    $atable->add_tablehead( 4, T_('Time#header'), 'Date');
    $atable->add_tablehead( 5, T_('Message#header'));
-   if( $show_ip )
+   if ( $show_ip )
       $atable->add_tablehead( 6, T_('IP#header'));
 
    $result = db_query( 'admin_show_adminlog.find_data',
@@ -72,20 +72,20 @@ require_once 'include/table_columns.php';
 
    $show_rows = $atable->compute_show_rows(mysql_num_rows($result));
 
-   while( $show_rows-- > 0 && ($row = mysql_fetch_assoc( $result )) )
+   while ( $show_rows-- > 0 && ($row = mysql_fetch_assoc( $result )) )
    {
       $arow_str = array();
-      if( $atable->Is_Column_Displayed[1] )
+      if ( $atable->Is_Column_Displayed[1] )
          $arow_str[1] = @$row['ID'];
-      if( $atable->Is_Column_Displayed[2] )
+      if ( $atable->Is_Column_Displayed[2] )
          $arow_str[2] = ((string)@$row['PAdm_Handle'] != '') ? @$row['PAdm_Handle'] : '';
-      if( $atable->Is_Column_Displayed[3] )
+      if ( $atable->Is_Column_Displayed[3] )
          $arow_str[3] = user_reference( REF_LINK, 1, '', $row['PUser_ID'], $row['PUser_Name'], $row['PUser_Handle'] );
-      if( $atable->Is_Column_Displayed[4] )
+      if ( $atable->Is_Column_Displayed[4] )
          $arow_str[4] = ($row['X_Date'] > 0 ? date(DATE_FMT2, $row['X_Date']) : NULL );
-      if( $atable->Is_Column_Displayed[5] )
+      if ( $atable->Is_Column_Displayed[5] )
          $arow_str[5] = wordwrap(@$row['Message'], 60, "<br>\n", false);
-      if( $show_ip && $atable->Is_Column_Displayed[6] )
+      if ( $show_ip && $atable->Is_Column_Displayed[6] )
          $arow_str[6] = @$row['IP'];
       $atable->add_row( $arow_str );
    }

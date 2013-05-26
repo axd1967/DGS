@@ -99,7 +99,7 @@ class Feature
    public function __construct( $id=0, $status=FEATSTAT_NEW, $size=FEATSIZE_UNSET, $subject='', $description='', $editor=0,
          $created=0, $lastchanged=0 )
    {
-      if( !is_numeric($editor) || $editor < 0 )
+      if ( !is_numeric($editor) || $editor < 0 )
          error('invalid_user', "Feature.construct.check.editor($id,$editor)");
       $this->id = (int) $id;
       $this->set_status( $status );
@@ -114,7 +114,7 @@ class Feature
    /*! \brief Sets valid status */
    public function set_status( $status )
    {
-      if( !preg_match( "/^(NEW|VOTE|WORK|DONE|LIVE|NACK)$/", $status ) )
+      if ( !preg_match( "/^(NEW|VOTE|WORK|DONE|LIVE|NACK)$/", $status ) )
          error('invalid_args', "Feature.set_status($status)");
 
       $this->status = $status;
@@ -123,7 +123,7 @@ class Feature
    /*! \brief Sets valid size */
    public function set_size( $size )
    {
-      if( !preg_match( "/^(\\?|EPIC|XXL|XL|L|M|S)$/", $size ) )
+      if ( !preg_match( "/^(\\?|EPIC|XXL|XL|L|M|S)$/", $size ) )
          error('invalid_args', "Feature.set_size($size)");
 
       $this->size = $size;
@@ -132,14 +132,14 @@ class Feature
    /*! \brief Returns true, if changing status is allowed. */
    public function edit_status_allowed( $is_super_admin, $new_status=null )
    {
-      if( $this->status == FEATSTAT_LIVE ) // final-status; NACK-status may be revived
+      if ( $this->status == FEATSTAT_LIVE ) // final-status; NACK-status may be revived
          return false;
-      if( $is_super_admin )
+      if ( $is_super_admin )
          return true;
-      if( $this->status != FEATSTAT_NEW )
+      if ( $this->status != FEATSTAT_NEW )
          return false;
 
-      if( is_null($new_status) )
+      if ( is_null($new_status) )
          return true;
       else
          return ( $new_status == FEATSTAT_NEW || $new_status == FEATSTAT_VOTE );
@@ -148,7 +148,7 @@ class Feature
    /*! \brief Sets description */
    public function set_description( $description )
    {
-      if( is_null($description) )
+      if ( is_null($description) )
          $this->description = '';
       else
          $this->description = preg_replace( "/(\r\n|\n|\r)/s", "\n", trim($description) );
@@ -160,7 +160,7 @@ class Feature
     */
    public function set_subject( $subject )
    {
-      if( is_null($subject) )
+      if ( is_null($subject) )
          $this->subject = '';
       else
          $this->subject = substr( preg_replace( "/(\r\n|\n|\r)+/s", " ", trim($subject) ), 0, 255);
@@ -178,9 +178,9 @@ class Feature
     */
    public function allow_edit()
    {
-      if( self::is_super_admin() && $this->status != FEATSTAT_LIVE ) // feature-super-admin can always edit non-LIVE feature
+      if ( self::is_super_admin() && $this->status != FEATSTAT_LIVE ) // feature-super-admin can always edit non-LIVE feature
          return true;
-      if( !self::is_admin() ) // only admin can edit
+      if ( !self::is_admin() ) // only admin can edit
          return false;
 
       return (bool) ( $this->status == FEATSTAT_NEW );
@@ -208,7 +208,7 @@ class Feature
          . ', Lastchanged=FROM_UNIXTIME(' . $this->lastchanged .')'
          ;
       $result = db_query( "feature.update_feature({$this->id},{$this->subject})", $update_query );
-      if( $result == 1 && !$this->id )
+      if ( $result == 1 && !$this->id )
          $this->id = mysql_insert_id();
       return $result;
    }//update_feature
@@ -217,7 +217,7 @@ class Feature
    public function can_delete_feature()
    {
       // check if there are votes for this feature to delete
-      if( $this->id )
+      if ( $this->id )
       {
          $row = mysql_single_fetch( "feature.check_delete_feature({$this->id})",
             "SELECT fid FROM FeatureVote WHERE fid={$this->id} LIMIT 1" );
@@ -235,10 +235,10 @@ class Feature
     */
    public function delete_feature()
    {
-      if( !self::is_admin() )
+      if ( !self::is_admin() )
          error('feature_edit_not_allowed', "Feature.delete_feature({$this->id})");
 
-      if( !$this->can_delete_feature() )
+      if ( !$this->can_delete_feature() )
          error('constraint_votes_delete_feature', "Feature.delete_feature({$this->id})");
 
       $delete_query = "DELETE FROM Feature WHERE ID='{$this->id}' LIMIT 1";
@@ -267,7 +267,7 @@ class Feature
    public function update_vote( $voter, $points )
    {
       $fpoints = 0; // consumed feature-points
-      if( is_null($this->featurevote) )
+      if ( is_null($this->featurevote) )
       {// no vote so far
          $this->featurevote = FeatureVote::new_featurevote( $this->id, $voter, $points );
          $fpoints = -abs($points);
@@ -276,7 +276,7 @@ class Feature
       {// already voted
          $old_points = $this->featurevote->get_points();
          $this->featurevote->set_points( $points );
-         if( $old_points != $points )
+         if ( $old_points != $points )
             $fpoints = abs($old_points) - abs($points);
       }
 
@@ -298,17 +298,17 @@ class Feature
     */
    public function fix_user_quota_feature_points( $old_status, $new_status )
    {
-      if( $old_status == $new_status ) // no status-change
+      if ( $old_status == $new_status ) // no status-change
          return 0;
-      if( $old_status == FEATSTAT_NACK ) // no "return" if NACK-status changed to something
+      if ( $old_status == FEATSTAT_NACK ) // no "return" if NACK-status changed to something
          return 0;
 
       // feature rejected OR feature went live -> "return" all feature-points
-      if( ( $old_status != FEATSTAT_NACK && $new_status == FEATSTAT_NACK )
+      if ( ( $old_status != FEATSTAT_NACK && $new_status == FEATSTAT_NACK )
             || ( $old_status != FEATSTAT_LIVE && $new_status == FEATSTAT_LIVE ) )
       {
          $row = FeatureVote::load_featurevote_summary( $this->id );
-         if( !$row ) return 0;
+         if ( !$row ) return 0;
          $sumPoints = @$row['sumAbsPoints'] + 0;
 
          // return all consumed points to respective voter
@@ -392,14 +392,14 @@ class Feature
    public static function build_feature_notes( $deny_reason=null, $with_size=true, $intro=true )
    {
       $notes = array();
-      if( !is_null($deny_reason) )
+      if ( !is_null($deny_reason) )
       {
          $notes[] = array( 'text' =>
             span('VotingRestricted', T_('Voting restricted'), '%s:') . ' ' . make_html_safe($deny_reason, 'line') );
          $notes[] = null; // empty line
       }
 
-      if( $intro )
+      if ( $intro )
       {
          $notes[] = T_('Feature or improvement suggestions are to be discussed in the <home forum/index.php>forums</home> first.');
          $notes[] = T_('Features can only be added to this list by a feature-admin.');
@@ -414,11 +414,11 @@ class Feature
             sprintf( T_('%s = feature released and online'), FEATSTAT_LIVE ),
             sprintf( T_('%s = feature rejected (will not or cannot be done)'), FEATSTAT_NACK ),
          );
-      if( $intro )
+      if ( $intro )
          $notes_fstatus[] = sprintf( T_('%s = show status %s + %s + %s'), T_('Open#featstat'), FEATSTAT_VOTE, FEATSTAT_WORK, FEATSTAT_DONE );
       $notes[] = $notes_fstatus;
 
-      if( $with_size )
+      if ( $with_size )
          $notes[] = self::build_feature_notes_size();
 
       return $notes;
@@ -449,14 +449,14 @@ class Feature
    {
       global $player_row, $NOW;
 
-      if( @$player_row['ID'] <= GUESTS_ID_MAX )
+      if ( @$player_row['ID'] <= GUESTS_ID_MAX )
          return T_('Voting is not allowed for guest user.');
 
-      if( @$player_row['AdminOptions'] & ADMOPT_DENY_FEATURE_VOTE )
+      if ( @$player_row['AdminOptions'] & ADMOPT_DENY_FEATURE_VOTE )
          return T_('Feature-Voting has been denied.');
 
       // minimum X finished+rated games, moved within Y days
-      if( @$player_row['RatedGames'] < VOTE_MIN_RATEDGAMES
+      if ( @$player_row['RatedGames'] < VOTE_MIN_RATEDGAMES
             || @$player_row['X_LastMove'] < $NOW - VOTE_MIN_DAYS_LASTMOVED * SECS_PER_DAY )
       {
          return sprintf( T_('To be able to vote you have to finish %s rated games and '."\n"
@@ -475,7 +475,7 @@ class Feature
     */
    public static function build_query_feature_list( $ftable, $user_id )
    {
-      if( !is_numeric($user_id) )
+      if ( !is_numeric($user_id) )
          error('invalid_user', "Feature:build_query_feature_list($user_id)");
 
       // build SQL-query
@@ -493,7 +493,7 @@ class Feature
    /*! \brief Returns db-fields to be used for query of Feature-object. */
    public static function get_query_fields( $short=false )
    {
-      if( $short )
+      if ( $short )
          return array( 'F.ID', 'F.Status', 'F.Size', 'F.Subject' );
 
       return array(
@@ -530,13 +530,13 @@ class Feature
     */
    public static function load_feature( $id )
    {
-      if( !is_numeric($id) )
+      if ( !is_numeric($id) )
          error('invalid_args', "Feature:load_feature.check.id($id)");
 
       $fields = implode(',', self::get_query_fields());
       $row = mysql_single_fetch("Feature:load_feature.find($id)",
             "SELECT $fields FROM Feature AS F WHERE F.ID='$id' LIMIT 1");
-      if( !$row )
+      if ( !$row )
          return null;
 
       return self::new_from_row( $row );
@@ -551,32 +551,32 @@ class Feature
     */
    public static function update_count_feature_new( $dbgmsg, $uid=0, $diff=null )
    {
-      if( !ALLOW_FEATURE_VOTE )
+      if ( !ALLOW_FEATURE_VOTE )
          return;
 
       $dbgmsg .= "Feature:update_count_feature_new($uid,$diff)";
-      if( !is_numeric($uid) )
+      if ( !is_numeric($uid) )
          error('invalid_args', "$dbgmsg.check.uid" );
 
-      if( is_null($diff) )
+      if ( is_null($diff) )
       {
          $query = "UPDATE Players SET CountFeatNew=-1 WHERE CountFeatNew>=0";
-         if( $uid > 0 )
+         if ( $uid > 0 )
             $query .= " AND ID='$uid' LIMIT 1";
          db_query( "$dbgmsg.reset", $query );
       }
-      elseif( is_numeric($diff) && $diff != 0 )
+      elseif ( is_numeric($diff) && $diff != 0 )
       {
          $query = "UPDATE Players SET CountFeatNew=CountFeatNew+($diff) WHERE CountFeatNew>=0";
-         if( $uid > 0 )
+         if ( $uid > 0 )
             $query .= " AND ID='$uid' LIMIT 1";
          db_query( "$dbgmsg.upd", $query );
       }
-      elseif( (string)$diff == COUNTNEW_RECALC && $uid > 0 )
+      elseif ( (string)$diff == COUNTNEW_RECALC && $uid > 0 )
       {
          global $player_row;
          $count_new = count_features_new( $uid );
-         if( @$player_row['ID'] == $uid )
+         if ( @$player_row['ID'] == $uid )
             $player_row['CountFeatNew'] = $count_new;
          db_query( "$dbgmsg.recalc",
             "UPDATE Players SET CountFeatNew=$count_new WHERE ID='$uid' LIMIT 1" );
@@ -610,7 +610,7 @@ class FeatureVote
     */
    public function __construct( $fid=0, $voter=0, $points=0, $lastchanged=0 )
    {
-      if( !is_numeric($voter) || !is_numeric($voter) || $voter < 0 )
+      if ( !is_numeric($voter) || !is_numeric($voter) || $voter < 0 )
          error('invalid_user', "FeatureVote.construct($fid,$voter)");
       $this->fid = (int) $fid;
       $this->voter = (int) $voter;
@@ -621,7 +621,7 @@ class FeatureVote
    /*! \brief Sets valid points (<0,0,>0). */
    public function set_points( $points )
    {
-      if( !is_numeric($points) || abs($points) > FEATVOTE_MAXPOINTS )
+      if ( !is_numeric($points) || abs($points) > FEATVOTE_MAXPOINTS )
          error('invalid_args', "FeatureVote.set_points($points)");
 
       $this->points = $points;
@@ -670,12 +670,12 @@ class FeatureVote
     */
    public static function check_points( $points, $max_points=FEATVOTE_MAXPOINTS )
    {
-      if( !is_numeric($points) )
+      if ( !is_numeric($points) )
          return sprintf( T_('points [%s] must be numeric'), $points );
-      if( abs($points) > FEATVOTE_MAXPOINTS )
+      if ( abs($points) > FEATVOTE_MAXPOINTS )
          return sprintf( T_('points [%1$s] must be in range [%2$s,%3$s]'),
                          $points, -FEATVOTE_MAXPOINTS, FEATVOTE_MAXPOINTS );
-      if( abs($points) > $max_points )
+      if ( abs($points) > $max_points )
          return sprintf( T_('points [%1$s] must be in range [%2$s,%3$s] (restricted by feature-points quota)'),
                          $points, -$max_points, $max_points );
       return null;
@@ -704,7 +704,7 @@ class FeatureVote
       $qsql->add_part( SQLP_WHERE, 'FV.Points<>0' ); // abstention from voting
       $qsql->add_part( SQLP_GROUP, 'FV.fid' );
       $qsql->add_part( SQLP_HAVING, 'sumPoints is not null' );
-      if( !is_null($mquery) )
+      if ( !is_null($mquery) )
          $qsql->merge( $mquery );
 
       return $qsql;
@@ -717,11 +717,11 @@ class FeatureVote
     */
    public static function load_featurevote_summary( $fid, $avgPoints=0 )
    {
-      if( !is_numeric($fid) || $fid < 0 )
+      if ( !is_numeric($fid) || $fid < 0 )
          error('invalid_args', "FeatureVote:load_featurevote_summary.check.fid($fid)");
 
       $qsql = new QuerySQL();
-      if( $avgPoints > 0 )
+      if ( $avgPoints > 0 )
          $qsql->add_part( SQLP_FIELDS,
             "SUM(IF($avgPoints<ABS(FV.Points),$avgPoints,ABS(FV.Points))) AS sumAvgPoints" );
       else
@@ -766,7 +766,7 @@ class FeatureVote
     */
    public static function new_from_row( $row )
    {
-      if( $row['fid'] != 0 )
+      if ( $row['fid'] != 0 )
          $fvote = new FeatureVote( $row['fid'], $row['Voter_ID'], $row['Points'], $row['FVLastchangedU'] );
       else
          $fvote = null;
@@ -779,13 +779,13 @@ class FeatureVote
     */
    public static function load_featurevote( $fid, $voter )
    {
-      if( !is_numeric($fid) )
+      if ( !is_numeric($fid) )
          error('invalid_args', "FeatureVote:load_featurevote.check.fid($fid,$voter)");
 
       $fields = implode(',', self::get_query_fields());
       $row = mysql_single_fetch("FeatureVote:load_featurevote($fid,$voter)",
             "SELECT $fields FROM FeatureVote AS FV WHERE FV.fid='$fid' and FV.Voter_ID='$voter' LIMIT 1");
-      if( !$row )
+      if ( !$row )
          return null;
 
       return self::new_from_row( $row );
@@ -796,11 +796,11 @@ class FeatureVote
    {
       global $NOW;
 
-      if( count($feature_ids) > 0 )
+      if ( count($feature_ids) > 0 )
       {
          // (fid,Voter_ID,Points,Lastchanged)
          $val_sets = array();
-         foreach( $feature_ids as $fid )
+         foreach ( $feature_ids as $fid )
             $val_sets[] = sprintf('(%s,%s,0,FROM_UNIXTIME(%s))', $fid, $uid, $NOW );
 
          // NOTE: must not use REPLACE as then we would need to handle existing Points<>0
@@ -812,18 +812,18 @@ class FeatureVote
    /*! \brief Returns text informing about remaining feature-points. */
    public static function getFeaturePointsText( $points )
    {
-      if( $points > 0 )
+      if ( $points > 0 )
          $points = span('Positive', $points);
-      elseif( $points < 0 )
+      elseif ( $points < 0 )
          $points = span('VotingRestricted', $points);
       return sprintf( T_('You have %s points available for voting on features.'), $points );
    }
 
    public static function formatPoints( $points )
    {
-      if( $points < 0 )
+      if ( $points < 0 )
          return span('Negative', $points);
-      elseif( $points > 0 )
+      elseif ( $points > 0 )
          return span('Positive', MINI_SPACING . $points);
       else
          return MINI_SPACING . $points;
@@ -831,13 +831,13 @@ class FeatureVote
 
    public static function formatPointsText( $points )
    {
-      if( !is_numeric($points) )
+      if ( !is_numeric($points) )
          return sprintf( T_('%s (no vote)'), NO_VALUE );
 
       $point_str = sprintf( T_('%s points#feature'), ( $points > 0 ? '+' . $points : $points ) );
-      if( $points > 0 )
+      if ( $points > 0 )
          $point_str = span('Positive', $point_str);
-      elseif( $points < 0 )
+      elseif ( $points < 0 )
          $point_str = span('Negative', $point_str);
       return $point_str;
    }//formatPointsText

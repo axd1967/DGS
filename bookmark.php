@@ -25,7 +25,7 @@ require_once 'include/std_functions.php';
    connect2mysql();
 
    $logged_in = who_is_logged( $player_row );
-   if( !$logged_in )
+   if ( !$logged_in )
       error('login_if_not_logged_in', 'bookmark');
 
    $my_id = $player_row['ID'];
@@ -51,7 +51,7 @@ require_once 'include/std_functions.php';
 
    // open bookmarked URL
    $target_url = @$system_bookmarks[$jumpto];
-   if( !empty($target_url) )
+   if ( !empty($target_url) )
       jump_to( $base_path . $target_url );
    else
       jump_to( $referer_url, true ); // absolute

@@ -105,12 +105,12 @@ $info_box = '<ul>
    connect2mysql();
 
    $logged_in = who_is_logged( $player_row, LOGIN_DEFAULT_OPTS|LOGIN_NO_QUOTA_HIT );
-   if( !$logged_in )
+   if ( !$logged_in )
       error('login_if_not_logged_in', 'admin_faq');
    $my_id = $player_row['ID'];
-   if( $my_id <= GUESTS_ID_MAX )
+   if ( $my_id <= GUESTS_ID_MAX )
       error('not_allowed_for_guest', 'admin_faq');
-   if( !(@$player_row['admin_level'] & ADMIN_FAQ) )
+   if ( !(@$player_row['admin_level'] & ADMIN_FAQ) )
       error('adminlevel_too_low', 'admin_faq');
 
 /* Actual REQUEST calls used:
@@ -148,15 +148,15 @@ $info_box = '<ul>
    $url_term = ( (string)$sql_term != '' ) ? URI_AMP.'qterm='.urlencode($sql_term) : '';
 
    $view = get_request_arg('view', 0); // ''|0, all, [int]
-   if( $url_term )
+   if ( $url_term )
       $view = 'all'; // enforce expand-all on term-search
    $view_all = ( $view === 'all' );
    $view = (int)$view;
-   if( $view < 0 ) $view = 0;
+   if ( $view < 0 ) $view = 0;
    $view_val = ($view_all) ? 'all' : $view; // used in form-fields
 
    $objtype = (int)get_request_arg('ot');
-   if( $objtype == TXTOBJTYPE_INTRO )
+   if ( $objtype == TXTOBJTYPE_INTRO )
    {
       $dbtable = $tr_group = 'Intro';
       $adm_title = 'Introduction';
@@ -165,7 +165,7 @@ $info_box = '<ul>
       $label_ref = '';
       $rows_cont = 20;
    }
-   elseif( $objtype == TXTOBJTYPE_LINKS )
+   elseif ( $objtype == TXTOBJTYPE_LINKS )
    {
       $dbtable = $adm_title = $tr_group = 'Links';
       $label_head = 'Link Text';
@@ -184,9 +184,9 @@ $info_box = '<ul>
 
    // read/write move-distance for entries using cookie
    $movedist = (int)@$_REQUEST['movedist'];
-   if( $movedist < 1 )
+   if ( $movedist < 1 )
       $movedist = max( 1, (int)safe_getcookie('admin_faq_movedist'));
-   if( @$_REQUEST['setmovedist'] ) // write into cookie
+   if ( @$_REQUEST['setmovedist'] ) // write into cookie
       safe_setcookie( 'admin_faq_movedist', $movedist, SECS_PER_HOUR ); // save for 1h
 
    $show_list = true;
@@ -198,7 +198,7 @@ $info_box = '<ul>
 
    $errors = array();
    // args: id, move=u|d, dir=length of the move (int, pos or neg)
-   if( ($action=@$_REQUEST['move']) == 'u' || $action == 'd' )
+   if ( ($action=@$_REQUEST['move']) == 'u' || $action == 'd' )
    {
       $dir = isset($_REQUEST['dir']) ? (int)$_REQUEST['dir'] : 1;
       $dir = ($action == 'd') ? $dir : -$dir; //because ID top < ID bottom
@@ -210,7 +210,7 @@ $info_box = '<ul>
    // ***********        Move entry to new category      ****************
 
    // args: id, move=uu|dd
-   elseif( ($action=@$_REQUEST['move']) == 'uu' || $action == 'dd' )
+   elseif ( ($action=@$_REQUEST['move']) == 'uu' || $action == 'dd' )
    {
       $page = $page_base . URI_AMP.'view=all'; // expand all categories
       AdminFAQ::move_faq_entry_to_new_category( "admin_faq($action)", $dbtable, $fid, ($action == 'dd' ? 1 : -1 ) );
@@ -221,7 +221,7 @@ $info_box = '<ul>
    // ***********       Toggle hidden       ****************
 
    // args: id, toggleH=Y|N
-   elseif( ($action=@$_REQUEST['toggleH']) )
+   elseif ( ($action=@$_REQUEST['toggleH']) )
    {
       AdminFAQ::toggle_hidden_faq_entry( "admin_faq", $dbtable, $fid );
       //jump_to($page); //clean URL
@@ -231,14 +231,14 @@ $info_box = '<ul>
    // ***********       Toggle translatable       ****************
 
    // args: id, toggleT=Y|N
-   elseif( ($action=@$_REQUEST['toggleT']) )
+   elseif ( ($action=@$_REQUEST['toggleT']) )
    {
       $row = AdminFAQ::get_faq_entry_row( $dbtable, $fid );
       $transl = AdminFAQ::transl_toggle_state($row);
-      if( !$transl )
+      if ( !$transl )
          jump_to($page.URI_AMP.'sysmsg='.urlencode('Error: entry already translated'));
 
-      if( ($action=='Y') xor ($transl == 'Y') )
+      if ( ($action=='Y') xor ($transl == 'Y') )
       {
          AdminFAQ::toggle_translatable_faq_entry( "admin_faq", $dbtable, $row, $transl );
          make_include_files(null, $tr_group); //must be called from main dir
@@ -251,9 +251,9 @@ $info_box = '<ul>
 
    // args: id, edit=t, type=c|e, question, answer, reference  [ preview=1, qterm=sql_term ]
    // keep it tested before 'do_edit' for the preview feature
-   elseif( @$_REQUEST['edit'] && ( ($action=@$_REQUEST['type']) == 'c' ||  $action == 'e' ) )
+   elseif ( @$_REQUEST['edit'] && ( ($action=@$_REQUEST['type']) == 'c' ||  $action == 'e' ) )
    {
-      if( $action == 'c' )
+      if ( $action == 'c' )
          $title = $adm_title.' Admin - Edit category';
       else
          $title = $adm_title.' Admin - Edit entry';
@@ -265,7 +265,7 @@ $info_box = '<ul>
       $row = AdminFAQ::get_faq_entry_row( $dbtable, $fid );
       $faqhide = ( @$row['Hidden'] == 'Y' );
 
-      if( @$_REQUEST['preview'] )
+      if ( @$_REQUEST['preview'] )
       {
          $question = trim( get_request_arg('question') );
          $answer = trim( get_request_arg('answer') );
@@ -279,12 +279,12 @@ $info_box = '<ul>
          $answer = $row['A'];
          $reference = $row['Reference'];
       }
-      if( $action == 'e' )
+      if ( $action == 'e' )
          check_reference( $errors, $objtype, $reference );
 
       $edit_form = new Form('faqeditform', $page.URI_AMP."id=$fid#e$fid", FORM_POST );
 
-      if( count($errors) )
+      if ( count($errors) )
       {
          $edit_form->add_row( array( 'DESCRIPTION', T_('Errors'),
                                      'TEXT', buildErrorListString(T_('There are some errors'), $errors) ));
@@ -292,7 +292,7 @@ $info_box = '<ul>
       }
 
       $q_updated = ( $row['QUpdated'] ) ? date(DATE_FMT, $row['QUpdated']) : NO_VALUE;
-      if( $row['Level'] == 1 ) //i.e. Category
+      if ( $row['Level'] == 1 ) //i.e. Category
       {
          //$edit_form->add_row( array( 'HEADER', 'Edit category' ) );
          $edit_form->add_row( array( 'DESCRIPTION', 'Category',
@@ -308,7 +308,7 @@ $info_box = '<ul>
          $a_updated = ( $row['AUpdated'] ) ? date(DATE_FMT, $row['AUpdated']) : NO_VALUE;
 
          //$edit_form->add_row( array( 'HEADER', "Edit $adm_title entry" ) );
-         if( $label_ref )
+         if ( $label_ref )
          {
             $edit_form->add_row( array( 'DESCRIPTION', $label_ref,
                                         'TEXTINPUT', 'reference', 80, 255, $reference ) );
@@ -351,7 +351,7 @@ $info_box = '<ul>
 
    // args: id, do_edit=t type=c|e, question, answer, reference  [ preview='', qterm=sql_term ]
    // keep it tested after 'edit' for the preview feature
-   elseif( @$_REQUEST['do_edit'] && ( ($action=@$_REQUEST['type']) == 'c' ||  $action == 'e' ) )
+   elseif ( @$_REQUEST['do_edit'] && ( ($action=@$_REQUEST['type']) == 'c' ||  $action == 'e' ) )
    {
       $question = trim( get_request_arg('question') );
       $answer = trim( get_request_arg('answer') );
@@ -363,19 +363,19 @@ $info_box = '<ul>
       $ref_id = $fid; // anchor-ref
 
       // Delete or update ?
-      if( !$question && !$answer && !$reference )
+      if ( !$question && !$answer && !$reference )
       { // Delete
-         if( !AdminFAQ::transl_toggle_state($row) ) //can't be toggled
+         if ( !AdminFAQ::transl_toggle_state($row) ) //can't be toggled
             jump_to($page.URI_AMP."sysmsg=".urlencode('Error: entry already translated'));
 
-         if( !AdminFAQ::delete_faq_entry( "admin_faq", $dbtable, $fid, $row ) )
+         if ( !AdminFAQ::delete_faq_entry( "admin_faq", $dbtable, $fid, $row ) )
             jump_to($page.URI_AMP."sysmsg=".urlencode('Error: category not empty'));
 
          $ref_id = $row['Parent']; // anchor-ref to former, parent category
       }
       else
       { //Update
-         if( count($errors) || !$question || ($objtype == TXTOBJTYPE_LINKS && $action == 'e' && !$reference) )
+         if ( count($errors) || !$question || ($objtype == TXTOBJTYPE_LINKS && $action == 'e' && !$reference) )
             jump_to($page.URI_AMP."sysmsg=".urlencode('Error: an entry must be given'));
 
          $log = AdminFAQ::update_faq_entry( "admin_faq", $dbtable, $fid, $row,
@@ -384,9 +384,9 @@ $info_box = '<ul>
             $question, $answer, $reference );
       }
 
-      if( $log & 0x7 ) //i.e. modified except deleted, 0x8=reference (not translated)
+      if ( $log & 0x7 ) //i.e. modified except deleted, 0x8=reference (not translated)
       {
-         if( $row['QTranslatable'] !== 'N' || ( $row['Answer'] > 0 && $row['ATranslatable'] !== 'N' ) )
+         if ( $row['QTranslatable'] !== 'N' || ( $row['Answer'] > 0 && $row['ATranslatable'] !== 'N' ) )
             make_include_files(null, $tr_group); //must be called from main dir
       }
 
@@ -401,9 +401,9 @@ $info_box = '<ul>
 
    // args: id, new=t, type=c|e, question, answer, reference  [ do_new=?, preview=t ]
    // keep it tested before 'do_new' for the preview feature
-   elseif( @$_REQUEST['new'] && ( ($action=@$_REQUEST['type']) == 'c' ||  $action == 'e' ) )
+   elseif ( @$_REQUEST['new'] && ( ($action=@$_REQUEST['type']) == 'c' ||  $action == 'e' ) )
    {
-      if( $action == 'c' )
+      if ( $action == 'c' )
          $title = $adm_title.' Admin - New category';
       else
          $title = $adm_title.' Admin - New entry';
@@ -412,7 +412,7 @@ $info_box = '<ul>
 
       $show_list = false;
 
-      if( @$_REQUEST['preview'] )
+      if ( @$_REQUEST['preview'] )
       {
          $question = trim( get_request_arg('question') );
          $answer = trim( get_request_arg('answer') );
@@ -426,19 +426,19 @@ $info_box = '<ul>
          $answer = '';
          $reference = '';
       }
-      if( $action == 'e' )
+      if ( $action == 'e' )
          check_reference( $errors, $objtype, $reference );
 
       $edit_form = new Form('faqnewform', $page.URI_AMP."id=$fid#e$fid", FORM_POST );
 
-      if( count($errors) )
+      if ( count($errors) )
       {
          $edit_form->add_row( array( 'DESCRIPTION', T_('Errors'),
                                      'TEXT', buildErrorListString(T_('There are some errors'), $errors) ));
          $edit_form->add_empty_row();
       }
 
-      if( $action == 'c' )
+      if ( $action == 'c' )
       {
          //$edit_form->add_row( array( 'HEADER', 'New category' ) );
          $edit_form->add_row( array( 'DESCRIPTION', 'Category',
@@ -447,7 +447,7 @@ $info_box = '<ul>
       else
       {
          //$edit_form->add_row( array( 'HEADER', 'New entry' ) );
-         if( $label_ref )
+         if ( $label_ref )
          {
             $edit_form->add_row( array( 'DESCRIPTION', $label_ref,
                                         'TEXTINPUT', 'reference', 80, 255, $reference ) );
@@ -478,13 +478,13 @@ $info_box = '<ul>
 
    // args: id, do_new=t type=c|e, question, answer, reference  [ preview='' ]
    // keep it tested after 'new' for the preview feature
-   elseif( @$_REQUEST['do_new'] && ( ($action=@$_REQUEST['type']) == 'c' ||  $action == 'e' ) )
+   elseif ( @$_REQUEST['do_new'] && ( ($action=@$_REQUEST['type']) == 'c' ||  $action == 'e' ) )
    {
       $question = trim( get_request_arg('question') );
       $answer = trim( get_request_arg('answer') );
       $reference = trim( get_request_arg('reference') );
 
-      if( !$question || ($objtype == TXTOBJTYPE_LINKS && $action == 'e' && !$reference) )
+      if ( !$question || ($objtype == TXTOBJTYPE_LINKS && $action == 'e' && !$reference) )
          jump_to($page.URI_AMP."sysmsg=".urlencode('Error: an entry must be given'));
 
       $new_id = AdminFAQ::save_new_faq_entry( 'admin_faq', $dbtable, $tr_group, $fid, ($action == 'c'),
@@ -500,13 +500,13 @@ $info_box = '<ul>
 
    // ***********       Show whole list       ****************
 
-   if( $show_list )
+   if ( $show_list )
    {
       $title = $adm_title.' Admin';
       start_page($title, true, $logged_in, $player_row );
 
       $str = 'Read this before editing';
-      if( (bool)@$_REQUEST['infos'] )
+      if ( (bool)@$_REQUEST['infos'] )
       {
          echo "<h3 class=Header>$str:</h3>\n"
             . "<table class=InfoBox><tr><td>\n"
@@ -540,9 +540,9 @@ $info_box = '<ul>
 
 
       //build comparison with implicit wildcards
-      if( $view_all )
+      if ( $view_all )
          $view_qpart = 'E.Level IN (1,2)';
-      elseif( $view > 0 )
+      elseif ( $view > 0 )
          $view_qpart = "E.Level=1 OR (E.Level=2 AND E.Parent=$view)";
       else
          $view_qpart = 'E.Level=1';
@@ -561,7 +561,7 @@ $info_box = '<ul>
             $view_qpart,
          SQLP_ORDER,
             'CatOrder', 'E.Level', 'E.SortOrder' );
-      if( $sql_term )
+      if ( $sql_term )
       {
          $term_like = "LIKE '".mysql_addslashes("%$sql_term%")."'";
          $qsql->add_part( SQLP_FIELDS,
@@ -584,12 +584,12 @@ $info_box = '<ul>
       // table-columns:
       // curr-entry | match-term | Q/New | A | move-up | ~down | cat-up | ~down | New | Hide | Transl
 
-      if( !$view_all )
+      if ( !$view_all )
          echo "<tr><td colspan=2></td>",
             TD_button( 'Expand all categories', $page_base.URI_AMP.'view=all', 'images/expand.gif', ''),
             '<td colspan=2>Expand all categories</td>',
             '<td colspan=', ($nbcol-5), '></td></tr>', "\n";
-      if( $view_all || $view )
+      if ( $view_all || $view )
          echo "<tr><td colspan=2></td>",
             TD_button( 'Collapse all categories', $page_base.URI_AMP.'view=0', 'images/collapse.gif', ''),
             '<td colspan=2>Collapse all categories</td>',
@@ -603,7 +603,7 @@ $info_box = '<ul>
          '<td colspan=2>(first category)</td>',
          '<td colspan=', ($nbcol-5), '></td></tr>', "\n";
 
-      while( $row = mysql_fetch_assoc( $result ) )
+      while ( $row = mysql_fetch_assoc( $result ) )
       {
          $question = (empty($row['Q']) ? '(empty)' : $row['Q']);
          $faqhide = ( @$row['Hidden'] == 'Y' );
@@ -613,15 +613,15 @@ $info_box = '<ul>
 
          // mark 'current' entry and matched-terms (2 cols)
          echo '<tr><td>';
-         if( $row['MatchQuestion'] || $row['MatchAnswer'] )
+         if ( $row['MatchQuestion'] || $row['MatchAnswer'] )
             echo '<font color="red">#</font>';
          echo '</td><td>';
-         if( $fid == $eid )
+         if ( $fid == $eid )
             echo '<font color="blue"><b>&gt;</b></font>';
          echo '</td>';
 
          // anchor-label + td-start for cat/entry
-         if( $row['Level'] == 1 )
+         if ( $row['Level'] == 1 )
          {
             echo '<td class=Category colspan=3><a name="e'.$eid.'"></a>',
                anchor( $page_base.URI_AMP."view=$eid", image( 'images/expand.gif', 'E', 'Expand category', 'class=InTextImage' )),
@@ -636,7 +636,7 @@ $info_box = '<ul>
          }
 
          // question/answer (1 col)
-         if( $faqhide )
+         if ( $faqhide )
             echo "(H) ";
          echo "<A href=\"$page".URI_AMP."edit=1".URI_AMP."type=$typechar".URI_AMP."id=$eid"
                   ."$url_term\" title=\"Edit\">$question</A>";
@@ -650,7 +650,7 @@ $info_box = '<ul>
                $page.URI_AMP."move=d".URI_AMP."id=$eid".URI_AMP."dir={$movedist}$entry_ref",
                'images/down.png', 'd');
 
-         if( $row['Level'] > 1 )
+         if ( $row['Level'] > 1 )
          {
             // move entry up/down to other category (focus current entry)
             echo TD_button( 'Move to previous category',
@@ -669,7 +669,7 @@ $info_box = '<ul>
                'images/new.png', 'N');
 
          // hide (focus parent category)
-         if( $faqhide )
+         if ( $faqhide )
             echo TD_button( 'Show',
                   $page.URI_AMP."toggleH=N".URI_AMP."id=$eid$entry_ref",
                   'images/hide_no.png', 'h');
@@ -679,9 +679,9 @@ $info_box = '<ul>
                   'images/hide.png', 'H');
 
          // translatable (focus parent category)
-         if( !$faqhide && $transl )
+         if ( !$faqhide && $transl )
          {
-            if( $transl == 'Y' )
+            if ( $transl == 'Y' )
                echo TD_button( 'Make untranslatable',
                      $page.URI_AMP."toggleT=N".URI_AMP."id=$eid$entry_ref",
                      'images/transl.png', 'T');
@@ -696,7 +696,7 @@ $info_box = '<ul>
          echo '</tr>';
 
          // new category (below section-title)
-         if( $row['Level'] == 1 && ($view_all || $view == $eid) )
+         if ( $row['Level'] == 1 && ($view_all || $view == $eid) )
             echo "<tr><td colspan=2></td><td class=Indent></td>",
                TD_button( 'Add new entry',
                   $page.URI_AMP."new=1".URI_AMP."type=e".URI_AMP."id=$eid",
@@ -723,9 +723,9 @@ function show_preview( $level, $question, $answer, $reference, $id='preview', $r
 {
    global $objtype;
 
-   if( $objtype == TXTOBJTYPE_INTRO ) // Intro-view, see also introduction.php
+   if ( $objtype == TXTOBJTYPE_INTRO ) // Intro-view, see also introduction.php
    {
-      if( $level == 1 )
+      if ( $level == 1 )
          section('IntroPreview', $question );
       else
       {
@@ -733,9 +733,9 @@ function show_preview( $level, $question, $answer, $reference, $id='preview', $r
          echo "<dl><dt>$question</dt>\n<dd>$answer</dd></dl>\n";
       }
    }
-   elseif( $objtype == TXTOBJTYPE_LINKS ) // Links-view, see also links.php
+   elseif ( $objtype == TXTOBJTYPE_LINKS ) // Links-view, see also links.php
    {
-      if( $level == 1 )
+      if ( $level == 1 )
          section('LinksPreview', $question );
       else
       {
@@ -760,11 +760,11 @@ function check_url( $str )
 
 function check_reference( &$errors, $objtype, $reference )
 {
-   if( $objtype == TXTOBJTYPE_LINKS )
+   if ( $objtype == TXTOBJTYPE_LINKS )
    {
-      if( (string)$reference != '' )
+      if ( (string)$reference != '' )
       {
-         if( !check_url($reference) )
+         if ( !check_url($reference) )
             $errors[] = 'Reference is no valid URL';
       }
       else

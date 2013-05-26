@@ -37,7 +37,7 @@ $GLOBALS['ThePage'] = new Page('Docs', 0, ROBOTS_NO_FOLLOW,
 
    add_link_page_link('introduction.php', T_('Introduction to Dragon'), T_('Getting started'));
    add_link_page_link('policy.php', T_('Terms of Service'), T_('Rules of Conduct and Privacy Policy'));
-   if( ENABLE_DONATIONS )
+   if ( ENABLE_DONATIONS )
       add_link_page_link('donation.php', T_('Donation'), T_('Support DGS with a donation'));
    add_link_page_link("news.php", T_('News'), T_('Release notes'));
    add_link_page_link('site_map.php', T_('Site map'), T_('Page structure of site'));
@@ -46,7 +46,7 @@ $GLOBALS['ThePage'] = new Page('Docs', 0, ROBOTS_NO_FOLLOW,
    add_link_page_link("people.php", T_('People'), T_("who contributes to Dragon"));
 
    $arr_stats = array( "statistics.php" => T_('Statistics') );
-   if( strpos(HOSTBASE,'dragongoserver.net') !== false )
+   if ( strpos(HOSTBASE,'dragongoserver.net') !== false )
       $arr_stats[HOSTBASE.'stat/'] = T_('Web-Statistics');
    add_link_page_link( $arr_stats, ', ', T_("Statistics about Dragon"));
    add_link_page_link("rank_converter.php", T_('DGS Rank Converter'),

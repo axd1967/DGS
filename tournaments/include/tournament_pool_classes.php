@@ -55,7 +55,7 @@ class PoolGame
       $this->GameNo = ($game_no) ? (int)$game_no : 1;
 
       $new_score = (is_null($score)) ? null : (float)$score;
-      if( $ch_uid < $df_uid )
+      if ( $ch_uid < $df_uid )
       {
          $this->Challenger_uid = (int)$ch_uid;
          $this->Defender_uid = (int)$df_uid;
@@ -77,7 +77,7 @@ class PoolGame
 
    public function get_score( $uid )
    {
-      if( is_null($this->Score) )
+      if ( is_null($this->Score) )
          return null;
       else
          return ($this->Challenger_uid == $uid) ? $this->Score : -$this->Score;
@@ -86,7 +86,7 @@ class PoolGame
    /*! \brief Returns arr( user-score, points, cell-marker, title, style ) for given user-id. */
    public function calc_result( $uid )
    {
-      if( is_null($this->Score) )
+      if ( is_null($this->Score) )
       {
          $chk_score = null;
          $points = 0;
@@ -99,13 +99,13 @@ class PoolGame
          $chk_score = $this->get_score($uid);
 
          //TODO for Mego/Hahn use score instead +-score (S18)
-         if( $chk_score < 0 )
+         if ( $chk_score < 0 )
          {
             $points = 2; // won
             $title = T_('Game won');
             $style = 'MatrixWon';
          }
-         elseif( $chk_score > 0 )
+         elseif ( $chk_score > 0 )
          {
             $points = 0; // lost
             $title = T_('Game lost');
@@ -147,7 +147,7 @@ class PoolRankCalculator
    {
       // index = order level: => tie-breaker
       static $map = array( TIEBREAKER_POINTS, TIEBREAKER_SODOS );
-      if( is_null($level) )
+      if ( is_null($level) )
          return count($map);
       else
          return (isset($map[$level])) ? $map[$level] : /*unknown*/0;
@@ -176,54 +176,54 @@ class PoolRankCalculator
       //   and apply tie-breaking on those recursively (without recursion)
       $arr_stop_tiebreak = array(); // [ uid => 1, ...]: no tie-breaking if set for uid
       $max_tiebreaker = self::get_tiebreaker(null) - 1;
-      for( $tie_level++; $tie_level <= $max_tiebreaker; $tie_level++ )
+      for ( $tie_level++; $tie_level <= $max_tiebreaker; $tie_level++ )
       {
-         if( count($arr_stop_tiebreak) == count($users) ) // no more subgroups without tie-break-stop
+         if ( count($arr_stop_tiebreak) == count($users) ) // no more subgroups without tie-break-stop
             break;
          $same_ranks = self::build_same_ranks_groups( $user_ranks );
-         if( is_null($same_ranks) ) // completely ordered = all ranks appear only once
+         if ( is_null($same_ranks) ) // completely ordered = all ranks appear only once
             break;
 
-         foreach( $same_ranks as $arr_users ) // tie-break subgroups with same rank
+         foreach ( $same_ranks as $arr_users ) // tie-break subgroups with same rank
          {
             $stop_tiebreaking = true;
-            if( count($arr_users) > 1 ) // subgroup only if >1 members
+            if ( count($arr_users) > 1 ) // subgroup only if >1 members
             {
                // set ranks (starting with 0) for subgroup of users
                $groupuser_ranks = self::build_user_ranks( $arr_tpools,
                   array_keys($arr_users), self::get_tiebreaker($tie_level) );
-               if( count( array_count_values($groupuser_ranks) ) > 1 ) // tie-breaking successful
+               if ( count( array_count_values($groupuser_ranks) ) > 1 ) // tie-breaking successful
                {
                   // adjust ranks in main-result for new-ranks (make "hole" by increasing remaining ranks)
                   $same_rank_val = current( $arr_users );
                   $max_rank_new = max( $groupuser_ranks );
-                  foreach( $user_ranks as $uid => $rank )
+                  foreach ( $user_ranks as $uid => $rank )
                   {
-                     if( $rank > $same_rank_val )
+                     if ( $rank > $same_rank_val )
                         $user_ranks[$uid] += $max_rank_new;
                   }
 
                   // copy new ranks to main-result $user_ranks
-                  foreach( $groupuser_ranks as $uid => $rank_new )
+                  foreach ( $groupuser_ranks as $uid => $rank_new )
                      $user_ranks[$uid] = $same_rank_val + $rank_new;
                }
                else // tie-breaking failed for current tie-breaker (still a draw)
                {
-                  if( $tie_level >= $max_tiebreaker )
+                  if ( $tie_level >= $max_tiebreaker )
                      $stop_tiebreaking = false; // continue tie-breaking if there are more tie-breakers
                }
             }
 
-            if( $stop_tiebreaking )
+            if ( $stop_tiebreaking )
             {
-               foreach( $arr_users as $uid => $rank )
+               foreach ( $arr_users as $uid => $rank )
                   $arr_stop_tiebreak[$uid] = 1;
             }
          }
       }
 
       // copy final ranks into TPool->CalcRank for given users
-      foreach( $user_ranks as $uid => $rank )
+      foreach ( $user_ranks as $uid => $rank )
          $arr_tpools[$uid]->CalcRank = $rank + 1;
    }//calc_ranks
 
@@ -243,11 +243,11 @@ class PoolRankCalculator
    {
       // find ties = rank-values appearing several times
       $arr_valcount = array_count_values( $users ); // [ rank => count ], e.g. 1 => #1, 2 => #2, 3 => #2
-      if( count($arr_valcount) == count($users) )
+      if ( count($arr_valcount) == count($users) )
          return null;
 
       $result = array();
-      foreach( $arr_valcount as $pivot_rank => $cnt )
+      foreach ( $arr_valcount as $pivot_rank => $cnt )
          $result[] = array_intersect( $users, array($pivot_rank) );
       return $result;
    }//build_same_ranks_groups
@@ -269,43 +269,43 @@ class PoolRankCalculator
       $arr = array();
       $result = array();
 
-      switch( (int)$tie_breaker )
+      switch ( (int)$tie_breaker )
       {
          case TIEBREAKER_POINTS:
          {
             // build mapping (unique value -> to rank)
-            foreach( $users as $uid )
+            foreach ( $users as $uid )
                $arr[] = (int) ( 2 * $arr_tpools[$uid]->Points ); // avoid float-keys
             $arr = self::build_value_rank_map( $arr, true );
 
             // assign rank to users according to mapped-values
-            foreach( $users as $uid )
+            foreach ( $users as $uid )
                $result[$uid] = $arr[(int)( 2 * $arr_tpools[$uid]->Points )];
             break;
          }
          case TIEBREAKER_SODOS:
          {
-            foreach( $users as $uid )
+            foreach ( $users as $uid )
                $arr[] = (int) ( 2 * $arr_tpools[$uid]->SODOS ); // avoid float-keys
             $arr = self::build_value_rank_map( $arr, true );
 
-            foreach( $users as $uid )
+            foreach ( $users as $uid )
                $result[$uid] = $arr[(int)( 2 * $arr_tpools[$uid]->SODOS )];
             break;
          }
          case TIEBREAKER_WINS:
          {
-            foreach( $users as $uid )
+            foreach ( $users as $uid )
                $arr[] = $arr_tpools[$uid]->Wins;
             $arr = self::build_value_rank_map( $arr, true );
 
-            foreach( $users as $uid )
+            foreach ( $users as $uid )
                $result[$uid] = $arr[$arr_tpools[$uid]->Wins];
             break;
          }
          default: // no tie-breaking
          {
-            foreach( $users as $uid )
+            foreach ( $users as $uid )
                $result[$uid] = 0;
             break;
          }
@@ -328,14 +328,14 @@ class PoolRankCalculator
       // (but even if applied on numbers, arr is unique afterwards)
       $arr = array_unique($arr);
 
-      if( $reverse )
+      if ( $reverse )
          rsort( $arr, SORT_NUMERIC );
       else
          sort( $arr, SORT_NUMERIC );
 
       $rank = 0;
       $rank_map = array();
-      foreach( $arr as $val )
+      foreach ( $arr as $val )
          $rank_map[$val] = $rank++;
       return $rank_map;
    }
@@ -359,7 +359,7 @@ class PoolTables
 
    public function __construct( $count_pools )
    {
-      for( $pool=1; $pool <= $count_pools; $pool++ )
+      for ( $pool=1; $pool <= $count_pools; $pool++ )
          $this->pools[$pool] = array();
    }
 
@@ -383,17 +383,17 @@ class PoolTables
    {
       $map = array();
       $idx = -1;
-      foreach( $this->pools[$pool] as $uid )
+      foreach ( $this->pools[$pool] as $uid )
          $map[$uid] = ++$idx;
       return $map;
    }
 
    public function fill_pools( $tpool_iterator )
    {
-      while( list(,$arr_item) = $tpool_iterator->getListIterator() )
+      while ( list(,$arr_item) = $tpool_iterator->getListIterator() )
       {
          list( $tpool, $orow ) = $arr_item;
-         if( is_null($tpool) )
+         if ( is_null($tpool) )
             continue;
          $uid = $tpool->uid;
          $pool = $tpool->Pool;
@@ -415,7 +415,7 @@ class PoolTables
       $fix_game_no = array(); // ch_uid.df_uid => game-no (= 1..<games-per-challenge>)
       $tgames_iterator->sortListIterator('ID', SORT_NUMERIC); // sort by TG.ID
 
-      while( list(,$arr_item) = $tgames_iterator->getListIterator() )
+      while ( list(,$arr_item) = $tgames_iterator->getListIterator() )
       {
          list( $tgame, $orow ) = $arr_item;
          $ch_uid = $tgame->Challenger_uid;
@@ -428,7 +428,7 @@ class PoolTables
 
          // fix PoolGame.GameNo in the same order as TG.ID to keep same position in pools-view
          $fkey = $poolGame->Challenger_uid . '.' . $poolGame->Defender_uid; // smaller uid 1st
-         if( !isset($fix_game_no[$fkey]) )
+         if ( !isset($fix_game_no[$fkey]) )
             $fix_game_no[$fkey] = 1;
          else
             $poolGame->GameNo = ++$fix_game_no[$fkey];
@@ -439,34 +439,34 @@ class PoolTables
          $ch_arr = $poolGame->calc_result( $ch_uid ); // score,points,mark,title,style
          $tpool_ch->Points += $ch_arr[1];
          $ch_score = $ch_arr[0];
-         if( !is_null($ch_score) )
+         if ( !is_null($ch_score) )
          {
-            if( $ch_score > 0 ) $tpool_ch->Losses++;
-            if( $ch_score < 0 ) $tpool_ch->Wins++;
-            if( $ch_score < 0 ) $defeated_opps[$ch_uid][] = $df_uid;
-            if( $ch_score <= 0 ) $defeated_opps[$ch_uid][] = $df_uid; // win counts double, jigo simple
+            if ( $ch_score > 0 ) $tpool_ch->Losses++;
+            if ( $ch_score < 0 ) $tpool_ch->Wins++;
+            if ( $ch_score < 0 ) $defeated_opps[$ch_uid][] = $df_uid;
+            if ( $ch_score <= 0 ) $defeated_opps[$ch_uid][] = $df_uid; // win counts double, jigo simple
          }
 
          $df_arr = $poolGame->calc_result( $df_uid );
          $tpool_df->Points += $df_arr[1];
          $df_score = $df_arr[0];
-         if( !is_null($df_score) )
+         if ( !is_null($df_score) )
          {
-            if( $df_score > 0 ) $tpool_df->Losses++;
-            if( $df_score < 0 ) $tpool_df->Wins++;
-            if( $df_score < 0 ) $defeated_opps[$df_uid][] = $ch_uid;
-            if( $df_score <= 0 ) $defeated_opps[$df_uid][] = $ch_uid; // win counts double, jigo simple
+            if ( $df_score > 0 ) $tpool_df->Losses++;
+            if ( $df_score < 0 ) $tpool_df->Wins++;
+            if ( $df_score < 0 ) $defeated_opps[$df_uid][] = $ch_uid;
+            if ( $df_score <= 0 ) $defeated_opps[$df_uid][] = $ch_uid; // win counts double, jigo simple
          }
 
-         if( !is_null($game_score) )
+         if ( !is_null($game_score) )
             $reorder_pools[$tpool_ch->Pool] = 1;
       }//process TGs
 
       // calc SODOS
-      foreach( $defeated_opps as $uid => $arr_opps )
+      foreach ( $defeated_opps as $uid => $arr_opps )
       {
          $tpool_ch = $this->users[$uid];
-         foreach( $arr_opps as $opp )
+         foreach ( $arr_opps as $opp )
          {
             $tpool_df = $this->users[$opp];
             $tpool_ch->SODOS += $tpool_df->Points;
@@ -475,7 +475,7 @@ class PoolTables
       }
 
       // re-order pool-users
-      foreach( $reorder_pools as $pool => $tmp )
+      foreach ( $reorder_pools as $pool => $tmp )
       {
          // calculate rank for users determined by tie-breakers
          PoolRankCalculator::calc_ranks( $this->users, $this->pools[$pool] );
@@ -491,12 +491,12 @@ class PoolTables
       $b_tpool = $this->users[$b_uid];
 
       $cmp_rank = cmp_int( $a_tpool->get_cmp_rank(), $b_tpool->get_cmp_rank() );
-      if( $cmp_rank != 0 )
+      if ( $cmp_rank != 0 )
          return $cmp_rank;
 
       // Tie-Breaker: CalcRank (even if eventually used in cmp_rank implicitly)
       $cmp_calcrank = cmp_int( $a_tpool->CalcRank, $b_tpool->CalcRank );
-      if( $cmp_calcrank != 0 )
+      if ( $cmp_calcrank != 0 )
          return $cmp_calcrank;
 
       return cmp_int( $a_uid, $b_uid ); // static ordering of users to assure same order
@@ -515,21 +515,21 @@ class PoolTables
       $count_resign = 0;
 
       $visited = array(); // game-id, because each PoolGame appears twice for challenger+defender
-      foreach( $this->users as $uid => $tpool )
+      foreach ( $this->users as $uid => $tpool )
       {
-         foreach( $tpool->PoolGames as $poolGame )
+         foreach ( $tpool->PoolGames as $poolGame )
          {
-            if( @$visited[$poolGame->gid] ) continue;
+            if ( @$visited[$poolGame->gid] ) continue;
             $visited[$poolGame->gid] = 1;
 
             $count_games++;
-            if( is_null($poolGame->Score) )
+            if ( is_null($poolGame->Score) )
                $count_run++;
-            elseif( $poolGame->Score == 0 )
+            elseif ( $poolGame->Score == 0 )
                $count_jigo++;
-            elseif( abs($poolGame->Score) == SCORE_TIME )
+            elseif ( abs($poolGame->Score) == SCORE_TIME )
                $count_time++;
-            elseif( abs($poolGame->Score) == SCORE_RESIGN )
+            elseif ( abs($poolGame->Score) == SCORE_RESIGN )
                $count_resign++;
          }
       }
@@ -548,9 +548,9 @@ class PoolTables
    public function count_pools_max_user()
    {
       $max_users = 0;
-      foreach( $this->pools as $pool => $arr_users )
+      foreach ( $this->pools as $pool => $arr_users )
       {
-         if( $pool > 0 )
+         if ( $pool > 0 )
             $max_users = max( $max_users, count($arr_users) );
       }
       return $max_users;
@@ -563,7 +563,7 @@ class PoolTables
    public function calc_pool_summary( $games_per_challenge )
    {
       $arr = array(); // [ pool => [ #users, [], #games-per-pool ], ... ]
-      foreach( $this->pools as $pool => $arr_users )
+      foreach ( $this->pools as $pool => $arr_users )
       {
          $usercount = count($arr_users);
          $arr[$pool] = array( $usercount, array(), TournamentUtils::calc_pool_games($usercount, $games_per_challenge) );
@@ -575,7 +575,7 @@ class PoolTables
    public function calc_pool_games_count( $games_per_challenge )
    {
       $count = 0;
-      foreach( $this->pools as $pool => $arr_users )
+      foreach ( $this->pools as $pool => $arr_users )
          $count += TournamentUtils::calc_pool_games( count($arr_users), $games_per_challenge );
       return $count;
    }
@@ -616,7 +616,7 @@ class PoolSummary
       ksort($this->pool_summary);
       $cnt_users = 0;
       $cnt_games = 0;
-      foreach( $this->pool_summary as $pool => $arr )
+      foreach ( $this->pool_summary as $pool => $arr )
       {
          list( $pool_usercount, $errors, $pool_games ) = $arr;
          $cnt_errors = count($errors);
@@ -629,7 +629,7 @@ class PoolSummary
             3 => $pool_games,
             4 => ( $cnt_errors ? implode(', ', $errors ) : T_('OK') ),
          );
-         if( $cnt_errors )
+         if ( $cnt_errors )
             $row_arr['extra_class'] = 'Violation';
          $this->table->add_row( $row_arr );
       }
@@ -649,7 +649,7 @@ class PoolSummary
    {
       $cnt_users = 0;
       $cnt_games = 0;
-      foreach( $this->pool_summary as $pool => $arr )
+      foreach ( $this->pool_summary as $pool => $arr )
       {
          list( $pool_usercount, $errors, $pool_games ) = $arr;
          $cnt_users += $pool_usercount;
@@ -703,7 +703,7 @@ class PoolViewer
       $this->options = (int)$pv_opts;
       $this->pools_max_users = $this->ptabs->count_pools_max_user();
 
-      if( $this->options & PVOPT_NO_COLCFG )
+      if ( $this->options & PVOPT_NO_COLCFG )
          $cfg_tblcols = null;
       else
       {
@@ -715,7 +715,7 @@ class PoolViewer
       $table = new Table( 'PoolViewer', $page, $cfg_tblcols, '', TABLE_NO_SORT|TABLE_NO_SIZE|TABLE_NO_THEAD );
       $table->use_show_rows(false);
       $table->add_external_parameters( new RequestParameters( array( 'tid' => $tid )), true );
-      if( !$hide_results )
+      if ( !$hide_results )
          $table->add_or_del_column();
       $this->table = $table;
    }//__construct
@@ -728,26 +728,26 @@ class PoolViewer
    public function init_pool_table()
    {
       // add_tablehead($nr, $descr, $attbs=null, $mode=TABLE_NO_HIDE|TABLE_NO_SORT, $sortx='')
-      if( $this->options & PVOPT_EDIT_COL )
+      if ( $this->options & PVOPT_EDIT_COL )
          $this->table->add_tablehead( 8, T_('Actions#header'), 'Image', TABLE_NO_HIDE );
       $this->table->add_tablehead( 1, T_('Name#header'), 'User', 0 );
       $this->table->add_tablehead( 2, T_('Userid#header'), 'User', TABLE_NO_HIDE );
       $this->table->add_tablehead( 3, T_('User Rating#header'), 'Rating', 0 );
-      if( !($this->options & PVOPT_NO_TRATING) )
+      if ( !($this->options & PVOPT_NO_TRATING) )
          $this->table->add_tablehead( 4, T_('Tournament Rating#header'), 'Rating', 0 );
       $this->table->add_tablehead( 5, T_('Country#header'), 'Image', 0 );
 
       $idx = 12; // last used-static-col
       $this->poolidx = $idx;
-      if( !($this->options & PVOPT_NO_RESULT) )
+      if ( !($this->options & PVOPT_NO_RESULT) )
       {
          $this->table->add_tablehead( 6, T_('Place#tourney'), 'NumberC', TABLE_NO_HIDE );
 
-         foreach( range(1, $this->pools_max_users) as $pool )
+         foreach ( range(1, $this->pools_max_users) as $pool )
          {
-            if( $this->games_per_challenge > 1 )
+            if ( $this->games_per_challenge > 1 )
             {
-               for( $g=0; $g < $this->games_per_challenge; ++$g )
+               for ( $g=0; $g < $this->games_per_challenge; ++$g )
                   $this->table->add_tablehead( ++$idx, $pool, 'Matrix', TABLE_NO_HIDE );
             }
             else
@@ -760,7 +760,7 @@ class PoolViewer
          $this->table->add_tablehead(11, T_('Rank#tpool'), 'TRank', TABLE_NO_HIDE );
          $this->table->add_tablehead(12, '', '', TABLE_NO_HIDE );
       }
-      if( ($this->options & PVOPT_EDIT_RANK) && !($this->options & PVOPT_EDIT_COL) )
+      if ( ($this->options & PVOPT_EDIT_RANK) && !($this->options & PVOPT_EDIT_COL) )
          $this->table->add_tablehead( 8, T_('Edit#header'), 'Image', TABLE_NO_HIDE );
    }//init_pool_table
 
@@ -770,12 +770,12 @@ class PoolViewer
       $this->first_pool = true;
 
       // unassigned users first
-      if( isset($this->ptabs->pools[0]) )
+      if ( isset($this->ptabs->pools[0]) )
          $this->make_single_pool_table( 0 );
 
-      foreach( $this->ptabs->pools as $pool => $arr_users )
+      foreach ( $this->ptabs->pools as $pool => $arr_users )
       {
-         if( $pool > 0 )
+         if ( $pool > 0 )
             $this->make_single_pool_table( $pool, 0 );
       }
    }//make_pool_table
@@ -796,21 +796,21 @@ class PoolViewer
       $show_edit_col = ( $this->options & (PVOPT_EDIT_COL|PVOPT_EDIT_RANK) ) && !is_null($this->edit_callback);
 
       // header
-      if( !$this->first_pool )
+      if ( !$this->first_pool )
          $this->table->add_row_one_col( '', array( 'extra_class' => 'Empty' ) );
-      if( $cnt_users )
+      if ( $cnt_users )
       {
          $pool_title = ($pool == 0) ? T_('Users without pool assignment') : sprintf( T_('Pool %s'), $pool );
          $this->table->add_row_title( "<a name=\"pool$pool\">$pool_title</a>" );
-         if( $this->first_pool )
+         if ( $this->first_pool )
             $this->table->add_row_thead();
          else
             $this->table->add_row_thead( array( 'mode1' => TABLE_NO_HIDE ));
       }
       $this->first_pool = false;
-      if( $cnt_users == 0 ) // empty-pool
+      if ( $cnt_users == 0 ) // empty-pool
       {
-         if( !($this->options & PVOPT_NO_EMPTY) || ($opts & PVOPT_EMPTY_SEL) )
+         if ( !($this->options & PVOPT_NO_EMPTY) || ($opts & PVOPT_EMPTY_SEL) )
             $this->table->add_row_title( sprintf( T_('Pool %s (empty)'), $pool ) );
          return;
       }
@@ -818,7 +818,7 @@ class PoolViewer
 
       // init crosstable
       $cell_matrix_self = Table::build_row_cell( 'X', 'MatrixSelf' );
-      if( $cnt_users < $this->pools_max_users ) // too few users in pool
+      if ( $cnt_users < $this->pools_max_users ) // too few users in pool
          $arr_miss_users = array_fill( $this->poolidx + 1 + $cnt_users * $this->games_per_challenge,
             $this->pools_max_users - $cnt_users + $this->games_per_challenge - 1, '-' );
       else
@@ -826,7 +826,7 @@ class PoolViewer
 
       // build crosstable
       $idx = -1;
-      foreach( $arr_users as $uid )
+      foreach ( $arr_users as $uid )
       {
          $tpool = $this->ptabs->users[$uid];
          $user = $tpool->User;
@@ -841,50 +841,50 @@ class PoolViewer
             11 => $tpool->formatRank( /*incl-CalcRank*/true ),
             12 => $tpool->echoRankImage(),
          );
-         if( $this->table->Is_Column_Displayed[1] )
+         if ( $this->table->Is_Column_Displayed[1] )
             $row_arr[1] = $user->Name;
-         if( $this->table->Is_Column_Displayed[3] )
+         if ( $this->table->Is_Column_Displayed[3] )
             $row_arr[3] = echo_rating( $user->Rating, true, $uid );
-         if( $show_trating && $this->table->Is_Column_Displayed[4] )
+         if ( $show_trating && $this->table->Is_Column_Displayed[4] )
             $row_arr[4] = echo_rating( @$user->urow['TP_Rating'], true, $uid );
-         if( $this->table->Is_Column_Displayed[5] )
+         if ( $this->table->Is_Column_Displayed[5] )
             $row_arr[5] = getCountryFlagImage( $user->Country );
 
-         if( $show_results ) // build game-result-matrix (one user-row)
+         if ( $show_results ) // build game-result-matrix (one user-row)
          {
-            for( $g=0; $g < $this->games_per_challenge; ++$g ) // blacken self-pairings
+            for ( $g=0; $g < $this->games_per_challenge; ++$g ) // blacken self-pairings
                $row_arr[$this->poolidx + 1 + $idx * $this->games_per_challenge + $g] = $cell_matrix_self;
-            if( $arr_miss_users ) // add '-' if too few users in pool
+            if ( $arr_miss_users ) // add '-' if too few users in pool
                $row_arr += $arr_miss_users;
 
             // add game-results
             // - X=self, 0=lost, 1=jigo, 2=won, #=running-game;; for Hahn use score instead '+-score'
             // - linked to running/finished game
-            foreach( $tpool->PoolGames as $poolGame )
+            foreach ( $tpool->PoolGames as $poolGame )
             {
                $game_url = $base_path."game.php?gid=".$poolGame->gid;
                $col = $map_usercols[ $poolGame->get_opponent($uid) ] * $this->games_per_challenge + $poolGame->GameNo;
 
                list( $score, $points, $mark, $title, $style ) = $poolGame->calc_result( $uid );
                $cell = anchor( $game_url, $mark, $title );
-               if( !is_null($style) )
+               if ( !is_null($style) )
                   $cell = Table::build_row_cell( $cell, $style );
 
                $row_arr[$this->poolidx + $col] = $cell;
             }
 
             // mark line of current-user
-            if( $uid == $this->my_id )
+            if ( $uid == $this->my_id )
             {
-               foreach( range(1, $this->poolidx) as $cell_idx )
+               foreach ( range(1, $this->poolidx) as $cell_idx )
                {
-                  if( isset($row_arr[$cell_idx]) )
+                  if ( isset($row_arr[$cell_idx]) )
                      $row_arr[$cell_idx] = Table::build_row_cell($row_arr[$cell_idx], 'TourneyUser');
                }
             }
          }//result-matrix
 
-         if( $show_edit_col && !is_null($this->edit_callback) )
+         if ( $show_edit_col && !is_null($this->edit_callback) )
             $row_arr[8] = call_user_func_array( $this->edit_callback, array( &$this, &$uid ) ); // call vars by ref
 
          $this->table->add_row( $row_arr );
@@ -930,13 +930,13 @@ class RankSummary
       $this->table = $rstable;
 
       $arr = array();
-      foreach( $rank_counts as $rank => $count )
+      foreach ( $rank_counts as $rank => $count )
       {
          $key = ( $rank < TPOOLRK_RANK_ZONE ) ? TPOOLRK_NO_RANK : abs($rank);
-         if( !isset($arr[$key]) )
+         if ( !isset($arr[$key]) )
             $arr[$key] = array( 0, 0 );
          $arr[$key][0] += $count;
-         if( $rank > 0 )
+         if ( $rank > 0 )
             $arr[$key][1] += $count;
       }
       $this->rank_summary = $arr;
@@ -946,9 +946,9 @@ class RankSummary
    public function get_ranks()
    {
       $arr = array();
-      foreach( $this->rank_summary as $rank => $tmp )
+      foreach ( $this->rank_summary as $rank => $tmp )
       {
-         if( $rank >= 0 )
+         if ( $rank >= 0 )
             $arr[] = $rank;
       }
       sort( $arr, SORT_NUMERIC );
@@ -979,7 +979,7 @@ class RankSummary
       $count_nextround = $this->tp_count;
       $count_users = 0;
 
-      foreach( $this->rank_summary as $rank => $arr ) // arr = count_rank, count_nextround
+      foreach ( $this->rank_summary as $rank => $arr ) // arr = count_rank, count_nextround
       {
          $count_nextround += $arr[1];
          $count_users += $arr[0];

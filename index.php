@@ -29,7 +29,7 @@ $GLOBALS['ThePage'] = new Page('Start', 0, ROBOTS_NO_FOLLOW, DGS_DESCRIPTION,
 {
    connect2mysql();
 
-   if( @$_GET['logout'] )
+   if ( @$_GET['logout'] )
       set_login_cookie("","", true);
 
    $logged_in = who_is_logged( $player_row);
@@ -43,13 +43,13 @@ $GLOBALS['ThePage'] = new Page('Start', 0, ROBOTS_NO_FOLLOW, DGS_DESCRIPTION,
 
    // check for maintenance-user to allow form-login, use URL:
    // index.php?userid=... without exposing password in URL
-   if( $logged_in && isset($player_row['Handle']) )
+   if ( $logged_in && isset($player_row['Handle']) )
       $user_handle = $player_row['Handle'];
    else
       $user_handle = @$_REQUEST['userid'];
-   if( check_maintenance( $user_handle ) )
+   if ( check_maintenance( $user_handle ) )
    {
-      if( !is_array($player_row) )
+      if ( !is_array($player_row) )
          $player_row = array();
       $player_row['Handle'] = $user_handle;
    }
@@ -62,13 +62,13 @@ $GLOBALS['ThePage'] = new Page('Start', 0, ROBOTS_NO_FOLLOW, DGS_DESCRIPTION,
    echo "\n<BR>&nbsp;";
 
 
-   if( $error_code )
+   if ( $error_code )
    {
       echo "<p></p>", ErrorCode::echo_error_text( $error_code, $errorlog_id ), "\n<hr>\n";
    }
    else
    {
-      if( HOSTNAME == "dragongoserver.sourceforge.net" )
+      if ( HOSTNAME == "dragongoserver.sourceforge.net" )
       {
          // for devel server
          echo "<p></p><font color=green>\n" .

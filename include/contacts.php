@@ -67,7 +67,7 @@ class Contact
     */
    public function __construct( $uid, $cid, $sysflags, $userflags, $created, $lastchanged, $note )
    {
-      if( !is_numeric($uid) || !is_numeric($cid) || $uid <= 0 || $cid < 0 || $uid == $cid )
+      if ( !is_numeric($uid) || !is_numeric($cid) || $uid <= 0 || $cid < 0 || $uid == $cid )
          error('invalid_user', "contacts.Contact($uid,$cid)");
       $this->uid = (int) $uid;
       $this->cid = (int) $cid;
@@ -97,7 +97,7 @@ class Contact
     */
    public function set_note( $note )
    {
-      if( is_null($note) )
+      if ( is_null($note) )
          $this->note = '';
       else
          $this->note = preg_replace( "/(\r\n|\n|\r)+/s", "\n", trim($note) );
@@ -122,9 +122,9 @@ class Contact
    public function parse_system_flags()
    {
       $this->sysflags = 0;
-      foreach( self::getContactSystemFlags() as $sysflag => $arr )
+      foreach ( self::getContactSystemFlags() as $sysflag => $arr )
       {
-         if( @$_REQUEST[$arr[0]] )
+         if ( @$_REQUEST[$arr[0]] )
             $this->sysflags |= $sysflag;
       }
    }//parse_system_flags
@@ -136,9 +136,9 @@ class Contact
    public function parse_user_flags()
    {
       $this->userflags = 0;
-      foreach( self::getContactUserFlags() as $userflag => $arr )
+      foreach ( self::getContactUserFlags() as $userflag => $arr )
       {
-         if( @$_REQUEST[$arr[0]] )
+         if ( @$_REQUEST[$arr[0]] )
             $this->userflags |= $userflag;
       }
    }//parse_user_flags
@@ -149,19 +149,19 @@ class Contact
     */
    public function update_contact()
    {
-      if( !is_numeric($this->uid) || !is_numeric($this->cid)
+      if ( !is_numeric($this->uid) || !is_numeric($this->cid)
             || $this->uid <= 0 || $this->cid <= 0
             || $this->uid == $this->cid )
          error('invalid_user', "contact.update_contact({$this->uid},{$this->cid})");
 
       global $NOW;
-      if( $this->created == 0 )
+      if ( $this->created == 0 )
          $this->created = $NOW;
       $this->lastchanged = $NOW;
 
       $result = db_query( "contact.find_user({$this->uid},{$this->cid})",
          "SELECT ID FROM Players WHERE ID IN ('{$this->uid}','{$this->cid}') LIMIT 2" );
-      if( !$result || mysql_num_rows($result) != 2 )
+      if ( !$result || mysql_num_rows($result) != 2 )
          error('unknown_user', "contact.find_user2({$this->uid},{$this->cid})");
       mysql_free_result($result);
 
@@ -180,7 +180,7 @@ class Contact
    /*! \brief Deletes current Contact from database. */
    public function delete_contact()
    {
-      if( !is_numeric($this->uid) || !is_numeric($this->cid)
+      if ( !is_numeric($this->uid) || !is_numeric($this->cid)
             || $this->uid <= 0 || $this->cid <= 0
             || $this->uid == $this->cid )
          error('invalid_user', "contact.delete_contact({$this->uid},{$this->cid})");
@@ -228,7 +228,7 @@ class Contact
     */
    public static function load_contact( $uid, $cid )
    {
-      if( !is_numeric($uid) || !is_numeric($cid) )
+      if ( !is_numeric($uid) || !is_numeric($cid) )
          error('invalid_user', "contact.load_contact($uid,$cid)");
 
       $row = mysql_single_fetch("contact.load_contact2($uid,$cid)",
@@ -236,7 +236,7 @@ class Contact
                "UNIX_TIMESTAMP(Created) AS X_Created, " .
                "UNIX_TIMESTAMP(Lastchanged) AS X_Lastchanged " .
             "FROM Contacts WHERE uid='$uid' AND cid='$cid' LIMIT 1");
-      if( !$row )
+      if ( !$row )
          return null;
 
       $contact = new Contact(
@@ -259,7 +259,7 @@ class Contact
       $query = $qsql->get_select();
       $result = db_query( "contact.load_quick_contacts($uid)", $query );
       $out = array();
-      while( $row = mysql_fetch_assoc( $result ) )
+      while ( $row = mysql_fetch_assoc( $result ) )
       {
          $contact = new Contact(
                $row['uid'], $row['cid'],
@@ -268,7 +268,7 @@ class Contact
                $row['Notes'] );
 
          $contact->contact_user_row = array();
-         foreach( $arr_userfields as $key )
+         foreach ( $arr_userfields as $key )
             $contact->contact_user_row[$key] = $row[$key];
 
          $out[] = $contact;
@@ -286,11 +286,11 @@ class Contact
     */
    public static function has_contact( $uid, $cid )
    {
-      if( $uid == $cid || $cid <= GUESTS_ID_MAX || $uid <= GUESTS_ID_MAX ) //exclude guest
+      if ( $uid == $cid || $cid <= GUESTS_ID_MAX || $uid <= GUESTS_ID_MAX ) //exclude guest
          return -1;
       $result = db_query( "Contact:has_contact($uid,$cid)",
          "SELECT cid FROM Contacts WHERE uid='$uid' AND cid='$cid' LIMIT 1");
-      if( !$result )
+      if ( !$result )
          return 0;
       $res = (int)( @mysql_num_rows($result) > 0 );
       mysql_free_result($result);
@@ -323,8 +323,8 @@ class Contact
    private static function format_flags( $flags_array, $flagmask, $sep )
    {
       $out = array();
-      foreach( $flags_array as $flag => $arr )
-         if( $flagmask & $flag )
+      foreach ( $flags_array as $flag => $arr )
+         if ( $flagmask & $flag )
             $out[]= $arr[1];
       return implode($sep, $out);
    }
@@ -334,11 +334,11 @@ class Contact
    {
       // lazy-init of texts
       $key = 'USERFLAGS' . ($quick ? '_QUICK' : '');
-      if( !isset(self::$ARR_CONTACT_TEXTS[$key]) )
+      if ( !isset(self::$ARR_CONTACT_TEXTS[$key]) )
       {
          $arr = array();
          // userflag => ( form_elem_name, translation )
-         if( $quick )
+         if ( $quick )
          {
             $arr[CUSERFLAG_BUDDY]   = array( 0, 'BUDDY' );
             $arr[CUSERFLAG_FRIEND]  = array( 0, 'FRIEND' );
@@ -371,11 +371,11 @@ class Contact
    {
       // lazy-init of texts
       $key = 'SYSTEMFLAGS' . ($quick ? '_QUICK' : '');
-      if( !isset(self::$ARR_CONTACT_TEXTS[$key]) )
+      if ( !isset(self::$ARR_CONTACT_TEXTS[$key]) )
       {
          $arr = array();
          // sysflag => ( form_elem_name, translation )
-         if( $quick )
+         if ( $quick )
          {
             $arr[CSYSFLAG_WR_HIDE_GAMES]  = array( 0, 'WR_HIDE_GAMES' );
             $arr[CSYSFLAG_WAITINGROOM]    = array( 0, 'WR_PROTECT_GAMES' );

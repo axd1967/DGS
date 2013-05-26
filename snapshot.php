@@ -72,11 +72,11 @@ $GLOBALS['ThePage'] = new Page('Docs');
    section( 'oldies', T_('Older versions'));
    centered_container();
 
-   if( $handle = @opendir('snapshot/archive') )
+   if ( $handle = @opendir('snapshot/archive') )
    {
-      while( false !== ($file = readdir($handle)) )
+      while ( false !== ($file = readdir($handle)) )
       {
-         if( $file[0] != "." )
+         if ( $file[0] != "." )
             add_link_page_link("snapshot/archive/$file", $file);
       }
 

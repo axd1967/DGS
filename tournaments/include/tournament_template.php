@@ -146,13 +146,13 @@ abstract class TournamentTemplate
    private static function build_tournament_template_title( $main_part, $extras )
    {
       $out = array();
-      if( $extras & TOURNEY_TITLE_INVITE_ONLY )
+      if ( $extras & TOURNEY_TITLE_INVITE_ONLY )
          $out[] = T_('invite-only#ttype');
-      if( $extras & TOURNEY_TITLE_ADMIN_ONLY )
+      if ( $extras & TOURNEY_TITLE_ADMIN_ONLY )
          $out[] = T_('only for admin#ttype');
-      if( $extras & TOURNEY_TITLE_NO_RESTRICTION )
+      if ( $extras & TOURNEY_TITLE_NO_RESTRICTION )
          $out[] = T_('no restrictions#ttype');
-      if( $extras & TOURNEY_TITLE_GAME_RESTRICTION )
+      if ( $extras & TOURNEY_TITLE_GAME_RESTRICTION )
          $out[] = T_('with game restrictions#ttype');
       return ( count($out) == 0 ) ? $main_part : sprintf('%s (%s)', $main_part, implode(', ', $out) );
    }//build_tournament_template_title

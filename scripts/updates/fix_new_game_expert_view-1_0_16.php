@@ -30,11 +30,11 @@ $GLOBALS['ThePage'] = new Page('Script', PAGEFLAG_IMPLICIT_FLUSH );
    set_time_limit(0); // don't want script-break during "transaction" with multi-db-queries or for large-datasets
 
    $logged_in = who_is_logged( $player_row);
-   if( !$logged_in )
+   if ( !$logged_in )
       error('login_if_not_logged_in', 'scripts.fix_new_game_expert_view-1_0_16');
-   if( $player_row['ID'] <= GUESTS_ID_MAX )
+   if ( $player_row['ID'] <= GUESTS_ID_MAX )
       error('not_allowed_for_guest', 'scripts.fix_new_game_expert_view-1_0_16');
-   if( !(@$player_row['admin_level'] & ADMIN_DATABASE) )
+   if ( !(@$player_row['admin_level'] & ADMIN_DATABASE) )
       error('adminlevel_too_low', 'scripts.fix_new_game_expert_view-1_0_16');
 
    $page = $_SERVER['PHP_SELF'];
@@ -46,12 +46,12 @@ $GLOBALS['ThePage'] = new Page('Script', PAGEFLAG_IMPLICIT_FLUSH );
 //echo ">>>> One shot fix. Do not run it again."; end_html(); exit;
 
    $do_it = @$_REQUEST['do_it'];
-   if( $do_it )
+   if ( $do_it )
    {
       function dbg_query($s) {
-         if( !mysql_query( $s) )
+         if ( !mysql_query( $s) )
            die("<BR>$s;<BR>" . mysql_error() );
-         if( DBG_QUERY>1 ) error_log("dbg_query(DO_IT): $s");
+         if ( DBG_QUERY>1 ) error_log("dbg_query(DO_IT): $s");
       }
       echo "<p>*** Fixes new-game-profiles with expert-view (old ".DEPRECATED_GSETVIEW_EXPERT.") ***"
          ."<br>".anchor(make_url($page, $page_args), 'Just show it')
@@ -61,7 +61,7 @@ $GLOBALS['ThePage'] = new Page('Script', PAGEFLAG_IMPLICIT_FLUSH );
    {
       function dbg_query($s) {
          echo "<BR>$s; ";
-         if( DBG_QUERY>1 ) error_log("dbg_query(SIMUL): $s");
+         if ( DBG_QUERY>1 ) error_log("dbg_query(SIMUL): $s");
       }
       $tmp = array_merge($page_args,array('do_it' => 1));
       echo "<p><b><font color=red>Important Note:</font></b> Ensure, that script 'fix_default_max_handi-1_0_16.php' has run first (once only)!"
@@ -82,9 +82,9 @@ $GLOBALS['ThePage'] = new Page('Script', PAGEFLAG_IMPLICIT_FLUSH );
 
    // fix view-mode
    $cnt_fix = 0;
-   foreach( $arr_templates as $profile_id => $tmpl )
+   foreach ( $arr_templates as $profile_id => $tmpl )
    {
-      if( ($curr_cnt++ % 50) == 0 )
+      if ( ($curr_cnt++ % 50) == 0 )
          echo "<br><br>... $curr_cnt of $all_cnt updated ...\n";
 
       $tmpl->GameSetup->ViewMode = GSETVIEW_STANDARD;
@@ -95,7 +95,7 @@ $GLOBALS['ThePage'] = new Page('Script', PAGEFLAG_IMPLICIT_FLUSH );
 
    echo "<br>Found $cnt_fix profiles that required fixing ...\n";
 
-   if( $do_it )
+   if ( $do_it )
       echo 'Fix by merging profile deprecated expert-view finished.';
 
    end_html();
@@ -109,10 +109,10 @@ function load_profile_templates_new_game_expert_view()
    $arr = array();
    $result = db_query("fix_new_game_expert_view.load_profile_templates_new_game_expert_view()",
       "SELECT ID, Text FROM Profiles WHERE Type=$template_type" );
-   while( $row = mysql_fetch_assoc( $result ) )
+   while ( $row = mysql_fetch_assoc( $result ) )
    {
       $tmpl = ProfileTemplate::decode( $template_type, $row['Text'] );
-      if( $tmpl->GameSetup->ViewMode == DEPRECATED_GSETVIEW_EXPERT )
+      if ( $tmpl->GameSetup->ViewMode == DEPRECATED_GSETVIEW_EXPERT )
          $arr[$row['ID']] = $tmpl;
    }
    mysql_free_result($result);

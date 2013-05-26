@@ -34,11 +34,11 @@ define('VAL_CHECK', '<font color="blue">-- <b>Need Validate!:</b> </font>');
    set_time_limit(SECS_PER_MIN); //max. 1min
 
    $logged_in = who_is_logged( $player_row);
-   if( !$logged_in )
+   if ( !$logged_in )
       error('login_if_not_logged_in', 'scripts.translation_consistency');
-   if( $player_row['ID'] <= GUESTS_ID_MAX )
+   if ( $player_row['ID'] <= GUESTS_ID_MAX )
       error('not_allowed_for_guest', 'scripts.translation_consistency');
-   if( !(@$player_row['admin_level'] & ADMIN_DATABASE) )
+   if ( !(@$player_row['admin_level'] & ADMIN_DATABASE) )
       error('adminlevel_too_low', 'scripts.translation_consistency');
 
    $page = $_SERVER['PHP_SELF'];
@@ -48,10 +48,10 @@ define('VAL_CHECK', '<font color="blue">-- <b>Need Validate!:</b> </font>');
    start_html( 'translation_consistency', 0);
 
    echo ">>>> Most of them needs manual fixes.";
-   if( $do_it=@$_REQUEST['do_it'] )
+   if ( $do_it=@$_REQUEST['do_it'] )
    {
       function dbg_query($s) {
-        if( !mysql_query( $s) )
+        if ( !mysql_query( $s) )
            die("<BR>$s;<BR>" . mysql_error() );
         echo " --- fixed. ";
       }
@@ -81,7 +81,7 @@ define('VAL_CHECK', '<font color="blue">-- <b>Need Validate!:</b> </font>');
    // - related tables: Translationlog, TranslationLanguages, TranslationPages, TranslationGroups
    $errcnt = 0;
 
-   if( @$_REQUEST['faq_refs'] )
+   if ( @$_REQUEST['faq_refs'] )
    {
       $errcnt += check_consistency_faq_refs($do_it);
    }
@@ -110,7 +110,7 @@ define('VAL_CHECK', '<font color="blue">-- <b>Need Validate!:</b> </font>');
 
 function commit_query( $dbgmsg, $commit, $sql )
 {
-   if( $commit )
+   if ( $commit )
    {
       db_query($dbgmsg, $sql );
       echo "-- Fixed: $sql", BRLF;
@@ -136,7 +136,7 @@ function check_consistency_faq( $dbtable, $commit )
       "FROM $dbtable AS D " .
          "LEFT JOIN $dbtable AS D2 ON D2.ID=D.Parent " .
       "WHERE D2.ID IS NULL" );
-   while( $row = mysql_fetch_assoc($result) )
+   while ( $row = mysql_fetch_assoc($result) )
    {
       $errcnt++;
       echo ERR_CHECK, "[$dbtable] Found entry without existing Parent [{$row['Parent']}]: Needs manual fix! ", BRLF,
@@ -152,17 +152,17 @@ function check_consistency_faq( $dbtable, $commit )
       "ORDER BY Parent, SortOrder" );
    $curr_parent = 1;
    $curr_order = 1;
-   while( $row = mysql_fetch_assoc($result) )
+   while ( $row = mysql_fetch_assoc($result) )
    {
       $ID = $row['ID'];
       $Parent = $row['Parent'];
       $Order = $row['SortOrder'];
-      if( $Parent != $curr_parent )
+      if ( $Parent != $curr_parent )
       {
          $curr_parent = $Parent;
          $curr_order = 1;
       }
-      if( $Order != $curr_order )
+      if ( $Order != $curr_order )
       {
          $errcnt++;
          echo ERR_CHECK, "[$dbtable] Found wrong SortOrder [$Order] for entry with Parent [$Parent] and ID [$ID]: Needs fix! ", BRLF;
@@ -177,7 +177,7 @@ function check_consistency_faq( $dbtable, $commit )
    echo BRLF, "[$dbtable] Checking for valid Level ...", BRLF;
    $result = db_query("$dbgmsg.check.level",
       "SELECT ID, Level FROM $dbtable WHERE NOT (Level BETWEEN 0 AND 2 )" );
-   while( $row = mysql_fetch_assoc($result) )
+   while ( $row = mysql_fetch_assoc($result) )
    {
       $errcnt++;
       echo ERR_CHECK, "[$dbtable] Found invalid Level [{$row['Level']}]: Needs manual fix! ", BRLF,
@@ -193,15 +193,15 @@ function check_consistency_faq( $dbtable, $commit )
          "LEFT JOIN TranslationTexts AS TTQ ON TTQ.ID=D.Question " .
          "LEFT JOIN TranslationTexts AS TTA ON TTA.ID=D.Answer " .
       "WHERE (D.Question>0 AND TTQ.ID IS NULL) OR (D.Answer>0 AND TTA.ID IS NULL)" );
-   while( $row = mysql_fetch_assoc($result) )
+   while ( $row = mysql_fetch_assoc($result) )
    {
       $errcnt++;
       $ID = $row['ID'];
 
       $fields = array();
-      if( $row['Question'] > 0 && $row['TTQ_ID'] == 0 )
+      if ( $row['Question'] > 0 && $row['TTQ_ID'] == 0 )
          $fields[] = 'Question='.$row['Question']; // missing Q
-      if( $row['Answer'] > 0 && $row['TTA_ID'] == 0 )
+      if ( $row['Answer'] > 0 && $row['TTA_ID'] == 0 )
          $fields[] = 'Answer='.$row['Answer']; // missing A
 
       echo ERR_CHECK, "[$dbtable] Found entry with ID [$ID] without existing text-id [", implode(', ', $fields), "]",
@@ -217,36 +217,36 @@ function check_consistency_faq( $dbtable, $commit )
    $arr_remove_type = array(); // TT.ID => 1 (if db_type matches)
    $result = db_query("$dbgmsg.check.QA.Type.1",
       "SELECT TT.ID FROM TranslationTexts AS TT WHERE TT.Type='$db_type'" );
-   while( $row = mysql_fetch_assoc($result) )
+   while ( $row = mysql_fetch_assoc($result) )
       $arr_remove_type[$row['ID']] = 1;
    mysql_free_result($result);
 
    // (2) find all texts for dbtable fixing wrong type
    $arr_set_type = array();
-   foreach( $FIELDS_QA as $field )
+   foreach ( $FIELDS_QA as $field )
    {
       $result = db_query("$dbgmsg.check.QA.Type.2($field)",
          "SELECT TT.ID, TT.Type " .
          "FROM $dbtable AS D " .
             "INNER JOIN TranslationTexts AS TT ON TT.ID=D.$field " .
          "WHERE D.$field>0" );
-      while( $row = mysql_fetch_assoc($result) )
+      while ( $row = mysql_fetch_assoc($result) )
       {
          $ID = $row['ID'];
          unset($arr_remove_type[$ID]);
-         if( $row['Type'] != $db_type )
+         if ( $row['Type'] != $db_type )
             $arr_set_type[] = $ID;
       }
       mysql_free_result($result);
    }
-   if( count($arr_remove_type) )
+   if ( count($arr_remove_type) )
    {
       $arr_rm = array_keys($arr_remove_type);
       echo ERR_CHECK, "[$dbtable] Found ", count($arr_rm), " entries with bad type: Needs fix! ", BRLF;
       commit_query("$dbgmsg.fix.QA.Type.3", $commit,
          "UPDATE TranslationTexts SET Type='NONE' WHERE ID IN (" . implode(', ', $arr_rm) . ")" );
    }
-   if( count($arr_set_type) )
+   if ( count($arr_set_type) )
    {
       echo ERR_CHECK, "[$dbtable] Found ", count($arr_set_type), " entries missing correct type [$db_type]: Needs fix! ", BRLF;
       commit_query("$dbgmsg.fix.QA.Type.4", $commit,
@@ -256,7 +256,7 @@ function check_consistency_faq( $dbtable, $commit )
 
    // check that all dbtable.Question/Answer-texts (if set) have a TFIG with the right TranslationGroup
    $group_id = get_translation_group( $dbtable );
-   foreach( $FIELDS_QA as $field )
+   foreach ( $FIELDS_QA as $field )
    {
       echo BRLF, "[$dbtable] Checking TranslationFoundInGroup for $field ...", BRLF;
       $result = db_query("$dbgmsg.check.TFIG.QA.$field",
@@ -265,7 +265,7 @@ function check_consistency_faq( $dbtable, $commit )
             "INNER JOIN TranslationTexts AS TT ON TT.ID=D.$field " .
             "LEFT JOIN TranslationFoundInGroup AS TFIG ON TFIG.Text_ID=TT.ID AND TFIG.Group_ID=$group_id " .
          "WHERE D.$field>0 AND TFIG.Text_ID IS NULL" );
-      while( $row = mysql_fetch_assoc($result) )
+      while ( $row = mysql_fetch_assoc($result) )
       {
          $errcnt++;
          $ID = $row['ID'];
@@ -277,17 +277,17 @@ function check_consistency_faq( $dbtable, $commit )
       mysql_free_result($result);
    }
 
-   if( $dbtable == 'Links' )
+   if ( $dbtable == 'Links' )
    {
       // check that Links.Reference is set only for Links.Level 2
       $result = db_query("$dbgmsg.check.TFIG.QA.$field",
          "SELECT ID, Level, Reference FROM Links " .
          "WHERE (Level=2 AND Reference ='' ) OR (Level<>2 AND Reference>'')" );
-      while( $row = mysql_fetch_assoc($result) )
+      while ( $row = mysql_fetch_assoc($result) )
       {
          $errcnt++;
          $ID = $row['ID'];
-         if( $row['Level'] == 2 )
+         if ( $row['Level'] == 2 )
             echo ERR_CHECK, "[$dbtable] Found bad entry (missing Reference): Needs manual fix! ", BRLF,
                "-- SELECT * FROM $dbtable WHERE ID=$ID ;", BRLF;
          else
@@ -315,7 +315,7 @@ function check_consistency_tfig( $commit )
       "FROM TranslationFoundInGroup AS TFIG " .
          "LEFT JOIN TranslationTexts AS TT ON TT.ID=TFIG.Text_ID " .
       "WHERE TT.ID IS NULL" );
-   while( $row = mysql_fetch_assoc($result) )
+   while ( $row = mysql_fetch_assoc($result) )
    {
       $errcnt++;
       $text_id = $row['Text_ID'];
@@ -332,7 +332,7 @@ function check_consistency_tfig( $commit )
       "FROM TranslationFoundInGroup AS TFIG " .
          "LEFT JOIN TranslationGroups AS TG ON TG.ID=TFIG.Group_ID " .
       "WHERE TG.ID IS NULL" );
-   while( $row = mysql_fetch_assoc($result) )
+   while ( $row = mysql_fetch_assoc($result) )
    {
       $errcnt++;
       $group_id = $row['Group_ID'];
@@ -366,7 +366,7 @@ function check_consistency_transl( $commit )
          "LEFT JOIN TranslationLanguages AS TL ON TL.ID=T.Language_ID " .
       "WHERE TL.ID IS NULL " .
       "GROUP BY T.Language_ID" );
-   while( $row = mysql_fetch_assoc($result) )
+   while ( $row = mysql_fetch_assoc($result) )
    {
       $errcnt++;
       $lang_id = $row['Language_ID'];
@@ -385,7 +385,7 @@ function check_consistency_transl( $commit )
          "LEFT JOIN TranslationTexts AS TT ON TT.ID=T.Original_ID " .
       "WHERE TT.ID IS NULL " .
       "GROUP BY T.Original_ID" );
-   while( $row = mysql_fetch_assoc($result) )
+   while ( $row = mysql_fetch_assoc($result) )
    {
       $errcnt++;
       $orig_id = $row['Original_ID'];
@@ -400,7 +400,7 @@ function check_consistency_transl( $commit )
    echo BRLF, "Checking Translations.Updated ...", BRLF;
    $row = mysql_single_fetch("$dbgmsg.check.T.need_Updated",
       "SELECT COUNT(*) AS X_Count FROM Translations WHERE Updated=0" );
-   if( @$row['X_Count'] )
+   if ( @$row['X_Count'] )
    {
       $errcnt += $row['X_Count'];
       echo BRLF, "Found {$row['X_Count']} entries with unset Translations.Updated. Trying to fix automatically ...", BRLF;
@@ -415,15 +415,15 @@ function check_consistency_transl( $commit )
             "INNER JOIN Translations AS T ON T.Original_ID=TL.Original_ID AND T.Language_ID=TL.Language_ID " .
          "WHERE TL.Translation>'' AND T.Updated=0 " .
          "ORDER BY TL.ID DESC" ); // start from last translation
-      while( $row = mysql_fetch_assoc($result) )
+      while ( $row = mysql_fetch_assoc($result) )
       {
          $lang_id = $row['Language_ID'];
          $orig_id = $row['Original_ID'];
          $t_date = $row['T_Date'];
-         if( !isset($arr_lang[$lang_id]) || ($t_date > $arr_lang[$lang_id]) )
+         if ( !isset($arr_lang[$lang_id]) || ($t_date > $arr_lang[$lang_id]) )
             $arr_lang[$lang_id] = $t_date;
          $key = $orig_id . ':' . $lang_id;
-         if( isset($visited[$key]) )
+         if ( isset($visited[$key]) )
             continue;
          $visited[$key] = 1;
 
@@ -440,7 +440,7 @@ function check_consistency_transl( $commit )
          "FROM Translations AS T " .
          "WHERE T.Updated > 0 " .
          "GROUP BY T.Language_ID" );
-      while( $row = mysql_fetch_assoc($result) )
+      while ( $row = mysql_fetch_assoc($result) )
       {
          $lang_id = $row['Language_ID'];
          commit_query("$dbgmsg.fix.T.Updated.4", $commit,
@@ -454,7 +454,7 @@ function check_consistency_transl( $commit )
       echo BRLF, "Fixing remaining Translations.Updated ...", BRLF;
       $result = db_query("$dbgmsg.check.T.Updated.5",
          "SELECT T.Language_ID, COUNT(*) AS X_Count FROM Translations AS T WHERE T.Updated=0 GROUP BY T.Language_ID" );
-      while( $row = mysql_fetch_assoc($result) )
+      while ( $row = mysql_fetch_assoc($result) )
       {
          $lang_id = $row['Language_ID'];
          $t_date = (isset($arr_lang[$lang_id])) ? $arr_lang[$lang_id] : $NOW;
@@ -484,7 +484,7 @@ function check_consistency_texts( $commit )
       "FROM TranslationTexts AS TT " .
       "LEFT JOIN TranslationFoundInGroup AS TFIG ON TFIG.Text_ID=TT.ID " .
       "WHERE TFIG.Text_ID IS NULL AND TT.Type<>'NONE'" );
-   while( $row = mysql_fetch_assoc($result) )
+   while ( $row = mysql_fetch_assoc($result) )
    {
       $errcnt++;
       $ID = $row['ID'];
@@ -503,9 +503,9 @@ function check_consistency_texts( $commit )
 
    // - (2) identify and mark texts from PHP-sources as USED
    list( $error, $arr_text_id, $arr_tfig, $arr_double_id ) = generate_translation_texts( /*commit*/false, /*echo*/false );
-   if( !$error )
+   if ( !$error )
    {
-      if( count($arr_text_id) )
+      if ( count($arr_text_id) )
       {
          echo sprintf( "... There are %s text entries, that will be marked as USED and of type=SRC.", count($arr_text_id) ), BRLF, BRLF;
          db_query("$dbgmsg.check.TT.Status.3",
@@ -520,10 +520,10 @@ function check_consistency_texts( $commit )
       $arr_orphans = array();
       $result = db_query("$dbgmsg.check.TT.Status.4",
          "SELECT TT.ID FROM TranslationTexts AS TT WHERE TT.Status='".TRANSL_STAT_ORPHAN."'" );
-      while( $row = mysql_fetch_assoc($result) )
+      while ( $row = mysql_fetch_assoc($result) )
          $arr_orphans[] = $row['ID'];
       mysql_free_result($result);
-      if( count($arr_orphans) )
+      if ( count($arr_orphans) )
       {
          $errcnt += count($arr_orphans);
          echo ERR_CHECK, "Found ".count($arr_orphans)." potential orphan texts:", BRLF,
@@ -539,12 +539,12 @@ function check_consistency_texts( $commit )
       $arr_type_src = array(); // TT.ID => 1
       $result = db_query("$dbgmsg.find.TT.type_src",
          "SELECT TT.ID FROM TranslationTexts AS TT WHERE TT.Type='SRC'" );
-      while( $row = mysql_fetch_assoc($result) )
+      while ( $row = mysql_fetch_assoc($result) )
          $arr_type_src[$row['ID']] = 1;
       mysql_free_result($result);
-      foreach( $arr_text_id as $text_id )
+      foreach ( $arr_text_id as $text_id )
          unset($arr_type_src[$text_id]);
-      if( count($arr_type_src) )
+      if ( count($arr_type_src) )
       {
          $arr_id = array_keys($arr_type_src);
          $errcnt += count($arr_id);
@@ -563,24 +563,24 @@ function check_consistency_texts( $commit )
       $arr_unused = array(); // [ text_id => [ group_id, ... ] ]
       $arr_unused_texts = array(); // [ text_id => text, ... ]
       $cnt_unused = 0;
-      while( $row = mysql_fetch_assoc($result) )
+      while ( $row = mysql_fetch_assoc($result) )
       {
          $text_id = $row['Text_ID'];
          $group_id = $row['Group_ID'];
-         if( !isset($arr_tfig[$group_id]) || !in_array($text_id, $arr_tfig[$group_id]) )
+         if ( !isset($arr_tfig[$group_id]) || !in_array($text_id, $arr_tfig[$group_id]) )
          {
             $arr_unused_texts[$text_id] = $row['Text'];
-            if( !isset($arr_unused[$text_id]) )
+            if ( !isset($arr_unused[$text_id]) )
                $arr_unused[$text_id] = array();
             $arr_unused[$text_id][] = $group_id;
             $cnt_unused++;
          }
       }
       mysql_free_result($result);
-      if( $cnt_unused )
+      if ( $cnt_unused )
       {
          $errcnt += $cnt_unused;
-         foreach( $arr_unused as $text_id => $arr_groups )
+         foreach ( $arr_unused as $text_id => $arr_groups )
          {
             echo BRLF, ERR_CHECK, "Found <font color=red><b>", count($arr_groups), "</b></font> unused TranslationFoundInGroup-entries for text [",
                "<font color=blue>", basic_safe(cut_str($arr_unused_texts[$text_id], 50)), "</font>]: Needs manual fix!", BRLF,
@@ -601,7 +601,7 @@ function check_consistency_texts( $commit )
       "GROUP BY Text " .
       "HAVING X_Count > 1" );
    $dbl_count = 0;
-   while( $row = mysql_fetch_assoc($result) )
+   while ( $row = mysql_fetch_assoc($result) )
    {
       $errcnt++;
       $fmt_text = preg_replace("/\\n/s", ' ', substr($row['Text'], 0, 20));
@@ -613,7 +613,7 @@ function check_consistency_texts( $commit )
             "LEFT JOIN Translations AS T ON T.Original_ID=TT.ID " .
          "WHERE TT.Text='$text' AND TT.Type IN ('NONE','SRC') " .
          "GROUP BY TT.ID, TT.Status, TT.Type" );
-      while( $row2 = mysql_fetch_assoc($result2) )
+      while ( $row2 = mysql_fetch_assoc($result2) )
       {
          $dbl_count++;
          $ID = $row2['ID'];
@@ -634,7 +634,7 @@ function check_consistency_texts( $commit )
 
    // check for unset TranslationTexts.Updated
    echo BRLF, "Check TranslationTexts.Updated ...", BRLF, BRLF;
-   if( $cnt_translations_no_updated > 0 )
+   if ( $cnt_translations_no_updated > 0 )
    {
       $errcnt++;
       echo ERR_CHECK, "To check and fix TranslationTexts.Updated all Translations.Updated must be set (found ",
@@ -650,15 +650,15 @@ function check_consistency_texts( $commit )
          "LEFT JOIN Translations AS T ON T.Original_ID=TT.ID " .
          "WHERE TT.Updated=0 " .
          "GROUP BY TT.ID" );
-      while( $row = mysql_fetch_assoc($result) )
+      while ( $row = mysql_fetch_assoc($result) )
       {
          $ID = $row['ID'];
          $transl_exists = $row['T_Exists']; // false = no translations
 
          // NOTE: For a new or changed text all existing translations for the text are marked with Translations.Translated='N'
-         if( $transl_exists )
+         if ( $transl_exists )
          {
-            if( $row['Translatable'] == 'Done' )
+            if ( $row['Translatable'] == 'Done' )
             {
                // TranslationTexts.Translatable=Done means, there is at least one translation of newer date
                // => so take MIN of Translations.Updated (oldest translation) with Translated=Y - 1 hour
@@ -704,7 +704,7 @@ function check_consistency_faq_refs( $commit )
    echo BRLF, "Loading all FAQ-entries with correct category ...", BRLF;
    $result = db_query( "$dbgmsg.load.faq_cat",
       "SELECT ID, Parent FROM FAQ WHERE Level=2");
-   while( $row = mysql_fetch_assoc($result) )
+   while ( $row = mysql_fetch_assoc($result) )
       $faq_entries[$row['ID']] = $row['Parent'];
    mysql_free_result($result);
 
@@ -741,17 +741,17 @@ function fix_faq_reference( $dbgmsg, $commit, $table, $text_field, $keys )
       "SELECT $sql_keys, $text_field AS Text " .
       "FROM $table " .
       "WHERE $text_field LIKE '" . mysql_addslashes( "%faq.php?%cat=%#Entry%" ) . "'" );
-   while( $row = mysql_fetch_assoc($result) )
+   while ( $row = mysql_fetch_assoc($result) )
    {
       ++$cnt;
       $new_text = preg_replace_callback(
          "/(faq\\.php?[^#]+?cat=)(\\d+)([^#]*?#Entry)(\\d+)/S", // matches: cat=$2 entry=$4
          'replace_faq_ref_text_callback', $row['Text'] );
 
-      if( strcmp($row['Text'], $new_text) )
+      if ( strcmp($row['Text'], $new_text) )
       {
          $arr = array();
-         foreach( $keys as $key )
+         foreach ( $keys as $key )
             $arr[] = $key . '=' . $row[$key];
          $sql_where = implode(' AND ', $arr);
 

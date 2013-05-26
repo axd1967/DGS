@@ -94,22 +94,22 @@ class Entity
       // skip arg #0=type-arg to add var-args: fields
       $type = 0;
       $cnt_args = func_num_args();
-      for( $i=1; $i < $cnt_args; $i++)
+      for ( $i=1; $i < $cnt_args; $i++)
       {
          $arg = trim(func_get_arg($i));
-         if( is_numeric($arg) )
+         if ( is_numeric($arg) )
          {
-            if( $arg >= 1 && $arg <= _FTYPE_MAX )
+            if ( $arg >= 1 && $arg <= _FTYPE_MAX )
                $type = $arg;
             else
                init_error('entity_init_error', "Entity.bad_type($table,$i,$arg)");
 
-            if( $type == FTYPE_CHBY )
+            if ( $type == FTYPE_CHBY )
             {
                $this->fields[FIELD_CHANGEDBY] = $type;
                $this->has_changedby = true;
             }
-            elseif( $type == FTYPE_OPTLOCK )
+            elseif ( $type == FTYPE_OPTLOCK )
             {
                $this->fields[FIELD_LOCKVERSION] = $type;
                $this->has_optimistic_locking = true;
@@ -117,30 +117,30 @@ class Entity
          }
          else
          {
-            if( $type == 0)
+            if ( $type == 0)
                init_error('entity_init_error', "Entity.miss_type($table,$i,$type,$arg)");
-            if( $type == FTYPE_CHBY )
+            if ( $type == FTYPE_CHBY )
                init_error('entity_init_error', "Entity.bad_arg.changedby_no_arg($table,$i,$type,$arg)");
-            if( $type == FTYPE_OPTLOCK )
+            if ( $type == FTYPE_OPTLOCK )
                init_error('entity_init_error', "Entity.bad_arg.optlock_no_arg($table,$i,$type,$arg)");
-            if( $arg == '' )
+            if ( $arg == '' )
                init_error('entity_init_error', "Entity.bad_arg($table,$i,$type,$arg)");
 
-            if( $type == FTYPE_PKEY )
+            if ( $type == FTYPE_PKEY )
                $this->pkeys[$arg] = 1;
-            elseif( $type == FTYPE_AUTO )
+            elseif ( $type == FTYPE_AUTO )
                $this->field_autoinc = $arg;
             else
             {
                $this->fields[$arg] = $type;
-               if( $type == FTYPE_DATE )
+               if ( $type == FTYPE_DATE )
                   $this->date_fields[] = $arg;
             }
          }
       }
 
       // reserved-fieldname for optimistic-locking
-      if( isset($this->fields[FIELD_LOCKVERSION]) && !$this->has_optimistic_locking )
+      if ( isset($this->fields[FIELD_LOCKVERSION]) && !$this->has_optimistic_locking )
          init_error('entity_init_error', "Entity.miss_optlock($table,".FIELD_LOCKVERSION.")");
    }//__construct
 
@@ -161,7 +161,7 @@ class Entity
 
    public function is_auto_increment( $field )
    {
-      if( is_null($this->field_autoinc) )
+      if ( is_null($this->field_autoinc) )
          return false;
       return (strcmp($this->field_autoinc, $field) == 0);
    }
@@ -178,7 +178,7 @@ class Entity
          SQLP_FROM, $this->table . ($table_alias ? " AS $table_alias" : '') );
 
       $arr_dates = array();
-      foreach( $this->date_fields as $field )
+      foreach ( $this->date_fields as $field )
          $arr_dates[] = "UNIX_TIMESTAMP($tbl.$field) AS X_$field";
       $qsql->add_part_fields( $arr_dates );
 
@@ -221,7 +221,7 @@ class EntityData
    public function get_pkey_string()
    {
       $arr = array();
-      foreach( $this->entity->pkeys as $field => $tmp )
+      foreach ( $this->entity->pkeys as $field => $tmp )
          $arr[] = sprintf( '%s[%s]', $field,
             ( isset($this->values[$field]) ? $this->values[$field] : '' ));
       return implode(',', $arr);
@@ -229,14 +229,14 @@ class EntityData
 
    public function set_value( $field, $value )
    {
-      if( !$this->entity->is_field($field) )
+      if ( !$this->entity->is_field($field) )
          error('assert', "EntityData.set_value.unknown_field({$this->entity->table},$field)");
       $this->values[$field] = $value;
    }
 
    public function set_query_value( $field, $query_value )
    {
-      if( !$this->entity->is_field($field) )
+      if ( !$this->entity->is_field($field) )
          error('assert', "EntityData.set_query_value.unknown_field({$this->entity->table},$field)");
       $this->query_values[$field] = $query_value;
    }
@@ -245,21 +245,21 @@ class EntityData
    public function get_fields( $dbgmsg )
    {
       $arr = array();
-      foreach( $this->values as $field => $tmp )
+      foreach ( $this->values as $field => $tmp )
       {
-         if( !$this->entity->is_field($field) )
+         if ( !$this->entity->is_field($field) )
             error('assert', "$dbgmsg.unknown_field({$this->entity->table},$field)");
          $arr[$field] = 1;
       }
 
-      foreach( $this->query_values as $field => $tmp )
+      foreach ( $this->query_values as $field => $tmp )
       {
-         if( !$this->entity->is_field($field) )
+         if ( !$this->entity->is_field($field) )
             error('assert', "$dbgmsg.unknown_field2({$this->entity->table},$field)");
          $arr[$field] = 2;
       }
 
-      if( isset($arr[FIELD_LOCKVERSION]) )
+      if ( isset($arr[FIELD_LOCKVERSION]) )
          unset($arr[FIELD_LOCKVERSION]);
 
       return array_keys( $arr );
@@ -284,31 +284,31 @@ class EntityData
    public function remove_value( $field, $with_queryval=true )
    {
       unset($this->values[$field]);
-      if( $with_queryval )
+      if ( $with_queryval )
          unset($this->query_values[$field]);
    }
 
    public function get_sql_value( $field, $default=null )
    {
-      if( $field == FIELD_CHANGEDBY )
+      if ( $field == FIELD_CHANGEDBY )
          return "RTRIM('" . mysql_addslashes( $this->build_changed_by() ) . "')";
 
-      if( isset($this->values[$field]) )
+      if ( isset($this->values[$field]) )
       {
          $ftype = $this->entity->fields[$field];
          $value = $this->get_value( $field, $default );
-         if( $ftype == FTYPE_INT )
+         if ( $ftype == FTYPE_INT )
             return (int)$value;
-         elseif( $ftype == FTYPE_TEXT || $ftype == FTYPE_ENUM )
+         elseif ( $ftype == FTYPE_TEXT || $ftype == FTYPE_ENUM )
             return "'" . mysql_addslashes($value) . "'";
-         elseif( $ftype == FTYPE_DATE )
+         elseif ( $ftype == FTYPE_DATE )
             return ( $value != 0 ) ? "FROM_UNIXTIME($value)" : "'0000-00-00 00:00:00'";
-         elseif( $ftype == FTYPE_FLOAT )
+         elseif ( $ftype == FTYPE_FLOAT )
             return (float)$value;
          else
             error('assert', "EntityData.get_sql_value.bad_field_type({$this->entity->table},$field)");
       }
-      elseif( isset($this->query_values[$field]) )
+      elseif ( isset($this->query_values[$field]) )
          return $this->get_query_value( $field, $default );
       else
          return $default;
@@ -320,10 +320,10 @@ class EntityData
       $handle = ( (string)@$player_row['Handle'] != '' ) ? @$player_row['Handle'] : UNKNOWN_VALUE;
       $changed_by = "[$handle]";
 
-      if( is_null($value) )
+      if ( is_null($value) )
          $value = $this->get_value(FIELD_CHANGEDBY, '');
 
-      if( strncmp($value, $changed_by, strlen($changed_by)) != 0 )
+      if ( strncmp($value, $changed_by, strlen($changed_by)) != 0 )
          $value = "$changed_by $value";
       return $value;
    }//build_changed_by
@@ -331,20 +331,20 @@ class EntityData
    public function build_sql_insert()
    {
       // primary-key field values must exist
-      foreach( $this->entity->pkeys as $field => $tmp )
+      foreach ( $this->entity->pkeys as $field => $tmp )
       {
-         if( !isset($this->values[$field]) && !$this->entity->is_auto_increment($field) )
+         if ( !isset($this->values[$field]) && !$this->entity->is_auto_increment($field) )
             error('assert', "EntityData.build_sql_insert.miss_pkey_value({$this->entity->table},$field)");
       }
 
       $arr = array();
-      foreach( $this->get_fields("EntityData.build_sql_insert") as $field )
+      foreach ( $this->get_fields("EntityData.build_sql_insert") as $field )
       {
-         if( !$this->entity->is_auto_increment($field) )
+         if ( !$this->entity->is_auto_increment($field) )
             $arr[] = $field . '=' . $this->get_sql_value( $field );
       }
 
-      if( $this->entity->has_changedby && !isset($this->values[FIELD_CHANGEDBY]) )
+      if ( $this->entity->has_changedby && !isset($this->values[FIELD_CHANGEDBY]) )
          $arr[] = FIELD_CHANGEDBY . '=' . $this->get_sql_value(FIELD_CHANGEDBY);
 
       $query = 'INSERT INTO ' . $this->entity->table . ' SET ' . implode(', ', $arr);
@@ -354,21 +354,21 @@ class EntityData
    public function build_sql_insert_values( $header=false, $with_PK=false, $skip_fields=null )
    {
       $arr = array();
-      if( $header ) // header
+      if ( $header ) // header
       {
          $query_fmt = 'INSERT INTO ' . $this->entity->table . ' (%s) VALUES ';
-         foreach( $this->entity->fields as $field => $ftype ) // in order from entity
+         foreach ( $this->entity->fields as $field => $ftype ) // in order from entity
          {
-            if( !isset($skip_fields[$field]) && ( $with_PK || !$this->entity->is_auto_increment($field) ) )
+            if ( !isset($skip_fields[$field]) && ( $with_PK || !$this->entity->is_auto_increment($field) ) )
                $arr[] = $field;
          }
       }
       else // values
       {
          $query_fmt = '(%s)';
-         foreach( $this->entity->fields as $field => $ftype ) // in order from entity
+         foreach ( $this->entity->fields as $field => $ftype ) // in order from entity
          {
-            if( !isset($skip_fields[$field]) && ( $with_PK || !$this->entity->is_auto_increment($field) ) )
+            if ( !isset($skip_fields[$field]) && ( $with_PK || !$this->entity->is_auto_increment($field) ) )
             {
                $sql_val = $this->get_sql_value( $field );
                $arr[] = (is_null($sql_val)) ? "DEFAULT($field)" : $sql_val;
@@ -385,34 +385,34 @@ class EntityData
    {
       // primary-key field values must exist
       $arr_pkeys = array();
-      foreach( $this->entity->pkeys as $field => $tmp )
+      foreach ( $this->entity->pkeys as $field => $tmp )
       {
-         if( !isset($this->values[$field]) )
+         if ( !isset($this->values[$field]) )
             error('assert', "EntityData.build_sql_update.miss_pkey_value({$this->entity->table},$field)");
-         if( isset($skip_fields[$field]) )
+         if ( isset($skip_fields[$field]) )
             unset($skip_fields[$field]);
          $sql_val = $this->get_sql_value( $field );
-         if( !is_null($sql_val) )
+         if ( !is_null($sql_val) )
             $arr_pkeys[] = $field . '=' . $sql_val;
       }
 
       $arr = array();
-      foreach( $this->get_fields("EntityData.build_sql_update") as $field )
+      foreach ( $this->get_fields("EntityData.build_sql_update") as $field )
       {
-         if( !isset($skip_fields[$field]) && !$this->entity->is_primary_key($field) )
+         if ( !isset($skip_fields[$field]) && !$this->entity->is_primary_key($field) )
             $arr[] = $field . '=' . $this->get_sql_value( $field );
       }
 
-      if( $incl_chby && $this->entity->has_changedby && !isset($this->values[FIELD_CHANGEDBY]) )
+      if ( $incl_chby && $this->entity->has_changedby && !isset($this->values[FIELD_CHANGEDBY]) )
          $arr[] = FIELD_CHANGEDBY . '=' . $this->get_sql_value(FIELD_CHANGEDBY);
 
-      if( $incl_optlock && $this->entity->has_optimistic_locking )
+      if ( $incl_optlock && $this->entity->has_optimistic_locking )
          $arr[] = sprintf( '%s=(%s+1) & 0xFF', FIELD_LOCKVERSION, FIELD_LOCKVERSION ); // 0xFF=tinyint-unsigned
 
       $arr_query = array();
       $arr_query[] = 'UPDATE ' . $this->entity->table . ' SET ' . implode(', ', $arr);
       $arr_query[] = 'WHERE ' . implode(' AND ', $arr_pkeys);
-      if( $incl_optlock && $this->entity->has_optimistic_locking && isset($this->values[FIELD_LOCKVERSION]) )
+      if ( $incl_optlock && $this->entity->has_optimistic_locking && isset($this->values[FIELD_LOCKVERSION]) )
          $arr_query[] = sprintf( 'AND %s=%s', FIELD_LOCKVERSION, (int)$this->values[FIELD_LOCKVERSION] );
       $arr_query[] = ( is_numeric($limit) && $limit > 0 ) ? "LIMIT $limit" : '';
       return ($as_arr) ? $arr_query : rtrim(implode(' ', $arr_query));
@@ -421,19 +421,19 @@ class EntityData
    public function build_sql_delete( $limit=1, $incl_optlock=true )
    {
       $arr = array();
-      foreach( $this->entity->pkeys as $field => $tmp )
+      foreach ( $this->entity->pkeys as $field => $tmp )
       {
-         if( !isset($this->values[$field]) )
+         if ( !isset($this->values[$field]) )
             error('assert', "EntityData.build_sql_delete.miss_pkey_value({$this->entity->table},$field)");
          $sql_val = $this->get_sql_value( $field );
-         if( !is_null($sql_val) )
+         if ( !is_null($sql_val) )
             $arr[] = $field . '=' . $sql_val;
       }
 
       $query = 'DELETE FROM ' . $this->entity->table . ' WHERE ' . implode(' AND ', $arr);
-      if( $incl_optlock && $this->entity->has_optimistic_locking && isset($this->values[FIELD_LOCKVERSION]) )
+      if ( $incl_optlock && $this->entity->has_optimistic_locking && isset($this->values[FIELD_LOCKVERSION]) )
          $query .= sprintf( ' AND %s=%s ', FIELD_LOCKVERSION, (int)$this->values[FIELD_LOCKVERSION] );
-      if( is_numeric($limit) && $limit > 0 )
+      if ( is_numeric($limit) && $limit > 0 )
          $query .= " LIMIT $limit";
       return $query;
    }//build_sql_delete

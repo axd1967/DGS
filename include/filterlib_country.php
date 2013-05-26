@@ -71,7 +71,7 @@ class FilterCountry extends Filter
       static $ARR_FILTER_COUNTRIES = null;
 
       // lazy-init
-      if( is_null($ARR_FILTER_COUNTRIES) )
+      if ( is_null($ARR_FILTER_COUNTRIES) )
       {
          $arr = getCountryText(); // get all countries
 

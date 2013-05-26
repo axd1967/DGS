@@ -39,13 +39,13 @@ $GLOBALS['ThePage'] = new Page('TournamentDirectorEdit');
 
    $logged_in = who_is_logged( $player_row);
 
-   if( !$logged_in )
+   if ( !$logged_in )
       error('login_if_not_logged_in', 'Tournament.edit_director');
-   if( !ALLOW_TOURNAMENTS )
+   if ( !ALLOW_TOURNAMENTS )
       error('feature_disabled', 'Tournament.edit_director');
 
    $my_id = $player_row['ID'];
-   if( $my_id <= GUESTS_ID_MAX )
+   if ( $my_id <= GUESTS_ID_MAX )
       error('not_allowed_for_guest', 'Tournament.edit_director');
 
 /* Actual REQUEST calls used (TD=tournament-director)
@@ -60,54 +60,54 @@ $GLOBALS['ThePage'] = new Page('TournamentDirectorEdit');
 */
 
    $tid = (int)@$_REQUEST['tid'];
-   if( $tid < 0 ) $tid = 0;
+   if ( $tid < 0 ) $tid = 0;
    $tourney = TournamentCache::load_cache_tournament( 'Tournament.edit_director.find_tournament', $tid );
    $tstatus = new TournamentStatus( $tourney );
 
    $allow_edit_tourney = TournamentHelper::allow_edit_tournaments($tourney, $my_id);
-   if( !$allow_edit_tourney )
+   if ( !$allow_edit_tourney )
       error('tournament_director_edit_not_allowed', "Tournament.edit_director.edit($tid,$my_id)");
 
-   if( @$_REQUEST['td_delete'] ) // at least one TD remaining ?
+   if ( @$_REQUEST['td_delete'] ) // at least one TD remaining ?
       TournamentDirector::assert_min_directors( $tid, $tourney->Status );
 
-   if( @$_REQUEST['td_cancel'] ) // cancel delete
+   if ( @$_REQUEST['td_cancel'] ) // cancel delete
       jump_to("tournaments/list_directors.php?tid=$tid");
 
    $uid = (int) @$_REQUEST['uid'];
    $user = trim(get_request_arg('user')); //Handle
-   if( $uid < 0 ) $uid = 0;
+   if ( $uid < 0 ) $uid = 0;
    $has_user = ( $uid || $user != '' ); // has in vars, can still be unknown
 
    // new+del needs special rights
    $owner_allow_edit = $tourney->allow_edit_directors($my_id);
-   if( !$has_user && !$owner_allow_edit )
+   if ( !$has_user && !$owner_allow_edit )
       error('tournament_director_new_del_not_allowed', "Tournament.edit_director.new_del($tid,$my_id)");
 
    // identify user from $uid and $user: other-player (=user to add/edit)
    $tduser_row = TournamentDirector::load_user_row( $uid, $user );
 
    $errors = $tstatus->check_edit_status( TournamentDirector::get_edit_tournament_status() );
-   if( !TournamentUtils::isAdmin() && $tourney->isFlagSet(TOURNEY_FLAG_LOCK_ADMIN) )
+   if ( !TournamentUtils::isAdmin() && $tourney->isFlagSet(TOURNEY_FLAG_LOCK_ADMIN) )
       $errors[] = $tourney->buildAdminLockText();
 
    $tduser_errors = array();
-   if( $tduser_row ) // valid user
+   if ( $tduser_row ) // valid user
    {
       $uid = $tduser_row['ID'];
       $user = $tduser_row['Handle'];
    }
-   elseif( $has_user )
+   elseif ( $has_user )
       $tduser_errors[] = T_('Unknown user');
 
-   if( !$owner_allow_edit && ($my_id != $uid) )
+   if ( !$owner_allow_edit && ($my_id != $uid) )
       error('tournament_director_edit_not_allowed', "Tournament.edit_director.edit_other($tid,$my_id,$uid)");
 
 
    $director = null;
-   if( count($tduser_errors) == 0 && $uid )
+   if ( count($tduser_errors) == 0 && $uid )
       $director = TournamentDirector::load_tournament_director( $tid, $uid ); // existing TD ?
-   if( is_null($director) )
+   if ( is_null($director) )
    {
       $director = new TournamentDirector( $tid, $uid ); // new TD
       $new_tdir = true;
@@ -117,7 +117,7 @@ $GLOBALS['ThePage'] = new Page('TournamentDirectorEdit');
    $old_flags = $director->Flags;
    $old_comment = $director->Comment;
 
-   if( $uid && $owner_allow_edit && @$_REQUEST['td_delete'] && @$_REQUEST['confirm'] && count($errors) == 0 ) // delete TD
+   if ( $uid && $owner_allow_edit && @$_REQUEST['td_delete'] && @$_REQUEST['confirm'] && count($errors) == 0 ) // delete TD
    {
       ta_begin();
       {//HOT-section to save tournament-director
@@ -142,13 +142,13 @@ $GLOBALS['ThePage'] = new Page('TournamentDirectorEdit');
    $errors = array_merge( $errors, $input_errors );
 
    // persist TD in database
-   if( $uid && @$_REQUEST['td_save'] && !@$_REQUEST['td_preview'] && count($errors) == 0 && count($edits) > 0 )
+   if ( $uid && @$_REQUEST['td_save'] && !@$_REQUEST['td_preview'] && count($errors) == 0 && count($edits) > 0 )
    {
       ta_begin();
       {//HOT-section to save tournament-director
          $director->persist();
 
-         if( $new_tdir ) // new TD
+         if ( $new_tdir ) // new TD
          {
             TournamentLogHelper::log_create_tournament_director( $tid, $owner_allow_edit, $director );
             Bulletin::update_count_bulletin_new( "Tournament.edit_dir.add_td($tid)", $uid );
@@ -164,7 +164,7 @@ $GLOBALS['ThePage'] = new Page('TournamentDirectorEdit');
 
 
    $page = "edit_director.php";
-   if( @$_REQUEST['td_delete'] )
+   if ( @$_REQUEST['td_delete'] )
       $title = T_('Tournament Director Removal for [%s]');
    else
       $title = T_('Tournament Director Edit for [%s]');
@@ -177,20 +177,20 @@ $GLOBALS['ThePage'] = new Page('TournamentDirectorEdit');
    $tdform->add_hidden( 'tid', $tid );
    TournamentUtils::show_tournament_flags( $tdform, $tourney );
 
-   if( count($errors) )
+   if ( count($errors) )
    {
       $tdform->add_row( array(
             'DESCRIPTION', T_('Error'),
             'TEXT', buildErrorListString(T_('There are some errors'), $errors) ));
    }
 
-   if( $uid <= 0 ) // ask for user to add/edit
+   if ( $uid <= 0 ) // ask for user to add/edit
    {
       $tdform->add_row( array(
             'DESCRIPTION',  T_('Userid'),
             'TEXTINPUT',    'user', 16, 16, $user,
             'SUBMITBUTTON', 'td_check', T_('Check user') ));
-      if( count($tduser_errors) )
+      if ( count($tduser_errors) )
          $tdform->add_row( array( 'TAB', 'TEXT', buildErrorListString( '', $tduser_errors ) ));
    }
    else // edit user (no change of user-id allowed)
@@ -209,14 +209,14 @@ $GLOBALS['ThePage'] = new Page('TournamentDirectorEdit');
             'DESCRIPTION', T_('Last access'),
             'TEXT',        ( ($lastaccess > 0) ? date(DATE_FMT2, $lastaccess) : '' ) ));
 
-      if( $tduser_row )
+      if ( $tduser_row )
       {
-         if( !@$_REQUEST['td_delete'] )
+         if ( !@$_REQUEST['td_delete'] )
          {
-            if( $owner_allow_edit )
+            if ( $owner_allow_edit )
             {
                $first = true;
-               foreach( $arr_flags as $flag => $name )
+               foreach ( $arr_flags as $flag => $name )
                {
                   $arr = ($first) ? array( 'DESCRIPTION', T_('Flags') ) : array( 'TAB' );
                   $first = false;
@@ -245,14 +245,14 @@ $GLOBALS['ThePage'] = new Page('TournamentDirectorEdit');
                'DESCRIPTION', T_('Unsaved edits'),
                'TEXT',        span('TWarning', implode(', ', $edits), '[%s]') ));
 
-         if( @$_REQUEST['td_preview'] || $director->Comment != '' )
+         if ( @$_REQUEST['td_preview'] || $director->Comment != '' )
          {
             $tdform->add_row( array(
                   'DESCRIPTION', $preview_descr,
                   'TEXT', make_html_safe( $director->Comment, true ) ));
          }
 
-         if( @$_REQUEST['td_delete'] )
+         if ( @$_REQUEST['td_delete'] )
          {
             $tdform->add_hidden( 'confirm', 1 );
             $tdform->add_row( array(
@@ -285,10 +285,10 @@ $GLOBALS['ThePage'] = new Page('TournamentDirectorEdit');
    $menu_array = array();
    $menu_array[T_('Tournament info')] = "tournaments/view_tournament.php?tid=$tid";
    $menu_array[T_('Tournament directors')] = "tournaments/list_directors.php?tid=$tid";
-   if( $owner_allow_edit )
+   if ( $owner_allow_edit )
       $menu_array[T_('Add tournament director')] =
          array( 'url' => "tournaments/edit_director.php?tid=$tid", 'class' => 'TAdmin' );
-   if( $allow_edit_tourney )
+   if ( $allow_edit_tourney )
       $menu_array[T_('Manage tournament')] =
          array( 'url' => "tournaments/manage_tournament.php?tid=$tid", 'class' => 'TAdmin' );
 
@@ -313,24 +313,24 @@ function parse_edit_form( &$tdir )
 
    $old_vals = array() + $vars; // copy to determine edit-changes
    // read URL-vals into vars
-   foreach( $vars as $key => $val )
+   foreach ( $vars as $key => $val )
       $vars[$key] = get_request_arg( $key, $val );
    // handle checkboxes having no key/val in _POST-hash
-   if( $is_posted )
+   if ( $is_posted )
    {
-      foreach( array_values($arr_flags) as $key )
+      foreach ( array_values($arr_flags) as $key )
          $vars[$key] = get_request_arg( $key, false );
    }
 
    // parse URL-vars
-   if( $is_posted )
+   if ( $is_posted )
    {
-      if( $owner_allow_edit )
+      if ( $owner_allow_edit )
       {
          $new_value = 0;
-         foreach( $arr_flags as $flag => $name )
+         foreach ( $arr_flags as $flag => $name )
          {
-            if( $vars[$name] )
+            if ( $vars[$name] )
                $new_value |= $flag;
          }
          $tdir->Flags = $new_value;
@@ -339,8 +339,8 @@ function parse_edit_form( &$tdir )
       $tdir->Comment = trim($vars['comment']);
 
       // determine edits
-      if( $old_vals['flags'] != $tdir->Flags ) $edits[] = T_('Flags');
-      if( $old_vals['comment'] != $tdir->Comment ) $edits[] = T_('Comment');
+      if ( $old_vals['flags'] != $tdir->Flags ) $edits[] = T_('Flags');
+      if ( $old_vals['comment'] != $tdir->Comment ) $edits[] = T_('Comment');
    }
 
    return array( $vars, array_unique($edits), $errors );

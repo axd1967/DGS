@@ -32,14 +32,14 @@ define('MAX_PATTERN_SIZE',51);
    connect2mysql();
 
    $logged_in = who_is_logged( $player_row);
-   if( !$logged_in )
+   if ( !$logged_in )
       error('not_logged_in', 'scripts.make_handicap_pattern');
 
-   if( $player_row['ID'] <= GUESTS_ID_MAX )
+   if ( $player_row['ID'] <= GUESTS_ID_MAX )
       error('not_allowed_for_guest', 'scripts.make_handicap_pattern');
 
    $player_level = (int)$player_row['admin_level'];
-   if( !($player_level & ADMIN_DATABASE) )
+   if ( !($player_level & ADMIN_DATABASE) )
       error('adminlevel_too_low', 'scripts.make_handicap_pattern');
 
 
@@ -303,7 +303,7 @@ C[$comment]',
 
 
   $ok= 1;
-  for( $size=5 ; $size<=MAX_BOARD_SIZE ; $size++ ) {
+  for ( $size=5 ; $size<=MAX_BOARD_SIZE ; $size++ ) {
     $dst = "standard_handicap_$size";
     echo "<br>\n".$dst;
 
@@ -315,9 +315,9 @@ GN[$dst]";
 
     $npar=1;
 
-    if( $size == 7 )
+    if ( $size == 7 )
       $step=&$step_s7;
-    else if( $size & 1 )
+    else if ( $size & 1 )
       $step=&$step_odd;
     else
       $step=&$step_even;
@@ -329,25 +329,25 @@ GN[$dst]";
     $db= min(ceil($dl/2),$dl-1);
 
     $cnt=1;
-    for( $ha=1 ; $ha<=MAX_PATTERN_SIZE ; $ha++ ) {
-      if( $size<=6 ) {
-        if( $cnt>8 ) break;
+    for ( $ha=1 ; $ha<=MAX_PATTERN_SIZE ; $ha++ ) {
+      if ( $size<=6 ) {
+        if ( $cnt>8 ) break;
 /*
-      } else if( $size<=7 ) {
-        if( $cnt>13 ) break;
+      } else if ( $size<=7 ) {
+        if ( $cnt>13 ) break;
 */
-      } else if( $size<=13 ) {
-        if( $cnt>17 ) break;
-        if( $ha>=10 && $ha<=13 && $dn==$dl+1 ) continue;
-      } else if( $size<=16 ) {
-        if( $size<=14 && $cnt>21 ) break;
+      } else if ( $size<=13 ) {
+        if ( $cnt>17 ) break;
+        if ( $ha>=10 && $ha<=13 && $dn==$dl+1 ) continue;
+      } else if ( $size<=16 ) {
+        if ( $size<=14 && $cnt>21 ) break;
         //if( $cnt>29 ) break;
-        if( $ha>=10 && $ha<=13 && $dn==$dl+1 ) continue;
+        if ( $ha>=10 && $ha<=13 && $dn==$dl+1 ) continue;
       }
 
       $cnt++;
       $str=@$step[$ha];
-      if( !$str ) continue;
+      if ( !$str ) continue;
       $npar+= count(explode('(',$str))-count(explode(')',$str));
 
       $str=str_replace('{','".number2sgf_coords(',$str);
@@ -358,14 +358,14 @@ GN[$dst]";
       $sgf.= $str;
     }
 
-    while( $npar-- >0 )
+    while ( $npar-- >0 )
       $sgf.= '
 )';
     $ok=write_to_file($dst.".sgf", $sgf, 0);
-    if( !$ok )
+    if ( !$ok )
       break;
   }
-   if( !$ok )
+   if ( !$ok )
       echo "\n<br>Can't write ",$dst;
    else
       echo "\n<br>Done.";

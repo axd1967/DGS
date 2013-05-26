@@ -30,20 +30,20 @@ require_once 'include/std_functions.php';
    connect2mysql();
 
    $logged_in = who_is_logged( $player_row);
-   if( !$logged_in )
+   if ( !$logged_in )
       error('not_logged_in', 'change_password');
-   if( $player_row['ID'] <= GUESTS_ID_MAX )
+   if ( $player_row['ID'] <= GUESTS_ID_MAX )
       error('not_allowed_for_guest', 'change_password');
 
    $guest_id= (int)@$_REQUEST['guestpass'];
-   if( $guest_id > 0 && $guest_id <= GUESTS_ID_MAX )
+   if ( $guest_id > 0 && $guest_id <= GUESTS_ID_MAX )
    {
       // admin can change guest-password(?)
-      if( !(@$player_row['admin_level'] & ADMIN_PASSWORD) )
+      if ( !(@$player_row['admin_level'] & ADMIN_PASSWORD) )
          error('adminlevel_too_low', "change_password($guest_id)");
 
       $passwd = $GUESTPASS;
-      if( illegal_chars( $passwd, true ) )
+      if ( illegal_chars( $passwd, true ) )
          error('password_illegal_chars', "change_password($guest_id)");
 
       $query = "UPDATE Players SET " .
@@ -53,16 +53,16 @@ require_once 'include/std_functions.php';
    else
    {
       $oldpasswd = @$_POST['oldpasswd'];
-      if( !check_password( $player_row["Handle"], $player_row["Password"], $player_row["Newpassword"], $oldpasswd ) )
+      if ( !check_password( $player_row["Handle"], $player_row["Password"], $player_row["Newpassword"], $oldpasswd ) )
          error('wrong_password', 'change_password.check.oldpasswd');
 
       $passwd = @$_POST['passwd'];
-      if( strlen($passwd) < 6 )
+      if ( strlen($passwd) < 6 )
          error('password_too_short', 'change_password.check.pass_len');
-      if( illegal_chars( $passwd, true ) )
+      if ( illegal_chars( $passwd, true ) )
          error('password_illegal_chars', 'change_password.check.pass_chars');
 
-      if( $passwd != @$_POST['passwd2'] )
+      if ( $passwd != @$_POST['passwd2'] )
          error('password_mismatch', 'change_password.check.pass2');
 
       $query = "UPDATE Players SET " .

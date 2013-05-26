@@ -27,7 +27,7 @@ require_once 'include/table_infos.php';
 require_once 'include/time_functions.php';
 require_once 'include/rating.php';
 require_once 'include/game_functions.php';
-if( ALLOW_TOURNAMENTS ) {
+if ( ALLOW_TOURNAMENTS ) {
    require_once 'tournaments/include/tournament.php';
    require_once 'tournaments/include/tournament_cache.php';
    require_once 'tournaments/include/tournament_games.php';
@@ -45,7 +45,7 @@ function build_game_status( $status )
 
 function build_rating_diff( $rating_diff )
 {
-   if( isset($rating_diff) )
+   if ( isset($rating_diff) )
       return ( $rating_diff > 0 ? '+' : '' ) . sprintf( "%0.2f", $rating_diff / 100 );
    else
       return '';
@@ -56,17 +56,17 @@ function build_rating_diff( $rating_diff )
    connect2mysql();
 
    $logged_in = who_is_logged( $player_row);
-   if( !$logged_in )
+   if ( !$logged_in )
       error('login_if_not_logged_in', 'gameinfo');
 
    $my_id = $player_row['ID'];
    $is_admin = (@$player_row['admin_level'] & ADMIN_DEVELOPER);
 
    $gid = (int) get_request_arg('gid', 0);
-   if( $gid < 1 )
+   if ( $gid < 1 )
       error('unknown_game', "gameinfo.check.game($gid)");
 
-   if( get_request_arg('set_prio') )
+   if ( get_request_arg('set_prio') )
    {
       $new_prio = trim(get_request_arg('prio'));
       NextGameOrder::persist_game_priority( $gid, $my_id, $new_prio );
@@ -102,16 +102,16 @@ function build_rating_diff( $rating_diff )
    $query = $qsql->get_select() . ' LIMIT 1';
 
    $grow = mysql_single_fetch( "gameinfo.find($gid)", $query );
-   if( !$grow )
+   if ( !$grow )
       error('unknown_game', "gameinfo.find2($gid)");
    $game_status = $grow['Status'];
-   if( $game_status == GAME_STATUS_SETUP || $game_status == GAME_STATUS_INVITED )
+   if ( $game_status == GAME_STATUS_SETUP || $game_status == GAME_STATUS_INVITED )
       error('invalid_game_status', "gameinfo.find3($gid,$game_status)");
 
    $shape_id = (int)@$grow['ShapeID'];
    $tid = (int) @$grow['tid'];
    $tourney = $tgame = null;
-   if( !ALLOW_TOURNAMENTS || $tid <= 0 )
+   if ( !ALLOW_TOURNAMENTS || $tid <= 0 )
       $tid = 0;
    else
    {
@@ -154,7 +154,7 @@ function build_rating_diff( $rating_diff )
          anchor( "{$base_path}game.php?gid=$gid", "#$gid" ) .
          echo_image_gameinfo($gid, true) .
          echo_image_shapeinfo( $shape_id, $grow['Size'], $grow['ShapeSnapshot'], false, true ) );
-   if( $grow['DoubleGame_ID'] )
+   if ( $grow['DoubleGame_ID'] )
    {
       $dbl_gid = $grow['DoubleGame_ID'];
       $itable->add_sinfo(
@@ -164,7 +164,7 @@ function build_rating_diff( $rating_diff )
                : '#'.abs($dbl_gid). sprintf(' (%s)', T_('deleted#dblgame') )
          );
    }
-   if( $is_my_game && $grow['mid'] > 0 )
+   if ( $is_my_game && $grow['mid'] > 0 )
    {
       $itable->add_sinfo(
             T_('Message'),
@@ -182,9 +182,9 @@ function build_rating_diff( $rating_diff )
          $arr_status[$status]
             . ( $is_admin ? " (<span class=\"DebugInfo\">$game_status</span>)" : '')
       );
-   if( $is_fairkomi )
+   if ( $is_fairkomi )
       $itable->add_sinfo( T_('Fair Komi Type#fairkomi'), $fk_htype_text );
-   if( $game_finished )
+   if ( $game_finished )
    {
       $admResult = ( $grow['X_GameFlags'] & GAMEFLAGS_ADMIN_RESULT )
          ? span('ScoreWarning', sprintf(' (%s)', T_('set by admin#game')))
@@ -198,7 +198,7 @@ function build_rating_diff( $rating_diff )
    $itable->add_sinfo( T_('Handicap'),    $grow['Handicap'] );
    $itable->add_sinfo( T_('Komi'),
       ( $is_fairkomi_negotiation ? T_('negotiated by Fair Komi#fairkomi') : $grow['Komi'] ) );
-   if( $is_fairkomi )
+   if ( $is_fairkomi )
       $itable->add_sinfo( T_('Jigo mode'), GameTexts::get_jigo_modes($jigo_mode) );
    $itable->add_sinfo( T_('Rated'),       yesno($grow['X_Rated']) );
    $itable->add_sinfo( T_('Weekend Clock'),     yesno($grow['WeekendClock']) ); // Yes=clock runs on weekend
@@ -211,7 +211,7 @@ function build_rating_diff( $rating_diff )
    // build table-info: players
 
    $color_class = 'class="InTextImage"';
-   if( $is_fairkomi )
+   if ( $is_fairkomi )
    {
       $fk = new FairKomiNegotiation($game_setup, $grow);
       $komibid_black = $fk->get_view_komibid( $my_id, $black_id );
@@ -219,9 +219,9 @@ function build_rating_diff( $rating_diff )
    }
    else
       $komibid_black = $komibid_white = '';
-   if( $is_fairkomi_negotiation )
+   if ( $is_fairkomi_negotiation )
    {
-      if( is_htype_divide_choose($Handitype) )
+      if ( is_htype_divide_choose($Handitype) )
       {
          $uhandles = $fk->get_htype_user_handles();
          $color_note = GameTexts::get_fair_komi_types( $Handitype, null, $uhandles[0], $uhandles[1] );
@@ -251,7 +251,7 @@ function build_rating_diff( $rating_diff )
             user_reference( REF_LINK, 1, '', $black_id, @$grow['Black_Name'], @$grow['Black_Handle'] ),
             user_reference( REF_LINK, 1, '', $white_id, @$grow['White_Name'], @$grow['White_Handle'] ),
          ));
-   if( @$grow['Black_OnVacation'] > 0 || @$grow['White_OnVacation'] > 0 )
+   if ( @$grow['Black_OnVacation'] > 0 || @$grow['White_OnVacation'] > 0 )
    {
       $itable->add_sinfo(
             T_('On vacation') . MINI_SPACING . echo_image_vacation(),
@@ -283,7 +283,7 @@ function build_rating_diff( $rating_diff )
             echo_rating( @$grow['Black_Start_Rating']),
             echo_rating( @$grow['White_Start_Rating']),
          ));
-   if( $game_finished )
+   if ( $game_finished )
    {
       $itable->add_sinfo(
             T_('End rating'),
@@ -292,7 +292,7 @@ function build_rating_diff( $rating_diff )
                echo_rating( @$grow['White_End_Rating']),
             ));
 
-      if( $grow['X_Rated'] === 'Y' &&
+      if ( $grow['X_Rated'] === 'Y' &&
             ( isset($grow['Black_RatingDiff']) || isset($grow['White_RatingDiff']) ))
       {
          $itable->add_sinfo(
@@ -303,7 +303,7 @@ function build_rating_diff( $rating_diff )
                ));
       }
    }
-   if( $komibid_black || $komibid_white )
+   if ( $komibid_black || $komibid_white )
    {
       $itable->add_sinfo(
             T_('Komi Bid#fairkomi'),
@@ -321,13 +321,13 @@ function build_rating_diff( $rating_diff )
    // build table-info: time settings
 
    // reduce player-time by current number of ticks
-   if( $grow['Maintime'] > 0 || $grow['Byotime'] > 0 )
+   if ( $grow['Maintime'] > 0 || $grow['Byotime'] > 0 )
    {
       // LastTicks may handle -(time spend) at the moment of the start of vacations
       $clock_ticks = get_clock_ticks( "gameinfo($gid)", $grow['ClockUsed'] );
       $hours = ticks_to_hours( $clock_ticks - $grow['LastTicks']);
 
-      if( $to_move == BLACK )
+      if ( $to_move == BLACK )
       {
          time_remaining($hours, $grow['Black_Maintime'], $grow['Black_Byotime'],
                         $grow['Black_Byoperiods'], $grow['Maintime'],
@@ -394,16 +394,16 @@ function build_rating_diff( $rating_diff )
          ));
 
    $clock_status = array( BLACK => array(), WHITE => array() );
-   if( is_vacation_clock($grow['ClockUsed']) )
+   if ( is_vacation_clock($grow['ClockUsed']) )
    {
       $clock_status[$to_move][] = echo_image_vacation( 'in_text',
          TimeFormat::echo_onvacation(
             ($to_move == BLACK) ? $grow['Black_OnVacation'] : $grow['White_OnVacation'] ),
          true );
    }
-   elseif( is_weekend_clock_stopped($grow['ClockUsed']) )
+   elseif ( is_weekend_clock_stopped($grow['ClockUsed']) )
       $clock_status[$to_move][] = echo_image_weekendclock(true, true);
-   if( is_nighttime_clock( ($to_move == BLACK) ? $grow['Black_ClockUsed'] : $grow['White_ClockUsed'] ) )
+   if ( is_nighttime_clock( ($to_move == BLACK) ? $grow['Black_ClockUsed'] : $grow['White_ClockUsed'] ) )
       $clock_status[$to_move][] = echo_image_nighttime('in_text', true);
 
    $clock_stopped = count($clock_status[BLACK]) + count($clock_status[WHITE]);
@@ -414,7 +414,7 @@ function build_rating_diff( $rating_diff )
             implode(' ', $clock_status[BLACK]),
             implode(' ', $clock_status[WHITE]),
          ));
-   if( $is_admin )
+   if ( $is_admin )
    {
       $itable->add_row( array(
             'rattb' => 'class=DebugInfo',
@@ -432,7 +432,7 @@ function build_rating_diff( $rating_diff )
    // ------------------------
    // build table-info: tournament info
 
-   if( ALLOW_TOURNAMENTS && $tid && !is_null($tourney) )
+   if ( ALLOW_TOURNAMENTS && $tid && !is_null($tourney) )
    {
       $itable = new Table_info('tourney');
       $itable->add_caption( T_('Tournament info') );
@@ -450,34 +450,34 @@ function build_rating_diff( $rating_diff )
       $itable->add_sinfo(
             T_('Title'),
             make_html_safe(wordwrap($tourney->Title, 30), true) );
-      if( $tourney->Type != TOURNEY_TYPE_LADDER )
+      if ( $tourney->Type != TOURNEY_TYPE_LADDER )
          $itable->add_sinfo(
                T_('Current Round#tourney'),
                $tourney->formatRound() );
       $itable->add_sinfo(
             T_('Tournament Status'),
             Tournament::getStatusText($tourney->Status) );
-      if( !is_null($tgame) )
+      if ( !is_null($tgame) )
       {
          $itable->add_sinfo(
                T_('Tournament Game Status'),
                TournamentGames::getStatusText($tgame->Status) );
 
-         if( $tourney->Type == TOURNEY_TYPE_LADDER )
+         if ( $tourney->Type == TOURNEY_TYPE_LADDER )
             $itable->add_sinfo(
                   T_('Tournament Game Role'),
                   ( $tgame->Challenger_uid == $my_id ? T_('Challenger#T_ladder') : T_('Defender#T_ladder') ) );
 
-         if( $tgame->isScoreStatus(/*chk-detach*/true) && $black_id )
+         if ( $tgame->isScoreStatus(/*chk-detach*/true) && $black_id )
          {
             $arr_flags = array();
-            if( $tgame->Flags & TG_FLAG_GAME_END_TD )
+            if ( $tgame->Flags & TG_FLAG_GAME_END_TD )
                $arr_flags[] = T_('by TD#TG_flag');
             $flags_str = (count($arr_flags)) ? sprintf( ' (%s)', implode(', ', $arr_flags)) : '';
 
             $tg_score = $tgame->getScoreForUser( $black_id );
             $tg_score_str = score2text( $tg_score, false );
-            if( !$game_finished || ( !is_null($tg_score) && @$grow['Score'] != $tg_score ) )
+            if ( !$game_finished || ( !is_null($tg_score) && @$grow['Score'] != $tg_score ) )
                $tg_score_str = span('ScoreWarning', $tg_score_str );
 
             $itable->add_sinfo(
@@ -486,9 +486,9 @@ function build_rating_diff( $rating_diff )
          }
 
          $arr_flags = array();
-         if( $tgame->Flags & TG_FLAG_GAME_DETACHED )
+         if ( $tgame->Flags & TG_FLAG_GAME_DETACHED )
             $arr_flags[] = span('TWarning', T_('detached#tourney'));
-         if( count($arr_flags) )
+         if ( count($arr_flags) )
          {
             $itable->add_sinfo(
                   T_('Tournament Game Flags'),
@@ -507,7 +507,7 @@ function build_rating_diff( $rating_diff )
    // build form for editing games-priority
 
    // for players and running games only
-   if( $is_my_game && !$game_finished )
+   if ( $is_my_game && !$game_finished )
    {
       $prio = NextGameOrder::load_game_priority( $gid, $my_id, '' );
 
@@ -541,24 +541,24 @@ function build_rating_diff( $rating_diff )
 
    $menu_array = array();
    $menu_array[T_('Show game')] = "game.php?gid=$gid";
-   if( $grow['GameType'] != GAMETYPE_GO )
+   if ( $grow['GameType'] != GAMETYPE_GO )
       $menu_array[T_('Show game-players')] = "game_players.php?gid=$gid";
    GameRematch::add_rematch_links( $menu_array, $gid, $game_status, $grow['GameType'], $grow['tid'] );
-   if( ALLOW_TOURNAMENTS && $tid && !is_null($tourney) )
+   if ( ALLOW_TOURNAMENTS && $tid && !is_null($tourney) )
    {
-      if( $tourney->Type == TOURNEY_TYPE_LADDER )
+      if ( $tourney->Type == TOURNEY_TYPE_LADDER )
          $menu_array[T_('View Ladder')] = "tournaments/ladder/view.php?tid=$tid";
-      if( TournamentHelper::allow_edit_tournaments($tourney, $my_id, TD_FLAG_GAME_END) )
+      if ( TournamentHelper::allow_edit_tournaments($tourney, $my_id, TD_FLAG_GAME_END) )
          $menu_array[T_('Admin tournament game')] =
             array( 'url' => "tournaments/game_admin.php?tid=$tid".URI_AMP."gid=$gid", 'class' => 'TAdmin' );
-      if( TournamentHelper::allow_edit_tournaments($tourney, $my_id) )
+      if ( TournamentHelper::allow_edit_tournaments($tourney, $my_id) )
          $menu_array[T_('Manage tournament')] =
             array( 'url' => "tournaments/manage_tournament.php?tid=$tid", 'class' => 'TAdmin' );
    }
-   if( $is_admin )
+   if ( $is_admin )
       $menu_array[T_('Show game-calc')] =
          array( 'url' => 'game_calc.php?show=1'.URI_AMP."gid=$gid", 'class' => 'AdminLink' );
-   if( @$player_row['admin_level'] & ADMIN_GAME )
+   if ( @$player_row['admin_level'] & ADMIN_GAME )
       $menu_array[T_('Admin game')] =
          array( 'url' => "admin_game.php?gid=$gid", 'class' => 'AdminLink' );
 

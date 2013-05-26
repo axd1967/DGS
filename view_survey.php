@@ -31,14 +31,14 @@ $GLOBALS['ThePage'] = new Page('SurveyView');
    connect2mysql();
 
    $logged_in = who_is_logged( $player_row);
-   if( !$logged_in )
+   if ( !$logged_in )
       error('login_if_not_logged_in', 'view_survey');
-   if( !ALLOW_SURVEY_VOTE )
+   if ( !ALLOW_SURVEY_VOTE )
       error('feature_disabled', 'view_survey');
    $my_id = $player_row['ID'];
 
    $sid = (int) @$_REQUEST['sid'];
-   if( $sid <= 0 )
+   if ( $sid <= 0 )
       error('invalid_args', "view_survey.check_args($sid)");
    $show_result = (bool) @$_REQUEST['result'];
 
@@ -48,7 +48,7 @@ $GLOBALS['ThePage'] = new Page('SurveyView');
    $qsql = Survey::build_query_sql( $sid );
    $qsql->merge( SurveyControl::build_view_query_sql(false) );
    $survey = Survey::load_survey_by_query( $qsql, /*withrow*/false );
-   if( is_null($survey) )
+   if ( is_null($survey) )
       error('unknown_survey', "view_survey.find_survey($sid)");
 
    $sql_sort = ($show_result) ? new QuerySQL( SQLP_ORDER, "SOPT.Score DESC" ) : null;
@@ -56,17 +56,17 @@ $GLOBALS['ThePage'] = new Page('SurveyView');
 
    // checks
    $errors = array();
-   if( @$_REQUEST['save'] && $survey->Status != SURVEY_STATUS_ACTIVE )
+   if ( @$_REQUEST['save'] && $survey->Status != SURVEY_STATUS_ACTIVE )
       $errors[] = sprintf( T_('Voting on survey only possible on %s status.'),
          SurveyControl::getStatusText(SURVEY_STATUS_ACTIVE) );
 
    $allow_vote = SurveyControl::allow_survey_vote( $survey, $errors );
 
    // handle save-vote
-   if( @$_REQUEST['save'] && $allow_vote && count($errors) == 0 )
+   if ( @$_REQUEST['save'] && $allow_vote && count($errors) == 0 )
    {
       $check_errors = prepare_save_votes( $survey ); // exports global vars
-      if( count($check_errors) > 0 )
+      if ( count($check_errors) > 0 )
          $errors = array_merge( $errors, $check_errors );
       else
       {
@@ -80,7 +80,7 @@ $GLOBALS['ThePage'] = new Page('SurveyView');
    start_page($title, true, $logged_in, $player_row );
    echo "<h3 class=Header>". $title . "</h3>\n";
 
-   if( count($errors) )
+   if ( count($errors) )
    {
       $form = new Form( 'surveyView', $page, FORM_GET );
       $form->add_row( array(
@@ -96,7 +96,7 @@ $GLOBALS['ThePage'] = new Page('SurveyView');
    $menu_array = array();
    $menu_array[T_('Surveys')] = "list_surveys.php";
    $menu_array[T_('View survey')] = "view_survey.php?sid=$sid";
-   if( SurveyControl::allow_survey_edit($survey) )
+   if ( SurveyControl::allow_survey_edit($survey) )
       $menu_array[T_('Edit survey')] = array( 'url' => "admin_survey.php?sid=$sid", 'class' => 'AdminLink' );
 
    end_page(@$menu_array);
@@ -115,14 +115,14 @@ function prepare_save_votes( &$survey )
    $sum_points = $cnt_selections = 0;
    $is_newvote = false;
 
-   foreach( $survey->SurveyOptions as $so )
+   foreach ( $survey->SurveyOptions as $so )
    {
       $points = get_new_points( $survey->ID, $survey->Type, $so );
       $sum_points += $points;
-      if( $points )
+      if ( $points )
          $cnt_selections++;
 
-      if( is_null($so->UserVotePoints) ) // new vote
+      if ( is_null($so->UserVotePoints) ) // new vote
       {
          $arr_votes_upd[$so->ID] = $points;
          $arr_sopts_upd[$so->ID] = $points;
@@ -132,7 +132,7 @@ function prepare_save_votes( &$survey )
       }
       else
       {
-         if( $so->UserVotePoints != $points ) // update existing vote
+         if ( $so->UserVotePoints != $points ) // update existing vote
          {
             $arr_votes_upd[$so->ID] = $points;
             $arr_sopts_upd[$so->ID] = $points - $so->UserVotePoints;
@@ -142,25 +142,25 @@ function prepare_save_votes( &$survey )
       }
    }
 
-   if( $is_newvote )
+   if ( $is_newvote )
       $survey->UserCount++;
 
    $errors = array();
-   if( $survey->Type == SURVEY_TYPE_SUM )
+   if ( $survey->Type == SURVEY_TYPE_SUM )
    {
-      if( $sum_points < $survey->MinPoints )
+      if ( $sum_points < $survey->MinPoints )
          $errors[] = sprintf( T_('You must spend at least %s point(s) in total, but you only spent %s point(s).'),
             $survey->MinPoints, $sum_points );
-      if( $sum_points > $survey->MaxPoints )
+      if ( $sum_points > $survey->MaxPoints )
          $errors[] = sprintf( T_('You must not spend more than %s point(s) in total, but you spent %s point(s).'),
             $survey->MaxPoints, $sum_points );
    }
-   elseif( $survey->Type == SURVEY_TYPE_MULTI )
+   elseif ( $survey->Type == SURVEY_TYPE_MULTI )
    {
-      if( $survey->MinPoints > 0 && $cnt_selections < $survey->MinPoints )
+      if ( $survey->MinPoints > 0 && $cnt_selections < $survey->MinPoints )
          $errors[] = sprintf( T_('You must at least select %s checkbox(es), but you only selected %s.'),
             $survey->MinPoints, $cnt_selections );
-      if( $survey->MaxPoints > 0 && $cnt_selections > $survey->MaxPoints )
+      if ( $survey->MaxPoints > 0 && $cnt_selections > $survey->MaxPoints )
          $errors[] = sprintf( T_('You must not select more than %s checkbox(es), but you selected %s.'),
             $survey->MaxPoints, $cnt_selections );
    }
@@ -171,7 +171,7 @@ function prepare_save_votes( &$survey )
 // parse new points from URL-args
 function get_new_points( $sid, $survey_type, $so )
 {
-   if( $survey_type == SURVEY_TYPE_SINGLE )
+   if ( $survey_type == SURVEY_TYPE_SINGLE )
    {
       $points = ( (int)@$_REQUEST['so'] == $so->ID ) ? $so->MinPoints : 0; // value from radio-button
       return $points;
@@ -180,21 +180,21 @@ function get_new_points( $sid, $survey_type, $so )
    $is_points_type = ( $survey_type == SURVEY_TYPE_POINTS || $survey_type == SURVEY_TYPE_SUM );
    $key = 'so'.$so->ID;
    $is_val_set = isset($_REQUEST[$key]);
-   if( /*need-key-val*/Survey::is_point_type($survey_type) && !$is_val_set )
+   if ( /*need-key-val*/Survey::is_point_type($survey_type) && !$is_val_set )
       error('miss_args', "view_survey.get_new_points($sid,$key,$survey_type,$need_key_val)");
 
-   if( $is_val_set )
+   if ( $is_val_set )
    {
       $arg_points = @$_REQUEST[$key];
-      if( !is_numeric($arg_points) )
+      if ( !is_numeric($arg_points) )
          error('invalid_args', "view_survey.get_new_points.check_points($sid,$key,$arg_points)");
    }
    else
       $arg_points = null;
 
-   if( $is_points_type )
+   if ( $is_points_type )
       $points = (int)$arg_points; // value from selectbox
-   elseif( $survey_type == SURVEY_TYPE_MULTI )
+   elseif ( $survey_type == SURVEY_TYPE_MULTI )
       $points = ($arg_points) ? $so->MinPoints : 0; // value from checkbox
    else
       error('invalid_args', "view_survey.get_new_points.check_type($sid,$key,$survey_type,$arg_points)");
@@ -211,7 +211,7 @@ function handle_save_votes( $sid, $uid )
       SurveyVote::persist_survey_votes( $sid, $uid, $arr_votes_upd );
       SurveyOption::update_aggregates_survey_options( $sid, $arr_sopts_upd );
 
-      if( $is_newvote )
+      if ( $is_newvote )
          Survey::update_user_count( $sid, 1 );
    }
    ta_end();

@@ -32,7 +32,7 @@ $GLOBALS['ThePage'] = new Page('Intro', 0, ROBOTS_NO_FOLLOW, DGS_DESCRIPTION );
    start_page(T_('Introduction'), true, $logged_in, $player_row );
 
    // show Intro from database, or static intro if no entries found in db
-   if( !load_intro() )
+   if ( !load_intro() )
       show_static_intro();
 
    end_page();
@@ -85,21 +85,21 @@ function load_intro()
       "ORDER BY CatOrder, entry.Level, entry.SortOrder" );
 
    $last_level = 0;
-   while( $row = mysql_fetch_assoc($result) )
+   while ( $row = mysql_fetch_assoc($result) )
    {
-      if( $row['Level'] == 1 ) // section
+      if ( $row['Level'] == 1 ) // section
       {
-         if( $last_level > 0 )
+         if ( $last_level > 0 )
             echo "</dl>\n";
          section( 'IntroTitle'.$row['SortOrder'], $TW_($row['Q']) );
          echo "<dl>\n";
       }
-      elseif( $row['Level'] == 2 ) // link-entry
+      elseif ( $row['Level'] == 2 ) // link-entry
          echo "<dt>", $TW_($row['Q']), "</dt>\n<dd>", $TW_($row['A']), "</dd>\n";
 
       $last_level = $row['Level'];
    }
-   if( $last_level > 0 )
+   if ( $last_level > 0 )
       echo "</dl>\n";
    mysql_free_result($result);
 

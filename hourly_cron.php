@@ -23,10 +23,10 @@ require_once 'include/dgs_cache.php';
 $TheErrors->set_mode(ERROR_MODE_COLLECT);
 
 
-if( !$is_down )
+if ( !$is_down )
 {
    $hourly_diff = SECS_PER_HOUR;
-   if( $chained )
+   if ( $chained )
       $chained = $hourly_diff;
    else
       connect2mysql();
@@ -38,9 +38,9 @@ if( !$is_down )
    $row = mysql_single_fetch( 'hourly_cron.check_frequency',
       "SELECT ($NOW-UNIX_TIMESTAMP(Lastchanged)) AS timediff"
       ." FROM Clock WHERE ID=".CLOCK_CRON_HOUR." LIMIT 1" );
-   if( !$row )
+   if ( !$row )
       $TheErrors->dump_exit('hourly_cron');
-   if( $row['timediff'] < $hourly_diff )
+   if ( $row['timediff'] < $hourly_diff )
       $TheErrors->dump_exit('hourly_cron');
 
    db_query( 'hourly_cron.set_lastchanged',
@@ -58,7 +58,7 @@ if( !$is_down )
    db_query( 'hourly_cron.reset_tick',
          "UPDATE Clock SET Ticks=0, Finished=FROM_UNIXTIME(".time().") WHERE ID=".CLOCK_CRON_HOUR." LIMIT 1" );
 
-   if( !$chained )
+   if ( !$chained )
       $TheErrors->dump_exit('hourly_cron');
 
 }//$is_down

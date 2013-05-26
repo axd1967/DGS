@@ -35,13 +35,13 @@ require_once 'include/utilities.php';
 {
    $handle_add_game = ( @$_REQUEST['add_game'] || @$_REQUEST['save_template'] );
 
-   if( $handle_add_game )
+   if ( $handle_add_game )
       disable_cache();
 
    connect2mysql();
 
    $logged_in = who_is_logged( $player_row);
-   if( !$logged_in )
+   if ( !$logged_in )
       error('login_if_not_logged_in', 'new_game');
    $my_id = $player_row['ID'];
 
@@ -49,19 +49,19 @@ require_once 'include/utilities.php';
 
    // load template for profile
    $prof_tmpl_id = (int)@$_REQUEST['tmpl'];
-   if( $prof_tmpl_id > 0 )
+   if ( $prof_tmpl_id > 0 )
    {
       $profile = Profile::load_profile_by_id( $prof_tmpl_id, $my_id ); // loads only if user-id correct
-      if( is_null($profile) )
+      if ( is_null($profile) )
          error('invalid_profile', "new_game.check.profile($prof_tmpl_id)");
 
       // check profile-type vs. msg-mode (also allow invite-templates)
-      if( $profile->Type != PROFTYPE_TMPL_NEWGAME && $profile->Type != PROFTYPE_TMPL_INVITE )
+      if ( $profile->Type != PROFTYPE_TMPL_NEWGAME && $profile->Type != PROFTYPE_TMPL_INVITE )
          error('invalid_profile', "new_game.check.profile.type($prof_tmpl_id,{$profile->Type})");
 
       $profile_template = ProfileTemplate::decode( $profile->Type, $profile->get_text(/*raw*/true) );
       $profile_template->fill( $_REQUEST, PROFTYPE_TMPL_NEWGAME );
-      if( $profile->Type == PROFTYPE_TMPL_INVITE )
+      if ( $profile->Type == PROFTYPE_TMPL_INVITE )
          $profile_template->fill_new_game_with_invite( $_REQUEST, PROFTYPE_TMPL_NEWGAME );
       $need_redraw = true;
 
@@ -75,14 +75,14 @@ require_once 'include/utilities.php';
    }
 
    $viewmode = (int) get_request_arg('view', GSETVIEW_STANDARD);
-   if( is_numeric($arg_viewmode) && $viewmode != (int)$arg_viewmode ) // view-URL-arg has prio over template
+   if ( is_numeric($arg_viewmode) && $viewmode != (int)$arg_viewmode ) // view-URL-arg has prio over template
       $viewmode = (int)$arg_viewmode;
-   if( !preg_match( "/^(".CHECK_GSETVIEW.")$/", $viewmode ) )
+   if ( !preg_match( "/^(".CHECK_GSETVIEW.")$/", $viewmode ) )
       $viewmode = GSETVIEW_STANDARD;
-   if( $viewmode == GSETVIEW_MPGAME && @$player_row['RatingStatus'] == RATING_NONE )
+   if ( $viewmode == GSETVIEW_MPGAME && @$player_row['RatingStatus'] == RATING_NONE )
       error('multi_player_need_initial_rating', "new_game.check.viewmode_rating($my_id,$viewmode,{$player_row['RatingStatus']})");
 
-   if( $handle_add_game )
+   if ( $handle_add_game )
    {
       $gsc = handle_add_game( $my_id, $viewmode );
       $errors = $gsc->get_errors();
@@ -107,7 +107,7 @@ require_once 'include/utilities.php';
       && is_numeric($my_rating) && $my_rating >= MIN_RATING );
 
    $page = "new_game.php?";
-   if( $viewmode == GSETVIEW_MPGAME )
+   if ( $viewmode == GSETVIEW_MPGAME )
       $title = T_('Add new game#mpg');
    else
       $title = T_('Add new game to waiting room');
@@ -115,11 +115,11 @@ require_once 'include/utilities.php';
    echo "<h3 class=Header>", sprintf( "%s (%s)", $title, get_gamesettings_viewmode($viewmode) ), "</h3>\n";
 
    $maxGamesCheck = new MaxGamesCheck();
-   if( $maxGamesCheck->allow_game_start() )
+   if ( $maxGamesCheck->allow_game_start() )
    {
       echo $maxGamesCheck->get_warn_text();
 
-      if( count($errors) > 0 )
+      if ( count($errors) > 0 )
       {
          echo "<br>\n<table><tr>",
             buildErrorListString( T_('There have been some errors'), array_unique($errors), 1 ),
@@ -136,7 +136,7 @@ require_once 'include/utilities.php';
    $menu_array = array();
    $menu_array[T_('New Game')] = 'new_game.php?view='.GSETVIEW_STANDARD . $shape_url_suffix . $tmpl_suffix;
    $menu_array[T_('New fair-komi game')] = 'new_game.php?view='.GSETVIEW_FAIRKOMI . $shape_url_suffix . $tmpl_suffix;
-   if( @$player_row['RatingStatus'] != RATING_NONE )
+   if ( @$player_row['RatingStatus'] != RATING_NONE )
       $menu_array[T_('New multi-player-game')] = 'new_game.php?view='.GSETVIEW_MPGAME . $shape_url_suffix . $tmpl_suffix;
 
    $menu_array[T_('Shapes')] = 'list_shapes.php';
@@ -150,7 +150,7 @@ function add_new_game_form( $form_id, $viewmode, $iamrated, $need_redraw, $gsc )
 {
    $addgame_form = new Form( $form_id, 'new_game.php', FORM_POST );
 
-   if( $need_redraw )
+   if ( $need_redraw )
       game_settings_form($addgame_form, GSET_WAITINGROOM, $viewmode, $iamrated, 'redraw', $_REQUEST, NULL, $gsc );
    else
       game_settings_form($addgame_form, GSET_WAITINGROOM, $viewmode, $iamrated);
@@ -174,15 +174,15 @@ function handle_add_game( $my_id, $viewmode )
    global $player_row, $NOW;
    $is_save_tmpl = (@$_REQUEST['save_template'] );
 
-   if( $player_row['ID'] <= GUESTS_ID_MAX )
+   if ( $player_row['ID'] <= GUESTS_ID_MAX )
       error('not_allowed_for_guest', 'new_game.handle_add_game');
 
    $gsc = GameSetupChecker::check_fields( $viewmode );
-   if( $gsc->has_errors() )
+   if ( $gsc->has_errors() )
       $gsc->add_default_values_info();
-   if( @$_REQUEST['add_game'] )
+   if ( @$_REQUEST['add_game'] )
       GameSetupChecker::check_wroom_count( $viewmode, $player_row['ID'], $gsc->errors );
-   if( $gsc->has_errors() )
+   if ( $gsc->has_errors() )
       return $gsc;
 
    $my_rating = $player_row['Rating2'];
@@ -194,10 +194,10 @@ function handle_add_game( $my_id, $viewmode )
 
    $cat_handicap_type = @$_REQUEST['cat_htype'];
    $is_fairkomi = false;
-   switch( (string)$cat_handicap_type )
+   switch ( (string)$cat_handicap_type )
    {
       case CAT_HTYPE_CONV:
-         if( !$iamrated )
+         if ( !$iamrated )
             error('no_initial_rating', 'new_game(conv)');
          $handicap_type = HTYPE_CONV;
          $handicap = 0; //further computing
@@ -205,7 +205,7 @@ function handle_add_game( $my_id, $viewmode )
          break;
 
       case CAT_HTYPE_PROPER:
-         if( !$iamrated )
+         if ( !$iamrated )
             error('no_initial_rating', 'new_game(proper)');
          $handicap_type = HTYPE_PROPER;
          $handicap = 0; //further computing
@@ -214,7 +214,7 @@ function handle_add_game( $my_id, $viewmode )
 
       case CAT_HTYPE_MANUAL:
          $handicap_type = @$_REQUEST['color_m'];
-         if( empty($handicap_type) )
+         if ( empty($handicap_type) )
             $handicap_type = HTYPE_NIGIRI;
 
          $handicap = (int)@$_REQUEST['handicap_m'];
@@ -224,7 +224,7 @@ function handle_add_game( $my_id, $viewmode )
       case CAT_HTYPE_FAIR_KOMI:
          $is_fairkomi = true;
          $handicap_type = @$_REQUEST['fk_htype'];
-         if( !preg_match("/^(".CHECK_HTYPES_FAIRKOMI.")$/", $handicap_type) )
+         if ( !preg_match("/^(".CHECK_HTYPES_FAIRKOMI.")$/", $handicap_type) )
             error('invalid_args', "new_game.handle_add_game.check.fk_htype($handicap_type)");
          $handicap = 0;
          $komi = 0.0;
@@ -238,46 +238,46 @@ function handle_add_game( $my_id, $viewmode )
          break;
    }
 
-   if( abs($komi) > MAX_KOMI_RANGE )
+   if ( abs($komi) > MAX_KOMI_RANGE )
       error('komi_range', "new_game.handle_add_game.check.komi($komi)");
-   if( floor(2 * $komi) != 2 * $komi ) // check for x.0|x.5
+   if ( floor(2 * $komi) != 2 * $komi ) // check for x.0|x.5
       error('komi_bad_fraction', "new_game.handle_add_game.check.komi.fraction($komi)");
 
-   if( $handicap < 0 || $handicap > MAX_HANDICAP )
+   if ( $handicap < 0 || $handicap > MAX_HANDICAP )
       error('handicap_range', "new_game.handle_add_game.check.handicap($handicap)");
 
-   if( !preg_match( "/^(".CHECK_GSETVIEW.")$/", $viewmode ) )
+   if ( !preg_match( "/^(".CHECK_GSETVIEW.")$/", $viewmode ) )
       error('invalid_args', "new_game.handle_add_game.check.viewmode($viewmode)");
 
    // ruleset
    $ruleset = @$_REQUEST['ruleset'];
-   if( !preg_match( "/^(".ALLOWED_RULESETS.")$/", $ruleset ) )
+   if ( !preg_match( "/^(".ALLOWED_RULESETS.")$/", $ruleset ) )
       error('feature_disabled', "new_game.disabled.ruleset($ruleset)");
 
    // komi adjustment
    $adj_komi = (float)@$_REQUEST['adj_komi'];
-   if( $is_fairkomi )
+   if ( $is_fairkomi )
       $adj_komi = 0;
-   if( abs($adj_komi) > MAX_KOMI_RANGE )
+   if ( abs($adj_komi) > MAX_KOMI_RANGE )
       $adj_komi = ($adj_komi<0 ? -1 : 1) * MAX_KOMI_RANGE;
-   if( floor(2 * $adj_komi) != 2 * $adj_komi ) // round to x.0|x.5
+   if ( floor(2 * $adj_komi) != 2 * $adj_komi ) // round to x.0|x.5
       $adj_komi = ($adj_komi<0 ? -1 : 1) * round(2 * abs($adj_komi)) / 2.0;
 
    $jigo_mode = (string)@$_REQUEST['jigo_mode'];
-   if( $jigo_mode == '' )
+   if ( $jigo_mode == '' )
       $jigo_mode = JIGOMODE_KEEP_KOMI;
-   elseif( !preg_match("/^(".CHECK_JIGOMODE.")$/", $jigo_mode) )
+   elseif ( !preg_match("/^(".CHECK_JIGOMODE.")$/", $jigo_mode) )
       error('invalid_args', "new_game.handle_add_game.check.jigo_mode($jigo_mode)");
 
    // handicap adjustment
    $adj_handicap = (int)@$_REQUEST['adj_handicap'];
-   if( $is_fairkomi )
+   if ( $is_fairkomi )
       $adj_handicap = 0;
-   if( abs($adj_handicap) > MAX_HANDICAP )
+   if ( abs($adj_handicap) > MAX_HANDICAP )
       $adj_handicap = ($adj_handicap<0 ? -1 : 1) * MAX_HANDICAP;
 
    $min_handicap = min( MAX_HANDICAP, max( 0, (int)@$_REQUEST['min_handicap'] ));
-   if( $is_fairkomi )
+   if ( $is_fairkomi )
       $min_handicap = 0;
 
    list( $min_handicap, $max_handicap ) =
@@ -286,17 +286,17 @@ function handle_add_game( $my_id, $viewmode )
    // multi-player
    $game_players = (string)@$_REQUEST['game_players'];
    $game_type = MultiPlayerGame::determine_game_type($game_players);
-   if( is_null($game_type) )
+   if ( is_null($game_type) )
       error('invalid_args', "new_game.handle_add_game.check.game_players($game_players)");
    $is_std_go = ( $game_type == GAMETYPE_GO );
-   if( $is_std_go && $viewmode == GSETVIEW_MPGAME )
+   if ( $is_std_go && $viewmode == GSETVIEW_MPGAME )
       error('invalid_args', "new_game.handle_add_game.check.game_players.viewmode($viewmode,$game_players)");
 
-   if( $is_fairkomi ) // fair-komi checks
+   if ( $is_fairkomi ) // fair-komi checks
    {
-      if( $viewmode != GSETVIEW_FAIRKOMI )
+      if ( $viewmode != GSETVIEW_FAIRKOMI )
          error('invalid_args', "new_game.handle_add_game.check.fairkomi.viewmode($viewmode,$game_type)");
-      if( !$is_std_go )
+      if ( !$is_std_go )
          error('invalid_args', 'new_game.handle_add_game.check.game_type.fairkomi_no_mpg');
    }
 
@@ -304,9 +304,9 @@ function handle_add_game( $my_id, $viewmode )
    $maxGamesCheck = new MaxGamesCheck();
    $max_games = $maxGamesCheck->get_allowed_games(NEWGAME_MAX_GAMES);
    $nrGames = max( 1, (int)@$_REQUEST['nrGames']);
-   if( $nrGames > NEWGAME_MAX_GAMES )
+   if ( $nrGames > NEWGAME_MAX_GAMES )
       error('invalid_args', "new_game.handle_add_game.check.nr_games($nrGames)");
-   elseif( $nrGames > $max_games )
+   elseif ( $nrGames > $max_games )
       error('max_games', "new_game.handle_add_game.check.max_games.nr_games($nrGames,$max_games)");
 
    $byoyomitype = @$_REQUEST['byoyomitype'];
@@ -330,26 +330,26 @@ function handle_add_game( $my_id, $viewmode )
                                  $byotimevalue_can, $timeunit_can, $byoperiods_can,
                                  $byotimevalue_fis, $timeunit_fis);
 
-   if( $hours<1 && ($byohours<1 || $byoyomitype == BYOTYPE_FISCHER) )
+   if ( $hours<1 && ($byohours<1 || $byoyomitype == BYOTYPE_FISCHER) )
       error('time_limit_too_small', "new_game.check.timelimit($hours,$byohours,$byoyomitype)");
 
 
-   if( ($rated = @$_REQUEST['rated']) != 'Y' || $player_row['RatingStatus'] == RATING_NONE )
+   if ( ($rated = @$_REQUEST['rated']) != 'Y' || $player_row['RatingStatus'] == RATING_NONE )
       $rated = 'N';
 
-   if( ENABLE_STDHANDICAP )
+   if ( ENABLE_STDHANDICAP )
    {
-      if( ($stdhandicap=@$_REQUEST['stdhandicap']) != 'Y' )
+      if ( ($stdhandicap=@$_REQUEST['stdhandicap']) != 'Y' )
          $stdhandicap = 'N';
    }
    else
       $stdhandicap = 'N';
 
-   if( ($weekendclock = @$_REQUEST['weekendclock']) != 'Y' )
+   if ( ($weekendclock = @$_REQUEST['weekendclock']) != 'Y' )
       $weekendclock = 'N';
 
    $adj_rating = !$is_save_tmpl;
-   if( $is_std_go )
+   if ( $is_std_go )
       list( $MustBeRated, $rating1, $rating2 ) = parse_waiting_room_rating_range( /*mpg*/false, $adj_rating );
    else
    {
@@ -363,7 +363,7 @@ function handle_add_game( $my_id, $viewmode )
 
    // insert game (standard-game or multi-player-game)
 
-   if( !$is_std_go ) // use defaults for MP-game
+   if ( !$is_std_go ) // use defaults for MP-game
    {
       //$nrGames = 1;
       $handicap_type = HTYPE_NIGIRI;
@@ -376,10 +376,10 @@ function handle_add_game( $my_id, $viewmode )
 
    // handle shape-game implicit settings (error if invalid)
    // NOTE: same handling as for make_invite_game()-func in 'include/make_game.php'
-   if( $shape_id > 0 )
+   if ( $shape_id > 0 )
    {
       $arr_shape = GameSnapshot::parse_check_extended_snapshot($shape_snapshot);
-      if( !is_array($arr_shape) ) // overwrite with defaults
+      if ( !is_array($arr_shape) ) // overwrite with defaults
          error('invalid_snapshot', "new_game.handle_add_game.check.shape($shape_id,$shape_snapshot)");
 
       // implicit defaults for shape-game
@@ -395,7 +395,7 @@ function handle_add_game( $my_id, $viewmode )
 
 
    // handle save-template
-   if( $is_save_tmpl )
+   if ( $is_save_tmpl )
    {
       // convert form-values into GameSetup to save as template
       $gs = new GameSetup( 0 );
@@ -413,7 +413,7 @@ function handle_add_game( $my_id, $viewmode )
       $gs->MinRatedGames = $min_rated_games;
       $gs->SameOpponent = $same_opponent;
 
-      if( $cat_handicap_type == CAT_HTYPE_FAIR_KOMI )
+      if ( $cat_handicap_type == CAT_HTYPE_FAIR_KOMI )
          $gs->Komi = $gs->OppKomi = null; // start with empty komi-bids
 
       // additional games-fields to PLAY game
@@ -444,7 +444,7 @@ function handle_add_game( $my_id, $viewmode )
 
    // add waiting-room game
    $query_mpgame = $query_wroom = '';
-   if( !$is_std_go ) // mp-game
+   if ( !$is_std_go ) // mp-game
    {
       $query_mpgame = "INSERT INTO Games SET " .
          "Black_ID=$my_id, " . // game-master
@@ -508,15 +508,15 @@ function handle_add_game( $my_id, $viewmode )
    ta_begin();
    {//HOT-section for creating waiting-room game
       $gid = 0;
-      if( $query_wroom )
+      if ( $query_wroom )
          db_query( 'new_game.handle_add_game.insert.waitingroom', $query_wroom );
-      else if( $query_mpgame )
+      else if ( $query_mpgame )
       {
          $result = db_query( 'new_game.handle_add_game.insert.game', $query_mpgame, 'mysql_insert_game' );
-         if( mysql_affected_rows() != 1)
+         if ( mysql_affected_rows() != 1)
             error('mysql_start_game', 'new_game.handle_add_game.insert.game2');
          $gid = mysql_insert_id();
-         if( $gid <= 0 )
+         if ( $gid <= 0 )
             error('internal_error', "new_game.handle_add_game.insert.game.err($gid)");
 
          MultiPlayerGame::init_multi_player_game( "add_to_waitingroom",
@@ -527,7 +527,7 @@ function handle_add_game( $my_id, $viewmode )
 
    $msg = urlencode(T_('Game added!'));
 
-   if( $gid > 0 )
+   if ( $gid > 0 )
       jump_to("game_players.php?gid=$gid".URI_AMP."sysmsg=$msg");
    else
       jump_to("waiting_room.php?good=2".URI_AMP."sysmsg=$msg"); // my-wr-games

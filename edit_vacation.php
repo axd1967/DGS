@@ -27,7 +27,7 @@ require_once 'include/form_functions.php';
    connect2mysql();
 
    $logged_in = who_is_logged( $player_row);
-   if( !$logged_in )
+   if ( !$logged_in )
       error('login_if_not_logged_in', 'edit_vacation');
 
    $my_id = $player_row['ID'];
@@ -38,19 +38,19 @@ require_once 'include/form_functions.php';
 
    $infomsg = '';
 
-   if( $player_row['OnVacation'] > 0 ) //already on vacation
+   if ( $player_row['OnVacation'] > 0 ) //already on vacation
    {
       $vacationdiff = round(@$_POST['vacationdiff']);
-      if( $minimum_days > $days_left || ( $minimum_days == $days_left && $minimum_days == 0 ) )
+      if ( $minimum_days > $days_left || ( $minimum_days == $days_left && $minimum_days == 0 ) )
       {
          $infomsg .= T_("Sorry, you can't change the vacation length at the moment.");
       }
-      else if( isset($_POST['change_vacation']) && $vacationdiff >= $minimum_days && $vacationdiff <= $days_left )
+      else if ( isset($_POST['change_vacation']) && $vacationdiff >= $minimum_days && $vacationdiff <= $days_left )
       {
-         if( $is_guest ) // view ok, edit forbidden
+         if ( $is_guest ) // view ok, edit forbidden
             error('not_allowed_for_guest', 'edit_vacation');
 
-         if( $vacationdiff == 0 )
+         if ( $vacationdiff == 0 )
             jump_to("status.php");
 
          $upd_timeout_ticks = timeleft_days_to_ticks($vacationdiff);
@@ -80,9 +80,9 @@ require_once 'include/form_functions.php';
          $vacation_form = new Form( 'vacationform', 'edit_vacation.php', FORM_POST );
 
          $days = array();
-         for( $i=$minimum_days; $i<=$days_left; $i++ )
+         for ( $i=$minimum_days; $i<=$days_left; $i++ )
          {
-            if( $i==0 )
+            if ( $i==0 )
                $days[$i] = '';
             else
                $days[$i] = ( $i >= 0 ? T_('Add') : T_('Remove') ) . ' ' . TimeFormat::echo_day(abs($i));
@@ -100,13 +100,13 @@ require_once 'include/form_functions.php';
    else //not yet on vacation
    {
       $vacationlength = round(@$_POST['vacationlength']);
-      if( $days_left < $vacation_min_days )
+      if ( $days_left < $vacation_min_days )
       {
          $infomsg .= sprintf(T_("Sorry, you need at least %d vacation days to be able to start a vacation period."), $vacation_min_days);
       }
-      elseif( isset($_POST['start_vacation']) && $vacationlength >= $vacation_min_days && $vacationlength <= $days_left )
+      elseif ( isset($_POST['start_vacation']) && $vacationlength >= $vacation_min_days && $vacationlength <= $days_left )
       {
-         if( $is_guest ) // view ok, edit forbidden
+         if ( $is_guest ) // view ok, edit forbidden
             error('not_allowed_for_guest', 'edit_vacation');
 
          $add_timeout_ticks = timeleft_days_to_ticks($vacationlength);
@@ -140,7 +140,7 @@ require_once 'include/form_functions.php';
          $vacation_form = new Form( 'vacationform', 'edit_vacation.php', FORM_POST );
 
          $days = array();
-         for($i=$vacation_min_days; $i<=$days_left; $i++ )
+         for ($i=$vacation_min_days; $i<=$days_left; $i++ )
             $days[$i] = "$i " . T_('days');
 
          $vacation_form->add_row( array( 'HEADER', T_('Start vacation') ) );
@@ -155,9 +155,9 @@ require_once 'include/form_functions.php';
 
    start_page(T_('Vacation'), true, $logged_in, $player_row );
 
-   if( $infomsg )
+   if ( $infomsg )
       echo "<br>\n", $infomsg;
-   if( isset($vacation_form) )
+   if ( isset($vacation_form) )
       echo $vacation_form->get_form_string(1);
 
    end_page();

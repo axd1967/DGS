@@ -66,14 +66,14 @@ class TournamentDirector
 
    public function formatFlags( $flags_val=null )
    {
-      if( is_null($flags_val) )
+      if ( is_null($flags_val) )
          $flags_val = $this->Flags;
 
       $arr = array();
       $arr_flags = self::getFlagsText();
-      foreach( $arr_flags as $flag => $flagtext )
+      foreach ( $arr_flags as $flag => $flagtext )
       {
-         if( $flags_val & $flag )
+         if ( $flags_val & $flag )
             $arr[] = $flagtext;
       }
       return implode(', ', $arr);
@@ -82,7 +82,7 @@ class TournamentDirector
    /*! \brief Inserts or updates TournamentDirector in database. */
    public function persist()
    {
-      if( !is_null(self::load_tournament_director($this->tid, $this->uid, /*with_user*/false)) )
+      if ( !is_null(self::load_tournament_director($this->tid, $this->uid, /*with_user*/false)) )
          $success = $this->update();
       else
          $success = $this->insert();
@@ -130,7 +130,7 @@ class TournamentDirector
    public static function build_query_sql( $tid, $with_user=true )
    {
       $qsql = $GLOBALS['ENTITY_TOURNAMENT_DIRECTOR']->newQuerySQL('TD');
-      if( $with_user )
+      if ( $with_user )
       {
          $qsql->add_part( SQLP_FIELDS,
             'TDPL.ID AS TDPL_ID', 'TDPL.Name AS TDPL_Name',
@@ -163,7 +163,7 @@ class TournamentDirector
    public static function load_tournament_director( $tid, $uid, $with_user=true )
    {
       $result = NULL;
-      if( $tid > 0 )
+      if ( $tid > 0 )
       {
          $qsql = self::build_query_sql( $tid, $with_user );
          $qsql->add_part( SQLP_WHERE, "TD.uid='$uid'" );
@@ -171,7 +171,7 @@ class TournamentDirector
 
          $row = mysql_single_fetch( "TournamentDirector.load_tournament_director($tid,$uid)",
             $qsql->get_select() );
-         if( $row )
+         if ( $row )
             $result = self::new_from_row( $row, $with_user );
       }
       return $result;
@@ -180,7 +180,7 @@ class TournamentDirector
    /*! \brief Returns true, if there is at least one TD. for given tournament. */
    public static function has_tournament_director( $tid )
    {
-      if( $tid > 0 )
+      if ( $tid > 0 )
       {
          $qsql = $GLOBALS['ENTITY_TOURNAMENT_DIRECTOR']->newQuerySQL('TD');
          $qsql->add_part( SQLP_WHERE, "TD.tid=$tid" );
@@ -188,7 +188,7 @@ class TournamentDirector
 
          $row = mysql_single_fetch( "TournamentDirector.has_tournament_director($tid)",
             $qsql->get_select() );
-         if( $row )
+         if ( $row )
             return true;
       }
       return false;
@@ -197,7 +197,7 @@ class TournamentDirector
    /*! \brief Returns count of tournament-directors (TDs) for given tournament; 0 otherwise. */
    public static function count_tournament_directors( $tid )
    {
-      if( $tid <= 0 )
+      if ( $tid <= 0 )
          error('invalid_args', "TournamentDirector:count_tournament_directors.check.tid($tid)");
 
       $row = mysql_single_fetch( "TournamentDirector:count_tournament_directors($tid)",
@@ -215,7 +215,7 @@ class TournamentDirector
       $iterator->setResultRows( mysql_num_rows($result) );
 
       $iterator->clearItems();
-      while( $row = mysql_fetch_array( $result ) )
+      while ( $row = mysql_fetch_array( $result ) )
       {
          $director = self::new_from_row( $row );
          $iterator->addItem( $director, $row );
@@ -232,7 +232,7 @@ class TournamentDirector
          "SELECT uid, Flags FROM TournamentDirector WHERE tid=$tid" );
 
       $result = array();
-      while( $row = mysql_fetch_array($db_result) )
+      while ( $row = mysql_fetch_array($db_result) )
          $result[$row['uid']] = $row['Flags'];
       mysql_free_result($db_result);
 
@@ -249,7 +249,7 @@ class TournamentDirector
       $result = db_query( "TournamentDirector.load_tournament_directors_uid($tid)", $qsql->get_select() );
 
       $out = array();
-      while( $row = mysql_fetch_array($result) )
+      while ( $row = mysql_fetch_array($result) )
          $out[] = $row['uid'];
       mysql_free_result($result);
 
@@ -265,21 +265,21 @@ class TournamentDirector
       $player_query = 'SELECT ID, Name, Handle, Rating2, '
             . 'UNIX_TIMESTAMP(Lastaccess) AS X_Lastaccess FROM Players WHERE ';
 
-      if( $uid && is_numeric($uid) )
+      if ( $uid && is_numeric($uid) )
       {
          // load user by ID
          $row = mysql_single_fetch( "TournamentDirector.load_user_row.find_user.id($uid)",
             $player_query . "ID=$uid LIMIT 1" );
-         if( $row )
+         if ( $row )
             return $row;
       }
 
-      if( $uhandle != '' )
+      if ( $uhandle != '' )
       {
          // load user by userid
          $row = mysql_single_fetch( "edit_director.find_user.handle($uid,$uhandle)",
             $player_query . "Handle='" . mysql_addslashes($uhandle) . "' LIMIT 1");
-         if( $row )
+         if ( $row )
             return $row;
       }
 
@@ -295,16 +295,16 @@ class TournamentDirector
    {
       static $allowed_status = array( TOURNEY_STATUS_ADMIN, TOURNEY_STATUS_NEW, TOURNEY_STATUS_DELETE );
       $has_error = false;
-      if( !in_array($t_status, $allowed_status) )
+      if ( !in_array($t_status, $allowed_status) )
       {
          $cntTD = ( is_null($count_TDs) || !is_numeric($count_TDs) )
             ? self::count_tournament_directors($tid)
             : $count_TDs;
-         if( $cntTD <= 1 )
+         if ( $cntTD <= 1 )
             $has_error = true;
       }
 
-      if( $die && $has_error )
+      if ( $die && $has_error )
          error('tournament_director_min1', "TournamentDirector:assert_min_directors($tid,$t_status)");
       return !$has_error;
    }//assert_min_directors
@@ -315,7 +315,7 @@ class TournamentDirector
       static $ARR_TDIR_FLAGS = null; // flag => text
 
       // lazy-init of texts
-      if( is_null($ARR_TDIR_FLAGS) )
+      if ( is_null($ARR_TDIR_FLAGS) )
       {
          $arr = array();
          $arr[TD_FLAG_GAME_END] = T_('Game End#TD_flag');
@@ -323,9 +323,9 @@ class TournamentDirector
          $ARR_TDIR_FLAGS = $arr;
       }
 
-      if( is_null($flag) )
+      if ( is_null($flag) )
          return $ARR_TDIR_FLAGS;
-      if( !isset($ARR_TDIR_FLAGS[$flag]) )
+      if ( !isset($ARR_TDIR_FLAGS[$flag]) )
          error('invalid_args', "TournamentDirector:getFlagsText($flag)");
       return $ARR_TDIR_FLAGS[$flag];
    }//getFlagsText

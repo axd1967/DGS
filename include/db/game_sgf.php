@@ -97,7 +97,7 @@ class GameSgf
 
    public function fillEntityData( $data=null )
    {
-      if( is_null($data) )
+      if ( is_null($data) )
          $data = $GLOBALS['ENTITY_GAME_SGF']->newEntityData();
       $data->set_value( 'gid', $this->gid );
       $data->set_value( 'uid', $this->uid );
@@ -114,7 +114,7 @@ class GameSgf
    {
       $qsql = $GLOBALS['ENTITY_GAME_SGF']->newQuerySQL('GSGF');
       $qsql->add_part( SQLP_WHERE, "GSGF.gid=$gid" );
-      if( $uid > 0 )
+      if ( $uid > 0 )
          $qsql->add_part( SQLP_WHERE, "GSGF.uid=$uid" );
       return $qsql;
    }
@@ -156,7 +156,7 @@ class GameSgf
       $db_result = db_query( "GameSgf:load_game_sgfs($gid)", $query );
 
       $result = array();
-      while( $row = mysql_fetch_array($db_result) )
+      while ( $row = mysql_fetch_array($db_result) )
          $result[] = self::new_from_row( $row );
       mysql_free_result($db_result);
 

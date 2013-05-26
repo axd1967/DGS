@@ -26,7 +26,7 @@ require_once 'forum/forum_functions.php';
 // to increase thread-hits to show thread-"activity"
 function hit_thread( $thread )
 {
-   if( is_numeric($thread) && $thread > 0 )
+   if ( is_numeric($thread) && $thread > 0 )
    {
       db_query( "forum_post.hit_thread($thread)",
          "UPDATE Posts SET Hits=Hits+1 WHERE ID='$thread' LIMIT 1" );
@@ -45,7 +45,7 @@ function post_message($player_row, &$cfg_board, $forum_opts, &$thread )
 {
    global $NOW;
 
-   if( ($player_row['AdminOptions'] & ADMOPT_FORUM_NO_POST) )
+   if ( ($player_row['AdminOptions'] & ADMOPT_FORUM_NO_POST) )
       return array( 0, T_('Sorry, you are not allowed to post on the forum') );
 
    $uid = @$player_row['ID'];
@@ -54,33 +54,33 @@ function post_message($player_row, &$cfg_board, $forum_opts, &$thread )
    $edit = @$_POST['edit']+0;
 
    $f_opts = new ForumOptions( $player_row );
-   if( !$f_opts->is_visible_forum( $forum_opts ) )
+   if ( !$f_opts->is_visible_forum( $forum_opts ) )
       error('forbidden_forum', "post_message.check.forum($uid,$forum)");
 
-   if( !Forum::allow_posting( $player_row, $forum_opts ) )
+   if ( !Forum::allow_posting( $player_row, $forum_opts ) )
       error('read_only_forum', "post_message.check.read_only($uid,$forum)");
 
    $Text = trim(get_request_arg('Text'));
    $Subject = trim(get_request_arg('Subject'));
-   if( (string)$Subject == '' || (string)$Text == '' )
+   if ( (string)$Subject == '' || (string)$Text == '' )
       return array( 0, T_('Message not saved, because of missing subject and/or text-body.') );
 
    $ReadOnly = (bool)get_request_arg('ReadOnly');
-   if( !$parent || !ForumPost::allow_post_read_only() ) // new post setting read-only flag only allowed for new-thread and executives
+   if ( !$parent || !ForumPost::allow_post_read_only() ) // new post setting read-only flag only allowed for new-thread and executives
       $ReadOnly = false;
 
-   if( is_null($cfg_board) && MarkupHandlerGoban::contains_goban($Text) ) // lazy-load
+   if ( is_null($cfg_board) && MarkupHandlerGoban::contains_goban($Text) ) // lazy-load
       $cfg_board = ConfigBoard::load_config_board($uid);
 
 //   $allow_go_diagrams = ( ALLOW_GO_DIAGRAMS && is_javascript_enabled() );
-//   if( $allow_go_diagrams) $GoDiagrams = GoDiagram::create_godiagrams($Text, $cfg_board);
+//   if ( $allow_go_diagrams) $GoDiagrams = GoDiagram::create_godiagrams($Text, $cfg_board);
    $Subject = mysql_addslashes( $Subject);
    $Text = mysql_addslashes( $Text);
 
    $moderated = (($forum_opts & FORUMOPT_MODERATED) || ($player_row['AdminOptions'] & ADMOPT_FORUM_MOD_POST));
 
    // -------   Edit old post  ---------- (use-case U07)
-   if( $edit > 0 )
+   if ( $edit > 0 )
    {
       $row = mysql_single_fetch( "post_message.edit.find_post($uid,$edit)",
                "SELECT Forum_ID,Thread_ID,Subject,Text,GREATEST(Time,Lastedited) AS Time,Approved ".
@@ -92,7 +92,7 @@ function post_message($player_row, &$cfg_board, $forum_opts, &$thread )
       $oldModerated = ( $row['Approved'] != 'Y' );
       $thread = @$row['Thread_ID'];
 
-      if( $oldSubject != $Subject || $oldText != $Text )
+      if ( $oldSubject != $Subject || $oldText != $Text )
       {
          //Update old record with new text
          db_query( "post_message.edit.update($edit)",
@@ -118,7 +118,7 @@ function post_message($player_row, &$cfg_board, $forum_opts, &$thread )
             ($moderated) ? FORUMLOGACT_EDIT_PEND_POST : FORUMLOGACT_EDIT_POST );
       }
 
-      if( !$oldModerated && $moderated ) // shown -> hidden
+      if ( !$oldModerated && $moderated ) // shown -> hidden
          hide_post_update_trigger( $row['Forum_ID'], $thread, $edit );
 
       hit_thread( $thread );
@@ -131,7 +131,7 @@ function post_message($player_row, &$cfg_board, $forum_opts, &$thread )
 
       // -------   Reply / Quote  ---------- (use-case U08)
       $post_flags = 0;
-      if( $parent > 0 ) // existing thread
+      if ( $parent > 0 ) // existing thread
       {
          $is_newthread = false;
          $row = mysql_single_fetch( "post_message.reply.find($forum,$parent)",
@@ -141,7 +141,7 @@ function post_message($player_row, &$cfg_board, $forum_opts, &$thread )
 
          extract( $row); // $PosIndex, $Depth, $Thread_ID, $Flags
 
-         if( ($Flags & FPOST_FLAG_READ_ONLY) && !ForumPost::allow_post_read_only() )
+         if ( ($Flags & FPOST_FLAG_READ_ONLY) && !ForumPost::allow_post_read_only() )
             error('read_only_thread', "post_message.reply.check.thread_readonly($forum,$parent)" );
 
          $row = mysql_single_fetch( "post_message.reply.max($parent)",
@@ -149,7 +149,7 @@ function post_message($player_row, &$cfg_board, $forum_opts, &$thread )
                         "FROM Posts WHERE Parent_ID=$parent LIMIT 1" )
             or error('unknown_parent_post', "post_message.reply.max2($parent)");
          $answer_nr = $row['answer_nr'];
-         if( $answer_nr <= 0 ) $answer_nr = 0;
+         if ( $answer_nr <= 0 ) $answer_nr = 0;
 
          $lastchanged_string = ''; // Lastchanged only set for thread
       }
@@ -163,17 +163,17 @@ function post_message($player_row, &$cfg_board, $forum_opts, &$thread )
          $Depth = 0;
          $Thread_ID = -1;
          $lastchanged_string = "LastChanged=FROM_UNIXTIME($NOW), ";
-         if( $ReadOnly )
+         if ( $ReadOnly )
             $post_flags |= FPOST_FLAG_READ_ONLY;
       }
 
 
       // -------   Update database   ------- (use-case U06, U08)
 
-      if( $answer_nr >= 64*64 )
+      if ( $answer_nr >= 64*64 )
          error('internal_error', "post_message.answer_nr.too_large($Thread_ID,$answer_nr)");
 
-      if( ++$Depth >= FORUM_MAX_DEPTH ) //see also the length of Posts.PosIndex
+      if ( ++$Depth >= FORUM_MAX_DEPTH ) //see also the length of Posts.PosIndex
          error('internal_error', "post_message.depth.too_large($Thread_ID,$Depth)");
 
       $order_str = ORDER_STR;
@@ -196,17 +196,17 @@ function post_message($player_row, &$cfg_board, $forum_opts, &$thread )
          "PosIndex='$PosIndex'";
 
       db_query( "post_message.insert_new_post($Thread_ID)", $query );
-      if( mysql_affected_rows() != 1)
+      if ( mysql_affected_rows() != 1)
          error('mysql_insert_post', "post_message.insert_new_post($Thread_ID)");
       $New_ID = mysql_insert_id();
 
-      if( $is_newthread ) // U06 (New thread), also $Thread_ID = -1
+      if ( $is_newthread ) // U06 (New thread), also $Thread_ID = -1
       {
          db_query( "post_message.new_thread($New_ID)",
             'UPDATE Posts SET Thread_ID=ID, LastPost=ID, '
             . 'PostsInThread=' . ($moderated ? '0' : '1')
             . " WHERE ID=$New_ID LIMIT 1" );
-         if( mysql_affected_rows() != 1)
+         if ( mysql_affected_rows() != 1)
             error('mysql_insert_post', "post_message.new_thread.update_thread($New_ID)");
 
          $thread = $Thread_ID = $New_ID;
@@ -216,10 +216,10 @@ function post_message($player_row, &$cfg_board, $forum_opts, &$thread )
          hit_thread( $Thread_ID );
       }
 
-//      if( $allow_go_diagrams) GoDiagram::save_diagrams($GoDiagrams);
+//      if ( $allow_go_diagrams) GoDiagram::save_diagrams($GoDiagrams);
 
       $flog_actsuffix = ( $Thread_ID == $New_ID ) ? FORUMLOGACT_SUFFIX_NEW_THREAD : FORUMLOGACT_SUFFIX_REPLY;
-      if( $moderated ) // hidden post
+      if ( $moderated ) // hidden post
       {
          add_forum_log( $Thread_ID, $New_ID, FORUMLOGACT_NEW_PEND_POST . $flog_actsuffix );
          return array( $New_ID, T_('This post is subject to moderation. '
@@ -228,7 +228,7 @@ function post_message($player_row, &$cfg_board, $forum_opts, &$thread )
       else // shown post
       {
          // thread-trigger
-         if( !$is_newthread ) // reply/quote
+         if ( !$is_newthread ) // reply/quote
          {
             db_query( "post_message.thread_trigger($Thread_ID)",
                'UPDATE Posts SET '
@@ -269,7 +269,7 @@ function approve_post( $fid, $tid, $pid )
    // approve post
    db_query( "approve_post.update_post($pid)",
       "UPDATE Posts SET Approved='Y' WHERE ID=$pid AND Approved<>'Y' LIMIT 1" );
-   if( mysql_affected_rows() < 1 )
+   if ( mysql_affected_rows() < 1 )
       return; // already approved
 
    add_forum_log( $tid, $pid, FORUMLOGACT_APPROVE_POST );
@@ -320,7 +320,7 @@ function reject_post( $fid, $tid, $pid )
 {
    db_query( "reject_post.update_post($pid)",
       "UPDATE Posts SET Approved='N' WHERE ID=$pid AND Approved<>'N' LIMIT 1" );
-   if( mysql_affected_rows() < 1 )
+   if ( mysql_affected_rows() < 1 )
       return; // already rejected
 
    add_forum_log( $tid, $pid, FORUMLOGACT_REJECT_POST );
@@ -333,7 +333,7 @@ function hide_post( $fid, $tid, $pid )
    // hide post
    db_query( "hide_post.update_post($pid)",
       "UPDATE Posts SET Approved='N' WHERE ID=$pid AND Approved<>'N' LIMIT 1" );
-   if( mysql_affected_rows() < 1 )
+   if ( mysql_affected_rows() < 1 )
       return; // already hidden
 
    add_forum_log( $tid, $pid, FORUMLOGACT_HIDE_POST );
@@ -383,10 +383,10 @@ function hide_post_update_trigger( $fid, $tid, $pid )
    // global-trigger
    ForumRead::trigger_recalc_global_post_update( $NOW );
 
-   if( $pid == $thread_lastpost && $thread_cntposts > 0 )
+   if ( $pid == $thread_lastpost && $thread_cntposts > 0 )
       recalc_thread_lastpost($tid);
 
-   if( $pid == $forum_lastpost && $forum_cntthreads > 0 )
+   if ( $pid == $forum_lastpost && $forum_cntthreads > 0 )
       recalc_forum_lastpost($fid);
 } //hide_post_update_trigger
 
@@ -399,7 +399,7 @@ function show_post( $fid, $tid, $pid )
    // show post
    db_query( "show_post.update_post($pid)",
       "UPDATE Posts SET Approved='Y' WHERE ID=$pid AND Approved<>'Y' LIMIT 1" );
-   if( mysql_affected_rows() < 1 )
+   if ( mysql_affected_rows() < 1 )
       return; // already shown
 
    add_forum_log( $tid, $pid, FORUMLOGACT_SHOW_POST );

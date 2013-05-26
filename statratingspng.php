@@ -34,7 +34,7 @@ define('MIN_RANK', round(MIN_RATING/100.0));
    $logged_in = who_is_logged( $player_row, LOGIN_SKIP_UPDATE );
 
    //disable translations in graph if not latin
-   if( eregi( '^iso-8859-', $encoding_used) )
+   if ( eregi( '^iso-8859-', $encoding_used) )
    {
       $keep_english= false;
       $T_= 'T_';
@@ -59,14 +59,14 @@ define('MIN_RANK', round(MIN_RATING/100.0));
    $cache_it= ( CACHE_FOLDER>'' && !@$_REQUEST['no_cache']
             && $SizeX==640 && !$show_time );
 
-   if( $cache_it )
+   if ( $cache_it )
    {
       $cache_name= CACHE_FOLDER.'cache_statratings.png';
       clearstatcache();
       $tmp= ((int)@filemtime($cache_name)) + CACHE_EXPIRE_GRAPH;
-      if( $tmp >= $NOW )
+      if ( $tmp >= $NOW )
       {
-         if( image_passthru($cache_name, $NOW, $tmp) )
+         if ( image_passthru($cache_name, $NOW, $tmp) )
          {
             exit;
          }
@@ -106,7 +106,7 @@ define('MIN_RANK', round(MIN_RATING/100.0));
    $a = $gr->width-2*$title_sep;
    $m = 0;
    $cnt_graphs = count($graphs);
-   for( $i=0; $i < $cnt_graphs; $i++ )
+   for ( $i=0; $i < $cnt_graphs; $i++ )
    {
       $graph= &$graphs[$i];
 
@@ -115,7 +115,7 @@ define('MIN_RANK', round(MIN_RATING/100.0));
       $v= sprintf($title_fmt, $graph['name']);
       $b= $gr->labelbox($v);
       $b= $x+$b['x'];
-      if( $b > $a )
+      if ( $b > $a )
       {
          $b-= $x;
          $x = 0;
@@ -150,7 +150,7 @@ define('MIN_RANK', round(MIN_RATING/100.0));
 
    $gr->setgraphview( $xlims['MIN'], $ymax, $xlims['MAX'], $ymin );
 
-   for( $i=0; $i < $cnt_graphs; $i++ )
+   for ( $i=0; $i < $cnt_graphs; $i++ )
    {
       $graph= &$graphs[$i]['y'];
       $graph = $gr->mapscaleY($graph);
@@ -173,7 +173,7 @@ define('MIN_RANK', round(MIN_RATING/100.0));
 
    //draw the curves
 
-   for( $i=0; $i < $cnt_graphs; $i++ )
+   for ( $i=0; $i < $cnt_graphs; $i++ )
    {
       $graph= &$graphs[$i];
 
@@ -184,13 +184,13 @@ define('MIN_RANK', round(MIN_RATING/100.0));
 
    //misc drawings
 
-   if( $show_time )
+   if ( $show_time )
       $gr->label( 0, 0, sprintf('%0.2f ms', (getmicrotime()-$page_microtime)*1000), $black);
 
-   if( $cache_it )
+   if ( $cache_it )
       grab_output_start();
    $gr->send_image();
-   if( $cache_it )
+   if ( $cache_it )
       grab_output_end( $cache_name);
 }
 
@@ -207,9 +207,9 @@ function get_ratings_data(&$Xaxis, &$graphs, &$xlims, &$ylims)
    $Ymax = 0;
 
    $Ymaxmin = 1;
-   for( $g=0; $g<3 ;$g++ )
+   for ( $g=0; $g<3 ;$g++ )
    {
-      switch( (int)$g )
+      switch ( (int)$g )
       {
          case 0:
             $name = $T_('Active users');
@@ -250,7 +250,7 @@ function get_ratings_data(&$Xaxis, &$graphs, &$xlims, &$ylims)
             break;
       }//switch $g (for-index)
 
-      if( $query )
+      if ( $query )
       {
          $result = db_query( 'statratingspng.query'.$g, $query );
 
@@ -261,11 +261,11 @@ function get_ratings_data(&$Xaxis, &$graphs, &$xlims, &$ylims)
          $graphs[$i]['y'] = array();
          $graph= &$graphs[$i]['y'];
          $gmax = $Ymin;
-         while( $row = mysql_fetch_assoc($result) )
+         while ( $row = mysql_fetch_assoc($result) )
          {
             $rank = (int)@$row['p_rank'];
             $cnt = (int)@$row['cnt'];
-            if( $cnt > $gmax && $rank > 0 ) //exclude 30kyu from "max"
+            if ( $cnt > $gmax && $rank > 0 ) //exclude 30kyu from "max"
                $gmax = $cnt;
             $graph[$rank] = $cnt;
             $tmp = (int)@$Xaxis[$rank];
@@ -273,9 +273,9 @@ function get_ratings_data(&$Xaxis, &$graphs, &$xlims, &$ylims)
          }
          mysql_free_result($result);
          $graphs[$i]['max'] = $gmax;
-         if( $i == 0 )
+         if ( $i == 0 )
             $Ymaxmin = $gmax;
-         else if( $Ymaxmin > $gmax )
+         else if ( $Ymaxmin > $gmax )
             $Ymaxmin = $gmax;
       } //$query
    } //$graphs
@@ -284,14 +284,14 @@ function get_ratings_data(&$Xaxis, &$graphs, &$xlims, &$ylims)
    //try to fit the graph drawings in similar spaces
    $Ymaxmin = max( $Ymaxmin, 10);
    $Ymax = $Ymin;
-   for( $i=0; $i<$nbg; $i++ )
+   for ( $i=0; $i<$nbg; $i++ )
    {
       $gmax = $graphs[$i]['max'];
-      if( $gmax > $Ymaxmin )
+      if ( $gmax > $Ymaxmin )
          $tmp = round(log10( $gmax/$Ymaxmin ));
       else
          $tmp = 0;
-      if( $tmp > 0 )
+      if ( $tmp > 0 )
       {
          $rscale = pow(10,$tmp);
          $graphs[$i]['name'] .= ' / '.($tmp>3 ? "1e$tmp" : $rscale);
@@ -301,38 +301,38 @@ function get_ratings_data(&$Xaxis, &$graphs, &$xlims, &$ylims)
          $graphs[$i]['max'] /= $rscale;
          $gmax = $graphs[$i]['max'];
       }
-      if( $Ymax < $gmax )
+      if ( $Ymax < $gmax )
          $Ymax = $gmax;
    } //$graphs
 
 
    ksort( $Xaxis);
    $Xmax = $Xmin;
-   foreach( $Xaxis as $rank => $cnt )
+   foreach ( $Xaxis as $rank => $cnt )
    {
-      if( $cnt > 0 )
+      if ( $cnt > 0 )
          $Xmax = $rank;
    }
-   while( $rank > $Xmax )
+   while ( $rank > $Xmax )
    {
-      for( $i=$nbg-1 ; $i>=0 ; $i-- )
+      for ( $i=$nbg-1 ; $i>=0 ; $i-- )
          unset($graphs[$i]['y'][$rank]);
       unset($Xaxis[$rank]);
       $rank--;
    }
-   for( $rank=$Xmin ; $rank<=$Xmax ; $rank++ )
+   for ( $rank=$Xmin ; $rank<=$Xmax ; $rank++ )
    {
-      for( $i=$nbg-1 ; $i>=0 ; $i-- )
+      for ( $i=$nbg-1 ; $i>=0 ; $i-- )
       {
          $graph= &$graphs[$i]['y'];
-         if( !isset($graph[$rank]) )
+         if ( !isset($graph[$rank]) )
             $graph[$rank] = 0;
       }
       $Xaxis[$rank] = $rank;
    }
 
    ksort( $Xaxis);
-   for( $i=$nbg-1 ; $i>=0 ; $i-- )
+   for ( $i=$nbg-1 ; $i>=0 ; $i-- )
       ksort($graphs[$i]['y']);
 
    $xlims = array('MIN'=>$Xmin, 'MAX'=>$Xmax);

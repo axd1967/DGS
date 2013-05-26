@@ -158,34 +158,34 @@ class GameAddTime
    public function add_time( $add_hours, $reset_byo=false )
    {
       $this->reset_byoyomi = $reset_byo;
-      if( !is_numeric($add_hours) || $add_hours < 0
+      if ( !is_numeric($add_hours) || $add_hours < 0
             || $add_hours > time_convert_to_hours( MAX_ADD_DAYS, 'days'))
          return sprintf( 'Invalid value for add_hours [%s]', $add_hours);
 
       // reset_byo: 0=no-reset, 1=full-byo-yomi-reset, 2=reset-byo-time-only
       $reset_byo = ( $reset_byo ) ? 1 : 0;
-      if( !$reset_byo && $add_hours == 0 )
+      if ( !$reset_byo && $add_hours == 0 )
          return 0; // nothing to do (0 hours added, no error)
 
-      if( is_numeric($this->game_row) )
+      if ( is_numeric($this->game_row) )
       {
          $gid = $this->game_row;
          $this->game_row = mysql_single_fetch( 'add_time_opponent',
             "SELECT G.* from Games AS G WHERE G.ID=$gid");
-         if( !$this->game_row )
+         if ( !$this->game_row )
             error('unknown_game',"add_time_opponent($gid)");
       }
       else
          $gid = $this->game_row['ID'];
 
-      if( !GameAddTime::allow_add_time_opponent( $this->game_row, $this->uid, $this->td_uid ) )
+      if ( !GameAddTime::allow_add_time_opponent( $this->game_row, $this->uid, $this->td_uid ) )
          return sprintf( T_('Conditions are not met to allow to add time by user [%s] for game [%s]'),
                          ($this->tdir ? T_('Tournament director') : $this->uid), $gid );
 
       // get opponents columns to update
       $oppcolor = ( $this->game_row['Black_ID'] == $this->uid ) ? 'White' : 'Black';
 
-      if( !isset($this->game_row["{$oppcolor}_Maintime"])
+      if ( !isset($this->game_row["{$oppcolor}_Maintime"])
             || !isset($this->game_row["{$oppcolor}_Byotime"])
             || !isset($this->game_row["{$oppcolor}_Byoperiods"])
             || !isset($this->game_row['Byotype'])
@@ -195,44 +195,44 @@ class GameAddTime
 
       // special byo-yomi resetting
       $byotype = $this->game_row['Byotype'];
-      if( !$reset_byo )
+      if ( !$reset_byo )
       {
          // reset current byo-yomi period for JAP|CAN if in byo-yomi
-         if( $byotype == BYOTYPE_CANADIAN )
+         if ( $byotype == BYOTYPE_CANADIAN )
             $reset_byo = 1; // CAN-time difficult to handle without reset (see specs/time.txt)
-         if( $byotype == BYOTYPE_JAPANESE && $this->game_row["{$oppcolor}_Byoperiods"] >= 0 )
+         if ( $byotype == BYOTYPE_JAPANESE && $this->game_row["{$oppcolor}_Byoperiods"] >= 0 )
             $reset_byo = 2; // reset current byo-period for JAP-time
       }
-      if( $reset_byo )
+      if ( $reset_byo )
       {
-         if( $byotype == BYOTYPE_FISCHER )
+         if ( $byotype == BYOTYPE_FISCHER )
             $reset_byo = 0;
-         elseif( $this->game_row["{$oppcolor}_Byoperiods"] < 0 )
+         elseif ( $this->game_row["{$oppcolor}_Byoperiods"] < 0 )
             $reset_byo = 0;
-         elseif( $this->game_row['Byotime'] <= 0 || $this->game_row['Byoperiods'] < 0 )
+         elseif ( $this->game_row['Byotime'] <= 0 || $this->game_row['Byoperiods'] < 0 )
             $reset_byo = 0; // no byoyomi-reset if absolute-time
       }
       $this->reset_byoyomi = $reset_byo;
 
-      if( !$reset_byo && $add_hours <= 0 )
+      if ( !$reset_byo && $add_hours <= 0 )
          return 0; // nothing to do (0 hours added, no error)
 
       // add maintime and eventually reset byo-time for opponent
       $this->game_query = '';
-      if( $add_hours > 0 )
+      if ( $add_hours > 0 )
       {
          $this->game_query .= ",{$oppcolor}_Maintime={$oppcolor}_Maintime+$add_hours";
          $this->game_row["{$oppcolor}_Maintime"] += $add_hours;
       }
 
-      if( $reset_byo == 2 ) // special reset for JAP-time
+      if ( $reset_byo == 2 ) // special reset for JAP-time
       {
          $this->game_query .= ",{$oppcolor}_Byotime=" . $this->game_row['Byotime'];
          $this->game_row["{$oppcolor}_Byotime"] = $this->game_row['Byotime'];
       }
-      elseif( $reset_byo == 1 ) // full byo-yomi reset
+      elseif ( $reset_byo == 1 ) // full byo-yomi reset
       {
-         if( $this->game_row["{$oppcolor}_Maintime"] <= 0 )
+         if ( $this->game_row["{$oppcolor}_Maintime"] <= 0 )
          {
             $new_byotime = $this->game_row['Byotime'];
             $new_byoper  = $this->game_row['Byoperiods'];
@@ -248,7 +248,7 @@ class GameAddTime
          $this->game_row["{$oppcolor}_Byoperiods"] = $new_byoper;
       }
 
-      if( !$this->game_query )
+      if ( !$this->game_query )
          return 0; //nothing to do (shouldn't happen here)
 
       return ( $add_hours > 0 ) ? $add_hours : -$reset_byo;
@@ -267,16 +267,16 @@ class GameAddTime
       $pfx = ($color_to_move == BLACK) ? 'Black' : 'White';
 
       $allow_reset = false;
-      if( $game_row['Byotype'] == BYOTYPE_CANADIAN )
+      if ( $game_row['Byotype'] == BYOTYPE_CANADIAN )
          $allow_reset = true;
-      elseif( $game_row['Byotype'] == BYOTYPE_JAPANESE && $game_row["{$pfx}_Byoperiods"] >= 0 )
+      elseif ( $game_row['Byotype'] == BYOTYPE_JAPANESE && $game_row["{$pfx}_Byoperiods"] >= 0 )
          $allow_reset = true;
-      if( $game_row['Byotime'] <= 0 ) // absolute-time
+      if ( $game_row['Byotime'] <= 0 ) // absolute-time
          $allow_reset = false;
 
       $arr_days = array();
       $startidx = ($allow_reset) ? 0 : 1;
-      for( $i=$startidx; $i <= MAX_ADD_DAYS; $i++)
+      for ( $i=$startidx; $i <= MAX_ADD_DAYS; $i++)
          $arr_days[$i] = $i . ' ' . (($i>1) ? T_('days') : T_('day'));
 
       return array( 'days' => $arr_days, 'byo_reset' => $allow_reset );
@@ -291,24 +291,24 @@ class GameAddTime
    public static function allow_add_time_opponent( $game_row, $uid, $is_tdir=false )
    {
       // must be a running-game (not allowed for fair-komi)
-      if( !isRunningGame($game_row['Status']) )
+      if ( !isRunningGame($game_row['Status']) )
          return false;
 
       // must be one of my games (to give time to my opponent)
-      if( $game_row['White_ID'] != $uid && $game_row['Black_ID'] != $uid )
+      if ( $game_row['White_ID'] != $uid && $game_row['Black_ID'] != $uid )
          return false;
 
       // must not be a tournament-game except TD-allowed-to-add-time
-      if( !$is_tdir && $game_row['tid'] != 0 )
+      if ( !$is_tdir && $game_row['tid'] != 0 )
          return false;
 
       // get opponents columns
-      if( $game_row['Black_ID'] == $uid )
+      if ( $game_row['Black_ID'] == $uid )
          $oppcolor = 'White';
       else
          $oppcolor = 'Black';
       // don't exceed 365 days maintime
-      if( $game_row["{$oppcolor}_Maintime"]
+      if ( $game_row["{$oppcolor}_Maintime"]
             + time_convert_to_hours(MAX_ADD_DAYS,'days') > time_convert_to_hours(360,'days') )
          return false;
 
@@ -344,12 +344,12 @@ class GameAddTime
       $add_hours = $game_addtime->add_time( $add_hours, $reset_byo );
       $reset_byo = $game_addtime->reset_byoyomi;
 
-      if( !is_numeric($add_hours) || ($add_hours == 0 && !$reset_byo) ) // error or nothing to do
+      if ( !is_numeric($add_hours) || ($add_hours == 0 && !$reset_byo) ) // error or nothing to do
          return $add_hours;
 
       // handle Games.TimeOutDate if opponent-to-move
       $to_move_id = $game_row['ToMove_ID'];
-      if( $to_move_id != $uid )
+      if ( $to_move_id != $uid )
       {
          $col_to_move = ( $to_move_id == $game_row['Black_ID'] ) ? BLACK : WHITE;
          $timeout_date = NextGameOrder::make_timeout_date( $game_row, $col_to_move, $game_row['ClockUsed'], $game_row['LastTicks'] );
@@ -374,11 +374,11 @@ class GameAddTime
 
       // see also confirm.php
       db_query( "GameAddTime:add_time_opponent.update($gid)", $game_query );
-      if( mysql_affected_rows() != 1 ) //0 if it had done nothing
+      if ( mysql_affected_rows() != 1 ) //0 if it had done nothing
          error('mysql_update_game',"GameAddTime:add_time_opponent.update($gid)");
 
       db_query( "GameAddTime:add_time_opponent.insert_move($gid)", $move_query );
-      if( mysql_affected_rows() != 1 )
+      if ( mysql_affected_rows() != 1 )
          error('mysql_insert_move',"GameAddTime:add_time_opponent.insert_move($gid)");
 
       // clear caches
@@ -410,18 +410,18 @@ class MultiPlayerGame
     */
    public static function determine_game_type( $game_players, $count=false )
    {
-      if( trim($game_players) == '' || $game_players == '1:1' || $game_players == '2' )
+      if ( trim($game_players) == '' || $game_players == '1:1' || $game_players == '2' )
          return ($count) ? 2 : GAMETYPE_GO;
-      elseif( is_numeric($game_players) )
+      elseif ( is_numeric($game_players) )
       {
-         if( $game_players > 2 && $game_players <= MAX_GAME_PLAYERS && ($game_players & 1) ) // odd
+         if ( $game_players > 2 && $game_players <= MAX_GAME_PLAYERS && ($game_players & 1) ) // odd
             return ($count) ? $game_players : GAMETYPE_ZEN_GO;
       }
-      elseif( preg_match("/^\d+:\d+$/", $game_players) )
+      elseif ( preg_match("/^\d+:\d+$/", $game_players) )
       {
          $arr = explode(':', $game_players);
          $cnt_players = $arr[0] + $arr[1];
-         if( $cnt_players > 2 && $cnt_players <= MAX_GAME_PLAYERS )
+         if ( $cnt_players > 2 && $cnt_players <= MAX_GAME_PLAYERS )
             return ($count) ? $cnt_players : GAMETYPE_TEAM_GO;
       }
       return ($count) ? 0 : null;
@@ -443,7 +443,7 @@ class MultiPlayerGame
    public static function is_single_player( $game_players, $is_black )
    {
       $arr = explode(':', $game_players);
-      if( count($arr) == 2 ) // TeamGo
+      if ( count($arr) == 2 ) // TeamGo
          return ( $is_black ) ? ( $arr[0] == 1 ) : ( $arr[1] == 1 );
       else
          return false; // ZenGo
@@ -468,7 +468,7 @@ class MultiPlayerGame
     */
    public static function revoke_offer_game_players( $gid, $del_count, $gp_flag )
    {
-      if( is_numeric($gid) && $gid > 0 && $del_count > 0 && $gp_flag > 0 )
+      if ( is_numeric($gid) && $gid > 0 && $del_count > 0 && $gp_flag > 0 )
       {
          // remove join-reservation for waiting-room or invitation
          $gpf_check = GPFLAG_RESERVED | $gp_flag;
@@ -513,12 +513,12 @@ class MultiPlayerGame
     */
    public static function init_multi_player_game( $dbgmsg, $gid, $uid, $gp_count )
    {
-      if( $gp_count <= 2 )
+      if ( $gp_count <= 2 )
          error('invalid_args', "$dbgmsg.init_multi_player_game.check.gp_count($gid,$uid,$gp_count)");
 
       $query = "INSERT GamePlayers (gid,uid,Flags) VALUES ";
       $query .= "($gid,$uid,".(GPFLAG_MASTER|GPFLAG_JOINED).")";
-      for( $i=2; $i <= $gp_count; $i++ )
+      for ( $i=2; $i <= $gp_count; $i++ )
          $query .= ", ($gid,0,0)";
 
       db_query( "$dbgmsg.init_multi_player_game.insert_gp($gid,$uid,$gp_count)",
@@ -542,14 +542,14 @@ class MultiPlayerGame
             "Flags=(Flags & ~".GPFLAG_RESERVED.") | ".GPFLAG_JOINED." " .
          "WHERE gid=$gid AND uid=0 AND (Flags & ".(GPFLAG_RESERVED|GPFLAG_WAITINGROOM).") LIMIT 1",
          'waitingroom_join_error' );
-      if( mysql_affected_rows() != 1)
+      if ( mysql_affected_rows() != 1)
          error('waitingroom_join_too_late', "$dbgmsg.join_waitingroom_mp_game($gid,$uid)");
 
       self::change_player_mpg_count( "$dbgmsg.join_waitingroom_mp_game", $gid, $uid, 1 );
       self::change_joined_players( $dbgmsg, $gid, 1 );
 
       $master_uid = self::load_master_uid( "$dbgmsg.join_waitingroom_mp_game", $gid );
-      if( $master_uid > 0 )
+      if ( $master_uid > 0 )
          clear_cache_quick_status( $master_uid, QST_CACHE_MPG );
    }//join_waitingroom_mp_game
 
@@ -578,19 +578,19 @@ class MultiPlayerGame
     */
    public static function calc_game_player_for_move( $game_players, $game_moves, $handicap, $add_moves=0 )
    {
-      if( $handicap > 0 )
+      if ( $handicap > 0 )
          $moves = ( $game_moves < $handicap ) ? 0 : $game_moves - $handicap + 1;
       else
          $moves = $game_moves;
       $moves += $add_moves;
-      if( $moves < 0 )
+      if ( $moves < 0 )
          $moves = 0;
       $movecol = ($moves & 1) ? GPCOL_W : GPCOL_B;
 
       $arr = explode(':', $game_players);
-      if( count($arr) == 2 ) // Team-Go
+      if ( count($arr) == 2 ) // Team-Go
       {
-         if( $moves & 1 ) // odd = WHITE
+         if ( $moves & 1 ) // odd = WHITE
             return array( GPCOL_W, ( ( ($moves - 1) >> 1 ) % (int)$arr[1] ) + 1, $movecol );
          else // even = BLACK
             return array( GPCOL_B, ( ( $moves >> 1 ) % (int)$arr[0] ) + 1, $movecol );
@@ -626,7 +626,7 @@ class MultiPlayerGame
          : array( 'P.Running=P.Running-1', 'P.Finished=P.Finished+1' ); // end-game
 
       // update Players for all game-players: GamesMPG-- if game in SETUP-mode (for joined or reserved-invitation)
-      if( $game_in_setup_mode )
+      if ( $game_in_setup_mode )
          $arr_set[] = "P.GamesMPG=P.GamesMPG - IF( ( (GP.Flags & ".GPFLAG_JOINED.") OR " .
                "((GP.Flags & ".GPFLAGS_RESERVED_INVITATION.")=".GPFLAGS_RESERVED_INVITATION.") ), 1, 0)";
 
@@ -648,7 +648,7 @@ class MultiPlayerGame
     */
    public static function get_message_defaults( $mpg_type, $mpg_gid, $mpg_arr )
    {
-      switch( (int)$mpg_type )
+      switch ( (int)$mpg_type )
       {
          case MPGMSG_RESIGN:
             $move = (int)$mpg_arr['move'];
@@ -690,15 +690,15 @@ class MultiPlayerGame
    public static function calc_average_group_ratings( $gamedata, $rating_update=false )
    {
       $calc_ratings = array();
-      if( is_array($gamedata) )
+      if ( is_array($gamedata) )
       {
-         foreach( $gamedata as $gp )
+         foreach ( $gamedata as $gp )
          {
-            if( !is_null($gp->user) && $gp->user->hasRating() )
+            if ( !is_null($gp->user) && $gp->user->hasRating() )
                $calc_ratings[$gp->GroupColor][] = $gp->user->Rating;
          }
       }
-      elseif( !is_numeric($gamedata) || $gamedata <= 0 )
+      elseif ( !is_numeric($gamedata) || $gamedata <= 0 )
          error('invalid_args', "MultiPlayerGame:calc_average_group_ratings.check.gid($gamedata)");
       else
       {
@@ -707,11 +707,11 @@ class MultiPlayerGame
             "FROM GamePlayers AS GP INNER JOIN Players AS P ON P.ID=GP.uid " .
             "WHERE gid=$gamedata" );
 
-         while( $row = mysql_fetch_assoc($result) )
+         while ( $row = mysql_fetch_assoc($result) )
          {
-            if( $row['RatingStatus'] == RATING_INIT || $row['RatingStatus'] == RATING_RATED ) // user has rating
+            if ( $row['RatingStatus'] == RATING_INIT || $row['RatingStatus'] == RATING_RATED ) // user has rating
             {
-               if( is_valid_rating($row['Rating2']) )
+               if ( is_valid_rating($row['Rating2']) )
                   $calc_ratings[$row['GroupColor']][] = $row['Rating2'];
             }
          }
@@ -720,17 +720,17 @@ class MultiPlayerGame
 
       // calc average rating for groups B/W | BW
       $arr_ratings = array();
-      foreach( $calc_ratings as $gr_col => $arr )
+      foreach ( $calc_ratings as $gr_col => $arr )
       {
          $cnt = count($arr);
-         if( $cnt )
+         if ( $cnt )
             $arr_ratings[$gr_col] = array_sum($arr) / $cnt;
       }
 
-      if( $rating_update ) // convert result into format needed for rating-update
+      if ( $rating_update ) // convert result into format needed for rating-update
       {
          $upd_ratings = array();
-         if( isset($arr_ratings[GPCOL_BW]) )
+         if ( isset($arr_ratings[GPCOL_BW]) )
             $upd_ratings['bRating'] = $upd_ratings['wRating'] = $arr_ratings[GPCOL_BW];
          else
          {
@@ -775,7 +775,7 @@ class GamePlayer
 
    public function setGroupColor( $group_color )
    {
-      if( !preg_match("/^(BW|B|W|G[12])$/", $group_color) )
+      if ( !preg_match("/^(BW|B|W|G[12])$/", $group_color) )
          error('invalid_args', "GamePlayer.setGroupColor($group_color)");
       $this->GroupColor = $group_color;
    }
@@ -803,7 +803,7 @@ class GamePlayer
       $row = mysql_single_fetch( "GamePlayer:load_game_player($gid,$group_color,$group_order)",
             "SELECT * FROM GamePlayers " .
             "WHERE gid=$gid AND GroupColor='$sql_gr_col' AND GroupOrder=$sql_gr_order LIMIT 1" );
-      if( !$row )
+      if ( !$row )
          error('internal_error', "GamePlayer:load_game_player($gid,$group_color,$group_order)");
       return new GamePlayer( $row['ID'], $row['gid'], $row['GroupColor'], $row['GroupOrder'], $row['Flags'], $row['uid'] );
    }//load_game_player
@@ -826,7 +826,7 @@ class GamePlayer
       $row = mysql_single_fetch( "GamePlayer:load_uid_for_move($gid,$group_color,$group_order)",
             "SELECT uid FROM GamePlayers " .
             "WHERE gid=$gid AND GroupColor='$sql_gr_col' AND GroupOrder=$sql_gr_order LIMIT 1" );
-      if( !$row )
+      if ( !$row )
          error('internal_error', "GamePlayer:load_uid_for_move($gid,$group_color,$group_order)");
       return (int)@$row['uid'];
    }//load_uid_for_move
@@ -851,9 +851,9 @@ class GamePlayer
    {
       global $player_row;
 
-      if( !is_numeric($gid) || $gid <= 0 )
+      if ( !is_numeric($gid) || $gid <= 0 )
          error('invalid_args', "GamePlayers:load_users_for_mpgame.check.gid($gid,$group_color)");
-      if( (string)$group_color != '' && !preg_match("/^(BW|B|W|G[12])$/", $group_color) )
+      if ( (string)$group_color != '' && !preg_match("/^(BW|B|W|G[12])$/", $group_color) )
          error('invalid_args', "GamePlayers:load_users_for_mpgame.check.grcol($gid,$group_color)");
 
       $qpart_grcol = ($group_color) ? " AND GP.GroupColor='$group_color'" : '';
@@ -865,9 +865,9 @@ class GamePlayer
             "WHERE GP.gid=$gid $qpart_grcol" );
       $out = array(); # uid => Handle
       $arr_users = array(); // clear
-      while( $row = mysql_fetch_array( $result ) )
+      while ( $row = mysql_fetch_array( $result ) )
       {
-         if( $skip_myself && $player_row['Handle'] == $row['Handle'] )
+         if ( $skip_myself && $player_row['Handle'] == $row['Handle'] )
             continue;
          $out[$row['uid']] = $row['Handle'];
          $arr_users["{$row['GroupColor']}:{$row['GroupOrder']}"] = $row;
@@ -885,7 +885,7 @@ class GamePlayer
    public static function build_image_group_color( $group_color )
    {
       static $arr_col_images = null;
-      if( is_null($arr_col_images) )
+      if ( is_null($arr_col_images) )
       {
          global $base_path;
 
@@ -903,7 +903,7 @@ class GamePlayer
    public static function get_group_color_text( $group_color=null )
    {
       static $arr_group_cols = null;
-      if( is_null($arr_group_cols) )
+      if ( is_null($arr_group_cols) )
       {
          $arr_group_cols = array(
             'BW'  => T_('BW#gpcol'),
@@ -919,7 +919,7 @@ class GamePlayer
    public static function get_group_color_order( $group_color )
    {
       static $arr_grcol_order = null;
-      if( is_null($arr_grcol_order) )
+      if ( is_null($arr_grcol_order) )
       {
          $arr_grcol_order = array(
             'B'   => 0,
@@ -981,14 +981,14 @@ class GameHelper
     */
    public static function delete_running_game( $gid, $upd_players=true )
    {
-      if( !is_numeric($gid) && $gid <= 0 )
+      if ( !is_numeric($gid) && $gid <= 0 )
          return false;
 
       $grow = mysql_single_fetch( "GameHelper:delete_running_game.check.gid($gid)",
             "SELECT Status, tid, DoubleGame_ID, GameType, Black_ID, White_ID, ToMove_ID from Games WHERE ID=$gid LIMIT 1");
-      if( !$grow || (int)@$grow['tid'] > 0 )
+      if ( !$grow || (int)@$grow['tid'] > 0 )
          return false;
-      elseif( @$grow['Status'] == GAME_STATUS_FINISHED ) // must not be finished game, allow for setup/fair-komi
+      elseif ( @$grow['Status'] == GAME_STATUS_FINISHED ) // must not be finished game, allow for setup/fair-komi
       {
          error('invalid_args', "GameHelper:delete_running_game.check.status($gid,{$grow['Status']})");
          return false; // if passing through on error()
@@ -999,15 +999,15 @@ class GameHelper
          self::remove_double_game_reference( $gid, (int)@$grow['DoubleGame_ID'] );
 
          // delete potentially assigned waiting-room-entry (max. 1)
-         if( $grow['GameType'] != GAMETYPE_GO )
+         if ( $grow['GameType'] != GAMETYPE_GO )
             db_query( "GameHelper:delete_running_game.del_wroom($gid)",
                "DELETE FROM Waitingroom WHERE gid=$gid LIMIT 1" );
 
          $Black_ID = (int)@$grow['Black_ID'];
          $White_ID = (int)@$grow['White_ID'];
-         if( $upd_players )
+         if ( $upd_players )
          {
-            if( $grow['GameType'] == GAMETYPE_GO )
+            if ( $grow['GameType'] == GAMETYPE_GO )
             {
                db_query( "GameHelper:delete_running_game.upd_players($gid,$Black_ID,$White_ID)",
                   "UPDATE Players SET Running=Running-1 WHERE ID IN ($Black_ID,$White_ID) LIMIT 2" );
@@ -1035,29 +1035,29 @@ class GameHelper
     */
    public static function delete_finished_unrated_game( $gid )
    {
-      if( !is_numeric($gid) && $gid <= 0 )
+      if ( !is_numeric($gid) && $gid <= 0 )
          return false;
 
       $grow = mysql_single_fetch( "GameHelper:delete_finished_unrated_game.check.gid($gid)",
          "SELECT Status, tid, DoubleGame_ID, GameType, Black_ID, White_ID, Rated " .
          "FROM Games WHERE ID=$gid LIMIT 1");
-      if( is_null($grow) )
+      if ( is_null($grow) )
          return false;
-      elseif( @$grow['Status'] != GAME_STATUS_FINISHED ) // must be finished game
+      elseif ( @$grow['Status'] != GAME_STATUS_FINISHED ) // must be finished game
       {
          error('invalid_args', "GameHelper:delete_finished_unrated_game.check.status($gid,{$grow['Status']})");
          return false; // if passing through on error()
       }
-      elseif( (int)@$grow['tid'] > 0 )
+      elseif ( (int)@$grow['tid'] > 0 )
          return false;
-      elseif( @$grow['Rated'] != 'N' )
+      elseif ( @$grow['Rated'] != 'N' )
          return false;
 
       ta_begin();
       {//HOT-section to delete game table-entries for finished game
          self::remove_double_game_reference( $gid, (int)@$grow['DoubleGame_ID'] );
 
-         if( $grow['GameType'] == GAMETYPE_GO )
+         if ( $grow['GameType'] == GAMETYPE_GO )
          {
             $Black_ID = (int)@$grow['Black_ID'];
             $White_ID = (int)@$grow['White_ID'];
@@ -1082,7 +1082,7 @@ class GameHelper
    public static function remove_double_game_reference( $gid, $double_gid )
    {
       $double_gid = (int)$double_gid;
-      if( $double_gid > 0 )
+      if ( $double_gid > 0 )
          db_query( "GameHelper:remove_double_game_reference.doublegame($gid)",
             "UPDATE Games SET DoubleGame_ID=-ABS(DoubleGame_ID) WHERE ID=$double_gid LIMIT 1" );
    }//remove_double_game_reference
@@ -1128,7 +1128,7 @@ class GameHelper
             "AND ( Black_ID=$uid1 OR White_ID=$uid1 ) " .
             "AND ( Black_ID=$uid2 OR White_ID=$uid2 ) " .
             "LIMIT 1" );
-      if( mysql_affected_rows() != 1)
+      if ( mysql_affected_rows() != 1)
       {
          error('game_delete_invitation', "GameHelper:delete_invitation_game.delres.$dbgmsg($gid,$uid1,$uid2)");
          return false;
@@ -1140,12 +1140,12 @@ class GameHelper
    public static function update_players_start_game( $dbgmsg, $uid1, $uid2, $game_count, $rated_game )
    {
       $dbgmsg = "GameHelper:update_players_start_game($uid1,$uid2,$game_count,$rated_game).$dbgmsg";
-      if( !is_numeric($uid1) || !is_numeric($uid2) )
+      if ( !is_numeric($uid1) || !is_numeric($uid2) )
          error('invalid_args', "$dbgmsg.check.uids");
 
       $upd_players = new UpdateQuery('Players');
       $upd_players->upd_raw('Running', "Running + " . (int)$game_count );
-      if( $rated_game )
+      if ( $rated_game )
          $upd_players->upd_txt('RatingStatus', RATING_RATED);
       db_query( "$dbgmsg.update",
          "UPDATE Players SET " . $upd_players->get_query() . " WHERE ID IN ($uid1,$uid2) LIMIT 2" );
@@ -1157,10 +1157,10 @@ class GameHelper
     */
    public static function update_players_end_game( $dbgmsg, $gid, $game_type, $rated_status, $score, $black_id, $white_id )
    {
-      if( !is_numeric($gid) && $gid <= 0 )
+      if ( !is_numeric($gid) && $gid <= 0 )
          return;
 
-      if( $game_type == GAMETYPE_GO )
+      if ( $game_type == GAMETYPE_GO )
       {
          db_query( $dbgmsg."GameHelper:update_players_end_game.W($gid,$white_id)",
             "UPDATE Players SET Running=Running-1, Finished=Finished+1"
@@ -1200,16 +1200,16 @@ class GameHelper
    {
       $upd_query = new UpdateQuery('Games');
       $hours = 0;
-      if( $grow['Maintime'] > 0 || $grow['Byotime'] > 0)
+      if ( $grow['Maintime'] > 0 || $grow['Byotime'] > 0)
       {
-         if( $do_ticks )
+         if ( $do_ticks )
          {
             // LastTicks may handle -(time spend) at the moment of the start of vacations
             // time since start of move in the reference of the ClockUsed by the game
             $clock_ticks = get_clock_ticks( $dbgmsg.'.GH.update_clock', $grow['ClockUsed'] );
             $hours = ticks_to_hours( $clock_ticks - $grow['LastTicks'] );
 
-            if( $to_move == BLACK )
+            if ( $to_move == BLACK )
             {
                time_remaining( $hours,
                   $grow['Black_Maintime'], $grow['Black_Byotime'], $grow['Black_Byoperiods'],
@@ -1231,7 +1231,7 @@ class GameHelper
 
          // determine clock-used, last-ticks, timeout-date
          $pfx = ( $next_to_move == BLACK ) ? 'Black' : 'White';
-         if( $grow["{$pfx}_OnVacation"] > 0 ) // next-player on vacation
+         if ( $grow["{$pfx}_OnVacation"] > 0 ) // next-player on vacation
             $next_clockused = VACATION_CLOCK; //and LastTicks=0
          else
             $next_clockused = $grow["X_{$pfx}Clock"] + ( $grow['WeekendClock'] != 'Y' ? WEEKEND_CLOCK_OFFSET : 0 );
@@ -1284,10 +1284,10 @@ class GameHelper
       $key = "Games.$gid";
 
       $row = DgsCache::fetch( $dbgmsg, CACHE_GRP_GAMES, $key );
-      if( is_null($row) )
+      if ( is_null($row) )
       {
          $row = self::load_game_row( $dbgmsg, $gid, /*add-fields*/true );
-         if( $row && isStartedGame(@$row['Status']) )
+         if ( $row && isStartedGame(@$row['Status']) )
             DgsCache::store( $dbgmsg, CACHE_GRP_GAMES, $key, $row, 10*SECS_PER_MIN );
       }
 
@@ -1301,13 +1301,13 @@ class GameHelper
 
    public static function get_quick_game_action( $game_status, $handicap, $moves, $fk )
    {
-      if( $handicap > 0 && $moves < $handicap && $game_status == GAME_STATUS_PLAY )
+      if ( $handicap > 0 && $moves < $handicap && $game_status == GAME_STATUS_PLAY )
          return 1; // set handicap-stones
-      elseif( $game_status == GAME_STATUS_PLAY || $game_status == GAME_STATUS_PASS )
+      elseif ( $game_status == GAME_STATUS_PLAY || $game_status == GAME_STATUS_PASS )
          return 2; // move
-      elseif( $game_status == GAME_STATUS_SCORE || $game_status == GAME_STATUS_SCORE2 )
+      elseif ( $game_status == GAME_STATUS_SCORE || $game_status == GAME_STATUS_SCORE2 )
          return 3; // scoring
-      elseif( $game_status == GAME_STATUS_KOMI && !is_null($fk) )
+      elseif ( $game_status == GAME_STATUS_KOMI && !is_null($fk) )
          return $fk->get_quick_fair_komi_game_action();
       else
          return 0; // unsupported
@@ -1321,7 +1321,7 @@ class GameHelper
 
    public static function extend_query_with_game_prio( &$qsql, $uid, $load_prio, $tablename='Games' )
    {
-      if( $load_prio )
+      if ( $load_prio )
       {
          $qsql->add_part( SQLP_FIELDS, "COALESCE(GPRIO.Priority,0) AS X_Priority" );
          $qsql->add_part( SQLP_FROM, "LEFT JOIN GamesPriority AS GPRIO ON GPRIO.gid=$tablename.ID AND GPRIO.uid=$uid" );
@@ -1336,7 +1336,7 @@ class GameHelper
       $key = "GameNotes.$gid.$uid";
 
       $row = DgsCache::fetch( $dbgmsg, CACHE_GRP_GAME_NOTES, $key );
-      if( is_null($row) )
+      if ( is_null($row) )
       {
          $row = mysql_single_fetch( $dbgmsg,
             "SELECT Hidden, Notes FROM GamesNotes WHERE gid=$gid AND uid=$uid LIMIT 1" );
@@ -1350,7 +1350,7 @@ class GameHelper
    public static function update_game_notes( $dbgmsg, $gid, $uid, $hidden, $notes )
    {
       $dbgmsg = "GameHelper:update_game_notes($gid,$uid,$hidden).$dbgmsg";
-      if( $hidden != 'Y' )
+      if ( $hidden != 'Y' )
          $hidden = 'N'; // use default (not hidden) for invalid args
 
       ta_begin();
@@ -1393,30 +1393,30 @@ class GameHelper
       $chksum_query = crc32($query); // compare with stored checksum in cache
 
       $result = DgsCache::fetch( $dbgmsg, CACHE_GRP_GAMELIST_STATUS, $key );
-      if( is_array($result) )
+      if ( is_array($result) )
       {
          // check if db-query matches stored db-query by comparing check-sum
-         if( count($result) > 0 )
+         if ( count($result) > 0 )
          {
             $stored_chksum_query = array_shift($result); // remove checksum for final result
-            if( $stored_chksum_query != $chksum_query )
+            if ( $stored_chksum_query != $chksum_query )
                $result = null; // different query -> reload
          }
          else
             $result = null; // invalid store-data -> reload
       }
-      if( is_null($result) )
+      if ( is_null($result) )
       {
          $result = array( $chksum_query );
          $db_result = db_query( $dbgmsg.'.find_games', $query );
-         while( $row = mysql_fetch_assoc($db_result) )
+         while ( $row = mysql_fetch_assoc($db_result) )
             $result[] = $row;
          mysql_free_result($db_result);
 
          // store in cache only if last-access within one min (otherwise it's expired immediately) thereby saving cache-space
          $last_access = ($field_lastaccess ) ? (int)@$player_row[$field_lastaccess] : 0;
          $store_cache = ( $last_access >= $NOW - 1*SECS_PER_MIN );
-         if( $store_cache )
+         if ( $store_cache )
             DgsCache::store( $dbgmsg, CACHE_GRP_GAMELIST_STATUS, $key, $result, 1*SECS_PER_MIN );
          array_shift($result); // remove checksum for final result (only needed for cache)
       }
@@ -1427,7 +1427,7 @@ class GameHelper
    public static function delete_cache_status_games( $dbgmsg, $uid, $oid=0 )
    {
       DgsCache::delete( $dbgmsg, CACHE_GRP_GAMELIST_STATUS, "StatusGames.$uid" );
-      if( $oid > 0 )
+      if ( $oid > 0 )
          DgsCache::delete( $dbgmsg, CACHE_GRP_GAMELIST_STATUS, "StatusGames.$oid" );
    }
 
@@ -1479,12 +1479,12 @@ class FairKomiNegotiation
 
    public function get_komibid( $uid, $opponent=false, $non_empty=false )
    {
-      if( $non_empty )
+      if ( $non_empty )
          $komi = (is_null($this->game_setup->Komi)) ? $this->game_setup->OppKomi : $this->game_setup->Komi;
       else
       {
          $mine = ( $uid == $this->game_setup->uid );
-         if( $opponent )
+         if ( $opponent )
             $mine = !$mine;
 
          $komi = ( $mine ) ? $this->game_setup->Komi : $this->game_setup->OppKomi;
@@ -1494,9 +1494,9 @@ class FairKomiNegotiation
 
    public function set_komibid( $uid, $komibid )
    {
-      if( $uid != $this->black_id && $uid != $this->white_id )
+      if ( $uid != $this->black_id && $uid != $this->white_id )
          error('invalid_args', "FKN.set_komibid({$this->gid},$uid)");
-      if( $uid == $this->game_setup->uid )
+      if ( $uid == $this->game_setup->uid )
          $this->game_setup->Komi = $komibid;
       else
          $this->game_setup->OppKomi = $komibid;
@@ -1504,11 +1504,11 @@ class FairKomiNegotiation
 
    public function get_uid_highest_bid()
    {
-      if( !$this->has_both_komibids() )
+      if ( !$this->has_both_komibids() )
          return 0;
-      if( $this->game_setup->Komi > $this->game_setup->OppKomi )
+      if ( $this->game_setup->Komi > $this->game_setup->OppKomi )
          return $this->game_setup->uid;
-      elseif( $this->game_setup->Komi < $this->game_setup->OppKomi )
+      elseif ( $this->game_setup->Komi < $this->game_setup->OppKomi )
          return ( $this->game_setup->uid == $this->black_id ) ? $this->white_id : $this->black_id;
       else // nigiri on identical komi-bids
       {
@@ -1520,10 +1520,10 @@ class FairKomiNegotiation
    public function is_choose_color( $player_id )
    {
       $htype = $this->game_setup->Handicaptype;
-      if( is_htype_divide_choose($htype) )
+      if ( is_htype_divide_choose($htype) )
       {
          $gs_uid = $this->game_setup->uid;
-         if( $this->game_status == GAME_STATUS_KOMI ) // negotiation
+         if ( $this->game_status == GAME_STATUS_KOMI ) // negotiation
             $choose_color = ( $player_id == $this->white_id );
          else // game started
             $choose_color = ( $htype == HTYPE_YOU_KOMI_I_COLOR && $gs_uid == $player_id )
@@ -1540,16 +1540,16 @@ class FairKomiNegotiation
       global $player_row;
       $my_id = $player_row['ID'];
 
-      if( $this->game_status != GAME_STATUS_KOMI ) // shouldn't happen
+      if ( $this->game_status != GAME_STATUS_KOMI ) // shouldn't happen
          error('invalid_args', "FKN.get_quick_fair_komi_game_action({$this->game_status})");
-      if( $my_id != $this->tomove_id )
+      if ( $my_id != $this->tomove_id )
          return 13; // wait
 
-      if( $this->is_choose_color($my_id) )
+      if ( $this->is_choose_color($my_id) )
          return 12; // choose color
 
       $komibid = $this->get_komibid($my_id);
-      if( !is_null($komibid) && $this->game_setup->Handicaptype == HTYPE_AUCTION_OPEN )
+      if ( !is_null($komibid) && $this->game_setup->Handicaptype == HTYPE_AUCTION_OPEN )
          return 11; // bid komi or accept last komi-bid
 
       return 10; // bid komi
@@ -1559,7 +1559,7 @@ class FairKomiNegotiation
    public function get_view_komibid( $viewer_uid, $player_id, $form=null, $komibid_input=null )
    {
       global $base_path;
-      if( $player_id != $this->black_id && $player_id != $this->white_id )
+      if ( $player_id != $this->black_id && $player_id != $this->white_id )
          error('invalid_args', "FKN.get_view_komibid.check.player({$this->gid},$viewer_uid,$player_id)");
 
       $htype = $this->game_setup->Handicaptype;
@@ -1570,28 +1570,28 @@ class FairKomiNegotiation
       $gs_uid = $this->game_setup->uid;
       $choose_color = $this->is_choose_color( $player_id );
 
-      if( !$is_negotiation || $viewer_uid != $player_id || $player_id != $this->tomove_id || is_null($form) ) // VIEW-only
+      if ( !$is_negotiation || $viewer_uid != $player_id || $player_id != $this->tomove_id || is_null($form) ) // VIEW-only
       {
-         if( !$is_negotiation && $choose_color )
+         if ( !$is_negotiation && $choose_color )
          {
             $is_black = ( $gs_uid == $this->black_id );
-            if( $gs_uid != $player_id )
+            if ( $gs_uid != $player_id )
                $is_black = !$is_black;
             $result = ($is_black) ? T_('Black chosen#fairkomi') : T_('White chosen#fairkomi');
          }
-         elseif( is_null($komibid) )
+         elseif ( is_null($komibid) )
             $result = ( $choose_color ) ? T_('Choose color#fairkomi') : sprintf( '(%s)', T_('No bid yet#fairkomi') );
-         elseif( $is_negotiation && ($htype == HTYPE_AUCTION_SECRET) && $viewer_uid != $player_id )
+         elseif ( $is_negotiation && ($htype == HTYPE_AUCTION_SECRET) && $viewer_uid != $player_id )
             $result = $secret_text; // hide komi-bid
          else
             $result = ( $choose_color ) ? T_('Choose color#fairkomi') : $komibid;
 
-         if( $is_negotiation && $this->tomove_id == $player_id )
+         if ( $is_negotiation && $this->tomove_id == $player_id )
             $result .= MED_SPACING . image( $base_path.'images/prev.gif', T_('Player to move'), null, 'class=InTextImage' );
       }
       else // EDIT: viewer is player and to-move -> show input-elements
       {
-         if( $choose_color )
+         if ( $choose_color )
          {
             $result =
                $form->print_insert_radio_buttonsx('komibid', array( 'B' => T_('I choose Black#fairkomi') ), false)
@@ -1604,7 +1604,7 @@ class FairKomiNegotiation
                ? sprintf( '(%s)', T_('No bid yet#fairkomi') )
                : sprintf( '%s (%s)', $komibid, T_('Current bid#fairkomi') );
 
-            if( is_null($komibid_input) )
+            if ( is_null($komibid_input) )
                $komibid_input = $komibid;
             $result = $form->print_insert_text_input('komibid', 8, 8, $komibid_input) . SMALL_SPACING . $curr_bid;
          }
@@ -1648,10 +1648,10 @@ class FairKomiNegotiation
       $choose_color = $this->is_choose_color($my_id);
       $actions = array();
 
-      if( $htype == HTYPE_AUCTION_SECRET || $htype == HTYPE_AUCTION_OPEN || !$choose_color )
+      if ( $htype == HTYPE_AUCTION_SECRET || $htype == HTYPE_AUCTION_OPEN || !$choose_color )
          $actions[] = $form->print_insert_submit_button('komi_save', T_('Save Komi Bid') );
 
-      if( $htype == HTYPE_AUCTION_OPEN || $choose_color )
+      if ( $htype == HTYPE_AUCTION_OPEN || $choose_color )
       {
          $actions[] = $form->print_insert_submit_buttonx('fk_start', T_('Start Game#fairkomi'),
             ( $this->allow_start_game($my_id) ? '' : 'disabled=1' ) );
@@ -1665,7 +1665,7 @@ class FairKomiNegotiation
       $htype = $this->game_setup->Handicaptype;
       $notes = array();
 
-      if( $htype == HTYPE_AUCTION_SECRET )
+      if ( $htype == HTYPE_AUCTION_SECRET )
       {
          $notes[] = T_('Players secretly give their respective komi-bid (once per player).#fairkomi');
          $notes[] = T_('Komi-bids are hidden from the other player.#fairkomi');
@@ -1674,7 +1674,7 @@ class FairKomiNegotiation
             T_('The player with the highest bid takes Black and is giving that number of komi to White.#fairkomi'),
             T_('If the komi-bids are equal, player color is determined by Nigiri.#fairkomi'), );
       }
-      elseif( $htype == HTYPE_AUCTION_OPEN )
+      elseif ( $htype == HTYPE_AUCTION_OPEN )
       {
          $notes[] = T_('Players openly give their komi-bids.#fairkomi');
          $notes[] = T_('Komi-bids are shown to the other player.#fairkomi');
@@ -1683,7 +1683,7 @@ class FairKomiNegotiation
             T_('Each komi-bid must be higher than the last bid of the opponent.#fairkomi'),
             T_('The player with the highest bid takes Black and is giving that number of komi to White.#fairkomi'), );
       }
-      elseif( is_htype_divide_choose($htype) )
+      elseif ( is_htype_divide_choose($htype) )
       {
          $notes[] = T_('One player chooses the komi for White.#fairkomi');
          $notes[] = T_('Then the other player chooses the color to play and the game starts.#fairkomi');
@@ -1703,31 +1703,31 @@ class FairKomiNegotiation
       $choose_color = $this->is_choose_color($my_id);
 
       $errors = array();
-      if( strlen($komibid) == 0 )
+      if ( strlen($komibid) == 0 )
          $errors[] = ($choose_color) ? T_('Missing color choice#fairkomi') : T_('Missing komi-bid#fairkomi');
-      elseif( $choose_color && $komibid != 'B' && $komibid != 'W' )
+      elseif ( $choose_color && $komibid != 'B' && $komibid != 'W' )
          $errors[] = T_('Invalid color choice#fairkomi');
-      elseif( !$choose_color && !is_numeric($komibid) )
+      elseif ( !$choose_color && !is_numeric($komibid) )
          $errors[] = T_('Komi-bid must be a numeric value#fairkomi');
       else
       {
          $htype = $this->game_setup->Handicaptype;
          $jigomode = $this->game_setup->JigoMode;
 
-         if( floor(2 * $komibid) != 2 * $komibid ) // check for x.0|x.5
+         if ( floor(2 * $komibid) != 2 * $komibid ) // check for x.0|x.5
             $errors[] = ErrorCode::get_error_text('komi_bad_fraction');
 
          $is_fractional = floor(2 * abs($komibid)) & 1;
-         if( $jigomode == JIGOMODE_ALLOW_JIGO && $is_fractional )
+         if ( $jigomode == JIGOMODE_ALLOW_JIGO && $is_fractional )
             $errors[] = T_('Jigo is enforced, so komi-bid must not be fractional#fairkomi');
-         elseif( $jigomode == JIGOMODE_NO_JIGO && !$is_fractional )
+         elseif ( $jigomode == JIGOMODE_NO_JIGO && !$is_fractional )
             $errors[] = T_('Jigo is forbidden, so komi-bid must be fractional#fairkomi');
 
-         if( $htype == HTYPE_AUCTION_OPEN )
+         if ( $htype == HTYPE_AUCTION_OPEN )
          {
             // komi-bid must be increasing
             $opp_komibid = $this->get_komibid($my_id, /*opp*/true);
-            if( !is_null($opp_komibid) && $komibid <= $opp_komibid )
+            if ( !is_null($opp_komibid) && $komibid <= $opp_komibid )
                $errors[] = T_('Your komi-bid must be higher than that of the opponent.#fairkomi');
          }
       }
@@ -1741,11 +1741,11 @@ class FairKomiNegotiation
       $htype = $this->game_setup->Handicaptype;
       $allow_start = false;
 
-      if( $htype == HTYPE_AUCTION_OPEN || is_htype_divide_choose($htype) )
+      if ( $htype == HTYPE_AUCTION_OPEN || is_htype_divide_choose($htype) )
       {
          // start-game allowed, if there is a komi-bid from opponent to accept
          $opp_komibid = $this->get_komibid($my_id, /*opp*/true);
-         if( !is_null($opp_komibid) )
+         if ( !is_null($opp_komibid) )
             $allow_start = true;
       }
 
@@ -1772,23 +1772,23 @@ class FairKomiNegotiation
       // eventually determine komi/colors + start-game
       $start_game_new_black = 0;
       $htype = $this->game_setup->Handicaptype;
-      if( $htype == HTYPE_AUCTION_SECRET )
+      if ( $htype == HTYPE_AUCTION_SECRET )
       {
-         if( $is_start_game ) // shouldn't happen
+         if ( $is_start_game ) // shouldn't happen
             error('invalid_args', "FKN.save_komi.check.auct_secret.start({$this->gid},$htype,$my_id)");
 
          // save komi-bid for player to-move
          $this->set_komibid( $this->tomove_id, $komibid );
          $upd_game->upd_txt('GameSetup', $this->game_setup->encode());
 
-         if( $this->has_both_komibids() )
+         if ( $this->has_both_komibids() )
             $start_game_new_black = $this->get_uid_highest_bid();
       }
-      elseif( $htype == HTYPE_AUCTION_OPEN )
+      elseif ( $htype == HTYPE_AUCTION_OPEN )
       {
-         if( $is_start_game )
+         if ( $is_start_game )
          {
-            if( !$this->allow_start_game($my_id) ) // shouldn't happen
+            if ( !$this->allow_start_game($my_id) ) // shouldn't happen
                error('invalid_args', "FKN.save_komi.check.auct_open.start({$this->gid},$htype,$my_id)");
 
             $start_game_new_black = $opp_id; // accept higher komi-bid of opponent (opp=Black, me=White)
@@ -1800,20 +1800,20 @@ class FairKomiNegotiation
             $upd_game->upd_txt('GameSetup', $this->game_setup->encode());
          }
       }
-      elseif( is_htype_divide_choose($htype) )
+      elseif ( is_htype_divide_choose($htype) )
       {
-         if( $is_start_game )
+         if ( $is_start_game )
          {
-            if( $komibid != 'B' && $komibid != 'W' )
+            if ( $komibid != 'B' && $komibid != 'W' )
                error('invalid_args', "FKN.save_komi.check.divchoose.check.komibid({$this->gid},$htype,$my_id,$komibid)");
-            if( !$this->allow_start_game($my_id) ) // shouldn't happen
+            if ( !$this->allow_start_game($my_id) ) // shouldn't happen
                error('invalid_args', "FKN.save_komi.check.divchoose.start({$this->gid},$htype,$my_id)");
 
             $start_game_new_black = ( $komibid == 'B' ) ? $my_id : $opp_id; // accept my color choice (komi-bid)
          }
          else
          {
-            if( $this->is_choose_color($my_id) ) // shouldn't happen
+            if ( $this->is_choose_color($my_id) ) // shouldn't happen
                error('invalid_args', "FKN.save_komi.check.divchoose.savekomi({$this->gid},$htype,$my_id)");
 
             // save komi-bid for player to-move (only once for black)
@@ -1835,7 +1835,7 @@ class FairKomiNegotiation
       db_query( "FKN.save_komi.upd_activity({$this->gid},$my_id)",
          "UPDATE Players SET " . $upd_player->get_query() . " WHERE ID=$my_id LIMIT 1" );
 
-      if( $start_game_new_black > 0 )
+      if ( $start_game_new_black > 0 )
       {
          $this->start_fairkomi_game( $start_game_new_black );
          $result = 1; // komi-bid saved + started game
@@ -1867,9 +1867,9 @@ class FairKomiNegotiation
       $this->read_from_game_row( $grow );
 
       // checks
-      if( $this->game_status != GAME_STATUS_KOMI )
+      if ( $this->game_status != GAME_STATUS_KOMI )
          error('internal_error', "$dbgmsg.check.status({$this->game_status})");
-      if( $new_black_id != $this->black_id && $new_black_id != $this->white_id )
+      if ( $new_black_id != $this->black_id && $new_black_id != $this->white_id )
          error('wrong_players', "$dbgmsg.check.players");
 
       $new_white_id = ( $new_black_id == $this->black_id ) ? $this->white_id : $this->black_id;
@@ -1877,13 +1877,13 @@ class FairKomiNegotiation
       // handle shape-game (need to determine color to start playing)
       $black_first = true; // fair-komi has NO handicap
       $shape_id = (int)$grow['ShapeID'];
-      if( $shape_id > 0 )
+      if ( $shape_id > 0 )
       {
          $shape_snapshot = $grow['ShapeSnapshot'];
          $arr_shape = GameSnapshot::parse_check_extended_snapshot($shape_snapshot);
-         if( !is_array($arr_shape) ) // overwrite with defaults
+         if ( !is_array($arr_shape) ) // overwrite with defaults
             error('invalid_snapshot', "$dbgmsg.check.shape($shape_id,$shape_snapshot)");
-         if( ! (bool)@$arr_shape['PlayColorB'] ) // W-first
+         if ( ! (bool)@$arr_shape['PlayColorB'] ) // W-first
             $black_first = false;
       }
       $next_tomove_id = ($black_first) ? $new_black_id : $new_white_id;
@@ -1897,7 +1897,7 @@ class FairKomiNegotiation
       $use_opp_komi = is_htype_divide_choose($this->game_setup->Handicaptype);
       $upd_game->upd_num('Komi', $this->get_komibid($new_black_id, false, $use_opp_komi) );
 
-      if( $new_black_id != $this->black_id ) // switch attributes of B/W-player
+      if ( $new_black_id != $this->black_id ) // switch attributes of B/W-player
       {
          $upd_game->upd_num('Black_ID', $new_black_id);
          $upd_game->upd_num('White_ID', $new_white_id);
@@ -1985,11 +1985,11 @@ class GameFinalizer
 
       // update Games-entry
       $timeout_rejected = false;
-      if( !$this->skip_game_query && !$do_delete )
+      if ( !$this->skip_game_query && !$do_delete )
       {
-         if( $this->action_by == ACTBY_ADMIN )
+         if ( $this->action_by == ACTBY_ADMIN )
             $this->GameFlags |= GAMEFLAGS_ADMIN_RESULT;
-         if( is_null($upd_game) )
+         if ( is_null($upd_game) )
          {
             $upd_game = new UpdateQuery('Games');
             $upd_game->upd_txt('Status', GAME_STATUS_FINISHED );
@@ -2002,18 +2002,18 @@ class GameFinalizer
 
          // make game unrated if criteria matches and opponent rejects-win-by-timeout
          $timeout_rejected = $this->should_reject_win_by_timeout($game_score);
-         if( $timeout_rejected )
+         if ( $timeout_rejected )
             $upd_game->upd_txt('Rated', 'N');
 
          $game_updquery = "UPDATE Games SET " . $upd_game->get_query() .
             " WHERE ID=$gid AND Status".IS_STARTED_GAME." AND Moves={$this->Moves} LIMIT 1";
          $result = db_query( "$dbgmsg.upd_game", $game_updquery );
-         if( mysql_affected_rows() != 1 )
+         if ( mysql_affected_rows() != 1 )
             error('mysql_update_game', "$dbgmsg.upd_game2");
       }
 
       // signal game-end for tournament
-      if( $this->tid > 0 )
+      if ( $this->tid > 0 )
          TournamentGames::update_tournament_game_end( "$dbgmsg.tourney_game_end",
             $this->tid, $gid, $this->Black_ID, $game_score );
 
@@ -2021,14 +2021,14 @@ class GameFinalizer
       $game_notify = new GameNotify( $gid, $this->my_id, $this->Status, $this->GameType, $this->GamePlayers,
          $this->GameFlags, $this->Black_ID, $this->White_ID, $game_score, $timeout_rejected, $message );
 
-      if( $do_delete )
+      if ( $do_delete )
       {
          GameHelper::delete_running_game( $gid );
          list( $Subject, $Text ) = $game_notify->get_text_game_deleted( $this->action_by );
       }
       else
       {
-         if( $this->GameType != GAMETYPE_GO ) // MP-game
+         if ( $this->GameType != GAMETYPE_GO ) // MP-game
          {
             $arr_ratings = MultiPlayerGame::calc_average_group_ratings( $gid, /*rating-upd*/true );
             $rated_status = update_rating2($gid, true, false, $arr_ratings);
@@ -2064,9 +2064,9 @@ class GameFinalizer
       global $NOW;
 
       // must be scored by timeout, must be rated game, must be GO-type game, must not be a tournament
-      if( abs($game_score) == SCORE_TIME && $this->is_rated && $this->GameType == GAMETYPE_GO && $this->tid == 0 )
+      if ( abs($game_score) == SCORE_TIME && $this->is_rated && $this->GameType == GAMETYPE_GO && $this->tid == 0 )
       {
-         if( $game_score == -SCORE_TIME )
+         if ( $game_score == -SCORE_TIME )
          {
             $uid_winner = $this->Black_ID;
             $uid_loser  = $this->White_ID;
@@ -2083,9 +2083,9 @@ class GameFinalizer
 
          // check if reject-timeout enabled for winner (-1 = disabled, 0 = always reject, >0 days chk on losers lastmove)
          $winner_reject_timeout_days = (int)$urow_winner['RejectTimeoutWin'];
-         if( $winner_reject_timeout_days == 0 )
+         if ( $winner_reject_timeout_days == 0 )
             return true; // reject timeout
-         elseif( $winner_reject_timeout_days > 0 ) // reject-timeout must be enabled for winner
+         elseif ( $winner_reject_timeout_days > 0 ) // reject-timeout must be enabled for winner
          {
             $urow_loser = mysql_single_fetch("GameFinalizer.should_reject_win_by_timeout.find_loser({$this->gid},$uid_loser)",
                   "SELECT UNIX_TIMESTAMP(LastMove) AS X_LastMove FROM Players WHERE ID=$uid_loser LIMIT 1" )
@@ -2093,7 +2093,7 @@ class GameFinalizer
 
             $loser_last_moved = (int)$urow_loser['X_LastMove'];
 
-            if( $loser_last_moved <= ($NOW - $winner_reject_timeout_days * SECS_PER_DAY) )
+            if ( $loser_last_moved <= ($NOW - $winner_reject_timeout_days * SECS_PER_DAY) )
                return true; // reject timeout
          }
       }
@@ -2106,9 +2106,9 @@ class GameFinalizer
 
    private static function convert_score_to_posx( $score )
    {
-      if( abs($score) == SCORE_RESIGN )
+      if ( abs($score) == SCORE_RESIGN )
          return POSX_RESIGN;
-      elseif( abs($score) == SCORE_TIME )
+      elseif ( abs($score) == SCORE_TIME )
          return POSX_TIME;
       else
          return POSX_SCORE;
@@ -2171,7 +2171,7 @@ class GameNotify
    {
       $this->players = array();
 
-      if( $this->game_type == GAMETYPE_GO )
+      if ( $this->game_type == GAMETYPE_GO )
       {
          $result = db_query( "GameNotify.find_players({$this->gid})",
             "SELECT ID, Handle, Name FROM Players WHERE ID IN ({$this->black_id},{$this->white_id}) LIMIT 2" );
@@ -2184,7 +2184,7 @@ class GameNotify
             "WHERE GP.gid={$this->gid}" );
       }
 
-      while( $row = mysql_fetch_array( $result ) )
+      while ( $row = mysql_fetch_array( $result ) )
          $this->players[$row['ID']] = $row;
       mysql_free_result($result);
    }//_load_players
@@ -2193,7 +2193,7 @@ class GameNotify
    {
       // NOTE: server messages does not allow a reply, so add an *in message* reference to players
       $arr = array();
-      foreach( $this->players as $user_row )
+      foreach ( $this->players as $user_row )
          $arr[] = send_reference( REF_LINK, 1, '', $user_row );
       return "<p>Send a message to:<center>" . implode('<br>', $arr) . "</center>";
    }//_build_text_players
@@ -2217,16 +2217,16 @@ class GameNotify
       $act_user_text = $MAP_ACTBY_SUBJECT[$action_by][0];
 
       $subject = 'Game deleted';
-      if( $action_by == ACTBY_ADMIN || $action_by == ACTBY_CRON || $action_by == ACTBY_GAMEMASTER )
+      if ( $action_by == ACTBY_ADMIN || $action_by == ACTBY_CRON || $action_by == ACTBY_GAMEMASTER )
          $subject .= sprintf(' (by %s)', $act_user_text );
-      elseif( $action_by != ACTBY_PLAYER )
+      elseif ( $action_by != ACTBY_PLAYER )
          $action_by = ACTBY_PLAYER;
 
-      if( $this->game_status == GAME_STATUS_FINISHED )
+      if ( $this->game_status == GAME_STATUS_FINISHED )
          $gstatus = 'finished ';
-      elseif( $this->game_status == GAME_STATUS_SETUP )
+      elseif ( $this->game_status == GAME_STATUS_SETUP )
          $gstatus = 'setup-';
-      elseif( $this->game_status == GAME_STATUS_KOMI )
+      elseif ( $this->game_status == GAME_STATUS_KOMI )
          $gstatus = 'started ';
       else
          $gstatus = 'running ';
@@ -2239,7 +2239,7 @@ class GameNotify
             . "</center>"
             . $this->players_text;
 
-      if( $this->message )
+      if ( $this->message )
          $text .= "<p>The $act_user_text wrote:<p></p>" . $this->message;
 
       return array( $subject, $text );
@@ -2252,13 +2252,13 @@ class GameNotify
    public function get_text_game_result( $action_by, $user_row=null )
    {
       global $MAP_ACTBY_SUBJECT;
-      if( is_null($this->score) )
+      if ( is_null($this->score) )
          error('invalid_args', "GameNotify.get_text_game_result.check.score({$this->gid})");
 
       $subject = 'Game result';
-      if( $action_by == ACTBY_ADMIN )
+      if ( $action_by == ACTBY_ADMIN )
          $subject .= sprintf(' (by %s)', $MAP_ACTBY_SUBJECT[$action_by][0]);
-      elseif( $action_by != ACTBY_PLAYER && $action_by != ACTBY_CRON )
+      elseif ( $action_by != ACTBY_PLAYER && $action_by != ACTBY_CRON )
          $action_by = ACTBY_PLAYER;
 
       $text = "The result in the game:<center>"
@@ -2272,7 +2272,7 @@ class GameNotify
          : '';
       $obs_info_text = $info_text;
 
-      if( $this->timeout_rejected )
+      if ( $this->timeout_rejected )
          $info_text .= "<p><b>Info:</b> Based on the winner's profile preference, " .
             "the win by timeout was automatically rejected and the game was changed to unrated!";
 
@@ -2297,7 +2297,7 @@ class GameNotify
    public function get_recipients()
    {
       $arr = array_keys( $this->players );
-      if( $this->uid > 0 && abs($this->score) != SCORE_TIME )
+      if ( $this->uid > 0 && abs($this->score) != SCORE_TIME )
          unset($arr[$this->uid]);
       return $arr;
    }//get_recipients
@@ -2318,12 +2318,12 @@ class MaxGamesCheck
 
    public function __construct( $urow=null )
    {
-      if( is_numeric($urow) )
+      if ( is_numeric($urow) )
          $this->count_games = (int)$urow;
       else
       {
          global $player_row;
-         if( !is_array($urow) )
+         if ( !is_array($urow) )
             $urow = $player_row;
          $this->count_games = (int)@$urow['Running'] + (int)@$urow['GamesMPG'];
       }
@@ -2344,7 +2344,7 @@ class MaxGamesCheck
    /*! \brief Returns amount of allowed games to start from given number. */
    public function get_allowed_games( $num )
    {
-      if( MAX_GAMESRUN <= 0 ) // unlimited
+      if ( MAX_GAMESRUN <= 0 ) // unlimited
          return $num;
       else
       {
@@ -2362,11 +2362,11 @@ class MaxGamesCheck
    /*! \brief Returns true, if warning-threshold reached. */
    public function need_warning()
    {
-      if( MAX_GAMESRUN <= 0 ) // unlimited
+      if ( MAX_GAMESRUN <= 0 ) // unlimited
          return false;
 
       $warn_threshold = round(MAX_GAMESRUN * 75/100); // warning-threshold 75% of MAX_GAMESRUN
-      if( ALLOW_TOURNAMENTS && MAX_GAMESRUN_TREG > 0 )
+      if ( ALLOW_TOURNAMENTS && MAX_GAMESRUN_TREG > 0 )
          $warn_threshold = min( $warn_threshold, round(MAX_GAMESRUN_TREG * 75/100) ); // 75% for tourney-reg
 
       return ( $this->count_games >= max(1, $warn_threshold) );
@@ -2374,11 +2374,11 @@ class MaxGamesCheck
 
    public function get_warn_text( $html=true )
    {
-      if( !$this->need_warning() )
+      if ( !$this->need_warning() )
          return '';
 
       $msg = sprintf( T_('You already started %s of max. %s games.'), $this->count_games, MAX_GAMESRUN );
-      if( ALLOW_TOURNAMENTS )
+      if ( ALLOW_TOURNAMENTS )
          $msg .= ' ' . sprintf( T_('Tournament registration only allowed for <%s games.'),
             self::get_max_gamesrun_treg() );
 
@@ -2573,15 +2573,15 @@ class GameSetup
     */
    public function encode( $invitation=false, $is_template=false )
    {
-      if( !isset(self::$MAP_GAME_SETUP[$this->Handicaptype]) )
+      if ( !isset(self::$MAP_GAME_SETUP[$this->Handicaptype]) )
          error('invalid_args', "GameSetup.encode.htype({$this->uid},{$this->Handicaptype})");
-      if( !isset(self::$MAP_GAME_SETUP[$this->JigoMode]) )
+      if ( !isset(self::$MAP_GAME_SETUP[$this->JigoMode]) )
          error('invalid_args', "GameSetup.encode.jigomode({$this->uid},{$this->JigoMode})");
-      if( $invitation )
+      if ( $invitation )
       {
-         if( !isset(self::$MAP_GAME_SETUP[$this->Ruleset]) )
+         if ( !isset(self::$MAP_GAME_SETUP[$this->Ruleset]) )
             error('invalid_args', "GameSetup.encode.ruleset({$this->uid},{$this->Ruleset})");
-         if( !isset(self::$MAP_GAME_SETUP[$this->Byotype]) )
+         if ( !isset(self::$MAP_GAME_SETUP[$this->Byotype]) )
             error('invalid_args', "GameSetup.encode.byotype({$this->uid},{$this->Byotype})");
       }
 
@@ -2600,13 +2600,13 @@ class GameSetup
       $out[] = (is_null($this->Komi)) ? 'K' : sprintf('K%.1f', (float)$this->Komi);
       $out[] = sprintf('%.1f', (float)$this->AdjustKomi);
       $out[] = self::$MAP_GAME_SETUP[$this->JigoMode]; // J<x>
-      if( $invitation && !$is_template )
+      if ( $invitation && !$is_template )
          $out[] = 'FK';
       else
          $out[] = (is_null($this->OppKomi)) ? 'FK' : sprintf('FK%.1f', (float)$this->OppKomi);
 
       // restriction-stuff: R1:-900:2900:999:-103
-      if( $invitation && !$is_template )
+      if ( $invitation && !$is_template )
          array_push($out, 'R0', 0, 0, 0, 0 );
       else
          array_push($out,
@@ -2616,7 +2616,7 @@ class GameSetup
             (int)$this->MinRatedGames,
             (int)$this->SameOpponent );
 
-      if( $invitation || $is_template )
+      if ( $invitation || $is_template )
       {
          $out[] = 'C'; // message (empty)
 
@@ -2641,9 +2641,9 @@ class GameSetup
    /*! \brief Encodes this GameSetup into GameSetup used for profile-template for invitation and new-game. */
    public function encode_profile_template( $prof_type )
    {
-      if( $prof_type == PROFTYPE_TMPL_INVITE )
+      if ( $prof_type == PROFTYPE_TMPL_INVITE )
          return $this->encode( /*inv*/true, /*tmpl*/false );
-      elseif( $prof_type == PROFTYPE_TMPL_NEWGAME )
+      elseif ( $prof_type == PROFTYPE_TMPL_NEWGAME )
          return $this->encode( /*inv*/true, /*tmpl*/true );
       else
          error('invalid_args', "GameSetup.encode_profile_template.check($prof_type)");
@@ -2657,35 +2657,35 @@ class GameSetup
     */
    public function read_waitingroom_fields( $grow )
    {
-      if( isset($grow['tid']) )
+      if ( isset($grow['tid']) )
          $this->tid = (int)$grow['tid'];
 
-      if( isset($grow['ShapeID']) )
+      if ( isset($grow['ShapeID']) )
          $this->ShapeID = (int)$grow['ShapeID'];
-      if( isset($grow['ShapeSnapshot']) )
+      if ( isset($grow['ShapeSnapshot']) )
          $this->ShapeSnapshot = $grow['ShapeSnapshot'];
-      if( isset($grow['GameType']) )
+      if ( isset($grow['GameType']) )
          $this->GameType = $grow['GameType'];
-      if( isset($grow['GamePlayers']) )
+      if ( isset($grow['GamePlayers']) )
          $this->GamePlayers = $grow['GamePlayers'];
-      if( isset($grow['Ruleset']) )
+      if ( isset($grow['Ruleset']) )
          $this->Ruleset = $grow['Ruleset'];
-      if( isset($grow['Size']) )
+      if ( isset($grow['Size']) )
          $this->Size = (int)@$grow['Size'];
-      if( isset($grow['Rated']) )
+      if ( isset($grow['Rated']) )
          $this->Rated = ( $grow['Rated'] == 'Y' );
-      if( isset($grow['StdHandicap']) )
+      if ( isset($grow['StdHandicap']) )
          $this->StdHandicap = ( $grow['StdHandicap'] == 'Y' );
 
-      if( isset($grow['Maintime']) )
+      if ( isset($grow['Maintime']) )
          $this->Maintime = (int)$grow['Maintime'];
-      if( isset($grow['Byotype']) )
+      if ( isset($grow['Byotype']) )
          $this->Byotype = $grow['Byotype'];
-      if( isset($grow['Byotime']) )
+      if ( isset($grow['Byotime']) )
          $this->Byotime = (int)$grow['Byotime'];
-      if( isset($grow['Byoperiods']) )
+      if ( isset($grow['Byoperiods']) )
          $this->Byoperiods = (int)$grow['Byoperiods'];
-      if( isset($grow['WeekendClock']) )
+      if ( isset($grow['WeekendClock']) )
          $this->WeekendClock = ( $grow['WeekendClock'] == 'Y' );
    }//read_waitingroom_fields
 
@@ -2696,7 +2696,7 @@ class GameSetup
          "K={$this->Komi}/{$this->AdjustKomi} J={$this->JigoMode} FK={$this->OppKomi} " .
          "MBR=" . yesno($this->MustBeRated) . " Rating={$this->RatingMin}..{$this->RatingMax} " .
          "MRG={$this->MinRatedGames} SO={$this->SameOpponent} M=[{$this->Message}]";
-      if( $invitation )
+      if ( $invitation )
          $result .= "; S={$this->Size} Rules={$this->Ruleset} Rated=" . yesno($this->Rated) . " StdH=" . yesno($this->StdHandicap) .
             " Time={$this->Byotype}:{$this->Maintime}/{$this->Byotime}/{$this->Byoperiods}:" . yesno($this->WeekendClock) .
             " tid={$this->tid} shape={$this->ShapeID}/[{$this->ShapeSnapshot}] " .
@@ -2712,11 +2712,11 @@ class GameSetup
 
    public function format_handicap_type( $handicaptype=null, $pivot_handle, $opp_handle )
    {
-      if( is_null($handicaptype) )
+      if ( is_null($handicaptype) )
          $handicaptype = $this->Handicaptype;
 
       $cat_htype = get_category_handicaptype($handicaptype);
-      switch( (string)$cat_htype )
+      switch ( (string)$cat_htype )
       {
          case CAT_HTYPE_CONV:
             return T_('Conventional handicap');
@@ -2760,7 +2760,7 @@ class GameSetup
 
       $gs = new GameSetup( 0 );
       $game_setup = trim($game_setup);
-      if( (string)$game_setup == '' )
+      if ( (string)$game_setup == '' )
          return ($null_on_empty) ? null : $gs;
 
       // Standard:
@@ -2770,7 +2770,7 @@ class GameSetup
       // NOTE: when adding new game-settings -> adjust regex also matching "old" syntaxes
       $rx_inv = ($invitation) ? ":I\\d+:[01]:r\\d+:[01]:t[JCF]:\\d+:\\d+:\\d+:[01]\$" : '';
       $rx_gs = "/^T\\d+:U\\d+:H\\d+:-?\\d+:\\d+:-?\\d+:K$RX_KOMI2:$RX_KOMI:J[012]:FK$RX_KOMI2:R[01]:-?\\d+:-?\\d+:\\d+:-?\\d+:C$rx_inv/";
-      if( !preg_match($rx_gs, $game_setup) )
+      if ( !preg_match($rx_gs, $game_setup) )
          error('invalid_args', "GameSetup:new_from_game_setup.check_gs($invitation,$game_setup)");
       $arr = explode(GS_SEP, $game_setup);
       //error_log("new_from_game_setup($invitation,$game_setup): [". implode('] [', $arr)."]"); //TEST
@@ -2796,7 +2796,7 @@ class GameSetup
       $gs->MinRatedGames = (int)array_shift($arr);
       $gs->SameOpponent = (int)array_shift($arr);
 
-      if( $invitation )
+      if ( $invitation )
       {
          $gs->Message = substr( array_shift($arr), 1);
 
@@ -2822,9 +2822,9 @@ class GameSetup
    public static function build_invitation_game_setup( $game_setup1, $game_setup2 )
    {
       $out = array();
-      if( !is_null($game_setup1) )
+      if ( !is_null($game_setup1) )
          $out[] = $game_setup1->encode( /*inv*/true );
-      if( !is_null($game_setup2) )
+      if ( !is_null($game_setup2) )
          $out[] = $game_setup2->encode( /*inv*/true );
       return implode(GS_SEP_INVITATION, $out );
    }//build_invitation_game_setup
@@ -2841,31 +2841,31 @@ class GameSetup
    {
       $arr_input = explode(GS_SEP_INVITATION, trim($game_setup)); // note: arr( Str ) if gs==empty
       $cnt_input = count($arr_input);
-      if( $cnt_input > 2 )
+      if ( $cnt_input > 2 )
          error('invalid_args', "GameSetup:parse_invitation_game_setup.check.gs($pivot_uid,$cnt_input,$game_setup)");
 
       $result = array();
-      foreach( $arr_input as $gs_part )
+      foreach ( $arr_input as $gs_part )
       {
-         if( (string)$gs_part != '' )
+         if ( (string)$gs_part != '' )
             $result[] = self::new_from_game_setup( $gs_part, /*inv*/true );
       }
 
       $cnt_gs = count($result);
-      if( $cnt_gs == 0 )
+      if ( $cnt_gs == 0 )
          array_push( $result, null, null );
-      elseif( $cnt_gs == 1 )
+      elseif ( $cnt_gs == 1 )
       {
-         if( $pivot_uid < 0 || $result[0]->uid == $pivot_uid )
+         if ( $pivot_uid < 0 || $result[0]->uid == $pivot_uid )
             $result[] = null;
          else
             array_unshift( $result, null );
       }
-      elseif( $cnt_gs == 2 && $pivot_uid >= 0 )
+      elseif ( $cnt_gs == 2 && $pivot_uid >= 0 )
       {
-         if( $result[0]->uid != $pivot_uid && $result[1]->uid != $pivot_uid )
+         if ( $result[0]->uid != $pivot_uid && $result[1]->uid != $pivot_uid )
             error('internal_error', "GameSetup:parse_inv_gs.check.uid($pivot_uid,$gid)");
-         if( $result[1]->uid == $pivot_uid && $result[0]->uid != $pivot_uid )
+         if ( $result[1]->uid == $pivot_uid && $result[0]->uid != $pivot_uid )
             swap( $result[0], $result[1] );
       }
 
@@ -2880,13 +2880,13 @@ class GameSetup
    {
       $jigo_mode = JIGOMODE_KEEP_KOMI; //default
 
-      if( $cat_htype == CAT_HTYPE_FAIR_KOMI )
+      if ( $cat_htype == CAT_HTYPE_FAIR_KOMI )
       {
-         if( $game_setup instanceof GameSetup )
+         if ( $game_setup instanceof GameSetup )
             $my_gs = $game_setup;
          else
             list( $my_gs, $opp_gs ) = self::parse_invitation_game_setup( $pivot_uid, $game_setup, $gid );
-         if( !is_null($my_gs) )
+         if ( !is_null($my_gs) )
             $jigo_mode = $my_gs->JigoMode;
       }
 
@@ -2914,9 +2914,9 @@ class GameSetup
       $gs->RatingMax = (int)$grow['RatingMax'];
       $gs->MinRatedGames = (int)$grow['MinRatedGames'];
       $gs->SameOpponent = (int)$grow['SameOpponent'];
-      if( isset($grow['Message']) )
+      if ( isset($grow['Message']) )
          $gs->Message = $grow['Message'];
-      elseif( isset($grow['Comment']) )
+      elseif ( isset($grow['Comment']) )
          $gs->Message = $grow['Comment'];
       return $gs;
    }//new_from_game_row
@@ -2929,40 +2929,40 @@ class GameSetup
    {
       $out = array();
 
-      if( $gs_old->Ruleset !== $gs_new->Ruleset )
+      if ( $gs_old->Ruleset !== $gs_new->Ruleset )
          $out[] = array( T_('Ruleset'), getRulesetText($gs_old->Ruleset), getRulesetText($gs_new->Ruleset) );
-      if( $gs_old->Size !== $gs_new->Size )
+      if ( $gs_old->Size !== $gs_new->Size )
          $out[] = array( T_('Board Size'), $gs_old->Size, $gs_new->Size );
 
       // handicap-type
       $htype_new = self::swap_htype_black_white($gs_new->Handicaptype);
       $htype_old_text = $gs_old->format_handicap_type( null, $my_handle, $opp_handle );
       $htype_new_text = $gs_new->format_handicap_type( $htype_new, $my_handle, $opp_handle );
-      if( $htype_old_text !== $htype_new_text )
+      if ( $htype_old_text !== $htype_new_text )
          $out[] = array( T_('Handicap Type#inv_diff'), $htype_old_text, $htype_new_text, 1 );
 
       $old_adj_handi = build_adjust_handicap( $gs_old->Size, $gs_old->AdjustHandicap, $gs_old->MinHandicap, $gs_old->MaxHandicap );
       $new_adj_handi = build_adjust_handicap( $gs_new->Size, $gs_new->AdjustHandicap, $gs_new->MinHandicap, $gs_new->MaxHandicap );
-      if( $old_adj_handi !== $new_adj_handi )
+      if ( $old_adj_handi !== $new_adj_handi )
          $out[] = array( T_('Adjust Handicap#inv_diff'), $old_adj_handi, $new_adj_handi );
 
-      if( $gs_old->StdHandicap !== $gs_new->StdHandicap )
+      if ( $gs_old->StdHandicap !== $gs_new->StdHandicap )
          $out[] = array( T_('Handicap stones placement#inv_diff'), $gs_old->format_std_handicap(), $gs_new->format_std_handicap() );
 
       $old_adj_komi = build_adjust_komi( $gs_old->AdjustKomi, $gs_old->JigoMode );
       $new_adj_komi = build_adjust_komi( $gs_new->AdjustKomi, $gs_new->JigoMode );
-      if( $old_adj_komi !== $new_adj_komi )
+      if ( $old_adj_komi !== $new_adj_komi )
          $out[] = array( T_('Adjust Komi#inv_diff'), $old_adj_komi, $new_adj_komi );
 
       // time
       $old_time = $gs_old->format_time();
       $new_time = $gs_new->format_time();
-      if( $old_time !== $new_time )
+      if ( $old_time !== $new_time )
          $out[] = array( T_('Time#inv_diff'), $old_time, $new_time );
 
-      if( $gs_old->WeekendClock !== $gs_new->WeekendClock )
+      if ( $gs_old->WeekendClock !== $gs_new->WeekendClock )
          $out[] = array( T_('Clock runs on weekends'), yesno($gs_old->WeekendClock), yesno($gs_new->WeekendClock) );
-      if( $gs_old->Rated !== $gs_new->Rated )
+      if ( $gs_old->Rated !== $gs_new->Rated )
          $out[] = array( T_('Rated game'), yesno($gs_old->Rated), yesno($gs_new->Rated) );
 
       return $out;
@@ -2977,13 +2977,13 @@ class GameSetup
 
    public static function swap_htype_black_white( $handicaptype )
    {
-      if( $handicaptype == HTYPE_BLACK )
+      if ( $handicaptype == HTYPE_BLACK )
          return HTYPE_WHITE;
-      elseif( $handicaptype == HTYPE_WHITE )
+      elseif ( $handicaptype == HTYPE_WHITE )
          return HTYPE_BLACK;
-      elseif( $handicaptype == HTYPE_YOU_KOMI_I_COLOR )
+      elseif ( $handicaptype == HTYPE_YOU_KOMI_I_COLOR )
          return HTYPE_I_KOMI_YOU_COLOR;
-      elseif( $handicaptype == HTYPE_I_KOMI_YOU_COLOR )
+      elseif ( $handicaptype == HTYPE_I_KOMI_YOU_COLOR )
          return HTYPE_YOU_KOMI_I_COLOR;
       else
          return $handicaptype;
@@ -2995,9 +2995,9 @@ class GameSetup
     */
    public static function determine_handicaptype( $my_gs, $opp_gs, $tomove_id, $my_col_black )
    {
-      if( !is_null($opp_gs) ) // opponents swapped htype choice has precedence
+      if ( !is_null($opp_gs) ) // opponents swapped htype choice has precedence
          $my_htype = $opp_gs->get_htype_swapped();
-      elseif( !is_null($my_gs) ) // if opp-game-setup not set -> use my own choice
+      elseif ( !is_null($my_gs) ) // if opp-game-setup not set -> use my own choice
          $my_htype = $my_gs->Handicaptype;
       else // otherwise determine htype from Games.ToMove_ID (could also be old non-migrated game-invitation)
          $my_htype = null;
@@ -3061,22 +3061,22 @@ class GameSetupChecker
    private function check_komi()
    {
       // komi-check only for: invite, std new-game
-      if( $this->view != GSC_VIEW_INVITE && $this->view != GSETVIEW_STANDARD )
+      if ( $this->view != GSC_VIEW_INVITE && $this->view != GSETVIEW_STANDARD )
          return;
 
       $has_err = false;
       $komi = trim(@$_REQUEST['komi_m']);
-      if( (string)$komi == '' || !is_numeric($komi) )
+      if ( (string)$komi == '' || !is_numeric($komi) )
          $this->errors[] = $has_err = sprintf( T_('Invalid value for komi [%s].'), $komi );
 
       $komi = (float)$komi;
 
-      if( abs($komi) > MAX_KOMI_RANGE )
+      if ( abs($komi) > MAX_KOMI_RANGE )
          $this->errors[] = $has_err = ErrorCode::get_error_text('komi_range');
-      if( floor(2 * $komi) != 2 * $komi ) // check for x.0|x.5
+      if ( floor(2 * $komi) != 2 * $komi ) // check for x.0|x.5
          $this->errors[] = $has_err = ErrorCode::get_error_text('komi_bad_fraction');
 
-      if( $has_err )
+      if ( $has_err )
          $this->error_fields['komi_m'] = 1;
    }//check_komi
 
@@ -3090,16 +3090,16 @@ class GameSetupChecker
 
       $has_err = false;
       $ferrors = array();
-      foreach( $arr_check_fields as $field )
+      foreach ( $arr_check_fields as $field )
       {
          $val = trim(@$_REQUEST[$field]);
-         if( (string)$val == '' || !is_numeric($val) || (int)$val != $val || $val < 0 )
+         if ( (string)$val == '' || !is_numeric($val) || (int)$val != $val || $val < 0 )
          {
             $ferrors[] = $val;
             $this->error_fields[$field] = $has_err = 1;
          }
       }
-      if( count($ferrors) )
+      if ( count($ferrors) )
          $this->errors[] = sprintf(T_('Invalid time values [%s], must be integer and >= 0.'), implode('][', $ferrors));
 
       $byoyomitype = @$_REQUEST['byoyomitype'];
@@ -3114,12 +3114,12 @@ class GameSetupChecker
       $timeunit_can = @$_REQUEST['timeunit_can'];
       $byoperiods_can = (int)@$_REQUEST['byoperiods_can'];
 
-      if( $byoyomitype == BYOTYPE_JAPANESE && $byoperiods_jap <= 0 )
+      if ( $byoyomitype == BYOTYPE_JAPANESE && $byoperiods_jap <= 0 )
       {
          $this->errors[] = T_('Invalid extra periods for Japanese byoyomi');
          $this->error_fields['byoperiods_jap'] = $has_err = 1;
       }
-      elseif( $byoyomitype == BYOTYPE_CANADIAN && $byoperiods_can <= 0 )
+      elseif ( $byoyomitype == BYOTYPE_CANADIAN && $byoperiods_can <= 0 )
       {
          $this->errors[] = T_('Invalid number of stones for Canadian byoyomi');
          $this->error_fields['byoperiods_can'] = $has_err = 1;
@@ -3134,12 +3134,12 @@ class GameSetupChecker
                                     $byotimevalue_can, $timeunit_can, $byoperiods_can,
                                     $byotimevalue_fis, $timeunit_fis);
 
-      if( $hours < 1 && ($byohours < 1 || $byoyomitype == BYOTYPE_FISCHER) )
+      if ( $hours < 1 && ($byohours < 1 || $byoyomitype == BYOTYPE_FISCHER) )
       {
          $this->errors[] = ErrorCode::get_error_text('time_limit_too_small');
-         if( !$has_err )
+         if ( !$has_err )
          {
-            foreach( $arr_check_fields as $err_field )
+            foreach ( $arr_check_fields as $err_field )
                $this->error_fields[$err_field] = 1;
          }
       }
@@ -3148,58 +3148,58 @@ class GameSetupChecker
    private function check_adjust_komi()
    {
       // komi-check only for: invite, std new-game
-      if( $this->view != GSC_VIEW_INVITE && $this->view != GSETVIEW_STANDARD )
+      if ( $this->view != GSC_VIEW_INVITE && $this->view != GSETVIEW_STANDARD )
          return;
 
       $has_err = false;
       $adj_komi = @$_REQUEST['adj_komi'];
-      if( (string)$adj_komi == '' || !is_numeric($adj_komi) )
+      if ( (string)$adj_komi == '' || !is_numeric($adj_komi) )
          $this->errors[] = $has_err = sprintf( T_('Invalid value for komi-adjustment [%s].'), $adj_komi );
 
-      if( abs($adj_komi) > MAX_KOMI_RANGE )
+      if ( abs($adj_komi) > MAX_KOMI_RANGE )
          $this->errors[] = $has_err = T_('Adjust Komi') . ': ' . ErrorCode::get_error_text('komi_range');
-      if( floor(2 * $adj_komi) != 2 * $adj_komi ) // check for x.0|x.5
+      if ( floor(2 * $adj_komi) != 2 * $adj_komi ) // check for x.0|x.5
          $this->errors[] = $has_err = T_('Adjust Komi') . ': ' . ErrorCode::get_error_text('komi_bad_fraction');
 
-      if( $has_err )
+      if ( $has_err )
          $this->error_fields['adj_komi'] = 1;
    }//check_adjust_komi
 
    private function check_min_rated_games()
    {
       // min-rated-games only for: std/fair-komi new-game
-      if( $this->view != GSETVIEW_STANDARD && $this->view != GSETVIEW_FAIRKOMI )
+      if ( $this->view != GSETVIEW_STANDARD && $this->view != GSETVIEW_FAIRKOMI )
          return;
 
       $min_rgames = @$_REQUEST['min_rated_games'];
-      if( (string)$min_rgames == '' )
+      if ( (string)$min_rgames == '' )
          return;
 
       $has_err = false;
-      if( !is_numeric($min_rgames) || (int)$min_rgames != $min_rgames || $min_rgames < 0 )
+      if ( !is_numeric($min_rgames) || (int)$min_rgames != $min_rgames || $min_rgames < 0 )
          $this->errors[] = $has_err = sprintf( T_('Invalid value for min. rated games [%s].'), $min_rgames );
 
       $min_rgames = (int)$min_rgames;
-      if( $min_rgames > 999 )
+      if ( $min_rgames > 999 )
          $this->errors[] = $has_err = sprintf( T_('Value for min. rated games is out of range.'), $min_rgames );
 
-      if( $has_err )
+      if ( $has_err )
          $this->error_fields['min_rated_games'] = 1;
    }//check_min_rated_games
 
    private function check_game_players()
    {
       // game-players only for: MPG new-game
-      if( $this->view != GSETVIEW_MPGAME )
+      if ( $this->view != GSETVIEW_MPGAME )
          return;
 
       $has_err = false;
       $game_players = @$_REQUEST['game_players'];
       $game_type = MultiPlayerGame::determine_game_type($game_players);
-      if( is_null($game_type) )
+      if ( is_null($game_type) )
          $this->errors[] = $has_err = sprintf( T_('Invalid value for game-players [%s].'), $game_players );
 
-      if( $has_err )
+      if ( $has_err )
          $this->error_fields['game_players'] = 1;
    }//check_game_players
 
@@ -3220,14 +3220,14 @@ class GameSetupChecker
    /*! \brief Checks max. count of existing waiting-room-entries. */
    public static function check_wroom_count( $view, $uid, &$errors )
    {
-      if( WROOM_MAX_ENTRIES <= 0 )
+      if ( WROOM_MAX_ENTRIES <= 0 )
          return;
 
-      if( $view == GSETVIEW_STANDARD || $view == GSETVIEW_FAIRKOMI || $view == GSETVIEW_MPGAME )
+      if ( $view == GSETVIEW_STANDARD || $view == GSETVIEW_FAIRKOMI || $view == GSETVIEW_MPGAME )
       {
          $row = mysql_single_fetch( "GameSetupChecker:check_wroom_count.count_wr($uid,$view)",
                "SELECT COUNT(*) AS X_Count FROM Waitingroom WHERE uid=$uid" );
-         if( $row && (int)@$row['X_Count'] >= WROOM_MAX_ENTRIES )
+         if ( $row && (int)@$row['X_Count'] >= WROOM_MAX_ENTRIES )
             $errors[] = sprintf( T_('Max. number of own waiting-room entries [%s] has been reached.'), WROOM_MAX_ENTRIES ) . "\n" .
                T_('You can save the form as template for later, delete one waiting-room offer or wait till they are joined.') . "\n" .
                ( $view != GSETVIEW_MPGAME ?
@@ -3288,7 +3288,7 @@ class GameSetupBuilder
       $this->build_url_handi_komi_rated( $url );
       $this->build_url_adjustments( $url, $cat_htype );
 
-      if( !$this->is_template )
+      if ( !$this->is_template )
          $url['message'] = $this->game_setup->Message;
    }//fill_invite_from_game_setup
 
@@ -3300,7 +3300,7 @@ class GameSetupBuilder
       $this->build_url_game_basics( $url );
       $url['game_players'] = $this->game->GamePlayers;
 
-      if( !$this->is_mpg )
+      if ( !$this->is_mpg )
       {
          $this->build_url_cat_htype_manual( $url, CAT_HTYPE_MANUAL, null );
          $this->build_url_handi_komi_rated( $url );
@@ -3311,7 +3311,7 @@ class GameSetupBuilder
    {
       $cat_htype = get_category_handicaptype( $this->game_setup->Handicaptype );
 
-      if( $this->is_template )
+      if ( $this->is_template )
       {
          $url['nrGames'] = $this->game_setup->NumGames;
          $url['view'] = $this->game_setup->ViewMode;
@@ -3327,9 +3327,9 @@ class GameSetupBuilder
       $this->build_url_adjustments( $url, $cat_htype );
 
       $url['mb_rated'] = bool_YN( $this->game_setup->MustBeRated );
-      if( $this->game_setup->RatingMin < OUT_OF_RATING )
+      if ( $this->game_setup->RatingMin < OUT_OF_RATING )
          $url['rat1'] = $this->game_setup->RatingMin;
-      if( $this->game_setup->RatingMax < OUT_OF_RATING )
+      if ( $this->game_setup->RatingMax < OUT_OF_RATING )
          $url['rat2'] = $this->game_setup->RatingMax;
       $url['min_rg'] = $this->game_setup->MinRatedGames;
       $url['same_opp'] = $this->game_setup->SameOpponent;
@@ -3339,7 +3339,7 @@ class GameSetupBuilder
 
    public function build_url_game_basics( &$url )
    {
-      if( $this->game->ShapeID > 0 )
+      if ( $this->game->ShapeID > 0 )
       {
          $url['shape'] = $this->game->ShapeID;
          $url['snapshot'] = $this->game->ShapeSnapshot;
@@ -3367,7 +3367,7 @@ class GameSetupBuilder
       $url['byotimevalue_jap'] = $url['byotimevalue_can'] = $url['byotimevalue_fis'] = $Byotime;
       $url['timeunit_jap'] = $url['timeunit_can'] = $url['timeunit_fis'] = $ByotimeUnit;
 
-      if( $this->game->Byoperiods > 0 )
+      if ( $this->game->Byoperiods > 0 )
          $url['byoperiods_jap'] = $url['byoperiods_can'] = $this->game->Byoperiods;
 
       $url['weekendclock'] = bool_YN( $this->game->WeekendClock );
@@ -3376,13 +3376,13 @@ class GameSetupBuilder
    public function build_url_cat_htype_manual( &$url, $cat_htype, $gs_htype )
    {
       $url['cat_htype'] = $cat_htype;
-      if( !is_null($gs_htype) && $cat_htype === CAT_HTYPE_MANUAL )
+      if ( !is_null($gs_htype) && $cat_htype === CAT_HTYPE_MANUAL )
          $url['color_m'] = $gs_htype;
-      elseif( !$this->is_template && $this->game->DoubleGame_ID != 0 )
+      elseif ( !$this->is_template && $this->game->DoubleGame_ID != 0 )
          $url['color_m'] = HTYPE_DOUBLE;
-      elseif( !$this->is_template && $this->my_id == $this->game->Black_ID )
+      elseif ( !$this->is_template && $this->my_id == $this->game->Black_ID )
          $url['color_m'] = HTYPE_BLACK;
-      elseif( !$this->is_template && $this->my_id == $this->game->White_ID )
+      elseif ( !$this->is_template && $this->my_id == $this->game->White_ID )
          $url['color_m'] = HTYPE_WHITE;
       else
          $url['color_m'] = HTYPE_NIGIRI; // default
@@ -3390,7 +3390,7 @@ class GameSetupBuilder
 
    public function build_url_handi_komi_rated( &$url )
    {
-      if( is_null($this->game_setup) )
+      if ( is_null($this->game_setup) )
       {
          $url['handicap_m'] = $this->game->Handicap;
          $url['komi_m'] = $this->game->Komi;
@@ -3401,7 +3401,7 @@ class GameSetupBuilder
          $url['komi_m'] = $this->game_setup->Komi;
       }
 
-      if( $this->is_template )
+      if ( $this->is_template )
          $url['rated'] = bool_YN( $this->game->Rated );
       else
          $url['rated'] = ( $this->game->Rated == 'N' ) ? 'N' : 'Y';
@@ -3419,21 +3419,21 @@ class GameSetupBuilder
 
    public function build_url_invite_to( &$url )
    {
-      if( $this->is_template ) // skip for template
+      if ( $this->is_template ) // skip for template
          return;
 
-      if( $this->my_id == $this->game->Black_ID )
+      if ( $this->my_id == $this->game->Black_ID )
          $opp_id = $this->game->White_ID;
-      elseif( $this->my_id == $this->game->White_ID )
+      elseif ( $this->my_id == $this->game->White_ID )
          $opp_id = $this->game->Black_ID;
       else
          $opp_id = 0;
 
       $opp_to = '';
-      if( $opp_id > 0 )
+      if ( $opp_id > 0 )
       {
          $users = User::load_quick_userinfo( array( $opp_id ) );
-         if( isset($users[$opp_id]) )
+         if ( isset($users[$opp_id]) )
             $opp_to = $users[$opp_id]['Handle'];
       }
       $url['to'] = $opp_to;
@@ -3483,7 +3483,7 @@ class GameSettingsCalculator
       $this->grow = $game_row;
       $this->pl_rating = $player_rating;
       $this->opp_rating = $opp_rating;
-      if( is_null($is_calculated) )
+      if ( is_null($is_calculated) )
       {
          $htype = $game_row['Handicaptype'];
          $this->is_calculated = ( $htype == HTYPE_CONV || $htype == HTYPE_PROPER );
@@ -3492,7 +3492,7 @@ class GameSettingsCalculator
          $this->is_calculated = $is_calculated;
       $this->is_tourney = $is_tourney;
 
-      if( !isset($this->grow['MaxHandicap']) ) // set default
+      if ( !isset($this->grow['MaxHandicap']) ) // set default
          $this->grow['MaxHandicap'] = DEFAULT_MAX_HANDICAP;
    }//__construct
 
@@ -3503,17 +3503,17 @@ class GameSettingsCalculator
       $is_fairkomi = ( $CategoryHandiType === CAT_HTYPE_FAIR_KOMI );
 
       $is_nigiri = false; // true, if nigiri needed (because of same rating)
-      if( $CategoryHandiType == CAT_HTYPE_PROPER )
+      if ( $CategoryHandiType == CAT_HTYPE_PROPER )
       {
          list( $infoHandicap, $infoKomi, $info_i_am_black, $is_nigiri ) =
             suggest_proper($this->pl_rating, $this->opp_rating, $this->grow['Size']);
       }
-      elseif( $CategoryHandiType == CAT_HTYPE_CONV )
+      elseif ( $CategoryHandiType == CAT_HTYPE_CONV )
       {
          list( $infoHandicap, $infoKomi, $info_i_am_black, $is_nigiri ) =
             suggest_conventional($this->pl_rating, $this->opp_rating, $this->grow['Size']);
       }
-      elseif( $is_fairkomi )
+      elseif ( $is_fairkomi )
       {
          $infoHandicap = $this->grow['Handicap'];
          $infoKomi = 0;
@@ -3523,7 +3523,7 @@ class GameSettingsCalculator
       {
          $infoHandicap = $this->grow['Handicap'];
          $infoKomi = $this->grow['Komi'];
-         if( $this->is_tourney )
+         if ( $this->is_tourney )
             $info_i_am_black = (bool)$this->grow['X_ChallengerIsBlack'];
          else
             $info_i_am_black = ($htype == HTYPE_BLACK); // game-offerer wants BLACK, so challenger gets WHITE
@@ -3536,7 +3536,7 @@ class GameSettingsCalculator
       $this->adjusted_handicap = ( $infoHandicap != $infoHandicap_old ) ? $infoHandicap_old : NULL;
 
       // adjust komi
-      if( $is_fairkomi )
+      if ( $is_fairkomi )
          $this->adjusted_komi = NULL;
       else
       {
@@ -3546,11 +3546,11 @@ class GameSettingsCalculator
       }
 
       // determine color
-      if( $htype == HTYPE_DOUBLE )
+      if ( $htype == HTYPE_DOUBLE )
          $color = GSC_COL_DOUBLE;
-      elseif( $is_fairkomi )
+      elseif ( $is_fairkomi )
          $color = GSC_COL_FAIRKOMI;
-      elseif( $htype == HTYPE_NIGIRI || $is_nigiri )
+      elseif ( $htype == HTYPE_NIGIRI || $is_nigiri )
          $color = GSC_COL_NIGIRI;
       else
          $color = ( $info_i_am_black ) ? GSC_COL_BLACK : GSC_COL_WHITE;
@@ -3589,7 +3589,7 @@ class ProfileTemplate
     */
    public function __construct( $template_type )
    {
-      if( !self::is_valid_type($template_type) )
+      if ( !self::is_valid_type($template_type) )
          error('invalid_args', "ProfileTemplate.new($template_type)");
       $this->TemplateType = (int)$template_type;
    }
@@ -3597,15 +3597,15 @@ class ProfileTemplate
    /*! \brief Encodes template into blob-value stored in Profiles-table. */
    public function encode()
    {
-      if( $this->TemplateType == PROFTYPE_TMPL_SENDMSG )
+      if ( $this->TemplateType == PROFTYPE_TMPL_SENDMSG )
          $result = "{$this->Subject}\n{$this->Text}";
-      elseif( $this->TemplateType == PROFTYPE_TMPL_INVITE )
+      elseif ( $this->TemplateType == PROFTYPE_TMPL_INVITE )
       {
          $extra = sprintf('SH%s:%s', $this->GameSetup->ShapeID, $this->GameSetup->ShapeSnapshot );
          $result = $this->GameSetup->encode_profile_template( $this->TemplateType )
             . "\n$extra\n{$this->Subject}\n{$this->Text}";
       }
-      elseif( $this->TemplateType == PROFTYPE_TMPL_NEWGAME )
+      elseif ( $this->TemplateType == PROFTYPE_TMPL_NEWGAME )
       {
          $extra = sprintf('V%s G%s GP%s SH%s:%s',
             $this->GameSetup->ViewMode, $this->GameSetup->NumGames, $this->GameSetup->GamePlayers,
@@ -3630,18 +3630,18 @@ class ProfileTemplate
 
    public function fill( &$url, $use_type=null )
    {
-      if( is_null($use_type) )
+      if ( is_null($use_type) )
          $use_type = $this->TemplateType;
 
-      if( $use_type == PROFTYPE_TMPL_SENDMSG )
+      if ( $use_type == PROFTYPE_TMPL_SENDMSG )
          $this->fill_message( $url );
-      elseif( $use_type == PROFTYPE_TMPL_INVITE )
+      elseif ( $use_type == PROFTYPE_TMPL_INVITE )
       {
          $gs_builder = new GameSetupBuilder( 0, $this->GameSetup, /*game*/$this->GameSetup, /*mpg*/false, /*tmpl*/true );
          $gs_builder->fill_invite_from_game_setup( $url );
          $this->fill_message( $url );
       }
-      elseif( $use_type == PROFTYPE_TMPL_NEWGAME )
+      elseif ( $use_type == PROFTYPE_TMPL_NEWGAME )
       {
          $gs_builder = new GameSetupBuilder( 0, $this->GameSetup, /*game*/$this->GameSetup, /*mpg*/false, /*tmpl*/true );
          $gs_builder->fill_new_game_from_game_setup( $url );
@@ -3654,7 +3654,7 @@ class ProfileTemplate
    /*! \brief Fills new-game form-values with invite-template-type data. */
    public function fill_new_game_with_invite( &$url, $use_type )
    {
-      if( $use_type == PROFTYPE_TMPL_NEWGAME && $this->TemplateType == PROFTYPE_TMPL_INVITE )
+      if ( $use_type == PROFTYPE_TMPL_NEWGAME && $this->TemplateType == PROFTYPE_TMPL_INVITE )
       {
          list( $line, $tmp ) = self::eat_line( $this->Text ); // take 1st line
          $url['comment'] = ( strlen($line) > 40 ) ? substr($line,0,40) : $line;
@@ -3663,7 +3663,7 @@ class ProfileTemplate
 
    public function fill_invite_with_new_game( &$url, $use_type )
    {
-      if( $use_type == PROFTYPE_TMPL_INVITE && $this->TemplateType == PROFTYPE_TMPL_NEWGAME )
+      if ( $use_type == PROFTYPE_TMPL_INVITE && $this->TemplateType == PROFTYPE_TMPL_NEWGAME )
          $url['message'] = $this->Subject;
    }
 
@@ -3679,9 +3679,9 @@ class ProfileTemplate
     */
    public function is_valid_new_game_template_for_invite()
    {
-      if( $this->TemplateType == PROFTYPE_TMPL_NEWGAME && !is_null($this->GameSetup) )
+      if ( $this->TemplateType == PROFTYPE_TMPL_NEWGAME && !is_null($this->GameSetup) )
       {
-         if( $this->GameSetup->ViewMode == GSETVIEW_MPGAME )
+         if ( $this->GameSetup->ViewMode == GSETVIEW_MPGAME )
             return false;
       }
       return true;
@@ -3726,10 +3726,10 @@ class ProfileTemplate
     */
    public static function is_valid_template_raw_check( $template_type, $use_type, $value )
    {
-      if( $template_type == PROFTYPE_TMPL_NEWGAME && $use_type == PROFTYPE_TMPL_INVITE )
+      if ( $template_type == PROFTYPE_TMPL_NEWGAME && $use_type == PROFTYPE_TMPL_INVITE )
       {
          // MPG not supported for invite
-         if( preg_match("/^[^\\n]+\\nV".GSETVIEW_MPGAME."\\b/", $value) )
+         if ( preg_match("/^[^\\n]+\\nV".GSETVIEW_MPGAME."\\b/", $value) )
             return false;
       }
       return true;
@@ -3740,11 +3740,11 @@ class ProfileTemplate
    {
       $tmpl = new ProfileTemplate( $template_type );
 
-      if( $template_type == PROFTYPE_TMPL_SENDMSG )
+      if ( $template_type == PROFTYPE_TMPL_SENDMSG )
       {
          list( $tmpl->Subject, $tmpl->Text ) = self::eat_line( $value );
       }
-      elseif( $template_type == PROFTYPE_TMPL_INVITE || $template_type == PROFTYPE_TMPL_NEWGAME )
+      elseif ( $template_type == PROFTYPE_TMPL_INVITE || $template_type == PROFTYPE_TMPL_NEWGAME )
       {
          list( $gs_line, $rem1 ) = self::eat_line( $value );
          list( $extra_line, $rem2 ) = self::eat_line( $rem1 );
@@ -3754,13 +3754,13 @@ class ProfileTemplate
 
          // parse extra-format for types -> see 'specs/db/table-Profiles.txt'
          $pline = $extra_line;
-         while( (string)$pline != '' )
+         while ( (string)$pline != '' )
          {
-            if( preg_match("/^SH\\d+:.*$/", $pline) ) // new-game + invite
+            if ( preg_match("/^SH\\d+:.*$/", $pline) ) // new-game + invite
             {
                list( $shape_id, $shape_snapshot ) = self::eat_line( $pline, ':' );
                $shape_id = (int)substr($shape_id, 2);
-               if( $shape_id <= 0 )
+               if ( $shape_id <= 0 )
                {
                   $shape_id = 0;
                   $shape_snapshot = '';
@@ -3775,11 +3775,11 @@ class ProfileTemplate
             $input = $pline; // note: must use copied value for list(..) =
             list( $val, $pline ) = self::eat_line( $input, ' ' ); // eat next group
 
-            if( preg_match("/^V\\d+$/", $val) ) // new-game: viewmode
+            if ( preg_match("/^V\\d+$/", $val) ) // new-game: viewmode
                $tmpl->GameSetup->ViewMode = (int)substr($val, 1);
-            elseif( preg_match("/^G\\d+$/", $val) ) // new-game: num-games
+            elseif ( preg_match("/^G\\d+$/", $val) ) // new-game: num-games
                $tmpl->GameSetup->NumGames = (int)substr($val, 1);
-            elseif( preg_match("/^GP(\\d+|\\d+:\\d+)?$/", $val) ) // new-game: game-players
+            elseif ( preg_match("/^GP(\\d+|\\d+:\\d+)?$/", $val) ) // new-game: game-players
                $tmpl->GameSetup->GamePlayers = trim( substr($val, 2) );
             else
                error('invalid_args', "ProfileTemplate.decode.parse.extra($template_type,[$val],[$pline],[$extra_line])");
@@ -3793,7 +3793,7 @@ class ProfileTemplate
    private static function eat_line( $str, $sep="\n" )
    {
       $pos = strpos($str, $sep);
-      if( $pos === false )
+      if ( $pos === false )
          return array( $str, '' );
       else
          return array( trim( substr($str, 0, $pos) ), trim( substr($str, $pos + 1) ) );
@@ -3802,7 +3802,7 @@ class ProfileTemplate
    public static function add_menu_link( &$menu, $handle='' )
    {
       $handle = trim($handle);
-      if( (string)$handle != '' )
+      if ( (string)$handle != '' )
       {
          $text = sprintf( T_('Templates with user-id [%s]'), $handle);
          $menu[$text] = "templates.php?to=".urlencode($handle);
@@ -3813,11 +3813,11 @@ class ProfileTemplate
 
    public static function get_template_type_text( $type )
    {
-      if( $type == PROFTYPE_TMPL_SENDMSG )
+      if ( $type == PROFTYPE_TMPL_SENDMSG )
          return T_('Message#tmpl');
-      elseif( $type == PROFTYPE_TMPL_INVITE )
+      elseif ( $type == PROFTYPE_TMPL_INVITE )
          return T_('Invite#tmpl');
-      elseif( $type == PROFTYPE_TMPL_NEWGAME )
+      elseif ( $type == PROFTYPE_TMPL_NEWGAME )
          return T_('New Game#tmpl');
       else
          error('invalid_args', "ProfileTemplate.get_template_type_text($type)");
@@ -3825,7 +3825,7 @@ class ProfileTemplate
 
    public static function new_default_profile( $uid, $type )
    {
-      if( !self::is_valid_type($type) )
+      if ( !self::is_valid_type($type) )
          error('invalid_args', "ProfileTemplate.new_default_profile.check.type($type)");
 
       return new Profile( 0, $uid, $type, 1, true );
@@ -3863,16 +3863,16 @@ class GameRematch
       global $base_path;
 
       $allow_newgame = $allow_invite = false;
-      if( $game_type != GAMETYPE_GO ) // MPG
+      if ( $game_type != GAMETYPE_GO ) // MPG
          $allow_newgame = true;
-      elseif( $tid > 0 ) // tournament
+      elseif ( $tid > 0 ) // tournament
          $allow_invite = $allow_newgame = true;
-      elseif( $game_status != GAME_STATUS_INVITED ) // normal-game
+      elseif ( $game_status != GAME_STATUS_INVITED ) // normal-game
          $allow_invite = $allow_newgame = true;
 
-      if( $allow_invite )
+      if ( $allow_invite )
          $arr_menu[T_('Rematch')] = $base_path."game_rematch.php?mode=" . REMATCH_INVITE .URI_AMP."gid=$gid";
-      if( $allow_newgame )
+      if ( $allow_newgame )
          $arr_menu[T_('Copy as new game#rematch')] = $base_path."game_rematch.php?mode=" . REMATCH_NEWGAME .URI_AMP."gid=$gid";
    }//add_rematch_links
 
@@ -4051,13 +4051,13 @@ class GameScore
    public function calculate_score( $mode=null, $fill_scoring_info=true )
    {
       // check args
-      if( is_null($mode) )
+      if ( is_null($mode) )
          $mode = $this->mode;
       else
          self::check_mode( $mode, 'get_score' );
 
       // calculate score
-      if( $mode == GSMODE_TERRITORY_SCORING )
+      if ( $mode == GSMODE_TERRITORY_SCORING )
       {
          $handi_diff = $this->handicap;
          $score_black = $this->territory[GSCOL_BLACK]
@@ -4087,7 +4087,7 @@ class GameScore
       }
       $this->score = $score_white - $score_black;
 
-      if( $fill_scoring_info )
+      if ( $fill_scoring_info )
       {
          $fill_sgf = ( $fill_scoring_info == 'sgf' );
 
@@ -4100,11 +4100,11 @@ class GameScore
          $isArea = ( $mode == GSMODE_AREA_SCORING );
 
          $arr_sgf = array(); // keep texts in english
-         if( $fill_sgf && $isArea )
+         if ( $fill_sgf && $isArea )
             $arr_sgf['Dame'] = ($this->dame == 1) ? '1 stone' : "{$this->dame} stones";
 
          $fmt_dead = ($isArea) ? '' : '2*';
-         foreach( array( GSCOL_BLACK, GSCOL_WHITE ) as $gscol )
+         foreach ( array( GSCOL_BLACK, GSCOL_WHITE ) as $gscol )
          {
             $gscol_opp = ( $gscol == GSCOL_BLACK ) ? GSCOL_WHITE : GSCOL_BLACK;
             $arr = array(
@@ -4115,7 +4115,7 @@ class GameScore
             );
             $map[$gscol] = $arr;
 
-            if( $fill_sgf )
+            if ( $fill_sgf )
             {
                $sgf_text = sprintf("%d territories + {$fmt_dead}%d dead %s(%s)",
                   $this->territory[$gscol],
@@ -4124,7 +4124,7 @@ class GameScore
                $sgf_komi = ( $gscol == GSCOL_WHITE )
                   ? sprintf( ' %s %s komi', ($this->komi < 0.0 ? '-' : '+'), abs($this->komi) )
                   : '';
-               if( $isArea )
+               if ( $isArea )
                {
                   $sgf_text .= sprintf(' + %d %s(%s)%s', $this->stones[$gscol],
                      ($this->stones[$gscol] == 1 ? 'stone' : 'stones'), ($gscol == GSCOL_BLACK ? 'B' : 'W'),
@@ -4148,7 +4148,7 @@ class GameScore
 
          $map[GSCOL_BLACK]['extra'] = ( $isArea && $handi_diff > 0 )
             ? sprintf( '-%s %s', $handi_diff, T_('(H)#scoring') ) : '';
-         if( $this->komi != 0.0 )
+         if ( $this->komi != 0.0 )
          {
             $fmt_komi = ($this->komi < 0.0) ? '%s %s' : '+%s %s';
             $map[GSCOL_WHITE]['extra'] = sprintf( $fmt_komi, $this->komi, T_('(K)#scoring') );
@@ -4169,7 +4169,7 @@ class GameScore
    /*! \brief Recalculates score if given mode different from mode of this object. */
    public function recalculate_score( $mode, $fill_scoring_info=true )
    {
-      if( strcmp($this->mode, $mode) != 0 )
+      if ( strcmp($this->mode, $mode) != 0 )
          $this->calculate_score($mode, $fill_scoring_info);
       return $this->score;
    }
@@ -4199,20 +4199,20 @@ class GameScore
 
    private static function check_mode( $mode, $method )
    {
-      if( $mode != GSMODE_TERRITORY_SCORING && $mode != GSMODE_AREA_SCORING )
+      if ( $mode != GSMODE_TERRITORY_SCORING && $mode != GSMODE_AREA_SCORING )
          error('invalid_args', "GameScore:$method($mode)");
    }
 
    private static function check_gscol( $gscol, $method )
    {
-      if( $gscol != GSCOL_BLACK && $gscol != GSCOL_WHITE )
+      if ( $gscol != GSCOL_BLACK && $gscol != GSCOL_WHITE )
          error('invalid_args', "GameScore:$method($gscol)");
    }
 
    /*! \brief [GUI] Draws table of given GameScore and scoring-mode using echo(). */
    public static function draw_score_box( $game_score, $scoring_mode )
    {
-      if( !($game_score instanceof GameScore) )
+      if ( !($game_score instanceof GameScore) )
          return;
 
       $game_score->recalculate_score($scoring_mode); // recalc if needed
@@ -4226,7 +4226,7 @@ class GameScore
       $caption2 = $score_info['mode_text'];
       echo "<table id=\"scoreInfo\" class=\"Scoring NoPrint\">\n",
          "<tr><th colspan=\"3\">$caption<br>($caption2)</th></tr>\n";
-      if( !$score_info['skip_dame'] )
+      if ( !$score_info['skip_dame'] )
          echo sprintf( $fmtline2, 'Header', T_('Dame#scoring'), $score_info['dame'] );
       echo sprintf( "<tr class=\"Header\"><td></td><td>%s</td><td>%s</td></tr>\n",
                   image( "{$base_path}17/b.gif", T_('Black'), null ),
@@ -4237,11 +4237,11 @@ class GameScore
          sprintf( $fmtline3, 'Header', T_('Dead stones#scoring'),
                   $score_info[GSCOL_BLACK]['dead_stones'],
                   $score_info[GSCOL_WHITE]['dead_stones'] );
-      if( !$score_info['skip_stones'] )
+      if ( !$score_info['skip_stones'] )
          echo sprintf( $fmtline3, 'Header', T_('Stones#scoring'),
                   $score_info[GSCOL_BLACK]['stones'],
                   $score_info[GSCOL_WHITE]['stones'] );
-      if( !$score_info['skip_prisoners'] )
+      if ( !$score_info['skip_prisoners'] )
          echo sprintf( $fmtline3, 'Header', T_('Prisoners#scoring'),
                   $score_info[GSCOL_BLACK]['prisoners'],
                   $score_info[GSCOL_WHITE]['prisoners'] );
@@ -4261,7 +4261,7 @@ class GameScore
       static $ARR_GSMODES = null; // gsmode => text
 
       // lazy-init of texts
-      if( is_null($ARR_GSMODES) )
+      if ( is_null($ARR_GSMODES) )
       {
          $arr = array();
          $arr[GSMODE_TERRITORY_SCORING] = T_('Territory scoring#scoring');
@@ -4269,9 +4269,9 @@ class GameScore
          $ARR_GSMODES = $arr;
       }
 
-      if( is_null($mode) )
+      if ( is_null($mode) )
          return $ARR_GSMODES;
-      if( !isset($ARR_GSMODES[$mode]) )
+      if ( !isset($ARR_GSMODES[$mode]) )
          error('invalid_args', "GameScore:getModeText($mode)");
       return $ARR_GSMODES[$mode];
    }//getModeText
@@ -4292,20 +4292,20 @@ class BoardStatus
 
    public function __construct()
    {
-      foreach( array( DAME, MARKED_DAME, BLACK, WHITE, BLACK_DEAD, WHITE_DEAD, BLACK_TERRITORY, WHITE_TERRITORY ) as $key )
+      foreach ( array( DAME, MARKED_DAME, BLACK, WHITE, BLACK_DEAD, WHITE_DEAD, BLACK_TERRITORY, WHITE_TERRITORY ) as $key )
          $this->arr[$key] = array();
    }
 
    public function add_coord( $key, $coord )
    {
-      if( !isset($this->arr[$key]) )
+      if ( !isset($this->arr[$key]) )
          error('invalid_args', "BoardStatus.add_coord($key,$coord)");
       $this->arr[$key][] = $coord;
    }
 
    public function get_coords( $key )
    {
-      if( !isset($this->arr[$key]) )
+      if ( !isset($this->arr[$key]) )
          error('invalid_args', "BoardStatus.get_coords($key)");
       return implode( array_unique( $this->arr[$key] ), '' ); // SGF-format
    }
@@ -4377,7 +4377,7 @@ class NextGameOrder
                $sql_order
          );
 
-      if( $load_ticks )
+      if ( $load_ticks )
       {
          $qsql->add_part( SQLP_FIELDS,
             "COALESCE(Clock.Ticks,0) AS X_Ticks" ); //always my clock because always my turn (status page)
@@ -4387,7 +4387,7 @@ class NextGameOrder
 
       GameHelper::extend_query_with_game_prio( $qsql, $uid, $load_prio );
 
-      if( $load_notes )
+      if ( $load_notes )
          GameHelper::extend_query_with_game_notes( $qsql, $uid );
 
       return $qsql;
@@ -4424,20 +4424,20 @@ class NextGameOrder
          NGO_TIMELEFT  => 4,
       );
 
-      if( !isset($ARR_NEXT_GAME_ORDER[$idx]) )
+      if ( !isset($ARR_NEXT_GAME_ORDER[$idx]) )
          return '';
 
       $idx_value = $idx;
-      if( !is_numeric($idx) ) // map enum-val to selection-index or order-string
+      if ( !is_numeric($idx) ) // map enum-val to selection-index or order-string
       {
          $idx_value = $ARR_NEXT_GAME_ORDER[$idx];
-         if( !$tablename )
+         if ( !$tablename )
             return $idx_value;
       }
 
-      if( $tablename === 'QUICK' )
+      if ( $tablename === 'QUICK' )
          return $ARR_NEXT_GAME_ORDER[$idx_value][2];
-      elseif( $tablename )
+      elseif ( $tablename )
       {
          $order_fmt = $ARR_NEXT_GAME_ORDER[$idx_value][1];
          return ( $with_order_by ? 'ORDER BY ' : '' ) . str_replace( '%G', $tablename, $order_fmt );
@@ -4474,17 +4474,17 @@ class NextGameOrder
     */
    public static function persist_game_priority( $gid, $uid, $prio )
    {
-      if( (string)$prio == '' )
+      if ( (string)$prio == '' )
       {
          db_query( "NextGameOrder:persist_game_priority.delete($gid,$uid)",
             "DELETE FROM GamesPriority WHERE gid=$gid AND uid=$uid LIMIT 1" );
       }
       else
       {
-         if( !is_numeric($prio) )
+         if ( !is_numeric($prio) )
             error('invalid_args', "NextGameOrder:persist_game_priority.check.prio.no_int($gid,$uid,$new_prio)");
          $new_prio = (int)$prio;
-         if( $new_prio < -32768 || $new_prio > 32767 )
+         if ( $new_prio < -32768 || $new_prio > 32767 )
             error('invalid_args', "NextGameOrder:persist_game_priority.check.prio.range($gid,$uid,$new_prio)");
 
          db_query( "NextGameOrder:persist_game_priority.update($gid,$uid,$new_prio)",
@@ -4526,7 +4526,7 @@ class NextGameOrder
    {
       // determine time-stuff for time-left-calculus
       $pfx = ($to_move == BLACK) ? 'Black' : 'White';
-      if( $is_new_game )
+      if ( $is_new_game )
       {
          $tl_Maintime   = $grow['Maintime'];
          $tl_Byotime    = $grow['Byotime'];
@@ -4540,7 +4540,7 @@ class NextGameOrder
       }
 
       // calculate elapsed ticks
-      if( $game_ticks <= 0 || $game_clock_used < 0 ) // relative ticks (for new-game or if on-vacation)
+      if ( $game_ticks <= 0 || $game_clock_used < 0 ) // relative ticks (for new-game or if on-vacation)
          $elapsed_ticks = abs($game_ticks);
       else // absolute ticks (of game-clock), no vacation clock
       {
@@ -4556,7 +4556,7 @@ class NextGameOrder
             $tl_Maintime, $tl_Byotime, $tl_Byoperiods );
 
       $tl_vac_days = (float)@$grow["{$pfx}_OnVacation"];
-      if( $tl_vac_days > 0 ) // handle remaining vacation
+      if ( $tl_vac_days > 0 ) // handle remaining vacation
          $hours_left += round( 24 * $tl_vac_days );
 
       $timeout_date = time_left_ticksdate( $hours_left );
@@ -4597,13 +4597,13 @@ class GameSnapshot
    {
       $out = '';
       $enc_val = $enc_cnt = 0;
-      for( $y = 0; $y < $size; $y++ )
+      for ( $y = 0; $y < $size; $y++ )
       {
-         for( $x = 0; $x < $size; $x++ )
+         for ( $x = 0; $x < $size; $x++ )
          {
             $stone_val = $stone_reader->read_stone_value( $x, $y, $with_dead );
             $enc_val = ($enc_val << 2) + $stone_val;
-            if( ++$enc_cnt == 3 )
+            if ( ++$enc_cnt == 3 )
             {
                $out .= self::$BASE64[$enc_val];
                $enc_cnt = $enc_val = 0;
@@ -4611,14 +4611,14 @@ class GameSnapshot
          }
       }
 
-      if( $enc_cnt > 0 )
+      if ( $enc_cnt > 0 )
       {
          $enc_val <<= (2 * (3 - $enc_cnt));
          $out .= self::$BASE64[$enc_val];
       }
 
       $out = rtrim($out, 'A');
-      if( (string)$out != '' )
+      if ( (string)$out != '' )
       {
          $out = preg_replace( array(
                "/AAAAAAAAAAAAAAAA/", // *=16xA
@@ -4653,22 +4653,22 @@ class GameSnapshot
       $out = array();
       $psize = $size * $size;
       $snapshot_len = strlen($snapshot);
-      for( $i=0, $p=0; $p < $psize && $i < $snapshot_len; $i++ )
+      for ( $i=0, $p=0; $p < $psize && $i < $snapshot_len; $i++ )
       {
          $ch = $snapshot[$i];
-         if( $ch == ' ' ) // stop on space (extended syntax)
+         if ( $ch == ' ' ) // stop on space (extended syntax)
             break;
          $skip_pos = @$SKIPPOS_MAP[$ch];
-         if( $skip_pos )
+         if ( $skip_pos )
             $p += 3 * $skip_pos; // skip empties
          else
          {
             $data = strpos(self::$BASE64, $ch);
-            if( $data === false )
+            if ( $data === false )
                error('invalid_snapshot_char', "GameSnapshot.parse_stones_snapshot($size,$ch,$p,$snapshot)");
-            foreach( array( ($data >> 4) & 0x3, ($data >> 2) & 0x3, $data & 0x3 ) as $val )
+            foreach ( array( ($data >> 4) & 0x3, ($data >> 2) & 0x3, $data & 0x3 ) as $val )
             {
-               if( $val == 1 || $val == 2 ) // 1=Black, 2=White, 3=Dead B|W
+               if ( $val == 1 || $val == 2 ) // 1=Black, 2=White, 3=Dead B|W
                   $out[] = array( ($val == 1 ? $black : $white), $p % $size, (int)($p / $size) );
                $p++;
             }
@@ -4687,7 +4687,7 @@ class GameSnapshot
    public static function parse_extended_snapshot( $ext_snapshot )
    {
       $arr = explode(' ', $ext_snapshot);
-      if( count($arr) )
+      if ( count($arr) )
       {
          $out = array( //defaults
                'Snapshot'     => array_shift($arr),
@@ -4695,16 +4695,16 @@ class GameSnapshot
                'PlayColorB'   => 1,
             );
          $err = '';
-         foreach( $arr as $item )
+         foreach ( $arr as $item )
          {
-            if( preg_match("/^S(\d+)$/", $item, $matches) )
+            if ( preg_match("/^S(\d+)$/", $item, $matches) )
                $out['Size'] = (int)@$matches[1];
-            elseif( preg_match("/^([BW])$/", $item, $matches) )
+            elseif ( preg_match("/^([BW])$/", $item, $matches) )
                $out['PlayColorB'] = (@$matches[1] == 'W') ? 0 : 1;
             else
                $err .= " [$err]";
          }
-         if( strlen($err) )
+         if ( strlen($err) )
             $out['Error'] = substr($err, 1);
       }
       else
@@ -4716,7 +4716,7 @@ class GameSnapshot
    public static function build_extended_snapshot( $snapshot, $size, $flags=0 )
    {
       $out = "$snapshot S$size";
-      if( $flags & SHAPE_FLAG_PLAYCOLOR_W )
+      if ( $flags & SHAPE_FLAG_PLAYCOLOR_W )
          $out .= " W";
       return $out;
    }//build_extended_snapshot
@@ -4724,7 +4724,7 @@ class GameSnapshot
    /*! \brief Checks non-extended snapshot for valid chars, returns bad chars (or EMPTY if empty) or '' if valid. */
    public static function check_snapshot( $snapshot )
    {
-      if( (string)$snapshot == '' )
+      if ( (string)$snapshot == '' )
          return T_('EMPTY#shape');
       else
          return preg_replace("/[A-Za-z0-9\\+\\/\\*@#%:]/", "", $snapshot);
@@ -4743,22 +4743,22 @@ class GameSnapshot
       $arr_xy = self::parse_stones_snapshot( $size, $snapshot, BLACK, WHITE );
       $arr_cnt = array( BLACK => 0, WHITE => 0 );
       $errpos = array();
-      foreach( $arr_xy as $point )
+      foreach ( $arr_xy as $point )
       {
          list( $stone, $x, $y ) = $point;
          $arr_cnt[$stone]++;
 
          // check for illegal positions
-         if( !$suicide_allowed && !@$board->visited_points[$x][$y] )
+         if ( !$suicide_allowed && !@$board->visited_points[$x][$y] )
          {
-            if( !$board->has_liberty_check($x, $y, $prisoners, /*rm*/false) )
+            if ( !$board->has_liberty_check($x, $y, $prisoners, /*rm*/false) )
                $errpos[] = number2board_coords($x, $y, $size);
          }
       }
 
-      if( $arr_cnt[BLACK] + $arr_cnt[WHITE] == 0 )
+      if ( $arr_cnt[BLACK] + $arr_cnt[WHITE] == 0 )
          return T_('EMPTY-BOARD#shape');
-      if( $arr_cnt[BLACK] == $size*$size || $arr_cnt[WHITE] == $size*$size )
+      if ( $arr_cnt[BLACK] == $size*$size || $arr_cnt[WHITE] == $size*$size )
          return T_('FULL-BOARD#shape');
 
       return implode(',', $errpos);
@@ -4771,13 +4771,13 @@ class GameSnapshot
    public static function parse_check_extended_snapshot( $ext_snapshot )
    {
       $arr = self::parse_extended_snapshot( $ext_snapshot );
-      if( is_null($arr) )
+      if ( is_null($arr) )
          return null;
-      if( $arr['Size'] < MIN_BOARD_SIZE || $arr['Size'] > MAX_BOARD_SIZE )
+      if ( $arr['Size'] < MIN_BOARD_SIZE || $arr['Size'] > MAX_BOARD_SIZE )
          return null;
-      if( strlen(@$arr['Error']) > 0 )
+      if ( strlen(@$arr['Error']) > 0 )
          return null;
-      if( self::check_snapshot($arr['Snapshot']) )
+      if ( self::check_snapshot($arr['Snapshot']) )
          return null;
       return $arr;
    }//parse_check_extended_snapshot
@@ -4830,9 +4830,9 @@ class DefaultMaxHandicap
       $max_handicap = self::limit_max_handicap( $orig_max_handicap );
       $def_max_handicap = self::calc_def_max_handicap( $board_size );
 
-      if( $max_handicap == DEFAULT_MAX_HANDICAP && $min_handicap > $def_max_handicap )
+      if ( $max_handicap == DEFAULT_MAX_HANDICAP && $min_handicap > $def_max_handicap )
          $min_handicap = $def_max_handicap;
-      elseif( $max_handicap >= 0 && $min_handicap > $max_handicap )
+      elseif ( $max_handicap >= 0 && $min_handicap > $max_handicap )
          swap( $min_handicap, $max_handicap );
 
       return array( $min_handicap, $max_handicap );
@@ -4845,18 +4845,18 @@ class DefaultMaxHandicap
          ? self::calc_def_max_handicap( $board_size )
          : min( MAX_HANDICAP, $max_handicap );
 
-      if( $min_handicap > 0 && $use_max_handi < MAX_HANDICAP )
+      if ( $min_handicap > 0 && $use_max_handi < MAX_HANDICAP )
          $lim_handi = sprintf( T_('limited by min. %s and max. %s stones'), $min_handicap, $use_max_handi );
-      elseif( $min_handicap > 0 )
+      elseif ( $min_handicap > 0 )
          $lim_handi = sprintf( T_('limited by min. %s stones'), $min_handicap );
-      elseif( $use_max_handi < MAX_HANDICAP )
+      elseif ( $use_max_handi < MAX_HANDICAP )
          $lim_handi = sprintf( T_('limited by max. %s stones'), $use_max_handi );
       else
          $lim_handi = '';
 
-      if( $lim_handi )
+      if ( $lim_handi )
       {
-         if( $max_handicap == DEFAULT_MAX_HANDICAP )
+         if ( $max_handicap == DEFAULT_MAX_HANDICAP )
             $lim_handi .= sprintf(' [%s]', T_('Default Max.#handi') );
       }
 
@@ -4872,28 +4872,28 @@ class DefaultMaxHandicap
 function adjust_komi( $komi, $adj_komi, $jigo_mode )
 {
    // adjust
-   if( $adj_komi )
+   if ( $adj_komi )
       $komi += $adj_komi;
 
    // assure valid limits up to the limits
-   if( $komi < -MAX_KOMI_RANGE )
+   if ( $komi < -MAX_KOMI_RANGE )
       $komi = -MAX_KOMI_RANGE;
-   elseif( $komi > MAX_KOMI_RANGE )
+   elseif ( $komi > MAX_KOMI_RANGE )
       $komi = MAX_KOMI_RANGE;
 
-   if( $jigo_mode == JIGOMODE_ALLOW_JIGO && floor($komi) != $komi )
+   if ( $jigo_mode == JIGOMODE_ALLOW_JIGO && floor($komi) != $komi )
       $komi = (($komi < 0) ? -1 : 1) * floor(abs($komi));
-   elseif( $jigo_mode == JIGOMODE_NO_JIGO && floor($komi) == $komi )
+   elseif ( $jigo_mode == JIGOMODE_NO_JIGO && floor($komi) == $komi )
       $komi += ($komi < 0) ? -0.5 : 0.5;
 
    // assure valid limits after applying jigo-mode
    $komi = (float) round( 2 * $komi ) / 2;
-   if( $komi < -MAX_KOMI_RANGE )
+   if ( $komi < -MAX_KOMI_RANGE )
       $komi += 1.0;
-   elseif( $komi > MAX_KOMI_RANGE )
+   elseif ( $komi > MAX_KOMI_RANGE )
       $komi -= 1.0;
 
-   if( (string)$komi == '-0' ) // strange effect
+   if ( (string)$komi == '-0' ) // strange effect
       $komi = 0;
    return (float)$komi;
 }
@@ -4905,29 +4905,29 @@ function adjust_handicap( $size, $handicap, $adj_handicap, $min_handicap, $max_h
    $min_handicap = min( MAX_HANDICAP, max( 0, $min_handicap ));
    $max_handicap = DefaultMaxHandicap::limit_max_handicap( $max_handicap );
 
-   if( $max_handicap == DEFAULT_MAX_HANDICAP )
+   if ( $max_handicap == DEFAULT_MAX_HANDICAP )
    {
       $chk_max_handicap = DefaultMaxHandicap::calc_def_max_handicap( $size );
-      if( $min_handicap > $chk_max_handicap )
+      if ( $min_handicap > $chk_max_handicap )
          $min_handicap = $chk_max_handicap;
    }
    else
    {
-      if( $min_handicap > $max_handicap )
+      if ( $min_handicap > $max_handicap )
          swap( $min_handicap, $max_handicap );
       $chk_max_handicap = $max_handicap;
    }
 
    // adjust
-   if( $adj_handicap )
+   if ( $adj_handicap )
       $handicap += $adj_handicap;
 
-   if( $handicap < $min_handicap )
+   if ( $handicap < $min_handicap )
       $handicap = $min_handicap;
-   elseif( $handicap > $chk_max_handicap )
+   elseif ( $handicap > $chk_max_handicap )
       $handicap = $chk_max_handicap;
 
-   if( $handicap == 1 )
+   if ( $handicap == 1 )
       $handicap = 0;
 
    return (int)$handicap;
@@ -4937,11 +4937,11 @@ function adjust_handicap( $size, $handicap, $adj_handicap, $min_handicap, $max_h
 function get_to_move( $grow, $errmsg )
 {
    $to_move_id = $grow['ToMove_ID'];
-   if( $grow['Black_ID'] == $to_move_id )
+   if ( $grow['Black_ID'] == $to_move_id )
       $to_move = BLACK;
-   elseif( $grow['White_ID'] == $to_move_id )
+   elseif ( $grow['White_ID'] == $to_move_id )
       $to_move = WHITE;
-   elseif( $to_move_id )
+   elseif ( $to_move_id )
       error('database_corrupted', "$errmsg({$grow['ID']})");
    else
       $to_move = -1; // can happen on finished game
@@ -5014,21 +5014,21 @@ function get_handicaptype_for_invite( $inv_handitype, $is_black_col, $fk_htype )
       );
 
    // handle OLD game-invitations with ToMove_ID > 0 (fix-color), see ToMove_ID in 'specs/db/table-Games.txt'
-   if( $inv_handitype > 0 )
+   if ( $inv_handitype > 0 )
    {
-      if( is_null($is_black_col) )
+      if ( is_null($is_black_col) )
          error('invalid_args', "get_handicaptype_for_invite.check.is_black_col_null($inv_handitype,$fk_htype)");
       return ( $is_black_col ) ? HTYPE_BLACK : HTYPE_WHITE;
    }
 
    $arr_calc = @$ARR_HTYPES_CALC[$inv_handitype];
-   if( $arr_calc )
+   if ( $arr_calc )
    {
-      if( is_null($is_black_col) )
+      if ( is_null($is_black_col) )
          error('invalid_args', "get_handicaptype_for_invite.check.is_black_col_null($inv_handitype,$fk_htype)");
-      if( $inv_handitype == INVITE_HANDI_DIV_CHOOSE )
+      if ( $inv_handitype == INVITE_HANDI_DIV_CHOOSE )
       {
-         if( !$fk_htype )
+         if ( !$fk_htype )
             error('invalid_args', "get_handicaptype_for_invite.check.fk_htype($inv_handitype,$is_black_col)");
          return $fk_htype;
       }
@@ -5037,7 +5037,7 @@ function get_handicaptype_for_invite( $inv_handitype, $is_black_col, $fk_htype )
    }
 
    $htype = @$ARR_HTYPES[$inv_handitype];
-   if( !$htype )
+   if ( !$htype )
       error('invalid_args', "get_handicaptype_for_invite.check.bad_htype($inv_handitype,$is_black_col,$fk_htype)");
 
    return $htype;
@@ -5056,21 +5056,21 @@ function getRulesetText( $ruleset=null )
    static $ARR_RULESET = null; // ruleset => text
 
    // lazy-init of texts
-   if( is_null($ARR_RULESET) )
+   if ( is_null($ARR_RULESET) )
    {
       $arr = array();
-      if( preg_match( "/^(".ALLOWED_RULESETS.")$/", RULESET_JAPANESE) )
+      if ( preg_match( "/^(".ALLOWED_RULESETS.")$/", RULESET_JAPANESE) )
          $arr[RULESET_JAPANESE] = T_('Japanese#ruleset');
-      if( preg_match( "/^(".ALLOWED_RULESETS.")$/", RULESET_CHINESE) )
+      if ( preg_match( "/^(".ALLOWED_RULESETS.")$/", RULESET_CHINESE) )
          $arr[RULESET_CHINESE] = T_('Chinese#ruleset');
-      if( count($arr) == 0 )
+      if ( count($arr) == 0 )
          error('internal_error', "getRulesetText.bad_config.must_not_be_empty(ALLOWED_RULESETS)");
       $ARR_RULESET = $arr;
    }
 
-   if( is_null($ruleset) )
+   if ( is_null($ruleset) )
       return $ARR_RULESET;
-   if( !isset($ARR_RULESET[$ruleset]) )
+   if ( !isset($ARR_RULESET[$ruleset]) )
       error('invalid_args', "getRulesetText($ruleset)");
    return $ARR_RULESET[$ruleset];
 }//getRulesetText
@@ -5079,9 +5079,9 @@ function build_ruleset_filter_array( $prefix='' )
 {
    $arr = array( T_('All') => '' );
    $arr_rulesets = getRulesetText();
-   foreach( $arr_rulesets as $ruleset => $tmp )
+   foreach ( $arr_rulesets as $ruleset => $tmp )
    {
-      if( preg_match( "/^(".ALLOWED_RULESETS.")$/", $ruleset) )
+      if ( preg_match( "/^(".ALLOWED_RULESETS.")$/", $ruleset) )
          $arr[getRulesetText($ruleset)] = "{$prefix}Ruleset='$ruleset'";
    }
    return $arr;
@@ -5099,7 +5099,7 @@ function getRulesetScoring( $ruleset )
 function get_gamesettings_viewmode( $viewmode )
 {
    static $ARR = null;
-   if( is_null($ARR) )
+   if ( is_null($ARR) )
    {
       $ARR = array(
          GSETVIEW_STANDARD => T_('standard settings#gsview'),
@@ -5116,7 +5116,7 @@ function get_gamesettings_viewmode( $viewmode )
 //       see also append_form_add_waiting_room_game()-func
 function parse_waiting_room_rating_range( $is_multi_player_game=false, $adjust=true, $arg_rating1=null, $arg_rating2=null )
 {
-   if( !$is_multi_player_game && get_request_arg('must_be_rated') != 'Y' )
+   if ( !$is_multi_player_game && get_request_arg('must_be_rated') != 'Y' )
    {
       $MustBeRated = 'N';
       //to keep a good column sorting:
@@ -5130,13 +5130,13 @@ function parse_waiting_room_rating_range( $is_multi_player_game=false, $adjust=t
       $rating1 = read_rating( $rating1 );
       $rating2 = read_rating( $rating2 );
 
-      if( $rating1 == NO_RATING || $rating2 == NO_RATING )
+      if ( $rating1 == NO_RATING || $rating2 == NO_RATING )
          error('rank_not_rating', "parse_waiting_room_rating_range.check($rating1,$rating2)");
 
-      if( $rating2 < $rating1 )
+      if ( $rating2 < $rating1 )
          swap( $rating1, $rating2 );
 
-      if( $adjust )
+      if ( $adjust )
       {
          $rating1 -= 50;
          $rating2 += 50;
@@ -5152,20 +5152,20 @@ function append_form_add_waiting_room_game( &$mform, $viewmode, $read_args=false
 {
    // note: multi-player-game requires rated game-players (RatingStatus != NONE)
    $rating_array = getRatingArray();
-   if( is_null($gsc) )
+   if ( is_null($gsc) )
       $gsc = new GameSetupChecker( $viewmode );
 
    $rating_min = '30 kyu';
    $rating_max = '9 dan';
-   if( $read_args ) // read init-vals from URL (for rematch / profile-template)
+   if ( $read_args ) // read init-vals from URL (for rematch / profile-template)
    {
       $must_be_rated = ( @$_REQUEST['mb_rated'] == 'Y' );
-      if( isset($_REQUEST['rat1']) )
+      if ( isset($_REQUEST['rat1']) )
       {
          $url_rat_min = limit( (int) $_REQUEST['rat1'], MIN_RATING, RATING_9DAN, MIN_RATING );
          $rating_min = echo_rating( $url_rat_min, /*%*/false, /*gfx-uid*/0, /*engl*/true, /*short*/false );
       }
-      if( isset($_REQUEST['rat2']) )
+      if ( isset($_REQUEST['rat2']) )
       {
          $url_rat_max = limit( (int) $_REQUEST['rat2'], MIN_RATING, RATING_9DAN, RATING_9DAN );
          $rating_max = echo_rating( $url_rat_max, /*%*/false, /*gfx-uid*/0, /*engl*/true, /*short*/false );
@@ -5180,7 +5180,7 @@ function append_form_add_waiting_room_game( &$mform, $viewmode, $read_args=false
       $min_rated_games = $comment = '';
       $same_opponent = 0;
    }
-   if( $viewmode == GSETVIEW_MPGAME )
+   if ( $viewmode == GSETVIEW_MPGAME )
       $must_be_rated = $disable_mbrated = true;
    else
       $disable_mbrated = false;
@@ -5197,7 +5197,7 @@ function append_form_add_waiting_room_game( &$mform, $viewmode, $read_args=false
          'TEXTINPUTX', 'min_rated_games', 5, 5, $min_rated_games, $gsc->get_class_error_field('min_rated_games'),
          'TEXT', MINI_SPACING . T_('(optional)'), ));
 
-   if( $viewmode == GSETVIEW_STANDARD || $viewmode == GSETVIEW_FAIRKOMI )
+   if ( $viewmode == GSETVIEW_STANDARD || $viewmode == GSETVIEW_FAIRKOMI )
    {
       $same_opp_array = build_accept_same_opponent_array(array( 0,  -101, -102, -103,  -1, -2, -3,  3, 7, 14 ));
       $mform->add_row( array( 'DESCRIPTION', T_('Accept same opponent'),
@@ -5211,7 +5211,7 @@ function append_form_add_waiting_room_game( &$mform, $viewmode, $read_args=false
 
 function echo_started_games( $game_count )
 {
-   if( $game_count <= 0 )
+   if ( $game_count <= 0 )
       return '';
 
    $fmt = ($game_count > 1)
@@ -5224,25 +5224,25 @@ function echo_started_games( $game_count )
 // \param $game_row expecting JoinedCount, X_TotalCount
 function echo_accept_same_opponent( $same_opp, $game_row=null )
 {
-   if( $same_opp == 0 )
+   if ( $same_opp == 0 )
       return T_('always#same_opp');
 
-   if( $same_opp < SAMEOPP_TOTAL )
+   if ( $same_opp < SAMEOPP_TOTAL )
    {
       if ($same_opp == SAMEOPP_TOTAL-1 )
          $out = T_('1 total time#same_opp');
       else
          $out = sprintf( T_('%s total times#same_opp'), -$same_opp + SAMEOPP_TOTAL );
-      if( is_array($game_row) && (int)@$game_row['X_TotalCount'] > 0 )
+      if ( is_array($game_row) && (int)@$game_row['X_TotalCount'] > 0 )
          $out .= ' (' . echo_started_games($game_row['X_TotalCount']) . ')';
    }
-   elseif( $same_opp < 0 )
+   elseif ( $same_opp < 0 )
    {
       if ($same_opp == -1)
          $out = T_('1 time (same offer)#same_opp');
       else //if ($same_opp < 0)
          $out = sprintf( T_('%s times (same offer)#same_opp'), -$same_opp );
-      if( is_array($game_row) && (int)@$game_row['JoinedCount'] > 0 )
+      if ( is_array($game_row) && (int)@$game_row['JoinedCount'] > 0 )
       {
          $join_fmt = ($game_row['JoinedCount'] > 1)
             ? T_('joined %s games#same_opp')
@@ -5257,7 +5257,7 @@ function echo_accept_same_opponent( $same_opp, $game_row=null )
          $out = T_('after 1 day#same_opp');
       else //if ($same_opp > 0)
          $out = sprintf( T_('after %s days#same_opp'), $same_opp );
-      if( is_array($game_row) && isset($game_row['X_ExpireDate']) && ($game_row['X_ExpireDate'] > $NOW) )
+      if ( is_array($game_row) && isset($game_row['X_ExpireDate']) && ($game_row['X_ExpireDate'] > $NOW) )
       {
          $out .= ' (' . sprintf( T_('wait till %s#same_opp'),
             date(DATE_FMT6, $game_row['X_ExpireDate']) ) . ')';
@@ -5269,7 +5269,7 @@ function echo_accept_same_opponent( $same_opp, $game_row=null )
 function build_accept_same_opponent_array( $arr )
 {
    $out = array();
-   foreach( $arr as $same_opp )
+   foreach ( $arr as $same_opp )
       $out[$same_opp] = echo_accept_same_opponent($same_opp);
    return $out;
 }
@@ -5277,10 +5277,10 @@ function build_accept_same_opponent_array( $arr )
 function build_arr_handicap_stones( $with_default )
 {
    $handi_stones = array();
-   if( $with_default )
+   if ( $with_default )
       $handi_stones[-1] = T_('Default#maxhandi');
    $handi_stones[0] = 0;
-   for( $bs = 2; $bs <= MAX_HANDICAP; $bs++ )
+   for ( $bs = 2; $bs <= MAX_HANDICAP; $bs++ )
       $handi_stones[$bs] = $bs;
    return $handi_stones;
 }
@@ -5300,9 +5300,9 @@ function get_colortext_probable( $iamblack, $is_nigiri )
    static $color_class = 'class="InTextStone"';
    global $base_path;
 
-   if( $is_nigiri )
+   if ( $is_nigiri )
       return image( $base_path.'17/y.gif', T_('Nigiri#color'), T_('Nigiri (You randomly play Black or White)#color'), $color_class );
-   elseif( $iamblack )
+   elseif ( $iamblack )
       return image( $base_path.'17/b.gif', T_('Black'), null, $color_class);
    else
       return image( $base_path.'17/w.gif', T_('White'), null, $color_class);

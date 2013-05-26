@@ -81,7 +81,7 @@ class SurveyOption
    /*! \brief Inserts or updates SurveyOption-entry in database. */
    public function persist()
    {
-      if( $this->ID > 0 )
+      if ( $this->ID > 0 )
          $success = $this->update();
       else
          $success = $this->insert();
@@ -92,7 +92,7 @@ class SurveyOption
    {
       $entityData = $this->fillEntityData();
       $result = $entityData->insert( "SurveyOption.insert(%s)" );
-      if( $result )
+      if ( $result )
          $this->ID = mysql_insert_id();
       return $result;
    }
@@ -105,7 +105,7 @@ class SurveyOption
 
    public function fillEntityData( $data=null )
    {
-      if( is_null($data) )
+      if ( is_null($data) )
          $data = $GLOBALS['ENTITY_SURVEY_OPTION']->newEntityData();
       $data->set_value( 'ID', $this->ID );
       $data->set_value( 'sid', $this->sid );
@@ -127,15 +127,15 @@ class SurveyOption
    public function copyValues( $sopt, $check=false )
    {
       // NOTE: no checking/cloning of fields: ID, sid, Tag; no check on Score (=aggregated-field)
-      if( $check )
+      if ( $check )
       {
-         if( $this->SortOrder != (int)$sopt->SortOrder )
+         if ( $this->SortOrder != (int)$sopt->SortOrder )
             return true;
-         if( $this->MinPoints != (int)$sopt->MinPoints )
+         if ( $this->MinPoints != (int)$sopt->MinPoints )
             return true;
-         if( strcmp($this->Title, $sopt->Title) != 0 )
+         if ( strcmp($this->Title, $sopt->Title) != 0 )
             return true;
-         if( strcmp($this->Text, $sopt->Text) != 0 )
+         if ( strcmp($this->Text, $sopt->Text) != 0 )
             return true;
          return false; // no diff, no copy/update needed
       }
@@ -161,11 +161,11 @@ class SurveyOption
    public static function build_query_sql( $sid, $sopt_id=0, $with_sort=false )
    {
       $qsql = $GLOBALS['ENTITY_SURVEY_OPTION']->newQuerySQL('SOPT');
-      if( $sid > 0 )
+      if ( $sid > 0 )
          $qsql->add_part( SQLP_WHERE, "SOPT.sid=$sid" );
-      if( $sopt_id > 0 )
+      if ( $sopt_id > 0 )
          $qsql->add_part( SQLP_WHERE, "SOPT.ID=$sopt_id" );
-      if( $with_sort )
+      if ( $with_sort )
          $qsql->add_part( SQLP_ORDER, 'SOPT.SortOrder ASC' );
       return $qsql;
    }
@@ -201,7 +201,7 @@ class SurveyOption
     */
    public static function load_survey_option( $sopt_id )
    {
-      if( !is_numeric($sopt_id) || $sopt_id <= 0 )
+      if ( !is_numeric($sopt_id) || $sopt_id <= 0 )
          error('invalid_args', "SurveyOption:load_survey_option($sopt_id)");
 
       $qsql = self::build_query_sql( 0, $sopt_id );
@@ -221,7 +221,7 @@ class SurveyOption
       $iterator->setResultRows( mysql_num_rows($result) );
 
       $iterator->clearItems();
-      while( $row = mysql_fetch_array( $result ) )
+      while ( $row = mysql_fetch_array( $result ) )
       {
          $s_opt = self::new_from_row( $row );
          $iterator->addItem( $s_opt, $row );
@@ -233,16 +233,16 @@ class SurveyOption
 
    public static function persist_survey_options( $sid, &$arr_sopts, $all_fields=true )
    {
-      if( !is_array($arr_sopts) || count($arr_sopts) == 0 )
+      if ( !is_array($arr_sopts) || count($arr_sopts) == 0 )
          return false;
 
       $skip_fields = ($all_fields) ? null : array( 'Score' );
 
       $entity_sopt = $GLOBALS['ENTITY_SURVEY_OPTION']->newEntityData();
       $arr_inserts = array();
-      foreach( $arr_sopts as $so )
+      foreach ( $arr_sopts as $so )
       {
-         if( $so->sid == 0 )
+         if ( $so->sid == 0 )
             $so->sid = $sid;
          $data_sopt = $so->fillEntityData( $entity_sopt );
          $arr_inserts[] = $data_sopt->build_sql_insert_values(false, /*with-PK*/true, $skip_fields);
@@ -260,19 +260,19 @@ class SurveyOption
    /*! \brief Updates SurveyOption-entries with $arr_upd = [ ID => diff_score, ... ]. */
    public static function update_aggregates_survey_options( $sid, $arr_upd )
    {
-      if( !is_array($arr_upd) || count($arr_upd) == 0 )
+      if ( !is_array($arr_upd) || count($arr_upd) == 0 )
          return false;
 
       $sid = (int)$sid;
 
       $arr_inserts = array();
-      foreach( $arr_upd as $id => $diff_score )
+      foreach ( $arr_upd as $id => $diff_score )
       {
-         if( $diff_score && is_numeric($diff_score) )
+         if ( $diff_score && is_numeric($diff_score) )
             $arr_inserts[] = "($id,$diff_score)";
       }
 
-      if( count($arr_inserts) > 0 )
+      if ( count($arr_inserts) > 0 )
       {
          $query = "INSERT INTO SurveyOption (ID,Score) VALUES " . implode(', ', $arr_inserts)
             . " ON DUPLICATE KEY UPDATE Score=Score+(VALUES(Score))";
@@ -285,14 +285,14 @@ class SurveyOption
 
    public static function delete_survey_options( $sid, $arr_sopts_id )
    {
-      if( !is_array($arr_sopts_id) || count($arr_sopts_id) == 0 )
+      if ( !is_array($arr_sopts_id) || count($arr_sopts_id) == 0 )
          return false;
 
       // check ids to delete
       $ids = array();
-      foreach( $arr_sopts_id as $sopt_id )
+      foreach ( $arr_sopts_id as $sopt_id )
       {
-         if( !is_numeric($sopt_id) || $sopt_id <= 0 )
+         if ( !is_numeric($sopt_id) || $sopt_id <= 0 )
             error('invalid_args', "SurveyOption:delete_survey_options.check.id($sid,$sopt_id)");
          $ids[] = (int)$sopt_id;
       }

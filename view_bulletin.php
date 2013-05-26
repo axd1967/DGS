@@ -32,12 +32,12 @@ $GLOBALS['ThePage'] = new Page('BulletinView');
    connect2mysql();
 
    $logged_in = who_is_logged( $player_row);
-   if( !$logged_in )
+   if ( !$logged_in )
       error('login_if_not_logged_in', 'view_bulletin');
    $my_id = $player_row['ID'];
 
    $bid = (int) @$_REQUEST['bid'];
-   if( $bid < 0 )
+   if ( $bid < 0 )
       error('invalid_args', "view_bulletin.check_args($bid)");
 
    $page = "view_bulletin.php";
@@ -46,14 +46,14 @@ $GLOBALS['ThePage'] = new Page('BulletinView');
    $qsql = Bulletin::build_query_sql( $bid );
    $qsql->merge( Bulletin::build_view_query_sql( false, /*count*/false, '', /*check*/true ) );
    list( $bulletin, $orow ) = Bulletin::load_bulletin_by_query( $qsql, /*withrow*/true );
-   if( is_null($bulletin) )
+   if ( is_null($bulletin) )
       error('unknown_bulletin', "view_bulletin.find_bulletin1($bid)");
-   if( (int)@$orow['B_View'] <= 0 )
+   if ( (int)@$orow['B_View'] <= 0 )
       error('no_view_bulletin', "view_bulletin.find_bulletin2($bid)");
 
    // mark bulletin as read + reload (for recount remaining bulletins)
    $markread = (int)get_request_arg('mr');
-   if( $markread > 0 )
+   if ( $markread > 0 )
    {
       Bulletin::mark_bulletin_as_read( $markread );
       jump_to("$page?bid=$bid");

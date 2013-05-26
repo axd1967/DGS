@@ -37,11 +37,11 @@ define('SEPLINE', "\n<p><hr>\n");
    set_time_limit(0); // don't want script-break during "transaction" with multi-db-queries
 
    $logged_in = who_is_logged( $player_row);
-   if( !$logged_in )
+   if ( !$logged_in )
       error('login_if_not_logged_in', 'scripts.tournament_consistency');
-   if( $player_row['ID'] <= GUESTS_ID_MAX )
+   if ( $player_row['ID'] <= GUESTS_ID_MAX )
       error('not_allowed_for_guest', 'scripts.tournament_consistency');
-   if( !(@$player_row['admin_level'] & ADMIN_DATABASE) )
+   if ( !(@$player_row['admin_level'] & ADMIN_DATABASE) )
       error('adminlevel_too_low', 'scripts.tournament_consistency');
 
    $tid = (int)@$_REQUEST['tid'];
@@ -75,9 +75,9 @@ define('SEPLINE', "\n<p><hr>\n");
 
    $cnt_err = 0;
 
-   if( @$_REQUEST['check_it'] || $do_it )
+   if ( @$_REQUEST['check_it'] || $do_it )
    {
-      if( $do_it )
+      if ( $do_it )
          echo "<p>*** Fixes errors ***</p>";
 
       $cnt_err += fix_tournament_RegisteredTP( $tid, $do_it );
@@ -97,14 +97,14 @@ define('SEPLINE', "\n<p><hr>\n");
 
 function do_updates( $dbgmsg, $upd_arr, $do_it )
 {
-   if( count($upd_arr) == 0 )
+   if ( count($upd_arr) == 0 )
       return;
 
    echo '<pre>';
-   foreach( $upd_arr as $query )
+   foreach ( $upd_arr as $query )
    {
       echo $query, "\n";
-      if( $do_it )
+      if ( $do_it )
          db_query( $dbgmsg, $query );
    }
    echo '</pre>';
@@ -131,7 +131,7 @@ function fix_tournament_RegisteredTP( $tid, $do_it )
       "WHERE TP.Status='".TP_STATUS_REGISTER."' " . tid_clause('TP.tid', $tid) .
       "GROUP BY TP.tid HAVING T.RegisteredTP <> X_Count" );
    $upd_arr = array();
-   while( $row = mysql_fetch_array($result) )
+   while ( $row = mysql_fetch_array($result) )
    {
       $tid = $row['tid'];
       $count = $row['X_Count'];
@@ -166,12 +166,12 @@ function fix_tournament_participant_game_count( $arg_tid, $do_it )
       "WHERE TG.Status IN ('".TG_STATUS_WAIT."','".TG_STATUS_DONE."') " . tid_clause('TG.tid', $arg_tid) .
       "GROUP BY TG.tid, TP.ID" );
    $chk = array(); // arr( tid => arr( rid => arr( Finished/Won/Lost/X_Finished/X_ChallengerWon/X_ChallengerLost => count )))
-   while( $row = mysql_fetch_array($result) )
+   while ( $row = mysql_fetch_array($result) )
    {
       extract($row);
-      if( !isset($chk[$tid]) )
+      if ( !isset($chk[$tid]) )
          $chk[$tid] = array();
-      if( !isset($chk[$tid][$rid]) )
+      if ( !isset($chk[$tid][$rid]) )
          $chk[$tid][$rid] = $row;
    }
    mysql_free_result($result);
@@ -184,12 +184,12 @@ function fix_tournament_participant_game_count( $arg_tid, $do_it )
       "WHERE TG.Status IN ('".TG_STATUS_WAIT."','".TG_STATUS_DONE."') " . tid_clause('TG.tid', $arg_tid) .
       "GROUP BY TG.tid, TP.ID " .
       "ORDER BY TG.tid, TP.ID" ); // also order
-   while( $row = mysql_fetch_array($result) )
+   while ( $row = mysql_fetch_array($result) )
    {
       extract($row);
-      if( !isset($chk[$tid]) )
+      if ( !isset($chk[$tid]) )
          $chk[$tid] = array();
-      if( !isset($chk[$tid][$rid]) )
+      if ( !isset($chk[$tid][$rid]) )
          $chk[$tid][$rid] = $row;
       else
       {
@@ -202,30 +202,30 @@ function fix_tournament_participant_game_count( $arg_tid, $do_it )
 
    // find descrepancies to fix on TP.Finished/Won/Lost
    $upd_arr = array();
-   foreach( $chk as $tid => $arr_rid )
+   foreach ( $chk as $tid => $arr_rid )
    {
-      foreach( $arr_rid as $rid => $arr )
+      foreach ( $arr_rid as $rid => $arr )
       {
          $upd = array();
          $diff = array();
          $cnt_won  = (int)@$arr['X_ChallengerWon']  + (int)@$arr['X_DefenderWon'];
          $cnt_lost = (int)@$arr['X_ChallengerLost'] + (int)@$arr['X_DefenderLost'];
-         if( $arr['Finished'] != $arr['X_Finished'] )
+         if ( $arr['Finished'] != $arr['X_Finished'] )
          {
             $upd[] = 'Finished=' . $arr['X_Finished'];
             $diff[] = sprintf('Finished %s -> %s', $arr['Finished'], $arr['X_Finished'] );
          }
-         if( $arr['Won'] != $cnt_won )
+         if ( $arr['Won'] != $cnt_won )
          {
             $upd[] = "Won=$cnt_won";
             $diff[] = sprintf('Won %s -> %s', $arr['Won'], $cnt_won );
          }
-         if( $arr['Lost'] != $cnt_lost )
+         if ( $arr['Lost'] != $cnt_lost )
          {
             $upd[] = "Lost=$cnt_lost";
             $diff[] = sprintf('Lost %s -> %s', $arr['Lost'], $cnt_lost );
          }
-         if( count($upd) )
+         if ( count($upd) )
          {
             $upd_arr[] = "UPDATE TournamentParticipant SET ".implode(', ', $upd)." WHERE ID=$rid LIMIT 1";
             echo sprintf( "Tournament #%s: found wrong counts for TP [%s]: %s<br>\n",
@@ -266,7 +266,7 @@ function fix_tournament_ladder_challenge_count( $arg_tid, $do_it )
       "GROUP BY TL.tid, TL.rid " .
       "HAVING ChallengesIn <> X_Count " .
       "ORDER BY TL.tid, TL.rid" );
-   while( $row = mysql_fetch_array($result) )
+   while ( $row = mysql_fetch_array($result) )
    {
       extract($row);
       $upd_arr[] = "UPDATE TournamentLadder SET ChallengesIn=$X_Count WHERE tid=$tid AND rid=$rid LIMIT 1";
@@ -286,7 +286,7 @@ function fix_tournament_ladder_challenge_count( $arg_tid, $do_it )
       "GROUP BY TL.tid, TL.rid " .
       "HAVING ChallengesOut <> X_Count " .
       "ORDER BY TL.tid, TL.rid" );
-   while( $row = mysql_fetch_array($result) )
+   while ( $row = mysql_fetch_array($result) )
    {
       extract($row);
       $upd_arr[] = "UPDATE TournamentLadder SET ChallengesOut=$X_Count WHERE tid=$tid AND rid=$rid LIMIT 1";

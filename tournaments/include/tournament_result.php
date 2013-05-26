@@ -88,7 +88,7 @@ class TournamentResult
    /*! \brief Inserts or updates tournament-result in database. */
    public function persist()
    {
-      if( $this->ID > 0 )
+      if ( $this->ID > 0 )
          $success = $this->update();
       else
          $success = $this->insert();
@@ -99,7 +99,7 @@ class TournamentResult
    {
       $entityData = $this->fillEntityData(true);
       $result = $entityData->insert( "TournamentResult.insert(%s)" );
-      if( $result )
+      if ( $result )
          $this->ID = mysql_insert_id();
       self::delete_cache_tournament_result( 'TournamentResult.insert', $this->tid );
       return $result;
@@ -146,7 +146,7 @@ class TournamentResult
    public static function build_query_sql( $tid=0 )
    {
       $qsql = $GLOBALS['ENTITY_TOURNAMENT_RESULT']->newQuerySQL('TRS');
-      if( $tid > 0 )
+      if ( $tid > 0 )
          $qsql->add_part( SQLP_WHERE, "TRS.tid='$tid'" );
       return $qsql;
    }
@@ -181,7 +181,7 @@ class TournamentResult
       $iterator->setResultRows( mysql_num_rows($result) );
 
       $iterator->clearItems();
-      while( $row = mysql_fetch_array( $result ) )
+      while ( $row = mysql_fetch_array( $result ) )
       {
          $tresult = self::new_from_row( $row );
          $iterator->addItem( $tresult, $row );

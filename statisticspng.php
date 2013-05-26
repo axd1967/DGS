@@ -29,10 +29,10 @@ require_once 'include/graph.php';
    $logged_in = who_is_logged( $player_row, LOGIN_SKIP_UPDATE );
 
    // define all months for (*) to have translation-texts (see use of '$TW_'):
-   if(0) T_('Jan').T_('Feb').T_('Mar').T_('Apr').T_('May').T_('Jun').T_('Jul').T_('Aug').T_('Sep').T_('Oct').T_('Nov').T_('Dec');
+   if (0) T_('Jan').T_('Feb').T_('Mar').T_('Apr').T_('May').T_('Jun').T_('Jul').T_('Aug').T_('Sep').T_('Oct').T_('Nov').T_('Dec');
 
    //disable translations in graph if not latin
-   if( eregi( '^iso-8859-', $encoding_used) )
+   if ( eregi( '^iso-8859-', $encoding_used) )
    {
       $keep_english= false;
       $T_= 'T_';
@@ -54,14 +54,14 @@ require_once 'include/graph.php';
    $cache_it= ( CACHE_FOLDER>'' && !@$_REQUEST['no_cache']
             && $SizeX==640 && !$show_time );
 
-   if( $cache_it )
+   if ( $cache_it )
    {
       $cache_name= CACHE_FOLDER . sprintf('cache_statistics-%s.png', $activity);
       clearstatcache(); //FIXME since PHP5.3.0 with filename
       $tmp= ((int)@filemtime($cache_name)) + CACHE_EXPIRE_GRAPH;
-      if( $tmp >= $NOW )
+      if ( $tmp >= $NOW )
       {
-         if( image_passthru($cache_name, $NOW, $tmp) )
+         if ( image_passthru($cache_name, $NOW, $tmp) )
             exit;
       }
    }
@@ -114,7 +114,7 @@ require_once 'include/graph.php';
       'min' => $minUsers,
       'c' => $gr->getcolor(   0, 200,   0),
    );
-   if( $activity )
+   if ( $activity )
    {
       $graphs[]= array(
          'name' => $T_('Activity'),
@@ -146,20 +146,20 @@ require_once 'include/graph.php';
    $a = $gr->width-2*$title_sep;
    $m = 0;
    $cnt_graphs = count($graphs);
-   for( $i=0; $i < $cnt_graphs; $i++ )
+   for ( $i=0; $i < $cnt_graphs; $i++ )
    {
       $graph= &$graphs[$i];
 
       $max = $graph['max'];
       $min = $graph['min'];
-      if( $max )
+      if ( $max )
          $curves_min = min($curves_min,$min/$max);
 
       $v= sprintf($title_fmt, $graph['name'], $graph['max']);
 
       $b= $gr->labelbox($v);
       $b= $x+$b['x'];
-      if( $b > $a )
+      if ( $b > $a )
       {
          $b-= $x;
          $x = 0;
@@ -199,7 +199,7 @@ require_once 'include/graph.php';
    $gr->setgraphviewX($minTime, $maxTime);
 
    $curves_min-= 0.01; //add a little spacing
-   for( $i=0; $i < $cnt_graphs; $i++ )
+   for ( $i=0; $i < $cnt_graphs; $i++ )
    {
       $graph= &$graphs[$i];
 
@@ -242,7 +242,7 @@ require_once 'include/graph.php';
 
    //draw the curves
 
-   for( $i=0; $i < $cnt_graphs; $i++ )
+   for ( $i=0; $i < $cnt_graphs; $i++ )
    {
       $graph= &$graphs[$i];
 
@@ -254,14 +254,14 @@ require_once 'include/graph.php';
 
    //misc drawings
 
-   if( $show_time )
+   if ( $show_time )
       $gr->label( 0, 0,
          sprintf('%0.2f ms', (getmicrotime()-$page_microtime)*1000), $black);
 
-   if( $cache_it )
+   if ( $cache_it )
       grab_output_start();
    $gr->send_image();
-   if( $cache_it )
+   if ( $cache_it )
       grab_output_end( $cache_name);
 }
 
@@ -294,7 +294,7 @@ function get_stat_data()
                ",MIN(Activity) AS minActiv,MAX(Activity) AS maxActiv" .
                ",MIN(Hits) AS minHits,MAX(Hits) AS maxHits" .
                " FROM Statistics" );
-   if( @mysql_num_rows( $result ) != 1 )
+   if ( @mysql_num_rows( $result ) != 1 )
       exit;
 
    $max_row = mysql_fetch_assoc($result);
@@ -305,10 +305,10 @@ function get_stat_data()
    $result = db_query( 'statisticspng.load_data',
          "SELECT *,UNIX_TIMESTAMP(Time) as times FROM Statistics ORDER BY Time" );
 
-   if( @mysql_num_rows( $result ) < 1 )
+   if ( @mysql_num_rows( $result ) < 1 )
       exit;
 
-   while( $row = mysql_fetch_assoc($result) )
+   while ( $row = mysql_fetch_assoc($result) )
    {
       $tTime[]= $row['times'];
       $tUsers[]= $row['Users'];

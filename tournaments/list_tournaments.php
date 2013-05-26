@@ -40,9 +40,9 @@ $GLOBALS['ThePage'] = new Page('TournamentList');
    connect2mysql();
 
    $logged_in = who_is_logged( $player_row);
-   if( !$logged_in )
+   if ( !$logged_in )
       error('login_if_not_logged_in', 'Tournament.list_tournaments');
-   if( !ALLOW_TOURNAMENTS )
+   if ( !ALLOW_TOURNAMENTS )
       error('feature_disabled', 'Tournament.list_tournaments');
    $my_id = $player_row['ID'];
    $cfg_tblcols = ConfigTableColumns::load_config( $my_id, CFGCOLS_TOURNAMENTS );
@@ -55,21 +55,21 @@ $GLOBALS['ThePage'] = new Page('TournamentList');
 
    // config for filters
    $scope_filter_array = array( T_('All') => '' );
-   foreach( Tournament::getScopeText() as $scope => $text )
+   foreach ( Tournament::getScopeText() as $scope => $text )
       $scope_filter_array[$text] = "T.Scope='$scope'";
 
    $type_filter_array = array( T_('All') => '' );
-   foreach( Tournament::getTypeText() as $type => $text )
+   foreach ( Tournament::getTypeText() as $type => $text )
       $type_filter_array[$text] = "T.Type='$type'";
 
    $status_filter_array = array( T_('All') => '' );
    $idx = 1;
-   foreach( Tournament::getStatusText() as $status => $text )
+   foreach ( Tournament::getStatusText() as $status => $text )
    {
       $status_filter_array[$text] = "T.Status='$status'";
-      if( $status == TOURNEY_STATUS_ADMIN )
+      if ( $status == TOURNEY_STATUS_ADMIN )
          $idx_status_admin = $idx;
-      elseif( $status == TOURNEY_STATUS_DELETE )
+      elseif ( $status == TOURNEY_STATUS_DELETE )
          $idx_status_delete = $idx;
       $idx++;
    }
@@ -120,7 +120,7 @@ $GLOBALS['ThePage'] = new Page('TournamentList');
    // attach external URL-parameters from static filter
    $ttable->add_external_parameters( $tsfilter->get_req_params(), true );
 
-   if( $show_notes )
+   if ( $show_notes )
    {
       $rp = new RequestParameters( array( 'notes' => $show_notes ) );
       $ttable->add_external_parameters( $rp, true );
@@ -136,7 +136,7 @@ $GLOBALS['ThePage'] = new Page('TournamentList');
    $ttable->add_tablehead(13, T_('Size#header'), 'Number', 0, 'TRULE.Size-');
    $ttable->add_tablehead(14, T_('Rated#header'), 'YesNo', TABLE_NO_SORT);
    $ttable->add_tablehead(15, T_('Ruleset#header'), 'Enum', TABLE_NO_SORT);
-   if( $is_admin )
+   if ( $is_admin )
       $ttable->add_tablehead(12, T_('Flags#header'), '', 0, 'T.Flags-');
    $ttable->add_tablehead(16, T_('Time limit#header'), 'Enum', TABLE_NO_SORT);
    $ttable->add_tablehead(18, T_('Restrictions#header'), '', TABLE_NO_SORT);
@@ -162,7 +162,7 @@ $GLOBALS['ThePage'] = new Page('TournamentList');
          'TRULE.Maintime', 'TRULE.Byotype', 'TRULE.Byotime', 'TRULE.Byoperiods',
       SQLP_FROM,
          'INNER JOIN TournamentRules AS TRULE ON TRULE.tid=T.ID' ));
-   if( $ttable->is_column_displayed(18) )
+   if ( $ttable->is_column_displayed(18) )
    {
       $tqsql->merge( new QuerySQL(
          SQLP_FIELDS,
@@ -173,13 +173,13 @@ $GLOBALS['ThePage'] = new Page('TournamentList');
          SQLP_FROM,
             'INNER JOIN TournamentProperties AS TPR ON TPR.tid=T.ID' ));
    }
-   if( $ttable->is_column_displayed(17) && !$ttable->is_column_displayed(18) )
+   if ( $ttable->is_column_displayed(17) && !$ttable->is_column_displayed(18) )
    {
       $tqsql->merge( new QuerySQL(
          SQLP_FIELDS, 'TPR.MaxParticipants',
          SQLP_FROM,   'INNER JOIN TournamentProperties AS TPR ON TPR.tid=T.ID' ));
    }
-   if( !$has_uid )
+   if ( !$has_uid )
    {
       $tqsql->add_part( SQLP_FIELDS, 'TP.Status AS TP_Status' );
       $tqsql->add_part( SQLP_FROM, "LEFT JOIN TournamentParticipant AS TP ON TP.tid=T.ID AND TP.uid=$my_id" );
@@ -190,15 +190,15 @@ $GLOBALS['ThePage'] = new Page('TournamentList');
          $tqsql,
          $ttable->current_order_string('ID-'),
          $ttable->current_limit_string() );
-   if( !TournamentUtils::isAdmin() ) // filter away ADM/DEL-status for non-admins
+   if ( !TournamentUtils::isAdmin() ) // filter away ADM/DEL-status for non-admins
    {
       $f_status = (int)$tfilter->get_filter_value(4);
       $arr_f_stat = array(); // show ADM|DEL if selected in filter
-      if( $f_status != $idx_status_admin )
+      if ( $f_status != $idx_status_admin )
          $arr_f_stat[] = TOURNEY_STATUS_ADMIN;
-      if( $f_status != $idx_status_delete )
+      if ( $f_status != $idx_status_delete )
          $arr_f_stat[] = TOURNEY_STATUS_DELETE;
-      if( count($arr_f_stat) )
+      if ( count($arr_f_stat) )
          $iterator->addQuerySQLMerge(
             new QuerySQL( SQLP_WHERE, "NOT T.Status IN ('" . implode("','", $arr_f_stat) . "')" ));
    }
@@ -210,9 +210,9 @@ $GLOBALS['ThePage'] = new Page('TournamentList');
    $maxGamesCheck = new MaxGamesCheck();
 
 
-   if( $has_uid )
+   if ( $has_uid )
       $title = T_('My tournaments as participant');
-   elseif( $has_tdir )
+   elseif ( $has_tdir )
       $title = T_('My tournaments as tournament director');
    else
       $title = T_('Tournaments');
@@ -221,41 +221,41 @@ $GLOBALS['ThePage'] = new Page('TournamentList');
 
    echo "<h3 class=Header>". $title . "</h3>\n";
 
-   while( ($show_rows-- > 0) && list(,$arr_item) = $iterator->getListIterator() )
+   while ( ($show_rows-- > 0) && list(,$arr_item) = $iterator->getListIterator() )
    {
       list( $tourney, $orow ) = $arr_item;
       $ID = $tourney->ID;
       $row_str = array();
 
-      if( $ttable->Is_Column_Displayed[ 1] )
+      if ( $ttable->Is_Column_Displayed[ 1] )
       {
          $tlink = ( $has_tdir )
             ? $base_path."tournaments/manage_tournament.php?tid=$ID"
             : $base_path."tournaments/view_tournament.php?tid=$ID";
          $row_str[ 1] = button_TD_anchor( $tlink, $ID );
       }
-      if( $ttable->Is_Column_Displayed[ 2] )
+      if ( $ttable->Is_Column_Displayed[ 2] )
          $row_str[ 2] = Tournament::getScopeText( $tourney->Scope );
-      if( $ttable->Is_Column_Displayed[ 3] )
+      if ( $ttable->Is_Column_Displayed[ 3] )
          $row_str[ 3] = Tournament::getTypeText( $tourney->Type );
-      if( $ttable->Is_Column_Displayed[ 4] )
+      if ( $ttable->Is_Column_Displayed[ 4] )
          $row_str[ 4] = Tournament::getStatusText( $tourney->Status );
-      if( $ttable->Is_Column_Displayed[ 5] )
+      if ( $ttable->Is_Column_Displayed[ 5] )
       {
          $str = make_html_safe( $tourney->Title, false, $rx_term );
-         if( $orow['ShapeID'] > 0 )
+         if ( $orow['ShapeID'] > 0 )
             $str .= MED_SPACING . echo_image_shapeinfo($orow['ShapeID'], $orow['Size'], $orow['ShapeSnapshot']);
          $row_str[ 5] = $str;
       }
-      if( $ttable->Is_Column_Displayed[ 7] )
+      if ( $ttable->Is_Column_Displayed[ 7] )
          $row_str[ 7] = ($tourney->Lastchanged > 0) ? date(DATE_FMT2, $tourney->Lastchanged) : '';
-      if( $ttable->Is_Column_Displayed[ 8] )
+      if ( $ttable->Is_Column_Displayed[ 8] )
          $row_str[ 8] = ($tourney->StartTime > 0) ? date(DATE_FMT2, $tourney->StartTime) : '';
-      if( $ttable->Is_Column_Displayed[ 9] )
+      if ( $ttable->Is_Column_Displayed[ 9] )
          $row_str[ 9] = ($tourney->EndTime > 0) ? date(DATE_FMT2, $tourney->EndTime) : '';
-      if( $ttable->Is_Column_Displayed[10] )
+      if ( $ttable->Is_Column_Displayed[10] )
          $row_str[10] = $tourney->formatRound(true);
-      if( $ttable->Is_Column_Displayed[11] )
+      if ( $ttable->Is_Column_Displayed[11] )
       {
          $row_str[11] =
             anchor( $base_path."tournaments/register.php?tid=$ID",
@@ -266,21 +266,21 @@ $GLOBALS['ThePage'] = new Page('TournamentList');
                   ? TournamentParticipant::getStatusText($orow['TP_Status'])
                   : NO_VALUE );
       }
-      if( $is_admin && $ttable->Is_Column_Displayed[12] )
+      if ( $is_admin && $ttable->Is_Column_Displayed[12] )
          $row_str[12] = $tourney->formatFlags('', 0, true, 'TWarning');
-      if( $ttable->Is_Column_Displayed[13] )
+      if ( $ttable->Is_Column_Displayed[13] )
          $row_str[13] = $orow['Size']; // TRULE.Size
-      if( $ttable->Is_Column_Displayed[14] )
+      if ( $ttable->Is_Column_Displayed[14] )
          $row_str[14] = ($orow['X_Rated'] == 'N') ? T_('No') : T_('Yes');
-      if( $ttable->Is_Column_Displayed[15] )
+      if ( $ttable->Is_Column_Displayed[15] )
          $row_str[15] = getRulesetText( $orow['Ruleset'] );
-      if( $ttable->Is_Column_Displayed[16] )
+      if ( $ttable->Is_Column_Displayed[16] )
          $row_str[16] = TimeFormat::echo_time_limit( $orow['Maintime'], $orow['Byotype'],
             $orow['Byotime'], $orow['Byoperiods'], TIMEFMT_SHORT|TIMEFMT_ADDTYPE );
-      if( $ttable->Is_Column_Displayed[17] )
+      if ( $ttable->Is_Column_Displayed[17] )
          $row_str[17] = sprintf( '%s / %s', $tourney->RegisteredTP,
             ( $orow['MaxParticipants'] > 0 ) ? $orow['MaxParticipants'] : NO_VALUE );
-      if( $ttable->Is_Column_Displayed[18] )
+      if ( $ttable->Is_Column_Displayed[18] )
       {
          list( $restrictions, $class, $title ) = build_restrictions( $tourney, $orow );
          $row_str[18] = ( $class )
@@ -296,15 +296,15 @@ $GLOBALS['ThePage'] = new Page('TournamentList');
 
 
    $notes = array();
-   if( $ttable->is_column_displayed(11) ) // reg-status
+   if ( $ttable->is_column_displayed(11) ) // reg-status
    {
       $reg_notes = array( sprintf('<b>%s</b> (%s):', T_('Registration Status#T_header'), T_('Registration Status') ) );
       $arr = array_merge( array( '' => NO_VALUE ), TournamentParticipant::getStatusText() );
-      foreach( $arr as $tpstat => $text )
+      foreach ( $arr as $tpstat => $text )
          $reg_notes[] = $text . ' = ' . TournamentParticipant::getStatusText($tpstat, false, true);
       $notes[] = $reg_notes;
    }
-   if( $ttable->is_column_displayed(18) && !$has_tdir ) // restrictions
+   if ( $ttable->is_column_displayed(18) && !$has_tdir ) // restrictions
    {
       $notes[] = array( sprintf('<b>%s</b> (%s):', T_('Tournament Registration Restrictions'), T_('background colors') ),
             span('TJoinErr',  T_('Error')   . ' = ' . T_('Tournament can not be joined.')),
@@ -333,7 +333,7 @@ $GLOBALS['ThePage'] = new Page('TournamentList');
       . $ttable->current_sort_string(1)
       . $ttable->current_filter_string(1)
       . $ttable->current_from_string(1);
-   if( $show_notes )
+   if ( $show_notes )
    {
       echo_notes( 'tournamentnotes', T_('Tournament notes'), $notes );
       echo anchor( $baseURL.'notes=0', T_('Hide tournament notes') ), "\n";
@@ -347,7 +347,7 @@ $GLOBALS['ThePage'] = new Page('TournamentList');
    $menu_array[T_('My tournaments')] = "tournaments/list_tournaments.php?uid=$my_id";
    $menu_array[T_('Directoring tournaments')] = "tournaments/list_tournaments.php?tdir=$my_id";
    $create_tourney = TournamentUtils::check_create_tournament();
-   if( $create_tourney )
+   if ( $create_tourney )
    {
       $menu_array[T_('Create new tournament')] = ($create_tourney == 1)
          ? array( 'url' => 'tournaments/wizard.php', 'class' => 'AdminLink' )
@@ -365,23 +365,23 @@ function build_restrictions( $tourney, $row )
 
    $out = array();
    $types = array(); // find gravest type: E > W > I > ok
-   foreach( $arr as $item )
+   foreach ( $arr as $item )
    {
       $types[$item[0]] = 1;
       $out[] = substr($item, 2);
    }
 
-   if( @$types['E'] )
+   if ( @$types['E'] )
    {
       $class = 'TJoinErr';
       $title = T_('Error');
    }
-   elseif( @$types['W'] )
+   elseif ( @$types['W'] )
    {
       $class = 'TJoinWarn';
       $title = T_('Warning');
    }
-   elseif( @$types['W'] )
+   elseif ( @$types['W'] )
    {
       $class = 'TJoinInv';
       $title = T_('Invite');

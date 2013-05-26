@@ -132,42 +132,42 @@ class TournamentLadderProps
 
    public function setDetermineChallenger( $determine_challenger )
    {
-      if( !preg_match( "/^(".CHECK_TLP_DETERMINE_CHALL.")$/", $determine_challenger ) )
+      if ( !preg_match( "/^(".CHECK_TLP_DETERMINE_CHALL.")$/", $determine_challenger ) )
          error('invalid_args', "TournamentLadderProps.setDetermineChallenger($determine_challenger)");
       $this->DetermineChallenger = $determine_challenger;
    }
 
    public function setGameEndNormal( $game_end )
    {
-      if( !preg_match( "/^(".CHECK_TGEND_NORMAL.")$/", $game_end ) )
+      if ( !preg_match( "/^(".CHECK_TGEND_NORMAL.")$/", $game_end ) )
          error('invalid_args', "TournamentLadderProps.setGameEndNormal($game_end)");
       $this->GameEndNormal = $game_end;
    }
 
    public function setGameEndJigo( $game_end )
    {
-      if( !preg_match( "/^(".CHECK_TGEND_JIGO.")$/", $game_end ) )
+      if ( !preg_match( "/^(".CHECK_TGEND_JIGO.")$/", $game_end ) )
          error('invalid_args', "TournamentLadderProps.setGameEndJigo($game_end)");
       $this->GameEndJigo = $game_end;
    }
 
    public function setGameEndTimeoutWin( $game_end )
    {
-      if( !preg_match( "/^(".CHECK_TGEND_TIMEOUT_WIN.")$/", $game_end ) )
+      if ( !preg_match( "/^(".CHECK_TGEND_TIMEOUT_WIN.")$/", $game_end ) )
          error('invalid_args', "TournamentLadderProps.setGameEndTimeoutWin($game_end)");
       $this->GameEndTimeoutWin = $game_end;
    }
 
    public function setGameEndTimeoutLoss( $game_end )
    {
-      if( !preg_match( "/^(".CHECK_TGEND_TIMEOUT_LOSS.")$/", $game_end ) )
+      if ( !preg_match( "/^(".CHECK_TGEND_TIMEOUT_LOSS.")$/", $game_end ) )
          error('invalid_args', "TournamentLadderProps.setGameEndTimeoutLoss($game_end)");
       $this->GameEndTimeoutLoss = $game_end;
    }
 
    public function setUserJoinOrder( $user_join_order )
    {
-      if( !preg_match( "/^(".CHECK_TLP_JOINORDER.")$/", $user_join_order ) )
+      if ( !preg_match( "/^(".CHECK_TLP_JOINORDER.")$/", $user_join_order ) )
          error('invalid_args', "TournamentLadderProps.setUserJoinOrder($user_join_order)");
       $this->UserJoinOrder = $user_join_order;
    }
@@ -175,7 +175,7 @@ class TournamentLadderProps
    /*! \brief Inserts or updates tournament-ladder-props in database. */
    public function persist()
    {
-      if( self::isTournamentLadderProps($tid) )
+      if ( self::isTournamentLadderProps($tid) )
          $success = $this->update();
       else
          $success = $this->insert();
@@ -210,7 +210,7 @@ class TournamentLadderProps
 
    public function fillEntityData( $data=null )
    {
-      if( is_null($data) )
+      if ( is_null($data) )
          $data = $GLOBALS['ENTITY_TOURNAMENT_LADDER_PROPS']->newEntityData();
       $data->set_value( 'tid', $this->tid );
       $data->set_value( 'Lastchanged', $this->Lastchanged );
@@ -243,57 +243,57 @@ class TournamentLadderProps
    {
       $errors = array();
 
-      if( $this->ChallengeRangeAbsolute == 0 && $this->ChallengeRangeRelative == 0
+      if ( $this->ChallengeRangeAbsolute == 0 && $this->ChallengeRangeRelative == 0
             && $this->ChallengeRangeRating == TLADDER_CHRNG_RATING_UNUSED )
          $errors[] = T_('There must be at least one USED challenge range configuration.#T_ladder');
-      if( $this->ChallengeRangeRelative < 0 || $this->ChallengeRangeRelative > 100 )
+      if ( $this->ChallengeRangeRelative < 0 || $this->ChallengeRangeRelative > 100 )
          $errors[] = sprintf( T_('Challenge Range Relative must be in percentage range of %s.#T_ladder'),
             build_range_text(0, 100) );
-      if( $this->ChallengeRangeRating != TLADDER_CHRNG_RATING_UNUSED
+      if ( $this->ChallengeRangeRating != TLADDER_CHRNG_RATING_UNUSED
             && abs($this->ChallengeRangeRating) > TLADDER_MAX_CHRNG_RATING )
          $errors[] = sprintf( T_('Challenge Range Rating must be in range of %s.#T_ladder'),
             build_range_text( -TLADDER_MAX_CHRNG_RATING, TLADDER_MAX_CHRNG_RATING ) );
 
-      if( $this->MaxDefenses < 1 || $this->MaxDefenses > TLADDER_MAX_DEFENSES )
+      if ( $this->MaxDefenses < 1 || $this->MaxDefenses > TLADDER_MAX_DEFENSES )
          $errors[] = sprintf( T_('Max. defenses for remaining ranks must be in range %s.#T_ladder'),
             build_range_text(1, TLADDER_MAX_DEFENSES) );
-      if( $this->MaxDefenses1 < 0 || $this->MaxDefenses1 > TLADDER_MAX_DEFENSES
+      if ( $this->MaxDefenses1 < 0 || $this->MaxDefenses1 > TLADDER_MAX_DEFENSES
             || $this->MaxDefenses2 < 0 || $this->MaxDefenses2 > TLADDER_MAX_DEFENSES )
          $errors[] = sprintf( T_('Max. defenses for groups must be in range %s (0 if not used).#T_ladder'),
             build_range_text(0, TLADDER_MAX_DEFENSES) );
-      if( $this->MaxDefensesStart1 < 0 || $this->MaxDefensesStart2 < 0 )
+      if ( $this->MaxDefensesStart1 < 0 || $this->MaxDefensesStart2 < 0 )
          $errors[] = T_('Max. defenses start-rank for groups must be 0 (if not used) or >0 otherwise.#T_ladder');
-      if( ($this->MaxDefenses1 > 0 && $this->MaxDefensesStart1 == 0) || ($this->MaxDefenses1 == 0 && $this->MaxDefensesStart1 > 0) )
+      if ( ($this->MaxDefenses1 > 0 && $this->MaxDefensesStart1 == 0) || ($this->MaxDefenses1 == 0 && $this->MaxDefensesStart1 > 0) )
          $errors[] = sprintf( T_('Max. defenses and start-rank for group #%s must both be 0 (if not used) or both be given.#T_ladder'), 1 );
-      if( ($this->MaxDefenses2 > 0 && $this->MaxDefensesStart2 == 0) || ($this->MaxDefenses2 == 0 && $this->MaxDefensesStart2 > 0) )
+      if ( ($this->MaxDefenses2 > 0 && $this->MaxDefensesStart2 == 0) || ($this->MaxDefenses2 == 0 && $this->MaxDefensesStart2 > 0) )
          $errors[] = sprintf( T_('Max. defenses and start-rank for group #%s must both be 0 (if not used) or both be given.#T_ladder'), 2 );
-      if( $this->MaxDefenses1 > 0 && ($this->MaxDefenses >= $this->MaxDefenses1) )
+      if ( $this->MaxDefenses1 > 0 && ($this->MaxDefenses >= $this->MaxDefenses1) )
          $errors[] = sprintf( T_('Max. defenses for remaining ranks must be < max. defenses for group #%s.#T_ladder'), 1 );
-      if( $this->MaxDefenses2 > 0 && ($this->MaxDefenses >= $this->MaxDefenses2) )
+      if ( $this->MaxDefenses2 > 0 && ($this->MaxDefenses >= $this->MaxDefenses2) )
          $errors[] = sprintf( T_('Max. defenses for remaining ranks must be < max. defenses for group #%s.#T_ladder'), 2 );
-      if( $this->MaxDefenses1 > 0 && $this->MaxDefenses2 > 0 && ($this->MaxDefenses2 >= $this->MaxDefenses1) )
+      if ( $this->MaxDefenses1 > 0 && $this->MaxDefenses2 > 0 && ($this->MaxDefenses2 >= $this->MaxDefenses1) )
          $errors[] = T_('Max. defenses for group #1 must be > max. defenses for group #2.#T_ladder');
-      if( $this->MaxDefensesStart1 > 0 && $this->MaxDefensesStart2 > 0 && ($this->MaxDefensesStart2 <= $this->MaxDefensesStart1) )
+      if ( $this->MaxDefensesStart1 > 0 && $this->MaxDefensesStart2 > 0 && ($this->MaxDefensesStart2 <= $this->MaxDefensesStart1) )
          $errors[] = T_('Max. defenses start-rank for group #1 must be < start-rank for group #2.#T_ladder');
-      if( $this->MaxDefenses1 == 0 && $this->MaxDefensesStart1 == 0 && $this->MaxDefenses2 > 0 )
+      if ( $this->MaxDefenses1 == 0 && $this->MaxDefensesStart1 == 0 && $this->MaxDefenses2 > 0 )
          $errors[] = T_('If one group is unused, it must be group #2.#T_ladder');
 
-      if( $this->MaxChallenges < 0 || $this->MaxChallenges > TLADDER_MAX_CHALLENGES )
+      if ( $this->MaxChallenges < 0 || $this->MaxChallenges > TLADDER_MAX_CHALLENGES )
          $errors[] = sprintf( T_('Max. outgoing challenges must be in range %s.#T_ladder'),
             build_range_text(0, TLADDER_MAX_CHALLENGES) );
 
-      if( $this->UserAbsenceDays < 0 || $this->UserAbsenceDays > 255 )
+      if ( $this->UserAbsenceDays < 0 || $this->UserAbsenceDays > 255 )
          $errors[] = sprintf( T_('User absence must be in range %s days.#T_ladder'),
             build_range_text(0, 255) );
 
-      if( $this->RankPeriodLength < 1 || $this->RankPeriodLength > 255 )
+      if ( $this->RankPeriodLength < 1 || $this->RankPeriodLength > 255 )
          $errors[] = sprintf( T_('Rank-period length must be in range %s months.#T_ladder'),
             build_range_text(1, 255) );
 
-      if( $this->CrownKingHours < 0 || $this->RankPeriodLength > 50000 )
+      if ( $this->CrownKingHours < 0 || $this->RankPeriodLength > 50000 )
          $errors[] = sprintf( T_('Crowning of king time must be in range %s hours.#T_ladder'),
             build_range_text(0, 50000) );
-      if( ($this->CrownKingHours > 0 && $this->CrownKingStart == 0) || ($this->CrownKingHours ==0 && $this->CrownKingStart > 0) )
+      if ( ($this->CrownKingHours > 0 && $this->CrownKingStart == 0) || ($this->CrownKingHours ==0 && $this->CrownKingStart > 0) )
          $errors[] = T_('For auto-crowning of king you need both settings (hours and check start date).#T_ladder');
 
       return $errors;
@@ -306,18 +306,18 @@ class TournamentLadderProps
 
       // challenge-range
       $arr = array( T_('You can challenge the highest ladder position matching the following conditions') );
-      if( $this->ChallengeRangeAbsolute < 0 )
+      if ( $this->ChallengeRangeAbsolute < 0 )
          $arr[] = T_('anyone above your own ladder position');
-      elseif( $this->ChallengeRangeAbsolute > 0 )
+      elseif ( $this->ChallengeRangeAbsolute > 0 )
          $arr[] = sprintf( T_('%s positions above your own#T_ladder'), $this->ChallengeRangeAbsolute );
-      if( $this->ChallengeRangeRelative > 0 )
+      if ( $this->ChallengeRangeRelative > 0 )
          $arr[] = sprintf( T_('%s of ladder users above your own position'), $this->ChallengeRangeRelative.'%' );
-      if( $this->ChallengeRangeRating != TLADDER_CHRNG_RATING_UNUSED )
+      if ( $this->ChallengeRangeRating != TLADDER_CHRNG_RATING_UNUSED )
       {
-         if( $this->ChallengeRangeRating < 0 )
+         if ( $this->ChallengeRangeRating < 0 )
             $arr[] = sprintf( T_('%s positions above your theoretical position ordered by user rating#T_ladder'),
                               abs($this->ChallengeRangeRating) );
-         elseif( $this->ChallengeRangeRating > 0 )
+         elseif ( $this->ChallengeRangeRating > 0 )
             $arr[] = sprintf( T_('%s positions below your theoretical position ordered by user rating#T_ladder'),
                               $this->ChallengeRangeRating );
          else //==0
@@ -328,19 +328,19 @@ class TournamentLadderProps
       // incoming challenges
       $arr = array( T_('The number of incoming challenges for any defender is restricted to#T_ladder') );
       $groups = 3;
-      if( $this->MaxDefenses1 > 0 && $this->MaxDefensesStart1 > 0 )
+      if ( $this->MaxDefenses1 > 0 && $this->MaxDefensesStart1 > 0 )
          $arr[] = sprintf( T_('%s challenges for ranks #%s..%s#T_ladder'),
                            $this->MaxDefenses1, 1, $this->MaxDefensesStart1 );
       else
          --$groups;
-      if( $this->MaxDefenses2 > 0 && $this->MaxDefensesStart2 > 0 )
+      if ( $this->MaxDefenses2 > 0 && $this->MaxDefensesStart2 > 0 )
          $arr[] = sprintf( T_('%s challenges for ranks #%s..%s#T_ladder'),
                            $this->MaxDefenses2, $this->MaxDefensesStart1 + 1, $this->MaxDefensesStart2 );
       else
          --$groups;
-      if( $this->MaxDefenses > 0 )
+      if ( $this->MaxDefenses > 0 )
       {
-         if( $groups > 1 )
+         if ( $groups > 1 )
             $arr[] = sprintf( T_('%s challenges for remaining ranks#T_ladder'), $this->MaxDefenses );
          else
             $arr[] = sprintf( T_('%s challenges for all ranks#T_ladder'), $this->MaxDefenses );
@@ -348,21 +348,21 @@ class TournamentLadderProps
       $arr_props[] = $arr;
 
       // outgoing challenges
-      if( $this->MaxChallenges > 0 )
+      if ( $this->MaxChallenges > 0 )
          $arr_props[] = sprintf( T_('The number of outgoing challenges is restricted to %s games.#T_ladder'),
                                  $this->MaxChallenges );
       else
          $arr_props[] = T_('The number of outgoing challenges is not restricted.#T_ladder');
 
       // challenge-rematch
-      if( $this->ChallengeRematchWaitHours > 0 )
+      if ( $this->ChallengeRematchWaitHours > 0 )
          $arr_props[] = sprintf( T_('Before a rematch with the same user you will have to wait %s.#T_ladder'),
                                  self::echo_rematch_wait($this->ChallengeRematchWaitHours) );
 
       $arr_props[] = T_('You may only have one running game per opponent.#T_ladder');
 
       // determine challenger
-      if( $this->DetermineChallenger == TLP_DETERMINE_CHALL_GEND )
+      if ( $this->DetermineChallenger == TLP_DETERMINE_CHALL_GEND )
          $arr_props[] = T_('The challenger is the player with the lower ladder-position at game-end.');
       else
          $arr_props[] = T_('The challenger is the player with the lower ladder-position at game-start.');
@@ -382,7 +382,7 @@ class TournamentLadderProps
       $arr_props[] = self::getUserJoinOrderText($this->UserJoinOrder, /*short*/false);
 
       // user absence handling
-      if( $this->UserAbsenceDays > 0 )
+      if ( $this->UserAbsenceDays > 0 )
          $arr_props[] = sprintf( T_("The user will be removed from the ladder, if player hasn't accessed DGS\n"
             . 'within the last %d days (excluding vacation).'), $this->UserAbsenceDays );
 
@@ -396,7 +396,7 @@ class TournamentLadderProps
                : sprintf( T_('%s months'), $this->RankPeriodLength ) );
 
       // crowning king
-      if( $this->CrownKingHours > 0 )
+      if ( $this->CrownKingHours > 0 )
          $arr_props[] = sprintf( T_('You will be crowned as "King of the Hill" after keeping the top rank for %s.#T_ladder'),
             TimeFormat::_echo_time( $this->CrownKingHours, 24, TIMEFMT_SHORT|TIMEFMT_ZERO, 0 ) ) . "\n" .
             sprintf( T_('The check for this starts at [%s].#T_ladder'), date(DATE_FMT, $this->CrownKingStart) );
@@ -412,26 +412,26 @@ class TournamentLadderProps
    public function fill_ladder_challenge_range( &$iterator, $uid )
    {
       list( $tl_user, $tl_user_orow ) = $iterator->getIndexValue( 'uid', $uid );
-      if( is_null($tl_user) )
+      if ( is_null($tl_user) )
          return null;
 
       // check max-challenges
-      if( $this->MaxChallenges > 0 && $tl_user->ChallengesOut >= $this->MaxChallenges )
+      if ( $this->MaxChallenges > 0 && $tl_user->ChallengesOut >= $this->MaxChallenges )
          $tl_user->MaxChallengedOut = true;
 
       // highest challenge-rank
       $user_rank = $tl_user->Rank;
       $tl_user_rating_pos = $this->determine_ladder_rating_pos( $iterator, @$tl_user_orow['TLP_Rating2'] );
       $high_rank = $this->calc_highest_challenge_rank( $user_rank, $tl_user_rating_pos );
-      for( $pos=$user_rank; $pos >= $high_rank; $pos-- )
+      for ( $pos=$user_rank; $pos >= $high_rank; $pos-- )
       {
          $tladder = $iterator->getIndexValue( 'Rank', $pos, 0 );
-         if( is_null($tladder) )
+         if ( is_null($tladder) )
             continue;
 
-         if( $tladder->Rank >= $high_rank && $tladder->Rank < $user_rank ) // chk again (race-cond)
+         if ( $tladder->Rank >= $high_rank && $tladder->Rank < $user_rank ) // chk again (race-cond)
          {
-            if( $tladder->ChallengesIn < $this->calc_max_defenses($tladder->Rank) ) // check max-defenses
+            if ( $tladder->ChallengesIn < $this->calc_max_defenses($tladder->Rank) ) // check max-defenses
                $tladder->AllowChallenge = true;
             else
                $tladder->MaxChallengedIn = true;
@@ -449,23 +449,23 @@ class TournamentLadderProps
     */
    public function fill_ladder_running_games( &$iterator, $tgame_iterator, $my_id )
    {
-      while( list(,$arr_item) = $tgame_iterator->getListIterator() )
+      while ( list(,$arr_item) = $tgame_iterator->getListIterator() )
       {
          list( $tgame, $orow ) = $arr_item;
 
          // identify TLadder of defender and challenger
          $df_tladder = $iterator->getIndexValue( 'uid', $tgame->Defender_uid, 0 );
-         if( !is_null($df_tladder) )
+         if ( !is_null($df_tladder) )
          {
             $tgame->Defender_tladder = $df_tladder;
-            if( $tgame->Challenger_uid == $my_id )
+            if ( $tgame->Challenger_uid == $my_id )
                $df_tladder->AllowChallenge = false;
 
             $ch_tladder = $iterator->getIndexValue( 'uid', $tgame->Challenger_uid, 0 );
             $tgame->Challenger_tladder = $ch_tladder;
-            if( !is_null($ch_tladder) )
+            if ( !is_null($ch_tladder) )
             {
-               if( $tgame->Status == TG_STATUS_WAIT )
+               if ( $tgame->Status == TG_STATUS_WAIT )
                   $df_tladder->RematchWait = $this->calc_rematch_wait_remaining_hours( $tgame );
                else
                   $df_tladder->add_running_game( $tgame );
@@ -486,17 +486,17 @@ class TournamentLadderProps
     */
    public function determine_ladder_rating_pos( $iterator, $rating )
    {
-      if( $this->ChallengeRangeRating == TLADDER_CHRNG_RATING_UNUSED || (string)$rating == '' || (int)$rating <= NO_RATING )
+      if ( $this->ChallengeRangeRating == TLADDER_CHRNG_RATING_UNUSED || (string)$rating == '' || (int)$rating <= NO_RATING )
          return 0;
 
       $cnt_higher = 0; // count of ladder-users with rating >= given-rating
-      while( list(,$arr_item) = $iterator->getListIterator() )
+      while ( list(,$arr_item) = $iterator->getListIterator() )
       {
          $orow = $arr_item[1];
-         if( isset($orow['TLP_Rating2']) )
+         if ( isset($orow['TLP_Rating2']) )
          {
             $tl_rating = $orow['TLP_Rating2'];
-            if( $tl_rating > NO_RATING && $rating <= $tl_rating )
+            if ( $tl_rating > NO_RATING && $rating <= $tl_rating )
                ++$cnt_higher;
          }
       }
@@ -512,14 +512,14 @@ class TournamentLadderProps
     */
    public function calc_highest_challenge_rank( $ch_rank, $rating_pos=0 )
    {
-      if( $this->ChallengeRangeAbsolute < 0 )
+      if ( $this->ChallengeRangeAbsolute < 0 )
          $abs_high_rank = 1;
-      elseif( $this->ChallengeRangeAbsolute > 0 )
+      elseif ( $this->ChallengeRangeAbsolute > 0 )
          $abs_high_rank = $ch_rank - $this->ChallengeRangeAbsolute;
       else
          $abs_high_rank = $ch_rank;
 
-      if( $this->ChallengeRangeRelative > 0 )
+      if ( $this->ChallengeRangeRelative > 0 )
       {
          $rel_rank = $ch_rank - round( $ch_rank * $this->ChallengeRangeRelative / 100 );
          $rel_high_rank = ( $rel_rank > 0 ) ? $rel_rank : 1;
@@ -527,7 +527,7 @@ class TournamentLadderProps
       else
          $rel_high_rank = $ch_rank;
 
-      if( $this->ChallengeRangeRating != TLADDER_CHRNG_RATING_UNUSED && $rating_pos > 0 )
+      if ( $this->ChallengeRangeRating != TLADDER_CHRNG_RATING_UNUSED && $rating_pos > 0 )
          $rating_high_rank = $rating_pos + $this->ChallengeRangeRating;
       else
          $rating_high_rank = $ch_rank;
@@ -538,9 +538,9 @@ class TournamentLadderProps
    /*! \brief Returns non-0 number of max. defenses for given ladder-rank. */
    public function calc_max_defenses( $rank )
    {
-      if( $this->MaxDefenses1 > 0 && $rank <= $this->MaxDefensesStart1 )
+      if ( $this->MaxDefenses1 > 0 && $rank <= $this->MaxDefensesStart1 )
          $max_defenses = $this->MaxDefenses1;
-      elseif( $this->MaxDefenses2 > 0 && $rank <= $this->MaxDefensesStart2 )
+      elseif ( $this->MaxDefenses2 > 0 && $rank <= $this->MaxDefensesStart2 )
          $max_defenses = $this->MaxDefenses2;
       else
          $max_defenses = $this->MaxDefenses;
@@ -556,37 +556,37 @@ class TournamentLadderProps
    {
       $errors = array();
 
-      if( $tladder_ch->rid == $tladder_df->rid )
+      if ( $tladder_ch->rid == $tladder_df->rid )
          error('invalid_args', "TournamentLadderProps.verify_challenge.check_rid_same({$this->tid},{$tladder_ch->rid})");
 
       $tgame = TournamentGames::load_tournament_game_by_uid( $tladder_ch->tid,
          $tladder_ch->uid, $tladder_df->uid );
-      if( !is_null($tgame) )
+      if ( !is_null($tgame) )
       {
-         if( $tgame->Status == TG_STATUS_WAIT )
+         if ( $tgame->Status == TG_STATUS_WAIT )
          {
             // should normally not be reached by link from ladder-view, so don't calc remaing-hours
             $errors[] = sprintf( T_('Before a rematch with the same user you will have to wait %s.#T_ladder'),
                                  self::echo_rematch_wait($this->ChallengeRematchWaitHours) );
          }
-         elseif( $tgame->Status != TG_STATUS_DONE )
+         elseif ( $tgame->Status != TG_STATUS_DONE )
             $errors[] = T_('You may only have one running game per opponent.');
       }
 
       // check rank-range
       $high_rank = $this->calc_highest_challenge_rank( $tladder_ch->Rank, $rating_pos );
-      if( $tladder_ch->Rank < $tladder_df->Rank )
+      if ( $tladder_ch->Rank < $tladder_df->Rank )
          $errors[] = T_('You may only challenge users above your own position.#T_ladder');
-      if( $tladder_df->Rank < $high_rank )
+      if ( $tladder_df->Rank < $high_rank )
          $errors[] = sprintf( T_('Defender rank #%s is out of your rank challenge range [#%s..#%s].#T_ladder'),
                               $tladder_df->Rank, $high_rank, $tladder_ch->Rank - 1 );
 
       // check defenders max. defenses
-      if( $tladder_df->ChallengesIn >= $this->calc_max_defenses($tladder_df->Rank) )
+      if ( $tladder_df->ChallengesIn >= $this->calc_max_defenses($tladder_df->Rank) )
          $errors[] = sprintf( T_('Defender already has max. %s incoming challenges.#T_ladder'), $tladder_df->ChallengesIn );
 
       // check challengers max. outgoing challenges
-      if( $tladder_ch->ChallengesOut >= $this->MaxChallenges )
+      if ( $tladder_ch->ChallengesOut >= $this->MaxChallenges )
          $errors[] = sprintf( T_('Challenger already has max. %s outgoing challenges.#T_ladder'), $tladder_ch->ChallengesOut );
 
       return $errors;
@@ -604,18 +604,18 @@ class TournamentLadderProps
       $action = TGEND_NO_CHANGE;
 
       // Score only has meaning if game is not detached
-      if( !($tgame_flags & TG_FLAG_GAME_DETACHED) )
+      if ( !($tgame_flags & TG_FLAG_GAME_DETACHED) )
       {
-         if( $tgame_flags & TG_FLAG_CH_DF_SWITCHED )
+         if ( $tgame_flags & TG_FLAG_CH_DF_SWITCHED )
             $score = -$score; // role of challenger and defender is reversed
 
-         if( $score == -SCORE_TIME ) // game timeout (challenger won)
+         if ( $score == -SCORE_TIME ) // game timeout (challenger won)
             $action = $this->GameEndTimeoutWin;
-         elseif( $score == SCORE_TIME ) // game timeout (challenger lost)
+         elseif ( $score == SCORE_TIME ) // game timeout (challenger lost)
             $action = $this->GameEndTimeoutLoss;
-         elseif( $score != 0 ) // game score|resignation
+         elseif ( $score != 0 ) // game score|resignation
          {
-            if( $score < 0 )
+            if ( $score < 0 )
                $action = $this->GameEndNormal;
          }
          else // ==0 = jigo
@@ -642,7 +642,7 @@ class TournamentLadderProps
          CLOCK_TOURNEY_GAME_WAIT);
 
       $remaining_hours = floor(($tgame->TicksDue - $wait_ticks + 1) / 2);
-      if( $remaining_hours < 0 )
+      if ( $remaining_hours < 0 )
          $remaining_hours = 0;
       return $remaining_hours;
    }
@@ -703,7 +703,7 @@ class TournamentLadderProps
     */
    public static function load_tournament_ladder_props( $tid )
    {
-      if( $tid <=0 )
+      if ( $tid <=0 )
          return NULL;
 
       $qsql = self::build_query_sql( $tid );
@@ -733,7 +733,7 @@ class TournamentLadderProps
 
       // lazy-init of texts
       $key = 'TGAMEEND';
-      if( !isset(self::$ARR_TLPROPS_TEXTS[$key]) )
+      if ( !isset(self::$ARR_TLPROPS_TEXTS[$key]) )
       {
          $arr = array();
          $arr[TGEND_NO_CHANGE]         = T_('No change#TG_end');
@@ -748,17 +748,17 @@ class TournamentLadderProps
          self::$ARR_TLPROPS_TEXTS[$key] = $arr;
       }
 
-      if( is_null($game_end) )
+      if ( is_null($game_end) )
       {
          $arr = self::$ARR_TLPROPS_TEXTS[$key]; // clone
-         if( !isset($arr_tgame_end[$game_end_type]) )
+         if ( !isset($arr_tgame_end[$game_end_type]) )
             error('invalid_args', "TournamentLadderProps:getGameEndText.check_type($game_end,$game_end_type)");
          $arr_intersect = $arr_tgame_end[$game_end_type];
-         if( is_array($arr_intersect) )
+         if ( is_array($arr_intersect) )
             $arr = array_intersect_key_values( $arr, $arr_intersect );
          return $arr;
       }
-      if( !isset(self::$ARR_TLPROPS_TEXTS[$key][$game_end]) )
+      if ( !isset(self::$ARR_TLPROPS_TEXTS[$key][$game_end]) )
          error('invalid_args', "TournamentLadderProps:getGameEndText($game_end)");
       return self::$ARR_TLPROPS_TEXTS[$key][$game_end];
    }//getGameEndText
@@ -767,7 +767,7 @@ class TournamentLadderProps
    {
       // lazy-init of texts
       $key = 'UJOINORDER';
-      if( !isset(self::$ARR_TLPROPS_TEXTS[$key]) )
+      if ( !isset(self::$ARR_TLPROPS_TEXTS[$key]) )
       {
          $arr = array();
          $arr[TLP_JOINORDER_REGTIME] = T_('Tournament Registration Time');
@@ -782,11 +782,11 @@ class TournamentLadderProps
          self::$ARR_TLPROPS_TEXTS[$key.'_LONG'] = $arr;
       }
 
-      if( !$short )
+      if ( !$short )
          $key .= '_LONG';
-      if( is_null($join_order) )
+      if ( is_null($join_order) )
          return array() + self::$ARR_TLPROPS_TEXTS[$key]; // cloned
-      if( !isset(self::$ARR_TLPROPS_TEXTS[$key][$join_order]) )
+      if ( !isset(self::$ARR_TLPROPS_TEXTS[$key][$join_order]) )
          error('invalid_args', "TournamentLadderProps:getUserJoinOrderText($join_order,$short)");
       return self::$ARR_TLPROPS_TEXTS[$key][$join_order];
    }//getUserJoinOrderText

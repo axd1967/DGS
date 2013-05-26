@@ -50,7 +50,7 @@ $arr_filter_demos = array(
 );
 
 $fdemo = get_request_arg('fdemo');
-if( !isset($arr_filter_demos[$fdemo]) )
+if ( !isset($arr_filter_demos[$fdemo]) )
    $fdemo = 1;
 
 /* control-form to select filter-demo */
@@ -81,7 +81,7 @@ $qsql = new QuerySQL(
 /* -------------------- (1) Form + Filters + Show-Rows ---------------------------  */
 // other example: see forum/search.php
 
-if( $fdemo == 1 )
+if ( $fdemo == 1 )
 {
    echo "<h3>Example #1 - Form used with Filter (+ Show-Rows-selection)</h3>\n";
 
@@ -124,8 +124,8 @@ if( $fdemo == 1 )
    $q1 = $qsql->duplicate();
    $q1->merge( $filter->get_query() );
    $form->echo_string();
-   if( $DEBUG_SQL ) echo "<br>QUERY: " . make_html_safe($q1->get_select()) . "<br>\n";
-   if( $DEBUG_SQL ) echo "<br>Max Rows: " . $maxrows . "<br>\n";
+   if ( $DEBUG_SQL ) echo "<br>QUERY: " . make_html_safe($q1->get_select()) . "<br>\n";
+   if ( $DEBUG_SQL ) echo "<br>Max Rows: " . $maxrows . "<br>\n";
 }
 
 
@@ -133,7 +133,7 @@ if( $fdemo == 1 )
 /* -------------------- (2) External-Form + Table + Filters ----------------------  */
 // other example: see search_messages.php, opponents.php
 
-if( $fdemo == 2 )
+if ( $fdemo == 2 )
 {
    echo "<hr size=1>\n";
    echo "<h3>Example #2 - External-Form and Table with Filter</h3>\n";
@@ -192,12 +192,12 @@ if( $fdemo == 2 )
    $q2->merge( $table->get_query() );
 
    // build table
-   foreach( $ARR_ANIMALS as $id => $animal )
+   foreach ( $ARR_ANIMALS as $id => $animal )
    {
       $arr_row = array();
-      if( $table->Is_Column_Displayed[1] )
+      if ( $table->Is_Column_Displayed[1] )
          $arr_row[1] = $id;
-      if( $table->Is_Column_Displayed[2] )
+      if ( $table->Is_Column_Displayed[2] )
          $arr_row[2] = $animal;
       $table->add_row( $arr_row );
    }
@@ -207,7 +207,7 @@ if( $fdemo == 2 )
       . $form->get_form_string() // static form
       . $table->make_table()
       . $form->print_end();
-   if( $DEBUG_SQL ) echo "<br>QUERY: " . make_html_safe($q2->get_select()) . "<br>\n";
+   if ( $DEBUG_SQL ) echo "<br>QUERY: " . make_html_safe($q2->get_select()) . "<br>\n";
 }
 
 
@@ -215,7 +215,7 @@ if( $fdemo == 2 )
 /* -------------------- (3) Table + Filters --------------------------------------  */
 // other example: see waiting_room.php, users.php, show_games.php
 
-if( $fdemo == 3 )
+if ( $fdemo == 3 )
 {
    echo "<hr size=1>\n";
    echo "<h3>Example #3 - Table with Filter</h3>\n";
@@ -243,18 +243,18 @@ if( $fdemo == 3 )
    $q3->merge( $table->get_query() );
 
    // build table
-   foreach( $ARR_ANIMALS as $id => $animal )
+   foreach ( $ARR_ANIMALS as $id => $animal )
    {
       $arr_row = array();
-      if( $table->Is_Column_Displayed[1] )
+      if ( $table->Is_Column_Displayed[1] )
          $arr_row[1] = $id;
-      if( $table->Is_Column_Displayed[2] )
+      if ( $table->Is_Column_Displayed[2] )
          $arr_row[2] = $animal;
       $table->add_row( $arr_row );
    }
 
    $table->echo_table();
-   if( $DEBUG_SQL ) echo "<br>QUERY: " . make_html_safe($q3->get_select()) . "<br>\n";
+   if ( $DEBUG_SQL ) echo "<br>QUERY: " . make_html_safe($q3->get_select()) . "<br>\n";
 }
 
 echo "</body></html>\n";

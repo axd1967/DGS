@@ -31,11 +31,11 @@ require_once 'include/form_functions.php';
    connect2mysql();
 
    $logged_in = who_is_logged( $player_row);
-   if( !$logged_in )
+   if ( !$logged_in )
       error('login_if_not_logged_in', 'admin_translators');
-   if( $player_row['ID'] <= GUESTS_ID_MAX )
+   if ( $player_row['ID'] <= GUESTS_ID_MAX )
       error('not_allowed_for_guest', 'admin_translators');
-   if( !(@$player_row['admin_level'] & ADMIN_TRANSLATORS) )
+   if ( !(@$player_row['admin_level'] & ADMIN_TRANSLATORS) )
       error('adminlevel_too_low', 'admin_translators');
 
 
@@ -70,7 +70,7 @@ require_once 'include/form_functions.php';
 */
 
    $browsercode = trim(get_request_arg('browsercode'));
-   if( !$browsercode ) //twoletter kept for old URL compatibility
+   if ( !$browsercode ) //twoletter kept for old URL compatibility
       $browsercode = trim(get_request_arg('twoletter'));
    $charenc = trim(get_request_arg('charenc'));
    $langname = trim(get_request_arg('langname'));
@@ -78,7 +78,7 @@ require_once 'include/form_functions.php';
    $transluser = trim(get_request_arg('transluser'));
    $transladdlang = get_request_arg('transladdlang');
 
-   if( !$charenc )
+   if ( !$charenc )
       $charenc = 'UTF-8';
 
    start_page(T_('Translator admin'), true, $logged_in, $player_row);
@@ -100,12 +100,12 @@ require_once 'include/form_functions.php';
          'SUBMITBUTTON', 'showlanguages', T_('Known languages'),
          'SUBMITBUTTON', 'addlanguage', T_('Add language'),
       ));
-   if( $showlanguages )
+   if ( $showlanguages )
    {
       $str= '';
-      foreach( $known_languages as $bcod => $value )
+      foreach ( $known_languages as $bcod => $value )
       {
-         foreach( $value as $cset => $lnam )
+         foreach ( $value as $cset => $lnam )
             $str.= $lnam . ' (' . $bcod .'.'. $cset . ')<BR>';
       }
       $translator_form->add_row( array(
@@ -130,25 +130,25 @@ require_once 'include/form_functions.php';
 
    $translator_array = array();
    $transluser_langs = array();
-   if( !empty($transluser) )
+   if ( !empty($transluser) )
    {
       $userrow = mysql_single_fetch( 'admin_translators.transluser',
              "SELECT Translator FROM Players"
             ." WHERE Handle='".mysql_addslashes($transluser)."'" );
 
-      if( $userrow )
+      if ( $userrow )
       {
-         if( !empty($userrow['Translator']) )
+         if ( !empty($userrow['Translator']) )
            $translator_array = explode( LANG_TRANSL_CHAR, $userrow['Translator'] );
 
-         foreach( $translator_array as $value )
+         foreach ( $translator_array as $value )
          {
-            if( isset($langs[$value]) )
+            if ( isset($langs[$value]) )
                $transluser_langs[$value] = $langs[$value];
          }
          asort($transluser_langs);
          $str= '';
-         foreach( $transluser_langs as $value => $langname )
+         foreach ( $transluser_langs as $value => $langname )
          {
             $str.= $langname . ' (' . $value . ')<BR>';
          }

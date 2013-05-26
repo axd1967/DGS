@@ -94,7 +94,7 @@ class Shape
    /*! \brief Inserts or updates Shape-entry in database. */
    public function persist()
    {
-      if( $this->ID > 0 )
+      if ( $this->ID > 0 )
          $success = $this->update();
       else
          $success = $this->insert();
@@ -107,7 +107,7 @@ class Shape
 
       $entityData = $this->fillEntityData();
       $result = $entityData->insert( "Shape.insert(%s)" );
-      if( $result )
+      if ( $result )
          $this->ID = mysql_insert_id();
       return $result;
    }
@@ -122,7 +122,7 @@ class Shape
 
    public function fillEntityData( $data=null )
    {
-      if( is_null($data) )
+      if ( is_null($data) )
          $data = $GLOBALS['ENTITY_SHAPE']->newEntityData();
       $data->set_value( 'ID', $this->ID );
       $data->set_value( 'uid', $this->uid );
@@ -143,7 +143,7 @@ class Shape
    public static function build_query_sql( $shape_id=0, $with_player=true )
    {
       $qsql = $GLOBALS['ENTITY_SHAPE']->newQuerySQL('SHP');
-      if( $with_player )
+      if ( $with_player )
       {
          $qsql->add_part( SQLP_FIELDS,
             'SHP.uid AS SHPP_ID',
@@ -152,7 +152,7 @@ class Shape
          $qsql->add_part( SQLP_FROM,
             'INNER JOIN Players AS SHPP ON SHPP.ID=SHP.uid' );
       }
-      if( $shape_id > 0 )
+      if ( $shape_id > 0 )
          $qsql->add_part( SQLP_WHERE, "SHP.ID=$shape_id" );
       return $qsql;
    }//build_query_sql
@@ -211,7 +211,7 @@ class Shape
       $iterator->setResultRows( mysql_num_rows($result) );
 
       $iterator->clearItems();
-      while( $row = mysql_fetch_array( $result ) )
+      while ( $row = mysql_fetch_array( $result ) )
       {
          $shape = self::new_from_row( $row );
          $iterator->addItem( $shape, $row );

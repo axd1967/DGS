@@ -20,7 +20,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 require_once 'include/quick_common.php';
 
 
-if( !$is_down )
+if ( !$is_down )
 {
    $chained = 1;
 
@@ -47,7 +47,7 @@ if( !$is_down )
       include_once 'daily_cron.php';
    }
 
-   if( $chained )
+   if ( $chained )
       $TheErrors->dump_exit('cron_chained');
 
 }//$is_down

@@ -31,43 +31,43 @@ require_once 'include/classlib_user.php';
    connect2mysql();
 
    $logged_in = who_is_logged( $player_row);
-   if( !$logged_in )
+   if ( !$logged_in )
       error('not_logged_in', 'game_rematch');
    $my_id = $player_row['ID'];
 
    $mode = (int) get_request_arg('mode');
-   if( $mode != REMATCH_INVITE && $mode != REMATCH_NEWGAME )
+   if ( $mode != REMATCH_INVITE && $mode != REMATCH_NEWGAME )
       error('invalid_args', "game_rematch.check.mode($mode)");
 
    $gid = (int) get_request_arg('gid', 0);
-   if( $gid < 1 )
+   if ( $gid < 1 )
       error('unknown_game', "game_rematch.check.game($mode,$gid)");
 
    // load game
    $game = Games::load_game( $gid );
-   if( is_null($game) )
+   if ( is_null($game) )
       error('unknown_game', "game_rematch.find_game($mode,$gid)");
 
 
    // build URL-values
 
    $url = array( 'rematch' => 1 ); // field => value
-   if( $game->GameType != GAMETYPE_GO ) // MPG
+   if ( $game->GameType != GAMETYPE_GO ) // MPG
    {
-      if( @$player_row['RatingStatus'] == RATING_NONE )
+      if ( @$player_row['RatingStatus'] == RATING_NONE )
          error('invalid_args', "game_rematch.check.mpg.rating($mode,$gid,$my_id)");
 
       $mode = REMATCH_NEWGAME;
       $gs_builder = new GameSetupBuilder( 0, /*gs*/null, $game, /*MPG*/true );
       $gs_builder->fill_new_game_from_game( $url );
    }
-   elseif( $game->tid > 0 || $game->Status != GAME_STATUS_INVITED ) // tourney or normal-game
+   elseif ( $game->tid > 0 || $game->Status != GAME_STATUS_INVITED ) // tourney or normal-game
    {
       $game_setup = GameSetup::new_from_game_setup( $game->GameSetup, /*inv*/false, /*null-empty*/true );
-      if( is_null($game_setup) ) // no game-setup available -> use only game-info
+      if ( is_null($game_setup) ) // no game-setup available -> use only game-info
       {
          $gs_builder = new GameSetupBuilder( $my_id, /*gs*/null, $game );
-         if( $mode == REMATCH_NEWGAME )
+         if ( $mode == REMATCH_NEWGAME )
             $gs_builder->fill_new_game_from_game( $url, /*MPG*/false );
          else //REMATCH_INVITE
             $gs_builder->fill_invite_from_game( $url );
@@ -76,11 +76,11 @@ require_once 'include/classlib_user.php';
       {
          // Correct handicap-type if $my_id does not match user-id of stored GameSetup for player or non-player
          // then compensating fix-color and divide&choose fair-komi.
-         if( $game_setup->uid != $my_id )
+         if ( $game_setup->uid != $my_id )
             $game_setup->Handicaptype = GameSetup::swap_htype_black_white( $game_setup->Handicaptype );
 
          $gs_builder = new GameSetupBuilder( $my_id, $game_setup, $game );
-         if( $mode == REMATCH_NEWGAME )
+         if ( $mode == REMATCH_NEWGAME )
             $gs_builder->fill_new_game_from_game_setup( $url );
          else //REMATCH_INVITE
             $gs_builder->fill_invite_from_game_setup( $url );
@@ -92,13 +92,13 @@ require_once 'include/classlib_user.php';
 
    // jump to other page
 
-   if( $mode == REMATCH_INVITE )
+   if ( $mode == REMATCH_INVITE )
       $page = 'message.php?mode=Invite'.URI_AMP;
    else //if( $mode == REMATCH_NEWGAME )
       $page = 'new_game.php?';
 
    $out = array();
-   foreach( $url as $field => $value )
+   foreach ( $url as $field => $value )
       $out[] = $field . '=' . urlencode($value);
 
    jump_to($page . implode(URI_AMP, $out));

@@ -27,15 +27,15 @@ require_once 'include/table_columns.php';
    connect2mysql();
 
    $logged_in = who_is_logged( $player_row);
-   if( !$logged_in )
+   if ( !$logged_in )
       error('login_if_not_logged_in', 'admin_admins');
    $my_id = $player_row['ID'];
-   if( $my_id <= GUESTS_ID_MAX )
+   if ( $my_id <= GUESTS_ID_MAX )
       error('not_allowed_for_guest', 'admin_admins');
 
    // only SUPERADMIN can manage admins
    $player_level = (int)@$player_row['admin_level']; //local modifications
-   if( !($player_level & ADMIN_SUPERADMIN) )
+   if ( !($player_level & ADMIN_SUPERADMIN) )
       error('adminlevel_too_low', 'admin_admins');
 
    $admin_tasks = array( // admin-level-id => arr( admin-bitmask, (alphabetic-order) admin-text ),
@@ -52,15 +52,15 @@ require_once 'include/table_columns.php';
          'TRNEY'  => array( ADMIN_TOURNAMENT, T_('Tournament')),
          'TRANS'  => array( ADMIN_TRANSLATORS, T_('Translators')),
       );
-   if( !ALLOW_FEATURE_VOTE )
+   if ( !ALLOW_FEATURE_VOTE )
       unset($admin_tasks['Feat']);
-   if( !ALLOW_SURVEY_VOTE )
+   if ( !ALLOW_SURVEY_VOTE )
       unset($admin_tasks['Survey']);
 
    // Make sure all previous admins gets into the Admin array
    $result = db_query( 'admin_admins.find_admins',
          "SELECT ID, Adminlevel+0 AS admin_level FROM Players WHERE Adminlevel > 0" );
-   while( $row = mysql_fetch_array($result) )
+   while ( $row = mysql_fetch_array($result) )
    {
       $uid = $row['ID'];
       $AdminOldLevel[$uid] = (int)$row['admin_level'];
@@ -78,19 +78,19 @@ require_once 'include/table_columns.php';
      update=&...&newadmin=handle&<aid>_new=.. : add new admin with uid='new'
 */
 
-   if( @$_REQUEST['update'] )
+   if ( @$_REQUEST['update'] )
    {
       // update admin-levels? -> Admin[uid] = new admin-levels
       $Admin['new'] = 0;
-      foreach( $_POST as $item => $value )
+      foreach ( $_POST as $item => $value )
       {
-         if( $value != 'Y' )
+         if ( $value != 'Y' )
             continue;
 
          // uid = Players.ID | 'new'
          list($type, $uid) = explode('_', $item, 2);
          $amask = (int)@$admin_tasks[$type][0];
-         if( $amask == 0 || ($uid !== 'new' && $uid <= GUESTS_ID_MAX) )
+         if ( $amask == 0 || ($uid !== 'new' && $uid <= GUESTS_ID_MAX) )
             error('invalid_args', "admin_admins.update($uid,$type,$amask)");
 
          $Admin[$uid] |= $amask;
@@ -98,14 +98,14 @@ require_once 'include/table_columns.php';
 
       // add new admin?
       $newadmin= get_request_arg('newadmin');
-      if( $Admin['new'] != 0 && !empty($newadmin))
+      if ( $Admin['new'] != 0 && !empty($newadmin))
       {
          $row = mysql_single_fetch( "admin_admins.find_new_admin($newadmin)",
                "SELECT ID,Adminlevel+0 AS admin_level FROM Players "
                . "WHERE Handle='".mysql_addslashes($newadmin)."' LIMIT 1" );
-         if( !$row )
+         if ( !$row )
             error('unknown_user', "admin_admin.check.user($newadmin)");
-         if( $row["admin_level"] != 0 )
+         if ( $row["admin_level"] != 0 )
             error('new_admin_already_admin', 'admin_admins');
 
          $uid = $row['ID'];
@@ -115,10 +115,10 @@ require_once 'include/table_columns.php';
       unset($Admin['new']);
 
       // update admin-levels
-      foreach( $Admin as $uid => $adm_level )
+      foreach ( $Admin as $uid => $adm_level )
       {
          $adm_level = (int)$adm_level;
-         if( $adm_level != $AdminOldLevel[$uid] )
+         if ( $adm_level != $AdminOldLevel[$uid] )
          {
             ta_begin();
             {//HOT-section to update player admin-level
@@ -158,7 +158,7 @@ require_once 'include/table_columns.php';
    $atable->add_tablehead(3, T_('Name'), 'User');
 
    $col = 4;
-   foreach( $admin_tasks as $aid => $tmp )
+   foreach ( $admin_tasks as $aid => $tmp )
    {
       list( $amask, $aname) = $tmp;
       $atable->add_tablehead($col++, $aname, 'Mark');
@@ -166,12 +166,12 @@ require_once 'include/table_columns.php';
    $atable->set_default_sort( 1); //on ID
 
    $new_admin = true;
-   while( ($row=mysql_fetch_assoc( $result )) || $new_admin )
+   while ( ($row=mysql_fetch_assoc( $result )) || $new_admin )
    {
       $arow_strings = array();
 
       $col = 3;
-      if( is_array($row) )
+      if ( is_array($row) )
       {
          $uid = $row['ID'];
          $level = $row['admin_level'];
@@ -192,15 +192,15 @@ require_once 'include/table_columns.php';
          $level = 0;
       }
 
-      foreach( $admin_tasks as $aid => $tmp )
+      foreach ( $admin_tasks as $aid => $tmp )
       {
          list( $amask, $aname) = $tmp;
 
          $attr = '';
          // SUPERADMIN can't change SUPERADMIN-flag for himself
-         if( ($amask & $level & ADMIN_SUPERADMIN) && ($uid == $my_id) )
+         if ( ($amask & $level & ADMIN_SUPERADMIN) && ($uid == $my_id) )
             $attr .= ' disabled';
-         if( $amask & $level )
+         if ( $amask & $level )
             $attr .= ' checked';
 
          $chkname = $aid . '_' . $uid;

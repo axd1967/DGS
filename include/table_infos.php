@@ -164,7 +164,7 @@ class Table_info
    /*! \brief Checks if passed arg is array, and adjust column-count accordingly if needed. */
    private function check_cols( $arr )
    {
-      if( is_array($arr) )
+      if ( is_array($arr) )
          $this->Columns = max( $this->Columns, count($arr) + 1 );
    }
 
@@ -179,11 +179,11 @@ class Table_info
 
       /* Make table rows */
 
-      if( count($this->Tablerows)>0 )
+      if ( count($this->Tablerows)>0 )
       {
          ksort($this->Tablerows);
          $c=0;
-         foreach( $this->Tablerows as $trow )
+         foreach ( $this->Tablerows as $trow )
          {
             $c=($c % LIST_ROWS_MODULO)+1;
             $string .= $this->make_tablerow( $trow, "class=Row$c", "Row$c" );
@@ -204,18 +204,18 @@ class Table_info
 
    private function make_tablerow( $tablerow, $rattbs='', $rclass='')
    {
-      if( isset($tablerow['rattb']) )
+      if ( isset($tablerow['rattb']) )
       {
          //$rattbs = $tablerow['rattb']; //overwrite $rattbs
          $rattbs = attb_merge( attb_parse($rattbs), attb_parse($tablerow['rattb']), false);
-         if( $rattbs['class'] != $rclass )
+         if ( $rattbs['class'] != $rclass )
             $rclass = '';
       }
       $rattbs = attb_build($rattbs);
 
       $string = " <tr$rattbs";
 /*
-      if( ALLOW_JAVASCRIPT && $rclass )
+      if ( ALLOW_JAVASCRIPT && $rclass )
       {
          //$string.= " ondblclick=\"javascript:this.className=((this.className=='highlight')?'$rclass':'highlight');\"";
          $string.= " ondblclick=\"javascript:this.className=((this.className=='$rclass')?'Hil$rclass':'$rclass');\"";
@@ -223,7 +223,7 @@ class Table_info
 */
       $string.= ">\n  ";
 
-      if( isset($tablerow['caption']) || isset($tablerow['scaption']) )
+      if ( isset($tablerow['caption']) || isset($tablerow['scaption']) )
       {
          $string.= $this->add_cell( $tablerow,
             'caption', 'scaption', 'cattb', '<th colspan='.($this->Columns).'$>', '</th>');
@@ -249,26 +249,26 @@ class Table_info
    private function add_cell( $tablerow, $unsafe, $safe, $attbs_key, $start, $stop, $arymrg=NULL)
    {
       $attbs = attb_parse(@$tablerow[$attbs_key]);
-      if( isset($arymrg) )
+      if ( isset($arymrg) )
          $attbs = attb_merge( $arymrg, $attbs );
       $start_str = str_replace('$', attb_build(@$attbs), $start);
 
       $out = array();
-      if( isset($tablerow[$unsafe]) )
+      if ( isset($tablerow[$unsafe]) )
       {
-         if( is_array($tablerow[$unsafe]) )
+         if ( is_array($tablerow[$unsafe]) )
          {
-            foreach( $tablerow[$unsafe] as $colval )
+            foreach ( $tablerow[$unsafe] as $colval )
                $out[] = $this->build_cell_data($colval, $start, $start_str, $attbs, true) . $stop;
          }
          else
             $out[] = $start_str . make_html_safe($tablerow[$unsafe],INFO_HTML) . $stop;
       }
-      elseif( isset($tablerow[$safe]) )
+      elseif ( isset($tablerow[$safe]) )
       {
-         if( is_array($tablerow[$safe]) )
+         if ( is_array($tablerow[$safe]) )
          {
-            foreach( $tablerow[$safe] as $colval )
+            foreach ( $tablerow[$safe] as $colval )
                $out[] = $this->build_cell_data($colval, $start, $start_str, $attbs, false) . $stop;
          }
          else
@@ -280,15 +280,15 @@ class Table_info
    // build table-cell: cell can be scalar of array( value, attbs )
    private function build_cell_data( $cell, $start, $start_str, $attbs, $make_safe )
    {
-      if( is_array($cell) )
+      if ( is_array($cell) )
       {
-         if( count($cell) == 2 )
+         if ( count($cell) == 2 )
          {
             $cell_attbs = attb_build( attb_merge( $attbs, attb_parse($cell[1])) );
             $start_str = str_replace('$', $cell_attbs, $start);
             return $start_str . ($make_safe ? make_html_safe($cell[0], INFO_HTML) : $cell[0]);
          }
-         elseif( count($cell) == 0 )
+         elseif ( count($cell) == 0 )
             return $start_str;
          $cell = $cell[0];
       }

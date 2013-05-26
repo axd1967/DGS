@@ -108,7 +108,7 @@ class TournamentParticipant
 
    public function setStatus( $status )
    {
-      if( !is_null($status) && !preg_match( "/^(".CHECK_TP_STATUS.")$/", $status ) )
+      if ( !is_null($status) && !preg_match( "/^(".CHECK_TP_STATUS.")$/", $status ) )
          error('invalid_args', "TournamentParticipant.setStatus($status)");
       $this->Status = $status;
    }
@@ -135,9 +135,9 @@ class TournamentParticipant
     */
    private function assert_tournament_participant( $dbgmsg, $tid, $uid )
    {
-      if( $this->tid != $tid )
+      if ( $this->tid != $tid )
          error('tournament_register_edit_not_allowed', $dbgmsg.".TP.assert_tp.check.tid($tid,$uid,{$this->ID})");
-      if( $uid > 0 && $this->uid != $uid )
+      if ( $uid > 0 && $this->uid != $uid )
          error('tournament_register_edit_not_allowed', $dbgmsg.".TP.assert_tp.check.uid($tid,$uid,{$this->ID})");
    }
 
@@ -168,24 +168,24 @@ class TournamentParticipant
    public function build_log_string()
    {
       $out = array();
-      if( $this->ID > 0 )
+      if ( $this->ID > 0 )
          $out[] = "ID=[{$this->ID}]";
       $out[] = "Status=[{$this->Status}]";
       $out[] = sprintf('Flags=[%s]', self::getFlagsText($this->Flags));
-      if( !is_null($this->Rating) )
+      if ( !is_null($this->Rating) )
          $out[] = "Rating=[{$this->Rating}]";
       $out[] = "StartRound=[{$this->StartRound}]";
-      if( $this->StartRound != $this->NextRound )
+      if ( $this->StartRound != $this->NextRound )
          $out[] = "NextRound=[{$this->NextRound}]";
-      if( (string)$this->Comment != '' )
+      if ( (string)$this->Comment != '' )
          $out[] = "Comment=[{$this->Comment}]";
-      if( (string)$this->Notes != '' )
+      if ( (string)$this->Notes != '' )
          $out[] = "Notes=[{$this->Notes}]";
-      if( (string)$this->UserMessage != '' )
+      if ( (string)$this->UserMessage != '' )
          $out[] = "UserMsg=[{$this->UserMessage}]";
-      if( (string)$this->AdminMessage != '' )
+      if ( (string)$this->AdminMessage != '' )
          $out[] = "AdmMsg=[{$this->AdminMessage}]";
-      if( $this->Finished + $this->Won + $this->Lost > 0 )
+      if ( $this->Finished + $this->Won + $this->Lost > 0 )
          $out[] = "Fin/Won/Lost=[{$this->Finished}/{$this->Won}/{$this->Lost}]";
       return implode(', ', $out);
    }//build_log_string
@@ -204,9 +204,9 @@ class TournamentParticipant
     */
    public function authorise_delete( $t_status )
    {
-      if( $t_status == TOURNEY_STATUS_REGISTER )
+      if ( $t_status == TOURNEY_STATUS_REGISTER )
          return true;
-      if( $t_status == TOURNEY_STATUS_PLAY && $this->ID && $this->Status != TP_STATUS_REGISTER )
+      if ( $t_status == TOURNEY_STATUS_PLAY && $this->ID && $this->Status != TP_STATUS_REGISTER )
          return true;
       return false;
    }
@@ -217,11 +217,11 @@ class TournamentParticipant
     */
    public function authorise_edit_customized( $t_status )
    {
-      if( $t_status == TOURNEY_STATUS_REGISTER )
+      if ( $t_status == TOURNEY_STATUS_REGISTER )
          return true;
-      if( $t_status == TOURNEY_STATUS_PLAY )
+      if ( $t_status == TOURNEY_STATUS_PLAY )
       {
-         if( $this->ID <= 0 || $this->Status != TP_STATUS_REGISTER )
+         if ( $this->ID <= 0 || $this->Status != TP_STATUS_REGISTER )
             return true;
       }
       return false;
@@ -234,17 +234,17 @@ class TournamentParticipant
    public function authorise_edit_register_status( $t_status, $tp_status_old, &$errors )
    {
       $allowed = false;
-      if( $t_status == TOURNEY_STATUS_REGISTER )
+      if ( $t_status == TOURNEY_STATUS_REGISTER )
          $allowed = true;
-      elseif( $t_status == TOURNEY_STATUS_PLAY )
+      elseif ( $t_status == TOURNEY_STATUS_PLAY )
       {
-         if( $this->ID <= 0 ) // new
+         if ( $this->ID <= 0 ) // new
             $allowed = true;
-         elseif( $tp_status_old != TP_STATUS_REGISTER || $tp_status_old == $this->Status ) // existing TP
+         elseif ( $tp_status_old != TP_STATUS_REGISTER || $tp_status_old == $this->Status ) // existing TP
             $allowed = true;
       }
 
-      if( !$allowed && is_array($errors) )
+      if ( !$allowed && is_array($errors) )
          $errors[] = sprintf( T_('Registration status change [%s] to [%s] is not allowed for tournament status [%s].'),
                               (is_null($tp_status_old) ? NO_VALUE : self::getStatusText($tp_status_old)),
                               self::getStatusText($this->Status),
@@ -256,7 +256,7 @@ class TournamentParticipant
    /*! \brief Inserts or updates tournament-participant in database. */
    public function persist()
    {
-      if( $this->ID > 0 )
+      if ( $this->ID > 0 )
          $success = $this->update();
       else
          $success = $this->insert();
@@ -270,7 +270,7 @@ class TournamentParticipant
       $this->checkData();
       $entityData = $this->fillEntityData(true);
       $result = $entityData->insert( "TournamentParticipant.insert(%s)" );
-      if( $result )
+      if ( $result )
          $this->ID = mysql_insert_id();
       self::delete_cache_tournament_participant_count( 'TournamentParticipant.insert', $this->tid );
       self::delete_cache_tournament_participant( 'TournamentParticipant.insert', $this->tid, $this->uid );
@@ -300,7 +300,7 @@ class TournamentParticipant
 
    private function checkData()
    {
-      if( is_null($this->Status) )
+      if ( is_null($this->Status) )
          error('invalid_args', "TournamentParticipant.checkData.miss_status({$this->ID},{$this->tid})");
    }
 
@@ -316,7 +316,7 @@ class TournamentParticipant
       $data->set_value( 'Rating', $this->Rating );
       $data->set_value( 'StartRound', $this->StartRound );
       $data->set_value( 'NextRound', $this->NextRound );
-      if( $withCreated )
+      if ( $withCreated )
          $data->set_value( 'Created', $this->Created );
       $data->set_value( 'Lastchanged', $this->Lastchanged );
       $data->set_value( 'ChangedBy', $this->ChangedBy );
@@ -349,18 +349,18 @@ class TournamentParticipant
          SQLP_WHERE,  "tid=$tid" );
 
       $stat_out = array();
-      if( is_array($tp_status) )
+      if ( is_array($tp_status) )
       {
-         foreach( $tp_status as $tp_stat )
+         foreach ( $tp_status as $tp_stat )
             $stat_out[] = mysql_addslashes($tp_stat);
-         if( count($stat_out) )
+         if ( count($stat_out) )
             $qsql->add_part( SQLP_WHERE, "Status IN ('" . implode("','", $stat_out) . "')" );
       }
-      elseif( !is_null($tp_status) )
+      elseif ( !is_null($tp_status) )
          $qsql->add_part( SQLP_WHERE, "Status='" . mysql_addslashes($tp_status) . "'" );
 
       $round_field = ($use_next_round) ? 'NextRound' : 'StartRound';
-      if( is_numeric($round) && $round > 0 )
+      if ( is_numeric($round) && $round > 0 )
          $qsql->add_part( SQLP_WHERE, "$round_field=$round" );
 
       $row = mysql_single_fetch( "TournamentParticipant:count_TPs($tid,".implode('/',$stat_out).",$round_field=$round)",
@@ -381,12 +381,12 @@ class TournamentParticipant
             "WHERE tid=$tid GROUP BY Status, StartRound" );
 
       $out = array();
-      while( $row = mysql_fetch_array($result) )
+      while ( $row = mysql_fetch_array($result) )
       {
          $status = @$row['Status'];
          $round = (int)@$row['StartRound'];
          $cnt = (int)@$row['X_Count'];
-         if( !isset($out[$round]) )
+         if ( !isset($out[$round]) )
             $out[$round] = array();
          $out[$round][$status] = $cnt;
       }
@@ -408,10 +408,10 @@ class TournamentParticipant
             . "WHERE tid='$tid' $query_status GROUP BY Status" );
 
       $out = array();
-      if( !is_null($status) )
+      if ( !is_null($status) )
          $out[$status] = 0;
       $sum = 0;
-      while( $row = mysql_fetch_array( $result ) )
+      while ( $row = mysql_fetch_array( $result ) )
       {
          $cnt = (int)@$row['X_Count'];
          $out[$row['Status']] = $cnt;
@@ -492,7 +492,7 @@ class TournamentParticipant
       $rid = (int)$rid;
 
       $result = NULL;
-      if( $rid > 0 )
+      if ( $rid > 0 )
       {
          $qsql = self::build_query_sql();
          $qsql->add_part( SQLP_WHERE, "TP.ID=$rid" ); // primary-key
@@ -500,7 +500,7 @@ class TournamentParticipant
 
          $row = mysql_single_fetch( "TournamentParticipant:load_tournament_participant_by_id($rid)",
             $qsql->get_select() );
-         if( $row )
+         if ( $row )
          {
             $result = self::new_from_row( $row );
             $result->assert_tournament_participant("TournamentParticipant:load_tournament_participant_by_id($rid)", $tid, $uid);
@@ -519,7 +519,7 @@ class TournamentParticipant
       $uid = (int)$uid;
 
       $result = NULL;
-      if( $tid > 0 && $uid > GUESTS_ID_MAX )
+      if ( $tid > 0 && $uid > GUESTS_ID_MAX )
       {
          $qsql = self::build_query_sql();
          $qsql->add_part( SQLP_WHERE, "TP.tid=$tid", "TP.uid=$uid" );
@@ -527,7 +527,7 @@ class TournamentParticipant
 
          $row = mysql_single_fetch( "TournamentParticipant:load_tournament_participant($tid,$uid)",
             $qsql->get_select() );
-         if( $row )
+         if ( $row )
             $result = self::new_from_row( $row );
       }
       return $result;
@@ -544,7 +544,7 @@ class TournamentParticipant
       $iterator->setResultRows( mysql_num_rows($result) );
 
       $iterator->clearItems();
-      while( $row = mysql_fetch_array( $result ) )
+      while ( $row = mysql_fetch_array( $result ) )
       {
          $tourney = self::new_from_row( $row );
          $iterator->addItem( $tourney, $row );
@@ -562,7 +562,7 @@ class TournamentParticipant
       $result = db_query( "TournamentParticipant:load_tournament_participants_registered($tid,$round)", $query );
 
       $arr = array();
-      while( $row = mysql_fetch_array( $result ) )
+      while ( $row = mysql_fetch_array( $result ) )
          $arr[$row['ID']] = $row['uid'];
       mysql_free_result($result);
       return $arr;
@@ -586,25 +586,25 @@ class TournamentParticipant
             "TP.NextRound=$round"
          );
 
-      if( $seed_order == TOURNEY_SEEDORDER_CURRENT_RATING )
+      if ( $seed_order == TOURNEY_SEEDORDER_CURRENT_RATING )
       {
          $qsql->add_part( SQLP_FROM,  'INNER JOIN Players AS TPP ON TPP.ID=TP.uid' );
          $qsql->add_part( SQLP_ORDER, 'TPP.Rating2 DESC' );
       }
-      elseif( $seed_order == TOURNEY_SEEDORDER_REGISTER_TIME )
+      elseif ( $seed_order == TOURNEY_SEEDORDER_REGISTER_TIME )
          $qsql->add_part( SQLP_ORDER, 'TP.Created ASC' );
-      elseif( $seed_order == TOURNEY_SEEDORDER_TOURNEY_RATING )
+      elseif ( $seed_order == TOURNEY_SEEDORDER_TOURNEY_RATING )
          $qsql->add_part( SQLP_ORDER, 'TP.Rating DESC' );
 
       // load all registered TPs (optimized = no TournamentParticipant-objects)
       $result = db_query( "TournamentParticipant:load_registered_users_in_seedorder.find_TPs($tid,$seed_order)",
          $qsql->get_select() );
       $arr_TPs = array();
-      while( $row = mysql_fetch_array($result) )
+      while ( $row = mysql_fetch_array($result) )
          $arr_TPs[] = $row;
       mysql_free_result($result);
 
-      if( $seed_order == TOURNEY_SEEDORDER_RANDOM )
+      if ( $seed_order == TOURNEY_SEEDORDER_RANDOM )
          shuffle( $arr_TPs );
 
       return $arr_TPs;
@@ -631,9 +631,9 @@ class TournamentParticipant
       $data->set_value( 'tid', $tid );
       $data->set_value( 'Lastchanged', $GLOBALS['NOW'] );
       $data->set_query_value( 'Finished', "Finished+1" );
-      if( $score < 0 )
+      if ( $score < 0 )
          $data->set_query_value( 'Won', "Won+1" );
-      if( $score > 0 )
+      if ( $score > 0 )
          $data->set_query_value( 'Lost', "Lost+1" );
 
       $result = $data->update( "TournamentParticipant:update_game_end_stats($tid,$rid,$score)" );
@@ -644,9 +644,9 @@ class TournamentParticipant
    /*! \brief Updates Tournament.RegisteredTP if needed by comparing old/new TP-status. */
    public static function sync_tournament_registeredTP( $tid, $old_tp_status, $new_tp_status )
    {
-      if( $old_tp_status != TP_STATUS_REGISTER && $new_tp_status == TP_STATUS_REGISTER )
+      if ( $old_tp_status != TP_STATUS_REGISTER && $new_tp_status == TP_STATUS_REGISTER )
          Tournament::update_tournament_registeredTP( $tid, 1 );
-      elseif( $old_tp_status == TP_STATUS_REGISTER && $new_tp_status != TP_STATUS_REGISTER )
+      elseif ( $old_tp_status == TP_STATUS_REGISTER && $new_tp_status != TP_STATUS_REGISTER )
          Tournament::update_tournament_registeredTP( $tid, -1 );
    }
 
@@ -659,12 +659,12 @@ class TournamentParticipant
    public static function delete_tournament_participant( $tid, $rid )
    {
       $tp = self::load_tournament_participant_by_id( $rid, $tid, 0 );
-      if( is_null($tp) )
+      if ( is_null($tp) )
          $result = true; // already deleted
       else
       {
          $result = $tp->delete();
-         if( $tp->Status == TP_STATUS_REGISTER )
+         if ( $tp->Status == TP_STATUS_REGISTER )
             Tournament::update_tournament_registeredTP( $tid, -1 );
       }
       return $result;
@@ -674,7 +674,7 @@ class TournamentParticipant
    public static function getStatusText( $status=null, $with_value=false, $info_mode=false )
    {
       // lazy-init of texts
-      if( !isset(self::$ARR_TP_TEXTS['STATUS']) )
+      if ( !isset(self::$ARR_TP_TEXTS['STATUS']) )
       {
          $arr = array();
          $arr[TP_STATUS_APPLY]    = T_('Apply#TP_status');
@@ -690,11 +690,11 @@ class TournamentParticipant
          self::$ARR_TP_TEXTS['STATUS_INFO'] = $arr;
       }
 
-      if( $info_mode )
+      if ( $info_mode )
       {
          $key = 'STATUS_INFO';
-         if( !$status ) $status = '';
-         if( !isset(self::$ARR_TP_TEXTS[$key][$status]) )
+         if ( !$status ) $status = '';
+         if ( !isset(self::$ARR_TP_TEXTS[$key][$status]) )
             error('invalid_args', "TournamentParticipant:getStatusText($status,$key)");
 
          $status_str = self::$ARR_TP_TEXTS[$key][$status];
@@ -703,10 +703,10 @@ class TournamentParticipant
       else
       {
          $key = 'STATUS';
-         if( is_null($status) )
+         if ( is_null($status) )
             return self::$ARR_TP_TEXTS[$key];
 
-         if( !isset(self::$ARR_TP_TEXTS[$key][$status]) )
+         if ( !isset(self::$ARR_TP_TEXTS[$key][$status]) )
             error('invalid_args', "TournamentParticipant:getStatusText($status,$key)");
          $status_str = self::$ARR_TP_TEXTS[$key][$status];
          return ( $with_value ) ? sprintf( '%s (%s)', $status, $status_str ) : $status_str;
@@ -722,7 +722,7 @@ class TournamentParticipant
    public static function getFlagsText( $flags=null )
    {
       // lazy-init of texts
-      if( !isset(self::$ARR_TP_TEXTS['FLAGS']) )
+      if ( !isset(self::$ARR_TP_TEXTS['FLAGS']) )
       {
          $arr = array();
          $arr[TP_FLAGS_INVITED]     = T_('Invited#TP_flag');
@@ -733,12 +733,12 @@ class TournamentParticipant
       }
       else
          $arr = self::$ARR_TP_TEXTS['FLAGS'];
-      if( is_null($flags) )
+      if ( is_null($flags) )
          return $arr;
 
       $out = array();
-      foreach( $arr as $flagmask => $flagtext )
-         if( $flags & $flagmask ) $out[] = $flagtext;
+      foreach ( $arr as $flagmask => $flagtext )
+         if ( $flags & $flagmask ) $out[] = $flagtext;
       return implode(', ', $out);
    }//getFlagsText
 

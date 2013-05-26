@@ -68,11 +68,11 @@ define('ADMOPT_DENY_SURVEY_VOTE',      0x8000); // deny: voting on surveys
 function setTZ( $tz='GMT')
 {
    static $curtz;
-   if( !@$curtz ) $curtz='GMT'; //default
+   if ( !@$curtz ) $curtz='GMT'; //default
    $res= $curtz;
-   if( is_string( $tz) && !empty( $tz) )
+   if ( is_string( $tz) && !empty( $tz) )
    {
-      if( !function_exists('date_default_timezone_set') || !date_default_timezone_set( $tz) )
+      if ( !function_exists('date_default_timezone_set') || !date_default_timezone_set( $tz) )
       {
          putenv( 'TZ='.$tz);
          //putenv('PHP_TZ='.$tz); //Does not seem to realize something
@@ -86,9 +86,9 @@ setTZ('GMT'); //default
 
 global $timeadjust; //PHP5
 $timeadjust = 0;
-if( @is_readable( "timeadjust.php" ) )
+if ( @is_readable( "timeadjust.php" ) )
    include_once( "timeadjust.php" );
-if( !is_numeric($timeadjust) )
+if ( !is_numeric($timeadjust) )
    $timeadjust = 0;
 
 // time() always returns time in UTC
@@ -138,13 +138,13 @@ function get_utc_timeinfo( $time=0, $is_assoc=true )
 
 // NOTE: also calling arg_stripslashes recursively can be exploited:
 //       see http://talks.php.net/show/php-best-practices/26
-if( get_magic_quotes_gpc() )
+if ( get_magic_quotes_gpc() )
 {
    function arg_stripslashes( $arg)
    {
-      if( is_string( $arg) )
+      if ( is_string( $arg) )
          return stripslashes($arg);
-      if( !is_array( $arg) )
+      if ( !is_array( $arg) )
          return $arg;
       return array_map('arg_stripslashes',$arg);
    }
@@ -168,9 +168,9 @@ function get_request_arg( $name, $def='', $list=NULL)
    $val = (isset($_REQUEST[$name]))
       ? arg_stripslashes($_REQUEST[$name])
       : $def; //$HTTP_REQUEST_VARS does not exist
-   if( is_array($list) && !is_array($val) )
+   if ( is_array($list) && !is_array($val) )
    {
-      if( !array_key_exists( (string) $val, $list) )
+      if ( !array_key_exists( (string) $val, $list) )
          $val = $def;
    }
    return $val;
@@ -224,28 +224,28 @@ function get_preferred_browser_language()
    $current_q_val = -100;
    $language = NULL;
 
-   foreach( $accept_langcodes as $lang )
+   foreach ( $accept_langcodes as $lang )
    {
       @list($browsercode, $q_val) = explode( ';', $lang);
 
       $q_val = trim(preg_replace( '/q=/i', '', $q_val));
-      if( empty($q_val) || !is_numeric($q_val) )
+      if ( empty($q_val) || !is_numeric($q_val) )
          $q_val = 1.0;
-      if( $current_q_val >= $q_val )
+      if ( $current_q_val >= $q_val )
          continue;
 
       // Normalization for the array_key_exists() matchings
       $browsercode = strtolower(trim($browsercode));
-      if( $browsercode == 'n' )
+      if ( $browsercode == 'n' )
       {
          $language = 'N';
          $current_q_val = $q_val;
          continue;
       }
-      while( $browsercode && !array_key_exists($browsercode, $known_languages))
+      while ( $browsercode && !array_key_exists($browsercode, $known_languages))
       {
          $tmp = strrpos( $browsercode, '-');
-         if( !is_numeric($tmp) || $tmp < 2 )
+         if ( !is_numeric($tmp) || $tmp < 2 )
          {
             $browsercode = '';
             break;
@@ -253,26 +253,26 @@ function get_preferred_browser_language()
          $browsercode = substr( $browsercode, 0, $tmp);
          $q_val-= 1.0;
       }
-      if( !$browsercode )
+      if ( !$browsercode )
          continue;
 
-      if( $current_q_val >= $q_val )
+      if ( $current_q_val >= $q_val )
          continue;
 
       $found = false;
-      if( $accept_charset )
+      if ( $accept_charset )
       {
-         foreach( $known_languages[$browsercode] as $charenc => $langname )
+         foreach ( $known_languages[$browsercode] as $charenc => $langname )
          {
             //$charenc = strtolower($charenc); // Normalization
-            if( strpos( $accept_charset, $charenc) !== false )
+            if ( strpos( $accept_charset, $charenc) !== false )
             {
                $found = true;
                break;
             }
          }
       }
-      if( !$found )
+      if ( !$found )
       {  // No supporting encoding found. Take the first one anyway.
          reset($known_languages[$browsercode]);
          $charenc = key($known_languages[$browsercode]);
@@ -292,45 +292,45 @@ function recover_language( $player_row=null) //must be called from main dir
 {
 //see also:   include_once( "translations/known_languages.php" );
    global $language_used, $encoding_used, $known_languages;
-   if( !empty( $language_used ) ) //set by a previous call
+   if ( !empty( $language_used ) ) //set by a previous call
       return $language_used;
 
    //else first call: find $language_used and $encoding_used
-   if( !isset($known_languages) )
-      if( file_exists( "translations/known_languages.php") )
+   if ( !isset($known_languages) )
+      if ( file_exists( "translations/known_languages.php") )
          include_once( "translations/known_languages.php" ); //must be called from main dir
-   if( !isset($known_languages) )
+   if ( !isset($known_languages) )
       $known_languages = array();
 
-   if( isset($_REQUEST['language']) )
+   if ( isset($_REQUEST['language']) )
       $language = (string)$_REQUEST['language'];
-   else if( isset($player_row['Lang']) )
+   else if ( isset($player_row['Lang']) )
       $language = (string)$player_row['Lang'];
    else
       $language = 'C';
 
-   if( empty($language) || $language == 'C' )
+   if ( empty($language) || $language == 'C' )
       $language = get_preferred_browser_language();
 
-   if( empty($language) || $language == 'en' )
+   if ( empty($language) || $language == 'en' )
       $language = LANG_DEF_LOAD;
 
    @list($browsercode,$encoding_used) = explode( LANG_CHARSET_CHAR, $language, 2);
-   if( @$browsercode && !@$encoding_used )
+   if ( @$browsercode && !@$encoding_used )
    {
-      if( isset($known_languages[$browsercode][LANG_DEF_CHARSET]) )
+      if ( isset($known_languages[$browsercode][LANG_DEF_CHARSET]) )
       {
          $encoding_used = LANG_DEF_CHARSET;
       }
-      else if( isset($known_languages[$browsercode]) )
+      else if ( isset($known_languages[$browsercode]) )
       {
          //get the first suitable encoding
          reset($known_languages[$browsercode]);
          $encoding_used = @key($known_languages[$browsercode]);
       }
-      if( !@$encoding_used )
+      if ( !@$encoding_used )
          $encoding_used = LANG_DEF_CHARSET;
-      if( $language != 'N' )
+      if ( $language != 'N' )
          $language = $browsercode.LANG_CHARSET_CHAR.$encoding_used;
    }
    $language_used = $language;
@@ -360,7 +360,7 @@ function error_on_blocked_ip( $errorcode, $row=null )
    //if( is_array($row) && (@$row['AdminOptions'] & ADMOPT_BYPASS_IP_BLOCK) )
       //return;
 
-   if( is_blocked_ip() )
+   if ( is_blocked_ip() )
    {
       $userid = (is_array($row)) ? @$row['Handle'] : '???';
       admin_log( 0, $userid, $errorcode );
@@ -373,24 +373,24 @@ function error_on_blocked_ip( $errorcode, $row=null )
 function is_blocked_ip( $ip=null, $arr_check=null )
 {
    global $ARR_BLOCK_IPLIST;
-   if( is_null($ip) )
+   if ( is_null($ip) )
       $ip = (string)@$_SERVER['REMOTE_ADDR'];
-   if( is_null($arr_check) || !is_array($arr_check) )
+   if ( is_null($arr_check) || !is_array($arr_check) )
       $arr_check = $ARR_BLOCK_IPLIST;
 
    // check simple IP-syntax in config-array: 1.2.3.4 (=ip)
-   if( in_array( $ip, $arr_check ) )
+   if ( in_array( $ip, $arr_check ) )
       return $ip;
 
    // check IP-Syntax in config-array: 1.2.3.4/8 (=subnet), /.../ (=regex)
-   foreach( $arr_check as $checkip )
+   foreach ( $arr_check as $checkip )
    {
-      if( $checkip[0] == '/' ) // regex
+      if ( $checkip[0] == '/' ) // regex
       {
-         if( preg_match( $checkip, $ip ) )
+         if ( preg_match( $checkip, $ip ) )
             return $ip;
       }
-      elseif( strpos( $checkip, '/' ) !== false ) // subnet
+      elseif ( strpos( $checkip, '/' ) !== false ) // subnet
       {
          if ( check_subnet_ip( $checkip, $ip ) == 1 )
             return $ip;
@@ -408,33 +408,33 @@ function check_subnet_ip( $subnet, $ip )
 
    // split subnet
    $arrnet = array();
-   if( !preg_match( "/^((\d+\.\d+\.\d+)\.(\d+))\/(\d+)$/", $subnet, $arrnet ) )
+   if ( !preg_match( "/^((\d+\.\d+\.\d+)\.(\d+))\/(\d+)$/", $subnet, $arrnet ) )
       return -1;
    $netbits = $arrnet[4];
-   if( $netbits == 32 && strcmp($arrnet[1], $ip) == 0 )
+   if ( $netbits == 32 && strcmp($arrnet[1], $ip) == 0 )
       return 1; // ip matching subnet [ip/32]
-   if( $netbits <= 0 || $netbits > 32 )
+   if ( $netbits <= 0 || $netbits > 32 )
       return -1;
 
    // split ip
    $arrip  = array();
-   if( !preg_match( "/^(\d+\.\d+\.\d+)\.(\d+)$/", $ip, $arrip ) )
+   if ( !preg_match( "/^(\d+\.\d+\.\d+)\.(\d+)$/", $ip, $arrip ) )
       return -2;
 
    // match high 24-bit
    $ip_high  = ip2long("0.{$arrip[1]}");
    $net_high = ip2long("0.{$arrnet[2]}");
-   if( $netbits < 24 )
+   if ( $netbits < 24 )
    {
       $matchmask = 0xffffff ^ ((1 << (24 - $netbits)) - 1);
-      if( ($ip_high & $matchmask) == ($net_high & $matchmask) )
+      if ( ($ip_high & $matchmask) == ($net_high & $matchmask) )
          return 1;
    }
-   elseif( ($ip_high & 0xffffff) != ($net_high & 0xffffff) )
+   elseif ( ($ip_high & 0xffffff) != ($net_high & 0xffffff) )
    {// high 24-bits don't match
       return 0;
    }
-   elseif( $netbits == 24 )
+   elseif ( $netbits == 24 )
    {// high 24-bits match exactly
       return 1;
    }
@@ -444,7 +444,7 @@ function check_subnet_ip( $subnet, $ip )
       $ip_low  = ip2long("0.0.0.{$arrip[2]}");
       $net_low = ip2long("0.0.0.{$arrnet[3]}");
       $matchmask = 0xff ^ ((1 << (8 - $lowbits)) - 1);
-      if( ($ip_low & $matchmask) == ($net_low & $matchmask) )
+      if ( ($ip_low & $matchmask) == ($net_low & $matchmask) )
          return 1;
    }
 
@@ -477,7 +477,7 @@ function dgs_json_encode( $var )
 function quick_suite_add_quota( &$arr )
 {
    global $player_row;
-   if( isset($player_row['VaultCnt']) && isset($player_row['X_VaultTime']) )
+   if ( isset($player_row['VaultCnt']) && isset($player_row['X_VaultTime']) )
    {
       $arr['quota_count'] = (int)@$player_row['VaultCnt'];
       $arr['quota_expire'] = date(DATE_FMT_QUICK, @$player_row['X_VaultTime']);

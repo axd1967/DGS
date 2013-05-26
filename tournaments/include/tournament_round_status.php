@@ -57,23 +57,23 @@ class TournamentRoundStatus
     */
    public function __construct( $tid, $round )
    {
-      if( $tid instanceof Tournament )
+      if ( $tid instanceof Tournament )
       {
          $this->tourney = $tid;
          $this->tid = $this->tourney->ID;
       }
-      elseif( is_numeric($tid) && $tid > 0 )
+      elseif ( is_numeric($tid) && $tid > 0 )
       {
          $this->tid = (int)$tid;
          $this->tourney = TournamentCache::load_cache_tournament(
             'TournamentRoundStatus.construct.find_tournament', $this->tid );
       }
-      if( is_null($this->tourney) || (int)$this->tid <= 0 )
+      if ( is_null($this->tourney) || (int)$this->tid <= 0 )
          error('unknown_tournament', "TournamentRoundStatus.construct.find_tournament2({$this->tid},{$this->Round})");
 
       $this->ttype = TournamentFactory::getTournament($this->tourney->WizardType);
 
-      if( $round instanceof TournamentRound )
+      if ( $round instanceof TournamentRound )
       {
          $this->tround = $round;
          $this->Round = $this->tround->Round;
@@ -121,7 +121,7 @@ class TournamentRoundStatus
 
    public function add_error( $str )
    {
-      if( $str )
+      if ( $str )
          $this->errors[] = $str;
    }
 
@@ -131,7 +131,7 @@ class TournamentRoundStatus
    {
       $this->new_status = $new_status;
 
-      if( $this->curr_status != $new_status )
+      if ( $this->curr_status != $new_status )
       {
          // expected status is: TROUND_STATUS_(INIT|POOL|PAIR|PLAY|DONE)
          $check_funcname = 'check_conditions_round_status_' . strtoupper($new_status);
@@ -211,7 +211,7 @@ class TournamentRoundStatus
    // Checks expected round- and tournament-status
    private function check_expected_round_status( $round_status, $t_status )
    {
-      if( $this->curr_status != $round_status || $this->tourney->Status != $t_status )
+      if ( $this->curr_status != $round_status || $this->tourney->Status != $t_status )
       {
          $this->errors[] = sprintf( T_('Expecting current round status [%s] and tournament status [%s] for change of round status to [%s]'),
             TournamentRound::getStatusText($round_status),
@@ -231,16 +231,16 @@ class TournamentRoundStatus
    public function check_action_round_status( $errmsgfmt, $arr_status, $allow_admin=true )
    {
       $errors = array();
-      if( !is_array($arr_status) )
+      if ( !is_array($arr_status) )
          $arr_status = array( $arr_status );
 
       // T-Admin can do anything at any time
-      if( $allow_admin && TournamentUtils::isAdmin() )
+      if ( $allow_admin && TournamentUtils::isAdmin() )
          $allow = true;
       else
          $allow = in_array($this->tround->Status, $arr_status);
 
-      if( !$allow )
+      if ( !$allow )
       {
          $errors[] = sprintf( $errmsgfmt,
                               TournamentRound::getStatusText($this->tround->Status),

@@ -30,11 +30,11 @@ require_once 'forum/forum_functions.php';
    connect2mysql();
 
    $logged_in = who_is_logged($player_row);
-   if( !$logged_in )
+   if ( !$logged_in )
       error('login_if_not_logged_in', 'admin_show_forumlog');
-   if( $player_row['ID'] <= GUESTS_ID_MAX )
+   if ( $player_row['ID'] <= GUESTS_ID_MAX )
       error('not_allowed_for_guest', 'admin_show_forumlog');
-   if( !Forum::is_admin() )
+   if ( !Forum::is_admin() )
       error('adminlevel_too_low', 'admin_show_forumlog');
    $show_ip = ( @$player_row['admin_level'] & ADMIN_DEVELOPER );
 
@@ -62,7 +62,7 @@ require_once 'forum/forum_functions.php';
              T_('Approve post#filter')  => sprintf( "Action='%s'", FORUMLOGACT_APPROVE_POST ),
              T_('Reject post#filter')   => sprintf( "Action='%s'", FORUMLOGACT_REJECT_POST ),
       ), true );
-   if( $show_ip )
+   if ( $show_ip )
       $flfilter->add_filter( 5, 'Text', 'FL.IP', true,
          array( FC_SIZE => 16, FC_SUBSTRING => 1, FC_START_WILD => 1 ));
    $flfilter->init(); // parse current value from _GET
@@ -76,7 +76,7 @@ require_once 'forum/forum_functions.php';
    $fltable->add_tablehead( 2, T_('Userid#header'), 'User', 0, 'P.Handle+');
    $fltable->add_tablehead( 3, T_('Time#header'), 'Date', 0, 'FL.Time-');
    $fltable->add_tablehead( 4, T_('Action#header'));
-   if( $show_ip )
+   if ( $show_ip )
       $fltable->add_tablehead( 5, T_('IP#header'));
    $fltable->add_tablehead( 6, T_('Show Thread/Post#header'), '', TABLE_NO_HIDE);
 
@@ -111,20 +111,20 @@ require_once 'forum/forum_functions.php';
 
    echo "<h3 class=Header>$title</h3>\n";
 
-   while( $show_rows-- > 0 && ($row = mysql_fetch_assoc( $result )) )
+   while ( $show_rows-- > 0 && ($row = mysql_fetch_assoc( $result )) )
    {
       $flrow_str = array();
-      if( $fltable->Is_Column_Displayed[1] )
+      if ( $fltable->Is_Column_Displayed[1] )
          $flrow_str[1] = @$row['ID'];
-      if( $fltable->Is_Column_Displayed[2] )
+      if ( $fltable->Is_Column_Displayed[2] )
          $flrow_str[2] = user_reference( REF_LINK, 1, '', @$row['User_ID'], @$row['P_Name'], @$row['P_Handle'] );
-      if( $fltable->Is_Column_Displayed[3] )
+      if ( $fltable->Is_Column_Displayed[3] )
          $flrow_str[3] = (@$row['X_Time'] > 0) ? date(DATE_FMT2, @$row['X_Time']) : NULL;
-      if( $fltable->Is_Column_Displayed[4] )
+      if ( $fltable->Is_Column_Displayed[4] )
          $flrow_str[4] = @$row['Action'];
-      if( $show_ip && $fltable->Is_Column_Displayed[5] )
+      if ( $show_ip && $fltable->Is_Column_Displayed[5] )
          $flrow_str[5] = @$row['IP'];
-      if( $fltable->Is_Column_Displayed[6] )
+      if ( $fltable->Is_Column_Displayed[6] )
       {
          $post_status = ForumPost::get_approved_text( $row['Approved'] );
          $flrow_str[6] = "<A HREF=\"read.php?thread=".@$row['Thread_ID'].URI_AMP."moderator=y#".@$row['Post_ID']."\">"

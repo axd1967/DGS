@@ -66,35 +66,35 @@ abstract class TournamentTemplateLadder extends TournamentTemplate
       ta_begin();
       {//HOT-section to create various tables for new tournament
          // check args
-         if( !($tourney instanceof Tournament) )
+         if ( !($tourney instanceof Tournament) )
             $this->create_error("TournamentTemplateLadder._createTournament.tourney.check(%s)");
-         if( !($tprops instanceof TournamentProperties) )
+         if ( !($tprops instanceof TournamentProperties) )
             $this->create_error("TournamentTemplateLadder._createTournament.tprops.check(%s)");
-         if( !($t_rules instanceof TournamentRules) )
+         if ( !($t_rules instanceof TournamentRules) )
             $this->create_error("TournamentTemplateLadder._createTournament.t_rules.check(%s)");
-         if( !($tl_props instanceof TournamentLadderProps) )
+         if ( !($tl_props instanceof TournamentLadderProps) )
             $this->create_error("TournamentTemplateLadder._createTournament.tl_props.check(%s)");
 
          // insert tournament-related tables
-         if( !$tourney->persist() )
+         if ( !$tourney->persist() )
             $this->create_error("TournamentTemplateLadder._createTournament.tourney.insert(%s)");
          $tid = $tourney->ID;
 
          $tprops->tid = $tid;
-         if( !$tprops->insert() )
+         if ( !$tprops->insert() )
             $this->create_error("TournamentTemplateLadder._createTournament.tprops.insert(%s,$tid)");
 
          $t_rules->tid = $tid;
-         if( !$t_rules->insert() )
+         if ( !$t_rules->insert() )
             $this->create_error("TournamentTemplateLadder._createTournament.t_rules.insert(%s,$tid)");
 
          $tl_props->tid = $tid;
-         if( !$tl_props->insert() )
+         if ( !$tl_props->insert() )
             $this->create_error("TournamentTemplateLadder._createTournament.tl_props.insert(%s,$tid)");
 
          $t_ext = new TournamentExtension( $tid, TE_PROP_TLADDER_RANK_PERIOD_UPDATE, 0,
                TournamentUtils::get_month_start_time($NOW) );
-         if( !$t_ext->persist() )
+         if ( !$t_ext->persist() )
             $this->create_error("TournamentTemplateLadder._createTournament.t_ext.insert(%s,$tid)");
 
          TournamentLogHelper::log_create_tournament( $tid, $tourney->WizardType, $tourney->Title );
@@ -109,7 +109,7 @@ abstract class TournamentTemplateLadder extends TournamentTemplate
       $tid = $tourney->ID;
       $errors = array();
 
-      if( $t_status == TOURNEY_STATUS_REGISTER )
+      if ( $t_status == TOURNEY_STATUS_REGISTER )
       {
          $tl_props = TournamentCache::load_cache_tournament_ladder_props( "TournamentTemplateLadder.checkProperties({$this->uid})", $tid );
          $errors = $tl_props->check_properties();
@@ -140,7 +140,7 @@ abstract class TournamentTemplateLadder extends TournamentTemplate
       ta_begin();
       {//HOT-section to save TournamentParticipant and add user in ladder
          $result = $tp->persist();
-         if( $tourney->Status == TOURNEY_STATUS_PLAY && $tp->Status == TP_STATUS_REGISTER )
+         if ( $tourney->Status == TOURNEY_STATUS_PLAY && $tp->Status == TP_STATUS_REGISTER )
             $result = TournamentLadder::add_user_to_ladder( $tp->tid, $tp->uid );
       }
       ta_end();

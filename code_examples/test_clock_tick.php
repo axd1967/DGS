@@ -35,9 +35,9 @@ require_once 'include/rating.php';
 
    $start = time();
    $lim = 10000;
-   for($i=1; $i <= $lim; $i++) {
+   for ($i=1; $i <= $lim; $i++) {
       test($v, $i, false);
-      if( $i % 100 == 0 ) {
+      if ( $i % 100 == 0 ) {
          echo "$i/$lim ...\n";
          echo "Needed[$v], Sum: " . (time() - $start) . "s\n";
       }
@@ -49,7 +49,7 @@ function test( $qver, $nr, $print=true )
 {
    global $NOW;
    $begin = gettimeofday();
-   if( $qver == 'A' )
+   if ( $qver == 'A' )
    {
       $query = 'SELECT Games.*, Games.ID as gid, Clock.Ticks as ticks, ' .
                'black.Handle as blackhandle, white.Handle as whitehandle, ' .
@@ -78,20 +78,20 @@ function test( $qver, $nr, $print=true )
 
    $result = db_query( "clock_tick.find_timeout_games", $query );
 
-   while($row = mysql_fetch_assoc($result))
+   while ($row = mysql_fetch_assoc($result))
    {
       extract($row);
 
       $hours = ticks_to_hours($ticks - $LastTicks);
 
-      if( $ToMove_ID == $Black_ID )
+      if ( $ToMove_ID == $Black_ID )
       {
          time_remaining( $hours, $Black_Maintime, $Black_Byotime, $Black_Byoperiods,
             $Maintime, $Byotype, $Byotime, $Byoperiods, false);
 
          $time_is_up = ( $Black_Maintime == 0 && $Black_Byotime == 0 );
       }
-      else if( $ToMove_ID == $White_ID )
+      else if ( $ToMove_ID == $White_ID )
       {
          time_remaining( $hours, $White_Maintime, $White_Byotime, $White_Byoperiods,
             $Maintime, $Byotype, $Byotime, $Byoperiods, false);
@@ -102,7 +102,7 @@ function test( $qver, $nr, $print=true )
    $end = gettimeofday();
    mysql_free_result($result);
 
-   if( $print )
+   if ( $print )
       echo "Needed[$qver], #$nr: " . timediff($begin,$end) . "\n";
 
 }
@@ -117,7 +117,7 @@ function timediff( $start, $end )
 
    $sec_diff   = $sec2 - $sec1;
    $msdiff = $ms2 - $ms1;
-   if( $msdiff < 0 )
+   if ( $msdiff < 0 )
    {
       $msdiff += 1000000;
       $sec_diff++;

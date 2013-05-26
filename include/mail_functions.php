@@ -24,7 +24,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
 
-if( !function_exists('html_entity_decode') ) //Does not exist on dragongoserver.sourceforge.net
+if ( !function_exists('html_entity_decode') ) //Does not exist on dragongoserver.sourceforge.net
 {
    //HTML_SPECIALCHARS or HTML_ENTITIES, ENT_COMPAT or ENT_QUOTES or ENT_NOQUOTES
    $local_reverse_htmlentities_table = get_html_translation_table(HTML_ENTITIES, ENT_QUOTES);
@@ -42,21 +42,21 @@ function mail_link( $nam, $lnk )
 {
    $nam = trim($nam);
    $lnk = trim($lnk);
-   if( $lnk )
+   if ( $lnk )
    {
-      if( strcspn($lnk,":?#") == strcspn($lnk,"?#")
+      if ( strcspn($lnk,":?#") == strcspn($lnk,"?#")
           && !is_numeric(strpos($lnk,'//'))
           && strtolower(substr($lnk,0,4)) != "www."
         )
       {
          //make it absolute to this server
-         while( substr($lnk,0,3) == '../' )
+         while ( substr($lnk,0,3) == '../' )
             $lnk = substr($lnk,3);
          $lnk = HOSTBASE.$lnk;
       }
       $nam = ($nam) ? "$nam ($lnk)" : $lnk;
    }
-   if( !$nam )
+   if ( !$nam )
       return '';
    $nam = trim( str_replace("\\\"","\"", $nam) );
    return "[ $nam ]";

@@ -29,14 +29,14 @@ function add_contributor_link( $text=false, $link, $extra='')
    static $started = false;
    static $c = 0;
 
-   if( $text === false )
+   if ( $text === false )
    {
-      if( $started )
+      if ( $started )
          echo "</table>\n";
       $started = false;
       return -1;
    }
-   if( $text )
+   if ( $text )
    {
       $c = 0;
       $class = 'First';
@@ -47,7 +47,7 @@ function add_contributor_link( $text=false, $link, $extra='')
       $class = 'Row'.$c;
    }
 
-   if( !$started )
+   if ( !$started )
    {
       echo "<table class=People>\n";
       $started = true;
@@ -78,23 +78,23 @@ function get_executives( $level )
 {
    $out = array();
    // NOTE: don't include: ADMIN_TRANSLATORS, ADMIN_DATABASE, ADMIN_SKINNER
-   if( $level & ADMIN_SUPERADMIN )
+   if ( $level & ADMIN_SUPERADMIN )
       $out[] = T_('Admin manager');
-   if( $level & ADMIN_DEVELOPER )
+   if ( $level & ADMIN_DEVELOPER )
       $out[] = T_('Site');
-   if( $level & ADMIN_PASSWORD )
+   if ( $level & ADMIN_PASSWORD )
       $out[] = T_('Password');
-   if( $level & ADMIN_FAQ )
+   if ( $level & ADMIN_FAQ )
       $out[] = T_('FAQ editor');
-   if( $level & ADMIN_FORUM )
+   if ( $level & ADMIN_FORUM )
       $out[] = T_('Forum moderator');
-   if( $level & ADMIN_TOURNAMENT )
+   if ( $level & ADMIN_TOURNAMENT )
       $out[] = T_('Tournaments');
-   if( $level & ADMIN_GAME )
+   if ( $level & ADMIN_GAME )
       $out[] = T_('Game & Rating');
-   if( ALLOW_FEATURE_VOTE && ($level & ADMIN_FEATURE) )
+   if ( ALLOW_FEATURE_VOTE && ($level & ADMIN_FEATURE) )
       $out[] = T_('Feature-Vote');
-   if( ALLOW_SURVEY_VOTE && ($level & ADMIN_SURVEY) )
+   if ( ALLOW_SURVEY_VOTE && ($level & ADMIN_SURVEY) )
       $out[] = T_('Survey');
    return array( count($out), implode(', ', $out) );
 }
@@ -117,7 +117,7 @@ function get_executives( $level )
 
 
    $first = T_("Developer");
-   foreach( array('rodival' => 'Rod Ival',
+   foreach ( array('rodival' => 'Rod Ival',
                   'JUG' => 'Jens-Uwe Gaspar',
                   //'ragou' => 'Ragnar Ouchterlony',
                   //4991 => 'Kris Van Hulle', //uid=4991 handle='uXd' ???
@@ -143,10 +143,10 @@ function get_executives( $level )
       " ORDER BY ID" );
 
    $FAQ_list = array();
-   while( $row = mysql_fetch_array( $result ) )
+   while ( $row = mysql_fetch_array( $result ) )
    {
       $uid = $row['ID'];
-      if( $extra_info )
+      if ( $extra_info )
       {
          $query = 'SELECT UNIX_TIMESTAMP(T.Date) AS Date'
             . ' FROM FAQlog AS T'
@@ -161,9 +161,9 @@ function get_executives( $level )
    mysql_free_result($result);
 
    $first = T_('FAQ editor');
-   foreach( $FAQ_list as $uid => $row )
+   foreach ( $FAQ_list as $uid => $row )
    {
-      if( in_array( $row['Handle'], $FAQexclude) )
+      if ( in_array( $row['Handle'], $FAQexclude) )
          continue;
       add_contributor( $first, $row['ID'], $row['Name'], $row['Handle'],
          ( ($extra_info && $row['LastUpdate']) ? date(DATE_FMT2, $row['LastUpdate']) : '') );
@@ -185,9 +185,9 @@ function get_executives( $level )
       " ORDER BY ID" );
 
    $first = T_('Forum moderator');
-   while( $row = mysql_fetch_array( $result ) )
+   while ( $row = mysql_fetch_array( $result ) )
    {
-      if( in_array( $row['Handle'], $MODexclude) )
+      if ( in_array( $row['Handle'], $MODexclude) )
          continue;
 
       add_contributor( $first, $row['ID'], $row['Name'], $row['Handle'], '' );
@@ -217,9 +217,9 @@ function get_executives( $level )
       " ORDER BY X_AdmLevBitCount DESC, ID ASC" );
 
    $people = array(); // sort-id => row, ...
-   while( $row = mysql_fetch_array( $result ) )
+   while ( $row = mysql_fetch_array( $result ) )
    {
-      if( in_array( $row['Handle'], $MODexclude) )
+      if ( in_array( $row['Handle'], $MODexclude) )
          continue;
 
       list( $sortmetric, $executives) = get_executives( $row['admin_level'] );
@@ -230,7 +230,7 @@ function get_executives( $level )
    //shuffle($people);
    $prevTitle = '<>nil';
    $title = '';
-   foreach( $people as $row )
+   foreach ( $people as $row )
    {
       $title = ( $title != $prevTitle || $title != $row['AL'] ) ? $row['AL'] : '';
       $prevTitle = $title;
@@ -251,11 +251,11 @@ function get_executives( $level )
       "SELECT ID,Handle,Name,Translator FROM Players WHERE Translator>'' ORDER BY ID" );
 
    $translator_list = array();
-   while( $row = mysql_fetch_array( $result ) )
+   while ( $row = mysql_fetch_array( $result ) )
    {
       $uid = $row['ID'];
       $languages = explode( LANG_TRANSL_CHAR, $row['Translator']);
-      foreach( $languages as $language )
+      foreach ( $languages as $language )
       {
          @list($browsercode, $charenc) = explode( LANG_CHARSET_CHAR, $language, 2);
          // Normalization for the array_key_exists() matchings
@@ -263,12 +263,12 @@ function get_executives( $level )
          $charenc = strtolower(trim($charenc));
 
          $langname = (string)@$known_languages[$browsercode][$charenc];
-         if( $langname )
+         if ( $langname )
             $langname = $TW_($langname);
          else
             $langname = $language;
 
-         if( $extra_info )
+         if ( $extra_info )
          {
             $query = 'SELECT UNIX_TIMESTAMP(T.Date) AS Date ' .
                'FROM Translationlog AS T INNER JOIN TranslationLanguages AS L ON L.ID=T.Language_ID ' .
@@ -285,11 +285,11 @@ function get_executives( $level )
 
    ksort($translator_list);
 
-   foreach( $translator_list as $langname => $translators )
+   foreach ( $translator_list as $langname => $translators )
    {
       //ksort($translators);
       $first = $langname;
-      foreach( $translators as $row )
+      foreach ( $translators as $row )
       {
          add_contributor( $first, $row['ID'], $row['Name'], $row['Handle'],
             ( ($extra_info && $row['LastUpdate']) ? date(DATE_FMT2, $row['LastUpdate']) : '') );

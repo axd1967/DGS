@@ -31,9 +31,9 @@ require_once 'include/wroom_control.php';
    connect2mysql();
 
    $logged_in = who_is_logged( $player_row);
-   if( !$logged_in )
+   if ( !$logged_in )
       error('not_logged_in', 'join_waitingroom_game');
-   if( $player_row['ID'] <= GUESTS_ID_MAX )
+   if ( $player_row['ID'] <= GUESTS_ID_MAX )
       error('not_allowed_for_guest', 'join_waitingroom_game');
 
 /* Actual REQUEST calls used:  id=wroom-id (mandatory)
@@ -42,12 +42,12 @@ require_once 'include/wroom_control.php';
 */
 
    $wr_id = (int)@$_REQUEST['id'];
-   if( @$_REQUEST['delete'] == 't' ) // delete
+   if ( @$_REQUEST['delete'] == 't' ) // delete
    {
       $gid = WaitingroomControl::delete_waitingroom_game( $wr_id );
 
       $msg = urlencode(T_('Game deleted!'));
-      if( $gid )
+      if ( $gid )
          jump_to("game_players.php?gid=$gid".URI_AMP."sysmsg=$msg");
       else
          jump_to("waiting_room.php?sysmsg=$msg");

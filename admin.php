@@ -27,11 +27,11 @@ $GLOBALS['ThePage'] = new Page('Admin');
    connect2mysql();
 
    $logged_in = who_is_logged( $player_row);
-   if( !$logged_in )
+   if ( !$logged_in )
       error('login_if_not_logged_in', 'admin');
 
    $admin_level = (int)@$player_row['admin_level']; //local modifications
-   if( !$admin_level )
+   if ( !$admin_level )
       error('adminlevel_too_low', 'admin');
 
    start_page(T_('Admin'), true, $logged_in, $player_row);
@@ -51,10 +51,10 @@ $GLOBALS['ThePage'] = new Page('Admin');
                      '', $admin_level & ADMIN_FAQ);
    add_link_page_link('admin_bulletin.php', T_('Admin Bulletin'),
                      '', $admin_level & ADMIN_DEVELOPER);
-   if( ALLOW_FEATURE_VOTE )
+   if ( ALLOW_FEATURE_VOTE )
       add_link_page_link('features/edit_feature.php', T_('Admin Feature'),
                         '', $admin_level & (ADMIN_FEATURE|ADMIN_DEVELOPER) );
-   if( ALLOW_SURVEY_VOTE )
+   if ( ALLOW_SURVEY_VOTE )
       add_link_page_link('admin_survey.php', T_('Admin Survey'),
                         '', $admin_level & (ADMIN_SURVEY|ADMIN_DEVELOPER));
    add_link_page_link('forum/admin.php', T_('Admin Forums'),

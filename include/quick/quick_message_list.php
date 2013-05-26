@@ -72,9 +72,9 @@ class QuickHandlerMessageList extends QuickHandler
       $this->parseFilters(MSGLIST_FILTERS);
 
       // filter-defaults
-      if( !isset($this->filters[MSGLIST_FILTER_FOLDERS]) )
+      if ( !isset($this->filters[MSGLIST_FILTER_FOLDERS]) )
          $this->filters[MSGLIST_FILTER_FOLDERS] = ''; // default all-received
-      if( !isset($this->filters[MSGLIST_FILTER_ANSWERS]) )
+      if ( !isset($this->filters[MSGLIST_FILTER_ANSWERS]) )
          $this->filters[MSGLIST_FILTER_ANSWERS] = ''; // no default (filter-disabled)
    }//parseURL
 
@@ -103,11 +103,11 @@ class QuickHandlerMessageList extends QuickHandler
 
       $qsql = DgsMessage::build_message_base_query( $my_id, /*full*/true, /*single*/false );
       $folder_str = implode(',', $this->filter_folders);
-      if( $this->filter_answers_mid > 0 )
+      if ( $this->filter_answers_mid > 0 )
          $qsql->add_part( SQLP_WHERE, 'M.ReplyTo=' . $this->filter_answers_mid );
-      if( count($this->filter_folders) )
+      if ( count($this->filter_folders) )
          $qsql->add_part( SQLP_WHERE, "me.Folder_nr IN ($folder_str)" );
-      if( $this->list_limit > 0 )
+      if ( $this->list_limit > 0 )
          $qsql->add_part( SQLP_LIMIT, sprintf('%s,%s', $this->list_offset, $this->list_limit + 1 )); //+1 to check for has-next
       $qsql->add_part( SQLP_ORDER, 'me.mid DESC' ); // creation-date (oldest first), equiv. msg-id
       $this->list_order = 'id-';
@@ -115,7 +115,7 @@ class QuickHandlerMessageList extends QuickHandler
       // load messages
       $result = db_query( "$dbgmsg.find_msgs($folder_str)", $qsql->get_select() );
       $arr_msg = array();
-      while( $row = mysql_fetch_assoc($result) )
+      while ( $row = mysql_fetch_assoc($result) )
       {
          $arr_msg[] = $row;
          $this->collect_msg_users( $row );
@@ -126,10 +126,10 @@ class QuickHandlerMessageList extends QuickHandler
 
    private function prepare_filter_answers()
    {
-      if( (string)$this->filters[MSGLIST_FILTER_ANSWERS] != '' )
+      if ( (string)$this->filters[MSGLIST_FILTER_ANSWERS] != '' )
       {
          $arg_mid = $this->filters[MSGLIST_FILTER_ANSWERS];
-         if( !is_numeric($arg_mid) || $arg_mid <= 0 )
+         if ( !is_numeric($arg_mid) || $arg_mid <= 0 )
             error('invalid_args', "QuickHandlerMessageList.prepare.check.filter_answers($arg_mid)");
 
          $this->filter_answers_mid = (int)$arg_mid;
@@ -150,7 +150,7 @@ class QuickHandlerMessageList extends QuickHandler
             'SENT'   => FOLDER_SENT,
          );
 
-      if( (string)$this->filters[MSGLIST_FILTER_FOLDERS] == '' ) // default
+      if ( (string)$this->filters[MSGLIST_FILTER_FOLDERS] == '' ) // default
       {
          $this->filter_folders = build_folders_all_received( $this->folders );
          return;
@@ -159,24 +159,24 @@ class QuickHandlerMessageList extends QuickHandler
          $this->filter_folders = array();
 
       $filter_arr = explode(',', trim($this->filters[MSGLIST_FILTER_FOLDERS]));
-      if( count($filter_arr) == 0 )
+      if ( count($filter_arr) == 0 )
          error('invalid_args', "QuickHandlerMessageList.prepare_filter_folders.miss_folders");
 
       $result = array();
-      foreach( $filter_arr as $folder )
+      foreach ( $filter_arr as $folder )
       {
-         if( isset($this->folders[$folder]) )
+         if ( isset($this->folders[$folder]) )
             $result[] = (int)$folder;
-         elseif( isset($ARR_FOLDER_ALIASES[$folder]) )
+         elseif ( isset($ARR_FOLDER_ALIASES[$folder]) )
             $result[] = $ARR_FOLDER_ALIASES[$folder];
          else
             error('folder_not_found', "QuickHandlerMessageList.prepare_filter_folders.bad.folder($folder)");
       }
 
       $result = array_unique( $result );
-      if( count($result) == 1 )
+      if ( count($result) == 1 )
       {
-         if( $result[0] == FOLDER_ALL_RECEIVED )
+         if ( $result[0] == FOLDER_ALL_RECEIVED )
             $result = build_folders_all_received( $this->folders );
       }
       $this->filter_folders = $result;
@@ -185,17 +185,17 @@ class QuickHandlerMessageList extends QuickHandler
    private function check_allow_limit_all()
    {
       // allow returning ALL entries if folders are only NEW and/or REPLY
-      if( @$_REQUEST[QOPT_LIMIT] === 'all' )
+      if ( @$_REQUEST[QOPT_LIMIT] === 'all' )
       {
          $allow_limit_all = $forbid_limit_all = false;
-         foreach( $this->filter_folders as $folder_id )
+         foreach ( $this->filter_folders as $folder_id )
          {
-            if( $folder_id == FOLDER_NEW || $folder_id == FOLDER_REPLY )
+            if ( $folder_id == FOLDER_NEW || $folder_id == FOLDER_REPLY )
                $allow_limit_all = true;
             else
                $forbid_limit_all = true;
          }
-         if( $allow_limit_all && !$forbid_limit_all )
+         if ( $allow_limit_all && !$forbid_limit_all )
              $this->list_limit = $this->list_offset = 0;
       }
    }//check_allow_limit_all
@@ -203,7 +203,7 @@ class QuickHandlerMessageList extends QuickHandler
    private function collect_msg_users( $msg_row )
    {
       $uid = (int)$msg_row['other_id'];
-      if( $uid > 0 && !isset($this->user_rows[$uid]) )
+      if ( $uid > 0 && !isset($this->user_rows[$uid]) )
       {
          $this->user_rows[$uid] = array(
                'ID' => $uid,
@@ -220,9 +220,9 @@ class QuickHandlerMessageList extends QuickHandler
    {
       $out = array();
 
-      if( is_array($this->msg_result_rows) )
+      if ( is_array($this->msg_result_rows) )
       {
-         foreach( $this->msg_result_rows as $msg_row )
+         foreach ( $this->msg_result_rows as $msg_row )
          {
             $arr = array();
             $out[] = QuickHandlerMessage::fill_message_info( $this, $arr, $msg_row, $this->user_rows, $this->folders );

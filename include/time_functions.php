@@ -42,7 +42,7 @@ function unix_timestamp($date)
    $pattern = "/(19|20)(\d{2})-(\d{1,2})-(\d{1,2}) (\d{1,2}):(\d{1,2}):(\d{1,2})/";
    $m = preg_match ($pattern, $date, $matches);
 
-   if(empty($date) || $date == "0000-00-00" || !$m)
+   if (empty($date) || $date == "0000-00-00" || !$m)
       return NULL;
 
    list($whole, $y1, $y2, $month, $day, $hour, $minute, $second) = $matches;
@@ -63,13 +63,13 @@ function get_clock_used($nightstart)
    $m= date("n");
    $y= date("Y");
    $n= -1;
-   for($i=0; $i<6; $i++) //within the 6 next days,
+   for ($i=0; $i<6; $i++) //within the 6 next days,
    { //try to find two days with the same result (on hour)
       $o= $n;
       $n= mktime($nightstart,0,0,$m,$d+$i,$y);
-      if( $n === FALSE || $n < 0 ) continue; // invalid timestamp
+      if ( $n === FALSE || $n < 0 ) continue; // invalid timestamp
       $n= gmdate('G', $n); //hour without leading zeros. 0..23
-      if( $n === $o ) break;
+      if ( $n === $o ) break;
    }
    return (max(0, (int)$n) % 24); //ALWAYS integer 0..23
 }
@@ -82,7 +82,7 @@ function is_hour_clock_run( $check_hour, $timestamp=null )
    $hour = gmdate('G', (is_null($timestamp) ? $NOW : $timestamp));
    $s = ($hour + 1) % 24;
    $e = ($hour + 24 - NIGHT_LEN) % 24;
-   if( $s <= $e)
+   if ( $s <= $e)
       $running_clock = ( $s <= $check_hour ) && ( $check_hour <= $e );
    else
       $running_clock = ( $check_hour <= $e ) || ( $s <= $check_hour );
@@ -106,15 +106,15 @@ function is_weekend_clock( $clock_id )
 /*! Returns true, if given clock-id is within non-ticking weekend-clock. */
 function is_weekend_clock_stopped( $clock_id, $timestamp=null )
 {
-   if( !is_weekend_clock($clock_id) ) // game-setting has clock running every day of the week
+   if ( !is_weekend_clock($clock_id) ) // game-setting has clock running every day of the week
       $clock_stopped = false; // independent from weekend
    else // game-setting has clock running only on Mo-Fr
    {
       $clock_id -= WEEKEND_CLOCK_OFFSET;
-      if( $clock_id < 0 || $clock_id > 23 )
+      if ( $clock_id < 0 || $clock_id > 23 )
          error('invalid_args', "is_weekend_clock_stopped($clock_id,$timestamp)");
 
-      if( is_weekend($timestamp) )
+      if ( is_weekend($timestamp) )
       {
          // NOTE: this can be seen as bug, but MUCH easier if you don't!
          //       BUG: weekend-clock is wrong, needs fixing; //is_hour_clock_run( $clock_id, $timestamp );
@@ -138,9 +138,9 @@ function is_vacation_clock( $clock_id )
 function is_nighttime_clock( $clock_id, $timestamp=null )
 {
    // clock_id is UTC-normalized ClockUsed (=NightStart)
-   if( is_weekend_clock($clock_id) )
+   if ( is_weekend_clock($clock_id) )
       $clock_id -= WEEKEND_CLOCK_OFFSET;
-   if( $clock_id < 0 || $clock_id > 23 )
+   if ( $clock_id < 0 || $clock_id > 23 )
       error('invalid_args', "is_nighttime_clock($clock_id,$timestamp)");
    return !is_hour_clock_run( $clock_id, $timestamp );
 }
@@ -162,27 +162,27 @@ function time_remaining( $hours, &$main, &$byotime, &$byoper,
 {
    $elapsed = $hours;
 
-   if( $main > $elapsed ) // still have main time left
+   if ( $main > $elapsed ) // still have main time left
    {
       $main -= $elapsed;
 
       // add extra-time on move for Fischer-time
-      if( $has_moved && $byotype == 'FIS' )
+      if ( $has_moved && $byotype == 'FIS' )
       {
          // not capping main-time after adding time if it exceeds starting-main-time (cap)
          // NOTE: avoiding complicated checks for add-time feature
-         if( $main < $startmaintime )
+         if ( $main < $startmaintime )
             $main = min($startmaintime, $main + $startbyotime);
       }
 
       return;
    }
 
-   if( $main > 0 )
+   if ( $main > 0 )
       $elapsed -= $main;
    $main = 0;
 
-   switch( (string)$byotype )
+   switch ( (string)$byotype )
    {
       case BYOTYPE_FISCHER:
          $byotime = $byoper = 0;  // time is up
@@ -190,13 +190,13 @@ function time_remaining( $hours, &$main, &$byotime, &$byoper,
 
       case BYOTYPE_JAPANESE:
       {
-         if( $startbyotime <= 0 )
+         if ( $startbyotime <= 0 )
          {
             $byotime = $byoper = 0; // no byoyomi, time is up
             break;
          }
 
-         if( $byoper < 0 ) // entering byoyomi
+         if ( $byoper < 0 ) // entering byoyomi
          {
             $byotime = $startbyotime;
             $byoper = $startbyoper-1;
@@ -226,9 +226,9 @@ function time_remaining( $hours, &$main, &$byotime, &$byoper,
          $deltaper = (int)(($startbyotime + $elapsed - $byotime)/$startbyotime);
          $byoper -= $deltaper;
 
-         if( $byoper < 0 )
+         if ( $byoper < 0 )
             $byotime = $byoper = 0;  // time is up
-         else if( $has_moved )
+         else if ( $has_moved )
             $byotime = $startbyotime;
          else
             $byotime-= $elapsed - $deltaper*$startbyotime;
@@ -237,13 +237,13 @@ function time_remaining( $hours, &$main, &$byotime, &$byoper,
 
       case BYOTYPE_CANADIAN:
       {
-         if( $startbyoper <= 0 )
+         if ( $startbyoper <= 0 )
          {
             $byotime = $byoper = 0; // no byoyomi, time is up
             break;
          }
 
-         if( $byoper < 0 ) // entering byoyomi
+         if ( $byoper < 0 ) // entering byoyomi
          {
             $byotime = $startbyotime;
             $byoper = $startbyoper;
@@ -251,12 +251,12 @@ function time_remaining( $hours, &$main, &$byotime, &$byoper,
 
          $byotime -= $elapsed;
 
-         if( $byotime <= 0 )
+         if ( $byotime <= 0 )
             $byotime = $byoper = 0;  // time is up
-         else if( $has_moved )
+         else if ( $has_moved )
          {
             $byoper--; // byo stones
-            if( $byoper <= 0 ) // get new stones
+            if ( $byoper <= 0 ) // get new stones
             {
                $byotime = $startbyotime;
                $byoper = $startbyoper;
@@ -276,7 +276,7 @@ function time_remaining_value( $byotype, $startByotime, $startByoperiods, $currM
 {
    $result = 0;
 
-   switch( (string)$byotype )
+   switch ( (string)$byotype )
    {
       case BYOTYPE_FISCHER:
          $result = ($currMaintime > 0) ? $currMaintime : 0;
@@ -285,18 +285,18 @@ function time_remaining_value( $byotype, $startByotime, $startByoperiods, $currM
       case BYOTYPE_JAPANESE:
          // IMPORTANT NOTE: need to handle add-time properly, see also specs/time.txt !!
          //   byo-yomi partly reset on add-time needs special handling
-         if( $currMaintime > 0 ) // not in byo-yomi yet
+         if ( $currMaintime > 0 ) // not in byo-yomi yet
          {
             $result = $currMaintime;
-            if( $currByoperiods > 0 ) // can happen after add-time (only for JAP-time)
+            if ( $currByoperiods > 0 ) // can happen after add-time (only for JAP-time)
                $result += $currByoperiods * $startByotime; // part byo-yomi reset
-            elseif( $startByotime > 0 ) // non-absolute
+            elseif ( $startByotime > 0 ) // non-absolute
                $result += $startByoperiods * $startByotime;
          }
          else
          {// in byo-yomi
             $result = $currByotime;
-            if( $startByoperiods > 0 && $startByotime > 0 )
+            if ( $startByoperiods > 0 && $startByotime > 0 )
                $result += $currByoperiods * $startByotime;
          }
          break;
@@ -304,15 +304,15 @@ function time_remaining_value( $byotype, $startByotime, $startByoperiods, $currM
       case BYOTYPE_CANADIAN:
          // IMPORTANT NOTE: need to handle add-time properly, see also specs/time.txt !!
          //    byo-yomi fully resetted on add-time, so no special handling needed
-         if( $currMaintime > 0 ) // not in byo-yomi yet
+         if ( $currMaintime > 0 ) // not in byo-yomi yet
          {
             $result = $currMaintime;
-            if( $startByoperiods > 0 ) // non-absolute
+            if ( $startByoperiods > 0 ) // non-absolute
                $result += $startByotime / $startByoperiods;
          }
          else
          {// in byo-yomi
-            if( $startByoperiods > 0 && $currByoperiods > 0 ) // non-absolute
+            if ( $startByoperiods > 0 && $currByoperiods > 0 ) // non-absolute
                $result = $currByotime / $currByoperiods;
             else
                $result = 0;
@@ -325,9 +325,9 @@ function time_remaining_value( $byotype, $startByotime, $startByoperiods, $currM
 // returns CSS-class if hours within warning-level for remaining-time
 function get_time_remaining_warning_class( $hours )
 {
-   if( $hours <= 3 * DAY_LEN )
+   if ( $hours <= 3 * DAY_LEN )
       return 'RemTimeWarn1';
-   elseif( $hours <= 7 * DAY_LEN )
+   elseif ( $hours <= 7 * DAY_LEN )
       return 'RemTimeWarn2';
    else
       return '';
@@ -347,7 +347,7 @@ function build_time_remaining( $grow, $color, $is_to_move, $timefmt=null )
    $userMaintime   = $grow[$prefix_col.'_Maintime'];
    $userByotime    = $grow[$prefix_col.'_Byotime'];
    $userByoperiods = $grow[$prefix_col.'_Byoperiods'];
-   if( is_null($timefmt) )
+   if ( is_null($timefmt) )
       $timefmt = TIMEFMT_ADDTYPE | TIMEFMT_ZERO;
 
    // no Ticks (vacation) == 0 => lead to 0 elapsed hours
@@ -378,7 +378,7 @@ function build_time_remaining( $grow, $color, $is_to_move, $timefmt=null )
  */
 function time_left_ticksdate( $hours_left, $curr_ticks=-1 )
 {
-   if( $curr_ticks < 0 )
+   if ( $curr_ticks < 0 )
       $curr_ticks = get_clock_ticks( 'time_left_ticksdate', CLOCK_TIMELEFT );
 
    $ticks_date = $curr_ticks + round( $hours_left * TICK_FREQUENCY );
@@ -396,9 +396,9 @@ function timeleft_days_to_ticks( $days )
 function time_convert_to_hours($time, $unit)
 {
    $time = (int)$time;
-   if( $unit != 'hours' )
+   if ( $unit != 'hours' )
       $time *= 15;
-   if( $unit == 'months' )
+   if ( $unit == 'months' )
       $time *= 30;
    return $time;
 } //time_convert_to_hours
@@ -406,13 +406,13 @@ function time_convert_to_hours($time, $unit)
 // $unit : hours | days | months
 function time_convert_to_longer_unit(&$time, &$unit)
 {
-   if( $unit == 'hours' && $time % 15 == 0 )
+   if ( $unit == 'hours' && $time % 15 == 0 )
    {
       $unit = 'days';
       $time /= 15;
    }
 
-   if( $unit == 'days' && $time % 30 == 0 )
+   if ( $unit == 'days' && $time % 30 == 0 )
    {
       $unit = 'months';
       $time /= 30;
@@ -439,14 +439,14 @@ class TimeFormat
    // fmtflags: TIMEFMT_ENGL, TIMEFMT_SHORT, TIMEFMT_HTMLSPC
    public static function echo_day( $days, $fmtflags=0 )
    {
-      if( ($fmtflags & TIMEFMT_SHORT) && ($fmtflags & TIMEFMT_ENGL) )
+      if ( ($fmtflags & TIMEFMT_SHORT) && ($fmtflags & TIMEFMT_ENGL) )
          return $days . 'd';
 
       $T_= ($fmtflags & TIMEFMT_ENGL) ? 'fnop' : 'T_';
       $absdays = abs($days);
 
       $str = $days;
-      if( $fmtflags & TIMEFMT_SHORT )
+      if ( $fmtflags & TIMEFMT_SHORT )
          $str .= ( $absdays > 0 && $absdays <= 1 ) ? $T_('day#short') : $T_('days#short');
       else
          $str .= ' ' . ( ($absdays > 0 && $absdays <= 1) ? $T_('day') : $T_('days') );
@@ -458,14 +458,14 @@ class TimeFormat
    // fmtflags: TIMEFMT_ENGL, TIMEFMT_SHORT, TIMEFMT_HTMLSPC
    public static function echo_hour( $hours, $fmtflags=0 )
    {
-      if( ($fmtflags & TIMEFMT_SHORT) && ($fmtflags & TIMEFMT_ENGL) )
+      if ( ($fmtflags & TIMEFMT_SHORT) && ($fmtflags & TIMEFMT_ENGL) )
          return $hours . 'h';
 
       $T_= ($fmtflags & TIMEFMT_ENGL) ? 'fnop' : 'T_';
       $abshours = abs($hours);
 
       $str = $hours;
-      if( $fmtflags & TIMEFMT_SHORT )
+      if ( $fmtflags & TIMEFMT_SHORT )
          $str .= ( $abshours > 0 && $abshours <= 1 ) ? $T_('hour#short') : $T_('hours#short');
       else
          $str .= ' ' . ( ($abshours > 0 && $abshours <= 1) ? $T_('hour') : $T_('hours') );
@@ -478,7 +478,7 @@ class TimeFormat
    // fmtflags: TIMEFMT_ENGL, TIMEFMT_SHORT, TIMEFMT_HTMLSPC, TIMEFMT_ZERO
    public static function _echo_time( $hours, $hours_per_day, $fmtflags=0, $zero_value=NO_VALUE )
    {
-      if( $hours <= 0 )
+      if ( $hours <= 0 )
          return ($fmtflags & TIMEFMT_ZERO) ? self::echo_hour(0, $fmtflags) : $zero_value;
 
       $T_= ($fmtflags & TIMEFMT_ENGL) ? 'fnop' : 'T_';
@@ -487,12 +487,12 @@ class TimeFormat
       $days = ($hours-$h) / $hours_per_day;
       $str = ( $days > 0 ) ? self::echo_day( $days, $fmtflags ) : '';
 
-      if( $h > 0 ) //or $str == '' )
+      if ( $h > 0 ) //or $str == '' )
       {
-         if( $str > '' )
+         if ( $str > '' )
          {
             $str .= ' ';
-            if( !($fmtflags & TIMEFMT_SHORT) )
+            if ( !($fmtflags & TIMEFMT_SHORT) )
                $str .= $T_('and') . ' ';
          }
 
@@ -511,7 +511,7 @@ class TimeFormat
    // fmtflags: TIMEFMT_ENGL, TIMEFMT_SHORT, TIMEFMT_HTMLSPC, TIMEFMT_ZERO
    public static function echo_time_diff( $now, $time, $hours_per_day, $fmtflags=0, $zero_value=NO_VALUE )
    {
-      if( $time > 0 )
+      if ( $time > 0 )
       {
          $hours_diff = round( ($now - $time) / SECS_PER_HOUR );
          return self::_echo_time( $hours_diff, $hours_per_day, $fmtflags, $zero_value );
@@ -524,7 +524,7 @@ class TimeFormat
    public static function echo_onvacation( $days, $fmtflags=0, $zero_value=NO_VALUE )
    {
       $hours = round($days*24);
-      if( !($fmtflags & TIMEFMT_QUICK) && ( $hours > 0 || ($fmtflags & TIMEFMT_ZERO) ) )
+      if ( !($fmtflags & TIMEFMT_QUICK) && ( $hours > 0 || ($fmtflags & TIMEFMT_ZERO) ) )
          $fmt = ($fmtflags & TIMEFMT_ENGL) ? '%s left' : T_('%s left#vacation');
       else
          $fmt = '%s';
@@ -535,11 +535,11 @@ class TimeFormat
    // fmtflags: TIMEFMT_ENGL, TIMEFMT_SHORT
    public static function echo_byotype( $byotype, $fmtflags=0 )
    {
-      if( $fmtflags & TIMEFMT_SHORT )
+      if ( $fmtflags & TIMEFMT_SHORT )
          return substr($byotype, 0, 1); // J, C, F
 
       $T_= ($fmtflags & TIMEFMT_ENGL) ? 'fnop' : 'T_';
-      switch( (string)$byotype )
+      switch ( (string)$byotype )
       {
          case BYOTYPE_JAPANESE:
             return $T_('Japanese byoyomi');
@@ -562,21 +562,21 @@ class TimeFormat
       $T_= ($fmtflags & TIMEFMT_ENGL) ? 'fnop' : 'T_';
       $str = '';
 
-      if( $fmtflags & TIMEFMT_ADDTYPE )
+      if ( $fmtflags & TIMEFMT_ADDTYPE )
          $str .= self::echo_byotype($byotype, $fmtflags) . ': ';
 
-      if( $maintime > 0 )
+      if ( $maintime > 0 )
          $str .= self::echo_time($maintime, $fmtflags) . ' ';
 
-      if( $maintime <= 0 && $byotime <= 0 )
+      if ( $maintime <= 0 && $byotime <= 0 )
       {
          $str .= self::echo_hour(0, $fmtflags);
       }
-      else if( $byotype == BYOTYPE_FISCHER )
+      else if ( $byotype == BYOTYPE_FISCHER )
       {
-         if( $byotime > 0 )
+         if ( $byotime > 0 )
          {
-            if( $fmtflags & TIMEFMT_SHORT )
+            if ( $fmtflags & TIMEFMT_SHORT )
                $str .= '+ ' . self::echo_time($byotime, $fmtflags);
             else
                $str .= sprintf( $T_('with %s extra per move'), self::echo_time($byotime, $fmtflags) );
@@ -584,27 +584,27 @@ class TimeFormat
       }
       else // JAP|CAN
       {
-         if( $byotime <= 0 ) // absolute-time
+         if ( $byotime <= 0 ) // absolute-time
          {
-            if( !($fmtflags & TIMEFMT_SHORT) )
+            if ( !($fmtflags & TIMEFMT_SHORT) )
                $str .= $T_('without byoyomi');
          }
          else // has byo-time
          {
-            if( $maintime > 0 )
+            if ( $maintime > 0 )
                $str .= '+ ';
 
-            if( $fmtflags & TIMEFMT_SHORT )
+            if ( $fmtflags & TIMEFMT_SHORT )
             {
                $str .= self::echo_time($byotime, $fmtflags);
-               if( $byotype == BYOTYPE_JAPANESE )
+               if ( $byotype == BYOTYPE_JAPANESE )
                   $str .= " * $byoper";
                else //if( $byotype == BYOTYPE_CANADIAN )
                   $str .= " / $byoper";
             }
             else
             {
-               if( $byotype == BYOTYPE_JAPANESE )
+               if ( $byotype == BYOTYPE_JAPANESE )
                   $str .= sprintf( $T_('%s per move and %s extra periods'), self::echo_time($byotime, $fmtflags), $byoper );
                else //if( $byotype == BYOTYPE_CANADIAN )
                   $str .= sprintf( $T_('%s per %s stones'), self::echo_time($byotime, $fmtflags), $byoper );
@@ -619,20 +619,20 @@ class TimeFormat
    // fmtflags: TIMEFMT_ENGL, TIMEFMT_HTMLSPC, TIMEFMT_ZERO, TIMEFMT_ADDTYPE, TIMEFMT_NO_EXTRA
    public static function echo_time_remaining( $maintime, $byotype, $byotime, $byoper, $startbyotime, $startbyoper, $fmtflags=null )
    {
-      if( is_null($fmtflags) )
+      if ( is_null($fmtflags) )
          $fmtflags = TIMEFMT_ADDTYPE;
       $fmtflags |= TIMEFMT_SHORT; // default
       $T_= ($fmtflags & TIMEFMT_ENGL) ? 'fnop' : 'T_';
       $str = '';
 
-      if( $fmtflags & TIMEFMT_ADDTYPE )
+      if ( $fmtflags & TIMEFMT_ADDTYPE )
          $str .= self::echo_byotype($byotype, $fmtflags) . ': ';
 
       // remaining main/byoyomi-time
       $rem_time = $maintime;
-      if( $maintime <= 0 )
+      if ( $maintime <= 0 )
       {
-         if( $byotype == BYOTYPE_FISCHER || $byotime <= 0 ) // time is up
+         if ( $byotype == BYOTYPE_FISCHER || $byotime <= 0 ) // time is up
          {
             $str .= self::echo_time($maintime, $fmtflags | TIMEFMT_ZERO);
             return self::_replace_space($str, $fmtflags);
@@ -643,25 +643,25 @@ class TimeFormat
 
       $str .= self::echo_time($rem_time, $fmtflags) . ' ';
 
-      if( $startbyotime <= 0 ) // absolute time
+      if ( $startbyotime <= 0 ) // absolute time
       {
-         if( !($fmtflags & TIMEFMT_NO_EXTRA) )
+         if ( !($fmtflags & TIMEFMT_NO_EXTRA) )
             $str .= '(-)';
          return self::_replace_space($str, $fmtflags);
       }
 
       // ignore invalid time-values (M=0, B>0); should not occur esp. after add-time
-      if( $byotype == BYOTYPE_CANADIAN && $maintime <= 0 && $byotime > 0 && $byoper > 0 )
+      if ( $byotype == BYOTYPE_CANADIAN && $maintime <= 0 && $byotime > 0 && $byoper > 0 )
          $str .= "/ $byoper ";
 
       // extra-time
-      if( !($fmtflags & TIMEFMT_NO_EXTRA) )
+      if ( !($fmtflags & TIMEFMT_NO_EXTRA) )
       {
-         if( $byotype == BYOTYPE_FISCHER )
+         if ( $byotype == BYOTYPE_FISCHER )
             $str .= '(+ ' . self::echo_time($startbyotime, $fmtflags) . ')';
          else // JAP | CAN
          {
-            if( $byotype == BYOTYPE_CANADIAN )
+            if ( $byotype == BYOTYPE_CANADIAN )
                $rem_byoper = $startbyoper;
             else //if( $byotype == BYOTYPE_JAPANESE )
                $rem_byoper = ( $byoper >= 0 ) ? $byoper : $startbyoper;
@@ -677,7 +677,7 @@ class TimeFormat
    // \internal
    private static function _replace_space( $str, $opts )
    {
-      if( !($opts & TIMEFMT_QUICK) && ($opts & TIMEFMT_HTMLSPC) )
+      if ( !($opts & TIMEFMT_QUICK) && ($opts & TIMEFMT_HTMLSPC) )
          return str_replace( ' ', '&nbsp;', trim($str) );
       else
          return trim($str);
@@ -690,21 +690,21 @@ class TimeFormat
    public static function parse_time_days_hours( $str )
    {
       $str = strtolower(trim($str));
-      if( (string)$str == '' )
+      if ( (string)$str == '' )
          return 0;
-      elseif( is_numeric($str) && $str >= 0 )
+      elseif ( is_numeric($str) && $str >= 0 )
          return (int)$str;
 
       $hours = 0;
       $parts = preg_split( "/\s+/", strtolower(trim($str)) );
-      foreach( $parts as $part )
+      foreach ( $parts as $part )
       {
          unset($matches);
-         if( !preg_match("/^(\d+)(h|d)?$/", $part, $matches) )
+         if ( !preg_match("/^(\d+)(h|d)?$/", $part, $matches) )
             return NULL; // error
-         if( $matches[2] == 'd' )
+         if ( $matches[2] == 'd' )
             $hours += 24 * (int)$matches[1];
-         elseif( $matches[2] == 'h' || (string)$matches[2] == '' )
+         elseif ( $matches[2] == 'h' || (string)$matches[2] == '' )
             $hours += (int)$matches[1];
       }
       return $hours;

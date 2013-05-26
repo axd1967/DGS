@@ -31,10 +31,10 @@ $GLOBALS['ThePage'] = new Page('ShapeEdit');
    connect2mysql();
 
    $logged_in = who_is_logged( $player_row);
-   if( !$logged_in )
+   if ( !$logged_in )
       error('login_if_not_logged_in', 'edit_shape');
    $my_id = $player_row['ID'];
-   if( $my_id <= GUESTS_ID_MAX )
+   if ( $my_id <= GUESTS_ID_MAX )
       error('not_allowed_for_guest', 'edit_shape');
    ConfigBoard::load_config_board($my_id); // load for displaying board
 
@@ -49,19 +49,19 @@ $GLOBALS['ThePage'] = new Page('ShapeEdit');
 
    // read URL-args
    $shape_id = (int)get_request_arg('shape');
-   if( $shape_id < 0 )
+   if ( $shape_id < 0 )
       $shape_id = 0;
 
    // init new shape
    $copy_err = 0;
-   if( $shape_id )
+   if ( $shape_id )
    {
       $shape = Shape::load_shape( $shape_id );
-      if( $shape_id && is_null($shape) )
+      if ( $shape_id && is_null($shape) )
          error('unknown_shape', "edit_shape.find_shape($shape_id)");
 
       // check shape-author -> enforce NEW-shape if another user
-      if( $shape->uid != $my_id )
+      if ( $shape->uid != $my_id )
       {
          $copy_err = sprintf( T_('Create new shape (with Preview), because [%s] is author of shape %s!'),
             $shape->User->Handle, '#'.$shape_id );
@@ -78,32 +78,32 @@ $GLOBALS['ThePage'] = new Page('ShapeEdit');
 
    // check + parse edit-form
    list( $vars, $edits, $errors ) = parse_edit_form( $shape );
-   if( $copy_err )
+   if ( $copy_err )
       array_unshift( $errors, $copy_err );
 
    // ---------- PROCESS ACTIONS -----------------------------------
 
-   if( count($errors) == 0 )
+   if ( count($errors) == 0 )
    {
-      if( @$_REQUEST['swcol'] ) // switch colors
+      if ( @$_REQUEST['swcol'] ) // switch colors
       {
          $arr_xy = GameSnapshot::parse_stones_snapshot( $shape->Size, $shape->Snapshot, GOBS_BLACK, GOBS_WHITE );
          $goban = Goban::create_goban_from_stones_snapshot( $shape->Size, $arr_xy );
          $goban->switch_colors();
          $vars['snapshot'] = GameSnapshot::make_game_snapshot( $shape->Size, $goban, /*with-dead*/false );
-         if( $shape->Snapshot != $vars['snapshot'] )
+         if ( $shape->Snapshot != $vars['snapshot'] )
             $edits[] = T_('Snapshot');
          $edits = array_unique($edits);
          $shape->Snapshot = $vars['snapshot'];
       }
-      elseif( @$_REQUEST['save'] ) // save shape
+      elseif ( @$_REQUEST['save'] ) // save shape
       {
-         if( $shape->persist() )
+         if ( $shape->persist() )
             jump_to("edit_shape.php?shape={$shape->ID}".URI_AMP."sysmsg=".urlencode(T_('Shape saved!')));
       }
    }
 
-   if( isset($arr_sizes[$shape->Size]) && $shape->Snapshot )
+   if ( isset($arr_sizes[$shape->Size]) && $shape->Snapshot )
    {
       $view_shape = ShapeControl::build_view_shape($shape, $stone_size);
       $url_snapshot = urlencode( GameSnapshot::build_extended_snapshot(
@@ -127,7 +127,7 @@ $GLOBALS['ThePage'] = new Page('ShapeEdit');
    $form->add_hidden('snapshot', $shape->Snapshot );
    $form->add_hidden('shape', $shape_id);
 
-   if( !is_null($errors) && count($errors) )
+   if ( !is_null($errors) && count($errors) )
    {
       $form->add_row( array(
             'DESCRIPTION', T_('Errors'),
@@ -141,11 +141,11 @@ $GLOBALS['ThePage'] = new Page('ShapeEdit');
    $form->add_row( array(
          'DESCRIPTION', T_('Author'),
          'TEXT', $shape->User->user_reference(), ));
-   if( $shape->Created )
+   if ( $shape->Created )
       $form->add_row( array(
             'DESCRIPTION', T_('Created'),
             'TEXT', formatDate($shape->Created), ));
-   if( $shape->Lastchanged )
+   if ( $shape->Lastchanged )
       $form->add_row( array(
             'DESCRIPTION', T_('Last changed'),
             'TEXT', formatDate($shape->Lastchanged), ));
@@ -223,20 +223,20 @@ function parse_edit_form( &$shape )
 
    $old_vals = array() + $vars; // copy to determine edit-changes
    // read URL-vals into vars
-   foreach( $vars as $key => $val )
+   foreach ( $vars as $key => $val )
       $vars[$key] = get_request_arg( $key, $val );
    // handle checkboxes having no key/val in _POST-hash
-   if( $is_posted )
+   if ( $is_posted )
    {
-      foreach( array( 'flag_public' ) as $key )
+      foreach ( array( 'flag_public' ) as $key )
          $vars[$key] = get_request_arg( $key, false );
    }
 
    // special handling, parsing snapshot/size/flags from extended-snapshot
-   if( !@$_REQUEST['size'] && @$_REQUEST['snapshot'] )
+   if ( !@$_REQUEST['size'] && @$_REQUEST['snapshot'] )
    {
       $arr = GameSnapshot::parse_extended_snapshot($_REQUEST['snapshot']);
-      if( is_array($arr) && ( $arr['Snapshot'] != $_REQUEST['snapshot'] ) )
+      if ( is_array($arr) && ( $arr['Snapshot'] != $_REQUEST['snapshot'] ) )
       {
          $vars['size'] = (int)$arr['Size'];
          $vars['snapshot'] = $arr['Snapshot'];
@@ -248,19 +248,19 @@ function parse_edit_form( &$shape )
    //if( $is_posted )
    {
       $new_value = trim($vars['name']);
-      if( strlen($new_value) < 3 )
+      if ( strlen($new_value) < 3 )
          $errors[] = T_('Shape Name is missing or too short.');
-      elseif( strlen($new_value) > 40 )
+      elseif ( strlen($new_value) > 40 )
          $errors[] = sprintf( T_('Shape Name is too long (max. %s chars).'), 40);
-      elseif( (!$shape->ID || $shape->Name != $new_value) && ShapeControl::is_shape_name_used($new_value) )
+      elseif ( (!$shape->ID || $shape->Name != $new_value) && ShapeControl::is_shape_name_used($new_value) )
          $errors[] = sprintf( T_('Shape Name [%s] is already used, but must be unique.'), $new_value);
       else
          $shape->Name = $new_value;
 
       $new_value = trim($vars['size']);
-      if( (string)$new_value == '' )
+      if ( (string)$new_value == '' )
          $errors[] = T_('Missing Size');
-      elseif( !isset($arr_sizes[$new_value]) )
+      elseif ( !isset($arr_sizes[$new_value]) )
          $errors[] = sprintf( T_('Invalid size [%s]'), $new_value );
       else
          $shape->Size = (int)$new_value;
@@ -271,28 +271,28 @@ function parse_edit_form( &$shape )
       $shape->Notes = trim($vars['notes']);
 
       $new_value = $vars['snapshot'];
-      if( (string)$new_value != '' )
+      if ( (string)$new_value != '' )
       {
-         if( (string)($bad_chars = GameSnapshot::check_snapshot($new_value)) != '' )
+         if ( (string)($bad_chars = GameSnapshot::check_snapshot($new_value)) != '' )
             $errors[] = sprintf( T_('Snapshot for shape contains invalid characters [%s].'), $bad_chars );
          else
             $shape->Snapshot = $new_value;
 
          // view shape even if with error
-         if( $shape->Size > 0 && (string)($ill_coords = GameSnapshot::check_illegal_positions($shape->Size, $new_value, /*suicide*/false)) != '' )
+         if ( $shape->Size > 0 && (string)($ill_coords = GameSnapshot::check_illegal_positions($shape->Size, $new_value, /*suicide*/false)) != '' )
             $errors[] = sprintf( T_('Snapshot for shape contains illegal positions at [%s].'), $ill_coords );
       }
-      if( (string)$shape->Snapshot == '' )
+      if ( (string)$shape->Snapshot == '' )
          $errors[] = T_('Missing Snapshot');
 
 
       // determine edits
-      if( $old_vals['name'] != $shape->Name ) $edits[] = T_('Shape Name');
-      if( $old_vals['size'] != $shape->Size ) $edits[] = T_('Size');
-      if( (bool)$old_vals['flag_public'] != (bool)($shape->Flags & SHAPE_FLAG_PUBLIC)) $edits[] = T_('Public#shape');
-      if( (bool)$old_vals['flag_playcol'] != (bool)($shape->Flags & SHAPE_FLAG_PLAYCOLOR_W)) $edits[] = T_('Play Color#shape');
-      if( $old_vals['notes'] != $shape->Notes ) $edits[] = T_('Notes');
-      if( $old_vals['snapshot'] != $shape->Snapshot ) $edits[] = T_('Snapshot');
+      if ( $old_vals['name'] != $shape->Name ) $edits[] = T_('Shape Name');
+      if ( $old_vals['size'] != $shape->Size ) $edits[] = T_('Size');
+      if ( (bool)$old_vals['flag_public'] != (bool)($shape->Flags & SHAPE_FLAG_PUBLIC)) $edits[] = T_('Public#shape');
+      if ( (bool)$old_vals['flag_playcol'] != (bool)($shape->Flags & SHAPE_FLAG_PLAYCOLOR_W)) $edits[] = T_('Play Color#shape');
+      if ( $old_vals['notes'] != $shape->Notes ) $edits[] = T_('Notes');
+      if ( $old_vals['snapshot'] != $shape->Snapshot ) $edits[] = T_('Snapshot');
    }
 
    return array( $vars, array_unique($edits), $errors );

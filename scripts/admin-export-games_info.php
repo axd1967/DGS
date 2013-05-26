@@ -33,20 +33,20 @@ require_once 'include/game_functions.php';
    // USAGE: Adjust query below to fit your needs!!
 
    // This script should not run via webserver, but from command-line
-   if( isset($_SERVER["SERVER_NAME"]) )
+   if ( isset($_SERVER["SERVER_NAME"]) )
       exit;
 
    // check args
    $errors = array();
-   if( $argc == 2 )
+   if ( $argc == 2 )
    {
       $offset = $argv[1];
-      if( !is_numeric($offset) || $offset < 10 || $offset > 1000 )
+      if ( !is_numeric($offset) || $offset < 10 || $offset > 1000 )
          $errors[] = "Bad offset '$offset', allowed are integers between [10..1000]";
    }
    else
       $errors[] = 'Bad arguments';
-   if( count($errors) )
+   if ( count($errors) )
    {
       $err_text = implode('], [', $errors);
       echo "ERROR: [$err_text]\n";
@@ -61,7 +61,7 @@ require_once 'include/game_functions.php';
    connect2mysql();
 
    $out_dir = "GAMESINFO"; // output-directory
-   if( !file_exists($out_dir) )
+   if ( !file_exists($out_dir) )
       create_dir( $out_dir );
 
    $qsql = new QuerySQL(
@@ -84,19 +84,19 @@ require_once 'include/game_functions.php';
    $filehandle = null;
    $curr_year = -1;
    $curr_offset = 0;
-   while( true )
+   while ( true )
    {
       $result = db_query( 'export_gamesinfo.find_games', "$query LIMIT $curr_offset, $offset" );
 
       $rows = @mysql_num_rows($result);
-      if( $rows <= 0 )
+      if ( $rows <= 0 )
          break;
       echo "There are $rows games to export from offset $offset ...\n";
 
-      while( $row = mysql_fetch_array( $result ) )
+      while ( $row = mysql_fetch_array( $result ) )
       {
          $cnt++;
-         if( !($cnt % 20) )
+         if ( !($cnt % 20) )
          {
             $timediff = time() - $begin_secs;
             echo "Retrieving game $gid ($cnt / $rows) ... needed $timediff secs so far ...\n";
@@ -119,7 +119,7 @@ function write_game_info( &$curr_year, $row )
    global $filehandle, $out_dir;
 
    $year = $row['Year'];
-   if( $year != $curr_year )
+   if ( $year != $curr_year )
    {
       close_file();
       $filename = sprintf( "%s/DGS-games_info-%04d.csv", $out_dir, $year );
@@ -134,14 +134,14 @@ function write_game_info( &$curr_year, $row )
 function close_file()
 {
    global $filehandle;
-   if( !is_null($filehandle) )
+   if ( !is_null($filehandle) )
       fclose($filehandle);
    $filehandle = null;
 }
 
 function build_game_info( $row=null )
 {
-   if( is_null($row) ) // headers
+   if ( is_null($row) ) // headers
    {
       return "GameID;Starttime;EndTime;Size;Moves;Rated;GameType;Ruleset;Handicap;Komi;Score;BlackID;WhiteID;BlackStartRating;WhiteStartRating;BlackEndRating;WhiteEndRating;TimeLimit\r\n";
    }
@@ -174,7 +174,7 @@ function build_game_info( $row=null )
 function create_dir( $path )
 {
    // NOTE: PHP4 don't have recursive-parameter yet
-   if( !@mkdir($path) )
+   if ( !@mkdir($path) )
       error('assert', "export_gamesinfo.create_dir($path)");
 }
 ?>

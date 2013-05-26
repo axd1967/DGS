@@ -39,9 +39,9 @@ function find_category_box_text($cat)
    connect2mysql();
 
    $logged_in = who_is_logged( $player_row );
-   if( !$logged_in )
+   if ( !$logged_in )
       error('login_if_not_logged_in', 'edit_bio');
-   if( (@$player_row['AdminOptions'] & ADMOPT_DENY_EDIT_BIO) )
+   if ( (@$player_row['AdminOptions'] & ADMOPT_DENY_EDIT_BIO) )
       error('edit_bio_denied', 'edit_bio');
 
    $my_id = $player_row['ID'];
@@ -71,7 +71,7 @@ function find_category_box_text($cat)
    $page = "edit_bio.php";
    $title = T_("Edit biographical info");
    $othertitle = T_("Edit biographical order");
-   if( $editorder ) {
+   if ( $editorder ) {
       $str = $title;
       $title = $othertitle;
       $othertitle = $str;
@@ -87,27 +87,27 @@ function find_category_box_text($cat)
    $text_height = 4;
 
    $moveurl = 'change_bio.php';
-   if( !$editorder )
+   if ( !$editorder )
       $bio_form = new Form( 'bioform', $moveurl, FORM_POST );
    else
       $bio_table = new Table_info('biomove');
    $moveurl .= '?';
 
-   while( $row = mysql_fetch_assoc( $result ) )
+   while ( $row = mysql_fetch_assoc( $result ) )
    {
       $bid = $row['ID'];
       $other = $row['Category'];
       $cat = find_category_box_text($other);
-      if( $cat )
+      if ( $cat )
          $other = '';
       else
       {
-         if( substr( $other, 0, 1) == '=' )
+         if ( substr( $other, 0, 1) == '=' )
             $other = substr( $other, 1);
          $other = make_html_safe($other, INFO_HTML);
       }
 
-      if( !$editorder )
+      if ( !$editorder )
       { //edit bio fields
          // adapt text-height
          $linecount = substr_count( $row['Text'], "\n" );
@@ -147,10 +147,10 @@ function find_category_box_text($cat)
    } //while($row)
    mysql_free_result($result);
 
-   if( !$editorder )
+   if ( !$editorder )
    {
       // And now some empty ones:
-      for($i=1; $i <= USER_BIO_ADDENTRIES; $i++)
+      for ($i=1; $i <= USER_BIO_ADDENTRIES; $i++)
       {
          $bio_form->add_row( array(
                'CELL', 0, 'class=NewHeader',
@@ -178,9 +178,9 @@ function find_category_box_text($cat)
 
 
    $menu_array = array();
-   if( !$editorder )
+   if ( !$editorder )
       $page = ( $row_cnt > 1 ) ? make_url($page, array( 'editorder' => '1') ) : '';
-   if( $page )
+   if ( $page )
       $menu_array[$othertitle] = $page;
 
    end_page(@$menu_array);

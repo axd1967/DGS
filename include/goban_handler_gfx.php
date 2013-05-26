@@ -37,7 +37,7 @@ require_once 'include/classlib_userconfig.php'; // consts SMOOTH_EDGE
   * \brief Goban-writer writing standard DGS (similar to that on the game page)
   */
 
-if( !defined('EDGE_SIZE') )
+if ( !defined('EDGE_SIZE') )
    define('EDGE_SIZE', 10);
 
 class GobanHandlerGfxBoard
@@ -66,7 +66,7 @@ class GobanHandlerGfxBoard
       $this->rawtext = $rawtext;
 
       global $player_row;
-      if( @$player_row['Stonesize'] )
+      if ( @$player_row['Stonesize'] )
       {
          $this->stone_size = $player_row['Stonesize'];
          $this->coord_borders = $player_row['Boardcoords'];
@@ -78,14 +78,14 @@ class GobanHandlerGfxBoard
          $this->coord_borders = 0; // use smooth-edge
          $this->woodcolor = 1;
       }
-      if( is_numeric($stone_size) )
+      if ( is_numeric($stone_size) )
          $this->stone_size = $stone_size;
    }//__construct
 
    // static, init in static-method to fix include-priority (avoids declaring of this file in "client" before classlib_goban.php)
    private static function init_statics()
    {
-      if( is_null(self::$MAP_TERRITORY_MARKERS) )
+      if ( is_null(self::$MAP_TERRITORY_MARKERS) )
       {
          self::$MAP_TERRITORY_MARKERS = array(
             GOBM_TERR_B       => 'b',
@@ -95,7 +95,7 @@ class GobanHandlerGfxBoard
          );
       }
 
-      if( is_null(self::$MAP_FORM_MARKERS) )
+      if ( is_null(self::$MAP_FORM_MARKERS) )
       {
          self::$MAP_FORM_MARKERS = array(
             GOBM_CIRCLE    => 'c',
@@ -105,7 +105,7 @@ class GobanHandlerGfxBoard
          );
       }
 
-      if( is_null(self::$MAP_BOARDLINES) )
+      if ( is_null(self::$MAP_BOARDLINES) )
       {
          /*
           *  SE  SWE  SW             ul u ur
@@ -165,12 +165,12 @@ class GobanHandlerGfxBoard
       // init board-layout options
       $opts_coords = ($skeleton) ? 0 : $goban->getOptionsCoords();
       $smooth_edge = ($skeleton) ? 0 : ( ($this->coord_borders & SMOOTH_EDGE) && ($this->woodcolor < 10) );
-      if( $smooth_edge )
+      if ( $smooth_edge )
       {
          $border_start = 140 - ( $opts_coords & GOBB_WEST ? $coord_width : 0 );
          $border_imgs = ceil( ($size_x * $stone_size - $border_start) / 150 ) - 1;
          $border_rem = $size_x * $stone_size - $border_start - 150 * $border_imgs;
-         if( $border_imgs < 0 )
+         if ( $border_imgs < 0 )
             $border_rem = $size_x * $stone_size;
 
          $edge_coord = '<td><img alt=" " height='.EDGE_SIZE.' src="'.$base_path.'images/blank.gif" width=' . $coord_width . "></td>\n";
@@ -184,9 +184,9 @@ class GobanHandlerGfxBoard
 
       $coord_alt = '.gif" alt="';
       $coord_end = "\"></td>\n";
-      if( $opts_coords & (GOBB_WEST | GOBB_EAST) )
+      if ( $opts_coords & (GOBB_WEST | GOBB_EAST) )
          $coord_start_number = "<td class=brdn><img class=brdn src=\"$base_path$stone_size/c";
-      if( $opts_coords & (GOBB_NORTH | GOBB_SOUTH) )
+      if ( $opts_coords & (GOBB_NORTH | GOBB_SOUTH) )
       {
          $coord_start_letter = "<td class=brdl><img class=brdl src=\"$base_path$stone_size/c";
 
@@ -203,11 +203,11 @@ class GobanHandlerGfxBoard
 
       $borders = $opts_coords;
       $start_col = 0;
-      if( ($goban->size_x > $goban->max_x && !($borders & GOBB_WEST)) )
+      if ( ($goban->size_x > $goban->max_x && !($borders & GOBB_WEST)) )
          $start_col = $goban->size_x - $goban->max_x;
 
       $start_row = $goban->size_y;
-      if( ($goban->size_y > $goban->max_y && !($borders & GOBB_NORTH)) || ($goban->size_y < $goban->max_y ) )
+      if ( ($goban->size_y > $goban->max_y && !($borders & GOBB_NORTH)) || ($goban->size_y < $goban->max_y ) )
          $start_row = $goban->max_y;
 
 
@@ -220,7 +220,7 @@ class GobanHandlerGfxBoard
        **/
       global $woodbgcolors;
       $styles = array( "width:{$table_width}px;" );
-      if( $this->woodcolor > 10 )
+      if ( $this->woodcolor > 10 )
       {
          $bcol = $woodbgcolors[$this->woodcolor - 10];
          $woodstring = ' bgcolor="' . $bcol . '"';
@@ -249,22 +249,22 @@ class GobanHandlerGfxBoard
       $this->result[] = "<table{$table_id} class=Goban" . $woodstring . $cell_size_fix
          . ' style="' . implode(' ', $styles) . '"><tbody>';
 
-      if( $opts_coords & GOBB_NORTH )
+      if ( $opts_coords & GOBB_NORTH )
          $this->draw_coord_row( $start_col, $coord_start_letter, $coord_alt, $coord_end, $coord_left, $coord_right );
 
-      if( $smooth_edge )
+      if ( $smooth_edge )
          $this->draw_edge_row( $goban, $edge_start.'u', $edge_coord, $border_start, $border_imgs, $border_rem );
 
-      for( $rownr = $start_row, $y = 1; !$skeleton && $y <= $goban->max_y; $rownr--, $y++ )
+      for ( $rownr = $start_row, $y = 1; !$skeleton && $y <= $goban->max_y; $rownr--, $y++ )
       {
          $out = '<tr>';
 
-         if( $opts_coords & GOBB_WEST )
+         if ( $opts_coords & GOBB_WEST )
             $out .= $coord_start_number . $rownr . $coord_alt . $rownr .$coord_end;
-         if( $smooth_edge )
+         if ( $smooth_edge )
             $out .= '<td>' . $edge_vert . "l.gif\"></td>\n";
 
-         for( $x = 1; $x <= $goban->max_x; $x++ )
+         for ( $x = 1; $x <= $goban->max_x; $x++ )
          {
             $arr = $goban->getValue( $x, $y );
             $cell_id = ($this->enable_id)
@@ -275,7 +275,7 @@ class GobanHandlerGfxBoard
             $background = ($link) ? ' BoardLink' : '';
 
             $image = $this->write_image( $x, $y, $arr[GOBMATRIX_VALUE], $arr[GOBMATRIX_LABEL], $link );
-            if( $image )
+            if ( $image )
                $out .= "<td{$cell_id} class=\"brdx{$background}\">$image</td>\n";
             else
             {
@@ -285,19 +285,19 @@ class GobanHandlerGfxBoard
             }
          }//for x
 
-         if( $smooth_edge )
+         if ( $smooth_edge )
             $out .= '<td>' . $edge_vert . "r.gif\"></td>\n";
-         if( $opts_coords & GOBB_EAST )
+         if ( $opts_coords & GOBB_EAST )
             $out .= $coord_start_number . $rownr . $coord_alt . $rownr .$coord_end;
 
          $out .= "</tr>\n";
          $this->result[] = $out;
       }//for y
 
-      if( $smooth_edge )
+      if ( $smooth_edge )
          $this->draw_edge_row( $goban, $edge_start.'d', $edge_coord, $border_start, $border_imgs, $border_rem );
 
-      if( $opts_coords & GOBB_SOUTH )
+      if ( $opts_coords & GOBB_SOUTH )
          $this->draw_coord_row( $start_col, $coord_start_letter, $coord_alt, $coord_end, $coord_left, $coord_right );
 
       $this->result[] = "</tbody></table>\n";
@@ -309,7 +309,7 @@ class GobanHandlerGfxBoard
          ? "<br>\n" . make_html_safe($goban->BoardText, true)
          : '';
 
-      if( $skeleton )
+      if ( $skeleton )
          $goban_str = '';
       else
       {
@@ -329,7 +329,7 @@ class GobanHandlerGfxBoard
    // \internal
    private function write_image( $x, $y, $value, $label='', $link=null )
    {
-      if( !($value & (GOBB_BITMASK|GOBS_BITMASK|GOBO_HOSHI|GOBM_BITMASK)) )
+      if ( !($value & (GOBB_BITMASK|GOBS_BITMASK|GOBO_HOSHI|GOBM_BITMASK)) )
          return ''; // TODO bug? set everything to EMPTY board-cell
 
       // layers
@@ -345,50 +345,50 @@ class GobanHandlerGfxBoard
       // mapping and prioritize goban-layer-values to actual images available on DGS
       // starting with most special ... ending with most generalized images
       $type = ''; // unknown mapping
-      if( $lMarker == GOBM_NUMBER && $isStoneBW )
+      if ( $lMarker == GOBM_NUMBER && $isStoneBW )
       {
          $type = ($lStone == GOBS_BLACK) ? 'b' : 'w';
-         if( $label >= 1 && $label <= 500 )
+         if ( $label >= 1 && $label <= 500 )
             $type .= (int)$label;
       }
-      elseif( $lMarker == GOBM_MARK && $isStoneBW )
+      elseif ( $lMarker == GOBM_MARK && $isStoneBW )
       {
          $type = ($lStone == GOBS_BLACK) ? 'b' : 'w';
          $type .= 'm';
       }
-      elseif( $lMarker == GOBM_TERR_B && $lStone == GOBS_WHITE )
+      elseif ( $lMarker == GOBM_TERR_B && $lStone == GOBS_WHITE )
          $type = 'wb';
-      elseif( $lMarker == GOBM_TERR_W && $lStone == GOBS_BLACK )
+      elseif ( $lMarker == GOBM_TERR_W && $lStone == GOBS_BLACK )
          $type = 'bw';
-      elseif( ($territoryMarker = @self::$MAP_TERRITORY_MARKERS[$lMarker]) != '' && $lStone == 0 && $bLineType != '' )
+      elseif ( ($territoryMarker = @self::$MAP_TERRITORY_MARKERS[$lMarker]) != '' && $lStone == 0 && $bLineType != '' )
          $type = $bLineType . $territoryMarker;
-      elseif( ($formMarker = @self::$MAP_FORM_MARKERS[$lMarker]) != '' && $isStoneBW )
+      elseif ( ($formMarker = @self::$MAP_FORM_MARKERS[$lMarker]) != '' && $isStoneBW )
       {
          $type = ($lStone == GOBS_BLACK) ? 'b' : 'w';
          $type .= $formMarker;
       }
-      elseif( ($formMarker = @self::$MAP_FORM_MARKERS[$lMarker]) != '' && $lStone == 0 && $lHoshi )
+      elseif ( ($formMarker = @self::$MAP_FORM_MARKERS[$lMarker]) != '' && $lStone == 0 && $lHoshi )
          $type = 'h' . $formMarker;
-      elseif( $lMarker == 0 && $isStoneBW )
+      elseif ( $lMarker == 0 && $isStoneBW )
          $type = ($lStone == GOBS_BLACK) ? 'b' : 'w';
-      elseif( $lMarker == 0 && $lHoshi )
+      elseif ( $lMarker == 0 && $lHoshi )
          $type = 'h';
-      elseif( $lMarker == GOBM_LETTER )
+      elseif ( $lMarker == GOBM_LETTER )
       {
-         if( $label >= 'a' && $label <= 'z' )
+         if ( $label >= 'a' && $label <= 'z' )
             $type = 'l' . $label;
       }
-      elseif( ($formMarker = @self::$MAP_FORM_MARKERS[$lMarker]) != '' && $lStone == 0 && $bLineType != '' )
+      elseif ( ($formMarker = @self::$MAP_FORM_MARKERS[$lMarker]) != '' && $lStone == 0 && $bLineType != '' )
          $type = $bLineType . $formMarker;
-      elseif( $lMarker == 0 && $lStone == 0 )
+      elseif ( $lMarker == 0 && $lStone == 0 )
          $type = $this->getBoardLineType($lBoard, false);
 
-      if( (string)$type != '' )
+      if ( (string)$type != '' )
       {
          global $base_path;
          $imgAttr = ($this->imageAttribute) ? ' '.sprintf( $this->imageAttribute, $x, $y ) : '';
          $out = "<img name=\"x{$x}y{$y}\" class=brdx src=\"{$base_path}{$this->stone_size}/$type.gif\" alt=\"$alt\"$imgAttr>";
-         if( !is_null($link) )
+         if ( !is_null($link) )
             $out = "<a href=\"$link\" target=\"_blank\">$out</a>";
          return $out;
       }
@@ -400,9 +400,9 @@ class GobanHandlerGfxBoard
    private function getBoardLineType( $board_lines, $mixed=true )
    {
       $board_lines &= GOBB_BITMASK;
-      if( !$mixed )
+      if ( !$mixed )
       {
-         if( $board_lines == (GOBB_NORTH|GOBB_SOUTH) )
+         if ( $board_lines == (GOBB_NORTH|GOBB_SOUTH) )
             return 'du';
       }
 
@@ -415,18 +415,18 @@ class GobanHandlerGfxBoard
    {
       $out = "<tr>\n";
 
-      if( $coord_left )
+      if ( $coord_left )
          $out .= $coord_left;
 
       $letter = chr(ord('a') + $start_val);
-      for( $colnr=1; $colnr <= $this->goban->max_x; $colnr++ )
+      for ( $colnr=1; $colnr <= $this->goban->max_x; $colnr++ )
       {
-         if( $letter == 'i' ) $letter++;
+         if ( $letter == 'i' ) $letter++;
          $out .= $coord_start_letter . $letter . $coord_alt . $letter . $coord_end;
          $letter++;
       }
 
-      if( $coord_right )
+      if ( $coord_right )
          $out .= $coord_right;
 
       $out .= "</tr>\n";
@@ -442,22 +442,22 @@ class GobanHandlerGfxBoard
       $size_x = $this->goban->max_x;
       $opts_coords = $goban->getOptionsCoords();
 
-      if( $opts_coords & GOBB_WEST )
+      if ( $opts_coords & GOBB_WEST )
          $out .= $edge_coord;
 
       $out .= '<td>' . $edge_start . 'l.gif" width='.EDGE_SIZE.'>' . "</td>\n";
 
       $out .= '<td colspan=' . $size_x . ' width=' . $size_x * $this->stone_size . '>';
 
-      if( $border_imgs >= 0 )
+      if ( $border_imgs >= 0 )
          $out .= $edge_start . '.gif" width=' . $border_start . '>';
-      for($i=0; $i<$border_imgs; $i++ )
+      for ($i=0; $i<$border_imgs; $i++ )
          $out .= $edge_start . '.gif" width=150>';
       $out .= $edge_start . '.gif" width=' . $border_rem . '>';
 
       $out .= "</td>\n" . '<td>' . $edge_start . 'r.gif" width='.EDGE_SIZE.'>' . "</td>\n";
 
-      if( $opts_coords & GOBB_EAST )
+      if ( $opts_coords & GOBB_EAST )
          $out .= $edge_coord;
 
       $out .= "</tr>\n";

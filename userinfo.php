@@ -36,7 +36,7 @@ $GLOBALS['ThePage'] = new Page('UserInfo');
 
    $logged_in = who_is_logged( $player_row);
 
-   if( !$logged_in )
+   if ( !$logged_in )
       error('login_if_not_logged_in', 'userinfo');
 
    $my_id = $player_row['ID'];
@@ -44,9 +44,9 @@ $GLOBALS['ThePage'] = new Page('UserInfo');
    $is_game_admin = (@$player_row['admin_level'] & ADMIN_GAME);
 
    get_request_user( $uid, $uhandle, true);
-   if( $uhandle )
+   if ( $uhandle )
       $where = "Handle='".mysql_addslashes($uhandle)."'";
-   elseif( $uid > 0 )
+   elseif ( $uid > 0 )
       $where = "ID=$uid";
    else
       $where = "ID=$my_id";
@@ -62,7 +62,7 @@ $GLOBALS['ThePage'] = new Page('UserInfo');
       .",UNIX_TIMESTAMP(LastMove) AS X_LastMove"
       ." FROM Players WHERE $where" );
 
-   if( !$row )
+   if ( !$row )
       error('unknown_user', "userinfo.find_player2($uid,$uhandle)");
    $uid = (int)$row['ID'];
    $user_handle = $row['Handle'];
@@ -74,7 +74,7 @@ $GLOBALS['ThePage'] = new Page('UserInfo');
       "SELECT * FROM Bio WHERE uid=$uid ORDER BY SortOrder");
    $count_bio = @mysql_num_rows($bio_result);
 
-   if( $hide_bio )
+   if ( $hide_bio )
    {
       mysql_free_result($bio_result);
       $bio_result = NULL; // hide bio
@@ -82,13 +82,13 @@ $GLOBALS['ThePage'] = new Page('UserInfo');
 
    $count_mpg_run = 0; // count MP-games of user
    $show_mpg = ( $my_info || $is_admin || $is_game_admin );
-   if( $show_mpg )
+   if ( $show_mpg )
    {
       $gp_row = mysql_single_fetch( "userinfo.count_gameplayer($uid)",
          "SELECT COUNT(*) AS X_Count " .
          "FROM GamePlayers AS GP INNER JOIN Games AS G ON G.ID=GP.gid " .
          "WHERE GP.uid=$uid AND G.Status ".IS_RUNNING_GAME." LIMIT 1" ); // no fair-komi for MPG
-      if( $gp_row )
+      if ( $gp_row )
          $count_mpg_run = (int)$gp_row['X_Count'];
    }
 
@@ -104,7 +104,7 @@ $GLOBALS['ThePage'] = new Page('UserInfo');
    echo "<h3 class=Header>$title</h3>\n";
 
    $fmt_block = "<p><font color=\"red\"><b>( %s )</b></font><br>\n";
-   if( (@$row['AdminOptions'] & ADMOPT_DENY_LOGIN) )
+   if ( (@$row['AdminOptions'] & ADMOPT_DENY_LOGIN) )
       echo sprintf( $fmt_block, T_('Account blocked - Login denied') );
 
    $run_link = "show_games.php?uid=$uid";
@@ -146,7 +146,7 @@ $GLOBALS['ThePage'] = new Page('UserInfo');
       $itable1 = new Table_info('user');
       $itable2 = ($twoCols) ? new Table_info('user') : $itable1;
 
-      if( @$row['Type'] )
+      if ( @$row['Type'] )
          $itable1->add_sinfo( T_('Type'), build_usertype_text(@$row['Type']) );
       $itable1->add_sinfo( T_('Name'),    $name_safe );
       $itable1->add_sinfo( T_('Userid'),  $handle_safe
@@ -156,7 +156,7 @@ $GLOBALS['ThePage'] = new Page('UserInfo');
       $itable2->add_sinfo( T_('Time zone'),       $row['Timezone'] . " [GMT$user_gmt_offset]" );
       $itable2->add_sinfo( T_('User local time'), $user_localtime );
       $itable2->add_sinfo( T_('Nighttime'),       $night_start_str . $img_nighttime );
-      if( $is_admin )
+      if ( $is_admin )
       { // show player clock
          $itable2->add_row( array(
                   'rattb' => 'class="DebugInfo"',
@@ -165,7 +165,7 @@ $GLOBALS['ThePage'] = new Page('UserInfo');
                   ) );
       }
 
-      if( $is_game_admin )
+      if ( $is_game_admin )
       {
          $admin_rating = SMALL_SPACING . span('AdminLink',
             anchor("admin_rating.php?uid=$uid",
@@ -183,7 +183,7 @@ $GLOBALS['ThePage'] = new Page('UserInfo');
       $itable1->add_sinfo( T_('Last quick access'), $lastquickaccess );
       $itable1->add_sinfo( T_('Last move'),   $lastmove );
 
-      if( $my_info || $is_admin || $is_game_admin )
+      if ( $my_info || $is_admin || $is_game_admin )
       {
          $reject_timeout = (int)@$row['RejectTimeoutWin'];
          $itable1->add_row( array(
@@ -194,7 +194,7 @@ $GLOBALS['ThePage'] = new Page('UserInfo');
 
       $itable1->add_sinfo( anchor( "edit_vacation.php", T_('Vacation days left') ),
          TimeFormat::echo_day(floor($row["VacationDays"])) );
-      if( $row['OnVacation'] > 0 )
+      if ( $row['OnVacation'] > 0 )
       {
          $onVacationText = TimeFormat::echo_onvacation($row['OnVacation']);
          $itable1->add_sinfo(
@@ -211,7 +211,7 @@ $GLOBALS['ThePage'] = new Page('UserInfo');
       $itable2->add_sinfo( anchor( $won_link, T_('Won games')),      $row['Won'] );
       $itable2->add_sinfo( anchor( $los_link, T_('Lost games')),     $row['Lost'] );
       $itable2->add_sinfo( T_('Percent'), $percent );
-      if( $show_mpg )
+      if ( $show_mpg )
       {
          $itable2->add_row( array(
                'rattb' => ($is_admin && !$my_info) ? 'class="DebugInfo"' : '',
@@ -220,7 +220,7 @@ $GLOBALS['ThePage'] = new Page('UserInfo');
       }
 
       // show user-info
-      if( $twoCols )
+      if ( $twoCols )
       {
          echo '<table id="UserInfo"><tr><td class="UserInfo">',
             $itable1->make_table(),
@@ -235,18 +235,18 @@ $GLOBALS['ThePage'] = new Page('UserInfo');
    } //User infos
 
 
-   if( USERPIC_FOLDER != '' )
+   if ( USERPIC_FOLDER != '' )
    {//User Picture
       echo name_anchor('pic');
-      if( is_null($bio_result) )
+      if ( is_null($bio_result) )
       {//User picture hidden by admin (together with bio)
-         if( $count_bio > 0 )
+         if ( $count_bio > 0 )
             echo '<p></p><h3 class=Header>' . T_('User picture (hidden)') . "</h3>\n";
       }
       else
       {
          list( $tmp,$tmp,$tmp, $pic_url, $pic_exists ) = UserPicture::getPicturePath($row);
-         if( $pic_exists )
+         if ( $pic_exists )
             echo '<p></p><h3 class="Header">' . T_('User picture') . "</h3>\n",
                UserPicture::getImageHtml( $user_handle, false, $row['UserPicture'], -1 );
       }
@@ -254,27 +254,27 @@ $GLOBALS['ThePage'] = new Page('UserInfo');
 
 
    echo name_anchor('bio');
-   if( is_null($bio_result) )
+   if ( is_null($bio_result) )
    {//Bio infos hidden by admin
-      if( $count_bio > 0 )
+      if ( $count_bio > 0 )
          echo '<p></p><h3 class=Header>' . T_('Biographical info (hidden)') . "</h3>\n";
    }
-   elseif( $count_bio > 0 )
+   elseif ( $count_bio > 0 )
    {//Bio infos + User picture
       echo '<p></p><h3 class=Header>' . T_('Biographical info') . "</h3>\n";
 
       $itable= new Table_info('bio');
       $TW_ = 'T_'; // for non-const translation-texts
 
-      while( $row = mysql_fetch_assoc( $bio_result ) )
+      while ( $row = mysql_fetch_assoc( $bio_result ) )
       {
          $cat = $row['Category'];
-         if( substr( $cat, 0, 1) == '=' )
+         if ( substr( $cat, 0, 1) == '=' )
             $cat = make_html_safe(substr( $cat, 1), INFO_HTML);
          else
          {
             $tmp = $TW_($cat); // for defined categories see 'edit_bio.php'
-            if( $tmp == $cat ) // no translation defined
+            if ( $tmp == $cat ) // no translation defined
                $cat = make_html_safe($cat, INFO_HTML);
             else
                $cat = $tmp;
@@ -287,33 +287,33 @@ $GLOBALS['ThePage'] = new Page('UserInfo');
       $itable->echo_table();
       unset($itable);
    }//Bio infos
-   if( !is_null($bio_result) )
+   if ( !is_null($bio_result) )
       mysql_free_result($bio_result);
    db_close();
 
 
    $menu_array = array();
-   if( $my_info )
+   if ( $my_info )
    {
       $menu_array[T_('Edit profile')] = 'edit_profile.php';
       $menu_array[T_('Change rating & rank')] = 'edit_rating.php';
       $menu_array[T_('Change password')] = 'edit_password.php';
       $menu_array[T_('Edit bio')] = 'edit_bio.php';
-      if( USERPIC_FOLDER != '' )
+      if ( USERPIC_FOLDER != '' )
          $menu_array[T_('Edit user picture')] = 'edit_picture.php';
       $menu_array[T_('Edit message folders')] = 'edit_folders.php';
 
       $days_left = floor($player_row['VacationDays']);
       $minimum_days = 7 - floor($player_row['OnVacation']);
 
-      if( $player_row['OnVacation'] > 0 )
+      if ( $player_row['OnVacation'] > 0 )
       {
-         if(!( $minimum_days > $days_left ||
+         if (!( $minimum_days > $days_left ||
                ( $minimum_days == $days_left && $minimum_days == 0 )))
             $menu_array[T_('Change vacation length')] = 'edit_vacation.php';
       }
       else
-         if( $days_left >= 7 )
+         if ( $days_left >= 7 )
             $menu_array[T_('Start vacation')] = 'edit_vacation.php';
 
       $menu_array[T_('Show my opponents')] = 'opponents.php';
@@ -327,20 +327,20 @@ $GLOBALS['ThePage'] = new Page('UserInfo');
                 T_('Invite this user') => "message.php?mode=Invite".URI_AMP."uid=$uid",
                 T_('Send message to user') => "message.php?mode=NewMessage".URI_AMP."uid=$uid" );
 
-      if( $has_contact >= 0 )
+      if ( $has_contact >= 0 )
       {
          $cstr = ( $has_contact ) ? T_('Edit contact') : T_('Add contact');
          $menu_array[$cstr] = "edit_contact.php?cid=$uid";
       }
    }
 
-   if( $is_admin )
+   if ( $is_admin )
    {
       $menu_array[T_('Admin user')] =
          array( 'url' => 'admin_users.php?show_user=1'.URI_AMP.'user='.urlencode($user_handle),
                 'class' => 'AdminLink' );
    }
-   if( $uid > GUESTS_ID_MAX && Bulletin::is_bulletin_admin() )
+   if ( $uid > GUESTS_ID_MAX && Bulletin::is_bulletin_admin() )
    {
       $menu_array[T_('New bulletin')] =
          array( 'url' => "admin_bulletin.php?n_uid=$uid", 'class' => 'AdminLink' );

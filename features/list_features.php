@@ -35,14 +35,14 @@ require_once 'features/lib_votes.php';
 
    $logged_in = who_is_logged( $player_row);
 
-   if( !$logged_in )
+   if ( !$logged_in )
       error('login_if_not_logged_in', 'list_features');
-   if( !ALLOW_FEATURE_VOTE )
+   if ( !ALLOW_FEATURE_VOTE )
       error('feature_disabled', 'list_features');
 
    $my_id = (int)@$player_row['ID'];
    $user_quota = UserQuota::load_user_quota($my_id);
-   if( is_null($user_quota) )
+   if ( is_null($user_quota) )
       error('miss_user_quota', "list_features.user_quota.check($my_id)");
    $cfg_tblcols = ConfigTableColumns::load_config( $my_id, CFGCOLS_FEATURE_LIST );
 
@@ -51,9 +51,9 @@ require_once 'features/lib_votes.php';
 
    $page = 'list_features.php?';
 
-   if( @$_REQUEST['vote_neutral'] && $user_can_vote )
+   if ( @$_REQUEST['vote_neutral'] && $user_can_vote )
    {
-      if( handle_vote_neutral($my_id) )
+      if ( handle_vote_neutral($my_id) )
          jump_to("features/list_features.php?status=2".URI_AMP.'my_vote=1');
    }
    $toggle_marks = (bool)@$_REQUEST['toggle_marks'];
@@ -93,7 +93,7 @@ require_once 'features/lib_votes.php';
    $is_vote_features = ( $filter_my_vote->value == 1 && $filter_status->value == 2 ); // UNVOTED + VOTE-status
    $allow_vote_neutral = $is_vote_features && $user_can_vote;
 
-   if( $allow_vote_neutral )
+   if ( $allow_vote_neutral )
    {
       $ftable->make_table_form();
       $ftable->set_extend_table_form_function( 'features_vote_neutral_extend_table_form' ); //func
@@ -128,9 +128,9 @@ require_once 'features/lib_votes.php';
    $show_rows = $ftable->compute_show_rows(mysql_num_rows($result));
    $ftable->set_found_rows( mysql_found_rows('featurelist.found_rows') );
 
-   if( $filter_my_vote->value == 2 ) // VOTED
+   if ( $filter_my_vote->value == 2 ) // VOTED
       $title = T_('My Feature Votes#title');
-   elseif( $is_vote_features ) // UNVOTED + VOTE-status
+   elseif ( $is_vote_features ) // UNVOTED + VOTE-status
       $title = T_('Features to vote on');
    else
       $title = T_('Features');
@@ -141,7 +141,7 @@ require_once 'features/lib_votes.php';
       FeatureVote::getFeaturePointsText( $user_quota->get_feature_points() ),
       "<br><br>\n";
 
-   while( ($row = mysql_fetch_assoc( $result )) && $show_rows-- > 0 )
+   while ( ($row = mysql_fetch_assoc( $result )) && $show_rows-- > 0 )
    {
       $feature = Feature::new_from_row($row);
       $fvote   = FeatureVote::new_from_row($row);
@@ -149,36 +149,36 @@ require_once 'features/lib_votes.php';
       $allow_vote = ( $user_can_vote && $feature->allow_vote() );
 
       $frow_strings = array();
-      if( $ftable->Is_Column_Displayed[ 1] )
+      if ( $ftable->Is_Column_Displayed[ 1] )
       {
          $url = "{$base_path}features/vote_feature.php?fid=$ID";
          $frow_strings[1] = button_TD_anchor( $url, $ID,
                ( $allow_vote ? T_('Vote') : T_('View vote') ));
       }
-      if( $feature->allow_edit() && $ftable->Is_Column_Displayed[2] ) // Edit-Action
+      if ( $feature->allow_edit() && $ftable->Is_Column_Displayed[2] ) // Edit-Action
       {
          $frow_strings[2] = anchor( "edit_feature.php?fid=$ID",
                image( "{$base_path}images/edit.gif", 'E'),
                T_('Edit feature'));
       }
-      if( $ftable->Is_Column_Displayed[3] )
+      if ( $ftable->Is_Column_Displayed[3] )
          $frow_strings[3] = $feature->status;
-      if( $ftable->Is_Column_Displayed[4] )
+      if ( $ftable->Is_Column_Displayed[4] )
          $frow_strings[4] = make_html_safe( wordwrap($feature->subject,FEAT_SUBJECT_WRAPLEN), true, $rx_term);
-      if( $ftable->Is_Column_Displayed[5] )
+      if ( $ftable->Is_Column_Displayed[5] )
          $frow_strings[5] = ($feature->created > 0 ? date(DATEFMT_FEATLIST, $feature->created) : '' );
-      if( $ftable->Is_Column_Displayed[6] )
+      if ( $ftable->Is_Column_Displayed[6] )
          $frow_strings[6] = ($feature->lastchanged > 0 ? date(DATE_FMT2, $feature->lastchanged) : '' );
-      if( !is_null($fvote) )
+      if ( !is_null($fvote) )
       {
-         if( $ftable->Is_Column_Displayed[8] )
+         if ( $ftable->Is_Column_Displayed[8] )
             $frow_strings[8] = FeatureVote::formatPoints( $fvote->points );
-         if( $ftable->Is_Column_Displayed[9] )
+         if ( $ftable->Is_Column_Displayed[9] )
             $frow_strings[9] = ($fvote->lastchanged > 0 ? date(DATE_FMT2, $fvote->lastchanged) : '' );
       }
-      else if( $feature->allow_vote() )
+      else if ( $feature->allow_vote() )
       {
-         if( $allow_vote_neutral )
+         if ( $allow_vote_neutral )
          {
             $name = "vf$ID";
             $checked = ((bool)@$_REQUEST[$name] xor $toggle_marks);
@@ -189,7 +189,7 @@ require_once 'features/lib_votes.php';
             $chk_str = '';
          $frow_strings[8] = array( 'text' => $chk_str . ' ?', 'attbs' => array( 'class' => 'MissVote' ) );
       }
-      if( $ftable->Is_Column_Displayed[10] )
+      if ( $ftable->Is_Column_Displayed[10] )
          $frow_strings[10] = $feature->size;
 
       $ftable->add_row( $frow_strings );
@@ -209,7 +209,7 @@ require_once 'features/lib_votes.php';
    $menu_array[T_('My feature votes')] = "features/list_features.php?status=3".URI_AMP.'my_vote=2';
    $menu_array[T_('All features')]     = "features/list_features.php?status=3".URI_AMP.'my_vote=0';
    $menu_array[T_('Feature Vote Results')] = "features/list_votes.php";
-   if( Feature::is_admin() )
+   if ( Feature::is_admin() )
       $menu_array[T_('Add new feature')] =
          array( 'url' => "features/edit_feature.php", 'class' => 'AdminLink' );
 
@@ -227,14 +227,14 @@ function features_vote_neutral_extend_table_form( &$table, &$form )
 function handle_vote_neutral( $my_id )
 {
    $feature_ids = array();
-   foreach( $_REQUEST as $key => $val )
+   foreach ( $_REQUEST as $key => $val )
    {
-      if( preg_match("/^vf(\d+)$/", $key, $matches) )
+      if ( preg_match("/^vf(\d+)$/", $key, $matches) )
          $feature_ids[]= $matches[1];
    }
 
    $cnt_features = count($feature_ids);
-   if( $cnt_features > 0 )
+   if ( $cnt_features > 0 )
    {
       ta_begin();
       {//HOT-section to update feature-vote

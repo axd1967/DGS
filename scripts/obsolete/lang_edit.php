@@ -62,12 +62,12 @@ function edit_all_langs($from_str, $to_str)
 
    $logged_in = is_logged_in($handle, $sessioncode, $player_row);
 
-   if( !$logged_in )
+   if ( !$logged_in )
      error('not_logged_in', 'scripts.obsolete.lang_edit');
 
-   if( $player_row['ID'] <= GUESTS_ID_MAX )
+   if ( $player_row['ID'] <= GUESTS_ID_MAX )
       error('not_allowed_for_guest', 'scripts.obsolete.lang_edit');
-   if( !(@$player_row['Adminlevel'] & ADMIN_DEVELOPER) )
+   if ( !(@$player_row['Adminlevel'] & ADMIN_DEVELOPER) )
      error("adminlevel_too_low", 'scripts.obsolete.lang_edit');
 
    $from_str = "once a week";

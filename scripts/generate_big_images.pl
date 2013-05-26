@@ -23,9 +23,9 @@ Gimp::init;
 $infile = $ARGV[1];
 $outfile = $ARGV[0];
 
-if( $outfile eq 'BigBlackMark.png' || $outfile eq 'BigWhiteMark.png' )
+if ( $outfile eq 'BigBlackMark.png' || $outfile eq 'BigWhiteMark.png' )
 {
-    if( $outfile eq 'BigBlackMark.png' )
+    if ( $outfile eq 'BigBlackMark.png' )
     {
         $file='BigBlack.png';
         $fg_color= [255, 255, 255];

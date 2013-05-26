@@ -31,7 +31,7 @@ require_once 'include/filter.php';
 
    $logged_in = who_is_logged( $player_row);
 
-   if( !$logged_in )
+   if ( !$logged_in )
       error('login_if_not_logged_in', 'list_messages');
 
    $my_id = $player_row['ID'];
@@ -62,30 +62,30 @@ require_once 'include/filter.php';
    *follow* : true to switch into target folder after move
 */
    $folder = (int)@$_GET['folder']; // 0 if unset
-   if( $folder < FOLDER_ALL_RECEIVED )
+   if ( $folder < FOLDER_ALL_RECEIVED )
       $folder = FOLDER_ALL_RECEIVED; //ineffective for move
 
    $current_folder = @$_GET['current_folder'];
-   if( !isset($current_folder) )
+   if ( !isset($current_folder) )
    {
       $current_folder = $folder;
       $folder = FOLDER_ALL_RECEIVED; //ineffective for move
    }
    else
       $current_folder = (int)$current_folder;
-   if( !isset($my_folders[$current_folder]) )
+   if ( !isset($my_folders[$current_folder]) )
       $current_folder = FOLDER_ALL_RECEIVED;
 
    $follow = (bool)@$_GET['follow']; // follow into target folder?
 
-   if( isset($_GET['toggle_marks']) )
+   if ( isset($_GET['toggle_marks']) )
       $toggle_marks= true;
    else
    {
       $toggle_marks= false;
-      if( change_folders_for_marked_messages($my_id, $my_folders) > 0 )
+      if ( change_folders_for_marked_messages($my_id, $my_folders) > 0 )
       {
-         if( isset($my_folders[$folder]) && $current_folder != FOLDER_DELETED && $follow )
+         if ( isset($my_folders[$folder]) && $current_folder != FOLDER_DELETED && $follow )
          {
             //follow the move if one
             $current_folder= $folder;
@@ -99,7 +99,7 @@ require_once 'include/filter.php';
 
    $page = '';
    $qsql = new QuerySQL(); // add extra-parts to SQL-statement
-   if( $find_answers > 0 )
+   if ( $find_answers > 0 )
    {
       $title = T_('Answers list');
       $page.= URI_AMP.'find_answers='.$find_answers ;
@@ -110,17 +110,17 @@ require_once 'include/filter.php';
    else
    {
       $title = T_('Message list');
-      if( $current_folder == FOLDER_ALL_RECEIVED )
+      if ( $current_folder == FOLDER_ALL_RECEIVED )
          $folderstring = implode(',', build_folders_all_received($my_folders));
       else
          $folderstring = (string)$current_folder;
    }
 
    $page.= URI_AMP.'current_folder=' . $current_folder ;
-   if( $folder!=$current_folder )
+   if ( $folder!=$current_folder )
       $page.= URI_AMP.'folder=' . $folder ;
 
-   if( $page )
+   if ( $page )
       $page= '?'.substr( $page, strlen(URI_AMP));
 
    start_page($title, true, $logged_in, $player_row );
@@ -145,7 +145,7 @@ require_once 'include/filter.php';
    $arr_msg = MessageListBuilder::message_list_query($my_id, $folderstring, $order, $limit, $qsql);
    $show_rows = count($arr_msg);
 
-   if( $find_answers && $show_rows == 1 )
+   if ( $find_answers && $show_rows == 1 )
    {
       $mid = $arr_msg[0]['mid'];
       jump_to( "message.php?mode=ShowMessage".URI_AMP."mid=$mid".URI_AMP."xterm=".urlencode($rx_term) );
@@ -164,7 +164,7 @@ require_once 'include/filter.php';
    $mtable->echo_table();
    //echo "<br>\n";
 
-   if( $can_move_messages )
+   if ( $can_move_messages )
    {
       /****
        *      Actually, toggle marks does not destroy sort
@@ -174,16 +174,16 @@ require_once 'include/filter.php';
        * See message_list_head/body() to re-insert the marks in the URL
        ****/
 
-      if( $find_answers > 0 )
+      if ( $find_answers > 0 )
          $marked_form->add_hidden( 'find_answers', $find_answers);
-      else if( $current_folder >= FOLDER_ALL_RECEIVED )
+      else if ( $current_folder >= FOLDER_ALL_RECEIVED )
          $marked_form->add_hidden( 'current_folder', $current_folder);
 
       $elem_toggle_marks =
            $marked_form->print_insert_submit_buttonx( 'toggle_marks',
                T_('Toggle marks'), array( 'accesskey' => ACCKEY_ACT_PREVIEW ));
 
-      if( $current_folder == FOLDER_DELETED )
+      if ( $current_folder == FOLDER_DELETED )
       {
          echo $marked_form->print_insert_submit_button( 'destroy_marked',
                   T_('Destroy marked messages')),
@@ -193,9 +193,9 @@ require_once 'include/filter.php';
       else
       {
          $fld = array('' => '');
-         foreach( $my_folders as $key => $val )
+         foreach ( $my_folders as $key => $val )
          {
-            if( $key != $current_folder && $key != FOLDER_NEW &&
+            if ( $key != $current_folder && $key != FOLDER_NEW &&
                 !($current_folder == FOLDER_SENT && $key == FOLDER_REPLY ) )
                $fld[$key] = $val[0];
          }
@@ -223,7 +223,7 @@ require_once 'include/filter.php';
    $menu_array = array();
    $menu_array[ T_('Search messages') ] = "search_messages.php";
 
-   if( $find_answers > 0 )
+   if ( $find_answers > 0 )
       $menu_array[ T_('Back to message') ] = "message.php?mode=ShowMessage".URI_AMP."mid=$find_answers".URI_AMP."xterm=".urlencode($rx_term);
    else
       $menu_array[ T_('Edit folders') ] = "edit_folders.php";

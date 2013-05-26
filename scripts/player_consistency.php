@@ -42,11 +42,11 @@ $GLOBALS['ThePage'] = new Page('Script', PAGEFLAG_IMPLICIT_FLUSH );
    set_time_limit(0); // don't want script-break during "transaction" with multi-db-queries
 
    $logged_in = who_is_logged( $player_row);
-   if( !$logged_in )
+   if ( !$logged_in )
       error('login_if_not_logged_in', 'scripts.player_consistency');
-   if( $player_row['ID'] <= GUESTS_ID_MAX )
+   if ( $player_row['ID'] <= GUESTS_ID_MAX )
       error('not_allowed_for_guest', 'scripts.player_consistency');
-   if( !(@$player_row['admin_level'] & ADMIN_DATABASE) )
+   if ( !(@$player_row['admin_level'] & ADMIN_DATABASE) )
       error('adminlevel_too_low', 'scripts.player_consistency');
 
 /*
@@ -65,11 +65,11 @@ $GLOBALS['ThePage'] = new Page('Script', PAGEFLAG_IMPLICIT_FLUSH );
 
    $page = $_SERVER['PHP_SELF'];
    $page_args = array();
-   if( $uid1 > '' )
+   if ( $uid1 > '' )
       $page_args['uid'] = ( $uid2 > '' ) ? $uid1.','.$uid2 : $uid1;
-   if( $lim > '' )
+   if ( $lim > '' )
       $page_args['limit'] = $lim;
-   if( $sqlbuf == '' )
+   if ( $sqlbuf == '' )
       $page_args['buffer'] = 'no';
 
    start_html( 'player_consistency', 0, '',
@@ -79,10 +79,10 @@ $GLOBALS['ThePage'] = new Page('Script', PAGEFLAG_IMPLICIT_FLUSH );
       "  tr.hil { background: #ffb010; }" );
 
 //echo ">>>> One shot fix. Do not run it again."; end_html(); exit;
-   if( $do_it=@$_REQUEST['do_it'] )
+   if ( $do_it=@$_REQUEST['do_it'] )
    {
       function dbg_query($s) {
-        if( !mysql_query( $s) )
+        if ( !mysql_query( $s) )
            die("<BR>$s;<BR>" . mysql_error() );
         echo " --- fixed. ";
       }
@@ -117,7 +117,7 @@ $GLOBALS['ThePage'] = new Page('Script', PAGEFLAG_IMPLICIT_FLUSH );
    echo "<p><h3 class=center>Player Consistency:</h3>\n";
    $form->echo_string();
 
-   if( !@$_REQUEST['check_it'] && !@$_REQUEST['do_it'] )
+   if ( !@$_REQUEST['check_it'] && !@$_REQUEST['do_it'] )
    {
       end_html();
       exit;
@@ -149,7 +149,7 @@ $GLOBALS['ThePage'] = new Page('Script', PAGEFLAG_IMPLICIT_FLUSH );
       or die("pID.find_bad_players2: " . mysql_error());
 
    $err = 0;
-   while( $row = mysql_fetch_assoc($result) )
+   while ( $row = mysql_fetch_assoc($result) )
    {
       extract($row);
       $msg = ( $row['White_ID'] == $row['Black_ID'] ) ? ' (same ID)' : '';
@@ -157,7 +157,7 @@ $GLOBALS['ThePage'] = new Page('Script', PAGEFLAG_IMPLICIT_FLUSH );
       $err++;
    }
    mysql_free_result($result);
-   if( $err )
+   if ( $err )
       echo "\n<br>--- $err error(s). Must be fixed by hand.";
 
    echo "\n<br>Needed: " . sprintf("%1.3fs", (getmicrotime() - $begin));
@@ -169,7 +169,7 @@ $GLOBALS['ThePage'] = new Page('Script', PAGEFLAG_IMPLICIT_FLUSH );
    echo span($C, "\n<br><br>Check game-counts of players ...\n<br>");
 
    $diff = cnt_diff( 'Run', 'Running', 'Status'.IS_STARTED_GAME);
-   foreach( $diff as $ID => $ary )
+   foreach ( $diff as $ID => $ary )
    {
       list( $cnt, $sum) = $ary;
       echo "\n<br>ID: $ID  Running: $cnt  Should be: $sum";
@@ -180,7 +180,7 @@ $GLOBALS['ThePage'] = new Page('Script', PAGEFLAG_IMPLICIT_FLUSH );
 
 
    $diff = cnt_diff( 'Fin', 'Finished', "Status='".GAME_STATUS_FINISHED."'");
-   foreach( $diff as $ID => $ary )
+   foreach ( $diff as $ID => $ary )
    {
       list( $cnt, $sum) = $ary;
       echo "\n<br>ID: $ID  Finished: $cnt  Should be: $sum";
@@ -191,7 +191,7 @@ $GLOBALS['ThePage'] = new Page('Script', PAGEFLAG_IMPLICIT_FLUSH );
 
 
    $diff = cnt_diff( 'Rat', 'RatedGames', "Status='".GAME_STATUS_FINISHED."' $is_rated");
-   foreach( $diff as $ID => $ary )
+   foreach ( $diff as $ID => $ary )
    {
       list( $cnt, $sum) = $ary;
       echo "\n<br>ID: $ID  RatedGames: $cnt  Should be: $sum";
@@ -202,7 +202,7 @@ $GLOBALS['ThePage'] = new Page('Script', PAGEFLAG_IMPLICIT_FLUSH );
 
 
    $diff = cnt_diff( 'Won', 'Won', "Status='".GAME_STATUS_FINISHED."' $is_rated", " AND Score<0", " AND Score>0");
-   foreach( $diff as $ID => $ary )
+   foreach ( $diff as $ID => $ary )
    {
       list( $cnt, $sum) = $ary;
       echo "\n<br>ID: $ID  Won: $cnt  Should be: $sum";
@@ -213,7 +213,7 @@ $GLOBALS['ThePage'] = new Page('Script', PAGEFLAG_IMPLICIT_FLUSH );
 
 
    $diff = cnt_diff( 'Los', 'Lost', "Status='".GAME_STATUS_FINISHED."'$is_rated", " AND Score>0", " AND Score<0");
-   foreach( $diff as $ID => $ary )
+   foreach ( $diff as $ID => $ary )
    {
       list( $cnt, $sum) = $ary;
       echo "\n<br>ID: $ID  Lost: $cnt  Should be: $sum";
@@ -226,14 +226,14 @@ $GLOBALS['ThePage'] = new Page('Script', PAGEFLAG_IMPLICIT_FLUSH );
    //RatedGames = Won + Lost + Jigo consistency
    $diff = cnt_diff( 'Jig', 'RatedGames-Won-Lost', "Status='".GAME_STATUS_FINISHED."'$is_rated", " AND Score=0", " AND Score=0");
    $err = 0;
-   foreach( $diff as $ID => $ary )
+   foreach ( $diff as $ID => $ary )
    {
       list( $cnt, $sum) = $ary;
       echo "\n<br>ID: $ID  Jigo: $cnt  Should be: $sum";
 
       $err++;
    }
-   if( $err )
+   if ( $err )
       echo "\n<br>--- $err error(s). MAYBE fixed with: scripts/recalculate_ratings2.php";
    echo "\n<br>Jigo Done.<br>\n";
 
@@ -253,14 +253,14 @@ $GLOBALS['ThePage'] = new Page('Script', PAGEFLAG_IMPLICIT_FLUSH );
       or die("Ratinglog2: " . mysql_error());
 
    $err = 0;
-   while( $row = mysql_fetch_assoc($result) )
+   while ( $row = mysql_fetch_assoc($result) )
    {
       extract($row);
       echo "\n<br>ID: $ID  Ratinglog: $Log  Should be: $RatedGames";
       $err++;
    }
    mysql_free_result($result);
-   if( $err )
+   if ( $err )
       echo "\n<br>--- $err error(s). MAYBE fixed with: scripts/recalculate_ratings2.php";
 
    echo "\n<br>Needed: " . sprintf("%1.3fs", (getmicrotime() - $begin));
@@ -292,14 +292,14 @@ $GLOBALS['ThePage'] = new Page('Script', PAGEFLAG_IMPLICIT_FLUSH );
       or die("Misc2: " . mysql_error());
 
    $err = 0;
-   while( $row = mysql_fetch_assoc($result) )
+   while ( $row = mysql_fetch_assoc($result) )
    {
       extract($row);
       echo "\n<br>ID: $ID  Misc: ClockUsed=$ClockUsed, $RatingMin &lt; $Rating2 &lt; $RatingMax.";
       $err++;
    }
    mysql_free_result($result);
-   if( $err )
+   if ( $err )
       echo "\n<br>--- $err error(s). Must be fixed by hand.";
 
    echo "\n<br>Needed: " . sprintf("%1.3fs", (getmicrotime() - $begin));
@@ -325,19 +325,19 @@ $GLOBALS['ThePage'] = new Page('Script', PAGEFLAG_IMPLICIT_FLUSH );
    $result = explain_query( "Players.GamesMPG1", $query)
       or die("Players.GamesMPG2: " . mysql_error());
    $err = 0;
-   while( $row = mysql_fetch_assoc($result) )
+   while ( $row = mysql_fetch_assoc($result) )
    {
       $uid = $row['uid'];
       $cntG = $row['X_Count'];
       $cntP = $row['GamesMPG'];
-      if( $cntG != $cntP )
+      if ( $cntG != $cntP )
       {
          $err++;
          echo "\n<br>ID: $uid  GamesMPG: $cntP  Should be: $cntG";
          dbg_query("UPDATE Players SET GamesMPG=$cntG WHERE ID=$uid LIMIT 1");
       }
    }
-   if( $err )
+   if ( $err )
       echo "\n<br>--- $err error(s) found.";
 
    echo "\n<br>Players.GamesMPG Done.";
@@ -364,32 +364,32 @@ $GLOBALS['ThePage'] = new Page('Script', PAGEFLAG_IMPLICIT_FLUSH );
    $result = explain_query( "PlayersFK1", $query)
       or die("PlayersFK2: " . mysql_error());
    $err = 0;
-   while( $row = mysql_fetch_assoc($result) )
+   while ( $row = mysql_fetch_assoc($result) )
    {
       $uid = $row['ID'];
-      if( $row['XCB_uid'] == 0 )
+      if ( $row['XCB_uid'] == 0 )
       {
          $err++;
          echo "Inserting ConfigBoard for user-id [$uid] ...\n<br>";
-         if( $do_it )
+         if ( $do_it )
             ConfigBoard::insert_default( $uid );
       }
-      if( $row['XCP_uid'] == 0 )
+      if ( $row['XCP_uid'] == 0 )
       {
          $err++;
          echo "Inserting ConfigPages for user-id [$uid] ...\n<br>";
-         if( $do_it )
+         if ( $do_it )
             ConfigPages::insert_default( $uid );
       }
-      if( $row['XUQ_uid'] == 0 )
+      if ( $row['XUQ_uid'] == 0 )
       {
          $err++;
          echo "Inserting UserQuota for user-id [$uid] ...\n<br>";
-         if( $do_it )
+         if ( $do_it )
             UserQuota::insert_default( $uid );
       }
    }
-   if( $err )
+   if ( $err )
       echo "\n<br>--- $err error(s) found.";
 
    echo "\n<br>Player-related tables Done.";
@@ -409,13 +409,13 @@ $GLOBALS['ThePage'] = new Page('Script', PAGEFLAG_IMPLICIT_FLUSH );
    $result = explain_query( "CountMsgNew1", $query)
       or die("CountMsgNew2: " . mysql_error());
    $err = 0;
-   while( $row = mysql_fetch_assoc($result) )
+   while ( $row = mysql_fetch_assoc($result) )
    {
       $uid = $row['ID'];
       $CountMsgNew = $row['CountMsgNew'];
 
       $count_msg_new = count_messages_new( $uid ); // force-recalc
-      if( $count_msg_new >= 0 && $count_msg_new != $CountMsgNew )
+      if ( $count_msg_new >= 0 && $count_msg_new != $CountMsgNew )
       {
          echo "\n<br>ID: $uid fix CountMsgNew [$CountMsgNew] -> [$count_msg_new].";
          dbg_query("UPDATE Players SET CountMsgNew=$count_msg_new WHERE ID=$uid LIMIT 1");
@@ -423,7 +423,7 @@ $GLOBALS['ThePage'] = new Page('Script', PAGEFLAG_IMPLICIT_FLUSH );
       }
    }
    mysql_free_result($result);
-   if( $err )
+   if ( $err )
       echo "\n<br>--- $err error(s) found.";
 
    echo "\n<br>MessageNew count Done.";
@@ -437,20 +437,20 @@ $GLOBALS['ThePage'] = new Page('Script', PAGEFLAG_IMPLICIT_FLUSH );
    $result = explain_query( "CountFeatNew1", $query)
       or die("CountFeatNew2: " . mysql_error());
    $err = 0;
-   while( $row = mysql_fetch_assoc($result) )
+   while ( $row = mysql_fetch_assoc($result) )
    {
       $uid = $row['ID'];
       $CountFeatNew = $row['CountFeatNew'];
 
       $count_feat_new = count_feature_new( $uid ); // force-recalc
-      if( $count_feat_new >= 0 && $count_feat_new != $CountFeatNew )
+      if ( $count_feat_new >= 0 && $count_feat_new != $CountFeatNew )
       {
          echo "\n<br>ID: $uid fix CountFeatNew [$CountFeatNew] -> [$count_feat_new].";
          $err++;
       }
    }
    mysql_free_result($result);
-   if( $err )
+   if ( $err )
    {
       // reset all to recalc on user-reloading
       dbg_query("UPDATE Players SET CountFeatNew=-1 WHERE CountFeatNew>=0 LIMIT $err");
@@ -468,20 +468,20 @@ $GLOBALS['ThePage'] = new Page('Script', PAGEFLAG_IMPLICIT_FLUSH );
    $result = explain_query("CountBulletinNew1", $query)
       or die("CountBulletinNew2: " . mysql_error());
    $err = 0;
-   while( $row = mysql_fetch_assoc($result) )
+   while ( $row = mysql_fetch_assoc($result) )
    {
       $uid = $row['ID'];
       $CountBulletinNew = $row['CountBulletinNew'];
 
       $count_bulletin_new = Bulletin::count_bulletin_new( $uid ); // force-recalc
-      if( $count_bulletin_new >= 0 && $count_bulletin_new != $CountBulletinNew )
+      if ( $count_bulletin_new >= 0 && $count_bulletin_new != $CountBulletinNew )
       {
          echo "\n<br>ID: $uid fix CountBulletinNew [$CountBulletinNew] -> [$count_bulletin_new].";
          $err++;
       }
    }
    mysql_free_result($result);
-   if( $err )
+   if ( $err )
    {
       // reset all to recalc on user-reloading
       dbg_query("UPDATE Players SET CountBulletinNew=-1 WHERE CountBulletinNew>=0 LIMIT $err");
@@ -509,16 +509,16 @@ function echo_query( $dbgmsg, $query, $rowhdr=20, $colsize=80, $colwrap='cut' )
    $result = db_query( "player_consistency.echo_query.$dbgmsg", $query );
 
    $mysqlerror = @mysql_error();
-   if( $mysqlerror )
+   if ( $mysqlerror )
    {
       echo "Error: $mysqlerror<p></p>";
       return -1;
    }
 
-   if( !$result  )
+   if ( !$result  )
       return 0;
    $numrows = 0+@mysql_num_rows($result);
-   if( $numrows<=0 )
+   if ( $numrows<=0 )
    {
       mysql_free_result($result);
       return 0;
@@ -527,42 +527,42 @@ function echo_query( $dbgmsg, $query, $rowhdr=20, $colsize=80, $colwrap='cut' )
    $c=0;
    $i=0;
    echo "\n<table title='$numrows rows' class=Table cellpadding=4 cellspacing=1>\n";
-   while( $row = mysql_fetch_assoc( $result ) )
+   while ( $row = mysql_fetch_assoc( $result ) )
    {
       $c=($c % LIST_ROWS_MODULO)+1;
       $i++;
-      if( $i==1 || ($rowhdr>1 && ($i%$rowhdr)==1) )
+      if ( $i==1 || ($rowhdr>1 && ($i%$rowhdr)==1) )
       {
          echo "<tr>\n";
-         foreach( $row as $key => $val )
+         foreach ( $row as $key => $val )
          {
             echo "<th>$key</th>";
          }
          echo "\n</tr>";
       }
       echo "<tr class=\"Row$c\" ondblclick=\"toggle_class(this,'Row$c','HilRow$c')\">\n";
-      foreach( $row as $key => $val )
+      foreach ( $row as $key => $val )
       {
          //remove sensible fields from a query like "SELECT * FROM Players"
-         switch( (string)$key )
+         switch ( (string)$key )
          {
             case 'Password':
             case 'Sessioncode':
             case 'Email':
-               if( $val ) $val= '***';
+               if ( $val ) $val= '***';
                break;
 
             case 'Debug':
-               if( $val )
+               if ( $val )
                   $val= preg_replace( "%(passwd=)[^&]*%is", "\\1***", $val);
                break;
          }
          $val= textarea_safe($val);
-         if( $colsize>0 )
+         if ( $colsize>0 )
          {
-            if( $colwrap==='wrap' )
+            if ( $colwrap==='wrap' )
                $val= wordwrap( $val, $colsize, '<br>', 1);
-            elseif( $colwrap==='cut' )
+            elseif ( $colwrap==='cut' )
                $val= substr( $val, 0, $colsize);
          }
          echo "<td title='$key#$i' nowrap>$val</td>";
@@ -576,7 +576,7 @@ function echo_query( $dbgmsg, $query, $rowhdr=20, $colsize=80, $colwrap='cut' )
 }//echo_query
 
 function explain_query( $dbgmsg, $s ) {
-   if(DEBUG)
+   if (DEBUG)
    {
      echo "<BR>EXPLAIN $s;<BR>";
      echo_query( $dbgmsg, "EXPLAIN $s" );
@@ -589,9 +589,9 @@ function explain_query( $dbgmsg, $s ) {
 function uid_clause( $fld, $oper='' )
 {
    global $uid1, $uid2;
-   if( $uid1>'' && $uid2>'' )
+   if ( $uid1>'' && $uid2>'' )
       return " $oper ($fld>=$uid1 AND $fld<=$uid2) ";
-   elseif( $uid1>'' )
+   elseif ( $uid1>'' )
       return " $oper ($fld=$uid1) ";
    else
       return '';
@@ -626,7 +626,7 @@ function cnt_diff( $name, $pfld, $gwhr, $gwhrB='', $gwhrW='')
       or die( "$name.B2: " . mysql_error());
 
    $plB = array(); // Players.ID => games-count
-   while( $rowB = mysql_fetch_assoc($resB) )
+   while ( $rowB = mysql_fetch_assoc($resB) )
       $plB[$rowB['idB']] = $rowB['cntB'];
    mysql_free_result($resB);
 
@@ -641,13 +641,13 @@ function cnt_diff( $name, $pfld, $gwhr, $gwhrB='', $gwhrW='')
       or die( "$name.W2: " . mysql_error());
 
    $plW = array(); // Players.ID => games-count
-   while( $rowW = mysql_fetch_assoc($resW) )
+   while ( $rowW = mysql_fetch_assoc($resW) )
       $plW[$rowW['idW']] = $rowW['cntW'];
    mysql_free_result($resW);
 
 
    $plMPG = array(); // Players.ID => games-count
-   if( $pfld == 'Running' || $pfld == 'Finished' ) // count MPGs
+   if ( $pfld == 'Running' || $pfld == 'Finished' ) // count MPGs
    {
       $query = "SELECT $sqlbuf GP.uid, COUNT(*) AS cntMPG"
              . " FROM GamePlayers AS GP  INNER JOIN Games AS G ON G.ID=GP.gid"
@@ -657,7 +657,7 @@ function cnt_diff( $name, $pfld, $gwhr, $gwhrB='', $gwhrW='')
       $resMPG = explain_query( "$name.MPG1", $query)
          or die( "$name.MPG2: " . mysql_error());
 
-      while( $rowMPG = mysql_fetch_assoc($resMPG) )
+      while ( $rowMPG = mysql_fetch_assoc($resMPG) )
          $plMPG[$rowMPG['uid']] = $rowW['cntMPG'];
       mysql_free_result($resMPG);
    }
@@ -667,13 +667,13 @@ function cnt_diff( $name, $pfld, $gwhr, $gwhrB='', $gwhrW='')
    $resP = explain_query( "$name.P1", $query)
       or die( "$name.P2: " . mysql_error());
 
-   while( $rowP = mysql_fetch_assoc($resP) )
+   while ( $rowP = mysql_fetch_assoc($resP) )
    {
       extract($rowP);
       $sum = @$plB[$idP] + @$plW[$idP] + @$plMPG[$idP];
-      if(DEBUG)
+      if (DEBUG)
          echo "\n<br>P:$idP/$cntP/$sum  B:".@$plB[$idP]." W:".@$plW[$idP]." MPG:".@$plMPG[$idP];
-      if( $cntP != $sum )
+      if ( $cntP != $sum )
          $diff[$idP] = array( $cntP, $sum );
    }
    mysql_free_result($resP);

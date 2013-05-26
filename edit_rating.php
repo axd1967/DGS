@@ -30,7 +30,7 @@ require_once 'include/rank_converter.php';
    connect2mysql();
 
    $logged_in = who_is_logged( $player_row);
-   if( !$logged_in )
+   if ( !$logged_in )
       error('login_if_not_logged_in', 'edit_rating');
 
    $my_id = $player_row['ID'];
@@ -43,9 +43,9 @@ require_once 'include/rank_converter.php';
 */
 
    // save changes
-   if( @$_REQUEST['save'] )
+   if ( @$_REQUEST['save'] )
    {
-      if( $is_guest ) // view ok, edit forbidden
+      if ( $is_guest ) // view ok, edit forbidden
          error('not_allowed_for_guest', 'edit_rating');
 
       // update RankInfo
@@ -57,7 +57,7 @@ require_once 'include/rank_converter.php';
       $ratingtype = get_request_arg('ratingtype') ;
       $newrating = convert_to_rating(get_request_arg('rating'), $ratingtype);
       $oldrating = $player_row['Rating2'];
-      if( $player_row['RatingStatus'] != RATING_RATED
+      if ( $player_row['RatingStatus'] != RATING_RATED
             && (is_numeric($newrating) && $newrating >= MIN_RATING)
             && ( $ratingtype != 'dragonrank'
                || !(is_numeric($oldrating) && $oldrating >= MIN_RATING)
@@ -83,7 +83,7 @@ require_once 'include/rank_converter.php';
 
    $rform->add_row( array( 'DESCRIPTION', T_('User'),
                            'TEXT', user_reference( 0, 1, '', $player_row ), ));
-   if( $player_row['RatingStatus'] != RATING_RATED )
+   if ( $player_row['RatingStatus'] != RATING_RATED )
    {
       $rform->add_row( array(
             'DESCRIPTION', T_('Rating'),

@@ -27,7 +27,7 @@ use strict;
 die "Usage: $0 YEAR\nERROR: Missing year\n" unless ( @ARGV == 1 );
 my $year = shift;
 die "Bad year [$year]\n" unless $year =~ /^\d{4}$/;
-die "Bad year [$year]\n" if( $year < 2000 || $year > 2999);
+die "Bad year [$year]\n" if ( $year < 2000 || $year > 2999);
 
 # ---------- process all files -----------------------------
 

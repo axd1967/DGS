@@ -120,7 +120,7 @@ class ConfigBoard
    /*! \brief Sets valid stone size [5..50]; if invalid set to default 25. */
    public function set_stone_size( $stone_size=25 )
    {
-      if( is_numeric($stone_size) && $stone_size >= 5 && $stone_size <= 50 )
+      if ( is_numeric($stone_size) && $stone_size >= 5 && $stone_size <= 50 )
          $this->stone_size = (int)$stone_size;
       else
          $this->stone_size = 25;
@@ -134,7 +134,7 @@ class ConfigBoard
    /*! \brief Sets valid wood-color [1..5,11..15]; if invalid set to default 1. */
    public function set_wood_color( $wood_color=1 )
    {
-      if( ( $wood_color >= 1 && $wood_color <= 5 ) || ( $wood_color >= 11 && $wood_color <= 15 ) )
+      if ( ( $wood_color >= 1 && $wood_color <= 5 ) || ( $wood_color >= 11 && $wood_color <= 15 ) )
          $this->wood_color = (int)$wood_color;
       else
          $this->wood_color = 1;
@@ -157,7 +157,7 @@ class ConfigBoard
 
    public function set_board_coords( $board_coords=-1 )
    {
-      if( is_numeric($board_coords) )
+      if ( is_numeric($board_coords) )
          $this->board_coords = (int)$board_coords;
       else
          $this->board_coords = COORD_MASK | SMOOTH_EDGE;
@@ -293,18 +293,18 @@ class ConfigBoard
       $src_row = ( isset($player_row['Handle']) && isset($player_row['Stonesize']) ) ? $player_row : NULL;
       $need_load = is_null($src_row);
 
-      if( $force_load || $need_load )
+      if ( $force_load || $need_load )
       {
          $dbgmsg = "ConfigBoard:load_config_board($uid)";
          $key = "ConfigBoard.$uid";
          $src_row = DgsCache::fetch( $dbgmsg, CACHE_GRP_CFG_BOARD, $key );
-         if( is_null($src_row) )
+         if ( is_null($src_row) )
          {
             $src_row = mysql_single_fetch($dbgmsg.'find', "SELECT * FROM ConfigBoard WHERE User_ID='$uid' LIMIT 1");
-            if( !is_null($src_row) )
+            if ( !is_null($src_row) )
                DgsCache::store( $dbgmsg, CACHE_GRP_CFG_BOARD, $key, $src_row, SECS_PER_DAY );
          }
-         if( !$src_row )
+         if ( !$src_row )
             return null;
       }
 
@@ -324,7 +324,7 @@ class ConfigBoard
             @$src_row['NotesLargeMode'],
             @$src_row['NotesCutoff']
             );
-      if( $upd_player_row && $need_load )
+      if ( $upd_player_row && $need_load )
          $config->fill_player_row();
       return $config;
    }//load_config_board
@@ -433,13 +433,13 @@ class ConfigPages
     */
    public function get_status_folder_visibility( $folder_nr, $all=false )
    {
-      if( $folder_nr == FOLDER_NEW )
+      if ( $folder_nr == FOLDER_NEW )
          return ( $this->status_flags & STATUSFLAG_SHOW_FOLDER_NEW ) ? 1 : 0;
-      elseif( $folder_nr == FOLDER_REPLY )
+      elseif ( $folder_nr == FOLDER_REPLY )
          return ( $this->status_flags & STATUSFLAG_SHOW_FOLDER_REPLY ) ? 1 : 0;
       else
       {
-         if( $all && (string)$folder_nr != '' )
+         if ( $all && (string)$folder_nr != '' )
             return (strpos(",{$this->status_folders},", ",$folder_nr,") === false) ? 0 : 1;
          else
             return -1;
@@ -453,14 +453,14 @@ class ConfigPages
     */
    public function set_status_flags_folderbit( $folder_nr, $value )
    {
-      if( $folder_nr == FOLDER_NEW )
+      if ( $folder_nr == FOLDER_NEW )
          $bitmask = STATUSFLAG_SHOW_FOLDER_NEW;
-      elseif( $folder_nr == FOLDER_REPLY )
+      elseif ( $folder_nr == FOLDER_REPLY )
          $bitmask = STATUSFLAG_SHOW_FOLDER_REPLY;
       else
          return;
 
-      if( $value )
+      if ( $value )
          $this->status_flags |= $bitmask;
       else
          $this->status_flags &= ~$bitmask;
@@ -485,12 +485,12 @@ class ConfigPages
    public function get_status_folders_querypart()
    {
       $folders = array();
-      if( $this->status_flags & STATUSFLAG_SHOW_FOLDER_NEW )
+      if ( $this->status_flags & STATUSFLAG_SHOW_FOLDER_NEW )
          $folders[] = FOLDER_NEW;
-      if( $this->status_flags & STATUSFLAG_SHOW_FOLDER_REPLY )
+      if ( $this->status_flags & STATUSFLAG_SHOW_FOLDER_REPLY )
          $folders[] = FOLDER_REPLY;
 
-      if( (string)$this->status_folders != '' )
+      if ( (string)$this->status_folders != '' )
          $folders[] = $this->status_folders; // ','-separated folder-list
 
       return implode(',', $folders);
@@ -531,7 +531,7 @@ class ConfigPages
 
    public static function _check_user_id( $user_id, $loc, $allow0=false )
    {
-      if( !is_numeric($user_id) || $user_id < 0 || ( !$allow0 && $user_id == 0 ) )
+      if ( !is_numeric($user_id) || $user_id < 0 || ( !$allow0 && $user_id == 0 ) )
          error('invalid_user', "$loc._check_user_id($user_id)");
    }
 
@@ -552,17 +552,17 @@ class ConfigPages
       $cfg_size = ($col_name) ? ConfigTableColumns::get_config_size($col_name, $dbgmsg) : 0;
 
       // need special handling to load only specific field or caching all fields
-      if( DgsCache::is_persistent(CACHE_GRP_CFG_PAGES) )
+      if ( DgsCache::is_persistent(CACHE_GRP_CFG_PAGES) )
          $row = self::load_cache_config_pages( $uid );
       else
       {
          $fieldset = 'User_ID,StatusFlags,StatusFolders,ForumFlags';
-         if( $col_name )
+         if ( $col_name )
             $fieldset .= ',' . ConfigTableColumns::build_fieldset( $col_name );
          $row = mysql_single_fetch("ConfigPages:load_config_pages.find($uid,$col_name)",
                "SELECT $fieldset FROM ConfigPages WHERE User_ID='$uid' LIMIT 1");
       }
-      if( !$row )
+      if ( !$row )
          return null;
 
       $config = new ConfigPages(
@@ -572,7 +572,7 @@ class ConfigPages
             $row['ForumFlags']
             );
 
-      if( $col_name )
+      if ( $col_name )
       {
          $bitset = ConfigTableColumns::read_columns_bitset( $row, $col_name, $cfg_size );
          $config->table_columns = new ConfigTableColumns( $uid, $col_name, $bitset );
@@ -586,10 +586,10 @@ class ConfigPages
       $dbgmsg = "ConfigPages:load_cache_config_pages($uid)";
       $key = "ConfigPages.$uid";
       $row = DgsCache::fetch( $dbgmsg, CACHE_GRP_CFG_PAGES, $key );
-      if( is_null($row) )
+      if ( is_null($row) )
       {
          $row = mysql_single_fetch($dbgmsg.'.find', "SELECT * FROM ConfigPages WHERE User_ID='$uid' LIMIT 1" );
-         if( !is_null($row) )
+         if ( !is_null($row) )
             DgsCache::store( $dbgmsg, CACHE_GRP_CFG_PAGES, $key, $row, SECS_PER_DAY );
       }
       return $row;
@@ -608,18 +608,18 @@ class ConfigPages
     */
    public static function _update_query( $errmsg, $user_id, $field_set_query )
    {
-      if( $field_set_query )
+      if ( $field_set_query )
       {
-         if( is_array($field_set_query) )
+         if ( is_array($field_set_query) )
          {
             $parts = array();
-            foreach( $field_set_query as $fieldname => $value )
+            foreach ( $field_set_query as $fieldname => $value )
                $parts[] = sprintf( "%s='%s'", $fieldname, mysql_addslashes($value) );
             $sqlpart = implode(', ', $parts);
          }
          else
             $sqlpart = $field_set_query;
-         if( $sqlpart )
+         if ( $sqlpart )
          {
             db_query( $errmsg,
                "UPDATE ConfigPages SET $sqlpart WHERE User_ID='$user_id' LIMIT 1" );
@@ -639,7 +639,7 @@ class ConfigPages
    // returns 1 if toggle was needed; 0 otherwise
    public static function toggle_forum_flags( $uid, $flag )
    {
-      if( is_numeric($flag) && $flag > 0 )
+      if ( is_numeric($flag) && $flag > 0 )
       {
          db_query( "ConfigPages:toggle_forum_flags.toggle_flag($uid,$flag)",
             "UPDATE ConfigPages SET ForumFlags=ForumFlags ^ $flag WHERE User_ID='$uid' LIMIT 1" );
@@ -651,7 +651,7 @@ class ConfigPages
 
    public static function set_clear_forum_flags( $uid, $clear_flags, $set_flags )
    {
-      if( is_numeric($clear_flags) && is_numeric($set_flags) && $clear_flags >= 0 && $set_flags >= 0
+      if ( is_numeric($clear_flags) && is_numeric($set_flags) && $clear_flags >= 0 && $set_flags >= 0
             && $clear_flags + $set_flags > 0 )
       {
          db_query( "ConfigPages:set_clear_forum_flags.upd($uid,$clear_flags,$set_flags)",
@@ -692,7 +692,7 @@ class ConfigTableColumns
 
       $this->user_id = (int)$user_id;
       $this->set_bitset( $bitset );
-      if( $col_name )
+      if ( $col_name )
       {
          $cfg_size = self::get_config_size($col_name, 'constructor');
          $this->col_name = $col_name;
@@ -733,7 +733,7 @@ class ConfigTableColumns
 
    public function set_bitset( $bitset )
    {
-      if( !($bitset instanceof BitSet) )
+      if ( !($bitset instanceof BitSet) )
          error('invalid_args', 'ConfigTableColumns.set_bitset.check');
       $this->bitset = $bitset;
    }
@@ -741,13 +741,13 @@ class ConfigTableColumns
    /*! \brief Updates ConfigPages-data into database for column-set of this object only; error if no col-name set. */
    public function update_config()
    {
-      if( empty($this->col_name) )
+      if ( empty($this->col_name) )
          error('invalid_args', "ConfigTableColumns.update_config.check.col_name({$this->col_name})");
       ConfigPages::_check_user_id( $this->user_id, 'ConfigTableColumns:update_config');
 
       $arr_write_columns = self::write_columns_bitset(
             $this->col_name, $this->bitset );
-      if( count($arr_write_columns) )
+      if ( count($arr_write_columns) )
       {
          ConfigPages::_update_query(
             "ConfigTableColumns:update_config.update({$this->user_id},{$this->col_name})",
@@ -765,7 +765,7 @@ class ConfigTableColumns
       $cfg_size = self::get_config_size($col_name, "ConfigTableColumns:load_config($uid)");
 
       // need special handling to load only specific field or caching all fields
-      if( DgsCache::is_persistent(CACHE_GRP_CFG_PAGES) )
+      if ( DgsCache::is_persistent(CACHE_GRP_CFG_PAGES) )
          $row = ConfigPages::load_cache_config_pages( $uid );
       else
       {
@@ -774,7 +774,7 @@ class ConfigTableColumns
          $row = mysql_single_fetch("ConfigTableColumns:load_config.find($uid,$col_name)",
                "SELECT $fieldset FROM ConfigPages WHERE User_ID='$uid' LIMIT 1");
       }
-      if( !$row )
+      if ( !$row )
          return null;
 
       // read + parse column-set into BitSet and build config
@@ -788,7 +788,7 @@ class ConfigTableColumns
    {
       $cfg_size = self::get_config_size($col_name, 'build_fieldset');
       $fieldset = $col_name;
-      for( $idx=2; $idx <= $cfg_size; $idx++ )
+      for ( $idx=2; $idx <= $cfg_size; $idx++ )
          $fieldset .= ",$col_name$idx";
       return $fieldset;
    }//build_fieldset
@@ -800,7 +800,7 @@ class ConfigTableColumns
    public static function read_columns_bitset( $row, $col_name, $count )
    {
       $arr_parse = array();
-      for( $idx = 1; $idx <= $count; $idx++)
+      for ( $idx = 1; $idx <= $count; $idx++)
       {
          $fieldname = $col_name . ( $idx == 1 ? '' : $idx);
          $arr_parse[] = (int)@$row[$fieldname];
@@ -819,7 +819,7 @@ class ConfigTableColumns
       $arr_write = $bitset->get_int_array();
       $cfg_size = self::get_config_size($col_name, 'write_columns_bitset');
       $result = array();
-      for( $idx = 1; $idx <= $cfg_size; $idx++)
+      for ( $idx = 1; $idx <= $cfg_size; $idx++)
       {
          $fieldname = $col_name . ( $idx == 1 ? '' : $idx);
          $result[$fieldname] = (int)@$arr_write[$idx-1];
@@ -857,7 +857,7 @@ class ConfigTableColumns
          CFGCOLS_TOURNAMENT_POOL_VIEW     => 1,
       );
 
-      if( !isset($cfg_size[$col_name]) )
+      if ( !isset($cfg_size[$col_name]) )
          error('invalid_args', "ConfigTableColumns[$dbgmsg]:get_config_size.check.col($col_name)");
 
       return $cfg_size[$col_name];

@@ -27,21 +27,21 @@ function search_browsers($result, &$Browsers)
 
    $total = 0;
 
-   while( $row = mysql_fetch_array($result) )
+   while ( $row = mysql_fetch_array($result) )
    {
       extract($row);
 //      echo "\n$Browser: ";
 
-      foreach( $Browsers as $key => $browserfam )
+      foreach ( $Browsers as $key => $browserfam )
       {
          $nr = 0;
-         foreach( $browserfam as $name => $b )
+         foreach ( $browserfam as $name => $b )
          {
             $res = preg_match("/{$b[0]}/i", $Browser);
 
-            if( $res == 0 )
+            if ( $res == 0 )
             {
-               if( $nr == 0 )
+               if ( $nr == 0 )
                   continue 2;
                else
                   continue;
@@ -50,14 +50,14 @@ function search_browsers($result, &$Browsers)
             $c = ($Browsers[$key][$name][1] += $Count);
 //            echo $name . ": {$c}  ";
 
-            if( $nr > 0 )
+            if ( $nr > 0 )
                continue 3;
 
             $nr++;
             $total+=$Count;
          }
 
-         if( $nr == 1 )
+         if ( $nr == 1 )
             continue 2;
 
          echo "No Browser Found ($Count): {$Browser}<br>\n";
@@ -72,15 +72,15 @@ function echo_browsers(&$Browsers)
 {
    global $total;
 
-   foreach( $Browsers as $key => $browserfam )
+   foreach ( $Browsers as $key => $browserfam )
    {
       $nr = 0;
-      foreach( $browserfam as $name => $b )
+      foreach ( $browserfam as $name => $b )
       {
-         if( $nr == 1 )
+         if ( $nr == 1 )
             echo "\n--------------";
          $s = "$name: {$b[1]}   " . sprintf("%.2f",100*$b[1]/$total) . "%";
-         if( $nr == 0 ) $s = "<b>$s</b>";
+         if ( $nr == 0 ) $s = "<b>$s</b>";
          echo "\n", $s;
          $nr++;
       }

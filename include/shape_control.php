@@ -45,7 +45,7 @@ class ShapeControl
       static $ARR_SHAPE_FLAGS = array(); // flag => text
 
       // lazy-init of texts
-      if( is_null($ARR_SHAPE_FLAGS) )
+      if ( is_null($ARR_SHAPE_FLAGS) )
       {
          $arr = array();
          $arr[SHAPE_FLAG_PLAYCOLOR_W] = T_('W-First#SHP_flag');
@@ -53,9 +53,9 @@ class ShapeControl
          $ARR_SHAPE_FLAGS = $arr;
       }
 
-      if( is_null($flag) )
+      if ( is_null($flag) )
          return $ARR_SHAPE_FLAGS;
-      if( !isset($ARR_SHAPE_FLAGS[$flag]) )
+      if ( !isset($ARR_SHAPE_FLAGS[$flag]) )
          error('invalid_args', "ShapeControl:getFlagsText($flag,$short)");
       return $ARR_SHAPE_FLAGS[$flag];
    }//getFlagsText
@@ -67,9 +67,9 @@ class ShapeControl
 
       $arr = array();
       $arr_flags = self::getFlagsText();
-      foreach( $arr_flags as $flag => $flagtext )
+      foreach ( $arr_flags as $flag => $flagtext )
       {
-         if( $check_flags & $flag )
+         if ( $check_flags & $flag )
             $arr[] = ($class) ? span($class, $flagtext) : $flagtext;
       }
       return (count($arr)) ? implode(', ', $arr) : $zero_val;
@@ -83,7 +83,7 @@ class ShapeControl
    /*! \brief Returns HTML for given Shape-object parsing Snapshot. */
    public static function build_view_shape( $shape, $stone_size=null )
    {
-      if( is_null($shape) )
+      if ( is_null($shape) )
          error('invalid_args', "ShapeControl:build_view_shape.miss_shape()");
 
       $arr_xy = GameSnapshot::parse_stones_snapshot( $shape->Size, $shape->Snapshot, GOBS_BLACK, GOBS_WHITE );
@@ -100,10 +100,10 @@ class ShapeControl
 
    public static function load_shape_name( $shape_id )
    {
-      if( $shape_id > 0 )
+      if ( $shape_id > 0 )
       {
          $shape = Shape::load_shape($shape_id, false);
-         if( !is_null($shape) )
+         if ( !is_null($shape) )
             return $shape->Name;
       }
       return '???';

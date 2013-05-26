@@ -32,10 +32,10 @@ require_once 'tournaments/include/tournament_news.php';
 $TheErrors->set_mode(ERROR_MODE_COLLECT);
 
 
-if( ALLOW_TOURNAMENTS && !$is_down )
+if ( ALLOW_TOURNAMENTS && !$is_down )
 {
    $chk_time_diff = SECS_PER_HOUR / 4;
-   if( $chained )
+   if ( $chained )
       $chained = $chk_time_diff;
    else
       connect2mysql();
@@ -48,9 +48,9 @@ if( ALLOW_TOURNAMENTS && !$is_down )
    $row = mysql_single_fetch( 'cron_tournament.check_frequency',
       "SELECT ($NOW-UNIX_TIMESTAMP(Lastchanged)) AS timediff"
       ." FROM Clock WHERE ID=".CLOCK_CRON_TOURNEY." LIMIT 1" );
-   if( !$row )
+   if ( !$row )
       $TheErrors->dump_exit('cron_tournament');
-   if( !DBG_TEST && $row['timediff'] < $chk_time_diff )
+   if ( !DBG_TEST && $row['timediff'] < $chk_time_diff )
       $TheErrors->dump_exit('cron_tournament');
 
    db_query( 'cron_tournament.set_lastchanged',
@@ -72,16 +72,16 @@ if( ALLOW_TOURNAMENTS && !$is_down )
    $tg_iterator = TournamentGames::load_tournament_games( $tg_iterator, 0, 0, 0, TG_STATUS_SCORE );
 
    $clear_cache = array();
-   while( list(,$arr_item) = $tg_iterator->getListIterator() )
+   while ( list(,$arr_item) = $tg_iterator->getListIterator() )
    {
       list( $tgame, $orow ) = $arr_item;
       $tid = $tgame->tid;
 
       $tourney = TournamentCache::load_cache_tournament( 'cron_tournament.game_end', $tid );
-      if( !is_null($tourney) && $thelper->process_tournament_game_end( $tourney, $tgame, /*check*/true ) )
+      if ( !is_null($tourney) && $thelper->process_tournament_game_end( $tourney, $tgame, /*check*/true ) )
       {
          $thelper->tcache->release_tournament_cron_lock( $tid );
-         if( $thelper->tcache->set_tournament_cron_lock( $tid ) )
+         if ( $thelper->tcache->set_tournament_cron_lock( $tid ) )
             $thelper->process_tournament_game_end( $tourney, $tgame, /*check*/false );
          $clear_cache[$tid] = $tourney->Type;
       }
@@ -89,11 +89,11 @@ if( ALLOW_TOURNAMENTS && !$is_down )
    $thelper->tcache->release_tournament_cron_lock();
 
    // clear caches
-   foreach( $clear_cache as $tid => $ttype )
+   foreach ( $clear_cache as $tid => $ttype )
    {
       $dbgmsg = "cron_tournament.game_end($tid,$ttype)";
       TournamentGames::delete_cache_tournament_games( $dbgmsg, $tid );
-      if( $ttype == TOURNEY_TYPE_LADDER )
+      if ( $ttype == TOURNEY_TYPE_LADDER )
          TournamentLadder::delete_cache_tournament_ladder( $dbgmsg, $tid );
    }
 
@@ -114,9 +114,9 @@ if( ALLOW_TOURNAMENTS && !$is_down )
    $row = mysql_single_fetch( 'cron_tournament.daily.check_frequency',
       "SELECT ($NOW-UNIX_TIMESTAMP(Lastchanged)) AS timediff"
       ." FROM Clock WHERE ID=".CLOCK_CRON_TOURNEY_DAILY." LIMIT 1" );
-   if( $row )
+   if ( $row )
    {
-      if( DBG_TEST || $row['timediff'] >= 24*SECS_PER_HOUR ) // one day-check
+      if ( DBG_TEST || $row['timediff'] >= 24*SECS_PER_HOUR ) // one day-check
       {
          db_query( 'cron_tournament.daily.next_run_date',
             "UPDATE Clock SET Lastchanged=FROM_UNIXTIME($NOW) WHERE ID=".CLOCK_CRON_TOURNEY_DAILY." LIMIT 1" );
@@ -133,9 +133,9 @@ if( ALLOW_TOURNAMENTS && !$is_down )
    $row = mysql_single_fetch( 'cron_tournament.hourly.check_frequency',
       "SELECT ($NOW-UNIX_TIMESTAMP(Lastchanged)) AS timediff"
       ." FROM Clock WHERE ID=".CLOCK_CRON_TOURNEY_HOURLY." LIMIT 1" );
-   if( $row )
+   if ( $row )
    {
-      if( DBG_TEST || $row['timediff'] >= 1*SECS_PER_HOUR ) // hourly-check
+      if ( DBG_TEST || $row['timediff'] >= 1*SECS_PER_HOUR ) // hourly-check
       {
          db_query( 'cron_tournament.hourly.next_run_date',
             "UPDATE Clock SET Lastchanged=FROM_UNIXTIME($NOW) WHERE ID=".CLOCK_CRON_TOURNEY_HOURLY." LIMIT 1" );
@@ -149,7 +149,7 @@ if( ALLOW_TOURNAMENTS && !$is_down )
    db_query( 'cron_tournament.reset_tick',
       "UPDATE Clock SET Ticks=0, Finished=FROM_UNIXTIME(".time().") WHERE ID=".CLOCK_CRON_TOURNEY." LIMIT 1" );
 
-   if( !$chained )
+   if ( !$chained )
       $TheErrors->dump_exit('cron_tournament');
 }//$is_down
 
@@ -165,13 +165,13 @@ function run_once_daily()
 
    ta_begin();
    {//HOT-section to process long-user-absence
-      while( list(,$arr_item) = $tl_iterator->getListIterator() )
+      while ( list(,$arr_item) = $tl_iterator->getListIterator() )
       {
          list( $tladder, $orow ) = $arr_item;
          $tid = $tladder->tid;
 
          $thelper->tcache->release_tournament_cron_lock( $tid );
-         if( $thelper->tcache->set_tournament_cron_lock( $tid ) )
+         if ( $thelper->tcache->set_tournament_cron_lock( $tid ) )
             TournamentLadder::process_user_absence( $tid, $tladder->uid, $orow['TLP_UserAbsenceDays'] );
       }
       $thelper->tcache->release_tournament_cron_lock();
@@ -186,13 +186,13 @@ function run_once_daily()
 
    ta_begin();
    {//HOT-section to process rank-updates
-      while( list(,$arr_item) = $te_iterator->getListIterator() )
+      while ( list(,$arr_item) = $te_iterator->getListIterator() )
       {
          list( $t_ext, $orow ) = $arr_item;
          $tid = $t_ext->tid;
 
          $thelper->tcache->release_tournament_cron_lock( $tid );
-         if( $thelper->tcache->set_tournament_cron_lock( $tid ) )
+         if ( $thelper->tcache->set_tournament_cron_lock( $tid ) )
             $thelper->process_rank_period( $t_ext );
       }
       $thelper->tcache->release_tournament_cron_lock();
@@ -217,13 +217,13 @@ function run_hourly()
 
    ta_begin();
    {//HOT-section to crown kings for ladder-tournaments
-      while( list(,$arr_item) = $tres_iterator->getListIterator() )
+      while ( list(,$arr_item) = $tres_iterator->getListIterator() )
       {
          list( ,$orow ) = $arr_item;
          $tid = $orow['tid'];
 
          $thelper->tcache->release_tournament_cron_lock( $tid );
-         if( $thelper->tcache->set_tournament_cron_lock( $tid ) )
+         if ( $thelper->tcache->set_tournament_cron_lock( $tid ) )
             TournamentHelper::process_tournament_ladder_crown_king( $orow, TLOG_TYPE_CRON );
       }
       $thelper->tcache->release_tournament_cron_lock();

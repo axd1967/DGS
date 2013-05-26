@@ -58,13 +58,13 @@ class WaitingroomControl
 
       // $calculated = ( $Handicaptype == 'conv' || $Handicaptype == 'proper' );
       // $haverating = ( !$calculated || is_numeric($my_rating) );
-      // if( $MustBeRated != 'Y' )         $goodrating = true;
-      // else if( is_numeric($my_rating) ) $goodrating = ( $my_rating>=$RatingMin && $my_rating<=$RatingMax );
+      // if ( $MustBeRated != 'Y' )         $goodrating = true;
+      // else if ( is_numeric($my_rating) ) $goodrating = ( $my_rating>=$RatingMin && $my_rating<=$RatingMax );
       // else                              $goodrating = false;
       // $goodmingames = ( $MinRatedGames > 0 ? ($my_rated_games >= $MinRatedGames) : true );
 
       $calculated = "(WR.Handicaptype='conv' OR WR.Handicaptype='proper')";
-      if( $iamrated )
+      if ( $iamrated )
       {
          $haverating = "1";
          $goodrating = "IF(WR.MustBeRated='Y' AND"
@@ -101,7 +101,7 @@ class WaitingroomControl
          );
       $qsql->add_part( SQLP_FROM,
          "LEFT JOIN WaitingroomJoined AS WRJ ON WRJ.opp_id=$my_id AND WRJ.wroom_id=WR.ID" );
-      if( $suitable && MaxGamesCheck::is_limited() )
+      if ( $suitable && MaxGamesCheck::is_limited() )
          $qsql->add_part( SQLP_HAVING, 'goodmaxgames' );
 
       // Contacts: make the protected waitingroom games invisible
@@ -119,7 +119,7 @@ class WaitingroomControl
          "IF(ISNULL(CH.uid),0,CH.SystemFlags & ".CSYSFLAG_WR_HIDE_GAMES.") AS CH_hidden" );
       $qsql->add_part( SQLP_FROM,
          "LEFT JOIN Contacts AS CH ON CH.uid=$my_id AND CH.cid=WR.uid" );
-      if( $suitable )
+      if ( $suitable )
          $qsql->add_part( SQLP_HAVING, 'CH_hidden=0' );
 
       return $qsql;
@@ -147,14 +147,14 @@ class WaitingroomControl
       global $player_row, $NOW;
 
       $my_id = (int)@$player_row['ID'];
-      if( $my_id <= GUESTS_ID_MAX )
+      if ( $my_id <= GUESTS_ID_MAX )
          error('not_allowed_for_guest', "WC:join_waitingroom_game($wr_id)");
 
-      if( !is_numeric($wr_id) || $wr_id <= 0 )
+      if ( !is_numeric($wr_id) || $wr_id <= 0 )
          error('waitingroom_game_not_found', "WC:join_waitingroom_game.bad_id($wr_id)");
 
       $maxGamesCheck = new MaxGamesCheck();
-      if( !$maxGamesCheck->allow_game_start() )
+      if ( !$maxGamesCheck->allow_game_start() )
          error('max_games', "WC:join_waitingroom_game.max_games($wr_id,{$maxGamesCheck->count_games})");
 
       $my_rated_games = (int)$player_row['RatedGames'];
@@ -180,7 +180,7 @@ class WaitingroomControl
             . " WHERE W.ID=$wr_id AND W.nrGames>0"
             . " HAVING C_denied=0";
       $game_row = mysql_single_fetch( "WC:join_waitingroom_game.find_game($wr_id,$my_id)", $query);
-      if( !$game_row )
+      if ( !$game_row )
          error('waitingroom_game_not_found', "WC:join_waitingroom_game.find_game2($wr_id,$my_id)");
 
       $opponent_ID = $game_row['uid'];
@@ -194,29 +194,29 @@ class WaitingroomControl
       $opponent_row = mysql_single_fetch('WC:join_waitingroom_game.find_players',
             "SELECT ID, Name, Handle, Rating2, RatingStatus, ClockUsed, OnVacation " .
             "FROM Players WHERE ID=$opponent_ID LIMIT 1" );
-      if( !$opponent_row )
+      if ( !$opponent_row )
          error('waitingroom_game_not_found', "WC:join_waitingroom_game.find_players.opp($wr_id,$opponent_ID)");
-      if( $my_id == $opponent_ID )
+      if ( $my_id == $opponent_ID )
          error('waitingroom_own_game', "WC:join_waitingroom_game.check.opp($wr_id)");
 
-      if( $game_row['MustBeRated'] == 'Y' &&
+      if ( $game_row['MustBeRated'] == 'Y' &&
           !($player_row['Rating2'] >= $game_row['RatingMin'] && $player_row['Rating2'] <= $game_row['RatingMax']) )
          error('waitingroom_not_in_rating_range', "WC:join_waitingroom_game.check.rating($wr_id)");
 
-      if( !$game_row['goodmingames'] )
+      if ( !$game_row['goodmingames'] )
          error('waitingroom_not_enough_rated_fin_games',
             "WC:join_waitingroom_game.min_rated_fin_games($gid,$my_id,{$game_row['MinRatedGames']})");
 
-      if( !$game_row['goodmaxgames'] )
+      if ( !$game_row['goodmaxgames'] )
          error('max_games_opp', "WC:join_waitingroom_game.opp_max_games($gid,$my_id,{$game_row['X_OppGamesCount']})");
 
-      if( !$game_row['goodsameopp'] )
+      if ( !$game_row['goodsameopp'] )
          error('waitingroom_not_same_opponent',
             "WC:join_waitingroom_game.same_opponent($gid,$my_id,{$game_row['SameOpponent']})");
 
-      if( $game_row['GameType'] != GAMETYPE_GO ) // user can join mp-game only once
+      if ( $game_row['GameType'] != GAMETYPE_GO ) // user can join mp-game only once
       {
-         if( GamePlayer::exists_game_player($gid, $my_id) )
+         if ( GamePlayer::exists_game_player($gid, $my_id) )
             error('waitingroom_not_same_opponent', "WC:join_waitingroom_game.mpg_same_opponent($gid,$my_id)");
       }
 
@@ -228,17 +228,17 @@ class WaitingroomControl
       $opprated = ( $opponent_row['RatingStatus'] != RATING_NONE && is_numeric($opprating) && $opprating >= MIN_RATING );
 
       $double = false;
-      switch( (string)$handicaptype )
+      switch ( (string)$handicaptype )
       {
          case HTYPE_CONV:
-            if( !$iamrated || !$opprated )
+            if ( !$iamrated || !$opprated )
                error('no_initial_rating', "WC:join_waitingroom_game.conv($wr_id)");
             list( $game_row['Handicap'], $game_row['Komi'], $i_am_black, $is_nigiri ) =
                suggest_conventional( $my_rating, $opprating, $size);
             break;
 
          case HTYPE_PROPER:
-            if( !$iamrated || !$opprated )
+            if ( !$iamrated || !$opprated )
                error('no_initial_rating', "WC:join_waitingroom_game.proper($wr_id)");
             list( $game_row['Handicap'], $game_row['Komi'], $i_am_black, $is_nigiri ) =
                suggest_proper( $my_rating, $opprating, $size);
@@ -277,23 +277,23 @@ class WaitingroomControl
 
       $game_setup = GameSetup::new_from_game_row( $game_row );
       $game_setup->read_waitingroom_fields( $game_row );
-      if( $category_handicaptype == CAT_HTYPE_FAIR_KOMI )
+      if ( $category_handicaptype == CAT_HTYPE_FAIR_KOMI )
          $game_setup->Komi = $game_setup->OppKomi = null; // start with empty komi-bids
 
       ta_begin();
       {//HOT-section to join waiting-room game-offer
          $gids = array();
          $is_std_go = ( $game_row['GameType'] == GAMETYPE_GO );
-         if( $is_std_go )
+         if ( $is_std_go )
          {
-            if( $i_am_black || $double )
+            if ( $i_am_black || $double )
                $gids[] = create_game($player_row, $opponent_row, $game_row, $game_setup);
             else
                $gids[] = create_game($opponent_row, $player_row, $game_row, $game_setup);
             $gid = $gids[0];
 
             //keep this after the regular one ($gid => consistency with send_message)
-            if( $double )
+            if ( $double )
             {
                // provide a link between the two paired "double" games
                $game_row['double_gid'] = $gid;
@@ -307,14 +307,14 @@ class WaitingroomControl
          else // join multi-player-game
          {
             $gid = $game_row['gid']; // use existing game for Team-/Zen-Go
-            if( $gid <= 0 )
+            if ( $gid <= 0 )
                error('internal_error', "WC:join_waitingroom_game.join_game.check.gid($wr_id,$gid,$my_id)");
 
             MultiPlayerGame::join_waitingroom_mp_game( "WC:join_waitingroom_game.join_game($wr_id)", $gid, $my_id );
             $gids[] = $gid;
          }
 
-         if( $is_std_go )
+         if ( $is_std_go )
          {
             GameHelper::update_players_start_game( 'WC:join_waitingroom_game',
                $my_id, $opponent_ID, count($gids), ($game_row['Rated'] == 'Y') );
@@ -323,7 +323,7 @@ class WaitingroomControl
 
          // Reduce number of games left in the waiting room
 
-         if( $game_row['nrGames'] > 1 )
+         if ( $game_row['nrGames'] > 1 )
          {
             db_query( 'WC:join_waitingroom_game.reduce',
                "UPDATE Waitingroom SET nrGames=nrGames-1 WHERE ID=$wr_id AND nrGames>0 LIMIT 1" );
@@ -339,25 +339,25 @@ class WaitingroomControl
 
          $same_opp = $game_row['SameOpponent'];
          $query_so = '';
-         if( $same_opp < 0 ) // restriction on count
+         if ( $same_opp < 0 ) // restriction on count
          {
-            if( $game_row['X_wrj_exists'] )
+            if ( $game_row['X_wrj_exists'] )
                $query_so = 'UPDATE WaitingroomJoined SET JoinedCount=JoinedCount+1 '
                   . "WHERE opp_id=$my_id AND wroom_id=$wr_id LIMIT 1";
             else
                $query_so = 'INSERT INTO WaitingroomJoined '
                   . "SET opp_id=$my_id, wroom_id=$wr_id, JoinedCount=1";
          }
-         elseif( $same_opp > 0 ) // restriction on time
+         elseif ( $same_opp > 0 ) // restriction on time
          {
             $expire_date = $NOW + $same_opp * SECS_PER_DAY;
             $query_wrjexp = "WaitingroomJoined SET ExpireDate=FROM_UNIXTIME($expire_date)";
-            if( $game_row['X_wrj_exists'] ) // faster than REPLACE-INTO
+            if ( $game_row['X_wrj_exists'] ) // faster than REPLACE-INTO
                $query_so = 'UPDATE ' . $query_wrjexp . "WHERE opp_id=$my_id AND wroom_id=$wr_id LIMIT 1";
             else
                $query_so = 'INSERT INTO ' . $query_wrjexp . ", opp_id=$my_id, wroom_id=$wr_id";
          }
-         if( $query_so )
+         if ( $query_so )
             db_query( "WC:join_waitingroom_game.wroom_joined.save(u$my_id,wr$wr_id)", $query_so );
 
 
@@ -369,7 +369,7 @@ class WaitingroomControl
             user_reference( REF_LINK, 1, '', $player_row) );
          $message .= sprintf( "\nGames of type [%s]:\n",
             GameTexts::get_game_type($game_row['GameType']) );
-         foreach( $gids as $gid )
+         foreach ( $gids as $gid )
             $message .= "* <game $gid>\n";
 
          send_message( 'WC:join_waitingroom_game', $message, $subject
@@ -390,11 +390,11 @@ class WaitingroomControl
 
       $game_row = mysql_single_fetch( "WC:delete_waitingroom_game.find_game($wr_id,$my_id)",
             "SELECT uid, gid, nrGames FROM Waitingroom WHERE ID=$wr_id LIMIT 1" );
-      if( !$game_row )
+      if ( !$game_row )
          error('waitingroom_game_not_found', "WC:delete_waitingroom_game.find_game2($wr_id,$my_id)");
 
       $uid = $game_row['uid'];
-      if( $my_id != $uid )
+      if ( $my_id != $uid )
          error('waitingroom_delete_not_own', "WC:delete_waitingroom_game.check.user($wr_id,$uid)");
       $gid = $game_row['gid'];
 
@@ -403,7 +403,7 @@ class WaitingroomControl
          db_query( "WC:delete_waitingroom_game.delete($wr_id,$gid)",
             "DELETE FROM Waitingroom WHERE ID=$wr_id LIMIT 1" );
 
-         if( $gid )
+         if ( $gid )
             MultiPlayerGame::revoke_offer_game_players( $gid, $game_row['nrGames'], GPFLAG_WAITINGROOM );
       }
       ta_end();
@@ -470,24 +470,24 @@ class WaitingroomOffer
       $infoKomi = $this->resultKomi = $this->row['Komi'];
       $iamblack = '';
       $info_nigiri = false;
-      if( $this->iamrated && !$is_my_game && !$is_fairkomi ) // conv/proper/manual
+      if ( $this->iamrated && !$is_my_game && !$is_fairkomi ) // conv/proper/manual
       {
-         if( user_has_rating($this->row, 'WRP_') ) // other has rating
+         if ( user_has_rating($this->row, 'WRP_') ) // other has rating
          {
-            if( $handitype == HTYPE_CONV )
+            if ( $handitype == HTYPE_CONV )
                list( $infoHandi, $infoKomi, $iamblack, $info_nigiri ) =
                   suggest_conventional( $my_rating, $this->row['WRP_Rating2'], $this->row['Size'] );
-            elseif( $handitype == HTYPE_PROPER )
+            elseif ( $handitype == HTYPE_PROPER )
                list( $infoHandi, $infoKomi, $iamblack, $info_nigiri ) =
                   suggest_proper( $my_rating, $this->row['WRP_Rating2'], $this->row['Size'] );
          }
       }
 
-      if( $is_my_game )
+      if ( $is_my_game )
          $this->resultType = 0;
-      elseif( $game_type != GAMETYPE_GO ) // MPG
+      elseif ( $game_type != GAMETYPE_GO ) // MPG
          $this->resultType = 3;
-      elseif( (string)$iamblack != '' ) // probable setting
+      elseif ( (string)$iamblack != '' ) // probable setting
          $this->resultType = 1;
       else // fix-calculated
          $this->resultType = 2;
@@ -497,7 +497,7 @@ class WaitingroomOffer
          $info_nigiri, $player_row['Handle'], $this->row['WRP_Handle'] );
 
       $settings_str = '';
-      if( !$is_my_game && $game_type == GAMETYPE_GO && !$is_fairkomi )
+      if ( !$is_my_game && $game_type == GAMETYPE_GO && !$is_fairkomi )
       {
          $this->resultHandicap = adjust_handicap( $this->row['Size'], $infoHandi,
             $this->row['AdjHandicap'], $this->row['MinHandicap'], $this->row['MaxHandicap'] );
@@ -506,12 +506,12 @@ class WaitingroomOffer
             ? sprintf( T_('%s H%s K%s#wrsettings'), $colstr, (int)$this->resultHandicap, $this->resultKomi )
             : sprintf( T_('%s Even K%s#wrsettings'), $colstr, $this->resultKomi );
       }
-      elseif( $is_fairkomi )
+      elseif ( $is_fairkomi )
       {
          $this->resultHandicap = 0;
          $settings_str = $colstr . ' ' . T_('Negotiate#fairkomi_wrsettings');
       }
-      elseif( $game_type != GAMETYPE_GO ) // MPG
+      elseif ( $game_type != GAMETYPE_GO ) // MPG
       {
          $this->resultHandicap = $this->resultKomi = 0;
          $icon_text = T_('Multi-Player-Game') . ': '
@@ -521,7 +521,7 @@ class WaitingroomOffer
             . MINI_SPACING . sprintf( '(%s/%s)', $this->row['nrGames'], $this->mp_player_count);
       }
 
-      if( ENABLE_STDHANDICAP && ($this->row['StdHandicap'] !== 'Y') && !$is_fairkomi )
+      if ( ENABLE_STDHANDICAP && ($this->row['StdHandicap'] !== 'Y') && !$is_fairkomi )
          $settings_str .= ($settings_str ? ' ' : '') . T_('(Free Handicap)#handicap_tablewr');
 
       return $settings_str;
@@ -533,38 +533,38 @@ class WaitingroomOffer
    {
       global $base_path;
 
-      if( $game_type != GAMETYPE_GO ) //MPG
+      if ( $game_type != GAMETYPE_GO ) //MPG
       {
          $this->resultColor = 'mpg';
          $colstr = image( $base_path.'17/y.gif', T_('Manual#color'), T_('Color set by game-master for multi-player-game#color') );
       }
-      elseif( $Handicaptype == HTYPE_NIGIRI || $is_nigiri )
+      elseif ( $Handicaptype == HTYPE_NIGIRI || $is_nigiri )
       {
          $this->resultColor = 'nigiri';
          $colstr = image( $base_path.'17/y.gif', T_('Nigiri#color'), T_('Nigiri (You randomly play Black or White)#color') );
       }
-      elseif( $Handicaptype == HTYPE_DOUBLE )
+      elseif ( $Handicaptype == HTYPE_DOUBLE )
       {
          $this->resultColor = 'double';
          $colstr = image( $base_path.'17/w_b.gif', T_('B+W#color'), T_('You play Black and White#color') );
       }
-      elseif( $Handicaptype == HTYPE_BLACK )
+      elseif ( $Handicaptype == HTYPE_BLACK )
       {
          $this->resultColor = ( $is_my_game ) ? 'black' : 'white';
-         if( $is_my_game )
+         if ( $is_my_game )
             $colstr = image( $base_path.'17/b.gif', T_('B#color'), T_('I play Black#color') );
          else
             $colstr = image( $base_path.'17/w.gif', T_('W#color'), T_('You play White#color') );
       }
-      elseif( $Handicaptype == HTYPE_WHITE )
+      elseif ( $Handicaptype == HTYPE_WHITE )
       {
          $this->resultColor = ( $is_my_game ) ? 'white' : 'black';
-         if( $is_my_game )
+         if ( $is_my_game )
             $colstr = image( $base_path.'17/w.gif', T_('W#color'), T_('I play White#color') );
          else
             $colstr = image( $base_path.'17/b.gif', T_('B#color'), T_('You play Black#color') );
       }
-      elseif( $CategoryHanditype == CAT_HTYPE_FAIR_KOMI )
+      elseif ( $CategoryHanditype == CAT_HTYPE_FAIR_KOMI )
       {
          $this->resultColor = 'fairkomi';
          $col_note = ( $is_my_game )
@@ -572,10 +572,10 @@ class WaitingroomOffer
             : GameTexts::get_fair_komi_types( $Handicaptype, NULL, $opp_handle, $my_handle );
          $colstr = image( $base_path.'17/y.gif', $col_note, NULL );
       }
-      elseif( (string)$iamblack != '' ) // $iamrated && !$is_my_game && HTYPE_CONV/PROPER
+      elseif ( (string)$iamblack != '' ) // $iamrated && !$is_my_game && HTYPE_CONV/PROPER
       {
          $this->resultColor = ($iamblack) ? 'black' : 'white';
-         if( $iamblack )
+         if ( $iamblack )
             $colstr = image( $base_path.'17/b.gif', T_('B#color'), T_('You probably play Black#color') );
          else
             $colstr = image( $base_path.'17/w.gif', T_('W#color'), T_('You probably play White#color') );
@@ -586,7 +586,7 @@ class WaitingroomOffer
          $colstr = '';
       }
 
-      if( $colstr && $Handicaptype != HTYPE_DOUBLE )
+      if ( $colstr && $Handicaptype != HTYPE_DOUBLE )
          $colstr = insert_width(5) . $colstr;
 
       return $colstr;
@@ -600,7 +600,7 @@ class WaitingroomOffer
       $html_out = $join_warning = '';
       $join_errors = array();
 
-      if( $this->row['GameType'] != GAMETYPE_GO ) // user can join mp-game only once
+      if ( $this->row['GameType'] != GAMETYPE_GO ) // user can join mp-game only once
          $can_join_mpg = !GamePlayer::exists_game_player( $this->row['gid'], $my_id );
       else
          $can_join_mpg = true;
@@ -609,20 +609,20 @@ class WaitingroomOffer
       $can_join_maxg = $maxGamesCheck->allow_game_start(); //own MAX-games
 
       $can_join = $can_join_mpg && $can_join_maxg;
-      if( !$this->is_my_game() )
+      if ( !$this->is_my_game() )
       {
          $html_out .= "<br>\n";
 
-         if( $can_join )
+         if ( $can_join )
          {
-            if( $html )
+            if ( $html )
                $html_out .= $maxGamesCheck->get_warn_text();
             else
                $join_warning = $maxGamesCheck->get_warn_text(/*html*/false);
          }
-         elseif( !$can_join_maxg )
+         elseif ( !$can_join_maxg )
          {
-            if( $html )
+            if ( $html )
                $html_out .= $maxGamesCheck->get_error_text() . "<br>\n" . $maxGamesCheck->get_warn_text();
             else
             {
@@ -630,19 +630,19 @@ class WaitingroomOffer
                $join_errors[] = $maxGamesCheck->get_warn_text(/*html*/false);
             }
          }
-         elseif( !$can_join_mpg )
+         elseif ( !$can_join_mpg )
          {
             $err_text = T_('Already invited to or joined this multi-player-game!');
-            if( $html )
+            if ( $html )
                $html_out .= span('MPGWarning', $err_text );
             else
                $join_errors[] = $err_text;
          }
 
-         if( $can_join_mpg && !$this->row['goodmaxgames'] )
+         if ( $can_join_mpg && !$this->row['goodmaxgames'] )
          {
             $err_text = ErrorCode::get_error_text('max_games_opp');
-            if( $html )
+            if ( $html )
                $html_out .= "<br>\n" . span('ErrMsgMaxGames', $err_text);
             else
                $join_errors[] = $err_text;

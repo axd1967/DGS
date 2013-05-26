@@ -33,9 +33,9 @@ $GLOBALS['ThePage'] = new Page('SurveyList');
    connect2mysql();
 
    $logged_in = who_is_logged( $player_row);
-   if( !$logged_in )
+   if ( !$logged_in )
       error('login_if_not_logged_in', 'list_surveys');
-   if( !ALLOW_SURVEY_VOTE )
+   if ( !ALLOW_SURVEY_VOTE )
       error('feature_disabled', 'list_surveys');
    $my_id = $player_row['ID'];
 
@@ -49,14 +49,14 @@ $GLOBALS['ThePage'] = new Page('SurveyList');
 
    // config for filters
    $status_filter_array = array( T_('All') => '' );
-   foreach( SurveyControl::getStatusText() as $status => $text )
+   foreach ( SurveyControl::getStatusText() as $status => $text )
    {
-      if( $is_admin || Survey::is_status_viewable($status) )
+      if ( $is_admin || Survey::is_status_viewable($status) )
          $status_filter_array[$text] = "S.Status='$status'";
    }
 
    $type_filter_array = array( T_('All') => '' );
-   foreach( SurveyControl::getTypeText() as $type => $text )
+   foreach ( SurveyControl::getTypeText() as $type => $text )
       $type_filter_array[$text] = "S.Type='$type'";
 
    // init search profile
@@ -91,7 +91,7 @@ $GLOBALS['ThePage'] = new Page('SurveyList');
    $table->add_tablehead( 1, T_('ID#header'), 'Button', TABLE_NO_HIDE, 'ID-');
    $table->add_tablehead( 3, T_('Type#header'), 'Enum', TABLE_NO_HIDE, 'Type+');
    $table->add_tablehead( 4, T_('Status#header'), 'Enum', TABLE_NO_HIDE, 'Status+');
-   if( $is_admin )
+   if ( $is_admin )
       $table->add_tablehead( 2, new TableHead( T_('Edit Survey#survey'), 'images/edit.gif'), 'ImagesLeft', TABLE_NO_HIDE);
    $table->add_tablehead( 5, T_('Author#header'), 'User', 0, 'SP_Handle+');
    $table->add_tablehead( 6, T_('Title#header'), null, TABLE_NO_SORT|TABLE_NO_HIDE );
@@ -118,21 +118,21 @@ $GLOBALS['ThePage'] = new Page('SurveyList');
 
    section('Survey', $title );
 
-   while( ($show_rows-- > 0) && list(,$arr_item) = $iterator->getListIterator() )
+   while ( ($show_rows-- > 0) && list(,$arr_item) = $iterator->getListIterator() )
    {
       list( $survey, $orow ) = $arr_item;
       $uid = $survey->uid;
       $row_str = array();
 
-      if( @$table->Is_Column_Displayed[ 1] )
+      if ( @$table->Is_Column_Displayed[ 1] )
       {
          $href = ( Survey::is_status_viewable($survey->Status) ) ? "view_survey.php?sid={$survey->ID}" : '';
          $row_str[ 1] = button_TD_anchor( $href, $survey->ID );
       }
-      if( @$table->Is_Column_Displayed[ 2] )
+      if ( @$table->Is_Column_Displayed[ 2] )
       {
          $links = '';
-         if( $is_admin )
+         if ( $is_admin )
          {
             $links .= span('AdminLink',
                anchor( $base_path."admin_survey.php?sid={$survey->ID}",
@@ -140,24 +140,24 @@ $GLOBALS['ThePage'] = new Page('SurveyList');
          }
          $row_str[ 2] = $links;
       }
-      if( @$table->Is_Column_Displayed[ 3] )
+      if ( @$table->Is_Column_Displayed[ 3] )
          $row_str[ 3] = SurveyControl::getTypeText( $survey->Type );
-      if( @$table->Is_Column_Displayed[ 4] )
+      if ( @$table->Is_Column_Displayed[ 4] )
          $row_str[ 4] = SurveyControl::getStatusText( $survey->Status );
-      if( @$table->Is_Column_Displayed[ 5] )
+      if ( @$table->Is_Column_Displayed[ 5] )
          $row_str[ 5] = user_reference( REF_LINK, 1, '', $uid, $survey->User->Handle, '');
-      if( @$table->Is_Column_Displayed[ 6] )
+      if ( @$table->Is_Column_Displayed[ 6] )
       {
          $title = make_html_safe( wordwrap($survey->Title, 60), true, $rx_term );
          $row_str[ 6] = preg_replace( "/[\r\n]+/", '<br>', $title ); //reduce multiple LF to one <br>
       }
-      if( @$table->Is_Column_Displayed[ 7] )
+      if ( @$table->Is_Column_Displayed[ 7] )
          $row_str[ 7] = formatDate($survey->Created);
-      if( @$table->Is_Column_Displayed[ 8] )
+      if ( @$table->Is_Column_Displayed[ 8] )
          $row_str[ 8] = formatDate($survey->Lastchanged);
-      if( @$table->Is_Column_Displayed[ 9] )
+      if ( @$table->Is_Column_Displayed[ 9] )
          $row_str[ 9] = $survey->UserCount;
-      if( @$table->Is_Column_Displayed[10] )
+      if ( @$table->Is_Column_Displayed[10] )
          $row_str[10] = SurveyControl::formatFlags($survey->Flags);
 
       $table->add_row( $row_str );
@@ -169,7 +169,7 @@ $GLOBALS['ThePage'] = new Page('SurveyList');
 
    $menu_array = array();
    $menu_array[T_('Surveys')] = "list_surveys.php";
-   if( $is_admin )
+   if ( $is_admin )
    {
       $menu_array[T_('New survey')] =
          array( 'url' => "admin_survey.php", 'class' => 'AdminLink' );

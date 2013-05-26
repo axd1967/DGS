@@ -105,7 +105,7 @@ class TournamentGames
 
    public function setStatus( $status )
    {
-      if( !preg_match( "/^(".CHECK_TG_STATUS.")$/", $status ) )
+      if ( !preg_match( "/^(".CHECK_TG_STATUS.")$/", $status ) )
          error('invalid_args', "TournamentGames.setStatus($status)");
       $this->Status = $status;
    }
@@ -119,7 +119,7 @@ class TournamentGames
       static $arr_status_with_score = array( TG_STATUS_SCORE, TG_STATUS_WAIT, TG_STATUS_DONE );
 
       $result = in_array( $this->Status, $arr_status_with_score );
-      if( $check_detached && ($this->Flags & TG_FLAG_GAME_DETACHED) )
+      if ( $check_detached && ($this->Flags & TG_FLAG_GAME_DETACHED) )
          $result = false;
       return $result ;
    }
@@ -127,10 +127,10 @@ class TournamentGames
    /*! \brief Returns score for given user; null if no score set. */
    public function getScoreForUser( $uid )
    {
-      if( $uid <= 0 )
+      if ( $uid <= 0 )
          error('invalid_args', "TournamentGames.getScoreForUser($uid)");
 
-      if( $uid > 0 && $this->isScoreStatus(/*chk-detach*/true) )
+      if ( $uid > 0 && $this->isScoreStatus(/*chk-detach*/true) )
          return (( $this->Challenger_uid == $uid ) ? 1 : -1 ) * $this->Score;
       else
          return null;
@@ -139,7 +139,7 @@ class TournamentGames
    /*! \brief Returns array( uid, uid ) from Challenger_uid and Defender_uid smallest first. */
    public function get_ordered_uids()
    {
-      if( $this->Challenger_uid < $this->Defender_uid )
+      if ( $this->Challenger_uid < $this->Defender_uid )
          return array( $this->Challenger_uid, $this->Defender_uid );
       else
          return array( $this->Defender_uid, $this->Challenger_uid );
@@ -147,13 +147,13 @@ class TournamentGames
 
    public function formatFlags( $flags_val=null )
    {
-      if( is_null($flags_val) )
+      if ( is_null($flags_val) )
          $flags_val = $this->Flags;
       $arr = array();
       $arr_flags = self::getFlagsText();
-      foreach( $arr_flags as $flag => $flagtext )
+      foreach ( $arr_flags as $flag => $flagtext )
       {
-         if( $flags_val & $flag )
+         if ( $flags_val & $flag )
             $arr[] = $flagtext;
       }
       return implode(', ', $arr);
@@ -162,7 +162,7 @@ class TournamentGames
    /*! \brief Inserts or updates tournament-ladder-props in database. */
    public function persist()
    {
-      if( $this->ID > 0 )
+      if ( $this->ID > 0 )
          $success = $this->update();
       else
          $success = $this->insert();
@@ -175,7 +175,7 @@ class TournamentGames
 
       $entityData = $this->fillEntityData();
       $result = $entityData->insert( "TournamentGames.insert(%s)" );
-      if( $result )
+      if ( $result )
          $this->ID = mysql_insert_id();
       return $result;
    }
@@ -196,7 +196,7 @@ class TournamentGames
 
    public function fillEntityData( $data=null )
    {
-      if( is_null($data) )
+      if ( is_null($data) )
          $data = $GLOBALS['ENTITY_TOURNAMENT_GAMES']->newEntityData();
       $data->set_value( 'ID', $this->ID );
       $data->set_value( 'tid', $this->tid );
@@ -234,7 +234,7 @@ class TournamentGames
       $data->set_value( 'Score', $this->Score );
 
       $arr_query = $data->build_sql_update( 1, true );
-      if( !is_null($old_status) )
+      if ( !is_null($old_status) )
          $arr_query[1] .= " AND Status='" . mysql_addslashes($old_status) . "'"; // WHERE-clause
 
       $result = db_query( "$dbgmsg.TournamentGames.update_score({$this->ID},{$this->tid},{$this->gid},{$this->Score})",
@@ -249,7 +249,7 @@ class TournamentGames
    public static function build_query_sql( $tid=0 )
    {
       $qsql = $GLOBALS['ENTITY_TOURNAMENT_GAMES']->newQuerySQL('TG');
-      if( $tid > 0 )
+      if ( $tid > 0 )
          $qsql->add_part( SQLP_WHERE, "TG.tid='$tid'" );
       return $qsql;
    }
@@ -285,7 +285,7 @@ class TournamentGames
     */
    public static function load_tournament_game_by_gid( $gid )
    {
-      if( !is_numeric($gid) || $gid <= 0 )
+      if ( !is_numeric($gid) || $gid <= 0 )
          error('invalid_args', "TournamentGames:load_tournament_game_by_gid.check_gid($gid)");
 
       $qsql = self::build_query_sql();
@@ -304,11 +304,11 @@ class TournamentGames
     */
    public static function load_tournament_game_by_uid( $tid, $ch_uid, $df_uid )
    {
-      if( !is_numeric($tid) || $tid <= 0 )
+      if ( !is_numeric($tid) || $tid <= 0 )
          error('invalid_args', "TournamentGames:load_tournament_game_by_uid.check_tid($tid,$ch_uid,$df_uid)");
-      if( !is_numeric($ch_uid) || $ch_uid <= GUESTS_ID_MAX )
+      if ( !is_numeric($ch_uid) || $ch_uid <= GUESTS_ID_MAX )
          error('invalid_args', "TournamentGames:load_tournament_game_by_uid.check_ch_uid($tid,$ch_uid,$df_uid)");
-      if( !is_numeric($df_uid) || $df_uid <= GUESTS_ID_MAX )
+      if ( !is_numeric($df_uid) || $df_uid <= GUESTS_ID_MAX )
          error('invalid_args', "TournamentGames:load_tournament_game_by_uid.check_df_uid($tid,$ch_uid,$df_uid)");
 
       $qsql = self::build_query_sql( $tid );
@@ -331,15 +331,15 @@ class TournamentGames
    public static function load_tournament_games( $iterator, $tid, $round_id=0, $pool=0, $status=null )
    {
       $qsql = self::build_query_sql( $tid );
-      if( is_array($status) )
+      if ( is_array($status) )
          $qsql->add_part( SQLP_WHERE, build_query_in_clause('TG.Status', $status, true) );
-      elseif( !is_null($status) )
+      elseif ( !is_null($status) )
          $qsql->add_part( SQLP_WHERE, "TG.Status='" . mysql_addslashes($status) . "'" );
-      if( $round_id > 0 )
+      if ( $round_id > 0 )
          $qsql->add_part( SQLP_WHERE, "TG.Round_ID=$round_id" );
-      if( is_array($pool) )
+      if ( is_array($pool) )
          $qsql->add_part( SQLP_WHERE, build_query_in_clause( 'TG.Pool', $pool, /*is-str*/false ) );
-      elseif( $pool > 0 )
+      elseif ( $pool > 0 )
          $qsql->add_part( SQLP_WHERE, "TG.Pool='$pool'" );
       $iterator->setQuerySQL( $qsql );
       $query = $iterator->buildQuery();
@@ -347,7 +347,7 @@ class TournamentGames
       $iterator->setResultRows( mysql_num_rows($result) );
 
       $iterator->clearItems();
-      while( $row = mysql_fetch_array( $result ) )
+      while ( $row = mysql_fetch_array( $result ) )
       {
          $tgame = self::new_from_row( $row );
          $iterator->addItem( $tgame, $row );
@@ -367,26 +367,26 @@ class TournamentGames
       static $tg_undone_status = array( TG_STATUS_INIT, TG_STATUS_PLAY, TG_STATUS_SCORE, TG_STATUS_WAIT );
       $tid = (int)$tid;
       $round_id = (int)$round_id;
-      if( is_null($arr_status) )
+      if ( is_null($arr_status) )
          $arr_status = $tg_undone_status;
-      elseif( !is_array($arr_status) )
+      elseif ( !is_array($arr_status) )
          $arr_status = array( $arr_status );
 
       $qsql = new QuerySQL(
          SQLP_FIELDS, 'COUNT(*) AS X_Count',
          SQLP_FROM, 'TournamentGames AS TG',
          SQLP_WHERE, "TG.tid=$tid", build_query_in_clause('TG.Status', $arr_status, /*is_str*/true) );
-      if( $round_id > 0 )
+      if ( $round_id > 0 )
          $qsql->add_part( SQLP_WHERE, "TG.Round_ID=$round_id" );
 
-      if( $pool_group ) // group by Pool, Status
+      if ( $pool_group ) // group by Pool, Status
       {
          $qsql->add_part( SQLP_FIELDS, 'Pool', 'Status' );
          $qsql->add_part( SQLP_GROUP, 'Pool', 'Status' );
          $result = db_query( "TournamentGames:count_tournament_games.group($tid,$round_id)", $qsql->get_select() );
 
          $arr = array();
-         while( $row = mysql_fetch_array( $result ) )
+         while ( $row = mysql_fetch_array( $result ) )
             $arr[$row['Pool']][$row['Status']] = $row['X_Count'];
          mysql_free_result($result);
 
@@ -402,9 +402,9 @@ class TournamentGames
    /*! \brief Counts Games for consistency-check with Tournament-games. */
    public static function count_games_started( $tid, $round_id )
    {
-      if( !is_numeric($tid) || $tid <= 0 )
+      if ( !is_numeric($tid) || $tid <= 0 )
          error('invalid_args', "TournamentGames:count_games_started.check.tid($tid,$round_id)");
-      if( !is_numeric($round_id) || $round_id <= 0 )
+      if ( !is_numeric($round_id) || $round_id <= 0 )
          error('invalid_args', "TournamentGames:count_games_started.check.round_id($tid,$round_id)");
 
       $qsql = new QuerySQL(
@@ -441,11 +441,11 @@ class TournamentGames
       $out_tg_id = array();
       $out_gid = array();
       $out_opp = array();
-      while( $row = mysql_fetch_array( $result ) )
+      while ( $row = mysql_fetch_array( $result ) )
       {
          $out_tg_id[] = $row['ID'];
          $out_gid[] = $row['gid'];
-         if( $row['Status'] == TG_STATUS_PLAY )
+         if ( $row['Status'] == TG_STATUS_PLAY )
             $out_opp[] = ( $row['Challenger_uid'] == $uid ) ? $row['Defender_uid'] : $row['Challenger_uid'];
       }
       mysql_free_result($result);
@@ -459,13 +459,13 @@ class TournamentGames
     */
    public static function update_tournament_game_end( $dbgmsg, $tid, $gid, $black_uid, $score )
    {
-      if( !is_numeric($tid) || $tid <= 0 )
+      if ( !is_numeric($tid) || $tid <= 0 )
          error('invalid_args', "TournamentGames:update_tournament_game_end.check.tid($tid,$gid)");
-      if( !is_numeric($gid) || $gid <= 0 )
+      if ( !is_numeric($gid) || $gid <= 0 )
          error('invalid_args', "TournamentGames:update_tournament_game_end.check.gid($tid,$gid)");
-      if( !is_numeric($black_uid) || $black_uid <= GUESTS_ID_MAX )
+      if ( !is_numeric($black_uid) || $black_uid <= GUESTS_ID_MAX )
          error('invalid_args', "TournamentGames:update_tournament_game_end.check.black_uid($tid,$gid,$black_uid)");
-      if( is_null($score) )
+      if ( is_null($score) )
          return 0;
 
       global $NOW;
@@ -485,7 +485,7 @@ class TournamentGames
       global $NOW;
 
       $dbgmsg .= ".TG:update_tournament_game_wait($wait_ticks)";
-      if( !is_numeric($wait_ticks) )
+      if ( !is_numeric($wait_ticks) )
          error('invalid_args', "$dbgmsg.check.ticks");
 
       $query_part = " WHERE Status='".TG_STATUS_WAIT."' AND TicksDue<=$wait_ticks";
@@ -493,7 +493,7 @@ class TournamentGames
       // find tournament-id to clear cache for
       $arr_tids = array();
       $result = db_query( "$dbgmsg.find_tids", "SELECT tid FROM TournamentGames $query_part" );
-      while( $row = mysql_fetch_array($result) )
+      while ( $row = mysql_fetch_array($result) )
          $arr_tids[] = $row['tid'];
       mysql_free_result($result);
 
@@ -501,9 +501,9 @@ class TournamentGames
       {//HOT-section to finish waiting tournament-games
          $result = db_query( "$dbgmsg.upd_tgame",
             "UPDATE TournamentGames SET Status='".TG_STATUS_DONE."', Lastchanged=FROM_UNIXTIME($NOW) $query_part" );
-         if( $result )
+         if ( $result )
          {
-            foreach( $arr_tids as $tid )
+            foreach ( $arr_tids as $tid )
                self::delete_cache_tournament_games( $dbgmsg, $tid );
          }
       }
@@ -517,7 +517,7 @@ class TournamentGames
    {
       // lazy-init of texts
       $key = 'STATUS';
-      if( !isset(self::$ARR_TGAME_TEXTS[$key]) )
+      if ( !isset(self::$ARR_TGAME_TEXTS[$key]) )
       {
          $arr = array();
          $arr[TG_STATUS_INIT] = T_('Init#TG_status');
@@ -528,9 +528,9 @@ class TournamentGames
          self::$ARR_TGAME_TEXTS[$key] = $arr;
       }
 
-      if( is_null($status) )
+      if ( is_null($status) )
          return self::$ARR_TGAME_TEXTS[$key];
-      if( !isset(self::$ARR_TGAME_TEXTS[$key][$status]) )
+      if ( !isset(self::$ARR_TGAME_TEXTS[$key][$status]) )
          error('invalid_args', "TournamentGames:getStatusText($status)");
       return self::$ARR_TGAME_TEXTS[$key][$status];
    }//getStatusText
@@ -540,7 +540,7 @@ class TournamentGames
    {
       // lazy-init of texts
       $key = 'FLAGS';
-      if( !isset(self::$ARR_TGAME_TEXTS[$key]) )
+      if ( !isset(self::$ARR_TGAME_TEXTS[$key]) )
       {
          $arr = array();
          $arr[TG_FLAG_GAME_END_TD] = T_('Game End by TD#TG_flag');
@@ -549,9 +549,9 @@ class TournamentGames
          self::$ARR_TGAME_TEXTS[$key] = $arr;
       }
 
-      if( is_null($flag) )
+      if ( is_null($flag) )
          return self::$ARR_TGAME_TEXTS[$key];
-      if( !isset(self::$ARR_TGAME_TEXTS[$key][$flag]) )
+      if ( !isset(self::$ARR_TGAME_TEXTS[$key][$flag]) )
          error('invalid_args', "TournamentGames:getFlagsText($flag)");
       return self::$ARR_TGAME_TEXTS[$key][$flag];
    }//getFlagsText
@@ -563,7 +563,7 @@ class TournamentGames
             T_('All') => '',
             T_('Active#TG_stat_filter') => $prefix."Status IN ('".TG_STATUS_PLAY."','".TG_STATUS_SCORE."','".TG_STATUS_WAIT."')",
          );
-      foreach( self::getStatusText() as $tg_status => $tg_text )
+      foreach ( self::getStatusText() as $tg_status => $tg_text )
          $arr[$tg_text] = $prefix."Status='$tg_status'";
       $arr[T_('None#TG_stat_filter')] = $prefix.'Status IS NULL';
       return $arr;

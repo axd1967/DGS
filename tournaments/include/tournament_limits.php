@@ -60,7 +60,7 @@ class TournamentLimits
 
    public function getLimits( $limit_id )
    {
-      if( TournamentUtils::isAdmin() ) // T-Admin can set any out-of-limit value
+      if ( TournamentUtils::isAdmin() ) // T-Admin can set any out-of-limit value
          return false;
       else
          return @$this->limit_config[$limit_id];
@@ -85,7 +85,7 @@ class TournamentLimits
    /*! \brief Returns text '[0; min..max [..admin-max]]' for given limit-id (the '0' appears if disabling-feature is allowed). */
    public function getLimitRangeTextAdmin( $limit_id )
    {
-      if( TournamentUtils::isAdmin() )
+      if ( TournamentUtils::isAdmin() )
       {
          $limits = $this->limit_config[$limit_id];
          return span('TWarning', sprintf( ' %s: %s',
@@ -125,14 +125,14 @@ class TournamentLimits
    private function _checkValue_MinMaxDisable( $limit_id, $value, $curr_value, $errtext_disable, $errtext_value )
    {
       $errors = array();
-      if( is_numeric($value) && ($value != $curr_value) && ($limits = $this->getLimits($limit_id)) )
+      if ( is_numeric($value) && ($value != $curr_value) && ($limits = $this->getLimits($limit_id)) )
       {
          $limit_maxval = self::getStaticMaxLimit($limit_id);
          list( $disable_allowed, $min_value, $max_value ) = $limits;
 
-         if( $value == 0 && !$disable_allowed )
+         if ( $value == 0 && !$disable_allowed )
             $errors[] = $errtext_disable;
-         elseif(  ( !is_null($min_value) && $value < $min_value )
+         elseif (  ( !is_null($min_value) && $value < $min_value )
                || ( !is_null($max_value) && $max_value < $limit_maxval && $value > $max_value ) )
          {
             $errors[] = sprintf( $errtext_value, build_range_text($min_value, $max_value) );
@@ -159,13 +159,13 @@ class TournamentLimits
    public function checkLadder_MaxDefenses( $value, $curr_value, $group_id=null )
    {
       $errors = array();
-      if( is_numeric($value) && ($value != $curr_value) && ($limits = $this->getLimits(TLIMITS_TL_MAX_DF)) )
+      if ( is_numeric($value) && ($value != $curr_value) && ($limits = $this->getLimits(TLIMITS_TL_MAX_DF)) )
       {
          $group_label = (is_null($group_id)) ? '' : " $group_id";
          list( $disable_allowed, $min_value, $max_value ) = $limits;
-         if( $value == 0 && is_null($group_id) /*&& !$disable_allowed*/ ) // always forbidden for main-group
+         if ( $value == 0 && is_null($group_id) /*&& !$disable_allowed*/ ) // always forbidden for main-group
             $errors[] = T_('Disabling feature of maximum defenses with 0-value not allowed.#T_ladder');
-         elseif(  ( !is_null($min_value) && $value < $min_value )
+         elseif (  ( !is_null($min_value) && $value < $min_value )
                || ( !is_null($max_value) && $max_value < TLADDER_MAX_DEFENSES && $value > $max_value ) )
          {
             $errors[] = sprintf( T_('Max. defenses%s must be in range %s, but was [%s].#T_ladder'),

@@ -17,7 +17,7 @@ foreach my $filename (@ARGV) {
     while (<IN>) {
       chomp;
       $lcnt++;
-      if( /^class ([a-z0-9_]+)/i ) {
+      if ( /^class ([a-z0-9_]+)/i ) {
          print "$prefix$class\t$class_line\tSTATIC\t$filename\n" if $class;
          $class = $1;
          $class_line = $lcnt;

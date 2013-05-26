@@ -48,9 +48,9 @@ $GLOBALS['ThePage'] = new Page('Tournament');
    connect2mysql();
 
    $logged_in = who_is_logged( $player_row);
-   if( !$logged_in )
+   if ( !$logged_in )
       error('login_if_not_logged_in', 'Tournament.view_tournament');
-   if( !ALLOW_TOURNAMENTS )
+   if ( !ALLOW_TOURNAMENTS )
       error('feature_disabled', 'Tournament.view_tournament');
    $my_id = $player_row['ID'];
 
@@ -79,7 +79,7 @@ $GLOBALS['ThePage'] = new Page('Tournament');
    // user result state
    $tt_props = null; // T-type-specific props
    $tt_user_state = '';
-   if( $tourney->Type == TOURNEY_TYPE_LADDER )
+   if ( $tourney->Type == TOURNEY_TYPE_LADDER )
    {
       $tt_props = TournamentCache::load_cache_tournament_ladder_props( 'Tournament.view_tournament', $tid, /*check*/false );
       $tl_iterator = TournamentLadder::load_cache_tournament_ladder( 'Tournament.view_tournament',
@@ -89,18 +89,18 @@ $GLOBALS['ThePage'] = new Page('Tournament');
          ? sprintf( T_('Your current ladder rank is #%s out of %s.'), $tl_rank, (int)@$tp_all_counts[1][TP_STATUS_REGISTER] )
          : NO_VALUE;
    }
-   elseif( $tourney->Type == TOURNEY_TYPE_ROUND_ROBIN )
+   elseif ( $tourney->Type == TOURNEY_TYPE_ROUND_ROBIN )
    {
       $tt_props = TournamentCache::load_cache_tournament_round( 'Tournament.view_tournament',
          $tid, $tourney->CurrentRound, /*check*/false );
-      if( $my_tp )
+      if ( $my_tp )
       {
          $tt_user_state = NO_VALUE;
          $tpool = TournamentPool::load_tournament_pool_user( $tid, $tourney->CurrentRound, $my_id );
-         if( $tpool && $tpool->Pool > 0 )
+         if ( $tpool && $tpool->Pool > 0 )
          {
             $tt_user_state = sprintf( T_('Rank %s in Pool %s'), $tpool->formatRank(false, NO_VALUE), $tpool->Pool );
-            if( $tpool->Rank > 0 )
+            if ( $tpool->Rank > 0 )
                $tt_user_state .= SMALL_SPACING . '+ ' . $tpool->echoRankImage();
          }
       }
@@ -148,18 +148,18 @@ $GLOBALS['ThePage'] = new Page('Tournament');
    // ------------- Section Menu
 
    $sectmenu = array();
-   if( $tourney->Type == TOURNEY_TYPE_LADDER )
+   if ( $tourney->Type == TOURNEY_TYPE_LADDER )
    {
-      if( $tourney->Status == TOURNEY_STATUS_PLAY || $tourney->Status == TOURNEY_STATUS_CLOSED )
+      if ( $tourney->Status == TOURNEY_STATUS_PLAY || $tourney->Status == TOURNEY_STATUS_CLOSED )
          $sectmenu[T_('View Ladder')] = "tournaments/ladder/view.php?tid=$tid";
    }
-   elseif( $tourney->Type == TOURNEY_TYPE_ROUND_ROBIN )
+   elseif ( $tourney->Type == TOURNEY_TYPE_ROUND_ROBIN )
    {
       $sectmenu[T_('View Pools')] = "tournaments/roundrobin/view_pools.php?tid=$tid";
    }
    $sectmenu[T_('Tournament directors')] = $page_tdirs;
    $sectmenu[T_('Refresh tournament info')] = "tournaments/view_tournament.php?tid=$tid";
-   if( $allow_edit_tourney )
+   if ( $allow_edit_tourney )
       $sectmenu[T_('Manage tournament')] =
          array( 'url' => "tournaments/manage_tournament.php?tid=$tid", 'class' => 'TAdmin' );
    make_menu( $sectmenu, false);
@@ -176,9 +176,9 @@ $GLOBALS['ThePage'] = new Page('Tournament');
 
    section( 'TournamentNews', T_('Tournament News#T_view'), 'news' );
 
-   if( count($arr_tnews) > 0 )
+   if ( count($arr_tnews) > 0 )
    {
-      foreach( $arr_tnews as $tnews )
+      foreach ( $arr_tnews as $tnews )
          echo TournamentNews::build_tournament_news( $tnews );
    }
    else
@@ -198,19 +198,19 @@ $GLOBALS['ThePage'] = new Page('Tournament');
    $arr_locks = check_locks( $tourney );
 
    $itable = new Table_info('tstatus', TABLEOPT_LABEL_COLON);
-   if( count($arr_locks) )
+   if ( count($arr_locks) )
       $itable->add_sinfo( T_('Tournament Locks'), implode("<br>\n", $arr_locks) );
    $itable->add_sinfo( T_('Tournament Status'), $tourney->getStatusText($tourney->Status) );
-   if( $ttype->need_rounds )
+   if ( $ttype->need_rounds )
       $itable->add_sinfo( T_('Tournament Round'), $tourney->formatRound() );
-   if( $reg_user_info )
+   if ( $reg_user_info )
       $itable->add_sinfo( T_('Registration Status#tourney'), span('TUserStatus', $reg_user_info) );
-   if( $my_tp )
+   if ( $my_tp )
       $itable->add_sinfo( T_('Tournament Games'),
          sprintf( T_('%s finished, %s won, %s lost tournament games'), $my_tp->Finished, $my_tp->Won, $my_tp->Lost ));
-   if( $tt_user_state )
+   if ( $tt_user_state )
    {
-      if( $tourney->Type == TOURNEY_TYPE_LADDER || $tourney->Type == TOURNEY_TYPE_ROUND_ROBIN )
+      if ( $tourney->Type == TOURNEY_TYPE_LADDER || $tourney->Type == TOURNEY_TYPE_ROUND_ROBIN )
          $itable->add_sinfo( T_('User Result State#tourney'), $tt_user_state );
    }
 
@@ -218,12 +218,12 @@ $GLOBALS['ThePage'] = new Page('Tournament');
 
    // --------------- Standings -------------------------------------
 
-   if( $cnt_tstandings > 0 )
+   if ( $cnt_tstandings > 0 )
    {
       section( 'TournamentStandings', sprintf( T_('Tournament Standings (TOP %s)'), $cnt_tstandings ),
          'standings' );
 
-      if( $tourney->Type == TOURNEY_TYPE_LADDER )
+      if ( $tourney->Type == TOURNEY_TYPE_LADDER )
          echo TournamentGuiHelper::build_tournament_ladder_standings( $tl_iterator, $page, $tprops->need_rating_copy() );
    }
 
@@ -250,10 +250,10 @@ $GLOBALS['ThePage'] = new Page('Tournament');
    $sectmenu[T_('Tournament participants')] = "tournaments/list_participants.php?tid=$tid";
 
    $reg_user_str = TournamentGuiHelper::getLinkTextRegistration($tid, $reg_user_status);
-   if( $reg_user_str )
+   if ( $reg_user_str )
       $sectmenu[$reg_user_str] = "tournaments/register.php?tid=$tid"; # for user
 
-   if( $allow_edit_tourney )
+   if ( $allow_edit_tourney )
       $sectmenu[T_('Edit participants')] =
          array( 'url' => "tournaments/edit_participant.php?tid=$tid", 'class' => 'TAdmin' ); # for TD
 
@@ -266,20 +266,20 @@ $GLOBALS['ThePage'] = new Page('Tournament');
 
    // show tourney-type-specific properties
    $tt_notes = null;
-   if( !is_null($tt_props) )
+   if ( !is_null($tt_props) )
       $tt_notes = $tt_props->build_notes_props();
-   if( !is_null($tt_notes) )
+   if ( !is_null($tt_notes) )
       echo_notes( 'ttprops', $tt_notes[0], $tt_notes[1], false );
 
    // ------------- Section Menu
 
    $sectmenu = array();
-   if( $tourney->Type == TOURNEY_TYPE_LADDER )
+   if ( $tourney->Type == TOURNEY_TYPE_LADDER )
    {
-      if( $tourney->Status == TOURNEY_STATUS_PLAY || $tourney->Status == TOURNEY_STATUS_CLOSED )
+      if ( $tourney->Status == TOURNEY_STATUS_PLAY || $tourney->Status == TOURNEY_STATUS_CLOSED )
          $sectmenu[T_('View Ladder')] = "tournaments/ladder/view.php?tid=$tid";
    }
-   elseif( $tourney->Type == TOURNEY_TYPE_ROUND_ROBIN )
+   elseif ( $tourney->Type == TOURNEY_TYPE_ROUND_ROBIN )
    {
       $sectmenu[T_('View Pools')] = "tournaments/roundrobin/view_pools.php?tid=$tid";
    }
@@ -294,7 +294,7 @@ $GLOBALS['ThePage'] = new Page('Tournament');
 
    // --------------- Results ---------------------------------------
 
-   if( $show_tresult )
+   if ( $show_tresult )
    {
       section( 'TournamentResult', T_('Tournament Results'), 'result', true );
 
@@ -311,11 +311,11 @@ $GLOBALS['ThePage'] = new Page('Tournament');
 function check_locks( $tourney )
 {
    $arr_locks = array();
-   if( $tourney->isFlagSet(TOURNEY_FLAG_LOCK_ADMIN|TOURNEY_FLAG_LOCK_TDWORK) )
+   if ( $tourney->isFlagSet(TOURNEY_FLAG_LOCK_ADMIN|TOURNEY_FLAG_LOCK_TDWORK) )
       $arr_locks[] = $tourney->buildMaintenanceLockText();
-   if( $tourney->isFlagSet(TOURNEY_FLAG_LOCK_REGISTER) )
+   if ( $tourney->isFlagSet(TOURNEY_FLAG_LOCK_REGISTER) )
       $arr_locks[] = Tournament::getLockText(TOURNEY_FLAG_LOCK_REGISTER);
-   if( $tourney->isFlagSet(TOURNEY_FLAG_LOCK_CLOSE) )
+   if ( $tourney->isFlagSet(TOURNEY_FLAG_LOCK_CLOSE) )
       $arr_locks[] = Tournament::getLockText(TOURNEY_FLAG_LOCK_CLOSE);
    return $arr_locks;
 }
@@ -323,28 +323,28 @@ function check_locks( $tourney )
 function echo_tournament_rules( $tourney, $trule )
 {
    $adj_komi = array();
-   if( $trule->AdjKomi )
+   if ( $trule->AdjKomi )
       $adj_komi[] = sprintf( T_('adjusted by %s points#komi'),
             spacing( ($trule->AdjKomi > 0 ? '+' : '') . sprintf('%.1f', $trule->AdjKomi), 1, 'b') );
-   if( $trule->JigoMode == JIGOMODE_ALLOW_JIGO )
+   if ( $trule->JigoMode == JIGOMODE_ALLOW_JIGO )
       $adj_komi[] = T_('Jigo allowed');
-   elseif( $trule->JigoMode == JIGOMODE_NO_JIGO )
+   elseif ( $trule->JigoMode == JIGOMODE_NO_JIGO )
       $adj_komi[] = T_('No Jigo allowed');
 
    $adj_handi = array();
-   if( $trule->AdjHandicap )
+   if ( $trule->AdjHandicap )
       $adj_handi[] = sprintf( T_('adjusted by %s stones#handi'),
             spacing( ($trule->AdjHandicap > 0 ? '+' : '') . $trule->AdjHandicap, 1, 'b') );
 
    $lim_handi = DefaultMaxHandicap::build_text_handicap_limits( $trule->Size, $trule->MinHandicap, $trule->MaxHandicap );
-   if( $lim_handi )
+   if ( $lim_handi )
       $adj_handi[] = $lim_handi;
 
    $itable = new Table_info('gamerules', TABLEOPT_LABEL_COLON);
-   if( $trule->ShapeID && $trule->ShapeSnapshot )
+   if ( $trule->ShapeID && $trule->ShapeSnapshot )
    {
       $arr_shape = GameSnapshot::parse_check_extended_snapshot($trule->ShapeSnapshot);
-      if( is_array($arr_shape) )
+      if ( is_array($arr_shape) )
       {
          $itable->add_sinfo( T_('Shape-Game'),
                ShapeControl::build_snapshot_info(
@@ -359,22 +359,22 @@ function echo_tournament_rules( $tourney, $trule )
       ( $trule->needsCalculatedHandicap() ? T_('calculated stones') : sprintf( T_('%s stones'), $trule->Handicap) )
       . ', ' .
       ( $trule->needsCalculatedKomi() ? T_('calculated komi') : sprintf( T_('%s points komi'), $trule->Komi) ));
-   if( count($adj_handi) )
+   if ( count($adj_handi) )
       $itable->add_sinfo( T_('Handicap adjustment'), implode(', ', $adj_handi) );
-   if( count($adj_komi) )
+   if ( count($adj_komi) )
       $itable->add_sinfo( T_('Komi adjustment'), implode(', ', $adj_komi) );
-   if( ENABLE_STDHANDICAP )
+   if ( ENABLE_STDHANDICAP )
       $itable->add_sinfo( T_('Standard placement'), yesno($trule->StdHandicap) );
    $itable->add_sinfo( T_('Main time'), TimeFormat::echo_time($trule->Maintime)
          . ( ($trule->Byotime == 0) ? SMALL_SPACING.T_('(absolute time)') : '' ));
-   if( $trule->Byotime > 0 )
+   if ( $trule->Byotime > 0 )
       $itable->add_sinfo(
          TimeFormat::echo_byotype($trule->Byotype),
          TimeFormat::echo_time_limit( -1, $trule->Byotype, $trule->Byotime, $trule->Byoperiods, 0) );
    $itable->add_sinfo( T_('Clock runs on weekends'), yesno($trule->WeekendClock) );
    $itable->add_sinfo( T_('Rated'), yesno($trule->Rated) );
 
-   if( $trule->Notes != '')
+   if ( $trule->Notes != '')
       echo make_html_safe( $trule->Notes, true ), "<br><br>\n";
 
    echo T_('The following game rules are used for this tournament'), ':',
@@ -388,37 +388,37 @@ function echo_tournament_registration( $tprops )
    $arr_tprops = array();
 
    // limit register end-time
-   if( $tprops->RegisterEndTime )
+   if ( $tprops->RegisterEndTime )
       $arr_tprops[] = sprintf( T_('Registration phase ends on [%s]#tourney'), formatDate($tprops->RegisterEndTime) );
 
    // limit participants
-   if( $tprops->MinParticipants > 0 && $tprops->MaxParticipants > 0 )
+   if ( $tprops->MinParticipants > 0 && $tprops->MaxParticipants > 0 )
       $arr_tprops[] = sprintf( T_('Tournament needs: min. %s and max. %s participants'),
             $tprops->MinParticipants, $tprops->MaxParticipants );
-   elseif( $tprops->MinParticipants > 0 )
+   elseif ( $tprops->MinParticipants > 0 )
       $arr_tprops[] = sprintf( T_('Tournament needs: min. %s participants'), $tprops->MinParticipants );
-   elseif( $tprops->MaxParticipants > 0 )
+   elseif ( $tprops->MaxParticipants > 0 )
       $arr_tprops[] = sprintf( T_('Tournament needs: max. %s participants'), $tprops->MaxParticipants );
 
    // use-rating-mode, limit user-rating
    $arr_tprops[] = TournamentProperties::getRatingUseModeText( $tprops->RatingUseMode, false );
-   if( $tprops->UserRated )
+   if ( $tprops->UserRated )
       $arr_tprops[] = sprintf( T_('User rating must be between [%s - %s].'),
             echo_rating( $tprops->UserMinRating, false ),
             echo_rating( $tprops->UserMaxRating, false ));
 
    // limit games-number
-   if( $tprops->UserMinGamesFinished > 0 )
+   if ( $tprops->UserMinGamesFinished > 0 )
       $arr_tprops[] = sprintf( T_('User must have at least %s finished games.'),
             $tprops->UserMinGamesFinished );
-   if( $tprops->UserMinGamesRated > 0 )
+   if ( $tprops->UserMinGamesRated > 0 )
       $arr_tprops[] = sprintf( T_('User must have at least %s rated finished games.'),
             $tprops->UserMinGamesRated );
 
-   if( count($arr_tprops) )
+   if ( count($arr_tprops) )
       echo T_('To register for this tournament the following criteria must match'), ':',
            '<ul><li>', implode("\n<li>", $arr_tprops), "</ul>\n";
-   if( $tprops->Notes != '' )
+   if ( $tprops->Notes != '' )
       echo make_html_safe($tprops->Notes, true), "<br><br>\n";
 }//echo_tournament_registration
 
@@ -438,7 +438,7 @@ function make_table_tournament_participant_counts( $page, $tourney, $arr_tp_cnt,
    $table->add_tablehead( 1, T_('Status#header').':', 'BoldC' );
    $col = 2;
    $arr_rndcnt = array();
-   foreach( $ARR_TP_STATUS as $tp_status )
+   foreach ( $ARR_TP_STATUS as $tp_status )
    {
       $table->add_tablehead( $col++, TournamentParticipant::getStatusText($tp_status), 'NumberC' );
       $arr_rndcnt[$tp_status] = 0;
@@ -448,12 +448,12 @@ function make_table_tournament_participant_counts( $page, $tourney, $arr_tp_cnt,
    // fill rounds
    $sum_all = 0;
    $has_only_one_round = ( count($arr_tp_cnt) == 1 );
-   foreach( $arr_tp_cnt as $round => $arr )
+   foreach ( $arr_tp_cnt as $round => $arr )
    {
       $row_arr = array( 1 => sprintf( T_('Round %s#header'), $round ) );
       $col = 2;
       $round_sum = 0;
-      foreach( $ARR_TP_STATUS as $tp_status )
+      foreach ( $ARR_TP_STATUS as $tp_status )
       {
          $row_arr[$col++] = @$arr[$tp_status]; // empty if not set
          $cnt = (int)@$arr[$tp_status];
@@ -462,14 +462,14 @@ function make_table_tournament_participant_counts( $page, $tourney, $arr_tp_cnt,
          $arr_rndcnt[$tp_status] += $cnt;
       }
       $row_arr[$col++] = $round_sum;
-      if( !$has_only_one_round || $show_single_round )
+      if ( !$has_only_one_round || $show_single_round )
          $table->add_row( $row_arr );
    }
 
    // summary row
    $row_arr = array( 1 => T_('Sum#header'), 'extra_class' => 'Sum' );
    $col = 2;
-   foreach( $ARR_TP_STATUS as $tp_status )
+   foreach ( $ARR_TP_STATUS as $tp_status )
       $row_arr[$col++] = $arr_rndcnt[$tp_status];
    $row_arr[$col++] = $sum_all;
    $table->add_row( $row_arr );

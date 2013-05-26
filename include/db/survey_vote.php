@@ -87,7 +87,7 @@ class SurveyVote
 
    public function fillEntityData( $data=null )
    {
-      if( is_null($data) )
+      if ( is_null($data) )
          $data = $GLOBALS['ENTITY_SURVEY_VOTE']->newEntityData();
       $data->set_value( 'soid', $this->soid );
       $data->set_value( 'uid', $this->uid );
@@ -102,9 +102,9 @@ class SurveyVote
    public static function build_query_sql( $soid=0, $uid=0 )
    {
       $qsql = $GLOBALS['ENTITY_SURVEY_VOTE']->newQuerySQL('SV');
-      if( $soid > 0 )
+      if ( $soid > 0 )
          $qsql->add_part( SQLP_WHERE, "SV.soid=$soid" );
-      if( $uid > 0 )
+      if ( $uid > 0 )
          $qsql->add_part( SQLP_WHERE, "SV.uid=$uid" );
       return $qsql;
    }
@@ -146,7 +146,7 @@ class SurveyVote
       $iterator->setResultRows( mysql_num_rows($result) );
 
       $iterator->clearItems();
-      while( $row = mysql_fetch_array( $result ) )
+      while ( $row = mysql_fetch_array( $result ) )
       {
          $s_vote = self::new_from_row( $row );
          $iterator->addItem( $s_vote, $row );
@@ -163,14 +163,14 @@ class SurveyVote
     */
    public static function persist_survey_votes( $sid, $uid, $arr_upd )
    {
-      if( !is_array($arr_upd) || count($arr_upd) == 0 )
+      if ( !is_array($arr_upd) || count($arr_upd) == 0 )
          return false;
 
       $data = $GLOBALS['ENTITY_SURVEY_VOTE']->newEntityData();
       $data->set_value( 'uid', (int)$uid );
 
       $arr_inserts = array();
-      foreach( $arr_upd as $soid => $points )
+      foreach ( $arr_upd as $soid => $points )
       {
          $data->set_value( 'soid', (int)$soid );
          $data->set_value( 'Points', (int)$points );

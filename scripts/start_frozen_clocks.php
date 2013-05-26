@@ -30,11 +30,11 @@ require_once 'include/move.php';
    set_time_limit(300); //max. 5min
 
    $logged_in = who_is_logged( $player_row);
-   if( !$logged_in )
+   if ( !$logged_in )
       error('login_if_not_logged_in', 'scripts.start_frozen_clock');
-   if( $player_row['ID'] <= GUESTS_ID_MAX )
+   if ( $player_row['ID'] <= GUESTS_ID_MAX )
       error('not_allowed_for_guest', 'scripts.start_frozen_clock');
-   if( !(@$player_row['admin_level'] & ADMIN_DATABASE) )
+   if ( !(@$player_row['admin_level'] & ADMIN_DATABASE) )
       error('adminlevel_too_low', 'scripts.start_frozen_clock');
 
    $page = $_SERVER['PHP_SELF'];
@@ -43,10 +43,10 @@ require_once 'include/move.php';
    start_html('start_frozen_clocks', 0);
 
 echo ">>>> Should not be used now. Do not run it before a check."; end_html(); exit;
-   if( $do_it=@$_REQUEST['do_it'] )
+   if ( $do_it=@$_REQUEST['do_it'] )
    {
       function dbg_query($s) {
-        if( !mysql_query( $s) )
+        if ( !mysql_query( $s) )
            die("<BR>$s;<BR>" . mysql_error() );
         echo " --- fixed. ";
       }
@@ -76,8 +76,8 @@ echo ">>>> Should not be used now. Do not run it before a check."; end_html(); e
    $n= (int)@mysql_num_rows($result);
    echo "\n<br>=&gt; result: $n rows<p></p>\n";
 
-   if( $n > 0 )
-   while( $row = mysql_fetch_assoc( $result ) )
+   if ( $n > 0 )
+   while ( $row = mysql_fetch_assoc( $result ) )
    {
       echo '<hr>Game_ID: ' . $row["gid"] . ": &nbsp; " .
          "ClockUsed: " . $row['ClockUsed'] .

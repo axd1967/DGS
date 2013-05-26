@@ -31,52 +31,52 @@ require_once 'include/std_functions.php';
    $logged_in = who_is_logged( $player_row);
    $my_id = @$player_row['ID'];
 
-   if( isset($_POST['goback']) )
+   if ( isset($_POST['goback']) )
       jump_to("index.php");
 
    $pswduser = get_request_arg('pswduser');
-   if( strtolower($pswduser) == 'guest' )
+   if ( strtolower($pswduser) == 'guest' )
       error('not_allowed_for_guest', 'send_new_password.2');
 
    $result = db_query( "send_new_password.find_player($pswduser)",
       "SELECT ID, Newpassword, Email " .
          "FROM Players WHERE Handle='".mysql_addslashes($pswduser)."' LIMIT 1" );
-   if( @mysql_num_rows($result) != 1 )
+   if ( @mysql_num_rows($result) != 1 )
       error('unknown_user', "send_new_password.find_player2($pswduser)");
 
    $row = mysql_fetch_assoc($result);
-   if( $row['ID'] <= GUESTS_ID_MAX )
+   if ( $row['ID'] <= GUESTS_ID_MAX )
       error('not_allowed_for_guest', 'send_new_password.3');
 
-   if( !empty($row['Newpassword']) )
+   if ( !empty($row['Newpassword']) )
    {
-      if( @$_POST['overnew'] )
+      if ( @$_POST['overnew'] )
       {
          // Could force email only if admin
-         if( !$logged_in )
+         if ( !$logged_in )
             error('not_logged_in', "send_new_password.check_admin.password($my_id,$pswduser)");
-         if( !(@$player_row['admin_level'] & ADMIN_PASSWORD) )
+         if ( !(@$player_row['admin_level'] & ADMIN_PASSWORD) )
             error('adminlevel_too_low', "send_new_password.reset_password($my_id,$pswduser)");
 
          $row['Newpassword'] = '';
       }
    }
 
-   if( !empty($row['Newpassword']) )
+   if ( !empty($row['Newpassword']) )
       error('newpassword_already_sent', "send_new_password.already_sent($pswduser)");
 
-   if( !empty($_POST['email']) )
+   if ( !empty($_POST['email']) )
    {
       // Could force email only if admin
-      if( !$logged_in )
+      if ( !$logged_in )
          error('not_logged_in', "send_new_password.check_admin.email($my_id,$pswduser)");
-      if( !(@$player_row['admin_level'] & ADMIN_PASSWORD) )
+      if ( !(@$player_row['admin_level'] & ADMIN_PASSWORD) )
          error('adminlevel_too_low', "send_new_password.set_email($my_id,$pswduser)");
 
       $row['Email'] = trim($_POST['email']);
    }
 
-   if( empty($row['Email']) )
+   if ( empty($row['Email']) )
       error('no_email', "send_new_password.miss_email($my_id,$pswduser)");
 
    $Email = trim($row['Email']);
@@ -115,7 +115,7 @@ Both the old and the new password will also be valid until
    ta_end();
 
    $msg = urlencode(T_("New password sent!"));
-   if( $logged_in )
+   if ( $logged_in )
       jump_to("status.php?sysmsg=$msg");
    jump_to("index.php?sysmsg=$msg");
 }

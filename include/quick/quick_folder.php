@@ -70,7 +70,7 @@ class QuickHandlerFolder extends QuickHandler
 
       // prepare command: list
 
-      if( $cmd == QCMD_LIST )
+      if ( $cmd == QCMD_LIST )
       {
          $this->list_offset = $this->list_limit = 0; // return all entries
          $this->cfg_pages = ConfigPages::load_config_pages( $uid, CFGCOLS_STATUS_GAMES );
@@ -82,16 +82,16 @@ class QuickHandlerFolder extends QuickHandler
    public function process()
    {
       $cmd = $this->quick_object->cmd;
-      if( $cmd == QCMD_LIST )
+      if ( $cmd == QCMD_LIST )
          $this->process_cmd_list();
    }
 
    private function process_cmd_list()
    {
       $out = array();
-      if( is_array($this->folders) )
+      if ( is_array($this->folders) )
       {
-         foreach( $this->folders as $folder_id => $arr )
+         foreach ( $this->folders as $folder_id => $arr )
             $out[] = self::build_obj_folder( $folder_id, $arr, /*with*/true, $this->cfg_pages );
       }
 
@@ -103,12 +103,12 @@ class QuickHandlerFolder extends QuickHandler
 
    public static function build_obj_folder( $folder_id, $arr, $with=true, $cfg_pages=null )
    {
-      if( !$with )
+      if ( !$with )
          return array( 'id' => $folder_id );
 
-      if( $folder_id == FOLDER_DESTROYED ) // invisible-folder
+      if ( $folder_id == FOLDER_DESTROYED ) // invisible-folder
          $arr = array( T_('Destroyed#folder'), 'FF88EE00', '000000' );
-      elseif( $folder_id == FOLDER_ALL_RECEIVED ) // pseudo folder
+      elseif ( $folder_id == FOLDER_ALL_RECEIVED ) // pseudo folder
          $arr = array( T_('All Received'), '00000000', '000000' );
 
       $out = array(
@@ -118,7 +118,7 @@ class QuickHandlerFolder extends QuickHandler
          'color_bg'  => $arr[1],
          'color_fg'  => $arr[2],
       );
-      if( !is_null($cfg_pages) )
+      if ( !is_null($cfg_pages) )
          $out['on_status'] = ($cfg_pages->get_status_folder_visibility($folder_id) > 0) ? 1 : 0;
       return $out;
    }//build_obj_folder

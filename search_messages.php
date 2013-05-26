@@ -32,7 +32,7 @@ require_once 'include/classlib_profile.php';
    connect2mysql();
 
    $logged_in = who_is_logged( $player_row);
-   if( !$logged_in )
+   if ( !$logged_in )
       error('login_if_not_logged_in', 'search_messages');
 
    $page = 'search_messages.php?';
@@ -44,7 +44,7 @@ require_once 'include/classlib_profile.php';
    $qsql = new QuerySQL(); // add extra-parts to SQL-statement
 
    $arr_chkfolders = array();
-   foreach( $my_folders as $folder_id => $arr ) // arr=( Name, BGColor, FGColor )
+   foreach ( $my_folders as $folder_id => $arr ) // arr=( Name, BGColor, FGColor )
    {
       $folder_box = echo_folder_box( $my_folders, $folder_id, null, '', "%%s%s");
       $arr_chkfolders[$folder_box] = $folder_id;

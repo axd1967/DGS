@@ -36,7 +36,7 @@ require_once 'include/classlib_userpicture.php';
    connect2mysql();
 
    $logged_in = who_is_logged( $player_row);
-   if( !$logged_in )
+   if ( !$logged_in )
       error('login_if_not_logged_in', 'users');
    $uid = $player_row['ID'];
    //$user = $player_row['Handle'];
@@ -48,11 +48,11 @@ require_once 'include/classlib_userpicture.php';
    $observe_gid = (int)get_request_arg('observe');
 
    $tid = (int)get_request_arg('tid'); // convenience for tourney-invites
-   if( !ALLOW_TOURNAMENTS || $tid < 0 ) $tid = 0;
+   if ( !ALLOW_TOURNAMENTS || $tid < 0 ) $tid = 0;
 
    $show_pos = (int)get_request_arg('showpos'); // 1=find-initial-pos, 2=browse-on-found-pos
    $has_rating = ( $player_row['RatingStatus'] != RATING_NONE );
-   if( !$has_rating )
+   if ( !$has_rating )
       $show_pos = 0;
 
    // config for usertype-filter
@@ -74,7 +74,7 @@ require_once 'include/classlib_userpicture.php';
    $utable = new Table( 'user', $page, $cfg_tblcols, '', TABLE_ROW_NUM|TABLE_ROWS_NAVI );
    $utable->set_profile_handler( $search_profile );
    $search_profile->handle_action();
-   if( $has_rating )
+   if ( $has_rating )
       $utable->set_extend_table_form_function( 'users_show_pos_extend_table_form' ); //func
 
    // table filters
@@ -119,11 +119,11 @@ require_once 'include/classlib_userpicture.php';
    $utable->register_filter( $ufilter );
    $utable->add_or_del_column();
 
-   if( $observe_gid || $tid )
+   if ( $observe_gid || $tid )
    {
       $rp = new RequestParameters();
-      if( $observe_gid ) $rp->add_entry( 'observe', $observe_gid );
-      if( $tid ) $rp->add_entry( 'tid', $tid );
+      if ( $observe_gid ) $rp->add_entry( 'observe', $observe_gid );
+      if ( $tid ) $rp->add_entry( 'tid', $tid );
       $utable->add_external_parameters( $rp, true );
    }
 
@@ -134,7 +134,7 @@ require_once 'include/classlib_userpicture.php';
    $header_1 = ($tid) ? T_('Invite#header') : T_('ID#header');
    $utable->add_tablehead( 1, $header_1, 'Button', TABLE_NO_HIDE, 'ID+');
    $utable->add_tablehead(18, T_('Type#header'), 'Enum', 0, 'Type+');
-   if( USERPIC_FOLDER != '' )
+   if ( USERPIC_FOLDER != '' )
       $utable->add_tablehead(19, new TableHead( T_('User picture#header'),
          'images/picture.gif', T_('Indicator for existing user picture') ), 'Image', 0, 'UserPicture+' );
    $utable->add_tablehead( 2, T_('Name#header'), 'User', 0, 'Name+');
@@ -157,7 +157,7 @@ require_once 'include/classlib_userpicture.php';
    $utable->add_tablehead(14, T_('Last access#header'), 'Date', 0, 'Lastaccess-');
    $utable->add_tablehead(15, T_('Last move#header'), 'Date', 0, 'LastMove-');
 
-   if( $show_pos )
+   if ( $show_pos )
    {
       $utable->set_sort( 5 ); // enforce rating-sort for showing players absolute pos
       $rp = new RequestParameters( null, false );
@@ -183,7 +183,7 @@ require_once 'include/classlib_userpicture.php';
       'UNIX_TIMESTAMP(P.Registerdate) AS X_Registerdate' );
    $qsql->add_part( SQLP_FROM, 'Players AS P' );
 
-   if( $observe_gid )
+   if ( $observe_gid )
       $qsql->add_part( SQLP_FROM, "INNER JOIN Observers AS OB ON P.ID=OB.uid AND OB.gid=$observe_gid" );
 
    $query_ufilter = $utable->get_query(); // clause-parts for filter
@@ -191,7 +191,7 @@ require_once 'include/classlib_userpicture.php';
 
    // find absolute player-position in (filtered) users-list
    $show_pivot = ( $show_pos == 2 );
-   if( $show_pos == 1 )
+   if ( $show_pos == 1 )
    {
       $my_rating = $player_row['Rating2'];
       $qsql_upos = $qsql->duplicate();
@@ -199,7 +199,7 @@ require_once 'include/classlib_userpicture.php';
       $qsql_upos->add_part( SQLP_FIELDS, "COUNT(*) AS X_RatingPos" );
       $qsql_upos->add_part( SQLP_WHERE, "P.Rating2 > $my_rating" );
       $row_upos = mysql_single_fetch( 'users.find_upos', $qsql_upos->get_select() . $order );
-      if( $row_upos )
+      if ( $row_upos )
       {
          $upos = (int)$row_upos['X_RatingPos'];
          $max_rows = $player_row['TableMaxRows'];
@@ -209,7 +209,7 @@ require_once 'include/classlib_userpicture.php';
          $show_pivot = true;
       }
    }
-   if( $show_pivot )
+   if ( $show_pivot )
    {
       // order pivot-user at top of users with same rating
       $qsql->add_part( SQLP_FIELDS, "(P.ID=$uid) AS X_PivotOrder" );
@@ -223,11 +223,11 @@ require_once 'include/classlib_userpicture.php';
    $utable->set_found_rows( mysql_found_rows('users.found_rows') );
 
 
-   if( $f_active->get_value() )
+   if ( $f_active->get_value() )
       $title = T_('Active users');
    else
       $title = T_('Users');
-   if( $observe_gid )
+   if ( $observe_gid )
    {
       $title .= ' - '
          . sprintf( T_('Observers of game %s'),
@@ -241,64 +241,64 @@ require_once 'include/classlib_userpicture.php';
    echo "<h3 class=Header>$title</h3>\n";
 
 
-   while( ($row = mysql_fetch_assoc( $result )) && $show_rows-- > 0 )
+   while ( ($row = mysql_fetch_assoc( $result )) && $show_rows-- > 0 )
    {
       $ID = $row['ID'];
 
       $urow_strings = array();
-      if( $utable->Is_Column_Displayed[1] )
+      if ( $utable->Is_Column_Displayed[1] )
       {
          $ulink = ( $tid )
             ? "tournaments/edit_participant.php?tid=$tid".URI_AMP."uid=$ID"
             : "userinfo.php?uid=$ID";
          $urow_strings[1] = button_TD_anchor( $ulink, $ID );
       }
-      if( $utable->Is_Column_Displayed[2] )
+      if ( $utable->Is_Column_Displayed[2] )
          $urow_strings[2] = "<A href=\"userinfo.php?uid=$ID\">" .
             make_html_safe($row['Name']) . "</A>";
-      if( $utable->Is_Column_Displayed[3] )
+      if ( $utable->Is_Column_Displayed[3] )
          $urow_strings[3] = "<A href=\"userinfo.php?uid=$ID\">" . $row['Handle'] . "</A>";
-      if( $utable->Is_Column_Displayed[16] )
+      if ( $utable->Is_Column_Displayed[16] )
          $urow_strings[16] = getCountryFlagImage( @$row['Country'] );
-      if( $utable->Is_Column_Displayed[4] )
+      if ( $utable->Is_Column_Displayed[4] )
          $urow_strings[4] = make_html_safe(@$row['Rankinfo'],INFO_HTML);
-      if( $utable->Is_Column_Displayed[5] )
+      if ( $utable->Is_Column_Displayed[5] )
          $urow_strings[5] = echo_rating(@$row['Rating2'],true,$ID);
-      if( $utable->Is_Column_Displayed[6] )
+      if ( $utable->Is_Column_Displayed[6] )
          $urow_strings[6] = make_html_safe($row['Open'],INFO_HTML);
-      if( $utable->Is_Column_Displayed[7] )
+      if ( $utable->Is_Column_Displayed[7] )
          $urow_strings[7] = $row['Games'];
-      if( $utable->Is_Column_Displayed[8] )
+      if ( $utable->Is_Column_Displayed[8] )
          $urow_strings[8] = $row['Running'];
-      if( $utable->Is_Column_Displayed[9] )
+      if ( $utable->Is_Column_Displayed[9] )
          $urow_strings[9] = $row['Finished'];
-      if( $utable->Is_Column_Displayed[17] )
+      if ( $utable->Is_Column_Displayed[17] )
          $urow_strings[17] = $row['RatedGames'];
-      if( $utable->Is_Column_Displayed[10] )
+      if ( $utable->Is_Column_Displayed[10] )
          $urow_strings[10] = $row['Won'];
-      if( $utable->Is_Column_Displayed[11] )
+      if ( $utable->Is_Column_Displayed[11] )
          $urow_strings[11] = $row['Lost'];
-      if( $utable->Is_Column_Displayed[12] )
+      if ( $utable->Is_Column_Displayed[12] )
          $urow_strings[12] = ( is_numeric($row['Percent']) ? $row['Percent'].'%' : '' );
-      if( $utable->Is_Column_Displayed[13] )
+      if ( $utable->Is_Column_Displayed[13] )
          $urow_strings[13] = activity_string( $row['ActivityLevel']);
-      if( $utable->Is_Column_Displayed[14] )
+      if ( $utable->Is_Column_Displayed[14] )
          $urow_strings[14] = ($row['LastaccessU'] > 0 ? date(DATE_FMT2, $row['LastaccessU']) : '' );
-      if( $utable->Is_Column_Displayed[15] )
+      if ( $utable->Is_Column_Displayed[15] )
          $urow_strings[15] = ($row['LastMoveU'] > 0 ? date(DATE_FMT2, $row['LastMoveU']) : '' );
-      if( $utable->Is_Column_Displayed[18] )
+      if ( $utable->Is_Column_Displayed[18] )
          $urow_strings[18] = build_usertype_text($row['Type'], ARG_USERTYPE_NO_TEXT, true, ' ');
-      if( @$row['UserPicture'] && $utable->Is_Column_Displayed[19] )
+      if ( @$row['UserPicture'] && $utable->Is_Column_Displayed[19] )
          $urow_strings[19] = UserPicture::getImageHtml( @$row['Handle'], true );
-      if( $utable->Is_Column_Displayed[20] )
+      if ( $utable->Is_Column_Displayed[20] )
       {
          $is_online = ($NOW - @$row['LastaccessU']) < SPAN_ONLINE_MINS * SECS_PER_MIN; // online up to X mins ago
          $urow_strings[20] = echo_image_online( $is_online, @$row['LastaccessU'], false );
       }
-      if( $utable->Is_Column_Displayed[22] )
+      if ( $utable->Is_Column_Displayed[22] )
          $urow_strings[22] = ($row['X_Registerdate'] > 0 ? date(DATE_FMT_YMD, $row['X_Registerdate']) : '' );
 
-      if( $show_pivot && ($ID == $uid ) ) // mine
+      if ( $show_pivot && ($ID == $uid ) ) // mine
          $urow_strings['extra_class'] = 'ShowPosUser';
       $utable->add_row( $urow_strings );
    }

@@ -43,17 +43,17 @@ var getUserHandle = function()
    var snap;
    
    snap = xPath(document.documentElement, "//table[@id='page_head']");
-   if( snap.snapshotLength > 0 )
+   if ( snap.snapshotLength > 0 )
       snap = xPath(snap.snapshotItem(0), "*//td[last()]//*[text()]");
 
-   if( snap.snapshotLength <= 0 )
+   if ( snap.snapshotLength <= 0 )
       snap = xPath(document.documentElement, "//a[@id='loggedId']");
 
-   if( snap.snapshotLength <= 0 )
+   if ( snap.snapshotLength <= 0 )
       return '';
    snap = snap.snapshotItem(0).textContent;
    snap = snap.match(/([\-\+_a-zA-Z0-9]+)\s*$/);
-   if( !snap )
+   if ( !snap )
       return '';
    return snap[1];
 } //getUserHandle
@@ -85,13 +85,13 @@ function createButton(func, tit, alt, width, height, src, bgcol) {
 function getbgcolor(elt)
 {
    var col = '';
-   while( elt != undefined )
+   while ( elt != undefined )
    {
       col = getComputedStyle(elt, '');
       col= col.backgroundColor;
-      if( col == undefined || col == 'transparent' )
+      if ( col == undefined || col == 'transparent' )
          col = '';
-      if( col > '' )
+      if ( col > '' )
          break;
       elt= elt.parentNode;
    }
@@ -100,17 +100,17 @@ function getbgcolor(elt)
 
 var DGSsh_toggle = function(event) {
 //alert('e='+typeof(event));
-   if( event == undefined )
+   if ( event == undefined )
       return;
-   if( typeof(event) != 'object' )
+   if ( typeof(event) != 'object' )
       return;
 
    var link, gmvar, div, but, hidden;
 
-   if( event.currentTarget == undefined )
+   if ( event.currentTarget == undefined )
    {
       link = event;
-      if( link.getAttribute('_gmvar') == undefined )
+      if ( link.getAttribute('_gmvar') == undefined )
          return;
       gmvar = link.getAttribute('_gmvar');
       hidden = GM_getValue(gmvar, false); //reset state
@@ -120,7 +120,7 @@ var DGSsh_toggle = function(event) {
       event.preventDefault();
       event.stopPropagation();
       link = event.currentTarget;
-      if( link.getAttribute('_gmvar') == undefined )
+      if ( link.getAttribute('_gmvar') == undefined )
          return;
       gmvar = link.getAttribute('_gmvar');
       hidden = !GM_getValue(gmvar, false); //toggle state
@@ -131,7 +131,7 @@ var DGSsh_toggle = function(event) {
    link.blur();
    div = DGSsh_divs[link.getAttribute('_divnb')];
    but = link.firstChild;
-   if( hidden )
+   if ( hidden )
    {
       but.src= but.getAttribute('_hsrc');
       but.alt= but.getAttribute('_halt');
@@ -154,16 +154,16 @@ var DGSsh_init = function()
    var sects, elt, node;
    sects = xPath(document.documentElement,
                "//td[@id='pageBody']");
-   if( sects.snapshotLength <= 0 )
+   if ( sects.snapshotLength <= 0 )
       sects = xPath(document.documentElement,
                   "//td[@id='page_body']");
-   if( sects.snapshotLength <= 0 )
+   if ( sects.snapshotLength <= 0 )
       return 1;
 
    sects = xPath(sects.snapshotItem(0),
                "//h3");
                //"h3 | form//h3[1]");
-   if( sects.snapshotLength <= 1 )
+   if ( sects.snapshotLength <= 1 )
       return 2;
 
    var splus= 'data:image/gif;base64,'+
@@ -182,31 +182,31 @@ var DGSsh_init = function()
 
    //alert('h3='+sects.snapshotLength);
    var divcnt = 0;
-   for( var i=sects.snapshotLength-1; i>=0 ; i--)
+   for ( var i=sects.snapshotLength-1; i>=0 ; i--)
    {
       node = sects.snapshotItem(i);
       //alert('h3.0='+node.textContent);
 
       var id = '';
       var div = document.createElement('div');
-      while( elt=node.nextSibling )
+      while ( elt=node.nextSibling )
       {
          //alert('d0.1='+elt.nodeName);
-         if( id == '' && elt.id != undefined )
+         if ( id == '' && elt.id != undefined )
             id = elt.id;
-         if( elt.nodeName.substr(0,1).toUpperCase() == 'H' ) //'HR' or 'H3'
+         if ( elt.nodeName.substr(0,1).toUpperCase() == 'H' ) //'HR' or 'H3'
             break;
          div.appendChild(elt); //move it, so remove it from node.nextSibling
          //alert('d0.2='+id);
       }
       //alert('h3.1='+div.innerHTML);
       node.parentNode.insertBefore(div, node.nextSibling);
-      if( id == '' )
+      if ( id == '' )
          id = i;
       //alert('h3.2='+id);
 
       var but= getbgcolor(node);
-      if( but == '' )
+      if ( but == '' )
          but = '#F7F5e3'; // #F7F5E3 page background-color
       but= createButton(DGSsh_toggle, 'Hide section', '-', 8, 8, smnus, but);
       but.setAttribute('_gmvar', DGSsh_prefix+id+'.hidden'); //GM var name
@@ -225,9 +225,9 @@ var DGSsh_init = function()
       node.insertBefore(but, node.firstChild);
       elt= GM_getValue(but.getAttribute('_gmvar'), false); //fails if var is reseted with about:config??
       //alert('h3.5='+elt);
-      if( elt == undefined )
+      if ( elt == undefined )
          elt= false;
-      if( elt )
+      if ( elt )
          DGSsh_toggle(but); //reset state
 
       //alert('h3.6='+but.getAttribute('_divnb'));

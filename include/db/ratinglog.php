@@ -80,7 +80,7 @@ class Ratinglog
    /*! \brief Inserts or updates Ratinglog-entry in database. */
    public function persist()
    {
-      if( $this->ID > 0 )
+      if ( $this->ID > 0 )
          $success = $this->update();
       else
          $success = $this->insert();
@@ -93,7 +93,7 @@ class Ratinglog
 
       $entityData = $this->fillEntityData();
       $result = $entityData->insert( "Ratinglog.insert(%s)" );
-      if( $result )
+      if ( $result )
          $this->ID = mysql_insert_id();
       return $result;
    }
@@ -112,7 +112,7 @@ class Ratinglog
 
    public function fillEntityData( $data=null )
    {
-      if( is_null($data) )
+      if ( is_null($data) )
          $data = $GLOBALS['ENTITY_RATINGLOG']->newEntityData();
       $data->set_value( 'ID', $this->ID );
       $data->set_value( 'uid', $this->uid );
@@ -132,9 +132,9 @@ class Ratinglog
    public static function build_query_sql( $gid=0, $uid=0 )
    {
       $qsql = $GLOBALS['ENTITY_RATINGLOG']->newQuerySQL('RL');
-      if( $gid > 0 )
+      if ( $gid > 0 )
          $qsql->add_part( SQLP_WHERE, "RL.gid='$gid'" );
-      if( $uid > 0 )
+      if ( $uid > 0 )
          $qsql->add_part( SQLP_WHERE, "RL.uid='$uid'" );
       return $qsql;
    }
@@ -163,7 +163,7 @@ class Ratinglog
     */
    public static function load_ratinglog_with_query( $query_qsql )
    {
-      if( !($query_qsql instanceof QuerySQL) )
+      if ( !($query_qsql instanceof QuerySQL) )
          error('invalid_args', "Ratinglog:load_ratinglog_with_query");
 
       $qsql = self::build_query_sql();
@@ -185,7 +185,7 @@ class Ratinglog
       $iterator->setResultRows( mysql_num_rows($result) );
 
       $iterator->clearItems();
-      while( $row = mysql_fetch_array( $result ) )
+      while ( $row = mysql_fetch_array( $result ) )
       {
          $rlog = self::new_from_row( $row );
          $iterator->addItem( $rlog, $row );

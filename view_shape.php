@@ -32,14 +32,14 @@ $GLOBALS['ThePage'] = new Page('ShapeView');
    connect2mysql();
 
    $logged_in = who_is_logged( $player_row);
-   if( !$logged_in )
+   if ( !$logged_in )
       error('login_if_not_logged_in', 'view_shape');
    $my_id = $player_row['ID'];
    ConfigBoard::load_config_board($my_id); // load for displaying board
 
    $shape_id = (int)get_request_arg('shape');
    $raw_snapshot = get_request_arg('snapshot'); // optional arg
-   if( $shape_id < 0 )
+   if ( $shape_id < 0 )
       $shape_id = 0;
 
    $page = "view_shape.php";
@@ -50,9 +50,9 @@ $GLOBALS['ThePage'] = new Page('ShapeView');
 
    // load shape for shape-id
    $shape = ($shape_id) ? Shape::load_shape($shape_id) : null;
-   if( $shape_id && is_null($shape) )
+   if ( $shape_id && is_null($shape) )
       error('unknown_shape', "view_shape.find_shape($shape_id)");
-   if( !is_null($shape) )
+   if ( !is_null($shape) )
    {
       $shape1 = array(
             'src'       => sprintf( T_('Shape ID #%s'), $shape->ID ),
@@ -76,17 +76,17 @@ $GLOBALS['ThePage'] = new Page('ShapeView');
       ? GameSnapshot::parse_extended_snapshot($raw_snapshot) // [ Snapshot/Size/PlayColorB ]
       : null;
    $shape2 = array();
-   if( is_array($parsed_snapshot) )
+   if ( is_array($parsed_snapshot) )
    {
       $shape2['src'] = T_('Game Shape');
-      if( isset($parsed_snapshot['Size']) )
+      if ( isset($parsed_snapshot['Size']) )
          $shape2['size'] = (int)$parsed_snapshot['Size'];
       $shape_flags = ( @$parsed_snapshot['PlayColorB'] ? 0 : SHAPE_FLAG_PLAYCOLOR_W );
-      if( isset($parsed_snapshot['PlayColorB']) )
+      if ( isset($parsed_snapshot['PlayColorB']) )
          $shape2['flags'] = ShapeControl::formatFlags($shape_flags);
-      if( isset($parsed_snapshot['Snapshot']) )
+      if ( isset($parsed_snapshot['Snapshot']) )
          $shape2['snapshot'] = $parsed_snapshot['Snapshot'];
-      if( @$shape2['size'] && isset($shape2['snapshot']) )
+      if ( @$shape2['size'] && isset($shape2['snapshot']) )
       {
          $shape2['shape'] = new Shape( 0, 0, null, '', $shape2['size'], $shape_flags, $shape2['snapshot']);
          $url_snapshot = urlencode($raw_snapshot);
@@ -94,7 +94,7 @@ $GLOBALS['ThePage'] = new Page('ShapeView');
       $shape2['notes'] = '';
    }
 
-   if( !@$shape1['src'] && !@$shape2['src'] )
+   if ( !@$shape1['src'] && !@$shape2['src'] )
       error('miss_args', "view_shape.miss_shape($shape_id,$raw_snapshot)");
 
    $itable = build_info_table( $shape1, $shape2 );
@@ -107,14 +107,14 @@ $GLOBALS['ThePage'] = new Page('ShapeView');
    // show snapshot-diff
    $view_shape2 = '';
    $title_row = sprintf( "<tr><th></th><th class=\"left\">%s</th><th></th></tr>\n", T_('Shape Notes') );
-   if( !@$shape1['shape'] ) // only parsed-shape
+   if ( !@$shape1['shape'] ) // only parsed-shape
       $view_shape1 = ShapeControl::build_view_shape($shape2['shape'], $stone_size);
-   elseif( !@$shape2['shape'] ) // only db-shape
+   elseif ( !@$shape2['shape'] ) // only db-shape
       $view_shape1 = ShapeControl::build_view_shape($shape1['shape'], $stone_size);
    else // two shapes
    {
       $view_shape1 = ShapeControl::build_view_shape($shape1['shape'], $stone_size);
-      if( $shape1['snapshot'] != $shape2['snapshot'] )
+      if ( $shape1['snapshot'] != $shape2['snapshot'] )
       {
          $view_shape2 = ShapeControl::build_view_shape($shape2['shape'], $stone_size);
          $title_row = sprintf( "<tr><th>%s</th><th>%s</th><th>%s</th></tr>\n",
@@ -138,7 +138,7 @@ $GLOBALS['ThePage'] = new Page('ShapeView');
    $menu_array[T_('Show in Goban Editor')] =
       "goban_editor.php?shape=$shape_id".URI_AMP."snapshot=$url_snapshot";
    $menu_array[T_('Shapes')] = "list_shapes.php";
-   if( @$shape->ID && $url_invite_snapshot )
+   if ( @$shape->ID && $url_invite_snapshot )
    {
       $menu_array[T_('Invite')] =
          "message.php?mode=Invite".URI_AMP."shape={$shape->ID}".URI_AMP."snapshot=".urlencode($url_invite_snapshot);
@@ -162,17 +162,17 @@ function build_info_table( $shape1, $shape2 )
          'lc'        => T_('Last changed'),
       );
 
-   if( !@$shape1['src'] ) // only parsed-shape
+   if ( !@$shape1['src'] ) // only parsed-shape
       $shape = $shape2;
-   elseif( !@$shape2['src'] ) // only db-shape
+   elseif ( !@$shape2['src'] ) // only db-shape
       $shape = $shape1;
    else // 2 shapes
       $shape = ( has_shape_diff($shape1,$shape2) ? null : $shape1 );
 
    $itable = new Table_info('shape');
-   if( is_null($shape) ) // two shapes
+   if ( is_null($shape) ) // two shapes
    {
-      foreach( $descr as $key => $title )
+      foreach ( $descr as $key => $title )
       {
          $itable->add_sinfo( $title,
                array( @$shape1[$key],
@@ -183,9 +183,9 @@ function build_info_table( $shape1, $shape2 )
    }
    else // single shape
    {
-      foreach( $descr as $key => $title )
+      foreach ( $descr as $key => $title )
       {
-         if( isset($shape[$key]) )
+         if ( isset($shape[$key]) )
             $itable->add_sinfo( $title, $shape[$key] );
       }
    }
@@ -195,9 +195,9 @@ function build_info_table( $shape1, $shape2 )
 
 function has_shape_diff( $shape1, $shape2 )
 {
-   foreach( array( 'size', 'flags', 'snapshot' ) as $key )
+   foreach ( array( 'size', 'flags', 'snapshot' ) as $key )
    {
-      if( (string)@$shape1[$key] != (string)@$shape2[$key] )
+      if ( (string)@$shape1[$key] != (string)@$shape2[$key] )
          return true;
    }
    return false;

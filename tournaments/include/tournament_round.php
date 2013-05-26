@@ -86,9 +86,9 @@ class TournamentRound
 
    public function setStatus( $status, $check_only=false )
    {
-      if( !preg_match( "/^(".CHECK_TROUND_STATUS.")$/", $status ) )
+      if ( !preg_match( "/^(".CHECK_TROUND_STATUS.")$/", $status ) )
          error('invalid_args', "TournamentRound.setStatus($status)");
-      if( !$check_only )
+      if ( !$check_only )
          $this->Status = $status;
    }
 
@@ -100,7 +100,7 @@ class TournamentRound
    /*! \brief Inserts or updates tournament-round in database. */
    public function persist()
    {
-      if( $this->ID > 0 )
+      if ( $this->ID > 0 )
          $success = $this->update();
       else
          $success = $this->insert();
@@ -113,7 +113,7 @@ class TournamentRound
 
       $entityData = $this->fillEntityData(true);
       $result = $entityData->insert( "TournamentRound.insert(%s)" );
-      if( $result )
+      if ( $result )
          $this->ID = mysql_insert_id();
       self::delete_cache_tournament_round( 'TournamentRound.insert', $this->tid, $this->Round );
       return $result;
@@ -161,22 +161,22 @@ class TournamentRound
    {
       $errors = array();
 
-      if( $this->MinPoolSize < 2 || $this->MinPoolSize > TROUND_MAX_POOLSIZE )
+      if ( $this->MinPoolSize < 2 || $this->MinPoolSize > TROUND_MAX_POOLSIZE )
          $errors[] = sprintf( T_('Tournament Round min. pool size must be in range %s.'),
             build_range_text(2, TROUND_MAX_POOLSIZE) );
-      if( $this->MaxPoolSize < 2 || $this->MaxPoolSize > TROUND_MAX_POOLSIZE )
+      if ( $this->MaxPoolSize < 2 || $this->MaxPoolSize > TROUND_MAX_POOLSIZE )
          $errors[] = sprintf( T_('Tournament Round max. pool size must be in range %s.'),
             build_range_text(2, TROUND_MAX_POOLSIZE) );
-      if( $this->MinPoolSize > $this->MaxPoolSize )
+      if ( $this->MinPoolSize > $this->MaxPoolSize )
          $errors[] = T_('Tournament Round min. pool size must be smaller than max. pool size.');
 
       // NOTE: to enforce that pools of next-round get smaller, pool winner ranks must be < max-pool-size,
       //       otherwise all pool-players could proceed and the tournament will not end or will be prolonged.
-      if( $this->PoolWinnerRanks < 1 || $this->PoolWinnerRanks >= $this->MaxPoolSize )
+      if ( $this->PoolWinnerRanks < 1 || $this->PoolWinnerRanks >= $this->MaxPoolSize )
          $errors[] = sprintf( T_('Tournament Round pool winner ranks must be in range %s and smaller max. pool size [%s].'),
             build_range_text(1, TROUND_MAX_POOLSIZE), $this->MaxPoolSize );
 
-      if( $this->MaxPoolCount < 0 || $this->MaxPoolCount > TROUND_MAX_POOLCOUNT )
+      if ( $this->MaxPoolCount < 0 || $this->MaxPoolCount > TROUND_MAX_POOLCOUNT )
          $errors[] = sprintf( T_('Tournament Round max. pool count must be in range %s.'),
             build_range_text(2, TROUND_MAX_POOLCOUNT) );
 
@@ -192,7 +192,7 @@ class TournamentRound
       $arr_props[] = sprintf( '%s: %s', T_('Tournament Round Status'), self::getStatusText($this->Status) );
       $arr_props[] = sprintf( '%s: %s', T_('Min. Pool Size'), $this->MinPoolSize );
       $arr_props[] = sprintf( '%s: %s', T_('Max. Pool Size'), $this->MaxPoolSize );
-      if( $this->MaxPoolCount > 0 )
+      if ( $this->MaxPoolCount > 0 )
          $arr_props[] = sprintf( '%s: %s', T_('Maximum Pool count'), $this->MaxPoolCount );
 
       $arr_props[] = sprintf( '%s: %s', T_('Pool Count'), $this->Pools );
@@ -231,7 +231,7 @@ class TournamentRound
       $changed_by = EntityData::build_sql_value_changed_by( $player_row['Handle'] );
       $query = "INSERT INTO TournamentRound (tid,Round,Lastchanged,ChangedBy) "
              . "SELECT $tid, MAX(Round)+1, FROM_UNIXTIME($NOW), $changed_by FROM TournamentRound WHERE tid=$tid";
-      if( db_query( "TournamentRound:add_tournament_round.insert($tid)", $query ) )
+      if ( db_query( "TournamentRound:add_tournament_round.insert($tid)", $query ) )
       {
          $new_id = mysql_insert_id();
          $tround = self::load_tournament_round_by_id($new_id);
@@ -255,7 +255,7 @@ class TournamentRound
    public static function build_query_sql( $tid=0 )
    {
       $qsql = $GLOBALS['ENTITY_TOURNAMENT_ROUND']->newQuerySQL('TRD');
-      if( $tid > 0 )
+      if ( $tid > 0 )
          $qsql->add_part( SQLP_WHERE, "TRD.tid='$tid'" );
       return $qsql;
    }
@@ -285,19 +285,19 @@ class TournamentRound
    public static function load_tournament_round( $tid, $round )
    {
       $result = NULL;
-      if( $tid > 0 )
+      if ( $tid > 0 )
       {
          $qsql = self::build_query_sql( $tid );
          $qsql->add_part( SQLP_LIMIT, '1' );
 
-         if( $round > 0 ) // get specific round
+         if ( $round > 0 ) // get specific round
             $qsql->add_part( SQLP_WHERE, "TRD.Round='{$round}'" );
          else // get latest round
             $qsql->add_part( SQLP_ORDER, "TRD.Round DESC'" );
 
          $row = mysql_single_fetch( "TournamentRound:load_tournament_round($tid,$round)",
             $qsql->get_select() );
-         if( $row )
+         if ( $row )
             $result = self::new_from_row( $row );
       }
       return $result;
@@ -325,7 +325,7 @@ class TournamentRound
       $iterator->setResultRows( mysql_num_rows($result) );
 
       $iterator->clearItems();
-      while( $row = mysql_fetch_array( $result ) )
+      while ( $row = mysql_fetch_array( $result ) )
       {
          $tourney = self::new_from_row( $row );
          $iterator->addItem( $tourney, $row );
@@ -341,7 +341,7 @@ class TournamentRound
       static $ARR_TROUND_STATUS = null; // status => text
 
       // lazy-init of texts
-      if( is_null($ARR_TROUND_STATUS) )
+      if ( is_null($ARR_TROUND_STATUS) )
       {
          $arr = array();
          $arr[TROUND_STATUS_INIT] = T_('Init#trd_status');
@@ -352,9 +352,9 @@ class TournamentRound
          $ARR_TROUND_STATUS = $arr;
       }
 
-      if( is_null($status) )
+      if ( is_null($status) )
          return $ARR_TROUND_STATUS;
-      if( !isset($ARR_TROUND_STATUS[$status]) )
+      if ( !isset($ARR_TROUND_STATUS[$status]) )
          error('invalid_args', "Tournament:getStatusText($status)");
       return $ARR_TROUND_STATUS[$status];
    }//getStatusText
@@ -363,7 +363,7 @@ class TournamentRound
    public static function authorise_set_tround( $t_status )
    {
       static $ARR_TSTATUS = array( TOURNEY_STATUS_PAIR, TOURNEY_STATUS_PLAY );
-      if( TournamentUtils::isAdmin() || in_array($t_status, $ARR_TSTATUS) )
+      if ( TournamentUtils::isAdmin() || in_array($t_status, $ARR_TSTATUS) )
          return false;
       else
       {

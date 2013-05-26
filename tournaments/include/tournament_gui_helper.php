@@ -67,12 +67,12 @@ class TournamentGuiHelper
       $ltable->add_tablehead( 4, T_('Userid#header'), 'User', TABLE_NO_HIDE );
       $ltable->add_tablehead( 5, T_('Country#header'), 'Image', 0 );
       $ltable->add_tablehead( 6, T_('Rating#header'), 'Rating', 0 );
-      if( $need_tp_rating )
+      if ( $need_tp_rating )
          $ltable->add_tablehead(14, T_('Tournament Rating#header'), 'Rating', 0 );
       $ltable->add_tablehead(10, T_('Rank Kept#header'), '', 0 );
       $ltable->add_tablehead(13, T_('Last access#header'), '', 0 );
 
-      while( list(,$arr_item) = $iterator->getListIterator() )
+      while ( list(,$arr_item) = $iterator->getListIterator() )
       {
          list( $tladder, $orow ) = $arr_item;
          $uid = $tladder->uid;
@@ -81,23 +81,23 @@ class TournamentGuiHelper
 
          $row_str = array();
 
-         if( $ltable->Is_Column_Displayed[ 1] )
+         if ( $ltable->Is_Column_Displayed[ 1] )
             $row_str[ 1] = $tladder->Rank . '.';
-         if( $ltable->Is_Column_Displayed[ 3] )
+         if ( $ltable->Is_Column_Displayed[ 3] )
             $row_str[ 3] = user_reference( REF_LINK, 1, '', $uid, $user->Name, '');
-         if( $ltable->Is_Column_Displayed[ 4] )
+         if ( $ltable->Is_Column_Displayed[ 4] )
             $row_str[ 4] = user_reference( REF_LINK, 1, '', $uid, $user->Handle, '');
-         if( $ltable->Is_Column_Displayed[ 5] )
+         if ( $ltable->Is_Column_Displayed[ 5] )
             $row_str[ 5] = getCountryFlagImage( $user->Country );
-         if( $ltable->Is_Column_Displayed[ 6] )
+         if ( $ltable->Is_Column_Displayed[ 6] )
             $row_str[ 6] = echo_rating( $user->Rating, true, $uid);
-         if( $ltable->Is_Column_Displayed[10] )
+         if ( $ltable->Is_Column_Displayed[10] )
             $row_str[10] = $tladder->build_rank_kept();
-         if( $ltable->Is_Column_Displayed[13] )
+         if ( $ltable->Is_Column_Displayed[13] )
             $row_str[13] = TimeFormat::echo_time_diff( $GLOBALS['NOW'], $user->Lastaccess, 24, TIMEFMT_SHORT, '' );
-         if( $need_tp_rating && $ltable->Is_Column_Displayed[14] )
+         if ( $need_tp_rating && $ltable->Is_Column_Displayed[14] )
             $row_str[14] = echo_rating( @$orow['TP_Rating'], true, $uid);
-         if( $is_mine )
+         if ( $is_mine )
             $row_str['extra_class'] = 'TourneyUser';
          $ltable->add_row( $row_str );
       }
@@ -113,7 +113,7 @@ class TournamentGuiHelper
 
       $arr_tresult = TournamentCache::load_cache_tournament_results( 'TournamentGuiHelper.build_tournament_results',
          $tid, $tourney->Type );
-      if( count($arr_tresult) == 0 )
+      if ( count($arr_tresult) == 0 )
          return T_('No tournament results yet.');
 
       // create table
@@ -131,17 +131,17 @@ class TournamentGuiHelper
       $table->add_tablehead( 3, T_('Country#header'), 'Image', 0, 'TRP_Count+');
       $table->add_tablehead( 4, T_('Current Rating#header'), 'Rating', 0, 'TRP_Rating2-');
       $table->add_tablehead( 5, T_('Result Rating#header'), 'Rating', 0, 'Rating-');
-      if( $tourney->Type == TOURNEY_TYPE_LADDER )
+      if ( $tourney->Type == TOURNEY_TYPE_LADDER )
          $table->add_tablehead( 7, T_('Rank Kept#header'), '', 0, 'RankKept-');
       $table->add_tablehead( 8, T_('Result Date#header'), '', 0, 'EndTime+');
 
-      if( $tourney->Type == TOURNEY_TYPE_LADDER )
+      if ( $tourney->Type == TOURNEY_TYPE_LADDER )
          $table->set_default_sort( 6, 7, 8 );
-      elseif( $tourney->Type == TOURNEY_TYPE_ROUND_ROBIN )
+      elseif ( $tourney->Type == TOURNEY_TYPE_ROUND_ROBIN )
          $table->set_default_sort( 6, 8 );
       $table->make_sort_images();
 
-      foreach( $arr_tresult as $arr_item )
+      foreach ( $arr_tresult as $arr_item )
       {
          list( $tresult, $orow ) = $arr_item;
          $uid = $tresult->uid;
@@ -150,23 +150,23 @@ class TournamentGuiHelper
 
          $row_str = array();
 
-         if( $table->Is_Column_Displayed[ 1] )
+         if ( $table->Is_Column_Displayed[ 1] )
             $row_str[ 1] = user_reference( REF_LINK, 1, '', $uid, $user->Name, '');
-         if( $table->Is_Column_Displayed[ 2] )
+         if ( $table->Is_Column_Displayed[ 2] )
             $row_str[ 2] = user_reference( REF_LINK, 1, '', $uid, $user->Handle, '');
-         if( $table->Is_Column_Displayed[ 3] )
+         if ( $table->Is_Column_Displayed[ 3] )
             $row_str[ 3] = getCountryFlagImage( $user->Country );
-         if( $table->Is_Column_Displayed[ 4] )
+         if ( $table->Is_Column_Displayed[ 4] )
             $row_str[ 4] = echo_rating( $user->Rating, true, $uid);
-         if( $table->Is_Column_Displayed[ 5] )
+         if ( $table->Is_Column_Displayed[ 5] )
             $row_str[ 5] = echo_rating( $tresult->Rating, true, 0);
-         if( $table->Is_Column_Displayed[ 6] )
+         if ( $table->Is_Column_Displayed[ 6] )
             $row_str[ 6] = $tresult->Rank . '.';
-         if( @$table->Is_Column_Displayed[ 7] )
+         if ( @$table->Is_Column_Displayed[ 7] )
             $row_str[ 7] = TimeFormat::echo_time_diff( $tresult->EndTime, $tresult->StartTime, 24, TIMEFMT_SHORT, '' );
-         if( $table->Is_Column_Displayed[ 8] )
+         if ( $table->Is_Column_Displayed[ 8] )
             $row_str[ 8] = ($tresult->EndTime > 0) ? date(DATE_FMT2, $tresult->EndTime) : '';
-         if( $is_mine )
+         if ( $is_mine )
             $row_str['extra_class'] = 'TourneyUser';
          $table->add_row( $row_str );
       }
@@ -179,14 +179,14 @@ class TournamentGuiHelper
    {
       $arr = array();
 
-      if( $tourney->Owner_ID == $uid )
+      if ( $tourney->Owner_ID == $uid )
          $arr[] = T_('Owner#tourney');
 
       $td = TournamentCache::is_cache_tournament_director('TournamentGuiHelper.getTournamentRoleText', $tourney->ID, $uid, 0xffff);
-      if( !is_null($td) )
+      if ( !is_null($td) )
          $arr[] = sprintf( T_('Tournament Director [%s]'), $td->formatFlags() );
 
-      if( TournamentUtils::isAdmin() )
+      if ( TournamentUtils::isAdmin() )
          $arr[] = T_('Tournament Admin');
 
       return (count($arr)) ? implode(', ', $arr) : NO_VALUE;
@@ -197,12 +197,12 @@ class TournamentGuiHelper
    {
       global $player_row;
 
-      if( is_null($reg_user_status) )
+      if ( is_null($reg_user_status) )
          $reg_user_status = TournamentCache::is_cache_tournament_participant( 'TGuiHelper.getLinkTextRegistration',
             $tid, $player_row['ID'] );
-      if( $reg_user_status != TP_STATUS_REGISTER )
+      if ( $reg_user_status != TP_STATUS_REGISTER )
       {
-         if( @$player_row['AdminOptions'] & ADMOPT_DENY_TOURNEY_REGISTER )
+         if ( @$player_row['AdminOptions'] & ADMOPT_DENY_TOURNEY_REGISTER )
             return '';
       }
 

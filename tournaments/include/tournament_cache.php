@@ -66,7 +66,7 @@ class TournamentCache
    public function release_tournament_cron_lock( $tid=0 )
    {
       // release (previous) lock when handling NEW tourney-ID
-      if( $this->is_tournament_locked() && ($tid != $this->lock_tourney->ID) )
+      if ( $this->is_tournament_locked() && ($tid != $this->lock_tourney->ID) )
       {
          $lock_tid = $this->lock_tourney->ID;
          $this->lock_tourney->update_flags( TOURNEY_FLAG_LOCK_CRON, 0 );
@@ -85,11 +85,11 @@ class TournamentCache
    {
       $tourney = self::load_cache_tournament( 'TCache.set_tournament_cron_lock.find', $tid );
 
-      if( $tourney->isFlagSet(TOURNEY_FLAG_LOCK_ADMIN | TOURNEY_FLAG_LOCK_TDWORK) )
+      if ( $tourney->isFlagSet(TOURNEY_FLAG_LOCK_ADMIN | TOURNEY_FLAG_LOCK_TDWORK) )
          return false;
 
       // lock for tourney-changes
-      if( !$this->is_tournament_locked() )
+      if ( !$this->is_tournament_locked() )
       {
          $tourney->update_flags( TOURNEY_FLAG_LOCK_CRON, 1 );
          $this->lock_tourney = $tourney;
@@ -105,7 +105,7 @@ class TournamentCache
    public static function get_instance()
    {
       static $TOURNAMENT_CACHE = null;
-      if( is_null($TOURNAMENT_CACHE) )
+      if ( is_null($TOURNAMENT_CACHE) )
          $TOURNAMENT_CACHE = new TournamentCache();
       return $TOURNAMENT_CACHE;
    }
@@ -123,24 +123,24 @@ class TournamentCache
       $use_dgs_cache = DgsCache::is_persistent( CACHE_GRP_TOURNAMENT );
 
       $tourney = $tcache = null;
-      if( $use_dgs_cache )
+      if ( $use_dgs_cache )
          $tourney = DgsCache::fetch( $dbgmsg, CACHE_GRP_TOURNAMENT, $key );
       else
       {
          $tcache = self::get_instance();
-         if( isset($tcache->cache_tournament[$tid]) )
+         if ( isset($tcache->cache_tournament[$tid]) )
             $tourney = $tcache->cache_tournament[$tid];
       }
 
-      if( is_null($tourney) )
+      if ( is_null($tourney) )
       {
          $tourney = Tournament::load_tournament($tid);
-         if( $check_exist && is_null($tourney) )
+         if ( $check_exist && is_null($tourney) )
             error('unknown_tournament', $dbgmsg);
 
-         if( !is_null($tourney) ) // only cache if existing
+         if ( !is_null($tourney) ) // only cache if existing
          {
-            if( $use_dgs_cache )
+            if ( $use_dgs_cache )
                DgsCache::store( $dbgmsg, CACHE_GRP_TOURNAMENT, $key, $tourney, SECS_PER_HOUR );
             else
                $tcache->cache_tournament[$tid] = $tourney;
@@ -173,17 +173,17 @@ class TournamentCache
       $key = "TDirector.$tid";
 
       $arr_tdir = DgsCache::fetch( $dbgmsg, CACHE_GRP_TDIRECTOR, $key );
-      if( is_null($arr_tdir) )
+      if ( is_null($arr_tdir) )
       {
          $arr_tdir = TournamentDirector::load_tournament_directors_flags( $tid );
          DgsCache::store( $dbgmsg, CACHE_GRP_TDIRECTOR, $key, $arr_tdir, SECS_PER_DAY );
       }
 
       $td_result = null;
-      if( isset($arr_tdir[$uid]) ) // user is TD
+      if ( isset($arr_tdir[$uid]) ) // user is TD
       {
          $td_flags = (int)$arr_tdir[$uid];
-         if( $flags <= 0 || ($td_flags & $flags) ) // pure TD, or TD-matching-flags
+         if ( $flags <= 0 || ($td_flags & $flags) ) // pure TD, or TD-matching-flags
             $td_result = new TournamentDirector($tid, $uid, $td_flags);
       }
 
@@ -201,13 +201,13 @@ class TournamentCache
       $key = "TLadderProps.$tid";
 
       $tl_props = DgsCache::fetch( $dbgmsg, CACHE_GRP_TLPROPS, $key );
-      if( is_null($tl_props) )
+      if ( is_null($tl_props) )
       {
          $tl_props = TournamentLadderProps::load_tournament_ladder_props($tid);
-         if( $check_exist && is_null($tl_props) )
+         if ( $check_exist && is_null($tl_props) )
             error('bad_tournament', $dbgmsg);
 
-         if( !is_null($tl_props) ) // only cache if existing
+         if ( !is_null($tl_props) ) // only cache if existing
             DgsCache::store( $dbgmsg, CACHE_GRP_TLPROPS, $key, $tl_props, SECS_PER_DAY );
       }
 
@@ -225,13 +225,13 @@ class TournamentCache
       $key = "TProps.$tid";
 
       $tprops = DgsCache::fetch( $dbgmsg, CACHE_GRP_TPROPS, $key );
-      if( is_null($tprops) )
+      if ( is_null($tprops) )
       {
          $tprops = TournamentProperties::load_tournament_properties($tid);
-         if( $check_exist && is_null($tprops) )
+         if ( $check_exist && is_null($tprops) )
             error('bad_tournament', $dbgmsg);
 
-         if( !is_null($tprops) ) // only cache if existing
+         if ( !is_null($tprops) ) // only cache if existing
             DgsCache::store( $dbgmsg, CACHE_GRP_TPROPS, $key, $tprops, SECS_PER_DAY );
       }
 
@@ -249,13 +249,13 @@ class TournamentCache
       $key = "TRules.$tid";
 
       $trule = DgsCache::fetch( $dbgmsg, CACHE_GRP_TRULES, $key );
-      if( is_null($trule) )
+      if ( is_null($trule) )
       {
          $trule = TournamentRules::load_tournament_rule($tid);
-         if( $check_exist && is_null($trule) )
+         if ( $check_exist && is_null($trule) )
             error('bad_tournament', $dbgmsg);
 
-         if( !is_null($trule) ) // only cache if existing
+         if ( !is_null($trule) ) // only cache if existing
             DgsCache::store( $dbgmsg, CACHE_GRP_TRULES, $key, $trule, SECS_PER_DAY );
       }
 
@@ -274,13 +274,13 @@ class TournamentCache
       $key = "TRound.$tid.$round";
 
       $tround = DgsCache::fetch( $dbgmsg, CACHE_GRP_TROUND, $key );
-      if( is_null($tround) )
+      if ( is_null($tround) )
       {
          $tround = TournamentRound::load_tournament_round($tid, $round);
-         if( $check_exist && is_null($tround) )
+         if ( $check_exist && is_null($tround) )
             error('bad_tournament', $dbgmsg);
 
-         if( !is_null($tround) ) // only cache if existing
+         if ( !is_null($tround) ) // only cache if existing
             DgsCache::store( $dbgmsg, CACHE_GRP_TROUND, $key, $tround, SECS_PER_DAY );
       }
 
@@ -295,7 +295,7 @@ class TournamentCache
       $key = sprintf( "TNews.%s.%s.%s", $tid, ($is_admin ? 1 : 0), ($is_tp ? 1 : 0) );
 
       $arr_tnews = DgsCache::fetch( $dbgmsg, CACHE_GRP_TNEWS, $key );
-      if( is_null($arr_tnews) )
+      if ( is_null($arr_tnews) )
       {
          $news_qsql = TournamentNews::build_view_query_sql( /*tid*/0, /*tn*/0, TNEWS_STATUS_SHOW, $is_admin, $is_tp );
          $news_qsql->add_part( SQLP_ORDER, 'TN.Published DESC' );
@@ -303,7 +303,7 @@ class TournamentCache
          $news_iterator = TournamentNews::load_tournament_news( $news_iterator, $tid );
 
          $arr_tnews = array();
-         while( list(,$arr_item) = $news_iterator->getListIterator() )
+         while ( list(,$arr_item) = $news_iterator->getListIterator() )
             $arr_tnews[] = $arr_item[0];
 
          DgsCache::store( $dbgmsg, CACHE_GRP_TNEWS, $key, $arr_tnews, SECS_PER_DAY, "TNews.$tid" );
@@ -324,7 +324,7 @@ class TournamentCache
       $key = "TPCount.$tid";
 
       $arr_counts = DgsCache::fetch( $dbgmsg, CACHE_GRP_TP_COUNT, $key );
-      if( is_null($arr_counts) )
+      if ( is_null($arr_counts) )
       {
          $arr_counts = TournamentParticipant::count_tournament_participants($tid);
          DgsCache::store( $dbgmsg, CACHE_GRP_TP_COUNT, $key, $arr_counts, SECS_PER_HOUR );
@@ -342,15 +342,15 @@ class TournamentCache
       $key = "TParticipant.$tid.$uid";
 
       $tp = DgsCache::fetch( $dbgmsg, CACHE_GRP_TPARTICIPANT, $key );
-      if( is_null($tp) )
+      if ( is_null($tp) )
       {
          $tp = TournamentParticipant::load_tournament_participant( $tid, $uid );
-         if( !is_null(@$tp->User->urow) )
+         if ( !is_null(@$tp->User->urow) )
             $tp->User->urow = null; // all fields read
-         if( $uid > 0 )
+         if ( $uid > 0 )
             DgsCache::store( $dbgmsg, CACHE_GRP_TPARTICIPANT, $key, (is_null($tp) ? false : $tp), SECS_PER_HOUR );
       }
-      elseif( $tp === false )
+      elseif ( $tp === false )
          $tp = null;
 
       return $tp;
@@ -358,7 +358,7 @@ class TournamentCache
 
    public static function is_cache_tournament_participant( $dbgmsg, $tid, $uid )
    {
-      if( DgsCache::is_persistent(CACHE_GRP_TPARTICIPANT) )
+      if ( DgsCache::is_persistent(CACHE_GRP_TPARTICIPANT) )
       {
          $dbgmsg .= ".TCache:is_cache_tp";
          $tp = self::load_cache_tournament_participant( $dbgmsg, $tid, $uid );
@@ -378,12 +378,12 @@ class TournamentCache
       $key = "TResult.$tid";
 
       $arr_tresult = DgsCache::fetch( $dbgmsg, CACHE_GRP_TRESULT, $key );
-      if( is_null($arr_tresult) )
+      if ( is_null($arr_tresult) )
       {
          // load tournament-results
-         if( $tourney_type == TOURNEY_TYPE_LADDER )
+         if ( $tourney_type == TOURNEY_TYPE_LADDER )
             $order = 'ORDER BY Rank ASC, RankKept DESC, EndTime DESC';
-         elseif( $tourney_type == TOURNEY_TYPE_ROUND_ROBIN )
+         elseif ( $tourney_type == TOURNEY_TYPE_ROUND_ROBIN )
             $order = 'ORDER BY Round DESC, Rank ASC, EndTime DESC';
          else
             $order = 'ORDER BY ID';
@@ -396,7 +396,7 @@ class TournamentCache
          $iterator = TournamentResult::load_tournament_results( $iterator, $tid );
 
          $arr_tresult = array();
-         while( list(,$arr_item) = $iterator->getListIterator() )
+         while ( list(,$arr_item) = $iterator->getListIterator() )
             $arr_tresult[] = $arr_item;
 
          DgsCache::store( $dbgmsg, CACHE_GRP_TRESULT, $key, $arr_tresult, SECS_PER_DAY );
@@ -417,7 +417,7 @@ class TournamentCache
       $tg_iterator = new ListIterator( $dbgmsg );
 
       $arr_tgames = DgsCache::fetch( $dbgmsg, CACHE_GRP_TGAMES, $key );
-      if( is_null($arr_tgames) )
+      if ( is_null($arr_tgames) )
       {
          $tg_iterator = TournamentGames::load_tournament_games( $tg_iterator, $tid, $round_id, $pool, $status );
 
@@ -425,7 +425,7 @@ class TournamentCache
       }
       else // transform cache-stored row-arr into ListIterator of TournamentGames
       {
-         foreach( $arr_tgames as $row )
+         foreach ( $arr_tgames as $row )
          {
             $tgame = TournamentGames::new_from_row( $row );
             $tg_iterator->addItem( $tgame, $row );

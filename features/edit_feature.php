@@ -30,14 +30,14 @@ require_once 'features/lib_votes.php';
    connect2mysql();
 
    $logged_in = who_is_logged( $player_row);
-   if( !$logged_in )
+   if ( !$logged_in )
       error('login_if_not_logged_in', 'edit_feature');
 
-   if( !ALLOW_FEATURE_VOTE )
+   if ( !ALLOW_FEATURE_VOTE )
       error('feature_disabled', 'edit_feature');
 
    $my_id = (int)@$player_row['ID'];
-   if( $my_id <= GUESTS_ID_MAX )
+   if ( $my_id <= GUESTS_ID_MAX )
       error('not_allowed_for_guest', 'edit_feature');
 
    $is_admin = Feature::is_admin();
@@ -57,37 +57,37 @@ require_once 'features/lib_votes.php';
 */
 
    $fid = (int)get_request_arg('fid'); //feature-ID
-   if( $fid < 0 )
+   if ( $fid < 0 )
       $fid = 0;
 
-   if( @$_REQUEST['feature_cancel'] ) // cancel delete
+   if ( @$_REQUEST['feature_cancel'] ) // cancel delete
       jump_to("features/edit_feature.php?fid=$fid");
 
    // error-check on feature to save
    $errormsg = null;
    $is_preview = @$_REQUEST['feature_preview'];
-   if( @$_REQUEST['feature_save'] || $is_preview )
+   if ( @$_REQUEST['feature_save'] || $is_preview )
    {
-      if( strlen(trim(get_request_arg('subject'))) == 0 )
+      if ( strlen(trim(get_request_arg('subject'))) == 0 )
          $errormsg = '('.T_('Missing subject of feature').')';
    }
 
    $feature = null;
-   if( is_null($errormsg) && $fid )
+   if ( is_null($errormsg) && $fid )
       $feature = Feature::load_feature( $fid ); // existing feature ?
-   if( is_null($feature) )
+   if ( is_null($feature) )
       $feature = Feature::new_feature( $my_id, $fid ); // new feature
 
    // check access right of user (only super-admin can edit anytime)
-   if( !$feature->allow_edit() )
+   if ( !$feature->allow_edit() )
       error('feature_edit_bad_status', "edit_feature.feature($fid,$my_id)");
 
    $is_feature_delete = ( $fid && @$_REQUEST['feature_delete'] );
-   if( $is_feature_delete && @$_REQUEST['confirm'] )
+   if ( $is_feature_delete && @$_REQUEST['confirm'] )
    {
       ta_begin();
       {//HOT-section to delete feature
-         if( $feature->delete_feature() > 0 && $feature->status == FEATSTAT_NEW )
+         if ( $feature->delete_feature() > 0 && $feature->status == FEATSTAT_NEW )
             Feature::update_count_feature_new( "edit_feature.delete_feature($fid)", 0, -1 ); // one NEW less for all users
       }
       ta_end();
@@ -97,31 +97,31 @@ require_once 'features/lib_votes.php';
 
    $old_status = $feature->status;
    $new_status = get_request_arg('new_status', $feature->status);
-   if( !$feature->edit_status_allowed($is_super_admin, $new_status) )
+   if ( !$feature->edit_status_allowed($is_super_admin, $new_status) )
       error('feature_edit_bad_status', "edit_feature.feature.edit_status($fid,$my_id,{$feature->status},$new_status)");
 
    // insert/update feature-object with values from edit-form if no error
-   if( @$_REQUEST['feature_save'] || $is_preview )
+   if ( @$_REQUEST['feature_save'] || $is_preview )
    {
-      if( !$is_preview )
+      if ( !$is_preview )
          $feature->set_status( $new_status );
       $feature->set_size( get_request_arg('size') );
       $feature->set_subject( get_request_arg('subject') );
       $feature->set_description( get_request_arg('description') );
 
-      if( !$is_preview && is_null($errormsg) )
+      if ( !$is_preview && is_null($errormsg) )
       {
          ta_begin();
          {//HOT-section to update feature
             $feature->update_feature();
-            if( !$fid && $feature->id > 0 )
+            if ( !$fid && $feature->id > 0 )
                $fid = $feature->id;
 
             $added_points = $feature->fix_user_quota_feature_points( $old_status, $new_status );
 
-            if( $new_status == FEATSTAT_VOTE && ( $fid == 0 || $old_status != $new_status ) )
+            if ( $new_status == FEATSTAT_VOTE && ( $fid == 0 || $old_status != $new_status ) )
                Feature::update_count_feature_new( "edit_feature.upd_feature.to_new($fid)", 0, 1 ); // one new-VOTE more for all users
-            elseif( $old_status == FEATSTAT_VOTE && $fid > 0 && $old_status != $new_status )
+            elseif ( $old_status == FEATSTAT_VOTE && $fid > 0 && $old_status != $new_status )
                Feature::update_count_feature_new( "edit_feature.upd_feature.from_new($fid)", 0, -1 ); // one new-VOTE less for all users
          }
          ta_end();
@@ -139,9 +139,9 @@ require_once 'features/lib_votes.php';
 
 
    $page = 'edit_feature.php';
-   if( $is_feature_delete )
+   if ( $is_feature_delete )
       $title = T_('Feature delete');
-   elseif( $fid )
+   elseif ( $fid )
       $title = T_('Feature update');
    else
       $title = T_('Feature add');
@@ -157,10 +157,10 @@ require_once 'features/lib_votes.php';
    $arr_status = array(
       'DESCRIPTION',  T_('Status'),
       'TEXT',         $feature->status );
-   if( $feature->edit_status_allowed($is_super_admin) )
+   if ( $feature->edit_status_allowed($is_super_admin) )
    {
       // status-change
-      if( $is_super_admin )
+      if ( $is_super_admin )
          $status_values = array_value_to_key_and_value(
             array( FEATSTAT_NEW, FEATSTAT_VOTE, FEATSTAT_WORK, FEATSTAT_DONE, FEATSTAT_LIVE, FEATSTAT_NACK ) );
       else
@@ -168,7 +168,7 @@ require_once 'features/lib_votes.php';
       array_push( $arr_status,
          'TEXT', '&nbsp;-&gt;&nbsp;',
          'SELECTBOX', 'new_status', 1, $status_values, $new_status, false );
-      if( $is_super_admin )
+      if ( $is_super_admin )
          array_push( $arr_status,
             'TEXT', SMALL_SPACING . sprintf( T_('Status-change to [%s] is final!'), FEATSTAT_NACK.'|'.FEATSTAT_LIVE ));
    }
@@ -180,25 +180,25 @@ require_once 'features/lib_votes.php';
    $fform->add_row( array(
       'DESCRIPTION',  T_('Created'),
       'TEXT',         date(DATEFMT_FEATURE, $feature->created) ));
-   if( $feature->lastchanged )
+   if ( $feature->lastchanged )
    {
       $fform->add_row( array(
          'DESCRIPTION',  T_('Lastchanged'),
          'TEXT',         date(DATEFMT_FEATURE, $feature->lastchanged) ));
    }
 
-   if( $is_feature_delete && !$can_delete_feature )
+   if ( $is_feature_delete && !$can_delete_feature )
    {
       $errormsg = ( is_null($errormsg) ) ? '' : $errormsg . "<br>\n";
       $errormsg .= T_('Feature can\'t be deleted because of existing votes!');
    }
 
-   if( !is_null($errormsg) )
+   if ( !is_null($errormsg) )
       $fform->add_row( array(
          'DESCRIPTION', T_('Error'),
          'TEXT', '<span class="ErrorMsg">' . $errormsg . '</span>' ));
 
-   if( @$_REQUEST['feature_delete'] ) // delete
+   if ( @$_REQUEST['feature_delete'] ) // delete
    {
       $fform->add_row( array(
          'DESCRIPTION', T_('Subject'),
@@ -209,7 +209,7 @@ require_once 'features/lib_votes.php';
          'TEXT',        $feature->description,
          ));
 
-      if( $can_delete_feature )
+      if ( $can_delete_feature )
       {
          $fform->add_hidden( 'confirm', 1 );
          $fform->add_row( array(
@@ -237,7 +237,7 @@ require_once 'features/lib_votes.php';
          'TEXTAREA',    'description', 70, 10, $feature->description,
          ));
 
-      if( $is_preview || ($feature->subject . $feature->description != '') )
+      if ( $is_preview || ($feature->subject . $feature->description != '') )
       {
          $fform->add_row( array(
             'DESCRIPTION', T_('Preview'),
@@ -266,7 +266,7 @@ require_once 'features/lib_votes.php';
    $fform->echo_string();
 
    $notes = array();
-   if( $is_admin )
+   if ( $is_admin )
    {
       array_unshift( $notes,
          T_('Add a category-prefix to the \'Subject\', e.g. "Game: feature description"'),
@@ -282,13 +282,13 @@ require_once 'features/lib_votes.php';
    $menu_array[T_('Vote on features')] = "features/list_features.php?status=2".URI_AMP.'my_vote=1';
    $menu_array[T_('My feature votes')] = "features/list_features.php?status=3".URI_AMP.'my_vote=2';
    $menu_array[T_('All features')]     = "features/list_features.php?status=3".URI_AMP.'my_vote=0';
-   if( $is_admin )
+   if ( $is_admin )
       $menu_array[T_('Add new feature')] =
          array( 'url' => "features/edit_feature.php", 'class' => 'AdminLink' );
-   if( !$is_feature_delete && $can_delete_feature && $fid > 0 && $is_admin )
+   if ( !$is_feature_delete && $can_delete_feature && $fid > 0 && $is_admin )
       $menu_array[T_('Delete this feature')] =
          array( 'url' => "features/edit_feature.php?fid=$fid".URI_AMP.'feature_delete=1', 'class' => 'AdminLink' );
-   if( $is_feature_delete && $fid > 0 && $feature->allow_edit() )
+   if ( $is_feature_delete && $fid > 0 && $feature->allow_edit() )
       $menu_array[T_('Edit this feature')] =
          array( 'url' => "features/edit_feature.php?fid=$fid", 'class' => 'AdminLink' );
 

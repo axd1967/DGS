@@ -118,23 +118,23 @@ class Survey
 
    public function setType( $type )
    {
-      if( !preg_match( "/^(".CHECK_SURVEY_TYPE.")$/", $type ) )
+      if ( !preg_match( "/^(".CHECK_SURVEY_TYPE.")$/", $type ) )
          error('invalid_args', "Survey.setType($type)");
       $this->Type = $type;
    }
 
    public function setStatus( $status )
    {
-      if( !preg_match( "/^(".CHECK_SURVEY_STATUS.")$/", $status ) )
+      if ( !preg_match( "/^(".CHECK_SURVEY_STATUS.")$/", $status ) )
          error('invalid_args', "Survey.setStatus($status)");
       $this->Status = $status;
    }
 
    public function setFlag( $flagmask, $value )
    {
-      if( $flagmask > 0 )
+      if ( $flagmask > 0 )
       {
-         if( $value )
+         if ( $value )
             $this->Flags |= $flagmask;
          else
             $this->Flags &= ~$flagmask;
@@ -144,7 +144,7 @@ class Survey
    /*! \brief Inserts or updates Survey-entry in database. */
    public function persist()
    {
-      if( $this->ID > 0 )
+      if ( $this->ID > 0 )
          $success = $this->update();
       else
          $success = $this->insert();
@@ -157,7 +157,7 @@ class Survey
 
       $entityData = $this->fillEntityData();
       $result = $entityData->insert( "Survey.insert(%s)" );
-      if( $result )
+      if ( $result )
          $this->ID = mysql_insert_id();
       return $result;
    }
@@ -172,7 +172,7 @@ class Survey
 
    public function fillEntityData( $data=null )
    {
-      if( is_null($data) )
+      if ( is_null($data) )
          $data = $GLOBALS['ENTITY_SURVEY']->newEntityData();
       $data->set_value( 'ID', $this->ID );
       $data->set_value( 'uid', $this->uid );
@@ -205,13 +205,13 @@ class Survey
       $this->UserListHandles = array();
       $this->UserListUserRefs = array();
 
-      if( $this->ID > 0 )
+      if ( $this->ID > 0 )
       {
          $result = db_query( "Survey.loadUserList({$this->ID})",
             "SELECT SU.uid as ID, P.Handle, P.Name " .
             "FROM SurveyUser AS SU INNER JOIN Players AS P ON P.ID=SU.uid " .
             "WHERE SU.sid={$this->ID} ORDER BY SU.uid" );
-         while( $row = mysql_fetch_array( $result ) )
+         while ( $row = mysql_fetch_array( $result ) )
          {
             $this->UserList[] = $row['ID'];
             $this->UserListHandles[] = ( is_numeric($row['Handle']) ? '=' : '' ) . $row['Handle'];
@@ -228,7 +228,7 @@ class Survey
    public static function build_query_sql( $sid=0, $with_player=true )
    {
       $qsql = $GLOBALS['ENTITY_SURVEY']->newQuerySQL('S');
-      if( $with_player )
+      if ( $with_player )
       {
          $qsql->add_part( SQLP_FIELDS,
             'S.uid AS SP_ID',
@@ -237,7 +237,7 @@ class Survey
          $qsql->add_part( SQLP_FROM,
             'INNER JOIN Players AS SP ON SP.ID=S.uid' );
       }
-      if( $sid > 0 )
+      if ( $sid > 0 )
          $qsql->add_part( SQLP_WHERE, "S.ID=$sid" );
       return $qsql;
    }//build_query_sql
@@ -283,7 +283,7 @@ class Survey
    {
       $qsql->add_part( SQLP_LIMIT, '1' );
       $row = mysql_single_fetch( "Survey:load_survey_by_query()", $qsql->get_select() );
-      if( $with_row )
+      if ( $with_row )
          return ($row) ? array( self::new_from_row($row), $row ) : array( NULL, NULL );
       else
          return ($row) ? self::new_from_row($row) : NULL;
@@ -299,7 +299,7 @@ class Survey
       $iterator->setResultRows( mysql_num_rows($result) );
 
       $iterator->clearItems();
-      while( $row = mysql_fetch_array( $result ) )
+      while ( $row = mysql_fetch_array( $result ) )
       {
          $survey = self::new_from_row( $row );
          $iterator->addItem( $survey, $row );
@@ -321,7 +321,7 @@ class Survey
 
    public static function update_user_count( $sid, $diff )
    {
-      if( !is_numeric($diff) )
+      if ( !is_numeric($diff) )
          error('invalid_args', "Survey.updateUserCount.check.diff($sid,$diff)");
 
       return db_query( "Survey.updateUserCount.upd($sid,$diff)",
@@ -335,18 +335,18 @@ class Survey
     */
    public static function persist_survey_userlist( $sid, $uids )
    {
-      if( !is_numeric($sid) || $sid <= 0 )
+      if ( !is_numeric($sid) || $sid <= 0 )
          error('invalid_args', "Survey:persist_survey_userlist.check.sid($sid)");
-      if( !is_array($uids) )
+      if ( !is_array($uids) )
          error('invalid_args', "Survey:persist_survey_userlist.check.uids($sid)");
 
       $cnt_uids = count($uids);
-      if( $cnt_uids > 0 )
+      if ( $cnt_uids > 0 )
       {
          $uids = array_unique($uids);
-         foreach( $uids as $uid )
+         foreach ( $uids as $uid )
          {
-            if( !is_numeric($uid) || $uid <= GUESTS_ID_MAX )
+            if ( !is_numeric($uid) || $uid <= GUESTS_ID_MAX )
                error('invalid_args', "Survey:persist_survey_userlist.check.uids.bad_uid($sid,$uid)");
          }
          $uids_sql = implode(',', $uids);
@@ -355,7 +355,7 @@ class Survey
       db_query( "Survey:persist_survey_userlist.del($sid,$cnt_uids)",
          "DELETE FROM SurveyUser WHERE sid=$sid" . ( $cnt_uids > 0 ? " AND uid NOT IN ($uids_sql)" : '' ) );
 
-      if( $cnt_uids > 0 )
+      if ( $cnt_uids > 0 )
       {
          db_query( "Survey:persist_survey_userlist.add($sid,$cnt_uids)",
             "INSERT IGNORE SurveyUser (sid,uid) " .
@@ -366,9 +366,9 @@ class Survey
    /*! \brief Returns true if user is on Survey-userlist. */
    public static function exists_survey_user( $sid, $uid )
    {
-      if( !is_numeric($sid) || $sid <= 0 )
+      if ( !is_numeric($sid) || $sid <= 0 )
          error('invalid_args', "Survey:exists_survey_user.check.sid($sid,$uid)");
-      if( !is_numeric($uid) || $uid <= GUESTS_ID_MAX )
+      if ( !is_numeric($uid) || $uid <= GUESTS_ID_MAX )
          error('invalid_args', "Survey:exists_survey_user.check.uid($sid,$uid)");
 
       $row = mysql_single_fetch( "Survey:exists_survey_user($sid,$uid)",

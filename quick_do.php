@@ -25,7 +25,7 @@ $TheErrors->set_mode(ERROR_MODE_QUICK_SUITE);
 
 header('Access-Control-Allow-Origin: *');
 
-if( $is_down )
+if ( $is_down )
 {
    error('server_down', str_replace("\n", "  ", $is_down_message));
 }
@@ -35,11 +35,11 @@ else
    connect2mysql();
 
    $logged_in = who_is_logged( $player_row, LOGIN_DEFAULT_OPTS|LOGIN_QUICK_SUITE );
-   if( !$logged_in )
+   if ( !$logged_in )
       error('not_logged_in', 'quick_do.logged_in');
-   if( !ALLOW_QUICK_DO )
+   if ( !ALLOW_QUICK_DO )
       error('feature_disabled', 'quick_do');
-   if( $player_row['ID'] <= GUESTS_ID_MAX )
+   if ( $player_row['ID'] <= GUESTS_ID_MAX )
       error('not_allowed_for_guest', 'quick_do');
 
    // call quick-handler
@@ -50,7 +50,7 @@ else
    $result = $quick_handler->getProcessedResult();
 
    // output HTTP-header
-   if( get_request_arg(QOPT_TEST) )
+   if ( get_request_arg(QOPT_TEST) )
       header('Content-Type: text/plain;charset=utf-8');
    else
       header('Content-Type: application/json');

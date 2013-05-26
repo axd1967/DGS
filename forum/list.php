@@ -28,7 +28,7 @@ require_once 'forum/forum_functions.php';
    connect2mysql();
 
    $logged_in = who_is_logged( $player_row);
-   if( !$logged_in )
+   if ( !$logged_in )
       error('login_if_not_logged_in', 'forum.list');
    $my_id = $player_row['ID'];
    $cfg_pages = ConfigPages::load_config_pages($my_id);
@@ -48,20 +48,20 @@ require_once 'forum/forum_functions.php';
    $toggle_baseurl = "list.php?forum=$forum_id"
       . ( $maxrows>0 ? URI_AMP."maxrows=$maxrows" : '' )
       . ( $offset>0 ? URI_AMP."offset=$offset" : '');
-   if( ConfigPages::toggle_forum_flags($my_id, $toggleflag) )
+   if ( ConfigPages::toggle_forum_flags($my_id, $toggleflag) )
       jump_to( 'forum/'.$toggle_baseurl );
    $show_lp_author = ( $cfg_pages->get_forum_flags() & FORUMFLAG_THREAD_SHOWAUTHOR );
 
    $forum = Forum::load_cache_forum( $forum_id );
    $f_opts = new ForumOptions( $player_row );
-   if( !$f_opts->is_visible_forum( $forum->options ) )
+   if ( !$f_opts->is_visible_forum( $forum->options ) )
       error('forbidden_forum', "forumlist.check.forum($forum_id)");
 
    $switch_moderator = switch_admin_status( $player_row, ADMIN_FORUM, @$_REQUEST['moderator'] );
    $is_moderator = ($switch_moderator == 1);
 
 
-   if( $markread > 0 ) // use-case U09
+   if ( $markread > 0 ) // use-case U09
    {
       $FR = new ForumRead( $my_id, $forum_id );
       $FR->mark_forum_read( $markread, $is_moderator );
@@ -78,15 +78,15 @@ require_once 'forum/forum_functions.php';
    $disp_forum->cols = 5;
    $disp_forum->links = LINKPAGE_LIST;
    $disp_forum->links |= LINK_FORUMS | LINK_SEARCH | LINK_REFRESH;
-   if( $offset > 0 )
+   if ( $offset > 0 )
       $disp_forum->links |= LINK_PREV_PAGE;
-   if( $forum->has_more_threads() )
+   if ( $forum->has_more_threads() )
       $disp_forum->links |= LINK_NEXT_PAGE;
-   if( $switch_moderator >= 0 )
+   if ( $switch_moderator >= 0 )
       $disp_forum->links |= LINK_TOGGLE_MODERATOR;
-   if( Forum::allow_posting( $player_row, $forum->options ) ) // read-only forum
+   if ( Forum::allow_posting( $player_row, $forum->options ) ) // read-only forum
       $disp_forum->links |= LINK_NEW_TOPIC;
-   if( $forum->has_new_posts_in_threads() )
+   if ( $forum->has_new_posts_in_threads() )
       $disp_forum->links |= LINK_MARK_READ;
 
    $head_lastpost = sprintf( '%s <span class="HeaderToggle">(<a href="%s">%s</a>)</span>',
@@ -111,9 +111,9 @@ require_once 'forum/forum_functions.php';
    $disp_forum->forum_start_table('List');
 
    $c=0;
-   foreach( $forum->threads as $thread ) // $thread = ForumPost-obj
+   foreach ( $forum->threads as $thread ) // $thread = ForumPost-obj
    {
-      if( $thread->count_posts > 0 || $is_moderator )
+      if ( $thread->count_posts > 0 || $is_moderator )
       {
          $c=($c % LIST_ROWS_MODULO)+1;
          $lpost = $thread->last_post;

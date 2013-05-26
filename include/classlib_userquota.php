@@ -70,9 +70,9 @@ class UserQuota
    /*! \brief Sets feature points within allowed limits -infinity..FEATURE_POINTS_MAX_VALUE. */
    public function set_feature_points( $points )
    {
-      if( !is_numeric($points) )
+      if ( !is_numeric($points) )
          $points = 25; // start-value
-      elseif( $points > FEATURE_POINTS_MAX_VALUE )
+      elseif ( $points > FEATURE_POINTS_MAX_VALUE )
          $points = FEATURE_POINTS_MAX_VALUE;
       $this->feature_points = (int)$points;
    }
@@ -90,7 +90,7 @@ class UserQuota
    public function update_feature_points()
    {
       self::_check_user_id( $this->user_id, 'UserQuota:update_feature_points');
-      if( $this->user_id <= GUESTS_ID_MAX )
+      if ( $this->user_id <= GUESTS_ID_MAX )
          error('not_allowed_for_guest', "UserQuota:update_feature_points({$this->user_id})");
 
       $update_query = 'UPDATE UserQuota SET'
@@ -106,7 +106,7 @@ class UserQuota
    /*! \internal (static) check for valid user-id */
    private static function _check_user_id( $user_id, $loc )
    {
-      if( !is_numeric($user_id) || $user_id <= 0 )
+      if ( !is_numeric($user_id) || $user_id <= 0 )
          error('invalid_user', "$loc:_check_user_id($user_id)");
    }
 
@@ -128,7 +128,7 @@ class UserQuota
 
       $row = mysql_single_fetch("UserQuota:load_user_quota.find($user_id)",
             "SELECT * FROM UserQuota WHERE uid='$user_id' LIMIT 1");
-      if( !$row )
+      if ( !$row )
          return null;
       return self::new_from_row( $row );
    }//load_user_quota

@@ -71,7 +71,7 @@ class RatingChangeAdmin
    /*! \brief Inserts or updates RatingChangeAdmin-entry in database. */
    public function persist()
    {
-      if( $this->ID > 0 )
+      if ( $this->ID > 0 )
          $success = $this->update();
       else
          $success = $this->insert();
@@ -84,7 +84,7 @@ class RatingChangeAdmin
 
       $entityData = $this->fillEntityData();
       $result = $entityData->insert( "RatingChangeAdmin.insert(%s)" );
-      if( $result )
+      if ( $result )
          $this->ID = mysql_insert_id();
       return $result;
    }
@@ -97,7 +97,7 @@ class RatingChangeAdmin
 
    public function fillEntityData( $data=null )
    {
-      if( is_null($data) )
+      if ( is_null($data) )
          $data = $GLOBALS['ENTITY_RATING_CHANGE_ADMIN']->newEntityData();
       $data->set_value( 'ID', $this->ID );
       $data->set_value( 'uid', $this->uid );
@@ -114,7 +114,7 @@ class RatingChangeAdmin
    public static function build_query_sql( $uid=0 )
    {
       $qsql = $GLOBALS['ENTITY_RATING_CHANGE_ADMIN']->newQuerySQL('RCA');
-      if( $uid > 0 )
+      if ( $uid > 0 )
          $qsql->add_part( SQLP_WHERE, "RCA.uid='$uid'" );
       return $qsql;
    }
@@ -140,7 +140,7 @@ class RatingChangeAdmin
     */
    public static function load_ratingchangeadmin_with_query( $query_qsql )
    {
-      if( !($query_qsql instanceof QuerySQL) )
+      if ( !($query_qsql instanceof QuerySQL) )
          error('invalid_args', "RatingChangeAdmin:load_ratingchangeadmin_with_query");
 
       $qsql = self::build_query_sql();
@@ -162,7 +162,7 @@ class RatingChangeAdmin
       $iterator->setResultRows( mysql_num_rows($result) );
 
       $iterator->clearItems();
-      while( $row = mysql_fetch_array( $result ) )
+      while ( $row = mysql_fetch_array( $result ) )
       {
          $rca = self::new_from_row( $row );
          $iterator->addItem( $rca, $row );

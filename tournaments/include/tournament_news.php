@@ -90,7 +90,7 @@ class TournamentNews
 
    public function setStatus( $status )
    {
-      if( !preg_match( "/^(".CHECK_TNEWS_STATUS.")$/", $status ) )
+      if ( !preg_match( "/^(".CHECK_TNEWS_STATUS.")$/", $status ) )
          error('invalid_args', "TournamentNews.setStatus($status)");
       $this->Status = $status;
    }
@@ -114,7 +114,7 @@ class TournamentNews
    /*! \brief Inserts or updates tournament-news in database. */
    public function persist()
    {
-      if( $this->ID > 0 )
+      if ( $this->ID > 0 )
          $success = $this->update();
       else
          $success = $this->insert();
@@ -128,7 +128,7 @@ class TournamentNews
       $this->checkData();
       $entityData = $this->fillEntityData(true);
       $result = $entityData->insert( "TournamentNews.insert(%s)" );
-      if( $result )
+      if ( $result )
          $this->ID = mysql_insert_id();
       self::delete_cache_tournament_news( 'TournamentNews.insert', $this->tid );
       return $result;
@@ -156,7 +156,7 @@ class TournamentNews
    // \internal
    private function checkData()
    {
-      if( is_null($this->Status) )
+      if ( is_null($this->Status) )
          error('invalid_args', "TournamentNews.checkData.miss_status({$this->ID},{$this->tid})");
    }
 
@@ -189,9 +189,9 @@ class TournamentNews
          'TNP.Handle AS TNP_Handle' );
       $qsql->add_part( SQLP_FROM,
          'INNER JOIN Players AS TNP ON TNP.ID=TN.uid' );
-      if( $tnews_id > 0 )
+      if ( $tnews_id > 0 )
          $qsql->add_part( SQLP_WHERE, "TN.ID=$tnews_id" );
-      if( $tid > 0 )
+      if ( $tid > 0 )
          $qsql->add_part( SQLP_WHERE, "TN.tid=$tid" );
       return $qsql;
    }
@@ -207,19 +207,19 @@ class TournamentNews
    public static function build_view_query_sql( $tnews_id, $tid, $tnews_status, $is_admin, $is_tparticipant )
    {
       $qsql = new QuerySQL();
-      if( $tnews_id > 0 )
+      if ( $tnews_id > 0 )
          $qsql->add_part( SQLP_WHERE, "TN.ID=$tnews_id" );
-      if( $tid > 0 )
+      if ( $tid > 0 )
          $qsql->add_part( SQLP_WHERE, "TN.tid=$tid" );
-      if( !$is_admin ) // hide some news for non-TDs / non-TPs
+      if ( !$is_admin ) // hide some news for non-TDs / non-TPs
       {
          $qsql->add_part( SQLP_WHERE,
             "TN.Status IN ('".TNEWS_STATUS_SHOW."','".TNEWS_STATUS_ARCHIVE."')",
             "(TN.Flags & ".TNEWS_FLAG_HIDDEN.") = 0" );
-         if( !$is_tparticipant )
+         if ( !$is_tparticipant )
             $qsql->add_part( SQLP_WHERE, "(TN.Flags & ".TNEWS_FLAG_PRIVATE.") = 0" );
       }
-      if( !is_null($tnews_status) )
+      if ( !is_null($tnews_status) )
          $qsql->add_part( SQLP_WHERE, "TN.Status='$tnews_status'" );
       return $qsql;
    }//build_view_query_sql
@@ -263,7 +263,7 @@ class TournamentNews
       $iterator->setResultRows( mysql_num_rows($result) );
 
       $iterator->clearItems();
-      while( $row = mysql_fetch_array( $result ) )
+      while ( $row = mysql_fetch_array( $result ) )
       {
          $tourney = self::new_from_row( $row );
          $iterator->addItem( $tourney, $row );
@@ -277,7 +277,7 @@ class TournamentNews
    public static function process_tournament_news_deleted( $days_age )
    {
       global $NOW;
-      if( !is_numeric($days_age) )
+      if ( !is_numeric($days_age) )
          error('invalid_args', "TournamentNews:process_tournament_news_deleted($days_age)");
 
       $query = "FROM TournamentNews WHERE Status='".TNEWS_STATUS_DELETE."' AND " .
@@ -289,12 +289,12 @@ class TournamentNews
          $arr_tids = array();
          $result = db_query( "TournamentNews:process_tournament_news_deleted.find_tourney($days_age)",
             "SELECT tid $query" );
-         while( $row = mysql_fetch_array($result) )
+         while ( $row = mysql_fetch_array($result) )
             $arr_tids[] = $row['tid'];
          mysql_free_result($result);
 
          db_query( "TournamentNews:process_tournament_news_deleted($days_age)", "DELETE $query" );
-         foreach( $arr_tids as $tid )
+         foreach ( $arr_tids as $tid )
             self::delete_cache_tournament_news( 'TournamentNews:process_tournament_news_deleted', $tid );
       }
       ta_end();
@@ -304,7 +304,7 @@ class TournamentNews
    public static function getStatusText( $status=null )
    {
       // lazy-init of texts
-      if( !isset(self::$ARR_TNEWS_TEXTS['STATUS']) )
+      if ( !isset(self::$ARR_TNEWS_TEXTS['STATUS']) )
       {
          $arr = array();
          $arr[TNEWS_STATUS_NEW]     = T_('New#TN_status');
@@ -315,10 +315,10 @@ class TournamentNews
       }
 
       $key = 'STATUS';
-      if( is_null($status) )
+      if ( is_null($status) )
          return self::$ARR_TNEWS_TEXTS[$key];
 
-      if( !isset(self::$ARR_TNEWS_TEXTS[$key][$status]) )
+      if ( !isset(self::$ARR_TNEWS_TEXTS[$key][$status]) )
          error('invalid_args', "TournamentNews:getStatusText($status,$key)");
       return self::$ARR_TNEWS_TEXTS[$key][$status];
    }//getStatusText
@@ -327,7 +327,7 @@ class TournamentNews
    public static function getFlagsText( $flags=null )
    {
       // lazy-init of texts
-      if( !isset(self::$ARR_TNEWS_TEXTS['FLAGS']) )
+      if ( !isset(self::$ARR_TNEWS_TEXTS['FLAGS']) )
       {
          $arr = array();
          $arr[TNEWS_FLAG_HIDDEN]    = T_('Hidden#TN_flag');
@@ -336,12 +336,12 @@ class TournamentNews
       }
       else
          $arr = self::$ARR_TNEWS_TEXTS['FLAGS'];
-      if( is_null($flags) )
+      if ( is_null($flags) )
          return $arr;
 
       $out = array();
-      foreach( $arr as $flagmask => $flagtext )
-         if( $flags & $flagmask ) $out[] = $flagtext;
+      foreach ( $arr as $flagmask => $flagtext )
+         if ( $flags & $flagmask ) $out[] = $flagtext;
       return implode(', ', $out);
    }//getFlagsText
 
@@ -352,9 +352,9 @@ class TournamentNews
       $text = make_html_safe($tnews->Text, true);
 
       $fout = array();
-      if( $tnews->Flags & TNEWS_FLAG_HIDDEN )
+      if ( $tnews->Flags & TNEWS_FLAG_HIDDEN )
          $fout[] = self::getFlagsText(TNEWS_FLAG_HIDDEN);
-      if( $tnews->Flags & TNEWS_FLAG_PRIVATE )
+      if ( $tnews->Flags & TNEWS_FLAG_PRIVATE )
          $fout[] = self::getFlagsText(TNEWS_FLAG_PRIVATE);
       $publish_text = ( count($fout) ) ? span('TNewsFlags', implode(', ', $fout), '(%s) ') : '';
 

@@ -41,13 +41,13 @@ $GLOBALS['ThePage'] = new Page('TournamentLadderAdmin');
    connect2mysql();
 
    $logged_in = who_is_logged( $player_row);
-   if( !$logged_in )
+   if ( !$logged_in )
       error('login_if_not_logged_in', 'Tournament.ladder.admin');
-   if( !ALLOW_TOURNAMENTS )
+   if ( !ALLOW_TOURNAMENTS )
       error('feature_disabled', 'Tournament.ladder.admin');
    $my_id = $player_row['ID'];
 
-   if( $my_id <= GUESTS_ID_MAX )
+   if ( $my_id <= GUESTS_ID_MAX )
       error('not_allowed_for_guest', 'Tournament.ladder.admin');
 
    $page = "admin.php";
@@ -65,10 +65,10 @@ $GLOBALS['ThePage'] = new Page('TournamentLadderAdmin');
 
    $tid = (int) @$_REQUEST['tid'];
    $uid = (int) @$_REQUEST['uid'];
-   if( $tid < 0 ) $tid = 0;
+   if ( $tid < 0 ) $tid = 0;
    $is_delete = (bool) @$_REQUEST['ta_delete'];
 
-   if( @$_REQUEST['ta_cancel'] ) // cancel delete
+   if ( @$_REQUEST['ta_cancel'] ) // cancel delete
       jump_to("tournaments/ladder/admin.php?tid=$tid");
 
    $tourney = TournamentCache::load_cache_tournament( 'Tournament.ladder_admin.find_tournament', $tid );
@@ -78,7 +78,7 @@ $GLOBALS['ThePage'] = new Page('TournamentLadderAdmin');
    // edit allowed?
    $is_admin = TournamentUtils::isAdmin();
    $allow_edit_tourney = TournamentHelper::allow_edit_tournaments($tourney, $my_id);
-   if( !$allow_edit_tourney )
+   if ( !$allow_edit_tourney )
       error('tournament_edit_not_allowed', "Tournament.ladder_admin.edit($tid,$my_id)");
 
    $tprops = TournamentCache::load_cache_tournament_properties( 'Tournament.ladder_admin', $tid );
@@ -95,32 +95,32 @@ $GLOBALS['ThePage'] = new Page('TournamentLadderAdmin');
    $tladder_user = null;
    $authorise_edit_user = $authorise_add_user = false;
    $count_tp_reg = $count_tl_user = 0;
-   if( !$is_delete && $uid > 0 )
+   if ( !$is_delete && $uid > 0 )
    {
       $user = User::load_user($uid);
-      if( is_null($user) )
+      if ( is_null($user) )
          $errors[] = T_('Unknown user-id') . " [".$uid."]";
       else
       {
          $tladder_user = TournamentLadder::load_tournament_ladder_by_user($tid, $uid);
 
          $tp = TournamentCache::load_cache_tournament_participant( 'Tournament.ladder_admin', $tid, $uid );
-         if( is_null($tp) )
+         if ( is_null($tp) )
             $errors[] = sprintf( T_('Missing tournament user registration for user [%s].'), $user->Handle );
          else
          {
             $authorise_edit_user = true;
             $authorise_add_user = ( $tp->Status == TP_STATUS_REGISTER );
 
-            if( @$_REQUEST['ta_adduser'] && !$authorise_add_user )
+            if ( @$_REQUEST['ta_adduser'] && !$authorise_add_user )
                $errors[] = T_('Adding unregistered user to ladder is not allowed.');
 
-            if( is_null($tladder_user) && ($user->AdminOptions & ADMOPT_DENY_TOURNEY_REGISTER) )
+            if ( is_null($tladder_user) && ($user->AdminOptions & ADMOPT_DENY_TOURNEY_REGISTER) )
                $errors[] = T_('Tournament registration of this user has been denied by admins.');
          }
       }
    }
-   elseif( !$is_delete && $uid <= 0 )
+   elseif ( !$is_delete && $uid <= 0 )
    {
       $count_tp_reg = TournamentParticipant::count_TPs( $tid, TP_STATUS_REGISTER, 1, /*NextR*/false ); // ladder has only 1 round
       $count_tl_user = TournamentLadder::count_tournament_ladder( $tid );
@@ -129,27 +129,27 @@ $GLOBALS['ThePage'] = new Page('TournamentLadderAdmin');
 
    // ---------- Process actions ------------------------------------------------
 
-   if( $allow_admin && count($errors) == 0 )
+   if ( $allow_admin && count($errors) == 0 )
    {
-      if( $is_delete && $authorise_seed && @$_REQUEST['confirm'] ) // confirm delete ladder
+      if ( $is_delete && $authorise_seed && @$_REQUEST['confirm'] ) // confirm delete ladder
       {
          TournamentLadder::delete_ladder($tid);
          TournamentLogHelper::log_delete_tournament_ladder( $tid, $allow_edit_tourney );
          $sys_msg = urlencode( T_('Ladder deleted!') );
          jump_to("tournaments/ladder/admin.php?tid=$tid".URI_AMP."sysmsg=$sys_msg");
       }
-      elseif( @$_REQUEST['ta_seed'] && $authorise_seed )
+      elseif ( @$_REQUEST['ta_seed'] && $authorise_seed )
       {
          $seed_order = (int)get_request_arg('seed_order');
          $seed_reorder = (bool)get_request_arg('seed_reorder');
          $cnt = TournamentLadder::seed_ladder( $tourney, $tprops, $seed_order, $seed_reorder );
 
-         if( $cnt > 0 )
+         if ( $cnt > 0 )
             TournamentLogHelper::log_seed_tournament_ladder( $tid, $allow_edit_tourney, $seed_order, $seed_reorder, $cnt );
          $sys_msg = urlencode( ( $cnt > 0 ? T_('Ladder seeded!') : T_('No change!') ) );
          jump_to("tournaments/ladder/admin.php?tid=$tid".URI_AMP."sysmsg=$sys_msg");
       }
-      elseif( @$_REQUEST['ta_adduser'] && $authorise_add_user && !is_null($user) && is_null($tladder_user) )
+      elseif ( @$_REQUEST['ta_adduser'] && $authorise_add_user && !is_null($user) && is_null($tladder_user) )
       {
          ta_begin();
          {//HOT-section to re-add existing TournamentParticipant-user into ladder
@@ -159,14 +159,14 @@ $GLOBALS['ThePage'] = new Page('TournamentLadderAdmin');
          $sys_msg = urlencode( sprintf( T_('User [%s] added to ladder!'), $user->Handle) );
          jump_to("tournaments/ladder/admin.php?tid=$tid".URI_AMP."uid=$uid".URI_AMP."sysmsg=$sys_msg");
       }
-      elseif( @$_REQUEST['ta_deluser'] && $authorise_edit_user && !is_null($user) && !is_null($tladder_user) )
+      elseif ( @$_REQUEST['ta_deluser'] && $authorise_edit_user && !is_null($user) && !is_null($tladder_user) )
       {
          $reason = sprintf( T_('Tournament-Director (or admin) %s has removed the user.'), "<user $my_id>" );
          ta_begin();
          {//HOT-section to remove user from ladder
             $success = $tladder_user->remove_user_from_ladder( 'Tournament.ladder_admin',
                $allow_edit_tourney, 'Ladder-Admin', /*upd-rank*/false, $uid, $user->Handle, /*nfy-user*/true, $reason );
-            if( $success )
+            if ( $success )
             {
                $sys_msg = urlencode( sprintf( T_('User [%s] removed from this ladder-tournament!'), $user->Handle )
                   . ' ' . T_('User and opponents have been notified!') );
@@ -175,7 +175,7 @@ $GLOBALS['ThePage'] = new Page('TournamentLadderAdmin');
          }
          ta_end();
       }
-      elseif( @$_REQUEST['ta_crownking'] && $authorise_edit_user && !is_null($user) && !is_null($tladder_user)
+      elseif ( @$_REQUEST['ta_crownking'] && $authorise_edit_user && !is_null($user) && !is_null($tladder_user)
             && $tl_props->CrownKingHours == 0 )
       {
          TournamentHelper::process_tournament_ladder_crown_king( array(
@@ -210,7 +210,7 @@ $GLOBALS['ThePage'] = new Page('TournamentLadderAdmin');
          'DESCRIPTION', T_('Rating Use Mode#tourney'),
          'TEXT',  TournamentProperties::getRatingUseModeText($tprops->RatingUseMode) ));
 
-   if( count($errors) )
+   if ( count($errors) )
    {
       $tform->add_row( array( 'HR' ));
       $tform->add_row( array(
@@ -218,7 +218,7 @@ $GLOBALS['ThePage'] = new Page('TournamentLadderAdmin');
             'TEXT', buildErrorListString( T_('There are some errors'), $errors ) ));
       $tform->add_empty_row();
    }
-   elseif( $tourney->isFlagSet(TOURNEY_FLAG_LOCK_TDWORK) )
+   elseif ( $tourney->isFlagSet(TOURNEY_FLAG_LOCK_TDWORK) )
    {
       $tform->add_row( array( 'HR' ));
       $tform->add_row( array(
@@ -228,11 +228,11 @@ $GLOBALS['ThePage'] = new Page('TournamentLadderAdmin');
 
    // ADMIN: Seed Ladder ---------------
 
-   if( $authorise_seed )
+   if ( $authorise_seed )
    {
       $tform->add_row( array( 'HR' ));
       $tform->add_row( array( 'HEADER', T_('Prepare Ladder') ));
-      if( $count_tp_reg + $count_tl_user > 0 )
+      if ( $count_tp_reg + $count_tl_user > 0 )
       {
          $tform->add_row( array(
                'CELL', 2, '',
@@ -241,7 +241,7 @@ $GLOBALS['ThePage'] = new Page('TournamentLadderAdmin');
          $tform->add_empty_row();
       }
 
-      if( !$is_delete )
+      if ( !$is_delete )
       {
          list( $seed_order_def, $arr_seed_order ) = $tprops->build_seed_order();
          $seed_order_val = get_request_arg('seed_order', $seed_order_def);
@@ -261,7 +261,7 @@ $GLOBALS['ThePage'] = new Page('TournamentLadderAdmin');
                'SUBMITBUTTON', 'ta_seed', T_('Seed Ladder'),
                'TEXT',         SMALL_SPACING,
                'SUBMITBUTTON', 'ta_delete', T_('Delete Ladder'), ));
-         if( $count_tp_reg + $count_tl_user > 0 )
+         if ( $count_tp_reg + $count_tl_user > 0 )
             $tform->add_row( array(
                   'CELL', 2, '',
                   'CHECKBOX', 'seed_reorder', 1, T_('Reorder already joined users (otherwise append new users)#T_ladder'), $seed_reorder, ));
@@ -286,7 +286,7 @@ $GLOBALS['ThePage'] = new Page('TournamentLadderAdmin');
 
    $tform->add_row( array( 'HR' ));
    $tform->add_row( array( 'HEADER', T_('Admin Ladder participants') ));
-   if( $uid > 0 )
+   if ( $uid > 0 )
    {
       $tform->add_hidden( 'uid', $uid );
       $tform->add_row( array(
@@ -305,11 +305,11 @@ $GLOBALS['ThePage'] = new Page('TournamentLadderAdmin');
          ));
       $tform->add_empty_row();
    }
-   if( !$is_delete && !is_null($user) && $authorise_edit_user ) // valid user
+   if ( !$is_delete && !is_null($user) && $authorise_edit_user ) // valid user
    {
-      if( is_null($tladder_user) )
+      if ( is_null($tladder_user) )
       {
-         if( $authorise_add_user )
+         if ( $authorise_add_user )
             add_form_edit_user( $tform, $user,
                'ta_adduser', T_('Add user [%s] to ladder'),
                T_('Add registered tournament participant to ladder (at bottom).'),
@@ -334,7 +334,7 @@ $GLOBALS['ThePage'] = new Page('TournamentLadderAdmin');
 
    $tform->add_row( array( 'HR' ));
    $tform->add_row( array( 'HEADER', T_('Crown King of the Hill#T_ladder') ));
-   if( !$is_delete && !is_null($user) && !is_null($tladder_user) && $authorise_edit_user
+   if ( !$is_delete && !is_null($user) && !is_null($tladder_user) && $authorise_edit_user
          && $tl_props->CrownKingHours == 0 ) // valid user and no auto-crowning
    {
       add_form_edit_user( $tform, $user,
@@ -343,7 +343,7 @@ $GLOBALS['ThePage'] = new Page('TournamentLadderAdmin');
          /*notify*/0,
          T_('User will NOT be notified of this. All tournament directors and owner will be notified.') );
    }
-   elseif( !$is_delete && $tl_props->CrownKingHours > 0 )
+   elseif ( !$is_delete && $tl_props->CrownKingHours > 0 )
    {
       $tform->add_row( array(
             'CELL', 2, '',
@@ -379,17 +379,17 @@ function add_form_edit_user( &$form, $user, $action, $act_fmt, $title, $notify=0
    $form->add_row( array(
          'CELL', 2, '',
          'TEXT', $title ));
-   if( $extra )
+   if ( $extra )
    {
       $form->add_row( array(
             'CELL', 2, '',
             'TEXT', '* ' . $extra ));
    }
-   if( is_numeric($notify) )
+   if ( is_numeric($notify) )
    {
-      if( $notify > 1 )
+      if ( $notify > 1 )
          $nfy_text = T_('User and opponents of running games will be notified about this.#tourney');
-      elseif( $notify )
+      elseif ( $notify )
          $nfy_text = T_('User will be notified about this.#tourney');
       else
          $nfy_text = T_('User will NOT be notified about this.#tourney');

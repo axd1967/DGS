@@ -28,7 +28,7 @@ function error($err, $debugmsg=NULL)
    list( $xerr, $uri ) = DgsErrors::err_log( $uhandle, $err, $debugmsg);
 
    global $wap_opened;
-   if( !$wap_opened )
+   if ( !$wap_opened )
       wap_open( 'ERROR');
    wap_error( $xerr);
    wap_close();
@@ -48,7 +48,7 @@ define('WAP_CHECK_MAX', 1*SECS_PER_HOUR);   //secs
 
 
 $xmltrans = array();
-for( $i=1; $i<0x20 ; $i++ )
+for ( $i=1; $i<0x20 ; $i++ )
    $xmltrans[chr($i)] = ''; //"&#$i;";
 unset( $xmltrans["\t"]);
 unset( $xmltrans["\n"]);
@@ -61,7 +61,7 @@ $xmltrans['<'] = '&lt;';
 $xmltrans['>'] = '&gt;';
 $xmltrans['"'] = '&quot;';
 
-for( $i=0x80; $i<0x100 ; $i++ )
+for ( $i=0x80; $i<0x100 ; $i++ )
    $xmltrans[chr($i)] = "&#$i;";
 
 
@@ -76,7 +76,7 @@ function wap_safe( $str)
 
 function wap_date( $dat=0)
 {
-   if( !$dat )
+   if ( !$dat )
    {
       global $NOW;
       $dat= $NOW;
@@ -103,7 +103,7 @@ function wap_open( $title)
    global $wap_opened;
    $wap_opened= true;
 
-   if( empty($encoding_used) )
+   if ( empty($encoding_used) )
    {
       $encoding_used = 'UTF-8';
       //$encoding_used = 'iso-8859-1';
@@ -142,19 +142,19 @@ function wap_item( $cardid, $head, $title, $link='', $description='', $pubDate='
 {
    $str = card_open( $cardid, $head);
 
-   if( $previd )
+   if ( $previd )
       $str.= " <a accesskey=\"p\" href=\"#$previd\">[&lt;Prev]</a>";
 
-   if( $link )
+   if ( $link )
    {
-      if( !$link_text )
+      if ( !$link_text )
          $link_text = '[Go]';
       $str.= " <a accesskey=\"g\" href=\"$link\">$link_text</a>";
    }
    //$str.= "<p><do type=\"prev\" label=\"back\"><prev/></do></p>";
    //$str.= "<do type=\"prev\" label=\"back\"><prev/></do>";
 
-   if( $nextid )
+   if ( $nextid )
       $str.= " <a accesskey=\"n\" href=\"#$nextid\">[Next&gt;]</a>";
 
    $str.= "<br/>";
@@ -166,7 +166,7 @@ function wap_item( $cardid, $head, $title, $link='', $description='', $pubDate='
    //if( $pubDate )
       $str.= "<p>" . wap_date($pubDate) . "</p>";
 
-   if( !empty($description) )
+   if ( !empty($description) )
    {
       $description = wap_safe( $description);
       $str.= "<p>$description</p>";
@@ -180,9 +180,9 @@ function wap_item( $cardid, $head, $title, $link='', $description='', $pubDate='
 
 function wap_error( $str, $title='', $link='')
 {
-   if( !$link )
+   if ( !$link )
       $link= HOSTBASE;
-   if( !$title )
+   if ( !$title )
       $title= 'ERROR';
 
    wap_item( 'E'.wap_id(), 'Error', $title, $link, 'Error: '.$str);
@@ -191,9 +191,9 @@ function wap_error( $str, $title='', $link='')
 
 function wap_warning( $str, $title='', $link='')
 {
-   if( !$link )
+   if ( !$link )
       $link= HOSTBASE;
-   if( !$title )
+   if ( !$title )
       $title= 'WARNING';
 
    wap_item( 'W'.wap_id(), 'Warning', $title, $link, 'Warning: '.$str);
@@ -223,7 +223,7 @@ function wap_auth( $defid='', $defpw='')
 
 
 
-if( $is_down )
+if ( $is_down )
 {
    wap_open( 'WARNING');
    wap_warning( $is_down_message);
@@ -233,7 +233,7 @@ else
 {
    $logged_in = false;
    $loggin_mode = '';
-   if( @$_REQUEST['logout'] )
+   if ( @$_REQUEST['logout'] )
    {
       $uhandle = '';
       $passwd = '';
@@ -242,9 +242,9 @@ else
    {
       $uhandle = get_request_arg('userid');
       $passwd = get_request_arg('passwd');
-      if( $uhandle && $passwd )
+      if ( $uhandle && $passwd )
          $loggin_mode = 'password';
-      else if( !$uhandle && !$passwd )
+      else if ( !$uhandle && !$passwd )
       {
          $uhandle= safe_getcookie('handle');
          $loggin_mode = 'cookie';
@@ -257,14 +257,14 @@ else
    // check for excessive usage
    // NOTE: Without checking DB, this can be abused to block other users. But that should be punished by an admin as abuse.
    //       Advantage like this is to avoid DB-requests.
-   if( !is_legal_handle($uhandle) ) // check userid to avoid exploits as it's used in filename
+   if ( !is_legal_handle($uhandle) ) // check userid to avoid exploits as it's used in filename
       error('invalid_user', "wap_status.check.handle(".substr($uhandle,0,50).")");
    list( $allow_exec, $last_call_time ) =
       enforce_min_timeinterval( 'wap', 'wap_status-'.strtolower($uhandle), WAP_CHECK_MIN, WAP_CHECK_MAX );
 
    disable_cache();
 
-   if( !$allow_exec )
+   if ( !$allow_exec )
    {
       $wap_head = "Status of [$uhandle] built at [" . gmdate(GMDATE_FMT, $NOW) . "]";
       $tit = "[DISABLED] $wap_head";
@@ -288,33 +288,33 @@ else
 
    connect2mysql();
 
-   if( $loggin_mode )
+   if ( $loggin_mode )
    {
       $result = @db_query( "wap_status.find_user($uhandle)",
          "SELECT *, UNIX_TIMESTAMP(Sessionexpire) AS Expire ".
          "FROM Players WHERE Handle='".mysql_addslashes($uhandle)."' LIMIT 1" );
 
-      if( @mysql_num_rows($result) == 1 )
+      if ( @mysql_num_rows($result) == 1 )
       {
          $player_row = mysql_fetch_assoc($result);
          mysql_free_result($result);
 
          setTZ( $player_row['Timezone']);
 
-         if( $loggin_mode=='password' )
+         if ( $loggin_mode=='password' )
          {
-            if( check_password( $uhandle, $player_row["Password"], $player_row["Newpassword"], $passwd ) )
+            if ( check_password( $uhandle, $player_row["Password"], $player_row["Newpassword"], $passwd ) )
                $logged_in = true;
             else
                error('wrong_password', "wap_status.check_password($uhandle)");
          }
          else //$loggin_mode=='cookie'
          {
-            if( $player_row['Sessioncode'] === safe_getcookie('sessioncode') && $player_row['Expire'] >= $NOW )
+            if ( $player_row['Sessioncode'] === safe_getcookie('sessioncode') && $player_row['Expire'] >= $NOW )
                $logged_in = true;
          }
 
-         if( (@$player_row['AdminOptions'] & ADMOPT_DENY_LOGIN) )
+         if ( (@$player_row['AdminOptions'] & ADMOPT_DENY_LOGIN) )
             error('login_denied', "wap_status.check.user($uhandle)");
       }
       else
@@ -326,9 +326,9 @@ else
 
    writeIpStats('WAP');
 
-   if( !$logged_in )
+   if ( !$logged_in )
    {
-      if( !$wap_opened )
+      if ( !$wap_opened )
          wap_open( 'LOGIN');
       $card = card_open( "login", "Register!");
       $card.= wap_auth( $uhandle);
@@ -383,12 +383,12 @@ else
    // NOTE: keep static access-keys, no const-usage
    $card.= "<p><a accesskey=\"s\" href=\"$lnk\">Status of</a>: " .wap_safe($my_name). "</p>";
    $card .= "Built at: " . date(DATE_FMT_TZ, $NOW). "<br/>";
-   if( $countM>0 )
+   if ( $countM>0 )
       $card.= "<a accesskey=\"m\" href=\"#M1\">Messages</a>: $countM<br/>";
    else
       $card.= "Messages: 0<br/>";
 
-   if( $countG>0 )
+   if ( $countG>0 )
    {
       $nextMid= 'G1';
       $card.= "<a accesskey=\"g\" href=\"#G1\">Games</a>: $countG<br/>";
@@ -406,10 +406,10 @@ else
 
 
    $i= 1;
-   while( $row = mysql_fetch_assoc($resultM) )
+   while ( $row = mysql_fetch_assoc($resultM) )
    {
       $sendname = @$row['sender'];
-      if( !$sendname )
+      if ( !$sendname )
          $sendname = '[Server message]';
       else
          $sendname.= " (".@$row['sendhndl'].")";
@@ -436,7 +436,7 @@ else
 
    $clrs="BW"; //player's color... so color to play.
    $i= 1;
-   while( $row = mysql_fetch_assoc($resultG) )
+   while ( $row = mysql_fetch_assoc($resultG) )
    {
       $opponame = @$row['opp_Name'];
       $opponame.= " (".@$row['opp_Handle'].")";

@@ -11,7 +11,7 @@ disable_cache();
 $result = mysql_query("select ID as gid,Black_ID,White_ID from Games " .
 		"where Status != 'INVITED' AND Status != 'FINISHED'  order by ID");
 
-  while( $row = mysql_fetch_array($result) )	
+  while ( $row = mysql_fetch_array($result) )	
 {
 	extract($row);
 	echo $gid .' ';

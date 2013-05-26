@@ -83,9 +83,9 @@ class QuickHandlerGameList extends QuickHandler
       $this->opt_uid = get_request_arg(GAMELIST_OPT_UID);
 
       // filter-defaults
-      if( !isset($this->filters[GAMELIST_FILTER_MPG]) )
+      if ( !isset($this->filters[GAMELIST_FILTER_MPG]) )
          $this->filters[GAMELIST_FILTER_MPG] = 0; // default: OFF
-      if( !ALLOW_TOURNAMENTS || !isset($this->filters[GAMELIST_FILTER_TID]) )
+      if ( !ALLOW_TOURNAMENTS || !isset($this->filters[GAMELIST_FILTER_TID]) )
          $this->filters[GAMELIST_FILTER_TID] = 0; // default: 0
    }//parseURL
 
@@ -101,22 +101,22 @@ class QuickHandlerGameList extends QuickHandler
 
       // check args
       QuickHandler::checkArgMandatory( $dbgmsg, GAMELIST_OPT_VIEW, $this->opt_view );
-      if( !QuickHandler::matchRegex(CHECK_GAMELIST_OPTVAL_VIEW, $this->opt_view) )
+      if ( !QuickHandler::matchRegex(CHECK_GAMELIST_OPTVAL_VIEW, $this->opt_view) )
          error('invalid_args', "$dbgmsg.check.opt.view({$this->opt_view})");
 
       $uid = 0;
-      if( is_numeric($this->opt_uid) && $this->opt_uid > 0 )
+      if ( is_numeric($this->opt_uid) && $this->opt_uid > 0 )
          $uid = (int)$this->opt_uid;
-      elseif( $this->opt_uid == 'all' )
+      elseif ( $this->opt_uid == 'all' )
          $uid = 'all';
-      elseif( (string)$this->opt_uid == '' || $this->opt_uid == 0 || $this->opt_uid == 'mine' )
+      elseif ( (string)$this->opt_uid == '' || $this->opt_uid == 0 || $this->opt_uid == 'mine' )
          $uid = $my_id;
       else
          error('invalid_args', "$dbgmsg.check.opt.uid({$this->opt_uid})");
 
       // check filters
       $f_ext_tid = $this->filters[GAMELIST_FILTER_TID];
-      if( !ALLOW_TOURNAMENTS || !is_numeric($f_ext_tid) || $f_ext_tid < 0 )
+      if ( !ALLOW_TOURNAMENTS || !is_numeric($f_ext_tid) || $f_ext_tid < 0 )
          $f_ext_tid = 0;
       $f_mpg = (bool)$this->filters[GAMELIST_FILTER_MPG];
 
@@ -126,16 +126,16 @@ class QuickHandlerGameList extends QuickHandler
       // prepare command: list
 
       $glc = new GameListControl(/*quick*/true);
-      if( $this->opt_view == GAMELIST_OPTVAL_VIEW_STATUS )
+      if ( $this->opt_view == GAMELIST_OPTVAL_VIEW_STATUS )
       {
-         if( $uid != $my_id )
+         if ( $uid != $my_id )
             error('invalid_args', "$dbgmsg.check.view.only_mine");
 
          $glc->setView( GAMEVIEW_STATUS, $uid );
          $this->clear_with_options( array( QWITH_RATINGDIFF ) ); // ST: not allowed
 
          // allow returning ALL entries for status-view
-         if( @$_REQUEST[QOPT_LIMIT] === 'all' )
+         if ( @$_REQUEST[QOPT_LIMIT] === 'all' )
             $this->list_limit = $this->list_offset = 0;
 
          $qsql = GameListControl::build_game_list_query_status_view(
@@ -143,32 +143,32 @@ class QuickHandlerGameList extends QuickHandler
 
          $this->list_order = NextGameOrder::get_next_game_order( $player_row['NextGameOrder'], 'QUICK', false );
 
-         if( $this->is_with_option(QWITH_USER_ID) )
+         if ( $this->is_with_option(QWITH_USER_ID) )
             GameListControl::extend_game_list_query_with_user_info( $qsql );
       }
       else //view running|finished|observe
       {
-         if( $this->opt_view == GAMELIST_OPTVAL_VIEW_OBSERVE && !($uid === 'all' || $uid == $my_id) )
+         if ( $this->opt_view == GAMELIST_OPTVAL_VIEW_OBSERVE && !($uid === 'all' || $uid == $my_id) )
             error('invalid_args', "$dbgmsg.check.view.uid.only_all_or_mine");
-         elseif( $this->opt_view != GAMELIST_OPTVAL_VIEW_OBSERVE && $uid === 'all' ) // would need restriction as web-site
+         elseif ( $this->opt_view != GAMELIST_OPTVAL_VIEW_OBSERVE && $uid === 'all' ) // would need restriction as web-site
             error('invalid_args', "$dbgmsg.check.view.uid.all.not_supported({$this->opt_uid})");
 
-         if( $this->opt_view == GAMELIST_OPTVAL_VIEW_OBSERVE )
+         if ( $this->opt_view == GAMELIST_OPTVAL_VIEW_OBSERVE )
             $glc->setView( ($uid === 'all' ? GAMEVIEW_OBSERVE_ALL : GAMEVIEW_OBSERVE_MINE), $uid );
          else // running/finished
             $glc->setView( ($this->opt_view == GAMELIST_OPTVAL_VIEW_RUNNING ? GAMEVIEW_RUNNING : GAMEVIEW_FINISHED), $uid );
 
          // reset forbidden WITH-options
-         if( $glc->is_observe_all() )
+         if ( $glc->is_observe_all() )
             $this->clear_with_options( array( QWITH_PRIO, QWITH_NOTES, QWITH_RATINGDIFF ) ); // OA
-         elseif( $glc->is_running() )
+         elseif ( $glc->is_running() )
          {
-            if( $uid == $my_id )
+            if ( $uid == $my_id )
                $this->clear_with_options( array( QWITH_RATINGDIFF ) ); // MY-RU
             else
                $this->clear_with_options( array( QWITH_PRIO, QWITH_RATINGDIFF ) ); // OTHER-RU
          }
-         elseif( $glc->is_finished() )
+         elseif ( $glc->is_finished() )
             $this->clear_with_options( array( QWITH_PRIO, QWITH_NOTES ) ); // FU
 
          $glc->mp_game = $f_mpg;
@@ -184,7 +184,7 @@ class QuickHandlerGameList extends QuickHandler
          $qsql = $glc->build_games_query( $this->is_with_option(QWITH_RATINGDIFF), $load_remaining_time, $this->is_with_option(QWITH_PRIO) );
 
          // default order
-         if( $glc->is_observe_all() )
+         if ( $glc->is_observe_all() )
          {
             $qsql->add_part( SQLP_ORDER, 'X_ObsCount DESC', 'Lastchanged DESC', 'ID DESC' );
             $this->list_order = 'obs_count-,time_lastmove-,id-';
@@ -202,7 +202,7 @@ class QuickHandlerGameList extends QuickHandler
       // load games
       $arr = array();
       $result = db_query( "$dbgmsg.find_games", $qsql->get_select() );
-      while( $row = mysql_fetch_assoc($result) )
+      while ( $row = mysql_fetch_assoc($result) )
          $arr[] = $row;
       mysql_free_result($result);
       $this->game_result_rows = $arr;
@@ -215,9 +215,9 @@ class QuickHandlerGameList extends QuickHandler
    {
       $out = array();
 
-      if( is_array($this->game_result_rows) )
+      if ( is_array($this->game_result_rows) )
       {
-         foreach( $this->game_result_rows as $game_row )
+         foreach ( $this->game_result_rows as $game_row )
          {
             $arr = array();
             $out[] = QuickHandlerGameInfo::fill_game_info($this, $this->glc, $arr, $game_row);

@@ -45,7 +45,7 @@ define('FACT_CANCEL', 'cancel');
 
    connect2mysql();
    $logged_in = who_is_logged($player_row);
-   if( !$logged_in )
+   if ( !$logged_in )
       error('login_if_not_logged_in', 'templates');
 
    $page = "templates.php";
@@ -60,41 +60,41 @@ define('FACT_CANCEL', 'cancel');
 
    // ---------- handle actions ----------
 
-   if( @$_REQUEST[FACT_CANCEL] )
+   if ( @$_REQUEST[FACT_CANCEL] )
       jump_to($page.'?to=' . urlencode($arg_to));
 
    $count_profiles = $arr_profiles = NULL;
-   if( $cmd == CMD_LIST || $cmd == CMD_NEW )
+   if ( $cmd == CMD_LIST || $cmd == CMD_NEW )
    {
       $arr_profiles = Profile::load_profiles( $my_id, ProfileTemplate::known_template_types(), /*templ*/true );
       $count_profiles = count($arr_profiles);
    }
 
    $is_save = @$_REQUEST[FACT_SAVE];
-   if( $is_guest && ($is_save || $cmd) )
+   if ( $is_guest && ($is_save || $cmd) )
       error('not_allowed_for_guest', 'templates.save_cmd');
 
    $errors = NULL;
    $auto_name = @$_REQUEST['name'];
-   if( $cmd == CMD_NEW && $is_save )
+   if ( $cmd == CMD_NEW && $is_save )
    {
       $name = trim( get_request_arg('name') );
       $replace = (int)@$_REQUEST['replace'];
       list( $errors, $replace_name ) = check_save_template( $arr_profiles, $name, $replace );
-      if( !is_null($replace_name) )
+      if ( !is_null($replace_name) )
          $name = $auto_name = $replace_name;
 
-      if( count($errors) == 0 ) // save
+      if ( count($errors) == 0 ) // save
       {
          save_template( $my_id, $name, $replace );
          jump_to($page."?sysmsg=" . urlencode(T_('Template saved!#tmpl')));
       }
    }
-   elseif( $cmd == CMD_DELETE )
+   elseif ( $cmd == CMD_DELETE )
    {
       $del_id = (int)get_request_arg('tmpl');
       $del_prof = check_delete_template( $my_id, $del_id );
-      if( $is_save && !is_null($del_prof) )
+      if ( $is_save && !is_null($del_prof) )
       {
          $del_prof->delete_profile();
          jump_to($page."?sysmsg=" . urlencode(T_('Template deleted!#tmpl')));
@@ -104,7 +104,7 @@ define('FACT_CANCEL', 'cancel');
 
    // ---------- page start ----------
 
-   if( is_numeric($count_profiles) )
+   if ( is_numeric($count_profiles) )
       $title = sprintf( T_('Templates (used %s of max. %s)'), $count_profiles, MAX_PROFILE_TEMPLATES );
    else
       $title = T_('Templates');
@@ -112,11 +112,11 @@ define('FACT_CANCEL', 'cancel');
 
    echo "<h3 class=Header>$title</h3>\n";
 
-   if( $cmd == CMD_LIST )
+   if ( $cmd == CMD_LIST )
       echo_list_templates( $arr_profiles );
-   elseif( $cmd == CMD_NEW )
+   elseif ( $cmd == CMD_NEW )
       echo_save_template( $arr_profiles, $errors, $auto_name );
-   elseif( $cmd == CMD_DELETE && !$is_save )
+   elseif ( $cmd == CMD_DELETE && !$is_save )
       echo_delete_template( $del_prof );
 
    //echo "<hr>\n<center><pre>\n", print_r($_REQUEST, false), "</pre></center>\n"; //DEBUG
@@ -142,25 +142,25 @@ function echo_list_templates( $arr_profiles )
    $ttable->add_tablehead( 3, T_('Name#header'), 'User', 0, 'Name+');
    $ttable->add_tablehead( 4, T_('Last changed#header'), 'Date', 0, 'Lastchanged-');
 
-   foreach( $arr_profiles as $prof )
+   foreach ( $arr_profiles as $prof )
    {
       $links = '';
       $url_tmpl = "tmpl={$prof->id}";
-      if( $prof->Type == PROFTYPE_TMPL_SENDMSG )
+      if ( $prof->Type == PROFTYPE_TMPL_SENDMSG )
       {
          $links .= anchor( "message.php?mode=NewMessage{$url_to}" . URI_AMP . $url_tmpl,
                image( 'images/send.gif', 'M', '', 'class="Action"' ), T_('Send a message'));
       }
-      elseif( $prof->Type == PROFTYPE_TMPL_INVITE )
+      elseif ( $prof->Type == PROFTYPE_TMPL_INVITE )
       {
          $links .= anchor( "message.php?mode=Invite{$url_to}" . URI_AMP . $url_tmpl,
                image( 'images/invite.gif', 'I', '', 'class="Action"' ), T_('Invite'));
          $links .= anchor( "new_game.php?$url_tmpl",
                image( 'images/newgame.gif', 'N', '', 'class="Action"' ), T_('New Game'));
       }
-      elseif( $prof->Type == PROFTYPE_TMPL_NEWGAME )
+      elseif ( $prof->Type == PROFTYPE_TMPL_NEWGAME )
       {
-         if( ProfileTemplate::is_valid_template_raw_check( $prof->Type, PROFTYPE_TMPL_INVITE, $prof->Text ) )
+         if ( ProfileTemplate::is_valid_template_raw_check( $prof->Type, PROFTYPE_TMPL_INVITE, $prof->Text ) )
          {
             $links .= anchor( "message.php?mode=Invite{$url_to}" . URI_AMP . $url_tmpl,
                   image( 'images/invite.gif', 'I', '', 'class="Action"' ), T_('Invite'));
@@ -203,7 +203,7 @@ function echo_save_template( $arr_profiles, $errors, $new_name )
    $form->add_hidden('type', $_REQUEST['type']);
    $form->add_hidden('data', $_REQUEST['data']);
 
-   if( !is_null($errors) && count($errors) )
+   if ( !is_null($errors) && count($errors) )
    {
       $form->add_empty_row();
       $form->add_row( array(
@@ -223,7 +223,7 @@ function echo_save_template( $arr_profiles, $errors, $new_name )
 
    $key = 'replace';
    $val_replace = (int)@$_REQUEST[$key];
-   foreach( $arr_profiles as $prof )
+   foreach ( $arr_profiles as $prof )
    {
       $ttable->add_row( array(
             1 => $form->print_insert_radio_buttonsx( $key, array( $prof->id => '' ), $val_replace ),
@@ -249,24 +249,24 @@ function check_save_template( $arr_profiles, $name, $replace )
    $errors = array();
 
    $type = (int)@$_REQUEST['type'];
-   if( !ProfileTemplate::is_valid_type($type) )
+   if ( !ProfileTemplate::is_valid_type($type) )
       $errors[] = T_('Invalid type for template to save!#tmpl');
 
    $datalen = strlen(@$_REQUEST['data']);
-   if( $datalen > MAX_PROFILE_TEMPLATES_DATA )
+   if ( $datalen > MAX_PROFILE_TEMPLATES_DATA )
       $errors[] = sprintf( T_('Data to store for template exceeds limit of %s bytes (by %s bytes)!#tmpl'),
          MAX_PROFILE_TEMPLATES_DATA, $datalen - MAX_PROFILE_TEMPLATES_DATA );
 
    $miss_name = ( (string)$name == '' );
 
-   if( !is_null($arr_profiles) )
+   if ( !is_null($arr_profiles) )
    {
       // check for unique name of user
-      foreach( $arr_profiles as $prof )
+      foreach ( $arr_profiles as $prof )
       {
-         if( $replace > 0 && $replace == $prof->id ) // skip replace-entry for uniq-check
+         if ( $replace > 0 && $replace == $prof->id ) // skip replace-entry for uniq-check
             continue;
-         if( strcasecmp($prof->Name, $name) == 0 )
+         if ( strcasecmp($prof->Name, $name) == 0 )
          {
             $errors[] = T_('Name of template must be unique!#tmpl');
             break;
@@ -274,30 +274,30 @@ function check_save_template( $arr_profiles, $name, $replace )
       }
 
       // check template-count
-      if( count($arr_profiles) >= MAX_PROFILE_TEMPLATES && $replace <= 0 )
+      if ( count($arr_profiles) >= MAX_PROFILE_TEMPLATES && $replace <= 0 )
          $errors[] = T_('Max. limit of templates is reached. You have to replace an existing entry!#tmpl');
    }
 
    // check that replace-entry exists and is of user
    $replace_miss_name = null;
-   if( $replace > 0 )
+   if ( $replace > 0 )
    {
       $can_replace = false;
-      foreach( $arr_profiles as $prof )
+      foreach ( $arr_profiles as $prof )
       {
-         if( $prof->id == $replace )
+         if ( $prof->id == $replace )
          {
             $can_replace = true;
-            if( $miss_name )
+            if ( $miss_name )
                $replace_miss_name = $prof->Name;
             break;
          }
       }
-      if( !$can_replace )
+      if ( !$can_replace )
          $errors[] = T_('Replace selection is faulty, because the entry to replace does not exist for this user.#tmpl');
    }
 
-   if( $miss_name && is_null($replace_miss_name) )
+   if ( $miss_name && is_null($replace_miss_name) )
       $errors[] = T_('Missing name for template!#tmpl');
 
    return array( $errors, $replace_miss_name );
@@ -308,7 +308,7 @@ function save_template( $uid, $name, $replace )
 {
    $prof_type = (int)@$_REQUEST['type'];
 
-   if( $replace > 0 )
+   if ( $replace > 0 )
       $profile = Profile::load_profile_by_id( $replace, $uid );
    else
       $profile = ProfileTemplate::new_default_profile( $uid, $prof_type );
@@ -323,10 +323,10 @@ function save_template( $uid, $name, $replace )
 function check_delete_template( $uid, $prof_id )
 {
    $profile = Profile::load_profile_by_id( $prof_id, $uid );
-   if( is_null($profile) )
+   if ( is_null($profile) )
       error('invalid_profile', "templates.check_delete_template.find($prof_id,$uid)");
 
-   if( !ProfileTemplate::is_valid_type($profile->Type) )
+   if ( !ProfileTemplate::is_valid_type($profile->Type) )
       error('invalid_profile', "templates.check_delete_template.check.type($prof_id,$uid,{$profile->Type})");
 
    return $profile;

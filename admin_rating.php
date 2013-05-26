@@ -34,12 +34,12 @@ $GLOBALS['ThePage'] = new Page('RatingAdmin');
    connect2mysql();
 
    $logged_in = who_is_logged( $player_row);
-   if( !$logged_in )
+   if ( !$logged_in )
       error('login_if_not_logged_in', 'admin_rating');
    $my_id = $player_row['ID'];
-   if( $my_id <= GUESTS_ID_MAX )
+   if ( $my_id <= GUESTS_ID_MAX )
       error('not_allowed_for_guest', 'admin_rating');
-   if( !(@$player_row['admin_level'] & ADMIN_GAME) )
+   if ( !(@$player_row['admin_level'] & ADMIN_GAME) )
       error('adminlevel_too_low', 'admin_rating');
 
    $page = "admin_rating.php";
@@ -52,7 +52,7 @@ $GLOBALS['ThePage'] = new Page('RatingAdmin');
 */
 
    $uid = (int)get_request_arg('uid');
-   if( $uid <= GUESTS_ID_MAX ) $uid = 0;
+   if ( $uid <= GUESTS_ID_MAX ) $uid = 0;
    $arg_rating = trim(get_request_arg('rating'));
    $arg_ratingtype = get_request_arg('ratingtype', 'dragonrank');
    $do_reset_confidence = @$_REQUEST['reset_confival']; // reset rating confidence-interval
@@ -61,10 +61,10 @@ $GLOBALS['ThePage'] = new Page('RatingAdmin');
    $errors = array();
    $user = $upd_user = null;
    $changes = 0;
-   if( $uid )
+   if ( $uid )
    {
       $user = User::load_user( $uid );
-      if( is_null($user) )
+      if ( is_null($user) )
          error('unknown_user', "admin_rating.find_user($uid)");
       $upd_user = array(
          'Rating'    => $user->Rating,
@@ -72,20 +72,20 @@ $GLOBALS['ThePage'] = new Page('RatingAdmin');
          'RatingMax' => $user->urow['RatingMax'],
       );
 
-      if( $user->RatingStatus != RATING_RATED )
+      if ( $user->RatingStatus != RATING_RATED )
          $errors[] = sprintf( T_('Rating can only be changed for rating-status [%s].'), RATING_RATED );
-      if( $uid == $my_id )
+      if ( $uid == $my_id )
          $errors[] = T_('You can\'t change your own rating. Ask another admin.');
 
-      if( (string)$arg_rating != '' ) // update rating
+      if ( (string)$arg_rating != '' ) // update rating
       {
          $upd_user['Rating'] = convert_to_rating($arg_rating, $arg_ratingtype);
-         if( abs($upd_user['Rating'] - $user->Rating) > 0.005 )
+         if ( abs($upd_user['Rating'] - $user->Rating) > 0.005 )
             $changes |= RCADM_CHANGE_RATING;
       }
 
       // prepare changes
-      if( $do_reset_confidence ) // reset rating confidence-interval
+      if ( $do_reset_confidence ) // reset rating confidence-interval
       {
          $newrating = $upd_user['Rating'];
          $upd_user['RatingMin'] = $newrating - 200 - max(1600 - $newrating, 0) * 2 / 15;
@@ -93,9 +93,9 @@ $GLOBALS['ThePage'] = new Page('RatingAdmin');
          $changes |= RCADM_RESET_CONFIDENCE;
       }
 
-      if( !is_valid_rating($upd_user['Rating']) )
+      if ( !is_valid_rating($upd_user['Rating']) )
          $errors[] = sprintf( T_('Rating [%s] is invalid'), $upd_user['Rating'] );
-      if( $changes == 0 && (@$_REQUEST['preview'] || @$_REQUEST['save']) )
+      if ( $changes == 0 && (@$_REQUEST['preview'] || @$_REQUEST['save']) )
          $errors[] = T_('No rating-change or it is too small.');
 
       $rcatable = load_old_rating_changes( $uid );
@@ -104,9 +104,9 @@ $GLOBALS['ThePage'] = new Page('RatingAdmin');
 
    // ---------- Process actions ------------------------------------------------
 
-   if( count($errors) == 0 )
+   if ( count($errors) == 0 )
    {
-      if( @$_REQUEST['save'] && $changes > 0 )
+      if ( @$_REQUEST['save'] && $changes > 0 )
       {
          $diff = array();
          $diff[] = sprintf( '%s[%s > %s]', 'Rating',    $user->Rating, $upd_user['Rating'] );
@@ -131,7 +131,7 @@ $GLOBALS['ThePage'] = new Page('RatingAdmin');
    $rform = new Form( 'adminrating', $page, FORM_GET );
    $rform->add_hidden('uid', $uid);
 
-   if( $uid )
+   if ( $uid )
    {
       $rform->add_row( array( 'DESCRIPTION', T_('User'),
                               'TEXT', $user->user_reference(), ));
@@ -141,7 +141,7 @@ $GLOBALS['ThePage'] = new Page('RatingAdmin');
                               'TEXT', echo_rating($user->Rating, true, $my_id, false ) ));
    }
 
-   if( count($errors) )
+   if ( count($errors) )
    {
       $rform->add_row( array( 'HR' ));
       $rform->add_row( array(
@@ -150,7 +150,7 @@ $GLOBALS['ThePage'] = new Page('RatingAdmin');
    }
    $rform->add_row( array( 'HR' ));
 
-   if( $uid && $user->RatingStatus == RATING_RATED )
+   if ( $uid && $user->RatingStatus == RATING_RATED )
    {
       $rform->add_row( array(
             'DESCRIPTION', T_('New Rating'),
@@ -204,7 +204,7 @@ $GLOBALS['ThePage'] = new Page('RatingAdmin');
 
    $rform->echo_string();
 
-   if( !is_null($rcatable) )
+   if ( !is_null($rcatable) )
    {
       section('old_ratingchanges', T_('Former rating-changes of user'));
       $rcatable->echo_table();
@@ -240,7 +240,7 @@ function percent( $old, $new )
 function load_old_rating_changes( $uid )
 {
    global $page;
-   if( !$uid )
+   if ( !$uid )
       return null;
 
    $rcatable = new Table( 'ratingchanges', $page, null, '',
@@ -255,7 +255,7 @@ function load_old_rating_changes( $uid )
    $iterator = RatingChangeAdmin::load_ratingchangeadmin( $iterator, $uid );
    $rcatable->set_found_rows( $iterator->getItemCount() );
 
-   while( list(,$arr_item) = $iterator->getListIterator() )
+   while ( list(,$arr_item) = $iterator->getListIterator() )
    {
       list( $rca, $orow ) = $arr_item;
       $rcatable->add_row( array(

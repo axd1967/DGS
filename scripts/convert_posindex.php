@@ -28,11 +28,11 @@ require_once 'forum/forum_functions.php';
    connect2mysql();
 
    $logged_in = who_is_logged( $player_row);
-   if( !$logged_in )
+   if ( !$logged_in )
       error('login_if_not_logged_in', 'scripts.convert_posindex');
-   if( $player_row['ID'] <= GUESTS_ID_MAX )
+   if ( $player_row['ID'] <= GUESTS_ID_MAX )
       error('not_allowed_for_guest', 'scripts.convert_posindex');
-   if( !(@$player_row['admin_level'] & ADMIN_DATABASE) )
+   if ( !(@$player_row['admin_level'] & ADMIN_DATABASE) )
       error('adminlevel_too_low', 'scripts.convert_posindex');
 
    $page = $_SERVER['PHP_SELF'];
@@ -41,10 +41,10 @@ require_once 'forum/forum_functions.php';
    start_html('convert_posindex', 0);
 
 echo ">>>> One shot fix. Do not run it again."; end_html(); exit;
-   if( $do_it=@$_REQUEST['do_it'] )
+   if ( $do_it=@$_REQUEST['do_it'] )
    {
       function dbg_query($s) {
-        if( !mysql_query( $s) )
+        if ( !mysql_query( $s) )
            die("<BR>$s;<BR>" . mysql_error() );
         echo " --- fixed. ";
       }
@@ -74,21 +74,21 @@ echo ">>>> One shot fix. Do not run it again."; end_html(); exit;
    $n= (int)mysql_num_rows($result);
    echo "\n<br>=&gt; result: $n rows<p></p>\n";
 
-   if( $n > 0 )
-   while( $row = mysql_fetch_assoc( $result ) )
+   if ( $n > 0 )
+   while ( $row = mysql_fetch_assoc( $result ) )
    {
       $old_posindex = $row['PosIndex'];
       $new_posindex = $old_posindex;
 
       $l = strlen($old_posindex);
 
-      for($i=0; $i<$l; $i++)
+      for ($i=0; $i<$l; $i++)
       {
          $pos = strpos($old_order_str, $old_posindex[$i]);
          $new_posindex[$i] = $new_order_str[$pos];
       }
 
-      if( $new_posindex !== $old_posindex )
+      if ( $new_posindex !== $old_posindex )
       {
          echo '<hr>' . $row["ID"] . ": " .
             $old_posindex . "  --->  "  . $new_posindex . "<br>\n";

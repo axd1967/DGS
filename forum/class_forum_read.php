@@ -81,7 +81,7 @@ class ForumRead
       $query = $qsql->get_select();
       $result = db_query( "ForumRead.load_forum_reads({$this->uid},{$this->fid},{$this->tid})", $query );
 
-      while( $row = mysql_fetch_array( $result ) )
+      while ( $row = mysql_fetch_array( $result ) )
       {
          $key = $row['Forum_ID'] . ',' . $row['Thread_ID'];
          $this->reads[$key] = $row['X_Time'];
@@ -113,7 +113,7 @@ class ForumRead
     */
    public function mark_thread_read( $thread_id, $mark_time )
    {
-      if( $this->fid > 0 && $thread_id > 0 && $mark_time >= $this->min_date )
+      if ( $this->fid > 0 && $thread_id > 0 && $mark_time >= $this->min_date )
       {
          ta_begin();
          {//HOT-section to mark thread read
@@ -132,7 +132,7 @@ class ForumRead
     */
    public function mark_forum_read( $mark_time, $is_moderator )
    {
-      if( $this->fid <= 0 || $mark_time < $this->min_date )
+      if ( $this->fid <= 0 || $mark_time < $this->min_date )
          return;
 
       $min_date = self::get_min_date();
@@ -149,18 +149,18 @@ class ForumRead
          "P.Forum_ID=".$this->fid,
          'P.Parent_ID=0', 'P.Thread_ID=P.ID', //=thread (better query with thread=id for Forumreads)
          "P.Lastchanged >= FROM_UNIXTIME($min_date)" );
-      if( !$is_moderator )
+      if ( !$is_moderator )
          $qsql->add_part( SQLP_WHERE, 'P.PostsInThread>0' );
       $query = $qsql->get_select();
       $result = db_query( "ForumRead.mark_forum_read.load({$this->uid},{$this->fid})", $query );
 
       $upd_arr = array();
       $ins_arr = array();
-      while( $row = mysql_fetch_array( $result ) )
+      while ( $row = mysql_fetch_array( $result ) )
       {
-         if( $row['FR_X_Lastread'] > 0 )
+         if ( $row['FR_X_Lastread'] > 0 )
          {
-            if( $row['X_Lastchanged'] > $row['FR_X_Lastread'] )
+            if ( $row['X_Lastchanged'] > $row['FR_X_Lastread'] )
                $upd_arr[] = $row['Thread_ID'];
          }
          else
@@ -170,7 +170,7 @@ class ForumRead
 
       ta_begin();
       {//HOT-section to mark forum as read
-         if( count($upd_arr) ) // update existing Forumreads-entries
+         if ( count($upd_arr) ) // update existing Forumreads-entries
          {
             $upd_threads = implode(',', $upd_arr);
             db_query( "ForumRead.mark_forum_read.update(({$this->uid},{$this->fid})",
@@ -179,14 +179,14 @@ class ForumRead
                   "Thread_ID IN ($upd_threads)" );
          }
 
-         if( count($ins_arr) ) // insert new Forumreads-entries for NEW-threads
+         if ( count($ins_arr) ) // insert new Forumreads-entries for NEW-threads
          {
             $query = "INSERT INTO Forumreads (User_ID,Forum_ID,Thread_ID,Time) VALUES ";
 
             $first = true;
-            foreach( $ins_arr as $thread_id )
+            foreach ( $ins_arr as $thread_id )
             {
-               if( !$first ) $query .= ', ';
+               if ( !$first ) $query .= ', ';
                $first = false;
                $query .= "({$this->uid},{$this->fid},$thread_id,FROM_UNIXTIME($mark_time))";
             }
@@ -206,7 +206,7 @@ class ForumRead
    public function to_string()
    {
       $reads = '';
-      foreach( $this->reads as $k => $time )
+      foreach ( $this->reads as $k => $time )
          $reads .= sprintf( "\n{ [$k]=[%s] },", date('Y-m-d H:i:s', $time));
       return "ForumRead(uid={$this->uid},fid={$this->fid},tid={$this->tid}): "
          . "min_date=[{$this->min_date}], "
@@ -255,7 +255,7 @@ class ForumRead
          'P.Parent_ID=0', // redundant, but sometimes query is faster (intersect-index-merge)
          'P.PostsInThread>0',
          'P.Lastchanged >= FROM_UNIXTIME('.self::get_min_date().')' );
-      if( $forum_id >= 0 )
+      if ( $forum_id >= 0 )
          $qsql->add_part( SQLP_WHERE, 'P.Forum_ID='.$forum_id );
       $qsql->add_part( SQLP_HAVING, 'P.Lastchanged > FR_Lastread' );
       $qsql->add_part( SQLP_LIMIT, '1' );
@@ -283,7 +283,7 @@ class ForumRead
          "INNER JOIN Forums ON Forums.ID=P.Forum_ID",
          "LEFT JOIN Forumreads AS FR " .
             "ON FR.Forum_ID=P.Forum_ID AND FR.Thread_ID=P.Thread_ID AND FR.User_ID='$uid'" );
-      if( $exclude_fopts > 0 )
+      if ( $exclude_fopts > 0 )
          $qsql->add_part( SQLP_WHERE, "Forums.Options & $exclude_fopts = 0" );
       $qsql->add_part( SQLP_WHERE,
          'P.ID=P.Thread_ID',
@@ -307,7 +307,7 @@ class ForumRead
    {
       global $player_row;
 
-      if( !($forum_opts instanceof ForumOptions) )
+      if ( !($forum_opts instanceof ForumOptions) )
          error('invalid_args', "ForumRead:load_global_new.check.forum_opts($forum_opts)");
       $user_id = $forum_opts->uid;
 
@@ -317,12 +317,12 @@ class ForumRead
       // load (from player_row) and check against global forum-read for user
       $fr_new = (int)@$player_row['ForumReadNew']; // recalc if <0
       $fr_time = (int)@$player_row['X_ForumReadTime'];
-      if( $fr_new < 0 || $fr_time <= 0 || $global_updated > $fr_time )
+      if ( $fr_new < 0 || $fr_time <= 0 || $global_updated > $fr_time )
       {
          $global_has_new = self::has_new_posts_in_all_forums( $forum_opts );
          $success_update = self::update_global_forum_read( "load_global_new", // no TA
             $user_id, $global_updated, $global_has_new );
-         if( $success_update )
+         if ( $success_update )
          {
             $player_row['X_ForumReadTime'] = $global_updated;
             $player_row['ForumReadNew'] = ($global_has_new) ? 1 : 0;
@@ -338,7 +338,7 @@ class ForumRead
    public static function load_global_updated( $need_update=true )
    {
       // assume updated=true if no file-cache (inefficient but functionality available)
-      if( (string)CACHE_FOLDER == '' )
+      if ( (string)CACHE_FOLDER == '' )
          return true;
 
       // read from file-cache
@@ -347,7 +347,7 @@ class ForumRead
          ? (int)@filemtime(CACHEFILE_FORUM_GLOBAL)
          : -1;
 
-      if( $need_update && $updated <= 0 ) // need-update ?
+      if ( $need_update && $updated <= 0 ) // need-update ?
       {
          global $NOW;
          $updated = $NOW;
@@ -359,10 +359,10 @@ class ForumRead
    /*! \brief Updates global-forum Updated-date because of change to post (stored in file-system). */
    public static function trigger_recalc_global_post_update( $time )
    {
-      if( (string)CACHE_FOLDER != '' )
+      if ( (string)CACHE_FOLDER != '' )
       {
          $updated = self::load_global_updated( false );
-         if( $updated < 0 || $time > $updated ) // update only if newer
+         if ( $updated < 0 || $time > $updated ) // update only if newer
             touch(CACHEFILE_FORUM_GLOBAL, $time );
       }
    }

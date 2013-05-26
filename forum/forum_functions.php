@@ -89,7 +89,7 @@ function add_forum_log( $tid, $pid, $action )
 {
    global $player_row, $NOW;
    $uid = @$player_row['ID'];
-   if( $uid <= 0 )
+   if ( $uid <= 0 )
       $uid = 1; // use guest-user as default-user
    $ip = (string) @$_SERVER['REMOTE_ADDR'];
 
@@ -109,7 +109,7 @@ function load_forum_id( $thread )
    $result = db_query( 'load_forum_id',
       "SELECT Forum_ID FROM Posts WHERE ID='$thread' LIMIT 1" );
 
-   if( @mysql_num_rows($result) != 1 )
+   if ( @mysql_num_rows($result) != 1 )
       return 0;
 
    $row = mysql_fetch_array($result);
@@ -131,7 +131,7 @@ function display_posts_pending_approval()
          . "WHERE Approved='P' ORDER BY Time" );
 
    $cnt = 0;
-   if( mysql_num_rows($result) > 0 )
+   if ( mysql_num_rows($result) > 0 )
    {
       $disp_forum = new DisplayForum( 0, false );
       $disp_forum->cols = $cols = 4;
@@ -142,7 +142,7 @@ function display_posts_pending_approval()
       $disp_forum->links = LINKPAGE_STATUS;
       $disp_forum->forum_start_table('Pending');
 
-      while( $row = mysql_fetch_array( $result ) )
+      while ( $row = mysql_fetch_array( $result ) )
       {
          $post = ForumPost::new_from_row($row);
          $forum_name = $row['X_Forumname'];
@@ -232,9 +232,9 @@ class DisplayForum
    public function set_rx_term( $rx_term='' )
    {
       // highlight terms (skipping XML-elements like tags & entities)
-      if( is_array($rx_term) && count($rx_term) > 0 )
+      if ( is_array($rx_term) && count($rx_term) > 0 )
          $this->rx_term = implode('|', $rx_term);
-      elseif( !is_string($rx_term) )
+      elseif ( !is_string($rx_term) )
          $this->rx_term = '';
       else
          $this->rx_term = $rx_term;
@@ -252,9 +252,9 @@ class DisplayForum
 
    public function set_threadpost_view( $forum_flags )
    {
-      if( ($forum_flags & FORUMFLAGS_POSTVIEW_FLAT) == FORUMFLAG_POSTVIEW_FLAT_NEW_FIRST )
+      if ( ($forum_flags & FORUMFLAGS_POSTVIEW_FLAT) == FORUMFLAG_POSTVIEW_FLAT_NEW_FIRST )
          $this->flat_view = 1;
-      elseif( ($forum_flags & FORUMFLAGS_POSTVIEW_FLAT) == FORUMFLAG_POSTVIEW_FLAT_OLD_FIRST )
+      elseif ( ($forum_flags & FORUMFLAGS_POSTVIEW_FLAT) == FORUMFLAG_POSTVIEW_FLAT_OLD_FIRST )
          $this->flat_view = -1;
       else
          $this->flat_view = 0;
@@ -262,13 +262,13 @@ class DisplayForum
 
    public function show_found_rows( $rows )
    {
-      if( $rows >=0 )
+      if ( $rows >=0 )
          $this->found_rows = $rows;
    }
 
    public function print_moderation_note( $width )
    {
-      if( $this->is_moderator)
+      if ( $this->is_moderator)
          echo "<table width='$width'><tr><td align=right><font color=red>"
             . T_("Moderating") . "</font></td></tr></table>\n";
    }
@@ -282,7 +282,7 @@ class DisplayForum
       echo name_anchor('ftop'), "<table id='forum$table_id' class=Forum>\n";
       $this->make_link_array( $ReqParam );
 
-      if( $this->links & LINK_MASKS )
+      if ( $this->links & LINK_MASKS )
          $this->echo_links(NEWMODE_TOP);
 
       $this->print_headline();
@@ -292,14 +292,14 @@ class DisplayForum
 
    public function print_headline( $headline=NULL )
    {
-      if( is_null($headline) )
+      if ( is_null($headline) )
          $headline = $this->headline;
 
       echo "<tr class=Caption>";
       $first = true;
-      foreach( $headline as $name => $attbs )
+      foreach ( $headline as $name => $attbs )
       {
-         if( $first && $this->found_rows >= 0 )
+         if ( $first && $this->found_rows >= 0 )
          {
             $fmt_entries = ($this->found_rows == 1 ) ? T_('%s entry') : T_('%s entries');
             $name .= SMALL_SPACING .
@@ -313,7 +313,7 @@ class DisplayForum
 
    public function forum_end_table( $bottom_bar=true )
    {
-      if( $bottom_bar && $this->links & LINK_MASKS )
+      if ( $bottom_bar && $this->links & LINK_MASKS )
          $this->echo_links(NEWMODE_BOTTOM);
       echo "</table>\n", name_anchor('fbottom');
    }
@@ -323,7 +323,7 @@ class DisplayForum
    {
       // build view-links "(tree | new/old first)"
       $arr = array();
-      if( $this->flat_view == 0 ) // tree-view
+      if ( $this->flat_view == 0 ) // tree-view
       {
          $arr[] = array( $base_url .URI_AMP.'view=fo', T_('Old First#thread_view') );
          $arr[] = array( $base_url .URI_AMP.'view=fn', T_('New First#thread_view') );
@@ -331,14 +331,14 @@ class DisplayForum
       else
       {
          $arr[] = array( $base_url .URI_AMP.'view=t', T_('Tree View#thread_view') );
-         if( $this->flat_view > 0 ) // flat new-first
+         if ( $this->flat_view > 0 ) // flat new-first
             $arr[] = array( $base_url .URI_AMP.'view=fo', T_('Old First#thread_view') );
          else //if( $this->flat_view < 0 ) // flat old-first
             $arr[] = array( $base_url .URI_AMP.'view=fn', T_('New First#thread_view') );
       }
 
       $head_fmt = '%s%s<span class="HeaderToggle">( <a href="%s">%s</a> ) ( <a href="%s">%s</a> | <a href="%s">%s</a> )</span>';
-      if( $show_overview )
+      if ( $show_overview )
       {
 
          $headtitle1 = sprintf( $head_fmt,
@@ -375,66 +375,66 @@ class DisplayForum
    {
       global $NOW;
       $links = $this->links;
-      if( !( $links & LINK_MASKS ) )
+      if ( !( $links & LINK_MASKS ) )
          return;
       $fid = $this->forum_id;
       $tid = $this->thread_id;
 
-      if( $links & LINK_FORUMS )
+      if ( $links & LINK_FORUMS )
          $this->link_array_left[T_('Forums')] = "index.php";
 
-      if( $links & LINK_THREADS )
+      if ( $links & LINK_THREADS )
          $this->link_array_left[T_('Threads')] = "list.php?forum=$fid";
 
-      if( $links & LINK_BACK_TO_THREAD )
+      if ( $links & LINK_BACK_TO_THREAD )
       {
          $this->link_array_left[T_('Back to thread')] = "read.php?forum=$fid"
                .URI_AMP."thread=$tid"
                .( ( $this->back_post_id ) ? '#'.$this->back_post_id : '' );
       }
 
-      if( $links & LINK_NEW_TOPIC )
+      if ( $links & LINK_NEW_TOPIC )
          $this->link_array_left[T_('New Topic')] = "read.php?forum=$fid";
 
-      if( $links & LINK_REFRESH )
+      if ( $links & LINK_REFRESH )
       {
-         if( $links & LINKPAGE_READ )
+         if ( $links & LINKPAGE_READ )
          {
             $url = make_url( 'read.php', array( 'forum' => $fid, 'thread' => $tid ));
-            if( isset($_REQUEST['raw']) )
+            if ( isset($_REQUEST['raw']) )
                $url .= URI_AMP . 'raw='.$_REQUEST['raw'];
          }
-         elseif( $links & LINKPAGE_LIST )
+         elseif ( $links & LINKPAGE_LIST )
             $url = make_url( 'list.php', array( 'forum' => $fid, 'maxrows' => $this->max_rows ));
-         elseif( $links & LINKPAGE_SEARCH )
+         elseif ( $links & LINKPAGE_SEARCH )
             $url = '';
          else
             $url = "index.php";
-         if( $url )
+         if ( $url )
             $this->link_array_left[T_('Refresh')] = $url;
       }
 
-      if( $links & LINK_SEARCH )
+      if ( $links & LINK_SEARCH )
          $this->link_array_left[T_('Search')] = "search.php";
 
-      if( ($links & LINKPAGE_LIST) && ($links & LINK_MARK_READ) )
+      if ( ($links & LINKPAGE_LIST) && ($links & LINK_MARK_READ) )
       {
          $this->link_array_left[T_('Mark All Read')] = make_url( 'list.php',
                array( 'forum' => $fid, 'maxrows' => $this->max_rows, 'markread' => $NOW ));
       }
 
-      if( $links & LINK_TOGGLE_MODERATOR )
+      if ( $links & LINK_TOGGLE_MODERATOR )
       {
          // preserve all page-args on moderator switch
          $get = array_merge( $_GET, $_POST);
          unset($get['modact']);
          unset($get['modpid']);
          $get['moderator'] = ($this->is_moderator) ? 'n' : 'y';
-         if( $links & LINKPAGE_READ )
+         if ( $links & LINKPAGE_READ )
             $url = make_url( 'read.php', $get );
-         elseif( $links & LINKPAGE_LIST )
+         elseif ( $links & LINKPAGE_LIST )
             $url = make_url( 'list.php', $get );
-         elseif( $links & LINKPAGE_SEARCH )
+         elseif ( $links & LINKPAGE_SEARCH )
             $url = make_url( 'search.php', $get );
          else
             $url = make_url( 'index.php', $get );
@@ -442,23 +442,23 @@ class DisplayForum
       }
 
       $navi = array( 'maxrows' => $this->max_rows );
-      if( !is_null($ReqParam) && ($links & (LINKPAGE_SEARCH|LINK_PREV_PAGE|LINK_NEXT_PAGE)) )
+      if ( !is_null($ReqParam) && ($links & (LINKPAGE_SEARCH|LINK_PREV_PAGE|LINK_NEXT_PAGE)) )
          $navi = array_merge( $navi, $ReqParam->get_entries() );
 
-      if( $links & LINK_PREV_PAGE )
+      if ( $links & LINK_PREV_PAGE )
       {
          $navi['offset'] = $this->offset - $this->max_rows;
-         if( $links & LINKPAGE_SEARCH )
+         if ( $links & LINKPAGE_SEARCH )
             $href = 'search.php?';
          else
             $href = "list.php?forum=$fid";
          $this->link_array_right[T_("Prev Page")] =
             array( make_url( $href, $navi ), '', array( 'accesskey' => ACCKEY_ACT_PREV ) );
       }
-      if( $links & LINK_NEXT_PAGE )
+      if ( $links & LINK_NEXT_PAGE )
       {
          $navi['offset'] = $this->offset + $this->max_rows;
-         if( $links & LINKPAGE_SEARCH )
+         if ( $links & LINKPAGE_SEARCH )
             $href = 'search.php?';
          else
             $href = "list.php?forum=$fid";
@@ -469,9 +469,9 @@ class DisplayForum
 
    public function echo_links( $new_mode )
    {
-      if( ($new_mode & (NEWMODE_TOP|NEWMODE_BOTTOM)) == NEWMODE_TOP )
+      if ( ($new_mode & (NEWMODE_TOP|NEWMODE_BOTTOM)) == NEWMODE_TOP )
          $id = 'T';
-      elseif( ($new_mode & (NEWMODE_TOP|NEWMODE_BOTTOM)) == NEWMODE_BOTTOM )
+      elseif ( ($new_mode & (NEWMODE_TOP|NEWMODE_BOTTOM)) == NEWMODE_BOTTOM )
          $id = 'B';
       else
          error('invalid_args', "DisplayForum.echo_links.check.new_mode($new_mode)");
@@ -481,13 +481,13 @@ class DisplayForum
       echo "<tr class=Links$id><td$tmp><div class=TreeLinks>";
 
       $first = true;
-      foreach( $this->link_array_left as $name => $link )
+      foreach ( $this->link_array_left as $name => $link )
       {
-         if( !$first )
+         if ( !$first )
             echo "&nbsp;|&nbsp;";
          else
             $first = false;
-         if( is_array($link) )
+         if ( is_array($link) )
             echo anchor( $link[0], $name, $link[1], $link[2]);
          else
             echo anchor( $link, $name);
@@ -496,19 +496,19 @@ class DisplayForum
 
       $lcols = $this->cols - $lcols;
       $tmp = ( $lcols > 1 ? ' colspan='.$lcols : '' );
-      if( $lcols > 0 )
+      if ( $lcols > 0 )
          echo "</div></td><td$tmp><div class=PageLinks>";
       else
          echo "</div><div class=PageLinks>";
 
       $first = true;
-      foreach( $this->link_array_right as $name => $link )
+      foreach ( $this->link_array_right as $name => $link )
       {
-         if( !$first )
+         if ( !$first )
             echo "&nbsp;|&nbsp;";
          else
             $first = false;
-         if( is_array($link) )
+         if ( is_array($link) )
             echo anchor( $link[0], $name, $link[1], $link[2]);
          else
             echo anchor( $link, $name);
@@ -528,17 +528,17 @@ class DisplayForum
 
       $new = '';
       $anchor_prefix = 'new';
-      if( $mode & (NEWMODE_TOP|NEWMODE_BOTTOM) ) // top/bottom-bar refer to 1st-NEW
+      if ( $mode & (NEWMODE_TOP|NEWMODE_BOTTOM) ) // top/bottom-bar refer to 1st-NEW
       {
          $link = ($mode & NEWMODE_NO_LINK) ? '' : ' href="#new1"';
-         if( ($mode & NEWMODE_TOP) && $this->count_new_posts > 0 )
+         if ( ($mode & NEWMODE_TOP) && $this->count_new_posts > 0 )
             $new = sprintf( $fmt_new, $anchor_prefix, 0, $link, T_('first new') );
-         elseif( ($mode & NEWMODE_BOTTOM) && $this->new_count > 0 )
+         elseif ( ($mode & NEWMODE_BOTTOM) && $this->new_count > 0 )
             $new = sprintf( $fmt_new, $anchor_prefix, $this->new_count + 1, $link, T_('first new') );
       }
       else
       {
-         if( $mode & NEWMODE_OVERVIEW )
+         if ( $mode & NEWMODE_OVERVIEW )
          {
             $anchor_prefix = 'treenew';
             $addnew = 0;
@@ -559,14 +559,14 @@ class DisplayForum
    public function forum_message_box( $drawmode, $post_id, $GoDiagrams=null, $ErrorMsg='', $Subject='', $Text='', $Flags=0 )
    {
       global $player_row;
-      if( ($player_row['AdminOptions'] & ADMOPT_FORUM_NO_POST) ) // user not allowed to post
+      if ( ($player_row['AdminOptions'] & ADMOPT_FORUM_NO_POST) ) // user not allowed to post
          return;
 
-      if( !Forum::allow_posting($player_row, $this->forum_opts) )
+      if ( !Forum::allow_posting($player_row, $this->forum_opts) )
          return;
 
       // reply-prefix
-      if( ($drawmode == DRAWPOST_NORMAL || $drawmode == DRAWPOST_REPLY)
+      if ( ($drawmode == DRAWPOST_NORMAL || $drawmode == DRAWPOST_REPLY)
             && strlen($Subject) > 0 && strcasecmp(substr($Subject,0,3), "re:") != 0 )
          $Subject = "RE: " . $Subject;
 
@@ -574,7 +574,7 @@ class DisplayForum
       $form = new Form( $msg_form, "read.php#preview", FORM_POST );
 
       global $player_row;
-      if( @$player_row['ID'] <= GUESTS_ID_MAX )
+      if ( @$player_row['ID'] <= GUESTS_ID_MAX )
       {
          $form->add_row( array(
                'DESCRIPTION', sprintf('<span class="ErrorMsg"><b>%s</b></span>', T_('NOTE#guest')),
@@ -583,7 +583,7 @@ class DisplayForum
                            . "If you want a private (non-public) answer, add your email and ask for private contact.")
                         . '</span>' ));
       }
-      if( $ErrorMsg )
+      if ( $ErrorMsg )
       {
          $form->add_row( array(
                'DESCRIPTION', sprintf('<span class="ErrorMsg"><b>%s</b></span>', T_('Error#forum')),
@@ -599,7 +599,7 @@ class DisplayForum
       $form->add_row( array(
             'TAB', 'TEXTAREA', 'Text', 70, 25, $Text ));
 
-      if( $post_id == 0 && ForumPost::allow_post_read_only() ) // only for new thread
+      if ( $post_id == 0 && ForumPost::allow_post_read_only() ) // only for new thread
       {
          $form->add_row( array(
             'TAB', 'CHECKBOX', 'ReadOnly', 1, T_('Read-only thread (only admin executives may reply)'),
@@ -608,10 +608,10 @@ class DisplayForum
 
       $arr_dump_diagrams = array();
 /*
-      if( ALLOW_GO_DIAGRAMS && is_javascript_enabled() && !is_null($GoDiagrams) )
+      if ( ALLOW_GO_DIAGRAMS && is_javascript_enabled() && !is_null($GoDiagrams) )
       {
          $diagrams_str = GoDiagram::draw_editors($GoDiagrams);
-         if( !empty($diagrams_str) )
+         if ( !empty($diagrams_str) )
          {
             $form->add_row( array( 'OWNHTML', "<td colspan=2>$diagrams_str</td>" ));
             $arr_dump_diagrams = array( 'onClick' => "dump_all_data('$msg_form');" );
@@ -635,20 +635,20 @@ class DisplayForum
    // level 3: the post cell TABLE
    public function change_depth( $new_depth )
    {
-      if( $new_depth < 1 && $this->cur_depth < 1 )
+      if ( $new_depth < 1 && $this->cur_depth < 1 )
          return;
 
-      if( $this->cur_depth >= 1 ) //this means that a cell table is already opened
+      if ( $this->cur_depth >= 1 ) //this means that a cell table is already opened
          echo "</table></td></tr>\n";
 
-      if( $new_depth < 1 ) //this means close it
+      if ( $new_depth < 1 ) //this means close it
       {
          echo "</table></td></tr>\n";
          $this->cur_depth = -1;
          return;
       }
 
-      if( $this->cur_depth < 1 ) //this means opened it
+      if ( $this->cur_depth < 1 ) //this means opened it
          echo "<tr><td colspan={$this->cols}><table width=\"100%\" border=0 cellspacing=0 cellpadding=0>";
 
       // then build the indenting row
@@ -657,7 +657,7 @@ class DisplayForum
       $indent = "<td class=Indent>&nbsp;</td>";
       $i = min( $this->cur_depth, FORUM_MAX_INDENT);
       $c = FORUM_MAX_INDENT+1 - $i;
-      switch( (int)$i )
+      switch ( (int)$i )
       {
          case 1:
             break;
@@ -682,7 +682,7 @@ class DisplayForum
    /*! \brief Inits and returns navigational images for draw_post if not initialized yet. */
    private function init_navi_images()
    {
-      if( !is_array($this->navi_img) )
+      if ( !is_array($this->navi_img) )
       {
          global $base_path;
          $this->navi_img = array(
@@ -731,26 +731,26 @@ class DisplayForum
       // highlight terms in Subject/Text
       $sbj = make_html_safe( $post->subject, SUBJECT_HTML, $this->rx_term );
       $txt = make_html_safe( $post->text, true, $this->rx_term );
-//      if( ALLOW_GO_DIAGRAMS && is_javascript_enabled() && !is_null($GoDiagrams) )
+//      if ( ALLOW_GO_DIAGRAMS && is_javascript_enabled() && !is_null($GoDiagrams) )
 //         $txt = GoDiagram::replace_goban_tags_with_boards($txt, $GoDiagrams);
       $txt = MarkupHandlerGoban::replace_igoban_tags( $txt );
-      if( strlen($txt) == 0 ) $txt = '&nbsp;';
+      if ( strlen($txt) == 0 ) $txt = '&nbsp;';
 
       $sbj_readonly = ( $post->is_thread_post() ) ? $post->format_flags() : '';
 
       // CSS-class for post header
       $drawmode_type = ($drawmode & MASK_DRAWPOST_MODES);
-      if( $drawmode == DRAWPOST_NORMAL ) // most frequent case, no extras
+      if ( $drawmode == DRAWPOST_NORMAL ) // most frequent case, no extras
          $class = 'Normal';
-      elseif( $drawmode_type == DRAWPOST_SEARCH )
+      elseif ( $drawmode_type == DRAWPOST_SEARCH )
          $class = 'SearchResult';
-      elseif( $drawmode & MASK_DRAWPOST_HIDDEN )
+      elseif ( $drawmode & MASK_DRAWPOST_HIDDEN )
          $class = 'Hidden';
-      elseif( $drawmode_type == DRAWPOST_PREVIEW )
+      elseif ( $drawmode_type == DRAWPOST_PREVIEW )
          $class = 'Preview';
-      elseif( $drawmode_type == DRAWPOST_EDIT )
+      elseif ( $drawmode_type == DRAWPOST_EDIT )
          $class = 'Edit';
-      elseif( $drawmode_type == DRAWPOST_REPLY )
+      elseif ( $drawmode_type == DRAWPOST_REPLY )
          $class = 'Reply';
       else //if drawmode_type 0 or DRAWPOST_NORMAL
       {
@@ -760,7 +760,7 @@ class DisplayForum
       $hdrclass = 'PostHead'.$class;
 
       // post header
-      if( $drawmode_type == DRAWPOST_PREVIEW )
+      if ( $drawmode_type == DRAWPOST_PREVIEW )
       {
          $hdrrows = 2;
          $hdrcols = $cols;
@@ -775,7 +775,7 @@ class DisplayForum
       }
       else
       {
-         if( $drawmode & MASK_DRAWPOST_HIDDEN )
+         if ( $drawmode & MASK_DRAWPOST_HIDDEN )
          {
             $hdrcols = $cols-1; //because of the rowspan=$hdrrows in the "hidden"-column
             $newstr = ''; // no NEW for hidden posts
@@ -788,7 +788,7 @@ class DisplayForum
          $subject_modstr = ( $drawmode & MASK_DRAWPOST_NO_BODY )
             ? '[* '.T_('subject moderated').' *]' : $sbj;
 
-         if( $drawmode_type == DRAWPOST_SEARCH )
+         if ( $drawmode_type == DRAWPOST_SEARCH )
          {
             $hdrrows = 3;
 
@@ -796,7 +796,7 @@ class DisplayForum
             echo "\n<tr class=\"$hdrclass FoundForum\"><td class=FoundForum colspan=$hdrcols>";
             echo '<span class=FoundForum>' ,T_('found in forum')
                ,' <a href="list.php?forum=', $post->forum_id, '">', $post->forum_name, "</a></span>\n";
-            if( $this->show_score )
+            if ( $this->show_score )
                echo ' <span class=FoundScore>' ,T_('with')
                   ,' <span>' ,T_('Score') ,' ' ,$post->score ,"</span></span>\n";
          }
@@ -808,7 +808,7 @@ class DisplayForum
             echo "\n<tr class=\"$hdrclass Subject\"><td class=Subject colspan=$hdrcols>";
 
             //from revision_history or because, when edited, the link will be obsolete
-            if( $drawmode_type == DRAWPOST_EDIT || $post->thread_no_link )
+            if ( $drawmode_type == DRAWPOST_EDIT || $post->thread_no_link )
                echo "<a name=\"$pid\" class=\"PostSubject\">$subject_modstr</a> $sbj_readonly";
             else
                echo "<a name=\"$pid\" class=\"PostSubject\" href=\"", $thread_url, $term_url,
@@ -816,17 +816,17 @@ class DisplayForum
          }
 
          // first [header-row] with different content (adding hidden-state)
-         if( $hdrcols != $cols )
+         if ( $hdrcols != $cols )
          {
             echo "</td>\n <td rowspan=$hdrrows class=PostStatus><span class=\"Hidden\">";
             echo ( $post->is_pending_approval() ? T_('Awaiting<br>approval') : T_('Hidden') );
-            if( $drawmode & MASK_DRAWPOST_NO_BODY )
+            if ( $drawmode & MASK_DRAWPOST_NO_BODY )
                echo sprintf( ' (%s)', T_('Content moderated'));
             echo '</span>';
          }
          echo '</td></tr>';
 
-         if( $drawmode_type == DRAWPOST_SEARCH )
+         if ( $drawmode_type == DRAWPOST_SEARCH )
          {
             // [header-row] subject
             echo "\n<tr class=\"$hdrclass Subject\"><td class=Subject colspan=$hdrcols>";
@@ -845,12 +845,12 @@ class DisplayForum
               echo_image_admin( $post->author->AdminLevel ),
               ' ', $post->author->user_reference(), $author_rating_str, SMALL_SPACING, $post_reference;
 
-         if( !($drawmode & MASK_DRAWPOST_NO_BODY) )
+         if ( !($drawmode & MASK_DRAWPOST_NO_BODY) )
             echo $this->get_post_edited_string( $post );
-         if( $post->last_edited > 0 )
+         if ( $post->last_edited > 0 )
             $post_reference = date(DATE_FMT, $post->last_edited);
 
-         if( $drawmode_type != DRAWPOST_SEARCH )
+         if ( $drawmode_type != DRAWPOST_SEARCH )
             echo SMALL_SPACING, sprintf( '(%s %s)', T_('No.#num'), $post->creation_order );
 
          echo "</td></tr>";
@@ -859,12 +859,12 @@ class DisplayForum
       }
 
       // post body
-      if( !($drawmode & MASK_DRAWPOST_NO_BODY) )
+      if ( !($drawmode & MASK_DRAWPOST_NO_BODY) )
          echo "\n<tr class=PostBody><td colspan=$cols>$txt</td></tr>";
 
 
       // post bottom line (footer)
-      if( $drawmode_type == DRAWPOST_NORMAL )
+      if ( $drawmode_type == DRAWPOST_NORMAL )
       {
          $flat = ( $this->flat_view != 0 );
          echo "\n<tr class=PostButtons><td colspan=$cols>";
@@ -893,19 +893,19 @@ class DisplayForum
             $prev_answer,
             '&nbsp;';
 
-         if( $user_may_post && Forum::allow_posting($player_row, $this->forum_opts) )
+         if ( $user_may_post && Forum::allow_posting($player_row, $this->forum_opts) )
          {
-            if( !is_null($post->thread_post) && $post->thread_post->allow_post_reply() )
+            if ( !is_null($post->thread_post) && $post->thread_post->allow_post_reply() )
             {
                // reply link
                echo '<a href="', $thread_url,URI_AMP,"reply=$pid#$pid\">[ ", T_('reply#forum'), " ]</a>&nbsp;&nbsp;";
-               if( ALLOW_QUOTING )
+               if ( ALLOW_QUOTING )
                   echo '<a href="', $thread_url,URI_AMP,"quote=1",URI_AMP,"reply=$pid#$pid\">[ ",
                      T_('quote'), " ]</a>&nbsp;&nbsp;";
             }
 
             // edit link
-            if( $is_my_post )
+            if ( $is_my_post )
                echo '<a class=Highlight href="', $thread_url,URI_AMP,"edit=$pid#$pid\">[ ",
                   T_('edit'), " ]</a>&nbsp;&nbsp;";
          }
@@ -919,11 +919,11 @@ class DisplayForum
             '&nbsp;';
 
          // for moderator: hide/show/approve/reject-link
-         if( $this->is_moderator )
+         if ( $this->is_moderator )
          {
             $modurl_fmt = '<a class=Highlight href="'.$thread_url
                . URI_AMP."modpid=$pid".URI_AMP."modact=%s#$pid\">[ %s ]</a>";
-            if( $post->is_pending_approval() )
+            if ( $post->is_pending_approval() )
             {
                echo sprintf( $modurl_fmt, 'approve',  T_('Approve') ),
                   MED_SPACING,
@@ -931,7 +931,7 @@ class DisplayForum
             }
             else
             {
-               if( $post->is_approved() )
+               if ( $post->is_approved() )
                   echo sprintf( $modurl_fmt, 'hide',  T_('hide#forum') );
                else
                   echo sprintf( $modurl_fmt, 'show',  T_('show#forum') );
@@ -957,12 +957,12 @@ class DisplayForum
 
       // draw for post: subject, author, date
       $c=2;
-      foreach( $fthread->posts as $pid => $post )
+      foreach ( $fthread->posts as $pid => $post )
       {
          $hidden = !$post->is_approved();
          $is_my_post = $post->is_author($this->user_id);
          $show_hidden_post = ( $is_my_post || $this->is_moderator );
-         if( $hidden && !$post->is_thread_post() && !$show_hidden_post )
+         if ( $hidden && !$post->is_thread_post() && !$show_hidden_post )
             continue;
 
          $subj_part = cut_str( $post->subject, 40 );
@@ -999,7 +999,7 @@ class DisplayForum
 
    public function get_post_edited_string( $post )
    {
-      if( $post->last_edited > 0 )
+      if ( $post->last_edited > 0 )
       {
          $result = SMALL_SPACING . sprintf( '(<a href="%s">%s</a> %s)',
                $post->build_url_post( '', 'revision_history='.$post->id ),
@@ -1094,14 +1094,14 @@ class Forum
       $opt_prefix = ' &nbsp;&nbsp;[';
       $str = '';
 
-      if( $this->options & FORUMOPT_MODERATED )
+      if ( $this->options & FORUMOPT_MODERATED )
          $str .= $opt_prefix . T_('Moderated') . ']';
-      if( $this->options & FORUMOPT_READ_ONLY )
+      if ( $this->options & FORUMOPT_READ_ONLY )
          $str .= $opt_prefix . T_('Read-Only') . ']';
-      if( $forum_opts->is_executive_admin() && ($this->options & FORUMOPTS_GROUPS_HIDDEN) )
+      if ( $forum_opts->is_executive_admin() && ($this->options & FORUMOPTS_GROUPS_HIDDEN) )
          $str .= $opt_prefix . T_('Hidden#forum') . ']';
 
-      if( $formatted && $str )
+      if ( $formatted && $str )
          $str = SMALL_SPACING . sprintf( "<span class=\"ForumOpts\">%s</span>", $str );
       return $str;
    }
@@ -1112,13 +1112,13 @@ class Forum
     */
    public function load_threads( $user_id, $is_moderator, $show_rows, $offset=0 )
    {
-      if( !is_numeric($user_id) )
+      if ( !is_numeric($user_id) )
          error('invalid_user', "Forum.load_threads($user_id)");
-      if( !is_numeric($show_rows) || !is_numeric($offset) )
+      if ( !is_numeric($show_rows) || !is_numeric($offset) )
          error('invalid_args', "Forum.load_threads($show_rows,$offset)");
 
       $forum_id = $this->id;
-      if( !is_numeric($forum_id) )
+      if ( !is_numeric($forum_id) )
          error('unknown_forum', "Forum.load_threads($forum_id)");
 
       $min_date = ForumRead::get_min_date();
@@ -1136,7 +1136,7 @@ class Forum
       $qsql->add_part( SQLP_WHERE,
          "P.Forum_ID=$forum_id",
          'P.Parent_ID=0', 'P.Thread_ID=P.ID' ); //=thread (better query with thread=id for Forumreads)
-      if( !$is_moderator )
+      if ( !$is_moderator )
          $qsql->add_part( SQLP_WHERE, 'P.PostsInThread>0' );
       $qsql->add_part( SQLP_ORDER, 'P.LastChanged DESC' );
       $qsql->add_part( SQLP_LIMIT, sprintf( '%d,%d', $offset, $show_rows + 1) );
@@ -1147,7 +1147,7 @@ class Forum
 
       $this->navi_more_threads = false;
       $thlist = array();
-      while( $row = mysql_fetch_array( $result ) )
+      while ( $row = mysql_fetch_array( $result ) )
       {
          $thread = ForumPost::new_from_row( $row ); // Post
          $thread->last_post = new ForumPost( $thread->last_post_id, $this->id, $thread->thread_id,
@@ -1159,7 +1159,7 @@ class Forum
       }
       mysql_free_result($result);
 
-      if( $rows > $show_rows )
+      if ( $rows > $show_rows )
       {
          array_pop( $thlist ); // remove last entry
          $this->navi_more_threads = true;
@@ -1173,11 +1173,11 @@ class Forum
    /*! \brief Returns true, if there are new posts in loaded thread-list. */
    public function has_new_posts_in_threads()
    {
-      if( !is_null($this->threads) )
+      if ( !is_null($this->threads) )
       {
-         foreach( $this->threads as $thread ) // $thread = ForumPost-obj
+         foreach ( $this->threads as $thread ) // $thread = ForumPost-obj
          {
-            if( $thread->has_new_posts )
+            if ( $thread->has_new_posts )
                return true;
          }
       }
@@ -1207,7 +1207,7 @@ class Forum
             "SELECT ID AS X_LastPost FROM Posts " .
             "WHERE Forum_ID='$fid' AND Thread_ID>0 AND Approved='Y' AND PosIndex>'' " .
             "ORDER BY Time DESC LIMIT 1" );
-      if( $row && $row['X_LastPost'] != $this->last_post_id )
+      if ( $row && $row['X_LastPost'] != $this->last_post_id )
          $upd_arr[] = 'LastPost=' . $row['X_LastPost'];
       elseif ( !$row && $this->last_post_id != 0 )
          $upd_arr[] = 'LastPost=0';
@@ -1216,7 +1216,7 @@ class Forum
       $row = mysql_single_fetch( "Forum.fix_forum.read.PostsInForum($fid)",
             "SELECT COUNT(*) AS X_Count FROM Posts " .
             "WHERE Forum_ID='$fid' AND Thread_ID>0 AND Approved='Y' AND PosIndex>''" );
-      if( $row && $row['X_Count'] != $this->count_posts )
+      if ( $row && $row['X_Count'] != $this->count_posts )
          $upd_arr[] = 'PostsInForum=' . $row['X_Count'];
 
       // read fix for Forums.ThreadsInForum
@@ -1224,15 +1224,15 @@ class Forum
       $row = mysql_single_fetch( "Forum.fix_forum.read.ThreadsInForum($fid)",
             "SELECT COUNT(*) AS X_Count FROM Posts ".
             "WHERE Forum_ID='$fid' AND Parent_ID=0 AND PostsInThread>0" );
-      if( $row && $row['X_Count'] != $this->count_threads )
+      if ( $row && $row['X_Count'] != $this->count_threads )
          $upd_arr[] = 'ThreadsInForum=' . $row['X_Count'];
 
       // fix Forums
-      if( count($upd_arr) > 0 )
+      if ( count($upd_arr) > 0 )
       {
          $query = "UPDATE Forums SET " . implode(', ', $upd_arr) . " WHERE ID='$fid' LIMIT 1";
          echo sprintf( $debug_format, $query );
-         if( !$debug )
+         if ( !$debug )
             db_query( "Forum.fix_forum.update($fid)", $query );
 
          self::delete_cache_forum( "Forum.fix_forum.update($fid)", $fid );
@@ -1253,7 +1253,7 @@ class Forum
    /*! \brief Returns true if "writing posts" is allowed for read-only forum for given user. */
    public static function allow_posting( $user_row, $forum_opts )
    {
-      if( is_null($forum_opts) )
+      if ( is_null($forum_opts) )
          $forum_opts = FORUMOPT_READ_ONLY; // assuming read-only to be safe
       return ( $forum_opts & FORUMOPT_READ_ONLY )
          ? ( (int)@$user_row['admin_level'] & (ADMIN_FORUM|ADMIN_DEVELOPER) )
@@ -1295,7 +1295,7 @@ class Forum
     */
    public static function load_forum( $id )
    {
-      if( !is_numeric($id) || $id <= 0 )
+      if ( !is_numeric($id) || $id <= 0 )
          error('unknown_forum', "Forum:load_forum($id)");
 
       $qsql = self::build_query_sql();
@@ -1304,7 +1304,7 @@ class Forum
 
       $query = $qsql->get_select();
       $row = mysql_single_fetch( "Forum:load_forum2($id)", $query );
-      if( !$row )
+      if ( !$row )
          error('unknown_forum', "Forum:load_forum3($id)");
 
       return self::new_from_row( $row );
@@ -1317,7 +1317,7 @@ class Forum
       $key = "Forum.$id";
 
       $forum = DgsCache::fetch( $dbgmsg, CACHE_GRP_FORUM, $key );
-      if( is_null($forum) )
+      if ( is_null($forum) )
       {
          $forum = self::load_forum( $id );
          DgsCache::store( $dbgmsg, CACHE_GRP_FORUM, $key, $forum, SECS_PER_DAY );
@@ -1340,7 +1340,7 @@ class Forum
     */
    public static function load_forum_list( $forum_opts )
    {
-      if( !($forum_opts instanceof ForumOptions) )
+      if ( !($forum_opts instanceof ForumOptions) )
          error('invalid_args', "Forum:load_forum_list.check.forum_opts($forum_opts)");
       $user_id = $forum_opts->uid;
 
@@ -1365,10 +1365,10 @@ class Forum
 
       $fread = new ForumRead( $user_id );
       $flist = array();
-      while( $row = mysql_fetch_array( $result ) )
+      while ( $row = mysql_fetch_array( $result ) )
       {
          $forum = self::new_from_row( $row );
-         if( !$forum_opts->is_visible_forum( $forum->options ) )
+         if ( !$forum_opts->is_visible_forum( $forum->options ) )
             continue;
 
          $fid = $forum->id;
@@ -1378,9 +1378,9 @@ class Forum
          $forum->last_post = $post;
 
          // update forum-read for NEW-handling
-         if( $forum->count_posts > 0 )
+         if ( $forum->count_posts > 0 )
          {
-            if( $row['FR_X_Lastread'] <= 0 || $forum->updated > $row['FR_X_Lastread'] )
+            if ( $row['FR_X_Lastread'] <= 0 || $forum->updated > $row['FR_X_Lastread'] )
             {
                $forum->has_new_posts = ForumRead::has_new_posts_in_forums( $user_id, $fid );
                $fread->replace_row_forumread( "Forum:load_forum_list.forum_read.upd",
@@ -1408,14 +1408,14 @@ class Forum
       $key = "ForumNames";
 
       $arr_forum_names = DgsCache::fetch( $dbgmsg, CACHE_GRP_FORUM_NAMES, $key );
-      if( is_null($arr_forum_names) )
+      if ( is_null($arr_forum_names) )
       {
          // build forum-array for filter: ( Name => Forum_ID )
          $db_result = db_query( 'Forum:load_cache_forum_names',
                'SELECT ID, Name, Options FROM Forums ORDER BY SortOrder' );
 
          $arr_forum_names = array();
-         while( $row = mysql_fetch_array($db_result) )
+         while ( $row = mysql_fetch_array($db_result) )
             $arr_forum_names[$row['ID']] = array( $row['Name'], $row['Options'] );
          mysql_free_result($db_result);
 
@@ -1423,12 +1423,12 @@ class Forum
       }
 
       $forum_names = array();
-      foreach( $arr_forum_names as $fid => $arr )
+      foreach ( $arr_forum_names as $fid => $arr )
       {
          list( $f_name, $f_opts ) = $arr;
 
          // can user view forum?
-         if( $forum_opts && !$forum_opts->is_visible_forum($f_opts) )
+         if ( $forum_opts && !$forum_opts->is_visible_forum($f_opts) )
             continue;
 
          $forum_names[$fid] = $f_name;
@@ -1450,7 +1450,7 @@ class Forum
 
       $result = db_query( "Forum:load_fix_forum_list", $qsql->get_select() );
       $flist = array();
-      while( $row = mysql_fetch_array( $result ) )
+      while ( $row = mysql_fetch_array( $result ) )
       {
          $forum = self::new_from_row( $row );
          $flist[] = $forum;
@@ -1518,22 +1518,22 @@ class ForumThread
       $this->thread_post = null;
       $this->last_created = 0;
       $new_posts = 0;
-      while( $row = mysql_fetch_array( $result ) )
+      while ( $row = mysql_fetch_array( $result ) )
       {
          $post = ForumPost::new_from_row( $row );
-         if( $post->parent_id == 0 )
+         if ( $post->parent_id == 0 )
             $this->thread_post = $post;
          $post->set_post_is_read( $this->forum_read );
-         if( !$post->is_read )
+         if ( !$post->is_read )
             ++$new_posts;
-         if( $post->created > $this->last_created )
+         if ( $post->created > $this->last_created )
             $this->last_created = $post->created;
 
          $this->posts[$post->id] = $post;
       }
       mysql_free_result($result);
 
-      foreach( $this->posts as $pid => $post )
+      foreach ( $this->posts as $pid => $post )
          $post->thread_post = $this->thread_post;
 
       return $new_posts;
@@ -1559,10 +1559,10 @@ class ForumThread
       $this->thread_post = $post;
 
       // check if allowed to view
-      if( !$post->is_approved() )
+      if ( !$post->is_approved() )
       {
          $my_id = $player_row['ID'];
-         if( !$post->is_author($my_id) && !Forum::is_admin() )
+         if ( !$post->is_author($my_id) && !Forum::is_admin() )
             error('forbidden_post', "ForumThread.load_revision_history.check_viewer($my_id,$post_id)");
       }
 
@@ -1576,7 +1576,7 @@ class ForumThread
       $qsql->add_part( SQLP_ORDER, 'X_SortTime DESC' );
       $result = db_query( "ForumThread.load_revision_history.find_edits($post_id)", $qsql->get_select() );
 
-      while( $row = mysql_fetch_array( $result ) )
+      while ( $row = mysql_fetch_array( $result ) )
       {
          $post = ForumPost::new_from_row($row);
          $post->thread_no_link = true; // display-opt
@@ -1589,9 +1589,9 @@ class ForumThread
    /*! \brief Returns true, if one of loaded posts contains a go-diagram. */
    public function contains_goban()
    {
-      foreach( $this->posts as $post_id => $post )
+      foreach ( $this->posts as $post_id => $post )
       {
-         if( MarkupHandlerGoban::contains_goban($post->text) )
+         if ( MarkupHandlerGoban::contains_goban($post->text) )
             return true;
       }
       return false;
@@ -1603,7 +1603,7 @@ class ForumThread
       $cnt = 0;
       $size = count($this->posts);
       $result = "ForumThread:\n";
-      foreach( $this->posts as $post_id => $post )
+      foreach ( $this->posts as $post_id => $post )
          $result .= sprintf( "[%d/%d]. pid=[%s]: {%s}\n", ++$cnt, $size, $post_id, $post->to_string() );
       return $result;
    }
@@ -1624,18 +1624,18 @@ class ForumThread
    {
       // find out flat-order
       $arr_order = array();
-      foreach( $this->posts as $post_id => $post )
+      foreach ( $this->posts as $post_id => $post )
          $arr_order[$post_id] = $post->created;
       asort($arr_order, SORT_NUMERIC);
       $idx = 0;
-      foreach( array_keys($arr_order) as $post_id )
+      foreach ( array_keys($arr_order) as $post_id )
          $arr_order[$post_id] = ++$idx;
 
       // build tree
       $navtree = array();
       $last_parent_posts = array(); // [ parent_id => last_post_id in parent-thread ]
       $parent_children = array(); // [ parent_id => [ post_id1, post_id2, ... ] ]
-      foreach( $this->posts as $post_id => $post )
+      foreach ( $this->posts as $post_id => $post )
       {
          $parent_id = $post->parent_id;
          $navmap = array();
@@ -1646,13 +1646,13 @@ class ForumThread
          $navmap['child'] = 0;
 
          $last_post_id = @$last_parent_posts[$parent_id];
-         if( $last_post_id )
+         if ( $last_post_id )
          {
             $navmap['prevA'] = $last_post_id;
             $navtree[$last_post_id]['nextA'] = $post_id;
          }
 
-         if( $parent_id )
+         if ( $parent_id )
          {
             $last_parent_posts[$parent_id] = $post_id;
             $parent_children[$parent_id][] = $post_id;
@@ -1662,19 +1662,19 @@ class ForumThread
          $post->creation_order = $arr_order[$post_id]; // set flat-order (sort by creation-date)
       }
 
-      foreach( $parent_children as $parent_id => $children )
+      foreach ( $parent_children as $parent_id => $children )
       {
-         if( isset($navtree[$parent_id]) )
+         if ( isset($navtree[$parent_id]) )
          {
             $navtree[$parent_id]['child'] = $children[0]; // children non-empty
-            foreach( $children as $post_id )
+            foreach ( $children as $post_id )
                $navtree[$post_id]['nextP'] = $navtree[$parent_id]['nextA'];
          }
       }
 
-      if( $set_in_posts )
+      if ( $set_in_posts )
       {
-         foreach( $navtree as $post_id => $navmap )
+         foreach ( $navtree as $post_id => $navmap )
          {
             $this->posts[$post_id]->set_navigation(
                ( $navmap['prevP'] ) ? $this->get_post($navmap['prevP']) : NULL,
@@ -1850,11 +1850,11 @@ class ForumPost
 
    public function format_flags( $flags=null )
    {
-      if( is_null($flags) )
+      if ( is_null($flags) )
          $flags = $this->flags;
 
       $out = array();
-      if( $flags & FPOST_FLAG_READ_ONLY )
+      if ( $flags & FPOST_FLAG_READ_ONLY )
          $out[] = span('ForumOpts', '[' . T_('Read-Only') . ']' );
 
       return (count($out)) ? MED_SPACING . implode(' ', $out) : '';
@@ -1876,13 +1876,13 @@ class ForumPost
     */
    public function build_url_post( $anchor=null, $url_suffix='' )
    {
-      if( is_null($anchor) )
+      if ( is_null($anchor) )
          $anchor = '#' . ((int)$this->id);
-      elseif( (string)$anchor != '' )
+      elseif ( (string)$anchor != '' )
          $anchor = '#' . ((string)$anchor);
       // else: anchor=''
 
-      if( $url_suffix != '' && $url_suffix[0] != URI_AMP )
+      if ( $url_suffix != '' && $url_suffix[0] != URI_AMP )
          $url_suffix = URI_AMP . $url_suffix;
 
       $url = sprintf( 'read.php?forum=%d'.URI_AMP.'thread=%d%s%s',
@@ -1893,7 +1893,7 @@ class ForumPost
    /*! \brief Builds link to this post for specified date using given anchor-attribs. */
    public function build_link_postdate( $date, $attbs='' )
    {
-     if( empty($date) )
+     if ( empty($date) )
          return NO_VALUE;
 
      $datestr = date( DATE_FMT, $date );
@@ -1938,17 +1938,17 @@ class ForumPost
    public function is_post_read( $fread )
    {
       // own posts are always read
-      if( $this->is_author($fread->uid) )
+      if ( $this->is_author($fread->uid) )
          return true;
 
       $chkdate = $this->created; // check against post creation-date
 
       // mark read, if date passed global read-date
-      if( $fread->min_date >= $chkdate )
+      if ( $fread->min_date >= $chkdate )
          return true;
 
       // check if mark as read, if date passed thread read-date
-      if( $fread->has_newer_read_date($chkdate, $fread->fid, $fread->tid) )
+      if ( $fread->has_newer_read_date($chkdate, $fread->fid, $fread->tid) )
          return true;
 
       return false; // unread = new
@@ -2018,9 +2018,9 @@ class ForumPost
    /*! \brief Returns M(=pending approval), H=hidden, S=shown for given approved value P|N|Y. */
    public static function get_approved_text( $approved )
    {
-      if( $approved == 'P' )
+      if ( $approved == 'P' )
          return 'M';
-      elseif( $approved == 'N' )
+      elseif ( $approved == 'N' )
          return 'H';
       else //if( $approved == 'Y' )
          return 'S';

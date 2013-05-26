@@ -29,11 +29,11 @@ $GLOBALS['ThePage'] = new Page('ForumAdmin');
    connect2mysql();
 
    $logged_in = who_is_logged( $player_row);
-   if( !$logged_in )
+   if ( !$logged_in )
       error('login_if_not_logged_in', 'forum.admin');
-   if( $player_row['ID'] <= GUESTS_ID_MAX )
+   if ( $player_row['ID'] <= GUESTS_ID_MAX )
       error('not_allowed_for_guest', 'forum.admin');
-   if( !(@$player_row['admin_level'] & ADMIN_DEVELOPER ) )
+   if ( !(@$player_row['admin_level'] & ADMIN_DEVELOPER ) )
       error('adminlevel_too_low', 'forum.admin');
 
    $fid = max(0,@$_REQUEST['id']);
@@ -52,7 +52,7 @@ $GLOBALS['ThePage'] = new Page('ForumAdmin');
    // ***********        Move entry       ****************
 
    // args: id, move=u|d, dir=length of the move (int, pos or neg)
-   if( ($action=@$_REQUEST['move']) == 'u' || $action == 'd' )
+   if ( ($action=@$_REQUEST['move']) == 'u' || $action == 'd' )
    {
       $dir = isset($_REQUEST['dir']) ? (int)$_REQUEST['dir'] : 1;
       $dir = $action == 'd' ? $dir : -$dir; //because ID top < ID bottom
@@ -69,7 +69,7 @@ $GLOBALS['ThePage'] = new Page('ForumAdmin');
       $start = $row['SortOrder'];
       $end = max( 1, min( $max, $start + $dir));
       $cnt = abs($end - $start);
-      if( $cnt )
+      if ( $cnt )
       {
          $dir = $dir>0 ? 1 : -1;
          $start+= $dir;
@@ -99,7 +99,7 @@ $GLOBALS['ThePage'] = new Page('ForumAdmin');
 
    // args: id, edit=t [ do_edit=? ]
    // keep it tested before 'do_edit'
-   elseif( @$_REQUEST['edit'] )
+   elseif ( @$_REQUEST['edit'] )
    {
       $title = T_('Forum Admin').' - '.T_('Edit forum');
       start_page($title, true, $logged_in, $player_row );
@@ -132,7 +132,7 @@ $GLOBALS['ThePage'] = new Page('ForumAdmin');
 
    // args: id, do_edit=t
    // keep it tested after 'edit'
-   elseif( @$_REQUEST['do_edit'] )
+   elseif ( @$_REQUEST['do_edit'] )
    {
       $row = mysql_single_fetch( 'forum_admin.do_edit.find',
                 "SELECT * FROM Forums WHERE ID=$fid")
@@ -144,11 +144,11 @@ $GLOBALS['ThePage'] = new Page('ForumAdmin');
       ta_begin();
       {//HOT-section to delete or update forum
          // Delete or update ?
-         if( !$name && !$description )
+         if ( !$name && !$description )
          { // Delete
             $row_posts = mysql_single_fetch( 'forum_admin.do_edit.empty',
                "SELECT ID FROM Posts WHERE Forum_ID=$fid LIMIT 1" );
-            if( $row_posts )
+            if ( $row_posts )
             {
                $msg = urlencode('Error: forum not empty');
                jump_to("$abspage?sysmsg=$msg");
@@ -161,7 +161,7 @@ $GLOBALS['ThePage'] = new Page('ForumAdmin');
          }
          else
          { //Update
-            if( !$name )
+            if ( !$name )
             {
                $msg = urlencode('Error: an entry must be given');
                jump_to("$abspage?sysmsg=$msg");
@@ -188,7 +188,7 @@ $GLOBALS['ThePage'] = new Page('ForumAdmin');
 
    // args: id, new=t
    // keep it tested before 'do_new'
-   elseif( @$_REQUEST['new'] )
+   elseif ( @$_REQUEST['new'] )
    {
       $title = T_('Forum Admin').' - '.T_('New forum');
       start_page($title, true, $logged_in, $player_row );
@@ -217,11 +217,11 @@ $GLOBALS['ThePage'] = new Page('ForumAdmin');
 
    // args: id, do_new=t (insert after entry #id, 0=first)
    // keep it tested after 'new'
-   elseif( @$_REQUEST['do_new'] )
+   elseif ( @$_REQUEST['do_new'] )
    {
       $name = trim( get_request_arg('name') );
       $description = trim( get_request_arg('description') );
-      if( !$name )
+      if ( !$name )
       {
          $msg = urlencode('Error: an entry must be given');
          jump_to("$abspage?sysmsg=$msg");
@@ -229,7 +229,7 @@ $GLOBALS['ThePage'] = new Page('ForumAdmin');
 
       $query = "SELECT * FROM Forums WHERE ID=$fid";
       $row = mysql_single_fetch( 'forum_admin.do_new.find', $query );
-      if( $row )
+      if ( $row )
          $SortOrder = $row['SortOrder'];
       else
          $SortOrder = 0;
@@ -257,7 +257,7 @@ $GLOBALS['ThePage'] = new Page('ForumAdmin');
 
    // ***********       Show whole list       ****************
 
-   if( $show_list )
+   if ( $show_list )
    {
       $title = T_('Forum Admin');
       start_page($title, true, $logged_in, $player_row );
@@ -280,7 +280,7 @@ $GLOBALS['ThePage'] = new Page('ForumAdmin');
          . '<td>(first entry)</td>'
          . '<td colspan='.($nbcol-2).'></td></tr>';
 
-      while( $row = mysql_fetch_assoc( $result ) )
+      while ( $row = mysql_fetch_assoc( $result ) )
       {
          $name = (empty($row['Name']) ? NO_VALUE : $row['Name']);
 
@@ -316,7 +316,7 @@ function build_forum_options( $urlargs )
 {
    global $ARR_FORUMOPTS;
    $fopts = 0;
-   foreach( $ARR_FORUMOPTS as $maskval => $arr )
+   foreach ( $ARR_FORUMOPTS as $maskval => $arr )
    {
       $fopts |= (@$_REQUEST[$arr[0]] ? $maskval : 0);
    }
@@ -328,9 +328,9 @@ function build_forum_options_text( $opts )
 {
    global $ARR_FORUMOPTS;
    $arrout = array();
-   foreach( $ARR_FORUMOPTS as $maskval => $arr )
+   foreach ( $ARR_FORUMOPTS as $maskval => $arr )
    {
-      if( $opts & $maskval )
+      if ( $opts & $maskval )
          $arrout[] = $arr[1];
    }
    return '['.implode(', ', $arrout).']';
@@ -340,11 +340,11 @@ function build_forum_options_text( $opts )
 function add_form_forum_options( &$form, $fopts )
 {
    global $ARR_FORUMOPTS;
-   foreach( $ARR_FORUMOPTS as $maskval => $arr )
+   foreach ( $ARR_FORUMOPTS as $maskval => $arr )
    {
       $rowarr = array();
 
-      if( (string)$arr[2] != '' )
+      if ( (string)$arr[2] != '' )
          array_push( $rowarr,
             'DESCRIPTION', $arr[2] );
       else

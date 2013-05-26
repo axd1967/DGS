@@ -28,11 +28,11 @@ require_once 'forum/forum_functions.php';
    connect2mysql();
 
    $logged_in = who_is_logged( $player_row);
-   if( !$logged_in )
+   if ( !$logged_in )
       error('login_if_not_logged_in', 'scripts.convert_from_old_forum');
-   if( $player_row['ID'] <= GUESTS_ID_MAX )
+   if ( $player_row['ID'] <= GUESTS_ID_MAX )
       error('not_allowed_for_guest', 'scripts.convert_from_old_forum');
-   if( !(@$player_row['admin_level'] & ADMIN_DATABASE) )
+   if ( !(@$player_row['admin_level'] & ADMIN_DATABASE) )
       error('adminlevel_too_low', 'scripts.convert_from_old_forum');
 
    start_html('convert_from_old_forum', 0);
@@ -43,7 +43,7 @@ echo '>>>> Should not be used now. Fix TODO before using it!! Do not run it befo
 
 
    $res0 = mysql_query( "SELECT * FROM forums" ) or die(mysql_error());
-   while( $row0 = mysql_fetch_array( $res0 ) )
+   while ( $row0 = mysql_fetch_array( $res0 ) )
    {
       $fname = $row0['table_name'];
 
@@ -56,7 +56,7 @@ echo '>>>> Should not be used now. Fix TODO before using it!! Do not run it befo
                   "Options=" . ($row0["moderation"] == 'y' ? FORUMOPT_MODERATED : 0 ) . ", " .
                   "SortOrder=" . $SortOrder) or die(mysql_error());
 
-      if( mysql_affected_rows() != 1)
+      if ( mysql_affected_rows() != 1)
          die(mysql_error());
 
       $new_forum_ID = mysql_insert_id();
@@ -71,7 +71,7 @@ echo '>>>> Should not be used now. Fix TODO before using it!! Do not run it befo
 
 
       echo "\nStart $fname\n\n";
-      while( $row = mysql_fetch_array( $result_1 ) )
+      while ( $row = mysql_fetch_array( $result_1 ) )
       {
          $old_parent = $row["parent"];
          $Text = $row["body"];
@@ -84,13 +84,13 @@ echo '>>>> Should not be used now. Fix TODO before using it!! Do not run it befo
 
          echo $old_ID;
 
-         if( $old_parent > 0 )
+         if ( $old_parent > 0 )
          {
             $result = mysql_query("SELECT ID as parent,PosIndex,Depth,Thread_ID FROM Posts " .
                                      "WHERE old_ID=$old_parent AND Forum_ID=$new_forum_ID")
                or die(mysql_error());
 
-            if( mysql_num_rows($result) != 1 )
+            if ( mysql_num_rows($result) != 1 )
             {
                echo "Unknown parent post\n";   //die( "Unknown parent post" );
                mysql_free_result($result);
@@ -106,7 +106,7 @@ echo '>>>> Should not be used now. Fix TODO before using it!! Do not run it befo
             extract(mysql_fetch_array($result));
             mysql_free_result($result);
 
-            if( !($answer_nr > 0) ) $answer_nr=0;
+            if ( !($answer_nr > 0) ) $answer_nr=0;
          }
          else
          {
@@ -142,18 +142,18 @@ echo '>>>> Should not be used now. Fix TODO before using it!! Do not run it befo
 
          mysql_query( $query ) or die(mysql_error());
 
-         if( mysql_affected_rows() != 1)
+         if ( mysql_affected_rows() != 1)
             die( "mysql_insert_post" );
 
          echo "->" . mysql_insert_id() . "\n";
 
-         if( !($parent > 0) )
+         if ( !($parent > 0) )
          {
             $Thread_ID = mysql_insert_id();
             mysql_query("UPDATE Posts SET Thread_ID=ID WHERE ID=$Thread_ID")
                 or die(mysql_error());
 
-            if( mysql_affected_rows() != 1)
+            if ( mysql_affected_rows() != 1)
                die("mysql_update_post");
          }
 

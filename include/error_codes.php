@@ -36,7 +36,7 @@ class ErrorCode
 
    public function echo_error_text( $error_code, $error_log_id )
    {
-      if( $error_log_id && self::is_shown_error_log_id( $error_code ) )
+      if ( $error_log_id && self::is_shown_error_log_id( $error_code ) )
          echo span('ErrorMsg', " [ERRLOG $error_log_id] ($error_code): ");
       echo self::get_error_text( $error_code );
    }
@@ -44,7 +44,7 @@ class ErrorCode
    public function get_error_text( $error_code )
    {
       self::init();
-      if( isset(self::$ARR_ERRORS['TEXT'][$error_code]) )
+      if ( isset(self::$ARR_ERRORS['TEXT'][$error_code]) )
          return self::$ARR_ERRORS['TEXT'][$error_code];
       else
          return " ($error_code) " . @self::$ARR_ERRORS['TEXT']['internal_error']; // default-error
@@ -54,7 +54,7 @@ class ErrorCode
    private function is_shown_error_log_id( $error_code )
    {
       self::init();
-      if( isset(self::$ARR_ERRORS['LOG_ID'][$error_code]) )
+      if ( isset(self::$ARR_ERRORS['LOG_ID'][$error_code]) )
          return self::$ARR_ERRORS['LOG_ID'][$error_code];
       else
          return true; // show error-log-id for unknown error-code
@@ -64,7 +64,7 @@ class ErrorCode
    public function is_sensitive( $error_code )
    {
       self::init();
-      if( isset(self::$ARR_ERRORS['SENSITIVE'][$error_code]) )
+      if ( isset(self::$ARR_ERRORS['SENSITIVE'][$error_code]) )
          return self::$ARR_ERRORS['SENSITIVE'][$error_code];
       else
          return false; // default = non-sensitive data shown
@@ -80,7 +80,7 @@ class ErrorCode
       //   mysql_update_game, not_implemented
 
       // lazy-init of texts
-      if( !isset(self::$ARR_ERRORS['TEXT']) )
+      if ( !isset(self::$ARR_ERRORS['TEXT']) )
       {
          $arr = array();
          $arr_logid = array();

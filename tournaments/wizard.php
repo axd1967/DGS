@@ -29,9 +29,9 @@ require_once 'tournaments/include/tournament_factory.php';
    connect2mysql();
 
    $logged_in = who_is_logged( $player_row);
-   if( !$logged_in )
+   if ( !$logged_in )
       error('login_if_not_logged_in', 'Tournament.wizard');
-   if( !ALLOW_TOURNAMENTS )
+   if ( !ALLOW_TOURNAMENTS )
       error('feature_disabled', 'Tournament.wizard');
 
    // create allowed?
@@ -50,13 +50,13 @@ require_once 'tournaments/include/tournament_factory.php';
    $ttype = ( $type ) ? TournamentFactory::getTournament($type) : null;
 
    // save tournament-object with values from edit-form
-   if( @$_REQUEST['t_save'] && !is_null($ttype) )
+   if ( @$_REQUEST['t_save'] && !is_null($ttype) )
    {
-      if( $is_guest ) // view ok, edit forbidden
+      if ( $is_guest ) // view ok, edit forbidden
          error('not_allowed_for_guest', 'Tournament.wizard');
 
       // check if user is allowed to create tournament
-      if( $ttype->need_admin_create_tourney && !$is_admin )
+      if ( $ttype->need_admin_create_tourney && !$is_admin )
          error('tournament_create_not_allowed', "Tournament.wizard.create.non_admin($my_id,$type)");
 
       $tid = $ttype->createTournament();
@@ -74,10 +74,10 @@ require_once 'tournaments/include/tournament_factory.php';
 
    $tform->add_row( array( 'HEADER', T_('Choose type of tournament') ));
    $last_wiz_flags = 0;
-   foreach( TournamentFactory::getTournamentTypes() as $wiztype => $wiz_flags )
+   foreach ( TournamentFactory::getTournamentTypes() as $wiztype => $wiz_flags )
    {
       $new_ttype = TournamentFactory::getTournament($wiztype);
-      if( $last_wiz_flags > 0 && ( ($last_wiz_flags & TWIZT_MASK) != ($wiz_flags & TWIZT_MASK) ) )
+      if ( $last_wiz_flags > 0 && ( ($last_wiz_flags & TWIZT_MASK) != ($wiz_flags & TWIZT_MASK) ) )
          $tform->add_empty_row();
       $tform->add_row( build_tourney_type_radio($new_ttype, $type, $is_admin) );
       $last_wiz_flags = $wiz_flags;

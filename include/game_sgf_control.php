@@ -48,14 +48,14 @@ class GameSgfControl
       $uid = $player_row['ID'];
 
       $game_sgf = GameSgf::load_game_sgf( $gid, $uid );
-      if( is_null($game_sgf) )
+      if ( is_null($game_sgf) )
          return true; // nothing to delete
       else
       {
          ta_begin();
          {//HOT-section to delete SGF and update game-flags
             $result = $game_sgf->delete();
-            if( $result && GameSgf::count_game_sgfs($gid) == 0 )
+            if ( $result && GameSgf::count_game_sgfs($gid) == 0 )
             {
                Games::update_game_flags( "GameSgfControl.delete_game_sgf.upd_flags($gid,$uid)",
                   $gid, 0, GAMEFLAGS_ATTACHED_SGF );
@@ -84,18 +84,18 @@ class GameSgfControl
 
       // read SGF from uploaded file
       $sgf_data = read_from_file( $path_file );
-      if( $sgf_data !== false )
+      if ( $sgf_data !== false )
       {
          $errors = self::verify_game_sgf( $game, $sgf_data );
-         if( count($errors) == 0 )
+         if ( count($errors) == 0 )
          {
             $game_sgf = new GameSgf( $gid, $uid, $NOW, $sgf_data );
 
             ta_begin();
             {//HOT-section to save SGF and update game-flags
-               if( $game_sgf->persist() )
+               if ( $game_sgf->persist() )
                {
-                  if( !($game->Flags & GAMEFLAGS_ATTACHED_SGF) )
+                  if ( !($game->Flags & GAMEFLAGS_ATTACHED_SGF) )
                   {
                      Games::update_game_flags( "GameSgfControl.save_game_sgf.upd_flags($gid,$uid)",
                         $gid, GAMEFLAGS_ATTACHED_SGF );
@@ -128,34 +128,34 @@ class GameSgfControl
       $errors = array();
       $gsize = $game->Size;
 
-      if( !SgfParser::might_be_sgf($sgf_data) )
+      if ( !SgfParser::might_be_sgf($sgf_data) )
          return array( T_('File has no SGF-format!') );
 
       $sgf_parser = SgfParser::parse_sgf( $sgf_data );
-      if( $sgf_parser->error )
+      if ( $sgf_parser->error )
          $errors[] = sprintf( T_('SGF-Parse error found: %s'), $sgf_parser->error );
       else
       {
-         if( $sgf_parser->Size != $gsize )
+         if ( $sgf_parser->Size != $gsize )
             $errors[] = sprintf( T_('Board size mismatch: expected %s but found %s#sgf'), $gsize, $sgf_parser->Size );
-         if( $sgf_parser->Handicap != $game->Handicap )
+         if ( $sgf_parser->Handicap != $game->Handicap )
             $errors[] = sprintf( T_('Handicap mismatch: expected %s but found %s#sgf'), $game->Handicap, $sgf_parser->Handicap );
-         if( (float)$sgf_parser->Komi != (float)$game->Komi )
+         if ( (float)$sgf_parser->Komi != (float)$game->Komi )
             $errors[] = sprintf( T_('Komi mismatch: expected %s but found %s#sgf'), $game->Komi, $sgf_parser->Komi );
       }
 
-      if( count($errors) == 0 )
+      if ( count($errors) == 0 )
       {
          // load some of the current game-moves and shape-setup from DB to compare with SGF
          list( $chk_cnt_moves, $db_shape_setup, $db_sgf_moves ) = self::prepare_verify_game_sgf( $game );
 
          // compare shape-setup from DB with B/W-stone-setup parsed from SGF
-         foreach( array( BLACK, WHITE ) as $stone )
+         foreach ( array( BLACK, WHITE ) as $stone )
          {
             $arr_coords = ( $stone == BLACK ) ? $sgf_parser->SetBlack : $sgf_parser->SetWhite;
-            foreach( $arr_coords as $sgf_coord )
+            foreach ( $arr_coords as $sgf_coord )
             {
-               if( !isset($db_shape_setup[$sgf_coord]) || $db_shape_setup[$sgf_coord] != $stone )
+               if ( !isset($db_shape_setup[$sgf_coord]) || $db_shape_setup[$sgf_coord] != $stone )
                {
                   $coord = sgf2board_coords( $sgf_coord, $gsize );
                   $errors[] = sprintf( T_('Shape-Setup mismatch: found discrepancy at coord [%s]#sgf'), $coord );
@@ -163,23 +163,23 @@ class GameSgfControl
                unset($db_shape_setup[$sgf_coord]);
             }
          }
-         if( count($db_shape_setup) > 0 )
+         if ( count($db_shape_setup) > 0 )
          {
             $coords = array();
-            foreach( $db_shape_setup as $sgf_coord => $stone )
+            foreach ( $db_shape_setup as $sgf_coord => $stone )
                $coords[] = sgf2board_coords( $sgf_coord, $gsize );
             $errors[] = sprintf( T_('Shape-Setup mismatch: missing setup stones in SGF [%s]#sgf'), implode(',', $coords) );
          }
 
          // compare some db-moves with moves parsed from SGF
          $move_nr = 0;
-         foreach( $sgf_parser->Moves as $move ) // move = B|W sgf-coord, e.g. "Baa", "Wbb"
+         foreach ( $sgf_parser->Moves as $move ) // move = B|W sgf-coord, e.g. "Baa", "Wbb"
          {
-            if( $move_nr >= $chk_cnt_moves )
+            if ( $move_nr >= $chk_cnt_moves )
                break;
-            if( strlen($move) != 3 ) // skip PASS-move
+            if ( strlen($move) != 3 ) // skip PASS-move
                continue;
-            if( $move != $db_sgf_moves[$move_nr++] )
+            if ( $move != $db_sgf_moves[$move_nr++] )
             {
                $errors[] = sprintf( T_('Moves mismatch: found discrepancy at move #%s#sgf'), $move_nr + 1 );
                break;
@@ -211,12 +211,12 @@ class GameSgfControl
          'ShapeSnapshot' => $game->ShapeSnapshot
       );
       $board = new Board();
-      if( !$board->load_from_db( $game_row, $chk_cnt_moves, BOARDOPT_USE_CACHE ) )
+      if ( !$board->load_from_db( $game_row, $chk_cnt_moves, BOARDOPT_USE_CACHE ) )
          error('internal_error', "GameSgfControl:prepare_verify_game_sgf.check.moves($gid,$chk_cnt_moves)");
 
       // prepare shape-setup from db
       $db_shape_setup = array(); // arr( SGF-coord => BLACK|WHITE, ... )
-      foreach( $board->shape_arr_xy as $arr )
+      foreach ( $board->shape_arr_xy as $arr )
       {
          list( $Stone, $PosX, $PosY) = $arr;
          $sgf_coord = number2sgf_coords( $PosX, $PosY, $size, $size );
@@ -226,19 +226,19 @@ class GameSgfControl
       // prepare to verify some moves: read some db-moves
       $db_sgf_moves = array(); // Baa, Wbb, ...
       $count_handicap = $game->Handicap;
-      foreach( $board->moves as $arr ) // arr: Stone,PosX,PosY
+      foreach ( $board->moves as $arr ) // arr: Stone,PosX,PosY
       {
          list( $Stone, $PosX, $PosY) = $arr;
-         if( $PosX < 0 ) // check for valid move
+         if ( $PosX < 0 ) // check for valid move
             continue;
-         if( $Stone == BLACK )
+         if ( $Stone == BLACK )
             $color = 'B';
-         elseif( $Stone == WHITE )
+         elseif ( $Stone == WHITE )
             $color = 'W';
          else
             continue;
 
-         if( $count_handicap-- > 0 ) // put handicap-stones into shape-setup-arr
+         if ( $count_handicap-- > 0 ) // put handicap-stones into shape-setup-arr
          {
             $sgf_coord = number2sgf_coords( $PosX, $PosY, $size, $size );
             $db_shape_setup[$sgf_coord] = $Stone;
@@ -259,10 +259,10 @@ class GameSgfControl
       global $NOW;
 
       $game_sgf = GameSgf::load_game_sgf( $gid, $uid );
-      if( is_null($game_sgf) )
+      if ( is_null($game_sgf) )
          error('invalid_args', $dbgmsg.".download_game_sgf.no_sgf($gid,$uid)");
 
-      if( $disposition_type != 'inline' && $disposition_type != 'attachment' )
+      if ( $disposition_type != 'inline' && $disposition_type != 'attachment' )
          $disposition_type = 'attachment';
 
       $filename = "dgs-{$game_sgf->gid}-{$game_sgf->uid}-" . date('Ymd', $game_sgf->Lastchanged);
@@ -274,7 +274,7 @@ class GameSgfControl
       header( "Content-Description: PHP Generated Data" );
 
       /*
-      if( $use_cache )
+      if ( $use_cache )
       {
          header('Expires: ' . gmdate(GMDATE_FMT, $NOW+5*SECS_PER_MIN));
          header('Last-Modified: ' . gmdate(GMDATE_FMT, $NOW));
@@ -290,7 +290,7 @@ class GameSgfControl
       $key = "GameSgfCount.$gid";
 
       $count = DgsCache::fetch( $dbgmsg, CACHE_GRP_GAMESGF_COUNT, $key );
-      if( is_null($count) )
+      if ( is_null($count) )
       {
          $count = GameSgf::count_game_sgfs( $gid );
          DgsCache::store( $dbgmsg, CACHE_GRP_GAMESGF_COUNT, $key, $count, 30*SECS_PER_MIN );

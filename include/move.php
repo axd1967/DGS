@@ -64,9 +64,9 @@ class GameCheckMove
       $this->colnr = $colnr;
       $this->rownr = $rownr;
 
-      if( !isset($rownr) || !isset($colnr) || @$array[$colnr][$rownr] != NONE )
+      if ( !isset($rownr) || !isset($colnr) || @$array[$colnr][$rownr] != NONE )
       {
-         if( $error_exit )
+         if ( $error_exit )
             error('illegal_position', "GCM.check_move({$this->board->gid})");
          else
             return 'illegal_position';
@@ -76,15 +76,15 @@ class GameCheckMove
       $this->board->check_prisoners( $colnr, $rownr, WHITE+BLACK-$to_move, $this->prisoners );
 
       $this->nr_prisoners = count($this->prisoners);
-      if( $this->nr_prisoners == 0 )
+      if ( $this->nr_prisoners == 0 )
       {
          // Check for suicide
          $suicide_allowed = false;
-         if( !$this->board->has_liberty_check( $colnr, $rownr, $this->prisoners, $suicide_allowed) )
+         if ( !$this->board->has_liberty_check( $colnr, $rownr, $this->prisoners, $suicide_allowed) )
          {
-            if( !$suicide_allowed )
+            if ( !$suicide_allowed )
             {
-               if( $error_exit )
+               if ( $error_exit )
                   error('suicide', "GCM.check_move({$this->board->gid})");
                else
                   return 'suicide';
@@ -94,20 +94,20 @@ class GameCheckMove
       }
 
       // note: $GameFlags has set Ko-flag if last move has taken a single stone
-      if( $this->nr_prisoners == 1 && ($game_flags & GAMEFLAGS_KO) )
+      if ( $this->nr_prisoners == 1 && ($game_flags & GAMEFLAGS_KO) )
       {
          // Check for ko
          list($x,$y) = $this->prisoners[0];
-         if( $last_move == number2sgf_coords( $x, $y, $Size) )
+         if ( $last_move == number2sgf_coords( $x, $y, $Size) )
          {
-            if( $error_exit )
+            if ( $error_exit )
                error('ko', "GCM.check_move({$this->board->gid})");
             else
                return 'ko';
          }
       }
 
-      if( $to_move == BLACK )
+      if ( $to_move == BLACK )
          $this->black_prisoners = $this->nr_prisoners;
       else
          $this->white_prisoners = $this->nr_prisoners;
@@ -140,19 +140,19 @@ function check_handicap( &$board, $stonestring, $coord=false )
 
    // add handicap stones to array
    $l = strlen( $stonestring );
-   for( $i=0; $i < $l; $i += 2 )
+   for ( $i=0; $i < $l; $i += 2 )
    {
       list($colnr,$rownr) = sgf2number_coords(substr($stonestring, $i, 2), $Size);
-      if( !isset($rownr) || !isset($colnr) || @$array[$colnr][$rownr] != NONE )
+      if ( !isset($rownr) || !isset($colnr) || @$array[$colnr][$rownr] != NONE )
          error('illegal_position', "check_handicap.1({$board->gid},$colnr,$rownr,$stonestring)");
 
       $array[$colnr][$rownr] = BLACK;
    }
 
-   if( $coord )
+   if ( $coord )
    {
       list($colnr,$rownr) = sgf2number_coords($coord, $Size);
-      if( !isset($rownr) || !isset($colnr) || @$array[$colnr][$rownr] != NONE )
+      if ( !isset($rownr) || !isset($colnr) || @$array[$colnr][$rownr] != NONE )
          error('illegal_position', "check_handicap.2({$board->gid},$colnr,$rownr,$stonestring)");
 
       $array[$colnr][$rownr] = BLACK;
@@ -213,50 +213,50 @@ class GameCheckScore
       $stonearray = array();
 
       $l = strlen($this->stonestring);
-      for( $i=0; $i < $l; $i += 2 )
+      for ( $i=0; $i < $l; $i += 2 )
       {
          list($colnr,$rownr) = sgf2number_coords(substr($this->stonestring, $i, 2), $Size);
-         if( !isset($rownr) || !isset($colnr) )
+         if ( !isset($rownr) || !isset($colnr) )
             error('illegal_position', "GCS.check_remove.move4($colnr,$rownr)");
 
          $stone = isset($array[$colnr][$rownr]) ? $array[$colnr][$rownr] : NONE ;
-         if( $stone == BLACK || $stone == WHITE || $stone == NONE ) //NONE for MARKED_DAME
+         if ( $stone == BLACK || $stone == WHITE || $stone == NONE ) //NONE for MARKED_DAME
             $array[$colnr][$rownr] = $stone + OFFSET_MARKED;
-         else if( $stone == BLACK_DEAD || $stone == WHITE_DEAD || $stone == MARKED_DAME )
+         else if ( $stone == BLACK_DEAD || $stone == WHITE_DEAD || $stone == MARKED_DAME )
             $array[$colnr][$rownr] = $stone - OFFSET_MARKED;
 
-         if( !isset($stonearray[$colnr][$rownr]) )
+         if ( !isset($stonearray[$colnr][$rownr]) )
             $stonearray[$colnr][$rownr] = true;
          else
             unset( $stonearray[$colnr][$rownr] );
       }
 
-      if( $coords )
+      if ( $coords )
       {
-         if( !is_array($coords) )
+         if ( !is_array($coords) )
             $coords = array( $coords );
 
          $toggled = ( $this->toggle_unique ) ? array() : NULL;
-         foreach( $coords as $coord )
+         foreach ( $coords as $coord )
          {
             list($colnr,$rownr) = sgf2number_coords($coord, $Size);
-            if( !isset($rownr) || !isset($colnr) )
+            if ( !isset($rownr) || !isset($colnr) )
                error('illegal_position', "GCS.check_remove.move5($colnr,$rownr)");
 
             $stone = isset($array[$colnr][$rownr]) ? $array[$colnr][$rownr] : NONE ;
-            if( MAX_SEKI_MARK<=0 || ($stone!=NONE && $stone!=MARKED_DAME) )
+            if ( MAX_SEKI_MARK<=0 || ($stone!=NONE && $stone!=MARKED_DAME) )
             {
-               if( $stone!=BLACK && $stone!=WHITE && $stone!=BLACK_DEAD && $stone!=WHITE_DEAD )
+               if ( $stone!=BLACK && $stone!=WHITE && $stone!=BLACK_DEAD && $stone!=WHITE_DEAD )
                   error('illegal_position', "GCS.check_remove.move6($colnr,$rownr,$stone)");
             }
 
             $marked = array();
             $this->board->toggle_marked_area( $colnr, $rownr, $marked, $toggled );
 
-            foreach( $marked as $sub )
+            foreach ( $marked as $sub )
             {
                list($colnr,$rownr) = $sub;
-               if( !isset( $stonearray[$colnr][$rownr] ) )
+               if ( !isset( $stonearray[$colnr][$rownr] ) )
                   $stonearray[$colnr][$rownr] = true;
                else
                   unset( $stonearray[$colnr][$rownr] );
@@ -265,9 +265,9 @@ class GameCheckScore
       }
 
       $this->stonestring = '';
-      foreach( $stonearray as $colnr => $sub )
+      foreach ( $stonearray as $colnr => $sub )
       {
-         foreach( $sub as $rownr => $dummy )
+         foreach ( $sub as $rownr => $dummy )
             $this->stonestring .= number2sgf_coords($colnr, $rownr, $Size);
       }
 

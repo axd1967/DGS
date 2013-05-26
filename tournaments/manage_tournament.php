@@ -38,28 +38,28 @@ $GLOBALS['ThePage'] = new Page('TournamentManage');
    connect2mysql();
 
    $logged_in = who_is_logged( $player_row);
-   if( !$logged_in )
+   if ( !$logged_in )
       error('login_if_not_logged_in', 'Tournament.manage_tournament');
-   if( !ALLOW_TOURNAMENTS )
+   if ( !ALLOW_TOURNAMENTS )
       error('feature_disabled', 'Tournament.manage_tournament');
    $my_id = $player_row['ID'];
 
-   if( $my_id <= GUESTS_ID_MAX )
+   if ( $my_id <= GUESTS_ID_MAX )
       error('not_allowed_for_guest', 'Tournament.manage_tournament');
 
    $tid = (int) @$_REQUEST['tid'];
-   if( $tid < 0 ) $tid = 0;
+   if ( $tid < 0 ) $tid = 0;
 
    $tourney = null;
-   if( $tid )
+   if ( $tid )
       $tourney = TournamentCache::load_cache_tournament( 'Tournament.manage_tournament.find_tournament', $tid );
-   if( is_null($tourney) )
+   if ( is_null($tourney) )
       error('unknown_tournament', "manage_tournament.find_tournament($tid)");
    $ttype = TournamentFactory::getTournament($tourney->WizardType);
 
    // create/edit allowed?
    $is_admin = TournamentUtils::isAdmin();
-   if( !TournamentHelper::allow_edit_tournaments($tourney, $my_id) )
+   if ( !TournamentHelper::allow_edit_tournaments($tourney, $my_id) )
       error('tournament_edit_not_allowed', "manage_tournament.edit_tournament($tid,$my_id)");
    $allow_new_del_TD = $tourney->allow_edit_directors($my_id);
 
@@ -90,7 +90,7 @@ $GLOBALS['ThePage'] = new Page('TournamentManage');
          'TEXT', $tourney->formatFlags(NO_VALUE) . SEP_SPACING .
                  make_menu_link( T_('Edit locks#tourney'),
                      array( 'url' => "tournaments/edit_lock.php?tid=$tid", 'class' => 'TAdmin' )) ));
-   if( $tourney->LockNote )
+   if ( $tourney->LockNote )
       $tform->add_row( array(
             'DESCRIPTION', T_('Lock Note'),
             'TEXT',        make_html_safe($tourney->LockNote, true), ));
@@ -102,7 +102,7 @@ $GLOBALS['ThePage'] = new Page('TournamentManage');
 
    $round = $tourney->CurrentRound;
    $tround = null;
-   if( $ttype->need_rounds )
+   if ( $ttype->need_rounds )
    {
       $tround = TournamentCache::load_cache_tournament_round( 'manage_tournament', $tid, $round );
 
@@ -173,7 +173,7 @@ $GLOBALS['ThePage'] = new Page('TournamentManage');
 
 
    $menu_array = array();
-   if( $tid )
+   if ( $tid )
       $menu_array[T_('Tournament info')] = "tournaments/view_tournament.php?tid=$tid";
    $menu_array[T_('Show Tournament Log')] =
       array( 'url' => "tournaments/show_tournament_log.php?tid=$tid", 'class' => 'TAdmin' );
@@ -195,15 +195,15 @@ function make_links_ttype_specific( $tourney, $tstat )
    $tid = $tourney->ID;
 
    // TYPE: ladder-specific stuff
-   if( $tourney->Type == TOURNEY_TYPE_LADDER )
+   if ( $tourney->Type == TOURNEY_TYPE_LADDER )
    {
-      if( $tstat == TOURNEY_STATUS_NEW )
+      if ( $tstat == TOURNEY_STATUS_NEW )
          return '<li>'
             . make_menu_link( T_('Edit Ladder Properties'), array( 'url' => "tournaments/ladder/edit_props.php?tid=$tid", 'class' => 'TAdmin' ))
             . subList( array( T_('challenge-range, max. defenses, max. challenges#t_mng'),
                               T_('game-end-handling, user-join-order, user-absence-handling, rank-period length, crown-king#t_mng'), ));
 
-      if( $tstat == TOURNEY_STATUS_PAIR )
+      if ( $tstat == TOURNEY_STATUS_PAIR )
          return '<li>'
             . make_menu_link( T_('Admin Ladder'), array( 'url' => "tournaments/ladder/admin.php?tid=$tid", 'class' => 'TAdmin' ))
             . SEP_SPACING
@@ -213,7 +213,7 @@ function make_links_ttype_specific( $tourney, $tstat )
             . subList( array( T_('Admin Ladder (seed ladder, remove users)#t_mng'),
                               T_('Edit Ladder (remove users, rank-changes)#t_mng') ));
 
-      if( $tstat == TOURNEY_STATUS_PLAY )
+      if ( $tstat == TOURNEY_STATUS_PLAY )
          return '<li>'
             . make_menu_link( T_('View Ladder'), "tournaments/ladder/view.php?tid=$tid" )
             . SEP_SPACING
@@ -225,14 +225,14 @@ function make_links_ttype_specific( $tourney, $tstat )
 
 
    // TYPE: round-robin-specific stuff
-   if( $tourney->Type == TOURNEY_TYPE_ROUND_ROBIN )
+   if ( $tourney->Type == TOURNEY_TYPE_ROUND_ROBIN )
    {
-      if( $tstat == TOURNEY_STATUS_NEW )
+      if ( $tstat == TOURNEY_STATUS_NEW )
          return '<li>'
             . make_menu_link( T_('Edit rounds'), array( 'url' => "tournaments/roundrobin/edit_rounds.php?tid=$tid", 'class' => 'TAdmin' ))
             . subList( array( T_('Setup tournament rounds for pooling and pairing') ));
 
-      if( $tstat == TOURNEY_STATUS_PAIR )
+      if ( $tstat == TOURNEY_STATUS_PAIR )
          return '<li>'
             . make_menu_link( T_('Define pools'), array( 'url' => "tournaments/roundrobin/define_pools.php?tid=$tid", 'class' => 'TAdmin' ))
             . SEP_SPACING
@@ -248,7 +248,7 @@ function make_links_ttype_specific( $tourney, $tstat )
             . make_menu_link( T_('Edit game pairing'), array( 'url' => "tournaments/roundrobin/edit_pairing.php?tid=$tid", 'class' => 'TAdmin' ))
             . subList( array( T_('Starting games for all pools#t_mng') ));
 
-      if( $tstat == TOURNEY_STATUS_PLAY )
+      if ( $tstat == TOURNEY_STATUS_PLAY )
          return '<li>'
             . make_menu_link( T_('View Pools'), "tournaments/roundrobin/view_pools.php?tid=$tid" )
             . SEP_SPACING
@@ -266,7 +266,7 @@ function make_links_ttype_specific( $tourney, $tstat )
 
 function subList( $arr, $class='SubList' )
 {
-   if( count($arr) == 0 )
+   if ( count($arr) == 0 )
       return '';
    $class_str = ($class != '') ? " class=\"$class\"" : '';
    return "<ul{$class_str}><li>" . implode("</li>\n<li>", $arr) . "</li></ul>\n";

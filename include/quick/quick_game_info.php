@@ -76,13 +76,13 @@ class QuickHandlerGameInfo extends QuickHandler
 
       // check gid
       QuickHandler::checkArgMandatory( $dbgmsg, GAMEOPT_GID, $this->gid );
-      if( !is_numeric($this->gid) || $this->gid <= 0 )
+      if ( !is_numeric($this->gid) || $this->gid <= 0 )
          error('unknown_game', "$dbgmsg.check.gid");
       $gid = $this->gid;
 
       // prepare command: info
 
-      if( $cmd == QCMD_INFO )
+      if ( $cmd == QCMD_INFO )
       {
          $glc = new GameListControl(/*quick*/true);
          $glc->setView( GAMEVIEW_INFO, 'all' );
@@ -92,7 +92,7 @@ class QuickHandlerGameInfo extends QuickHandler
          $qsql->add_part( SQLP_WHERE, "G.ID=$gid" );
          $qsql->add_part( SQLP_LIMIT, 1 );
 
-         if( $this->is_with_option(QWITH_NOTES) )
+         if ( $this->is_with_option(QWITH_NOTES) )
             GameHelper::extend_query_with_game_notes( $qsql, $uid, 'G' );
 
          $this->game_row = mysql_single_fetch( "QuickHandlerGameInfo.prepare.find_game3($gid)", $qsql->get_select() )
@@ -104,7 +104,7 @@ class QuickHandlerGameInfo extends QuickHandler
    public function process()
    {
       $cmd = $this->quick_object->cmd;
-      if( $cmd == QCMD_INFO )
+      if ( $cmd == QCMD_INFO )
          self::fill_game_info($this, $this->glc, $this->quick_object->result, $this->game_row);
    }
 
@@ -114,13 +114,13 @@ class QuickHandlerGameInfo extends QuickHandler
    private static function convertGameFlags( $flags )
    {
       $out = array();
-      if( $flags & GAMEFLAGS_HIDDEN_MSG )
+      if ( $flags & GAMEFLAGS_HIDDEN_MSG )
          $out[] = 'HIDDENMSG';
-      if( $flags & GAMEFLAGS_ADMIN_RESULT )
+      if ( $flags & GAMEFLAGS_ADMIN_RESULT )
          $out[] = 'ADMRESULT';
-      if( $flags & GAMEFLAGS_TG_DETACHED )
+      if ( $flags & GAMEFLAGS_TG_DETACHED )
          $out[] = 'TGDETACHED';
-      if( $flags & GAMEFLAGS_ATTACHED_SGF )
+      if ( $flags & GAMEFLAGS_ATTACHED_SGF )
          $out[] = 'ATTACHEDSGF';
       return implode(',', $out);
    }//convertGameFlags
@@ -176,7 +176,7 @@ class QuickHandlerGameInfo extends QuickHandler
       $out['my_id'] = $glc->my_id;
       $out['move_id'] = (int)$row['Moves'];
       $out['move_count'] = (int)$row['Moves'];
-      if( !$game_finished )
+      if ( !$game_finished )
       {
          $out['move_color'] = ($color == BLACK) ? 'B' : 'W';
          $out['move_uid'] = (int)$row['ToMove_ID'];
@@ -185,16 +185,16 @@ class QuickHandlerGameInfo extends QuickHandler
          //$out['move_ko'] = ($row['X_GameFlags'] & GAMEFLAGS_KO) ? 1 : 0;
 
          $out['prio'] = (int)@$row['X_Priority'];
-         if( $quick_handler->is_with_option(QWITH_NOTES) )
+         if ( $quick_handler->is_with_option(QWITH_NOTES) )
             $out['notes'] = @$row['X_Note'];
       }
 
-      foreach( array( BLACK, WHITE ) as $col )
+      foreach ( array( BLACK, WHITE ) as $col )
       {
          $icol = ($col == BLACK) ? 'Black' : 'White';
          $prefix = strtolower($icol);
          $uid = (int)$row[$icol.'_ID'];
-         if( $game_started && $is_my_game )
+         if ( $game_started && $is_my_game )
          {
             $time_remaining = build_time_remaining( $row, $col,
                   /*is_to_move*/ ( $uid == $row['ToMove_ID'] ),
@@ -214,14 +214,14 @@ class QuickHandlerGameInfo extends QuickHandler
          $ginfo['rating_start'] = echo_rating($row[$icol.'_Start_Rating'], /*perc*/1, /*uid*/0, /*engl*/true, /*short*/1);
          $ginfo['rating_start_elo'] = echo_rating_elo($row[$icol.'_Start_Rating']);
 
-         if( $game_finished )
+         if ( $game_finished )
          {
             $ginfo['rating_end']     = echo_rating($row[$icol.'_End_Rating'], /*perc*/1, /*uid*/0, /*engl*/true, /*short*/1);
             $ginfo['rating_end_elo'] = echo_rating_elo($row[$icol.'_End_Rating']);
 
-            if( $quick_handler->is_with_option(QWITH_RATINGDIFF) )
+            if ( $quick_handler->is_with_option(QWITH_RATINGDIFF) )
             {
-               if( isset($row[$prefix.'Diff']) )
+               if ( isset($row[$prefix.'Diff']) )
                {
                   $rat_diff = $row[$prefix.'Diff'];
                   $ginfo['rating_diff'] = ( $rat_diff > 0 ? '+' : '' ) . sprintf( "%0.2f", $rat_diff / 100 );
@@ -234,7 +234,7 @@ class QuickHandlerGameInfo extends QuickHandler
          $out[$prefix.'_gameinfo'] = $ginfo;
       }
 
-      if( $glc->is_observe_all() )
+      if ( $glc->is_observe_all() )
       {
          $out['obs_count'] = (int)@$row['X_ObsCount'];
          $out['obs_mine'] = ( @$row['X_MeObserved'] == 'Y' ) ? 1 : 0;

@@ -36,13 +36,13 @@ $GLOBALS['ThePage'] = new Page('TournamentLockEdit');
    connect2mysql();
 
    $logged_in = who_is_logged( $player_row);
-   if( !$logged_in )
+   if ( !$logged_in )
       error('login_if_not_logged_in', 'Tournament.edit_lock');
-   if( !ALLOW_TOURNAMENTS )
+   if ( !ALLOW_TOURNAMENTS )
       error('feature_disabled', 'Tournament.edit_lock');
    $my_id = $player_row['ID'];
 
-   if( $my_id <= GUESTS_ID_MAX )
+   if ( $my_id <= GUESTS_ID_MAX )
       error('not_allowed_for_guest', 'Tournament.edit_lock');
 
 /* Actual REQUEST calls used:
@@ -52,7 +52,7 @@ $GLOBALS['ThePage'] = new Page('TournamentLockEdit');
 */
 
    $tid = (int) @$_REQUEST['tid'];
-   if( $tid < 0 ) $tid = 0;
+   if ( $tid < 0 ) $tid = 0;
 
    $tourney = TournamentCache::load_cache_tournament( 'Tournament.edit_lock.find_tournament', $tid );
    $tstatus = new TournamentStatus( $tourney );
@@ -62,7 +62,7 @@ $GLOBALS['ThePage'] = new Page('TournamentLockEdit');
    // edit allowed?
    $is_admin = TournamentUtils::isAdmin();
    $allow_edit_tourney = TournamentHelper::allow_edit_tournaments($tourney, $my_id);
-   if( !$allow_edit_tourney )
+   if ( !$allow_edit_tourney )
       error('tournament_edit_not_allowed', "Tournament.edit_lock.edit($tid,$my_id)");
 
    // init
@@ -78,7 +78,7 @@ $GLOBALS['ThePage'] = new Page('TournamentLockEdit');
       TOURNEY_FLAG_LOCK_CRON     => 1,
    );
    $errors = $tstatus->check_edit_status( Tournament::get_edit_lock_tournament_status() );
-   if( !$is_admin && $tourney->isFlagSet(TOURNEY_FLAG_LOCK_ADMIN) )
+   if ( !$is_admin && $tourney->isFlagSet(TOURNEY_FLAG_LOCK_ADMIN) )
       $errors[] = $tourney->buildAdminLockText();
 
    // check + parse edit-form
@@ -86,7 +86,7 @@ $GLOBALS['ThePage'] = new Page('TournamentLockEdit');
    $errors = array_merge( $errors, $input_errors );
 
    // save tournament-object with values from edit-form
-   if( @$_REQUEST['t_save'] && !@$_REQUEST['t_preview'] && count($errors) == 0 && count($edits) > 0 )
+   if ( @$_REQUEST['t_save'] && !@$_REQUEST['t_preview'] && count($errors) == 0 && count($edits) > 0 )
    {
       ta_begin();
       {//HOT-section to change tournament-lock
@@ -127,7 +127,7 @@ $GLOBALS['ThePage'] = new Page('TournamentLockEdit');
          'TEXT',        Tournament::getStatusText($tourney->Status), ));
    $tform->add_row( array( 'HR' ));
 
-   if( count($errors) )
+   if ( count($errors) )
    {
       $tform->add_row( array(
             'DESCRIPTION', T_('Error'),
@@ -136,7 +136,7 @@ $GLOBALS['ThePage'] = new Page('TournamentLockEdit');
    }
 
    $first = true;
-   foreach( $arr_flags as $flag => $name )
+   foreach ( $arr_flags as $flag => $name )
    {
       $disable = ( !$is_admin && @$arr_flags_admin[$flag] ) ? 'disabled=1' : '';
       $flag_set = $tourney->isFlagSet($flag);
@@ -144,11 +144,11 @@ $GLOBALS['ThePage'] = new Page('TournamentLockEdit');
       $first = false;
 
       array_push( $arr, 'CHECKBOXX', $name, 1, Tournament::getFlagsText($flag), $flag_set, $disable );
-      if( @$arr_flags_admin[$flag] )
+      if ( @$arr_flags_admin[$flag] )
          array_push( $arr, 'TEXT', MINI_SPACING . '('.T_('change only by admin').')' );
       $tform->add_row( $arr );
 
-      if( $disable )
+      if ( $disable )
          $tform->add_hidden( $name, $flag_set );
    }
 
@@ -186,9 +186,9 @@ $GLOBALS['ThePage'] = new Page('TournamentLockEdit');
 
 
    $menu_array = array();
-   if( $tid )
+   if ( $tid )
       $menu_array[T_('Tournament info')] = "tournaments/view_tournament.php?tid=$tid";
-   if( $allow_edit_tourney ) # for TD
+   if ( $allow_edit_tourney ) # for TD
       $menu_array[T_('Manage tournament')] =
          array( 'url' => "tournaments/manage_tournament.php?tid=$tid", 'class' => 'TAdmin' );
 
@@ -213,29 +213,29 @@ function parse_edit_form( &$tney )
 
    $old_vals = array() + $vars; // copy to determine edit-changes
    // read URL-vals into vars
-   foreach( $vars as $key => $val )
+   foreach ( $vars as $key => $val )
       $vars[$key] = get_request_arg( $key, $val );
    // handle checkboxes having no key/val in _POST-hash
-   if( $is_posted )
+   if ( $is_posted )
    {
-      foreach( $arr_flags as $flag => $key )
+      foreach ( $arr_flags as $flag => $key )
       {
-         if( $is_admin || !(@$arr_flags_admin[$flag]) )
+         if ( $is_admin || !(@$arr_flags_admin[$flag]) )
             $vars[$key] = get_request_arg( $key, false );
       }
    }
 
    // parse URL-vars
-   if( $is_posted )
+   if ( $is_posted )
    {
       $new_value = 0;
       $flagmask = 0;
-      foreach( $arr_flags as $flag => $name )
+      foreach ( $arr_flags as $flag => $name )
       {
-         if( $is_admin || !(@$arr_flags_admin[$flag]) )
+         if ( $is_admin || !(@$arr_flags_admin[$flag]) )
          {
             $flagmask |= $flag;
-            if( $vars[$name] )
+            if ( $vars[$name] )
                $new_value |= $flag;
          }
       }
@@ -244,14 +244,14 @@ function parse_edit_form( &$tney )
       list( $new_value, $note_len, $has_line ) = format_lock_note( trim($vars['locknote']) );
       $vars['locknote'] = $new_value;
       $lock_flags = ($tney->Flags & $flagmask);
-      if( $lock_flags && ( ($has_line && $note_len < 4) || (!$has_line && empty($new_value)) ) )
+      if ( $lock_flags && ( ($has_line && $note_len < 4) || (!$has_line && empty($new_value)) ) )
          $errors[] = T_('Your lock note is insufficient for setting locks.');
       else
          $tney->LockNote = ( $lock_flags ) ? $new_value : '';
 
       // determine edits
-      if( $old_vals['flags'] != $tney->Flags ) $edits[] = T_('Flags');
-      if( $old_vals['locknote'] != $tney->LockNote ) $edits[] = T_('Lock Note');
+      if ( $old_vals['flags'] != $tney->Flags ) $edits[] = T_('Flags');
+      if ( $old_vals['locknote'] != $tney->LockNote ) $edits[] = T_('Lock Note');
    }
 
    return array( $vars, array_unique($edits), $errors );
@@ -267,13 +267,13 @@ function format_lock_note( $note )
    $result = array();
    $notelen = 0;
    $user_hasline = false;
-   foreach( $arr as $line )
+   foreach ( $arr as $line )
    {
       $line = trim($line);
-      if( (string)$line != '' && (/*skip other users*/ !preg_match("/^\\[[^\\/]+\\/(?!$user)/i", $line)) )
+      if ( (string)$line != '' && (/*skip other users*/ !preg_match("/^\\[[^\\/]+\\/(?!$user)/i", $line)) )
       {
          // check for complete line for current user
-         if( preg_match( "/^\\[\\d{4}-\\d{2}-\\d{2} \\d{2}:\\d{2}\\/$user\\]:\\s+(.*)$/i", $line, $matches ) )
+         if ( preg_match( "/^\\[\\d{4}-\\d{2}-\\d{2} \\d{2}:\\d{2}\\/$user\\]:\\s+(.*)$/i", $line, $matches ) )
          {
             $notelen += strlen($matches[1]);
             $user_hasline = true;
@@ -293,7 +293,7 @@ function build_notes_locking()
    //$notes[] = null; // empty line
 
    $narr = array( T_('Tournament Locks') . ':' );
-   foreach( Tournament::getFlagsText(null, false) as $flag => $descr )
+   foreach ( Tournament::getFlagsText(null, false) as $flag => $descr )
       $narr[] = sprintf( "%s = $descr", Tournament::getFlagsText($flag) );
    $notes[] = $narr;
 

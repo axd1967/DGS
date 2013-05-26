@@ -37,7 +37,7 @@ require_once 'include/countries.php';
    $statsmenu[T_('Standard view')] = $page;
    $statsmenu[T_('User countries')] = "$page?stats=1";
 
-   if( $stats == 1 )
+   if ( $stats == 1 )
       show_stats_user_countries();
    else // default: stats=0 or illegal
    {
@@ -50,7 +50,7 @@ require_once 'include/countries.php';
       show_stats_default();
    }
 
-   if( $stats > 0 )
+   if ( $stats > 0 )
    {
       echo "<hr>\n";
       make_menu( $statsmenu );
@@ -78,7 +78,7 @@ function show_stats_default()
       , "<tr><th>Status</th><th>Games</th><th>Moves</th></tr>\n";
 
    $col_fmt = '<td class="right">%s</td>';
-   foreach( $arr_moves as $row )
+   foreach ( $arr_moves as $row )
    {
       $col_title = ( is_null($row['Status']) ) ? 'Total' : $row['Status'];
       echo '<tr>'
@@ -90,7 +90,7 @@ function show_stats_default()
 
    echo "</table>\n";
 
-   if( $arr_activity )
+   if ( $arr_activity )
    {
       $row = $arr_activity;
       echo '<p>', number_format($row["hits"]), ' hits by ', number_format($row["count"]), ' players</p>';
@@ -98,10 +98,10 @@ function show_stats_default()
    }
 
    // NOTE: only works under Linux-like systems and with safe_mode=off
-   if( @$player_row['admin_level'] & ADMIN_DEVELOPER )
+   if ( @$player_row['admin_level'] & ADMIN_DEVELOPER )
    {
       $tmp = '/proc/loadavg';
-      if( ($tmp=trim(@read_from_file($tmp))) )
+      if ( ($tmp=trim(@read_from_file($tmp))) )
          echo '<p><span class=DebugInfo>Loadavg: ', $tmp, '</span></p>';
    }
 
@@ -129,15 +129,15 @@ function load_cache_games_stats( $num )
    $key = "Statistics.games.$num";
 
    $result = DgsCache::fetch( $dbgmsg, CACHE_GRP_STATS_GAMES, $key );
-   if( is_null($result) )
+   if ( is_null($result) )
    {
-      if( $num == 1 )
+      if ( $num == 1 )
       {
          $result = array();
          $db_result = db_query( $dbgmsg,
             "SELECT SQL_SMALL_RESULT Status,SUM(Moves) AS moves, COUNT(*) AS count " .
             "FROM Games GROUP BY Status WITH ROLLUP" );
-         while( $row = mysql_fetch_array($db_result) )
+         while ( $row = mysql_fetch_array($db_result) )
             $result[] = $row;
          mysql_free_result($db_result);
       }
@@ -183,22 +183,22 @@ function show_stats_user_countries()
 
    $arr_countries = getCountryText();
    $total = 0;
-   while( $row = mysql_fetch_array( $result ) )
+   while ( $row = mysql_fetch_array( $result ) )
    {
       $ccode = $row['Country'];
       $total += $row['X_Count'];
       unset($arr_countries[$ccode]);
 
       $ccimg = getCountryFlagImage($ccode);
-      if( $ccode == '' )
+      if ( $ccode == '' )
          $ccimg = NO_VALUE;
-      elseif( $ccimg == '' )
+      elseif ( $ccimg == '' )
          $ccimg = "[$ccode]";
 
       $cctxt = getCountryText($ccode);
-      if( $ccode == '' )
+      if ( $ccode == '' )
          $cctxt = T_('Unset');
-      elseif( $cctxt == '' )
+      elseif ( $cctxt == '' )
          $cctxt = NO_VALUE;
 
       echo sprintf( "<tr><td class=\"Number\">%s</td><td class=\"Image\">%s</td><td>%s</td></tr>\n",
@@ -211,7 +211,7 @@ function show_stats_user_countries()
 
    echo "<br>\n", T_('Remaining countries'), ":\n<p>\n";
    asort($arr_countries);
-   foreach( $arr_countries as $ccode => $cctxt )
+   foreach ( $arr_countries as $ccode => $cctxt )
    {
       echo getCountryFlagImage($ccode), SMALL_SPACING, "\n";
    }

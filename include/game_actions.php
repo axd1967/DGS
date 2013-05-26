@@ -111,24 +111,24 @@ class GameActionHelper
    public function init_globals( $dbgmsg )
    {
       $dbgmsg .= ".GAH.init_globals({$this->gid})";
-      if( is_null($this->game_row) && is_null($this->action) )
+      if ( is_null($this->game_row) && is_null($this->action) )
          error('assert', "$dbgmsg.miss_init1");
 
       $ToMove_ID = $this->game_row['ToMove_ID'];
       $Black_ID = $this->game_row['Black_ID'];
       $White_ID = $this->game_row['White_ID'];
 
-      if( $ToMove_ID == 0 )
+      if ( $ToMove_ID == 0 )
          error('game_finished', "$dbgmsg.bad_ToMove_ID.gamend");
-      if( $Black_ID == $ToMove_ID )
+      if ( $Black_ID == $ToMove_ID )
          $this->to_move = BLACK;
-      elseif( $White_ID == $ToMove_ID )
+      elseif ( $White_ID == $ToMove_ID )
          $this->to_move = WHITE;
       else
          error('database_corrupted', "$dbgmsg.check.to_move($ToMove_ID,$Black_ID,$White_ID)");
 
       // correct to_move on resign-if-not-your-turn
-      if( $this->action == GAMEACT_RESIGN && $this->my_id != $ToMove_ID )
+      if ( $this->action == GAMEACT_RESIGN && $this->my_id != $ToMove_ID )
          $this->to_move = WHITE + BLACK - $this->to_move;
 
       $this->next_to_move = WHITE + BLACK - $this->to_move;
@@ -141,7 +141,7 @@ class GameActionHelper
    public function load_game_board( $dbgmsg )
    {
       $dbgmsg .= ".GAH.load_game_board({$this->gid})";
-      if( is_null($this->game_row) && is_null($this->action) )
+      if ( is_null($this->game_row) && is_null($this->action) )
          error('assert', "$dbgmsg.miss_init2");
       $Status = $this->game_row['Status'];
 
@@ -149,7 +149,7 @@ class GameActionHelper
       $board_opts = ( $no_marked_dead ? 0 : BOARDOPT_MARK_DEAD );
 
       $board = new Board();
-      if( !$board->load_from_db( $this->game_row, 0, $board_opts) )
+      if ( !$board->load_from_db( $this->game_row, 0, $board_opts) )
          error('internal_error', "$dbgmsg.load_from_db");
       $this->board = $board;
 
@@ -160,7 +160,7 @@ class GameActionHelper
    /*! \brief Inits query-parts and SQL-clauses for updating game-data. */
    public function init_query( $dbgmsg )
    {
-      if( is_null($this->game_row) || is_null($this->action) || $this->to_move == 0 )
+      if ( is_null($this->game_row) || is_null($this->action) || $this->to_move == 0 )
          error('assert', "$dbgmsg.GAH.init_query({$this->gid}).miss_init3");
 
       $Moves = $this->get_moves();
@@ -191,16 +191,16 @@ class GameActionHelper
       // update clock
       list( $this->hours, $upd_clock ) =
          GameHelper::update_clock( $dbgmsg, $this->game_row, $this->to_move, $this->next_to_move );
-      if( $this->action != GAMEACT_DELETE )
+      if ( $this->action != GAMEACT_DELETE )
       {
          $this->game_updquery->merge( $upd_clock ); // update clock
          $this->game_updquery->upd_time('Lastchanged');
 
          // init mp-query
-         if( $this->action != GAMEACT_RESIGN )
+         if ( $this->action != GAMEACT_RESIGN )
          {
             $is_mpgame = ( $this->game_row['GameType'] != GAMETYPE_GO );
-            if( $is_mpgame && ($this->action == GAMEACT_DO_MOVE || $this->action == GAMEACT_PASS
+            if ( $is_mpgame && ($this->action == GAMEACT_DO_MOVE || $this->action == GAMEACT_PASS
                   || $this->action == GAMEACT_SET_HANDICAP || $this->action == GAMEACT_SCORE) )
             {
                list( $group_color, $group_order, $gpmove_color )
@@ -219,15 +219,15 @@ class GameActionHelper
    /*! \brief Strips away empty comments from message and set game-flags if there are embedded hidden messages. */
    public function set_game_move_message( $message_raw )
    {
-      if( is_null($this->game_row) )
+      if ( is_null($this->game_row) )
          error('assert', "$dbgmsg.GAH.init_query({$this->gid}).miss_init4");
 
       $this->message_raw = trim($message_raw);
-      if( preg_match( "/^<c>\s*<\\/c>$/si", $this->message_raw ) ) // remove empty comment-only tags
+      if ( preg_match( "/^<c>\s*<\\/c>$/si", $this->message_raw ) ) // remove empty comment-only tags
          $this->message_raw = '';
       $this->message = $this->message_raw;
 
-      if( $this->message && preg_match( "#</?h(idden)?>#is", $this->message) )
+      if ( $this->message && preg_match( "#</?h(idden)?>#is", $this->message) )
          $this->game_row['GameFlags'] |= GAMEFLAGS_HIDDEN_MSG;
    }//prepare_game_move_message
 
@@ -258,29 +258,29 @@ class GameActionHelper
       $Size = $this->game_row['Size'];
       $dbgmsg .= ".GAH.prepare_game_action_set_handicap({$this->gid},{$this->action},$Status,$Moves,$Handicap)";
 
-      if( $this->is_quick )
+      if ( $this->is_quick )
          $this->board->add_handicap_stones( $quick_moves ); // check coords
       else
       {
-         if( $Status != GAME_STATUS_PLAY || !( $Handicap > 1 && $Moves == 1 ) )
+         if ( $Status != GAME_STATUS_PLAY || !( $Handicap > 1 && $Moves == 1 ) )
             error('invalid_action', "$dbgmsg.check_status");
 
          $stonestring = check_handicap( $this->board, $orig_stonestring );
-         if( strlen($stonestring) != 2 * $Handicap )
+         if ( strlen($stonestring) != 2 * $Handicap )
             error('wrong_number_of_handicap_stone', "$dbgmsg.check.handicap($stonestring)");
 
          $quick_moves = array();
-         for( $i=1; $i <= $Handicap; $i++ )
+         for ( $i=1; $i <= $Handicap; $i++ )
          {
             list( $x, $y ) = sgf2number_coords( substr($stonestring, $i*2-2, 2), $Size );
-            if( !isset($x) || !isset($y) )
+            if ( !isset($x) || !isset($y) )
                error('illegal_position', "$dbgmsg.check_pos(#$i,$x,$y)");
             else
                $quick_moves[] = array( $x, $y );
          }
       }
 
-      for( $i=1; $i <= $Handicap; $i++ )
+      for ( $i=1; $i <= $Handicap; $i++ )
       {
          list( $x, $y ) = $quick_moves[$i-1];
          $this->move_query .= // (gid,MoveNr,Stone,PosX,PosY,Hours)
@@ -315,14 +315,14 @@ class GameActionHelper
       $dbgmsg .= ".GAH.prepare_game_action_do_move({$this->gid},{$this->action})";
 
       {//to fix the old way Ko detect. Could be removed when no more old way games.
-         if( !@$Last_Move ) $Last_Move = number2sgf_coords($Last_X, $Last_Y, $Size);
+         if ( !@$Last_Move ) $Last_Move = number2sgf_coords($Last_X, $Last_Y, $Size);
       }
       $gchkmove = new GameCheckMove( $this->board );
       $gchkmove->check_move( $move_coord, $this->to_move, $Last_Move, $GameFlags );
       $gchkmove->update_prisoners( $Black_Prisoners, $White_Prisoners );
 
       $prisoner_string = '';
-      foreach( $gchkmove->prisoners as $coord )
+      foreach ( $gchkmove->prisoners as $coord )
       {
          list( $x, $y ) = $coord;
          $this->move_query .= // (gid,MoveNr,Stone,PosX,PosY,Hours)
@@ -330,14 +330,14 @@ class GameActionHelper
          $prisoner_string .= number2sgf_coords($x, $y, $Size);
       }
 
-      if( ( strlen($prisoner_string) != $gchkmove->nr_prisoners*2 )
+      if ( ( strlen($prisoner_string) != $gchkmove->nr_prisoners*2 )
             || ( $chk_stonestring && $prisoner_string != $chk_stonestring) )
          error('move_problem', "$dbgmsg.prisoner({$gchkmove->nr_prisoners},$prisoner_string,$chk_stonestring)");
 
       $this->move_query .= // (gid,MoveNr,Stone,PosX,PosY,Hours)
          "({$this->gid}, $Moves, {$this->to_move}, {$gchkmove->colnr}, {$gchkmove->rownr}, {$this->hours}) ";
 
-      if( $gchkmove->nr_prisoners == 1 )
+      if ( $gchkmove->nr_prisoners == 1 )
          $GameFlags |= GAMEFLAGS_KO;
       else
          $GameFlags &= ~GAMEFLAGS_KO;
@@ -350,9 +350,9 @@ class GameActionHelper
       $this->game_updquery->upd_num('Flags', $GameFlags);
       $this->game_updquery->upd_txt('Snapshot', GameSnapshot::make_game_snapshot($Size, $this->board) );
       $this->game_updquery->upd_num('ToMove_ID', $this->next_to_move_ID);
-      if( $gchkmove->nr_prisoners > 0 )
+      if ( $gchkmove->nr_prisoners > 0 )
       {
-         if( $this->to_move == BLACK )
+         if ( $this->to_move == BLACK )
             $this->game_updquery->upd_num('Black_Prisoners', $Black_Prisoners);
          else
             $this->game_updquery->upd_num('White_Prisoners', $White_Prisoners);
@@ -370,12 +370,12 @@ class GameActionHelper
       $GameFlags = $this->game_row['GameFlags'];
       $dbgmsg .= ".GAH.prepare_game_action_pass({$this->gid},{$this->action},$Status,$Moves,$Handicap)";
 
-      if( $Moves < $Handicap )
+      if ( $Moves < $Handicap )
          error('early_pass', "$dbgmsg.check.moves");
 
-      if( $Status == GAME_STATUS_PLAY )
+      if ( $Status == GAME_STATUS_PLAY )
          $next_status = GAME_STATUS_PASS;
-      else if( $Status == GAME_STATUS_PASS )
+      else if ( $Status == GAME_STATUS_PASS )
          $next_status = GAME_STATUS_SCORE;
       else
          error('invalid_action', "$dbgmsg.check_status");
@@ -434,35 +434,35 @@ class GameActionHelper
       $GameFlags = $this->game_row['GameFlags'];
       $dbgmsg .= ".GAH.prepare_game_action_score({$this->gid},{$this->action})";
 
-      if( !$this->is_quick )
+      if ( !$this->is_quick )
          $arr_coords = false;
 
       $gchkscore = new GameCheckScore( $this->board, $stonestring, $Handicap, $Komi, $Black_Prisoners, $White_Prisoners );
-      if( $toggle_uniq )
+      if ( $toggle_uniq )
          $gchkscore->set_toggle_unique();
       $game_score = $gchkscore->check_remove( getRulesetScoring($Ruleset), $arr_coords );
       $gchkscore->update_stonestring( $stonestring );
       $this->score = $game_score->calculate_score();
 
       $l = strlen($stonestring);
-      if( $Status == GAME_STATUS_SCORE2 && $l < 2 )
+      if ( $Status == GAME_STATUS_SCORE2 && $l < 2 )
       {
-         if( $this->is_quick && !$agree )
+         if ( $this->is_quick && !$agree )
             error('invalid_action', "$dbgmsg.expect_agree($agree)");
          $next_status = GAME_STATUS_FINISHED;
          $this->game_finished = true;
       }
       else
       {
-         if( $this->is_quick && $l < 2 && !$agree )
+         if ( $this->is_quick && $l < 2 && !$agree )
             error('invalid_action', "$dbgmsg.no_dispute_but_miss_agree($agree)");
-         elseif( $this->is_quick && $l >=2 && $agree )
+         elseif ( $this->is_quick && $l >=2 && $agree )
             error('invalid_action', "$dbgmsg.dispute_expect_disagree($agree)");
          $next_status = GAME_STATUS_SCORE2;
       }
 
       $mark_stone = ( $this->to_move == BLACK ) ? MARKED_BY_BLACK : MARKED_BY_WHITE;
-      for( $i=0; $i < $l; $i += 2 )
+      for ( $i=0; $i < $l; $i += 2 )
       {
          list($x,$y) = sgf2number_coords(substr($stonestring, $i, 2), $Size);
          $this->move_query .= // (gid,MoveNr,Stone,PosX,PosY,Hours)
@@ -488,7 +488,7 @@ class GameActionHelper
       $Handicap = $this->game_row['Handicap'];
       $Komi = $this->game_row['Komi'];
 
-      if( $this->action != GAMEACT_DELETE && (string)$this->message != '' )
+      if ( $this->action != GAMEACT_DELETE && (string)$this->message != '' )
       {
          $this->mmsg_updquery->upd_num('gid', $this->gid);
          $this->mmsg_updquery->upd_num('MoveNr',
@@ -521,20 +521,20 @@ class GameActionHelper
       ta_begin();
       {//HOT-section to update game-action
          //See *** HOT_SECTION *** above
-         if( $this->game_updquery->has_updates() )
+         if ( $this->game_updquery->has_updates() )
          {
             $result = db_query( "$dbgmsg.upd_game1",
                "UPDATE Games SET " . $this->game_updquery->get_query() . $this->game_clause );
-            if( mysql_affected_rows() != 1 )
+            if ( mysql_affected_rows() != 1 )
                error('mysql_update_game', "$dbgmsg.upd_game2");
 
             GameHelper::delete_cache_game_row( "$dbgmsg.upd_game3", $this->gid );
          }
 
-         if( $this->move_query )
+         if ( $this->move_query )
          {
             $result = db_query( "$dbgmsg.upd_moves1", self::$MOVE_INSERT_QUERY . $this->move_query );
-            if( mysql_affected_rows() < 1 && $this->action != GAMEACT_DELETE )
+            if ( mysql_affected_rows() < 1 && $this->action != GAMEACT_DELETE )
                error('mysql_insert_move', "$dbgmsg.upd_moves2");
 
             clear_cache_quick_status( array( $ToMove_ID, $this->next_to_move_ID ), QST_CACHE_GAMES );
@@ -542,17 +542,17 @@ class GameActionHelper
             Board::delete_cache_game_moves( "$dbgmsg.upd_moves4", $this->gid );
          }
 
-         if( $this->mmsg_updquery->has_updates() )
+         if ( $this->mmsg_updquery->has_updates() )
          {
             $result = db_query( "$dbgmsg.upd_msg1",
                "INSERT INTO MoveMessages SET " . $this->mmsg_updquery->get_query() );
-            if( mysql_affected_rows() < 1 && $this->action != GAMEACT_DELETE )
+            if ( mysql_affected_rows() < 1 && $this->action != GAMEACT_DELETE )
                error('mysql_insert_move', "$dbgmsg.upd_msg2");
 
             Board::delete_cache_game_move_messages( "$dbgmsg.upd_msg3", $this->gid );
          }
 
-         if( $this->game_finished )
+         if ( $this->game_finished )
          {
             $game_finalizer = new GameFinalizer( ACTBY_PLAYER, $this->my_id, $this->gid, $tid, $Status,
                $GameType, $GamePlayers, $GameFlags, $Black_ID, $White_ID, $Moves, ($Rated != 'N') );
@@ -566,7 +566,7 @@ class GameActionHelper
             $do_delete = false;
 
          // Notify opponent about move
-         if( !$do_delete )
+         if ( !$do_delete )
             notify( "$dbgmsg.notify_opponent({$this->next_to_move_ID})", $this->next_to_move_ID );
 
          // Increase moves and activity

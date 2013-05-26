@@ -48,7 +48,7 @@ $GLOBALS['ThePage'] = new Page('Script', PAGEFLAG_IMPLICIT_FLUSH );
    $repeat= max(1,(int)get_request_arg( 'repeat', 200));
    $precision= min(8,max(0,(int)get_request_arg( 'precision', 3)));
    $sample= max(0,(int)get_request_arg( 'sample', 1000));
-   if( $tmode ) $tname= 'temp';
+   if ( $tmode ) $tname= 'temp';
    $tname = 'test_'.$tname; // see note above
 
    $halflife= 100;
@@ -69,7 +69,7 @@ $GLOBALS['ThePage'] = new Page('Script', PAGEFLAG_IMPLICIT_FLUSH );
 
    set_time_limit( 300); //seconds
 
-   switch( (int)$tmode )
+   switch ( (int)$tmode )
    {
       case 0:
          $engine= '';
@@ -133,14 +133,14 @@ $GLOBALS['ThePage'] = new Page('Script', PAGEFLAG_IMPLICIT_FLUSH );
       ),
    );
 
-   foreach( $tsts as $tst => $dummy )
+   foreach ( $tsts as $tst => $dummy )
    {
       $sub= &$tsts[$tst];
       $sub['tim']= 0;
    }
-   for( $i=1; $i<=$repeat; $i++ )
+   for ( $i=1; $i<=$repeat; $i++ )
    {
-      foreach( $tsts as $tst => $dummy )
+      foreach ( $tsts as $tst => $dummy )
       {
          $sub= &$tsts[$tst];
          $t= getmicrotime();
@@ -150,14 +150,14 @@ $GLOBALS['ThePage'] = new Page('Script', PAGEFLAG_IMPLICIT_FLUSH );
       }
 
       $t= getmicrotime();
-      if( $t-$rfrshtim > 5 )
+      if ( $t-$rfrshtim > 5 )
       {
          echo '.'; //the browser won't freeze... hoping so
          $rfrshtim= $t;
       }
    }
 
-   if( $tmode )
+   if ( $tmode )
    {
       db_query( 'test.drop', "DROP TEMPORARY TABLE IF EXISTS $tname");
    }
@@ -166,11 +166,11 @@ $GLOBALS['ThePage'] = new Page('Script', PAGEFLAG_IMPLICIT_FLUSH );
    $sub= &$tsts['F'];
    $rn= $sub['nam']; $rt= $sub['tim'];
    echo sprintf("<br>%10s:%7.3fs avg=%7.3fs (used as reference)",$rn,$rt,$rt/$repeat);
-   if( $rt > 0 )
+   if ( $rt > 0 )
    {
-      foreach( $tsts as $tst => $dummy )
+      foreach ( $tsts as $tst => $dummy )
       {
-         if( $tst == 'F' ) continue;
+         if ( $tst == 'F' ) continue;
          $sub= &$tsts[$tst];
          $n= $sub['nam']; $t= $sub['tim'];
          $d= $t-$rt; $r= 100*$d/$rt;

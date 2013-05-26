@@ -40,15 +40,15 @@ define('BUTTON_TEXT', -1); // Players.Button
  */
 function warning_cell_attb( $title='', $return_array=false )
 {
-   if( $return_array )
+   if ( $return_array )
    {
       $result = array('class' => 'Warning');
-      if( $title ) $result['title'] = $title;
+      if ( $title ) $result['title'] = $title;
    }
    else
    {
       $result = ' class=Warning';
-      if( $title ) $result .= ' title=' . attb_quote($title);
+      if ( $title ) $result .= ' title=' . attb_quote($title);
    }
    return $result;
 }
@@ -63,10 +63,10 @@ function button_style( $button_nr=0 )
 {
    global $base_path, $buttoncolors, $buttonfiles;
 
-   if( !is_valid_button($button_nr) )
+   if ( !is_valid_button($button_nr) )
       $button_nr = 0;
 
-   if( $button_nr == BUTTON_TEXT )
+   if ( $button_nr == BUTTON_TEXT )
       return '';
 
    return
@@ -100,7 +100,7 @@ function button_TD_anchor( $href, $text='', $title='' )
  */
 function button_TD_insert_width( $width=false )
 {
-   if( !is_numeric($width) )
+   if ( !is_numeric($width) )
       $width = BUTTON_WIDTH;
    return insert_width( $width, 0, true ); // with MinWidth-class
 }
@@ -118,27 +118,27 @@ function TD_button( $title, $href, $isrc, $ialt)
 /*! \brief Prints notes in formatted table if there are notes. */
 function echo_notes( $table_id, $title, $notes, $pre_sep=true, $html_safe=true )
 {
-   if( !is_array($notes) || count($notes) == 0 )
+   if ( !is_array($notes) || count($notes) == 0 )
       return;
 
    echo ( $pre_sep ? "<br><br>\n" : '' ),
       "<table id=\"{$table_id}\">\n";
-   if( $title != '' )
+   if ( $title != '' )
       echo "<tr><th>", make_html_safe($title, 'line'), "</th></tr>\n";
    echo "<tr><td><ul class=\"Notes\">\n";
-   foreach( $notes as $note )
+   foreach ( $notes as $note )
    {
-      if( is_null($note) || (string)$note === '' )
+      if ( is_null($note) || (string)$note === '' )
          echo "<p></p>\n";
-      elseif( is_array($note) && isset($note['text']) )
+      elseif ( is_array($note) && isset($note['text']) )
       {
          $safe = (bool)@$note['safe'];
          echo '  <li>', ( $safe ? make_html_safe($note['text'], 'line') : $note['text'] ), "\n";
       }
-      elseif( is_array($note) )
+      elseif ( is_array($note) )
       {
          echo '  <li>', array_shift( $note ), "\n<ul class=\"SubNotes\">\n"; // note-title
-         foreach( $note as $note_item )
+         foreach ( $note as $note_item )
             echo "<li>$note_item\n";
          echo "</ul>\n";
       }
@@ -151,13 +151,13 @@ function echo_notes( $table_id, $title, $notes, $pre_sep=true, $html_safe=true )
 /*! \brief Returns image-tag with vacation-image if on_vacation set; return '' otherwise. */
 function echo_image_vacation( $on_vacation=true, $vacText='', $game_clock_stopped=false )
 {
-   if( (is_numeric($on_vacation) && $on_vacation > 0) || $on_vacation )
+   if ( (is_numeric($on_vacation) && $on_vacation > 0) || $on_vacation )
    {
       global $base_path;
       $title = T_('On vacation');
-      if( $vacText != '' )
+      if ( $vacText != '' )
          $title .= " ($vacText)";
-      if( $game_clock_stopped )
+      if ( $game_clock_stopped )
          $title .= ', ' . T_('Game clock stopped');
       $attbs = ($on_vacation === true ) ? '' : 'class="InTextImage"';
       return image( $base_path.'images/vacation.gif', $title, null, $attbs );
@@ -169,7 +169,7 @@ function echo_image_vacation( $on_vacation=true, $vacText='', $game_clock_stoppe
 /*! \brief Returns image-tag with night-time-image if $sleeping set; return '' otherwise. */
 function echo_image_nighttime( $sleeping=true, $game_clock_stopped=false )
 {
-   if( $sleeping )
+   if ( $sleeping )
    {
       global $base_path;
       $title = T_('User in sleeping time') . ($game_clock_stopped ? ', ' . T_('Game clock stopped') : '');
@@ -183,7 +183,7 @@ function echo_image_nighttime( $sleeping=true, $game_clock_stopped=false )
 /*! \brief Returns image-tag for weekend-clock. */
 function echo_image_weekendclock( $weekend=true, $game_clock_stopped=true )
 {
-   if( $weekend )
+   if ( $weekend )
    {
       global $base_path;
       $title = T_('Weekend (UTC)') . ($game_clock_stopped ? ', ' . T_('Game clock stopped') : '');
@@ -196,7 +196,7 @@ function echo_image_weekendclock( $weekend=true, $game_clock_stopped=true )
 /*! \brief Returns image-tag for admin with given admin-level. */
 function echo_image_admin( $adminlevel, $withSep=true )
 {
-   if( $adminlevel & ADMINGROUP_EXECUTIVE )
+   if ( $adminlevel & ADMINGROUP_EXECUTIVE )
    {
       global $base_path;
       $title = T_('Dragon executive');
@@ -211,14 +211,14 @@ function echo_image_admin( $adminlevel, $withSep=true )
 /*! \brief Returns image-tag for being-online if online; return '' otherwise. */
 function echo_image_online( $in_the_house=true, $last_access=0, $withSep=true )
 {
-   if( $in_the_house )
+   if ( $in_the_house )
    {
       global $base_path, $NOW;
       $title = T_('Online');
-      if( $last_access > 0 )
+      if ( $last_access > 0 )
       {
          $mins_ago = round( ($NOW - $last_access + SECS_PER_MIN - 1) / SECS_PER_MIN );
-         if( $mins_ago >= 0 )
+         if ( $mins_ago >= 0 )
             $title = sprintf( T_('Online &lt;%s mins ago'), $mins_ago );
       }
       return ($withSep ? MINI_SPACING : '')
@@ -236,21 +236,21 @@ function echo_image_online( $in_the_house=true, $last_access=0, $withSep=true )
  */
 function echo_off_time( $player_to_move, $on_vacation, $player_clock_used, $game_weekendclock )
 {
-   if( $on_vacation === true )
+   if ( $on_vacation === true )
       $vac_str = echo_image_vacation();
-   elseif( is_numeric($on_vacation) && $on_vacation > 0 )
+   elseif ( is_numeric($on_vacation) && $on_vacation > 0 )
       $vac_str = echo_image_vacation( $on_vacation,
          TimeFormat::echo_onvacation($on_vacation), $player_to_move );
    else
       $vac_str = '';
 
    $game_str = '';
-   if( !is_null($player_clock_used) )
+   if ( !is_null($player_clock_used) )
    {
       $game_clock = $player_clock_used + ( $game_weekendclock == 'Y' ? 0 : WEEKEND_CLOCK_OFFSET );
-      if( is_weekend_clock_stopped($game_clock) )
+      if ( is_weekend_clock_stopped($game_clock) )
          $game_str .= MINI_SPACING . echo_image_weekendclock( true, $player_to_move );
-      if( is_nighttime_clock($player_clock_used) )
+      if ( is_nighttime_clock($player_clock_used) )
          $game_str .= MINI_SPACING . echo_image_nighttime( 'in_text', $player_to_move );
    }
 
@@ -263,7 +263,7 @@ function echo_image_gameinfo( $gid, $with_sep=false, $board_size=null, $snapshot
 {
    global $base_path;
 
-   if( is_numeric($board_size) && !is_null($snapshot) && is_javascript_enabled() )
+   if ( is_numeric($board_size) && !is_null($snapshot) && is_javascript_enabled() )
    {
       $img_str = image( $base_path.'images/info.gif', '', null, 'class="InTextImage"');
       $link = anchor( $base_path."gameinfo.php?gid=$gid", $img_str, '',
@@ -286,20 +286,20 @@ function echo_image_gameinfo( $gid, $with_sep=false, $board_size=null, $snapshot
  */
 function echo_image_shapeinfo( $shape_id, $board_size, $snapshot, $edit_goban=false, $with_sep=false )
 {
-   if( $shape_id == 0 || (string)$snapshot == '' )
+   if ( $shape_id == 0 || (string)$snapshot == '' )
       return '';
 
    global $base_path;
    $page_url = $base_path . ( ($edit_goban) ? 'goban_editor.php' : 'view_shape.php' ) . "?shape=$shape_id";
 
-   if( is_numeric($board_size) && !is_null($snapshot) )
+   if ( is_numeric($board_size) && !is_null($snapshot) )
    {
       $ext_snapshot = (strpos($snapshot, ' ') !== false)
          ? $snapshot // already extended
          : "$snapshot S$board_size";
       $page_url .= URI_AMP."snapshot=".urlencode($ext_snapshot);
 
-      if( is_javascript_enabled() )
+      if ( is_javascript_enabled() )
       {
          $img_str = image( $base_path.'images/shape.gif', '', null, 'class="InTextImage"');
          $link = anchor( $page_url, $img_str, '',
@@ -325,14 +325,14 @@ function echo_image_shapeinfo( $shape_id, $board_size, $snapshot, $edit_goban=fa
 /*! \brief Returns image to tournament-info page for given tournament-id. */
 function echo_image_tournament_info( $tid, $with_sep=false, $img_only=false )
 {
-   if( ALLOW_TOURNAMENTS && $tid > 0 )
+   if ( ALLOW_TOURNAMENTS && $tid > 0 )
    {
       global $base_path;
       $img_str = image( $base_path.'images/tourney.gif',
                         ($img_only ? T_('Tournaments') : T_('Tournament info') . ' #' . $tid ),
                         null, 'class="InTextImage"');
       $str_sep = ($with_sep ? ' ' : '' );
-      if( $img_only )
+      if ( $img_only )
          return $str_sep . $img_str;
       else
          return $str_sep . anchor( $base_path."tournaments/view_tournament.php?tid=$tid", $img_str );
@@ -350,7 +350,7 @@ function echo_image_gamecomment( $gid, $hidden_comments=true )
 {
    global $base_path;
    $arr = array();
-   if( $hidden_comments )
+   if ( $hidden_comments )
       $arr[] = ($hidden_comments === true) ? T_('Game has hidden comments') : $hidden_comments;
    return image( $base_path.'images/game_comment.gif', implode(', ', $arr), null, 'class="InTextImage"');
 }
@@ -396,7 +396,7 @@ function echo_image_tourney_pool_winner()
 function echo_image_game_players( $gid, $icon_text='' )
 {
    global $base_path;
-   if( !$icon_text )
+   if ( !$icon_text )
       $icon_text = T_('Multi-Player-Game') . ': ' . T_('Show game-players');
    $text = ($gid <= 0) ? T_('Show multi-player-games') : $icon_text;
    $img = image( $base_path.'images/team.gif', $text, null, 'class="InTextImage"' );
@@ -412,18 +412,18 @@ function echo_image_game_players( $gid, $icon_text='' )
 function spacing( $str, $space_count=0, $tag_l='', $tag_r=null )
 {
    $spc = str_repeat( MINI_SPACING, $space_count );
-   if( is_null($tag_r) ) $tag_r = "/$tag_l";
-   if( $tag_l ) $tag_l = "<$tag_l>";
-   if( $tag_r ) $tag_r = "<$tag_r>";
+   if ( is_null($tag_r) ) $tag_r = "/$tag_l";
+   if ( $tag_l ) $tag_l = "<$tag_l>";
+   if ( $tag_r ) $tag_r = "<$tag_r>";
    return "{$spc}{$tag_l}{$str}{$tag_r}{$spc}";
 }
 
 // \param $class 'id=id attr=...' or else 'classname'
 function span( $class, $str='', $strfmt='%s', $title='' )
 {
-   if( $title )
+   if ( $title )
       $title = " title=\"$title\"";
-   if( strpos($class,'=') !== false )
+   if ( strpos($class,'=') !== false )
       return sprintf( "<span " . attb_build($class) . $title . ">$strfmt</span>", $str );
    else
       return sprintf( "<span class=\"$class\"$title>$strfmt</span>", $str );

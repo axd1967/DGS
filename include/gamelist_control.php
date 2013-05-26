@@ -67,13 +67,13 @@ class GameListControl
       $this->view = $view;
       $this->view_uid = $this->my_id; // default
 
-      if( $this->is_observe() )
+      if ( $this->is_observe() )
          $this->view_all = false; // only for finished/running
-      elseif( $this->is_status() || $this->is_info() )
+      elseif ( $this->is_status() || $this->is_info() )
          $this->view_all = false;
       else
       {
-         if( $view_uid === 'all' )
+         if ( $view_uid === 'all' )
             $this->view_all = true;
          else
          {
@@ -122,7 +122,7 @@ class GameListControl
    /*! \brief Returns QuerySQL for games-list. */
    public function build_games_query( $load_user_ratingdiff, $load_remaining_time, $load_game_prio )
    {
-      if( $this->is_status() )
+      if ( $this->is_status() )
          error('invalid_action', "GameListControl.build_games_query({$this->view},{$this->view_all},{$this->view_uid})");
 
       $my_id = $this->my_id;
@@ -140,14 +140,14 @@ class GameListControl
          'UNIX_TIMESTAMP(G.Starttime) AS X_Starttime',
          "IF(G.Rated='N','N','Y') AS X_Rated" );
 
-      if( $this->is_observe() ) //OB
+      if ( $this->is_observe() ) //OB
       {
          $need_bw_user_info = $need_ticks = true;
          $qsql->add_part( SQLP_FROM,
             'Observers AS Obs',
             'INNER JOIN Games AS G ON G.ID=Obs.gid' );
 
-         if( $this->is_observe_all() ) //OA
+         if ( $this->is_observe_all() ) //OA
          {
             $qsql->add_part( SQLP_FIELDS,
                'COUNT(Obs.uid) AS X_ObsCount',
@@ -159,12 +159,12 @@ class GameListControl
             $qsql->add_part( SQLP_WHERE, 'Obs.uid=' . $my_id );
          }
       }
-      elseif( $is_all ) //FA+RA
+      elseif ( $is_all ) //FA+RA
       {
          $need_bw_user_info = true;
          $qsql->add_part( SQLP_FROM, 'Games AS G' );
 
-         if( $is_finished ) //FA
+         if ( $is_finished ) //FA
          {
             $need_ratingdiff = true;
             $qsql->add_part( SQLP_FIELDS,
@@ -172,21 +172,21 @@ class GameListControl
                'White_End_Rating AS whiteEndRating' );
             $qsql->add_part( SQLP_WHERE, "G.Status='".GAME_STATUS_FINISHED."'" );
          }
-         elseif( $is_running ) //RA
+         elseif ( $is_running ) //RA
             $qsql->add_part( SQLP_WHERE, 'G.Status' . IS_STARTED_GAME );
       }
-      elseif( $this->is_info() ) // INFO
+      elseif ( $this->is_info() ) // INFO
       {
          $need_bw_user_info = $need_ticks = $need_ratingdiff = true;
          $qsql->add_part( SQLP_FROM, 'Games AS G' );
-         if( $load_game_prio )
+         if ( $load_game_prio )
             GameHelper::extend_query_with_game_prio( $qsql, $uid, true, 'G' );
       }
       else //FU+RU ?UNION
       {
          $qsql->add_part( SQLP_FROM, 'Games AS G' );
 
-         if( $this->is_quick )
+         if ( $this->is_quick )
             $need_bw_user_info = true;
          else
          {
@@ -208,24 +208,24 @@ class GameListControl
             "IF(G.ToMove_ID=$uid,0,0x10)+IF(G.White_ID=$uid,2,0)+"
                . "IF(G.White_ID=G.ToMove_ID,1,IF(G.Black_ID=G.ToMove_ID,0,0x20)) AS X_Color" );
 
-         if( $this->mp_game )
+         if ( $this->mp_game )
          {
             $qsql->add_part( SQLP_FROM, 'INNER JOIN GamePlayers AS GP ON GP.gid=G.ID' );
             $qsql->add_part( SQLP_WHERE, "GP.uid=$uid" );
          }
 
-         if( $this->load_notes && $uid == $my_id ) //FU+RU ?UNION
+         if ( $this->load_notes && $uid == $my_id ) //FU+RU ?UNION
             GameHelper::extend_query_with_game_notes( $qsql, $my_id, 'G' );
 
-         if( $is_finished ) //FU ?UNION
+         if ( $is_finished ) //FU ?UNION
          {
             $qsql->add_part( SQLP_WHERE, "G.Status='".GAME_STATUS_FINISHED."'" );
 
-            if( $this->is_quick )
+            if ( $this->is_quick )
                $need_ratingdiff = $load_user_ratingdiff;
             else
             {
-               if( $this->mp_game )
+               if ( $this->mp_game )
                {
                   $qsql->add_part( SQLP_FIELDS,
                      "IF(GP.GroupColor='W',G.Score,-G.Score) AS X_Score", // user takes opp-role, GrCol=B|W|BW
@@ -243,32 +243,32 @@ class GameListControl
                $qsql->add_part( SQLP_FROM,
                   "LEFT JOIN Ratinglog AS oppRlog ON oppRlog.gid=G.ID AND oppRlog.uid=G.White_ID+G.Black_ID-$uid" );
 
-               if( $load_user_ratingdiff && !$this->mp_game ) // opp is always user for MP-game
+               if ( $load_user_ratingdiff && !$this->mp_game ) // opp is always user for MP-game
                {
                   $qsql->add_part( SQLP_FIELDS, 'userRlog.RatingDiff AS userRatingDiff' );
                   $qsql->add_part( SQLP_FROM, "LEFT JOIN Ratinglog AS userRlog ON userRlog.gid=G.ID AND userRlog.uid=$uid" );
                }
             }
          }
-         elseif( $is_running ) //RU ?UNION
+         elseif ( $is_running ) //RU ?UNION
          {
             $qsql->add_part( SQLP_WHERE, 'G.Status' . IS_STARTED_GAME );
 
-            if( $load_remaining_time ) //RU
+            if ( $load_remaining_time ) //RU
                $need_ticks = true;
 
-            if( $load_game_prio )
+            if ( $load_game_prio )
                GameHelper::extend_query_with_game_prio( $qsql, $uid, true, 'G' );
          }
 
-         if( $this->mp_game )
+         if ( $this->mp_game )
          {
-            if( !$this->is_quick )
+            if ( !$this->is_quick )
                $qsql->add_part( SQLP_WHERE, "Opp.ID=$uid" );
          }
          else
          {
-            if( $this->is_quick )
+            if ( $this->is_quick )
                $qsql->add_part( SQLP_UNION_WHERE, "G.White_ID=$uid", "G.Black_ID=$uid" );
             else
             {
@@ -280,14 +280,14 @@ class GameListControl
          }
       }//FU+RU
 
-      if( $need_bw_user_info )
+      if ( $need_bw_user_info )
          self::extend_game_list_query_with_user_info( $qsql, 'G' );
-      if( $need_ticks )
+      if ( $need_ticks )
       {
          $qsql->add_part( SQLP_FIELDS, "COALESCE(Clock.Ticks,0) AS X_Ticks" );
          $qsql->add_part( SQLP_FROM, "LEFT JOIN Clock ON Clock.ID=G.ClockUsed" );
       }
-      if( $need_ratingdiff )
+      if ( $need_ratingdiff )
       {
          $qsql->add_part( SQLP_FIELDS,
             'blog.RatingDiff AS blackDiff',
@@ -297,7 +297,7 @@ class GameListControl
             'LEFT JOIN Ratinglog AS wlog ON wlog.gid=G.ID AND wlog.uid=G.White_ID' );
       }
 
-      if( $this->ext_tid )
+      if ( $this->ext_tid )
       {
          $qsql->add_part( SQLP_FIELDS,
             'TG.Status AS TG_Status',
@@ -307,7 +307,7 @@ class GameListControl
          $qsql->add_part( SQLP_WHERE,
             "G.tid={$this->ext_tid}" );
 
-         if( !$is_all )
+         if ( !$is_all )
          {
             $qsql->add_part( SQLP_FIELDS,
                "IF(T.Type='".TOURNEY_TYPE_LADDER."',IF(TG.Challenger_uid=$uid,1,0),-1) AS TG_Challenge" );
@@ -331,10 +331,10 @@ class GameListControl
       $qsql = NextGameOrder::build_status_games_query(
          $uid, IS_STARTED_GAME, $next_game_order, /*ticks*/true, $load_prio, $load_notes );
 
-      if( $is_mpg )
+      if ( $is_mpg )
          $qsql->add_part( SQLP_WHERE, "Games.GamePlayers>''" ); // '' = std-go
 
-      if( ALLOW_TOURNAMENTS && is_numeric($ext_tid) && $ext_tid > 0 )
+      if ( ALLOW_TOURNAMENTS && is_numeric($ext_tid) && $ext_tid > 0 )
          $qsql->add_part( SQLP_WHERE, "Games.tid=$ext_tid" );
 
       return $qsql;

@@ -29,7 +29,7 @@ $GLOBALS['ThePage'] = new Page('ForumsList');
    connect2mysql();
 
    $logged_in = who_is_logged( $player_row);
-   if( !$logged_in )
+   if ( !$logged_in )
       error('login_if_not_logged_in', 'forum.index');
    $my_id = $player_row['ID'];
    $cfg_pages = ConfigPages::load_config_pages($my_id);
@@ -37,7 +37,7 @@ $GLOBALS['ThePage'] = new Page('ForumsList');
    // toggle forumflag
    $toggleflag = (int)@$_REQUEST['toggleflag'] + 0;
    $toggle_baseurl = 'index.php';
-   if( ConfigPages::toggle_forum_flags($my_id, $toggleflag) )
+   if ( ConfigPages::toggle_forum_flags($my_id, $toggleflag) )
       jump_to( 'forum/'.$toggle_baseurl );
    $show_lp_author = ( $cfg_pages->get_forum_flags() & FORUMFLAG_FORUM_SHOWAUTHOR );
 
@@ -54,7 +54,7 @@ $GLOBALS['ThePage'] = new Page('ForumsList');
 
    $disp_forum->links = LINKPAGE_INDEX;
    $disp_forum->links |= LINK_FORUMS | LINK_SEARCH;
-   if( $switch_moderator >=0 )
+   if ( $switch_moderator >=0 )
       $disp_forum->links |= LINK_TOGGLE_MODERATOR;
 
    $head_lastpost = sprintf( '%s <span class="HeaderToggle">(<a href="%s">%s</a>)</span>',
@@ -75,9 +75,9 @@ $GLOBALS['ThePage'] = new Page('ForumsList');
    $disp_forum->print_moderation_note('98%');
    $disp_forum->forum_start_table('Index');
 
-   foreach( $forums as $forum )
+   foreach ( $forums as $forum )
    {
-      if( !$f_opts->is_visible_forum( $forum->options ) )
+      if ( !$f_opts->is_visible_forum( $forum->options ) )
          continue;
 
       $lpost = $forum->last_post;
@@ -109,9 +109,9 @@ $GLOBALS['ThePage'] = new Page('ForumsList');
 
    $menu_array = array();
    $menu_array[T_('Goban Editor')] = "goban_editor.php";
-   if( ALLOW_SURVEY_VOTE )
+   if ( ALLOW_SURVEY_VOTE )
       $menu_array[T_('Surveys')] = "list_surveys.php";
-   if( Forum::is_admin() )
+   if ( Forum::is_admin() )
       $menu_array[T_('Show Forum Log')] =
          array( 'url' => 'forum/admin_show_forumlog.php', 'class' => 'AdminLink' );
 

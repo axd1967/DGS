@@ -40,13 +40,13 @@ $GLOBALS['ThePage'] = new Page('TournamentPropertiesEdit');
    connect2mysql();
 
    $logged_in = who_is_logged( $player_row);
-   if( !$logged_in )
+   if ( !$logged_in )
       error('login_if_not_logged_in', 'Tournament.edit_properties');
-   if( !ALLOW_TOURNAMENTS )
+   if ( !ALLOW_TOURNAMENTS )
       error('feature_disabled', 'Tournament.edit_properties');
    $my_id = $player_row['ID'];
 
-   if( $my_id <= GUESTS_ID_MAX )
+   if ( $my_id <= GUESTS_ID_MAX )
       error('not_allowed_for_guest', 'Tournament.edit_properties');
 
 /* Actual REQUEST calls used:
@@ -56,7 +56,7 @@ $GLOBALS['ThePage'] = new Page('TournamentPropertiesEdit');
 */
 
    $tid = (int) @$_REQUEST['tid'];
-   if( $tid < 0 ) $tid = 0;
+   if ( $tid < 0 ) $tid = 0;
 
    $tourney = TournamentCache::load_cache_tournament( 'Tournament.edit_properties.find_tournament', $tid );
    $tstatus = new TournamentStatus( $tourney );
@@ -65,7 +65,7 @@ $GLOBALS['ThePage'] = new Page('TournamentPropertiesEdit');
 
    // create/edit allowed?
    $allow_edit_tourney = TournamentHelper::allow_edit_tournaments($tourney, $my_id);
-   if( !$allow_edit_tourney )
+   if ( !$allow_edit_tourney )
       error('tournament_edit_not_allowed', "Tournament.edit_properties.edit_tournament($tid,$my_id)");
 
    $tprops = TournamentCache::load_cache_tournament_properties( 'Tournament.edit_properties', $tid );
@@ -74,7 +74,7 @@ $GLOBALS['ThePage'] = new Page('TournamentPropertiesEdit');
    $errors = $tstatus->check_edit_status( TournamentProperties::get_edit_tournament_status() );
    $arr_rating_use_modes = TournamentProperties::getRatingUseModeText();
    $rating_array = getRatingArray();
-   if( !TournamentUtils::isAdmin() && $tourney->isFlagSet(TOURNEY_FLAG_LOCK_ADMIN) )
+   if ( !TournamentUtils::isAdmin() && $tourney->isFlagSet(TOURNEY_FLAG_LOCK_ADMIN) )
       $errors[] = $tourney->buildAdminLockText();
 
    // check + parse edit-form
@@ -83,7 +83,7 @@ $GLOBALS['ThePage'] = new Page('TournamentPropertiesEdit');
    $errors = array_merge( $errors, $input_errors );
 
    // save tournament-properties-object with values from edit-form
-   if( @$_REQUEST['tp_save'] && !@$_REQUEST['tp_preview'] && count($errors) == 0 )
+   if ( @$_REQUEST['tp_save'] && !@$_REQUEST['tp_preview'] && count($errors) == 0 )
    {
       $tprops->update();
       TournamentLogHelper::log_change_tournament_props( $tid, $allow_edit_tourney, $edits, $old_tprops, $tprops );
@@ -105,13 +105,13 @@ $GLOBALS['ThePage'] = new Page('TournamentPropertiesEdit');
          'DESCRIPTION', T_('Tournament ID'),
          'TEXT',        $tourney->build_info() ));
    TournamentUtils::show_tournament_flags( $tform, $tourney );
-   if( $tprops->Lastchanged )
+   if ( $tprops->Lastchanged )
       $tform->add_row( array(
             'DESCRIPTION', T_('Last changed'),
             'TEXT',        TournamentUtils::buildLastchangedBy($tprops->Lastchanged, $tprops->ChangedBy) ));
    $tform->add_row( array( 'HR' ));
 
-   if( count($errors) )
+   if ( count($errors) )
    {
       $tform->add_row( array(
             'DESCRIPTION', T_('Error'),
@@ -169,7 +169,7 @@ $GLOBALS['ThePage'] = new Page('TournamentPropertiesEdit');
          'SUBMITBUTTON', 'tp_preview', T_('Preview'),
       ));
 
-   if( @$_REQUEST['tp_preview'] || $tprops->Notes != '' )
+   if ( @$_REQUEST['tp_preview'] || $tprops->Notes != '' )
    {
       $tform->add_row( array(
             'DESCRIPTION', T_('Preview Notes'),
@@ -218,24 +218,24 @@ function parse_edit_form( &$tpr, $t_limits )
 
    $old_vals = array() + $vars; // copy to determine edit-changes
    // read URL-vals into vars
-   foreach( $vars as $key => $val )
+   foreach ( $vars as $key => $val )
       $vars[$key] = get_request_arg( $key, $val );
    // handle checkboxes having no key/val in _POST-hash
-   if( $is_posted )
+   if ( $is_posted )
    {
-      foreach( array( 'user_rated' ) as $key )
+      foreach ( array( 'user_rated' ) as $key )
          $vars[$key] = get_request_arg( $key, false );
    }
 
    // parse URL-vars
-   if( $is_posted )
+   if ( $is_posted )
    {
       $old_vals['reg_end_time'] = $tpr->RegisterEndTime;
       $old_vals['user_min_rating'] = $tpr->UserMinRating;
       $old_vals['user_max_rating'] = $tpr->UserMaxRating;
 
       $parsed_value = parseDate( T_('End time for registration#tourney'), $vars['reg_end_time'] );
-      if( is_numeric($parsed_value) )
+      if ( is_numeric($parsed_value) )
       {
          $tpr->RegisterEndTime = $parsed_value;
          $vars['reg_end_time'] = formatDate($tpr->RegisterEndTime);
@@ -244,17 +244,17 @@ function parse_edit_form( &$tpr, $t_limits )
          $errors[] = $parsed_value;
 
       $new_value = $vars['min_participants'];
-      if( TournamentUtils::isNumberOrEmpty($new_value) && $new_value >=0 && $new_value <= TP_MAX_COUNT )
+      if ( TournamentUtils::isNumberOrEmpty($new_value) && $new_value >=0 && $new_value <= TP_MAX_COUNT )
          $tpr->MinParticipants = limit( $new_value, 0, TP_MAX_COUNT, 0 );
       else
          $errors[] = sprintf( T_('Expecting number for minimum participants in range %s.'),
                               build_range_text(0, TP_MAX_COUNT) );
 
       $new_value = $vars['max_participants'];
-      if( TournamentUtils::isNumberOrEmpty($new_value) && $new_value >=0 && $new_value <= TP_MAX_COUNT )
+      if ( TournamentUtils::isNumberOrEmpty($new_value) && $new_value >=0 && $new_value <= TP_MAX_COUNT )
       {
          $limit_errors = $t_limits->check_MaxParticipants( $new_value, $tpr->MaxParticipants );
-         if( count($limit_errors) )
+         if ( count($limit_errors) )
             $errors = array_merge( $errors, $limit_errors );
          else
             $tpr->MaxParticipants = limit( $new_value, 0, TP_MAX_COUNT, 0 );
@@ -263,7 +263,7 @@ function parse_edit_form( &$tpr, $t_limits )
          $errors[] = sprintf( T_('Expecting number for maximum participants in range %s.'),
             $t_limits->getLimitRangeText(TLIMITS_MAX_TP, TP_MAX_COUNT) ); // check for general MAX, but show specific max
 
-      if( $tpr->MinParticipants > 0 && $tpr->MaxParticipants > 0 && $tpr->MinParticipants > $tpr->MaxParticipants )
+      if ( $tpr->MinParticipants > 0 && $tpr->MaxParticipants > 0 && $tpr->MinParticipants > $tpr->MaxParticipants )
          $errors[] = T_('Maximum participants must be greater than minimum participants');
 
       $tpr->setRatingUseMode( $vars['rating_use_mode'] );
@@ -272,13 +272,13 @@ function parse_edit_form( &$tpr, $t_limits )
       $tpr->setUserMaxRating( read_rating( $vars['user_max_rating'] ));
 
       $new_value = $vars['min_games_finished'];
-      if( TournamentUtils::isNumberOrEmpty($new_value) && $new_value >=0 )
+      if ( TournamentUtils::isNumberOrEmpty($new_value) && $new_value >=0 )
          $tpr->UserMinGamesFinished = limit( $new_value, 0, 9999, 0 );
       else
          $errors[] = T_('Expecting positive number of finished games.');
 
       $new_value = $vars['min_games_rated'];
-      if( TournamentUtils::isNumberOrEmpty($new_value) && $new_value >=0 )
+      if ( TournamentUtils::isNumberOrEmpty($new_value) && $new_value >=0 )
          $tpr->UserMinGamesRated = limit( $new_value, 0, 9999, 0 );
       else
          $errors[] = T_('Expecting positive number of rated finished games.');
@@ -290,25 +290,25 @@ function parse_edit_form( &$tpr, $t_limits )
       $vars['user_max_rating'] = echo_rating( $tpr->UserMaxRating, false, 0, true, false );
 
       // determine edits
-      if( $old_vals['reg_end_time'] != $tpr->RegisterEndTime ) $edits[] = T_('Register end time#tourney');
-      if( $old_vals['min_participants'] != $tpr->MinParticipants ) $edits[] = T_('Participants');
-      if( $old_vals['max_participants'] != $tpr->MaxParticipants ) $edits[] = T_('Participants');
-      if( $old_vals['rating_use_mode'] != $tpr->RatingUseMode ) $edits[] = T_('Rating Use Mode#tourney');
-      if( $old_vals['user_rated'] != $tpr->UserRated ) $edits[] = T_('User Rating');
-      if( $old_vals['user_min_rating'] != $tpr->UserMinRating ) $edits[] = T_('User Rating');
-      if( $old_vals['user_max_rating'] != $tpr->UserMaxRating ) $edits[] = T_('User Rating');
-      if( $old_vals['min_games_finished'] != $tpr->UserMinGamesFinished ) $edits[] = T_('User-Games');
-      if( $old_vals['min_games_rated'] != $tpr->UserMinGamesRated ) $edits[] = T_('User-Games');
-      if( $old_vals['notes'] != $tpr->Notes ) $edits[] = T_('Notes');
+      if ( $old_vals['reg_end_time'] != $tpr->RegisterEndTime ) $edits[] = T_('Register end time#tourney');
+      if ( $old_vals['min_participants'] != $tpr->MinParticipants ) $edits[] = T_('Participants');
+      if ( $old_vals['max_participants'] != $tpr->MaxParticipants ) $edits[] = T_('Participants');
+      if ( $old_vals['rating_use_mode'] != $tpr->RatingUseMode ) $edits[] = T_('Rating Use Mode#tourney');
+      if ( $old_vals['user_rated'] != $tpr->UserRated ) $edits[] = T_('User Rating');
+      if ( $old_vals['user_min_rating'] != $tpr->UserMinRating ) $edits[] = T_('User Rating');
+      if ( $old_vals['user_max_rating'] != $tpr->UserMaxRating ) $edits[] = T_('User Rating');
+      if ( $old_vals['min_games_finished'] != $tpr->UserMinGamesFinished ) $edits[] = T_('User-Games');
+      if ( $old_vals['min_games_rated'] != $tpr->UserMinGamesRated ) $edits[] = T_('User-Games');
+      if ( $old_vals['notes'] != $tpr->Notes ) $edits[] = T_('Notes');
    }
 
-   if( ($tpr->MinParticipants + $tpr->MaxParticipants == 0) && ($tpr->MinParticipants > $tpr->MaxParticipants) )
+   if ( ($tpr->MinParticipants + $tpr->MaxParticipants == 0) && ($tpr->MinParticipants > $tpr->MaxParticipants) )
    {
       swap( $tpr->MinParticipants, $tpr->MaxParticipants );
       swap( $vars['min_participants'], $vars['max_participants'] );
    }
 
-   if( $tpr->UserMinRating > $tpr->UserMaxRating )
+   if ( $tpr->UserMinRating > $tpr->UserMaxRating )
    {
       swap( $tpr->UserMinRating, $tpr->UserMaxRating );
       swap( $vars['user_min_rating'], $vars['user_max_rating'] );
@@ -325,7 +325,7 @@ function build_properties_notes()
    $notes[] = null; // empty line
 
    $narr = array( T_('Rating Use Mode#tourney') . ':' );
-   foreach( TournamentProperties::getRatingUseModeText(null, false) as $usemode => $descr )
+   foreach ( TournamentProperties::getRatingUseModeText(null, false) as $usemode => $descr )
       $narr[] = sprintf( "%s = $descr", TournamentProperties::getRatingUseModeText($usemode) );
    $notes[] = $narr;
 

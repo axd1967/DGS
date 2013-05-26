@@ -44,7 +44,7 @@ define('SGF_MAXSIZE_UPLOAD', 30*1024); // bytes
    connect2mysql();
 
    $logged_in = who_is_logged( $player_row);
-   if( !$logged_in )
+   if ( !$logged_in )
       error('login_if_not_logged_in', 'goban_editor');
    $my_id = $player_row['ID'];
    $cfg_board = ConfigBoard::load_config_board($my_id);
@@ -76,11 +76,11 @@ define('SGF_MAXSIZE_UPLOAD', 30*1024); // bytes
    // check args
    $width = limit( $width, MIN_BOARD_SIZE, MAX_BOARD_SIZE, $width );
    $height = limit( $height, MIN_BOARD_SIZE, MAX_BOARD_SIZE, $height );
-   if( $gid < 0 )
+   if ( $gid < 0 )
       $gid = 0;
-   if( $move < 0 )
+   if ( $move < 0 )
       $move = 0;
-   if( $shape_id < 0 )
+   if ( $shape_id < 0 )
       $shape_id = 0;
 
    // ---------- Process Commands ----------------------------------
@@ -88,48 +88,48 @@ define('SGF_MAXSIZE_UPLOAD', 30*1024); // bytes
    $goban_preview = $errors = NULL;
    $do_preview = @$_REQUEST['gob_preview'];
 
-   if( @$_REQUEST['gob_new'] )
+   if ( @$_REQUEST['gob_new'] )
    {
       $board_text = create_new_igoban( $width, $height );
    }
-   elseif( @$_REQUEST['gob_load_game'] && $gid )
+   elseif ( @$_REQUEST['gob_load_game'] && $gid )
    {
       list( $board_text, $width, $height, $do_preview ) = load_igoban_from_dgs_game( $gid, $move );
    }
-   elseif( @$_REQUEST['gob_load_sgf'] && isset($_FILES['file_sgf']) )
+   elseif ( @$_REQUEST['gob_load_sgf'] && isset($_FILES['file_sgf']) )
    {
       list( $errors, $board_text ) = load_igoban_from_sgf( $_FILES['file_sgf'] ); // GLOBALS $do_preview, $width, $height
    }
-   elseif( @$_REQUEST['gob_swcol'] ) // switch colors
+   elseif ( @$_REQUEST['gob_swcol'] ) // switch colors
    {
       list( $board_text, $do_preview ) = update_igoban( $board_text, 'switch_colors' );
    }
-   elseif( @$_REQUEST['gob_flatten'] ) // flatten to stones
+   elseif ( @$_REQUEST['gob_flatten'] ) // flatten to stones
    {
       list( $board_text, $do_preview ) = update_igoban( $board_text, 'flatten_for_shape_game' );
       $width = $height = max( $width, $height );
    }
-   elseif( @$_REQUEST['gob_save_shape'] && $width == $height ) // save shape-game
+   elseif ( @$_REQUEST['gob_save_shape'] && $width == $height ) // save shape-game
    {
       list( $tmp, $arr_goban ) = MarkupHandlerGoban::replace_igoban_tags_collect_goban( $board_text );
-      if( count($arr_goban) )
+      if ( count($arr_goban) )
       {
          $goban = $arr_goban[0];
          $snapshot = GameSnapshot::make_game_snapshot( $goban->size_x, $goban, /*with-dead*/false );
          jump_to("edit_shape.php?shape=$shape_id".URI_AMP."size={$goban->size_x}".URI_AMP."snapshot=".urlencode($snapshot));
       }
    }
-   elseif( !$do_preview && $snapshot ) // other load-methods first
+   elseif ( !$do_preview && $snapshot ) // other load-methods first
    {
       list( $board_text, $width, $height, $do_preview ) = create_goban_from_extended_snapshot( $snapshot );
    }
-   elseif( !$do_preview && $shape_id )
+   elseif ( !$do_preview && $shape_id )
    {
       list( $board_text, $width, $height, $do_preview ) = load_igoban_from_shape_game( $shape_id );
    }
 
    // parse <igoban...>-tag (inline) for preview
-   if( (string)$board_text != '' || $do_preview )
+   if ( (string)$board_text != '' || $do_preview )
       $goban_preview = MarkupHandlerGoban::replace_igoban_tags( $board_text );
 
 
@@ -137,7 +137,7 @@ define('SGF_MAXSIZE_UPLOAD', 30*1024); // bytes
 
    $gobform = new Form( 'goban', $page, FORM_POST );
 
-   if( is_null($goban_preview) )
+   if ( is_null($goban_preview) )
    {
       $arr_sizes = build_num_range_map( MIN_BOARD_SIZE, MAX_BOARD_SIZE, false );
 
@@ -209,10 +209,10 @@ define('SGF_MAXSIZE_UPLOAD', 30*1024); // bytes
    start_page( $title, true, $logged_in, $player_row, $style_str );
    echo "<h3 class=Header>$title</h3>\n";
 
-   if( !is_null($errors) && count($errors) )
+   if ( !is_null($errors) && count($errors) )
       echo buildErrorListString( T_('There are some errors'), $errors ), "<p>\n";
 
-   if( is_null($goban_preview) )
+   if ( is_null($goban_preview) )
       $gobform->echo_string();
    else
    {
@@ -301,7 +301,7 @@ function load_igoban_from_dgs_game( $gid, $move )
 function load_igoban_from_shape_game( $shape_id )
 {
    $shape = Shape::load_shape( $shape_id, /*with-user*/false );
-   if( !$shape )
+   if ( !$shape )
       error('unknown_shape', "goban_editor.load_igoban_from_shape_game($shape_id)");
 
    return create_goban_from_extended_snapshot( $shape->Snapshot, $shape->Size );
@@ -310,11 +310,11 @@ function load_igoban_from_shape_game( $shape_id )
 // switches-color or "flattens" goban and re-creates <igoban>-tag from manipulated Goban
 function update_igoban( $board_text, $goban_operation )
 {
-   if( $goban_operation != 'switch_colors' && $goban_operation != 'flatten_for_shape_game' )
+   if ( $goban_operation != 'switch_colors' && $goban_operation != 'flatten_for_shape_game' )
       error('invalid_method', "goban_editor.update_igoban($goban_operation)");
 
    list( $tmp, $arr_goban ) = MarkupHandlerGoban::replace_igoban_tags_collect_goban( $board_text );
-   if( count($arr_goban) )
+   if ( count($arr_goban) )
    {
       $goban = $arr_goban[0];
       $exporter = new GobanHandlerSL1( MarkupHandlerGoban::attribute_split( 'SL1' ) );
@@ -334,19 +334,19 @@ function load_igoban_from_sgf( $file_sgf_arr )
    $errors = NULL;
    $board_text = NULL;
    $upload = new FileUpload( $file_sgf_arr, SGF_MAXSIZE_UPLOAD );
-   if( $upload->is_uploaded() && !$upload->has_error() )
+   if ( $upload->is_uploaded() && !$upload->has_error() )
    {
       $sgf_data = @read_from_file( $upload->get_file_src_tmpfile() );
-      if( $sgf_data !== false )
+      if ( $sgf_data !== false )
       {
          $do_preview = true;
          $sgf_parser = SgfParser::parse_sgf( $sgf_data );
          list( $board_text, $err ) = create_igoban_from_parsed_sgf( $sgf_parser );
-         if( $err )
+         if ( $err )
             $errors = array( $err );
       }
    }
-   if( $upload->has_error() )
+   if ( $upload->has_error() )
       $errors = $upload->get_errors();
    @$upload->cleanup();
 
@@ -360,17 +360,17 @@ function create_igoban_from_parsed_sgf( $sgf_parser )
    global $width, $height;
 
    $size = $sgf_parser->Size;
-   if( $size >= MIN_BOARD_SIZE && $size <= MAX_BOARD_SIZE )
+   if ( $size >= MIN_BOARD_SIZE && $size <= MAX_BOARD_SIZE )
       $width = $height = $size;
 
    $board = new Board( 0, $size ); // need board to really "move" (with capturing stones)
    $board->init_board();
 
    // handle setup B/W-stone
-   foreach( array( BLACK, WHITE ) as $stone )
+   foreach ( array( BLACK, WHITE ) as $stone )
    {
       $arr_coords = ( $stone == BLACK ) ? $sgf_parser->SetBlack : $sgf_parser->SetWhite;
-      foreach( $arr_coords as $sgf_coord )
+      foreach ( $arr_coords as $sgf_coord )
       {
          list($x,$y) = sgf2number_coords($sgf_coord, $size);
          $board->array[$x][$y] = $stone;
@@ -384,18 +384,18 @@ function create_igoban_from_parsed_sgf( $sgf_parser )
    $GameFlags = 0;
    $to_move = BLACK;
    $parse_error = '';
-   foreach( $sgf_parser->Moves as $move ) // move = B|W sgf-coord, e.g. "Baa", "Wbb"
+   foreach ( $sgf_parser->Moves as $move ) // move = B|W sgf-coord, e.g. "Baa", "Wbb"
    {
-      if( $move[0] == 'B' )
+      if ( $move[0] == 'B' )
          $to_move = BLACK;
-      elseif( $move[0] == 'W' )
+      elseif ( $move[0] == 'W' )
          $to_move = WHITE;
       else
          continue; // unknown value
       $sgf_move = substr($move, 1);
 
       $err = $gchkmove->check_move( $sgf_move, $to_move, $Last_Move, $GameFlags, /*exit*/false);
-      if( $err )
+      if ( $err )
       {
          $board_pos = sgf2board_coords( $sgf_move, $size );
          $parse_error = sprintf( T_('Parsing SGF stopped: Error [%s] at position [%s] found!'), $err, $board_pos );
@@ -403,7 +403,7 @@ function create_igoban_from_parsed_sgf( $sgf_parser )
       }
       $gchkmove->update_prisoners( $Black_Prisoners, $White_Prisoners );
 
-      if( $gchkmove->nr_prisoners == 1 )
+      if ( $gchkmove->nr_prisoners == 1 )
          $GameFlags |= GAMEFLAGS_KO;
       else
          $GameFlags &= ~GAMEFLAGS_KO;
@@ -415,13 +415,13 @@ function create_igoban_from_parsed_sgf( $sgf_parser )
    $goban->setOptionsCoords( GOBB_MID, true );
    $goban->setSize( $size, $size );
    $goban->makeBoard( $size, $size, /*withHoshi*/true );
-   foreach( $board->array as $x => $arr_y )
+   foreach ( $board->array as $x => $arr_y )
    {
-      foreach( $arr_y as $y => $stone )
+      foreach ( $arr_y as $y => $stone )
       {
-         if( $stone == BLACK )
+         if ( $stone == BLACK )
             $goban_stone = GOBS_BLACK;
-         elseif( $stone == WHITE )
+         elseif ( $stone == WHITE )
             $goban_stone = GOBS_WHITE;
          else
             continue;
@@ -438,11 +438,11 @@ function create_igoban_from_parsed_sgf( $sgf_parser )
 
 function create_goban_from_extended_snapshot( $snapshot, $size=null )
 {
-   if( is_null($size) && preg_match("/ S(\d+)/", $snapshot, $matches) )
+   if ( is_null($size) && preg_match("/ S(\d+)/", $snapshot, $matches) )
       $size = (int)@$matches[1];
-   if( $size < MIN_BOARD_SIZE || $size > MAX_BOARD_SIZE )
+   if ( $size < MIN_BOARD_SIZE || $size > MAX_BOARD_SIZE )
       error('invalid_args', "goban_editor.create_goban_from_extended_snapshot.bad_size($size,$snapshot)");
-   if( is_null($size) )
+   if ( is_null($size) )
       error('miss_snapshot_size', "goban_editor.create_goban_from_extended_snapshot($snapshot)");
 
    $arr_xy = GameSnapshot::parse_stones_snapshot( $size, $snapshot, GOBS_BLACK, GOBS_WHITE );

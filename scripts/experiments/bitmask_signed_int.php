@@ -121,9 +121,9 @@ HEREDOC;
    echo "<pre>INSERT VALUES:";
    $query= '';
    $id= 0;
-   for( $k=-2147483648; $k<=4294967296; $k+=0x40000000 )
+   for ( $k=-2147483648; $k<=4294967296; $k+=0x40000000 )
    {
-      for( $j=-1; $j<1; $j++ )
+      for ( $j=-1; $j<1; $j++ )
       {
          $m= $k + $j;
          $x= dechex($m);
@@ -143,7 +143,7 @@ HEREDOC;
 
    echo "\n";
    //>>> CAUTION: enabling this part will DROP and CREATE a table!
-   if( 1 && $query )
+   if ( 1 && $query )
    {
       $query[0]= ' ';
 /*
@@ -196,13 +196,13 @@ function signed($v) {
 
 function unsigned($v) {
    $v= ($v & 0xffffffff);
-   if( $v < 0 ) $v+= 4294967296;
+   if ( $v < 0 ) $v+= 4294967296;
    return $v;
 }
 
 function rout($s='',$v=0,$w=0)
 {
-   if( !$s )
+   if ( !$s )
    {
       echo "\n<tr><th>Expression</th><th>hex</th><th>raw</th><th>!!!</th><th>(unsigned)</th><th>(signed)</th></tr>";
       return;
@@ -212,47 +212,47 @@ function rout($s='',$v=0,$w=0)
 }
 
 function MysqlTableStr( &$result, $free=true) {
-   if( $result == false )
+   if ( $result == false )
       return '';
    $rows = array();
-   if( mysql_num_rows($result) > 0 )
+   if ( mysql_num_rows($result) > 0 )
    {
-      while( $row=mysql_fetch_assoc( $result) ) {
+      while ( $row=mysql_fetch_assoc( $result) ) {
          $rows[] = $row;
       }
       mysql_data_seek($result, 0);
    }
-   if( $free ) mysql_free_result($result);
+   if ( $free ) mysql_free_result($result);
    return TableStr( $rows);
 } //MysqlTableStr
 
 function TableStr(&$rows) {
-   if( !is_array( $rows) || count( $rows)<1 ) return '';
+   if ( !is_array( $rows) || count( $rows)<1 ) return '';
    $str = '';
    $lens = array();
-   foreach( $rows as $row ) {
-      if( !is_array( $row) || count( $row)<1 ) continue;
-      foreach( $row as $key => $val ) {
+   foreach ( $rows as $row ) {
+      if ( !is_array( $row) || count( $row)<1 ) continue;
+      foreach ( $row as $key => $val ) {
          $lens[$key] = max( @$lens[$key], strlen((string)$key), strlen((string)$val));
       }
    }
-   if( count( $lens)<1 ) return '';
+   if ( count( $lens)<1 ) return '';
 
-      foreach( $lens as $key => $len ) {
+      foreach ( $lens as $key => $len ) {
          $str.= '+-' . str_pad( '', $len, '-', STR_PAD_RIGHT) . '-';
       }  $str.= "+\n";
-      foreach( $lens as $key => $len ) { //STR_PAD_LEFT
+      foreach ( $lens as $key => $len ) { //STR_PAD_LEFT
          $str.= '| ' . str_pad( $key, $len, ' ', STR_PAD_RIGHT) . ' ';
       }  $str.= "| keys\n";
-      foreach( $lens as $key => $len ) {
+      foreach ( $lens as $key => $len ) {
          $str.= '+-' . str_pad( '', $len, '-', STR_PAD_RIGHT) . '-';
       }  $str.= "+\n";
-   foreach( $rows as $val => $row ) {
-      foreach( $lens as $key => $len ) {
+   foreach ( $rows as $val => $row ) {
+      foreach ( $lens as $key => $len ) {
          $str.= '| ' . str_pad( (string)@$row[$key], $len, ' ', STR_PAD_RIGHT) . ' ';
       }  $str.= "| $val\n";
    }
-      foreach( $lens as $key => $len ) {
+      foreach ( $lens as $key => $len ) {
          $str.= '+-' . str_pad( '', $len, '-', STR_PAD_RIGHT) . '-';
       }  $str.= "+\n";
    //reset($rows);

@@ -61,23 +61,23 @@ class TournamentUtils
    {
       global $player_row;
 
-      if( @$player_row['ID'] <= GUESTS_ID_MAX )
+      if ( @$player_row['ID'] <= GUESTS_ID_MAX )
       {
-         if( $label )
+         if ( $label )
             error('not_allowed_for_guest', "$label.create.guest");
          return 0;
       }
 
-      if( @$player_row['AdminOptions'] & ADMOPT_DENY_TOURNEY_CREATE )
+      if ( @$player_row['AdminOptions'] & ADMOPT_DENY_TOURNEY_CREATE )
       {
-         if( $label )
+         if ( $label )
             error('tournament_create_denied', "$label.create.denied");
          return 0;
       }
 
-      if( !TournamentUtils::isAdmin() && !ALLOW_TOURNAMENTS_CREATE_BY_USER )
+      if ( !TournamentUtils::isAdmin() && !ALLOW_TOURNAMENTS_CREATE_BY_USER )
       {
-         if( $label )
+         if ( $label )
             error('tournament_create_only_by_admin', "$label.create.admin_only");
          return 0;
       }
@@ -91,7 +91,7 @@ class TournamentUtils
     */
    public static function normalizeRating( $rating )
    {
-      if( is_null($rating) || !is_numeric($rating)
+      if ( is_null($rating) || !is_numeric($rating)
             || $rating <= -OUT_OF_RATING || $rating >= OUT_OF_RATING )
          return NO_RATING;
       else
@@ -112,7 +112,7 @@ class TournamentUtils
          TOURNEY_WIZTYPE_PRIVATE_LADDER => TOURNEY_TYPE_LADDER,
          TOURNEY_WIZTYPE_DGS_ROUNDROBIN => TOURNEY_TYPE_ROUND_ROBIN,
       );
-      if( !isset($arr_map[$wizard_type]) )
+      if ( !isset($arr_map[$wizard_type]) )
          error('invalid_args', "TournamentUtils:getWizardTournamentType($wizard_type)");
       return $arr_map[$wizard_type];
    }
@@ -125,15 +125,15 @@ class TournamentUtils
 
    public static function build_num_range_sql_clause( $field, $min, $max, $prefix_op='' )
    {
-      if( $min > 0 && $max > 0 )
+      if ( $min > 0 && $max > 0 )
       {
-         if( $min > $max )
+         if ( $min > $max )
             swap( $min, $max );
          return "$prefix_op $field BETWEEN $min AND $max";
       }
-      elseif( $min > 0 )
+      elseif ( $min > 0 )
          return "$prefix_op $field >= $min";
-      elseif( $max > 0 )
+      elseif ( $max > 0 )
          return "$prefix_op $field <= $max";
       return '';
    }//build_num_range_sql_clause
@@ -147,7 +147,7 @@ class TournamentUtils
    /*! \brief Show all tournament-flags for admin in given Form-object. */
    public static function show_tournament_flags( &$tform, $tourney )
    {
-      if( TournamentUtils::isAdmin() && $tourney->Flags > 0 )
+      if ( TournamentUtils::isAdmin() && $tourney->Flags > 0 )
       {
          $tform->add_row( array(
                'DESCRIPTION', T_('Tournament Flags'),
@@ -168,7 +168,7 @@ class TournamentUtils
 
    public static function calc_pool_count( $user_count, $pool_size )
    {
-      if( $pool_size == 0 )
+      if ( $pool_size == 0 )
          return 0;
       else
          return floor( ( $user_count + $pool_size - 1 ) / $pool_size );

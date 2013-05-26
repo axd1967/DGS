@@ -34,28 +34,28 @@ function echo_item($text, $link='', $show_link, $working=true, $last=false)
    $level = min( $item_level, $item_nbcols-1);
 
    echo "<tr>";
-   for( $i=1; $i<$level; $i++ )
+   for ( $i=1; $i<$level; $i++ )
    {
-      if( @$f[$i] )
+      if ( @$f[$i] )
          echo "<td class=Indent>&nbsp;&nbsp;&nbsp;</td>";
       else
          echo "<td class=Indent><img alt=\"&nbsp;|&nbsp;\" src=\"$size/du.gif\"></td>";
    }
-   if( $level > 0 )
+   if ( $level > 0 )
    {
       $f[$level] = $last;
-      if( $last )
+      if ( $last )
          echo "<td class=Indent><img alt=\"&nbsp;`-\" src=\"$size/dl.gif\"></td>";
       else
          echo "<td class=Indent><img alt=\"&nbsp;|-\" src=\"$size/el.gif\"></td>";
    }
 
    $level = $item_nbcols-$level;
-   if( $level > 1 )
+   if ( $level > 1 )
       echo "<td colspan=$level>";
    else
       echo "<td>";
-   if( $show_link && $working && $link )
+   if ( $show_link && $working && $link )
       echo "<a href=\"$link\">$text</a>";
    else
       echo "<span class=Inactive>$text</span>";
@@ -104,7 +104,7 @@ function itemL($text, $link='', $working=true, $last=false)
          item(T_('My running games'), "show_games.php?uid=$id", true);
          item(T_('My finished games'), "show_games.php?uid=$id".URI_AMP."finished=1", true);
          item(T_('Games I\'m observing'), "show_games.php?observe=$id", true);
-         if( ALLOW_TOURNAMENTS )
+         if ( ALLOW_TOURNAMENTS )
             item(T_('My tournaments'), "tournaments/list_tournaments.php?uid=$id", true);
          item(T_('My running multi-player-games'), "show_games.php?uid=$id".URI_AMP."mp=1", true);
          item(T_('My finished multi-player-games'), "show_games.php?uid=$id".URI_AMP."finished=1".URI_AMP."mp=1", true);
@@ -132,14 +132,14 @@ function itemL($text, $link='', $working=true, $last=false)
          itemL(T_('My waiting games'), "waiting_room.php?good=2", true, true);
       } $item_level--;
 
-      if( ALLOW_TOURNAMENTS )
+      if ( ALLOW_TOURNAMENTS )
       {
       item(T_('Tournaments'), "tournaments/list_tournaments.php", true);
       { $item_level++;
          item(T_('All tournaments'), "tournaments/list_tournaments.php", true);
          item(T_('My tournaments'), "tournaments/list_tournaments.php?uid=$id", true);
          item(T_('Directoring tournaments'), "tournaments/list_tournaments.php?tdir=$id", true);
-         if( TournamentUtils::check_create_tournament() )
+         if ( TournamentUtils::check_create_tournament() )
             item(T_('Create new tournament'), "tournaments/wizard.php", true);
          item(T_('View tournament'), "tournaments/view_tournament.php", false, true);
          { $item_level++;
@@ -284,7 +284,7 @@ function itemL($text, $link='', $working=true, $last=false)
       { $item_level++;
          itemL(T_('Introduction'), "introduction.php", true);
          itemL(T_('Terms of Service - Rules of Conduct and Privacy Policy'), "policy.php", true);
-         if( ENABLE_DONATIONS )
+         if ( ENABLE_DONATIONS )
             item(T_('Donation'), 'donation.php', true);
          itemL(T_('News, Release notes'), "news.php", true);
          itemL(T_('Site map'), "site_map.php", true);
@@ -293,7 +293,7 @@ function itemL($text, $link='', $working=true, $last=false)
          itemL(T_('Links'), "links.php", true);
          itemL(T_('People'), "people.php", true);
          itemL(T_('Statistics'), "statistics.php", true);
-         if( strpos(HOSTBASE,'dragongoserver.net') !== false )
+         if ( strpos(HOSTBASE,'dragongoserver.net') !== false )
             itemL(T_('Web-Statistics'), HOSTBASE."stat/", true);
          itemL(T_('DGS Rank Converter'), "rank_converter.php", true);
          itemL(T_('DGS Wish list'), "http://senseis.xmp.net/?DGSWishlist", true);
@@ -311,7 +311,7 @@ function itemL($text, $link='', $working=true, $last=false)
          } $item_level--;
          item(T_('Search forums'), "forum/search.php", true);
          item(T_('Goban Editor'), "goban_editor.php", true, !ALLOW_SURVEY_VOTE);
-         if( ALLOW_SURVEY_VOTE )
+         if ( ALLOW_SURVEY_VOTE )
             item(T_('Surveys'), "list_surveys.php", true, true);
       } $item_level--;
 
@@ -321,7 +321,7 @@ function itemL($text, $link='', $working=true, $last=false)
          itemL(T_('My Bulletins'), "list_bulletins.php?text=0".URI_AMP."read=2".URI_AMP."mine=1".URI_AMP."no_adm=1", true, true);
       } $item_level--;
 
-      if( ALLOW_FEATURE_VOTE )
+      if ( ALLOW_FEATURE_VOTE )
       {
          item(T_('Feature Vote Result'), "features/list_votes.php", true);
          { $item_level++;
@@ -331,13 +331,13 @@ function itemL($text, $link='', $working=true, $last=false)
          } $item_level--;
       }
 
-      if( ALLOW_GAME_EDITOR )
+      if ( ALLOW_GAME_EDITOR )
          itemL(T_('Game Editor'), "game_editor.php", true);
       itemL(T_('Goban Editor'), "goban_editor.php", true);
 
-      if( @$player_row['admin_level'] )
+      if ( @$player_row['admin_level'] )
          item(T_('Admin'), "admin.php", true);
-      if( @$player_row['Translator'] )
+      if ( @$player_row['Translator'] )
          item(T_('Translate'), "translate.php", true);
 
       itemL(T_('Logout'), "index.php?logout=t", true, true);
@@ -345,7 +345,7 @@ function itemL($text, $link='', $working=true, $last=false)
    } $item_level--;
 
    echo "</table>\n";
-   if( $logged_in )
+   if ( $logged_in )
       echo T_('The black links require an argument to work, so they are not usable here.');
    else
       echo T_('The black links require to be logged in, so they are not usable here.');

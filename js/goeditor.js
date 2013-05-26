@@ -89,21 +89,21 @@ function init(nr)
    mark[nr] = [];
    move_history[nr] = [];
 
-   if( size[nr] < 1 ) size[nr] = 19;
-   if( size[nr] > 25 ) size[nr] = 25; //MAX_BOARD_SIZE
+   if ( size[nr] < 1 ) size[nr] = 19;
+   if ( size[nr] > 25 ) size[nr] = 25; //MAX_BOARD_SIZE
 
-   if( startx[nr] < 0 ) startx[nr] = 0;
-   if( endx[nr] > size[nr] ) endx[nr] = size[nr];
-   if( starty[nr] < 0 ) starty[nr] = 0;
-   if( endy[nr] > size[nr] ) endy[nr] = size[nr];
+   if ( startx[nr] < 0 ) startx[nr] = 0;
+   if ( endx[nr] > size[nr] ) endx[nr] = size[nr];
+   if ( starty[nr] < 0 ) starty[nr] = 0;
+   if ( endy[nr] > size[nr] ) endy[nr] = size[nr];
 
 
-   for(x=0; x<size[nr]; x++)
+   for (x=0; x<size[nr]; x++)
    {
       goban[nr][x] = [];
       index[nr][x] = [];
       mark[nr][x] = [];
-      for(y=0; y<size[nr]; y++)
+      for (y=0; y<size[nr]; y++)
       {
          goban[nr][x][y] = 0;
          index[nr][x][y] = 0;
@@ -124,14 +124,14 @@ function show_goban(nr)
          : 'background="' + path + 'images/wood' + woodcolor[nr] + '.gif"';
 
    document.write('<table border=0 cellpadding=0 cellspacing=0 '+woodstring+' align=center><tr><td valign=top><table border=0 cellpadding=0 cellspacing=0 align=center valign=center background="">');
-   for( y=starty[nr]; y<endy[nr]; y++)
+   for ( y=starty[nr]; y<endy[nr]; y++)
    {
       document.write('<tr>');
-      for( x=startx[nr]; x<endx[nr]; x++ )
+      for ( x=startx[nr]; x<endx[nr]; x++ )
       {
          fig = get_empty_image(x, y, size[nr]);
 
-         if( version == 1 )
+         if ( version == 1 )
             document.write ('<td><img name="pos'+nr+'_'+x+'_'+y+'" src="'+path+stonesz+'/'+fig+'.'+img+'" onClick="click('+nr+','+x+','+y+')">');
          else
             document.write ('<td><a href="javascript:click('+nr+','+x+','+y+');"><img name="pos'+nr+'_'+x+'_'+y+'" border=0 src="'+path+stonesz+'/'+fig+'.'+img+'" width='+stonesz+' height='+stonesz+'></a>');
@@ -144,9 +144,9 @@ function show_goban(nr)
 
 function change_mode(nr, new_mode)
 {
-   if( current_mode[nr] == new_mode )
+   if ( current_mode[nr] == new_mode )
    {
-      if( new_mode == 'play' || new_mode == 'number2' )
+      if ( new_mode == 'play' || new_mode == 'number2' )
          change_col_next(nr, 3-col_next[nr]);
 
       return;
@@ -171,7 +171,7 @@ function show_button(nr, button_mode, button_function, image, alt, width, height
    document.write('<tr><td colspan=3><img width='+(width+2*border)+' height='+border+' name="'+button_mode+'_'+nr+'_1" src="'+path+'images/'+(on ? bl_img : gr_img)+'\"></td></tr>');
    document.write('<tr><td><img width='+border+' height='+height+' name="'+button_mode+'_'+nr+'_2" src="'+path+'images/'+(on ? bl_img : gr_img)+'"></td>');
 
-   if( version == 1 )
+   if ( version == 1 )
       document.write('<td width='+width+' height='+height+' align=center><img border=0 name="'+button_mode+'_'+nr+'" src="'+path+image+'" onClick="'+button_function+'('+nr+',\''+button_mode+'\')"></td>');
    else
       document.write('<td width='+width+' height='+height+' align=center><a href="javascript:'+button_function+'('+nr+',\''+button_mode+'\');"><img border=0 align=center name="'+button_mode+'_'+nr+'" src="'+path+image+'"></a></td>');
@@ -226,19 +226,19 @@ function has_liberty(nr, start_x, start_y, remove)
 
    index[nr][x][y] = current_index[nr] + 7;
 
-   while( true )
+   while ( true )
    {
-      if( index[nr][x][y] >= current_index[nr] + 32 )  // Have looked in all directions
+      if ( index[nr][x][y] >= current_index[nr] + 32 )  // Have looked in all directions
       {
          m = index[nr][x][y] % 8;
 
-         if( m == 7 )   // At starting point, no liberties found
+         if ( m == 7 )   // At starting point, no liberties found
          {
-            if( remove )
+            if ( remove )
             {
-               for( nx=0; nx<size[nr]; nx++ )
-                  for( ny=0; ny<size[nr]; ny++ )
-                     if( index[nr][nx][ny] >= current_index[nr] )
+               for ( nx=0; nx<size[nr]; nx++ )
+                  for ( ny=0; ny<size[nr]; ny++ )
+                     if ( index[nr][nx][ny] >= current_index[nr] )
                      {
                         change_goban(nr, nx, ny, 0);
                      }
@@ -256,14 +256,14 @@ function has_liberty(nr, start_x, start_y, remove)
          nx = x+dirx[dir];
          ny = y+diry[dir];
 
-         if( ( nx >= 0 ) && (nx < size[nr]) && (ny >= 0) && (ny < size[nr]) )
+         if ( ( nx >= 0 ) && (nx < size[nr]) && (ny >= 0) && (ny < size[nr]) )
          {
             new_color = goban[nr][nx][ny];
 
-            if( new_color == 0 )
+            if ( new_color == 0 )
                return true; // found liberty
 
-            if( new_color == c && index[nr][nx][ny] < current_index[nr] )
+            if ( new_color == c && index[nr][nx][ny] < current_index[nr] )
             {
                x = nx;  // Go to the neighbour
                y = ny;
@@ -278,7 +278,7 @@ function has_liberty(nr, start_x, start_y, remove)
 /* Handler for clicking on the grid */
 function click(nr,x,y)
 {
-   if( x < 0 || y < 0 || x >= size[nr] || y >= size[nr] ||
+   if ( x < 0 || y < 0 || x >= size[nr] || y >= size[nr] ||
        ( goban[nr][x][y] > 0 && ( current_mode[nr] == 'play' ||
                                   current_mode[nr] == 'letter' ) ) ||
        ( goban[nr][x][y] == 0 && current_mode[nr] == 'number' ) )
@@ -286,10 +286,10 @@ function click(nr,x,y)
 
    move_nr[nr]++;
 
-   if( max_move_nr[nr] == move_nr[nr] )
+   if ( max_move_nr[nr] == move_nr[nr] )
        max_move_nr[nr]++;  // make sure history is cleaned.
 
-   if( lastx[nr] >= 0 && lasty[nr] >=0 && mark[nr][lastx[nr]][lasty[nr]] == 'm' &&
+   if ( lastx[nr] >= 0 && lasty[nr] >=0 && mark[nr][lastx[nr]][lasty[nr]] == 'm' &&
        !( current_mode[nr] == 'play' && goban[nr][x][y] > 0 ) )
    {
       change_last(nr, -1, -1);
@@ -299,22 +299,22 @@ function click(nr,x,y)
    old_mark = mark[nr][x][y];
 
 
-   switch( current_mode[nr] )
+   switch ( current_mode[nr] )
    {
       case 'play':
          change_goban(nr, x, y, col_next[nr]);
          change_last(nr, x, y);
 
-         if( x > 0 && goban[nr][x-1][y] == 3-col_next[nr] )
+         if ( x > 0 && goban[nr][x-1][y] == 3-col_next[nr] )
             has_liberty(nr, x-1, y, true);
 
-         if( y > 0 && goban[nr][x][y-1] == 3-col_next[nr] )
+         if ( y > 0 && goban[nr][x][y-1] == 3-col_next[nr] )
             has_liberty(nr, x, y-1, true);
 
-         if( x < size[nr]-1 && goban[nr][x+1][y] == 3-col_next[nr] )
+         if ( x < size[nr]-1 && goban[nr][x+1][y] == 3-col_next[nr] )
             has_liberty(nr, x+1, y, true);
 
-         if( y < size[nr]-1 && goban[nr][x][y+1] == 3-col_next[nr] )
+         if ( y < size[nr]-1 && goban[nr][x][y+1] == 3-col_next[nr] )
             has_liberty(nr, x, y+1, true);
 
          has_liberty(nr, x, y, true);
@@ -323,7 +323,7 @@ function click(nr,x,y)
          break;
 
       case 'black':
-         if( goban[nr][x][y] == 1 )
+         if ( goban[nr][x][y] == 1 )
             change_goban(nr, x, y, 0);
          else
          {
@@ -333,7 +333,7 @@ function click(nr,x,y)
          break;
 
       case 'white':
-         if( goban[nr][x][y] == 2 )
+         if ( goban[nr][x][y] == 2 )
             change_goban(nr, x, y, 0);
          else
          {
@@ -381,13 +381,13 @@ function click(nr,x,y)
 function undo(nr, mode)
 {
    var a;
-   if( move_nr[nr] == 0 ) return;
+   if ( move_nr[nr] == 0 ) return;
 
-   for(var i=move_history[nr][move_nr[nr]].length-1; i>=0; i--)
+   for (var i=move_history[nr][move_nr[nr]].length-1; i>=0; i--)
    {
       a = move_history[nr][move_nr[nr]][i];
 
-      switch( a[0] )
+      switch ( a[0] )
       {
          case 'l':
             lastx[nr] = a[1];
@@ -419,7 +419,7 @@ function undo(nr, mode)
          case 'n':
             col_next[nr] = a[1];
             document.images['play_'+nr].src = path+stonesize[nr]+'/p'+col[a[1]]+'.'+img;
-            if( number_mode == 'number2' )
+            if ( number_mode == 'number2' )
                document.images['number2_'+nr].src =
                   path+stonesize[nr]+'/'+col[a[1]]+current_number[nr]+'.'+img;
             break;
@@ -433,7 +433,7 @@ function redo(nr, mode)
 {
    var a;
 
-   if( move_nr[nr] == max_move_nr[nr] )
+   if ( move_nr[nr] == max_move_nr[nr] )
    {
       refresh(nr);
       return;
@@ -441,11 +441,11 @@ function redo(nr, mode)
 
    move_nr[nr]++;
 
-   for(var i=0; i<move_history[nr][move_nr[nr]].length; i++)
+   for (var i=0; i<move_history[nr][move_nr[nr]].length; i++)
    {
       a = move_history[nr][move_nr[nr]][i];
 
-      switch( a[0] )
+      switch ( a[0] )
       {
          case 'l':
             lastx[nr] = a[3];
@@ -477,7 +477,7 @@ function redo(nr, mode)
          case 'n':
             col_next[nr] = a[2];
             document.images['play_'+nr].src = path+stonesize[nr]+'/p'+col[a[2]]+'.'+img;
-            if( number_mode == 'number2' )
+            if ( number_mode == 'number2' )
                document.images['number2_'+nr].src =
                   path+stonesize[nr]+'/'+col[a[2]]+current_number[nr]+'.'+img;
             break;
@@ -491,9 +491,9 @@ function dump_data(nr, formname)
    var str = '';
    var separator = '';
 
-   for(y=starty[nr]; y<endy[nr]; y++)
+   for (y=starty[nr]; y<endy[nr]; y++)
    {
-      for(x=startx[nr]; x<endx[nr]; x++)
+      for (x=startx[nr]; x<endx[nr]; x++)
       {
          str += separator + col[goban[nr][x][y]] + mark[nr][x][y];
          separator = ',';
@@ -511,7 +511,7 @@ function dump_all_data(formname)
 {
    var i;
 
-   for(i=0; i<number_of_gobans; i++)
+   for (i=0; i<number_of_gobans; i++)
       dump_data(goban_numbers[i], formname);
 }
 
@@ -519,16 +519,16 @@ function get_empty_image(x, y, sz)
 {
    var fig = 'e';
 
-   if( hoshi_pos[sz] & ( ( ( x == hoshi_dist[sz]-1 || x == sz-hoshi_dist[sz] ? 2 : 0 ) +
+   if ( hoshi_pos[sz] & ( ( ( x == hoshi_dist[sz]-1 || x == sz-hoshi_dist[sz] ? 2 : 0 ) +
                            ( x*2+1 == sz ? 1 : 0) ) *
                          ( ( y == hoshi_dist[sz]-1 || y == sz-hoshi_dist[sz] ? 2 : 0 ) +
                            ( y*2+1 == sz ? 1 : 0) ) ) )
       fig = 'h';
 
-   if( y == 0 ) fig = 'u';
-   if( y == sz-1 ) fig = 'd';
-   if( x == 0 ) fig += 'l';
-   if( x == sz-1 ) fig += 'r';
+   if ( y == 0 ) fig = 'u';
+   if ( y == sz-1 ) fig = 'd';
+   if ( x == 0 ) fig += 'l';
+   if ( x == sz-1 ) fig += 'r';
 
    return fig;
 }
@@ -538,10 +538,10 @@ function set_image(nr, x, y)
 {
    var prefix = col[goban[nr][x][y]];
 //   alert('x: '+x+'  y: '+y+'   g: '+prefix+'   m: '+mark[nr][x][y]);
-   if( prefix == 'e' )
+   if ( prefix == 'e' )
       prefix = get_empty_image(x, y, size[nr]);
 
-   if( mark[nr][x][y].charAt(0) == 'l' )
+   if ( mark[nr][x][y].charAt(0) == 'l' )
       prefix = '';
 
    prefix += mark[nr][x][y];
@@ -553,9 +553,9 @@ function push_history(nr, push_array)
 {
    var i;
 
-   if( move_nr[nr] != max_move_nr[nr] )
+   if ( move_nr[nr] != max_move_nr[nr] )
    {
-      for( i=move_nr[nr]; i<=max_move_nr[nr]+1; i++ )
+      for ( i=move_nr[nr]; i<=max_move_nr[nr]+1; i++ )
          move_history[nr][i] = [];
 
       max_move_nr[nr] = move_nr[nr];
@@ -568,7 +568,7 @@ function push_history(nr, push_array)
 function change_last(nr, x, y)
 {
    push_history(nr, ['l', lastx[nr], lasty[nr], x , y]);
-   if( lastx[nr] >= 0 && lasty[nr] >= 0 && mark[nr][lastx[nr]][lasty[nr]] == 'm' )
+   if ( lastx[nr] >= 0 && lasty[nr] >= 0 && mark[nr][lastx[nr]][lasty[nr]] == 'm' )
    {
       push_history(nr, ['m', lastx[nr], lasty[nr], mark[nr][lastx[nr]][lasty[nr]], '']);
       mark[nr][lastx[nr]][lasty[nr]] = '';
@@ -577,7 +577,7 @@ function change_last(nr, x, y)
    lastx[nr] = x;
    lasty[nr] = y;
 
-   if( x >= 0 && y >= 0 && ( mark[nr][x][y] == '' || mark[nr][x][y].charAt(0) == 'l' ) )
+   if ( x >= 0 && y >= 0 && ( mark[nr][x][y] == '' || mark[nr][x][y].charAt(0) == 'l' ) )
    {
       push_history(nr, ['m', x, y, mark[nr][x][y], 'm']);
       mark[nr][x][y] = 'm';
@@ -587,14 +587,14 @@ function change_last(nr, x, y)
 
 function change_col_next(nr, val)
 {
-   if( val == col_next[nr] )
+   if ( val == col_next[nr] )
       return;
 
-   if( move_nr[nr] > 0 )
+   if ( move_nr[nr] > 0 )
       push_history(nr, ['n', col_next[nr], val]);
    col_next[nr] = val;
    document.images['play_'+nr].src = path+stonesize[nr]+'/p'+col[val]+'.'+img;
-   if( number_mode == 'number2' )
+   if ( number_mode == 'number2' )
       document.images['number2_'+nr].src =
          path+stonesize[nr]+'/'+col[val]+current_number[nr]+'.'+img;
 }
@@ -603,7 +603,7 @@ function increase_number(nr)
 {
    push_history(nr, ['1', current_number[nr], current_number[nr] + 1]);
    current_number[nr] ++;
-   if( current_number[nr] > 100 )
+   if ( current_number[nr] > 100 )
       current_number[nr] = 1;
    document.images[number_mode+'_'+nr].src =
       path+stonesize[nr]+'/b'+(current_number[nr])+'.'+img;
@@ -613,7 +613,7 @@ function increase_letter(nr)
 {
    push_history(nr, ['a', current_letter[nr], current_letter[nr] + 1]);
    current_letter[nr] ++;
-   if( current_letter[nr] > 26 )
+   if ( current_letter[nr] > 26 )
       current_letter[nr] = 1;
    document.images['letter_'+nr].src =
       path+stonesize[nr]+'/l'+letters[current_letter[nr]]+'.'+img;
@@ -625,7 +625,7 @@ function change_goban(nr, x, y, val)
 
    push_history(nr, ['g', x, y, goban[nr][x][y], val]);
    goban[nr][x][y] = val;
-   if( (val > 0 && (m.charAt(0) == 'l')) ||
+   if ( (val > 0 && (m.charAt(0) == 'l')) ||
        (( val == 0 && Number(m) >= 1 && !isNaN(Number(m))) ) )
    {
       push_history(nr, ['m', x, y, mark[nr][x][y], '']);
@@ -638,7 +638,7 @@ function change_goban(nr, x, y, val)
 function change_mark(nr, x, y, val)
 {
    var g = goban[nr][x][y];
-   if( g > 0 && (val.charAt(0) == 'l') ||
+   if ( g > 0 && (val.charAt(0) == 'l') ||
        g == 0 && Number(val) >= 1 && !isNaN(Number(val)) )
       return;
 
@@ -650,9 +650,9 @@ function change_mark(nr, x, y, val)
 
 function refresh(nr)
 {
-   for(y=starty[nr]; y<endy[nr]; y++)
+   for (y=starty[nr]; y<endy[nr]; y++)
    {
-      for(x=startx[nr]; x<endx[nr]; x++)
+      for (x=startx[nr]; x<endx[nr]; x++)
       {
          set_image(nr, x, y);
       }
@@ -665,17 +665,17 @@ function enter_data(nr, data)
    var data_rows = data.split(';');
    var c, v;
 
-   for(y=starty[nr]; y<endy[nr]; y++)
+   for (y=starty[nr]; y<endy[nr]; y++)
    {
       row = data_rows[y-starty[nr]].split(',');
 
-      for(x=startx[nr]; x<endx[nr]; x++)
+      for (x=startx[nr]; x<endx[nr]; x++)
       {
          c = row[x-startx[nr]].charAt(0);
          v = ( c == 'b' ? 1 : ( c == 'w' ? 2 : 0 ) );
          goban[nr][x][y] = v;
          mark[nr][x][y] = row[x-startx[nr]].substr(1);
-         if( mark[nr][x][y] == 'm' )
+         if ( mark[nr][x][y] == 'm' )
              {
                  lastx[nr] = x;
                  lasty[nr] = y;

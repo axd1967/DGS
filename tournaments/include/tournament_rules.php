@@ -140,9 +140,9 @@ class TournamentRules
 
    public function setRuleset( $ruleset )
    {
-      if( !preg_match( "/^(".CHECK_RULESETS.")$/", $ruleset ) )
+      if ( !preg_match( "/^(".CHECK_RULESETS.")$/", $ruleset ) )
          error('invalid_args', "TournamentRules.setRuleset($ruleset)");
-      if( !preg_match( "/^(".ALLOWED_RULESETS.")$/", $ruleset ) )
+      if ( !preg_match( "/^(".ALLOWED_RULESETS.")$/", $ruleset ) )
          error('feature_disabled', "TournamentRules.setRuleset($ruleset)");
       $this->Ruleset = $ruleset;
    }
@@ -155,7 +155,7 @@ class TournamentRules
    /*! \brief Inserts or updates tournament-rules in database. */
    public function persist()
    {
-      if( $this->ID > 0 )
+      if ( $this->ID > 0 )
          $success = $this->update();
       else
          $success = $this->insert();
@@ -169,7 +169,7 @@ class TournamentRules
 
       $entityData = $this->fillEntityData();
       $result = $entityData->insert( "TournamentRules.insert(%s,{$this->tid})" );
-      if( $result )
+      if ( $result )
          $this->ID = mysql_insert_id();
       return $result;
    }
@@ -196,9 +196,9 @@ class TournamentRules
    // \internal
    private function checkData()
    {
-      if( !preg_match( "/^(".CHECK_TRULE_HANDITYPE.")$/", $this->Handicaptype ) )
+      if ( !preg_match( "/^(".CHECK_TRULE_HANDITYPE.")$/", $this->Handicaptype ) )
          error('invalid_args', "TournamentRules.checkData.Handicaptype({$this->tid},{$this->Handicaptype})");
-      if( !preg_match( "/^".REGEX_BYOTYPES."$/", $this->Byotype ) )
+      if ( !preg_match( "/^".REGEX_BYOTYPES."$/", $this->Byotype ) )
          error('invalid_args', "TournamentRules.checkData.Byotype({$this->tid},{$this->Byotype})");
    }
 
@@ -282,7 +282,7 @@ class TournamentRules
       $cat_htype = get_category_handicaptype($std_htype);
       $vars['cat_htype'] = $cat_htype;
       $vars['color_m'] = $std_htype;
-      if( $cat_htype == CAT_HTYPE_MANUAL )
+      if ( $cat_htype == CAT_HTYPE_MANUAL )
       {
          $vars['handicap_m'] = (int)$this->Handicap;
          $vars['komi_m'] = (float)$this->Komi;
@@ -304,11 +304,11 @@ class TournamentRules
       $byo_timevalue = (int)$this->Byotime;
       time_convert_to_longer_unit( $byo_timevalue, $byo_timeunit );
       $vars['byoyomitype'] = $this->Byotype;
-      foreach( array( 'jap', 'can', 'fis' ) as $suffix )
+      foreach ( array( 'jap', 'can', 'fis' ) as $suffix )
       {
          $vars["timeunit_$suffix"] = $byo_timeunit;
          $vars["byotimevalue_$suffix"] = $byo_timevalue;
-         if( $suffix == 'jap' || $suffix == 'can' )
+         if ( $suffix == 'jap' || $suffix == 'can' )
             $vars["byoperiods_$suffix"] = (int)$this->Byoperiods;
       }
 
@@ -325,7 +325,7 @@ class TournamentRules
    {
       // NOTE: keep "sync'ed" with new-game handle_add_game()-func
 
-      if( !$this->TourneyType )
+      if ( !$this->TourneyType )
          error('invalid_args', "TournamentRules.convertEditForm_to_TournamentRules.miss_var.TourneyType({$this->tid})");
 
       $size = min(MAX_BOARD_SIZE, max(MIN_BOARD_SIZE, (int)@$vars['size']));
@@ -333,7 +333,7 @@ class TournamentRules
       $cat_handicap_type = @$vars['cat_htype'];
       $color_m = @$vars['color_m'];
       $handicap_type = ( $cat_handicap_type == CAT_HTYPE_MANUAL ) ? $color_m : $cat_handicap_type;
-      switch( (string)$handicap_type )
+      switch ( (string)$handicap_type )
       {
          case HTYPE_CONV:
             $handicap = 0; //further computing
@@ -346,7 +346,7 @@ class TournamentRules
             break;
 
          case HTYPE_DOUBLE:
-            if( $this->TourneyType != TOURNEY_TYPE_ROUND_ROBIN )
+            if ( $this->TourneyType != TOURNEY_TYPE_ROUND_ROBIN )
                error('invalid_args', "TournamentRules.convertEditForm_to_TournamentRules.bad_htype({$this->tid},{$this->TourneyType},$handicap_type)");
             // fall-through setting H/K
 
@@ -371,33 +371,33 @@ class TournamentRules
             break;
       }
 
-      if( !( $komi >= -MAX_KOMI_RANGE && $komi <= MAX_KOMI_RANGE ) )
+      if ( !( $komi >= -MAX_KOMI_RANGE && $komi <= MAX_KOMI_RANGE ) )
          $errors[] = ErrorCode::get_error_text('komi_range');
 
-      if( !( $handicap >= 0 && $handicap <= MAX_HANDICAP ) )
+      if ( !( $handicap >= 0 && $handicap <= MAX_HANDICAP ) )
          $errors[] = ErrorCode::get_error_text('handicap_range');
 
       // ruleset
       $ruleset = @$vars['ruleset'];
-      if( !preg_match( "/^(".CHECK_RULESETS.")$/", $ruleset ) )
+      if ( !preg_match( "/^(".CHECK_RULESETS.")$/", $ruleset ) )
          $errors[] = ErrorCode::get_error_text('unknown_ruleset');
-      elseif( !preg_match( "/^(".ALLOWED_RULESETS.")$/", $ruleset ) )
+      elseif ( !preg_match( "/^(".ALLOWED_RULESETS.")$/", $ruleset ) )
          $errors[] = ErrorCode::get_error_text('unknown_ruleset');
 
       // komi adjustment
       $adj_komi = (float)@$vars['adj_komi'];
-      if( abs($adj_komi) > MAX_KOMI_RANGE )
+      if ( abs($adj_komi) > MAX_KOMI_RANGE )
          $adj_komi = ($adj_komi<0 ? -1 : 1) * MAX_KOMI_RANGE;
-      if( floor(2 * $adj_komi) != 2 * $adj_komi ) // <>x.0|x.5
+      if ( floor(2 * $adj_komi) != 2 * $adj_komi ) // <>x.0|x.5
          $adj_komi = ($adj_komi<0 ? -1 : 1) * round(2 * abs($adj_komi)) / 2.0;
 
       $jigo_mode = (string)@$vars['jigo_mode'];
-      if( $jigo_mode != JIGOMODE_KEEP_KOMI && $jigo_mode != JIGOMODE_ALLOW_JIGO && $jigo_mode != JIGOMODE_NO_JIGO )
+      if ( $jigo_mode != JIGOMODE_KEEP_KOMI && $jigo_mode != JIGOMODE_ALLOW_JIGO && $jigo_mode != JIGOMODE_NO_JIGO )
          $jigo_mode = JIGOMODE_KEEP_KOMI;
 
       // handicap adjustment
       $adj_handicap = (int)@$vars['adj_handicap'];
-      if( abs($adj_handicap) > MAX_HANDICAP )
+      if ( abs($adj_handicap) > MAX_HANDICAP )
          $adj_handicap = ($adj_handicap<0 ? -1 : 1) * MAX_HANDICAP;
 
       $min_handicap = min( MAX_HANDICAP, max( 0, (int)@$vars['min_handicap'] ));
@@ -408,13 +408,13 @@ class TournamentRules
       list( $hours, $byohours, $byoperiods ) = self::convertFormTimeSettings( $vars );
       $byoyomitype = @$vars['byoyomitype'];
 
-      if( $hours < 1 && ($byohours < 1 || $byoyomitype == BYOTYPE_FISCHER) )
+      if ( $hours < 1 && ($byohours < 1 || $byoyomitype == BYOTYPE_FISCHER) )
          $errors[] = ErrorCode::get_error_text('time_limit_too_small');
 
 
       $rated = ( @$vars['rated'] == 'Y' );
 
-      if( ENABLE_STDHANDICAP )
+      if ( ENABLE_STDHANDICAP )
          $stdhandicap = ( @$vars['stdhandicap'] == 'Y' );
       else
          $stdhandicap = false;
@@ -424,14 +424,14 @@ class TournamentRules
       // handle shape-game
       $shape_id = trim(@$vars['shape']);
       $shape_snapshot = '';
-      if( $shape_id )
+      if ( $shape_id )
       {
-         if( !is_numeric($shape_id) || $shape_id < 0 )
+         if ( !is_numeric($shape_id) || $shape_id < 0 )
             $errors[] = ErrorCode::get_error_text('bad_shape_id');
          else
          {
             $shape = Shape::load_shape($shape_id, false);
-            if( is_null($shape) )
+            if ( is_null($shape) )
                $errors[] = ErrorCode::get_error_text('unknown_shape');
             else
             {
@@ -532,21 +532,21 @@ class TournamentRules
     */
    public function determineJigoBehaviour()
    {
-      if( $this->JigoMode == JIGOMODE_ALLOW_JIGO )
+      if ( $this->JigoMode == JIGOMODE_ALLOW_JIGO )
          return 0;
-      if( $this->JigoMode == JIGOMODE_NO_JIGO )
+      if ( $this->JigoMode == JIGOMODE_NO_JIGO )
          return 1;
 
-      if( $this->Handicaptype == TRULE_HANDITYPE_CONV || $this->Handicaptype == TRULE_HANDITYPE_PROPER )
+      if ( $this->Handicaptype == TRULE_HANDITYPE_CONV || $this->Handicaptype == TRULE_HANDITYPE_PROPER )
          return -1; // can be x.0|x.5 for CONV|PROPER and AdjkustKomi doesn't change that
 
-      if( $this->Handicaptype == TRULE_HANDITYPE_NIGIRI
+      if ( $this->Handicaptype == TRULE_HANDITYPE_NIGIRI
             || $this->Handicaptype == TRULE_HANDITYPE_DOUBLE
             || $this->Handicaptype == TRULE_HANDITYPE_BLACK
             || $this->Handicaptype == TRULE_HANDITYPE_WHITE )
       { // manual-handicap-type
          $chk_komi = floor( abs( 2 * (float)($this->Komi + $this->AdjKomi) ) );
-         if( $chk_komi & 1 )
+         if ( $chk_komi & 1 )
             return 1; // can be only x.5
          else
             return 0; // can be only x.0
@@ -580,13 +580,13 @@ class TournamentRules
          $df_uid, $user_df->urow['Rating2'] );
 
       $gids = array();
-      if( $ch_is_black || $is_double )
+      if ( $ch_is_black || $is_double )
          $gids[] = create_game($user_ch->urow, $user_df->urow, $game_row, $game_setup);
       else // challenger is white
          $gids[] = create_game($user_df->urow, $user_ch->urow, $game_row, $game_setup);
       $gid = $gids[0];
 
-      if( $is_double )
+      if ( $is_double )
       {
          // provide a link between the two paired "double" games
          $game_row['double_gid'] = $gid;
@@ -609,13 +609,13 @@ class TournamentRules
     */
    public function prepare_create_game_row( &$game_row, &$game_setup, $ch_uid, $ch_rating, $df_uid, $df_rating )
    {
-      if( !$this->TourneyType )
+      if ( !$this->TourneyType )
          error('invalid_args', "TournamentRules.prepare_create_game_row.miss_var.TourneyType($ch_uid,$df_uid)");
 
       $game_row['Handicaptype'] = self::convert_trule_handicaptype_to_stdhtype($this->Handicaptype);
       $gs_uid = $ch_uid; // default
 
-      switch( (string)$this->Handicaptype )
+      switch ( (string)$this->Handicaptype )
       {
          case TRULE_HANDITYPE_CONV:
             list( $game_row['Handicap'], $game_row['Komi'], $ch_is_black, $is_nigiri ) =
@@ -638,7 +638,7 @@ class TournamentRules
             break;
 
          case TRULE_HANDITYPE_BLACK:
-            if( $this->TourneyType == TOURNEY_TYPE_LADDER ) // challenger is black
+            if ( $this->TourneyType == TOURNEY_TYPE_LADDER ) // challenger is black
                $ch_is_black = true;
             else //TOURNEY_TYPE_ROUND_ROBIN : stronger is black
                $ch_is_black = ( $ch_rating > $df_rating );
@@ -646,7 +646,7 @@ class TournamentRules
             break;
 
          case TRULE_HANDITYPE_WHITE:
-            if( $this->TourneyType == TOURNEY_TYPE_LADDER ) // challenger is white
+            if ( $this->TourneyType == TOURNEY_TYPE_LADDER ) // challenger is white
                $ch_is_black = false;
             else //TOURNEY_TYPE_ROUND_ROBIN : stronger is white
                $ch_is_black = ( $ch_rating < $df_rating );
@@ -659,7 +659,7 @@ class TournamentRules
             break;
       }
 
-      if( $game_setup )
+      if ( $game_setup )
          $game_setup->uid = $gs_uid;
 
       return $ch_is_black;
@@ -721,14 +721,14 @@ class TournamentRules
    public static function load_tournament_rule( $tid )
    {
       $result = NULL;
-      if( $tid > 0 )
+      if ( $tid > 0 )
       {
          $qsql = self::build_query_sql( $tid );
          $qsql->add_part( SQLP_LIMIT, '1' );
          $qsql->add_part( SQLP_ORDER, 'TR.ID DESC' );
          $row = mysql_single_fetch( "TournamentRules:load_tournament_rule($tid)",
             $qsql->get_select() );
-         if( $row )
+         if ( $row )
             $result = self::new_from_row( $row );
       }
       return $result;
@@ -744,7 +744,7 @@ class TournamentRules
       $iterator->setResultRows( mysql_num_rows($result) );
 
       $iterator->clearItems();
-      while( $row = mysql_fetch_array( $result ) )
+      while ( $row = mysql_fetch_array( $result ) )
       {
          $tourney = self::new_from_row( $row );
          $iterator->addItem( $tourney, $row );
@@ -758,19 +758,19 @@ class TournamentRules
    public static function getFlagsText( $flags=null )
    {
       // lazy-init of texts
-      if( !isset(self::$ARR_TRULES_TEXTS['FLAGS']) )
+      if ( !isset(self::$ARR_TRULES_TEXTS['FLAGS']) )
       {
          $arr = array();
          self::$ARR_TRULES_TEXTS['FLAGS'] = $arr;
       }
       else
          $arr = self::$ARR_TRULES_TEXTS['FLAGS'];
-      if( is_null($flags) )
+      if ( is_null($flags) )
          return $arr;
 
       $out = array();
-      foreach( $arr as $flagmask => $flagtext )
-         if( $flags & $flagmask ) $out[] = $flagtext;
+      foreach ( $arr as $flagmask => $flagtext )
+         if ( $flags & $flagmask ) $out[] = $flagtext;
       return implode(', ', $out);
    }//getFlagsText
 
@@ -779,18 +779,18 @@ class TournamentRules
    {
       // lazy-init of texts
       $key = 'HANDICAPTYPE'.$tourney_type;
-      if( !isset(self::$ARR_TRULES_TEXTS[$key]) )
+      if ( !isset(self::$ARR_TRULES_TEXTS[$key]) )
       {
          $arr = array();
          $arr[TRULE_HANDITYPE_CONV]   = T_('Conventional handicap');
          $arr[TRULE_HANDITYPE_PROPER] = T_('Proper handicap');
          $arr[TRULE_HANDITYPE_NIGIRI] = T_('Even game with nigiri');
-         if( $tourney_type == TOURNEY_TYPE_LADDER )
+         if ( $tourney_type == TOURNEY_TYPE_LADDER )
          {
             $arr[TRULE_HANDITYPE_BLACK] = T_('Manual game with Challenger getting Black#T_ladder');
             $arr[TRULE_HANDITYPE_WHITE] = T_('Manual game with Challenger getting White#T_ladder');
          }
-         elseif( $tourney_type == TOURNEY_TYPE_ROUND_ROBIN )
+         elseif ( $tourney_type == TOURNEY_TYPE_ROUND_ROBIN )
          {
             $arr[TRULE_HANDITYPE_BLACK] = T_('Manual game with stronger player getting Black#tourney');
             $arr[TRULE_HANDITYPE_WHITE] = T_('Manual game with stronger player getting White#tourney');
@@ -799,9 +799,9 @@ class TournamentRules
          self::$ARR_TRULES_TEXTS[$key] = $arr;
       }
 
-      if( is_null($type) )
+      if ( is_null($type) )
          return self::$ARR_TRULES_TEXTS[$key];
-      if( !isset(self::$ARR_TRULES_TEXTS[$key][$type]) )
+      if ( !isset(self::$ARR_TRULES_TEXTS[$key][$type]) )
          error('invalid_args', "TournamentRules:getHandicaptypeText($type)");
       return self::$ARR_TRULES_TEXTS[$key][$type];
    }//getHandicaptypeText
@@ -829,9 +829,9 @@ class TournamentRules
 
    public static function getJigoBehaviourText( $jigo_behaviour )
    {
-      if( $jigo_behaviour == 0 )
+      if ( $jigo_behaviour == 0 )
          return T_('Tournament-rules enforces Jigo, so game score must be an integer, not ending on .5');
-      elseif( $jigo_behaviour == 1 )
+      elseif ( $jigo_behaviour == 1 )
          return T_('Tournament-rules forbid Jigo, so game score must be a float ending on .5');
       else
          return '';

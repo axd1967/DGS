@@ -10,7 +10,7 @@ disable_cache();
 
 $result = mysql_query("select ID as gid from Games where Status != 'INVITED' AND Moves>0 order by ID");
 
-  while( $row = mysql_fetch_array($result) )	
+  while ( $row = mysql_fetch_array($result) )	
 {
 	extract($row);
 	echo $gid .' ';

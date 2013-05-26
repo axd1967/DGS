@@ -37,11 +37,11 @@ $GLOBALS['ThePage'] = new Page('Script', PAGEFLAG_IMPLICIT_FLUSH );
    set_time_limit(0); // don't want script-break during "transaction" with multi-db-queries or for large-datasets
 
    $logged_in = who_is_logged( $player_row);
-   if( !$logged_in )
+   if ( !$logged_in )
       error('login_if_not_logged_in', 'scrips.fix_game_snapshot');
-   if( $player_row['ID'] <= GUESTS_ID_MAX )
+   if ( $player_row['ID'] <= GUESTS_ID_MAX )
       error('not_allowed_for_guest', 'scripts.fix_game_snapshot');
-   if( !(@$player_row['admin_level'] & (ADMIN_DEVELOPER|ADMIN_GAME|ADMIN_DATABASE)) )
+   if ( !(@$player_row['admin_level'] & (ADMIN_DEVELOPER|ADMIN_GAME|ADMIN_DATABASE)) )
       error('adminlevel_too_low', 'scripts.fix_game_snapshot');
 
    $page = "fix_game_snapshot.php";
@@ -52,11 +52,11 @@ $GLOBALS['ThePage'] = new Page('Script', PAGEFLAG_IMPLICIT_FLUSH );
 */
 
    $gid = (int)get_request_arg('gid');
-   if( $gid <= 0 ) $gid = '';
+   if ( $gid <= 0 ) $gid = '';
    $sleep = (int)get_request_arg('sleep');
-   if( $sleep < 0 ) $sleep = 0;
+   if ( $sleep < 0 ) $sleep = 0;
    $limit = (int)get_request_arg('limit', 100);
-   if( $limit < 0 ) $limit = 0;
+   if ( $limit < 0 ) $limit = 0;
 
 
    $title = T_('Fix Games Snapshot');
@@ -69,15 +69,15 @@ $GLOBALS['ThePage'] = new Page('Script', PAGEFLAG_IMPLICIT_FLUSH );
 
    section( 'result', T_('Result') );
 
-   if( @$_REQUEST['fix_single'] ) // single-fix + show game-snapshot
+   if ( @$_REQUEST['fix_single'] ) // single-fix + show game-snapshot
       fix_single_game( $gid );
-   elseif( @$_REQUEST['fix_bulk'] ) // bulk-fix
+   elseif ( @$_REQUEST['fix_bulk'] ) // bulk-fix
    {
       $status = get_request_arg('status');
       $uid = (int)get_request_arg('uid');
-      if( $uid <= 0 ) $uid = 0;
+      if ( $uid <= 0 ) $uid = 0;
       $startgid = (int)get_request_arg('startgid');
-      if( $startgid <= 0 ) $startgid = 0;
+      if ( $startgid <= 0 ) $startgid = 0;
       bulk_fix_missing_game_snapshots( $status, $uid, $startgid, $limit, $sleep );
    }
 
@@ -136,22 +136,22 @@ function show_form()
 
 function fix_single_game( $gid )
 {
-   if( !$gid )
+   if ( !$gid )
       return;
 
    // load game
    $game_row = Games::load_game( $gid, /*row*/true );
-   if( is_null($game_row) )
+   if ( is_null($game_row) )
       error('unknown_game', "fix_game_snaphost.find_game($gid)");
 
    $game = Games::new_from_row($game_row);
-   if( $game->Status == GAME_STATUS_SETUP || $game->Status == GAME_STATUS_INVITED )
+   if ( $game->Status == GAME_STATUS_SETUP || $game->Status == GAME_STATUS_INVITED )
       error('invalid_game_status', "fix_game_snaphost.check.status($gid,{$game->Status})");
 
    $board_opts = ( GameHelper::game_need_mark_dead($game->Status) ) ? BOARDOPT_MARK_DEAD : 0;
 
    $board = new Board();
-   if( !$board->load_from_db( $game_row, $game->Moves, $board_opts) )
+   if ( !$board->load_from_db( $game_row, $game->Moves, $board_opts) )
       error('internal_error', "fix_game_snapshost.load_from_db($gid)");
    $new_snapshot = GameSnapshot::make_game_snapshot( $board->size, $board );
 
@@ -165,7 +165,7 @@ function fix_single_game( $gid )
       sprintf( $linefmt, 'New snapshot:', $new_snapshot ),
       "</table><br>\n\n";
 
-   if( $game->Snapshot != $new_snapshot )
+   if ( $game->Snapshot != $new_snapshot )
    {
       db_query( "fix_game_snapshost.fix_single_game.upd_game_snapshot($gid)",
             "UPDATE Games SET Snapshot='$new_snapshot' WHERE ID=$gid LIMIT 1" );
@@ -185,18 +185,18 @@ function bulk_fix_missing_game_snapshots( $status, $uid, $startgid, $limit, $sle
       SQLP_WHERE,  "G.Snapshot=''", // games without snapshot
       SQLP_ORDER,  'G.ID ASC' );
 
-   if( $status == 'R' ) // running-games
+   if ( $status == 'R' ) // running-games
       $qsql->add_part( SQLP_WHERE, "G.Status".IS_STARTED_GAME );
-   elseif( $status == 'F' ) // finished-games
+   elseif ( $status == 'F' ) // finished-games
       $qsql->add_part( SQLP_WHERE, "G.Status='".GAME_STATUS_FINISHED."'" );
    else
       $qsql->add_part( SQLP_WHERE, "G.Status ".not_in_clause( $ENUM_GAMES_STATUS, GAME_STATUS_SETUP, GAME_STATUS_INVITED ) );
 
-   if( $uid > 0 )
+   if ( $uid > 0 )
       $qsql->add_part( SQLP_WHERE, "(G.Black_ID=$uid OR G.White_ID=$uid)" );
-   if( $startgid > 0 )
+   if ( $startgid > 0 )
       $qsql->add_part( SQLP_WHERE, "G.ID >= $startgid" );
-   if( $limit > 0 )
+   if ( $limit > 0 )
       $qsql->add_part( SQLP_LIMIT, $limit );
 
    $begin = getmicrotime();
@@ -209,7 +209,7 @@ function bulk_fix_missing_game_snapshots( $status, $uid, $startgid, $limit, $sle
 
    $cnt = $cnt_err = $lasterr_gid = 0;
    $error_gids = array();
-   while( $game_row = mysql_fetch_assoc($result) )
+   while ( $game_row = mysql_fetch_assoc($result) )
    {
       $cnt++;
       $gid = $game_row['ID'];
@@ -218,7 +218,7 @@ function bulk_fix_missing_game_snapshots( $status, $uid, $startgid, $limit, $sle
       $board_opts = (( GameHelper::game_need_mark_dead($game_status) ) ? BOARDOPT_MARK_DEAD : 0 ) | BOARDOPT_STOP_ON_FIX;
 
       $board = new Board();
-      if( $board->load_from_db( $game_row, $game_row['Moves'], $board_opts) )
+      if ( $board->load_from_db( $game_row, $game_row['Moves'], $board_opts) )
       {
          $new_snapshot = GameSnapshot::make_game_snapshot( $board->size, $board );
 
@@ -226,7 +226,7 @@ function bulk_fix_missing_game_snapshots( $status, $uid, $startgid, $limit, $sle
             "UPDATE Games SET Snapshot='$new_snapshot' WHERE ID=$gid LIMIT 1" );
          echo sprintf( "Game #%s -> fixed %d. of %d<br>\n", $gid, $cnt, $count_rows );
 
-         if( $sleep > 0 )
+         if ( $sleep > 0 )
             sleep($sleep);
       }
       else
@@ -238,7 +238,7 @@ function bulk_fix_missing_game_snapshots( $status, $uid, $startgid, $limit, $sle
    }
    mysql_free_result($result);
 
-   if( $cnt_err > 0 )
+   if ( $cnt_err > 0 )
    {
       echo sprintf( "<br><span class=ErrorMsg>Found %d errors: last game-id with error = %d</span><br>\n",
                     $cnt_err, $lasterr_gid ),

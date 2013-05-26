@@ -35,9 +35,9 @@ define('IMG_SPACING', MINI_SPACING.MINI_SPACING);
    connect2mysql();
 
    $logged_in = who_is_logged( $player_row);
-   if( !$logged_in )
+   if ( !$logged_in )
       error('login_if_not_logged_in', 'old_goban_editor');
-   if( !ALLOW_OLD_GOBAN_EDITOR )
+   if ( !ALLOW_OLD_GOBAN_EDITOR )
       error('feature_disabled', 'old_goban_editor');
    $my_id = $player_row['ID'];
    $is_guest = ( $my_id <= GUESTS_ID_MAX );
@@ -58,7 +58,7 @@ define('IMG_SPACING', MINI_SPACING.MINI_SPACING);
    // init vars
    $tool_size = 21;
    $goban_form = 'goban';
-   if( $goban_text == '' && !@$_REQUEST['gob_new'] )
+   if ( $goban_text == '' && !@$_REQUEST['gob_new'] )
    {
       // <igoban> example
       $goban_text = <<<EOF_GOBAN
@@ -80,7 +80,7 @@ EOF_GOBAN;
    }
 
    $arr_sizes =  array();
-   for( $bs = MIN_BOARD_SIZE; $bs <= MAX_BOARD_SIZE; $bs++ )
+   for ( $bs = MIN_BOARD_SIZE; $bs <= MAX_BOARD_SIZE; $bs++ )
       $arr_sizes[$bs] = $bs;
 
    // setup goban for board-editing
@@ -101,20 +101,20 @@ EOF_GOBAN;
    $go_diagrams_str = NULL;
    $arr_dump_diagrams = array();
    $goban_preview_old = '';
-   if( ALLOW_GO_DIAGRAMS && is_javascript_enabled() && @$_REQUEST['gob_old'] )
+   if ( ALLOW_GO_DIAGRAMS && is_javascript_enabled() && @$_REQUEST['gob_old'] )
    {
-      if( $is_guest ) // view ok, edit forbidden
+      if ( $is_guest ) // view ok, edit forbidden
          error('not_allowed_for_guest', 'old_goban_editor');
 
       // create new entries for <goban> (without ID) in GoDiagrams-table
       // and replace <goban> tag with <goban id=#>
       $GoDiagrams = GoDiagram::create_godiagrams($goban_text, $cfg_board);
-      if( !is_null($GoDiagrams) )
+      if ( !is_null($GoDiagrams) )
       {
          $goban_preview_old = GoDiagram::replace_goban_tags_with_boards($goban_text, $GoDiagrams);
          $arr_dump_diagrams = array();
          $go_diagrams_str = GoDiagram::draw_editors($GoDiagrams);
-         if( !empty($go_diagrams_str) )
+         if ( !empty($go_diagrams_str) )
          {
             // needs to be added to "Save"-submits to summon edited data
             $arr_dump_diagrams = array( 'onClick' => "dump_all_data('{$goban_form}Form');" );
@@ -135,13 +135,13 @@ EOF_GOBAN;
    $errorlist = NULL;
 
    // save goban with values from edit-form
-   if( @$_REQUEST['gob_save'] && !@$_REQUEST['gob_preview'] && is_null($errorlist) )
+   if ( @$_REQUEST['gob_save'] && !@$_REQUEST['gob_preview'] && is_null($errorlist) )
    {
-      if( $is_guest ) // view ok, edit forbidden
+      if ( $is_guest ) // view ok, edit forbidden
          error('not_allowed_for_guest', 'old_goban_editor');
 
       // TODO insert or update
-      if( !is_null($GoDiagrams) )
+      if ( !is_null($GoDiagrams) )
       {
          // GoDiagram::save_diagrams($GoDiagrams); // <goban>-tags
       }
@@ -249,13 +249,13 @@ EOF_GOBAN;
 
    $gobform->echo_string();
 
-   if( @$_REQUEST['gob_preview'] )
+   if ( @$_REQUEST['gob_preview'] )
    {
       section( 'GobanPreview', T_('Preview area') );
       echo $goban_preview, "<br>\n";
    }
 
-   if( @$_REQUEST['gob_old'] && $goban_preview_old != '' )
+   if ( @$_REQUEST['gob_old'] && $goban_preview_old != '' )
    {
       section( 'GobanPreviewOld', T_('Preview area (Old Goban Editor)') );
       echo $goban_preview_old, "<br>\n";

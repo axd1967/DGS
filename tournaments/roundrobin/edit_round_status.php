@@ -38,13 +38,13 @@ $GLOBALS['ThePage'] = new Page('TournamentRoundStatusEdit');
    connect2mysql();
 
    $logged_in = who_is_logged( $player_row);
-   if( !$logged_in )
+   if ( !$logged_in )
       error('login_if_not_logged_in', 'Tournament.roundrobin.edit_round_status');
-   if( !ALLOW_TOURNAMENTS )
+   if ( !ALLOW_TOURNAMENTS )
       error('feature_disabled', 'Tournament.roundrobin.edit_round_status');
    $my_id = $player_row['ID'];
 
-   if( $my_id <= GUESTS_ID_MAX )
+   if ( $my_id <= GUESTS_ID_MAX )
       error('not_allowed_for_guest', 'Tournament.roundrobin.edit_round_status');
 
 /* Actual REQUEST calls used:
@@ -55,34 +55,34 @@ $GLOBALS['ThePage'] = new Page('TournamentRoundStatusEdit');
 */
 
    $tid = (int) @$_REQUEST['tid'];
-   if( $tid < 0 ) $tid = 0;
+   if ( $tid < 0 ) $tid = 0;
    $round = (int) @$_REQUEST['round'];
-   if( $round < 0 ) $round = 0;
+   if ( $round < 0 ) $round = 0;
 
    // load tourney and T-round
    $tr_status = new TournamentRoundStatus( $tid, $round ); // existing tournament-round?
    $tourney = $tr_status->get_tournament();
    $tstatus = new TournamentStatus( $tourney );
    $ttype = TournamentFactory::getTournament($tourney->WizardType);
-   if( !$ttype->need_rounds )
+   if ( !$ttype->need_rounds )
       error('tournament_edit_rounds_not_allowed', "Tournament.edit_round_status.need_rounds($tid,$round)");
 
    // create/edit allowed?
    $allow_edit_tourney = TournamentHelper::allow_edit_tournaments($tourney, $my_id);
-   if( !$allow_edit_tourney )
+   if ( !$allow_edit_tourney )
       error('tournament_edit_not_allowed', "Tournament.edit_round_status.edit_tournament($tid,$round,$my_id)");
 
    $tround = $tr_status->get_tournament_round();
    $is_admin = TournamentUtils::isAdmin();
 
-   if( @$_REQUEST['t_cancel'] ) // cancel status-change
+   if ( @$_REQUEST['t_cancel'] ) // cancel status-change
       jump_to("tournaments/roundrobin/edit_round_status.php?tid=$tid".URI_AMP."round=$round");
 
 
    // init
    $arr_status = TournamentRound::getStatusText();
    $status_errors = $tstatus->check_edit_status( array( TOURNEY_STATUS_PAIR, TOURNEY_STATUS_PLAY ) );
-   foreach( $status_errors as $errmsg )
+   foreach ( $status_errors as $errmsg )
       $tr_status->add_error( $errmsg );
 
    // check + parse edit-form + check status
@@ -91,12 +91,12 @@ $GLOBALS['ThePage'] = new Page('TournamentRoundStatusEdit');
    $new_status = $vars['status'];
    $tr_status->check_round_status_change($new_status);
    $tround->setStatus($new_status);
-   if( !$is_admin && $tourney->isFlagSet(TOURNEY_FLAG_LOCK_ADMIN) )
+   if ( !$is_admin && $tourney->isFlagSet(TOURNEY_FLAG_LOCK_ADMIN) )
       $tr_status->add_error( $tourney->buildAdminLockText() );
 
    // save tournament-object with values from edit-form (if no errors and something changed)
    $allow_confirm = ( !$tr_status->has_error() || $is_admin );
-   if( @$_REQUEST['t_confirm'] && count($edits) && $allow_confirm && count($status_errors) == 0 )
+   if ( @$_REQUEST['t_confirm'] && count($edits) && $allow_confirm && count($status_errors) == 0 )
    {
       ta_begin();
       {//HOT-section to change tournament-round-status
@@ -138,7 +138,7 @@ $GLOBALS['ThePage'] = new Page('TournamentRoundStatusEdit');
          'TEXT',        TournamentRound::getStatusText($tround->Status), ));
    $tform->add_row( array( 'HR' ));
 
-   if( $tr_status->has_error() )
+   if ( $tr_status->has_error() )
    {
       $tform->add_row( array(
             'DESCRIPTION', T_('Error'),
@@ -154,18 +154,18 @@ $GLOBALS['ThePage'] = new Page('TournamentRoundStatusEdit');
          'SELECTBOX',    'status', 1, $arr_status, $tround->Status, false,
          'SUBMITBUTTON', 't_save', T_('Change Round Status#tourney'), ));
 
-   if( count($edits) && @$_REQUEST['t_save'] ) // show confirmation
+   if ( count($edits) && @$_REQUEST['t_save'] ) // show confirmation
    {
       $confirm_notes = '';
-      if( $tr_status->has_error() )
+      if ( $tr_status->has_error() )
       {
-         if( $is_admin && count($status_errors) == 0 )
+         if ( $is_admin && count($status_errors) == 0 )
             $confirm_notes = T_('Confirm only, if you want to change the status regardless of the occured errors!');
       }
       else
       {
          $confirm_notes = T_('Are you still sure you want to change the status?');
-         if( !$is_admin )
+         if ( !$is_admin )
             $confirm_notes = // role_info comes here (see below)
                T_('Be aware, that only the status changes defined below are possible.')
                . "<br>\n"
@@ -174,7 +174,7 @@ $GLOBALS['ThePage'] = new Page('TournamentRoundStatusEdit');
                . $confirm_notes;
       }
 
-      if( $confirm_notes )
+      if ( $confirm_notes )
       {
          $role_str = $tourney->build_role_info();
          $tform->add_empty_row();
@@ -223,16 +223,16 @@ function parse_edit_form( &$tround )
 
    $old_vals = array() + $vars; // copy to determine edit-changes
    // read URL-vals into vars
-   foreach( $vars as $key => $val )
+   foreach ( $vars as $key => $val )
       $vars[$key] = get_request_arg( $key, $val );
 
    // parse URL-vars
-   if( $is_posted )
+   if ( $is_posted )
    {
       $tround->setStatus($vars['status'], true/*check-only*/);
 
       // determine edits
-      if( $old_vals['status'] != $vars['status'] ) $edits[] = T_('Status');
+      if ( $old_vals['status'] != $vars['status'] ) $edits[] = T_('Status');
    }
 
    return array( $vars, array_unique($edits) );
@@ -276,7 +276,7 @@ function build_status_notes()
    $arrst[TROUND_STATUS_PLAY] = T_('Tournament playing phase (tournament game can be played, set pool winners for next round or final results)#trd_status');
    $arrst[TROUND_STATUS_DONE] = T_('Tournament finalizing phase (tournament round is finished)#trd_status');
    $narr = array( T_('Tournament Round Status') );
-   foreach( $arrst as $status => $descr )
+   foreach ( $arrst as $status => $descr )
       $narr[] = sprintf( "%s = %s", TournamentRound::getStatusText($status), $descr );
    $notes[] = $narr;
 

@@ -34,7 +34,7 @@ require_once 'include/table_columns.php';
    connect2mysql();
 
    $logged_in = who_is_logged( $player_row);
-   if( !$logged_in )
+   if ( !$logged_in )
       error('login_if_not_logged_in', 'game_calc');
 
    $page = "game_calc.php";
@@ -44,20 +44,20 @@ require_once 'include/table_columns.php';
 */
 
    $gid = (int)get_request_arg('gid');
-   if( $gid <= 0 ) $gid = 0;
+   if ( $gid <= 0 ) $gid = 0;
 
    $game = $game_row = $rlog_b = $rlog_w = null;
-   if( @$_REQUEST['show'] && $gid )
+   if ( @$_REQUEST['show'] && $gid )
    {
       $game = Games::load_game( $gid );
-      if( !is_null($game) )
+      if ( !is_null($game) )
       {
-         if( $game->Status == GAME_STATUS_FINISHED )
+         if ( $game->Status == GAME_STATUS_FINISHED )
          {
             $rlog = Ratinglog::load_ratinglog_with_query( new QuerySQL( SQLP_WHERE, "RL.gid=$gid", SQLP_ORDER, "RL.ID ASC" ) );
             $rlog_id = (is_null($rlog)) ? 0 : $rlog->ID;
             $game_row = array();
-            foreach( array( 'b', 'w' ) as $pfx )
+            foreach ( array( 'b', 'w' ) as $pfx )
             {
                $uid = ($pfx == 'b') ? $game->Black_ID : $game->White_ID;
                $rlog_data = load_rating_data( $uid, $rlog_id );
@@ -88,7 +88,7 @@ require_once 'include/table_columns.php';
    $gcform->echo_string(1);
 
    section( 'result', T_('Result') );
-   if( !is_null($game) ) // show players-rating-results for finished or running game
+   if ( !is_null($game) ) // show players-rating-results for finished or running game
    {
       echo "Game: ", make_html_safe("<game $gid>", true), "\n";
 
@@ -101,20 +101,20 @@ require_once 'include/table_columns.php';
          "\n\n";
 
       $is_running = isRunningGame($game->Status);
-      if( $is_running )
+      if ( $is_running )
       {
          print_rating_update( $game, array( 'Score' =>  1 ) );
          print_rating_update( $game, array( 'Score' => -1 ) );
          print_rating_update( $game, array( 'Score' =>  0 ) );
       }
-      elseif( $game->Status == GAME_STATUS_FINISHED )
+      elseif ( $game->Status == GAME_STATUS_FINISHED )
          print_rating_update( $game, $game_row );
       else
          echo "Game-Status = [{$game->Status}]\n";
 
       echo "</pre></td></tr></table>\n";
 
-      if( !$is_running )
+      if ( !$is_running )
          echo_ratinglogs( $rlog_b, $rlog_w );
    }
 
@@ -130,12 +130,12 @@ require_once 'include/table_columns.php';
 // FIXME: could be wrong if user had rating-change inbetween
 function load_rating_data( $uid, $rlog_id, $gid=0 )
 {
-   if( $rlog_id > 0 )
+   if ( $rlog_id > 0 )
    {
       $qsql = new QuerySQL(
          SQLP_WHERE, "RL.uid=$uid",
          SQLP_ORDER, "RL.ID DESC" );
-      if( $gid > 0 )
+      if ( $gid > 0 )
          $qsql->add_part( SQLP_WHERE, "RL.gid=$gid" );
       else
          $qsql->add_part( SQLP_WHERE, "RL.ID < $rlog_id" );
@@ -144,7 +144,7 @@ function load_rating_data( $uid, $rlog_id, $gid=0 )
    else
       $rlog = null;
 
-   if( !$rlog ) // calc from initial-rating
+   if ( !$rlog ) // calc from initial-rating
    {
       $user = User::load_user( $uid );
       $initial_rating = $user->urow['InitialRating'];
@@ -160,7 +160,7 @@ function load_rating_data( $uid, $rlog_id, $gid=0 )
 
 function echo_ratinglogs( $rlog_b, $rlog_w )
 {
-   if( is_null($rlog_b) || is_null($rlog_w) )
+   if ( is_null($rlog_b) || is_null($rlog_w) )
    {
       echo "No ratinglog found!\n";
       return;
@@ -189,11 +189,11 @@ function echo_ratinglogs( $rlog_b, $rlog_w )
 
 function convert_rating_result( $result )
 {
-   if( $result == 0 )
+   if ( $result == 0 )
       return '(RATED-game)';
-   elseif( $result == 1 )
+   elseif ( $result == 1 )
       return '(game can be deleted)';
-   elseif( $result == 2 )
+   elseif ( $result == 2 )
       return '(game not rated)';
    return '???';
 }//convert_rating_result
@@ -202,11 +202,11 @@ function print_rating_update( $game, $game_row )
 {
    // build title
    $score = $game->Score;
-   if( isset($game_row['Score']) )
+   if ( isset($game_row['Score']) )
       $score = $game_row['Score'];
-   if( $score < 0 )
+   if ( $score < 0 )
       $title = 'Black wins';
-   elseif( $score > 0 )
+   elseif ( $score > 0 )
       $title = 'White wins';
    else
       $title = 'Jigo';

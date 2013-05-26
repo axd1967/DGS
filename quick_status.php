@@ -46,7 +46,7 @@ header('Access-Control-Allow-Origin: *');
      order=..           : controls next-game-order for status-games output
 */
 
-if( $is_down )
+if ( $is_down )
 {
    //recover_language(); //set $language_used and $encoding_used
    loc_start_page();
@@ -59,14 +59,14 @@ else
    $version = (int)get_request_arg('version');
 
    $no_cache = (int)get_request_arg('no_cache', '0');
-   if( $no_cache == 2 && (FRIENDLY_SHORT_NAME == 'DGS') )
+   if ( $no_cache == 2 && (FRIENDLY_SHORT_NAME == 'DGS') )
       error('invalid_args', "quick_status.check.no_cache.live_server($no_cache)");
    loc_start_page( !$no_cache );
 
    // login required to allow caching!
    $uhandle = trim( get_request_arg('userid') );
    $passwd = get_request_arg('passwd');
-   if( $uhandle && $passwd )
+   if ( $uhandle && $passwd )
       $login_mode = 'password';
    else
    {
@@ -83,20 +83,20 @@ else
          "SELECT ID, Timezone, AdminOptions, CountBulletinNew, SkipBulletin, GamesMPG, NextGameOrder, " .
          "UNIX_TIMESTAMP(Sessionexpire) AS Expire, Sessioncode, Password, Newpassword " .
          "FROM Players WHERE Handle='" . mysql_addslashes($uhandle)."' LIMIT 1" );
-   if( !$player_row )
+   if ( !$player_row )
       error('unknown_user', "quick_status.find_player2($uhandle)");
 
-   if( (@$player_row['AdminOptions'] & ADMOPT_DENY_LOGIN) )
+   if ( (@$player_row['AdminOptions'] & ADMOPT_DENY_LOGIN) )
       error('login_denied', 'quick_status', /*log*/false);
 
-   if( $login_mode == 'password' )
+   if ( $login_mode == 'password' )
    {
-      if( !check_password( $uhandle, $player_row['Password'], $player_row['Newpassword'], $passwd ) )
+      if ( !check_password( $uhandle, $player_row['Password'], $player_row['Newpassword'], $passwd ) )
          error('wrong_password', "quick_status.check_password($uhandle)");
    }
    else //if( $login_mode == 'cookie' )
    {
-      if( $player_row['Sessioncode'] !== safe_getcookie('sessioncode') || $player_row['Expire'] < $NOW )
+      if ( $player_row['Sessioncode'] !== safe_getcookie('sessioncode') || $player_row['Expire'] < $NOW )
          error('not_logged_in', "quick_status.expired($uhandle)");
    }
 
@@ -114,7 +114,7 @@ else
    $expire_min  = array(); // QST_CACHE_... key => minutes used to calculate current expire-time
    $crc32       = array(); // QST_CACHE_... key => crc32() of last printed data
    $ARR_CACHEKEYS = array( QST_CACHE_BULLETIN, QST_CACHE_MSG, QST_CACHE_GAMES, QST_CACHE_MPG );
-   foreach( $ARR_CACHEKEYS as $block )
+   foreach ( $ARR_CACHEKEYS as $block )
    {
       $datablocks[$block] = '';
       $load_data[$block] = true;
@@ -125,12 +125,12 @@ else
       $expire_time[$block] = $NOW + $min * SECS_PER_MIN;
    }
 
-   if( $no_cache != 2 )
+   if ( $no_cache != 2 )
       $clear_cache = parse_cache_content( $content_body );
    else
       $clear_cache = true;
 
-   if( !$allow_exec && !$clear_cache )
+   if ( !$allow_exec && !$clear_cache )
    {
       warning('excessive_usage',
          "quick_status.returning_cached_data($uhandle)" .
@@ -142,48 +142,48 @@ else
 
    setTZ( $player_row['Timezone'] );
 
-   if( (@$player_row['AdminOptions'] & ADMOPT_DENY_LOGIN) )
+   if ( (@$player_row['AdminOptions'] & ADMOPT_DENY_LOGIN) )
       error('login_denied', "quick_status($player_id)");
 
 
    // Data-Blocks -------------------------------
 
-   if( $version != 2 )
+   if ( $version != 2 )
       warning('deprecated_version');
 
    $nothing_found = true;
 
-   if( $version == 2 )
+   if ( $version == 2 )
    {
-      if( $load_data[QST_CACHE_BULLETIN] )
+      if ( $load_data[QST_CACHE_BULLETIN] )
          print_bulletins( $player_row );
       else
          print_datablock(QST_CACHE_BULLETIN);
    }
 
-   if( $load_data[QST_CACHE_MSG] )
+   if ( $load_data[QST_CACHE_MSG] )
       print_messages( $version, $player_id );
    else
       print_datablock(QST_CACHE_MSG);
 
-   if( $load_data[QST_CACHE_GAMES] )
+   if ( $load_data[QST_CACHE_GAMES] )
       print_status_games( $version, $player_row );
    else
       print_datablock(QST_CACHE_GAMES);
 
-   if( $version == 2 )
+   if ( $version == 2 )
    {
-      if( $load_data[QST_CACHE_MPG] )
+      if ( $load_data[QST_CACHE_MPG] )
          print_mpg( $player_row );
       else
          print_datablock(QST_CACHE_MPG);
    }
 
 
-   if( $nothing_found )
+   if ( $nothing_found )
       warning('empty lists');
 
-   if( $no_cache != 2 )
+   if ( $no_cache != 2 )
       write_quick_status_datastore( $path_cache, $content_header );
 
    loc_end_page();
@@ -193,7 +193,7 @@ else
 function append_data( $block, $line=null )
 {
    global $datablocks;
-   if( is_null($line) )
+   if ( is_null($line) )
       $datablocks[$block] = ''; // init
    else
       $datablocks[$block] .= $line;
@@ -203,7 +203,7 @@ function append_data( $block, $line=null )
 function print_datablock( $block )
 {
    global $datablocks, $nothing_found;
-   if( !empty($datablocks[$block]) )
+   if ( !empty($datablocks[$block]) )
    {
       echo $datablocks[$block];
       $nothing_found = false;
@@ -218,20 +218,20 @@ function print_bulletins( $player_row )
    append_data(QST_CACHE_BULLETIN); //clear block
 
    $player_id = @$player_row['ID'];
-   if( $player_id > 0 && $player_row['CountBulletinNew'] < 0 )
+   if ( $player_id > 0 && $player_row['CountBulletinNew'] < 0 )
       Bulletin::update_count_bulletin_new( 'quick_status', $player_id, COUNTNEW_RECALC );
 
    // Bulletin-header: type=B, Bulletin.ID, TargetType, Category, PublishTime, ExpireTime, Subject
    append_data(QST_CACHE_BULLETIN,
       "## B,bulletin_id,target_type,category,'publish_time','expire_time','subject'\n" );
 
-   if( $player_row['CountBulletinNew'] > 0 ) // show unread bulletins
+   if ( $player_row['CountBulletinNew'] > 0 ) // show unread bulletins
    {
       $arr_bulletins = Bulletin::load_cache_bulletins( 'quick_status', $player_id );
-      if( count($arr_bulletins) > 0 )
+      if ( count($arr_bulletins) > 0 )
          $nothing_found = false;
 
-      foreach( $arr_bulletins as $bulletin )
+      foreach ( $arr_bulletins as $bulletin )
       {
          // type, Bulletin.ID, TargetType, Category, PublishTime, ExpireTime, Subject
          append_data(QST_CACHE_BULLETIN,
@@ -265,7 +265,7 @@ function print_messages( $version, $player_id )
 
    $result = db_query( 'quick_status.find_messages', $query );
 
-   if( $version == 2 )
+   if ( $version == 2 )
    {
       // message-header: type=M, Messages.ID, me.Folder_nr, Messages.Type, correspondent.Handle, message.Subject, message.Date
       append_data(QST_CACHE_MSG,
@@ -278,13 +278,13 @@ function print_messages( $version, $player_id )
       $msg_fmt = "'M',%s,'%s','%s','%s'\n"; // diff: M <- 'M'
    }
 
-   while( $row = mysql_fetch_assoc($result) )
+   while ( $row = mysql_fetch_assoc($result) )
    {
       $nothing_found = false;
-      if( !@$row['sender'] )
+      if ( !@$row['sender'] )
          $row['sender'] = '[Server message]';
 
-      if( $version == 2 )
+      if ( $version == 2 )
       {
          // type, msg.ID, me.Folder_nr, msg.Type, correspondent.Handle, msg.Subject, msg.Date
          append_data(QST_CACHE_MSG,
@@ -316,7 +316,7 @@ function print_status_games( $version, $player_row )
    $player_id = @$player_row['ID'];
    $load_prio = ( $player_id > 0 );
    $game_order = strtoupper( trim( get_request_arg('order', @$player_row['NextGameOrder']) ));
-   if( (string)$game_order == '' )
+   if ( (string)$game_order == '' )
       $game_order = @$player_row['NextGameOrder'];
 
    // build status-query (including next-game-order)
@@ -328,7 +328,7 @@ function print_status_games( $version, $player_row )
    $timefmt_flags = TIMEFMT_ENGL | TIMEFMT_ADDTYPE;
 
    // game-header: type=G, game.ID, opponent.handle, player.color, Lastmove.date, TimeRemaining, GameAction, GameStatus, MovesId, tid, ShapeID, GameType, GamePrio, opponent.LastAccess.date, Handicap
-   if( $version == 2 )
+   if ( $version == 2 )
    {
       append_data(QST_CACHE_GAMES,
            "## G,game_id,'opponent_handle',player_color,'lastmove_date','time_remaining',game_action,game_status,move_id,tournament_id,shape_id,game_type,game_prio,'opponent_lastaccess_date',handicap\n" );
@@ -338,7 +338,7 @@ function print_status_games( $version, $player_row )
 
    $arr_colors = array( BLACK => 'B', WHITE => 'W' );
    $crc_val = (int)$version;
-   while( $row = mysql_fetch_assoc($result) )
+   while ( $row = mysql_fetch_assoc($result) )
    {
       $nothing_found = false;
 
@@ -350,7 +350,7 @@ function print_status_games( $version, $player_row )
       $game_status = isStartedGame($chk_game_status) ? $chk_game_status : '';
       $crc_val .= ':' . $row['ID'] . '/' . $row['X_Lastchanged'];
 
-      if( $version == 2 )
+      if ( $version == 2 )
       {
          $game_action = GameHelper::get_quick_game_action( $row['Status'], $row['Handicap'], $row['Moves'],
             new FairKomiNegotiation( GameSetup::new_from_game_setup($row['GameSetup']), $row ) );
@@ -378,7 +378,7 @@ function print_status_games( $version, $player_row )
 
    // progressive caching
    $new_crc = crc32($crc_val);
-   if( $crc32[QST_CACHE_GAMES] == 0 || $crc32[QST_CACHE_GAMES] != $new_crc ) // changed data
+   if ( $crc32[QST_CACHE_GAMES] == 0 || $crc32[QST_CACHE_GAMES] != $new_crc ) // changed data
    {
       $crc32[QST_CACHE_GAMES] = $new_crc;
       $exp_min = MIN_REQ_IVAL_GAMES;
@@ -396,7 +396,7 @@ function print_mpg( $player_row )
 
    append_data(QST_CACHE_MPG); //clear block
 
-   if( $player_row['GamesMPG'] > 0 )
+   if ( $player_row['GamesMPG'] > 0 )
    {
       $player_id = @$player_row['ID'];
       $query = "SELECT G.ID, G.GameType, G.GamePlayers, G.Ruleset, G.Size, G.Moves AS X_Joined, GP.Flags, "
@@ -411,7 +411,7 @@ function print_mpg( $player_row )
       append_data(QST_CACHE_MPG,
          "## MPG,game_id,game_type,ruleset,size,'lastchanged_date',ready_to_start\n" );
 
-      while( $row = mysql_fetch_assoc($result) )
+      while ( $row = mysql_fetch_assoc($result) )
       {
          $nothing_found = false;
 
@@ -438,7 +438,7 @@ function write_quick_status_datastore( $path, $header )
    global $version, $datablocks, $expire_time, $expire_min, $crc32, $ARR_CACHEKEYS;
 
    $out = $header . "\n";
-   foreach( $ARR_CACHEKEYS as $block )
+   foreach ( $ARR_CACHEKEYS as $block )
    {
       // format: "BLOCK block version expire-time expire-min crc32" LF data "END" LF
       $out .= sprintf( "BLOCK %s %s %s %s %s\n%sEND\n",
@@ -455,7 +455,7 @@ function parse_cache_content( $content )
    global $version, $datablocks, $load_data, $expire_time, $expire_min, $crc32, $NOW;
 
    $pcont = $content;
-   while( preg_match("/^BLOCK (\S+) (\S+) (\S+) (\S+) (\S+)\n(.*?)END\n(.*)$/s", $pcont, $matches) )
+   while ( preg_match("/^BLOCK (\S+) (\S+) (\S+) (\S+) (\S+)\n(.*?)END\n(.*)$/s", $pcont, $matches) )
    {
       // NOTE: $expire = expire-time, when reached -> reload data
       list( $tmp, $block, $data_version, $expire, $exp_min, $crc, $data, $rem_pcnt ) = $matches;
@@ -465,7 +465,7 @@ function parse_cache_content( $content )
       $crc32[$block] = $crc;
       $pcont = $rem_pcnt;
 
-      if( $version == $data_version && $expire > 0 && $NOW < $expire )
+      if ( $version == $data_version && $expire > 0 && $NOW < $expire )
       {
          $datablocks[$block] = $data; // row-data
          $load_data[$block] = false; // take from cache
@@ -474,7 +474,7 @@ function parse_cache_content( $content )
 
    // handle clear-cache commands, appended by write-operations on objects: B, M, G MPG (see QST_CACHE_...)
    $clear_cache = false;
-   while( preg_match("/^CLEAR (\S+)\n+(.*?)$/s", $pcont, $matches) )
+   while ( preg_match("/^CLEAR (\S+)\n+(.*?)$/s", $pcont, $matches) )
    {
       list( $tmp, $block, $rem_pcnt ) = $matches;
       $pcont = $rem_pcnt;
@@ -503,7 +503,7 @@ function loc_start_page( $use_cache=true )
    //header( "Content-Disposition: attachment; filename=\"$filename\"" );
    header( "Content-Description: PHP Generated Data" );
 
-   if( $use_cache )
+   if ( $use_cache )
    {
       header('Expires: ' . gmdate(GMDATE_FMT, $NOW+5*SECS_PER_MIN)); // 5min
       header('Last-Modified: ' . gmdate(GMDATE_FMT, $NOW));

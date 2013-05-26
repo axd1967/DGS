@@ -29,7 +29,7 @@ $GLOBALS['ThePage'] = new Page('RankConverter', 0, ROBOTS_NO_FOLLOW,
 {
    connect2mysql();
    $logged_in = who_is_logged($player_row);
-   if( !$logged_in )
+   if ( !$logged_in )
       db_close();
 
    $page = "rank_converter.php";

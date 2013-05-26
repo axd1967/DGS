@@ -9,7 +9,7 @@
     $pattern = "/(19|20)(\d{2})-(\d{1,2})-(\d{1,2}) (\d{1,2}):(\d{1,2}):(\d{1,2})/";
     preg_match ($pattern, "$datestamp", $matches);
        
-    if(empty($datestamp) or $datestamp == "0000-00-00") 
+    if (empty($datestamp) or $datestamp == "0000-00-00") 
       {
         $datestamp = "0000-00-00 00:00:00";
       }

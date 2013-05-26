@@ -70,19 +70,19 @@ class QuickSuite
          'QuickHandlerFolder',      // folder: list
       );
 
-      if( is_null($obj) )
+      if ( is_null($obj) )
          $obj = get_request_arg('obj');
-      if( is_null($cmd) )
+      if ( is_null($cmd) )
          $cmd = get_request_arg('cmd');
       $quick_obj = new QuickObject( $obj, $cmd );
 
       $quick_handler = null;
-      foreach( $quick_handler_list as $handler_class )
+      foreach ( $quick_handler_list as $handler_class )
       {
-         if( call_user_func( array($handler_class, 'canHandle'), $obj, $cmd ) ) // Handler::canHandle(obj,cmd)
+         if ( call_user_func( array($handler_class, 'canHandle'), $obj, $cmd ) ) // Handler::canHandle(obj,cmd)
             $quick_handler = new $handler_class( $quick_obj );
       }
-      if( is_null($quick_handler) )
+      if ( is_null($quick_handler) )
          error('invalid_args', "QuickSuite:getQuickHandler.no_handler($obj,$cmd)");
 
       return $quick_handler;

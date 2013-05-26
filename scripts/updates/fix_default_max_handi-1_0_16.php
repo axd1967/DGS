@@ -30,11 +30,11 @@ $GLOBALS['ThePage'] = new Page('Script', PAGEFLAG_IMPLICIT_FLUSH );
    set_time_limit(0); // don't want script-break during "transaction" with multi-db-queries or for large-datasets
 
    $logged_in = who_is_logged( $player_row);
-   if( !$logged_in )
+   if ( !$logged_in )
       error('login_if_not_logged_in', 'scripts.fix_default_max_handi-1_0_16');
-   if( $player_row['ID'] <= GUESTS_ID_MAX )
+   if ( $player_row['ID'] <= GUESTS_ID_MAX )
       error('not_allowed_for_guest', 'scripts.fix_default_max_handi-1_0_16');
-   if( !(@$player_row['admin_level'] & ADMIN_DATABASE) )
+   if ( !(@$player_row['admin_level'] & ADMIN_DATABASE) )
       error('adminlevel_too_low', 'scripts.fix_default_max_handi-1_0_16');
 
    $page = $_SERVER['PHP_SELF'];
@@ -46,12 +46,12 @@ $GLOBALS['ThePage'] = new Page('Script', PAGEFLAG_IMPLICIT_FLUSH );
 //echo ">>>> One shot fix. Do not run it again."; end_html(); exit;
 
    $do_it = @$_REQUEST['do_it'];
-   if( $do_it )
+   if ( $do_it )
    {
       function dbg_query($s) {
-         if( !mysql_query( $s) )
+         if ( !mysql_query( $s) )
            die("<BR>$s;<BR>" . mysql_error() );
-         if( DBG_QUERY>1 ) error_log("dbg_query(DO_IT): $s");
+         if ( DBG_QUERY>1 ) error_log("dbg_query(DO_IT): $s");
       }
       echo "<p>*** Fixes default max-handicap ***"
          ."<br>".anchor(make_url($page, $page_args), 'Just show it')
@@ -61,7 +61,7 @@ $GLOBALS['ThePage'] = new Page('Script', PAGEFLAG_IMPLICIT_FLUSH );
    {
       function dbg_query($s) {
          echo "<BR>$s; ";
-         if( DBG_QUERY>1 ) error_log("dbg_query(SIMUL): $s");
+         if ( DBG_QUERY>1 ) error_log("dbg_query(SIMUL): $s");
       }
       $tmp = array_merge($page_args,array('do_it' => 1));
       echo "<p>(just show needed queries)"
@@ -79,7 +79,7 @@ $GLOBALS['ThePage'] = new Page('Script', PAGEFLAG_IMPLICIT_FLUSH );
    $cnts[] = handle_tournament_rules_gamesetup();
 
    $cnt_all = $cnt_fix = 0;
-   foreach( $cnts as $cnt_arr )
+   foreach ( $cnts as $cnt_arr )
    {
       $cnt_all += $cnt_arr[0];
       $cnt_fix += $cnt_arr[1];
@@ -87,7 +87,7 @@ $GLOBALS['ThePage'] = new Page('Script', PAGEFLAG_IMPLICIT_FLUSH );
 
    echo "<br><br>Found $cnt_all entries in total to fix ...\n";
 
-   if( $do_it )
+   if ( $do_it )
    {
       echo "<br>Found $cnt_fix entries in total that required fixing ...\n";
       echo 'Fix by setting default-max-handicap finished.';
@@ -104,9 +104,9 @@ function load_games_gamesetup()
    $result = db_query("fix_default_max_handi.load_games_gamesetup()",
       "SELECT ID, Status, Size, Handicap, Komi, GameSetup, ShapeID FROM Games " .
       "WHERE GameSetup>'' AND GameType='".GAMETYPE_GO."'" );
-   while( $row = mysql_fetch_assoc( $result ) )
+   while ( $row = mysql_fetch_assoc( $result ) )
    {
-      if( $row['Status'] == GAME_STATUS_SETUP ) // skip MPGs (shouldn't occur)
+      if ( $row['Status'] == GAME_STATUS_SETUP ) // skip MPGs (shouldn't occur)
          continue;
       $arr[] = $row;
    }
@@ -120,7 +120,7 @@ function load_profiles_gamesetup( $template_type )
    $arr = array();
    $result = db_query("fix_default_max_handi.load_profiles_gamesetup($template_type)",
       "SELECT ID, Text FROM Profiles WHERE Type=$template_type" );
-   while( $row = mysql_fetch_assoc( $result ) )
+   while ( $row = mysql_fetch_assoc( $result ) )
    {
       $tmpl = ProfileTemplate::decode( $template_type, $row['Text'] );
       $arr[$row['ID']] = $tmpl;
@@ -142,19 +142,19 @@ function handle_games_gamesetup()
    echo "<br>Found $all_cnt games to fix ...\n";
 
    $cnt_fix = 0;
-   foreach( $arr_games as $grow )
+   foreach ( $arr_games as $grow )
    {
-      if( ($curr_cnt++ % 50) == 0 )
+      if ( ($curr_cnt++ % 50) == 0 )
          echo "<br><br>... $curr_cnt of $all_cnt updated ...\n";
 
-      if( $grow['Status'] == GAME_STATUS_INVITED ) // invitation or dispute
+      if ( $grow['Status'] == GAME_STATUS_INVITED ) // invitation or dispute
       {
-         if( fix_game_invite_dispute( $grow ) )
+         if ( fix_game_invite_dispute( $grow ) )
             $cnt_fix++;
       }
       else // finished or running game
       {
-         if( fix_game_finished_running( $grow ) )
+         if ( fix_game_finished_running( $grow ) )
             $cnt_fix++;
       }
    }
@@ -169,20 +169,20 @@ function fix_game_invite_dispute( $row )
 {
    $gid = (int)$row['ID'];
    $gs_arr = GameSetup::parse_invitation_game_setup( -1, $row['GameSetup'], $gid );
-   if( count($gs_arr) != 2 || is_null($gs_arr[0]) || is_null($gs_arr[1]) )
+   if ( count($gs_arr) != 2 || is_null($gs_arr[0]) || is_null($gs_arr[1]) )
       error('internal_error', "fix_default_max_handi.fix_game_invite_dispute.find_bad_gamesetup_inv.need2($gid,{$row['GameSetup']})");
 
    $update = false;
-   foreach( $gs_arr as $gs )
+   foreach ( $gs_arr as $gs )
    {
-      if( $gs->MaxHandicap == 0 )
+      if ( $gs->MaxHandicap == 0 )
       {
          $gs->MaxHandicap = DEFAULT_MAX_HANDICAP;
          $update = true;
       }
    }
 
-   if( $update )
+   if ( $update )
    {
       $new_gs = GameSetup::build_invitation_game_setup( $gs_arr[0], $gs_arr[1] );
       dbg_query( "UPDATE Games SET GameSetup='".mysql_addslashes($new_gs)."' WHERE ID=$gid LIMIT 1" );
@@ -196,17 +196,17 @@ function fix_game_invite_dispute( $row )
 function fix_game_finished_running( $row )
 {
    $gs = GameSetup::new_from_game_setup( $row['GameSetup'], /*inv*/false, /*null-empty*/true );
-   if( is_null($gs) )
+   if ( is_null($gs) )
       return false;
 
    $def_max_handi = DefaultMaxHandicap::calc_def_max_handicap( $row['Size'] );
    $update = false;
-   if( $gs->MaxHandicap == 0 )
+   if ( $gs->MaxHandicap == 0 )
       $update = true;
-   elseif( $gs->MaxHandicap == MAX_HANDICAP && $gs->Handicap <= $def_max_handi )
+   elseif ( $gs->MaxHandicap == MAX_HANDICAP && $gs->Handicap <= $def_max_handi )
       $update = true;
 
-   if( $update )
+   if ( $update )
    {
       $gs->MaxHandicap = DEFAULT_MAX_HANDICAP;
       $new_gs = $gs->encode();
@@ -231,12 +231,12 @@ function handle_profiles_gamesetup( $templ_type )
    echo "<br>Found $all_cnt profiles type [$templ_type] to fix ...\n";
 
    $cnt_fix = 0;
-   foreach( $arr_templates as $profile_id => $tmpl )
+   foreach ( $arr_templates as $profile_id => $tmpl )
    {
-      if( ($curr_cnt++ % 50) == 0 )
+      if ( ($curr_cnt++ % 50) == 0 )
          echo "<br><br>... $curr_cnt of $all_cnt updated ...\n";
 
-      if( fix_profile( $templ_type, $profile_id, $tmpl ) )
+      if ( fix_profile( $templ_type, $profile_id, $tmpl ) )
          $cnt_fix++;
    }
 
@@ -248,20 +248,20 @@ function handle_profiles_gamesetup( $templ_type )
 function fix_profile( $templ_type, $prof_id, $tmpl )
 {
    $update = false;
-   if( $templ_type == PROFTYPE_TMPL_INVITE )
+   if ( $templ_type == PROFTYPE_TMPL_INVITE )
    {
-      if( $tmpl->GameSetup->MaxHandicap == 0 )
+      if ( $tmpl->GameSetup->MaxHandicap == 0 )
          $update = true;
    }
-   elseif( $templ_type == PROFTYPE_TMPL_NEWGAME )
+   elseif ( $templ_type == PROFTYPE_TMPL_NEWGAME )
    {
-      if( $tmpl->GameSetup->MaxHandicap == MAX_HANDICAP )
+      if ( $tmpl->GameSetup->MaxHandicap == MAX_HANDICAP )
          $update = true;
-      elseif( $tmpl->GameSetup->MaxHandicap == 0 && $tmpl->GameSetup->ViewMode == GSETVIEW_STANDARD )
+      elseif ( $tmpl->GameSetup->MaxHandicap == 0 && $tmpl->GameSetup->ViewMode == GSETVIEW_STANDARD )
          $update = true;
    }
 
-   if( $update )
+   if ( $update )
    {
       $tmpl->GameSetup->MaxHandicap = DEFAULT_MAX_HANDICAP;
       $new_gs = $tmpl->encode();

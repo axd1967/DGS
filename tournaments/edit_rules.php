@@ -40,13 +40,13 @@ $GLOBALS['ThePage'] = new Page('TournamentRulesEdit');
    connect2mysql();
 
    $logged_in = who_is_logged( $player_row);
-   if( !$logged_in )
+   if ( !$logged_in )
       error('login_if_not_logged_in', 'Tournament.edit_rules');
-   if( !ALLOW_TOURNAMENTS )
+   if ( !ALLOW_TOURNAMENTS )
       error('feature_disabled', 'Tournament.edit_rules');
    $my_id = $player_row['ID'];
 
-   if( $my_id <= GUESTS_ID_MAX )
+   if ( $my_id <= GUESTS_ID_MAX )
       error('not_allowed_for_guest', 'Tournament.edit_rules');
 
 /* Actual REQUEST calls used:
@@ -56,21 +56,21 @@ $GLOBALS['ThePage'] = new Page('TournamentRulesEdit');
 */
 
    $tid = (int) @$_REQUEST['tid'];
-   if( $tid < 0 ) $tid = 0;
+   if ( $tid < 0 ) $tid = 0;
 
    $tourney = TournamentCache::load_cache_tournament( 'Tournament.edit_rules.find_tournament', $tid );
    $tstatus = new TournamentStatus( $tourney );
 
    // create/edit allowed?
    $allow_edit_tourney = TournamentHelper::allow_edit_tournaments($tourney, $my_id);
-   if( !$allow_edit_tourney )
+   if ( !$allow_edit_tourney )
       error('tournament_edit_not_allowed', "Tournament.edit_rules.edit_tournament($tid,$my_id)");
 
    $trule = TournamentCache::load_cache_tournament_rules( 'Tournament.edit_rules', $tid );
    $trule->TourneyType = $tourney->Type; // for parsing rules
 
    $errors = $tstatus->check_edit_status( TournamentRules::get_edit_tournament_status() );
-   if( !TournamentUtils::isAdmin() && $tourney->isFlagSet(TOURNEY_FLAG_LOCK_ADMIN) )
+   if ( !TournamentUtils::isAdmin() && $tourney->isFlagSet(TOURNEY_FLAG_LOCK_ADMIN) )
       $errors[] = $tourney->buildAdminLockText();
 
    // check + parse edit-form (notes)
@@ -79,11 +79,11 @@ $GLOBALS['ThePage'] = new Page('TournamentRulesEdit');
    $errors = array_merge( $errors, $input_errors );
 
    // check (if Rated=Yes) that ALL existing TPs have a user-rating (can happen by admin-ops)
-   if( $trule->Rated && !TournamentParticipant::check_rated_tournament_participants($tid) )
+   if ( $trule->Rated && !TournamentParticipant::check_rated_tournament_participants($tid) )
       $errors[] = T_('There are users without a rating, which conflicts with a "rated" tournament.');
 
    // save tournament-rules-object with values from edit-form
-   if( @$_REQUEST['tr_save'] && !@$_REQUEST['tr_preview'] && count($errors) == 0 )
+   if ( @$_REQUEST['tr_save'] && !@$_REQUEST['tr_preview'] && count($errors) == 0 )
    {
       $trule->update();
       TournamentLogHelper::log_change_tournament_rules( $tid, $allow_edit_tourney, $edits, $old_trule, $trule );
@@ -104,13 +104,13 @@ $GLOBALS['ThePage'] = new Page('TournamentRulesEdit');
          'DESCRIPTION', T_('Tournament ID'),
          'TEXT',        $tourney->build_info() ));
    TournamentUtils::show_tournament_flags( $trform, $tourney );
-   if( $trule->Lastchanged )
+   if ( $trule->Lastchanged )
       $trform->add_row( array(
             'DESCRIPTION', T_('Last changed'),
             'TEXT',        TournamentUtils::buildLastchangedBy($trule->Lastchanged, $trule->ChangedBy) ));
    $trform->add_row( array( 'HR' ));
 
-   if( count($errors) )
+   if ( count($errors) )
    {
       $trform->add_row( array(
             'DESCRIPTION', T_('Error'),
@@ -136,7 +136,7 @@ $GLOBALS['ThePage'] = new Page('TournamentRulesEdit');
          'SUBMITBUTTON', 'tr_preview', T_('Preview'),
       ));
 
-   if( @$_REQUEST['tr_preview'] || $trule->Notes != '' )
+   if ( @$_REQUEST['tr_preview'] || $trule->Notes != '' )
    {
       $trform->add_row( array(
             'DESCRIPTION', T_('Preview Notes'),
@@ -167,10 +167,10 @@ function parse_edit_form( &$trule )
    $errors = array();
    $is_posted = ( @$_REQUEST['tr_save'] || @$_REQUEST['tr_preview'] );
 
-   if( $is_posted )
+   if ( $is_posted )
    {
       $gsc = GameSetupChecker::check_fields( GSETVIEW_STANDARD );
-      if( $gsc->has_errors() )
+      if ( $gsc->has_errors() )
       {
          $gsc->add_default_values_info();
          $errors = array_merge( $errors, $gsc->get_errors() );
@@ -185,56 +185,56 @@ function parse_edit_form( &$trule )
 
    $old_vals = array() + $vars; // copy to determine edit-changes
    // read URL-vals into vars
-   foreach( $vars as $key => $val )
+   foreach ( $vars as $key => $val )
       $vars[$key] = get_request_arg( $key, $val );
    // handle checkboxes having no key/val in _POST-hash
-   if( $is_posted )
+   if ( $is_posted )
    {
-      foreach( array( 'stdhandicap', 'weekendclock', 'rated' ) as $key )
+      foreach ( array( 'stdhandicap', 'weekendclock', 'rated' ) as $key )
          $vars[$key] = get_request_arg( $key, false );
    }
 
    // parse URL-vars
-   if( $is_posted )
+   if ( $is_posted )
    {
       $trule->convertEditForm_to_TournamentRules( $vars, $errors );
-      if( $trule->ShapeSnapshot ) // refresh loaded-shape-snapshot
+      if ( $trule->ShapeSnapshot ) // refresh loaded-shape-snapshot
          $vars['snapshot'] = $trule->ShapeSnapshot;
 
       // determine edits
       $tr_cat_htype = get_category_handicaptype(strtolower($trule->Handicaptype));
-      if( $old_vals['size'] != $trule->Size ) $edits[] = T_('Board Size');
-      if( $old_vals['cat_htype'] != $tr_cat_htype )
+      if ( $old_vals['size'] != $trule->Size ) $edits[] = T_('Board Size');
+      if ( $old_vals['cat_htype'] != $tr_cat_htype )
          $edits[] = T_('Handicap Type');
-      elseif( $tr_cat_htype == CAT_HTYPE_MANUAL )
+      elseif ( $tr_cat_htype == CAT_HTYPE_MANUAL )
       {
-         if( $old_vals['color_m'] != $vars['color_m'] ) $edits[] = T_('Color');
-         if( $old_vals['handicap_m'] != $trule->Handicap ) $edits[] = T_('Handicap');
-         if( $old_vals['komi_m'] != $trule->Komi ) $edits[] = T_('Komi');
+         if ( $old_vals['color_m'] != $vars['color_m'] ) $edits[] = T_('Color');
+         if ( $old_vals['handicap_m'] != $trule->Handicap ) $edits[] = T_('Handicap');
+         if ( $old_vals['komi_m'] != $trule->Komi ) $edits[] = T_('Komi');
       }
 
-      if( ($old_vals['adj_komi'] != $trule->AdjKomi) || ( $old_vals['jigo_mode'] != $trule->JigoMode ) )
+      if ( ($old_vals['adj_komi'] != $trule->AdjKomi) || ( $old_vals['jigo_mode'] != $trule->JigoMode ) )
          $edits[] = T_('Adjust Komi');
-      if( ($old_vals['adj_handicap'] != $trule->AdjHandicap)
+      if ( ($old_vals['adj_handicap'] != $trule->AdjHandicap)
             || ( $old_vals['min_handicap'] != $trule->MinHandicap )
             || ( $old_vals['max_handicap'] != $trule->MaxHandicap ) )
          $edits[] = T_('Adjust Handicap');
-      if( getBool($old_vals['stdhandicap']) != getBool($trule->StdHandicap) )
+      if ( getBool($old_vals['stdhandicap']) != getBool($trule->StdHandicap) )
          $edits[] = T_('Standard placement');
 
       list($old_hours, $old_byohours, $old_byoperiods) =
          TournamentRules::convertFormTimeSettings( $old_vals );
-      if( ($old_vals['byoyomitype'] != $trule->Byotype)
+      if ( ($old_vals['byoyomitype'] != $trule->Byotype)
             || ($old_hours != $trule->Maintime)
             || ($old_byohours != $trule->Byotime)
             || ($trule->Byotype == BYOTYPE_FISCHER && $old_byoperiods != $trule->Byoperiods) )
          $edits[] = T_('Time settings');
 
-      if( getBool($old_vals['weekendclock']) != getBool($trule->WeekendClock) )
+      if ( getBool($old_vals['weekendclock']) != getBool($trule->WeekendClock) )
          $edits[] = T_('Weekend Clock');
-      if( getBool($old_vals['rated']) != getBool($trule->Rated) ) $edits[] = T_('Rated');
-      if( $old_vals['_tr_notes'] != $trule->Notes ) $edits[] = T_('Notes');
-      if( ($old_vals['shape'] != $trule->ShapeID) || ($old_vals['snapshot'] != $trule->ShapeSnapshot) )
+      if ( getBool($old_vals['rated']) != getBool($trule->Rated) ) $edits[] = T_('Rated');
+      if ( $old_vals['_tr_notes'] != $trule->Notes ) $edits[] = T_('Notes');
+      if ( ($old_vals['shape'] != $trule->ShapeID) || ($old_vals['snapshot'] != $trule->ShapeSnapshot) )
          $edits[] = T_('Shape');
    }
 
@@ -244,9 +244,9 @@ function parse_edit_form( &$trule )
 // return true|false from val (Y|N|bool|int|str|null)
 function getBool( $val )
 {
-   if( is_string($val) ) return ( $val == 'Y' );
-   if( is_numeric($val) ) return ( $val != 0 );
-   if( is_null($val) ) return false;
+   if ( is_string($val) ) return ( $val == 'Y' );
+   if ( is_numeric($val) ) return ( $val != 0 );
+   if ( is_null($val) ) return false;
    return (bool)$val;
 }
 

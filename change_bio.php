@@ -28,14 +28,14 @@ require_once 'include/std_functions.php';
    connect2mysql();
 
    $logged_in = who_is_logged( $player_row);
-   if( !$logged_in )
+   if ( !$logged_in )
       error('not_logged_in', 'change_bio');
 
    $my_id = (int)@$player_row['ID'];
-   if( $my_id <= GUESTS_ID_MAX )
+   if ( $my_id <= GUESTS_ID_MAX )
       error('not_allowed_for_guest', 'change_bio');
 
-   if( (@$player_row['AdminOptions'] & ADMOPT_DENY_EDIT_BIO) )
+   if ( (@$player_row['AdminOptions'] & ADMOPT_DENY_EDIT_BIO) )
       error('edit_bio_denied', 'change_bio');
 
    $my_id = $player_row['ID'];
@@ -48,15 +48,15 @@ require_once 'include/std_functions.php';
 
    $bios = array();
    $idx = 0;
-   while( $row = mysql_fetch_assoc( $result ) )
+   while ( $row = mysql_fetch_assoc( $result ) )
    {
       $bid= $row['ID'];
 
       // delete entry
-      if( $change_it )
+      if ( $change_it )
       {
          $EnteredText = trim(get_request_arg("text$bid"));
-         if( $EnteredText == "" )
+         if ( $EnteredText == "" )
          {
             db_query( "change_bio.delete_bio[$bid]", "DELETE FROM Bio WHERE ID=$bid LIMIT 1" );
             continue;
@@ -71,21 +71,21 @@ require_once 'include/std_functions.php';
    $max_pos = $idx;
 
    // compute the new SortOrder
-   if( !$change_it )
+   if ( !$change_it )
    {
-      foreach( $bios as $idx => $row )
+      foreach ( $bios as $idx => $row )
       {
          $bid= $row['ID'];
 
          // check for bios movements
          $pos = (int)@$_REQUEST['move'.$bid];
-         if( !$pos )
+         if ( !$pos )
             continue;
 
          $pos+= $idx;
-         while( $pos < 1 )
+         while ( $pos < 1 )
             $pos+= $max_pos;
-         while( $pos > $max_pos )
+         while ( $pos > $max_pos )
             $pos-= $max_pos;
 
          // swap in internal struct
@@ -99,18 +99,18 @@ require_once 'include/std_functions.php';
    ta_begin();
    {//HOT-section to update bio-entries
       // update existing DB-entries
-      foreach( $bios as $idx => $row )
+      foreach ( $bios as $idx => $row )
       {
          $bid= $row['ID'];
 
-         if( $change_it )
+         if ( $change_it )
          {
             $EnteredText = trim(get_request_arg("text$bid"));
             $EnteredCategory = trim(get_request_arg("category$bid"));
-            if( $EnteredCategory == '' )
+            if ( $EnteredCategory == '' )
                $EnteredCategory = '='.trim(get_request_arg("other$bid"));
 
-            if( $EnteredText == $row['Text']
+            if ( $EnteredText == $row['Text']
                   && $EnteredCategory == $row['Category']
                   && $row['SortOrder'] == $row['newpos'] )
                continue;
@@ -123,7 +123,7 @@ require_once 'include/std_functions.php';
          }
          else
          {
-            if( $row['SortOrder'] == $row['newpos'] )
+            if ( $row['SortOrder'] == $row['newpos'] )
                continue;
 
             $query = 'UPDATE Bio SET ' .
@@ -138,16 +138,16 @@ require_once 'include/std_functions.php';
 
       // add new entries
       $idx = get_request_arg("newcnt");
-      if( $change_it )
-      for( $bid=1; $bid <= $idx; $bid++ )
+      if ( $change_it )
+      for ( $bid=1; $bid <= $idx; $bid++ )
       {
          $EnteredText = trim(get_request_arg("newtext$bid"));
          $EnteredCategory = trim(get_request_arg("newcategory$bid"));
 
-         if( $EnteredCategory == '' )
+         if ( $EnteredCategory == '' )
             $EnteredCategory = '='.trim(get_request_arg("newother$bid"));
 
-         if( $EnteredText == "" )
+         if ( $EnteredText == "" )
             continue;
 
          $query = "INSERT INTO Bio SET uid=$my_id" .
@@ -161,7 +161,7 @@ require_once 'include/std_functions.php';
    ta_end();
 
 
-   if( !$change_it )
+   if ( !$change_it )
    {
       // was up/down-move
       jump_to("edit_bio.php?editorder=1");

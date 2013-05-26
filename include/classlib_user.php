@@ -74,7 +74,7 @@ class User
 
    public function setRating( $rating )
    {
-      if( is_null($rating) || !is_numeric($rating) || abs($rating) >= OUT_OF_RATING )
+      if ( is_null($rating) || !is_numeric($rating) || abs($rating) >= OUT_OF_RATING )
          $this->Rating = NO_RATING;
       else
          $this->Rating = limit( (double)$rating, MIN_RATING, OUT_OF_RATING-1, NO_RATING );
@@ -89,9 +89,9 @@ class User
    /*! \brief Returns true, if user has set and valid rating. */
    public function hasRating( $check_rating_status=true )
    {
-      if( $check_rating_status )
+      if ( $check_rating_status )
       {
-         if( $this->RatingStatus == RATING_INIT || $this->RatingStatus == RATING_RATED ) // user has rating
+         if ( $this->RatingStatus == RATING_INIT || $this->RatingStatus == RATING_RATED ) // user has rating
             return ( abs($this->Rating) < OUT_OF_RATING ); // valid rating
          else // user not rated ( RatingStatus == RATING_NONE )
             return false;
@@ -103,7 +103,7 @@ class User
    /*! \brief Returns true, if user-rating falls inbetween given rating range (+/- 50%). */
    public function matchRating( $min, $max, $fix=false )
    {
-      if( !$fix )
+      if ( !$fix )
       {
          $min = limit( $min - 50, MIN_RATING, OUT_OF_RATING-1, $min );
          $max = limit( $max + 50, MIN_RATING, OUT_OF_RATING-1, $max );
@@ -177,12 +177,12 @@ class User
          );
 
       $user->urow = $row;
-      if( $urow_strip_prefix && (string)$prefix != '' )
+      if ( $urow_strip_prefix && (string)$prefix != '' )
       {
          $prefixlen = strlen($prefix);
-         foreach( $user->urow as $key => $val )
+         foreach ( $user->urow as $key => $val )
          {
-            if( strpos($key, $prefix) == 0 )
+            if ( strpos($key, $prefix) == 0 )
                $user->urow[substr($key, $prefixlen)] = $val;
          }
       }
@@ -203,16 +203,16 @@ class User
    public static function load_user_query( $query, $dbgmsg=NULL )
    {
       $result = NULL;
-      if( $query instanceof QuerySQL )
+      if ( $query instanceof QuerySQL )
       {
          $qsql = self::build_query_sql();
          $qsql->merge( $query );
          $qsql->add_part( SQLP_LIMIT, '1' );
 
-         if( is_null($dbgmsg) )
+         if ( is_null($dbgmsg) )
             $dbgmsg = "User:load_user_query()";
          $row = mysql_single_fetch( $dbgmsg, $qsql->get_select() );
-         if( $row )
+         if ( $row )
             $result = self::new_from_row( $row );
       }
       return $result;
@@ -222,7 +222,7 @@ class User
    public static function load_user( $uid )
    {
       $result = NULL;
-      if( is_numeric($uid) && $uid > 0 )
+      if ( is_numeric($uid) && $uid > 0 )
       {
          $query_part = new QuerySQL( SQLP_WHERE, "P.ID=$uid" );
          $result = self::load_user_query( $query_part, "User:load_user($uid)" );
@@ -234,7 +234,7 @@ class User
    public static function load_user_by_handle( $handle )
    {
       $result = NULL;
-      if( (string)$handle != '' )
+      if ( (string)$handle != '' )
       {
          $query_part = new QuerySQL( SQLP_WHERE, sprintf( "P.Handle='%s'", mysql_addslashes($handle) ));
          $result = self::load_user_query( $query_part, "User:load_user_by_handle($handle)" );
@@ -247,12 +247,12 @@ class User
    {
       $out = array();
       $size = count($arr_uid);
-      if( $size )
+      if ( $size )
       {
          $users = implode(',', $arr_uid);
          $result = db_query( "User.load_quick_userinfo($users)",
                "SELECT ID, Handle, Name, Rating2, Country FROM Players WHERE ID IN ($users) LIMIT $size" );
-         while( $row = mysql_fetch_assoc($result) )
+         while ( $row = mysql_fetch_assoc($result) )
             $out[$row['ID']] = $row;
          mysql_free_result($result);
       }

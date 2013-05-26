@@ -29,22 +29,22 @@ require_once 'include/sgf_builder.php';
 
 {
    // This script should not run via webserver, but from command-line
-   if( isset($_SERVER["SERVER_NAME"]) )
+   if ( isset($_SERVER["SERVER_NAME"]) )
       exit;
 
    // check args
    $errors = array();
-   if( $argc == 4 )
+   if ( $argc == 4 )
    {
       $cmd = $argv[1];
-      if( $cmd != 'count' && $cmd != 'exec' )
+      if ( $cmd != 'count' && $cmd != 'exec' )
          $errors[] = "Bad command '$cmd', allowed are [count|exec]";
       $sleep_games = (int)abs($argv[2]);
       $sleep_secs  = (int)abs($argv[3]);
    }
    else
       $errors[] = 'Bad arguments';
-   if( count($errors) )
+   if ( count($errors) )
    {
       $err_text = implode('], [', $errors);
       echo "ERROR: [$err_text]\n";
@@ -60,7 +60,7 @@ require_once 'include/sgf_builder.php';
    connect2mysql();
 
    $out_dir = "SGF"; // output-directory
-   if( !file_exists($out_dir) )
+   if ( !file_exists($out_dir) )
       create_dir( $out_dir );
 
    $qsql = new QuerySQL(
@@ -83,13 +83,13 @@ require_once 'include/sgf_builder.php';
 
    $rows = @mysql_num_rows($result);
    echo "There are $rows games to download ...\n";
-   if( $cmd != 'exec' )
+   if ( $cmd != 'exec' )
       exit;
 
    $cnt = 0;
    $cnt_games = $sleep_games;
    $begin_secs = time();
-   while( $row = mysql_fetch_array( $result ) )
+   while ( $row = mysql_fetch_array( $result ) )
    {
       $cnt++;
       $timediff = time() - $begin_secs;
@@ -109,9 +109,9 @@ require_once 'include/sgf_builder.php';
 
       // NOTE: adjust dir-creation to new path-pattern
       $path = "$out_dir/$year/$month";
-      if( !file_exists($path) )
+      if ( !file_exists($path) )
       {
-         if( !file_exists("$out_dir/$year") )
+         if ( !file_exists("$out_dir/$year") )
             create_dir( "$out_dir/$year" );
          create_dir( $path );
       }
@@ -119,7 +119,7 @@ require_once 'include/sgf_builder.php';
       // write SGF to file
       write_to_file( "$path/{$filename}.sgf", $sgf->get_sgf(), true );
 
-      if( $cnt_games-- < 0 )
+      if ( $cnt_games-- < 0 )
       {
          $cnt_games = $sleep_games;
          echo "... sleeping for $sleep_secs secs\n";
@@ -132,7 +132,7 @@ require_once 'include/sgf_builder.php';
 function create_dir( $path )
 {
    // NOTE: PHP4 don't have recursive-parameter yet
-   if( !@mkdir($path) )
+   if ( !@mkdir($path) )
       error('assert', "sgf_bulk.create_dir($path)");
 }
 ?>

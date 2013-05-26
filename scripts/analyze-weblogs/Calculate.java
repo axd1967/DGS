@@ -38,7 +38,7 @@ class Calculate {
 
         long AVG[] = new long[IDXCNT], TIME[] = new long[IDXCNT], CNT[] = new long[IDXCNT];
         float P_CNT[] = new float[IDXCNT], P_TIME[] = new float[IDXCNT];
-        for( int i=0; i < IDXCNT; i++) {
+        for ( int i=0; i < IDXCNT; i++) {
             AVG[i] = TIME[i] = CNT[i] = 0;
             P_CNT[i] = P_TIME[i] = 0;
         }
@@ -61,27 +61,27 @@ class Calculate {
             TIME[ALL] += time;
             CNT[ALL]++;
 
-            if( time > 10000000 ) {
+            if ( time > 10000000 ) {
                 TIME[TOP] += time;
                 CNT[TOP]++;
                 add = "\tTOP";
             }
-            else if( time > 5000000 ) {
+            else if ( time > 5000000 ) {
                 TIME[MOST] += time;
                 CNT[MOST]++;
                 add = "\tMOST";
             }
-            else if( time > 2000000 ) {
+            else if ( time > 2000000 ) {
                 TIME[MORE] += time;
                 CNT[MORE]++;
                 add = "\tMORE";
             }
-            else if( time > 1000000 ) {
+            else if ( time > 1000000 ) {
                 TIME[SOME] += time;
                 CNT[SOME]++;
                 add = "\tSOME";
             }
-            else if( time > 500000 ) {
+            else if ( time > 500000 ) {
                 TIME[BLUB] += time;
                 CNT[BLUB]++;
                 add = "\tBLUB";
@@ -93,7 +93,7 @@ class Calculate {
             }
         }
 
-        for( int i=0; i < IDXCNT; i++) {
+        for ( int i=0; i < IDXCNT; i++) {
             if (CNT[i] > 0 )
                 AVG[i] = TIME[i] / CNT[i];
 
@@ -103,7 +103,7 @@ class Calculate {
 
         System.out.println();
         System.out.println("LEGEND   :      COUNT                         TIME               AVG-TIME [micro-sec]");
-        for( int i=1; i < IDXCNT; i++) {
+        for ( int i=1; i < IDXCNT; i++) {
             print( TITLE[i], CNT[i], P_CNT[i], TIME[i], P_TIME[i], AVG[i] );
         }
         print( TITLE[0], CNT[0], P_CNT[0], TIME[0], P_TIME[0], AVG[0] );

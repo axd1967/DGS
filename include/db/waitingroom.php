@@ -136,9 +136,9 @@ class Waitingroom
 
    public function setRuleset( $ruleset )
    {
-      if( !preg_match( "/^(".CHECK_RULESETS.")$/", $ruleset ) )
+      if ( !preg_match( "/^(".CHECK_RULESETS.")$/", $ruleset ) )
          error('invalid_args', "Waitingroom.setRuleset($ruleset)");
-      if( !preg_match( "/^(".ALLOWED_RULESETS.")$/", $ruleset ) )
+      if ( !preg_match( "/^(".ALLOWED_RULESETS.")$/", $ruleset ) )
          error('feature_disabled', "Waitingroom.setRuleset($ruleset)");
       $this->Ruleset = $ruleset;
    }
@@ -151,7 +151,7 @@ class Waitingroom
    /*! \brief Inserts or updates Waitingroom-entry in database. */
    public function persist()
    {
-      if( $this->ID > 0 )
+      if ( $this->ID > 0 )
          $success = $this->update();
       else
          $success = $this->insert();
@@ -162,7 +162,7 @@ class Waitingroom
    {
       $entityData = $this->fillEntityData();
       $result = $entityData->insert( "Waitingroom.insert(%s)" );
-      if( $result )
+      if ( $result )
          $this->ID = mysql_insert_id();
       return $result;
    }
@@ -175,7 +175,7 @@ class Waitingroom
 
    public function fillEntityData( $data=null )
    {
-      if( is_null($data) )
+      if ( is_null($data) )
          $data = $GLOBALS['ENTITY_WROOM']->newEntityData();
       $data->set_value( 'ID', $this->ID );
       $data->set_value( 'uid', $this->uid );
@@ -219,7 +219,7 @@ class Waitingroom
    public static function build_query_sql( $wroom_id=0, $with_player=true )
    {
       $qsql = $GLOBALS['ENTITY_WROOM']->newQuerySQL('WR');
-      if( $with_player )
+      if ( $with_player )
       {
          $qsql->add_part( SQLP_FIELDS,
             'WR.uid AS WRP_ID',
@@ -232,7 +232,7 @@ class Waitingroom
          $qsql->add_part( SQLP_FROM,
             'INNER JOIN Players AS WRP ON WRP.ID=WR.uid' );
       }
-      if( $wroom_id > 0 )
+      if ( $wroom_id > 0 )
          $qsql->add_part( SQLP_WHERE, "WR.ID=$wroom_id" );
       return $qsql;
    }//build_query_sql
@@ -314,7 +314,7 @@ class Waitingroom
       $iterator->setResultRows( mysql_num_rows($result) );
 
       $iterator->clearItems();
-      while( $row = mysql_fetch_array( $result ) )
+      while ( $row = mysql_fetch_array( $result ) )
       {
          $survey = self::new_from_row( $row );
          $iterator->addItem( $survey, $row );

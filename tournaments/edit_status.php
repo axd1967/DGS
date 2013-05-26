@@ -36,13 +36,13 @@ $GLOBALS['ThePage'] = new Page('TournamentStatusEdit');
    connect2mysql();
 
    $logged_in = who_is_logged( $player_row);
-   if( !$logged_in )
+   if ( !$logged_in )
       error('login_if_not_logged_in', 'Tournament.edit_status');
-   if( !ALLOW_TOURNAMENTS )
+   if ( !ALLOW_TOURNAMENTS )
       error('feature_disabled', 'Tournament.edit_status');
    $my_id = $player_row['ID'];
 
-   if( $my_id <= GUESTS_ID_MAX )
+   if ( $my_id <= GUESTS_ID_MAX )
       error('not_allowed_for_guest', 'Tournament.edit_status');
 
 /* Actual REQUEST calls used:
@@ -53,17 +53,17 @@ $GLOBALS['ThePage'] = new Page('TournamentStatusEdit');
 */
 
    $tid = (int) @$_REQUEST['tid'];
-   if( $tid < 0 ) $tid = 0;
+   if ( $tid < 0 ) $tid = 0;
 
    $tstatus = new TournamentStatus( $tid ); // existing tournament?
    $tourney = $tstatus->get_tournament();
 
    // create/edit allowed?
    $allow_edit_tourney = TournamentHelper::allow_edit_tournaments($tourney, $my_id);
-   if( !$allow_edit_tourney )
+   if ( !$allow_edit_tourney )
       error('tournament_edit_not_allowed', "Tournament.edit_status.edit_tournament($tid,$my_id)");
 
-   if( @$_REQUEST['t_cancel'] ) // cancel status-change
+   if ( @$_REQUEST['t_cancel'] ) // cancel status-change
       jump_to("tournaments/edit_status.php?tid=$tid");
 
    // init
@@ -76,14 +76,14 @@ $GLOBALS['ThePage'] = new Page('TournamentStatusEdit');
    $new_status = $vars['status'];
    $tstatus->check_status_change($new_status);
    $tourney->setStatus($new_status);
-   if( !$is_admin && $tourney->isFlagSet(TOURNEY_FLAG_LOCK_ADMIN) )
+   if ( !$is_admin && $tourney->isFlagSet(TOURNEY_FLAG_LOCK_ADMIN) )
       $tstatus->add_error( $tourney->buildAdminLockText() );
 
    // save tournament-object with values from edit-form (if no errors and something changed)
    $allow_confirm = ( !$tstatus->has_error() || $is_admin );
-   if( @$_REQUEST['t_confirm'] && count($edits) && $allow_confirm )
+   if ( @$_REQUEST['t_confirm'] && count($edits) && $allow_confirm )
    {
-      if( $tourney->Status == TOURNEY_STATUS_CLOSED ) // set end-time
+      if ( $tourney->Status == TOURNEY_STATUS_CLOSED ) // set end-time
          $tourney->EndTime = $NOW;
 
       ta_begin();
@@ -119,7 +119,7 @@ $GLOBALS['ThePage'] = new Page('TournamentStatusEdit');
          'TEXT',        TournamentUtils::buildLastchangedBy($tourney->Lastchanged, $tourney->ChangedBy) ));
    $tform->add_row( array( 'HR' ));
 
-   if( $tstatus->has_error() )
+   if ( $tstatus->has_error() )
    {
       $tform->add_row( array(
             'DESCRIPTION', T_('Error'),
@@ -135,18 +135,18 @@ $GLOBALS['ThePage'] = new Page('TournamentStatusEdit');
          'SELECTBOX',    'status', 1, $arr_status, $tourney->Status, false,
          'SUBMITBUTTON', 't_save', T_('Change Status'), ));
 
-   if( count($edits) && @$_REQUEST['t_save'] ) // show confirmation
+   if ( count($edits) && @$_REQUEST['t_save'] ) // show confirmation
    {
       $confirm_notes = '';
-      if( $tstatus->has_error() )
+      if ( $tstatus->has_error() )
       {
-         if( $is_admin )
+         if ( $is_admin )
             $confirm_notes = T_('Confirm only, if you want to change the status regardless of the occured errors!');
       }
       else
       {
          $confirm_notes = T_('Are you still sure you want to change the status?');
-         if( !$is_admin )
+         if ( !$is_admin )
             $confirm_notes = // role_info comes here (see below)
                T_('Be aware, that only the status changes defined below are possible.')
                . "<br>\n"
@@ -155,7 +155,7 @@ $GLOBALS['ThePage'] = new Page('TournamentStatusEdit');
                . $confirm_notes;
       }
 
-      if( $confirm_notes )
+      if ( $confirm_notes )
       {
          $role_str = $tourney->build_role_info();
          $tform->add_empty_row();
@@ -181,9 +181,9 @@ $GLOBALS['ThePage'] = new Page('TournamentStatusEdit');
 
 
    $menu_array = array();
-   if( $tid )
+   if ( $tid )
       $menu_array[T_('Tournament info')] = "tournaments/view_tournament.php?tid=$tid";
-   if( $allow_edit_tourney )
+   if ( $allow_edit_tourney )
       $menu_array[T_('Manage tournament')] =
          array( 'url' => "tournaments/manage_tournament.php?tid=$tid", 'class' => 'TAdmin' );
 
@@ -204,16 +204,16 @@ function parse_edit_form( &$tourney )
 
    $old_vals = array() + $vars; // copy to determine edit-changes
    // read URL-vals into vars
-   foreach( $vars as $key => $val )
+   foreach ( $vars as $key => $val )
       $vars[$key] = get_request_arg( $key, $val );
 
    // parse URL-vars
-   if( $is_posted )
+   if ( $is_posted )
    {
       $tourney->setStatus($vars['status'], true/*check-only*/);
 
       // determine edits
-      if( $old_vals['status'] != $vars['status'] ) $edits[] = T_('Status');
+      if ( $old_vals['status'] != $vars['status'] ) $edits[] = T_('Status');
    }
 
    return array( $vars, array_unique($edits) );
@@ -267,7 +267,7 @@ function build_status_notes()
    $arrst[TOURNEY_STATUS_ADMIN]    = T_('Tournament admin phase managed only by tournament admin (hidden, archived tournaments)#tstat_admin');
    $arrst[TOURNEY_STATUS_DELETE]   = T_('Tournament delete phase managed only by tournament admin (tournament ready for deletion)#tstat_del');
    $narr = array( T_('Tournament Status') );
-   foreach( $arrst as $status => $descr )
+   foreach ( $arrst as $status => $descr )
       $narr[] = sprintf( "%s = %s", Tournament::getStatusText($status), $descr );
    $notes[] = $narr;
 

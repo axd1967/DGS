@@ -465,7 +465,7 @@ Notes:
              "Stone=$to_move, " .
              "PosX=".POSX_TIME.", PosY=0, " .
              "Hours=$hours" );
-         if( mysql_affected_rows() < 1 )
+         if ( mysql_affected_rows() < 1 )
             error('mysql_insert_move', "clock_tick.update_moves($gid)");
 */
 

@@ -45,7 +45,7 @@ foreach my $arr (@games) {
 
    # determine min/max cluster-id
    my ($cluster_id,$mod_clid);
-   if( $cl1 < $cl2 ) {
+   if ( $cl1 < $cl2 ) {
       $cluster_id = $cl1;
       $mod_clid = $cl2;
    } else {
@@ -59,7 +59,7 @@ foreach my $arr (@games) {
    $cl_map->{$id2}++;
 
    # update all users with max-cluster-IDs to min-cluster-id
-   if( $cluster_id != $mod_clid ) {
+   if ( $cluster_id != $mod_clid ) {
       my $cl_map2 = $cluster->{$mod_clid};
       foreach my $uid (keys %{$cl_map2}) {
          $users->{$uid} = $cluster_id;

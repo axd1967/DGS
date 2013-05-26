@@ -39,7 +39,7 @@ function make_known_languages() //must be called from main dir
    //$e= error_reporting(E_ALL & ~(E_WARNING | E_NOTICE));
    $fd = @fopen( $Filename, 'w');
    //error_reporting($e);
-   if( !$fd )
+   if ( !$fd )
    {
       //echo "couldnt_open_file ". $Filename; exit;
       global $TheErrors;
@@ -61,14 +61,14 @@ function make_known_languages() //must be called from main dir
 
    $prev_lang = '';
    $first = true;
-   while( $row = mysql_fetch_array($result) )
+   while ( $row = mysql_fetch_array($result) )
    {
       @list($browsercode,$charenc) = explode( LANG_CHARSET_CHAR, $row['Language'], 2);
       $browsercode = strtolower(trim($browsercode));
       $charenc = strtolower(trim($charenc));
 
       $tmp = slashed($row['Name']);
-      if( $browsercode === $prev_lang )
+      if ( $browsercode === $prev_lang )
          fwrite( $fd, ",\n                 '$charenc' => \$T_('$tmp')");
       else
          fwrite( $fd, ( $first ? '' : " ),\n" ) .
@@ -109,9 +109,9 @@ function make_include_files($language=null, $group=null) //must be called from m
       "WHERE Translations.Language_ID = TL.ID ";
       //"AND Translations.Text!='' "; //else a file containing only '' will not be reseted
 
-   if( !empty($group) )
+   if ( !empty($group) )
       $query .= "AND TG.Groupname='$group' ";
-   if( !empty($language) )
+   if ( !empty($language) )
       $query .= "AND TL.Language='$language' ";
 
    $query .= "ORDER BY Language,Groupname";
@@ -120,16 +120,16 @@ function make_include_files($language=null, $group=null) //must be called from m
 
    $grp = '';
    $lang = '';
-   while( $row = mysql_fetch_array($result) )
+   while ( $row = mysql_fetch_array($result) )
    {
-      if( $row['Groupname'] !== $grp || $row['Language'] !== $lang )
+      if ( $row['Groupname'] !== $grp || $row['Language'] !== $lang )
       {
          $grp = $row['Groupname'];
          $lang = $row['Language'];
 
 //         echo "<p></p>$lang -- $grp\n";
 
-         if( isset( $fd ) )
+         if ( isset( $fd ) )
          {
             fwrite( $fd , "\n?>");
             fclose( $fd );
@@ -140,20 +140,20 @@ function make_include_files($language=null, $group=null) //must be called from m
          //$e= error_reporting(E_ALL & ~(E_WARNING | E_NOTICE));
          $fd = @fopen( $Filename, 'w');
          //error_reporting($e);
-         if( !$fd )
+         if ( !$fd )
             error('couldnt_open_file', "make_include_files.err2($Filename)");
 
          fwrite( $fd, "<?php\n\n/* Automatically generated at " .
                  gmdate('Y-m-d H:i:s T', $NOW) . " */\n\n");
       }
 
-      if( !empty($row['Text']) )
+      if ( !empty($row['Text']) )
          fwrite( $fd, "\$Tr['" . slashed($row['Original']) . "'] = '" .
               slashed($row['Text']) . "';\n" );
    }
 
 
-   if( isset($fd) )
+   if ( isset($fd) )
    {
       fwrite( $fd , "\n?>");
       fclose( $fd );
@@ -176,11 +176,11 @@ function translations_query( $translate_lang, $untranslated, $group, $from_row=-
       As the Original are identical when the Original_ID are identical,
       an other possible sort is "ORDER BY Original,Original_ID";
    */
-   if( $alpha_order )
+   if ( $alpha_order )
       $order = ' ORDER BY Original,Original_ID';
    else
       $order = ' ORDER BY Original_ID';
-   if( $from_row >= 0 )
+   if ( $from_row >= 0 )
       $limit = " LIMIT $from_row,".(TRANS_ROW_PER_PAGE+1);
    else
       $limit = '';
@@ -207,18 +207,18 @@ function translations_query( $translate_lang, $untranslated, $group, $from_row=-
       . " AND TT.Text>''"
       . " AND TT.Translatable!='N'" ;
 
-   if( $filter_en )
+   if ( $filter_en )
       $query .= " AND TT.Text LIKE '%".mysql_addslashes($filter_en)."%'";
-   if( is_numeric($max_len) && $max_len > 0 )
+   if ( is_numeric($max_len) && $max_len > 0 )
       $query .= " AND LENGTH(TT.Text) <= $max_len";
 
-   if( $untranslated == 1 ) // untranslated-only
+   if ( $untranslated == 1 ) // untranslated-only
    {
       // Translations.Translated IS NULL means "never translated" (LEFT JOIN fails).
       $query .= " AND (Translations.Translated IS NULL OR Translations.Translated='N')";
    }
 
-   if( $group != 'allgroups' )
+   if ( $group != 'allgroups' )
       $query .= " AND TG.Groupname='".mysql_addslashes($group)."'";
    $query .= $order.$limit;
 
@@ -236,7 +236,7 @@ function add_text_to_translate( $debugmsg, $orig_text, $Group_ID, $do_it=true)
    global $NOW;
 
    $orig_text = trim($orig_text);
-   if( !$orig_text || $Group_ID <= 0 )
+   if ( !$orig_text || $Group_ID <= 0 )
       return array( false, 0, array(), '' );
 
    $text_sql = mysql_addslashes( latin1_safe($orig_text) );
@@ -252,20 +252,20 @@ function add_text_to_translate( $debugmsg, $orig_text, $Group_ID, $do_it=true)
    $new_tfig = true;
    $arr_double = array();
    $found_rows = (int)@mysql_num_rows($result);
-   if( $found_rows == 0 )
+   if ( $found_rows == 0 )
       $action = 'I'; // insert (new text)
    else // #>0 entries
    {
       $action = '';
       $err = array();
-      while( $row = mysql_fetch_assoc($result) )
+      while ( $row = mysql_fetch_assoc($result) )
       {
          $Text_ID = $row['ID'];
          $arr_double[] = $Text_ID;
-         if( strcmp($row['Text'], $orig_text) != 0 ) // compare case of orig-text
+         if ( strcmp($row['Text'], $orig_text) != 0 ) // compare case of orig-text
          {
             // different case
-            if( $found_rows == 1 && $row['Status'] == TRANSL_STAT_ORPHAN )
+            if ( $found_rows == 1 && $row['Status'] == TRANSL_STAT_ORPHAN )
             {
                $action = 'U'; // re-use orphan text
                $new_tfig = ( $row['X_tfig'] == 0 );
@@ -276,35 +276,35 @@ function add_text_to_translate( $debugmsg, $orig_text, $Group_ID, $do_it=true)
          else // case-exact match
             $new_tfig = ( $row['X_tfig'] == 0 );
       }
-      if( count($err) )
+      if ( count($err) )
          $error = sprintf( 'Text [%s] must be unique, but found [{%s}]. Need fix in db and/or code!',
             $orig_text, implode('}, {', $err) );
-      elseif( $found_rows > 1 )
+      elseif ( $found_rows > 1 )
          $error = sprintf( 'Text [%s] must be unique, but found it %s times in db. Need fix in db!',
             $orig_text, $found_rows );
    }
    mysql_free_result($result);
 
-   if( $error )
+   if ( $error )
       return array( $error, 0, $arr_double, '' );
 
-   if( $action == 'I' )
+   if ( $action == 'I' )
    {
       $sql = "INSERT INTO TranslationTexts SET Text='$text_sql', Type='SRC', Translatable='Y', " .
          "Status='".TRANSL_STAT_USED."', Updated=FROM_UNIXTIME($NOW)";
-      if( $do_it )
+      if ( $do_it )
       {
          db_query( "$debugmsg.new_transltext", $sql );
          $Text_ID = mysql_insert_id();
       }
    }
-   elseif( $action == 'U' ) // only one (orphan) row found
+   elseif ( $action == 'U' ) // only one (orphan) row found
    {
       $sql1 = "UPDATE TranslationTexts SET Text='$text_sql', Type='SRC', Translatable='Changed', " .
          "Status='".TRANSL_STAT_USED."', Updated=FROM_UNIXTIME($NOW) WHERE ID=$Text_ID LIMIT 1";
       $sql2 = "UPDATE Translations SET Translated='N' WHERE Original_ID=$Text_ID";
       $sql = "-- $sql1 -- $sql2";
-      if( $do_it )
+      if ( $do_it )
       {
          db_query( "$debugmsg.reuse_orphan_transltext.1", $sql1 );
          db_query( "$debugmsg.reuse_orphan_transltext.2", $sql2 );
@@ -313,7 +313,7 @@ function add_text_to_translate( $debugmsg, $orig_text, $Group_ID, $do_it=true)
    else
       $sql = '';
 
-   if( $do_it && $new_tfig && $Text_ID > 0 )
+   if ( $do_it && $new_tfig && $Text_ID > 0 )
    {
       db_query( "$debugmsg.update_translfig($Text_ID,$Group_ID)",
          "INSERT INTO TranslationFoundInGroup SET Text_ID=$Text_ID, Group_ID=$Group_ID" );
@@ -332,7 +332,7 @@ function generate_translation_texts( $do_it, $echo=true )
          . "ORDER BY TP.Page" );
 
    $errorfmt = "<br><a name=\"err%s\"></a><font color=\"red\">*** Error:</font> %s<br>\n"; //err-no, err-msg
-   if( $echo )
+   if ( $echo )
       echo "<p><b>NOTE:</b> Check at <a href=\"#errors\">bottom</a> if errors or new entries are detected.<br>\n";
 
    $errcnt = 0;
@@ -340,17 +340,17 @@ function generate_translation_texts( $do_it, $echo=true )
    $arr_text_id = array();
    $arr_tfig = array(); // group_id => [ text_id, ... ]
    $arr_double_text_id = array();
-   while( $row = mysql_fetch_array($result) )
+   while ( $row = mysql_fetch_array($result) )
    {
       $Filename = $row['Page'];
       $Group_ID = $row['Group_ID'];
       $GroupName = @$row['Groupname'];
 
-      if( $echo )
+      if ( $echo )
          echo "<hr><p>$Filename - Group $Group_ID [$GroupName]</p><hr>\n";
 
       $contents = php_strip_whitespace($Filename); // strips also LFs
-      if( (string)$contents == '' )
+      if ( (string)$contents == '' )
       {
          printf( $errorfmt, ++$errcnt, "no content found reading file [$Filename]" );
          continue;
@@ -364,25 +364,25 @@ function generate_translation_texts( $do_it, $echo=true )
       // find and check all T_- and $T_-texts
       $matches = find_translation_texts( $contents );
 
-      foreach( $matches as $resultmatch )
+      foreach ( $matches as $resultmatch )
       {
          $tstring = '';
          list( $transl_text, $errormsg, $pos ) = $resultmatch;
-         if( is_numeric($errormsg) && $errormsg == 0 )
+         if ( is_numeric($errormsg) && $errormsg == 0 )
          {
             $result_eval = eval( "\$tstring = $transl_text;" );
-            if( $result_eval === false || strlen($tstring) == 0 )
+            if ( $result_eval === false || strlen($tstring) == 0 )
                $errormsg = "Evaluation error";
             else
             {
                $orig_tstr = $tstring;
                $tstring = trim($tstring);
-               if( strlen($orig_tstr) != strlen($tstring) )
+               if ( strlen($orig_tstr) != strlen($tstring) )
                   $errormsg = "Found forbidden leading or trailing white-space";
             }
          }
 
-         if( $errormsg )
+         if ( $errormsg )
          {
             printf( $errorfmt, ++$errcnt,
                "Something went wrong at parse pos #$pos [".textarea_safe($errormsg)
@@ -392,46 +392,46 @@ function generate_translation_texts( $do_it, $echo=true )
          {// $tstring defined
             list( $error, $text_id, $dbl_ids, $sql ) =
                add_text_to_translate('generate_translation_texts', $tstring, $Group_ID, $do_it);
-            if( $error )
+            if ( $error )
             {
-               if( $echo ) // non-critical error not printed
+               if ( $echo ) // non-critical error not printed
                   printf( $errorfmt, ++$errcnt, $error );
             }
-            elseif( $sql )
+            elseif ( $sql )
             {
                $newcnt++;
                $tmp = ( $do_it ) ? '++ '.$tstring : $sql;
-               if( $echo )
+               if ( $echo )
                   echo textarea_safe($tmp), "<br>\n";
             }
-            if( $text_id > 0 )
+            if ( $text_id > 0 )
             {
                $arr_text_id[] = $text_id;
-               if( !isset($arr_tfig[$Group_ID]) )
+               if ( !isset($arr_tfig[$Group_ID]) )
                   $arr_tfig[$Group_ID] = array( $text_id );
                else
                   $arr_tfig[$Group_ID][] = $text_id;
             }
-            if( count($dbl_ids) )
+            if ( count($dbl_ids) )
                $arr_double_text_id = array_merge( $arr_double_text_id, $dbl_ids );
          }
       }
    }
    mysql_free_result($result);
 
-   if( $echo )
+   if ( $echo )
    {
       echo "<a name=\"errors\"></a><hr><p>\n";
-      if( $errcnt > 0 )
+      if ( $errcnt > 0 )
       {
          printf( "Found %s errors. Please correct them before going on!!!<br>\nErrors: ", $errcnt );
-         for( $i=1; $i <= $errcnt; $i++)
+         for ( $i=1; $i <= $errcnt; $i++)
             echo "<a href=\"#err$i\">Error #$i</a>, ";
       }
       else
          echo "No errors occured.<br>\n";
 
-      if( $newcnt > 0 )
+      if ( $newcnt > 0 )
          echo "<p>Found $newcnt new entries to insert!!!\n";
       else
          echo "<p>No new entries found.\n";
@@ -459,10 +459,10 @@ function find_translation_texts( $contents )
    $pos = 0;
    $clen = strlen($contents);
    // PARSE: find $T_ or T_
-   while( preg_match('%(.*?)\b\$?T_(\s*)\(\s*%s', $contents, $matches, 0, $pos) )
+   while ( preg_match('%(.*?)\b\$?T_(\s*)\(\s*%s', $contents, $matches, 0, $pos) )
    {
       $spos = $pos + strlen($matches[1]);
-      if( strlen($matches[2]) > 0 )
+      if ( strlen($matches[2]) > 0 )
          $result[] = array( substr($contents,$spos,30), "No space allowed after T_", $spos );
       $pos += strlen($matches[0]);
 
@@ -470,28 +470,28 @@ function find_translation_texts( $contents )
       $endtext = false;
       $errpos = -1; // last error-pos
       $allow = 1|2; // bit0(1)=allow-text, bit1(2)=expect-text
-      while( $pos < $clen && !$endtext )
+      while ( $pos < $clen && !$endtext )
       {
          eat_comments($contents, $clen, $pos); // PARSE: eat all comments
-         if( $pos >= $clen) break;
+         if ( $pos >= $clen) break;
 
          $ch = $contents[$pos];
-         if( ($allow & 1) && ($ch == "'" || $ch == '"') )
+         if ( ($allow & 1) && ($ch == "'" || $ch == '"') )
          {
             list( $ttext, $errmsg, $tpos ) = eat_translation_text( $contents, $clen, $pos );
-            if( $errmsg )
+            if ( $errmsg )
                $result[] = array( $ttext, $errmsg, $errpos = $spos );
             else
                $text .= $ttext;
             $allow = 0;
          }
-         elseif( !$allow && $ch == '.' )
+         elseif ( !$allow && $ch == '.' )
          {
             $pos++;
             $text .= ' . ';
             $allow = 1|2;
          }
-         elseif( $ch == ')' )
+         elseif ( $ch == ')' )
          {
             $pos++;
             $endtext = true; // end of T_ found
@@ -506,20 +506,20 @@ function find_translation_texts( $contents )
          }
       }
 
-      if( !$endtext )
+      if ( !$endtext )
       {
-         if( $errpos != $spos )
+         if ( $errpos != $spos )
             $result[] = array( $text, "Missing end ')' for translation text", $spos );
       }
-      elseif( $allow & 2 )
+      elseif ( $allow & 2 )
       {
-         if( $errpos != $spos )
+         if ( $errpos != $spos )
             $result[] = array( $text, sprintf( "Expected translation text, but found [%s]",
                substr($contents,$spos,$pos - $spos + 20)), $spos );
       }
-      elseif( strlen($text) == 0 )
+      elseif ( strlen($text) == 0 )
       {
-         if( $errpos != $spos )
+         if ( $errpos != $spos )
             $result[] = array( substr($contents,$spos,$pos-$spos), "Found empty translation text", $spos );
       }
       else
@@ -532,23 +532,23 @@ function find_translation_texts( $contents )
 // eat comments "/*..*/", "//...", "#..."
 function eat_comments( $contents, $clen, &$pos )
 {
-   while( $pos < $clen )
+   while ( $pos < $clen )
    {
       eat_whitespace( $contents, $clen, $pos );
 
-      if( $contents[$pos] == '#' || substr($contents,$pos,2) == '//' )
+      if ( $contents[$pos] == '#' || substr($contents,$pos,2) == '//' )
       {
-         while( $pos < $clen ) // skip #... and //...
+         while ( $pos < $clen ) // skip #... and //...
          {
-            if( $contents[$pos++] == "\n" ) break; // ... till EOL
+            if ( $contents[$pos++] == "\n" ) break; // ... till EOL
          }
       }
-      elseif( substr($contents,$pos,2) == '/*' )
+      elseif ( substr($contents,$pos,2) == '/*' )
       {
          $pos += 2;
-         while( $pos < $clen ) // skip /* ... */
+         while ( $pos < $clen ) // skip /* ... */
          {
-            if( substr($contents,$pos,2) == '*/' )
+            if ( substr($contents,$pos,2) == '*/' )
             {
                $pos += 2;
                break;
@@ -565,7 +565,7 @@ function eat_comments( $contents, $clen, &$pos )
 
 function eat_whitespace( $contents, $clen, &$pos )
 {
-   while( $pos < $clen && ctype_space($contents[$pos]) )
+   while ( $pos < $clen && ctype_space($contents[$pos]) )
       $pos++;
 }
 
@@ -577,27 +577,27 @@ function eat_translation_text( $contents, $clen, &$pos )
 
    // eat "..." or '...'
    $endquote = false;
-   while( $pos < $clen )
+   while ( $pos < $clen )
    {
       $ch1 = $contents[$pos++];
-      if( $ch1 == '\\' && $pos < $clen )
+      if ( $ch1 == '\\' && $pos < $clen )
       {
          $ch2 = $contents[$pos];
-         if( $ch2 == '\\' || $ch2 == $quote )
+         if ( $ch2 == '\\' || $ch2 == $quote )
             $pos++;
       }
-      elseif( $ch1 == $quote )
+      elseif ( $ch1 == $quote )
       {
          $endquote = true;
          break;
       }
    }
    $text = substr( $contents, $spos, $pos - $spos );
-   if( !$endquote )
+   if ( !$endquote )
       return array( $text, "Missing end quote [$quote] for translation text", $spos );
 
    // check for "..$var.."
-   if( $quote == '"' && preg_match('/(?<!\\\)(\$[a-z_][a-z0-9_]+)/si', $text, $match) )
+   if ( $quote == '"' && preg_match('/(?<!\\\)(\$[a-z_][a-z0-9_]+)/si', $text, $match) )
       return array( $text, "Found invalid variable-usage in translation-text [{$match[1]}]", $spos );
 
    return array( $text, 0, $spos );

@@ -48,13 +48,13 @@ define('GA_RES_TIMOUT', 3);
    connect2mysql();
 
    $logged_in = who_is_logged( $player_row);
-   if( !$logged_in )
+   if ( !$logged_in )
       error('login_if_not_logged_in', 'Tournament.game_admin');
-   if( !ALLOW_TOURNAMENTS )
+   if ( !ALLOW_TOURNAMENTS )
       error('feature_disabled', 'Tournament.game_admin');
    $my_id = $player_row['ID'];
 
-   if( $my_id <= GUESTS_ID_MAX )
+   if ( $my_id <= GUESTS_ID_MAX )
       error('not_allowed_for_guest', 'Tournament.game_admin');
 
    $page = "game_admin.php";
@@ -67,22 +67,22 @@ define('GA_RES_TIMOUT', 3);
 
    $tid = (int) @$_REQUEST['tid'];
    $gid = (int) @$_REQUEST['gid'];
-   if( $tid < 0 ) $tid = 0;
-   if( $gid < 0 ) $gid = 0;
+   if ( $tid < 0 ) $tid = 0;
+   if ( $gid < 0 ) $gid = 0;
 
    $tourney = TournamentCache::load_cache_tournament( 'Tournament.game_admin.find_tournament', $tid );
    $tstatus = new TournamentStatus( $tourney );
 
    $game = Games::load_game($gid);
-   if( is_null($game) )
+   if ( is_null($game) )
       error('unknown_game', "Tournament.game_admin.find_tournament($tid)");
    $g_score = ( $game->Status == GAME_STATUS_FINISHED ) ? $game->Score : null;
    $g_score_text = score2text($g_score, false);
 
    $tgame = TournamentGames::load_tournament_game_by_gid($gid);
-   if( is_null($tgame) )
+   if ( is_null($tgame) )
       error('bad_tournament', "Tournament.game_admin.find_tgame($tid,$gid)");
-   if( $tgame->tid != $tid )
+   if ( $tgame->tid != $tid )
       error('bad_tournament', "Tournament.game_admin.check_tgame.tid($tid,$gid)");
    $tg_score = $tgame->getScoreForUser( $game->Black_ID );
    $tg_score_text = score2text($tg_score, false);
@@ -95,11 +95,11 @@ define('GA_RES_TIMOUT', 3);
    // edit allowed?
    $is_admin = TournamentUtils::isAdmin();
    $allow_edit_tourney = TournamentHelper::allow_edit_tournaments($tourney, $my_id);
-   if( !$allow_edit_tourney )
+   if ( !$allow_edit_tourney )
       error('tournament_edit_not_allowed', "Tournament.game_admin.edit($tid,$my_id)");
 
    $errors = $tstatus->check_edit_status( TournamentGames::get_admin_tournament_status() );
-   if( !TournamentUtils::isAdmin() && $tourney->isFlagSet(TOURNEY_FLAG_LOCK_ADMIN) )
+   if ( !TournamentUtils::isAdmin() && $tourney->isFlagSet(TOURNEY_FLAG_LOCK_ADMIN) )
       $errors[] = $tourney->buildAdminLockText();
    $authorise_game_end = TournamentHelper::allow_edit_tournaments($tourney, $my_id, TD_FLAG_GAME_END);
    $authorise_add_time = TournamentHelper::allow_edit_tournaments($tourney, $my_id, TD_FLAG_GAME_ADD_TIME);
@@ -112,9 +112,9 @@ define('GA_RES_TIMOUT', 3);
 
    // ---------- Process actions ------------------------------------------------
 
-   if( count($errors) == 0 )
+   if ( count($errors) == 0 )
    {
-      if( @$_REQUEST['gend_save'] && $authorise_game_end )
+      if ( @$_REQUEST['gend_save'] && $authorise_game_end )
       {
          $tgame->Flags |= TG_FLAG_GAME_END_TD;
          $tgame->setStatus(TG_STATUS_SCORE);
@@ -122,7 +122,7 @@ define('GA_RES_TIMOUT', 3);
          ta_begin();
          {//HOT-section to update TG-score
             $success = $tgame->update_score( 'Tournament.game_admin', TG_STATUS_PLAY );
-            if( $success )
+            if ( $success )
             {
                // clear cache
                TournamentGames::delete_cache_tournament_games( "Tournament.game_admin($tid)", $tid );
@@ -134,16 +134,16 @@ define('GA_RES_TIMOUT', 3);
          }
          ta_end();
 
-         if( $success )
+         if ( $success )
             jump_to("tournaments/game_admin.php?tid=$tid".URI_AMP."gid=$gid".URI_AMP .
                "sysmsg=".urlencode( T_('Tournament Game result set!') ));
       }
 
-      if( @$_REQUEST['addtime_save'] && $authorise_add_time )
+      if ( @$_REQUEST['addtime_save'] && $authorise_add_time )
       {
          $color = @$vars['color'];
          $opp = calc_opponent( $game, $color );
-         if( is_null($opp) ) // shouldn't happen
+         if ( is_null($opp) ) // shouldn't happen
             error('assert', "Tournament.game_admin.addtime.check.opp($tid,$gid,$color)");
          $add_days  = (int) @$vars['add_days'];
          $reset_byo = (bool) @$vars['reset_byoyomi'];
@@ -155,7 +155,7 @@ define('GA_RES_TIMOUT', 3);
          ta_begin();
          {//HOT-section to add time
             $add_hours = GameAddTime::add_time_opponent( $game_row, $opp, $add_days_hours, $reset_byo, /*by_td*/$my_id );
-            if( !is_numeric($add_hours) ) // error occured
+            if ( !is_numeric($add_hours) ) // error occured
                $errors[] = $add_hours;
             else
             {
@@ -167,7 +167,7 @@ define('GA_RES_TIMOUT', 3);
          }
          ta_end();
 
-         if( is_numeric($add_hours) )
+         if ( is_numeric($add_hours) )
          {
             $sys_msg = urlencode( T_('Time added!') );
             jump_to("tournaments/game_admin.php?tid=$tid".URI_AMP."gid=$gid".URI_AMP."sysmsg=$sys_msg");
@@ -195,18 +195,18 @@ define('GA_RES_TIMOUT', 3);
 
    $arr = array();
    $arr[] = sprintf( T_('Status [%s]'), TournamentGames::getStatusText($tgame->Status) );
-   if( $tgame->Round_ID > 0 )
+   if ( $tgame->Round_ID > 0 )
    {
       $tround = TournamentRound::load_tournament_round_by_id( $tgame->Round_ID );
-      if( !is_null($tround) )
+      if ( !is_null($tround) )
          $arr[] = sprintf( T_('Round %s on Status [%s]#tourney'), $tround->Round, TournamentRound::getStatusText($tround->Status) );
    }
-   if( $tgame->Pool > 0 )
+   if ( $tgame->Pool > 0 )
       $arr[] = sprintf( T_('Pool %s'), $tgame->Pool );
    $tform->add_row( array(
          'DESCRIPTION', T_('Tournament Game Info'),
          'TEXT',        implode(', ', $arr) ));
-   if( $tgame->Flags > 0 )
+   if ( $tgame->Flags > 0 )
       $tform->add_row( array(
          'DESCRIPTION', T_('Tournament Game Flags'),
          'TEXT',        $tgame->formatFlags() ));
@@ -227,7 +227,7 @@ define('GA_RES_TIMOUT', 3);
    $tform->add_row( array(
          'DESCRIPTION', T_('Game Info#tourney'),
          'TEXT',        implode(', ', $arr) ));
-   if( $game->Flags > 0 )
+   if ( $game->Flags > 0 )
       $tform->add_row( array(
          'DESCRIPTION', T_('Game Flags'),
          'TEXT',        Games::buildFlags($game->Flags) ));
@@ -243,7 +243,7 @@ define('GA_RES_TIMOUT', 3);
          'TEXT',        $user_white->user_reference() . SEP_SPACING .
                         echo_rating($user_white->Rating, true, $user_white->ID), ));
 
-   if( count($errors) )
+   if ( count($errors) )
    {
       $tform->add_row( array( 'HR' ));
       $tform->add_row( array(
@@ -257,7 +257,7 @@ define('GA_RES_TIMOUT', 3);
 
    // ADMIN: End game ------------------
 
-   if( $authorise_game_end )
+   if ( $authorise_game_end )
       draw_game_end( $tgame, $trule );
    else
       echo span('TWarning', T_('You are not authorised to end a tournament game.')), "<br><br>\n";
@@ -265,9 +265,9 @@ define('GA_RES_TIMOUT', 3);
 
    // ADMIN: Add time ------------------
 
-   if( $authorise_add_time )
+   if ( $authorise_add_time )
    {
-      if( isStartedGame($game->Status) )
+      if ( isStartedGame($game->Status) )
          draw_add_time( $tgame, $game, $authorise_add_time );
    }
    else
@@ -307,20 +307,20 @@ function parse_edit_form( &$tgame, $trule, $game )
    );
 
    // init for game-end
-   if( $tgame->Status == TG_STATUS_SCORE || $tgame->Status == TG_STATUS_WAIT || $tgame->Status == TG_STATUS_DONE )
+   if ( $tgame->Status == TG_STATUS_SCORE || $tgame->Status == TG_STATUS_WAIT || $tgame->Status == TG_STATUS_DONE )
       $game_score = (($tgame->Challenger_uid == $game->Black_ID) ? 1 : -1) * $tgame->Score;
-   elseif( $game->Status == GAME_STATUS_FINISHED )
+   elseif ( $game->Status == GAME_STATUS_FINISHED )
       $game_score = $game->Score;
    else
       $game_score = null;
-   if( !is_null($game_score) )
+   if ( !is_null($game_score) )
    {
       $vars['TG_Score'] = (($tgame->Challenger_uid == $game->Black_ID) ? 1 : -1) * $game_score;
       $vars['color'] = ($game_score <= 0) ? BLACK : WHITE;
       $vars['score'] = '';
-      if( abs($tgame->Score) == SCORE_RESIGN )
+      if ( abs($tgame->Score) == SCORE_RESIGN )
          $vars['result'] = GA_RES_RESIGN;
-      elseif( abs($tgame->Score) == SCORE_TIME )
+      elseif ( abs($tgame->Score) == SCORE_TIME )
          $vars['result'] = GA_RES_TIMOUT;
       else
       {
@@ -331,35 +331,35 @@ function parse_edit_form( &$tgame, $trule, $game )
 
    $old_vals = array() + $vars; // copy to determine edit-changes
    // read URL-vals into vars
-   foreach( $vars as $key => $val )
+   foreach ( $vars as $key => $val )
       $vars[$key] = get_request_arg( $key, $val );
    // handle checkboxes having no key/val in _POST-hash
-   if( @$_REQUEST['addtime_save'] )
+   if ( @$_REQUEST['addtime_save'] )
    {
-      foreach( array( 'reset_byoyomi' ) as $key )
+      foreach ( array( 'reset_byoyomi' ) as $key )
          $vars[$key] = get_request_arg( $key, false );
    }
 
    // parse URL-vars
    $mask_gend = 0;
-   if( @$_REQUEST['gend_save'] || @$_REQUEST['addtime_save'] )
+   if ( @$_REQUEST['gend_save'] || @$_REQUEST['addtime_save'] )
    {
       $new_value = $vars['color'];
-      if( (string)$new_value != '' )
+      if ( (string)$new_value != '' )
       {
-         if( $new_value != BLACK && $new_value != WHITE ) // shouldn't happen with radio-buttons
+         if ( $new_value != BLACK && $new_value != WHITE ) // shouldn't happen with radio-buttons
             error('assert', "Tournament.game_admin.parse_edit_form.check.color($tid,$gid,$new_value)");
          else
             $mask_gend |= 1;
       }
    }
 
-   if( @$_REQUEST['gend_save'] )
+   if ( @$_REQUEST['gend_save'] )
    {
       $new_value = (int)$vars['result'];
-      if( $new_value )
+      if ( $new_value )
       {
-         if( $new_value != GA_RES_SCORE && $new_value != GA_RES_RESIGN
+         if ( $new_value != GA_RES_SCORE && $new_value != GA_RES_RESIGN
                && $new_value != GA_RES_TIMOUT ) // shouldn't happen with radio-buttons
             error('assert', "Tournament.game_admin.parse_edit_form.check.result($tid,$gid,$new_value)");
          else
@@ -370,9 +370,9 @@ function parse_edit_form( &$tgame, $trule, $game )
       }
 
       $new_value = trim($vars['score']);
-      if( (string)$new_value != '' )
+      if ( (string)$new_value != '' )
       {
-         if( !preg_match("/^\\d+(\\.[05])?$/", $new_value) || $new_value > SCORE_MAX )
+         if ( !preg_match("/^\\d+(\\.[05])?$/", $new_value) || $new_value > SCORE_MAX )
             $errors[] = sprintf( T_('Expecting number in format %s.5 for game score'), SCORE_MAX );
          else
          {
@@ -381,15 +381,15 @@ function parse_edit_form( &$tgame, $trule, $game )
          }
       }
 
-      if( ($mask_gend & 3) == 3 ) // expected color, result [,score]
+      if ( ($mask_gend & 3) == 3 ) // expected color, result [,score]
       {
-         if( $vars['result'] == GA_RES_RESIGN )
+         if ( $vars['result'] == GA_RES_RESIGN )
             $game_score = SCORE_RESIGN;
-         elseif( $vars['result'] == GA_RES_TIMOUT )
+         elseif ( $vars['result'] == GA_RES_TIMOUT )
             $game_score = SCORE_TIME;
          else
          {
-            if( $mask_gend & 4 )
+            if ( $mask_gend & 4 )
                $game_score = $vars['score'];
             else
             {
@@ -398,21 +398,21 @@ function parse_edit_form( &$tgame, $trule, $game )
             }
          }
 
-         if( !is_null($game_score) )
+         if ( !is_null($game_score) )
          {
-            if( $game_score != SCORE_RESIGN && $game_score != SCORE_TIME && !@$_REQUEST['jigo_check'] ) // jigo_check=1 : skip jigo-check
+            if ( $game_score != SCORE_RESIGN && $game_score != SCORE_TIME && !@$_REQUEST['jigo_check'] ) // jigo_check=1 : skip jigo-check
             {
                $jigo_behaviour = $trule->determineJigoBehaviour();
                $chk_score = floor( abs( 2 * (float)$game_score ) );
-               if( ( $jigo_behaviour > 0 && !($chk_score & 1) ) || ( $jigo_behaviour == 0 && ($chk_score & 1) ) )
+               if ( ( $jigo_behaviour > 0 && !($chk_score & 1) ) || ( $jigo_behaviour == 0 && ($chk_score & 1) ) )
                   $errors[] = TournamentRules::getJigoBehaviourText( $jigo_behaviour );
             }
 
-            if( count($errors) == 0 )
+            if ( count($errors) == 0 )
             {
-               if( $vars['color'] == BLACK ) // normalize to BLACK(<0), WHITE(>0)
+               if ( $vars['color'] == BLACK ) // normalize to BLACK(<0), WHITE(>0)
                   $game_score = -$game_score;
-               if( $tgame->Challenger_uid == $game->White_ID ) // adjust to Challenger/Defender-color
+               if ( $tgame->Challenger_uid == $game->White_ID ) // adjust to Challenger/Defender-color
                   $game_score = -$game_score;
                $vars['TG_Score'] = $tgame->Score = $game_score;
             }
@@ -423,15 +423,15 @@ function parse_edit_form( &$tgame, $trule, $game )
 
 
       // determine edits
-      if( $old_vals['TG_Score'] != $tgame->Score ) $edits[] = T_('Score');
+      if ( $old_vals['TG_Score'] != $tgame->Score ) $edits[] = T_('Score');
    }//game-end
-   elseif( @$_REQUEST['addtime_save'] )
+   elseif ( @$_REQUEST['addtime_save'] )
    {
-      if( ($mask_gend & 1) != 1 ) // expected color
+      if ( ($mask_gend & 1) != 1 ) // expected color
          $errors[] = T_('Missing color for add-time');
 
       $new_value = $vars['add_days'];
-      if( !is_numeric($new_value) || $new_value < 1 || $new_value > MAX_ADD_DAYS )
+      if ( !is_numeric($new_value) || $new_value < 1 || $new_value > MAX_ADD_DAYS )
          error('assert', "Tournament.game_admin.parse_edit_form.check.add_days($tid,$gid,$new_value)");
    }
 
@@ -451,7 +451,7 @@ function draw_game_end( $tgame, $trule )
    $tform->add_row( array(
          'CELL', 2, '',
          'HEADER', T_('End Tournament Game') ));
-   if( $allow_edit )
+   if ( $allow_edit )
       $tform->add_row( array(
          'CELL', 2, '',
          'TEXT', span('TWarning', T_('This operation is irreversible, so please be careful!')), ));
@@ -476,7 +476,7 @@ function draw_game_end( $tgame, $trule )
          'RADIOBUTTONSX', 'result', array( GA_RES_TIMOUT => T_('Timeout') ), @$vars['result'], $disabled, ));
 
    $jigo_behaviour_text = TournamentRules::getJigoBehaviourText( $trule->determineJigoBehaviour() );
-   if( $jigo_behaviour_text )
+   if ( $jigo_behaviour_text )
    {
       $tform->add_empty_row();
       $tform->add_row( array(
@@ -487,7 +487,7 @@ function draw_game_end( $tgame, $trule )
          'CHECKBOX', 'jigo_check', 1, T_('allow to set a score contradicting Jigo-restrictions'), @$_REQUEST['jigo_check'], ));
    }
 
-   if( $allow_edit )
+   if ( $allow_edit )
    {
       $tform->add_empty_row();
       $tform->add_row( array(
@@ -502,9 +502,9 @@ function draw_game_end( $tgame, $trule )
 
 function calc_opponent( $game, $color )
 {
-   if( $color == WHITE )
+   if ( $color == WHITE )
       return $game->Black_ID;
-   elseif( $color == BLACK )
+   elseif ( $color == BLACK )
       return $game->White_ID;
    return null;
 }
@@ -546,7 +546,7 @@ function draw_add_time( $tgame, $game, $allow_add_time )
          'TEXT', SEP_SPACING . T_('Time remaining') . MED_SPACING . $white_remtime['text'], ));
    $tform->add_empty_row();
 
-   if( $allow_edit )
+   if ( $allow_edit )
    {
       $info = GameAddTime::make_add_time_info( $game_row, ($black_to_move) ? BLACK : WHITE );
 
@@ -559,7 +559,7 @@ function draw_add_time( $tgame, $game, $allow_add_time )
             'TEXT', MINI_SPACING . T_('added to maintime.'), ));
 
       // no byoyomi-reset if no byoyomi
-      if( $info['byo_reset'] )
+      if ( $info['byo_reset'] )
       {
          $tform->add_row( array(
                'TAB', 'CELL', 1, '',

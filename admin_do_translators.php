@@ -34,7 +34,7 @@ function lang_illegal( $str)
 
 function retry_admin( $msg)
 {
-   if( $tmp = trim( $msg) )
+   if ( $tmp = trim( $msg) )
    {
       $tmp = '?sysmsg='.urlencode($tmp);
       $sep = URI_AMP;
@@ -45,7 +45,7 @@ function retry_admin( $msg)
       $sep = '?';
    }
 
-   foreach( array(
+   foreach ( array(
          'langname',
          'browsercode',
          'charenc',
@@ -55,7 +55,7 @@ function retry_admin( $msg)
          ) as $arg )
    {
       global $$arg;
-      if( isset($$arg) && (!is_string($$arg) || $$arg>'') )
+      if ( isset($$arg) && (!is_string($$arg) || $$arg>'') )
       {
          $tmp.= $sep.$arg."=".urlencode($$arg);
          $sep = URI_AMP;
@@ -72,11 +72,11 @@ function retry_admin( $msg)
    connect2mysql();
 
    $logged_in = who_is_logged( $player_row);
-   if( !$logged_in )
+   if ( !$logged_in )
       error('not_logged_in', 'admin_do_translators');
-   if( $player_row['ID'] <= GUESTS_ID_MAX )
+   if ( $player_row['ID'] <= GUESTS_ID_MAX )
       error('not_allowed_for_guest', 'admin_do_translators');
-   if( !(@$player_row['admin_level'] & ADMIN_TRANSLATORS) )
+   if ( !(@$player_row['admin_level'] & ADMIN_TRANSLATORS) )
       error('adminlevel_too_low', 'admin_do_translators');
 
 /* Originally, the language code was a 2 letters code (like ISO 639-1).
@@ -110,20 +110,20 @@ function retry_admin( $msg)
 
    $msg = '';
 
-   if( $showlanguages )
+   if ( $showlanguages )
       retry_admin('');
 
-   if( $addlanguage )
+   if ( $addlanguage )
    {
       $tmp = lang_illegal( $browsercode.$langname.$charenc);
-      if( $tmp )
+      if ( $tmp )
          retry_admin( "Sorry, there was an illegal character in a language field ($tmp)");
 
-      if( strlen( $browsercode ) < 2 || empty( $langname ) || empty( $charenc ) )
+      if ( strlen( $browsercode ) < 2 || empty( $langname ) || empty( $charenc ) )
         retry_admin( "Sorry, there was a missing or incorrect field when adding a language.");
 
       $tmp= language_exists( $browsercode, $charenc, $langname );
-      if( $tmp )
+      if ( $tmp )
         retry_admin( "Sorry, the language you tried to add already exists."
                      ."\n" . $tmp);
 
@@ -155,37 +155,37 @@ function retry_admin( $msg)
 // Queries with a user:
 
    $old_langs = '';
-   if( $showpriv || $transladd || $translpriv )
+   if ( $showpriv || $transladd || $translpriv )
    {
-      if( empty($transluser) )
+      if ( empty($transluser) )
          retry_admin( "Sorry, you must specify a user.");
       $row = mysql_single_fetch( 'admin_do_translators.user.find',
          "SELECT Translator FROM Players WHERE Handle='".mysql_addslashes($transluser)."'" );
-      if( !$row )
+      if ( !$row )
          retry_admin( "Sorry, I couldn't find this user.");
-      if( !empty($row['Translator']) )
+      if ( !empty($row['Translator']) )
          $old_langs = $row['Translator'];
    }
 
-   if( $showpriv )
+   if ( $showpriv )
       retry_admin('');
 
    $translator_array = array();
    $update_it = false;
-   if( $transladd )
+   if ( $transladd )
    {
-      if( !empty($transladdlang) )
+      if ( !empty($transladdlang) )
       {
-         if( !language_exists( $transladdlang ) )
+         if ( !language_exists( $transladdlang ) )
             $transladdlang = '';
       }
-      if( empty($transladdlang) )
+      if ( empty($transladdlang) )
          retry_admin( "Sorry, you must specify existing languages.");
 
-      if( $old_langs )
+      if ( $old_langs )
          $translator_array = explode( LANG_TRANSL_CHAR, $old_langs );
 
-      if( in_array( $transladdlang, $translator_array) )
+      if ( in_array( $transladdlang, $translator_array) )
          retry_admin( sprintf( "User %s is already translator for language %s.",
                            $transluser, $transladdlang) );
       $translator_array[]= $transladdlang;
@@ -194,9 +194,9 @@ function retry_admin( $msg)
       $msg = sprintf( "Added user %s as translator for language %s."
                            , $transluser, $transladdlang );
    }
-   else if( $translpriv )
+   else if ( $translpriv )
    {
-      if( is_array( $transllang ) )
+      if ( is_array( $transllang ) )
          $translator_array = $transllang;
 
       $update_it = 'admin_t5';
@@ -204,11 +204,11 @@ function retry_admin( $msg)
                            , $transluser );
    }
 
-   if( $update_it )
+   if ( $update_it )
    {
       $new_langs = implode( LANG_TRANSL_CHAR, array_unique($translator_array));
 
-      if( $new_langs == $old_langs )
+      if ( $new_langs == $old_langs )
          retry_admin( $msg);
 
       ta_begin();
@@ -216,17 +216,17 @@ function retry_admin( $msg)
          db_query( "admin_do_translators.user.update($transluser,$new_langs)",
             "UPDATE Players SET Translator='$new_langs'"
                . " WHERE Handle='".mysql_addslashes($transluser)."' LIMIT 1" );
-         if( mysql_affected_rows() != 1 )
+         if ( mysql_affected_rows() != 1 )
             error('internal_error', "admin_do_translators.user.update2($transluser,$new_langs)");
 
          // Check result
          $tmp = mysql_single_fetch( "admin_do_translators.user.translator($transluser)",
             "SELECT Translator FROM Players WHERE Handle='".mysql_addslashes($transluser)."'" );
-         if( !$tmp )
+         if ( !$tmp )
             $update_it.= '.1';
-         else if( !isset($tmp['Translator']) )
+         else if ( !isset($tmp['Translator']) )
             $update_it.= '.2';
-         else if( $tmp['Translator'] != $new_langs )
+         else if ( $tmp['Translator'] != $new_langs )
             $update_it.= '.3'; //surely, the field truncats the string
          else
             retry_admin( $msg);

@@ -69,7 +69,7 @@ class QuickHandlerWaitingroom extends QuickHandler
       $this->wroom_id = (int)get_request_arg('wrid');
 
       // filter-defaults
-      if( !isset($this->filters[WROOM_FILTER_SUITABLE]) )
+      if ( !isset($this->filters[WROOM_FILTER_SUITABLE]) )
          $this->filters[WROOM_FILTER_SUITABLE] = 1; // default: suitable=ON
    }//parseURL
 
@@ -84,31 +84,31 @@ class QuickHandlerWaitingroom extends QuickHandler
 
       // prepare command: info, delete, join, list
 
-      if( $cmd == QCMD_INFO || $cmd == WROOMCMD_DELETE || $cmd == WROOMCMD_JOIN )
+      if ( $cmd == QCMD_INFO || $cmd == WROOMCMD_DELETE || $cmd == WROOMCMD_JOIN )
       {
          // check id
-         if( (string)$this->wroom_id == '' || !is_numeric($this->wroom_id) || $this->wroom_id <= 0 )
+         if ( (string)$this->wroom_id == '' || !is_numeric($this->wroom_id) || $this->wroom_id <= 0 )
             error('invalid_args', "$dbgmsg.bad_wrid");
       }
 
-      if( $cmd == QCMD_INFO )
+      if ( $cmd == QCMD_INFO )
       {
          $this->filters[WROOM_FILTER_SUITABLE] = 0; // allow ALL
          $qsql = WaitingroomControl::build_waiting_room_query( $this->wroom_id, /*suitable*/false );
          $this->wroom = Waitingroom::load_waitingroom_by_query( $qsql );
-         if( is_null($this->wroom) )
+         if ( is_null($this->wroom) )
             error('unknown_entry', "$dbgmsg.load_wroom({$this->wroom_id})");
       }
-      elseif( $cmd == QCMD_LIST )
+      elseif ( $cmd == QCMD_LIST )
       {
          $filter_suitable = (int)$this->filters[WROOM_FILTER_SUITABLE]; // 0=all, 1=suitable, 2=mine
          $qsql = WaitingroomControl::build_waiting_room_query( 0, ( $filter_suitable == 1 ) );
-         if( $filter_suitable == 2 ) // mine
+         if ( $filter_suitable == 2 ) // mine
             $qsql->add_part( SQLP_WHERE, "WR.uid=".$this->my_id );
          else // all | suitable
          {
             $qsql->add_part( SQLP_WHERE, "WR.uid<>".$this->my_id );
-            if( $filter_suitable == 1 ) // suitable
+            if ( $filter_suitable == 1 ) // suitable
                $qsql->add_part( SQLP_HAVING, 'goodrating', 'goodmingames', 'haverating', 'goodsameopp' );
          }
 
@@ -124,22 +124,22 @@ class QuickHandlerWaitingroom extends QuickHandler
    public function process()
    {
       $cmd = $this->quick_object->cmd;
-      if( $cmd == QCMD_INFO )
+      if ( $cmd == QCMD_INFO )
          $this->fill_wroom_object( $this->quick_object->result, $this->wroom, /*list*/false );
-      elseif( $cmd == QCMD_LIST )
+      elseif ( $cmd == QCMD_LIST )
          $this->process_cmd_list();
-      elseif( $cmd == WROOMCMD_DELETE )
+      elseif ( $cmd == WROOMCMD_DELETE )
          WaitingroomControl::delete_waitingroom_game( $this->wroom_id );
-      elseif( $cmd == WROOMCMD_JOIN )
+      elseif ( $cmd == WROOMCMD_JOIN )
          WaitingroomControl::join_waitingroom_game( $this->wroom_id );
    }//process
 
    private function process_cmd_list()
    {
       $out = array();
-      if( !is_null($this->wroom_iterator) )
+      if ( !is_null($this->wroom_iterator) )
       {
-         while( list(,$arr_item) = $this->wroom_iterator->getListIterator() )
+         while ( list(,$arr_item) = $this->wroom_iterator->getListIterator() )
          {
             list( $wr, $wrow ) = $arr_item;
             $arr = array();
@@ -163,16 +163,16 @@ class QuickHandlerWaitingroom extends QuickHandler
       list( $restrictions, $joinable ) =
          WaitingroomControl::get_waitingroom_restrictions(
             $wr->wrow, $this->filters[WROOM_FILTER_SUITABLE], /*html*/false );
-      if( $restrictions == NO_VALUE )
+      if ( $restrictions == NO_VALUE )
          $restrictions = '';
 
       $opp_started_games = $join_warning = $join_error = '';
-      if( !$is_list && !$wro->is_my_game() )
+      if ( !$is_list && !$wro->is_my_game() )
       {
          $opp_started_games = GameHelper::count_started_games( $this->my_id, $wr->uid );
 
          list( $can_join, $html_out, $join_warning, $join_error ) = $wro->check_joining_waitingroom(/*html*/false);
-         if( !$can_join )
+         if ( !$can_join )
             $joinable = false;
       }
 
@@ -210,7 +210,7 @@ class QuickHandlerWaitingroom extends QuickHandler
 
       $result['restrictions'] = $restrictions;
       $result['join'] = ( !$wro->is_my_game() && $joinable ) ? 1 : 0;
-      if( !$is_list )
+      if ( !$is_list )
       {
          $result['join_warn'] = $join_warning;
          $result['join_err'] = $join_error;
@@ -220,10 +220,10 @@ class QuickHandlerWaitingroom extends QuickHandler
       $result['calc_type'] = $wro->resultType;
       $result['calc_color'] = $wro->resultColor;
       $result['calc_handicap'] = $result['calc_komi'] = ''; // needed for LIST-cmd
-      if( ($wro->resultType == 1 || $wro->resultType == 2) && $wro->resultColor )
+      if ( ($wro->resultType == 1 || $wro->resultType == 2) && $wro->resultColor )
       {
          $result['calc_handicap'] = $wro->resultHandicap;
-         if( $wro->resultColor != 'fairkomi' )
+         if ( $wro->resultColor != 'fairkomi' )
             $result['calc_komi'] = $wro->resultKomi;
       }
    }//fill_wroom_object

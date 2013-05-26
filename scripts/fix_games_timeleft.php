@@ -32,11 +32,11 @@ $GLOBALS['ThePage'] = new Page('Script', PAGEFLAG_IMPLICIT_FLUSH );
 
 
    $logged_in = who_is_logged($player_row);
-   if( !$logged_in )
+   if ( !$logged_in )
       error('login_if_not_logged_in', 'scripts.fix_games_timeleft');
-   if( $player_row['ID'] <= GUESTS_ID_MAX )
+   if ( $player_row['ID'] <= GUESTS_ID_MAX )
       error('not_allowed_for_guest', 'scripts.fix_games_timeleft');
-   if( !(@$player_row['admin_level'] & (ADMIN_DATABASE|ADMIN_GAME)) )
+   if ( !(@$player_row['admin_level'] & (ADMIN_DATABASE|ADMIN_GAME)) )
       error('adminlevel_too_low', 'scripts.fix_games_timeleft');
 
    $page = $_SERVER['PHP_SELF'];
@@ -48,10 +48,10 @@ $GLOBALS['ThePage'] = new Page('Script', PAGEFLAG_IMPLICIT_FLUSH );
 //echo ">>>> One shot fix. Do not run it again."; end_html(); exit;
 
    $do_it = @$_REQUEST['do_it'];
-   if( $do_it )
+   if ( $do_it )
    {
       function dbg_query($s, $msg='') {
-        if( !mysql_query( $s) )
+        if ( !mysql_query( $s) )
            die("<BR>$s;<BR>" . ($msg ? "; -- $msg" : '') . mysql_error() );
       }
       echo "<p>*** Fixes Games.TimeOutDate ***"
@@ -94,19 +94,19 @@ $GLOBALS['ThePage'] = new Page('Script', PAGEFLAG_IMPLICIT_FLUSH );
    echo "<br>Found $games_cnt games to process and calculate time left ...\n";
 
    // update Games.TimeOutDate
-   while( $row = mysql_fetch_assoc($result) )
+   while ( $row = mysql_fetch_assoc($result) )
    {
       $gid = $row['ID'];
 
       $to_move = ($row['Black_ID'] == $row['ToMove_ID']) ? BLACK : WHITE;
       $timeout_date = NextGameOrder::make_timeout_date( $row, $to_move, $row['ClockUsed'], $row['LastTicks'] );
 
-      if( $row['TimeOutDate'] != $timeout_date )
+      if ( $row['TimeOutDate'] != $timeout_date )
          update_games_timeoutdate( $gid, $timeout_date, $row['TimeOutDate'] );
    }
    mysql_free_result($result);
 
-   if( $do_it )
+   if ( $do_it )
       echo 'Running games remaining-time fix for Games.TimeOutDate finished.';
 
    echo "<p></p>Done.";
@@ -118,7 +118,7 @@ $GLOBALS['ThePage'] = new Page('Script', PAGEFLAG_IMPLICIT_FLUSH );
 function update_games_timeoutdate( $gid, $timeout_date, $curr_timeout_date )
 {
    global $games_cnt, $curr_cnt;
-   if( ($curr_cnt++ % 50) == 0 )
+   if ( ($curr_cnt++ % 50) == 0 )
       echo "<br><br>... $curr_cnt of $games_cnt updated ...\n";
    $update_query = "UPDATE Games SET TimeOutDate=$timeout_date WHERE ID='$gid' LIMIT 1";
    dbg_query($update_query, "$curr_timeout_date -> $timeout_date");

@@ -61,7 +61,7 @@ abstract class HTMLPage
    {
       $this->BaseName = substr( @$_SERVER['PHP_SELF'], strlen(SUB_PATH));
 
-      if( !is_string($_pageid) )
+      if ( !is_string($_pageid) )
          $_pageid = substr( $this->BaseName, 0, strrpos($this->BaseName,'.'));
       //make it CSS compatible, just allowing the space (see getCSSclass())
       $this->ClassCSS = preg_replace('%[^ a-zA-Z0-9]+%', '-', $_pageid);
@@ -82,12 +82,12 @@ abstract class HTMLPage
        * Default-level for ZLib-compression is 6, but 3 gives less load on web-server.
        * Or may be set in php.ini-file -> see http://de2.php.net/manual/en/zlib.configuration.php#ini.zlib.output-compression
        */
-      if( $this->page_flags & PAGEFLAG_IMPLICIT_FLUSH )
+      if ( $this->page_flags & PAGEFLAG_IMPLICIT_FLUSH )
       {
          ob_implicit_flush(true);
          $this->page_flags |= PAGEFLAG_NO_BUFFERING; // flushing works only with no-buffering
       }
-      if( !($this->page_flags & PAGEFLAG_NO_BUFFERING) )
+      if ( !($this->page_flags & PAGEFLAG_NO_BUFFERING) )
          ob_start('ob_gzhandler');
    }//__construct
 

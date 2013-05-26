@@ -60,7 +60,7 @@ class FilterGameType extends FilterSelection
       parent::__construct($name, $dbfield, $config);
       $this->type = 'GameType';
 
-      if( $this->get_config(FC_MULTIPLE) )
+      if ( $this->get_config(FC_MULTIPLE) )
          error('invalid_filter', "FilterGameType.construct.conf.no_multiple({$this->id},$name)");
 
       $this->add_element_name( FGTNAME_MPGAME );
@@ -78,7 +78,7 @@ class FilterGameType extends FilterSelection
     */
    public function parse_value( $name, $val )
    {
-      if( $name == FGTNAME_MPGAME )
+      if ( $name == FGTNAME_MPGAME )
       {
          $val = $this->handle_default( $name, $val );
          $this->init_parse($val, $name);
@@ -95,7 +95,7 @@ class FilterGameType extends FilterSelection
       $r = parent::get_input_element($prefix, $attr);
 
       // check-box for mp-game
-      if( $this->get_config(FC_MPGAME) )
+      if ( $this->get_config(FC_MPGAME) )
       {
          $r .= $this->build_generic_checkbox_elem(
                $prefix, FGTNAME_MPGAME, $this->values[FGTNAME_MPGAME],

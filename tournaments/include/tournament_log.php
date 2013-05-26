@@ -98,9 +98,9 @@ class Tournamentlog
    /* \brief Sets type to TLOG_TYPE_..., if empty determine from players admin-level. */
    public function setType( $type )
    {
-      if( $type )
+      if ( $type )
       {
-         if( !preg_match( "/^(".CHECK_TLOG_TYPES.")$/", $type ) )
+         if ( !preg_match( "/^(".CHECK_TLOG_TYPES.")$/", $type ) )
             error('invalid_args', "Tournamentlog.setType($type)");
       }
       else
@@ -120,7 +120,7 @@ class Tournamentlog
    /*! \brief Inserts or updates tournament-log in database. */
    public function persist()
    {
-      if( $this->ID > 0 )
+      if ( $this->ID > 0 )
          $success = $this->update();
       else
          $success = $this->insert();
@@ -133,7 +133,7 @@ class Tournamentlog
 
       $entityData = $this->fillEntityData();
       $result = $entityData->insert( "Tournamentlog.insert(%s,{$this->tid})" );
-      if( $result )
+      if ( $result )
          $this->ID = mysql_insert_id();
       return $result;
    }
@@ -166,7 +166,7 @@ class Tournamentlog
    public static function build_query_sql( $tid=0 )
    {
       $qsql = $GLOBALS['ENTITY_TOURNAMENT_LOG']->newQuerySQL('TLOG');
-      if( is_numeric($tid) && $tid > 0 )
+      if ( is_numeric($tid) && $tid > 0 )
          $qsql->add_part( SQLP_WHERE, "TLOG.tid=$tid" );
       return $qsql;
    }
@@ -186,7 +186,7 @@ class Tournamentlog
             @$row['actuid'],
             @$row['Message']
          );
-      if( @$row['uid'] == 0 ) // special handling for CRON
+      if ( @$row['uid'] == 0 ) // special handling for CRON
          $tlog->uid = 0;
       return $tlog;
    }
@@ -201,7 +201,7 @@ class Tournamentlog
       $iterator->setResultRows( mysql_num_rows($result) );
 
       $iterator->clearItems();
-      while( $row = mysql_fetch_array( $result ) )
+      while ( $row = mysql_fetch_array( $result ) )
       {
          $tourney = self::new_from_row( $row );
          $iterator->addItem( $tourney, $row );

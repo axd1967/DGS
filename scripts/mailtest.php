@@ -28,11 +28,11 @@ require_once 'include/form_functions.php';
    connect2mysql();
 
    $logged_in = who_is_logged( $player_row);
-   if( !$logged_in )
+   if ( !$logged_in )
       error('login_if_not_logged_in', 'scripts.mailtest');
-   if( $player_row['ID'] <= GUESTS_ID_MAX )
+   if ( $player_row['ID'] <= GUESTS_ID_MAX )
       error('not_allowed_for_guest', 'scripts.mailtest');
-   if( !(@$player_row['admin_level'] & ADMIN_SUPERADMIN) )
+   if ( !(@$player_row['admin_level'] & ADMIN_SUPERADMIN) )
       error('adminlevel_too_low', 'scripts.mailtest');
 
 
@@ -41,7 +41,7 @@ require_once 'include/form_functions.php';
    $sendit= @$_REQUEST['sendit'];
    $Email= trim(get_request_arg( 'email', ''));
    $From= get_request_arg( 'from', '');
-   if( !$sendit && !$From )
+   if ( !$sendit && !$From )
       $From= EMAIL_FROM;
    $Subject= get_request_arg( 'subject', 'Mail test');
    $Text = 'Mail test from '.FRIENDLY_LONG_NAME.' - ignore it';
@@ -86,25 +86,25 @@ require_once 'include/form_functions.php';
    $dform->echo_string(1);
 
 
-   if( !function_exists('mail') )
+   if ( !function_exists('mail') )
    {
       echo "<br>mail() function not found.<br>";
    }
-   else if( $sendit && $Email )
+   else if ( $sendit && $Email )
    {
       $err = 0;
-      foreach( explode( ',', $Email) as $addr )
+      foreach ( explode( ',', $Email) as $addr )
       {
          $addr = trim($addr);
-         if( verify_invalid_email(false, $addr) )
+         if ( verify_invalid_email(false, $addr) )
          {
             echo "<br>bad mail address: ".textarea_safe($addr)."<br>";
             $err = 1;
          }
       }
-      if( !$err )
+      if ( !$err )
       {
-         if( $From )
+         if ( $From )
             $headers = "From: $From\n";
          else
             $headers = "";
@@ -116,7 +116,7 @@ require_once 'include/form_functions.php';
              strip_tags( $Text, '') . "\n";
 
          $res = send_email( false, $Email, 0, $msg, FRIENDLY_LONG_NAME.' mail test', $headers );
-         if( !$res )
+         if ( !$res )
          {
             echo "<br>mail() function failed.<br>";
          }

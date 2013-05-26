@@ -30,10 +30,10 @@ require_once 'include/message_functions.php';
    connect2mysql();
 
    $logged_in = who_is_logged( $player_row);
-   if( !$logged_in )
+   if ( !$logged_in )
       error('login_if_not_logged_in', 'edit_folders');
    $my_id = $player_row['ID'];
-   if( $my_id <= GUESTS_ID_MAX )
+   if ( $my_id <= GUESTS_ID_MAX )
       error('not_allowed_for_guest', 'edit_folders');
 
    $cfg_pages = ConfigPages::load_config_pages($my_id);
@@ -53,9 +53,9 @@ require_once 'include/message_functions.php';
 
    $folder_query = '';
    $old_status_flags = $cfg_pages->get_status_flags();
-   foreach( $_POST as $key => $val )
+   foreach ( $_POST as $key => $val )
    {
-      if( !preg_match("/^folder(\d+)$/", $key, $matches) ) // filters out negative (special) folders too
+      if ( !preg_match("/^folder(\d+)$/", $key, $matches) ) // filters out negative (special) folders too
          continue;
 
       $nr = $matches[1]; // >=0
@@ -74,42 +74,42 @@ require_once 'include/message_functions.php';
 
       $onstatuspage = ( @$_POST["onstatuspage$nr"] == 't' );
 
-      if( $nr >= USER_FOLDERS && ( in_array($nr, $statusfolders) xor $onstatuspage ) )
+      if ( $nr >= USER_FOLDERS && ( in_array($nr, $statusfolders) xor $onstatuspage ) )
       {
-         if( $onstatuspage )
+         if ( $onstatuspage )
             $statusfolders[]= $nr;
          else
          {
             $i=array_search( $nr, $statusfolders);
-            if($i !== false)
+            if ($i !== false)
                unset($statusfolders[$i]);
          }
       }
-      elseif( ConfigPages::is_system_status_folder($nr) )
+      elseif ( ConfigPages::is_system_status_folder($nr) )
       {
          $cfg_pages->set_status_flags_folderbit( $nr, $onstatuspage );
       }
 
-      if( empty($name) && $nr > $max_folder )
+      if ( empty($name) && $nr > $max_folder )
          continue;
 
 
       $newfolder = array($name, $bgcolor, $fgcolor);
-      if( !isset($folders[$nr]) )
+      if ( !isset($folders[$nr]) )
       {
          $delete = false;
          $update = false;
          //else insert $newfolder
       }
-      else if( $folders[$nr] == $newfolder )
+      else if ( $folders[$nr] == $newfolder )
       {
          continue;
       }
-      else if( $nr >= USER_FOLDERS )
+      else if ( $nr >= USER_FOLDERS )
       {
-         if( !empty($name) )
+         if ( !empty($name) )
             $delete = false;
-         elseif( folder_is_empty($nr, $my_id) )
+         elseif ( folder_is_empty($nr, $my_id) )
             $delete = true;
          else
          {
@@ -125,21 +125,21 @@ require_once 'include/message_functions.php';
       }
 
 
-      if( $delete )
+      if ( $delete )
       {
          $folder_query = "DELETE FROM Folders WHERE uid=$my_id AND Folder_nr=$nr LIMIT 1";
       }
-      else if( $update )
+      else if ( $update )
       {
          list($oldname, $oldbgcolor, $oldfgcolor) = $folders[$nr];
 
          $folder_query = "UPDATE Folders SET ";
          $updates = array();
-         if( $name != $oldname ) $updates[]= "Name='".mysql_addslashes($name)."'";
-         if( $bgcolor != $oldbgcolor ) $updates[]= "BGColor='$bgcolor'";
-         if( $fgcolor != $oldfgcolor ) $updates[]= "FGColor='$fgcolor'";
+         if ( $name != $oldname ) $updates[]= "Name='".mysql_addslashes($name)."'";
+         if ( $bgcolor != $oldbgcolor ) $updates[]= "BGColor='$bgcolor'";
+         if ( $fgcolor != $oldfgcolor ) $updates[]= "FGColor='$fgcolor'";
 
-         if( !(count($updates) > 0) )
+         if ( !(count($updates) > 0) )
             continue;
 
          $folder_query .= implode(",", $updates);
@@ -159,22 +159,22 @@ require_once 'include/message_functions.php';
 
    ta_begin();
    {//HOT-section to update folders
-      if( $folder_query )
+      if ( $folder_query )
       {
          db_query( "edit_folders.main($my_id)", $folder_query ); // table Folders
          DgsCache::delete( "edit_folders.main($my_id)", CACHE_GRP_FOLDERS, "Folders.$my_id" );
-         if( !$sysmsg )
+         if ( !$sysmsg )
             $sysmsg = T_('Folders adjusted!');
       }
 
       asort($statusfolders);
-      if( $statusfolders != $old_statusfolders || $cfg_pages->get_status_flags() != $old_status_flags )
+      if ( $statusfolders != $old_statusfolders || $cfg_pages->get_status_flags() != $old_status_flags )
       {
          $cfg_pages->set_status_folders( implode(',', $statusfolders) );
          $cfg_pages->update_status_folders();
          clear_cache_quick_status( $my_id, QST_CACHE_MSG );
          delete_cache_message_list( "edit_folders.main($my_id)", $my_id );
-         if( !$sysmsg )
+         if ( !$sysmsg )
             $sysmsg = T_('Folders adjusted!');
       }
    }
@@ -195,14 +195,14 @@ require_once 'include/message_functions.php';
 
    $form->add_row( array( 'HEADER', T_('Edit message folders') ) );
 
-   foreach( $folders as $nr => $fld )
+   foreach ( $folders as $nr => $fld )
    {
       list($name, $bgcolor, $fgcolor) = $fld;
       list($bgred,$bggreen,$bgblue,$bgalpha)= split_RGBA($bgcolor, 0);
       list($fgred,$fggreen,$fgblue,$dummy)= split_RGBA($fgcolor);
 
       $show_checkbox = $cfg_pages->get_status_folder_visibility($nr);
-      if( $show_checkbox < 0 )
+      if ( $show_checkbox < 0 )
          $show_checkbox = in_array($nr, $statusfolders);
 
       make_folder_form_row($form, $name, $nr,
@@ -214,7 +214,7 @@ require_once 'include/message_functions.php';
 
 // And now two empty ones:
 
-   for($i=$max_folder+1; $i<=$max_folder+2; $i++)
+   for ($i=$max_folder+1; $i<=$max_folder+2; $i++)
    {
       make_folder_form_row($form, '', $i, 247, 245, 227, 255, 0, 0, 0, false);
    }
@@ -245,7 +245,7 @@ function make_folder_form_row(&$form, $name, $nr,
    $fcol = RGBA($fgred, $fggreen, $fgblue);
 
    $name_cel = '<td bgcolor="#' . blend_alpha($bgred, $bggreen, $bgblue, $bgalpha) . '">';
-   if( empty($name) )
+   if ( empty($name) )
       $name_cel.= "<font color=\"#$fcol\">" . T_('Folder name') . '</font></td>';
    else
       $name_cel.= "<a style=\"color:'#$fcol'\" href=\"list_messages.php?folder=$nr\">" .
@@ -266,7 +266,7 @@ function make_folder_form_row(&$form, $name, $nr,
 
    $form->add_row( $array );
 
-   if( ConfigPages::is_system_status_folder($nr) || $nr >= USER_FOLDERS )
+   if ( ConfigPages::is_system_status_folder($nr) || $nr >= USER_FOLDERS )
       $array = array( 'TAB',
                       'CHECKBOX', "onstatuspage$nr", 't',
                       T_('Show on status page'), $onstatuspage );

@@ -22,11 +22,11 @@ require_once 'include/error_functions.php';
 //@set_time_limit(0); //does not work with safe_mode
 
 // following switches can be defined in config-local for test-systems
-if( !defined('DBG_QUERY') )
+if ( !defined('DBG_QUERY') )
    define('DBG_QUERY', 0); //0=no-debug, 1=print-query, 2=print-retry-count
-if( !defined('DBG_TEST') )
+if ( !defined('DBG_TEST') )
    define('DBG_TEST', 0); //0=no-debug, 1=allow-some-stuff-for-testing
-if( !defined('DBG_RATING') )
+if ( !defined('DBG_RATING') )
    define('DBG_RATING', 0); //0=no-debug, 1=print-rating-calculations
 
 
@@ -46,10 +46,10 @@ function jump_to($uri, $absolute=false)
    $uri= str_replace( URI_AMP, URI_AMP_IN, $uri);
    session_write_close();
    //@ignore_user_abort(false);
-   if( connection_aborted() )
+   if ( connection_aborted() )
       exit;
    //header('HTTP/1.1 303 REDIRECT');
-   if( $absolute )
+   if ( $absolute )
       header( "Location: " . $uri );
    else
       header( "Location: " . HOSTBASE . $uri );
@@ -61,15 +61,15 @@ function jump_to($uri, $absolute=false)
 function disable_cache($stamp=NULL, $expire=NULL)
 {
    global $NOW;
-   if( !$stamp )
+   if ( !$stamp )
       $stamp = $NOW;  // Always modified
-   if( !$expire )
+   if ( !$expire )
       $expire = $stamp - SECS_PER_HOUR;  // Force revalidation
 
    //header('Expires: Mon, 26 Jul 1997 05:00:00 GMT');
    header('Expires: ' . gmdate(GMDATE_FMT, $expire)); // HTTP/1.0 (replaced with max-age)
    header('Last-Modified: ' . gmdate(GMDATE_FMT, $stamp));
-   if( !$expire || $expire<=$NOW )
+   if ( !$expire || $expire<=$NOW )
       header('Cache-Control: no-store, no-cache, must-revalidate, max-age=0'); // HTTP/1.1
 }
 
@@ -81,7 +81,7 @@ function mysql_addslashes( $str )
    // Warning: Can't connect to MySQL server on '...' in ... on line ...
    //$e= error_reporting(E_ALL & ~(E_WARNING | E_NOTICE));
    $res = mysql_real_escape_string($str);
-   if( $res === false )
+   if ( $res === false )
    {
       //error('mysql_query_failed','mysql_addslashes');
       $res= mysql_escape_string($str); // deprecated-warning since PHP 4.3.0
@@ -92,7 +92,7 @@ function mysql_addslashes( $str )
 
 function admin_log( $uid, $handle, $err)
 {
-   if( @$GLOBALS['is_down'] )
+   if ( @$GLOBALS['is_down'] )
       return true;
 
    $uid = (int)$uid;
@@ -112,7 +112,7 @@ function writeIpStats( $page )
    global $player_row, $NOW;
 
    $ip = @$_SERVER['REMOTE_ADDR'];
-   if( !@$GLOBALS['is_down'] && !empty($ip) )
+   if ( !@$GLOBALS['is_down'] && !empty($ip) )
    {
       $uid = (int)@$player_row['ID'];
       $sql_ip = mysql_addslashes($ip);
@@ -131,8 +131,8 @@ function writeIpStats( $page )
 function db_close()
 {
    global $dbcnx;
-   if( DBG_QUERY>1 ) error_log("db_close(): dbcnx=[$dbcnx]");
-   if( $dbcnx ) // $dbcnx is a resource
+   if ( DBG_QUERY>1 ) error_log("db_close(): dbcnx=[$dbcnx]");
+   if ( $dbcnx ) // $dbcnx is a resource
       @mysql_close( $dbcnx);
    $dbcnx= 0;
 }
@@ -153,38 +153,38 @@ function connect2mysql($no_errors=false)
 
    $retry = DB_CONNECT_RETRY_COUNT; //retry count = $retry+1 attempts to connect
    $rcnt = 0;
-   for(;;)
+   for (;;)
    {
       $rcnt++;
       $dbcnx = @mysql_connect( MYSQLHOST, MYSQLUSER, MYSQLPASSWORD);
-      if( $dbcnx ) break; // got connection
-      if( --$retry < 0 ) break; // retry count reached (don't sleep on last loop)
+      if ( $dbcnx ) break; // got connection
+      if ( --$retry < 0 ) break; // retry count reached (don't sleep on last loop)
 
       //max_user_connections: Error: 1203 SQLSTATE: 42000 (ER_TOO_MANY_USER_CONNECTIONS)
-      if( mysql_errno() != 1203 ) break;
+      if ( mysql_errno() != 1203 ) break;
 
       //delay in micro-secs, needs PHP5 for Win-server
       usleep(1000 * DB_CONNECT_RETRY_SLEEP_MS);
    }
 
-   if( !$dbcnx )
+   if ( !$dbcnx )
    {
       $err= 'mysql_connect_failed';
-      if( $no_errors ) return $err;
+      if ( $no_errors ) return $err;
       error($err); //error() with no DgsErrors::err_log(), because no DB, see DgsErrors::need_db_errorlog()-func
    }
 
-   if( !@mysql_select_db(DB_NAME) )
+   if ( !@mysql_select_db(DB_NAME) )
    {
       @mysql_close( $dbcnx);
       $dbcnx= 0;
       $err= 'mysql_select_db_failed';
-      if( $no_errors )
+      if ( $no_errors )
          return $err;
       error($err); //TODO: error() with no DgsErrors::err_log(), because no DB
    }
 
-   if( DBG_QUERY>1 ) error_log("connect2mysql($no_errors): dbcnx=[$dbcnx] on attempt #$rcnt/".DB_CONNECT_RETRY_COUNT);
+   if ( DBG_QUERY>1 ) error_log("connect2mysql($no_errors): dbcnx=[$dbcnx] on attempt #$rcnt/".DB_CONNECT_RETRY_COUNT);
 
    return false;
 } //connect2mysql
@@ -198,11 +198,11 @@ $level_ignore_user_abort = 0;
 function ta_begin()
 {
    global $old_ignore_user_abort, $level_ignore_user_abort;
-   if( $level_ignore_user_abort < 0 )
+   if ( $level_ignore_user_abort < 0 )
       $level_ignore_user_abort = 0;
-   if( $level_ignore_user_abort++ == 0 )
+   if ( $level_ignore_user_abort++ == 0 )
       $old_ignore_user_abort = @ignore_user_abort(true);
-   if( DBG_QUERY ) error_log("ta_begin(): level=[$level_ignore_user_abort], old=$old_ignore_user_abort");
+   if ( DBG_QUERY ) error_log("ta_begin(): level=[$level_ignore_user_abort], old=$old_ignore_user_abort");
    return $old_ignore_user_abort;
 }
 
@@ -211,10 +211,10 @@ function ta_begin()
 function ta_end( $new_ignore_user_abort=null )
 {
    global $old_ignore_user_abort, $level_ignore_user_abort;
-   if( is_null($new_ignore_user_abort) )
+   if ( is_null($new_ignore_user_abort) )
       $new_ignore_user_abort = $old_ignore_user_abort;
-   if( DBG_QUERY ) error_log("ta_end(): level=[$level_ignore_user_abort], new=$new_ignore_user_abort");
-   if( --$level_ignore_user_abort <= 0 )
+   if ( DBG_QUERY ) error_log("ta_end(): level=[$level_ignore_user_abort], new=$new_ignore_user_abort");
+   if ( --$level_ignore_user_abort <= 0 )
       @ignore_user_abort((bool)$new_ignore_user_abort);
    $old_ignore_user_abort = $new_ignore_user_abort;
 }
@@ -236,12 +236,12 @@ function db_unlock()
 function db_query( $debugmsg, $query, $errorcode='mysql_query_failed' )
 {
    //echo $debugmsg.'.db_query='.$query.'<br>';
-   if( DBG_QUERY && DBG_QUERY <= 2 ) error_log("db_query($debugmsg,$errorcode): query=[$query]");
+   if ( DBG_QUERY && DBG_QUERY <= 2 ) error_log("db_query($debugmsg,$errorcode): query=[$query]");
    //for debug: $result = ( preg_match( "/^(insert|update|delete)/i", $query )) ? 1 : mysql_query($query);
-   if( @$GLOBALS['is_down'] )
+   if ( @$GLOBALS['is_down'] )
    {
       $chk_pos = stripos($query, 'SELECT'); // SELECTs allowed if server down, but no write-queries
-      if( $chk_pos === false || $chk_pos > 3 ) // query with SELECT may start with "(.." or some spaces
+      if ( $chk_pos === false || $chk_pos > 3 ) // query with SELECT may start with "(.." or some spaces
       {
          error('server_down', "db_query.check.no_select(): $debugmsg");
          return false;
@@ -250,10 +250,10 @@ function db_query( $debugmsg, $query, $errorcode='mysql_query_failed' )
 
    $begin_time = microtime(/*float*/true);
    $result = mysql_query($query);
-   if( DBG_QUERY > 2 ) error_log("db_query($debugmsg,$errorcode)[" . round( 1000 * (getmicrotime()-$begin_time) ) . "ms]{U" . @$GLOBALS['player_row']['ID'] . "," . @$GLOBALS['player_row']['Handle'] . "}: query=[$query]");
-   if( $result )
+   if ( DBG_QUERY > 2 ) error_log("db_query($debugmsg,$errorcode)[" . round( 1000 * (getmicrotime()-$begin_time) ) . "ms]{U" . @$GLOBALS['player_row']['ID'] . "," . @$GLOBALS['player_row']['Handle'] . "}: query=[$query]");
+   if ( $result )
       return $result;
-   if( is_string($debugmsg) )
+   if ( is_string($debugmsg) )
       error( $errorcode, $debugmsg.'='.$query);
    return false;
 }//db_query
@@ -263,15 +263,15 @@ function db_query( $debugmsg, $query, $errorcode='mysql_query_failed' )
 // NOTE: only if allowed in config by ALLOW_SQL_CALC_ROWS
 function mysql_found_rows( $debugmsg )
 {
-   if( !ALLOW_SQL_CALC_ROWS )
+   if ( !ALLOW_SQL_CALC_ROWS )
       return -1; // not allowed
 
    $found_rows = -1; // error
    $result = db_query( $debugmsg, 'SELECT FOUND_ROWS()' );
-   if( $result )
+   if ( $result )
    {
       $val = mysql_result($result, 0);
-      if( $val >= 0 )
+      if ( $val >= 0 )
          $found_rows = $val;
       mysql_free_result($result);
    }
@@ -283,9 +283,9 @@ function mysql_single_fetch( $debugmsg, $query, $fetch_type=FETCHTYPE_ASSOC )
 {
    $dbg_str = ( !is_string($debugmsg) ) ? false : $debugmsg.'.single_fetch';
    $result = db_query( $dbg_str, $query);
-   if( !$result )
+   if ( !$result )
       return false;
-   elseif( mysql_num_rows($result) != 1 )
+   elseif ( mysql_num_rows($result) != 1 )
    {
       mysql_free_result($result);
       return false;
@@ -293,27 +293,27 @@ function mysql_single_fetch( $debugmsg, $query, $fetch_type=FETCHTYPE_ASSOC )
    $fetch_func = 'mysql_fetch_'.$fetch_type;
    $row = $fetch_func($result);
    mysql_free_result($result);
-   if( !is_array($row) )
+   if ( !is_array($row) )
       return false;
    return $row;
 }
 
-// if( !$keyed ) $result = array( $col[0],...);
+// if ( !$keyed ) $result = array( $col[0],...);
 // else $result = array( $col[0] => $col[1],...);
 function mysql_single_col( $debugmsg, $query, $keyed=false)
 {
    $dbg_str = ( !is_string($debugmsg) ) ? false : $debugmsg.'.single_col';
    $result = db_query( $dbg_str, $query);
-   if( mysql_num_rows($result) < 1 )
+   if ( mysql_num_rows($result) < 1 )
    {
       mysql_free_result($result);
       return false;
    }
    $column = array();
    $row = mysql_fetch_row($result);
-   if( $keyed )
+   if ( $keyed )
    {
-      while( is_array($row) && count($row) >= 2 )
+      while ( is_array($row) && count($row) >= 2 )
       {
          $column[$row[0]] = $row[1];
          $row = mysql_fetch_row($result);
@@ -321,14 +321,14 @@ function mysql_single_col( $debugmsg, $query, $keyed=false)
    }
    else
    {
-      while( is_array($row) && count($row) >= 1 )
+      while ( is_array($row) && count($row) >= 1 )
       {
          $column[] = $row[0];
          $row = mysql_fetch_row($result);
       }
    }
    mysql_free_result($result);
-   if( count($column) > 0 ) //at least one value
+   if ( count($column) > 0 ) //at least one value
       return $column;
    return false;
 }
@@ -356,7 +356,7 @@ function check_passwd_method( $passwd_encrypted, $given_passwd, &$method)
       - SHA1() is 40
       - others?
    */
-   switch( (int)strlen( $passwd_encrypted ) )
+   switch ( (int)strlen( $passwd_encrypted ) )
    {
       case 41: $method='PASSWORD'; break;
       case 40: $method='SHA1'; break;
@@ -377,14 +377,14 @@ function check_passwd_method( $passwd_encrypted, $given_passwd, &$method)
 // Checks and eventually fixes (old-format) password
 function check_password( $uhandle, $passwd, $new_passwd, $given_passwd )
 {
-   if( !check_passwd_method( $passwd, $given_passwd, $method) ) // $method is set in check-func
+   if ( !check_passwd_method( $passwd, $given_passwd, $method) ) // $method is set in check-func
    {
       // Check if there is a new password
-      if( empty($new_passwd) ||
+      if ( empty($new_passwd) ||
             !check_passwd_method( $new_passwd, $given_passwd, $method) )
          return false;
    }
-   if( !empty($new_passwd) || $method != PASSWORD_ENCRYPT )
+   if ( !empty($new_passwd) || $method != PASSWORD_ENCRYPT )
    {
       db_query( "check_password.set_password($uhandle)",
            'UPDATE Players'
@@ -399,10 +399,10 @@ function check_password( $uhandle, $passwd, $new_passwd, $given_passwd )
 function build_query_in_clause( $field, $arr, $is_string=true )
 {
    $clause = '';
-   if( count($arr) > 0 )
+   if ( count($arr) > 0 )
    {
       $arr_vals = array();
-      foreach( $arr as $item )
+      foreach ( $arr as $item )
       {
          $arr_vals[] = ( $is_string || !is_numeric($item) )
             ? "'" . mysql_addslashes($item) . "'"
@@ -457,7 +457,7 @@ class UpdateQuery
 
    public function upd_time( $field, $value=null )
    {
-      if( is_null($value) )
+      if ( is_null($value) )
          $value = $GLOBALS['NOW'];
       $this->updates[] = "$field=FROM_UNIXTIME($value)";
    }
@@ -469,9 +469,9 @@ class UpdateQuery
 
    public function merge( $upd_query )
    {
-      if( $this->table !== $upd_query->table )
+      if ( $this->table !== $upd_query->table )
          error('internal_error', "UpdateQuery.merge.conflict({$this->table},{$upd_query->table})");
-      foreach( $upd_query->updates as $update )
+      foreach ( $upd_query->updates as $update )
          $this->updates[] = $update;
    }
 

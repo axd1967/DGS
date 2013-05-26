@@ -82,17 +82,17 @@ class BitSet
    public function reset( $bitval=0 )
    {
       $bitval = ($bitval) ? 1 : 0;
-      if( $bitval )
+      if ( $bitval )
       {
          $arrpos = self::_arrpos(BITSET_MAXSIZE);
          $this->store[$arrpos] = (1 << ( ((BITSET_MAXSIZE-1) % BITSET_STORE_BITS) + 1 )) - 1;
-         while( $arrpos-- > 0 )
+         while ( $arrpos-- > 0 )
             $this->store[$arrpos] = (1 << BITSET_STORE_BITS) - 1;
       }
       else
       {
          $cnt_store = count($this->store);
-         for( $i=0; $i < $cnt_store; $i++)
+         for ( $i=0; $i < $cnt_store; $i++)
             $this->store[$i] = 0;
       }
    }//reset
@@ -105,10 +105,10 @@ class BitSet
     */
    public function set_bit( $bitpos, $setval=true )
    {
-      if( $bitpos >=1 && $bitpos <= BITSET_MAXSIZE )
+      if ( $bitpos >=1 && $bitpos <= BITSET_MAXSIZE )
       {
          $arrpos = self::_arrpos($bitpos);
-         if( $setval )
+         if ( $setval )
             $this->store[$arrpos] |= self::_intmask($bitpos);
          else
             $this->store[$arrpos] &= (~self::_intmask($bitpos));
@@ -127,7 +127,7 @@ class BitSet
    /*! \brief Toggles bit at pos (1..n) in this BitSet; return if valid bitpos used. */
    public function toggle_bit( $bitpos )
    {
-      if( $bitpos >=1 && $bitpos <= BITSET_MAXSIZE )
+      if ( $bitpos >=1 && $bitpos <= BITSET_MAXSIZE )
       {
          $arrpos = self::_arrpos($bitpos);
          $this->store[$arrpos] ^= self::_intmask($bitpos);
@@ -141,10 +141,10 @@ class BitSet
    public function get_bit( $bitpos )
    {
       $result = 0;
-      if( $bitpos >=1 && $bitpos <= BITSET_MAXSIZE )
+      if ( $bitpos >=1 && $bitpos <= BITSET_MAXSIZE )
       {
          $arrpos = self::_arrpos($bitpos);
-         if( $this->store[$arrpos] & self::_intmask($bitpos) )
+         if ( $this->store[$arrpos] & self::_intmask($bitpos) )
             $result = 1;
       }
       return $result;
@@ -154,9 +154,9 @@ class BitSet
    public function get_size()
    {
       $arrpos = count($this->store);
-      while( $arrpos-- >= 0 )
+      while ( $arrpos-- >= 0 )
       {
-         if( ($value = $this->store[$arrpos]) > 0 )
+         if ( ($value = $this->store[$arrpos]) > 0 )
             return $arrpos * BITSET_STORE_BITS + intval( floor(log($value) / log(2)) ) + 1;
       }
       return 0;
@@ -166,9 +166,9 @@ class BitSet
    public function get_bitpos_array()
    {
       $out = array();
-      for( $bitpos = $this->get_size(); $bitpos >= 1; $bitpos-- )
+      for ( $bitpos = $this->get_size(); $bitpos >= 1; $bitpos-- )
       {
-         if( $this->get_bit($bitpos) )
+         if ( $this->get_bit($bitpos) )
             $out[] = $bitpos;
       }
       return $out;
@@ -182,14 +182,14 @@ class BitSet
     */
    public function get_int_array( $leading_zero=true, $bits_per_int=BITSET_EXPORT_INTBITS )
    {
-      if( $bits_per_int > 30 )
+      if ( $bits_per_int > 30 )
          return NULL;
-      if( $bits_per_int < 1 )
+      if ( $bits_per_int < 1 )
          $bits_per_int = 1;
 
       $out = array();
       $size = ($leading_zero) ? BITSET_MAXSIZE : $this->get_size();
-      for( $s_bitpos = 1; $s_bitpos <= $size; $s_bitpos += $bits_per_int )
+      for ( $s_bitpos = 1; $s_bitpos <= $size; $s_bitpos += $bits_per_int )
       {
          $e_bitpos = $s_bitpos + $bits_per_int - 1;
          $out[] = $this->_get_intval_range( $s_bitpos, $e_bitpos );
@@ -205,9 +205,9 @@ class BitSet
       $binfmt = '%0'.BITSET_STORE_BITS.'b';
       $skip0 = true;
       $out_str = '';
-      foreach( array_reverse($this->store) as $int_val )
+      foreach ( array_reverse($this->store) as $int_val )
       {
-         if( $skip0 && $int_val == 0 ) continue;
+         if ( $skip0 && $int_val == 0 ) continue;
          $skip0 = false;
          $out_str .= sprintf( $binfmt, $int_val );
       }
@@ -223,9 +223,9 @@ class BitSet
       $hexfmt = '%0'.(BITSET_STORE_BITS >> 2) . ($uppercase ? 'X' : 'x'); // hex-digit (=nibble)
       $skip0 = true;
       $out_str = '';
-      foreach( array_reverse($this->store) as $int_val )
+      foreach ( array_reverse($this->store) as $int_val )
       {
-         if( $skip0 && $int_val == 0 ) continue;
+         if ( $skip0 && $int_val == 0 ) continue;
          $skip0 = false;
          $out_str .= sprintf( $hexfmt, $int_val );
       }
@@ -261,19 +261,19 @@ class BitSet
    private function _get_intval_range( $spos, $epos )
    {
       // assure valid values for spos, epos; and spos <= epos
-      if( $spos < 1 ) $spos = 1;
-      if( $epos > BITSET_MAXSIZE ) $epos = BITSET_MAXSIZE;
-      if( $spos > $epos ) swap( $spos, $epos );
-      if( ($epos - $spos + 1) > 30 )
+      if ( $spos < 1 ) $spos = 1;
+      if ( $epos > BITSET_MAXSIZE ) $epos = BITSET_MAXSIZE;
+      if ( $spos > $epos ) swap( $spos, $epos );
+      if ( ($epos - $spos + 1) > 30 )
          return -1;
 
       // can be optimized later using bitmasks and shifting
       $out_val = 0;
       $out_bitmask = 0x1;
-      for( $bitpos = $spos; $bitpos <= $epos; $bitpos++, $out_bitmask <<= 1 )
+      for ( $bitpos = $spos; $bitpos <= $epos; $bitpos++, $out_bitmask <<= 1 )
       {
          $arrpos = self::_arrpos($bitpos);
-         if( $this->store[$arrpos] & self::_intmask($bitpos) )
+         if ( $this->store[$arrpos] & self::_intmask($bitpos) )
             $out_val |= $out_bitmask;
       }
       return $out_val;
@@ -288,19 +288,19 @@ class BitSet
    private function _set_intval_range( $spos, $epos, $int_val )
    {
       // assure valid values for spos, epos; and spos <= epos
-      if( $spos > $epos ) swap( $spos, $epos );
-      if( $spos < 1 )
+      if ( $spos > $epos ) swap( $spos, $epos );
+      if ( $spos < 1 )
          return false;
-      if( $epos > BITSET_MAXSIZE ) // ignore irrelevant bits
+      if ( $epos > BITSET_MAXSIZE ) // ignore irrelevant bits
          $epos = BITSET_MAXSIZE;
-      if( ($epos - $spos + 1) > 30 )
+      if ( ($epos - $spos + 1) > 30 )
          return false;
 
       // can be optimized later using bitmasks and shifting
       $chk_bitmask = 0x1;
-      for( $bitpos = $spos; $bitpos <= $epos; $bitpos++, $chk_bitmask <<= 1 )
+      for ( $bitpos = $spos; $bitpos <= $epos; $bitpos++, $chk_bitmask <<= 1 )
       {
-         if( $int_val & $chk_bitmask )
+         if ( $int_val & $chk_bitmask )
          {
             $arrpos = self::_arrpos($bitpos);
             $this->store[$arrpos] |= self::_intmask($bitpos);
@@ -319,25 +319,25 @@ class BitSet
     */
    public static function read_from_int_array( $arr_ints, $bits_per_int=BITSET_EXPORT_INTBITS )
    {
-      if( $bits_per_int < 1 )
+      if ( $bits_per_int < 1 )
          $bits_per_int = 1;
-      elseif( $bits_per_int > 30 )
+      elseif ( $bits_per_int > 30 )
          $bits_per_int = 30;
 
       $bitset = new BitSet();
-      if( is_null($arr_ints) )
+      if ( is_null($arr_ints) )
          return $bitset;
 
       $maskbits_intval = (1 << $bits_per_int) - 1;
       $s_bitpos = 1;
-      foreach( $arr_ints as $int_val )
+      foreach ( $arr_ints as $int_val )
       {
          // ignore not relevant bits
-         if( $int_val < 0 )
+         if ( $int_val < 0 )
             $int_val ^= 0x80000000; // invert sign-bit
          $int_val &= $maskbits_intval;
 
-         if( $int_val )
+         if ( $int_val )
          {
             $e_bitpos = $s_bitpos + $bits_per_int - 1;
             $bitset->_set_intval_range( $s_bitpos, $e_bitpos, $int_val );
@@ -354,9 +354,9 @@ class BitSet
     */
    public static function read_from_bin( $bin_str )
    {
-      if( is_null($bin_str) || $bin_str == '' )
+      if ( is_null($bin_str) || $bin_str == '' )
          return new BitSet();
-      if( !preg_match( "/^[01]+$/", $bin_str) )
+      if ( !preg_match( "/^[01]+$/", $bin_str) )
          return NULL;
 
       // convert binary to hex-string
@@ -366,7 +366,7 @@ class BitSet
       $bin_str = str_repeat('0',$bitstep + 1) . $bin_str; // avoid special cases
       $binlen = strlen($bin_str);
       $hex_str = '';
-      for( $spos = $bitstep; $spos <= $binlen; $spos += $bitstep )
+      for ( $spos = $bitstep; $spos <= $binlen; $spos += $bitstep )
       {
          $binpart = substr($bin_str, -$spos, $bitstep);
          $hex_str = sprintf($hexfmt, base_convert($binpart,2,10), $hex_str);
@@ -381,15 +381,15 @@ class BitSet
     */
    public static function read_from_hex( $hex_str )
    {
-      if( is_null($hex_str) || $hex_str == '' )
+      if ( is_null($hex_str) || $hex_str == '' )
          return new BitSet();
 
       $hex_str = preg_replace( "/^(0x)?/", '', $hex_str ); // strip 0x-prefix
-      if( !preg_match( "/^[0-9A-F]*$/i", $hex_str) )
+      if ( !preg_match( "/^[0-9A-F]*$/i", $hex_str) )
          return NULL;
 
       $bitset = new BitSet();
-      if( $hex_str == '' || $hex_str == '0' )
+      if ( $hex_str == '' || $hex_str == '0' )
          return $bitset;
       $hex_str = str_repeat( '0', BITSET_STORE_NIBBLES ) . $hex_str;
       $len_hex = strlen($hex_str);
@@ -397,11 +397,11 @@ class BitSet
       // here: hex_str is valid and long enough
       $rpos = BITSET_STORE_NIBBLES; // str-pos from right
       $s_bitpos = 1;
-      while( $rpos < $len_hex )
+      while ( $rpos < $len_hex )
       {
          $hexpart_str = substr( $hex_str, -$rpos, BITSET_STORE_NIBBLES );
          $int_val = intval( $hexpart_str, 16 ); // hex -> dec
-         if( $int_val )
+         if ( $int_val )
          {
             $e_bitpos = $s_bitpos + BITSET_STORE_BITS - 1;
             $bitset->_set_intval_range( $s_bitpos, $e_bitpos, $int_val );
@@ -419,21 +419,21 @@ class BitSet
     */
    public static function read_from_db_set( $db_set_str, $prefix='b' )
    {
-      if( is_null($prefix) || strlen($prefix) == 0 )
+      if ( is_null($prefix) || strlen($prefix) == 0 )
          return NULL;
 
       $bitset = new BitSet();
-      if( is_null($db_set_str) || $db_set_str == '' )
+      if ( is_null($db_set_str) || $db_set_str == '' )
          return $bitset;
 
       $prefixlen = strlen($prefix);
       $arr_db = explode(',', $db_set_str);
-      foreach( $arr_db as $db_value )
+      foreach ( $arr_db as $db_value )
       {
-         if( strncmp($db_value, $prefix, $prefixlen) != 0 ) // bad prefix
+         if ( strncmp($db_value, $prefix, $prefixlen) != 0 ) // bad prefix
             return NULL;
          $value = substr($db_value, $prefixlen);
-         if( !preg_match( "/^\d+$/", $value ) )
+         if ( !preg_match( "/^\d+$/", $value ) )
             return NULL;
 
          $bitset->set_bit( (int)$value );

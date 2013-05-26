@@ -42,18 +42,18 @@ class ClockCache
 
    public function load_clock_ticks( $dbgmsg, $clock_id, $use_cache=true )
    {
-      if( !is_numeric($clock_id) || $clock_id > MAX_CLOCK )
+      if ( !is_numeric($clock_id) || $clock_id > MAX_CLOCK )
          error('invalid_args', "$dbgmsg.load_clock_ticks.check($clock_id)");
-      if( $clock_id < 0 ) // VACATION_CLOCK
+      if ( $clock_id < 0 ) // VACATION_CLOCK
          return 0; // On vacation
 
-      if( !$use_cache || !isset($this->cache_clock_ticks[$clock_id]) )
+      if ( !$use_cache || !isset($this->cache_clock_ticks[$clock_id]) )
       {
          // need special handling to load all or only one clock-entry (if cache disabled)
-         if( DgsCache::is_persistent(CACHE_GRP_CLOCKS) )
+         if ( DgsCache::is_persistent(CACHE_GRP_CLOCKS) )
          {
             $arr_clocks = self::load_cache_clocks( !$use_cache );
-            if( is_null($arr_clocks) || !isset($arr_clocks[$clock_id]) )
+            if ( is_null($arr_clocks) || !isset($arr_clocks[$clock_id]) )
                error('invalid_args', "$dbgmsg.load_clock_ticks.cache.bad_clock($clock_id)");
             $this->cache_clock_ticks = $arr_clocks;
          }
@@ -61,7 +61,7 @@ class ClockCache
          {
             $row = mysql_single_fetch( "$dbgmsg.load_clock_ticks.find($clock_id)",
                "SELECT Ticks FROM Clock WHERE ID=$clock_id LIMIT 1" );
-            if( !$row )
+            if ( !$row )
                error('invalid_args', "$dbgmsg.load_clock_ticks.no_cache.bad_clock($clock_id)");
             else
                $this->cache_clock_ticks[$clock_id] = (int)@$row['Ticks'];
@@ -79,7 +79,7 @@ class ClockCache
    public static function get_instance()
    {
       static $CLOCK_CACHE = null;
-      if( is_null($CLOCK_CACHE) )
+      if ( is_null($CLOCK_CACHE) )
          $CLOCK_CACHE = new ClockCache();
       return $CLOCK_CACHE;
    }
@@ -89,11 +89,11 @@ class ClockCache
       $dbgmsg = "ClockCache:load_cache_clocks()";
       $key = "Clocks";
       $result = DgsCache::fetch( $dbgmsg, CACHE_GRP_CLOCKS, $key );
-      if( $reload || is_null($result) )
+      if ( $reload || is_null($result) )
       {
          $result = array();
          $db_result = db_query( $dbgmsg.'.find_all', "SELECT ID, Ticks FROM Clock" ); // load all clocks
-         while( ($row = mysql_fetch_assoc($db_result)) )
+         while ( ($row = mysql_fetch_assoc($db_result)) )
             $result[$row['ID']] = (int)$row['Ticks'];
          mysql_free_result($db_result);
 

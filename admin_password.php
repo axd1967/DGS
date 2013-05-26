@@ -26,21 +26,21 @@ require_once 'include/form_functions.php';
    connect2mysql();
 
    $logged_in = who_is_logged( $player_row);
-   if( !$logged_in )
+   if ( !$logged_in )
       error('login_if_not_logged_in', 'admin_password');
-   if( $player_row['ID'] <= GUESTS_ID_MAX )
+   if ( $player_row['ID'] <= GUESTS_ID_MAX )
       error('not_allowed_for_guest', 'admin_password');
-   if( !(@$player_row['admin_level'] & ADMIN_PASSWORD) )
+   if ( !(@$player_row['admin_level'] & ADMIN_PASSWORD) )
       error('adminlevel_too_low', 'admin_password');
 
    $user = get_request_arg('pswduser');
    $user_email = null;
-   if( @$_REQUEST['show_email'] && (string)$user != '' )
+   if ( @$_REQUEST['show_email'] && (string)$user != '' )
    {
       $query = "SELECT Email FROM Players WHERE Handle='".mysql_addslashes($user)."' LIMIT 1";
       $row = mysql_single_fetch( "admin_password.find_user($user)", $query );
       $row_email = ( $row ) ? trim($row['Email']) : '';
-      if( (string)$row_email != '' )
+      if ( (string)$row_email != '' )
          $user_email = $row_email;
    }
 
@@ -82,7 +82,7 @@ require_once 'include/form_functions.php';
          'TEXTINPUT', 'pswduser', 16, 16, $user,
          'TEXT', SMALL_SPACING,
          'SUBMITBUTTON', 'show_email', T_('Show email'), ));
-   if( @$_REQUEST['show_email'] || !is_null($user_email) )
+   if ( @$_REQUEST['show_email'] || !is_null($user_email) )
    {
       $email_form->add_row( array(
             'DESCRIPTION', T_('Email'),

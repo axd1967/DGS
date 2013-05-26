@@ -33,32 +33,32 @@ require_once 'include/rating.php';
 
 
    $logged_in = who_is_logged( $player_row);
-   if( !$logged_in )
+   if ( !$logged_in )
       error('not_logged_in', 'scripts.recalculate_ratings2');
-   if( $player_row['ID'] <= GUESTS_ID_MAX )
+   if ( $player_row['ID'] <= GUESTS_ID_MAX )
       error('not_allowed_for_guest', 'scripts.recalculate_ratings2');
-   if( !(@$player_row['admin_level'] & ADMIN_DATABASE) )
+   if ( !(@$player_row['admin_level'] & ADMIN_DATABASE) )
       error('adminlevel_too_low', 'scripts.recalculate_ratings2');
 
-   if( ($lim=@$_REQUEST['limit']) > '' )
+   if ( ($lim=@$_REQUEST['limit']) > '' )
       $limit = " LIMIT $lim";
    else
       $limit = "";
 
    $page = $_SERVER['PHP_SELF'];
    $page_args = array();
-   if( $lim > '' )
+   if ( $lim > '' )
       $page_args['limit'] = $lim;
 
    start_html( 'recalculate_ratings2', 0);
 
 echo ">>>> Must be enabled first in code. Make recalc-test. Do not run if you are unsure."; end_html(); exit;
-   if( $do_it=@$_REQUEST['do_it'] )
+   if ( $do_it=@$_REQUEST['do_it'] )
    {
       function dbg_query($s) {
-         if( !mysql_query( $s) )
+         if ( !mysql_query( $s) )
             die("<BR>$s;<BR>" . mysql_error() );
-         if( DBG_QUERY>1 ) error_log("dbg_query(DO_IT): $s");
+         if ( DBG_QUERY>1 ) error_log("dbg_query(DO_IT): $s");
          echo " --- fixed. ";
       }
       echo "<p>*** Fixes errors ***"
@@ -69,7 +69,7 @@ echo ">>>> Must be enabled first in code. Make recalc-test. Do not run if you ar
    {
       function dbg_query($s) {
          echo " --- query:<BR>$s; ";
-         if( DBG_QUERY>1 ) error_log("dbg_query(SIMUL): $s");
+         if ( DBG_QUERY>1 ) error_log("dbg_query(SIMUL): $s");
       }
       $tmp = array_merge($page_args,array('do_it' => 1));
       echo "<p>(just show needed queries)"
@@ -79,7 +79,7 @@ echo ">>>> Must be enabled first in code. Make recalc-test. Do not run if you ar
    }
 
 
-   if( !($lim > 0) )
+   if ( !($lim > 0) )
    {
       echo "<br>Reset Players' ratings";
       dbg_query( "UPDATE Players SET " .
@@ -95,7 +95,7 @@ echo ">>>> Must be enabled first in code. Make recalc-test. Do not run if you ar
    $iterator = new ListIterator( 'recalc_ratings', null, 'ORDER BY Created ASC, ID ASC' );
    $iterator = RatingChangeAdmin::load_ratingchangeadmin( $iterator );
    $arr_rca = array();
-   while( list(,$arr_item) = $iterator->getListIterator() )
+   while ( list(,$arr_item) = $iterator->getListIterator() )
    {
       list( $rca, $orow ) = $arr_item;
       $arr_rca[] = $rca;
@@ -122,22 +122,22 @@ echo ">>>> Must be enabled first in code. Make recalc-test. Do not run if you ar
    $count=0; $tot=0;
    ta_begin();
    {//HOT-section to recalculate user-ratings
-      while( $row = mysql_fetch_assoc( $result ) )
+      while ( $row = mysql_fetch_assoc( $result ) )
       {
-         if( connection_aborted() ) break; // not sure this works if nothing is flushed
+         if ( connection_aborted() ) break; // not sure this works if nothing is flushed
 
          echo ' ', $row['gid'];
          $rating_changes = find_rating_changes( $row['X_Lastchanged'], $arr_rca );
 
-         if( $do_it )
+         if ( $do_it )
          {
             // reset user-rating
-            if( !is_null($rating_changes) )
+            if ( !is_null($rating_changes) )
                change_user_ratings_for_recalc( $rating_changes );
 
             // NOTE: MP-games are always unrated and are handled in update_rating2()-func
             $rated_status = update_rating2($row["gid"], false/*=check_done*/); //0=rated game
-            if( $rated_status == RATEDSTATUS_RATED )
+            if ( $rated_status == RATEDSTATUS_RATED )
                $count++;
             else
                echo '--';
@@ -165,14 +165,14 @@ function find_rating_changes( $game_end_date, &$arr_rca )
 {
    $out = array();
    $first = true;
-   while( count($arr_rca) > 0 )
+   while ( count($arr_rca) > 0 )
    {
-      if( $arr_rca[0]->Created < $game_end_date )
+      if ( $arr_rca[0]->Created < $game_end_date )
       {
          $rca = array_shift( $arr_rca );
          $out[] = $rca;
 
-         if( $first )
+         if ( $first )
          {
             echo "<br>\n";
             $first = false;
@@ -187,7 +187,7 @@ function find_rating_changes( $game_end_date, &$arr_rca )
 
 function change_user_ratings_for_recalc( $rating_changes )
 {
-   foreach( $rating_changes as $rca )
+   foreach ( $rating_changes as $rca )
    {
       $uid = $rca->uid;
 
@@ -195,21 +195,21 @@ function change_user_ratings_for_recalc( $rating_changes )
       $urow = mysql_single_fetch( "recalc_ratings2.find_user1($uid,{$rca->ID})",
          "SELECT Rating2, RatingMin, RatingMax FROM Players " .
          "WHERE ID=$uid AND RatingStatus=".RATING_RATED." LIMIT 1");
-      if( is_null($urow) )
+      if ( is_null($urow) )
          error('internal_error', "recalc_ratings2.find_user2($uid,{$rca->ID})");
       $rating = $urow['Rating2'];
       $rating_min = $urow['RatingMin'];
       $rating_max = $urow['RatingMax'];
 
       // update rating
-      if( $rca->Changes & RCADM_CHANGE_RATING )
+      if ( $rca->Changes & RCADM_CHANGE_RATING )
          $rating = $rca->Rating;
-      if( $rca->Changes & RCADM_RESET_CONFIDENCE )
+      if ( $rca->Changes & RCADM_RESET_CONFIDENCE )
       {
          $rating_min = $rating - 200 - max(1600 - $rating, 0) * 2 / 15;
          $rating_max = $rating + 200 + max(1600 - $rating, 0) * 2 / 15;
       }
-      if( abs($urow['Rating2'] - $rating) > 0.005 )
+      if ( abs($urow['Rating2'] - $rating) > 0.005 )
       {
          change_user_rating( $uid, $rca->Changes, $rating, $rating_min, $rating_max, /*rca-upd*/false );
          echo " RC{$rca->ID}:{$rca->Changes}:$uid:OK";

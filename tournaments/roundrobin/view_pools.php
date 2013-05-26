@@ -40,9 +40,9 @@ $GLOBALS['ThePage'] = new Page('TournamentPoolView');
    connect2mysql();
 
    $logged_in = who_is_logged( $player_row);
-   if( !$logged_in )
+   if ( !$logged_in )
       error('login_if_not_logged_in', 'Tournament.roundrobin.view_pools');
-   if( !ALLOW_TOURNAMENTS )
+   if ( !ALLOW_TOURNAMENTS )
       error('feature_disabled', 'Tournament.roundrobin.view_pools');
    $my_id = $player_row['ID'];
 
@@ -53,23 +53,23 @@ $GLOBALS['ThePage'] = new Page('TournamentPoolView');
 */
 
    $tid = (int) @$_REQUEST['tid'];
-   if( $tid < 0 ) $tid = 0;
+   if ( $tid < 0 ) $tid = 0;
    $round = (int) @$_REQUEST['round'];
-   if( $round < 0 ) $round = 0;
+   if ( $round < 0 ) $round = 0;
    $edit = (get_request_arg('edit', 0)) ? 1 : 0;
 
    $tourney = TournamentCache::load_cache_tournament( 'Tournament.pool_view.find_tournament', $tid );
    $ttype = TournamentFactory::getTournament($tourney->WizardType);
-   if( !$ttype->need_rounds )
+   if ( !$ttype->need_rounds )
       error('tournament_edit_rounds_not_allowed', "Tournament.pool_view.find_tournament($tid)");
 
    // create/edit allowed?
    $allow_edit_tourney = TournamentHelper::allow_edit_tournaments($tourney, $my_id );
-   if( $edit && !$allow_edit_tourney )
+   if ( $edit && !$allow_edit_tourney )
       error('tournament_edit_not_allowed', "Tournament.pool_view.find_tournament($tid)");
 
    // load existing T-round
-   if( $round < 1 || $round > $tourney->CurrentRound )
+   if ( $round < 1 || $round > $tourney->CurrentRound )
       $round = $tourney->CurrentRound;
    $tround = TournamentCache::load_cache_tournament_round( 'Tournament.pool_view', $tid, $round );
 
@@ -98,7 +98,7 @@ $GLOBALS['ThePage'] = new Page('TournamentPoolView');
    start_page( $title, true, $logged_in, $player_row );
    echo "<h2 class=Header>", $tourney->build_info(3, sprintf(T_('Round #%s#tourney'), $round)), "</h2>\n";
 
-   if( count($errors) )
+   if ( count($errors) )
    {
       echo "<table><tr>",
          buildErrorListString( T_('There are some errors'), $errors, 1, false ),
@@ -110,7 +110,7 @@ $GLOBALS['ThePage'] = new Page('TournamentPoolView');
       "<br>\n";
 
    $my_tpool = $tpool_iterator->getIndexValue( 'uid', $my_id, 0 );
-   if( $my_tpool )
+   if ( $my_tpool )
    {
       $pool_link = anchor('#pool'.$my_tpool->Pool, sprintf( T_('Pool %s'), $my_tpool->Pool ) );
       echo sprintf( T_('You are playing in %s.#tpool'), $pool_link ), "<br>\n";
@@ -119,7 +119,7 @@ $GLOBALS['ThePage'] = new Page('TournamentPoolView');
 
    $poolViewer = new PoolViewer( $tid, $page, $poolTables, $games_per_challenge,
       ($need_trating ? 0 : PVOPT_NO_TRATING) | ($edit ? PVOPT_EDIT_RANK : 0) );
-   if( $edit )
+   if ( $edit )
       $poolViewer->setEditCallback( 'pool_user_edit_rank' );
    $poolViewer->init_pool_table();
    $poolViewer->make_pool_table();
@@ -131,12 +131,12 @@ $GLOBALS['ThePage'] = new Page('TournamentPoolView');
    $menu_array = array();
    $menu_array[T_('Tournament info')] = "tournaments/view_tournament.php?tid=$tid";
    $menu_array[T_('View Pools')] = "tournaments/roundrobin/view_pools.php?tid=$tid";
-   if( $allow_edit_tourney )
+   if ( $allow_edit_tourney )
    {
-      if( $tround->Status == TROUND_STATUS_POOL )
+      if ( $tround->Status == TROUND_STATUS_POOL )
          $menu_array[T_('Edit pools#tpool')] =
             array( 'url' => "tournaments/roundrobin/edit_pools.php?tid=$tid", 'class' => 'TAdmin' );
-      if( $tround->Status == TROUND_STATUS_PLAY )
+      if ( $tround->Status == TROUND_STATUS_PLAY )
          $menu_array[T_('Edit ranks#tpool')] =
             array( 'url' => "tournaments/roundrobin/edit_ranks.php?tid=$tid", 'class' => 'TAdmin' );
       $menu_array[T_('Manage tournament')] =

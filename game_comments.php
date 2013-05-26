@@ -35,17 +35,17 @@ $TheErrors->set_mode(ERROR_MODE_PRINT);
    connect2mysql();
 
    $logged_in = who_is_logged( $player_row);
-   if( !$logged_in )
+   if ( !$logged_in )
       error('not_logged_in', 'game_comments');
    $my_id = $player_row['ID'];
 
    $gid = (int)@$_GET['gid'];
-   if( $gid <= 0 )
+   if ( $gid <= 0 )
    {
-      if( preg_match('/game([0-9]+)/i', @$_SERVER['REQUEST_URI'], $result) )
+      if ( preg_match('/game([0-9]+)/i', @$_SERVER['REQUEST_URI'], $result) )
          $gid = $result[1];
    }
-   if( $gid <= 0 )
+   if ( $gid <= 0 )
       error('unknown_game', "game_comments($gid)");
 
    $game = mysql_single_fetch( 'game_comments.find_game',
@@ -55,17 +55,17 @@ $TheErrors->set_mode(ERROR_MODE_PRINT);
          ' INNER JOIN Players AS black ON black.ID=G.Black_ID ' .
          ' INNER JOIN Players AS white ON white.ID=G.White_ID ' .
       " WHERE G.ID=$gid LIMIT 1" );
-   if( !$game )
+   if ( !$game )
       error('unknown_game', "game_comments.find_game($gid)");
    $gstatus = $game['Status'];
-   if( $gstatus == GAME_STATUS_SETUP || $gstatus == GAME_STATUS_INVITED )
+   if ( $gstatus == GAME_STATUS_SETUP || $gstatus == GAME_STATUS_INVITED )
       error('invalid_game_status', "game_comments.find_game($gid,$gstatus)");
    $game_players = $game['GamePlayers'];
    $handicap = $game['Handicap'];
 
 
    $my_game = ( $logged_in && ( $player_row['ID'] == $game['Black_ID'] || $player_row['ID'] == $game['White_ID'] ) ) ;
-   if( !$my_game )
+   if ( !$my_game )
       $my_color = DAME ;
    else
       $my_color = $player_row['ID'] == $game['Black_ID'] ? BLACK : WHITE ;
@@ -75,15 +75,15 @@ $TheErrors->set_mode(ERROR_MODE_PRINT);
    $html_mode = ( $gstatus == GAME_STATUS_FINISHED ) ? 'gameh' : 'game';
 
    $arr_users = array();
-   if( $is_mp_game )
+   if ( $is_mp_game )
       GamePlayer::load_users_for_mpgame( $gid, '', false, $arr_users );
 
    list( $arr_moves, $arr_movemsg ) = load_game_comments_data( $gid );
 
    $style_str = null; // if set, <igoban>-tag present in one of the move-messages
-   foreach( $arr_movemsg as $mvmsg )
+   foreach ( $arr_movemsg as $mvmsg )
    {
-      if( MarkupHandlerGoban::contains_goban($mvmsg) )
+      if ( MarkupHandlerGoban::contains_goban($mvmsg) )
       {
          $cfg_board = ConfigBoard::load_config_board($my_id);
          $style_str = GobanHandlerGfxBoard::style_string( $cfg_board->get_stone_size() );
@@ -103,17 +103,17 @@ $TheErrors->set_mode(ERROR_MODE_PRINT);
 
    // add_tablehead($nr, $descr, $attbs=null, $mode=TABLE_NO_HIDE|TABLE_NO_SORT, $sortx='')
    $ctable->add_tablehead(1, T_('Moves'), 'Move');
-   if( $is_mp_game )
+   if ( $is_mp_game )
       $ctable->add_tablehead(3, T_('Player') );
    $ctable->add_tablehead(2, T_('Comments'), 'Comment');
 
    $cnt_comments = $mpg_user = 0;
-   foreach( $arr_moves as $row )
+   foreach ( $arr_moves as $row )
    {
       $move_nr = (int)$row['MoveNr'];
       $Text = @$arr_movemsg[$move_nr];
 
-      if( $is_mp_game )
+      if ( $is_mp_game )
       {
          list( $group_color, $group_order, $move_color ) =
             MultiPlayerGame::calc_game_player_for_move( $game_players, $move_nr, $handicap, -1 );
@@ -123,17 +123,17 @@ $TheErrors->set_mode(ERROR_MODE_PRINT);
       }
       else
          $move_html_mode = ( $row['Stone'] == $my_color ) ? 'gameh' : $html_mode;
-      if( !$my_game && !$my_mpgame )
+      if ( !$my_game && !$my_mpgame )
          $Text = game_tag_filter( $Text);
       $Text = trim( make_html_safe($Text, $move_html_mode) );
-      if( (string)$Text == '' )
+      if ( (string)$Text == '' )
          continue;
-      if( $style_str )
+      if ( $style_str )
          $Text = MarkupHandlerGoban::replace_igoban_tags( $Text );
       $cnt_comments++;
 
       $color_class = ' class="InTextStone"';
-      if( $row['Stone'] == BLACK )
+      if ( $row['Stone'] == BLACK )
          $colortxt = '<img src="17/b.gif" alt="' . T_('Black') . "\"$color_class>" ;
       else
          $colortxt = '<img src="17/w.gif" alt="' . T_('White') . "\"$color_class>" ;
@@ -141,7 +141,7 @@ $TheErrors->set_mode(ERROR_MODE_PRINT);
       $crow_strings = array();
       $crow_strings[1] = "$move_nr&nbsp;$colortxt";
       $crow_strings[2] = $Text;
-      if( $is_mp_game && is_array($mpg_user) )
+      if ( $is_mp_game && is_array($mpg_user) )
          $crow_strings[3] = user_reference( REF_LINK, 1, '', $mpg_user['uid'], $mpg_user['Handle'], '' );
 
       $ctable->add_row( $crow_strings );
@@ -161,14 +161,14 @@ function load_game_comments_data( $gid )
    $arr_moves = array();
    $arr_cached_moves = Board::load_cache_game_moves(
       'game_comments.load_game_comments_data', $gid, /*fetch*/true, /*store*/false );
-   if( is_array($arr_cached_moves) )
+   if ( is_array($arr_cached_moves) )
    {
-      foreach( $arr_cached_moves as $row )
+      foreach ( $arr_cached_moves as $row )
       {
          $stone = $row['Stone'];
 
          // include moves: PASS, SCORE, RESIGN
-         if( $row['PosX'] >= POSX_RESIGN && ($stone == BLACK || $stone == WHITE) )
+         if ( $row['PosX'] >= POSX_RESIGN && ($stone == BLACK || $stone == WHITE) )
             $arr_moves[] = $row;
       }
    }

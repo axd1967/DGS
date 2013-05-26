@@ -393,7 +393,7 @@ class Form
       $this->fclass = $class;
       $this->echo_form_start_now = $echo_form_start_now;
 
-      if( $echo_form_start_now )
+      if ( $echo_form_start_now )
          echo $this->print_start_default();
    }//__construct
 
@@ -454,11 +454,11 @@ class Form
       $rx_attrs = "/^(" . implode('|', array_keys($ARR_FORMELEM_READONLY) ) . ")$/";
 
       $name = strtoupper($name);
-      if( !preg_match( $rx_attrs, $attrname ) )
+      if ( !preg_match( $rx_attrs, $attrname ) )
          error('internal_error', "Form.set_attr_form_element.bad_attr_name($name,$attrname)");
-      if( @$ARR_FORMELEM_READONLY[$attrname] )
+      if ( @$ARR_FORMELEM_READONLY[$attrname] )
          error('internal_error', "Form.set_attr_form_element.readonly_attr($name,$attrname)");
-      if( !isset($this->form_elements[$name]) )
+      if ( !isset($this->form_elements[$name]) )
          error('internal_error', "Form.set_attr_form_element.miss_form_element($name)");
 
       $this->form_elements[$name][$attrname] = $value;
@@ -473,9 +473,9 @@ class Form
     */
    public function set_layout( $key, $value, $arr=NULL )
    {
-      if( $key === FLAYOUT_GLOBAL )
+      if ( $key === FLAYOUT_GLOBAL )
          $this->parse_layout_global( $value );
-      else if( $key === FLAYOUT_AREACONF )
+      else if ( $key === FLAYOUT_AREACONF )
          $this->parse_layout_areaconf( $value, $arr );
       else
          error('internal_error', "Form.set_layout.unknown_key($key)");
@@ -496,35 +496,35 @@ class Form
       $this->areas  = array();
 
       // syntax-checks: allowed chars, non-empty braces
-      if( !preg_match( "/(^[\d,|\(\)]+$|\(\))/", $layout ) )
+      if ( !preg_match( "/(^[\d,|\(\)]+$|\(\))/", $layout ) )
          error('internal_error', "Form.parse_layout_global.bad_syntax1($layout)");
 
       $groups = array();
       $grcnt = 0;
       $L = "($layout)";
-      while( true )
+      while ( true )
       {
          $epos = strpos( $L, ')' );
-         if( $epos === false )
+         if ( $epos === false )
             break;
          # found ')', search backwards to '(' -> group
          $spos = strrpos( substr($L, 0, $epos), '(' );
-         if( $spos === false )
+         if ( $spos === false )
             error('internal_error', "Form.parse_layout_global.bracing_mismatch1($layout)");
 
          $group = substr( $L, $spos + 1, $epos - $spos - 1 ); // no '()' in group, only x or x, or x|
          $arr = array();
          $arr_horiz = explode( ',', $group );
-         foreach( $arr_horiz as $hgr )
+         foreach ( $arr_horiz as $hgr )
          {
-            if( strlen($hgr) == 0 )
+            if ( strlen($hgr) == 0 )
                error('internal_error', "Form.parse_layout_global.missing_area-num.H($layout)"); // around a ','
             $arr_vert = explode( '|', $hgr );
-            if( count($arr_vert) == 1 )
+            if ( count($arr_vert) == 1 )
             {
-               if( $hgr[0] == 'G' )
+               if ( $hgr[0] == 'G' )
                   $hgr = $groups[ substr($hgr,1) ];
-               elseif( $hgr < 1 )
+               elseif ( $hgr < 1 )
                   error('internal_error', "Form.parse_layout_global.area-num.H<1");
                else
                   $this->areas[$hgr] = 1;
@@ -533,13 +533,13 @@ class Form
             else
             {
                $arrv = array( 'H' );
-               foreach( $arr_vert as $vgr )
+               foreach ( $arr_vert as $vgr )
                {
-                  if( strlen($vgr) == 0 )
+                  if ( strlen($vgr) == 0 )
                      error('internal_error', "Form.parse_layout_global.missing_area-num.V($layout)"); // around a '|'
-                  if( $vgr[0] == 'G' )
+                  if ( $vgr[0] == 'G' )
                      $vgr = $groups[ substr($vgr,1) ];
-                  elseif( $vgr < 1 )
+                  elseif ( $vgr < 1 )
                      error('internal_error', "Form.parse_layout_global.area-num.V<1");
                   else
                      $this->areas[$vgr] = 1;
@@ -554,13 +554,13 @@ class Form
          $grcnt++;
       }
 
-      if( !(strpos( $L, '(' ) === false) )
+      if ( !(strpos( $L, '(' ) === false) )
          error('internal_error', "Form.parse_layout_global.bracing_mismatch2($layout)");
-      if( preg_match( "/[\|,]/", $L ) )
+      if ( preg_match( "/[\|,]/", $L ) )
          error('internal_error', "Form.parse_layout_global.bad_syntax2($layout)"); // with one of '|,'
 
       $result = $groups[$grcnt-1];
-      while( is_array($result) && count($result) == 1 )
+      while ( is_array($result) && count($result) == 1 )
          $result = array_shift($result);
       $this->layout[FLAYOUT_GLOBAL] = $result;
    }//parse_layout_global
@@ -571,15 +571,15 @@ class Form
     */
    private function parse_layout_areaconf( $area, $config )
    {
-      if( !preg_match( "/^(\d+|".FAREA_ALL.")$/", $area) )
+      if ( !preg_match( "/^(\d+|".FAREA_ALL.")$/", $area) )
          error('assert', "Form.parse_layout_areaconf.area-num($area)");
-      if( !is_array( $config ) )
+      if ( !is_array( $config ) )
          error('assert', "Form.parse_layout_areaconf.config-arg()");
 
       // don't overwrite existing config
-      if( !isset($this->areaconf[$area]) )
+      if ( !isset($this->areaconf[$area]) )
          $this->areaconf[$area] = array();
-      foreach( $config as $key => $val )
+      foreach ( $config as $key => $val )
          $this->areaconf[$area][$key] = $val;
    }//parse_layout_areaconf
 
@@ -601,9 +601,9 @@ class Form
    /*! \brief Changes current area (area-num must exist in specified layout \see set_layout ). */
    public function set_area( $area )
    {
-      if( !isset($this->layout[FLAYOUT_GLOBAL]) )
+      if ( !isset($this->layout[FLAYOUT_GLOBAL]) )
          error('assert', "Form.set_area.unset_layout");
-      if( !isset($this->areas[$area]) )
+      if ( !isset($this->areas[$area]) )
          error('assert', "Form.set_area.bad_area($area)");
       $this->area = $area;
    }//set_area
@@ -618,14 +618,14 @@ class Form
     */
    public function add_row( $row_array, $line_no = -1, $make_texts_safe = true )
    {
-      if( $line_no != -1 )
+      if ( $line_no != -1 )
       {
-         if( array_key_exists( $line_no, $this->rows ) )
+         if ( array_key_exists( $line_no, $this->rows ) )
             return -1;
       }
       else
       {
-         if( empty($this->rows) )
+         if ( empty($this->rows) )
             $line_no = $this->line_no_step;
          else
             $line_no = max( array_keys( $this->rows ) ) + $this->line_no_step;
@@ -653,7 +653,7 @@ class Form
    /*! \brief Update $form_string with new $rows data. */
    private function update_form_string()
    {
-      if( $this->updated )
+      if ( $this->updated )
          return;
 
       $this->form_string = $this->create_form_string();
@@ -666,9 +666,9 @@ class Form
       $has_layout = isset($this->layout[FLAYOUT_GLOBAL]);
       $rootformstr = "";
 
-      if( count($this->rows) <= 0 )
+      if ( count($this->rows) <= 0 )
       {
-         if( !$this->get_config(FEC_EXTERNAL_FORM) && $this->echo_form_start_now )
+         if ( !$this->get_config(FEC_EXTERNAL_FORM) && $this->echo_form_start_now )
             $rootformstr .= $this->print_end();
          return $rootformstr;
       }
@@ -677,10 +677,10 @@ class Form
 
       // prepare area-grouping
       $area_rows = array();
-      foreach( $this->areas as $area => $tmp )
+      foreach ( $this->areas as $area => $tmp )
          $area_rows[$area] = '';
 
-      foreach( $this->rows as $row_args )
+      foreach ( $this->rows as $row_args )
       {
          list( $tmp, $args, $curr_area ) = $row_args;
          $this->make_texts_safe = $tmp;
@@ -695,45 +695,45 @@ class Form
          $result = '';
          $element_counter = 0;
 
-         while( $current_arg < count($args) )
+         while ( $current_arg < count($args) )
          {
             //40 allow 10*(TEXT,TD,TEXTAREA,TD) in the row
-            if( $element_counter >= 40 )
+            if ( $element_counter >= 40 )
                exit;
 
             $element_name = $args[ $current_arg ];
             $current_arg++;
 
-            if( !array_key_exists( $element_name, $this->form_elements ) )
+            if ( !array_key_exists( $element_name, $this->form_elements ) )
                continue;
 
             $element_counter++;
             $element_type = $this->form_elements[ $element_name ];
 
             $num_args = $element_type[FEA_NUMARGS];
-            if( $current_arg + $num_args > count($args) )
+            if ( $current_arg + $num_args > count($args) )
                continue;
 
             $element_args = array();
-            for( $i = 0; $i < $num_args; $i++ )
+            for ( $i = 0; $i < $num_args; $i++ )
                $element_args[] = $args[ $current_arg + $i ];
 
             $func_name = "create_string_func_" . strtolower( $element_name );
 
             $current_arg += $num_args;
 
-            if( $element_name == 'ROW' )
+            if ( $element_name == 'ROW' )
             {
                $rowclass = ' class='.$element_args[ 0 ];
             }
-            else if( $element_name == 'HIDDEN' || $element_name == 'ENABLE' )
+            else if ( $element_name == 'HIDDEN' || $element_name == 'ENABLE' )
             {
                $this->$func_name( $result, $element_args );
             }
-            else if( $element_type[FEA_SPANALLCOLS] )
+            else if ( $element_type[FEA_SPANALLCOLS] )
             {
 
-               if( !$this->column_started )
+               if ( !$this->column_started )
                $result .= $this->print_td_start( $element_type[FEA_ATTBS],
                                                  max( $this->max_nr_columns -
                                                       $this->nr_columns,
@@ -746,13 +746,13 @@ class Form
             }
             else
             {
-               if( $element_type[FEA_NEWTD] && $this->column_started )
+               if ( $element_type[FEA_NEWTD] && $this->column_started )
                {
                   $result .= $this->print_td_end();
                   $this->column_started = false;
                }
 
-               if( $element_type[FEA_STARTTD] && !$this->column_started )
+               if ( $element_type[FEA_STARTTD] && !$this->column_started )
                {
                   $result .= $this->print_td_start( $element_type[FEA_ATTBS] );
                   $this->column_started = true;
@@ -761,25 +761,25 @@ class Form
 
                $this->$func_name( $result, $element_args );
 
-               if( $element_type[FEA_ENDTD] && $this->column_started )
+               if ( $element_type[FEA_ENDTD] && $this->column_started )
                {
                   $result .= $this->print_td_end();
                   $this->column_started = false;
                }
             }
-            if( $this->nr_columns > $this->max_nr_columns )
+            if ( $this->nr_columns > $this->max_nr_columns )
                $this->max_nr_columns = $this->nr_columns;
          } //while args
-         if( $this->column_started )
+         if ( $this->column_started )
             $result .= $this->print_td_end();
 
-         if( $result )
+         if ( $result )
          {
             $tr_attrs = $this->get_config(FEC_TR_ATTR);
             $formstr .= '<TR';
-            if( $rowclass )
+            if ( $rowclass )
                $formstr .= $rowclass;
-            else if( $tr_attrs )
+            else if ( $tr_attrs )
                $formstr .=  ' '.$tr_attrs;
             $formstr .= ">$result</TR>\n";
             $area_rows[$curr_area] .= $formstr;
@@ -789,7 +789,7 @@ class Form
       $is_block_form = $this->get_config(FEC_BLOCK_FORM);
 
       // start default-form here because above loop may add additional form-attributes
-      if( !$this->get_config(FEC_EXTERNAL_FORM) && !$this->echo_form_start_now && !$is_block_form )
+      if ( !$this->get_config(FEC_EXTERNAL_FORM) && !$this->echo_form_start_now && !$is_block_form )
          $rootformstr .= $this->print_start_default();
 
       $table_attbs = $this->get_areaconf( 0, FAC_TABLE );
@@ -797,16 +797,16 @@ class Form
       $rootformstr .= "<TABLE $table_attbs>\n"; //form table
 
       // build area-groups
-      if( $has_layout )
+      if ( $has_layout )
          $rootformstr .= $this->build_areas( $this->layout[FLAYOUT_GLOBAL], $area_rows );
       else
          $rootformstr .= implode( "", $area_rows );
 
       $rootformstr .= "</TABLE>";
 
-      if( !$this->get_config(FEC_EXTERNAL_FORM) && !$is_block_form )
+      if ( !$this->get_config(FEC_EXTERNAL_FORM) && !$is_block_form )
          $rootformstr .= $this->print_end();
-      if( $is_block_form )
+      if ( $is_block_form )
          $this->rows = array();
 
       return $rootformstr;
@@ -823,46 +823,46 @@ class Form
    {
       $areastr = '';
 
-      if( is_numeric($L) )
+      if ( is_numeric($L) )
       {
          $areastr = @$AR[$L]; //always TRlevel
-         if( !$areastr )
+         if ( !$areastr )
             return '';
          $table_attbs = $this->get_areaconf( $L, FAC_TABLE );
          $tdtable_attbs = $this->get_areaconf( $L, FAC_ENVTABLE );
          $table_attbs = $this->get_form_attbs( $table_attbs, 'C');
          $tdtable_attbs = $this->get_form_attbs( $tdtable_attbs, 'C');
          $title = (string)@$this->get_areaconf( $L, 'title' );
-         if( $title )
+         if ( $title )
             $title = "<span class=Rubric>$title</span>";
          $areastr = "<TD$tdtable_attbs><!-- Area #$L -->$title<TABLE$table_attbs>\n"
                   . $areastr
                   . "</TABLE></TD>\n";
-         if( $TRlevel )
+         if ( $TRlevel )
             $areastr = "<TR>$areastr</TR>\n";
       }
       else
       {
-         if( !is_array($L) )
+         if ( !is_array($L) )
             error('assert', "Form.build_areas.bad-layout-type($L)");
-         if( count($L) == 0 )
+         if ( count($L) == 0 )
             error('assert', "Form.build_areas.empty-layout-array");
 
          $table_attbs = $this->get_areaconf( FAREA_ALL, FAC_TABLE );
          $cnt = 0;
-         if( $L[0] == 'H' )
+         if ( $L[0] == 'H' )
          { // horizontal grouping
             $cnt_L = count($L);
-            for( $i=1; $i < $cnt_L; $i++ )
+            for ( $i=1; $i < $cnt_L; $i++ )
             {
                $area = $L[$i];
                $str = $this->build_areas( $area, $AR, false);
-               if( !$str )
+               if ( !$str )
                   continue;
                $areastr.= $str;
                $cnt++;
             }
-            if( $cnt < 1 )
+            if ( $cnt < 1 )
                return '';
             //if( $cnt > 1 ) //removed because it can induce mis-alignment of siblings
             {
@@ -874,22 +874,22 @@ class Form
                         . "<TR>$areastr</TR>\n"
                         . "</TABLE></TD>\n";
             }
-            if( $TRlevel )
+            if ( $TRlevel )
                $areastr = "<TR>$areastr</TR>\n";
          }
          else
          { // vertical grouping
-            foreach( $L as $area )
+            foreach ( $L as $area )
             {
                $str = $this->build_areas( $area, $AR, false);
-               if( !$str )
+               if ( !$str )
                   continue;
-               if( $areastr )
+               if ( $areastr )
                   $areastr .= "</TR>\n<TR>";
                $areastr .= $str;
                $cnt++;
             }
-            if( $cnt < 1 )
+            if ( $cnt < 1 )
                return '';
             //if( $cnt > 1 ) //removed because it can induce mis-alignment of siblings
             {
@@ -901,7 +901,7 @@ class Form
                         . $areastr
                         . "</TR>\n</TABLE></TD>\n";
             }
-            if( $TRlevel )
+            if ( $TRlevel )
                $areastr = "<TR>$areastr</TR>\n";
          }
       }
@@ -915,11 +915,11 @@ class Form
     */
    private function get_areaconf( $area, $context )
    {
-      if( isset($this->areaconf[$area][$context]) )
+      if ( isset($this->areaconf[$area][$context]) )
          return $this->areaconf[$area][$context]; // special first
-      if( $area !== FAREA_ALL ) // all already checked
+      if ( $area !== FAREA_ALL ) // all already checked
       {
-         if( isset($this->areaconf[FAREA_ALL][$context]) )
+         if ( isset($this->areaconf[FAREA_ALL][$context]) )
             return $this->areaconf[FAREA_ALL][$context]; // all
       }
       return '';
@@ -1217,9 +1217,9 @@ class Form
       $pg_arr = array( FORM_GET => "GET", FORM_POST => "POST" );
 
       $attrib_str = '';
-      if( is_array($attributes) )
+      if ( is_array($attributes) )
       {
-         foreach( $attributes as $key => $value )
+         foreach ( $attributes as $key => $value )
             $attrib_str .= sprintf( ' %s="%s"', $key, $value );
       }
 
@@ -1236,7 +1236,7 @@ class Form
    public function print_end()
    {
       $formstr = '';
-      if(!$this->hiddens_echoed)
+      if (!$this->hiddens_echoed)
          $formstr .= $this->get_hiddens_string();
 
       return $formstr."\n</FORM>";
@@ -1287,12 +1287,12 @@ class Form
     */
    public function print_insert_text_input( $name, $size, $maxlength, $initial_value, $attbs='' )
    {
-      if( $this->make_texts_safe )
+      if ( $this->make_texts_safe )
          $initial_value = textarea_safe($initial_value);
 
       $str = "<INPUT type=\"text\" name=\"$name\" value=\"$initial_value\""
          . $this->get_input_attbs() . " size=\"$size\"";
-      if( $maxlength >= 0 )
+      if ( $maxlength >= 0 )
          $str .= " maxlength=\"$maxlength\"";
       $str .= self::parse_input_standard_attributes( $attbs, 'type|name|value|size|maxlength' );
       $str .= ">";
@@ -1337,7 +1337,7 @@ class Form
     */
    public function print_insert_textarea( $name, $columns, $rows, $initial_text )
    {
-      if( $this->make_texts_safe )
+      if ( $this->make_texts_safe )
          $initial_text = textarea_safe($initial_text);
       return "<TEXTAREA name=\"$name\" cols=\"$columns\"" .
          $this->get_input_attbs() . " rows=\"$rows\">$initial_text</TEXTAREA>";
@@ -1370,10 +1370,10 @@ class Form
       $result .= self::parse_input_standard_attributes($attbs);
       $result .= ">\n";
 
-      foreach( $value_array as $value => $info )
+      foreach ( $value_array as $value => $info )
       {
          $result .= "<OPTION value=\"$value\"";
-         if( ($multiple ? array_key_exists((string)$value,$selected)
+         if ( ($multiple ? array_key_exists((string)$value,$selected)
                         : ((string)$value == $selected) ) )
             $result .= " selected";
 
@@ -1403,10 +1403,10 @@ class Form
    public function print_insert_radio_buttonsx( $name, $value_array, $selected, $attbs='', $use_disable=true )
    {
       $result = '';
-      foreach( $value_array as $value => $info )
+      foreach ( $value_array as $value => $info )
       {
          $result .= "<INPUT type=\"radio\" name=\"$name\" value=\"$value\"";
-         if((string)$value == $selected)
+         if ((string)$value == $selected)
             $result .= " checked";
 
          $result .= $this->get_input_attbs($use_disable);
@@ -1430,7 +1430,7 @@ class Form
    public function print_insert_checkbox( $name, $value, $description, $selected, $attbs='' )
    {
       $result = "<INPUT type=\"checkbox\" name=\"$name\" value=\"$value\"";
-      if($selected)
+      if ($selected)
          $result .= " checked";
 
       $result .= $this->get_input_attbs();
@@ -1490,13 +1490,13 @@ class Form
    {
       $result = '';
       $str = '';
-      if( $maxlength > 0 )
+      if ( $maxlength > 0 )
       {
          $str .= sprintf( ' maxlength="%s"', $maxlength );
-         if( $with_maxsize )
+         if ( $with_maxsize )
             $result .= self::print_insert_hidden_input( 'MAX_FILE_SIZE', $maxlength );
       }
-      if( $accept != '' )
+      if ( $accept != '' )
          $str .= sprintf( ' accept="%s"', $accept );
       $result .= "<INPUT type=\"file\" name=\"$name\" size=\"$size\"" . $str . ">";
       return $result;
@@ -1512,7 +1512,7 @@ class Form
    public function print_insert_filter( $filters, $fid, $attr = array() )
    {
       $filter = $filters->get_filter($fid);
-      if( isset($filter) )
+      if ( isset($filter) )
          return $filter->get_input_element( $filters->get_prefix(), $attr );
       else
          return '';
@@ -1530,14 +1530,14 @@ class Form
    public function print_insert_filtererror( $filters, $fid, $prefix = '', $suffix = '', $with_syntax = true )
    {
       $filter = $filters->get_filter($fid);
-      if( !isset($filter) || !$filter->has_error() )
+      if ( !isset($filter) || !$filter->has_error() )
          return '';
 
       $msg = $filter->errormsg();
-      if( $with_syntax )
+      if ( $with_syntax )
       {
          $syntax = $filter->get_syntax_description();
-         if( $syntax )
+         if ( $syntax )
             $msg.= "; $syntax";
       }
       return $prefix . T_('Error#filter') . ': ' . make_html_safe( $msg ) . $suffix;
@@ -1555,14 +1555,14 @@ class Form
    public function print_insert_filterwarn( $filters, $fid, $prefix = '', $suffix = '', $with_syntax = false )
    {
       $filter = $filters->get_filter($fid);
-      if( !isset($filter) || !$filter->has_warn() )
+      if ( !isset($filter) || !$filter->has_warn() )
          return '';
 
       $msg = $filter->warnmsg();
-      if( $with_syntax )
+      if ( $with_syntax )
       {
          $syntax = $filter->get_syntax_description();
-         if( $syntax )
+         if ( $syntax )
             $msg.= "; $syntax";
       }
       return $prefix . T_('Warning#filter') . ': ' . make_html_safe( $msg ) . $suffix;
@@ -1624,11 +1624,11 @@ class Form
    /*! \brief return the array of hiddens merged with owneds and attachments' ones. */
    public function get_hiddens( &$hiddens)
    {
-      if( is_array($hiddens) )
+      if ( is_array($hiddens) )
          $hiddens = array_merge( $hiddens, $this->hiddens);
       else
          $hiddens = $this->hiddens;
-      foreach( $this->attached as $attach )
+      foreach ( $this->attached as $attach )
       {
          $attach->get_hiddens( $hiddens);
       }
@@ -1638,7 +1638,7 @@ class Form
    public function get_hiddens_string()
    {
       $hiddens = $this->hiddens;
-      foreach( $this->attached as $attach )
+      foreach ( $this->attached as $attach )
       {
          $attach->get_hiddens( $hiddens);
       }
@@ -1658,9 +1658,9 @@ class Form
    {
       $str = '';
       $attbs = attb_parse($attbs);
-      if( is_array($attbs) )
+      if ( is_array($attbs) )
       {
-         if( isset($attbs['title']) )
+         if ( isset($attbs['title']) )
          {
             $title = trim($attbs['title']);
             unset($attbs['title']);
@@ -1668,33 +1668,33 @@ class Form
          else
             $title = '';
 
-         if( isset($attbs['accesskey']) )
+         if ( isset($attbs['accesskey']) )
          {
             $xkey = trim($attbs['accesskey']);
             unset($attbs['accesskey']);
-            if( (string)$xkey != '' ) // can be '0'
+            if ( (string)$xkey != '' ) // can be '0'
             {
                $xkey = substr($xkey,0,1);
                $title .= " [&amp;$xkey]";
                $str .= ' accesskey='.attb_quote($xkey);
             }
          }
-         if( $title )
+         if ( $title )
             $str .= ' title='.attb_quote($title);
 
-         if( isset($attbs['disabled']) )
+         if ( isset($attbs['disabled']) )
          {
-            if( $attbs['disabled'] )
+            if ( $attbs['disabled'] )
                $str .= ' disabled';
             unset($attbs['disabled']);
          }
 
          // skip some attributes
-         if( $rx_skipattr )
+         if ( $rx_skipattr )
          {
-            foreach( $attbs as $akey => $aval )
+            foreach ( $attbs as $akey => $aval )
             {
-               if( preg_match( "/^($rx_skipattr)$/i", $akey ) )
+               if ( preg_match( "/^($rx_skipattr)$/i", $akey ) )
                   unset($attbs[$akey]);
             }
          }
@@ -1707,7 +1707,7 @@ class Form
    // only used for debugging/code-examples
    public static function echo_internal_layout( $form )
    {
-      if( isset($form->layout[FLAYOUT_GLOBAL]) )
+      if ( isset($form->layout[FLAYOUT_GLOBAL]) )
       {
          echo "<br><br>\nvar_export:\n<font size=+2><pre>"
             . "global-layout: " . var_export( $form->orig_layout, true ) ."\n\n"

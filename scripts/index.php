@@ -32,11 +32,11 @@ require_once 'include/std_functions.php';
 
    connect2mysql();
    $logged_in = who_is_logged($player_row);
-   if( !$logged_in )
+   if ( !$logged_in )
       error('login_if_not_logged_in', 'scripts.index');
-   if( $player_row['ID'] <= GUESTS_ID_MAX )
+   if ( $player_row['ID'] <= GUESTS_ID_MAX )
       error('not_allowed_for_guest', 'scripts.index');
-   if( !(@$player_row['admin_level'] & (ADMIN_SUPERADMIN|ADMIN_DATABASE|ADMIN_DEVELOPER)) )
+   if ( !(@$player_row['admin_level'] & (ADMIN_SUPERADMIN|ADMIN_DATABASE|ADMIN_DEVELOPER)) )
       error('adminlevel_too_low', 'scripts.index');
 
    $arr_scripts = array(
@@ -106,15 +106,15 @@ function echo_scripts( $arr_dirs )
 
    $chk_scripts = array();
    echo '<table id="Scripts"><tr><th>Category</th> <th>Script</th> <th>Description</th></tr>', "\n";
-   while( count($arr_dirs) > 1 )
+   while ( count($arr_dirs) > 1 )
    {
       $dir = $base_path . array_shift($arr_dirs);
       $arr_scripts = array_shift($arr_dirs);
-      foreach( $arr_scripts as $key => $val )
+      foreach ( $arr_scripts as $key => $val )
       {
          // show only script-name, but keep unique
          $scriptname = preg_replace( '/\?.*$/', '', $key );
-         if( isset($chk_scripts[$scriptname]) )
+         if ( isset($chk_scripts[$scriptname]) )
          {
             $chk_scripts[$scriptname]++;
             $scriptname .= ' #' . $chk_scripts[$scriptname];
@@ -122,7 +122,7 @@ function echo_scripts( $arr_dirs )
          else
             $chk_scripts[$scriptname] = 1;
 
-         if( is_numeric($val) && $val == 0 ) // section-title
+         if ( is_numeric($val) && $val == 0 ) // section-title
             printf( '<tr class="Title"><td colspan="3"><hr>%s</td>', $key );
          else // script with description
             printf( '<tr><td></td> <td>%s</td> <td>%s</td>',

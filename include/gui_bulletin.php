@@ -44,7 +44,7 @@ class GuiBulletin
    {
       // lazy-init of texts
       $key = 'CAT';
-      if( !isset(self::$ARR_BULLETIN_TEXTS[$key]) )
+      if ( !isset(self::$ARR_BULLETIN_TEXTS[$key]) )
       {
          $arr = array();
          $arr[BULLETIN_CAT_MAINT]            = T_('Maintenance#B_cat');
@@ -57,10 +57,10 @@ class GuiBulletin
          self::$ARR_BULLETIN_TEXTS[$key] = $arr;
       }
 
-      if( is_null($category) )
+      if ( is_null($category) )
          return self::$ARR_BULLETIN_TEXTS[$key];
 
-      if( !isset(self::$ARR_BULLETIN_TEXTS[$key][$category]) )
+      if ( !isset(self::$ARR_BULLETIN_TEXTS[$key][$category]) )
          error('invalid_args', "GuiBulletin:getCategoryText($category,$key)");
       return self::$ARR_BULLETIN_TEXTS[$key][$category];
    }//getCategoryText
@@ -70,7 +70,7 @@ class GuiBulletin
    {
       // lazy-init of texts
       $key = 'STATUS';
-      if( !isset(self::$ARR_BULLETIN_TEXTS[$key]) )
+      if ( !isset(self::$ARR_BULLETIN_TEXTS[$key]) )
       {
          $arr = array();
          $arr[BULLETIN_STATUS_NEW]        = T_('New#B_status');
@@ -82,10 +82,10 @@ class GuiBulletin
          self::$ARR_BULLETIN_TEXTS[$key] = $arr;
       }
 
-      if( is_null($status) )
+      if ( is_null($status) )
          return self::$ARR_BULLETIN_TEXTS[$key];
 
-      if( !isset(self::$ARR_BULLETIN_TEXTS[$key][$status]) )
+      if ( !isset(self::$ARR_BULLETIN_TEXTS[$key][$status]) )
          error('invalid_args', "GuiBulletin:getStatusText($status,$key)");
       return self::$ARR_BULLETIN_TEXTS[$key][$status];
    }//getStatusText
@@ -95,7 +95,7 @@ class GuiBulletin
    {
       // lazy-init of texts
       $key = 'TRGTYPE';
-      if( !isset(self::$ARR_BULLETIN_TEXTS[$key]) )
+      if ( !isset(self::$ARR_BULLETIN_TEXTS[$key]) )
       {
          $arr = array();
          $arr[BULLETIN_TRG_UNSET]    = NO_VALUE;
@@ -107,10 +107,10 @@ class GuiBulletin
          self::$ARR_BULLETIN_TEXTS[$key] = $arr;
       }
 
-      if( is_null($trg_type) )
+      if ( is_null($trg_type) )
          return self::$ARR_BULLETIN_TEXTS[$key];
 
-      if( !isset(self::$ARR_BULLETIN_TEXTS[$key][$trg_type]) )
+      if ( !isset(self::$ARR_BULLETIN_TEXTS[$key][$trg_type]) )
          error('invalid_args', "GuiBulletin:getTargetTypeText($trg_type,$key)");
       return self::$ARR_BULLETIN_TEXTS[$key][$trg_type];
    }//getTargetTypeText
@@ -120,7 +120,7 @@ class GuiBulletin
    {
       // lazy-init of texts
       $key = 'FLAGS';
-      if( !isset(self::$ARR_BULLETIN_TEXTS[$key]) )
+      if ( !isset(self::$ARR_BULLETIN_TEXTS[$key]) )
       {
          $arr = array();
          $arr[BULLETIN_FLAG_ADMIN_CREATED] = T_('Admin-Created#B_flag');
@@ -128,9 +128,9 @@ class GuiBulletin
          self::$ARR_BULLETIN_TEXTS[$key] = $arr;
       }
 
-      if( is_null($flag) )
+      if ( is_null($flag) )
          return self::$ARR_BULLETIN_TEXTS[$key];
-      if( !isset(self::$ARR_BULLETIN_TEXTS[$key][$flag]) )
+      if ( !isset(self::$ARR_BULLETIN_TEXTS[$key][$flag]) )
          error('invalid_args', "GuiBulletin:getFlagsText($flag,$short)");
       return self::$ARR_BULLETIN_TEXTS[$key][$flag];
    }//getFlagsText
@@ -142,9 +142,9 @@ class GuiBulletin
 
       $arr = array();
       $arr_flags = self::getFlagsText();
-      foreach( $arr_flags as $flag => $flagtext )
+      foreach ( $arr_flags as $flag => $flagtext )
       {
-         if( $check_flags & $flag )
+         if ( $check_flags & $flag )
             $arr[] = ($class) ? span($class, $flagtext) : $flagtext;
       }
       return (count($arr)) ? implode(', ', $arr) : $zero_val;
@@ -163,9 +163,9 @@ class GuiBulletin
       $publish_text = sprintf( T_('[%s] by %s#bulletin'),
          date(DATE_FMT2, $bulletin->PublishTime), $bulletin->User->user_reference() );
 
-      if( $bulletin->tid > 0 )
+      if ( $bulletin->tid > 0 )
       {
-         if( is_null($bulletin->Tournament) )
+         if ( is_null($bulletin->Tournament) )
             $bulletin->Tournament = TournamentCache::load_cache_tournament( 'GuiBulletin:build_view_bulletin',
                $bulletin->tid, /*check*/false );
 
@@ -174,7 +174,7 @@ class GuiBulletin
                ? sprintf( T_('Unknown tournament [%s]'), $bulletin->tid )
                : $bulletin->Tournament->build_info(5, 30) ));
       }
-      elseif( $bulletin->gid > 0 )
+      elseif ( $bulletin->gid > 0 )
       {
          $ref_text = span('Reference',
             sprintf( '%s %s', // linked: (img) Game-info
@@ -184,7 +184,7 @@ class GuiBulletin
       else
          $ref_text = '';
 
-      if( $mark_url )
+      if ( $mark_url )
       {
          global $base_path;
          $mark_link = anchor( make_url( $base_path.$mark_url, array( 'mr' => $bulletin->ID ) ),
@@ -208,8 +208,8 @@ class GuiBulletin
    {
       static $mindays = 7, $maxdays = 100;
 
-      if( $bulletin->is_user_bulletin() ) {
-         if( ($parsed_expiretime < $GLOBALS['NOW'] + $mindays * SECS_PER_DAY )
+      if ( $bulletin->is_user_bulletin() ) {
+         if ( ($parsed_expiretime < $GLOBALS['NOW'] + $mindays * SECS_PER_DAY )
                || ($parsed_expiretime > $GLOBALS['NOW'] + $maxdays * SECS_PER_DAY ) )
          {
             $errors[] = sprintf( T_('Expire-time must be within %s days.'), "[$mindays..$maxdays]" );

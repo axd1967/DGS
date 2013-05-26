@@ -58,55 +58,55 @@ define('BLOCKEND', CR.COMMENT_LINE_STR.' }'.CR);
 
 function safe_value( $val=NULL)
 {
-   if( $val === NULL )
+   if ( $val === NULL )
       $val = 'NULL';
-   else if( !is_numeric($val) )
+   else if ( !is_numeric($val) )
       $val = "'".mysql_addslashes($val)."'";
    return $val;
 } //safe_value
 
 function insert_set( $table, $query, $title=false)
 {
-   if( $title === '' )
+   if ( $title === '' )
       $title = "Dumping data for table ".quoteit( $table, QUOTE);
 
    $result = mysql_query( $query) or die(mysql_error());
 
    $mysqlerror = @mysql_error();
-   if( $mysqlerror )
+   if ( $mysqlerror )
    {
       echo "<p>Error: ".textarea_safe($mysqlerror)."</p>";
       return -1;
    }
 
-   if( !$result )
+   if ( !$result )
       return 0;
 
    $numrows = @mysql_num_rows($result);
-   if( $numrows<=0 )
+   if ( $numrows<=0 )
    {
       @mysql_free_result( $result);
       return 0;
    }
 
    $text = '';
-   while( $row = mysql_fetch_assoc( $result ) )
+   while ( $row = mysql_fetch_assoc( $result ) )
    {
       $str = '';
       $sep = '';
-      foreach( $row as $key => $val )
+      foreach ( $row as $key => $val )
       {
          $str.= $sep.$key.'='.safe_value($val);
          $sep = ',';
       }
-      if( $str )
+      if ( $str )
          $text.= "INSERT INTO "
             . quoteit( $table, ( QUOTE_NAME ? QUOTE :'') )
             . " SET $str;" .CR;
    }
    mysql_free_result($result);
 
-   if( $title !== false )
+   if ( $title !== false )
       $text = comment_block( $title).CR.$text;
 
    return $text;
@@ -114,23 +114,23 @@ function insert_set( $table, $query, $title=false)
 
 function insert_values( $table, $names, $query, $title=false)
 {
-   if( $title === '' )
+   if ( $title === '' )
       $title = "Dumping data for table ".quoteit( $table, QUOTE);
 
    $result = mysql_query( $query) or die(mysql_error());
 
    $mysqlerror = @mysql_error();
-   if( $mysqlerror )
+   if ( $mysqlerror )
    {
       echo "<p>Error: ".textarea_safe($mysqlerror)."</p>";
       return -1;
    }
 
-   if( !$result )
+   if ( !$result )
       return 0;
 
    $numrows = @mysql_num_rows($result);
-   if( $numrows<=0 )
+   if ( $numrows<=0 )
    {
       @mysql_free_result( $result);
       return 0;
@@ -144,16 +144,16 @@ function insert_values( $table, $names, $query, $title=false)
 
    $hdrs = explode(',',$names);
    $text = '';
-   while( $row = mysql_fetch_assoc( $result ) )
+   while ( $row = mysql_fetch_assoc( $result ) )
    {
       $str = '';
       $sep = '';
-      foreach( $hdrs as $key )
+      foreach ( $hdrs as $key )
       {
          $str.= $sep.safe_value(@$row[$key]);
          $sep = ',';
       }
-      if( $str )
+      if ( $str )
       {
          $text.= $rowbeg.$str.$rowend;
       }
@@ -166,13 +166,13 @@ INSERT INTO TranslationTexts
       (5,'Move outside board?','FAQ','Y', ... ),
       (...);
 */
-   if( $text )
+   if ( $text )
       $text = CR."INSERT INTO "
          . quoteit( $table, ( QUOTE_NAME ? QUOTE :'') )
          . CRINDENT."($names) VALUES"
          . substr( $text, 0, -1) .";";
 
-   if( $title !== false )
+   if ( $title !== false )
       $text = comment_block( $title).$text.CR;
 
    return $text;
@@ -181,15 +181,15 @@ INSERT INTO TranslationTexts
 function multi_insert_values( $tables, $title=false, $rowmod=0)
 {
    $text = '';
-   foreach( $tables as $table => $clauses )
+   foreach ( $tables as $table => $clauses )
    {
       $rowmod = ($rowmod % LIST_ROWS_MODULO)+1;
       @list($fields, $where, $order) = $clauses;
-      if( $where )
+      if ( $where )
          $where = ' WHERE '.$where;
       else
          $where = '';
-      if( $order )
+      if ( $order )
          $order = ' ORDER BY '.$order;
       else
          $order = '';
@@ -210,9 +210,9 @@ function after_table( $table)
    global $dumptype;
    $str = '';
 
-   if( (string)$dumptype == 'init' )
+   if ( (string)$dumptype == 'init' )
    {
-      switch((string)$table)
+      switch ((string)$table)
       {
          case 'Players': //'Statistics':
 /*
@@ -254,7 +254,7 @@ function get_tables( $database)
 {
    global $dumptype;
 
-   if( $dumptype == 'init' )
+   if ( $dumptype == 'init' )
    {
       $tables = array (
             'Adminlog',
@@ -333,14 +333,14 @@ function get_tables( $database)
             or die(mysql_error());
 
       $mysqlerror = @mysql_error();
-      if( $mysqlerror )
+      if ( $mysqlerror )
       {
          echo "<p>Error: ".textarea_safe($mysqlerror)."</p>";
          return -1;
       }
 
       $tables = array();
-      while( list($row) = mysql_fetch_row( $result ) )
+      while ( list($row) = mysql_fetch_row( $result ) )
          $tables[] = $row;
       mysql_free_result($result);
       sort( $tables);
@@ -359,7 +359,7 @@ $defs_rep= array(); // repair defs_rep[table][field][regex] = replacement
 //those are the default values of older versions
 // Date timestamp NOT NULL default CURRENT_TIMESTAMP on update CURRENT_TIMESTAMP,
 // Date timestamp(14) NOT NULL,
-foreach( array(
+foreach ( array(
    'Adminlog',
    'Errorlog',
    'Translationlog',
@@ -386,31 +386,31 @@ function definitions_fix( $table, $keys)
 
    //move columns
    $ary = array();
-   foreach( $keys as $str )
+   foreach ( $keys as $str )
    {
       $row = def_split($str);
       $name = $row[0];
       $ary[$name][]= $str;
    }
-   foreach( array('defs_bef','defs_aft') as $mov )
+   foreach ( array('defs_bef','defs_aft') as $mov )
    {
-      if( isset(${$mov}[$table]) )
+      if ( isset(${$mov}[$table]) )
       {
-         foreach( ${$mov}[$table] as $src => $dst )
+         foreach ( ${$mov}[$table] as $src => $dst )
          {
             $keys = array();
             $tmp = 0;
-            foreach( $ary as $name => $row )
+            foreach ( $ary as $name => $row )
             {
-               if( $name == $src )
+               if ( $name == $src )
                   continue;
-               if( $name != $dst )
+               if ( $name != $dst )
                {
                   $keys[$name]= $row;
                   continue;
                }
                $tmp = 1;
-               if( $mov == 'defs_bef' )
+               if ( $mov == 'defs_bef' )
                {
                   $keys[$src]= $ary[$src];
                   $keys[$name]= $row;
@@ -421,23 +421,23 @@ function definitions_fix( $table, $keys)
                   $keys[$src]= $ary[$src];
                }
             }
-            if( $tmp )
+            if ( $tmp )
                $ary = $keys;
          }
       }
    }
    $keys = array();
-   foreach( $ary as $name => $row )
+   foreach ( $ary as $name => $row )
    {
-      foreach( $row as $str )
+      foreach ( $row as $str )
       {
-         foreach( array($table,'*') as $tbl )
+         foreach ( array($table,'*') as $tbl )
          {
-            foreach( array($name,'*') as $nam )
+            foreach ( array($name,'*') as $nam )
             {
-               if( isset($defs_rep[$tbl]) && isset($defs_rep[$tbl][$nam]) )
+               if ( isset($defs_rep[$tbl]) && isset($defs_rep[$tbl][$nam]) )
                {
-                  foreach( $defs_rep[$tbl][$nam] as $rgx => $rep )
+                  foreach ( $defs_rep[$tbl][$nam] as $rgx => $rep )
                      $str= preg_replace($rgx, $rep, $str);
                }
             }
@@ -449,22 +449,22 @@ function definitions_fix( $table, $keys)
 
    //misc adjusts
    $defs = array();
-   foreach( $keys as $str )
+   foreach ( $keys as $str )
    {
       $row = def_split($str);
       $name = $row[0];
 
       /*
-      if( (string)$table == 'Posts' )
+      if ( (string)$table == 'Posts' )
       {
-         if( (string)$name == 'KEY' ) //can't have this option with older versions
+         if ( (string)$name == 'KEY' ) //can't have this option with older versions
          {
-            if( $row[1] == 'SomeFieldName' )
+            if ( $row[1] == 'SomeFieldName' )
                $str = eregi_replace('Time DESC','Time',$str); // do something
          }
       }
       */
-      if( $str )
+      if ( $str )
          $defs[] = $str;
    }
    return $defs;
@@ -472,14 +472,14 @@ function definitions_fix( $table, $keys)
 
 function quoteit( $mixed, $quote='`')
 {
-   if( is_array( $mixed) )
+   if ( is_array( $mixed) )
    {
       $result = array();
-      foreach( $mixed AS $key => $val)
+      foreach ( $mixed AS $key => $val)
          $result[$key] = quoteit( $val);
       return $result;
    }
-   if( !empty($mixed) || is_numeric($mixed) )
+   if ( !empty($mixed) || is_numeric($mixed) )
       return $quote . trim($mixed, " '`$quote") . $quote;
    return $mixed;
 } //quoteit
@@ -502,7 +502,7 @@ function fdate( $sdat)
 {
    $fmt= 'Y-m-d H:i:s \G\M\T'; //O e
 
-   if( is_string( $sdat) )
+   if ( is_string( $sdat) )
       $sdat = strtotime($sdat);
    return date( $fmt, $sdat); //date gmdate
 } //fdate
@@ -514,7 +514,7 @@ function dump2html( $str)
    //$str = textarea_safe( $str ); TODO
    $str = textarea_safe( $str, 'ISO-8859-1' );
 
-   if( HTML_PRE )
+   if ( HTML_PRE )
    {
       $str = trim( $str);
    }
@@ -530,17 +530,17 @@ function echoTR( $typ, $str)
 {
    global $export_it;
 
-   if( !$str)
+   if ( !$str)
       return $str;
 
-   if( $export_it )
+   if ( $export_it )
       return BLOCKBEG. trim($str) .BLOCKEND;
 
-   switch((string)$typ)
+   switch ((string)$typ)
    {
       case 'th':
       case 'td':
-         if( HTML_PRE )
+         if ( HTML_PRE )
             $str= "<pre>\n" . dump2html( $str) . "\n</pre>";
          else
             $str= "<br>\n" . dump2html( $str) . "\n<br>";
@@ -548,7 +548,7 @@ function echoTR( $typ, $str)
          break;
 
       default:
-         if( HTML_PRE )
+         if ( HTML_PRE )
             $str= "<pre>\n" . dump2html( $str) . "\n</pre>";
          else
             $str= "<br>\n" . dump2html( $str) . "\n<br>";
@@ -614,35 +614,35 @@ class dbTable
 
       $query = 'SHOW TABLE STATUS FROM ' . $this->qdatabase
              . ' LIKE \'' . $this->uname . '\'';
-      if( $row=mysql_single_fetch( false, $query) )
+      if ( $row=mysql_single_fetch( false, $query) )
       {
 
-         if( !@$row['Engine'] && @$row['Type'] )
+         if ( !@$row['Engine'] && @$row['Type'] )
             $row['Engine']= $row['Type'];
-         if( @$row['Engine'] )
+         if ( @$row['Engine'] )
          {
             $ok = 1;
             $this->engine = $row['Engine'];
-            if( AUTO_INCREMENT && @$row['Auto_increment'] )
+            if ( AUTO_INCREMENT && @$row['Auto_increment'] )
                $incr = ' AUTO_INCREMENT=' . $row['Auto_increment'];
 
-            if( CREATE_TIME && @$row['Create_time'] ) //also 'Update_time'
+            if ( CREATE_TIME && @$row['Create_time'] ) //also 'Update_time'
                $comment .= 'Created: '.fdate( $row['Create_time']).chr(10);
 
-            if( CREATE_OPTION && @$row['Create_options'] )
+            if ( CREATE_OPTION && @$row['Create_options'] )
             {
                $opts = $row['Create_options'];
                $opts = strtoupper(trim($opts));
-               if( $opts )
+               if ( $opts )
                   $opts = ' ' . $opts;
             }
          }
       }
 
-      if( !$ok )
+      if ( !$ok )
       {
          $comment.= 'Not found.'.chr(10);
-         if( @$GLOBALS['Super_admin'] )
+         if ( @$GLOBALS['Super_admin'] )
          {
             $comment.= "QUERY: ".$query.chr(10);
          }
@@ -652,15 +652,15 @@ class dbTable
            comment_block( 'Table structure for table '.quoteit( $this->uname, QUOTE)
                .chr(10).$comment);
 
-      if( $ok )
+      if ( $ok )
       {
-         if( DROP_TABLE )
+         if ( DROP_TABLE )
             $head.= 'DROP TABLE IF EXISTS '.$this->qname.';'.CR;
 
          mysql_query('SET SQL_QUOTE_SHOW_CREATE='
             . ( QUOTE_NAME ?'1' :'0') ) or die(mysql_error());
 
-         if( !($body = $this->structure_body()) )
+         if ( !($body = $this->structure_body()) )
             $body = 'Error: body';
 
          $struct.= CR.
@@ -687,42 +687,42 @@ class dbTable
    function structure_body()
    {
       $body = '';
-      if( $row=mysql_single_fetch( false,
+      if ( $row=mysql_single_fetch( false,
              'SHOW CREATE TABLE ' . $this->qpath
            , FETCHTYPE_ARRAY) )
       {
-         if( !($str=@$row['Create Table']) )
+         if ( !($str=@$row['Create Table']) )
             $str = @$row[1];
-         if( !$str ) return '';
+         if ( !$str ) return '';
 
          //find the inner text of external parentheses
-         if( preg_match( '%^[^\\(]*\\((.*)\\)[^\\)]*$%s'
+         if ( preg_match( '%^[^\\(]*\\((.*)\\)[^\\)]*$%s'
                        , $str, $row) <= 0 )
             return '';
 
          $str = trim( preg_replace('%[\t ]+%', ' '
                      , adj_eol(@$row[1], chr(10))));
-         if( !$str ) return '';
+         if ( !$str ) return '';
 
          $keys = explode( chr(10), $str);
-         if( !DEFINITION_ORIG )
+         if ( !DEFINITION_ORIG )
             $keys = definitions_fix( $this->uname, $keys);
          $defs = array();
-         if( DEFINITION_SORT )
+         if ( DEFINITION_SORT )
          {
             $ary = array();
             $spc = array();
-            foreach( $keys as $str )
+            foreach ( $keys as $str )
             {
                $row = explode(' ', $str, 2); //def_split($str);
-               if( array_key_exists( @$row[0], $this->keywords) )
+               if ( array_key_exists( @$row[0], $this->keywords) )
                   $ary[$str] = $this->keywords[$row[0]].$str;
-               else if( eregi('auto_increment', $str) )//( @$row[0] == 'ID' )
+               else if ( eregi('auto_increment', $str) )//( @$row[0] == 'ID' )
                   $defs[] = $str;
                else
                   $spc[] = $str;
             }
-            if( DEFINITION_SORT )
+            if ( DEFINITION_SORT )
             {
                asort($defs);
                asort($spc);
@@ -735,11 +735,11 @@ class dbTable
 
          $spc = '   ';
          $str = '';
-         foreach( array('defs','keys') as $ary )
-            if( count($$ary) )
+         foreach ( array('defs','keys') as $ary )
+            if ( count($$ary) )
          {
             $$ary = implode(CR.$spc, $$ary);
-            if( !QUOTE_NAME )
+            if ( !QUOTE_NAME )
                $$ary = str_replace('`', '', $$ary);
             $str.= $spc.$$ary.CR;
             //$str.= comment_line( '----')
@@ -764,7 +764,7 @@ function dump_header( $database)
    $str.= "PHP version: ".@phpversion().chr(10);
    $str.= sprintf("MySQL version: %s (%s)",READ_MYSQL_VERSION,MYSQL_VERSION).chr(10);
 
-   if( 0 && @$GLOBALS['Super_admin'] )
+   if ( 0 && @$GLOBALS['Super_admin'] )
    {
       $str.= "MYSQLUSER: ".@$GLOBALS['MYSQLUSER'].chr(10);
       $str.= "MYSQLPASSWORD: ".@$GLOBALS['MYSQLPASSWORD'].chr(10);
@@ -776,7 +776,7 @@ function dump_header( $database)
 function init_dump( $database)
 {
    $tables = get_tables( $database);
-   if( !is_array($tables) )
+   if ( !is_array($tables) )
       return '';
 
    asort($tables);
@@ -785,7 +785,7 @@ function init_dump( $database)
    $text = echoTR( 'th', $text);
 
    $c=0;
-   foreach( $tables as $table)
+   foreach ( $tables as $table)
    {
       $c=($c % LIST_ROWS_MODULO)+1;
       $tbl = new dbTable( $database, $table);
@@ -869,13 +869,13 @@ function language_dump( $database, $lang, $header=true)
 {
    global $lang_desc;
 
-   if( $header === true )
+   if ( $header === true )
       $text = dump_header( $database);
-   else if( is_string($header) )
+   else if ( is_string($header) )
       $text = trim($header);
    else
       $text = '';
-   if( $text )
+   if ( $text )
       $text = echoTR( 'th', $text);
 
    $langname = @$lang_desc[$lang];
@@ -884,7 +884,7 @@ function language_dump( $database, $lang, $header=true)
    $title = "Datas for language: $langname ($lang)";
 
    $query = "SELECT ID FROM TranslationLanguages WHERE Language='$lang'";
-   if( ($row=mysql_single_fetch( false, $query))
+   if ( ($row=mysql_single_fetch( false, $query))
          && @$row['ID'] > 0 )
       $langID = $row['ID'];
    else
@@ -915,13 +915,13 @@ function freesql_dump( $database, $query)
    $result = mysql_query( $query);
 
    $mysqlerror = @mysql_error();
-   if( $mysqlerror )
+   if ( $mysqlerror )
    {
       $title .= chr(10)."Error: ".textarea_safe($mysqlerror);
       return echoTR('th', comment_block( $title));
    }
 
-   if( !$result )
+   if ( !$result )
    {
       $title .= chr(10)."Error: Fail";
       return echoTR('th', comment_block( $title));
@@ -929,7 +929,7 @@ function freesql_dump( $database, $query)
 
    $numrows = @mysql_num_rows($result);
    $title .= chr(10)." => $numrows rows";
-   if( $numrows<=0 )
+   if ( $numrows<=0 )
    {
       @mysql_free_result( $result);
       return echoTR('th', comment_block( $title));
@@ -940,12 +940,12 @@ function freesql_dump( $database, $query)
    $text = '';
    $n=0;
    $c=0;
-   while( $row = mysql_fetch_assoc( $result ) )
+   while ( $row = mysql_fetch_assoc( $result ) )
    {
       $n++;
       $c=($c % LIST_ROWS_MODULO)+1;
 
-      if( !isset($hdrs) )
+      if ( !isset($hdrs) )
       {
          $hdrs = array_keys( $row);
          $col = count($hdrs);
@@ -956,9 +956,9 @@ function freesql_dump( $database, $query)
       $str = '';
       $sep = '';
       $rnam= '';
-      foreach( $hdrs as $key )
+      foreach ( $hdrs as $key )
       {
-         if( !$rnam )
+         if ( !$rnam )
             $rnam= basic_safe(trim(@$row[$key]));
          $str.= $sep.safe_value(@$row[$key]);
          $sep = '</td><td>';
@@ -968,7 +968,7 @@ function freesql_dump( $database, $query)
    }
    mysql_free_result($result);
 
-   if( $title !== false )
+   if ( $title !== false )
       $text = "<tr><td colspan=$col><pre>"
          .dump2html(comment_block( $title))
          .'</pre></td></tr>'.CR.$text;
@@ -985,14 +985,14 @@ function freesql_dump( $database, $query)
    $logged_in = who_is_logged( $player_row);
    setTZ('GMT');
 
-   if( !$logged_in )
+   if ( !$logged_in )
       error('login_if_not_logged_in', 'scripts.data_export');
-   if( $player_row['ID'] <= GUESTS_ID_MAX )
+   if ( $player_row['ID'] <= GUESTS_ID_MAX )
       error('not_allowed_for_guest', 'scripts.data_export');
-   if( !(@$player_row['admin_level'] & ADMIN_DATABASE) )
+   if ( !(@$player_row['admin_level'] & ADMIN_DATABASE) )
       error('adminlevel_too_low', 'scripts.data_export');
 
-   if( is_array($ARR_USERS_MAINTENANCE) && in_array( $player_row['Handle'], $ARR_USERS_MAINTENANCE ) )
+   if ( is_array($ARR_USERS_MAINTENANCE) && in_array( $player_row['Handle'], $ARR_USERS_MAINTENANCE ) )
       $Super_admin = true;
    else
       $Super_admin = false;
@@ -1000,7 +1000,7 @@ function freesql_dump( $database, $query)
    //FIXME UTF-8 makes problems, see dump2html()-func !!
    $encoding_used= get_request_arg( 'charset', 'UTF-8'); //LANG_DEF_CHARSET iso-8859-1 UTF-8
 
-   if( $row=mysql_single_fetch( false, 'SELECT VERSION() AS version') )
+   if ( $row=mysql_single_fetch( false, 'SELECT VERSION() AS version') )
    {
       define('READ_MYSQL_VERSION', $row['version']);
 /*
@@ -1024,13 +1024,13 @@ function freesql_dump( $database, $query)
          'init' => 'init.mysql',
          'transl' => 'translationdata.mysql',
       );
-   foreach( $lang_desc as $lang => $langname )
+   foreach ( $lang_desc as $lang => $langname )
    {
       $dumptypes['lang.'.$lang] = "translationdata.$lang.mysql";
    }
 
    $dumptype = trim(get_request_arg('dumptype'));
-   if( !array_key_exists( $dumptype, $dumptypes) )
+   if ( !array_key_exists( $dumptype, $dumptypes) )
       $dumptype= '';
 
    $show_it= @$_REQUEST['show_it'];
@@ -1044,7 +1044,7 @@ function freesql_dump( $database, $query)
    $row = explode('.', $dumptype, 2);
    $export_file = $dumptypes[$dumptype];
    $text = '';
-   if( @$GLOBALS['Super_admin'] && $freesql_it && $freesql )
+   if ( @$GLOBALS['Super_admin'] && $freesql_it && $freesql )
    {
       $text = freesql_dump( DB_NAME, $freesql);
       $show_it = true;
@@ -1053,7 +1053,7 @@ function freesql_dump( $database, $query)
    }
    else
    {
-      switch( (string)$row[0] )
+      switch ( (string)$row[0] )
       {
          case 'init':
             $text = init_dump( DB_NAME);
@@ -1070,7 +1070,7 @@ function freesql_dump( $database, $query)
 
    //====================
 
-   if( $export_it && $text && $export_file )
+   if ( $export_it && $text && $export_file )
    {
       $export_file= FRIENDLY_SHORT_NAME.'-'.$export_file;
 
@@ -1124,7 +1124,7 @@ function freesql_dump( $database, $query)
       'HIDDEN', 'charset', $encoding_used,
       ) );
 
-   if( @$GLOBALS['Super_admin'] )
+   if ( @$GLOBALS['Super_admin'] )
    {
       $dform->add_empty_row();
       $dform->add_row( array(
@@ -1141,7 +1141,7 @@ function freesql_dump( $database, $query)
 
    //====================
 
-   if( $show_it && $text)
+   if ( $show_it && $text)
    {
       echo "\n<table class=Table cellpadding=4 cellspacing=1>\n"
          . $text ."</table>\n";

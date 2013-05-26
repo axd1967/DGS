@@ -32,9 +32,9 @@ require_once 'features/lib_votes.php';
    connect2mysql();
 
    $logged_in = who_is_logged( $player_row);
-   if( !$logged_in )
+   if ( !$logged_in )
       error('login_if_not_logged_in', 'list_votes');
-   if( !ALLOW_FEATURE_VOTE )
+   if ( !ALLOW_FEATURE_VOTE )
       error('feature_disabled', 'list_votes');
 
    $my_id = (int)$player_row['ID'];
@@ -100,38 +100,38 @@ require_once 'features/lib_votes.php';
    echo "<h3 class=Header>$title</h3>\n";
 
 
-   while( ($row = mysql_fetch_assoc( $result )) && $show_rows-- > 0 )
+   while ( ($row = mysql_fetch_assoc( $result )) && $show_rows-- > 0 )
    {
       $feature = Feature::new_from_row($row);
       $ID = $feature->id;
       $allow_vote = ( $user_can_vote && $feature->allow_vote() );
 
       $frow_strings = array();
-      if( $vtable->Is_Column_Displayed[ 1] )
+      if ( $vtable->Is_Column_Displayed[ 1] )
       {
          $url = "{$base_path}features/vote_feature.php?fid=$ID";
          $frow_strings[1] = button_TD_anchor( $url, $ID,
                ( $allow_vote ? T_('Vote') : T_('View vote') ));
       }
-      if( $vtable->Is_Column_Displayed[3] )
+      if ( $vtable->Is_Column_Displayed[3] )
          $frow_strings[3] = $feature->status;
-      if( $vtable->Is_Column_Displayed[4] )
+      if ( $vtable->Is_Column_Displayed[4] )
          $frow_strings[4] = make_html_safe( wordwrap($feature->subject,FEAT_SUBJECT_WRAPLEN), true, $rx_term);
 
       // FeatureVote-fields
-      if( $vtable->Is_Column_Displayed[10] )
+      if ( $vtable->Is_Column_Displayed[10] )
          $frow_strings[10] = FeatureVote::formatPoints( $row['sumPoints'] );
-      if( $vtable->Is_Column_Displayed[11] )
+      if ( $vtable->Is_Column_Displayed[11] )
          $frow_strings[11] = $row['countVotes'];
-      if( $vtable->Is_Column_Displayed[12] )
+      if ( $vtable->Is_Column_Displayed[12] )
          $frow_strings[12] = $row['countYes'];
-      if( $vtable->Is_Column_Displayed[13] )
+      if ( $vtable->Is_Column_Displayed[13] )
          $frow_strings[13] = $row['countNo'];
-      if( $vtable->Is_Column_Displayed[14] )
+      if ( $vtable->Is_Column_Displayed[14] )
          $frow_strings[14] = $feature->size;
-      if( $vtable->Is_Column_Displayed[15] )
+      if ( $vtable->Is_Column_Displayed[15] )
       {
-         if( is_numeric($row['myPoints']) )
+         if ( is_numeric($row['myPoints']) )
             $frow_strings[15] = FeatureVote::formatPoints($row['myPoints']);
          else
          {
@@ -157,7 +157,7 @@ require_once 'features/lib_votes.php';
    $menu_array[T_('My feature votes')] = "features/list_features.php?status=3".URI_AMP.'my_vote=2';
    $menu_array[T_('All features')]     = "features/list_features.php?status=3".URI_AMP.'my_vote=0';
    $menu_array[T_('Feature Vote Results')] = "features/list_votes.php";
-   if( Feature::is_admin() )
+   if ( Feature::is_admin() )
       $menu_array[T_('Add new feature')] =
          array( 'url' => "features/edit_feature.php", 'class' => 'AdminLink' );
 

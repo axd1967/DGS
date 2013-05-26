@@ -37,11 +37,11 @@ define('UNBUF_TIMOUT', 0); //x seconds limit. 0 to disable.
    connect2mysql();
 
    $logged_in = who_is_logged( $player_row);
-   if( !$logged_in )
+   if ( !$logged_in )
       error('login_if_not_logged_in', 'scripts.data_report');
-   if( $player_row['ID'] <= GUESTS_ID_MAX )
+   if ( $player_row['ID'] <= GUESTS_ID_MAX )
       error('not_allowed_for_guest', 'scripts.data_report');
-   if( !(@$player_row['admin_level'] & ADMIN_DATABASE) )
+   if ( !(@$player_row['admin_level'] & ADMIN_DATABASE) )
       error('adminlevel_too_low', 'scripts.data_report');
 
 
@@ -52,7 +52,7 @@ define('UNBUF_TIMOUT', 0); //x seconds limit. 0 to disable.
    $colwrap= get_request_arg( 'colwrap', 'cut');
 
    $oldquery= urldecode(get_request_arg( 'oldquery', ''));
-   if( UNBUF_TIMOUT > 0 )
+   if ( UNBUF_TIMOUT > 0 )
       $unbuffered= (int)(bool)get_request_arg( 'unbuffered', '');
    else
       $unbuffered= 0;
@@ -70,7 +70,7 @@ define('UNBUF_TIMOUT', 0); //x seconds limit. 0 to disable.
       'order'  => array('word'=>'ORDER BY'),
       'limit'  => array('word'=>'LIMIT'),
       );
-   foreach( $arg_array as $arg => $ary)
+   foreach ( $arg_array as $arg => $ary)
    {
       $$arg= trim(get_request_arg($arg));
    }
@@ -99,14 +99,14 @@ define('UNBUF_TIMOUT', 0); //x seconds limit. 0 to disable.
    $dbtimout= UNBUF_TIMOUT;
    $dbthread= false;
    $dbcnxctl= false;
-   if( $unbuffered )
+   if ( $unbuffered )
    {
       //$dbthread = mysql_thread_id( $dbcnx); //PHP4 >= 4.3.0
-      for(;;) {
+      for (;;) {
          $result= mysql_query('SHOW PROCESSLIST', $dbcnx);
          $mysqlerror = @mysql_error();
          $numrows = @mysql_num_rows($result);
-         if( $mysqlerror || !$result || $numrows != 1 )
+         if ( $mysqlerror || !$result || $numrows != 1 )
          {
             echo "<p>Error: find thread $numrows=".textarea_safe($mysqlerror)."</p>";
             break;
@@ -118,7 +118,7 @@ define('UNBUF_TIMOUT', 0); //x seconds limit. 0 to disable.
          $result= mysql_query("SHOW VARIABLES LIKE 'long_query_time'", $dbcnx);
          $mysqlerror = @mysql_error();
          $numrows = @mysql_num_rows($result);
-         if( $mysqlerror || !$result || $numrows != 1 )
+         if ( $mysqlerror || !$result || $numrows != 1 )
          {
             echo "<p>Error: find timeout $numrows=".textarea_safe($mysqlerror)."</p>";
             break;
@@ -126,7 +126,7 @@ define('UNBUF_TIMOUT', 0); //x seconds limit. 0 to disable.
          $row = mysql_fetch_assoc( $result);
          $tmp = (float)@$row['Value']-1;
          mysql_free_result( $result);
-         if( $tmp>0 && $tmp<$dbtimout )
+         if ( $tmp>0 && $tmp<$dbtimout )
             $dbtimout= $tmp;
 
          //if( echo_query( 'SHOW VARIABLES', 'query_svar', 0, 0, 0, 0) < 0 ) break;
@@ -134,7 +134,7 @@ define('UNBUF_TIMOUT', 0); //x seconds limit. 0 to disable.
 
          break;
       }
-      if( !$dbthread )
+      if ( !$dbthread )
       {
          @mysql_close( $dbcnx);
          error('mysql_connect_failed', "data_report.dbthread($dbthread)");
@@ -142,7 +142,7 @@ define('UNBUF_TIMOUT', 0); //x seconds limit. 0 to disable.
 
       //add a controller link
       $dbcnxctl = mysql_connect( MYSQLHOST, MYSQLUSER, MYSQLPASSWORD, true );
-      if( !$dbcnxctl )
+      if ( !$dbcnxctl )
       {
          @mysql_close( $dbcnx);
          error('mysql_connect_failed', 'data_report.dbcnxctl');
@@ -154,14 +154,14 @@ define('UNBUF_TIMOUT', 0); //x seconds limit. 0 to disable.
    $dform = new Form('dform', 'data_report.php#result', FORM_POST, true );
    $query= '';
    $uri= '';
-   foreach( $arg_array as $arg => $ary )
+   foreach ( $arg_array as $arg => $ary )
    {
       $word= $ary['word'];
       $tmp= ($word == 'LEFT JOIN' ?$word.'<BR>(including ON)' :$word);
       $n= max(1,@$ary['size']);
       $dform->add_row( array( 'DESCRIPTION', $tmp,
                               'TEXTAREA', $arg, 120, $n, $$arg ) );
-      if( $select && $$arg )
+      if ( $select && $$arg )
       {
          $query.= $word . ' ' . $$arg . ' ';
          $uri.= $arg . '=' . urlencode($$arg) . URI_AMP;
@@ -170,7 +170,7 @@ define('UNBUF_TIMOUT', 0); //x seconds limit. 0 to disable.
    $formcol= 2;
 
    $query= trim($query);
-   if( $select && $query )
+   if ( $select && $query )
    {
       list($protocol) = explode(HOSTNAME, HOSTBASE);
       $uri= $protocol . HOSTNAME . @$_SERVER['PHP_SELF'] . '?' . $uri;
@@ -180,9 +180,9 @@ define('UNBUF_TIMOUT', 0); //x seconds limit. 0 to disable.
       $uri.= 'apply=1#result';
    }
 
-   if( $apply )
+   if ( $apply )
    {
-      if( $query && $query == $oldquery )
+      if ( $query && $query == $oldquery )
          $execute = 1;
       else
          $execute = 0;
@@ -200,7 +200,7 @@ define('UNBUF_TIMOUT', 0); //x seconds limit. 0 to disable.
       'RADIOBUTTONS', 'colwrap'
          , array('cut'=>'cut','wrap'=>'wrap','none'=>'none',), $colwrap,
       );
-   if( UNBUF_TIMOUT > 0 )
+   if ( UNBUF_TIMOUT > 0 )
       array_push( $row,
          'TEXT', '&nbsp;&nbsp;&nbsp;',
          'CHECKBOX', 'unbuffered', 1, 'Unbuffered', $unbuffered
@@ -215,17 +215,17 @@ define('UNBUF_TIMOUT', 0); //x seconds limit. 0 to disable.
    echo "<p>&nbsp;</p>\n";
 
 
-   if( $query )
+   if ( $query )
    {
       echo 'Query&gt; ' . anchor( $uri, textarea_safe($query).';') . "&nbsp;<br>\n";
       //echo "&nbsp;<br>\n";
    }
 
    echo "<div id='result'>\n";
-   while( $apply && $query )
+   while ( $apply && $query )
    {
       $apply=0;
-      if( $execute )
+      if ( $execute )
       {
          //maybe, test the LIMIT params and force $qryunbuf:
          $qryunbuf = $unbuffered;
@@ -233,10 +233,10 @@ define('UNBUF_TIMOUT', 0); //x seconds limit. 0 to disable.
          $n= echo_query( $query, 'query_result'
                         , $qryunbuf, $rowhdr, $colsize, $colwrap);
 
-         if( $n < 0 )
+         if ( $n < 0 )
             break;
 
-         if( is_array($n) )
+         if ( is_array($n) )
          {
             list( $tmp,$qrytime) = $n;
             $n = $tmp;
@@ -255,7 +255,7 @@ define('UNBUF_TIMOUT', 0); //x seconds limit. 0 to disable.
             . ",'" . gmdate('Y-m-d H:i:s', $NOW) . "' as 'GMT time'"
             //. ",'".mysql_info()."' as 'Infos'"
             ;
-         if( echo_query( $s, 'query_info', 0, 0, 0, 0) < 0 ) break;
+         if ( echo_query( $s, 'query_info', 0, 0, 0, 0) < 0 ) break;
 
       }
       else
@@ -263,7 +263,7 @@ define('UNBUF_TIMOUT', 0); //x seconds limit. 0 to disable.
          echo "<span>>>> Just EXPLAIN</span>";
       }
 
-      if( echo_query( 'EXPLAIN '.$query, 'query_explain', 0, 0, 0, 0) < 0 ) break;
+      if ( echo_query( 'EXPLAIN '.$query, 'query_explain', 0, 0, 0, 0) < 0 ) break;
 
       echo 'Query&gt; ' . anchor( $uri, textarea_safe($query).';') . "&nbsp;<br>\n";
    }
@@ -279,22 +279,22 @@ function echo_query( $query, $qid='', $unbuffered=false, $rowhdr=20, $colsize=40
 
    $info= '';
 
-   if( !$dbcnxctl || !$dbthread )
+   if ( !$dbcnxctl || !$dbthread )
       $unbuffered= false;
 
    //kill sensible fields from a query like "SELECT Password as pwd FROM Players"
-   if( !@$GLOBALS['Super_admin'] )
+   if ( !@$GLOBALS['Super_admin'] )
       $query= preg_replace("%(Password|Sessioncode|Email)%is", "***", $query);
 
    $table = array();
    $numrows = 0;
    $qrytime = getmicrotime();
-   if( $unbuffered && $dbtimout<=0 )
+   if ( $unbuffered && $dbtimout<=0 )
    {
       $info = "#Time > ${dbtimout}s";
       $qrytime = 0;
    }
-   else if( $unbuffered )
+   else if ( $unbuffered )
    {
       $qrytout = $qrytime + $dbtimout; //in second
       $rowtime = getmicrotime();
@@ -302,17 +302,17 @@ function echo_query( $query, $qid='', $unbuffered=false, $rowhdr=20, $colsize=40
 
 /*
       $mysqlerror = @mysql_error( $dbcnx);
-      if( $mysqlerror )
+      if ( $mysqlerror )
       {
          echo "<p>Error: ".textarea_safe($mysqlerror)."</p>";
          return -1;
       }
 */
 
-      if( !$result )
+      if ( !$result )
          return 0;
 
-      while( $row = mysql_fetch_assoc( $result) )
+      while ( $row = mysql_fetch_assoc( $result) )
       {
          $tmp= $rowtime;
          $rowtime= getmicrotime();
@@ -320,7 +320,7 @@ function echo_query( $query, $qid='', $unbuffered=false, $rowhdr=20, $colsize=40
          $table[] = $row;
          $numrows++;
 
-         if( $rowtime > $qrytout )
+         if ( $rowtime > $qrytout )
          {
             // this is taking too long
             mysql_query("KILL $dbthread", $dbcnxctl);
@@ -331,7 +331,7 @@ function echo_query( $query, $qid='', $unbuffered=false, $rowhdr=20, $colsize=40
       $qrytime = round((getmicrotime() - $qrytime) * 1e3, 2);
       mysql_free_result( $result);
 
-      if( $numrows<=0 )
+      if ( $numrows<=0 )
          return array(0,$qrytime);
    }
    else //buffered
@@ -340,23 +340,23 @@ function echo_query( $query, $qid='', $unbuffered=false, $rowhdr=20, $colsize=40
       $qrytime = round((getmicrotime() - $qrytime) * 1e3, 2);
 
       $mysqlerror = @mysql_error();
-      if( $mysqlerror )
+      if ( $mysqlerror )
       {
          echo "<p id=query_error>Error: ".textarea_safe($mysqlerror)."</p>";
          return -1;
       }
 
-      if( !$result )
+      if ( !$result )
          return 0;
 
       $numrows = @mysql_num_rows($result);
-      if( $numrows<=0 )
+      if ( $numrows<=0 )
       {
          @mysql_free_result( $result);
          return array(0,$qrytime);
       }
 
-      while( $row = mysql_fetch_assoc( $result) )
+      while ( $row = mysql_fetch_assoc( $result) )
          $table[] = $row;
 
       mysql_free_result( $result);
@@ -366,49 +366,49 @@ function echo_query( $query, $qid='', $unbuffered=false, $rowhdr=20, $colsize=40
    $c=0;
    $i=0;
    $ncol= 0;
-   if( $qid>'' )
+   if ( $qid>'' )
       $qid = " id='$qid'";
    else
       $qid = '';
    echo "\n<table$qid class=Table title='$numrows rows'>\n";
-   foreach( $table as $row )
+   foreach ( $table as $row )
    {
       $c=($c % LIST_ROWS_MODULO)+1;
       $i++;
-      if( $i==1 or ($rowhdr>1 && ($i%$rowhdr)==1) )
+      if ( $i==1 or ($rowhdr>1 && ($i%$rowhdr)==1) )
       {
          $ncol= 0;
          echo "<tr class=Head>\n";
-         foreach( $row as $key => $val )
+         foreach ( $row as $key => $val )
          {
             echo "<th>$key</th>";
             $ncol++;
          }
          echo "\n</tr>";
       }
-      if( is_javascript_enabled() )
+      if ( is_javascript_enabled() )
          echo "<tr class=Row$c ondblclick=\"toggle_class(this,'Row$c','HilRow$c')\">\n";
       else
          echo "<tr class=Row$c>\n";
-      foreach( $row as $key => $val )
+      foreach ( $row as $key => $val )
       {
          //remove sensible fields from a query like "SELECT * FROM Players"
-         if( !@$GLOBALS['Super_admin'] )
-         switch( (string)$key )
+         if ( !@$GLOBALS['Super_admin'] )
+         switch ( (string)$key )
          {
             case 'Newpassword':
             case 'Password':
             case 'Sessioncode':
             case 'Email':
-               if( $val ) $val= '***';
+               if ( $val ) $val= '***';
                break;
             case 'Debug':
-               if( $val && !@$GLOBALS['Super_admin'] )
+               if ( $val && !@$GLOBALS['Super_admin'] )
                   $val= preg_replace("%(passwd=)[^&]*%is", "\\1***", $val);
                break;
          }
 
-         if( !isset($val) )
+         if ( !isset($val) )
          {
             $val= '';
             $class= ' class="Null"';
@@ -419,18 +419,18 @@ function echo_query( $query, $qid='', $unbuffered=false, $rowhdr=20, $colsize=40
             $class= '';
          }
 
-         if( $colsize>0 )
+         if ( $colsize>0 )
          {
-            if( $colwrap==='wrap' )
+            if ( $colwrap==='wrap' )
                $val= wordwrap( $val, $colsize, '<br>', 1);
-            else if( $colwrap==='cut' )
+            else if ( $colwrap==='cut' )
                $val= substr( $val, 0, $colsize);
          }
          echo "<td$class title='$key#$i' nowrap>$val</td>";
       }
       echo "\n</tr>";
    }
-   if( $info )
+   if ( $info )
    {
       $tmp= $ncol > 1 ?" colspan=$ncol" :'';
       echo "<tr><td$tmp>$info</td></tr>\n";

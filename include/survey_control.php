@@ -46,7 +46,7 @@ class SurveyControl
    {
       // lazy-init of texts
       $key = 'TYPE';
-      if( !isset(self::$ARR_SURVEY_TEXTS[$key]) )
+      if ( !isset(self::$ARR_SURVEY_TEXTS[$key]) )
       {
          $arr = array();
          $arr[SURVEY_TYPE_POINTS]   = T_('Points#S_type');
@@ -56,10 +56,10 @@ class SurveyControl
          self::$ARR_SURVEY_TEXTS[$key] = $arr;
       }
 
-      if( is_null($type) )
+      if ( is_null($type) )
          return self::$ARR_SURVEY_TEXTS[$key];
 
-      if( !isset(self::$ARR_SURVEY_TEXTS[$key][$type]) )
+      if ( !isset(self::$ARR_SURVEY_TEXTS[$key][$type]) )
          error('invalid_args', "SurveyControl:getTypeText($type,$key)");
       return self::$ARR_SURVEY_TEXTS[$key][$type];
    }//getTypeText
@@ -69,7 +69,7 @@ class SurveyControl
    {
       // lazy-init of texts
       $key = 'STATUS';
-      if( !isset(self::$ARR_SURVEY_TEXTS[$key]) )
+      if ( !isset(self::$ARR_SURVEY_TEXTS[$key]) )
       {
          $arr = array();
          $arr[SURVEY_STATUS_NEW]    = T_('New#S_status');
@@ -79,10 +79,10 @@ class SurveyControl
          self::$ARR_SURVEY_TEXTS[$key] = $arr;
       }
 
-      if( is_null($status) )
+      if ( is_null($status) )
          return self::$ARR_SURVEY_TEXTS[$key];
 
-      if( !isset(self::$ARR_SURVEY_TEXTS[$key][$status]) )
+      if ( !isset(self::$ARR_SURVEY_TEXTS[$key][$status]) )
          error('invalid_args', "SurveyControl:getStatusText($status,$key)");
       return self::$ARR_SURVEY_TEXTS[$key][$status];
    }//getStatusText
@@ -92,16 +92,16 @@ class SurveyControl
    {
       // lazy-init of texts
       $key = 'FLAGS';
-      if( !isset(self::$ARR_SURVEY_TEXTS[$key]) )
+      if ( !isset(self::$ARR_SURVEY_TEXTS[$key]) )
       {
          $arr = array();
          $arr[SURVEY_FLAG_USERLIST] = T_('User-List#S_flag');
          self::$ARR_SURVEY_TEXTS[$key] = $arr;
       }
 
-      if( is_null($flag) )
+      if ( is_null($flag) )
          return self::$ARR_SURVEY_TEXTS[$key];
-      if( !isset(self::$ARR_SURVEY_TEXTS[$key][$flag]) )
+      if ( !isset(self::$ARR_SURVEY_TEXTS[$key][$flag]) )
          error('invalid_args', "SurveyControl:getFlagsText($flag,$short)");
       return self::$ARR_SURVEY_TEXTS[$key][$flag];
    }//getFlagsText
@@ -113,9 +113,9 @@ class SurveyControl
 
       $arr = array();
       $arr_flags = self::getFlagsText();
-      foreach( $arr_flags as $flag => $flagtext )
+      foreach ( $arr_flags as $flag => $flagtext )
       {
-         if( $check_flags & $flag )
+         if ( $check_flags & $flag )
             $arr[] = ($class) ? span($class, $flagtext) : $flagtext;
       }
       return (count($arr)) ? implode(', ', $arr) : $zero_val;
@@ -134,7 +134,7 @@ class SurveyControl
       global $player_row;
 
       $uid = (int)@$player_row['ID'];
-      if( !is_numeric($uid) || $uid <= GUESTS_ID_MAX )
+      if ( !is_numeric($uid) || $uid <= GUESTS_ID_MAX )
          error('invalid_args', "SurveyControl:new_survey.check.uid($uid)");
       $user = new User( $uid, @$player_row['Name'], @$player_row['Handle'] );
 
@@ -145,7 +145,7 @@ class SurveyControl
    /*! \brief Returns true if this Survey can be edited by admin. */
    public static function allow_survey_edit( $survey )
    {
-      if( self::is_survey_admin() )
+      if ( self::is_survey_admin() )
          return true;
 
       return ( $survey->Status == SURVEY_STATUS_NEW );
@@ -156,30 +156,30 @@ class SurveyControl
    {
       global $player_row, $NOW;
 
-      if( $survey->Status != SURVEY_STATUS_ACTIVE )
+      if ( $survey->Status != SURVEY_STATUS_ACTIVE )
          return false;
 
-      if( @$player_row['AdminOptions'] & ADMOPT_DENY_SURVEY_VOTE )
+      if ( @$player_row['AdminOptions'] & ADMOPT_DENY_SURVEY_VOTE )
       {
          $errors[] = T_('Survey-Voting has been denied.');
          return false;
       }
 
       // vote only allowed by users on user-list
-      if( $survey->Flags & SURVEY_FLAG_USERLIST )
+      if ( $survey->Flags & SURVEY_FLAG_USERLIST )
       {
-         if( Survey::exists_survey_user($survey->ID, $player_row['ID']) )
+         if ( Survey::exists_survey_user($survey->ID, $player_row['ID']) )
             return true;
 
          $errors[] = T_('You are not eligible to vote on this survey because of user-list-restriction.');
          return false;
       }
 
-      if( self::is_survey_admin() )
+      if ( self::is_survey_admin() )
          return true;
 
       // vote only allowed by users actively playing: 2 finished-games, played in last 30 days
-      if( @$player_row['Finished'] < 2 || @$player_row['X_LastMove'] < $NOW - 30 * SECS_PER_DAY )
+      if ( @$player_row['Finished'] < 2 || @$player_row['X_LastMove'] < $NOW - 30 * SECS_PER_DAY )
       {
          $errors[] = T_('To be eligible to vote on this survey you need to actively play in games.');
          return false;
@@ -197,7 +197,7 @@ class SurveyControl
       $sid = $survey->ID;
       $iterator = new ListIterator( "SurveyControl:load_survey_options($sid,$uid)",
          ( $order_result ? new QuerySQL( SQLP_ORDER, 'SOPT.Score DESC' ) : null ) );
-      if( $uid > 0 ) // with user-vote
+      if ( $uid > 0 ) // with user-vote
       {
          $iterator->addQuerySQLMerge( new QuerySQL(
             SQLP_FIELDS, "IFNULL(SV.Points,".SQL_NO_POINTS.") AS SV_Points",
@@ -206,14 +206,14 @@ class SurveyControl
 
       $iterator = SurveyOption::load_survey_options( $iterator, $sid, /*sort*/ !$order_result );
 
-      if( $uid > 0 ) // with user-vote
+      if ( $uid > 0 ) // with user-vote
       {
          $arr = array();
          $survey->UserVoted = false;
-         while( list(,$arr_item) = $iterator->getListIterator() )
+         while ( list(,$arr_item) = $iterator->getListIterator() )
          {
             list( $sopt, $orow ) = $arr_item;
-            if( @$orow['SV_Points'] == SQL_NO_POINTS )
+            if ( @$orow['SV_Points'] == SQL_NO_POINTS )
                $sopt->UserVotePoints = null;
             else
             {
@@ -235,11 +235,11 @@ class SurveyControl
    public static function buildSurveyOptionsText( $survey )
    {
       $out = array();
-      if( (string)$survey->Header != '' )
+      if ( (string)$survey->Header != '' )
          $out[] = $survey->Header;
 
       $need_points = $survey->need_option_minpoints();
-      foreach( $survey->SurveyOptions as $so )
+      foreach ( $survey->SurveyOptions as $so )
       {
          $points = ($need_points) ? ' ' . $so->MinPoints : '';
          $out[] = trim( sprintf("<opt %s%s \"%s\"> %s", $so->Tag, $points, trim($so->Title), trim($so->Text) ) );
@@ -250,9 +250,9 @@ class SurveyControl
    /*! \brief Return cloned SurveyOption in Survey->SurveyOptions array matching on same Tag-value; null otherwise. */
    public static function findMatchingSurveyOption( $survey, $tag )
    {
-      foreach( $survey->SurveyOptions as $so )
+      foreach ( $survey->SurveyOptions as $so )
       {
-         if( $so->Tag == $tag )
+         if ( $so->Tag == $tag )
             return SurveyOption::cloneSurveyOption($so);
       }
       return null;
@@ -269,9 +269,9 @@ class SurveyControl
       $sid = (int)$sid;
 
       $arr_del = array();
-      foreach( $sopts_del as $so )
+      foreach ( $sopts_del as $so )
       {
-         if( $so->ID == 0 )
+         if ( $so->ID == 0 )
             error('invalid_args', "SurveyControl:update_merged_survey_options.check_del($sid)");
          $arr_del[] = $so->ID;
       }
@@ -284,29 +284,29 @@ class SurveyControl
    public static function build_view_query_sql( $is_admin )
    {
       $qsql = new QuerySQL();
-      if( !$is_admin )
+      if ( !$is_admin )
          $qsql->add_part( SQLP_WHERE, "S.Status IN ('".SURVEY_STATUS_ACTIVE."','".SURVEY_STATUS_CLOSED."')" );
       return $qsql;
    }//build_view_query_sql
 
    public static function build_points_array( $min, $max, $with_plus=true, $dir_asc=false )
    {
-      if( $min > $max )
+      if ( $min > $max )
          swap($min, $max);
 
       $arr = array();
       $plus = ($with_plus) ? '+' : MINI_SPACING;
-      if( $dir_asc ) // direction ascending
+      if ( $dir_asc ) // direction ascending
       {
-         for( $val = $min; $val <= $max; $val++ )
+         for ( $val = $min; $val <= $max; $val++ )
             $arr[$val] = ($val <= 0) ? $val : $plus.$val;
       }
       else // direction descending
       {
-         for( $val = $max; $val >= $min; $val-- )
+         for ( $val = $max; $val >= $min; $val-- )
             $arr[$val] = ($val <= 0) ? $val : $plus.$val;
       }
-      if( isset($arr[0]) )
+      if ( isset($arr[0]) )
          $arr[0] = MINI_SPACING . 0;
 
       return $arr;
@@ -315,7 +315,7 @@ class SurveyControl
    public static function build_view_survey( $survey, $allow_vote=false, $page='', $rx_term='' )
    {
       $sform = null;
-      if( $allow_vote && $page && $survey->ID > 0 && $survey->Status == SURVEY_STATUS_ACTIVE )
+      if ( $allow_vote && $page && $survey->ID > 0 && $survey->Status == SURVEY_STATUS_ACTIVE )
       {
          $sform = new Form( 'surveyVote', $page, FORM_GET );
          $sform->add_hidden( 'sid', $survey->ID );
@@ -332,14 +332,14 @@ class SurveyControl
          ( $show_result ? span('Result', $survey->UserCount, ' #%s', T_('Vote User Count#survey')) : '' ),
          date(DATE_FMT2, $survey->Lastchanged) );
 
-      if( $survey->Type == SURVEY_TYPE_SUM )
+      if ( $survey->Type == SURVEY_TYPE_SUM )
       {
          $optheader_text = sprintf( T_('You have to spend %s points in total for voting on all options.'),
             ( $survey->MinPoints == $survey->MaxPoints )
                ? $survey->MaxPoints
                : build_range_text($survey->MinPoints, $survey->MaxPoints, '%s-%s') );
       }
-      elseif( $survey->Type == SURVEY_TYPE_MULTI && ( $survey->MinPoints > 0 || $survey->MaxPoints > 0 ) )
+      elseif ( $survey->Type == SURVEY_TYPE_MULTI && ( $survey->MinPoints > 0 || $survey->MaxPoints > 0 ) )
       {
          $optheader_text = sprintf( T_('You can select %s checkbox(es) for your vote.'),
                ( ($survey->MinPoints == $survey->MaxPoints)
@@ -349,41 +349,41 @@ class SurveyControl
       else
          $optheader_text = '';
 
-      if( (string)$survey->Header != '' )
+      if ( (string)$survey->Header != '' )
          $optheader_text = trim($survey->Header . "\n\n" . $optheader_text);
-      if( (string)$optheader_text != '' )
+      if ( (string)$optheader_text != '' )
          $optheader_text = make_html_safe($optheader_text, true);
 
-      if( $survey->Type == SURVEY_TYPE_POINTS )
+      if ( $survey->Type == SURVEY_TYPE_POINTS )
          $arr_points = self::build_points_array( $survey->MinPoints, $survey->MaxPoints );
-      elseif( $survey->Type == SURVEY_TYPE_SUM )
+      elseif ( $survey->Type == SURVEY_TYPE_SUM )
          $arr_points = self::build_points_array( 0, $survey->MaxPoints, /*with-plus*/false, /*dir-asc*/true );
       else
          $arr_points = 0;
 
       $vote = $user_vote = $result = '';
       $s_opts = array();
-      foreach( $survey->SurveyOptions as $so )
+      foreach ( $survey->SurveyOptions as $so )
       {
          $fname = 'so' . $so->ID;
          $label = $so->buildLabel();
 
-         if( $sform )
+         if ( $sform )
          {
             $sel_points = (int)$so->UserVotePoints; // cast null|int -> int
-            if( Survey::is_point_type($survey->Type) )
+            if ( Survey::is_point_type($survey->Type) )
                $vote = $sform->print_insert_select_box( $fname, 1, $arr_points, $sel_points, false );
-            elseif( $survey->Type == SURVEY_TYPE_MULTI )
+            elseif ( $survey->Type == SURVEY_TYPE_MULTI )
                $vote = $sform->print_insert_checkbox( $fname, 1, '', $sel_points, '' );
-            elseif( $survey->Type == SURVEY_TYPE_SINGLE )
+            elseif ( $survey->Type == SURVEY_TYPE_SINGLE )
                $vote = $sform->print_insert_radio_buttonsx( 'so', array( $so->ID => '' ), ($sel_points ? $so->ID : 0) );
             else
                $vote = '???'; // shouldn't happen
          }
-         if( $show_uservote )
+         if ( $show_uservote )
             $user_vote = span('UserVote', ( !is_null($so->UserVotePoints) ? formatNumber($so->UserVotePoints) : '-' ),
                '[%s]', T_('My vote#survey') );
-         if( $show_result )
+         if ( $show_result )
          {
             $result = ( $survey->hasUserVotes() )
                ? span('Result', formatNumber($so->Score), '%s', T_('All votes#survey') )
@@ -398,7 +398,7 @@ class SurveyControl
       }
       $opts_text = sprintf( "\n  <table>\n%s\n  </table>\n", implode("\n", $s_opts) );
 
-      if( $sform )
+      if ( $sform )
          $action_text = $sform->print_insert_submit_button( 'save', T_('Save vote') );
       else
          $action_text = '';
@@ -417,7 +417,7 @@ class SurveyControl
             " <div class=\"Actions\">$action_text</div>\n" .
          "</div>\n";
 
-      if( $sform )
+      if ( $sform )
       {
          return $sform->print_start_default()
             . $div_survey

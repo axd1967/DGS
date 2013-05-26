@@ -35,11 +35,11 @@ $GLOBALS['ThePage'] = new Page('Goodies', 0, ROBOTS_NO_FOLLOW,
 
    $files = array();
    $path_goodies = 'goodies';
-   if( $fh = opendir($path_goodies) )
+   if ( $fh = opendir($path_goodies) )
    {
-      while( false !== ($file = readdir($fh)) )
+      while ( false !== ($file = readdir($fh)) )
       {
-         if( substr($file,-8) == '.user.js' )
+         if ( substr($file,-8) == '.user.js' )
             $files[] = "$path_goodies/$file";
       }
       closedir($fh);
@@ -57,14 +57,14 @@ $GLOBALS['ThePage'] = new Page('Goodies', 0, ROBOTS_NO_FOLLOW,
       "<em>", T_('Depending of your GreaseMonkey version, either Click or Right-Click on a desired name-link to install it:'), "</em>\n",
       "<ul>\n";
 
-   foreach( $files as $file )
+   foreach ( $files as $file )
    {
       $fh = fopen($file, 'r');
       $txt = fread($fh, filesize($file));
       fclose($fh);
 
       // @name        DGS Section Hide
-      foreach( array('name','description') as $field )
+      foreach ( array('name','description') as $field )
       {
          $r = '%@'.$field.'\\s+(.*)%i';
          preg_match($r, $txt, $m);
@@ -81,7 +81,7 @@ $GLOBALS['ThePage'] = new Page('Goodies', 0, ROBOTS_NO_FOLLOW,
 
       $txt = '';
       $str = "- $description\n";
-      if( $infos )
+      if ( $infos )
          $str.= "<br />- Script infos:\n";
       $txt.= "<dt>\n$str</dt>\n";
 

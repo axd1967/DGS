@@ -44,17 +44,17 @@ define('MSGBOXROWS_INVITE', 6);
    $preview = @$_REQUEST['preview'];
    $handle_msg_action = $send_message && !$preview;
 
-   if( $handle_msg_action )
+   if ( $handle_msg_action )
       disable_cache();
 
    connect2mysql();
 
    $logged_in = who_is_logged( $player_row);
-   if( !$logged_in )
+   if ( !$logged_in )
       error('login_if_not_logged_in', 'message');
 
 /* Actual GET calls used (to identify the ways to handle them):
-   if(message.php?mode=...) //with mode
+   if (message.php?mode=...) //with mode
       NewMessage           : from menu (or site_map)
       NewMessage&uid=      : from user info
       NewMessage&tmpl=     : load from Profile-template for send-message (combinable with others args)
@@ -68,10 +68,10 @@ define('MSGBOXROWS_INVITE', 6);
       Invite&uid=          : from user_info or show_games
       Dispute&mid=         : from here
 
-   else if(message.php?...) //without mode
+   else if (message.php?...) //without mode
       mid=                 : from notifications or here
                            => ShowMessage&mid=
-   else if(message.php) //alone
+   else if (message.php) //alone
                            : from site_map
                            => NewMessage
 
@@ -90,41 +90,41 @@ define('MSGBOXROWS_INVITE', 6);
    $mid = (int)@$_REQUEST['mid'];
    $other_uid = (int)@$_REQUEST['oid']; // for bulk-message
    $mode = @$_REQUEST['mode'];
-   if( !$mode )
+   if ( !$mode )
       $mode = ($mid > 0 ? 'ShowMessage' : 'NewMessage');
-   elseif( @$_REQUEST['mode_dispute'] )
+   elseif ( @$_REQUEST['mode_dispute'] )
       $mode = 'Dispute';
    $can_reply = false;
 
    // load template for profile
    $prof_tmpl_id = (int)@$_REQUEST['tmpl'];
    $profile = null;
-   if( $prof_tmpl_id > 0 )
+   if ( $prof_tmpl_id > 0 )
    {
       $profile = Profile::load_profile_by_id( $prof_tmpl_id, $my_id ); // loads only if user-id correct
-      if( is_null($profile) )
+      if ( is_null($profile) )
          error('invalid_profile', "message.check.profile($prof_tmpl_id)");
 
       // check profile-type vs. msg-mode
       $ok = ( $profile->Type == PROFTYPE_TMPL_SENDMSG && $mode == 'NewMessage' )
          || ( $profile->Type == PROFTYPE_TMPL_INVITE  && $mode == 'Invite' )
          || ( $profile->Type == PROFTYPE_TMPL_NEWGAME && $mode == 'Invite' );
-      if( !$ok )
+      if ( !$ok )
          error('invalid_profile', "message.check.profile.type($prof_tmpl_id,{$profile->Type},$mode)");
 
       $profile_template = ProfileTemplate::decode( $profile->Type, $profile->get_text(/*raw*/true) );
-      if( !$profile_template->is_valid_new_game_template_for_invite() )
+      if ( !$profile_template->is_valid_new_game_template_for_invite() )
          error('invalid_profile', "message.check.profile_newg4inv($prof_tmpl_id,{$profile->Type},$mode)");
 
       $profile_template->fill( $_REQUEST );
-      if( $profile->Type == PROFTYPE_TMPL_NEWGAME )
+      if ( $profile->Type == PROFTYPE_TMPL_NEWGAME )
          $profile_template->fill_invite_with_new_game( $_REQUEST, PROFTYPE_TMPL_INVITE );
 
       $preview = true;
    }
 
    $is_rematch = ( $mode == 'Invite' ) && @$_REQUEST['rematch'];
-   if( $is_rematch )
+   if ( $is_rematch )
    {
       $mid = $mpg_gid = $mpg_type = 0;
       $msg_type = MSGTYPE_INVITATION;
@@ -133,14 +133,14 @@ define('MSGBOXROWS_INVITE', 6);
 
    $arg_to = get_request_arg('to'); // single or multi-receivers
    $has_arg_to = ( (string)trim($arg_to) != '' );
-   if( $mpg_type > 0 && (!$arg_to && $mode == 'NewMessage') )
+   if ( $mpg_type > 0 && (!$arg_to && $mode == 'NewMessage') )
    {
       // handle multi-player-game msg-request
       list( $arg_to, $arr_mpg_users, $mpg_arr ) = read_mpgame_request();
    }
    else
       $arr_mpg_users = null;
-   if( !$arg_to )
+   if ( !$arg_to )
       $arg_to = read_user_from_request(); // single
 
    $msg_control = new MessageControl( $folders, /*allow-bulk*/true, $mpg_type, $mpg_gid, $mpg_col, $arr_mpg_users );
@@ -148,12 +148,12 @@ define('MSGBOXROWS_INVITE', 6);
    $dgs_message = $msg_control->get_dgs_message();
 
    $gsc = ( @$_REQUEST['gsc'] ) ? $gsc = GameSetupChecker::check_fields( GSC_VIEW_INVITE ) : NULL;
-   if( !is_null($gsc) && $gsc->has_errors() )
+   if ( !is_null($gsc) && $gsc->has_errors() )
    {
       $gsc->add_default_values_info();
       $errors = $gsc->get_errors();
    }
-   elseif( $handle_msg_action )
+   elseif ( $handle_msg_action )
    {
       ta_begin();
       {//HOT-section to handle message
@@ -163,7 +163,7 @@ define('MSGBOXROWS_INVITE', 6);
    }
    else
       $errors = array();
-   if( count($errors) )
+   if ( count($errors) )
       $preview = true;
 
    $my_rating = $player_row['Rating2'];
@@ -172,10 +172,10 @@ define('MSGBOXROWS_INVITE', 6);
 
    $default_subject = get_request_arg('subject');
    $default_message = get_request_arg('message');
-   if( $is_rematch && empty($default_subject) )
+   if ( $is_rematch && empty($default_subject) )
       $default_subject = 'Game invitation';
 
-   if( $mpg_type > 0 && (@$mpg_gid || !$has_arg_to) && (empty($default_subject) && empty($default_message)) )
+   if ( $mpg_type > 0 && (@$mpg_gid || !$has_arg_to) && (empty($default_subject) && empty($default_message)) )
    {
       list( $default_subject, $default_message ) =
          MultiPlayerGame::get_message_defaults( $mpg_type, $mpg_gid, $mpg_arr );
@@ -183,19 +183,19 @@ define('MSGBOXROWS_INVITE', 6);
    $rx_term = get_request_arg('xterm'); // rx-terms: abc|def|...
 
    $submode = $mode;
-   if( $mode == 'ShowMessage' || $mode == 'Dispute' )
+   if ( $mode == 'ShowMessage' || $mode == 'Dispute' )
    {
       $msg_row = DgsMessage::load_message( "message", $mid, $my_id, $other_uid, /*fulldata*/true );
       extract($msg_row);
       $msg_type = $Type; //overwrite type
 
-      if( $Sender === 'M' ) //message to myself
+      if ( $Sender === 'M' ) //message to myself
       {
          $other_id = $my_id;
          $other_handle = $player_row["Handle"];
          $other_name = $player_row["Name"];
       }
-      else if( $other_id <= 0 )
+      else if ( $other_id <= 0 )
       {
          $other_id = 0;
          $other_handle = '';
@@ -206,17 +206,17 @@ define('MSGBOXROWS_INVITE', 6);
       $can_reply = ( $Sender == 'N' && $other_id>0 && $other_handle);
       $to_me = ( $Sender != 'Y' ); //include system and myself messages
 
-      if( $mode == 'ShowMessage' )
+      if ( $mode == 'ShowMessage' )
       {
-         if( !$preview )
+         if ( !$preview )
          {
             $default_subject = $Subject;
             $default_message = ( count($errors) ? $default_message : '' );
          }
-         if( strcasecmp(substr($default_subject,0,3), "re:") != 0 )
+         if ( strcasecmp(substr($default_subject,0,3), "re:") != 0 )
             $default_subject = "RE: " . $default_subject;
 
-         if( $Folder_nr == FOLDER_NEW )
+         if ( $Folder_nr == FOLDER_NEW )
          {
             // Remove NEW flag
             $Folder_nr = ( $msg_type == MSGTYPE_INVITATION ) ? FOLDER_REPLY : FOLDER_MAIN;
@@ -228,56 +228,56 @@ define('MSGBOXROWS_INVITE', 6);
             ta_end();
          }
 
-         if( $msg_type == MSGTYPE_INVITATION )
+         if ( $msg_type == MSGTYPE_INVITATION )
          {
-            if( $Status == GAME_STATUS_INVITED && ($Replied != 'Y') )
+            if ( $Status == GAME_STATUS_INVITED && ($Replied != 'Y') )
                $submode = ( $to_me ) ? 'ShowInvite' : 'ShowMyInvite'; // message is active invitation
             else
                $submode = ( is_null($Status) ) ? 'AlreadyDeclined' : 'AlreadyAccepted';
          }
-         elseif( $msg_type == MSGTYPE_DISPUTED )
+         elseif ( $msg_type == MSGTYPE_DISPUTED )
             $submode = ( @$Game_mid ) ? 'InviteDisputed' : 'AlreadyDeclined'; // message is disputed or dispute-declined invitation
-         elseif( $msg_type == MSGTYPE_NORMAL && @$Game_mid )
+         elseif ( $msg_type == MSGTYPE_NORMAL && @$Game_mid )
             $submode = ( is_null($Status) ) ? 'AlreadyDeclined' : 'AlreadyAccepted';
       }
    }// $mode == 'ShowMessage' || $mode == 'Dispute'
 
    // more checks
-   if( $mode == 'NewMessage' || $mode == 'Invite' || $can_reply )
+   if ( $mode == 'NewMessage' || $mode == 'Invite' || $can_reply )
    {
-      if( $arg_to )
+      if ( $arg_to )
       {
-         if( $msg_control->read_message_receivers( $dgs_message, $msg_type, false, $arg_to ) )
+         if ( $msg_control->read_message_receivers( $dgs_message, $msg_type, false, $arg_to ) )
             $errors = array_merge( $errors, $dgs_message->errors );
       }
       else
       {
-         if( $preview )
+         if ( $preview )
             $errors[] = T_('Missing message receiver');
       }
 
-      if( $preview && $mode != 'Invite' && (string)$default_subject == '' )
+      if ( $preview && $mode != 'Invite' && (string)$default_subject == '' )
          $errors[] = T_('Missing message subject');
    }//NewMessage
 
    // prepare to show conv/proper-handitype-suggestions
    $other_row = $dgs_message->get_recipient(); // NULL if self-invited, bulk or other error
    $map_ratings = NULL;
-   if( ($submode === 'Dispute' || $submode === 'Invite') && $iamrated && !is_null($other_row) )
+   if ( ($submode === 'Dispute' || $submode === 'Invite') && $iamrated && !is_null($other_row) )
    {
       $other_rating = (int)@$other_row['Rating2'];
-      if( @$other_row['RatingStatus'] != RATING_NONE && is_valid_rating($other_rating) ) // other is rated
+      if ( @$other_row['RatingStatus'] != RATING_NONE && is_valid_rating($other_rating) ) // other is rated
          $map_ratings = array( 'rating1' => $my_rating, 'rating2' => $other_rating );
    }
 
    // check own/opp max-games
-   if( preg_match("/^(InviteDisputed|ShowInvite|ShowMyInvite|Invite|Dispute)$/", $submode) )
+   if ( preg_match("/^(InviteDisputed|ShowInvite|ShowMyInvite|Invite|Dispute)$/", $submode) )
    {
       $opp_row = $other_row;
-      if( is_null($opp_row) && !$arg_to && @$msg_row['other_handle'] )
+      if ( is_null($opp_row) && !$arg_to && @$msg_row['other_handle'] )
       {
          $arg_to = $msg_row['other_handle'];
-         if( $msg_control->read_message_receivers( $dgs_message, $msg_type, false, $arg_to ) )
+         if ( $msg_control->read_message_receivers( $dgs_message, $msg_type, false, $arg_to ) )
             $errors = array_merge( $errors, $dgs_message->errors );
          else
             $opp_row = $dgs_message->get_recipient();
@@ -285,7 +285,7 @@ define('MSGBOXROWS_INVITE', 6);
 
       $chk_errors = $msg_control->check_max_games($opp_row);
       $allow_game_start = ( count($chk_errors) == 0 );
-      if( !$allow_game_start )
+      if ( !$allow_game_start )
          $errors = array_merge( $errors, $chk_errors );
    }
    else
@@ -293,7 +293,7 @@ define('MSGBOXROWS_INVITE', 6);
 
    $has_errors = ( count($errors) > 0 );
 
-   if( MarkupHandlerGoban::contains_goban(@$Text) || MarkupHandlerGoban::contains_goban($default_message) )
+   if ( MarkupHandlerGoban::contains_goban(@$Text) || MarkupHandlerGoban::contains_goban($default_message) )
    {
       $cfg_board = ConfigBoard::load_config_board($my_id);
       $style_str = GobanHandlerGfxBoard::style_string( $cfg_board->get_stone_size() );
@@ -309,13 +309,13 @@ define('MSGBOXROWS_INVITE', 6);
    $message_form->add_hidden('mode', $mode);
    $message_form->add_hidden('mid', $mid);
    $message_form->add_hidden('senderid', $my_id);
-   if( $mpg_type > 0 )
+   if ( $mpg_type > 0 )
    {
-      foreach( array( 'mpmt', 'mpgid', 'mpcol', 'mpmove', 'mpuid' ) as $hidden_key )
+      foreach ( array( 'mpmt', 'mpgid', 'mpcol', 'mpmove', 'mpuid' ) as $hidden_key )
          $message_form->add_hidden( $hidden_key, get_request_arg($hidden_key) );
    }
 
-   switch( (string)$submode )
+   switch ( (string)$submode )
    {
       case 'ShowMessage':
       case 'AlreadyDeclined':
@@ -330,24 +330,24 @@ define('MSGBOXROWS_INVITE', 6);
                             $Flags, $Thread, $ReplyTo, $X_Flow,
                             $folders, $Folder_nr, $message_form, $Replied=='M', $rx_term);
 
-         if( $submode == 'AlreadyAccepted' )
+         if ( $submode == 'AlreadyAccepted' )
          {
             echo span('InviteMsgInfo',
                       sprintf( T_('This %sgame%s invitation has already been accepted.'),
                                "<a href=\"game.php?gid=$Game_ID\">", '</a>' ) );
          }
-         else if( $submode == 'AlreadyDeclined' )
+         else if ( $submode == 'AlreadyDeclined' )
          {
             echo span('InviteMsgInfo', T_('This invitation has been declined or the game deleted') );
          }
-         else if( $submode == 'InviteDisputed' )
+         else if ( $submode == 'InviteDisputed' )
          {
             echo span('InviteMsgInfo',
                       sprintf( T_('The settings for this game invitation has been %sdisputed%s'),
                                "<a href=\"message.php?mid=$Game_mid\">", '</a>' ) );
          }
 
-         if( $can_reply )
+         if ( $can_reply )
          {
             $message_form->add_row( array(
                   'HEADER', T_('Reply'),
@@ -422,10 +422,10 @@ define('MSGBOXROWS_INVITE', 6);
 
          // show dispute-diffs to opponent game-settings
          list( $my_gs, $opp_gs ) = GameSetup::parse_invitation_game_setup( $my_id, $msg_row['GameSetup'], $Game_ID );
-         if( !is_null($my_gs) && !is_null($opp_gs) )
+         if ( !is_null($my_gs) && !is_null($opp_gs) )
             echo_dispute_diffs( $my_gs, $opp_gs, $player_row['Handle'], $other_handle, $message_form );
 
-         if( $can_reply )
+         if ( $can_reply )
          {
             $message_form->add_row( array(
                   'SUBMITBUTTONX', 'mode_dispute', T_('Dispute settings'),
@@ -465,21 +465,21 @@ define('MSGBOXROWS_INVITE', 6);
                             $Flags, $Thread, $ReplyTo, $X_Flow, //no folders, so no move
                             null, null, null, false, $rx_term);
 
-         if( $preview )
+         if ( $preview )
             game_settings_form($message_form, GSET_MSG_DISPUTE, GSETVIEW_STANDARD, $iamrated, 'redraw', @$_POST, $map_ratings, $gsc);
          else
             game_settings_form($message_form, GSET_MSG_DISPUTE, GSETVIEW_STANDARD, $iamrated, $my_id, $Game_ID, $map_ratings);
 
          // show dispute-diffs to opponent game-settings
          list( $my_gs, $opp_gs ) = GameSetup::parse_invitation_game_setup( $my_id, $msg_row['GameSetup'], $Game_ID );
-         if( !is_null($opp_gs) )
+         if ( !is_null($opp_gs) )
          {
-            if( $preview )
+            if ( $preview )
             {
                $opp_row = array( 'ID' => $other_id, 'RatingStatus' => $other_ratingstatus, 'Rating2' => $other_rating );
                $my_gs = make_invite_game_setup( $player_row, $opp_row );
             }
-            if( !is_null($my_gs) )
+            if ( !is_null($my_gs) )
                echo_dispute_diffs( $my_gs, $opp_gs, $player_row['Handle'], $other_handle, $message_form );
          }
 
@@ -510,7 +510,7 @@ define('MSGBOXROWS_INVITE', 6);
          section('invite', T_('Game Invitation') );
          echo $maxGamesCheck->get_warn_text();
 
-         if( $preview )
+         if ( $preview )
             game_settings_form($message_form, GSET_MSG_INVITE, GSETVIEW_STANDARD, $iamrated, 'redraw', @$_REQUEST, $map_ratings, $gsc);
          else
             game_settings_form($message_form, GSET_MSG_INVITE, GSETVIEW_STANDARD, $iamrated, null, null, $map_ratings);
@@ -545,19 +545,19 @@ define('MSGBOXROWS_INVITE', 6);
    $message_form->echo_string(1);
 
 
-   if( $has_errors )
+   if ( $has_errors )
    {
       echo "<br>\n<table><tr>",
          buildErrorListString( T_('There have been some errors'), array_unique($errors), 1 ),
          "</tr></table>";
    }
 
-   if( $preview || ($send_message && $has_errors) )
+   if ( $preview || ($send_message && $has_errors) )
    {
       echo "\n<h3 id='preview' class=Header>", T_('Message preview'), "</h3>\n";
 
       //$mid==0 means preview - display a *to_me* like message
-      if( $dgs_message->has_recipient() ) // single-receiver
+      if ( $dgs_message->has_recipient() ) // single-receiver
       {
          $user_row = $dgs_message->build_recipient_user_row();
          message_info_table( 0 /* preview */, $NOW, false,
@@ -575,7 +575,7 @@ define('MSGBOXROWS_INVITE', 6);
    echo "\n</center>\n";
 
    $menu_array = array();
-   if( preg_match("/^(InviteDisputed|ShowInvite|ShowMyInvite|Invite|Dispute)$/", $submode) )
+   if ( preg_match("/^(InviteDisputed|ShowInvite|ShowMyInvite|Invite|Dispute)$/", $submode) )
       $menu_array[T_('Shapes')] = 'list_shapes.php';
    ProfileTemplate::add_menu_link( $menu_array, $arg_to );
 
@@ -595,34 +595,34 @@ function handle_send_message_selector( &$msg_control, $arg_to, $msg_type )
    global $player_row, $folders;
 
    $my_id = (int)@$player_row['ID'];
-   if( $my_id <= GUESTS_ID_MAX )
+   if ( $my_id <= GUESTS_ID_MAX )
       return array( ErrorCode::get_error_text('not_allowed_for_guest') );
 
    $new_folder = (int)get_request_arg('folder');
 
-   if( isset($_REQUEST['foldermove']) )
+   if ( isset($_REQUEST['foldermove']) )
    {
       handle_change_folder( $my_id, $folders, $new_folder, $msg_type );
    }
-   elseif( isset($_REQUEST['save_template']) )
+   elseif ( isset($_REQUEST['save_template']) )
    {
       handle_save_template( $my_id, $msg_type );
    }
    else
    {
-      if( @$_REQUEST['send_accept'] )
+      if ( @$_REQUEST['send_accept'] )
          $msg_action = 'accept_inv';
-      elseif( @$_REQUEST['send_decline'] )
+      elseif ( @$_REQUEST['send_decline'] )
          $msg_action = 'decline_inv';
       else
          $msg_action = 'send_msg';
 
       $_REQUEST['action'] = $msg_action;
       $result = $msg_control->handle_send_message( $arg_to, $msg_type, $_REQUEST );
-      if( is_array($result) && count($result) )
+      if ( is_array($result) && count($result) )
          return $result; // errors
 
-      if( $result == 0 )
+      if ( $result == 0 )
          jump_to("status.php?sysmsg=".urlencode(T_('Message sent!')));
       else // result == msg_gid
          jump_to("game_players.php?gid=$result".URI_AMP."sysmsg=".urlencode(T_('Message sent!')));
@@ -639,13 +639,13 @@ function handle_change_folder( $my_id, $folders, $new_folder, $msg_type )
    $need_reply = ( $msg_type == MSGTYPE_INVITATION );
 
    $move_ok = ( change_folders($my_id, $folders, array($foldermove_mid), $new_folder, $current_folder, $need_reply) > 0 );
-   if( !$move_ok || !$follow )
+   if ( !$move_ok || !$follow )
       $new_folder = ( $current_folder ) ? $current_folder : FOLDER_ALL_RECEIVED;
 
    $page = "";
-   foreach( $_REQUEST as $key => $val )
+   foreach ( $_REQUEST as $key => $val )
    {
-      if( $val == 'Y' && preg_match("/^mark\d+$/i", $key) )
+      if ( $val == 'Y' && preg_match("/^mark\d+$/i", $key) )
          $page.= URI_AMP."$key=Y" ;
    }
    jump_to("list_messages.php?folder=$new_folder$page");
@@ -655,9 +655,9 @@ function handle_save_template( $my_id, $msg_type )
 {
    global $player_row;
 
-   if( $msg_type == MSGTYPE_NORMAL )
+   if ( $msg_type == MSGTYPE_NORMAL )
       $tmpl = ProfileTemplate::new_template_send_message( $_REQUEST['subject'], $_REQUEST['message'] );
-   elseif( $msg_type == MSGTYPE_INVITATION )
+   elseif ( $msg_type == MSGTYPE_INVITATION )
    {
       $tmpl = ProfileTemplate::new_template_game_setup_invite( $_REQUEST['subject'], $_REQUEST['message'] );
       $tmpl->GameSetup = make_invite_template_game_setup( $player_row );
@@ -673,14 +673,14 @@ function read_user_from_request()
    global $player_row;
 
    get_request_user( $uid, $uhandle, true); // set globals: $uid, $uhandle
-   if( !$uhandle && $uid > 0 )
+   if ( !$uhandle && $uid > 0 )
    {
-      if( $uid == $player_row['ID'] )
+      if ( $uid == $player_row['ID'] )
          $uhandle = $player_row['Handle'];
       else
       {
          $row = mysql_single_fetch( 'message.handle', "SELECT Handle FROM Players WHERE ID=$uid LIMIT 1" );
-         if( $row )
+         if ( $row )
             $uhandle = $row['Handle'];
       }
    }
@@ -696,28 +696,28 @@ function read_mpgame_request()
 
    $col = get_request_arg('mpcol');
    $dbgmsg = "message.read_mpgame_request($mpg_gid,$mpg_type,$col)";
-   if( $mpg_type != MPGMSG_STARTGAME && $mpg_type != MPGMSG_RESIGN && $mpg_type != MPGMSG_INVITE )
+   if ( $mpg_type != MPGMSG_STARTGAME && $mpg_type != MPGMSG_RESIGN && $mpg_type != MPGMSG_INVITE )
       error('invalid_args', "$dbgmsg.check.mpg_type");
 
-   if( $mpg_gid <= 0 )
+   if ( $mpg_gid <= 0 )
       error('multi_player_msg_miss_game', "$dbgmsg.check.game");
    $game_row = mysql_single_fetch( "$dbgmsg.load_game",
          "SELECT GameType, GamePlayers, ToMove_ID, Status, ShapeID FROM Games WHERE ID=$mpg_gid LIMIT 1" );
-   if( !$game_row )
+   if ( !$game_row )
       error('unknown_game', "$dbgmsg.load_game2");
-   if( $game_row['GameType'] != GAMETYPE_TEAM_GO && $game_row['GameType'] != GAMETYPE_ZEN_GO )
+   if ( $game_row['GameType'] != GAMETYPE_TEAM_GO && $game_row['GameType'] != GAMETYPE_ZEN_GO )
       error('multi_player_msg_no_mpg', "$dbgmsg.load_game2");
    $game_status = $game_row['Status'];
 
-   if( $mpg_type == MPGMSG_INVITE )
+   if ( $mpg_type == MPGMSG_INVITE )
    {
       $mpg_uid = (int)get_request_arg('mpuid');
       $mpg_gp = GamePlayer::load_game_player_by_uid( $mpg_gid, $mpg_uid );
-      if( is_null($mpg_gp) )
+      if ( is_null($mpg_gp) )
          error('multi_player_unknown_user', "$dbgmsg.check.mpuid");
 
       $arr_users = User::load_quick_userinfo( array( $mpg_uid ) );
-      if( !isset($arr_users[$mpg_uid]) )
+      if ( !isset($arr_users[$mpg_uid]) )
          error('multi_player_invite_unknown_user', "$dbgmsg.check.mpuid($mpg_uid)");
 
       $handles = array( $mpg_uid => $arr_users[$mpg_uid]['Handle'] );
@@ -726,31 +726,31 @@ function read_mpgame_request()
    {
       $handles = GamePlayer::load_users_for_mpgame( $mpg_gid, $col, /*skip-myself*/true, $tmp_arr );
    }
-   if( count($handles) == 0 )
+   if ( count($handles) == 0 )
       error('multi_player_no_users', "$dbgmsg.check.handles");
 
    $mpg_arr = array(); // for Resign
    $mpg_arr['shape_id'] = (int)@$game_row['ShapeID'];
-   if( $mpg_type == MPGMSG_INVITE )
+   if ( $mpg_type == MPGMSG_INVITE )
    {
-      if( $game_status != GAME_STATUS_SETUP )
+      if ( $game_status != GAME_STATUS_SETUP )
          error('invalid_game_status', "$dbgmsg.check.invite.status($game_status)");
-      if( $player_row['ID'] != $game_row['ToMove_ID'] )
+      if ( $player_row['ID'] != $game_row['ToMove_ID'] )
          error('multi_player_master_mismatch', "$dbgmsg.check.invite.master($game_status)");
 
       $mpg_arr['from_handle'] = $player_row['Handle'];
       $mpg_arr['game_type']   = GameTexts::format_game_type( $game_row['GameType'], $game_row['GamePlayers'] );
    }
-   elseif( $mpg_type == MPGMSG_RESIGN )
+   elseif ( $mpg_type == MPGMSG_RESIGN )
    {
-      if( !isRunningGame($game_status) )
+      if ( !isRunningGame($game_status) )
          error('invalid_game_status', "$dbgmsg.check.resign.status($game_status)");
 
       $mpg_arr['move'] = (int)get_request_arg('mpmove'); // for Resign
    }
-   elseif( $mpg_type == MPGMSG_STARTGAME )
+   elseif ( $mpg_type == MPGMSG_STARTGAME )
    {
-      if( $game_status != GAME_STATUS_SETUP )
+      if ( $game_status != GAME_STATUS_SETUP )
          error('invalid_game_status', "$dbgmsg.check.startgame.status($game_status)");
    }
 
@@ -761,13 +761,13 @@ function read_mpgame_request()
 function echo_dispute_diffs( $my_gs, $opp_gs, $my_handle, $opp_handle, &$msg_form  )
 {
    $arr_diffs = GameSetup::build_invitation_diffs( $my_gs, $opp_gs, $my_handle, $opp_handle );
-   if( count($arr_diffs) )
+   if ( count($arr_diffs) )
    {
       array_unshift( $arr_diffs, array( T_('Game settings by#inv_diff'),
          sprintf( '%s (%s)', $my_handle, T_('myself#inv_diff')), $opp_handle ));
 
       $msg_form->add_row( array('HEADER', T_('Differences of Dispute') ));
-      foreach( $arr_diffs as $diff )
+      foreach ( $arr_diffs as $diff )
       {
          list( $field, $old, $new ) = $diff;
          $msg_form->add_row( array(

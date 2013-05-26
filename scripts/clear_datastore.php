@@ -28,11 +28,11 @@ require_once 'include/form_functions.php';
    connect2mysql();
 
    $logged_in = who_is_logged($player_row);
-   if( !$logged_in )
+   if ( !$logged_in )
       error('login_if_not_logged_in', 'scripts.clear_datastore');
-   if( $player_row['ID'] <= GUESTS_ID_MAX )
+   if ( $player_row['ID'] <= GUESTS_ID_MAX )
       error('not_allowed_for_guest', 'scripts.clear_datastore');
-   if( !(@$player_row['admin_level'] & ADMIN_DEVELOPER) )
+   if ( !(@$player_row['admin_level'] & ADMIN_DEVELOPER) )
       error('adminlevel_too_low', 'scripts.clear_datastore');
 
    $subdir = get_request_arg('subdir');
@@ -53,16 +53,16 @@ require_once 'include/form_functions.php';
 
    echo "Choose sub-dir of datastore-folder [$path_datastore] and action to perform:<br>\n";
    echo "<table><tr><td><dl>\n";
-   foreach( $subdirs as $dir )
+   foreach ( $subdirs as $dir )
       printf("  <dd>%s\n", $form->print_insert_radio_buttonsx('subdir', array( $dir => "$dir/*" ), ($dir == $subdir)) );
    echo "</dl>\n</td></tr></table>";
    echo $form->print_insert_submit_button('list', 'List Files'),
       SMALL_SPACING,
       $form->print_insert_submit_button('del',  'Delete Files');
 
-   if( @$_REQUEST['list'] && $subdir )
+   if ( @$_REQUEST['list'] && $subdir )
       list_files( $path_datastore, $subdir );
-   elseif( @$_REQUEST['del'] && $subdir )
+   elseif ( @$_REQUEST['del'] && $subdir )
       delete_files( $path_datastore, $subdir );
 
    echo $form->print_end();
@@ -76,9 +76,9 @@ function read_subdirs( $path )
 {
    $out = array();
    $arr = glob("$path/*", GLOB_ONLYDIR);
-   foreach( $arr as $item )
+   foreach ( $arr as $item )
    {
-      if( is_dir($item) )
+      if ( is_dir($item) )
          $out[] = basename($item);
    }
    return $out;
@@ -92,9 +92,9 @@ function delete_files( $path, $subdir )
    echo "<table><tr><td>\n",
       "<pre>\n",
       "Deleted files of sub-dir [$subdir]:\n";
-   foreach( $files as $file )
+   foreach ( $files as $file )
    {
-      if( !is_file($file) )
+      if ( !is_file($file) )
          continue;
       $cnt++;
       printf("  [%s]\n", basename($file));
@@ -114,9 +114,9 @@ function list_files( $path, $subdir )
    echo "<table><tr><td>\n",
       "<pre>\n",
       "Files of sub-dir [$subdir]:\n";
-   foreach( $files as $file )
+   foreach ( $files as $file )
    {
-      if( !is_file($file) )
+      if ( !is_file($file) )
          continue;
       $cnt++;
       printf("  [%s]\n", basename($file));

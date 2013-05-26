@@ -27,17 +27,17 @@ require_once 'include/register_functions.php';
    connect2mysql();
    $player_row = array( 'ID' => 0 );
 
-   if( !is_blocked_ip() )
+   if ( !is_blocked_ip() )
       error('not_logged_in', 'do_registration_blocked'); // block spammer, call only if IP-blocked
 
    $errorlog_id = get_request_arg('errlog_id');
 
    $reg = new UserRegistration( /*die_on_error*/false );
    $errors = 0;
-   if( @$_REQUEST['register'] ) // register blocked user
+   if ( @$_REQUEST['register'] ) // register blocked user
    {
       $errors = $reg->check_registration_blocked();
-      if( !$errors )
+      if ( !$errors )
       {
          $reg->register_blocked_user( FORUM_ID_SUPPORT );
          jump_to('index.php?sysmsg=' .
@@ -74,7 +74,7 @@ require_once 'include/register_functions.php';
    $reg_form->set_area(1);
    $reg_form->add_row( array( 'HEADER', T_('Please enter data') ) );
 
-   if( is_array($errors) )
+   if ( is_array($errors) )
    {
       $error_str = format_array( $errors, "\n<li>%s</li>" );
 

@@ -32,7 +32,7 @@ require_once 'include/goban_handler_gfx.php';
    connect2mysql();
 
    $logged_in = who_is_logged( $player_row);
-   if( !$logged_in )
+   if ( !$logged_in )
       error('login_if_not_logged_in', 'message_thread');
 
    $my_id = $player_row['ID'];
@@ -50,7 +50,7 @@ require_once 'include/goban_handler_gfx.php';
    $mid = (int)get_request_arg('mid');
    $other_uid = (int)get_request_arg('oid');
    $with_text = get_request_arg('text', 0);
-   if( $mid <= 0 || $thread <= 0 )
+   if ( $mid <= 0 || $thread <= 0 )
       error('unknown_message', "message_thread.find_msg($mid,$thread)" );
 
    // init search profile
@@ -84,7 +84,7 @@ require_once 'include/goban_handler_gfx.php';
       SQLP_ORDER,
          'M.ID'
    );
-   if( $with_text )
+   if ( $with_text )
       $qsql->add_part( SQLP_FIELDS, 'M.Text' );
 
    $query = $qsql->get_select();
@@ -92,10 +92,10 @@ require_once 'include/goban_handler_gfx.php';
    $msg_thread = array(); // mid => ThreadList
    $roots = array(); // root-threads (should only be one, but with corrupt db this may be >1 )
    $has_igoban = false;
-   while( $row = mysql_fetch_array( $result ) )
+   while ( $row = mysql_fetch_array( $result ) )
    {
       $reply = $row['ReplyTo'];
-      if( $reply > 0 && isset($msg_thread[$reply]) )
+      if ( $reply > 0 && isset($msg_thread[$reply]) )
       {
          $parent = $msg_thread[$reply];
          $threadlist = $parent->addChild( $row );
@@ -106,14 +106,14 @@ require_once 'include/goban_handler_gfx.php';
          $roots[] = $threadlist;
       }
       $msg_thread[$row['ID']] = $threadlist;
-      if( $with_text && MarkupHandlerGoban::contains_goban(@$row['Text']) )
+      if ( $with_text && MarkupHandlerGoban::contains_goban(@$row['Text']) )
          $has_igoban = true;
    }
    mysql_free_result($result);
    $msg_count = count($msg_thread);
    unset($msg_thread);
 
-   if( $has_igoban )
+   if ( $has_igoban )
    {
       $cfg_board = ConfigBoard::load_config_board($my_id);
       $style_str = GobanHandlerGfxBoard::style_string( $cfg_board->get_stone_size() );
@@ -129,7 +129,7 @@ require_once 'include/goban_handler_gfx.php';
    // thread-list can be very long, so add switch also on top
    $menu = array();
    $url_args = "thread=$thread".URI_AMP."mid=$mid".URI_AMP."oid=$other_uid#mid$mid";
-   if( $with_text )
+   if ( $with_text )
       $menu[T_('Hide message texts')] = $page.'text=0'.URI_AMP.$url_args;
    else
       $menu[T_('Show message texts')] = $page.'text=1'.URI_AMP.$url_args;
@@ -138,7 +138,7 @@ require_once 'include/goban_handler_gfx.php';
 
 
    $arr_directions = get_message_directions();
-   foreach( $roots as $threadlist )
+   foreach ( $roots as $threadlist )
       $threadlist->traverse( 'echo_message_row', $mtable );
 
    $mtable->echo_table();
@@ -164,7 +164,7 @@ function echo_message_row( $threadlist, &$mtable )
 
    $oid = (int)$item['other_ID'];
    $oid_url = ( (@$item['Flags'] & MSGFLAG_BULK) && $oid > 0 ) ? URI_AMP."oid=$oid" : '';
-   if( $item['ID'] == $mid && (!$other_uid || $other_uid == $oid) )
+   if ( $item['ID'] == $mid && (!$other_uid || $other_uid == $oid) )
       $curr_msg = name_anchor("mid$mid")
             . anchor( 'message.php?mode=ShowMessage'.URI_AMP."mid=$mid{$oid_url}",
                   image( $base_path.'images/msg.gif', T_('Current message'), null, 'class="InTextImage"' ))
@@ -184,10 +184,10 @@ function echo_message_row( $threadlist, &$mtable )
             make_html_safe( $item['Subject'], SUBJECT_HTML ) );
    $row_str[6] = date(DATE_FMT, $item['X_Time']);
 
-   if( $with_text )
+   if ( $with_text )
    {
       $txt = make_html_safe( $item['Text'], true );
-      if( $has_igoban )
+      if ( $has_igoban )
          $txt = MarkupHandlerGoban::replace_igoban_tags( $txt );
 
       $row_str['extra_row_class'] = 'MessageThread';

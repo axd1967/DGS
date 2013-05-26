@@ -35,11 +35,11 @@ require_once 'include/sgf_builder.php';
  */
 
 $quick_mode = (boolean)@$_REQUEST['quick_mode'];
-if( $quick_mode )
+if ( $quick_mode )
    $TheErrors->set_mode(ERROR_MODE_PRINT);
 
 
-if( $is_down )
+if ( $is_down )
 {
    error('server_down');
 }
@@ -52,13 +52,13 @@ else
 
    // parse args
    $gid = (int)@$_REQUEST['gid'];
-   if( $gid <= 0 )
+   if ( $gid <= 0 )
    {
-      if( eregi("game([0-9]+)", @$_SERVER['REQUEST_URI'], $tmp) )
+      if ( eregi("game([0-9]+)", @$_SERVER['REQUEST_URI'], $tmp) )
          $gid = $tmp[1];
    }
    $gid = (int)$gid;
-   if( $gid <= 0 )
+   if ( $gid <= 0 )
       error('unknown_game', "sgf.check.game($gid)");
 
    $use_cache = !((bool)@$_REQUEST['no_cache']);
@@ -66,7 +66,7 @@ else
 
    $owned_comments = @$_REQUEST['owned_comments'];
    $no_comments = false;
-   if( strtolower($owned_comments) == 'n' )
+   if ( strtolower($owned_comments) == 'n' )
    {
       $owned_comments = 0;
       $no_comments = true;
@@ -75,7 +75,7 @@ else
    $opt_mpg = (int)@$_REQUEST['mpg'];
 
    $sgf = new SgfBuilder( $gid, /*use_buf*/false );
-   if( $opt_mpg & 1 )
+   if ( $opt_mpg & 1 )
       $sgf->set_mpg_node_add_user(false);
 
    $row = $sgf->load_game_info();
@@ -85,16 +85,16 @@ else
 
    // owned_comments: BLACK|WHITE=viewed by B/W-game-player (also for MP-game), DAME=viewed by other user
    $owned_uid = 0;
-   if( $owned_comments )
+   if ( $owned_comments )
    {
       $owned_comments = DAME;
       $cookie_handle = safe_getcookie('handle');
-      if( $sgf->is_mpgame() )
+      if ( $sgf->is_mpgame() )
       {
          $sgf->find_mpg_user( $cookie_handle );
-         if( is_array($sgf->mpg_active_user) )
+         if ( is_array($sgf->mpg_active_user) )
          {
-            if( $sgf->mpg_active_user['Sessioncode'] == safe_getcookie('sessioncode')
+            if ( $sgf->mpg_active_user['Sessioncode'] == safe_getcookie('sessioncode')
                   && $sgf->mpg_active_user['X_Sessionexpire'] >= $NOW )
             {
                $owned_uid = $sgf->mpg_active_user[0];
@@ -102,17 +102,17 @@ else
             }
          }
       }
-      elseif( strcasecmp($Blackhandle, $cookie_handle) == 0 )
+      elseif ( strcasecmp($Blackhandle, $cookie_handle) == 0 )
       {
-         if( $Blackscode == safe_getcookie('sessioncode') && $Blackexpire >= $NOW )
+         if ( $Blackscode == safe_getcookie('sessioncode') && $Blackexpire >= $NOW )
          {
             $owned_comments = BLACK ;
             $owned_uid = $Black_uid;
          }
       }
-      elseif( strcasecmp($Whitehandle, $cookie_handle) == 0 )
+      elseif ( strcasecmp($Whitehandle, $cookie_handle) == 0 )
       {
-         if( $Whitescode == safe_getcookie('sessioncode') && $Whiteexpire >= $NOW )
+         if ( $Whitescode == safe_getcookie('sessioncode') && $Whiteexpire >= $NOW )
          {
             $owned_comments = WHITE ;
             $owned_uid = $White_uid;
@@ -123,7 +123,7 @@ else
       $owned_comments = DAME;
 
    // load GamesNotes for player
-   if( $sgf->is_include_games_notes() && ($owned_comments != DAME) && ($owned_uid > 0) )
+   if ( $sgf->is_include_games_notes() && ($owned_comments != DAME) && ($owned_uid > 0) )
       $sgf->load_player_game_notes( $owned_uid );
 
    $sgf->load_trimmed_moves( !$no_comments );
@@ -137,7 +137,7 @@ else
    header( "Content-Description: PHP Generated Data" );
 
    //to allow some mime applications to find it in the cache
-   if( $use_cache )
+   if ( $use_cache )
    {
       header('Expires: ' . gmdate(GMDATE_FMT, $NOW+5*SECS_PER_MIN));
       header('Last-Modified: ' . gmdate(GMDATE_FMT, $NOW));

@@ -46,13 +46,13 @@ class TournamentFactory
    /*! \brief Constructs ConfigBoard-object with specified arguments. */
    public static function getTournament( $wizard_type )
    {
-      if( $wizard_type == TOURNEY_WIZTYPE_DGS_LADDER )
+      if ( $wizard_type == TOURNEY_WIZTYPE_DGS_LADDER )
          return new DgsLadderTournament();
-      elseif( $wizard_type == TOURNEY_WIZTYPE_PUBLIC_LADDER )
+      elseif ( $wizard_type == TOURNEY_WIZTYPE_PUBLIC_LADDER )
          return new PublicLadderTournament();
-      elseif( $wizard_type == TOURNEY_WIZTYPE_PRIVATE_LADDER )
+      elseif ( $wizard_type == TOURNEY_WIZTYPE_PRIVATE_LADDER )
          return new PrivateLadderTournament();
-      elseif( $wizard_type == TOURNEY_WIZTYPE_DGS_ROUNDROBIN )
+      elseif ( $wizard_type == TOURNEY_WIZTYPE_DGS_ROUNDROBIN )
          return new DgsRoundRobinTournament();
       else
          error('invalid_args', "TournamentFactory:getTournament($wizard_type)");
@@ -62,13 +62,13 @@ class TournamentFactory
    public static function getTournamentTypes()
    {
       $ttypes = array();
-      if( preg_match("/^(".ALLOW_TOURNAMENTS.")$/", TOURNEY_TYPE_LADDER) )
+      if ( preg_match("/^(".ALLOW_TOURNAMENTS.")$/", TOURNEY_TYPE_LADDER) )
       {
          $ttypes[TOURNEY_WIZTYPE_DGS_LADDER]     = TWIZT_LADDER | TWIZ_DGS;
          $ttypes[TOURNEY_WIZTYPE_PUBLIC_LADDER]  = TWIZT_LADDER | TWIZ_PUBLIC;
          $ttypes[TOURNEY_WIZTYPE_PRIVATE_LADDER] = TWIZT_LADDER | TWIZ_PRIVATE;
       }
-      if( preg_match("/^(".ALLOW_TOURNAMENTS.")$/", TOURNEY_TYPE_ROUND_ROBIN) )
+      if ( preg_match("/^(".ALLOW_TOURNAMENTS.")$/", TOURNEY_TYPE_ROUND_ROBIN) )
          $ttypes[TOURNEY_WIZTYPE_DGS_ROUNDROBIN] = TWIZT_ROUND_ROBIN | TWIZ_DGS;
       return $ttypes;
    }

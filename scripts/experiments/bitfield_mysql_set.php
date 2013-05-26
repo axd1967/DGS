@@ -49,7 +49,7 @@ $TheErrors->set_mode(ERROR_MODE_PRINT);
       or $TheErrors->dump_exit('test');
 
    echo "<pre># $field_size bits size<br># default";
-   foreach( array(
+   foreach ( array(
          array( 3, -1),
          array( 3, 1),
          array( 3, -1),
@@ -87,12 +87,12 @@ $TheErrors->set_mode(ERROR_MODE_PRINT);
       //echo "<br>"; var_export($row);
 
       list( $nr, $op)= $sub;
-      if( $nr < 0 )
+      if ( $nr < 0 )
       {
-         if( $op < 0 )
+         if ( $op < 0 )
             break;
          echo "<br># ", ($op ? 'set' : 'clr'), " all";
-         if( $op )
+         if ( $op )
             db_query( 'test.set_all',
                "UPDATE test SET ColumnSet=CAST(-1 AS UNSIGNED) WHERE ID=1 LIMIT 1");
          else
@@ -100,7 +100,7 @@ $TheErrors->set_mode(ERROR_MODE_PRINT);
                "UPDATE test SET ColumnSet=CAST(0 AS UNSIGNED) WHERE ID=1 LIMIT 1");
          continue;
       }
-      if( $op < 0 )
+      if ( $op < 0 )
       {
          $res= bitfield_op( $X_ColumnSet, $nr);
          echo "<br># bit.$nr is ", (int)$res;
@@ -125,34 +125,34 @@ $TheErrors->set_mode(ERROR_MODE_PRINT);
 //$op: 0=clr, 1=set, -1=tst
 function bitfield_op( $hexstr, $bitnr=0, $op=-1)
 {
-   if( $bitnr < 0 )
+   if ( $bitnr < 0 )
       return null;
    $i= ($bitnr >> 2) + 1;
    $s= str_pad( (string)$hexstr, $i, '0', STR_PAD_LEFT);
    $i= strlen( $s) - $i;
    //hex digit to value
    $c= ord($s[$i]);
-   if( $c > 0x60 )
+   if ( $c > 0x60 )
       $c-= 0x61-10;
-   else if( $c > 0x40 )
+   else if ( $c > 0x40 )
       $c-= 0x41-10;
    else
       $c-= 0x30;
    //operation
    $b= $bitnr & 0x3;
-   if( $op < 0 ) //tst
+   if ( $op < 0 ) //tst
       return (bool)($c & (1<<$b));
-   if( $op > 0 ) //set
+   if ( $op > 0 ) //set
       $c|= (1<<$b);
    else //clr
       $c&=~(1<<$b);
    //value to hex digit
-   if( $c > 9 )
+   if ( $c > 9 )
       $c+= 0x41-10;
    else
       $c+= 0x30;
    $s[$i]= chr($c);
-   //$s= ltrim( $s, '0'); if( $s == '' ) $s= '0';
+   //$s= ltrim( $s, '0'); if ( $s == '' ) $s= '0';
    return $s;
 } //bitfield_op
 

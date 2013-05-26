@@ -67,7 +67,7 @@ class TournamentExtension
 
    public function setProperty( $property )
    {
-      if( !is_numeric($property) || $property <= 0 || $property > TE_MAX_PROP )
+      if ( !is_numeric($property) || $property <= 0 || $property > TE_MAX_PROP )
          error('invalid_args', "TournamentExtension.setProperty($property)");
       $this->Property = (int)$property;
    }
@@ -126,9 +126,9 @@ class TournamentExtension
    public static function build_query_sql( $tid=0, $property=0 )
    {
       $qsql = $GLOBALS['ENTITY_TOURNAMENT_EXTENSION']->newQuerySQL('TE');
-      if( $tid > 0 )
+      if ( $tid > 0 )
          $qsql->add_part( SQLP_WHERE, "TE.tid='$tid'" );
-      if( $property > 0 )
+      if ( $property > 0 )
          $qsql->add_part( SQLP_WHERE, "TE.Property='$property'" );
       return $qsql;
    }
@@ -152,14 +152,14 @@ class TournamentExtension
    public static function load_tournament_extension( $tid, $property )
    {
       $result = NULL;
-      if( $tid > 0 && $property > 0 )
+      if ( $tid > 0 && $property > 0 )
       {
          $qsql = self::build_query_sql( $tid, $property );
          $qsql->add_part( SQLP_LIMIT, '1' );
 
          $row = mysql_single_fetch( "TournamentExtension.load_tournament_extension($tid,$property)",
             $qsql->get_select() );
-         if( $row )
+         if ( $row )
             $result = self::new_from_row( $row );
       }
       return $result;
@@ -175,7 +175,7 @@ class TournamentExtension
       $iterator->setResultRows( mysql_num_rows($result) );
 
       $iterator->clearItems();
-      while( $row = mysql_fetch_array( $result ) )
+      while ( $row = mysql_fetch_array( $result ) )
       {
          $tourney = self::new_from_row( $row );
          $iterator->addItem( $tourney, $row );

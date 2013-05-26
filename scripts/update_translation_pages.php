@@ -45,9 +45,9 @@ function find_php_files( )
 
    $array = array();
 
-   foreach( $directories as $dir )
+   foreach ( $directories as $dir )
    {
-      foreach( glob("$dir*.php") as $filename )
+      foreach ( glob("$dir*.php") as $filename )
       {
          //echo "filename=$filename<br>";
          $array[] = $filename;
@@ -78,11 +78,11 @@ function group_string( $id)
    connect2mysql();
 
    $logged_in = who_is_logged( $player_row);
-   if( !$logged_in )
+   if ( !$logged_in )
       error('login_if_not_logged_in', 'scripts.update_translation_pages');
-   if( $player_row['ID'] <= GUESTS_ID_MAX )
+   if ( $player_row['ID'] <= GUESTS_ID_MAX )
       error('not_allowed_for_guest', 'scripts.update_translation_pages');
-   if( !(@$player_row['admin_level'] & ADMIN_DATABASE) )
+   if ( !(@$player_row['admin_level'] & ADMIN_DATABASE) )
       error('adminlevel_too_low', 'scripts.update_translation_pages');
 
    $page = $_SERVER['PHP_SELF'];
@@ -90,10 +90,10 @@ function group_string( $id)
 
    start_html('update_translation_pages', 0);
 
-   if( $do_it=@$_REQUEST['do_it'] )
+   if ( $do_it=@$_REQUEST['do_it'] )
    {
       function dbg_query($s) {
-         if( !mysql_query( $s) )
+         if ( !mysql_query( $s) )
             die("<BR>$s;<BR>" . mysql_error() );
          echo " --- fixed. ";
       }
@@ -116,7 +116,7 @@ function group_string( $id)
    $result = mysql_query($query) or die(mysql_error());
 
    $translationgroups = array();
-   while( $row = mysql_fetch_assoc( $result ) )
+   while ( $row = mysql_fetch_assoc( $result ) )
    {
       $translationgroups[$row['Groupname']] = $row['ID'];
    }
@@ -127,14 +127,14 @@ function group_string( $id)
 
    $files = find_php_files();
    $translationpages_found = array();
-   foreach( $files as $file )
+   foreach ( $files as $file )
    {
       //note: only keep the first match of the file (starting at column 1)
-      if( grep_file('/^\$TranslateGroups\[\]\s*=\s*([\"\'])(\w+)\1\s*;/', $file, $matches) )
+      if ( grep_file('/^\$TranslateGroups\[\]\s*=\s*([\"\'])(\w+)\1\s*;/', $file, $matches) )
       {
          $group_found = $matches[2];
          //echo $file . " " . $group_found . ", " . $translationgroups[$group_found] . "<br>\n";
-         if( !isset($translationgroups[$group_found]) )
+         if ( !isset($translationgroups[$group_found]) )
          {
             echo "<hr>Should be adjusted NOW: '$group_found' from $file ... OR be added:<br>\n";
             dbg_query("INSERT INTO TranslationGroups SET Groupname='" . mysql_addslashes($group_found) . "'");
@@ -155,10 +155,10 @@ function group_string( $id)
    $n= (int)mysql_num_rows($result);
    echo "\n<br>=&gt; result: $n rows<p></p>\n";
 
-   if( $n > 0 )
-   while( $row = mysql_fetch_assoc( $result ) )
+   if ( $n > 0 )
+   while ( $row = mysql_fetch_assoc( $result ) )
    {
-      if( !isset($translationpages_found[$row['Page']]) )
+      if ( !isset($translationpages_found[$row['Page']]) )
       {
          echo "<hr>Should be deleted: " . $row['Page'] . "<br>\n";
          dbg_query("DELETE FROM TranslationPages WHERE Page='" . mysql_addslashes($row['Page']) . "' LIMIT 1");
@@ -166,14 +166,14 @@ function group_string( $id)
       else
       {
          $ref = &$translationpages_found[$row['Page']];
-         if( $ref[1] === true )
+         if ( $ref[1] === true )
          {
             echo "<hr><font color=red>Error: Duplicate entry: " . $row['Page'] .
                "</font><br>\n";
             continue;
          }
          $ref[1] = true;
-         if( $ref[0] !== $row['Group_ID'] )
+         if ( $ref[0] !== $row['Group_ID'] )
          {
             echo sprintf( "<hr>Group changed: %s: %s --> %s<br>\n",
                           $row['Page'], group_string($row['Group_ID']), group_string($ref[0]) );
@@ -185,9 +185,9 @@ function group_string( $id)
    mysql_free_result($result);
 
 
-   foreach( $translationpages_found as $page => $val )
+   foreach ( $translationpages_found as $page => $val )
    {
-      if( $val[1] === false )
+      if ( $val[1] === false )
       {
          echo "<hr>To be added: $page --> ", group_string($val[0]), "<br>\n";
          dbg_query("INSERT INTO TranslationPages " .

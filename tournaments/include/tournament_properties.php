@@ -93,7 +93,7 @@ class TournamentProperties
 
    public function setRatingUseMode( $use_mode )
    {
-      if( !is_null($use_mode) && !preg_match( "/^(".CHECK_TPROP_RUMODE.")$/", $use_mode ) )
+      if ( !is_null($use_mode) && !preg_match( "/^(".CHECK_TPROP_RUMODE.")$/", $use_mode ) )
          error('invalid_args', "TournamentProperties.setRatingUseMode($use_mode)");
       $this->RatingUseMode = $use_mode;
    }
@@ -134,7 +134,7 @@ class TournamentProperties
    /*! \brief Inserts or updates tournament-properties in database. */
    public function persist()
    {
-      if( self::isTournamentProperties($this->tid) ) // async
+      if ( self::isTournamentProperties($this->tid) ) // async
          $success = $this->update();
       else
          $success = $this->insert();
@@ -204,26 +204,26 @@ class TournamentProperties
       $is_new_tp = ( $tp->ID == 0 ); // >0 = edit-existing-TP
 
       $errors = array();
-      if( $is_new_tp )
+      if ( $is_new_tp )
          $warnings =& $errors;
       else
          $warnings = array();
 
-      if( $is_new_tp && $check_type == TCHKTYPE_USER_NEW && $tourney->Scope == TOURNEY_SCOPE_PRIVATE )
+      if ( $is_new_tp && $check_type == TCHKTYPE_USER_NEW && $tourney->Scope == TOURNEY_SCOPE_PRIVATE )
          $errors[] = T_('This is a private tournament, so you must be invited to participate.');
 
       // limit register end-time
       global $NOW;
-      if( $this->RegisterEndTime && $NOW > $this->RegisterEndTime )
+      if ( $this->RegisterEndTime && $NOW > $this->RegisterEndTime )
          $warnings[] = sprintf( T_('Registration phase ended on [%s].#tourney'), formatDate($this->RegisterEndTime) );
 
       // limit participants
       $maxTP = $this->getMaxParticipants();
       $round_max_tps = ( $tp->StartRound > 1 ) ? round( $maxTP / pow(2, $tp->StartRound - 1) ) : $maxTP;
       $tp_count = TournamentParticipant::count_TPs( $this->tid, /*TP-stat-ALL*/null, $tp->StartRound, /*NextR*/false ); //TODO TODO must cache this!! ... or store locally or helper
-      if( $is_new_tp )
+      if ( $is_new_tp )
          ++$tp_count;
-      if( $tp_count > $round_max_tps )
+      if ( $tp_count > $round_max_tps )
          $errors[] = sprintf( T_('Tournament max. participant limit (%s users) for Start-Round %s is reached.'),
             $round_max_tps, $tp->StartRound );
 
@@ -232,23 +232,23 @@ class TournamentProperties
       $user = $this->_load_user($check_user);
 
       // check use-rating-modes
-      if( $this->RatingUseMode == TPROP_RUMODE_CURR_FIX || $this->RatingUseMode == TPROP_RUMODE_COPY_FIX )
+      if ( $this->RatingUseMode == TPROP_RUMODE_CURR_FIX || $this->RatingUseMode == TPROP_RUMODE_COPY_FIX )
       {// need user-rating or tournament-rating
-         if( !$user->hasRating() )
+         if ( !$user->hasRating() )
             $errors[] = T_('User has no valid Dragon rating, which is needed for tournament rating mode.');
                //. "\n" . self::getRatingUseModeText($this->RatingUseMode, false);
       }
-      elseif( $this->RatingUseMode == TPROP_RUMODE_COPY_CUSTOM )
+      elseif ( $this->RatingUseMode == TPROP_RUMODE_COPY_CUSTOM )
       {
-         if( !$tp->hasRating() && !$user->hasRating() )
+         if ( !$tp->hasRating() && !$user->hasRating() )
             $errors[] = T_('User needs valid Dragon rating or customized rating, which is required by tournament rating mode.#tourney');
       }
 
       // limit user-rating
-      if( $this->UserRated )
+      if ( $this->UserRated )
       {
          // user must have rating, because tournament-games are rated
-         if( !$user->hasRating() )
+         if ( !$user->hasRating() )
             $errors[] = T_('User has no Dragon rating, which is required for this rated tournament.');
          elseif ( !$user->matchRating( $this->UserMinRating, $this->UserMaxRating ) )
             $warnings[] = sprintf( T_('User rating [%s] does not match the required rating range %s.'),
@@ -260,15 +260,15 @@ class TournamentProperties
       }
 
       // limit games-number
-      if( $this->UserMinGamesFinished > 0 )
+      if ( $this->UserMinGamesFinished > 0 )
       {
-         if( $user->GamesFinished < $this->UserMinGamesFinished )
+         if ( $user->GamesFinished < $this->UserMinGamesFinished )
             $warnings[] = sprintf( T_('User must have at least %s finished games, but has only %s.'),
                $this->UserMinGamesFinished, $user->GamesFinished );
       }
-      if( $this->UserMinGamesRated > 0 )
+      if ( $this->UserMinGamesRated > 0 )
       {
-         if( $user->GamesRated < $this->UserMinGamesRated )
+         if ( $user->GamesRated < $this->UserMinGamesRated )
             $warnings[] = sprintf( T_('User must have at least %s rated finished games, but has only %s.'),
                $this->UserMinGamesRated, $user->GamesRated );
       }
@@ -281,9 +281,9 @@ class TournamentProperties
    /*! \brief (internally) loads User-object if user is only user-id and returns User-object. */
    private function _load_user( $check_user )
    {
-      if( $check_user instanceof User )
+      if ( $check_user instanceof User )
          return $check_user;
-      if( !is_numeric($check_user) )
+      if ( !is_numeric($check_user) )
          error('invalid_args', "TournamentProperties._load_user($check_user)");
       return User::load_user( (int)$check_user );
    }
@@ -293,15 +293,15 @@ class TournamentProperties
    {
       $arr = array();
       $default = 0;
-      if( $this->RatingUseMode == TPROP_RUMODE_CURR_FIX )
+      if ( $this->RatingUseMode == TPROP_RUMODE_CURR_FIX )
       {
          $arr[TOURNEY_SEEDORDER_CURRENT_RATING] = T_('Current User Rating#T_ladder');
          $default = TOURNEY_SEEDORDER_CURRENT_RATING;
       }
       $arr[TOURNEY_SEEDORDER_REGISTER_TIME] = T_('Tournament Registration Time');
-      if( $default == 0 )
+      if ( $default == 0 )
          $default = TOURNEY_SEEDORDER_REGISTER_TIME;
-      if( $this->RatingUseMode == TPROP_RUMODE_COPY_CUSTOM || $this->RatingUseMode == TPROP_RUMODE_COPY_FIX )
+      if ( $this->RatingUseMode == TPROP_RUMODE_COPY_CUSTOM || $this->RatingUseMode == TPROP_RUMODE_COPY_FIX )
          $arr[TOURNEY_SEEDORDER_TOURNEY_RATING] = T_('Tournament Rating');
       $arr[TOURNEY_SEEDORDER_RANDOM] = T_('Random#T_ladder');
       return array( $default, $arr );
@@ -359,12 +359,12 @@ class TournamentProperties
    public static function load_tournament_properties( $tid )
    {
       $result = NULL;
-      if( $tid > 0 )
+      if ( $tid > 0 )
       {
          $qsql = self::build_query_sql( $tid );
          $row = mysql_single_fetch( "TournamentProperties:load_tournament_properties($tid)",
             $qsql->get_select() );
-         if( $row )
+         if ( $row )
             $result = self::new_from_row( $row );
       }
       return $result;
@@ -377,7 +377,7 @@ class TournamentProperties
 
       // lazy-init of texts
       $key = 'USE_MODE';
-      if( !isset($ARR_RAT_USEMODES[$key]) )
+      if ( !isset($ARR_RAT_USEMODES[$key]) )
       {
          $arr = array();
          $arr[TPROP_RUMODE_COPY_CUSTOM] = T_('Copy Custom#TP_usemode');
@@ -392,11 +392,11 @@ class TournamentProperties
          $ARR_RAT_USEMODES[$key.'_LONG'] = $arr;
       }
 
-      if( !$short )
+      if ( !$short )
          $key .= '_LONG';
-      if( is_null($use_mode) )
+      if ( is_null($use_mode) )
          return $ARR_RAT_USEMODES[$key];
-      if( !isset($ARR_RAT_USEMODES[$key][$use_mode]) )
+      if ( !isset($ARR_RAT_USEMODES[$key][$use_mode]) )
          error('invalid_args', "TournamentProperties:getRatingUseModeText($use_mode,$key)");
       return $ARR_RAT_USEMODES[$key][$use_mode];
    }//getRatingUseModeText

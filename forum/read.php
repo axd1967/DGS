@@ -29,7 +29,7 @@ require_once 'forum/post.php';
    connect2mysql();
 
    $logged_in = who_is_logged( $player_row);
-   if( !$logged_in )
+   if ( !$logged_in )
       error('login_if_not_logged_in', 'forum.read');
    $my_id = $player_row['ID'];
    $cfg_pages = ConfigPages::load_config_pages($my_id);
@@ -47,15 +47,15 @@ require_once 'forum/post.php';
       . URI_AMP."thread=$thread"
       . ( $rx_term != '' ? URI_AMP."xterm=$rx_term" : '');
 
-   if( $toggleflag > 0 && ConfigPages::toggle_forum_flags($my_id, $toggleflag) )
+   if ( $toggleflag > 0 && ConfigPages::toggle_forum_flags($my_id, $toggleflag) )
       jump_to( 'forum/'.$toggle_baseurl );
-   elseif( $chg_view )
+   elseif ( $chg_view )
    {
-      if( $chg_view == 't' )
+      if ( $chg_view == 't' )
          ConfigPages::set_clear_forum_flags($my_id, FORUMFLAGS_POSTVIEW_FLAT, 0 );
-      elseif( $chg_view == 'fo' )
+      elseif ( $chg_view == 'fo' )
          ConfigPages::set_clear_forum_flags($my_id, FORUMFLAGS_POSTVIEW_FLAT, FORUMFLAG_POSTVIEW_FLAT_OLD_FIRST );
-      elseif( $chg_view == 'fn' )
+      elseif ( $chg_view == 'fn' )
          ConfigPages::set_clear_forum_flags($my_id, FORUMFLAGS_POSTVIEW_FLAT, FORUMFLAG_POSTVIEW_FLAT_NEW_FIRST );
       jump_to( 'forum/'.$toggle_baseurl );
    }
@@ -69,16 +69,16 @@ require_once 'forum/post.php';
 
    // no mark-read on moderator-actions or after moderator-toggle
    $allow_mark_read = !$is_moderator;
-   if( $switch_moderator >= 0 && (string)$arg_moderator != '' )
+   if ( $switch_moderator >= 0 && (string)$arg_moderator != '' )
       $allow_mark_read = false;
 
    // assure independence from forum_id
-   if( $forum_id == 0 && $thread > 0 )
+   if ( $forum_id == 0 && $thread > 0 )
       $forum_id = load_forum_id( $thread );
 
    $forum = Forum::load_cache_forum( $forum_id );
    $f_opts = new ForumOptions( $player_row );
-   if( !$f_opts->is_visible_forum( $forum->options ) )
+   if ( !$f_opts->is_visible_forum( $forum->options ) )
       error('forbidden_forum', "forum_read.check.forum_visible($forum_id,$my_id)");
 
    // for GoDiagrams
@@ -86,7 +86,7 @@ require_once 'forum/post.php';
    $cfg_board = null; // only load ConfigBoard if post contains go-diagram
 
    $post_errmsg = '';
-   if( isset($_POST['post']) )
+   if ( isset($_POST['post']) )
    {
       ta_begin(); //caller-TA
       {//HOT-section to post (=add/edit) message
@@ -94,7 +94,7 @@ require_once 'forum/post.php';
       }
       ta_end();
 
-      if( $pmsg_id )
+      if ( $pmsg_id )
       {// added/edited post successfully
          // maybe there are new posts during reply, so omit jump to reply, but jump to top instead
          jump_to("forum/read.php?forum=$forum_id".URI_AMP."thread=$thread"
@@ -109,17 +109,17 @@ require_once 'forum/post.php';
 
    $preview_ID = ($edit > 0 ? $edit : @$_REQUEST['parent']+0 );
    $preview_GoDiagrams = NULL;
-   if( $preview )
+   if ( $preview )
    {
       $preview_Subject = trim(get_request_arg('Subject'));
       $preview_Text = trim(get_request_arg('Text'));
 
-      if( is_null($cfg_board) && MarkupHandlerGoban::contains_goban($preview_Text) ) // lazy-load
+      if ( is_null($cfg_board) && MarkupHandlerGoban::contains_goban($preview_Text) ) // lazy-load
          $cfg_board = ConfigBoard::load_config_board($my_id);
 
-      if( !($edit > 0) )
+      if ( !($edit > 0) )
          $reply = @$_REQUEST['parent']+0;
-//      if( ALLOW_GO_DIAGRAMS && is_javascript_enabled() )
+//      if ( ALLOW_GO_DIAGRAMS && is_javascript_enabled() )
 //         $preview_GoDiagrams = GoDiagram::create_godiagrams($preview_Text, $cfg_board);
    }
 
@@ -133,22 +133,22 @@ require_once 'forum/post.php';
    $disp_forum->links |= LINK_FORUMS | LINK_THREADS | LINK_SEARCH | LINK_REFRESH;
 
    $modact = '';
-   if( $switch_moderator >= 0 )
+   if ( $switch_moderator >= 0 )
    {
       $disp_forum->links |= LINK_TOGGLE_MODERATOR;
       $modpid = get_request_arg('modpid', 0); // post-id
-      if( $arg_moderator == '' && $modpid > 0 )
+      if ( $arg_moderator == '' && $modpid > 0 )
       {
          ta_begin(); //caller-TA
          {//HOT-section to moderate post
             $modact = get_request_arg('modact'); // moderate-action
-            if( $modact == 'show' )
+            if ( $modact == 'show' )
                show_post( $forum_id, $thread, $modpid );
-            elseif( $modact == 'hide' )
+            elseif ( $modact == 'hide' )
                hide_post( $forum_id, $thread, $modpid );
-            elseif( $modact == 'approve' )
+            elseif ( $modact == 'approve' )
                approve_post( $forum_id, $thread, $modpid );
-            elseif( $modact == 'reject' )
+            elseif ( $modact == 'reject' )
                reject_post( $forum_id, $thread, $modpid );
             $allow_mark_read = false;
          }
@@ -158,9 +158,9 @@ require_once 'forum/post.php';
 
    // load thread/post-data
    $revh_post_id = (int)@$_GET['revision_history'];
-   if( $revh_post_id > 0 )
+   if ( $revh_post_id > 0 )
       $fthread = load_revision_history( $revh_post_id );
-   else if( $thread > 0 )
+   else if ( $thread > 0 )
    {
       // load user forum-reads
       $FR = new ForumRead( $my_id, $forum_id, $thread );
@@ -173,9 +173,9 @@ require_once 'forum/post.php';
          "P.Thread_ID=$thread",
          "P.PosIndex>''" ); // '' == inactivated (edited)
 
-      if( $disp_forum->flat_view < 0 ) // flat old-first
+      if ( $disp_forum->flat_view < 0 ) // flat old-first
          $qsql->add_part( SQLP_ORDER, 'P.Time ASC' );
-      elseif( $disp_forum->flat_view > 0 ) // flat new-first
+      elseif ( $disp_forum->flat_view > 0 ) // flat new-first
          $qsql->add_part( SQLP_ORDER, 'P.Time DESC' );
       else // tree-view
          $qsql->add_part( SQLP_ORDER, 'P.PosIndex' );
@@ -184,13 +184,13 @@ require_once 'forum/post.php';
       $disp_forum->count_new_posts = $fthread->load_posts( $qsql );
       $fthread->create_navigation_tree();
 
-      if( !$reply && !$edit && !$preview && $allow_mark_read )
+      if ( !$reply && !$edit && !$preview && $allow_mark_read )
          $FR->mark_thread_read( $thread, $fthread->last_created ); // use-case U01
    }
    else
       $fthread = new ForumThread();
 
-   if( is_null($cfg_board) && $fthread->contains_goban() )
+   if ( is_null($cfg_board) && $fthread->contains_goban() )
       $cfg_board = ConfigBoard::load_config_board($my_id);
    // end of DB-stuff
 
@@ -205,11 +205,11 @@ require_once 'forum/post.php';
 
    $disp_forum->print_moderation_note('99%');
 
-   if( $revh_post_id > 0 )
+   if ( $revh_post_id > 0 )
    {
       show_revision_history( $fthread, $disp_forum, $revh_post_id );
       end_page();
-      if( !$fthread->thread_post->is_author($my_id) )
+      if ( !$fthread->thread_post->is_author($my_id) )
          hit_thread( $thread ); // use-case U04
       exit;
    }
@@ -217,7 +217,7 @@ require_once 'forum/post.php';
 
    $post0 = $fthread->thread_post; // initial post of the thread
    $is_empty_thread = is_null($post0);
-   if( $is_empty_thread )
+   if ( $is_empty_thread )
    {
       $allow_thread_post = true;
       $thread_Subject = '';
@@ -241,7 +241,7 @@ require_once 'forum/post.php';
    $disp_forum->headline = ( $show_overview ) ? $headline1 : $headline2;
    $disp_forum->forum_start_table('Read');
 
-   if( $show_overview && !$is_empty_thread )
+   if ( $show_overview && !$is_empty_thread )
    {
       // draw tree-overview
       $disp_forum->draw_overview( $fthread );
@@ -250,47 +250,47 @@ require_once 'forum/post.php';
 
 
    // draw posts
-   if( $disp_forum->flat_view )
+   if ( $disp_forum->flat_view )
       $disp_forum->change_depth( 1 );
 
    $all_my_posts = true;
-   foreach( $fthread->posts as $post )
+   foreach ( $fthread->posts as $post )
    {
       $pid = $post->id;
       $is_my_post = $post->is_author($my_id);
-      if( !$is_my_post ) $all_my_posts = false;
+      if ( !$is_my_post ) $all_my_posts = false;
 
       $hidden = !$post->is_approved();
       $show_hidden_post = ( $is_my_post || $disp_forum->is_moderator );
-      if( $hidden && !$post->is_thread_post() && !$show_hidden_post )
+      if ( $hidden && !$post->is_thread_post() && !$show_hidden_post )
          continue;
 
-      if( !$disp_forum->flat_view )
+      if ( !$disp_forum->flat_view )
          $disp_forum->change_depth( $post->depth );
 
-      if( $edit == $pid && $is_my_post )
+      if ( $edit == $pid && $is_my_post )
          $drawmode = DRAWPOST_EDIT;
-      elseif( $reply == $pid )
+      elseif ( $reply == $pid )
          $drawmode = DRAWPOST_REPLY;
       else
          $drawmode = DRAWPOST_NORMAL;
       $drawmode_type = $drawmode;
-      if( $hidden && $drawmode != DRAWPOST_EDIT )
+      if ( $hidden && $drawmode != DRAWPOST_EDIT )
       {
          $drawmode |= MASK_DRAWPOST_HIDDEN;
-         if( !$show_hidden_post )
+         if ( !$show_hidden_post )
             $drawmode |= MASK_DRAWPOST_NO_BODY;
       }
 
       // draw current post
       $GoDiagrams = NULL;
-//      if( ALLOW_GO_DIAGRAMS && is_javascript_enabled() )
+//      if ( ALLOW_GO_DIAGRAMS && is_javascript_enabled() )
 //         $GoDiagrams = GoDiagram::find_godiagrams($post->text, $cfg_board);
       $post_reference = $disp_forum->draw_post( $drawmode, $post, $is_my_post, $GoDiagrams );
 
       // preview of new or existing post (within existing thread)
       $pvw_post = $post->copy_post(); // copy for preview/edit
-      if( $allow_thread_post && $preview && $preview_ID == $pid )
+      if ( $allow_thread_post && $preview && $preview_ID == $pid )
       {
          $disp_forum->change_depth( $disp_forum->cur_depth + 1 );
 
@@ -301,13 +301,13 @@ require_once 'forum/post.php';
       }
 
       // input-form for reply/edit-post
-      if( $allow_thread_post && ( $drawmode_type == DRAWPOST_EDIT || $drawmode_type == DRAWPOST_REPLY ) )
+      if ( $allow_thread_post && ( $drawmode_type == DRAWPOST_EDIT || $drawmode_type == DRAWPOST_REPLY ) )
       {
          $pvw_post_text = $pvw_post->text;
-         if( $drawmode_type == DRAWPOST_REPLY && !($preview && $preview_ID == $pid) )
+         if ( $drawmode_type == DRAWPOST_REPLY && !($preview && $preview_ID == $pid) )
          {
             // can only quote "showable"-post (non-hidden, my-post, or moderator)
-            if( ALLOW_QUOTING && @$_REQUEST['quote'] && !($drawmode & MASK_DRAWPOST_NO_BODY) )
+            if ( ALLOW_QUOTING && @$_REQUEST['quote'] && !($drawmode & MASK_DRAWPOST_NO_BODY) )
                $pvw_post_text = "<quote>$post_reference\n\n$pvw_post_text</quote>\n";
             else
                $pvw_post_text = '';
@@ -321,14 +321,14 @@ require_once 'forum/post.php';
    } //posts loop
 
 
-   if( $allow_thread_post && Forum::allow_posting( $player_row, $forum->options ) )
+   if ( $allow_thread_post && Forum::allow_posting( $player_row, $forum->options ) )
    {
       // preview of new thread
-      if( $preview && $preview_ID == 0 )
+      if ( $preview && $preview_ID == 0 )
       {
          $disp_forum->change_depth( 1 );
          $post = new ForumPost( 0, $forum_id, 0, null, 0, 0, 0, $preview_Subject, $preview_Text );
-         if( get_request_arg('ReadOnly') )
+         if ( get_request_arg('ReadOnly') )
             $post->flags |= FPOST_FLAG_READ_ONLY;
          $GoDiagrams = $preview_GoDiagrams;
          $disp_forum->draw_post(DRAWPOST_PREVIEW, $post, false, $GoDiagrams );
@@ -340,18 +340,18 @@ require_once 'forum/post.php';
       }
 
       // footer: reply-form (only for a NEW THREAD or if ONE post existing)
-      if( ($cnt_posts <= 1) && !($reply > 0) && !($edit > 0) && !$preview )
+      if ( ($cnt_posts <= 1) && !($reply > 0) && !($edit > 0) && !$preview )
       {
          $disp_forum->change_depth( 1 );
          echo "<tr><td colspan={$disp_forum->cols} align=center>\n";
-         if( $thread > 0 )
+         if ( $thread > 0 )
             echo '<hr>';
          $disp_forum->forum_message_box(DRAWPOST_NORMAL, $thread, null, '', $thread_Subject);
          echo "</td></tr>\n";
       }
 
       // add link to add reply to initial-thread at end of thread-view
-      if( $cnt_posts > 1 && !$preview && !($edit > 0) )
+      if ( $cnt_posts > 1 && !$preview && !($edit > 0) )
       {
          $disp_forum->change_depth( 0 );
          echo "<tr><td colspan={$disp_forum->cols} align=center>\n<hr>"
@@ -365,7 +365,7 @@ require_once 'forum/post.php';
    $disp_forum->forum_end_table();
 
    // use-cases U03: increase thread-hits show thread-"activity"
-   if( $thread > 0 && !($reply > 0) && !$preview && !($edit > 0) && !$all_my_posts )
+   if ( $thread > 0 && !($reply > 0) && !$preview && !($edit > 0) && !$all_my_posts )
       hit_thread( $thread );
 
    end_page();
@@ -398,7 +398,7 @@ function show_revision_history( $revhist_thread, $display_forum, $post_id )
 
    echo "<tr><td colspan={$display_forum->cols} height=2></td></tr>";
    $display_forum->change_depth( 2 );
-   foreach( $revhist_thread->posts as $post )
+   foreach ( $revhist_thread->posts as $post )
    {
       $display_forum->draw_post( DRAWPOST_EDIT, $post, true, null );
       echo "<tr><td colspan={$display_forum->cols} height=2></td></tr>";

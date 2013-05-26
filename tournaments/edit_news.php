@@ -36,13 +36,13 @@ $GLOBALS['ThePage'] = new Page('TournamentNewsEdit');
    connect2mysql();
 
    $logged_in = who_is_logged( $player_row);
-   if( !$logged_in )
+   if ( !$logged_in )
       error('login_if_not_logged_in', 'Tournament.edit_news');
-   if( !ALLOW_TOURNAMENTS )
+   if ( !ALLOW_TOURNAMENTS )
       error('feature_disabled', 'Tournament.edit_news');
    $my_id = $player_row['ID'];
 
-   if( $my_id <= GUESTS_ID_MAX )
+   if ( $my_id <= GUESTS_ID_MAX )
       error('not_allowed_for_guest', 'Tournament.edit_news');
 
 /* Actual REQUEST calls used:
@@ -54,28 +54,28 @@ $GLOBALS['ThePage'] = new Page('TournamentNewsEdit');
 */
 
    $tid = (int) @$_REQUEST['tid'];
-   if( $tid < 0 ) $tid = 0;
+   if ( $tid < 0 ) $tid = 0;
    $tnews_id = (int) @$_REQUEST['tnid'];
-   if( $tnews_id < 0 ) $tnews_id = 0;
+   if ( $tnews_id < 0 ) $tnews_id = 0;
 
    // edit allowed?
    $tourney = TournamentCache::load_cache_tournament( 'Tournament.edit_news.find_tournament', $tid );
    $is_admin = TournamentUtils::isAdmin();
    $allow_edit_tourney = TournamentHelper::allow_edit_tournaments($tourney, $my_id);
-   if( !$allow_edit_tourney )
+   if ( !$allow_edit_tourney )
       error('tournament_edit_not_allowed', "Tournament.edit_news.edit($tid,$my_id)");
 
    // init
-   if( $tnews_id > 0 )
+   if ( $tnews_id > 0 )
    {
       $qsql = TournamentNews::build_query_sql( $tnews_id, $tid );
       $tnews = TournamentNews::load_tournament_news_entry_by_query( $qsql ); // existing T-news ?
    }
    else
       $tnews = null;
-   if( is_null($tnews) )
+   if ( is_null($tnews) )
    {
-      if( $tnews_id )
+      if ( $tnews_id )
          error('bad_tournament_news', "Tournament.edit_news.edit($tid,$tnews_id)");
       $tnews = new TournamentNews( 0, $tid, $my_id );
       $tnews->Published = $NOW;
@@ -93,7 +93,7 @@ $GLOBALS['ThePage'] = new Page('TournamentNewsEdit');
    $errors = $input_errors;
 
    // save tournament-news-object with values from edit-form
-   if( @$_REQUEST['tn_save'] && !@$_REQUEST['tn_preview'] && count($errors) == 0 )
+   if ( @$_REQUEST['tn_save'] && !@$_REQUEST['tn_preview'] && count($errors) == 0 )
    {
       $tlog_action = ( $tnews->ID > 0 ) ? TLOG_ACT_CHANGE : TLOG_ACT_CREATE;
       $tnews->persist();
@@ -119,14 +119,14 @@ $GLOBALS['ThePage'] = new Page('TournamentNewsEdit');
    $tnform->add_row( array(
          'DESCRIPTION', T_('Tournament Status'),
          'TEXT',        Tournament::getStatusText($tourney->Status), ));
-   if( $tnews->Lastchanged )
+   if ( $tnews->Lastchanged )
       $tnform->add_row( array(
             'DESCRIPTION', T_('Last changed'),
             'TEXT',        TournamentUtils::buildLastchangedBy($tnews->Lastchanged, $tnews->ChangedBy) ));
 
    $tnform->add_row( array( 'HR' ));
 
-   if( count($errors) )
+   if ( count($errors) )
    {
       $tnform->add_row( array(
             'DESCRIPTION', T_('Error'),
@@ -142,7 +142,7 @@ $GLOBALS['ThePage'] = new Page('TournamentNewsEdit');
          'SELECTBOX',    'status', 1, $arr_status, $vars['status'], false, ));
 
    $first = true;
-   foreach( $arr_flags as $flag => $farr )
+   foreach ( $arr_flags as $flag => $farr )
    {
       list( $name, $ftext ) = $farr;
       $arr = ($first) ? array( 'DESCRIPTION', T_('Flags') ) : array( 'TAB' );
@@ -176,7 +176,7 @@ $GLOBALS['ThePage'] = new Page('TournamentNewsEdit');
          'SUBMITBUTTON', 'tn_preview', T_('Preview'),
       ));
 
-   if( @$_REQUEST['tn_preview'] || $tnews->Subject . $tnews->Text != '' )
+   if ( @$_REQUEST['tn_preview'] || $tnews->Subject . $tnews->Text != '' )
    {
       $tnform->add_empty_row();
       $tnform->add_row( array(
@@ -196,7 +196,7 @@ $GLOBALS['ThePage'] = new Page('TournamentNewsEdit');
    $menu_array[T_('Tournament news')] = "tournaments/list_news.php?tid=$tid";
    $menu_array[T_('Add news#tnews')] = "tournaments/edit_news.php?tid=$tid";
    $menu_array[T_('New bulletin')] = "edit_bulletin.php?n_tid=$tid";
-   if( Bulletin::is_bulletin_admin() )
+   if ( Bulletin::is_bulletin_admin() )
       $menu_array[T_('New admin bulletin')] =
          array( 'url' => "admin_bulletin.php?n_tid=$tid", 'class' => 'AdminLink' );
    $menu_array[T_('Manage tournament')] =
@@ -226,12 +226,12 @@ function parse_edit_form( &$tnews )
 
    $old_vals = array() + $vars; // copy to determine edit-changes
    // read URL-vals into vars
-   foreach( $vars as $key => $val )
+   foreach ( $vars as $key => $val )
       $vars[$key] = get_request_arg( $key, $val );
    // handle checkboxes having no key/val in _POST-hash
-   if( $is_posted )
+   if ( $is_posted )
    {
-      foreach( array_values($arr_flags) as $farr )
+      foreach ( array_values($arr_flags) as $farr )
       {
          list( $key, $tmp ) = $farr;
          $vars[$key] = get_request_arg( $key, false );
@@ -239,23 +239,23 @@ function parse_edit_form( &$tnews )
    }
 
    // parse URL-vars
-   if( $is_posted )
+   if ( $is_posted )
    {
       $old_vals['publish'] = $tnews->Published;
 
       $tnews->setStatus($vars['status']);
 
       $new_value = 0;
-      foreach( $arr_flags as $flag => $farr )
+      foreach ( $arr_flags as $flag => $farr )
       {
          list( $name, $tmp ) = $farr;
-         if( $vars[$name] )
+         if ( $vars[$name] )
             $new_value |= $flag;
       }
       $tnews->Flags = $new_value;
 
       $parsed_value = parseDate( T_('Publish time for news#tnews'), $vars['publish'] );
-      if( is_numeric($parsed_value) )
+      if ( is_numeric($parsed_value) )
       {
          $tnews->Published = $parsed_value;
          $vars['publish'] = formatDate($tnews->Published);
@@ -264,7 +264,7 @@ function parse_edit_form( &$tnews )
          $errors[] = $parsed_value;
 
       $new_value = trim($vars['subject']);
-      if( strlen($new_value) < 8 )
+      if ( strlen($new_value) < 8 )
          $errors[] = T_('Tournament-News subject missing or too short');
       else
          $tnews->Subject = $new_value;
@@ -274,11 +274,11 @@ function parse_edit_form( &$tnews )
 
 
       // determine edits
-      if( $old_vals['status'] != $tnews->Status ) $edits[] = T_('Status');
-      if( $old_vals['flags'] != $tnews->Flags ) $edits[] = T_('Flags');
-      if( $old_vals['publish'] != $tnews->Published ) $edits[] = T_('Publish Time');
-      if( $old_vals['subject'] != $tnews->Subject ) $edits[] = T_('Subject');
-      if( $old_vals['text'] != $tnews->Text ) $edits[] = T_('Text');
+      if ( $old_vals['status'] != $tnews->Status ) $edits[] = T_('Status');
+      if ( $old_vals['flags'] != $tnews->Flags ) $edits[] = T_('Flags');
+      if ( $old_vals['publish'] != $tnews->Published ) $edits[] = T_('Publish Time');
+      if ( $old_vals['subject'] != $tnews->Subject ) $edits[] = T_('Subject');
+      if ( $old_vals['text'] != $tnews->Text ) $edits[] = T_('Text');
    }
 
    return array( $vars, array_unique($edits), $errors );

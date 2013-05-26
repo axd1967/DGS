@@ -83,7 +83,7 @@ function mod( $k, $m)
 //return a float within [0..abs($m)[
 function modf( $k, $m)
 {
-   if( $m < 0 ) $m = -$m;
+   if ( $m < 0 ) $m = -$m;
    return $k - $m * floor($k/$m);
 }
 
@@ -91,7 +91,7 @@ function modf( $k, $m)
 function array_value_to_key_and_value( $array )
 {
    $new_array = array();
-   foreach( $array as $value )
+   foreach ( $array as $value )
       $new_array[$value] = $value;
    return $new_array;
 }
@@ -101,7 +101,7 @@ function build_num_range_map( $start, $count, $is_count=true )
 {
    $arr = array();
    $end_range = ( $is_count ) ? $start + $count - 1 : $count;
-   for( $i=$start; $i <= $end_range; $i++ )
+   for ( $i=$start; $i <= $end_range; $i++ )
       $arr[$i] = $i;
    return $arr;
 }
@@ -110,11 +110,11 @@ function build_num_range_map( $start, $count, $is_count=true )
 // NOTE: similar to PHP-funcs var_export() and print_r()
 function map_to_string( $map, $sep=', ' )
 {
-   if( !is_array($map) )
+   if ( !is_array($map) )
       return '';
 
    $arr = array();
-   foreach( $map as $key => $val )
+   foreach ( $map as $key => $val )
       $arr[]= "$key=[$val]";
 
    return implode( $sep, $arr );
@@ -131,10 +131,10 @@ function array_bsearch( $needle, &$haystack )
 {
    $h = count($haystack);
    $l = 0;
-   while( $h > $l )
+   while ( $h > $l )
    {
       $p = ($h+$l) >> 1;
-      if( $needle > $haystack[$p] )
+      if ( $needle > $haystack[$p] )
          $l = $p+1;
       else
          $h = $p;
@@ -152,23 +152,23 @@ function array_bsearch( $needle, &$haystack )
 //   limit('#0f',0,16,0) = 15
 function limit( $val, $minimum, $maximum, $default )
 {
-   if( is_string($val) )
+   if ( is_string($val) )
    {
       $val = trim($val);
-      if( strlen($val) > 1 )
+      if ( strlen($val) > 1 )
       {
-         if( substr($val,-1) == '%' && is_numeric($minimum) && is_numeric($maximum) )
+         if ( substr($val,-1) == '%' && is_numeric($minimum) && is_numeric($maximum) )
             $val = ( $maximum - $minimum ) * (substr($val,0,-1) / 100.) + $minimum;
-         elseif( is_numeric(strpos('hHxX#$', $val[0])) )
+         elseif ( is_numeric(strpos('hHxX#$', $val[0])) )
             $val = base_convert( substr($val,1), 16, 10);
       }
    }
 
-   if( !is_numeric($val) )
+   if ( !is_numeric($val) )
       return (isset($default) ? $default : $val );
-   elseif( is_numeric($minimum) && $val < $minimum )
+   elseif ( is_numeric($minimum) && $val < $minimum )
       return $minimum;
-   elseif( is_numeric($maximum) && $val > $maximum )
+   elseif ( is_numeric($maximum) && $val > $maximum )
       return $maximum;
 
    return $val;
@@ -180,7 +180,7 @@ function limit( $val, $minimum, $maximum, $default )
  */
 function extract_regex_value( $string, $rxname, $rxvalue="[-\w]+" )
 {
-   if( preg_match( "/\s+($rxname)=($rxvalue)/i", $string, $matches) )
+   if ( preg_match( "/\s+($rxname)=($rxvalue)/i", $string, $matches) )
       return $matches[2];
    else
       return null;
@@ -215,9 +215,9 @@ function add_js_var( $varname, $text )
 function format_array( $arr, $fmt_elem )
 {
    $str = '';
-   if( is_array($arr) && count($arr) > 0 )
+   if ( is_array($arr) && count($arr) > 0 )
    {
-      foreach( $arr as $elem )
+      foreach ( $arr as $elem )
          $str .= sprintf( $fmt_elem, $elem );
    }
    return $str;
@@ -232,23 +232,23 @@ function array_intersect_key_values( $array1 ) // var-args
    $arr_keys = array();
 
    $cnt_args = func_num_args();
-   for( $i=1; $i < $cnt_args; $i++)
+   for ( $i=1; $i < $cnt_args; $i++)
    {
       $arr_intersect = func_get_arg($i);
-      if( !is_array($arr_intersect) )
+      if ( !is_array($arr_intersect) )
          error('invalid_args', "array_intersect_key.check_arr(arg$i)");
-      foreach( $arr_intersect as $key )
+      foreach ( $arr_intersect as $key )
       {
-         if( isset($array1[$key]) )
+         if ( isset($array1[$key]) )
             $arr_keys[$key] = 1;
       }
    }
 
    // build intersection in key-order of given main-array
    $arr = array();
-   foreach( $array1 as $key => $val )
+   foreach ( $array1 as $key => $val )
    {
-      if( isset($arr_keys[$key]) )
+      if ( isset($arr_keys[$key]) )
          $arr[$key] = $val;
    }
    return $arr;
@@ -263,7 +263,7 @@ function format_number( $num )
 /*! \brief Concats two strings separated by given separator if strings are non-empty. */
 function concat_str( $str1, $sep, $str2 )
 {
-   if( (string)$str1.$str2 == '' )
+   if ( (string)$str1.$str2 == '' )
       return '';
    else
       return $str1 . ( ((string)$str1 != '' && (string)$str2 != '') ? $sep : '' ) . $str2;
@@ -273,7 +273,7 @@ function concat_str( $str1, $sep, $str2 )
 /*! \brief Returns -1 (a<b), 1 (a>b), 0 (a=b). */
 function cmp_int( $a, $b )
 {
-   if( $a == $b )
+   if ( $a == $b )
       return 0;
    else
       return ( $a < $b ) ? -1 : 1;
@@ -287,17 +287,17 @@ function cut_str( $str, $len, $handle_entities=true, $hardcut='...' )
 {
    $s = substr($str, 0, $len);
 
-   if( $handle_entities )
+   if ( $handle_entities )
    {
       $pos = strrpos($s, '&');
-      if( $pos !== false && preg_match("/(\\&(#\\d+|[a-z]+);)/i", substr($str,$pos), $matches) )
+      if ( $pos !== false && preg_match("/(\\&(#\\d+|[a-z]+);)/i", substr($str,$pos), $matches) )
       {
-         if( $pos + strlen($matches[1]) > $len )
+         if ( $pos + strlen($matches[1]) > $len )
             $s = substr($s, 0, $pos) . $matches[1];
       }
    }
 
-   if( $hardcut && strlen($str) > $len )
+   if ( $hardcut && strlen($str) > $len )
       $s .= $hardcut;
 
    return $s;
@@ -331,7 +331,7 @@ function latin1_safe( $str )
 
 function isNumber( $value, $allow_negative=true, $allow_empty=false )
 {
-   if( $allow_empty && (string)$value == '' )
+   if ( $allow_empty && (string)$value == '' )
       return true;
    $rx_sign = ($allow_negative) ? '\\-?' : '';
    return preg_match( "/^{$rx_sign}\d+$/", $value );
@@ -346,9 +346,9 @@ function build_path_dir( $src_path, $path_def )
 /*! \brief Appends $item to $str if not there already separated by $sep. */
 function append_unique( $str, $item, $sep=',' )
 {
-   if( (string)$str == '' )
+   if ( (string)$str == '' )
       $str = $item;
-   elseif( !preg_match("/\\b".preg_quote($item)."\\b/", $str) )
+   elseif ( !preg_match("/\\b".preg_quote($item)."\\b/", $str) )
       $str .= $sep . $item;
    return $str;
 }
@@ -360,9 +360,9 @@ function append_unique( $str, $item, $sep=',' )
 function build_text_list( $funcname, $arr, $sep=',' )
 {
    $out = array();
-   if( !is_array($arr) )
+   if ( !is_array($arr) )
       $arr = array( $arr );
-   foreach( $arr as $item )
+   foreach ( $arr as $item )
       $out[] = call_user_func( $funcname, $item );
    return implode($sep, $out);
 }

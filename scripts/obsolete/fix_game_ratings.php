@@ -14,13 +14,13 @@ require_once 'include/rating.php';
       or die(mysql_error());
 
    echo '<pre>';
-   while( $row = mysql_fetch_array($result) )
+   while ( $row = mysql_fetch_array($result) )
    {
       $br = get_rating_at($row['Black_ID'], $row['Starttime']);
-      if( !is_numeric($br) ) $br = 'NULL';
+      if ( !is_numeric($br) ) $br = 'NULL';
 
       $wr = get_rating_at($row['White_ID'], $row['Starttime']);
-      if( !is_numeric($wr) ) $wr = 'NULL';
+      if ( !is_numeric($wr) ) $wr = 'NULL';
 
       $query = "UPDATE Games SET Black_Start_Rating=$br, White_Start_Rating=$wr " .
          "WHERE ID=" . $row['ID'] . " LIMIT 1";

@@ -42,7 +42,7 @@ require_once 'include/wroom_control.php';
    connect2mysql();
 
    $logged_in = who_is_logged( $player_row);
-   if( !$logged_in )
+   if ( !$logged_in )
       error('login_if_not_logged_in', 'waiting_room');
    $my_id = $player_row['ID'];
    $cfg_tblcols = ConfigTableColumns::load_config( $my_id, CFGCOLS_WAITINGROOM );
@@ -91,15 +91,15 @@ require_once 'include/wroom_control.php';
    $iamrated = ( $player_row['RatingStatus'] != RATING_NONE && is_numeric($my_rating) && $my_rating >= MIN_RATING );
 
    $idinfo = (int)@$_GET['info'];
-   if( $idinfo < 0)
+   if ( $idinfo < 0)
       $idinfo = 0;
    else
    {
       $gid = (int)get_request_arg('gid');
-      if( $gid > 0 )
+      if ( $gid > 0 )
       {
          list( $idinfo, $wr_uid ) = load_waitingroom_info( $gid );
-         if( $idinfo )
+         if ( $idinfo )
             set_request_arg('good', ( $wr_uid == $my_id ) ? 2 : 0 ); // my|all-wrgames-view
       }
    }
@@ -131,7 +131,7 @@ require_once 'include/wroom_control.php';
          true);
    $wrfilter->add_filter(11, 'RatedSelect', 'Rated', true);
    $wrfilter->add_filter(12, 'BoolSelect', 'Weekendclock', true);
-   if( ENABLE_STDHANDICAP )
+   if ( ENABLE_STDHANDICAP )
       $wrfilter->add_filter(13, 'BoolSelect', 'StdHandicap', true);
    $wrfilter->add_filter(15, 'Country', 'WRP.Country', false,
          array( FC_HIDE => 1 ));
@@ -172,7 +172,7 @@ require_once 'include/wroom_control.php';
    // NOTE: User can choose:
    // View "merged" "Handicap + StdPlacement (in Settings column),
    // but has separate column on StdPlacement for filtering on it:
-   if( ENABLE_STDHANDICAP )
+   if ( ENABLE_STDHANDICAP )
       $wrtable->add_tablehead(13, T_('Standard placement#header'), '', 0, 'StdHandicap-');
 
    $wrtable->set_default_sort( 3, 2); //on WRP_Rating2,WRP_Handle
@@ -196,9 +196,9 @@ require_once 'include/wroom_control.php';
    $wrtable->set_found_rows( mysql_found_rows('waiting_room.found_rows') );
 
 
-   if( $suitable )
+   if ( $suitable )
       $title = T_('Suitable waiting games');
-   elseif( $f_suitable->get_value() == 2 )
+   elseif ( $f_suitable->get_value() == 2 )
       $title = T_('My waiting games');
    else
       $title = T_('All waiting games');
@@ -209,13 +209,13 @@ require_once 'include/wroom_control.php';
    echo "<h3 class=Header>". $title . "</h3>\n";
 
    $maxGamesCheck = new MaxGamesCheck();
-   if( !$idinfo )
+   if ( !$idinfo )
       echo $maxGamesCheck->get_warn_text();
 
    $info_row = $info_joinable = NULL;
-   if( $show_rows > 0 || $wrfilter->has_query() )
+   if ( $show_rows > 0 || $wrfilter->has_query() )
    {
-      while( ($row = mysql_fetch_assoc( $result )) && $show_rows-- > 0 )
+      while ( ($row = mysql_fetch_assoc( $result )) && $show_rows-- > 0 )
       {
          $WRP_Rating2 = NULL;
          $wro = new WaitingroomOffer( $row );
@@ -225,79 +225,79 @@ require_once 'include/wroom_control.php';
 
          list( $restrictions, $joinable ) = WaitingroomControl::get_waitingroom_restrictions( $row, $suitable );
 
-         if( $GameType != GAMETYPE_GO )
+         if ( $GameType != GAMETYPE_GO )
             $Handicaptype = HTYPEMP_MANUAL;
-         if( $idinfo == (int)$ID )
+         if ( $idinfo == (int)$ID )
          {
             $info_row = $row;
             $info_joinable = $joinable;
          }
 
          $wrow_strings = array();
-         if( $wrtable->Is_Column_Displayed[17] )
+         if ( $wrtable->Is_Column_Displayed[17] )
             $wrow_strings[17] = button_TD_anchor( $baseURL."info=$ID#joingameForm", T_('Info'));
-         if( $wrtable->Is_Column_Displayed[ 1] )
+         if ( $wrtable->Is_Column_Displayed[ 1] )
             $wrow_strings[ 1] = user_reference( REF_LINK, 1, '', $WRP_ID, $WRP_Name, '');
-         if( $wrtable->Is_Column_Displayed[ 2] )
+         if ( $wrtable->Is_Column_Displayed[ 2] )
             $wrow_strings[ 2] = user_reference( REF_LINK, 1, '', $WRP_ID, $WRP_Handle, '');
-         if( $wrtable->Is_Column_Displayed[15] )
+         if ( $wrtable->Is_Column_Displayed[15] )
             $wrow_strings[15] = getCountryFlagImage( @$row['WRP_Country'] );
-         if( $wrtable->Is_Column_Displayed[ 3] )
+         if ( $wrtable->Is_Column_Displayed[ 3] )
             $wrow_strings[ 3] = echo_rating($WRP_Rating2, true, $WRP_ID);
-         if( $wrtable->Is_Column_Displayed[ 4] )
+         if ( $wrtable->Is_Column_Displayed[ 4] )
             $wrow_strings[ 4] = make_html_safe($Comment, INFO_HTML);
-         if( $wrtable->Is_Column_Displayed[ 5] ) // Handicaptype
+         if ( $wrtable->Is_Column_Displayed[ 5] ) // Handicaptype
          {
             $wrow_strings[ 5] = array('text' => $handi_array[$Handicaptype]);
-            if( !$haverating )
+            if ( !$haverating )
                $wrow_strings[ 5]['attbs'] = warning_cell_attb( T_('No initial rating'), true);
          }
-         if( $wrtable->Is_Column_Displayed[14] ) // Handicap
+         if ( $wrtable->Is_Column_Displayed[14] ) // Handicap
          {
             $h_str = ( $calculated )
                ? build_adjust_handicap( $Size, $AdjHandicap, $MinHandicap, $MaxHandicap, /*short*/true )
                : $Handicap;
             $wrow_strings[14] = ( (string)$h_str != '' ) ? $h_str : NO_VALUE;
          }
-         if( $wrtable->Is_Column_Displayed[ 6] ) // Komi
+         if ( $wrtable->Is_Column_Displayed[ 6] ) // Komi
          {
-            if( $calculated )
+            if ( $calculated )
                $k_str = build_adjust_komi( $AdjKomi, $JigoMode, /*short*/true );
-            elseif( $is_fairkomi )
+            elseif ( $is_fairkomi )
                $k_str = '';
             else
                $k_str = (float)$Komi;
             $wrow_strings[ 6] = ( (string)$k_str != '' ) ? $k_str : NO_VALUE;
          }
-         if( $wrtable->Is_Column_Displayed[ 7] )
+         if ( $wrtable->Is_Column_Displayed[ 7] )
             $wrow_strings[ 7] = $Size;
-         if( $wrtable->Is_Column_Displayed[ 8] )
+         if ( $wrtable->Is_Column_Displayed[ 8] )
          {
             $wrow_strings[ 8] = array( 'text' => $restrictions );
-            if( !$joinable )
+            if ( !$joinable )
                $wrow_strings[ 8]['attbs']= warning_cell_attb( T_('Restricted#wroom'), true);
          }
-         if( $wrtable->Is_Column_Displayed[ 9] )
+         if ( $wrtable->Is_Column_Displayed[ 9] )
             $wrow_strings[ 9] = TimeFormat::echo_time_limit(
                   $Maintime, $Byotype, $Byotime, $Byoperiods, TIMEFMT_SHORT|TIMEFMT_ADDTYPE);
-         if( $wrtable->Is_Column_Displayed[10] )
+         if ( $wrtable->Is_Column_Displayed[10] )
             $wrow_strings[10] = ($wro->mp_player_count) ? 1 : $nrGames;
-         if( $wrtable->Is_Column_Displayed[11] )
+         if ( $wrtable->Is_Column_Displayed[11] )
             $wrow_strings[11] = yesno( $Rated);
-         if( $wrtable->Is_Column_Displayed[12] )
+         if ( $wrtable->Is_Column_Displayed[12] )
             $wrow_strings[12] = yesno( $WeekendClock);
-         if( ENABLE_STDHANDICAP )
+         if ( ENABLE_STDHANDICAP )
          {
-            if( $wrtable->Is_Column_Displayed[13] )
+            if ( $wrtable->Is_Column_Displayed[13] )
                $wrow_strings[13] = yesno( $StdHandicap);
          }
-         if( $wrtable->Is_Column_Displayed[16] )
+         if ( $wrtable->Is_Column_Displayed[16] )
             $wrow_strings[16] = build_usertype_text($WRP_Type, ARG_USERTYPE_NO_TEXT, true, '');
-         if( $wrtable->Is_Column_Displayed[18] ) // Settings (resulting Color + Handi + Komi)
+         if ( $wrtable->Is_Column_Displayed[18] ) // Settings (resulting Color + Handi + Komi)
             $wrow_strings[18] = $wro_settings;
-         if( $wrtable->Is_Column_Displayed[19] )
+         if ( $wrtable->Is_Column_Displayed[19] )
             $wrow_strings[19] = getRulesetText($Ruleset);
-         if( $wrtable->Is_Column_Displayed[20] )
+         if ( $wrtable->Is_Column_Displayed[20] )
          {
             $wrow_strings[20] =
                ( $ShapeID > 0 ? echo_image_shapeinfo($ShapeID, $Size, $ShapeSnapshot) . ' ' : '' ) .
@@ -312,7 +312,7 @@ require_once 'include/wroom_control.php';
       echo $wrtable->make_table();
 
       $show_info = ( $idinfo && is_array($info_row) );
-      if( !$show_info )
+      if ( !$show_info )
       {
          $restrictions = array(
                T_('Handicap-type (conventional and proper handicap-type need a rating for calculations)#wroom'),
@@ -340,7 +340,7 @@ require_once 'include/wroom_control.php';
    mysql_free_result($result);
 
 
-   if( @$show_info )
+   if ( @$show_info )
       add_old_game_form( 'joingame', $info_row, $iamrated, $info_joinable );
 
 
@@ -373,19 +373,19 @@ function add_old_game_form( $form_id, $game_row, $iamrated, $joinable )
    $game_form = new Form($form_id, 'join_waitingroom_game.php', FORM_POST, true);
 
    $game_row['X_TotalCount'] = ($is_my_game) ? 0 : GameHelper::count_started_games( $my_id, $opp_id );
-   foreach( $ARR_COPY_FIELDS as $src => $trg )
+   foreach ( $ARR_COPY_FIELDS as $src => $trg )
       $game_row[$trg]  = $game_row[$src];
    game_info_table( GSET_WAITINGROOM, $game_row, $player_row, $iamrated );
 
    $game_form->add_hidden( 'id', $game_row['ID'] ); // wroom-id
-   if( $is_my_game )
+   if ( $is_my_game )
    {
       $game_form->add_row( array(
             'HIDDEN', 'delete', 't',
             'SUBMITBUTTON', 'deletebut', T_('Delete'),
          ));
    }
-   elseif( $can_join && $joinable )
+   elseif ( $can_join && $joinable )
    {
       $game_form->add_row( array(
             'SUBMITBUTTONX', 'join', T_('Join'), array( 'accesskey' => ACCKEY_ACT_EXECUTE ),

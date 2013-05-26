@@ -33,7 +33,7 @@ define('SHOW_WIN_PIE', false);
 
 function interpolate($val1, $val3, $time1, $time2, $time3)
 {
-   if( $time1 == $time3 )
+   if ( $time1 == $time3 )
       return $val3;
    return $val3 + ($val1-$val3)*($time2-$time3)/($time1-$time3);
 }
@@ -45,11 +45,11 @@ function interpolate($val1, $val3, $time1, $time2, $time3)
    $logged_in = who_is_logged( $player_row, LOGIN_SKIP_UPDATE );
 
    // rating-graph can be viewed without being logged in
-   // if( !$logged_in )
+   // if ( !$logged_in )
    //    error('not_logged_in', 'ratingpng');
 
    //disable translations in graph if not latin
-   if( eregi( '^iso-8859-', $encoding_used) )
+   if ( eregi( '^iso-8859-', $encoding_used) )
    {
       $keep_english= false;
       $T_= 'T_';
@@ -73,19 +73,19 @@ function interpolate($val1, $val3, $time1, $time2, $time3)
 
    $starttime = mktime(0,0,0,BEGINMONTH,1,BEGINYEAR);
    $endtime = $NOW + GRAPH_RATING_MIN_INTERVAL;
-   if( $endtime < $starttime )
+   if ( $endtime < $starttime )
    {
       $endtime = $starttime + GRAPH_RATING_MIN_INTERVAL;
-      if( $endtime < $starttime )
+      if ( $endtime < $starttime )
         swap($starttime, $endtime);
    }
 
-   if( isset($_GET['startyear']) )
+   if ( isset($_GET['startyear']) )
       $starttime = max($starttime, mktime(0,0,0
          ,isset($_GET['startmonth']) ? $_GET['startmonth'] : 1
          ,1,$_GET['startyear']));
 
-   if( isset($_GET['endyear']) )
+   if ( isset($_GET['endyear']) )
       $endtime = min($endtime, mktime(0,0,0
          ,isset($_GET['endmonth']) ? $_GET['endmonth']+1 : 13
          ,0,$_GET['endyear']));
@@ -112,7 +112,7 @@ function interpolate($val1, $val3, $time1, $time2, $time3)
    $nr_points = count($ratings);
 
    //$startnumber is the number of games before the graph start
-   if( !isset($number) || count($number) < 1 )
+   if ( !isset($number) || count($number) < 1 )
    {
       $startnumber = $endnumber = -1;
    }
@@ -122,7 +122,7 @@ function interpolate($val1, $val3, $time1, $time2, $time3)
       $endnumber = round($number[count($number)-1]);
    }
 
-   if( GRAPH_RATING_BY_NUM_ENABLED && $show_by_number )
+   if ( GRAPH_RATING_BY_NUM_ENABLED && $show_by_number )
    {
       $xvals = $number;
       $xlims = array('MIN'=>$startnumber, 'MAX'=>$endnumber);
@@ -142,7 +142,7 @@ function interpolate($val1, $val3, $time1, $time2, $time3)
    $m = array ($ratinglabel( 100), //20kyu
                $ratinglabel(3000)); //10dan
    $x = 0;
-   foreach( $m as $y )
+   foreach ( $m as $y )
    {
       $b= $gr->labelbox($y);
       $x= max($x,$b['x']);
@@ -167,7 +167,7 @@ function interpolate($val1, $val3, $time1, $time2, $time3)
 
    //draw the blue array
 
-   if( $nr_points > 1 )
+   if ( $nr_points > 1 )
    {
       $gr->filledpolygon(
             array_merge(
@@ -187,19 +187,19 @@ function interpolate($val1, $val3, $time1, $time2, $time3)
 
    //horizontal scaling
 
-   if( GRAPH_RATING_BY_NUM_ENABLED && $show_by_number )
+   if ( GRAPH_RATING_BY_NUM_ENABLED && $show_by_number )
    { // the X-axis is the number of games
       $step = 20.; //min grid distance in pixels
       $step/= $gr->sizeX; //graph width
       $step = ceil(($endnumber - $startnumber) * $step);
 
-      if( $startnumber >= 0 )
+      if ( $startnumber >= 0 )
       {
          function nbr2date($v){
             global $startnumber, $time, $datelabel;
-            if( $startnumber >= 0 )
+            if ( $startnumber >= 0 )
             {
-               if( isset($time[$v-=$startnumber]) )
+               if ( isset($time[$v-=$startnumber]) )
                   return $datelabel($time[$v]);
             }
             return '';
@@ -211,7 +211,7 @@ function interpolate($val1, $val3, $time1, $time2, $time3)
       // show numbers
       $y = $gr->boxbottom+3;
       $x = $gr->label($gr->border, $y, $T_('Games').':', $number_color);
-      if( $startnumber >= 0 )
+      if ( $startnumber >= 0 )
       {
          $x= $x['x'] +$gr->labelMetrics['WIDTH'];
          $gr->gridX( $startnumber, $step, $y, '', $number_color, '', $red, 0, $x );
@@ -233,12 +233,12 @@ function interpolate($val1, $val3, $time1, $time2, $time3)
       // show numbers
       $y = $gr->boxbottom+3 +2*$gr->labelMetrics['LINEH'];
       $x = $gr->label($gr->border, $y, $T_('Games').':', $number_color );
-      if( $startnumber >= 0 )
+      if ( $startnumber >= 0 )
       {
          function date2nbr($v){
             global $time, $number;
             $n= array_bsearch($v, $time);
-            if( $n > 0 )
+            if ( $n > 0 )
                $n--;
             else
                $n= 0;
@@ -257,7 +257,7 @@ function interpolate($val1, $val3, $time1, $time2, $time3)
 
    //misc drawings
 
-   if( ENA_WIN_PIE && $show_win_pie )
+   if ( ENA_WIN_PIE && $show_win_pie )
    {
       // set pie dimensions.
       $sx = $gr->width/6.; $sy = $sx/3.; $sz = $sx/16.;
@@ -276,7 +276,7 @@ function interpolate($val1, $val3, $time1, $time2, $time3)
       $gr->pie( $datas, $cx, $cy, $sx, $sy, $sz, $color);
    }
 
-   if( @$_REQUEST['show_time'] )
+   if ( @$_REQUEST['show_time'] )
       $gr->label($gr->offsetX, 0,
                  sprintf('%0.2f ms', (getmicrotime()-$page_microtime)*1000), $black);
 
@@ -289,7 +289,7 @@ function get_rating_data($uid)
    global $ratings, $ratingmin, $ratingmax, $number,
       $time, $starttime, $endtime;
 
-   if( !($uid > 0 ) )
+   if ( !($uid > 0 ) )
       exit;
 
 
@@ -303,7 +303,7 @@ function get_rating_data($uid)
 
    // note: Ratinglog-entries exists only for rated games
    $query = "SELECT InitialRating AS Rating, ";
-   if( ENA_WIN_PIE )
+   if ( ENA_WIN_PIE )
       $query .= "Finished, RatedGames, Won, Lost,";
    $query .=
       "InitialRating+200+GREATEST(1600-InitialRating,0)*2/15 AS RatingMax, " .
@@ -311,7 +311,7 @@ function get_rating_data($uid)
       "UNIX_TIMESTAMP(Registerdate) AS reg_seconds " .
       "FROM Players WHERE ID=$uid LIMIT 1";
    $result = db_query( 'ratingpng.find_initial', $query );
-   if( @mysql_num_rows($result) != 1 )
+   if ( @mysql_num_rows($result) != 1 )
       exit;
 
    $min_row = mysql_fetch_assoc($result);
@@ -324,22 +324,22 @@ function get_rating_data($uid)
    // start time with first rated-game, otherwise registration-date
    $min_row['seconds'] = ( @$max_row['min_seconds'] ) ? $max_row['min_seconds'] - SECS_PER_DAY : $min_row['reg_seconds'];
 
-   if( $starttime < $min_row['seconds'] - $bound_interval )
+   if ( $starttime < $min_row['seconds'] - $bound_interval )
       $starttime = $min_row['seconds'] - $bound_interval;
-   if( $endtime < $min_row['seconds'] + $bound_interval)
+   if ( $endtime < $min_row['seconds'] + $bound_interval)
       $endtime = $min_row['seconds'] + $bound_interval;
-   if( ENA_WIN_PIE )
+   if ( ENA_WIN_PIE )
    {
       global $owner_row;
       $owner_row = $min_row;
    }
 
-   if( $starttime > $max_row['seconds'] - $bound_interval )
+   if ( $starttime > $max_row['seconds'] - $bound_interval )
       $starttime = $max_row['seconds'] - $bound_interval;
-   if( $endtime > $max_row['seconds'] + $bound_interval)
+   if ( $endtime > $max_row['seconds'] + $bound_interval)
       $endtime = $max_row['seconds'] + $bound_interval;
 
-   if( ($endtime - $starttime) < GRAPH_RATING_MIN_INTERVAL )
+   if ( ($endtime - $starttime) < GRAPH_RATING_MIN_INTERVAL )
    {
       $mean = ( $starttime + $endtime )/2 + 12*SECS_PER_HOUR;
       $starttime = $mean - GRAPH_RATING_MIN_INTERVAL/2;
@@ -351,7 +351,7 @@ function get_rating_data($uid)
       "SELECT Rating, RatingMax, RatingMin, UNIX_TIMESTAMP(Time) AS seconds " .
       "FROM Ratinglog WHERE uid=$uid ORDER BY Time" );
 
-   if( @mysql_num_rows( $result ) < 1 )
+   if ( @mysql_num_rows( $result ) < 1 )
       exit;
 
    $numbercount = -1 ; //first point is Registerdate
@@ -360,16 +360,16 @@ function get_rating_data($uid)
    $row = $min_row;
    do
    {
-      if( $row['seconds'] < $starttime )
+      if ( $row['seconds'] < $starttime )
       {
          $tmp = $row;
          $numbercount++ ;
          continue;
       }
 
-      if( $first )
+      if ( $first )
       {
-         if( is_array($tmp) && $tmp['seconds'] < $starttime )
+         if ( is_array($tmp) && $tmp['seconds'] < $starttime )
          {
             //interpolate the first curves points
             $ratings[]= interpolate($tmp['Rating'], $row['Rating'],
@@ -384,10 +384,10 @@ function get_rating_data($uid)
          $first = false;
       }
 
-      if( $row['seconds'] > $endtime )
+      if ( $row['seconds'] > $endtime )
       {
          //interpolate the last curves points
-         if( is_array($tmp) && $tmp['seconds'] <= $endtime )
+         if ( is_array($tmp) && $tmp['seconds'] <= $endtime )
          {
             $ratings[]= interpolate($tmp['Rating'], $row['Rating'],
                               $tmp['seconds'], $endtime, $row['seconds']);
@@ -409,6 +409,6 @@ function get_rating_data($uid)
       $number[]= $numbercount;
 
       $tmp = $row;
-   } while( $row = mysql_fetch_assoc($result) ) ;
+   } while ( $row = mysql_fetch_assoc($result) ) ;
 }
 ?>

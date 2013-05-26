@@ -33,11 +33,11 @@ require_once 'include/filter.php';
    connect2mysql();
 
    $logged_in = who_is_logged( $player_row);
-   if( !$logged_in )
+   if ( !$logged_in )
       error('login_if_not_logged_in', 'admin_show_errorlog');
-   if( $player_row['ID'] <= GUESTS_ID_MAX )
+   if ( $player_row['ID'] <= GUESTS_ID_MAX )
       error('not_allowed_for_guest', 'admin_show_errorlog');
-   if( !(@$player_row['admin_level'] & ADMIN_DEVELOPER) )
+   if ( !(@$player_row['admin_level'] & ADMIN_DEVELOPER) )
       error('adminlevel_too_low', 'admin_show_errorlog');
    $show_ip = ( @$player_row['admin_level'] & ADMIN_DEVELOPER ); // only for adm-dev!
 
@@ -51,7 +51,7 @@ require_once 'include/filter.php';
       array( FC_TIME_UNITS => FRDTU_ALL_ABS, FC_SIZE => 8 ));
    $elfilter->add_filter( 4, 'Text', 'EL.Message', true,
       array( FC_SIZE => 20 ));
-   if( $show_ip )
+   if ( $show_ip )
       $elfilter->add_filter( 7, 'Text', 'EL.IP', true,
          array( FC_SIZE => 16, FC_SUBSTRING => 1, FC_START_WILD => 1 ));
    $elfilter->init(); // parse current value from _GET
@@ -69,7 +69,7 @@ require_once 'include/filter.php';
    $atable->add_tablehead( 8, T_('Request#header'));
    $atable->add_tablehead( 5, T_('DB error#header'));
    $atable->add_tablehead( 6, T_('Debug info#header'));
-   if( $show_ip )
+   if ( $show_ip )
       $atable->add_tablehead( 7, T_('IP#header'));
    $tbl_colcnt = $atable->get_column_count();
 
@@ -99,26 +99,26 @@ require_once 'include/filter.php';
    $atable->set_found_rows( mysql_found_rows('admin_show_errorlog.found_rows') );
 
    $cols_dbginfo = $tbl_colcnt - 1;
-   while( $show_rows-- > 0 && ($row = mysql_fetch_assoc( $result )) )
+   while ( $show_rows-- > 0 && ($row = mysql_fetch_assoc( $result )) )
    {
       $arow_str = array();
       $dbginfo = '';
-      if( $atable->Is_Column_Displayed[1] )
+      if ( $atable->Is_Column_Displayed[1] )
          $arow_str[1] = @$row['ID'];
-      if( $atable->Is_Column_Displayed[2] )
+      if ( $atable->Is_Column_Displayed[2] )
       {
          $arow_str[2] = ((string)@$row['Handle'] != '')
             ? user_reference( REF_LINK, 1, '',
                   $row['PUser_ID'], $row['PUser_Name'], $row['PUser_Handle'] )
             : '';
       }
-      if( $atable->Is_Column_Displayed[3] )
+      if ( $atable->Is_Column_Displayed[3] )
          $arow_str[3] = ($row['X_Date'] > 0 ? date(DATE_FMT3, $row['X_Date']) : NULL );
-      if( $atable->Is_Column_Displayed[4] )
+      if ( $atable->Is_Column_Displayed[4] )
          $arow_str[4] = sprintf( '<b>%s</b>', @$row['Message'] );
-      if( $atable->Is_Column_Displayed[8] )
+      if ( $atable->Is_Column_Displayed[8] )
       {
-         if( strlen(@$row['Request']) <= 50 )
+         if ( strlen(@$row['Request']) <= 50 )
             $arow_str[8] = @$row['Request'];
          else
          {
@@ -127,11 +127,11 @@ require_once 'include/filter.php';
                T_('Request info'), @$row['Request'] );
          }
       }
-      if( $atable->Is_Column_Displayed[5] )
+      if ( $atable->Is_Column_Displayed[5] )
          $arow_str[5] = wordwrap(@$row['MysqlError'], 40, "<br>\n", true);
-      if( $atable->Is_Column_Displayed[6] )
+      if ( $atable->Is_Column_Displayed[6] )
       {
-         if( strlen(@$row['Debug']) <= 40 )
+         if ( strlen(@$row['Debug']) <= 40 )
             $arow_str[6] = wordwrap(@$row['Debug'], 40, "<br>\n", true);
          else
          {
@@ -140,15 +140,15 @@ require_once 'include/filter.php';
                T_('Debug info'), wordwrap(@$row['Debug'], 120, "<br>\n", true) );
          }
       }
-      if( $show_ip && $atable->Is_Column_Displayed[7] )
+      if ( $show_ip && $atable->Is_Column_Displayed[7] )
          $arow_str[7] = @$row['IP'];
-      if( $atable->Is_Column_Displayed[9] )
+      if ( $atable->Is_Column_Displayed[9] )
       {
          $arow_str[9] = ((int)@$row['uid'] > 0)
             ? anchor( $base_path."userinfo.php?uid=".$row['uid'], $row['uid'] ) : '';
       }
 
-      if( $dbginfo ) // put long-info in extra line
+      if ( $dbginfo ) // put long-info in extra line
          $arow_str['extra_row'] = "<td></td><td colspan=\"$cols_dbginfo\">$dbginfo</td>";
 
       $atable->add_row( $arow_str );

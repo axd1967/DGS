@@ -175,37 +175,37 @@ class Games
 
    public function setStatus( $status )
    {
-      if( !preg_match( "/^(".CHECK_GAME_STATUS.")$/", $status ) )
+      if ( !preg_match( "/^(".CHECK_GAME_STATUS.")$/", $status ) )
          error('invalid_args', "Games.setStatus($status)");
       $this->Status = $status;
    }
 
    public function setGameType( $game_type )
    {
-      if( !preg_match( "/^(".CHECK_GAMETYPE.")$/", $game_type ) )
+      if ( !preg_match( "/^(".CHECK_GAMETYPE.")$/", $game_type ) )
          error('invalid_args', "Games.setGameType($game_type)");
       $this->GameType = $game_type;
    }
 
    public function setRuleset( $ruleset )
    {
-      if( !preg_match( "/^(".CHECK_RULESETS.")$/", $ruleset ) )
+      if ( !preg_match( "/^(".CHECK_RULESETS.")$/", $ruleset ) )
          error('invalid_args', "Games.setRuleset($ruleset)");
-      if( !preg_match( "/^(".ALLOWED_RULESETS.")$/", $ruleset ) )
+      if ( !preg_match( "/^(".ALLOWED_RULESETS.")$/", $ruleset ) )
          error('feature_disabled', "Games.setRuleset($ruleset)");
       $this->Ruleset = $ruleset;
    }
 
    public function setByotype( $byotype )
    {
-      if( !preg_match( "/^".REGEX_BYOTYPES."$/", $byotype ) )
+      if ( !preg_match( "/^".REGEX_BYOTYPES."$/", $byotype ) )
          error('invalid_args', "Games.setByotype($byotype)");
       $this->Byotype = $byotype;
    }
 
    public function setRated( $rated )
    {
-      if( !preg_match( "/^(Y|N|Done)$/", $rated ) )
+      if ( !preg_match( "/^(Y|N|Done)$/", $rated ) )
          error('invalid_args', "Games.setRated($rated)");
       $this->Rated = $rated;
    }
@@ -218,7 +218,7 @@ class Games
    /*! \brief Inserts or updates Games-entry in database. */
    public function persist()
    {
-      if( $this->ID > 0 )
+      if ( $this->ID > 0 )
          $success = $this->update();
       else
          $success = $this->insert();
@@ -229,7 +229,7 @@ class Games
    {
       $entityData = $this->fillEntityData();
       $result = $entityData->insert( "Games.insert(%s)" );
-      if( $result )
+      if ( $result )
          $this->ID = mysql_insert_id();
       return $result;
    }
@@ -248,7 +248,7 @@ class Games
 
    public function fillEntityData( $data=null )
    {
-      if( is_null($data) )
+      if ( is_null($data) )
          $data = $GLOBALS['ENTITY_GAMES']->newEntityData();
       $data->set_value( 'ID', $this->ID );
       $data->set_value( 'tid', $this->tid );
@@ -315,10 +315,10 @@ class Games
       );
 
       $flags = 0;
-      if( $flags_str )
+      if ( $flags_str )
       {
          $arr = explode(',', $flags_str );
-         foreach( $arr as $flagkey )
+         foreach ( $arr as $flagkey )
             $flags |= $map_flags[strtoupper($flagkey)];
       }
       return $flags;
@@ -327,15 +327,15 @@ class Games
    public static function buildFlags( $flags )
    {
       $arr = array();
-      if( $flags & GAMEFLAGS_KO )
+      if ( $flags & GAMEFLAGS_KO )
          $arr[] = 'Ko';
-      if( $flags & GAMEFLAGS_HIDDEN_MSG )
+      if ( $flags & GAMEFLAGS_HIDDEN_MSG )
          $arr[] = 'HiddenMsg';
-      if( $flags & GAMEFLAGS_ADMIN_RESULT )
+      if ( $flags & GAMEFLAGS_ADMIN_RESULT )
          $arr[] = 'AdmResult';
-      if( $flags & GAMEFLAGS_TG_DETACHED )
+      if ( $flags & GAMEFLAGS_TG_DETACHED )
          $arr[] = 'TGDetached';
-      if( $flags & GAMEFLAGS_ATTACHED_SGF )
+      if ( $flags & GAMEFLAGS_ATTACHED_SGF )
          $arr[] = 'AttachedSgf';
       return implode(',', $arr);
    }//buildFlags
@@ -344,7 +344,7 @@ class Games
    public static function build_query_sql( $gid=0 )
    {
       $qsql = $GLOBALS['ENTITY_GAMES']->newQuerySQL('G');
-      if( $gid > 0 )
+      if ( $gid > 0 )
          $qsql->add_part( SQLP_WHERE, "G.ID='$gid'" );
       return $qsql;
    }
@@ -413,7 +413,7 @@ class Games
     */
    public static function load_game( $gid, $return_row=false )
    {
-      if( !is_numeric($gid) || $gid <= 0 )
+      if ( !is_numeric($gid) || $gid <= 0 )
          error('invalid_args', "Games:load_game.check_gid($gid)");
 
       $qsql = self::build_query_sql( $gid );
@@ -427,12 +427,12 @@ class Games
    /*! \brief Updates Games.Flags with $set_flags and $clear_flags. */
    public static function update_game_flags( $dbgmsg, $gid, $set_flags=0, $clear_flags=0 )
    {
-      if( $set_flags || $clear_flags )
+      if ( $set_flags || $clear_flags )
       {
          $qparts = array();
-         if( $set_flags )
+         if ( $set_flags )
             $qparts[] = " | ".(int)$set_flags;
-         if( $clear_flags )
+         if ( $clear_flags )
             $qparts[] = " & ~".(int)$clear_flags;
 
          db_query( "Games:update_game_flags($gid)",
@@ -446,7 +446,7 @@ class Games
       static $ARR_GAMESTATUS = null; // status => text
 
       // lazy-init of texts
-      if( is_null($ARR_GAMESTATUS) )
+      if ( is_null($ARR_GAMESTATUS) )
       {
          $arr = array();
          $arr[GAME_STATUS_KOMI] = T_('Fair Komi Negotiation#G_status');
@@ -460,9 +460,9 @@ class Games
          $ARR_GAMESTATUS = $arr;
       }
 
-      if( is_null($status) )
+      if ( is_null($status) )
          return $ARR_GAMESTATUS;
-      if( !isset($ARR_GAMESTATUS[$status]) )
+      if ( !isset($ARR_GAMESTATUS[$status]) )
          error('invalid_args', "Games:getStatusText($status)");
       return $ARR_GAMESTATUS[$status];
    }//getStatusText
