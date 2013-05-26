@@ -487,11 +487,11 @@ $GLOBALS['ThePage'] = new Page('Game');
 
    $html_mode = ( $Status == GAME_STATUS_FINISHED ) ? 'gameh' : 'game';
 
-   // determine mpg_uid (user of current/selected move + move-color) for last-move & comment-info
+   // determine mpg_uid (user of current/selected move + move-color) for last-move with comment-info
    if( $is_mp_game )
    {
       list( $group_color, $group_order, $move_color ) =
-         MultiPlayerGame::calc_game_player_for_move( $GamePlayers, $move, $Handicap, -1 );
+         MultiPlayerGame::calc_game_player_for_move( $GamePlayers, $move, $Handicap, -1 ); // last-move
       $mpg_uid = GamePlayer::load_uid_for_move( $gid, $group_color, $group_order );
    }
    else
