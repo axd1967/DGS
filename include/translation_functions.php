@@ -77,7 +77,7 @@ function include_all_translate_groups($player_row=null) //must be called from ma
    {
       if( !file_exists( "translations/known_languages.php") )
       {
-         require_once( "include/make_translationfiles.php" );
+         require_once 'include/make_translationfiles.php';
          make_known_languages(); //must be called from main dir
          //reload the globals, but already done by make_known_languages()
          //include( "translations/known_languages.php");

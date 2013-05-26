@@ -18,10 +18,10 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
 
-require_once( "include/std_functions.php" );
-require_once( "include/rating.php" );
-require_once( 'include/game_functions.php' );
-require_once( 'include/cache_clock.php' );
+require_once 'include/std_functions.php';
+require_once 'include/rating.php';
+require_once 'include/game_functions.php';
+require_once 'include/cache_clock.php';
 
 $TheErrors->set_mode(ERROR_MODE_COLLECT);
 

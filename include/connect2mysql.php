@@ -17,8 +17,8 @@ You should have received a copy of the GNU Affero General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-require_once( "include/config-local.php" );
-require_once( "include/error_functions.php" );
+require_once 'include/config-local.php';
+require_once 'include/error_functions.php';
 //@set_time_limit(0); //does not work with safe_mode
 
 // following switches can be defined in config-local for test-systems

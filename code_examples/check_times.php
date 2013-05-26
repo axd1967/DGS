@@ -1,12 +1,12 @@
 <?php
 
 chdir("../");
-require_once("include/std_functions.php");
-require_once( 'include/time_functions.php' );
+require_once 'include/std_functions.php';
+require_once 'include/time_functions.php';
 chdir("code_examples/");
 
 if(1){ //display/check time_remaining and add_time
- //require_once( "include/game_functions.php" );
+ //require_once 'include/game_functions.php';
 
    if( !@$dbcnx )
       connect2mysql(true);

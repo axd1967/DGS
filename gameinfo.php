@@ -19,14 +19,14 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 $TranslateGroups[] = "Game";
 
-require_once( 'include/std_functions.php' );
-require_once( 'include/gui_functions.php' );
-require_once( 'include/std_classes.php' );
-require_once( 'include/table_columns.php' );
-require_once( 'include/table_infos.php' );
-require_once( 'include/time_functions.php' );
-require_once( 'include/rating.php' );
-require_once( 'include/game_functions.php' );
+require_once 'include/std_functions.php';
+require_once 'include/gui_functions.php';
+require_once 'include/std_classes.php';
+require_once 'include/table_columns.php';
+require_once 'include/table_infos.php';
+require_once 'include/time_functions.php';
+require_once 'include/rating.php';
+require_once 'include/game_functions.php';
 if( ALLOW_TOURNAMENTS ) {
    require_once 'tournaments/include/tournament.php';
    require_once 'tournaments/include/tournament_cache.php';

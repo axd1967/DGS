@@ -20,8 +20,8 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 $TranslateGroups[] = "Forum";
 
 chdir('..');
-require_once( 'include/classlib_userconfig.php' );
-require_once( 'forum/forum_functions.php' );
+require_once 'include/classlib_userconfig.php';
+require_once 'forum/forum_functions.php';
 
 $GLOBALS['ThePage'] = new Page('ForumsList');
 

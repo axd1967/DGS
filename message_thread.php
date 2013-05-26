@@ -19,13 +19,13 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 $TranslateGroups[] = "Messages";
 
-require_once( 'include/std_functions.php' );
-require_once( 'include/std_classes.php' );
-require_once( 'include/table_columns.php' );
-require_once( 'include/message_functions.php' );
-require_once( 'include/classlib_goban.php' );
-require_once( 'include/classlib_userconfig.php' );
-require_once( 'include/goban_handler_gfx.php' );
+require_once 'include/std_functions.php';
+require_once 'include/std_classes.php';
+require_once 'include/table_columns.php';
+require_once 'include/message_functions.php';
+require_once 'include/classlib_goban.php';
+require_once 'include/classlib_userconfig.php';
+require_once 'include/goban_handler_gfx.php';
 
 
 {

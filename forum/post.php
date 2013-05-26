@@ -19,8 +19,8 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 $TranslateGroups[] = "Forum"; //local use
 
-require_once( 'include/classlib_userconfig.php' );
-require_once( 'forum/forum_functions.php' );
+require_once 'include/classlib_userconfig.php';
+require_once 'forum/forum_functions.php';
 
 
 // to increase thread-hits to show thread-"activity"

@@ -19,13 +19,13 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 $TranslateGroups[] = "Common";
 
-require_once( 'include/globals.php' );
-require_once( "include/std_functions.php" );
-require_once( "include/std_classes.php" );
-require_once( "include/form_functions.php" );
-require_once( "include/filter_functions.php" );
-require_once( "include/filter_parser.php" );
-require_once( 'include/classlib_bitset.php' );
+require_once 'include/globals.php';
+require_once 'include/std_functions.php';
+require_once 'include/std_classes.php';
+require_once 'include/form_functions.php';
+require_once 'include/filter_functions.php';
+require_once 'include/filter_parser.php';
+require_once 'include/classlib_bitset.php';
 
  /* Author: Jens-Uwe Gaspar */
 

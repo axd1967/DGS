@@ -19,14 +19,14 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 // translations remove for admin page: $TranslateGroups[] = "Admin";
 
-require_once( "include/std_functions.php" );
-require_once( "include/std_classes.php" );
-require_once( "include/gui_functions.php" );
-require_once( "include/form_functions.php" );
-require_once( "include/make_translationfiles.php" );
-require_once( "include/faq_functions.php" );
-require_once( "include/admin_faq_functions.php" );
-require_once( "include/filter_parser.php" );
+require_once 'include/std_functions.php';
+require_once 'include/std_classes.php';
+require_once 'include/gui_functions.php';
+require_once 'include/form_functions.php';
+require_once 'include/make_translationfiles.php';
+require_once 'include/faq_functions.php';
+require_once 'include/admin_faq_functions.php';
+require_once 'include/filter_parser.php';
 
 $GLOBALS['ThePage'] = new Page('FAQAdmin');
 

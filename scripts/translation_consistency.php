@@ -18,9 +18,9 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
 chdir( '../' );
-require_once( "include/std_functions.php" );
-require_once( "include/translation_functions.php" );
-require_once( "include/make_translationfiles.php" );
+require_once 'include/std_functions.php';
+require_once 'include/translation_functions.php';
+require_once 'include/make_translationfiles.php';
 
 define('BRLF', "<br>\n");
 define('SEP_CHECK', BRLF . '<hr>' . BRLF);

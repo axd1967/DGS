@@ -17,10 +17,10 @@ You should have received a copy of the GNU Affero General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-require_once( 'include/globals.php' );
-require_once( "include/json_pear.php" );
-require_once( "include/error_functions.php" );
-require_once( "include/connect2mysql.php" );
+require_once 'include/globals.php';
+require_once 'include/json_pear.php';
+require_once 'include/error_functions.php';
+require_once 'include/connect2mysql.php';
 
 // $is_down can be overriden for maintenance-allowed users (in config-local.php)
 // $is_maintenance is not changed (can be used to indicate maintenance-mode)

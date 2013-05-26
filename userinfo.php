@@ -19,15 +19,15 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 $TranslateGroups[] = "Users";
 
-require_once( 'include/globals.php' );
-require_once( "include/std_functions.php" );
-require_once( 'include/gui_functions.php' );
-require_once( 'include/time_functions.php' );
-require_once( 'include/table_infos.php' );
-require_once( "include/rating.php" );
-require_once( "include/countries.php" );
-require_once( "include/contacts.php" );
-require_once( "include/classlib_userpicture.php" );
+require_once 'include/globals.php';
+require_once 'include/std_functions.php';
+require_once 'include/gui_functions.php';
+require_once 'include/time_functions.php';
+require_once 'include/table_infos.php';
+require_once 'include/rating.php';
+require_once 'include/countries.php';
+require_once 'include/contacts.php';
+require_once 'include/classlib_userpicture.php';
 
 $GLOBALS['ThePage'] = new Page('UserInfo');
 

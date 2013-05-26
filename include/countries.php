@@ -19,7 +19,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 $TranslateGroups[] = "Countries";
 
-require_once( 'include/utilities.php' );
+require_once 'include/utilities.php';
 
 
 /*!

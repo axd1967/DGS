@@ -19,9 +19,9 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 $TranslateGroups[] = "Users";
 
-require_once( "include/std_functions.php" );
-require_once( "include/rating.php" );
-require_once( "include/graph.php" );
+require_once 'include/std_functions.php';
+require_once 'include/rating.php';
+require_once 'include/graph.php';
 
 // NOTE: always display the number of games played below the dates.
 

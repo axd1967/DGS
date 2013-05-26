@@ -27,11 +27,11 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
 chdir("../");
-require_once("include/std_functions.php");
-require_once("include/std_classes.php");
-require_once("include/form_functions.php");
-require_once("include/table_columns.php");
-require_once("include/filter.php");
+require_once 'include/std_functions.php';
+require_once 'include/std_classes.php';
+require_once 'include/form_functions.php';
+require_once 'include/table_columns.php';
+require_once 'include/filter.php';
 chdir("code_examples/");
 
 /* init vars */

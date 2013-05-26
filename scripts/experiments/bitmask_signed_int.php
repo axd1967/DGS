@@ -28,9 +28,9 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
 chdir("../../");
-require_once( "include/quick_common.php" );
-require_once( "include/connect2mysql.php" );
-require_once( "include/std_functions.php" );
+require_once 'include/quick_common.php';
+require_once 'include/connect2mysql.php';
+require_once 'include/std_functions.php';
 
 
 

@@ -17,9 +17,9 @@ You should have received a copy of the GNU Affero General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-require_once( 'include/globals.php' );
-require_once( 'include/classlib_bitset.php' );
-require_once( 'include/dgs_cache.php' );
+require_once 'include/globals.php';
+require_once 'include/classlib_bitset.php';
+require_once 'include/dgs_cache.php';
 
  /* Author: Jens-Uwe Gaspar */
 

@@ -17,7 +17,7 @@ You should have received a copy of the GNU Affero General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-require_once( "include/quick_common.php" );
+require_once 'include/quick_common.php';
 
 
 if( !$is_down )
@@ -32,19 +32,19 @@ if( !$is_down )
    // the whole cron stuff in one run (see also 'INSTALL')
    {
       // normally every 5 mins
-      include_once( "clock_tick.php" );
+      include_once 'clock_tick.php';
 
       // normally every 15 mins
-      include_once( "tournaments/cron_tournaments.php" );
+      include_once 'tournaments/cron_tournaments.php';
 
       // normally every 30 mins
-      include_once( "halfhourly_cron.php" );
+      include_once 'halfhourly_cron.php';
 
       // normally every 1 h
-      include_once( "hourly_cron.php" );
+      include_once 'hourly_cron.php';
 
       // normally every 24 h
-      include_once( "daily_cron.php" );
+      include_once 'daily_cron.php';
    }
 
    if( $chained )

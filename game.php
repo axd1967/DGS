@@ -27,28 +27,28 @@ if( @$_REQUEST['nextgame']
       || @$_REQUEST['fk_start'] )
 {
 //confirm use $_REQUEST: gid, move, action, coord, stonestring
-   include_once( "confirm.php");
+   include_once 'confirm.php';
    exit; //should not be executed
 }
 
 $TranslateGroups[] = "Game";
 
-require_once( "include/std_functions.php" );
-require_once( 'include/gui_functions.php' );
-require_once( 'include/classlib_userconfig.php' );
-require_once( "include/game_functions.php" );
-require_once( "include/game_actions.php" );
-require_once( "include/form_functions.php" );
-require_once( "include/board.php" );
-require_once( "include/move.php" );
-require_once( 'include/classlib_user.php' );
-require_once( 'include/time_functions.php' );
-require_once( "include/rating.php" );
-require_once( 'include/table_infos.php' );
-require_once( 'include/classlib_goban.php' );
-require_once( 'include/game_sgf_control.php' );
+require_once 'include/std_functions.php';
+require_once 'include/gui_functions.php';
+require_once 'include/classlib_userconfig.php';
+require_once 'include/game_functions.php';
+require_once 'include/game_actions.php';
+require_once 'include/form_functions.php';
+require_once 'include/board.php';
+require_once 'include/move.php';
+require_once 'include/classlib_user.php';
+require_once 'include/time_functions.php';
+require_once 'include/rating.php';
+require_once 'include/table_infos.php';
+require_once 'include/classlib_goban.php';
+require_once 'include/game_sgf_control.php';
 if( ENABLE_STDHANDICAP ) {
-   require_once( "include/sgf_parser.php" );
+   require_once 'include/sgf_parser.php';
 }
 if( ALLOW_TOURNAMENTS ) {
    require_once 'tournaments/include/tournament_cache.php';

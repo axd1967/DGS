@@ -19,7 +19,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 $TranslateGroups[] = "Common";
 
-require_once( "include/filter.php" );
+require_once 'include/filter.php';
 
 
 /*!

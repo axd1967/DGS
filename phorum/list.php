@@ -1,7 +1,7 @@
 <?php
 
 chdir("../");
-require_once( "include/quick_common.php" );
+require_once 'include/quick_common.php';
 
 {
    $forum_id = (int)@$_REQUEST['f'];

@@ -17,12 +17,12 @@ You should have received a copy of the GNU Affero General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-require_once( "include/quick_common.php" );
-require_once( "include/connect2mysql.php" );
-require_once( "include/translation_functions.php" );
-require_once( "include/time_functions.php" );
-require_once( "include/game_functions.php" );
-require_once( "include/db/bulletin.php" );
+require_once 'include/quick_common.php';
+require_once 'include/connect2mysql.php';
+require_once 'include/translation_functions.php';
+require_once 'include/time_functions.php';
+require_once 'include/game_functions.php';
+require_once 'include/db/bulletin.php';
 
 $TheErrors->set_mode(ERROR_MODE_PRINT);
 

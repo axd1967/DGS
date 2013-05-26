@@ -21,14 +21,14 @@ $TranslateGroups[] = "Game";
 
 define('DBG_RATING', 1); // print new users rating
 
-require_once( "include/std_functions.php" );
-require_once( "include/std_classes.php" );
-require_once( "include/db/games.php" );
-require_once( "include/db/ratinglog.php" );
-require_once( "include/classlib_user.php" );
-require_once( "include/form_functions.php" );
-require_once( "include/rating.php" );
-require_once( "include/table_columns.php" );
+require_once 'include/std_functions.php';
+require_once 'include/std_classes.php';
+require_once 'include/db/games.php';
+require_once 'include/db/ratinglog.php';
+require_once 'include/classlib_user.php';
+require_once 'include/form_functions.php';
+require_once 'include/rating.php';
+require_once 'include/table_columns.php';
 
 {
    connect2mysql();

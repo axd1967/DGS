@@ -17,12 +17,12 @@ You should have received a copy of the GNU Affero General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-require_once( "include/std_functions.php" );
-require_once( "include/game_functions.php" );
-require_once( "include/game_actions.php" );
-require_once( "include/board.php" );
-require_once( "include/move.php" );
-//require_once( "include/rating.php" );
+require_once 'include/std_functions.php';
+require_once 'include/game_functions.php';
+require_once 'include/game_actions.php';
+require_once 'include/board.php';
+require_once 'include/move.php';
+//require_once 'include/rating.php';
 
 $TheErrors->set_mode(ERROR_MODE_PRINT);
 

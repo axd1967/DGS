@@ -19,19 +19,19 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 $TranslateGroups[] = "Users";
 
-require_once( 'include/globals.php' );
-require_once( "include/std_functions.php" );
-require_once( 'include/gui_functions.php' );
-require_once( "include/std_classes.php" );
-require_once( "include/countries.php" );
-require_once( "include/rating.php" );
-require_once( "include/table_columns.php" );
-require_once( "include/form_functions.php" );
-require_once( "include/filter.php" );
-require_once( "include/filterlib_country.php" );
-require_once( "include/classlib_profile.php" );
-require_once( 'include/classlib_userconfig.php' );
-require_once( 'include/classlib_userpicture.php' );
+require_once 'include/globals.php';
+require_once 'include/std_functions.php';
+require_once 'include/gui_functions.php';
+require_once 'include/std_classes.php';
+require_once 'include/countries.php';
+require_once 'include/rating.php';
+require_once 'include/table_columns.php';
+require_once 'include/form_functions.php';
+require_once 'include/filter.php';
+require_once 'include/filterlib_country.php';
+require_once 'include/classlib_profile.php';
+require_once 'include/classlib_userconfig.php';
+require_once 'include/classlib_userpicture.php';
 
 
 {

@@ -25,9 +25,9 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 $TranslateGroups[] = "Forum"; //local use
 
-require_once( 'include/std_classes.php' );
-require_once( 'include/connect2mysql.php' );
-require_once( 'forum/class_forum_options.php' );
+require_once 'include/std_classes.php';
+require_once 'include/connect2mysql.php';
+require_once 'forum/class_forum_options.php';
 
 
 

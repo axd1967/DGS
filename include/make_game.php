@@ -19,10 +19,10 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 //$TranslateGroups[] = "Game";
 
-require_once( 'include/game_functions.php' );
-require_once( 'include/time_functions.php' );
-require_once( 'include/rating.php' );
-require_once( 'include/board.php' );
+require_once 'include/game_functions.php';
+require_once 'include/time_functions.php';
+require_once 'include/rating.php';
+require_once 'include/board.php';
 
 
 // Inserts INVITATION-game or updates DISPUTE-game
@@ -765,13 +765,13 @@ function standard_handicap_is_possible($size, $hcp)
 {
    if( ENABLE_STDHANDICAP & 4 ) //allow everything
       return true;
-   return( $size == 19 || $hcp <= 4 || ($hcp <= 9 && $size%2 == 1 && $size>=9) );
+   return ( $size == 19 || $hcp <= 4 || ($hcp <= 9 && $size%2 == 1 && $size>=9) );
 }
 
 if( ENABLE_STDHANDICAP & 2 ) { //skip black validation
 //for get_handicap_pattern:
-require_once('include/sgf_parser.php');
-require_once('include/coords.php');
+require_once 'include/sgf_parser.php';
+require_once 'include/coords.php';
 
 //return false if no placement is done but is still possible
 // IMPORTANT NOTE: caller needs to open TA with HOT-section if used with other db-writes!!

@@ -19,9 +19,9 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 $TranslateGroups[] = "Users";
 
-require_once( "include/std_functions.php" );
-require_once( "include/form_functions.php" );
-require_once( "include/contacts.php" );
+require_once 'include/std_functions.php';
+require_once 'include/form_functions.php';
+require_once 'include/contacts.php';
 
 {
    connect2mysql();

@@ -19,9 +19,9 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 $TranslateGroups[] = "Users";
 
-require_once( "include/std_functions.php" );
-require_once( "include/form_functions.php" );
-require_once( 'include/table_infos.php' );
+require_once 'include/std_functions.php';
+require_once 'include/form_functions.php';
+require_once 'include/table_infos.php';
 
 define('USER_BIO_ADDENTRIES', 3);
 

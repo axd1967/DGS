@@ -24,7 +24,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
 chdir("../");
-require_once("include/form_functions.php");
+require_once 'include/form_functions.php';
 chdir("code_examples/");
 
 echo "<html><body>\n";

@@ -20,14 +20,14 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 $TranslateGroups[] = "Feature";
 
 chdir('../');
-require_once( "include/std_functions.php" );
-require_once( 'include/gui_functions.php' );
-require_once( "include/table_columns.php" );
-require_once( "include/filter.php" );
-require_once( "include/classlib_profile.php" );
-require_once( 'include/classlib_userconfig.php' );
-require_once( 'include/classlib_userquota.php' );
-require_once( "features/lib_votes.php" );
+require_once 'include/std_functions.php';
+require_once 'include/gui_functions.php';
+require_once 'include/table_columns.php';
+require_once 'include/filter.php';
+require_once 'include/classlib_profile.php';
+require_once 'include/classlib_userconfig.php';
+require_once 'include/classlib_userquota.php';
+require_once 'features/lib_votes.php';
 
 
 {

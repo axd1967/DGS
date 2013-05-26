@@ -21,13 +21,13 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 $TranslateGroups[] = "Game";
 
-require_once( "include/std_functions.php" );
-require_once( "include/message_functions.php" );
-require_once( "include/game_functions.php" );
-require_once( "include/rating.php" );
-require_once( "include/make_game.php" );
-require_once( "include/contacts.php" );
-require_once( "include/db/waitingroom.php" );
+require_once 'include/std_functions.php';
+require_once 'include/message_functions.php';
+require_once 'include/game_functions.php';
+require_once 'include/rating.php';
+require_once 'include/make_game.php';
+require_once 'include/contacts.php';
+require_once 'include/db/waitingroom.php';
 
 
  /*!

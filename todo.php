@@ -17,7 +17,7 @@ You should have received a copy of the GNU Affero General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-require_once( 'include/connect2mysql.php' );
+require_once 'include/connect2mysql.php';
 
 {
    // TO-DO list moved to DGS-wishlist on SLs

@@ -20,10 +20,10 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 // Checks and show errors in the Games database.
 
 chdir( '../' );
-require_once( "include/std_functions.php" );
-require_once( "include/board.php" );
-require_once( "include/move.php" );
-require_once( "include/game_functions.php" );
+require_once 'include/std_functions.php';
+require_once 'include/board.php';
+require_once 'include/move.php';
+require_once 'include/game_functions.php';
 
 
 {

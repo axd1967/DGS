@@ -19,7 +19,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 $TranslateGroups[] = "Game";
 
-require_once( "include/std_functions.php" ); // consts
+require_once 'include/std_functions.php'; // consts
 
 // rated-status for update_rating2()
 define('RATEDSTATUS_RATED',     0);

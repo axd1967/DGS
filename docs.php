@@ -19,7 +19,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 $TranslateGroups[] = "Docs";
 
-require_once( "include/std_functions.php" );
+require_once 'include/std_functions.php';
 
 $GLOBALS['ThePage'] = new Page('Docs', 0, ROBOTS_NO_FOLLOW,
    "Overview of static documents of the Dragon Go Server (DGS) where you can play turn-based Go (aka Baduk or Weichi).",

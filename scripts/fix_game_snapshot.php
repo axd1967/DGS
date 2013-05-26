@@ -20,12 +20,12 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 // translations remove for admin page: $TranslateGroups[] = "Admin";
 
 chdir('..');
-require_once( "include/std_functions.php" );
-require_once( "include/std_classes.php" );
-require_once( "include/db/games.php" );
-require_once( "include/board.php" );
-require_once( "include/classlib_user.php" );
-require_once( "include/form_functions.php" );
+require_once 'include/std_functions.php';
+require_once 'include/std_classes.php';
+require_once 'include/db/games.php';
+require_once 'include/board.php';
+require_once 'include/classlib_user.php';
+require_once 'include/form_functions.php';
 
 define('SEPLINE', "\n<p><hr>\n");
 

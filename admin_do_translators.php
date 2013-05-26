@@ -19,9 +19,9 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 // translations remove for admin page: $TranslateGroups[] = "Admin";
 
-require_once( "include/std_functions.php" );
-require_once( "include/form_functions.php" );
-require_once( "include/make_translationfiles.php" );
+require_once 'include/std_functions.php';
+require_once 'include/form_functions.php';
+require_once 'include/make_translationfiles.php';
 
 
 function lang_illegal( $str)

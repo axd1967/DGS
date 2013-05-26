@@ -30,7 +30,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
  *    sep   : additional separator-char used ('-' default)
  */
 
-require_once( "include/tokenizer.php" );
+require_once 'include/tokenizer.php';
 
 function fnop() {}
 

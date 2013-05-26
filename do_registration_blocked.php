@@ -19,8 +19,8 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 $TranslateGroups[] = "Start";
 
-require_once( "include/form_functions.php" );
-require_once( "include/register_functions.php" );
+require_once 'include/form_functions.php';
+require_once 'include/register_functions.php';
 
 
 {

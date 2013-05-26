@@ -21,12 +21,12 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 $TranslateGroups[] = "Common";
 
-require_once( 'include/globals.php' );
-require_once( "include/quick_common.php" );
-require_once( 'include/utilities.php' );
-require_once( 'include/dgs_cache.php' );
+require_once 'include/globals.php';
+require_once 'include/quick_common.php';
+require_once 'include/utilities.php';
+require_once 'include/dgs_cache.php';
 
-require_once( "include/time_functions.php" );
+require_once 'include/time_functions.php';
 
 global $page_microtime, $main_path, $base_path, $printable; //PHP5
 if( !isset($page_microtime) )
@@ -39,15 +39,15 @@ if( !isset($page_microtime) )
    $printable = (bool)@$_REQUEST['printable'];
 }
 
-require_once( "include/page_functions.php" );
-require_once( "include/gui_functions.php" );
-require_once( "include/game_texts.php" );
+require_once 'include/page_functions.php';
+require_once 'include/gui_functions.php';
+require_once 'include/game_texts.php';
 
-require_once( "include/translation_functions.php" );
-require_once( "include/classlib_matrix.php" );
-require_once( "forum/class_forum_read.php" );
-require_once( "include/db/bulletin.php" );
-require_once( "include/survey_control.php" );
+require_once 'include/translation_functions.php';
+require_once 'include/classlib_matrix.php';
+require_once 'forum/class_forum_read.php';
+require_once 'include/db/bulletin.php';
+require_once 'include/survey_control.php';
 
 
 // Server birth date:

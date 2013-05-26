@@ -19,15 +19,15 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 $TranslateGroups[] = "Users";
 
-require_once( "include/std_functions.php" );
-require_once( 'include/error_codes.php' );
-require_once( 'include/classlib_userconfig.php' );
-require_once( "include/timezones.php" );
-require_once( "include/countries.php" );
-require_once( "include/form_functions.php" );
-require_once( 'include/utilities.php' );
-require_once( 'include/db/bulletin.php' );
-require_once( 'include/gui_bulletin.php' );
+require_once 'include/std_functions.php';
+require_once 'include/error_codes.php';
+require_once 'include/classlib_userconfig.php';
+require_once 'include/timezones.php';
+require_once 'include/countries.php';
+require_once 'include/form_functions.php';
+require_once 'include/utilities.php';
+require_once 'include/db/bulletin.php';
+require_once 'include/gui_bulletin.php';
 
 // Reminder: to friendly reset the language:
 // {HOSTBASE}edit_profile.php?language=C
@@ -53,7 +53,7 @@ require_once( 'include/gui_bulletin.php' );
 
    // ----- init globals ---------------------------------
 
-   include_once( 'skins/known_skins.php' );
+   include_once 'skins/known_skins.php';
    $arr_timezones = get_timezone_array();
    $stonesizes = array_value_to_key_and_value( array( 5, 7, 9, 11, 13, 17, 21, 25, 29, 35, 42, 50 ) );
 

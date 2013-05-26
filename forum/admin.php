@@ -20,8 +20,8 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 // translations remove for admin page: $TranslateGroups[] = "Admin";
 
 chdir('..');
-require_once( "forum/forum_functions.php" );
-require_once( "include/gui_functions.php" );
+require_once 'forum/forum_functions.php';
+require_once 'include/gui_functions.php';
 
 $GLOBALS['ThePage'] = new Page('ForumAdmin');
 

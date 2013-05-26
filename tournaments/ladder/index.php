@@ -22,7 +22,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 do {
   if( !chdir('../') ) exit;
 } while( !file_exists('include/connect2mysql.php') );
-require_once( 'include/connect2mysql.php' );
+require_once 'include/connect2mysql.php';
 
 jump_to('tournaments/list_tournaments.php');
 

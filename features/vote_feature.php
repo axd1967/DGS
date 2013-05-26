@@ -20,10 +20,10 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 $TranslateGroups[] = "Feature";
 
 chdir('../');
-require_once( "include/std_functions.php" );
-require_once( "include/form_functions.php" );
-require_once( 'include/classlib_userquota.php' );
-require_once( "features/lib_votes.php" );
+require_once 'include/std_functions.php';
+require_once 'include/form_functions.php';
+require_once 'include/classlib_userquota.php';
+require_once 'features/lib_votes.php';
 
 {
    connect2mysql();

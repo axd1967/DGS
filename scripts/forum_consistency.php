@@ -22,10 +22,10 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 // see section 'Calculated database fields' in 'specs/forums.txt' for necessary forum-updates !!
 
 chdir( '../' );
-require_once( 'include/std_functions.php' );
-require_once( 'include/gui_functions.php' );
-require_once( 'include/table_columns.php' );
-require_once( 'forum/forum_functions.php' );
+require_once 'include/std_functions.php';
+require_once 'include/gui_functions.php';
+require_once 'include/table_columns.php';
+require_once 'forum/forum_functions.php';
 
 define('SEPLINE', "\n<p><hr>\n");
 

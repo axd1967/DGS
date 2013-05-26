@@ -2,7 +2,7 @@
 
 exit; ## for safety, as it's not clear if this (old) scripts still works
 
-require( "include/std_functions.php" );
+require_once 'include/std_functions.php';
 
 connect2mysql();
 

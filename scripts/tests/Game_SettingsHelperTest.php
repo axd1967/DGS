@@ -24,8 +24,8 @@ if (!defined("PHPUnit_MAIN_METHOD")) {
     define("PHPUnit_MAIN_METHOD", "Game_SettingsHelperTest::main");
 }
 
-require_once "PHPUnit/Framework/TestCase.php";
-require_once "PHPUnit/Framework/TestSuite.php";
+require_once 'PHPUnit/Framework/TestCase.php';
+require_once 'PHPUnit/Framework/TestSuite.php';
 
 require_once 'include/game_functions.php';
 
@@ -42,7 +42,7 @@ class Game_SettingsHelperTest extends PHPUnit_Framework_TestCase {
     * @static
     */
    public static function main() {
-      require_once "PHPUnit/TextUI/TestRunner.php";
+      require_once 'PHPUnit/TextUI/TestRunner.php';
 
       $suite  = new PHPUnit_Framework_TestSuite("Game_SettingsHelperTest");
       $result = PHPUnit_TextUI_TestRunner::run($suite);

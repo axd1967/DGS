@@ -25,17 +25,17 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 $TranslateGroups[] = "Forum"; //local use
 
-require_once( "include/std_functions.php" );
-require_once( 'include/gui_functions.php' );
-require_once( 'include/std_classes.php' );
-require_once( "include/form_functions.php" );
-require_once( 'include/classlib_user.php' );
-require_once( 'include/classlib_goban.php' );
-require_once( 'include/rating.php' );
-require_once( 'include/dgs_cache.php' );
-require_once( 'forum/class_forum_options.php' );
-require_once( 'forum/class_forum_read.php' );
-//if( ALLOW_GO_DIAGRAMS ) require_once( "include/GoDiagram.php" );
+require_once 'include/std_functions.php';
+require_once 'include/gui_functions.php';
+require_once 'include/std_classes.php';
+require_once 'include/form_functions.php';
+require_once 'include/classlib_user.php';
+require_once 'include/classlib_goban.php';
+require_once 'include/rating.php';
+require_once 'include/dgs_cache.php';
+require_once 'forum/class_forum_options.php';
+require_once 'forum/class_forum_read.php';
+//if( ALLOW_GO_DIAGRAMS ) require_once 'include/GoDiagram.php';
 
 
 //must follow the "ORDER BY PosIndex" order and have at least 64 chars:

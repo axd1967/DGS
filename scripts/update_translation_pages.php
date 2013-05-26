@@ -20,7 +20,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 // Search the php files to see which are to be included in TranslationPages
 
 chdir( '../' );
-require_once( "include/std_functions.php" );
+require_once 'include/std_functions.php';
 
 
 function find_php_files( )

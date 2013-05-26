@@ -18,8 +18,8 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
 chdir( '../' );
-require_once('include/std_functions.php' );
-require_once('include/coords.php');
+require_once 'include/std_functions.php';
+require_once 'include/coords.php';
 chdir( 'pattern/' );
 
 

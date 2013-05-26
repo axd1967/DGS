@@ -19,7 +19,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 $TranslateGroups[] = "Goban";
 
-require_once( 'include/classlib_goban.php' );
+require_once 'include/classlib_goban.php';
 
  /* Author: Jens-Uwe Gaspar */
 

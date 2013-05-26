@@ -21,10 +21,10 @@ $TranslateGroups[] = "Common";
 
  /* Author: Jens-Uwe Gaspar */
 
-require_once( "include/quick_common.php" );
-require_once( "include/filter_functions.php" );
-require_once( "include/tokenizer.php" );
-require_once( 'include/utilities.php' );
+require_once 'include/quick_common.php';
+require_once 'include/filter_functions.php';
+require_once 'include/tokenizer.php';
+require_once 'include/utilities.php';
 
  /*!
   * \file filter_parser.php

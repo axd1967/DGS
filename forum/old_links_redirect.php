@@ -18,7 +18,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
 chdir('..');
-require_once( "include/quick_common.php" );
+require_once 'include/quick_common.php';
 
 {
    connect2mysql();

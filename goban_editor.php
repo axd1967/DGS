@@ -19,19 +19,19 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 $TranslateGroups[] = "Goban";
 
-require_once( 'include/std_functions.php' );
-require_once( 'include/gui_functions.php' );
-require_once( 'include/form_functions.php' );
-require_once( 'include/classlib_goban.php' );
-require_once( 'include/classlib_upload.php' );
-require_once( 'include/goban_handler_sl.php' );
-require_once( 'include/goban_handler_gfx.php' );
-require_once( 'include/goban_handler_dgsgame.php' );
-require_once( 'include/sgf_parser.php' );
-require_once( 'include/board.php' );
-require_once( 'include/move.php' );
-require_once( 'include/coords.php' );
-require_once( 'include/db/shape.php' );
+require_once 'include/std_functions.php';
+require_once 'include/gui_functions.php';
+require_once 'include/form_functions.php';
+require_once 'include/classlib_goban.php';
+require_once 'include/classlib_upload.php';
+require_once 'include/goban_handler_sl.php';
+require_once 'include/goban_handler_gfx.php';
+require_once 'include/goban_handler_dgsgame.php';
+require_once 'include/sgf_parser.php';
+require_once 'include/board.php';
+require_once 'include/move.php';
+require_once 'include/coords.php';
+require_once 'include/db/shape.php';
 
 $GLOBALS['ThePage'] = new Page('GobanEdit');
 

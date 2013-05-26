@@ -19,15 +19,15 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 $TranslateGroups[] = "Common";
 
-require_once( "include/std_functions.php" );
-require_once( 'include/gui_functions.php' );
-require_once( "include/rating.php" );
-require_once( 'include/table_infos.php' );
-require_once( "include/table_columns.php" );
-require_once( "include/game_functions.php" );
-require_once( "include/message_functions.php" );
-require_once( 'include/classlib_userconfig.php' );
-require_once( 'include/gui_bulletin.php' );
+require_once 'include/std_functions.php';
+require_once 'include/gui_functions.php';
+require_once 'include/rating.php';
+require_once 'include/table_infos.php';
+require_once 'include/table_columns.php';
+require_once 'include/game_functions.php';
+require_once 'include/message_functions.php';
+require_once 'include/classlib_userconfig.php';
+require_once 'include/gui_bulletin.php';
 
 $GLOBALS['ThePage'] = new Page('Status');
 
@@ -248,7 +248,7 @@ if( $player_row['GamesMPG'] > 0 )
    if( (@$player_row['admin_level'] & ADMIN_FORUM) )
    {
       section( 'Pending', '');
-      require_once('forum/forum_functions.php'); // NOTE: always included, but only executed here !!
+      require_once 'forum/forum_functions.php'; // NOTE: always included, but only executed here !!
       display_posts_pending_approval();
    }
 } // show pending posts

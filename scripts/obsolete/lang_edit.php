@@ -23,7 +23,7 @@ exit; ## for safety, as it's not clear if this (old) scripts still works
 
 /* The code in this file is written by Ragnar Ouchterlony */
 
-require( "include/std_functions.php" );
+require_once 'include/std_functions.php';
 
 
 function edit_file($file, $from_str, $to_str)

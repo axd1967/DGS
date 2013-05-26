@@ -20,11 +20,11 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 // translations remove for admin page: $TranslateGroups[] = "Admin";
 
 chdir('..');
-require_once( "include/std_functions.php" );
-require_once( 'include/gui_functions.php' );
-require_once( "include/table_columns.php" );
-require_once( "include/filter.php" );
-require_once( "forum/forum_functions.php" );
+require_once 'include/std_functions.php';
+require_once 'include/gui_functions.php';
+require_once 'include/table_columns.php';
+require_once 'include/filter.php';
+require_once 'forum/forum_functions.php';
 
 {
    connect2mysql();

@@ -17,7 +17,7 @@ You should have received a copy of the GNU Affero General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-require_once( 'include/utilities.php' );
+require_once 'include/utilities.php';
 
  /* Author: Jens-Uwe Gaspar */
 

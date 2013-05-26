@@ -34,9 +34,9 @@ $CONTEXT_FILE= $BASENAME.'.ini';
 //default $CONTEXT_VARS:
 //$games= array();
 $Logfp= fopen($BASENAME.'.rpt', 'w');
-require_once('curl.php'); // J:\common\curl.php
-require_once('Common.php'); // J:\common\Common.php
-require_once('Dragon.php'); // J:\common\Dragon.php
+require_once 'curl.php'; // J:\common\curl.php
+require_once 'Common.php'; // J:\common\Common.php
+require_once 'Dragon.php'; // J:\common\Dragon.php
 } else {
 define('CR',"\r\n"); //for output to screen
 define('MY_GETBUFSIZ', 32000);

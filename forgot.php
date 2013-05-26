@@ -19,9 +19,9 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 $TranslateGroups[] = "Start";
 
-require_once( "include/std_functions.php" );
-require_once( "include/form_functions.php" );
-require_once( "include/error_codes.php" );
+require_once 'include/std_functions.php';
+require_once 'include/form_functions.php';
+require_once 'include/error_codes.php';
 
 {
    // NOTE: using page: send_new_password.php

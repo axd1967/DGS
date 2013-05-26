@@ -28,7 +28,7 @@ require_once 'include/form_functions.php';
 require_once 'include/message_functions.php';
 require_once 'include/game_functions.php';
 require_once 'include/time_functions.php';
-require_once "include/rating.php";
+require_once 'include/rating.php';
 require_once 'include/utilities.php';
 
 

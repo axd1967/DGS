@@ -19,19 +19,19 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 $TranslateGroups[] = "Game";
 
-require_once( "include/std_functions.php" );
-require_once( 'include/gui_functions.php' );
-require_once( "include/table_columns.php" );
-require_once( "include/form_functions.php" );
-require_once( "include/game_functions.php" );
-require_once( "include/rating.php" );
-require_once( "include/filter.php" );
-require_once( "include/classlib_profile.php" );
-require_once( 'include/classlib_userconfig.php' );
-require_once( 'include/time_functions.php' );
-require_once( 'tournaments/include/tournament_games.php' );
-require_once( 'include/filterlib_gametype.php' );
-require_once( 'include/gamelist_control.php' );
+require_once 'include/std_functions.php';
+require_once 'include/gui_functions.php';
+require_once 'include/table_columns.php';
+require_once 'include/form_functions.php';
+require_once 'include/game_functions.php';
+require_once 'include/rating.php';
+require_once 'include/filter.php';
+require_once 'include/classlib_profile.php';
+require_once 'include/classlib_userconfig.php';
+require_once 'include/time_functions.php';
+require_once 'tournaments/include/tournament_games.php';
+require_once 'include/filterlib_gametype.php';
+require_once 'include/gamelist_control.php';
 
 $GLOBALS['ThePage'] = new Page('GamesList');
 
