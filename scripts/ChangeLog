@@ -18,6 +18,12 @@ ChangeLog
 
 2013-05-26 juga
 
+   * all files,
+     scripts/README.developers:
+   - adjusted code-style:
+     - for 'require/require_once/include/include_once': use without braces and '..' if const-string
+     - for 'return/if/elseif/for/foreach/while/do/switch': with space after keyword
+
    * game_comments.php:
    - bugfix: show hidden game-comments in multi-player-games only for comment-author
 
