@@ -16,6 +16,11 @@ Developers INFO:
 ChangeLog
 ------------------------------------------------------------------
 
+2013-05-26 juga
+
+   * game_comments.php:
+   - bugfix: show hidden game-comments in multi-player-games only for comment-author
+
 2013-05-21 juga
 
    * tournaments/include/tournament_round_status.php (TournamentRoundStatus.check_round_status_change,
