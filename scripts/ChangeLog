@@ -18,6 +18,14 @@ ChangeLog
 
 2013-06-01 juga
 
+   * scripts/README.developers, specs/tournaments.txt, skins/dragon/screen.css,
+     docs.php, index.php, snapshot.php, INSTALL, .gitignore:
+   - adjustments to reflect changes caused by CVS-to-GIT migration
+      - adjusted comments on snapshot-page to export Dragon-snapshots from GIT
+      - added code-browsing link for GIT, adjusted text for old CVS code-browsing
+      - replaced texts about CVS with the more general term of SCM (source control management)
+      - replaced CVS-HEAD with (GIT-)master terminology
+
    * images/, images/flags/, 5/, 7/, 9/, 11/, 13/, 17/, 21/, 25/, 29/, 35/, 42/, 50/:
    - put all images under version-control
 
