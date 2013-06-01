@@ -5,7 +5,7 @@ changelog reference at:
 http://www.gnu.org/prep/standards/html_node/Change-Logs.html
 
 previous server update:
-Release [2012-06-08] - DGS 1.0.15 - CVS-tag [release-1_0_15-20120608] on branch [DGS-stable-20120610]
+Release [2012-06-08] - DGS 1.0.15 - tag [release-1_0_15-20120608] on branch [DGS-stable-20120610]
 
 Developers INFO:
 
@@ -15,6 +15,17 @@ Developers INFO:
 ------------------------------------------------------------------
 ChangeLog
 ------------------------------------------------------------------
+
+2013-06-01 juga
+
+   * images/, images/flags/, 5/, 7/, 9/, 11/, 13/, 17/, 21/, 25/, 29/, 35/, 42/, 50/:
+   - put all images under version-control
+
+   * all files:
+   - migrated CVS-repository to GIT-repository:
+     - see http://sourceforge.net/p/dragongoserver/dgs-main
+     - git clone ssh://USERNAME@git.code.sf.net/p/dragongoserver/dgs-main LOCAL-DIR
+     - replaced .cvsignore files with single .gitignore file
 
 2013-05-26 juga
 
