@@ -1,0 +1,218 @@
+# Topic: proposal for a revised translation-system
+# Description: Translations (Help, FAQ, Links, source, Intro, etc)
+# URL:
+# Author: Jens-Uwe Gaspar, DGS 'jug'
+
+#-------- (1) Introduction ----------------------------------------------------
+
+Basically i thought over something that fulfills the following
+features without looking too much on existing table-design
+or php-code, but not redo it from scratch:
+
+Features:
+- managing FAQ-entries, link-entries, help-pages, normal translation-texts (from sources)
+- keeps most of the current db-tables, or allows an easy migration
+- solves problem with changed entries and translators
+   marking global text as Done; propably also more performant
+
+What type of texts are there to translate ? (referred as TYPES)
+- texts from source code
+- FAQ: category (section-title), question, answer
+- Links: category, text for link, link (URL), description for link
+- Help: title, text (assume, you may think of that differently)
+- Intro: title, text
+
+Currently implemented:
+- editor for FAQ, Links, Introduction
+- translators can translate texts for: FAQ, Links, introduction, source-code-texts
+
+The last one is optional, included just for illustration, what could
+be done.
+
+Basically the pages showing the different TYPES have a similar
+layout:
+- a potential hierachy (like the FAQ)
+- a category
+- a child entry containing:
+   - a first text  (e.g. question for FAQ, link for Links)
+   - a second text (e.g. answer for FAQ, description for Links)
+
+Those are only different layout which could use the same database-
+entries. This is a big change, but i think it's ok, because it
+could use the same managing page for all TYPES.
+
+There are 6 existing tables, that need a change:
+- FAQ
+- Links !?
+- Intro !?
+- TranslationTexts
+- Translations
+- FAQlog
+
+Changes to FAQ-table:
+- rename table (or add new one, copying data):
+
+   TABLE TextElements -- or TextStructure or some other name
+     ID             -- copy from FAQ
+     Type           -- Enum( 'Link', 'FAQ', 'Help' )
+     Parent         -- copy from FAQ
+     Level          -- copy from FAQ
+     SortOrder      -- copy from FAQ
+     Label          -- varchar(64)  NULL; UNIQUE-index
+     Comment        -- varchar(255)
+     Text1          -- foreign key to TranslationTexts.ID
+     Text2          -- foreign key to TranslationTexts.ID
+     Hidden         -- Enum( 'Y', 'N' ), copy from FAQ
+     Translatable   -- Enum( 'Y', 'N' )
+
+- field 'Type' identifies which of the TYPES entry is for
+- field 'Label', 'Comment' as described in above mail-text
+- field Text1, Text2:
+   - for FAQ: Text1 = Question, Text2 = Answer
+   - for Links: Text1 = Text for link, Text2 = description
+     (need some additional field for link-URL or integrate in
+     Text1 with XML-tag)
+   - for Help: (don't know your needs for this, but positive,
+     that it can fit)
+
+- field 'Translatable': This is moved from TranslationTexts,
+   because all TranslationTexts basically are translatable.
+   What "makes" them untranslatable is the place they are used.
+
+   It also combines the state for both text1 and text2 (Q&A);
+   IMO, it makes not much sense to make text1 translatable
+   and text2 untranslatable (at the moment Q&A-translatable-
+   state is kept the same; normalization in database-theory
+   would lead to moving this field at a shared place to avoid
+   that redundancy).
+
+   So this field has been moved into this new/renamed table.
+   The states 'New / Changed' are represented differently ...
+
+
+Changes to TranslationTexts-table:
+- added / changed / removed fields:
+
+   TABLE TranslationTexts
+     ID             -- no change
+     Text           -- no change
+     Ref_ID         -- no change (foreign key to TextElements.ID)
+     LastUpdate     -- current date of changed / new TextElements-
+                       entry, that need to be translated
+                       (not touched for minor edits)
+
+- field 'Ref_ID': 0 for normal (source-)texts,
+   otherwise back-reference for TextElements.ID
+   on TYPES (FAQ, Links, Help)
+
+Changes to Translations-table:
+- added / changed / removed fields:
+
+   TABLE Translations
+     Original_ID    -- no change
+     Language_ID    -- no change
+     Text           -- no change
+     LastUpdate     -- current date translator changed / added text
+
+Changes to FAQlog (not elaborated as table, trivial changes):
+- rename it accordingly to TextElements-table
+- add action: Enum( 'NEw', 'UPD', 'DEL' ) as described above
+- add comment (from TextElements-table)
+
+
+With this table-design, it's possible to:
+- use the same managing page for different TYPES:
+   select type, present tree structure (just like FAQ is now)
+   in admin_faq.php
+
+- Reading the entries for FAQ, Links, Help could be based using
+   shared code, putting the read in a class. Then the different
+   layouts could use the class as abstractions to the database.
+
+- the untranslated (new or changed "entries") for translators
+   are those that for a specific language have no database-entry
+   in Translations-table or for which the date-expression
+   "Translations.LastUpdate < TranslationTexts.LastUpdate"
+   is fulfilled.
+
+   Select would be something like:
+     SELECT ..., IF(ISNULL(T.ID),1,0) AS IS_NEW, ...
+     FROM TranslationTexts AS TT
+        LEFT JOIN TextElements AS TE
+           ON TT.Ref_ID=TE.ID and TE.Translatable='Y'
+        LEFT JOIN Translations AS T
+           ON T.Original_ID=TT.ID AND T.Language_ID=$LANG_ID
+              AND T.LastUpdate < TT.LastUpdate
+     WHERE ...
+
+   If the left-join with Translations results in NULL, than there
+   is no translated text for the language. If there is a
+   TranslationTexts-db-entry, then the LastUpdate indicates,
+   if the translator already has translated the text or not.
+
+   That was, what I had in mind, when talking about a Date
+   (in above email-text).
+
+
+Changes need to source-code:
+- add a class that abstracts from the database to read
+   (maybe also write) the entries in a hierarchical structure;
+- this class can then be used on links-, faq-, help-, translate-
+   page to avoid (would make smaller code, avoid redundancy)
+- admin_faq.php -> admin_texts.php,
+   - structure-view: handle Hidden, Translateable,
+     add TYPE-selection to edit entries for
+   - entry-view: add form-elements for label, comment and checkbox
+     to mark as minor-edit (or need-for-translation)
+- translate.php: need adjustments in the selecting query
+   (or use common class to read entries),
+   need adjustments handling the LastUpdate-field.
+- data-entries from links must be entered in db
+
+
+More notes:
+- this design would also allow to use TextElements providing
+   a comment on source-based texts (e.g. meaning / context)
+
+- if the structure is the same, the TYPES could be extended.
+   this may also be used for the introduction.php-page
+
+- TextElements.Hidden-field could also be set to 'Static' (or provide
+   an additional field for it) to forbid that an entry can be deleted
+   (e.g. for referenced, labeled entry used in the source-code) ...
+
+- this is of course only a start, some details need some further
+   thoughts and elaboration
+
+- from Rod: about FAQ-Admin "Comment":
+  Maybe this could be a pseudo HTML tag (like <comment> and
+  <hidden> in the game messages) that the FAQ admin could add
+  where he want in the item text. It will be parsed in
+  different way when displayed to the translators or to the
+  users (to be defined).
+
+
+#-----------------------------------------
+# JUG:
+
+What about the following suggestion (for later):
+- Somehow add a 2nd optional argument to T_(..), that gives
+   an additional note to the translators. Could be added
+   in TranslationTexts-table in an additional note-field.
+
+   Examples:
+   - T_("H", "Handicap in Table-header")
+   - T_("d", "days (short for time-system)")
+   - T_("Std.Plac.", "standard placement in table-header")
+   - in general: T_("some text to translate" [, "context"] )
+
+Would also need no special parsing for the '#'.
+
+Makes the parsing a bit more complex, but could be worth some
+more thoughts !?
+
+comment Rod: Difficult to implement the T_() parse for the phrases crop.
+
+
+#-----------------------------------------
+

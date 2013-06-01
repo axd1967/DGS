@@ -1,0 +1,31 @@
+# Topic: Conditional-Moves
+# Description: Play submitted sequence of moves
+#
+# Forum-discussions:
+# - http://www.dragongoserver.net/forum/read.php?forum=4&thread=6325
+# - http://www.dragongoserver.net/forum/read.php?forum=4&thread=6325#24713 (patterns)
+# - http://www.dragongoserver.net/forum/read.php?forum=3&thread=18632
+# - http://www.dragongoserver.net/forum/read.php?forum=8&thread=22210
+# - http://www.dragongoserver.net/forum/read.php?forum=4&thread=5381
+# - search for "conditional"
+#
+# Author: Jens-Uwe Gaspar, DGS 'juga'
+
+* store the rest of non-played moves as variations
+
+* Q: program "pass"-move ?
+
+* Q: what if message submitted -> skip or show + ack conditional-move
+
+* from DGS-wishlist:
+    * possibility to propose a sequence,
+    * possibility to propose variations in a sequence
+    * server takes over playing until sequence ends or opponent opts for an alternative move
+    * opponent can/cannot (to be discussed) see the entire sequence (i.e. must submit his move before seeing the programmed answer)
+          o He should not be able to see it, or he might deviate just to annoy his opponent. Or for that matter, the sequence may give extra hints on where to move, or, in some cases, where not to move. OneWeirdDude
+    * past sequences stored in SGF as variations
+    * jonathan Multiple Moves: Allow users to enter sequences of moves. Similar to eBay's automatic bidding, your sequence of moves is revealed to your opponent only if they play a response included in your sequence. Being able to specify variations would be nice but not required -- even the ability to enter single threaded sequences would be useful.
+    * The [ext] wyvern program fulfills all of these requests client-side: save your sequence of moves as an SGF, and wyvern will connect to DGS and play them for you. It even handles branching, so if you see that your opponent has several sane responses, you can give continuations for each of them.
+
+* Q: implement using async-handling (more secure) !?
+

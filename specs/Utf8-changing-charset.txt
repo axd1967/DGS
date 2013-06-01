@@ -1,0 +1,693 @@
+Hi Rod,
+
+rod.ival@libertysurf.fr wrote:
+
+>>>>>>...
+>>>
+>>>>>>>> I think, the basic advice is to be careful on
+>>>
+>>>>>> charset-conversions.
+>>>>>> 
+>>>>>> That's why I want to start in a good way as soon as possible.
+>>
+>>>>
+>>>> Experience taught me, that it's often better to make that
+>>>> a separate milestone, so it's the only change in a "release".
+>>>> 
+>>>> If we mix it together with other changes and something goes
+>>>> wrong, it can be very hard to track the problem down.
+>>>> Especially with such sensitive change of charsets, which we
+>>>> don't know what side-effects are going to show up.
+>
+>> 
+>> I would like at least to specify in the init.mysql that the
+>> Handle columns MUST be case insensitive (i.e.
+>> latin1_general_ci)
+
+
+The 'Handle'-columns are VARCHARs and whatever charset is used,
+those are case-insensitive, except when a case-sensitive
+collation is used on them (one with _cs-suffix).
+
+
+>> and maybe others like the translation
+>> english text (it is rebuilt during the update)
+
+
+What do you mean by "it is rebuilt ...". How exactly ?
+
+
+>> Then have all the servers working the same way.
+
+
+No. They never will work in the same way, as long as those are
+different mysql-versions. Well maybe mysql 4.1 and 5.0 are work
+in the same, but certainly not mysql 4.0 and that is the main
+problem:
+- SF: mysql 4.1
+- live-server: mysql 4.0
+- local: mysql 4.0, 4.1 or 5.0
+
+Especially the translation texts are showing the biggest
+problematics. Making the translation-english text case
+insensitive might not be so easy.
+At the moment, the following fields are using a blob-datatype:
+- TranslationTexts.Text
+- Translations.Text
+- Translationlog.OldTranslation
+- Translationlog.Translation
+
+A BLOB is a binary field, which has NO charset or collation
+and therefore the sorting is based on the numeric values of the
+bytes in that binary-string. So the ASCII-order makes it case-
+sensitive. Adding a charset and/or collation is not possible
+for a BLOB (or has no effect as long as it is a binary).
+More Info: http://dev.mysql.com/doc/refman/4.1/en/blob.html
+
+The only chance to make it case-insensitive is to alter it
+into a TEXT-datatype, which has a charset and collation.
+BUT the problem is, that on the live-server there is no utf8
+charset. And you certainly would not want to use charset latin1,
+because that would loose data. I assume, the reason, why the
+translation-texts are stored in BLOBs is, that the live-server
+has no utf8-charset (mysql 4.0).
+
+Another point to mention is, that on mysql 4.0 whatever charset
+is used for a TEXT-column, the sorting and comparison is using
+the servers character set.
+
+I'm afraid that before making a change to the translation-texts
+we need mysql 4.1 on the live-server. Some time ago i asked
+Erik about it (he wanted to ask his provider, though I got
+not answer to that yet).
+
+
+
+>>>> Of what server you are speaking of ?
+>>>> a) SF-devel-server (mysql 4.1)
+>>>> b) live-server (mysql 4.0)
+>>>> 
+>>>> Maybe you want both to be "cleaned", but those are different
+>>>> mysql-versions, that have a totally different handling of
+>>>> charsets. So we may even need to handle them completly
+>
+>> separate.
+>> 
+>> Take the less compatible. Make all others like it.
+>> So all other severs to latin1_general_ci...
+>> I don't want to have some disturbing ???swedish??? or
+>> utf8??? at random places.
+
+
+You may also note, that the latin1_swedish_ci is the default
+collation for the latin1-charset !
+
+So, I wouldn't be too upset about the latin1_swedish_ci.
+Nothing wrong with that. That would only pose a problem,
+if you are unsatisfied with the ordering of the strings.
+Do you know the exact difference of latin1_general_ci
+and the latin1_swedish_ci ? I guess, it's very small.
+
+To test it, you may create a copy of a table using another
+collation and see, if the order or comparison changed
+and what you prefer. It might not be clear which collation
+is most suitable for a given application, so testing it
+can be helpful to perform some comparisons with representative
+data values to make sure that a given collation sorts values
+the way you expect.
+
+About some mixing of latin1-charsets on the live-server,
+I can't tell, because I have no access to it.
+
+
+However having some utf8-charset might be disturbing when
+you only want one charset. I assume you speak about the
+Sourceforge devel-server (mysql 4.1). That's the only one
+that can have utf8 ;)
+
+The database default is utf8. That can be altered of course.
+It has only effect on new tables.
+
+The only other tables using a utf8-charset in some way are:
+- Adminlog: might be converted from utf8 to latin1,
+   because the column IP is the only varchar-field,
+   and IP-strings should only contain latin1-chars
+
+- FAQ: might be converted from utf8 to latin1, because the
+   only column Hidden does only store Y/N, which makes no
+   encoding problems
+
+I've detected one more difference in used collations.
+That is on the Posts-table: The column PosIndex uses
+a binary-collation 'latin1_bin'.
+
+Another difference i detected is that on some tables
+(i think those would be log-tables), there is a trigger-
+attribute defined. Can the data_export-script export
+the collations and additional attributes of a column
+too ?
+
+
+
+>>>>>> First draft, goal:
+>>>>>> - everything in a basic way, i.e. pure latin1 + english +
+>>>>>> case insensitive
+>>
+>>>> 
+>>>> in general a good idea, but i wouldn't do it now (see cause
+>>>> above). Though it may be better to wait for mysql 4.1, then
+>>>> go to utf8 directly. ... As i said, would need intensive
+>
+>> testing,
+>
+>>>> not only the migration-process itself, but also checking
+>>>> out what can be done and how it can be done.
+>>>> 
+>>>> I'm not sure, how you want to do that to introduce
+>
+>> latin1+en+...
+>
+>>>> If a field is a blob (binary-field) and you want to convert
+>>>> that to latin1, it's possible to loose data, because the
+>>>> binary may contain non-latin-chars.
+>
+>> 
+>> But actually, with a part of the column in latin1, other in
+>> utf8, half in swedish, the remainder in english, we are
+>> DOING what you are afraid of each time we copy a column in
+>> an other one!!!
+
+
+Not quite. You mix up some problems in one sentence.
+utf8 and latin1 are charsets. The swedish/english i'm not
+so sure what you mean: the collation or potential texts
+in the database.
+Whatever, a swedish text and a english text can both be
+stored in either a column that uses utf8 or latin1 charset.
+
+What causes a problem, would be to copy data from a utf8-
+column into a latin1 column, when it contains non-latin1-
+encodings. Then we loose data. But as long as we don't
+do this, this is no problem.
+
+It might be justified to have different charsets on
+different columns as i've explained before in an earlier
+mail.
+
+
+
+>>>>>> - except the users input text fields, set to UTF-8 + case
+>>>>>> insensitive, i.e. the posts, messages, foreign translations,
+>>>>>> Names, RankInfo, OpenForMatch,... excluding the pure ascII
+>>>>>> ones like Handle, Email,...
+>>
+>>>>
+>>>> UTF-8 is only possible with mysql 4.1 (we don't have that
+>
+>> on the
+>
+>>>> live-server. As long as this is not the case, it's better to
+>>>> keep the other db-servers just the same, using the same
+>
+>> charsets).
+>
+>>>>
+>>
+>>>>>> - then adjust the case sensitivity when needed
+>>>>>> 
+>>>>>> I'm intersted by the Translations' ones. Maybe, with the
+>>>>>> german and swedish, we may have enought tests. Else I may
+>>>>>> ask for vietnamese friend... from time to time. I may also
+>>>>>> check the esperanto... and the french ;)
+>>
+>>>>
+>>>> About Translations migrated to utf8 i remember a forum-thread:
+>>>>
+>
+>> http://www.dragongoserver.net/forum/read.php?forum=7&thread=14641
+>
+>>>>
+>>>> Maybe he can be of help with that task.
+
+
+maybe not ;)
+I read it in more detail now ...
+
+
+>> To do what? What is he proposing?
+
+
+He proposes to dump the database, convert it to UTF8 and the
+re-import it. That is of course not so easy, as he proposes :(
+
+That is only possible, if the server is supporting
+utf8, if we use the right charsets on the tables and have
+converted all data. But then we done it already ;)
+
+Are the translation-texts not already stored as utf8 on the
+live-server (in the BLOB) ?
+
+
+
+>> The better encoding converter I've found is my browser!
+
+
+Sadly, the browser won't help us for converting our
+databases :(
+
+BTW, where do you live (France or another timezone) ?
+or are you really up that late (around 3:00 ;-?
+
+
+
+
+
+
+
+
+>> Another difference i detected is that on some tables
+>> (i think those would be log-tables), there is a trigger-
+>> attribute defined. Can the data_export-script export
+>> the collations and additional attributes of a column
+>> too ?
+
+
+It seems it's a feature of mysql 4.1:
+For timestamps you can give a default value 'CURRENT_TIMESTAMP',
+that automatically set it to the current timestamp, when
+an update is performed on an entry.
+
+
+
+
+
+
+>>>> I would like at least to specify in the init.mysql that the
+>>>> Handle columns MUST be case insensitive (i.e.
+>>>> latin1_general_ci)
+>
+>>
+>> The 'Handle'-columns are VARCHARs and whatever charset is
+
+used,
+
+>> those are case-insensitive, except when a case-sensitive
+>> collation is used on them (one with _cs-suffix).
+
+
+We must keep in mind this (and check it... and maybe add a
+line in init.mysql)
+Actually, only the database comparison rejects the Handles
+with only case differences when someone create his account.
+We already have had some guys trying to usurpe an other
+account by using a really similar Name+Handle... so I've
+have recently added a piece of code to reject the zero in
+place of a O, the 1 in place of a I(upper i) or l(lower L)
+and the 5 in place of a S... This had caused a bad affair
+when 0soitz was posting in the forums in place of Osoitz.
+
+
+>>>> and maybe others like the translation
+>>>> english text (it is rebuilt during the update)
+>
+>>
+>> What do you mean by "it is rebuilt ...". How exactly ?
+
+
+I mean that we can change the properties of this column as
+it may be rebuilt from scratch.
+
+
+>>>> Then have all the servers working the same way.
+
+
+>> No. They never will work in the same way, as long as those are
+>> different mysql-versions. Well maybe mysql 4.1 and 5.0 are
+
+work
+
+>> in the same, but certainly not mysql 4.0 and that is the main
+>> problem:
+>> - SF: mysql 4.1
+>> - live-server: mysql 4.0
+>> - local: mysql 4.0, 4.1 or 5.0
+>>
+>> Especially the translation texts are showing the biggest
+>> problematics. Making the translation-english text case
+>> insensitive might not be so easy.
+>> At the moment, the following fields are using a blob-datatype:
+>> - TranslationTexts.Text
+>> - Translations.Text
+>> - Translationlog.OldTranslation
+>> - Translationlog.Translation
+>>
+>> A BLOB is a binary field, which has NO charset or collation
+>> and therefore the sorting is based on the numeric values
+
+of the
+
+>> bytes in that binary-string. So the ASCII-order makes it case-
+>> sensitive. Adding a charset and/or collation is not possible
+>> for a BLOB (or has no effect as long as it is a binary).
+>> More Info: http://dev.mysql.com/doc/refman/4.1/en/blob.html
+>> 
+>> The only chance to make it case-insensitive is to alter it
+>> into a TEXT-datatype, which has a charset and collation.
+
+
+Ok. We will not do that.
+So, we have to sort the field with PHP if needed! :(
+
+
+>> BUT the problem is, that on the live-server there is no utf8
+>> charset. And you certainly would not want to use charset
+
+latin1,
+
+>> because that would loose data. I assume, the reason, why the
+>> translation-texts are stored in BLOBs is, that the live-server
+>> has no utf8-charset (mysql 4.0).
+
+
+I don't know... but if living with BLOBs allow us to get
+free of UTF-8 database problem, that's not so bad.
+We have just to remove the UTF-8 from the fields of the
+devel server.
+
+
+>> Another point to mention is, that on mysql 4.0 whatever
+
+charset
+
+>> is used for a TEXT-column, the sorting and comparison is using
+>> the servers character set.
+>> 
+>> I'm afraid that before making a change to the
+
+translation-texts
+
+>> we need mysql 4.1 on the live-server. Some time ago i asked
+>> Erik about it (he wanted to ask his provider, though I got
+>> not answer to that yet).
+>> 
+>
+>>>>>> Of what server you are speaking of ?
+>>>>>> a) SF-devel-server (mysql 4.1)
+>>>>>> b) live-server (mysql 4.0)
+>>>>>> 
+>>>>>> Maybe you want both to be "cleaned", but those are different
+>>>>>> mysql-versions, that have a totally different handling of
+>>>>>> charsets. So we may even need to handle them completly
+>>
+>>>> separate.
+>>>> 
+>>>> Take the less compatible. Make all others like it.
+>>>> So all other severs to latin1_general_ci...
+>>>> I don't want to have some disturbing ???swedish??? or
+>>>> utf8??? at random places.
+>
+>>
+>> You may also note, that the latin1_swedish_ci is the default
+>> collation for the latin1-charset !
+
+
+Is that a general fact or a particularity of our database?
+
+
+>> So, I wouldn't be too upset about the latin1_swedish_ci.
+>> Nothing wrong with that. That would only pose a problem,
+>> if you are unsatisfied with the ordering of the strings.
+>> Do you know the exact difference of latin1_general_ci
+>> and the latin1_swedish_ci ? I guess, it's very small.
+>> 
+>> To test it, you may create a copy of a table using another
+>> collation and see, if the order or comparison changed
+>> and what you prefer. It might not be clear which collation
+>> is most suitable for a given application, so testing it
+>> can be helpful to perform some comparisons with representative
+>> data values to make sure that a given collation sorts values
+>> the way you expect.
+>> 
+>> About some mixing of latin1-charsets on the live-server,
+>> I can't tell, because I have no access to it.
+>> 
+>> 
+>> However having some utf8-charset might be disturbing when
+>> you only want one charset. I assume you speak about the
+>> Sourceforge devel-server (mysql 4.1). That's the only one
+>> that can have utf8 ;)
+
+
+Yes
+
+
+>> The database default is utf8. That can be altered of course.
+>> It has only effect on new tables.
+>> 
+>> The only other tables using a utf8-charset in some way are:
+>> - Adminlog: might be converted from utf8 to latin1,
+>>    because the column IP is the only varchar-field,
+>>    and IP-strings should only contain latin1-chars
+
+
+I've created this column few weeks ago!!! Is it possible
+that my "defaults" set it to UTF-8? Where can I check that?
+
+
+>> - FAQ: might be converted from utf8 to latin1, because the
+>>    only column Hidden does only store Y/N, which makes no
+>>    encoding problems
+
+
+Again a column I've created!!! :(
+
+
+>> I've detected one more difference in used collations.
+>> That is on the Posts-table: The column PosIndex uses
+>> a binary-collation 'latin1_bin'.
+
+
+Yes. good. The lower case letters must be sorted after the
+'Z'. Else we have to change the $order_str in
+forum_functions.php.
+
+
+>> Another difference i detected is that on some tables
+>> (i think those would be log-tables), there is a trigger-
+>> attribute defined. Can the data_export-script export
+>> the collations and additional attributes of a column
+>> too ?
+
+
+Actually, I was interested to remove the "server
+differences" with data_export to allow an easier comparison.
+So, I was removing those infos that does not exist on all
+the servers.
+
+
+>>>>>>>> First draft, goal:
+>>>>>>>> - everything in a basic way, i.e. pure latin1 + english +
+>>>>>>>> case insensitive
+>>>
+>>>>>> 
+>>>>>> in general a good idea, but i wouldn't do it now (see cause
+>>>>>> above). Though it may be better to wait for mysql 4.1, then
+>>>>>> go to utf8 directly. ... As i said, would need intensive
+>>
+>>>> testing,
+>>
+>>>>>> not only the migration-process itself, but also checking
+>>>>>> out what can be done and how it can be done.
+>>>>>> 
+>>>>>> I'm not sure, how you want to do that to introduce
+>>
+>>>> latin1+en+...
+>>
+>>>>>> If a field is a blob (binary-field) and you want to convert
+>>>>>> that to latin1, it's possible to loose data, because the
+>>>>>> binary may contain non-latin-chars.
+>>
+>>>> 
+>>>> But actually, with a part of the column in latin1, other in
+>>>> utf8, half in swedish, the remainder in english, we are
+>>>> DOING what you are afraid of each time we copy a column in
+>>>> an other one!!!
+>
+>>
+>> Not quite. You mix up some problems in one sentence.
+>> utf8 and latin1 are charsets. The swedish/english i'm not
+>> so sure what you mean: the collation or potential texts
+>> in the database.
+>> Whatever, a swedish text and a english text can both be
+>> stored in either a column that uses utf8 or latin1 charset.
+>> 
+>> What causes a problem, would be to copy data from a utf8-
+>> column into a latin1 column, when it contains non-latin1-
+>> encodings. Then we loose data. But as long as we don't
+>> do this, this is no problem.
+>> 
+>> It might be justified to have different charsets on
+>> different columns as i've explained before in an earlier
+>> mail.
+
+
+Do we need that?
+If BLOBs are good to record the UTF-8 strings, that's good
+for us. We don't need to compare the foreign strings, just
+to keep them unchanged.
+
+
+>>>>>>>> - except the users input text fields, set to UTF-8 + case
+>>>>>>>> insensitive, i.e. the posts, messages, foreign
+
+translations,
+
+>>>>>>>> Names, RankInfo, OpenForMatch,... excluding the pure ascII
+>>>>>>>> ones like Handle, Email,...
+>>>
+>>>>>>
+>>>>>> UTF-8 is only possible with mysql 4.1 (we don't have that
+>>
+>>>> on the
+>>
+>>>>>> live-server. As long as this is not the case, it's better to
+>>>>>> keep the other db-servers just the same, using the same
+>>
+>>>> charsets).
+>>
+>>>>>>
+>>>
+>>>>>>>> - then adjust the case sensitivity when needed
+>>>>>>>> 
+>>>>>>>> I'm intersted by the Translations' ones. Maybe, with the
+>>>>>>>> german and swedish, we may have enought tests. Else I may
+>>>>>>>> ask for vietnamese friend... from time to time. I may also
+>>>>>>>> check the esperanto... and the french ;)
+>>>
+>>>>>>
+>>>>>> About Translations migrated to utf8 i remember a
+
+forum-thread:
+
+>>>>>>
+>>
+>>>>
+
+http://www.dragongoserver.net/forum/read.php?forum=7&thread=14641
+
+>>>>>>
+>>>>>> Maybe he can be of help with that task.
+>
+>>
+>> maybe not ;)
+>> I read it in more detail now ...
+
+
+:)
+
+
+>>>> To do what? What is he proposing?
+
+
+>> He proposes to dump the database, convert it to UTF8 and the
+>> re-import it. That is of course not so easy, as he proposes :(
+>> 
+>> That is only possible, if the server is supporting
+>> utf8, if we use the right charsets on the tables and have
+>> converted all data. But then we done it already ;)
+>>
+>> Are the translation-texts not already stored as utf8 on the
+>> live-server (in the BLOB) ?
+
+
+Since a couple of years, I only add a new language in UTF-8
+(since my bad experiences with japanese and slovak).
+I also try to find some translators to re-translate the
+not-UTF-8 languages into UTF-8 (thanks to kaput who had
+translated the two chinese versions... of course I'm unable
+to check his work but he had worked a lot during a month)
+But there is still some old languages (like thaï) I can't
+success.
+Actually on the live-server, the known languages are:
+------
+1  sv.iso-8859-1  Swedish
+2  no.iso-8859-1  Norwegian
+3  en.iso-8859-1  English
+4  de.iso-8859-1  German
+5  fr.iso-8859-1  French
+6  es.iso-8859-1  Spanish
+7  cs.iso-8859-2  Czech
+8  zh.big5  Chinese (Traditional)
+9  pt.iso-8859-1  Portuguese
+10 zh.gb2312   Chinese (Simplified)
+11 nl.iso-8859-1  Dutch
+12 th.tis-620  Thai
+14 fi.iso-8859-1  Finnish
+15 ko.euc-kr   Korean
+16 ru.windows-1251   Russian
+17 pl.iso-8859-2  Polish
+18 it.iso-8859-1  Italian
+19 eu.iso-8859-1  Basque
+20 ia.iso-8859-1  Interlingua
+21 eo.iso-8859-3  Esperanto
+23 jp.UTF-8 Japanese
+24 sk.utf-8 Slovak
+25 ro.utf-8 Romanian
+26 il.UTF-8 Hebrew
+27 lf.iso-8859-1  Lingua Franca Nova
+28 vn.utf-8 Vietnamese
+29 sr.utf-8 Serbian
+30 el.utf-8 Greek
+31 uk.utf-8 Ukrainian
+32 ca.utf-8 Catalan
+33 zh.utf-8 Chinese (Simplified) (utf-8)
+34 zt.utf-8 Chinese (Traditional) (utf-8)
+35 tr.utf-8 Turkish
+36 hu.utf-8 Hungarian
+------
+
+
+>>>> The better encoding converter I've found is my browser!
+>
+>>
+>> Sadly, the browser won't help us for converting our
+>> databases :(
+
+
+Maybe yes... but manually.
+What I've found is:
+- as far as I know, the PHP does not have good converters
+(iconv does not works even between two japanese encodings)
+- the browsers manage a lot of charsets and have been tested
+a lot more that any little free converter that we may find
+on the net.
+- they know how to input many encodings.
+
+My solution to convert encodings is to open two browser
+windows, one for each encoding. For example, two DGS
+translate pages. Then I cut&past from one to the other...
+and it works rather fine!
+
+
+
+
+
+
+
+
+
+
+
+(iconv does not works even between two japanese encodings)
+
+
+
+
+
+
+
+
+
+
+
+

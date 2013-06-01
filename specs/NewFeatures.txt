@@ -1,0 +1,38 @@
+# Topic: Features
+# Description: Collection of new features, need classification
+# URL:
+
+#-------- JUG --------------------------------------------------
+
+* messages: allow multi-recipients (copy or shared?), allow CC/BCC
+   with auto-reply to all (CC) or only sender
+
+* offer game: auto-matching ->
+   http://www.dragongoserver.net/forum/read.php?forum=4&thread=4006
+
+* define order for sort by time-left (with SQL), maybe using score-pointing
+
+* wait-room (to allow dispute):
+   link from game-offer "invite user with this/other props"
+   http://www.dragongoserver.net/forum/read.php?forum=3&thread=3404
+
+* game: send finished game (SGF) per email (if configured)
+
+* kibitz, notify existence of kibitz after game finished
+
+* go-variants: magnetic-go
+
+* wait-room: game-offer: option to view opponent before accepting game
+    (opp knows he can be rejected)
+
+* some features from other turn-based-server (tournament, etc):
+   http://www.dragongoserver.net/forum/read.php?forum=5&thread=11036#11036
+
+* DB-Table-design:
+  MessageC: sender + recipient + type=SENT|REC
+  for myself: 2 MCs
+  joins: MC sender, MC recipient; sMC.sender<>rMC.recipient
+
+* Japanese Scoring:
+  http://www.dragongoserver.net/forum/read.php?forum=4&thread=16121#new1
+
