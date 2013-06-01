@@ -1,0 +1,27 @@
+# root-files
+*~
+.project
+*.bak
+*.diff
+apple-touch-icon*.png
+favicon.ico
+Makefile
+timeadjust.php
+tags
+
+# subdirs
+archive
+DATASTORE
+data-store
+php
+ref-doc
+snapshot
+temp
+userpic
+
+# subdir-files
+include/config-local.php
+scripts/.htaccess
+translations/??.*.php
+translations/known_languages.php
+
