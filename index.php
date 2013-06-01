@@ -74,7 +74,7 @@ $GLOBALS['ThePage'] = new Page('Start', 0, ROBOTS_NO_FOLLOW, DGS_DESCRIPTION,
          echo "<p></p><font color=green>\n" .
             T_("Welcome to the development version of the Dragon Go Server!") .
             '<br>&nbsp;<br>' . T_("If you want to play on the real server, please visits <a href=\"http://www.dragongoserver.net\">http://www.dragongoserver.net</a> instead.") .
-            '<br>&nbsp;<br><b>' . T_("Note: Since this server is running on the CVS code, bugs and even data losses could happen at any time, so don't feel too attached to your games ;-)") . '</b>' .
+            '<br>&nbsp;<br><b>' . T_("Note: Since this server is running on the SCM code, bugs and even data losses could happen at any time, so don't feel too attached to your games ;-)") . '</b>' .
             '<br>&nbsp;<br>' . T_("Have a look to the FAQ for more infos.") .
             "</font><HR>\n";
       }

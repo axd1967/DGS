@@ -289,7 +289,7 @@ Features / Processes:
       - Formats: http://senseis.xmp.net/?OGS%2FTournamentFormats
       - Example: http://www.online-go.com/faq/tournaments.php#q1b
 
-* old incomplete tournaments on DGS (2004): see CVS-history (dead files):
+* old incomplete tournaments on DGS (2004): see SCM-history (dead files):
    new_tournament.php
    list_tournaments.php
    show_tournament.php

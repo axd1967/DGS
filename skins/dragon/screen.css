@@ -3841,7 +3841,7 @@ body#dDGS table#pageMenu {
 }
 
 /* JUG local devel servers:
- * ldDGS = local devel on CVS-HEAD
+ * ldDGS = local devel on master
  * lsDGS = local stable branch
  * ltDGS = local devel for db-tests
  */
@@ -3857,7 +3857,7 @@ body#ldDGS table#pageMenu {
 }
 
 /* JUG remote devel servers:
- * rdDGS = remote devel on CVS-HEAD
+ * rdDGS = remote devel on master
  * rsDGS = remote stable branch
  * ltDGS = local devel for db-tests
  */
@@ -3873,7 +3873,7 @@ body#rdDGS table#pageMenu {
 }
 
 /* JUG local test servers:
- * ldDGS = local devel on CVS-HEAD
+ * ldDGS = local devel on master
  * lsDGS = local stable branch
  * ltDGS = local devel for db-tests
  */

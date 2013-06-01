@@ -19,7 +19,7 @@ Requirements:
 *) A webserver which can use php, e.g., apache <http://httpd.apache.org>
 *) PHP >= 5.1.0 <http://www.php.net>
 *) MySQL >= 5.0.38 <http://www.mysql.com>
-*) cvs client <http://www.cvshome.org>
+*) git client <http://git-scm.com>
 
 *) GD >= 2.0.0 to draw rating graph and upload images <http://www.boutell.com/gd/>
 *) FreeType for optional fonts in rating graph <http://www.freetype.org>
@@ -35,49 +35,49 @@ Optional but recommended:
 
 #--------------------------------------------------------------------
 
-1) Download sources and images:
+1) Download sources with images:
 
-Either from cvs:
-(( CAUTION: Recently, sourceforge.net disable the anonymous use of cvs.
-   You must register yourself. Read the SourceForge documentations.
-   Though start with trying it first anonymously.))
+Dragon root-directory referred to as DGS_ROOT.
 
-Best to create an empty directory to checkout the sources.
+Either download from GIT-repository on SourceForge.net:
 
-> cd /path/to/the/directory/where/you/want/dragon/to/be
-> cvs -d:pserver:anonymous@dragongoserver.cvs.sourceforge.net:/cvsroot/dragongoserver login
-> cvs -z3 -d:pserver:anonymous@dragongoserver.cvs.sourceforge.net:/cvsroot/dragongoserver co DragonGoServer
-> mv -i DragonGoServer/* DragonGoServer/.[a-z]* .
-> rmdir DragonGoServer
+   # with an existing SourceForge-account 'USER':
+   # (to ease updates it's a good idea to upload your public SSH-key on SourceForge
+   #  to avoid repeated authentification)
+   git clone ssh://USER@git.code.sf.net/p/dragongoserver/dgs-main DGS_ROOT
 
-or download a cvs snapshot from <http://www.dragongoserver.net/snapshot.php>
+   # OR: with an anonymous read-only checkout from SourceForge:
+   git clone git://git.code.sf.net/p/dragongoserver/dgs-main DGS_ROOT
+
+OR download a snapshot from   http://www.dragongoserver.net/snapshot.php
 
 
-For both methods also download the images and translation-data
-from <http://www.dragongoserver.net/snapshot.php>
+For both methods also download the images and translation-data from
 
-Those files have to be unzipped in the dragon root directory to obtain a tree like:
-      /root
-         /include
-         /forum
+   http://www.dragongoserver.net/snapshot.php
+
+Those files have to be extracted into the dragon-root directory to obtain a tree like:
+
+      DGS_ROOT/
+         include/
+         forum/
          ...
-         /images
-            /flags
-         /5
-         /7
+         images/
+            flags/
+         5/
+         7/
          ...
-         /50
+         50/
          index.php
          status.php
          ...
 
-Copy  /images/favicon.ico  into the root folder (or place your own favicon.ico
+Copy  /images/favicon.ico  into the DGS_ROOT folder (or place your own favicon.ico
 in the root folder). Some older browser ignore the shortcut-icon directive
 and expects it to be in the document-root.
 
-Copy all  /images/apple-touch-icon-*.png  into the root folder to avoid 'page_not_found'-errors.
+Copy all  /images/apple-touch-icon-*.png  into the DGS_ROOT folder to avoid 'page_not_found'-errors.
 For reference see also http://mathiasbynens.be/notes/touch-icons
-
 
 
 #--------------------------------------------------------------------
@@ -86,7 +86,6 @@ For reference see also http://mathiasbynens.be/notes/touch-icons
 
 mysql> CREATE DATABASE dragondb;
 mysql> GRANT SELECT, INSERT, UPDATE, DELETE, CREATE TEMPORARY TABLES, LOCK TABLES ON dragondb.* TO dragon@localhost IDENTIFIED BY 'secret';
-
 
 
 
@@ -114,13 +113,17 @@ Import mandatory initial-data for the server:
 > mysql -D dragondb < specs/db/dragon-data.sql
 
 
-and add some translations (the data file can be downloaded
-from <http://www.dragongoserver.net/snapshot.php>
-and then unzipped ):
+IMPORTANT NOTE:
+   Before you try logging in on your local DGS-server, ensure that the translations are added first.
+   Otherwise the import may fail because of changed primary-keys of translation-data that will be
+   inserted by the running server itself.
 
-> gunzip Translationdata.mysql.gz
-> mysql -D dragondb < Translationdata.mysql
+Add translations: the data file can be downloaded and extracted from:
 
+   http://www.dragongoserver.net/snapshot.php
+
+   gunzip Translationdata.mysql.gz
+   mysql -D dragondb < Translationdata.mysql
 
 (( This could be delayed until you need it:
 Add at least one admin user by registering a user via the website and
@@ -142,7 +145,7 @@ Then, this user will be able to manage the other admins in the Admin-menu.
 4) Adjust config of software and adjust file permissions:
 
 NOTE: order of the following items is not strict. You may need to re-edit the
-      local-config for some of the items.
+      local-config multiple times for some of the items.
 
 
 * Copy config-template and adjust for local configuration:
@@ -166,6 +169,7 @@ NOTE: order of the following items is not strict. You may need to re-edit the
 * Edit permissions for include/config-local.php and directory translations/:
 
   Find out which group your webserver is using (e.g. www-data).
+  > mkdir -p translations/
   > su -c 'chgrp www-data include/config-local.php translations'
   > chmod 640 include/config-local.php
   > chmod 775 translations/
@@ -346,7 +350,7 @@ MAILTO= < EMAIL-OF-YOUR-CHOICE >
 #--------------------------------------------------------------------
 
 7) If you have problems you can ask for help in Support forum
-   at dragon <http://www.dragongoserver.net>
+   at dragon   http://www.dragongoserver.net
 
    If you are successful and have a running Dragon server,
    we would appreciate a note in the dragon forums as well.

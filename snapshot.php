@@ -27,8 +27,16 @@ $GLOBALS['ThePage'] = new Page('Docs');
  * - To create translation-data snapshot you may use (replace 'DBUSER' and 'DATABASE_NAME'):
  *   mysqldump --quick --extended-insert --compress --no-create-info -hdragongoserver.net -uDBUSER -p DATABASE_NAME  TranslationLanguages TranslationGroups TranslationPages TranslationTexts TranslationFoundInGroup Translations | gzip -c > Translationdata.mysql.gz
  *
- * - To create stable-snapshot you may use (replace 'BRANCH_NAME' and 'CVS_USER'):
- *   cvs -d CVSUSER@dragongoserver.cvs.sourceforge.net:/cvsroot/dragongoserver export -r BRANCH_NAME -d DragonGoServer-BRANCH_NAME DragonGoServer
+ * - To create stable-snapshot from GIT WITH images you may use (replace 'BRANCH_NAME' and 'SCM_USER'):
+ *   git checkout BRANCH_NAME
+ *   git archive --format=tar HEAD | gzip >DragonGoServer-BRANCH_NAME.tar.gz
+ *
+ * - To create stable-snapshot from GIT WITHOUT images you may use (replace 'BRANCH_NAME' and 'SCM_USER'):
+ *   git checkout BRANCH_NAME
+ *   git archive --format=tar HEAD | tar --delete 5 7 9 11 13 17 21 25 29 35 42 50 images | gzip >DragonGoServer-BRANCH_NAME.tar.gz
+ *
+ * - To create stable-snapshot from CVS you may use (replace 'BRANCH_NAME' and 'SCM_USER'):
+ *   cvs -d SCM_USER@dragongoserver.cvs.sourceforge.net:/cvsroot/dragongoserver export -r BRANCH_NAME -d DragonGoServer-BRANCH_NAME DragonGoServer
  *   tar czvf DragonGoServer-BRANCH_NAME.tar.gz DragonGoServer-BRANCH_NAME/
  *
  * - To create image-data you may use:
