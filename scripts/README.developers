@@ -26,6 +26,21 @@ General instructions for developers:
    On the other hand, the column, variable and alias names seem to be well
    handled in a case sensitive way under the MS Windows systems.
 
+
+----------------- Working with GIT:
+
+   Configure git-config with your full name and a SourceForge mail-address as built below:
+
+      # USER = your SourceForge account
+      git config user.name "FIRSTNAME LASTNAME"
+      git config user.email "USER@users.sf.net"
+
+   For commits follow the GIT guidelines, i.e. first line is a summary of a change
+   followed by an empty line and the details of the change.
+
+   For using the shared work-area on SourceForge, read the 'README'-file in the DGS-rootdir.
+
+
 ----------------- PHP: Guest-User
 
    When adding new pages, take handling of the guest-user (uid <= GUESTS_ID_MAX)
