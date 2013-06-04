@@ -89,23 +89,20 @@ How-to set CVS-repository as read-only:
    cvs -d juga@dragongoserver.cvs.sourceforge.net:/cvsroot/dragongoserver co CVSROOT
    cd CVSROOT
 
-   # edit 'checkoutlist' adding two files (important to add LF on each line)
+   # edit 'checkoutlist' adding four files (important to add LF on each line)
+   #    'commit_prep' & 'cvs_acls' was copied from the CVS-distribution on /usr/share/cvs/contrib
+   #    and modified, because there were bugs with perl's taint-check, which I fixed
+   #    with the local checked in scripts (adding taint-checks).
+   #    see also SF-ticket: http://sourceforge.net/p/forge/site-support/4241/
+   commit_prep
+   cvs_acls
    cvsacl
    restrict_msg
 
    # edit 'commitinfo' adding hookup-scripts for ACL-checking allowing to specify
    # read/write on each repository, which is more flexible than using a 'writers'-file.
-   ALL     /usr/share/cvs/contrib/commit_prep
-   ALL     /usr/share/cvs/contrib/cvs_acls -u $USER
-
-      # IMPORTANT NOTE: in the original 'commit_prep'-script is an error, that prevents
-      #     committing, so revoking read-only mode is not possible right now:
-      #     see ticket: http://sourceforge.net/p/forge/site-support/4241/
-      #     Therefore it's better to copy these scripts into the CVSROOT-dir as well
-      #     and fix them there using something along the following lines instead
-      #     in the 'commitinfo'-file:
-      ALL     $CVSROOT/CVSROOT/commit_prep
-      ALL     $CVSROOT/CVSROOT/cvs_acls -u $USER
+   ALL     $CVSROOT/CVSROOT/commit_prep
+   ALL     $CVSROOT/CVSROOT/cvs_acls -u $USER
 
    # added new file 'restrict_msg' with message to show on commits
 
@@ -119,11 +116,11 @@ How-to set CVS-repository as read-only:
       deny
 
       # allow commits to revoke ACL or change deny-message in CVSROOT by project-admins
-      allow|juga, ejlo|CVSROOT/commitinfo CVSROOT/cvsacl CVSROOT/checkoutlist CVSROOT/restrict_msg
+      allow|juga, ejlo|CVSROOT/commitinfo CVSROOT/cvsacl CVSROOT/checkoutlist CVSROOT/commit_prep CVSROOT/cvs_acls CVSROOT/restrict_msg
       #--------- end of file 'cvsacls' --------
 
    # add new files to CVS and commit changes with appropriate comment
-   cvs add cvsacl restrict_msg
+   cvs add commit_prep cvs_acls cvsacl restrict_msg
    cvs commit .
 
 
