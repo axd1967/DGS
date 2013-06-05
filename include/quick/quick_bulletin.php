@@ -31,7 +31,7 @@ require_once 'include/db/bulletin.php';
 
 // see specs/quick_suite.txt (3g)
 define('BULLETINCMD_MARK_READ', 'mark_read');
-define('BULLETIN_COMMANDS', 'list|mark_read');
+define('BULLETIN_COMMANDS', 'info|list|mark_read');
 
 
  /*!
@@ -41,6 +41,7 @@ define('BULLETIN_COMMANDS', 'list|mark_read');
   */
 class QuickHandlerBulletin extends QuickHandler
 {
+   private $bulletin = null;
    private $bulletin_iterator = null;
    private $mark_bulletins = null;
 
@@ -55,7 +56,7 @@ class QuickHandlerBulletin extends QuickHandler
    public function parseURL()
    {
       parent::checkArgsUnknown('bid');
-      $this->mark_bulletins = array_unique( explode(',', get_request_arg('bid')) );
+      $this->mark_bulletins = array_unique( explode(',', trim(get_request_arg('bid'))) );
    }
 
    public function prepare()
@@ -70,7 +71,18 @@ class QuickHandlerBulletin extends QuickHandler
 
       // prepare command: list
 
-      if ( $cmd == QCMD_LIST )
+      if ( $cmd == QCMD_INFO )
+      {
+         if ( !is_array($this->mark_bulletins) || count($this->mark_bulletins) == 0 )
+            error('invalid_args', "$dbgmsg.check.miss_bid");
+         if ( count($this->mark_bulletins) != 1 )
+            error('invalid_args', "$dbgmsg.check.expect_one_bid");
+         $bid = $this->mark_bulletins[0];
+         if ( !is_numeric($bid) || $bid <= 0 )
+            error('invalid_args', "$dbgmsg.check.expect_num($bid)");
+         $this->bulletin = Bulletin::load_bulletin( $bid, true, /*read*/true );
+      }
+      elseif ( $cmd == QCMD_LIST )
       {
          $qsql = Bulletin::build_view_query_sql( /*adm*/false, /*cnt*/false, /*type*/'', /*chk*/false );
          $qsql->add_part( SQLP_WHERE,
@@ -98,7 +110,9 @@ class QuickHandlerBulletin extends QuickHandler
    public function process()
    {
       $cmd = $this->quick_object->cmd;
-      if ( $cmd == QCMD_LIST )
+      if ( $cmd == QCMD_INFO )
+         $this->fill_bulletin_info( $this->quick_object->result, $this->bulletin );
+      elseif ( $cmd == QCMD_LIST )
          $this->process_cmd_list();
       elseif ( $cmd == BULLETINCMD_MARK_READ )
          $this->process_cmd_mark_read();
@@ -111,23 +125,9 @@ class QuickHandlerBulletin extends QuickHandler
       while ( list(,$arr_item) = $this->bulletin_iterator->getListIterator() )
       {
          list( $bulletin, $orow ) = $arr_item;
-         $out[] = array(
-               'id' => $bulletin->ID,
-               'target_type' => strtoupper($bulletin->TargetType),
-               'status' => strtoupper($bulletin->Status),
-               'category' => strtoupper($bulletin->Category),
-               'flags' => self::convertBulletinFlags($bulletin->Flags),
-               'time_published' => QuickHandler::formatDate(@$bulletin->PublishTime),
-               'time_expires' => QuickHandler::formatDate(@$bulletin->ExpireTime),
-               'time_updated' => QuickHandler::formatDate(@$bulletin->Lastchanged),
-               'author' => $this->build_obj_user($bulletin->uid, $orow, 'BP_'),
-               'tournament_id' => $bulletin->tid,
-               'game_id' => $bulletin->gid,
-               'hits' => (int)$bulletin->CountReads,
-               'subject' => $bulletin->Subject,
-               'text' => $bulletin->Text,
-               'read' => ( @$orow['BR_Read'] ? 1 : 0),
-            );
+
+         $arr = array();
+         $out[] = $this->fill_bulletin_info( $arr, $bulletin );
       }
 
       $this->add_list( QOBJ_BULLETIN, $out, 'time_published-' );
@@ -141,6 +141,27 @@ class QuickHandlerBulletin extends QuickHandler
             Bulletin::mark_bulletin_as_read( $bid );
       }
    }//process_cmd_mark_read
+
+   private function fill_bulletin_info( &$out, $bulletin )
+   {
+      $out['id'] = $bulletin->ID;
+      $out['target_type'] = strtoupper($bulletin->TargetType);
+      $out['status'] = strtoupper($bulletin->Status);
+      $out['category'] = strtoupper($bulletin->Category);
+      $out['flags'] = self::convertBulletinFlags($bulletin->Flags);
+      $out['time_published'] = QuickHandler::formatDate(@$bulletin->PublishTime);
+      $out['time_expires'] = QuickHandler::formatDate(@$bulletin->ExpireTime);
+      $out['time_updated'] = QuickHandler::formatDate(@$bulletin->Lastchanged);
+      $out['author'] = $this->build_obj_user($bulletin->uid, $bulletin->User->urow, 'BP_');
+      $out['tournament_id'] = $bulletin->tid;
+      $out['game_id'] = $bulletin->gid;
+      $out['hits'] = (int)$bulletin->CountReads;
+      $out['subject'] = $bulletin->Subject;
+      $out['text'] = $bulletin->Text;
+      $out['read'] = ( $bulletin->ReadState ? 1 : 0 );
+
+      return $out;
+   }//fill_bulletin_info
 
 
    // ------------ static functions ----------------------------

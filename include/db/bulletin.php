@@ -518,14 +518,24 @@ class Bulletin
     * \param $bid Bulletin.ID
     * \return NULL if nothing found; Bulletin-object otherwise
     */
-   public static function load_bulletin( $bid, $with_player=true )
+   public static function load_bulletin( $bid, $with_player=true, $with_read=false )
    {
+      global $player_row;
+
       $qsql = self::build_query_sql( $bid, $with_player );
       $qsql->add_part( SQLP_LIMIT, '1' );
+      if( $with_read )
+      {
+         // BR_Read = 1 = mark-as-read, 0 = unread (=BR.bid IS NULL)
+         $qsql->add_part( SQLP_FROM, "LEFT JOIN BulletinRead AS BR ON BR.bid=B.ID AND BR.uid=" . $player_row['ID'] );
+         $qsql->add_part( SQLP_FIELDS, 'IFNULL(BR.bid,0) AS BR_Read' );
+      }
 
-      $row = mysql_single_fetch( "Bulletin:load_bulletin.find_Bulletin($bid)", $qsql->get_select() );
+      $row = mysql_single_fetch( "Bulletin:load_bulletin.find_Bulletin($bid,$with_player,$with_read)",
+         $qsql->get_select() );
       return ($row) ? self::new_from_row($row) : NULL;
    }//load_bulletin
+
 
    /*! \brief Loads and returns Bulletin-object for given bulletin-QuerySQL; NULL if nothing found. */
    public static function load_bulletin_by_query( $qsql, $with_row=false )

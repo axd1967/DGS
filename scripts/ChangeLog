@@ -16,6 +16,14 @@ Developers INFO:
 ChangeLog
 ------------------------------------------------------------------
 
+2013-06-05 juga
+
+   * include/quick/quick_bulletin.php (class QuickHandlerBulletin, ~.parseURL, ~.prepare,
+       ~.process, ~.process_cmd_list, ~.fill_bulletin_info),
+     include/db/bulletin.php (Bulletin.load_bulletin),
+     specs/quick_suite.txt:
+   - implemented quick-do-handler info-command for bulletin-object.
+
 2013-06-01 juga
 
    * scripts/README.developers, specs/tournaments.txt, skins/dragon/screen.css,

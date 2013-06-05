@@ -155,6 +155,8 @@ Copyright (C) 2001-2013  Erik Ouchterlony, Jens-Uwe Gaspar
    * Quick-Suite (alternative interface "quick_do.php"):
       * Added message-handler to
          * retrieve list of messages with nested user-/folder-objects, including game-settings for invitation
+      * Added bulletin-handler to
+         * retrieve single bulletin
 
    * Added tooltip with server-version in top-bar on DGS-link
 

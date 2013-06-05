@@ -1805,8 +1805,8 @@ Purpose:
 
    The quick-suite for the bulletin-object allows to
 
-      - retrieve bulletins, mark bulletin as read;
-        corresponding pages: "list_bulletins.php"
+      - retrieve unread bulletins, retrieve single bulletin, mark bulletin as read;
+        corresponding pages: "list_bulletins.php", "view_bulletin.php"
 
 Request:
 
@@ -1817,14 +1817,50 @@ Request:
 
 Options:
 
-   <COMMAND> = "list" | "mark_read"
+   <COMMAND> = "info" | "list" | "mark_read"
 
-   <BULLETIN_ID> = list of comma-separated bulletin-ids
+   <BULLETIN_ID> = single or list of comma-separated bulletin-ids
 
    <WITH> = optional with-option to include additional data-fields (see commands)
 
 
 Commands:
+
+   "info" : returns single bulletin
+      - required opts: BULLETIN_ID
+      - optional opts: WITH
+
+      - WITH-option:
+         - 'user_id' : additionally return user_id-data (handle + name) for author of bulletin
+
+      - Errors:
+         - all errors of: [E-LOGIN], [E-GEN]
+         - invalid_args : bad parameters (missing or invalid bulletin-id)
+
+      - Result (JSON) = // also see specs/db/table-Bulletin.txt
+         {
+            "id" : 123, # bulletin-id
+            "target_type" : "ALL",  # target-type: ALL,TD,TP,UL,MPG
+            "status" : "SHOW",      # status: NEW,PENDING,REJECTED,SHOW,ARCHIVE,DELETE
+            "category" : "ADM_MSG", # category: MAINT,ADM_MSG,TOURNEY,TNEWS,FEATURE,PRIV_MSG,AD
+            "flags" : "",           # flags (comma-separated): ADM_CREATED, USER_EDIT
+            "time_published" : "YYYY-MM-DD hh:mm:ss", # publish-time
+            "time_expires" : "YYYY-MM-DD hh:mm:ss",   # expire-time
+            "time_updated" : "YYYY-MM-DD hh:mm:ss",   # last-changed-time
+            "author" : {
+               "id" : 111,          # user-id of author
+               # the following fields only if WITH-option contains 'user_id'
+               "handle" : "user1",  # USER_HANDLE
+               "name" : "Name1",    # user name
+            },
+            "tournament_id" : 0,    # tournament-id
+            "game_id" : 0,          # game-id
+            "hits" : 33,            # view-count
+            "subject" : "title",
+            "text" : "text",
+            "read" : 0,             # 0=unread, 1=read
+         }
+
 
    "list" : returns list of unread bulletins
       - optional opts: WITH
@@ -1844,27 +1880,8 @@ Commands:
             "list_limit" : 0,
             "list_order" : "time_published-",
             "list_result" : [
+               # the fields content and semantics are the same as for the bulletin-object "info"-command (see above)
                {
-                  "id" : 123, # bulletin-id
-                  "target_type" : "ALL",  # target-type: ALL,TD,TP,UL,MPG
-                  "status" : "SHOW",      # status: NEW,PENDING,REJECTED,SHOW,ARCHIVE,DELETE
-                  "category" : "ADM_MSG", # category: MAINT,ADM_MSG,TOURNEY,TNEWS,FEATURE,PRIV_MSG,AD
-                  "flags" : "",           # flags (comma-separated): ADM_CREATED, USER_EDIT
-                  "time_published" : "YYYY-MM-DD hh:mm:ss", # publish-time
-                  "time_expires" : "YYYY-MM-DD hh:mm:ss",   # expire-time
-                  "time_updated" : "YYYY-MM-DD hh:mm:ss",   # last-changed-time
-                  "author" : {
-                     "id" : 111,          # user-id of author
-                     # the following fields only if WITH-option contains 'user_id'
-                     "handle" : "user1",  # USER_HANDLE
-                     "name" : "Name1",    # user name
-                  },
-                  "tournament_id" : 0,    # tournament-id
-                  "game_id" : 0,          # game-id
-                  "hits" : 3,             # view-count
-                  "subject" : "title",
-                  "text" : "text",
-                  "read" : 0,             # 0=unread, 1=read
                },
                ...
             ]
@@ -1884,6 +1901,9 @@ Examples for bulletin-commands:
 
    # retrieve unread bulletins
    quick_do.php?obj=bulletin&cmd=list&with=user_id
+
+   # retrieve single bulletin (read or unread)
+   quick_do.php?obj=bulletin&cmd=info&bid=7&with=user_id
 
    # mark unread bulletin(s)
    quick_do.php?obj=bulletin&cmd=mark_read&bid=7,11
@@ -2123,8 +2143,9 @@ Purpose:
         showing messages from NEW- & REPLY-folder
 
       - retrieve a list of games the specified user is next to move in
+        (normal games or multi-player-games alike)
 
-      - retrieve a list of multi-player-games to manage
+      - retrieve a list of multi-player-games in SETUP-mode to manage
 
 Request:
 
@@ -2416,7 +2437,7 @@ Response:
                            - version < 2: format described in section (6b) "TimeLimit-formats" in section "Format of [TL] Time-limit"
 
 
-      # header-line with format of multi-player-game-data-line (only for version >= 2)
+      # header-line with format of multi-player-game data-line (only for version >= 2)
       "## MPG,game_id,game_type,ruleset,size,lastchanged_date,ready_to_start"
 
          game_id           : see game-data
