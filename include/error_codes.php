@@ -34,14 +34,14 @@ class ErrorCode
 
    // ------------ static functions ----------------------------
 
-   public function echo_error_text( $error_code, $error_log_id )
+   public static function echo_error_text( $error_code, $error_log_id )
    {
       if ( $error_log_id && self::is_shown_error_log_id( $error_code ) )
          echo span('ErrorMsg', " [ERRLOG $error_log_id] ($error_code): ");
       echo self::get_error_text( $error_code );
    }
 
-   public function get_error_text( $error_code )
+   public static function get_error_text( $error_code )
    {
       self::init();
       if ( isset(self::$ARR_ERRORS['TEXT'][$error_code]) )
@@ -51,7 +51,7 @@ class ErrorCode
    }
 
    // \internal
-   private function is_shown_error_log_id( $error_code )
+   private static function is_shown_error_log_id( $error_code )
    {
       self::init();
       if ( isset(self::$ARR_ERRORS['LOG_ID'][$error_code]) )
@@ -61,7 +61,7 @@ class ErrorCode
    }
 
    /*! \brief Returns true, if error-code contains sensitive-data that is not meant for public eyes. */
-   public function is_sensitive( $error_code )
+   public static function is_sensitive( $error_code )
    {
       self::init();
       if ( isset(self::$ARR_ERRORS['SENSITIVE'][$error_code]) )
@@ -71,7 +71,7 @@ class ErrorCode
    }
 
    // \internal
-   private function init()
+   private static function init()
    {
       global $base_path;
 
