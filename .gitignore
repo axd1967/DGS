@@ -21,6 +21,8 @@ translations
 userpic
 
 # subdir-files
+!images/apple-touch-icon*.png
+!images/favicon.ico
 include/config-local.php
 scripts/.htaccess
 translations/??.*.php
