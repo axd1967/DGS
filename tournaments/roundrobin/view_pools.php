@@ -166,7 +166,7 @@ function build_pool_notes()
    $img_pool_winner = echo_image_tourney_pool_winner();
    $notes[] =
       sprintf( T_('[%s] 1..n: \'#\' = running game, \'-\' = no game, %s#tpool'),
-         T_('Place#tourney'), span('MatrixSelf', T_('self#tpool_table'), $mfmt) )
+         T_('Position#tourneyheader'), span('MatrixSelf', T_('self#tpool_table'), $mfmt) )
       . ",<br>\n"
       . sprintf( T_('\'%s\' on colored background (%s)#tpool_table'), T_('Points#tourney'),
             sprintf( ' %s %s %s ',

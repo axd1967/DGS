@@ -11,3 +11,6 @@ copy /images/sgf.gif
 # fixed player-consistency for MPGs
 execute 'scripts/player_consistency.php'
 
+-----------
+# shorten '#'-texts for tournaments, esp. '%#t%header'
+

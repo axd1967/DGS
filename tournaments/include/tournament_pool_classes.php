@@ -741,7 +741,7 @@ class PoolViewer
       $this->poolidx = $idx;
       if ( !($this->options & PVOPT_NO_RESULT) )
       {
-         $this->table->add_tablehead( 6, T_('Place#tourney'), 'NumberC', TABLE_NO_HIDE );
+         $this->table->add_tablehead( 6, T_('Position#tourneyheader'), 'NumberC', TABLE_NO_HIDE );
 
          foreach ( range(1, $this->pools_max_users) as $pool )
          {
