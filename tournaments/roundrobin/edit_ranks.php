@@ -253,8 +253,7 @@ $GLOBALS['ThePage'] = new Page('TournamentRankEditor');
       $tform->add_row( array(
             'CELL', 2, '',
             'TEXT', T_('Current Rank#tpool') . ': '
-                  . span('TRank', ( $curr_rank < TPOOLRK_RANK_ZONE
-                        ? T_('unset#tpool') : $tpool_user->formatRank() )), ));
+                  . span('TRank', ( $curr_rank < TPOOLRK_RANK_ZONE ? T_('unset#tpool') : $tpool_user->formatRank() )), ));
       $tform->add_row( array(
             'CELL', 2, '',
             'TEXT', T_('Current Pool-Winner Status#tourney') . ': '
