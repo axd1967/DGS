@@ -145,6 +145,13 @@ $GLOBALS['ThePage'] = new Page('TournamentRoundStatusEdit');
             'TEXT', buildErrorListString(T_('There are some errors'), $tr_status->get_errors()) ));
       $tform->add_empty_row();
    }
+   if ( $tr_status->has_warning() )
+   {
+      $tform->add_row( array(
+            'DESCRIPTION', T_('Warning'),
+            'TEXT', buildWarnListString(T_('There are some warnings'), $tr_status->get_warnings() ) ));
+      $tform->add_empty_row();
+   }
 
    $tform->add_row( array(
          'DESCRIPTION', T_('Current Round Status#tourney'),

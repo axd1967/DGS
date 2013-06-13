@@ -195,6 +195,100 @@ abstract class TournamentTemplateRoundRobin extends TournamentTemplate
       return $errors;
    }//checkGamesStarted
 
+
+   public function checkPoolWinners( $tourney, $tround )
+   {
+      $errors = array();
+      $warnings = array();
+
+      $tid = (int)$tourney->ID;
+      $round = (int)$tround->Round;
+
+      $this->check_unset_pool_ranks( $tid, $round, $errors );
+      $this->check_auto_poolwinners( $tid, $tround, $errors, $warnings );
+      $this->check_minimum_poolwinners( $tid, $tround, $errors );
+
+      return array( $errors, $warnings );
+   }//checkPoolWinners
+
+
+   /*! \brief Checks that there is no unset TPool.Rank (<= TPOOLRK_RANK_ZONE). */
+   private function check_unset_pool_ranks( $tid, $round, &$errors )
+   {
+      $result = db_query( "TournamentTemplateRoundRobin.check_unset_pool_ranks($tid,$round)",
+         "SELECT SQL_SMALL_RESULT Pool, COUNT(*) AS X_Count FROM TournamentPool " .
+         "WHERE tid=$tid AND Round=$round AND Rank <= ".TPOOLRK_RANK_ZONE." GROUP BY Pool" );
+      $arr = array();
+      $cnt = 0;
+      while ( $row = mysql_fetch_assoc($result) )
+      {
+         $arr[] = $row['Pool'];
+         $cnt += $row['X_Count'];
+      }
+      mysql_free_result($result);
+      if ( count($arr) )
+         $errors[] = sprintf( T_('Pool(s) [%s] have still %s unset ranks.'), implode(',', $arr), $cnt );
+   }//check_unset_ranks
+
+   /*! \brief Checks that all "automatic" PoolWinnerRanks are set. */
+   private function check_auto_poolwinners( $tid, $tround, &$errors, &$warnings )
+   {
+      if ( $tround->PoolWinnerRanks > 0 )
+      {
+         $round = (int)$tround->Round;
+
+         $result = db_query( "TournamentTemplateRoundRobin.check_auto_poolwinners.miss_auto($tid,$round)",
+            "SELECT DISTINCT Pool FROM TournamentPool " .
+            "WHERE tid=$tid AND Round=$round AND Rank >= -{$tround->PoolWinnerRanks} AND Rank < 0" );
+         $arr = array();
+         while ( $row = mysql_fetch_assoc($result) )
+            $arr[] = $row['Pool'];
+         mysql_free_result($result);
+         if ( count($arr) )
+         {
+            $errors[] = sprintf( T_('Pool(s) [%s] have unmarked pool-winners (rank <= %d).'),
+               implode(',', $arr), $tround->PoolWinnerRanks );
+         }
+
+         // warning if there is TP with TPool.Rank > PoolWinnerRank (may be set by TD, or a mistake)
+         $result = db_query( "TournamentTemplateRoundRobin.check_auto_poolwinners.bigger_rank($tid,$round)",
+            "SELECT TPOOL.Pool, TPOOL.Rank, TPOOL.uid as ID, TPP.Handle, TPP.Name " .
+            "FROM TournamentPool TPOOL INNER JOIN Players AS TPP ON TPP.ID=TPOOL.uid " .
+            "WHERE TPOOL.tid=$tid AND TPOOL.Round=$round AND TPOOL.Rank > {$tround->PoolWinnerRanks}" );
+         $arr = array();
+         while ( $row = mysql_fetch_assoc($result) )
+         {
+            $arr[] = '** ' . sprintf( T_('Pool %d: user [%s] with rank %d'),
+               $row['Pool'], user_reference(0, 1, 'WarnMsg', $row), $row['Rank'] );
+         }
+         mysql_free_result($result);
+         if ( count($arr) )
+         {
+            $warnings[] =
+               sprintf( T_("There are the following users marked as pool winners with a bigger rank <br>\n"
+                        .  "than the pool-winner rank [%s] defined for this round (which is either a mistake <br>\n"
+                        .  "or done intentionally by one of the tournament directors)."),
+                  $tround->PoolWinnerRanks ) . "<br>\n" . implode("<br>\n", $arr);
+         }
+      }
+   }//check_auto_poolwinners
+
+   /*! \brief Checks that at least ONE PoolWinner is set per pool of current round. */
+   private function check_minimum_poolwinners( $tid, $tround, &$errors )
+   {
+      $round = (int)$tround->Round;
+
+      $result = db_query( "TournamentTemplateRoundRobin.check_minimum_poolwinners($tid,$round)",
+         "SELECT SQL_SMALL_RESULT Pool, COUNT(*) AS X_Count FROM TournamentPool " .
+         "WHERE tid=$tid AND Round=$round AND Rank > 0 GROUP BY Pool" );
+      $arr = array_value_to_key_and_value( range(1, $tround->Pools) ); // [ 1=>1, 2=>2, ... ]
+      while ( $row = mysql_fetch_assoc($result) )
+         unset($arr[$row['Pool']]);
+      mysql_free_result($result);
+      if ( count($arr) )
+         $errors[] = sprintf( T_('Pool(s) [%s] must have at least one pool-winner.'), implode(',', array_keys($arr)) );
+   }//check_min_poolwinners
+
 } // end of 'TournamentTemplateRoundRobin'
 
 ?>

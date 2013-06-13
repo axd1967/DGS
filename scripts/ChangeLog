@@ -16,6 +16,23 @@ Developers INFO:
 ChangeLog
 ------------------------------------------------------------------
 
+2013-06-13 juga
+
+   * tournaments/include/tournament_template_round_robin.php (TournamentTemplateRoundRobin.checkPoolWinners,
+       ~.check_unset_pool_ranks, ~.check_auto_poolwinners, ~.check_minimum_poolwinners),
+     tournaments/include/tournament_round_status.php (class TournamentRoundStatus; ~.has_warning,
+       ~.get_warnings, ~.check_conditions_round_status_DONE),
+     tournaments/include/tournament_template_ladder.php (TournamentTemplateLadder.checkPoolWinners),
+     tournaments/include/tournament_template.php (TournamentTemplateRoundRobin.checkPoolWinners),
+     include/std_functions.php (buildErrorListString, buildWarnListString),
+     tournaments/roundrobin/edit_round_status.php:
+   - added error-checks and additional warning-check for tournament-round status-change PLAY->DONE
+     - check that all games are processed
+     - check that there's no unset pool rank
+     - check that all automatic pool-winner-ranks are set
+     - warn if there are pool-winners above the automatic pool-winner-ranks
+     - check that there's at least one pool-winner for each pool
+
 2013-06-05 juga
 
    * include/quick/quick_bulletin.php (class QuickHandlerBulletin, ~.parseURL, ~.prepare,

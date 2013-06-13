@@ -135,6 +135,11 @@ abstract class TournamentTemplateLadder extends TournamentTemplate
       return array(); // games need not be started
    }
 
+   public function checkPoolWinners( $tourney, $tround )
+   {
+      return array( array(), array() ); // no pools or rounds (only one) for ladders
+   }
+
    public function joinTournament( $tourney, $tp )
    {
       ta_begin();

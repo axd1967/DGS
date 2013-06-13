@@ -126,12 +126,23 @@ abstract class TournamentTemplate
     */
    abstract public function checkProperties( $tourney, $t_status );
 
-   /*! \brief Returns list with errors from checking pooling for tournament; empty if ok. */
+   /*!
+    * \brief Returns list with errors from checking pooling for tournament; empty if ok.
+    * \param $round integer tournament-round or TournamentRound-object
+    */
    abstract public function checkPooling( $tourney, $round );
 
    abstract public function checkParticipantRegistrations( $tid, $arr_TPs );
 
    abstract public function checkGamesStarted( $tid );
+
+   /*!
+    * \brief Returns list with warnings and errors from checking if pool-winners are set correctly after all pool-games
+    *        for a round have been finished.
+    * \param $tround TournamentRound-object
+    * \return array( errors, warnings )
+    */
+   abstract public function checkPoolWinners( $tourney, $tround );
 
    /*! \brief Saves given TournamentParticipant in HOT-section and joins (running) tournament if not already joined. */
    public function joinTournament( $tourney, $tp )

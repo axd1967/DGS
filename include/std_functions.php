@@ -3514,13 +3514,13 @@ function strip_gamenotes( $note )
    return trim( substr( preg_replace('/[\x00-\x1f].*$/s','',$note) , 0, LIST_GAMENOTE_LEN) );
 }
 
-function buildErrorListString( $errmsg, $errors, $colspan=0, $safe=true, $lineclass='TWarning' )
+function buildErrorListString( $errmsg, $errors, $colspan=0, $safe=true, $lineclass='TWarning', $errclass='ErrorMsg' )
 {
    if ( count($errors) == 0 )
       return '';
 
    if ( $colspan <= 0 )
-      return span('ErrorMsg', ( $errmsg ? "$errmsg:" : '') . "<br>\n* " . implode("<br>\n* ", $errors));
+      return span($errclass, ( $errmsg ? "$errmsg:" : '') . "<br>\n* " . implode("<br>\n* ", $errors));
    else
    {
       $out = "\n<ul>";
@@ -3531,6 +3531,11 @@ function buildErrorListString( $errmsg, $errors, $colspan=0, $safe=true, $linecl
       return "<td colspan=\"$colspan\">$out</td>";
    }
 }//buildErrorListString
+
+function buildWarnListString( $warnmsg, $warnings )
+{
+   return buildErrorListString( $warnmsg, $warnings, 0, true, 'TWarning', 'WarnMsg' );
+}
 
 /*!
  * \brief Parses given date-string (expect given format [YYYY-MM-DD hh:mm])

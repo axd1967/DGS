@@ -23,6 +23,7 @@ $TranslateGroups[] = "Tournament";
 
 require_once 'tournaments/include/tournament_cache.php';
 require_once 'tournaments/include/tournament_factory.php';
+require_once 'tournaments/include/tournament_games.php';
 require_once 'tournaments/include/tournament_round.php';
 require_once 'tournaments/include/tournament_utils.php';
 
@@ -48,6 +49,7 @@ class TournamentRoundStatus
    private $curr_status;
    private $new_status;
    private $errors; // arr
+   private $warnings; // arr
 
 
    /*!
@@ -87,6 +89,7 @@ class TournamentRoundStatus
 
       $this->curr_status = $this->new_status = $this->tround->Status;
       $this->errors = array();
+      $this->warnings = array();
    }//__construct
 
    public function get_tournament()
@@ -123,6 +126,16 @@ class TournamentRoundStatus
    {
       if ( $str )
          $this->errors[] = $str;
+   }
+
+   public function has_warning()
+   {
+      return (bool)count($this->warnings);
+   }
+
+   public function get_warnings()
+   {
+      return $this->warnings;
    }
 
 
@@ -200,10 +213,17 @@ class TournamentRoundStatus
    {
       $this->check_expected_round_status( TROUND_STATUS_PLAY, TOURNEY_STATUS_PLAY );
 
-      //TODO TODO (RR) T-Rnd-stat-chg PLAY->DONE
-      //TODO TODO check that all "automatic" PoolWinnerRanks are set (TPs with TPool.Rank <= PoolWinnerRank) + warning if there is one with TPool.Rank > PoolWinnerRank (may be set by TD, or a mistake)
-      //TODO TODO check that at least ONE PoolWinner is set per pool of current round
-      $this->errors[] = 'status-transition not implemented yet';
+      // check that all started games are finished and processed
+      $cnt_tgames = TournamentGames::count_tournament_games( $this->tid, $this->tround->ID );
+      if( $cnt_tgames > 0 )
+         $this->errors[] = sprintf( T_('There are still %s unfinished tournament games in round %d.'),
+            $cnt_tgames, $this->Round );
+
+      list( $errors, $warnings ) = $this->ttype->checkPoolWinners( $this->tourney, $this->tround );
+      if ( count($errors) )
+         $this->errors = array_merge( $this->errors, $errors );
+      if ( count($warnings) )
+         $this->warnings = array_merge( $this->warnings, $warnings );
    }
 
 
