@@ -73,6 +73,7 @@ $GLOBALS['ThePage'] = new Page('TournamentRoundStatusEdit');
       error('tournament_edit_not_allowed', "Tournament.edit_round_status.edit_tournament($tid,$round,$my_id)");
 
    $tround = $tr_status->get_tournament_round();
+   $old_tr_status = $tround->Status;
    $is_admin = TournamentUtils::isAdmin();
 
    if ( @$_REQUEST['t_cancel'] ) // cancel status-change
@@ -135,7 +136,7 @@ $GLOBALS['ThePage'] = new Page('TournamentRoundStatusEdit');
          'TEXT',        TournamentUtils::buildLastchangedBy($tround->Lastchanged, $tround->ChangedBy) ));
    $tform->add_row( array(
          'DESCRIPTION', T_('Round Status#tourney'),
-         'TEXT',        TournamentRound::getStatusText($tround->Status), ));
+         'TEXT',        TournamentRound::getStatusText($old_tr_status), ));
    $tform->add_row( array( 'HR' ));
 
    if ( $tr_status->has_error() )
