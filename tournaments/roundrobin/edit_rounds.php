@@ -60,6 +60,8 @@ $GLOBALS['ThePage'] = new Page('TournamentRoundEditor');
      tre_set_confirm&tid=&round=    : sets selected round as the current round (confirmed)
      tre_stat&tid=&round=           : changes round status (forward to separate edit-round-status page)
      tre_cancel&tid=&round=         : cancel previous action
+     tre_final&tid=&round=          : finalize round
+     tre_fillwin&tid=&round=        : fill tournament winners
 */
 
    $tid = (int) @$_REQUEST['tid'];
@@ -113,6 +115,10 @@ $GLOBALS['ThePage'] = new Page('TournamentRoundEditor');
          TournamentHelper::remove_tournament_round( $tourney, $tround, $action_errors, true );
       elseif ( @$_REQUEST['tre_set'] )
          TournamentHelper::set_tournament_round( $tourney, $round, $action_errors, true );
+      elseif ( @$_REQUEST['tre_final'] )
+         TournamentHelper::finalize_tournament_round( $tourney, $round, $action_errors, true ); //TODO TODO finalize T-round (copy TPOOL->TP.NextRnd)
+      elseif ( @$_REQUEST['tre_fillwin'] )
+         TournamentHelper::fill_tournament_round_winners( $tourney, $round, $action_errors, true ); //TODO TODO fill T-winners (add T-Result from TP.NextRnd > CurrRnd)
       // do confirmed actions
       elseif ( @$_REQUEST['tre_add_confirm'] ) // add new T-round
       {
@@ -142,6 +148,24 @@ $GLOBALS['ThePage'] = new Page('TournamentRoundEditor');
             jump_to("tournaments/roundrobin/edit_rounds.php?tid=$tid".URI_AMP."round=$round".URI_AMP."sysmsg=$sys_msg");
          }
       }
+      elseif ( @$_REQUEST['tre_final_confirm'] ) // finalize current T-round
+      {
+         $success = TournamentHelper::finalize_tournament_round( $tourney, $round, $action_errors, false ); //TODO TODO finalize T-round (copy TPOOL->TP.NextRnd)
+         if ( $success )
+         {
+            $sys_msg = urlencode( sprintf( T_('Tournament Round #%s finalized!'), $round ) );
+            jump_to("tournaments/roundrobin/edit_rounds.php?tid=$tid".URI_AMP."round=$round".URI_AMP."sysmsg=$sys_msg");
+         }
+      }
+      elseif ( @$_REQUEST['tre_fillwin_confirm'] ) // fill T-winners
+      {
+         $success = TournamentHelper::fill_tournament_round_winners( $tourney, $round, $action_errors, false ); //TODO TODO fill T-winners (add T-Result from TP.NextRnd > CurrRnd)
+         if ( $success )
+         {
+            $sys_msg = T_('Tournament winners set!');
+            jump_to("tournaments/roundrobin/edit_rounds.php?tid=$tid".URI_AMP."round=$round".URI_AMP."sysmsg=$sys_msg");
+         }
+      }
 
       if ( count($action_errors) )
       {
@@ -152,7 +176,7 @@ $GLOBALS['ThePage'] = new Page('TournamentRoundEditor');
 
    // ---------- Tournament Form -----------------------------------
 
-   $tform = new Form( 'tournament', $page, FORM_GET );
+   $tform = new Form( 'troundeditor', $page, FORM_GET );
    $tform->add_hidden( 'tid', $tid );
 
    $tform->add_row( array(
@@ -183,14 +207,15 @@ $GLOBALS['ThePage'] = new Page('TournamentRoundEditor');
    $tform->add_row( array( 'HR' ));
    $tform->add_row( array(
          'DESCRIPTION', T_('Select Round#tourney'),
-         'SELECTBOX',   'round', 1, $arr_rounds, $round, false,
-         'TEXT', SMALL_SPACING,
+         'SELECTBOX',   'round', 1, $arr_rounds, $round, false, ));
+   $tform->add_row( array(
+         'DESCRIPTION', T_('Actions#tourney'),
          'SUBMITBUTTON', 'tre_view', T_('View Round#tourney'), ));
 
    if ( $tourney->Rounds < $max_rounds ) // valid to add T-round
    {
       $tform->add_row( array(
-            'TAB', 'CELL', 1, '',
+            'TAB',
             'SUBMITBUTTON', 'tre_add', T_('Add Round#tourney'), ));
       if ( @$_REQUEST['tre_add'] && !$has_action_error )
          echo_confirm( $tform, T_('Please confirm adding of a new tournament round'),
@@ -200,7 +225,7 @@ $GLOBALS['ThePage'] = new Page('TournamentRoundEditor');
    if ( $tourney->Rounds > 1 ) // valid to remove T-round
    {
       $tform->add_row( array(
-            'TAB', 'CELL', 1, '',
+            'TAB',
             'SUBMITBUTTON', 'tre_del', T_('Remove Round#tourney'), ));
       if ( @$_REQUEST['tre_del'] && !$has_action_error )
          echo_confirm( $tform, sprintf( T_('Please confirm deletion of selected tournament round #%s'), $round ),
@@ -208,19 +233,39 @@ $GLOBALS['ThePage'] = new Page('TournamentRoundEditor');
    }
 
    $tform->add_row( array(
-         'TAB', 'CELL', 1, '',
+         'TAB',
          'SUBMITBUTTON', 'tre_edit', T_('Edit Round Properties#tourney'), ));
 
    $tform->add_row( array(
-         'TAB', 'CELL', 1, '',
+         'TAB',
          'SUBMITBUTTON', 'tre_stat', T_('Change Round Status#tourney'), ));
+
+   $tform->add_empty_row();
+   $tform->add_row( array(
+         'TAB',
+         'SUBMITBUTTON', 'tre_final', T_('Finalize Round#tourney'),
+         'TEXT', sptext(T_('Prepare next round / Prepare tournament winners#tourney'), 1), ));
+   //TODO TODO add confirm-text w/ extra-info for finalize-round
+   if ( @$_REQUEST['tre_final'] && !$has_action_error )
+      ;
+
+   if( $tourney->CurrentRound == $tourney->Rounds )
+   {
+      $tform->add_row( array(
+            'TAB',
+            'SUBMITBUTTON', 'tre_fillwin', T_('Fill Tournament Winners'),
+            'TEXT', sptext(T_('Set tournament winners'), 1), ));
+      //TODO TODO add confirm-text w/ extra-info for filling-T-winners
+      if ( @$_REQUEST['tre_fillwin'] && !$has_action_error )
+         ;
+   }
 
    if ( $authorise_set_tround && ($tourney->Rounds > 1) ) // valid to set current T-round
    {
       $tform->add_row( array(
-            'TAB', 'CELL', 1, '',
+            'TAB',
             'SUBMITBUTTON', 'tre_set', T_('Set Current Round#tourney'),
-            'TEXT', sptext(T_('Switch to next round#tourney'), 1), ));
+            'TEXT', sptext(T_('Switch to selected round#tourney'), 1), ));
       if ( @$_REQUEST['tre_set'] && !$has_action_error )
          echo_confirm( $tform,
             sprintf( T_('Please confirm setting the current tournament round from #%s to #%s'),
@@ -278,10 +323,10 @@ function echo_confirm( &$tform, $message, $confirm_action, $confirm_text )
 {
    $tform->add_empty_row();
    $tform->add_row( array(
-         'TAB', 'CELL', 1, '',
+         'TAB',
          'TEXT', span('TWarning', $message.':'), ));
    $tform->add_row( array(
-         'TAB', 'CELL', 1, '',
+         'TAB',
          'SUBMITBUTTON', $confirm_action.'_confirm', $confirm_text,
          'TEXT', SMALL_SPACING,
          'SUBMITBUTTON', 'tre_view', T_('Cancel') ));

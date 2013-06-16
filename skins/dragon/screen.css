@@ -3278,6 +3278,13 @@ span.TRank {
    font-weight: bold;
 }
 
+form#troundeditorForm table td {
+   text-align: left;
+}
+form#troundeditorForm table td.FormDescription {
+   text-align: right;
+}
+
 
 /* ------------------------- */
 /* Multi-player-game pages */

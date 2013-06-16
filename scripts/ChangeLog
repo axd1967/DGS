@@ -18,6 +18,26 @@ ChangeLog
 
 2013-06-16 juga
 
+   * include/std_functions.php (echo_dragon_top_bar, end_page),
+     skins/dragon/screen.css:
+   - replace tooltip with DGS-version in top-bar with version-text in bottom-bar
+
+   * tournaments/include/tournament_globals.php (TRESULTTYPE_RR_WINNERS),
+     specs/db/table-Tournaments.txt:
+   - added tournament-result-type for round-robin in preparation to fill tournament-winners
+
+   * tournaments/include/tournament_helper.php,
+     tournaments/roundrobin/edit_ranks.php,
+     tournaments/roundrobin/edit_rounds.php,
+     tournaments/manage_tournament.php (make_links_ttype_specific),
+     skins/dragon/screen.css:
+   - started to finalizing tournament-round to prepare for next round or setting tournament winners
+   - formatting form on tournament-edit-round-page
+
+   * tournaments/view_tournament.php:
+   - moved refresh-link to page-bottom
+   - copied registration-link to top important links as convenience
+
    * show_games.php:
    - don't restrict games-list with default last-moved-date for tournament-games-list
 

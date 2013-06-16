@@ -284,7 +284,10 @@ $GLOBALS['ThePage'] = new Page('TournamentRankEditor');
 
    section( 'actionResult', T_('Action Results') );
    if ( !is_null($rstable) )
+   {
       $rstable->echo_table();
+      //TODO TODO edit_ranks: add check with warnings if TPool.Rank > PoolWinnersRank (similar to check on TR-stat-chg PLAY->DONE)
+   }
    if ( !is_null($result_notes) )
       echo_notes( 'edittournamentpoolrankTable', '', $result_notes );
 

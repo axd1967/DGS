@@ -585,8 +585,9 @@ class TournamentHelper
          $errors[] = sprintf( T_('You are only allowed to switch to the next tournament round %s.'),
             $tround->Round + 1 );
 
+      //TODO TODO check if T-round finalized (copied TPOOL->TP.NextRnd)
+
       //TODO TODO set-T-rnd: automatically check + do switch T-status back to PLAY->PAIR !? YES ... if so, have to do the same checks as in REG->PAIR T-status-change !? ;; perhaps better to put this into separate use-case "switch to next-round" => check if TStatus->check_status_change() can be used here (may need CurrRound already changed)
-      //TODO TODO set-T-rnd: do: set TP.NextRound for all pool-winners -> not here, but separately (only doing checks here): checked HERE, but not filled (but in edit_ranks-page -> add check there as well with warnings if TPool.Rank > PoolWinnersRank)
 
       if ( count($errors) || $check_only )
          return false;
