@@ -866,6 +866,7 @@ Description:
 
 * Type : type of tournament-result
    - 1 = Crowned King (of ladder)
+   - 2 = Round-Robin Winners (rank 1..n); Ranks need not to be unique
 
 * StartTime : start-time for entry
 
