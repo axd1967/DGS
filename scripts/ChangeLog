@@ -16,6 +16,11 @@ Developers INFO:
 ChangeLog
 ------------------------------------------------------------------
 
+2013-06-16 juga
+
+   * show_games.php:
+   - don't restrict games-list with default last-moved-date for tournament-games-list
+
 2013-06-13 juga
 
    * tournaments/include/tournament_template_round_robin.php (TournamentTemplateRoundRobin.checkPoolWinners,

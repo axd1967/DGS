@@ -148,7 +148,7 @@ $GLOBALS['ThePage'] = new Page('GamesList');
    $cfg_tblcols = ConfigTableColumns::load_config( $my_id, $column_set_name );
 
    $restrict_games = '';
-   if ( RESTRICT_SHOW_GAMES_ALL && $all && !@$_REQUEST['sgfs'] )
+   if ( RESTRICT_SHOW_GAMES_ALL && $all && !@$_REQUEST['sgfs'] && !$glc->ext_tid )
       $restrict_games = ($finished) ? min(30, 5*RESTRICT_SHOW_GAMES_ALL) : RESTRICT_SHOW_GAMES_ALL;
 
    // init search profile
