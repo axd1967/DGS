@@ -500,8 +500,7 @@ function echo_dragon_top_bar( $logged_in, $user_handle )
 
    echo "\n\n<table id=\"pageHead\">",
       "\n <tr>",
-      "\n  <td class=\"ServerHome\"><A id=\"homeId\" href=\"".HOSTBASE."index.php\" title=\"", T_('Version'), ': ', DGS_VERSION, "\">",
-      FRIENDLY_LONG_NAME."</A>";
+      "\n  <td class=\"ServerHome\"><A id=\"homeId\" href=\"".HOSTBASE."index.php\">", FRIENDLY_LONG_NAME, "</A>";
 
    // show bookmarks
    if ( !$printable && $logged_in && !$is_down )
@@ -527,7 +526,7 @@ function echo_dragon_top_bar( $logged_in, $user_handle )
       echo SEP_MEDSPACING . span('AdminTournament', '[Tournament-Admin]');
 
    echo "</td>";
-   echo "\n  <td class='LoginBox'>";
+   echo "\n  <td class=\"LoginBox\">";
 
    if ( $logged_in && !$is_down )
       echo T_("Logged in as"), ': <a id="loggedId" title="' . $player_row['ID'] . '">', $user_handle, '</a>';
@@ -688,10 +687,11 @@ function end_page( $menu_array=NULL, $links_per_line=0 )
 
 
    global $NOW;
-   echo "\n<table id=pageFoot>"
-      . "\n <tr>"
-      . "\n  <td class=ServerHome><A href=\"{$base_path}index.php\">"
-        . FRIENDLY_LONG_NAME."</A></td>";
+   echo "\n<table id=pageFoot>",
+      "\n <tr>",
+      "\n  <td class=ServerHome><A href=\"{$base_path}index.php\">", FRIENDLY_LONG_NAME, "</A> ",
+      span('Version', '[' . T_('Version') . ' ' . DGS_VERSION . ']'),
+      "</td>";
 
    echo "\n  <td class=PageTime>"
         . T_("Page time") . ' <span id="pageTime">' . date(DATE_FMT, $NOW)

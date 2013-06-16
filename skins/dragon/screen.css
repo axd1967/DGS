@@ -460,6 +460,12 @@ table#pageHead .LoginBox {
    text-align: right;
 }
 
+table#pageFoot span.Version {
+   font-size: 80%;
+   padding-left: 1em;
+   margin-right: -8em;
+}
+
 table#pageFoot .PageTime {
    text-align: center;
    font-weight: normal;
