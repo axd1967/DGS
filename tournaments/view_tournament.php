@@ -70,6 +70,7 @@ $GLOBALS['ThePage'] = new Page('Tournament');
    $my_tp = TournamentCache::load_cache_tournament_participant( 'Tournament.view_tournament', $tid, $my_id );
    $reg_user_status = ( $my_tp ) ? $my_tp->Status : false;
    $reg_user_info   = TournamentParticipant::getStatusUserInfo($reg_user_status);
+   $reg_user_str = TournamentGuiHelper::getLinkTextRegistration($tid, $reg_user_status);
 
    $arr_tnews = TournamentCache::load_cache_tournament_news( 'Tournament.view_tournament.news',
       $tid, $allow_edit_tourney, $reg_user_status );
@@ -157,8 +158,9 @@ $GLOBALS['ThePage'] = new Page('Tournament');
    {
       $sectmenu[T_('View Pools')] = "tournaments/roundrobin/view_pools.php?tid=$tid";
    }
+   if ( $reg_user_str )
+      $sectmenu[$reg_user_str] = "tournaments/register.php?tid=$tid"; # for user
    $sectmenu[T_('Tournament directors')] = $page_tdirs;
-   $sectmenu[T_('Refresh tournament info')] = "tournaments/view_tournament.php?tid=$tid";
    if ( $allow_edit_tourney )
       $sectmenu[T_('Manage tournament')] =
          array( 'url' => "tournaments/manage_tournament.php?tid=$tid", 'class' => 'TAdmin' );
@@ -303,9 +305,11 @@ $GLOBALS['ThePage'] = new Page('Tournament');
          "</center><br>\n";
    }
 
+   $menu = array();
+   $menu[T_('Refresh tournament info')] = "tournaments/view_tournament.php?tid=$tid";
 
-   end_page();
-}
+   end_page(@$menu);
+}//main
 
 
 function check_locks( $tourney )
