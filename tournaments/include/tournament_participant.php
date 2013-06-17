@@ -272,7 +272,7 @@ class TournamentParticipant
       $result = $entityData->insert( "TournamentParticipant.insert(%s)" );
       if ( $result )
          $this->ID = mysql_insert_id();
-      self::delete_cache_tournament_participant_count( 'TournamentParticipant.insert', $this->tid );
+      self::delete_cache_tournament_participant_counts( 'TournamentParticipant.insert', $this->tid );
       self::delete_cache_tournament_participant( 'TournamentParticipant.insert', $this->tid, $this->uid );
       return $result;
    }
@@ -284,7 +284,7 @@ class TournamentParticipant
       $this->checkData();
       $entityData = $this->fillEntityData();
       $result = $entityData->update( "TournamentParticipant.update(%s)" );
-      self::delete_cache_tournament_participant_count( 'TournamentParticipant.update', $this->tid );
+      self::delete_cache_tournament_participant_counts( 'TournamentParticipant.update', $this->tid );
       self::delete_cache_tournament_participant( 'TournamentParticipant.update', $this->tid, $this->uid );
       return $result;
    }
@@ -293,7 +293,7 @@ class TournamentParticipant
    {
       $entityData = $this->fillEntityData();
       $result = $entityData->delete( "TournamentParticipant.delete(%s)" );
-      self::delete_cache_tournament_participant_count( 'TournamentParticipant.delete', $this->tid );
+      self::delete_cache_tournament_participant_counts( 'TournamentParticipant.delete', $this->tid );
       self::delete_cache_tournament_participant( 'TournamentParticipant.delete', $this->tid, $this->uid );
       return $result;
    }
@@ -334,13 +334,12 @@ class TournamentParticipant
    // ------------ static functions ----------------------------
 
    /*!
-    * \brief Returns count of TournamentParticipants for given tournament, TP-status and NextRound.
+    * \brief Returns count of TournamentParticipants for given tournament, TP-status, round and NextRound.
     * \param $tp_status one of TP_STATUS_... or array of TP_STATUS_... or null (=count all TP-stati)
     * \param $round 0 (=count all rounds), >0 (=count only given round)
     * \param $use_next_round true = match $next_round on TP.NextRound; false = match on TP.StartRound
     */
-   //TODO TODO rename properly
-   public static function count_TPs( $tid, $tp_status, $round, $use_next_round )
+   public static function count_tournament_participants( $tid, $tp_status, $round, $use_next_round )
    {
       $qsql = new QuerySQL(
          SQLP_OPTS,   'SQL_SMALL_RESULT',
@@ -366,15 +365,14 @@ class TournamentParticipant
       $row = mysql_single_fetch( "TournamentParticipant:count_TPs($tid,".implode('/',$stat_out).",$round_field=$round)",
             $qsql->get_select() );
       return ($row) ? (int)$row['X_Count'] : 0;
-   }//count_TPs
+   }//count_tournament_participants
 
    /*!
     * \brief Returns non-null array with count of TournamentParticipants for all (start-)rounds and TP-stati.
     * \return array( TPCOUNT_STATUS_ALL => sum-count for all rounds,
     *                TP.StartRound      => array( TP_STATUS_... => count, ... ))
     */
-   //TODO TODO rename properly
-   public static function count_all_TPs( $tid )
+   public static function count_all_tournament_participants( $tid )
    {
       $result = db_query( "TournamentParticipant:count_all_TPs($tid)",
             "SELECT SQL_SMALL_RESULT Status, StartRound, COUNT(*) AS X_Count FROM TournamentParticipant " .
@@ -393,34 +391,8 @@ class TournamentParticipant
       mysql_free_result($result);
 
       return $out;
-   }//count_all_TPs
+   }//count_all_tournament_participants
 
-   /*!
-    * \brief Returns non-null array with count of TournamentParticipants for given tournament and TP-status.
-    * \return array( TP_STATUS_... => count, TPCOUNT_STATUS_ALL => summary-count )
-    */
-   //TODO TODO obsolete !?
-   public static function count_tournament_participants( $tid, $status=NULL )
-   {
-      $query_status = (is_null($status)) ? '' : " AND Status='".mysql_addslashes($status)."'";
-      $result = db_query( "TournamentParticipant:count_tournament_participants($tid,$status)",
-            "SELECT SQL_SMALL_RESULT Status, COUNT(*) AS X_Count FROM TournamentParticipant "
-            . "WHERE tid='$tid' $query_status GROUP BY Status" );
-
-      $out = array();
-      if ( !is_null($status) )
-         $out[$status] = 0;
-      $sum = 0;
-      while ( $row = mysql_fetch_array( $result ) )
-      {
-         $cnt = (int)@$row['X_Count'];
-         $out[$row['Status']] = $cnt;
-         $sum += $cnt;
-      }
-      mysql_free_result($result);
-      $out[TPCOUNT_STATUS_ALL] = $sum;
-      return $out;
-   }//count_tournament_participants
 
    /*! \brief Returns db-fields to be used for query of TournamentParticipant-object. */
    public static function build_query_sql()
@@ -750,9 +722,10 @@ class TournamentParticipant
       return $statuslist;
    }
 
-   public static function delete_cache_tournament_participant_count( $dbgmsg, $tid )
+   public static function delete_cache_tournament_participant_counts( $dbgmsg, $tid )
    {
-      DgsCache::delete( $dbgmsg, CACHE_GRP_TP_COUNT, "TPCount.$tid" );
+      DgsCache::delete( $dbgmsg, CACHE_GRP_TP_COUNT_ALL, "TPCountAll.$tid" );
+      DgsCache::delete_group( $dbgmsg, CACHE_GRP_TP_COUNT, "TPCount.$tid" );
    }
 
    public static function delete_cache_tournament_participant( $dbgmsg, $tid, $uid )

@@ -220,7 +220,8 @@ class TournamentProperties
       // limit participants
       $maxTP = $this->getMaxParticipants();
       $round_max_tps = ( $tp->StartRound > 1 ) ? round( $maxTP / pow(2, $tp->StartRound - 1) ) : $maxTP;
-      $tp_count = TournamentParticipant::count_TPs( $this->tid, /*TP-stat-ALL*/null, $tp->StartRound, /*NextR*/false ); //TODO TODO must cache this!! ... or store locally or helper
+      $tp_count = TournamentCache::count_cache_tournament_participants(
+         $this->tid, /*TP-stat-ALL*/null, $tp->StartRound, /*NextR*/false );
       if ( $is_new_tp )
          ++$tp_count;
       if ( $tp_count > $round_max_tps )

@@ -141,7 +141,8 @@ $GLOBALS['ThePage'] = new Page('TournamentRankEditor');
 
       if ( @$_REQUEST['t_stats'] || @$_REQUEST['t_exec'] || @$_REQUEST['t_userexec'] || @$_REQUEST['t_setrank'] )
       {
-         $tp_regcount = TournamentParticipant::count_TPs( $tid, TP_STATUS_REGISTER, $round + 1, /*NextR*/false );
+         $tp_regcount =
+            TournamentParticipant::count_tournament_participants( $tid, TP_STATUS_REGISTER, $round + 1, /*NextR*/false );
 
          // count ranks for current round over all pools
          $rank_counts = TournamentPool::count_tournament_pool_ranks( $tid, $round );

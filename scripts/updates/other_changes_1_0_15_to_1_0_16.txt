@@ -14,3 +14,6 @@ execute 'scripts/player_consistency.php'
 -----------
 # shorten '#'-texts for tournaments, esp. '%#t%header'
 
+-----------
+# adjust 'include/config-local.php' reflecting changes
+

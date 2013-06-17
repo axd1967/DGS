@@ -131,7 +131,8 @@ abstract class TournamentTemplateRoundRobin extends TournamentTemplate
       {
          // TPs on APPLY/INVITE-status are not allowed!
          static $ARR_TPSTATUS = array( TP_STATUS_APPLY, TP_STATUS_INVITE );
-         $tp_nonreg_count = TournamentParticipant::count_TPs( $tid, $ARR_TPSTATUS, /*all-rounds*/0, /*NextR*/false );
+         $tp_nonreg_count =
+            TournamentParticipant::count_tournament_participants( $tid, $ARR_TPSTATUS, /*all-rounds*/0, /*NextR*/false );
          if ( $tp_nonreg_count > 0 )
          {
             $errors[] = sprintf(

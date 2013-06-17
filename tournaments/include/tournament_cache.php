@@ -313,25 +313,55 @@ class TournamentCache
    }//load_cache_tournament_news
 
    /*!
-    * \brief Returns non-null array with count of TournamentParticipants for given tournament and TP-status.
-    * \note if caching is activated, all stati are returned even if $status != null
+    * \brief Returns cached count of TournamentParticipants for given tournament, TP-status, round and NextRound.
+    * \param $tp_status one of TP_STATUS_... or array of TP_STATUS_... or null (=count all TP-stati)
+    * \param $round 0 (=count all rounds), >0 (=count only given round)
+    * \param $use_next_round true = match $next_round on TP.NextRound; false = match on TP.StartRound
+    * \see TournamentParticipant.count_tournament_participants()
     */
-   //TODO TODO obsolete !?
-   public static function count_cache_tournament_participants( $tid, $status=null )
+   public static function count_cache_tournament_participants( $tid, $tp_status, $round, $use_next_round )
    {
       $tid = (int)$tid;
-      $dbgmsg = "TCache:count_cache_tp($tid,$status)";
-      $key = "TPCount.$tid";
+      if ( is_array($tp_status) )
+         $stat_str = implode('-', $tp_status);
+      elseif ( is_null($tp_status) )
+         $stat_str = '';
+      else
+         $stat_str = $tp_status;
+
+      $dbgmsg = "TCache:count_cache_tps($tid,$stat_str,$round,$use_next_round)";
+      $group_id = "TPCount.$tid";
+      $key = "TPCount.$tid.$stat_str.$round." . ($use_next_round ? 1 : 0);
 
       $arr_counts = DgsCache::fetch( $dbgmsg, CACHE_GRP_TP_COUNT, $key );
       if ( is_null($arr_counts) )
       {
-         $arr_counts = TournamentParticipant::count_tournament_participants($tid);
-         DgsCache::store( $dbgmsg, CACHE_GRP_TP_COUNT, $key, $arr_counts, SECS_PER_HOUR );
+         $arr_counts = TournamentParticipant::count_tournament_participants($tid, $tp_status, $round, $use_next_round);
+         DgsCache::store( $dbgmsg, CACHE_GRP_TP_COUNT, $key, $arr_counts, SECS_PER_DAY, $group_id );
       }
 
       return $arr_counts;
    }//count_cache_tournament_participants
+
+   /*!
+    * \brief Returns non-null array with cached count of TournamentParticipants for all (start-)rounds and TP-stati.
+    * \see TournamentParticipant.count_all_tournament_participants()
+    */
+   public static function count_cache_all_tournament_participants( $tid )
+   {
+      $tid = (int)$tid;
+      $dbgmsg = "TCache:count_cache_all_tps($tid)";
+      $key = "TPCountAll.$tid";
+
+      $arr_counts = DgsCache::fetch( $dbgmsg, CACHE_GRP_TP_COUNT_ALL, $key );
+      if ( is_null($arr_counts) )
+      {
+         $arr_counts = TournamentParticipant::count_all_tournament_participants($tid);
+         DgsCache::store( $dbgmsg, CACHE_GRP_TP_COUNT_ALL, $key, $arr_counts, SECS_PER_DAY );
+      }
+
+      return $arr_counts;
+   }//count_cache_all_tournament_participants
 
    /*! \brief Loads and caches TournamentParticipant for given tournament-id and user-id. */
    public static function load_cache_tournament_participant( $dbgmsg, $tid, $uid )

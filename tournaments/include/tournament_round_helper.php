@@ -301,7 +301,8 @@ class TournamentRoundHelper
       if ( $tround->Round != $tourney->Rounds )
          $errors[] = sprintf( T_('You can only remove the last tournament round #%s.'), $tourney->Rounds );
 
-      $tp_count = TournamentParticipant::count_TPs( $tourney->ID, /*all-stat*/null, $tround->Round, /*NextR*/true );
+      $tp_count = TournamentParticipant::count_tournament_participants(
+         $tourney->ID, /*all-stat*/null, $tround->Round, /*NextR*/true );
       if ( $tp_count > 0 )
          $errors[] = sprintf( T_('There are %s tournament participants registered to play in round %s.'),
             $tp_count, $tround->Round );

@@ -18,6 +18,26 @@ ChangeLog
 
 2013-06-17 juga
 
+   * tournaments/include/tournament_participant.php (TournamentParticipant.count_tournament_participants,
+       ~.count_all_tournament_participants, ~.delete_cache_tournament_participant_counts),
+     tournaments/include/tournament_cache.php (TournamentCache.count_cache_tournament_participants,
+       ~.count_cache_all_tournament_participants),
+     tournaments/include/tournament_properties.php (class TournamentProperties),
+     tournaments/include/tournament_template_round_robin.php,
+     tournaments/include/tournament_round_helper.php,
+     tournaments/include/tournament_status.php,
+     include/cache_globals.php (CACHE_GRP_TP_COUNT_ALL),
+     include/config.php,
+     tournaments/roundrobin/create_pools.php, tournaments/roundrobin/define_pools.php,
+     tournaments/roundrobin/edit_ranks.php, tournaments/ladder/admin.php,
+     tournaments/view_tournament.php:
+   - added caching for counting tournament-participants at required places
+     - added caching for counting selected and all tournament-participants
+     - renamed TournamentParticipant::count_[all_]TPs() to TP::count_[all_]tournament_participants()
+     - renamed TournamentParticipant::delete_cache_tournament_participant_count()
+       to TP::delete_cache_tournament_participant_counts()
+     - changed expire-time for tournament-participant counts from 1h to 1d
+
    * forum/forum_functions.php (DisplayForum.draw_post),
      forum/read.php (show_revision_history):
    - bugfix: don't show "No. X" on forum-posts revision-history

@@ -99,7 +99,7 @@ $GLOBALS['ThePage'] = new Page('TournamentPoolCreate');
          $errors[] = T_('There are no pools existing for deletion');
    }
 
-   $reg_count = TournamentParticipant::count_TPs( $tid, TP_STATUS_REGISTER, $round, /*NextR*/true );
+   $reg_count = TournamentParticipant::count_tournament_participants( $tid, TP_STATUS_REGISTER, $round, /*NextR*/true );
 
    // ---------- Process actions ------------------------------------------------
 

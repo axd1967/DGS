@@ -123,7 +123,9 @@ $GLOBALS['ThePage'] = new Page('TournamentLadderAdmin');
    }
    elseif ( !$is_delete && $uid <= 0 )
    {
-      $count_tp_reg = TournamentParticipant::count_TPs( $tid, TP_STATUS_REGISTER, 1, /*NextR*/false ); // ladder has only 1 round
+      $count_tp_reg = TournamentParticipant::count_tournament_participants(
+         $tid, TP_STATUS_REGISTER, 1, // ladder has only 1 round
+         /*NextR*/false );
       $count_tl_user = TournamentLadder::count_tournament_ladder( $tid );
    }
 

@@ -210,7 +210,8 @@ class TournamentStatus
       $this->_load_tround();
       $min_participants = $this->ttype->calcTournamentMinParticipants( $this->tprops, $this->tround );
       $max_participants = $this->tprops->getMaxParticipants();
-      $tp_reg_count = TournamentParticipant::count_TPs( $this->tid, TP_STATUS_REGISTER, $curr_round, /*NextR*/true );
+      $tp_reg_count = TournamentParticipant::count_tournament_participants(
+         $this->tid, TP_STATUS_REGISTER, $curr_round, /*NextR*/true );
       if ( $min_participants > 0 && $tp_reg_count < $min_participants )
       {
          $this->errors[] = sprintf(

@@ -65,7 +65,7 @@ $GLOBALS['ThePage'] = new Page('Tournament');
    $show_tresult = TournamentResult::show_tournament_result( $tourney->Status );
 
    // TP-count
-   $tp_all_counts = TournamentParticipant::count_all_TPs($tid); //TODO TODO cache it
+   $tp_all_counts = TournamentCache::count_cache_all_tournament_participants($tid);
 
    $my_tp = TournamentCache::load_cache_tournament_participant( 'Tournament.view_tournament', $tid, $my_id );
    $reg_user_status = ( $my_tp ) ? $my_tp->Status : false;
