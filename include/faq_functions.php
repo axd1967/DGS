@@ -59,7 +59,7 @@ function faq_item_html( $level=2, $Qtext='', $Atext='', $href='', $attbs='', $rx
          if ( $prevlevel > 0 )
             $str.= "\n</div>\n";
 
-         //if( $prevlevel < 1 )
+         //if ( $prevlevel < 1 )
             $str.= "\n<div class=FAQlevel1>";
          if ( $prevlevel != 0 )
             $str .= "<hr>";

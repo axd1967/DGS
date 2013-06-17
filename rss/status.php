@@ -250,7 +250,7 @@ function rss_item( $title, $link, $description='', $pubDate='', $category='', $g
       $str.= '   '.rss_tag( 'guid', rss_link( $guid));
    if ( $category )
       $str.= '   '.rss_tag( 'category', rss_safe( $category));
-   //if( $pubDate )
+   //if ( $pubDate )
       $str.= '   '.rss_tag( 'pubDate', rss_date( $pubDate));
    $str.= '   '.rss_tag( 'description', rss_safe( $description), 'xml:space="preserve"');
    $str.= "  </item>\n";
@@ -291,7 +291,7 @@ function rss_warning( $str, $title='', $link='')
 */
 function rss_auth( $cancel_str, $uhandle='')
 {
-   //if( $uhandle ) $uhandle= ' - '.$uhandle; else
+   //if ( $uhandle ) $uhandle= ' - '.$uhandle; else
       $uhandle= '';
    $uhandle= FRIENDLY_LONG_NAME . $uhandle;
 

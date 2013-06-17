@@ -245,7 +245,7 @@ function parse_edit_form( &$shape )
    }
 
    // parse URL-vars
-   //if( $is_posted )
+   //if ( $is_posted )
    {
       $new_value = trim($vars['name']);
       if ( strlen($new_value) < 3 )

@@ -879,7 +879,7 @@ class TournamentPool
          $rankval = '-ABS(Rank)'; // where Rank > 0
       elseif ( $action == RKACT_CLEAR_RANKS )
          $rankval = '0';
-      else //if( $action == RKACT_REMOVE_RANKS )
+      else //if ( $action == RKACT_REMOVE_RANKS )
          $rankval = TPOOLRK_NO_RANK;
 
       $query = "UPDATE TournamentPool SET Rank=$rankval "

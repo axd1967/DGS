@@ -2590,7 +2590,7 @@ function is_logged_in($handle, $scode, &$player_row, $login_opts=LOGIN_DEFAULT_O
          $vaultcnt = 0; // stay in fever vault... quota-block in place till expire-date
       elseif ( $vaultcnt > 1 ) //measuring fever
          $upd->upd_num('VaultCnt', (--$vaultcnt) );
-      else //if( $vaulttime == 1 ) // quota up, but not expired (fever too high)
+      else //if ( $vaulttime == 1 ) // quota up, but not expired (fever too high)
       {
          // enter fever vault... set quota-expire on block-time
          $vaultcnt = 0;
@@ -3419,7 +3419,7 @@ function attb_build( $attbs)
          $str .= ' '.$key.'=';
 
          // don't quote values of JavaScript-attributes
-         //if( preg_match( "/^(on((dbl)?click|mouse(down|up|over|move)|key(press|down|up)))$/i", $key ) )
+         //if ( preg_match( "/^(on((dbl)?click|mouse(down|up|over|move)|key(press|down|up)))$/i", $key ) )
          if ( strncasecmp($key,'on',2) == 0 ) // begins with 'on'
             $str .= "\"$val\"";
          else

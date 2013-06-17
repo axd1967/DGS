@@ -129,7 +129,7 @@ define('UNBUF_TIMOUT', 0); //x seconds limit. 0 to disable.
          if ( $tmp>0 && $tmp<$dbtimout )
             $dbtimout= $tmp;
 
-         //if( echo_query( 'SHOW VARIABLES', 'query_svar', 0, 0, 0, 0) < 0 ) break;
+         //if ( echo_query( 'SHOW VARIABLES', 'query_svar', 0, 0, 0, 0) < 0 ) break;
          //long_query_time is in second
 
          break;

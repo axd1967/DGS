@@ -250,7 +250,7 @@ $GLOBALS['ThePage'] = new Page('TournamentRoundEditor');
    if ( @$_REQUEST['tre_final'] && !$has_action_error )
       ;
 
-   if( $tourney->CurrentRound == $tourney->Rounds )
+   if ( $tourney->CurrentRound == $tourney->Rounds )
    {
       $tform->add_row( array(
             'TAB',

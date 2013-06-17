@@ -192,7 +192,7 @@ class Tournament
          else
             return sprintf( T_('%s of %s rounds#tourney'), $this->CurrentRound, $rounds_str );
       }
-      else //if( $this->Type == TOURNEY_TYPE_LADDER )
+      else //if ( $this->Type == TOURNEY_TYPE_LADDER )
          return ( $short ) ? 1 : T_('1 round#tourney');
    }//formatRound
 
@@ -368,7 +368,7 @@ class Tournament
                          T_('Status#tourney'),
                          self::getStatusText($this->Status) );
 
-      //if( $version == 5 ) // extra=max-title-len
+      //if ( $version == 5 ) // extra=max-title-len
       return sprintf( '%s %s - %s', // linked: (img) Tournament - Title
                       echo_image_tournament_info($this->ID),
                       anchor( $base_path."tournaments/view_tournament.php?tid=".$this->ID, T_('Tournament') ),

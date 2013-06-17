@@ -341,7 +341,7 @@ GN[$dst]";
         if ( $ha>=10 && $ha<=13 && $dn==$dl+1 ) continue;
       } else if ( $size<=16 ) {
         if ( $size<=14 && $cnt>21 ) break;
-        //if( $cnt>29 ) break;
+        //if ( $cnt>29 ) break;
         if ( $ha>=10 && $ha<=13 && $dn==$dl+1 ) continue;
       }
 

@@ -357,7 +357,7 @@ function reverse_htmlentities( $str)
 // param row: expect field AdminOptions, if null only check for IP
 function error_on_blocked_ip( $errorcode, $row=null )
 {
-   //if( is_array($row) && (@$row['AdminOptions'] & ADMOPT_BYPASS_IP_BLOCK) )
+   //if ( is_array($row) && (@$row['AdminOptions'] & ADMOPT_BYPASS_IP_BLOCK) )
       //return;
 
    if ( is_blocked_ip() )

@@ -182,11 +182,11 @@ class DgsErrors
             header('Content-Type: application/json');
          elseif ( $this->error_header == ERROR_HEADER_TEXT )
             header('Content-Type: text/plain;charset=utf-8');
-         //else //if( $this->error_header == ERROR_HEADER_DEFAULT )
+         //else //if ( $this->error_header == ERROR_HEADER_DEFAULT )
 
          if ( $this->error_format == ERROR_FORMAT_TEXT )
             echo '[', ( $warn ? "#Warning" : "#Error" ), ": $err; $debugmsg]\n";
-         else //if( $this->error_format == ERROR_FORMAT_JSON )
+         else //if ( $this->error_format == ERROR_FORMAT_JSON )
          {
             if ( !$warn )
             {

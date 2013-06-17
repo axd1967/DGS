@@ -43,7 +43,7 @@ define('TTF_PATH', ''); // Font path
 define('TTF_NAME', 'FreeSans-Medium'); //Font name
 define('TTF_HEIGHT', 10); //Font height
 
-//if( function_exists('imagefilledarc') && defined('IMG_ARC_PIE') )
+//if ( function_exists('imagefilledarc') && defined('IMG_ARC_PIE') )
 define('GD2_ARC',function_exists('imagefilledarc') && defined('IMG_ARC_PIE'));
 
 if ( !defined('M_2PI') )

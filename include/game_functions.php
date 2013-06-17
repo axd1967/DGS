@@ -3519,7 +3519,7 @@ class GameSettingsCalculator
          $infoKomi = 0;
          //$info_i_am_black unknown yet
       }
-      else //if( $CategoryHandiType == CAT_HTYPE_MANUAL )
+      else //if ( $CategoryHandiType == CAT_HTYPE_MANUAL )
       {
          $infoHandicap = $this->grow['Handicap'];
          $infoKomi = $this->grow['Komi'];
@@ -4068,7 +4068,7 @@ class GameScore
                         + 2 * $this->dead_stones[GSCOL_BLACK]
                         + $this->komi;
       }
-      else //if( $mode == GSMODE_AREA_SCORING )
+      else //if ( $mode == GSMODE_AREA_SCORING )
       {
          // "why H-1?": using rule #4 from AGA-rules http://www.cs.cmu.edu/~wjh/go/rules/AGA.html
          //             "White receives an additional point of compensation for each Black handicap stone after the first."

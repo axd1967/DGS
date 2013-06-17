@@ -11,14 +11,14 @@ error_reporting(E_ALL);
 //Warning: Filename must be 8.3
 $BASENAME=explode('.',$argv[0]); $BASENAME=$BASENAME[0];
 $BASENAME=strtolower(str_replace('\\','/',$BASENAME));
-if (1){
+if (1) {
   $BASEDIR= $BASENAME;
   $BASENAME= strrchr($BASEDIR,'/');
-  //if( !$BASENAME ) $BASENAME= strrchr($BASEDIR,'\\');
+  //if ( !$BASENAME ) $BASENAME= strrchr($BASEDIR,'\\');
   if ( !$BASENAME ) $BASENAME= '/'.$BASEDIR;
 //echo CR.$BASENAME;
   $BASENAME= $BASEDIR.$BASENAME;
-}else{
+} else {
   $BASEDIR='.';
 }
 //echo CR.$BASENAME.' '.$BASEDIR; exit;
@@ -96,7 +96,7 @@ function Myarg( $help, &$i, $key, $arg)
    else
       $tmp= $var;
    reset( $tmp);
-   //if( !$help ) echo CR."1.i=$i f=$full t=".var_export($tmp,true);
+   //if ( !$help ) echo CR."1.i=$i f=$full t=".var_export($tmp,true);
    foreach ( $args as $aname => $aunit )
    {
       $str.= " <$aname>";
@@ -120,7 +120,7 @@ function Myarg( $help, &$i, $key, $arg)
       else
          $full= 0;
    }
-   //if( !$help ) echo CR."2.i=$i f=$full v=".var_export($val,true);
+   //if ( !$help ) echo CR."2.i=$i f=$full v=".var_export($val,true);
    if ( $help || !$full )
    {
       if ( !$help )
@@ -361,7 +361,7 @@ GROUP BY Grp) AS T ORDER BY Grp
  (Date,Query_time,Lock_time,Rows_sent,Rows_examined,Query) VALUES";
       $CHUNK_CLOSE= "\n;\n";
       break;
-   } //switch( RES_TYPE )
+   }//switch ( RES_TYPE )
 
    echo CR; //-----------
 /*
@@ -392,7 +392,7 @@ SELECT... (QUERY_ZON)
       else
          break;
 
-      //if($rescnt<1) echo CR.$rescnt.': '.$str;
+      //if ($rescnt<1) echo CR.$rescnt.': '.$str;
       if ( !strcasecmp(ENTRY_HDR, substr($str,0,ENTRY_HDR_LEN)) )
       {
          if ( strcasecmp(ENTRY_HDR.' admin', substr($str,0, 6+ENTRY_HDR_LEN))
@@ -400,7 +400,7 @@ SELECT... (QUERY_ZON)
          { //end of the variable QUERY_ZON => end of the entry
             if ( count($qrow)<4 ) Myerror('qrow_too_small');
             $rescnt++;
-            //if( $rescnt > 20 ) break;
+            //if ( $rescnt > 20 ) break;
             if ( VERBOSE )
             {
                echo CR.sprintf('%06d> %s',(int)$rescnt, $qdat)
@@ -439,7 +439,7 @@ SELECT... (QUERY_ZON)
                   $chunk_closed= 1;
                }
                break;
-            } //switch( RES_TYPE )
+            }//switch ( RES_TYPE )
             $chunk_start= 0;
             $qrow= array();
             if ( SKIP_MISSING_DATE ) $qdat= '';
@@ -515,9 +515,9 @@ SELECT... (QUERY_ZON)
       default:
          $zon= 0;
          break;
-      } //switch($zon)
+      }//switch ($zon)
       //echo '*'.$zon;
-      //if( $qdat == '2008-01-02 23:36:02' ) break;
+      //if ( $qdat == '2008-01-02 23:36:02' ) break;
    } //foreach(input lines)
 
    switch ( (string)RES_TYPE )
@@ -534,7 +534,7 @@ SELECT... (QUERY_ZON)
       $str= "\nUPDATE SlowLog SET Grp=DAYOFWEEK(Date);\n";
       fputs($resfp, $str);
       break;
-   } //switch( RES_TYPE )
+   }//switch ( RES_TYPE )
    fclose($resfp);
    fclose($slowfp);
 

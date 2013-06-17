@@ -336,7 +336,7 @@ function load_games_to_move( $uid, &$gtable )
          extract($row);
 
          $row_arr = array();
-         //if( $gtable->Is_Column_Displayed[0] )
+         //if ( $gtable->Is_Column_Displayed[0] )
             $row_arr[ 1] = button_TD_anchor( "game.php?gid=$ID", $ID);
          if ( $gtable->Is_Column_Displayed[2] )
             $row_arr[ 2] = "<A href=\"sgf.php?gid=$ID\">" . T_('sgf') . "</A>";

@@ -215,7 +215,7 @@ class TournamentRoundStatus
 
       // check that all started games are finished and processed
       $cnt_tgames = TournamentGames::count_tournament_games( $this->tid, $this->tround->ID );
-      if( $cnt_tgames > 0 )
+      if ( $cnt_tgames > 0 )
          $this->errors[] = sprintf( T_('There are still %s unfinished tournament games in round %d.'),
             $cnt_tgames, $this->Round );
 

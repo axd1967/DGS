@@ -1420,7 +1420,7 @@ function check_game_setup( $game_type, $game_players )
             GamePlayer::get_group_color_text(GPCOL_W),
             implode(', ', $arr_grcol_keys_text) );
    }
-   else //if( $game_type == GAMETYPE_ZEN_GO )
+   else //if ( $game_type == GAMETYPE_ZEN_GO )
    {
       // CHECK: need one group-color: BW
       if ( count($arr_grcol) == 1 && isset($arr_grcol[GPCOL_BW]) )

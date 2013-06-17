@@ -994,7 +994,7 @@ function game_info_table( $tablestyle, $game_row, $player_row, $iamrated, $use_s
             $subtype = T_('Double game');
             $colortxt = build_image_double_game( true, $color_class );
          }
-         else //if( $Handitype == HTYPE_BLACK || $Handitype == HTYPE_WHITE ) // my-color
+         else //if ( $Handitype == HTYPE_BLACK || $Handitype == HTYPE_WHITE ) // my-color
          {
             // determine user-white/black
             // NOTE: my-color (for waiting-room color is switched above in this case)
@@ -2074,7 +2074,7 @@ class MessageListBuilder
                $can_move_messages = true;
                $n = $this->table->get_prefix() . "mark$mid";
                $checked = (('Y'==(string)@$_REQUEST[$n]) xor (bool)$toggle_marks);
-               //if( $checked ) $page.= "$n=Y".URI_AMP;
+               //if ( $checked ) $page.= "$n=Y".URI_AMP;
                $mrow_strings[ 5] = "<input type='checkbox' name='$n' value='Y'" . ($checked ? ' checked' : '') . '>';
                $arr_marks[$mid] = 1;
             }

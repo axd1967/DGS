@@ -524,7 +524,7 @@ class Bulletin
 
       $qsql = self::build_query_sql( $bid, $with_player );
       $qsql->add_part( SQLP_LIMIT, '1' );
-      if( $with_read )
+      if ( $with_read )
       {
          // BR_Read = 1 = mark-as-read, 0 = unread (=BR.bid IS NULL)
          $qsql->add_part( SQLP_FROM, "LEFT JOIN BulletinRead AS BR ON BR.bid=B.ID AND BR.uid=" . $player_row['ID'] );
@@ -832,7 +832,7 @@ class Bulletin
       }
       elseif ( $target_type == BULLETIN_TRG_UNSET ) // should not occur
          error('invalid_args', "$dbgmsg.check.target_type($target_type)");
-      else //if( $target_type == BULLETIN_TRG_ALL || $tid/bid/gid <=0 for respective target-type
+      else //if ( $target_type == BULLETIN_TRG_ALL || $tid/bid/gid <=0 for respective target-type
       {
          db_query( "$dbgmsg.upd_all",
             "UPDATE Players AS P SET P.CountBulletinNew=-1 " .

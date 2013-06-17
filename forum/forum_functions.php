@@ -35,7 +35,7 @@ require_once 'include/rating.php';
 require_once 'include/dgs_cache.php';
 require_once 'forum/class_forum_options.php';
 require_once 'forum/class_forum_read.php';
-//if( ALLOW_GO_DIAGRAMS ) require_once 'include/GoDiagram.php';
+//if ( ALLOW_GO_DIAGRAMS ) require_once 'include/GoDiagram.php';
 
 
 //must follow the "ORDER BY PosIndex" order and have at least 64 chars:
@@ -334,7 +334,7 @@ class DisplayForum
          $arr[] = array( $base_url .URI_AMP.'view=t', T_('Tree View#thread_view') );
          if ( $this->flat_view > 0 ) // flat new-first
             $arr[] = array( $base_url .URI_AMP.'view=fo', T_('Old First#thread_view') );
-         else //if( $this->flat_view < 0 ) // flat old-first
+         else //if ( $this->flat_view < 0 ) // flat old-first
             $arr[] = array( $base_url .URI_AMP.'view=fn', T_('New First#thread_view') );
       }
 
@@ -2023,7 +2023,7 @@ class ForumPost
          return 'M';
       elseif ( $approved == 'N' )
          return 'H';
-      else //if( $approved == 'Y' )
+      else //if ( $approved == 'Y' )
          return 'S';
    }
 

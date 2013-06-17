@@ -599,14 +599,14 @@ class TimeFormat
                $str .= self::echo_time($byotime, $fmtflags);
                if ( $byotype == BYOTYPE_JAPANESE )
                   $str .= " * $byoper";
-               else //if( $byotype == BYOTYPE_CANADIAN )
+               else //if ( $byotype == BYOTYPE_CANADIAN )
                   $str .= " / $byoper";
             }
             else
             {
                if ( $byotype == BYOTYPE_JAPANESE )
                   $str .= sprintf( $T_('%s per move and %s extra periods'), self::echo_time($byotime, $fmtflags), $byoper );
-               else //if( $byotype == BYOTYPE_CANADIAN )
+               else //if ( $byotype == BYOTYPE_CANADIAN )
                   $str .= sprintf( $T_('%s per %s stones'), self::echo_time($byotime, $fmtflags), $byoper );
             }
          }
@@ -663,7 +663,7 @@ class TimeFormat
          {
             if ( $byotype == BYOTYPE_CANADIAN )
                $rem_byoper = $startbyoper;
-            else //if( $byotype == BYOTYPE_JAPANESE )
+            else //if ( $byotype == BYOTYPE_JAPANESE )
                $rem_byoper = ( $byoper >= 0 ) ? $byoper : $startbyoper;
 
             $str2 = self::echo_time_limit( 0, $byotype, $startbyotime, $rem_byoper, $fmtflags & ~TIMEFMT_ADDTYPE );

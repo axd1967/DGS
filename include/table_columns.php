@@ -563,7 +563,7 @@ class Table
    /*! \brief Create a string of the table. */
    public function make_table()
    {
-      //if( !$this->Head_closed )
+      //if ( !$this->Head_closed )
       //   error('assert', "Table.make_table.!closed({$this->Head_closed})");
 
       /* Make tablehead */
@@ -882,7 +882,7 @@ class Table
    {
       if ( !$this->Head_closed )
          error('assert', "Table.make_sort_images.!closed({$this->Head_closed})");
-      //if( TABLE_MAX_SORT <= 0 || $this->Mode & TABLE_NO_SORT ) return;
+      //if ( TABLE_MAX_SORT <= 0 || $this->Mode & TABLE_NO_SORT ) return;
 
       //$this->Sortimg = array();
       $str = '';
@@ -923,7 +923,7 @@ class Table
    {
       if ( !$this->Head_closed )
          error('assert', "Table.current_order_string.!closed({$this->Head_closed})");
-      //if( TABLE_MAX_SORT <= 0 || $this->Mode & TABLE_NO_SORT ) return;
+      //if ( TABLE_MAX_SORT <= 0 || $this->Mode & TABLE_NO_SORT ) return;
 
       $str = $this->make_sort_images();
       if ( $sort_xtend )
@@ -1032,7 +1032,7 @@ class Table
     */
    private function make_tablehead( $tablehead, $arr_opts=null )
    {
-      //if( !$this->Head_closed )
+      //if ( !$this->Head_closed )
       //   error('assert', "Table.make_tablehead.!closed({$this->Head_closed})");
       $nr = (int)@$tablehead['Nr'];
       if ( $nr < 0 || ($nr == 0 && !($this->Mode && TABLE_ROW_NUM)) )

@@ -94,7 +94,7 @@ else
       if ( !check_password( $uhandle, $player_row['Password'], $player_row['Newpassword'], $passwd ) )
          error('wrong_password', "quick_status.check_password($uhandle)");
    }
-   else //if( $login_mode == 'cookie' )
+   else //if ( $login_mode == 'cookie' )
    {
       if ( $player_row['Sessioncode'] !== safe_getcookie('sessioncode') || $player_row['Expire'] < $NOW )
          error('not_logged_in', "quick_status.expired($uhandle)");

@@ -214,7 +214,7 @@ class SgfBuilder
 
    private function sgf_echo_prop( $prop )
    {
-      //if( stristr('-B-W-MN-BL-WL-KO-BM-DO-IT-OB-OW-TE-', $prop.'-') )
+      //if ( stristr('-B-W-MN-BL-WL-KO-BM-DO-IT-OB-OW-TE-', $prop.'-') )
       if ( stristr('-B-W-MN-', '-'.$prop.'-') )
       {
          if ( $this->prop_type == 'setup' || $this->prop_type == 'force_node' )
@@ -664,7 +664,7 @@ class SgfBuilder
                }
                else
                {
-                  //if( @$this->array[$PosX][$PosY] == NONE )
+                  //if ( @$this->array[$PosX][$PosY] == NONE )
                   $this->points[$coord] = 'MA';
                }
 

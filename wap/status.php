@@ -163,7 +163,7 @@ function wap_item( $cardid, $head, $title, $link='', $description='', $pubDate='
    $title = wap_safe( $title);
    $str.= "<p><b>$title</b></p>";
 
-   //if( $pubDate )
+   //if ( $pubDate )
       $str.= "<p>" . wap_date($pubDate) . "</p>";
 
    if ( !empty($description) )

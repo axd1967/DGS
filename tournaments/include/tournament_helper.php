@@ -139,7 +139,7 @@ class TournamentHelper
    {
       if ( $RatingUseMode == TPROP_RUMODE_CURR_FIX )
          $rating = ($strict_tp_rating) ? null : $user->Rating;
-      else //if( $RatingUseMode == TPROP_RUMODE_COPY_CUSTOM || $RatingUseMode == TPROP_RUMODE_COPY_FIX )
+      else //if ( $RatingUseMode == TPROP_RUMODE_COPY_CUSTOM || $RatingUseMode == TPROP_RUMODE_COPY_FIX )
       {
          $tp = TournamentCache::load_cache_tournament_participant( 'TournamentHelper:get_tournament_rating', $tid, $user->ID );
          if ( is_null($tp) )

@@ -412,7 +412,7 @@ class Board
          if ( isset($this->moves[$n]) )
          {
             list( $s, $x, $y) = $this->moves[$n];
-            //if( $s != BLACK && $s != WHITE ) continue;
+            //if ( $s != BLACK && $s != WHITE ) continue;
             $sgfc = number2sgf_coords( $x, $y, $this->size);
             if ( $sgfc )
             {

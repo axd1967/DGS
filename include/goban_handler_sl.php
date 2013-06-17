@@ -590,7 +590,7 @@ class GobanHandlerSL1
          $this->drawHoshiPoints( $arr_hoshi, $this->goban->max_x + 1, 0 );
       elseif ( ($this->borders & (GOBB_SOUTH|GOBB_WEST)) == (GOBB_SOUTH|GOBB_WEST) ) // |__
          $this->drawHoshiPoints( $arr_hoshi, 0, $this->goban->max_y + 1 );
-      else //if( ($this->borders & (GOBB_SOUTH|GOBB_EAST)) == (GOBB_SOUTH|GOBB_EAST) ) // __|
+      else //if ( ($this->borders & (GOBB_SOUTH|GOBB_EAST)) == (GOBB_SOUTH|GOBB_EAST) ) // __|
          $this->drawHoshiPoints( $arr_hoshi, $this->goban->max_x + 1, $this->goban->max_y + 1 );
 
       return true;

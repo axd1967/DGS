@@ -243,7 +243,7 @@ function after_table( $table)
             $str.= insert_set( 'Clock',
                "SELECT ID, 0 as Lastchanged FROM Clock WHERE ID>200 AND ID<204 ORDER BY ID" );
             break;
-      } //switch($table)
+      }//switch ($table)
    }
 
    return $str;
@@ -486,7 +486,7 @@ function quoteit( $mixed, $quote='`')
 
 function adj_eol( $str, $cr=CR, $trim=' ')
 {
-   //if( $cr===false ) $cr = CR;
+   //if ( $cr===false ) $cr = CR;
    return preg_replace(
          "/[$trim\x01-\x1f]*[\x0a\x0d]+[$trim\x01-\x1f]*/",
          $cr,

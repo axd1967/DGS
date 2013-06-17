@@ -788,7 +788,7 @@ function make_standard_placement_of_handicap_stones( $size, $hcp, $gid, $allow_i
 
    $err = '';
    $stonestring = get_handicap_pattern( $size, $hcp, $err);
-   //if( $err ) return false;
+   //if ( $err ) return false;
 
    $patlen = strlen( $stonestring );
    if ( ( $patlen > 2*$hcp ) || ( $patlen < 2*$hcp && !$allow_incomplete_pattern ) )

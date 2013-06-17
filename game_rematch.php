@@ -94,7 +94,7 @@ require_once 'include/classlib_user.php';
 
    if ( $mode == REMATCH_INVITE )
       $page = 'message.php?mode=Invite'.URI_AMP;
-   else //if( $mode == REMATCH_NEWGAME )
+   else //if ( $mode == REMATCH_NEWGAME )
       $page = 'new_game.php?';
 
    $out = array();

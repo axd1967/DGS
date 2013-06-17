@@ -864,7 +864,7 @@ class Form
             }
             if ( $cnt < 1 )
                return '';
-            //if( $cnt > 1 ) //removed because it can induce mis-alignment of siblings
+            //if ( $cnt > 1 ) //removed because it can induce mis-alignment of siblings
             {
                $table_attbs = $this->get_areaconf( FAREA_ALLH, FAC_TABLE );
                $tdtable_attbs = $this->get_areaconf( FAREA_ALLH, FAC_ENVTABLE );
@@ -891,7 +891,7 @@ class Form
             }
             if ( $cnt < 1 )
                return '';
-            //if( $cnt > 1 ) //removed because it can induce mis-alignment of siblings
+            //if ( $cnt > 1 ) //removed because it can induce mis-alignment of siblings
             {
                $table_attbs = $this->get_areaconf( FAREA_ALLV, FAC_TABLE );
                $tdtable_attbs = $this->get_areaconf( FAREA_ALLV, FAC_ENVTABLE );

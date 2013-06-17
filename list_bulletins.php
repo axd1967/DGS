@@ -82,7 +82,7 @@ $GLOBALS['ThePage'] = new Page('BulletinList');
             "B.Status IN ('".BULLETIN_STATUS_NEW."','".BULLETIN_STATUS_PENDING."')";
          $idx_status_default = 3;
       }
-      else //if( $mine )
+      else //if ( $mine )
          $idx_status_default = 1;
       $status_filter_array[NO_VALUE] = ''; //sep
    }

@@ -1104,7 +1104,7 @@ class TournamentLadder
             $logmsg = "DF.Rank={$tladder_df->Rank}>DEL";
             break;
          }
-      }//switch(game_end_action)
+      }//switch (game_end_action)
 
       if ( DBG_QUERY )
          error_log("$dbgmsg: $logmsg");
