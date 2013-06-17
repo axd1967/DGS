@@ -178,8 +178,7 @@ $GLOBALS['ThePage'] = new Page('TournamentPairEdit', PAGEFLAG_IMPLICIT_FLUSH ); 
    {
       ta_begin();
       {//HOT-section to start all T-games for T-round
-         $thelper = new TournamentHelper();
-         $result = $thelper->start_tournament_round_games( $tourney, $tround );
+         $result = TournamentHelper::start_tournament_round_games( $tourney, $tround );
       }
       ta_end();
 

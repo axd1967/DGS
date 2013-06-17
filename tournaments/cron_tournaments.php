@@ -63,7 +63,7 @@ if ( ALLOW_TOURNAMENTS && !$is_down )
    $player_row['ID'] = 0; // for tourney-log
    $player_row['Handle'] = '#CRONT'; // for tourney-tables ChangedBy-fields
    $tg_order = "ORDER BY TG.tid ASC, TG.Lastchanged ASC, TG.ID ASC";
-   $thelper = new TournamentHelper();
+   $tcache = TournamentCache::get_instance();
 
 
    // ---------- handle tournament-game ending by score/resignation/jigo/timeout
@@ -78,15 +78,15 @@ if ( ALLOW_TOURNAMENTS && !$is_down )
       $tid = $tgame->tid;
 
       $tourney = TournamentCache::load_cache_tournament( 'cron_tournament.game_end', $tid );
-      if ( !is_null($tourney) && $thelper->process_tournament_game_end( $tourney, $tgame, /*check*/true ) )
+      if ( !is_null($tourney) && TournamentHelper::process_tournament_game_end( $tourney, $tgame, /*check*/true ) )
       {
-         $thelper->tcache->release_tournament_cron_lock( $tid );
-         if ( $thelper->tcache->set_tournament_cron_lock( $tid ) )
-            $thelper->process_tournament_game_end( $tourney, $tgame, /*check*/false );
+         $tcache->release_tournament_cron_lock( $tid );
+         if ( $tcache->set_tournament_cron_lock( $tid ) )
+            TournamentHelper::process_tournament_game_end( $tourney, $tgame, /*check*/false );
          $clear_cache[$tid] = $tourney->Type;
       }
    }
-   $thelper->tcache->release_tournament_cron_lock();
+   $tcache->release_tournament_cron_lock();
 
    // clear caches
    foreach ( $clear_cache as $tid => $ttype )
@@ -156,7 +156,7 @@ if ( ALLOW_TOURNAMENTS && !$is_down )
 
 function run_once_daily()
 {
-   global $thelper;
+   global $tcache;
 
    // ---------- Handle long-user-absence for tournaments
 
@@ -170,11 +170,11 @@ function run_once_daily()
          list( $tladder, $orow ) = $arr_item;
          $tid = $tladder->tid;
 
-         $thelper->tcache->release_tournament_cron_lock( $tid );
-         if ( $thelper->tcache->set_tournament_cron_lock( $tid ) )
+         $tcache->release_tournament_cron_lock( $tid );
+         if ( $tcache->set_tournament_cron_lock( $tid ) )
             TournamentLadder::process_user_absence( $tid, $tladder->uid, $orow['TLP_UserAbsenceDays'] );
       }
-      $thelper->tcache->release_tournament_cron_lock();
+      $tcache->release_tournament_cron_lock();
    }
    ta_end();
 
@@ -191,11 +191,11 @@ function run_once_daily()
          list( $t_ext, $orow ) = $arr_item;
          $tid = $t_ext->tid;
 
-         $thelper->tcache->release_tournament_cron_lock( $tid );
-         if ( $thelper->tcache->set_tournament_cron_lock( $tid ) )
-            $thelper->process_rank_period( $t_ext );
+         $tcache->release_tournament_cron_lock( $tid );
+         if ( $tcache->set_tournament_cron_lock( $tid ) )
+            TournamentHelper::process_ladder_rank_period( $t_ext );
       }
-      $thelper->tcache->release_tournament_cron_lock();
+      $tcache->release_tournament_cron_lock();
    }
    ta_end();
 
@@ -208,7 +208,7 @@ function run_once_daily()
 
 function run_hourly()
 {
-   global $thelper;
+   global $tcache;
 
    // ---------- Check for crowning of "King of the Hill"
 
@@ -222,11 +222,11 @@ function run_hourly()
          list( ,$orow ) = $arr_item;
          $tid = $orow['tid'];
 
-         $thelper->tcache->release_tournament_cron_lock( $tid );
-         if ( $thelper->tcache->set_tournament_cron_lock( $tid ) )
+         $tcache->release_tournament_cron_lock( $tid );
+         if ( $tcache->set_tournament_cron_lock( $tid ) )
             TournamentHelper::process_tournament_ladder_crown_king( $orow, TLOG_TYPE_CRON );
       }
-      $thelper->tcache->release_tournament_cron_lock();
+      $tcache->release_tournament_cron_lock();
    }
    ta_end();
 }//run_hourly

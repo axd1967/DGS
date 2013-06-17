@@ -16,6 +16,15 @@ Developers INFO:
 ChangeLog
 ------------------------------------------------------------------
 
+2013-06-17 juga
+
+   * tournaments/include/tournament_helper.php (class TournamentHelper,
+       ~.process_tournament_game_end, ~.process_tournament_ladder_game_end,
+       ~.process_tournament_round_robin_game_end, ~.process_ladder_rank_period),
+     tournaments/cron_tournaments.php (run_once_daily, run_hourly),
+     tournaments/roundrobin/edit_pairing.php:
+   - refactored TournamentHelper in a solely static helper-class
+
 2013-06-16 juga
 
    * include/std_functions.php (echo_dragon_top_bar, end_page),

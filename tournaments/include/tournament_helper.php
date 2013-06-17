@@ -58,19 +58,13 @@ require_once 'tournaments/include/tournament_utils.php';
   */
 class TournamentHelper
 {
-   public $tcache;
-
-   public function __construct()
-   {
-      $this->tcache = TournamentCache::get_instance();
-   }
 
    /*!
     * \brief Processes end of tournament-game.
     *
     * \note caller needs to take care of clearing caches.
     */
-   public function process_tournament_game_end( $tourney, $tgame, $check_only )
+   public static function process_tournament_game_end( $tourney, $tgame, $check_only )
    {
       $tid = $tourney->ID;
       if ( $tourney->Type != TOURNEY_TYPE_LADDER && $tourney->Type != TOURNEY_TYPE_ROUND_ROBIN )
@@ -83,9 +77,9 @@ class TournamentHelper
          return true;
 
       if ( $tourney->Type == TOURNEY_TYPE_LADDER )
-         $result = $this->process_tournament_ladder_game_end( $tourney, $tgame );
+         $result = self::process_tournament_ladder_game_end( $tourney, $tgame );
       elseif ( $tourney->Type == TOURNEY_TYPE_ROUND_ROBIN )
-         $result = $this->process_tournament_round_robin_game_end( $tourney, $tgame );
+         $result = self::process_tournament_round_robin_game_end( $tourney, $tgame );
       else
          $result = false;
 
@@ -93,7 +87,7 @@ class TournamentHelper
    }//process_tournament_game_end
 
    // \internal
-   private function process_tournament_ladder_game_end( $tourney, $tgame )
+   private static function process_tournament_ladder_game_end( $tourney, $tgame )
    {
       $tid = $tourney->ID;
       $tl_props = TournamentCache::load_cache_tournament_ladder_props( 'process_tournament_ladder_game_end', $tid, /*check*/false );
@@ -158,7 +152,7 @@ class TournamentHelper
    }//process_tournament_ladder_game_end
 
    // \internal
-   private function process_tournament_round_robin_game_end( $tourney, $tgame )
+   private static function process_tournament_round_robin_game_end( $tourney, $tgame )
    {
       $tid = $tourney->ID;
 
@@ -180,10 +174,10 @@ class TournamentHelper
     * \brief Updates TournamentLadder.Period/History-Rank when rank-update is due, set next update-date.
     * \note IMPORTANT NOTE: caller needs to open TA with HOT-section!!
     */
-   public function process_rank_period( $t_ext )
+   public static function process_ladder_rank_period( $t_ext )
    {
       $tid = $t_ext->tid;
-      $tl_props = TournamentCache::load_cache_tournament_ladder_props( 'process_rank_period', $tid, /*check*/false );
+      $tl_props = TournamentCache::load_cache_tournament_ladder_props( 'process_ladder_rank_period', $tid, /*check*/false );
       if ( is_null($tl_props) )
          return false;
 
@@ -195,7 +189,7 @@ class TournamentHelper
          $success = TournamentLadder::process_rank_period( $tid );
 
       return $success;
-   }//process_rank_period
+   }//process_ladder_rank_period
 
 
    // ------------ static functions ----------------------------
