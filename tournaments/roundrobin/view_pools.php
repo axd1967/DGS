@@ -30,6 +30,7 @@ require_once 'tournaments/include/tournament_helper.php';
 require_once 'tournaments/include/tournament_pool.php';
 require_once 'tournaments/include/tournament_pool_classes.php';
 require_once 'tournaments/include/tournament_properties.php';
+require_once 'tournaments/include/tournament_round_helper.php';
 require_once 'tournaments/include/tournament_status.php';
 require_once 'tournaments/include/tournament_utils.php';
 
@@ -77,7 +78,7 @@ $GLOBALS['ThePage'] = new Page('TournamentPoolView');
    $errors = array();
    $tprops = TournamentCache::load_cache_tournament_properties( 'Tournament.pool_view', $tid );
    $need_trating = $tprops->need_rating_copy();
-   $games_per_challenge = TournamentHelper::determine_games_per_challenge( $tid );
+   $games_per_challenge = TournamentRoundHelper::determine_games_per_challenge( $tid );
 
    $tpool_iterator = new ListIterator( 'Tournament.pool_view.load_pools' );
    $tpool_iterator = TournamentPool::load_tournament_pools( $tpool_iterator, $tid, $round, 0,

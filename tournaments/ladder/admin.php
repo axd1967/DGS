@@ -27,6 +27,7 @@ require_once 'tournaments/include/tournament_cache.php';
 require_once 'tournaments/include/tournament_factory.php';
 require_once 'tournaments/include/tournament_helper.php';
 require_once 'tournaments/include/tournament_ladder.php';
+require_once 'tournaments/include/tournament_ladder_helper.php';
 require_once 'tournaments/include/tournament_ladder_props.php';
 require_once 'tournaments/include/tournament_log_helper.php';
 require_once 'tournaments/include/tournament_participant.php';
@@ -178,7 +179,7 @@ $GLOBALS['ThePage'] = new Page('TournamentLadderAdmin');
       elseif ( @$_REQUEST['ta_crownking'] && $authorise_edit_user && !is_null($user) && !is_null($tladder_user)
             && $tl_props->CrownKingHours == 0 )
       {
-         TournamentHelper::process_tournament_ladder_crown_king( array(
+         TournamentLadderHelper::process_tournament_ladder_crown_king( array(
                'tid'             => $tid,
                'uid'             => $uid,
                'rid'             => $tladder_user->rid,

@@ -26,6 +26,7 @@ require_once 'tournaments/include/tournament.php';
 require_once 'tournaments/include/tournament_cache.php';
 require_once 'tournaments/include/tournament_games.php';
 require_once 'tournaments/include/tournament_helper.php';
+require_once 'tournaments/include/tournament_ladder_helper.php';
 require_once 'tournaments/include/tournament_log.php';
 require_once 'tournaments/include/tournament_news.php';
 
@@ -160,8 +161,8 @@ function run_once_daily()
 
    // ---------- Handle long-user-absence for tournaments
 
-   $tl_iterator = TournamentHelper::load_ladder_absent_users(
-      new ListIterator( 'cron_tournament.load_ladder_user_absence' ));
+   $tl_iterator = TournamentLadderHelper::load_ladder_absent_users(
+      new ListIterator( 'cron_tournament.load_ladder_absent_users' ));
 
    ta_begin();
    {//HOT-section to process long-user-absence
@@ -181,7 +182,7 @@ function run_once_daily()
 
    // ---------- Update history/period-rank for ladder-tournaments
 
-   $te_iterator = TournamentHelper::load_ladder_rank_period_update(
+   $te_iterator = TournamentLadderHelper::load_ladder_rank_period_update(
       new ListIterator( 'cron_tournament.load_ladder_rank_period_update' ));
 
    ta_begin();
@@ -193,7 +194,7 @@ function run_once_daily()
 
          $tcache->release_tournament_cron_lock( $tid );
          if ( $tcache->set_tournament_cron_lock( $tid ) )
-            TournamentHelper::process_ladder_rank_period( $t_ext );
+            TournamentLadderHelper::process_ladder_rank_period( $t_ext );
       }
       $tcache->release_tournament_cron_lock();
    }
@@ -212,7 +213,7 @@ function run_hourly()
 
    // ---------- Check for crowning of "King of the Hill"
 
-   $tres_iterator = TournamentHelper::load_ladder_crown_kings(
+   $tres_iterator = TournamentLadderHelper::load_ladder_crown_kings(
       new ListIterator( 'cron_tournament.load_ladder_crown_kings' ));
 
    ta_begin();
@@ -224,7 +225,7 @@ function run_hourly()
 
          $tcache->release_tournament_cron_lock( $tid );
          if ( $tcache->set_tournament_cron_lock( $tid ) )
-            TournamentHelper::process_tournament_ladder_crown_king( $orow, TLOG_TYPE_CRON );
+            TournamentLadderHelper::process_tournament_ladder_crown_king( $orow, TLOG_TYPE_CRON );
       }
       $tcache->release_tournament_cron_lock();
    }

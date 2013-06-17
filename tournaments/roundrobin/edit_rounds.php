@@ -27,6 +27,7 @@ require_once 'tournaments/include/tournament_cache.php';
 require_once 'tournaments/include/tournament_factory.php';
 require_once 'tournaments/include/tournament_helper.php';
 require_once 'tournaments/include/tournament_round.php';
+require_once 'tournaments/include/tournament_round_helper.php';
 require_once 'tournaments/include/tournament_status.php';
 require_once 'tournaments/include/tournament_utils.php';
 
@@ -110,19 +111,19 @@ $GLOBALS['ThePage'] = new Page('TournamentRoundEditor');
 
       // only checks
       if ( @$_REQUEST['tre_add'] )
-         TournamentHelper::add_new_tournament_round( $tourney, $action_errors, true );
+         TournamentRoundHelper::add_new_tournament_round( $tourney, $action_errors, true );
       elseif ( @$_REQUEST['tre_del'] )
-         TournamentHelper::remove_tournament_round( $tourney, $tround, $action_errors, true );
+         TournamentRoundHelper::remove_tournament_round( $tourney, $tround, $action_errors, true );
       elseif ( @$_REQUEST['tre_set'] )
-         TournamentHelper::set_tournament_round( $tourney, $round, $action_errors, true );
+         TournamentRoundHelper::set_tournament_round( $tourney, $round, $action_errors, true );
       elseif ( @$_REQUEST['tre_final'] )
-         TournamentHelper::finalize_tournament_round( $tourney, $round, $action_errors, true ); //TODO TODO finalize T-round (copy TPOOL->TP.NextRnd)
+         TournamentRoundHelper::finalize_tournament_round( $tourney, $round, $action_errors, true ); //TODO TODO finalize T-round (copy TPOOL->TP.NextRnd)
       elseif ( @$_REQUEST['tre_fillwin'] )
-         TournamentHelper::fill_tournament_round_winners( $tourney, $round, $action_errors, true ); //TODO TODO fill T-winners (add T-Result from TP.NextRnd > CurrRnd)
+         TournamentRoundHelper::fill_tournament_round_winners( $tourney, $round, $action_errors, true ); //TODO TODO fill T-winners (add T-Result from TP.NextRnd > CurrRnd)
       // do confirmed actions
       elseif ( @$_REQUEST['tre_add_confirm'] ) // add new T-round
       {
-         $new_tround = TournamentHelper::add_new_tournament_round( $tourney, $action_errors, false );
+         $new_tround = TournamentRoundHelper::add_new_tournament_round( $tourney, $action_errors, false );
          if ( !is_null($new_tround) )
          {
             $round = $new_tround->Round;
@@ -132,7 +133,7 @@ $GLOBALS['ThePage'] = new Page('TournamentRoundEditor');
       }
       elseif ( @$_REQUEST['tre_del_confirm'] ) // remove T-round
       {
-         $success = TournamentHelper::remove_tournament_round( $tourney, $tround, $action_errors, false );
+         $success = TournamentRoundHelper::remove_tournament_round( $tourney, $tround, $action_errors, false );
          if ( $success )
          {
             $sys_msg = urlencode( sprintf( T_('Tournament Round #%s removed!'), $round ) );
@@ -141,7 +142,7 @@ $GLOBALS['ThePage'] = new Page('TournamentRoundEditor');
       }
       elseif ( @$_REQUEST['tre_set_confirm'] ) // set current T-round
       {
-         $success = TournamentHelper::set_tournament_round( $tourney, $round, $action_errors, false );
+         $success = TournamentRoundHelper::set_tournament_round( $tourney, $round, $action_errors, false );
          if ( $success )
          {
             $sys_msg = urlencode( sprintf( T_('Tournament Round #%s switched!'), $round ) );
@@ -150,7 +151,7 @@ $GLOBALS['ThePage'] = new Page('TournamentRoundEditor');
       }
       elseif ( @$_REQUEST['tre_final_confirm'] ) // finalize current T-round
       {
-         $success = TournamentHelper::finalize_tournament_round( $tourney, $round, $action_errors, false ); //TODO TODO finalize T-round (copy TPOOL->TP.NextRnd)
+         $success = TournamentRoundHelper::finalize_tournament_round( $tourney, $round, $action_errors, false ); //TODO TODO finalize T-round (copy TPOOL->TP.NextRnd)
          if ( $success )
          {
             $sys_msg = urlencode( sprintf( T_('Tournament Round #%s finalized!'), $round ) );
@@ -159,7 +160,7 @@ $GLOBALS['ThePage'] = new Page('TournamentRoundEditor');
       }
       elseif ( @$_REQUEST['tre_fillwin_confirm'] ) // fill T-winners
       {
-         $success = TournamentHelper::fill_tournament_round_winners( $tourney, $round, $action_errors, false ); //TODO TODO fill T-winners (add T-Result from TP.NextRnd > CurrRnd)
+         $success = TournamentRoundHelper::fill_tournament_round_winners( $tourney, $round, $action_errors, false ); //TODO TODO fill T-winners (add T-Result from TP.NextRnd > CurrRnd)
          if ( $success )
          {
             $sys_msg = T_('Tournament winners set!');

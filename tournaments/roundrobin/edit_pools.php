@@ -35,6 +35,7 @@ require_once 'tournaments/include/tournament_pool.php';
 require_once 'tournaments/include/tournament_pool_classes.php';
 require_once 'tournaments/include/tournament_properties.php';
 require_once 'tournaments/include/tournament_round.php';
+require_once 'tournaments/include/tournament_round_helper.php';
 require_once 'tournaments/include/tournament_round_status.php';
 require_once 'tournaments/include/tournament_status.php';
 require_once 'tournaments/include/tournament_utils.php';
@@ -176,7 +177,7 @@ $GLOBALS['ThePage'] = new Page('TournamentPoolEdit');
    $count_errors = count($errors);
    if ( $show_pools && count($arr_selpool) && ($count_errors == $count_status_errors) )
    {
-      $games_per_challenge = TournamentHelper::determine_games_per_challenge( $tid );
+      $games_per_challenge = TournamentRoundHelper::determine_games_per_challenge( $tid );
 
       $tpool_iterator = new ListIterator( 'Tournament.pool_view.load_pools' );
       $tpool_iterator->addQuerySQLMerge(

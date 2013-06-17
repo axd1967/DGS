@@ -37,6 +37,7 @@ require_once 'tournaments/include/tournament_pool.php';
 require_once 'tournaments/include/tournament_pool_classes.php';
 require_once 'tournaments/include/tournament_properties.php';
 require_once 'tournaments/include/tournament_round.php';
+require_once 'tournaments/include/tournament_round_helper.php';
 require_once 'tournaments/include/tournament_round_status.php';
 require_once 'tournaments/include/tournament_status.php';
 require_once 'tournaments/include/tournament_utils.php';
@@ -178,7 +179,7 @@ $GLOBALS['ThePage'] = new Page('TournamentPairEdit', PAGEFLAG_IMPLICIT_FLUSH ); 
    {
       ta_begin();
       {//HOT-section to start all T-games for T-round
-         $result = TournamentHelper::start_tournament_round_games( $tourney, $tround );
+         $result = TournamentRoundHelper::start_tournament_round_games( $tourney, $tround );
       }
       ta_end();
 

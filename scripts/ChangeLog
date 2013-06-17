@@ -18,6 +18,21 @@ ChangeLog
 
 2013-06-17 juga
 
+   * tournaments/include/tournament_ladder_helper.php (class TournamentLadderHelper),
+     tournaments/include/tournament_round_helper.php (class TournamentRoundHelper),
+     tournaments/include/tournament_helper.php (class TournamentHelper),
+     tournaments/include/tournament_pool.php (class TournamentPool),
+     tournaments/roundrobin/define_pools.php,
+     tournaments/roundrobin/edit_pairing.php,
+     tournaments/roundrobin/edit_pools.php,
+     tournaments/roundrobin/edit_ranks.php,
+     tournaments/roundrobin/edit_rounds.php,
+     tournaments/roundrobin/view_pools.php,
+     tournaments/ladder/admin.php,
+     tournaments/cron_tournaments.php:
+   - refactored ladder and round-robin helper-functions from TournamentHelper into
+     separate helper-classes TournamentLadderHelper & TournamentRoundHelper
+
    * tournaments/include/tournament_helper.php (class TournamentHelper,
        ~.process_tournament_game_end, ~.process_tournament_ladder_game_end,
        ~.process_tournament_round_robin_game_end, ~.process_ladder_rank_period),

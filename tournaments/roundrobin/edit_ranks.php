@@ -33,6 +33,7 @@ require_once 'tournaments/include/tournament_participant.php';
 require_once 'tournaments/include/tournament_pool.php';
 require_once 'tournaments/include/tournament_pool_classes.php';
 require_once 'tournaments/include/tournament_round.php';
+require_once 'tournaments/include/tournament_round_helper.php';
 require_once 'tournaments/include/tournament_round_status.php';
 require_once 'tournaments/include/tournament_status.php';
 require_once 'tournaments/include/tournament_utils.php';
@@ -150,11 +151,11 @@ $GLOBALS['ThePage'] = new Page('TournamentRankEditor');
       }
       elseif ( @$_REQUEST['t_fillranks'] )
       {
-         $result_notes = TournamentHelper::fill_ranks_tournament_pool( $tround );
+         $result_notes = TournamentRoundHelper::fill_ranks_tournament_pool( $tround );
       }
       elseif ( @$_REQUEST['t_setpoolwinners'] )
       {
-         $result_notes = TournamentHelper::fill_pool_winners_tournament_pool( $tround );
+         $result_notes = TournamentRoundHelper::fill_pool_winners_tournament_pool( $tround );
       }
    }
 

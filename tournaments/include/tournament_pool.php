@@ -27,6 +27,7 @@ require_once 'include/classlib_user.php';
 require_once 'tournaments/include/tournament_globals.php';
 require_once 'tournaments/include/tournament_helper.php';
 require_once 'tournaments/include/tournament_pool_classes.php';
+require_once 'tournaments/include/tournament_round_helper.php';
 require_once 'tournaments/include/tournament_utils.php';
 
  /*!
@@ -284,7 +285,7 @@ class TournamentPool
          . "WHERE tid=%s AND Round=%s GROUP BY Pool", (int)$tid, (int)$round );
       $result = db_query( "TournamentPool:count_tournament_pool_games($tid,$round)", $query );
 
-      $games_per_challenge = TournamentHelper::determine_games_per_challenge( $tid );
+      $games_per_challenge = TournamentRoundHelper::determine_games_per_challenge( $tid );
 
       $count = 0;
       while ( $row = mysql_fetch_assoc($result) )
@@ -639,7 +640,7 @@ class TournamentPool
       $round = $tround->Round;
       $errors = array();
 
-      $games_per_challenge = TournamentHelper::determine_games_per_challenge( $tid );
+      $games_per_challenge = TournamentRoundHelper::determine_games_per_challenge( $tid );
 
       // load tourney-participants and pool data
       $iterator = new ListIterator( 'TournamentPool.check_pools.load_tp_pools' );
@@ -777,7 +778,8 @@ class TournamentPool
     * \brief Updates TournamentPool.Rank setting pool-winners determined by tround->PoolWinnerRanks.
     * \param $tround TournamentRound-object
     * \return number of affected rows
-    * \note expecting TournamentPool.Rank already set, either manually by TD or TournamentHelper::fill_ranks_tournament_pool()
+    *
+    * \note expecting TournamentPool.Rank already set, either manually by TD or TournamentRoundHelper::fill_ranks_tournament_pool()
     * \note already set pool-winners are not touched
     */
    public static function update_tournament_pool_set_pool_winners( $tround )

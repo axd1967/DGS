@@ -30,6 +30,7 @@ require_once 'tournaments/include/tournament_helper.php';
 require_once 'tournaments/include/tournament_participant.php';
 require_once 'tournaments/include/tournament_pool.php';
 require_once 'tournaments/include/tournament_round.php';
+require_once 'tournaments/include/tournament_round_helper.php';
 require_once 'tournaments/include/tournament_round_status.php';
 require_once 'tournaments/include/tournament_rules.php';
 require_once 'tournaments/include/tournament_status.php';
@@ -137,7 +138,7 @@ $GLOBALS['ThePage'] = new Page('TournamentPoolDefine');
    $ttable = null;
    if ( @$_REQUEST['t_suggest'] || @$_REQUEST['t_save'] || @$_REQUEST['t_preview'] )
    {
-      $games_per_challenge = TournamentHelper::determine_games_per_challenge( $tid );
+      $games_per_challenge = TournamentRoundHelper::determine_games_per_challenge( $tid );
       $ttable = make_suggestions_table( $tround, $reg_count, $errors, $games_per_challenge,
          $tround->PoolSize, $tround->Pools );
    }
