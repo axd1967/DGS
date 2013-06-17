@@ -18,6 +18,10 @@ ChangeLog
 
 2013-06-17 juga
 
+   * forum/forum_functions.php (DisplayForum.draw_post),
+     forum/read.php (show_revision_history):
+   - bugfix: don't show "No. X" on forum-posts revision-history
+
    * tournaments/include/tournament_ladder_helper.php (class TournamentLadderHelper),
      tournaments/include/tournament_round_helper.php (class TournamentRoundHelper),
      tournaments/include/tournament_helper.php (class TournamentHelper),

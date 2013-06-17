@@ -394,13 +394,13 @@ function show_revision_history( $revhist_thread, $display_forum, $post_id )
 
    $display_forum->forum_start_table('Revision');
    $display_forum->change_depth( 1 );
-   $display_forum->draw_post( DRAWPOST_REPLY, $revhist_thread->thread_post, null );
+   $display_forum->draw_post( DRAWPOST_REPLY|MASK_DRAWPOST_NO_NUM, $revhist_thread->thread_post, null );
 
    echo "<tr><td colspan={$display_forum->cols} height=2></td></tr>";
    $display_forum->change_depth( 2 );
    foreach ( $revhist_thread->posts as $post )
    {
-      $display_forum->draw_post( DRAWPOST_EDIT, $post, true, null );
+      $display_forum->draw_post( DRAWPOST_EDIT|MASK_DRAWPOST_NO_NUM, $post, true, null );
       echo "<tr><td colspan={$display_forum->cols} height=2></td></tr>";
    }
 

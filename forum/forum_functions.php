@@ -180,6 +180,7 @@ define('DRAWPOST_REPLY',   4); // post reply
 define('DRAWPOST_SEARCH',  5); // post search-result view
 define('MASK_DRAWPOST_HIDDEN', 0x10); // post-header hidden view
 define('MASK_DRAWPOST_NO_BODY', 0x20); // no post-body shown
+define('MASK_DRAWPOST_NO_NUM', 0x40); // no post-numbering
 
  /*!
   * \class DisplayForum
@@ -850,7 +851,7 @@ class DisplayForum
          if ( $post->last_edited > 0 )
             $post_reference = date(DATE_FMT, $post->last_edited);
 
-         if ( $drawmode_type != DRAWPOST_SEARCH )
+         if ( $drawmode_type != DRAWPOST_SEARCH && !($drawmode & MASK_DRAWPOST_NO_NUM) )
             echo SMALL_SPACING, sprintf( '(%s %s)', T_('No.#num'), $post->creation_order );
 
          echo "</td></tr>";
