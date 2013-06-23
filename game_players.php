@@ -818,7 +818,7 @@ function build_form_change_group( &$form, $grow, $cmd, $edit_hk=false )
       $form->add_empty_row();
    }
 
-   $form->add_row( array( 'SUBMITBUTTON', FACT_SAVE, T_('Update'),
+   $form->add_row( array( 'SUBMITBUTTON', FACT_SAVE, T_('Save selected settings#mpg'),
                           'TEXT', SMALL_SPACING,
                           'SUBMITBUTTON', FACT_PREVIEW, T_('Preview') ));
    return $form;
@@ -831,7 +831,7 @@ function build_form_change_order( $grow, $gid, $cmd, $edit_hk=false )
    $form->add_hidden( 'cmd', $cmd );
 
    $form->add_empty_row();
-   $form->add_row( array( 'SUBMITBUTTON', FACT_SAVE, T_('Update') ));
+   $form->add_row( array( 'SUBMITBUTTON', FACT_SAVE, T_('Save selected settings#mpg') ));
    return $form;
 }//build_form_change_order
 
