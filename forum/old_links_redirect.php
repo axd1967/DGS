@@ -23,9 +23,9 @@ require_once 'include/quick_common.php';
 {
    connect2mysql();
 
-   $old_forum = @$_REQUEST['f']+0;
-   $old_thread = @$_REQUEST['t']+0;
-   $old_id = @$_REQUEST['i']+0;
+   $old_forum = (int)@$_REQUEST['f'];
+   $old_thread = (int)@$_REQUEST['t'];
+   $old_id = (int)@$_REQUEST['i'];
 
    $row = mysql_single_fetch( "forum_old_links_redirect($old_forum,$old_id)",
          "SELECT ID, Thread_ID, Forum_ID FROM Posts " .
