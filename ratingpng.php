@@ -281,7 +281,7 @@ function interpolate($val1, $val3, $time1, $time2, $time3)
                  sprintf('%0.2f ms', (getmicrotime()-$page_microtime)*1000), $black);
 
    $gr->send_image();
-}
+}//main
 
 
 function get_rating_data($uid)
@@ -410,5 +410,6 @@ function get_rating_data($uid)
 
       $tmp = $row;
    } while ( $row = mysql_fetch_assoc($result) ) ;
-}
+}//get_rating_data
+
 ?>

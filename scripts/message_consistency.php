@@ -163,7 +163,8 @@ require_once 'include/std_functions.php';
 
    echo "<hr>Done!!!\n";
    end_html();
-}
+}//main
+
 
 // Try to find myself messages
 //see also: message_list_query and message_list_head/body

@@ -60,7 +60,7 @@ function add_contributor_link( $text=false, $link, $extra='')
       . "</td></tr>\n";
 
    return $c;
-}
+}//add_contributor_link
 
 function add_contributor( $text=false, $uref='', $name=false, $handle=false, $extra='' )
 {
@@ -97,7 +97,7 @@ function get_executives( $level )
    if ( ALLOW_SURVEY_VOTE && ($level & ADMIN_SURVEY) )
       $out[] = T_('Survey');
    return array( count($out), implode(', ', $out) );
-}
+}//get_executives
 
 
 

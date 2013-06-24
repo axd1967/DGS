@@ -122,23 +122,16 @@ $GLOBALS['ThePage'] = new Page('UserInfo');
    $user_localtime  = date(DATE_FMT5, $NOW); // +timezone-name
    $user_clockused  = get_clock_used($row['Nightstart']);
    setTZ($tmpTZ);
-   $img_nighttime = (is_nighttime_clock($user_clockused))
-      ? SMALL_SPACING . echo_image_nighttime(true) : '';
-   $night_start_str = sprintf('%02d:00 - %02d:59',
-      $row['Nightstart'],
-      ($row['Nightstart'] + NIGHT_LEN - 1) % 24 );
+   $img_nighttime = ( is_nighttime_clock($user_clockused) ) ? SMALL_SPACING . echo_image_nighttime(true) : '';
+   $night_start_str = sprintf('%02d:00 - %02d:59', $row['Nightstart'], ($row['Nightstart'] + NIGHT_LEN - 1) % 24 );
 
    { //User infos
       $activity = activity_string( $row['ActivityLevel']);
-      $registerdate = (@$row['X_Registerdate'] > 0
-                        ? date(DATE_FMT_YMD, $row['X_Registerdate']) : '' );
-      $lastaccess = (@$row['X_Lastaccess'] > 0
-                        ? date(DATE_FMT2, $row['X_Lastaccess']) : '' );
-      $lastquickaccess = (@$row['X_LastQuickAccess'] > 0
-                        ? date(DATE_FMT2, $row['X_LastQuickAccess']) : NO_VALUE );
-      $lastmove = (@$row['X_LastMove'] > 0
-                        ? date(DATE_FMT2, $row['X_LastMove']) : '' );
-      $percent = ( is_numeric($row['Percent']) ? $row['Percent'].'%' : '' );
+      $registerdate = ( @$row['X_Registerdate'] > 0 ) ? date(DATE_FMT_YMD, $row['X_Registerdate']) : '';
+      $lastaccess = ( @$row['X_Lastaccess'] > 0 ) ? date(DATE_FMT2, $row['X_Lastaccess']) : '';
+      $lastquickaccess = ( @$row['X_LastQuickAccess'] > 0 ) ? date(DATE_FMT2, $row['X_LastQuickAccess']) : NO_VALUE;
+      $lastmove = ( @$row['X_LastMove'] > 0 ) ? date(DATE_FMT2, $row['X_LastMove']) : '';
+      $percent = ( is_numeric($row['Percent']) ) ? $row['Percent'].'%' : '';
 
 
       // draw user-info fields in two separate columns
@@ -162,7 +155,7 @@ $GLOBALS['ThePage'] = new Page('UserInfo');
                   'rattb' => 'class="DebugInfo"',
                   'sname' => 'used, used(change)',
                   'sinfo' => $row['ClockUsed'] .', '.$user_clockused .' ('.$row['ClockChanged'].')'
-                  ) );
+                  ));
       }
 
       if ( $is_game_admin )

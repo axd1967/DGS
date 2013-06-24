@@ -43,13 +43,12 @@ $GLOBALS['ThePage'] = new Page('TournamentEditParticipant');
    connect2mysql();
 
    $logged_in = who_is_logged( $player_row);
-
    if ( !$logged_in )
       error('login_if_not_logged_in', 'Tournament.edit_participant');
    if ( !ALLOW_TOURNAMENTS )
       error('feature_disabled', 'Tournament.edit_participant');
-   $my_id = $player_row['ID'];
 
+   $my_id = $player_row['ID'];
    if ( $my_id <= GUESTS_ID_MAX )
       error('not_allowed_for_guest', 'Tournament.edit_participant');
 
@@ -527,7 +526,7 @@ $GLOBALS['ThePage'] = new Page('TournamentEditParticipant');
          array( 'url' => "tournaments/manage_tournament.php?tid=$tid", 'class' => 'TAdmin' );
 
    end_page(@$menu_array);
-}
+}//main
 
 
 function build_rating_str( $rating, $uid=0 )

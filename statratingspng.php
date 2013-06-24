@@ -192,7 +192,7 @@ define('MIN_RANK', round(MIN_RATING/100.0));
    $gr->send_image();
    if ( $cache_it )
       grab_output_end( $cache_name);
-}
+}//main
 
 
 function get_ratings_data(&$Xaxis, &$graphs, &$xlims, &$ylims)
@@ -337,6 +337,6 @@ function get_ratings_data(&$Xaxis, &$graphs, &$xlims, &$ylims)
 
    $xlims = array('MIN'=>$Xmin, 'MAX'=>$Xmax);
    $ylims = array('MIN'=>$Ymin, 'MAX'=>$Ymax);
-}
+}//get_ratings_data
 
 ?>

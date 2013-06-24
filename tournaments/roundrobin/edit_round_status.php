@@ -42,8 +42,8 @@ $GLOBALS['ThePage'] = new Page('TournamentRoundStatusEdit');
       error('login_if_not_logged_in', 'Tournament.roundrobin.edit_round_status');
    if ( !ALLOW_TOURNAMENTS )
       error('feature_disabled', 'Tournament.roundrobin.edit_round_status');
-   $my_id = $player_row['ID'];
 
+   $my_id = $player_row['ID'];
    if ( $my_id <= GUESTS_ID_MAX )
       error('not_allowed_for_guest', 'Tournament.roundrobin.edit_round_status');
 
@@ -215,7 +215,7 @@ $GLOBALS['ThePage'] = new Page('TournamentRoundStatusEdit');
       array( 'url' => "tournaments/manage_tournament.php?tid=$tid", 'class' => 'TAdmin' );
 
    end_page(@$menu_array);
-}
+}//main
 
 
 // return ( vars-hash, edits-arr )

@@ -65,7 +65,7 @@ function search_browsers($result, &$Browsers)
 
       echo "No Family Found ($Count): {$Browser}<br>\n";
    }
-}
+}//search_browsers
 
 
 function echo_browsers(&$Browsers)

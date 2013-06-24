@@ -52,6 +52,7 @@ $GLOBALS['ThePage'] = new Page('Tournament');
       error('login_if_not_logged_in', 'Tournament.view_tournament');
    if ( !ALLOW_TOURNAMENTS )
       error('feature_disabled', 'Tournament.view_tournament');
+
    $my_id = $player_row['ID'];
 
    $tid = (int) @$_REQUEST['tid'];

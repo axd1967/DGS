@@ -39,6 +39,7 @@ $GLOBALS['ThePage'] = new Page('BulletinEdit');
    $logged_in = who_is_logged( $player_row);
    if ( !$logged_in )
       error('login_if_not_logged_in', 'edit_bulletin');
+
    $my_id = $player_row['ID'];
    if ( $my_id <= GUESTS_ID_MAX )
       error('not_allowed_for_guest', 'edit_bulletin');
@@ -257,8 +258,6 @@ $GLOBALS['ThePage'] = new Page('BulletinEdit');
 function check_bulletin_input( &$bulletin, $my_id )
 {
    $errors = array();
-   $gid = $bulletin->gid;
-   $tid = $bulletin->tid;
 
    // check/correct status
    if ( ($bulletin->Flags & BULLETIN_FLAG_ADMIN_CREATED)
@@ -270,30 +269,30 @@ function check_bulletin_input( &$bulletin, $my_id )
    // check/correct gid
    if ( $bulletin->TargetType != BULLETIN_TRG_MPG )
       $bulletin->gid = 0;
-   elseif ( $gid > 0 )
+   elseif ( $bulletin->gid > 0 )
    {
-      $game_row = Bulletin::load_multi_player_game($gid);
+      $game_row = Bulletin::load_multi_player_game($bulletin->gid);
       if ( is_null($game_row) )
-         $errors[] = sprintf( T_('No game found for game-ID [%s]!'), $gid );
+         $errors[] = sprintf( T_('No game found for game-ID [%s]!'), $bulletin->gid );
       elseif ( $game_row['GameType'] != GAMETYPE_TEAM_GO && $game_row['GameType'] != GAMETYPE_ZEN_GO )
-         $errors[] = sprintf( T_('Game-ID [%s] must reference a multi-player-game!'), $gid );
+         $errors[] = sprintf( T_('Game-ID [%s] must reference a multi-player-game!'), $bulletin->gid );
 
-      if ( !MultiPlayerGame::is_game_player($gid, $my_id) )
-         $errors[] = sprintf( T_('Only participants of multi-player-game [%s] can create a MPG-bulletin.'), $gid );
+      if ( !MultiPlayerGame::is_game_player($bulletin->gid, $my_id) )
+         $errors[] = sprintf( T_('Only participants of multi-player-game [%s] can create a MPG-bulletin.'), $bulletin->gid );
    }
 
    // check/correct tid
    if ( $bulletin->TargetType != BULLETIN_TRG_TP && $bulletin->TargetType != BULLETIN_TRG_TD )
       $bulletin->tid = 0;
-   elseif ( $tid > 0 )
+   elseif ( $bulletin->tid > 0 )
    {
       $tourney = TournamentCache::load_cache_tournament( 'edit_bulletin', $bulletin->tid, /*check*/false );
       if ( is_null($tourney) )
-         $errors[] = sprintf( T_('No tournament found for tournament-ID [%s]!'), $tid );
+         $errors[] = sprintf( T_('No tournament found for tournament-ID [%s]!'), $bulletin->tid );
       $bulletin->Tournament = $tourney;
 
       if ( !TournamentHelper::allow_edit_tournaments($tourney, $my_id) )
-         $errors[] = sprintf( T_('Only the owner or a director of tournament [%s] can create a tournament-news-bulletin.'), $tid );
+         $errors[] = sprintf( T_('Only the owner or a director of tournament [%s] can create a tournament-news-bulletin.'), $bulletin->tid );
    }
 
    return $errors;

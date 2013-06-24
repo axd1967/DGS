@@ -34,7 +34,6 @@ require_once 'include/std_functions.php';
    $my_id = (int)@$player_row['ID'];
    if ( $my_id <= GUESTS_ID_MAX )
       error('not_allowed_for_guest', 'change_bio');
-
    if ( (@$player_row['AdminOptions'] & ADMOPT_DENY_EDIT_BIO) )
       error('edit_bio_denied', 'change_bio');
 

@@ -37,7 +37,6 @@ define('SGF_MAXSIZE_UPLOAD', 100*1024); // max. 100KB stored, keep factor of 102
    $logged_in = who_is_logged( $player_row);
    if ( !$logged_in )
       error('login_if_not_logged_in', 'manage_sgf');
-   $my_id = $player_row['ID'];
 
    $gid = (int)$_REQUEST['gid'];
    if ( $gid <= 0 )
@@ -54,6 +53,7 @@ define('SGF_MAXSIZE_UPLOAD', 100*1024); // max. 100KB stored, keep factor of 102
       exit; // shouldn't come to here
    }
 
+   $my_id = $player_row['ID'];
    if ( $my_id <= GUESTS_ID_MAX )
       error('not_allowed_for_guest', 'manage_sgf');
 

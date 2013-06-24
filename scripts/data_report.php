@@ -47,8 +47,8 @@ define('UNBUF_TIMOUT', 0); //x seconds limit. 0 to disable.
 
    $encoding_used= get_request_arg( 'charset', 'UTF-8'); //LANG_DEF_CHARSET iso-8859-1 UTF-8
 
-   $rowhdr= get_request_arg( 'rowhdr', 20);
-   $colsize= get_request_arg( 'colsize', 40);
+   $rowhdr = (int)get_request_arg( 'rowhdr', 20);
+   $colsize = (int)get_request_arg( 'colsize', 40);
    $colwrap= get_request_arg( 'colwrap', 'cut');
 
    $oldquery= urldecode(get_request_arg( 'oldquery', ''));
@@ -270,7 +270,7 @@ define('UNBUF_TIMOUT', 0); //x seconds limit. 0 to disable.
    echo "</div>\n";
 
    end_html();
-}
+}//main
 
 
 function echo_query( $query, $qid='', $unbuffered=false, $rowhdr=20, $colsize=40, $colwrap='cut' )
@@ -439,6 +439,6 @@ function echo_query( $query, $qid='', $unbuffered=false, $rowhdr=20, $colsize=40
    //echo "<font size=-1>Query time: $qrytime&nbsp;ms</font><br>\n";
 
    return array($numrows,$qrytime);
-}
+}//echo_query
 
 ?>

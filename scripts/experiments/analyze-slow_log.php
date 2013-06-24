@@ -141,7 +141,8 @@ function Myarg( $help, &$i, $key, $arg)
    }
    //echo CR."$key=".var_export($var,true);
    return 0; //continue;
-}
+}//Myarg
+
 
    $verbose= 0;
    $sleep= 0;

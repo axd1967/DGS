@@ -50,8 +50,8 @@ $GLOBALS['ThePage'] = new Page('TournamentPoolEdit');
       error('login_if_not_logged_in', 'Tournament.roundrobin.edit_pools');
    if ( !ALLOW_TOURNAMENTS )
       error('feature_disabled', 'Tournament.roundrobin.edit_pools');
-   $my_id = $player_row['ID'];
 
+   $my_id = $player_row['ID'];
    if ( $my_id <= GUESTS_ID_MAX )
       error('not_allowed_for_guest', 'Tournament.roundrobin.edit_pools');
 
@@ -316,7 +316,7 @@ $GLOBALS['ThePage'] = new Page('TournamentPoolEdit');
       array( 'url' => "tournaments/manage_tournament.php?tid=$tid", 'class' => 'TAdmin' );
 
    end_page( @$menu_array, 6 );
-}
+}//main
 
 
 function get_marked_users()
@@ -333,7 +333,7 @@ function get_marked_users()
       }
    }
    return $arr;
-}
+}//get_marked_users
 
 // return: array( pool => array( uids, ... ), ... ); empty-array on error
 function get_assigned_user_pools( &$errors, $prefix )
@@ -362,7 +362,7 @@ function get_assigned_user_pools( &$errors, $prefix )
          $arr[$pool][] = $uid;
    }
    return $arr;
-}
+}//get_assigned_user_pools
 
 function make_pool_unassigned_table( $tid, &$uatable, &$uafilter )
 {

@@ -38,8 +38,8 @@ $GLOBALS['ThePage'] = new Page('TournamentLadderRetreat');
       error('login_if_not_logged_in', 'Tournament.ladder.retreat');
    if ( !ALLOW_TOURNAMENTS )
       error('feature_disabled', 'Tournament.ladder.retreat');
-   $my_id = $player_row['ID'];
 
+   $my_id = $player_row['ID'];
    if ( $my_id <= GUESTS_ID_MAX )
       error('not_allowed_for_guest', 'Tournament.ladder.retreat');
 
@@ -153,7 +153,7 @@ $GLOBALS['ThePage'] = new Page('TournamentLadderRetreat');
    $menu_array[T_('My running games')] = "show_games.php?tid=$tid".URI_AMP."uid=$my_id";
 
    end_page(@$menu_array);
-}
+}//main
 
 
 /*! \brief Returns array with notes about retreating from ladder. */

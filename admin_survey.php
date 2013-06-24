@@ -38,6 +38,7 @@ $GLOBALS['ThePage'] = new Page('SurveyAdmin');
       error('login_if_not_logged_in', 'admin_survey');
    if ( !ALLOW_SURVEY_VOTE )
       error('feature_disabled', 'admin_survey');
+
    $my_id = $player_row['ID'];
    if ( $my_id <= GUESTS_ID_MAX )
       error('not_allowed_for_guest', 'admin_survey');

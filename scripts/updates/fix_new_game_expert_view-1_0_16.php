@@ -117,6 +117,6 @@ function load_profile_templates_new_game_expert_view()
    }
    mysql_free_result($result);
    return $arr;
-}//load_profile_templates
+}//load_profile_templates_new_game_expert_view
 
 ?>

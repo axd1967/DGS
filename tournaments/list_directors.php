@@ -92,8 +92,7 @@ $GLOBALS['ThePage'] = new Page('TournamentDirectorList');
 
    $pagetitle = sprintf( T_('Tournament Directors #%d'), $tid );
    $title = sprintf( T_('Tournament Directors of [%s]'), $tourney->Title );
-   start_page($pagetitle, true, $logged_in, $player_row,
-               button_style($player_row['Button']) );
+   start_page($pagetitle, true, $logged_in, $player_row, button_style($player_row['Button']) );
 
    echo "<h3 class=Header>". $title . "</h3>\n";
 

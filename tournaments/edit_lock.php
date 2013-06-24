@@ -40,8 +40,8 @@ $GLOBALS['ThePage'] = new Page('TournamentLockEdit');
       error('login_if_not_logged_in', 'Tournament.edit_lock');
    if ( !ALLOW_TOURNAMENTS )
       error('feature_disabled', 'Tournament.edit_lock');
-   $my_id = $player_row['ID'];
 
+   $my_id = $player_row['ID'];
    if ( $my_id <= GUESTS_ID_MAX )
       error('not_allowed_for_guest', 'Tournament.edit_lock');
 
@@ -193,7 +193,7 @@ $GLOBALS['ThePage'] = new Page('TournamentLockEdit');
          array( 'url' => "tournaments/manage_tournament.php?tid=$tid", 'class' => 'TAdmin' );
 
    end_page(@$menu_array);
-}
+}//main
 
 
 // return [ vars-hash, edits-arr, errorlist ]

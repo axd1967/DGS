@@ -468,7 +468,7 @@ function definitions_fix( $table, $keys)
          $defs[] = $str;
    }
    return $defs;
-}
+}//definitions_fix
 
 function quoteit( $mixed, $quote='`')
 {
@@ -593,6 +593,16 @@ class dbTable
    private $xname;
    private $engine = '';
 
+   private $keywords = array(
+      'PRIMARY'   => 1, // KEY (index_col_name,...)
+      'KEY'       => 2, // [index_name] (index_col_name,...)
+      'INDEX'     => 3, // [index_name] (index_col_name,...)
+      'FULLTEXT'  => 4, // [INDEX] [index_name] (index_col_name,...)
+      'UNIQUE'    => 5, // [INDEX] [index_name] (index_col_name,...)
+      'CHECK'     => 6, // (expr)
+      );
+
+
    public function __construct( $database, $name)
    {
       $this->qdatabase = quoteit( $database);
@@ -603,7 +613,7 @@ class dbTable
       $this->xname = quoteit( $name, ( QUOTE_NAME ? QUOTE :'') );
    }
 
-   function structure()
+   public function structure()
    {
       $comment = '';
       $head = '';
@@ -673,23 +683,13 @@ class dbTable
             ;
       }
       return $struct;
-   }
+   }//structure
 
-   var $keywords = array(
-      'PRIMARY'   => 1, // KEY (index_col_name,...)
-      'KEY'       => 2, // [index_name] (index_col_name,...)
-      'INDEX'     => 3, // [index_name] (index_col_name,...)
-      'FULLTEXT'  => 4, // [INDEX] [index_name] (index_col_name,...)
-      'UNIQUE'    => 5, // [INDEX] [index_name] (index_col_name,...)
-      'CHECK'     => 6, // (expr)
-      ) ;
 
-   function structure_body()
+   private function structure_body()
    {
       $body = '';
-      if ( $row=mysql_single_fetch( false,
-             'SHOW CREATE TABLE ' . $this->qpath
-           , FETCHTYPE_ARRAY) )
+      if ( $row=mysql_single_fetch( false, 'SHOW CREATE TABLE ' . $this->qpath, FETCHTYPE_ARRAY) )
       {
          if ( !($str=@$row['Create Table']) )
             $str = @$row[1];
@@ -748,7 +748,8 @@ class dbTable
          $body.= $str;
       }
       return $body;
-   }
+   }//structure_body
+
 }// end of class 'dbTable'
 
 
@@ -977,6 +978,7 @@ function freesql_dump( $database, $query)
 } //freesql_dump
 
 
+
 {
    disable_cache();
 
@@ -1155,6 +1157,6 @@ function freesql_dump( $database, $query)
    }
 
    end_html();
-}
+}//main
 
 ?>

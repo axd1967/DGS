@@ -46,8 +46,8 @@ $GLOBALS['ThePage'] = new Page('TournamentLadderAdmin');
       error('login_if_not_logged_in', 'Tournament.ladder.admin');
    if ( !ALLOW_TOURNAMENTS )
       error('feature_disabled', 'Tournament.ladder.admin');
-   $my_id = $player_row['ID'];
 
+   $my_id = $player_row['ID'];
    if ( $my_id <= GUESTS_ID_MAX )
       error('not_allowed_for_guest', 'Tournament.ladder.admin');
 
@@ -372,7 +372,7 @@ $GLOBALS['ThePage'] = new Page('TournamentLadderAdmin');
       array( 'url' => "tournaments/manage_tournament.php?tid=$tid", 'class' => 'TAdmin' );
 
    end_page(@$menu_array);
-}
+}//main
 
 
 function add_form_edit_user( &$form, $user, $action, $act_fmt, $title, $notify=0, $extra='' )

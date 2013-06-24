@@ -131,6 +131,6 @@ function echo_scripts( $arr_dirs )
       }
    }
    echo "</table>\n";
-}
+}//echo_scripts
 
 ?>

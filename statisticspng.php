@@ -263,7 +263,7 @@ require_once 'include/graph.php';
    $gr->send_image();
    if ( $cache_it )
       grab_output_end( $cache_name);
-}
+}//main
 
 
 function get_stat_data()
@@ -319,6 +319,6 @@ function get_stat_data()
       $tHits[]= $row['Hits'];
    }
    mysql_free_result($result);
-} //get_stat_data
+}//get_stat_data
 
 ?>

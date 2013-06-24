@@ -57,7 +57,8 @@ require_once 'include/countries.php';
    }
 
    end_page();
-}
+}//main
+
 
 function stats_start_page( $title )
 {
@@ -215,6 +216,6 @@ function show_stats_user_countries()
    {
       echo getCountryFlagImage($ccode), SMALL_SPACING, "\n";
    }
-}
+}//show_stats_user_countries
 
 ?>

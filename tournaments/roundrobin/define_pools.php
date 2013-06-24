@@ -46,8 +46,8 @@ $GLOBALS['ThePage'] = new Page('TournamentPoolDefine');
       error('login_if_not_logged_in', 'Tournament.roundrobin.define_pools');
    if ( !ALLOW_TOURNAMENTS )
       error('feature_disabled', 'Tournament.roundrobin.define_pools');
-   $my_id = $player_row['ID'];
 
+   $my_id = $player_row['ID'];
    if ( $my_id <= GUESTS_ID_MAX )
       error('not_allowed_for_guest', 'Tournament.roundrobin.define_pools');
 
@@ -271,7 +271,8 @@ $GLOBALS['ThePage'] = new Page('TournamentPoolDefine');
       array( 'url' => "tournaments/manage_tournament.php?tid=$tid", 'class' => 'TAdmin' );
 
    end_page(@$menu_array);
-}
+}//main
+
 
 function stripLF( $str )
 {
@@ -357,7 +358,7 @@ function calc_suggestion( $reg_count, $pool_size, $pool_count, $chall_games, $us
 
    return array( $pool_size, $pool_count, $user_capacity, $pool_size_base,
       $pool_count_remain, $pool_count_base, $games_count, $distribution, $user_choice );
-}
+}//calc_suggestion
 
 function make_suggestions_table( $tround, $reg_count, &$errors, $games_per_challenge, $user_pool_size=0, $user_pool_count=0 )
 {

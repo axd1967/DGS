@@ -36,6 +36,7 @@ $GLOBALS['ThePage'] = new Page('RatingAdmin');
    $logged_in = who_is_logged( $player_row);
    if ( !$logged_in )
       error('login_if_not_logged_in', 'admin_rating');
+
    $my_id = $player_row['ID'];
    if ( $my_id <= GUESTS_ID_MAX )
       error('not_allowed_for_guest', 'admin_rating');
@@ -53,6 +54,7 @@ $GLOBALS['ThePage'] = new Page('RatingAdmin');
 
    $uid = (int)get_request_arg('uid');
    if ( $uid <= GUESTS_ID_MAX ) $uid = 0;
+
    $arg_rating = trim(get_request_arg('rating'));
    $arg_ratingtype = get_request_arg('ratingtype', 'dragonrank');
    $do_reset_confidence = @$_REQUEST['reset_confival']; // reset rating confidence-interval

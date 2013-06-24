@@ -44,6 +44,7 @@ require_once 'tournaments/include/tournament_log.php';
       error('login_if_not_logged_in', 'Tournament.show_tlog');
    if ( !ALLOW_TOURNAMENTS )
       error('feature_disabled', 'Tournament.show_tlog');
+
    $my_id = $player_row['ID'];
    if ( $my_id <= GUESTS_ID_MAX )
       error('not_allowed_for_guest', 'Tournament.show_tlog');
@@ -55,7 +56,7 @@ require_once 'tournaments/include/tournament_log.php';
    $is_admin = ( @$player_row['admin_level'] & (ADMIN_DEVELOPER|ADMIN_TOURNAMENT) );
    $tourney = null;
    $allow_view = false;
-   if ( $tid )
+   if ( $tid > 0 )
    {
       $tourney = TournamentCache::load_cache_tournament( 'Tournament.show_tlog', $tid, /*check*/false );
       if ( !is_null($tourney) ) // deleted tournament perhaps (so no error)
@@ -190,7 +191,7 @@ require_once 'tournaments/include/tournament_log.php';
    echo_notes( 'tournamentlog', T_('Tournament Log notes'), $notes );
 
    end_page();
-}
+}//main
 
 
 function format_tlog_message( $tlog )
@@ -203,6 +204,6 @@ function format_tlog_message( $tlog )
    $msg = preg_replace("/UID#(\\d+)/", anchor($base_path."userinfo.php?uid=\$1", 'User #$1'), $msg );
 
    return $msg;
-}
+}//format_tlog_message
 
 ?>

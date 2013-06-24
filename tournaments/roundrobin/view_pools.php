@@ -45,6 +45,7 @@ $GLOBALS['ThePage'] = new Page('TournamentPoolView');
       error('login_if_not_logged_in', 'Tournament.roundrobin.view_pools');
    if ( !ALLOW_TOURNAMENTS )
       error('feature_disabled', 'Tournament.roundrobin.view_pools');
+
    $my_id = $player_row['ID'];
 
    $page = "view_pools.php";
@@ -145,7 +146,7 @@ $GLOBALS['ThePage'] = new Page('TournamentPoolView');
    }
 
    end_page(@$menu_array);
-}
+}//main
 
 
 // callback-func for edit-column in pools
