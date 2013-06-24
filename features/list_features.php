@@ -44,7 +44,10 @@ require_once 'features/lib_votes.php';
    $user_quota = UserQuota::load_user_quota($my_id);
    if ( is_null($user_quota) )
       error('miss_user_quota', "list_features.user_quota.check($my_id)");
+
    $cfg_tblcols = ConfigTableColumns::load_config( $my_id, CFGCOLS_FEATURE_LIST );
+   if ( !$cfg_tblcols )
+      error('user_init_error', 'list_features.init.config_table_cols');
 
    $user_vote_reason = Feature::allow_vote_check();
    $user_can_vote = is_null($user_vote_reason);

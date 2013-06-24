@@ -49,9 +49,9 @@ function post_message($player_row, &$cfg_board, $forum_opts, &$thread )
       return array( 0, T_('Sorry, you are not allowed to post on the forum') );
 
    $uid = @$player_row['ID'];
-   $forum = @$_POST['forum']+0;
-   $parent = @$_POST['parent']+0;
-   $edit = @$_POST['edit']+0;
+   $forum = (int)@$_POST['forum'];
+   $parent = (int)@$_POST['parent'];
+   $edit = (int)@$_POST['edit'];
 
    $f_opts = new ForumOptions( $player_row );
    if ( !$f_opts->is_visible_forum( $forum_opts ) )
@@ -70,7 +70,7 @@ function post_message($player_row, &$cfg_board, $forum_opts, &$thread )
       $ReadOnly = false;
 
    if ( is_null($cfg_board) && MarkupHandlerGoban::contains_goban($Text) ) // lazy-load
-      $cfg_board = ConfigBoard::load_config_board($uid);
+      $cfg_board = ConfigBoard::load_config_board_or_default($uid);
 
 //   $allow_go_diagrams = ( ALLOW_GO_DIAGRAMS && is_javascript_enabled() );
 //   if ( $allow_go_diagrams) $GoDiagrams = GoDiagram::create_godiagrams($Text, $cfg_board);

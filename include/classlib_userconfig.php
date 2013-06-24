@@ -283,7 +283,7 @@ class ConfigBoard
 
    // ------------ static functions ----------------------------
 
-   /*! \brief (static) Loads ConfigBoard-data for given user. */
+   /*! \brief Loads ConfigBoard-data for given user. */
    public static function load_config_board( $uid, $force_load=false, $upd_player_row=true )
    {
       ConfigPages::_check_user_id( $uid, 'ConfigBoard:load_config_board');
@@ -328,6 +328,13 @@ class ConfigBoard
          $config->fill_player_row();
       return $config;
    }//load_config_board
+
+   /*! \brief Loads ConfigBoard-data for given user, or return default on init-error (used for some leniency). */
+   public static function load_config_board_or_default( $uid )
+   {
+      $cfg_board = self::load_config_board( $uid );
+      return ( $cfg_board ) ? $cfg_board : new ConfigBoard($uid);
+   }
 
    public static function delete_cache_config_board( $uid )
    {
@@ -544,7 +551,7 @@ class ConfigPages
       return ( $folder_nr == FOLDER_NEW || $folder_nr == FOLDER_REPLY );
    }
 
-   /*! \brief (static) Loads ConfigPages-data for given user (without column-sets). */
+   /*! \brief Loads ConfigPages-data for given user (without column-sets). */
    public static function load_config_pages( $uid, $col_name='' )
    {
       $dbgmsg = "ConfigPages:load_config_pages($uid)";
@@ -570,7 +577,7 @@ class ConfigPages
             $row['StatusFlags'],
             $row['StatusFolders'],
             $row['ForumFlags']
-            );
+         );
 
       if ( $col_name )
       {

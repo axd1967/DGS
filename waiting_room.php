@@ -44,8 +44,12 @@ require_once 'include/wroom_control.php';
    $logged_in = who_is_logged( $player_row);
    if ( !$logged_in )
       error('login_if_not_logged_in', 'waiting_room');
+
    $my_id = $player_row['ID'];
+
    $cfg_tblcols = ConfigTableColumns::load_config( $my_id, CFGCOLS_WAITINGROOM );
+   if ( !$cfg_tblcols )
+      error('user_init_error', 'waiting_room.init.config_table_cols');
 
    //short descriptions for table
    $handi_array = array(
@@ -351,7 +355,7 @@ require_once 'include/wroom_control.php';
    $menu_array[T_('My waiting games')] = $baseURLMenu.'good=2'.SPURL_NO_DEF;
 
    end_page(@$menu_array);
-}
+}//main
 
 
 function add_old_game_form( $form_id, $game_row, $iamrated, $joinable )
@@ -399,9 +403,9 @@ function add_old_game_form( $form_id, $game_row, $iamrated, $joinable )
 // find waiting-room-id with WR-owner-user-id for given game-id
 function load_waitingroom_info( $gid )
 {
-   $row = mysql_single_fetch( "waiting_room.load_wroom($gid)",
+   $row = mysql_single_fetch( "waiting_room.load_waitingroom_info($gid)",
       "SELECT ID, uid FROM Waitingroom WHERE gid=$gid LIMIT 1" );
    return ($row) ? array( $row['ID'], $row['uid'] ) : array( 0, 0 );
-}//load_wroom
+}//load_waitingroom_info
 
 ?>

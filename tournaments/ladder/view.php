@@ -119,6 +119,8 @@ $GLOBALS['ThePage'] = new Page('TournamentLadderView');
       }
 
       $cfg_tblcols = ConfigTableColumns::load_config( $my_id, CFGCOLS_TOURNAMENT_LADDER_VIEW );
+      if ( !$cfg_tblcols )
+         error('user_init_error', "Tournament.ladder.view.init.config_table_cols($tid)");
 
       // init table
       $page = "view.php?";
@@ -329,7 +331,7 @@ $GLOBALS['ThePage'] = new Page('TournamentLadderView');
    }
 
    end_page(@$menu_array);
-}
+}//main
 
 
 // return TournamentLadder-object; maybe null
@@ -380,7 +382,7 @@ function build_rank_change( $tladder )
             'onmouseout' => 'hideInfo();' ));
    }
    return $result;
-}
+}//build_rank_change
 
 function build_action_row_str( &$tladder, &$form, $is_mine, $rid, $run_games_str )
 {

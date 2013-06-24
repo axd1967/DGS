@@ -48,8 +48,8 @@ $GLOBALS['ThePage'] = new Page('TournamentLadderChallenge');
       error('login_if_not_logged_in', 'Tournament.ladder.challenge');
    if ( !ALLOW_TOURNAMENTS )
       error('feature_disabled', 'Tournament.ladder.challenge');
-   $my_id = $player_row['ID'];
 
+   $my_id = $player_row['ID'];
    if ( $my_id <= GUESTS_ID_MAX )
       error('not_allowed_for_guest', 'Tournament.ladder.challenge');
 
@@ -90,7 +90,11 @@ $GLOBALS['ThePage'] = new Page('TournamentLadderChallenge');
    if ( is_null($tladder_df) )
       $errors[] = T_('Defender is not participating on ladder');
    else
+   {
       $user_df = User::load_user( $tladder_df->uid );
+      if ( !$user_df )
+         error('unknown_user', "Tournament.ladder.challenge.load_user($tid,{$tladder_df->uid}");
+   }
 
    // check if challenge is valid
    $trules = $tprops = null;

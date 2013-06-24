@@ -37,8 +37,11 @@ $GLOBALS['ThePage'] = new Page('BulletinList');
    $logged_in = who_is_logged( $player_row);
    if ( !$logged_in )
       error('login_if_not_logged_in', 'list_bulletins');
+
    $my_id = $player_row['ID'];
    $cfg_tblcols = ConfigTableColumns::load_config( $my_id, CFGCOLS_BULLETIN_LIST );
+   if ( !$cfg_tblcols )
+      error('user_init_error', 'list_bulletins.init.config_table_cols');
 
    $was_admin = $is_admin = Bulletin::is_bulletin_admin();
    $mine = (@$_REQUEST['mine']) ? 1 : 0;

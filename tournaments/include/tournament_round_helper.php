@@ -290,6 +290,9 @@ class TournamentRoundHelper
    /*! \brief Deletes tournament-round and updates Tournament.Rounds. */
    public static function remove_tournament_round( $tourney, $tround, &$errors, $check_only )
    {
+      if ( !$tround )
+         error('invalid_args', "TournamentRoundHelper:remove_tournament_round.check.miss.t_round({$tourney->ID})");
+
       $errors = array();
       if ( $tourney->CurrentRound == $tround->Round )
          $errors[] = T_('The current tournament round can not be removed.');

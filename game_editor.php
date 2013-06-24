@@ -37,7 +37,7 @@ $GLOBALS['ThePage'] = new Page('GameEditor');
    if ( !ALLOW_GAME_EDITOR || !is_javascript_enabled() )
       error('feature_disabled', 'game_editor');
    $my_id = $player_row['ID'];
-   $cfg_board = ConfigBoard::load_config_board($my_id);
+   $cfg_board = ConfigBoard::load_config_board_or_default($my_id);
    $imgtool_path = $base_path . '21/';
 
    $page = "game_editor.php";

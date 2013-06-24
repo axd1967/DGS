@@ -42,19 +42,15 @@ $GLOBALS['ThePage'] = new Page('TournamentManage');
       error('login_if_not_logged_in', 'Tournament.manage_tournament');
    if ( !ALLOW_TOURNAMENTS )
       error('feature_disabled', 'Tournament.manage_tournament');
-   $my_id = $player_row['ID'];
 
+   $my_id = $player_row['ID'];
    if ( $my_id <= GUESTS_ID_MAX )
       error('not_allowed_for_guest', 'Tournament.manage_tournament');
 
    $tid = (int) @$_REQUEST['tid'];
    if ( $tid < 0 ) $tid = 0;
 
-   $tourney = null;
-   if ( $tid )
-      $tourney = TournamentCache::load_cache_tournament( 'Tournament.manage_tournament.find_tournament', $tid );
-   if ( is_null($tourney) )
-      error('unknown_tournament', "manage_tournament.find_tournament($tid)");
+   $tourney = TournamentCache::load_cache_tournament( 'Tournament.manage_tournament.find_tournament', $tid );
    $ttype = TournamentFactory::getTournament($tourney->WizardType);
 
    // create/edit allowed?
@@ -181,7 +177,7 @@ $GLOBALS['ThePage'] = new Page('TournamentManage');
       array( 'url' => "tournaments/manage_tournament.php?tid=$tid", 'class' => 'TAdmin' );
 
    end_page(@$menu_array);
-}
+}//main
 
 
 function make_header( $no, $title, $t_status )

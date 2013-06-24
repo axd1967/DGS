@@ -44,9 +44,13 @@ $GLOBALS['ThePage'] = new Page('TournamentList');
       error('login_if_not_logged_in', 'Tournament.list_tournaments');
    if ( !ALLOW_TOURNAMENTS )
       error('feature_disabled', 'Tournament.list_tournaments');
+
    $my_id = $player_row['ID'];
-   $cfg_tblcols = ConfigTableColumns::load_config( $my_id, CFGCOLS_TOURNAMENTS );
    $is_admin = TournamentUtils::isAdmin();
+
+   $cfg_tblcols = ConfigTableColumns::load_config( $my_id, CFGCOLS_TOURNAMENTS );
+   if ( !$cfg_tblcols )
+      error('user_init_error', 'Tournament.list_tournaments.init.config_table_cols');
 
    $page = "list_tournaments.php?";
 
@@ -216,8 +220,7 @@ $GLOBALS['ThePage'] = new Page('TournamentList');
       $title = T_('My tournaments as tournament director');
    else
       $title = T_('Tournaments');
-   start_page($title, true, $logged_in, $player_row,
-               button_style($player_row['Button']) );
+   start_page($title, true, $logged_in, $player_row, button_style($player_row['Button']) );
 
    echo "<h3 class=Header>". $title . "</h3>\n";
 
@@ -355,7 +358,7 @@ $GLOBALS['ThePage'] = new Page('TournamentList');
    }
 
    end_page(@$menu_array);
-}
+}//main
 
 
 function build_restrictions( $tourney, $row )
@@ -390,6 +393,6 @@ function build_restrictions( $tourney, $row )
       $class = $title = '';
 
    return array( implode(', ', $out), $class, $title );
-}
+}//build_restrictions
 
 ?>

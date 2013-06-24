@@ -35,7 +35,7 @@ $GLOBALS['ThePage'] = new Page('ShapeView');
    if ( !$logged_in )
       error('login_if_not_logged_in', 'view_shape');
    $my_id = $player_row['ID'];
-   ConfigBoard::load_config_board($my_id); // load for displaying board
+   ConfigBoard::load_config_board_or_default($my_id); // load for displaying board
 
    $shape_id = (int)get_request_arg('shape');
    $raw_snapshot = get_request_arg('snapshot'); // optional arg

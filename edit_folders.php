@@ -32,11 +32,14 @@ require_once 'include/message_functions.php';
    $logged_in = who_is_logged( $player_row);
    if ( !$logged_in )
       error('login_if_not_logged_in', 'edit_folders');
+
    $my_id = $player_row['ID'];
    if ( $my_id <= GUESTS_ID_MAX )
       error('not_allowed_for_guest', 'edit_folders');
 
    $cfg_pages = ConfigPages::load_config_pages($my_id);
+   if ( !$cfg_pages )
+      error('user_init_error', 'edit_folders.init.config_pages');
 
    init_standard_folders();
    $folders = get_folders($my_id);

@@ -30,8 +30,12 @@ require_once 'forum/forum_functions.php';
    $logged_in = who_is_logged( $player_row);
    if ( !$logged_in )
       error('login_if_not_logged_in', 'forum.list');
+
    $my_id = $player_row['ID'];
+
    $cfg_pages = ConfigPages::load_config_pages($my_id);
+   if ( !$cfg_pages )
+      error('user_init_error', 'forum.list.init.config_pages');
 
    $forum_id = max(0, (int)get_request_arg('forum'));
    $offset = max(0, (int)get_request_arg('offset'));
@@ -53,6 +57,8 @@ require_once 'forum/forum_functions.php';
    $show_lp_author = ( $cfg_pages->get_forum_flags() & FORUMFLAG_THREAD_SHOWAUTHOR );
 
    $forum = Forum::load_cache_forum( $forum_id );
+   if ( !$forum )
+      error('unknown_forum', "forum.list.bad_forum($forum_id)");
    $f_opts = new ForumOptions( $player_row );
    if ( !$f_opts->is_visible_forum( $forum->options ) )
       error('forbidden_forum', "forumlist.check.forum($forum_id)");

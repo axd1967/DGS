@@ -295,7 +295,7 @@ define('MSGBOXROWS_INVITE', 6);
 
    if ( MarkupHandlerGoban::contains_goban(@$Text) || MarkupHandlerGoban::contains_goban($default_message) )
    {
-      $cfg_board = ConfigBoard::load_config_board($my_id);
+      $cfg_board = ConfigBoard::load_config_board_or_default($my_id);
       $style_str = GobanHandlerGfxBoard::style_string( $cfg_board->get_stone_size() );
    }
    else

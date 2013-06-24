@@ -146,6 +146,8 @@ $GLOBALS['ThePage'] = new Page('GamesList');
 
    // load table-columns
    $cfg_tblcols = ConfigTableColumns::load_config( $my_id, $column_set_name );
+   if ( !$cfg_tblcols )
+      error('user_init_error', 'show_games.init.config_table_cols');
 
    $restrict_games = '';
    if ( RESTRICT_SHOW_GAMES_ALL && $all && !@$_REQUEST['sgfs'] && !$glc->ext_tid )

@@ -38,9 +38,12 @@ require_once 'include/classlib_userpicture.php';
    $logged_in = who_is_logged( $player_row);
    if ( !$logged_in )
       error('login_if_not_logged_in', 'users');
-   $uid = $player_row['ID'];
-   //$user = $player_row['Handle'];
-   $cfg_tblcols = ConfigTableColumns::load_config( $uid, CFGCOLS_USERS );
+
+   $my_id = $player_row['ID'];
+
+   $cfg_tblcols = ConfigTableColumns::load_config( $my_id, CFGCOLS_USERS );
+   if ( !$cfg_tblcols )
+      error('user_init_error', 'users.init.config_table_cols');
 
    $page = "users.php?";
 
@@ -68,7 +71,7 @@ require_once 'include/classlib_userpicture.php';
 
    // init search profile
    $profile_type = ($observe_gid) ? PROFTYPE_FILTER_OBSERVERS : PROFTYPE_FILTER_USERS;
-   $search_profile = new SearchProfile( $uid, $profile_type );
+   $search_profile = new SearchProfile( $my_id, $profile_type );
    $ufilter = new SearchFilter( '', $search_profile );
    $search_profile->register_regex_save_args( 'name|user|active' ); // named-filters FC_FNAME
    $utable = new Table( 'user', $page, $cfg_tblcols, '', TABLE_ROW_NUM|TABLE_ROWS_NAVI );
@@ -212,7 +215,7 @@ require_once 'include/classlib_userpicture.php';
    if ( $show_pivot )
    {
       // order pivot-user at top of users with same rating
-      $qsql->add_part( SQLP_FIELDS, "(P.ID=$uid) AS X_PivotOrder" );
+      $qsql->add_part( SQLP_FIELDS, "(P.ID=$my_id) AS X_PivotOrder" );
       $order .= ", X_PivotOrder DESC";
    }
 
@@ -298,7 +301,7 @@ require_once 'include/classlib_userpicture.php';
       if ( $utable->Is_Column_Displayed[22] )
          $urow_strings[22] = ($row['X_Registerdate'] > 0 ? date(DATE_FMT_YMD, $row['X_Registerdate']) : '' );
 
-      if ( $show_pivot && ($ID == $uid ) ) // mine
+      if ( $show_pivot && ($ID == $my_id ) ) // mine
          $urow_strings['extra_class'] = 'ShowPosUser';
       $utable->add_row( $urow_strings );
    }
@@ -311,7 +314,7 @@ require_once 'include/classlib_userpicture.php';
       T_('Show my opponents') => "opponents.php?tid=$tid" );
 
    end_page(@$menu_array);
-}
+}//main
 
 
 // callback-func for users-list Table-form adding form-elements below table

@@ -65,6 +65,8 @@ require_once 'include/classlib_userpicture.php';
    if ( !ALLOW_TOURNAMENTS || $tid < 0 ) $tid = 0;
 
    $cfg_tblcols = ConfigTableColumns::load_config( $my_id, CFGCOLS_OPPONENTS );
+   if ( !$cfg_tblcols )
+      error('user_init_error', 'opponents.init.config_table_cols');
 
 
    // who are player (uid) and opponent (opp) ?
@@ -498,7 +500,8 @@ require_once 'include/classlib_userpicture.php';
       $menu_array[ T_('Switch opponent role') ] = "{$page}{$filterURL}uid=$opp".URI_AMP."opp=$uid";
 
    end_page(@$menu_array);
-}
+}//main
+
 
 function build_opp_games_link( $uid, $opp_handle, $fin )
 {
@@ -507,7 +510,7 @@ function build_opp_games_link( $uid, $opp_handle, $fin )
       "show_games.php?uid=$uid".URI_AMP."opp_hdl=$opp_handle".REQF_URL.'opp_hdl'
          . ( $fin ? URI_AMP.'finished=1' : '' ),
       sprintf($link_fmt, $opp_handle), true );
-}
+}//build_opp_games_link
 
 // return array with dbfields extracted from passed db-result
 // keys: cntGames, cntJigo, (cnt|max)Handicap, cnt(Won|Lost)(|Time|Resign|Score)
@@ -541,7 +544,7 @@ function extract_user_stats( $color, $query = null )
    }
 
    return $arr;
-}
+}//extract_user_stats
 
 // echo table with info about both players: uid and opponent
 // param p: players-array[$uid,$opp] = ( ID, Name, Handle, Rating2, Country )
@@ -612,7 +615,7 @@ function print_players_table( $p, $uid, $opp, $fin )
 
    $r .= '</table>';
    return $r;
-}
+}//print_players_table
 
 // echo table with info about both players: uid and opponent
 // param p: players-array[$uid,$opp] = ( ID, Name, Handle, Rating2, Country )
@@ -707,6 +710,6 @@ function print_stats_table( $p, $B, $W, $fin )
 
    $r .= '</table>';
    return $r;
-}
+}//print_stats_table
 
 ?>

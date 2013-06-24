@@ -41,7 +41,7 @@ define('IMG_SPACING', MINI_SPACING.MINI_SPACING);
       error('feature_disabled', 'old_goban_editor');
    $my_id = $player_row['ID'];
    $is_guest = ( $my_id <= GUESTS_ID_MAX );
-   $cfg_board = ConfigBoard::load_config_board($my_id);
+   $cfg_board = ConfigBoard::load_config_board_or_default($my_id);
 
 /* Actual REQUEST calls used:
      (no args)                : new goban
@@ -242,9 +242,8 @@ EOF_GOBAN;
    //$gobform->add_hidden( 'gobid', $gob_id );
 
 
-   $style_str = (is_null($cfg_board))
-      ? '' : GobanHandlerGfxBoard::style_string( $cfg_board->get_stone_size() );
-   start_page( $title, true, $logged_in, $player_row, $style_str );
+   start_page( $title, true, $logged_in, $player_row,
+               GobanHandlerGfxBoard::style_string( $cfg_board->get_stone_size() ) );
    echo "<h3 class=Header>$title</h3>\n";
 
    $gobform->echo_string();

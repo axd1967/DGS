@@ -68,6 +68,8 @@ $GLOBALS['ThePage'] = new Page('Status');
    }
 
    $cfg_pages = ConfigPages::load_config_pages( $my_id, CFGCOLS_STATUS_GAMES );
+   if ( !$cfg_pages )
+      error('user_init_error', 'status.init.config_pages');
    $cfg_tblcols = $cfg_pages->get_table_columns();
 
 

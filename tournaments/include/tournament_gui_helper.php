@@ -118,6 +118,8 @@ class TournamentGuiHelper
 
       // create table
       $cfg_tblcols = ConfigTableColumns::load_config( $my_id, CFGCOLS_TOURNAMENT_RESULTS );
+      if ( !$cfg_tblcols )
+         error('user_init_error', "TournamentGuiHelper.build_tournament_results.init.config_table_cols($tid)");
 
       $table = new Table( 'tournament_results', $page, $cfg_tblcols, '',
          TABLE_NO_SORT|TABLE_NO_PAGE|TABLE_NO_SIZE|TABLE_ROWS_NAVI );

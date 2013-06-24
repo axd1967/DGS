@@ -16,6 +16,35 @@ Developers INFO:
 ChangeLog
 ------------------------------------------------------------------
 
+2013-06-24 juga
+
+   * include/classlib_userconfig.php (ConfigBoard.load_config_board_or_default),
+     include/error_codes.php (ErrorCode.init),
+     include/quick/quick_folder.php,
+     tournaments/include/tournament_gui_helper.php, tournaments/include/tournament_pool_classes.php,
+     tournaments/include/tournament_round_helper.php,
+     scripts/README.developers,
+     features/list_features.php,
+     forum/post.php, forum/index.php, forum/list.php, forum/read.php,
+     tournaments/ladder/challenge.php, tournaments/ladder/view.php,
+     tournaments/roundrobin/edit_rounds.php,
+     tournaments/game_admin.php, tournaments/list_participants.php,
+     tournaments/list_tournaments.php, tournaments/manage_tournament.php,
+     edit_folders.php, edit_profile.php, edit_shape.php, game.php, game_comments.php,
+     game_editor.php, goban_editor.php, list_bulletins.php, list_contacts.php, message.php,
+     message_thread.php, old_goban_editor.php, opponents.php, show_games.php, status.php,
+     users.php, view_shape.php, waiting_room.php:
+   - added error-check preventing access on an uninitialized object regarding user-related tables
+     - added new error-code 'user_init_error' on all pages preventing access on an uninitialized object
+       of ConfigPages/ConfigTableColumns, which expects consistent user-data in the database
+       Players-entry <-> ConfigPages-entry
+     - used default ConfigBoard on pages, if user-data in db is inconsistent:
+       normal is Players-entry <-> ConfigBoard-entry.
+       But only use default if particular page does not allow to change the state of ConfigBoard.
+     - added check for uninitialized objects like loading forum, user, game, tournament, tournament-round
+     - cleanup: used (int)-cast instead of '+0' for URL-arg safety-checks
+     - cleanup: minor layout changes
+
 2013-06-17 juga
 
    * tournaments/include/tournament_participant.php (TournamentParticipant.count_tournament_participants,

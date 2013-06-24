@@ -97,7 +97,7 @@ $GLOBALS['ThePage'] = new Page('Game');
    if ( $logged_in )
    {
       $my_id = $player_row['ID'];
-      $cfg_board = ConfigBoard::load_config_board($my_id);
+      $cfg_board = ConfigBoard::load_config_board_or_default($my_id);
    }
    else
    {// for quick-suite //TODO still needed ?
@@ -108,6 +108,8 @@ $GLOBALS['ThePage'] = new Page('Game');
 
 
    $game_row = GameHelper::load_cache_game_row( 'game', $gid );
+   if ( !$game_row )
+      error('unknown_game', "game.bad_game_id($gid)");
    extract($game_row);
    $is_shape = ($ShapeID > 0);
 
@@ -1252,18 +1254,21 @@ function draw_game_info( $game_row, $game_setup, $board, $tourney )
       if ( $game_row['Moves'] > 0 && $mpg_uid > 0 )
       {
          $mpg_userarr = User::load_quick_userinfo( array( $mpg_uid ) );
-         $mpg_urow = $mpg_userarr[$mpg_uid];
+         if ( is_array($mpg_userarr) )
+         {
+            $mpg_urow = $mpg_userarr[$mpg_uid];
 
-         echo "<tr id=\"gameRules\"><td></td><td colspan=\"", ($cols-1), "\">",
-            "<dl class=BoardInfos><dd>",
-               T_('Last move by:'), SMALL_SPACING,
-                  ($move_color == GPCOL_B ? $icon_col_b : $icon_col_w),
-                  MINI_SPACING,
-                  user_reference( REF_LINK, 1, '', $mpg_urow ),
-                  SMALL_SPACING,
-                  echo_rating( @$mpg_urow['Rating2'], true, $mpg_uid ),
-            "</dd></dl>\n",
-            "</td></tr>\n";
+            echo "<tr id=\"gameRules\"><td></td><td colspan=\"", ($cols-1), "\">",
+               "<dl class=BoardInfos><dd>",
+                  T_('Last move by:'), SMALL_SPACING,
+                     ($move_color == GPCOL_B ? $icon_col_b : $icon_col_w),
+                     MINI_SPACING,
+                     user_reference( REF_LINK, 1, '', $mpg_urow ),
+                     SMALL_SPACING,
+                     echo_rating( @$mpg_urow['Rating2'], true, $mpg_uid ),
+               "</dd></dl>\n",
+               "</td></tr>\n";
+         }
       }
    }
 

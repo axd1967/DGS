@@ -45,6 +45,8 @@ require_once 'include/gui_bulletin.php';
 
    ConfigBoard::delete_cache_config_board($my_id); // force reload
    $cfg_board = ConfigBoard::load_config_board($my_id);
+   if ( !$cfg_board )
+      error('user_init_error', 'edit_profile.init.config_board');
 
 /* Actual REQUEST calls used:
      save                  : save profile

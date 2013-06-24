@@ -128,6 +128,9 @@ class ErrorCode
          $arr['internal_error'] = // default-error-text
             T_("Unknown problem. This shouldn't happen. Please send the url of this page to the support, so that this doesn't happen again.");
 
+         $arr['user_init_error'] =
+            T_("User initialization error occured because of inconsistent user data. Please report this problem to the support.");
+
          $arr['wrong_players'] =
             T_("The player-IDs are wrong for this operation. Please send this problem to the support.");
 

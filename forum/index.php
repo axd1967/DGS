@@ -31,8 +31,12 @@ $GLOBALS['ThePage'] = new Page('ForumsList');
    $logged_in = who_is_logged( $player_row);
    if ( !$logged_in )
       error('login_if_not_logged_in', 'forum.index');
+
    $my_id = $player_row['ID'];
+
    $cfg_pages = ConfigPages::load_config_pages($my_id);
+   if ( !$cfg_pages )
+      error('user_init_error', 'forum.index.init.config_pages');
 
    // toggle forumflag
    $toggleflag = (int)@$_REQUEST['toggleflag'] + 0;

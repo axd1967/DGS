@@ -241,6 +241,42 @@ General instructions for developers:
    an urlencode().
 
 
+----------------- PHP: check for uninitialized objects
+
+   It's good to "throw" an error if objects are not properly initialized.
+   This prevents runtime-errors, that can be nasty for a user or difficult
+   to debug. You can and should use the following DGS-error-codes (for example,
+   please search the code):
+
+      // error-check after ConfigTableColumns::load_config(..)
+      error('user_init_error', 'label.init.config_table_cols');
+
+      // error-check after ConfigPages::load_config_pages(..)
+      error('user_init_error', 'label.init.config_pages');
+
+      // error-check after ConfigBoard::load_config_board(..)
+      // NOTE: on pages, that do not have a way to change the state of ConfigBoard,
+      //       you may use ConfigBoard::load_config_board_or_default(..) to get the default-object
+      //       in case of a found inconsitency (preventing the page fails too often for users).
+      error('user_init_error', 'label.init.config_board');
+
+      // error-check after loading a user, e.g. after User::load_user(..)
+      error('unknown_user', 'label.USE-CASE-DETAILS');
+
+      // error-check on used URL-arguments or function-arguments:
+      error('invalid_args', 'label.USE-CASE-DETAILS');
+
+      // in all other cases, you may either define a new error-code or just use the universal
+      //    'internal_error'.
+      //
+      // NOTE: But before you do create a new error-code, check the known error-codes and
+      //       choose one that may match your need from 'include/error_codes.php'.
+      //       There are already a variety for specific use-cases; some examples:
+      //          unknown_game, unknown_forum, unknown_message, unknown_user,
+      //          unknown_tournament, unknown_entry
+      error('internal_error', 'label.init.USE-CASE-DETAILS');
+
+
 ----------------- PHP, DGS, Translations:
 
    Take care of the T_() function and translation features.

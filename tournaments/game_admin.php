@@ -52,8 +52,8 @@ define('GA_RES_TIMOUT', 3);
       error('login_if_not_logged_in', 'Tournament.game_admin');
    if ( !ALLOW_TOURNAMENTS )
       error('feature_disabled', 'Tournament.game_admin');
-   $my_id = $player_row['ID'];
 
+   $my_id = $player_row['ID'];
    if ( $my_id <= GUESTS_ID_MAX )
       error('not_allowed_for_guest', 'Tournament.game_admin');
 
@@ -108,7 +108,11 @@ define('GA_RES_TIMOUT', 3);
    list( $vars, $edits, $input_errors ) = parse_edit_form( $tgame, $trule, $game );
    $errors = array_merge( $errors, $input_errors );
    $user_black = User::load_user( $game->Black_ID );
+   if ( !$user_black )
+      error('unknown_user', "Tournament.game_admin.load_user.black($tid,$gid,{$game->Black_ID})");
    $user_white = User::load_user( $game->White_ID );
+   if ( !$user_white )
+      error('unknown_user', "Tournament.game_admin.load_user.white($tid,$gid,{$game->White_ID})");
 
    // ---------- Process actions ------------------------------------------------
 

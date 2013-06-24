@@ -115,7 +115,7 @@ require_once 'include/goban_handler_gfx.php';
 
    if ( $has_igoban )
    {
-      $cfg_board = ConfigBoard::load_config_board($my_id);
+      $cfg_board = ConfigBoard::load_config_board_or_default($my_id);
       $style_str = GobanHandlerGfxBoard::style_string( $cfg_board->get_stone_size() );
    }
    else

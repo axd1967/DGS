@@ -54,6 +54,8 @@ $GLOBALS['ThePage'] = new Page('TournamentParticipantList');
    // TD has different view of table-column-set
    $cfg_tblcols = ConfigTableColumns::load_config( $my_id,
          ($allow_edit_tourney) ? CFGCOLS_TD_TOURNAMENT_PARTICIPANTS : CFGCOLS_TOURNAMENT_PARTICIPANTS );
+   if ( !$cfg_tblcols )
+      error('user_init_error', "Tournament.list_participants.init.config_table_cols($tid)");
 
    $page = "list_participants.php?";
 

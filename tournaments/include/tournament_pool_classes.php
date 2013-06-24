@@ -707,8 +707,9 @@ class PoolViewer
          $cfg_tblcols = null;
       else
       {
-         $cfg_pages = ConfigPages::load_config_pages( $this->my_id, CFGCOLS_TOURNAMENT_POOL_VIEW );
-         $cfg_tblcols = $cfg_pages->get_table_columns();
+         $cfg_tblcols = ConfigTableColumns::load_config( $this->my_id, CFGCOLS_TOURNAMENT_POOL_VIEW );
+         if ( !$cfg_tblcols )
+            error('user_init_error', 'TournamentPoolClasses.constructor.init.config_table_cols');
       }
       $hide_results = ( $this->options & PVOPT_NO_RESULT );
 

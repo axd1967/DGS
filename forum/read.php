@@ -31,13 +31,17 @@ require_once 'forum/post.php';
    $logged_in = who_is_logged( $player_row);
    if ( !$logged_in )
       error('login_if_not_logged_in', 'forum.read');
-   $my_id = $player_row['ID'];
-   $cfg_pages = ConfigPages::load_config_pages($my_id);
 
-   $reply = @$_REQUEST['reply']+0;
-   $forum_id = @$_REQUEST['forum']+0;
-   $thread = @$_REQUEST['thread']+0;
-   $edit = @$_REQUEST['edit']+0;
+   $my_id = $player_row['ID'];
+
+   $cfg_pages = ConfigPages::load_config_pages($my_id);
+   if ( !$cfg_pages )
+      error('user_init_error', 'forum.read.init.config_pages');
+
+   $reply = (int)@$_REQUEST['reply'];
+   $forum_id = (int)@$_REQUEST['forum'];
+   $thread = (int)@$_REQUEST['thread'];
+   $edit = (int)@$_REQUEST['edit'];
    $rx_term = get_request_arg('xterm', '');
 
    // toggle / change forumflags
@@ -60,6 +64,7 @@ require_once 'forum/post.php';
       jump_to( 'forum/'.$toggle_baseurl );
    }
 
+
    $f_flags = $cfg_pages->get_forum_flags();
    $show_overview = ( $f_flags & FORUMFLAG_POSTVIEW_OVERVIEW );
 
@@ -77,6 +82,8 @@ require_once 'forum/post.php';
       $forum_id = load_forum_id( $thread );
 
    $forum = Forum::load_cache_forum( $forum_id );
+   if ( !$forum )
+      error('unknown_forum', "forum.read.bad_forum($forum_id)");
    $f_opts = new ForumOptions( $player_row );
    if ( !$f_opts->is_visible_forum( $forum->options ) )
       error('forbidden_forum', "forum_read.check.forum_visible($forum_id,$my_id)");
@@ -115,7 +122,7 @@ require_once 'forum/post.php';
       $preview_Text = trim(get_request_arg('Text'));
 
       if ( is_null($cfg_board) && MarkupHandlerGoban::contains_goban($preview_Text) ) // lazy-load
-         $cfg_board = ConfigBoard::load_config_board($my_id);
+         $cfg_board = ConfigBoard::load_config_board_or_default($my_id);
 
       if ( !($edit > 0) )
          $reply = @$_REQUEST['parent']+0;
@@ -191,7 +198,7 @@ require_once 'forum/post.php';
       $fthread = new ForumThread();
 
    if ( is_null($cfg_board) && $fthread->contains_goban() )
-      $cfg_board = ConfigBoard::load_config_board($my_id);
+      $cfg_board = ConfigBoard::load_config_board_or_default($my_id);
    // end of DB-stuff
 
 
