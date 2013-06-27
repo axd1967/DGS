@@ -140,7 +140,7 @@ $GLOBALS['ThePage'] = new Page('RatingAdmin');
       $rform->add_row( array( 'DESCRIPTION', T_('Rating Status'),
                               'TEXT', $user->RatingStatus, ));
       $rform->add_row( array( 'DESCRIPTION', T_('Current Rating'),
-                              'TEXT', echo_rating($user->Rating, true, $my_id, false ) ));
+                              'TEXT', echo_rating($user->Rating, true, $uid, false ) ));
    }
 
    if ( count($errors) )
