@@ -415,8 +415,8 @@ $info_box = '<br>When translating you should keep the following things in mind:
 
          $hsize = 70;
          $vsize = intval( floor( max( 2,
-                     substr_count( wordwrap( $translation, $hsize, "\n", 1), "\n" ),
-                     substr_count( wordwrap( $orig_string, $hsize, "\n", 1), "\n" )
+                     substr_count( wordwrap( $translation, $hsize, "\n", 1), "\n" ) + 1,
+                     substr_count( wordwrap( $orig_string, $hsize, "\n", 1), "\n" ) + 1
                   )));
 
          //insert the rx_term highlights as if it was 'faq' (lose) item
