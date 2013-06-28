@@ -269,7 +269,7 @@ $GLOBALS['ThePage'] = new Page('Game');
          {
             $score_board = clone $TheBoard;
             list( $score, $game_score ) =
-               GameActionHelper::calculate_game_score( $score_board, $stonestring, $score_mode, $coord );
+               GameActionHelper::calculate_game_score( $score_board, $stonestring, $Ruleset, $coord );
          }
          $admResult = ( $GameFlags & GAMEFLAGS_ADMIN_RESULT ) ? sprintf(' (%s)', T_('set by admin#game')) : '';
          $extra_infos[score2text($Score, true) . $admResult] = 'Score';
@@ -278,7 +278,7 @@ $GLOBALS['ThePage'] = new Page('Game');
       {
          $score_board = clone $TheBoard;
          list( $score, $game_score ) =
-            GameActionHelper::calculate_game_score( $score_board, $stonestring, $score_mode );
+            GameActionHelper::calculate_game_score( $score_board, $stonestring, $Ruleset );
       }
    }
    else
@@ -416,7 +416,7 @@ $GLOBALS['ThePage'] = new Page('Game');
 
             $validation_step = false;
             list( $score, $game_score ) =
-               GameActionHelper::calculate_game_score( $TheBoard, $stonestring, $score_mode, $coord );
+               GameActionHelper::calculate_game_score( $TheBoard, $stonestring, $Ruleset, $coord );
 
             $done_url = "game.php?gid=$gid".URI_AMP."a=done"
                . ( $stonestring ? URI_AMP."stonestring=$stonestring" : '' );
@@ -438,7 +438,7 @@ $GLOBALS['ThePage'] = new Page('Game');
 
             $validation_step = true;
             list( $score, $game_score ) =
-               GameActionHelper::calculate_game_score( $TheBoard, $stonestring, $score_mode );
+               GameActionHelper::calculate_game_score( $TheBoard, $stonestring, $Ruleset );
 
             $extra_infos[T_('Score') . ": " . score2text($score, true)] = 'Score';
             break;
@@ -654,12 +654,17 @@ $GLOBALS['ThePage'] = new Page('Game');
       $TheBoard->draw_last_captures_box( T_('Last Move Capture') );
       echo "<br>\n";
    }
-   GameScore::draw_score_box( $game_score, $score_mode );
+   GameScore::draw_score_box( $game_score, $Ruleset );
    if ( FRIENDLY_SHORT_NAME != 'DGS' ) // show other scoring on test-server as well
    {
-      if ( $Status == GAME_STATUS_SCORE || $Status == GAME_STATUS_SCORE2 || $Status == GAME_STATUS_FINISHED )
-         echo span('NoPrint', "<br>\nOther scoring:<br>\n");
-      GameScore::draw_score_box( $game_score, ($score_mode == GSMODE_AREA_SCORING ? GSMODE_TERRITORY_SCORING : GSMODE_AREA_SCORING) );
+      $other_ruleset = ( $Ruleset == RULESET_JAPANESE ) ? RULESET_CHINESE : RULESET_JAPANESE;
+      if ( preg_match( "/^(".ALLOWED_RULESETS.")$/", $other_ruleset) )
+      {
+         if ( $Status == GAME_STATUS_SCORE || $Status == GAME_STATUS_SCORE2 || $Status == GAME_STATUS_FINISHED )
+            echo span('NoPrint', "<br>\nOther scoring:<br>\n");
+
+         GameScore::draw_score_box( $game_score, $other_ruleset );
+      }
    }
    echo "</td><td>";
 

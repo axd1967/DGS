@@ -3894,8 +3894,8 @@ define('GSCOL_WHITE', 1);
   */
 class GameScore
 {
-   /*! \brief GSMODE_TERRITORY_SCORING or GSMODE_AREA_SCORING. */
-   private $mode;
+   /*! \brief RULESET_JAPANESE, RULESET_CHINESE. */
+   private $ruleset;
    /*! \brief Number of handicap stones. */
    private $handicap;
    /*! \brief used komi [float] */
@@ -3911,9 +3911,9 @@ class GameScore
    /*! \brief dame-count */
    private $dame = 0;
 
-   /*! \brief calculated scoring-information (may be independently set from $this->mode). */
+   /*! \brief calculated scoring-information (may be independently set from $this->ruleset). */
    private $scoring_info = null;
-   /*! \brief calculated score (may be independently set from $this->mode). */
+   /*! \brief calculated score (may be independently set from $this->ruleset). */
    private $score = null;
    /*! \brief BoardStatus-object (if set), used for scoring with quick-suite. */
    private $board_status = null;
@@ -3921,12 +3921,12 @@ class GameScore
 
    /*!
     * \brief Constructs GameScore-object.
-    * \param $mode GSMODE_TERRITORY_SCORING or GSMODE_AREA_SCORING
+    * \param $ruleset RULESET_..
     */
-   public function __construct( $mode, $handicap, $komi )
+   public function __construct( $ruleset, $handicap, $komi )
    {
-      self::check_mode( $mode, 'constructor' );
-      $this->mode = $mode;
+      self::check_ruleset( $ruleset, 'constructor' );
+      $this->ruleset = $ruleset;
       $this->handicap = $handicap;
       $this->komi = $komi;
    }
@@ -4042,24 +4042,29 @@ class GameScore
 
 
    /*!
-    * \brief Calculating score for given mode (territory or area scoring).
-    * \param $mode null (use mode from constructing this object) or GSMODE_TERRITORY_SCORING or GSMODE_AREA_SCORING
+    * \brief Calculating score for given ruleset (which defines if territory or area scoring is used).
+    * \param $ruleset null (use ruleset from constructing this object) or specified RULESET_...
     * \param $fill_scoring_info fill scoring-info map if not-false, 'sgf' for sgf-text scoring-info
     * \return overall score (=score-white - score-black), also set in $this->score
     * NOTE: for format of scoring-info map see code and game.php#draw_score_box()
     */
-   public function calculate_score( $mode=null, $fill_scoring_info=true )
+   public function calculate_score( $ruleset=null, $fill_scoring_info=true )
    {
       // check args
-      if ( is_null($mode) )
-         $mode = $this->mode;
+      if ( is_null($ruleset) )
+         $ruleset = $this->ruleset;
       else
-         self::check_mode( $mode, 'get_score' );
+         self::check_ruleset( $ruleset, 'calculate_score' );
+      $gs_mode = getRulesetScoring( $ruleset );
+
+      $handi_compensation = getRulesetHandicapCompensation( $ruleset );
+      $handi_diff = ( is_numeric($handi_compensation) && $this->handicap > 0 )
+         ? max(0, $this->handicap + $handi_compensation)
+         : 0;
 
       // calculate score
-      if ( $mode == GSMODE_TERRITORY_SCORING )
+      if ( $gs_mode == GSMODE_TERRITORY_SCORING )
       {
-         $handi_diff = $this->handicap;
          $score_black = $this->territory[GSCOL_BLACK]
                         + $this->prisoners[GSCOL_BLACK]
                         + 2 * $this->dead_stones[GSCOL_WHITE];
@@ -4068,13 +4073,8 @@ class GameScore
                         + 2 * $this->dead_stones[GSCOL_BLACK]
                         + $this->komi;
       }
-      else //if ( $mode == GSMODE_AREA_SCORING )
+      elseif ( $gs_mode == GSMODE_AREA_SCORING )
       {
-         // "why H-1?": using rule #4 from AGA-rules http://www.cs.cmu.edu/~wjh/go/rules/AGA.html
-         //             "White receives an additional point of compensation for each Black handicap stone after the first."
-         // also see:   http://www.dragongoserver.net/forum/read.php?forum=4&thread=25182#25620
-         //             http://senseis.xmp.net/?TerritoryAndAreaScoring#toc6 "Handicap Go"
-         $handi_diff = ($this->handicap >= 2 ) ? $this->handicap - 1 : 0;
          $score_black = $this->stones[GSCOL_BLACK]
                         + $this->dead_stones[GSCOL_WHITE]
                         + $this->territory[GSCOL_BLACK]
@@ -4092,12 +4092,13 @@ class GameScore
          $fill_sgf = ( $fill_scoring_info == 'sgf' );
 
          $map = array(
-            'mode_text' => self::getModeText($mode),
-            'mode'  => $mode,
+            'ruleset' => $ruleset,
+            'mode'  => $gs_mode,
+            'mode_text' => self::getModeText($gs_mode),
             'dame'  => sprintf( '(%s)', $this->dame ),
             'score' => $this->score,
          );
-         $isArea = ( $mode == GSMODE_AREA_SCORING );
+         $isArea = ( $gs_mode == GSMODE_AREA_SCORING );
 
          $arr_sgf = array(); // keep texts in english
          if ( $fill_sgf && $isArea )
@@ -4166,11 +4167,11 @@ class GameScore
       return $this->score;
    }//calculate_score
 
-   /*! \brief Recalculates score if given mode different from mode of this object. */
-   public function recalculate_score( $mode, $fill_scoring_info=true )
+   /*! \brief Recalculates score if given ruleset different from ruleset of this object. */
+   public function recalculate_score( $ruleset, $fill_scoring_info=true )
    {
-      if ( strcmp($this->mode, $mode) != 0 )
-         $this->calculate_score($mode, $fill_scoring_info);
+      if ( strcmp($this->ruleset, $ruleset) != 0 )
+         $this->calculate_score($ruleset, $fill_scoring_info);
       return $this->score;
    }
 
@@ -4178,7 +4179,7 @@ class GameScore
    public function to_string()
    {
       return "GameScore:"
-         . "  mode={$this->mode}"
+         . "  ruleset={$this->ruleset}"
          . ", handicap={$this->handicap}"
          . ", komi={$this->komi}"
          . ", stones=[B" . $this->stones[GSCOL_BLACK] . ",W" . $this->stones[GSCOL_WHITE] . "]"
@@ -4187,8 +4188,6 @@ class GameScore
          . ", prisoners=[B" . $this->prisoners[GSCOL_BLACK] . ",W" . $this->prisoners[GSCOL_WHITE] . "]"
          . ", dame={$this->dame}"
          . ", score=[{$this->score}]"
-         . ", score.territory=" . $this->calculate_score(GSMODE_TERRITORY_SCORING, false)
-         . ", score.area=" . $this->calculate_score(GSMODE_AREA_SCORING, false)
          . ", scoring_info=[ " . print_r($this->scoring_info, false) . " ]"
          . ", board_status=[ " . print_r($this->board_status, false) . " ]"
          ;
@@ -4197,10 +4196,10 @@ class GameScore
 
    // ---------- static funcs ----------------------
 
-   private static function check_mode( $mode, $method )
+   private static function check_ruleset( $ruleset, $method )
    {
-      if ( $mode != GSMODE_TERRITORY_SCORING && $mode != GSMODE_AREA_SCORING )
-         error('invalid_args', "GameScore:$method($mode)");
+      if ( !preg_match( "/^(".ALLOWED_RULESETS.")$/", $ruleset) )
+         error('invalid_args', "GameScore:$method($ruleset)");
    }
 
    private static function check_gscol( $gscol, $method )
@@ -4209,13 +4208,13 @@ class GameScore
          error('invalid_args', "GameScore:$method($gscol)");
    }
 
-   /*! \brief [GUI] Draws table of given GameScore and scoring-mode using echo(). */
-   public static function draw_score_box( $game_score, $scoring_mode )
+   /*! \brief [GUI] Draws table of given GameScore and ruleset using echo(). */
+   public static function draw_score_box( $game_score, $ruleset )
    {
       if ( !($game_score instanceof GameScore) )
-         return;
+         error('internal_error', "game.draw_score_box");
 
-      $game_score->recalculate_score($scoring_mode); // recalc if needed
+      $game_score->recalculate_score($ruleset); // recalc if needed
       $score_info = $game_score->get_scoring_info();
 
       $fmtline3 = "<tr><td class=\"%s\">%s</td><td>%s</td><td>%s</td></tr>\n";
@@ -4223,9 +4222,10 @@ class GameScore
 
       global $base_path;
       $caption = T_('Scoring information#scoring');
-      $caption2 = $score_info['mode_text'];
+      $caption2 = sprintf( T_('%s ruleset'), getRulesetText( $score_info['ruleset'] ) );
+      $caption3 = $score_info['mode_text'];
       echo "<table id=\"scoreInfo\" class=\"Scoring NoPrint\">\n",
-         "<tr><th colspan=\"3\">$caption<br>($caption2)</th></tr>\n";
+         "<tr><th colspan=\"3\">$caption<br>$caption2<br>($caption3)</th></tr>\n";
       if ( !$score_info['skip_dame'] )
          echo sprintf( $fmtline2, 'Header', T_('Dame#scoring'), $score_info['dame'] );
       echo sprintf( "<tr class=\"Header\"><td></td><td>%s</td><td>%s</td></tr>\n",
@@ -5095,6 +5095,26 @@ function getRulesetScoring( $ruleset )
    );
    return $arr[$ruleset];
 }
+
+/*!
+ * \brief Returns by how much points handicap is changed on scoring.
+ * \return  0 = full handicap-compensation,
+ *         -1 = full handicap - 1,
+ *         null = NO compensation at all
+ *
+ * \note use full handicap-compensation as DGS-choice for chinese ruleset (with area scoring).
+ *       If later AGA will be introduced, this needs to be differed in the ruleset.
+ *       see http://www.dragongoserver.net/forum/read.php?forum=4&thread=32466#36522
+ */
+function getRulesetHandicapCompensation( $ruleset )
+{
+   static $arr = array(
+      RULESET_JAPANESE => 0,
+      RULESET_CHINESE  => 0,
+   );
+   return $arr[$ruleset];
+}
+
 
 function get_gamesettings_viewmode( $viewmode )
 {

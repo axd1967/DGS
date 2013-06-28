@@ -198,11 +198,11 @@ class GameCheckScore
 
    /*!
     * \brief Checks removal of stones by toggling stones.
-    * \param $scoring_mode GSMODE_TERRITORY_SCORING | GSMODE_AREA_SCORING
+    * \param $ruleset RULESET_...
     * \param $coord false to just treat stonestring; single sgf-coord or array of sgf-coords to toggle
     * \return GameScore-object
     */
-   public function check_remove( $scoring_mode, $coords=false, $with_board_status=false )
+   public function check_remove( $ruleset, $coords=false, $with_board_status=false )
    {
       $Size = $this->board->size;
       $array = &$this->board->array;
@@ -271,7 +271,7 @@ class GameCheckScore
             $this->stonestring .= number2sgf_coords($colnr, $rownr, $Size);
       }
 
-      $game_score = new GameScore( $scoring_mode, $this->handicap, $this->komi );
+      $game_score = new GameScore( $ruleset, $this->handicap, $this->komi );
       $game_score->set_prisoners_all( $this->black_prisoners, $this->white_prisoners );
       $this->board->fill_game_score( $game_score, /*coords*/false, $with_board_status );
 

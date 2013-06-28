@@ -292,7 +292,7 @@ class QuickHandlerGame extends QuickHandler
       $gchkscore = new GameCheckScore( $this->TheBoard, /*stonestr*/'', $Handicap, $Komi, $Black_Prisoners, $White_Prisoners );
       if ( $this->toggle_mode == GAMEOPTVAL_TOGGLE_UNIQUE )
          $gchkscore->set_toggle_unique();
-      $game_score = $gchkscore->check_remove( getRulesetScoring($Ruleset), $arr_coords, /*board-status*/true );
+      $game_score = $gchkscore->check_remove( $Ruleset, $arr_coords, /*board-status*/true );
       $score = $game_score->calculate_score();
 
       $this->addResultKey( 'ruleset', strtoupper($Ruleset) );

@@ -440,7 +440,7 @@ class GameActionHelper
       $gchkscore = new GameCheckScore( $this->board, $stonestring, $Handicap, $Komi, $Black_Prisoners, $White_Prisoners );
       if ( $toggle_uniq )
          $gchkscore->set_toggle_unique();
-      $game_score = $gchkscore->check_remove( getRulesetScoring($Ruleset), $arr_coords );
+      $game_score = $gchkscore->check_remove( $Ruleset, $arr_coords );
       $gchkscore->update_stonestring( $stonestring );
       $this->score = $game_score->calculate_score();
 
@@ -586,12 +586,12 @@ class GameActionHelper
    // ------------ static functions ----------------------------
 
    /*! \brief Returns arr( score, GameScore-object ), modified $board and $stonestring accordingly to calculate game-score. */
-   public static function calculate_game_score( &$board, &$stonestring, $score_mode, $coord=false )
+   public static function calculate_game_score( &$board, &$stonestring, $ruleset, $coord=false )
    {
       global $Handicap, $Komi, $Black_Prisoners, $White_Prisoners;
 
       $gchkscore = new GameCheckScore( $board, $stonestring, $Handicap, $Komi, $Black_Prisoners, $White_Prisoners );
-      $game_score = $gchkscore->check_remove( $score_mode, $coord );
+      $game_score = $gchkscore->check_remove( $ruleset, $coord );
       $gchkscore->update_stonestring( $stonestring );
       $score = $game_score->calculate_score();
 

@@ -850,8 +850,7 @@ class SgfBuilder
 
       if ( abs($score) < SCORE_RESIGN ) // scor-able
       {
-         $scoring_mode = getRulesetScoring( $this->game_row['Ruleset'] );
-         $game_score = new GameScore( $scoring_mode, $this->game_row['Handicap'], $this->game_row['Komi'] );
+         $game_score = new GameScore( $this->game_row['Ruleset'], $this->game_row['Handicap'], $this->game_row['Komi'] );
          $game_score->set_prisoners_all( $this->game_row['Black_Prisoners'], $this->game_row['White_Prisoners'] );
 
          $board = new Board( $this->gid, $this->game_row['Size'], $this->game_row['Moves'] );

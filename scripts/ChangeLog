@@ -18,7 +18,21 @@ ChangeLog
 
 2013-06-28 juga
 
-   * include/game_actions.php (GameScore.calculate_game_score),
+   * include/game_functions.php (class GameScore, ~.__construct, ~.calculate_score, ~.recalculate_score,
+       ~.to_string, ~.check_ruleset, ~.draw_score_box;
+       getRulesetHandicapCompensation),
+     include/game_actions.php (GameActionHelper.prepare_game_action_score, ~.calculate_game_score),
+     include/quick/quick_game.php (QuickHandlerGame.process_cmd_status_score),
+     include/sgf_builder.php (SgfBuilder.build_sgf_result),
+     include/move.php (GameCheckScore.check_remove),
+     game.php:
+   - changed game score-calculation
+     - changed handicap-compensation for area-scoring from H-1 to full handicap compensation
+     - refactored handicap-compensation for scoring-mode to depend on ruleset
+     - determine area or territory scoring-mode from ruleset
+     - add used ruleset in scoring-info-box on game-page
+
+   * include/game_actions.php (GameActionHelper.calculate_game_score),
      game.php:
    - bugfix: re-add showing of calculated game-score after code-cleanup removed too much code
 
