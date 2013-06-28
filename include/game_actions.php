@@ -585,6 +585,7 @@ class GameActionHelper
 
    // ------------ static functions ----------------------------
 
+   /*! \brief Returns arr( score, GameScore-object ), modified $board and $stonestring accordingly to calculate game-score. */
    public static function calculate_game_score( &$board, &$stonestring, $score_mode, $coord=false )
    {
       global $Handicap, $Komi, $Black_Prisoners, $White_Prisoners;
@@ -594,7 +595,7 @@ class GameActionHelper
       $gchkscore->update_stonestring( $stonestring );
       $score = $game_score->calculate_score();
 
-      return $score;
+      return array( $score, $game_score );
    }//calculate_game_score
 
 } //end 'GameActionHelper'

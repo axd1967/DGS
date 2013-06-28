@@ -18,6 +18,10 @@ ChangeLog
 
 2013-06-28 juga
 
+   * include/game_actions.php (GameScore.calculate_game_score),
+     game.php:
+   - bugfix: re-add showing of calculated game-score after code-cleanup removed too much code
+
    * scripts/README.developers, INSTALL, README, docs.php:
    - merged in and modified changes from axd about installing DGS, working with GIT
      - see https://sourceforge.net/p/dragongoserver/dgs-main/merge-requests/1/
