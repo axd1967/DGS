@@ -543,18 +543,21 @@ function echo_dragon_top_bar( $logged_in, $user_handle )
 function make_dragon_main_menu_logged_out()
 {
    $menu = new Matrix(); // see make_dragon_main_menu()
-   // object = arr( itemtext, itemlink [, arr( accesskey/class => value ) ]
+   // object = arr( itemtext, itemlink, itemtitle [, arr( accesskey/class => value ) ]
 
-   $menu->add( 1,1, array( T_('Login'),        'index.php?logout=t', array()));
-   $menu->add( 1,2, array( T_('Register'),     'register.php',       array()));
+   $menu->add( 1,1, array( T_('Login'),        'index.php?logout=t', '', array()));
+   $menu->add( 1,2, array( T_('Register'),     'register.php',       '', array()));
 
-   $menu->add( 2,1, array( T_('Introduction'), 'introduction.php', array()));
-   $menu->add( 2,2, array( T_('Policy'),       'policy.php',       array()));
-   $menu->add( 2,3, array( T_('Help / FAQ'),   'faq.php',          array( 'accesskey' => ACCKEY_MENU_FAQ )));
+   $menu->add( 2,1, array( T_('Introduction'), 'introduction.php', '', array()));
+   $menu->add( 2,2, array( T_('Policy'),       'policy.php',       '', array()));
+   $menu->add( 2,3, array( T_('Help / FAQ'),   'faq.php',
+      T_('search site documentation#menu'), array( 'accesskey' => ACCKEY_MENU_FAQ )));
 
-   $menu->add( 3,1, array( T_('Docs'),         'docs.php',         array( 'accesskey' => ACCKEY_MENU_DOCS )));
-   $menu->add( 3,2, array( T_('Site map'),     'site_map.php',     array()));
-   $menu->add( 3,3, array( T_('Statistics'),   'statistics.php',   array()));
+   $menu->add( 3,1, array( T_('Docs'),         'docs.php',
+      T_('show policy, release notes, links, contributors, tools, sources, license#menu'),
+      array( 'accesskey' => ACCKEY_MENU_DOCS )));
+   $menu->add( 3,2, array( T_('Site map'),     'site_map.php',     T_('show all pages of this site#menu'), array()));
+   $menu->add( 3,3, array( T_('Statistics'),   'statistics.php',   '', array()));
 
    return $menu;
 } //make_dragon_main_menu_logged_out
@@ -567,69 +570,85 @@ function make_dragon_main_menu( $player_row )
    $has_forum_new = load_global_forum_new();
 
    $menu = new Matrix(); // keep x/y sorted (then no need to sort in make_menu_horizontal/vertical)
-   // object = arr( itemtext, itemlink [, arr( accesskey/class => value ) ]
+   // object = arr( itemtext, itemlink, itemtitle [, arr( accesskey/class => value ) ]
    // NOTE: row-number can be skipped, only for ordering
    // NOTE: multi-text per matrix-entry possible: use list of arrays with arr( itemtext ..) or sep-str
-   $menu->add( 1,1, array( T_('Status'),       'status.php',       array( 'accesskey' => ACCKEY_MENU_STATUS, 'class' => 'strong' )));
-   $menu->add( 1,2, array( T_('Waiting room'), 'waiting_room.php', array( 'accesskey' => ACCKEY_MENU_WAITROOM )));
+   $menu->add( 1,1, array( T_('Status'),       'status.php',       '', array( 'accesskey' => ACCKEY_MENU_STATUS, 'class' => 'strong' )));
+   $menu->add( 1,2, array( T_('Waiting room'), 'waiting_room.php',
+      T_('show new game offers from other players#menu'), array( 'accesskey' => ACCKEY_MENU_WAITROOM )));
    if ( ALLOW_TOURNAMENTS )
-      $menu->add( 1,3, array( T_('Tournaments'), 'tournaments/list_tournaments.php', array( 'accesskey' => ACCKEY_MENU_TOURNAMENT )));
-   $menu->add( 1,4, array( T_('User info'),    'userinfo.php',     array( 'accesskey' => ACCKEY_MENU_USERINFO )));
+      $menu->add( 1,3, array( T_('Tournaments'), 'tournaments/list_tournaments.php', '', array( 'accesskey' => ACCKEY_MENU_TOURNAMENT )));
+   $menu->add( 1,4, array( T_('User info'),    'userinfo.php',     '', array( 'accesskey' => ACCKEY_MENU_USERINFO )));
 
-   $arr_msgs = array( array( T_('Messages'), 'list_messages.php', array( 'accesskey' => ACCKEY_MENU_MESSAGES ) ));
+   $arr_msgs = array( array( T_('Messages'), 'list_messages.php',
+      T_('show your messages and folders#menu'), array( 'accesskey' => ACCKEY_MENU_MESSAGES ) ));
    if ( $cnt_msg_new > 0 )
    {
       $arr_msgs[] = MINI_SPACING;
       $arr_msgs[] = array( span('MainMenuCount', $cnt_msg_new, '(%s)' ),
-         'list_messages.php?folder='.FOLDER_NEW, array( 'class' => 'MainMenuCount' ) );
+         'list_messages.php?folder='.FOLDER_NEW,
+         T_('show new messages#menu'),
+         array( 'class' => 'MainMenuCount' ) );
    }
    $menu->add( 2,1, $arr_msgs );
-   $menu->add( 2,2, array( T_('Send message'), 'message.php?mode=NewMessage', array( 'accesskey' => ACCKEY_MENU_SENDMSG )));
-   $menu->add( 2,3, array( T_('Invite'),       'message.php?mode=Invite',     array( 'accesskey' => ACCKEY_MENU_INVITE )));
-   $menu->add( 2,4, array( T_('New Game'),     'new_game.php',                array( 'accesskey' => ACCKEY_MENU_NEWGAME )));
+   $menu->add( 2,2, array( T_('Send message'), 'message.php?mode=NewMessage', '', array( 'accesskey' => ACCKEY_MENU_SENDMSG )));
+   $menu->add( 2,3, array( T_('Invite'),       'message.php?mode=Invite',
+      T_('send game invitation to another player#menu'), array( 'accesskey' => ACCKEY_MENU_INVITE )));
+   $menu->add( 2,4, array( T_('New Game'),     'new_game.php',
+      T_('offer new games in waiting room for other players#menu'), array( 'accesskey' => ACCKEY_MENU_NEWGAME )));
 
-   $menu->add( 3,1, array( T_('Users'),    'users.php',              array( 'accesskey' => ACCKEY_MENU_USERS )));
-   $menu->add( 3,2, array( T_('Contacts'), 'list_contacts.php',      array( 'accesskey' => ACCKEY_MENU_CONTACTS )));
-   $menu->add( 3,3, array( T_('Games'),    'show_games.php?uid=all', array( 'accesskey' => ACCKEY_MENU_GAMES )));
+   $menu->add( 3,1, array( T_('Users'),    'users.php',              '', array( 'accesskey' => ACCKEY_MENU_USERS )));
+   $menu->add( 3,2, array( T_('Contacts'), 'list_contacts.php',      '', array( 'accesskey' => ACCKEY_MENU_CONTACTS )));
+   $menu->add( 3,3, array( T_('Games'),    'show_games.php?uid=all', '', array( 'accesskey' => ACCKEY_MENU_GAMES )));
 
-   $menu->add( 4,1, array( T_('Introduction'), 'introduction.php', array()));
-   $menu->add( 4,2, array( T_('Help / FAQ'), 'faq.php',        array( 'accesskey' => ACCKEY_MENU_FAQ )));
-   $menu->add( 4,3, array( T_('Site map'), 'site_map.php',    array()));
-   $menu->add( 4,4, array( T_('Docs'),     'docs.php',        array( 'accesskey' => ACCKEY_MENU_DOCS )));
+   $menu->add( 4,1, array( T_('Introduction'), 'introduction.php', '', array()));
+   $menu->add( 4,2, array( T_('Help / FAQ'), 'faq.php',
+      T_('search site documentation#menu'), array( 'accesskey' => ACCKEY_MENU_FAQ )));
+   $menu->add( 4,3, array( T_('Site map'), 'site_map.php',
+      T_('show all pages of this site#menu'), array()));
+   $menu->add( 4,4, array( T_('Docs'),     'docs.php',
+      T_('show policy, release notes, links, contributors, tools, sources, license#menu'),
+      array( 'accesskey' => ACCKEY_MENU_DOCS )));
 
-   $arr_forums = array( array( T_('Forums'), 'forum/index.php', array( 'accesskey' => ACCKEY_MENU_FORUMS )) );
+   $arr_forums = array( array( T_('Forums'), 'forum/index.php',
+      T_('show support and discussion forums#menu'), array( 'accesskey' => ACCKEY_MENU_FORUMS )) );
    if ( $has_forum_new )
    {
       $arr_forums[] = MINI_SPACING;
-      $arr_forums[] = array( span('MainMenuCount', '(*)'), 'bookmark.php?jumpto=S1', array( 'class' => 'MainMenuCount' ) );
+      $arr_forums[] = array( span('MainMenuCount', '(*)'), 'bookmark.php?jumpto=S1',
+         T_('show forums with new entries#menu'), array( 'class' => 'MainMenuCount' ) );
    }
    $menu->add( 5,1, $arr_forums );
-   $arr_bulletins = array( array( T_('Bulletins'), 'list_bulletins.php?read=2'.URI_AMP.'no_adm=1', array()) );
+   $arr_bulletins = array( array( T_('Bulletins'), 'list_bulletins.php?read=2'.URI_AMP.'no_adm=1', '', array()) );
    if ( $cnt_bulletin_new > 0 )
    {
       $arr_bulletins[] = MINI_SPACING;
       $arr_bulletins[] = array( span('MainMenuCount', $cnt_bulletin_new, '(%s)' ),
-         'list_bulletins.php?text=1'.URI_AMP.'view=1'.URI_AMP.'no_adm=1', array( 'class' => 'MainMenuCount' ) );
+         'list_bulletins.php?text=1'.URI_AMP.'view=1'.URI_AMP.'no_adm=1',
+         '',
+         array( 'class' => 'MainMenuCount' ) );
    }
    $menu->add( 5,2, $arr_bulletins );
    if ( ALLOW_FEATURE_VOTE )
    {
-      $arr_feats = array( array( T_('Features'), 'features/list_votes.php', array( 'accesskey' => ACCKEY_MENU_VOTE )) );
+      $arr_feats = array( array( T_('Features'), 'features/list_votes.php',
+         T_('show feature votes#menu'), array( 'accesskey' => ACCKEY_MENU_VOTE )) );
       if ( $cnt_feat_new > 0 )
       {
          $arr_feats[] = MINI_SPACING;
          $arr_feats[] = array( span('MainMenuCount', $cnt_feat_new, '(%s)' ),
             'features/list_features.php?status=2'.URI_AMP.'my_vote=1',
+            T_('vote on new features#menu'),
             array( 'class' => 'MainMenuCount' ) );
       }
       $menu->add( 5,3, $arr_feats );
    }
    if ( ALLOW_GAME_EDITOR )
-      $menu->add( 5,4, array( T_('Game Editor'), 'game_editor.php', array()));
-   $menu->add( 5,5, array( T_('Goban Editor'), 'goban_editor.php', array()));
+      $menu->add( 5,4, array( T_('Game Editor'), 'game_editor.php', '', array()));
+   $menu->add( 5,5, array( T_('Goban Editor'), 'goban_editor.php', '', array()));
 
    return $menu;
-} //make_dragon_main_menu
+}//make_dragon_main_menu
 
 function make_dragon_tools()
 {
@@ -921,14 +940,14 @@ function make_menu_horizontal($menu)
          {
             if ( is_array($menuitem[0]) )
             {
-               // object = arr( sep-string | arr( itemtext, itemlink [, arr( accesskey/class => value ) ] ), ...) for multi-items
+               // object = arr( sep-string | arr( itemtext, itemlink, itemtitle [, arr( accesskey/class => value ) ] ), ...) for multi-items
                $content = '';
                foreach ( $menuitem as $mitem )
                {
                   if ( is_array($mitem) )
                   {//item-arr
-                     @list( $text, $link, $attbs ) = $mitem;
-                     $content .= anchor( $base_path.$link, $text, '', $attbs);
+                     @list( $text, $link, $title, $attbs ) = $mitem;
+                     $content .= anchor( $base_path.$link, $text, $title, $attbs);
                   }
                   else //separator
                      $content .= $mitem;
@@ -937,8 +956,8 @@ function make_menu_horizontal($menu)
             else
             {
                // object = arr( itemtext, itemlink, arr( accesskey/class => value ))
-               @list( $text, $link, $attbs ) = $menuitem;
-               $content = anchor( $base_path.$link, $text, '', $attbs);
+               @list( $text, $link, $title, $attbs ) = $menuitem;
+               $content = anchor( $base_path.$link, $text, $title, $attbs);
             }
          }
          else
@@ -962,7 +981,7 @@ function make_menu_horizontal($menu)
       . "\n  <td height=1><img src=\"{$base_path}images/dot.gif\" width=1 height=1 alt=\"\"></td>"
       . "\n </tr>\n</table>\n";
 */
-}
+}//make_menu_horizontal
 
 function make_menu_vertical($menu)
 {
@@ -998,13 +1017,13 @@ function make_menu_vertical($menu)
       {
          if ( is_array($menuitem[0]) )
          {
-            // object = arr( sep-string | arr( itemtext, itemlink [, arr( accesskey/class => value ) ] ), ...) for multi-items
+            // object = arr( sep-string | arr( itemtext, itemlink, itemtitle [, arr( accesskey/class => value ) ] ), ...) for multi-items
             foreach ( $menuitem as $mitem )
             {
                if ( is_array($mitem) )
                {//item-arr
-                  @list( $text, $link, $attbs ) = $mitem;
-                  echo anchor( $base_path.$link, $text, '', $attbs);
+                  @list( $text, $link, $title, $attbs ) = $mitem;
+                  echo anchor( $base_path.$link, $text, $title, $attbs);
                }
                else //separator
                   echo $mitem;
@@ -1013,8 +1032,8 @@ function make_menu_vertical($menu)
          else
          {
             // object = arr( itemtext, itemlink, arr( accesskey/class => value ))
-            @list( $text, $link, $attbs ) = $menuitem;
-            echo anchor( $base_path.$link, $text, '', $attbs);
+            @list( $text, $link, $title, $attbs ) = $menuitem;
+            echo anchor( $base_path.$link, $text, $title, $attbs);
          }
          echo '<br>';
       }
@@ -1031,7 +1050,7 @@ function make_menu_vertical($menu)
    echo "\n  </td>"
       . "\n </tr>\n</table>\n";
 */
-}
+}//make_menu_vertical
 
 function echo_menu_tools( $array, $width=0)
 {

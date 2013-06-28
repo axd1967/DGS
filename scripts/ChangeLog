@@ -16,6 +16,12 @@ Developers INFO:
 ChangeLog
 ------------------------------------------------------------------
 
+2013-06-28 juga
+
+   * include/std_functions.php (make_dragon_main_menu_logged_out, make_dragon_main_menu,
+       make_menu_horizontal, make_menu_vertical):
+   - added tooltips for main-menu entries for clarification of the used short-terms
+
 2013-06-24 juga
 
    * include/classlib_userconfig.php (ConfigBoard.load_config_board_or_default),
