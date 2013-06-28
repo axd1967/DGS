@@ -19,9 +19,11 @@ Requirements:
 *) A webserver which can use php, e.g., apache <http://httpd.apache.org>
 *) PHP >= 5.1.0 <http://www.php.net>
 *) MySQL >= 5.0.38 <http://www.mysql.com>
-*) git client <http://git-scm.com>
-
 *) GD >= 2.0.0 to draw rating graph and upload images <http://www.boutell.com/gd/>
+
+Optionally
+
+*) git client <http://git-scm.com>
 *) FreeType for optional fonts in rating graph <http://www.freetype.org>
 
 Last versions used by Dragon Live Server:
@@ -49,14 +51,15 @@ Either download from GIT-repository on SourceForge.net:
    # OR: with an anonymous read-only checkout from SourceForge:
    git clone git://git.code.sf.net/p/dragongoserver/dgs-main DGS_ROOT
 
-OR download a snapshot from   http://www.dragongoserver.net/snapshot.php
+   # OR: download a snapshot from   http://www.dragongoserver.net/snapshot.php
 
+For both git clone methods, the images are already included, while the download
+of an archive from the snapshot-page does only contain the sources while the images
+must be downloaded separately from the snapshot-page as well.
 
-For both methods also download the images and translation-data from
+If the images are downloaded from the snapshot, unpack the archive into the dragon-root
+directory to obtain a tree like:
 
-   http://www.dragongoserver.net/snapshot.php
-
-Those files have to be extracted into the dragon-root directory to obtain a tree like:
 
       DGS_ROOT/
          include/
@@ -68,12 +71,9 @@ Those files have to be extracted into the dragon-root directory to obtain a tree
          7/
          ...
          50/
-         index.php
-         status.php
-         ...
 
-Copy  /images/favicon.ico  into the DGS_ROOT folder (or place your own favicon.ico
-in the root folder). Some older browser ignore the shortcut-icon directive
+Copy or link  /images/favicon.ico  into the DGS_ROOT folder (or place your own favicon.ico
+in the root folder). Some older browsers ignore the shortcut-icon directive
 and expects it to be in the document-root.
 
 Copy all  /images/apple-touch-icon-*.png  into the DGS_ROOT folder to avoid 'page_not_found'-errors.
@@ -84,9 +84,19 @@ For reference see also http://mathiasbynens.be/notes/touch-icons
 
 2) Make a mysql database and a mysql user to access the database:
 
-mysql> CREATE DATABASE dragondb;
-mysql> GRANT SELECT, INSERT, UPDATE, DELETE, CREATE TEMPORARY TABLES, LOCK TABLES ON dragondb.* TO dragon@localhost IDENTIFIED BY 'secret';
+IMPORTANT NOTE:
+For creating and altering database tables you will need a separate database admin user 'dragon-admin'.
+For safety reasons, the db-user used for the website MUST NOT have rights to create, alter or drop tables!
 
+   mysql> CREATE DATABASE dragondb;
+   mysql> GRANT SELECT, INSERT, UPDATE, DELETE, CREATE TEMPORARY TABLES, LOCK TABLES
+          ON dragondb.* TO dragonuser@localhost IDENTIFIED BY 'secret';
+
+As dragon-admin user you may either use the database 'root'-user which has all rights or
+create a separate user with additional access rights.
+
+   mysql> GRANT SELECT, INSERT, UPDATE, DELETE, CREATE TEMPORARY TABLES, LOCK TABLES,
+          CREATE, ALTER, DROP ON dragondb.* TO dragonadmin@localhost IDENTIFIED BY 'adminsecret';
 
 
 #--------------------------------------------------------------------
@@ -101,16 +111,17 @@ NOTE: This DDL-Export has been created using PHPMyAdmin: Export(DB) with Export 
       - Data: off
       'dragon-ddl.sql' (unused tables removed)
 
-> mysql -D dragondb < specs/db/dragon-ddl.sql
+With an db admin user create all the tables:
 
-(( or maybe, if needed by your configuration, the more complete:
-> mysql -D dragondb -h mysqlhost -u username -p password < specs/db/dragon-ddl.sql
-))
+   > mysql -D dragondb < specs/db/dragon-ddl.sql
+
+   ## or maybe, if needed by your configuration, the more complete:
+   > mysql -D dragondb -h mysqlhost -u dragon-admin -p < specs/db/dragon-ddl.sql
 
 
 Import mandatory initial-data for the server:
 
-> mysql -D dragondb < specs/db/dragon-data.sql
+   > mysql -D dragondb < specs/db/dragon-data.sql
 
 
 IMPORTANT NOTE:
@@ -118,14 +129,26 @@ IMPORTANT NOTE:
    Otherwise the import may fail because of changed primary-keys of translation-data that will be
    inserted by the running server itself.
 
-Add translations: the data file can be downloaded and extracted from:
+Create the translations:
+
+  > mkdir translations
+  > su -c 'chgrp www-data translations'
+  > chmod 775 translations/
+  > pushd scripts
+  > php make_all_translationfiles.php
+  > popd
+
+
+Now, add the latest translations.
+The data file can be downloaded and extracted from:
 
    http://www.dragongoserver.net/snapshot.php
 
    gunzip Translationdata.mysql.gz
    mysql -D dragondb < Translationdata.mysql
 
-(( This could be delayed until you need it:
+
+(( The following creation of an DGS admin user could be delayed until you need it:
 Add at least one admin user by registering a user via the website and
 then give him the full set of priviledges by manually setting his
 Adminlevel field to 0xffff (setting all bits) in the Players table.
@@ -169,10 +192,8 @@ NOTE: order of the following items is not strict. You may need to re-edit the
 * Edit permissions for include/config-local.php and directory translations/:
 
   Find out which group your webserver is using (e.g. www-data).
-  > mkdir -p translations/
-  > su -c 'chgrp www-data include/config-local.php translations'
+  > su -c 'chgrp www-data include/config-local.php'
   > chmod 640 include/config-local.php
-  > chmod 775 translations/
 
 * If wanted, create a CACHE_FOLDER (from include/config-local.php) with
   the proper user/groups and rights, so that your web-server
@@ -230,7 +251,7 @@ NOTE: order of the following items is not strict. You may need to re-edit the
   and the unit for the variable $timeadjust is seconds.
   It's added to form the "current timestamp" ($NOW).
 
-* You need to create translations, so take a sidestep to read and execute
+* [step to review] You need to create translations, so take a sidestep to read and execute
   the directives in 'scripts/README.translations'
 
 * If you want to adjust the source-code, please have a look to the
@@ -349,8 +370,9 @@ MAILTO= < EMAIL-OF-YOUR-CHOICE >
 
 #--------------------------------------------------------------------
 
-7) If you have problems you can ask for help in Support forum
-   at dragon   http://www.dragongoserver.net
+7) If you have problems you can ask for help in the Support or Development forum
+   at dragon   http://www.dragongoserver.net   as explained in the "help" note
+   at the top of this documentation.
 
    If you are successful and have a running Dragon server,
    we would appreciate a note in the dragon forums as well.

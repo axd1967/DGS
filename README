@@ -1,4 +1,9 @@
-Currently SourceForge.net does not support branch-specific access-permissions.
+This file explains how to contribute to the DGS project.
+
+NOTE:
+   Currently SourceForge.net does not support branch-specific access-permissions.
+   That's the reason for a 2nd work repository as outline in this documentation.
+
 
 The repository with URL:
 
@@ -14,7 +19,8 @@ You can also use other remote servers (like github.com), but please use the same
 conventions on git-usage and committing as described below!
 
 
-Conventions and How to use the work-area (replace upper-case words with your setting):
+If using the dgs-work repository, here are the conventions on how to use the
+work-area (replace upper-case words with your setting):
 
    1. get a SourceForge account USER
    2. ask project-admin to add your USER in user-group 'Workers'
@@ -25,24 +31,27 @@ Conventions and How to use the work-area (replace upper-case words with your set
       git config user.name "FIRSTNAME LASTNAME"
       git config user.email "USER@users.sf.net"
 
+   5. [optional] To ease the authentification with SourceForge you can upload your
+      public-SSH-key in your SF user account. See  http://sourceforge.net/account/services
+
    # create local working-dir and create empty repository
    mkdir WORK
    cd WORK
    git init
 
-   # add remote server (as Worker you only have read-only access to the 'main' repository)
-   git remote add main ssh://USER@git.code.sf.net/p/dragongoserver/dgs-main
-   git remote add work ssh://USER@git.code.sf.net/p/dragongoserver/dgs-work
+   # add remote server (as Worker you only have read-only access to the 'dgs-main' repository)
+   git remote add dgs-main ssh://USER@git.code.sf.net/p/dragongoserver/dgs-main
+   git remote add dgs-work ssh://USER@git.code.sf.net/p/dragongoserver/dgs-work
 
-   # shows all branches (including master branch)
-   git remote show main
+   # show all branches (including master branch)
+   git remote show dgs-main
 
    # download repository: BRANCH = optional to fetch all branches, else specific branch-name to fetch
-   git fetch main [BRANCH]
+   git fetch dgs-main [BRANCH]
 
-   # open own branch by cloning 'main/master'
-   # CONVENTION-NOTE: prefix your branch with your SHORTNAME or USER (at least when pushing to work-repository)
-   git checkout -b SHORTNAME/branch-name main/master
+   # open own branch by cloning 'dgs-main/master'
+   # CONVENTION-NOTE: prefix your branch with your SHORTNAME or USER (at least when pushing to dgs-work)
+   git checkout -b SHORTNAME/branch-name dgs-main/master
 
    # CONVENTION to save on remote work-area (for sharing or backup)
    git push work SHORTNAME/branch-name

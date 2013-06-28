@@ -18,6 +18,10 @@ ChangeLog
 
 2013-06-28 juga
 
+   * scripts/README.developers, INSTALL, README, docs.php:
+   - merged in and modified changes from axd about installing DGS, working with GIT
+     - see https://sourceforge.net/p/dragongoserver/dgs-main/merge-requests/1/
+
    * include/std_functions.php (make_dragon_main_menu_logged_out, make_dragon_main_menu,
        make_menu_horizontal, make_menu_vertical):
    - added tooltips for main-menu entries for clarification of the used short-terms

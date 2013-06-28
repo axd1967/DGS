@@ -40,6 +40,58 @@ General instructions for developers:
 
    For using the shared work-area on SourceForge, read the 'README'-file in the DGS-rootdir.
 
+----------------- Working with GIT - the Integration-Manager Worflow
+
+   Note: following is for users that want to mirror the official master branch of the main repository
+   in order to contribute to DGS.
+   Forking off dgs-main to have a variant DGS server is not discussed here.
+
+   The root README document explains how to work with the dgs-work repository.
+   Here's an alternative to working with the dgs-main (rater than the dgs-work) repository.
+
+   1. Clone the dgs-main repository into your own (public) GIT repository on SF or other GIT server
+      that you will use to publish your changes.
+
+   2. Clone the dgs-main repository into a local (private) repository where you will work on your branches.
+
+   3. The idea is now to fetch updates from dgs-main into your master branch, push your private branches
+      to your public repository, and nicely ask the Integrator (see [2] and dgs-main users) to merge
+      your branches.
+
+   The idea working the dgs-work repository as described in the root README document works in the same way,
+   just that the dgs-work repository is used as your (public) repository.
+
+   Your local master branch will reflect the latest changes from dgs-main. So from time to time you need
+   to update your master branch:
+
+      > (if necessary, git stash...)
+      > git checkout master
+      > git pull dgs-main
+      > (git stash pop...)
+
+   When working on bugs/issues:
+
+   1. create a local branch based off master
+
+      > git checkout -b <newbranch> master
+
+   2. work on <newbranch>, commit, etc...
+
+   3. while the branch hasn't been published, consider rebasing with the latest master content
+
+   4. when the branch is ready, publish your branch in your public repository
+
+      > git push <my_public_SF_rep> <newbranch>:<newbranch>
+
+   5. Be aware that a merge may be refused and you might need to re-merge your work on recent changes
+      in dgs-main/master.
+      Remember to never rebase a published branch!
+
+   For more details on this workflow, see also [1].
+
+   [1] http://git-scm.com/book/en/Distributed-Git-Distributed-Workflows#Integration-Manager-Workflow
+   [2] http://www.dragongoserver.net/people.php
+
 
 ----------------- PHP: Guest-User
 
@@ -71,7 +123,7 @@ General instructions for developers:
 
 ----------------- Layout:
 
-   DGS "layout"-style for sources (PHP, JavaScript similar):
+   DGS "layout"-style for sources (PHP, JavaScript similar): (see also next section)
 
    - TAB-width is 3 spaces, written with spaces.
    - max. line-length should be 120 (exceptions possible, e.g. for texts)
@@ -188,6 +240,17 @@ General instructions for developers:
      Comments on single-lines (or few lines) in //-style.
 
    - Best to orient the layout at the existing sources.
+
+----------------- Editor settings:
+
+   To implement the layout rules above, here are some setups for popular editors:
+
+   - VIM: add in ~/.vimrc
+
+         :set expandtab       " put spaces for each <TAB> pressed
+         :set shiftwidth=3    " autoindent steps
+         :set softtabstop=3   " also insert spaces while editing
+         :set tabstop=8       " KEEP the default (or whatever you like); tabstop defines the number of spaces for existing tabs
 
 ----------------- Database:
 

@@ -63,7 +63,7 @@ $GLOBALS['ThePage'] = new Page('Docs', 0, ROBOTS_NO_FOLLOW,
    add_link_page_link("http://sourceforge.net/p/dragongoserver/dgs-main",
                      T_('Browse Dragon source code (GIT)'));
    add_link_page_link("http://dragongoserver.cvs.sourceforge.net/dragongoserver/DragonGoServer/",
-                     T_('Browse Dragon source code (CVS till May-2013)'));
+                     T_('Browse Dragon source code (CVS, till May-2013)'));
    add_link_page_link("http://sourceforge.net/projects/dragongoserver/",
                      T_('Dragon project page at sourceforge'));
    add_link_page_link("licence.php", T_('License'), 'AGPL');
