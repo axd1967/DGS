@@ -158,7 +158,8 @@ Copyright (C) 2001-2013  Erik Ouchterlony, Jens-Uwe Gaspar
       * Added bulletin-handler to
          * retrieve single bulletin
 
-   * Added tooltip with server-version in top-bar on DGS-link
+   * Added tooltips for main-menu entries
+   * Added server-version in bottom-bar
 
 
    Bug fixes:
