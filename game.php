@@ -43,6 +43,7 @@ require_once 'include/board.php';
 require_once 'include/move.php';
 require_once 'include/classlib_user.php';
 require_once 'include/time_functions.php';
+require_once 'include/rulesets.php';
 require_once 'include/rating.php';
 require_once 'include/table_infos.php';
 require_once 'include/classlib_goban.php';
@@ -127,7 +128,7 @@ $GLOBALS['ThePage'] = new Page('Game');
    else
       $tourney = null;
 
-   $score_mode = getRulesetScoring($Ruleset);
+   $score_mode = Ruleset::getRulesetScoring($Ruleset);
 
    if ( @$_REQUEST['movechange'] )
    {
@@ -654,16 +655,19 @@ $GLOBALS['ThePage'] = new Page('Game');
       $TheBoard->draw_last_captures_box( T_('Last Move Capture') );
       echo "<br>\n";
    }
-   GameScore::draw_score_box( $game_score, $Ruleset );
-   if ( FRIENDLY_SHORT_NAME != 'DGS' ) // show other scoring on test-server as well
+   if( !is_null($game_score) )
    {
-      $other_ruleset = ( $Ruleset == RULESET_JAPANESE ) ? RULESET_CHINESE : RULESET_JAPANESE;
-      if ( preg_match( "/^(".ALLOWED_RULESETS.")$/", $other_ruleset) )
+      GameScore::draw_score_box( $game_score, $Ruleset );
+      if ( FRIENDLY_SHORT_NAME != 'DGS' ) // show other scoring on test-server as well
       {
-         if ( $Status == GAME_STATUS_SCORE || $Status == GAME_STATUS_SCORE2 || $Status == GAME_STATUS_FINISHED )
-            echo span('NoPrint', "<br>\nOther scoring:<br>\n");
+         $other_ruleset = ( $Ruleset == RULESET_JAPANESE ) ? RULESET_CHINESE : RULESET_JAPANESE;
+         if ( preg_match( "/^(".ALLOWED_RULESETS.")$/", $other_ruleset) )
+         {
+            if ( $Status == GAME_STATUS_SCORE || $Status == GAME_STATUS_SCORE2 || $Status == GAME_STATUS_FINISHED )
+               echo span('NoPrint', "<br>\nOther scoring:<br>\n");
 
-         GameScore::draw_score_box( $game_score, $other_ruleset );
+            GameScore::draw_score_box( $game_score, $other_ruleset );
+         }
       }
    }
    echo "</td><td>";
@@ -1289,7 +1293,7 @@ function draw_game_info( $game_row, $game_setup, $board, $tourney )
          echo_image_gameinfo($game_row['ID']),
          echo_image_shapeinfo($shape_id, $game_row['Size'], $game_row['ShapeSnapshot'], false, true),
       "</td>\n";
-   echo "<td colspan=\"", ($cols-1), "\">", T_('Ruleset'), ': ', getRulesetText($game_row['Ruleset']);
+   echo "<td colspan=\"", ($cols-1), "\">", T_('Ruleset'), ': ', Ruleset::getRulesetText($game_row['Ruleset']);
    echo $sep, T_('Komi'), ': ', $komi;
    echo $sep, T_('Handicap'), ': ', $game_row['Handicap'];
    echo $sep, T_('Rated game'), ': ',
