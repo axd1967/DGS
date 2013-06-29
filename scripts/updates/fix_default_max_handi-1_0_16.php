@@ -279,8 +279,18 @@ function handle_waiting_room_gamesetup()
 
    echo "<hr>Fix waiting-room entries ...";
 
-   dbg_query( "UPDATE Waitingroom SET MaxHandicap=".DEFAULT_MAX_HANDICAP." WHERE MaxHandicap IN (".MAX_HANDICAP.",127)" );
-   $cnt_fix = ( $do_it ) ? mysql_affected_rows(): 0;
+   if ( $do_it )
+   {
+      dbg_query( "UPDATE Waitingroom SET MaxHandicap=".DEFAULT_MAX_HANDICAP." WHERE MaxHandicap IN (".MAX_HANDICAP.",127)" );
+      $cnt_fix = mysql_affected_rows();
+   }
+   else
+   {
+      $row = mysql_single_fetch( "scripts.fix_default_max_handi.handle_waiting_room_gamesetup",
+         $query = "SELECT COUNT(*) AS X_Count FROM Waitingroom WHERE MaxHandicap IN (".MAX_HANDICAP.",127)" );
+      echo "<BR>$query; ";
+      $cnt_fix = ($row) ? (int)$row['X_Count'] : 0;
+   }
 
    echo "<br>Found $cnt_fix waiting-room entries that required fixing ...\n";
 
@@ -293,8 +303,18 @@ function handle_tournament_rules_gamesetup()
 
    echo "<hr>Fix tournament-rules entries ...";
 
-   dbg_query( "UPDATE TournamentRules SET MaxHandicap=".DEFAULT_MAX_HANDICAP." WHERE MaxHandicap IN (".MAX_HANDICAP.",127)" );
-   $cnt_fix = ( $do_it ) ? mysql_affected_rows(): 0;
+   if ( $do_it )
+   {
+      dbg_query( "UPDATE TournamentRules SET MaxHandicap=".DEFAULT_MAX_HANDICAP." WHERE MaxHandicap IN (".MAX_HANDICAP.",127)" );
+      $cnt_fix = mysql_affected_rows();
+   }
+   else
+   {
+      $row = mysql_single_fetch( "scripts.fix_default_max_handi.handle_tournament_rules_gamesetup",
+         $query = "SELECT COUNT(*) AS X_Count FROM TournamentRules WHERE MaxHandicap IN (".MAX_HANDICAP.",127)" );
+      echo "<BR>$query; ";
+      $cnt_fix = ($row) ? (int)$row['X_Count'] : 0;
+   }
 
    echo "<br>Found $cnt_fix tournament-rules entries that required fixing ...\n";
 
