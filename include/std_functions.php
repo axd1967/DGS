@@ -379,8 +379,9 @@ function start_html( $title, $no_cache, $skinname=NULL, $style_string=NULL, $las
 
    if ( is_javascript_enabled() )
    {
-      $js_base_path = add_js_var( 'base_path', $base_path );
-      echo "\n<script language=\"JavaScript\" type=\"text/javascript\">\n$js_base_path\n</script>";
+      $js_code = array(); // global declarations first (before including JS-libs)
+      $js_code[] = add_js_var( 'base_path', $base_path );
+      echo "\n<script language=\"JavaScript\" type=\"text/javascript\">\n", implode("\n", $js_code), "</script>";
       echo "\n<script language=\"JavaScript\" type=\"text/javascript\" src=\"{$base_path}js/common.js\"></script>";
 
       if ( $enable_js_game )
@@ -396,6 +397,7 @@ function start_html( $title, $no_cache, $skinname=NULL, $style_string=NULL, $las
             echo "\n<script language=\"JavaScript\" type=\"text/javascript\" src=\"{$base_path}js/goeditor.js\"></script>";
       }
 
+      // additional JS-code (after including JS-libs)
       if ( !is_null($javascript) && is_string($javascript) )
          echo "\n<script language=\"JavaScript\" type=\"text/javascript\">\n$javascript\n</script>";
    }
