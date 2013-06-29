@@ -113,7 +113,7 @@ class Game_SetupTest extends PHPUnit_Framework_TestCase {
 
    public function test_encode_invite() {
       $gsi = $this->gsi;
-      $this->assertEquals( 'T7:U123:H2:0:0:0:K-199.5:0:J1:FK:R0:0:0:0:0:C:I17:1:r2:0:tJ:61:17:4:1', $gsi->encode(true) );
+      $this->assertEquals( 'T7:U123:H2:-1:3:9:K-199.5:70.0:J1:FK:R0:0:0:0:0:C:I17:1:r2:0:tJ:61:17:4:1', $gsi->encode(true) );
 
       $gsi->Handicaptype = HTYPE_PROPER;
       $gsi->Komi = 6;
@@ -130,7 +130,7 @@ class Game_SetupTest extends PHPUnit_Framework_TestCase {
       $gsi->Byotime = 10;
       $gsi->Byoperiods = 3;
       $gsi->WeekendClock = false;
-      $this->assertEquals( 'T2:U123:H2:0:0:0:K6.0:0:J2:FK:R0:0:0:0:0:C:I18:0:r1:1:tC:6:10:3:0', $gsi->encode(true) );
+      $this->assertEquals( 'T2:U123:H2:-1:3:9:K6.0:10.0:J2:FK:R0:0:0:0:0:C:I18:0:r1:1:tC:6:10:3:0', $gsi->encode(true) );
    }
 
    public function test_new_from_game_setup() {
@@ -139,8 +139,8 @@ class Game_SetupTest extends PHPUnit_Framework_TestCase {
       $this->assertEquals( $this->gs->to_string(true), $gs->to_string(true) );
 
       $gs = GameSetup::new_from_game_setup( 'T2:U123:H2:7:3:9:K6.0:-190.5:J0:FK-7.0:R0:-333:1000:5:0:Cbla:blub' );
-      $this->assertEquals( 'GameSetup: U=123 T=proper H=2/7/3-9 K=6/-190.5 J=KEEP_KOMI FK=-7 MBR=No Rating=-333..1000 MRG=5 SO=0 M=[bla:blub]; #G=1 view=', $gs->to_string() );
-      $this->assertEquals( 'GameSetup: U=123 T=proper H=2/7/3-9 K=6/-190.5 J=KEEP_KOMI FK=-7 MBR=No Rating=-333..1000 MRG=5 SO=0 M=[bla:blub]; S=19 Rules=JAPANESE Rated=Yes StdH=Yes Time=FIS:210/15/0:Yes tid=0 shape=0/[] gtype=GO/; #G=1 view=', $gs->to_string(true) );
+      $this->assertEquals( 'GameSetup: U=123 T=proper H=2/7/3..9 K=6/-190.5 J=KEEP_KOMI FK=-7 MBR=No Rating=-333..1000 MRG=5 SO=0 M=[bla:blub]; #G=1 view=', $gs->to_string() );
+      $this->assertEquals( 'GameSetup: U=123 T=proper H=2/7/3..9 K=6/-190.5 J=KEEP_KOMI FK=-7 MBR=No Rating=-333..1000 MRG=5 SO=0 M=[bla:blub]; S=19 Rules=JAPANESE Rated=Yes StdH=Yes Time=FIS:210/15/0:Yes tid=0 shape=0/[] gtype=GO/; #G=1 view=', $gs->to_string(true) );
    }
 
    public function test_new_from_game_setup_invitation() {
@@ -150,7 +150,7 @@ class Game_SetupTest extends PHPUnit_Framework_TestCase {
       $this->assertEquals( $this->gsi->to_string(true), $gsi->to_string(true) );
 
       $gsi = GameSetup::new_from_game_setup( 'T2:U123:H2:7:3:9:K6.0:-190.5:J0:FK-7.0:R0:-333:1000:5:0:C:I9:0:r2:1:tC:50:10:7:0', true );
-      $this->assertEquals( 'GameSetup: U=123 T=proper H=2/7/3-9 K=6/-190.5 J=KEEP_KOMI FK=-7 MBR=No Rating=-333..1000 MRG=5 SO=0 M=[]; S=9 Rules=CHINESE Rated=No StdH=Yes Time=CAN:50/10/7:No tid=0 shape=0/[] gtype=GO/; #G=1 view=', $gsi->to_string(true) );
+      $this->assertEquals( 'GameSetup: U=123 T=proper H=2/7/3..9 K=6/-190.5 J=KEEP_KOMI FK=-7 MBR=No Rating=-333..1000 MRG=5 SO=0 M=[]; S=9 Rules=CHINESE Rated=No StdH=Yes Time=CAN:50/10/7:No tid=0 shape=0/[] gtype=GO/; #G=1 view=', $gsi->to_string(true) );
 
       // catch error: no message for 'Ccomment'
       UnitTestHelper::clearErrors(ERROR_MODE_TEST);
@@ -173,7 +173,7 @@ class Game_SetupTest extends PHPUnit_Framework_TestCase {
       $gs2->Size = 13;
       $str = GameSetup::build_invitation_game_setup( $gs1, $gs2 );
       $this->assertEquals( $gs1->encode(true) . GS_SEP_INVITATION . $gs2->encode(true), $str );
-      $this->assertEquals( 'T7:U11:H2:0:0:0:K5.5:0:J1:FK:R0:0:0:0:0:C:I17:1:r2:0:tJ:61:17:4:1 T7:U22:H2:0:0:0:K-199.5:0:J1:FK:R0:0:0:0:0:C:I13:1:r2:0:tJ:61:17:4:1', $str );
+      $this->assertEquals( 'T7:U11:H2:-1:3:9:K5.5:70.0:J1:FK:R0:0:0:0:0:C:I17:1:r2:0:tJ:61:17:4:1 T7:U22:H2:-1:3:9:K-199.5:70.0:J1:FK:R0:0:0:0:0:C:I13:1:r2:0:tJ:61:17:4:1', $str );
 
       $arr_gs = GameSetup::parse_invitation_game_setup( 22, '' );
       $this->assertEquals( 2, count($arr_gs));
@@ -201,11 +201,13 @@ class Game_SetupTest extends PHPUnit_Framework_TestCase {
       $this->assertEquals(
          array( 'Ruleset', 'Chinese', 'Japanese' ), $r[$i++] );
       $this->assertEquals(
-         array( 'Board size', '9', '11' ), $r[$i++] );
+         array( 'Board Size', '9', '11' ), $r[$i++] );
       $this->assertEquals(
-         array( 'Handicap-Type', 'Proper handicap', 'Manual setting with My Color [Double], Handicap 0, Komi -5', 1 ), $r[$i++] );
+         array( 'Handicap Type', 'Proper handicap', 'Manual setting with My Color [Double], Handicap 0, Komi -5', 1 ), $r[$i++] );
       $this->assertEquals(
          array( 'Handicap stones placement', 'Standard-Handicap', 'Free-Handicap' ), $r[$i++] );
+      $this->assertEquals(
+         array( 'Adjust Komi', '', '[Allow Jigo]' ), $r[$i++] );
       $this->assertEquals(
          array( 'Time', 'C: 3Te 5Stdn. + 10Stdn. / 7', 'C: 6Te + 5Stdn. / 4' ), $r[$i++] );
       $this->assertEquals(
@@ -217,7 +219,9 @@ class Game_SetupTest extends PHPUnit_Framework_TestCase {
       $r = GameSetup::build_invitation_diffs($gs2,$gs3);
       $i = 0;
       $this->assertEquals(
-         array( 'Handicap-Type', 'Manual setting with My Color [Double], Handicap 0, Komi -5', 'Fair Komi of Type [Secret Auction Komi], Jigo-Check [Forbid Jigo]', 1 ), $r[$i++] );
+         array( 'Handicap Type', 'Manual setting with My Color [Double], Handicap 0, Komi -5', 'Fair Komi of Type [Secret Auction Komi], Jigo mode [Forbid Jigo]', 1 ), $r[$i++] );
+      $this->assertEquals(
+         array( 'Adjust Komi', '[Allow Jigo]', '[No Jigo]' ), $r[$i++] );
       $this->assertEquals(
          array( 'Time', 'C: 6Te + 5Stdn. / 4', 'J: 6Te + 5Stdn. * 4' ), $r[$i++] );
    }
