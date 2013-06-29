@@ -22,6 +22,7 @@ $TranslateGroups[] = "Game";
 require_once 'include/globals.php';
 require_once 'include/db/games.php';
 require_once 'include/board.php';
+require_once 'include/rulesets.php';
 require_once 'include/rating.php';
 require_once 'include/classlib_profile.php';
 require_once 'include/classlib_user.php';
@@ -2539,7 +2540,7 @@ class GameSetup
       $this->GameType = GAMETYPE_GO;
       $this->GamePlayers = '';
 
-      $this->Ruleset = get_default_ruleset();
+      $this->Ruleset = Ruleset::get_default_ruleset();
       $this->Size = 19;
       $this->Rated = true;
       $this->StdHandicap = true;
@@ -2930,7 +2931,7 @@ class GameSetup
       $out = array();
 
       if ( $gs_old->Ruleset !== $gs_new->Ruleset )
-         $out[] = array( T_('Ruleset'), getRulesetText($gs_old->Ruleset), getRulesetText($gs_new->Ruleset) );
+         $out[] = array( T_('Ruleset'), Ruleset::getRulesetText($gs_old->Ruleset), Ruleset::getRulesetText($gs_new->Ruleset) );
       if ( $gs_old->Size !== $gs_new->Size )
          $out[] = array( T_('Board Size'), $gs_old->Size, $gs_new->Size );
 
@@ -3506,12 +3507,12 @@ class GameSettingsCalculator
       if ( $CategoryHandiType == CAT_HTYPE_PROPER )
       {
          list( $infoHandicap, $infoKomi, $info_i_am_black, $is_nigiri ) =
-            suggest_proper($this->pl_rating, $this->opp_rating, $this->grow['Size']);
+            suggest_proper($this->pl_rating, $this->opp_rating, $this->grow['Ruleset'], $this->grow['Size']);
       }
       elseif ( $CategoryHandiType == CAT_HTYPE_CONV )
       {
          list( $infoHandicap, $infoKomi, $info_i_am_black, $is_nigiri ) =
-            suggest_conventional($this->pl_rating, $this->opp_rating, $this->grow['Size']);
+            suggest_conventional($this->pl_rating, $this->opp_rating, $this->grow['Ruleset'], $this->grow['Size']);
       }
       elseif ( $is_fairkomi )
       {
@@ -4055,9 +4056,9 @@ class GameScore
          $ruleset = $this->ruleset;
       else
          self::check_ruleset( $ruleset, 'calculate_score' );
-      $gs_mode = getRulesetScoring( $ruleset );
+      $gs_mode = Ruleset::getRulesetScoring( $ruleset );
 
-      $handi_compensation = getRulesetHandicapCompensation( $ruleset );
+      $handi_compensation = Ruleset::getRulesetHandicapCompensation( $ruleset );
       $handi_diff = ( is_numeric($handi_compensation) && $this->handicap > 0 )
          ? max(0, $this->handicap + $handi_compensation)
          : 0;
@@ -4222,7 +4223,7 @@ class GameScore
 
       global $base_path;
       $caption = T_('Scoring information#scoring');
-      $caption2 = sprintf( T_('%s ruleset'), getRulesetText( $score_info['ruleset'] ) );
+      $caption2 = sprintf( T_('%s ruleset'), Ruleset::getRulesetText( $score_info['ruleset'] ) );
       $caption3 = $score_info['mode_text'];
       echo "<table id=\"scoreInfo\" class=\"Scoring NoPrint\">\n",
          "<tr><th colspan=\"3\">$caption<br>$caption2<br>($caption3)</th></tr>\n";
@@ -5051,70 +5052,14 @@ function build_image_double_game( $with_sep=false, $class='' )
           . image( $base_path.'17/b.gif', T_('Double game (Black)'), null, $class);
 }
 
-function getRulesetText( $ruleset=null )
+function build_game_settings_javascript()
 {
-   static $ARR_RULESET = null; // ruleset => text
-
-   // lazy-init of texts
-   if ( is_null($ARR_RULESET) )
-   {
-      $arr = array();
-      if ( preg_match( "/^(".ALLOWED_RULESETS.")$/", RULESET_JAPANESE) )
-         $arr[RULESET_JAPANESE] = T_('Japanese#ruleset');
-      if ( preg_match( "/^(".ALLOWED_RULESETS.")$/", RULESET_CHINESE) )
-         $arr[RULESET_CHINESE] = T_('Chinese#ruleset');
-      if ( count($arr) == 0 )
-         error('internal_error', "getRulesetText.bad_config.must_not_be_empty(ALLOWED_RULESETS)");
-      $ARR_RULESET = $arr;
-   }
-
-   if ( is_null($ruleset) )
-      return $ARR_RULESET;
-   if ( !isset($ARR_RULESET[$ruleset]) )
-      error('invalid_args', "getRulesetText($ruleset)");
-   return $ARR_RULESET[$ruleset];
-}//getRulesetText
-
-function build_ruleset_filter_array( $prefix='' )
-{
-   $arr = array( T_('All') => '' );
-   $arr_rulesets = getRulesetText();
-   foreach ( $arr_rulesets as $ruleset => $tmp )
-   {
-      if ( preg_match( "/^(".ALLOWED_RULESETS.")$/", $ruleset) )
-         $arr[getRulesetText($ruleset)] = "{$prefix}Ruleset='$ruleset'";
-   }
-   return $arr;
+   if ( is_javascript_enabled() )
+      $js = add_js_var('ARR_RULESET_DEF_KOMI', Ruleset::build_ruleset_default_komi_javascript_map(), /*raw*/true );
+   else
+      $js = null;
+   return $js;
 }
-
-function getRulesetScoring( $ruleset )
-{
-   static $arr = array(
-      RULESET_JAPANESE => GSMODE_TERRITORY_SCORING,
-      RULESET_CHINESE  => GSMODE_AREA_SCORING,
-   );
-   return $arr[$ruleset];
-}
-
-/*!
- * \brief Returns by how much points handicap is changed on scoring.
- * \return  0 = full handicap-compensation,
- *         -1 = full handicap - 1,
- *         null = NO compensation at all
- *
- * \note use full handicap-compensation as DGS-choice for chinese ruleset (with area scoring).
- *       If later AGA will be introduced, this needs to be differed in the ruleset.
- *       see http://www.dragongoserver.net/forum/read.php?forum=4&thread=32466#36522
- */
-function getRulesetHandicapCompensation( $ruleset )
-{
-   static $arr = array(
-      RULESET_JAPANESE => 0,
-      RULESET_CHINESE  => 0,
-   );
-   return $arr[$ruleset];
-}
-
 
 function get_gamesettings_viewmode( $viewmode )
 {
@@ -5362,11 +5307,5 @@ function increaseMoveStats( $uid )
       "VALUES ($uid,$slot_time,$slot_wday,$slot_week,1) " .
       "ON DUPLICATE KEY UPDATE Counter=Counter+1" );
 }//increaseMoveStats
-
-function get_default_ruleset()
-{
-   $arr = explode('|', ALLOWED_RULESETS);
-   return ( count($arr) ) ? $arr[0] : RULESET_JAPANESE;
-}
 
 ?>

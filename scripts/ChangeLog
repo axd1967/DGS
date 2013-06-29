@@ -16,6 +16,33 @@ Developers INFO:
 ChangeLog
 ------------------------------------------------------------------
 
+2013-06-29 juga
+
+   * game.php:
+   - bugfix: show game-score-info-box only if game-score calculated for different stages of game
+   - bugfix: on test-server show game-score-info also for other ruleset if allowed
+
+   * include/game_functions.php (GameSetup.set_defaults, ~.build_invitation_diffs;
+       GameSettingsCalculator.calculate_settings;
+       GameScore.calculate_score;
+       build_image_double_game),
+     include/rulesets.php (class Ruleset, ~.getRulesetText, ~.build_ruleset_filter_array,
+       ~.getRulesetScoring, ~.getRulesetHandicapCompensation, ~.get_default_ruleset),
+     include/wroom_control.php (WaitingroomControl.join_waitingroom_game, ~.calculate_offer_settings),
+     include/rating.php (suggest_proper, suggest_conventional),
+     include/make_game.php (accept_invite_game, create_game),
+     include/message_functions.php (game_settings_form),
+     include/utilities.php (add_js_var),
+     tournaments/include/tournament_rules.php (TournamentRules.prepare_create_game_row),
+     js/common.js (updateRulesetDefaulKomi),
+     tournaments/edit_rules.php, tournaments/list_tournaments.php, tournaments/view_tournament.php,
+     game_players.php (build_form_change_group_with_handicap),
+     new_game.php (handle_add_game),
+     game.php, gameinfo.php, message.php show_games.php, status.php, waiting_room.php:
+   - used default komi 7.5 for chinese-ruleset on conventional and proper handicap-type
+   - changed used komi in game-settings-form on changing ruleset using JavaScript
+   - refactored ruleset-related functions into Ruleset-class
+
 2013-06-28 juga
 
    * include/game_functions.php (class GameScore, ~.__construct, ~.calculate_score, ~.recalculate_score,

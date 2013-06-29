@@ -206,9 +206,9 @@ function js_safe( $str, $quote="'" )
 }
 
 /*! \brief (GUI) Returns JavaScript initializing global-var with quoted PHP-string. */
-function add_js_var( $varname, $text )
+function add_js_var( $varname, $text, $raw_text=false )
 {
-   return sprintf( "var %s = %s;\n", $varname, js_safe($text) );
+   return sprintf( "var %s = %s;\n", $varname, ($raw_text ? $text : js_safe($text)) );
 }
 
 /*! \brief Formats elements of array with given sprintf-format */

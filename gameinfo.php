@@ -25,6 +25,7 @@ require_once 'include/std_classes.php';
 require_once 'include/table_columns.php';
 require_once 'include/table_infos.php';
 require_once 'include/time_functions.php';
+require_once 'include/rulesets.php';
 require_once 'include/rating.php';
 require_once 'include/game_functions.php';
 if ( ALLOW_TOURNAMENTS ) {
@@ -193,7 +194,7 @@ function build_rating_diff( $rating_diff )
    }
    $itable->add_sinfo( T_('Start Time'),  date(DATE_FMT3, @$grow['X_Starttime']) );
    $itable->add_sinfo( T_('Lastchanged'), date(DATE_FMT3, @$grow['X_Lastchanged']) );
-   $itable->add_sinfo( T_('Ruleset'),     getRulesetText($grow['Ruleset']) );
+   $itable->add_sinfo( T_('Ruleset'),     Ruleset::getRulesetText($grow['Ruleset']) );
    $itable->add_sinfo( T_('Size'),        $grow['Size'] );
    $itable->add_sinfo( T_('Handicap'),    $grow['Handicap'] );
    $itable->add_sinfo( T_('Komi'),

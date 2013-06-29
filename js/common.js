@@ -74,6 +74,17 @@ function hideInfo()
    document.getElementById('InfoBox').style.visibility = 'hidden';
 }
 
+function updateRulesetDefaulKomi( e )
+{
+   var ruleset = e.value;
+   if ( !(typeof ARR_RULESET_DEF_KOMI === 'undefined') )
+   {
+      // NOTE: see also PHP-function game_settings_form()
+      document.getElementById('RulesetDefKomi').textContent = ARR_RULESET_DEF_KOMI[ruleset];
+      document.getElementById('GSF_komi_m').value = ARR_RULESET_DEF_KOMI[ruleset];
+   }
+}
+
 // ---------- Tournament-Ladder --------------------
 
 // NOTE: requires global vars with translated texts: T_rankInfoTitle/Format

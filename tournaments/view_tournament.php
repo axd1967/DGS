@@ -24,6 +24,7 @@ require_once 'include/std_functions.php';
 require_once 'include/gui_functions.php';
 require_once 'include/form_functions.php';
 require_once 'include/table_infos.php';
+require_once 'include/rulesets.php';
 require_once 'include/rating.php';
 require_once 'include/game_functions.php';
 require_once 'include/shape_control.php';
@@ -356,7 +357,7 @@ function echo_tournament_rules( $tourney, $trule )
                   $trule->ShapeID, $arr_shape['Size'], $arr_shape['Snapshot'], $arr_shape['PlayColorB'] ) );
       }
    }
-   $itable->add_sinfo( T_('Ruleset'), getRulesetText($trule->Ruleset) );
+   $itable->add_sinfo( T_('Ruleset'), Ruleset::getRulesetText($trule->Ruleset) );
    $itable->add_sinfo( T_('Board Size'), $trule->Size .' x '. $trule->Size );
    $itable->add_sinfo( T_('Handicap Type'),
          TournamentRules::getHandicaptypeText($trule->Handicaptype, $tourney->Type) );

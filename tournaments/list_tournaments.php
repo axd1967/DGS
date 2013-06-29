@@ -23,6 +23,7 @@ chdir('..');
 require_once 'include/std_functions.php';
 require_once 'include/std_classes.php';
 require_once 'include/table_columns.php';
+require_once 'include/rulesets.php';
 require_once 'include/game_functions.php';
 require_once 'include/time_functions.php';
 require_once 'include/filter.php';
@@ -276,7 +277,7 @@ $GLOBALS['ThePage'] = new Page('TournamentList');
       if ( $ttable->Is_Column_Displayed[14] )
          $row_str[14] = ($orow['X_Rated'] == 'N') ? T_('No') : T_('Yes');
       if ( $ttable->Is_Column_Displayed[15] )
-         $row_str[15] = getRulesetText( $orow['Ruleset'] );
+         $row_str[15] = Ruleset::getRulesetText( $orow['Ruleset'] );
       if ( $ttable->Is_Column_Displayed[16] )
          $row_str[16] = TimeFormat::echo_time_limit( $orow['Maintime'], $orow['Byotype'],
             $orow['Byotime'], $orow['Byoperiods'], TIMEFMT_SHORT|TIMEFMT_ADDTYPE );

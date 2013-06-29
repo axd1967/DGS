@@ -22,13 +22,13 @@ $TranslateGroups[] = "Game";
 require_once 'include/std_functions.php';
 require_once 'include/gui_functions.php';
 require_once 'include/std_classes.php';
+require_once 'include/rulesets.php';
 require_once 'include/rating.php';
 require_once 'include/table_columns.php';
 require_once 'include/form_functions.php';
 require_once 'include/message_functions.php';
 require_once 'include/game_functions.php';
 require_once 'include/time_functions.php';
-require_once 'include/rating.php';
 require_once 'include/utilities.php';
 
 
@@ -111,7 +111,8 @@ require_once 'include/utilities.php';
       $title = T_('Add new game#mpg');
    else
       $title = T_('Add new game to waiting room');
-   start_page($title, true, $logged_in, $player_row );
+   start_page( $title, true, $logged_in, $player_row, null, null, build_game_settings_javascript() );
+
    echo "<h3 class=Header>", sprintf( "%s (%s)", $title, get_gamesettings_viewmode($viewmode) ), "</h3>\n";
 
    $maxGamesCheck = new MaxGamesCheck();
@@ -368,7 +369,7 @@ function handle_add_game( $my_id, $viewmode )
       //$nrGames = 1;
       $handicap_type = HTYPE_NIGIRI;
       $handicap = 0;
-      $komi = 6.5;
+      $komi = Ruleset::getRulesetDefaultKomi( $ruleset );
       $rated = 'N';
       //$min_rated_games = 0;
       //$same_opponent = -1; // same-opp only ONCE for Team-/Zen-Go

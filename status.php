@@ -21,6 +21,7 @@ $TranslateGroups[] = "Common";
 
 require_once 'include/std_functions.php';
 require_once 'include/gui_functions.php';
+require_once 'include/rulesets.php';
 require_once 'include/rating.php';
 require_once 'include/table_infos.php';
 require_once 'include/table_columns.php';
@@ -231,7 +232,7 @@ if ( $player_row['GamesMPG'] > 0 )
          $row_arr = array(
             1 => button_TD_anchor( "game_players.php?gid=".$row['ID'], $row['ID'] ),
             2 => GameTexts::format_game_type( $row['GameType'], $row['GamePlayers'] ),
-            3 => getRulesetText($row['Ruleset']),
+            3 => Ruleset::getRulesetText($row['Ruleset']),
             4 => $row['Size'],
             5 => ($row['X_Lastchanged'] > 0) ? date(DATE_FMT, $row['X_Lastchanged']) : '',
             6 => $joined_players,
@@ -400,7 +401,7 @@ function load_games_to_move( $uid, &$gtable )
          if ( $gtable->Is_Column_Displayed[17] )
             $row_arr[17] = ($X_Priority) ? $X_Priority : ''; // don't show 0
          if ( $gtable->Is_Column_Displayed[18] )
-            $row_arr[18] = getRulesetText($Ruleset);
+            $row_arr[18] = Ruleset::getRulesetText($Ruleset);
          if ( $gtable->Is_Column_Displayed[19] )
             $row_arr[19] = GameTexts::format_game_type( $GameType, $GamePlayers )
                . ($GameType == GAMETYPE_GO ? '' : MINI_SPACING . echo_image_game_players( $ID ) )

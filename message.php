@@ -301,7 +301,7 @@ define('MSGBOXROWS_INVITE', 6);
    else
       $style_str = '';
 
-   start_page("Message - $submode", true, $logged_in, $player_row, $style_str );
+   start_page("Message - $submode", true, $logged_in, $player_row, $style_str, null, build_game_settings_javascript() );
 
    echo "<center>\n";
 

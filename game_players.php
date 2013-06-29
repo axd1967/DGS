@@ -27,6 +27,7 @@ require_once 'include/table_columns.php';
 require_once 'include/table_infos.php';
 require_once 'include/game_functions.php';
 require_once 'include/classlib_user.php';
+require_once 'include/rulesets.php';
 require_once 'include/rating.php';
 require_once 'include/countries.php';
 require_once 'include/make_game.php';
@@ -327,7 +328,7 @@ function build_game_settings( $grow )
          sprintf( "%s, %d x %d, %s: %s, %s: %s",
                GameTexts::format_game_type($grow['GameType'], $grow['GamePlayers']),
                $grow['Size'], $grow['Size'],
-               T_('Ruleset'), getRulesetText($grow['Ruleset']),
+               T_('Ruleset'), Ruleset::getRulesetText($grow['Ruleset']),
                T_('Rated game'), yesno($grow['Rated']) // normally never Rated
          ));
    $itable->add_sinfo(
@@ -767,8 +768,8 @@ function build_form_change_group_with_handicap( &$form, $grow, $cmd, $enable_edi
       $arr_ratings = MultiPlayerGame::calc_average_group_ratings($arr_game_players);
       $rating1 = $arr_ratings[$arr_color_keys[0]];
       $rating2 = $arr_ratings[$arr_color_keys[1]];
-      $arr_conv_sugg = suggest_conventional( $rating1, $rating2, $grow['Size'] ); // H,K,i'm-black
-      $arr_prop_sugg = suggest_proper( $rating1, $rating2, $grow['Size'] );
+      $arr_conv_sugg = suggest_conventional( $rating1, $rating2, $grow['Ruleset'], $grow['Size'] ); // H,K,i'm-black
+      $arr_prop_sugg = suggest_proper( $rating1, $rating2, $grow['Ruleset'], $grow['Size'] );
 
       $arr_gp_id = array(
             implode(',', get_group_color_game_player_id( $arr_color_keys[0] )),

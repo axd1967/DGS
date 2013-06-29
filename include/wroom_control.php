@@ -220,6 +220,7 @@ class WaitingroomControl
             error('waitingroom_not_same_opponent', "WC:join_waitingroom_game.mpg_same_opponent($gid,$my_id)");
       }
 
+      $ruleset = $game_row['Ruleset'];
       $size = limit( $game_row['Size'], MIN_BOARD_SIZE, MAX_BOARD_SIZE, 19 );
 
       $my_rating = $player_row['Rating2'];
@@ -234,14 +235,14 @@ class WaitingroomControl
             if ( !$iamrated || !$opprated )
                error('no_initial_rating', "WC:join_waitingroom_game.conv($wr_id)");
             list( $game_row['Handicap'], $game_row['Komi'], $i_am_black, $is_nigiri ) =
-               suggest_conventional( $my_rating, $opprating, $size);
+               suggest_conventional( $my_rating, $opprating, $ruleset, $size);
             break;
 
          case HTYPE_PROPER:
             if ( !$iamrated || !$opprated )
                error('no_initial_rating', "WC:join_waitingroom_game.proper($wr_id)");
             list( $game_row['Handicap'], $game_row['Komi'], $i_am_black, $is_nigiri ) =
-               suggest_proper( $my_rating, $opprating, $size);
+               suggest_proper( $my_rating, $opprating, $ruleset, $size);
             break;
 
          case HTYPE_DOUBLE:
@@ -476,10 +477,10 @@ class WaitingroomOffer
          {
             if ( $handitype == HTYPE_CONV )
                list( $infoHandi, $infoKomi, $iamblack, $info_nigiri ) =
-                  suggest_conventional( $my_rating, $this->row['WRP_Rating2'], $this->row['Size'] );
+                  suggest_conventional( $my_rating, $this->row['WRP_Rating2'], $this->row['Ruleset'], $this->row['Size'] );
             elseif ( $handitype == HTYPE_PROPER )
                list( $infoHandi, $infoKomi, $iamblack, $info_nigiri ) =
-                  suggest_proper( $my_rating, $this->row['WRP_Rating2'], $this->row['Size'] );
+                  suggest_proper( $my_rating, $this->row['WRP_Rating2'], $this->row['Ruleset'], $this->row['Size'] );
          }
       }
 

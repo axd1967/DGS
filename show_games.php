@@ -24,6 +24,7 @@ require_once 'include/gui_functions.php';
 require_once 'include/table_columns.php';
 require_once 'include/form_functions.php';
 require_once 'include/game_functions.php';
+require_once 'include/rulesets.php';
 require_once 'include/rating.php';
 require_once 'include/filter.php';
 require_once 'include/classlib_profile.php';
@@ -192,7 +193,7 @@ $GLOBALS['ThePage'] = new Page('GamesList');
          array( FC_TIME_UNITS => FRDTU_ALL_ABS, FC_SIZE => 8, FC_DEFAULT => $restrict_games ));
    $gfilter->add_filter(14, 'RatedSelect', 'G.Rated', true,
          array( FC_FNAME => 'rated' ));
-   $gfilter->add_filter(43, 'Selection', build_ruleset_filter_array('G.'), true);
+   $gfilter->add_filter(43, 'Selection', Ruleset::build_ruleset_filter_array('G.'), true);
    $gfilter->add_filter(44, 'GameType', $game_type_filter_array, true,
          array( FC_MPGAME => $allow_mpgame ));
 
@@ -827,7 +828,7 @@ $GLOBALS['ThePage'] = new Page('GamesList');
          $row_arr[45] = ( $TG_Challenge > 0 ) ? T_('Challenger#T_ladder') : T_('Defender#T_ladder');
 
       if ( $gtable->Is_Column_Displayed[43] )
-         $row_arr[43] = getRulesetText($Ruleset);
+         $row_arr[43] = Ruleset::getRulesetText($Ruleset);
       if ( $gtable->Is_Column_Displayed[44] )
       {
          $row_arr[44] = GameTexts::format_game_type($GameType, $GamePlayers);

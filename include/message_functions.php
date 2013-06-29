@@ -22,6 +22,7 @@ $TranslateGroups[] = "Messages";
 require_once 'include/std_classes.php';
 require_once 'include/gui_functions.php';
 require_once 'include/table_infos.php';
+require_once 'include/rulesets.php';
 require_once 'include/rating.php';
 require_once 'include/game_functions.php';
 require_once 'include/time_functions.php';
@@ -116,11 +117,11 @@ function game_settings_form(&$mform, $formstyle, $viewmode, $iamrated=true, $my_
    $Handitype = ($iamrated) ? HTYPE_CONV : HTYPE_NIGIRI;
    $Color_m = HTYPE_NIGIRI; // always my-color of current-user (also for dispute)
    $CategoryHandiType = get_category_handicaptype( $Handitype );
+   $Ruleset = Ruleset::get_default_ruleset();
    $Handicap_m = 0;
-   $Komi_m = DEFAULT_KOMI;
+   $Komi_m = Ruleset::getRulesetDefaultKomi( $Ruleset );
    $AdjustKomi = 0.0;
    $JigoMode = JIGOMODE_KEEP_KOMI;
-   $Ruleset = get_default_ruleset();
    $AdjustHandicap = 0;
    $MinHandicap = 0;
    $MaxHandicap = DEFAULT_MAX_HANDICAP;
@@ -366,18 +367,21 @@ function game_settings_form(&$mform, $formstyle, $viewmode, $iamrated=true, $my_
       $mform->add_row( array( 'SPACE' ) );
    }
 
-   $arr_rulesets = getRulesetText(); // non-empty
+   $arr_rulesets = Ruleset::getRulesetText(); // non-empty
+   $arr = array( 'DESCRIPTION', T_('Ruleset') );
    if ( count($arr_rulesets) > 1 )
    {
-      $mform->add_row( array( 'DESCRIPTION', T_('Ruleset'),
-                              'SELECTBOX', 'ruleset', 1, $arr_rulesets, $Ruleset, false ) );
+      // NOTE: need also build_game_settings_javascript() in start_page()-call on respective-page!
+      $attb_arr = ( is_javascript_enabled() ) ? array( 'onchange' => 'updateRulesetDefaulKomi(this)' ) : array();
+      array_push( $arr, 'SELECTBOXX', 'ruleset', 1, $arr_rulesets, $Ruleset, false, $attb_arr );
    }
    else // one static ruleset
    {
       $ruleset_vals = array_values($arr_rulesets);
-      $mform->add_row( array( 'DESCRIPTION', T_('Ruleset'),
-                              'TEXT', $ruleset_vals[0], ));
+      array_push( $arr, 'TEXT', $ruleset_vals[0] );
    }
+   array_push( $arr, 'TEXT', SMALL_SPACING . T_('use default komi') . " <span id=\"RulesetDefKomi\">$Komi_m</span>" );
+   $mform->add_row( $arr );
 
    $value_array = array_value_to_key_and_value( range( MIN_BOARD_SIZE, MAX_BOARD_SIZE ));
    $mform->add_row( array( 'DESCRIPTION', T_('Board Size'),
@@ -398,8 +402,8 @@ function game_settings_form(&$mform, $formstyle, $viewmode, $iamrated=true, $my_
          {
             $r1 = $map_ratings['rating1'];
             $r2 = $map_ratings['rating2'];
-            $arr_conv_sugg = suggest_conventional( $r1, $r2, $Size );
-            $arr_prop_sugg = suggest_proper( $r1, $r2, $Size );
+            $arr_conv_sugg = suggest_conventional( $r1, $r2, $Ruleset, $Size );
+            $arr_prop_sugg = suggest_proper( $r1, $r2, $Ruleset, $Size );
             $sugg_conv = '<span class="Suggestion">' .
                sptext( build_suggestion_shortinfo($arr_conv_sugg) ) . '</span>';
             $sugg_prop = '<span class="Suggestion">' .
@@ -453,7 +457,8 @@ function game_settings_form(&$mform, $formstyle, $viewmode, $iamrated=true, $my_
          'TEXT', sptext(T_('Handicap'),1),
          'SELECTBOX', 'handicap_m', 1, $handi_stones, $Handicap_m, false,
          'TEXT', sptext(T_('Komi'),1),
-         'TEXTINPUTX', 'komi_m', 5, 5, $Komi_m, $gsc->get_class_error_field('komi_m'), ));
+         'TEXTINPUTX', 'komi_m', 5, 5, $Komi_m,
+            'id="GSF_komi_m" ' . $gsc->get_class_error_field('komi_m'), )); // 'id' for javascript-update
    }//manual HType
 
 
@@ -954,7 +959,7 @@ function game_info_table( $tablestyle, $game_row, $player_row, $iamrated, $use_s
    if ( $tablestyle == GSET_WAITINGROOM )
       $itable->add_sinfo( T_('Game Type'), GameTexts::format_game_type($GameType, $GamePlayers) );
 
-   $itable->add_sinfo( T_('Ruleset'), getRulesetText($Ruleset) );
+   $itable->add_sinfo( T_('Ruleset'), Ruleset::getRulesetText($Ruleset) );
    $itable->add_sinfo( T_('Size'), $Size );
 
    $color_class = 'class=InTextImage';

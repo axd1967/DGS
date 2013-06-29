@@ -146,7 +146,7 @@ $GLOBALS['ThePage'] = new Page('TournamentRulesEdit');
    $trform->add_hidden( 'tid', $tid );
 
 
-   start_page( $title, true, $logged_in, $player_row );
+   start_page( $title, true, $logged_in, $player_row, null, null, build_game_settings_javascript() );
    echo "<h3 class=Header>$title</h3>\n";
 
    $trform->echo_string();

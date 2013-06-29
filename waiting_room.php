@@ -23,6 +23,7 @@ require_once 'include/std_functions.php';
 require_once 'include/gui_functions.php';
 require_once 'include/std_classes.php';
 require_once 'include/countries.php';
+require_once 'include/rulesets.php';
 require_once 'include/rating.php';
 require_once 'include/table_columns.php';
 require_once 'include/form_functions.php';
@@ -139,7 +140,7 @@ require_once 'include/wroom_control.php';
       $wrfilter->add_filter(13, 'BoolSelect', 'StdHandicap', true);
    $wrfilter->add_filter(15, 'Country', 'WRP.Country', false,
          array( FC_HIDE => 1 ));
-   $wrfilter->add_filter(19, 'Selection', build_ruleset_filter_array(), true);
+   $wrfilter->add_filter(19, 'Selection', Ruleset::build_ruleset_filter_array(), true);
    $wrfilter->add_filter(20, 'Selection', $game_type_filter_array, true);
    $wrfilter->init();
    $f_suitable =& $wrfilter->get_filter(8);
@@ -300,7 +301,7 @@ require_once 'include/wroom_control.php';
          if ( $wrtable->Is_Column_Displayed[18] ) // Settings (resulting Color + Handi + Komi)
             $wrow_strings[18] = $wro_settings;
          if ( $wrtable->Is_Column_Displayed[19] )
-            $wrow_strings[19] = getRulesetText($Ruleset);
+            $wrow_strings[19] = Ruleset::getRulesetText($Ruleset);
          if ( $wrtable->Is_Column_Displayed[20] )
          {
             $wrow_strings[20] =

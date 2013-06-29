@@ -21,6 +21,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 require_once 'include/game_functions.php';
 require_once 'include/time_functions.php';
+require_once 'include/rulesets.php';
 require_once 'include/rating.php';
 require_once 'include/board.php';
 
@@ -365,6 +366,7 @@ function accept_invite_game( $gid, $player_row, $opponent_row )
    $opprating = $opponent_row['Rating2'];
    $opprated = ( $opponent_row['RatingStatus'] != RATING_NONE && is_numeric($opprating) && $opprating >= MIN_RATING );
 
+   $ruleset = $game_row['Ruleset'];
    $size = $game_row['Size'];
    $double = false;
 
@@ -375,13 +377,13 @@ function accept_invite_game( $gid, $player_row, $opponent_row )
       case HTYPE_CONV:
          if ( !$iamrated || !$opprated )
             error('no_initial_rating', "$dbgmsg.check.conv_H.rating");
-         list( $handicap, $komi, $i_am_black, $is_nigiri ) = suggest_conventional( $my_rating, $opprating, $size);
+         list( $handicap, $komi, $i_am_black, $is_nigiri ) = suggest_conventional( $my_rating, $opprating, $ruleset, $size);
          break;
 
       case HTYPE_PROPER:
          if ( !$iamrated || !$opprated )
             error('no_initial_rating', "$dbgmsg.check.prop.rating");
-         list( $handicap, $komi, $i_am_black, $is_nigiri ) = suggest_proper( $my_rating, $opprating, $size);
+         list( $handicap, $komi, $i_am_black, $is_nigiri ) = suggest_proper( $my_rating, $opprating, $ruleset, $size);
          break;
 
       // manual handicap-types
@@ -559,7 +561,7 @@ function create_game(&$black_row, &$white_row, &$game_info_row, $game_setup=null
    $white_rated = ( $white_row['RatingStatus'] != RATING_NONE && $rating_white >= MIN_RATING );
 
    if ( !isset($game_info_row['Ruleset']) )
-      $game_info_row['Ruleset'] = get_default_ruleset();
+      $game_info_row['Ruleset'] = Ruleset::get_default_ruleset();
    if ( !preg_match( "/^(".ALLOWED_RULESETS.")$/", $game_info_row['Ruleset']) )
       error('feature_disabled', "create_game.disabled.ruleset({$game_info_row['Ruleset']})");
 

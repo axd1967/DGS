@@ -20,6 +20,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 $TranslateGroups[] = "Game";
 
 require_once 'include/std_functions.php'; // consts
+require_once 'include/rulesets.php';
 
 // rated-status for update_rating2()
 define('RATEDSTATUS_RATED',     0);
@@ -62,7 +63,7 @@ function table_interpolate($value, $table, $extrapolate=false)
 
    return $prev['VAL'] + ($value-$prev['KEY'])/($x['KEY']-$prev['KEY']) *
       ($x['VAL']-$prev['VAL']);
-}
+}//table_interpolate2
 
 
 function con_value($rating)
@@ -79,7 +80,7 @@ function con_value($rating)
    );
 
    return table_interpolate($rating, $CON_TABLE, true);
-}
+}//con_value
 
 function a_value($rating)
 {
@@ -156,11 +157,11 @@ function change_rating(&$rating_W, &$rating_B, $result, $size, $komi, $handicap,
          sprintf($fmt, 'Black', $SEB, $conB, $old_rating_B, $rating_B, $rating_B - $old_rating_B),
          "\n";
    }
-}
+}//change_rating
 
-// (handi,komi,iamblack,is_nigiri) = suggest_proper(my_rating, $opp_rating, size)
+// (handi,komi,iamblack,is_nigiri) = suggest_proper(my_rating, $opp_rating, ruleset, size)
 // NOTE: iamblack/is_nigiri is <>''
-function suggest_proper($rating_W, $rating_B, $size, $positive_komi=false)
+function suggest_proper( $rating_W, $rating_B, $ruleset, $size, $positive_komi=false )
 {
    $H = abs($rating_W - $rating_B) / 100.0;
 
@@ -181,15 +182,16 @@ function suggest_proper($rating_W, $rating_B, $size, $positive_komi=false)
       $iamblack = ( $rating_B > $rating_W );
 
    $komi = round( 2.0 * STONE_VALUE * ( $handicap - $H ) ) / 2.0;
+   $komi += Ruleset::getRulesetDefaultKomi($ruleset) - STONE_VALUE / 2.0;
 
    if ( $handicap == 1 ) $handicap = 0; //back to the 0 handicap habit
 
    return array( $handicap, $komi, ($iamblack ? 1:0), ($is_nigiri ? 1:0) );
 }//suggest_proper
 
-// (handi,komi,iamblack,is_nigiri) = suggest_conventional(my_rating, $opp_rating, size)
+// (handi,komi,iamblack,is_nigiri) = suggest_conventional(my_rating, $opp_rating, ruleset, size)
 // NOTE: iamblack/is_nigiri is <>''
-function suggest_conventional($rating_W, $rating_B, $size, $positive_komi=false)
+function suggest_conventional( $rating_W, $rating_B, $ruleset, $size, $positive_komi=false )
 {
    $H = abs($rating_W - $rating_B) / 100.0;
 
@@ -199,7 +201,7 @@ function suggest_conventional($rating_W, $rating_B, $size, $positive_komi=false)
 
    if ( $handicap == 0 ) // even-game
    {
-      $komi = STONE_VALUE / 2.0;
+      $komi = Ruleset::getRulesetDefaultKomi($ruleset);
       $is_nigiri = true;
       $iamblack = mt_rand(0,1); // nigiri on even-game
    }
@@ -404,7 +406,7 @@ function update_rating2($gid, $check_done=true, $simul=false, $game_row=null)
    }
 
    return RATEDSTATUS_RATED; //rated game
-} //update_rating2
+}//update_rating2
 
 
 // returns true, if given DGS-rating is valid
@@ -427,7 +429,7 @@ function getRatingArray()
    for ($i=1; $i<=30; $i++) //30 = (2100-MIN_RATING)/100
       $rating_array["$i kyu"] = $i . $s;
    return $rating_array;
-}
+}//getRatingArray
 
 // input: show_percent = true|1|false (1 = like true but no HTML-space)
 // input: short = true|1|false (1 = like true, but use abbreviations 'k/d' for kyu/dan and no translation)
@@ -462,7 +464,7 @@ function echo_rating($rating, $show_percent=true, $graph_uid=0, $keep_english=fa
       $string = anchor( $base_path."ratinggraph.php?uid=$graph_uid", $string, $elo_str, 'class="Rating"' );
    }
    return $string;
-}
+}//echo_rating
 
 // used for quick-suite
 function echo_rating_elo( $rating )
@@ -485,7 +487,7 @@ function read_rating($string)
 
    $kyu = ( $matches[2] == 'dan' || $matches[2] == 'd' ) ? 2 : 1;
    return rank_to_rating($matches[1], $kyu) + ((int)@$matches[4]);
-}
+}//read_rating
 
 //Must not rise an error, see read_rating()
 //need $kyu=1 (kyu) or $kyu=2 (dan)
@@ -515,7 +517,7 @@ function get_rating_at_date($uid, $date)
    if ( isset($row['Rating']) )
       return $row['Rating'];
    return NO_RATING; //not ranked
-}
+}//get_rating_at_date
 
 // for converting ranks, see convert_to_rating()-func
 function getRatingTypes()
@@ -542,7 +544,7 @@ function getRatingTypes()
       'tygem'        => T_('Tygem rank#ratingtype'),
       'wbaduk'       => T_('WBaduk rank#ratingtype'),
    );
-}
+}//getRatingTypes
 
 
 // May rise an error if not said otherwise (except for bad ranktype) returning an out-of-range-rating then
