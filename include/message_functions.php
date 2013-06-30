@@ -266,7 +266,6 @@ function game_settings_form(&$mform, $formstyle, $viewmode, $iamrated=true, $my_
       $StdHandicap = ( $game_row['StdHandicap'] == 'Y' );
       $WeekendClock = ( $game_row['WeekendClock'] == 'Y' );
       $Handicap_m = $game_row['Handicap'];
-      $Komi_m = $game_row['Komi'];
 
       // ToMove_ID holds handitype for game on INVITATION-status
       list( $my_gs, $opp_gs ) = GameSetup::parse_invitation_game_setup( $my_ID, @$game_row['GameSetup'], $gid );
@@ -274,6 +273,7 @@ function game_settings_form(&$mform, $formstyle, $viewmode, $iamrated=true, $my_
       $Handitype = GameSetup::determine_handicaptype( $my_gs, $opp_gs, (int)$game_row['ToMove_ID'], $my_color_black );
       $CategoryHandiType = get_category_handicaptype( $Handitype );
       $Color_m = ( $CategoryHandiType == CAT_HTYPE_MANUAL ) ? $Handitype : HTYPE_NIGIRI;
+      $Komi_m = ( $CategoryHandiType == CAT_HTYPE_MANUAL ) ? $game_row['Komi'] : Ruleset::getRulesetDefaultKomi($Ruleset);
       $JigoMode = GameSetup::parse_jigo_mode_from_game_setup( $CategoryHandiType, $my_ID, $opp_gs, $gid );
 
       $MaintimeUnit = 'hours';
