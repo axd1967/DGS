@@ -98,7 +98,7 @@ Description:
         from or to the corresponding value HTYPE_WHITE.
         See also INVITE_HANDI_FIXCOL under ToMove_ID-field.
 
-* ToMove_ID : foreign key to Players.ID
+* ToMove_ID : sometimes foreign key to Players.ID; other times integer-value
    - for started games = field-value points to player, that has to move next in game
 
    - for invite-game:
