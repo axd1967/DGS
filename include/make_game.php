@@ -334,6 +334,7 @@ function accept_invite_game( $gid, $player_row, $opponent_row )
       error('wrong_dispute_game', "$dbg.check_players");
    if ( $game_row['Status'] != GAME_STATUS_INVITED )
       error('game_already_accepted', "$dbg.badstat");
+   $game_settings = GameSettings::get_game_settings( $game_row );
 
 
    // NOTE: ToMove_ID holds handitype (of INVITATION) for game on INVITED-status
@@ -366,10 +367,7 @@ function accept_invite_game( $gid, $player_row, $opponent_row )
    $opprating = $opponent_row['Rating2'];
    $opprated = ( $opponent_row['RatingStatus'] != RATING_NONE && is_numeric($opprating) && $opprating >= MIN_RATING );
 
-   $ruleset = $game_row['Ruleset'];
-   $size = $game_row['Size'];
    $double = false;
-
    $handicap = $game_row['Handicap'];
    $komi = $game_row['Komi'];
    switch ( (string)$handicaptype )
@@ -377,13 +375,13 @@ function accept_invite_game( $gid, $player_row, $opponent_row )
       case HTYPE_CONV:
          if ( !$iamrated || !$opprated )
             error('no_initial_rating', "$dbgmsg.check.conv_H.rating");
-         list( $handicap, $komi, $i_am_black, $is_nigiri ) = suggest_conventional( $my_rating, $opprating, $ruleset, $size);
+         list( $handicap, $komi, $i_am_black, $is_nigiri ) = $game_settings->suggest_conventional( $my_rating, $opprating );
          break;
 
       case HTYPE_PROPER:
          if ( !$iamrated || !$opprated )
             error('no_initial_rating', "$dbgmsg.check.prop.rating");
-         list( $handicap, $komi, $i_am_black, $is_nigiri ) = suggest_proper( $my_rating, $opprating, $ruleset, $size);
+         list( $handicap, $komi, $i_am_black, $is_nigiri ) = $game_settings->suggest_proper( $my_rating, $opprating );
          break;
 
       // manual handicap-types

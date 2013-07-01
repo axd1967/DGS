@@ -3454,11 +3454,12 @@ define('GSC_COL_WHITE', 'white');
 /*!
  * \class GameSettingsCalculator
  *
- * \brief Helper-class to calculate probably game-setting.
+ * \brief Helper-class to calculate probable game-setting.
  */
 class GameSettingsCalculator
 {
    private $grow;
+   private $game_settings;
    private $pl_rating;
    private $opp_rating;
    private $is_calculated;
@@ -3482,6 +3483,7 @@ class GameSettingsCalculator
    public function __construct( $game_row, $player_rating, $opp_rating, $is_calculated=null, $is_tourney=false )
    {
       $this->grow = $game_row;
+      $this->game_settings = GameSettings::get_game_settings( $game_row );
       $this->pl_rating = $player_rating;
       $this->opp_rating = $opp_rating;
       if ( is_null($is_calculated) )
@@ -3507,12 +3509,12 @@ class GameSettingsCalculator
       if ( $CategoryHandiType == CAT_HTYPE_PROPER )
       {
          list( $infoHandicap, $infoKomi, $info_i_am_black, $is_nigiri ) =
-            suggest_proper($this->pl_rating, $this->opp_rating, $this->grow['Ruleset'], $this->grow['Size']);
+            $this->game_settings->suggest_proper( $this->pl_rating, $this->opp_rating );
       }
       elseif ( $CategoryHandiType == CAT_HTYPE_CONV )
       {
          list( $infoHandicap, $infoKomi, $info_i_am_black, $is_nigiri ) =
-            suggest_conventional($this->pl_rating, $this->opp_rating, $this->grow['Ruleset'], $this->grow['Size']);
+            $this->game_settings->suggest_conventional( $this->pl_rating, $this->opp_rating );
       }
       elseif ( $is_fairkomi )
       {
@@ -3563,6 +3565,102 @@ class GameSettingsCalculator
    }//calculate_settings
 
 } //end 'GameSettingsCalculator'
+
+
+
+/*!
+ * \class GameSettings
+ *
+ * \brief Class to store parameters for calculation of game-settings for conventional and proper handicap type.
+ */
+class GameSettings
+{
+   private $Size;
+   private $Ruleset;
+   private $AdjustHandicap;
+   private $MinHandicap;
+   private $MaxHandicap;
+   private $AdjustKomi;
+   private $JigoMode;
+
+   public function __construct( $size, $ruleset, $adj_handicap, $min_handicap, $max_handicap, $adj_komi, $jigomode )
+   {
+      $this->Size = (int)$size;
+      $this->Ruleset = $ruleset;
+      $this->AdjustHandicap = (int)$adj_handicap;
+      $this->MinHandicap = (int)$min_handicap;
+      $this->MaxHandicap = (int)$max_handicap;
+      $this->AdjustKomi = (float)$adj_komi;
+      $this->JigoMode = $jigomode;
+   }
+
+   // (handi,komi,iamblack,is_nigiri) = suggest_proper(my_rating, $opp_rating)
+   // NOTE: iamblack/is_nigiri is <>''
+   public function suggest_proper( $rating_W, $rating_B, $positive_komi=false )
+   {
+      $H = abs($rating_W - $rating_B) / 100.0;
+
+      // Handicap value is about proportional to number of moves
+      $H *= handicapfactor( $this->Size );
+
+      $H += 0.5; // advantage for playing first;
+
+      $handicap = ( $positive_komi ? ceil($H) : round($H) );
+      // temporary, there is no 0 handicap stone game in this calculus. An equal
+      // game is a 1 stone game where black play his handicap stone where he want.
+      if ( $handicap < 1 ) $handicap = 1;
+
+      $is_nigiri = ( $rating_B == $rating_W );
+      if ( $is_nigiri )
+         $iamblack = mt_rand(0,1); // nigiri on same rating
+      else
+         $iamblack = ( $rating_B > $rating_W );
+
+      $komi = round( 2.0 * STONE_VALUE * ( $handicap - $H ) ) / 2.0;
+      $komi += Ruleset::getRulesetDefaultKomi($this->Ruleset) - STONE_VALUE / 2.0;
+
+      if ( $handicap == 1 ) $handicap = 0; //back to the 0 handicap habit
+
+      return array( $handicap, $komi, ($iamblack ? 1:0), ($is_nigiri ? 1:0) );
+   }//suggest_proper
+
+   // (handi,komi,iamblack,is_nigiri) = suggest_conventional(my_rating, $opp_rating)
+   // NOTE: iamblack/is_nigiri is <>''
+   public function suggest_conventional( $rating_W, $rating_B, $positive_komi=false )
+   {
+      $H = abs($rating_W - $rating_B) / 100.0;
+
+      // Handicap value is about proportional to number of moves
+      $H *= handicapfactor( $this->Size );
+      $handicap = round($H);
+
+      if ( $handicap == 0 ) // even-game
+      {
+         $komi = Ruleset::getRulesetDefaultKomi($this->Ruleset);
+         $is_nigiri = true;
+         $iamblack = mt_rand(0,1); // nigiri on even-game
+      }
+      else // handicap-game
+      {
+         if ( $handicap == 1 ) $handicap = 0;
+         $komi = 0.5;
+         $is_nigiri = false;
+         $iamblack = ( $rating_B > $rating_W );
+      }
+
+      return array( $handicap, $komi, ($iamblack ? 1:0), ($is_nigiri ? 1:0) );
+   }//suggest_conventional
+
+
+   // ------------ static functions ----------------------------
+
+   public static function get_game_settings( $grow )
+   {
+      return new GameSettings( $grow['Size'], $grow['Ruleset'],
+         $grow['AdjHandicap'], $grow['MinHandicap'], $grow['MaxHandicap'], $grow['AdjKomi'], $grow['JigoMode'] );
+   }
+
+} // end 'GameSettings'
 
 
 

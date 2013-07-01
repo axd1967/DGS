@@ -20,7 +20,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 $TranslateGroups[] = "Game";
 
 require_once 'include/std_functions.php'; // consts
-require_once 'include/rulesets.php';
+
 
 // rated-status for update_rating2()
 define('RATEDSTATUS_RATED',     0);
@@ -158,63 +158,6 @@ function change_rating(&$rating_W, &$rating_B, $result, $size, $komi, $handicap,
          "\n";
    }
 }//change_rating
-
-// (handi,komi,iamblack,is_nigiri) = suggest_proper(my_rating, $opp_rating, ruleset, size)
-// NOTE: iamblack/is_nigiri is <>''
-function suggest_proper( $rating_W, $rating_B, $ruleset, $size, $positive_komi=false )
-{
-   $H = abs($rating_W - $rating_B) / 100.0;
-
-   // Handicap value is about proportional to number of moves
-   $H *= handicapfactor( $size);
-
-   $H += 0.5; // advantage for playing first;
-
-   $handicap = ( $positive_komi ? ceil($H) : round($H) );
-   // temporary, there is no 0 handicap stone game in this calculus. An equal
-   // game is a 1 stone game where black play his handicap stone where he want.
-   if ( $handicap < 1 ) $handicap = 1;
-
-   $is_nigiri = ( $rating_B == $rating_W );
-   if ( $is_nigiri )
-      $iamblack = mt_rand(0,1); // nigiri on same rating
-   else
-      $iamblack = ( $rating_B > $rating_W );
-
-   $komi = round( 2.0 * STONE_VALUE * ( $handicap - $H ) ) / 2.0;
-   $komi += Ruleset::getRulesetDefaultKomi($ruleset) - STONE_VALUE / 2.0;
-
-   if ( $handicap == 1 ) $handicap = 0; //back to the 0 handicap habit
-
-   return array( $handicap, $komi, ($iamblack ? 1:0), ($is_nigiri ? 1:0) );
-}//suggest_proper
-
-// (handi,komi,iamblack,is_nigiri) = suggest_conventional(my_rating, $opp_rating, ruleset, size)
-// NOTE: iamblack/is_nigiri is <>''
-function suggest_conventional( $rating_W, $rating_B, $ruleset, $size, $positive_komi=false )
-{
-   $H = abs($rating_W - $rating_B) / 100.0;
-
-   // Handicap value is about proportional to number of moves
-   $H *= handicapfactor( $size);
-   $handicap = round($H);
-
-   if ( $handicap == 0 ) // even-game
-   {
-      $komi = Ruleset::getRulesetDefaultKomi($ruleset);
-      $is_nigiri = true;
-      $iamblack = mt_rand(0,1); // nigiri on even-game
-   }
-   else // handicap-game
-   {
-      if ( $handicap == 1 ) $handicap = 0;
-      $komi = 0.5;
-      $is_nigiri = false;
-      $iamblack = ( $rating_B > $rating_W );
-   }
-
-   return array( $handicap, $komi, ($iamblack ? 1:0), ($is_nigiri ? 1:0) );
-}//suggest_conventional
 
 
 //

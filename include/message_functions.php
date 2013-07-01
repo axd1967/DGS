@@ -400,10 +400,13 @@ function game_settings_form(&$mform, $formstyle, $viewmode, $iamrated=true, $my_
          $sugg_prop = '';
          if ( is_array($map_ratings) )
          {
+            $game_settings = new GameSettings( $Size, $Ruleset, $AdjustHandicap, $MinHandicap, $MaxHandicap,
+               $AdjustKomi, $JigoMode );
+
             $r1 = $map_ratings['rating1'];
             $r2 = $map_ratings['rating2'];
-            $arr_conv_sugg = suggest_conventional( $r1, $r2, $Ruleset, $Size );
-            $arr_prop_sugg = suggest_proper( $r1, $r2, $Ruleset, $Size );
+            $arr_conv_sugg = $game_settings->suggest_conventional( $r1, $r2 );
+            $arr_prop_sugg = $game_settings->suggest_proper( $r1, $r2 );
             $sugg_conv = '<span class="Suggestion">' .
                sptext( build_suggestion_shortinfo($arr_conv_sugg) ) . '</span>';
             $sugg_prop = '<span class="Suggestion">' .
@@ -539,6 +542,8 @@ function game_settings_form(&$mform, $formstyle, $viewmode, $iamrated=true, $my_
             'TEXT', sptext(T_('Jigo mode'), 1),
             'SELECTBOX', 'jigo_mode', 1, GameTexts::get_jigo_modes(), $JigoMode, false,
          ));
+      $mform->add_row( array( 'CELL', 2, 'class="center WarnMsg"',
+                              'TEXT', T_('NOTE: Adjustments (handicap & komi) only apply for conventional and proper handicap type!'), ));
    }
    elseif ( $is_view_fairkomi )
    {

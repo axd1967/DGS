@@ -182,6 +182,7 @@ class WaitingroomControl
       $game_row = mysql_single_fetch( "WC:join_waitingroom_game.find_game($wr_id,$my_id)", $query);
       if ( !$game_row )
          error('waitingroom_game_not_found', "WC:join_waitingroom_game.find_game2($wr_id,$my_id)");
+      $game_settings = GameSettings::get_game_settings( $game_row );
 
       $opponent_ID = $game_row['uid'];
       $gid = (int)@$game_row['gid'];
@@ -220,7 +221,6 @@ class WaitingroomControl
             error('waitingroom_not_same_opponent', "WC:join_waitingroom_game.mpg_same_opponent($gid,$my_id)");
       }
 
-      $ruleset = $game_row['Ruleset'];
       $size = limit( $game_row['Size'], MIN_BOARD_SIZE, MAX_BOARD_SIZE, 19 );
 
       $my_rating = $player_row['Rating2'];
@@ -235,14 +235,14 @@ class WaitingroomControl
             if ( !$iamrated || !$opprated )
                error('no_initial_rating', "WC:join_waitingroom_game.conv($wr_id)");
             list( $game_row['Handicap'], $game_row['Komi'], $i_am_black, $is_nigiri ) =
-               suggest_conventional( $my_rating, $opprating, $ruleset, $size);
+               $game_settings->suggest_conventional( $my_rating, $opprating );
             break;
 
          case HTYPE_PROPER:
             if ( !$iamrated || !$opprated )
                error('no_initial_rating', "WC:join_waitingroom_game.proper($wr_id)");
             list( $game_row['Handicap'], $game_row['Komi'], $i_am_black, $is_nigiri ) =
-               suggest_proper( $my_rating, $opprating, $ruleset, $size);
+               $game_settings->suggest_proper( $my_rating, $opprating );
             break;
 
          case HTYPE_DOUBLE:
@@ -475,12 +475,13 @@ class WaitingroomOffer
       {
          if ( user_has_rating($this->row, 'WRP_') ) // other has rating
          {
+            $game_settings = GameSettings::get_game_settings( $this->row );
             if ( $handitype == HTYPE_CONV )
                list( $infoHandi, $infoKomi, $iamblack, $info_nigiri ) =
-                  suggest_conventional( $my_rating, $this->row['WRP_Rating2'], $this->row['Ruleset'], $this->row['Size'] );
+                  $game_settings->suggest_conventional( $my_rating, $this->row['WRP_Rating2'] );
             elseif ( $handitype == HTYPE_PROPER )
                list( $infoHandi, $infoKomi, $iamblack, $info_nigiri ) =
-                  suggest_proper( $my_rating, $this->row['WRP_Rating2'], $this->row['Ruleset'], $this->row['Size'] );
+                  $game_settings->suggest_proper( $my_rating, $this->row['WRP_Rating2'] );
          }
       }
 

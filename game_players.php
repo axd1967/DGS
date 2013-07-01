@@ -768,8 +768,9 @@ function build_form_change_group_with_handicap( &$form, $grow, $cmd, $enable_edi
       $arr_ratings = MultiPlayerGame::calc_average_group_ratings($arr_game_players);
       $rating1 = $arr_ratings[$arr_color_keys[0]];
       $rating2 = $arr_ratings[$arr_color_keys[1]];
-      $arr_conv_sugg = suggest_conventional( $rating1, $rating2, $grow['Ruleset'], $grow['Size'] ); // H,K,i'm-black
-      $arr_prop_sugg = suggest_proper( $rating1, $rating2, $grow['Ruleset'], $grow['Size'] );
+      $game_settings = GameSettings::get_game_settings( $grow );
+      $arr_conv_sugg = $game_settings->suggest_conventional( $rating1, $rating2 ); // H,K,i'm-black
+      $arr_prop_sugg = $game_settings->suggest_proper( $rating1, $rating2 );
 
       $arr_gp_id = array(
             implode(',', get_group_color_game_player_id( $arr_color_keys[0] )),

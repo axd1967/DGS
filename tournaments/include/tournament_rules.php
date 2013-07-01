@@ -614,17 +614,19 @@ class TournamentRules
 
       $game_row['Handicaptype'] = self::convert_trule_handicaptype_to_stdhtype($this->Handicaptype);
       $gs_uid = $ch_uid; // default
+      $game_settings = new GameSettings( $this->Size, $this->Ruleset,
+         $this->AdjHandicap, $this->MinHandicap, $this->MaxHandicap, $this->AdjKomi, $this->JigoMode );
 
       switch ( (string)$this->Handicaptype )
       {
          case TRULE_HANDITYPE_CONV:
             list( $game_row['Handicap'], $game_row['Komi'], $ch_is_black, $is_nigiri ) =
-               suggest_conventional( $ch_rating, $df_rating, $this->Ruleset, $this->Size );
+               $game_settings->suggest_conventional( $ch_rating, $df_rating );
             break;
 
          case TRULE_HANDITYPE_PROPER:
             list( $game_row['Handicap'], $game_row['Komi'], $ch_is_black, $is_nigiri ) =
-               suggest_proper( $ch_rating, $df_rating, $this->Ruleset, $this->Size );
+               $game_settings->suggest_proper( $ch_rating, $df_rating );
             break;
 
          case TRULE_HANDITYPE_NIGIRI:
