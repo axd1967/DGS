@@ -5,11 +5,18 @@
 # run test
 # - use -d option to set PHP-ini 'include_path' or
 # - change "include_path" in php.ini for php-CLI (command-line, not for Apache)
-#   could be: /etc/php5/apache2/php.ini
+#   could be: /etc/php5/cli/php.ini
 #   add DGS-basepath, so that phpunit find relative includes
+# - if you have multiple versions in different root-directories, you can not use
+#   the global php.ini file to configure the include-path for phpunit.
+#   Instead you either have to use the '-d' option as mentioned above or you have
+#   to pass the include-path when calling phpunit. This works with newer version
+#   of the phpunit-package.
 # - use --verbose option to print more test-"debug"
 cd <testdir>
 phpunit testclass.php
+   or
+phpunit -d include_path=.:/myhome/dgs-root-dir  testclass.php
 
 # create phpunit test-skeleton from existing class
 cd <DGS-basepath>

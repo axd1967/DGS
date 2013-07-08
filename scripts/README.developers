@@ -684,5 +684,12 @@ General instructions for developers:
       without switching to another table-engine (like InnoDB for example) with
       real transactions.
 
+----------------- PHP: unit-tests, phpunit
+
+   For preparing, writing and running the unit-tests in the 'scripts/tests/'-directory,
+   please study the following doc-file:
+
+      scripts/tests/README.test
+
 -----------------
 
