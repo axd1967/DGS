@@ -571,19 +571,6 @@ function create_game(&$black_row, &$white_row, &$game_info_row, $game_setup=null
    // set reference to other double-game
    $double_gid = (int)@$game_info_row['double_gid'];
 
-   // adjust komi (AdjKomi/JigoMode may be unset); called but irrelevant for fair-komi
-   $komi = adjust_komi( (float)$game_info_row['Komi'],
-      (float)@$game_info_row['AdjKomi'],
-      (string)@$game_info_row['JigoMode'] );
-   $game_info_row['Komi'] = $komi; // write back
-
-   // adjust handicap (Adj/Min/MaxHandicap may be unset)
-   $handicap = adjust_handicap( $size, (int)$game_info_row['Handicap'],
-      (int)@$game_info_row['AdjHandicap'],
-      (int)@$game_info_row['MinHandicap'],
-      ( isset($game_info_row['MaxHandicap']) ? (int)$game_info_row['MaxHandicap'] : DEFAULT_MAX_HANDICAP ) );
-   $game_info_row['Handicap'] = $handicap; // write back
-
    $stdhandicap = $game_info_row['StdHandicap'];
    $moves = $handicap;
    if ( $stdhandicap != 'Y' || !standard_handicap_is_possible($size, $moves ) )

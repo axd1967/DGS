@@ -1152,8 +1152,9 @@ function update_handicap_komi( &$grow, $gid, $preview, $size, $handicap, $komi )
 {
    global $NOW;
 
-   $handicap = adjust_handicap( $size, (int)$handicap, 0, 0, MAX_HANDICAP );
-   $komi = adjust_komi( (float)$komi, 0, JIGOMODE_KEEP_KOMI );
+   // verify limits for handicap & komi
+   $handicap = GameSettings::adjust_handicap( $size, (int)$handicap, 0, 0, MAX_HANDICAP );
+   $komi = GameSettings::adjust_komi( (float)$komi, 0, JIGOMODE_KEEP_KOMI );
 
    if ( !$preview )
    {
@@ -1196,9 +1197,9 @@ function use_handicap_suggestion( &$grow, $size )
       }
    }
 
-   // 2. update H+K
-   $grow['Handicap'] = adjust_handicap( $size, (int)get_request_arg($prefix.'h'), 0, 0, MAX_HANDICAP );
-   $grow['Komi'] = adjust_komi( (float)get_request_arg($prefix.'k'), 0, JIGOMODE_KEEP_KOMI );
+   // 2. update H+K (verifying limits for handicap & komi)
+   $grow['Handicap'] = GameSettings::adjust_handicap( $size, (int)get_request_arg($prefix.'h'), 0, 0, MAX_HANDICAP );
+   $grow['Komi'] = GameSettings::adjust_komi( (float)get_request_arg($prefix.'k'), 0, JIGOMODE_KEEP_KOMI );
 
    if ( $need_reorder )
       reorder_game_players();

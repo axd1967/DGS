@@ -2942,16 +2942,18 @@ class GameSetup
       if ( $htype_old_text !== $htype_new_text )
          $out[] = array( T_('Handicap Type#inv_diff'), $htype_old_text, $htype_new_text, 1 );
 
-      $old_adj_handi = build_adjust_handicap( $gs_old->Size, $gs_old->AdjustHandicap, $gs_old->MinHandicap, $gs_old->MaxHandicap );
-      $new_adj_handi = build_adjust_handicap( $gs_new->Size, $gs_new->AdjustHandicap, $gs_new->MinHandicap, $gs_new->MaxHandicap );
+      $old_adj_handi = GameSettings::build_adjust_handicap(
+         $gs_old->Size, $gs_old->AdjustHandicap, $gs_old->MinHandicap, $gs_old->MaxHandicap );
+      $new_adj_handi = GameSettings::build_adjust_handicap(
+         $gs_new->Size, $gs_new->AdjustHandicap, $gs_new->MinHandicap, $gs_new->MaxHandicap );
       if ( $old_adj_handi !== $new_adj_handi )
          $out[] = array( T_('Adjust Handicap#inv_diff'), $old_adj_handi, $new_adj_handi );
 
       if ( $gs_old->StdHandicap !== $gs_new->StdHandicap )
          $out[] = array( T_('Handicap stones placement#inv_diff'), $gs_old->format_std_handicap(), $gs_new->format_std_handicap() );
 
-      $old_adj_komi = build_adjust_komi( $gs_old->AdjustKomi, $gs_old->JigoMode );
-      $new_adj_komi = build_adjust_komi( $gs_new->AdjustKomi, $gs_new->JigoMode );
+      $old_adj_komi = GameSettings::build_adjust_komi( $gs_old->AdjustKomi, $gs_old->JigoMode );
+      $new_adj_komi = GameSettings::build_adjust_komi( $gs_new->AdjustKomi, $gs_new->JigoMode );
       if ( $old_adj_komi !== $new_adj_komi )
          $out[] = array( T_('Adjust Komi#inv_diff'), $old_adj_komi, $new_adj_komi );
 
@@ -3470,8 +3472,6 @@ class GameSettingsCalculator
    public $calc_color = ''; // double, fairkomi, nigiri, black, white
    public $calc_handicap = 0;
    public $calc_komi = 0;
-   public $adjusted_handicap = null; // old handicap if handicap adjusted; NULL otherwise
-   public $adjusted_komi = null; // old komi if komi adjusted; NULL otherwise
 
    /*!
     * \brief Constructs GameSettingsCalculator.
@@ -3532,22 +3532,6 @@ class GameSettingsCalculator
             $info_i_am_black = ($htype == HTYPE_BLACK); // game-offerer wants BLACK, so challenger gets WHITE
       }
 
-      // adjust handicap
-      $infoHandicap_old = $infoHandicap;
-      $infoHandicap = adjust_handicap( $this->grow['Size'], $infoHandicap, (int)@$this->grow['AdjHandicap'],
-         (int)@$this->grow['MinHandicap'], $this->grow['MaxHandicap'] );
-      $this->adjusted_handicap = ( $infoHandicap != $infoHandicap_old ) ? $infoHandicap_old : NULL;
-
-      // adjust komi
-      if ( $is_fairkomi )
-         $this->adjusted_komi = NULL;
-      else
-      {
-         $infoKomi_old = $infoKomi;
-         $infoKomi = adjust_komi( $infoKomi, (float)@$this->grow['AdjKomi'], $this->grow['JigoMode'] );
-         $this->adjusted_komi = ( $infoKomi != $infoKomi_old ) ? $infoKomi_old : NULL;
-      }
-
       // determine color
       if ( $htype == HTYPE_DOUBLE )
          $color = GSC_COL_DOUBLE;
@@ -3594,6 +3578,13 @@ class GameSettings
       $this->JigoMode = $jigomode;
    }
 
+   public function to_string()
+   {
+      return "GS({$this->Size},{$this->Ruleset};"
+         . "H{$this->AdjustHandicap}[{$this->MinHandicap},{$this->MaxHandicap}];"
+         . "K{$this->AdjustKomi}[{$this->JigoMode}])";
+   }
+
    // (handi,komi,iamblack,is_nigiri) = suggest_proper(my_rating, $opp_rating)
    // NOTE: iamblack/is_nigiri is <>''
    public function suggest_proper( $rating_W, $rating_B, $positive_komi=false )
@@ -3604,22 +3595,28 @@ class GameSettings
       $H *= handicapfactor( $this->Size );
 
       $H += 0.5; // advantage for playing first;
-
       $handicap = ( $positive_komi ? ceil($H) : round($H) );
+
       // temporary, there is no 0 handicap stone game in this calculus. An equal
       // game is a 1 stone game where black play his handicap stone where he want.
       if ( $handicap < 1 ) $handicap = 1;
 
+      $komi = round( 2.0 * STONE_VALUE * ( $handicap - $H ) ) / 2.0;
+      $komi += Ruleset::getRulesetDefaultKomi($this->Ruleset) - STONE_VALUE / 2.0;
+
+      // adjust handicap & komi
+      $handicap = self::adjust_handicap( $this->Size, $handicap,
+         $this->AdjustHandicap, $this->MinHandicap, $this->MaxHandicap, /*round-H*/false );
+      $komi = self::adjust_komi( $komi, $this->AdjustKomi, $this->JigoMode );
+
+      if ( $handicap == 1 ) $handicap = 0; //back to the 0 handicap habit
+
+      // NOTE: calculate nigiri/i-am-black on original rating-diff even after handicap/komi-adjustment
       $is_nigiri = ( $rating_B == $rating_W );
       if ( $is_nigiri )
          $iamblack = mt_rand(0,1); // nigiri on same rating
       else
          $iamblack = ( $rating_B > $rating_W );
-
-      $komi = round( 2.0 * STONE_VALUE * ( $handicap - $H ) ) / 2.0;
-      $komi += Ruleset::getRulesetDefaultKomi($this->Ruleset) - STONE_VALUE / 2.0;
-
-      if ( $handicap == 1 ) $handicap = 0; //back to the 0 handicap habit
 
       return array( $handicap, $komi, ($iamblack ? 1:0), ($is_nigiri ? 1:0) );
    }//suggest_proper
@@ -3633,6 +3630,9 @@ class GameSettings
       // Handicap value is about proportional to number of moves
       $H *= handicapfactor( $this->Size );
       $handicap = round($H);
+
+      $handicap = self::adjust_handicap( $this->Size, $handicap,
+         $this->AdjustHandicap, $this->MinHandicap, $this->MaxHandicap, /*round-H*/false );
 
       if ( $handicap == 0 ) // even-game
       {
@@ -3648,6 +3648,8 @@ class GameSettings
          $iamblack = ( $rating_B > $rating_W );
       }
 
+      $komi = self::adjust_komi( $komi, $this->AdjustKomi, $this->JigoMode );
+
       return array( $handicap, $komi, ($iamblack ? 1:0), ($is_nigiri ? 1:0) );
    }//suggest_conventional
 
@@ -3660,8 +3662,122 @@ class GameSettings
          $grow['AdjHandicap'], $grow['MinHandicap'], $grow['MaxHandicap'], $grow['AdjKomi'], $grow['JigoMode'] );
    }
 
-} // end 'GameSettings'
+   /*! \brief Returns arr( minH, maxH ) to check for limits on handicap stones. */
+   private static function get_handicap_limits( $size, $min_handicap, $max_handicap )
+   {
+      // assure valid limits
+      $min_handicap = min( MAX_HANDICAP, max( 0, $min_handicap ));
+      $max_handicap = DefaultMaxHandicap::limit_max_handicap( $max_handicap );
 
+      if ( $max_handicap == DEFAULT_MAX_HANDICAP )
+      {
+         $chk_max_handicap = DefaultMaxHandicap::calc_def_max_handicap( $size );
+         if ( $min_handicap > $chk_max_handicap )
+            $min_handicap = $chk_max_handicap;
+      }
+      else
+      {
+         if ( $min_handicap > $max_handicap )
+            swap( $min_handicap, $max_handicap );
+         $chk_max_handicap = $max_handicap;
+      }
+
+      return array( $min_handicap, $chk_max_handicap );
+   }//get_handicap_limits
+
+   // returns adjusted handicap within limits, also checking for valid limits
+   public static function adjust_handicap( $size, $handicap, $adj_handicap, $min_handicap, $max_handicap, $round_handi1=true )
+   {
+      list( $chk_min_handicap, $chk_max_handicap ) = self::get_handicap_limits( $size, $min_handicap, $max_handicap );
+
+      // adjust
+      if ( $adj_handicap )
+         $handicap += $adj_handicap;
+
+      if ( $handicap < $chk_min_handicap )
+         $handicap = $chk_min_handicap;
+      elseif ( $handicap > $chk_max_handicap )
+         $handicap = $chk_max_handicap;
+
+      if ( $round_handi1 && $handicap == 1 )
+         $handicap = 0;
+
+      return (int)$handicap;
+   }//adjust_handicap
+
+   // returns adjusted komi within limits, also checking for valid limits
+   public static function adjust_komi( $komi, $adj_komi, $jigo_mode )
+   {
+      // adjust
+      if ( $adj_komi )
+         $komi += $adj_komi;
+
+      // assure valid limits up to the limits
+      if ( $komi < -MAX_KOMI_RANGE )
+         $komi = -MAX_KOMI_RANGE;
+      elseif ( $komi > MAX_KOMI_RANGE )
+         $komi = MAX_KOMI_RANGE;
+
+      if ( $jigo_mode == JIGOMODE_ALLOW_JIGO && floor($komi) != $komi )
+         $komi = (($komi < 0) ? -1 : 1) * floor(abs($komi));
+      elseif ( $jigo_mode == JIGOMODE_NO_JIGO && floor($komi) == $komi )
+         $komi += ($komi < 0) ? -0.5 : 0.5;
+
+      // assure valid limits after applying jigo-mode
+      $komi = (float) round( 2 * $komi ) / 2;
+      if ( $komi < -MAX_KOMI_RANGE )
+         $komi += 1.0;
+      elseif ( $komi > MAX_KOMI_RANGE )
+         $komi -= 1.0;
+
+      if ( (string)$komi == '-0' ) // strange effect
+         $komi = 0;
+      return (float)$komi;
+   }//adjust_komi
+
+   // output (with optional parts): +/-adj [min,[D]max]
+   // returns '' if no handicap; caller must format empty to NO_VALUE for example
+   public static function build_adjust_handicap( $size, $adj_handicap, $min_handicap, $max_handicap, $short=false )
+   {
+      $out = array();
+      if ( $adj_handicap )
+         $out[] = ($adj_handicap > 0 ? '+' : '') . $adj_handicap;
+      if ( $max_handicap == DEFAULT_MAX_HANDICAP )
+      {
+         $def_max_handicap = DefaultMaxHandicap::calc_def_max_handicap($size);
+         if ( $short )
+            $out[] = sprintf( "[%d,D%d]", $min_handicap, $def_max_handicap );
+         else
+            $out[] = sprintf( "[%d,%s %d]", $min_handicap, T_('Default'), $def_max_handicap );
+      }
+      elseif ( $min_handicap > 0 || $max_handicap < MAX_HANDICAP )
+         $out[] = sprintf( "[%d,%d]", $min_handicap, min( MAX_HANDICAP, $max_handicap) );
+
+      return ( count($out) ) ? implode(' ',$out) : '';
+   }//build_adjust_handicap
+
+   // output (with optional parts): +/-adj [jigomode]
+   // returns '' if no komi-adjustment; caller must format "empty" value
+   public static function build_adjust_komi( $adj_komi, $jigo_mode, $short=false )
+   {
+      $out = array();
+      if ( (float)$adj_komi != 0.0 )
+         $out[] = ($adj_komi > 0 ? '+' : '') . (float)$adj_komi;
+      if ( $jigo_mode != JIGOMODE_KEEP_KOMI )
+      {
+         $jigo_str = '';
+         if ( $jigo_mode == JIGOMODE_ALLOW_JIGO )
+            $jigo_str = ($short) ? T_('.0#wroomshort') : T_('Allow Jigo#wroom');
+         elseif ( $jigo_mode == JIGOMODE_NO_JIGO )
+            $jigo_str = ($short) ? T_('.5#wroomshort') : T_('No Jigo#wroom');
+         if ( $jigo_str )
+            $out[] = sprintf( '[%s]', $jigo_str );
+      }
+
+      return ( count($out) ) ? implode(' ',$out) : '';
+   }//build_adjust_komi
+
+} // end 'GameSettings'
 
 
 
@@ -4966,71 +5082,6 @@ class DefaultMaxHandicap
 
 
 
-
-// returns adjusted komi within limits, also checking for valid limits
-function adjust_komi( $komi, $adj_komi, $jigo_mode )
-{
-   // adjust
-   if ( $adj_komi )
-      $komi += $adj_komi;
-
-   // assure valid limits up to the limits
-   if ( $komi < -MAX_KOMI_RANGE )
-      $komi = -MAX_KOMI_RANGE;
-   elseif ( $komi > MAX_KOMI_RANGE )
-      $komi = MAX_KOMI_RANGE;
-
-   if ( $jigo_mode == JIGOMODE_ALLOW_JIGO && floor($komi) != $komi )
-      $komi = (($komi < 0) ? -1 : 1) * floor(abs($komi));
-   elseif ( $jigo_mode == JIGOMODE_NO_JIGO && floor($komi) == $komi )
-      $komi += ($komi < 0) ? -0.5 : 0.5;
-
-   // assure valid limits after applying jigo-mode
-   $komi = (float) round( 2 * $komi ) / 2;
-   if ( $komi < -MAX_KOMI_RANGE )
-      $komi += 1.0;
-   elseif ( $komi > MAX_KOMI_RANGE )
-      $komi -= 1.0;
-
-   if ( (string)$komi == '-0' ) // strange effect
-      $komi = 0;
-   return (float)$komi;
-}
-
-// returns adjusted handicap within limits, also checking for valid limits
-function adjust_handicap( $size, $handicap, $adj_handicap, $min_handicap, $max_handicap )
-{
-   // assure valid limits
-   $min_handicap = min( MAX_HANDICAP, max( 0, $min_handicap ));
-   $max_handicap = DefaultMaxHandicap::limit_max_handicap( $max_handicap );
-
-   if ( $max_handicap == DEFAULT_MAX_HANDICAP )
-   {
-      $chk_max_handicap = DefaultMaxHandicap::calc_def_max_handicap( $size );
-      if ( $min_handicap > $chk_max_handicap )
-         $min_handicap = $chk_max_handicap;
-   }
-   else
-   {
-      if ( $min_handicap > $max_handicap )
-         swap( $min_handicap, $max_handicap );
-      $chk_max_handicap = $max_handicap;
-   }
-
-   // adjust
-   if ( $adj_handicap )
-      $handicap += $adj_handicap;
-
-   if ( $handicap < $min_handicap )
-      $handicap = $min_handicap;
-   elseif ( $handicap > $chk_max_handicap )
-      $handicap = $chk_max_handicap;
-
-   if ( $handicap == 1 )
-      $handicap = 0;
-
-   return (int)$handicap;
-}//adjust_handicap
 
 /*! \brief Determines who is to move (BLACK|WHITE), expects game-row with fields ID,Black_ID,White_ID,ToMove_ID. */
 function get_to_move( $grow, $errmsg )

@@ -16,6 +16,29 @@ Developers INFO:
 ChangeLog
 ------------------------------------------------------------------
 
+2013-07-08 juga
+
+   * include/game_functions.php (GameSetup.build_invitation_diffs;
+       class GameSettingsCalculator, ~.calculate_settings;
+       GameSettings.to_string, ~.suggest_proper, ~.suggest_conventional, ~.get_handicap_limits,
+         ~.adjust_handicap, ~.adjust_komi, ~.build_adjust_handicap, ~.build_adjust_komi),
+     include/wroom_control.php (WaitingroomOffer.calculate_offer_settings),
+     include/message_functions.php (game_settings_form, game_info_table),
+     include/make_game.php (create_game),
+     scripts/tests/AllTests.php, scripts/tests/GameSettingsTest.php,
+     game_players.php (update_handicap_komi, use_handicap_suggestion),
+     waiting_room.php:
+   - apply handicap/komi-adjustment only for conventional/proper handicap-type
+     - refactored handicap & komi adjustments into GameSettings-class for methods:
+       adjust_handicap, adjust_komi, build_adjust_handicap, build_adjust_komi
+     - removed showing adjustment-info with old and adjusted handicap/komi as calculation
+       not longer possible
+     - moved handicap-standard-placement in game-settings-form above adjustments
+       for clearer grouping of adjustments on handicap & komi with note about scope
+     - always show probable/calculated game-settings-info for invitations and waitingroom-info
+     - renamed unit-tests for game-settings: Game_SettingsHelperTest -> GameSettingsTest
+     - added tests for GameSettings::suggest_proper & suggest_conventional
+
 2013-07-01 juga
 
    * include/game_functions.php (class GameSettingsCalculator, ~.calculate_settings;

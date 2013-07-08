@@ -481,11 +481,23 @@ function game_settings_form(&$mform, $formstyle, $viewmode, $iamrated=true, $my_
       $mform->add_row( $row_arr );
    }
 
+   if ( ENABLE_STDHANDICAP && !$is_view_fairkomi )
+   {
+      $mform->add_row( array(
+            'DESCRIPTION', T_('Handicap stones'),
+            'CHECKBOXX', 'stdhandicap', 'Y', "", $StdHandicap, array( 'disabled' => $ShapeID ),
+            'TEXT', T_('Standard placement'), ));
+   }
+
 
    $adjustments_view = ( $is_fstyle_tourney || ($formstyle == GSET_WAITINGROOM && $viewmode == GSETVIEW_STANDARD)
       || $is_fstyle_invite );
    if ( $adjustments_view )
    {
+      $mform->add_row( array( 'SPACE' ) );
+      $mform->add_row( array( 'CELL', 2, 'class="center WarnMsg"',
+                              'TEXT', T_('Adjustments only apply for conventional and proper handicap type!'), ));
+
       // adjust handicap stones
       $adj_handi_stones = array();
       $HSTART = max(5, (int)(MAX_HANDICAP/3));
@@ -499,8 +511,7 @@ function game_settings_form(&$mform, $formstyle, $viewmode, $iamrated=true, $my_
                                           DefaultMaxHandicap::calc_def_max_handicap($Size), $Size ))
          : '';
 
-      $mform->add_row( array( 'SPACE' ) );
-      $mform->add_row( array( 'DESCRIPTION', T_('Handicap stones'),
+      $mform->add_row( array( 'DESCRIPTION', T_('Handicap stone adjustments'),
                               'TEXT', sptext(T_('Adjust by#handi')),
                               'SELECTBOX', 'adj_handicap', 1, $adj_handi_stones, $AdjustHandicap, false,
                               'TEXT', sptext(T_('Min.'), 1),
@@ -519,31 +530,16 @@ function game_settings_form(&$mform, $formstyle, $viewmode, $iamrated=true, $my_
             ));
    }
 
-   if ( ENABLE_STDHANDICAP && !$is_view_fairkomi )
-   {
-      $arr = array();
-      if ( $adjustments_view )
-         $arr[] = 'TAB';
-      else
-         array_push( $arr, 'DESCRIPTION', T_('Handicap stones') );
-      array_push( $arr,
-            'CHECKBOXX', 'stdhandicap', 'Y', "", $StdHandicap, array( 'disabled' => $ShapeID ),
-            'TEXT', T_('Standard placement') );
-      $mform->add_row($arr);
-   }
-
    if ( $adjustments_view )
    {
       // adjust komi
       $mform->add_row( array(
-            'DESCRIPTION', T_('Komi'),
+            'DESCRIPTION', T_('Komi adjustments'),
             'TEXT', sptext(T_('Adjust by#komi')),
             'TEXTINPUTX', 'adj_komi', 5, 5, $AdjustKomi, $gsc->get_class_error_field('adj_komi'),
             'TEXT', sptext(T_('Jigo mode'), 1),
             'SELECTBOX', 'jigo_mode', 1, GameTexts::get_jigo_modes(), $JigoMode, false,
          ));
-      $mform->add_row( array( 'CELL', 2, 'class="center WarnMsg"',
-                              'TEXT', T_('NOTE: Adjustments (handicap & komi) only apply for conventional and proper handicap type!'), ));
    }
    elseif ( $is_view_fairkomi )
    {
@@ -1091,7 +1087,7 @@ function game_info_table( $tablestyle, $game_row, $player_row, $iamrated, $use_s
 
    if ( $tablestyle == GSET_MSG_INVITE || $tablestyle == GSET_WAITINGROOM || $tablestyle == GSET_TOURNAMENT_LADDER ) // Handicap adjustment
    {
-      $adj_handi_str = build_adjust_handicap( $Size, $AdjHandicap, $MinHandicap, $MaxHandicap );
+      $adj_handi_str = GameSettings::build_adjust_handicap( $Size, $AdjHandicap, $MinHandicap, $MaxHandicap );
       if ( (string)$adj_handi_str != '' )
          $itable->add_sinfo( T_('Handicap adjustment'), $adj_handi_str );
    }
@@ -1103,7 +1099,7 @@ function game_info_table( $tablestyle, $game_row, $player_row, $iamrated, $use_s
    {
       if ( !$is_fairkomi )
       {
-         $adj_komi_str = build_adjust_komi( $AdjKomi, $JigoMode );
+         $adj_komi_str = GameSettings::build_adjust_komi( $AdjKomi, $JigoMode );
          if ( (string)$adj_komi_str != '' )
             $itable->add_sinfo( T_('Komi adjustment'), $adj_komi_str );
       }
@@ -1153,82 +1149,33 @@ function game_info_table( $tablestyle, $game_row, $player_row, $iamrated, $use_s
          ( $tablestyle == GSET_TOURNAMENT_LADDER ) );
       $gs_calc->calculate_settings();
 
-      $adj_handi_str = (is_null($gs_calc->adjusted_handicap)) ? '' : sprintf( T_('adjusted from %d'), $gs_calc->adjusted_handicap);
-      $adj_komi_str = (is_null($gs_calc->adjusted_komi)) ? '' : sprintf( T_('adjusted from %.1f'), $gs_calc->adjusted_komi);
-
       if ( $tablestyle == GSET_WAITINGROOM && !$is_my_game )
          $itable->add_sinfo( T_('Started games'), (int)@$game_row['X_TotalCount'] );
 
-      if ( $gs_calc->calc_type == 2 || $adj_handi_str || $adj_komi_str || $is_fairkomi )
-      {
-         // determine color
-         if ( $gs_calc->calc_color == GSC_COL_DOUBLE )
-            $colortxt = build_image_double_game( true, $color_class );
-         elseif ( $gs_calc->calc_color == GSC_COL_FAIRKOMI )
-            $colortxt = image( $base_path.'17/y.gif', $color_note, NULL, $color_class ) . MED_SPACING . $color_note;
-         else
-            $colortxt = get_colortext_probable( ($gs_calc->calc_color == GSC_COL_BLACK), ($gs_calc->calc_color == GSC_COL_NIGIRI) );
+      // determine color
+      if ( $gs_calc->calc_color == GSC_COL_DOUBLE )
+         $colortxt = build_image_double_game( true, $color_class );
+      elseif ( $gs_calc->calc_color == GSC_COL_FAIRKOMI )
+         $colortxt = image( $base_path.'17/y.gif', $color_note, NULL, $color_class ) . MED_SPACING . $color_note;
+      else
+         $colortxt = get_colortext_probable( ($gs_calc->calc_color == GSC_COL_BLACK), ($gs_calc->calc_color == GSC_COL_NIGIRI) );
 
-         $itable->add_scaption( ($gs_calc->calc_type == 1) ? T_('Probable game settings') : T_('Game settings') );
+      $itable->add_scaption( ($gs_calc->calc_type == 1) ? T_('Probable game settings') : T_('Game settings') );
 
-         $itable->add_sinfo( T_('Color'), $colortxt );
-         $itable->add_sinfo( T_('Handicap'),
-               $gs_calc->calc_handicap . ($adj_handi_str ? MED_SPACING."($adj_handi_str)" : '' ) );
+      $itable->add_sinfo( T_('Color'), $colortxt );
+      $itable->add_sinfo( T_('Handicap'), $gs_calc->calc_handicap );
 
-         $komi_text = ( $is_fairkomi )
-            ? T_('negotiated by Fair Komi#fairkomi')
-            : sprintf("%.1f", $gs_calc->calc_komi) . ($adj_komi_str ? MED_SPACING."($adj_komi_str)" : '' );
-         $itable->add_sinfo( T_('Komi'), $komi_text );
+      $komi_text = ( $is_fairkomi )
+         ? T_('negotiated by Fair Komi#fairkomi')
+         : sprintf("%.1f", $gs_calc->calc_komi);
+      $itable->add_sinfo( T_('Komi'), $komi_text );
 
-         if ( $is_fairkomi )
-            $itable->add_sinfo( T_('Jigo mode'), GameTexts::get_jigo_modes($JigoMode) );
-      }
+      if ( $is_fairkomi )
+         $itable->add_sinfo( T_('Jigo mode'), GameTexts::get_jigo_modes($JigoMode) );
    } //Probable settings
 
    $itable->echo_table();
 }//game_info_table
-
-// output (with optional parts): +/-adj [jigomode]
-// returns '' if no komi-adjustment; caller must format "empty" value
-function build_adjust_komi( $adj_komi, $jigo_mode, $short=false )
-{
-   $out = array();
-   if ( (float)$adj_komi != 0.0 )
-      $out[] = ($adj_komi > 0 ? '+' : '') . (float)$adj_komi;
-   if ( $jigo_mode != JIGOMODE_KEEP_KOMI )
-   {
-      $jigo_str = '';
-      if ( $jigo_mode == JIGOMODE_ALLOW_JIGO )
-         $jigo_str = ($short) ? T_('.0#wroomshort') : T_('Allow Jigo#wroom');
-      elseif ( $jigo_mode == JIGOMODE_NO_JIGO )
-         $jigo_str = ($short) ? T_('.5#wroomshort') : T_('No Jigo#wroom');
-      if ( $jigo_str )
-         $out[] = sprintf( '[%s]', $jigo_str );
-   }
-
-   return ( count($out) ) ? implode(' ',$out) : '';
-}
-
-// output (with optional parts): +/-adj [min,[D]max]
-// returns '' if no handicap; caller must format empty to NO_VALUE for example
-function build_adjust_handicap( $size, $adj_handicap, $min_handicap, $max_handicap, $short=false )
-{
-   $out = array();
-   if ( $adj_handicap )
-      $out[] = ($adj_handicap > 0 ? '+' : '') . $adj_handicap;
-   if ( $max_handicap == DEFAULT_MAX_HANDICAP )
-   {
-      $def_max_handicap = DefaultMaxHandicap::calc_def_max_handicap($size);
-      if ( $short )
-         $out[] = sprintf( "[%d,D%d]", $min_handicap, $def_max_handicap );
-      else
-         $out[] = sprintf( "[%d,%s %d]", $min_handicap, T_('Default'), $def_max_handicap );
-   }
-   elseif ( $min_handicap > 0 || $max_handicap < MAX_HANDICAP )
-      $out[] = sprintf( "[%d,%d]", $min_handicap, min( MAX_HANDICAP, $max_handicap) );
-
-   return ( count($out) ) ? implode(' ',$out) : '';
-}
 
 /*!
  * \brief Returns restrictions on rating-range, rated-finished-games, acceptance-mode-same-opponent,

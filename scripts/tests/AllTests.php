@@ -26,7 +26,7 @@ require_once 'BitSetTest.php';
 require_once 'ProfileTest.php';
 require_once 'TimeFormatTest.php';
 require_once 'GameAddTimeTest.php';
-require_once 'Game_SettingsHelperTest.php';
+require_once 'GameSettingsTest.php';
 require_once 'EntityTest.php';
 require_once 'EntityDataTest.php';
 require_once 'Game_SetupTest.php';
@@ -52,7 +52,7 @@ class AllTests
       $suite->addTestSuite('ProfileTest');
       $suite->addTestSuite('TimeFormatTest');
       $suite->addTestSuite('GameAddTimeTest');
-      $suite->addTestSuite('Game_SettingsHelperTest');
+      $suite->addTestSuite('GameSettingsTest');
       $suite->addTestSuite('EntityTest');
       $suite->addTestSuite('EntityDataTest');
       $suite->addTestSuite('Game_SetupTest');

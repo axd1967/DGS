@@ -29,7 +29,6 @@ require_once 'include/table_columns.php';
 require_once 'include/form_functions.php';
 require_once 'include/game_functions.php';
 require_once 'include/time_functions.php';
-require_once 'include/message_functions.php';
 require_once 'include/contacts.php';
 require_once 'include/filter.php';
 require_once 'include/filterlib_country.php';
@@ -260,14 +259,14 @@ require_once 'include/wroom_control.php';
          if ( $wrtable->Is_Column_Displayed[14] ) // Handicap
          {
             $h_str = ( $calculated )
-               ? build_adjust_handicap( $Size, $AdjHandicap, $MinHandicap, $MaxHandicap, /*short*/true )
+               ? GameSettings::build_adjust_handicap( $Size, $AdjHandicap, $MinHandicap, $MaxHandicap, /*short*/true )
                : $Handicap;
             $wrow_strings[14] = ( (string)$h_str != '' ) ? $h_str : NO_VALUE;
          }
          if ( $wrtable->Is_Column_Displayed[ 6] ) // Komi
          {
             if ( $calculated )
-               $k_str = build_adjust_komi( $AdjKomi, $JigoMode, /*short*/true );
+               $k_str = GameSettings::build_adjust_komi( $AdjKomi, $JigoMode, /*short*/true );
             elseif ( $is_fairkomi )
                $k_str = '';
             else

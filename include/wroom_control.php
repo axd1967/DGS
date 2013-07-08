@@ -477,11 +477,15 @@ class WaitingroomOffer
          {
             $game_settings = GameSettings::get_game_settings( $this->row );
             if ( $handitype == HTYPE_CONV )
+            {
                list( $infoHandi, $infoKomi, $iamblack, $info_nigiri ) =
                   $game_settings->suggest_conventional( $my_rating, $this->row['WRP_Rating2'] );
+            }
             elseif ( $handitype == HTYPE_PROPER )
+            {
                list( $infoHandi, $infoKomi, $iamblack, $info_nigiri ) =
                   $game_settings->suggest_proper( $my_rating, $this->row['WRP_Rating2'] );
+            }
          }
       }
 
@@ -501,9 +505,8 @@ class WaitingroomOffer
       $settings_str = '';
       if ( !$is_my_game && $game_type == GAMETYPE_GO && !$is_fairkomi )
       {
-         $this->resultHandicap = adjust_handicap( $this->row['Size'], $infoHandi,
-            $this->row['AdjHandicap'], $this->row['MinHandicap'], $this->row['MaxHandicap'] );
-         $this->resultKomi = adjust_komi( $infoKomi, $this->row['AdjKomi'], $this->row['JigoMode'] );
+         $this->resultHandicap = $infoHandi;
+         $this->resultKomi = $infoKomi;
          $settings_str = ($this->resultHandicap > 0)
             ? sprintf( T_('%s H%s K%s#wrsettings'), $colstr, (int)$this->resultHandicap, $this->resultKomi )
             : sprintf( T_('%s Even K%s#wrsettings'), $colstr, $this->resultKomi );
