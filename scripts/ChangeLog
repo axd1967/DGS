@@ -18,6 +18,9 @@ ChangeLog
 
 2013-07-08 juga
 
+   * game.php:
+   - show that score is preliminary below game-board as long as game is in scoring-mode
+
    * include/game_functions.php (GameSetup.build_invitation_diffs;
        class GameSettingsCalculator, ~.calculate_settings;
        GameSettings.to_string, ~.suggest_proper, ~.suggest_conventional, ~.get_handicap_limits,

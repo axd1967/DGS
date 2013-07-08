@@ -422,7 +422,7 @@ $GLOBALS['ThePage'] = new Page('Game');
             $done_url = "game.php?gid=$gid".URI_AMP."a=done"
                . ( $stonestring ? URI_AMP."stonestring=$stonestring" : '' );
 
-            $extra_infos[T_('Score') . ": " . score2text($score, true)] = 'Score';
+            $extra_infos[T_('Preliminary Score') . ": " . score2text($score, true)] = 'Score';
 
             $strtmp = span('NoPrint',
                sprintf( T_("Please mark dead stones and click %s'done'%s when finished."),
@@ -441,7 +441,7 @@ $GLOBALS['ThePage'] = new Page('Game');
             list( $score, $game_score ) =
                GameActionHelper::calculate_game_score( $TheBoard, $stonestring, $Ruleset );
 
-            $extra_infos[T_('Score') . ": " . score2text($score, true)] = 'Score';
+            $extra_infos[T_('Preliminary Score') . ": " . score2text($score, true)] = 'Score';
             break;
          }//case 'done'
 
