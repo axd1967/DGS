@@ -56,8 +56,8 @@ class Game_SetupTest extends PHPUnit_Framework_TestCase {
    protected function setUp() {
       UnitTestHelper::clearErrors(ERROR_MODE_PRINT);
 
-      $this->gs = Game_SetupTest::create_gs();
-      $this->gsi = Game_SetupTest::create_gs_inv();
+      $this->gs = self::create_gs();
+      $this->gsi = self::create_gs_inv();
    }
 
    public function test_new_from_game_row() {
@@ -164,11 +164,11 @@ class Game_SetupTest extends PHPUnit_Framework_TestCase {
    }
 
    public function test_build_and_parse_invitation_game_setup() {
-      $gs1 = Game_SetupTest::create_gs_inv();
+      $gs1 = self::create_gs_inv();
       $gs1->Komi = 5.5;
       $gs1->uid = 11;
       $gs1->Message = 'bla';
-      $gs2 = Game_SetupTest::create_gs_inv();
+      $gs2 = self::create_gs_inv();
       $gs2->uid = 22;
       $gs2->Size = 13;
       $str = GameSetup::build_invitation_game_setup( $gs1, $gs2 );
@@ -250,7 +250,7 @@ class Game_SetupTest extends PHPUnit_Framework_TestCase {
    }
 
    private static function create_gs_inv() {
-      $gs = Game_SetupTest::create_gs();
+      $gs = self::create_gs();
       $gs->read_waitingroom_fields( array(
          'tid' => 4711,
          'ShapeID' => 7,
