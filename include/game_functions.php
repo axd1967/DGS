@@ -4722,7 +4722,7 @@ class NextGameOrder
    /*!
     * \brief Calculates timeout-date (in ticks) to be stored in Games.TimeOutDate.
     * \note used for status-games-ordering on remaining-time
-    * \note ignores vacation and weekends
+    * \note ignores weekends as explained in the specs
     *
     * \param $grow Games-table-row to read time-settings for game, expected fields:
     *              Maintime, Byotype, Byotime, Byoperiods,

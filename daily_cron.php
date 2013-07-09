@@ -172,7 +172,10 @@ if num_rows==2 {compute differences and checks}
 
    $result = db_query( 'daily_cron.night_hours',
       "SELECT ID, Timezone, Nightstart, ClockUsed FROM Players WHERE ClockChanged='Y'" );
-   // note: DST-adjustments are checked in include/std_functions.php is_logged_in()
+   // NOTE: DST-adjustments are checked in include/std_functions.php is_logged_in()
+
+   // NOTE: clock-used for games to move in MUST NOT be changed, because the clocks are not aligned.
+   //       See also doc about 'Games.TimeOutDate' in 'specs/db/table-Games.txt'
 
    if ( @mysql_num_rows( $result) > 0 )
    {

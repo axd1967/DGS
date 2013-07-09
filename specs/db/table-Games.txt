@@ -256,17 +256,24 @@ Description:
      - If user changes the length of vacation, the TimeOutDate of all the games-to-move
        for that user is adjusted by the respective number of ticks.
      - If the vacation of a user ends, the TimeOutDate is not changed,
-       because the additional time (gained by vacation) is consumed.
+       because the additional time (gained by vacation) has been consumed.
 
    - value is not changed if player changes night-time or timezone, because current game-clocks
-     are not changed. Only on the next move it influences the game-time, but then also TimeOutDate
-     is correctly calculated with the changed Players.ClockUsed.
+     are not changed.
+
+     Actually the game-clocks for games to move in MUST NOT be changed, because the clock-ticks
+     for other clocks are not aligned and so the used time by the current player may jump,
+     because Games.LastTicks refers to the ticks of the currently used-clock as specified
+     by Games.ClockUsed rather than being relative to the Clock.Ticks of the new clock.
+
+     Only on the next move the clock-change influences the game-time, but then also TimeOutDate
+     is correctly calculated anew with the changed Players.ClockUsed.
 
    - Weekend-handling is NOT implemented, because:
      Weekend-handling would have a flaw, which after outages for which the clock are not "ticking"
      (like maintenance) would need that admins have to recalculate the Games.TimeOutDate.
-     The weekend-handling would need to use the current time to compensate all weekends during
-     the time left. This weekend-compensation would make it unsynchronized with
+     The weekend-handling would need to use the current day and time to compensate all weekends
+     during the time left. This weekend-compensation would make it unsynchronized with
      the Clock-aligned TimeOutDate.
 
      Also the weekend-clock (and normal clocks) are 15-hour days, while the timeleft-clock resembles a 24-hour day.
@@ -278,7 +285,7 @@ Description:
      accepted to skip the fix-step after maintenance if not taking too long.
 
      CONCLUSION:
-     Games with weekend-clock stopped is not handled, because it would be complex to correctly
+     Games with weekend-clock stopped is not handled, because it would be too complex to correctly
      calculate the time-diff.
 
      So in effect the TimeOutDate is not accurate for games with clock-stopped-on-weekends,

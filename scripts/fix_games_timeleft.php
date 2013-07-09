@@ -121,7 +121,8 @@ function update_games_timeoutdate( $gid, $timeout_date, $curr_timeout_date )
    if ( ($curr_cnt++ % 50) == 0 )
       echo "<br><br>... $curr_cnt of $games_cnt updated ...\n";
    $update_query = "UPDATE Games SET TimeOutDate=$timeout_date WHERE ID='$gid' LIMIT 1";
-   dbg_query($update_query, "$curr_timeout_date -> $timeout_date");
+   dbg_query($update_query,
+      sprintf( '%s -> %s (%s)', $curr_timeout_date, $timeout_date, $timeout_date - $curr_timeout_date) );
    GameHelper::delete_cache_game_row( "scripts.fix_games_timeleft($gid)", $gid );
 }
 
