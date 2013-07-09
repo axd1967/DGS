@@ -192,7 +192,7 @@ require_once 'include/filter.php';
       }
       else
       {
-         $fld = array('' => '');
+         $fld = array( FOLDER_NONE => '' );
          foreach ( $my_folders as $key => $val )
          {
             if ( $key != $current_folder && $key != FOLDER_NEW &&

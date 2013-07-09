@@ -16,6 +16,13 @@ Developers INFO:
 ChangeLog
 ------------------------------------------------------------------
 
+2013-07-09 juga
+
+   * include/message_functions.php (message_info_table, change_folders_for_marked_messages),
+     list_messages.php:
+   - fix bug: no selection of folder to move message in does not lead to error, but redirects
+     to message-list with message marked
+
 2013-07-08 juga
 
    * game.php:

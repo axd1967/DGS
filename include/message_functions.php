@@ -764,7 +764,7 @@ function message_info_table($mid, $date, $to_me, //$mid==0 means preview
       $deleted = ( $folder_nr == FOLDER_DESTROYED );
       if ( !$deleted )
       {
-         $fldrs = array('' => '');
+         $fldrs = array( FOLDER_NONE => '');
          foreach ( $folders as $key => $val )
          {
             if ( $key != $folder_nr && $key != FOLDER_NEW && (!$to_me || $key != FOLDER_SENT) )
@@ -1381,12 +1381,12 @@ function change_folders_for_marked_messages($uid, $folders)
    return change_folders($uid, $folders, $message_ids, $new_folder, @$_GET['current_folder']);
 }
 
-// return >0 success (messages moved), 0 = no messages to move
+// return >0 success (messages moved), 0 = no messages to move or no (new-)target-folder specified
 // \param $need_replied false = change only messages that have been replied,
 //                      true = change only message that need NO reply
 function change_folders($uid, $folders, $message_ids, $new_folder, $current_folder=false, $need_replied=false, $quick_suite=false)
 {
-   if ( count($message_ids) <= 0 )
+   if ( count($message_ids) <= 0 || $new_folder == FOLDER_NONE )
       return 0;
 
    if ( $new_folder == FOLDER_DESTROYED )
