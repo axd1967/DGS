@@ -139,8 +139,8 @@ Copyright (C) 2001-2013  Erik Ouchterlony, Jens-Uwe Gaspar
 
    * Game settings:
       * Added Ruleset option for
-         * Japanese rules (default) using territory scoring
-         * Chinese rules using area scoring
+         * Japanese rules (default) using territory scoring, default komi 6.5
+         * Chinese rules using area scoring, default komi 7.5
 
    * Game page:
       * Show player to move (marked by <image backward.gif>)
