@@ -275,6 +275,8 @@ function load_old_rating_changes( $uid )
 
 
 /* TODO TODO TODO
+// running normal running games (non-MPG) to adjust start-rating for changed player-rating + inform opponents + make unrated if not tournament-game and not only a confidence-interval-reset
+// NOTE: can include games in fair-komi-negotiation
 function find_running_normal_games( $uid )
 {
    // handle tid, FK, B/W
@@ -284,7 +286,29 @@ function find_running_normal_games( $uid )
    //update Games set White_Start_Rating=-900 where GameType='GO' and White_ID=75273 and Status in ('play','pass','score','score2') and White_Start_Rating > -9999
    //update Games set Black_Start_Rating=-900 where GameType='GO' and Black_ID=75273 and Status in ('play','pass','score','score2') and Black_Start_Rating > -9999
 }
+/* Possible message to opponents:
+--##################################################################
+Subject: Rating change of opponent in your games
+Hi,
 
+the rating of the opponent player <user =xyz> has been changed from 7k to 30k.  All corresponding RATED games have been changed to UNRATED to prevent your and his rating to jump too much when the games end.
+
+The <home forum/read.php?forum=...>original complaint</home> was discussed in the forums.  To ensure the integrity of the rating-system, the step with the rating-change was taken.
+
+It looks like we have a kid here, that thought if funny or more interesting to start with a higher rank than that of a beginner.  So please be a bit lenient, as this happens from time to time.
+
+You can resign the games without a rating-change (because the games are unrated now) or ask an admin for deletion (would be more work for me).
+
+If you questions about the issues, please don't hesitate to ask.
+
+PS: Multi-player-games are treated differently.
+
+Cheers,
+DGS-Admin
+--##################################################################
+* /
+
+// running MPGs need adjustment of group (B|W|BW) start-rating for changed player-rating + inform game-masters that start-rating is re-calculated
 function find_running_multi_player_games( $uid )
 {
    $result = db_query("admin_rating.find_running_multi_player_games($uid)",
@@ -293,11 +317,45 @@ function find_running_multi_player_games( $uid )
    //select avg(Rating2) from GamePlayers as GP inner join Players as P on P.ID=GP.uid where gid=784456 and GroupColor ='W'
    //update Games set  White_Start_Rating = -165.540034484907  where ID=784456 limit 1
 }
+/* Possible message to opponents:
+--##################################################################
+Hi,
 
+the rating of the opponent player <user =xyz> has been changed from 7k to 30k.  The combined start ratings of your multi-player-games have been re-calculated.
+
+This is a bulk-message, so check your game accordingly:
+<ul>
+<li><b>nick1:</b> <game g1> ; old Black Rating: 10 kyu (+23%) => changed to new Black-Rating: 21 kyu (+17%)
+
+<li><b>nick2:</b> <game g2> ; old White-Rating: 17 kyu (-0%) => changed to new White-Rating: 23 kyu (+34%)
+</ul>
+
+The <home forum/read.php?forum=...>original complaint</home> was discussed in the forums.  To ensure the integrity of the rating-system, the step with the rating-change was taken.  The rating-change also has an impact on multi-player-games because the average rating of the participating groups "changed".
+
+This admin-message is sent only to the game-masters of the multi-player-games in question.  It's up to you if you want to continue the game under this changed pretext.
+
+If you decide to end the game prematurely, please inform the other players with either a bulk-message or MPG-bulletin about it.  If you want the game deleted, you have to send me a request to do that as only an admin can delete multi-player-games at the moment.
+If you want to play on, just do so.
+
+If you have questions about the issues, please don't hesitate to ask.
+
+Cheers,
+DGS-Admin
+--##################################################################
+* /
+
+// find running tournament-games or tournament-participants for running tournaments + inform tournament-directors to take action (automatic handling not possible to variety of cases)
 function find_running_tournaments( $uid )
 {
    $result = db_query("admin_rating.find_running_tournaments($uid)",
       "SELECT TP.tid, T.Status FROM TournamentParticipant AS TP INNER JOIN Tournament AS T ON T.ID=TP.tid WHERE TP.uid=$uid AND T.Status IN ()" );
+}
+
+// find open invitations with player whose rating changed + inform opponent, that there are X invitations (besides informing about rating-change), he/she should inform the invited opponents about the rating-change
+function find_open_invitations( $uid )
+{
+   $result = db_query("admin_rating.find_open_invitations($uid)",
+      "SELECT COUNT(*) FROM Games AS G WHERE G.Status='INVITED' AND (Black_ID=$uid OR White_ID=$uid)" );
 }
 */
 
