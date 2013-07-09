@@ -189,7 +189,7 @@ NOTE: order of the following items is not strict. You may need to re-edit the
 
       - chapter (4) to get familiar with cache-admin scripts
 
-* Edit permissions for include/config-local.php and directory translations/:
+* Edit permissions for include/config-local.php:
 
   Find out which group your webserver is using (e.g. www-data).
   > su -c 'chgrp www-data include/config-local.php'
@@ -251,8 +251,9 @@ NOTE: order of the following items is not strict. You may need to re-edit the
   and the unit for the variable $timeadjust is seconds.
   It's added to form the "current timestamp" ($NOW).
 
-* [step to review] You need to create translations, so take a sidestep to read and execute
-  the directives in 'scripts/README.translations'
+* Now you need to create the remaining page-specific translations.
+  After ensuring, that all the previous steps to prepare translations have been taken
+  as described above, read and execute the directives in 'scripts/README.translations'.
 
 * If you want to adjust the source-code, please have a look to the
   notes in 'scripts/README.developers'
