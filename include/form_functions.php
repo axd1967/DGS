@@ -958,7 +958,7 @@ class Form
     */
    private function create_string_func_chapter( &$result, $args )
    {
-      $result .= "<b>" . $args[0] . ":</b>";
+      $result .= "<h4 class=Chapter>" . $args[0] . ":</h4>";
    }
 
    /*!
