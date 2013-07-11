@@ -229,6 +229,12 @@ h3.Header {
    margin: 1em 0px;
 }
 
+h4.Chapter {
+   font-weight: bold;
+   padding: 0px;
+   margin: 0px;
+}
+
 span.NativeText {
    border: 1px solid lime;
    border-style: dashed;
