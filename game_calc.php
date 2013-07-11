@@ -95,9 +95,9 @@ require_once 'include/table_columns.php';
       echo "<table><tr><td><pre>\n";
       //echo print_r( $game_row, true), "\n\n";
       echo "Source-Code: ",
-         anchor('http://dragongoserver.cvs.sourceforge.net/viewvc/dragongoserver/DragonGoServer/include/rating.php?revision=1.84&view=markup&pathrev=HEAD#l290', 'update_rating2()'),
+         anchor('https://sourceforge.net/p/dragongoserver/dgs-main/ci/2adb3f360d93e9b0137dcc931cb95b8a9cd4fbec/tree/include/rating.php#l289', 'update_rating2()'),
          ", ",
-         anchor('http://dragongoserver.cvs.sourceforge.net/viewvc/dragongoserver/DragonGoServer/include/rating.php?revision=1.84&view=markup&pathrev=HEAD#l119', 'change_rating'),
+         anchor('https://sourceforge.net/p/dragongoserver/dgs-main/ci/2adb3f360d93e9b0137dcc931cb95b8a9cd4fbec/tree/include/rating.php#l118', 'change_rating'),
          "\n\n";
 
       $is_running = isRunningGame($game->Status);
