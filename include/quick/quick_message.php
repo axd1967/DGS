@@ -394,7 +394,7 @@ class QuickHandlerMessage extends QuickHandler
             // NOTE: players have a rating if an invitation exists
             $row['Handicaptype'] = $Handitype;
             $row['JigoMode'] = $jigo_mode;
-            $gs_calc = new GameSettingsCalculator( $row, $player_row['Rating2'], $row['other_rating'] );
+            $gs_calc = new GameSettingsCalculator( $row, $my_gs, $player_row['Rating2'], $row['other_rating'] );
             $gs_calc->calculate_settings();
 
             $out['game_settings'] = array(

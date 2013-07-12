@@ -16,6 +16,23 @@ Developers INFO:
 ChangeLog
 ------------------------------------------------------------------
 
+2013-07-12 juga
+
+   * include/game_functions.php (MultiPlayerGame.determine_groups_player_count, ~.count_player_groups;
+       class GameSettingsCalculator, ~.__construct;
+       GameSettings.get_game_settings_from_gamesetup, ~.get_game_settings_from_gamerow),
+     include/wroom_control.php (WaitingroomControl.join_waitingroom_game, ~.calculate_offer_settings),
+     include/quick/quick_message.php (QuickHandlerMessage.fill_message_info),
+     include/make_game.php (accept_invite_game, create_game),
+     include/message_functions.php (game_info_table),
+     game_players.php (build_table_game_players, check_game_setup, build_form_change_group_with_handicap):
+   - bugfix: restrict selectbox to maximal number of players of respective group
+     to change order of players for multi-player-game
+   - bugfix: calculating game-setting from adjust/min/max-handicap & adjust-komi/jigomode
+     need additional data-source of GameSetup
+   - bugfix: removed too much code on previous adjust-handicap/komi change setting handicap/komi-vars
+     for creating-game
+
 2013-07-09 juga
 
    * include/message_functions.php (message_info_table, change_folders_for_marked_messages),

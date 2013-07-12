@@ -534,7 +534,7 @@ function build_table_game_players( $grow, $cmd, &$form )
    $utable->add_tablehead( 7, T_('Flags#header'), 'ImagesLeft' );
    $utable->add_tablehead( 8, T_('Actions#header'), 'ImagesLeft' );
 
-   $group_max_players = MultiPlayerGame::determine_groups_player_count( $grow['GamePlayers'] );
+   $group_max_players = MultiPlayerGame::count_player_groups( $arr_game_players );
 
    $idx = 0;
    $last_group = null;
@@ -589,7 +589,7 @@ function build_table_game_players( $grow, $cmd, &$form )
          if ( allow_change_group_order($grow['GameType'], $gp->GroupColor) )
          {
             $gpkey = KEY_GROUP_ORDER.$gp->id;
-            $arr_group_order = array( 0 => NO_VALUE ) + build_num_range_map( 1, $group_max_players );
+            $arr_group_order = array( 0 => NO_VALUE ) + build_num_range_map( 1, $group_max_players[$gp->uid] );
             $row_str[10] = $form->print_insert_select_box( $gpkey, 1, $arr_group_order,
                get_request_arg($gpkey, $gp->GroupOrder) );
          }
@@ -768,7 +768,7 @@ function build_form_change_group_with_handicap( &$form, $grow, $cmd, $enable_edi
       $arr_ratings = MultiPlayerGame::calc_average_group_ratings($arr_game_players);
       $rating1 = $arr_ratings[$arr_color_keys[0]];
       $rating2 = $arr_ratings[$arr_color_keys[1]];
-      $game_settings = GameSettings::get_game_settings( $grow );
+      $game_settings = GameSettings::get_game_settings_from_gamesetup( $grow );
       $arr_conv_sugg = $game_settings->suggest_conventional( $rating1, $rating2 ); // H,K,i'm-black
       $arr_prop_sugg = $game_settings->suggest_proper( $rating1, $rating2 );
 
@@ -1395,7 +1395,7 @@ function check_game_setup( $game_type, $game_players )
             $arr_users[$uid]->user->Handle );
    }
 
-   $arr_group_cnt = MultiPlayerGame::determine_groups_player_count( $game_players, false );
+   $arr_group_cnt = MultiPlayerGame::determine_groups_player_count( $game_players );
    $arr_grcol_vals = array_values( $arr_grcol );
    $arr_grcol_keys = array_keys( $arr_grcol );
    $arr_grcol_keys_text = build_arr_group_color_texts( $arr_grcol_keys );

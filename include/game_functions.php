@@ -435,11 +435,33 @@ class MultiPlayerGame
    }
 
    /*! \brief Returns max number of required players in all groups. */
-   public static function determine_groups_player_count( $game_players, $max=true )
+   public static function determine_groups_player_count( $game_players )
    {
       $arr = explode(':', $game_players);
-      return ($max) ? max($arr) : array( min($arr), max($arr) );
+      return array( min($arr), max($arr) );
    }
+
+   /*!
+    * \brief Returns max number of required players for all groups per user.
+    * \return array( uid => max-count of group with that user, ... )
+    */
+   public static function count_player_groups( $arr_game_players )
+   {
+      $gpcnt = array();
+      foreach ( $arr_game_players as $gp )
+      {
+         if ( isset($gpcnt[$gp->GroupColor]) )
+            $gpcnt[$gp->GroupColor]++;
+         else
+            $gpcnt[$gp->GroupColor] = 1;
+      }
+
+      $group_max_players = array();
+      foreach ( $arr_game_players as $gp )
+         $group_max_players[$gp->uid] = $gpcnt[$gp->GroupColor];
+
+      return $group_max_players;
+   }//count_player_groups
 
    public static function is_single_player( $game_players, $is_black )
    {
@@ -3475,15 +3497,15 @@ class GameSettingsCalculator
 
    /*!
     * \brief Constructs GameSettingsCalculator.
-    * \param $game_row expecting fields: Handicaptype, Size, Handicap, Komi,
-    *        AdjHandicap, MinHandicap, MaxHandicap, AdjKomi, JigoMode;
+    * \param $game_row expecting fields: Handicaptype, Size, Handicap, Komi;
     *        X_ChallengerIsBlack (if is_tourney)
+    * \param $game_setup GameSetup-object for fields: AdjHandicap, MinHandicap, MaxHandicap, AdjKomi, JigoMode
     * \param $is_calculated null if should be calculated here; must be given for ladder-tourney
     */
-   public function __construct( $game_row, $player_rating, $opp_rating, $is_calculated=null, $is_tourney=false )
+   public function __construct( $game_row, $game_setup, $player_rating, $opp_rating, $is_calculated=null, $is_tourney=false )
    {
       $this->grow = $game_row;
-      $this->game_settings = GameSettings::get_game_settings( $game_row );
+      $this->game_settings = GameSettings::get_game_settings_from_gamesetup( $game_row, $game_setup );
       $this->pl_rating = $player_rating;
       $this->opp_rating = $opp_rating;
       if ( is_null($is_calculated) )
@@ -3656,7 +3678,16 @@ class GameSettings
 
    // ------------ static functions ----------------------------
 
-   public static function get_game_settings( $grow )
+   public static function get_game_settings_from_gamesetup( $grow, $game_setup=null )
+   {
+      if ( is_null($game_setup) )
+         $game_setup = new GameSetup(0);
+      return new GameSettings( $grow['Size'], $grow['Ruleset'],
+         $game_setup->AdjustHandicap, $game_setup->MinHandicap, $game_setup->MaxHandicap,
+         $game_setup->AdjustKomi, $game_setup->JigoMode );
+   }
+
+   public static function get_game_settings_from_gamerow( $grow )
    {
       return new GameSettings( $grow['Size'], $grow['Ruleset'],
          $grow['AdjHandicap'], $grow['MinHandicap'], $grow['MaxHandicap'], $grow['AdjKomi'], $grow['JigoMode'] );
