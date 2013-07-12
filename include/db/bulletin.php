@@ -674,7 +674,7 @@ class Bulletin
    }//mark_bulletin_as_read
 
    /*!
-    * \brief Persists user-list for bulletin in BulletinTarget-table.
+    * \brief Persists (replaces existing) user-list for bulletin in BulletinTarget-table.
     *
     * \note IMPORTANT NOTE: caller needs to open TA with HOT-section!!
     */
