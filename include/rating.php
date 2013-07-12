@@ -750,7 +750,7 @@ function change_user_rating( $uid, $changes, $rating, $rating_min, $rating_max, 
    if ( $with_rca )
    {
       $new_rating = ( $changes & RCADM_CHANGE_RATING ) ? $rating : NO_RATING;
-      db_query( "change_user_rating.insert_rating_chg($uid,$rating,$reset_confidence)",
+      db_query( "change_user_rating.insert_rating_chg($uid,$rating,$changes)",
          "INSERT RatingChangeAdmin (uid,Created,Changes,Rating) " .
          "VALUES ($uid,FROM_UNIXTIME($NOW),$changes,$new_rating)" );
    }

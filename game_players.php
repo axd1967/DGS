@@ -113,7 +113,7 @@ define('KEY_GROUP_ORDER', 'gpo');
    // load data
    $grow = load_game( $gid );
    // load game-players + set vars: $arr_users, $arr_free_slots, $has_wroom_entry, $ack_invite_uid, $master_uid
-   $arr_game_players = load_game_players( $gid );
+   $arr_game_players = load_game_players_with_info( $gid );
 
    $status = $grow['Status'];
    $game_type = $grow['GameType'];
@@ -445,7 +445,7 @@ function load_game( $gid )
 // RETURN: [ GamePlayer, ... ]
 // global OUTPUT: $arr_users[uid>0] = GamePlayer, $arr_free_slots[] = GamePlayer,
 //                $has_wroom_entry = true|false, $ack_invite_uid = 0|uid, $master_uid = uid
-function load_game_players( $gid )
+function load_game_players_with_info( $gid )
 {
    global $my_id, $arr_users, $arr_free_slots, $has_wroom_entry, $ack_invite_uid, $master_uid;
    $arr_users = array();
@@ -453,33 +453,10 @@ function load_game_players( $gid )
    $has_wroom_entry = false;
    $ack_invite_uid = $master_uid = 0;
 
-   $result = db_query( "game_players.find.game_players($gid)",
-      "SELECT GP.*, " .
-         "P.Name, P.Handle, P.Rating2, P.RatingStatus, P.Country, P.OnVacation, P.ClockUsed, " .
-         "UNIX_TIMESTAMP(P.Lastaccess) AS X_Lastaccess " .
-      "FROM GamePlayers AS GP LEFT JOIN Players AS P ON P.ID=GP.uid " .
-      "WHERE gid=$gid ORDER BY GroupColor ASC, GroupOrder ASC" );
-
-   $arr_gp = array();
-   while ( $row = mysql_fetch_assoc($result) )
+   $arr_game_players = MultiPlayerGame::load_game_players( $gid );
+   foreach ( $arr_game_players as $gp )
    {
-      $uid = (int)$row['uid'];
-      if ( $uid > 0 )
-      {
-         $user = new User( $uid, $row['Name'], $row['Handle'], 0, $row['X_Lastaccess'],
-            $row['Country'], $row['Rating2'], $row['RatingStatus'] );
-         $user->urow = array(
-               'OnVacation' => $row['OnVacation'],
-               'ClockUsed'  => $row['ClockUsed'],
-            );
-      }
-      else
-         $user = null;
-
-      $gp = GamePlayer::build_game_player( $row['ID'], $row['gid'], $row['GroupColor'],
-         $row['GroupOrder'], $row['Flags'], $uid, $user );
-      $arr_gp[] = $gp;
-
+      $uid = $gp->uid;
       if ( $uid > 0 )
       {
          $arr_users[$uid] = $gp;
@@ -493,10 +470,9 @@ function load_game_players( $gid )
       if ( ($gp->Flags & GPFLAGS_RESERVED_WAITINGROOM) == GPFLAGS_RESERVED_WAITINGROOM )
          $has_wroom_entry = true;
    }
-   mysql_free_result($result);
 
-   return $arr_gp;
-}//load_game_players
+   return $arr_game_players;
+}//load_game_players_with_info
 
 // return arr( group-colors that appear at least once, ... )
 function count_group_colors()
