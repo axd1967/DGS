@@ -367,4 +367,21 @@ function build_text_list( $funcname, $arr, $sep=',' )
    return implode($sep, $out);
 }
 
+/*! \brief Formats text-lines by breaking line after $item_count items. */
+function build_text_block( $arr, $item_count, $item_sep=', ', $line_sep="<br>\n" )
+{
+   if ( $item_count < 1 )
+      $item_count = 1;
+
+   $lines = array();
+   $cnt_all = count($arr);
+   for ( $cnt = 0; $cnt < $cnt_all; $cnt += $item_count )
+   {
+      $lines[] = implode($item_sep, array_slice( $arr, $cnt, $item_count ) )
+         . ( $cnt + $item_count < $cnt_all ? $item_sep : '' );
+   }
+
+   return implode($line_sep, $lines);
+}//build_text_block
+
 ?>

@@ -158,7 +158,7 @@ $GLOBALS['ThePage'] = new Page('UserInfo');
                   ));
       }
 
-      if ( $is_game_admin )
+      if ( $is_game_admin && $row['RatingStatus'] == RATING_RATED )
       {
          $admin_rating = SMALL_SPACING . span('AdminLink',
             anchor("admin_rating.php?uid=$uid",

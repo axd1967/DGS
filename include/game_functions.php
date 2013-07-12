@@ -704,11 +704,47 @@ class MultiPlayerGame
       }
    }//get_message_defaults
 
+   /*! \brief Returns array of GamePlayer-objects (filled with User-object) for given game-id. */
+   public static function load_game_players( $gid )
+   {
+      $result = db_query( "MultiPlayerGame:load_game_players($gid)",
+         "SELECT GP.*, " .
+            "P.Name, P.Handle, P.Rating2, P.RatingStatus, P.Country, P.OnVacation, P.ClockUsed, " .
+            "UNIX_TIMESTAMP(P.Lastaccess) AS X_Lastaccess " .
+         "FROM GamePlayers AS GP LEFT JOIN Players AS P ON P.ID=GP.uid " .
+         "WHERE gid=$gid ORDER BY GroupColor ASC, GroupOrder ASC" );
+
+      $arr_gp = array();
+      while ( $row = mysql_fetch_assoc($result) )
+      {
+         $uid = (int)$row['uid'];
+         if ( $uid > 0 )
+         {
+            $user = new User( $uid, $row['Name'], $row['Handle'], 0, $row['X_Lastaccess'],
+               $row['Country'], $row['Rating2'], $row['RatingStatus'] );
+            $user->urow = array(
+                  'OnVacation' => $row['OnVacation'],
+                  'ClockUsed'  => $row['ClockUsed'],
+               );
+         }
+         else
+            $user = null;
+
+         $gp = GamePlayer::build_game_player( $row['ID'], $row['gid'], $row['GroupColor'],
+            $row['GroupOrder'], $row['Flags'], $uid, $user );
+         $arr_gp[] = $gp;
+      }
+      mysql_free_result($result);
+
+      return $arr_gp;
+   }//load_game_players
+
    /*!
-    * \brief Returns array( b|wRating => group-rating ) for set game-end-rating.
+    * \brief Returns calculated average for groups of MP-game.
     * \param $gamedata array of GamePlayer-objects with loaded User-object (with RatingStatus + Rating2)
+    *        \see MultiPlayerGame.load_game_players()
     * \param $rating_update if true, return in format for rating-update: $arr_rating['b/wRating'] = rating
-    * \return $arr_ratings[$group_color] = average-rating, or $arr_rating['b/wRating'] if $rating_udpate set
+    * \return $arr_ratings[$group_color] = average-group-rating, or $arr_rating['b/wRating'] if $rating_udpate set
     */
    public static function calc_average_group_ratings( $gamedata, $rating_update=false )
    {

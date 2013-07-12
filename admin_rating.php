@@ -21,11 +21,15 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 require_once 'include/std_functions.php';
 require_once 'include/form_functions.php';
+require_once 'include/game_functions.php';
+require_once 'include/game_texts.php';
 require_once 'include/gui_functions.php';
 require_once 'include/rating.php';
 require_once 'include/classlib_user.php';
 require_once 'include/db/ratingchangeadmin.php';
 require_once 'include/table_columns.php';
+require_once 'include/utilities.php';
+require_once 'tournaments/include/tournament_globals.php';
 
 $GLOBALS['ThePage'] = new Page('RatingAdmin');
 
@@ -61,7 +65,8 @@ $GLOBALS['ThePage'] = new Page('RatingAdmin');
 
    // init
    $errors = array();
-   $user = $upd_user = null;
+   $user = $upd_user = $rcatable = null;
+   $arr_std_games = $arr_mp_games = $arr_tourneys = $arr_invitations = 0;
    $changes = 0;
    if ( $uid )
    {
@@ -101,7 +106,15 @@ $GLOBALS['ThePage'] = new Page('RatingAdmin');
          $errors[] = T_('No rating-change or it is too small.');
 
       $rcatable = load_old_rating_changes( $uid );
-   }
+
+      $arr_std_games = find_running_normal_games( $uid ); // gid/opp_uid/opp_handle/color => ..
+      $arr_mp_games = find_running_multi_player_games( $uid ); // gid/GameType/GamePlayers/GroupColor => ..
+      $arr_tourneys = find_running_tournaments( $uid ); // tid, ..
+      $arr_invitations = find_open_invitations( $uid ); // gid/opp_uid/opp_handle/color => ..
+   }//load-/check-user
+   else
+      $errors[] = T_('Missing user to change rating. This page is normally called from user-info page.');
+
 
 
    // ---------- Process actions ------------------------------------------------
@@ -118,12 +131,17 @@ $GLOBALS['ThePage'] = new Page('RatingAdmin');
 
          ta_begin();
          {//HOT-SECTION for admin changing user-rating
+            $new_rating = $upd_user['Rating'];
             admin_log( $my_id, $user->Handle, sprintf( "Change rating: %s", implode(', ', $diff) ) );
-            change_user_rating( $uid, $changes, $upd_user['Rating'], $upd_user['RatingMin'], $upd_user['RatingMax'] );
+            change_user_rating( $uid, $changes, $new_rating, $upd_user['RatingMin'], $upd_user['RatingMax'] );
+
+            // fix running games/MPGs, create bulletins for running games and tournaments
+            $has_bulletins = notify_fix_running_games( $uid, $user->Handle, $changes, $user->Rating, $new_rating );
          }
          ta_end();
 
-         jump_to("admin_rating.php?uid=$uid".URI_AMP."sysmsg=".urlencode(T_('Rating changed!')));
+         $extra_msg = ($has_bulletins) ? T_('Ensure that created bulletins are activated!') : '';
+         jump_to("admin_rating.php?uid=$uid".URI_AMP."sysmsg=".urlencode(T_('Rating changed!') . " $extra_msg"));
       }
    }//actions
 
@@ -188,6 +206,13 @@ $GLOBALS['ThePage'] = new Page('RatingAdmin');
                              percent( $user->urow['RatingMax'] - $user->Rating, $upd_user['RatingMax'] - $upd_user['Rating'] ),
                              diff( $user->urow['RatingMax'] - $upd_user['RatingMax'], '%1.2f' ) ), ));
 
+
+      // show running games and tournaments for player
+      $lines = build_user_activities( $changes );
+      $rform->add_empty_row();
+      $rform->add_row( array( 'CHAPTER', T_('Running games and tournaments for this player'), ));
+      $rform->add_row( array( 'CELL', 2, '', 'TEXT', implode("<br>\n", $lines), ));
+
       $rform->add_empty_row();
       $rform->add_row( array(
          'TAB', 'CELL', 1, '', // align submit-buttons
@@ -195,7 +220,9 @@ $GLOBALS['ThePage'] = new Page('RatingAdmin');
          'TEXT', SMALL_SPACING,
          'SUBMITBUTTON', 'save', T_('Save changes'), ));
 
-      $rform->add_empty_row();
+      $lines = build_user_activities_list();
+      $rform->add_row( array( 'HEADER', T_('List of running games and active tournaments'), ));
+      $rform->add_row( array( 'CELL', 2, '', 'TEXT', '<ul><li>' . implode("<br>\n<li>", $lines) . '</ul>', ));
    }
 
 
@@ -274,89 +301,295 @@ function load_old_rating_changes( $uid )
 }//load_old_rating_changes
 
 
-/* TODO TODO TODO
-// running normal running games (non-MPG) to adjust start-rating for changed player-rating + inform opponents + make unrated if not tournament-game and not only a confidence-interval-reset
-// NOTE: can include games in fair-komi-negotiation
+/*!
+ * \brief Finds normal running non-tournament games played by player with given $uid.
+ * \return arr( { gid/opp_uid/opp_handle => .., color => BLACK|WHITE of pivot-user $uid }, ... )
+ */
 function find_running_normal_games( $uid )
 {
-   // handle tid, FK, B/W
-   $result = db_query("admin_rating.find_running_normal_games($uid)",
-      "SELECT ID AS gid, Status, tid, Black_ID, White_ID FROM Games WHERE GameType='".GAMETYPE_GO."' AND Status ".IS_STARTED_GAME." AND ( (Black_ID=$uid AND Black_Start_Rating > -".OUT_OF_RATING.") OR (White_ID=$uid AND White_Start_Rating > -".OUT_OF_RATING.") )" );
+   $out = array();
+   $base_query = "SELECT G.ID AS gid, G.%s AS opp_uid, P.Handle AS opp_handle, %s AS color " .
+      "FROM Games AS G INNER JOIN Players AS P ON P.ID=G.%s " .
+      "WHERE G.GameType='".GAMETYPE_GO."' AND G.Status ".IS_STARTED_GAME." AND G.tid=0 " .
+         "AND G.%s=$uid AND G.%s_Start_Rating > -".OUT_OF_RATING;
 
-   //update Games set White_Start_Rating=-900 where GameType='GO' and White_ID=75273 and Status in ('play','pass','score','score2') and White_Start_Rating > -9999
-   //update Games set Black_Start_Rating=-900 where GameType='GO' and Black_ID=75273 and Status in ('play','pass','score','score2') and Black_Start_Rating > -9999
-}
-/* Possible message to opponents:
---##################################################################
-Subject: Rating change of opponent in your games
-Hi,
+   $result = db_query("admin_rating.find_running_normal_games.black($uid)",
+      sprintf( $base_query, 'White_ID', BLACK, 'White_ID', 'Black_ID', 'Black' ) );
+   while ( $row = mysql_fetch_array($result) )
+      $out[] = $row;
+   mysql_free_result($result);
 
-the rating of the opponent player <user =xyz> has been changed from 7k to 30k.  All corresponding RATED games have been changed to UNRATED to prevent your and his rating to jump too much when the games end.
+   $result = db_query("admin_rating.find_running_normal_games.white($uid)",
+      sprintf( $base_query, 'Black_ID', WHITE, 'Black_ID', 'White_ID', 'White' ) );
+   while ( $row = mysql_fetch_array($result) )
+      $out[] = $row;
+   mysql_free_result($result);
 
-The <home forum/read.php?forum=...>original complaint</home> was discussed in the forums.  To ensure the integrity of the rating-system, the step with the rating-change was taken.
+   return $out;
+}//find_running_normal_games
 
-It looks like we have a kid here, that thought if funny or more interesting to start with a higher rank than that of a beginner.  So please be a bit lenient, as this happens from time to time.
-
-You can resign the games without a rating-change (because the games are unrated now) or ask an admin for deletion (would be more work for me).
-
-If you questions about the issues, please don't hesitate to ask.
-
-PS: Multi-player-games are treated differently.
-
-Cheers,
-DGS-Admin
---##################################################################
-* /
-
-// running MPGs need adjustment of group (B|W|BW) start-rating for changed player-rating + inform game-masters that start-rating is re-calculated
+/*!
+ * \brief Finds multi-player running games played by player with given $uid.
+ * \return arr( { gid/GameType/GamePlayers/GroupColor => .. },  ... )
+ */
 function find_running_multi_player_games( $uid )
 {
+   $out = array();
+
    $result = db_query("admin_rating.find_running_multi_player_games($uid)",
-      "SELECT GP.gid, G.GameType, G.Status FROM GamePlayers AS GP INNER JOIN Games AS G ON G.ID=GP.gid WHERE GP.uid=$uid AND Status IN ('SETUP','PLAY','PASS','SCORE','SCORE2')" );
+      "SELECT GP.gid, G.GameType, G.GamePlayers, GP.GroupColor " .
+      "FROM GamePlayers AS GP INNER JOIN Games AS G ON G.ID=GP.gid " .
+      "WHERE GP.uid=$uid AND G.Status ".IS_RUNNING_GAME );
+   while ( $row = mysql_fetch_array($result) )
+      $out[] = $row;
+   mysql_free_result($result);
 
-   //select avg(Rating2) from GamePlayers as GP inner join Players as P on P.ID=GP.uid where gid=784456 and GroupColor ='W'
-   //update Games set  White_Start_Rating = -165.540034484907  where ID=784456 limit 1
-}
-/* Possible message to opponents:
---##################################################################
-Hi,
+   return $out;
+}//find_running_multi_player_games
 
-the rating of the opponent player <user =xyz> has been changed from 7k to 30k.  The combined start ratings of your multi-player-games have been re-calculated.
-
-This is a bulk-message, so check your game accordingly:
-<ul>
-<li><b>nick1:</b> <game g1> ; old Black Rating: 10 kyu (+23%) => changed to new Black-Rating: 21 kyu (+17%)
-
-<li><b>nick2:</b> <game g2> ; old White-Rating: 17 kyu (-0%) => changed to new White-Rating: 23 kyu (+34%)
-</ul>
-
-The <home forum/read.php?forum=...>original complaint</home> was discussed in the forums.  To ensure the integrity of the rating-system, the step with the rating-change was taken.  The rating-change also has an impact on multi-player-games because the average rating of the participating groups "changed".
-
-This admin-message is sent only to the game-masters of the multi-player-games in question.  It's up to you if you want to continue the game under this changed pretext.
-
-If you decide to end the game prematurely, please inform the other players with either a bulk-message or MPG-bulletin about it.  If you want the game deleted, you have to send me a request to do that as only an admin can delete multi-player-games at the moment.
-If you want to play on, just do so.
-
-If you have questions about the issues, please don't hesitate to ask.
-
-Cheers,
-DGS-Admin
---##################################################################
-* /
-
-// find running tournament-games or tournament-participants for running tournaments + inform tournament-directors to take action (automatic handling not possible to variety of cases)
+/*!
+ * \brief Finds running tournaments where given $uid has registered.
+ * \return arr( tid, ... )
+ */
 function find_running_tournaments( $uid )
 {
-   $result = db_query("admin_rating.find_running_tournaments($uid)",
-      "SELECT TP.tid, T.Status FROM TournamentParticipant AS TP INNER JOIN Tournament AS T ON T.ID=TP.tid WHERE TP.uid=$uid AND T.Status IN ()" );
-}
+   $out = array();
 
-// find open invitations with player whose rating changed + inform opponent, that there are X invitations (besides informing about rating-change), he/she should inform the invited opponents about the rating-change
+   if( ALLOW_TOURNAMENTS )
+   {
+      $tstats = array( TOURNEY_STATUS_ADMIN, TOURNEY_STATUS_NEW, TOURNEY_STATUS_REGISTER, TOURNEY_STATUS_PAIR,
+         TOURNEY_STATUS_PLAY );
+      $result = db_query("admin_rating.find_running_tournaments($uid)",
+         "SELECT TP.tid FROM TournamentParticipant AS TP INNER JOIN Tournament AS T ON T.ID=TP.tid " .
+         "WHERE TP.uid=$uid AND T.Status IN ('".implode("','", $tstats)."')" );
+      while ( $row = mysql_fetch_array($result) )
+         $out[] = $row['tid'];
+      mysql_free_result($result);
+   }
+
+   return $out;
+}//find_running_tournaments
+
+/*!
+ * \brief Finds open invitations for given $uid.
+ * \return arr( { gid/opp_uid/opp_handle => .., color => BLACK|WHITE of pivot-user $uid }, ... )
+ */
 function find_open_invitations( $uid )
 {
-   $result = db_query("admin_rating.find_open_invitations($uid)",
-      "SELECT COUNT(*) FROM Games AS G WHERE G.Status='INVITED' AND (Black_ID=$uid OR White_ID=$uid)" );
-}
-*/
+   $out = array();
+   $base_query = "SELECT G.ID AS gid, G.%s AS opp_uid, P.Handle AS opp_handle, %s AS color " .
+      "FROM Games AS G INNER JOIN Players AS P ON P.ID=G.%s " .
+      "WHERE G.Status='".GAME_STATUS_INVITED."' AND G.%s=$uid";
+
+   $result = db_query("admin_rating.find_open_invitations.black($uid)",
+      sprintf( $base_query, 'White_ID', BLACK, 'White_ID', 'Black_ID' ) );
+   while ( $row = mysql_fetch_array($result) )
+      $out[] = $row;
+   mysql_free_result($result);
+
+   $result = db_query("admin_rating.find_open_invitations.white($uid)",
+      sprintf( $base_query, 'Black_ID', WHITE, 'Black_ID', 'White_ID' ) );
+   while ( $row = mysql_fetch_array($result) )
+      $out[] = $row;
+   mysql_free_result($result);
+
+   return $out;
+}//find_open_invitations
+
+function build_user_activities( $changes )
+{
+   global $base_path, $arr_std_games, $arr_mp_games, $arr_invitations, $arr_tourneys;
+
+   $lines = array();
+   $lines[] = sprintf( T_('There are %s normal games, %s multi-player-games, %s open invitations. See below for full list.'),
+      count($arr_std_games), count($arr_mp_games), count($arr_invitations) );
+   if ( $changes & RCADM_CHANGE_RATING )
+      $lines[] = T_('The start-rating will be adjusted for the running games. All opponents will be informed about the rating-change.');
+   $lines[] = '';
+   $lines[] = sprintf( T_('There are %s active tournaments where the player registered. See below for full list.'), count($arr_tourneys) );
+   if ( $changes & RCADM_CHANGE_RATING )
+      $lines[] = T_('The tournament directors will be informed about the rating-change.');
+
+   $lines[] = '';
+   $lines[] = span('ErrMsg', T_('On rank-changes bulletins are created to inform the opponents and tournament-directors!'));
+   $lines[] = span('ErrMsg',
+      sprintf( T_('On page with %s choose \'Fresh\'-Status selection to see the bulletins to review and set to show.'),
+         anchor( $base_path.'list_bulletins.php?read=2', T_('All Bulletins') ) ));
+
+   return $lines;
+}//build_user_activities
+
+function build_user_activities_list()
+{
+   global $base_path, $arr_std_games, $arr_mp_games, $arr_invitations, $arr_tourneys;
+   $lines = array();
+
+   $out = array();
+   foreach ( $arr_std_games as $arr )
+   {
+      $gid = $arr['gid'];
+      $out[] = anchor( $base_path."gameinfo.php?gid=$gid", "#$gid ({$arr['opp_handle']})" );
+   }
+   if( count($out) )
+      $lines[] = T_('Running normal games (opponents)#adm') . ":<br>\n" . build_text_block($out, 5) . "<br>\n";
+
+   $out = array();
+   foreach ( $arr_mp_games as $arr )
+   {
+      $gid = $arr['gid'];
+      $out[] = anchor( $base_path."game_players.php?gid=$gid",
+         "#$gid " . GameTexts::format_game_type( $arr['GameType'], $arr['GamePlayers'] ) . " [{$arr['GroupColor']}]");
+   }
+   if( count($out) )
+      $lines[] = T_('Running multi-player-games [player-color]#adm') . ":<br>\n" . build_text_block($out, 5) . "<br>\n";
+
+   $out = array();
+   foreach ( $arr_invitations as $arr )
+      $out[] = anchor( $base_path."userinfo.php?uid={$arr['opp_uid']}", $arr['opp_handle'] );
+   if( count($out) )
+      $lines[] = T_('Open invitations (opponents)#adm') . ":<br>\n" . build_text_block($out, 10) . "<br>\n";
+
+   if ( ALLOW_TOURNAMENTS )
+   {
+      $out = array();
+      foreach ( $arr_tourneys as $tid )
+         $out[] = anchor( $base_path."tournaments/view_tournament.php?tid=$tid", "#$tid " );
+      if( count($out) )
+         $lines[] = T_('Active tournaments#adm') . ":<br>\n" . build_text_block($out, 15) . "<br>\n";
+   }
+
+   return $lines;
+}//build_user_activities_list
+
+
+/*!
+ * \brief Fixes running normal and multi-player games and creates bulletins to inform opponents and tournament-directors.
+ * \param $uid Players.ID and Players.Handle for the user with the changed rating
+ * \return true = bulletins created; false = no bulletins created
+ *
+ * \note Players.Rating must have already been changed to new rating!
+ *
+ * \note IMPORTANT NOTE: caller needs to open TA with HOT-section!!
+ */
+function notify_fix_running_games( $uid, $handle, $changes, $old_rating, $new_rating )
+{
+   global $player_row, $NOW, $arr_std_games, $arr_mp_games, $arr_invitations, $arr_tourneys;
+
+   // fixes/notifies only required on rank-change (not confidence-interval-reset)
+   if ( !($changes & RCADM_CHANGE_RATING) )
+      return false;
+
+   $uids = array( $uid ); // notify player with rating-change
+   $old_rating_str = echo_rating($old_rating, /*%*/false, 0, /*engl*/true, /*short*/1 );
+   $new_rating_str = echo_rating($new_rating, /*%*/false, 0, /*engl*/true, /*short*/1 );
+
+   // fix normal running games -------------
+
+   $base_query = "UPDATE Games SET Rated='N', %s_Start_Rating=$new_rating " .
+      "WHERE GameType='".GAMETYPE_GO."' AND %s=$uid AND tid=0 " .
+         "AND Status ".IS_STARTED_GAME." AND %s_Start_Rating > -".OUT_OF_RATING;
+   db_query("admin_rating.notify_fix_running_games.run_games.black($uid)",
+      sprintf($base_query, 'Black', 'Black_ID', 'Black' ) );
+   db_query("admin_rating.notify_fix_running_games.run_games.white($uid)",
+      sprintf($base_query, 'White', 'White_ID', 'White' ) );
+
+   foreach ( $arr_std_games as $arr ) // arr: gid/opp_uid/opp_handle/color => ..
+      $uids[] = $arr['opp_uid'];
+
+
+   // fix multi-player-games ---------------
+   // NOTE: changed start-rating will not be accurate anymore, because group rating uses
+   //       the current rating of the players, which could have changed since the MP-game has been started.
+   //       But it's considered better to change it regardless to reflect the (big) rating change.
+
+   foreach ( $arr_mp_games as $arr ) // arr: gid/GameType/GamePlayers/GroupColor => ..
+   {
+      $gid = $arr['gid'];
+      $game_type = $arr['GameType'];
+      $arr_game_players = MultiPlayerGame::load_game_players( $gid );
+      $arr_ratings = MultiPlayerGame::calc_average_group_ratings($arr_game_players, /*rat-upd*/true);
+
+      if ( $game_type == GAMETYPE_TEAM_GO )
+      {
+         // NOTE: group-color can only be B|W, because games on SETUP-game-status are not processed
+         $dbcol = ( $arr['GroupColor'] == GPCOL_B ) ? 'Black' : 'White';
+         $key = ( $arr['GroupColor'] == GPCOL_B ) ? 'bRating' : 'wRating';
+         $grp_rating = (float)$arr_ratings[$key];
+         db_query( "admin_rating.notify_fix_running_games.run_mpg.team_go($gid)",
+            "UPDATE Games SET {$dbcol}_Start_Rating=$grp_rating " .
+            "WHERE ID=$gid AND Status ".IS_RUNNING_GAME." LIMIT 1" );
+      }
+      elseif ( $game_type == GAMETYPE_ZEN_GO )
+      {
+         $grp_rating = (float)$arr_ratings['bRating'];
+         db_query( "admin_rating.notify_fix_running_games.run_mpg.zen_go($gid)",
+            "UPDATE Games SET Black_Start_Rating=$grp_rating, White_Start_Rating=$grp_rating " .
+            "WHERE ID=$gid AND Status ".IS_RUNNING_GAME." LIMIT 1" );
+      }
+      else
+         continue; // something wrong, but don't throw error to avoid breaking "transaction"
+
+      if ( mysql_affected_rows() == 1 ) // game could be finished in the meantime
+      {
+         foreach ( $arr_game_players as $gp )
+            $uids[] = $gp->uid;
+      }
+   }//mpg
+
+
+   // notify tournament-directors ----------
+
+   $cnt_bulletins = 0;
+   foreach ( $arr_tourneys as $tid )
+   {
+      $bulletin = new Bulletin( 0, $player_row['ID'], null, BULLETIN_CAT_ADMIN_MSG, BULLETIN_STATUS_NEW,
+            BULLETIN_TRG_TD, BULLETIN_FLAG_ADMIN_CREATED, $NOW, $NOW + 30*SECS_PER_DAY, $tid, /*gid*/0,
+            0, 'created automatically by admin_rating-script',
+            sprintf( T_('Rating change of opponent [handle] in your running games and invitations'), $handle ),
+            sprintf( T_('Hello,
+
+the rating of the player <user %s> has been changed from %s to %s.
+This player participates in the <tourney %s>.  As tournament-directors you have to handle this in any case you see fit.
+
+Cheers,
+DGS-Admin'), $uid, $old_rating_str, $new_rating_str, $tid )
+         );
+      if ( $bulletin->persist() )
+         ++$cnt_bulletins;
+   }
+
+
+   // notify opponents of invitations ------
+
+   foreach ( $arr_invitations as $arr ) // arr: gid/opp_uid/opp_handle/color => ..
+      $uids[] = $arr['opp_uid'];
+
+
+   // create bulletins
+
+   $bulletin = new Bulletin( 0, $player_row['ID'], null, BULLETIN_CAT_ADMIN_MSG, BULLETIN_STATUS_NEW,
+         BULLETIN_TRG_USERLIST, BULLETIN_FLAG_ADMIN_CREATED, $NOW, $NOW + 30*SECS_PER_DAY, /*tid*/0, /*gid*/0,
+         0, 'created automatically by admin_rating-script',
+         sprintf( T_('Rating change of opponent [handle] in your running games and invitations'), $handle ),
+         sprintf( T_('Hello,
+
+the rating of your opponent <user %s> has been changed from %s to %s.  All corresponding RATED non-tournament games have been changed to UNRATED to prevent your and your opponents rating to jump too much when the games end.  The start rating for those games have been recalculated for all running normal and multi-player games.  Invitations are not changed, so ensure you check invitations with that player for changed game settings that can be caused by the rating change.
+Tournament games have to be handled by the respective tournament-directors which are informed about this rating change as well.
+
+It\'s up to you if you want to continue your games under the changed pretext. You can resign the games without a rating-change (because the games are unrated now) or ask an admin for deletion if you can\'t do by yourself.
+
+Cheers,
+DGS-Admin'), $uid, $old_rating_str, $new_rating_str )
+      );
+   $bulletin->persist();
+   $bid = $bulletin->ID;
+   if ( $bid > 0 )
+   {
+      Bulletin::persist_bulletin_userlist( $bid, $uids );
+      ++$cnt_bulletins;
+   }
+
+   return ( $cnt_bulletins > 0 );
+}//notify_fix_running_games
 
 ?>

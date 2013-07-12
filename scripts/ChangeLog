@@ -18,6 +18,30 @@ ChangeLog
 
 2013-07-12 juga
 
+   * include/game_functions.php (MultiPlayerGame.load_game_players),
+     include/utilities.php (build_text_block),
+     include/rating.php (change_user_rating),
+     admin_rating.php (find_running_normal_games, find_running_multi_player_games,
+       find_running_tournaments, find_open_invitations, build_user_activities,
+       build_user_activities_list, notify_fix_running_games),
+     game_players.php (load_game_players_with_info),
+     userinfo.php:
+   - added better handling for players rating-change by admin
+     - find and show running normal games to fix start-rating for respective color of player
+       with changed rating, and make game unrated to prevent too big rating-change at game-end
+     - find and show running multi-player-games to fix start-rating of group of player with changed rating
+     - find and show opponents from open invitations
+     - find and show active tournaments where player with changed rating is participating
+     - create admin-bulletins for all opponents of player with changed rating
+     - create a bulletin for respective tournament-directors which have to handle the rating-change
+       accordingly where player with changed rating participates
+     - perform fixes of start-rating and creation of bulletins only on rank-changes,
+       not on reset of confidence interval
+     - refactored load_game_players()-function into load_game_players_with_info() and
+       MultiPlayerGame::load_game_players() to be used by admin-rating-script as well
+     - allow rating-change on user-info-page only for players with an existing rating
+     - minor bugfixes
+
    * include/game_functions.php (MultiPlayerGame.determine_groups_player_count, ~.count_player_groups;
        class GameSettingsCalculator, ~.__construct;
        GameSettings.get_game_settings_from_gamesetup, ~.get_game_settings_from_gamerow),
