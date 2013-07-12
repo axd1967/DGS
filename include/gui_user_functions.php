@@ -27,7 +27,7 @@ require_once 'include/std_classes.php';
 
 
 /*!
- * Parses and checks list of users specified as numeric user-id (456), numeric handle (=123) or textual handle (abc).
+ * \brief Parses and checks list of users specified as numeric user-id (456), numeric handle (=123) or textual handle (abc).
  * \param $user_list string with users
  * \param $author_uid user-id to check for contacts if rejecting message from author
  * \return [ handle-arr, uid-arr, User-row-arr, handle-reject-map( Handle => 1 ), errors ]
