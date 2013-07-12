@@ -843,6 +843,7 @@ function game_info_table( $tablestyle, $game_row, $player_row, $iamrated, $use_s
    $my_id = $player_row['ID'];
    $is_my_game = ( $game_row['other_id'] == $my_id ); // used for waiting-room-checks only
 
+   $my_gs = new GameSetup( $my_id ); // get defaults
    if ( $tablestyle == GSET_WAITINGROOM )
    {
       $Handitype = $Handicaptype;
@@ -1145,7 +1146,7 @@ function game_info_table( $tablestyle, $game_row, $player_row, $iamrated, $use_s
    {
       $game_row['Handicaptype'] = $Handitype;
       $game_row['JigoMode'] = $JigoMode;
-      $gs_calc = new GameSettingsCalculator( $game_row, $player_row['Rating2'], $other_rating, $calculated,
+      $gs_calc = new GameSettingsCalculator( $game_row, $my_gs, $player_row['Rating2'], $other_rating, $calculated,
          ( $tablestyle == GSET_TOURNAMENT_LADDER ) );
       $gs_calc->calculate_settings();
 

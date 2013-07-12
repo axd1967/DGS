@@ -334,7 +334,6 @@ function accept_invite_game( $gid, $player_row, $opponent_row )
       error('wrong_dispute_game', "$dbg.check_players");
    if ( $game_row['Status'] != GAME_STATUS_INVITED )
       error('game_already_accepted', "$dbg.badstat");
-   $game_settings = GameSettings::get_game_settings( $game_row );
 
 
    // NOTE: ToMove_ID holds handitype (of INVITATION) for game on INVITED-status
@@ -359,6 +358,8 @@ function accept_invite_game( $gid, $player_row, $opponent_row )
    // values needed for create_game() if $my_gs == null
    $my_gs->Handicaptype = $handicaptype;
    $my_gs->JigoMode = $game_row['JigoMode'] = $jigo_mode;
+
+   $game_settings = GameSettings::get_game_settings_from_gamesetup( $game_row, $my_gs );
 
    // prepare final game-settings
 
@@ -571,6 +572,7 @@ function create_game(&$black_row, &$white_row, &$game_info_row, $game_setup=null
    // set reference to other double-game
    $double_gid = (int)@$game_info_row['double_gid'];
 
+   $handicap = (int)$game_info_row['Handicap'];
    $stdhandicap = $game_info_row['StdHandicap'];
    $moves = $handicap;
    if ( $stdhandicap != 'Y' || !standard_handicap_is_possible($size, $moves ) )
@@ -649,7 +651,7 @@ function create_game(&$black_row, &$white_row, &$game_info_row, $game_setup=null
    $upd_game->upd_time('Starttime');
    $upd_game->upd_num('Size', $size);
    $upd_game->upd_num('Handicap', $handicap);
-   $upd_game->upd_num('Komi', $komi);
+   $upd_game->upd_num('Komi', (float)$game_info_row['Komi']);
    $upd_game->upd_num('Maintime', $game_info_row['Maintime']);
    $upd_game->upd_txt('Byotype', $game_info_row['Byotype']);
    $upd_game->upd_num('Byotime', $game_info_row['Byotime']);

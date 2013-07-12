@@ -182,7 +182,7 @@ class WaitingroomControl
       $game_row = mysql_single_fetch( "WC:join_waitingroom_game.find_game($wr_id,$my_id)", $query);
       if ( !$game_row )
          error('waitingroom_game_not_found', "WC:join_waitingroom_game.find_game2($wr_id,$my_id)");
-      $game_settings = GameSettings::get_game_settings( $game_row );
+      $game_settings = GameSettings::get_game_settings_from_gamerow( $game_row );
 
       $opponent_ID = $game_row['uid'];
       $gid = (int)@$game_row['gid'];
@@ -475,7 +475,7 @@ class WaitingroomOffer
       {
          if ( user_has_rating($this->row, 'WRP_') ) // other has rating
          {
-            $game_settings = GameSettings::get_game_settings( $this->row );
+            $game_settings = GameSettings::get_game_settings_from_gamerow( $this->row );
             if ( $handitype == HTYPE_CONV )
             {
                list( $infoHandi, $infoKomi, $iamblack, $info_nigiri ) =
