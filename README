@@ -2,7 +2,8 @@ This file explains how to contribute to the DGS project.
 
 NOTE:
    Currently SourceForge.net does not support branch-specific access-permissions.
-   That's the reason for a 2nd work repository as outline in this documentation.
+   That's the reason for a 2nd work repository (also referred to as the "work-area")
+   as outlined in this documentation.
 
 
 The repository with URL:
@@ -19,13 +20,12 @@ You can also use other remote servers (like github.com), but please use the same
 conventions on git-usage and committing as described below!
 
 
-If using the dgs-work repository, here are the conventions on how to use the
-work-area (replace upper-case words with your setting):
+Here are the conventions on how to use the dgs-work repository (replace upper-case words with your setting):
 
    1. get a SourceForge account USER
    2. ask project-admin to add your USER in user-group 'Workers'
-   3. install git on your local machine
-   4. config user and email in git:
+   3. install Git on your local machine
+   4. config user and email in Git:
 
       # CONVENTION-NOTE: use the SourceForge-mail-address and use your full name!
       git config user.name "FIRSTNAME LASTNAME"
@@ -43,7 +43,7 @@ work-area (replace upper-case words with your setting):
    git remote add dgs-main ssh://USER@git.code.sf.net/p/dragongoserver/dgs-main
    git remote add dgs-work ssh://USER@git.code.sf.net/p/dragongoserver/dgs-work
 
-   # show all branches (including master branch)
+   # show all branches from the main rep (including master branch)
    git remote show dgs-main
 
    # download repository: BRANCH = optional to fetch all branches, else specific branch-name to fetch
@@ -53,8 +53,16 @@ work-area (replace upper-case words with your setting):
    # CONVENTION-NOTE: prefix your branch with your SHORTNAME or USER (at least when pushing to dgs-work)
    git checkout -b SHORTNAME/branch-name dgs-main/master
 
+   # NOTE: if previous checkout did not work, try this first:
+   git remote update
+
    # CONVENTION to save on remote work-area (for sharing or backup)
-   git push work SHORTNAME/branch-name
+   git push dgs-work SHORTNAME/branch-name
+
+   # to have your work branch integrated, notify a dgs-main maintainer
+   (FIXME: currently it looks like this should be done via DGS, there is no obvious way to contact a dev via SF)
+
+   # once a branch has been dealt with, consider deleting it to keep the noise level down in dgs-work.
 
 More conventions can be found in the main-master branch in 'scripts/README.developers'.
 

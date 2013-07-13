@@ -3,23 +3,23 @@ CVS2GIT-migration completed at 02-Jun-2013:
 
 Topics:
 
-   - 1. Converted CVS-repository from SourceForge.net to GIT-repository
+   - 1. Converted CVS-repository from SourceForge.net to Git-repository
    - 2. Set/Revoke read-only mode of CVS-repository
 
    - File 'dgs2git.opts'
    - File 'symbol-hints.txt'
    - File 'LOG-2013-05-26'
 
-Some rules and conventions defined for working with GIT you can find in the
+Some rules and conventions defined for working with Git you can find in the
 DGS-rootdir 'README'-file and 'scripts/README.developers'.
 
 
 
 #################################################################################
-#     1. Converted CVS-repository from SourceForge.net to GIT-repository
+#     1. Converted CVS-repository from SourceForge.net to Git-repository
 #################################################################################
 
-Commands used to migrate CVS-repository from SourceForge.net to GIT-repository
+Commands used to migrate CVS-repository from SourceForge.net to Git-repository
 on SourceForge with full history and all branches:
 
    # backup of full CVS-repository to local disc
@@ -31,7 +31,7 @@ on SourceForge with full history and all branches:
    # prepare cvs2git-options-file and created some temp-folders:
    # (copied 'cvs2git-example.options' and modified for DGS-CVS into 'dgs2git.opts', see below)
 
-   # convert CVS-repo into raw-data for GIT-repo
+   # convert CVS-repo into raw-data for Git-repo
    rm -i symbol-hints.txt symbol-info.txt conv-temp/*.*
    touch symbol-hints.txt
    cvs2git --options=dgs2git.opts -p 1:3
@@ -43,12 +43,12 @@ on SourceForge with full history and all branches:
    # 2nd-pass of conversion
    cvs2git --options=dgs2git.opts -p 4:16
 
-   # create local "bare" GIT-repository
+   # create local "bare" Git-repository
    mkdir dgs-main
    cd dgs-main
    git init --bare
 
-   # import converted raw-data into local GIT-repo
+   # import converted raw-data into local Git-repo
    cat ../conv-temp/git-blob.dat ../cvs2git-tmp/git-dump.dat | git fast-import
 
    # view results
@@ -61,8 +61,8 @@ on SourceForge with full history and all branches:
    ##git gc --prune=now
 
    # For this specific cvs2git-migration of dragongoserver, the following branches
-   # and tags have been removed from the GIT-repository by local modifications
-   # of the bare GIT-repository before uploading:
+   # and tags have been removed from the Git-repository by local modifications
+   # of the bare Git-repository before uploading:
    #
    #     branch 'Tournaments' (very old branch by ragnar)
    #     branch 'rodival'     (old branch from 2006 by rodival)

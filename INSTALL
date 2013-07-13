@@ -41,7 +41,7 @@ Optional but recommended:
 
 Dragon root-directory referred to as DGS_ROOT.
 
-Either download from GIT-repository on SourceForge.net:
+Either download from Git-repository on SourceForge.net:
 
    # with an existing SourceForge-account 'USER':
    # (to ease updates it's a good idea to upload your public SSH-key on SourceForge

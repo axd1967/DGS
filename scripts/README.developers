@@ -12,7 +12,7 @@ General instructions for developers:
    Validating can be done using a locally installed w3c-markup-validator
    (Linux ubuntu-package) for example.
 
------------------ SCM (GIT/CVS), filenames, database names:
+----------------- SCM (Git/CVS), filenames, database names:
 
    Don't use uppercase letters in the filenames (unless a special needed
    meaning). In such cases, contact the other developers first.
@@ -27,39 +27,40 @@ General instructions for developers:
    handled in a case sensitive way under the MS Windows systems.
 
 
------------------ Working with GIT:
+----------------- Working with Git:
 
-   Configure git-config with your full name and a SourceForge mail-address as built below:
+   Configure git-config with your full name and a SourceForge email-address as built below:
 
       # USER = your SourceForge account
       git config user.name "FIRSTNAME LASTNAME"
       git config user.email "USER@users.sf.net"
 
-   For commits follow the GIT guidelines, i.e. first line is a summary of a change
+   For commits follow the Git guidelines, i.e. first line is a summary of a change
    followed by an empty line and the details of the change.
 
    For using the shared work-area on SourceForge, read the 'README'-file in the DGS-rootdir.
 
------------------ Working with GIT - the Integration-Manager Worflow
+----------------- Working with Git - the Integration-Manager Worflow
 
    Note: following is for users that want to mirror the official master branch of the main repository
    in order to contribute to DGS.
    Forking off dgs-main to have a variant DGS server is not discussed here.
 
    The root README document explains how to work with the dgs-work repository.
-   Here's an alternative to working with the dgs-main (rater than the dgs-work) repository.
+   Here's an alternative to working with the dgs-main (rather than the dgs-work) repository.
 
-   1. Clone the dgs-main repository into your own (public) GIT repository on SF or other GIT server
+   1. Clone the dgs-main repository into your own (public) Git repository on SF or other Git server
       that you will use to publish your changes.
 
    2. Clone the dgs-main repository into a local (private) repository where you will work on your branches.
 
-   3. The idea is now to fetch updates from dgs-main into your master branch, push your private branches
-      to your public repository, and nicely ask the Integrator (see [2] and dgs-main users) to merge
-      your branches.
+   3. Fetch updates from dgs-main into your private repository.
+   
+   4. Push your private branches to your public repository, and nicely ask an Integrator
+   (see [1]) to merge your branches.
 
-   The idea working the dgs-work repository as described in the root README document works in the same way,
-   just that the dgs-work repository is used as your (public) repository.
+   Using the dgs-work repository as described in the root README document works in the same way,
+   except that the dgs-work repository is used as your (public) repository.
 
    Your local master branch will reflect the latest changes from dgs-main. So from time to time you need
    to update your master branch:
@@ -71,27 +72,34 @@ General instructions for developers:
 
    When working on bugs/issues:
 
-   1. create a local branch based off master
+   1. create a local branch based off master (for significant changes, consider a stable tag to start from)
 
       > git checkout -b <newbranch> master
 
    2. work on <newbranch>, commit, etc...
 
-   3. while the branch hasn't been published, consider rebasing with the latest master content
+   3. as long as your branch hasn't been published, consider rebasing with the latest master content
 
    4. when the branch is ready, publish your branch in your public repository
 
-      > git push <my_public_SF_rep> <newbranch>:<newbranch>
+      > git push <my_public_rep> <newbranch>:<newbranch>
 
-   5. Be aware that a merge may be refused and you might need to re-merge your work on recent changes
-      in dgs-main/master.
-      Remember to never rebase a published branch!
+   5. Be aware that a merge may be refused and you might need to re-merge your work taking recent
+      changes in dgs-main/master into account.
+      Remember to never rebase a published branch if there is any chance it might have been fetched elsewhere!
 
-   For more details on this workflow, see also [1].
+   For more details on this workflow, see also [2].
 
-   [1] http://git-scm.com/book/en/Distributed-Git-Distributed-Workflows#Integration-Manager-Workflow
-   [2] http://www.dragongoserver.net/people.php
+   [1] http://www.dragongoserver.net/people.php
+   [2] http://git-scm.com/book/en/Distributed-Git-Distributed-Workflows#Integration-Manager-Workflow
 
+
+----------------- SourceForge tips
+
+    There is no apparent way in the SF UI to find back merge requests once they have been handled.
+    Append /merge-requests/ to the target repository URL to get the interface.
+
+    Forking on SF provides additional tools such as Merge Requests and associated discussion threads.
 
 ----------------- PHP: Guest-User
 

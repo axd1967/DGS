@@ -27,11 +27,11 @@ $GLOBALS['ThePage'] = new Page('Docs');
  * - To create translation-data snapshot you may use (replace 'DBUSER' and 'DATABASE_NAME'):
  *   mysqldump --quick --extended-insert --compress --no-create-info -hdragongoserver.net -uDBUSER -p DATABASE_NAME  TranslationLanguages TranslationGroups TranslationPages TranslationTexts TranslationFoundInGroup Translations | gzip -c > Translationdata.mysql.gz
  *
- * - To create stable-snapshot from GIT WITH images you may use (replace 'BRANCH_NAME' and 'SCM_USER'):
+ * - To create a stable-snapshot from Git WITH images you may use (replace 'BRANCH_NAME'):
  *   git checkout BRANCH_NAME
  *   git archive --format=tar HEAD | gzip >DragonGoServer-BRANCH_NAME.tar.gz
  *
- * - To create stable-snapshot from GIT WITHOUT images you may use (replace 'BRANCH_NAME' and 'SCM_USER'):
+ * - To create stable-snapshot from Git WITHOUT images you may use (replace 'BRANCH_NAME'):
  *   git checkout BRANCH_NAME
  *   git archive --format=tar HEAD | tar --delete 5 7 9 11 13 17 21 25 29 35 42 50 images | gzip >DragonGoServer-BRANCH_NAME.tar.gz
  *

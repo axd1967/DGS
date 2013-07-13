@@ -16,6 +16,16 @@ Developers INFO:
 ChangeLog
 ------------------------------------------------------------------
 
+2013-07-13 axd
+
+   * .gitignore:
+   - grouped and cleaned up ignore-files
+
+   * scripts/updates/dgs-cvs2git-migration.txt, scripts/README.developers, scripts/ChangeLog,
+     INSTALL, README, docs.php, snapshot.php:
+   - adjusted text-usage of 'git' -> Git
+   - added minor clarifications and fixed typos
+
 2013-07-12 juga
 
    * include/game_functions.php (MultiPlayerGame.load_game_players),
@@ -156,7 +166,7 @@ ChangeLog
    - bugfix: re-add showing of calculated game-score after code-cleanup removed too much code
 
    * scripts/README.developers, INSTALL, README, docs.php:
-   - merged in and modified changes from axd about installing DGS, working with GIT
+   - merged in and modified changes from axd about installing DGS, working with Git
      - see https://sourceforge.net/p/dragongoserver/dgs-main/merge-requests/1/
 
    * include/std_functions.php (make_dragon_main_menu_logged_out, make_dragon_main_menu,
@@ -294,11 +304,11 @@ ChangeLog
 
    * scripts/README.developers, specs/tournaments.txt, skins/dragon/screen.css,
      docs.php, index.php, snapshot.php, INSTALL, .gitignore:
-   - adjustments to reflect changes caused by CVS-to-GIT migration
-      - adjusted comments on snapshot-page to export Dragon-snapshots from GIT
-      - added code-browsing link for GIT, adjusted text for old CVS code-browsing
+   - adjustments to reflect changes caused by CVS-to-Git migration
+      - adjusted comments on snapshot-page to export Dragon-snapshots from Git
+      - added code-browsing link for Git, adjusted text for old CVS code-browsing
       - replaced texts about CVS with the more general term of SCM (source control management)
-      - replaced CVS-HEAD with (GIT-)master terminology
+      - replaced CVS-HEAD with (Git-)master terminology
 
    * images/, images/flags/, 5/, 7/, 9/, 11/, 13/, 17/, 21/, 25/, 29/, 35/, 42/, 50/:
    - put all images under version-control

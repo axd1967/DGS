@@ -61,7 +61,7 @@ $GLOBALS['ThePage'] = new Page('Docs', 0, ROBOTS_NO_FOLLOW,
    add_link_page_link("snapshot.php", T_('Download dragon sources'),
                      T_('Dragon source code snapshots'));
    add_link_page_link("http://sourceforge.net/p/dragongoserver/dgs-main",
-                     T_('Browse Dragon source code (GIT)'));
+                     T_('Browse Dragon source code (Git)'));
    add_link_page_link("http://dragongoserver.cvs.sourceforge.net/dragongoserver/DragonGoServer/",
                      T_('Browse Dragon source code (CVS, till May-2013)'));
    add_link_page_link("http://sourceforge.net/projects/dragongoserver/",
