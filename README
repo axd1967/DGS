@@ -20,7 +20,7 @@ You can also use other remote servers (like github.com), but please use the same
 conventions on git-usage and committing as described below!
 
 
-Here are the conventions on how to use the dgs-work repository (replace upper-case words with your setting):
+Conventions on how to use the dgs-work repository (replace upper-case words with your setting):
 
    1. get a SourceForge account USER
    2. ask project-admin to add your USER in user-group 'Workers'
@@ -59,8 +59,7 @@ Here are the conventions on how to use the dgs-work repository (replace upper-ca
    # CONVENTION to save on remote work-area (for sharing or backup)
    git push dgs-work SHORTNAME/branch-name
 
-   # to have your work branch integrated, notify a dgs-main maintainer
-   (FIXME: currently it looks like this should be done via DGS, there is no obvious way to contact a dev via SF)
+   # to have your work branch integrated, notify a dgs-main maintainer using the development-forum on DGS
 
    # once a branch has been dealt with, consider deleting it to keep the noise level down in dgs-work.
 

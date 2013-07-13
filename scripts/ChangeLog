@@ -16,6 +16,13 @@ Developers INFO:
 ChangeLog
 ------------------------------------------------------------------
 
+2013-07-13 juga
+
+   * scripts/README.developers, .gitignore, README:
+   - reviewed and adjusted axd's changes from branch dgs-work/axd-sfdev/review,
+     see pull-request http://www.dragongoserver.net/forum/read.php?forum=10&thread=36610#36610
+   - cleaned up .gitignore (remove double entries, less and clearer groups)
+
 2013-07-13 axd
 
    * .gitignore:

@@ -55,9 +55,9 @@ General instructions for developers:
    2. Clone the dgs-main repository into a local (private) repository where you will work on your branches.
 
    3. Fetch updates from dgs-main into your private repository.
-   
+
    4. Push your private branches to your public repository, and nicely ask an Integrator
-   (see [1]) to merge your branches.
+      (see [1]) to merge your branches.
 
    Using the dgs-work repository as described in the root README document works in the same way,
    except that the dgs-work repository is used as your (public) repository.
@@ -72,7 +72,7 @@ General instructions for developers:
 
    When working on bugs/issues:
 
-   1. create a local branch based off master (for significant changes, consider a stable tag to start from)
+   1. create a local branch based on master (for significant changes, consider a stable tag to start from)
 
       > git checkout -b <newbranch> master
 

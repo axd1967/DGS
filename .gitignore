@@ -1,53 +1,29 @@
-# confidential, site specific configuration that should not reach a public repository
+# confidential & runtime-stuff, site specific config & data that should not reach a public repository
 include/config-local.php
+.htaccess
 timeadjust.php
-scripts/.htaccess
-
-# (re)generated DGS files
-translations
-translations/??.*.php
-translations/known_languages.php
-ref-doc
-
-# runtime stuff, user data.
-# installation instructions should be changed, because every site might choose another name:
-# imagine all contributors adding their preferred names in such lists...
-userpic
 DATASTORE
 data-store
+translations
+userpic
 
-# root-files
+# root
 apple-touch-icon*.png
 favicon.ico
-
-# subdir-files
-#FIXME why ignore the images files while they ARE in the rep?
 !images/apple-touch-icon*.png
 !images/favicon.ico
 
-
-# remainder is most probably developer-specific and should be configured locally rather than in a project file
-
+# developer-specific dirs & files
+# should be configured locally rather than in a project file
 # users can store this kind of excludes in following places (which will not be committed):
 #     -  .git/info/exclude
 #     -  in a personal exclude file (git config option 'core.exludefile')
 # for more details, see 'git help ignore' and https://help.github.com/articles/ignoring-files
-
-# editor artefacts
-# (if it's OK for you, JUG, could we start by removing this editor section?)
-*~
-*.bak
-*.swp
-*.diff
-
-# more strange stuff ;-) that hints that there is life out there touching DGS code...
 .project
-tags
-Makefile
-temp
+*.diff
 archive
-
-# subdirs
-php
-snapshot
+Makefile
+ref-doc
+tags
+temp
 
