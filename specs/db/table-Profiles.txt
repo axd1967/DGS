@@ -54,10 +54,10 @@ Description:
 
    - PROFTYPE_TMPL_SENDMSG = format for send-message: "Subject\nMessageText"
 
-   - PROFTYPE_TMPL_GAMESETUP_INVITE = format for invitation: "GameSetup\nEXTRA\nSubject\nMessageText"
+   - PROFTYPE_TMPL_INVITE = format for invitation: "GameSetup\nEXTRA\nSubject\nMessageText"
       - EXTRA format = "SH<shape-id>:<shape-snapshot>"
 
-   - PROFTYPE_TMPL_GAMESETUP_NEWGAME = format for new-game: "GameSetup\nEXTRA\nSubject\nMessageText"
+   - PROFTYPE_TMPL_NEWGAME = format for new-game: "GameSetup\nEXTRA\nSubject\nMessageText"
       - EXTRA format = "V<view> G<NumGames> GP<game-players> SH<shape-id>:<shape-snapshot>"
 
 
