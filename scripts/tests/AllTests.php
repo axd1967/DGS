@@ -29,7 +29,7 @@ require_once 'GameAddTimeTest.php';
 require_once 'GameSettingsTest.php';
 require_once 'EntityTest.php';
 require_once 'EntityDataTest.php';
-require_once 'Game_SetupTest.php';
+require_once 'GameSetupTest.php';
 require_once 'DefaultMaxHandicapTest.php';
 
 /*!
@@ -55,7 +55,7 @@ class AllTests
       $suite->addTestSuite('GameSettingsTest');
       $suite->addTestSuite('EntityTest');
       $suite->addTestSuite('EntityDataTest');
-      $suite->addTestSuite('Game_SetupTest');
+      $suite->addTestSuite('GameSetupTest');
       $suite->addTestSuite('DefaultMaxHandicapTest');
 
       return $suite;
