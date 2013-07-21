@@ -18,6 +18,10 @@ ChangeLog
 
 2013-07-21 juga
 
+   * features/lib_votes.php (VOTE_MIN_FINISHED_GAMES; Feature.allow_vote_check),
+     NEWS:
+   - allow voting on features also if user finished unrated games
+
    * include/message_functions.php (game_settings_form):
    - cleanup: replaced multi-typed $gid-function-argument $gid with $arr_url_or_gid
      seperating $gid from parsing URL-array

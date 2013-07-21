@@ -61,7 +61,7 @@ define('DATEFMT_VOTELIST', 'Y-m-d');
 define('DATEFMT_FEATURE',  'Y-m-d&\n\b\s\p;H:i');
 
 // conditions on user to allow voting
-define('VOTE_MIN_RATEDGAMES', 5); // #games
+define('VOTE_MIN_FINISHED_GAMES', 5); // #games
 define('VOTE_MIN_DAYS_LASTMOVED', 30); // #days
 
 
@@ -456,11 +456,11 @@ class Feature
          return T_('Feature-Voting has been denied.');
 
       // minimum X finished+rated games, moved within Y days
-      if ( @$player_row['RatedGames'] < VOTE_MIN_RATEDGAMES
+      if ( @$player_row['Finished'] < VOTE_MIN_FINISHED_GAMES
             || @$player_row['X_LastMove'] < $NOW - VOTE_MIN_DAYS_LASTMOVED * SECS_PER_DAY )
       {
-         return sprintf( T_("To be able to vote you have to finish %s rated games and \nactively play in games during the last %s days."),
-                         VOTE_MIN_RATEDGAMES, VOTE_MIN_DAYS_LASTMOVED );
+         return sprintf( T_("To be able to vote you have to finish %s games and \nactively play in games during the last %s days."),
+                         VOTE_MIN_FINISHED_GAMES, VOTE_MIN_DAYS_LASTMOVED );
       }
 
       //return 'testing'; // for easy testing

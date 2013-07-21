@@ -3,7 +3,7 @@ Copyright (C) 2001-2013  Erik Ouchterlony, Jens-Uwe Gaspar
 
 %TOC%
 
-#release DGS_1_0_16 [2013-???-??] - DGS 1.0.16  (Tournaments, Game settings)
+#release DGS_1_0_16 [2013-Jul-??] - DGS 1.0.16  (Tournaments, Game settings)
 
    New features and Major changes:
 
@@ -157,6 +157,8 @@ Copyright (C) 2001-2013  Erik Ouchterlony, Jens-Uwe Gaspar
          * retrieve list of messages with nested user-/folder-objects, including game-settings for invitation
       * Added bulletin-handler to
          * retrieve single bulletin
+
+   * Allow voting on features also if user finished unrated games
 
    * Added tooltips for main-menu entries
    * Added server-version in bottom-bar
