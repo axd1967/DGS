@@ -587,7 +587,7 @@ class TournamentParticipant
    {
       $row = mysql_single_fetch( "TournamentParticipant:check_rated_tournament_participants.find_unrated($tid)",
          "SELECT TP.uid FROM TournamentParticipant AS TP INNER JOIN Players AS P ON P.ID=TP.uid " .
-         "WHERE TP.tid=$tid AND P.RatingStatus='NONE' LIMIT 1" );
+         "WHERE TP.tid=$tid AND P.RatingStatus='".RATING_NONE."' LIMIT 1" );
       return ( $row ) ? false : true;
    }
 
