@@ -34,7 +34,7 @@ Description:
 
 * Created : date of change
 
-* Changes : TODO
+* Changes : bitmask of executed changes
    - 1 = bit set if rating-confidence-interval has been resetted
    - 2 = bit set if rating has been changed, then Rating-field is meaningful
 
