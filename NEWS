@@ -279,8 +279,6 @@ Copyright (C) 2001-2013  Erik Ouchterlony, Jens-Uwe Gaspar
       * General:
          * Changed default for Time settings to: Fischer time with 30d + 1d
          * Changed default for Standard Handicap Placement to: ON
-         * Changed nigiri-handling of CONVENTIONAL and PROPER handicap-type:
-           Now stronger player gets White color and only make Nigiri if both players have same rating
 
       * <home waiting_room.php>Waiting room</home>:
          * Moved adding of a new game offer for the waiting room to a separate page:
