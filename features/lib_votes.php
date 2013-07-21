@@ -459,8 +459,7 @@ class Feature
       if ( @$player_row['RatedGames'] < VOTE_MIN_RATEDGAMES
             || @$player_row['X_LastMove'] < $NOW - VOTE_MIN_DAYS_LASTMOVED * SECS_PER_DAY )
       {
-         return sprintf( T_('To be able to vote you have to finish %s rated games and '."\n"
-                           . 'actively play in games during the last %s days.'),
+         return sprintf( T_("To be able to vote you have to finish %s rated games and \nactively play in games during the last %s days."),
                          VOTE_MIN_RATEDGAMES, VOTE_MIN_DAYS_LASTMOVED );
       }
 
