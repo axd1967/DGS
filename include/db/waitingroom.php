@@ -42,9 +42,10 @@ global $ENTITY_WROOM; //PHP5
 $ENTITY_WROOM = new Entity( 'Waitingroom',
       FTYPE_PKEY, 'ID',
       FTYPE_AUTO, 'ID',
-      FTYPE_INT,  'ID', 'uid', 'gid', 'ShapeID', 'nrGames', 'Size', 'Komi', 'Handicap', 'AdjKomi', 'AdjHandicap',
-                  'MinHandicap', 'MaxHandicap', 'Maintime', 'Byotime', 'Byoperiods', 'RatingMin', 'RatingMax',
-                  'MinRatedGames', 'SameOpponent',
+      FTYPE_INT,  'ID', 'uid', 'gid', 'ShapeID', 'nrGames', 'Size', 'Handicap',
+                  'AdjHandicap', 'MinHandicap', 'MaxHandicap', 'Maintime', 'Byotime', 'Byoperiods',
+                  'RatingMin', 'RatingMax', 'MinRatedGames', 'SameOpponent',
+      FTYPE_FLOAT, 'Komi', 'AdjKomi',
       FTYPE_ENUM, 'GameType', 'Handicaptype', 'JigoMode', 'Rated', 'StdHandicap', 'WeekendClock', 'MustBeRated',
       FTYPE_TEXT, 'GamePlayers', 'Ruleset', 'Handicaptype', 'Byotype', 'ShapeSnapshot', 'Comment',
       FTYPE_DATE, 'Time'
@@ -198,10 +199,10 @@ class Waitingroom
       $data->set_value( 'Byotype', $this->Byotype );
       $data->set_value( 'Byotime', $this->Byotime );
       $data->set_value( 'Byoperiods', $this->Byoperiods );
-      $data->set_value( 'WeekendClock', $this->WeekendClock );
-      $data->set_value( 'Rated', $this->Rated );
-      $data->set_value( 'StdHandicap', $this->StdHandicap );
-      $data->set_value( 'MustBeRated', $this->MustBeRated );
+      $data->set_value( 'WeekendClock', ($this->WeekendClock ? 'Y' : 'N') );
+      $data->set_value( 'Rated', ($this->Rated ? 'Y' : 'N') );
+      $data->set_value( 'StdHandicap', ($this->StdHandicap ? 'Y' : 'N') );
+      $data->set_value( 'MustBeRated', ($this->MustBeRated ? 'Y' : 'N') );
       $data->set_value( 'RatingMin', $this->RatingMin );
       $data->set_value( 'RatingMax', $this->RatingMax );
       $data->set_value( 'MinRatedGames', $this->MinRatedGames );
@@ -316,8 +317,8 @@ class Waitingroom
       $iterator->clearItems();
       while ( $row = mysql_fetch_array( $result ) )
       {
-         $survey = self::new_from_row( $row );
-         $iterator->addItem( $survey, $row );
+         $wroom = self::new_from_row( $row );
+         $iterator->addItem( $wroom, $row );
       }
       mysql_free_result($result);
 

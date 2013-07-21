@@ -16,6 +16,13 @@ Developers INFO:
 ChangeLog
 ------------------------------------------------------------------
 
+2013-07-21 juga
+
+   * include/db/waitingroom.php (class Waitingroom, ~.fillEntityData, ~.load_waitingroom_entries):
+   - bugfix: wrong declaraction of float-typed db-table-fields Komi/AdjKomi for Waitingroom-entity
+   - bugfix: wrong handling of writing boolean-fields into database expecting Y|N values
+   - cleanup: minor var-rename
+
 2013-07-13 juga
 
    * scripts/README.developers, .gitignore, README:
