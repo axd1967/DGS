@@ -467,7 +467,7 @@ function game_settings_form(&$mform, $formstyle, $viewmode, $iamrated=true, $my_
       elseif ( $formstyle == GSET_TOURNAMENT_ROUNDROBIN )
          $color_txt = T_('Color Stronger#T_RRobin');
       else
-         $color_txt = T_('My color');
+         $color_txt = T_('My Color');
 
       $mform->add_row( array(
          'DESCRIPTION', T_('Manual setting (even or handicap game)'),
