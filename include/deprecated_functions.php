@@ -119,28 +119,6 @@ class DeprecatedGameSetup
       return $gs;
    }//read_game_setup_from_gamerow
 
-   //TODO TODO obsolete -> REMOVE
-   /*!
-    * \brief Parses Jigo-mode from GameSetup.
-    * \param $game_setup either Games.GameSetup-string or a GameSetup-object of pivot-user
-    */
-   public static function parse_jigo_mode_from_game_setup( $cat_htype, $pivot_uid, $game_setup, $gid )
-   {
-      $jigo_mode = JIGOMODE_KEEP_KOMI; //default
-
-      if ( $cat_htype == CAT_HTYPE_FAIR_KOMI )
-      {
-         if ( $game_setup instanceof GameSetup )
-            $my_gs = $game_setup;
-         else
-            list( $my_gs, $opp_gs ) = self::parse_invitation_game_setup( $pivot_uid, $game_setup, $gid );
-         if ( !is_null($my_gs) )
-            $jigo_mode = $my_gs->JigoMode;
-      }
-
-      return $jigo_mode;
-   }//parse_jigo_mode_from_game_setup
-
    /*!
     * \brief Returns handicap-type for game-invitations.
     * \return non-null handicap-type (or else throw error what's missing/wrong)
@@ -157,25 +135,6 @@ class DeprecatedGameSetup
       $htype = self::get_handicaptype_for_invite( $tomove_id, $my_col_black, $my_htype );
       return $htype;
    }//determine_handicaptype
-
-   //TODO TODO obsolete -> REMOVE
-   public static function get_invite_handicaptype( $handitype )
-   {
-      // handicap-type => invite-handicap-type
-      static $ARR_INVITE_HTYPES = array(
-            HTYPE_CONV     => INVITE_HANDI_CONV,
-            HTYPE_PROPER   => INVITE_HANDI_PROPER,
-            HTYPE_NIGIRI   => INVITE_HANDI_NIGIRI,
-            HTYPE_DOUBLE   => INVITE_HANDI_DOUBLE,
-            HTYPE_BLACK    => INVITE_HANDI_FIXCOL,
-            HTYPE_WHITE    => INVITE_HANDI_FIXCOL,
-            HTYPE_AUCTION_SECRET   => INVITE_HANDI_AUCTION_SECRET,
-            HTYPE_AUCTION_OPEN     => INVITE_HANDI_AUCTION_OPEN,
-            HTYPE_YOU_KOMI_I_COLOR => INVITE_HANDI_DIV_CHOOSE,
-            HTYPE_I_KOMI_YOU_COLOR => INVITE_HANDI_DIV_CHOOSE,
-         );
-      return @$ARR_INVITE_HTYPES[$handitype];
-   }//get_invite_handicaptype
 
    // use is_black_col = fk_htype = null to get standard htype (e.g. for transition of Games without GameSetup)
    // NOTE: if $inv_handitype >0 for old game-invitations, $fk_htype can be null

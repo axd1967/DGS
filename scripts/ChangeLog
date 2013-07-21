@@ -18,6 +18,10 @@ ChangeLog
 
 2013-07-21 juga
 
+   * include/deprecated_functions.php:
+   - cleanup: removed unused obsolete functions after re-design of game-invitation:
+     DeprecatedGameSetup.parse_jigo_mode_from_game_setup, ~.get_invite_handicaptype)
+
    * include/game_functions.php (GameHelper.delete_running_game, ~.delete_invitation_game;
        FairKomiNegotiation.save_komi;
        GameFinalizer.finish_game;
