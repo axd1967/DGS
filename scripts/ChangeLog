@@ -18,6 +18,10 @@ ChangeLog
 
 2013-07-21 juga
 
+   * include/message_functions.php (game_settings_form):
+   - cleanup: replaced multi-typed $gid-function-argument $gid with $arr_url_or_gid
+     seperating $gid from parsing URL-array
+
    * include/deprecated_functions.php:
    - cleanup: removed unused obsolete functions after re-design of game-invitation:
      DeprecatedGameSetup.parse_jigo_mode_from_game_setup, ~.get_invite_handicaptype)

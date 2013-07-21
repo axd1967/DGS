@@ -81,15 +81,14 @@ function init_standard_folders()
  *     GSETVIEW_MPGAME = view with settings allowed for multi-player-game; auto for MP-game-type
  * \param $my_ID user-id for invite/dispute, then $gid is game-id;
  *     my_ID='redraw' for invite/dispute/tourney and $gid then is the $_POST[] of the form asking preview
- * \param $gid if null, shape + snapshot args are read from $_REQUEST (normally used for Invite and NewGame)
- *     can be game-id, or array with URL-args, e.g. for tournament-rules (see also $my_ID)
+ * \param $arr_url_or_gid if null, shape + snapshot args are read from $_REQUEST (normally used for Invite and NewGame);
+ *     can be game-id or array with URL-args, e.g. for tournament-rules (see also $my_ID argument)
  * \param $map_ratings:
  *     if set, contain map with keys (rating1, rating2) ->
  *     then add probable game-settings for conventional/proper-handicap-type
  * \param $gsc GameSetupChecker-object containing error-fields to highlight; or NULL
  */
-//TODO TODO INV-clup: LATER replace  $gid with $arr_url_or_gid
-function game_settings_form(&$mform, $formstyle, $viewmode, $iamrated=true, $my_ID=NULL, $gid=NULL,
+function game_settings_form(&$mform, $formstyle, $viewmode, $iamrated=true, $my_ID=NULL, $arr_url_or_gid=NULL,
       $map_ratings=NULL, $gsc=NULL )
 {
    if ( !preg_match( "/^(".CHECK_GSET.")$/", $formstyle ) )
@@ -98,6 +97,8 @@ function game_settings_form(&$mform, $formstyle, $viewmode, $iamrated=true, $my_
       $viewmode = GSETVIEW_STANDARD;
    if ( $viewmode == GSETVIEW_MPGAME && $formstyle != GSET_WAITINGROOM )
       $viewmode = GSETVIEW_STANDARD;
+
+   $gid = ( is_null($arr_url_or_gid) ) ? 0 : (int)$arr_url_or_gid;
 
    if ( is_null($gsc) )
       $gsc = new GameSetupChecker( $viewmode );
@@ -151,7 +152,7 @@ function game_settings_form(&$mform, $formstyle, $viewmode, $iamrated=true, $my_
       $CategoryHandiType = CAT_HTYPE_MANUAL;
       $Rated = false;
    }
-   if ( is_null($gid) ) // handle shape-game
+   if ( $gid == 0 ) // handle shape-game
    {
       if ( ($shape_id = (int)@$_REQUEST['shape']) > 0 )
       {
@@ -160,88 +161,89 @@ function game_settings_form(&$mform, $formstyle, $viewmode, $iamrated=true, $my_
       }
    }
 
-   if ( $my_ID==='redraw' && is_array($gid) )
+   if ( $my_ID==='redraw' && is_array($arr_url_or_gid) )
    {
-      // If redraw, use values from array $gid
-      // ($gid[] is the $_POST[] of the form asking the preview (i.e. this form))
+      // If 'redraw', use values from array $arr_url_or_gid,
+      // which is the $_POST[] of the form asking the preview (i.e. this form)
+      $url = $arr_url_or_gid;
 
-      if ( isset($gid['shape']) )
+      if ( isset($url['shape']) )
       {
-         $orig_shape_id = trim($gid['shape']);
-         $ShapeID = (int)$gid['shape'];
-         if ( $ShapeID > 0 && isset($gid['snapshot']) )
-            $ShapeSnapshot = $gid['snapshot'];
+         $orig_shape_id = trim($url['shape']);
+         $ShapeID = (int)$url['shape'];
+         if ( $ShapeID > 0 && isset($url['snapshot']) )
+            $ShapeSnapshot = $url['snapshot'];
       }
 
-      if ( isset($gid['ruleset']) )
-         $Ruleset = $gid['ruleset'];
-      if ( isset($gid['size']) )
-         $Size = (int)$gid['size'];
+      if ( isset($url['ruleset']) )
+         $Ruleset = $url['ruleset'];
+      if ( isset($url['size']) )
+         $Size = (int)$url['size'];
 
-      if ( isset($gid['cat_htype']) )
-         $CategoryHandiType = (string)$gid['cat_htype'];
-      if ( isset($gid['color_m']) )
-         $Color_m = $gid['color_m'];
+      if ( isset($url['cat_htype']) )
+         $CategoryHandiType = (string)$url['cat_htype'];
+      if ( isset($url['color_m']) )
+         $Color_m = $url['color_m'];
 
       if ( $CategoryHandiType === CAT_HTYPE_MANUAL )
          $Handitype = $Color_m;
       elseif ( $CategoryHandiType === CAT_HTYPE_FAIR_KOMI )
-         $Handitype = ( isset($gid['fk_htype']) ) ? $gid['fk_htype'] : DEFAULT_HTYPE_FAIRKOMI;
+         $Handitype = ( isset($url['fk_htype']) ) ? $url['fk_htype'] : DEFAULT_HTYPE_FAIRKOMI;
       else
          $Handitype = $CategoryHandiType;
 
-      if ( isset($gid['handicap_m']) )
-         $Handicap_m = (int)$gid['handicap_m'];
-      if ( isset($gid['komi_m']) )
-         $Komi_m = (float)$gid['komi_m'];
+      if ( isset($url['handicap_m']) )
+         $Handicap_m = (int)$url['handicap_m'];
+      if ( isset($url['komi_m']) )
+         $Komi_m = (float)$url['komi_m'];
 
-      if ( isset($gid['adj_komi']) )
-         $AdjKomi = (float)$gid['adj_komi'];
-      if ( isset($gid['jigo_mode']) )
-         $JigoMode = $gid['jigo_mode'];
+      if ( isset($url['adj_komi']) )
+         $AdjKomi = (float)$url['adj_komi'];
+      if ( isset($url['jigo_mode']) )
+         $JigoMode = $url['jigo_mode'];
 
-      if ( isset($gid['adj_handicap']) )
-         $AdjHandicap = (int)$gid['adj_handicap'];
-      if ( isset($gid['min_handicap']) )
-         $MinHandicap = (int)$gid['min_handicap'];
-      if ( isset($gid['max_handicap']) )
-         $MaxHandicap = DefaultMaxHandicap::limit_max_handicap( (int)$gid['max_handicap'] );
+      if ( isset($url['adj_handicap']) )
+         $AdjHandicap = (int)$url['adj_handicap'];
+      if ( isset($url['min_handicap']) )
+         $MinHandicap = (int)$url['min_handicap'];
+      if ( isset($url['max_handicap']) )
+         $MaxHandicap = DefaultMaxHandicap::limit_max_handicap( (int)$url['max_handicap'] );
 
-      if ( isset($gid['game_players']) )
-         $GamePlayers = $gid['game_players'];
+      if ( isset($url['game_players']) )
+         $GamePlayers = $url['game_players'];
 
       // NOTE on time-hours: 36 hours eval to 2d + 6h (because of sleeping time)
 
-      if ( isset($gid['byoyomitype']) )
-         $Byotype = $gid['byoyomitype'];
+      if ( isset($url['byoyomitype']) )
+         $Byotype = $url['byoyomitype'];
 
-      if ( isset($gid['timevalue']) )
-         $Maintime = (int)$gid['timevalue'];
-      if ( isset($gid['timeunit']) )
-         $MaintimeUnit = (string)$gid['timeunit'];
+      if ( isset($url['timevalue']) )
+         $Maintime = (int)$url['timevalue'];
+      if ( isset($url['timeunit']) )
+         $MaintimeUnit = (string)$url['timeunit'];
 
-      if ( isset($gid['byotimevalue_jap']) )
-         $Byotime_jap = (int)$gid['byotimevalue_jap'];
-      if ( isset($gid['timeunit_jap']) )
-         $ByotimeUnit_jap = (string)$gid['timeunit_jap'];
-      if ( isset($gid['byoperiods_jap']) )
-         $Byoperiods_jap = (int)$gid['byoperiods_jap'];
+      if ( isset($url['byotimevalue_jap']) )
+         $Byotime_jap = (int)$url['byotimevalue_jap'];
+      if ( isset($url['timeunit_jap']) )
+         $ByotimeUnit_jap = (string)$url['timeunit_jap'];
+      if ( isset($url['byoperiods_jap']) )
+         $Byoperiods_jap = (int)$url['byoperiods_jap'];
 
-      if ( isset($gid['byotimevalue_can']) )
-         $Byotime_can = (int)$gid['byotimevalue_can'];
-      if ( isset($gid['timeunit_can']) )
-         $ByotimeUnit_can = (string)$gid['timeunit_can'];
-      if ( isset($gid['byoperiods_can']) )
-         $Byoperiods_can = (int)$gid['byoperiods_can'];
+      if ( isset($url['byotimevalue_can']) )
+         $Byotime_can = (int)$url['byotimevalue_can'];
+      if ( isset($url['timeunit_can']) )
+         $ByotimeUnit_can = (string)$url['timeunit_can'];
+      if ( isset($url['byoperiods_can']) )
+         $Byoperiods_can = (int)$url['byoperiods_can'];
 
-      if ( isset($gid['byotimevalue_fis']) )
-         $Byotime_fis = (int)$gid['byotimevalue_fis'];
-      if ( isset($gid['timeunit_fis']) )
-         $ByotimeUnit_fis = $gid['timeunit_fis'];
+      if ( isset($url['byotimevalue_fis']) )
+         $Byotime_fis = (int)$url['byotimevalue_fis'];
+      if ( isset($url['timeunit_fis']) )
+         $ByotimeUnit_fis = $url['timeunit_fis'];
 
-      $WeekendClock = ( @$gid['weekendclock'] == 'Y' );
-      $StdHandicap = ( @$gid['stdhandicap'] == 'Y' );
-      $Rated = ( @$gid['rated'] == 'Y' );
+      $WeekendClock = ( @$url['weekendclock'] == 'Y' );
+      $StdHandicap = ( @$url['stdhandicap'] == 'Y' );
+      $Rated = ( @$url['rated'] == 'Y' );
    }
    else if ( $gid > 0 && $my_ID > 0 ) //'Dispute'
    {
