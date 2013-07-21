@@ -78,7 +78,7 @@ class TournamentRoundHelper
    /*! \brief Finds out games-per-challenge from various sources for given tournament. */
    public static function determine_games_per_challenge( $tid, $trule=null )
    {
-      // load T-rules (need HandicapType for games-count)
+      // load T-rules (need Handicaptype for games-count)
       if ( !($trule instanceof TournamentRules) )
          $trule = TournamentCache::load_cache_tournament_rules( 'TRH:determine_games_per_challenge', $tid );
 

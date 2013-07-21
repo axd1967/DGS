@@ -133,7 +133,7 @@ class TournamentHelper
     * \brief Returns rating for user from Players/TournamentParticipant-table according to rating-use-mode.
     * \param $user User-object
     * \param $RatingUseMode TournamentProperties.RatingUseMode
-    * \param $strict_tp_rating true = return null if rating taken from $user
+    * \param $strict_tp_rating if true, return null if rating is taken from $user-var
     */
    public static function get_tournament_rating( $tid, $user, $RatingUseMode, $strict_tp_rating=false )
    {
