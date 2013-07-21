@@ -18,6 +18,10 @@ ChangeLog
 
 2013-07-21 juga
 
+   * game.php:
+   - bugfix: don't show link to Eidogo-game-player for games in fair-komi-negotiation,
+     that have no board yet
+
    * include/db/waitingroom.php (class Waitingroom, ~.fillEntityData, ~.load_waitingroom_entries):
    - bugfix: wrong declaraction of float-typed db-table-fields Komi/AdjKomi for Waitingroom-entity
    - bugfix: wrong handling of writing boolean-fields into database expecting Y|N values

@@ -748,10 +748,13 @@ $GLOBALS['ThePage'] = new Page('Game');
       $show_notes = false;
    }
 
-   echo SMALL_SPACING,
-      anchor( 'http://eidogo.com/#url:'.HOSTBASE."sgf.php?gid=$gid",
-         image( 'images/eidogo.gif', T_('EidoGo Game Player'), null, 'class=InTextImage' ),
-         '', 'class=NoPrint' );
+   if ( $Status != GAME_STATUS_KOMI )
+   {
+      echo SMALL_SPACING,
+         anchor( 'http://eidogo.com/#url:'.HOSTBASE."sgf.php?gid=$gid",
+            image( 'images/eidogo.gif', T_('EidoGo Game Player'), null, 'class=InTextImage' ),
+            '', 'class=NoPrint' );
+   }
 
    if ( $cnt_attached_sgf > 0 )
       echo SMALL_SPACING, echo_image_game_sgf( $gid, $cnt_attached_sgf );
