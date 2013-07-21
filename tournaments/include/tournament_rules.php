@@ -246,11 +246,12 @@ class TournamentRules
       $grow['Size'] = limit( (int)$this->Size, MIN_BOARD_SIZE, MAX_BOARD_SIZE, 19 );
 
       $grow['Handicap'] = (int)$this->Handicap;
+      $grow['StdHandicap'] = ($this->StdHandicap) ? 'Y' : 'N';
+      $grow['Komi'] = (float)$this->Komi;
+      // NOTE: extra-fields for adjust-handicap/komi are needed for game_info_table()
       $grow['AdjHandicap'] = (int)$this->AdjHandicap;
       $grow['MinHandicap'] = (int)$this->MinHandicap;
       $grow['MaxHandicap'] = DefaultMaxHandicap::limit_max_handicap( (int)$this->MaxHandicap );
-      $grow['StdHandicap'] = ($this->StdHandicap) ? 'Y' : 'N';
-      $grow['Komi'] = (float)$this->Komi;
       $grow['AdjKomi'] = (float)$this->AdjKomi;
       $grow['JigoMode'] = $this->JigoMode;
 
@@ -498,16 +499,29 @@ class TournamentRules
    /*! \brief Converts this TournamentRules-object to GameSetup-object to be used to create game; uid must be set later. */
    public function convertTournamentRules_to_GameSetup()
    {
-      // store only fields that are no Games-fields already
       $gs = new GameSetup( /*uid*/0 );
       $gs->Handicaptype = self::convert_trule_handicaptype_to_stdhtype($this->Handicaptype);
-      $gs->Handicap = (int)$this->Handicap;
-      $gs->Komi = (float)$this->Komi;
       $gs->AdjKomi = (float)$this->AdjKomi;
       $gs->JigoMode = $this->JigoMode;
       $gs->AdjHandicap = (int)$this->AdjHandicap;
       $gs->MinHandicap = (int)$this->MinHandicap;
       $gs->MaxHandicap = (int)$this->MaxHandicap;
+
+      // natural Games-table-fields
+      $gs->tid = (int)$this->tid;
+      $gs->Ruleset = $this->Ruleset;
+      $gs->Size = (int)$this->Size;
+      $gs->Handicap = (int)$this->Handicap;
+      $gs->Komi = (float)$this->Komi;
+      $gs->StdHandicap = (bool)$this->StdHandicap;
+      $gs->Maintime = (int)$this->Maintime;
+      $gs->Byotype = $this->Byotype;
+      $gs->Byotime = (int)$this->Byotime;
+      $gs->Byoperiods = (int)$this->Byoperiods;
+      $gs->WeekendClock = (bool)$this->WeekendClock;
+      $gs->Rated = (bool)$this->Rated;
+      $gs->ShapeID = (int)$this->ShapeID;
+      $gs->ShapeSnapshot = $this->ShapeSnapshot;
       return $gs;
    }//convertTournamentRules_to_GameSetup
 

@@ -20,6 +20,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 chdir( '../../' );
 require_once 'include/std_functions.php';
 require_once 'include/game_functions.php';
+require_once 'include/deprecated_functions.php';
 
 $GLOBALS['ThePage'] = new Page('Script', PAGEFLAG_IMPLICIT_FLUSH );
 
@@ -168,9 +169,9 @@ function handle_games_gamesetup()
 function fix_game_invite_dispute( $row )
 {
    $gid = (int)$row['ID'];
-   $gs_arr = GameSetup::parse_invitation_game_setup( -1, $row['GameSetup'], $gid );
+   $gs_arr = DeprecatedGameSetup::parse_invitation_game_setup( -1, $row['GameSetup'], $gid );
    if ( count($gs_arr) != 2 || is_null($gs_arr[0]) || is_null($gs_arr[1]) )
-      error('internal_error', "fix_default_max_handi.fix_game_invite_dispute.find_bad_gamesetup_inv.need2($gid,{$row['GameSetup']})");
+      error('invite_bad_gamesetup', "fix_default_max_handi.fix_game_invite_dispute.find_bad_gamesetup_inv.need2($gid,{$row['GameSetup']})");
 
    $update = false;
    foreach ( $gs_arr as $gs )
@@ -184,7 +185,7 @@ function fix_game_invite_dispute( $row )
 
    if ( $update )
    {
-      $new_gs = GameSetup::build_invitation_game_setup( $gs_arr[0], $gs_arr[1] );
+      $new_gs = DeprecatedGameSetup::build_invitation_game_setup( $gs_arr[0], $gs_arr[1] );
       dbg_query( "UPDATE Games SET GameSetup='".mysql_addslashes($new_gs)."' WHERE ID=$gid LIMIT 1" );
       return true;
    }
@@ -209,7 +210,7 @@ function fix_game_finished_running( $row )
    if ( $update )
    {
       $gs->MaxHandicap = DEFAULT_MAX_HANDICAP;
-      $new_gs = $gs->encode();
+      $new_gs = $gs->encode_game_setup();
       $gid = (int)$row['ID'];
       dbg_query( "UPDATE Games SET GameSetup='".mysql_addslashes($new_gs)."' WHERE ID=$gid LIMIT 1" );
       return true;
@@ -264,7 +265,7 @@ function fix_profile( $templ_type, $prof_id, $tmpl )
    if ( $update )
    {
       $tmpl->GameSetup->MaxHandicap = DEFAULT_MAX_HANDICAP;
-      $new_gs = $tmpl->encode();
+      $new_gs = $tmpl->encode_template();
       dbg_query( "UPDATE Profiles SET Text='".mysql_addslashes($new_gs)."' WHERE ID=$prof_id AND Type=$templ_type LIMIT 1" );
       return true;
    }

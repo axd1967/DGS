@@ -19,6 +19,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 require_once 'include/quick/quick_handler.php';
 require_once 'include/quick/quick_folder.php';
+require_once 'include/db/game_invitation.php';
 require_once 'include/std_functions.php';
 require_once 'include/message_functions.php';
 require_once 'include/classlib_user.php';
@@ -379,28 +380,23 @@ class QuickHandlerMessage extends QuickHandler
 
          if ( $game_status == GAME_STATUS_INVITED )
          {
-            // ToMove_ID holds handitype for game on INVITATION-status
-            list( $my_gs, $opp_gs ) = GameSetup::parse_invitation_game_setup( $my_id, @$row['GameSetup'], $gid );
-            $my_color_black = ( $row['Black_ID'] == $my_id );
-            $Handitype = GameSetup::determine_handicaptype( $my_gs, $opp_gs, (int)$row['ToMove_ID'], $my_color_black );
-
-            $cat_htype = get_category_handicaptype( $Handitype );
-            $jigo_mode = GameSetup::parse_jigo_mode_from_game_setup( $cat_htype, $my_id, $my_gs, $gid );
+            $game_inv = GameInvitation::load_game_invitation( $gid, $row['ToMove_ID'] );
+            if ( is_null($game_inv) )
+               error('invite_bad_gamesetup', "QuickHandlerMessage.fill_message_info.miss_game_inv($gid,{$row['ToMove_ID']})");
 
             $time_limit = TimeFormat::echo_time_limit(
                   $row['Maintime'], $row['Byotype'], $row['Byotime'], $row['Byoperiods'],
                   TIMEFMT_QUICK|TIMEFMT_ENGL|TIMEFMT_SHORT|TIMEFMT_ADDTYPE);
 
             // NOTE: players have a rating if an invitation exists
-            $row['Handicaptype'] = $Handitype;
-            $row['JigoMode'] = $jigo_mode;
-            $gs_calc = new GameSettingsCalculator( $row, $my_gs, $player_row['Rating2'], $row['other_rating'] );
-            $gs_calc->calculate_settings();
+            $inv_gs = GameSetup::new_from_game_invitation( $row, $game_inv );
+            $gs_calc = new GameSettingsCalculator( $inv_gs, $player_row['Rating2'], $row['other_rating'] );
+            $gs_calc->calculate_settings( $my_id );
 
             $out['game_settings'] = array(
                   'game_type' => GAMETYPE_GO,
                   'game_players' => '1:1',
-                  'handicap_type' => $Handitype,
+                  'handicap_type' => $game_inv->Handicaptype,
                   'shape_id' => (int)$row['ShapeID'],
                   'shape_snapshot' => $row['ShapeSnapshot'],
 
@@ -411,11 +407,11 @@ class QuickHandlerMessage extends QuickHandler
                   'handicap' =>  (int)$row['Handicap'],
                   'handicap_mode' => ( ($row['StdHandicap'] == 'Y') ? 'STD' : 'FREE' ),
 
-                  'adjust_handicap' => (int)$my_gs->AdjustHandicap,
-                  'min_handicap' => (int)$my_gs->MinHandicap,
-                  'max_handicap' => (int)$my_gs->MaxHandicap,
-                  'adjust_komi' => (float)$my_gs->AdjustKomi,
-                  'jigo_mode' => $jigo_mode,
+                  'adjust_handicap' => (int)$game_inv->AdjHandicap,
+                  'min_handicap' => (int)$game_inv->MinHandicap,
+                  'max_handicap' => (int)$game_inv->MaxHandicap,
+                  'adjust_komi' => (float)$game_inv->AdjKomi,
+                  'jigo_mode' => $game_inv->JigoMode,
 
                   'time_weekend_clock' => ( ($row['WeekendClock'] == 'Y') ? 1 : 0 ),
                   'time_mode' => strtoupper($row['Byotype']),

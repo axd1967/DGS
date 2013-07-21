@@ -233,6 +233,11 @@ if num_rows==2 {compute differences and checks}
             "Lastchanged <= NOW() - INTERVAL ".GAME_INVITATIONS_EXPIRE_MONTHS." MONTH " .
          "LIMIT 100" );
 
+      // delete GameInvitation-entries without Games-entry
+      db_query( 'daily_cron.cleanup_old_invitations.game_inv',
+         "DELETE GI FROM GameInvitation AS GI " .
+            "LEFT JOIN Games AS G ON G.ID=GI.gid WHERE G.ID IS NULL" );
+
       fix_invitations_replied( 'daily_cron.cleanup_old_invitations', 100 );
    }
 

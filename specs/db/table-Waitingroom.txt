@@ -11,10 +11,8 @@ Description:
 Important Note:
    - Must be kept synchron with table 'TournamentRules' for fields relevant for tournaments.
    - Must be kept synchron with 'Invite'-feature, but Invites have less features,
-     because of the manual nature of an invitation. Also the settings for invitations
-     are kept in the Games-table.
-   - Invitations using the Message-system will be removed in the future and
-     migrated into the waiting-room.
+     because of the manual nature of an invitation.
+     The settings for invitations are stored in the GameInvitation-table.
 
 | Field         | Type                                     | Null | Key | Default             | Extra          |
 +---------------+------------------------------------------+------+-----+---------------------+----------------+
@@ -109,12 +107,12 @@ Important Note:
    - white = manual game-mode, game-offerer wants to play as White
    - auko_sec = Secret Auction Komi, both players choose komi, higher bid gets Black
      giving his bid of komi to White, use nigiri on equal bids
+   - auko_opn = Open Auction Komi, like Secret but with open bidding
+   - div_ykic = Divide & Choose "You choose Komi, I choose Color"
+   - div_ikyc = Divide & Choose "I choose Komi, You choose Color"
 
-   - [future] auko_opn = Open Auction Komi, like Secret but with open bidding
-   - [future] div_ykic = Divide & Choose "You choose Komi, I choose Color"
-   - [future] div_ikyc = Divide & Choose "I choose Komi, You choose Color"
-   - [future] pie_ymic = Pie Rule "You choose first Move, I choose Color"
-   - [future] pie_imyc = Pie Rule "I choose first Move, You choose Color"
+   - [future?] pie_ymic = Pie Rule "You choose first Move, I choose Color"
+   - [future?] pie_imyc = Pie Rule "I choose first Move, You choose Color"
 
 * AdjKomi : Komi adjustment and Jigo-mode
    - Calculated or fix komi is adjusted by value of 'AdjKomi' (+/- komi)

@@ -410,6 +410,13 @@ define('MSGBOXROWS_INVITE', 6);
          // load total started games
          $msg_row['X_TotalCount'] = GameHelper::count_started_games( $my_id, $other_id );
 
+         $game_invitations = GameInvitation::load_game_invitations( $Game_ID );
+         if ( count($game_invitations) != 2 )
+            error('invite_bad_gamesetup', "message.show_invite.miss_game_inv($Game_ID,$submode)");
+         list( $my_gs, $opp_gs ) =
+            GameSetup::build_game_setup_from_game_invitations( $my_id, $msg_row, $game_invitations );
+         $show_gs = ( $submode == 'ShowInvite' ) ? $opp_gs : $my_gs; // inv|dispute sent to me : own inv|dispute that I sent
+
          message_info_table($mid, $X_Time, $to_me,
                             $other_id, $other_name, $other_handle,
                             $Subject, $Text,
@@ -417,11 +424,9 @@ define('MSGBOXROWS_INVITE', 6);
                             $folders, $Folder_nr, $message_form, ($submode=='ShowInvite' || $Replied=='M'),
                             $rx_term);
 
-         $use_opp_data = ($submode == 'ShowInvite'); // invitation or dispute sent to me
-         game_info_table( GSET_MSG_INVITE, $msg_row, $player_row, $iamrated, $use_opp_data );
+         game_info_table( GSET_MSG_INVITE, $msg_row, $player_row, $iamrated, $show_gs );
 
          // show dispute-diffs to opponent game-settings
-         list( $my_gs, $opp_gs ) = GameSetup::parse_invitation_game_setup( $my_id, $msg_row['GameSetup'], $Game_ID );
          if ( !is_null($my_gs) && !is_null($opp_gs) )
             echo_dispute_diffs( $my_gs, $opp_gs, $player_row['Handle'], $other_handle, $message_form );
 
@@ -459,6 +464,12 @@ define('MSGBOXROWS_INVITE', 6);
          section('invite', T_('Game Invitation Dispute') );
          echo $maxGamesCheck->get_warn_text();
 
+         $game_invitations = GameInvitation::load_game_invitations( $Game_ID );
+         if ( count($game_invitations) != 2 )
+            error('invite_bad_gamesetup', "message.show_dispute.miss_game_inv($Game_ID,$submode)");
+         list( $my_gs, $opp_gs ) =
+            GameSetup::build_game_setup_from_game_invitations( $my_id, $msg_row, $game_invitations );
+
          message_info_table($mid, $X_Time, $to_me,
                             $other_id, $other_name, $other_handle,
                             $Subject, $Text,
@@ -471,17 +482,12 @@ define('MSGBOXROWS_INVITE', 6);
             game_settings_form($message_form, GSET_MSG_DISPUTE, GSETVIEW_STANDARD, $iamrated, $my_id, $Game_ID, $map_ratings);
 
          // show dispute-diffs to opponent game-settings
-         list( $my_gs, $opp_gs ) = GameSetup::parse_invitation_game_setup( $my_id, $msg_row['GameSetup'], $Game_ID );
-         if ( !is_null($opp_gs) )
+         if ( $preview )
          {
-            if ( $preview )
-            {
-               $opp_row = array( 'ID' => $other_id, 'RatingStatus' => $other_ratingstatus, 'Rating2' => $other_rating );
-               $my_gs = make_invite_game_setup( $player_row, $opp_row );
-            }
-            if ( !is_null($my_gs) )
-               echo_dispute_diffs( $my_gs, $opp_gs, $player_row['Handle'], $other_handle, $message_form );
+            $opp_row = array( 'ID' => $other_id, 'RatingStatus' => $other_ratingstatus, 'Rating2' => $other_rating );
+            $my_gs = make_invite_game_setup_from_url( $player_row, $opp_row );
          }
+         echo_dispute_diffs( $my_gs, $opp_gs, $player_row['Handle'], $other_handle, $message_form );
 
          $message_form->add_row( array(
                'HEADER', T_('Dispute settings'),
@@ -567,7 +573,7 @@ define('MSGBOXROWS_INVITE', 6);
       else // multi-receiver (bulk)
       {
          message_info_table( 0 /* preview */, $NOW, false,
-                             $dgs_message->recipients, '', '',
+                             $dgs_message->get_recipients(), '', '',
                              $default_subject, $default_message, MSGFLAG_BULK );
       }
    }
@@ -665,7 +671,8 @@ function handle_save_template( $my_id, $msg_type )
    else
       error('invalid_args', "handle_save_template($my_id,$msg_type)");
 
-   jump_to("templates.php?cmd=new".URI_AMP."type={$tmpl->TemplateType}".URI_AMP."data=" . urlencode( $tmpl->encode() ));
+   jump_to("templates.php?cmd=new".URI_AMP."type={$tmpl->TemplateType}"
+      .URI_AMP."data=" . urlencode( $tmpl->encode_template() ));
 }//handle_save_template
 
 function read_user_from_request()

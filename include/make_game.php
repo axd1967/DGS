@@ -28,20 +28,20 @@ require_once 'include/board.php';
 
 // Inserts INVITATION-game or updates DISPUTE-game
 // always return a valid game ID from the database, else call error()
+// IMPORTANT NOTE: caller needs to open TA with HOT-section!!
 function make_invite_game( &$player_row, &$opponent_row, $disputegid )
 {
    $my_id = $player_row['ID'];
    $opp_id = $opponent_row['ID'];
 
-   $my_gs = make_invite_game_setup( $player_row, $opponent_row );
-   $my_gs_old = $opp_gs = null;
+   $my_gs = make_invite_game_setup_from_url( $player_row, $opponent_row );
    $is_dispute = ( $disputegid > 0 );
 
-   if ( $is_dispute ) // dispute
+   if ( $is_dispute )
    {
       // Check if dispute game exists
       $grow = mysql_single_fetch( "make_game.make_invite_game.dispute($disputegid)",
-            "SELECT ID, Black_ID, White_ID, ShapeID, ShapeSnapshot, GameSetup " .
+            "SELECT ID, Black_ID, White_ID, ShapeID, ShapeSnapshot " .
             "FROM Games WHERE ID=$disputegid AND Status='".GAME_STATUS_INVITED."' LIMIT 1" );
       if ( !$grow )
          error('unknown_game', "make_invite_game.dispute1($disputegid)");
@@ -51,69 +51,18 @@ function make_invite_game( &$player_row, &$opponent_row, $disputegid )
       if ( !$correct_game )
          error('wrong_dispute_game', "make_invite_game.dispute2($disputegid,$my_id,$opp_id)");
 
+      // shape is not allowed to change
       if ( $grow['ShapeID'] != $my_gs->ShapeID || $grow['ShapeSnapshot'] != $my_gs->ShapeSnapshot )
          error('mismatch_snapshot', "make_invite_game.dispute3($disputegid,{$my_gs->ShapeID},{$my_gs->ShapeSnapshot})");
 
-      $Black_ID = $grow['Black_ID'];
-      $White_ID = $grow['White_ID'];
-
-      list( $my_gs_old, $opp_gs ) = GameSetup::parse_invitation_game_setup( $my_id, $grow['GameSetup'], $disputegid );
+      if ( is_null(GameInvitation::load_game_invitation( $disputegid, $my_id )) )
+         error('invite_bad_gamesetup', "make_invite_game.dispute4.miss_game_inv($disputegid,$my_id)");
    }
 
-   // invitation or dispute: correct Black/White_ID for special handi-types
-   if ( $my_gs->Handicaptype == HTYPE_WHITE )
-   {
-      $Black_ID = $opp_id;
-      $White_ID = $my_id;
-   }
-   elseif ( $my_gs->Handicaptype == HTYPE_BLACK || !$is_dispute ) // HTYPE_BLACK + all other handicap-types
-   {
-      $Black_ID = $my_id;
-      $White_ID = $opp_id;
-   } // else: keep ids for dispute
 
-   if ( is_null($opp_gs) ) // create opponents GameSetup
-   {
-      // Notes:
-      // 1. properly handle BLACK/WHITE-handicaptype for disputes
-      // 2. not-set shouldn't happen for dispute (except for non-migrated games) -> fix setup with opp-default
-      $opp_gs = GameSetup::create_opponent_game_setup( $my_gs, $opp_id );
-   }
-   $game_setup_encoded = GameSetup::build_invitation_game_setup( $my_gs, $opp_gs );
-
-   //ToMove_ID=$tomove will hold handitype until game-setting accepted
-   $tomove = get_invite_handicaptype( $my_gs->Handicaptype );
-   if ( !$tomove )
-      $tomove = INVITE_HANDI_NIGIRI; //always available
-
-
-   $upd_game = new UpdateQuery('Games');
-   if ( !$is_dispute )
-   {
-      $upd_game->upd_txt('Status', GAME_STATUS_INVITED);
-      $upd_game->upd_time('Starttime');
-   }
-   $upd_game->upd_num('Black_ID', $Black_ID);
-   $upd_game->upd_num('White_ID', $White_ID);
-   $upd_game->upd_num('ToMove_ID', $tomove); // handicap-type
-   $upd_game->upd_time('Lastchanged');
-   $upd_game->upd_txt('Ruleset', $my_gs->Ruleset);
-   $upd_game->upd_num('Size', $my_gs->Size);
-   $upd_game->upd_num('Handicap', $my_gs->Handicap);
-   $upd_game->upd_bool('StdHandicap', $my_gs->StdHandicap );
-   $upd_game->upd_num('Komi', $my_gs->Komi );
-   $upd_game->upd_num('Maintime', $my_gs->Maintime );
-   $upd_game->upd_txt('Byotype', $my_gs->Byotype );
-   $upd_game->upd_num('Byotime', $my_gs->Byotime );
-   $upd_game->upd_num('Byoperiods', $my_gs->Byoperiods );
-   $upd_game->upd_num('Black_Maintime', $my_gs->Maintime );
-   $upd_game->upd_num('White_Maintime', $my_gs->Maintime );
-   $upd_game->upd_bool('WeekendClock', $my_gs->WeekendClock );
-   $upd_game->upd_bool('Rated', $my_gs->Rated );
-   $upd_game->upd_num('ShapeID', $my_gs->ShapeID );
-   $upd_game->upd_txt('ShapeSnapshot', $my_gs->ShapeSnapshot );
-   $upd_game->upd_txt('GameSetup', $game_setup_encoded );
-
+   // insert new Games-entry, or for dispute update Games-entry with game-setup of current dispute-sender
+   $upd_game = build_invitation_game_update( $my_id, $opp_id, $my_id, $my_gs,
+      /*upd-shape*/true, $is_dispute, /*upd-time*/true );
    $upd_game_query = $upd_game->get_query();
    if ( $is_dispute )
       $query = "UPDATE Games SET $upd_game_query WHERE ID=$disputegid LIMIT 1";
@@ -129,19 +78,68 @@ function make_invite_game( &$player_row, &$opponent_row, $disputegid )
    if ( $gid <= 0 )
       error('internal_error', "make_invite_game.err2($gid)");
 
+   // insert both GameInvitation-entries for 1st invite-msg, or update my GameInvitation-entry on dispute
+   $my_ginv = $my_gs->build_game_invitation( $gid );
+   if ( $is_dispute )
+      $my_ginv->update();
+   else // first invite-msg
+   {
+      // create opponents GameSetup, handling color-switching handicap-types
+      $opp_gs = GameSetup::create_opponent_game_setup( $my_gs, $opp_id );
+
+      $opp_ginv = $opp_gs->build_game_invitation( $gid );
+      GameInvitation::insert_game_invitations( array( $my_ginv, $opp_ginv ) );
+   }
+
    return $gid;
 }//make_invite_game
+
+function build_invitation_game_update( $black_id, $white_id, $tomove_id, $game_setup, $upd_shape, $is_dispute, $upd_time )
+{
+   $upd_game = new UpdateQuery('Games');
+   if ( !$is_dispute )
+   {
+      $upd_game->upd_txt('Status', GAME_STATUS_INVITED);
+      if ( $upd_time )
+         $upd_game->upd_time('Starttime');
+      $upd_game->upd_num('Black_ID', $black_id); // initial inviting user
+      $upd_game->upd_num('White_ID', $white_id); // initial invited user
+   }
+   $upd_game->upd_num('ToMove_ID', $tomove_id); // current sender of invitation/dispute-message
+   if ( $upd_time )
+      $upd_game->upd_time('Lastchanged');
+   $upd_game->upd_txt('Ruleset', $game_setup->Ruleset);
+   $upd_game->upd_num('Size', $game_setup->Size);
+   $upd_game->upd_num('Handicap', $game_setup->Handicap);
+   $upd_game->upd_bool('StdHandicap', $game_setup->StdHandicap );
+   $upd_game->upd_num('Komi', $game_setup->Komi );
+   $upd_game->upd_num('Maintime', $game_setup->Maintime );
+   $upd_game->upd_txt('Byotype', $game_setup->Byotype );
+   $upd_game->upd_num('Byotime', $game_setup->Byotime );
+   $upd_game->upd_num('Byoperiods', $game_setup->Byoperiods );
+   $upd_game->upd_num('Black_Maintime', $game_setup->Maintime );
+   $upd_game->upd_num('White_Maintime', $game_setup->Maintime );
+   $upd_game->upd_bool('WeekendClock', $game_setup->WeekendClock );
+   $upd_game->upd_bool('Rated', $game_setup->Rated );
+   if ( $upd_shape )
+   {
+      $upd_game->upd_num('ShapeID', $game_setup->ShapeID );
+      $upd_game->upd_txt('ShapeSnapshot', $game_setup->ShapeSnapshot );
+   }
+   $upd_game->upd_txt('GameSetup', $game_setup->encode_game_setup() );
+   return $upd_game;
+}//build_invitation_game_update
 
 /*!
  * \brief Creates GameSetup-obj parsed from URL-args, used as container for game-settings.
  * \param $my_urow pivot-user, required fields in row: ID, RatingStatus, Rating2
  */
-function make_invite_game_setup( $my_urow, $opp_urow )
+function make_invite_game_setup_from_url( $my_urow, $opp_urow )
 {
    $my_id = $my_urow['ID'];
    $opp_id = $opp_urow['ID'];
    if ( $my_id == $opp_id )
-      error('invalid_args', "make_invite_game_setup.check.same_players($my_id,$opp_id)");
+      error('invalid_args', "make_invite_game_setup_from_url.check.same_players($my_id,$opp_id)");
 
    $gs = new GameSetup( $my_id );
 
@@ -158,7 +156,7 @@ function make_invite_game_setup( $my_urow, $opp_urow )
    // check handi-type & cat-handi-type
    $check_cat_htype = get_category_handicaptype($gs->Handicaptype);
    if ( !$check_cat_htype || $check_cat_htype !== $cat_handicap_type )
-      error('invalid_args', "make_invite_game_setup.check.cat_htype({$gs->Handicaptype},$check_cat_htype,$cat_handicap_type)");
+      error('invalid_args', "make_invite_game_setup_from_url.check.cat_htype({$gs->Handicaptype},$check_cat_htype,$cat_handicap_type)");
    $is_fairkomi = ( $check_cat_htype == CAT_HTYPE_FAIR_KOMI );
 
 
@@ -178,7 +176,7 @@ function make_invite_game_setup( $my_urow, $opp_urow )
       case HTYPE_CONV:
       case HTYPE_PROPER:
          if ( !$iamrated || !$opprated )
-            error('no_initial_rating', "make_invite_game_setup.check.urat({$gs->Handicaptype},$iamrated,$opprated)");
+            error('no_initial_rating', "make_invite_game_setup_from_url.check.urat({$gs->Handicaptype},$iamrated,$opprated)");
          //break; running through
       case HTYPE_AUCTION_SECRET: //further computing for conv/proper, or negotiating on fair-komi
       case HTYPE_AUCTION_OPEN:
@@ -206,7 +204,7 @@ function make_invite_game_setup( $my_urow, $opp_urow )
    {
       $arr_shape = GameSnapshot::parse_check_extended_snapshot($gs->ShapeSnapshot);
       if ( !is_array($arr_shape) ) // overwrite with defaults
-         error('invalid_snapshot', "make_invite_game_setup.check.shape({$gs->ShapeID},{$gs->ShapeSnapshot})");
+         error('invalid_snapshot', "make_invite_game_setup_from_url.check.shape({$gs->ShapeID},{$gs->ShapeSnapshot})");
 
       $gs->Size = (int)$arr_shape['Size'];
       $gs->StdHandicap = false;
@@ -227,13 +225,13 @@ function make_invite_game_setup( $my_urow, $opp_urow )
       $adj_komi = ($adj_komi<0 ? -1 : 1) * MAX_KOMI_RANGE;
    if ( floor(2 * $adj_komi) != 2 * $adj_komi ) // round to x.0|x.5
       $adj_komi = ($adj_komi<0 ? -1 : 1) * round(2 * abs($adj_komi)) / 2.0;
-   $gs->AdjustKomi = $adj_komi;
+   $gs->AdjKomi = $adj_komi;
 
    $jigo_mode = (string)@$_REQUEST['jigo_mode'];
    if ( $jigo_mode == '' )
       $jigo_mode = JIGOMODE_KEEP_KOMI;
    elseif ( !preg_match("/^(".CHECK_JIGOMODE.")$/", $jigo_mode) )
-      error('invalid_args', "make_invite_game_setup.check.jigo_mode($jigo_mode)");
+      error('invalid_args', "make_invite_game_setup_from_url.check.jigo_mode($jigo_mode)");
    $gs->JigoMode = $jigo_mode;
 
    // handicap adjustment
@@ -242,7 +240,7 @@ function make_invite_game_setup( $my_urow, $opp_urow )
       $adj_handicap = 0;
    if ( abs($adj_handicap) > MAX_HANDICAP )
       $adj_handicap = ($adj_handicap<0 ? -1 : 1) * MAX_HANDICAP;
-   $gs->AdjustHandicap = $adj_handicap;
+   $gs->AdjHandicap = $adj_handicap;
 
    $min_handicap = min( MAX_HANDICAP, max( 0, (int)@$_REQUEST['min_handicap'] ));
    if ( $is_fairkomi )
@@ -254,16 +252,16 @@ function make_invite_game_setup( $my_urow, $opp_urow )
 
    $gs->Ruleset = @$_REQUEST['ruleset'];
    if ( !preg_match( "/^(".CHECK_RULESETS.")$/", $gs->Ruleset ) )
-      error('unknown_ruleset', "make_invite_game_setup.check.ruleset({$gs->Ruleset})");
+      error('unknown_ruleset', "make_invite_game_setup_from_url.check.ruleset({$gs->Ruleset})");
    elseif ( !preg_match( "/^(".ALLOWED_RULESETS.")$/", $gs->Ruleset ) )
-      error('feature_disabled', "make_invite_game_setup.disabled.ruleset({$gs->Ruleset})");
+      error('feature_disabled', "make_invite_game_setup_from_url.disabled.ruleset({$gs->Ruleset})");
 
    if ( !($gs->Komi <= MAX_KOMI_RANGE && $gs->Komi >= -MAX_KOMI_RANGE) )
-      error('komi_range', "make_invite_game_setup.check.komi({$gs->Komi})");
+      error('komi_range', "make_invite_game_setup_from_url.check.komi({$gs->Komi})");
    $gs->Komi = (float)round( 2 * $gs->Komi ) / 2.0;
 
    if ( !($gs->Handicap <= MAX_HANDICAP && $gs->Handicap >= 0) )
-      error('handicap_range', "make_invite_game_setup.check.handicap({$gs->Handicap})");
+      error('handicap_range', "make_invite_game_setup_from_url.check.handicap({$gs->Handicap})");
 
    if ( !standard_handicap_is_possible($gs->Size, $gs->Handicap) )
       $gs->StdHandicap = false;
@@ -291,14 +289,14 @@ function make_invite_game_setup( $my_urow, $opp_urow )
                                  $byotimevalue_can, $timeunit_can, $byoperiods_can,
                                  $byotimevalue_fis, $timeunit_fis);
    if ( $hours < 1 && ($byohours < 1 || $byoyomitype == BYOTYPE_FISCHER) )
-      error('time_limit_too_small', "make_invite_game_setup.check.time($byoyomitype,$hours,$byohours,$byoperiods)");
+      error('time_limit_too_small', "make_invite_game_setup_from_url.check.time($byoyomitype,$hours,$byohours,$byoperiods)");
    $gs->Maintime = $hours;
    $gs->Byotype = $byoyomitype;
    $gs->Byotime = $byohours;
    $gs->Byoperiods = $byoperiods;
 
    return $gs;
-}//make_invite_game_setup
+}//make_invite_game_setup_from_url
 
 function make_invite_template_game_setup( $my_urow )
 {
@@ -310,7 +308,7 @@ function make_invite_template_game_setup( $my_urow )
    }
    $fake_urow = array( 'ID' => $my_urow['ID'] + 1, 'RatingStatus' => RATING_RATED, 'Rating2' => MIN_RATING );
 
-   $gs = make_invite_game_setup( $my_urow, $fake_urow );
+   $gs = make_invite_game_setup_from_url( $my_urow, $fake_urow );
    return $gs;
 }//make_invite_template_game_setup
 
@@ -335,43 +333,32 @@ function accept_invite_game( $gid, $player_row, $opponent_row )
    if ( $game_row['Status'] != GAME_STATUS_INVITED )
       error('game_already_accepted', "$dbg.badstat");
 
+   // accepting invite-game from opponents invitation- or dispute-game-setup
+   // NOTE: game-invitation-setup of user in 'ToMove_ID' is already copied by make_invite_game() into Games-fields
+   //       ready to be used for create_game()!
+   if ( $game_row['ToMove_ID'] != $opp_id )
+      error('internal_error', "$dbg.bad_invitation_tomove");
 
-   // NOTE: ToMove_ID holds handitype (of INVITATION) for game on INVITED-status
-   list( $my_gs, $opp_gs ) = GameSetup::parse_invitation_game_setup( $my_id, @$game_row['GameSetup'], $gid );
-   $invite_handitype = (int)$game_row['ToMove_ID'];
-   $my_col_black = ( $my_id == $game_row['Black_ID'] );
-   $handicaptype = GameSetup::determine_handicaptype( $my_gs, $opp_gs, $invite_handitype, $my_col_black );
-   $cat_htype = get_category_handicaptype($handicaptype);
-   $jigo_mode = GameSetup::parse_jigo_mode_from_game_setup( $cat_htype, $my_id, $opp_gs, $gid );
+   $opp_game_inv = GameInvitation::load_game_invitation( $gid, $opp_id );
+   if ( is_null($opp_game_inv) )
+      error('invite_bad_gamesetup', "$dbg.miss_game_invitation($opp_id)");
+   $opp_gs = GameSetup::new_from_game_invitation( $game_row, $opp_game_inv );
 
-   if ( is_null($my_gs) ) // shouldn't happen (but could for older games) -> use defaults
-   {
-      $my_gs = new GameSetup( $my_id );
-      if ( $cat_htype == CAT_HTYPE_MANUAL )
-      {
-         $my_gs->Handicap = (int)$game_row['Handicap'];
-         $my_gs->Komi = (float)$game_row['Komi'];
-      }
-   }
-
-   // store swapped opponents htype choice, which is the accepted htype.
-   // values needed for create_game() if $my_gs == null
-   $my_gs->Handicaptype = $handicaptype;
-   $my_gs->JigoMode = $game_row['JigoMode'] = $jigo_mode;
-
-   $game_settings = GameSettings::get_game_settings_from_gamesetup( $game_row, $my_gs );
 
    // prepare final game-settings
+
+   $game_settings = GameSettings::get_game_settings_from_gamesetup( $opp_gs );
 
    $my_rating = $player_row['Rating2'];
    $iamrated = ( $player_row['RatingStatus'] != RATING_NONE && is_numeric($my_rating) && $my_rating >= MIN_RATING );
    $opprating = $opponent_row['Rating2'];
    $opprated = ( $opponent_row['RatingStatus'] != RATING_NONE && is_numeric($opprating) && $opprating >= MIN_RATING );
 
+   $handicaptype = $opp_gs->Handicaptype;
    $double = false;
    $handicap = $game_row['Handicap'];
    $komi = $game_row['Komi'];
-   switch ( (string)$handicaptype )
+   switch ( (string)$handicaptype ) // handicap-type seen from opponent
    {
       case HTYPE_CONV:
          if ( !$iamrated || !$opprated )
@@ -388,13 +375,13 @@ function accept_invite_game( $gid, $player_row, $opponent_row )
       // manual handicap-types
       case HTYPE_DOUBLE:
          $double = true;
-         $i_am_black = true;
+         $i_am_black = false;
          break;
       case HTYPE_BLACK:
-         $i_am_black = true;
+         $i_am_black = false;
          break;
       case HTYPE_WHITE:
-         $i_am_black = false;
+         $i_am_black = true;
          break;
 
       // fair-komi handicap-types, start fair-komi-negotiation
@@ -402,18 +389,16 @@ function accept_invite_game( $gid, $player_row, $opponent_row )
       case HTYPE_AUCTION_OPEN:
       case HTYPE_YOU_KOMI_I_COLOR:
       case HTYPE_I_KOMI_YOU_COLOR:
-         if ( is_null($my_gs) )
-            error('internal_error', "$dbgmsg.check.game_setup.miss_gs($handicaptype)");
-         $my_gs->Komi = $my_gs->OppKomi = NULL;
+         $opp_gs->Komi = $opp_gs->OppKomi = NULL;
          $handicap = $komi = 0;
 
          // for div&choose-FK: komi-giver comes first, so that player must take BLACK
          if ( $handicaptype == HTYPE_YOU_KOMI_I_COLOR )
-            $i_am_black = false;
-         elseif ( $handicaptype == HTYPE_I_KOMI_YOU_COLOR )
             $i_am_black = true;
+         elseif ( $handicaptype == HTYPE_I_KOMI_YOU_COLOR )
+            $i_am_black = false;
          else
-            $i_am_black = $my_col_black;
+            $i_am_black = false;
          break;
 
       //case HTYPE_NIGIRI: // default
@@ -433,9 +418,9 @@ function accept_invite_game( $gid, $player_row, $opponent_row )
       // NOTE: for non-game-invitations, create_game()-func must avoid that multiple-clicks lead to race-conditions
       $gids = array();
       if ( $i_am_black || $double )
-         $gids[] = create_game($player_row, $opponent_row, $game_row, $my_gs, $gid);
+         $gids[] = create_game($player_row, $opponent_row, $game_row, $opp_gs, $gid);
       else
-         $gids[] = create_game($opponent_row, $player_row, $game_row, $my_gs, $gid);
+         $gids[] = create_game($opponent_row, $player_row, $game_row, $opp_gs, $gid);
       $gid = $gids[0];
 
       // always after the "already in database" one
@@ -443,7 +428,7 @@ function accept_invite_game( $gid, $player_row, $opponent_row )
       {
          // provide a link between the two paired "double" games
          $game_row['double_gid'] = $gid;
-         $gids[] = $double_gid2 = create_game($opponent_row, $player_row, $game_row, $my_gs);
+         $gids[] = $double_gid2 = create_game($opponent_row, $player_row, $game_row, $opp_gs);
 
          db_query( "$dbg.update_double2",
             "UPDATE Games SET DoubleGame_ID=$double_gid2 WHERE ID=$gid LIMIT 1" );
@@ -464,8 +449,7 @@ function accept_invite_game( $gid, $player_row, $opponent_row )
  * \param $black_row / $white_row required fields: ID, Rating2, RatingStatus, OnVacation, ClockUsed
  * \param $game_info_row required fields & [optional fields with defaults]:
  *        Handicaptype, Black_ID, White_ID, ShapeID, ShapeSnapshot, GameType, [GamePlayers], [tid], [Ruleset], Size,
- *        Rated, double_gid, Komi, [AdjKomi], [JigoMode], Handicap, [AdjHandicap], [MinHandicap], [MaxHandicap],
- *        StdHandicap, Maintime, Byotype, Byotime, Byoperiods, WeekendClock;
+ *        Rated, double_gid, Komi, Handicap, StdHandicap, Maintime, Byotype, Byotime, Byoperiods, WeekendClock;
  *        field 'double_gid' can be set to write reference to twin double-game,
  *        field 'tid' = tournament-id
  * \param $game_setup GameSetup-object; can be null for MP-games
@@ -481,7 +465,7 @@ function create_game(&$black_row, &$white_row, &$game_info_row, $game_setup=null
    if ( $gid > 0 )
    {
       if ( !($game_info_row['Black_ID'] == $black_id && $game_info_row['White_ID'] == $white_id )
-       && !($game_info_row['White_ID'] == $black_id && $game_info_row['Black_ID'] == $white_id ) )
+        && !($game_info_row['White_ID'] == $black_id && $game_info_row['Black_ID'] == $white_id ) )
       {
          error('wrong_players', "create_game.wrong_players($gid)");
       }
@@ -496,7 +480,7 @@ function create_game(&$black_row, &$white_row, &$game_info_row, $game_setup=null
    else
    {
       $htype = $game_setup->Handicaptype;
-      $game_setup_encoded = $game_setup->encode();
+      $game_setup_encoded = $game_setup->encode_game_setup();
    }
    if ( !$htype )
       error('invalid_args', "create_game.check.miss_htype($gid,$black_id,$white_id)");
@@ -748,7 +732,7 @@ function create_game(&$black_row, &$white_row, &$game_info_row, $game_setup=null
    Board::delete_cache_game_moves( "create_game($gid)", $gid ); // not needed for NEW game, but not hurting either
 
    return $gid;
-} //create_game
+}//create_game
 
 function standard_handicap_is_possible($size, $hcp)
 {

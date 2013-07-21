@@ -7,7 +7,7 @@
 
 Description:
    Table to store static and dynamic information about game.
-   - store invited game, running game, finished game
+   - store invited game, running game, game in fair-komi-negotiation, finished game
 
 | Field              | Type                                             | Null | Key | Default             | Extra          |
 +--------------------+--------------------------------------------------+------+-----+---------------------+----------------+
@@ -73,6 +73,7 @@ Description:
 * ShapeID : shape-id, FK to Shape.ID
    - 0 = no shape-game (standard)
    - maybe not sync'ed with ShapeSnapshot-field
+   - the shape cannot be disputed in invitations
 
 * Starttime : timestamp when game has started (clock starts ticking)
    - for invited game it's the creation date (of the invitation),
@@ -82,9 +83,9 @@ Description:
    - not changed on adding-time
 
 * mid : foreign key to Messages.ID
-   - field is 0 if game has been created using waiting-room
    - field is set, if game has been created by an invitation,
-     then referring to the first invitation message or result-message for finished games
+     then it refers to the last invitation message or the result-message for finished games
+   - field is 0 if game has not been created by an invitation (from waiting-room or tournament)
 
 * DoubleGame_ID : foreign key to Games.ID
    - referring to other game if started as double-game
@@ -93,30 +94,48 @@ Description:
    - for normal-game : representing current Black and White players
 
    - for invite-game :
-      - Black_ID = user who started invitation, White_ID = opponent-user
-      - Black_ID and White_ID are changed on a dispute, if the handicap-type switches
-        from or to the corresponding value HTYPE_WHITE.
-        See also INVITE_HANDI_FIXCOL under ToMove_ID-field.
+      - Black_ID, White_ID = the two users of a game-invitation
+      - Black_ID is the user that initially sent the first invitation-message
 
 * ToMove_ID : sometimes foreign key to Players.ID; other times integer-value
-   - for started games = field-value points to player, that has to move next in game
+   - for started games : Players.ID that has to move next in game
+      - this includes KOMI-status for fair-komi-negotiation
 
-   - for invite-game:
-      - value < 0 : keeps handicap-type, see consts 'INVITE_HANDI_...' in 'include/message_functions.php'
-      - for value INVITE_HANDI_FIXCOL the handicaptype HTYPE_BLACK/WHITE is calculated
-        by matching the current Black_ID with the logged-in user
-      - for value INVITE_HANDI_DIV_CHOOSE the handicaptype HTYPE_YOU_KOMI_I_COLOR/I_KOMI_YOU_COLOR is calculated
-        by matching the current logged-in user as pivot-user in the Games.GameSetup-field taking that handicap-type
-      - for available handicap-types and more details,
-        see Waitingroom.Handicaptype in 'specs/db/table-Waitingroom.txt'
+   - for finished games (Status=FINISHED) : 0
 
-      - value > 0 : OBSOLETE, positive value was indicator for FIX-color handicap-type
-        (was always identical to Black_ID, but it could have been any positive value)
+   - for multi-player-games on Status=SETUP : Players.ID of game-master
+
+   - for invite-game (Status=INVITED):
+      - Players.ID of user, that sent the last invitation- or dispute-message
+      - user-specific game-setup properties are stored in GameInvitation-table in two entries,
+        one entry for the inviting user and one for the invited user (=opponent).
+
+        All fields, that both users can change are stored in their GameInvitation-table-entry.
+        The latest game-setup on sending the 1st invitation or a dispute-message will
+        be copied from GameInvitation to the Games-table; see 'make_invite_game()'-func.
+
+        Games-table-fields, that can NOT be disputed: ShapeID, ShapeSnapshot
+        Games-table-fields, that are not supported for invitations: GameType=GO, GamePlayers=''
+
+      - value > 0 : old-style is OBSOLETE,
+        but since 1.0.16 'values > 0' are re-used in a different way (see above)!
+        - all old way-games has been migrated to use GameInvitation-table instead
+        - positive value was indicator for FIX-color handicap-type; it was always refer to the black-player
+
+      - value < 0 : OBSOLETE since 1.0.16
+        - used to keep handicap-type, see consts 'INVITE_HANDI_...'
+        - for value INVITE_HANDI_FIXCOL the handicaptype HTYPE_BLACK/WHITE was calculated
+          by matching the current Black_ID with the logged-in user
+        - for value INVITE_HANDI_DIV_CHOOSE the handicaptype HTYPE_YOU_KOMI_I_COLOR/I_KOMI_YOU_COLOR
+          was calculated by matching the current logged-in user as pivot-user in the Games.GameSetup-field
+          taking that handicap-type
+        - for available handicap-types and more details,
+          see Waitingroom.Handicaptype in 'specs/db/table-Waitingroom.txt'
 
    - for game on KOMI-status:
-      - the player who must do the next bidding/choice for negotiating fair-komi
+      - the Players.ID of player who must do the next bidding/choice for negotiating fair-komi
       - the JigoMode to be able to start a fair-komi after negotiation is saved
-        in the GameSetup-field and must be decoded from that value.
+        in the GameSetup-field and must be decoded from that GameSetup-field.
 
         - JigoMode : Komi adjustment concerning Jigo-check on fair-komi-negotiation
           - KEEP_KOMI = Komi is not changed regarding Jigo
@@ -136,6 +155,8 @@ Description:
      - N:M = Team-Go, N+M > 2, 2:2 = Rengo
      - N = Zen-Go, N > 2
 
+   - for invitations, GamePlayers is empty =''
+
    - IMPORTANT NOTE:
      When a MP-game is started (leaving SETUP-status), the 'GamePlayers'-fields
      may need to be updated into order 'B:W', which is needed for playing.
@@ -153,7 +174,10 @@ Description:
    - KOMI: game-entry is used to negotiate fair-komi,
      fields Black/White_Prisoners are used to store B/W-komi-bids during negotiation
    - SETUP: game-entry is used to configure game-players for multi-player-game
-   - INVITED: game-entry is used to hold game-settings for invitational game negotiation
+   - INVITED: game-entry is used to hold game-settings for invitation-game negotiation,
+      - If game is on this status, there are also two corresponding GameInvitation-entries
+        holding game-setup properties for the two users negotiating the invitation.
+        See also notes for 'ToMove_ID'-field for more details.
    - PLAY: running game, playing mode
    - PASS: running game, player has passed (transition to scoring-step)
    - SCORE: running game, first player marks dead stones (scoring-step 1)
@@ -328,10 +352,12 @@ Description:
      of the game shows the differences
 
 * GameSetup : game-settings to handle rematch, fair-komi-negotiation, invitation
-   - can be empty (for older game-invitations) -> default-handling is used then
+   - can be empty (for older game-invitations) -> default-handling is used in such cases
 
-   - for normal games, Format (A) is used
-   - for game-invitations, Format (B) is used
+   - for normal (non-invitation) games, Format (A) is used
+
+   - for game-invitations since 1.0.16, Format (A) is used, but see notes about format (B) as well
+   - for game-invitations up to 1.0.15, Format (B) was used
 
    - General Format:
       - values separated by ':' (const 'GS_SEP')
@@ -346,23 +372,33 @@ Description:
          - <htype> : handicap-type
          - <uid> : user-id (=Players.ID), game started/initiated by given user
          - <handicap> : number of handicap-stones
-         - <adj*> : [+|-] number
+         - <adjH> : [+|-] number to adjust handicap
          - <minH> : min handicap-stones
          - <maxH> : max handicap-stones, -1 = calculated default-max-handicap
          - <komi> : komi-bid of user, can be empty, used for fair-komi
-         - <jigomode> : jigo-mode
+         - <adjK> : [+|-] number to adjust komi
+         - <jigomode> : jigo-mode (0=keep-komi, 1=allow-jigo, 2=no-jigo)
          - <oppkomi> : komi-bid of opponent, can be empty, used for fair-komi
          - <mustBeRated> : 0=false, 1=true
          - <ratingMin|Max> : min/max-rating for waiting-room
          - <minRG> : min. rated finished games, see WaitingRoom.MinRatedGames in 'specs/db/table-Waitingroom.txt'
          - <sameOpp> : see Waitingroom.SameOpponent in 'specs/db/table-Waitingroom.txt'
          - <msg> : waiting-room-comment or invitation-message (part)
+
+      - Fields <mustBeRated>, <ratingMin|Max>, <minRG>, <sameOpp> have no meaning for invitations,
+        default-values are stored
+
       - Example: "T1:U123:H0:-2:0:9:K6.5:0:J2:FK:R1:-800:2000:5:-101:Cslow game"
 
    - (B) Format for game-invitations (2nd part):
-      - for invitations, field 'GameSetup' contains two strings, one for each player:
-         - used to store all game-setup to tell the difference on disputes
+      - OBSOLETE since 1.0.16 for game-invitations, replaced with GameInvitation-table
+      - but NOT OBSOLETE and in use for GameSetup-part for invite-profile-templates,
+        see 'specs/db/table-Profiles.txt'
+
+      - for invitations (up to 1.0.15), field 'GameSetup' contained two strings, one for each player:
+         - old-usage: used to store all game-setup to tell the difference on disputes
          - Format (A) is used in Games-table when invitation is accepted
+
          - format GameSetup := "T..C:I... T..C:I.." with <msg> empty, part-separator is space ' '
          - "I<size>:<rated>:r<ruleset>:<stdH>:t<byoType>:<mainT>:<byoTime>:<byoPeriods>:<wkclock>"
             - 'I' stands for invitation-game-setup-part
@@ -373,7 +409,10 @@ Description:
             - <byoType> : J=japanese-byo-yomi, C=canadian-byo-yomi, F=Fischer-time
             - <mainT>, <byoTime>, <byoPeriods> : number (=hours)
             - <wkclock> : 0=clock-stopped-on-weekend, 1=clock-running-on-weekend
-      - Example: "T1:U12:H0:0:0:-1:K6:0:J2:FK:R1:0:0:5:0:C:I19:1:r1:0:tF:60:15:0:1 T1:U12:H0:0:0:21:K6:0:J2:FK:R1:0:0:5:0:C:I19:1:r0:0:tF:45:15:0:0"
+
+         - Example:
+            - old-invitation: "T1:U12:H0:0:0:-1:K6:0:J2:FK:R0:0:0:0:0:C:I19:1:r1:0:tF:60:15:0:1 T1:U12:H0:0:0:21:K6:0:J2:FK:R0:0:0:0:0:C:I19:1:r0:0:tF:45:15:0:0"
+            - invite-template GameSetup-part: "T1:U12:H0:0:0:-1:K6:0:J2:FK:R1:-900:2900:0:0:C:I19:1:r1:0:tF:60:15:0:1"
 
 
 
@@ -486,10 +525,61 @@ Notes:
 | PosY   | tinyint(4)           | NO   |     | NULL    |                |
 | Hours  | smallint(5) unsigned | NO   |     | NULL    |                |
 
-
 ## Fields:
 
-TODO TODO TODO
+* ID : primary key
+
+* gid : foreign key to Games.ID
+
+* MoveNr : move-number
+   - not unique
+   - correlates with Games.Moves
+
+* Stone : player-color for "move"-action (see PosX)
+   - 0 (NONE)  = prisoner taken at coordinates (PosX,PosY) with Hours=0
+   - 1 (BLACK) = "move"-action by black-player
+   - 2 (WHITE) = "move"-action by white-player
+   - 7 (MARKED_BY_WHITE) = point marked by black-player
+   - 8 (MARKED_BY_BLACK) = point marked by white-player
+
+* PosX : describing move-action, or coordinates of point/move
+   - -1 (POSX_PASS) = Pass-move, Stone=BLACK|WHITE, PosY=0, Hours=passed-time
+
+   - -2 (POSX_SCORE) = scoring-step by Stone=BLACK|WHITE, PosY=0, Hours=passed-time
+      - points marked first or differently than opponent are stored as separate
+        Moves-entries with same MoveNr and Stone=7|8 respectively
+
+   - -3 (POSX_RESIGN) = resigned by Stone=BLACK|WHITE, PosY=0, Hours=passed-time
+
+   - -3 (POSX_TIME) = timeout for Stone=BLACK|WHITE, PosY=0, Hours=passed-time
+
+   - -4 (POSX_SETUP) = setup for shape-game for Stone=BLACK: PosY=0, Hours=0
+      - initial shape-setup for board is taken from Games.ShapeSnapshot
+
+   - -50 (POSX_ADDTIME) = added time by Stone=BLACK|WHITE,
+     PosY = bitmask with bit 1 (0x01)=byoyomi-reset, bit 2 (0x02)=added-by-TD),
+     Hours = added-hours (can be 0 if only byoyomi-reset)
+
+   - >= 0:
+      - (PosX,PosY) represents number-coordinates 0..24 with (0,0) = upper-left corner
+      - player-color determined by Stone=1|2
+      - prisoners are stored as separate Moves-entries as well with Stone=0 and same MoveNr
+
+* PosY : y-coordinate, see also 'PosX'-field
+
+* Hours : number of hours
+   - for PosX >= 0 (coordinate):
+      - Hours >= 0 with passed time since last board-move
+      - rounded down, so moving within 1 hour gives Hours=0
+
+   - for PosX = -1 (pass), -2 (score), -3 (resign), -4 (timeout):
+      - number of hours passed since last board-move was played
+
+   - for PosX = -5 (shape-setup):
+      - Hours = 0
+
+   - for PosX = -50 (add-time):
+      - Hours >=0 : number of added hours
 
 
 
@@ -595,4 +685,66 @@ Description:
 * Lastchanged : date of last-update of shape
 
 * SgfData : binary-blob with raw SGF
+
+
+
+###########################################################################
+## --- GameInvitation ---
+
+Description:
+   Table to store game-setup of game-invitation between two players before game is started.
+
+Notes:
+   - At any time there must be exactly two entries per invitation (Games with Status='INVITED').
+   - Fields from GameInvitation-entry are copied to Games-table when respective user sends out
+     the first invitational message or sends a dispute. The 'Games.ToMove_ID'-field represents
+     the user, that last sent the invitation/dispute-message.
+     See also 'Games.ToMove_ID'-field for more details.
+   - GameInvitation-entries are kept till game is finished, then the two entries are removed.
+     After invitation-game has been started and game is running, GameInvitation-entries are not
+     used and could be deleted, but are kept for safety (in case something goes wrong with
+     encoding Games.GameSetup).
+
+| Field        | Type                                                | Null | Key | Default             | Extra |
++--------------+-----------------------------------------------------+------+-----+---------------------+-------+
+| gid          | int(11)                                             | NO   | PRI | NULL                |       |
+| uid          | int(11)                                             | NO   | PRI | NULL                |       |
+| Lastchanged  | datetime                                            | NO   |     | 0000-00-00 00:00:00 |       |
+| Ruleset      | enum('JAPANESE','CHINESE')                          | NO   |     | JAPANESE            |       |
+| Size         | tinyint(3) unsigned                                 | NO   |     | 19                  |       |
+| Komi         | decimal(4,1)                                        | NO   |     | 6.5                 |       |
+| Handicap     | tinyint(3) unsigned                                 | NO   |     | 0                   |       |
+| Handicaptype | enum('conv','proper','nigiri','double','black','white','auko_sec','auko_opn','div_ykic','div_ikyc')
+                                                                     | NO   |     | conv                |       |
+| AdjKomi      | decimal(4,1)                                        | NO   |     | 0.0                 |       |
+| JigoMode     | enum('KEEP_KOMI','ALLOW_JIGO','NO_JIGO')            | NO   |     | KEEP_KOMI           |       |
+| AdjHandicap  | tinyint(4)                                          | NO   |     | 0                   |       |
+| MinHandicap  | tinyint(3) unsigned                                 | NO   |     | 0                   |       |
+| MaxHandicap  | tinyint(4)                                          | NO   |     | -1                  |       |
+| Maintime     | smallint(6)                                         | NO   |     | 0                   |       |
+| Byotype      | enum('JAP','CAN','FIS')                             | NO   |     | JAP                 |       |
+| Byotime      | smallint(6)                                         | NO   |     | 0                   |       |
+| Byoperiods   | tinyint(4)                                          | NO   |     | 0                   |       |
+| Rated        | enum('N','Y')                                       | NO   |     | N                   |       |
+| StdHandicap  | enum('N','Y')                                       | NO   |     | N                   |       |
+| WeekendClock | enum('N','Y')                                       | NO   |     | Y                   |       |
+
+## Fields:
+
+* gid : foreign key to Games.ID
+
+* uid : foreign key to Players.ID
+   - two entries for the two participating parties for a game-invitation,
+     one entry GameInvitation.uid joins to Games.Black_ID, the other to Games.White_ID
+
+* Lastchanged : time of last changed to data-row
+
+* Handicaptype : handicap-type for player given by uid-field
+   - initial row-entries for handicap-type for both players have to be oppositely set,
+     i.e. if uid1 chooses 'black', for uid2 'white' must be set (or vice versa).
+     Later on disputes they are not both changed when the users dispute the invitation-game-settings.
+
+* Ruleset, Size, Komi, Handicap, Handicaptype, AdjKomi, JigoMode, AdjHandicap, MinHandicap, MaxHandicap,
+  Maintime, Byotype, Byotime, Byoperiods, Rated, StdHandicap, WeekendClock
+   - fields exactly like in Waitingroom-table, see 'specs/db/table-Waitingroom.txt'
 

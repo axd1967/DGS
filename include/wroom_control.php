@@ -182,7 +182,7 @@ class WaitingroomControl
       $game_row = mysql_single_fetch( "WC:join_waitingroom_game.find_game($wr_id,$my_id)", $query);
       if ( !$game_row )
          error('waitingroom_game_not_found', "WC:join_waitingroom_game.find_game2($wr_id,$my_id)");
-      $game_settings = GameSettings::get_game_settings_from_gamerow( $game_row );
+      $game_settings = GameSettings::get_game_settings_from_gamerow( $game_row, /*def*/false );
 
       $opponent_ID = $game_row['uid'];
       $gid = (int)@$game_row['gid'];
@@ -276,7 +276,7 @@ class WaitingroomControl
             break;
       }//handicaptype
 
-      $game_setup = GameSetup::new_from_game_row( $game_row );
+      $game_setup = GameSetup::new_from_waitingroom_game_row( $game_row );
       $game_setup->read_waitingroom_fields( $game_row );
       if ( $category_handicaptype == CAT_HTYPE_FAIR_KOMI )
          $game_setup->Komi = $game_setup->OppKomi = null; // start with empty komi-bids
@@ -475,7 +475,7 @@ class WaitingroomOffer
       {
          if ( user_has_rating($this->row, 'WRP_') ) // other has rating
          {
-            $game_settings = GameSettings::get_game_settings_from_gamerow( $this->row );
+            $game_settings = GameSettings::get_game_settings_from_gamerow( $this->row, /*def*/false );
             if ( $handitype == HTYPE_CONV )
             {
                list( $infoHandi, $infoKomi, $iamblack, $info_nigiri ) =
@@ -524,6 +524,12 @@ class WaitingroomOffer
             . '; ' . T_('Show game-players');
          $settings_str = $colstr . MINI_SPACING . echo_image_game_players( $this->row['gid'], $icon_text )
             . MINI_SPACING . sprintf( '(%s/%s)', $this->row['nrGames'], $this->mp_player_count);
+      }
+      elseif ( $is_my_game && $colstr )
+      {
+         $settings_str = ($infoHandi > 0)
+            ? sprintf( T_('%s H%s K%s#wrsettings'), $colstr, (int)$infoHandi, $infoKomi )
+            : sprintf( T_('%s Even K%s#wrsettings'), $colstr, $infoKomi );
       }
 
       if ( ENABLE_STDHANDICAP && ($this->row['StdHandicap'] !== 'Y') && !$is_fairkomi )

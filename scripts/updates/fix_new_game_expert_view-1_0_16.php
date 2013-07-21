@@ -88,7 +88,7 @@ $GLOBALS['ThePage'] = new Page('Script', PAGEFLAG_IMPLICIT_FLUSH );
          echo "<br><br>... $curr_cnt of $all_cnt updated ...\n";
 
       $tmpl->GameSetup->ViewMode = GSETVIEW_STANDARD;
-      $fix_text = $tmpl->encode();
+      $fix_text = $tmpl->encode_template();
       dbg_query( "UPDATE Profiles SET Text='".mysql_addslashes($fix_text)."' WHERE ID=$profile_id LIMIT 1" );
       $cnt_fix++;
    }

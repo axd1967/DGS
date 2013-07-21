@@ -427,7 +427,7 @@ function check_consistency( $gid)
       return "Wrong number of prisoners removed!";
    }
 
-   if ( isRunningGame($Status) || $Status == GAME_STATUS_INVITED )
+   if ( isRunningGame($Status) )
    {
       //TODO handle shape-games W-to-start
       $handinr = ($Handicap < 2 ? 1 : $Handicap );
@@ -453,6 +453,10 @@ function check_consistency( $gid)
          return "Wrong ClockUsed! Can't be $ClockUsed.";
       }
    }
+   elseif ( $Status == GAME_STATUS_INVITED )
+   {
+      //TODO add consistency-checks for INVITED
+   }
    elseif ( $Status == GAME_STATUS_FINISHED )
    {
 /* TODO? see time-out cleanup in clock_tick.php
@@ -469,7 +473,7 @@ function check_consistency( $gid)
    }
    elseif ( $Status == GAME_STATUS_KOMI )
    {
-      //TODO handle MP-game
+      //TODO handle fair-komi-game
    }
 
    return ''; //no error

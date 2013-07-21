@@ -65,3 +65,33 @@ ALTER TABLE TournamentParticipant
    ADD INDEX tidStartRound (tid,StartRound) ;
 
 
+-- added table to store changeable game-settings for invitations replacing old GameSetup-invitation-handling parsing a text-field
+CREATE TABLE GameInvitation (
+  gid int NOT NULL,
+  uid int NOT NULL,
+  Lastchanged datetime NOT NULL default '0000-00-00 00:00:00',
+  Ruleset enum('JAPANESE','CHINESE') NOT NULL default 'JAPANESE',
+  Size tinyint unsigned NOT NULL default '19',
+  Komi decimal(4,1) NOT NULL default '6.5',
+  Handicap tinyint unsigned NOT NULL default '0',
+  Handicaptype enum('conv','proper','nigiri','double','black','white','auko_sec','auko_opn','div_ykic','div_ikyc') NOT NULL default 'conv',
+  AdjKomi decimal(4,1) NOT NULL default '0.0',
+  JigoMode enum('KEEP_KOMI','ALLOW_JIGO','NO_JIGO') NOT NULL default 'KEEP_KOMI',
+  AdjHandicap tinyint NOT NULL default '0',
+  MinHandicap tinyint unsigned NOT NULL default '0',
+  MaxHandicap tinyint NOT NULL default '-1',
+  Maintime smallint NOT NULL default '0',
+  Byotype enum('JAP','CAN','FIS') NOT NULL default 'JAP',
+  Byotime smallint NOT NULL default '0',
+  Byoperiods tinyint NOT NULL default '0',
+  Rated enum('N','Y') NOT NULL default 'N',
+  StdHandicap enum('N','Y') NOT NULL default 'N',
+  WeekendClock enum('N','Y') NOT NULL default 'Y',
+  PRIMARY KEY (gid,uid)
+) ENGINE=MyISAM;
+
+-- execute migration-script (with do_it=1) to merge all old-style game-invitations:
+--    'scripts/updates/fix_game_invitations-1_0_16.php?limit=1000'
+--    repeat it till all game-invitations are fixed by migrating them.
+
+

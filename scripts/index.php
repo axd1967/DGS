@@ -87,6 +87,7 @@ require_once 'include/std_functions.php';
          "Migration scripts for release 1.0.16, use <b>ONLY</b> if you know how they work !!<br>\n(see database_changes_1_0_15_to_1_0_16.mysql)" => 0,
             'fix_new_game_expert_view-1_0_16.php' => "Replace deprecated new-game expert-view",
             'fix_default_max_handi-1_0_16.php'    => "Set default max-handicap",
+            'fix_game_invitations-1_0_16.php'     => "Migrate old 1.0.15-style game-invitations",
       ),
    ); //arr_scripts
 

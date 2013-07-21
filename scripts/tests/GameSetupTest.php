@@ -39,6 +39,7 @@ recover_language( array('Lang' => LANG_DEF_LOAD) ); // want default english
 class GameSetupTest extends PHPUnit_Framework_TestCase {
 
    private $gs;
+   private $gsi;
 
    /**
     * Runs the test methods of this class.
@@ -60,16 +61,42 @@ class GameSetupTest extends PHPUnit_Framework_TestCase {
       $this->gsi = self::create_gs_inv();
    }
 
+   public function test_swap_htype() {
+      // implicit check of create_gs()
+      $gs = self::create_gs(); // uid=123
+      $this->assertEquals( 123, $gs->uid );
+
+      $gs->Handicaptype = HTYPE_CONV;
+      $this->assertEquals( HTYPE_CONV, $gs->get_user_view_handicaptype(123) );
+      $this->assertEquals( HTYPE_CONV, $gs->get_user_view_handicaptype(456) );
+
+      $gs->Handicaptype = HTYPE_BLACK;
+      $this->assertEquals( HTYPE_BLACK, $gs->get_user_view_handicaptype(123) );
+      $this->assertEquals( HTYPE_WHITE, $gs->get_user_view_handicaptype(456) );
+
+      $gs->Handicaptype = HTYPE_WHITE;
+      $this->assertEquals( HTYPE_WHITE, $gs->get_user_view_handicaptype(123) );
+      $this->assertEquals( HTYPE_BLACK, $gs->get_user_view_handicaptype(456) );
+
+      $gs->Handicaptype = HTYPE_I_KOMI_YOU_COLOR;
+      $this->assertEquals( HTYPE_I_KOMI_YOU_COLOR, $gs->get_user_view_handicaptype(123) );
+      $this->assertEquals( HTYPE_YOU_KOMI_I_COLOR, $gs->get_user_view_handicaptype(456) );
+
+      $gs->Handicaptype = HTYPE_YOU_KOMI_I_COLOR;
+      $this->assertEquals( HTYPE_YOU_KOMI_I_COLOR, $gs->get_user_view_handicaptype(123) );
+      $this->assertEquals( HTYPE_I_KOMI_YOU_COLOR, $gs->get_user_view_handicaptype(456) );
+   }
+
    public function test_new_from_game_row() {
       // implicit check of create_gs()
       $this->assertEquals( 123, $this->gs->uid );
       $this->assertEquals( HTYPE_AUCTION_SECRET, $this->gs->Handicaptype );
       $this->assertEquals( 2, $this->gs->Handicap );
-      $this->assertEquals( -1, $this->gs->AdjustHandicap );
+      $this->assertEquals( -1, $this->gs->AdjHandicap );
       $this->assertEquals( 3, $this->gs->MinHandicap );
       $this->assertEquals( 9, $this->gs->MaxHandicap );
       $this->assertEquals( -199.5, $this->gs->Komi );
-      $this->assertEquals( 70, $this->gs->AdjustKomi );
+      $this->assertEquals( 70, $this->gs->AdjKomi );
       $this->assertEquals( JIGOMODE_ALLOW_JIGO, $this->gs->JigoMode );
       $this->assertEquals( 'Y', $this->gs->MustBeRated );
       $this->assertEquals( -800, $this->gs->RatingMin );
@@ -99,25 +126,26 @@ class GameSetupTest extends PHPUnit_Framework_TestCase {
 
    public function test_encode() {
       $gs = $this->gs;
-      $this->assertEquals( 'T7:U123:H2:-1:3:9:K-199.5:70.0:J1:FK:R1:-800:2600:998:-102:Cslow game', $gs->encode() );
+      $this->assertEquals( 'T7:U123:H2:-1:3:9:K-199.5:70.0:J1:FK:R1:-800:2600:998:-102:Cslow game', $gs->encode_game_setup() );
 
       $gs->Handicaptype = HTYPE_PROPER;
-      $gs->AdjustHandicap = +7;
+      $gs->AdjHandicap = +7;
       $gs->Komi = 6;
-      $gs->AdjustKomi = -199.5;
+      $gs->AdjKomi = -199.5;
       $gs->JigoMode = JIGOMODE_KEEP_KOMI;
       $gs->SameOpponent = 0;
       $gs->Message = 'bla:blub';
-      $this->assertEquals( 'T2:U123:H2:7:3:9:K6.0:-199.5:J0:FK:R1:-800:2600:998:0:Cbla:blub', $gs->encode() );
+      $this->assertEquals( 'T2:U123:H2:7:3:9:K6.0:-199.5:J0:FK:R1:-800:2600:998:0:Cbla:blub', $gs->encode_game_setup() );
    }
 
    public function test_encode_invite() {
       $gsi = $this->gsi;
-      $this->assertEquals( 'T7:U123:H2:-1:3:9:K-199.5:70.0:J1:FK:R0:0:0:0:0:C:I17:1:r2:0:tJ:61:17:4:1', $gsi->encode(true) );
+      $this->assertEquals( 'T7:U123:H2:-1:3:9:K-199.5:70.0:J1:FK:R1:-800:2600:998:-102:C:I17:1:r2:0:tJ:61:17:4:1', $gsi->encode_game_setup(GSENC_FULL_GAME) );
+      $this->assertEquals( 'T7:U123:H2:-1:3:9:K-199.5:70.0:J1:FK:R1:-800:2600:998:-102:C', $gsi->encode_game_setup() );
 
       $gsi->Handicaptype = HTYPE_PROPER;
       $gsi->Komi = 6;
-      $gsi->AdjustKomi = 10;
+      $gsi->AdjKomi = 10;
       $gsi->JigoMode = JIGOMODE_NO_JIGO;
       $gsi->SameOpponent = 3;
       $gsi->Message = 'wwi';
@@ -130,7 +158,8 @@ class GameSetupTest extends PHPUnit_Framework_TestCase {
       $gsi->Byotime = 10;
       $gsi->Byoperiods = 3;
       $gsi->WeekendClock = false;
-      $this->assertEquals( 'T2:U123:H2:-1:3:9:K6.0:10.0:J2:FK:R0:0:0:0:0:C:I18:0:r1:1:tC:6:10:3:0', $gsi->encode(true) );
+      $this->assertEquals( 'T2:U123:H2:-1:3:9:K6.0:10.0:J2:FK:R1:-800:2600:998:3:C:I18:0:r1:1:tC:6:10:3:0', $gsi->encode_game_setup(GSENC_FULL_GAME) );
+      $this->assertEquals( 'T2:U123:H2:-1:3:9:K6.0:10.0:J2:FK:R1:-800:2600:998:3:Cwwi', $gsi->encode_game_setup() );
    }
 
    public function test_new_from_game_setup() {
@@ -163,33 +192,6 @@ class GameSetupTest extends PHPUnit_Framework_TestCase {
       $this->assertEquals( 1, UnitTestHelper::countErrors() );
    }
 
-   public function test_build_and_parse_invitation_game_setup() {
-      $gs1 = self::create_gs_inv();
-      $gs1->Komi = 5.5;
-      $gs1->uid = 11;
-      $gs1->Message = 'bla';
-      $gs2 = self::create_gs_inv();
-      $gs2->uid = 22;
-      $gs2->Size = 13;
-      $str = GameSetup::build_invitation_game_setup( $gs1, $gs2 );
-      $this->assertEquals( $gs1->encode(true) . GS_SEP_INVITATION . $gs2->encode(true), $str );
-      $this->assertEquals( 'T7:U11:H2:-1:3:9:K5.5:70.0:J1:FK:R0:0:0:0:0:C:I17:1:r2:0:tJ:61:17:4:1 T7:U22:H2:-1:3:9:K-199.5:70.0:J1:FK:R0:0:0:0:0:C:I13:1:r2:0:tJ:61:17:4:1', $str );
-
-      $arr_gs = GameSetup::parse_invitation_game_setup( 22, '' );
-      $this->assertEquals( 2, count($arr_gs));
-      $this->assertTrue( is_null($arr_gs[0]) );
-      $this->assertTrue( is_null($arr_gs[1]) );
-
-      $arr_gs = GameSetup::parse_invitation_game_setup( 22, $str );
-      $this->assertEquals( 2, count($arr_gs));
-      $this->assertEquals( 22, $arr_gs[0]->uid );
-      $this->assertEquals( 11, $arr_gs[1]->uid );
-      $this->assertEquals( -199.5, $arr_gs[0]->Komi );
-      $this->assertEquals( 5.5, $arr_gs[1]->Komi );
-      $this->assertEquals( 13, $arr_gs[0]->Size );
-      $this->assertEquals( 17, $arr_gs[1]->Size );
-   }
-
    public function test_build_invitation_diffs() {
       $gs1 = GameSetup::new_from_game_setup( 'T2:U123:H2:0:0:0:K6:0:J0:FK:R0:0:0:0:0:C:I9:0:r2:1:tC:50:10:7:0', true );
       $gs2 = clone $gs1;
@@ -197,6 +199,7 @@ class GameSetupTest extends PHPUnit_Framework_TestCase {
 
       $gs2 = GameSetup::new_from_game_setup( 'T4:U123:H0:0:0:0:K-5:0:J1:FK:R0:0:0:0:0:C:I11:1:r1:0:tC:90:5:4:1', true );
       $r = GameSetup::build_invitation_diffs($gs1,$gs2);
+      $this->assertEquals( 8, count($r) );
       $i = 0;
       $this->assertEquals(
          array( 'Ruleset', 'Chinese', 'Japanese' ), $r[$i++] );
@@ -209,7 +212,7 @@ class GameSetupTest extends PHPUnit_Framework_TestCase {
       $this->assertEquals(
          array( 'Adjust Komi', '', '[Allow Jigo]' ), $r[$i++] );
       $this->assertEquals(
-         array( 'Time', 'C: 3Te 5Stdn. + 10Stdn. / 7', 'C: 6Te + 5Stdn. / 4' ), $r[$i++] );
+         array( 'Time', 'C: 3days 5hours + 10hours / 7', 'C: 6days + 5hours / 4' ), $r[$i++] );
       $this->assertEquals(
          array( 'Clock runs on weekends', 'No', 'Yes' ), $r[$i++] );
       $this->assertEquals(
@@ -217,13 +220,14 @@ class GameSetupTest extends PHPUnit_Framework_TestCase {
 
       $gs3 = GameSetup::new_from_game_setup( 'T7:U123:H0:0:0:0:K5:0:J2:FK:R0:0:0:0:0:C:I11:1:r1:0:tJ:90:5:4:1', true );
       $r = GameSetup::build_invitation_diffs($gs2,$gs3);
+      $this->assertEquals( 3, count($r) );
       $i = 0;
       $this->assertEquals(
          array( 'Handicap Type', 'Manual setting with My Color [Double], Handicap 0, Komi -5', 'Fair Komi of Type [Secret Auction Komi], Jigo mode [Forbid Jigo]', 1 ), $r[$i++] );
       $this->assertEquals(
          array( 'Adjust Komi', '[Allow Jigo]', '[No Jigo]' ), $r[$i++] );
       $this->assertEquals(
-         array( 'Time', 'C: 6Te + 5Stdn. / 4', 'J: 6Te + 5Stdn. * 4' ), $r[$i++] );
+         array( 'Time', 'C: 6days + 5hours / 4', 'J: 6days + 5hours * 4' ), $r[$i++] );
    }
 
 
@@ -245,11 +249,11 @@ class GameSetupTest extends PHPUnit_Framework_TestCase {
          'SameOpponent' => -102,
          'Message' => 'slow game',
       );
-      $gs = GameSetup::new_from_game_row( $r );
+      $gs = GameSetup::new_from_waitingroom_game_row( $r );
       return $gs;
    }
 
-   private static function create_gs_inv() {
+   public static function create_gs_inv() {
       $gs = self::create_gs();
       $gs->read_waitingroom_fields( array(
          'tid' => 4711,

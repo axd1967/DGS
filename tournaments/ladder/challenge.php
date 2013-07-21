@@ -267,6 +267,7 @@ function add_form_user_info( &$tform, $utype, $user, $tladder, $trules )
 // show game-info-table for challenge
 function show_game_info( $tid, $user_ch, $user_df, $trules, $tprops )
 {
+   global $player_row;
    if ( is_null($user_ch) || is_null($user_df) )
       return;
 
@@ -274,17 +275,11 @@ function show_game_info( $tid, $user_ch, $user_df, $trules, $tprops )
    $df_rating = TournamentHelper::get_tournament_rating( $tid, $user_df, $tprops->RatingUseMode );
 
    $game_row = array();
-   $gs_tmp = new GameSetup( 0 );
-   $ch_is_black = $trules->prepare_create_game_row( $game_row, $gs_tmp, $user_ch->ID, $ch_rating, $user_df->ID, $df_rating );
+   $gs_tourney = $trules->convertTournamentRules_to_GameSetup();
+   $ch_is_black = $trules->prepare_create_game_row( $game_row, $gs_tourney, $user_ch->ID, $ch_rating, $user_df->ID, $df_rating );
 
    $game_row = $trules->convertTournamentRules_to_GameRow();
-   $game_row['X_Handitype'] = TournamentRules::convert_trule_handicaptype_to_stdhtype($trules->Handicaptype);
-   if ( $trules->Handicaptype == TRULE_HANDITYPE_NIGIRI )
-      $game_row['X_Color'] = HTYPE_NIGIRI;
-   else
-      $game_row['X_Color'] = ($ch_is_black) ? HTYPE_BLACK : HTYPE_WHITE;
-   $game_row['X_Calculated'] = $trules->needsCalculatedHandicap();
-   $game_row['X_ChallengerIsBlack'] = $ch_is_black;
+   $game_row['calculated'] = $trules->needsCalculatedHandicap();
 
    // user-data
    $game_row['other_id']     = $user_df->ID;
@@ -299,7 +294,9 @@ function show_game_info( $tid, $user_ch, $user_df, $trules, $tprops )
    );
 
    echo "<br>\n";
-   game_info_table( GSET_TOURNAMENT_LADDER, $game_row, $user_row, $user_ch->hasRating() );
+
+   // NOTE: challenger must be current user, properly set in GameSetup
+   game_info_table( GSET_TOURNAMENT_LADDER, $game_row, $user_row, $user_ch->hasRating(), $gs_tourney );
 }//show_game_info
 
 /*! \brief Returns array with notes about challenging users on ladder. */

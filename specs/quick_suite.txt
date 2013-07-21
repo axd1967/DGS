@@ -2695,6 +2695,7 @@ Errors:
       - receiver_not_found : given recipient(s) can not be found
       - folder_not_found : specified folder is unknown for current user
       - bulkmessage_self : bulk-messages can not be sent to oneself
+      - invite_bad_gamesetup : internal consistency-error, missing invitation game-setup
 
    * [E-MSGSEND] Message Send Errors:
       - invalid_action : failure on checking to send a message, detailed error-texts found in "error_texts"-field

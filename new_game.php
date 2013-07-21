@@ -402,11 +402,11 @@ function handle_add_game( $my_id, $viewmode )
       $gs = new GameSetup( 0 );
       $gs->Handicaptype = $handicap_type; // HTYPE_...
       $gs->Handicap = $handicap;
-      $gs->AdjustHandicap = $adj_handicap;
+      $gs->AdjHandicap = $adj_handicap;
       $gs->MinHandicap = $min_handicap;
       $gs->MaxHandicap = ( $max_handicap < DEFAULT_MAX_HANDICAP ) ? DEFAULT_MAX_HANDICAP : $max_handicap;
       $gs->Komi = $komi;
-      $gs->AdjustKomi = $adj_komi;
+      $gs->AdjKomi = $adj_komi;
       $gs->JigoMode = $jigo_mode; // JIGOMODE_...
       $gs->MustBeRated = ( $MustBeRated == 'Y' ); // bool
       $gs->RatingMin = $rating1;
@@ -439,7 +439,8 @@ function handle_add_game( $my_id, $viewmode )
       $tmpl = ProfileTemplate::new_template_game_setup_newgame( $comment );
       $tmpl->GameSetup = $gs;
 
-      jump_to("templates.php?cmd=new".URI_AMP."type={$tmpl->TemplateType}".URI_AMP."data=" . urlencode( $tmpl->encode() ));
+      jump_to("templates.php?cmd=new".URI_AMP."type={$tmpl->TemplateType}"
+         .URI_AMP."data=" . urlencode( $tmpl->encode_template() ));
    }//save-template
 
 

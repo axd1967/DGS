@@ -23,14 +23,15 @@ require_once 'include/connect2mysql.php';
 
 // list all tests
 require_once 'BitSetTest.php';
-require_once 'ProfileTest.php';
-require_once 'TimeFormatTest.php';
+require_once 'DefaultMaxHandicapTest.php';
+require_once 'DeprecatedGameSetupTest.php';
+require_once 'EntityDataTest.php';
+require_once 'EntityTest.php';
 require_once 'GameAddTimeTest.php';
 require_once 'GameSettingsTest.php';
-require_once 'EntityTest.php';
-require_once 'EntityDataTest.php';
 require_once 'GameSetupTest.php';
-require_once 'DefaultMaxHandicapTest.php';
+require_once 'ProfileTest.php';
+require_once 'TimeFormatTest.php';
 
 /*!
  * \class AllTests
@@ -49,14 +50,15 @@ class AllTests
 
       // list all tests
       $suite->addTestSuite('BitSetTest');
-      $suite->addTestSuite('ProfileTest');
-      $suite->addTestSuite('TimeFormatTest');
+      $suite->addTestSuite('DefaultMaxHandicapTest');
+      $suite->addTestSuite('DeprecatedGameSetupTest');
+      $suite->addTestSuite('EntityDataTest');
+      $suite->addTestSuite('EntityTest');
       $suite->addTestSuite('GameAddTimeTest');
       $suite->addTestSuite('GameSettingsTest');
-      $suite->addTestSuite('EntityTest');
-      $suite->addTestSuite('EntityDataTest');
       $suite->addTestSuite('GameSetupTest');
-      $suite->addTestSuite('DefaultMaxHandicapTest');
+      $suite->addTestSuite('ProfileTest');
+      $suite->addTestSuite('TimeFormatTest');
 
       return $suite;
    }

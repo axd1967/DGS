@@ -225,11 +225,11 @@ require_once 'include/wroom_control.php';
          $wro = new WaitingroomOffer( $row );
          $wro_settings = $wro->calculate_offer_settings();
          $is_fairkomi = $wro->is_fairkomi();
-         extract($row); //including $calculated, $haverating, $goodrating, $goodmingames, $goodmaxgames, $goodsameopp, $X_Time
+         extract($row); //including: $calculated, $haverating, $goodrating, $goodmingames, $goodmaxgames, $goodsameopp, $X_Time
 
          list( $restrictions, $joinable ) = WaitingroomControl::get_waitingroom_restrictions( $row, $suitable );
 
-         if ( $GameType != GAMETYPE_GO )
+         if ( $GameType != GAMETYPE_GO ) // MPG
             $Handicaptype = HTYPEMP_MANUAL;
          if ( $idinfo == (int)$ID )
          {
@@ -378,8 +378,12 @@ function add_old_game_form( $form_id, $game_row, $iamrated, $joinable )
 
    $game_row['X_TotalCount'] = ($is_my_game) ? 0 : GameHelper::count_started_games( $my_id, $opp_id );
    foreach ( $ARR_COPY_FIELDS as $src => $trg )
-      $game_row[$trg]  = $game_row[$src];
-   game_info_table( GSET_WAITINGROOM, $game_row, $player_row, $iamrated );
+      $game_row[$trg] = $game_row[$src];
+
+   $gs_wroom = GameSetup::new_from_waitingroom_game_row( $game_row );
+   $gs_wroom->read_waitingroom_fields( $game_row );
+
+   game_info_table( GSET_WAITINGROOM, $game_row, $player_row, $iamrated, $gs_wroom );
 
    $game_form->add_hidden( 'id', $game_row['ID'] ); // wroom-id
    if ( $is_my_game )

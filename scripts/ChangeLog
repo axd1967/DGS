@@ -18,6 +18,125 @@ ChangeLog
 
 2013-07-21 juga
 
+   * include/game_functions.php (GameHelper.delete_running_game, ~.delete_invitation_game;
+       FairKomiNegotiation.save_komi;
+       GameFinalizer.finish_game;
+       class GameSetup, ~.set_defaults, ~.encode_game_setup, ~.encode_profile_template,
+         ~.build_game_invitation, ~.to_string, ~.get_user_view_handicaptype, ~.new_from_game_setup,
+         ~.new_from_waitingroom_game_row, ~.build_game_setup_from_game_invitations,
+         ~.new_from_game_invitation, ~.build_invitation_diffs;
+       GameSetupBuilder.build_url_adjustments;
+       class GameSettingsCalculator, ~.__construct, ~.calculate_settings;
+       class GameSettings, ~.__construct, ~.to_string, ~.suggest_proper, ~.suggest_conventional,
+         ~.get_game_settings_from_gamesetup, ~.get_game_settings_from_gamerow;
+       ProfileTemplate.encode_template, ~.build_profile;
+       NextGameOrder.build_status_games_query;
+       is_htype_calculated),
+     include/deprecated_functions.php (INVITE_HANDI_CONV, GS_SEP_INVITATION;
+       class DeprecatedGameSetup, ~.build_invitation_game_setup, ~.parse_invitation_game_setup,
+         ~.read_game_setup_from_gamerow, ~.parse_jigo_mode_from_game_setup, ~.determine_handicaptype,
+         ~.get_invite_handicaptype, ~.get_handicaptype_for_invite),
+     include/db/game_invitation.php (class GameInvitation, ~.__construct, ~.setRuleset, ~.to_string,
+       ~.persist, ~.insert, ~.update, ~.fillEntityData, ~.build_query_sql, ~.new_from_row,
+       ~.load_game_invitation, ~.load_game_invitations, ~.insert_game_invitations,
+       ~.delete_game_invitations),
+     include/make_game.php (make_invite_game, build_invitation_game_update,
+       make_invite_game_setup_from_url, make_invite_template_game_setup,
+       accept_invite_game, create_game),
+     include/message_functions.php (game_settings_form, game_info_table;
+       DgsMessage.get_recipients;
+       MessageControl.handle_send_message),
+     include/wroom_control.php (WaitingroomControl.join_waitingroom_game, ~.calculate_offer_settings),
+     include/quick/quick_message.php (QuickHandlerMessage.fill_message_info),
+     tournaments/include/tournament_rules.php (TournamentRules.convertTournamentRules_to_GameSetup),
+     scripts/tests/DeprecatedGameSetupTest.php, scripts/tests/GameSetupTest.php,
+     scripts/tests/AllTests.php,
+     scripts/updates/fix_default_max_handi-1_0_16.php (fix_game_invite_dispute,
+       fix_game_finished_running, fix_profile),
+     scripts/updates/fix_game_invitations-1_0_16.php (migrate_game_invitations, fix_game_invitation),
+     scripts/updates/database_changes_1_0_15_to_1_0_16.mysql,
+     scripts/updates/fix_new_game_expert_view-1_0_16.php, scripts/data_export.php,
+     scripts/game_consistency.php, scripts/index.php,
+     specs/db/dragon-ddl.sql, specs/db/table-Games.txt,
+     specs/db/table-Waitingroom.txt,
+     specs/quick_suite.txt,
+     tournaments/ladder/challenge.php (show_game_info),
+     game_players.php (build_form_change_group_with_handicap),
+     message.php (handle_save_template),
+     new_game.php (handle_add_game),
+     waiting_room.php (add_old_game_form),
+     daily_cron.php:
+   - re-designed game-invitations
+     - re-design with clearer structures was necessary to support bug-fixes for game-invitations
+       messing up state of invitation: who sent it?, who views it?, what's the handicap-type
+       for black/white-fix-color and fair-komi-divide&choose for current user?
+       Determination of this variables sucked big with string-encoded game-setup and storing
+       of users for game on INVITED-status.
+     - added GameInvitation-table to store changeable game-settings for invitations
+       replacing old GameSetup-invitation-handling parsing a one-string text-field for both users
+     - replaced Games.ToMove_ID holding handicap-type-encoding with players-id
+       that last sent game-invitation- or game-dispute-message
+     - stored initially inviting user in Games.Black_ID and invited user in Games.White_ID
+     - GameInvitation-entries are kept till game is finished, then they are deleted
+     - moved deprecated functions and constants into separate file 'include/deprecated_functions.php'
+       to be used for migration-scripts and potential later disposal
+     - added migration-script 'scripts/updates/fix_game_invitations-1_0_16.php'
+       to migrate old 1.0.15-style game-invitations
+     - fixed bug: showing correct state of invitation and dispute-difference for all combinations
+       of inviting- & invited-user, disputed or original invitation with reversed handicap-type
+       dependent on current-user
+     - added cleanup of GameInvitation-table for deleted or cleaned up invitations
+     - additional refactoring for re-designed game-invitations:
+       - adjusted and simplified GameSetup-encoding for invitations to only store game-settings
+         of last sent invitation/dispute from one user in preparation for accepting and starting
+         invitation-game
+       - moved deprecated functions and constants into 'include/deprecated_functions.php'
+         to be used for migration-scripts and potential later disposal:
+         GameSetup.build_invitation_game_setup, ~.parse_invitation_game_setup,
+         ~.parse_jigo_mode_from_game_setup, ~.determine_handicaptype, get_invite_handicaptype,
+         get_handicaptype_for_invite
+       - refactored and simplified GameSettingsCalculator to use GameSetup instead of
+         game-row to calculate probable game-settings for pivot-user
+       - renamed GameSetup- and GameSettings-fields: AdjustHandicap/Komi -> AdjHandicap/Komi
+       - avoid clashes with other encode()-functions:
+         - renamed GameSetup.encode() -> GameSetup.encode_game_setup()
+         - renamed ProfileTemplate.encode() -> ProfileTemplate.encode_template()
+       - renamed GameSetup.new_from_game_row() -> GameSetup.new_from_waitingroom_game_row()
+       - cleanup: added safety-checks on vars (status) for some use-cases
+   - added my-rating in game-info-table on viewing own or opponents game-settings
+   - added docu about Moves-table in 'specs/db/table-Games.txt'
+-----------
+-- added table to store changeable game-settings for invitations
+--    replacing old GameSetup-invitation-handling parsing a text-field
+CREATE TABLE GameInvitation (
+  gid int NOT NULL,
+  uid int NOT NULL,
+  Lastchanged datetime NOT NULL default '0000-00-00 00:00:00',
+  Ruleset enum('JAPANESE','CHINESE') NOT NULL default 'JAPANESE',
+  Size tinyint unsigned NOT NULL default '19',
+  Komi decimal(4,1) NOT NULL default '6.5',
+  Handicap tinyint unsigned NOT NULL default '0',
+  Handicaptype enum('conv','proper','nigiri','double','black','white','auko_sec','auko_opn','div_ykic','div_ikyc') NOT NULL default 'conv',
+  AdjKomi decimal(4,1) NOT NULL default '0.0',
+  JigoMode enum('KEEP_KOMI','ALLOW_JIGO','NO_JIGO') NOT NULL default 'KEEP_KOMI',
+  AdjHandicap tinyint NOT NULL default '0',
+  MinHandicap tinyint unsigned NOT NULL default '0',
+  MaxHandicap tinyint NOT NULL default '-1',
+  Maintime smallint NOT NULL default '0',
+  Byotype enum('JAP','CAN','FIS') NOT NULL default 'JAP',
+  Byotime smallint NOT NULL default '0',
+  Byoperiods tinyint NOT NULL default '0',
+  Rated enum('N','Y') NOT NULL default 'N',
+  StdHandicap enum('N','Y') NOT NULL default 'N',
+  WeekendClock enum('N','Y') NOT NULL default 'Y',
+  PRIMARY KEY (gid,uid)
+) ENGINE=MyISAM;
+
+-- execute migration-script (with do_it=1) to merge all old-style game-invitations:
+--    'scripts/updates/fix_game_invitations-1_0_16.php?limit=1000'
+--    repeat it till all game-invitations are fixed by migrating them.
+-----------
+
    * game.php:
    - bugfix: don't show link to Eidogo-game-player for games in fair-komi-negotiation,
      that have no board yet
