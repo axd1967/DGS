@@ -25,7 +25,7 @@ require_once 'tournaments/include/tournament_utils.php';
 $GLOBALS['ThePage'] = new Page('SiteMap');
 
 
-function echo_item($text, $link='', $show_link, $working=true, $last=false)
+function echo_item($text, $link, $show_link, $working=true, $last=false)
 {
    global $item_nbcols, $item_level;
    static $f = array();
@@ -86,6 +86,12 @@ function itemL($text, $link='', $working=true, $last=false)
 
    start_page(T_('Site map'), true, $logged_in, $player_row );
 
+   echo "<i>"; // use CSS to indicate how to render this comments
+   if ( $logged_in )
+      echo T_('The black links require an argument to work, so they are not usable here.');
+   else
+      echo T_('The black links require to be logged in, so they are not usable here.');
+   echo "</i>";
 
    section( 'SiteMap', T_('Site map'));
 
@@ -345,10 +351,6 @@ function itemL($text, $link='', $working=true, $last=false)
    } $item_level--;
 
    echo "</table>\n";
-   if ( $logged_in )
-      echo T_('The black links require an argument to work, so they are not usable here.');
-   else
-      echo T_('The black links require to be logged in, so they are not usable here.');
 
    end_page();
 }
