@@ -141,7 +141,8 @@ $GLOBALS['ThePage'] = new Page('TournamentDirectorEdit');
    $errors = array_merge( $errors, $input_errors );
 
    // persist TD in database
-   if ( $uid && @$_REQUEST['td_save'] && !@$_REQUEST['td_preview'] && count($errors) == 0 && count($edits) > 0 )
+   if ( $uid && @$_REQUEST['td_save'] && !@$_REQUEST['td_preview'] && count($errors) == 0
+         && ($new_tdir || count($edits) > 0) )
    {
       ta_begin();
       {//HOT-section to save tournament-director

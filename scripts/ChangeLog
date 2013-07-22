@@ -16,6 +16,11 @@ Developers INFO:
 ChangeLog
 ------------------------------------------------------------------
 
+2013-07-22 juga
+
+   * tournaments/edit_director.php:
+   - fix bug: adding new tournament-director without enabling flags was not saving director
+
 2013-07-21 juga
 
    * features/lib_votes.php (VOTE_MIN_FINISHED_GAMES; Feature.allow_vote_check),
