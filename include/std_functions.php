@@ -711,7 +711,7 @@ function end_page( $menu_array=NULL, $links_per_line=0 )
    echo "\n<table id=pageFoot>",
       "\n <tr>",
       "\n  <td class=ServerHome><A href=\"{$base_path}index.php\">", FRIENDLY_LONG_NAME, "</A> ",
-      span('Version', '[' . T_('Version') . ' ' . DGS_VERSION . ']'),
+      span('Version', '[' . anchor( $base_path.'news.php', T_('Version') . ' ' . DGS_VERSION ) . ']'),
       "</td>";
 
    echo "\n  <td class=PageTime>"
