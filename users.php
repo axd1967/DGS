@@ -320,7 +320,7 @@ require_once 'include/classlib_userpicture.php';
 // callback-func for users-list Table-form adding form-elements below table
 function users_show_pos_extend_table_form( &$table, &$form )
 {
-   return $form->print_insert_checkbox('showpos', '1', T_('Show position'), @$_REQUEST['showpos'] );
+   return $form->print_insert_checkbox('showpos', '1', T_('Show my rating position'), @$_REQUEST['showpos'] );
 }
 
 ?>
