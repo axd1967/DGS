@@ -151,7 +151,7 @@ $GLOBALS['ThePage'] = new Page('BulletinEdit');
             'DESCRIPTION', T_('Bulletin Flags'),
             'TEXT',        GuiBulletin::formatFlags($bulletin->Flags), ));
    $bform->add_row( array(
-         'DESCRIPTION', T_('Publish Time'),
+         'DESCRIPTION', T_('Publish time'),
          'TEXT',        formatDate($bulletin->PublishTime), ));
    if ( $bulletin->Lastchanged > 0 )
       $bform->add_row( array(

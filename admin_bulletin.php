@@ -244,7 +244,7 @@ $GLOBALS['ThePage'] = new Page('BulletinAdmin');
          'DESCRIPTION', T_('Author'),
          'TEXTINPUT',   'author', 16, 20, $vars['author'], ));
    $bform->add_row( array(
-         'DESCRIPTION', T_('Publish Time'),
+         'DESCRIPTION', T_('Publish time'),
          'TEXTINPUT',   'publish_time', 20, 30, $vars['publish_time'],
          'TEXT',  '&nbsp;' . span('EditNote', sprintf( T_('(Date format [%s])'), FMT_PARSE_DATE)), ));
    $bform->add_row( array(

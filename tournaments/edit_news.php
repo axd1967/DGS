@@ -154,7 +154,7 @@ $GLOBALS['ThePage'] = new Page('TournamentNewsEdit');
    }
 
    $tnform->add_row( array(
-         'DESCRIPTION', T_('Publish Time'),
+         'DESCRIPTION', T_('Publish time'),
          'TEXTINPUT',   'publish', 20, 30, $vars['publish'],
          'TEXT',  '&nbsp;' . span('EditNote', sprintf( T_('(Date format [%s])'), FMT_PARSE_DATE )), ));
    $tnform->add_row( array(
@@ -276,7 +276,7 @@ function parse_edit_form( &$tnews )
       // determine edits
       if ( $old_vals['status'] != $tnews->Status ) $edits[] = T_('Status');
       if ( $old_vals['flags'] != $tnews->Flags ) $edits[] = T_('Flags');
-      if ( $old_vals['publish'] != $tnews->Published ) $edits[] = T_('Publish Time');
+      if ( $old_vals['publish'] != $tnews->Published ) $edits[] = T_('Publish time');
       if ( $old_vals['subject'] != $tnews->Subject ) $edits[] = T_('Subject');
       if ( $old_vals['text'] != $tnews->Text ) $edits[] = T_('Text');
    }
