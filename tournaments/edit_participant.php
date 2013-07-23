@@ -180,9 +180,9 @@ $GLOBALS['ThePage'] = new Page('TournamentEditParticipant');
    if ( !$rid ) // new-TP
    {
       if ( count($reg_errors) )
-         $errors[] = T_('[Errors]: Registration restrictions disallow user to be registered.#tourney');
+         $errors[] = T_('[Errors]: Registration restrictions disallow user from registering.#tourney');
       if ( !$ignore_warnings && count($reg_warnings) )
-         $errors[] = T_('[Warnings]: Registration restrictions normally disallow user to be registered.#tourney');
+         $errors[] = T_('[Warnings]: Registration restrictions normally disallow user from registering.#tourney');
 
       $tp->Status = TP_STATUS_INVITE; // TD can only invite
    }

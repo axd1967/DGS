@@ -140,7 +140,7 @@ $GLOBALS['ThePage'] = new Page('TournamentRegistration');
    if ( !$rid ) // new-TP
    {
       if ( count($reg_errors) )
-         $errors[] = T_('Registration restrictions disallow you to register.#tourney');
+         $errors[] = T_('Registration restrictions disallow you from registering.#tourney');
 
       $tp->Status = $tp->calc_init_status($tprops->RatingUseMode);
    }
