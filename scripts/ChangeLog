@@ -16,6 +16,11 @@ Developers INFO:
 ChangeLog
 ------------------------------------------------------------------
 
+2013-07-24 juga
+
+   * include/register_functions.php (UserRegistration.register_user):
+   - write IP & Browser info on player-registration
+
 2013-07-22 juga
 
    * tournaments/edit_director.php:

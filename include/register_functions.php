@@ -187,18 +187,26 @@ class UserRegistration
       global $NOW;
 
       $code = make_session_code();
+      $ip = (string)@$_SERVER['REMOTE_ADDR'];
+      $browser = substr(@$_SERVER['HTTP_USER_AGENT'], 0, 150);
 
       ta_begin();
       {//HOT-section for registering new player
+         $upd = new UpdateQuery('Players');
+         $upd->upd_txt('Handle', $this->uhandle );
+         $upd->upd_txt('Name', $this->name );
+         $upd->upd_raw('Password', sprintf( "%s('%s')", PASSWORD_ENCRYPT, mysql_addslashes($this->password) ));
+         if ( $this->email )
+            $upd->upd_txt('Email', $this->email );
+         $upd->upd_time('Registerdate', $NOW);
+         $upd->upd_txt('Sessioncode', $code);
+         $upd->upd_time('Sessionexpire', $NOW + SESSION_DURATION );
+         if ( $ip )
+            $upd->upd_txt('IP', $ip );
+         if ( $browser )
+            $upd->upd_txt('Browser', $browser );
          $result = db_query( "UserReg.register_user.insert_player({$this->uhandle})",
-            "INSERT INTO Players SET " .
-               "Handle='".mysql_addslashes($this->uhandle)."', " .
-               "Name='".mysql_addslashes($this->name)."', " .
-               "Password=".PASSWORD_ENCRYPT."('".mysql_addslashes($this->password)."'), " .
-               ($this->email ? "Email='".mysql_addslashes($this->email)."', " : '' ) .
-               "Registerdate=FROM_UNIXTIME($NOW), " .
-               "Sessioncode='$code', " .
-               "Sessionexpire=FROM_UNIXTIME(".($NOW+SESSION_DURATION).")" );
+            "INSERT INTO Players SET " . $upd->get_query() );
 
          $new_id = mysql_insert_id();
 
