@@ -18,6 +18,12 @@ ChangeLog
 
 2013-07-24 juga
 
+   * include/message_functions.php (MessageListBuilder.message_list_query):
+   - optimized query for standard message-query which was reported 3000 times in the
+     last 6 months in the mysql-slow-log,
+     instructing mysql-optimizer to use MessageCorrespondents.uid index on corresponding
+     join as uid is a constant in most of the cases
+
    * include/register_functions.php (class UserRegistration, ~.__construct, ~.parse_args,
        ~.build_key_suffix, ~.build_key, ~.check_registration_normal,
        ~.check_registration_blocked),

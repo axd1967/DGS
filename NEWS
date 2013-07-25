@@ -178,6 +178,10 @@ Copyright (C) 2001-2013  Erik Ouchterlony, Jens-Uwe Gaspar
       * Added caching to load tournament, tournament directors, tournament-ladder-props, tournament-properties,
         tournament-rules, tournament-round, tournament-news, tournament-participant-list & -count,
         tournament-results, tournament-games, tournament-ladder
+
+   * Improvements of database queries
+      * Messages: faster search for new & replied messages for status-page
+
    * PHP4 to PHP5 code cleanup
 
 

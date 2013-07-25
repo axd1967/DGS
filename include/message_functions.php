@@ -2101,7 +2101,7 @@ class MessageListBuilder
          'otherP.Handle AS other_handle' );
       $qsql->add_part( SQLP_FROM,
          'Messages AS M',
-         'INNER JOIN MessageCorrespondents AS me ON M.ID=me.mid',
+         'INNER JOIN MessageCorrespondents AS me USE INDEX (uid) ON M.ID=me.mid', // prefer uid-index as reported by mysql-SLOW-log
          'LEFT JOIN MessageCorrespondents AS other ON other.mid=me.mid AND other.Sender!=me.Sender',
          'LEFT JOIN Players AS otherP ON otherP.ID=other.uid',
          'LEFT JOIN MessageCorrespondents AS previous ON M.ReplyTo>0 AND previous.mid=M.ReplyTo AND previous.uid='.$my_id );
