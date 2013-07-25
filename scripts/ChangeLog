@@ -18,6 +18,12 @@ ChangeLog
 
 2013-07-24 juga
 
+   * include/register_functions.php (class UserRegistration, ~.__construct, ~.parse_args,
+       ~.build_key_suffix, ~.build_key, ~.check_registration_normal,
+       ~.check_registration_blocked),
+     do_registration_blocked.php, register.php:
+   - added registration-bot prevention by using dynamic form-keys
+
    * include/register_functions.php (UserRegistration.register_user):
    - write IP & Browser info on player-registration
 

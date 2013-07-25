@@ -75,24 +75,24 @@ require_once 'include/register_functions.php';
 
    $reg_form->set_area(3);
    $reg_form->add_row( array( 'DESCRIPTION', T_('Userid'),
-                              'TEXTINPUT', 'userid', 16, 16, $reg->uhandle ));
+                              'TEXTINPUT', $reg->build_key('userid'), 16, 16, $reg->uhandle ));
    $reg_form->add_row( array( 'DESCRIPTION', T_('Full name'),
-                              'TEXTINPUT', 'name', 16, 80, $reg->name ));
+                              'TEXTINPUT', $reg->build_key('name'), 16, 80, $reg->name ));
    $reg_form->add_row( array( 'DESCRIPTION', T_('Password'),
-                              'PASSWORD', 'passwd', 16, 16, $reg->password ));
+                              'PASSWORD', $reg->build_key('passwd'), 16, 16, $reg->password ));
    $reg_form->add_row( array( 'DESCRIPTION', T_('Confirm password'),
-                              'PASSWORD', 'passwd2', 16, 16, $reg->password2 ));
+                              'PASSWORD', $reg->build_key('passwd2'), 16, 16, $reg->password2 ));
 
    $reg_form->add_row( array(
       'TAB',
-      'CHECKBOX', 'policy', '1', '', $reg->policy,
+      'CHECKBOX', $reg->build_key('policy'), '1', '', $reg->policy,
       'TEXT', sprintf( T_('I have read and accepted the DGS <a href="%s" target="dgsTOS">Rules of Conduct</a>.'),
                        HOSTBASE."policy.php" ) ));
 
    $reg_form->add_empty_row();
    $reg_form->add_row( array(
       'DESCRIPTION', T_('Email'),
-      'TEXTINPUT', 'email', 50, 80, $reg->email,
+      'TEXTINPUT', $reg->build_key('email'), 50, 80, $reg->email,
       'TEXT', "<br>\n"
             . T_('The email is optional, though it\'s recommended to specify an email.')
             . "<br>\n"

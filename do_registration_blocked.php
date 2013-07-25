@@ -87,19 +87,19 @@ require_once 'include/register_functions.php';
 
    $reg_form->set_area(3);
    $reg_form->add_row( array( 'DESCRIPTION', T_('Userid'),
-                              'TEXTINPUT', 'userid', 16, 16, $reg->uhandle ) );
+                              'TEXTINPUT', $reg->build_key('userid'), 16, 16, $reg->uhandle ) );
    $reg_form->add_row( array( 'DESCRIPTION', T_('Email'),
-                              'TEXTINPUT', 'email', 50, 80, $reg->email ) );
+                              'TEXTINPUT', $reg->build_key('email'), 50, 80, $reg->email ) );
 
    $reg_form->add_row( array(
       'TAB',
-      'CHECKBOX', 'policy', '1', '', $reg->policy,
+      'CHECKBOX', $reg->build_key('policy'), '1', '', $reg->policy,
       'TEXT', sprintf( T_('I have read and accepted the DGS <a href="%s" target="dgsTOS">Rules of Conduct</a>.'),
                        HOSTBASE."policy.php" ) ));
 
    $reg_form->add_empty_row();
    $reg_form->add_row( array( 'DESCRIPTION', T_('Comment'),
-                              'TEXTAREA', 'comment', 60, 10, $reg->comment ));
+                              'TEXTAREA', $reg->build_key('comment'), 60, 10, $reg->comment ));
 
    $reg_form->add_row( array( 'SUBMITBUTTON', 'register', T_('Send registration request') ) );
    $reg_form->add_row( array( 'HIDDEN', 'errlog_id', $errorlog_id ));

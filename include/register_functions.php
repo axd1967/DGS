@@ -38,6 +38,7 @@ class UserRegistration
 {
    private $die_on_error;
    private $errors = array();
+   private $key_suffix; // for register-bot prevention
 
    public $uhandle;
    public $policy;
@@ -51,25 +52,55 @@ class UserRegistration
    public function __construct( $die_on_error=true )
    {
       $this->die_on_error = $die_on_error;
+      $this->key_suffix = $this->build_key_suffix();
+   }//__construct
+
+   /*! \brief Parses arguments from URL with dynamic form-keys. */
+   public function parse_args()
+   {
+      // check for correct key-suffix (day-switch for example)
+      // NOTE: allow 2 hours for registering, see also build_key_suffix()-func
+      $cnt = 2;
+      while ( $cnt-- && !isset($_REQUEST[$this->build_key('userid')]) )
+         $this->key_suffix = $this->build_key_suffix( -1 );
+      if ( $cnt <= 0 )
+      {
+         $this->errors[] = ErrorCode::get_error_text('miss_args');
+         return;
+      }
 
       // for both normal and blocked registration
-      $this->uhandle = get_request_arg('userid');
-      $this->policy = get_request_arg('policy');
-      $this->email = trim(get_request_arg('email'));
+      $this->uhandle = get_request_arg($this->build_key('userid'));
+      $this->policy = get_request_arg($this->build_key('policy'));
+      $this->email = trim(get_request_arg($this->build_key('email')));
 
       // only for normal-registration
-      $this->name = trim(get_request_arg('name'));
-      $this->password = get_request_arg('passwd');
-      $this->password2 = get_request_arg('passwd2');
+      $this->name = trim(get_request_arg($this->build_key('name')));
+      $this->password = get_request_arg($this->build_key('passwd'));
+      $this->password2 = get_request_arg($this->build_key('passwd2'));
 
       // only for blocked-registration
-      $this->comment = trim(get_request_arg('comment'));
-   }//__construct
+      $this->comment = trim(get_request_arg($this->build_key('comment')));
+   }
+
+   private function build_key_suffix( $add=0 )
+   {
+      // NOTE: use different form-keys to make it more difficult for register-bots to register
+      // - use dynamic suffix dependent on current hour
+      return substr( md5( floor($GLOBALS['NOW'] / SECS_PER_HOUR) + $add ), 4, 5 );
+   }
+
+   public function build_key( $key )
+   {
+      return $key . '_' . $this->key_suffix;
+   }
 
    // returns 0=no-error, array with error-texts otherwise or error thrown (depends on die-mode)
    public function check_registration_normal()
    {
       $this->errors = array();
+      $this->parse_args();
+
       $this->check_userid();
       if ( !$this->die_on_error )
          $this->check_existing_user();
@@ -86,6 +117,8 @@ class UserRegistration
    public function check_registration_blocked()
    {
       $this->errors = array();
+      $this->parse_args();
+
       $this->check_userid();
       if ( !$this->die_on_error )
          $this->check_existing_user();
@@ -241,24 +274,24 @@ class UserRegistration
          . "Blocked-IP: $ip\n\n"
          . "User-Comment:\n" . $this->comment;
 
-      $query = "INSERT INTO Posts SET " .
-               "Forum_ID=$forum_id, " .
-               "Thread_ID=0, " .
-               "Time=FROM_UNIXTIME($NOW), " .
-               "LastChanged=FROM_UNIXTIME($NOW), " .
-               "Subject=\"$Subject\", " .
-               "Text=\"$Text\", " .
-               "User_ID=1, " . // user moderated guest-user
-               "Parent_ID=0, " .
-               "AnswerNr=1, " .
-               "Depth=1, " .
-               "Approved='P', " .
-               "crc32=" . crc32($Text) . ", " .
-               "PosIndex='**'";
+      $upd = new UpdateQuery('Posts');
+      $upd->upd_num('Forum_ID', $forum_id );
+      $upd->upd_num('Thread_ID', 0 );
+      $upd->upd_time('Time', $NOW );
+      $upd->upd_txt('Subject', $Subject );
+      $upd->upd_txt('Text', $Text );
+      $upd->upd_num('User_ID', 1 ); // user moderated guest-user
+      $upd->upd_num('Parent_ID', 0 );
+      $upd->upd_num('AnswerNr', 1 );
+      $upd->upd_num('Depth', 1 );
+      $upd->upd_txt('Approved', 'P' );
+      $upd->upd_num('crc32', crc32($Text) );
+      $upd->upd_txt('PosIndex', '**' );
 
       ta_begin();
       {//HOT-section to register blocked user
-         $result = db_query( "UserReg.register_blocked_user.insert_new_post({$this->uhandle})", $query );
+         $result = db_query( "UserReg.register_blocked_user.insert_new_post({$this->uhandle})",
+            "INSERT INTO Posts SET " . $upd->get_query() );
          if ( mysql_affected_rows() != 1)
             error('mysql_insert_post', "UserReg.register_blocked_user.insert_new_post2({$this->uhandle})");
 
