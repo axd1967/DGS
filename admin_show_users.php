@@ -54,7 +54,7 @@ require_once 'include/table_columns.php';
       ADMIN_FEATURE        => array( 'FEATURE',          T_('Can administrate feature-voting') ),
       ADMIN_SKINNER        => array( 'SKINNER',          T_('Can choose CSS-skin (experimental)') ),
       ADMIN_SURVEY         => array( 'SURVEY',           T_('Can administrate survey-voting') ),
-      ADMIN_TRANSLATORS    => array( 'TRANSLATOR',       T_('Can translate texts') ),
+      ADMIN_TRANSLATORS    => array( 'TRANSLATOR',       T_('Can manage translators (add, edit, delete)') ),
    );
 
    $ARR_ADMOPTS = array( // maskval => [ bit-text, descr ]
