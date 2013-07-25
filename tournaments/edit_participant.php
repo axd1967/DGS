@@ -107,12 +107,13 @@ $GLOBALS['ThePage'] = new Page('TournamentEditParticipant');
          $user = User::load_user_by_handle( $userhandle );
    }
    else
-      $user = User::load_user( $uid );
+      $user = ( $uid <= GUESTS_ID_MAX ) ? null : User::load_user($uid);
 
    if ( is_null($user) )
    {
+      if ( $uid > GUESTS_ID_MAX )
+         $errors[] = T_('Unknown user');
       $uid = 0;
-      $errors[] = T_('Unknown user');
    }
    else
    {
@@ -132,7 +133,9 @@ $GLOBALS['ThePage'] = new Page('TournamentEditParticipant');
       : TournamentCache::load_cache_tournament_properties( 'Tournament.edit_participant', $tid );
 
    // existing participation ?
-   $tp = TournamentCache::load_cache_tournament_participant( 'Tournament.edit_participant', $tid, $uid );
+   $tp = ( $uid > 0 )
+      ? TournamentCache::load_cache_tournament_participant( 'Tournament.edit_participant', $tid, $uid )
+      : null;
    if ( is_null($tp) )
    {
       if ( !is_null($user) )

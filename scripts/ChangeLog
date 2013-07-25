@@ -18,6 +18,11 @@ ChangeLog
 
 2013-07-24 juga
 
+   * tournaments/edit_participant.php:
+   - fix bug: don't show 'unknown user'-error if no user has been entered yet
+
+2013-07-24 juga
+
    * include/message_functions.php (MessageListBuilder.message_list_query):
    - optimized query for standard message-query which was reported 3000 times in the
      last 6 months in the mysql-slow-log,
