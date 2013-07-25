@@ -189,7 +189,7 @@ class TournamentProperties
 
    /*!
     * \brief Checks potential registration by given user and returns non-null
-    *        list of errors and warnings with matching criteria, that disallow registration.
+    *        list of errors and warnings with matching criteria, that do not allow registration.
     * \param $tourney Tournament-object
     * \param $tp TournamentParticipant-object to check: $tp->ID =0 for new-user; $tp->StartRound set;
     *        $tp->Rating set if customized-rating wanted for tourney

@@ -389,8 +389,7 @@ class Tournament
    }//build_role_info
 
    /*!
-    * \brief Checks tournament-locks and returns non-null
-    *        list of errors and warnings, that disallow registration.
+    * \brief Checks tournament-locks and returns non-null list of errors and warnings, that do not allow registration.
     * \param $check_type TCHKTYPE_TD|USER_NEW|USER_EDIT
     */
    public function checkRegistrationLocks( $check_type, $with_admin_check=true )
