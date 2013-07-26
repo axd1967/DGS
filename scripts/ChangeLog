@@ -16,7 +16,12 @@ Developers INFO:
 ChangeLog
 ------------------------------------------------------------------
 
-2013-07-24 juga
+2013-07-26 juga
+
+   * status.php:
+   - added game-master in list with multi-player-games in setup-mode on status-page
+
+2013-07-25 juga
 
    * tournaments/edit_participant.php:
    - fix bug: don't show 'unknown user'-error if no user has been entered yet

@@ -200,6 +200,7 @@ if ( $player_row['GamesMPG'] > 0 )
    $mpgtable->add_tablehead( 1, T_('Game ID#header'), 'Button', TABLE_NO_HIDE, 'ID-');
    $mpgtable->add_tablehead( 2, T_('GameType#header'), '', TABLE_NO_HIDE, 'GameType+');
    $mpgtable->add_tablehead( 6, T_('Joined#header'), 'NumberC', 0, 'Moves+');
+   $mpgtable->add_tablehead( 7, T_('Game master#header'), 'User', 0, 'ToMove_ID+');
    $mpgtable->add_tablehead( 3, T_('Ruleset#header'), '', 0, 'Ruleset-');
    $mpgtable->add_tablehead( 4, T_('Size#header'), 'Number', 0, 'Size-');
    $mpgtable->add_tablehead( 5, T_('Last changed#header'), 'Date', 0, 'Lastchanged-');
@@ -208,9 +209,10 @@ if ( $player_row['GamesMPG'] > 0 )
    $order = $mpgtable->current_order_string('ID-');
    $mpgtable->use_show_rows(false);
 
-   $query = "SELECT G.ID, G.GameType, G.GamePlayers, G.Ruleset, G.Size, G.Moves AS X_Joined, GP.Flags, "
-      . "UNIX_TIMESTAMP(G.Lastchanged) AS X_Lastchanged "
-      . "FROM GamePlayers AS GP INNER JOIN Games AS G ON G.ID=GP.gid "
+   $query = "SELECT G.ID, G.GameType, G.GamePlayers, G.ToMove_ID, G.Ruleset, G.Size, G.Moves AS X_Joined, GP.Flags, "
+      . "UNIX_TIMESTAMP(G.Lastchanged) AS X_Lastchanged, "
+      . "GM.ID AS GM_ID, GM.Handle AS GM_Handle, GM.Name AS GM_Name " // game-master
+      . "FROM GamePlayers AS GP INNER JOIN Games AS G ON G.ID=GP.gid INNER JOIN Players AS GM ON GM.ID=G.ToMove_ID "
       . "WHERE GP.uid=$uid AND G.Status='".GAME_STATUS_SETUP."'"
       . $order;
 
@@ -223,6 +225,7 @@ if ( $player_row['GamesMPG'] > 0 )
       while ( $row = mysql_fetch_assoc( $result ) )
       {
          $cnt_rows++;
+         $game_master = User::new_from_row( $row, 'GM_' );
 
          $cnt_players = MultiPlayerGame::determine_player_count($row['GamePlayers']);
          $joined_players = sprintf( '%d / %d', $row['X_Joined'], $cnt_players );
@@ -236,6 +239,7 @@ if ( $player_row['GamesMPG'] > 0 )
             4 => $row['Size'],
             5 => ($row['X_Lastchanged'] > 0) ? date(DATE_FMT, $row['X_Lastchanged']) : '',
             6 => $joined_players,
+            7 => $game_master->user_reference(),
          );
          $mpgtable->add_row( $row_arr );
       }
