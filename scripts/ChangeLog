@@ -16,6 +16,12 @@ Developers INFO:
 ChangeLog
 ------------------------------------------------------------------
 
+2013-07-29 juga
+
+   * game_players.php:
+   - bugfix: correct link to existing waiting-room-offer for game-master,
+     show also independent from free-slots taken
+
 2013-07-26 juga
 
    * status.php:

@@ -272,8 +272,11 @@ define('KEY_GROUP_ORDER', 'gpo');
    $menu_array[T_('Show game-players')] = "game_players.php?gid=$gid";
    if ( $status == GAME_STATUS_SETUP )
    {
-      if ( $has_wroom_entry && $cnt_free_slots == 0 )
-         $menu_array[T_('Show waiting-room entry#mpg')] = "waiting_room.php?gid=$gid#joingameForm";
+      if ( $has_wroom_entry )
+      {
+         $my_wrgame = ( $my_id == $master_uid ) ? URI_AMP.'good=2' : '';
+         $menu_array[T_('Show waiting-room entry#mpg')] = "waiting_room.php?gid=$gid$my_wrgame#joingameForm";
+      }
 
       if ( $allow_edit )
       {
