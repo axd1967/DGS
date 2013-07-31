@@ -16,6 +16,11 @@ Developers INFO:
 ChangeLog
 ------------------------------------------------------------------
 
+2013-07-31 juga
+
+   * game_players.php (build_game_settings, load_game):
+   - show move-number and last-move-date on game-players-page for MP-game in playing-mode
+
 2013-07-29 juga
 
    * game_players.php:

@@ -354,6 +354,13 @@ function build_game_settings( $grow )
       $itable->add_sinfo(
             T_('Group ratings'), implode("<br>\n", build_group_rating()) );
    }
+
+   if ( $grow['Status'] != GAME_STATUS_SETUP )
+   {
+      $itable->add_sinfo( T_('Last move#header'),
+         sprintf( T_('Move #%s at [%s]#mpg'), (int)$grow['Moves'], date(DATE_FMT3, $grow['X_Lastchanged']) ));
+   }
+
    return $itable;
 }//build_game_settings
 
@@ -428,7 +435,7 @@ function build_user_actions( $gp )
 function load_game( $gid )
 {
    $qsql = new QuerySQL(
-      SQLP_FIELDS, 'G.*',
+      SQLP_FIELDS, 'G.*', 'UNIX_TIMESTAMP(G.Lastchanged) AS X_Lastchanged',
       SQLP_FROM, 'Games AS G',
       SQLP_WHERE, "G.ID=$gid" );
    $query = $qsql->get_select() . ' LIMIT 1';
