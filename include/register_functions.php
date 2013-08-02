@@ -198,12 +198,11 @@ class UserRegistration
       {
          //reject the O0, l1I and S5 confusing matchings (used by account usurpers)
          //for instance, with the Arial font, a I and a l can't be distinguished
-         $regx = preg_quote($this->uhandle); //quotemeta()
-         $regx = eregi_replace( '[0o]', '[0o]', $regx);
-         $regx = eregi_replace( '[1li]', '[1li]', $regx);
-         $regx = eregi_replace( '[5s]', '[5s]', $regx);
-         $regx = mysql_addslashes($regx);
-         $regx = '^'.$regx.'$';
+         $regx = preg_replace(
+            array( '/[0o]/i', '/[1li]/i', '/[5s]/i' ), // match
+            array( '[0o]',    '[1li]',    '[5s]' ),    // replacements (regex for REGEXP-SQL-match)
+            preg_quote($this->uhandle) ); //quotemeta()
+         $regx = '^' . mysql_addslashes($regx) . '$';
 
          $result = db_query( "UserReg.check_existing_user.find_player_regexp({$this->uhandle},[$regx]})",
             "SELECT Handle FROM Players WHERE Handle REGEXP '$regx'" );

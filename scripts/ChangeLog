@@ -18,6 +18,9 @@ ChangeLog
 
 2013-08-03 juga
 
+   * include/register_functions.php (UserRegistration.check_existing_user):
+   - cleanup: replaced deprecated PHP-function eregi_replace() with preg_replace()
+
    * include/std_functions.php (verify_invalid_email, get_request_user):
    - bugfix: parsing user-handle from URL checking on non-empty string as handle
      can be '000' for which check would be incorrect evaluating to false
