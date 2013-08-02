@@ -132,10 +132,10 @@ function itemL($text, $link='', $working=true, $last=false)
 
       item(T_('Waiting room'), "waiting_room.php", true);
       { $item_level++;
-         itemL(T_('New Game'), "new_game.php", true);
-         itemL(T_('All waiting games'), "waiting_room.php?good=0", true);
-         itemL(T_('Suitable waiting games'), "waiting_room.php?good=1", true);
-         itemL(T_('My waiting games'), "waiting_room.php?good=2", true, true);
+         item(T_('New Game'), "new_game.php", true);
+         item(T_('All waiting games'), "waiting_room.php?good=0", true);
+         item(T_('Suitable waiting games'), "waiting_room.php?good=1", true);
+         item(T_('My waiting games'), "waiting_room.php?good=2", true, true);
       } $item_level--;
 
       if ( ALLOW_TOURNAMENTS )
@@ -321,10 +321,10 @@ function itemL($text, $link='', $working=true, $last=false)
             item(T_('Surveys'), "list_surveys.php", true, true);
       } $item_level--;
 
-      itemL(T_('Bulletins'), "list_bulletins.php?read=2".URI_AMP."no_adm=1", true);
+      item(T_('Bulletins'), "list_bulletins.php?read=2".URI_AMP."no_adm=1", true);
       { $item_level++;
-         itemL(T_('Unread Bulletins (show with text)'), "list_bulletins.php?text=1".URI_AMP."view=1".URI_AMP."no_adm=1", true);
-         itemL(T_('My Bulletins'), "list_bulletins.php?text=0".URI_AMP."read=2".URI_AMP."mine=1".URI_AMP."no_adm=1", true, true);
+         item(T_('Unread Bulletins (show with text)'), "list_bulletins.php?text=1".URI_AMP."view=1".URI_AMP."no_adm=1", true);
+         item(T_('My Bulletins'), "list_bulletins.php?text=0".URI_AMP."read=2".URI_AMP."mine=1".URI_AMP."no_adm=1", true, true);
       } $item_level--;
 
       if ( ALLOW_FEATURE_VOTE )
@@ -338,8 +338,8 @@ function itemL($text, $link='', $working=true, $last=false)
       }
 
       if ( ALLOW_GAME_EDITOR )
-         itemL(T_('Game Editor'), "game_editor.php", true);
-      itemL(T_('Goban Editor'), "goban_editor.php", true);
+         item(T_('Game Editor'), "game_editor.php", true);
+      item(T_('Goban Editor'), "goban_editor.php", true);
 
       if ( @$player_row['admin_level'] )
          item(T_('Admin'), "admin.php", true);
