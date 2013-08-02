@@ -46,7 +46,7 @@ require_once 'include/register_functions.php';
          if ( !$errors )
          {
             $reg->register_user();
-            jump_to("status.php");
+            jump_to("verify_email.php?user=".urlencode($reg->uhandle));
          }
       }
       ta_end();
@@ -64,7 +64,7 @@ require_once 'include/register_functions.php';
 
    if ( is_array($errors) )
    {
-      $error_str = format_array( $errors, "\n<li>%s</li>" );
+      $error_str = format_array( $errors, "\n<li><span class=\"ErrorMsg\">%s</span></li>" );
 
       $reg_form->set_area(2);
       $reg_form->add_row( array( 'TAB', 'TEXT',
@@ -75,30 +75,32 @@ require_once 'include/register_functions.php';
 
    $reg_form->set_area(3);
    $reg_form->add_row( array( 'DESCRIPTION', T_('Userid'),
-                              'TEXTINPUT', $reg->build_key('userid'), 16, 16, $reg->uhandle ));
+                              'TEXTINPUT', $reg->build_key('userid'), 16, 16, $reg->uhandle,
+                              'TEXT', sptext(T_('Account to log in'), 1), ));
    $reg_form->add_row( array( 'DESCRIPTION', T_('Full name'),
-                              'TEXTINPUT', $reg->build_key('name'), 16, 80, $reg->name ));
+                              'TEXTINPUT', $reg->build_key('name'), 16, 40, $reg->name ));
    $reg_form->add_row( array( 'DESCRIPTION', T_('Password'),
                               'PASSWORD', $reg->build_key('passwd'), 16, 16, $reg->password ));
    $reg_form->add_row( array( 'DESCRIPTION', T_('Confirm password'),
                               'PASSWORD', $reg->build_key('passwd2'), 16, 16, $reg->password2 ));
-
-   $reg_form->add_row( array(
-      'TAB',
-      'CHECKBOX', $reg->build_key('policy'), '1', '', $reg->policy,
-      'TEXT', sprintf( T_('I have read and accepted the DGS <a href="%s" target="dgsTOS">Rules of Conduct</a>.'),
-                       HOSTBASE."policy.php" ) ));
 
    $reg_form->add_empty_row();
    $reg_form->add_row( array(
       'DESCRIPTION', T_('Email'),
       'TEXTINPUT', $reg->build_key('email'), 50, 80, $reg->email,
       'TEXT', "<br>\n"
-            . T_('The email is optional, though it\'s recommended to specify an email.')
+            . span('RegisterMsg', T_('To activate your account and confirm the registration, a validation code will be sent to your email.'))
             . "<br>\n"
-            . T_('In case you\'ll forget the DGS password a reset will be easier.')
+            . T_('The email is also used to send you new passwords or to inform about server related issues.')
             . "<br>\n"
             . sprintf( T_('The email is kept confidential, see "Privacy Policy" in the DGS <a href="%s" target="dgsTOS">Rules of Conduct</a>.'),
+                       HOSTBASE."policy.php" ) ));
+
+   $reg_form->add_empty_row();
+   $reg_form->add_row( array(
+      'TAB',
+      'CHECKBOX', $reg->build_key('policy'), '1', '', $reg->policy,
+      'TEXT', sprintf( T_('I have read and accepted the DGS <a href="%s" target="dgsTOS">Rules of Conduct</a>.'),
                        HOSTBASE."policy.php" ) ));
 
    $reg_form->add_row( array( 'SUBMITBUTTON', 'register', T_('Register') ));

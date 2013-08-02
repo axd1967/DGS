@@ -18,6 +18,41 @@ ChangeLog
 
 2013-08-03 juga
 
+   * include/db/verification.php (class Verification, ~.__construct, ~.to_string, ~.persist,
+       ~.insert, ~.update, ~.fillEntityData, ~.increase_verification_counter, ~.build_query_sql,
+       ~.new_from_row, ~.load_verification, ~.load_verifications, ~.build_code),
+     include/std_functions.php (USERFLAG_VERIFY_EMAIL, USERFLAG_ACTIVATE_REGISTRATION;
+       LOGIN_SKIP_VFY_CHK, is_logged_in),
+     include/register_functions.php (UserRegistration.check_userid, ~.register_user,
+       ~.process_verification),
+     include/error_functions.php (DgsErrors.need_db_errorlog),
+     include/error_codes.php (ErrorCode.init),
+     scripts/updates/database_changes_1_0_15_to_1_0_16.mysql,
+     scripts/data_export.php, skins/dragon/screen.css,
+     specs/db/dragon-ddl.sql, specs/db/table-Verification.txt, specs/quick_suite.txt,
+     verify_email.php (load_user_info),
+     register.php, site_map.php, INSTALL:
+   - added account-activation with mandatory verification of email-address on user-registration
+     - send activation-mail with verification-code to provided email-address on user-registration
+     - added Verification-table to verify email-address for user-registration and later email-change
+     - added check of user-flags on login showing error if account not activated yet
+   - added check on user-registration for max-length of user-id
+-----------
+-- added table for email-verification
+CREATE TABLE Verification (
+  ID int NOT NULL auto_increment,
+  uid int NOT NULL,
+  Verified datetime NOT NULL default '0000-00-00 00:00:00',
+  Created datetime NOT NULL default '0000-00-00 00:00:00',
+  Email varchar(80) NOT NULL,
+  Code varbinary(40) NOT NULL,
+  Counter tinyint unsigned NOT NULL default '0',
+  IP varchar(16) NOT NULL default '',
+  PRIMARY KEY (ID),
+  KEY uid_Verified (uid,Verified)
+) ENGINE=MyISAM ;
+-----------
+
    * include/register_functions.php (UserRegistration.check_existing_user):
    - cleanup: replaced deprecated PHP-function eregi_replace() with preg_replace()
 

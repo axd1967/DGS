@@ -2630,6 +2630,7 @@ Errors:
       - not_logged_in : user is not logged in
       - wrong_userid : unknown user-id provided for login
       - wrong_password : wrong password to login given user
+      - need_activation : newly registered accounts must first be activated by email verification
       - cookies_disabled : no cookies set with user-id and login-session
       - fever_vault : login quota exceeded
       - login_denied : login of user denied by admin

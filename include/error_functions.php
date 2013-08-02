@@ -273,6 +273,7 @@ class DgsErrors
     */
    public static function need_db_errorlog( $errcode )
    {
+      // keep in alphabetic-order
       static $skip_dblog = array(
             'bulkmessage_self' => 1,
             'cookies_disabled' => 1,
@@ -281,6 +282,7 @@ class DgsErrors
             'guest_may_not_receive_messages' => 1,
             'guest_no_invite' => 1,
             'handicap_range' => 1,
+            'invalid_args:nolog' => 1,
             'invite_self' => 1,
             'ko' => 1,
             'komi_bad_fraction' => 1,
@@ -292,6 +294,7 @@ class DgsErrors
             'mysql_connect_failed' => 1,
             'mysql_select_db_failed' => 1,
             'name_not_given' => 1,
+            'need_activation' => 1,
             'not_allowed_for_guest' => 1,
             'not_logged_in' => 1,
             'optlock_clash' => 1,
@@ -310,9 +313,12 @@ class DgsErrors
             'unknown_user' => 1,
             'userid_illegal_chars' => 1,
             'userid_in_use' => 1,
+            'userid_too_long' => 1,
+            'userid_too_short' => 1,
             'value_not_numeric' => 1,
             'value_out_of_range' => 1,
             'waitingroom_game_not_found' => 1,
+            'verification_invalidated' => 1,
             'waitingroom_not_enough_rated_fin_games' => 1,
             'waitingroom_not_in_rating_range' => 1,
             'waitingroom_not_same_opponent' => 1,

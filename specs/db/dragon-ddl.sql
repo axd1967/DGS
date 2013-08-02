@@ -3,7 +3,7 @@
 -- http://www.phpmyadmin.net
 --
 -- Host: localhost
--- Generation Time: Jul 14, 2013 at 10:10 PM
+-- Generation Time: Aug 03, 2013 at 01:33 AM
 -- Server version: 5.0.96
 -- PHP Version: 5.2.4-2ubuntu5.27
 
@@ -1455,6 +1455,25 @@ CREATE TABLE IF NOT EXISTS `UserQuota` (
   PRIMARY KEY  (`uid`),
   KEY `FeaturePointsUpdated` (`FeaturePointsUpdated`)
 ) ENGINE=MyISAM DEFAULT CHARSET=latin1;
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `Verification`
+--
+
+CREATE TABLE IF NOT EXISTS `Verification` (
+  `ID` int(11) NOT NULL auto_increment,
+  `uid` int(11) NOT NULL,
+  `Verified` datetime NOT NULL default '0000-00-00 00:00:00',
+  `Created` datetime NOT NULL default '0000-00-00 00:00:00',
+  `Email` varchar(80) NOT NULL,
+  `Code` varbinary(40) NOT NULL,
+  `Counter` tinyint(3) unsigned NOT NULL default '0',
+  `IP` varchar(16) NOT NULL default '',
+  PRIMARY KEY  (`ID`),
+  KEY `uid_Verified` (`uid`,`Verified`)
+) ENGINE=MyISAM  DEFAULT CHARSET=latin1;
 
 -- --------------------------------------------------------
 

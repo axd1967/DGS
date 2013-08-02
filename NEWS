@@ -7,6 +7,11 @@ Copyright (C) 2001-2013  Erik Ouchterlony, Jens-Uwe Gaspar
 
    New features and Major changes:
 
+   * <home register.php>User Registration</home>:
+      * Email is mandatory for new user registrations
+      * Send mail with verification-code on user-registration to verify email-address and activate account
+      * Show error for pages that require login, if account not activated yet
+
    * Changed default for max-handicap from 21 to board-size-dependent calculated max-handicap
       * Merged simple and expert new-game view into one <home new_game.php>new-game standard-view</home>,
         Merged jigo-check setting for fair-komi with adjust-komi setting
@@ -158,7 +163,7 @@ Copyright (C) 2001-2013  Erik Ouchterlony, Jens-Uwe Gaspar
       * Added bulletin-handler to
          * retrieve single bulletin
 
-   * Allow voting on features also if user finished unrated games
+   * Allow voting on <home features/list_votes.php>features</home> also if user finished unrated games
 
    * Added tooltips for main-menu entries
    * Added server-version in bottom-bar

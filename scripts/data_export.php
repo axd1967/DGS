@@ -324,6 +324,7 @@ function get_tables( $database)
             'Translationlog',
             'Translations',
             'UserQuota',
+            'Verification',
             'Waitingroom',
             'WaitingroomJoined',
          );

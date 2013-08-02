@@ -1,0 +1,40 @@
+###
+### Description of mysql table:  Verification
+###
+
+###########################################################################
+## --- Verification ---
+
+Description:
+   Table containing data to verify email with code sent to email.
+
+| Field    | Type                | Null | Key | Default             | Extra          |
++----------+---------------------+------+-----+---------------------+----------------+
+| ID       | int(11)             | NO   | PRI | NULL                | auto_increment |
+| uid      | int(11)             | NO   | MUL | NULL                |                |
+| Verified | datetime            | NO   |     | 0000-00-00 00:00:00 |                |
+| Created  | datetime            | NO   |     | 0000-00-00 00:00:00 |                |
+| Email    | varchar(80)         | NO   |     | NULL                |                |
+| Code     | varbinary(40)       | NO   |     | NULL                |                |
+| Counter  | tinyint(3) unsigned | NO   |     | 0                   |                |
+| IP       | varchar(16)         | NO   |     |                     |                |
+
+## Fields:
+
+* ID : primary key, verification-ID
+
+* uid : foreign key to Players.ID
+
+* Verified : date of verification of entry
+
+* Created : creation-date of entry
+
+* Email : email to verify
+
+* Code : verification-code
+   - normally generated from SHA1(text . time())
+
+* Counter : counting verification attemps to recognize brute-force attacks
+
+* IP : ip-address (v4) of user when requesting email-verification
+

@@ -149,15 +149,23 @@ The data file can be downloaded and extracted from:
 
 
 (( The following creation of an DGS admin user could be delayed until you need it:
-Add at least one admin user by registering a user via the website and
+Add at least one super-admin user by registering a user via the website and
 then give him the full set of priviledges by manually setting his
 Adminlevel field to 0xffff (setting all bits) in the Players table.
 
-> mysql -D dragondb
+   > mysql -D dragondb
 
-mysql> UPDATE Players SET Adminlevel=0xffff WHERE Handle='adminusernick';
+   mysql> UPDATE Players SET Adminlevel=0xffff WHERE Handle='adminusernick';
 
 Then, this user will be able to manage the other admins in the Admin-menu.
+
+You may also need to manually activate the super-admins registration,
+because sending email may not work yet sending out a verification-code
+after the registration.
+
+   mysql> UPDATE Players SET UserFlags=UserFlags & (4|8) WHERE Handle='adminusernick';
+   mysql> UPDATE Verification AS V INNER JOIN Players AS P ON P.ID=V.uid SET V.Verified=NOW() WHERE P.Handle='adminusernick' LIMIT 1;
+
 ))
 
 

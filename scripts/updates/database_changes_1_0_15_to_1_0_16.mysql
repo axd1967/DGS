@@ -95,3 +95,18 @@ CREATE TABLE GameInvitation (
 --    repeat it till all game-invitations are fixed by migrating them.
 
 
+-- added table for email-verification
+CREATE TABLE Verification (
+  ID int NOT NULL auto_increment,
+  uid int NOT NULL,
+  Verified datetime NOT NULL default '0000-00-00 00:00:00',
+  Created datetime NOT NULL default '0000-00-00 00:00:00',
+  Email varchar(80) NOT NULL,
+  Code varbinary(40) NOT NULL,
+  Counter tinyint unsigned NOT NULL default '0',
+  IP varchar(16) NOT NULL default '',
+  PRIMARY KEY (ID),
+  KEY uid_Verified (uid,Verified)
+) ENGINE=MyISAM ;
+
+

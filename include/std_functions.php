@@ -223,9 +223,11 @@ define('MAX_REJECT_TIMEOUT', 120); // days
 
 
 //-----
-// UserFlags (also stored in cookie)
+// Players.UserFlags (also stored in cookie)
 define('USERFLAG_JAVASCRIPT_ENABLED', 0x0001);
 define('USERFLAG_NFY_BUT_NO_OR_INVALID_EMAIL', 0x0002); // user has SendEmail>'' but missing or invalid Email
+define('USERFLAG_VERIFY_EMAIL', 0x0004); // if set, Players.Email will be replaced with verified email
+define('USERFLAG_ACTIVATE_REGISTRATION', 0x0008); // if set, account will be activated (accessible) after email-verification
 //-----
 
 
@@ -2480,16 +2482,17 @@ define('LOGIN_RESET_NOTIFY', 0x04); // set Players.Notify to NONE (nothing to no
 define('LOGIN_SKIP_UPDATE',  0x08); // skips update & other checks for Players-table or main-menu; for error-page (to not decrease quota)
 define('LOGIN_QUICK_PLAY',   0x10);
 define('LOGIN_NO_QUOTA_HIT', 0x20);
+define('LOGIN_SKIP_VFY_CHK', 0x40); // skip verify-checks to avoid redirect-loop
 define('LOGIN_DEFAULT_OPTS', (LOGIN_UPD_ACTIVITY|LOGIN_RESET_NOTIFY));
 
-/**
+/*!
  * \brief Check if the player $handle can be logged in
  * \return returns 0 if $handle can't be logged in;
  *    or for quick_suite==true if jump_to other page would have been initiated
  * \note else fill the $player_row array with its characteristics,
  *    load the player language definitions, set his timezone
  *    and finally returns his ID (i.e. >0)
- **/
+ */
 function is_logged_in($handle, $scode, &$player_row, $login_opts=LOGIN_DEFAULT_OPTS ) //must be called from main dir
 {
    global $hostname_jump, $NOW, $dbcnx, $ActivityForHit, $ActivityMax, $is_down;
@@ -2538,6 +2541,10 @@ function is_logged_in($handle, $scode, &$player_row, $login_opts=LOGIN_DEFAULT_O
       }
       mysql_free_result($result);
    }
+
+   $user_flags = (int)@$player_row['UserFlags'];
+   if ( !($login_opts & LOGIN_SKIP_VFY_CHK) && ($user_flags & USERFLAG_ACTIVATE_REGISTRATION) )
+      error('need_activation');
 
    if ( !$skip_update && $is_quick_suite ) // NOTE: for now only for quick-suite
       writeIpStats( (($login_opts & LOGIN_QUICK_PLAY) ? 'QPL' : ($is_quick_suite ? 'QDO' : 'WEB')) );

@@ -104,6 +104,14 @@ class ErrorCode
          $arr['user_init_error'] =
             T_("User initialization error occured because of inconsistent user data. Please report this problem to the support.");
 
+         $arr['verification_invalidated'] =
+            T_("Verification has been invalidated due to massive overuse.");
+
+         $arr['need_activation'] =
+            str_repeat("<br>\n", 3) .
+            span('ErrMsgCode',
+               T_('Before you can use your account, you first need to activate it with the verification-code sent to you via email!'));
+
          $arr_logid['wrong_players'] = 1;
          $arr['wrong_players'] =
             T_("The player-IDs are wrong for this operation. Please send this problem to the support.");
@@ -210,11 +218,13 @@ class ErrorCode
          $arr['mysql_insert_game'] =
             T_("Sorry, the additon of the game to the database seems to have failed.");
 
-         $arr_logid['mysql_insert_move'] = $arr_logid['mysql_update_game'] = 1;
-         $arr['mysql_insert_move'] = $arr['mysql_update_game'] =
+         $arr_logid['mysql_insert_move'] = 1;
+         $arr['mysql_insert_move'] =
             T_("The insertion of the move into the database seems to have failed. " .
                "This may or may not be a problem, please return to the game to see " .
                "if the move has been registered.");
+         $arr_logid['mysql_update_game'] = 1;
+         $arr['mysql_update_game'] = $arr['mysql_insert_move'];
 
          $arr_logid['mysql_insert_player'] = 1;
          $arr['mysql_insert_player'] =
@@ -440,6 +450,9 @@ class ErrorCode
          $arr['userid_too_short'] =
             T_("Sorry, userid must be at least 3 characters long.");
 
+         $arr['userid_too_long'] =
+            T_("Sorry, userid can be at most 16 characters long.");
+
          $arr['invalid_user'] = // Players.ID
             T_("Sorry, invalid player id used.");
 
@@ -606,6 +619,7 @@ class ErrorCode
             T_("Sorry, there's a configuration problem with a search-filter.");
 
          $arr_logid['invalid_args'] = 1;
+         $arr['invalid_args:nolog'] = // without db-log
          $arr['invalid_args'] =
             T_("Sorry, invalid arguments used.");
 

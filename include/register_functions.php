@@ -20,8 +20,10 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 $TranslateGroups[] = "Start";
 
 require_once 'include/std_functions.php';
+require_once 'include/classlib_user.php';
 require_once 'include/classlib_userconfig.php';
 require_once 'include/classlib_userquota.php';
+require_once 'include/db/verification.php';
 require_once 'forum/forum_functions.php';
 require_once 'include/error_codes.php';
 
@@ -134,6 +136,8 @@ class UserRegistration
    {
       if ( strlen( $this->uhandle ) < 3 )
          $this->_error('userid_too_short', "UserReg.check_userid({$this->uhandle})");
+      if ( strlen( $this->uhandle ) > 16 )
+         $this->_error('userid_too_long', "UserReg.check_userid({$this->uhandle})");
       if ( illegal_chars( $this->uhandle ) )
          $this->_error('userid_illegal_chars', "UserReg.check_userid({$this->uhandle})");
    }
@@ -216,7 +220,7 @@ class UserRegistration
    // do the registration to the database
    public function register_user( $set_cookie=true )
    {
-      global $NOW;
+      global $NOW, $base_path;
 
       $code = make_session_code();
       $ip = (string)@$_SERVER['REMOTE_ADDR'];
@@ -237,6 +241,9 @@ class UserRegistration
             $upd->upd_txt('IP', $ip );
          if ( $browser )
             $upd->upd_txt('Browser', $browser );
+         $upd->upd_num('VaultCnt', VAULT_CNT ); // initial quota
+         $upd->upd_time('VaultTime', $NOW + VAULT_DELAY );
+         $upd->upd_num('UserFlags', USERFLAG_ACTIVATE_REGISTRATION|USERFLAG_VERIFY_EMAIL );
          $result = db_query( "UserReg.register_user.insert_player({$this->uhandle})",
             "INSERT INTO Players SET " . $upd->get_query() );
 
@@ -248,6 +255,29 @@ class UserRegistration
          ConfigPages::insert_default( $new_id );
          ConfigBoard::insert_default( $new_id );
          UserQuota::insert_default( $new_id );
+
+         // send activation-mail with verification-code for email
+         $vfy_code = Verification::build_code( $new_id, $this->email );
+         $vfy = new Verification( 0, $new_id, 0, $NOW, $this->email, $vfy_code );
+         if ( $vfy->insert() )
+         {
+            $vfy_id = $vfy->ID;
+            $text = sprintf( T_('You are now registered with an account at Dragon Go Server, %s!'), $this->uhandle ) . "\n\n"
+               . T_('Your account\'s user-id is:') . " {$this->uhandle}\n\n"
+               . T_('Before you can use your account, you first need to activate it.') . "\n"
+               . T_('You may be redirected to login first with your chosen password.') . "\n\n"
+               . T_('To activate your account, please follow this link:#reg') . "\n\n"
+               . "    ".HOSTBASE."verify_email.php?uid=$new_id".URI_AMP_IN."vid={$vfy_id}".URI_AMP_IN."code=".urlencode($vfy_code)."\n\n"
+               . sprintf( T_('This verification code can only be used once and expires after %s days.'),
+                          VFY_MAX_DAYS_CODE_VALID ) . "\n\n"
+               . T_('Please do not reply to this automated message!') . "\n"
+               . T_('In case of problems, please login as guest-user and ask for help in the support-forum:') . "\n\n"
+               . "    ".HOSTBASE."forum/read.php?forum=".FORUM_ID_SUPPORT . "\n\n"
+               . T_('Provide your user-id and describe the problem with the registration process.') . "\n\n"
+               ;
+            send_email( "UserReg.register_user.send_activation($new_id,$vfy_id)", $this->email, EMAILFMT_SKIP_WORDWRAP,
+               $text, T_('Welcome to the Dragon Go Server') );
+         }
       }
       ta_end();
 
@@ -304,6 +334,106 @@ class UserRegistration
       }
       ta_end();
    }//register_blocked_user
+
+
+   /*!
+    * \brief Processes email-verification (optionally coupled with account activation after registration).
+    * \param $user User-object of user to verify code for
+    * \param $vid Verification.ID to verify code against
+    * \param $code input-code to verify against
+    * \return error-string on failure to process verification successfully; or integer-bitmask-value on success
+    *       with set flags (USERFLAG_VERIFY_EMAIL, USERFLAG_ACTIVATE_REGISTRATION) depending on executed action
+    *
+    * \note User need to be logged-in!
+    */
+   public static function process_verification( $user, $vid, $code )
+   {
+      global $player_row, $NOW;
+
+      // paranoid checking to avoid abuse ....
+
+      if ( @$player_row['ID'] == 0 )
+         error('login_if_not_logged_in', "UserReg.process_verification.check_login");
+      if ( !($user instanceof User) )
+         error('invalid_args:nolog', "UserReg.process_verification.check.user($vid)");
+      $uid = $user->ID;
+      if ( !is_numeric($uid) )
+         error('invalid_args:nolog', "UserReg.process_verification.check.uid($uid,$vid)");
+
+      if ( !is_numeric($vid) || $vid <= 0 )
+         return sprintf( T_('Missing valid id to process verification for user [%s].'), $user->Handle );
+      if ( $uid != $player_row['ID'] )
+         return sprintf( T_('Logged-in as wrong user [%s] to process verification with id [%s] for user [%s].'),
+            @$player_row['Handle'], $vid, $user->Handle );
+
+      $user_flags = (int)$user->urow['UserFlags'];
+      if ( $user_flags == 0 )
+         return sprintf( T_('There is nothing to verify for user [%s].'), $user->Handle );
+      if ( strlen($code) == 0 )
+         return sprintf( T_('Missing code to process verification with id [%s].'), $vid );
+
+      $verification = Verification::load_verification( $vid );
+      if ( is_null($verification) )
+         return sprintf( T_('No verification entry found for verification-id [%s].'), $vid );
+      if ( $verification->uid != $uid )
+         return sprintf( T_('Found wrong user [%s] to process verification with id [%s].'), $user->Handle, $vid );
+      if ( $verification->Verified != 0 )
+         return sprintf( T_('Verification with id [%s] has been processed already and is no longer valid.'), $vid );
+
+      // expire verification by invalidating for too old codes
+      if ( $verification->Created < $NOW - VFY_MAX_DAYS_CODE_VALID*SECS_PER_HOUR )
+      {
+         if ( $user_flags & USERFLAG_ACTIVATE_REGISTRATION )
+            $helptext = T_('Please contact support to help with your registration.');
+         elseif ( $user_flags & USERFLAG_VERIFY_EMAIL )
+            $helptext = T_('Please repeat changing your email getting a new verification-code, or else contact support.');
+
+         $verification->Verified = $NOW;
+         $verification->update();
+         return sprintf( T_('Verification-code expired after %s days.'), VFY_MAX_DAYS_CODE_VALID ) . "<br>\n$helptext";
+      }
+
+      // safety-checks on verification-db-data (shouldn't happen)
+      $errorcode = verify_invalid_email( "UserReg:process_verification.verify_email($uid,$vid)",
+         $verification->Email, /*die-on-err*/false );
+      if ( $errorcode )
+         error($errorcode, "UserReg:process_verification.check_email($uid,$vid)");
+      if ( strlen(trim($verification->Code)) < VFY_MIN_CODELEN )
+         error('internal_error', "UserReg.process_verification.bad_code.verify_code($uid,$vid)");
+
+      // invalidate verification if tried too often (to prevent brute-force attack)
+      if ( $verification->increase_verification_counter(25) )
+         error('verification_invalidated', "UserReg.process_verification.check.count($uid,$vid)");
+
+      if ( strcmp($code, $verification->Code) != 0 )
+         return T_('Verification code is invalid!');
+
+
+      // verify-email and/or activate registration
+      ta_begin();
+      {//HOT-section for handling verification
+         $verification->Verified = $NOW;
+         $verification->update();
+
+         $clear_userflags = 0;
+         if ( $user_flags & USERFLAG_ACTIVATE_REGISTRATION ) // activate account by clearing flag, if email verified
+            $clear_userflags |= USERFLAG_ACTIVATE_REGISTRATION;
+         if ( $user_flags & USERFLAG_VERIFY_EMAIL ) // replace email and clear flag, if email verified
+            $clear_userflags |= USERFLAG_VERIFY_EMAIL;
+         if ( $clear_userflags > 0 )
+         {
+            // NOTE: this update could go wrong leaving verification invalidated -> must be handled by admin
+            $upd = new UpdateQuery('Players');
+            $upd->upd_txt('Email', $verification->Email );
+            $upd->upd_raw('UserFlags', "UserFlags & ~$clear_userflags" );
+            db_query("UserReg:process_verification.upd_email_uflags($uid,$vid,$user_flags->$clear_userflags)",
+               "UPDATE Players SET " . $upd->get_query() . " WHERE ID=$uid LIMIT 1" );
+         }
+      }
+      ta_end();
+
+      return $clear_userflags;
+   }//process_verification
 
 } // end of 'UserRegistration'
 

@@ -80,7 +80,7 @@ function itemL($text, $link='', $working=true, $last=false)
 {
    connect2mysql();
 
-   $logged_in = who_is_logged( $player_row);
+   $logged_in = who_is_logged( $player_row, LOGIN_DEFAULT_OPTS|LOGIN_SKIP_VFY_CHK );
    $id = (int)@$player_row['ID'];
    $uhandle = @$player_row['Handle'];
 
@@ -102,6 +102,9 @@ function itemL($text, $link='', $working=true, $last=false)
    item(T_('Welcome page'), "index.php", true);
    { $item_level++;
       itemL(T_('Register new account'), "register.php", true);
+      { $item_level++;
+         item(T_('Verify email'), "verify_email.php?uid=$id", true, true);
+      } $item_level--;
       itemL(T_('Forgot password?'), "forgot.php", true);
       itemL(T_('Introduction'), "introduction.php", true);
       item(T_('Status'), "status.php", true);
