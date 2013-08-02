@@ -18,6 +18,10 @@ ChangeLog
 
 2013-08-03 juga
 
+   * include/std_functions.php (verify_invalid_email, get_request_user):
+   - bugfix: parsing user-handle from URL checking on non-empty string as handle
+     can be '000' for which check would be incorrect evaluating to false
+
    * include/error_codes.php (ErrorCode.is_shown_error_log_id, ~.init),
      include/error_functions.php (DgsErrors.need_db_errorlog):
    - overhauled special-handling settings for error-codes

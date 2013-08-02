@@ -1181,9 +1181,8 @@ function verify_invalid_email( $debugmsg, $email, $die_on_error=true )
    // - see http://en.wikipedia.org/wiki/Email_address#Local_part
    //   normally also the following chars are allowed: ! # $ % & ' * + - / = ? ^ _ ` { | } ~
    //   though some systems/organizations do not support all of these.
-   //   DGS using only ...
    // - RFC 2822 - 3.4.1 : Addr-spec specification, see http: //www.faqs.org/rfcs/rfc2822
-   static $atext = "[-+_a-z0-9]";
+   static $atext = "[-+_a-z0-9]"; // allowed chars for DGS' email-localpart
    $regexp = "/^($atext+)(\\.$atext+)*@([-a-z0-9]+)(\\.[-a-z0-9]+)*(\\.[-a-z0-9]{2,63})\$/i";
    $res= preg_match($regexp, $email);
    if ( !$res ) // invalid email
@@ -2419,7 +2418,7 @@ function get_request_user( &$uid, &$uhandle, $from_referer=false)
       return 1; //bit0
    $uid = 0;
    $uhandle = (string)@$_REQUEST[UHANDLE_NAME];
-   if ( $uhandle )
+   if ( (string)$uhandle != '' ) // '000' is valid handle
       return 2; //bit1
    if ( $from_referer && ($refer=@$_SERVER['HTTP_REFERER']) )
    {
