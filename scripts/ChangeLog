@@ -16,6 +16,13 @@ Developers INFO:
 ChangeLog
 ------------------------------------------------------------------
 
+2013-08-03 juga
+
+   * include/error_codes.php (ErrorCode.is_shown_error_log_id, ~.init),
+     include/error_functions.php (DgsErrors.need_db_errorlog):
+   - overhauled special-handling settings for error-codes
+   - bugfix: do not show Errorlog-id for regular error-codes if not explicitly specified
+
 2013-07-31 juga
 
    * game_players.php (build_game_settings, load_game):

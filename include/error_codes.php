@@ -57,7 +57,7 @@ class ErrorCode
       if ( isset(self::$ARR_ERRORS['LOG_ID'][$error_code]) )
          return self::$ARR_ERRORS['LOG_ID'][$error_code];
       else
-         return true; // show error-log-id for unknown error-code
+         return !isset(self::$ARR_ERRORS['TEXT'][$error_code]); // show error-log-id for unknown error-code
    }
 
    /*! \brief Returns true, if error-code contains sensitive-data that is not meant for public eyes. */
@@ -75,62 +75,36 @@ class ErrorCode
    {
       global $base_path;
 
-      // NOTE: currently undefined error-codes:
-      //   assert, couldnt_open_file, database_corrupted, mysql_insert_post, mysql_update_message,
-      //   mysql_update_game, not_implemented
-
       // lazy-init of texts
       if ( !isset(self::$ARR_ERRORS['TEXT']) )
       {
-         $arr = array();
-         $arr_logid = array();
+         // error-codes for which error-details contain sensitive data, that should be hidden for non-admin users.
+         //    has entry = debug-msg (label) with details not shown
+         //    value 0 = special handling required, see handle_error(); only codes with sensitive data needs to be listed here
+         //    value 1 = just hide error-details
          $arr_secret = array();
 
-         $arr_logid['internal_error'] = 1;
-         $arr_logid['constraint_votes_delete_feature'] = 1;
-         $arr_logid['couldnt_update_translation'] = 1;
-         $arr_logid['feature_disabled'] = 1;
-         $arr_logid['folder_not_found'] = 1;
-         $arr_logid['game_delete_invitation'] = 1;
-         $arr_logid['invalid_action'] = 1;
-         $arr_logid['invalid_args'] = 1;
-         $arr_logid['invalid_command'] = 1;
-         $arr_logid['invalid_method'] = 1;
-         $arr_logid['invalid_filter'] = 1;
-         $arr_logid['ip_blocked_guest_login'] = 1;
-         $arr_logid['ip_blocked_register'] = 1;
-         $arr_logid['mail_failure'] = 1;
-         $arr_logid['max_games'] = 1;
-         $arr_logid['move_problem'] = 1;
-         $arr_logid['mysql_connect_failed'] = 1;
-         $arr_logid['mysql_insert_game'] = 1;
-         $arr_logid['mysql_insert_message'] = 1;
-         $arr_logid['mysql_insert_move'] = 1;
-         $arr_logid['mysql_insert_player'] = 1;
-         $arr_logid['mysql_insert_post'] = 1;
-         $arr_logid['mysql_query_failed'] = 1;
-         $arr_logid['mysql_select_db_failed'] = 1;
-         $arr_logid['mysql_start_game'] = 1;
-         $arr_logid['mysql_update_game'] = 1;
-         $arr_logid['page_not_found'] = 1;
-         $arr_logid['unknown_message'] = 1;
-         $arr_logid['unknown_parent_post'] = 1;
-         $arr_logid['user_mismatch'] = 1;
-         $arr_logid['value_out_of_range'] = 1;
+         // NOTE: currently undefined error-codes (without error-text which is possible):
+         //   assert, couldnt_open_file, database_corrupted, mysql_insert_post, mysql_update_message,
+         //   mysql_update_game, not_implemented
 
-         $arr_secret['mysql_query_failed'] = 0; // contains DB-query, but handle in error.php (for admin)
-         $arr_secret['bad_mail_address'] = 1; // contains email
-         $arr_secret['mail_failure'] = 1; // contains email
+         // error-codes for which Errorlog.ID is shown (reference for support); keep in alphabetic-order
+         $arr_logid = array();
+         $arr_logid['mysql_insert_post'] = 1;
 
          // IMPORTANT NOTE:
          //   when adding new error-codes also check DgsErrors::need_db_errorlog()-func in 'include/error_functions.php' !!
+         $arr = array();
 
+         $arr_logid['internal_error'] = 1;
          $arr['internal_error'] = // default-error-text
-            T_("Unknown problem. This shouldn't happen. Please send the url of this page to the support, so that this doesn't happen again.");
+            T_("Unknown problem. This shouldn't happen. Please report this to the support describing the context of your actions.");
 
+         $arr_logid['user_init_error'] = 1;
          $arr['user_init_error'] =
             T_("User initialization error occured because of inconsistent user data. Please report this problem to the support.");
 
+         $arr_logid['wrong_players'] = 1;
          $arr['wrong_players'] =
             T_("The player-IDs are wrong for this operation. Please send this problem to the support.");
 
@@ -158,6 +132,7 @@ class ErrorCode
          $arr['illegal_position'] =
             T_("This move leads to an illegal board position.");
 
+         $arr_logid['invalid_action'] = 1;
          $arr['invalid_action'] =
             T_("This type of action is either unknown or can't be used in this state of the game.");
 
@@ -179,12 +154,15 @@ class ErrorCode
          $arr['game_already_accepted'] =
             T_("Sorry, can't find the game you are invited to. Already accepted?");
 
+         $arr_logid['game_delete_invitation'] = 1;
          $arr['game_delete_invitation'] =
             T_("Delete game failed. This is problably not a problem.");
 
+         $arr_logid['invite_bad_gamesetup'] = 1;
          $arr['invite_bad_gamesetup'] =
             T_("Sorry, missing game-setup for invitation. Please contact support.");
 
+         $arr_logid['max_games'] = 1;
          $arr['max_games'] =
             T_("Sorry, your limit on started games has exceeded.");
 
@@ -201,6 +179,7 @@ class ErrorCode
             T_("Sorry, you may not retake a stone which has just captured a stone, " .
                "since it would repeat a previous board position. Look for 'ko' in the rules.");
 
+         $arr_logid['unknown_ruleset'] = 1;
          $arr['unknown_ruleset'] =
             T_("Sorry, an unknown ruleset has been used.");
 
@@ -216,33 +195,41 @@ class ErrorCode
          $arr['time_limit_too_small'] =
             T_("The time limit is too small, please choose at least one hour.");
 
+         $arr_logid['move_problem'] = 1;
          $arr['move_problem'] =
             T_("An error occurred for this move. Usually it works if you try again, otherwise please contact the support.");
 
          $arr['mysql_connect_failed'] =
             T_("Connection to database failed. Please wait a few minutes and test again.");
 
+         $arr_logid['mysql_insert_message'] = 1;
          $arr['mysql_insert_message'] =
             T_("Sorry, the additon of the message to the database seems to have failed.");
 
+         $arr_logid['mysql_insert_game'] = 1;
          $arr['mysql_insert_game'] =
             T_("Sorry, the additon of the game to the database seems to have failed.");
 
+         $arr_logid['mysql_insert_move'] = $arr_logid['mysql_update_game'] = 1;
          $arr['mysql_insert_move'] = $arr['mysql_update_game'] =
             T_("The insertion of the move into the database seems to have failed. " .
                "This may or may not be a problem, please return to the game to see " .
                "if the move has been registered.");
 
+         $arr_logid['mysql_insert_player'] = 1;
          $arr['mysql_insert_player'] =
             T_("The insertion of your data into the database seems to have failed. " .
                "If you can't log in, please try once more and, if this fails, contact the support.");
 
+         $arr_secret['mysql_query_failed'] = 0; // contains DB-query, but handle in error.php (for admin)
+         $arr_logid['mysql_query_failed'] = 1;
          $arr['mysql_query_failed'] =
             T_("Database query failed. Please wait a few minutes and try again.");
 
          $arr['mysql_select_db_failed'] =
             T_("Couldn't select the database. Please wait a few minutes and try again.");
 
+         $arr_logid['mysql_start_game'] = 1;
          $arr['mysql_start_game'] =
             T_("Sorry, couldn't start the game. Please wait a few minutes and try again.");
 
@@ -261,9 +248,12 @@ class ErrorCode
             T_("Sorry, no email has been given, so I can't send you the password.") . ' ' .
             $arr['no_email:support'];
 
+         $arr_secret['bad_mail_address'] = 1; // contains email
          $arr['bad_mail_address'] = //an email address validity function should never be treated as definitive
             T_("Sorry, the email given does not seem to be a valid address. Please, verify your spelling or try another one.");
 
+         $arr_secret['mail_failure'] = 1; // contains email
+         $arr_logid['mail_failure'] = 1;
          $arr['mail_failure'] =
             T_("Sorry, an error occured during sending of the email.");
 
@@ -288,6 +278,7 @@ class ErrorCode
          $arr['multi_player_msg_no_mpg'] =
             T_('Multi-player-game message can only be created for a multi-player-game.');
 
+         $arr_logid['multi_player_invite_unknown_user'] = 1;
          $arr['multi_player_invite_unknown_user'] =
             T_('This shouldn\'t happen. Found unknown invited user for multi-player-game message. Please contact an admin.');
 
@@ -300,12 +291,14 @@ class ErrorCode
          $arr['not_allowed_for_guest'] =
             T_("Sorry, this is not allowed for guests, please first register a personal account");
 
+         $arr_logid['ip_blocked_guest_login'] = 1;
          $arr['ip_blocked_guest_login'] =
             T_('Sorry, you are not allowed to login as guest to this server. The IP address you are using has been blocked by the admins.') .
                "<br><br>\n" .
                sprintf( T_('If you think the IP block is not intended for you, please register your account with the <a href="%s">alternative registration page</a>.'),
                   HOSTBASE."register.php" );
 
+         $arr_logid['ip_blocked_register'] = 1;
          $arr['ip_blocked_register'] =
             T_('Sorry, you are not allowed to register a new account. The IP address you are using has been blocked by the admins.');
 
@@ -334,9 +327,11 @@ class ErrorCode
          $arr['cookies_disabled'] =
             T_("Sorry, you haven't enabled cookies in your browser.");
 
+         $arr_logid['feature_disabled'] = 1;
          $arr['feature_disabled'] =
             T_("Sorry, this feature has been disabled on this server.");
 
+         $arr_logid['upload_miss_temp_folder'] = 1;
          $arr['upload_miss_temp_folder'] = // Introduced in PHP 4.3.10 and PHP 5.0.3
             T_("Sorry, missing a temporary folder to upload files. Please contact the administrators.");
 
@@ -352,6 +347,7 @@ class ErrorCode
          $arr['already_played'] =
             T_("Sorry, this turn has already been played.");
 
+         $arr_logid['page_not_found'] = 1;
          $arr['page_not_found'] = // see error.php
             T_('Page not found. Please contact the server administrators and inform them of the time the ' .
                'error occurred, and anything you might have done that may have caused the error.');
@@ -423,15 +419,18 @@ class ErrorCode
          $arr['unknown_post'] =
             T_("Sorry, I couldn't find the post you wanted to show.");
 
+         $arr_logid['unknown_parent_post'] = 1;
          $arr['unknown_parent_post'] =
             T_("Hmm, this message seems to be a reply to a non-existing post.");
 
+         $arr_logid['unknown_message'] = 1;
          $arr['unknown_message'] =
             T_("Sorry, I couldn't find the message you wanted to show.");
 
          $arr['unknown_user'] =
             T_("Sorry, I couldn't find this user.");
 
+         $arr_logid['user_mismatch'] = 1;
          $arr['user_mismatch'] =
             T_("Sorry, the logged user seems to have changed during the operation.");
 
@@ -523,6 +522,7 @@ class ErrorCode
          $arr['translation_bad_language_or_group'] =
             T_("Sorry, I couldn't find the language or group you want to translate. Please contact the support.");
 
+         $arr_logid['couldnt_update_translation'] = 1;
          $arr['couldnt_update_translation'] =
             T_("Sorry, something went wrong when trying to insert the new translations into the database.");
 
@@ -538,6 +538,7 @@ class ErrorCode
          $arr['unknown_tournament'] =
             T_("Sorry, I couldn't find the given tournament.");
 
+         $arr_logid['bad_tournament'] = 1;
          $arr['bad_tournament'] =
             T_("Sorry, there's something wrong with this tournament. Please contact a tournament admin.");
 
@@ -565,6 +566,7 @@ class ErrorCode
          $arr['unknown_tournament_news'] =
             T_("Sorry, I couldn't find the given tournament news or you are not allowed to view this tournament news entry.");
 
+         $arr_logid['bad_tournament_news'] = 1;
          $arr['bad_tournament_news'] =
             T_("Sorry, there's something wrong with the tournament-news. Please contact a tournament admin.");
 
@@ -592,24 +594,29 @@ class ErrorCode
          $arr['tournament_wrong_status'] =
             T_('Sorry, tournament is on wrong status to allow this action for tournament.');
 
+         $arr_logid['folder_not_found'] = 1;
          $arr['folder_not_found'] =
             T_("Sorry, couldn't find the specified message folder.");
 
          $arr['folder_forbidden'] =
             T_("Sorry, this folder can not be used for this operation.");
 
+         $arr_logid['invalid_filter'] = 1;
          $arr['invalid_filter'] =
             T_("Sorry, there's a configuration problem with a search-filter.");
 
+         $arr_logid['invalid_args'] = 1;
          $arr['invalid_args'] =
             T_("Sorry, invalid arguments used.");
 
          $arr['miss_args'] =
             T_("Sorry, an argument is missing.");
 
+         $arr_logid['invalid_command'] = 1;
          $arr['invalid_command'] =
             T_("Sorry, invalid quick-suite command used.");
 
+         $arr_logid['invalid_method'] = 1;
          $arr['invalid_method'] =
             T_("Sorry, there's a problem with a class-method.");
 
@@ -631,6 +638,7 @@ class ErrorCode
          $arr['entity_init_error'] =
             T_("Sorry, Entity-class initialization is wrong.");
 
+         $arr_logid['constraint_votes_delete_feature'] = 1;
          $arr['constraint_votes_delete_feature'] =
             T_("Sorry, feature can't be deleted because of existing votes for feature.");
 
@@ -655,9 +663,11 @@ class ErrorCode
          $arr['survey_edit_not_allowed'] =
             T_("Sorry, you are not allowed to edit this survey on current status.");
 
+         $arr_logid['miss_user_quota'] = 1;
          $arr['miss_user_quota'] =
             T_("Sorry, something is wrong with your user data. Please contact an administrator to fix this.");
 
+         $arr_logid['invalid_profile'] = 1;
          $arr['invalid_profile'] =
             T_("Sorry, this profile is not existing or is not suitable for this operation.");
 
