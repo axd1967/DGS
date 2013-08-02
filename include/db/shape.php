@@ -69,7 +69,7 @@ class Shape
 
    public $User; // User-object
 
-   /*! \brief Constructs Bulletin-object with specified arguments. */
+   /*! \brief Constructs Shape-object with specified arguments. */
    public function __construct( $id=0, $uid=0, $user=null, $name='', $size=19, $flags=0, $snapshot='', $notes='',
          $created=0, $lastchanged=0 )
    {
