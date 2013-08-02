@@ -104,7 +104,7 @@ function get_executives( $level )
 {
    connect2mysql();
 
-   $logged_in = who_is_logged( $player_row);
+   $logged_in = who_is_logged( $player_row, LOGIN_DEFAULT_OPTS|LOGIN_SKIP_VFY_CHK );
    $img_admin = MINI_SPACING . echo_image_admin(ADMINGROUP_EXECUTIVE);
 
    start_page(T_('People'), true, $logged_in, $player_row );

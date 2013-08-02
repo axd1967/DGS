@@ -18,6 +18,11 @@ ChangeLog
 
 2013-08-03 juga
 
+   * goodies/index.php, docs.php, error.php, faq.php, install.php, introduction.php,
+     licence.php, links.php, news.php, people.php, policy.php, rank_converter.php,
+     snapshot.php, statistics.php, statisticspng.php, statratingspng.php:
+   - skip account-activation-check on login for pages, that are accessible without login
+
    * include/db/verification.php (class Verification, ~.__construct, ~.to_string, ~.persist,
        ~.insert, ~.update, ~.fillEntityData, ~.increase_verification_counter, ~.build_query_sql,
        ~.new_from_row, ~.load_verification, ~.load_verifications, ~.build_code),
@@ -31,7 +36,7 @@ ChangeLog
      scripts/data_export.php, skins/dragon/screen.css,
      specs/db/dragon-ddl.sql, specs/db/table-Verification.txt, specs/quick_suite.txt,
      verify_email.php (load_user_info),
-     register.php, site_map.php, INSTALL:
+     register.php, site_map.php, INSTALL, NEWS:
    - added account-activation with mandatory verification of email-address on user-registration
      - send activation-mail with verification-code to provided email-address on user-registration
      - added Verification-table to verify email-address for user-registration and later email-change

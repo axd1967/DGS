@@ -47,7 +47,7 @@ $GLOBALS['ThePage'] = new Page('Docs');
 {
    connect2mysql();
 
-   $logged_in = who_is_logged( $player_row);
+   $logged_in = who_is_logged( $player_row, LOGIN_DEFAULT_OPTS|LOGIN_SKIP_VFY_CHK );
 
    start_page(T_('Snapshot'), true, $logged_in, $player_row );
 

@@ -47,7 +47,7 @@ function build_TOC( $text )
 
    connect2mysql();
 
-   $logged_in = who_is_logged( $player_row);
+   $logged_in = who_is_logged( $player_row, LOGIN_DEFAULT_OPTS|LOGIN_SKIP_VFY_CHK );
 
    /* FORMAT of 'NEWS'-file:
       * DGS-tags can be used: <home ..> <image ...> etc.

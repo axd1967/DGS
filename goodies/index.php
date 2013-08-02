@@ -29,7 +29,7 @@ $GLOBALS['ThePage'] = new Page('Goodies', 0, ROBOTS_NO_FOLLOW,
 
 {
    connect2mysql();
-   $logged_in = who_is_logged($player_row);
+   $logged_in = who_is_logged( $player_row, LOGIN_DEFAULT_OPTS|LOGIN_SKIP_VFY_CHK );
 
    $page = "goodies/index.php";
 

@@ -28,7 +28,7 @@ $GLOBALS['ThePage'] = new Page('Links');
 {
    connect2mysql();
 
-   $logged_in = who_is_logged( $player_row);
+   $logged_in = who_is_logged( $player_row, LOGIN_DEFAULT_OPTS|LOGIN_SKIP_VFY_CHK );
 
    start_page(T_('Links'), true, $logged_in, $player_row, "a.blue:visited{color:purple;}" );
    echo "<h3 class=Header>", T_('Link collection'), "</h3>\n";

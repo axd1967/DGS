@@ -31,7 +31,7 @@ define('MIN_RANK', round(MIN_RATING/100.0));
 {
    connect2mysql();
 
-   $logged_in = who_is_logged( $player_row, LOGIN_SKIP_UPDATE );
+   $logged_in = who_is_logged( $player_row, LOGIN_SKIP_UPDATE|LOGIN_SKIP_VFY_CHK );
 
    //disable translations in graph if not latin
    if ( eregi( '^iso-8859-', $encoding_used) )

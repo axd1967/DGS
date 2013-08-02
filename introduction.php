@@ -27,7 +27,7 @@ $GLOBALS['ThePage'] = new Page('Intro', 0, ROBOTS_NO_FOLLOW, DGS_DESCRIPTION );
 
 {
    connect2mysql();
-   $logged_in = who_is_logged($player_row);
+   $logged_in = who_is_logged($player_row, LOGIN_DEFAULT_OPTS|LOGIN_SKIP_VFY_CHK );
 
    start_page(T_('Introduction'), true, $logged_in, $player_row );
 
