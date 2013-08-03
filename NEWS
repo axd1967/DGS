@@ -627,7 +627,7 @@ Copyright (C) 2001-2013  Erik Ouchterlony, Jens-Uwe Gaspar
          * mark bulletins as read
 
    * <home_ quick_status.php?version=2>Quick Status</home> (new version):
-      * Added <http://dragongoserver.cvs.sourceforge.net/viewvc/dragongoserver/DragonGoServer/specs/quick_suite.txt?revision=1.52&view=markup#l1786 |progressive block-specific caching with invalidation>
+      * Added <http://sourceforge.net/p/dragongoserver/dgs-main/ci/a63b7de50c410fe04142645016ba1662079a6335/tree/specs/quick_suite.txt#l1786 |progressive block-specific caching with invalidation>
       * Removed non-login mode, login per cookie or userid/passwd-URL-args is mandatory now
       * Added URL-args:
          * 'no_cache' to disable caching

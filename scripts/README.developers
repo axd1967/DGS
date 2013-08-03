@@ -649,7 +649,7 @@ General instructions for developers:
    Database fields storing such values must be signed: INT(11) NOT NULL
 
    Here is a former code-snipplet (from include/table_columns.php#add_or_del_column-func):
-   http://dragongoserver.cvs.sourceforge.net/viewvc/dragongoserver/DragonGoServer/include/table_columns.php?revision=1.116&view=markup#l626
+   http://sourceforge.net/p/dragongoserver/dgs-main/ci/ac1520795de6689f4f3c2a4ee326984ebbb6152d/tree/include/table_columns.php#l626
 
 ----------------- PHP: Transactions
 
