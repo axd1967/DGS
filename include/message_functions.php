@@ -87,6 +87,8 @@ function init_standard_folders()
  *     if set, contain map with keys (rating1, rating2) ->
  *     then add probable game-settings for conventional/proper-handicap-type
  * \param $gsc GameSetupChecker-object containing error-fields to highlight; or NULL
+ * \return true if settings would be allowed; false if they would not be allowed
+ *     (e.g. unrated player using calulcated handicap-type conventional or proper).
  */
 function game_settings_form(&$mform, $formstyle, $viewmode, $iamrated=true, $my_ID=NULL, $arr_url_or_gid=NULL,
       $map_ratings=NULL, $gsc=NULL )
@@ -110,6 +112,7 @@ function game_settings_form(&$mform, $formstyle, $viewmode, $iamrated=true, $my_
    $is_view_mpgame = ( $viewmode == GSETVIEW_MPGAME );
    $is_view_fairkomi = ( $viewmode == GSETVIEW_FAIRKOMI );
 
+   $text_need_rating = '(' . T_('needs a user-rating to be enabled') . ')';
    $allowed = true;
    $shape_init = true;
 
@@ -409,49 +412,40 @@ function game_settings_form(&$mform, $formstyle, $viewmode, $iamrated=true, $my_
    // Conventional & Proper handicap
    if ( !$is_view_mpgame && !$is_view_fairkomi )
    {
-      $trc = T_('Conventional handicap (komi 0.5 if not even)');
-      $trp = T_('Proper handicap (komi adjusted by system)');
-      if ( $iamrated )
-      {// user has a rating
-         $sugg_conv = '';
-         $sugg_prop = '';
-         if ( is_array($map_ratings) )
-         {
-            $game_settings = new GameSettings( $Size, $Ruleset, $AdjHandicap, $MinHandicap, $MaxHandicap,
-               $AdjKomi, $JigoMode );
-
-            $r1 = $map_ratings['rating1'];
-            $r2 = $map_ratings['rating2'];
-            $arr_conv_sugg = $game_settings->suggest_conventional( $r1, $r2 );
-            $arr_prop_sugg = $game_settings->suggest_proper( $r1, $r2 );
-            $sugg_conv = '<span class="Suggestion">' .
-               sptext( build_suggestion_shortinfo($arr_conv_sugg) ) . '</span>';
-            $sugg_prop = '<span class="Suggestion">' .
-               sptext( build_suggestion_shortinfo($arr_prop_sugg) ) . '</span>';
-         }
-
-         $mform->add_row( array(
-               'DESCRIPTION', $trc,
-               'RADIOBUTTONS', 'cat_htype', array( CAT_HTYPE_CONV => '' ), $CategoryHandiType,
-               'TEXT', $sugg_conv ));
-         $mform->add_row( array(
-               'DESCRIPTION', $trp,
-               'RADIOBUTTONS', 'cat_htype', array( CAT_HTYPE_PROPER => '' ), $CategoryHandiType,
-               'TEXT', $sugg_prop ));
+      if ( $formstyle == GSET_MSG_DISPUTE && is_htype_calculated($Handitype) && !$iamrated ) // user-unrated
+      {
+         $Handitype = HTYPE_NIGIRI; // fallback to default
+         $CategoryHandiType = get_category_handicaptype( $Handitype );
+         $allowed = false;
       }
-      else
-      {// user-unrated
-         if ( $formstyle == GSET_MSG_DISPUTE && is_htype_calculated($Handitype) )
-         {
-            $descr_str = ( $Handitype == HTYPE_CONV ) ? $trc : $rtp; // No initial rating
-            $mform->add_row( array(
-                  'DESCRIPTION', $descr_str,
-                  'TEXT', sptext('<font color="red">' . T_('Impossible') . '</font>',1), ));
-            $Handitype = HTYPE_NIGIRI; // default
-            $CategoryHandiType = get_category_handicaptype( $Handitype );
-            $allowed = false;
-         }
+
+      $sugg_conv = $sugg_prop = '';
+      if ( $iamrated && is_array($map_ratings) ) // user has a rating
+      {
+         $game_settings = new GameSettings( $Size, $Ruleset, $AdjHandicap, $MinHandicap, $MaxHandicap,
+            $AdjKomi, $JigoMode );
+
+         $r1 = $map_ratings['rating1'];
+         $r2 = $map_ratings['rating2'];
+         $arr_conv_sugg = $game_settings->suggest_conventional( $r1, $r2 );
+         $arr_prop_sugg = $game_settings->suggest_proper( $r1, $r2 );
+         $sugg_conv = '<span class="Suggestion">' .
+            sptext( build_suggestion_shortinfo($arr_conv_sugg) ) . '</span>';
+         $sugg_prop = '<span class="Suggestion">' .
+            sptext( build_suggestion_shortinfo($arr_prop_sugg) ) . '</span>';
       }
+      elseif ( !$iamrated )
+         $sugg_conv = $sugg_prop = span('WarnMsg', $text_need_rating);
+
+      $calc_htype_disabled = ( $iamrated ) ? '' : 'disabled=1';
+      $mform->add_row( array(
+            'DESCRIPTION', T_('Conventional handicap (komi 0.5 if not even)'),
+            'RADIOBUTTONSX', 'cat_htype', array( CAT_HTYPE_CONV => '' ), $CategoryHandiType, $calc_htype_disabled,
+            'TEXT', $sugg_conv ));
+      $mform->add_row( array(
+            'DESCRIPTION', T_('Proper handicap (komi adjusted by system)'),
+            'RADIOBUTTONSX', 'cat_htype', array( CAT_HTYPE_PROPER => '' ), $CategoryHandiType, $calc_htype_disabled,
+            'TEXT', $sugg_prop ));
    }//conv/proper-HType
 
    // Manual game: nigiri, double, black, white
@@ -638,20 +632,25 @@ function game_settings_form(&$mform, $formstyle, $viewmode, $iamrated=true, $my_
       if ( $formstyle == GSET_WAITINGROOM )
          $mform->add_row( array( 'HEADER', T_('Restrictions') ) );
 
-      if ( $iamrated )
-      {
-         $mform->add_row( array( 'DESCRIPTION', T_('Rated game'),
-                                 'CHECKBOXX', 'rated', 'Y', "", $Rated, array( 'disabled' => $ShapeID ) ) );
-      }
-      else if ( $formstyle == GSET_MSG_DISPUTE && $Rated )
-      {// user unrated
-         $mform->add_row( array(
-               'DESCRIPTION', T_('Rated game'),
-               'TEXT', sptext('<font color="red">' . T_('Impossible') . '</font>',1),
-               //'HIDDEN', 'rated', '',
-            ));
+      if ( $formstyle == GSET_MSG_DISPUTE && $Rated && !$iamrated ) // user-unrated
          $allowed = false;
-      }//rated
+
+      if ( $ShapeID )
+      {
+         $rated_value = false;
+         $rated_disabled = true;
+         $rated_descr = span('WarnMsg', T_('shape-games are always unrated'), '(%s)');
+      }
+      else
+      {
+         $rated_value = ( $iamrated && $Rated );
+         $rated_disabled = !$iamrated;
+         $rated_descr = ( $iamrated ) ? '' : $text_need_rating;
+      }
+      $mform->add_row( array(
+            'DESCRIPTION', T_('Rated game'),
+            'CHECKBOXX', 'rated', 'Y', "", $rated_value, ( $rated_disabled ? 'disabled=1' : '' ),
+            'TEXT', $rated_descr ));
    }
 
    if ( $formstyle == GSET_WAITINGROOM && !$is_view_mpgame )

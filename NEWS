@@ -163,6 +163,10 @@ Copyright (C) 2001-2013  Erik Ouchterlony, Jens-Uwe Gaspar
       * Added bulletin-handler to
          * retrieve single bulletin
 
+   * <home new_game.php>New game</home> and <home message.php?mode=Invite>Invitation</home>:
+      * Show disabled form-inputs for calculated handicap-type and rated-game for players without rating
+        with note about reason
+
    * Allow voting on <home features/list_votes.php>features</home> also if user finished unrated games
 
    * Added tooltips for main-menu entries

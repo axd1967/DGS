@@ -18,6 +18,13 @@ ChangeLog
 
 2013-08-03 juga
 
+   * include/message_functions.php (game_settings_form),
+     waiting_room.php, NEWS:
+   - show disabled form-inputs for calculated handicap-type and rated-game for users without rating
+     in new-game and invitation dialogs for players without initial rating with text describing reason:
+     shape-game or user-rating-needed.
+     - removed 'impossible'-text for invitation-disputes
+
    * include/std_functions.php (make_html_safe),
      scripts/convert_from_old_forum.php, scripts/data_export.php,
      ratingpng.php, sgf.php, statisticspng.php, statratingspng.php:
