@@ -54,8 +54,8 @@ else
    $gid = (int)@$_REQUEST['gid'];
    if ( $gid <= 0 )
    {
-      if ( eregi("game([0-9]+)", @$_SERVER['REQUEST_URI'], $tmp) )
-         $gid = $tmp[1];
+      if ( preg_match("/game([0-9]+)/i", @$_SERVER['REQUEST_URI'], $matches) )
+         $gid = $matches[1];
    }
    $gid = (int)$gid;
    if ( $gid <= 0 )

@@ -32,7 +32,7 @@ require_once 'include/graph.php';
    if (0) T_('Jan').T_('Feb').T_('Mar').T_('Apr').T_('May').T_('Jun').T_('Jul').T_('Aug').T_('Sep').T_('Oct').T_('Nov').T_('Dec');
 
    //disable translations in graph if not latin
-   if ( eregi( '^iso-8859-', $encoding_used) )
+   if ( preg_match( '/^iso-8859-/i', $encoding_used) )
    {
       $keep_english= false;
       $T_= 'T_';

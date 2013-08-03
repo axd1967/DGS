@@ -74,9 +74,7 @@ echo '>>>> Should not be used now. Fix TODO before using it!! Do not run it befo
       while ( $row = mysql_fetch_array( $result_1 ) )
       {
          $old_parent = $row["parent"];
-         $Text = $row["body"];
-         $Text = eregi_replace("^<html>","",$Text);
-         $Text = eregi_replace("</html>$","",$Text);
+         $Text = preg_replace( array( "#^<html>#i", "#</html>$#i" ), '', $row['body'] );
          $Subject = $row["subject"];
          $old_ID = $row["id"];
          $uid = $row["pid"];

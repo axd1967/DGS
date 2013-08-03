@@ -462,7 +462,7 @@ function definitions_fix( $table, $keys)
          if ( (string)$name == 'KEY' ) //can't have this option with older versions
          {
             if ( $row[1] == 'SomeFieldName' )
-               $str = eregi_replace('Time DESC','Time',$str); // do something
+               $str = preg_replace('/Time DESC/i','Time',$str); // do something
          }
       }
       */
@@ -719,7 +719,7 @@ class dbTable
                $row = explode(' ', $str, 2); //def_split($str);
                if ( array_key_exists( @$row[0], $this->keywords) )
                   $ary[$str] = $this->keywords[$row[0]].$str;
-               else if ( eregi('auto_increment', $str) )//( @$row[0] == 'ID' )
+               else if ( preg_match('/auto_increment/i', $str) )//( @$row[0] == 'ID' )
                   $defs[] = $str;
                else
                   $spc[] = $str;

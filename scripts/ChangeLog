@@ -18,6 +18,11 @@ ChangeLog
 
 2013-08-03 juga
 
+   * include/std_functions.php (make_html_safe),
+     scripts/convert_from_old_forum.php, scripts/data_export.php,
+     ratingpng.php, sgf.php, statisticspng.php, statratingspng.php:
+   - cleanup: replaced deprecated eregi/eregi_replace-functions with preg_match/preg_replace-funcs
+
    * goodies/index.php, docs.php, error.php, faq.php, install.php, introduction.php,
      licence.php, links.php, news.php, people.php, policy.php, rank_converter.php,
      snapshot.php, statistics.php, statisticspng.php, statratingspng.php:

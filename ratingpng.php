@@ -49,7 +49,7 @@ function interpolate($val1, $val3, $time1, $time2, $time3)
    //    error('not_logged_in', 'ratingpng');
 
    //disable translations in graph if not latin
-   if ( eregi( '^iso-8859-', $encoding_used) )
+   if ( preg_match( '/^iso-8859-/i', $encoding_used) )
    {
       $keep_english= false;
       $T_= 'T_';

@@ -2122,12 +2122,7 @@ function make_html_safe( $msg, $some_html=false, $mark_terms='')
 
    // Filter out HTML code
 
-   /*
-   $msg = str_replace('&', '&amp;', $msg);
-   $msg = eregi_replace('&amp;((#[0-9]+|[A-Z][0-9A-Z]*);)', '&\\1', $msg);
-   */
    $msg = preg_replace('/&(?!(#[0-9]+|[A-Z][0-9A-Z]*);)/is', '&amp;', $msg);
-
    $msg = basic_safe( $msg);
 
    if ( $some_html || $mark_terms )
