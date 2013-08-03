@@ -395,6 +395,10 @@ span.ErrorMsg {
    color: darkred;
 }
 
+span.Note {
+   font-style: italic;
+}
+
 span.AdminOption,
 span.AdminTitle,
 .AdminLink {

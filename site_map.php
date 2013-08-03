@@ -88,12 +88,15 @@ function itemL($text, $link='', $working=true, $last=false)
 
    section( 'SiteMap', T_('Site map'));
 
-   echo "<i>", T_('Note'), ': '; // use CSS to indicate how to render this comments
+   $note = T_('Note') . ': ';
    if ( $logged_in )
-      echo T_('The black links require an argument to work, so they are not usable here.');
+      $note .= T_('The black links require an argument to work, so they are not usable here.');
    else
-      echo T_('The black links require to be logged in, so they are not usable here.');
-   echo "</i><br><br>\n";
+   {
+      $note .= T_('The black links require to be logged in, so they are not usable here.') .
+         "<br>\n" . T_('Note') . ': ' . T_('More links will be available if you\'re logged in.');
+   }
+   echo span('Note', $note), "<br><br>\n";
 
    $item_nbcols = 6;
    $item_level = 0;
