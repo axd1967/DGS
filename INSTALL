@@ -17,7 +17,7 @@ Help with installation:
 Requirements:
 
 *) A webserver which can use php, e.g., apache <http://httpd.apache.org>
-*) PHP >= 5.1.0 <http://www.php.net>
+*) PHP >= 5.2.0 <http://www.php.net>
 *) MySQL >= 5.0.38 <http://www.mysql.com>
 *) GD >= 2.0.0 to draw rating graph and upload images <http://www.boutell.com/gd/>
 
