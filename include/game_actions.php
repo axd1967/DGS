@@ -570,12 +570,14 @@ class GameActionHelper
             notify( "$dbgmsg.notify_opponent({$this->next_to_move_ID})", $this->next_to_move_ID );
 
          // Increase moves and activity
+         $upd = new UpdateQuery('Players');
+         $upd->upd_raw('Moves', 'Moves+1' ); // NOTE: count also delete + set-handicap as one move
+         if ( $this->is_quick )
+            $upd->upd_time('LastQuickAccess', $NOW );
+         $upd->upd_raw('Activity', "LEAST($ActivityMax,$ActivityForMove+Activity)" );
+         $upd->upd_time('LastMove', $NOW );
          db_query( "$dbgmsg.activity({$this->my_id})",
-               "UPDATE Players SET Moves=Moves+1" // NOTE: count also delete + set-handicap as one move
-               . ( $this->is_quick ? ",LastQuickAccess=FROM_UNIXTIME($NOW)" : '' )
-               .",Activity=LEAST($ActivityMax,$ActivityForMove+Activity)"
-               .",LastMove=FROM_UNIXTIME($NOW)"
-               ." WHERE ID={$this->my_id} LIMIT 1" );
+            "UPDATE Players SET " . $upd->get_query() . " WHERE ID={$this->my_id} LIMIT 1" );
 
          increaseMoveStats( $this->my_id );
       }
