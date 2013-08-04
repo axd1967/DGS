@@ -82,8 +82,8 @@ require_once 'include/wroom_control.php';
    // sync with QuickHandlerWaitingroom list-cmd
    $suitable_filter_array = array(
       T_('All')      => new QuerySQL( SQLP_WHERE, "WR.uid<>$my_id" ),
-      T_('Suitable') => new QuerySQL( SQLP_WHERE, "WR.uid<>$my_id",
-                                      SQLP_HAVING, 'goodrating', 'goodmingames', 'haverating', 'goodsameopp' ),
+      T_('Suitable') => WaitingroomControl::extend_query_waitingroom_suitable(
+         new QuerySQL( SQLP_WHERE, "WR.uid<>$my_id" ) ),
       T_('Mine')     => new QuerySQL( SQLP_WHERE, "WR.uid=$my_id" ),
    );
 
@@ -225,7 +225,7 @@ require_once 'include/wroom_control.php';
          $wro = new WaitingroomOffer( $row );
          $wro_settings = $wro->calculate_offer_settings();
          $is_fairkomi = $wro->is_fairkomi();
-         extract($row); //including: $calculated, $haverating, $goodrating, $goodmingames, $goodmaxgames, $goodsameopp, $X_Time
+         extract($row); //including: $calculated, $goodrated, $haverating, $goodrating, $goodmingames, $goodmaxgames, $goodsameopp, $X_Time
 
          list( $restrictions, $joinable ) = WaitingroomControl::get_waitingroom_restrictions( $row, $suitable );
 
@@ -287,7 +287,11 @@ require_once 'include/wroom_control.php';
          if ( $wrtable->Is_Column_Displayed[10] )
             $wrow_strings[10] = ($wro->mp_player_count) ? 1 : $nrGames;
          if ( $wrtable->Is_Column_Displayed[11] )
-            $wrow_strings[11] = yesno( $Rated);
+         {
+            $wrow_strings[11] = array( 'text' => yesno($Rated) );
+            if ( !$goodrated )
+               $wrow_strings[11]['attbs'] = warning_cell_attb( T_('User has no rating'), true );
+         }
          if ( $wrtable->Is_Column_Displayed[12] )
             $wrow_strings[12] = yesno( $WeekendClock);
          if ( ENABLE_STDHANDICAP )
@@ -318,24 +322,17 @@ require_once 'include/wroom_control.php';
       $show_info = ( $idinfo && is_array($info_row) );
       if ( !$show_info )
       {
-         $restrictions = array(
-               T_('Handicap-type (conventional and proper handicap-type need a rating for calculations)#wroom'),
-               T_('Rating range (user rating must be within the requested rating range), e.g. "25k-2d"#wroom'),
-               T_('Number of rated finished games, e.g. "RG[2]"#wroom'),
-               T_('Max. number of opponents started games must not exceed limits, e.g. "MXG"#wroom'),
-               T_('Acceptance mode for challenges from same opponent, e.g. "SOT[1]" (total) or "SO[1x]" or "SO[&gt;7d]"#wroom'),
-               sprintf( T_('Contact-option \'Hide waiting room games\', marked by "%s"'),
-                        sprintf('[%s]', T_('Hidden#wroom')) ),
-            );
          $notes = array();
          $notes[] = T_('Column \'Settings\' shows the probable game-color, handicap and komi.')
                . sprintf( '<br>%s = %s', T_('(Free Handicap)#handicap_tablewr'), T_('indicator of free handicap stone placement') );
-         $notes[] = sprintf( T_('Column \'%s\' shows the handicap or its limitations, e.g. 5 or [0,9] or [0,D9] or %s#wroom'),
-                  T_('Handicap#header'), NO_VALUE )
+         $notes[] =
+            sprintf( T_('Column \'%s\' shows the handicap or its limitations, e.g. 5 or [0,9] or [0,D9] or %s#wroom'),
+                     T_('Handicap#header'), NO_VALUE )
                . "<br>'D' = " . T_('indicator for calculated default max. handicap for board-size#wroom')
                . '; '.NO_VALUE.' = ' . T_('calculated handicap#wroom');
+         $notes[] = null;
          $notes[] = T_('A waiting game is <b>suitable</b> when a player matches the requested game restrictions on:')
-               . "\n* " . implode(",\n* ", $restrictions);
+               . "\n* " . implode(",\n* ", build_game_restriction_notes() );
          echo_notes( 'waitingroomnotes', T_('Waiting room notes'), $notes );
       }
    }

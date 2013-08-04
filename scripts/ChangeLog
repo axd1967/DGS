@@ -18,6 +18,18 @@ ChangeLog
 
 2013-08-04 juga
 
+   * include/wroom_control.php (WaitingroomControl.build_waiting_room_query,
+       ~.extend_query_waitingroom_suitable, ~.get_waitingroom_restrictions),
+     include/message_functions.php (game_info_table, build_game_restriction_notes,
+       echo_game_restrictions),
+     include/quick/quick_wroom.php (QuickHandlerWaitingroom.prepare),
+     waiting_room.php:
+   - bugfix: waiting-room-list with game-offers was not restricted on unrated games for unrated users
+   - improved restrictions-text for showing info of single waiting-room-offer: adding reasons
+   - added more detail notes & comments about waiting-room restrictions
+   - cleanup: refactored extending waitingroom-query for suitable games into function to avoid redundancy
+   - cleanup: minor improvements on expressions
+
    * waiting_room.php:
    - always show Settings-column in waiting-room
 

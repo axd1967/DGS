@@ -40,7 +40,7 @@ class WaitingroomControl
 
    // ------------ static functions ----------------------------
 
-   /*! \brief Returns QuerySQL for waiting-room. */
+   /*! \brief Returns QuerySQL for waiting-room (used for base-query for all/suitable/my waiting-room-games). */
    public static function build_waiting_room_query( $wroom_id=0, $suitable=false )
    {
       global $player_row, $NOW;
@@ -57,22 +57,23 @@ class WaitingroomControl
          'UNIX_TIMESTAMP(WRJ.ExpireDate) AS X_ExpireDate' );
 
       // $calculated = ( $Handicaptype == 'conv' || $Handicaptype == 'proper' );
-      // $haverating = ( !$calculated || is_numeric($my_rating) );
-      // if ( $MustBeRated != 'Y' )         $goodrating = true;
-      // else if ( is_numeric($my_rating) ) $goodrating = ( $my_rating>=$RatingMin && $my_rating<=$RatingMax );
-      // else                              $goodrating = false;
+      // $goodrated  = ( user-has-rating || Rated == 'N' );
+      // $haverating = ( user-has-rating || !$calculated );
+      // if ( $MustBeRated != 'Y' )  $goodrating = true;
+      // else if ( user-has-rating ) $goodrating = ( $my_rating>=$RatingMin && $my_rating<=$RatingMax );
+      // else                        $goodrating = false;
       // $goodmingames = ( $MinRatedGames > 0 ? ($my_rated_games >= $MinRatedGames) : true );
 
-      $calculated = "(WR.Handicaptype='conv' OR WR.Handicaptype='proper')";
+      $calculated = "(WR.Handicaptype='".HTYPE_CONV."' OR WR.Handicaptype='".HTYPE_PROPER."')";
       if ( $iamrated )
       {
+         $goodrated = "1";
          $haverating = "1";
-         $goodrating = "IF(WR.MustBeRated='Y' AND"
-                     . " ($my_rating<WR.RatingMin OR $my_rating>WR.RatingMax)"
-                     . ",0,1)";
+         $goodrating = "IF(WR.MustBeRated='Y' AND ($my_rating<WR.RatingMin OR $my_rating>WR.RatingMax),0,1)";
       }
-      else
+      else // user unrated
       {
+         $goodrated = "IF(WR.Rated='N',1,0)";
          $haverating = "NOT $calculated";
          $goodrating = "IF(WR.MustBeRated='Y',0,1)";
       }
@@ -83,6 +84,7 @@ class WaitingroomControl
 
       $qsql->add_part( SQLP_FIELDS,
          "$calculated AS calculated",
+         "$goodrated AS goodrated",
          "$haverating AS haverating",
          "$goodrating AS goodrating",
          "$sql_goodmingames AS goodmingames",
@@ -125,6 +127,13 @@ class WaitingroomControl
       return $qsql;
    }//build_waiting_room_query
 
+   /*! \brief Extend and return passed QuerySQL $qsql with HAVING-clause for suitable-filter. */
+   public static function extend_query_waitingroom_suitable( $qsql )
+   {
+      $qsql->add_part( SQLP_HAVING, 'goodrating', 'goodmingames', 'goodrated', 'haverating', 'goodsameopp' );
+      return $qsql;
+   }
+
    /*!
     * \brief Returns restrictions for joining waiting-room entry and if offer is joinable or not.
     * \param $row waiting-room row loaded by query built from build_waiting_room_query().
@@ -135,9 +144,9 @@ class WaitingroomControl
    {
       $restrictions = echo_game_restrictions( $row['MustBeRated'], $row['RatingMin'], $row['RatingMax'],
             $row['MinRatedGames'], $row['goodmaxgames'], $row['SameOpponent'],
-            ( !$suitable && $row['CH_hidden'] ), /*short*/true, $html );
-      $joinable = ( $row['haverating'] && $row['goodrating'] && $row['goodmingames'] && $row['goodmaxgames']
-         && $row['goodsameopp'] && !$row['C_denied'] );
+            ( !$suitable && $row['CH_hidden'] ), $row['goodrated'], $row['haverating'], /*short*/true, $html );
+      $joinable = ( $row['goodrated'] && $row['haverating'] && $row['goodrating'] && $row['goodmingames']
+         && $row['goodmaxgames'] && $row['goodsameopp'] && !$row['C_denied'] );
       return array( $restrictions, $joinable );
    }//get_waitingroom_restrictions
 

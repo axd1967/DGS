@@ -832,7 +832,7 @@ function game_info_table( $tablestyle, $game_row, $player_row, $iamrated, $game_
    $MaxHandicap = DEFAULT_MAX_HANDICAP;
 
    // $game_row containing:
-   // - for GSET_WAITINGROOM: Waitingroom.*; calculated, haverating; WaitingroomJoined.JoinedCount; X_TotalCount
+   // - for GSET_WAITINGROOM: Waitingroom.*; calculated, goodrated, haverating; WaitingroomJoined.JoinedCount; X_TotalCount
    // - for GSET_TOURNAMENT_LADDER: TournamentRules.*, X_Handitype, X_Color, X_Calculated
    // - for GSET_MSG_INVITE:
    //   Players ($player_row): other_id, other_handle, other_name, other_rating, other_ratingstatus,
@@ -848,6 +848,7 @@ function game_info_table( $tablestyle, $game_row, $player_row, $iamrated, $game_
    $CategoryHandiType = get_category_handicaptype( $Handicaptype );
    $my_htype = $game_setup->get_user_view_handicaptype( $my_id );
    $is_fairkomi = ( $CategoryHandiType === CAT_HTYPE_FAIR_KOMI );
+   $restricted_text = T_('Restricted#wroom') . ': ';
 
    // handle shape-games
    if ( $ShapeID > 0 )
@@ -864,6 +865,7 @@ function game_info_table( $tablestyle, $game_row, $player_row, $iamrated, $game_
       case GSET_WAITINGROOM:
          //$calculated passed in from $game_row
          $goodmingames = ( $MinRatedGames > 0 ) ? ((int)@$player_row['RatedGames'] >= $MinRatedGames) : true;
+         //$goodrated passed in from $game_row
          //$haverating passed in from $game_row
          break;
 
@@ -875,7 +877,8 @@ function game_info_table( $tablestyle, $game_row, $player_row, $iamrated, $game_
          //$calculated passed in from $game_row
          $goodrating = 1;
          $goodmingames = true;
-         $haverating = ( $iamrated ) ? 1 : !$calculated;
+         $goodrated = 1; // tournament-participants always have a rating
+         $haverating = ( $iamrated || !$calculated );
          break;
 
       //case GSET_MSG_INVITE: // invite|dispute
@@ -906,7 +909,8 @@ function game_info_table( $tablestyle, $game_row, $player_row, $iamrated, $game_
          $calculated = is_htype_calculated( $Handicaptype );
          $goodrating = 1;
          $goodmingames = true;
-         $haverating = ( $iamrated ) ? 1 : !$calculated;
+         $goodrated = ( $iamrated || $Rated == 'N' );
+         $haverating = ( $iamrated || !$calculated );
          break;
    }//switch $tablestyle
 
@@ -957,13 +961,13 @@ function game_info_table( $tablestyle, $game_row, $player_row, $iamrated, $game_
       case CAT_HTYPE_CONV: // Conventional handicap
          $itable->add_sinfo(
                   T_('Type'), T_('Conventional handicap (komi 0.5 if not even)'),
-                  ( $haverating ? '' : warning_cell_attb( T_('User has no rating')) ) );
+                  ( $haverating ? '' : warning_cell_attb( $restricted_text . T_('User has no rating')) ) );
          break;
 
       case CAT_HTYPE_PROPER: // Proper handicap
          $itable->add_sinfo(
                   T_('Type'), T_('Proper handicap'),
-                  ( $haverating ? '' : warning_cell_attb( T_('User has no rating')) ) );
+                  ( $haverating ? '' : warning_cell_attb( $restricted_text . T_('User has no rating')) ) );
          break;
 
       case CAT_HTYPE_MANUAL: // Manual game: Nigiri/Double/Black/White
@@ -1087,20 +1091,30 @@ function game_info_table( $tablestyle, $game_row, $player_row, $iamrated, $game_
       }
    }
 
-   if ( $tablestyle == GSET_WAITINGROOM ) // Restrictions
+   if ( $tablestyle == GSET_WAITINGROOM )
    {
-      $ratinglimit_str = echo_game_restrictions($MustBeRated, $RatingMin, $RatingMax,
-         $MinRatedGames, null, null, null, true);
+      // check + show if there are restrictions for rating-range & min-rated-games
+      $ratinglimit_str = echo_game_restrictions( $MustBeRated, $RatingMin, $RatingMax, $MinRatedGames );
       if ( $ratinglimit_str != NO_VALUE )
+      {
+         $r_out = array();
+         if ( !$goodrating )
+            $r_out[] = ( $iamrated ) ? T_('User rating is out of range#wroom') : T_('User has no rating');
+         if ( !$goodmingames )
+            $r_out[] = T_('User has not enough finished rated games#wroom');
          $itable->add_sinfo(
             T_('Rating restrictions'), $ratinglimit_str,
-            ( ($goodrating && $goodmingames) ? '' : warning_cell_attb( T_('Restricted#wroom')) ) );
+            ( count($r_out) ? warning_cell_attb( $restricted_text . implode(', ', $r_out)) : '' ) );
+      }
 
+      // check + show if there are restrictions for same-opponent-check
       $same_opp_str = echo_accept_same_opponent($SameOpponent, $game_row);
       if ( $SameOpponent != 0 )
+      {
          $itable->add_sinfo(
             T_('Accept same opponent'), $same_opp_str,
-            ( $goodsameopp ? '' : warning_cell_attb( T_('Restricted#wroom')) ) );
+            ( $goodsameopp ? '' : warning_cell_attb( $restricted_text . T_('User already has started games#wroom')) ) );
+      }
    }
 
 
@@ -1111,7 +1125,7 @@ function game_info_table( $tablestyle, $game_row, $player_row, $iamrated, $game_
 
    $itable->add_sinfo(
          T_('Rated game'), yesno( $Rated),
-         ( $iamrated || $Rated != 'Y' ? '' : warning_cell_attb( T_('User has no rating')) ) );
+         ( $goodrated ? '' : warning_cell_attb( $restricted_text . T_('User has no rating')) ) );
    $itable->add_sinfo( T_('Clock runs on weekends'), yesno( $WeekendClock) );
 
    if ( $tablestyle == GSET_WAITINGROOM ) // Comment
@@ -1156,21 +1170,51 @@ function game_info_table( $tablestyle, $game_row, $player_row, $iamrated, $game_
    $itable->echo_table();
 }//game_info_table
 
+
+// see also echo_game_restrictions()-func for abbreviations
+function build_game_restriction_notes()
+{
+   $restrictions = array(
+         T_('Rating range (user rating must be within the requested rating range), e.g. "25k-2d"#wroom'), // rating-range
+         sprintf( T_('Number of rated finished games, e.g. "%s"#wroom'),
+                  sprintf(T_('Rated Games[%s]#short'),2) ),
+         sprintf( T_('Max. number of opponents started games must not exceed limits, marked by "%s"#wroom'),
+                  'MXG' ),
+         sprintf( T_('Acceptance mode for challenges from same opponent, e.g. "%s" (total) or "%s" or "%s"#wroom'),
+                  'SOT[1]', 'SO[1x]', 'SO[&gt;7d]' ),
+         sprintf( T_('Handicap-type (conventional and proper handicap-type need a rating for calculations), marked by "%s"#wroom'),
+                  'CHT' ), // calculated-handicap-type
+         sprintf( T_('User has no rating, marked by "%s"#wroom'), 'RT' ),
+         sprintf( T_('Contact-option \'Hide waiting room games\', marked by "%s"'),
+                  sprintf('[%s]', T_('Hidden#wroom')) ),
+      );
+   return $restrictions;
+}//build_game_restriction_notes
+
 /*!
- * \brief Returns restrictions on rating-range, rated-finished-games, acceptance-mode-same-opponent,
- *        contact-hidden option.
+ * \brief Returns restrictions for waiting-room-offer on rating-range, rated-finished-games,
+ *       acceptance-mode-same-opponent, contact-hidden option.
  * \param $OppGoodMaxGames ignore if null
  * \param $SameOpponent ignore if null
  * \param $Hidden ignore if null
+ * \param $haverating ignore if null
+ * \param $goodrated ignore if null
  * \param $html false=no HTML-entities
- * \return NO_VALUE if no restrictions
+ * \return NO_VALUE if no restrictions; otherwise string-list of with found restriction
+ *
+ * \note Difference between "Restrictions"-column from waiting-room-list and "real" restrictions in game-info-table:
+ *   - waiting-room-restrictions show all "potentially" restricting factors (even if some of them are not restricted
+ *     for the particular offer and user viewing the offers).
+ *   - while in the game-info-table the "real" restricted attributes are shown with a restricted-warning!
+ *
+ * \see also build_game_restriction_notes() for used abbreviations and check-order of restrictions
  */
-function echo_game_restrictions($MustBeRated, $RatingMin, $RatingMax, $MinRatedGames,
-      $OppGoodMaxGames=null, $SameOpponent=null, $Hidden=null, $short=false, $html=true )
+function echo_game_restrictions($MustBeRated, $RatingMin, $RatingMax, $MinRatedGames, $OppGoodMaxGames=null,
+      $SameOpponent=null, $Hidden=null, $goodrated=null, $haverating=null, $short=true, $html=true )
 {
    $out = array();
 
-   if ( $MustBeRated == 'Y')
+   if ( $MustBeRated == 'Y' )
    {
       // +/-50 reverse the inflation from new-game handle_add_game()-func
       $r1 = echo_rating( $RatingMin + 50, false, 0, false, $short );
@@ -1200,6 +1244,12 @@ function echo_game_restrictions($MustBeRated, $RatingMin, $RatingMax, $MinRatedG
       elseif ( $SameOpponent > 0 )
          $out[] = sprintf( 'SO[&gt;%sd]', $SameOpponent ); // after N days
    }
+
+   if ( !is_null($haverating) && !$haverating )
+      $out[] = 'CHT';
+
+   if ( !is_null($goodrated) && !$goodrated )
+      $out[] = 'RT';
 
    if ( !is_null($Hidden) && $Hidden )
       $out[] = sprintf( '[%s]', T_('Hidden#wroom') );

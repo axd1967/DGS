@@ -109,7 +109,7 @@ class QuickHandlerWaitingroom extends QuickHandler
          {
             $qsql->add_part( SQLP_WHERE, "WR.uid<>".$this->my_id );
             if ( $filter_suitable == 1 ) // suitable
-               $qsql->add_part( SQLP_HAVING, 'goodrating', 'goodmingames', 'haverating', 'goodsameopp' );
+               $qsql = WaitingroomControl::extend_query_waitingroom_suitable( $qsql );
          }
 
          $qsql->add_part( SQLP_ORDER, 'WRP_Rating2 DESC', 'WRP_Handle ASC', 'ID ASC' );
