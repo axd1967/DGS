@@ -254,7 +254,7 @@ require_once 'include/wroom_control.php';
          {
             $wrow_strings[ 5] = array('text' => $handi_array[$Handicaptype]);
             if ( !$haverating )
-               $wrow_strings[ 5]['attbs'] = warning_cell_attb( T_('User has no initial rating'), true);
+               $wrow_strings[ 5]['attbs'] = warning_cell_attb( T_('User has no rating'), true);
          }
          if ( $wrtable->Is_Column_Displayed[14] ) // Handicap
          {

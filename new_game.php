@@ -179,8 +179,6 @@ function handle_add_game( $my_id, $viewmode )
       error('not_allowed_for_guest', 'new_game.handle_add_game');
 
    $gsc = GameSetupChecker::check_fields( $viewmode );
-   if ( $gsc->has_errors() )
-      $gsc->add_default_values_info();
    if ( @$_REQUEST['add_game'] )
       GameSetupChecker::check_wroom_count( $viewmode, $player_row['ID'], $gsc->errors );
    if ( $gsc->has_errors() )

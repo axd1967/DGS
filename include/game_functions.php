@@ -3086,9 +3086,9 @@ class GameSetupChecker
       $this->errors[] = $error;
    }
 
-   public function add_default_values_info()
+   private function add_default_values_info()
    {
-      $this->errors[] = T_('Some invalid values may have been replaced with default-values!');
+      $this->errors[] = T_('Note: Some invalid values may have been replaced with default-values!');
    }
 
    public function is_error_field( $field )
@@ -3100,6 +3100,45 @@ class GameSetupChecker
    {
       return ($this->is_error_field($field)) ? 'class="GSError"' : '';
    }
+
+   private function check_game_rated()
+   {
+      if ( $this->view == GSETVIEW_MPGAME )
+         return;
+
+      $rated = ( @$_REQUEST['rated'] == 'Y' );
+      if ( $rated )
+      {
+         if ( !user_has_rating() )
+            $this->errors[] = T_('User has no rating');
+      }
+   }//check_game_rated
+
+   /*!
+    * \brief Returns false if combination of game-settings (calculated handicap-type/rated-game)
+    *       conflicts with user without rating; true otherwise.
+    */
+   public function check_opponent_rating( $opp_handle )
+   {
+      if ( (string)trim($opp_handle) == '' )
+         return true;
+      if ( $this->view != GSC_VIEW_INVITE )
+         return;
+
+      $is_rated_game = ( @$_REQUEST['rated'] == 'Y' );
+      $is_calc_htype = is_htype_calculated( @$_REQUEST['cat_htype'], /*cat-htype*/true );
+      if ( $is_rated_game || $is_calc_htype )
+      {
+         $opp_user = User::load_user_by_handle( $opp_handle );
+         if ( !is_null($opp_user) && !$opp_user->hasRating() )
+         {
+            if ( $is_calc_htype )
+               $this->add_error( T_('Opponent needs a rating to be able to use conventional or proper handicap-type.') );
+            if ( $is_rated_game )
+               $this->add_error( T_('Opponent needs a rating to be able to play a rated game.') );
+         }
+      }
+   }//check_opponent_rating
 
    private function check_komi()
    {
@@ -3252,11 +3291,15 @@ class GameSetupChecker
    public static function check_fields( $view )
    {
       $gsc = new GameSetupChecker( $view );
+      $gsc->check_game_rated();
       $gsc->check_komi();
       $gsc->check_time();
       $gsc->check_adjust_komi();
       $gsc->check_min_rated_games();
       $gsc->check_game_players();
+
+      if ( $gsc->has_errors() )
+         $gsc->add_default_values_info();
       return $gsc;
    }//check_fields
 
@@ -5150,9 +5193,12 @@ function get_to_move( $grow, $errmsg )
    return $to_move;
 }
 
-function is_htype_calculated( $htype )
+function is_htype_calculated( $htype, $cat_htype=false )
 {
-   return ( $htype == HTYPE_CONV || $htype == HTYPE_PROPER );
+   if ( $cat_htype )
+      return ( $htype == CAT_HTYPE_CONV || $htype == CAT_HTYPE_PROPER );
+   else
+      return ( $htype == HTYPE_CONV || $htype == HTYPE_PROPER );
 }
 
 function is_htype_divide_choose( $htype )

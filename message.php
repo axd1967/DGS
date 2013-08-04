@@ -131,8 +131,8 @@ define('MSGBOXROWS_INVITE', 6);
       $preview = true;
    }
 
-   $arg_to = get_request_arg('to'); // single or multi-receivers
-   $has_arg_to = ( (string)trim($arg_to) != '' );
+   $arg_to = trim( get_request_arg('to') ); // single or multi-receivers
+   $has_arg_to = ( (string)$arg_to != '' );
    if ( $mpg_type > 0 && (!$arg_to && $mode == 'NewMessage') )
    {
       // handle multi-player-game msg-request
@@ -140,19 +140,17 @@ define('MSGBOXROWS_INVITE', 6);
    }
    else
       $arr_mpg_users = null;
-   if ( !$arg_to )
+   if ( (string)$arg_to == '' )
       $arg_to = read_user_from_request(); // single
 
    $msg_control = new MessageControl( $folders, /*allow-bulk*/true, $mpg_type, $mpg_gid, $mpg_col, $arr_mpg_users );
    $maxGamesCheck = $msg_control->get_max_games_check();
    $dgs_message = $msg_control->get_dgs_message();
 
-   $gsc = ( @$_REQUEST['gsc'] ) ? $gsc = GameSetupChecker::check_fields( GSC_VIEW_INVITE ) : NULL;
+   $gsc = ( @$_REQUEST['gsc'] ) ? GameSetupChecker::check_fields(GSC_VIEW_INVITE) : NULL;
+   $opp_rating_is_ok = ( !is_null($gsc) ) ? $gsc->check_opponent_rating( $arg_to ) : true;
    if ( !is_null($gsc) && $gsc->has_errors() )
-   {
-      $gsc->add_default_values_info();
       $errors = $gsc->get_errors();
-   }
    elseif ( $handle_msg_action )
    {
       ta_begin();
@@ -482,7 +480,7 @@ define('MSGBOXROWS_INVITE', 6);
             game_settings_form($message_form, GSET_MSG_DISPUTE, GSETVIEW_STANDARD, $iamrated, $my_id, $Game_ID, $map_ratings);
 
          // show dispute-diffs to opponent game-settings
-         if ( $preview )
+         if ( $preview && $opp_rating_is_ok )
          {
             $opp_row = array( 'ID' => $other_id, 'RatingStatus' => $other_ratingstatus, 'Rating2' => $other_rating );
             $my_gs = make_invite_game_setup_from_url( $player_row, $opp_row );

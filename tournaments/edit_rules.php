@@ -172,10 +172,7 @@ function parse_edit_form( &$trule )
    {
       $gsc = GameSetupChecker::check_fields( GSETVIEW_STANDARD );
       if ( $gsc->has_errors() )
-      {
-         $gsc->add_default_values_info();
          $errors = array_merge( $errors, $gsc->get_errors() );
-      }
    }
    else
       $gsc = null;

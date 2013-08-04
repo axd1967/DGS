@@ -18,6 +18,17 @@ ChangeLog
 
 2013-08-04 juga
 
+   * include/game_functions.php (GameSetupChecker.add_default_values_info, ~.check_game_rated,
+       ~.check_opponent_rating, ~.check_fields; is_htype_calculated),
+     include/message_functions.php (game_info_table),
+     tournaments/edit_rules.php, message.php, new_game.php, waiting_room.php:
+   - show errors if game-settings of invitation/dispute combines calculated handicap-type or
+     rated-game with user without a rating
+   - show preview and dispute-difference only if user-without-rating raised no conflict prohibiting
+     calculating diffs
+   - detailed warning: No initial rating -> User has no rating
+   - cleanup: call GameSetupChecker->add_default_values_info() adding error-note internally
+
    * include/message_functions.php (game_settings_form):
    - hide checkbox for rated-game for shape-games as that state can never be changed
 

@@ -957,13 +957,13 @@ function game_info_table( $tablestyle, $game_row, $player_row, $iamrated, $game_
       case CAT_HTYPE_CONV: // Conventional handicap
          $itable->add_sinfo(
                   T_('Type'), T_('Conventional handicap (komi 0.5 if not even)'),
-                  ( $haverating ? '' : warning_cell_attb( T_('No initial rating')) ) );
+                  ( $haverating ? '' : warning_cell_attb( T_('User has no rating')) ) );
          break;
 
       case CAT_HTYPE_PROPER: // Proper handicap
          $itable->add_sinfo(
                   T_('Type'), T_('Proper handicap'),
-                  ( $haverating ? '' : warning_cell_attb( T_('No initial rating')) ) );
+                  ( $haverating ? '' : warning_cell_attb( T_('User has no rating')) ) );
          break;
 
       case CAT_HTYPE_MANUAL: // Manual game: Nigiri/Double/Black/White
@@ -1111,7 +1111,7 @@ function game_info_table( $tablestyle, $game_row, $player_row, $iamrated, $game_
 
    $itable->add_sinfo(
          T_('Rated game'), yesno( $Rated),
-         ( $iamrated || $Rated != 'Y' ? '' : warning_cell_attb( T_('No initial rating')) ) );
+         ( $iamrated || $Rated != 'Y' ? '' : warning_cell_attb( T_('User has no rating')) ) );
    $itable->add_sinfo( T_('Clock runs on weekends'), yesno( $WeekendClock) );
 
    if ( $tablestyle == GSET_WAITINGROOM ) // Comment
