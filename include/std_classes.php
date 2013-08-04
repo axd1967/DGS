@@ -233,7 +233,7 @@ class QuerySQL
     *    add_part( SQLP_FROM,    "INNER JOIN ..." );
     *    add_part( SQLP_WHERE,   "G.ID=G2.ID AND G.Moves>10" ); // joined with 'AND'
     *    add_part( SQLP_GROUP,   "Games.To_MoveID" );
-    *    add_part( SQLP_HAVING,  'haverating and goodrating' );
+    *    add_part( SQLP_HAVING,  'haverating AND goodrating' );
     *    add_part( SQLP_ORDER,   'M.ID DESC' );
     *    add_part( SQLP_LIMIT,   '0,10' );
     *    add_part( SQLP_WHERETMPL, "(G.ID #OP #VAL OR G.ID2 #OP #VAL)" );
