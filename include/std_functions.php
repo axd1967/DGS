@@ -2578,12 +2578,11 @@ function is_logged_in($handle, $scode, &$player_row, $login_opts=LOGIN_DEFAULT_O
       if ( $login_opts & LOGIN_RESET_NOTIFY )
          $upd->upd_txt('Notify', 'NONE' );
 
+      $upd->upd_raw('Lastaccess', "GREATEST(Lastaccess,$NOW)" ); // update for both (web-site + quick-suite)
       if ( $is_quick_suite )
-         $upd->upd_time('LastQuickAccess');
+         $upd->upd_time('LastQuickAccess', $NOW);
       else
       {
-         $upd->upd_time('Lastaccess');
-
          $browser = substr(@$_SERVER['HTTP_USER_AGENT'], 0, 150);
          if ( $player_row['Browser'] !== $browser )
          {

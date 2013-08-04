@@ -169,6 +169,9 @@ Copyright (C) 2001-2013  Erik Ouchterlony, Jens-Uwe Gaspar
 
    * Allow voting on <home features/list_votes.php>features</home> also if user finished unrated games
 
+   * Show combined web-site and quick-suite last-access as 'Last access' on user-info and game-lists,
+     <home userinfo.php>user-info page</home> still shows difference to last quick-suite access
+
    * Added tooltips for main-menu entries
    * Added server-version in bottom-bar
 

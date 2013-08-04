@@ -157,8 +157,14 @@ Zu  | RejectTimeoutWin | tinyint(4)                                  | NO   |   
 -------------------------------------------------
 # Description of fields:
 
-* Lastaccess : timestamp when user was "last on site"
-   - should not / is not set when user uses one of the RSS/WAP/quick-features
+* Lastaccess : timestamp when user was "last on site" or last used quick-suite
+   - field is not set when user uses one of the RSS/WAP/quick-features
+
+   - field is updated when user access web-site OR accesses the quick-suite (quick_play.php or quick_do.php)
+     To differ web-access and quick-suite-access, there is a separate field 'LastQuickAccess':
+     - if 'Lastaccess' > 'LastQuickAccess', then it was a web-site access
+     - if 'Lastaccess' == 'LastQuickAccess', then it was a quick-suite access
+     - if 'Lastaccess' < 'LastQuickAccess' (should not happen)
 
 * LastQuickAccess : timestamp when user last used the quick-suite
 

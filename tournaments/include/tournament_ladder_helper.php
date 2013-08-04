@@ -159,8 +159,8 @@ class TournamentLadderHelper
          SQLP_WHERE,
             'TLP.UserAbsenceDays > 0',
             "T.Status='".TOURNEY_STATUS_PLAY."'",
+            // no check on P.LastQuickAccess needed as P.Lastaccess contains both (see specs)
             'P.Lastaccess < NOW() - INTERVAL (TLP.UserAbsenceDays + CEIL(P.OnVacation)) DAY',
-            'P.LastQuickAccess < NOW() - INTERVAL (TLP.UserAbsenceDays + CEIL(P.OnVacation)) DAY',
          SQLP_ORDER,
             'TL.tid ASC'
          );

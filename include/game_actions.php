@@ -573,7 +573,10 @@ class GameActionHelper
          $upd = new UpdateQuery('Players');
          $upd->upd_raw('Moves', 'Moves+1' ); // NOTE: count also delete + set-handicap as one move
          if ( $this->is_quick )
+         {
+            $upd->upd_raw('Lastaccess', "GREATEST(Lastaccess,$NOW)" ); // update too on quick-suite access
             $upd->upd_time('LastQuickAccess', $NOW );
+         }
          $upd->upd_raw('Activity', "LEAST($ActivityMax,$ActivityForMove+Activity)" );
          $upd->upd_time('LastMove', $NOW );
          db_query( "$dbgmsg.activity({$this->my_id})",

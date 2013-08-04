@@ -18,6 +18,12 @@ ChangeLog
 
 2013-08-04 juga
 
+   * tournaments/include/tournament_ladder_helper.php (TournamentLadderHelper.load_ladder_absent_users),
+     include/game_actions.php (GameActionHelper.update_game)
+     include/std_functions.php (is_logged_in)
+     specs/db/table-Players.txt, NEWS:
+   - update Players.Lastaccess for both web-site AND quick-suite access
+
    * include/wroom_control.php (WaitingroomControl.build_waiting_room_query,
        ~.extend_query_waitingroom_suitable, ~.get_waitingroom_restrictions),
      include/message_functions.php (game_info_table, build_game_restriction_notes,
