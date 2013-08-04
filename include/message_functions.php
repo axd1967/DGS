@@ -112,7 +112,6 @@ function game_settings_form(&$mform, $formstyle, $viewmode, $iamrated=true, $my_
    $is_view_mpgame = ( $viewmode == GSETVIEW_MPGAME );
    $is_view_fairkomi = ( $viewmode == GSETVIEW_FAIRKOMI );
 
-   $text_need_rating = '(' . T_('needs a user-rating to be enabled') . ')';
    $allowed = true;
    $shape_init = true;
 
@@ -410,6 +409,7 @@ function game_settings_form(&$mform, $formstyle, $viewmode, $iamrated=true, $my_
    $mform->add_row( array( 'SPACE' ) );
 
    // Conventional & Proper handicap
+   $text_need_rating = '(' . T_('needs a user-rating to be enabled') . ')';
    if ( !$is_view_mpgame && !$is_view_fairkomi )
    {
       if ( $formstyle == GSET_MSG_DISPUTE && is_htype_calculated($Handitype) && !$iamrated ) // user-unrated
@@ -636,21 +636,14 @@ function game_settings_form(&$mform, $formstyle, $viewmode, $iamrated=true, $my_
          $allowed = false;
 
       if ( $ShapeID )
-      {
-         $rated_value = false;
-         $rated_disabled = true;
-         $rated_descr = span('WarnMsg', T_('shape-games are always unrated'), '(%s)');
-      }
+         $mform->add_hidden('rated', '');
       else
       {
-         $rated_value = ( $iamrated && $Rated );
-         $rated_disabled = !$iamrated;
-         $rated_descr = ( $iamrated ) ? '' : $text_need_rating;
+         $mform->add_row( array(
+               'DESCRIPTION', T_('Rated game'),
+               'CHECKBOXX', 'rated', 'Y', "", ( $iamrated && $Rated ), ( $iamrated ? '' : 'disabled=1' ),
+               'TEXT', ( $iamrated ? '' : span('WarnMsg', $text_need_rating) ) ));
       }
-      $mform->add_row( array(
-            'DESCRIPTION', T_('Rated game'),
-            'CHECKBOXX', 'rated', 'Y', "", $rated_value, ( $rated_disabled ? 'disabled=1' : '' ),
-            'TEXT', $rated_descr ));
    }
 
    if ( $formstyle == GSET_WAITINGROOM && !$is_view_mpgame )

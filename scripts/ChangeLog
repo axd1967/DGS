@@ -16,6 +16,11 @@ Developers INFO:
 ChangeLog
 ------------------------------------------------------------------
 
+2013-08-04 juga
+
+   * include/message_functions.php (game_settings_form):
+   - hide checkbox for rated-game for shape-games as that state can never be changed
+
 2013-08-03 juga
 
    * include/message_functions.php (game_settings_form),
