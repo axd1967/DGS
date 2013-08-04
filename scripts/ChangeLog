@@ -18,6 +18,9 @@ ChangeLog
 
 2013-08-04 juga
 
+   * waiting_room.php:
+   - always show Settings-column in waiting-room
+
    * include/game_functions.php (GameSetupChecker.add_default_values_info, ~.check_game_rated,
        ~.check_opponent_rating, ~.check_fields; is_htype_calculated),
      include/message_functions.php (game_info_table),
