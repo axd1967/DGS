@@ -120,7 +120,7 @@ function itemL($text, $link='', $working=true, $last=false)
             item(T_('My tournaments'), "tournaments/list_tournaments.php?uid=$id", true);
          item(T_('My running multi-player-games'), "show_games.php?uid=$id".URI_AMP."mp=1", true);
          item(T_('My finished multi-player-games'), "show_games.php?uid=$id".URI_AMP."finished=1".URI_AMP."mp=1", true);
-         item(T_('Show messages'), "message.php?mode=ShowMessage", false);
+         item(T_('Show message'), "message.php?mode=ShowMessage", false);
          item(T_('Show game (follow id)'), "game.php", false, true);
          { $item_level++;
             item(T_('Add time for opponent'), "game.php", false);
@@ -208,7 +208,7 @@ function itemL($text, $link='', $working=true, $last=false)
          item(T_('Show my opponents'), "opponents.php", true, true);
       } $item_level--;
 
-      item(T_('Messages'), "list_messages.php", false);
+      item(T_('Messages'), "list_messages.php", true);
       { $item_level++;
          item(T_('Send a message'), "message.php?mode=NewMessage", true);
          item(T_('Invite'), "message.php?mode=Invite", true);
