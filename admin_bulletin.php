@@ -535,7 +535,7 @@ function parse_edit_form( &$bulletin )
       if ( $old_vals['gid'] != $bulletin->gid ) $edits[] = T_('Game ID');
       if ( $old_vals['user_list'] != $vars['user_list'] ) $edits[] = T_('User List');
       if ( $old_vals['author'] != $vars['author'] ) $edits[] = T_('Author');
-      if ( $old_vals['publish_time'] != $bulletin->PublishTime ) $edits[] = T_('Publish Time');
+      if ( $old_vals['publish_time'] != $bulletin->PublishTime ) $edits[] = T_('Publish time');
       if ( $old_vals['expire_time'] != $bulletin->ExpireTime ) $edits[] = T_('Expire Time');
       if ( $old_vals['subject'] != $bulletin->Subject ) $edits[] = T_('Subject');
       if ( $old_vals['text'] != $bulletin->Text ) $edits[] = T_('Text');
