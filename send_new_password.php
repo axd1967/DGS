@@ -110,7 +110,8 @@ Both the old and the new password will also be valid until
             "SET Newpassword=".PASSWORD_ENCRYPT."('$newpasswd') " .
             "WHERE Handle='".mysql_addslashes($pswduser)."' LIMIT 1" );
 
-      send_email("send_new_password Uid:$pswduser Text:$msg", $Email, 0, $msg);
+      $subject = sprintf( '%s: %s', FRIENDLY_LONG_NAME, sprintf( T_('New password for [%s]'), $pswduser ) );
+      send_email("send_new_password Uid:$pswduser Subject:$subject Text:$msg", $Email, 0, $msg, $subject );
    }
    ta_end();
 
