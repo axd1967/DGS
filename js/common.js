@@ -85,6 +85,17 @@ function updateRulesetDefaulKomi( e )
    }
 }
 
+function updateDefaultMaxHandicap( e )
+{
+   var size = e.value;
+   if ( !(typeof ARR_DEF_MAX_HANDICAP === 'undefined') )
+   {
+      // NOTE: see also PHP-function game_settings_form()
+      var content = String.sprintf( T_defaultMaxHandicap, ARR_DEF_MAX_HANDICAP[size], size );
+      document.getElementById('DefMaxHandicap').textContent = content;
+   }
+}
+
 // ---------- Tournament-Ladder --------------------
 
 // NOTE: requires global vars with translated texts: T_rankInfoTitle/Format

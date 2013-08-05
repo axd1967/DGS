@@ -16,6 +16,16 @@ Developers INFO:
 ChangeLog
 ------------------------------------------------------------------
 
+2013-08-05 juga
+
+   * include/game_functions.php (DefaultMaxHandicap.build_default_max_handicap_javascript_map;
+       build_game_settings_javascript),
+     include/message_functions.php (game_settings_form),
+     js/common.js (updateDefaultMaxHandicap):
+   - changed info about default-max-handicap in game-settings-form on changing board-size using JavaScript
+     - update default-max-handicap info for invitations AND standard new-game
+     - minor cleanup also using span()-function to set id-attribute
+
 2013-08-04 juga
 
    * tournaments/include/tournament_ladder_helper.php (TournamentLadderHelper.load_ladder_absent_users),

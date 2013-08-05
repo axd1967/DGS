@@ -5173,6 +5173,14 @@ class DefaultMaxHandicap
       return $lim_handi;
    }//build_text_handicap_limits
 
+   public static function build_default_max_handicap_javascript_map()
+   {
+      $arr = array();
+      for ( $size=MIN_BOARD_SIZE; $size <= MAX_BOARD_SIZE; ++$size )
+         $arr[] = sprintf( "%s: %s", $size, self::calc_def_max_handicap($size));
+      return '{ ' . implode(', ', $arr) . ' }';
+   }
+
 } //end 'DefaultMaxHandicap'
 
 
@@ -5239,7 +5247,11 @@ function build_image_double_game( $with_sep=false, $class='' )
 function build_game_settings_javascript()
 {
    if ( is_javascript_enabled() )
+   {
       $js = add_js_var('ARR_RULESET_DEF_KOMI', Ruleset::build_ruleset_default_komi_javascript_map(), /*raw*/true );
+      $js .= add_js_var('ARR_DEF_MAX_HANDICAP', DefaultMaxHandicap::build_default_max_handicap_javascript_map(), /*raw*/true );
+      $js .= add_js_var('T_defaultMaxHandicap', T_('(Def. is %s for size %s)#defmaxhandi') );
+   }
    else
       $js = null;
    return $js;

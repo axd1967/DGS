@@ -399,12 +399,15 @@ function game_settings_form(&$mform, $formstyle, $viewmode, $iamrated=true, $my_
       $ruleset_vals = array_values($arr_rulesets);
       array_push( $arr, 'TEXT', $ruleset_vals[0] );
    }
-   array_push( $arr, 'TEXT', SMALL_SPACING . T_('use default komi') . " <span id=\"RulesetDefKomi\">$Komi_m</span>" );
+   array_push( $arr, 'TEXT', SMALL_SPACING . T_('use default komi') . ' ' . span('id="RulesetDefKomi"', $Komi_m) );
    $mform->add_row( $arr );
 
    $value_array = array_value_to_key_and_value( range( MIN_BOARD_SIZE, MAX_BOARD_SIZE ));
+   $attb_arr = array( 'disabled' => $ShapeID );
+   if ( is_javascript_enabled() )
+      $attb_arr['onchange'] = 'updateDefaultMaxHandicap(this)';
    $mform->add_row( array( 'DESCRIPTION', T_('Board Size'),
-                           'SELECTBOXX', 'size', 1, $value_array, $Size, false, array( 'disabled' => $ShapeID ) ));
+                           'SELECTBOXX', 'size', 1, $value_array, $Size, false, $attb_arr ));
 
    $mform->add_row( array( 'SPACE' ) );
 
@@ -517,10 +520,9 @@ function game_settings_form(&$mform, $formstyle, $viewmode, $iamrated=true, $my_
       $adj_handi_stones[0] = '&nbsp;0';
 
       $max_handi_stones = build_arr_handicap_stones( /*def*/true );
-      $txt_def_max_handi = ( $is_fstyle_invite )
-         ? ' ' . span('smaller', sprintf( T_('(Def. is %s for size %s)#defmaxhandi'),
-                                          DefaultMaxHandicap::calc_def_max_handicap($Size), $Size ))
-         : '';
+      $txt_def_max_handi = span('id="DefMaxHandicap" class="smaller"',
+         sprintf( T_('(Def. is %s for size %s)#defmaxhandi'), // adjust also build_game_settings_javascript()
+            DefaultMaxHandicap::calc_def_max_handicap($Size), $Size ));
 
       $mform->add_row( array( 'DESCRIPTION', T_('Handicap stone adjustments'),
                               'TEXT', sptext(T_('Adjust by#handi')),
@@ -529,7 +531,7 @@ function game_settings_form(&$mform, $formstyle, $viewmode, $iamrated=true, $my_
                               'SELECTBOX', 'min_handicap', 1, $handi_stones, $MinHandicap, false,
                               'TEXT', sptext(T_('Max.'), 1),
                               'SELECTBOX', 'max_handicap', 1, $max_handi_stones, $MaxHandicap, false,
-                              'TEXT', $txt_def_max_handi,
+                              'TEXT', ' ' . $txt_def_max_handi,
                               ));
    }
    else
