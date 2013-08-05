@@ -18,6 +18,9 @@ ChangeLog
 
 2013-08-05 juga
 
+   * include/register_functions.php (UserRegistration.register_user):
+   - enabled JavaScript per default for new user on registration
+
    * include/register_functions.php (UserRegistration.process_verification),
      include/std_functions.php (USERFLAG_EMAIL_VERIFIED),
      specs/db/table-Players.txt, admin_users.php:

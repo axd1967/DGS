@@ -243,7 +243,7 @@ class UserRegistration
             $upd->upd_txt('Browser', $browser );
          $upd->upd_num('VaultCnt', VAULT_CNT ); // initial quota
          $upd->upd_time('VaultTime', $NOW + VAULT_DELAY );
-         $upd->upd_num('UserFlags', USERFLAG_ACTIVATE_REGISTRATION|USERFLAG_VERIFY_EMAIL );
+         $upd->upd_num('UserFlags', USERFLAG_JAVASCRIPT_ENABLED|USERFLAG_ACTIVATE_REGISTRATION|USERFLAG_VERIFY_EMAIL );
          $result = db_query( "UserReg.register_user.insert_player({$this->uhandle})",
             "INSERT INTO Players SET " . $upd->get_query() );
 
