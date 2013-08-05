@@ -51,6 +51,9 @@ require_once 'include/form_functions.php';
 
    echo "</CENTER>\n";
 
-   end_page();
+   $menu_array = array();
+   $menu_array[T_('Change email & notifications')] = 'edit_email.php';
+
+   end_page(@$menu_array);
 }
 ?>

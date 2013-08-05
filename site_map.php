@@ -199,6 +199,7 @@ function itemL($text, $link='', $working=true, $last=false)
          item(T_('My finished multi-player-games'), "show_games.php?uid=$id".URI_AMP."finished=1".URI_AMP."mp=1", true);
          item(T_('Edit profile'), "edit_profile.php", true);
          item(T_('Change rating & rank'), "edit_rating.php", true);
+         item(T_('Change email & notifications'), "edit_email.php", true);
          item(T_('Change password'), "edit_password.php", true);
          item(T_('Edit biographical info'), "edit_bio.php", true);
          item(T_('Edit biographical order'), "edit_bio.php?editorder=1", true);

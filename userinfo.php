@@ -290,6 +290,7 @@ $GLOBALS['ThePage'] = new Page('UserInfo');
    {
       $menu_array[T_('Edit profile')] = 'edit_profile.php';
       $menu_array[T_('Change rating & rank')] = 'edit_rating.php';
+      $menu_array[T_('Change email & notifications')] = 'edit_email.php';
       $menu_array[T_('Change password')] = 'edit_password.php';
       $menu_array[T_('Edit bio')] = 'edit_bio.php';
       if ( USERPIC_FOLDER != '' )

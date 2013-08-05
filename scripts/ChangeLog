@@ -18,6 +18,12 @@ ChangeLog
 
 2013-08-05 juga
 
+   * edit_email.php (parse_edit_form, handle_save_mail),
+     edit_profile.php (parse_edit_form, handle_save_mail),
+     edit_password.php, site_map.php, userinfo.php:
+   - moved changing email & nofications to separate 'edit_email.php'-page
+     in preparation for email-verification
+
    * include/game_functions.php (DefaultMaxHandicap.build_default_max_handicap_javascript_map;
        build_game_settings_javascript),
      include/message_functions.php (game_settings_form),

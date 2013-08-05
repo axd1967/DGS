@@ -93,13 +93,6 @@ require_once 'include/gui_bulletin.php';
 
    // ----- init form-data -------------------------------
 
-   $notify_msg = array(
-         0 => T_('Off'),
-         1 => T_('Notify only'),
-         2 => T_('Moves and messages'),
-         3 => T_('Full board and messages'),
-      );
-
    $menu_directions = array(
          'VERTICAL'   => sptext(T_('Vertical'),2),
          'HORIZONTAL' => sptext(T_('Horizontal')),
@@ -165,18 +158,6 @@ require_once 'include/gui_bulletin.php';
             'SELECTBOX', 'nightstart', 1, $nightstart, (int)$vars['night_start'], false ) );
    else
       $profile_form->add_row( array( 'HIDDEN', 'nightstart', (int)$vars['night_start'] ) );
-
-   $profile_form->add_empty_row();
-   $profile_form->add_row( array(
-         'DESCRIPTION', T_('Email notifications'),
-         'SELECTBOX', 'emailnotify', 1, $notify_msg, (int)$vars['gui:email_notify'], false ) );
-   $row = array(
-         'DESCRIPTION', T_('Email'),
-         'TEXTINPUT', 'email', 32, 80, $vars['email'] );
-   if ( !$vars['email'] )
-      array_push( $row,
-            'TEXT', span('FormWarning', T_('Must be filled to receive a new password or a notification')) );
-   $profile_form->add_row($row);
 
 
    $skipbull = (int)$vars['skip_bulletin'];
@@ -405,6 +386,7 @@ require_once 'include/gui_bulletin.php';
 
    $menu_array = array();
    $menu_array[T_('Change rating & rank')] = 'edit_rating.php';
+   $menu_array[T_('Change email & notifications')] = 'edit_email.php';
    $menu_array[T_('Change password')] = 'edit_password.php';
    $menu_array[T_('Edit bio')] = 'edit_bio.php';
    if ( USERPIC_FOLDER != '' )
@@ -430,9 +412,6 @@ function parse_edit_form( &$cfg_board )
       'timezone'           => $player_row['Timezone'],
       'night_start'        => (int)$player_row['Nightstart'],
       'db:clock_changed'   => false,
-      'gui:email_notify'   => 0,
-      'send_email'         => $player_row['SendEmail'], // db-value
-      'email'              => $player_row['Email'],
       'skip_bulletin'      => (int)$player_row['SkipBulletin'],
       'reject_timeout'     => (int)$player_row['RejectTimeoutWin'],
       // appearance
@@ -457,19 +436,6 @@ function parse_edit_form( &$cfg_board )
       'notes_width_small'  => $cfg_board->get_notes_width( CFGBOARD_NOTES_SMALL ),
       'notes_width_large'  => $cfg_board->get_notes_width( CFGBOARD_NOTES_LARGE ),
    );
-
-   // parse mail-notification for GUI
-   $send_email = $player_row['SendEmail'];
-   if ( strpos($send_email, 'BOARD') !== false )
-      $notify_msg_idx = 3;
-   elseif ( strpos($send_email, 'MOVE') !== false )
-      $notify_msg_idx = 2;
-   elseif ( strpos($send_email, 'ON') !== false )
-      $notify_msg_idx = 1;
-   else
-      $notify_msg_idx = 0;
-   $vars['gui:email_notify'] = $notify_msg_idx;
-
 
    // parse URL-vars from form-submit
    $errors = array();
@@ -519,40 +485,6 @@ function parse_edit_form( &$cfg_board )
       }
       $vars['night_start'] = $nightstart;
 
-      $email = trim(get_request_arg('email'));
-      if ( $email )
-      {
-         $email_error = verify_invalid_email(false, $email, /*err-die*/false );
-         if ( $email_error )
-            $errors[] = ErrorCode::get_error_text($email_error);
-      }
-      else
-         $email_error = false;
-      $vars['email'] = $email;
-
-      $emailnotify = (int)@$_REQUEST['emailnotify'];
-      if ( $emailnotify < 0 )
-         $emailnotify = 0;
-      elseif ( $emailnotify > 3 )
-         $emailnotify = 3;
-      if ( $emailnotify >= 1 )
-      {
-         $sendemail = 'ON';
-         if ( $emailnotify >= 2 ) // BOARD also includes moves+message
-         {
-            $sendemail .= ',MOVE,MESSAGE';
-            if ( $emailnotify >= 3 )
-               $sendemail .= ',BOARD';
-         }
-
-         if ( empty($email) )
-            $errors[] = T_('Missing email-address for enabled email notifications.#profile');
-      }
-      else
-         $sendemail = '';
-      $vars['gui:email_notify'] = $emailnotify;
-      $vars['send_email'] = $sendemail;
-
       $skipbulletin = 0;
       foreach ( array( BULLETIN_SKIPCAT_TOURNAMENT, BULLETIN_SKIPCAT_FEATURE, BULLETIN_SKIPCAT_PRIVATE_MSG, BULLETIN_SKIPCAT_SPAM ) as $mask )
          $skipbulletin |= ( !@$_REQUEST['skipbull'.$mask] ? $mask : 0 );
@@ -593,8 +525,6 @@ function parse_edit_form( &$cfg_board )
          else
             $user_flags &= ~USERFLAG_JAVASCRIPT_ENABLED;
       }
-      if ( !$email_error ) // reset error-flag if email valid
-         $user_flags &= ~USERFLAG_NFY_BUT_NO_OR_INVALID_EMAIL;
       $vars['user_flags'] = $user_flags;
 
 
@@ -716,8 +646,6 @@ function handle_save_profile( &$cfg_board, $nval )
    $upd->upd_num('Nightstart', (int)$nval['night_start'] );
    if ( $nval['db:clock_changed'] )
       $upd->upd_bool('ClockChanged', true );
-   $upd->upd_txt('SendEmail', $nval['send_email'] );
-   $upd->upd_txt('Email', $nval['email'] );
    $upd->upd_num('SkipBulletin', (int)$nval['skip_bulletin'] );
    if ( (int)@$player_row['Skipbulletin'] != $nval['skip_bulletin'] ) // reset bulletin-count
       $upd->upd_num('CountBulletinNew', -1 );
