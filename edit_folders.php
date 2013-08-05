@@ -236,7 +236,11 @@ require_once 'include/message_functions.php';
 
    echo "</center>\n";
 
-   end_page();
+
+   $menu_array = array();
+   $menu_array[T_('Edit message folders')] = 'edit_folders.php';
+
+   end_page(@$menu_array);
 }//main
 
 
