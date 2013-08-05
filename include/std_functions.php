@@ -223,7 +223,7 @@ define('MAX_REJECT_TIMEOUT', 120); // days
 
 
 //-----
-// Players.UserFlags (also stored in cookie)
+// Players.UserFlags (also stored in cookie);  adjust also admin_users.php showing user-flags
 define('USERFLAG_JAVASCRIPT_ENABLED', 0x0001);
 define('USERFLAG_NFY_BUT_NO_OR_INVALID_EMAIL', 0x0002); // user has SendEmail>'' but missing or invalid Email
 define('USERFLAG_VERIFY_EMAIL', 0x0004); // if set, Players.Email will be replaced with verified email
