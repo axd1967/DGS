@@ -18,6 +18,10 @@ ChangeLog
 
 2013-08-05 juga
 
+   * include/register_functions.php (UserRegistration.build_email_verification),
+     edit_email.php (handle_save_mail):
+   - send mail-verification also for unverified unchanged email
+
    * include/register_functions.php (UserRegistration.register_user),
      include/config.php (SEND_ACTIVATION_MAIL),
      scripts/updates/other_changes_1_0_15_to_1_0_16.txt,

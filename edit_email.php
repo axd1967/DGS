@@ -291,7 +291,9 @@ function handle_save_mail( $nval )
    $clear_userflags = $nval['clear_user_flags'];
    if ( $new_email )
    {
-      if ( !$old_email || strcasecmp($old_email, $new_email) ) // added missing email or changed email
+      // added missing email or changed email, or verify unverified unchanged email
+      $diff_mail = strcasecmp($old_email, $new_email);
+      if ( !$old_email || $diff_mail || ( !$diff_mail && !($player_row['UserFlags'] & USERFLAG_EMAIL_VERIFIED) ) )
          $set_userflags |= USERFLAG_VERIFY_EMAIL;
    }
    $infos = array();
@@ -317,7 +319,10 @@ function handle_save_mail( $nval )
                $my_id, $my_handle, $vfy->ID, $vfy->VType, $vfy_code, $new_email );
             send_email( "edit_email.send_email_change($my_id,{$vfy->ID})",
                $new_email, EMAILFMT_SKIP_WORDWRAP, $text, $subject );
-            $infos[] = T_('Verification mail for email-change sent!');
+            if ( $diff_mail )
+               $infos[] = T_('Verification mail for email-change sent!');
+            else // mail didn't change, so just verify
+               $infos[] = T_('Verification mail for existing email sent!');
             $reload = true;
          }
       }

@@ -476,7 +476,7 @@ class UserRegistration
             break;
 
          case VFY_TYPE_EMAIL_CHANGE:
-            $subj = sprintf( T_('Dragon Go Server: Verify email change for [%s]'), $uhandle );
+            $subj = sprintf( T_('Dragon Go Server: Verify email for [%s]'), $uhandle );
             $text = T_('To be able to use your new email, it needs to be verified!') . "\n\n"
                . $text_account
                . sprintf( T_('To verify your new email [%s], please follow this link:#reg'), $vfy_email) . "\n"
