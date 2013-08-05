@@ -16,6 +16,15 @@ Developers INFO:
 ChangeLog
 ------------------------------------------------------------------
 
+2013-08-06 juga
+
+   * admin_bulletin.php:
+   - fix "double"-case translation: Publish Time -> Publish time
+-----------
+-- fix translations
+UPDATE TranslationTexts SET Text='Publish time' WHERE Text='Publish time' ;
+-----------
+
 2013-08-05 juga
 
    * include/register_functions.php (UserRegistration.build_email_verification),

@@ -117,3 +117,7 @@ UPDATE Verification
    SET VType=1 WHERE VType=0 ;
 
 
+-- fix translations
+UPDATE TranslationTexts SET Text='Publish time' WHERE Text='Publish time' ;
+
+
