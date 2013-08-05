@@ -18,6 +18,11 @@ ChangeLog
 
 2013-08-05 juga
 
+   * include/register_functions.php (UserRegistration.process_verification),
+     include/std_functions.php (USERFLAG_EMAIL_VERIFIED),
+     specs/db/table-Players.txt, admin_users.php:
+   - mark email as verified after email-verification and account-activation
+
    * edit_email.php (parse_edit_form, handle_save_mail),
      edit_profile.php (parse_edit_form, handle_save_mail),
      edit_password.php, site_map.php, userinfo.php:

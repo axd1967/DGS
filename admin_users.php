@@ -268,6 +268,7 @@ require_once 'include/form_functions.php';
             $out[] = sprintf( 'JavaScript=%s', ( $fval & USERFLAG_JAVASCRIPT_ENABLED ) ? 'ON' : 'OFF' );
             $out[] = sprintf( 'VerifyEmail=%s', ( $fval & USERFLAG_VERIFY_EMAIL ) ? 'ON' : 'OFF' );
             $out[] = sprintf( 'ActivateReg=%s', ( $fval & USERFLAG_ACTIVATE_REGISTRATION ) ? 'ON' : 'OFF' );
+            $out[] = sprintf( 'EmailVerified=%s', ( $fval & USERFLAG_EMAIL_VERIFIED ) ? 'Y' : 'N' );
             if ( $fval & USERFLAG_NFY_BUT_NO_OR_INVALID_EMAIL )
                $out[] = 'Notify_on_but_no_or_invalid_email';
             $fval = implode(', ', $out);

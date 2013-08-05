@@ -415,17 +415,19 @@ class UserRegistration
          $verification->Verified = $NOW;
          $verification->update();
 
-         $clear_userflags = 0;
+         $set_userflags = $clear_userflags = 0;
          if ( $user_flags & USERFLAG_ACTIVATE_REGISTRATION ) // activate account by clearing flag, if email verified
             $clear_userflags |= USERFLAG_ACTIVATE_REGISTRATION;
          if ( $user_flags & USERFLAG_VERIFY_EMAIL ) // replace email and clear flag, if email verified
             $clear_userflags |= USERFLAG_VERIFY_EMAIL;
+         if ( $user_flags & (USERFLAG_ACTIVATE_REGISTRATION|USERFLAG_VERIFY_EMAIL) )
+            $set_userflags |= USERFLAG_EMAIL_VERIFIED;
          if ( $clear_userflags > 0 )
          {
             // NOTE: this update could go wrong leaving verification invalidated -> must be handled by admin
             $upd = new UpdateQuery('Players');
             $upd->upd_txt('Email', $verification->Email );
-            $upd->upd_raw('UserFlags', "UserFlags & ~$clear_userflags" );
+            $upd->upd_raw('UserFlags', "(UserFlags | $set_userflags) & ~$clear_userflags" );
             db_query("UserReg:process_verification.upd_email_uflags($uid,$vid,$user_flags->$clear_userflags)",
                "UPDATE Players SET " . $upd->get_query() . " WHERE ID=$uid LIMIT 1" );
          }

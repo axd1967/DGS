@@ -209,6 +209,17 @@ Zu  | RejectTimeoutWin | tinyint(4)                                  | NO   |   
    - 0 .. 127 = number of days that must pass since last-move-date of opponent
      to enable rejecting a win-by-timeout by making the game unrated.
 
+* UserFlags : user-flags
+   - NOTE: for constants see USERFLAG_...
+
+   - 0x0001 = set to enable JavaScript-usage on the web-site
+   - 0x0002 = set to indicate, that user has SendEmail>'' (notification on), but has no or an invalid email
+   - 0x0004 = set to indicate, that an email-verification is underway (see Verification-table)
+   - 0x0008 = set to indicate, that an account-activation is underway (see Verification-table)
+   - 0x0010 = set to indicate, that the Players.Email is verified by email-verification,
+     this may be used to later differ accounts with unverified emails from accounts with verified emails
+
+
 -------------------------------------------------
 TABLE Players:
    ID int(11) NOT NULL auto_increment, -- numerical user-id 'uid'
