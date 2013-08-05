@@ -87,6 +87,9 @@ define('ALLOW_SQL_CALC_ROWS', 1);
 
 // Dependent of the configuration of your server:
 
+// Sends mail to new user with activation-code: false = no account-activation required
+define('SEND_ACTIVATION_MAIL', true);
+
 // OPTIMIZATION:
 // restrict initial view in show_games.php when showing ALL games:
 // NOTE: used to avoid slow-queries on live-server

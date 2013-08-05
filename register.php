@@ -46,7 +46,10 @@ require_once 'include/register_functions.php';
          if ( !$errors )
          {
             $reg->register_user();
-            jump_to("verify_email.php?user=".urlencode($reg->uhandle));
+            if ( SEND_ACTIVATION_MAIL )
+               jump_to("verify_email.php?user=".urlencode($reg->uhandle));
+            else
+               jump_to("introduction.php?sysmsg=".urlencode(T_('Account registered!')));
          }
       }
       ta_end();
@@ -85,13 +88,15 @@ require_once 'include/register_functions.php';
                               'PASSWORD', $reg->build_key('passwd2'), 16, 16, $reg->password2 ));
 
    list( $text_email_use, $text_email_priv ) = UserRegistration::build_common_verify_texts();
+   $text_activate_mail = ( SEND_ACTIVATION_MAIL )
+      ? span('RegisterMsg', T_('To activate your account and confirm the registration, a validation code will be sent to your email.')) . "<br>\n"
+      : '';
    $reg_form->add_empty_row();
    $reg_form->add_row( array(
       'DESCRIPTION', T_('Email'),
       'TEXTINPUT', $reg->build_key('email'), 50, 80, $reg->email,
       'TEXT', "<br>\n"
-            . span('RegisterMsg', T_('To activate your account and confirm the registration, a validation code will be sent to your email.'))
-            . "<br>\n"
+            . $text_activate_mail
             . $text_email_use
             . "<br>\n"
             . $text_email_priv ));

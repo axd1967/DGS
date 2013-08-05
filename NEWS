@@ -227,6 +227,7 @@ Copyright (C) 2001-2013  Erik Ouchterlony, Jens-Uwe Gaspar
 ##         * ENABLE_GAME_VIEWER                - disabled (needs JavaScript)
          * Added restriction on max. running games for tournament-registration (150)
          * ALLOWED_RULESETS                  - enabled with: JAPANESE (default) + CHINESE
+         * SEND_ACTIVATION_MAIL              - enabled
 
 
 #release DGS_1_0_15 [2012-Jun-08] - DGS 1.0.15  (Game types & settings, Users, Forum, Voting)

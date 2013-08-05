@@ -226,6 +226,10 @@ class UserRegistration
       $ip = (string)@$_SERVER['REMOTE_ADDR'];
       $browser = substr(@$_SERVER['HTTP_USER_AGENT'], 0, 150);
 
+      $user_flags = USERFLAG_JAVASCRIPT_ENABLED;
+      if ( SEND_ACTIVATION_MAIL )
+         $user_flags |= USERFLAG_ACTIVATE_REGISTRATION|USERFLAG_VERIFY_EMAIL;
+
       ta_begin();
       {//HOT-section for registering new player
          $upd = new UpdateQuery('Players');
@@ -243,7 +247,7 @@ class UserRegistration
             $upd->upd_txt('Browser', $browser );
          $upd->upd_num('VaultCnt', VAULT_CNT ); // initial quota
          $upd->upd_time('VaultTime', $NOW + VAULT_DELAY );
-         $upd->upd_num('UserFlags', USERFLAG_JAVASCRIPT_ENABLED|USERFLAG_ACTIVATE_REGISTRATION|USERFLAG_VERIFY_EMAIL );
+         $upd->upd_num('UserFlags', $user_flags );
          $result = db_query( "UserReg.register_user.insert_player({$this->uhandle})",
             "INSERT INTO Players SET " . $upd->get_query() );
 
@@ -256,15 +260,18 @@ class UserRegistration
          ConfigBoard::insert_default( $new_id );
          UserQuota::insert_default( $new_id );
 
-         // send activation-mail with verification-code for email
-         $vfy_code = Verification::build_code( $new_id, $this->email );
-         $vfy = new Verification( 0, $new_id, 0, $NOW, VFY_TYPE_USER_REGISTRATION, $this->email, $vfy_code );
-         if ( $vfy->insert() )
+         if ( SEND_ACTIVATION_MAIL )
          {
-            list( $subject, $text ) = self::build_email_verification(
-               $new_id, $this->uhandle, $vfy->ID, $vfy->VType, $vfy_code, $this->email );
-            send_email( "UserReg.register_user.send_activation($new_id,{$vfy->ID})",
-               $this->email, EMAILFMT_SKIP_WORDWRAP, $text, $subject );
+            // send activation-mail with verification-code for email
+            $vfy_code = Verification::build_code( $new_id, $this->email );
+            $vfy = new Verification( 0, $new_id, 0, $NOW, VFY_TYPE_USER_REGISTRATION, $this->email, $vfy_code );
+            if ( $vfy->insert() )
+            {
+               list( $subject, $text ) = self::build_email_verification(
+                  $new_id, $this->uhandle, $vfy->ID, $vfy->VType, $vfy_code, $this->email );
+               send_email( "UserReg.register_user.send_activation($new_id,{$vfy->ID})",
+                  $this->email, EMAILFMT_SKIP_WORDWRAP, $text, $subject );
+            }
          }
       }
       ta_end();

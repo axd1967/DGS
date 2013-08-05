@@ -16,4 +16,9 @@ execute 'scripts/player_consistency.php'
 
 -----------
 # adjust 'include/config-local.php' reflecting changes
+# - extended $DGS_CACHE_GROUPS with CACHE_GRP_TP_COUNT_ALL for caching tournament-participant-counts
+# - replaced 'ALLOW_RULESET_CHINESE' with 'ALLOWED_RULESETS' to configure allowed rulesets
+# - removed 'ALLOW_TOURNAMENTS_ROUND_ROBIN' by changing format of 'ALLOW_TOURNAMENTS'
+# - added 'WROOM_MAX_ENTRIES'
+# - added 'SEND_ACTIVATION_MAIL' to disable account-activation-mail
 

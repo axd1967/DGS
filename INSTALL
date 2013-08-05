@@ -153,6 +153,12 @@ Add at least one super-admin user by registering a user via the website and
 then give him the full set of priviledges by manually setting his
 Adminlevel field to 0xffff (setting all bits) in the Players table.
 
+You need a working mailing setup for this, because a user-registration sends out a mail
+with a validation-code to activate the new account. For the registered admin-user
+you either temporarily set 'SEND_ACTIVATION_MAIL' to false in your 'include/config-local.php',
+which bypasses the mail-activation, or you manually do the activation with the
+"ACTIVATE"-statements shown below (2nd next paragraph):
+
    > mysql -D dragondb
 
    mysql> UPDATE Players SET Adminlevel=0xffff WHERE Handle='adminusernick';
@@ -163,8 +169,10 @@ You may also need to manually activate the super-admins registration,
 because sending email may not work yet sending out a verification-code
 after the registration.
 
+   # ACTIVATE-statements:
    mysql> UPDATE Players SET UserFlags=UserFlags & (4|8) WHERE Handle='adminusernick';
-   mysql> UPDATE Verification AS V INNER JOIN Players AS P ON P.ID=V.uid SET V.Verified=NOW() WHERE P.Handle='adminusernick' LIMIT 1;
+   mysql> UPDATE Verification AS V INNER JOIN Players AS P ON P.ID=V.uid
+             SET V.Verified=NOW(), V.Counter=V.Counter+1 WHERE P.Handle='adminusernick';
 
 ))
 

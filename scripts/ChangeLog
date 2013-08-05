@@ -18,6 +18,14 @@ ChangeLog
 
 2013-08-05 juga
 
+   * include/register_functions.php (UserRegistration.register_user),
+     include/config.php (SEND_ACTIVATION_MAIL),
+     scripts/updates/other_changes_1_0_15_to_1_0_16.txt,
+     register.php, INSTALL, NEWS:
+   - added server-config SEND_ACTIVATION_MAIL to allow user-registration without mail-verification
+     - jump directly to introduction-page after user-registration with disabled SEND_ACTIVATION_MAIL
+     - needed to allow user-registration on SourceForge-server without mail-support
+
    * include/register_functions.php (UserRegistration.register_user, ~.process_verification,
        ~.build_email_verification, ~.remove_verification, ~.build_common_verify_texts),
      include/db/verification.php (class Verification, ~.__construct, ~.setVType, ~.delete,
