@@ -246,7 +246,7 @@ define('MSGBOXROWS_INVITE', 6);
       if ( $arg_to )
       {
          if ( $msg_control->read_message_receivers( $dgs_message, $msg_type, false, $arg_to ) )
-            $errors = array_merge( $errors, $dgs_message->errors );
+            $errors = array_merge( $errors, $dgs_message->get_errors() );
       }
       else
       {
@@ -276,7 +276,7 @@ define('MSGBOXROWS_INVITE', 6);
       {
          $arg_to = $msg_row['other_handle'];
          if ( $msg_control->read_message_receivers( $dgs_message, $msg_type, false, $arg_to ) )
-            $errors = array_merge( $errors, $dgs_message->errors );
+            $errors = array_merge( $errors, $dgs_message->get_errors() );
          else
             $opp_row = $dgs_message->get_recipient();
       }
