@@ -41,12 +41,21 @@ require_once 'include/register_functions.php';
       $vfy_result = UserRegistration::process_verification( $user, $vid, $code );
       if ( is_numeric($vfy_result) && $vfy_result > 0 )
       {
-         $msg = array();
-         if ( $vfy_result & USERFLAG_VERIFY_EMAIL )
-            $msg[] = T_('Email verified!#reg');
+         $infos = array();
+         $load_intro = false;
          if ( $vfy_result & USERFLAG_ACTIVATE_REGISTRATION )
-            $msg[] = T_('Account activated!#reg');
-         jump_to("introduction.php?sysmsg=".urlencode(implode(' + ', $msg)));
+         {
+            $infos[] = T_('Account activated!#reg');
+            $load_intro = true;
+         }
+         if ( $vfy_result & USERFLAG_VERIFY_EMAIL )
+            $infos[] = T_('Email verified!#reg');
+
+         $msg = urlencode( implode(' + ', $infos) );
+         if ( $load_intro )
+            jump_to("introduction.php?sysmsg=$msg"); // after activation
+         else
+            jump_to("edit_email.php?sysmsg=$msg"); // after simple mail-verification
       }
    }
    else
@@ -60,6 +69,7 @@ require_once 'include/register_functions.php';
    if ( !is_numeric($vfy_result) )
       echo str_repeat("<br>\n", 2), span('ErrMsgCode larger', $vfy_result);
 
+   list( $tmp1, $tmp2, $subnotes_problems_mail_change ) = UserRegistration::build_common_verify_texts();
    $notes = array();
    $notes[] = sprintf( T_("A message with a validation-code has been sent to the email-address you provided.\n"
             . "By opening the link from that message in the browser, your email-address is verified as valid\n"
@@ -70,9 +80,7 @@ require_once 'include/register_functions.php';
       make_html_safe( sprintf( T_('Please <home %s>login as guest-user</home> and ask for help in the <home %s>support-forum</home>.'),
          'index.php?logout=t', 'forum/read.php?forum='.FORUM_ID_SUPPORT ), 'line'),
       T_('Provide your user-id and describe the problem with the registration process.') );
-   $notes[] = array( T_('In case of problems with your email-change:'),
-      make_html_safe( sprintf( T_('Please describe your problem in the <home %s>support-forum</home>.'),
-         'forum/read.php?forum='.FORUM_ID_SUPPORT ), 'line') );
+   $notes[] = $subnotes_problems_mail_change;
    echo str_repeat("<br>\n", 3);
    echo_notes( 'verify_email', T_('Troubleshooting'), $notes );
 

@@ -1467,6 +1467,7 @@ CREATE TABLE IF NOT EXISTS `Verification` (
   `uid` int(11) NOT NULL,
   `Verified` datetime NOT NULL default '0000-00-00 00:00:00',
   `Created` datetime NOT NULL default '0000-00-00 00:00:00',
+  `VType` tinyint(3) unsigned NOT NULL,
   `Email` varchar(80) NOT NULL,
   `Code` varbinary(40) NOT NULL,
   `Counter` tinyint(3) unsigned NOT NULL default '0',

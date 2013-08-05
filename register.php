@@ -84,6 +84,7 @@ require_once 'include/register_functions.php';
    $reg_form->add_row( array( 'DESCRIPTION', T_('Confirm password'),
                               'PASSWORD', $reg->build_key('passwd2'), 16, 16, $reg->password2 ));
 
+   list( $text_email_use, $text_email_priv ) = UserRegistration::build_common_verify_texts();
    $reg_form->add_empty_row();
    $reg_form->add_row( array(
       'DESCRIPTION', T_('Email'),
@@ -91,10 +92,9 @@ require_once 'include/register_functions.php';
       'TEXT', "<br>\n"
             . span('RegisterMsg', T_('To activate your account and confirm the registration, a validation code will be sent to your email.'))
             . "<br>\n"
-            . T_('The email is also used to send you new passwords or to inform about server related issues.')
+            . $text_email_use
             . "<br>\n"
-            . sprintf( T_('The email is kept confidential, see "Privacy Policy" in the DGS <a href="%s" target="dgsTOS">Rules of Conduct</a>.'),
-                       HOSTBASE."policy.php" ) ));
+            . $text_email_priv ));
 
    $reg_form->add_empty_row();
    $reg_form->add_row( array(

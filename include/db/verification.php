@@ -35,6 +35,9 @@ require_once 'include/std_classes.php';
 define('VFY_MIN_CODELEN', 8);
 define('VFY_MAX_DAYS_CODE_VALID', 30);
 
+// NOTE: for adding new also adjust UserRegistration::remove_verification()
+define('VFY_TYPE_USER_REGISTRATION', 1);
+define('VFY_TYPE_EMAIL_CHANGE', 2);
 
  /*!
   * \class Verification
@@ -46,7 +49,7 @@ global $ENTITY_VERIFICATION; //PHP5
 $ENTITY_VERIFICATION = new Entity( 'Verification',
       FTYPE_PKEY, 'ID',
       FTYPE_AUTO, 'ID',
-      FTYPE_INT,  'ID', 'uid', 'Counter',
+      FTYPE_INT,  'ID', 'uid', 'VType', 'Counter',
       FTYPE_TEXT, 'Email', 'Code', 'IP',
       FTYPE_DATE, 'Verified', 'Created'
    );
@@ -57,23 +60,33 @@ class Verification
    public $uid;
    public $Verified;
    public $Created;
+   public $VType;
    public $Email;
    public $Code;
    public $Counter;
    public $IP;
 
    /*! \brief Constructs Verification-object with specified arguments. */
-   public function __construct( $id=0, $uid=0, $verified=0, $created=0, $email='', $code='', $counter=0, $ip=null )
+   public function __construct( $id=0, $uid=0, $verified=0, $created=0, $vtype=0, $email='', $code='', $counter=0, $ip=null )
    {
       $this->ID = (int)$id;
       $this->uid = (int)$uid;
       $this->Verified = (int)$verified;
       $this->Created = (int)$created;
+      $this->setVType( $vtype );
       $this->Email = $email;
       $this->Code = $code;
       $this->Counter = (int)$counter;
       $this->IP = ( is_null($ip) ) ? (string)@$_SERVER['REMOTE_ADDR'] : $ip;
    }//__construct
+
+   private function setVType( $vtype )
+   {
+      if ( $vtype != VFY_TYPE_USER_REGISTRATION && $vtype != VFY_TYPE_EMAIL_CHANGE )
+         error('invalid_args', "Verification.setVType($vtype)");
+      else
+         $this->VType = (int)$vtype;
+   }
 
    public function to_string()
    {
@@ -107,6 +120,12 @@ class Verification
       return $entityData->update( "Verification.update(%s)" );
    }
 
+   public function delete()
+   {
+      $entityData = $this->fillEntityData();
+      return $entityData->delete( "Verification.delete(%s)" );
+   }
+
    public function fillEntityData( $data=null )
    {
       if ( is_null($data) )
@@ -115,6 +134,7 @@ class Verification
       $data->set_value( 'uid', $this->uid );
       $data->set_value( 'Verified', $this->Verified );
       $data->set_value( 'Created', $this->Created );
+      $data->set_value( 'VType', $this->VType );
       $data->set_value( 'Email', $this->Email );
       $data->set_value( 'Code', $this->Code );
       $data->set_value( 'Counter', $this->Counter );
@@ -168,6 +188,7 @@ class Verification
             @$row['uid'],
             @$row['X_Verified'],
             @$row['X_Created'],
+            @$row['VType'],
             @$row['Email'],
             @$row['Code'],
             @$row['Counter'],
@@ -222,6 +243,24 @@ class Verification
       $code = sha1( sprintf('%s %s %s', $uid, $email, time()) );
       return substr( $code, 0, $len );
    }
+
+   public static function get_type_text( $vtype )
+   {
+      static $ARR_TYPES = null; // vtype => text
+
+      // lazy-init of texts
+      if ( is_null($ARR_TYPES) )
+      {
+         $arr = array();
+         $arr[VFY_TYPE_USER_REGISTRATION] = T_('User-Registration#VFY_type');
+         $arr[VFY_TYPE_EMAIL_CHANGE] = T_('Email-Change#VFY_type');
+         $ARR_TYPES = $arr;
+      }
+
+      if ( !isset($ARR_TYPES[$vtype]) )
+         error('invalid_args', "Verification:get_type_text($vtype)");
+      return $ARR_TYPES[$vtype];
+   }//get_type_text
 
 } // end of 'Verification'
 ?>

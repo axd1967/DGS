@@ -18,6 +18,32 @@ ChangeLog
 
 2013-08-05 juga
 
+   * include/register_functions.php (UserRegistration.register_user, ~.process_verification,
+       ~.build_email_verification, ~.remove_verification, ~.build_common_verify_texts),
+     include/db/verification.php (class Verification, ~.__construct, ~.setVType, ~.delete,
+       ~.fillEntityData, ~.new_from_row, ~.get_type_text),
+     scripts/updates/database_changes_1_0_15_to_1_0_16.mysql,
+     specs/db/table-Verification.txt, specs/db/dragon-ddl.sql,
+     edit_email.php (parse_edit_form, handle_save_mail, handle_delete_verification, handle_resend_mail),
+     register.php, verify_email.php, NEWS:
+   - extended edit-mail-page with:
+     - email now mandatory, and changing email requires a mail-verification
+     - changing email creates Verification-entry and sends mail with validation-code
+     - added Verification.VType to enable fixing of Players.UserFlags
+     - show if email is missing, invalid, unverified or verified
+     - show open verifications
+     - added removal of open verifications for account-activation and email-change
+       with fixing of Players.UserFlags according to remaining verifications
+     - added re-sending of open verifications
+     - added email-change-notes with similar information like registration-page
+-----------
+-- added verification-type
+ALTER TABLE Verification
+   ADD VType tinyint unsigned NOT NULL AFTER Created ;
+UPDATE Verification
+   SET VType=1 WHERE VType=0 ;
+-----------
+
    * include/register_functions.php (UserRegistration.register_user):
    - enabled JavaScript per default for new user on registration
 

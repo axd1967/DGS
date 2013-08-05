@@ -258,25 +258,13 @@ class UserRegistration
 
          // send activation-mail with verification-code for email
          $vfy_code = Verification::build_code( $new_id, $this->email );
-         $vfy = new Verification( 0, $new_id, 0, $NOW, $this->email, $vfy_code );
+         $vfy = new Verification( 0, $new_id, 0, $NOW, VFY_TYPE_USER_REGISTRATION, $this->email, $vfy_code );
          if ( $vfy->insert() )
          {
-            $vfy_id = $vfy->ID;
-            $text = sprintf( T_('You are now registered with an account at Dragon Go Server, %s!'), $this->uhandle ) . "\n\n"
-               . T_('Your account\'s user-id is:') . " {$this->uhandle}\n\n"
-               . T_('Before you can use your account, you first need to activate it.') . "\n"
-               . T_('You may be redirected to login first with your chosen password.') . "\n\n"
-               . T_('To activate your account, please follow this link:#reg') . "\n\n"
-               . "    ".HOSTBASE."verify_email.php?uid=$new_id".URI_AMP_IN."vid={$vfy_id}".URI_AMP_IN."code=".urlencode($vfy_code)."\n\n"
-               . sprintf( T_('This verification code can only be used once and expires after %s days.'),
-                          VFY_MAX_DAYS_CODE_VALID ) . "\n\n"
-               . T_('Please do not reply to this automated message!') . "\n"
-               . T_('In case of problems, please login as guest-user and ask for help in the support-forum:') . "\n\n"
-               . "    ".HOSTBASE."forum/read.php?forum=".FORUM_ID_SUPPORT . "\n\n"
-               . T_('Provide your user-id and describe the problem with the registration process.') . "\n\n"
-               ;
-            send_email( "UserReg.register_user.send_activation($new_id,$vfy_id)", $this->email, EMAILFMT_SKIP_WORDWRAP,
-               $text, T_('Welcome to the Dragon Go Server') );
+            list( $subject, $text ) = self::build_email_verification(
+               $new_id, $this->uhandle, $vfy->ID, $vfy->VType, $vfy_code, $this->email );
+            send_email( "UserReg.register_user.send_activation($new_id,{$vfy->ID})",
+               $this->email, EMAILFMT_SKIP_WORDWRAP, $text, $subject );
          }
       }
       ta_end();
@@ -379,13 +367,14 @@ class UserRegistration
          return sprintf( T_('Found wrong user [%s] to process verification with id [%s].'), $user->Handle, $vid );
       if ( $verification->Verified != 0 )
          return sprintf( T_('Verification with id [%s] has been processed already and is no longer valid.'), $vid );
+      $vfy_type = $verification->VType;
 
       // expire verification by invalidating for too old codes
       if ( $verification->Created < $NOW - VFY_MAX_DAYS_CODE_VALID*SECS_PER_HOUR )
       {
-         if ( $user_flags & USERFLAG_ACTIVATE_REGISTRATION )
+         if ( $vfy_type == VFY_TYPE_USER_REGISTRATION )
             $helptext = T_('Please contact support to help with your registration.');
-         elseif ( $user_flags & USERFLAG_VERIFY_EMAIL )
+         elseif ( $vfy_type == VFY_TYPE_EMAIL_CHANGE )
             $helptext = T_('Please repeat changing your email getting a new verification-code, or else contact support.');
 
          $verification->Verified = $NOW;
@@ -409,26 +398,42 @@ class UserRegistration
          return T_('Verification code is invalid!');
 
 
+      // determine updates for verification-action
+      $set_userflags = $clear_userflags = 0;
+      switch ( $vfy_type )
+      {
+         case VFY_TYPE_USER_REGISTRATION:
+            // activate account by clearing user-flags, if email verified
+            if ( $user_flags & USERFLAG_ACTIVATE_REGISTRATION )
+               $clear_userflags |= (USERFLAG_ACTIVATE_REGISTRATION|USERFLAG_VERIFY_EMAIL);
+            $set_userflags |= USERFLAG_EMAIL_VERIFIED;
+            break;
+
+         case VFY_TYPE_EMAIL_CHANGE:
+            // replace email and clear flag, if email verified
+            if ( $user_flags & USERFLAG_VERIFY_EMAIL )
+               $clear_userflags |= USERFLAG_VERIFY_EMAIL;
+            $set_userflags |= USERFLAG_EMAIL_VERIFIED;
+            break;
+
+         default:
+            error('invalid_args', "UserReg.process_verification.check.bad_vfy_type($uid,$vid,$vfy_type)");
+      }
+
       // verify-email and/or activate registration
       ta_begin();
       {//HOT-section for handling verification
          $verification->Verified = $NOW;
          $verification->update();
 
-         $set_userflags = $clear_userflags = 0;
-         if ( $user_flags & USERFLAG_ACTIVATE_REGISTRATION ) // activate account by clearing flag, if email verified
-            $clear_userflags |= USERFLAG_ACTIVATE_REGISTRATION;
-         if ( $user_flags & USERFLAG_VERIFY_EMAIL ) // replace email and clear flag, if email verified
-            $clear_userflags |= USERFLAG_VERIFY_EMAIL;
-         if ( $user_flags & (USERFLAG_ACTIVATE_REGISTRATION|USERFLAG_VERIFY_EMAIL) )
-            $set_userflags |= USERFLAG_EMAIL_VERIFIED;
-         if ( $clear_userflags > 0 )
+         if ( $set_userflags || $clear_userflags )
          {
             // NOTE: this update could go wrong leaving verification invalidated -> must be handled by admin
             $upd = new UpdateQuery('Players');
-            $upd->upd_txt('Email', $verification->Email );
+            if ( $set_userflags & USERFLAG_EMAIL_VERIFIED )
+               $upd->upd_txt('Email', $verification->Email );
             $upd->upd_raw('UserFlags', "(UserFlags | $set_userflags) & ~$clear_userflags" );
-            db_query("UserReg:process_verification.upd_email_uflags($uid,$vid,$user_flags->$clear_userflags)",
+            db_query("UserReg:process_verification.upd_email_uflags($uid,$vid,$vfy_type,$user_flags->$clear_userflags)",
                "UPDATE Players SET " . $upd->get_query() . " WHERE ID=$uid LIMIT 1" );
          }
       }
@@ -436,6 +441,125 @@ class UserRegistration
 
       return $clear_userflags;
    }//process_verification
+
+   /*! \brief Returns array( subject, text ) for email sent for new email-verification according to $vfy_type. */
+   public static function build_email_verification( $uid, $uhandle, $vfy_id, $vfy_type, $vfy_code, $vfy_email )
+   {
+      $text_account = T_('Your account\'s user-id is:') . ' ' . $uhandle . "\n\n";
+      $vfy_url = "\n    ".HOSTBASE."verify_email.php?uid=$uid".URI_AMP_IN."vid={$vfy_id}".URI_AMP_IN."code=".urlencode($vfy_code) . "\n\n";
+      $text_code_use = sprintf( T_('This verification code can only be used once and expires after %s days.'), VFY_MAX_DAYS_CODE_VALID ) . "\n\n";
+      $text_no_reply = T_('Please do not reply to this automated message!') . "\n";
+      $forum_url = "\n    ".HOSTBASE."forum/read.php?forum=".FORUM_ID_SUPPORT."\n\n";
+
+      switch ( $vfy_type )
+      {
+         case VFY_TYPE_USER_REGISTRATION:
+            $subj = T_('Welcome to the Dragon Go Server');
+            $text = sprintf( T_('You are now registered with an account at Dragon Go Server, %s!'), $uhandle ) . "\n\n"
+               . $text_account
+               . T_('Before you can use your account, you first need to activate it.') . "\n"
+               . T_('You may be redirected to login first with your chosen password.') . "\n\n"
+               . T_('To activate your account, please follow this link:#reg') . "\n"
+               . $vfy_url
+               . $text_code_use
+               . $text_no_reply
+               . T_('In case of problems, please login as guest-user and ask for help in the support-forum:') . "\n"
+               . $forum_url
+               . T_('Provide your user-id and describe the problem with the registration process.') . "\n\n";
+            break;
+
+         case VFY_TYPE_EMAIL_CHANGE:
+            $subj = sprintf( T_('Dragon Go Server: Verify email change for [%s]'), $uhandle );
+            $text = T_('To be able to use your new email, it needs to be verified!') . "\n\n"
+               . $text_account
+               . sprintf( T_('To verify your new email [%s], please follow this link:#reg'), $vfy_email) . "\n"
+               . $vfy_url
+               . $text_code_use
+               . $text_no_reply
+               . T_('In case of problems, please ask for help in the support-forum:') . "\n"
+               . $forum_url;
+            break;
+
+         default:
+            error('invalid_args', "UserReg.build_email_changed_email.check.bad_vfy_type($vfy_type,$uid,$vfy_id)");
+      }
+
+      return array( $subj, $text );
+   }//build_email_verification
+
+   /*!
+    * \brief Removes own verification with given id and if needed update Players.UserFlags accordingly.
+    * \return 0 = nothing deleted; -1 = failed because verification of other user; 1 = delete successful
+    */
+   public static function remove_verification( $dbgmsg, $vfy_id )
+   {
+      global $player_row;
+
+      if ( !is_numeric($vfy_id) || $vfy_id <= 0 )
+         return 0;
+
+      $verification = Verification::load_verification( (int)$vfy_id );
+      if ( is_null($verification) )
+         return 0;
+
+      $my_id = $player_row['ID'];
+      if( $verification->uid != $my_id ) // can only delete own verifications
+         return -1;
+
+      ta_begin();
+      {//HOT-section for deleting verification and updating Players-table
+         if ( $verification->delete() )
+         {
+            // fix Players.UserFlags according to existing Verification-entries
+            // - load all verification for existing types
+            $arr = array(
+                  VFY_TYPE_USER_REGISTRATION => 0,
+                  VFY_TYPE_EMAIL_CHANGE => 0,
+               );
+            $result = db_query( $dbgmsg."UserReg.remove_verification.count_types($vfy_id)",
+               "SELECT VType, COUNT(*) AS X_Count FROM Verification WHERE uid=$my_id AND Verified=0 GROUP BY VType" );
+            while ( $row = mysql_fetch_assoc($result) )
+               $arr[$row['VType']] = (int)$row['X_Count'];
+            mysql_free_result($result);
+
+            // - determine what to fix in Players.UserFlags
+            $my_uflags = (int)$player_row['UserFlags'];
+            $set_uflags = $clear_uflags = 0;
+            foreach ( $arr as $vtype => $count )
+            {
+               if ( $vtype == VFY_TYPE_USER_REGISTRATION )
+                  $chk_uflag = USERFLAG_ACTIVATE_REGISTRATION;
+               elseif ( $vtype == VFY_TYPE_EMAIL_CHANGE )
+                  $chk_uflag = USERFLAG_VERIFY_EMAIL;
+
+               if ( $count == 0 && ($my_uflags & $chk_uflag) )
+                  $clear_uflags |= $chk_uflag;
+               elseif ( $count > 0 && !($my_uflags & $chk_uflag) )
+                  $set_uflags |= $chk_uflag;
+            }
+
+            if ( $set_uflags || $clear_uflags )
+               db_query( $dbgmsg."UserReg.remove_verification.fix_user_flags($vfy_id,$my_uflags>+$set_uflags-$clear_uflags)",
+                  "UPDATE Players SET UserFlags=(UserFlags | $set_uflags) & ~$clear_uflags WHERE ID=$my_id LIMIT 1" );
+         }
+      }
+      ta_end();
+
+      return 1;
+   }//remove_verification
+
+   public static function build_common_verify_texts()
+   {
+      $text_email_use = T_('The email is used to send you new passwords or to inform about server related issues.');
+      $text_email_priv = sprintf( T_('The email is kept confidential, see "Privacy Policy" in the DGS <a href="%s" target="dgsTOS">Rules of Conduct</a>.'),
+         HOSTBASE."policy.php" );
+
+      $subnotes_problems_mail_change = array(
+         T_('In case of problems with your email-change:'),
+         make_html_safe( sprintf( T_('Please describe your problem in the <home %s>support-forum</home>.'),
+            'forum/read.php?forum='.FORUM_ID_SUPPORT ), 'line') );
+      return array( $text_email_use, $text_email_priv, $subnotes_problems_mail_change );
+   }//build_common_verify_texts
 
 } // end of 'UserRegistration'
 

@@ -110,3 +110,10 @@ CREATE TABLE Verification (
 ) ENGINE=MyISAM ;
 
 
+-- added verification-type
+ALTER TABLE Verification
+   ADD VType tinyint unsigned NOT NULL AFTER Created ;
+UPDATE Verification
+   SET VType=1 WHERE VType=0 ;
+
+

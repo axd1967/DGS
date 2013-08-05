@@ -14,6 +14,7 @@ Description:
 | uid      | int(11)             | NO   | MUL | NULL                |                |
 | Verified | datetime            | NO   |     | 0000-00-00 00:00:00 |                |
 | Created  | datetime            | NO   |     | 0000-00-00 00:00:00 |                |
+| VType    | tinyint(3) unsigned | NO   |     | NULL                |                |
 | Email    | varchar(80)         | NO   |     | NULL                |                |
 | Code     | varbinary(40)       | NO   |     | NULL                |                |
 | Counter  | tinyint(3) unsigned | NO   |     | 0                   |                |
@@ -28,6 +29,10 @@ Description:
 * Verified : date of verification of entry
 
 * Created : creation-date of entry
+
+* VType : verification-type
+   - 1 = user-registration for account-activation
+   - 2 = changed-email
 
 * Email : email to verify
 
