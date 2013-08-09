@@ -171,19 +171,10 @@ $GLOBALS['ThePage'] = new Page('UserInfo');
       $itable1->add_sinfo( T_('Activity'),  $activity );
       $itable1->add_sinfo( T_('Rating'),    echo_rating(@$row['Rating2'],true,$row['ID']) . $admin_rating );
       $itable1->add_sinfo( T_('Rank info'), make_html_safe(@$row['Rank'],INFO_HTML) );
-      $itable2->add_sinfo( T_('Registration date'), $registerdate );
+      $itable1->add_sinfo( T_('Registration date'), $registerdate );
       $itable1->add_sinfo( T_('Last access'), $lastaccess );
       $itable1->add_sinfo( T_('Last quick access'), $lastquickaccess );
       $itable1->add_sinfo( T_('Last move'),   $lastmove );
-
-      if ( $my_info || $is_admin || $is_game_admin )
-      {
-         $reject_timeout = (int)@$row['RejectTimeoutWin'];
-         $itable1->add_row( array(
-               'rattb' => (!$my_info ? 'class="DebugInfo"' : ''),
-               'sname' => T_('Reject win by timeout'),
-               'sinfo' => ( $reject_timeout < 0 ? T_('disabled#rwt') : sprintf(T_('%s days#rwt'), $reject_timeout) )));
-      }
 
       $itable1->add_sinfo( anchor( "edit_vacation.php", T_('Vacation days left') ),
          TimeFormat::echo_day(floor($row["VacationDays"])) );
@@ -210,6 +201,15 @@ $GLOBALS['ThePage'] = new Page('UserInfo');
                'rattb' => ($is_admin && !$my_info) ? 'class="DebugInfo"' : '',
                'sname' => anchor( $run_mpg_link, T_('MP-games')),
                'sinfo' => sprintf( T_('%s (Running), %s (Setup)#mpg'), $count_mpg_run, $row['GamesMPG'] ) ));
+      }
+
+      if ( $my_info || $is_admin || $is_game_admin )
+      {
+         $reject_timeout = (int)@$row['RejectTimeoutWin'];
+         $itable2->add_row( array(
+               'rattb' => (!$my_info ? 'class="DebugInfo"' : ''),
+               'sname' => T_('Reject win by timeout'),
+               'sinfo' => ( $reject_timeout < 0 ? T_('disabled#rwt') : sprintf(T_('%s days#rwt'), $reject_timeout) )));
       }
 
       // show user-info

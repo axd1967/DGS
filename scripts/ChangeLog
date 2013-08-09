@@ -16,6 +16,13 @@ Developers INFO:
 ChangeLog
 ------------------------------------------------------------------
 
+2013-08-09 juga
+
+   * userinfo.php:
+   - re-arranged some user-info-fields on user-info-page
+     - moved register-date to left side to other dates
+     - moved reject-time-out to right side to other game-related stuff
+
 2013-08-06 juga
 
    * admin_bulletin.php:
