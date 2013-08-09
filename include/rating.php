@@ -103,8 +103,8 @@ function handicapfactor( $size)
 }
 
 // Using rating the EGF system:
-// http://www.european-go.org/rating/gor.html
-// http://gemma.ujf.cas.cz/~cieply/GO/gor.html
+// http://www.europeangodatabase.eu/EGD/EGF_rating_system.php#System
+// http://en.wikipedia.org/wiki/Elo_rating_system
 //
 // $result: 0 = black win, 1 = white win, 0.5 = jigo
 function change_rating(&$rating_W, &$rating_B, $result, $size, $komi, $handicap, $factor=1)
