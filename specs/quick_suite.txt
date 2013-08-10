@@ -2585,6 +2585,10 @@ Options:
          - if both are given 'sgf_..' and 'board_..' coordinate arguments,
            then the 'sgf'-version takes precedence
 
+      - Example:
+         - With a 19x19 board, the upper left intersection is 'aa' in sgf coordinates and the lower right is 'ss'.
+           In board coordinates, these 2 points are 'a19' and 't1' (take care about the skipped 'i'). Lowercase is needed.
+
    <COLOR> = B | W
       - color to play (W or B). This is your color.
         The same as returned by the quick-status page.
