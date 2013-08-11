@@ -47,7 +47,7 @@ ALTER TABLE TournamentRules
 
 -- execute fix-script (with do_it=1) to merge new-game expert-view with standard-view:
 -- IMPORTANT NOTE: execute script 'fix_default_max_handi-1_0_16.php' before this one!!
---    'scripts/updates/fix_merge_new_game_expert_view-1_0_16.php'
+--    'scripts/updates/fix_new_game_expert_view-1_0_16.php'
 
 
 -- determine challenger-role at game-start or game-end
