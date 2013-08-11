@@ -12,9 +12,9 @@ Copyright (C) 2001-2013  Erik Ouchterlony, Jens-Uwe Gaspar
       * Send mail with verification-code on user-registration to verify email-address and activate account
       * Show error for pages that require login, if account not activated yet
 
-   * <home edit_mail.php>Email & notifications</home>:
+   * <home edit_email.php>Email & notifications</home>:
       * Added mail-verification on changing email-address
-      * Moved email and notifications onto separate <home edit_mail.php>Change email & notifications</home> page
+      * Moved email and notifications onto separate <home edit_email.php>Change email & notifications</home> page
       * Added list of open mail-verifications with way to re-send and remove them
 
    * Changed default for max-handicap from 21 to board-size-dependent calculated max-handicap
