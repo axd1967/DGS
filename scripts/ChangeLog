@@ -18,6 +18,16 @@ ChangeLog
 
 2013-08-11 juga
 
+   * include/game_actions.php (GameActionHelper.update_game),
+     include/std_functions.php (is_logged_in):
+   - fix bug: update Players.Lastaccess for both web-site AND quick-suite access
+     with greatest datetime of both
+-----------
+-- fix last-access of all existing players
+UPDATE Players
+   SET Lastaccess=GREATEST(Lastaccess, LastQuickAccess, LastMove) ;
+-----------
+
    * scripts/updates/roadmap_1_0_15_to_1_0_16.txt, NEWS:
    - prepared live-release 1.0.16
 
@@ -1246,7 +1256,7 @@ ALTER TABLE TournamentRules
 
 -- execute fix-script (with do_it=1) to merge new-game expert-view with standard-view:
 -- IMPORTANT NOTE: execute script 'fix_default_max_handi-1_0_16.php' before this one!!
---    'scripts/updates/fix_merge_new_game_expert_view-1_0_16.php'
+--    'scripts/updates/fix_new_game_expert_view-1_0_16.php'
 -----------
 
 2013-03-15 juga

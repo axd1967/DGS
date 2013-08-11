@@ -574,7 +574,7 @@ class GameActionHelper
          $upd->upd_raw('Moves', 'Moves+1' ); // NOTE: count also delete + set-handicap as one move
          if ( $this->is_quick )
          {
-            $upd->upd_raw('Lastaccess', "GREATEST(Lastaccess,$NOW)" ); // update too on quick-suite access
+            $upd->upd_raw('Lastaccess', "GREATEST(Lastaccess,FROM_UNIXTIME($NOW))" ); // update too on quick-suite access
             $upd->upd_time('LastQuickAccess', $NOW );
          }
          $upd->upd_raw('Activity', "LEAST($ActivityMax,$ActivityForMove+Activity)" );

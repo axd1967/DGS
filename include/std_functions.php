@@ -2579,7 +2579,7 @@ function is_logged_in($handle, $scode, &$player_row, $login_opts=LOGIN_DEFAULT_O
       if ( $login_opts & LOGIN_RESET_NOTIFY )
          $upd->upd_txt('Notify', 'NONE' );
 
-      $upd->upd_raw('Lastaccess', "GREATEST(Lastaccess,$NOW)" ); // update for both (web-site + quick-suite)
+      $upd->upd_raw('Lastaccess', "GREATEST(Lastaccess,FROM_UNIXTIME($NOW))" ); // update for both (web-site + quick-suite)
       if ( $is_quick_suite )
          $upd->upd_time('LastQuickAccess', $NOW);
       else

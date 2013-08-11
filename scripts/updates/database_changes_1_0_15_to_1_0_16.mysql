@@ -121,3 +121,8 @@ UPDATE Verification
 UPDATE TranslationTexts SET Text='Publish time' WHERE Text='Publish time' ;
 
 
+-- fix last-access of all existing players
+UPDATE Players
+   SET Lastaccess=GREATEST(Lastaccess, LastQuickAccess, LastMove) ;
+
+
