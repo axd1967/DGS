@@ -18,6 +18,10 @@ ChangeLog
 
 2013-08-11 juga
 
+   * include/globals.php (CSS_VERSION),
+     skins/dragon/screen.css:
+   - bugfix: no wrap for dgs-name & version in bottom-bar
+
    * include/game_actions.php (GameActionHelper.update_game),
      include/std_functions.php (is_logged_in):
    - fix bug: update Players.Lastaccess for both web-site AND quick-suite access

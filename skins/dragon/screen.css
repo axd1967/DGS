@@ -468,6 +468,7 @@ table#pageHead a {
 table#pageFoot .ServerHome,
 table#pageHead .ServerHome {
    text-align: left;
+   white-space: nowrap;
 }
 
 table#pageFoot .LoginBox,
@@ -478,7 +479,7 @@ table#pageHead .LoginBox {
 table#pageFoot span.Version {
    font-size: 80%;
    padding-left: 1em;
-   margin-right: -20em;
+   margin-right: -8em;
 }
 
 table#pageFoot .PageTime {
