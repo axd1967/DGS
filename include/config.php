@@ -101,7 +101,7 @@ define('RESTRICT_SHOW_GAMES_ALL', 1);
 // Number of attempts to retry connecting to database (see connect2mysql())
 // WARNING: needs PHP5 for Windows-Server because of usleep()
 // - 0 = no retries (only one connect-try)
-define('DB_CONNECT_RETRY_COUNT', 2);
+define('DB_CONNECT_RETRY_COUNT', 0);
 define('DB_CONNECT_RETRY_SLEEP_MS', 1000); // [ms]
 
 define('URI_AMP_IN','&'); //see ini_get('arg_separator.input')
