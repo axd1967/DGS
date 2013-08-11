@@ -1,0 +1,70 @@
+## Server Upgrade from DGS 1.0.15 to DGS 1.0.16 on 11-Aug-2013
+
+* Take Server offline. Clear cache!
+   - upload 'include/quick_common.php' with $is_down=true and adjusted $is_down_message
+   - clear cache with script: ./scripts/apc_clear_cache.php
+
+* Update code (locally) from GIT
+   - set GIT-tag: release-1_0_16-20130811
+   - sync $is_down_message from live-server to local-file: include/quick_common.php
+   - prepare server-config for live-server (copy from config.php): include/config-local.php
+
+* Transfer changes to samurajdata. Clear cache!
+   - update remote site with updates
+
+* Update web-site with  ./scripts/updates/other_changes_1_0_15_to_1_0_16.txt
+
+* Update database with  ./scripts/updates/database_changes_1_0_15_to_1_0_16.mysql
+   - Execute all db-changes
+
+   - Export database DDL and save as specs/db/dragon-ddl.sql in CVS
+
+* Run consistency tests.
+
+   - Run 3 translation scripts from ./scripts/index.php
+      - check+translate the english '#LABEL'-entries
+      - export Translationdata with:
+        mysqldump -q -e -C -v -n -t -h DBHOST -u DBUSER -p DATABASE TranslationLanguages TranslationGroups TranslationPages TranslationTexts TranslationFoundInGroup Translations | gzip -c > Translationdata.mysql.gz
+
+   - Run some consistency tests (if needed):
+      ./scripts/player_consistency.php
+      ./scripts/translation_consistency.php
+
+   - Fix obvious detected bugs
+
+* Do final tests (see NEWS-file):
+
+     (a) Admin-scripts
+     (b) Status-page
+     (c) Bulletins
+     (d) FAQ-Search, Intro, Links
+     (e) Game-page, Game-Info
+     (f) New Game, Waitingroom, Invite, Templates
+     (g) SGF-Download
+     (h) Game-lists
+     (i) Multi-Player-Game
+     (j) Quick-Suite, Quick-Status, RSS
+     (k) User-info, User-profile
+     (l) Messages
+
+* Setup additional crons as described in 'INSTALL'-docfile
+   - tournament-feature enabled, so new cron
+
+* Adjust FAQ and post in News-forum
+
+* Start server. Clear cache!
+   - upload 'include/quick_common.php' with $is_down=false
+
+* Announce changes about server-upgrade 1.0.16 in news-forum
+
+* Update forum with all fixes
+
+
+-- Misc:
+
+* Make a branch later with released version: DGS-stable-20130811
+
+* Do Snapshots:
+   - Adjust snapshot page to include new version release: DGS-YYYYMMDD.tar.gz + images-YYYYMMDD.tar.gz; rename older entries
+   - Create snapshot without passwords and upload it to /snapshot directory
+

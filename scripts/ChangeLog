@@ -5,7 +5,7 @@ changelog reference at:
 http://www.gnu.org/prep/standards/html_node/Change-Logs.html
 
 previous server update:
-Release [2012-06-08] - DGS 1.0.15 - tag [release-1_0_15-20120608] on branch [DGS-stable-20120610]
+Release [2013-08-11] - DGS 1.0.16 - tag [release-1_0_16-20130811] on (later) branch [DGS-stable-20130811]
 
 Developers INFO:
 
@@ -15,6 +15,11 @@ Developers INFO:
 ------------------------------------------------------------------
 ChangeLog
 ------------------------------------------------------------------
+
+2013-08-11 juga
+
+   * scripts/updates/roadmap_1_0_15_to_1_0_16.txt, NEWS:
+   - prepared live-release 1.0.16
 
 2013-08-09 juga
 
