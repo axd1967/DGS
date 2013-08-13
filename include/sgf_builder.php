@@ -865,7 +865,8 @@ class SgfBuilder
          $this->sgf_echo_point( array_merge( $this->points, $arr_territory ) );
 
          $game_score->calculate_score( null, 'sgf' );
-         foreach ( array_reverse($game_score->scoring_info['sgf_texts']) as $key => $info )
+         $scoring_info = $game_score->get_scoring_info();
+         foreach ( array_reverse($scoring_info['sgf_texts']) as $key => $info )
             $this->node_com .= "\n$key: $info";
       }
 

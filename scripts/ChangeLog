@@ -16,6 +16,11 @@ Developers INFO:
 ChangeLog
 ------------------------------------------------------------------
 
+2013-08-13 juga
+
+   * include/sgf_builder.php (SgfBuilder.build_sgf_result):
+   - bugfix after PHP-cleanup: use public modifier to access private GameScore->scoring_info
+
 2013-08-11 juga
 
    * include/globals.php (CSS_VERSION),
