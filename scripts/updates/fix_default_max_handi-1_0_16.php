@@ -30,6 +30,9 @@ $GLOBALS['ThePage'] = new Page('Script', PAGEFLAG_IMPLICIT_FLUSH );
    connect2mysql();
    set_time_limit(0); // don't want script-break during "transaction" with multi-db-queries or for large-datasets
 
+   // may need to be adjusted for large game-count fixed as load_profiles_gamesetup() loads all games in one step
+   @ini_set('memory_limit', '320M');
+
    $logged_in = who_is_logged( $player_row);
    if ( !$logged_in )
       error('login_if_not_logged_in', 'scripts.fix_default_max_handi-1_0_16');
