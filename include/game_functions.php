@@ -1002,7 +1002,8 @@ class GamePlayer
     */
    public static function delete_joined_player( $gid, $uid )
    {
-      db_query( "GamePlayer:delete_joined_player.gp_upd($gid,$uid)",
+      $dbgmsg = "GamePlayer:delete_joined_player($gid,$uid)";
+      db_query( "$dbgmsg.gp_upd",
          "UPDATE GamePlayers SET uid=0, GroupColor='".GPCOL_DEFAULT."', GroupOrder=0, Flags=0 " .
          "WHERE gid=$gid AND uid=$uid AND (Flags & ".GPFLAG_JOINED.") > 0 " .
          "LIMIT 1" );

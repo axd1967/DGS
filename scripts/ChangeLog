@@ -16,6 +16,11 @@ Developers INFO:
 ChangeLog
 ------------------------------------------------------------------
 
+2013-08-15 juga
+
+   * include/game_functions.php (GamePlayer.delete_joined_player):
+   - bugfix: used unknown var skipping updating Players.MPGCount on deleting joined player
+
 2013-08-13 juga
 
    * include/sgf_builder.php (SgfBuilder.build_sgf_result):
