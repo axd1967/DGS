@@ -121,7 +121,7 @@ $GLOBALS['ThePage'] = new Page('TournamentPropertiesEdit');
 
    $reg_end_time = trim(get_request_arg('reg_end_time'));
    $tform->add_row( array(
-         'DESCRIPTION', T_('Register end time#tourney'),
+         'DESCRIPTION', T_('Registration end time#tourney'),
          'TEXTINPUT',   'reg_end_time', 20, 20, $vars['reg_end_time'],
          'TEXT',  '&nbsp;' . span('EditNote', sprintf( T_('(Date format [%s])'), FMT_PARSE_DATE )), ));
 
@@ -290,7 +290,7 @@ function parse_edit_form( &$tpr, $t_limits )
       $vars['user_max_rating'] = echo_rating( $tpr->UserMaxRating, false, 0, true, false );
 
       // determine edits
-      if ( $old_vals['reg_end_time'] != $tpr->RegisterEndTime ) $edits[] = T_('Register end time#tourney');
+      if ( $old_vals['reg_end_time'] != $tpr->RegisterEndTime ) $edits[] = T_('Registration end time#tourney');
       if ( $old_vals['min_participants'] != $tpr->MinParticipants ) $edits[] = T_('Participants');
       if ( $old_vals['max_participants'] != $tpr->MaxParticipants ) $edits[] = T_('Participants');
       if ( $old_vals['rating_use_mode'] != $tpr->RatingUseMode ) $edits[] = T_('Rating Use Mode#tourney');

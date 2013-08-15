@@ -406,7 +406,7 @@ function make_pool_unassigned_table( $tid, &$uatable, &$uafilter )
    if ( $needs_trating )
       $uatable->add_tablehead( 4, T_('Tournament Rating#header'), 'Rating', 0, 'TP_Rating-' );
    $uatable->add_tablehead( 5, T_('Country#header'), 'Image', 0, 'Country+' );
-   $uatable->add_tablehead( 6, T_('Register Time#TP_header'), 'Date', 0, 'TP_X_RegisterTime+' );
+   $uatable->add_tablehead( 6, T_('Registration Time#TP_header'), 'Date', 0, 'TP_X_RegisterTime+' );
    $uatable->add_tablehead( 7, T_('Last access#header'), 'Date', 0, 'Lastaccess-');
 
    $uatable->set_default_sort( 4, 2); //on T-Rating

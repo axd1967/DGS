@@ -649,9 +649,9 @@ class TournamentParticipant
       if ( !isset(self::$ARR_TP_TEXTS['STATUS']) )
       {
          $arr = array();
-         $arr[TP_STATUS_APPLY]    = T_('Apply#TP_status');
-         $arr[TP_STATUS_REGISTER] = T_('Register#TP_status');
-         $arr[TP_STATUS_INVITE]   = T_('Invite#TP_status');
+         $arr[TP_STATUS_APPLY]    = T_('Applied#TP_status');
+         $arr[TP_STATUS_REGISTER] = T_('Registered#TP_status');
+         $arr[TP_STATUS_INVITE]   = T_('Invited#TP_status');
          self::$ARR_TP_TEXTS['STATUS'] = $arr;
 
          $arr = array();
