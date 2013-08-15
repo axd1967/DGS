@@ -390,7 +390,7 @@ class TournamentLadderProps
          . wordwrap( TournamentUtils::get_tournament_ladder_notes_user_removed(), 80 );
 
       // rank-change period
-      $arr_props[] = T_('Length of one rank-archive period#T_ladder') . ': ' .
+      $arr_props[] = T_('Length of one rank archiving period#T_ladder') . ': ' .
          ( ($this->RankPeriodLength == 1)
                ? T_('1 month')
                : sprintf( T_('%s months'), $this->RankPeriodLength ) );

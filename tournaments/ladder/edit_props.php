@@ -214,9 +214,9 @@ $GLOBALS['ThePage'] = new Page('TournamentLadderPropsEdit');
          'TEXT',        T_('[days] user can be absent without being removed from ladder'), ));
    $tform->add_empty_row();
 
-   // rank-archive-period
+   // rank-archiving-period
    $tform->add_row( array(
-         'DESCRIPTION', T_('Rank-archive Period Length#T_ladder'),
+         'DESCRIPTION', T_('Rank Archiving Period length#T_ladder'),
          'TEXTINPUT',   'rankplen', 4, 4, $vars['rankplen'],
          'TEXT',        T_('months'), ));
    $tform->add_empty_row();
@@ -430,7 +430,7 @@ function parse_edit_form( &$tlp, $t_limits )
       if ( TournamentUtils::isNumberOrEmpty($new_value) )
          $tlp->RankPeriodLength = $new_value;
       else
-         $errors[] = sprintf( T_('Expecting number for rank-archive period length in range %s months#T_ladder'),
+         $errors[] = sprintf( T_('Expecting number for rank archiving period length in range %s months#T_ladder'),
                               build_range_text(1, 255) );
 
       $new_value = $vars['crownking'];
@@ -476,7 +476,7 @@ function parse_edit_form( &$tlp, $t_limits )
       if ( $old_vals['gend_jigo'] != $tlp->GameEndJigo ) $edits[] = T_('Game End');
       if ( $old_vals['join_order'] != $tlp->UserJoinOrder ) $edits[] = T_('User Join Order#T_ladder');
       if ( $old_vals['uabs_days'] != $tlp->UserAbsenceDays ) $edits[] = T_('User Absence#T_ladder');
-      if ( $old_vals['rankplen'] != $tlp->RankPeriodLength ) $edits[] = T_('Rank-archive Period Length#T_ladder');
+      if ( $old_vals['rankplen'] != $tlp->RankPeriodLength ) $edits[] = T_('Rank Archiving Period Length#T_ladder');
       if ( $old_vals['crownking'] != $tlp->CrownKingHours ) $edits[] = T_('Crown King#T_ladder');
       if ( $old_vals['crownstart'] != $tlp->CrownKingStart ) $edits[] = T_('Crown King Check time#T_ladder');
    }
