@@ -41,7 +41,7 @@ Copyright (C) 2001-2013  Erik Ouchterlony, Jens-Uwe Gaspar
          * "Directoring tournaments"-view with ID-button linked to manage your tournaments
 
       * Tournament Info page to show all important information of a tournament
-         * description, news, status, (preliminrary) standings, rules, registration, games, results
+         * description, news, status, (preliminary) standings, rules, registration, games, results
       * Tournament News page
       * Tournament Directors page showing tournament-owner and tournament-directors
       * Adjusted <home show_games.php>Games page</home> to show only tournament-specific games
