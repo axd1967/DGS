@@ -190,7 +190,15 @@ require_once 'tournaments/include/tournament_log.php';
       );
    echo_notes( 'tournamentlog', T_('Tournament Log notes'), $notes );
 
-   end_page();
+   $menu = array();
+   if ( $tid )
+   {
+      $menu[T_('Tournament info')] = "tournaments/view_tournament.php?tid=$tid";
+      $menu[T_('Manage tournament')] =
+         array( 'url' => "tournaments/manage_tournament.php?tid=$tid", 'class' => 'TAdmin' );
+   }
+
+   end_page(@$menu);
 }//main
 
 

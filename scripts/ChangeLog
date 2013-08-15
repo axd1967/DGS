@@ -18,6 +18,9 @@ ChangeLog
 
 2013-08-15 juga
 
+   * tournaments/show_tournament_log.php:
+   - added bottom-links on tournament-log-page back to specific tournament-info/-manage pages
+
    * include/game_functions.php (GamePlayer.delete_joined_player):
    - bugfix: used unknown var skipping updating Players.MPGCount on deleting joined player
 
