@@ -289,7 +289,7 @@ $GLOBALS['ThePage'] = new Page('TournamentLadderAdmin');
 
    $tform->add_row( array( 'HR' ));
    $tform->add_row( array( 'HEADER', T_('Admin Ladder participants') ));
-   if ( $uid > 0 )
+   if ( $uid > 0 && !is_null($user) )
    {
       $tform->add_hidden( 'uid', $uid );
       $tform->add_row( array(
