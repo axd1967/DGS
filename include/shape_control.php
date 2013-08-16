@@ -42,7 +42,7 @@ class ShapeControl
    /*! \brief Returns Flags-text or all Flags-texts (if arg=null). */
    public static function getFlagsText( $flag=null )
    {
-      static $ARR_SHAPE_FLAGS = array(); // flag => text
+      static $ARR_SHAPE_FLAGS = null; // flag => text
 
       // lazy-init of texts
       if ( is_null($ARR_SHAPE_FLAGS) )
