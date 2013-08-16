@@ -313,6 +313,7 @@ class DgsErrors
             'unknown_user' => 1,
             'userid_illegal_chars' => 1,
             'userid_in_use' => 1,
+            'userid_spam_account' => 1,
             'userid_too_long' => 1,
             'userid_too_short' => 1,
             'value_not_numeric' => 1,

@@ -18,6 +18,11 @@ ChangeLog
 
 2013-08-16 juga
 
+   * include/register_functions.php (UserRegistration.check_userid, ~.check_userid_spam),
+     include/error_functions.php (DgsErrors.need_db_errorlog),
+     include/error_codes.php (ErrorCode.init):
+   - prevent spam-accounts on user-registration with user-id of consecutive letters like 'defgh384'
+
    * tournaments/include/tournament_pool_classes.php (PoolViewer.init_pool_table,
        ~.make_single_pool_table),
      tournaments/include/tournament_ladder.php (TournamentLadder.load_cache_tournament_ladder)

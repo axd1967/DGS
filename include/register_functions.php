@@ -140,7 +140,27 @@ class UserRegistration
          $this->_error('userid_too_long', "UserReg.check_userid({$this->uhandle})");
       if ( illegal_chars( $this->uhandle ) )
          $this->_error('userid_illegal_chars', "UserReg.check_userid({$this->uhandle})");
+
+      $this->check_userid_spam();
    }
+
+   /*! \brief Checks and prevent new user-id matching patterns for spam-accounts. */
+   private function check_userid_spam()
+   {
+      // SPAM-accounts: http://www.dragongoserver.net/forum/read.php?forum=2&thread=36701
+      // - prevent user-id like 'defgh384...' with consecutive letters
+      if ( preg_match("/^([a-z]{4,})(\\d{3,})$/i", $this->uhandle, $matches) )
+      {
+         $wordpart = strtolower($matches[1]);
+         $base = ord($wordpart[0]);
+         $len = strlen($wordpart) - 1;
+         $sum = 0;
+         for ( $n=0; $n <= $len; $n++ )
+            $sum += ord($wordpart[$n]) - $base;
+         if ( $sum <= $len * ($len+1) / 2 )
+            $this->_error('userid_spam_account', "UserReg.check_userid_spam({$this->uhandle})");
+      }
+   }//check_userid_spam
 
    private function check_name()
    {

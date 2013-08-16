@@ -369,6 +369,9 @@ class ErrorCode
          $arr['userid_illegal_chars'] =
             T_("The userid contained illegal characters, only the characters a-z, A-Z, 0-9 and -_+ are allowed, and the first one must be a-z, A-Z.");
 
+         $arr['userid_spam_account'] =
+            T_("The userid looks like a spam-account, please choose another userid.");
+
          $arr['password_mismatch'] =
             T_("The confirmed password didn't match the password, please go back and retry.");
 
