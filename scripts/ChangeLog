@@ -18,6 +18,9 @@ ChangeLog
 
 2013-08-16 juga
 
+   * tournaments/list_participants.php:
+   - bugfix: fix sorting of tournament-rating dependent on tournament-properties RatingUseMode
+
    * include/register_functions.php (UserRegistration.check_userid, ~.check_userid_spam),
      include/error_functions.php (DgsErrors.need_db_errorlog),
      include/error_codes.php (ErrorCode.init):

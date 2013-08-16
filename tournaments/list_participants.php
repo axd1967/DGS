@@ -33,6 +33,7 @@ require_once 'tournaments/include/tournament_cache.php';
 require_once 'tournaments/include/tournament_gui_helper.php';
 require_once 'tournaments/include/tournament_helper.php';
 require_once 'tournaments/include/tournament_participant.php';
+require_once 'tournaments/include/tournament_properties.php';
 
 $GLOBALS['ThePage'] = new Page('TournamentParticipantList');
 
@@ -50,6 +51,9 @@ $GLOBALS['ThePage'] = new Page('TournamentParticipantList');
    $tid = (int) @$_REQUEST['tid'];
    $tourney = TournamentCache::load_cache_tournament( 'Tournament.list_participants.find_tournament', $tid );
    $allow_edit_tourney = TournamentHelper::allow_edit_tournaments($tourney, $my_id);
+
+   $tprops = TournamentCache::load_cache_tournament_properties( 'Tournament.list_participants', $tid );
+   $has_tp_rating = $tprops->need_rating_copy(); // false : use curr user-rating for T-rating
 
    // TD has different view of table-column-set
    $cfg_tblcols = ConfigTableColumns::load_config( $my_id,
@@ -110,7 +114,7 @@ $GLOBALS['ThePage'] = new Page('TournamentParticipantList');
       $tptable->add_tablehead( 9, T_('Flags#header'), 'Enum', 0, 'Flags+');
    $tptable->add_tablehead(10, T_('Round#header'), 'Number', 0, 'StartRound-');
    $tptable->add_tablehead(15, new TableHead( T_('Running games'), 'images/table.gif'), 'ImagesLeft', TABLE_NO_SORT);
-   $tptable->add_tablehead(11, T_('Tournament Rating#header'), 'Rating', 0, 'Rating-');
+   $tptable->add_tablehead(11, T_('Tournament Rating#header'), 'Rating', 0, ( $has_tp_rating ? 'TP.Rating-' : 'Rating2-' ));
    $tptable->add_tablehead(16, T_('Finished#header'), 'Number', 0, 'Finished-');
    $tptable->add_tablehead(17, T_('Won#header'), 'Number', 0, 'Won-');
    $tptable->add_tablehead(18, T_('Lost#header'), 'Number', 0, 'Lost-');
@@ -161,6 +165,7 @@ $GLOBALS['ThePage'] = new Page('TournamentParticipantList');
          $row_str[1] = implode(' ', $links);
       }
 
+      $user_rating_str = echo_rating($tp->User->Rating, true, $uid);
       if ( $tptable->Is_Column_Displayed[ 2] )
          $row_str[ 2] = user_reference( REF_LINK, 1, '', $uid, $tp->User->Name, '');
       if ( $tptable->Is_Column_Displayed[ 3] )
@@ -168,7 +173,7 @@ $GLOBALS['ThePage'] = new Page('TournamentParticipantList');
       if ( $tptable->Is_Column_Displayed[ 4] )
          $row_str[ 4] = getCountryFlagImage( $tp->User->Country );
       if ( $tptable->Is_Column_Displayed[ 5] )
-         $row_str[ 5] = echo_rating($tp->User->Rating, true, $uid);
+         $row_str[ 5] = $user_rating_str;
       if ( $tptable->Is_Column_Displayed[ 6] )
          $row_str[ 6] = $tp->Comment;
       if ( $tptable->Is_Column_Displayed[ 7] )
@@ -180,12 +185,7 @@ $GLOBALS['ThePage'] = new Page('TournamentParticipantList');
       if ( $tptable->Is_Column_Displayed[10] )
          $row_str[10] = $tp->StartRound;
       if ( $tptable->Is_Column_Displayed[11] )
-      {
-         $rating_str = echo_rating($tp->Rating, true, $uid);
-         if ( $rating_str == '' )
-            $rating_str = echo_rating( $tp->User->Rating, true, $uid);
-         $row_str[11] = $rating_str;
-      }
+         $row_str[11] = ($has_tp_rating) ? echo_rating($tp->Rating, true, $uid) : $user_rating_str;
       if ( $tptable->Is_Column_Displayed[12] )
          $row_str[12] = ($tp->Created > 0) ? date(DATE_FMT2, $tp->Created) : '';
       if ( $tptable->Is_Column_Displayed[13] )
