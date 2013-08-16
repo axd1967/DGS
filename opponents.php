@@ -216,8 +216,9 @@ require_once 'include/classlib_userpicture.php';
    $utable->add_tablehead(11, T_('Lost#header'), 'Number', 0, 'Lost-');
    $utable->add_tablehead(12, T_('Percent#header'), 'Number', 0, 'Percent-');
    $utable->add_tablehead(13, T_('Activity#header'), 'Image', TABLE_NO_HIDE, 'ActivityLevel-');
-   $utable->add_tablehead(20, new TableHead( T_('User online#header'),
-      'images/online.gif', sprintf( T_('Indicator for being online up to %s mins ago'), SPAN_ONLINE_MINS) ), 'Image', 0 );
+   $utable->add_tablehead(20, new TableHead( T_('User online#header'), 'images/online.gif',
+      sprintf( T_('Indicator for being online up to %s mins ago'), SPAN_ONLINE_MINS)
+         . ', ' . T_('or on vacation#header') ), 'Image', 0 );
    $utable->add_tablehead(22, T_('Registered#header'), 'Date', 0, 'Registerdate+');
    $utable->add_tablehead(14, T_('Last access#header'), 'Date', 0, 'Lastaccess-');
    $utable->add_tablehead(15, T_('Last move#header'), 'Date', 0, 'LastMove-');
@@ -440,10 +441,7 @@ require_once 'include/classlib_userpicture.php';
          if ( @$row['UserPicture'] && $utable->Is_Column_Displayed[19] )
             $urow_strings[19] = UserPicture::getImageHtml( @$row['Handle'], true );
          if ( $utable->Is_Column_Displayed[20] )
-         {
-            $is_online = ($NOW - @$row['LastaccessU']) < SPAN_ONLINE_MINS * SECS_PER_MIN; // online up to X mins ago
-            $urow_strings[20] = echo_image_online( $is_online, @$row['LastaccessU'], false );
-         }
+            $urow_strings[20] = echo_user_online_vacation( @$row['OnVacation'], @$row['LastaccessU'] );
          if ( $utable->Is_Column_Displayed[21] )
          {
             // don't use full selection of filter-values to link to opponent-games

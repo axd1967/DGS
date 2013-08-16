@@ -403,6 +403,25 @@ function echo_image_game_players( $gid, $icon_text='' )
    return ($gid > 0) ? anchor( $base_path."game_players.php?gid=$gid", $img ) : $img;
 }
 
+/*! \brief Returns image-tags for user being on-vacation and/or online. */
+function echo_user_online_vacation( $on_vacation, $last_access )
+{
+   global $NOW;
+
+   $img_vacation = echo_image_vacation($on_vacation, TimeFormat::echo_onvacation($on_vacation));
+
+   $is_online = ($NOW - $last_access) < SPAN_ONLINE_MINS * SECS_PER_MIN; // online up to X mins ago
+   $img_online = echo_image_online( $is_online, $last_access, false );
+
+   $out = array();
+   if ( $img_vacation )
+      $out[] = $img_vacation;
+   if ( $img_online )
+      $out[] = $img_online;
+
+   return implode(' ', $out);
+}//echo_user_online_vacation
+
 /*!
  * \brief Formats string: <SPACES><TAG_L>str<TAG_R><SPACES>
  * \note spacing('text', 1, 'b'); -> ' <b>text</b> '

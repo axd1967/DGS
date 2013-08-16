@@ -309,8 +309,9 @@ function load_games_to_move( $uid, &$gtable )
    $gtable->add_tablehead( 8, T_('Komi#header'), 'Number', 0, 'Komi-');
    $gtable->add_tablehead( 9, T_('Moves#header'), 'Number', 0, 'Moves-');
    $gtable->add_tablehead(14, T_('Rated#header'), '', 0, 'X_Rated-');
-   $gtable->add_tablehead(11, new TableHead( T_('User online#header'),
-      'images/online.gif', sprintf( T_('Indicator for being online up to %s mins ago'), SPAN_ONLINE_MINS) ), 'Image', 0 );
+   $gtable->add_tablehead(11, new TableHead( T_('User online#header'), 'images/online.gif',
+      sprintf( T_('Indicator for being online up to %s mins ago'), SPAN_ONLINE_MINS)
+         . ', ' . T_('or on vacation#header') ), 'Image', 0 );
    $gtable->add_tablehead(13, T_('Last move#header'), 'Date', 0, 'Lastchanged+');
    $gtable->add_tablehead(17, T_('Priority#header'), 'Number',
       ($show_prio ? TABLE_NO_HIDE : 0), 'X_Priority-');
@@ -391,10 +392,7 @@ function load_games_to_move( $uid, &$gtable )
             $row_arr[10] = build_time_remaining( $row, $my_col, /*is_to_move*/true, $timefmt );
          }
          if ( $gtable->Is_Column_Displayed[11] )
-         {
-            $is_online = ($NOW - @$opp_Lastaccess) < SPAN_ONLINE_MINS * SECS_PER_MIN; // online up to X mins ago
-            $row_arr[11] = echo_image_online( $is_online, @$opp_Lastaccess, false );
-         }
+            $row_arr[11] = echo_user_online_vacation( @$opp_OnVacation, @$opp_Lastaccess );
          if ( $gtable->Is_Column_Displayed[15] )
          {
             $snapshot = ($Snapshot) ? $Snapshot : null;

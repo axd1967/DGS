@@ -16,6 +16,15 @@ Developers INFO:
 ChangeLog
 ------------------------------------------------------------------
 
+2013-08-16 juga
+
+   * include/game_functions.php (NextGameOrder.build_status_games_query),
+     include/gui_functions.php (echo_user_online_vacation),
+     include/contacts.php (Contact.build_querysql_contact),
+     status.php (load_games_to_move),
+     list_contacts.php, opponents.php, users.php, NEWS:
+   - extended user-online-columns with user-on-vacation for status, users, opponents & contacts pages
+
 2013-08-15 juga
 
    * tournaments/show_tournament_log.php:

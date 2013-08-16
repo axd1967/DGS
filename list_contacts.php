@@ -117,8 +117,9 @@ require_once 'include/classlib_userpicture.php';
    $ctable->add_tablehead( 2, T_('Userid#header'), 'User', TABLE_NO_HIDE, 'P.Handle+');
    $ctable->add_tablehead( 3, T_('Country#header'), 'Image', 0, 'P.Country+');
    $ctable->add_tablehead( 4, T_('Rating#header'), 'Rating', 0, 'P.Rating2-');
-   $ctable->add_tablehead(14, new TableHead( T_('User online#header'),
-      'images/online.gif', sprintf( T_('Indicator for being online up to %s mins ago'), SPAN_ONLINE_MINS) ), 'Image', 0 );
+   $ctable->add_tablehead(14, new TableHead( T_('User online#header'), 'images/online.gif',
+      sprintf( T_('Indicator for being online up to %s mins ago'), SPAN_ONLINE_MINS)
+         . ', ' . T_('or on vacation#header') ), 'Image', 0 );
    $ctable->add_tablehead( 5, T_('Last access#header'), 'Date', 0, 'P.Lastaccess-');
    $ctable->add_tablehead( 6, T_('System categories#header'), 'Enum', 0, 'C.SystemFlags+');
    $ctable->add_tablehead( 7, T_('User categories#header'), 'Enum', 0, 'C.UserFlags+');
@@ -245,10 +246,7 @@ require_once 'include/classlib_userpicture.php';
       if ( $ctable->Is_Column_Displayed[11] )
          $crow_strings[11] = ($row['CX_Lastchanged']>0 ? date(DATE_FMT2, $row['CX_Lastchanged']) : '');
       if ( $ctable->Is_Column_Displayed[14] )
-      {
-         $is_online = ($NOW - @$row['X_Lastaccess']) < SPAN_ONLINE_MINS * SECS_PER_MIN; // online up to X mins ago
-         $crow_strings[14] = echo_image_online( $is_online, @$row['X_Lastaccess'], false );
-      }
+         $crow_strings[14] = echo_user_online_vacation( @$row['OnVacation'], @$row['X_Lastaccess'] );
 
       $ctable->add_row( $crow_strings );
    }

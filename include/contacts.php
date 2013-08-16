@@ -207,7 +207,7 @@ class Contact
       $qsql = new QuerySQL();
       $qsql->add_part( SQLP_FIELDS,
          'P.Type', 'P.Name', 'P.Handle', 'P.Country', 'P.UserPicture',
-         'P.RatingStatus', 'P.Rating2',
+         'P.RatingStatus', 'P.Rating2', 'P.OnVacation',
          'UNIX_TIMESTAMP(P.Lastaccess) AS X_Lastaccess',
          'UNIX_TIMESTAMP(P.LastMove) AS X_LastMove',
          'C.uid', 'C.cid', 'C.SystemFlags', 'C.UserFlags AS ContactsUserFlags', 'C.Notes',
