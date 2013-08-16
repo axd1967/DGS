@@ -18,6 +18,14 @@ ChangeLog
 
 2013-08-16 juga
 
+   * tournaments/include/tournament_pool_classes.php (PoolViewer.init_pool_table,
+       ~.make_single_pool_table),
+     tournaments/include/tournament_ladder.php (TournamentLadder.load_cache_tournament_ladder)
+     tournaments/include/tournament_pool.php (TournamentPool.load_tournament_pools)
+     tournaments/ladder/view.php:
+   - add user-online-column with user-is-online & user-on-vacation info
+     for view-ladder & view-pools tournaments pages
+
    * include/game_functions.php (NextGameOrder.build_status_games_query),
      include/gui_functions.php (echo_user_online_vacation),
      include/contacts.php (Contact.build_querysql_contact),

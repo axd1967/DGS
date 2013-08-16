@@ -356,13 +356,13 @@ class TournamentPool
             $qsql->add_part( SQLP_FIELDS,
                'TPU.Name AS TPU_Name',
                'TPU.Handle AS TPU_Handle',
-               'TPU.Country AS TPU_Country',
-               'UNIX_TIMESTAMP(TPU.Lastaccess) AS TPU_X_Lastaccess' );
+               'TPU.Country AS TPU_Country' );
          }
          $qsql->add_part( SQLP_FIELDS,
             'TPU.ID AS TPU_ID', // MUST have to overwrite TP.ID with Players.ID in User-obj and User->urow(!)
             'TPU.Rating2 AS TPU_Rating2',
             'TPU.RatingStatus AS TPU_RatingStatus',
+            'UNIX_TIMESTAMP(TPU.Lastaccess) AS TPU_X_Lastaccess',
             'TPU.OnVacation AS TPU_OnVacation',
             'TPU.ClockUsed AS TPU_ClockUsed' );
          $qsql->add_part( SQLP_FROM,

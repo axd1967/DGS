@@ -150,6 +150,9 @@ $GLOBALS['ThePage'] = new Page('TournamentLadderView');
       $ltable->add_tablehead( 8, T_('Challenges#header'), '', TABLE_NO_HIDE );
       $ltable->add_tablehead( 9, T_('Rank Changed#T_ladder'), 'Date', 0 );
       $ltable->add_tablehead(10, T_('Rank Kept#header'), '', 0 );
+      $ltable->add_tablehead(15, new TableHead( T_('User online#header'), 'images/online.gif',
+         sprintf( T_('Indicator for being online up to %s mins ago'), SPAN_ONLINE_MINS)
+            . ', ' . T_('or on vacation#header') ), 'Image', 0 );
       $ltable->add_tablehead(13, T_('Last access#header'), '', 0 );
       $ltable->add_tablehead(11, T_('Started#header'), 'Date', 0 );
 
@@ -239,6 +242,8 @@ $GLOBALS['ThePage'] = new Page('TournamentLadderView');
             $row_str[13] = TimeFormat::echo_time_diff( $GLOBALS['NOW'], $user->Lastaccess, 24, TIMEFMT_SHORT|TIMEFMT_ZERO );
          if ( $need_tp_rating && @$ltable->Is_Column_Displayed[14] )
             $row_str[14] = echo_rating( $orow['TP_Rating'], true, $uid);
+         if ( $ltable->Is_Column_Displayed[15] )
+            $row_str[15] = echo_user_online_vacation( $user->urow['TLP_OnVacation'], $user->Lastaccess );
 
          if ( $is_mine )
             $row_str['extra_class'] = 'TourneyUser';

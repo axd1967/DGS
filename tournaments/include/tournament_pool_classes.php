@@ -25,6 +25,7 @@ require_once 'include/classlib_userconfig.php';
 require_once 'include/countries.php';
 require_once 'include/rating.php';
 require_once 'include/std_classes.php';
+require_once 'include/gui_functions.php';
 require_once 'include/table_columns.php';
 require_once 'tournaments/include/tournament_globals.php';
 require_once 'tournaments/include/tournament_pool.php';
@@ -737,8 +738,14 @@ class PoolViewer
       if ( !($this->options & PVOPT_NO_TRATING) )
          $this->table->add_tablehead( 4, T_('Tournament Rating#header'), 'Rating', 0 );
       $this->table->add_tablehead( 5, T_('Country#header'), 'Image', 0 );
+      $this->table->add_tablehead(13, new TableHead( T_('User online#header'), 'images/online.gif',
+         sprintf( T_('Indicator for being online up to %s mins ago'), SPAN_ONLINE_MINS)
+            . ', ' . T_('or on vacation#header') ), 'Image', 0 );
+      $this->table->add_tablehead(14, T_('Last access#header'), '', 0 );
 
-      $idx = 12; // last used-static-col
+      // IMPORTANT NOTE: increase accordingly when adding new columns!!
+      $idx = 14; // last used-static-col
+
       $this->poolidx = $idx;
       if ( !($this->options & PVOPT_NO_RESULT) )
       {
@@ -787,7 +794,7 @@ class PoolViewer
     */
    public function make_single_pool_table( $pool, $opts=0 )
    {
-      global $base_path;
+      global $base_path, $NOW;
 
       $arr_users = $this->ptabs->pools[$pool];
       $map_usercols = $this->ptabs->get_user_col_map( $pool, $this->games_per_challenge );
@@ -841,6 +848,8 @@ class PoolViewer
             10 => $tpool->SODOS,
             11 => $tpool->formatRank( /*incl-CalcRank*/true ),
             12 => $tpool->echoRankImage(),
+            13 => echo_user_online_vacation( @$user->urow['OnVacation'], $user->Lastaccess ),
+            14 => TimeFormat::echo_time_diff( $NOW, $user->Lastaccess, 24, TIMEFMT_SHORT|TIMEFMT_ZERO ),
          );
          if ( $this->table->Is_Column_Displayed[1] )
             $row_arr[1] = $user->Name;

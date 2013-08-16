@@ -1288,6 +1288,7 @@ class TournamentLadder
       {
          $tl_iterator->addQuerySQLMerge( new QuerySQL(
                SQLP_FIELDS, 'TLP.ID AS TLP_ID', 'TLP.Name AS TLP_Name', 'TLP.Handle AS TLP_Handle',
+                            'TLP.OnVacation AS TLP_OnVacation',
                             'TLP.Country AS TLP_Country', 'TLP.Rating2 AS TLP_Rating2',
                             'UNIX_TIMESTAMP(TLP.Lastaccess) AS TLP_X_Lastaccess',
                SQLP_FROM,   'INNER JOIN Players AS TLP ON TLP.ID=TL.uid'
