@@ -311,7 +311,7 @@ class TournamentLadderProps
       elseif ( $this->ChallengeRangeAbsolute > 0 )
          $arr[] = sprintf( T_('%s positions above your own#T_ladder'), $this->ChallengeRangeAbsolute );
       if ( $this->ChallengeRangeRelative > 0 )
-         $arr[] = sprintf( T_('%s of ladder users above your own position'), $this->ChallengeRangeRelative.'%' );
+         $arr[] = sprintf( T_('%s of the users above your position'), $this->ChallengeRangeRelative.'%' );
       if ( $this->ChallengeRangeRating != TLADDER_CHRNG_RATING_UNUSED )
       {
          if ( $this->ChallengeRangeRating < 0 )
