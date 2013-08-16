@@ -282,7 +282,7 @@ $GLOBALS['ThePage'] = new Page('TournamentLadderView');
 
       if ( $cnt_players > 0 && is_array($arr_tg_counts) )
       {
-         echo sprintf( T_('Ladder summary (%s players): %s running games (with %s finished games waiting to be processed)#T_ladder'),
+         echo sprintf( T_('Ladder summary (%s players): %s running games, %s finished games waiting to be processed#T_ladder'),
             $cnt_players, (int)@$arr_tg_counts[TG_STATUS_PLAY], (int)@$arr_tg_counts[TG_STATUS_SCORE] ), "<br>\n";
       }
 
