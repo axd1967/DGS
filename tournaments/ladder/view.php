@@ -96,7 +96,8 @@ $GLOBALS['ThePage'] = new Page('TournamentLadderView');
       ? TournamentLadder::allow_edit_ladder($tourney, $errors) // check-locks
       : false;
 
-   $tl_user = null;
+   $tl_user = $arr_tg_counts = $ltable = null;
+   $cnt_players = 0;
    if ( $allow_view )
    {
       if ( $admin_mode && $allow_admin && @$_REQUEST['ta_updrank'] ) // move rank (by TD)
@@ -160,7 +161,8 @@ $GLOBALS['ThePage'] = new Page('TournamentLadderView');
       //$ltable->make_sort_images(); //obvious, so left away as it also take a bit of unneccessary table-width
 
       $iterator = TournamentLadder::load_cache_tournament_ladder( 'Tournament.ladder_view', $tid, $need_tp_rating, 0, /*idx*/true );
-      $ltable->set_found_rows( $iterator->getItemCount() );
+      $cnt_players = $iterator->getItemCount();
+      $ltable->set_found_rows( $cnt_players );
       $ltable->set_rows_per_page( null ); // no navigating
       $show_rows = $ltable->compute_show_rows( $iterator->getResultRows() );
 
@@ -176,7 +178,7 @@ $GLOBALS['ThePage'] = new Page('TournamentLadderView');
 
          // add ladder-info (challenge-range)
          $tl_user = $tl_props->fill_ladder_challenge_range( $iterator, $my_id );
-         $tl_props->fill_ladder_running_games( $iterator, $tg_iterator, $my_id );
+         $arr_tg_counts = $tl_props->fill_ladder_running_games( $iterator, $tg_iterator, $my_id );
       }
    }//allow-view
 
@@ -276,6 +278,12 @@ $GLOBALS['ThePage'] = new Page('TournamentLadderView');
             echo Tournament::getLockText(TOURNEY_FLAG_LOCK_CLOSE), MINI_SPACING,
                span('LadderWarn', T_('Challenging locked#T_ladder')), ".<br>\n";
          echo "<br>\n";
+      }
+
+      if ( $cnt_players > 0 && is_array($arr_tg_counts) )
+      {
+         echo sprintf( T_('Ladder summary (%s players): %s running games (with %s finished games waiting to be processed)#T_ladder'),
+            $cnt_players, (int)@$arr_tg_counts[TG_STATUS_PLAY], (int)@$arr_tg_counts[TG_STATUS_SCORE] ), "<br>\n";
       }
 
       if ( !is_null($tl_user) && !$admin_mode )

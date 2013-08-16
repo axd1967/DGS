@@ -446,9 +446,11 @@ class TournamentLadderProps
     * \note Must run after fill_ladder_challenge_range()-func
     * \param $iterator ListIterator on ordered TournamentLadder with iterator-Index on uid
     * \param $tgame_iterator ListIterator on TournamentGames
+    * \return array( TG_STATUS_... => count, ... ); not all stati-keys filled
     */
    public function fill_ladder_running_games( &$iterator, $tgame_iterator, $my_id )
    {
+      $arr_counts = array();
       while ( list(,$arr_item) = $tgame_iterator->getListIterator() )
       {
          list( $tgame, $orow ) = $arr_item;
@@ -473,7 +475,15 @@ class TournamentLadderProps
             else // no challenger from detached T-game
                $df_tladder->add_running_game( $tgame );
          }
+
+         // count TG-status
+         if ( !isset($arr_counts[$tgame->Status]) )
+            $arr_counts[$tgame->Status] = 1;
+         else
+            $arr_counts[$tgame->Status]++;
       }
+
+      return $arr_counts;
    }//fill_ladder_running_games
 
    /*!

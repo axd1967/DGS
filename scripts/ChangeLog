@@ -18,6 +18,11 @@ ChangeLog
 
 2013-08-16 juga
 
+   * tournaments/include/tournament_ladder_props.php (TournamentLadderProps.fill_ladder_running_games),
+     tournaments/ladder/view.php:
+   - added ladder-summary on ladder-view with count of running games and games on TG-SCORE-status
+     waiting to be processed
+
    * tournaments/list_participants.php:
    - bugfix: fix sorting of tournament-rating dependent on tournament-properties RatingUseMode
 
