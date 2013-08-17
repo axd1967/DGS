@@ -51,7 +51,7 @@ function T_($string)
 {
    global $Tr;
    $s = @$Tr[$string];
-   if ( !empty($s) )
+   if ( (string)$s != '' )
       return $s;
 
    global $language_used;
@@ -59,7 +59,7 @@ function T_($string)
       return '<span class=NativeText>'.$string.'</span>';
 
    //if you need a '#' which is removed, end the string with a '#'
-   return preg_replace('%(.)#[_0-9A-Za-z]*$%', '\\1', $string); // \w (=_0-9a-z) is locale-dependent
+   return strip_translation_label($string);
 }
 
 function strip_translation_label( $string )
