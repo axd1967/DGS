@@ -18,6 +18,9 @@ ChangeLog
 
 2013-08-17 juga
 
+   * tournaments/ladder/view.php (build_action_row_str):
+   - do not show ladder-rematch-wait action for only observing users like non-admins/tournament-directors
+
    * tournaments/include/tournament_template_ladder.php (TournamentTemplateLadder._createTournament),
      tournaments/include/tournament_utils.php,
      tournaments/ladder/view.php (build_rank_change),
