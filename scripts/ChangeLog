@@ -18,6 +18,9 @@ ChangeLog
 
 2013-08-17 juga
 
+   * tournaments/include/tournament_ladder_props.php (TournamentLadderProps.calc_game_end_action):
+   - bugfix: need public function-modifier to process ladders game-end-handling
+
    * tournaments/show_tournament_log.php:
    - bugfix: forward tid-URL-argument on paging tournament-log
 

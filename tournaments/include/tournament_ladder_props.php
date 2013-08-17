@@ -609,7 +609,7 @@ class TournamentLadderProps
     * \return TGEND_NO_CHANGE if no action needed; otherwise TGEND_..-action
     * \internal
     */
-   private function calc_game_end_action( $score, $tgame_flags )
+   public function calc_game_end_action( $score, $tgame_flags )
    {
       $action = TGEND_NO_CHANGE;
 
