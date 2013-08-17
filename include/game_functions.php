@@ -2251,7 +2251,7 @@ class GameNotify
       // NOTE: server messages does not allow a reply, so add an *in message* reference to players
       $arr = array();
       foreach ( $this->players as $user_row )
-         $arr[] = send_reference( REF_LINK, 1, '', $user_row );
+         $arr[] = send_user_reference( REF_LINK, 1, '', $user_row );
       return "<p>Send a message to:<center>" . implode('<br>', $arr) . "</center>";
    }//_build_text_players
 
@@ -2292,7 +2292,7 @@ class GameNotify
             // game will be deleted => can't use <game>
             . game_reference( REF_LINK, 1, '', $this->gid, 0, $this->build_game_ref_array() )
             . "</center>has been deleted by $act_user_text:<center>"
-            . send_reference( REF_LINK, 1, '', $player_row )
+            . send_user_reference( REF_LINK, 1, '', $player_row )
             . "</center>"
             . $this->players_text;
 
