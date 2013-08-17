@@ -18,6 +18,16 @@ ChangeLog
 
 2013-08-17 juga
 
+   * tournaments/include/tournament_template_ladder.php (TournamentTemplateLadder._createTournament),
+     tournaments/include/tournament_utils.php,
+     tournaments/ladder/view.php (build_rank_change),
+     tournaments/cron_tournaments.php:
+   - bugfix: showing actual rank-change before first rank-archiving
+     - setup rank-archiving-period with next-month instead of current month to use StartRank
+       to compare with CurrentRank as long as rank is not archived, i.e. PeriodRank or HistoryRank == 0
+     - run rank-archiving (daily-job) before game-end-processing to preserve rank-changes
+       from former day
+
    * tournaments/include/tournament_template_ladder.php (TournamentTemplateLadder.joinTournament),
      tournaments/include/tournament_template.php (TournamentTemplate.joinTournament),
      tournaments/ladder/admin.php, tournaments/edit_participant.php, tournaments/register.php:

@@ -301,10 +301,12 @@ $GLOBALS['ThePage'] = new Page('TournamentLadderView');
             ), ".<br>\n";
          if ( !is_javascript_enabled() )
          {
+            $cmp_curr_rank = ( $tl_user->PeriodRank > 0 ) ? $tl_user->PeriodRank : $tl_user->StartRank;
+            $cmp_prev_rank = ( $tl_user->HistoryRank > 0 ) ? $tl_user->HistoryRank : $tl_user->StartRank;
             echo sprintf( T_('Your start rank (change) in the current period is: %s#T_ladder'),
-                        TournamentLadder::build_rank_diff( $tl_user->Rank, $tl_user->PeriodRank )), "<br>\n";
+                        TournamentLadder::build_rank_diff( $tl_user->Rank, $cmp_curr_rank )), "<br>\n";
             echo sprintf( T_('Your rank (change) in the previous period was: %s#T_ladder'),
-                        TournamentLadder::build_rank_diff( $tl_user->Rank, $tl_user->HistoryRank )), "<br>\n";
+                        TournamentLadder::build_rank_diff( $tl_user->Rank, $cmp_prev_rank )), "<br>\n";
          }
          echo sprintf( T_('Your current rank is %s.#T_ladder'), $tl_user->Rank ),
             MED_SPACING,
@@ -383,15 +385,15 @@ function build_rank_change( $tladder )
 {
    global $js_enabled;
 
-   $result = TournamentLadder::build_rank_diff( $tladder->Rank, $tladder->PeriodRank, '%2$s' );
+   $cmp_rank = ( $tladder->PeriodRank > 0 ) ? $tladder->PeriodRank : $tladder->StartRank;
+   $result = TournamentLadder::build_rank_diff( $tladder->Rank, $cmp_rank, '%2$s' );
    if ( $js_enabled )
    {
       $result = anchor( '#', $result, '',
          array(
             'class' => 'TLadderRank',
             'onmouseover' => sprintf( "showTLRankInfo(event,%s,%s,%s,%s);",
-                                      $tladder->Rank, $tladder->BestRank,
-                                      $tladder->PeriodRank, $tladder->HistoryRank ),
+                                      $tladder->Rank, $tladder->BestRank, $cmp_rank, $tladder->HistoryRank ),
             'onmouseout' => 'hideInfo();' ));
    }
    return $result;

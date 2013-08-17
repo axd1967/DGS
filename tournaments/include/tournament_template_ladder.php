@@ -93,7 +93,7 @@ abstract class TournamentTemplateLadder extends TournamentTemplate
             $this->create_error("TournamentTemplateLadder._createTournament.tl_props.insert(%s,$tid)");
 
          $t_ext = new TournamentExtension( $tid, TE_PROP_TLADDER_RANK_PERIOD_UPDATE, 0,
-               TournamentUtils::get_month_start_time($NOW) );
+               TournamentUtils::get_month_start_time($NOW, 1) ); // start with next month
          if ( !$t_ext->persist() )
             $this->create_error("TournamentTemplateLadder._createTournament.t_ext.insert(%s,$tid)");
 

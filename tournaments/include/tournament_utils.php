@@ -156,7 +156,7 @@ class TournamentUtils
 
    /*!
     * \brief Calculates unix-timestamp for start of month.
-    * \param $month_add 0=current month, -1=previous-month
+    * \param $month_add 0=current month, -1=previous-month, 1=next-month
     */
    public static function get_month_start_time( $gm_time, $month_add=0 )
    {

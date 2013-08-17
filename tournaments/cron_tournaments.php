@@ -67,7 +67,49 @@ if ( ALLOW_TOURNAMENTS && !$is_down )
    $tcache = TournamentCache::get_instance();
 
 
+   // ---------- jobs running only once a day ----------
+
+   // NOTE: added special daily-jobs here to avoid the complexity of cron-locking
+   //       of daily_cron/tournament-cron-scripts
+
+   $row = mysql_single_fetch( 'cron_tournament.daily.check_frequency',
+      "SELECT ($NOW-UNIX_TIMESTAMP(Lastchanged)) AS timediff"
+      ." FROM Clock WHERE ID=".CLOCK_CRON_TOURNEY_DAILY." LIMIT 1" );
+   if ( $row )
+   {
+      if ( DBG_TEST || $row['timediff'] >= 24*SECS_PER_HOUR ) // one day-check
+      {
+         db_query( 'cron_tournament.daily.next_run_date',
+            "UPDATE Clock SET Lastchanged=FROM_UNIXTIME($NOW) WHERE ID=".CLOCK_CRON_TOURNEY_DAILY." LIMIT 1" );
+
+         run_once_daily();
+      }
+   }
+
+
+   // ---------- jobs running hourly -------------------
+
+   // NOTE: added special hourly-jobs here to avoid the complexity of cron-locking
+   //       of hourly_cron/tournament-cron-scripts
+
+   $row = mysql_single_fetch( 'cron_tournament.hourly.check_frequency',
+      "SELECT ($NOW-UNIX_TIMESTAMP(Lastchanged)) AS timediff"
+      ." FROM Clock WHERE ID=".CLOCK_CRON_TOURNEY_HOURLY." LIMIT 1" );
+   if ( $row )
+   {
+      if ( DBG_TEST || $row['timediff'] >= 1*SECS_PER_HOUR ) // hourly-check
+      {
+         db_query( 'cron_tournament.hourly.next_run_date',
+            "UPDATE Clock SET Lastchanged=FROM_UNIXTIME($NOW) WHERE ID=".CLOCK_CRON_TOURNEY_HOURLY." LIMIT 1" );
+
+         run_hourly();
+      }
+   }
+
+
+
    // ---------- handle tournament-game ending by score/resignation/jigo/timeout
+   // NOTE: keep after hourls & daily tournament-jobs! so copying ladder-ranks in daily-run is done first
 
    $tg_iterator = new ListIterator( 'cron_tournament.load_tgames.score', null, $tg_order );
    $tg_iterator = TournamentGames::load_tournament_games( $tg_iterator, 0, 0, 0, TG_STATUS_SCORE );
@@ -99,51 +141,12 @@ if ( ALLOW_TOURNAMENTS && !$is_down )
    }
 
 
-
    // ---------- finish waiting, due tournament-games
 
    $wait_ticks = get_clock_ticks( 'cron_tournament.game_wait', CLOCK_TOURNEY_GAME_WAIT );
    TournamentGames::update_tournament_game_wait( 'cron_tournament', $wait_ticks );
 
 
-
-   // ---------- jobs running only once a day ----------
-
-   // NOTE: added special daily-jobs here to avoid the complexity of cron-locking
-   //       of daily_cron/tournament-cron-scripts
-
-   $row = mysql_single_fetch( 'cron_tournament.daily.check_frequency',
-      "SELECT ($NOW-UNIX_TIMESTAMP(Lastchanged)) AS timediff"
-      ." FROM Clock WHERE ID=".CLOCK_CRON_TOURNEY_DAILY." LIMIT 1" );
-   if ( $row )
-   {
-      if ( DBG_TEST || $row['timediff'] >= 24*SECS_PER_HOUR ) // one day-check
-      {
-         db_query( 'cron_tournament.daily.next_run_date',
-            "UPDATE Clock SET Lastchanged=FROM_UNIXTIME($NOW) WHERE ID=".CLOCK_CRON_TOURNEY_DAILY." LIMIT 1" );
-
-         run_once_daily();
-      }
-   }
-
-   // ---------- jobs running hourly -------------------
-
-   // NOTE: added special hourly-jobs here to avoid the complexity of cron-locking
-   //       of hourly_cron/tournament-cron-scripts
-
-   $row = mysql_single_fetch( 'cron_tournament.hourly.check_frequency',
-      "SELECT ($NOW-UNIX_TIMESTAMP(Lastchanged)) AS timediff"
-      ." FROM Clock WHERE ID=".CLOCK_CRON_TOURNEY_HOURLY." LIMIT 1" );
-   if ( $row )
-   {
-      if ( DBG_TEST || $row['timediff'] >= 1*SECS_PER_HOUR ) // hourly-check
-      {
-         db_query( 'cron_tournament.hourly.next_run_date',
-            "UPDATE Clock SET Lastchanged=FROM_UNIXTIME($NOW) WHERE ID=".CLOCK_CRON_TOURNEY_HOURLY." LIMIT 1" );
-
-         run_hourly();
-      }
-   }
 
    // ---------- END --------------------------------
 
