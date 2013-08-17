@@ -144,8 +144,11 @@ abstract class TournamentTemplate
     */
    abstract public function checkPoolWinners( $tourney, $tround );
 
-   /*! \brief Saves given TournamentParticipant in HOT-section and joins (running) tournament if not already joined. */
-   public function joinTournament( $tourney, $tp )
+   /*!
+    * \brief Saves given TournamentParticipant in HOT-section and joins (running) tournament if not already joined.
+    * \param $tlog_type for tournament-log TLOG_TYPE_... who executed the tournament-join
+    */
+   public function joinTournament( $tourney, $tp, $tlog_type )
    {
       return $tp->persist();
    }

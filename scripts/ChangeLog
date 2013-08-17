@@ -18,6 +18,11 @@ ChangeLog
 
 2013-08-17 juga
 
+   * tournaments/include/tournament_template_ladder.php (TournamentTemplateLadder.joinTournament),
+     tournaments/include/tournament_template.php (TournamentTemplate.joinTournament),
+     tournaments/ladder/admin.php, tournaments/edit_participant.php, tournaments/register.php:
+   - bugfix: need TLOG_TYPE_.. passed on adding user to ladder for tournament-log
+
    * tournaments/include/tournament_ladder_props.php (TournamentLadderProps.calc_game_end_action):
    - bugfix: need public function-modifier to process ladders game-end-handling
 

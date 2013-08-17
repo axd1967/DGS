@@ -160,7 +160,7 @@ $GLOBALS['ThePage'] = new Page('TournamentRegistration');
          {//HOT-section to accept tourney-invitation
             $tp->Status = TP_STATUS_REGISTER;
             $tp->Flags |= TP_FLAGS_ACK_INVITE;
-            $ttype->joinTournament( $tourney, $tp ); // update
+            $ttype->joinTournament( $tourney, $tp, TLOG_TYPE_USER ); // update
             TournamentParticipant::sync_tournament_registeredTP( $tid, $old_status, $tp->Status );
             TournamentLogHelper::log_change_tp_registration_by_user( $tid, 'ack_invite', $edits, $old_tp, $tp );
          }
@@ -213,7 +213,7 @@ $GLOBALS['ThePage'] = new Page('TournamentRegistration');
 
       ta_begin();
       {//HOT-section to update tourney-registration
-         $ttype->joinTournament( $tourney, $tp ); // insert or update (and join eventually)
+         $ttype->joinTournament( $tourney, $tp, TLOG_TYPE_USER ); // insert or update (and join eventually)
          TournamentParticipant::sync_tournament_registeredTP( $tid, $old_status, $tp->Status );
 
          if ( $rid == 0 ) // new TP

@@ -156,7 +156,7 @@ $GLOBALS['ThePage'] = new Page('TournamentLadderAdmin');
       {
          ta_begin();
          {//HOT-section to re-add existing TournamentParticipant-user into ladder
-            TournamentLadder::add_user_to_ladder( $tid, $user->ID, $tl_props, $tprops );
+            TournamentLadder::add_user_to_ladder( $tid, $user->ID, $allow_edit_tourney, $tl_props, $tprops );
          }
          ta_end();
          $sys_msg = urlencode( sprintf( T_('User [%s] added to ladder!'), $user->Handle) );

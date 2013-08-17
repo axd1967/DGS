@@ -140,13 +140,13 @@ abstract class TournamentTemplateLadder extends TournamentTemplate
       return array( array(), array() ); // no pools or rounds (only one) for ladders
    }
 
-   public function joinTournament( $tourney, $tp )
+   public function joinTournament( $tourney, $tp, $tlog_type )
    {
       ta_begin();
       {//HOT-section to save TournamentParticipant and add user in ladder
          $result = $tp->persist();
          if ( $tourney->Status == TOURNEY_STATUS_PLAY && $tp->Status == TP_STATUS_REGISTER )
-            $result = TournamentLadder::add_user_to_ladder( $tp->tid, $tp->uid );
+            $result = TournamentLadder::add_user_to_ladder( $tp->tid, $tp->uid, $tlog_type );
       }
       ta_end();
       return $result;

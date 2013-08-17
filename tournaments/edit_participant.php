@@ -250,7 +250,7 @@ $GLOBALS['ThePage'] = new Page('TournamentEditParticipant');
 
          ta_begin();
          {//HOT-section to update tournament-registration
-            $ttype->joinTournament( $tourney, $tp ); // insert or update (and join eventually)
+            $ttype->joinTournament( $tourney, $tp, $allow_edit_tourney ); // insert or update (and join eventually)
             TournamentParticipant::sync_tournament_registeredTP( $tid, $old_status, $tp->Status );
 
             // send notification (if needed)
