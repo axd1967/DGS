@@ -90,6 +90,12 @@ require_once 'tournaments/include/tournament_log.php';
    $table->register_filter( $tlogfilter );
    $table->add_or_del_column();
 
+   // attach external URL-parameters to table
+   $extparam = new RequestParameters();
+   if ( $tid > 0 )
+      $extparam->add_entry( 'tid', $tid );
+   $table->add_external_parameters( $extparam, true ); // also for hiddens
+
    // add_tablehead($nr, $descr, $attbs=null, $mode=TABLE_NO_HIDE|TABLE_NO_SORT, $sortx='')
    $table->add_tablehead( 1, T_('ID#header'), 'ID', TABLE_NO_HIDE, 'ID-');
    $table->add_tablehead( 3, T_('Userid#header'), 'User', TABLE_NO_HIDE, 'uid+');

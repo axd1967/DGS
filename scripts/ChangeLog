@@ -16,6 +16,11 @@ Developers INFO:
 ChangeLog
 ------------------------------------------------------------------
 
+2013-08-17 juga
+
+   * tournaments/show_tournament_log.php:
+   - bugfix: forward tid-URL-argument on paging tournament-log
+
 2013-08-16 juga
 
    * include/shape_control.php (ShapeControl.getFlagsText):
