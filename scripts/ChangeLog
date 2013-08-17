@@ -16,6 +16,13 @@ Developers INFO:
 ChangeLog
 ------------------------------------------------------------------
 
+2013-08-18 juga
+
+   * include/game_functions.php (GameNotify._build_text_players, ~.get_text_game_deleted),
+     include/std_functions.php (send_reference, user_reference):
+   - bugfix: undo rename of send_user_reference() back to send_reference() as it's required in regex
+     in $html_safe_reg (which would be difficult to adjust to new name)
+
 2013-08-17 juga
 
    * tournaments/ladder/view.php (build_action_row_str):

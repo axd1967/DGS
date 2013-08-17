@@ -3073,7 +3073,8 @@ function survey_reference( $link, $safe_it, $class, $sid )
 }
 
 /*! \brief Sends user-reference with link to send new message to user. */
-function send_user_reference( $link, $safe_it, $class, $player_ref, $player_name=false, $player_handle=false)
+// IMPORTANT NOTE: do not rename this function without adjusting "<send ..>"-DGS-tag in $html_safe_preg !!
+function send_reference( $link, $safe_it, $class, $player_ref, $player_name=false, $player_handle=false)
 {
    if ( is_numeric($link) ) //not owned reference
       $link = -$link; //make it a send_reference
@@ -3164,7 +3165,7 @@ function user_reference( $link, $safe_it, $class, $player_ref, $player_name=fals
          $link = 0;
          $class = 'Ref'.$class;
       }
-      elseif ( $link<0 ) //send_user_reference
+      elseif ( $link<0 ) //send_reference
       {
          $url = "message.php?mode=NewMessage".URI_AMP;
          $link = -$link;
