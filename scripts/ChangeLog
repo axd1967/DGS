@@ -16,6 +16,13 @@ Developers INFO:
 ChangeLog
 ------------------------------------------------------------------
 
+2013-08-19 axd
+
+   * forum/forum_functions.php (DisplayForum.draw_post):
+   - merged in changes from axd about forum-bugfix:
+     - see https://sourceforge.net/p/dragongoserver/dgs-main/merge-requests/5/
+     - bugfix: enable navigation-panel even when replying on forum-topic
+
 2013-08-19 juga
 
    * gameinfo.php:

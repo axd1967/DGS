@@ -865,7 +865,7 @@ class DisplayForum
 
 
       // post bottom line (footer)
-      if ( $drawmode_type == DRAWPOST_NORMAL )
+      if ( $drawmode_type == DRAWPOST_NORMAL || $drawmode_type == DRAWPOST_REPLY )
       {
          $flat = ( $this->flat_view != 0 );
          echo "\n<tr class=PostButtons><td colspan=$cols>";
@@ -896,7 +896,7 @@ class DisplayForum
 
          if ( $user_may_post && Forum::allow_posting($player_row, $this->forum_opts) )
          {
-            if ( !is_null($post->thread_post) && $post->thread_post->allow_post_reply() )
+            if ( !is_null($post->thread_post) && $post->thread_post->allow_post_reply() && $drawmode_type != DRAWPOST_REPLY )
             {
                // reply link
                echo '<a href="', $thread_url,URI_AMP,"reply=$pid#$pid\">[ ", T_('reply#forum'), " ]</a>&nbsp;&nbsp;";
