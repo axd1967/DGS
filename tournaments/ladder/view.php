@@ -234,7 +234,7 @@ $GLOBALS['ThePage'] = new Page('TournamentLadderView');
             $row_str[ 7] = build_action_row_str( $tladder, $tform, $is_mine, $rid,
                ( $ltable->Is_Column_Displayed[12] ? '' : $run_games_str) );
          if ( $ltable->Is_Column_Displayed[ 8] )
-            $row_str[ 8] = implode(' ', $tladder->build_linked_running_games());
+            $row_str[ 8] = implode(' ', $tladder->build_linked_incoming_games());
          if ( $ltable->Is_Column_Displayed[ 9] )
             $row_str[ 9] = ($tladder->RankChanged > 0) ? date(DATE_FMT2, $tladder->RankChanged) : '';
          if ( $ltable->Is_Column_Displayed[10] )

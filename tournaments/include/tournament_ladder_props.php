@@ -470,10 +470,10 @@ class TournamentLadderProps
                if ( $tgame->Status == TG_STATUS_WAIT )
                   $df_tladder->RematchWait = $this->calc_rematch_wait_remaining_hours( $tgame );
                else
-                  $df_tladder->add_running_game( $tgame );
+                  $df_tladder->add_incoming_game( $tgame );
             }
             else // no challenger from detached T-game
-               $df_tladder->add_running_game( $tgame );
+               $df_tladder->add_incoming_game( $tgame );
          }
 
          // count TG-status

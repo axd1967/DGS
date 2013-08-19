@@ -16,6 +16,15 @@ Developers INFO:
 ChangeLog
 ------------------------------------------------------------------
 
+2013-08-19 juga
+
+   * tournaments/include/tournament_ladder.php (class TournamentLadder, ~.add_incoming_game,
+       ~.get_incoming_games, ~.build_linked_incoming_games),
+     tournaments/include/tournament_ladder_props.php (TournamentLadderProps.fill_ladder_running_games),
+     tournaments/ladder/view.php:
+   - cleanup: renamed TournamentLadder.RunningTourneyGames -> .IncomingTourneyGames
+     including all related functions
+
 2013-08-18 juga
 
    * include/game_functions.php (GameNotify._build_text_players, ~.get_text_game_deleted),
