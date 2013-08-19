@@ -646,7 +646,7 @@ class TournamentLadderProps
       $clock_ticks = get_clock_ticks( "TournamentLadderProps.calc_ticks_due_rematch_wait({$this->tid})",
          CLOCK_TOURNEY_GAME_WAIT );
 
-      $ticks_due = $clock_ticks + 2 * $this->ChallengeRematchWaitHours; // half-hour-ticks to wait
+      $ticks_due = $clock_ticks + TICK_FREQUENCY * $this->ChallengeRematchWaitHours; // 5min-ticks to wait
       return $ticks_due;
    }
 
@@ -656,7 +656,7 @@ class TournamentLadderProps
       $wait_ticks = get_clock_ticks( "TournamentLadderProps.calc_rematch_wait_remaining_hours({$this->tid},{$tgame->ID})",
          CLOCK_TOURNEY_GAME_WAIT);
 
-      $remaining_hours = floor(($tgame->TicksDue - $wait_ticks + 1) / 2);
+      $remaining_hours = floor(($tgame->TicksDue - $wait_ticks + 1) / TICK_FREQUENCY);
       if ( $remaining_hours < 0 )
          $remaining_hours = 0;
       return $remaining_hours;

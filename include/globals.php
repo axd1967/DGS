@@ -52,14 +52,14 @@ define('COUNTNEW_RECALC', 'recalc');
 define('CLOCK_CRON_TICK', 201);
 define('CLOCK_CRON_HALFHOUR', 202);
 define('CLOCK_CRON_DAY', 203);
-define('CLOCK_TIMELEFT', 204);
+define('CLOCK_TIMELEFT', 204); // 5min-tick
 define('CLOCK_CRON_TOURNEY', 205);
 define('CLOCK_CRON_TOURNEY_DAILY', 206);
 define('CLOCK_CRON_TOURNEY_HOURLY', 207);
 define('CLOCK_CRON_HOUR', 208);
 define('MAX_CLOCK', 208);
 
-define('CLOCK_TOURNEY_GAME_WAIT', CLOCK_CRON_HALFHOUR);
+define('CLOCK_TOURNEY_GAME_WAIT', CLOCK_TIMELEFT); // 5min-tick
 
 define('WEEKEND_CLOCK_OFFSET', 100);
 define('VACATION_CLOCK', -1); // keep it < 0

@@ -2645,3 +2645,17 @@ ALTER TABLE Games
    MODIFY Flags set('Ko','HiddenMsg','AdmResult','TGDetached','AttachedSgf') NOT NULL default '' ;
 
 
+-- fix rematch-wait due-time for ladder-tournament-games using 5min-ticks TIMELEFT-clock
+-- reduced by 5min-ticks already passed since game ended
+-- IMPORTANT NOTE: only run this once!
+UPDATE TournamentGames AS TG
+   INNER JOIN TournamentLadderProps AS TLP ON TLP.tid=TG.tid
+   INNER JOIN Clock
+   SET TG.TicksDue=Clock.Ticks + TLP.ChallengeRematchWait*12 - FLOOR((UNIX_TIMESTAMP(NOW()) - UNIX_TIMESTAMP(TG.EndTime))/300)
+   WHERE TG.Status='WAIT' AND TLP.ChallengeRematchWait > 0 AND TG.TicksDue>0 AND Clock.ID=204 ;
+
+-- fix potential tournament-games with negative due-time
+UPDATE TournamentGames
+   SET TicksDue=0 WHERE TicksDue < 0 ;
+
+

@@ -712,10 +712,10 @@ Description:
      see TicksDue-field
    - DONE = Tournament-game is finished and results booked in tournament
 
-* TicksDue : half-hour due-ticks to keep track of rematch-lock
+* TicksDue : 5min clock-ticks to keep track of rematch-lock
    - has meaning only if status=WAIT
-   - TicksDue contains the absolute number of half-hour-ticks when the status is changed
-     to DONE to allow rematch of challenger and defender
+   - TicksDue contains the absolute number of 5min-clock-ticks (from CLOCK_TIMELEFT) when the status
+     is changed to DONE to allow rematch of challenger and defender
 
 * Flags : flags
    - 0x0001 = game-result (Score) has been set by tournament-director (not taken from Games.Score)
@@ -870,7 +870,7 @@ Description:
 
 * StartTime : start-time for entry
 
-* EndTime : start-time for entry
+* EndTime : end-time for entry
 
 * Round : round number
    - always 1 for tournament-ladder
