@@ -18,6 +18,10 @@ ChangeLog
 
 2013-08-19 juga
 
+   * include/sgf_builder.php (class SgfBuilder, ~.set_file_format, ~.build_filename_sgf),
+     specs/quick_suite.txt, sgf.php, NEWS:
+   - added URL-arg 'filefmt' to specify different download-filenames
+
    * tournaments/include/tournament_ladder_props.php (TournamentLadderProps.calc_ticks_due_rematch_wait,
        ~.calc_rematch_wait_remaining_hours),
      include/globals.php (CLOCK_TOURNEY_GAME_WAIT),

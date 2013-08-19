@@ -151,6 +151,8 @@ class SgfBuilder
    public $mpg_active_user = null; // arr with Players-fields, see GamePlayers::load_users_for_mpgame()
    private $is_mpgame = false;
 
+   private $file_format = null; // null = use default, see build_filename_sgf()
+
    // load data from database
 
    private $gid;
@@ -200,6 +202,13 @@ class SgfBuilder
    public function get_sgf()
    {
       return $this->SGF;
+   }
+
+   public function set_file_format( $file_format )
+   {
+      $file_format = trim($file_format);
+      if ( (string)$file_format != '' )
+         $this->file_format = $file_format;
    }
 
    private function echo_sgf( $sgf_text, $last_prop=0 )
@@ -428,32 +437,48 @@ class SgfBuilder
 
    public function build_filename_sgf( $bulk_filename )
    {
-      if ( $bulk_filename )
-      {
-         // DGS-<gid>_YYYY-MM-DD_<rated=R|F><size>(H<handi>)K<komi>(=<result>)_<white>-<black>.sgf
-         $f_rated = ( $this->game_row['Rated'] == 'N' ) ? 'F' : 'R';
-         $f_size = $this->game_row['Size'];
-         $f_handi = ( $this->game_row['Handicap'] > 0 ) ? 'H' . $this->game_row['Handicap'] : '';
-         $f_komi = 'K' . str_replace( '.', ',', $this->game_row['Komi'] );
-         $f_result = '';
-         if ( $this->game_row['Status'] == GAME_STATUS_FINISHED )
-         {
-            $f_result = '=' . ( $this->game_row['Score'] < 0 ? 'B' : 'W' );
-            if ( abs($this->game_row['Score']) == SCORE_TIME )
-               $f_result .= 'T';
-            elseif ( abs($this->game_row['Score']) == SCORE_RESIGN )
-               $f_result .= 'R';
-            else
-               $f_result .= str_replace( '.', ',', abs($this->game_row['Score']) );
-         }
-         $filename = "DGS-{$this->gid}_" . date('Y-m-d', $this->game_row['timestamp'])
-            . "_{$f_rated}{$f_size}{$f_handi}{$f_komi}{$f_result}_{$this->game_row['Whitehandle']}-{$this->game_row['Blackhandle']}";
-      }
+      // <white_user>-<black_user>-<gid>-YYYYMMDD.sgf
+      static $FMT_STD  = '$w-$b-$g-$d1';
+      // DGS-<gid>_YYYY-MM-DD_<rated=R|F><size>(H<handi>)K<komi>(=<result>)_<white>-<black>.sgf
+      static $FMT_BULK = 'DGS-$g_$d2_$R$S$H$K$r_$w-$b';
+
+      if ( is_null($this->file_format) )
+         $file_format = ( $bulk_filename ) ? $FMT_BULK : $FMT_STD;
       else
+         $file_format = $this->file_format;
+
+      $f_rated = ( $this->game_row['Rated'] == 'N' ) ? 'F' : 'R';
+      $f_handi = ( $this->game_row['Handicap'] > 0 ) ? 'H' . $this->game_row['Handicap'] : '';
+      $f_komi = 'K' . str_replace( '.', ',', $this->game_row['Komi'] );
+      $f_result = '';
+      if ( $this->game_row['Status'] == GAME_STATUS_FINISHED )
       {
-         // <white_user>-<black_user>-<gid>-YYYYMMDD.sgf
-         $filename = "{$this->game_row['Whitehandle']}-{$this->game_row['Blackhandle']}-{$this->gid}-" . date('Ymd', $this->game_row['timestamp']);
+         $f_result = '=' . ( $this->game_row['Score'] < 0 ? 'B' : 'W' );
+         if ( abs($this->game_row['Score']) == SCORE_TIME )
+            $f_result .= 'T';
+         elseif ( abs($this->game_row['Score']) == SCORE_RESIGN )
+            $f_result .= 'R';
+         else
+            $f_result .= str_replace( '.', ',', abs($this->game_row['Score']) );
       }
+
+      // see <FILEFORMAT>-option in section "4.SGF" in 'specs/quick_suite.txt'
+      $filename = str_replace(
+         array( '$b', '$w', '$g', '$d1', '$d2', '$S', '$R', '$H', '$K', '$r', '$$' ),
+         array(
+            $this->game_row['Blackhandle'], // $b
+            $this->game_row['Whitehandle'], // $w
+            $this->gid, // $g
+            date('Ymd', $this->game_row['timestamp']),   // $d1
+            date('Y-m-d', $this->game_row['timestamp']), // $d2
+            $this->game_row['Size'], // $S
+            $f_rated,  // $R
+            $f_handi,  // $H
+            $f_komi,   // $K
+            $f_result, // $r
+            '$', // $$
+         ),
+         $file_format );
 
       return $filename;
    }//build_filename_sgf

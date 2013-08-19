@@ -1922,7 +1922,7 @@ Purpose:
 
 Request:
 
-   sgf.php?gid=<GAME_ID>&owned_comments=<CMODE>&mpg=<MPG>&quick_mode=<QMODE>&inline=<INLINE>&no_cache=<CACHE>&bulk=<BULK>
+   sgf.php?gid=<GAME_ID>&owned_comments=<CMODE>&mpg=<MPG>&quick_mode=<QMODE>&inline=<INLINE>&no_cache=<CACHE>&bulk=<BULK>&filefmt=<FILEFORMAT>
 
 Important Notes:
 
@@ -1980,6 +1980,24 @@ Options:
         Example:
             "DGS-537452_2010-04-11_R9H3K0,5=B0,5_pjo-Testter.sgf"
             "DGS-557175_2010-04-13_F9K1,5=W29,5_Stanberry-Tim1tim2tim3.sgf"
+
+   <FILEFORMAT> = normal text mixed with special placeholders defining file-format
+      - extension '.sgf' is always appended automatically
+      - defaults:
+         - with bulk=0: $w-$b-$g-$d1                  (example: "userW-userB-123-20130819.sgf")
+         - with bulk=1: DGS-$g_$d2_$R$S$H$K$r_$w-$b   (for example see <BULK>-option)
+      - special placeholders:
+         - $$ = escape special-symbol: '$'
+         - $b = black-user handle
+         - $w = white-user handle
+         - $g = game-id
+         - $S = board-size: '19'
+         - $R = rated: 'F' = free, 'R' = rated
+         - $H = handicap: '' = no handicap, 'H7'
+         - $K = komi: 'K6,5'
+         - $r = result: '=B3,5' = B won by 3.5, '=W0' = jigo, '=W3' = white won by 3
+         - $d1 = last-changed date in format YYYYMMDD: 20130819
+         - $d2 = last-changed date in format YYYY-MM-DD: 2013-08-19
 
 
 Response (SGF-properties):

@@ -32,6 +32,7 @@ require_once 'include/sgf_builder.php';
       inline=0|1           : 1 = use Content-Disposition type of "inline" to directly start assigned application
       bulk=0|1             : 1 = use special filename-pattern (omit handicap if =0 and result if unfinished game):
                              DGS-<gid>_YYYY-MM-DD_<rated=R|F><size>(H<handi>)K<komi>(=<result>)_<white>-<black>.sgf
+      filefmt=format       : special-format, see <FILEFORMAT>-option in section "4.SGF" in 'specs/quick_suite.txt'
  */
 
 $quick_mode = (boolean)@$_REQUEST['quick_mode'];
@@ -75,6 +76,7 @@ else
    $opt_mpg = (int)@$_REQUEST['mpg'];
 
    $sgf = new SgfBuilder( $gid, /*use_buf*/false );
+   $sgf->set_file_format( @$_REQUEST['filefmt'] );
    if ( $opt_mpg & 1 )
       $sgf->set_mpg_node_add_user(false);
 
