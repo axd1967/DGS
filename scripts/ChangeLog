@@ -18,6 +18,9 @@ ChangeLog
 
 2013-08-19 juga
 
+   * gameinfo.php:
+   - bugfix: adjust ladder-tournament game-role for observer and adding color for my-game
+
    * include/sgf_builder.php (class SgfBuilder, ~.set_file_format, ~.build_filename_sgf),
      specs/quick_suite.txt, sgf.php, NEWS:
    - added URL-arg 'filefmt' to specify different download-filenames

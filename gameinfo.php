@@ -465,9 +465,24 @@ function build_rating_diff( $rating_diff )
                TournamentGames::getStatusText($tgame->Status) );
 
          if ( $tourney->Type == TOURNEY_TYPE_LADDER )
+         {
+            $tg_col = '';
+            if ( $tgame->Challenger_uid == $my_id )
+               $tg_role = T_('Challenger#T_ladder');
+            elseif ( $tgame->Defender_uid == $my_id )
+               $tg_role = T_('Defender#T_ladder');
+            else
+            {
+               $tg_col = T_('Black');
+               $tg_role = ( $tgame->Challenger_uid == $black_id ) ? T_('Challenger#T_ladder') : T_('Defender#T_ladder');
+            }
+            if ( !$tg_col )
+               $tg_col = ( $my_id == $black_id ) ? T_('Black') : T_('White');
+
             $itable->add_sinfo(
-                  T_('Tournament Game Role'),
-                  ( $tgame->Challenger_uid == $my_id ? T_('Challenger#T_ladder') : T_('Defender#T_ladder') ) );
+                  ( $is_my_game ) ? T_('My Tournament Game Role') : T_('Tournament Game Role'),
+                  "$tg_col: $tg_role" );
+         }
 
          if ( $tgame->isScoreStatus(/*chk-detach*/true) && $black_id )
          {
