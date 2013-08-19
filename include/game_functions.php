@@ -2265,7 +2265,7 @@ class GameNotify
    }//build_game_ref_array
 
    /*!
-    * \brief Returns subject and text for message to players if game got deleted.
+    * \brief Returns (untranslated) subject and text for message to players if game got deleted.
     * \param $action_by ACTBY_...
     */
    public function get_text_game_deleted( $action_by )
@@ -2303,7 +2303,8 @@ class GameNotify
    }//get_text_game_deleted
 
    /*!
-    * \brief Returns subject and text (and observer-text) for message to players/observers with normal game-result.
+    * \brief Returns (untranslated) subject and text (and observer-text) for message to players/observers
+    *       with normal game-result.
     * \param $action_by ACTBY_...
     */
    public function get_text_game_result( $action_by, $user_row=null )
