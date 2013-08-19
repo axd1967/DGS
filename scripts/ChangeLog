@@ -18,6 +18,9 @@ ChangeLog
 
 2013-08-19 juga
 
+   * tournaments/include/tournament_ladder_props.php (TournamentLadderProps.fill_ladder_running_games):
+   - bugfix: set & show rematch-wait for ladder-view only for players that challenged the defender-user
+
    * tournaments/include/tournament_ladder.php (class TournamentLadder, ~.add_incoming_game,
        ~.get_incoming_games, ~.build_linked_incoming_games),
      tournaments/include/tournament_ladder_props.php (TournamentLadderProps.fill_ladder_running_games),

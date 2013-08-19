@@ -443,10 +443,12 @@ class TournamentLadderProps
 
    /*!
     * \brief Enhances ladder with additional info/data for defenders (incoming challenge-games):
-    * \note Must run after fill_ladder_challenge_range()-func
     * \param $iterator ListIterator on ordered TournamentLadder with iterator-Index on uid
     * \param $tgame_iterator ListIterator on TournamentGames
     * \return array( TG_STATUS_... => count, ... ); not all stati-keys filled
+    *
+    * \note Must run after fill_ladder_challenge_range()-func
+    * \note TournamentLadder.RematchWait is only set for games $my_id challenged!
     */
    public function fill_ladder_running_games( &$iterator, $tgame_iterator, $my_id )
    {
@@ -468,7 +470,10 @@ class TournamentLadderProps
             if ( !is_null($ch_tladder) )
             {
                if ( $tgame->Status == TG_STATUS_WAIT )
-                  $df_tladder->RematchWait = $this->calc_rematch_wait_remaining_hours( $tgame );
+               {
+                  if ( $tgame->Challenger_uid == $my_id )
+                     $df_tladder->RematchWait = $this->calc_rematch_wait_remaining_hours( $tgame );
+               }
                else
                   $df_tladder->add_incoming_game( $tgame );
             }

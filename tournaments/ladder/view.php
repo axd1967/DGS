@@ -98,7 +98,6 @@ $GLOBALS['ThePage'] = new Page('TournamentLadderView');
 
    $tl_user = $arr_tg_counts = $ltable = null;
    $cnt_players = 0;
-   $is_observer = true;
    if ( $allow_view )
    {
       if ( $admin_mode && $allow_admin && @$_REQUEST['ta_updrank'] ) // move rank (by TD)
@@ -166,7 +165,6 @@ $GLOBALS['ThePage'] = new Page('TournamentLadderView');
       $ltable->set_found_rows( $cnt_players );
       $ltable->set_rows_per_page( null ); // no navigating
       $show_rows = $ltable->compute_show_rows( $iterator->getResultRows() );
-      $is_observer = is_null($iterator->getIndexValue('uid', $my_id)); // current user playing in ladder?
 
       if ( $admin_mode )
       {
@@ -183,7 +181,6 @@ $GLOBALS['ThePage'] = new Page('TournamentLadderView');
          $arr_tg_counts = $tl_props->fill_ladder_running_games( $iterator, $tg_iterator, $my_id );
       }
    }//allow-view
-   $is_observer_only = $is_observer && !$allow_edit_tourney; // T-Dir/Owner/T-Admin can see more
 
 
    $title = sprintf( T_('Tournament-Ladder #%s'), $tid );
@@ -404,7 +401,7 @@ function build_rank_change( $tladder )
 
 function build_action_row_str( &$tladder, &$form, $is_mine, $rid, $run_games_str )
 {
-   global $base_path, $admin_mode, $allow_play, $allow_admin, $is_observer_only;
+   global $base_path, $admin_mode, $allow_play, $allow_admin;
    $tid = $tladder->tid;
 
    $row_str = '';
@@ -445,7 +442,7 @@ function build_action_row_str( &$tladder, &$form, $is_mine, $rid, $run_games_str
       {
          $row_str = span('LadderInfo', sprintf( T_('Already in %s challenges#T_ladder'), $tladder->ChallengesIn ));
       }
-      elseif ( !$is_observer_only && $tladder->RematchWait >= 0 )
+      elseif ( $tladder->RematchWait >= 0 )
       {
          if ( $tladder->RematchWait > 0 )
          {
