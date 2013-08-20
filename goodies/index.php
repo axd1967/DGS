@@ -40,7 +40,7 @@ $GLOBALS['ThePage'] = new Page('Goodies', 0, ROBOTS_NO_FOLLOW,
       while ( false !== ($file = readdir($fh)) )
       {
          if ( substr($file,-8) == '.user.js' )
-            $files[] = "$path_goodies/$file";
+            $files[] = $file;
       }
       closedir($fh);
    }
@@ -59,8 +59,9 @@ $GLOBALS['ThePage'] = new Page('Goodies', 0, ROBOTS_NO_FOLLOW,
 
    foreach ( $files as $file )
    {
-      $fh = fopen($file, 'r');
-      $txt = fread($fh, filesize($file));
+      $path = "$path_goodies/$file";
+      $fh = fopen($path, 'r');
+      $txt = fread($fh, filesize($path));
       fclose($fh);
 
       // @name        DGS Section Hide

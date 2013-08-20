@@ -16,6 +16,14 @@ Developers INFO:
 ChangeLog
 ------------------------------------------------------------------
 
+2013-08-20 jug
+
+   * goodies/DgsSgfDownloadWithoutDate.user.js:
+   - added GreaseMonkey-script from admiralnlson to download sgf without date in filename
+
+   * goodies/index.php:
+   - bugfix: link to scripts included double goodies/-path
+
 2013-08-19 axd
 
    * forum/forum_functions.php (DisplayForum.draw_post):
