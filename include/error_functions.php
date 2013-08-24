@@ -305,6 +305,7 @@ class DgsErrors
             'rating_not_rank' => 1,
             'rating_out_of_range' => 1,
             'receiver_not_found' => 1,
+            'register_miss_email' => 1,
             'registration_policy_not_checked' => 1,
             'server_down' => 1,
             'suicide' => 1,

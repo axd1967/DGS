@@ -164,7 +164,7 @@ class UserRegistration
 
    private function check_name()
    {
-      if ( strlen( $this->name ) < 1 )
+      if ( strlen($this->name) < 1 )
          $this->_error('name_not_given', "UserReg.check_name({$this->name})");
    }
 
@@ -188,7 +188,9 @@ class UserRegistration
    // returns 0=no-error, array with error-texts otherwise or error thrown (depends on die-mode)
    private function check_email()
    {
-      if ( (string)$this->email != '' )
+      if ( (string)$this->email == '' )
+         $this->_error('register_miss_email', "UserReg.check.miss_email");
+      else
       {
          $errorcode = verify_invalid_email( "UserReg.check_email({$this->uhandle})", $this->email, $this->die_on_error );
          if ( $errorcode )

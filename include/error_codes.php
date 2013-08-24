@@ -258,6 +258,9 @@ class ErrorCode
             T_("Sorry, no email has been given, so I can't send you the password.") . ' ' .
             $arr['no_email:support'];
 
+         $arr['register_miss_email'] =
+            T_("Missing email for registration.");
+
          $arr_secret['bad_mail_address'] = 1; // contains email
          $arr['bad_mail_address'] = //an email address validity function should never be treated as definitive
             T_("Sorry, the email given does not seem to be a valid address. Please, verify your spelling or try another one.");
