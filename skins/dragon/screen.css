@@ -3109,7 +3109,8 @@ body.Tournament table#pageLayout td#pageBody div.Section {
    text-align: left;
 }
 
-table tr.TourneyUser td {
+table tr.TourneyUser td,
+span.TourneyOpp {
    background: #bbddff;
 }
 span.TourneyUser {

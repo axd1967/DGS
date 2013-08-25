@@ -16,6 +16,13 @@ Developers INFO:
 ChangeLog
 ------------------------------------------------------------------
 
+2013-08-25 jug
+
+   * tournaments/include/tournament_ladder.php (TournamentLadder.build_linked_incoming_games),
+     include/globals.php (CSS_VERSION),
+     skins/dragon/screen.css, tournaments/ladder/view.php:
+   - mark own challenges on ladder-view for ladder-tournament
+
 2013-08-24 jug
 
    * include/register_functions.php (UserRegistration.check_email),

@@ -121,9 +121,10 @@ class TournamentLadder
 
    /*!
     * \brief Returns non-null array with "[#Rank]" linked to game-id for challenge-incoming running tourney-games.
+    * \param $my_id if >0, mark my challenges
     * \see fill_ladder_running_games()
     */
-   public function build_linked_incoming_games()
+   public function build_linked_incoming_games( $my_id=0 )
    {
       $arr = array();
       if ( count($this->IncomingTourneyGames) )
@@ -138,6 +139,8 @@ class TournamentLadder
             $ginfo = '[' . anchor( $base_path."game.php?gid={$tgame->gid}", $gtext ) . ']';
             if ( $is_detached )
                $ginfo = span('TGDetached', $ginfo, '%s', T_('detached#tourney') );
+            elseif ( $my_id > 0 && $tgame->Challenger_uid == $my_id )
+               $ginfo = span('TourneyOpp', $ginfo);
             $arr[] = $ginfo;
          }
       }
