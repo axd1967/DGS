@@ -52,8 +52,8 @@ class PrivateLadderTournament extends TournamentTemplateLadder
       // overwrite tournament-type-specific properties
       $this->need_admin_create_tourney = false;
       $this->limits->setLimits( TLIMITS_MAX_TP, false, 2, 100 );
-      $this->limits->setLimits( TLIMITS_TL_MAX_DF, false, 0, 8 );
-      $this->limits->setLimits( TLIMITS_TL_MAX_CH, false, 1, 8 );
+      $this->limits->setLimits( TLIMITS_TL_MAX_DF, false, 0, 5 );
+      $this->limits->setLimits( TLIMITS_TL_MAX_CH, false, 1, 5 );
    }
 
    public function createTournament()
@@ -70,7 +70,7 @@ class PrivateLadderTournament extends TournamentTemplateLadder
 
       $tl_props = new TournamentLadderProps();
       $tl_props->ChallengeRangeAbsolute = 10;
-      $tl_props->MaxChallenges = 5;
+      $tl_props->MaxChallenges = 3;
       $tl_props->MaxDefenses = 3;
 
       return $this->_createTournament( $tourney, $tprops, $trules, $tl_props );

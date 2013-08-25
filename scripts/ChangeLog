@@ -18,6 +18,14 @@ ChangeLog
 
 2013-08-25 jug
 
+   * tournaments/include/types/private_ladder.php (PrivateLadderTournament.__construct,
+       ~.createTournament),
+     tournaments/include/types/public_ladder.php (PublicLadderTournament.__construct,
+       ~.createTournament):
+   - reduced max-defenses/challenges & defaults for public and private ladder-tournaments
+     - reduced max-defenses/challenges from 8 to 5
+     - reduced default max-challenges for new ladder from 5 to 3
+
    * tournaments/include/tournament_ladder.php (TournamentLadder.build_linked_incoming_games),
      include/globals.php (CSS_VERSION),
      skins/dragon/screen.css, tournaments/ladder/view.php:
