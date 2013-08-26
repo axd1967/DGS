@@ -16,6 +16,11 @@ Developers INFO:
 ChangeLog
 ------------------------------------------------------------------
 
+2013-08-26 jug
+
+   * admin_rating.php (notify_fix_running_games):
+   - bugfix: adjusted parametrized text missing %s-argument to notify players about user-rating-change
+
 2013-08-25 jug
 
    * tournaments/include/types/private_ladder.php (PrivateLadderTournament.__construct,

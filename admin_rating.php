@@ -545,7 +545,7 @@ function notify_fix_running_games( $uid, $handle, $changes, $old_rating, $new_ra
       $bulletin = new Bulletin( 0, $player_row['ID'], null, BULLETIN_CAT_ADMIN_MSG, BULLETIN_STATUS_NEW,
             BULLETIN_TRG_TD, BULLETIN_FLAG_ADMIN_CREATED, $NOW, $NOW + 30*SECS_PER_DAY, $tid, /*gid*/0,
             0, 'created automatically by admin_rating-script',
-            sprintf( T_('Rating change of opponent [handle] in your running games and invitations'), $handle ),
+            sprintf( T_('Rating change of opponent [%s] in your running games and invitations'), $handle ),
             sprintf( T_('Hello,
 
 the rating of the player <user %s> has been changed from %s to %s.
@@ -570,7 +570,7 @@ DGS-Admin'), $uid, $old_rating_str, $new_rating_str, $tid )
    $bulletin = new Bulletin( 0, $player_row['ID'], null, BULLETIN_CAT_ADMIN_MSG, BULLETIN_STATUS_NEW,
          BULLETIN_TRG_USERLIST, BULLETIN_FLAG_ADMIN_CREATED, $NOW, $NOW + 30*SECS_PER_DAY, /*tid*/0, /*gid*/0,
          0, 'created automatically by admin_rating-script',
-         sprintf( T_('Rating change of opponent [handle] in your running games and invitations'), $handle ),
+         sprintf( T_('Rating change of opponent [%s] in your running games and invitations'), $handle ),
          sprintf( T_('Hello,
 
 the rating of your opponent <user %s> has been changed from %s to %s.  All corresponding RATED non-tournament games have been changed to UNRATED to prevent your and your opponents rating to jump too much when the games end.  The start rating for those games have been recalculated for all running normal and multi-player games.  Invitations are not changed, so ensure you check invitations with that player for changed game settings that can be caused by the rating change.
