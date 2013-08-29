@@ -18,6 +18,12 @@ ChangeLog
 
 2013-08-29 jug
 
+   * include/game_functions.php (class GameSetupChecker, ~.check_game_rated, ~.check_komi,
+       ~.check_adjust_komi, ~.check_min_rated_games),
+     tournaments/edit_rules.php (parse_edit_form):
+   - bugfix: no user-rating-check for editing tournament-rules as tournament-director/owner/admin
+     could have no rating
+
    * tournaments/include/tournament_participant.php (TournamentParticipant.check_rated_tournament_participants):
    - bugfix: add no-participant-check in safety-check for editing tournament-rules
 

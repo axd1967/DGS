@@ -170,7 +170,7 @@ function parse_edit_form( &$trule )
 
    if ( $is_posted )
    {
-      $gsc = GameSetupChecker::check_fields( GSETVIEW_STANDARD );
+      $gsc = GameSetupChecker::check_fields( GSC_VIEW_TRULES );
       if ( $gsc->has_errors() )
          $errors = array_merge( $errors, $gsc->get_errors() );
    }

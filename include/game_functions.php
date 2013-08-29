@@ -3056,6 +3056,7 @@ class GameSetup
 
 
 define('GSC_VIEW_INVITE', -1); // invite/dispute
+define('GSC_VIEW_TRULES', -2); // tournament-rules (behaves similar to GSETVIEW_STANDARD)
 
 /*!
  * \class GameSetupChecker
@@ -3064,7 +3065,7 @@ define('GSC_VIEW_INVITE', -1); // invite/dispute
  */
 class GameSetupChecker
 {
-   private $view; //GSETVIEW_... for new-game, GSC_VIEW_INVITE for invite/dispute
+   private $view; //GSETVIEW_... for new-game, GSC_VIEW_INVITE for invite/dispute, GSC_VIEW_TRULES for tournament-rules
    public $errors = array();
    private $error_fields = array(); // field => 1
 
@@ -3105,7 +3106,7 @@ class GameSetupChecker
 
    private function check_game_rated()
    {
-      if ( $this->view == GSETVIEW_MPGAME )
+      if ( $this->view == GSETVIEW_MPGAME || $this->view == GSC_VIEW_TRULES )
          return;
 
       $rated = ( @$_REQUEST['rated'] == 'Y' );
@@ -3144,8 +3145,8 @@ class GameSetupChecker
 
    private function check_komi()
    {
-      // komi-check only for: invite, std new-game
-      if ( $this->view != GSC_VIEW_INVITE && $this->view != GSETVIEW_STANDARD )
+      // komi-check only for: invite, std new-game (& tournament-rules)
+      if ( $this->view != GSC_VIEW_INVITE && $this->view != GSETVIEW_STANDARD && $this->view != GSC_VIEW_TRULES )
          return;
 
       $has_err = false;
@@ -3231,8 +3232,8 @@ class GameSetupChecker
 
    private function check_adjust_komi()
    {
-      // komi-check only for: invite, std new-game
-      if ( $this->view != GSC_VIEW_INVITE && $this->view != GSETVIEW_STANDARD )
+      // komi-check only for: invite, std new-game (incl. tournament-rules)
+      if ( $this->view != GSC_VIEW_INVITE && $this->view != GSETVIEW_STANDARD && $this->view != GSC_VIEW_TRULES )
          return;
 
       $has_err = false;
@@ -3251,8 +3252,8 @@ class GameSetupChecker
 
    private function check_min_rated_games()
    {
-      // min-rated-games only for: std/fair-komi new-game
-      if ( $this->view != GSETVIEW_STANDARD && $this->view != GSETVIEW_FAIRKOMI )
+      // min-rated-games only for: std/fair-komi new-game (incl. tournament-rules)
+      if ( $this->view != GSETVIEW_STANDARD && $this->view != GSC_VIEW_TRULES && $this->view != GSETVIEW_FAIRKOMI )
          return;
 
       $min_rgames = @$_REQUEST['min_rated_games'];
