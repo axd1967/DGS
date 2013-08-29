@@ -16,6 +16,11 @@ Developers INFO:
 ChangeLog
 ------------------------------------------------------------------
 
+2013-08-29 jug
+
+   * tournaments/include/tournament_participant.php (TournamentParticipant.check_rated_tournament_participants):
+   - bugfix: add no-participant-check in safety-check for editing tournament-rules
+
 2013-08-26 jug
 
    * admin_rating.php (notify_fix_running_games):

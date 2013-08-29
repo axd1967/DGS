@@ -582,9 +582,14 @@ class TournamentParticipant
       return $arr_TPs;
    }//load_registered_users_in_seedorder
 
-   /*! \brief Returns false, if there is at least one TP, that does not have a user-rating. */
+   /*! \brief Returns false, if there is no TP at all or at least one TP, that does not have a user-rating. */
    public static function check_rated_tournament_participants( $tid )
    {
+      $row = mysql_single_fetch( "TournamentParticipant:check_rated_tournament_participants.exist_tp($tid)",
+         "SELECT COUNT(*) AS X_Count FROM TournamentParticipant WHERE tid=$tid" );
+      if ( (int)@$row['X_Count'] == 0 )
+         return false;
+
       $row = mysql_single_fetch( "TournamentParticipant:check_rated_tournament_participants.find_unrated($tid)",
          "SELECT TP.uid FROM TournamentParticipant AS TP INNER JOIN Players AS P ON P.ID=TP.uid " .
          "WHERE TP.tid=$tid AND P.RatingStatus='".RATING_NONE."' LIMIT 1" );
