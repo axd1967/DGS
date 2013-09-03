@@ -16,6 +16,11 @@ Developers INFO:
 ChangeLog
 ------------------------------------------------------------------
 
+2013-09-03 jug
+
+   * include/std_functions.php (send_email):
+   - error_log() error on sending mail
+
 2013-08-29 jug
 
    * include/game_functions.php (class GameSetupChecker, ~.check_game_rated, ~.check_komi,
