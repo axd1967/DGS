@@ -1,3 +1,29 @@
+UTF-8 Links & Stuff to know about UTF-8 with PHP:
+=================================================
+
+- short overview of problems: https://phpbestpractices.org/#utf-8
+
+- MUST-READ: http://www.phpwact.org/php/i18n/charsets
+
+- MUST-READ: Handling UTF-8 in PHP: http://www.phpwact.org/php/i18n/utf-8
+
+- Possible migration-strategy using mbstring:
+  http://blog.loftdigital.com/blog/php-utf-8-cheatsheet
+
+- Providing replacements of PHPs questionable functions to support UTF-8, independent from mbstring-extension:
+  http://sourceforge.net/projects/phputf8/
+
+- mbstring-extension: http://de2.php.net/manual/en/book.mbstring.php
+
+- Examples of Unicode / UTF-8 incompatibilities and behavior in PHP:
+  http://www.php.net/manual/en/reference.pcre.pattern.modifiers.php#54805
+
+- Migrating to UTF-8 (web-application & database):
+  http://htmlpurifier.org/docs/enduser-utf8.html
+
+
+##############################################################################3
+
 Hi Rod,
 
 rod.ival@libertysurf.fr wrote:
@@ -7,19 +33,19 @@ rod.ival@libertysurf.fr wrote:
 >>>>>>>> I think, the basic advice is to be careful on
 >>>
 >>>>>> charset-conversions.
->>>>>> 
+>>>>>>
 >>>>>> That's why I want to start in a good way as soon as possible.
 >>
 >>>>
 >>>> Experience taught me, that it's often better to make that
 >>>> a separate milestone, so it's the only change in a "release".
->>>> 
+>>>>
 >>>> If we mix it together with other changes and something goes
 >>>> wrong, it can be very hard to track the problem down.
 >>>> Especially with such sensitive change of charsets, which we
 >>>> don't know what side-effects are going to show up.
 >
->> 
+>>
 >> I would like at least to specify in the init.mysql that the
 >> Handle columns MUST be case insensitive (i.e.
 >> latin1_general_ci)
@@ -86,13 +112,13 @@ not answer to that yet).
 >>>> Of what server you are speaking of ?
 >>>> a) SF-devel-server (mysql 4.1)
 >>>> b) live-server (mysql 4.0)
->>>> 
+>>>>
 >>>> Maybe you want both to be "cleaned", but those are different
 >>>> mysql-versions, that have a totally different handling of
 >>>> charsets. So we may even need to handle them completly
 >
 >> separate.
->> 
+>>
 >> Take the less compatible. Make all others like it.
 >> So all other severs to latin1_general_ci...
 >> I don't want to have some disturbing ???swedish??? or
@@ -153,7 +179,7 @@ too ?
 >>>>>> - everything in a basic way, i.e. pure latin1 + english +
 >>>>>> case insensitive
 >>
->>>> 
+>>>>
 >>>> in general a good idea, but i wouldn't do it now (see cause
 >>>> above). Though it may be better to wait for mysql 4.1, then
 >>>> go to utf8 directly. ... As i said, would need intensive
@@ -162,7 +188,7 @@ too ?
 >
 >>>> not only the migration-process itself, but also checking
 >>>> out what can be done and how it can be done.
->>>> 
+>>>>
 >>>> I'm not sure, how you want to do that to introduce
 >
 >> latin1+en+...
@@ -171,7 +197,7 @@ too ?
 >>>> that to latin1, it's possible to loose data, because the
 >>>> binary may contain non-latin-chars.
 >
->> 
+>>
 >> But actually, with a part of the column in latin1, other in
 >> utf8, half in swedish, the remainder in english, we are
 >> DOING what you are afraid of each time we copy a column in
@@ -214,7 +240,7 @@ mail.
 >>>>
 >>
 >>>>>> - then adjust the case sensitivity when needed
->>>>>> 
+>>>>>>
 >>>>>> I'm intersted by the Translations' ones. Maybe, with the
 >>>>>> german and swedish, we may have enought tests. Else I may
 >>>>>> ask for vietnamese friend... from time to time. I may also
@@ -350,7 +376,7 @@ of the
 >> sensitive. Adding a charset and/or collation is not possible
 >> for a BLOB (or has no effect as long as it is a binary).
 >> More Info: http://dev.mysql.com/doc/refman/4.1/en/blob.html
->> 
+>>
 >> The only chance to make it case-insensitive is to alter it
 >> into a TEXT-datatype, which has a charset and collation.
 
@@ -381,7 +407,7 @@ charset
 
 >> is used for a TEXT-column, the sorting and comparison is using
 >> the servers character set.
->> 
+>>
 >> I'm afraid that before making a change to the
 
 translation-texts
@@ -389,18 +415,18 @@ translation-texts
 >> we need mysql 4.1 on the live-server. Some time ago i asked
 >> Erik about it (he wanted to ask his provider, though I got
 >> not answer to that yet).
->> 
+>>
 >
 >>>>>> Of what server you are speaking of ?
 >>>>>> a) SF-devel-server (mysql 4.1)
 >>>>>> b) live-server (mysql 4.0)
->>>>>> 
+>>>>>>
 >>>>>> Maybe you want both to be "cleaned", but those are different
 >>>>>> mysql-versions, that have a totally different handling of
 >>>>>> charsets. So we may even need to handle them completly
 >>
 >>>> separate.
->>>> 
+>>>>
 >>>> Take the less compatible. Make all others like it.
 >>>> So all other severs to latin1_general_ci...
 >>>> I don't want to have some disturbing ???swedish??? or
@@ -419,7 +445,7 @@ Is that a general fact or a particularity of our database?
 >> if you are unsatisfied with the ordering of the strings.
 >> Do you know the exact difference of latin1_general_ci
 >> and the latin1_swedish_ci ? I guess, it's very small.
->> 
+>>
 >> To test it, you may create a copy of a table using another
 >> collation and see, if the order or comparison changed
 >> and what you prefer. It might not be clear which collation
@@ -427,11 +453,11 @@ Is that a general fact or a particularity of our database?
 >> can be helpful to perform some comparisons with representative
 >> data values to make sure that a given collation sorts values
 >> the way you expect.
->> 
+>>
 >> About some mixing of latin1-charsets on the live-server,
 >> I can't tell, because I have no access to it.
->> 
->> 
+>>
+>>
 >> However having some utf8-charset might be disturbing when
 >> you only want one charset. I assume you speak about the
 >> Sourceforge devel-server (mysql 4.1). That's the only one
@@ -443,7 +469,7 @@ Yes
 
 >> The database default is utf8. That can be altered of course.
 >> It has only effect on new tables.
->> 
+>>
 >> The only other tables using a utf8-charset in some way are:
 >> - Adminlog: might be converted from utf8 to latin1,
 >>    because the column IP is the only varchar-field,
@@ -489,7 +515,7 @@ the servers.
 >>>>>>>> - everything in a basic way, i.e. pure latin1 + english +
 >>>>>>>> case insensitive
 >>>
->>>>>> 
+>>>>>>
 >>>>>> in general a good idea, but i wouldn't do it now (see cause
 >>>>>> above). Though it may be better to wait for mysql 4.1, then
 >>>>>> go to utf8 directly. ... As i said, would need intensive
@@ -498,7 +524,7 @@ the servers.
 >>
 >>>>>> not only the migration-process itself, but also checking
 >>>>>> out what can be done and how it can be done.
->>>>>> 
+>>>>>>
 >>>>>> I'm not sure, how you want to do that to introduce
 >>
 >>>> latin1+en+...
@@ -507,7 +533,7 @@ the servers.
 >>>>>> that to latin1, it's possible to loose data, because the
 >>>>>> binary may contain non-latin-chars.
 >>
->>>> 
+>>>>
 >>>> But actually, with a part of the column in latin1, other in
 >>>> utf8, half in swedish, the remainder in english, we are
 >>>> DOING what you are afraid of each time we copy a column in
@@ -520,12 +546,12 @@ the servers.
 >> in the database.
 >> Whatever, a swedish text and a english text can both be
 >> stored in either a column that uses utf8 or latin1 charset.
->> 
+>>
 >> What causes a problem, would be to copy data from a utf8-
 >> column into a latin1 column, when it contains non-latin1-
 >> encodings. Then we loose data. But as long as we don't
 >> do this, this is no problem.
->> 
+>>
 >> It might be justified to have different charsets on
 >> different columns as i've explained before in an earlier
 >> mail.
@@ -558,7 +584,7 @@ translations,
 >>>>>>
 >>>
 >>>>>>>> - then adjust the case sensitivity when needed
->>>>>>>> 
+>>>>>>>>
 >>>>>>>> I'm intersted by the Translations' ones. Maybe, with the
 >>>>>>>> german and swedish, we may have enought tests. Else I may
 >>>>>>>> ask for vietnamese friend... from time to time. I may also
@@ -591,7 +617,7 @@ http://www.dragongoserver.net/forum/read.php?forum=7&thread=14641
 
 >> He proposes to dump the database, convert it to UTF8 and the
 >> re-import it. That is of course not so easy, as he proposes :(
->> 
+>>
 >> That is only possible, if the server is supporting
 >> utf8, if we use the right charsets on the tables and have
 >> converted all data. But then we done it already ;)
