@@ -18,6 +18,12 @@ ChangeLog
 
 2013-09-08 jug
 
+   * include/error_codes.php (ErrorCode.echo_error_text, ~.get_error_text),
+     do_registration_blocked.php,
+     error.php (handle_error):
+   - security-fix: avoid XSS on error-page passing in malicious JavaScript via URL-arguments
+     error-code or error-log-id
+
    * scripts/player_consistency.php (cnt_diff):
    - bugfix: count MPGs for player-consistency script calculating Players.Running/Finished
 

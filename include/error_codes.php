@@ -37,7 +37,7 @@ class ErrorCode
    public static function echo_error_text( $error_code, $error_log_id )
    {
       if ( $error_log_id && self::is_shown_error_log_id( $error_code ) )
-         echo span('ErrorMsg', " [ERRLOG $error_log_id] ($error_code): ");
+         echo span('ErrorMsg', sprintf(' [ERRLOG %s] (%s): ', $error_log_id, @htmlspecialchars($error_code) ));
       echo self::get_error_text( $error_code );
    }
 
@@ -46,8 +46,8 @@ class ErrorCode
       self::init();
       if ( isset(self::$ARR_ERRORS['TEXT'][$error_code]) )
          return self::$ARR_ERRORS['TEXT'][$error_code];
-      else
-         return " ($error_code) " . @self::$ARR_ERRORS['TEXT']['internal_error']; // default-error
+      else // default-error
+         return sprintf(' (%s) %s', @htmlspecialchars($error_code), @self::$ARR_ERRORS['TEXT']['internal_error'] );
    }
 
    // \internal

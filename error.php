@@ -51,7 +51,7 @@ require_once 'include/error_codes.php';
    }
 
    $err = get_request_arg('err');
-   $errorlog_id = get_request_arg('eid');
+   $errorlog_id = (int)get_request_arg('eid');
 
    // written if set, can be resetted to NULL on certain errors to avoid publishing sensitive data
    $debugmsg = get_request_arg('debugmsg');
@@ -186,7 +186,7 @@ function handle_error( $error_code, $errorlog_id, $userid, $is_admin, $block_rea
          break;
 
       case('ip_blocked_register'):
-         jump_to("do_registration_blocked.php?errlog_id=$errorlog_id");
+         jump_to("do_registration_blocked.php?errlog_id=".urlencode($errorlog_id));
          break;
    } //end-switch
 

@@ -30,7 +30,7 @@ require_once 'include/register_functions.php';
    if ( !is_blocked_ip() )
       error('not_logged_in', 'do_registration_blocked'); // block spammer, call only if IP-blocked
 
-   $errorlog_id = get_request_arg('errlog_id');
+   $errorlog_id = (int)get_request_arg('errlog_id');
 
    $reg = new UserRegistration( /*die_on_error*/false );
    $errors = 0;
