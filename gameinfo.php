@@ -562,8 +562,7 @@ function build_rating_diff( $rating_diff )
    GameRematch::add_rematch_links( $menu_array, $gid, $game_status, $grow['GameType'], $grow['tid'] );
    if ( ALLOW_TOURNAMENTS && $tid && !is_null($tourney) )
    {
-      if ( $tourney->Type == TOURNEY_TYPE_LADDER )
-         $menu_array[T_('View Ladder')] = "tournaments/ladder/view.php?tid=$tid";
+      $tourney->build_data_link( $menu_array );
       if ( TournamentHelper::allow_edit_tournaments($tourney, $my_id, TD_FLAG_GAME_END) )
          $menu_array[T_('Admin tournament game')] =
             array( 'url' => "tournaments/game_admin.php?tid=$tid".URI_AMP."gid=$gid", 'class' => 'TAdmin' );

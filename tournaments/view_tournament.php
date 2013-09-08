@@ -151,15 +151,7 @@ $GLOBALS['ThePage'] = new Page('Tournament');
    // ------------- Section Menu
 
    $sectmenu = array();
-   if ( $tourney->Type == TOURNEY_TYPE_LADDER )
-   {
-      if ( $tourney->Status == TOURNEY_STATUS_PLAY || $tourney->Status == TOURNEY_STATUS_CLOSED )
-         $sectmenu[T_('View Ladder')] = "tournaments/ladder/view.php?tid=$tid";
-   }
-   elseif ( $tourney->Type == TOURNEY_TYPE_ROUND_ROBIN )
-   {
-      $sectmenu[T_('View Pools')] = "tournaments/roundrobin/view_pools.php?tid=$tid";
-   }
+   $tourney->build_data_link( $sectmenu );
    if ( $reg_user_str )
       $sectmenu[$reg_user_str] = "tournaments/register.php?tid=$tid"; # for user
    $sectmenu[T_('Tournament directors')] = $page_tdirs;
@@ -278,15 +270,7 @@ $GLOBALS['ThePage'] = new Page('Tournament');
    // ------------- Section Menu
 
    $sectmenu = array();
-   if ( $tourney->Type == TOURNEY_TYPE_LADDER )
-   {
-      if ( $tourney->Status == TOURNEY_STATUS_PLAY || $tourney->Status == TOURNEY_STATUS_CLOSED )
-         $sectmenu[T_('View Ladder')] = "tournaments/ladder/view.php?tid=$tid";
-   }
-   elseif ( $tourney->Type == TOURNEY_TYPE_ROUND_ROBIN )
-   {
-      $sectmenu[T_('View Pools')] = "tournaments/roundrobin/view_pools.php?tid=$tid";
-   }
+   $tourney->build_data_link( $sectmenu );
 
    $sectmenu[T_('My running games')] = "show_games.php?tid=$tid".URI_AMP."uid=$my_id";
    $sectmenu[T_('All running games')] = "show_games.php?tid=$tid".URI_AMP."uid=all";

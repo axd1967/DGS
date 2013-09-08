@@ -389,6 +389,37 @@ class Tournament
    }//build_role_info
 
    /*!
+    * \brief Returns link to tournament-specific data-page.
+    * \param $menu set $menu[title] = $link if result-array not empty
+    * \return arr( title, link ); items can be empty (=array(0,0)), if status allows no view of tournament-data
+    */
+   public function build_data_link( &$menu )
+   {
+      $title = $link = 0;
+      if ( $this->Type == TOURNEY_TYPE_LADDER )
+      {
+         if ( $this->Status == TOURNEY_STATUS_PLAY || $this->Status == TOURNEY_STATUS_CLOSED )
+         {
+            $title = T_('View Ladder');
+            $link = "tournaments/ladder/view.php?tid={$this->ID}";
+         }
+      }
+      elseif ( $this->Type == TOURNEY_TYPE_ROUND_ROBIN )
+      {
+         if ( $this->Status == TOURNEY_STATUS_PLAY || $this->Status == TOURNEY_STATUS_CLOSED )
+         {
+            $title = T_('View Pools');
+            $link = "tournaments/roundrobin/view_pools.php?tid={$this->ID}";
+         }
+      }
+
+      if ( is_array($menu) )
+         $menu[$title] = $link;
+
+      return array( $title, $link );
+   }//build_data_link
+
+   /*!
     * \brief Checks tournament-locks and returns non-null list of errors and warnings, that do not allow registration.
     * \param $check_type TCHKTYPE_TD|USER_NEW|USER_EDIT
     */

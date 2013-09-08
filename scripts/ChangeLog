@@ -16,6 +16,12 @@ Developers INFO:
 ChangeLog
 ------------------------------------------------------------------
 
+2013-09-09 jug
+
+   * tournaments/include/tournament.php (Tournament.build_data_link),
+     tournaments/list_tournaments.php, tournaments/view_tournament.php, gameinfo.php:
+   - added link to specific tournament-data-page (view-ladder or view-pools) on tournament-list page
+
 2013-09-08 jug
 
    * include/sgf_builder.php (class SgfBuilder, ~.load_game_info, ~.build_sgf_start),

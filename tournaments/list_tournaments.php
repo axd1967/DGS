@@ -241,7 +241,14 @@ $GLOBALS['ThePage'] = new Page('TournamentList');
       if ( $ttable->Is_Column_Displayed[ 2] )
          $row_str[ 2] = Tournament::getScopeText( $tourney->Scope );
       if ( $ttable->Is_Column_Displayed[ 3] )
-         $row_str[ 3] = Tournament::getTypeText( $tourney->Type );
+      {
+         list( $title, $link ) = $tourney->build_data_link( $tmp = array() );
+         $type_str = Tournament::getTypeText( $tourney->Type );
+         if ( $title && $link )
+            $type_str .= MED_SPACING . anchor( $base_path.$link,
+               image($base_path.'images/info.gif', $title, null, 'class=InTextImage') );
+         $row_str[ 3] = $type_str;
+      }
       if ( $ttable->Is_Column_Displayed[ 4] )
          $row_str[ 4] = Tournament::getStatusText( $tourney->Status );
       if ( $ttable->Is_Column_Displayed[ 5] )
@@ -264,7 +271,7 @@ $GLOBALS['ThePage'] = new Page('TournamentList');
          $row_str[11] =
             anchor( $base_path."tournaments/register.php?tid=$ID",
                image( $base_path.'images/info.gif',
-                  sprintf( T_('Registration for tournament %s'), $ID ), null, 'class=InTextImage'))
+                  sprintf( T_('My registration for tournament %s'), $ID ), null, 'class=InTextImage'))
             . ' '
             . ( $orow['TP_Status']
                   ? TournamentParticipant::getStatusText($orow['TP_Status'])
