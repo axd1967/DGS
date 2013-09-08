@@ -18,6 +18,11 @@ ChangeLog
 
 2013-09-08 jug
 
+   * tournaments/include/tournament_ladder.php (TournamentLadder.load_cache_tournament_ladder),
+     tournaments/ladder/view.php, tournaments/view_tournament.php:
+   - on ladder-view show table-icon linked to finished tournament-games for each user
+     if there are finished games
+
    * tournaments/ladder/view.php:
    - free db-connection as early as possible when before sending HTML for the full ladder
      in hope to reduce observed too-many-connections errors on live-server

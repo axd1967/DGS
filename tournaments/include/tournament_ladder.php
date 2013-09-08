@@ -1273,14 +1273,15 @@ class TournamentLadder
    }
 
    /*! \brief Loads and caches TournamentLadder-entries for given tournament-id. */
-   public static function load_cache_tournament_ladder( $dbgmsg, $tid, $with_tp_rating, $limit=0, $with_index=false )
+   public static function load_cache_tournament_ladder( $dbgmsg, $tid, $with_tp_rating, $need_tp_finished, $limit=0,
+         $with_index=false )
    {
-      $with_tp_rating = ( $with_tp_rating ) ? 1 : 0;
+      $with_tp = ( $with_tp_rating || $need_tp_finished ) ? 1 : 0;
 
-      $dbgmsg .= ".TL:load_cache_tournament_ladder($tid,$with_tp_rating,$limit)";
+      $dbgmsg .= ".TL:load_cache_tournament_ladder($tid,$with_tp,$limit)";
       $group_id = "TLadder.$tid";
-      $allkey = "TLadder.$tid.$with_tp_rating.L0";
-      $key = "TLadder.$tid.$with_tp_rating.L$limit";
+      $allkey = "TLadder.$tid.$with_tp.L0";
+      $key = "TLadder.$tid.$with_tp.L$limit";
 
       $tl_iterator = new ListIterator( $dbgmsg, null, 'ORDER BY Rank ASC', ($limit > 0 ? "LIMIT $limit" : '') );
 
@@ -1296,9 +1297,9 @@ class TournamentLadder
                             'UNIX_TIMESTAMP(TLP.Lastaccess) AS TLP_X_Lastaccess',
                SQLP_FROM,   'INNER JOIN Players AS TLP ON TLP.ID=TL.uid'
             ));
-         if ( $with_tp_rating )
+         if ( $with_tp )
             $tl_iterator->addQuerySQLMerge( new QuerySQL(
-                  SQLP_FIELDS, 'TP.Rating AS TP_Rating',
+                  SQLP_FIELDS, 'TP.Rating AS TP_Rating', 'TP.Finished AS TP_Finished',
                   SQLP_FROM,   'INNER JOIN TournamentParticipant AS TP ON TP.tid=TL.tid AND TP.ID=TL.rid'
                ));
          if ( $with_index )

@@ -147,7 +147,7 @@ $GLOBALS['ThePage'] = new Page('TournamentLadderView');
       if ( $need_tp_rating )
          $ltable->add_tablehead(14, T_('Tournament Rating#header'), 'Rating', 0 );
       $ltable->add_tablehead( 7, T_('Actions#header'), '', TABLE_NO_HIDE );
-      $ltable->add_tablehead(12, new TableHead( T_('Running games'), 'images/table.gif'), 'Image', 0 );
+      $ltable->add_tablehead(12, new TableHead( T_('Running and finished tournament games'), 'images/table.gif'), 'Image', 0 );
       $ltable->add_tablehead( 8, T_('Challenges#header'), '', TABLE_NO_HIDE );
       $ltable->add_tablehead( 9, T_('Rank Changed#T_ladder'), 'Date', 0 );
       $ltable->add_tablehead(10, T_('Rank Kept#header'), '', 0 );
@@ -160,7 +160,8 @@ $GLOBALS['ThePage'] = new Page('TournamentLadderView');
       $ltable->set_default_sort( 1 );
       //$ltable->make_sort_images(); //obvious, so left away as it also take a bit of unneccessary table-width
 
-      $iterator = TournamentLadder::load_cache_tournament_ladder( 'Tournament.ladder_view', $tid, $need_tp_rating, 0, /*idx*/true );
+      $iterator = TournamentLadder::load_cache_tournament_ladder( 'Tournament.ladder_view', $tid, $need_tp_rating,
+         /*need-TP.Fin*/true, 0, /*idx*/true );
       $cnt_players = $iterator->getItemCount();
       $ltable->set_found_rows( $cnt_players );
       $ltable->set_rows_per_page( null ); // no navigating
@@ -203,15 +204,23 @@ $GLOBALS['ThePage'] = new Page('TournamentLadderView');
          $user = User::new_from_row($orow, 'TLP_');
          $is_mine = ( $my_id == $uid );
 
-         $run_games_str = '';
+         $run_games_str = $fin_games_str = '';
          if ( $is_mine || $ltable->Is_Column_Displayed[12] )
          {
             if ( $tladder->ChallengesIn + $tladder->ChallengesOut > 0 )
             {
                $run_games_str = echo_image_table( $base_path."show_games.php?tid=$tid".URI_AMP."uid=$uid",
                   ( ($is_mine)
-                        ? T_('My running games')
-                        : sprintf( T_('Running games of user [%s]'), $user->Handle ) ),
+                        ? T_('My running tournament games')
+                        : sprintf( T_('Running tournament games of user [%s]'), $user->Handle ) ),
+                  false );
+            }
+            if ( @$orow['TP_Finished'] > 0 )
+            {
+               $fin_games_str = echo_image_table( $base_path."show_games.php?tid=$tid".URI_AMP."uid=$uid".URI_AMP."finished=1",
+                  ( ($is_mine)
+                        ? T_('My finished tournament games')
+                        : sprintf( T_('Finished tournament games of user [%s]'), $user->Handle ) ),
                   false );
             }
          }
@@ -242,7 +251,7 @@ $GLOBALS['ThePage'] = new Page('TournamentLadderView');
          if ( $ltable->Is_Column_Displayed[11] )
             $row_str[11] = ($tladder->Created > 0) ? date(DATE_FMT2, $tladder->Created) : '';
          if ( $ltable->Is_Column_Displayed[12] )
-            $row_str[12] = $run_games_str;
+            $row_str[12] = $run_games_str . $fin_games_str;
          if ( $ltable->Is_Column_Displayed[13] )
             $row_str[13] = TimeFormat::echo_time_diff( $GLOBALS['NOW'], $user->Lastaccess, 24, TIMEFMT_SHORT|TIMEFMT_ZERO );
          if ( $need_tp_rating && @$ltable->Is_Column_Displayed[14] )
