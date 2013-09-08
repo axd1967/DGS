@@ -25,6 +25,7 @@ require_once 'include/rating.php';
 require_once 'include/game_functions.php';
 require_once 'include/board.php';
 require_once 'include/shape_control.php';
+require_once 'tournaments/include/tournament_cache.php';
 
 
 /* SGF specs (version 4):
@@ -54,7 +55,7 @@ BT    Black team name      game-info   string
 WT    White team name      game-info   string
 CP    copyright            game-info   string
 DT    date of game         game-info   list of string : "YYYY-MM-DD", abbreviations allowed
-EV    event name           game-info   string, e.g. tournament-name without round-info
+EV    event name           game-info   string, e.g. tournament-name and/or link (without round-info)
 GN    game name            game-info   string : can indicate filename
 GC    general comment      game-info   string
 HA    handicap             game-info   integer : >=2
@@ -65,8 +66,8 @@ PB    Black player name    game-info   string
 PW    White player name    game-info   string
 PC    place                game-info   string
 RE    result               game-info   B|W+real, W+0.5, 0=jigo, B+R|Resign, W+T|Time, B+F|Forfeit, ?, Void=no-result/suspended
-RO    round                game-info   string : "round (type)"
-RU    rules                game-info   string : AGA,GOE,Japanese,NZ
+RO    round                game-info   string : "Round N of M"
+RU    rules                game-info   string : AGA,GOE,Japanese,NZ,Chinese
 SO    source               game-info   string
 TM    main-time            game-info   real : >0, seconds
 US    user/program of SGF  game-info   string
@@ -160,6 +161,7 @@ class SgfBuilder
    private $moves_iterator;
    private $player_notes = '';
    private $shape_info = ''; // for shape-game
+   private $tourney = null; // Tournament-object
 
    // runtime vars
 
@@ -352,6 +354,10 @@ class SgfBuilder
             $this->game_row['ShapeID'], $this->game_row['Size'], $shape_snapshot, $b_first, /*incl-img*/false );
       }
 
+      $tid = (int)$grow['tid'];
+      if ( $tid > 0 )
+         $this->tourney = TournamentCache::load_cache_tournament( "SgfBuilder.load_game_info({$this->gid})", $tid, /*chk*/false );
+
       return $this->game_row;
    }//load_game_info
 
@@ -497,6 +503,19 @@ class SgfBuilder
    {
       extract($this->game_row);
 
+      if ( $this->tourney )
+      {
+         $tourney_info = self::sgf_simpletext(
+            sprintf('(%s %s) Tournament #%s: %s',
+               Tournament::getScopeText($this->tourney->Scope), Tournament::getTypeText($this->tourney->Type),
+               $this->tourney->ID, $this->tourney->Title ));
+         $tourney_str = "\nEV[$tourney_info]"
+            . sprintf("\nRO[Round %s of %s]", $this->tourney->CurrentRound, $this->tourney->Rounds );
+         $tourney_info .= sprintf('; with %s participants', $this->tourney->RegisteredTP );
+      }
+      else
+         $tourney_str = $tourney_info = '';
+
       $this->echo_sgf(
          "(\n;FF[{$this->sgf_version}]GM[1]"
          . ( $this->charset ? "CA[{$this->charset}]" : '' )
@@ -506,6 +525,7 @@ class SgfBuilder
          . "\nDT[" . date( 'Y-m-d', $startstamp ) . ',' . date( 'Y-m-d', $timestamp ) . "]"
          . "\nGN[" . self::sgf_simpletext($filename) . "]"
          . "\nSO[".HOSTBASE."game.php?gid={$this->gid}]"
+         . $tourney_str
          . "\nPB[" . self::sgf_simpletext($this->buildPlayerName(BLACK, false)) . "]"
          . "\nPW[" . self::sgf_simpletext($this->buildPlayerName(WHITE, false)) . "]"
          );
@@ -552,6 +572,7 @@ class SgfBuilder
       $w_rating_start = ( is_valid_rating($White_Start_Rating) ) ? self::sgf_echo_rating($White_Start_Rating,true) : '';
       $general_comment = "Game ID: {$this->gid}"
          . "\nGame Type: $GameType ($game_players)"
+         . ( $tourney_info ? "\n$tourney_info" : '' )
          . "\nRated: ". ( $Rated=='N' ? 'N' : 'Y' )
          . ( ($X_GameFlags & GAMEFLAGS_ADMIN_RESULT) ? "\nNote: game-result set by admin" : '' )
          . "\n"

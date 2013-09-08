@@ -18,6 +18,13 @@ ChangeLog
 
 2013-09-08 jug
 
+   * include/sgf_builder.php (class SgfBuilder, ~.load_game_info, ~.build_sgf_start),
+     specs/quick_suite.txt:
+   - extend game-info properties for tournament-game
+     - added EV-property with scope, type, id and title of tournament
+     - added RO-property with current round and total number of rounds
+     - added tournament-title-info with number of registered participants in game-comment
+
    * tournaments/include/tournament_ladder.php (TournamentLadder.load_cache_tournament_ladder),
      tournaments/ladder/view.php, tournaments/view_tournament.php:
    - on ladder-view show table-icon linked to finished tournament-games for each user

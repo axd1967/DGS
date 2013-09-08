@@ -2034,6 +2034,9 @@ Response (SGF-properties):
       DT[2007-04-21,2007-05-19]        # start-date,end-date of game
       GN[Ba_alza-jug-310100-20070519]  # filename of SGF (see <BULK>-option above)
       SO[http://www.dragongoserver.net/game.php?gid=310100]    # source with URL
+      # EV and RO properties only present for tournaments
+      EV[(Dragon Ladder) Tournament #X: title]   # info if game of tournament
+      RO[Round X of Y]                           # round-info of tournament
       PB[JUG (jug)]
       PW[Ba_alza (Ba_alza)]
       BR[6k]
@@ -2051,6 +2054,7 @@ Response (SGF-properties):
       # - "White|Black End Rating:" only included for finished game
       GC[Game ID: 310100
          Game Type: Go (1:1)           # values: GO (1:1) | TEAM_GO (N:M) | ZEN_GO (N)
+         (Dragon Ladder) Tournament #X: title; with Y participants   # only for tournament-game: tournament-info
          Rated: Y                      # values: Y | N
          Note: game-result set by admin   # Note-lines 0..n
 

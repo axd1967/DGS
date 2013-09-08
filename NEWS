@@ -172,6 +172,7 @@ Copyright (C) 2001-2013  Erik Ouchterlony, Jens-Uwe Gaspar
 
    * Game SGF Download:
       * Added URL-arg 'filefmt' to specify different download-filenames
+      * Added tournament-info for tournament-game
 
    * <home new_game.php>New game</home> and <home message.php?mode=Invite>Invitation</home>:
       * Show disabled form-inputs for calculated handicap-type and rated-game for players without rating
