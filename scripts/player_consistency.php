@@ -658,7 +658,7 @@ function cnt_diff( $name, $pfld, $gwhr, $gwhrB='', $gwhrW='')
          or die( "$name.MPG2: " . mysql_error());
 
       while ( $rowMPG = mysql_fetch_assoc($resMPG) )
-         $plMPG[$rowMPG['uid']] = $rowW['cntMPG'];
+         $plMPG[$rowMPG['uid']] = $rowMPG['cntMPG'];
       mysql_free_result($resMPG);
    }
 

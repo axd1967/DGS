@@ -16,6 +16,11 @@ Developers INFO:
 ChangeLog
 ------------------------------------------------------------------
 
+2013-09-08 jug
+
+   * scripts/player_consistency.php (cnt_diff):
+   - bugfix: count MPGs for player-consistency script calculating Players.Running/Finished
+
 2013-09-03 jug
 
    * include/std_functions.php (send_email):
