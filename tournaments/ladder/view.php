@@ -187,6 +187,8 @@ $GLOBALS['ThePage'] = new Page('TournamentLadderView');
    start_page( $title, true, $logged_in, $player_row, null, null, $js );
    echo "<h2 class=Header>", $tourney->build_info(2), "</h2>\n";
 
+   db_close(); // HTML to send for ladder can be quite large, so free db-connection as early as possible
+
    $maxGamesCheck = new MaxGamesCheck();
    echo $maxGamesCheck->get_warn_text();
 

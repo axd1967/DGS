@@ -18,6 +18,10 @@ ChangeLog
 
 2013-09-08 jug
 
+   * tournaments/ladder/view.php:
+   - free db-connection as early as possible when before sending HTML for the full ladder
+     in hope to reduce observed too-many-connections errors on live-server
+
    * include/error_codes.php (ErrorCode.echo_error_text, ~.get_error_text),
      do_registration_blocked.php,
      error.php (handle_error):
