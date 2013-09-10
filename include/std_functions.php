@@ -1523,7 +1523,7 @@ function notify( $debugmsg, $ids, $type='', $nfy_flags=0 )
 } //notify
 
 
-function safe_setcookie( $name, $value='', $rel_expire=-3600 ) //-SECS_PER_HOUR
+function safe_setcookie( $name, $value='', $rel_expire=-3600, $http_only=false ) //-SECS_PER_HOUR
 //should be: ($name, $value, $expire, $path, $domain, $secure)
 {
    global $NOW;
@@ -1536,12 +1536,13 @@ function safe_setcookie( $name, $value='', $rel_expire=-3600 ) //-SECS_PER_HOUR
    else
       $n= 0;
 
-   while ( $n>1 )
-   {
+   while ( $n-- > 1 )
       setcookie( $name, '', $NOW-SECS_PER_HOUR, SUB_PATH);
-      $n--;
-   }
-   setcookie( $name, $value, $NOW+$rel_expire, SUB_PATH );
+
+   if ( $http_only )
+      setcookie( $name, $value, $NOW+$rel_expire, SUB_PATH, '', /*secure*/false, (bool)$http_only );
+   else
+      setcookie( $name, $value, $NOW+$rel_expire, SUB_PATH );
    //for current session:
    $_COOKIE[$name] = $value; //??? add magic_quotes_gpc like slashes?
 } //safe_setcookie
@@ -1556,7 +1557,7 @@ function set_login_cookie($handl, $code, $delete=false)
    else
    {
       safe_setcookie('handle', $handl, 5 * SESSION_DURATION);
-      safe_setcookie('sessioncode', $code, SESSION_DURATION);
+      safe_setcookie('sessioncode', $code, SESSION_DURATION, /*http_only*/true );
    }
 } //set_login_cookie
 

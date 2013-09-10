@@ -16,6 +16,12 @@ Developers INFO:
 ChangeLog
 ------------------------------------------------------------------
 
+2013-09-10 jug
+
+   * include/std_functions.php (safe_setcookie, set_login_cookie):
+   - security-fix: use HttpOnly on setting cookie with session-code to prevent malicious
+     XSS JavaScript reading it
+
 2013-09-09 jug
 
    * tournaments/include/tournament.php (Tournament.build_data_link),
