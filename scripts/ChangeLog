@@ -16,6 +16,21 @@ Developers INFO:
 ChangeLog
 ------------------------------------------------------------------
 
+2013-09-11 jug
+
+   * include/game_functions.php (GameSetupChecker.get_class_error_field;
+       append_form_add_waiting_room_game),
+     include/message_functions.php (game_settings_form):
+   - enabled dependent checkboxes & radio-buttons for two-phase choices in new-game and invite-forms
+     using JavaScript
+     - enabled checkbox on clicking selectboxes with required rating-range
+     - selected radio-button with manual-handicap-type
+       on clicking my-color selectbox & handicap or komi input-box
+     - selected radio-button with fair-komi-handicap-type in invite-game-settings-form
+       on clicking fair-komi-type selectbox
+     - selected radio-button with japanese/canadian/Fischer time in game-settings-form
+       on clicking time-type specific input-box or unit-selectbox
+
 2013-09-10 jug
 
    * include/std_functions.php (safe_setcookie, set_login_cookie):

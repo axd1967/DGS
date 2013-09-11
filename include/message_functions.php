@@ -466,16 +466,18 @@ function game_settings_form(&$mform, $formstyle, $viewmode, $iamrated=true, $my_
       else
          $color_txt = T_('My Color');
 
+      $attb_arr = ( is_javascript_enabled() ) ? array( 'onclick' => 'this.form.cat_htype_manual.checked=true;' ) : array();
       $mform->add_row( array(
          'DESCRIPTION', T_('Manual setting (even or handicap game)'),
-         'RADIOBUTTONS', 'cat_htype', array( CAT_HTYPE_MANUAL => '' ), $CategoryHandiType,
+         'RADIOBUTTONSX', 'cat_htype', array( CAT_HTYPE_MANUAL => '' ), $CategoryHandiType, 'id="cat_htype_manual"',
          'TEXT', sptext($color_txt),
-         'SELECTBOX', 'color_m', 1, $color_arr, $Color_m, false,
+         'SELECTBOXX', 'color_m', 1, $color_arr, $Color_m, false, $attb_arr,
          'TEXT', sptext(T_('Handicap'),1),
-         'SELECTBOX', 'handicap_m', 1, $handi_stones, $Handicap_m, false,
+         'SELECTBOXX', 'handicap_m', 1, $handi_stones, $Handicap_m, false, $attb_arr,
          'TEXT', sptext(T_('Komi'),1),
          'TEXTINPUTX', 'komi_m', 5, 5, $Komi_m,
-            'id="GSF_komi_m" ' . $gsc->get_class_error_field('komi_m'), )); // 'id' for javascript-update
+            $attb_arr + array( 'id' => 'GSF_komi_m '. $gsc->get_class_error_field('komi_m') ), // 'id' for javascript-update
+         ));
    }//manual HType
 
 
@@ -483,12 +485,17 @@ function game_settings_form(&$mform, $formstyle, $viewmode, $iamrated=true, $my_
    if ( $is_view_fairkomi || $is_fstyle_invite )
    {
       $row_arr = array( 'DESCRIPTION', T_('Fair Komi (even game)') );
+      $attb_arr = array();
       if ( $is_view_fairkomi )
          $mform->add_hidden('cat_htype', CAT_HTYPE_FAIR_KOMI);
       else
-         array_push( $row_arr, 'RADIOBUTTONS', 'cat_htype', array( CAT_HTYPE_FAIR_KOMI => '' ), $CategoryHandiType );
+      {
+         $attb_arr['onclick'] = 'this.form.cat_htype_fk.checked=true;';
+         array_push( $row_arr, 'RADIOBUTTONSX', 'cat_htype', array( CAT_HTYPE_FAIR_KOMI => '' ), $CategoryHandiType,
+            'id="cat_htype_fk"' );
+      }
       array_push( $row_arr,
-         'SELECTBOX', 'fk_htype', 1, GameTexts::get_fair_komi_types(), $Handitype, false );
+         'SELECTBOXX', 'fk_htype', 1, GameTexts::get_fair_komi_types(), $Handitype, false, $attb_arr );
       if ( $is_fstyle_invite )
          array_push( $row_arr,
             'TEXT', T_('+ set Jigo mode (see below)#fairkomi') );
@@ -593,32 +600,43 @@ function game_settings_form(&$mform, $formstyle, $viewmode, $iamrated=true, $my_
          'TEXTINPUTX', 'timevalue', 5, 5, $Maintime, $gsc->get_class_error_field('timevalue'),
          'SELECTBOX', 'timeunit', 1, $value_array, $MaintimeUnit, false ) );
 
+   $attb_arr_jap = ( is_javascript_enabled() ) ? array( 'onclick' => 'this.form.time_byotype_jap.checked=true;' ) : array();
    $mform->add_row( array(
          'DESCRIPTION', T_('Japanese byoyomi'),
          //'CELL', 1, 'nowrap',
-         'RADIOBUTTONS', 'byoyomitype', array( BYOTYPE_JAPANESE => '' ), $Byotype,
-         'TEXTINPUTX', 'byotimevalue_jap', 5, 5, $Byotime_jap, $gsc->get_class_error_field('byotimevalue_jap'),
-         'SELECTBOX', 'timeunit_jap', 1,$value_array, $ByotimeUnit_jap, false,
+         'RADIOBUTTONSX', 'byoyomitype', array( BYOTYPE_JAPANESE => '' ), $Byotype,
+            array( 'id' => 'time_byotype_jap' ) + $attb_arr_jap,
+         'TEXTINPUTX', 'byotimevalue_jap', 5, 5, $Byotime_jap,
+            $gsc->get_class_error_field('byotimevalue_jap', true) + $attb_arr_jap,
+         'SELECTBOXX', 'timeunit_jap', 1, $value_array, $ByotimeUnit_jap, false, $attb_arr_jap,
          'TEXT', sptext(T_('with')),
-         'TEXTINPUTX', 'byoperiods_jap', 5, 5, $Byoperiods_jap, $gsc->get_class_error_field('byoperiods_jap'),
+         'TEXTINPUTX', 'byoperiods_jap', 5, 5, $Byoperiods_jap,
+            $gsc->get_class_error_field('byoperiods_jap', true) + $attb_arr_jap,
          'TEXT', sptext(T_('extra periods')),
       ));
 
+   $attb_arr_can = ( is_javascript_enabled() ) ? array( 'onclick' => 'this.form.time_byotype_can.checked=true;' ) : array();
    $mform->add_row( array(
          'DESCRIPTION', T_('Canadian byoyomi'),
-         'RADIOBUTTONS', 'byoyomitype', array( BYOTYPE_CANADIAN => '' ), $Byotype,
-         'TEXTINPUTX', 'byotimevalue_can', 5, 5, $Byotime_can, $gsc->get_class_error_field('byotimevalue_can'),
-         'SELECTBOX', 'timeunit_can', 1,$value_array, $ByotimeUnit_can, false,
+         'RADIOBUTTONSX', 'byoyomitype', array( BYOTYPE_CANADIAN => '' ), $Byotype,
+            array( 'id' => 'time_byotype_can' ) + $attb_arr_can,
+         'TEXTINPUTX', 'byotimevalue_can', 5, 5, $Byotime_can,
+            $gsc->get_class_error_field('byotimevalue_can', true) + $attb_arr_can,
+         'SELECTBOXX', 'timeunit_can', 1, $value_array, $ByotimeUnit_can, false, $attb_arr_can,
          'TEXT', sptext(T_('for')),
-         'TEXTINPUTX', 'byoperiods_can', 5, 5, $Byoperiods_can, $gsc->get_class_error_field('byoperiods_can'),
+         'TEXTINPUTX', 'byoperiods_can', 5, 5, $Byoperiods_can,
+            $gsc->get_class_error_field('byoperiods_can', true) + $attb_arr_can,
          'TEXT', sptext(T_('stones')),
       ));
 
+   $attb_arr_fis = ( is_javascript_enabled() ) ? array( 'onclick' => 'this.form.time_byotype_fis.checked=true;' ) : array();
    $mform->add_row( array(
          'DESCRIPTION', T_('Fischer time'),
-         'RADIOBUTTONS', 'byoyomitype', array( BYOTYPE_FISCHER => '' ), $Byotype,
-         'TEXTINPUTX', 'byotimevalue_fis', 5, 5, $Byotime_fis, $gsc->get_class_error_field('byotimevalue_fis'),
-         'SELECTBOX', 'timeunit_fis', 1,$value_array, $ByotimeUnit_fis, false,
+         'RADIOBUTTONSX', 'byoyomitype', array( BYOTYPE_FISCHER => '' ), $Byotype,
+            array( 'id' => 'time_byotype_fis' ) + $attb_arr_fis,
+         'TEXTINPUTX', 'byotimevalue_fis', 5, 5, $Byotime_fis,
+            $gsc->get_class_error_field('byotimevalue_fis', true) + $attb_arr_fis,
+         'SELECTBOXX', 'timeunit_fis', 1, $value_array, $ByotimeUnit_fis, false, $attb_arr_fis,
          'TEXT', sptext(T_('extra per move')),
       ));
 

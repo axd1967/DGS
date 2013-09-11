@@ -3099,9 +3099,12 @@ class GameSetupChecker
       return @$this->error_fields[$field];
    }
 
-   public function get_class_error_field( $field )
+   public function get_class_error_field( $field, $as_arr=false )
    {
-      return ($this->is_error_field($field)) ? 'class="GSError"' : '';
+      if ( $this->is_error_field($field) )
+         return ( $as_arr ) ? array( 'class' => 'GSError' ) : 'class="GSError"';
+      else
+         return ( $as_arr ) ? array() : '';
    }
 
    private function check_game_rated()
@@ -5349,12 +5352,13 @@ function append_form_add_waiting_room_game( &$mform, $viewmode, $read_args=false
    else
       $disable_mbrated = false;
 
+   $rat_attb_arr = ( is_javascript_enabled() ) ? array( 'onclick' => 'this.form.must_be_rated.checked=true;' ) : array();
    $mform->add_row( array( 'DESCRIPTION', T_('Require rated opponent'),
                            'CHECKBOXX', 'must_be_rated', 'Y', "", $must_be_rated, ($disable_mbrated ? 'disabled=1' : ''),
                            'TEXT', sptext(T_('If yes, rating between'),1),
-                           'SELECTBOX', 'rating1', 1, $rating_array, $rating_min, false,
+                           'SELECTBOXX', 'rating1', 1, $rating_array, $rating_min, false, $rat_attb_arr,
                            'TEXT', sptext(T_('and')),
-                           'SELECTBOX', 'rating2', 1, $rating_array, $rating_max, false ) );
+                           'SELECTBOXX', 'rating2', 1, $rating_array, $rating_max, false, $rat_attb_arr ) );
 
    $mform->add_row( array(
          'DESCRIPTION', T_('Min. rated finished games'),
