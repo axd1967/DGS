@@ -453,6 +453,18 @@ class TournamentGames
       return array( $out_tg_id, $out_gid, array_unique($out_opp) );
    }//find_undetached_running_games
 
+   /*! \brief "End" finished rematch-waiting tournament-games for given tournament and user by setting Status=DONE. */
+   public static function end_rematch_waiting_finished_games( $tid, $uid )
+   {
+      $dbgmsg = "TournamentGames:end_rematch_waiting_finished_games($tid,$uid)";
+      db_query( "$dbgmsg.upd_challenger",
+         "UPDATE TournamentGames SET Status='".TG_STATUS_DONE."' " .
+         "WHERE tid=$tid AND Status='".TG_STATUS_WAIT."' AND Challenger_uid=$uid" );
+      db_query( "$dbgmsg.upd_defender",
+         "UPDATE TournamentGames SET Status='".TG_STATUS_DONE."' " .
+         "WHERE tid=$tid AND Status='".TG_STATUS_WAIT."' AND Defender_uid=$uid" );
+   }//end_rematch_waiting_finished_games
+
    /*!
     * \brief Signals end of tournament-game updating TournamentGames to SCORE-status and
     *        setting TG.Score for given tournament-ID and game-id.

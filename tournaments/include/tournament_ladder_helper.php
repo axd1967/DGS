@@ -67,10 +67,10 @@ class TournamentLadderHelper
 
       // determine challenger (at game-end)
       // NOTE: if determined at game-start -> TGame-challenger-role is correct
+      $tl_rank_ch = TournamentLadder::load_rank( $tid, $tgame->Challenger_rid );
+      $tl_rank_df = TournamentLadder::load_rank( $tid, $tgame->Defender_rid );
       if ( $tl_props->DetermineChallenger == TLP_DETERMINE_CHALL_GEND )
       {
-         $tl_rank_ch = TournamentLadder::load_rank( $tid, $tgame->Challenger_rid );
-         $tl_rank_df = TournamentLadder::load_rank( $tid, $tgame->Defender_rid );
          if ( $tl_rank_ch > 0 && $tl_rank_df > 0 && $tl_rank_ch < $tl_rank_df ) // role of challenger and defender reversed
             $tgame->Flags |= TG_FLAG_CH_DF_SWITCHED;
       }
@@ -93,8 +93,8 @@ class TournamentLadderHelper
             $tladder_ch = new TournamentLadder( $tid, $tgame->Challenger_rid, $tgame->Challenger_uid );
             $tladder_ch->update_outgoing_challenges( -1 );
 
-            // tournament-game done
-            if ( $tl_props->ChallengeRematchWaitHours > 0 )
+            // tournament-game done, or start rematch-wait-period if not detached-game
+            if ( $tl_props->ChallengeRematchWaitHours > 0 && !($tgame->Flags & TG_FLAG_GAME_DETACHED) )
             {
                $tgame->setStatus(TG_STATUS_WAIT);
                $tgame->TicksDue = $tl_props->calc_ticks_due_rematch_wait();

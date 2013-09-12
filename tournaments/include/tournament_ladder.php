@@ -289,20 +289,27 @@ class TournamentLadder
 
       if ( $is_deleted )
       {
+         // end finished rematch-waiting games (no need for rematch-wait on removed user)
+         TournamentGames::end_rematch_waiting_finished_games( $this->tid, $this->uid );
+
          // identify running TGs in role as challenger + defender
          list( $arr_tg_id, $arr_gid, $arr_opp ) = TournamentGames::find_undetached_running_games( $this->tid, $this->uid );
-         if ( count($arr_tg_id) ) // set TournamentGames: detached-flag, SCORE-process to fix in/out-challenges
+         if ( count($arr_tg_id) ) // set TournamentGames: set detached-flag, init SCORE-process to fix in/out-challenges
          {
             db_query( "$xdbgmsg.upd_tg",
-               sprintf( "UPDATE TournamentGames SET Flags=Flags | %s, Status=IF(Status='%s','%s',Status) WHERE ID IN (%s)",
-                        TG_FLAG_GAME_DETACHED, TG_STATUS_PLAY, TG_STATUS_SCORE, implode(',', $arr_tg_id) ));
+               "UPDATE TournamentGames SET " .
+                  "Flags=Flags | ".TG_FLAG_GAME_DETACHED.", " .
+                  "Status=IF(Status='".TG_STATUS_PLAY."','".TG_STATUS_SCORE."',Status) " .
+               "WHERE ID IN (" . implode(',', $arr_tg_id) . ")" );
          }
-         if ( count($arr_gid) ) // set Games: unrated, detached-flag
+         if ( count($arr_gid) ) // set Games: make unrated, set detached-flag
          {
             // NOTE: keep Rated-state if game already finished or rated-calculation done
             db_query( "$xdbgmsg.upd_games.detach",
-               sprintf( "UPDATE Games SET Flags=Flags | %s, Rated=IF( (Status='%s' OR Rated='Done'), Rated,'N') WHERE ID IN (%s)",
-                        GAMEFLAGS_TG_DETACHED, GAME_STATUS_FINISHED, implode(',', $arr_gid) ));
+               "UPDATE Games SET " .
+                  "Flags=Flags | ".GAMEFLAGS_TG_DETACHED.", " .
+                  "Rated=IF( (Status='".GAME_STATUS_FINISHED."' OR Rated='Done'), Rated,'N') " . // make unrated if running
+               "WHERE ID IN (" . implode(',', $arr_gid) . ")" );
 
             foreach ( $arr_gid as $tgid )
                GameHelper::delete_cache_game_row( "$xdbgmsg.upd_games.detach.del_cach($tgid)", $tgid );

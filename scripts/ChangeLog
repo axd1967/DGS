@@ -16,6 +16,16 @@ Developers INFO:
 ChangeLog
 ------------------------------------------------------------------
 
+2013-09-12 jug
+
+   * tournaments/include/tournament_ladder_helper.php (TournamentLadderHelper.process_tournament_ladder_game_end),
+     tournaments/include/tournament_games.php (TournamentGames.end_rematch_waiting_finished_games),
+     tournaments/include/tournament_ladder.php (TournamentLadder.remove_user_from_ladder):
+   - bugfix: set DONE-status for finished yet rematch-waiting tournament-ladder-game on
+     ladder-user-removal, because no need to wait for removed user
+   - always load tournament-ladder-rank on processing-game-end for tournament-log
+   - cleanup: re-wrote SQL-queries without sprintf to make constant-placement clearer
+
 2013-09-11 jug
 
    * include/game_functions.php (GameSetupChecker.get_class_error_field;
