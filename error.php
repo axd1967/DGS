@@ -21,11 +21,14 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 $TranslateGroups[] = "Error";
 
 require_once 'include/std_functions.php';
+require_once 'include/error_functions.php';
 require_once 'include/error_codes.php';
 
 
 {
-   if ( !$is_down )
+   $err = get_request_arg('err');
+   $skip_db_connect = DgsErrors::skip_db_connect($err);
+   if ( !$is_down && !$skip_db_connect )
       connect2mysql(true);
 
    $BlockReason = '';
@@ -50,11 +53,20 @@ require_once 'include/error_codes.php';
       $player_row = NULL;
    }
 
-   $err = get_request_arg('err');
    $errorlog_id = (int)get_request_arg('eid');
+   $mysqlerror = get_request_arg('mysqlerror');
 
    // written if set, can be resetted to NULL on certain errors to avoid publishing sensitive data
    $debugmsg = get_request_arg('debugmsg');
+
+   // write log to enable monitoring of mysql-connect-errors like 'too-many-connections', etc.
+   // NOTE: $player_row not available as db-connect failed in the first place
+   if ( $skip_db_connect )
+   {
+      // special URL-args set for DgsErrors::skip_db_connect(err) in DgsErrors::err_log()
+      $req_uri = substr( get_request_arg('req_uri'), 0, 255 );
+      error_log( sprintf("DB_CONNECT_ERROR: err [%s], mysql-err [%s] on request [%s]", $err, $mysqlerror, $req_uri ) );
+   }
 
 /*
 Within the .htaccess file of the server root:
@@ -118,7 +130,6 @@ ErrorDocument 404 /DragonGoServer/error.php?err=page_not_found&redir=htaccess
    if ( !is_null($debugmsg) && !$hide_dbgmsg && (string)$debugmsg != '' )
       echo '<p>', span('ErrorMsg', 'Error details: '), basic_safe($debugmsg), '</p>';
 
-   $mysqlerror = get_request_arg('mysqlerror');
    if ( $mysqlerror )
    {
       $mysqlerror = str_replace(

@@ -16,6 +16,14 @@ Developers INFO:
 ChangeLog
 ------------------------------------------------------------------
 
+2013-09-16 jug
+
+   * include/error_functions.php (DgsErrors.err_log, ~.skip_db_connect),
+     error.php:
+   - write log to allow monitoring of db-errors like 'too-many-connections'
+     - write entry in web-error-log on errors mysql_connect_failed & mysql_select_db_failed
+     - bugfix: fix check on correct error-code instead of log-message if db-Errorlog needs to be written
+
 2013-09-15 jug
 
    * tournaments/include/tournament_utils.php (TournamentUtils.build_num_range_sql_clause),

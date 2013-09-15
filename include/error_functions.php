@@ -217,13 +217,13 @@ class DgsErrors
 
    // ------------ static functions ----------------------------
 
-   public static function err_log( $handle, $err, $debugmsg=NULL)
+   public static function err_log( $handle, $err_code, $debugmsg=NULL)
    {
       global $dbcnx, $player_row, $is_down;
 
       $mysqlerror = @mysql_error();
 
-      $uri = "error.php?err=" . urlencode($err);
+      $uri = "error.php?err=" . urlencode($err_code);
       if ( !is_null($debugmsg) ) $uri .= URI_AMP . 'debugmsg=' . urlencode($debugmsg);
 
       $uid = (int)@$player_row['ID'];
@@ -234,13 +234,17 @@ class DgsErrors
       $request = @$_SERVER['REQUEST_URI']; //@$_SERVER['PHP_SELF'];
       $request = substr( $request, strlen(SUB_PATH));
 
+      $err_msg = $err_code;
       if ( !empty($mysqlerror) )
       {
          $uri .= URI_AMP."mysqlerror=" . urlencode($mysqlerror);
-         $err.= ' / '. $mysqlerror;
+         $err_msg .= ' / '. $mysqlerror;
       }
 
-      if ( !$is_down && self::need_db_errorlog($err) )
+      if ( self::skip_db_connect($err_code) )
+         $uri .= URI_AMP."req_uri=" . urlencode(substr($request,0,255)); // trim a bit
+
+      if ( !$is_down && self::need_db_errorlog($err_code) )
       {
          if ( !@$dbcnx )
             connect2mysql(true);
@@ -248,7 +252,7 @@ class DgsErrors
          $errorlog_query = "INSERT INTO Errorlog SET"
                         . " uid='$uid'"
                         . ", Handle='".mysql_addslashes($handle)."'"
-                        . ", Message='".mysql_addslashes($err)."'"
+                        . ", Message='".mysql_addslashes($err_msg)."'"
                         . ", Request='".mysql_addslashes($request)."'"
                         . ", IP='".mysql_addslashes($ip)."'" ; //+ Date= timestamp
          if ( !empty($mysqlerror) )
@@ -263,7 +267,7 @@ class DgsErrors
          }
       }
 
-      return array( $err, $uri);
+      return array( $err_msg, $uri);
    }//err_log
 
 
@@ -328,6 +332,16 @@ class DgsErrors
          );
       return !isset($skip_dblog[$errcode]);
    }//need_db_errorlog
+
+   /*! \brief Returns true for errors, that need special error-handling as db-connect failed. */
+   public static function skip_db_connect( $errcode )
+   {
+      static $no_db_connect = array(
+            'mysql_connect_failed' => 1,
+            'mysql_select_db_failed' => 1,
+         );
+      return isset($no_db_connect[$errcode]);
+   }
 
 } //end of class 'DgsErrors'
 
