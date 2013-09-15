@@ -128,6 +128,8 @@ class TournamentUtils
       {
          if ( $min > $max )
             swap( $min, $max );
+         elseif ( $min == $max )
+            return "$prefix_op $field = $min";
          return "$prefix_op $field BETWEEN $min AND $max";
       }
       elseif ( $min > 0 )

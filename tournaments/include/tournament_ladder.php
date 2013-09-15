@@ -1020,7 +1020,7 @@ class TournamentLadder
       $dbgmsg = "TournamentLadder.process_game_end($tid,$ch_rid,$df_rid,$game_end_action)";
       switch ( (string)$game_end_action )
       {
-         case TGEND_CHALLENGER_ABOVE:
+         case TGEND_CHALLENGER_ABOVE: // move challenger right above defender
          {
             $logmsg = "CH.Rank={$tladder_ch->Rank}";
             $ch_new_rank = $tladder_df->Rank;
@@ -1033,21 +1033,23 @@ class TournamentLadder
             break;
          }
 
-         case TGEND_CHALLENGER_BELOW:
+         case TGEND_CHALLENGER_BELOW: // move challenger right below defender
          {
             $logmsg = "CH.Rank={$tladder_ch->Rank}";
             $ch_new_rank = $tladder_df->Rank + 1;
             if ( $tladder_ch->Rank > $ch_new_rank ) // challenger below new pos
             {
-               if ( abs($tladder_ch->Rank - $tladder_df->Rank) > 1 ) // direct neighbours?
+               if ( abs($tladder_ch->Rank - $tladder_df->Rank) > 1 ) // no direct neighbours?
+               {
                   self::move_down_ladder_part( $tid, true, $ch_new_rank, $tladder_ch->Rank - 1 );
-               $success = $tladder_ch->update_rank( $ch_new_rank );
+                  $success = $tladder_ch->update_rank( $ch_new_rank );
+               }
                $logmsg .= ">$ch_new_rank";
             }
             break;
          }
 
-         case TGEND_CHALLENGER_LAST:
+         case TGEND_CHALLENGER_LAST: // move challenger to last ladder-position
          {
             $logmsg = "CH.Rank={$tladder_ch->Rank}";
             $ch_new_rank = self::load_max_rank( $tid ); // get last ladder-rank
@@ -1060,7 +1062,7 @@ class TournamentLadder
             break;
          }
 
-         case TGEND_CHALLENGER_DELETE:
+         case TGEND_CHALLENGER_DELETE: // remove challenger from ladder
          {
             $success = $tladder_ch->remove_user_from_ladder( $dbgmsg, TLOG_TYPE_CRON, "Game-End[$game_end_action]",
                /*upd-rank*/true, $tladder_ch->uid, '', /*nfy-user*/true );
@@ -1068,7 +1070,7 @@ class TournamentLadder
             break;
          }
 
-         case TGEND_SWITCH:
+         case TGEND_SWITCH: // switch challenger with defender
          {
             $logmsg = "CH.Rank={$tladder_ch->Rank}";
             $ch_new_rank = $tladder_df->Rank;
@@ -1080,21 +1082,20 @@ class TournamentLadder
             break;
          }
 
-         case TGEND_DEFENDER_BELOW:
+         case TGEND_DEFENDER_BELOW: // move defender right below challenger
          {
             $logmsg = "DF.Rank={$tladder_df->Rank}";
             $df_new_rank = $tladder_ch->Rank;
             if ( $tladder_df->Rank < $df_new_rank ) // defender above new pos
             {
-               if ( abs($tladder_ch->Rank - $tladder_df->Rank) > 1 ) // direct neighbours?
-                  self::move_up_ladder_part( $tid, true, $tladder_df->Rank + 1, $df_new_rank );
+               self::move_up_ladder_part( $tid, true, $tladder_df->Rank + 1, $df_new_rank );
                $success = $tladder_df->update_rank( $df_new_rank );
                $logmsg .= ">$df_new_rank";
             }
             break;
          }
 
-         case TGEND_DEFENDER_LAST:
+         case TGEND_DEFENDER_LAST: // move defender to last ladder-position
          {
             $logmsg = "DF.Rank={$tladder_df->Rank}";
             $df_new_rank = self::load_max_rank( $tid ); // get last ladder-rank
@@ -1107,7 +1108,7 @@ class TournamentLadder
             break;
          }
 
-         case TGEND_DEFENDER_DELETE:
+         case TGEND_DEFENDER_DELETE: // remove defender from ladder
          {
             $success = $tladder_df->remove_user_from_ladder( $dbgmsg, TLOG_TYPE_CRON, "Game-End[$game_end_action]",
                /*upd-rank*/true, $tladder_df->uid, '', /*nfy-user*/true );

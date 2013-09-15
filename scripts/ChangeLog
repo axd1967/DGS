@@ -18,6 +18,12 @@ ChangeLog
 
 2013-09-15 jug
 
+   * tournaments/include/tournament_utils.php (TournamentUtils.build_num_range_sql_clause),
+     tournaments/include/tournament_ladder.php (TournamentLadder._process_game_end):
+   - bugfixes for ladder-tournament game-end-actions:
+     - fix TGEND_CHALLENGER_BELOW by not moving challenger if already directly below defender
+     - fix TGEND_DEFENDER_BELOW by moving all neighbours of defender
+
    * scripts/tournament_consistency.php (check_tournament_ladder_unique_rank):
    - added check in tournament-consistency-script for unique ladder-rank
 
