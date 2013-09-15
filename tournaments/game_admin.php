@@ -310,7 +310,7 @@ function parse_edit_form( &$tgame, $trule, $game )
       'reset_byoyomi' => '',
    );
 
-   // init for game-end
+   // init for game-end; $game_score <0 for Black-win
    if ( $tgame->Status == TG_STATUS_SCORE || $tgame->Status == TG_STATUS_WAIT || $tgame->Status == TG_STATUS_DONE )
       $game_score = (($tgame->Challenger_uid == $game->Black_ID) ? 1 : -1) * $tgame->Score;
    elseif ( $game->Status == GAME_STATUS_FINISHED )
