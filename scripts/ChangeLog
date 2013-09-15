@@ -18,6 +18,9 @@ ChangeLog
 
 2013-09-15 jug
 
+   * scripts/tournament_consistency.php (check_tournament_ladder_unique_rank):
+   - added check in tournament-consistency-script for unique ladder-rank
+
    * tournaments/include/tournament_games.php (TournamentGames.load_tournament_game_by_pair_uid,
        ~.load_tournament_game_by_challenger_uid),
      tournaments/include/tournament_ladder_props.php (TournamentLadderProps.fill_ladder_running_games,

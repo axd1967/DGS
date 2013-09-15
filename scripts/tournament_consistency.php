@@ -83,6 +83,7 @@ define('SEPLINE', "\n<p><hr>\n");
       $cnt_err += fix_tournament_RegisteredTP( $tid, $do_it );
       $cnt_err += fix_tournament_participant_game_count( $tid, $do_it );
       $cnt_err += fix_tournament_ladder_challenge_count( $tid, $do_it );
+      $cnt_err += check_tournament_ladder_unique_rank( $tid, $do_it );
    }
 
    echo SEPLINE;
@@ -304,5 +305,39 @@ function fix_tournament_ladder_challenge_count( $arg_tid, $do_it )
 
    return $cnt_err;
 }//fix_tournament_ladder_challenge_count
+
+
+function check_tournament_ladder_unique_rank( $arg_tid, $do_it )
+{
+   $begin = getmicrotime();
+   $cnt_err = 0;
+   echo SEPLINE;
+   echo "Fix TournamentLadder.Rank (unique) ...<br>\n";
+   echo "<font color=\"red\">\n";
+
+   // find non-unique TournamentLadder.Rank
+   $result = db_query( "tournament_consistency.check_tournament_ladder_unique_rank($arg_tid)",
+      "SELECT TL.tid, TL.Rank, COUNT(*) AS X_Count " .
+      "FROM TournamentLadder AS TL " .
+      ( $arg_tid > 0 ? 'WHERE ' . tid_clause('TL.tid', $arg_tid, 0) : '' ) .
+      "GROUP BY TL.tid, TL.Rank " .
+      "HAVING X_Count > 1 " .
+      "ORDER BY TL.tid" );
+   while ( $row = mysql_fetch_array($result) )
+   {
+      extract($row);
+      echo sprintf( "Tournament #%s: found non-unique TL.Rank [%s] with count of %s -> needs manual fixing!<br>\n",
+         $tid, $Rank, $X_Count );
+      $cnt_err++;
+   }
+   mysql_free_result($result);
+
+
+   echo "</font>\n";
+   echo "\n<br>Needed: " . sprintf("%1.3fs", (getmicrotime() - $begin))
+      , " - TournamentLadder.Rank (unique) check Done.";
+
+   return $cnt_err;
+}//check_tournament_ladder_unique_rank
 
 ?>
