@@ -16,6 +16,15 @@ Developers INFO:
 ChangeLog
 ------------------------------------------------------------------
 
+2013-09-15 jug
+
+   * tournaments/include/tournament_games.php (TournamentGames.load_tournament_game_by_pair_uid,
+       ~.load_tournament_game_by_challenger_uid),
+     tournaments/include/tournament_ladder_props.php (TournamentLadderProps.fill_ladder_running_games,
+       ~.verify_challenge):
+   - bugfix: forbid re-challenge of same user in ladder-tournament even if challenger & defender role
+     are reversed
+
 2013-09-12 jug
 
    * tournaments/include/tournament_ladder_helper.php (TournamentLadderHelper.process_tournament_ladder_game_end),

@@ -299,17 +299,31 @@ class TournamentGames
    }//load_tournament_game_by_gid
 
    /*!
+    * \brief Loads and returns TournamentGames-object for given tournament-ID, challenger- and defender-uid
+    *     or reversed roles.
+    * \return NULL if nothing found; TournamentGames otherwise
+    */
+   public static function load_tournament_game_by_pair_uid( $tid, $ch_uid, $df_uid )
+   {
+      $tgame = self::load_tournament_game_by_challenger_uid( $tid, $ch_uid, $df_uid );
+      if ( is_null($tgame) )
+         $tgame = self::load_tournament_game_by_challenger_uid( $tid, $df_uid, $ch_uid );
+      return $tgame;
+   }//load_tournament_game_by_pair_uid
+
+   /*!
     * \brief Loads and returns TournamentGames-object for given tournament-ID, challenger- and defender-uid.
     * \return NULL if nothing found; TournamentGames otherwise
     */
-   public static function load_tournament_game_by_uid( $tid, $ch_uid, $df_uid )
+   private static function load_tournament_game_by_challenger_uid( $tid, $ch_uid, $df_uid )
    {
+      $dbgmsg = "TournamentGames:load_tournament_game_by_challenger_uid($tid,$ch_uid,$df_uid)";
       if ( !is_numeric($tid) || $tid <= 0 )
-         error('invalid_args', "TournamentGames:load_tournament_game_by_uid.check_tid($tid,$ch_uid,$df_uid)");
+         error('invalid_args', "$dbgmsg.check_tid");
       if ( !is_numeric($ch_uid) || $ch_uid <= GUESTS_ID_MAX )
-         error('invalid_args', "TournamentGames:load_tournament_game_by_uid.check_ch_uid($tid,$ch_uid,$df_uid)");
+         error('invalid_args', "$dbgmsg.check_ch_uid");
       if ( !is_numeric($df_uid) || $df_uid <= GUESTS_ID_MAX )
-         error('invalid_args', "TournamentGames:load_tournament_game_by_uid.check_df_uid($tid,$ch_uid,$df_uid)");
+         error('invalid_args', "$dbgmsg.check_df_uid");
 
       $qsql = self::build_query_sql( $tid );
       $qsql->add_part( SQLP_WHERE,
@@ -317,10 +331,9 @@ class TournamentGames
             'TG.Defender_uid=' . (int)$df_uid );
       $qsql->add_part( SQLP_LIMIT, '1' );
 
-      $row = mysql_single_fetch( "TournamentGames:load_tournament_game_by_uid.find_tgame($tid,$ch_uid,$df_uid)",
-         $qsql->get_select() );
+      $row = mysql_single_fetch( "$dbgmsg.find_tgame", $qsql->get_select() );
       return ($row) ? self::new_from_row($row) : NULL;
-   }//load_tournament_game_by_uid
+   }//load_tournament_game_by_challenger_uid
 
    /*!
     * \brief Returns ListIterator with TournamentGames-objects for given tournament-id and TournamentGames-status.

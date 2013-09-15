@@ -466,13 +466,18 @@ class TournamentLadderProps
                $df_tladder->AllowChallenge = false;
 
             $ch_tladder = $iterator->getIndexValue( 'uid', $tgame->Challenger_uid, 0 );
-            $tgame->Challenger_tladder = $ch_tladder;
             if ( !is_null($ch_tladder) )
             {
+               $tgame->Challenger_tladder = $ch_tladder;
+               if ( $tgame->Defender_uid == $my_id )
+                  $ch_tladder->AllowChallenge = false;
+
                if ( $tgame->Status == TG_STATUS_WAIT )
                {
                   if ( $tgame->Challenger_uid == $my_id )
                      $df_tladder->RematchWait = $this->calc_rematch_wait_remaining_hours( $tgame );
+                  elseif ( $tgame->Defender_uid == $my_id )
+                     $ch_tladder->RematchWait = $this->calc_rematch_wait_remaining_hours( $tgame );
                }
                else
                   $df_tladder->add_incoming_game( $tgame );
@@ -574,8 +579,7 @@ class TournamentLadderProps
       if ( $tladder_ch->rid == $tladder_df->rid )
          error('invalid_args', "TournamentLadderProps.verify_challenge.check_rid_same({$this->tid},{$tladder_ch->rid})");
 
-      $tgame = TournamentGames::load_tournament_game_by_uid( $tladder_ch->tid,
-         $tladder_ch->uid, $tladder_df->uid );
+      $tgame = TournamentGames::load_tournament_game_by_pair_uid( $tladder_ch->tid, $tladder_ch->uid, $tladder_df->uid );
       if ( !is_null($tgame) )
       {
          if ( $tgame->Status == TG_STATUS_WAIT )
