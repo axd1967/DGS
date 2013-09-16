@@ -18,6 +18,9 @@ ChangeLog
 
 2013-09-16 jug
 
+   * tournaments/ladder/challenge.php:
+   - add current tournament-ladder-rank of challenger & defender in challenge-notification
+
    * tournaments/include/tournament_ladder.php (TournamentLadder.load_tournament_ladder_by_uids),
      gameinfo.php:
    - show current tournament-ladder-rank of players on game-info page for running tournament-game

@@ -147,10 +147,15 @@ $GLOBALS['ThePage'] = new Page('TournamentLadderChallenge');
          $tladder_df->update_incoming_challenges( +1 );
          $tladder_ch->update_outgoing_challenges( +1 );
 
+         $msg = sprintf( T_('%s on ladder-rank #%s has challenged you.#T_ladder'), "<user $ch_uid>", $tladder_ch->Rank )
+            . "\n"
+            . sprintf( T_('Your current ladder-rank is #%s.#T_ladder'), $tladder_df->Rank )
+            . "\n\n<tourney $tid>\n"
+            . T_('Game') . ": <game $gid>";
+
          // notify defender about started game
          send_message( "$dbgmsg.notify",
-            trim( sprintf( T_('%s has challenged you in %s: %s#T_ladder'),
-                           "<user $ch_uid>", "<tourney $tid>", "<game $gid>" )),
+            $msg,
             sprintf( T_('Challenge started for tournament #%s#T_ladder'), $tid ),
             $df_uid, '', /*notify*/true,
             0/*sys-msg*/, MSGTYPE_NORMAL );
