@@ -121,7 +121,7 @@ class TournamentGames
       $result = in_array( $this->Status, $arr_status_with_score );
       if ( $check_detached && ($this->Flags & TG_FLAG_GAME_DETACHED) )
          $result = false;
-      return $result ;
+      return $result;
    }
 
    /*! \brief Returns score for given user; null if no score set. */

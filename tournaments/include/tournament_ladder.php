@@ -493,6 +493,30 @@ class TournamentLadder
       return ($row) ? self::new_from_row($row) : NULL;
    }//load_tournament_ladder_by_user
 
+   /*!
+    * \brief Loads and returns TournamentLadder-objects for given uid-array.
+    * \return empty array if nothing found; array( uid => TournamentLadder, ...) otherwise; not all keys might be set.
+    */
+   public static function load_tournament_ladder_by_uids( $tid, $arr_uids )
+   {
+      $out = array();
+      if ( $tid <= 0 || !is_array($arr_uids) || count($arr_uids) < 1 )
+         return $out;
+
+      $qsql = self::build_query_sql( $tid );
+      $qsql->add_part( SQLP_WHERE, "TL.uid IN (" . implode(',', $arr_uids) . ")" );
+      $result = db_query( "TournamentLadder:load_tournament_ladder_by_uids($tid)", $qsql->get_select() );
+
+      while ( $row = mysql_fetch_array($result) )
+      {
+         $tladder = self::new_from_row( $row );
+         $out[$tladder->uid] = $tladder;
+      }
+      mysql_free_result($result);
+
+      return $out;
+   }//load_tournament_ladder_by_uids
+
    /*! \brief Loads and returns TournamentLadder-object for given tournament-ID and rank; NULL if nothing found. */
    public static function load_tournament_ladder_by_rank( $tid, $rank )
    {

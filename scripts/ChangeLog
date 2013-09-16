@@ -18,6 +18,10 @@ ChangeLog
 
 2013-09-16 jug
 
+   * tournaments/include/tournament_ladder.php (TournamentLadder.load_tournament_ladder_by_uids),
+     gameinfo.php:
+   - show current tournament-ladder-rank of players on game-info page for running tournament-game
+
    * include/error_functions.php (DgsErrors.err_log, ~.skip_db_connect),
      error.php:
    - write log to allow monitoring of db-errors like 'too-many-connections'

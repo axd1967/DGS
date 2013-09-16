@@ -33,6 +33,7 @@ if ( ALLOW_TOURNAMENTS ) {
    require_once 'tournaments/include/tournament_cache.php';
    require_once 'tournaments/include/tournament_games.php';
    require_once 'tournaments/include/tournament_helper.php';
+   require_once 'tournaments/include/tournament_ladder.php';
 }
 
 $GLOBALS['ThePage'] = new Page('GameInfo');
@@ -109,21 +110,31 @@ function build_rating_diff( $rating_diff )
    if ( $game_status == GAME_STATUS_SETUP || $game_status == GAME_STATUS_INVITED )
       error('invalid_game_status', "gameinfo.find3($gid,$game_status)");
 
+   $black_id = $grow['Black_ID'];
+   $white_id = $grow['White_ID'];
    $shape_id = (int)@$grow['ShapeID'];
    $tid = (int) @$grow['tid'];
-   $tourney = $tgame = null;
+   $tourney = $tgame = $tladder_rank = null;
    if ( !ALLOW_TOURNAMENTS || $tid <= 0 )
       $tid = 0;
    else
    {
       $tourney = TournamentCache::load_cache_tournament( "gameinfo.find_tournament($gid,$tid)", $tid );
       $tgame = TournamentGames::load_tournament_game_by_gid($gid);
+
+      if ( $tourney->Type == TOURNEY_TYPE_LADDER && !is_null($tgame) && isRunningGame($game_status) )
+      {
+         $tladder_rank = array( $black_id => NO_VALUE, $white_id => NO_VALUE );
+         $arr_tladder = TournamentLadder::load_tournament_ladder_by_uids( $tid, array( $black_id, $white_id ) );
+         if ( isset($arr_tladder[$black_id]) )
+            $tladder_rank[$black_id] = $arr_tladder[$black_id]->Rank;
+         if ( isset($arr_tladder[$white_id]) )
+            $tladder_rank[$white_id] = $arr_tladder[$white_id]->Rank;
+      }
    }
 
 
    // init some vars
-   $black_id = $grow['Black_ID'];
-   $white_id = $grow['White_ID'];
    $is_my_game = ( $my_id == $black_id || $my_id == $white_id );
    $arr_status = array( // see build_game_status()
       GAME_STATUS_SETUP    => T_('Setup'),
@@ -284,6 +295,15 @@ function build_rating_diff( $rating_diff )
             echo_rating( @$grow['Black_Start_Rating']),
             echo_rating( @$grow['White_Start_Rating']),
          ));
+   if ( !is_null($tladder_rank) )
+   {
+      $itable->add_sinfo(
+            T_('Ladder rank#tourney'),
+            array(
+               $tladder_rank[$black_id],
+               $tladder_rank[$white_id],
+            ));
+   }
    if ( $game_finished )
    {
       $itable->add_sinfo(
