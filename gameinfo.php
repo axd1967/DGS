@@ -81,9 +81,11 @@ function build_rating_diff( $rating_diff )
       'Games.*',
       'BP.Name AS Black_Name', 'BP.Handle AS Black_Handle',
       'BP.Rating2 AS Black_Rating', 'BP.OnVacation AS Black_OnVacation',
+      'UNIX_TIMESTAMP(BP.Lastaccess) AS Black_Lastaccess', 'UNIX_TIMESTAMP(BP.LastMove) AS Black_LastMove',
       'BP.ClockUsed AS Black_ClockUsed',
       'WP.Name AS White_Name', 'WP.Handle AS White_Handle',
       'WP.Rating2 AS White_Rating', 'WP.OnVacation AS White_OnVacation',
+      'UNIX_TIMESTAMP(WP.Lastaccess) AS White_Lastaccess', 'UNIX_TIMESTAMP(WP.LastMove) AS White_LastMove',
       'WP.ClockUsed AS White_ClockUsed',
       'BRL.RatingDiff AS Black_RatingDiff',
       'WRL.RatingDiff AS White_RatingDiff',
@@ -262,6 +264,18 @@ function build_rating_diff( $rating_diff )
          array(
             user_reference( REF_LINK, 1, '', $black_id, @$grow['Black_Name'], @$grow['Black_Handle'] ),
             user_reference( REF_LINK, 1, '', $white_id, @$grow['White_Name'], @$grow['White_Handle'] ),
+         ));
+   $itable->add_sinfo(
+         T_('Last access'),
+         array(
+            date(DATE_FMT2, @$grow['Black_Lastaccess']),
+            date(DATE_FMT2, @$grow['White_Lastaccess']),
+         ));
+   $itable->add_sinfo(
+         T_('Last move'),
+         array(
+            date(DATE_FMT2, @$grow['Black_LastMove']),
+            date(DATE_FMT2, @$grow['White_LastMove']),
          ));
    if ( @$grow['Black_OnVacation'] > 0 || @$grow['White_OnVacation'] > 0 )
    {

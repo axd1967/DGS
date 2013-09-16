@@ -18,6 +18,9 @@ ChangeLog
 
 2013-09-16 jug
 
+   * gameinfo.php:
+   - added last-access and last-move date for black- & white player on game-info-page
+
    * scripts/tournament_consistency.php (tid_clause, fix_tournament_participant_game_count):
    - bugfix: fix query to fix all tournament-participants with correct counts of finished/won/lost-games
 
