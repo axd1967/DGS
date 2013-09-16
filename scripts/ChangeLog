@@ -18,6 +18,16 @@ ChangeLog
 
 2013-09-16 jug
 
+   * include/timezones.php (get_timezone_array),
+     scripts/updates/database_changes_1_0_15_to_1_0_16.mysql:
+   - use alias 'Asia/Shanghai' for removed tzdata of 'China/Beijing' & 'China/Shanghai'-timezone
+     as live-system does not know it anymore
+-----------
+-- use alias for removed tzdata of 'China/Beijing' & 'China/Shanghai'-timezone
+UPDATE Players
+   SET Timezone='Asia/Shanghai' WHERE Timezone IN ('China/Beijing', 'China/Shanghai') ;
+-----------
+
    * tournaments/ladder/challenge.php:
    - add current tournament-ladder-rank of challenger & defender in challenge-notification
 

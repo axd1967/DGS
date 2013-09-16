@@ -126,3 +126,8 @@ UPDATE Players
    SET Lastaccess=GREATEST(Lastaccess, LastQuickAccess, LastMove) ;
 
 
+-- use alias for removed tzdata of 'China/Beijing' & 'China/Shanghai'-timezone
+UPDATE Players
+   SET Timezone='Asia/Shanghai' WHERE Timezone IN ('China/Beijing', 'China/Shanghai') ;
+
+
