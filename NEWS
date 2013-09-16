@@ -97,6 +97,8 @@ Copyright (C) 2001-2013  Erik Ouchterlony, Jens-Uwe Gaspar
             * User and opponents with running games will be notified about user-removal from tournament
          * Crown "King of the Hill" for ladder-tournaments as tournament-result
 
+         * Added current ladder-rank on game-info page for running tournament-game
+
 ##    * Tournament-type specific pages for Pooled Round-Robin Tournament:
 ##       * Allow to register players for higher start rounds
 ##       * Tournament Rounds Editor
@@ -169,6 +171,9 @@ Copyright (C) 2001-2013  Erik Ouchterlony, Jens-Uwe Gaspar
          * retrieve list of messages with nested user-/folder-objects, including game-settings for invitation
       * Added bulletin-handler to
          * retrieve single bulletin
+
+   * Game info page:
+      * Added black- and white players last-access and last-move date
 
    * Game SGF Download:
       * Added URL-arg 'filefmt' to specify different download-filenames
