@@ -18,6 +18,9 @@ ChangeLog
 
 2013-09-16 jug
 
+   * scripts/tournament_consistency.php (tid_clause, fix_tournament_participant_game_count):
+   - bugfix: fix query to fix all tournament-participants with correct counts of finished/won/lost-games
+
    * tournaments/include/tournament_ladder_props.php (TournamentLadderProps.fill_ladder_challenge_range),
      tournaments/include/tournament_ladder.php (class TournamentLadder):
    - show ladder-rank for theoretical rating-pos on ladder-view in tooltip on my-info in Actions-column

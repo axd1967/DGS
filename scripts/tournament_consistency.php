@@ -111,10 +111,11 @@ function do_updates( $dbgmsg, $upd_arr, $do_it )
    echo '</pre>';
 }//do_updates
 
-function tid_clause( $field_tid, $tid, $with_op=true )
+function tid_clause( $field_tid, $tid, $with_op=true, $with_where=false )
 {
+   $where = ($with_where) ? 'WHERE' : '';
    $op = ($with_op) ? 'AND' : '';
-   return ( $tid > 0 ) ? " $op $field_tid=$tid " : '';
+   return ( $tid > 0 ) ? " $where $op $field_tid=$tid " : '';
 }
 
 
@@ -161,11 +162,13 @@ function fix_tournament_participant_game_count( $arg_tid, $do_it )
 
    // find finished/won/lost tournament-games for challenger
    $result = db_query( "tournament_consistency.fix_tournament_participant_game_count.challenger($arg_tid)",
-      "SELECT TG.tid, TP.ID AS rid, TP.Finished, TP.Won, TP.Lost, COUNT(*) AS X_Finished, " .
+      "SELECT TP.tid, TP.ID AS rid, TP.Finished, TP.Won, TP.Lost, COUNT(*) AS X_Finished, " .
          "SUM(IF(TG.Score<0,1,0)) AS X_ChallengerWon, SUM(IF(TG.Score>0,1,0)) AS X_ChallengerLost " .
-      "FROM TournamentGames AS TG INNER JOIN TournamentParticipant AS TP ON TP.ID=TG.Challenger_rid " .
-      "WHERE TG.Status IN ('".TG_STATUS_WAIT."','".TG_STATUS_DONE."') " . tid_clause('TG.tid', $arg_tid) .
-      "GROUP BY TG.tid, TP.ID" );
+      "FROM TournamentParticipant AS TP " .
+         "LEFT JOIN TournamentGames AS TG ON TG.Challenger_rid=TP.ID AND TG.Status IN ('".TG_STATUS_WAIT."','".TG_STATUS_DONE."') " .
+      tid_clause('TP.tid', $arg_tid, /*with-OP*/false, /*with-WHERE*/true) .
+      "GROUP BY TP.tid, TP.ID " .
+      "ORDER BY TP.tid, TP.ID" );
    $chk = array(); // arr( tid => arr( rid => arr( Finished/Won/Lost/X_Finished/X_ChallengerWon/X_ChallengerLost => count )))
    while ( $row = mysql_fetch_array($result) )
    {
@@ -179,12 +182,13 @@ function fix_tournament_participant_game_count( $arg_tid, $do_it )
 
    // find finished/won/lost tournament-games for defender
    $result = db_query( "tournament_consistency.fix_tournament_participant_game_count.defender($arg_tid)",
-      "SELECT TG.tid, TP.ID AS rid, TP.Finished, TP.Won, TP.Lost, COUNT(*) AS X_Finished, " .
+      "SELECT TP.tid, TP.ID AS rid, TP.Finished, TP.Won, TP.Lost, COUNT(*) AS X_Finished, " .
          "SUM(IF(TG.Score>0,1,0)) AS X_DefenderWon, SUM(IF(TG.Score<0,1,0)) AS X_DefenderLost " .
-      "FROM TournamentGames AS TG INNER JOIN TournamentParticipant AS TP ON TP.ID=TG.Defender_rid " .
-      "WHERE TG.Status IN ('".TG_STATUS_WAIT."','".TG_STATUS_DONE."') " . tid_clause('TG.tid', $arg_tid) .
-      "GROUP BY TG.tid, TP.ID " .
-      "ORDER BY TG.tid, TP.ID" ); // also order
+      "FROM TournamentParticipant AS TP " .
+         "LEFT JOIN TournamentGames AS TG ON TG.Defender_rid=TP.ID AND TG.Status IN ('".TG_STATUS_WAIT."','".TG_STATUS_DONE."') " .
+      tid_clause('TP.tid', $arg_tid, /*with-OP*/false, /*with-WHERE*/true) .
+      "GROUP BY TP.tid, TP.ID " .
+      "ORDER BY TP.tid, TP.ID" );
    while ( $row = mysql_fetch_array($result) )
    {
       extract($row);
@@ -202,6 +206,7 @@ function fix_tournament_participant_game_count( $arg_tid, $do_it )
    mysql_free_result($result);
 
    // find descrepancies to fix on TP.Finished/Won/Lost
+   // NOTE: matching on TP.ID = rid (which can change over time by re-joining ladder)
    $upd_arr = array();
    foreach ( $chk as $tid => $arr_rid )
    {
@@ -211,10 +216,11 @@ function fix_tournament_participant_game_count( $arg_tid, $do_it )
          $diff = array();
          $cnt_won  = (int)@$arr['X_ChallengerWon']  + (int)@$arr['X_DefenderWon'];
          $cnt_lost = (int)@$arr['X_ChallengerLost'] + (int)@$arr['X_DefenderLost'];
-         if ( $arr['Finished'] != $arr['X_Finished'] )
+         $cnt_fin  = (int)@$arr['X_Finished'];
+         if ( $arr['Finished'] != $cnt_fin )
          {
-            $upd[] = 'Finished=' . $arr['X_Finished'];
-            $diff[] = sprintf('Finished %s -> %s', $arr['Finished'], $arr['X_Finished'] );
+            $upd[] = "Finished=$cnt_fin";
+            $diff[] = sprintf('Finished %s -> %s', $arr['Finished'], $cnt_fin );
          }
          if ( $arr['Won'] != $cnt_won )
          {
