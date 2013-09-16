@@ -85,6 +85,8 @@ class TournamentLadder
    public $IncomingTourneyGames = array();
    /*! \brief how many hours to wait till rematch allowed with same user; -1=rematch allowed, 0=TG still on WAIT-status but due. */
    public $RematchWait = -1;
+   /*! \brief theoretical ladder-position if ladder were ordered by rating; 0=unknown. */
+   public $RatingPos = 0;
 
    /*! \brief Constructs TournamentLadder-object with specified arguments. */
    public function __construct( $tid=0, $rid=0, $uid=0, $created=0, $rank_changed=0, $rank=0, $best_rank=0,

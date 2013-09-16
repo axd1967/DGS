@@ -241,7 +241,7 @@ $GLOBALS['ThePage'] = new Page('TournamentLadderView');
             $row_str[ 6] = echo_rating( $user->Rating, true, $uid);
          if ( $ltable->Is_Column_Displayed[ 7] ) // actions
             $row_str[ 7] = build_action_row_str( $tladder, $tform, $is_mine, $rid,
-               ( $ltable->Is_Column_Displayed[12] ? '' : $run_games_str) );
+               ( $ltable->Is_Column_Displayed[12] ? '' : $run_games_str . $fin_games_str) );
          if ( $ltable->Is_Column_Displayed[ 8] )
             $row_str[ 8] = implode(' ', $tladder->build_linked_incoming_games( $my_uid ));
          if ( $ltable->Is_Column_Displayed[ 9] )
@@ -432,7 +432,10 @@ function build_action_row_str( &$tladder, &$form, $is_mine, $rid, $run_games_str
    }
    elseif ( $is_mine )
    {
-      $row_str = span('TourneyUser', T_('This is you#T_ladder') );
+      $out = array();
+      if ( $tladder->RatingPos > 0 )
+         $out[] = sprintf( T_('Your ladder-rank ordered by rating would be %s.'), $tladder->RatingPos );
+      $row_str = span('TourneyUser', T_('This is you#T_ladder'), '%s', implode('; ', $out));
       if ( $run_games_str )
          $row_str .= SMALL_SPACING . $run_games_str;
    }

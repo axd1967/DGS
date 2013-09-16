@@ -18,6 +18,13 @@ ChangeLog
 
 2013-09-16 jug
 
+   * tournaments/include/tournament_ladder_props.php (TournamentLadderProps.fill_ladder_challenge_range),
+     tournaments/include/tournament_ladder.php (class TournamentLadder):
+   - show ladder-rank for theoretical rating-pos on ladder-view in tooltip on my-info in Actions-column
+
+   * tournaments/ladder/view.php (build_action_row_str):
+   - bugfix: show finished-games table-icon also in Actions-column if games-icon-column hidden
+
    * include/timezones.php (get_timezone_array),
      scripts/updates/database_changes_1_0_15_to_1_0_16.mysql:
    - use alias 'Asia/Shanghai' for removed tzdata of 'China/Beijing' & 'China/Shanghai'-timezone

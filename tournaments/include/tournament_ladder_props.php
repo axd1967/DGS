@@ -421,7 +421,8 @@ class TournamentLadderProps
 
       // highest challenge-rank
       $user_rank = $tl_user->Rank;
-      $tl_user_rating_pos = $this->determine_ladder_rating_pos( $iterator, @$tl_user_orow['TLP_Rating2'] );
+      $tl_user_rating_pos = $tl_user->RatingPos =
+         $this->determine_ladder_rating_pos( $iterator, @$tl_user_orow['TLP_Rating2'] );
       $high_rank = $this->calc_highest_challenge_rank( $user_rank, $tl_user_rating_pos );
       for ( $pos=$user_rank; $pos >= $high_rank; $pos-- )
       {
