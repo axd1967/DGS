@@ -966,16 +966,6 @@ class TournamentLadder
             $arr[] = anchor( $base_path."tournaments/edit_participant.php?tid=$tid".URI_AMP."uid=$uid", $uid );
          $errors[] = T_('Found users added to ladder without registration (contact tournament-admin to fix inconsistency)')
             . "<br>\n" . sprintf( T_('users [%s]#T_ladder'), implode(', ', $arr) );
-
-         /* TODO -> refactor into T-consistency-script also fixing TL.Rank
-         // removing bad ladder-registrations
-         foreach ( $arr_bad as $rid => $uid )
-         {
-            $tladder = new TournamentLadder( $tid, $rid );
-            $tladder->delete();
-         }
-         self::delete_cache_tournament_ladder( "TournamentLadder:check_participant_registrations.fix_bad($tid,$rid)", $tid );
-         */
       }
       return $errors;
    }//check_participant_registrations

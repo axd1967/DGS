@@ -83,7 +83,8 @@ define('SEPLINE', "\n<p><hr>\n");
       $cnt_err += fix_tournament_RegisteredTP( $tid, $do_it );
       $cnt_err += fix_tournament_participant_game_count( $tid, $do_it );
       $cnt_err += fix_tournament_ladder_challenge_count( $tid, $do_it );
-      $cnt_err += check_tournament_ladder_unique_rank( $tid, $do_it );
+      $cnt_err += check_tournament_ladder_unique_rank( $tid );
+      $cnt_err += check_tournament_ladder_miss_tp_entry( $tid );
    }
 
    echo SEPLINE;
@@ -315,12 +316,12 @@ function fix_tournament_ladder_challenge_count( $arg_tid, $do_it )
 }//fix_tournament_ladder_challenge_count
 
 
-function check_tournament_ladder_unique_rank( $arg_tid, $do_it )
+function check_tournament_ladder_unique_rank( $arg_tid )
 {
    $begin = getmicrotime();
    $cnt_err = 0;
    echo SEPLINE;
-   echo "Fix TournamentLadder.Rank (unique) ...<br>\n";
+   echo "Check TournamentLadder.Rank (unique) ...<br>\n";
    echo "<font color=\"red\">\n";
 
    // find non-unique TournamentLadder.Rank
@@ -347,5 +348,41 @@ function check_tournament_ladder_unique_rank( $arg_tid, $do_it )
 
    return $cnt_err;
 }//check_tournament_ladder_unique_rank
+
+
+// NOTE: manual fix may include:
+// - if existing TournamentGames- or Tournamentlog-entries => fix by inserting correct TournamentParticipant-entry with corresponding TP.ID
+// - alternatively deleting TournamentLadder-entry by tournament-director may be needed; not manual,
+//   because ranks of other ladder-user needs adjustment -> see func remove_user_from_ladder() what to do
+function check_tournament_ladder_miss_tp_entry( $arg_tid )
+{
+   $begin = getmicrotime();
+   $cnt_err = 0;
+   echo SEPLINE;
+   echo "Check for missing TournamentParticipant for ladder ...<br>\n";
+   echo "<font color=\"red\">\n";
+
+   // find non-unique TournamentLadder.Rank
+   $result = db_query( "tournament_consistency.check_tournament_ladder_miss_tp_entry($arg_tid)",
+      "SELECT TL.tid, TL.rid, TL.uid " .
+      "FROM TournamentLadder AS TL " .
+         "LEFT JOIN TournamentParticipant AS TP ON TP.ID=TL.rid " .
+      "WHERE TP.ID IS NULL " . tid_clause('TL.tid', $arg_tid) .
+      "ORDER BY TL.tid" );
+   while ( $row = mysql_fetch_array($result) )
+   {
+      extract($row);
+      echo sprintf( "Tournament #%s: found ladder-entry with rid [%s] and uid [%s] -> needs manual fixing!<br>\n",
+         $tid, $rid, $uid );
+      $cnt_err++;
+   }
+   mysql_free_result($result);
+
+   echo "</font>\n";
+   echo "\n<br>Needed: " . sprintf("%1.3fs", (getmicrotime() - $begin))
+      , " - missing TournamentParticipant-check for ladder Done.";
+
+   return $cnt_err;
+}//check_tournament_ladder_miss_tp_entry
 
 ?>
