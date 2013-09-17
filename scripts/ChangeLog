@@ -16,6 +16,11 @@ Developers INFO:
 ChangeLog
 ------------------------------------------------------------------
 
+2013-09-17 jug
+
+   * tournaments/include/tournament_ladder_props.php (TournamentLadderProps.build_notes_props):
+   - used clearer descriptions for challenge-range of tournament-ladder-properties
+
 2013-09-16 jug
 
    * gameinfo.php:

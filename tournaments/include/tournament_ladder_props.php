@@ -305,23 +305,23 @@ class TournamentLadderProps
       $arr_props = array();
 
       // challenge-range
-      $arr = array( T_('You can challenge the highest ladder position matching the following conditions') );
+      $arr = array( T_('You can challenge the highest from the following ladder positions') );
       if ( $this->ChallengeRangeAbsolute < 0 )
          $arr[] = T_('anyone above your own ladder position');
       elseif ( $this->ChallengeRangeAbsolute > 0 )
          $arr[] = sprintf( T_('%s positions above your own#T_ladder'), $this->ChallengeRangeAbsolute );
       if ( $this->ChallengeRangeRelative > 0 )
-         $arr[] = sprintf( T_('%s of the users above your position'), $this->ChallengeRangeRelative.'%' );
+         $arr[] = sprintf( T_('%s of the positions above your own position#T_ladder'), $this->ChallengeRangeRelative.'%' );
       if ( $this->ChallengeRangeRating != TLADDER_CHRNG_RATING_UNUSED )
       {
          if ( $this->ChallengeRangeRating < 0 )
-            $arr[] = sprintf( T_('%s positions above your theoretical position ordered by user rating#T_ladder'),
+            $arr[] = sprintf( T_('%s positions above your position in the ladder ordered by user rating'),
                               abs($this->ChallengeRangeRating) );
          elseif ( $this->ChallengeRangeRating > 0 )
-            $arr[] = sprintf( T_('%s positions below your theoretical position ordered by user rating#T_ladder'),
+            $arr[] = sprintf( T_('%s positions below your position in the ladder ordered by user rating'),
                               $this->ChallengeRangeRating );
          else //==0
-            $arr[] = T_('your theoretical position ordered by user rating#T_ladder');
+            $arr[] = T_('your position in the ladder ordered by user rating');
       }
       $arr_props[] = $arr;
 
