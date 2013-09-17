@@ -16,6 +16,14 @@ Developers INFO:
 ChangeLog
 ------------------------------------------------------------------
 
+2013-09-18 jug
+
+   * scripts/tournament_consistency.php (fix_tournament_participant_game_count),
+     specs/db/table-Tournaments.txt:
+   - bugfixes for tournament-consistency-script
+     - correct count of finished tournament-games in left-join
+     - only count undetached finished tournament-games fixing count TournamentParticipant.Finished
+
 2013-09-17 jug
 
    * tournaments/include/tournament_ladder_props.php (TournamentLadderProps.build_notes_props):

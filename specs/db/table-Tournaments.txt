@@ -260,6 +260,7 @@ Description:
 * AdminMessage : private message from TD to user
 
 * Finished, Won, Lost : number of finished/won/lost tournament-games of user
+   - for ladder-tournaments detached tournament-games (because of user-removals) are not counted
 
 
 ###########################################################################

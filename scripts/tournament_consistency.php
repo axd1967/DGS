@@ -162,10 +162,11 @@ function fix_tournament_participant_game_count( $arg_tid, $do_it )
 
    // find finished/won/lost tournament-games for challenger
    $result = db_query( "tournament_consistency.fix_tournament_participant_game_count.challenger($arg_tid)",
-      "SELECT TP.tid, TP.ID AS rid, TP.Finished, TP.Won, TP.Lost, COUNT(*) AS X_Finished, " .
+      "SELECT TP.tid, TP.ID AS rid, TP.Finished, TP.Won, TP.Lost, SUM(IF(ISNULL(TG.ID),0,1)) AS X_Finished, " .
          "SUM(IF(TG.Score<0,1,0)) AS X_ChallengerWon, SUM(IF(TG.Score>0,1,0)) AS X_ChallengerLost " .
       "FROM TournamentParticipant AS TP " .
          "LEFT JOIN TournamentGames AS TG ON TG.Challenger_rid=TP.ID AND TG.Status IN ('".TG_STATUS_WAIT."','".TG_STATUS_DONE."') " .
+            "AND (TG.Flags & ".TG_FLAG_GAME_DETACHED.")=0 " .
       tid_clause('TP.tid', $arg_tid, /*with-OP*/false, /*with-WHERE*/true) .
       "GROUP BY TP.tid, TP.ID " .
       "ORDER BY TP.tid, TP.ID" );
@@ -182,10 +183,11 @@ function fix_tournament_participant_game_count( $arg_tid, $do_it )
 
    // find finished/won/lost tournament-games for defender
    $result = db_query( "tournament_consistency.fix_tournament_participant_game_count.defender($arg_tid)",
-      "SELECT TP.tid, TP.ID AS rid, TP.Finished, TP.Won, TP.Lost, COUNT(*) AS X_Finished, " .
+      "SELECT TP.tid, TP.ID AS rid, TP.Finished, TP.Won, TP.Lost, SUM(IF(ISNULL(TG.ID),0,1)) AS X_Finished, " .
          "SUM(IF(TG.Score>0,1,0)) AS X_DefenderWon, SUM(IF(TG.Score<0,1,0)) AS X_DefenderLost " .
       "FROM TournamentParticipant AS TP " .
          "LEFT JOIN TournamentGames AS TG ON TG.Defender_rid=TP.ID AND TG.Status IN ('".TG_STATUS_WAIT."','".TG_STATUS_DONE."') " .
+            "AND (TG.Flags & ".TG_FLAG_GAME_DETACHED.")=0 " .
       tid_clause('TP.tid', $arg_tid, /*with-OP*/false, /*with-WHERE*/true) .
       "GROUP BY TP.tid, TP.ID " .
       "ORDER BY TP.tid, TP.ID" );
