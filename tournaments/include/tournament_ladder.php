@@ -302,7 +302,8 @@ class TournamentLadder
                "UPDATE TournamentGames SET " .
                   "Flags=Flags | ".TG_FLAG_GAME_DETACHED.", " .
                   "Status=IF(Status='".TG_STATUS_PLAY."','".TG_STATUS_SCORE."',Status) " .
-               "WHERE ID IN (" . implode(',', $arr_tg_id) . ")" );
+               "WHERE ID IN (" . implode(',', $arr_tg_id) . ") AND " .
+                  "Status IN ('".TG_STATUS_PLAY."','".TG_STATUS_SCORE."')" ); // avoid race-condition
          }
          if ( count($arr_gid) ) // set Games: make unrated, set detached-flag
          {
