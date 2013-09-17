@@ -720,7 +720,10 @@ Description:
 * Flags : flags
    - 0x0001 = game-result (Score) has been set by tournament-director (not taken from Games.Score)
    - 0x0002 = game is detached from tournament (on user-removal for example),
-     TG.Score has no meaning if this flag is set
+     - TG.Score has no meaning if this flag is set,
+     - for ladder-tournament the corresponding incoming- and outgoing challenges are freed for the
+       involved tournament-participants
+   - 0x0004 = if set, indicates that role of challenger and defender has switched at game-end
 
 * Lastchanged : date of last update of table-entry
 
@@ -733,6 +736,7 @@ Description:
 * StartTime : like Games.Startime
 
 * EndTime : like Games.Lastchanged when game finished
+   - can be 0 if tournament-game ended prematurely, e.g. by detaching on ladder-user-removal
 
 * Score : similar to Games.Score but meaning is oriented on challenger/defender-roles
    - Score has no meaning if game is "detached" from tournament (see TG.Flags),

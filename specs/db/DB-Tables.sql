@@ -500,8 +500,6 @@ CREATE TABLE TranslationLanguages (
 # Table structure for table 'TranslationGroups'
 #
 
--- each php-page can be assigned a single TranslationGroup, so that texts on different pages
--- can have different translations depending on the context.
 CREATE TABLE TranslationGroups (
    ID int(11) NOT NULL auto_increment,
    Groupname varchar(32) NOT NULL default '', -- name of group, see scripts/README.translations
