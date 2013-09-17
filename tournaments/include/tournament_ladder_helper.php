@@ -85,11 +85,11 @@ class TournamentLadderHelper
          $success = TournamentLadder::process_game_end( $tid, $tgame, $game_end_action );
          if ( $success )
          {
-            // decrease TG.ChallengesIn for defender
+            // decrease TL.ChallengesIn for defender
             $tladder_df = new TournamentLadder( $tid, $tgame->Defender_rid, $tgame->Defender_uid );
             $tladder_df->update_incoming_challenges( -1 );
 
-            // decrease TG.ChallengesOut for challenger
+            // decrease TL.ChallengesOut for challenger
             $tladder_ch = new TournamentLadder( $tid, $tgame->Challenger_rid, $tgame->Challenger_uid );
             $tladder_ch->update_outgoing_challenges( -1 );
 
