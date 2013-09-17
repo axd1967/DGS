@@ -19,10 +19,17 @@ ChangeLog
 2013-09-18 jug
 
    * scripts/tournament_consistency.php (fix_tournament_participant_game_count),
-     specs/db/table-Tournaments.txt:
+     scripts/updates/database_changes_1_0_15_to_1_0_16.mysql,
+     specs/db/dragon-ddl.sql, specs/db/table-Tournaments.txt:
    - bugfixes for tournament-consistency-script
      - correct count of finished tournament-games in left-join
      - only count undetached finished tournament-games fixing count TournamentParticipant.Finished
+-----------
+-- added keys on TournamentGames-table for tournament-consistency-check
+ALTER TABLE TournamentGames
+   ADD KEY Challenger_rid (Challenger_rid),
+   ADD KEY Defender_rid (Defender_rid) ;
+-----------
 
 2013-09-17 jug
 

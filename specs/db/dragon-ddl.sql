@@ -1083,7 +1083,9 @@ CREATE TABLE IF NOT EXISTS `TournamentGames` (
   KEY `Defender_uid` (`Defender_uid`),
   KEY `gid` (`gid`),
   KEY `Status_Ticks` (`Status`,`TicksDue`),
-  KEY `tidRoundPool` (`tid`,`Round_ID`,`Pool`)
+  KEY `tidRoundPool` (`tid`,`Round_ID`,`Pool`),
+  KEY `Challenger_rid` (`Challenger_rid`),
+  KEY `Defender_rid` (`Defender_rid`)
 ) ENGINE=MyISAM  DEFAULT CHARSET=latin1;
 
 -- --------------------------------------------------------

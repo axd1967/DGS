@@ -131,3 +131,9 @@ UPDATE Players
    SET Timezone='Asia/Shanghai' WHERE Timezone IN ('China/Beijing', 'China/Shanghai') ;
 
 
+-- added keys on TournamentGames-table for tournament-consistency-check
+ALTER TABLE TournamentGames
+   ADD KEY Challenger_rid (Challenger_rid),
+   ADD KEY Defender_rid (Defender_rid) ;
+
+
