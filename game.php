@@ -85,6 +85,7 @@ $GLOBALS['ThePage'] = new Page('Game');
    $preview = (bool)@$_REQUEST['preview'];
 
    $message = get_request_arg( 'message');
+   $message = replace_move_tag( $message, $gid );
 
    disable_cache();
 

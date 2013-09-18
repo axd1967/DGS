@@ -18,6 +18,12 @@ ChangeLog
 
 2013-09-18 jug
 
+   * include/game_actions.php (GameActionHelper.set_game_move_message),
+     include/std_functions.php (replace_move_tag),
+     game.php, NEWS:
+   - added tag "<move num|S>" on game-page to be replaced with "<game GID,num|S>" as input-help
+     for game-move-links
+
    * include/board.php (Board.load_from_db):
    - bugfix: showing only shape-setup for shape-games was also showing 1st move
 

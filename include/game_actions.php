@@ -216,7 +216,10 @@ class GameActionHelper
    }//init_query
 
 
-   /*! \brief Strips away empty comments from message and set game-flags if there are embedded hidden messages. */
+   /*!
+    * \brief Strips away empty comments from message, replace move-tag and
+    *    set game-flags if there are embedded hidden messages.
+    */
    public function set_game_move_message( $message_raw )
    {
       if ( is_null($this->game_row) )
@@ -225,7 +228,8 @@ class GameActionHelper
       $this->message_raw = trim($message_raw);
       if ( preg_match( "/^<c>\s*<\\/c>$/si", $this->message_raw ) ) // remove empty comment-only tags
          $this->message_raw = '';
-      $this->message = $this->message_raw;
+
+      $this->message = replace_move_tag( $this->message_raw, $this->gid );
 
       if ( $this->message && preg_match( "#</?h(idden)?>#is", $this->message) )
          $this->game_row['GameFlags'] |= GAMEFLAGS_HIDDEN_MSG;

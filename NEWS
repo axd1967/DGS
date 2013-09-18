@@ -130,6 +130,8 @@ Copyright (C) 2001-2013  Erik Ouchterlony, Jens-Uwe Gaspar
 
       * Markup tags and Images:
          * &lt;tourney id> : showing link to corresponding tournament page
+         * &lt;move 123> | &lt;move S> : showing link to specific move of current game (can only be used on game-page),
+           will be replaced with corresponding &lt;game>-tag
 
 ## * <home game_editor.php>Game-editor</home>:
 ##    * added experimental JavaScript-based game-editor using jQuery 1.6.1

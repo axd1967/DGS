@@ -2140,6 +2140,12 @@ function make_html_safe( $msg, $some_html=false, $mark_terms='')
    return $msg;
 }//make_html_safe
 
+// replace "<move num|S>" with "<game $gid,N>"
+function replace_move_tag( $msg, $gid )
+{
+   return preg_replace("/<move\\s+(\\d+|S)>/s", "<game $gid,\\1>", $msg);
+}
+
 function textarea_safe( $msg, $charenc=false)
 {
    global $encoding_used;
