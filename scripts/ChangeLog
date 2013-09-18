@@ -18,6 +18,9 @@ ChangeLog
 
 2013-09-18 jug
 
+   * include/board.php (Board.load_from_db):
+   - bugfix: showing only shape-setup for shape-games was also showing 1st move
+
    * scripts/tournament_consistency.php (fix_tournament_participant_game_count),
      scripts/updates/database_changes_1_0_15_to_1_0_16.mysql,
      specs/db/dragon-ddl.sql, specs/db/table-Tournaments.txt:

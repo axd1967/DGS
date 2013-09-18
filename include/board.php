@@ -122,12 +122,12 @@ class Board
          error('invalid_args', "board.load_from_db.check.move.no_shape($gid,$move)");
       if ( $is_shape && $move === MOVE_SETUP )
       {
-         $move = 1;
+         $move = 0;
          $show_move_setup = true;
       }
       else
          $show_move_setup = false;
-      if ( $move <= 0 || $move > $this->max_moves )
+      if ( ($move <= 0 && !$is_shape) || $move > $this->max_moves )
          $move = $this->max_moves;
 
       // load moves
