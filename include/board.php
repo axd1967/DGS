@@ -127,7 +127,7 @@ class Board
       }
       else
          $show_move_setup = false;
-      if ( ($move <= 0 && !$is_shape) || $move > $this->max_moves )
+      if ( $move < 0 || ($move == 0 && !$is_shape) || $move > $this->max_moves )
          $move = $this->max_moves;
 
       // load moves
