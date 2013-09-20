@@ -120,13 +120,18 @@ class Board
       // handle goto-move (incl. shape-game)
       if ( !$is_shape && $move === MOVE_SETUP )
          error('invalid_args', "board.load_from_db.check.move.no_shape($gid,$move)");
-      if ( $is_shape && $move === MOVE_SETUP )
+      if ( $is_shape )
       {
-         $move = 0;
          $show_move_setup = true;
+         if ( $move === MOVE_SETUP )
+            $move = 0;
+         elseif ( $move === 0 )
+            $move = $this->max_moves; // move=0 -> last-move
       }
       else
          $show_move_setup = false;
+
+      // correct illegal move & default move=0 (=last-move); exception for shape-game to jump to shape-setup
       if ( $move < 0 || ($move == 0 && !$is_shape) || $move > $this->max_moves )
          $move = $this->max_moves;
 

@@ -16,6 +16,12 @@ Developers INFO:
 ChangeLog
 ------------------------------------------------------------------
 
+2013-09-21 jug
+
+   * include/board.php (Board.load_from_db):
+   - bugfix: fixed handling $move=0 defaulting to last-move for shape-game,
+     which was introduced by last two bug-fixes
+
 2013-09-18 jug
 
    * include/game_actions.php (GameActionHelper.set_game_move_message),
