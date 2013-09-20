@@ -21,6 +21,7 @@ $TranslateGroups[] = "Game";
 
 require_once 'include/globals.php';
 require_once 'include/board.php';
+require_once 'include/move.php';
 require_once 'include/std_classes.php';
 require_once 'include/std_functions.php';
 require_once 'include/game_functions.php';

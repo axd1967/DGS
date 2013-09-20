@@ -205,7 +205,7 @@ class GameCheckScore
    public function check_remove( $ruleset, $coords=false, $with_board_status=false )
    {
       $Size = $this->board->size;
-      $array = &$this->board->array;
+      $array =& $this->board->array;
 
       // toggle marked stones and marked dame to array
 
