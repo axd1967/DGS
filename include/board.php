@@ -120,19 +120,16 @@ class Board
       // handle goto-move (incl. shape-game)
       if ( !$is_shape && $move === MOVE_SETUP )
          error('invalid_args', "board.load_from_db.check.move.no_shape($gid,$move)");
-      if ( $is_shape )
+      if ( $is_shape && $move === MOVE_SETUP )
       {
+         $move = 0;
          $show_move_setup = true;
-         if ( $move === MOVE_SETUP )
-            $move = 0;
-         elseif ( $move === 0 )
-            $move = $this->max_moves; // move=0 -> last-move
       }
       else
          $show_move_setup = false;
 
-      // correct illegal move & default move=0 (=last-move); exception for shape-game to jump to shape-setup
-      if ( $move < 0 || ($move == 0 && !$is_shape) || $move > $this->max_moves )
+      // correct illegal move & default move=0 (-> last-move); exception for showing shape-setup of shape-game
+      if ( $move < 0 || ($move == 0 && !$show_move_setup) || $move > $this->max_moves )
          $move = $this->max_moves;
 
       // load moves
@@ -870,7 +867,7 @@ class Board
                if ( is_array($this->marks) && $sgfc && @$this->marks[$sgfc] )
                {
                   $mrk = $this->marks[$sgfc];
-                  if ( is_numeric($mrk) && $this->coord_borders & NUMBER_OVER )
+                  if ( is_numeric($mrk) && ($this->coord_borders & NUMBER_OVER) )
                      $numover = true;
                }
                if ( !$mrk && $sgfc && $mark_last_capture && @$this->last_captures[$sgfc] )

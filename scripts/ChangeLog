@@ -19,6 +19,9 @@ ChangeLog
 2013-09-21 jug
 
    * include/board.php (Board.load_from_db):
+   - bugfix: re-enable last-move-mark, which has vanished within last bugfix for shape-games
+
+   * include/board.php (Board.load_from_db):
    - bugfix: fixed handling $move=0 defaulting to last-move for shape-game,
      which was introduced by last two bug-fixes
 
