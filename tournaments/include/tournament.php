@@ -413,7 +413,7 @@ class Tournament
          }
       }
 
-      if ( is_array($menu) )
+      if ( is_array($menu) && $title && $link )
          $menu[$title] = $link;
 
       return array( $title, $link );

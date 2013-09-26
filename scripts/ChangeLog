@@ -16,6 +16,11 @@ Developers INFO:
 ChangeLog
 ------------------------------------------------------------------
 
+2013-09-26 jug
+
+   * tournaments/include/tournament.php (Tournament.build_data_link):
+   - bugfix: show link to tournament-data only if link allowed
+
 2013-09-21 jug
 
    * include/board.php (Board.load_from_db):
