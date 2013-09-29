@@ -1028,7 +1028,7 @@ chapter lists the other used caching strategies currently (Dec-2012) in use.
 
 #-------- (9a) Quick-Status ----------------
 
-In early 2012 (ca. Jan) the it was detected, that the RSS- and quick-status-page
+In early 2012 (ca. Jan) it was detected, that the RSS- and quick-status-page
 were excessively used and tremendously slowed down the server due to heavy server-
 load. Later this was documented on the live-server forums mostly regarding RSS,
 but also hinting towards quick-status:
@@ -1049,7 +1049,7 @@ with something using the [FILE]- or [APC]-cache.
 
 #-------- (9b) RSS/WAP ---------------------
 
-In early 2012 (ca. Jan) the it was detected, that the RSS- and quick-status-page
+In early 2012 (ca. Jan) it was detected, that the RSS- and quick-status-page
 were excessively used and tremendously slowed down the server due to heavy server-
 load. For RSS alone 11 Mio page-requests (of 29 Mio, ca. 38%) per month were done.
 Sometimes even every 5-10 secs the RSS-requests came in (resulting in over 3 Mio
@@ -1114,7 +1114,7 @@ to reduce redundant db-queries.
 
 * class TournamentCache
    - The "TournamentCache"-class is used for all kind of caching for tournaments.
-     For locking the tournamnet by the tournament-cron-script, an additional
+     For locking the tournament by the tournament-cron-script, an additional
      soft-caching kicks in if the caching is not persistent or disabled.
 
      For this also
