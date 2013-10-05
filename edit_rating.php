@@ -20,6 +20,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 $TranslateGroups[] = "Users";
 
 require_once 'include/std_functions.php';
+require_once 'include/classlib_user.php';
 require_once 'include/form_functions.php';
 require_once 'include/gui_functions.php';
 require_once 'include/rating.php';
@@ -69,6 +70,8 @@ require_once 'include/rank_converter.php';
       }
       else
          update_player_rating( $my_id, /*new-rating*/null, $upd_players );
+
+      User::delete_cache_user_handle('edit_rating', $player_row['Handle']);
 
       jump_to("edit_rating.php?sysmsg=".urlencode($message));
    }

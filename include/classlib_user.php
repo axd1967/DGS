@@ -242,6 +242,39 @@ class User
       return $result;
    }//load_user_by_handle
 
+   /*!
+    * \brief Loads cached version and returns User-object for given user-Handle; NULL if nothing found.
+    * \see User::load_user_by_handle()
+    */
+   public static function load_cache_user_by_handle( $xdbgmsg, $handle )
+   {
+      if ( (string)trim($handle) == '' )
+         error('invalid_args', "User:load_cache_user_by_handle.miss_handle($handle)");
+
+      $player_ref = strtolower($handle);
+      $dbgmsg = "User:load_cache_user_by_handle($player_ref).$xdbgmsg";
+      $key = "user_hdl.$player_ref";
+
+      $urow = DgsCache::fetch( $dbgmsg, CACHE_GRP_USER_HANDLE, $key );
+      if ( is_null($urow) )
+      {
+         $user = self::load_user_by_handle($handle);
+         if ( !is_null($user) )
+            DgsCache::store( $dbgmsg, CACHE_GRP_USER_HANDLE, $key, $user->urow, SECS_PER_HOUR );
+      }
+      else
+         $user = self::new_from_row($urow);
+
+      return $user;
+   }//load_cache_user_by_handle
+
+   public static function delete_cache_user_handle( $dbgmsg, $uhandle, $uhandle2=null )
+   {
+      DgsCache::delete( $dbgmsg, CACHE_GRP_USER_HANDLE, 'user_hdl.' . strtolower($uhandle) );
+      if ( !is_null($uhandle2) )
+         DgsCache::delete( $dbgmsg, CACHE_GRP_USER_HANDLE, 'user_hdl.' . strtolower($uhandle2) );
+   }
+
    /*! \brief Returns non-null array( uid => { ID/Handle/Name/Rating2/Country => val }, ... ) for given users. */
    public static function load_quick_userinfo( $arr_uid )
    {

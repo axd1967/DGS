@@ -21,4 +21,5 @@ execute 'scripts/player_consistency.php'
 # - removed 'ALLOW_TOURNAMENTS_ROUND_ROBIN' by changing format of 'ALLOW_TOURNAMENTS'
 # - added 'WROOM_MAX_ENTRIES'
 # - added 'SEND_ACTIVATION_MAIL' to disable account-activation-mail
+# - extended $DGS_CACHE_GROUPS with CACHE_GRP_USER_HANDLE for caching user-data for preview of rating-changes
 

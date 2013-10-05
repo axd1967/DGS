@@ -320,6 +320,14 @@ $GLOBALS['ThePage'] = new Page('UserInfo');
                 T_('Show opponents') => "opponents.php?uid=$uid",
                 T_('Invite this user') => "message.php?mode=Invite".URI_AMP."uid=$uid",
                 T_('Send message to user') => "message.php?mode=NewMessage".URI_AMP."uid=$uid" );
+      if ( !$my_info )
+      {
+         $w_hdl = urlencode($handle_safe);
+         $b_hdl = urlencode($player_row['Handle']);
+         if ( $player_row['Rating2'] > @$row['Rating2'] )
+            swap( $w_hdl, $b_hdl );
+         $menu_array[T_('Show rating changes')] = "rating_changes.php?w=$w_hdl".URI_AMP."b=$b_hdl";
+      }
 
       if ( $has_contact >= 0 )
       {

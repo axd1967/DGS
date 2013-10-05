@@ -214,7 +214,7 @@ function print_rating_update( $game, $game_row )
    echo "<hr><h3>$title</h3>\n";
 
    // rating-debug logged by method-call
-   $result = update_rating2( $game->ID, /*check-done*/false, /*simul*/true, $game_row );
+   list( $result, $result2 ) = update_rating2( $game->ID, /*check-done*/false, /*simul*/true, $game_row );
    $result_descr = convert_rating_result($result);
    echo "<b>RESULT for [$title]</b> update_rating2 = $result <b>$result_descr</b>\n",
       "<font size=smaller>(Note: 0=rated-game, 1=can-be-deleted, 2=not-rated)</font>\n\n";

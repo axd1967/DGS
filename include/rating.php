@@ -163,13 +163,16 @@ function change_rating(&$rating_W, &$rating_B, $result, $size, $komi, $handicap,
 //
 // EGF rating, see above URIs for documentation
 //
+// param gid: 0 allowed if $simul == true
 // param simul: if true, don't write into db (used for rating-calcs only)
 //
 // param game_row: only if simul=true for overwriting loaded fields from Games-table:
-//    Moves, Handicap, Rated=Y|N, Score, Size, Komi, (Lastchanged),
-//    b/wRatingStatus, b/wRating, b/wRatingMin/Max, Black/White_ID
+//    Moves, Handicap, Rated=Y|N, Score, Size, Komi, (Lastchanged), tid, GameType,
+//    b/wRatingStatus, b/wRating, b/wRatingMin/Max, Black/White_ID, Black/White_Start_Rating
 //
-// return: -1=error, or: RATEDSTATUS_...: 0=..RATED=rated-game, 1=..DELETABLE=not-rated, 2=..UNRATED=not-rated
+// return: $result if $simul==false; otherwise: arr( $result, $result2 ) with:
+//    $result: -1=error, or: RATEDSTATUS_...: 0=..RATED=rated-game, 1=..DELETABLE=not-rated, 2=..UNRATED=not-rated
+//    $result2: arr( 'b/wRating' => new-calculated rating-elements for B|W )
 //
 // IMPORTANT NOTE: caller needs to open TA with HOT-section!!
 //
@@ -179,25 +182,32 @@ function update_rating2($gid, $check_done=true, $simul=false, $game_row=null)
 
    $WithinPercent = 1/4;
 
-   $query = "SELECT G.*, ".
-      "white.Rating2 as wRating, white.RatingStatus as wRatingStatus, " .
-      "white.RatingMax as wRatingMax, white.RatingMin as wRatingMin, " .
-      "black.Rating2 as bRating, black.RatingStatus as bRatingStatus, " .
-      "black.RatingMax as bRatingMax, black.RatingMin as bRatingMin " .
-      "FROM Games AS G " .
-         "INNER JOIN Players AS black ON black.ID=G.Black_ID " .
-         "INNER JOIN Players AS white ON white.ID=G.White_ID " .
-      "WHERE G.ID=$gid";
-   if ( $simul )
-      $query .= " AND G.Status='".GAME_STATUS_FINISHED."'";
-   if ( $check_done )
-      $query .= " AND G.Rated!='Done'";
+   if ( $gid > 0 )
+   {
+      $query = "SELECT G.*, ".
+         "white.Rating2 as wRating, white.RatingStatus as wRatingStatus, " .
+         "white.RatingMax as wRatingMax, white.RatingMin as wRatingMin, " .
+         "black.Rating2 as bRating, black.RatingStatus as bRatingStatus, " .
+         "black.RatingMax as bRatingMax, black.RatingMin as bRatingMin " .
+         "FROM Games AS G " .
+            "INNER JOIN Players AS black ON black.ID=G.Black_ID " .
+            "INNER JOIN Players AS white ON white.ID=G.White_ID " .
+         "WHERE G.ID=$gid";
+      if ( $simul )
+         $query .= " AND G.Status='".GAME_STATUS_FINISHED."'";
+      if ( $check_done )
+         $query .= " AND G.Rated!='Done'";
+      $query .= " LIMIT 2"; // NOTE: 'limit 2' to check for inconsistencies
 
-   $result = db_query( 'update_rating2.find_game', $query );
-   if ( @mysql_num_rows($result) != 1 )
-      return -1; //error or game not found or rate already done
-   $row = mysql_fetch_assoc( $result );
-   extract($row);
+      $result = db_query( 'update_rating2.find_game', $query );
+      if ( @mysql_num_rows($result) != 1 )
+         return -1; //error or game not found or rate already done
+      $row = mysql_fetch_assoc( $result );
+      mysql_free_result($result);
+      extract($row);
+   }
+   elseif ( !$simul )
+      error('internal_error', "update_rating2.miss_gid");
 
    if ( !is_null($game_row) ) // overwrite (for simul-mode & MP-game)
       extract($game_row);
@@ -348,7 +358,16 @@ function update_rating2($gid, $check_done=true, $simul=false, $game_row=null)
          "\n";
    }
 
-   return RATEDSTATUS_RATED; //rated game
+   $result = RATEDSTATUS_RATED; // rated game
+   if ( $simul )
+   {
+      $result = array( $result,
+         array(
+            'bRating' => $bRating,
+            'wRating' => $wRating,
+         ));
+   }
+   return $result;
 }//update_rating2
 
 

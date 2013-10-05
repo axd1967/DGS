@@ -16,6 +16,25 @@ Developers INFO:
 ChangeLog
 ------------------------------------------------------------------
 
+2013-10-05 jug
+
+   * include/cache_globals.php (CACHE_GRP_USER_HANDLE, $ARR_CACHE_GROUP_NAMES, $ARR_CACHE_GROUP_CLEANUP),
+     include/classlib_user.php (User.load_cache_user_by_handle, ~.delete_cache_user_handle),
+     include/game_functions.php (GameFinalizer.finish_game; GameNotify.get_user_handle),
+     include/config.php ($DGS_CACHE_GROUPS),
+     include/rating.php (update_rating2),
+     include/globals.php (CSS_VERSION),
+     scripts/updates/other_changes_1_0_15_to_1_0_16.txt,
+     skins/dragon/screen.css, specs/caching.txt,
+     rating_changes.php (load_data_rating_changes, fill_user_rating_changes,
+       calculate_rating_change_prediction, rdiff),
+     game_calc.php (print_rating_update),
+     admin_rating.php, edit_rating.php, gameinfo.php, site_map.php, userinfo.php, NEWS:
+   - added page to preview rating-changes between two players
+     - cached user-data with rating-info with new cache-group CACHE_GRP_USER_HANDLE
+     - invalidated user-handle cache on changing user-rating
+     - added bottom-links to 'show rating changes' on userinfo- and gameinfo-page
+
 2013-09-26 jug
 
    * tournaments/include/tournament.php (Tournament.build_data_link):

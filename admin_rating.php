@@ -137,6 +137,8 @@ $GLOBALS['ThePage'] = new Page('RatingAdmin');
 
             // fix running games/MPGs, create bulletins for running games and tournaments
             $has_bulletins = notify_fix_running_games( $uid, $user->Handle, $changes, $user->Rating, $new_rating );
+
+            User::delete_cache_user_handle('admin_rating', $user->Handle );
          }
          ta_end();
 

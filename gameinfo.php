@@ -594,6 +594,12 @@ function build_rating_diff( $rating_diff )
    if ( $grow['GameType'] != GAMETYPE_GO )
       $menu_array[T_('Show game-players')] = "game_players.php?gid=$gid";
    GameRematch::add_rematch_links( $menu_array, $gid, $game_status, $grow['GameType'], $grow['tid'] );
+   if ( $grow['GameType'] == GAMETYPE_GO )
+   {
+      $menu_array[T_('Show rating changes')] = "rating_changes.php?b=".urlencode($grow['Black_Handle']) .
+         URI_AMP. "w=".urlencode($grow['White_Handle']).URI_AMP."size={$grow['Size']}" .
+         URI_AMP."handicap={$grow['Handicap']}".URI_AMP."komi={$grow['Komi']}";
+   }
    if ( ALLOW_TOURNAMENTS && $tid && !is_null($tourney) )
    {
       $tourney->build_data_link( $menu_array );

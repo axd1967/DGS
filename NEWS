@@ -160,6 +160,9 @@ Copyright (C) 2001-2013  Erik Ouchterlony, Jens-Uwe Gaspar
       * Show player to move (marked by <image backward.gif>)
       * Show hint about area-scoring before passing to avoid odd dame
 
+   * <home userinfo.php>User info</home> & Game info page:
+      * Added new page to preview rating-changes between two players
+
 
    Minor changes:
 

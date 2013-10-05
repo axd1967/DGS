@@ -1015,6 +1015,17 @@ See "template" for new cache-group at end of this section.
      is only 30 minutes.
 
 
+* CACHE_GRP_USER_HANDLE
+   - Caching of data for a user-handle is used for previewing rating-changes.
+
+   - A cache-entry for this cache-group depends on the user-handle.
+     The cache-key (user-handle) is converted into lower-case to be able to
+     identify it independent from the writing.
+
+   - Only automatic expire-invalidation is performed as the rating does not
+     change so often.  Current expire-time is 1 hour.
+
+
 * new cache-group CACHE_GRP_ ...
    - motivation, description, cache-invalidation, expire-time, special-handling ?
 

@@ -129,7 +129,8 @@ function itemL($text, $link='', $working=true, $last=false)
             item(T_('Show game info'), "gameinfo.php", false);
             { $item_level++;
                item(T_('Rematch'), "game_rematch.php?mode=".REMATCH_INVITE, false);
-               item(T_('Copy as new game#rematch'), "game_rematch.php".REMATCH_NEWGAME, false, true);
+               item(T_('Copy as new game#rematch'), "game_rematch.php".REMATCH_NEWGAME, false);
+               item(T_('Show rating changes'), "rating_changes.php?b=".urlencode($uhandle), true, true);
             } $item_level--;
             item(T_('Show game-players'), "game_players.php", false);
             item(T_('Attach SGF'), "manage_sgf.php", false, true);
@@ -205,7 +206,8 @@ function itemL($text, $link='', $working=true, $last=false)
          item(T_('Edit biographical order'), "edit_bio.php?editorder=1", true);
          item(T_('Edit user picture'), "edit_picture.php", true);
          item(T_('Edit vacation'), "edit_vacation.php", true);
-         item(T_('Show my opponents'), "opponents.php", true, true);
+         item(T_('Show my opponents'), "opponents.php", true);
+         item(T_('Show rating changes'), "rating_changes.php?b=".urlencode($uhandle), true, true);
       } $item_level--;
 
       item(T_('Messages'), "list_messages.php", true);

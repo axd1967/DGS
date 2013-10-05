@@ -2087,7 +2087,7 @@ class GameFinalizer
          if ( $this->GameType != GAMETYPE_GO ) // MP-game
          {
             $arr_ratings = MultiPlayerGame::calc_average_group_ratings( $gid, /*rating-upd*/true );
-            $rated_status = update_rating2($gid, true, false, $arr_ratings);
+            $rated_status = update_rating2($gid, true, /*simul*/false, $arr_ratings);
          }
          else
             $rated_status = update_rating2($gid);
@@ -2113,6 +2113,8 @@ class GameFinalizer
       clear_cache_quick_status( array( $this->Black_ID, $this->White_ID ), QST_CACHE_GAMES );
       GameHelper::delete_cache_status_games( "GameFinalizer.finish_game.del_cache($gid)", $this->Black_ID, $this->White_ID );
       GameHelper::delete_cache_game_row( "GameFinalizer.finish_game.del_cache($gid)", $gid );
+      User::delete_cache_user_handle( "GameFinalizer.finish_game.del_cache($gid)",
+         $game_notify->get_user_handle($this->Black_ID), $game_notify->get_user_handle($this->White_ID) );
    }//finish_game
 
    /*! \brief Returns true, if opponent rejects-win-by-timout and game should be made unrated. */
@@ -2263,6 +2265,11 @@ class GameNotify
          'Status' => $this->game_status,
          );
    }//build_game_ref_array
+
+   public function get_user_handle( $uid )
+   {
+      return @$this->players[$uid]['Handle'];
+   }
 
    /*!
     * \brief Returns (untranslated) subject and text for message to players if game got deleted.

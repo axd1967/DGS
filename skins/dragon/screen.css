@@ -1744,6 +1744,36 @@ table#gameStats tr.Number td {
 }
 
 
+
+/* ------------------------- */
+/* rating changes pages */
+/* ------------------------- */
+
+table#RatingChgTableInfos {
+   background: #f7f5ff;
+   border: 1px solid grey;
+   border-bottom: 2px solid grey;
+   border-spacing: 0px;
+   font-size: 90%;
+}
+
+table#RatingChgTableInfos th.Caption {
+   padding: 0.5em;
+   border: 1px solid grey;
+   border-bottom: 0px solid grey;
+}
+
+table#RatingChgTableInfos td.Rubric {
+   text-align: left;
+}
+table#RatingChgTableInfos td {
+   text-align: center;
+   border: 1px solid grey;
+   border-bottom: 0px solid grey;
+}
+
+
+
 /* ------------------------- */
 /* docs pages */
 /* ------------------------- */
