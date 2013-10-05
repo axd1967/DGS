@@ -315,9 +315,7 @@ $GLOBALS['ThePage'] = new Page('UserInfo');
    else // others info
    {
       $menu_array =
-         array( T_('Show running games') => $run_link,
-                T_('Show finished games') => $fin_link,
-                T_('Show opponents') => "opponents.php?uid=$uid",
+         array( T_('Show opponents') => "opponents.php?uid=$uid",
                 T_('Invite this user') => "message.php?mode=Invite".URI_AMP."uid=$uid",
                 T_('Send message to user') => "message.php?mode=NewMessage".URI_AMP."uid=$uid" );
       if ( !$my_info )
