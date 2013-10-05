@@ -797,7 +797,7 @@ class TournamentLadderProps
 
          $arr = array();
          $arr[TLP_JOINORDER_REGTIME] = T_('Add new user in position ordered by tournament registration time (bottom of ladder).#T_ladder');
-         $arr[TLP_JOINORDER_RATING]  = T_('Add new user in ladder at position below user with same user rating.#T_ladder');
+         $arr[TLP_JOINORDER_RATING]  = T_('Add new user below user with same rating in the ladder ordered by user rating.#T_ladder');
          $arr[TLP_JOINORDER_RANDOM]  = T_('Add new user at random position in the ladder.#T_ladder');
          self::$ARR_TLPROPS_TEXTS[$key.'_LONG'] = $arr;
       }

@@ -16,6 +16,11 @@ Developers INFO:
 ChangeLog
 ------------------------------------------------------------------
 
+2013-10-06 jug
+
+   * tournaments/include/tournament_ladder_props.php (TournamentLadderProps.getUserJoinOrderText):
+   - clarified text for ladder-tournament rating-join-order
+
 2013-10-05 jug
 
    * include/cache_globals.php (CACHE_GRP_USER_HANDLE, $ARR_CACHE_GROUP_NAMES, $ARR_CACHE_GROUP_CLEANUP),
