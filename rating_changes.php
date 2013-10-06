@@ -17,7 +17,7 @@ You should have received a copy of the GNU Affero General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-$TranslateGroups[] = "User";
+$TranslateGroups[] = "Users";
 
 require_once 'include/classlib_user.php';
 require_once 'include/form_functions.php';
