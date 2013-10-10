@@ -18,6 +18,9 @@ ChangeLog
 
 2013-10-10 jug
 
+   * tournaments/ladder/retreat.php:
+   - bugfix: do not allow ladder-retreat on tournament-CLOSED-status
+
    * include/globals.php, skins/dragon/screen.css,
      rating_changes.php  (fill_user_rating_changes):
    - merged rating-min/max field-rows on rating-changes-page into one field

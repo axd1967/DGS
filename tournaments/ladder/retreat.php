@@ -60,7 +60,7 @@ $GLOBALS['ThePage'] = new Page('TournamentLadderRetreat');
    $tourney = TournamentCache::load_cache_tournament( 'Tournament.ladder_retreat.find_tournament', $tid );
    $tstatus = new TournamentStatus( $tourney );
 
-   $errors = $tstatus->check_edit_status( TournamentLadder::get_view_ladder_status(false) );
+   $errors = $tstatus->check_edit_status( array( TOURNEY_STATUS_PLAY ) );
    if ( $tourney->isFlagSet(TOURNEY_FLAG_LOCK_ADMIN|TOURNEY_FLAG_LOCK_TDWORK) )
       $errors[] = $tourney->buildMaintenanceLockText();
 
