@@ -16,6 +16,12 @@ Developers INFO:
 ChangeLog
 ------------------------------------------------------------------
 
+2013-10-10 jug
+
+   * include/gui_functions.php (echo_image_table),
+     opponents.php, userinfo.php:
+   - added table-image links on userinfo-page of other user to running & finished games with opponent
+
 2013-10-06 jug
 
    * tournaments/include/tournament_ladder_props.php (TournamentLadderProps.getUserJoinOrderText):

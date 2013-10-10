@@ -385,6 +385,17 @@ function echo_image_table( $url, $title, $withSep=true )
          $title );
 }
 
+function echo_image_opp_games( $uid, $opp_handle, $is_finished )
+{
+   $link_fmt = ( $is_finished )
+      ? T_('Link to finished games with opponent [%s]')
+      : T_('Link to running games with opponent [%s]'); // running + all
+   return echo_image_table(
+      "show_games.php?uid=$uid".URI_AMP."opp_hdl=".urlencode($opp_handle).REQF_URL.'opp_hdl'
+         . ( $is_finished ? URI_AMP.'finished=1' : '' ),
+      sprintf($link_fmt, $opp_handle), true );
+}
+
 /*! \brief Returns image-tag for tournament-round (pool-winner = next-round). */
 function echo_image_tourney_pool_winner()
 {

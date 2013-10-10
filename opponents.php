@@ -354,10 +354,6 @@ require_once 'include/classlib_userpicture.php';
       $utable->set_found_rows( mysql_found_rows('opponents.found_rows') );
    }
 
-   $link_fmt = ( $finished )
-      ? T_('Link to finished games with opponent [%s]')
-      : T_('Link to running games with opponent [%s]'); // running + all
-
    if ( $opp )
    {
       //players infos
@@ -445,7 +441,7 @@ require_once 'include/classlib_userpicture.php';
          if ( $utable->Is_Column_Displayed[21] )
          {
             // don't use full selection of filter-values to link to opponent-games
-            $urow_strings[21] = build_opp_games_link( $uid, $row['Handle'], $finished );
+            $urow_strings[21] = echo_image_opp_games( $uid, $row['Handle'], $finished );
          }
          if ( $utable->Is_Column_Displayed[22] )
             $urow_strings[22] = ($row['X_Registerdate'] > 0 ? date(DATE_FMT_YMD, $row['X_Registerdate']) : '' );
@@ -500,15 +496,6 @@ require_once 'include/classlib_userpicture.php';
    end_page(@$menu_array);
 }//main
 
-
-function build_opp_games_link( $uid, $opp_handle, $fin )
-{
-   global $link_fmt;
-   return echo_image_table(
-      "show_games.php?uid=$uid".URI_AMP."opp_hdl=$opp_handle".REQF_URL.'opp_hdl'
-         . ( $fin ? URI_AMP.'finished=1' : '' ),
-      sprintf($link_fmt, $opp_handle), true );
-}//build_opp_games_link
 
 // return array with dbfields extracted from passed db-result
 // keys: cntGames, cntJigo, (cnt|max)Handicap, cnt(Won|Lost)(|Time|Resign|Score)
@@ -573,7 +560,7 @@ function print_players_table( $p, $uid, $opp, $fin )
          ? "<A href=\"userinfo.php?uid=$opp\">" . make_html_safe( $p2['Name']) . "</A>"
          : NO_VALUE ) );
    $r .= sprintf( $rowpatt, T_('Userid'),
-      $p1['Handle'] . ( $p2 ? MED_SPACING . build_opp_games_link( $uid, $p2['Handle'], $fin ) : '' ),
+      $p1['Handle'] . ( $p2 ? MED_SPACING . echo_image_opp_games( $uid, $p2['Handle'], $fin ) : '' ),
       ( $p2 ? $p2['Handle'] : $SPC) );
 
    // Country
