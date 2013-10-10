@@ -189,10 +189,12 @@ $GLOBALS['ThePage'] = new Page('UserInfo');
       }
 
       $itable2->add_sinfo(
-         anchor( $run_link, T_('Running games')) . MED_SPACING . echo_image_opp_games( $my_id, $user_handle, /*fin*/false ),
+         anchor( $run_link, T_('Running games')) .
+            ($my_info ? '' : MED_SPACING . echo_image_opp_games( $my_id, $user_handle, /*fin*/false )),
          $row['Running'] );
       $itable2->add_sinfo(
-         anchor( $fin_link, T_('Finished games')) . MED_SPACING . echo_image_opp_games( $my_id, $user_handle, /*fin*/true ),
+         anchor( $fin_link, T_('Finished games')) .
+            ($my_info ? '' : MED_SPACING . echo_image_opp_games( $my_id, $user_handle, /*fin*/true )),
          $row['Finished'] . MED_SPACING . '/ '
             . span('Smaller', sprintf( '(%s)', anchor( $fin_link_timeout, T_('Games lost by timeout')))) );
       $itable2->add_sinfo( anchor( $rat_link, T_('Rated games')),    $row['RatedGames'] );
