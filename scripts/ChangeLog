@@ -18,6 +18,10 @@ ChangeLog
 
 2013-10-10 jug
 
+   * include/globals.php, skins/dragon/screen.css,
+     rating_changes.php  (fill_user_rating_changes):
+   - merged rating-min/max field-rows on rating-changes-page into one field
+
    * include/gui_functions.php (echo_image_table),
      opponents.php, userinfo.php:
    - added table-image links on userinfo-page of other user to running & finished games with opponent

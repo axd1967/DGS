@@ -174,20 +174,18 @@ function fill_user_rating_changes( $data, &$rform, &$itable, $b_id, $w_id )
    $itable->add_sinfo( T_('Rating'), array(
          ($has_b_rating ? echo_rating(@$userb->Rating, true, $userb->ID, false) : NO_VALUE),
          ($has_w_rating ? echo_rating(@$userw->Rating, true, $userw->ID, false) : NO_VALUE),
-         ($has_b_rating && $has_w_rating
-            ? T_('DIFF#ratchg') . ': ' . sprintf($fmt_elo, abs(@$userb->Rating - @$userw->Rating))
-            : '' )) );
-   $itable->add_sinfo( T_('ELO Rating Min#ratchg'), array(
-         ($has_b_rating ? sprintf($fmt_elo, @$userb->urow['RatingMin']) : NO_VALUE),
-         ($has_w_rating ? sprintf($fmt_elo, @$userw->urow['RatingMin']) : NO_VALUE),
-         T_('Confidence interval') ) );
+         '' ) );
    $itable->add_sinfo( T_('ELO Rating#ratchg'), array(
          ($has_b_rating ? sprintf($fmt_elo, @$userb->Rating) : NO_VALUE),
          ($has_w_rating ? sprintf($fmt_elo, @$userw->Rating) : NO_VALUE),
-         T_('Current rating (ELO)#ratchg') ) );
-   $itable->add_sinfo( T_('ELO Rating Max#ratchg'), array(
-         ($has_b_rating ? sprintf($fmt_elo, @$userb->urow['RatingMax']) : NO_VALUE),
-         ($has_w_rating ? sprintf($fmt_elo, @$userw->urow['RatingMax']) : NO_VALUE),
+         ($has_b_rating && $has_w_rating
+            ? T_('DIFF#ratchg') . ': ' . sprintf($fmt_elo, abs(@$userb->Rating - @$userw->Rating))
+            : '' )) );
+   $itable->add_sinfo( T_('ELO Rating Min - Max#ratchg'), array(
+         ($has_b_rating ? sprintf($fmt_elo, @$userb->urow['RatingMin']) : NO_VALUE) . ' - ' .
+            ($has_b_rating ? sprintf($fmt_elo, @$userb->urow['RatingMax']) : NO_VALUE),
+         ($has_w_rating ? sprintf($fmt_elo, @$userw->urow['RatingMin']) : NO_VALUE) . ' - ' .
+            ($has_w_rating ? sprintf($fmt_elo, @$userw->urow['RatingMax']) : NO_VALUE),
          T_('Confidence interval') ) );
 
    $size_value_arr = array_value_to_key_and_value( range( MIN_BOARD_SIZE, MAX_BOARD_SIZE ));
@@ -229,7 +227,7 @@ function fill_user_rating_changes( $data, &$rform, &$itable, $b_id, $w_id )
          list( $b_ratdiff_jigo, $w_ratdiff_jigo ) = calculate_rating_change_prediction( $data, 0 ); // jigo
          list( $b_ratdiff_lost, $w_ratdiff_won ) = calculate_rating_change_prediction( $data, 1 ); // black lost
 
-         $itable->add_scaption( T_('Rating changes') );
+         $itable->add_scaption( T_('Rating changes (ELO)') );
          $diff_note = T_('100 ELO points = 1 kyu#ratchg');
          $itable->add_sinfo( T_('Rating diff on Win') . MED_SPACING
             . image('images/yes.gif', T_('Yes'), null, 'class=InTextImage'),

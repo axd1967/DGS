@@ -1770,6 +1770,7 @@ table#RatingChgTableInfos td {
    text-align: center;
    border: 1px solid grey;
    border-bottom: 0px solid grey;
+   padding: 4px 8px;
 }
 
 
