@@ -18,6 +18,10 @@ ChangeLog
 
 2013-10-10 jug
 
+   * tournaments/ladder/view.php:
+   - added bottom-links to running & finished tournament-games and tournament-participants
+     on ladder-view
+
    * tournaments/ladder/retreat.php:
    - bugfix: do not allow ladder-retreat on tournament-CLOSED-status
 

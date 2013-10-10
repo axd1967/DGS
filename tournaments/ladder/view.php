@@ -344,10 +344,14 @@ $GLOBALS['ThePage'] = new Page('TournamentLadderView');
       if ( !$is_seed_status && !is_null($tl_user) && !$admin_mode )
          $menu_array[T_('Retreat from Ladder')] = "tournaments/ladder/retreat.php?tid=$tid";
    }
+   $menu_array[T_('Tournament participants')] = "tournaments/list_participants.php?tid=$tid";
+   if ( in_array($tourney->Status, TournamentLadder::get_view_ladder_status()) )
+   {
+      $menu_array[T_('All running games')] = "show_games.php?tid=$tid".URI_AMP."uid=all";
+      $menu_array[T_('All finished games')] = "show_games.php?tid=$tid".URI_AMP."uid=all".URI_AMP."finished=1";
+   }
    if ( $allow_edit_tourney )
    {
-      if ( $admin_mode )
-         $menu_array[T_('Tournament participants')] = "tournaments/list_participants.php?tid=$tid";
       if ( $is_seed_status )
          $menu_array[T_('Admin Ladder')] =
             array( 'url' => "tournaments/ladder/admin.php?tid=$tid", 'class' => 'TAdmin' );
