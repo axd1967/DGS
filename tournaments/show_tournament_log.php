@@ -84,7 +84,11 @@ require_once 'tournaments/include/tournament_log.php';
    $tlogfilter->add_filter( 4, 'RelativeDate', 'TLOG.Date', true,
       array( FC_TIME_UNITS => FRDTU_ALL_ABS, FC_SIZE => 8 ));
    $tlogfilter->add_filter( 5, 'Selection', $types_arr, true );
+   $tlogfilter->add_filter( 9, 'Text', 'TLOG.Message', true,
+      array( FC_SIZE => 50, FC_SUBSTRING => 1, FC_START_WILD => 2 ));
    $tlogfilter->init(); // parse current value from _GET
+   $filter_msg =& $tlogfilter->get_filter(9);
+   $rx_terms_msg = implode('|', $filter_msg->get_rx_terms() );
 
    $table = new Table( 'tournamentlog', $page );
    $table->register_filter( $tlogfilter );
@@ -163,7 +167,7 @@ require_once 'tournaments/include/tournament_log.php';
             : NO_VALUE;
       }
       if ( $table->Is_Column_Displayed[9] )
-         $row_str[9] = format_tlog_message( $tlog );
+         $row_str[9] = format_tlog_message( $tlog, $rx_terms_msg );
 
       $table->add_row( $row_str );
    }
@@ -208,10 +212,11 @@ require_once 'tournaments/include/tournament_log.php';
 }//main
 
 
-function format_tlog_message( $tlog )
+function format_tlog_message( $tlog, $rx_terms )
 {
    global $base_path;
-   $msg = wordwrap( str_replace( "\n", "<br>\n", $tlog->Message ), 80, "<br>\n", true );
+   $msg = make_html_safe( $tlog->Message, false, $rx_terms );
+   $msg = wordwrap( str_replace( "\n", "<br>\n", $msg ), 80, "<br>\n", true );
 
    $msg = preg_replace("/TG#(\\d+)/", anchor($base_path."tournaments/game_admin.php?tid={$tlog->tid}".URI_AMP.'gid=$1', 'TGame #$1'), $msg );
    $msg = preg_replace("/GID#(\\d+)/", anchor($base_path."game.php?gid=\$1", 'Game #$1'), $msg );

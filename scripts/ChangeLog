@@ -16,6 +16,11 @@ Developers INFO:
 ChangeLog
 ------------------------------------------------------------------
 
+2013-10-13 jug
+
+   * tournaments/show_tournament_log.php (format_tlog_message):
+   - added search-filter on tournament-log message
+
 2013-10-10 jug
 
    * tournaments/ladder/view.php:
