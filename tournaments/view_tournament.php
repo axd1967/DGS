@@ -197,6 +197,9 @@ $GLOBALS['ThePage'] = new Page('Tournament');
    if ( count($arr_locks) )
       $itable->add_sinfo( T_('Tournament Locks'), implode("<br>\n", $arr_locks) );
    $itable->add_sinfo( T_('Tournament Status'), $tourney->getStatusText($tourney->Status) );
+   $itable->add_sinfo( T_('Tournament started'), date(DATE_FMT6, $tourney->StartTime) );
+   if ( $tourney->EndTime > 0 )
+      $itable->add_sinfo( T_('Tournament ended'), date(DATE_FMT6, $tourney->EndTime) );
    if ( $ttype->need_rounds )
       $itable->add_sinfo( T_('Tournament Round'), $tourney->formatRound() );
    if ( $reg_user_info )

@@ -18,6 +18,9 @@ ChangeLog
 
 2013-10-13 jug
 
+   * tournaments/view_tournament.php:
+   - added tournament start- & end-time on view-tournament-page
+
    * tournaments/show_tournament_log.php (format_tlog_message):
    - added search-filter on tournament-log message
 
