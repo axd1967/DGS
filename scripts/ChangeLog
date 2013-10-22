@@ -16,6 +16,12 @@ Developers INFO:
 ChangeLog
 ------------------------------------------------------------------
 
+2013-10-22 jug
+
+   * include/countries.php (getCountryFlagImage),
+     gameinfo.php:
+   - added players country on game-info-page
+
 2013-10-13 jug
 
    * tournaments/view_tournament.php:

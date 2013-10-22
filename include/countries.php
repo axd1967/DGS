@@ -333,14 +333,15 @@ function getCountryText( $code=null )
 }//getCountryText
 
 /*! \brief Returns image-tag; '' if unknown country-code used. */
-function getCountryFlagImage( $ccode )
+function getCountryFlagImage( $ccode, $class='' )
 {
    global $base_path;
    $cText = basic_safe( getCountryText($ccode) );
+   $class_str = ($class) ? " class=\"$class\"" : '';
    return (empty($cText))
       ? ''
       : "<img src=\"{$base_path}images/flags/$ccode.gif\" " .
-        "title=\"$cText\" alt=\"$cText\" width=\"32\" height=\"20\">";
+        "title=\"$cText\" alt=\"$cText\"$class_str width=\"32\" height=\"20\">";
 }
 
 ?>

@@ -25,6 +25,7 @@ require_once 'include/std_classes.php';
 require_once 'include/table_columns.php';
 require_once 'include/table_infos.php';
 require_once 'include/time_functions.php';
+require_once 'include/countries.php';
 require_once 'include/rulesets.php';
 require_once 'include/rating.php';
 require_once 'include/game_functions.php';
@@ -79,11 +80,11 @@ function build_rating_diff( $rating_diff )
    $qsql = new QuerySQL();
    $qsql->add_part( SQLP_FIELDS,
       'Games.*',
-      'BP.Name AS Black_Name', 'BP.Handle AS Black_Handle',
+      'BP.Name AS Black_Name', 'BP.Handle AS Black_Handle', 'BP.Country AS Black_Country',
       'BP.Rating2 AS Black_Rating', 'BP.OnVacation AS Black_OnVacation',
       'UNIX_TIMESTAMP(BP.Lastaccess) AS Black_Lastaccess', 'UNIX_TIMESTAMP(BP.LastMove) AS Black_LastMove',
       'BP.ClockUsed AS Black_ClockUsed',
-      'WP.Name AS White_Name', 'WP.Handle AS White_Handle',
+      'WP.Name AS White_Name', 'WP.Handle AS White_Handle', 'WP.Country AS White_Country',
       'WP.Rating2 AS White_Rating', 'WP.OnVacation AS White_OnVacation',
       'UNIX_TIMESTAMP(WP.Lastaccess) AS White_Lastaccess', 'UNIX_TIMESTAMP(WP.LastMove) AS White_LastMove',
       'WP.ClockUsed AS White_ClockUsed',
@@ -262,8 +263,10 @@ function build_rating_diff( $rating_diff )
    $itable->add_sinfo(
          T_('Player'),
          array(
-            user_reference( REF_LINK, 1, '', $black_id, @$grow['Black_Name'], @$grow['Black_Handle'] ),
-            user_reference( REF_LINK, 1, '', $white_id, @$grow['White_Name'], @$grow['White_Handle'] ),
+            user_reference( REF_LINK, 1, '', $black_id, @$grow['Black_Name'], @$grow['Black_Handle'] )
+               . MED_SPACING . getCountryFlagImage(@$grow['Black_Country'], 'InTextImage'),
+            user_reference( REF_LINK, 1, '', $white_id, @$grow['White_Name'], @$grow['White_Handle'] )
+               . MED_SPACING . getCountryFlagImage(@$grow['White_Country'], 'InTextImage'),
          ));
    $itable->add_sinfo(
          T_('Last access'),
