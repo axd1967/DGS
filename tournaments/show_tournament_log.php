@@ -216,7 +216,7 @@ function format_tlog_message( $tlog, $rx_terms )
 {
    global $base_path;
    $msg = make_html_safe( $tlog->Message, false, $rx_terms );
-   $msg = wordwrap( str_replace( "\n", "<br>\n", $msg ), 80, "<br>\n", true );
+   $msg = wordwrap( str_replace( "\n", "<br>\n", $msg ), 80, "<br>\n", false );
 
    $msg = preg_replace("/TG#(\\d+)/", anchor($base_path."tournaments/game_admin.php?tid={$tlog->tid}".URI_AMP.'gid=$1', 'TGame #$1'), $msg );
    $msg = preg_replace("/GID#(\\d+)/", anchor($base_path."game.php?gid=\$1", 'Game #$1'), $msg );
