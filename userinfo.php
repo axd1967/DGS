@@ -123,7 +123,15 @@ $GLOBALS['ThePage'] = new Page('UserInfo');
    $user_clockused  = get_clock_used($row['Nightstart']);
    setTZ($tmpTZ);
    $img_nighttime = ( is_nighttime_clock($user_clockused) ) ? SMALL_SPACING . echo_image_nighttime(true) : '';
-   $night_start_str = sprintf('%02d:00 - %02d:59', $row['Nightstart'], ($row['Nightstart'] + NIGHT_LEN - 1) % 24 );
+   $user_night_start_str = sprintf('%02d:00 - %02d:59', $row['Nightstart'], ($row['Nightstart'] + NIGHT_LEN - 1) % 24 );
+   $mytime_nightclock = ($my_info) ? $user_clockused : get_clock_used($row['Nightstart']);
+   $mytime_nightstart = '';
+   if ( $mytime_nightclock != $user_clockused )
+   {
+      $mytime_nightstart = ( $row['Nightstart'] - ($mytime_nightclock - $user_clockused) ) % 24;
+      $mytime_night_start_str = sprintf('%02d:00 - %02d:59',
+         $mytime_nightstart, ($mytime_nightstart + NIGHT_LEN - 1) % 24 );
+   }
 
    { //User infos
       $activity = activity_string( $row['ActivityLevel']);
@@ -148,7 +156,11 @@ $GLOBALS['ThePage'] = new Page('UserInfo');
 
       $itable2->add_sinfo( T_('Time zone'),       $row['Timezone'] . " [GMT$user_gmt_offset]" );
       $itable2->add_sinfo( T_('User local time'), $user_localtime );
-      $itable2->add_sinfo( T_('Nighttime'),       $night_start_str . $img_nighttime );
+      $night_time_str = $user_night_start_str;
+      if ( $mytime_nightstart )
+         $night_time_str = sprintf( '<span title="%s: %s">%s</span>',
+            basic_safe(T_('User local nighttime')), basic_safe($night_time_str), $mytime_night_start_str );
+      $itable2->add_sinfo( T_('Nighttime'), $night_time_str . $img_nighttime );
       if ( $is_admin )
       { // show player clock
          $itable2->add_row( array(

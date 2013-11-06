@@ -16,6 +16,12 @@ Developers INFO:
 ChangeLog
 ------------------------------------------------------------------
 
+2013-11-06 jug
+
+   * userinfo.php:
+   - show night-time of other user-info on user-info-page in my time-zone,
+     adding users local night-time in tooltip if different from my time-zone
+
 2013-10-22 jug
 
    * include/countries.php (getCountryFlagImage),
