@@ -128,7 +128,7 @@ $GLOBALS['ThePage'] = new Page('UserInfo');
    $mytime_nightstart = '';
    if ( $mytime_nightclock != $user_clockused )
    {
-      $mytime_nightstart = ( $row['Nightstart'] - ($mytime_nightclock - $user_clockused) ) % 24;
+      $mytime_nightstart = ( $row['Nightstart'] - ($mytime_nightclock - $user_clockused) + 24 ) % 24;
       $mytime_night_start_str = sprintf('%02d:00 - %02d:59',
          $mytime_nightstart, ($mytime_nightstart + NIGHT_LEN - 1) % 24 );
    }
