@@ -252,7 +252,7 @@ function build_rating_diff( $rating_diff )
    }
 
    $itable = new Table_info('players');
-   $itable->add_caption( T_('Players') );
+   $itable->add_caption( T_('Players Information') );
    $itable->add_sinfo(
          T_('Color'),
          array(
