@@ -36,6 +36,7 @@ class Board
    public $gid;
    public $size;
    public $max_moves;
+   public $curr_move; // move game-board has been loaded up to
    private $coord_borders = -1;
    private $board_flags = 0;
    private $stone_size = 25;
@@ -49,6 +50,7 @@ class Board
    private $moves_captures = null; //array: [$MoveNr] => array(sgfcoord-prisoners, ...)
    private $last_captures = array(); //array: [sgfcoord] => 1 (if pos should be marked)
    public $shape_arr_xy = array();
+   public $prisoners = array( BLACK => 0, WHITE => 0 ); //array: [BLACK|WHITE] => count
 
    //Last move shown ($movemrkx<0 if PASS, RESIGN or SCORE)
    private $movemrkx = -1;
@@ -85,6 +87,7 @@ class Board
       $this->js_moves = array();
       $this->moves_captures = array();
       $this->shape_arr_xy = array();
+      $this->prisoners = array( BLACK => 0, WHITE => 0 );
    }//init_board
 
    /*!
@@ -98,11 +101,14 @@ class Board
     * \note fills $this->array with positions where the stones are (incl. handling of shape-game)
     * \note fills $this->moves with moves and coordinates.
     * \note fills $this->shape_arr_xy with parsed shape-setup as returned by GameSnapshot::parse_stones_snapshot().
+    * \note fills $this->prisoners with prisoner-count up to move $move
+    * \note fills $this->curr_move with selected move-number
     * \note keep the coords, color and message of the move $move.
     */
    public function load_from_db( $game_row, $move=0, $board_opts=0, $cache_ttl=0 )
    {
       $this->init_board();
+      $this->curr_move = $move;
 
       $gid = $game_row['ID'];
       if ( $gid <= 0 )
@@ -183,6 +189,7 @@ class Board
          {
             $this->moves[$MoveNr] = array( $Stone, $PosX, $PosY);
             $this->js_moves[] = array( $MoveNr, $Stone, $PosX, $PosY );
+            $this->prisoners[$Stone] += count( @$this->moves_captures[$MoveNr] );
          }
 
          if ( $MoveNr > $move )

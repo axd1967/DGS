@@ -16,6 +16,12 @@ Developers INFO:
 ChangeLog
 ------------------------------------------------------------------
 
+2013-11-13 jug
+
+   * include/board.php (class Board, ~/load_from_db),
+     game.php (draw_game_info):
+   - bugfix: on game-page show black/white-prisoners only up to selected move
+
 2013-11-06 jug
 
    * userinfo.php:

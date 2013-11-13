@@ -1150,6 +1150,7 @@ function draw_game_info( $game_row, $game_setup, $board, $tourney )
    $cols = 4;
    $to_move = get_to_move( $game_row, 'game.bad_ToMove_ID' );
    $img_tomove = SMALL_SPACING . image( $base_path.'images/backward.gif', T_('Player to move'), null, 'class="InTextImage"' );
+   $all_moves = ( $board->curr_move >= $board->max_moves );
 
    $color_class = 'class="InTextStone"';
    if ( $game_row['Status'] == GAME_STATUS_KOMI )
@@ -1188,12 +1189,13 @@ function draw_game_info( $game_row, $game_setup, $board, $tourney )
       ( $blackOffTime ? $blackOffTime : '' ),
       "</td>\n";
 
+   $black_prisoners = ($all_moves) ? $game_row['Black_Prisoners'] : $board->prisoners[BLACK];
    echo '<td class=Ratings>'
       , echo_game_rating( $game_row['Black_ID'],
             $game_row['Black_Start_Rating'],
             ($game_row['Status'] === GAME_STATUS_FINISHED) ? $game_row['Black_End_Rating'] : $game_row['Blackrating'] )
       , "</td>\n";
-   echo '<td class=Prisoners>', T_('Prisoners'), ': ', $game_row['Black_Prisoners'], "</td>\n";
+   echo '<td class=Prisoners>', T_('Prisoners'), ': ', $black_prisoners, "</td>\n";
    echo "</tr>\n";
 
    if ( $game_is_running )
@@ -1219,12 +1221,13 @@ function draw_game_info( $game_row, $game_setup, $board, $tourney )
       ( $whiteOffTime ? $whiteOffTime : '' ),
       "</td>\n";
 
+   $white_prisoners = ($all_moves) ? $game_row['White_Prisoners'] : $board->prisoners[WHITE];
    echo '<td class=Ratings>'
       , echo_game_rating( $game_row['White_ID'],
             $game_row['White_Start_Rating'],
             ($game_row['Status'] === GAME_STATUS_FINISHED) ? $game_row['White_End_Rating'] : $game_row['Whiterating'] )
       , "</td>\n";
-   echo '<td class=Prisoners>', T_('Prisoners'), ': ', $game_row['White_Prisoners'], "</td>\n";
+   echo '<td class=Prisoners>', T_('Prisoners'), ': ', $white_prisoners, "</td>\n";
    echo "</tr>\n";
 
 
