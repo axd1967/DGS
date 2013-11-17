@@ -16,6 +16,11 @@ Developers INFO:
 ChangeLog
 ------------------------------------------------------------------
 
+2013-11-17 jug
+
+   * images/flags/ve.gif:
+   - updated flag of Venezuela: changed colors and iconic top-left part
+
 2013-11-13 jug
 
    * include/board.php (class Board, ~/load_from_db),
