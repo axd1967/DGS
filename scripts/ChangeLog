@@ -19,7 +19,7 @@ ChangeLog
 2013-11-24 jug
 
    * include/std_functions.php (end_page):
-   - added time-zone on page-time in bottom-bar
+   - added time-zone on page-time and quota-expire-time in bottom-bar
 
 2013-11-20 jug
 
