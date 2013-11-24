@@ -717,9 +717,7 @@ function end_page( $menu_array=NULL, $links_per_line=0 )
       span('Version', '[' . anchor( $base_path.'news.php', T_('Version') . ' ' . DGS_VERSION ) . ']'),
       "</td>";
 
-   echo "\n  <td class=PageTime>"
-        . T_("Page time") . ' <span id="pageTime">' . date(DATE_FMT, $NOW)
-        . "</span>";
+   echo "\n  <td class=PageTime>", T_('Page time'), ': <span id="pageTime">', date(DATE_FMT5, $NOW), "</span>";
 
    if ( !$printable )
    {
