@@ -761,7 +761,7 @@ function end_page( $menu_array=NULL, $links_per_line=0 )
    }
 
    //continuation of host line
-   echo "\n  <td id='hostedBy'>Hosted by&nbsp;&nbsp;$hostlink</td>";
+   echo "\n  <td id='hostedBy'>", T_('Hosted by'), "&nbsp;&nbsp;$hostlink</td>";
 
    echo "\n </tr>",
         "\n</table>";
