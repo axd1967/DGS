@@ -100,9 +100,9 @@ define('DATE_FMT', 'Y-m-d H:i'); // see also parseDate()-func
 define('DATE_FMT2', 'Y-m-d&\n\b\s\p;H:i');
 define('DATE_FMT3', 'Y-m-d&\n\b\s\p;H:i:s');
 define('DATE_FMT4', 'YmdHis');
-define('DATE_FMT5', 'D, Y-m-d H:i T');
-define('DATE_FMT6', 'd-M-Y H:i');
-define('DATE_FMT_TZ', 'd-M-Y H:i:s T (O)'); // with time-zone, e.g. "2013-01-05 23:00:00 CET (+0100)"
+define('DATE_FMT5', 'D, Y-m-d H:i T'); // e.g. "Sun, 2013-11-24 15:30 CET"
+define('DATE_FMT6', 'd-M-Y H:i'); // e.g. "21-Jan-2001 17:55"
+define('DATE_FMT_TZ', 'd-M-Y H:i:s T (O)'); // with full time-zone, e.g. "05-Jan-2013 23:00:00 CET (+0100)"
 define('GMDATE_FMT', 'D, d M Y H:i:s \G\M\T');
 define('DATE_FMT_YMD', 'Y-m-d');
 define('DATE_FMT_QUICK_YMD', 'Y-m-d'); // quick-suite date-format
