@@ -91,6 +91,7 @@ DGS.game = {
 };
 
 DGS.utils = {
+   /** Returns associative array[key_i]=val_i from arr( key_1, val_1, key_2, val_2, ... ) */
    build_map : function( arr ) {
       if ( !$.isArray(arr) )
          throw "DGS.utils.build_map(): invalid args, array expected ["+arr+"]";
@@ -1216,33 +1217,37 @@ $.extend( DGS.GameEditor.prototype, {
    },
 
    /*
-    * $moves_data = space-separate String splitted into $game_moves
-    * Syntax $game_moves := [ game_move* ]
-    *    game_move := move_nr ( color move | prisoners | setup )
-    *    move_nr   := digit+
+    * $moves_data = String-array with shape-setup & moves of game
+    * Syntax $game_moves := setup [ game_move* ]
+    *    setup     := ( COLOR "S" move+ ){0,2}
+    *    COLOR     := "B" | "W"
+    *    game_move := color move prisoners
     *    color     := "b" | "w"
     *    move      := ( "a".."z" "a".."z" | "_P" )       ; _P = pass
+    *    prisoners := "/" move+
     *    TODO:
-    *    prisoners := "P" black_prisoners "/" white_prisoners
-    *    setup     := ( COLOR "S" move+ )+
-    *    COLOR     := "B" | "W"
-    *    territory := ( COLOR "T" move+ )+               ; for LATER
+    *    territory := ( COLOR "T" move+ )+               ; for LATER perhaps
     */
    parseMoves : function( size_x, size_y, moves_data ) {
       this.goban.setSize( size_x, size_y );
       this.goban.makeBoard( size_x, size_y, true );
 
       var game_tree = [], result;
+      //TODO create move-index for point-navigation
 
-      for ( var mvd in moves_data.split(' ') ) {
-         if ( (result = /^(\d+\.)?([bw])([a-z][a-z])$/.exec(mvd)) ) { // pattern: 123.czz
-            var mnr = result[1]; // move-nr (optional)
-            var col = result[2];
-            var pos = result[3];
+      for ( var mvd in moves_data ) {
+         if ( (result = /^([bw])([a-z][a-z])(?:\/([a-z][a-z])+)?$/.exec(mvd)) ) { // parse MOVE-pattern: bzz[/xx]
+            var col = result[1]; // b|w
+            var pos = result[2]; // sgf-coord
+            var cap = result[3]; // prisoners = sgf-coord+
 
-            //var changes = this.calculateMoveChanges( col, pos ); // TODO impl. has-lib-check, calc prisoners/captured-stones
+            //var changes = this.calculateMoveChanges( col, pos ); // TODO no lib-check needed, prisoners = $cap
             //var treenode = new DGS.TreeNode( mnr, col, pos, 'MOVE', changes ); //TODO
             //game_tree.push( treenode );
+         }
+         else if ( (result = /^([BW])S([a-z][a-z])+$/.exec(mvd)) ) { // parse SHAPE-pattern: BSzz
+            var col = result[1]; // B|W
+            var pos = result[2]; // sgf-coord+
          }
       }
    }, //parseMoves

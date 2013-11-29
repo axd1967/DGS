@@ -1446,11 +1446,13 @@ class Board
    /*!
     * \brief Returns String with moves to be passed to JavaScript-game-editor for building up game-tree.
     * \return space-separate string with moves, for syntax see GameEditor.parseMoves() in 'js/game-editor.js'
-    * \note prisoners will be calculated, handicap is either done as SETUP or as MOVE
+    * \note prisoners are encoded, handicap is either done as SETUP or as MOVE
+    * \todo may be later replaced with SGF-encoding
     */
    public function make_js_game_moves()
    {
       $out = array();
+      $shape = array( BLACK => array(), WHITE => array() );
       foreach ( $this->js_moves as $arr )
       {
          list( $move_nr, $stone, $x, $y ) = $arr;
@@ -1465,11 +1467,24 @@ class Board
             $val = '_P';
          else
             $val = number2sgf_coords($x,$y, $this->size);
-         $out[] = "{$color}{$val}";
-         //$out[] = "{$move_nr}.{$color}{$val}";
+
+         if ( $move_nr == 0 )
+            $shape[$stone][] = $val;
+         else
+         {
+            if ( count(@$this->moves_captures[$move_nr]) )
+               $val .= '/' . implode('', @$this->moves_captures[$move_nr]);
+            $out[] = $color . $val;
+            //$out[] = "$move_nr.$color$val";
+         }
       }
 
-      $result = implode(' ', $out);
+      if ( count($shape[BLACK]) )
+         array_unshift( $out, 'BS' . implode('', $shape[BLACK]) );
+      if ( count($shape[WHITE]) )
+         array_unshift( $out, 'WS' . implode('', $shape[WHITE]) );
+
+      $result = ( count($out) ) ? "['" . implode("','", $out). "']" : "[]";
       //error_log("make_js_game_moves({$this->size}) = [$result]");
       return $result;
    }//make_js_game_moves

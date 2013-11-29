@@ -613,11 +613,10 @@ $GLOBALS['ThePage'] = new Page('Game');
 
    if ( ALLOW_JAVASCRIPT && ENABLE_GAME_VIEWER )
    {
-      $js_moves_data = $TheBoard->make_js_game_moves();
       $js = sprintf( "DGS.run.gameEditor = new DGS.GameEditor(%d,%d);\n",
          $cfg_board->get_stone_size(), $cfg_board->get_wood_color() );
       $js .= sprintf( "DGS.run.gameEditor.parseMoves(%s,%s,%s);\n",
-         $Size, $Size, js_safe($TheBoard->make_js_game_moves()) );
+         $Size, $Size, $TheBoard->make_js_game_moves() );
       $js .= "DGS.game.loadPage();\n";
    }
    else
