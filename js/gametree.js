@@ -93,12 +93,12 @@ DGS.GameNode.prototype = {
     */
    deletePropertyValue : function( prop, value ) {
       var test = ( value instanceof RegExp )
-         ? function(v) { return value.test(v); }
-         : function(v) { return value == v; };
+         ? function( v ) { return value.test(v); }
+         : function( v ) { return value == v; };
       var props = ( prop instanceof Array ) ? prop : [ prop ];
       for (var i = 0; prop = props[i]; i++) {
          if ( this[prop] instanceof Array ) {
-            this[prop] = this[prop].filter( function(v) { return !test(v); } );
+            this[prop] = this[prop].filter( function( v ) { return !test(v); } );
             if ( !this[prop].length )
                delete this[prop];
          } else if ( test(this.prop) ) {
@@ -199,7 +199,7 @@ DGS.GameNode.prototype = {
                this[propName] = [this[propName]];
 
             this[propName] = this[propName].filter(
-               function(val) {
+               function( val ) {
                   if ( val == coord ) {
                      deleted = val;
                      return false;
@@ -278,7 +278,7 @@ DGS.GameNode.prototype = {
  */
 DGS.GameCursor = function() {
    this.init.apply(this, arguments);
-}
+};
 
 DGS.GameCursor.prototype = {
 
@@ -386,7 +386,9 @@ DGS.GameCursor.prototype = {
       // If we're on the tree root, return the first game
       if ( !this.node._parent && this.node._children.length )
          return this.node._children[0];
-      while ( cur.previous() ) {}
+      /*jsl:ignore*/
+      while ( cur.previous() ) { }
+      /*jsl:end*/
       return cur.node;
    }
 
