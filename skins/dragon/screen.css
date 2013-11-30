@@ -2254,12 +2254,23 @@ div.GobanEnd {
 /* game page / board page */
 /* ------------------------- */
 
-a.GameViewer {
-   font-weight: bold;
-   padding-right: 1em;
+table#GamePage div#tabs {
+   margin: 0px;
+   padding: 0px;
 }
+table#GamePage div.tab {
+   clear: left;
+   position: relative;
+   top: -1px;
+   background-color: #aaaad0;
+}
+
+table#GamePage td#ToolsArea {
+   vertical-align: top;
+   /*width: 400px; TODO needed? */
+}
+
 span#GameViewer {
-   display: none;
    padding: 1em 0.5em 0.7em 1em;
 }
 span#GameViewer img {
@@ -2442,7 +2453,7 @@ td.GameNotesBelow {
 
 table.GameNotes {
    border-width: 0px;
-   margin: 4px;
+   margin: 2px;
 }
 
 table.GameNotes th {
@@ -2484,45 +2495,15 @@ table.GameInfos td {
 table.GameInfos tr {
    background: #e0e8ed;
 }
-
-table.GameInfos tr#blackInfo,
-table.GameInfos tr#blackTime {
+table.GameInfos tr.blackInfo {
    background: #dddddd;
 }
-
-table.GameInfos tr#whiteInfo,
-table.GameInfos tr#whiteTime {
+table.GameInfos tr.whiteInfo {
    background: #ffffff;
 }
-
-table.GameInfos td.Color,
-table.GameInfos td.Name {
-   text-align: left;
-}
-
-table.GameInfos td.Prisoners {
-   text-align: right;
-}
-
+table.GameInfos td.Prisoners,
 table.GameInfos td.Ratings {
-   border: 0px solid red;
-   text-align: center;
-}
-
-table.GameInfos td.Ratings span.StartRating {
-   display: none; /* none block inline */
-/*   visibility: hidden; /* visible hidden collapse(table) */
-}
-
-table.GameInfos td.Ratings span.Separator {
-   display: none; /* none block inline */
-/*   visibility: hidden; /* visible hidden collapse(table) */
-   padding: 0px 4px;
-}
-
-table.GameInfos td.Ratings span.EndRating {
-   display: inline; /* none block inline */
-/*   visibility: visible; /* visible hidden collapse(table) */
+   padding-left: 1em;
 }
 
 table.GameInfos span.OnVacation {
@@ -2549,6 +2530,7 @@ dl.BoardInfos dd {
    padding: 0px;
    text-align: left;
    color: green;
+   font-size: 80%;
 }
 
 

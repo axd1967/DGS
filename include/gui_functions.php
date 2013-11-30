@@ -284,7 +284,7 @@ function echo_image_gameinfo( $gid, $with_sep=false, $board_size=null, $snapshot
  * \brief Returns image to shape-info page for given shape-id.
  * \param $edit_goban false = link to view-shape-page, true = link to goban-editor
  */
-function echo_image_shapeinfo( $shape_id, $board_size, $snapshot, $edit_goban=false, $with_sep=false )
+function echo_image_shapeinfo( $shape_id, $board_size, $snapshot, $edit_goban=false, $with_sep=false, $after_sep=false )
 {
    if ( $shape_id == 0 || (string)$snapshot == '' )
       return '';
@@ -319,7 +319,7 @@ function echo_image_shapeinfo( $shape_id, $board_size, $snapshot, $edit_goban=fa
       $link = anchor( $page_url, $img_str );
    }
 
-   return ($with_sep ? ' ' : '' ) . $link;
+   return ($with_sep ? ' ' : '' ) . $link . ($after_sep ? ' ' : '' );
 }
 
 /*! \brief Returns image to tournament-info page for given tournament-id. */

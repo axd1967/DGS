@@ -16,6 +16,29 @@ Developers INFO:
 ChangeLog
 ------------------------------------------------------------------
 
+2013-11-30 jug
+
+   * include/gui_functions.php (echo_image_shapeinfo),
+     js/game-editor.js (DGS.game.initPage),
+     skins/dragon/screen.css,
+     game.php (draw_game_tools, draw_moves, draw_game_info, draw_notes):
+   - added game-tools area on game-page in preparation for game-editor browsing game
+     - added tabbed game-tools controlled with JavaScript
+     - change game-user-interface if config ENABLE_GAME_VIEWER is enabled
+     - if game-viewer enabled
+       - show game-information box and private game notes in game-tools to right of board
+       - reformat game-information box to allow smaller width by moving and highlighting
+         prisoner-info into 2nd-line, by splitting rule-line into two lines,
+         and by formatting time-limit in short-format
+       - game notes need no 'hide notes'-button if shown as game-tools
+       - use fixed size for private game notes ignoring user-prefs
+   - cleanup:
+     - removed normally hidden start-rating in game-info box
+     - avoid redundant code by using black/white-loop to draw user-specific game-info
+     - simplified and corrected CSS of game-info by replacing normally unique id-attr
+       by using class-attr instead
+     - put other-ruleset for dev into comments
+
 2013-11-24 jug
 
    * include/std_functions.php (end_page):

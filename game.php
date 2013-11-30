@@ -637,7 +637,7 @@ $GLOBALS['ThePage'] = new Page('Game');
    $page_hiddens = array();
    // [ game_form start
 
-   echo "\n<table align=center>\n<tr><td>"; //board & associates table {--------
+   echo "\n<table id=GamePage align=center>\n<tr><td>"; //board & associates table {--------
 
    if ( $movenumbers>0 )
    {
@@ -658,17 +658,9 @@ $GLOBALS['ThePage'] = new Page('Game');
    if( !is_null($game_score) )
    {
       GameScore::draw_score_box( $game_score, $Ruleset );
-      if ( FRIENDLY_SHORT_NAME != 'DGS' ) // show other scoring on test-server as well
-      {
-         $other_ruleset = ( $Ruleset == RULESET_JAPANESE ) ? RULESET_CHINESE : RULESET_JAPANESE;
-         if ( preg_match( "/^(".ALLOWED_RULESETS.")$/", $other_ruleset) )
-         {
-            if ( $Status == GAME_STATUS_SCORE || $Status == GAME_STATUS_SCORE2 || $Status == GAME_STATUS_FINISHED )
-               echo span('NoPrint', "<br>\nOther scoring:<br>\n");
-
-            GameScore::draw_score_box( $game_score, $other_ruleset );
-         }
-      }
+      //FIXME for debugging show other ruleset:
+      //$other_ruleset = ( $Ruleset == RULESET_JAPANESE ) ? RULESET_CHINESE : RULESET_JAPANESE;
+      //GameScore::draw_score_box( $game_score, $other_ruleset );
    }
    echo "</td><td>";
 
@@ -677,7 +669,6 @@ $GLOBALS['ThePage'] = new Page('Game');
       draw_fairkomi_negotiation( $my_id, $gform, $game_row, $game_setup );
    else
       $TheBoard->draw_board( $may_play, $action, $stonestring);
-   //TODO: javascript move buttons && numbers hide
 
    //messages about actions
    if ( $validation_step )
@@ -694,6 +685,13 @@ $GLOBALS['ThePage'] = new Page('Game');
       echo "<br>\n";
 
    $cols = 2;
+   $game_tools_shown = draw_game_tools();
+   if ( $game_tools_shown )
+   {
+      ++$cols;
+      $show_notes = false;
+   }
+
    if ( $show_notes && $noteshide != 'Y' )
    {
       if ( $notesmode == 'BELOW' )
@@ -790,7 +788,8 @@ $GLOBALS['ThePage'] = new Page('Game');
    echo "\n</FORM>";
 
    echo "\n<HR>";
-   draw_game_info($game_row, $game_setup, $TheBoard, $tourney); // with board-info
+   if ( !$game_tools_shown )
+      draw_game_info($game_row, $game_setup, $TheBoard, $tourney); // with board-info
 
 
 
@@ -1012,7 +1011,6 @@ function draw_moves( $gid, $move, $handicap )
          $sgf_move -= $handicap;
    }
 
-   draw_game_viewer();
    echo '<span class="SgfMove">', sprintf( T_('(SGF-Move %s)'), $sgf_move ), '</span>&nbsp;';
 
    // add selectbox to show specific move
@@ -1026,20 +1024,41 @@ function draw_moves( $gid, $move, $handicap )
    echo '<INPUT type="submit" name="movechange" value="' . T_('View move') . "\" class=NoPrint>";
 } //draw_moves
 
-function draw_game_viewer()
+function draw_game_tools()
 {
    global $base_path;
+   global $game_row, $game_setup, $TheBoard, $tourney, $notes;
+
    if ( ALLOW_JAVASCRIPT && ENABLE_GAME_VIEWER )
    {
-      echo anchor('#', T_('Browse Game'), '', 'class=GameViewer'),
-         "<span id=\"GameViewer\">",
+      echo "</td>\n",
+         "<td id=ToolsArea class=GameTools>",
+            "<div id=tabs>\n",
+               "<ul>\n",
+                  "<li>", anchor('#tab_GameInfo', T_('Game Info#ged'), T_('Game Information#ged')), "</li>\n",
+                  "<li>", anchor('#tab_GameNotes', T_('Game Notes#ged'), T_('Private game notes#ged')), "</li>\n",
+               "</ul>\n",
+               "<div id=tab_GameInfo class=tab>\n";
+      draw_game_info($game_row, $game_setup, $TheBoard, $tourney); // with board-info
+      echo     "</div>\n",
+               "<div id=tab_GameNotes class=tab>\n";
+      draw_notes(null, $notes, 12, 65); // use fixed size
+      echo     "</div>\n",
+            "</div>\n";
+
+      /* TODO replace, move into TABs for navigation
+      echo "<span id=\"GameViewer\">",
             anchor('#', image($base_path.'images/start.gif', T_('First move'), null), '',    'id=FirstMove'),
             anchor('#', image($base_path.'images/prev.gif',  T_('Previous move'), null), '', 'id=PrevMove'),
             anchor('#', image($base_path.'images/next.gif',  T_('Next move'), null), '',     'id=NextMove'),
             anchor('#', image($base_path.'images/end.gif',   T_('Last move'), null), '',     'id=LastMove'),
          "</span>\n";
+      */
+      return true;
    }
-}
+   else
+      return false;
+}//draw_game_tools
 
 // returns true, if given move is the final score-move (predecessor = POSX_SCORE too)
 function get_final_score_move( $move )
@@ -1146,7 +1165,9 @@ function draw_game_info( $game_row, $game_setup, $board, $tourney )
 
    echo '<table class=GameInfos>', "\n";
 
-   $cols = 4;
+   $show_game_tools = ( ALLOW_JAVASCRIPT && ENABLE_GAME_VIEWER );
+   $cols = 3;
+   $cols_r = $cols - 1;
    $to_move = get_to_move( $game_row, 'game.bad_ToMove_ID' );
    $img_tomove = SMALL_SPACING . image( $base_path.'images/backward.gif', T_('Player to move'), null, 'class="InTextImage"' );
    $all_moves = ( $board->curr_move >= $board->max_moves );
@@ -1177,70 +1198,45 @@ function draw_game_info( $game_row, $game_setup, $board, $tourney )
    }
 
 
-   //black rows
-   $blackOffTime = echo_off_time( ($to_move == BLACK), $game_row['Black_OnVacation'], $game_row['Black_ClockUsed'],
-      $game_row['WeekendClock'] );
-   echo '<tr id="blackInfo">', "\n";
-   echo "<td class=Color>$icon_col_b</td>\n";
-   echo '<td class=Name>',
-      user_reference( REF_LINK, 1, '', $game_row['Black_ID'], $game_row['Blackname'], $game_row['Blackhandle']),
-      ( $to_move == BLACK ? $img_tomove : '' ),
-      ( $blackOffTime ? $blackOffTime : '' ),
-      "</td>\n";
-
-   $black_prisoners = ($all_moves) ? $game_row['Black_Prisoners'] : $board->prisoners[BLACK];
-   echo '<td class=Ratings>'
-      , echo_game_rating( $game_row['Black_ID'],
-            $game_row['Black_Start_Rating'],
-            ($game_row['Status'] === GAME_STATUS_FINISHED) ? $game_row['Black_End_Rating'] : $game_row['Blackrating'] )
-      , "</td>\n";
-   echo '<td class=Prisoners>', T_('Prisoners'), ': ', $black_prisoners, "</td>\n";
-   echo "</tr>\n";
-
-   if ( $game_is_running )
+   foreach( array( BLACK, WHITE ) as $color )
    {
-      echo '<tr id="blackTime">', "\n";
-      echo "<td colspan=\"$cols\">\n", T_("Time remaining"), ": ",
-         TimeFormat::echo_time_remaining( $game_row['Black_Maintime'], $game_row['Byotype'],
-               $game_row['Black_Byotime'], $game_row['Black_Byoperiods'],
-               $game_row['Byotime'], $game_row['Byoperiods'],
-               TIMEFMT_ADDTYPE | TIMEFMT_ZERO ),
-         "</td>\n</tr>\n";
-   }
+      $PFX = ($color == BLACK) ? 'Black' : 'White';
+      $pfx = ($color == BLACK) ? 'black' : 'white';
+      $icon_col = ($color == BLACK) ? $icon_col_b : $icon_col_w;
+      $col_uid = $game_row["{$PFX}_ID"];
 
+      // name-info + to-move + off-time + rating
+      $offTime = echo_off_time( ($to_move == $color), $game_row["{$PFX}_OnVacation"], $game_row["{$PFX}_ClockUsed"],
+         $game_row['WeekendClock'] );
+      echo "<tr class={$pfx}Info>\n", // blackInfo/whiteInfo
+         "<td class=Color>$icon_col</td>\n",
+         '<td class=Name>',
+            user_reference( REF_LINK, 1, '', $col_uid, $game_row["{$PFX}name"], $game_row["{$PFX}handle"]),
+            ( $to_move == $color ? $img_tomove : '' ),
+            ( $offTime ? $offTime : '' ),
+         "</td>\n",
+         "<td class=\"Ratings right\">",
+            echo_rating(
+               ($game_row['Status'] === GAME_STATUS_FINISHED) ? $game_row["{$PFX}_End_Rating"] : $game_row["{$PFX}rating"],
+               true, $col_uid ),
+         "</td>\n",
+         "</tr>\n";
 
-   //white rows
-   $whiteOffTime = echo_off_time( ($to_move == WHITE), $game_row['White_OnVacation'], $game_row['White_ClockUsed'],
-      $game_row['WeekendClock'] );
-   echo '<tr id="whiteInfo">', "\n";
-   echo "<td class=Color>$icon_col_w</td>\n";
-   echo '<td class=Name>',
-      user_reference( REF_LINK, 1, '', $game_row['White_ID'], $game_row['Whitename'], $game_row['Whitehandle']),
-      ( $to_move == WHITE ? $img_tomove : '' ),
-      ( $whiteOffTime ? $whiteOffTime : '' ),
-      "</td>\n";
+      echo "<tr class={$pfx}Info>\n", "<td colspan=2>";
+      if ( $game_is_running ) // remaining-time
+      {
+         echo T_('Time remaining'), ": ",
+            TimeFormat::echo_time_remaining( $game_row["{$PFX}_Maintime"], $game_row['Byotype'],
+                  $game_row["{$PFX}_Byotime"], $game_row["{$PFX}_Byoperiods"],
+                  $game_row['Byotime'], $game_row['Byoperiods'],
+                  TIMEFMT_ADDTYPE | TIMEFMT_ZERO );
+      }
+      echo "</td>\n";
 
-   $white_prisoners = ($all_moves) ? $game_row['White_Prisoners'] : $board->prisoners[WHITE];
-   echo '<td class=Ratings>'
-      , echo_game_rating( $game_row['White_ID'],
-            $game_row['White_Start_Rating'],
-            ($game_row['Status'] === GAME_STATUS_FINISHED) ? $game_row['White_End_Rating'] : $game_row['Whiterating'] )
-      , "</td>\n";
-   echo '<td class=Prisoners>', T_('Prisoners'), ': ', $white_prisoners, "</td>\n";
-   echo "</tr>\n";
-
-
-   if ( $game_is_running )
-   {
-      echo '<tr id="whiteTime">', "\n";
-      echo "<td colspan=\"$cols\">\n", T_("Time remaining"), ": ",
-         TimeFormat::echo_time_remaining( $game_row['White_Maintime'], $game_row['Byotype'],
-               $game_row['White_Byotime'], $game_row['White_Byoperiods'],
-               $game_row['Byotime'], $game_row['Byoperiods'],
-               TIMEFMT_ADDTYPE | TIMEFMT_ZERO ),
-         "</td>\n</tr>\n";
-   }
-
+      $prisoners = ($all_moves) ? $game_row["{$PFX}_Prisoners"] : $board->prisoners[$color];
+      echo "<td class=\"Prisoners right\">", T_('Prisoners'), ': ', span('bold', $prisoners), "</td>\n",
+         "</tr>\n";
+   }//black/white-rows
 
    //tournament rows
    if ( ALLOW_TOURNAMENTS && !is_null($tourney) )
@@ -1248,14 +1244,14 @@ function draw_game_info( $game_row, $game_setup, $board, $tourney )
       $tflags_str = ($game_row['GameFlags'] & GAMEFLAGS_TG_DETACHED)
          ? span('TWarning', sprintf('(%s) ', T_('detached#tourney')))
          : '';
-      echo "<tr id=\"gameRules\">\n"
-         , '<td class=Color>', echo_image_tournament_info($tourney->ID), "</td>\n"
-         , "<td colspan=\"", ($cols-1), "\">", $tourney->build_info(4), "</td>\n"
-         , "</tr>\n"
-         , "<tr id=\"gameRules\">\n"
-         , "<td></td>\n"
-         , "<td colspan=\"$cols\">", $tflags_str, T_('Title'), ': ', make_html_safe($tourney->Title, true), "</td>\n"
-         , "</tr>\n";
+      echo "<tr>\n",
+         '<td class=Color>', echo_image_tournament_info($tourney->ID), "</td>\n",
+         "<td colspan=\"$cols_r\">", $tourney->build_info(4), "</td>\n",
+         "</tr>\n",
+         "<tr>\n<td></td>\n",
+         "<td colspan=\"$cols_r\">", $tflags_str, T_('Title'), ': ', make_html_safe($tourney->Title, true),
+         "</td>\n",
+         "</tr>\n";
    }
 
    //multi-player-game rows
@@ -1263,12 +1259,12 @@ function draw_game_info( $game_row, $game_setup, $board, $tourney )
    {
       global $mpg_uid, $move_color;
 
-      echo "<tr id=\"gameRules\">\n"
-         , '<td class=Color>', echo_image_game_players($game_row['ID']), "</td>\n"
-         , "<td colspan=\"", ($cols-1), "\">",
-            T_('Game Type').': ',
-            GameTexts::format_game_type($game_row['GameType'], $game_row['GamePlayers']), "</td>\n"
-         , "</tr>\n";
+      echo "<tr>\n",
+         '<td class=Color>', echo_image_game_players($game_row['ID']), "</td>\n",
+         "<td colspan=\"$cols_r\">", T_('Game Type').': ',
+            GameTexts::format_game_type($game_row['GameType'], $game_row['GamePlayers']),
+         "</td>\n",
+         "</tr>\n";
 
       if ( $game_row['Moves'] > 0 && $mpg_uid > 0 )
       {
@@ -1277,41 +1273,45 @@ function draw_game_info( $game_row, $game_setup, $board, $tourney )
          {
             $mpg_urow = $mpg_userarr[$mpg_uid];
 
-            echo "<tr id=\"gameRules\"><td></td><td colspan=\"", ($cols-1), "\">",
-               "<dl class=BoardInfos><dd>",
-                  T_('Last move by:'), SMALL_SPACING,
-                     ($move_color == GPCOL_B ? $icon_col_b : $icon_col_w),
-                     MINI_SPACING,
-                     user_reference( REF_LINK, 1, '', $mpg_urow ),
-                     SMALL_SPACING,
-                     echo_rating( @$mpg_urow['Rating2'], true, $mpg_uid ),
+            echo "<tr>\n<td></td>\n",
+               "<td colspan=\"$cols_r\">",
+               "<dl class=BoardInfos><dd>", T_('Last move by:'), SMALL_SPACING,
+                  ($move_color == GPCOL_B ? $icon_col_b : $icon_col_w),
+                  MINI_SPACING,
+                  user_reference( REF_LINK, 1, '', $mpg_urow ),
+                  SMALL_SPACING,
+                  echo_rating( @$mpg_urow['Rating2'], true, $mpg_uid ),
                "</dd></dl>\n",
-               "</td></tr>\n";
+               "</td>\n",
+               "</tr>\n";
          }
       }
-   }
+   }//mpg-info
 
    //game rows
-   $sep = ',' . MED_SPACING;
+   $sep = ', ';
    $shape_id = (int)@$game_row['ShapeID'];
-   echo '<tr id="gameRules">', "\n";
-   echo '<td class=Color>',
-         echo_image_gameinfo($game_row['ID']),
-         echo_image_shapeinfo($shape_id, $game_row['Size'], $game_row['ShapeSnapshot'], false, true),
-      "</td>\n";
-   echo "<td colspan=\"", ($cols-1), "\">", T_('Ruleset'), ': ', Ruleset::getRulesetText($game_row['Ruleset']);
-   echo $sep, T_('Komi'), ': ', $komi;
-   echo $sep, T_('Handicap'), ': ', $game_row['Handicap'];
-   echo $sep, T_('Rated game'), ': ',
-      ( ($game_row['Rated'] == 'N') ? T_('No') : T_('Yes') ), "</td>\n";
-   echo "</tr>\n";
+   echo "<tr>\n",
+      '<td class=Color>', echo_image_gameinfo($game_row['ID']), "</td>\n",
+      "<td colspan=\"$cols_r\">",
+         echo_image_shapeinfo($shape_id, $game_row['Size'], $game_row['ShapeSnapshot'], false, false, true),
+         T_('Ruleset'), ': ', Ruleset::getRulesetText($game_row['Ruleset']),
+         $sep, T_('Rated'), ': ', ( ($game_row['Rated'] == 'N') ? T_('No') : T_('Yes') ),
+      ( $show_game_tools
+         ? "</td>\n</tr>\n" .
+           "<tr>\n<td></td>\n" .
+           "<td colspan=\"$cols_r\">"
+         : $sep ),
+         T_('Handicap'), ': ', $game_row['Handicap'],
+         $sep, T_('Komi'), ': ', $komi,
+      "</td>\n</tr>\n";
 
-   echo '<tr id="gameTime">', "\n";
-   echo "<td colspan=\"$cols\">", T_('Time limit'), ': ',
-      TimeFormat::echo_time_limit( $game_row['Maintime'], $game_row['Byotype'],
-         $game_row['Byotime'], $game_row['Byoperiods']),
-      "</td>\n";
-   echo "</tr>\n";
+   echo "<tr>\n<td></td>\n",
+      "<td colspan=\"$cols_r\">", T_('Time limit'), ': ',
+         TimeFormat::echo_time_limit( $game_row['Maintime'], $game_row['Byotype'],
+            $game_row['Byotime'], $game_row['Byoperiods'], TIMEFMT_ADDTYPE|TIMEFMT_SHORT),
+      "</td>\n",
+      "</tr>\n";
 
    if ( isset($board) )
    {
@@ -1370,40 +1370,25 @@ function draw_board_info($board)
          //echo var_export($val, true);
          $str= vsprintf($fmt, $val);
          if ( $str )
-            $txt.= "<dd>$str</dd\n>";
+            $txt.= "<dd>$str</dd>\n";
       }
    }
    if ( $txt )
-      $txt= "<dl class=\"BoardInfos\">$txt</dl>\n";
+      $txt= "<dl class=\"BoardInfos\">\n$txt</dl>\n";
    return $txt;
 } //draw_board_info
 
-function echo_game_rating( $uid, $start_rating, $end_rating)
-{
-   return
-        "<span class=StartRating>"
-      . echo_rating( $start_rating, true, $uid )
-      . "</span>"
-      . "<span class=Separator>-</span>"
-      . "<span class=EndRating>"
-      . echo_rating( $end_rating, true, $uid )
-      . "</span>"
-      ;
-} //echo_game_rating
 
-
+// $collapsed==null used to skip hide-notes for JS-based game-tools
 function draw_notes( $collapsed='N', $notes='', $height=0, $width=0)
 {
-   if ( $collapsed == 'Y' )
+   if ( $collapsed === 'Y' )
    {
       //echo textarea_safe( $notes) . "\n";
       echo '<INPUT type="HIDDEN" name="hidenotes" value="N">'
          , "  <input name=\"togglenotes\" type=\"submit\" value=\"", T_('Show notes'), "\" class=NoPrint>";
       return;
    }
-
-   if ( $height<3 ) $height= 3;
-   if ( $width<15 ) $width= 15;
 
    echo " <table class=GameNotes>\n"
       , "  <tr><th>", T_('Private game notes'), "</th></tr>\n"
@@ -1413,7 +1398,7 @@ function draw_notes( $collapsed='N', $notes='', $height=0, $width=0)
       , "  </td></tr>\n"
       , "  <tr><td class=NoPrint><input name=\"savenotes\" type=\"submit\" value=\"", T_('Save notes'), "\">";
 
-   if ( $collapsed == 'N' )
+   if ( $collapsed === 'N' )
    {
       echo '<INPUT type="HIDDEN" name="hidenotes" value="Y">'
          , "<input name=\"togglenotes\" type=\"submit\" value=\"", T_('Hide notes'), "\">";

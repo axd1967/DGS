@@ -60,7 +60,6 @@ DGS.game_editor = {
          DGS.run.gameEditor.action_play_handle_tool( this );
       });
 
-
       DGS.run.gameEditor.testBoard(); //TODO test
    }
 };
@@ -71,6 +70,15 @@ DGS.game = {
    },
 
    initPage : function() {
+      $( function() {
+         $("#tabs").tabs({ disabled: [], selected: 0 });
+      });
+
+      $("#tabs").bind('tabsshow', function(event, ui) {
+         //TODO
+      });
+
+      /* TODO maybe used later
       $("a.GameViewer").click( function(event) {
          event.preventDefault();
          $("span#GameViewer").toggle();
@@ -87,11 +95,12 @@ DGS.game = {
          event.preventDefault();
          //TODO this.id = (First|Last|Next|Prev)Move
       });
+      */
    }
 };
 
 DGS.utils = {
-   /** Returns associative array[key_i]=val_i from arr( key_1, val_1, key_2, val_2, ... ) */
+   /** Returns associative array[key_i]=val_i built from arr( key_1, val_1, key_2, val_2, ... ). */
    build_map : function( arr ) {
       if ( !$.isArray(arr) )
          throw "DGS.utils.build_map(): invalid args, array expected ["+arr+"]";
