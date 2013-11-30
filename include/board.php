@@ -645,7 +645,8 @@ class Board
    // keep in sync with GobanHandlerGfxBoard
    // board: img.alt-attr mapping: B>X W>O, last-move B># W>@, dead B>x W>o, terr B>+ W>-, dame>. seki-dame>s hoshi>, else>.
    // \param $action GAMEACT_SET_HANDICAP, 'remove', or other text
-   public function draw_board( $may_play=false, $action='', $stonestring='')
+   // \param $draw_move_msg true=draw move-message above board in message-box, false=no move-msg drawn
+   public function draw_board( $may_play=false, $action='', $stonestring='', $draw_move_msg=true )
    {
       global $woodbgcolors;
 
@@ -737,7 +738,7 @@ class Board
          $move_end = ".gif\"></a></td>\n";
       }
 
-      if ( $this->movemsg )
+      if ( $draw_move_msg && $this->movemsg )
          $this->draw_move_message( $this->movemsg );
 
 
@@ -1068,8 +1069,8 @@ class Board
 
    public function draw_move_message( $msg )
    {
-      echo "<table id=\"gameMessage\" class=MessageBox><tr>" . //align=center
-           "<td width=\"" . $this->stone_size*19 . "\" align=left>$msg</td></tr></table><BR>\n";
+      $width = $this->stone_size * 19;
+      echo "<table class=MessageBox><tr><td width=\"$width\">$msg</td></tr></table><BR>\n";
    }
 
    /*!

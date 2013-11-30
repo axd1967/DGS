@@ -2270,6 +2270,23 @@ table#GamePage td#ToolsArea {
    /*width: 400px; TODO needed? */
 }
 
+div#GameMessageHeader {
+   background: #aaaad0;
+   margin-top: 5px;
+   padding: 2px;
+   padding-left: 1em;
+   font-weight: bold;
+   font-size: larger;
+}
+div#GameMessage {
+   border: 3px solid #aaaad0;
+   background: #e0e8ed;
+   text-align: left;
+   width: 29em;
+   height: 12em;
+   overflow: scroll;
+}
+
 span#GameViewer {
    padding: 1em 0.5em 0.7em 1em;
 }

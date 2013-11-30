@@ -18,7 +18,8 @@ ChangeLog
 
 2013-11-30 jug
 
-   * include/gui_functions.php (echo_image_shapeinfo),
+   * include/board.php (Board.draw_board, ~.draw_move_message),
+     include/gui_functions.php (echo_image_shapeinfo),
      js/game-editor.js (DGS.game.initPage),
      skins/dragon/screen.css,
      game.php (draw_game_tools, draw_moves, draw_game_info, draw_notes):
@@ -32,6 +33,7 @@ ChangeLog
          and by formatting time-limit in short-format
        - game notes need no 'hide notes'-button if shown as game-tools
        - use fixed size for private game notes ignoring user-prefs
+       - move message-box with last game-message below game-tools
    - cleanup:
      - removed normally hidden start-rating in game-info box
      - avoid redundant code by using black/white-loop to draw user-specific game-info

@@ -664,11 +664,12 @@ $GLOBALS['ThePage'] = new Page('Game');
    }
    echo "</td><td>";
 
+   $show_game_tools = ( ALLOW_JAVASCRIPT && ENABLE_GAME_VIEWER );
    $TheBoard->movemsg = $movemsg;
    if ( $is_fairkomi_negotiation )
       draw_fairkomi_negotiation( $my_id, $gform, $game_row, $game_setup );
    else
-      $TheBoard->draw_board( $may_play, $action, $stonestring);
+      $TheBoard->draw_board( $may_play, $action, $stonestring, /*draw-move-msg*/!$show_game_tools );
 
    //messages about actions
    if ( $validation_step )
@@ -685,11 +686,11 @@ $GLOBALS['ThePage'] = new Page('Game');
       echo "<br>\n";
 
    $cols = 2;
-   $game_tools_shown = draw_game_tools();
-   if ( $game_tools_shown )
+   if ( $show_game_tools )
    {
-      ++$cols;
+      draw_game_tools();
       $show_notes = false;
+      ++$cols;
    }
 
    if ( $show_notes && $noteshide != 'Y' )
@@ -788,7 +789,7 @@ $GLOBALS['ThePage'] = new Page('Game');
    echo "\n</FORM>";
 
    echo "\n<HR>";
-   if ( !$game_tools_shown )
+   if ( !$show_game_tools )
       draw_game_info($game_row, $game_setup, $TheBoard, $tourney); // with board-info
 
 
@@ -1026,38 +1027,35 @@ function draw_moves( $gid, $move, $handicap )
 
 function draw_game_tools()
 {
-   global $base_path;
-   global $game_row, $game_setup, $TheBoard, $tourney, $notes;
+   global $base_path, $game_row, $game_setup, $TheBoard, $tourney, $notes;
 
-   if ( ALLOW_JAVASCRIPT && ENABLE_GAME_VIEWER )
-   {
-      echo "</td>\n",
-         "<td id=ToolsArea class=GameTools>",
-            "<div id=tabs>\n",
-               "<ul>\n",
-                  "<li>", anchor('#tab_GameInfo', T_('Game Info#ged'), T_('Game Information#ged')), "</li>\n",
-                  "<li>", anchor('#tab_GameNotes', T_('Game Notes#ged'), T_('Private game notes#ged')), "</li>\n",
-               "</ul>\n",
-               "<div id=tab_GameInfo class=tab>\n";
-      draw_game_info($game_row, $game_setup, $TheBoard, $tourney); // with board-info
-      echo     "</div>\n",
-               "<div id=tab_GameNotes class=tab>\n";
-      draw_notes(null, $notes, 12, 65); // use fixed size
-      echo     "</div>\n",
-            "</div>\n";
+   echo "</td>\n",
+      "<td id=ToolsArea class=GameTools>",
+         "<div id=tabs>\n",
+            "<ul>\n",
+               "<li>", anchor('#tab_GameInfo', T_('Game Info#ged'), T_('Game Information#ged')), "</li>\n",
+               "<li>", anchor('#tab_GameNotes', T_('Game Notes#ged'), T_('Private game notes#ged')), "</li>\n",
+            "</ul>\n",
+            "<div id=tab_GameInfo class=tab>\n";
+   draw_game_info($game_row, $game_setup, $TheBoard, $tourney); // with board-info
+   echo     "</div>\n",
+            "<div id=tab_GameNotes class=tab>\n";
+   draw_notes(null, $notes, 12, 65); // use fixed size
+   echo     "</div>\n",
+         "</div>\n",
+         "<div id=GameMessageHeader>\n", T_('Message'), "</div>\n",
+         "<div id=GameMessage>\n",
+            "<table><tr><td>{$TheBoard->movemsg}</td></tr></table>\n",
+         "</div>\n";
 
-      /* TODO replace, move into TABs for navigation
-      echo "<span id=\"GameViewer\">",
-            anchor('#', image($base_path.'images/start.gif', T_('First move'), null), '',    'id=FirstMove'),
-            anchor('#', image($base_path.'images/prev.gif',  T_('Previous move'), null), '', 'id=PrevMove'),
-            anchor('#', image($base_path.'images/next.gif',  T_('Next move'), null), '',     'id=NextMove'),
-            anchor('#', image($base_path.'images/end.gif',   T_('Last move'), null), '',     'id=LastMove'),
-         "</span>\n";
-      */
-      return true;
-   }
-   else
-      return false;
+   /* TODO replace, move into TABs for navigation
+   echo "<span id=\"GameViewer\">",
+         anchor('#', image($base_path.'images/start.gif', T_('First move'), null), '',    'id=FirstMove'),
+         anchor('#', image($base_path.'images/prev.gif',  T_('Previous move'), null), '', 'id=PrevMove'),
+         anchor('#', image($base_path.'images/next.gif',  T_('Next move'), null), '',     'id=NextMove'),
+         anchor('#', image($base_path.'images/end.gif',   T_('Last move'), null), '',     'id=LastMove'),
+      "</span>\n";
+   */
 }//draw_game_tools
 
 // returns true, if given move is the final score-move (predecessor = POSX_SCORE too)
