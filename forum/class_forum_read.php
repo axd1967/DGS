@@ -207,7 +207,7 @@ class ForumRead
    {
       $reads = '';
       foreach ( $this->reads as $k => $time )
-         $reads .= sprintf( "\n{ [$k]=[%s] },", date('Y-m-d H:i:s', $time));
+         $reads .= sprintf( "\n{ [$k]=[%s] },", date(DATE_FMT_QUICK, $time));
       return "ForumRead(uid={$this->uid},fid={$this->fid},tid={$this->tid}): "
          . "min_date=[{$this->min_date}], "
          . $reads;

@@ -81,7 +81,7 @@ function wap_date( $dat=0)
       global $NOW;
       $dat= $NOW;
    }
-   return date( 'Y-m-d H:i', $dat);
+   return date(DATE_FMT, $dat);
 }
 
 

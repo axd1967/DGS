@@ -787,7 +787,7 @@ class DateParser
 
       // handle exceeding of limits by increasing of date-parts
       $unixtime = $this->make_ts_snapshot();
-      $this->dateval = date("Y-m-d H:i:s", $unixtime);
+      $this->dateval = date(DATE_FMT_QUICK, $unixtime);
    }//complete_date
 
 } // end of 'DateParser'
