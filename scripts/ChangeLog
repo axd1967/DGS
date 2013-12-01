@@ -28,8 +28,17 @@ ChangeLog
 
 2013-11-30 jug
 
+   * js/gametree.js, js/lang-ext.js:
+   - initial commit of copied EidoGo-Code to suit the environment and needs of DGS
+     - Source: git://github.com/jkk/eidogo.git
+     - File:   player/js/gametree.js   08-Sep-2008 16:33:12   29cd15cf3ddb8f540d466dead2191e2fdc0295c6
+     - File:   player/js/lang.js   19-Mar-2008 23:09:15   817449a6f592403cb39c4d58429f12e0908c6eb6
+   - initial adjustments to DGS:
+     added DGS preamble, reformatted to DGS code-layout, renamed eidogo to DGS namespace
+
    * include/board.php (Board.draw_board, ~.draw_move_message),
      include/gui_functions.php (echo_image_shapeinfo),
+     include/globals (CSS_VERSION),
      js/game-editor.js (DGS.game.initPage),
      skins/dragon/screen.css,
      game.php (draw_game_tools, draw_moves, draw_game_info, draw_notes):
