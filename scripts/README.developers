@@ -397,6 +397,17 @@ General instructions for developers:
       - see 'scripts/README.translations' of tasks to execute
 
 
+----------------- PHP, Date-Translations:
+
+   The PHP date()-function can be used to format timestamps into a date-string.
+   However if the date-format contains 'D' (weekday name) or 'M' (month name)
+   the text is not translated.  To achieve a translated weekday and month name
+   you have to use a dedicated function to format the date:
+
+      require_once 'include/gui_functions.php';
+      echo format_translated_date('D, d-M-Y H:i:s', time());
+
+
 ----------------- PHP, Using translations in libraries/classes:
 
    For using translated text with  T_('some text')  first the current
