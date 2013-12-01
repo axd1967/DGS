@@ -20,6 +20,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 $TranslateGroups[] = "Users";
 
 require_once 'include/std_functions.php';
+require_once 'include/gui_functions.php';
 require_once 'include/rating.php';
 require_once 'include/graph.php';
 
@@ -51,18 +52,13 @@ function interpolate($val1, $val3, $time1, $time2, $time3)
    //disable translations in graph if not latin
    if ( preg_match( '/^iso-8859-/i', $encoding_used) )
    {
-      $keep_english= false;
-      $T_= 'T_';
-
-      // Translation-NOTE: all months for T_(date..) defined in -> 'statisticspng.php'
-      // $TW_ = 'T_'; // for non-const translation-texts
-      $datelabel = create_function('$x', '$TW_ = "T_"; return $TW_(date("M",$x)).date("\\nY",$x);' );
+      //$T_= 'T_';
+      $datelabel = create_function('$x', 'return format_translated_date("M\\nY", $x);' );
       $ratinglabel = create_function('$x', 'return echo_rating($x,0,0,0);' );
    }
    else
    {
-      $keep_english= true;
-      $T_= 'fnop';
+      $T_= 'fnop'; // keep English
       $datelabel = create_function('$x', 'return date("M\\nY",$x);' );
       $ratinglabel = create_function('$x', 'return echo_rating($x,0,0,1);' );
    }

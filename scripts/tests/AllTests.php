@@ -30,6 +30,7 @@ require_once 'EntityTest.php';
 require_once 'GameAddTimeTest.php';
 require_once 'GameSettingsTest.php';
 require_once 'GameSetupTest.php';
+require_once 'GuiFunctionsTest.php';
 require_once 'ProfileTest.php';
 require_once 'TimeFormatTest.php';
 
@@ -57,6 +58,7 @@ class AllTests
       $suite->addTestSuite('GameAddTimeTest');
       $suite->addTestSuite('GameSettingsTest');
       $suite->addTestSuite('GameSetupTest');
+      $suite->addTestSuite('GuiFunctionsTest');
       $suite->addTestSuite('ProfileTest');
       $suite->addTestSuite('TimeFormatTest');
 

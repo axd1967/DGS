@@ -717,7 +717,8 @@ function end_page( $menu_array=NULL, $links_per_line=0 )
       span('Version', '[' . anchor( $base_path.'news.php', T_('Version') . ' ' . DGS_VERSION ) . ']'),
       "</td>";
 
-   echo "\n  <td class=PageTime>", T_('Page time'), ': <span id="pageTime">', date(DATE_FMT5, $NOW), "</span>";
+   echo "\n  <td class=PageTime>", T_('Page time'),
+      ': <span id="pageTime">', format_translated_date(DATE_FMT5, $NOW), "</span>";
 
    if ( !$printable )
    {
@@ -725,7 +726,8 @@ function end_page( $menu_array=NULL, $links_per_line=0 )
       if ( isset($player_row['VaultCnt']) && isset($player_row['X_VaultTime']) )
       {
          echo '<br>', span('PageQuota',
-            sprintf( "%s: %s / %s", T_('Quota#user'), $player_row['VaultCnt'], date(DATE_FMT5, $player_row['X_VaultTime']) ));
+            sprintf( "%s: %s / %s", T_('Quota#user'), $player_row['VaultCnt'],
+               format_translated_date(DATE_FMT5, $player_row['X_VaultTime']) ));
       }
 
       echo '<br>', span('PageLapse',

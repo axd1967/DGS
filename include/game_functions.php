@@ -5435,7 +5435,7 @@ function echo_accept_same_opponent( $same_opp, $game_row=null )
       if ( is_array($game_row) && isset($game_row['X_ExpireDate']) && ($game_row['X_ExpireDate'] > $NOW) )
       {
          $out .= ' (' . sprintf( T_('wait till %s#same_opp'),
-            date(DATE_FMT6, $game_row['X_ExpireDate']) ) . ')';
+            format_translated_date(DATE_FMT6, $game_row['X_ExpireDate']) ) . ')';
       }
    }
    return $out;

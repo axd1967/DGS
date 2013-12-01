@@ -20,6 +20,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 $TranslateGroups[] = "Users";
 
 require_once 'include/std_functions.php';
+require_once 'include/gui_functions.php';
 require_once 'include/graph.php';
 
 
@@ -28,21 +29,15 @@ require_once 'include/graph.php';
 
    $logged_in = who_is_logged( $player_row, LOGIN_SKIP_UPDATE|LOGIN_SKIP_VFY_CHK );
 
-   // define all months for (*) to have translation-texts (see use of '$TW_'):
-   if (0) T_('Jan').T_('Feb').T_('Mar').T_('Apr').T_('May').T_('Jun').T_('Jul').T_('Aug').T_('Sep').T_('Oct').T_('Nov').T_('Dec');
-
    //disable translations in graph if not latin
    if ( preg_match( '/^iso-8859-/i', $encoding_used) )
    {
-      $keep_english= false;
-      $T_= 'T_';
-      //$TW_ = 'T_'; // for non-const translation-texts
-      $datelabel = create_function('$x', '$TW_ = "T_"; return $TW_(date("M",$x)).date("\\nY",$x);' );
+      //$T_= 'T_';
+      $datelabel = create_function('$x', 'return format_translated_date("M\\nY", $x);' );
    }
    else
    {
-      $keep_english= true;
-      $T_= 'fnop';
+      $T_= 'fnop'; // keep English
       $datelabel = create_function('$x', 'return date("M\\nY",$x);' );
    }
 
@@ -51,8 +46,7 @@ require_once 'include/graph.php';
    $show_time= (int)(bool)@$_REQUEST['show_time'];
    $SizeX= ( @$_REQUEST['size'] > 0 ? $_REQUEST['size'] : 640 );
    $SizeX= min( 2048, max( 256, $SizeX ));
-   $cache_it= ( CACHE_FOLDER>'' && !@$_REQUEST['no_cache']
-            && $SizeX==640 && !$show_time );
+   $cache_it= ( CACHE_FOLDER>'' && !@$_REQUEST['no_cache'] && $SizeX==640 && !$show_time );
 
    if ( $cache_it )
    {

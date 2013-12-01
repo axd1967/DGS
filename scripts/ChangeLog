@@ -16,6 +16,16 @@ Developers INFO:
 ChangeLog
 ------------------------------------------------------------------
 
+2013-12-01 jug
+
+   * include/gui_functions.php (format_translated_date, quote_dateformat),
+     include/game_functions.php (echo_accept_same_opponent),
+     include/std_functions.php (end_page),
+     scripts/tests/GuiFunctionsTest.php, scripts/tests/AllTests.php,
+     tournaments/view_tournament.php, rss/status.php,
+     ratingpng.php (interpolate), statisticspng.php, userinfo.php:
+   - format date with translated month & weekday names if date-format contains 'D' or 'M'
+
 2013-11-30 jug
 
    * include/board.php (Board.draw_board, ~.draw_move_message),

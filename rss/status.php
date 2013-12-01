@@ -57,6 +57,7 @@ require_once 'include/quick_common.php';
 require_once 'include/connect2mysql.php';
 require_once 'include/game_functions.php';
 require_once 'include/gui_bulletin.php';
+require_once 'include/gui_functions.php';
 
 $TheErrors->set_mode(ERROR_MODE_PRINT);
 
@@ -448,7 +449,7 @@ else
 
    $tit= $channel_title;
    $lnk= HOSTBASE.'status.php';
-   $dsc= sprintf( $channel_description_fmt, date(DATE_FMT_TZ, $NOW) ); // with TZ
+   $dsc= sprintf( $channel_description_fmt, format_translated_date(DATE_FMT_TZ, $NOW) ); // with TZ
    rss_open( $tit, $dsc, $lnk);
 
    $nothing_found = true;

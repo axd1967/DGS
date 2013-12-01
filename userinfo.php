@@ -119,7 +119,7 @@ $GLOBALS['ThePage'] = new Page('UserInfo');
    // get player clock
    $tmpTZ = setTZ($row['Timezone']); //for get_clock_used() and local time
    $user_gmt_offset = date('O', $NOW);
-   $user_localtime  = date(DATE_FMT5, $NOW); // +timezone-name
+   $user_localtime  = format_translated_date(DATE_FMT5, $NOW); // +timezone-name
    $user_clockused  = get_clock_used($row['Nightstart']);
    setTZ($tmpTZ);
    $img_nighttime = ( is_nighttime_clock($user_clockused) ) ? SMALL_SPACING . echo_image_nighttime(true) : '';

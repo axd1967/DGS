@@ -459,6 +459,7 @@ function span( $class, $str='', $strfmt='%s', $title='' )
       return sprintf( "<span class=\"$class\"$title>$strfmt</span>", $str );
 }
 
+// NOTE: if $datefmt contains 'D' or 'M', function format_translated_date() must be used instead to keep month/weekday translated!
 function formatDate( $date, $defval='', $datefmt=DATE_FMT )
 {
    return ($date > 0) ? date($datefmt, $date) : $defval;
@@ -472,6 +473,45 @@ function formatNumber( $num )
 function build_range_text( $min, $max, $fmt='[%s..%s]', $generic_max=null )
 {
    return sprintf( $fmt, $min, $max, $generic_max );
+}
+
+// use this function if $datefmt contains 'D' or 'M' to get a DGS-language-specific date
+function format_translated_date( $datefmt, $time )
+{
+   static $ARR_MONTHS = null;
+   static $ARR_WEEKDAYS = null;
+
+   if ( preg_match("/(?<!\\\\)[DM]/", $datefmt) )
+   {
+      if ( is_null($ARR_MONTHS) )
+      {
+         $ARR_MONTHS = array(
+            T_('Jan'), T_('Feb'), T_('Mar'), T_('Apr'), T_('May'), T_('Jun'),
+            T_('Jul'), T_('Aug'), T_('Sep'), T_('Oct'), T_('Nov'), T_('Dec') );
+      }
+      if ( is_null($ARR_WEEKDAYS) )
+         $ARR_WEEKDAYS = array( T_('Sun'), T_('Mon'), T_('Tue'), T_('Wed'), T_('Thu'), T_('Fri'), T_('Sat') );
+
+      $ts = localtime($time, true);
+      $datefmt = preg_replace(
+         array( "/(?<!\\\\)D/",
+                "/(?<!\\\\)M/" ),
+         array( quote_dateformat($ARR_WEEKDAYS[$ts['tm_wday']]),
+                quote_dateformat($ARR_MONTHS[$ts['tm_mon']]) ),
+         $datefmt );
+   }
+
+   return date($datefmt, $time);
+}//format_translated_date
+
+// prepend each date-format-character with a '\' to escape it
+function quote_dateformat( $datefmt )
+{
+   $out = '';
+   $len = strlen($datefmt);
+   for ( $i=0; $i < $len; $i++ )
+      $out .= '\\' . $datefmt[$i];
+   return $out;
 }
 
 ?>
