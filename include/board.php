@@ -30,6 +30,8 @@ define('BOARDOPT_LOAD_LAST_MSG', 0x02);
 define('BOARDOPT_STOP_ON_FIX',   0x04); // if set: stop and return FALSE if corrupted game found
 define('BOARDOPT_USE_CACHE',     0x08);
 
+define('JS_CHILDREN', '_children');
+
 
 class Board
 {
@@ -334,8 +336,13 @@ class Board
          }
       }
 
-      if ( is_numeric($move) && isset($result[$move]) )
-         $result = $result[$move]; // Text-value for single-move
+      if ( is_numeric($move) )
+      {
+         if ( isset($result[$move]) )
+            $result = $result[$move]; // Text-value for single-move
+         else
+            $result = false;
+      }
 
       return $result;
    }//load_cache_game_move_message
@@ -1445,51 +1452,70 @@ class Board
    }//read_stone_value
 
    /*!
-    * \brief Returns String with moves to be passed to JavaScript-game-editor for building up game-tree.
-    * \return space-separate string with moves, for syntax see GameEditor.parseMoves() in 'js/game-editor.js'
-    * \note prisoners are encoded, handicap is either done as SETUP or as MOVE
-    * \todo may be later replaced with SGF-encoding
+    * \brief Returns JS-String with game-tree as required for 'js/game-editor.js'.
+    * \return JSON { _children: [..], B|W: sgf-move|'', AB|AW: [ shape-sgf ], d_capt: [ sgf-captures ], d_gc: game-comment }
     */
-   public function make_js_game_moves()
+   public function make_js_game_tree()
    {
-      $out = array();
+      //TODO avoid double load-move-msgs on game-page also take user-specific view into account
+      $move_texts = self::load_cache_game_move_message( 'make_js_game_tree', $this->gid, null, true, true );
+
+      $root_node = $curr_node = new JS_GameNode();
       $shape = array( BLACK => array(), WHITE => array() );
       foreach ( $this->js_moves as $arr )
       {
          list( $move_nr, $stone, $x, $y ) = $arr;
          if ( $stone == BLACK )
-            $color = 'b';
+            $prop = 'B';
          elseif ( $stone == WHITE )
-            $color = 'w';
+            $prop = 'W';
          else
             continue; // stone=NONE|MARKED_BY_BLACK/WHITE, x=POSX_RESIGN/TIMEOUT/SCORE
 
-         if ( $x == POSX_PASS )
-            $val = '_P';
-         else
-            $val = number2sgf_coords($x,$y, $this->size);
+         $curr_node = $curr_node->add_new_child();
 
+         $val = ( $x == POSX_PASS ) ? '' : number2sgf_coords($x,$y, $this->size);
          if ( $move_nr == 0 )
             $shape[$stone][] = $val;
          else
          {
+            $curr_node->{$prop} = $val;
             if ( count(@$this->moves_captures[$move_nr]) )
-               $val .= '/' . implode('', @$this->moves_captures[$move_nr]);
-            $out[] = $color . $val;
-            //$out[] = "$move_nr.$color$val";
+               $curr_node->d_capt = $this->moves_captures[$move_nr]; // captures
+            if ( isset($move_texts[$move_nr]) ) // TODO make_html_safe() according to curr-viewer + move-player
+               $curr_node->d_gc = $move_texts[$move_nr]; // game-comment
          }
       }
 
       if ( count($shape[BLACK]) )
-         array_unshift( $out, 'BS' . implode('', $shape[BLACK]) );
+         $root_node->AB = $shape[BLACK];
       if ( count($shape[WHITE]) )
-         array_unshift( $out, 'WS' . implode('', $shape[WHITE]) );
+         $root_node->AW = $shape[WHITE];
 
-      $result = ( count($out) ) ? "['" . implode("','", $out). "']" : "[]";
-      //error_log("make_js_game_moves({$this->size}) = [$result]");
+      $root_node->XM = $this->max_moves;
+
+      $result = dgs_json_encode( $root_node );
+      //error_log("make_js_game_tree({$this->size}) = [$result]");
       return $result;
-   }//make_js_game_moves
+   }//make_js_game_tree
 
 } //class Board
+
+
+
+/*! \brief Class used to create JavaScript-data using json-encode to be passed to 'js/game-editor.js'. */
+class JS_GameNode
+{
+   // other attributes are set dynamically
+   public $_children = array();
+
+   /*! \brief Appends new JS_GameNode to children and return new node. */
+   public function add_new_child()
+   {
+      $node = new JS_GameNode();
+      $this->_children[] = $node;
+      return $node;
+   }
+}
 
 ?>

@@ -18,6 +18,17 @@ ChangeLog
 
 2013-12-01 jug
 
+   * include/board.php (Board.load_cache_game_move_message, ~.make_js_game_tree;
+       class JS_GameNode, ~.add_new_child)
+     include/std_functions.php (start_html)
+     js/game-editor.js (DGS.GameEditor.parseGameTree)
+     game.php (draw_game_tools):
+   - encode game-tree in JSON-like format for JS-game-editor
+   - started 'Analyze'-tab in game-tools
+   - commented in old draw_moves-code with "ugly" green moves-history-table
+   - bugfix: return false instead of full message-array if there is no move-message
+     in loaded & cached move-message-array
+
    * include/gui_functions.php (format_translated_date, quote_dateformat),
      include/game_functions.php (echo_accept_same_opponent),
      include/std_functions.php (end_page),

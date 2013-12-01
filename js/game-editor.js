@@ -78,13 +78,14 @@ DGS.game = {
          //TODO
       });
 
+      DGS.run.gameEditor.saveBoard();
+
       /* TODO maybe used later
       $("a.GameViewer").click( function(event) {
          event.preventDefault();
          $("span#GameViewer").toggle();
 
          if ( $("span#GameViewer").is(":visible") ) {
-            DGS.run.gameEditor.saveBoard();
             DGS.run.gameEditor.drawBoard();
          } else {
             DGS.run.gameEditor.restoreBoard();
@@ -1225,41 +1226,18 @@ $.extend( DGS.GameEditor.prototype, {
       this.play_next_color = C.GOBS_BLACK;
    },
 
-   /*
-    * $moves_data = String-array with shape-setup & moves of game
-    * Syntax $game_moves := setup [ game_move* ]
-    *    setup     := ( COLOR "S" move+ ){0,2}
-    *    COLOR     := "B" | "W"
-    *    game_move := color move prisoners
-    *    color     := "b" | "w"
-    *    move      := ( "a".."z" "a".."z" | "_P" )       ; _P = pass
-    *    prisoners := "/" move+
-    *    TODO:
-    *    territory := ( COLOR "T" move+ )+               ; for LATER perhaps
-    */
-   parseMoves : function( size_x, size_y, moves_data ) {
-      this.goban.setSize( size_x, size_y );
-      this.goban.makeBoard( size_x, size_y, true );
+   /**
+    * Parses JSON-formatted game-tree into client-side used game-tree structure.
+    * $tree_data = { PROP: VAL|ARR|OBJ, _children: [] }
+    **/
+   parseGameTree : function( size, tree_data ) {
+      this.goban.setSize( size, size );
+      this.goban.makeBoard( size, size, true );
 
-      var game_tree = [], result;
-      //TODO create move-index for point-navigation
-
-      for ( var mvd in moves_data ) {
-         if ( (result = /^([bw])([a-z][a-z])(?:\/([a-z][a-z])+)?$/.exec(mvd)) ) { // parse MOVE-pattern: bzz[/xx]
-            var col = result[1]; // b|w
-            var pos = result[2]; // sgf-coord
-            var cap = result[3]; // prisoners = sgf-coord+
-
-            //var changes = this.calculateMoveChanges( col, pos ); // TODO no lib-check needed, prisoners = $cap
-            //var treenode = new DGS.TreeNode( mnr, col, pos, 'MOVE', changes ); //TODO
-            //game_tree.push( treenode );
-         }
-         else if ( (result = /^([BW])S([a-z][a-z])+$/.exec(mvd)) ) { // parse SHAPE-pattern: BSzz
-            var col = result[1]; // B|W
-            var pos = result[2]; // sgf-coord+
-         }
-      }
-   }, //parseMoves
+      //TODO parse with eidogo GameTree
+      //var changes = this.calculateMoveChanges( col, pos ); // TODO no lib-check needed, prisoners = $cap
+      //var treenode = new DGS.TreeNode( mnr, col, pos, 'MOVE', changes ); //TODO
+   }, //parseGameTree
 
    drawBoard : function() {
       this.goban.clearBoard();
