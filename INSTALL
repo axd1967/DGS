@@ -331,6 +331,16 @@ NOTE: order of the following items is not strict. You may need to re-edit the
      mysql.max_links = -1 ;Unused
      mysql.trace_mode = Off  ; needed for FOUND_ROWS() to work, see config.php ALLOW_SQL_CALC_ROWS
 
+* if using XDebug (or similar) for local PHP development:
+
+  The max-nesting-level of xdebug must be raised, otherwise encoding JSON for the game-editor will fail
+  (happens if ENABLE_GAME_VIEWER=true and game-page is used):
+
+  Edit xdebug-config for PHP running in Apache, probably at "/etc/php5/apache2/conf.d/xdebug.ini" and
+  adjust (or add) the following config-line:
+
+     xdebug.max_nesting_level=1500
+
 
 * OPTIONAL: for using FreeType-font drawing rating graphs:
 
