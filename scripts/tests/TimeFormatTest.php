@@ -21,7 +21,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 // Call TimeFormatTest::main() if this source file is executed directly.
 if (!defined("PHPUnit_MAIN_METHOD")) {
-    define("PHPUnit_MAIN_METHOD", "TimeFormatTest::main");
+   define("PHPUnit_MAIN_METHOD", "TimeFormatTest::main");
 }
 
 require_once 'PHPUnit/Framework/TestCase.php';

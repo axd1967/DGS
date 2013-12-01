@@ -19,7 +19,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 // Call GameSetupTest::main() if this source file is executed directly.
 if (!defined("PHPUnit_MAIN_METHOD")) {
-    define("PHPUnit_MAIN_METHOD", "GameSetupTest::main");
+   define("PHPUnit_MAIN_METHOD", "GameSetupTest::main");
 }
 
 require_once "PHPUnit/Framework/TestCase.php";
