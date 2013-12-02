@@ -18,6 +18,13 @@ ChangeLog
 
 2013-12-01 jug
 
+   * js/game-editor.js, game.php, game_editor.php:
+   - optimization of JS-game-editor: replaced inner board-format matrix[y][x]
+     to use faster 1-dimensional matrix[y*size+x]
+     - replaced interal handling of starting-point of x/y-board-coord from 1 to 0
+
+2013-12-01 jug
+
    * include/board.php (Board.load_cache_game_move_message, ~.make_js_game_tree;
        class JS_GameNode, ~.add_new_child)
      include/std_functions.php (start_html)

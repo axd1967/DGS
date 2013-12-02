@@ -119,15 +119,15 @@ DGS.utils = {
       $(selector).effect("highlight", { color: '#FF0000' }).focus();
    },
 
-   makeSgfCoords : function( x, y ) { // x/y=1..n
-      return String.fromCharCode(0x60 + x) + String.fromCharCode(0x60 + y); //0x61=a
+   makeSgfCoords : function( x, y ) { // x/y=0..
+      return String.fromCharCode(0x61 + x) + String.fromCharCode(0x61 + y); //0x61=a
    },
 
-   // SGF-single-coord: a..y -> 1..25
+   // SGF-single-coord: a..y -> 0..24
    makeNumberCoord : function( sgf_part ) {
       if ( sgf_part < 'a' || sgf_part > 'y' )
          throw "DGS.utils.makeNumberCoord("+sgf_part+"): invalid args";
-      return sgf_part.charCodeAt(0) - 0x60; //0x61=a
+      return sgf_part.charCodeAt(0) - 0x61; //0x61=a
    },
 
    debug : function( msg ) {
@@ -268,20 +268,21 @@ var C = DGS.constants.Goban;
 
 
 // constructs Goban
-DGS.Goban = function() {
+DGS.Goban = function( bsize_x, bsize_y ) {
    // bitmask using GOBB_NORTH|SOUTH|WEST|EAST enabling coordinates on that side of the go-board.
    this.opts_coords = 0;
    this.show_coords = true; // true to show coordinates
 
-   // matrix[y][x] = GOB-bitmask | [ GOB-value-bitmask, number|letter (=label) ]; x/y=1..n
+   // matrix[ y * size_y + x ] = GOB-bitmask | [ GOB-value-bitmask, number|letter (=label) ]; x/y=0..n-1
    // NOTE: makeBoard() MUST be called to properly init matrix
    this.matrix = [];
 
-   // 1..max_x/y really HAS something on board, can be partial board of size_x/y
-   this.max_x = this.max_y = 1;
+   // 0..max_x/y really HAS something on board, can be partial board of size_x/y
+   this.max_x = this.max_y = 0;
 
    // for starting y-coordinates-label
-   this.size_x = this.size_y = 1;
+   this.size_x = bsize_x;
+   this.size_y = bsize_y;
 
    this.goban_labels = new DGS.GobanLabels();
    this.mark_point = null; // goban maintains ONE GOBM_MARK-marker reserved for last-move: null=none or [x,y]
@@ -299,15 +300,16 @@ $.extend( DGS.Goban.prototype, {
    },
 
    setSize : function( size_x, size_y ) {
+      //TODO resize needed !?
       this.size_x = size_x;
       this.size_y = size_y;
    },
 
    toString : function() {
-      var buf = String.sprintf("Goban(%s,%s):\n", this.max_x, this.max_y);
-      for ( var y=1; y <= this.max_y; y++ ) {
+      var buf = String.sprintf("Goban(%s,%s):\n", this.max_x + 1, this.max_y + 1 );
+      for ( var y=0; y < this.max_y; y++ ) {
          buf += y + ": ";
-         for ( var x=1; x <= this.max_x; x++ ) {
+         for ( var x=0; x < this.max_x; x++ ) {
             var arr = this.getValue(x,y);
             buf += String.sprintf("[%x,%s] ", arr[C.GOBMATRIX_VALUE], arr[C.GOBMATRIX_LABEL] );
          }
@@ -317,7 +319,7 @@ $.extend( DGS.Goban.prototype, {
    },
 
    clearBoard : function() {
-      this.makeBoard( this.max_x, this.max_y, true );
+      this.makeBoard( this.size_x, this.size_y, true );
    },
 
    makeBoard : function( width, height, withHoshi ) {
@@ -325,30 +327,29 @@ $.extend( DGS.Goban.prototype, {
          throw "Goban.makeBoard("+width+","+height+","+withHoshi+"): invalid_args width, height";
 
       this.matrix = [];
-      for ( var y=1; y <= height; y++) {
+      for ( var y=0; y < height; y++) {
          var board_lines = C.GOBB_MID;
-         if ( y == 1 )
+         if ( y == 0 )
             board_lines &= ~C.GOBB_NORTH;
-         else if ( y == height )
+         else if ( y == height - 1 )
             board_lines &= ~C.GOBB_SOUTH;
 
-         this.matrix[y] = [];
-         for ( var x=1; x <= width; x++) {
+         for ( var x=0; x < width; x++) {
             var val = board_lines;
-            if ( x == 1 )
+            if ( x == 0 )
                val &= ~C.GOBB_WEST;
-            else if ( x == width )
+            else if ( x == width - 1 )
                val &= ~C.GOBB_EAST;
 
-            if ( withHoshi && this.isHoshi(x-1, y-1, width, height) )
+            if ( withHoshi && this.isHoshi(x, y, width, height) )
                val |= C.GOBO_HOSHI;
 
-            this.matrix[y][x] = val;
+            this.matrix[ y*this.size_y + x ] = val;
          }
       }
 
-      this.max_x = width;
-      this.max_y = height;
+      this.max_x = width - 1;
+      this.max_y = height - 1;
 
       this.goban_labels.reset();
       this.mark_point = null;
@@ -389,16 +390,18 @@ $.extend( DGS.Goban.prototype, {
          value = arrval;
       }
 
+      var m_xy = y*this.size_y + x;
       if ( is_arr_value )
-         this.matrix[y][x] = arrval;
+         this.matrix[m_xy] = arrval;
       else if ( typeof(value) != 'number' )
          throw "Goban.setValue("+x+","+y+","+value+","+label+"): invalid_args value";
       else if ( label )
-         this.matrix[y][x] = [ value, label ];
+         this.matrix[m_xy] = [ value, label ];
       else
-         this.matrix[y][x] = value; // optimization to avoid too many object-instances
+         this.matrix[m_xy] = value; // optimization to avoid too many object-instances
 
-      if ( this.mark_point != null && ((value & C.GOBS_BITMASK) == C.GOBS_EMPTY) && this.mark_point[0] == x && this.mark_point[1] == y )
+      if ( this.mark_point != null
+            && ((value & C.GOBS_BITMASK) == C.GOBS_EMPTY) && this.mark_point[0] == x && this.mark_point[1] == y )
          this.mark_point = null;
       if ( (value & C.GOBM_BITMASK) == C.GOBM_MARK ) // only used in PLAY-mode, otherwise undo/redo not working
          this.mark_point = [ x, y ];
@@ -416,14 +419,15 @@ $.extend( DGS.Goban.prototype, {
    }, //setValue
 
    hasValue : function( x, y ) {
-      return (this.matrix[y] && this.matrix[y][x]);
+      return this.matrix[ y*this.size_y + x ];
    },
 
    // returns non-null [ value, label ]
    getValue : function( x, y ) {
       if ( !this.hasValue(x,y) )
          return [ 0, '' ];
-      var arrval = this.matrix[y][x];
+
+      var arrval = this.matrix[ y*this.size_y + x ];
       if ( typeof(arrval) == 'number' )
          return [ arrval, '' ];
       else if ( typeof(arrval) == 'object' )
@@ -472,21 +476,15 @@ $.extend( DGS.Goban.prototype, {
       return this.getValue(x,y)[C.GOBMATRIX_LABEL];
    },
 
-   // returns cloned and filtered matrix[y][x] = GOBS_EMPTY|BLACK|WHITE, Ys all filled, Xs only filled if set
+   // returns cloned and filtered matrix[y][x] with only stone-data GOBS_EMPTY|BLACK|WHITE
    cloneStoneMatrix : function() {
       var arrval, cmatrix = []; // cloned matrix
-      for ( var y=1; y <= this.max_y; y++ ) {
-         cmatrix[y] = [];
-         if ( y in this.matrix ) {
-            for ( var x=1; x < this.matrix[y].length; x++ ) {
-               if ( x in this.matrix[y] ) {
-                  arrval = this.matrix[y][x];
-                  cmatrix[y][x] = ( typeof(arrval) == 'number' )
-                     ? ( arrval & C.GOBS_BITMASK )
-                     : ( arrval[C.GOBMATRIX_VALUE] & C.GOBS_BITMASK );
-               }
-            }
-         }
+      var mlen = this.matrix.length;
+      for ( var m_xy=0; m_xy < mlen; m_xy++ ) {
+         arrval = this.matrix[m_xy];
+         cmatrix[m_xy] = ( typeof(arrval) == 'number' )
+            ? ( arrval & C.GOBS_BITMASK )
+            : ( arrval[C.GOBMATRIX_VALUE] & C.GOBS_BITMASK );
       }
       return cmatrix;
    } //cloneStoneMatrix
@@ -674,7 +672,7 @@ $.extend( DGS.Board.prototype, {
       var tbody = $("table#Goban tbody");
 
       var coord_width = Math.floor( this.stone_size * 31 / 25 );
-      var table_width = goban.max_x * this.stone_size;
+      var table_width = (goban.max_x+1) * this.stone_size;
 
       // init board-layout options
       var opts_coords = goban.getOptionsCoords();
@@ -699,12 +697,12 @@ $.extend( DGS.Board.prototype, {
 
       var borders = opts_coords;
       var start_col = 0;
-      if ( (goban.size_x > goban.max_x && !(borders & C.GOBB_WEST)) )
-         start_col = goban.size_x - goban.max_x;
+      if ( (goban.size_x > goban.max_x + 1 && !(borders & C.GOBB_WEST)) )
+         start_col = goban.size_x - goban.max_x - 1;
 
       var start_row = goban.size_y;
-      if ( (goban.size_y > goban.max_y && !(borders & C.GOBB_NORTH)) || (goban.size_y < goban.max_y ) )
-         start_row = goban.max_y;
+      if ( (goban.size_y > goban.max_y + 1 && !(borders & C.GOBB_NORTH)) || (goban.size_y < goban.max_y + 1 ) )
+         start_row = goban.max_y + 1;
 
       // ---------- Goban ------------------------------------------------
 
@@ -736,9 +734,9 @@ $.extend( DGS.Board.prototype, {
          tbody.append( $(row) );
       }
 
-      for ( var rownr = start_row, y = 1; y <= goban.max_y; rownr--, y++ ) {
+      for ( var rownr = start_row, y = 0; y <= goban.max_y; rownr--, y++ ) {
          row = ( opts_coords & C.GOBB_WEST ) ? coord_start_number + rownr + coord_alt + rownr + coord_end : '';
-         for ( var x = 1; x <= goban.max_x; x++ ) {
+         for ( var x = 0; x <= goban.max_x; x++ ) {
             row += '<td id=' + DGS.utils.makeSgfCoords(x,y) + " class=brdx>" + blank_image + "</td>\n";
          }
          if ( opts_coords & C.GOBB_EAST )
@@ -752,18 +750,19 @@ $.extend( DGS.Board.prototype, {
       }
 
       $("#GameEditor div.GobanGfx").css('width', table_width + 'px');
-      if ( withActions )
-      $("#GameEditor td.brdx a").click( function(event) {
-         DGS.run.gameEditor.action_handle_board( this, event );
-         event.preventDefault();
-      });
+      if ( withActions ) {
+         $("#GameEditor td.brdx a").click( function(event) {
+            DGS.run.gameEditor.action_handle_board( this, event );
+            event.preventDefault();
+         });
+      }
 
       $("#Goban tbody").show();
    }, //draw_board_structure
 
    make_coord_row : function( max_x, start_val, coord_start_letter, coord_alt, coord_end, coord_left, coord_right ) {
       var out = '', letterIdx = 0, letter;
-      for ( var colnr = 1; colnr <= max_x; colnr++ ) {
+      for ( var colnr = 0; colnr <= max_x; colnr++ ) {
          if ( letterIdx == 8 ) letterIdx++; // skip 8='i'
          letter = String.fromCharCode(0x61 + start_val + letterIdx); //0x61=a
          out += coord_start_letter + letter + coord_alt + letter + coord_end;
@@ -779,8 +778,8 @@ $.extend( DGS.Board.prototype, {
          $("table#Goban td.brdx img").removeAttr('alt');
       }
 
-      for ( var y=1; y <= goban.max_y; y++ ) {
-         for ( var x=1; x <= goban.max_x; x++ ) {
+      for ( var y=0; y <= goban.max_y; y++ ) {
+         for ( var x=0; x <= goban.max_x; x++ ) {
             var arr = goban.getValue(x,y);
             this.write_image( x, y, arr[C.GOBMATRIX_VALUE], arr[C.GOBMATRIX_LABEL] );
          }
@@ -801,7 +800,7 @@ $.extend( DGS.Board.prototype, {
       }
    },
 
-   // updates td-cell with board-image (and link); rebuild=true to rebuild td-cell (content replaced)
+   // updates td-cell with board-image (and link) at x/y=0..; rebuild=true to rebuild td-cell (content replaced)
    write_image : function( x, y, value, label ) {
       //global base_path
       var lBoard  = value & C.GOBB_BITMASK;
@@ -1054,12 +1053,12 @@ DGS.GameChangeCalculator = function( goban ) {
       if ( old_stone != C.GOBS_EMPTY ) // point must be empty
          return goban_changes;
 
-      var x0 = DGS.utils.makeNumberCoord( coord_sgf.charAt(0) ); //1..
+      var x0 = DGS.utils.makeNumberCoord( coord_sgf.charAt(0) ); //0..
       var y0 = DGS.utils.makeNumberCoord( coord_sgf.charAt(1) );
 
       // determine captures
-      this.stone_matrix = this.goban.cloneStoneMatrix();
-      this.stone_matrix[y0][x0] = color;
+      this.stone_matrix = this.goban.cloneStoneMatrix(); // only contains simple stones
+      this.stone_matrix[ y0*this.goban.size_y + x0 ] = color;
       var opp_color = C.GOBS_BLACK + C.GOBS_WHITE - color;
       var prisoners = this.determine_prisoners( x0, y0, opp_color );
       var nr_prisoners = prisoners.length;
@@ -1106,10 +1105,8 @@ DGS.GameChangeCalculator = function( goban ) {
       for ( var dir=0; dir < 4; dir++ ) { // determine captured stones for ALL directions
          x = x0 + DIR_X[dir];
          y = y0 + DIR_Y[dir];
-         if ( (y in this.stone_matrix) && (x in this.stone_matrix[y]) ) {
-            if ( this.stone_matrix[y][x] == color )
-               this.has_liberties( x, y, prisoners, /*remove*/true );
-         }
+         if ( this.stone_matrix[ y*this.goban.size_y + x ] == color )
+            this.has_liberties( x, y, prisoners, /*remove*/true );
       }
       return prisoners;
    }; //determine_prisoners
@@ -1123,15 +1120,13 @@ DGS.GameChangeCalculator = function( goban ) {
     * \note extracted from has_liberty_check()-func in 'include/board.php'
     */
    this.has_liberties = function( x0, y0, prisoners, remove ) {
-      var color = this.stone_matrix[y0][x0]; // Color of this stone
+      var color = this.stone_matrix[ y0*this.goban.size_y + x0 ]; // Color of this stone
 
       var arr_xy = [ x0, y0 ];
       var stack = [ arr_xy ];
 
       var visited = []; // potential prisoners and marker if point already checked
-      for ( var y=1; y <= this.goban.max_y; y++ )
-         visited[y] = [];
-      visited[y0][x0] = 1;
+      visited[ y0*this.goban.size_y + x0 ] = 1;
 
       // scanning all directions starting at start-x/y building up a stack of adjacent points to check
       var dir, x, new_x, new_y, new_color;
@@ -1142,27 +1137,26 @@ DGS.GameChangeCalculator = function( goban ) {
             new_x = x + DIR_X[dir];
             new_y = y + DIR_Y[dir];
 
-            if ( (new_x >= 1 && new_x <= this.goban.max_x) && (new_y >= 1 && new_y <= this.goban.max_y) ) {
-               new_color = this.stone_matrix[new_y][new_x];
+            if ( (new_x >= 0 && new_x <= this.goban.max_x) && (new_y >= 0 && new_y <= this.goban.max_y) ) {
+               new_m_xy = new_y*this.goban.size_y + new_x;
+               new_color = this.stone_matrix[new_m_xy];
                if ( !new_color || new_color == C.GOBS_EMPTY ) {
                   return true; // found liberty
-               } else if ( new_color == color && !visited[new_y][new_x] ) {
+               } else if ( new_color == color && !visited[new_m_xy] ) {
                   stack.push( [ new_x, new_y ] );
-                  visited[new_y][new_x] = 1;
+                  visited[new_m_xy] = 1;
                }
             }
          }
       }
 
       if ( remove ) {
-         for ( y=1; y < visited.length; y++ ) {
-            if ( y in visited ) {
-               for ( x=1; x < visited[y].length; x++ ) {
-                  if ( x in visited[y] ) {
-                     prisoners.push( [x,y] );
-                     this.stone_matrix[y][x] = C.GOBS_EMPTY;
-                  }
-               }
+         for ( var m_xy=0; m_xy <= visited.length; m_xy++ ) {
+            if ( visited[m_xy] ) {
+               y = Math.floor( m_xy / this.goban.size_y );
+               x = m_xy % this.goban.size_y;
+               prisoners.push( [x,y] );
+               this.stone_matrix[ m_xy ] = C.GOBS_EMPTY;
             }
          }
       }
@@ -1178,8 +1172,8 @@ DGS.GameChangeCalculator = function( goban ) {
 // ---------- GameEditor -------------------------------------------------------
 
 // constructs GameEditor
-DGS.GameEditor = function( stone_size, wood_color ) {
-   this.goban = new DGS.Goban(); // DGS.Goban to keep board-state
+DGS.GameEditor = function( stone_size, wood_color, size_x, size_y ) {
+   this.goban = new DGS.Goban( size_x, size_y ); // DGS.Goban to keep board-state
    this.board = new DGS.Board( stone_size, wood_color ); // DGS.Board for drawing board
    this.calc = new DGS.ChangeCalculator(); // DGS.ChangeCalculator for calculating changes for goban & more
    this.gamecalc = new DGS.GameChangeCalculator( this.goban ); // DGS.GameChangeCalculator for calculating play-changes for goban & more

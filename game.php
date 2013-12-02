@@ -614,8 +614,8 @@ $GLOBALS['ThePage'] = new Page('Game');
 
    if ( ALLOW_JAVASCRIPT && ENABLE_GAME_VIEWER )
    {
-      $js = sprintf( "DGS.run.gameEditor = new DGS.GameEditor(%d,%d);\n",
-         $cfg_board->get_stone_size(), $cfg_board->get_wood_color() );
+      $js = sprintf( "DGS.run.gameEditor = new DGS.GameEditor(%d,%d,%d,%d);\n",
+         $cfg_board->get_stone_size(), $cfg_board->get_wood_color(), $Size, $Size );
       $js .= sprintf( "DGS.run.gameEditor.parseGameTree(%s,%s);\n",
          $Size, $TheBoard->make_js_game_tree() );
       $js .= "DGS.game.loadPage();\n";

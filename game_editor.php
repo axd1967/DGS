@@ -56,8 +56,8 @@ $GLOBALS['ThePage'] = new Page('GameEditor');
 
    // ---------- Game EDITOR ---------------------------------------
 
-   $js = sprintf( "DGS.run.gameEditor = new DGS.GameEditor(%d,%d);\n",
-      $cfg_board->get_stone_size(), $cfg_board->get_wood_color() );
+   $js = sprintf( "DGS.run.gameEditor = new DGS.GameEditor(%d,%d,%d,%d);\n",
+      $cfg_board->get_stone_size(), $cfg_board->get_wood_color(), 9, 9 );
    $js .= "DGS.game_editor.loadPage();\n";
 
    $style_str = (is_null($cfg_board))
