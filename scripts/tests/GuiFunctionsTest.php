@@ -76,11 +76,12 @@ class GuiFunctionsTest extends PHPUnit_Framework_TestCase {
 
    /** Tests format_translated_date(). */
    public function test_format_translated_date() {
-      static $FMT = 'D, d-M-Y';
+      static $FMT = 'D, d-M-Y \\D\\M';
 
-      $this->assertEquals( "Mo, 20-Mai-2013", format_translated_date($FMT, mktime(13,0,0,   5,20,2013) ));
-      $this->assertEquals( "Sa, 19-Okt-2013", format_translated_date($FMT, mktime(13,0,0,  10,19,2013) ));
-      $this->assertEquals( "Mi, 18-Dez-2013", format_translated_date($FMT, mktime(13,0,0,  12,18,2013) ));
+      $this->assertEquals( "Mo, 20-Mai-2013 DM", format_translated_date($FMT, mktime(13,0,0,   5,20,2013) ));
+      $this->assertEquals( "Sa, 19-Okt-2013 DM", format_translated_date($FMT, mktime(13,0,0,  10,19,2013) ));
+      $this->assertEquals( "Mi, 18-Dez-2013 DM", format_translated_date($FMT, mktime(13,0,0,  12,18,2013) ));
+      $this->assertEquals( "Mi, 18-Dez-2013 DM", format_translated_date($FMT, mktime(13,0,0,  12,18,2013) ));
    }
 
 }
