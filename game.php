@@ -1035,7 +1035,7 @@ function draw_game_tools()
          "<div id=tabs>\n",
             "<ul>\n",
                "<li>", anchor('#tab_GameInfo', T_('Game Info#ged'), T_('Game Information#ged')), "</li>\n",
-               "<li>", anchor('#tab_GameNotes', T_('Notes#ged'), T_('Private game notes#ged')), "</li>\n",
+               "<li>", anchor('#tab_GameNotes', T_('Notes#ged'), T_('Private game notes')), "</li>\n",
                "<li>", anchor('#tab_GameAnalysis', T_('Analyze#ged'), T_('Analyze game#ged')), "</li>\n",
             "</ul>\n",
             "<div id=tab_GameInfo class=tab>\n";

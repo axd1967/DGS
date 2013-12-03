@@ -16,6 +16,17 @@ Developers INFO:
 ChangeLog
 ------------------------------------------------------------------
 
+2013-12-03 jug
+
+   * include/std_functions.php (start_html),
+     js/game-editor.js (DGS.game_editor.initPage, DGS.game.initPage, DGS.GameEditor.current_tab,
+       ~.action_handle_show_tab),
+     js/jquery-ui-1.10.3.custom.min.js,
+     js/jquery-1.9.1.min.js,
+     skins/dragon/screen.css:
+   - updated jquery 1.6.1 to 1.9.1 and jquery-ui 1.8.13 to 1.10.3, added jquery-resizable CSS
+     - migrated game-editor to work with changed jquery-ui tabs API
+
 2013-12-01 jug
 
    * js/game-editor.js, game.php, game_editor.php:

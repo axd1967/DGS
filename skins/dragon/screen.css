@@ -2081,17 +2081,47 @@ table#GameEditor div.GobanGfx {
    border: 0px solid darkblue;
 }
 
-/* Adjusted extract from jQuery UI - jquery-ui-1.8.13.custom.css */
-.ui-tabs { position: relative; padding: 0; }
-.ui-tabs .ui-tabs-nav { margin: 0; padding: .2em .2em; }
-.ui-tabs .ui-tabs-nav li { list-style: none; float: left; position: relative; top: 2px; margin: 0 .2em 1px 0; border-bottom: 0 !important; padding: 0; white-space: nowrap; }
-.ui-tabs .ui-tabs-nav li a { float: left; padding: .3em .5em; text-decoration: none; }
-.ui-tabs .ui-tabs-nav li.ui-tabs-selected { font-weight: bold; background-color: #cccccc; top: 0; margin-bottom: 0; padding-bottom: 0px; }
-.ui-tabs .ui-tabs-nav li.ui-state-disabled a { font-style: italic; color: darkred; }
-.ui-tabs .ui-tabs-nav li.ui-tabs-selected a, .ui-tabs .ui-tabs-nav li.ui-state-disabled a, .ui-tabs .ui-tabs-nav li.ui-state-processing a { cursor: text; }
-.ui-tabs .ui-tabs-nav li a, .ui-tabs.ui-tabs-collapsible .ui-tabs-nav li.ui-tabs-selected a { cursor: pointer; }
+
+/*----------------------------------------*/
+/*!
+ * Adjusted extract from: jQuery UI Tabs 1.10.3 - http://jqueryui.com
+ * Copyright 2013 jQuery Foundation and other contributors
+ * Released under the MIT license.
+ * http://jquery.org/license
+ * http://docs.jquery.com/UI/Tabs#theming
+ */
+.ui-tabs { position: relative; padding: .2em; }
+.ui-tabs .ui-tabs-nav { margin: 0; padding: .2em .2em 0; }
+.ui-tabs .ui-tabs-nav li { list-style: none; float: left; position: relative; top: 0; margin: 1px .2em 0 0; border-bottom-width: 0; padding: 0; white-space: nowrap; }
+.ui-tabs .ui-tabs-nav li a { float: left; padding: .5em .5em; text-decoration: none; }
+.ui-tabs .ui-tabs-nav li.ui-tabs-active { font-weight: bold; background-color: #cccccc; margin-bottom: 0; padding-bottom: 0; }
+.ui-tabs .ui-tabs-nav li.ui-tabs-active a,
+.ui-tabs .ui-tabs-nav li.ui-state-disabled a,
+.ui-tabs .ui-tabs-nav li.ui-tabs-loading a { cursor: text; }
+.ui-tabs .ui-tabs-nav li a,
+.ui-tabs-collapsible .ui-tabs-nav li.ui-tabs-active a { cursor: pointer; }
 .ui-tabs .ui-tabs-panel { display: block; border-width: 0; padding: .2em; background: none; }
-.ui-tabs .ui-tabs-hide { display: none !important; }
+
+/*!
+ * Adjusted extract from: jQuery UI Resizable 1.10.3 - http://jqueryui.com
+ * Copyright 2013 jQuery Foundation and other contributors
+ * Released under the MIT license.
+ * http://jquery.org/license
+ * http://docs.jquery.com/UI/Resizable#theming
+ */
+.ui-resizable { position: relative; }
+.ui-resizable-handle { position: absolute; font-size: 0.1px; display: block; }
+.ui-resizable-disabled .ui-resizable-handle,
+.ui-resizable-autohide .ui-resizable-handle { display: none; }
+.ui-resizable-n { cursor: n-resize; height: 7px; width: 100%; top: -5px; left: 0; }
+.ui-resizable-s { cursor: s-resize; height: 7px; width: 100%; bottom: -5px; left: 0; }
+.ui-resizable-e { cursor: e-resize; width: 7px; right: -5px; top: 0; height: 100%; }
+.ui-resizable-w { cursor: w-resize; width: 7px; left: -5px; top: 0; height: 100%; }
+.ui-resizable-se { cursor: se-resize; width: 12px; height: 12px; right: 1px; bottom: 1px; }
+.ui-resizable-sw { cursor: sw-resize; width: 9px; height: 9px; left: -5px; bottom: -5px; }
+.ui-resizable-nw { cursor: nw-resize; width: 9px; height: 9px; left: -5px; top: -5px; }
+.ui-resizable-ne { cursor: ne-resize; width: 9px; height: 9px; right: -5px; top: -5px; }
+/*--------------------*/
 
 table#GameEditor div#tabs {
    margin: 0px;

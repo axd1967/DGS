@@ -33,32 +33,25 @@ DGS.game_editor = {
    },
 
    initPage : function() {
-      $( function() {
-         $("#tabs").tabs({ disabled: [], selected: 2 });
-      });
-
       $("#tab_Size input#size_upd").click( function(event) {
          event.preventDefault();
          DGS.run.gameEditor.action_size_updateSize();
-      });
-
-      $("#tabs").bind('tabsshow', function(event, ui) {
-         DGS.run.gameEditor.action_handle_show_tab( ui );
       });
       $("#tabs a.UndoTool").click( function(event) {
          event.preventDefault();
          DGS.run.gameEditor.action_handle_undo_tool( this );
       });
-
       $("#tab_Edit a.Tool").click( function(event) {
          event.preventDefault();
          DGS.run.gameEditor.action_edit_handle_tool( this );
       });
-
       $("#tab_Play a.Tool").click( function(event) {
          event.preventDefault();
          DGS.run.gameEditor.action_play_handle_tool( this );
       });
+      $("#tabs").on("tabscreate tabsactivate", function(event, ui) {
+         DGS.run.gameEditor.action_handle_show_tab( ui );
+      }).tabs({ active: 2 });
 
       DGS.run.gameEditor.testBoard(); //TODO test
    }
@@ -70,13 +63,7 @@ DGS.game = {
    },
 
    initPage : function() {
-      $( function() {
-         $("#tabs").tabs({ disabled: [], selected: 0 });
-      });
-
-      $("#tabs").bind('tabsshow', function(event, ui) {
-         //TODO
-      });
+      $("#tabs").tabs({ active: 0 });
 
       DGS.run.gameEditor.saveBoard();
 
@@ -1261,18 +1248,19 @@ $.extend( DGS.GameEditor.prototype, {
    },
 
    current_tab : function() {
-      return $("#tabs").tabs('option', 'selected');
+      return $("#tabs").tabs('option', 'active');
    },
 
    // also set defaults
-   action_handle_show_tab : function( $ui ) {
-      if ( $ui.index == 1 ) { // Edit-tab
+   action_handle_show_tab : function( ui ) {
+      var panel = ui.newPanel || ui.panel;
+      if ( panel.is("#tab_Edit") ) {
          if ( this.edit_tool_selected == null ) // default-tool
             $('#edit_tool_toggle_stone').click();
          this.update_label_tool();
          this.update_history_tool();
 
-      } else if ( $ui.index == 2 ) { // Play-tab
+      } else if ( panel.is("#tab_Play") ) {
          if ( this.play_tool_selected == null ) // default-tool
             $('#play_tool_move').click();
          this.update_play_tool_next_color();
