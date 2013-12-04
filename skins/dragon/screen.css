@@ -2300,15 +2300,17 @@ table#GamePage td#ToolsArea {
    /*width: 400px; TODO needed? */
 }
 
-div#GameMessageHeader {
-   background: #aaaad0;
+div#GameMessage {
    margin-top: 5px;
+   background: #aaaad0;
    padding: 2px;
-   padding-left: 1em;
+}
+div#GameMessageHeader {
+   padding-left: 0.5em;
    font-weight: bold;
    font-size: larger;
 }
-div#GameMessage {
+div#GameMessageBody {
    border: 3px solid #aaaad0;
    background: #e0e8ed;
    text-align: left;

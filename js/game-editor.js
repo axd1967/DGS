@@ -84,6 +84,8 @@ DGS.game = {
          //TODO this.id = (First|Last|Next|Prev)Move
       });
       */
+
+      //TODO $("#GameMessage").resizable({ maxWidth: 600, maxHeight: 600, minWidth: 200 minHeight: 100, });
    }
 };
 
