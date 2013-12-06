@@ -16,6 +16,14 @@ Developers INFO:
 ChangeLog
 ------------------------------------------------------------------
 
+2013-12-06 jug
+
+   * js/game-editor.js (DGS.game.initPage),
+     images/ui-icons_222222_256x240.png,
+     skins/dragon/screen.css,
+     game.php:
+   - prepared resizable game-message for JS-game-editor using jQuery UI Resizable
+
 2013-12-03 jug
 
    * include/std_functions.php (start_html),

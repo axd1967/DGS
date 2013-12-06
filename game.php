@@ -1047,7 +1047,7 @@ function draw_game_tools()
             "<div id=tab_GameAnalysis class=tab>\n", build_tab_GameAnalysis(), "</div>\n",
          "</div>\n",
          "<div id=GameMessage>\n",
-            "<div id=GameMessageHeader>\n", T_('Message'), "</div>\n",
+            "<div id=GameMessageHeader>", T_('Message'), "</div>\n",
             "<div id=GameMessageBody>\n",
                "<table><tr><td>{$TheBoard->movemsg}</td></tr></table>\n",
             "</div>\n",

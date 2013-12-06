@@ -65,6 +65,8 @@ DGS.game = {
    initPage : function() {
       $("#tabs").tabs({ active: 0 });
 
+      //TODO use later, but detach from above <div> in same <td>; otherwise it resizes upper <div> as well: $("#GameMessageBody").resizable();
+
       DGS.run.gameEditor.saveBoard();
 
       /* TODO maybe used later

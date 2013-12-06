@@ -2121,6 +2121,7 @@ table#GameEditor div.GobanGfx {
 .ui-resizable-sw { cursor: sw-resize; width: 9px; height: 9px; left: -5px; bottom: -5px; }
 .ui-resizable-nw { cursor: nw-resize; width: 9px; height: 9px; left: -5px; top: -5px; }
 .ui-resizable-ne { cursor: ne-resize; width: 9px; height: 9px; right: -5px; top: -5px; }
+.ui-icon-gripsmall-diagonal-se { width: 16px; height: 16px; background-image: url(../../images/ui-icons_222222_256x240.png); background-position: -64px -224px; }
 /*--------------------*/
 
 table#GameEditor div#tabs {
@@ -2316,7 +2317,7 @@ div#GameMessageBody {
    text-align: left;
    width: 29em;
    height: 12em;
-   overflow: scroll;
+   /* TODO overflow: scroll;*/
 }
 
 span#GameViewer {
