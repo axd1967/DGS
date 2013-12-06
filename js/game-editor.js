@@ -69,6 +69,8 @@ DGS.game = {
       $("#GameMessage").resizable({ alsoResize: "#GameMessageBody" });
       $("#GameMessageBody").resizable();
       $("#GameMessageBody div.ui-resizable-handle").remove(); // removes resizable-handle for inner element
+      //TODO sort the draggable out with the resizable as this can detach the div from the table it seems
+      $("#GameMessage").draggable({ handle: "#GameMessageHeader" });
 
       DGS.run.gameEditor.saveBoard();
 
@@ -1216,7 +1218,8 @@ $.extend( DGS.GameEditor.prototype, {
 
    /**
     * Parses JSON-formatted game-tree into client-side used game-tree structure.
-    * $tree_data = { PROP: VAL|ARR|OBJ, _children: [] }
+    * $tree_data = [ var-no, { PROP: VAL|ARR|OBJ, _vars: [ var-no, ... ] }, ... ]
+    * Returns tree-structure like node = { PROP: VAL|ARR|OBJ, _children: [ node, ...] }
     **/
    parseGameTree : function( size, tree_data ) {
       this.goban.setSize( size, size );
