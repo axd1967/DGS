@@ -214,7 +214,7 @@ class Board
          {
             if ( $PosX < 0 )
             {
-               $this->js_moves[] = array( $MoveNr, $Stone, $PosX, 0 );
+               //TODO double entry I think !?  $this->js_moves[] = array( $MoveNr, $Stone, $PosX, 0 );
                continue; //excluding PASS, RESIGN and SCORE, ADDTIME
             }
 
@@ -1460,11 +1460,23 @@ class Board
       //TODO avoid double load-move-msgs on game-page also take user-specific view into account
       $move_texts = self::load_cache_game_move_message( 'make_js_game_tree', $this->gid, null, true, true );
 
+      //FIXME perhaps an easier format could be simple-SGF-format parsed in JS, depends what's easier to create with variations and comments/review-stuff, etc
+      // format := [ var-num, node+,  var-num, node+, ... ];
+      // node := { prop: val|arr, prop2:...} || { prop:.., _vars: [var-num, ...] }; // _vars is only present if there are variations
       $root_node = $curr_node = new JS_GameNode();
+      $var_num = 0;
+      $out = array( $var_num ); // variation #0
+      $out[] = $root_node;
+
       $shape = array( BLACK => array(), WHITE => array() );
       foreach ( $this->js_moves as $arr )
       {
+         //error_log("make_js_game_tree().js_moves.arr = [".dgs_json_encode($arr)."]");
          list( $move_nr, $stone, $x, $y ) = $arr;
+         //TODO handle scoring/resign/time-out
+         if ( $x < POSX_PASS ) // POSX_SCORE|RESIGN|TIME|SETUP|ADDTIME
+            continue;
+
          if ( $stone == BLACK )
             $prop = 'B';
          elseif ( $stone == WHITE )
@@ -1485,6 +1497,8 @@ class Board
             if ( isset($move_texts[$move_nr]) ) // TODO make_html_safe() according to curr-viewer + move-player
                $curr_node->d_gc = $move_texts[$move_nr]; // game-comment
          }
+
+         $out[] = $curr_node;
       }
 
       if ( count($shape[BLACK]) )
@@ -1494,7 +1508,7 @@ class Board
 
       $root_node->XM = $this->max_moves;
 
-      $result = dgs_json_encode( $root_node );
+      $result = dgs_json_encode( $out );
       //error_log("make_js_game_tree({$this->size}) = [$result]");
       return $result;
    }//make_js_game_tree
@@ -1507,13 +1521,13 @@ class Board
 class JS_GameNode
 {
    // other attributes are set dynamically
-   public $_children = array();
+   //TODO cleanup later if used format is clear: public $_children = array();
 
    /*! \brief Appends new JS_GameNode to children and return new node. */
    public function add_new_child()
    {
       $node = new JS_GameNode();
-      $this->_children[] = $node;
+      //$this->_children[] = $node;
       return $node;
    }
 }
