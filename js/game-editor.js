@@ -65,7 +65,10 @@ DGS.game = {
    initPage : function() {
       $("#tabs").tabs({ active: 0 });
 
-      //TODO use later, but detach from above <div> in same <td>; otherwise it resizes upper <div> as well: $("#GameMessageBody").resizable();
+      //TODO use later, but detach from above <div> in same <td>; otherwise it resizes upper <div> as well:
+      $("#GameMessage").resizable({ alsoResize: "#GameMessageBody" });
+      $("#GameMessageBody").resizable();
+      $("#GameMessageBody div.ui-resizable-handle").remove(); // removes resizable-handle for inner element
 
       DGS.run.gameEditor.saveBoard();
 
