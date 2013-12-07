@@ -581,7 +581,10 @@ $info_box = '<br>When translating you should keep the following things in mind:
       $langchoice_form->echo_string($tabindex);
    }
 
-   end_page();
+
+   $menu = array( T_('Translation-Statistics') => "translation_stats.php" );
+
+   end_page($menu);
 }//main
 
 

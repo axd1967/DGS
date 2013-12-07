@@ -198,6 +198,7 @@ Copyright (C) 2001-2013  Erik Ouchterlony, Jens-Uwe Gaspar
 
    * Added tooltips for main-menu entries
    * Added server-version in bottom-bar
+   * Added <home translation_stats.php>translation statistics</home> with count of translated texts for each language
 
 
    Bug fixes:

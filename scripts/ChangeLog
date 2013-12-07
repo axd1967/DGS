@@ -16,6 +16,12 @@ Developers INFO:
 ChangeLog
 ------------------------------------------------------------------
 
+2013-12-07 jug
+
+   * translation_stats.php (show_translation_stats, count_translation_texts, count_translations),
+     docs.php, site_map.php, translate.php, NEWS:
+   - added translation-statistics with count of translated texts for each language
+
 2013-12-06 jug
 
    * js/game-editor.js (DGS.game.initPage),
