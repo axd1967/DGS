@@ -18,6 +18,11 @@ ChangeLog
 
 2013-12-08 jug
 
+   * include/std_functions.php (start_html),
+     js/jquery.scrollTo-1.4.3.1-min.js,
+     js/game-editor.js (DGS.game.initPage):
+   - added scrollTo-JS-plugin for scrolling to certain position within <div> on game-page
+
    * halfhourly_cron.php:
    - bugfix in email-notification: only remove hidden-comments in game-move-message
      keeping text-block of public comments instead of removing it

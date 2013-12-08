@@ -389,11 +389,13 @@ function start_html( $title, $no_cache, $skinname=NULL, $style_string=NULL, $las
 
       if ( $enable_js_game )
       {
-         $ts = date(DATE_FMT4, $GLOBALS['NOW']); //TODO good for dev, but rely on chg-date for LIVE-server
+         //TODO good for dev, but rely on chg-date for LIVE-server (later check on FRIENDLY_SHORT_NAME to include dev-stuff or live-stuff compressed into single JS)
+         $ts = date(DATE_FMT4, $GLOBALS['NOW']);
          if ( ALLOW_GAME_EDITOR || ENABLE_GAME_VIEWER )
          {
             echo "\n<script language=\"JavaScript\" type=\"text/javascript\" src=\"{$base_path}js/jquery-1.9.1.min.js\"></script>";
             echo "\n<script language=\"JavaScript\" type=\"text/javascript\" src=\"{$base_path}js/jquery-ui-1.10.3.custom.min.js\"></script>";
+            echo "\n<script language=\"JavaScript\" type=\"text/javascript\" src=\"{$base_path}js/jquery.scrollTo-1.4.3.1-min.js\"></script>";
             echo "\n<script language=\"JavaScript\" type=\"text/javascript\" src=\"{$base_path}js/lang-ext.js?t=$ts\"></script>";
             echo "\n<script language=\"JavaScript\" type=\"text/javascript\" src=\"{$base_path}js/gametree.js?t=$ts\"></script>";
             echo "\n<script language=\"JavaScript\" type=\"text/javascript\" src=\"{$base_path}js/game-editor.js?t=$ts\"></script>";

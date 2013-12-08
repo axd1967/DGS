@@ -75,6 +75,9 @@ DGS.game = {
 
       DGS.run.gameEditor.saveBoard();
 
+      //TODO scroll to selected move
+      //$("#GameMessageBody").scrollTo( "#movetxt50", { axis: "xy", duration: 500, easing: "swing", queue: true });
+
       $("#tabs").show(); // hide till all elements built
 
       /* TODO maybe used later
