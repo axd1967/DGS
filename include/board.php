@@ -108,13 +108,13 @@ class Board
     * \note fills $this->curr_move with selected move-number
     * \note fills $this->movemsg with '' or string last-move-msg (for BOARDOPT_LOAD_LAST_MSG), or
     *       array( MoveNr => raw-comment, ...) with all move-messages for BOARDOPT_LOAD_ALL_MSG
-    * \note fills $this->movecol/movemrkx/movemrky with last move if game-message (last or all) should be loaded
+    * \note fills $this->movecol/movemrkx/movemrky with last move for last-move-marker
     * \note keep the coords, color and message of the move $move.
     */
    public function load_from_db( $game_row, $move=0, $board_opts=0, $cache_ttl=0 )
    {
       $this->init_board();
-      $this->curr_move = $move;
+      $this->curr_move = ( $move === MOVE_SETUP ) ? 0 : $move;
 
       $gid = $game_row['ID'];
       if ( $gid <= 0 )
@@ -245,16 +245,34 @@ class Board
          }
       }
 
-      if ( ($board_opts & (BOARDOPT_LOAD_LAST_MSG|BOARDOPT_LOAD_ALL_MSG))
-            && !$show_move_setup && isset($this->moves[$move]) )
-      {
-         list($this->movecol, $this->movemrkx, $this->movemrky) = $this->moves[$move];
 
-         $load_move = ( $board_opts & BOARDOPT_LOAD_ALL_MSG) ? null : $move; // only msg for $move or all(=null)
-         $move_text = self::load_cache_game_move_message( 'load_from_db',
-            $gid, $load_move, $use_cache, $use_cache, $cache_ttl );
-         if ( $move_text !== false )
-            $this->movemsg = $move_text; // can be string or array
+      // load game-move-messages
+      if ( $board_opts & BOARDOPT_LOAD_ALL_MSG )
+      {
+         $move_texts = self::load_cache_game_move_message( 'load_from_db.all',
+            $gid, null, $use_cache, $use_cache, $cache_ttl );
+         if ( $move_texts !== false )
+            $this->movemsg = $move_texts; // array
+      }
+      else
+         $move_texts = null; // not loaded yet
+
+      if ( !$show_move_setup ) // move does not show shape-setup (without last-marker or move-msg)
+      {
+         if ( isset($this->moves[$move]) )
+            list( $this->movecol, $this->movemrkx, $this->movemrky ) = $this->moves[$move];
+
+         if ( $board_opts & BOARDOPT_LOAD_LAST_MSG )
+         {
+            // don't reload move-texts if already loaded, but then $this->movemsg is array|''
+            if ( is_null($move_texts) )
+            {
+               $move_text = self::load_cache_game_move_message( 'load_from_db.last',
+                  $gid, $move, $use_cache, $use_cache, $cache_ttl );
+               if ( $move_text !== false )
+                  $this->movemsg = $move_text; // string
+            }
+         }
       }
 
       return TRUE;

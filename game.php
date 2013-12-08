@@ -273,7 +273,7 @@ $GLOBALS['ThePage'] = new Page('Game');
    if ( !$TheBoard->load_from_db( $game_row, $arg_move, $board_opts, $cache_ttl) )
       error('internal_error', "game.load_from_db($gid)");
    $movecol = $TheBoard->movecol;
-   $last_move_msg = ( is_array($TheBoard->movemsg) ) ? @$TheBoard->movemsg[$arg_move] : $TheBoard->movemsg;
+   $last_move_msg = ( is_array($TheBoard->movemsg) ) ? @$TheBoard->movemsg[$move] : $TheBoard->movemsg;
 
    $extra_infos = array();
    $game_score = null;
@@ -713,7 +713,8 @@ $GLOBALS['ThePage'] = new Page('Game');
    }
    else if ( $Moves > 1 || $is_shape )
    {
-      draw_moves( $gid, $arg_move, $game_row['Handicap'] );
+      if ( !$show_game_tools )
+         draw_moves( $gid, $arg_move, $game_row['Handicap'] );
       if ( $show_notes )
       {
          draw_notes('Y');
@@ -754,8 +755,8 @@ $GLOBALS['ThePage'] = new Page('Game');
 
 
    // ] game_form end
-   //$page_hiddens['gid'] = $gid; //set in the URL (allow a cool OK button in the browser)
-                     //and more: a hidden gid may already be set by draw_moves()
+   if ( $show_game_tools ) // a hidden gid is already set by draw_moves(), but not if $show_game_tools set
+      $page_hiddens['gid'] = $gid;
    $page_hiddens['action'] = $action;
    $page_hiddens['move'] = $arg_move;
    if ( @$coord )
@@ -863,6 +864,7 @@ function get_alt_arg( $n1, $n2)
    return '';
 }//get_alt_arg
 
+// draw select-box with moves to go-to selected move
 // \param $move == global $arg_move including MOVE_SETUP for shape-game
 function draw_moves( $gid, $move, $handicap )
 {
@@ -1058,17 +1060,18 @@ function build_move_comments()
             echo_rating($game_row["White{$rat_suffix}"], false, 0, false, true) );
    }
 
+   $base_move_link = $base_path."game.php?gid={$TheBoard->gid}".URI_AMP."movechange=1".URI_AMP."gotomove=";
    if ( is_array(@$TheBoard->moves[MOVE_SETUP]) ) // handle shape-game setup (has no game-comment)
    {
       $move_nr = MOVE_SETUP;
+      $move_link = anchor( $base_move_link . $move_nr, T_('Setup: Shape#moves') );
       $out[] = "<div id=movetxt$move_nr>\n"
-         . "<h3>{$cfg_image[$move_nr]} " . T_('Setup: Shape#moves') . "</h3>\n"
+         . "<h3>{$cfg_image[$move_nr]} $move_link</h3>\n"
          . "</div>";
    }
 
    //TODO later add option to "show-only moves with comments" (for compacter msg-view but lack of navigation)
    //TODO later add option to jump to "my-last-move" (esp. for MPG)
-   //TODO later add link on each move to go-to selected move
    for ( $move_nr=0; $move_nr <= $TheBoard->max_moves; $move_nr++ )
    {
       list( $Stone, $PosX, $PosY ) = @$TheBoard->moves[$move_nr];
@@ -1102,9 +1105,11 @@ function build_move_comments()
          $user_info = $cfg_user[$Stone];
 
       $handi_str = ( $Handicap > 0 && $move_nr <= $Handicap ? ' ' . T_('(H)#viewmove') : '' );
+      //TODO later change move-link to JS-based link to go-to selected move
+      $move_link = anchor( $base_move_link.$move_nr, $move_pos );
       $out[] = "<div id=movetxt$move_nr class=\"{$cfg_class[$Stone]}\">\n"
          . "<h3>{$cfg_image[$Stone]} "
-            . sprintf( T_('Move %s [%s] by %s#ged'), $move_nr . $handi_str, $move_pos, $user_info )
+            . sprintf( T_('Move %s [%s] by %s#ged'), $move_nr . $handi_str, $move_link, $user_info )
          . "</h3>\n"
          . $move_msg . "</div>";
    }

@@ -18,6 +18,16 @@ ChangeLog
 
 2013-12-08 jug
 
+   * include/board.php (Board.load_from_db),
+     game.php (build_move_comments):
+   - added links on move-positions on all game-move-messages in message-box for all messages
+     including shape-setup
+     - do not draw select-box to view selected moves if all game-move-messages is present
+       with links to moves for JS-game-editor
+   - bugfix: handle go-to for shape-setup correctly in loading last-move-message and last-move-marker
+   - bugfix: always load all game move-messages with board-option BOARDOPT_LOAD_ALL_MSG
+     for JS-game-editor to have all messages even for jumping to earlier moves
+
    * include/game_comments.php (class GameCommentHelper, ~.__construct, ~.get_mpg_user,
        ~.get_mpg_move_color, ~.filter_comment),
      include/board.php (BOARDOPT_LOAD_ALL_MSG; Board.load_from_db, ~.draw_board, ~.draw_ascii_board,
