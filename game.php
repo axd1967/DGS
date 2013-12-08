@@ -74,6 +74,8 @@ $GLOBALS['ThePage'] = new Page('Game');
      a=resign           : show resign dialog -> confirm-page on submit
 
      toggleobserve=y|n  : toggle observing game
+     movechange=1&gotomove= : view selected move (for view-move selectbox)
+     move|m=            : view specific move (alternative for selecting move)
 */
    // NOTE: using page: confirm.php
    // NOTE: allowed for guest-user: toggle-observe
@@ -1075,7 +1077,7 @@ function build_move_comments()
             echo_rating($game_row["White{$rat_suffix}"], false, 0, false, true) );
    }
 
-   $base_move_link = $base_path."game.php?gid={$TheBoard->gid}".URI_AMP."movechange=1".URI_AMP."gotomove=";
+   $base_move_link = $base_path."game.php?gid={$TheBoard->gid}".URI_AMP."move=";
    if ( is_array(@$TheBoard->moves[MOVE_SETUP]) ) // handle shape-game setup (has no game-comment)
    {
       $move_nr = MOVE_SETUP;
