@@ -1228,8 +1228,12 @@ $.extend( DGS.GameEditor.prototype, {
     * Returns tree-structure like node = { PROP: VAL|ARR|OBJ, _children: [ node, ...] }
     **/
    parseGameTree : function( size, tree_data ) {
-      this.goban.setSize( size, size );
+      this.goban.setSize( size, size ); //TODO size also stored in this.goban already for DGS.GameEditor
       this.goban.makeBoard( size, size, true );
+
+      this.game_tree = new DGS.GameNode();
+      this.game_tree.loadJsonFlatTree( tree_data );
+      this.game_cursor = new DGS.GameCursor(this.game_tree);
 
       //TODO parse with eidogo GameTree
       //var changes = this.calculateMoveChanges( col, pos ); // TODO no lib-check needed, prisoners = $cap

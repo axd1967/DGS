@@ -145,6 +145,49 @@ DGS.GameNode.prototype = {
       }
    },
 
+   /**
+    * Loads SGF-like data given in simplified JSON format
+    *     [ var-no, node={ PROP: VAL, _vars: [ var-no, var-no, ... ] }, node, ..., var-no, node, ... ]
+    * into tree-like structure:
+    *     {PROP1: VALUE, PROP2: VALUE, _children: [...]}
+    */
+   loadJsonFlatTree : function( data ) {
+      var parent_node = this, curr_var = -1,  node, item;
+      var var_refs = []; // [ var_ref, target_node ], ...
+      var var_list = []; // [ var_num, start_node ], ...
+      var i = 0, datalen = data.length;
+      while ( i < datalen ) {
+         item = data[i++];
+         if ( typeof(item) == 'number' ) { // parse variation
+            if ( item != curr_var ) { // new variation
+               if ( curr_var >= 0 ) // not first variation
+                  parent_node = null;
+               curr_var = item;
+            }
+         } else { // parse node with properties
+            node = new DGS.GameNode( parent_node, item );
+            if ( var_list[curr_var] === undefined )
+               var_list[curr_var] = parent_node || node;
+            parent_node._children.push( node );
+            parent_node = node;
+
+            if ( "_vars" in node ) { // remember variations to fill in later
+               var node_vars = node['_vars'];
+               for ( var j=0, vlen=node_vars.length; j < vlen; j++ )
+                  var_refs.push([ node_vars[j], node ]);
+               delete node['_vars'];
+            }
+         }
+      }
+
+      // add variations in children of remembered nodes
+      for ( i=0, vlen=var_refs.length; i < vlen; i++ ) {
+         curr_var = var_ref[i][0];
+         node = var_ref[i][1];
+         node._children.push( var_list[curr_var] );
+      }
+   },
+
    /** Adds a new child (variation). */
    appendChild : function( node ) {
       node._parent = this;
@@ -268,7 +311,7 @@ DGS.GameNode.prototype = {
       return sgf;
    } //toSgf
 
-};
+}; // end of 'DGS.GameNode'
 
 
 
@@ -315,6 +358,7 @@ DGS.GameCursor.prototype = {
       return this.node && this.node._parent && this.node._parent._parent;
    },
 
+   /* return map={ sgf-coord: child-index } or null (no next move) with first move for every variation from current node. */
    getNextMoves : function() {
       if ( !this.hasNext() )
          return null;
@@ -392,6 +436,6 @@ DGS.GameCursor.prototype = {
       return cur.node;
    }
 
-};
+}; // end of 'DGS.GameCursor'
 
 // -->
