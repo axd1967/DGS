@@ -58,15 +58,19 @@ DGS.game_editor = {
 }; //end of DGS.game_editor
 
 DGS.game = {
-   loadPage : function() {
-      $(document).ready( DGS.game.initPage );
+   loadPage : function( move_nr ) {
+      $(document).ready( function() { DGS.game.initPage(move_nr); } );
    },
 
-   initPage : function() {
+   initPage : function( move_nr ) {
       $("#tabs").tabs({ active: 0 });
 
       $("#GameMsgTool_ToggleComment").click( { action: "hide" },  function(event) {
          DGS.game.handle_action_toggle_comment( this, event );
+      });
+      $("#GameMsgTool_ScrollToCurrMove").click( function(event) {
+         //TODO need to use stored curr-move, see markCurrentMove()-func
+         $("#GameMessageBody").scrollTo( "#movetxt" + move_nr, { axis: "xy", duration: 200, easing: "swing", queue: true });
       });
 
       //TODO use later, but detach from above <div> in same <td>; otherwise it resizes upper <div> as well:
@@ -82,8 +86,7 @@ DGS.game = {
 
       DGS.run.gameEditor.saveBoard();
 
-      //TODO scroll to selected move
-      //$("#GameMessageBody").scrollTo( "#movetxt50", { axis: "xy", duration: 500, easing: "swing", queue: true });
+      DGS.game.markCurrentMove( move_nr );
 
       $("#tabs").show(); // hide till all elements built
 
@@ -121,8 +124,21 @@ DGS.game = {
          $(elem).attr("alt", T_gametools["hide_comment"] );
          $("#GameMessageBody div.CBody").show();
       }
+   },
+
+   markCurrentMove : function( move_nr ) {
+      var id = "#movetxt" + move_nr;
+      $(id + " div.Tools").prepend('<img src="images/backward.gif" title="'+T_gametools['curr_move']+'">');
+
+      // scroll to selected move
+      $("#GameMessageBody").scrollTo( id, { axis: "xy", duration: 200, easing: "swing", queue: true });
+
+      //TODO later: store current-move in context and remove old-curr-move when showing new-curr-move
    }
+
 }; //end of DGS.game
+
+
 
 DGS.utils = {
    /** Returns associative array[key_i]=val_i built from arr( key_1, val_1, key_2, val_2, ... ). */

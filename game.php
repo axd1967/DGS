@@ -612,13 +612,14 @@ $GLOBALS['ThePage'] = new Page('Game');
          array(
             'hide_comment' => T_('Hide comments#ged'),
             'show_comment' => T_('Show comments#ged'),
+            'curr_move'    => T_('Current Move#ged'),
          )), true );
 
       $js .= sprintf( "DGS.run.gameEditor = new DGS.GameEditor(%d,%d,%d,%d);\n",
          $cfg_board->get_stone_size(), $cfg_board->get_wood_color(), $Size, $Size );
       $js .= sprintf( "DGS.run.gameEditor.parseGameTree(%s,%s);\n",
          $Size, $TheBoard->make_js_game_tree() );
-      $js .= "DGS.game.loadPage();\n";
+      $js .= "DGS.game.loadPage($move);\n";
    }
    else
       $js = null;
@@ -1062,6 +1063,7 @@ function build_comment_tools()
 {
    global $base_path;
    return " <div id=GameMessageTools>"
+      . image($base_path."13/wm.gif", T_('Show current move comment#ged'), null, 'id=GameMsgTool_ScrollToCurrMove')
       . image($base_path."images/comment_hide.png", T_('Hide comments#ged'), null, 'id=GameMsgTool_ToggleComment')
       . "</div>";
 }
@@ -1099,7 +1101,7 @@ function build_move_comments()
       $move_nr = MOVE_SETUP;
       $move_link = anchor( $base_move_link . $move_nr, T_('Setup: Shape#moves') );
       $out[] = "<div id=movetxt$move_nr>\n"
-         . "<h3>{$cfg_image[$move_nr]} $move_link</h3>\n"
+         . "<div class=Head>{$cfg_image[$move_nr]} $move_link</div><div class=Tools></div>\n"
          . "</div>";
    }
 
@@ -1140,9 +1142,9 @@ function build_move_comments()
       //TODO later change move-link to JS-based link to go-to selected move
       $move_link = anchor( $base_move_link.$move_nr, $move_pos );
       $out[] = "<div id=movetxt$move_nr class=\"{$cfg_class[$Stone]}\">\n"
-         . "<h3>{$cfg_image[$Stone]} "
+         . "<div class=Head>{$cfg_image[$Stone]} "
             . sprintf( T_('Move %s [%s] by %s#ged'), $move_nr . $handi_str, $move_link, $user_info )
-         . "</h3>\n"
+         . "</div><div class=Tools></div>\n"
          . "<div class=CBody>$move_msg</div>"
          . "</div>";
    }

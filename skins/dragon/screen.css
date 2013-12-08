@@ -2323,6 +2323,7 @@ div#GameMessageTools img {
 }
 div#GameMessageBody {
    clear: both;
+   display: block;
    padding: 2px;
    width: 29em;
    height: 15em;
@@ -2334,16 +2335,19 @@ div#GameMessageBody > div {
    padding: 0 0 0.5em 0.5em;
    font-size: smaller;
 }
-div#GameMessageBody div.Black {
+div#GameMessageBody .Black {
    background: #dddddd;
 }
-div#GameMessageBody div.White {
+div#GameMessageBody .White {
    background: #ffffff;
 }
-div#GameMessageBody h3 {
-   margin: 0.5em 0 0.5em 0;
-   font-size: 100%;
-   font-weight: normal;
+div#GameMessageBody div.Head {
+   display: inline-block;
+   margin: 0.5em 0;
+}
+div#GameMessageBody div.Tools {
+   float: right;
+   margin: 0.5em 1.5em;
 }
 
 span#GameViewer {

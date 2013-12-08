@@ -18,6 +18,14 @@ ChangeLog
 
 2013-12-08 jug
 
+   * js/game-editor.js  (DGS.game.loadPage, ~.initPage, ~.markCurrentMove),
+     skins/dragon/screen.css,
+     game.php (build_comment_tools):
+   - mark current-move in game-move-message-box and scroll to current move
+     - added message-box-tool to scroll to current move message
+     - show backward-icon right to move-info in message-box to indicate current move
+     - bugfix CSS: used inline-block to avoid floating-clear-fix
+
    * game.php (draw_game_info):
    - added testing-link under board to switch JS-game-editor ON and OFF
 
