@@ -76,8 +76,9 @@ DGS.game = {
       });
       $("#GameMessageBody").resizable();
       $("#GameMessageBody div.ui-resizable-handle").remove(); // removes resizable-handle for inner element
+
       //TODO sort the draggable out with the resizable as this can detach the div from the table it seems
-      $("#GameMessage").draggable({ handle: "#GameMessageHeader" });
+      $("#GameMessage").draggable({ handle: "#GameMessageHeader", opacity: 0.35 });
 
       DGS.run.gameEditor.saveBoard();
 
