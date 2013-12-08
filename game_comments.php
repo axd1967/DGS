@@ -22,6 +22,7 @@ $TranslateGroups[] = "Game";
 require_once 'include/std_functions.php';
 require_once 'include/table_columns.php';
 require_once 'include/game_functions.php';
+require_once 'include/game_comments.php';
 require_once 'include/board.php';
 require_once 'include/dgs_cache.php';
 require_once 'include/classlib_goban.php';
@@ -60,23 +61,26 @@ $TheErrors->set_mode(ERROR_MODE_PRINT);
    $gstatus = $game['Status'];
    if ( $gstatus == GAME_STATUS_SETUP || $gstatus == GAME_STATUS_INVITED )
       error('invalid_game_status', "game_comments.find_game($gid,$gstatus)");
-   $game_players = $game['GamePlayers'];
-   $handicap = $game['Handicap'];
+   $game_type = $game['GameType'];
 
-
-   $my_game = ( $logged_in && ( $player_row['ID'] == $game['Black_ID'] || $player_row['ID'] == $game['White_ID'] ) ) ;
-   if ( !$my_game )
-      $my_color = DAME ;
+   if ( $my_id == $game['Black_ID'] )
+      $my_color = BLACK;
+   elseif ( $my_id == $game['White_ID'] )
+      $my_color = WHITE;
    else
-      $my_color = $player_row['ID'] == $game['Black_ID'] ? BLACK : WHITE ;
+      $my_color = DAME;
+   $my_game = ( $logged_in && $my_color != DAME );
 
-   $is_mp_game = ( $game['GameType'] != GAMETYPE_GO );
-   $my_mpgame = ( !$my_game && $is_mp_game ) ? MultiPlayerGame::is_game_player($gid, $my_id) : $my_game;
-   $html_mode = ( $gstatus == GAME_STATUS_FINISHED ) ? 'gameh' : 'game';
-
-   $arr_users = array();
+   $is_mp_game = ( $game_type != GAMETYPE_GO );
+   $mpg_users = array();
+   $mpg_active_user = null;
    if ( $is_mp_game )
-      GamePlayer::load_users_for_mpgame( $gid, '', false, $arr_users );
+   {
+      GamePlayer::load_users_for_mpgame( $gid, '', false, $mpg_users );
+      $mpg_active_user = GamePlayer::find_mpg_user( $mpg_users, $my_id );
+   }
+   $gc_helper = new GameCommentHelper( $gid, $gstatus, $game_type, $game['GamePlayers'], $game['Handicap'],
+      $mpg_users, $mpg_active_user );
 
    list( $arr_moves, $arr_movemsg ) = load_game_comments_data( $gid );
 
@@ -113,21 +117,10 @@ $TheErrors->set_mode(ERROR_MODE_PRINT);
       $move_nr = (int)$row['MoveNr'];
       $Text = @$arr_movemsg[$move_nr];
 
-      if ( $is_mp_game )
-      {
-         list( $group_color, $group_order, $move_color ) =
-            MultiPlayerGame::calc_game_player_for_move( $game_players, $move_nr, $handicap, -1 );
-         $mpg_user = GamePlayer::get_user_info( $arr_users, $group_color, $group_order );
-
-         $move_html_mode = ( $my_id == @$mpg_user['uid'] ) ? 'gameh' : $html_mode;
-      }
-      else
-         $move_html_mode = ( $row['Stone'] == $my_color ) ? 'gameh' : $html_mode;
-      if ( !$my_game && !$my_mpgame )
-         $Text = game_tag_filter( $Text);
-      $Text = trim( make_html_safe($Text, $move_html_mode) );
+      $Text = $gc_helper->filter_comment( $Text, $move_nr, $row['Stone'], $my_color, /*html*/true );
       if ( (string)$Text == '' )
          continue;
+      $mpg_user = ( $is_mp_game ) ? $gc_helper->get_mpg_user() : null;
       if ( $style_str )
          $Text = MarkupHandlerGoban::replace_igoban_tags( $Text );
       $cnt_comments++;

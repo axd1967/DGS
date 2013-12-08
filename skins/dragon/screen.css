@@ -2315,10 +2315,27 @@ div#GameMessageHeader {
    font-size: larger;
 }
 div#GameMessageBody {
-   padding: 3px;
+   padding: 2px;
    width: 29em;
-   height: 12em;
+   height: 15em;
    overflow: scroll;
+}
+
+div#GameMessageBody > div {
+   border-top: 1px solid black;
+   padding: 0 0 0.5em 0.5em;
+   font-size: smaller;
+}
+div#GameMessageBody div.Black {
+   background: #dddddd;
+}
+div#GameMessageBody div.White {
+   background: #ffffff;
+}
+div#GameMessageBody h3 {
+   margin: 0.5em 0 0.5em 0;
+   font-size: 100%;
+   font-weight: normal;
 }
 
 span#GameViewer {

@@ -18,6 +18,25 @@ ChangeLog
 
 2013-12-08 jug
 
+   * include/game_comments.php (class GameCommentHelper, ~.__construct, ~.get_mpg_user,
+       ~.get_mpg_move_color, ~.filter_comment),
+     include/board.php (BOARDOPT_LOAD_ALL_MSG; Board.load_from_db, ~.draw_board, ~.draw_ascii_board,
+       ~.make_js_game_tree),
+     include/sgf_builder.php (SgfBuilder.find_mpg_active_user, ~.build_sgf_moves),
+     include/game_functions.php (GamePlayer.find_mpg_user),
+     include/std_functions.php,
+     skins/dragon/screen.css,
+     game.php (draw_game_tools, build_move_comments),
+     game_comments.php, sgf.php:
+   - cleanup: refactored redundant code to determine visibility of game-move-messages
+     for game-/game-comments-page/SGF-download into GameCommentHelper-class
+     - on game-page load and display all game move messages for JS-game-editor filtered
+       according to visibility of player & move
+     - removed game-move-messages from JS-gametree, because all texts are already present
+       on game-page's message-box
+   - bugfix: on game-page show bottom-link 'download sgf with all comments' for ALL players
+     of multi-player-game
+
    * include/std_functions.php (start_html),
      js/jquery.scrollTo-1.4.3.1-min.js,
      js/game-editor.js (DGS.game.initPage):

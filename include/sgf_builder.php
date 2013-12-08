@@ -23,6 +23,7 @@ require_once 'include/std_classes.php';
 require_once 'include/std_functions.php';
 require_once 'include/rating.php';
 require_once 'include/game_functions.php';
+require_once 'include/game_comments.php';
 require_once 'include/board.php';
 require_once 'include/shape_control.php';
 require_once 'tournaments/include/tournament_cache.php';
@@ -361,20 +362,10 @@ class SgfBuilder
       return $this->game_row;
    }//load_game_info
 
-   public function find_mpg_user( $handle )
+   public function find_mpg_active_user( $handle )
    {
-      $result = null;
-      foreach ( $this->mpg_users as $key => $arr )
-      {
-         if ( $arr['Handle'] == $handle )
-         {
-            $result = $arr;
-            break;
-         }
-      }
-      $this->mpg_active_user = $result;
-      return $result;
-   }//find_mpg_user
+      $this->mpg_active_user = GamePlayer::find_mpg_user( $this->mpg_users, 0, $handle );
+   }
 
    public function load_player_game_notes( $uid )
    {
@@ -664,6 +655,7 @@ class SgfBuilder
    }//build_sgf_setup
 
    // see also load_from_db()-func in 'include/board.php'
+   // param $owned_comments see build_sgf()-func
    private function build_sgf_moves( $owned_comments )
    {
       extract($this->game_row);
@@ -671,6 +663,9 @@ class SgfBuilder
       $this->array = array();
       $this->points = array();
       $this->next_color = 'B';
+
+      $gc_helper = new GameCommentHelper( $this->gid, $Status, $GameType, $GamePlayers, $Handicap,
+         $this->mpg_users, $this->mpg_active_user );
 
       //Last dead stones property: (uppercase only)
       // ''= keep them, 'AE'= remove, 'MA'/'CR'/'TR'/'SQ'= mark them
@@ -737,51 +732,18 @@ class SgfBuilder
                //keep comments even if in ending pass, SCORE, SCORE2 or resign steps.
                if ( $Handicap == 0 || $MoveNr >= $Handicap )
                {
+                  $Text = $gc_helper->filter_comment( $Text, $MoveNr, $Stone, $owned_comments, /*html*/false );
                   if ( $this->is_mpgame )
                   {
-                     // get player of current move
-                     list( $group_color, $group_order, $move_color ) =
-                        MultiPlayerGame::calc_game_player_for_move( $GamePlayers, $MoveNr, $Handicap, -1 );
-                     $mpg_user = GamePlayer::get_user_info( $this->mpg_users, $group_color, $group_order );
-                     $player_txt = self::formatPlayerName($mpg_user);
-
-                     if ( is_array($this->mpg_active_user) ) // is game-player of MP-game
-                     {
-                        $is_move_player = ( is_array($mpg_user) && $mpg_user['uid'] == $this->mpg_active_user['uid'] );
-                        if ( $Status != GAME_STATUS_FINISHED && !$is_move_player )
-                           $Text = remove_hidden_game_tags($Text);
-
-                        if ( (string)$Text != '' )
-                           $this->node_com .= "\n$player_txt: $Text";
-                        else if ( $this->mpg_node_add_user )
-                           $this->node_com .= "\n$player_txt";
-                     }
-                     else // observer
-                     {
-                        if ( $Status != GAME_STATUS_FINISHED )
-                           $Text = remove_hidden_game_tags($Text);
-
-                        $Text = game_tag_filter( $Text, /*incl-tags*/false );
-                        if ( (string)$Text != '' )
-                           $this->node_com .= "\n$player_txt: $Text";
-                        else if ( $this->mpg_node_add_user )
-                           $this->node_com .= "\n$player_txt";
-                     }
-                  }
-                  else if ( $owned_comments == BLACK || $owned_comments == WHITE )
-                  {
-                     if ( $Status != GAME_STATUS_FINISHED && $owned_comments != $Stone )
-                        $Text = remove_hidden_game_tags($Text);
+                     $player_txt = self::formatPlayerName( $gc_helper->get_mpg_user() );
 
                      if ( (string)$Text != '' )
-                        $this->node_com .= "\n" . $this->buildPlayerName($Stone, false) . ': ' . $Text;
+                        $this->node_com .= "\n$player_txt: $Text";
+                     else if ( $this->mpg_node_add_user )
+                        $this->node_com .= "\n$player_txt";
                   }
-                  else //SGF query from an observer
+                  else // std-game
                   {
-                     if ( $Status != GAME_STATUS_FINISHED )
-                        $Text = remove_hidden_game_tags($Text);
-
-                     $Text = game_tag_filter( $Text, /*incl-tags*/false );
                      if ( (string)$Text != '' )
                         $this->node_com .= "\n" . $this->buildPlayerName($Stone, false) . ': ' . $Text;
                   }

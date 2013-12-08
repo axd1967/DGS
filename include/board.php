@@ -29,6 +29,7 @@ define('BOARDOPT_MARK_DEAD',     0x01);
 define('BOARDOPT_LOAD_LAST_MSG', 0x02);
 define('BOARDOPT_STOP_ON_FIX',   0x04); // if set: stop and return FALSE if corrupted game found
 define('BOARDOPT_USE_CACHE',     0x08);
+define('BOARDOPT_LOAD_ALL_MSG',  0x10); // mutual-exclusive with BOARDOPT_LOAD_LAST_MSG
 
 define('JS_CHILDREN', '_children');
 
@@ -58,7 +59,7 @@ class Board
    private $movemrkx = -1;
    private $movemrky = -1;
    public $movecol = DAME;
-   public $movemsg = '';
+   public $movemsg = ''; // string '' or last-move-msg; or array( MoveNr => move-message, ...) for all messages
 
    public $infos = array(); //extra-infos collected
 
@@ -97,7 +98,7 @@ class Board
     * \param $game_row need fields: ID, Size, Moves, ShapeSnapshot
     * \param $move move-number, 0=last-move, MOVE_SETUP=S=initial-setup-for-shape-game
     * \param $board_opts BOARDOPT_... specifying extras to do or not do:
-    *        BOARDOPT_MARK_DEAD, BOARDOPT_LOAD_LAST_MSG, BOARDOPT_STOP_ON_FIX, BOARDOPT_USE_CACHE
+    *        BOARDOPT_MARK_DEAD, BOARDOPT_LOAD_LAST_MSG xor BOARDOPT_LOAD_ALL_MSG, BOARDOPT_STOP_ON_FIX, BOARDOPT_USE_CACHE
     * \param $cache_ttl 0 = use default (see load_cache_game_moves-func); otherwise TTL in secs for caching game-moves
     *
     * \note fills $this->array with positions where the stones are (incl. handling of shape-game)
@@ -105,6 +106,9 @@ class Board
     * \note fills $this->shape_arr_xy with parsed shape-setup as returned by GameSnapshot::parse_stones_snapshot().
     * \note fills $this->prisoners with prisoner-count up to move $move
     * \note fills $this->curr_move with selected move-number
+    * \note fills $this->movemsg with '' or string last-move-msg (for BOARDOPT_LOAD_LAST_MSG), or
+    *       array( MoveNr => raw-comment, ...) with all move-messages for BOARDOPT_LOAD_ALL_MSG
+    * \note fills $this->movecol/movemrkx/movemrky with last move if game-message (last or all) should be loaded
     * \note keep the coords, color and message of the move $move.
     */
    public function load_from_db( $game_row, $move=0, $board_opts=0, $cache_ttl=0 )
@@ -213,10 +217,7 @@ class Board
          if ( $Stone <= WHITE ) //including NONE (prisoners)
          {
             if ( $PosX < 0 )
-            {
-               //TODO double entry I think !?  $this->js_moves[] = array( $MoveNr, $Stone, $PosX, 0 );
                continue; //excluding PASS, RESIGN and SCORE, ADDTIME
-            }
 
             $this->array[$PosX][$PosY] = $Stone; //including DAME (prisoners)
 
@@ -244,13 +245,16 @@ class Board
          }
       }
 
-      if ( ($board_opts & BOARDOPT_LOAD_LAST_MSG) && !$show_move_setup && isset($this->moves[$move]) )
+      if ( ($board_opts & (BOARDOPT_LOAD_LAST_MSG|BOARDOPT_LOAD_ALL_MSG))
+            && !$show_move_setup && isset($this->moves[$move]) )
       {
          list($this->movecol, $this->movemrkx, $this->movemrky) = $this->moves[$move];
 
-         $move_text = self::load_cache_game_move_message( 'load_from_db', $gid, $move, $use_cache, $use_cache, $cache_ttl );
-         if ( $move_text !== false && !is_array($move_text) )
-            $this->movemsg = $move_text;
+         $load_move = ( $board_opts & BOARDOPT_LOAD_ALL_MSG) ? null : $move; // only msg for $move or all(=null)
+         $move_text = self::load_cache_game_move_message( 'load_from_db',
+            $gid, $load_move, $use_cache, $use_cache, $cache_ttl );
+         if ( $move_text !== false )
+            $this->movemsg = $move_text; // can be string or array
       }
 
       return TRUE;
@@ -652,8 +656,8 @@ class Board
    // keep in sync with GobanHandlerGfxBoard
    // board: img.alt-attr mapping: B>X W>O, last-move B># W>@, dead B>x W>o, terr B>+ W>-, dame>. seki-dame>s hoshi>, else>.
    // \param $action GAMEACT_SET_HANDICAP, 'remove', or other text
-   // \param $draw_move_msg true=draw move-message above board in message-box, false=no move-msg drawn
-   public function draw_board( $may_play=false, $action='', $stonestring='', $draw_move_msg=true )
+   // \param $draw_move_msg move-message to show above board in message-box, empty=no move-msg
+   public function draw_board( $may_play=false, $action='', $stonestring='', $draw_move_msg='' )
    {
       global $woodbgcolors;
 
@@ -745,8 +749,8 @@ class Board
          $move_end = ".gif\"></a></td>\n";
       }
 
-      if ( $draw_move_msg && $this->movemsg )
-         $this->draw_move_message( $this->movemsg );
+      if ( (string)$draw_move_msg != '' )
+         $this->draw_move_message( $draw_move_msg );
 
 
       { // draw goban
@@ -964,7 +968,7 @@ class Board
    {
       $out = "\n";
 
-      if ( $movemsg )
+      if ( (string)$movemsg != '' )
          $out .= wordwrap("Message: $movemsg", 47) . "\n\n";
 
       if ( $coord_borders & COORD_UP )
@@ -1453,13 +1457,12 @@ class Board
 
    /*!
     * \brief Returns JS-String with game-tree as required for 'js/game-editor.js'.
-    * \return JSON { _children: [..], B|W: sgf-move|'', AB|AW: [ shape-sgf ], d_capt: [ sgf-captures ], d_gc: game-comment }
+    * \return JSON { _children: [..], B|W: sgf-move|'', AB|AW: [ shape-sgf ], d_capt: [ sgf-captures ] }
+    *
+    * \note game-move-comments not included, because those are already displayed on game-page in msg-box
     */
    public function make_js_game_tree()
    {
-      //TODO avoid double load-move-msgs on game-page also take user-specific view into account
-      $move_texts = self::load_cache_game_move_message( 'make_js_game_tree', $this->gid, null, true, true );
-
       //FIXME perhaps an easier format could be simple-SGF-format parsed in JS, depends what's easier to create with variations and comments/review-stuff, etc
       // format := [ var-num, node+,  var-num, node+, ... ];
       // node := { prop: val|arr, prop2:...} || { prop:.., _vars: [var-num, ...] }; // _vars is only present if there are variations
@@ -1494,8 +1497,6 @@ class Board
             $curr_node->{$prop} = $val;
             if ( count(@$this->moves_captures[$move_nr]) )
                $curr_node->d_capt = $this->moves_captures[$move_nr]; // captures
-            if ( isset($move_texts[$move_nr]) ) // TODO make_html_safe() according to curr-viewer + move-player
-               $curr_node->d_gc = $move_texts[$move_nr]; // game-comment
          }
 
          $out[] = $curr_node;

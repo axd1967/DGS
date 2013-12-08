@@ -925,6 +925,24 @@ class GamePlayer
       return $out;
    }//load_users_for_mpgame
 
+   /*!
+    * \brief Finds and return MPG-user with specific uid (if >0) or handle (if !='' and uid==0).
+    * \note Used to check if specifc player (e.g. logged-in user) participates as MPG-player.
+    * \param $mpg_users array filled as last arg in GamePlayer::load_users_for_mpgame()-func
+    * \param $uid if > 0 search for that uid in $mpg_users
+    * \param $handle if $uid==0 and non-empty search for that handle in $mpg_users
+    * \return entry of $mpg_users (see GamePlayer::load_users_for_mpgame()-func) if match found; null otherwise
+    */
+   public static function find_mpg_user( $mpg_users, $uid, $handle='' )
+   {
+      foreach ( $mpg_users as $key => $arr )
+      {
+         if ( ($uid > 0 && $arr['uid'] == $uid ) || ($uid == 0 && $arr['Handle'] == $handle ) )
+            return $arr;
+      }
+      return null;
+   }//find_mpg_user
+
    /*! \brief Returns user-map ( uid/Handle/etc => vals ) as created in arr_users by load_users_for_mpgame()-method. */
    public static function get_user_info( &$arr_users, $group_color, $group_order )
    {

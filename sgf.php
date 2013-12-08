@@ -65,11 +65,11 @@ else
    $use_cache = !((bool)@$_REQUEST['no_cache']);
    #$use_cache = false;
 
-   $owned_comments = @$_REQUEST['owned_comments'];
+   $arg_owned_comments = @$_REQUEST['owned_comments'];
    $no_comments = false;
-   if ( strtolower($owned_comments) == 'n' )
+   if ( strtolower($arg_owned_comments) == 'n' )
    {
-      $owned_comments = 0;
+      $arg_owned_comments = 0;
       $no_comments = true;
    }
 
@@ -85,15 +85,15 @@ else
 
    $filename = $sgf->build_filename_sgf( @$_REQUEST['bulk'] );
 
-   // owned_comments: BLACK|WHITE=viewed by B/W-game-player (also for MP-game), DAME=viewed by other user
+   // set $owned_comments: BLACK|WHITE=viewed by B/W-game-player (also for MP-game), DAME=viewed by other user
    $owned_uid = 0;
-   if ( $owned_comments )
+   if ( $arg_owned_comments )
    {
       $owned_comments = DAME;
       $cookie_handle = safe_getcookie('handle');
       if ( $sgf->is_mpgame() )
       {
-         $sgf->find_mpg_user( $cookie_handle );
+         $sgf->find_mpg_active_user( $cookie_handle );
          if ( is_array($sgf->mpg_active_user) )
          {
             if ( $sgf->mpg_active_user['Sessioncode'] == safe_getcookie('sessioncode')

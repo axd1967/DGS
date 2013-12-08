@@ -2060,7 +2060,10 @@ $html_safe_preg = array(
  *  false: no tags at all, except the marked terms
  *  true:  same as 'msg'
  *  'cell', 'line', 'msg', 'game' or 'faq': see $html_code[]
- *  'gameh': 'game' + show hidden sgf comments
+ *  'game': format public comment tags (<c> + <comment>): <c>..</c> -> <span class=GameTagC>..</span>,
+ *          remove hidden comments
+ *  'gameh': format public (like 'game' but keep hidden comments),
+ *           format hidden comment tags (<h> + <hidden>): <h>..</h> -> <span class=GameTagH>..</span>
  * $mark_terms: see parse_html_safe().
  **/
 function make_html_safe( $msg, $some_html=false, $mark_terms='')
@@ -2166,12 +2169,16 @@ function textarea_safe( $msg, $charenc=false)
    return $msg;
 }
 
+// removes hidden comment tags and included text
 function remove_hidden_game_tags( $msg )
 {
    return trim(preg_replace("'<h(idden)? *>(.*?)</h(idden)? *>'is", "", $msg));
 }
 
-//keep the parts readable by an observer
+// keeps and trims the parts readable by an observer, removing private comments (the text outside of <c> and <h> tags)
+// param $includeTags if false also removes the <c>/<h>-tags itself keeping only the surrounded text
+//
+// NOTE: $includeTags==false MUST NOT be used to format HTML, because then style-applying is impossible with the tags gone
 function game_tag_filter( $msg, $includeTags=true )
 {
    if ( $includeTags )

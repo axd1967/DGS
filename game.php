@@ -38,6 +38,7 @@ require_once 'include/gui_functions.php';
 require_once 'include/classlib_userconfig.php';
 require_once 'include/game_functions.php';
 require_once 'include/game_actions.php';
+require_once 'include/game_comments.php';
 require_once 'include/form_functions.php';
 require_once 'include/board.php';
 require_once 'include/move.php';
@@ -102,7 +103,7 @@ $GLOBALS['ThePage'] = new Page('Game');
       $cfg_board = ConfigBoard::load_config_board_or_default($my_id);
    }
    else
-   {// for quick-suite //TODO still needed ?
+   {// for quick-suite //FIXME still needed ?
       $my_id = 0;
       $cfg_board = new ConfigBoard($my_id); // use defaults
    }
@@ -189,7 +190,20 @@ $GLOBALS['ThePage'] = new Page('Game');
 
    $my_game = ( $logged_in && ( $my_id == $Black_ID || $my_id == $White_ID ) );
    $is_mp_game = ( $GameType != GAMETYPE_GO );
-   $my_mpgame = ( !$my_game && $is_mp_game ) ? MultiPlayerGame::is_game_player($gid, $my_id) : $my_game;
+
+   $mpg_users = array();
+   $mpg_active_user = null;
+   if ( $is_mp_game )
+   {
+      GamePlayer::load_users_for_mpgame( $gid, '', false, $mpg_users );
+      $mpg_active_user = GamePlayer::find_mpg_user( $mpg_users, $my_id );
+      $my_mpgame = !is_null($mpg_active_user);
+   }
+   else
+      $my_mpgame = $my_game;
+
+   $gc_helper = new GameCommentHelper( $gid, $Status, $GameType, $GamePlayers, $Handicap, $mpg_users, $mpg_active_user );
+
 
    // toggle observing (also allowed for my-game)
    $chk_observers = true;
@@ -245,19 +259,21 @@ $GLOBALS['ThePage'] = new Page('Game');
    $may_add_time = $my_game && GameAddTime::allow_add_time_opponent($game_row, $my_id);
 
 
+   $show_game_tools = ( ALLOW_JAVASCRIPT && ENABLE_GAME_VIEWER );
    $no_marked_dead = ( $Status == GAME_STATUS_KOMI || $Status == GAME_STATUS_PLAY || $Status == GAME_STATUS_PASS ||
                        $action == 'choose_move' || $action == GAMEACT_DO_MOVE );
-   $board_opts = ( $no_marked_dead ? 0 : BOARDOPT_MARK_DEAD ) | BOARDOPT_LOAD_LAST_MSG | BOARDOPT_USE_CACHE;
+   $board_opts = ( $no_marked_dead ? 0 : BOARDOPT_MARK_DEAD )
+      | ( $show_game_tools ? BOARDOPT_LOAD_ALL_MSG : BOARDOPT_LOAD_LAST_MSG )
+      | BOARDOPT_USE_CACHE;
    $cache_ttl = ( $Status == GAME_STATUS_KOMI || $Status == GAME_STATUS_FINISHED )
       ? 5*SECS_PER_MIN
       : 0; // use default
 
-   //TODO load all moves if URL-move given, but jump to given move
    $TheBoard = new Board( );
    if ( !$TheBoard->load_from_db( $game_row, $arg_move, $board_opts, $cache_ttl) )
       error('internal_error', "game.load_from_db($gid)");
-   $movecol= $TheBoard->movecol;
-   $movemsg= $TheBoard->movemsg;
+   $movecol = $TheBoard->movecol;
+   $last_move_msg = ( is_array($TheBoard->movemsg) ) ? @$TheBoard->movemsg[$arg_move] : $TheBoard->movemsg;
 
    $extra_infos = array();
    $game_score = null;
@@ -475,71 +491,32 @@ $GLOBALS['ThePage'] = new Page('Game');
    }
 
 
-/*
- : Viewing of game messages while read (game-, game-comments-page) or downloaded (sgf):
-   (Opponent also includes all game-players of multi-player-game)
- : Game  : Text ::         Viewed by         :: sgf+comments by : sgf only :
- : Ended : Tag  :: Writer : Oppon. : Others  :: Writer : Oppon. : any ones :
- : ----- : ---- :: ------ : ------ : ------- :: ------ : ------ : -------- :
- : no    : none :: yes    : yes    : no      :: yes    : yes    : no       :
- : no    : <c>  :: yes    : yes    : yes     :: yes    : yes    : yes      :
- : no    : <h>  :: yes    : no     : no      :: yes    : no     : no       :
- : yes   : none :: yes    : yes    : no      :: yes    : yes    : no       :
- : yes   : <c>  :: yes    : yes    : yes     :: yes    : yes    : yes      :
- : yes   : <h>  :: yes    : yes    : yes     :: yes    : yes    : yes      :
- : ----- : ---- :: ------ : ------ : ------- :: ------ : ------ : -------- :
-  corresponding $html_mode (F= a filter only keeping <c> and <h> blocks):
- : no    : -    :: gameh  : game   : F+game  ::   ... see sgf.php ...
- : yes   : -    :: gameh  : gameh  : F+gameh ::
-*/
+   //----------------------------------------
 
-   $html_mode = ( $Status == GAME_STATUS_FINISHED ) ? 'gameh' : 'game';
-
-   // determine mpg_uid (user of current/selected move + move-color) for last-move with comment-info
-   if ( $is_mp_game )
-   {
-      list( $group_color, $group_order, $move_color ) =
-         MultiPlayerGame::calc_game_player_for_move( $GamePlayers, $move, $Handicap, -1 ); // last-move
-      $mpg_uid = GamePlayer::load_uid_for_move( $gid, $group_color, $group_order );
-   }
-   else
-      $mpg_uid = $move_color = 0;
-
+   $view_comment = DAME; // watch game-comments as observer
    $opponent_ID = 0;
    if ( $my_game || $my_mpgame )
    {
       if ( $is_mp_game )
-      {
-         if ( $my_id == $mpg_uid ) // last-move-user of selected move
-            $movemsg = make_html_safe($movemsg, 'gameh');
-         else
-         {
-            if ( !$my_mpgame )
-               $movemsg = game_tag_filter($movemsg);
-            $movemsg = make_html_safe($movemsg, $html_mode);
-         }
-      }
+         $view_comment = BLACK;
       else // std-game
       {
          if ( $my_id == $Black_ID )
          {
             $my_color = 'B';
             $opponent_ID = $White_ID;
-            $movemsg = make_html_safe($movemsg, ($movecol==BLACK) ? 'gameh' : $html_mode );
+            $view_comment = BLACK;
          }
          elseif ( $my_id == $White_ID )
          {
             $my_color = 'W';
             $opponent_ID = $Black_ID;
-            $movemsg = make_html_safe($movemsg, ($movecol==WHITE) ? 'gameh' : $html_mode );
-         }
-         else
-         {
-            $movemsg = game_tag_filter($movemsg);
-            $movemsg = make_html_safe($movemsg, $html_mode);
+            $view_comment = WHITE;
          }
       }
 
+
+      // private-game-notes
 
       $cfgsize_notes = $cfg_board->get_cfgsize_notes( $Size );
       $notesheight = $cfg_board->get_notes_height( $cfgsize_notes );
@@ -592,12 +569,16 @@ $GLOBALS['ThePage'] = new Page('Game');
    }
    else // !$my_game
    {
-      $movemsg = game_tag_filter($movemsg);
-      $movemsg = make_html_safe($movemsg, $html_mode );
       $show_notes = false;
       $noteshide = 'Y';
    }
-   $movemsg = MarkupHandlerGoban::replace_igoban_tags( $movemsg );
+
+   $last_move_msg = $gc_helper->filter_comment( $last_move_msg, $move, $movecol, $view_comment, /*html*/true );
+   $last_move_msg = MarkupHandlerGoban::replace_igoban_tags( $last_move_msg );
+
+   // determine mpg_uid (user of current/selected move + move-color) for last-move with comment-info
+   $mpg_uid = $gc_helper->get_mpg_user( /*uid-only*/true );
+   $move_color = $gc_helper->get_mpg_move_color();
 
    if ( ENA_MOVENUMBERS )
    {
@@ -665,12 +646,10 @@ $GLOBALS['ThePage'] = new Page('Game');
    }
    echo "</td><td>";
 
-   $show_game_tools = ( ALLOW_JAVASCRIPT && ENABLE_GAME_VIEWER );
-   $TheBoard->movemsg = $movemsg;
    if ( $is_fairkomi_negotiation )
       draw_fairkomi_negotiation( $my_id, $gform, $game_row, $game_setup );
    else
-      $TheBoard->draw_board( $may_play, $action, $stonestring, /*draw-move-msg*/!$show_game_tools );
+      $TheBoard->draw_board( $may_play, $action, $stonestring, ( $show_game_tools ? '' : $last_move_msg ) );
 
    //messages about actions
    if ( $validation_step )
@@ -836,7 +815,7 @@ $GLOBALS['ThePage'] = new Page('Game');
          //global $has_sgf_alias;
          $menu_array[T_('Download sgf')] = ( $has_sgf_alias ? "game$gid.sgf" : "sgf.php?gid=$gid" );
 
-         if ( $my_game && ($Moves>0 || $is_shape) && !$has_sgf_alias )
+         if ( ($my_game || $my_mpgame) && ($Moves>0 || $is_shape) && !$has_sgf_alias )
             $menu_array[T_('Download sgf with all comments')] = "sgf.php?gid=$gid".URI_AMP."owned_comments=1" ;
       }
 
@@ -1031,7 +1010,7 @@ function draw_game_tools()
    global $game_row, $game_setup, $TheBoard, $tourney, $notes;
 
    echo "</td>\n",
-      "<td id=ToolsArea class=GameTools>",
+      "<td id=ToolsArea class=\"GameTools NoPrint\">",
          "<div id=tabs>\n",
             "<ul>\n",
                "<li>", anchor('#tab_GameInfo', T_('Game Info#ged'), T_('Game Information#ged')), "</li>\n",
@@ -1044,13 +1023,94 @@ function draw_game_tools()
             "<div id=tab_GameNotes class=tab>\n";
    draw_notes(null, $notes, 12, 65); // use fixed size
    echo     "</div>\n",
-            "<div id=tab_GameAnalysis class=tab>\n", build_tab_GameAnalysis(), "</div>\n",
+            "<div id=tab_GameAnalysis class=\"tab\">\n", build_tab_GameAnalysis(), "</div>\n",
          "</div>\n",
          "<div id=GameMessage>\n",
-            "<div id=GameMessageHeader>", T_('Message'), "</div>\n",
-            "<div id=GameMessageBody>\n", $TheBoard->movemsg, "</div>\n",
+            "<div id=GameMessageHeader>", T_('Messages#ged'), "</div>\n",
+            "<div id=GameMessageBody>\n", build_move_comments(), "</div>\n",
          "</div>\n";
 }//draw_game_tools
+
+// display all game move-messages properly filtered according to player/observer and move for std- and MP-game
+function build_move_comments()
+{
+   global $base_path, $TheBoard, $game_row, $is_mp_game, $mpg_users, $gc_helper, $view_comment;
+   $out = array();
+
+   $Handicap = $game_row['Handicap'];
+   $GamePlayers = $game_row['GamePlayers'];
+   $rat_suffix = ($game_row['Status'] == GAME_STATUS_FINISHED) ? '_End_Rating' : 'rating';
+   $cfg_class = array( BLACK => 'Black', WHITE => 'White' );
+   $cfg_image = array(
+         BLACK => image($base_path."17/b.gif", T_('Black'), null, 'class=InTextImage'),
+         WHITE => image($base_path."17/w.gif", T_('White'), null, 'class=InTextImage'),
+         MOVE_SETUP => image($base_path."images/shape.gif", T_('Shape Game'), null, 'class=InTextImage'),
+      );
+
+   $cfg_user = array(); // uid => Handle, Rank  |  (for MPG): "grp_col:grp_order" => [ Handle, Rating2, ... ]
+   if ( $is_mp_game )
+      $cfg_users = $mpg_users;
+   else
+   {
+      $cfg_user[BLACK] = sprintf( '%s, %s', $game_row['Blackhandle'],
+            echo_rating($game_row["Black{$rat_suffix}"], false, 0, false, true) );
+      $cfg_user[WHITE] = sprintf( '%s, %s', $game_row['Whitehandle'],
+            echo_rating($game_row["White{$rat_suffix}"], false, 0, false, true) );
+   }
+
+   if ( is_array(@$TheBoard->moves[MOVE_SETUP]) ) // handle shape-game setup (has no game-comment)
+   {
+      $move_nr = MOVE_SETUP;
+      $out[] = "<div id=movetxt$move_nr>\n"
+         . "<h3>{$cfg_image[$move_nr]} " . T_('Setup: Shape#moves') . "</h3>\n"
+         . "</div>";
+   }
+
+   //TODO later add option to "show-only moves with comments" (for compacter msg-view but lack of navigation)
+   //TODO later add option to jump to "my-last-move" (esp. for MPG)
+   //TODO later add link on each move to go-to selected move
+   for ( $move_nr=0; $move_nr <= $TheBoard->max_moves; $move_nr++ )
+   {
+      list( $Stone, $PosX, $PosY ) = @$TheBoard->moves[$move_nr];
+      if ( $Stone != BLACK && $Stone != WHITE )
+         continue;
+
+      switch ( (int)$PosX )
+      {
+         case POSX_PASS: $move_pos = 'PASS'; break;
+         case POSX_SCORE: $move_pos = 'SCORE'; break;
+         case POSX_RESIGN: $move_pos = 'RESIGN'; break;
+         default:
+            if ( $PosX < 0) continue;
+            $move_pos = number2board_coords($PosX, $PosY, $TheBoard->size);
+            break;
+      }
+
+      $move_msg = trim( @$TheBoard->movemsg[$move_nr] );
+      $move_msg = $gc_helper->filter_comment( $move_msg, $move_nr, $Stone, $view_comment, /*html*/true );
+      $move_msg = MarkupHandlerGoban::replace_igoban_tags( $move_msg ); // shown with same style-size as main-board
+
+      // build player-info for current move
+      if ( $is_mp_game )
+      {
+         $mpg_user = $gc_helper->get_mpg_user();
+         $user_info = ( is_array($mpg_user) )
+            ? sprintf( '%s, %s', $mpg_user['Handle'], echo_rating($mpg_user['Rating2'], false, 0, false, true) )
+            : '[?]'; // shouldn't happen
+      }
+      else
+         $user_info = $cfg_user[$Stone];
+
+      $handi_str = ( $Handicap > 0 && $move_nr <= $Handicap ? ' ' . T_('(H)#viewmove') : '' );
+      $out[] = "<div id=movetxt$move_nr class=\"{$cfg_class[$Stone]}\">\n"
+         . "<h3>{$cfg_image[$Stone]} "
+            . sprintf( T_('Move %s [%s] by %s#ged'), $move_nr . $handi_str, $move_pos, $user_info )
+         . "</h3>\n"
+         . $move_msg . "</div>";
+   }
+
+   return implode("\n", $out);
+}//build_move_comments
 
 function build_tab_GameAnalysis()
 {
@@ -1254,6 +1314,8 @@ function draw_add_time( $game_row, $colorToMove )
       </TABLE>';
 } //draw_add_time
 
+//TODO try using <div>'s instead of tables (which is normally better for layouting)
+//TODO fix non-JS layout to use one line if game-finished (or we have just prisoners on one line)
 function draw_game_info( $game_row, $game_setup, $board, $tourney )
 {
    global $base_path;
