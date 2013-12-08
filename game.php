@@ -261,7 +261,17 @@ $GLOBALS['ThePage'] = new Page('Game');
    $may_add_time = $my_game && GameAddTime::allow_add_time_opponent($game_row, $my_id);
 
 
-   $show_game_tools = ( ALLOW_JAVASCRIPT && ENABLE_GAME_VIEWER );
+   $enable_game_viewer = $show_game_tools = ( ALLOW_JAVASCRIPT && ENABLE_GAME_VIEWER );
+   if ( $enable_game_viewer ) // temporary switch for enable/disable JS-game-viewer
+   {
+      $cmd = @$_REQUEST['jsgv'];
+      if ( $cmd == 'on' )
+         safe_setcookie("js_gv", 1, $NOW + 30*SECS_PER_DAY);
+      elseif ( $cmd == 'off' )
+         safe_setcookie("js_gv");
+      $show_game_tools = (bool)safe_getcookie("js_gv");
+   }
+
    $no_marked_dead = ( $Status == GAME_STATUS_KOMI || $Status == GAME_STATUS_PLAY || $Status == GAME_STATUS_PASS ||
                        $action == 'choose_move' || $action == GAMEACT_DO_MOVE );
    $board_opts = ( $no_marked_dead ? 0 : BOARDOPT_MARK_DEAD )
@@ -595,7 +605,7 @@ $GLOBALS['ThePage'] = new Page('Game');
       $TheBoard->set_style( $cfg_board );
 
 
-   if ( ALLOW_JAVASCRIPT && ENABLE_GAME_VIEWER )
+   if ( $show_game_tools )
    {
       // set translated texts as global JS-vars
       $js  = add_js_var( 'T_gametools', dgs_json_encode(
@@ -759,6 +769,12 @@ $GLOBALS['ThePage'] = new Page('Game');
    }
    if ( $Status == GAME_STATUS_FINISHED && ($GameFlags & GAMEFLAGS_HIDDEN_MSG) )
       echo MED_SPACING . echo_image_gamecomment( $gid );
+   if ( $enable_game_viewer ) //TODO remove/replace later
+   {
+      $cmd = ($show_game_tools) ? 'off' : 'on';
+      echo SMALL_SPACING, anchor( "game.php?gid=$gid".URI_AMP."jsgv=$cmd", "JS-GameEditor ".strtoupper($cmd) );
+   }
+
 
    echo "\n</td></tr>\n</table>"; //board & associates table }--------
 
@@ -1340,11 +1356,10 @@ function draw_add_time( $game_row, $colorToMove )
 //TODO fix non-JS layout to use one line if game-finished (or we have just prisoners on one line)
 function draw_game_info( $game_row, $game_setup, $board, $tourney )
 {
-   global $base_path;
+   global $base_path, $show_game_tools;
 
    echo '<table class=GameInfos>', "\n";
 
-   $show_game_tools = ( ALLOW_JAVASCRIPT && ENABLE_GAME_VIEWER );
    $cols = 3;
    $cols_r = $cols - 1;
    $to_move = get_to_move( $game_row, 'game.bad_ToMove_ID' );

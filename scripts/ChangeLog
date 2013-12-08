@@ -18,6 +18,9 @@ ChangeLog
 
 2013-12-08 jug
 
+   * game.php (draw_game_info):
+   - added testing-link under board to switch JS-game-editor ON and OFF
+
    * game.php (draw_game_tools, build_comment_tools, build_move_comments),
      js/game-editor.js (DGS.game.initPage, ~.handle_action_toggle_comment),
      include/globals.php (CSS_VERSION),
