@@ -66,8 +66,10 @@ DGS.game = {
       $("#tabs").tabs({ active: 0 });
 
       //TODO use later, but detach from above <div> in same <td>; otherwise it resizes upper <div> as well:
-      //TODO add min/max-size on resizable
-      $("#GameMessage").resizable({ alsoResize: "#GameMessageBody" });
+      $("#GameMessage").resizable({
+         alsoResize: "#GameMessageBody",
+         minWidth: 300, minHeight: 150,  maxWidth: 600, maxHeight: 600
+      });
       $("#GameMessageBody").resizable();
       $("#GameMessageBody div.ui-resizable-handle").remove(); // removes resizable-handle for inner element
       //TODO sort the draggable out with the resizable as this can detach the div from the table it seems
@@ -97,8 +99,6 @@ DGS.game = {
          //TODO this.id = (First|Last|Next|Prev)Move
       });
       */
-
-      //TODO $("#GameMessage").resizable({ maxWidth: 600, maxHeight: 600, minWidth: 200 minHeight: 100, });
    }
 };
 
