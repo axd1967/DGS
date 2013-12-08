@@ -55,7 +55,7 @@ DGS.game_editor = {
 
       DGS.run.gameEditor.testBoard(); //TODO test
    }
-};
+}; //end of DGS.game_editor
 
 DGS.game = {
    loadPage : function() {
@@ -64,6 +64,10 @@ DGS.game = {
 
    initPage : function() {
       $("#tabs").tabs({ active: 0 });
+
+      $("#GameMsgTool_ToggleComment").click( { action: "hide" },  function(event) {
+         DGS.game.handle_action_toggle_comment( this, event );
+      });
 
       //TODO use later, but detach from above <div> in same <td>; otherwise it resizes upper <div> as well:
       $("#GameMessage").resizable({
@@ -99,8 +103,25 @@ DGS.game = {
          //TODO this.id = (First|Last|Next|Prev)Move
       });
       */
+   },
+
+   handle_action_toggle_comment : function( elem, event ) {
+      var action = event.data.action;
+      if ( action == "hide" ) {
+         event.data.action = "show";
+         $(elem).attr("src", "images/comment_show.png");
+         $(elem).attr("title", T_gametools["show_comment"] );
+         $(elem).attr("alt", T_gametools["show_comment"] );
+         $("#GameMessageBody div.CBody").hide();
+      } else { // unhide(=show)
+         event.data.action = "hide";
+         $(elem).attr("src", "images/comment_hide.png");
+         $(elem).attr("title", T_gametools["hide_comment"] );
+         $(elem).attr("alt", T_gametools["hide_comment"] );
+         $("#GameMessageBody div.CBody").show();
+      }
    }
-};
+}; //end of DGS.game
 
 DGS.utils = {
    /** Returns associative array[key_i]=val_i built from arr( key_1, val_1, key_2, val_2, ... ). */
@@ -138,7 +159,7 @@ DGS.utils = {
       $("#D").text( msg );
    }
 
-};
+}; //end of DGS.utils
 
 
 

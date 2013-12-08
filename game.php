@@ -595,7 +595,14 @@ $GLOBALS['ThePage'] = new Page('Game');
 
    if ( ALLOW_JAVASCRIPT && ENABLE_GAME_VIEWER )
    {
-      $js = sprintf( "DGS.run.gameEditor = new DGS.GameEditor(%d,%d,%d,%d);\n",
+      // set translated texts as global JS-vars
+      $js  = add_js_var( 'T_gametools', dgs_json_encode(
+         array(
+            'hide_comment' => T_('Hide comments#ged'),
+            'show_comment' => T_('Show comments#ged'),
+         )), true );
+
+      $js .= sprintf( "DGS.run.gameEditor = new DGS.GameEditor(%d,%d,%d,%d);\n",
          $cfg_board->get_stone_size(), $cfg_board->get_wood_color(), $Size, $Size );
       $js .= sprintf( "DGS.run.gameEditor.parseGameTree(%s,%s);\n",
          $Size, $TheBoard->make_js_game_tree() );
@@ -1028,10 +1035,18 @@ function draw_game_tools()
             "<div id=tab_GameAnalysis class=\"tab\">\n", build_tab_GameAnalysis(), "</div>\n",
          "</div>\n",
          "<div id=GameMessage>\n",
-            "<div id=GameMessageHeader>", T_('Messages#ged'), "</div>\n",
+            "<div id=GameMessageHeader>", T_('Messages#ged'), build_comment_tools(), "</div>\n",
             "<div id=GameMessageBody>\n", build_move_comments(), "</div>\n",
          "</div>\n";
 }//draw_game_tools
+
+function build_comment_tools()
+{
+   global $base_path;
+   return " <div id=GameMessageTools>"
+      . image($base_path."images/comment_hide.png", T_('Hide comments#ged'), null, 'id=GameMsgTool_ToggleComment')
+      . "</div>";
+}
 
 // display all game move-messages properly filtered according to player/observer and move for std- and MP-game
 function build_move_comments()
@@ -1070,7 +1085,6 @@ function build_move_comments()
          . "</div>";
    }
 
-   //TODO later add option to "show-only moves with comments" (for compacter msg-view but lack of navigation)
    //TODO later add option to jump to "my-last-move" (esp. for MPG)
    for ( $move_nr=0; $move_nr <= $TheBoard->max_moves; $move_nr++ )
    {
@@ -1111,7 +1125,8 @@ function build_move_comments()
          . "<h3>{$cfg_image[$Stone]} "
             . sprintf( T_('Move %s [%s] by %s#ged'), $move_nr . $handi_str, $move_link, $user_info )
          . "</h3>\n"
-         . $move_msg . "</div>";
+         . "<div class=CBody>$move_msg</div>"
+         . "</div>";
    }
 
    return implode("\n", $out);

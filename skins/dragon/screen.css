@@ -2314,7 +2314,15 @@ div#GameMessageHeader {
    font-weight: bold;
    font-size: larger;
 }
+div#GameMessageTools {
+   float: right;
+   margin: 0 1.5em;
+}
+div#GameMessageTools img {
+   padding: 3px;
+}
 div#GameMessageBody {
+   clear: both;
    padding: 2px;
    width: 29em;
    height: 15em;

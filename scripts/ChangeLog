@@ -18,6 +18,14 @@ ChangeLog
 
 2013-12-08 jug
 
+   * game.php (draw_game_tools, build_comment_tools, build_move_comments),
+     js/game-editor.js (DGS.game.initPage, ~.handle_action_toggle_comment),
+     include/globals.php (CSS_VERSION),
+     skins/dragon/screen.css,
+     images/comment_hide.png, images/comment_show.png:
+   - added tool with toggling icons & tooltip to hide/show game-move-comments in message-box
+     for JS-game-editor
+
    * include/board.php (Board.load_from_db),
      game.php (build_move_comments):
    - added links on move-positions on all game-move-messages in message-box for all messages
