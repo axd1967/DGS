@@ -16,6 +16,12 @@ Developers INFO:
 ChangeLog
 ------------------------------------------------------------------
 
+2013-12-08 jug
+
+   * halfhourly_cron.php:
+   - bugfix in email-notification: only remove hidden-comments in game-move-message
+     keeping text-block of public comments instead of removing it
+
 2013-12-07 jug
 
    * translation_stats.php (show_translation_stats, count_translation_texts, count_translations),

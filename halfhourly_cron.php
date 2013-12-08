@@ -258,11 +258,9 @@ if ( !$is_down )
                   if ( !$TheBoard->load_from_db($game_row, 0, BOARDOPT_MARK_DEAD|BOARDOPT_LOAD_LAST_MSG|BOARDOPT_STOP_ON_FIX) )
                      error('internal_error', "halfhourly_cron.game.load_from_db($gid,$uid)");
 
-                  // remove all tags
-                  $movemsg = trim(preg_replace(
-                     "'(<c(omment)? *>(.*?)</c(omment)? *>)".
-                     "|(<h(idden)? *>(.*?)</h(idden)? *>)'is",
-                     '', $TheBoard->movemsg ));
+                  // remove hidden tags, strip away <c>-tags but keeping surrounded text
+                  $movemsg = remove_hidden_game_tags( $TheBoard->movemsg );
+                  $movemsg = trim( preg_replace( "'(<c(omment)?\\s*>(.*?)</c(omment)?\\s*>)", "\\3\n", $movemsg ) );
                   $movemsg = mail_strip_html($movemsg);
                   $msg .= $TheBoard->draw_ascii_board($movemsg) . "\n";
                }
