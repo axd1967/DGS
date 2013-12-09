@@ -73,16 +73,13 @@ DGS.game = {
          $("#GameMessageBody").scrollTo( "#movetxt" + move_nr, { axis: "xy", duration: 200, easing: "swing", queue: true });
       });
 
-      //TODO use later, but detach from above <div> in same <td>; otherwise it resizes upper <div> as well:
+      $("#GameMessage").draggable({ handle: "#GameMessageHeader", opacity: 0.50 });
       $("#GameMessage").resizable({
          alsoResize: "#GameMessageBody",
          minWidth: 300, minHeight: 150,  maxWidth: 600, maxHeight: 600
       });
       $("#GameMessageBody").resizable();
       $("#GameMessageBody div.ui-resizable-handle").remove(); // removes resizable-handle for inner element
-
-      //TODO sort the draggable out with the resizable as this can detach the div from the table it seems
-      $("#GameMessage").draggable({ handle: "#GameMessageHeader", opacity: 0.35 });
 
       DGS.run.gameEditor.saveBoard();
 
