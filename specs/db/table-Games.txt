@@ -80,7 +80,7 @@ Description:
      which will be updated when the game actually starts
 
 * Lastchanged : timestamp when there was a move-like change to the game
-   - not changed on adding-time
+   - not changed on adding-time (because reserved for email-notifications on moves)
 
 * mid : foreign key to Messages.ID
    - field is set, if game has been created by an invitation,
