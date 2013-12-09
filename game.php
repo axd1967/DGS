@@ -588,10 +588,6 @@ $GLOBALS['ThePage'] = new Page('Game');
    $last_move_msg = $gc_helper->filter_comment( $last_move_msg, $move, $movecol, $view_comment, /*html*/true );
    $last_move_msg = MarkupHandlerGoban::replace_igoban_tags( $last_move_msg );
 
-   // determine mpg_uid (user of current/selected move + move-color) for last-move with comment-info
-   $mpg_uid = $gc_helper->get_mpg_user( /*uid-only*/true );
-   $move_color = $gc_helper->get_mpg_move_color();
-
    if ( ENA_MOVENUMBERS )
    {
       $movenumbers = $cfg_board->get_move_numbers();
@@ -1356,7 +1352,7 @@ function draw_add_time( $game_row, $colorToMove )
 
 function draw_game_info( $game_row, $game_setup, $board, $tourney )
 {
-   global $base_path, $show_game_tools;
+   global $base_path, $show_game_tools, $gc_helper;
 
    echo '<table class=GameInfos>', "\n";
 
@@ -1462,8 +1458,6 @@ function draw_game_info( $game_row, $game_setup, $board, $tourney )
    //multi-player-game rows
    if ( $game_row['GameType'] != GAMETYPE_GO )
    {
-      global $mpg_uid, $move_color;
-
       echo "<tr>\n",
          '<td class=Color>', echo_image_game_players($game_row['ID']), "</td>\n",
          "<td colspan=\"$cols_r\">", T_('Game Type').': ',
@@ -1471,21 +1465,20 @@ function draw_game_info( $game_row, $game_setup, $board, $tourney )
          "</td>\n",
          "</tr>\n";
 
-      if ( $game_row['Moves'] > 0 && $mpg_uid > 0 )
+      if ( $game_row['Moves'] > 0 )
       {
-         $mpg_userarr = User::load_quick_userinfo( array( $mpg_uid ) ); //TODO avoid load using pre-loaded mpg_users instead
-         if ( is_array($mpg_userarr) )
+         // determine user of current/selected move + move-color for last-move with comment-info
+         $mpg_user = $gc_helper->get_mpg_user();
+         if ( is_array($mpg_user) )
          {
-            $mpg_urow = $mpg_userarr[$mpg_uid];
-
             echo "<tr>\n<td></td>\n",
                "<td colspan=\"$cols_r\">",
                "<dl class=BoardInfos><dd>", T_('Last move by:'), SMALL_SPACING,
-                  ($move_color == GPCOL_B ? $icon_col_b : $icon_col_w),
+                  ( $gc_helper->get_mpg_move_color() == GPCOL_B ? $icon_col_b : $icon_col_w),
                   MINI_SPACING,
-                  user_reference( REF_LINK, 1, '', $mpg_urow ),
+                  user_reference( REF_LINK, 1, '', $mpg_user['uid'], $mpg_user['Name'], $mpg_user['Handle'] ),
                   SMALL_SPACING,
-                  echo_rating( @$mpg_urow['Rating2'], true, $mpg_uid ),
+                  echo_rating( @$mpg_user['Rating2'], true, $mpg_user['uid'] ),
                "</dd></dl>\n",
                "</td>\n",
                "</tr>\n";

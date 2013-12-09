@@ -81,12 +81,9 @@ class GameCommentHelper
       $this->mpg_active_user = $mpg_active_user;
    }
 
-   public function get_mpg_user( $only_uid=false )
+   public function get_mpg_user()
    {
-      if ( $this->mpg_user )
-         return ($only_uid) ? $this->mpg_user['uid'] : $this->mpg_user;
-      else
-         return 0;
+      return $this->mpg_user;
    }
 
    public function get_mpg_move_color()
