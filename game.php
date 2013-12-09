@@ -1354,24 +1354,27 @@ function draw_add_time( $game_row, $colorToMove )
       </TABLE>';
 } //draw_add_time
 
-//TODO try using <div>'s instead of tables (which is normally better for layouting)
-//TODO fix non-JS layout to use one line if game-finished (or we have just prisoners on one line)
 function draw_game_info( $game_row, $game_setup, $board, $tourney )
 {
    global $base_path, $show_game_tools;
 
    echo '<table class=GameInfos>', "\n";
 
-   $cols = 3;
+   // with JS-game-tools put prisoner-info into 2nd-line with time-remaining & indent lines on starting-icons
+   // otherwise: prisoners in 1st-line and not always indent (e.g. time-info)
+
+   $cols = ( $show_game_tools ) ? 3 : 4; // 3=icon|user+imgs|rank, 4=(like 3) | prisoners
    $cols_r = $cols - 1;
+   $cols_r1 = ( $cols == 4 ) ? $cols : $cols_r; // remaining cols for one element on single line
    $to_move = get_to_move( $game_row, 'game.bad_ToMove_ID' );
    $img_tomove = SMALL_SPACING . image( $base_path.'images/backward.gif', T_('Player to move'), null, 'class="InTextImage"' );
    $all_moves = ( $board->curr_move >= $board->max_moves );
+   $game_is_started = isStartedGame($game_row['Status']);
+   $game_is_finished = ($game_row['Status'] === GAME_STATUS_FINISHED);
 
    $color_class = 'class="InTextStone"';
    if ( $game_row['Status'] == GAME_STATUS_KOMI )
    {
-      $game_is_running = true;
       $komi = NO_VALUE;
 
       $Handitype = $game_setup->Handicaptype;
@@ -1387,7 +1390,6 @@ function draw_game_info( $game_row, $game_setup, $board, $tourney )
    }
    else
    {
-      $game_is_running = isRunningGame($game_row['Status']);
       $komi = $game_row['Komi'];
       $icon_col_b = image( $base_path.'17/b.gif', T_('Black'), null, $color_class );
       $icon_col_w = image( $base_path.'17/w.gif', T_('White'), null, $color_class );
@@ -1401,37 +1403,44 @@ function draw_game_info( $game_row, $game_setup, $board, $tourney )
       $icon_col = ($color == BLACK) ? $icon_col_b : $icon_col_w;
       $col_uid = $game_row["{$PFX}_ID"];
 
-      // name-info + to-move + off-time + rating
-      $offTime = echo_off_time( ($to_move == $color), $game_row["{$PFX}_OnVacation"], $game_row["{$PFX}_ClockUsed"],
-         $game_row['WeekendClock'] );
-      echo "<tr class={$pfx}Info>\n", // blackInfo/whiteInfo
-         "<td class=Color>$icon_col</td>\n",
-         '<td class=Name>',
-            user_reference( REF_LINK, 1, '', $col_uid, $game_row["{$PFX}name"], $game_row["{$PFX}handle"]),
-            ( $to_move == $color ? $img_tomove : '' ),
-            ( $offTime ? $offTime : '' ),
-         "</td>\n",
-         "<td class=\"Ratings right\">",
-            echo_rating(
-               ($game_row['Status'] === GAME_STATUS_FINISHED) ? $game_row["{$PFX}_End_Rating"] : $game_row["{$PFX}rating"],
-               true, $col_uid ),
-         "</td>\n",
-         "</tr>\n";
-
-      echo "<tr class={$pfx}Info>\n", "<td colspan=2>";
-      if ( $game_is_running ) // remaining-time
+      $user_ref = user_reference( REF_LINK, 1, '', $col_uid, $game_row["{$PFX}name"], $game_row["{$PFX}handle"] );
+      $user_tomove_img = ( $to_move == $color ) ? $img_tomove : '';
+      $user_off_time = echo_off_time( ($to_move == $color), $game_row["{$PFX}_OnVacation"],
+         $game_row["{$PFX}_ClockUsed"], $game_row['WeekendClock'] );
+      if ( !$user_off_time ) $user_off_time = '';
+      $user_rating = echo_rating(
+         ($game_is_finished) ? $game_row["{$PFX}_End_Rating"] : $game_row["{$PFX}rating"],
+         true, $col_uid );
+      if ( $game_is_started )
       {
-         echo T_('Time remaining'), ": ",
+         $time_remaining = T_('Time remaining') . ": " .
             TimeFormat::echo_time_remaining( $game_row["{$PFX}_Maintime"], $game_row['Byotype'],
                   $game_row["{$PFX}_Byotime"], $game_row["{$PFX}_Byoperiods"],
                   $game_row['Byotime'], $game_row['Byoperiods'],
                   TIMEFMT_ADDTYPE | TIMEFMT_ZERO );
       }
-      echo "</td>\n";
+      else
+         $time_remaining = '';
 
       $prisoners = ($all_moves) ? $game_row["{$PFX}_Prisoners"] : $board->prisoners[$color];
-      echo "<td class=\"Prisoners right\">", T_('Prisoners'), ': ', span('bold', $prisoners), "</td>\n",
+      $td_prisoners = sprintf( "<td class=\"Prisoners %s right\">%s: %s</td>\n",
+         $PFX, T_('Prisoners'), span('bold', $prisoners) );
+
+      // name-info + to-move + off-time + rating
+      echo "<tr class={$pfx}Info>\n", // blackInfo/whiteInfo
+         "<td class=Color>", $icon_col, "</td>\n",
+         "<td class=Name>", $user_ref, $user_tomove_img, $user_off_time, "</td>\n",
+         "<td class=\"Ratings right\">", $user_rating, "</td>\n",
+         ( $cols == 4 ? $td_prisoners : '' ),
          "</tr>\n";
+
+      if ( $game_is_started || $cols == 3 )
+      {
+         echo "<tr class={$pfx}Info>\n",
+            "<td colspan=$cols_r1>$time_remaining</td>\n",
+            ( $cols == 4 ? '' : $td_prisoners ),
+            "</tr>\n";
+      }
    }//black/white-rows
 
    //tournament rows
@@ -1464,7 +1473,7 @@ function draw_game_info( $game_row, $game_setup, $board, $tourney )
 
       if ( $game_row['Moves'] > 0 && $mpg_uid > 0 )
       {
-         $mpg_userarr = User::load_quick_userinfo( array( $mpg_uid ) );
+         $mpg_userarr = User::load_quick_userinfo( array( $mpg_uid ) ); //TODO avoid load using pre-loaded mpg_users instead
          if ( is_array($mpg_userarr) )
          {
             $mpg_urow = $mpg_userarr[$mpg_uid];
@@ -1493,7 +1502,7 @@ function draw_game_info( $game_row, $game_setup, $board, $tourney )
          echo_image_shapeinfo($shape_id, $game_row['Size'], $game_row['ShapeSnapshot'], false, false, true),
          T_('Ruleset'), ': ', Ruleset::getRulesetText($game_row['Ruleset']),
          $sep, T_('Rated'), ': ', ( ($game_row['Rated'] == 'N') ? T_('No') : T_('Yes') ),
-      ( $show_game_tools
+      ( $cols == 3
          ? "</td>\n</tr>\n" .
            "<tr>\n<td></td>\n" .
            "<td colspan=\"$cols_r\">"
@@ -1502,8 +1511,9 @@ function draw_game_info( $game_row, $game_setup, $board, $tourney )
          $sep, T_('Komi'), ': ', $komi,
       "</td>\n</tr>\n";
 
-   echo "<tr>\n<td></td>\n",
-      "<td colspan=\"$cols_r\">", T_('Time limit'), ': ',
+   echo "<tr>\n",
+      ( $cols == 4 ? '' : "<td></td>\n" ),
+      "<td colspan=\"$cols_r1\">", T_('Time limit'), ': ',
          TimeFormat::echo_time_limit( $game_row['Maintime'], $game_row['Byotype'],
             $game_row['Byotime'], $game_row['Byoperiods'], TIMEFMT_ADDTYPE|TIMEFMT_SHORT),
       "</td>\n",
