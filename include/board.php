@@ -485,6 +485,21 @@ class Board
       }
    }//move_marks
 
+   /*! \brief Returns true, if scoring is allowed. */
+   public function is_scoring_step( $move, $game_status )
+   {
+      // last move and on scoring game-status
+      if ( $move == $this->max_moves && ($game_status == GAME_STATUS_SCORE || $game_status == GAME_STATUS_SCORE2) )
+         return true;
+
+      // current move is SCORE-step
+      $curr_move = @$this->moves[$move][1];
+      if ( $curr_move == POSX_SCORE )
+         return true;
+
+      return false;
+   }//is_scoring_step
+
    public function draw_captures_box( $caption)
    {
       if ( !is_array($this->captures) )

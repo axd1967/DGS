@@ -305,7 +305,7 @@ $GLOBALS['ThePage'] = new Page('Game');
          $admResult = ( $GameFlags & GAMEFLAGS_ADMIN_RESULT ) ? sprintf(' (%s)', T_('set by admin#game')) : '';
          $extra_infos[score2text($Score, true) . $admResult] = 'Score';
       }
-      elseif ( $move == $Moves && ($Status == GAME_STATUS_SCORE || $Status == GAME_STATUS_SCORE2) )
+      elseif ( $TheBoard->is_scoring_step($move, $Status) )
       {
          $score_board = clone $TheBoard;
          list( $score, $game_score ) =

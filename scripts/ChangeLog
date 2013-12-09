@@ -18,6 +18,10 @@ ChangeLog
 
 2013-12-09 jug
 
+   * include/board.php (Board.is_scoring_step),
+     game.php:
+   - bugfix: show scoring-info box also for scoring-step in move-history
+
    * game.php (draw_game_info):
    - layout-fix: for JS-game-editor show prisoners on 2nd-line instead of 1st-line
      - cleanup of some var-usage, use clearer separation of data and layout
