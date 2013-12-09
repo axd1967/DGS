@@ -700,7 +700,7 @@ class FeatureVote
       $qsql->add_part( SQLP_FROM,
          "LEFT JOIN FeatureVote AS MYFV on MYFV.fid=F.ID AND MYFV.Voter_ID=$my_id",
          'LEFT JOIN FeatureVote AS FV ON F.ID=FV.fid' );
-      $qsql->add_part( SQLP_WHERE, 'FV.Points<>0' ); // abstention from voting
+      $qsql->add_part( SQLP_WHERE, 'FV.Points is not null' ); // abstention from voting
       $qsql->add_part( SQLP_GROUP, 'FV.fid' );
       $qsql->add_part( SQLP_HAVING, 'sumPoints is not null' );
       if ( !is_null($mquery) )

@@ -18,6 +18,9 @@ ChangeLog
 
 2013-12-09 jug
 
+   * features/lib_votes.php (FeatureVote.build_query_featurevote_list):
+   - bugfix: show features-votes also if there are only other neutral votes
+
    * include/board.php (Board.is_scoring_step),
      game.php:
    - bugfix: show scoring-info box also for scoring-step in move-history
