@@ -18,6 +18,11 @@ ChangeLog
 
 2013-12-11 jug
 
+   * include/std_functions.php (start_html),
+     include/globals.php (JS_VERSION):
+   - use JS_VERSION to auto-reload updated js-file on LIVE-server while reloading everytime
+     on local server
+
    * include/gui_functions.php (echo_image_gameinfo),
      js/common.js (DGS.data.ARR_THUMBNAIL; showGameThumbnail),
      images/tbmb.gif, images/tbmw.gif,

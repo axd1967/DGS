@@ -382,15 +382,18 @@ function start_html( $title, $no_cache, $skinname=NULL, $style_string=NULL, $las
 
    if ( is_javascript_enabled() )
    {
+      $ts = JS_VERSION;
       $js_code = array(); // global declarations first (before including JS-libs)
       $js_code[] = add_js_var( 'base_path', $base_path );
       echo "\n<script language=\"JavaScript\" type=\"text/javascript\">\n", implode("\n", $js_code), "</script>";
-      echo "\n<script language=\"JavaScript\" type=\"text/javascript\" src=\"{$base_path}js/common.js\"></script>";
+      echo "\n<script language=\"JavaScript\" type=\"text/javascript\" src=\"{$base_path}js/common.js?t=$ts\"></script>";
 
       if ( $enable_js_game )
       {
-         //TODO good for dev, but rely on chg-date for LIVE-server (later check on FRIENDLY_SHORT_NAME to include dev-stuff or live-stuff compressed into single JS)
-         $ts = date(DATE_FMT4, $GLOBALS['NOW']);
+         // for development reload everytime (on LIVE-server use $ts with JS_VERSION to use latest version)
+         //TODO later compress jquery + other-js into 2 separate compressed JS with dojo-toolkit and updated JS_VERSION
+         if ( FRIENDLY_SHORT_NAME != 'DGS' )
+            $ts = date(DATE_FMT4, $GLOBALS['NOW']);
          if ( ALLOW_GAME_EDITOR || ENABLE_GAME_VIEWER )
          {
             echo "\n<script language=\"JavaScript\" type=\"text/javascript\" src=\"{$base_path}js/jquery-1.9.1.min.js\"></script>";
