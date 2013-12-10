@@ -135,15 +135,25 @@ DGS.data.ARR_THUMBNAIL = [
       "<img src=\"" + base_path + "images/tbne.gif\" width=7 height=7>",
       "<img src=\"" + base_path + "images/tbnb.gif\" width=7 height=7>",
       "<img src=\"" + base_path + "images/tbnw.gif\" width=7 height=7>",
-      "<img src=\"" + base_path + "images/tbnd.gif\" width=7 height=7>"
+      "<img src=\"" + base_path + "images/tbnd.gif\" width=7 height=7>",
+      // last-move marker (bit-mask bit 2 set): 101=black-last-move, 110=white-last-move
+      "", // 100 = reserved
+      "<img src=\"" + base_path + "images/tbmb.gif\" width=7 height=7>",
+      "<img src=\"" + base_path + "images/tbmw.gif\" width=7 height=7>"
    ];
 
 // shows game-thumbnail for board-size $size and given dgs-base64-encoded game $snapshot
-function showGameThumbnail( e, size, snapshot )
+// param last_x/y last-move-marker; no last-move marker if values undefined or < 0
+function showGameThumbnail( e, size, snapshot, last_x, last_y )
 {
    const LF = "<br>\n";
    const SPC = DGS.data.ARR_THUMBNAIL[0];
    var output = '';
+
+   // check if there is a last-move-marker
+   var last_pos = ( last_x != undefined && last_y != undefined && last_x >= 0 && last_x < size && last_y >=0 && last_y < size )
+      ? last_y * size + last_x
+      : -1;
 
    var data, data1, data2, data3, repcount;
    var p = 0; // board-pos
@@ -180,12 +190,17 @@ function showGameThumbnail( e, size, snapshot )
             if ( p >= psize ) break;
          }
       } else {
+         if ( p == last_pos ) data1 |= 4;
          output += DGS.data.ARR_THUMBNAIL[data1];
          if ( ++p % size == 0 ) output += LF;
          if ( p >= psize ) break;
+
+         if ( p == last_pos ) data2 |= 4;
          output += DGS.data.ARR_THUMBNAIL[data2];
          if ( ++p % size == 0 ) output += LF;
          if ( p >= psize ) break;
+
+         if ( p == last_pos ) data3 |= 4;
          output += DGS.data.ARR_THUMBNAIL[data3];
          if ( ++p % size == 0 ) output += LF;
       }

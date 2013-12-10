@@ -258,17 +258,21 @@ function echo_off_time( $player_to_move, $on_vacation, $player_clock_used, $game
    return ($result) ? SMALL_SPACING . $result : '';
 }
 
-/*! \brief Returns image to game-info page for given game-id. */
-function echo_image_gameinfo( $gid, $with_sep=false, $board_size=null, $snapshot=null )
+/*!
+ * \brief Returns image to game-info page for given game-id.
+ * \param $last_x include x/y coordinate for last-move-marker; null = no last-move-marker
+ */
+function echo_image_gameinfo( $gid, $with_sep=false, $board_size=null, $snapshot=null, $last_x=null, $last_y=null )
 {
    global $base_path;
 
    if ( is_numeric($board_size) && !is_null($snapshot) && is_javascript_enabled() )
    {
+      $lastmove_str = ( !is_null($last_x) ) ? ",$last_x,$last_y" : '';
       $img_str = image( $base_path.'images/info.gif', '', null, 'class="InTextImage"');
       $link = anchor( $base_path."gameinfo.php?gid=$gid", $img_str, '',
          array(
-            'onmouseover' => sprintf( "showGameThumbnail(event,%s,'%s');", $board_size, $snapshot ),
+            'onmouseover' => sprintf( "showGameThumbnail(event,%s,'%s'%s);", $board_size, $snapshot, $lastmove_str ),
             'onmouseout'  => 'hideInfo();' ));
    }
    else

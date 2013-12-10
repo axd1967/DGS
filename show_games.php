@@ -653,7 +653,7 @@ $GLOBALS['ThePage'] = new Page('GamesList');
       if ( $gtable->Is_Column_Displayed[32] )
       {
          $snapshot = ($Snapshot) ? $Snapshot : null;
-         $row_arr[32] = echo_image_gameinfo($ID, /*sep*/false, $Size, $snapshot)
+         $row_arr[32] = echo_image_gameinfo($ID, /*sep*/false, $Size, $snapshot, $Last_X, $Last_Y)
             . echo_image_shapeinfo( $ShapeID, $Size, $ShapeSnapshot, false, true )
             . echo_image_tournament_info($tid,true);
       }

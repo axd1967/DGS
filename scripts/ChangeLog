@@ -16,6 +16,17 @@ Developers INFO:
 ChangeLog
 ------------------------------------------------------------------
 
+2013-12-11 jug
+
+   * include/gui_functions.php (echo_image_gameinfo),
+     js/common.js (DGS.data.ARR_THUMBNAIL; showGameThumbnail),
+     images/tbmb.gif, images/tbmw.gif,
+     specs/db/table-Games.txt,
+     status.php (load_games_to_move),
+     manage_sgf.php:
+   - added last-move marker on game-thumbnail if available
+     - last-move not available for shapes, pass-move, scoring-step, finished-games
+
 2013-12-09 jug
 
    * features/lib_votes.php (FeatureVote.build_query_featurevote_list):

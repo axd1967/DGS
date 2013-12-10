@@ -200,15 +200,17 @@ Description:
 * Black_Prisoners, White_Prisoners
    - number of Black and White (stone) prisoners
 
-* Last_X, Last_Y : legacy-fields ??
-   - purpose unclear. sure it holds the last position, but for what is unclear
-     - a possibility is to check for last-move in the "old" quick_play-suite
-
+* Last_X, Last_Y : last-move (sometimes)
    - for game-status PLAY: x/y coordinates of last move (start at 0..size-1)
    - for game-status PASS: Last_X=POSX_PASS, Last_Y undefined
    - for game-status SCORE/SCORE2: Last_X=POSX_SCORE
    - for game-status FINISHED: Last_X= POSX_RESIGN/TIME/SCORE
    - for other game-status: undefined
+
+   - since 10-Dec-2013 used to hold last-move for last-move-marker in game-thumbnail
+
+   - NOTE (till 10-Dec-2013): purpose was unclear. sure it holds the last position, but for what is unclear
+     - a possibility is to check for last-move in the "old" quick_play-suite
 
 * Last_Move : legacy-field
    - according to comment in 'scripts/game_consistency.php', field-usage is:

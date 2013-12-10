@@ -145,7 +145,8 @@ define('SGF_MAXSIZE_UPLOAD', 100*1024); // max. 100KB stored, keep factor of 102
 
    $infos = array(
       anchor( "{$base_path}game.php?gid=$gid", "#$gid" ),
-      echo_image_gameinfo($gid, /*sep*/false, $game->Size, ($game->Snapshot ? $game->Snapshot : null) ),
+      echo_image_gameinfo($gid, /*sep*/false, $game->Size, ($game->Snapshot ? $game->Snapshot : null),
+         $game->Last_X, $game->Last_Y ),
    );
    if ( $game->ShapeID > 0 )
       $infos[] = echo_image_shapeinfo( $game->ShapeID, $game->Size, $game->ShapeSnapshot, /*gob-ed*/false);
