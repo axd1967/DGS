@@ -264,15 +264,20 @@ function echo_off_time( $player_to_move, $on_vacation, $player_clock_used, $game
  */
 function echo_image_gameinfo( $gid, $with_sep=false, $board_size=null, $snapshot=null, $last_x=null, $last_y=null )
 {
-   global $base_path;
+   global $base_path, $player_row;
 
    if ( is_numeric($board_size) && !is_null($snapshot) && is_javascript_enabled() )
    {
-      $lastmove_str = ( !is_null($last_x) ) ? ",$last_x,$last_y" : '';
+      $lastmove_str = ( !is_null($last_x) ) ? sprintf(',%s,%s', (int)$last_x, (int)$last_y) : '';
       $img_str = image( $base_path.'images/info.gif', '', null, 'class="InTextImage"');
+
+      $thumbnail_size = (isset($player_row['ThumbnailSize'])) ? (int)$player_row['ThumbnailSize'] : 7; // default
+      $js_show = sprintf( "showGameThumbnail(event,%s,%s,'%s'%s);",
+         $thumbnail_size, $board_size, $snapshot, $lastmove_str );
+
       $link = anchor( $base_path."gameinfo.php?gid=$gid", $img_str, '',
          array(
-            'onmouseover' => sprintf( "showGameThumbnail(event,%s,'%s'%s);", $board_size, $snapshot, $lastmove_str ),
+            'onmouseover' => $js_show,
             'onmouseout'  => 'hideInfo();' ));
    }
    else
@@ -293,7 +298,7 @@ function echo_image_shapeinfo( $shape_id, $board_size, $snapshot, $edit_goban=fa
    if ( $shape_id == 0 || (string)$snapshot == '' )
       return '';
 
-   global $base_path;
+   global $base_path, $player_row;
    $page_url = $base_path . ( ($edit_goban) ? 'goban_editor.php' : 'view_shape.php' ) . "?shape=$shape_id";
 
    if ( is_numeric($board_size) && !is_null($snapshot) )
@@ -306,9 +311,12 @@ function echo_image_shapeinfo( $shape_id, $board_size, $snapshot, $edit_goban=fa
       if ( is_javascript_enabled() )
       {
          $img_str = image( $base_path.'images/shape.gif', '', null, 'class="InTextImage"');
+         $thumbnail_size = (isset($player_row['ThumbnailSize'])) ? (int)$player_row['ThumbnailSize'] : 7; // default
+         $js_show = sprintf( "showGameThumbnail(event,%s,%s,'%s');", $thumbnail_size, $board_size, $snapshot );
+
          $link = anchor( $page_url, $img_str, '',
             array(
-               'onmouseover' => sprintf( "showGameThumbnail(event,%s,'%s');", $board_size, $snapshot ),
+               'onmouseover' => $js_show,
                'onmouseout'  => 'hideInfo();' ));
       }
       else

@@ -97,6 +97,7 @@ Zu  | UserPicture      | varchar(48)                                 | NO   |   
 Zu  | NextGameOrder    | enum('LASTMOVED','MOVES','PRIO','TIMELEFT') | NO   |     | LASTMOVED           |                |
 Zu  | SkipBulletin     | tinyint(3) unsigned                         | NO   |     | 4                   |                |
 Zu  | RejectTimeoutWin | tinyint(4)                                  | NO   |     | -1                  |                |
+Zu  | ThumbnailSize    | tinyint(3) unsigned                         | NO   |     | 7                   |                |
 
 
 # Fields for board-related GUI-config in ConfigBoard-table (category = Gu):
@@ -218,6 +219,9 @@ Zu  | RejectTimeoutWin | tinyint(4)                                  | NO   |   
    - 0x0008 = set to indicate, that an account-activation is underway (see Verification-table)
    - 0x0010 = set to indicate, that the Players.Email is verified by email-verification,
      this may be used to later differ accounts with unverified emails from accounts with verified emails
+
+* ThumbnailSize :
+   - stone-size to be used for game-thumbnails
 
 
 -------------------------------------------------

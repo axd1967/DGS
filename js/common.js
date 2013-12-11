@@ -129,26 +129,39 @@ function buildRankDiff( rank, prev_rank )
 // ---------- Game-Thumbnail -----------------------
 
 DGS.data.BASE64_CHARS = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/";
-DGS.data.ARR_THUMBNAIL = [
+DGS.data.ARR_THUMBNAIL = [];
+DGS.data.ARR_THUMBNAIL[7] = [ // stone-size 7 (default)
       // global base_path
       // 00=empty, 01=Black, 10=White, 11=Dead-stone
-      "<img src=\"" + base_path + "images/tbne.gif\" width=7 height=7>",
-      "<img src=\"" + base_path + "images/tbnb.gif\" width=7 height=7>",
-      "<img src=\"" + base_path + "images/tbnw.gif\" width=7 height=7>",
-      "<img src=\"" + base_path + "images/tbnd.gif\" width=7 height=7>",
+      "<img src=\"" + base_path + "images/tbne-7.gif\" width=7 height=7>",
+      "<img src=\"" + base_path + "7/b.gif\" width=7 height=7>",
+      "<img src=\"" + base_path + "7/w.gif\" width=7 height=7>",
+      "<img src=\"" + base_path + "images/tbnd-7.gif\" width=7 height=7>",
       // last-move marker (bit-mask bit 2 set): 101=black-last-move, 110=white-last-move
       "", // 100 = reserved
-      "<img src=\"" + base_path + "images/tbmb.gif\" width=7 height=7>",
-      "<img src=\"" + base_path + "images/tbmw.gif\" width=7 height=7>"
+      "<img src=\"" + base_path + "7/bw.gif\" width=7 height=7>",
+      "<img src=\"" + base_path + "7/wb.gif\" width=7 height=7>"
+   ];
+DGS.data.ARR_THUMBNAIL[11] = [ // stone-size 11
+      "<img src=\"" + base_path + "images/tbne-11.gif\" width=11 height=11>",
+      "<img src=\"" + base_path + "11/b.gif\" width=11 height=11>",
+      "<img src=\"" + base_path + "11/w.gif\" width=11 height=11>",
+      "<img src=\"" + base_path + "images/tbnd-11.gif\" width=11 height=11>",
+      "",
+      "<img src=\"" + base_path + "11/bw.gif\" width=11 height=11>",
+      "<img src=\"" + base_path + "11/wb.gif\" width=11 height=11>"
    ];
 
 // shows game-thumbnail for board-size $size and given dgs-base64-encoded game $snapshot
 // param last_x/y last-move-marker; no last-move marker if values undefined or < 0
-function showGameThumbnail( e, size, snapshot, last_x, last_y )
+function showGameThumbnail( e, stone_size, size, snapshot, last_x, last_y )
 {
+   if ( !DGS.data.ARR_THUMBNAIL[stone_size] )
+      stone_size = 7; // default
+   var IMG_ARR = DGS.data.ARR_THUMBNAIL[stone_size];
+
    const LF = "<br>\n";
-   const SPC = DGS.data.ARR_THUMBNAIL[0];
-   var output = '';
+   const SPC = IMG_ARR[0];
 
    // check if there is a last-move-marker
    var last_pos = ( last_x != undefined && last_y != undefined && last_x >= 0 && last_x < size && last_y >=0 && last_y < size )
@@ -158,7 +171,8 @@ function showGameThumbnail( e, size, snapshot, last_x, last_y )
    var data, data1, data2, data3, repcount;
    var p = 0; // board-pos
    var psize = size * size;
-   for ( var i=0; p < psize && i < snapshot.length; i++ ) {
+   var output = '';
+   for ( var i=0, slen=snapshot.length; p < psize && i < slen; i++ ) {
       var ch = snapshot.charAt(i);
       if ( ch == ' ' ) // stop for extended snapshot
          break;
@@ -191,17 +205,17 @@ function showGameThumbnail( e, size, snapshot, last_x, last_y )
          }
       } else {
          if ( p == last_pos ) data1 |= 4;
-         output += DGS.data.ARR_THUMBNAIL[data1];
+         output += IMG_ARR[data1];
          if ( ++p % size == 0 ) output += LF;
          if ( p >= psize ) break;
 
          if ( p == last_pos ) data2 |= 4;
-         output += DGS.data.ARR_THUMBNAIL[data2];
+         output += IMG_ARR[data2];
          if ( ++p % size == 0 ) output += LF;
          if ( p >= psize ) break;
 
          if ( p == last_pos ) data3 |= 4;
-         output += DGS.data.ARR_THUMBNAIL[data3];
+         output += IMG_ARR[data3];
          if ( ++p % size == 0 ) output += LF;
       }
    }

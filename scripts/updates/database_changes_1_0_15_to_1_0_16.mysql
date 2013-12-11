@@ -137,3 +137,8 @@ ALTER TABLE TournamentGames
    ADD KEY Defender_rid (Defender_rid) ;
 
 
+-- add customized size for game-thumbnails
+ALTER TABLE Players
+   ADD ThumbnailSize tinyint unsigned NOT NULL default '7' ;
+
+

@@ -58,6 +58,7 @@ require_once 'include/gui_bulletin.php';
    include_once 'skins/known_skins.php';
    $arr_timezones = get_timezone_array();
    $stonesizes = array_value_to_key_and_value( array( 5, 7, 9, 11, 13, 17, 21, 25, 29, 35, 42, 50 ) );
+   $thumbnailsizes = array_value_to_key_and_value( array( 7, 11 ) );
 
    $woodcolors = array();
    for ($i=1; $i<16; $i++ )
@@ -211,6 +212,10 @@ require_once 'include/gui_bulletin.php';
             'DESCRIPTION', T_('Enable JavaScript'),
             'CHECKBOX', 'jsenable', 1, '', ($userflags & USERFLAG_JAVASCRIPT_ENABLED) ) );
    }
+
+   $profile_form->add_row( array(
+         'DESCRIPTION', T_('Thumbnail size'),
+         'SELECTBOX', 'thumbnailsize', 1, $thumbnailsizes, (int)$vars['thumbnail_size'], false ) );
 
    $profile_form->add_empty_row();
    if ( (@$player_row['admin_level'] & ADMIN_SKINNER) )
@@ -401,7 +406,8 @@ require_once 'include/gui_bulletin.php';
 // return ( vars, error-list ) with $vars containing default or changed profile-values
 function parse_edit_form( &$cfg_board )
 {
-   global $player_row, $arr_timezones, $known_skins, $stonesizes, $woodcolors, $notesheights, $notescutoffs, $noteswidths;
+   global $player_row, $arr_timezones, $known_skins, $stonesizes, $thumbnailsizes,
+      $woodcolors, $notesheights, $notescutoffs, $noteswidths;
 
    // set defaults
    $vars = array(
@@ -415,6 +421,7 @@ function parse_edit_form( &$cfg_board )
       'skip_bulletin'      => (int)$player_row['SkipBulletin'],
       'reject_timeout'     => (int)$player_row['RejectTimeoutWin'],
       // appearance
+      'thumbnail_size'     => (int)$player_row['ThumbnailSize'],
       'table_maxrows'      => (int)$player_row['TableMaxRows'],
       'user_flags'         => (int)$player_row['UserFlags'],
       'skin_name'          => $player_row['SkinName'],
@@ -527,6 +534,13 @@ function parse_edit_form( &$cfg_board )
       }
       $vars['user_flags'] = $user_flags;
 
+      $thumbnail_size = (int)@$_REQUEST['thumbnailsize'];
+      if ( !isset($thumbnailsizes[$thumbnail_size]) )
+      {
+         $errors[] = sprintf( T_('Invalid thumbnail size [%s] selected (corrected to default).#profile'), $thumbnail_size );
+         $thumbnail_size = 7;
+      }
+      $vars['thumbnail_size'] = $thumbnail_size;
 
       $skin_name = get_request_arg('skinname', 'dragon');
       if ( !isset($known_skins[$skin_name]) )
@@ -655,6 +669,7 @@ function handle_save_profile( &$cfg_board, $nval )
    {
       // adjust $cookie_pref_rows too
       $cookie_prefs['TableMaxRows'] = (int)$nval['table_maxrows'];
+      $cookie_prefs['ThumbnailSize'] = (int)$nval['thumbnail_size'];
       $cookie_prefs['UserFlags'] = (int)$nval['user_flags'];
       $cookie_prefs['SkinName'] = $nval['skin_name'];
       $cookie_prefs['MenuDirection'] = $nval['menu_direction'];
@@ -681,6 +696,7 @@ function handle_save_profile( &$cfg_board, $nval )
    else // save into db
    {
       $upd->upd_num('TableMaxRows', (int)$nval['table_maxrows'] );
+      $upd->upd_num('ThumbnailSize', (int)$nval['thumbnail_size'] );
       $upd->upd_num('UserFlags', (int)$nval['user_flags'] );
       $upd->upd_txt('SkinName', $nval['skin_name'] );
       $upd->upd_txt('MenuDirection', $nval['menu_direction'] );

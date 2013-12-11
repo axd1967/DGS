@@ -154,6 +154,7 @@ $cookie_pref_rows = array(
        'UserFlags',
        'Button',
        'TableMaxRows',
+       'ThumbnailSize',
        'MenuDirection',
        'SkinName',
        // board config (from ConfigBoard-table):

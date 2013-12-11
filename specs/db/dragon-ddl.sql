@@ -773,6 +773,7 @@ CREATE TABLE IF NOT EXISTS `Players` (
   `NextGameOrder` enum('LASTMOVED','MOVES','PRIO','TIMELEFT') NOT NULL default 'LASTMOVED',
   `SkipBulletin` tinyint(3) unsigned NOT NULL default '4',
   `RejectTimeoutWin` tinyint(4) NOT NULL default '-1',
+  `ThumbnailSize` tinyint(3) unsigned NOT NULL default '7',
   PRIMARY KEY  (`ID`),
   UNIQUE KEY `Handle` (`Handle`),
   KEY `Rating2` (`Rating2`),
