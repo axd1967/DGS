@@ -382,7 +382,9 @@ function start_html( $title, $no_cache, $skinname=NULL, $style_string=NULL, $las
 
    if ( is_javascript_enabled() )
    {
-      $ts = JS_VERSION;
+      // for development reload everytime (on LIVE-server use JS_VERSION to use latest committed version)
+      $ts = ( FRIENDLY_SHORT_NAME == 'DGS' ) ? JS_VERSION : date(DATE_FMT4, $GLOBALS['NOW']);
+
       $js_code = array(); // global declarations first (before including JS-libs)
       $js_code[] = add_js_var( 'base_path', $base_path );
       echo "\n<script language=\"JavaScript\" type=\"text/javascript\">\n", implode("\n", $js_code), "</script>";
@@ -390,10 +392,7 @@ function start_html( $title, $no_cache, $skinname=NULL, $style_string=NULL, $las
 
       if ( $enable_js_game )
       {
-         // for development reload everytime (on LIVE-server use $ts with JS_VERSION to use latest version)
          //TODO later compress jquery + other-js into 2 separate compressed JS with dojo-toolkit and updated JS_VERSION
-         if ( FRIENDLY_SHORT_NAME != 'DGS' )
-            $ts = date(DATE_FMT4, $GLOBALS['NOW']);
          if ( ALLOW_GAME_EDITOR || ENABLE_GAME_VIEWER )
          {
             echo "\n<script language=\"JavaScript\" type=\"text/javascript\" src=\"{$base_path}js/jquery-1.9.1.min.js\"></script>";
