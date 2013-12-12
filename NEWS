@@ -82,7 +82,6 @@ Copyright (C) 2001-2013  Erik Ouchterlony, Jens-Uwe Gaspar
 
    * <home tournaments/list_tournaments.php>Tournaments</home>:
       * Tournament types: Ladder
-##      * Tournament types: Ladder, Round-Robin
       * Tournament scopes: Dragon, Public, Private
       * Tournament status: Admin, New, Register, Pair, Play, Finished, Delete
 
@@ -90,8 +89,6 @@ Copyright (C) 2001-2013  Erik Ouchterlony, Jens-Uwe Gaspar
          * Ladder Tournament without restrictions of 'Dragon'-scope (created by Admin only)
          * Ladder Tournament with restrictions of 'Public'-scope
          * Ladder Tournament with restrictions of 'Private'-scope (invite-only registration)
-
-##         * Pooled Round-Robin Tournament without restrictions of 'Dragon'-scope (created by Admin only)
 
       * <home tournaments/list_tournaments.php>Tournament List</home> with different views:
          * Show registration restrictions for users
@@ -157,20 +154,6 @@ Copyright (C) 2001-2013  Erik Ouchterlony, Jens-Uwe Gaspar
 
          * Added current ladder-rank on game-info page for running tournament-game
 
-##    * Tournament-type specific pages for Pooled Round-Robin Tournament:
-##       * Allow to register players for higher start rounds
-##       * Tournament Rounds Editor
-##       * Tournament Round Properties Editor for round-robin-specific properties
-##       * Tournament Round Status Editor
-##          * Tournament Round Status: Init, Pool, Pair, Game, Play, Done
-##       * Tournament Round Pool Setup (define pool parameters, add pool, remove pool)
-##       * Tournament Round Pool Manager (seed pools, delete pools, add missing registered users)
-##       * Tournament Round Pool Editor (edit pools)
-##       * Tournament Round Pairing Editor (start games)
-##       * Tournament Round Rank Editor (finishing pools)
-##       * Tournament Pool view page with crosstables
-##          * Tie-Breaker (static): Points, SODOS
-
       * General Changes for Tournaments:
          * Added Tournaments-link into main-menu (access-key [t])
          * Added view of games for specific tournament on games-list pages
@@ -190,24 +173,6 @@ Copyright (C) 2001-2013  Erik Ouchterlony, Jens-Uwe Gaspar
          * &lt;tourney id> : showing link to corresponding tournament page
          * &lt;move 123> | &lt;move S> : showing link to specific move of current game (can only be used on game-page),
            will be replaced with corresponding &lt;game>-tag
-
-## * <home game_editor.php>Game-editor</home>:
-##    * added experimental JavaScript-based game-editor using jQuery 1.6.1
-##    * added game-editor in main-menu
-##    * add game-related JavaScript for go-diagrams and game-viewer only on game and forum-read-page
-##    * use user-configured stone-size and wood-color to draw board, smooth-edge not supported
-##
-##    * added tool to create new board on Size-tab
-##    * added tools to edit markers on board on Edit-tab
-##      * added stone-tool to set/clear/toggle black/white stone
-##      * added marker-tool to toggle markers: circle, square, triangle, cross
-##      * added marker-tool to toggle markers: territory black/white/neutral/dame
-##      * added label-tool to toggle letter and stone-numbers on board with auto-increment
-##      * added undo-history-tool to undo goban-changes
-##      * added redo-history-tool to redo goban-changes, clear if varying from next-redo-step
-##    * added tool to play moves in Play-tab
-##      * added playing game-moves with capturing of stones, update last-move-marker
-##      * check for forbidden suicide of played-move
 
    * Game settings:
       * Added Ruleset option for
@@ -301,8 +266,6 @@ Copyright (C) 2001-2013  Erik Ouchterlony, Jens-Uwe Gaspar
       * Added config-switches:
          * ALLOW_TOURNAMENTS                 - enabled with: LADDER (ROUNDROBIN disabled)
          * ALLOW_TOURNAMENTS_CREATE_BY_USER  - disabled
-##         * ALLOW_GAME_EDITOR                 - disabled (needs JavaScript)
-##         * ENABLE_GAME_VIEWER                - disabled (needs JavaScript)
          * Added restriction on max. running games for tournament-registration (150)
          * ALLOWED_RULESETS                  - enabled with: JAPANESE (default) + CHINESE
          * SEND_ACTIVATION_MAIL              - enabled
