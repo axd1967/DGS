@@ -7,9 +7,19 @@ http://www.gnu.org/prep/standards/html_node/Change-Logs.html
 previous server update:
 Release [2013-08-11] - DGS 1.0.16 - tag [release-1_0_16-20130811] on (later) branch [DGS-stable-20130811]
 
+Developers INFO:
+
+2012-12-06 juga
+   Tournaments
+
 ------------------------------------------------------------------
 ChangeLog
 ------------------------------------------------------------------
+
+2013-12-12 jug
+
+   * snapshot.php:
+   - added stable release 1.0.16
 
 2013-12-11 jug
 

@@ -57,11 +57,14 @@ $GLOBALS['ThePage'] = new Page('Docs');
    //add_link_page_link('snapshot/DragonGoServer-cvs.tar.gz', 'DragonGoServer-cvs.tar.gz',
       //T_('The latest version of the source code, directly from the cvs'));
 
+   add_link_page_link('snapshot/DragonGoServer-stable-20130811.tar.gz', 'DragonGoServer-stable-20130811.tar.gz',
+      sprintf( T_('The code this server is running (version %s)'), '1.0.16'));
+
    add_link_page_link('snapshot/DragonGoServer-stable-20120610.tar.gz', 'DragonGoServer-stable-20120610.tar.gz',
-      sprintf( T_('The code this server is running (version %s)'), '1.0.15'));
+      sprintf( T_('The previous version %s'), '1.0.15'));
 
    add_link_page_link('snapshot/DragonGoServer-stable-200812.tar.gz', 'DragonGoServer-stable-200812.tar.gz',
-      sprintf( T_('The previous version %s'), '1.0.14'));
+      sprintf( T_('The version %s'), '1.0.14'));
 
    add_link_page_link('snapshot/DragonGoServer-stable-200712.tar.gz', 'DragonGoServer-stable-200712.tar.gz',
       sprintf( T_('The version %s'), '1.0.13'));
