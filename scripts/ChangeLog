@@ -13,6 +13,7 @@ ChangeLog
 
 2013-12-12 jug
 
-   * prep for dev of 1.0.17:
-   - prep'ed changelog for dev of 1.0.17
+   * include/globals.php (DGS_VERSION),
+     NEWS:
+   - prep for next major version 1.0.17
 

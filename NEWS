@@ -3,6 +3,64 @@ Copyright (C) 2001-2013  Erik Ouchterlony, Jens-Uwe Gaspar
 
 %TOC%
 
+#release DGS_1_0_17 [2013-???-??] - DGS 1.0.17  (??)
+
+   New features and Major changes:
+
+##   * <home tournaments/list_tournaments.php>Tournaments</home>:
+##      * Tournament types: Ladder, Round-Robin
+##
+##      * <home tournaments/wizard.php>Tournament-Wizard</home> to create tournaments:
+##         * Pooled Round-Robin Tournament without restrictions of 'Dragon'-scope (created by Admin only)
+##
+##    * Tournament-type specific pages for Pooled Round-Robin Tournament:
+##       * Allow to register players for higher start rounds
+##       * Tournament Rounds Editor
+##       * Tournament Round Properties Editor for round-robin-specific properties
+##       * Tournament Round Status Editor
+##          * Tournament Round Status: Init, Pool, Pair, Game, Play, Done
+##       * Tournament Round Pool Setup (define pool parameters, add pool, remove pool)
+##       * Tournament Round Pool Manager (seed pools, delete pools, add missing registered users)
+##       * Tournament Round Pool Editor (edit pools)
+##       * Tournament Round Pairing Editor (start games)
+##       * Tournament Round Rank Editor (finishing pools)
+##       * Tournament Pool view page with crosstables
+##          * Tie-Breaker (static): Points, SODOS
+
+## * <home game_editor.php>Game-editor</home>:
+##    * added experimental JavaScript-based game-editor using jQuery 1.6.1
+##    * added game-editor in main-menu
+##    * add game-related JavaScript for go-diagrams and game-viewer only on game and forum-read-page
+##    * use user-configured stone-size and wood-color to draw board, smooth-edge not supported
+##
+##    * added tool to create new board on Size-tab
+##    * added tools to edit markers on board on Edit-tab
+##      * added stone-tool to set/clear/toggle black/white stone
+##      * added marker-tool to toggle markers: circle, square, triangle, cross
+##      * added marker-tool to toggle markers: territory black/white/neutral/dame
+##      * added label-tool to toggle letter and stone-numbers on board with auto-increment
+##      * added undo-history-tool to undo goban-changes
+##      * added redo-history-tool to redo goban-changes, clear if varying from next-redo-step
+##    * added tool to play moves in Play-tab
+##      * added playing game-moves with capturing of stones, update last-move-marker
+##      * check for forbidden suicide of played-move
+
+
+   Minor changes:
+
+   Bug fixes:
+
+   Code improvements:
+
+   Administrative changes:
+
+   Server config:
+
+##      * Added config-switches:
+##         * ALLOW_GAME_EDITOR                 - disabled (needs JavaScript)
+##         * ENABLE_GAME_VIEWER                - disabled (needs JavaScript)
+
+
 #release DGS_1_0_16 [2013-Aug-11] - DGS 1.0.16  (Ladder-Tournaments, Game settings, Mail-Activation)
 
    New features and Major changes:
