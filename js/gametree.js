@@ -309,7 +309,27 @@ DGS.GameNode.prototype = {
       sgf += ( this._parent ) ? ")" : "";
 
       return sgf;
-   } //toSgf
+   }, //toSgf
+
+   // for debugging: JSON.stringify(..) fails on GameNode because of "too much recursion".
+   // so return object without recursive structures by replacing referenced nested GameNode-instances with using ref._id as representation
+   toJSON : function() {
+      var copy = {};
+      for ( var prop in this ) {
+         if ( prop == '_children' ) {
+            var arr = [];
+            for ( var i=0; i < this._children.length; i++ ) {
+               arr.push( this._children[i]._id );
+            }
+            copy[prop] = arr;
+         } else if ( prop == '_parent' ) {
+            copy[prop] = (this._parent) ? this._parent._id : null;
+         } else {
+            copy[prop] = this[prop];
+         }
+      }
+      return copy;
+   }
 
 }; // end of 'DGS.GameNode'
 
@@ -334,9 +354,9 @@ DGS.GameCursor.prototype = {
    },
 
    next : function( varNum ) {
-      if ( !this.hasNext() )
-         return false;
       varNum = ( typeof varNum == "undefined" || varNum == null ) ? this.node._preferredChild : varNum;
+      if ( !this.hasNext(varNum) )
+         return false;
       this.node._preferredChild = varNum;
       this.node = this.node._children[varNum];
       return true;
@@ -349,12 +369,13 @@ DGS.GameCursor.prototype = {
       return true;
    },
 
-   hasNext : function() {
-      return this.node && this.node._children.length;
+   hasNext : function( varNum ) {
+      varNum = ( typeof varNum == "undefined" || varNum == null || varNum < 0 ) ? this.node._preferredChild : varNum;
+      return this.node && (varNum < this.node._children.length);
    },
 
    hasPrevious : function() {
-      // Checking _parent of _parent is to prevent returning to root
+      // Checking _parent of _parent is to prevent returning to root-game-collection
       return this.node && this.node._parent && this.node._parent._parent;
    },
 
@@ -423,7 +444,24 @@ DGS.GameCursor.prototype = {
       return num;
    },
 
-   getGameRoot : function() {
+   // return GameNode.d_mn property set with move-number of current-node
+   getDgsMoveNumber : function() {
+      return this.node.d_mn;
+   },
+
+   // move cursor to root-node of 1st game
+   resetToRootGameNode : function() {
+      // If we're on the tree root, set cursor to the first game
+      if ( !this.node._parent && this.node._children.length )
+         this.node = this.node._children[0];
+      else {
+         /*jsl:ignore*/
+         while ( this.previous() ) { }
+         /*jsl:end*/
+      }
+   },
+
+   getRootGameNode : function() {
       if ( !this.node )
          return null;
       var cur = new DGS.GameCursor(this.node);
@@ -434,6 +472,10 @@ DGS.GameCursor.prototype = {
       while ( cur.previous() ) { }
       /*jsl:end*/
       return cur.node;
+   },
+
+   toJSON : function() {
+      return this.node.toJSON();
    }
 
 }; // end of 'DGS.GameCursor'

@@ -31,6 +31,8 @@ $GLOBALS['ThePage'] = new Page('GameEditor');
 {
    connect2mysql();
 
+   //TODO fix after refactoring of DGS.GameEditor-stuff into 'js/goban-editor.js'
+
    $logged_in = who_is_logged( $player_row);
    if ( !$logged_in )
       error('login_if_not_logged_in', 'game_editor');
@@ -56,9 +58,11 @@ $GLOBALS['ThePage'] = new Page('GameEditor');
 
    // ---------- Game EDITOR ---------------------------------------
 
-   $js = sprintf( "DGS.run.gameEditor = new DGS.GameEditor(%d,%d,%d,%d);\n",
+   // NOTE: game_editor.php uses JavaScript DGS.GobanEditor/goban_editor !!
+
+   $js = sprintf( "DGS.run.gobanEditor = new DGS.GobanEditor(%d,%d,%d,%d);\n",
       $cfg_board->get_stone_size(), $cfg_board->get_wood_color(), 9, 9 );
-   $js .= "DGS.game_editor.loadPage();\n";
+   $js .= "DGS.goban_editor.loadPage();\n";
 
    $style_str = (is_null($cfg_board))
       ? '' : GobanHandlerGfxBoard::style_string( $cfg_board->get_stone_size() );

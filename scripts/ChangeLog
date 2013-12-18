@@ -11,6 +11,89 @@ Release [2013-08-11] - DGS 1.0.16 - tag [release-1_0_16-20130811] on (later) bra
 ChangeLog
 ------------------------------------------------------------------
 
+2013-12-18 jug
+
+   * js/game-editor.js (DGS.utils.makePointNumberCoord;
+       DGS.GamePageEditor, ~.init, ~.makeDocReady, ~.parseGameTree, ~.scrollToMoveMessage,
+         ~.setCurrentMove, ~.goToMove, ~.executeNode, ~.playMove, ~.addStone, ~.setMovesCount,
+         ~.addCaptures;
+       DGS.constants.Goban, DGS.Goban, ~.init, ~.reset, ~.toString, ~.clearBoard, ~.clearMarkers,
+         ~.emptyBoard, ~.makeBoard, ~.getValue, ~.setStone, ~.getStone, ~.setMarker, ~.getMarker,
+         ~.setLabel, ~.getLabel, ~.cloneStoneMatrix, ~.commit, ~.rollback, ~.render_board, ~.render;
+       DGS.Board, ~.init, ~.setOptionsCoords, ~.getOptionsCoords, ~.reset_board, ~.draw_board,
+         ~.render_point;
+       DGS.GameChangeCalculator.calc_change_play_move),
+     js/goban-editor.js (DGS.goban_editor;
+       DGS.GobanLabels, ~.update_label;
+       DGS.Goban.setValue;
+       DGS.Board.draw_board_structure;
+       DGS.GobanChanges, ~.draw_goban_changes;
+       DGS.ChangeCalculator;
+       DGS.GobanEditor),
+     js/gametree.js (DGS.GameNode.toJSON;
+       DGS.GameCursor.next, ~.hasNext, ~.getDgsMoveNumber, ~.resetToRootGameNode, ~.getRootGameNode,
+         ~.toJSON),
+     js/jslint-dgs.conf,
+     include/board.php (Board.make_js_game_tree; class JS_GameNode),
+     include/std_functions.php (start_html),
+     game.php, game_editor.php:
+   - taken some & integrating code-fragments and concepts from Eidogo for DGS JS-game-editor
+     - stuff taken/inspired from Eidogo marked in function comments
+     - replaced 2-dimensional array-valued board-state in DGS.Goban with faster & easier
+       to handle 1-dimensional scalar-valued board-state
+     - taken & simplified way of caching & last-render-detection on board-state for navigating game-tree
+     - taken & adjusted & extended parsing of game-tree with handlers
+
+   - refactored all specific code for old JS-GameEditor into 'js/goban-editor.js'
+     - this change is breaking code of the old game-editor, will be either fixed or merged later
+       with new JS-game-editor
+     - renamed old GameEditor -> GobanEditor to differ from new JS-game-editor used on game-page
+     - moved DGS.goban_editor, DGS.GobanLabels, DGS.GobanChanges, DGS.ChangeCalculator, DGS.GobanEditor
+       from 'js/game-editor.js'
+     - refactored DGS.Goban.setValue, DGS.Board.draw_board_structure from 'js/game-editor.js'
+     - refactored DGS.Board.draw_goban_changes from 'js/game-editor.js'
+       into DGS.GobanChanges.draw_goban_changes
+
+   - changes on new JS-game-editor
+     - renamed new GameEditor -> GamePageEditor to differ from old JS-game-editor used on 'game_editor.php'
+     - cleanup: simplified constructor for GamePageEditor
+     - cleanup: refactored DGS.game.loadPage into GamePageEditor-constructor
+     - added GamePageEditor with board-state in DGS.Goban, board-renderer DGS.Board, DGS.GameNode
+       root-game & cursor to navigate on game-tree
+     - overwrite server-created board to let JS-game-editor handle board-related actions
+     - jump to selected move with JS-game-editor after game-page has been loaded
+       to create internal navigational game-tree
+     - parse server-created JS-game-tree into DGS.GameNode root-tree used to navigate in game
+       with DGS.GameCursor by using SGF-like property-handlers
+       - B/W-property to play-move
+       - AB/AW-props to add-stone
+       - XM-prop to set max-moves
+       - d_mn pseudo-property to set DGS-specific move-number
+       - d_capt pseudo-property to fill prisoners
+     - remove old move-marker in game-move-message-box when scrolling to new move
+
+   - changes on DGS.Board
+     - cleanup: added move-number of each node in 'd_mn' pseudo-property
+     - cleanup: reduced helper-class JS_GameNode to minimum empty-class
+
+   - changes on DGS.Goban
+     - bugfix: converting (x/y)-point to 1-dimensional matrix-position used wrong factor
+       for y-axis-steps: y*size_y -> y*size_x
+     - simplified internal structure of DGS.Goban for easier caching/rendering
+     - stored label-number/letter in scalar value in Goban-matrix-array instead of array-value
+       in matrix-array
+       - using 5 GOBL_LETTER-bits for label-letter
+       - using 9 GOBL_NUMBER-bits for label-number
+     - using copy of matrix with grid-only for faster clearing of board-state
+     - removed handling of partial-board using max_x/y, may be introduced later for old JS-game-editor
+     - removed mark_point with last-move-marker as Goban has no knowledge of moves
+     - cleanup: moved UI-editor-related DGS.GobanLabels-stuff into 'js/goban-editor.js'
+     - cleanup: moved board-coordinate display-options into Board-class
+
+   - changes on DGS.GameNode & DGS.GameCursor:
+     - allow to select variation-number on navigating tree with GameCursor
+     - added helper-function for debugging of DGS.GameNode/GameCursor using JSON.stringify()
+
 2013-12-12 jug
 
    * include/globals.php (DGS_VERSION),

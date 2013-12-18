@@ -1490,7 +1490,7 @@ class Board
 
    /*!
     * \brief Returns JS-String with game-tree as required for 'js/game-editor.js'.
-    * \return JSON { _children: [..], B|W: sgf-move|'', AB|AW: [ shape-sgf ], d_capt: [ sgf-captures ] }
+    * \return JSON { _children: [..], B|W: sgf-move|'', AB|AW: [ shape-sgf ], d_capt: [ sgf-captures ], d_mn: dgs-move-number }
     *
     * \note game-move-comments not included, because those are already displayed on game-page in msg-box
     */
@@ -1499,7 +1499,7 @@ class Board
       //FIXME perhaps an easier format could be simple-SGF-format parsed in JS, depends what's easier to create with variations and comments/review-stuff, etc
       // format := [ var-num, node+,  var-num, node+, ... ];
       // node := { prop: val|arr, prop2:...} || { prop:.., _vars: [var-num, ...] }; // _vars is only present if there are variations
-      $root_node = $curr_node = new JS_GameNode();
+      $root_node = new JS_GameNode();
       $var_num = 0;
       $out = array( $var_num ); // variation #0
       $out[] = $root_node;
@@ -1520,27 +1520,28 @@ class Board
          else
             continue; // stone=NONE|MARKED_BY_BLACK/WHITE, x=POSX_RESIGN/TIMEOUT/SCORE
 
-         $curr_node = $curr_node->add_new_child();
-
          $val = ( $x == POSX_PASS ) ? '' : number2sgf_coords($x,$y, $this->size);
          if ( $move_nr == 0 )
             $shape[$stone][] = $val;
          else
          {
+            $curr_node = new JS_GameNode();
+            $curr_node->d_mn = $move_nr;
+
             $curr_node->{$prop} = $val;
             if ( count(@$this->moves_captures[$move_nr]) )
                $curr_node->d_capt = $this->moves_captures[$move_nr]; // captures
-         }
 
-         $out[] = $curr_node;
+            $out[] = $curr_node;
+         }
       }
 
+      $root_node->d_mn = 0;
+      $root_node->XM = $this->max_moves;
       if ( count($shape[BLACK]) )
          $root_node->AB = $shape[BLACK];
       if ( count($shape[WHITE]) )
          $root_node->AW = $shape[WHITE];
-
-      $root_node->XM = $this->max_moves;
 
       $result = dgs_json_encode( $out );
       //error_log("make_js_game_tree({$this->size}) = [$result]");
@@ -1554,16 +1555,7 @@ class Board
 /*! \brief Class used to create JavaScript-data using json-encode to be passed to 'js/game-editor.js'. */
 class JS_GameNode
 {
-   // other attributes are set dynamically
-   //TODO cleanup later if used format is clear: public $_children = array();
-
-   /*! \brief Appends new JS_GameNode to children and return new node. */
-   public function add_new_child()
-   {
-      $node = new JS_GameNode();
-      //$this->_children[] = $node;
-      return $node;
-   }
+   // attributes are set dynamically
 }
 
 ?>
