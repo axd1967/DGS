@@ -754,46 +754,53 @@ $.extend( DGS.Board.prototype, {
       var lStone  = value & C.GOBS_BITMASK;
       var lHoshi  = value & C.GOBO_HOSHI;
       var lMarker = value & C.GOBM_BITMASK;
-      var isStoneBW = (lStone == C.GOBS_BLACK || lStone == C.GOBS_WHITE );
-      var bLineType = this.getBoardLineType(lBoard, true); // only mixable
 
       var type = ''; // unknown mapping
-      var territoryMarker, formMarker;
 
       // mapping and prioritize goban-layer-values to actual images available on DGS
-      // starting with most special ... ending with most generalized images
-      if ( lMarker == C.GOBM_NUMBER && isStoneBW ) { // B/W-stone with number-label
-         type = (lStone == C.GOBS_BLACK) ? 'b' : 'w';
-         var labelNumber = (value & C.GOBL_NUMBER) >> 19;
-         if ( labelNumber >= 1 && labelNumber <= 500 )
-            type += parseInt(labelNumber, 10); // strip away leading 0s
-      }
-      else if ( lMarker == C.GOBM_MARK && isStoneBW ) // B/W-stone with last-move-marker
-         type = (lStone == C.GOBS_BLACK) ? 'bm' : 'wm';
-      else if ( lMarker == C.GOBM_TERR_B && lStone == C.GOBS_WHITE ) // dead W-stone (marked as B-territory)
-         type = 'wb';
-      else if ( lMarker == C.GOBM_TERR_W && lStone == C.GOBS_BLACK ) // dead B-stone (marked as W-territory)
-         type = 'bw';
-      else if ( (territoryMarker = BC.MAP_TERRITORY_MARKERS[lMarker]) && lStone == 0 && bLineType ) // territory-marker without stone
-         type = bLineType + territoryMarker;
-      else if ( (formMarker = BC.MAP_FORM_MARKERS[lMarker]) && isStoneBW ) // marker on B/W-stone
-         type = ( (lStone == C.GOBS_BLACK) ? 'b' : 'w' ) + formMarker;
-      else if ( (formMarker = BC.MAP_FORM_MARKERS[lMarker]) && lStone == 0 && lHoshi ) // marker without stone on hoshi
-         type = 'h' + formMarker;
-      else if ( lMarker == 0 && isStoneBW ) // simple B/W-stone (no label)
-         type = (lStone == C.GOBS_BLACK) ? 'b' : 'w';
-      else if ( lMarker == 0 && lHoshi ) // empty board-point with hoshi
-         type = 'h';
-      else if ( lMarker == C.GOBM_LETTER ) { // label (letter)
-         var labelLetter = String.fromCharCode( 0x60 + ((value & C.GOBL_LETTER) >> 12) ); //0x61=a
-         if ( labelLetter >= 'a' && labelLetter <= 'z' )
-            type = 'l' + labelLetter;
-      }
-      else if ( (formMarker = BC.MAP_FORM_MARKERS[lMarker]) && lStone == 0 && bLineType ) // marker on grid
-         type = bLineType + formMarker;
-      else if ( lMarker == 0 && lStone == 0 ) { // empty cell (even no board-grid)
-         type = this.getBoardLineType( lBoard, false );
-         if ( !type ) type = 'dot'; // empty-cell default
+      // starting with mostly-used types ...
+      if ( lMarker == 0 ) { // no marker (=no label)
+         if ( lStone == 0 ) { // empty cell (grid or no grid)
+            if ( lHoshi ) // empty board-point with hoshi
+               type = 'h';
+            else { // no-hoshi grid-point
+               type = this.getBoardLineType( lBoard, false );
+               if ( !type )
+                  type = 'dot'; // empty-cell default
+            }
+         }
+         else // if ( lStone ) // simple B/W-stone (no marker, no label)
+            type = (lStone == C.GOBS_BLACK) ? 'b' : 'w';
+      } else { // point with some marker
+         // ... continuing with most special ... ending with most generalized images
+         var bLineType = this.getBoardLineType(lBoard, true); // only mixable
+         var territoryMarker, formMarker;
+
+         if ( lStone && lMarker == C.GOBM_MARK ) // B/W-stone with last-move-marker
+            type = (lStone == C.GOBS_BLACK) ? 'bm' : 'wm';
+         else if ( lStone && lMarker == C.GOBM_NUMBER ) { // B/W-stone with number-label
+            type = (lStone == C.GOBS_BLACK) ? 'b' : 'w';
+            var labelNumber = (value & C.GOBL_NUMBER) >> 19;
+            if ( labelNumber >= 1 && labelNumber <= 500 )
+               type += parseInt(labelNumber, 10); // strip away leading 0s
+         }
+         else if ( lStone == C.GOBS_WHITE && lMarker == C.GOBM_TERR_B ) // dead W-stone (marked as B-territory)
+            type = 'wb';
+         else if ( lStone == C.GOBS_BLACK && lMarker == C.GOBM_TERR_W ) // dead B-stone (marked as W-territory)
+            type = 'bw';
+         else if ( lStone == 0 && (territoryMarker = BC.MAP_TERRITORY_MARKERS[lMarker]) && bLineType ) // territory-marker without stone
+            type = bLineType + territoryMarker;
+         else if ( lStone && (formMarker = BC.MAP_FORM_MARKERS[lMarker]) ) // marker on B/W-stone
+            type = ( (lStone == C.GOBS_BLACK) ? 'b' : 'w' ) + formMarker;
+         else if ( lStone == 0 && (formMarker = BC.MAP_FORM_MARKERS[lMarker]) && lHoshi ) // marker without stone on hoshi
+            type = 'h' + formMarker;
+         else if ( lMarker == C.GOBM_LETTER ) { // label (letter)
+            var labelLetter = String.fromCharCode( 0x60 + ((value & C.GOBL_LETTER) >> 12) ); //0x61=a
+            if ( labelLetter >= 'a' && labelLetter <= 'z' )
+               type = 'l' + labelLetter;
+         }
+         else if ( lStone == 0 && (formMarker = BC.MAP_FORM_MARKERS[lMarker]) && bLineType ) // marker on grid
+            type = bLineType + formMarker;
       }
 
       if ( type ) {
