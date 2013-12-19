@@ -13,6 +13,9 @@ ChangeLog
 
 2013-12-19 jug
 
+   * game.php:
+   - disable user-options move-numbering & mark-last-capture if JS-game-editor is used
+
    * js/game-editor.js (DGS.GamePageEditor.refresh, ~.addCaptures;
        DGS.Goban.reset, ~.toString, ~. ~.emptyBoard, ~.addPrisoners, ~.getPrisoners, ~.commit,
          ~.rollback),

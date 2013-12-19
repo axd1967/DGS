@@ -588,7 +588,7 @@ $GLOBALS['ThePage'] = new Page('Game');
    $last_move_msg = $gc_helper->filter_comment( $last_move_msg, $move, $movecol, $view_comment, /*html*/true );
    $last_move_msg = MarkupHandlerGoban::replace_igoban_tags( $last_move_msg );
 
-   if ( ENA_MOVENUMBERS )
+   if ( ENA_MOVENUMBERS && !$show_game_tools )
    {
       $movenumbers = $cfg_board->get_move_numbers();
       if ( isset($_REQUEST['movenumbers']) )
@@ -645,7 +645,7 @@ $GLOBALS['ThePage'] = new Page('Game');
          echo "<br>\n";
       }
    }
-   if ( $cfg_board->get_board_flags() & BOARDFLAG_MARK_LAST_CAPTURE )
+   if ( !$show_game_tools && ($cfg_board->get_board_flags() & BOARDFLAG_MARK_LAST_CAPTURE) )
    {
       $TheBoard->mark_last_captures( $move );
       $TheBoard->draw_last_captures_box( T_('Last Move Capture') );
