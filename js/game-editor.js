@@ -180,6 +180,8 @@ $.extend( DGS.GamePageEditor.prototype, {
       }
    },
 
+   // handle key-press events on document:
+   // - cursor-left/right navigates back/forward in game-tree
    handle_key_press : function( evt ) {
       var code = evt.keyCode;
       var stop = true;
@@ -187,13 +189,13 @@ $.extend( DGS.GamePageEditor.prototype, {
 
       switch ( code ) {
          case 37: // CURSOR-left
-            showAnalyseTab = true;
             this.goto_previous_node();
+            showAnalyseTab = true;
             break;
 
          case 39: // CURSOR-right
-            showAnalyseTab = true;
             this.goto_next_variation_node();
+            showAnalyseTab = true;
             break;
 
          default:
@@ -250,11 +252,6 @@ $.extend( DGS.GamePageEditor.prototype, {
 
    // refresh board by re-committing current node & updating other UI-controls
    refresh : function( redo_node ) {
-      if ( redo_node ) { //FIXME needed ? perhaps later after editing-node implemented
-         this.goban.revert( 1 ); // to redo current cache-entry we need to purge current one
-         this.executeNode();
-      }
-
       // update controls
       this.setCurrentMove( this.cursor.getDgsMoveNumber() );
       //TODO update prisoners-info
