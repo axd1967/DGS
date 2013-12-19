@@ -13,6 +13,9 @@ ChangeLog
 
 2013-12-19 jug
 
+   * js/goban-editor.js, js/game-editor.js, js/common.js:
+   - cleanup: in local JS-files replaced browser-global 'event'-var with 'evt' to avoid confusion
+
    * js/game-editor.js (DGS.GamePageEditor.init, ~.makeDocReady, ~.handle_action_move_navigation,
          ~.goto_previous_node, ~.goto_next_variation_node, ~.refresh, ~.scrollToMoveMessage,
          ~.setCurrentMove, ~.goto_move, ~.executeNode, ~.playMove;

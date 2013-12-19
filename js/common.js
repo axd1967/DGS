@@ -50,17 +50,17 @@ function toggle_class( obj, cl1, cl2 ) {
    obj.className = ( obj.className == cl1 ) ? cl2 : cl1;
 }
 
-function showInfo( e, contentHTML, y_add ) {
+function showInfo( evt, contentHTML, y_add ) {
    var infoBoxElem = document.getElementById('InfoBox');
    infoBoxElem.innerHTML = contentHTML;
 
    var x, y;
    if ( document.all ) {
-      x = event.clientX + document.body.scrollLeft;
-      y = event.clientY + document.body.scrollTop;
+      x = evt.clientX + document.body.scrollLeft;
+      y = evt.clientY + document.body.scrollTop;
    } else {
-      x = e.pageX;
-      y = e.pageY;
+      x = evt.pageX;
+      y = evt.pageY;
    }
 
    var boxStyle = infoBoxElem.style;

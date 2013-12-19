@@ -32,23 +32,23 @@ DGS.goban_editor = {
    },
 
    initPage : function() {
-      $("#tab_Size input#size_upd").click( function(event) {
-         event.preventDefault();
+      $("#tab_Size input#size_upd").click( function(evt) {
+         evt.preventDefault();
          DGS.run.GobanEditor.action_size_updateSize();
       });
-      $("#tabs a.UndoTool").click( function(event) {
-         event.preventDefault();
+      $("#tabs a.UndoTool").click( function(evt) {
+         evt.preventDefault();
          DGS.run.GobanEditor.action_handle_undo_tool( this );
       });
-      $("#tab_Edit a.Tool").click( function(event) {
-         event.preventDefault();
+      $("#tab_Edit a.Tool").click( function(evt) {
+         evt.preventDefault();
          DGS.run.GobanEditor.action_edit_handle_tool( this );
       });
-      $("#tab_Play a.Tool").click( function(event) {
-         event.preventDefault();
+      $("#tab_Play a.Tool").click( function(evt) {
+         evt.preventDefault();
          DGS.run.GobanEditor.action_play_handle_tool( this );
       });
-      $("#tabs").on("tabscreate tabsactivate", function(event, ui) {
+      $("#tabs").on("tabscreate tabsactivate", function(evt, ui) {
          DGS.run.GobanEditor.action_handle_show_tab( ui );
       }).tabs({ active: 2 });
 
@@ -263,9 +263,9 @@ $.extend( DGS.Board.prototype, {
 
       $("#GameEditor div.GobanGfx").css('width', table_width + 'px');
       if ( withActions ) {
-         $("#GameEditor td.brdx a").click( function(event) {
-            DGS.run.gameEditor.action_handle_board( this, event );
-            event.preventDefault();
+         $("#GameEditor td.brdx a").click( function(evt) {
+            DGS.run.gameEditor.action_handle_board( this, evt );
+            evt.preventDefault();
          });
       }
 
@@ -713,14 +713,14 @@ $.extend( DGS.GobanEditor.prototype, {
       $(prefix + "_tool_redo_hist").text( String.sprintf("(%s)", this.history_redo.length) );
    },
 
-   action_handle_board : function( $point, $event ) { // $point = clicked board-point, $event = event for click
+   action_handle_board : function( $point, evt ) { // $point = clicked board-point, evt = event for click
       var point_id = $($point).parent().attr('id'); // SGF-coord
       var curr_tab = this.current_tab();
 
       if ( curr_tab == 1 )
-         this.action_edit_handle_board( point_id, $event );
+         this.action_edit_handle_board( point_id, evt );
       else if ( curr_tab == 2 )
-         this.action_play_handle_board( point_id, $event );
+         this.action_play_handle_board( point_id, evt );
    },
 
    // ---------- Actions on SIZE-tab -------------------------------------------
@@ -766,7 +766,7 @@ $.extend( DGS.GobanEditor.prototype, {
       DGS.utils.debug( $tool.id );
    }, //action_edit_handle_tool
 
-   action_edit_handle_board : function( point_id, $event ) { // point_id = SGF-coord, $event = event for click
+   action_edit_handle_board : function( point_id, evt ) { // point_id = SGF-coord, evt = event for click
       if ( this.current_tab() != 1 )
          return;
       var dbg = point_id;
@@ -782,7 +782,7 @@ $.extend( DGS.GobanEditor.prototype, {
             goban_changes = this.calc.calc_goban_change_set_stone( this.goban, point_id, value );
 
          } else if ( tool_id == 'edit_tool_toggle_stone' ) {
-            value = ( $event.shiftKey ) ? C.GOBS_WHITE : C.GOBS_BLACK;
+            value = ( evt.shiftKey ) ? C.GOBS_WHITE : C.GOBS_BLACK;
             goban_changes = this.calc.calc_goban_change_toggle_stone( this.goban, point_id, value );
          }
          // --- MARKER-tools ---
@@ -855,7 +855,7 @@ $.extend( DGS.GobanEditor.prototype, {
       DGS.utils.debug( $tool.id );
    }, //action_play_handle_tool
 
-   action_play_handle_board : function( point_id, $event ) { // point_id = SGF-coord, $event = event for click
+   action_play_handle_board : function( point_id, evt ) { // point_id = SGF-coord, evt = event for click
       if ( this.current_tab() != 2 )
          return;
       var dbg = point_id;

@@ -118,15 +118,15 @@ $.extend( DGS.GamePageEditor.prototype, {
 
       $("#tabs").tabs({ active: 0 });
 
-      $("#GameMsgTool_ToggleComment").click( { action: "hide" }, function(event) {
-         me.handle_action_toggle_comment( this, event );
+      $("#GameMsgTool_ToggleComment").click( { action: "hide" }, function( evt ) {
+         me.handle_action_toggle_comment( this, evt );
       });
-      $("#GameMsgTool_ScrollToCurrMove").click( function(event) {
+      $("#GameMsgTool_ScrollToCurrMove").click( function( evt ) {
          me.scrollToMoveMessage( me.curr_move, 200 );
       });
 
-      $("span#GameViewer img").click( function(event) {
-         me.handle_action_move_navigation(this, event);
+      $("span#GameViewer img").click( function( evt ) {
+         me.handle_action_move_navigation( this, evt );
       });
 
       $("#GameMessage").draggable({ handle: "#GameMessageHeader", opacity: 0.50 });
@@ -160,16 +160,16 @@ $.extend( DGS.GamePageEditor.prototype, {
 
 
    // handle toggle-comment action in header of game-move-messages box: hide <-> show move-comments
-   handle_action_toggle_comment : function( elem, event ) {
-      var action = event.data.action;
+   handle_action_toggle_comment : function( elem, evt ) {
+      var action = evt.data.action;
       if ( action == "hide" ) {
-         event.data.action = "show";
+         evt.data.action = "show";
          $(elem).attr("src", "images/comment_show.png");
          $(elem).attr("title", T_gametools["show_comment"] );
          $(elem).attr("alt", T_gametools["show_comment"] );
          $("#GameMessageBody div.CBody").hide();
       } else { // unhide(=show)
-         event.data.action = "hide";
+         evt.data.action = "hide";
          $(elem).attr("src", "images/comment_hide.png");
          $(elem).attr("title", T_gametools["hide_comment"] );
          $(elem).attr("alt", T_gametools["hide_comment"] );
@@ -178,7 +178,7 @@ $.extend( DGS.GamePageEditor.prototype, {
    },
 
    // handle action on clicking first/prev/next/last icons to navigate in game-tree
-   handle_action_move_navigation : function( elem, event ) {
+   handle_action_move_navigation : function( elem, evt ) {
       var id = $(elem).attr("id");
       if ( id == 'FirstMove' ) {
          this.goto_move( 0 );
