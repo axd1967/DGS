@@ -455,9 +455,7 @@ DGS.GameCursor.prototype = {
       if ( !this.node._parent && this.node._children.length )
          this.node = this.node._children[0];
       else {
-         /*jsl:ignore*/
          while ( this.previous() ) { }
-         /*jsl:end*/
       }
    },
 
@@ -468,9 +466,7 @@ DGS.GameCursor.prototype = {
       // If we're on the tree root, return the first game
       if ( !this.node._parent && this.node._children.length )
          return this.node._children[0];
-      /*jsl:ignore*/
       while ( cur.previous() ) { }
-      /*jsl:end*/
       return cur.node;
    },
 
