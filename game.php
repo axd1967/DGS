@@ -611,8 +611,8 @@ $GLOBALS['ThePage'] = new Page('Game');
             'curr_move'    => T_('Current Move#ged'),
          )), true );
 
-      $js .= sprintf( "DGS.run.gamePageEditor = new DGS.GamePageEditor(%d,%d,%d,%d);\n",
-         $cfg_board->get_stone_size(), $cfg_board->get_wood_color(), $Size, $move );
+      $js .= sprintf( "DGS.run.gamePageEditor = new DGS.GamePageEditor(%d,%d,%d,%d,%d);\n",
+         $cfg_board->get_stone_size(), $cfg_board->get_wood_color(), $Size, $Moves, $move );
       $js .= sprintf( "DGS.run.gamePageEditor.parseGameTree(%s);\n", $TheBoard->make_js_game_tree() );
    }
    else
@@ -1037,7 +1037,7 @@ function draw_game_tools()
             "<ul>\n",
                "<li>", anchor('#tab_GameInfo', T_('Game Info#ged'), T_('Game Information#ged')), "</li>\n",
                "<li>", anchor('#tab_GameNotes', T_('Notes#ged'), T_('Private game notes')), "</li>\n",
-               "<li>", anchor('#tab_GameAnalysis', T_('Analyze#ged'), T_('Analyze game#ged')), "</li>\n",
+               "<li>", anchor('#tab_GameAnalysis', T_('Analyse#ged'), T_('Analyse game#ged')), "</li>\n",
             "</ul>\n",
             "<div id=tab_GameInfo class=tab>\n";
    draw_game_info($game_row, $game_setup, $TheBoard, $tourney); // with board-info
@@ -1094,7 +1094,7 @@ function build_move_comments()
    {
       $move_nr = MOVE_SETUP;
       $move_link = anchor( $base_move_link . $move_nr, T_('Setup: Shape#moves') );
-      $out[] = "<div id=movetxt$move_nr>\n"
+      $out[] = "<div id=movetxt0>\n"
          . "<div class=Head>{$cfg_image[$move_nr]} $move_link</div><div class=Tools></div>\n"
          . "</div>";
    }
@@ -1151,102 +1151,12 @@ function build_tab_GameAnalysis()
    global $base_path;
 
    return "<span id=\"GameViewer\">" .
-         anchor('#', image($base_path.'images/start.gif', T_('First move'), null), '',    'id=FirstMove') .
-         anchor('#', image($base_path.'images/prev.gif',  T_('Previous move'), null), '', 'id=PrevMove') .
-         anchor('#', image($base_path.'images/next.gif',  T_('Next move'), null), '',     'id=NextMove') .
-         anchor('#', image($base_path.'images/end.gif',   T_('Last move'), null), '',     'id=LastMove') .
+         image($base_path.'images/start.gif', T_('First move'), null,    'id=FirstMove') .
+         image($base_path.'images/prev.gif',  T_('Previous move'), null, 'id=PrevMove') .
+         image($base_path.'images/next.gif',  T_('Next move'), null,     'id=NextMove') .
+         image($base_path.'images/end.gif',   T_('Last move'), null,     'id=LastMove') .
       "</span>\n";
 }
-
-/* draw move-history-table: 6c7de55b 2006-12-23 15:11:13 skins/dragon/screen.css :
- /* board page - old moves table /
-
- table.moves {
-    background: #66C17B;
-    border-width: 2px;
-    border-spacing: 0px;
-    margin: 4px;
-    empty-cells: hide;
- }
-
- table.moves td, table.moves th {
-    border-width: 1px;
-    padding: 1px;
-    color: black;
-    text-align: center;
- }
-
- table.moves td.c {
-    background: #F7F5E3;
-    color: red;
-    font: bold 85% sans-serif;
-    text-decoration: none;
- }
-
- table.moves a.w {
-    color: white;
-    font: bold 85% sans-serif;
-    text-decoration: none;
- }
-
- table.moves a.b {
-    color: black;
-    font: bold 85% sans-serif;
-    text-decoration: none;
- }
-
-dbb10b5d 2005-09-21 11:08:54) function draw_moves()
-dbb10b5d 2005-09-21 11:08:54) {
-dbb10b5d 2005-09-21 11:08:54)    global $TheBoard, $gid, $move, $Size;
-dbb10b5d 2005-09-21 11:08:54)
-a4af5d5b 2005-10-30 17:06:11)    echo "<table id=\"game_moves\" class=moves border=1>\n";
-a4af5d5b 2005-10-30 17:06:11)    echo "<tr><th>" . T_('Moves') . "</th>\n";
-dbb10b5d 2005-09-21 11:08:54)
-dbb10b5d 2005-09-21 11:08:54)    $moves_per_row = 20;
-dbb10b5d 2005-09-21 11:08:54)
-dbb10b5d 2005-09-21 11:08:54)    for($i=0; $i<$moves_per_row; $i++)
-dbb10b5d 2005-09-21 11:08:54)      echo "<td>$i</td>";
-dbb10b5d 2005-09-21 11:08:54)
-a4af5d5b 2005-10-30 17:06:11)    echo "</tr>\n<tr><td>1-". ($moves_per_row - 1) . '</td><td>&nbsp;</td>';
-dbb10b5d 2005-09-21 11:08:54)
-dbb10b5d 2005-09-21 11:08:54)    $i=1;
-dbb10b5d 2005-09-21 11:08:54)    foreach( $TheBoard->moves as $MoveNr => $sub )
-dbb10b5d 2005-09-21 11:08:54)    {
-dbb10b5d 2005-09-21 11:08:54)       list( $Stone, $PosX, $PosY) = $sub;
-dbb10b5d 2005-09-21 11:08:54)       if( $Stone != BLACK and $Stone != WHITE ) continue;
-dbb10b5d 2005-09-21 11:08:54)       if( $i % $moves_per_row == 0 )
-a4af5d5b 2005-10-30 17:06:11)          echo "</tr>\n<tr><td>$i-" . ($i + $moves_per_row - 1) . '</td>';
-dbb10b5d 2005-09-21 11:08:54)
-dbb10b5d 2005-09-21 11:08:54)       switch( $PosX )
-dbb10b5d 2005-09-21 11:08:54)       {
-dbb10b5d 2005-09-21 11:08:54)          case POSX_PASS :
-dbb10b5d 2005-09-21 11:08:54)             $c = 'P';
-dbb10b5d 2005-09-21 11:08:54)             break;
-dbb10b5d 2005-09-21 11:08:54)          case POSX_SCORE :
-dbb10b5d 2005-09-21 11:08:54)             $c = 'S';
-dbb10b5d 2005-09-21 11:08:54)             break;
-dbb10b5d 2005-09-21 11:08:54)          case POSX_RESIGN :
-dbb10b5d 2005-09-21 11:08:54)             $c = 'R';
-dbb10b5d 2005-09-21 11:08:54)             break;
-dbb10b5d 2005-09-21 11:08:54)          default :
-dbb10b5d 2005-09-21 11:08:54)             $c = number2board_coords($PosX, $PosY, $Size);
-dbb10b5d 2005-09-21 11:08:54)             break;
-dbb10b5d 2005-09-21 11:08:54)       }
-dbb10b5d 2005-09-21 11:08:54)
-dbb10b5d 2005-09-21 11:08:54)       if( $MoveNr == $move ) // bgcolor=F7F5E3
-a4af5d5b 2005-10-30 17:06:11)          printf("<td class=c>%s</td>\n", $c );
-dbb10b5d 2005-09-21 11:08:54)       else if( $Stone == BLACK )
-a4af5d5b 2005-10-30 17:06:11)          printf( '<td><a class=b href="game.php?gid=%d'.URI_AMP."move=%d\">%s</a></td>\n"
-dbb10b5d 2005-09-21 11:08:54)                , $gid, $MoveNr, $c );
-dbb10b5d 2005-09-21 11:08:54)       else
-dbb10b5d 2005-09-21 11:08:54)          printf( '<td><a class=w href="game.php?gid=%d'.URI_AMP."move=%d\">%s</a></td>\n"
-dbb10b5d 2005-09-21 11:08:54)                , $gid, $MoveNr, $c );
-dbb10b5d 2005-09-21 11:08:54)
-dbb10b5d 2005-09-21 11:08:54)       $i++;
-dbb10b5d 2005-09-21 11:08:54)    }
-dbb10b5d 2005-09-21 11:08:54)    echo "</tr></table>\n";
-dbb10b5d 2005-09-21 11:08:54) }
-*/
 
 
 // returns true, if given move is the final score-move (predecessor = POSX_SCORE too)

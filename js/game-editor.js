@@ -87,16 +87,15 @@ DGS.GamePageEditor = function() {
 
 $.extend( DGS.GamePageEditor.prototype, {
 
-   init : function( stone_size, wood_color, board_size, view_move ) {
+   init : function( stone_size, wood_color, board_size, max_moves, view_move ) {
       var me = this;
 
-      this.max_moves = 0;
+      this.max_moves = max_moves;
       this.curr_move = view_move; // <0 = no-move selected
       this.board = new DGS.Board( stone_size, wood_color ); // DGS.Board for drawing board
       this.goban = new DGS.Goban( board_size, board_size, this.board ); // DGS.Goban to keep board-state
       this.root_game_collection = new DGS.GameNode(); // 1st GameNode is game-colllection-root, from which move #0 of game-roots are children
       this.cursor = null; // cursor on current game-root
-      this.last_move = null; // {x/y: x|y=coord|null(=PASS)}
 
       // handlers for the various types of GameNode properties;; inspired by Eidogo
       this.propertyHandlers = {
@@ -104,7 +103,6 @@ $.extend( DGS.GamePageEditor.prototype, {
          W:  this.playMove,
          AW: this.addStone,
          AB: this.addStone,
-         XM: this.setMovesCount,
          d_capt: this.addCaptures
       };
 
@@ -127,6 +125,10 @@ $.extend( DGS.GamePageEditor.prototype, {
          me.scrollToMoveMessage( me.curr_move, 200 );
       });
 
+      $("span#GameViewer img").click( function(event) {
+         me.handle_action_move_navigation(this, event);
+      });
+
       $("#GameMessage").draggable({ handle: "#GameMessageHeader", opacity: 0.50 });
       $("#GameMessage").resizable({
          alsoResize: "#GameMessageBody",
@@ -137,26 +139,8 @@ $.extend( DGS.GamePageEditor.prototype, {
 
       $("#tabs").show(); // hidden till all elements built
 
-      me.goToMove();
-
-      /* FIXME maybe used later
-      $("a.GameViewer").click( function(event) {
-         event.preventDefault();
-         $("span#GameViewer").toggle();
-
-         if ( $("span#GameViewer").is(":visible") ) {
-            DGS.run.gameEditor.drawBoard();
-         } else {
-            DGS.run.gameEditor.restoreBoard();
-         }
-      });
-
-      $("span#GameViewer a").click( function(event) {
-         event.preventDefault();
-         //FIXME this.id = (First|Last|Next|Prev)Move
-      });
-      */
-   },
+      me.goto_move();
+   }, //makeDocReady
 
    /**
     * Parses JSON-formatted game-tree into client-side used game-tree structure.
@@ -193,9 +177,64 @@ $.extend( DGS.GamePageEditor.prototype, {
       }
    },
 
+   // handle action on clicking first/prev/next/last icons to navigate in game-tree
+   handle_action_move_navigation : function( elem, event ) {
+      var id = $(elem).attr("id");
+      if ( id == 'FirstMove' ) {
+         this.goto_move( 0 );
+      } else if ( id == 'PrevMove' ) {
+         this.goto_previous_node();
+      } else if ( id == 'NextMove' ) {
+         this.goto_next_variation_node();
+      } else if ( id == 'LastMove' ) {
+         this.goto_move( this.max_moves, /*from-curr-node*/true );
+      }
+   },
+
+   // handles going to the previous node in the game-tree
+   // NOTE: taken from Eidogo (Player.back()) + adjusted
+   goto_previous_node : function() {
+      if ( this.cursor.previous() ) {
+         this.goban.revert( 1 );
+         this.refresh();
+      } else if ( this.cursor.getDgsMoveNumber() == 1 ) {
+         this.goto_move( 0 );
+      }
+   },
+
+   // handles going to the next sibling or variation following preffered variation-path
+   // return true = moved to next node, false = no next node (already on last node for wanted variation)
+   // NOTE: taken from Eidogo (Player.variation()) + adjusted
+   goto_next_variation_node : function() {
+      if ( this.cursor.next() ) {
+         this.executeNode();
+         this.refresh();
+         return true;
+      } else {
+         return false;
+      }
+   },
+
+   // refresh board by re-committing current node & updating other UI-controls
+   refresh : function( redo_node ) {
+      if ( redo_node ) { //FIXME needed ? perhaps later after editing-node implemented
+         this.goban.revert( 1 ); // to redo current cache-entry we need to purge current one
+         this.executeNode();
+      }
+
+      // update controls
+      this.setCurrentMove( this.cursor.getDgsMoveNumber() );
+      //TODO update prisoners-info
+
+      this.goban.render( /*full*/false );
+   },
+
    // scrolls move-message-box to show div with move-info for given move with given scroll-speed
    scrollToMoveMessage : function( move_nr, duration ) {
-      $("#GameMessageBody").scrollTo( "#movetxt" + move_nr,
+      var target = "#movetxt" + move_nr;
+      if ( !$(target).length )
+         target = ( move_nr < 1 ) ? 0 : 'max'; // use top or bottom if target-id not found
+      $("#GameMessageBody").scrollTo( target,
          { axis: "xy", duration: duration, easing: "swing", queue: true });
    },
 
@@ -210,47 +249,46 @@ $.extend( DGS.GamePageEditor.prototype, {
       }
 
       if ( this.curr_move >= 0 ) {
-         $("#movetxt" + this.curr_move + " div.Tools")
-            .prepend('<img src="images/backward.gif" class="CurrMove" title="'+T_gametools['curr_move']+'">');
-
          this.scrollToMoveMessage( this.curr_move, 200 ); // scroll to selected move
+
+         var elemId = "#movetxt" + this.curr_move + " div.Tools";
+         if ( !$(elemId + " img.CurrMove").length )
+            $(elemId).prepend('<img src="images/backward.gif" class="CurrMove" title="'+T_gametools['curr_move']+'">');
       }
    },
 
-   // goto given move;; taken from Eidogo + simplified
-   goToMove : function( move_nr ) {
+
+   // goto given move by forward-replaying nodes from start or current-node in game-tree
+   // NOTE: taken from Eidogo + simplified
+   goto_move : function( move_nr, from_curr_node ) {
       var varNum = 0; // navigate in first child-variations
       if ( move_nr == undefined )
          move_nr = this.curr_move;
 
-      this.goban.emptyBoard();
-      this.cursor.resetToRootGameNode(); // reset to move #0
-      this.last_move = null;
-
-      var dgsMoveNum;
-      while ( (dgsMoveNum = this.cursor.getDgsMoveNumber()) <= move_nr ) {
-         this.executeNode( this.cursor.node );
-         if ( dgsMoveNum < move_nr )
-            this.cursor.next(varNum);
-         else
-            break;
+      if ( !from_curr_node ) {
+         this.goban.emptyBoard();
+         this.cursor.resetToRootGameNode(); // reset to move #0
       }
 
-      // update GUI-elements
-      this.setCurrentMove( move_nr );
-      //TODO update prisoners-info
+      var skip_exec_node = from_curr_node;
+      var dgsMoveNum;
+      while ( (dgsMoveNum = this.cursor.getDgsMoveNumber()) <= move_nr ) {
+         if ( skip_exec_node )
+            skip_exec_node = false; // skip only first (current) node to execute, b/c already executed
+         else
+            this.executeNode( this.cursor.node );
 
-      this.goban.render( false );
+         if ( dgsMoveNum >= move_nr )
+            break;
+         this.cursor.next(varNum);
+      }
+
+      this.refresh();
    },
 
    // apply properties from GameNode on Goban;; taken from Eidogo + simplified
    executeNode : function( node ) {
       var curr_node = (node) ? node : this.cursor.node;
-
-      if ( this.last_move && this.last_move.x != null && this.last_move.y != null ) {
-         this.goban.setMarker( this.last_move.x, this.last_move.y, C.GOBM_EMPTY ); // clear last-move-marker
-         this.last_move = null;
-      }
 
       // execute handlers for the appropriate properties
       var props = curr_node.getProperties();
@@ -260,9 +298,6 @@ $.extend( DGS.GamePageEditor.prototype, {
       }
 
       this.goban.commit();
-
-      //TODO update controls: better on higher-level?: move-number, prisoners, PASS-move, nav-buttons (grey-out), nav-slider, nav-tree
-      //TODO draw-board if required (dep. on $render-arg); do draw if only ONE node, only draw after multi-node
    },
 
    // SGF-prop-handler: plays a move on the board and apply rules to it; coord='' for PASS
@@ -276,13 +311,13 @@ $.extend( DGS.GamePageEditor.prototype, {
       var coord = node[prop];
       if ( coord ) { // move on board
          var pt = DGS.utils.makePointNumberCoord( coord );
-         this.goban.setStone( pt.x, pt.y, ( prop == 'B' ? C.GOBS_BLACK : C.GOBS_WHITE ), C.GOBM_MARK );
-         this.last_move = pt;
+         this.goban.setStone( pt.x, pt.y, ( prop == 'B' ? C.GOBS_BLACK : C.GOBS_WHITE ) );
+         this.goban.replaceLastMove( pt.x, pt.y );
 
          //TODO handle captures, currently handled with d_capt-property added in game-tree by server
          //this.rules.apply(pt, color);
       } else { // PASS-move
-         this.last_move = { x: null, y: null };
+         this.goban.replaceLastMove( null, null );
       }
    },
 
@@ -304,14 +339,6 @@ $.extend( DGS.GamePageEditor.prototype, {
             this.goban.setStone( pt.x, pt.y, ( prop == 'AB' ? C.GOBS_BLACK : C.GOBS_WHITE ) );
          }
       }
-   },
-
-   // SGF-prop-handler: read moves from XM-SGF-dgs-pseudo-prop
-   // @param node current node; node[prop] == number of moves
-   // @param prop DGS-pseudo-property 'XM'
-   setMovesCount : function( node, prop ) {
-      if ( prop == 'XM' )
-         this.max_moves = node[prop];
    },
 
    // SGF-prop-handler: handle pre-stored captures from 'd_capt'-SGF-dgs-pseudo-property
@@ -429,8 +456,11 @@ $.extend( DGS.Goban.prototype, {
       // NOTE: inspired by Eidogo
       this.matrix = [];
       this.grid_matrix = null; // board-matrix-copy with only grid+hoshi for faster board-clearing; null=lazy-init of initial board
-      this.cache = []; // store stack with matrix-snapshots for each move
+      this.cache = []; // store stack with matrix-/lastmove-snapshots for each move
       this.lastRender = []; // last-copy of matrix to compare to and calculating changes to fast render
+
+      // feature of Goban to track last move, normally a board-state does not know of it
+      this.last_move = []; // [] = no last-move, [null,null] = PASS, else [x,y]
    },
 
    toString : function() {
@@ -441,6 +471,7 @@ $.extend( DGS.Goban.prototype, {
             buf += String.sprintf("%x ", this.getValue(x,y));
          buf += "\n";
       }
+      buf += "  LastMove=" + JSON.stringify(this.LastMove);
       return buf;
    },
 
@@ -448,13 +479,14 @@ $.extend( DGS.Goban.prototype, {
       this.makeBoard( true );
    },
 
+   // NOTE: does not change this.last_move
    clearMarkers : function() {
       var clear_bitmask = ~C.GOBM_BITMASK; // keep grid/hoshi + stones, clear markers/labels
       for ( var i=0, mlen=this.matrix.length; i < mlen; i++ )
          this.matrix[i] &= clear_bitmask;
    },
 
-   // clear all stones/markers/labels from the board, but keeping grid
+   // clear all stones/markers/labels from the board, but keeping grid; resets last-move
    emptyBoard : function() {
       if ( this.grid_matrix )
          this.matrix = this.grid_matrix.concat();
@@ -463,8 +495,10 @@ $.extend( DGS.Goban.prototype, {
          for ( var i=0, mlen=this.matrix.length; i < mlen; i++ )
             this.matrix[i] &= clear_bitmask;
       }
+      this.last_move = [];
    },
 
+   // fill board-state matrix with grid+hoshi
    makeBoard : function( withHoshi ) {
       this.reset();
 
@@ -512,6 +546,7 @@ $.extend( DGS.Goban.prototype, {
       }
    }, //isHoshi
 
+
    // returns "safe" raw-value from coord x/y on Goban: 0=out-of-bound or no value set; else goban-value
    getValue : function( x, y ) {
       var xy = y * this.size_x + x;
@@ -525,14 +560,11 @@ $.extend( DGS.Goban.prototype, {
       return this.getValue(x,y);
    },
 
-   // sets C.GOBS_BLACK/WHITE/EMPTY stone on Goban, keeping grid, overwriting stone/marker/label; adding marker if given
-   // @param marker_value optional marker (like last-move-marker C.GOBM_MARK for example)
-   setStone : function( x, y, stone_value, marker_value ) {
-      var xy = y * this.size_x + x;
-
+   // sets C.GOBS_BLACK/WHITE/EMPTY stone on Goban, keeping grid, overwriting stone/marker/label
+   setStone : function( x, y, stone_value ) {
       // keep grid, overwrite stone/marker/label
-      this.matrix[xy] = ( this.matrix[xy] & C.GOBG_BITMASK ) | (stone_value & C.GOBS_BITMASK)
-         | ( marker_value ? (marker_value & C.GOBM_BITMASK) : 0 );
+      var xy = y * this.size_x + x;
+      this.matrix[xy] = ( this.matrix[xy] & C.GOBG_BITMASK ) | (stone_value & C.GOBS_BITMASK);
    },
 
    // returns C.GOBS_... from goban @x/y
@@ -541,7 +573,34 @@ $.extend( DGS.Goban.prototype, {
       return ( this.matrix[xy] & C.GOBS_BITMASK );
    },
 
-   // sets C.GOBM_... marker on Goban, keeping grid/stone/label, overwriting marker only
+   // removes former last-move, adding last-move marker at x/y, unless x/y=null/null for PASS-move
+   replaceLastMove : function( x, y ) {
+      // remove last-move marker
+      if ( this.last_move.length == 2 && this.last_move[0] != null && this.last_move[1] != null ) {
+         var lm_xy = this.last_move[1] * this.size_x + this.last_move[0];
+         if ( (this.matrix[lm_xy] & C.GOBM_BITMASK) == C.GOBM_MARK )
+            this.matrix[lm_xy] &= ~C.GOBM_BITMASK; // clear marker
+         this.last_move = [];
+      }
+
+      // set new last-move-marker
+      if ( x != null && y != null ) {
+         var xy = y * this.size_x + x;
+         if ( this.matrix[xy] & C.GOBS_BITMASK ) {
+            // keep grid/stone, replace marker, clear label
+            this.matrix[xy] = (this.matrix[xy] & (C.GOBG_BITMASK|C.GOBS_BITMASK)) | C.GOBM_MARK;
+            this.last_move = [ x, y ];
+         }
+      } else {
+         this.last_move = [ null, null ]; // PASS-move
+      }
+   },
+
+   getLastMove : function() {
+      return this.last_move;
+   },
+
+   // sets C.GOBM_... marker on Goban, keeping grid/stone/label, replace marker only
    setMarker : function( x, y, marker_value ) {
       var xy = y * this.size_x + x;
       this.matrix[xy] = ( this.matrix[xy] & ~C.GOBM_BITMASK ) | (marker_value & C.GOBM_BITMASK);
@@ -553,7 +612,7 @@ $.extend( DGS.Goban.prototype, {
       return ( this.matrix[xy] & C.GOBM_BITMASK );
    },
 
-   // sets C.GOBM_NUMBER/LETTER + label-number/letter on Goban, keeping grid/stone, overwriting marker/label
+   // sets C.GOBM_NUMBER/LETTER + label-number/letter on Goban, keeping grid/stone, replacing marker/label
    setLabel : function( x, y, label ) {
       var xy = y * this.size_x + x;
       var value = ( this.matrix[xy] & ~(C.GOBM_BITMASK|C.GOBL_BITMASK) );
@@ -578,6 +637,7 @@ $.extend( DGS.Goban.prototype, {
       return label;
    },
 
+
    // returns cloned and filtered matrix[x,y] with only stone-data GOBS_EMPTY|BLACK|WHITE
    // NOTE: taken from Eidogo + simplified
    cloneStoneMatrix : function() {
@@ -587,22 +647,34 @@ $.extend( DGS.Goban.prototype, {
       return cmatrix;
    }, //cloneStoneMatrix
 
-   // save the current state. This allows us to revert back to previous states for, say, navigating backwards in a game.
+   // saves the current board-state (allows us to revert back to previous states for navigating backwards in a game).
    // NOTE: taken from Eidogo
    commit : function() {
       this.cache.push({
-         matrix: this.matrix.concat()
+         matrix: this.matrix.concat(),
+         last_move: this.last_move.concat()
       });
    },
 
-   // undo any uncomitted changes
+   // undo any uncomitted changes (needed when game-tree has been modified by editing)
    // NOTE: taken from Eidogo + simplified
    rollback : function() {
       if ( this.cache.last() ) {
          this.matrix = this.cache.last().matrix.concat();
+         this.last_move = this.cache.last().last_move.concat();
       } else {
          this.emptyBoard();
       }
+   },
+
+   // revert to a previous board-state
+   // NOTE: taken from Eidogo + simplified
+   revert : function( count ) {
+      if ( !count || count < 0 )
+         count = 1;
+      for ( var i=0; i < count; i++ )
+         this.cache.pop();
+      this.rollback();
    },
 
 

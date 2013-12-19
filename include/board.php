@@ -1537,7 +1537,6 @@ class Board
       }
 
       $root_node->d_mn = 0;
-      $root_node->XM = $this->max_moves;
       if ( count($shape[BLACK]) )
          $root_node->AB = $shape[BLACK];
       if ( count($shape[WHITE]) )

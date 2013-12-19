@@ -13,6 +13,23 @@ ChangeLog
 
 2013-12-19 jug
 
+   * js/game-editor.js (DGS.GamePageEditor.init, ~.makeDocReady, ~.handle_action_move_navigation,
+         ~.goto_previous_node, ~.goto_next_variation_node, ~.refresh, ~.scrollToMoveMessage,
+         ~.setCurrentMove, ~.goto_move, ~.executeNode, ~.playMove;
+       DGS.Goban.reset, ~.toString, ~.emptyBoard, ~.setStone, ~.replaceLastMove, ~.getLastMove,
+         ~.commit, ~.rollback, ~.revert),
+     include/board.php (Board.make_js_game_tree),
+     game.php (build_move_comments, build_tab_GameAnalysis):
+   - added navigation to first-move, previous-move, next-move, last-move in JS-game-editor on Analyse-tab
+     - moved last-move-tracking from DGS.GamePageEditor into DGS.Goban to track in board-state
+       commit-history
+     - refactored updating of UI-controls after move-navigation into refresh()-function
+     - bugfix: add current-move icon in game-move-message-box only if not present already
+     - bugfix: changed movetxt-id for shape-games 'movetextS' to 'movetxt0' for JS-game-editor
+     - cleanup: set game-max-moves in GamePageEditor-constructor instead of parsing it
+       from game-trees XM-property
+     - cleanup: removed old commented-out draw-move-history-table generation from game.php
+
    * js/game-editor.js (DGS.Board.render_point):
    - optimized drawing of board-point by rendering grid-points & simple stones first
 
