@@ -13,6 +13,12 @@ ChangeLog
 
 2013-12-19 jug
 
+   * js/game-editor.js (DGS.GamePageEditor.init, ~.handle_key_press, ~.setCurrentMove):
+   - trigger navigation to previous-move & next-move on keypress of cursor-left/right for JS-game-editor
+     - activate Analyse-tab on keypress of back/forward-navigation
+     - scroll faster to current move in game-move-messages-box in case user holds down
+       cursor-left/right-keys for longer time
+
    * js/goban-editor.js, js/game-editor.js, js/common.js:
    - cleanup: in local JS-files replaced browser-global 'event'-var with 'evt' to avoid confusion
 

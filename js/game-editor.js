@@ -128,6 +128,9 @@ $.extend( DGS.GamePageEditor.prototype, {
       $("span#GameViewer img").click( function( evt ) {
          me.handle_action_move_navigation( this, evt );
       });
+      $(document).keypress( function( evt ) {
+         me.handle_key_press( evt );
+      });
 
       $("#GameMessage").draggable({ handle: "#GameMessageHeader", opacity: 0.50 });
       $("#GameMessage").resizable({
@@ -175,6 +178,36 @@ $.extend( DGS.GamePageEditor.prototype, {
          $(elem).attr("alt", T_gametools["hide_comment"] );
          $("#GameMessageBody div.CBody").show();
       }
+   },
+
+   handle_key_press : function( evt ) {
+      var code = evt.keyCode;
+      var stop = true;
+      var showAnalyseTab = false;
+
+      switch ( code ) {
+         case 37: // CURSOR-left
+            showAnalyseTab = true;
+            this.goto_previous_node();
+            break;
+
+         case 39: // CURSOR-right
+            showAnalyseTab = true;
+            this.goto_next_variation_node();
+            break;
+
+         default:
+            stop = false;
+            break;
+      }
+
+      if ( showAnalyseTab ) { // show Analyse-tab if not already active
+         if ( $("#tabs").tabs('option', 'active') != 2 )
+            $("#tabs").tabs({ active: 2 });
+      }
+
+      if ( stop )
+         evt.preventDefault();
    },
 
    // handle action on clicking first/prev/next/last icons to navigate in game-tree
@@ -249,7 +282,7 @@ $.extend( DGS.GamePageEditor.prototype, {
       }
 
       if ( this.curr_move >= 0 ) {
-         this.scrollToMoveMessage( this.curr_move, 200 ); // scroll to selected move
+         this.scrollToMoveMessage( this.curr_move, 20 ); // scroll to selected move
 
          var elemId = "#movetxt" + this.curr_move + " div.Tools";
          if ( !$(elemId + " img.CurrMove").length )
