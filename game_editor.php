@@ -31,7 +31,22 @@ $GLOBALS['ThePage'] = new Page('GameEditor');
 {
    connect2mysql();
 
-   //TODO fix after refactoring of DGS.GameEditor-stuff into 'js/goban-editor.js'
+   /* Implementation NOTE:
+    * This 'game_editor.php' was meant as JS-based game-editor to serve two purposes:
+    * - allow to analyze running or finished DGS games
+    * - provide a more convenient way to create boards to discuss games similar to the non-JS way 'goban_editor.php'
+    *   does to create the <igoban> boards.
+    * However, this was far from being finished even though implementation had been started,
+    * originally with the JS-part in 'js/game-editor.js'.
+    *
+    * In Dec-2013 a new game-editor approach has been started trying to integrate parts & concepts of Eidogo
+    * (as that is also open-source and to avoid "re-inventing the wheel").  At first new code has been added
+    * in 'js/game-editor.js' as well, but later the code already present for this (old) JS-game-editor
+    * was refactored into 'js/goban-editor.js' for later use (integrating or perhaps merging in some way).
+    *
+    * This refactoring-step broke code, so this former JS-game-editor does not fully function any more.
+    * TODO fix after refactoring of DGS.GameEditor-stuff into 'js/goban-editor.js'
+    */
 
    $logged_in = who_is_logged( $player_row);
    if ( !$logged_in )
