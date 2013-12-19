@@ -192,13 +192,19 @@ $.extend( DGS.GamePageEditor.prototype, {
       var showAnalyseTab = false;
 
       switch ( code ) {
-         case 37: // CURSOR-left
-            this.goto_previous_node();
+         case 37: // left
+            if ( evt.ctrlKey )
+               this.goto_move( 0 ); // first-move
+            else
+               this.goto_previous_node(); // prev-move
             showAnalyseTab = true;
             break;
 
          case 39: // CURSOR-right
-            this.goto_next_variation_node();
+            if ( evt.ctrlKey )
+               this.goto_move( this.max_moves, /*from-curr-node*/true ); // last-move
+            else
+               this.goto_next_variation_node(); // next-move
             showAnalyseTab = true;
             break;
 

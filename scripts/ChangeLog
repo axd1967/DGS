@@ -13,6 +13,9 @@ ChangeLog
 
 2013-12-19 jug
 
+   * js/game-editor.js (DGS.GamePageEditor.handle_key_press):
+   - added navigation to first-/last-move by pressing CTRL + cursor-left/right key in JS-game-editor
+
    * js/game-editor.js (DGS.GamePageEditor.init, ~.handle_action_view_move),
      game.php (build_move_comments):
    - navigate-jump to selected move in game-move-message-box for JS-game-editor
