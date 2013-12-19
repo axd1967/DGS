@@ -13,6 +13,10 @@ ChangeLog
 
 2013-12-19 jug
 
+   * js/game-editor.js (DGS.GamePageEditor.init, ~.handle_action_board_point):
+   - click on board-stone navigates to selected move or shape-setup-move by searching backwards
+     in game-tree for JS-game-editor
+
    * js/game-editor.js (DGS.GamePageEditor.handle_key_press):
    - added navigation to first-/last-move by pressing CTRL + cursor-left/right key in JS-game-editor
 

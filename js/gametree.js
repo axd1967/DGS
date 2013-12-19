@@ -446,7 +446,7 @@ DGS.GameCursor.prototype = {
 
    // return GameNode.d_mn property set with move-number of current-node
    getDgsMoveNumber : function() {
-      return this.node.d_mn;
+      return parseInt( this.node.d_mn, 10 );
    },
 
    // move cursor to root-node of 1st game

@@ -128,6 +128,9 @@ $.extend( DGS.GamePageEditor.prototype, {
          evt.preventDefault();
          me.handle_action_view_move( this, evt );
       });
+      $("#Goban img.brdx").click( function( evt ) {
+         me.handle_action_board_point( this, evt );
+      });
 
       $("span#GameViewer img").click( function( evt ) {
          me.handle_action_move_navigation( this, evt );
@@ -244,6 +247,46 @@ $.extend( DGS.GamePageEditor.prototype, {
          this.goto_move( move_nr ); // go-to seems fast enough, so no optimized backward/forward-moving is required
    },
 
+   // handle click on one of the board-images
+   // - click on board-stone navigates to selected move by searching back in game-tree
+   handle_action_board_point : function( elem, evt ) {
+      var coord = $(elem).closest("td.brdx").attr("id"); // sgf-coord
+      if ( this.cursor.node.getMove() == coord ) // current-move?
+         return;
+
+      // find stone-color: all B/W-stone-images start with 'b' or 'w'; otherwise it's an empty-point or label or no-stone
+      var img = $(elem).attr("src").replace( /^.*?\/([bw])?.+$/, "$1" );
+      if ( img == 'b' || img == 'w' ) {
+         var stone_color = img.toUpperCase(); // prop in node: B/W
+
+         // backward-search in game-tree for stone on selected coord
+         var move_cursor = new DGS.GameCursor( this.cursor.node );
+         var move_nr = -1; // -1 = not-found
+         while ( move_cursor.previous() ) {
+            if ( move_cursor.node[stone_color] == coord ) {
+               move_nr = move_cursor.getDgsMoveNumber();
+               break;
+            }
+         }
+
+         if ( move_nr < 0 && move_cursor.getDgsMoveNumber() == 0 ) {
+            // search in shape-setup
+            var shapeSetup = move_cursor.node["A" + stone_color]; // prop: AB/AW
+            if ( shapeSetup ) {
+               if ( shapeSetup instanceof Array ) {
+                  if ( shapeSetup.contains(coord) )
+                     move_nr = 0;
+               } else if ( shapeSetup == coord ) {
+                  move_nr = 0;
+               }
+            }
+         }
+
+         if ( move_nr >= 0 )
+            this.goto_move( move_nr );
+      }
+   }, // handle_action_board_point
+
    // handles going to the previous node in the game-tree
    // NOTE: taken from Eidogo (Player.back()) + adjusted
    goto_previous_node : function() {
@@ -269,7 +312,7 @@ $.extend( DGS.GamePageEditor.prototype, {
    },
 
    // refresh board by re-committing current node & updating other UI-controls
-   refresh : function( redo_node ) {
+   refresh : function() {
       // update controls
       this.setCurrentMove( this.cursor.getDgsMoveNumber() );
       //TODO update prisoners-info
