@@ -124,6 +124,10 @@ $.extend( DGS.GamePageEditor.prototype, {
       $("#GameMsgTool_ScrollToCurrMove").click( function( evt ) {
          me.scrollToMoveMessage( me.curr_move, 200 );
       });
+      $("#GameMessageBody a.MRef").click( function( evt ) {
+         evt.preventDefault();
+         me.handle_action_view_move( this, evt );
+      });
 
       $("span#GameViewer img").click( function( evt ) {
          me.handle_action_move_navigation( this, evt );
@@ -224,6 +228,14 @@ $.extend( DGS.GamePageEditor.prototype, {
       } else if ( id == 'LastMove' ) {
          this.goto_move( this.max_moves, /*from-curr-node*/true );
       }
+   },
+
+   // handle click on move in move-message-box -> view selected move
+   handle_action_view_move : function( elem, evt ) {
+      var id = $(elem).closest("div[id^=movetxt]").attr("id");
+      var move_nr = parseInt( id.substr(7), 10 );
+      if ( move_nr != this.curr_move )
+         this.goto_move( move_nr ); // go-to seems fast enough, so no optimized backward/forward-moving is required
    },
 
    // handles going to the previous node in the game-tree

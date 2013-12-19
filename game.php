@@ -1093,7 +1093,7 @@ function build_move_comments()
    if ( is_array(@$TheBoard->moves[MOVE_SETUP]) ) // handle shape-game setup (has no game-comment)
    {
       $move_nr = MOVE_SETUP;
-      $move_link = anchor( $base_move_link . $move_nr, T_('Setup: Shape#moves') );
+      $move_link = anchor( $base_move_link . $move_nr, T_('Setup: Shape#moves'), '', 'class=MRef' );
       $out[] = "<div id=movetxt0>\n"
          . "<div class=Head>{$cfg_image[$move_nr]} $move_link</div><div class=Tools></div>\n"
          . "</div>";
@@ -1133,8 +1133,7 @@ function build_move_comments()
          $user_info = $cfg_user[$Stone];
 
       $handi_str = ( $Handicap > 0 && $move_nr <= $Handicap ? ' ' . T_('(H)#viewmove') : '' );
-      //TODO later change move-link to JS-based link to go-to selected move
-      $move_link = anchor( $base_move_link.$move_nr, $move_pos );
+      $move_link = anchor( $base_move_link.$move_nr, $move_pos, '', 'class=MRef' );
       $out[] = "<div id=movetxt$move_nr class=\"{$cfg_class[$Stone]}\">\n"
          . "<div class=Head>{$cfg_image[$Stone]} "
             . sprintf( T_('Move %s [%s] by %s#ged'), $move_nr . $handi_str, $move_link, $user_info )
