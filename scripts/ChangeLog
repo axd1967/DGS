@@ -13,6 +13,12 @@ ChangeLog
 
 2013-12-19 jug
 
+   * js/game-editor.js (DGS.GamePageEditor.refresh, ~.addCaptures;
+       DGS.Goban.reset, ~.toString, ~. ~.emptyBoard, ~.addPrisoners, ~.getPrisoners, ~.commit,
+         ~.rollback),
+     game.php (build_tab_GameAnalysis):
+   - update prisoners for B/W-player on navigating on game-tree in JS-game-editor
+
    * js/game-editor.js (DGS.GamePageEditor.init, ~.handle_action_board_point):
    - click on board-stone navigates to selected move or shape-setup-move by searching backwards
      in game-tree for JS-game-editor

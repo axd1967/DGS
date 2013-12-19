@@ -313,9 +313,11 @@ $.extend( DGS.GamePageEditor.prototype, {
 
    // refresh board by re-committing current node & updating other UI-controls
    refresh : function() {
-      // update controls
       this.setCurrentMove( this.cursor.getDgsMoveNumber() );
-      //TODO update prisoners-info
+
+      var prisoners = this.goban.getPrisoners();
+      $("span.BlackPrisoners").text( prisoners[0] );
+      $("span.WhitePrisoners").text( prisoners[1] );
 
       this.goban.render( /*full*/false );
    },
@@ -440,16 +442,24 @@ $.extend( DGS.GamePageEditor.prototype, {
       if ( !(coords instanceof Array) )
          coords = [ coords ];
 
+      var cnt = 0;
       for ( var i=0; i < coords.length; i++ ) {
          if ( coords[i] ) { // no pass-move allowed
             var pt = DGS.utils.makePointNumberCoord( coords[i] );
             this.goban.setStone( pt.x, pt.y, C.GOBS_EMPTY );
+            cnt++;
          }
       }
 
-      //TODO update prisoner-count for color
-      var capt_color = (node.B) ? 'W' : 'B';
-   }
+      // update prisoner-count for stone-color
+      var color = 0;
+      if ( typeof node.B != undefined )
+         color = C.GOBS_BLACK;
+      else if ( typeof node.W != undefined )
+         color = C.GOBS_WHITE;
+      if ( color )
+         this.goban.addPrisoners( color, cnt );
+   } //addCaptures
 
 }); //GamePageEditor
 
@@ -550,6 +560,8 @@ $.extend( DGS.Goban.prototype, {
       this.cache = []; // store stack with matrix-/lastmove-snapshots for each move
       this.lastRender = []; // last-copy of matrix to compare to and calculating changes to fast render
 
+      this.prisoners = [ 0, 0 ]; // B,W-prisoner-counts
+
       // feature of Goban to track last move, normally a board-state does not know of it
       this.last_move = []; // [] = no last-move, [null,null] = PASS, else [x,y]
    },
@@ -562,7 +574,8 @@ $.extend( DGS.Goban.prototype, {
             buf += String.sprintf("%x ", this.getValue(x,y));
          buf += "\n";
       }
-      buf += "  LastMove=" + JSON.stringify(this.LastMove);
+      buf += "  Prisoners=" + JSON.stringify(this.prisoners) + "\n";
+      buf += "  LastMove=" + JSON.stringify(this.LastMove) + "\n";
       return buf;
    },
 
@@ -586,6 +599,7 @@ $.extend( DGS.Goban.prototype, {
          for ( var i=0, mlen=this.matrix.length; i < mlen; i++ )
             this.matrix[i] &= clear_bitmask;
       }
+      this.prisoners = [ 0, 0 ];
       this.last_move = [];
    },
 
@@ -728,6 +742,17 @@ $.extend( DGS.Goban.prototype, {
       return label;
    },
 
+   addPrisoners : function( stone_color, diff_count ) {
+      if ( stone_color == C.GOBS_BLACK )
+         this.prisoners[0] += diff_count;
+      else if ( stone_color == C.GOBS_WHITE )
+         this.prisoners[1] += diff_count;
+   },
+
+   getPrisoners : function() {
+      return this.prisoners;
+   },
+
 
    // returns cloned and filtered matrix[x,y] with only stone-data GOBS_EMPTY|BLACK|WHITE
    // NOTE: taken from Eidogo + simplified
@@ -739,10 +764,11 @@ $.extend( DGS.Goban.prototype, {
    }, //cloneStoneMatrix
 
    // saves the current board-state (allows us to revert back to previous states for navigating backwards in a game).
-   // NOTE: taken from Eidogo
+   // NOTE: taken from Eidogo + modified
    commit : function() {
       this.cache.push({
          matrix: this.matrix.concat(),
+         prisoners: this.prisoners.concat(),
          last_move: this.last_move.concat()
       });
    },
@@ -752,6 +778,7 @@ $.extend( DGS.Goban.prototype, {
    rollback : function() {
       if ( this.cache.last() ) {
          this.matrix = this.cache.last().matrix.concat();
+         this.prisoners = this.cache.last().prisoners.concat();
          this.last_move = this.cache.last().last_move.concat();
       } else {
          this.emptyBoard();

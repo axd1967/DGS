@@ -1149,7 +1149,15 @@ function build_tab_GameAnalysis()
 {
    global $base_path;
 
-   return "<span id=\"GameViewer\">" .
+   return
+      sprintf( "%s: %s %s %s %s %s<br>\n",
+         span('bold', T_('Prisoners#ged')),
+         image($base_path.'17/b.gif', T_('Black'), null, 'class=InTextStone'),
+         span('BlackPrisoners bold', 0),
+         MED_SPACING,
+         image($base_path.'17/w.gif', T_('White'), null, 'class=InTextStone'),
+         span('WhitePrisoners bold', 0) ) .
+      "<span id=\"GameViewer\">" .
          image($base_path.'images/start.gif', T_('First move'), null,    'id=FirstMove') .
          image($base_path.'images/prev.gif',  T_('Previous move'), null, 'id=PrevMove') .
          image($base_path.'images/next.gif',  T_('Next move'), null,     'id=NextMove') .
