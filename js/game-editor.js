@@ -454,9 +454,9 @@ $.extend( DGS.GamePageEditor.prototype, {
 
       // update prisoner-count for stone-color
       var color = 0;
-      if ( typeof node.B != undefined )
+      if ( node.B )
          color = C.GOBS_BLACK;
-      else if ( typeof node.W != undefined )
+      else if ( node.W )
          color = C.GOBS_WHITE;
       if ( color )
          this.goban.addPrisoners( color, cnt );
