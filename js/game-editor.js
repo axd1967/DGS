@@ -373,7 +373,8 @@ $.extend( DGS.GamePageEditor.prototype, {
 
          if ( dgsMoveNum >= move_nr )
             break;
-         this.cursor.next(varNum);
+         if ( !this.cursor.next(varNum) )
+            break; // last node reached
       }
 
       this.refresh();
