@@ -1490,13 +1490,21 @@ class Board
 
    /*!
     * \brief Returns JS-String with game-tree as required for 'js/game-editor.js'.
-    * \return JSON { _children: [..], B|W: sgf-move|'', AB|AW: [ shape-sgf ], d_capt: [ sgf-captures ], d_mn: dgs-move-number }
+    * \return JSON { _children: [..], B|W: sgf-move|'', AB|AW: [ shape-sgf ],
+    *    d_tp: [ coords ], d_capt: [ sgf-captures ], d_mn: dgs-move-number }
+    * \note d_tp = toggled points (into dead-/alive stone or into territory-/neutral-point depending on board-context/state)
     *
     * \note game-move-comments not included, because those are already displayed on game-page in msg-box
     */
    public function make_js_game_tree()
    {
-      //FIXME perhaps an easier format could be simple-SGF-format parsed in JS, depends what's easier to create with variations and comments/review-stuff, etc
+      static $MAP_PROPS = array( // map Stone -> game-tree-property
+            BLACK => 'B',
+            WHITE => 'W',
+            MARKED_BY_WHITE => 'd_tp',
+            MARKED_BY_BLACK => 'd_tp',
+         );
+
       // format := [ var-num, node+,  var-num, node+, ... ];
       // node := { prop: val|arr, prop2:...} || { prop:.., _vars: [var-num, ...] }; // _vars is only present if there are variations
       $root_node = new JS_GameNode();
@@ -1505,30 +1513,38 @@ class Board
       $out[] = $root_node;
 
       $shape = array( BLACK => array(), WHITE => array() );
+      $territory = array();
       foreach ( $this->js_moves as $arr )
       {
          //error_log("make_js_game_tree().js_moves.arr = [".dgs_json_encode($arr)."]");
          list( $move_nr, $stone, $x, $y ) = $arr;
-         //TODO handle scoring/resign/time-out
-         if ( $x < POSX_PASS ) // POSX_SCORE|RESIGN|TIME|SETUP|ADDTIME
+         if ( $x < POSX_SCORE ) // RESIGN|TIME|SETUP|ADDTIME
             continue;
 
-         if ( $stone == BLACK )
-            $prop = 'B';
-         elseif ( $stone == WHITE )
-            $prop = 'W';
-         else
-            continue; // stone=NONE|MARKED_BY_BLACK/WHITE, x=POSX_RESIGN/TIMEOUT/SCORE
+         if ( !( $prop = @$MAP_PROPS[$stone] ) )
+            continue; // stone=NONE, x=POSX_RESIGN/TIMEOUT
 
-         $val = ( $x == POSX_PASS ) ? '' : number2sgf_coords($x,$y, $this->size);
+         $val = ( $x == POSX_PASS || $x == POSX_SCORE ) ? '' : number2sgf_coords($x,$y, $this->size);
          if ( $move_nr == 0 )
             $shape[$stone][] = $val;
+         else if ( $stone == MARKED_BY_BLACK || $stone == MARKED_BY_WHITE )
+            $territory[] = $val; // collect toggle-points for final POSX_SCORE with same move-nr
          else
          {
             $curr_node = new JS_GameNode();
             $curr_node->d_mn = $move_nr;
 
-            $curr_node->{$prop} = $val;
+            if ( $x == POSX_SCORE )
+            {
+               if ( count($territory) )
+               {
+                  $curr_node->d_tp = $territory;
+                  $territory = array();
+               }
+            }
+            else
+               $curr_node->{$prop} = $val;
+
             if ( count(@$this->moves_captures[$move_nr]) )
                $curr_node->d_capt = $this->moves_captures[$move_nr]; // captures
 

@@ -11,6 +11,18 @@ Release [2013-08-11] - DGS 1.0.16 - tag [release-1_0_16-20130811] on (later) bra
 ChangeLog
 ------------------------------------------------------------------
 
+2013-12-20 jug
+
+   * js/game-editor.js (DGS.utils.makeArray;
+       DGS.GamePageEditor.init, ~.addStone, ~.addCaptures, ~.toggleTerritory;
+       DGS.Goban.toggleTerritoryMarker),
+     include/board.php (Board.make_js_game_tree):
+   - added viewing of toggling points in scoring-steps for JS-game-editor from perspective of observer
+     - added pseudo-property 'd_tp' to mark toggled points for parsing game-tree for JS-game-editor
+     - toggle points on SCORE-moves between dead/alive-state for stones and
+       between neutral/non-neutral-state for empty points
+     - cleanup: refactored redundant code to create array from non-array-value
+
 2013-12-19 jug
 
    * game.php:

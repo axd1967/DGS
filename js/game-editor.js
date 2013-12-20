@@ -66,6 +66,11 @@ DGS.utils = {
       };
    },
 
+   // returns array with value (if value is not already an array), otherwise just return value-array
+   makeArray : function( value ) {
+      return ( value instanceof Array ) ? value : [ value ];
+   },
+
    debug : function( msg ) {
       //return; // uncomment to disable debugging
       msg = (msg + "\n" + $("#D").text()).substr(0, 200);
@@ -103,7 +108,8 @@ $.extend( DGS.GamePageEditor.prototype, {
          W:  this.playMove,
          AW: this.addStone,
          AB: this.addStone,
-         d_capt: this.addCaptures
+         d_capt: this.addCaptures,
+         d_tp:   this.toggleTerritory
       };
 
       $(document).ready( function() { me.makeDocReady.apply(me); });
@@ -423,10 +429,7 @@ $.extend( DGS.GamePageEditor.prototype, {
       if ( prop != 'AB' && prop != 'AW' )
          return;
 
-      var coords = node[prop];
-      if ( !(coords instanceof Array) )
-         coords = [ coords ];
-
+      var coords = DGS.utils.makeArray( node[prop] );
       for ( var i=0; i < coords.length; i++ ) {
          if ( coords[i] ) { // no pass-move allowed
             var pt = DGS.utils.makePointNumberCoord( coords[i] );
@@ -439,10 +442,7 @@ $.extend( DGS.GamePageEditor.prototype, {
    // @param node current node; node[prop] == coords with single SGF-coord or SGF-coords-array
    // @param prop DGS-pseudo-property 'd_capt'
    addCaptures : function( node, prop ) {
-      var coords = node[prop];
-      if ( !(coords instanceof Array) )
-         coords = [ coords ];
-
+      var coords = DGS.utils.makeArray( node[prop] );
       var cnt = 0;
       for ( var i=0; i < coords.length; i++ ) {
          if ( coords[i] ) { // no pass-move allowed
@@ -460,7 +460,20 @@ $.extend( DGS.GamePageEditor.prototype, {
          color = C.GOBS_WHITE;
       if ( color )
          this.goban.addPrisoners( color, cnt );
-   } //addCaptures
+   }, //addCaptures
+
+   // SGF-prop-handler: toggles territory-markers of stones (dead/alive-state) or grid-points (neutral/non-neutral-state)
+   // @param node current node; node[prop] == coords with single SGF-coord or SGF-coords-array
+   // @param prop property-name 'd_tp' indicating toggle-points on board
+   toggleTerritory : function( node, prop ) {
+      var coords = DGS.utils.makeArray( node[prop] );
+      for ( var i=0; i < coords.length; i++ ) {
+         if ( coords[i] ) { // no pass-move allowed
+            var pt = DGS.utils.makePointNumberCoord( coords[i] );
+            this.goban.toggleTerritoryMarker( pt.x, pt.y );
+         }
+      }
+   } //toggleTerritory
 
 }); //GamePageEditor
 
@@ -716,6 +729,31 @@ $.extend( DGS.Goban.prototype, {
    getMarker : function( x, y ) {
       var xy = y * this.size_x + x;
       return ( this.matrix[xy] & C.GOBM_BITMASK );
+   },
+
+   // toggles territory-marker on given empty point (territory <-> neutral) or on stone (alive <-> dead)
+   //    regardless of former potential territory-mark of different colorm
+   toggleTerritoryMarker : function( x, y ) {
+      var xy = y * this.size_x + x;
+      var curr_stone = ( this.matrix[xy] & C.GOBS_BITMASK );
+      var curr_marker = ( this.matrix[xy] & C.GOBM_BITMASK );
+
+      if ( curr_stone ) { // toggle stone: alive <-> dead
+         if ( curr_marker == C.GOBM_TERR_B || curr_marker == C.GOBM_TERR_W ) {
+            this.matrix[xy] &= ~C.GOBM_BITMASK; // toggle stones into alive-state (w/o territory-marker)
+         } else {
+            // set new territory-marker (with territory-marker of opposite stone-color)
+            if ( curr_stone == C.GOBS_BLACK )
+               this.matrix[xy] = ( this.matrix[xy] & ~C.GOBM_BITMASK ) | C.GOBM_TERR_W;
+            else // white-stone
+               this.matrix[xy] = ( this.matrix[xy] & ~C.GOBM_BITMASK ) | C.GOBM_TERR_B;
+         }
+      } else {
+         if ( curr_marker == C.GOBM_TERR_NEUTRAL )
+            this.matrix[xy] &= ~C.GOBM_BITMASK; // toggle point into territory-point (no markings, b/c it needs color of surrounding stones)
+         else
+            this.matrix[xy] = ( this.matrix[xy] & ~C.GOBM_BITMASK ) | C.GOBM_TERR_NEUTRAL; // toggle into neutral point
+      }
    },
 
    // sets C.GOBM_NUMBER/LETTER + label-number/letter on Goban, keeping grid/stone, replacing marker/label
