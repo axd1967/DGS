@@ -13,6 +13,14 @@ ChangeLog
 
 2013-12-20 jug
 
+   * js/game-editor.js (DGS.GamePageEditor.init, ~.handle_action_goto_my_prev_move),
+     game.php (build_comment_tools, build_move_comments):
+   - added move-navigation to my-previous-move for JS-game-editor
+     - useful for MPG to check moves and comments of previous players
+     - added up-icon in header of move-message-box to jump up to my-previous-move
+     - added MyMove-class marking own moves on move-divs in move-message-box
+       to easily identify own moves
+
    * js/game-editor.js (DGS.utils.makeArray;
        DGS.GamePageEditor.init, ~.addStone, ~.addCaptures, ~.toggleTerritory;
        DGS.Goban.toggleTerritoryMarker),

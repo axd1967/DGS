@@ -130,6 +130,9 @@ $.extend( DGS.GamePageEditor.prototype, {
       $("#GameMsgTool_ScrollToCurrMove").click( function( evt ) {
          me.scrollToMoveMessage( me.curr_move, 200 );
       });
+      $("#GameMsgTool_GoToMyPreviousMove").click( function( evt ) {
+         me.handle_action_goto_my_prev_move();
+      });
       $("#GameMessageBody a.MRef").click( function( evt ) {
          evt.preventDefault();
          me.handle_action_view_move( this, evt );
@@ -245,12 +248,23 @@ $.extend( DGS.GamePageEditor.prototype, {
       }
    },
 
+   // handle click on icon to jump to my previous move on move-message-box
+   handle_action_goto_my_prev_move : function() {
+      var my_prev_div = $("#movetxt" + this.curr_move).prevUntil("#GameMessageBody").filter("div.MyMove").first();
+      if ( $(my_prev_div).length == 1 ) {
+         var id = $(my_prev_div).attr("id");
+         var move_nr = parseInt( id.substr(7), 10 );
+         if ( move_nr != this.curr_move )
+            this.goto_move( move_nr );
+      }
+   },
+
    // handle click on move in move-message-box -> view selected move
    handle_action_view_move : function( elem, evt ) {
       var id = $(elem).closest("div[id^=movetxt]").attr("id");
       var move_nr = parseInt( id.substr(7), 10 );
       if ( move_nr != this.curr_move )
-         this.goto_move( move_nr ); // go-to seems fast enough, so no optimized backward/forward-moving is required
+         this.goto_move( move_nr );
    },
 
    // handle click on one of the board-images
@@ -359,6 +373,7 @@ $.extend( DGS.GamePageEditor.prototype, {
 
    // goto given move by forward-replaying nodes from start or current-node in game-tree
    // NOTE: taken from Eidogo + simplified
+   // NOTE: go-to seems fast enough, so no optimized backward/forward-moving is required from some node to nearby nodes
    goto_move : function( move_nr, from_curr_node ) {
       var varNum = 0; // navigate in first child-variations
       if ( move_nr == undefined )

@@ -1057,6 +1057,7 @@ function build_comment_tools()
 {
    global $base_path;
    return " <div id=GameMessageTools>"
+      . image($base_path."images/up.png", T_('Show my previous move#ged'), null, 'id=GameMsgTool_GoToMyPreviousMove')
       . image($base_path."13/wm.gif", T_('Show current move comment#ged'), null, 'id=GameMsgTool_ScrollToCurrMove')
       . image($base_path."images/comment_hide.png", T_('Hide comments#ged'), null, 'id=GameMsgTool_ToggleComment')
       . "</div>";
@@ -1065,7 +1066,7 @@ function build_comment_tools()
 // display all game move-messages properly filtered according to player/observer and move for std- and MP-game
 function build_move_comments()
 {
-   global $base_path, $TheBoard, $game_row, $is_mp_game, $mpg_users, $gc_helper, $view_comment;
+   global $base_path, $TheBoard, $game_row, $is_mp_game, $mpg_users, $gc_helper, $view_comment, $my_id;
    $out = array();
 
    $Handicap = $game_row['Handicap'];
@@ -1077,6 +1078,7 @@ function build_move_comments()
          WHITE => image($base_path."17/w.gif", T_('White'), null, 'class=InTextImage'),
          MOVE_SETUP => image($base_path."images/shape.gif", T_('Shape Game'), null, 'class=InTextImage'),
       );
+   $chk_uid_color = array( BLACK => $game_row['Black_ID'], WHITE => $game_row['White_ID'] );
 
    $cfg_user = array(); // uid => Handle, Rank  |  (for MPG): "grp_col:grp_order" => [ Handle, Rating2, ... ]
    if ( $is_mp_game )
@@ -1122,19 +1124,29 @@ function build_move_comments()
       $move_msg = MarkupHandlerGoban::replace_igoban_tags( $move_msg ); // shown with same style-size as main-board
 
       // build player-info for current move
+      $my_move_str = '';
       if ( $is_mp_game )
       {
          $mpg_user = $gc_helper->get_mpg_user();
-         $user_info = ( is_array($mpg_user) )
-            ? sprintf( '%s, %s', $mpg_user['Handle'], echo_rating($mpg_user['Rating2'], false, 0, false, true) )
-            : '[?]'; // shouldn't happen
+         if ( is_array($mpg_user) )
+         {
+            $user_info = sprintf( '%s, %s', $mpg_user['Handle'], echo_rating($mpg_user['Rating2'], false, 0, false, true) );
+            if ( $mpg_user['uid'] == $my_id )
+               $my_move_str = ' MyMove';
+         }
+         else
+            $user_info = '[?]'; // shouldn't happen
       }
       else
+      {
          $user_info = $cfg_user[$Stone];
+         if ( $chk_uid_color[$Stone] == $my_id )
+            $my_move_str = ' MyMove';
+      }
 
       $handi_str = ( $Handicap > 0 && $move_nr <= $Handicap ? ' ' . T_('(H)#viewmove') : '' );
       $move_link = anchor( $base_move_link.$move_nr, $move_pos, '', 'class=MRef' );
-      $out[] = "<div id=movetxt$move_nr class=\"{$cfg_class[$Stone]}\">\n"
+      $out[] = "<div id=movetxt$move_nr class=\"{$cfg_class[$Stone]}$my_move_str\">\n"
          . "<div class=Head>{$cfg_image[$Stone]} "
             . sprintf( T_('Move %s [%s] by %s#ged'), $move_nr . $handi_str, $move_link, $user_info )
          . "</div><div class=Tools></div>\n"
