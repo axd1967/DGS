@@ -129,6 +129,20 @@ General instructions for developers:
    out there, running under different operating systems (like Linux, Windows,
    MacOS), which have different handling of "things".
 
+----------------- JavaScript:
+
+   Currently (Dec-2013) using featuers of JavaScript-versions > 1.8.1
+   should not be used to keep compatibility with older browsers.
+
+   If newer JS-features are required explicitly test if there are available and
+   if possible add an implementation for older JS-versions.
+   See 'js/lang-ext.js' for examples.
+
+   Non-external JavaScript-libs should follow the PHP-layout guidelines (see below)
+   with some exceptions allowed ... just try to keep the layouts close:
+
+      - if-expression/loop-expression can use '{..}' on same line as statements
+
 ----------------- Layout:
 
    DGS "layout"-style for sources (PHP, JavaScript similar): (see also next section)
