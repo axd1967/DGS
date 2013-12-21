@@ -131,11 +131,11 @@ General instructions for developers:
 
 ----------------- JavaScript:
 
-   Currently (Dec-2013) using featuers of JavaScript-versions > 1.8.1
+   Currently (Dec-2013), using features of JavaScript-versions > 1.8.1
    should not be used to keep compatibility with older browsers.
 
-   If newer JS-features are required explicitly test if there are available and
-   if possible add an implementation for older JS-versions.
+   If newer JS-features are required explicitly test if there are available,
+   and if possible add an implementation for older JS-versions.
    See 'js/lang-ext.js' for examples.
 
    Non-external JavaScript-libs should follow the PHP-layout guidelines (see below)
