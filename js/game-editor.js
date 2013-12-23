@@ -92,9 +92,10 @@ DGS.GamePageEditor = function() {
 
 $.extend( DGS.GamePageEditor.prototype, {
 
-   init : function( stone_size, wood_color, board_size, max_moves, view_move ) {
+   init : function( game_id, stone_size, wood_color, board_size, max_moves, view_move ) {
       var me = this;
 
+      this.gid = game_id;
       this.max_moves = max_moves;
       this.curr_move = view_move; // <0 = no-move selected
       this.board = new DGS.Board( stone_size, wood_color ); // DGS.Board for drawing board
@@ -124,8 +125,12 @@ $.extend( DGS.GamePageEditor.prototype, {
 
       $("#tabs").tabs({ active: 0 });
 
-      $("#gameNotes").on("change input propertychange", null, { old_value: $("#gameNotes").val() }, function( evt ) {
+      this.old_game_notes = $("#gameNotes").val();
+      $("#gameNotes").on("change input propertychange", function( evt ) { // NOTE: undo/redo-events not captured
          me.handle_action_note_changes( this, evt );
+      });
+      $("#saveNotes").click( function( evt ) {
+         me.handle_action_save_notes( this, evt );
       });
 
       $("#GameMsgTool_ToggleComment").click( { action: "hide" }, function( evt ) {
@@ -202,10 +207,25 @@ $.extend( DGS.GamePageEditor.prototype, {
 
    // toggle "star" in Notes-tab-header if there's a change in the notes
    handle_action_note_changes : function( elem, evt ) {
-      if ( evt.data.old_value != elem.value )
-         $("img#NotesChanged").show();
+      if ( this.old_game_notes != elem.value ) {
+         if ( !$("img#NotesChanged").is(":visible") )
+            $("img#NotesChanged").show();
+      }
       else
          $("img#NotesChanged").hide();
+   },
+
+   // save notes with aync ajax-post-request despite any notes-changes
+   handle_action_save_notes : function( elem, evt ) {
+      evt.preventDefault();
+
+      var notes_value = $("#gameNotes").val();
+      var fn_success_notes_saved = function() {
+         this.old_game_notes = notes_value;
+         $("img#NotesChanged").hide();
+      };
+
+      DGS.QuickRemoteApi.save_game_notes( evt, this.gid, notes_value, fn_success_notes_saved, this );
    },
 
    // handle key-press events on document:
@@ -503,6 +523,81 @@ $.extend( DGS.GamePageEditor.prototype, {
    } //toggleTerritory
 
 }); //GamePageEditor
+
+
+
+// --------------- QuickRemoteApi ---------------------------------------------
+
+// API with functions calling servers quick-do-suite
+DGS.QuickRemoteApi = {
+   quick_url : "quick_do.php",
+
+   // generic success-handler for AJAX-call of quick-do
+   handle_quick_do_success : function( data, msg_success, fn_success, scope, evt ) {
+      DGS.QuickRemoteApi.update_quota( data );
+
+      var error_code = data['error'];
+      if ( error_code ) {
+         DGS.QuickRemoteApi.show_error_box( evt, error_code + " [" + data['error_msg'] + "]" );
+      } else {
+         var pos = { left: evt.pageX - 20, top: evt.pageY - 40 };
+         $("#JSInfoBox").text(msg_success).css(pos).fadeIn(200).delay(1000).fadeOut(500);
+
+         if ( fn_success )
+            fn_success.call( scope, data );
+      }
+   },
+
+   // generic error-handler for AJAX-call of quick-do
+   handle_quick_do_error : function( xhr, req_status, error_thrown, evt ) {
+      DGS.QuickRemoteApi.show_error_box( evt,
+         "[" + req_status + "] " + error_thrown + "<br>\n" + xhr.responseText );
+   },
+
+   // show info-box with error, that vanish if mouse leaves box (to allow copying of error-text)
+   show_error_box : function( evt, error_text ) {
+      var pos = { left: evt.pageX - 20, top: evt.pageY - 20 };
+      var msg = "<span class=\"ErrMsgCode\">" + T_js['error_occured'] + ":</span> " + error_text;
+      $("#JSInfoBox").html(msg).css(pos).fadeIn(200).on("mouseleave", function() {
+         $(this).off("mouseleave").fadeOut(500);
+      });
+   },
+
+   // update quota-count after quick-do-call and check for quota-warning
+   update_quota : function( data ) {
+      if ( data['quota_count'] ) {
+         var quota_count = parseInt( data['quota_count'], 10 );
+         $("span.QuotaCount").text(quota_count); // update count in bottom-bar
+
+         // toggle quota-warning
+         if ( quota_count < 10 ) {
+            $("#QuotaWarning")
+               .html("<p class=WarnQuota>" + T_js['quota_low'] + "<p><hr class=SysMsg>\n")
+               .show();
+         } else {
+            if ( $("#QuotaWarning").is(":visible") )
+               $("#QuotaWarning").hide();
+         }
+      }
+   }, //update_quota
+
+
+   save_game_notes : function( evt, gid, notes, fn_success, scope ) {
+      return $.ajax({
+         type: "POST",
+         url:  DGS.QuickRemoteApi.quick_url,
+         data: { obj: "game", cmd: "save_notes", gid: gid, notes: notes },
+         success: function( data, req_status, xhr ) {
+            DGS.QuickRemoteApi.handle_quick_do_success( data, T_js['save_success'], fn_success, scope, evt );
+         },
+         error: function( xhr, req_status, error_thrown ) {
+            DGS.QuickRemoteApi.handle_quick_do_error( xhr, req_status, error_thrown, evt );
+         },
+         timeout: 3000
+      });
+   } //save_game_notes
+
+}; //QuickRemoteApi
 
 
 

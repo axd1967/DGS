@@ -611,8 +611,8 @@ $GLOBALS['ThePage'] = new Page('Game');
             'curr_move'    => T_('Current Move#ged'),
          )), true );
 
-      $js .= sprintf( "DGS.run.gamePageEditor = new DGS.GamePageEditor(%d,%d,%d,%d,%d);\n",
-         $cfg_board->get_stone_size(), $cfg_board->get_wood_color(), $Size, $Moves, $move );
+      $js .= sprintf( "DGS.run.gamePageEditor = new DGS.GamePageEditor(%d,%d,%d,%d,%d,%d);\n",
+         $gid, $cfg_board->get_stone_size(), $cfg_board->get_wood_color(), $Size, $Moves, $move );
       $js .= sprintf( "DGS.run.gamePageEditor.parseGameTree(%s);\n", $TheBoard->make_js_game_tree() );
    }
    else
@@ -1525,7 +1525,7 @@ function draw_notes( $collapsed='N', $notes='', $height=0, $width=0)
             textarea_safe( $notes), "</textarea>\n"
       , "  </td></tr>\n"
       , "  <tr><td class=NoPrint>"
-      , "<input name=\"savenotes\" id=\"savenotes\" type=\"submit\" value=\"", T_('Save notes'), "\">";
+      , "<input name=\"savenotes\" id=\"saveNotes\" type=\"submit\" value=\"", T_('Save notes'), "\">";
 
    if ( $collapsed === 'N' )
    {

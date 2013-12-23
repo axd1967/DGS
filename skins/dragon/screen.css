@@ -1170,7 +1170,7 @@ table.Table tr.Head th span.Tool img.Sort { /* headers row */
 div#InfoBox {
    position: absolute;
    visibility: hidden;
-   z-index: 20;
+   z-index: 200;
    min-width: 50px;
    max-width: 400px;
    padding: 5px;
@@ -1187,6 +1187,18 @@ div#InfoBox table th {
 
 div#InfoBox table.GameThumbnail td {
    padding: 2px;
+}
+
+div#JSInfoBox {
+   position: absolute;
+   display: none;
+   z-index: 200;
+   min-width: 50px;
+   max-width: 400px;
+   padding: 5px;
+   border: 1px solid #0C41C9;
+   background: #f7f5ff;
+   text-align: left;
 }
 
 

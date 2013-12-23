@@ -388,6 +388,12 @@ function start_html( $title, $no_cache, $skinname=NULL, $style_string=NULL, $las
 
       $js_code = array(); // global declarations first (before including JS-libs)
       $js_code[] = add_js_var( 'base_path', $base_path );
+      $js_code[] = add_js_var( 'T_js', dgs_json_encode(
+         array(
+            'quota_low'     => T_('Your access quota is running low!#js'),
+            'save_success'  => T_('Save operation successful!#js'),
+            'error_occured' => T_('Error occured#js'),
+         )), true );
       echo "\n<script language=\"JavaScript\" type=\"text/javascript\">\n", implode("\n", $js_code), "</script>";
       echo "\n<script language=\"JavaScript\" type=\"text/javascript\" src=\"{$base_path}js/common.js?t=$ts\"></script>";
 
@@ -419,6 +425,8 @@ function start_html( $title, $no_cache, $skinname=NULL, $style_string=NULL, $las
       : '';
    echo "\n</HEAD>\n<BODY id=\"".FRIENDLY_SHORT_NAME."\"$tmp_class>\n";
    echo "<div id=\"InfoBox\"></div>\n";
+   if ( is_javascript_enabled() )
+      echo "<div id=\"JSInfoBox\"></div>\n";
 } //start_html
 
 function start_page( $title, $no_cache, $logged_in, &$player_row,
@@ -480,6 +488,8 @@ function start_page( $title, $no_cache, $logged_in, &$player_row,
    //this <table><tr><td> is left open until page end
    echo "\n  <td id=\"pageBody\">\n\n";
 
+   if ( is_javascript_enabled() )
+      echo "<div id=\"QuotaWarning\"></div>"; // for JS-quota-warning
    sysmsg(get_request_arg('sysmsg'));
    if ( isset($player_row['VaultCnt']) && $player_row['VaultCnt'] <= 11 )
    {
@@ -735,7 +745,7 @@ function end_page( $menu_array=NULL, $links_per_line=0 )
       if ( isset($player_row['VaultCnt']) && isset($player_row['X_VaultTime']) )
       {
          echo '<br>', span('PageQuota',
-            sprintf( "%s: %s / %s", T_('Quota#user'), $player_row['VaultCnt'],
+            sprintf( "%s: %s / %s", T_('Quota#user'), span('QuotaCount', $player_row['VaultCnt']),
                format_translated_date(DATE_FMT5, $player_row['X_VaultTime']) ));
       }
 

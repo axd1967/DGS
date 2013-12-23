@@ -13,6 +13,23 @@ ChangeLog
 
 2013-12-23 jug
 
+   * js/game-editor.js (DGS.GamePageEditor.init, ~.handle_action_note_changes,
+         ~.handle_action_save_notes;
+       DGS.QuickRemoteApi, ~.handle_quick_do_success, ~.handle_quick_do_error, ~.show_error_box,
+         ~.update_quota, ~.save_game_notes),
+     include/std_functions.php (start_html, start_page, end_page),
+     include/globals.php (CSS_VERSION),
+     skins/dragon/screen.css,
+     game.php (draw_notes):
+   - added async saving of private-game-notes in JS-game-editor
+     - calling quick-do-suite AJAX-POST-call to server to save game-notes
+     - show info-box with success fading out after a short delay
+     - show info-box with error staying till mouse leaves box to allow copy of error-text
+       for support-questions
+     - update quota-count after call to quick-do-suite and show warning if on low quota
+     - moved old-value state for detection of game-notes-changes from textarea-event-data
+       to GamePageEditor-object to allow for text-update after saving game-notes to server
+
    * js/game-editor.js (DGS.GamePageEditor.init, ~.handle_action_note_changes),
      include/globals.php (CSS_VERSION),
      skins/dragon/screen.css,
