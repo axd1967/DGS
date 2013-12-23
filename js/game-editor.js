@@ -150,7 +150,7 @@ $.extend( DGS.GamePageEditor.prototype, {
          me.handle_action_board_point( this, evt );
       });
 
-      $("span#GameViewer img").click( function( evt ) {
+      $("#GameViewer img").click( function( evt ) {
          me.handle_action_move_navigation( this, evt );
       });
       $(document).keypress( function( evt ) {
@@ -208,11 +208,11 @@ $.extend( DGS.GamePageEditor.prototype, {
    // toggle "star" in Notes-tab-header if there's a change in the notes
    handle_action_note_changes : function( elem, evt ) {
       if ( this.old_game_notes != elem.value ) {
-         if ( !$("img#NotesChanged").is(":visible") )
-            $("img#NotesChanged").show();
+         if ( !$("#NotesChanged").is(":visible") )
+            $("#NotesChanged").show();
       }
       else
-         $("img#NotesChanged").hide();
+         $("#NotesChanged").hide();
    },
 
    // save notes with aync ajax-post-request despite any notes-changes
@@ -222,7 +222,7 @@ $.extend( DGS.GamePageEditor.prototype, {
       var notes_value = $("#gameNotes").val();
       var fn_success_notes_saved = function() {
          this.old_game_notes = notes_value;
-         $("img#NotesChanged").hide();
+         $("#NotesChanged").hide();
       };
 
       DGS.QuickRemoteApi.save_game_notes( evt, this.gid, notes_value, fn_success_notes_saved, this );
@@ -1088,8 +1088,8 @@ $.extend( DGS.Board.prototype, {
    // @param rebuild true = prepare board for client-use after rendering from server (removing all actions from board)
    draw_board : function( goban, rebuild ) {
       if ( rebuild ) {
-         $("table#Goban td.brdx a img").unwrap(); // remove all image-links
-         $("table#Goban td.brdx img").removeAttr('alt');
+         $("#Goban td.brdx a img").unwrap(); // remove all image-links
+         $("#Goban td.brdx img").removeAttr('alt');
       }
 
       for ( var y=0; y <= goban.size_y; y++ ) {
@@ -1156,7 +1156,7 @@ $.extend( DGS.Board.prototype, {
 
       if ( type ) {
          var sgf_coord = DGS.utils.makeSgfCoords(x,y);
-         $("td#" + sgf_coord + " img").attr("src", base_path + this.stone_size + '/' + type + '.gif' );
+         $("#" + sgf_coord + " img").attr("src", base_path + this.stone_size + '/' + type + '.gif' );
       }
    }, //render_point
 
