@@ -2297,6 +2297,10 @@ table#GamePage div.tab {
    background-color: #aaaad0;
 }
 
+img#NotesChanged {
+   display: none;
+}
+
 table#GamePage td#ToolsArea {
    vertical-align: top;
    /*width: 400px; TODO needed? */

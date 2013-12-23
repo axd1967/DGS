@@ -1029,14 +1029,16 @@ function draw_moves( $gid, $move, $handicap )
 
 function draw_game_tools()
 {
-   global $game_row, $game_setup, $TheBoard, $tourney, $notes;
+   global $base_path, $game_row, $game_setup, $TheBoard, $tourney, $notes;
+   $img_chg_note = image($base_path."images/star3.gif", T_('Notes have unsaved changes!#ged'), null, 'id=NotesChanged');
+
 
    echo "</td>\n",
       "<td id=ToolsArea class=\"GameTools NoPrint\">",
          "<div id=tabs>\n",
             "<ul>\n",
                "<li>", anchor('#tab_GameInfo', T_('Game Info#ged'), T_('Game Information#ged')), "</li>\n",
-               "<li>", anchor('#tab_GameNotes', T_('Notes#ged'), T_('Private game notes')), "</li>\n",
+               "<li>", anchor('#tab_GameNotes', T_('Notes#ged') . ' ' . $img_chg_note, T_('Private game notes')), "</li>\n",
                "<li>", anchor('#tab_GameAnalysis', T_('Analyse#ged'), T_('Analyse game#ged')), "</li>\n",
             "</ul>\n",
             "<div id=tab_GameInfo class=tab>\n";
@@ -1522,7 +1524,8 @@ function draw_notes( $collapsed='N', $notes='', $height=0, $width=0)
       , "   <textarea name=\"gamenotes\" id=\"gameNotes\" cols=\"$width\" rows=\"$height\">",
             textarea_safe( $notes), "</textarea>\n"
       , "  </td></tr>\n"
-      , "  <tr><td class=NoPrint><input name=\"savenotes\" type=\"submit\" value=\"", T_('Save notes'), "\">";
+      , "  <tr><td class=NoPrint>"
+      , "<input name=\"savenotes\" id=\"savenotes\" type=\"submit\" value=\"", T_('Save notes'), "\">";
 
    if ( $collapsed === 'N' )
    {

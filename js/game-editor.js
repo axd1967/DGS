@@ -124,6 +124,10 @@ $.extend( DGS.GamePageEditor.prototype, {
 
       $("#tabs").tabs({ active: 0 });
 
+      $("#gameNotes").on("change input propertychange", null, { old_value: $("#gameNotes").val() }, function( evt ) {
+         me.handle_action_note_changes( this, evt );
+      });
+
       $("#GameMsgTool_ToggleComment").click( { action: "hide" }, function( evt ) {
          me.handle_action_toggle_comment( this, evt );
       });
@@ -194,6 +198,14 @@ $.extend( DGS.GamePageEditor.prototype, {
          $(elem).attr("alt", T_gametools["hide_comment"] );
          $("#GameMessageBody div.CBody").show();
       }
+   },
+
+   // toggle "star" in Notes-tab-header if there's a change in the notes
+   handle_action_note_changes : function( elem, evt ) {
+      if ( evt.data.old_value != elem.value )
+         $("img#NotesChanged").show();
+      else
+         $("img#NotesChanged").hide();
    },
 
    // handle key-press events on document:
