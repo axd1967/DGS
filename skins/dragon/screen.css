@@ -2322,6 +2322,12 @@ table#GamePage td#ToolsArea {
    width: 100%;
 }
 
+div.ToolsArea {
+   background: #e0e8ed;
+   padding: 5px;
+   line-height: 150%;
+}
+
 div#GameMessage {
    margin-top: 5px;
    border: 3px solid #aaaad0;
@@ -2371,7 +2377,7 @@ div#GameMessageBody div.Tools {
 }
 
 span#GameViewer {
-   padding: 1em 0.5em 0.7em 1em;
+   padding: 1em 0.5em 0.7em 0.5em;
 }
 span#GameViewer img {
    margin: 0px 0.5em 0px 0.5em;

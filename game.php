@@ -1163,7 +1163,7 @@ function build_tab_GameAnalysis()
 {
    global $base_path;
 
-   return
+   return "<div class=\"ToolsArea\">\n" .
       sprintf( "%s: %s %s %s %s %s<br>\n",
          span('bold', T_('Prisoners#ged')),
          image($base_path.'17/b.gif', T_('Black'), null, 'class=InTextStone'),
@@ -1176,7 +1176,8 @@ function build_tab_GameAnalysis()
          image($base_path.'images/prev.gif',  T_('Previous move'), null, 'id=PrevMove') .
          image($base_path.'images/next.gif',  T_('Next move'), null,     'id=NextMove') .
          image($base_path.'images/end.gif',   T_('Last move'), null,     'id=LastMove') .
-      "</span>\n";
+      "</span>\n" .
+      "</div>\n";
 }
 
 
