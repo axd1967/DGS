@@ -75,13 +75,13 @@ function show_stats_default()
    $arr_moves = load_cache_games_stats( 1 );
    $arr_activity = load_cache_games_stats( 2 );
 
-   echo "<table border=1>\n"
-      , "<tr><th>Status</th><th>Games</th><th>Moves</th></tr>\n";
+   echo "<table border=1>\n",
+      sprintf( "<tr><th>%s</th><th>%s</th><th>%s</th></tr>\n", T_('Status#stats'), T_('Games#stats'), T_('Moves#stats') );
 
    $col_fmt = '<td class="right">%s</td>';
    foreach ( $arr_moves as $row )
    {
-      $col_title = ( is_null($row['Status']) ) ? 'Total' : $row['Status'];
+      $col_title = ( is_null($row['Status']) ) ? T_('Total#stats') : $row['Status'];
       echo '<tr>'
          , "<td>$col_title</td>"
          , sprintf( $col_fmt, number_format($row['count']))
@@ -94,8 +94,9 @@ function show_stats_default()
    if ( $arr_activity )
    {
       $row = $arr_activity;
-      echo '<p>', number_format($row["hits"]), ' hits by ', number_format($row["count"]), ' players</p>';
-      echo '<p>Activity: ', number_format(round($row['activity'])), "</p>\n";
+      echo '<p>', sprintf( T_('%s hits by %s players#stats'), number_format($row['hits']), number_format($row['count']) ),
+         '</p>';
+      echo '<p>', T_('Activity#stats'), ': ', number_format(round($row['activity'])), "</p>\n";
    }
 
    // NOTE: only works under Linux-like systems and with safe_mode=off
@@ -103,7 +104,7 @@ function show_stats_default()
    {
       $tmp = '/proc/loadavg';
       if ( ($tmp=trim(@read_from_file($tmp))) )
-         echo '<p><span class=DebugInfo>Loadavg: ', $tmp, '</span></p>';
+         echo '<p><span class=DebugInfo>', T_('Loadavg#stats'), ': ', $tmp, '</span></p>';
    }
 
    // pass URL-args to graph-generation-script
