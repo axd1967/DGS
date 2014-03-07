@@ -3173,6 +3173,11 @@ span.TWarning {
    color: darkred;
 }
 
+span.TWarningMsg {
+   font-size: 90%;
+   color: teal;
+}
+
 span.TJoinErr,  td.TJoinErr  { background: #ff6347; /*red*/ }
 span.TJoinWarn, td.TJoinWarn { background: #ffb500; /*orange*/ }
 span.TJoinInv,  td.TJoinInv  { background: #ffe840; /*yellow*/ }

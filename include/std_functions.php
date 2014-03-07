@@ -3585,14 +3585,14 @@ function buildErrorListString( $errmsg, $errors, $colspan=0, $safe=true, $linecl
       foreach ( $errors as $err )
          $out .= "<li>" . span($lineclass, ($safe ? make_html_safe($err, 'line') : $err)) . "\n";
       $out .= "</ul>\n";
-      $out = span('ErrorMsg', ( $errmsg ? "$errmsg:<br>\n" : '' )) . $out;
+      $out = span($errclass, ( $errmsg ? "$errmsg:<br>\n" : '' )) . $out;
       return "<td colspan=\"$colspan\">$out</td>";
    }
 }//buildErrorListString
 
-function buildWarnListString( $warnmsg, $warnings )
+function buildWarnListString( $warnmsg, $warnings, $colspan=0 )
 {
-   return buildErrorListString( $warnmsg, $warnings, 0, true, 'TWarning', 'WarnMsg' );
+   return buildErrorListString( $warnmsg, $warnings, $colspan, true, 'TWarning', 'WarnMsg' );
 }
 
 /*!

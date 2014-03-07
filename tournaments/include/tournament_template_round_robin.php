@@ -266,9 +266,9 @@ abstract class TournamentTemplateRoundRobin extends TournamentTemplate
          if ( count($arr) )
          {
             $warnings[] =
-               sprintf( T_("There are the following users marked as pool winners with a bigger rank <br>\n"
-                        .  "than the pool-winner rank [%s] defined for this round (which is either a mistake <br>\n"
-                        .  "or done intentionally by one of the tournament directors)."),
+               sprintf( T_("There are the following users marked as pool winners with a bigger rank \n"
+                        .  "than the pool-winner rank [%s] defined for this round (which is either a mistake \n"
+                        .  "or done intentionally by one of the tournament directors):"),
                   $tround->PoolWinnerRanks ) . "<br>\n" . implode("<br>\n", $arr);
          }
       }

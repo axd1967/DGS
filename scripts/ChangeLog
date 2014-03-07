@@ -11,6 +11,18 @@ Release [2013-08-11] - DGS 1.0.16 - tag [release-1_0_16-20130811] on (later) bra
 ChangeLog
 ------------------------------------------------------------------
 
+2014-03-07 jug
+
+   * tournaments/include/tournament_template_round_robin.php (TournamentTemplateRoundRobin.check_auto_poolwinners),
+     include/std_functions.php (buildErrorListString, buildWarnListString),
+     skins/dragon/screen.css,
+     tournaments/roundrobin/edit_ranks.php:
+   - added same check for pool-winners on edit-ranks for round-robin tournaments as
+     for tournament-round PLAY-to-DONE status-change showing errors about missing actions
+     before completing round and warnings about it
+   - for round-robin rank-editing show rank-stats and perform pool-winners-check
+     also if tournament-round-status prevents actions
+
 2014-02-07 jug
 
    * statistics.php (show_stats_default):

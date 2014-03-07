@@ -59,7 +59,7 @@ $GLOBALS['ThePage'] = new Page('TournamentRankEditor');
 /* Actual REQUEST calls used:
      tid=                                          : edit tournament pool ranks
      tid=&uid=                                     : edit rank of single user
-     t_stats&tid=                                  : show rank stats
+     t_stats&tid=                                  : show rank stats + pool-winners-check
      t_fillranks&tid=                              : fill ranks for all finished pools
      t_setpoolwinners&tid=                         : set pool winners for all finished pools
      t_exec&tid=&action=&rank_from=&rank_to=&pool= : execute action on ranks
@@ -110,8 +110,9 @@ $GLOBALS['ThePage'] = new Page('TournamentRankEditor');
 
    // ---------- Process actions ------------------------------------------------
 
-   $result_notes = null;
-   $rstable = null;
+   $result_notes = $rstable = null;
+   $show_rank_sum = false;
+   $show_stats = @$_REQUEST['t_stats'];
    $has_errors = count($errors);
    if ( !$has_errors )
    {
@@ -139,25 +140,28 @@ $GLOBALS['ThePage'] = new Page('TournamentRankEditor');
             $tpool_user->Rank = $rank_value;
       }
 
-      if ( @$_REQUEST['t_stats'] || @$_REQUEST['t_exec'] || @$_REQUEST['t_userexec'] || @$_REQUEST['t_setrank'] )
-      {
-         $tp_regcount =
-            TournamentParticipant::count_tournament_participants( $tid, TP_STATUS_REGISTER, $round + 1, /*NextR*/false );
-
-         // count ranks for current round over all pools
-         $rank_counts = TournamentPool::count_tournament_pool_ranks( $tid, $round );
-         $rank_summary = new RankSummary( $page, $rank_counts, $tp_regcount );
-         $rstable = $rank_summary->make_table_rank_summary();
-         $result_notes = $rank_summary->build_notes();
-      }
+      if ( $show_stats || @$_REQUEST['t_exec'] || @$_REQUEST['t_userexec'] || @$_REQUEST['t_setrank'] )
+         $show_rank_sum = true;
       elseif ( @$_REQUEST['t_fillranks'] )
-      {
          $result_notes = TournamentRoundHelper::fill_ranks_tournament_pool( $tround );
-      }
       elseif ( @$_REQUEST['t_setpoolwinners'] )
-      {
          $result_notes = TournamentRoundHelper::fill_pool_winners_tournament_pool( $tround );
-      }
+   }
+
+   $pw_errors = $pw_warnings = null;
+   if ( $show_rank_sum || $show_stats )
+   {
+      $tp_regcount =
+         TournamentParticipant::count_tournament_participants( $tid, TP_STATUS_REGISTER, $round + 1, /*NextR*/false );
+
+      // count ranks for current round over all pools
+      $rank_counts = TournamentPool::count_tournament_pool_ranks( $tid, $round );
+      $rank_summary = new RankSummary( $page, $rank_counts, $tp_regcount );
+      $rstable = $rank_summary->make_table_rank_summary();
+      $result_notes = $rank_summary->build_notes();
+
+      if ( $show_stats )
+         list( $pw_errors, $pw_warnings ) = $ttype->checkPoolWinners( $tourney, $tround );
    }
 
    // --------------- Tournament-Pool-Ranks EDIT form --------------------
@@ -205,9 +209,9 @@ $GLOBALS['ThePage'] = new Page('TournamentRankEditor');
 
    $tform->add_row( array(
          'CELL', 1, '',
-         'SUBMITBUTTONX', 't_stats', T_('Show Rank Stats#tourney'), $disable_submit,
+         'SUBMITBUTTON', 't_stats', T_('Show Rank Stats#tourney'),
          'CELL', 1, '',
-         'TEXT', T_('Show counts of all ranks + Show rank-actions.#tourney'), ));
+         'TEXT', T_('Show counts of all ranks & rank-actions + Check Pool Winners.#tourney'), ));
 
    $tform->add_row( array(
          'CELL', 1, '',
@@ -221,7 +225,7 @@ $GLOBALS['ThePage'] = new Page('TournamentRankEditor');
          'CELL', 1, '',
          'TEXT', sprintf( T_('Set pool winners with ranks %s for finished pools.'), '1..' . $tround->PoolWinnerRanks) ));
 
-   if ( (@$_REQUEST['t_stats'] || @$_REQUEST['t_exec']) && !$uid )
+   if ( !$has_errors && (@$_REQUEST['t_stats'] || @$_REQUEST['t_exec']) && !$uid )
    {
       $arr_ranks = array_value_to_key_and_value( $rank_summary->get_ranks() );
       $arr_ranks_to = array( '' => '=' ) + $arr_ranks;
@@ -288,10 +292,22 @@ $GLOBALS['ThePage'] = new Page('TournamentRankEditor');
    if ( !is_null($rstable) )
    {
       $rstable->echo_table();
-      //TODO TODO edit_ranks: add check with warnings if TPool.Rank > PoolWinnersRank (similar to check on TR-stat-chg PLAY->DONE)
+
+      if ( is_array($pw_errors) || is_array($pw_warnings) )
+      {
+         $out = array();
+         if ( count(@$pw_errors) )
+            $out[] = "<tr>" . buildErrorListString(T_('Errors'), $pw_errors, 1) . "</tr>\n";
+         echo "</tr></table>\n";
+         if ( count(@$pw_warnings) )
+            $out[] = "<tr>" . buildErrorListString(T_('Warnings'), $pw_warnings, 1, true, 'TWarningMsg', 'WarnMsg') . "</tr>\n";
+         if ( count($out) == 0 )
+            $out[] = "<tr><td>" . T_('No errors or warnings found.#tourney') . "<br><br></td></tr>\n";
+         echo "<table>\n<tr><th>", T_('Pool Winners Check').':', "</th></tr>\n", implode('', $out), "</table>\n";
+      }
    }
    if ( !is_null($result_notes) )
-      echo_notes( 'edittournamentpoolrankTable', '', $result_notes );
+      echo_notes( 'edittournamentpoolrankTable', T_('Rank Summary Notes#tourney').':', $result_notes, false );
 
 
    $menu_array = array();
