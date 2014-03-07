@@ -244,7 +244,7 @@ class TournamentStatus
             break;
       }
       if ( $err_count < 0 )
-         $this->errors[] = sprintf( T_('Actually more than %s errors occured, but output was limited.'), $limit_err_count );
+         $this->errors[] = sprintf( T_('More than %s errors occured, so output was limited.#tourney'), $limit_err_count );
 
       // check tournament-type specific checks
       $this->errors = array_merge( $this->errors,
