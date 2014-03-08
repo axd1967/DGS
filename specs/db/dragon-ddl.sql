@@ -1197,7 +1197,8 @@ CREATE TABLE IF NOT EXISTS `TournamentParticipant` (
   PRIMARY KEY  (`ID`),
   KEY `uid` (`uid`),
   KEY `tid_status` (`tid`,`Status`),
-  KEY `tidStartRound` (`tid`,`StartRound`)
+  KEY `tidStartRound` (`tid`,`StartRound`),
+  KEY `tidNextRound` (`tid`,`NextRound`)
 ) ENGINE=MyISAM  DEFAULT CHARSET=latin1;
 
 -- --------------------------------------------------------

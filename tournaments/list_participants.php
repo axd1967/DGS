@@ -83,8 +83,8 @@ $GLOBALS['ThePage'] = new Page('TournamentParticipantList');
    $tpfilter->add_filter( 5, 'Rating', 'TPP.Rating2', true);
    if ( $allow_edit_tourney )
       $tpfilter->add_filter( 8, 'Selection', $status_filter_array, true);
-   $tpfilter->add_filter(10, 'Numeric', 'TP.StartRound', true,
-         array( FC_SIZE => 4 ));
+   $tpfilter->add_filter(10, 'Numeric', 'TP.NextRound', true,
+         array( FC_SIZE => 4, FC_FNAME => 'round' ));
    $tpfilter->add_filter(11, 'Rating', 'TP.Rating', true);
    $tpfilter->add_filter(12, 'RelativeDate', 'TP.Created', true,
          array( FC_TIME_UNITS => FRDTU_ALL_ABS, FC_SIZE => 6 ));
@@ -112,7 +112,7 @@ $GLOBALS['ThePage'] = new Page('TournamentParticipantList');
    $tptable->add_tablehead( 8, T_('Status#header'), 'Enum', ($allow_edit_tourney ? TABLE_NO_HIDE : 0), 'Status+');
    if ( $allow_edit_tourney )
       $tptable->add_tablehead( 9, T_('Flags#header'), 'Enum', 0, 'Flags+');
-   $tptable->add_tablehead(10, T_('Round#header'), 'Number', 0, 'StartRound-');
+   $tptable->add_tablehead(10, T_('Round#header'), 'Number', 0, 'NextRound-');
    $tptable->add_tablehead(15, new TableHead( T_('Running games'), 'images/table.gif'), 'ImagesLeft', TABLE_NO_SORT);
    $tptable->add_tablehead(11, T_('Tournament Rating#header'), 'Rating', 0, ( $has_tp_rating ? 'TP.Rating-' : 'Rating2-' ));
    $tptable->add_tablehead(16, T_('Finished#header'), 'Number', 0, 'Finished-');

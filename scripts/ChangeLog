@@ -13,6 +13,12 @@ ChangeLog
 
 2014-03-08 jug
 
+   * tournaments/list_participants.php, tournaments/manage_tournament.php,
+     specs/db/dragon-ddl.sql:
+   - added link on tourney-management-page to tournament-participants-list for current round
+   - filter tournament-participants-list on NextRound as StartRound is only relevant
+     for registration-checks but need list for pooling higher rounds
+
    * tournaments/include/tournament_pool.php  (TournamentPool.check_pools, ~.check_pools_game_integrity),
      tournaments/roundrobin/edit_pairing.php:
    - show pool-summary also if tournament/round-status prevents edit
