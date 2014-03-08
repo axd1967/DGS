@@ -651,7 +651,36 @@ class TournamentPool
 
       $pool_summary = $poolTables->calc_pool_summary( $games_per_challenge );
       if ( $only_summary ) // load only summary
+      {
+         // check game-counts integrity for all pools
+         $arr_game_counts = TournamentPool::check_pools_game_integrity( $tround );
+         $cnt_miss_games = $cnt_bad_games = 0;
+         foreach ( $pool_summary as $pool => $arr )
+         {
+            $cnt_expected_games = $arr[2];
+            if ( $arr_game_counts[$pool] )
+            {
+               list( $cnt_tgames, $cnt_games ) = $arr_game_counts[$pool];
+               if ( $cnt_tgames != $cnt_games || $cnt_expected_games != $cnt_tgames )
+               {
+                  if ( $cnt_expected_games != $cnt_tgames )
+                     ++$cnt_miss_games;
+                  if ( $cnt_tgames != $cnt_games )
+                     ++$cnt_bad_games;
+
+                  $pool_summary[$pool][1][] =
+                     sprintf( T_('Inconsistency: expected %s games, but have: %s TGames & %s Games#tourney'),
+                        $cnt_expected_games, $cnt_tgames, $cnt_games );
+               }
+            }
+         }
+         if ( $cnt_miss_games )
+            $errors[] = T_('Found inconsistencies requiring partial restart to create missing tournament games.#tourney');
+         if ( $cnt_bad_games )
+            $errors[] = T_('Found game inconsistencies (TGames!=Games). Contact tournament-admin for assistance!#tourney');
+
          return array( $errors, $pool_summary );
+      }//only-summary
 
 
       $arr_counts = array(); // [ pool => #users, ... ]
@@ -739,6 +768,31 @@ class TournamentPool
 
       return array( $errors, $pool_summary );
    }//check_pools
+
+   /*!
+    * \brief checks game integrity for pools of given tournament-round.
+    * \return count of TournamentGames- and respective Games-entries (which should be the same) for each pool in array:
+    *       array( pool => array( TournamentGames-count, Games-count ), ... )
+    */
+   public static function check_pools_game_integrity( $tround )
+   {
+      $tid = $tround->tid;
+      $round_id = $tround->ID;
+
+      $qsql = new QuerySQL(
+         SQLP_FIELDS, 'Pool', 'COUNT(*) AS X_Count_TGames', 'SUM(IF(ISNULL(G.ID),0,1)) AS X_Count_Games',
+         SQLP_FROM, 'TournamentGames AS TG', 'LEFT JOIN Games as G ON G.ID=TG.gid',
+         SQLP_WHERE, "TG.tid=$tid", "TG.Round_ID=$round_id",
+         SQLP_GROUP, 'Pool' );
+
+      $result = db_query( "TournamentPool:check_pools_game_integrity($tid,$round_id)", $qsql->get_select() );
+      $arr = array();
+      while ( $row = mysql_fetch_array( $result ) )
+         $arr[$row['Pool']] = array( $row['X_Count_TGames'], $row['X_Count_Games'] );
+      mysql_free_result($result);
+
+      return $arr;
+   }//check_pools_game_integrity
 
    /*!
     * \brief Updates TournamentPool.Rank with given rank for specified TournamentPool.ID(s).

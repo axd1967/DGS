@@ -102,9 +102,9 @@ $GLOBALS['ThePage'] = new Page('TournamentPairEdit', PAGEFLAG_IMPLICIT_FLUSH ); 
          "<br><br>\n" . $lock_errtext;
    }
 
-   $arr_pool_summary = null;
-   if ( count($errors) == 0 && !$do_pair )
-      list( $errors, $arr_pool_summary ) = TournamentPool::check_pools( $tround, /*only-sum*/true );
+   $arr_pool_summary = $pool_errors = null;
+   if ( !$do_pair )
+      list( $pool_errors, $arr_pool_summary ) = TournamentPool::check_pools( $tround, /*only-sum*/true );
 
 
    // --------------- Tournament-Pairing EDIT form --------------------
@@ -173,6 +173,9 @@ $GLOBALS['ThePage'] = new Page('TournamentPairEdit', PAGEFLAG_IMPLICIT_FLUSH ); 
       echo sprintf( T_('Tournament Round #%s has %s pools with %s users going to play in %s games.'),
                     $round, $count_pools, $count_users, $count_games ), "<p></p>\n";
       $pstable->echo_table();
+
+      if ( count(@$pool_errors) )
+         echo "<br>\n", span('bold', buildErrorListString(T_('There are some errors'), $pool_errors) );
    }
 
    if ( $do_pair && !$has_errors )

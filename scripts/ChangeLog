@@ -13,6 +13,11 @@ ChangeLog
 
 2014-03-08 jug
 
+   * tournaments/include/tournament_pool.php  (TournamentPool.check_pools, ~.check_pools_game_integrity),
+     tournaments/roundrobin/edit_pairing.php:
+   - show pool-summary also if tournament/round-status prevents edit
+   - added pools-games integrity check on showing pool-summary with fix-directions
+
    * tournaments/list_participants.php:
    - show "StartRound; NextRound" on tournament-participant-list in round-column if values are different
 
