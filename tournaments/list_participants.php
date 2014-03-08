@@ -183,7 +183,7 @@ $GLOBALS['ThePage'] = new Page('TournamentParticipantList');
       if ( $allow_edit_tourney && $tptable->Is_Column_Displayed[ 9] )
          $row_str[ 9] = TournamentParticipant::getFlagsText( $tp->Flags );
       if ( $tptable->Is_Column_Displayed[10] )
-         $row_str[10] = $tp->StartRound;
+         $row_str[10] = $tp->StartRound . ( $tp->StartRound == $tp->NextRound ? '' : '; ' . $tp->NextRound );
       if ( $tptable->Is_Column_Displayed[11] )
          $row_str[11] = ($has_tp_rating) ? echo_rating($tp->Rating, true, $uid) : $user_rating_str;
       if ( $tptable->Is_Column_Displayed[12] )
