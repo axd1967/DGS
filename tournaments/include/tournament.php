@@ -323,6 +323,7 @@ class Tournament
 
       $data = $GLOBALS['ENTITY_TOURNAMENT']->newEntityData();
       $data->set_value( 'ID', $this->ID );
+      $data->set_value( 'Status', $this->Status );
       $data->set_value( 'Lastchanged', $this->Lastchanged );
       $data->set_value( 'ChangedBy', $this->ChangedBy );
       $result = $data->update( "Tournament.update_tournament_status(%s,$new_status)" );
