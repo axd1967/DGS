@@ -42,6 +42,11 @@ ChangeLog
    - added link on tourney-management-page to tournament-participants-list for current round
    - filter tournament-participants-list on NextRound as StartRound is only relevant
      for registration-checks but need list for pooling higher rounds
+-----------
+-- added index for loading next-round tournament-participants
+ALTER TABLE TournamentParticipant
+   ADD KEY tidNextRound (tid,NextRound) ;
+-----------
 
    * tournaments/include/tournament_pool.php  (TournamentPool.check_pools, ~.check_pools_game_integrity),
      tournaments/roundrobin/edit_pairing.php:
