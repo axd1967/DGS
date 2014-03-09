@@ -13,6 +13,10 @@ ChangeLog
 
 2014-03-09 jug
 
+   * include/game_functions.php (GameAddTime.allow_add_time_opponent),
+     scripts/tests/GameAddTimeTest.php:
+   - allow adding-time to tournament-game detached from tournament
+
    * tournaments/include/tournament_ladder.php (class TournamentLadder, ~.add_outgoing_game,
        ~.get_outgoing_games, ~.build_linked_outgoing_games),
      tournaments/include/tournament_ladder_props.php (TournamentLadderProps.fill_ladder_running_games),
