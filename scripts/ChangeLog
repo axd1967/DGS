@@ -13,6 +13,32 @@ ChangeLog
 
 2014-03-09 jug
 
+   * tournaments/include/tournament_round_helper.php (TournamentRoundHelper.remove_tournament_round,
+       ~.set_tournament_round, ~.start_next_tournament_round),
+     tournaments/include/tournament_status.php (TournamentStatus.check_conditions_status_CLOSED):
+   - bugfix: moved check for tournament-participants for removing round in commented form to tournament-status-change to CLOSED
+   - bugfix: missed setting of variable with tournament-id and tournament-status
+   - bugfix: adding new tournament-round overwrites errors-array missing on some errors
+   - optimize preparing next round by omitting double-check of missing next-rounders
+
+   * tournaments/include/tournament_games.php (TournamentGames.count_games_started):
+   - bugfix: must use INNER-join instead of LEFT-join for consistency-count of Games-entries,
+     because Games-table has no knowledge of T-round;
+     value of check is diminished with this, but no chance to fix that without adding T-round
+     into Games-table
+
+   * tournaments/include/tournament_pool.php (TournamentPool.check_pools,
+       ~.mark_next_round_participation):
+   - bugfix: check for empty games-array with games-count for pools/game-consistency-check
+     on changing tournament-status
+   - bugfix: missed trailing space on concattening TournamentParticipant.ChangedBy-field on update
+
+   * tournaments/include/tournament.php (Tournament.update_tournament_status):
+   - bugfix: forgot to set Tournament.Status-field on tournament-status-update
+
+   * tournaments/roundrobin/edit_round_props.php:
+   - allow editing of tournament-round-properties only for tournament-round-status INIT
+
    * tournaments/include/tournament_pool.php (TournamentPool.build_query_sql,
        ~.exists_tournament_pool, ~.count_tournament_pool, ~.count_tournament_pool_users,
        ~.count_tournament_pool_ranks, ~.count_tournament_pool_games, ~.load_tournament_pool_bad_user,

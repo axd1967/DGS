@@ -269,10 +269,10 @@ class TournamentRoundHelper
     */
    public static function add_new_tournament_round( $tourney, &$errors, $check_only, $set_curr_round=false )
    {
-      $errors = array();
       $ttype = TournamentFactory::getTournament($tourney->WizardType);
       $t_limits = $ttype->getTournamentLimits();
 
+      $errors = array();
       if ( $tourney->Rounds >= TROUND_MAX_COUNT ) // check for static-max T-rounds
          $errors[] = sprintf( T_('Maximum of allowed tournament rounds of %s has been reached.'), TROUND_MAX_COUNT );
       $errors = array_merge( $errors, $t_limits->check_MaxRounds( $tourney->Rounds + 1, $tourney->Rounds ) );
@@ -308,12 +308,6 @@ class TournamentRoundHelper
       if ( $tround->Round != $tourney->Rounds )
          $errors[] = sprintf( T_('You can only remove the last tournament round #%s.'), $tourney->Rounds );
 
-      $tp_count = TournamentParticipant::count_tournament_participants(
-         $tourney->ID, /*all-stat*/null, $tround->Round, /*NextR*/true );
-      if ( $tp_count > 0 )
-         $errors[] = sprintf( T_('There are %s tournament participants registered to play in round %s.'),
-            $tp_count, $tround->Round );
-
       $cnt_games = TournamentGames::count_tournament_games( $tourney->ID, $tround->ID, array() );
       if ( $cnt_games > 0 )
          $errors[] = sprintf( T_('There are %s tournament games for round %s.'), $cnt_games, $tround->Round );
@@ -339,8 +333,8 @@ class TournamentRoundHelper
    /*! \brief Sets current tournament-round updating Tournament.CurrentRound. */
    public static function set_tournament_round( $tourney, $new_round, &$errors, $check_only )
    {
-      $tround = TournamentCache::load_cache_tournament_round( 'TRH.set_tournament_round',
-         $tourney->ID, $tourney->CurrentRound );
+      $tid = $tourney->ID;
+      $tround = TournamentCache::load_cache_tournament_round( 'TRH.set_tournament_round', $tid, $tourney->CurrentRound );
 
       $errors = array();
       if ( $errmsg = TournamentRound::authorise_set_tround($tourney->Status) )
@@ -391,7 +385,7 @@ class TournamentRoundHelper
       $tround = TournamentCache::load_cache_tournament_round( 'TRH.start_next_tournament_round', $tid, $curr_round );
 
       $errors = array();
-      if ( !in_array($t_status, $ARR_TSTATUS) )
+      if ( !in_array($tourney->Status, $ARR_TSTATUS) )
          $errors[] = sprintf( T_('Starting next round is only allowed on tournament status [%s].'),
             build_text_list('Tournament::getStatusText', $ARR_TSTATUS) );
       if ( $tround->Status != TROUND_STATUS_DONE )
@@ -408,7 +402,11 @@ class TournamentRoundHelper
          $errors[] = sprintf( T_('Need at least %s players to start next round.'), 2 );
 
       if ( $check_only && $curr_round == $cnt_rounds )
-         self::add_new_tournament_round( $tourney, $errors, /*chk*/true );
+      {
+         self::add_new_tournament_round( $tourney, $errors_add_round, /*chk*/true );
+         if ( count($errors_add_round) )
+            $errors = array_merge( $errors, $errors_add_round );
+      }
 
       if ( count($errors) || $check_only )
          return false;
@@ -419,8 +417,12 @@ class TournamentRoundHelper
 
          // 1. prepare next round by setting TPs next-round participation (TPOOL->TP.NextRound from curr-round)
          if ( TournamentPool::count_tournament_pool_missing_next_rounders( $tid, $curr_round ) > 0 )
+         {
             TournamentPool::mark_next_round_participation( $tid, $curr_round );
-         if ( TournamentPool::count_tournament_pool_missing_next_rounders( $tid, $curr_round ) == 0 ) // re-check
+            if ( TournamentPool::count_tournament_pool_missing_next_rounders( $tid, $curr_round ) == 0 ) // re-check
+               $success |= 1;
+         }
+         else
             $success |= 1;
 
          // 2. switch tournament-status
