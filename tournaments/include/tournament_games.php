@@ -424,7 +424,8 @@ class TournamentGames
          SQLP_FIELDS, 'COUNT(*) AS X_Count',
          SQLP_FROM,
             'Games AS G',
-            "LEFT JOIN TournamentGames AS TG ON TG.gid=G.ID AND TG.tid=$tid AND TG.Round_ID=$round_id",
+            // NOTE: LEFT-JOIN would be better, but Games-table has no knowledge of T-round, so we have to equi-join with TGs
+            "INNER JOIN TournamentGames AS TG ON TG.gid=G.ID AND TG.tid=$tid AND TG.Round_ID=$round_id",
          SQLP_WHERE, "G.tid=$tid" );
 
       $row = mysql_single_fetch( "TournamentGames:count_games_started($tid,$round_id)", $qsql->get_select() );
