@@ -283,6 +283,10 @@ class TournamentStatus
       $this->check_conditions_unfinished_tourney_games();
 
       //TODO TODO T-stat-chg *->CLOSED: check for tournament-results (warnings?);; maybe check for TPs with higher rounds but not participated yet;; maybe check for last round with >1 pool? (perhaps ok);; for TRR: all T-rounds must be finished
+      //TODO may use adjusted:
+      //$tp_count = TournamentParticipant::count_tournament_participants( $tourney->ID, /*all-stat*/null, $tround->Round, /*NextR*/true );
+      //if ( $tp_count > 0 )
+         //$errors[] = sprintf( T_('There are %s tournament participants registered to play in round %s.'), $tp_count, $tround->Round );
    }
 
 
