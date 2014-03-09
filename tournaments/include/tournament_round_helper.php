@@ -262,8 +262,12 @@ class TournamentRoundHelper
    }//create_pairing_games
 
 
-   /*! \brief Adds new tournament-round and updates Tournament.Rounds, returning new TournamentRound-object. */
-   public static function add_new_tournament_round( $tourney, &$errors, $check_only )
+   /*!
+    * \brief Adds new tournament-round and updates Tournament.Rounds, returning new TournamentRound-object.
+    * \param $set_curr_round true = sets current round to newly added round; false = no change of current round
+    * \return new TournamentRound on success; null on failure
+    */
+   public static function add_new_tournament_round( $tourney, &$errors, $check_only, $set_curr_round=false )
    {
       $errors = array();
       $ttype = TournamentFactory::getTournament($tourney->WizardType);
@@ -279,7 +283,7 @@ class TournamentRoundHelper
       {//HOT-section to add T-round and updating T-data
          $tround = TournamentRound::add_tournament_round( $tourney->ID );
          if ( !is_null($tround) )
-            $success = $tourney->update_rounds( 1 );
+            $success = $tourney->update_rounds( 1, ($set_curr_round ? $tround->Round : 0) );
       }
       ta_end();
 
@@ -310,6 +314,13 @@ class TournamentRoundHelper
          $errors[] = sprintf( T_('There are %s tournament participants registered to play in round %s.'),
             $tp_count, $tround->Round );
 
+      $cnt_games = TournamentGames::count_tournament_games( $tourney->ID, $tround->ID, array() );
+      if ( $cnt_games > 0 )
+         $errors[] = sprintf( T_('There are %s tournament games for round %s.'), $cnt_games, $tround->Round );
+
+      if ( TournamentPool::exists_tournament_pool( $tourney->ID, $tround->Round ) )
+         $errors[] = sprintf( T_('There are existing tournament pools for round %s.'), $tround->Round );
+
       if ( count($errors) || $check_only )
          return false;
 
@@ -339,16 +350,14 @@ class TournamentRoundHelper
             build_range_text(1, $tourney->Rounds) );
       if ( $tround->Round == $new_round )
          $errors[] = T_('Current tournament round is already set to selected round.');
-      if ( $tround->Status != TROUND_STATUS_DONE )
+      if ( $tround->Status != TROUND_STATUS_DONE && $new_round > $tround->Round )
          $errors[] = sprintf( T_('Current tournament round %s must be finished before switching to next.'),
             $tourney->CurrentRound );
-      if ( $tround->Status == TROUND_STATUS_DONE && $new_round != $tround->Round + 1 )
-         $errors[] = sprintf( T_('You are only allowed to switch to the next tournament round %s.'),
-            $tround->Round + 1 );
 
-      //TODO TODO check if T-round finalized (copied TPOOL->TP.NextRnd)
-
-      //TODO TODO set-T-rnd: automatically check + do switch T-status back to PLAY->PAIR !? YES ... if so, have to do the same checks as in REG->PAIR T-status-change !? ;; perhaps better to put this into separate use-case "switch to next-round" => check if TStatus->check_status_change() can be used here (may need CurrRound already changed)
+      $cnt_missing_next_rounders = TournamentPool::count_tournament_pool_missing_next_rounders( $tid, $new_round - 1 );
+      if ( $cnt_missing_next_rounders )
+         $errors[] = sprintf( T_('Missing next-round-mark for %s users (with "start next round" on previous tournament round %s).'),
+            $cnt_missing_next_rounders, $new_round - 1 );
 
       if ( count($errors) || $check_only )
          return false;
@@ -361,6 +370,80 @@ class TournamentRoundHelper
 
       return $success;
    }//set_tournament_round
+
+
+   /*!
+    * \brief Starts next round after current round is finished.
+    *    Executed steps (can be partly done already):
+    *       1. prepare next round by setting TPs next-round participation
+    *       2. switch tournament-status to PAIR
+    *       3. add new round + set it as current round
+    * \return success: 0=failure, otherwise bitmask with success of steps: step1=1, step2=2, step3=4; should be 7 for full success
+    */
+   public static function start_next_tournament_round( $tourney, &$errors, $check_only )
+   {
+      static $ARR_TSTATUS = array( TOURNEY_STATUS_PAIR, TOURNEY_STATUS_PLAY );
+
+      $cnt_rounds = $tourney->Rounds;
+      $curr_round = $tourney->CurrentRound;
+      $next_round = $curr_round + 1;
+      $tid = $tourney->ID;
+      $tround = TournamentCache::load_cache_tournament_round( 'TRH.start_next_tournament_round', $tid, $curr_round );
+
+      $errors = array();
+      if ( !in_array($t_status, $ARR_TSTATUS) )
+         $errors[] = sprintf( T_('Starting next round is only allowed on tournament status [%s].'),
+            build_text_list('Tournament::getStatusText', $ARR_TSTATUS) );
+      if ( $tround->Status != TROUND_STATUS_DONE )
+         $errors[] = sprintf( T_('Current tournament round %s must be finished before starting new round.'),
+            $curr_round );
+      if ( $curr_round != $cnt_rounds )
+         $errors[] = sprintf( T_('Current tournament round must be last finished round %s. Contact tournament-admin for support!'),
+            $cnt_rounds );
+
+      // need min. 2 players for next-round (participants with according StartRound and/or next-rounders from current round)
+      $cnt_tp_nextround = TournamentParticipant::count_tournament_participants( $tid, null, $next_round, /*NextRnd*/true );
+      $cnt_tpool_next_rounders = TournamentPool::count_tournament_pool_next_rounders( $tid, $curr_round );
+      if ( $cnt_tp_nextround + $cnt_tpool_next_rounders < 2 )
+         $errors[] = sprintf( T_('Need at least %s players to start next round.'), 2 );
+
+      if ( $check_only && $curr_round == $cnt_rounds )
+         self::add_new_tournament_round( $tourney, $errors, /*chk*/true );
+
+      if ( count($errors) || $check_only )
+         return false;
+
+      ta_begin();
+      {//HOT-section to start new round
+         $success = 0;
+
+         // 1. prepare next round by setting TPs next-round participation (TPOOL->TP.NextRound from curr-round)
+         if ( TournamentPool::count_tournament_pool_missing_next_rounders( $tid, $curr_round ) > 0 )
+            TournamentPool::mark_next_round_participation( $tid, $curr_round );
+         if ( TournamentPool::count_tournament_pool_missing_next_rounders( $tid, $curr_round ) == 0 ) // re-check
+            $success |= 1;
+
+         // 2. switch tournament-status
+         if ( $success & 1 )
+         {
+            if ( $tourney->Status != TOURNEY_STATUS_PAIR )
+            {
+               if ( $tourney->update_tournament_status( TOURNEY_STATUS_PAIR ) )
+                  $success |= 2;
+            }
+            else
+               $success |= 2;
+         }
+
+         // 3. add new round + set it as current round
+         // NOTE: must be atomar operation and last step (b/c current-round changed, which is a precondition for steps1+3)
+         if ( (($success & 3) == 3) && self::add_new_tournament_round( $tourney, $errors, /*chk*/false, /*set-curr-rnd*/true ) )
+            $success |= 4;
+      }
+      ta_end();
+
+      return $success;
+   }//start_next_tournament_round
 
 
    /*!

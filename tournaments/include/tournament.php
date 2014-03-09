@@ -315,6 +315,21 @@ class Tournament
       return $result;
    }//update_rounds
 
+   /*! \brief Updates Tournament.Status only. */
+   public function update_tournament_status( $new_status )
+   {
+      $this->setStatus( $new_status );
+      $this->Lastchanged = $GLOBALS['NOW'];
+
+      $data = $GLOBALS['ENTITY_TOURNAMENT']->newEntityData();
+      $data->set_value( 'ID', $this->ID );
+      $data->set_value( 'Lastchanged', $this->Lastchanged );
+      $data->set_value( 'ChangedBy', $this->ChangedBy );
+      $result = $data->update( "Tournament.update_tournament_status(%s,$new_status)" );
+      self::delete_cache_tournament( 'Tournament.update_tournament_status', $this->ID );
+      return $result;
+   }//update_tournament_status
+
    /*! \brief Returns TLOG_TYPE_... if given user can edit tournament directors; false otherwise. */
    public function allow_edit_directors( $uid )
    {

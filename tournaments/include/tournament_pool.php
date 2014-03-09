@@ -185,6 +185,10 @@ class TournamentPool
     */
    public static function build_query_sql( $tid=0, $round=0, $pool=0 )
    {
+      $tid = (int)$tid;
+      $round = (int)$round;
+      $pool = (int)$pool;
+
       $qsql = $GLOBALS['ENTITY_TOURNAMENT_POOL']->newQuerySQL('TPOOL');
       if ( $tid > 0 )
          $qsql->add_part( SQLP_WHERE, "TPOOL.tid='$tid'" );
@@ -215,8 +219,12 @@ class TournamentPool
    /*! \brief Checks, if TournamentPool-entry exists in db; false if no entry found. */
    public static function exists_tournament_pool( $tid, $round, $pool=0, $uid=null )
    {
-      $query = sprintf( "SELECT 1 FROM TournamentPool WHERE tid=%s AND Round=%s", (int)$tid, (int)$round );
-      if ( is_numeric($pool) && $pool > 0 )
+      $tid = (int)$tid;
+      $round = (int)$round;
+      $pool = (int)$pool;
+
+      $query = "SELECT 1 FROM TournamentPool WHERE tid=$tid AND Round=$round";
+      if ( $pool > 0 )
          $query .= " AND Pool=$pool";
       if ( !is_null($uid) && is_numeric($uid) )
          $query .= " AND uid=$uid";
@@ -232,14 +240,18 @@ class TournamentPool
     */
    public static function count_tournament_pool( $tid, $round, $pool=0, $count_uid=false )
    {
+      $tid = (int)$tid;
+      $round = (int)$round;
+
       $query = 'SELECT COUNT(*) AS X_CountAll, COUNT(DISTINCT Pool) AS X_CountPools, '
          . ( $count_uid ? 'COUNT(DISTINCT uid)' : '0' ) . ' AS X_CountUsers '
-         . sprintf( 'FROM TournamentPool WHERE tid=%s AND Round=%s', (int)$tid, (int)$round );
+         . "FROM TournamentPool WHERE tid=$tid AND Round=$round";
       if ( is_numeric($pool) && $pool > 0 )
          $query .= " AND Pool=$pool";
+
       $row = mysql_single_fetch( "TournamentPool:count_tournament_pool($tid,$round,$pool)", $query );
       return ($row) ? array( $row['X_CountAll'], $row['X_CountPools'], $row['X_CountUsers'] ) : array( 0, 0, 0 );
-   }
+   }//count_tournament_pool
 
    /*!
     * \brief Returns array( pool => user-count ) for given tournament-id and round.
@@ -247,13 +259,16 @@ class TournamentPool
     */
    public static function count_tournament_pool_users( $tid, $round, $rank=null )
    {
+      $tid = (int)$tid;
+      $round = (int)$round;
+
       if ( !is_null($rank) && is_numeric($rank) )
          $where_rank = ( $rank == TPOOLRK_NO_RANK ) ? "AND Rank <= $rank" : "AND Rank > $rank";
       else
          $where_rank = '';
-      $query = sprintf( "SELECT SQL_SMALL_RESULT Pool, COUNT(*) AS X_Count FROM TournamentPool "
-         . "WHERE tid=%s AND Round=%s $where_rank GROUP BY Pool", (int)$tid, (int)$round );
-      $result = db_query( "TournamentPool:count_tournament_pool_users($tid,$round,$rank)", $query );
+      $result = db_query( "TournamentPool:count_tournament_pool_users($tid,$round,$rank)",
+         "SELECT SQL_SMALL_RESULT Pool, COUNT(*) AS X_Count FROM TournamentPool " .
+         "WHERE tid=$tid AND Round=$round $where_rank GROUP BY Pool" );
 
       $arr = array();
       while ( $row = mysql_fetch_assoc($result) )
@@ -266,9 +281,12 @@ class TournamentPool
    /*! \brief Returns array( rank => count ) for given tournament-id and round. */
    public static function count_tournament_pool_ranks( $tid, $round )
    {
-      $query = sprintf( "SELECT Rank, COUNT(*) AS X_Count FROM TournamentPool "
-         . "WHERE tid=%s AND Round=%s GROUP BY Rank", (int)$tid, (int)$round );
-      $result = db_query( "TournamentPool:count_tournament_pool_ranks($tid,$round)", $query );
+      $tid = (int)$tid;
+      $round = (int)$round;
+
+      $result = db_query( "TournamentPool:count_tournament_pool_ranks($tid,$round)",
+         "SELECT Rank, COUNT(*) AS X_Count FROM TournamentPool " .
+         "WHERE tid=$tid AND Round=$round GROUP BY Rank" );
 
       $arr = array();
       while ( $row = mysql_fetch_assoc($result) )
@@ -281,9 +299,12 @@ class TournamentPool
    /*! \brief Returns expected sum of games for all pools for given tournament and round. */
    public static function count_tournament_pool_games( $tid, $round )
    {
-      $query = sprintf( "SELECT SQL_SMALL_RESULT Pool, COUNT(*) AS X_Count FROM TournamentPool "
-         . "WHERE tid=%s AND Round=%s GROUP BY Pool", (int)$tid, (int)$round );
-      $result = db_query( "TournamentPool:count_tournament_pool_games($tid,$round)", $query );
+      $tid = (int)$tid;
+      $round = (int)$round;
+
+      $result = db_query( "TournamentPool:count_tournament_pool_games($tid,$round)",
+         "SELECT SQL_SMALL_RESULT Pool, COUNT(*) AS X_Count FROM TournamentPool " .
+         "WHERE tid=$tid AND Round=$round GROUP BY Pool" );
 
       $games_per_challenge = TournamentRoundHelper::determine_games_per_challenge( $tid );
 
@@ -301,8 +322,11 @@ class TournamentPool
     */
    public static function load_tournament_pool_bad_user( $tid, $round )
    {
-      $query = "SELECT uid FROM TournamentPool WHERE tid=$tid AND Round=$round GROUP BY uid HAVING COUNT(*) > 1";
-      $result = db_query( "TournamentPool:load_tournament_pool_bad_user($tid,$round)", $query );
+      $tid = (int)$tid;
+      $round = (int)$round;
+
+      $result = db_query( "TournamentPool:load_tournament_pool_bad_user($tid,$round)",
+         "SELECT uid FROM TournamentPool WHERE tid=$tid AND Round=$round GROUP BY uid HAVING COUNT(*) > 1" );
 
       $arr_uids = array();
       while ( $row = mysql_fetch_assoc($result) )
@@ -942,9 +966,55 @@ class TournamentPool
          . " AND Rank >".TPOOLRK_RANK_ZONE // don't touch UNSET-ranks
          . $qpart_rank
          . ( $uid ? " AND uid=$uid LIMIT 1" : '' );
-      return db_query( "TournamentPool.execute_rank_action.update("
+      return db_query( "TournamentPool:execute_rank_action.update("
          . "$tid,$round,a$action,u$uid,$rank_from-$rank_to,p$pool)", $query );
    }//execute_rank_action_on_tournament_pools
+
+
+   /*! \brief Returns number of user marked as next-rounders/finalists for given tournament-id and round. */
+   public static function count_tournament_pool_next_rounders( $tid, $round )
+   {
+      $tid = (int)$tid;
+      $round = (int)$round;
+
+      $row = mysql_single_fetch( "TournamentPool:count_tournament_pool_next_rounders($tid,$round)",
+         "SELECT COUNT(*) AS X_Count FROM TournamentPool WHERE tid=$tid AND Round=$round AND Rank>0" );
+      return ($row) ? (int)@$row['X_Count'] : 0;
+   }//count_tournament_pool_next_rounders
+
+   /*! \brief Returns number of users marked as next-rounders without set TP.NextRound for next-round. */
+   public static function count_tournament_pool_missing_next_rounders( $tid, $round )
+   {
+      $tid = (int)$tid;
+      $round = (int)$round; // current-round
+      $next_round = $round + 1;
+
+      $row = mysql_single_fetch( "TournamentPool:count_tournament_pool_missing_next_rounders($tid,$round)",
+         "SELECT COUNT(*) AS X_Count " .
+         "FROM TournamentParticipant AS TP " .
+            "INNER JOIN TournamentPool AS TPOOL ON TPOOL.uid=TP.uid " .
+         "WHERE TPOOL.tid=$tid AND TPOOL.Round=$round AND TPOOL.Rank>0 " .
+            "AND TP.tid=$tid AND TP.NextRound < $next_round" );
+      return ($row) ? (int)@$row['X_Count'] : 0;
+   }//count_tournament_pool_missing_next_rounders
+
+   /*! \brief Sets TournamentParticipant.NextRound to next-round (round+1) for missing users marked as finalists/next-rounders in current round. */
+   public static function mark_next_round_participation( $tid, $round )
+   {
+      global $NOW, $player_row;
+      $tid = (int)$tid;
+      $round = (int)$round; // current-round
+      $next_round = $round + 1;
+      $changed_by = ( (string)@$player_row['Handle'] != '' ) ? @$player_row['Handle'] : UNKNOWN_VALUE;
+
+      return db_query( "TournamentPool:mark_next_round_participation.TP.update($tid,$round)",
+         "UPDATE TournamentParticipant AS TP " .
+            "INNER JOIN TournamentPool AS TPOOL ON TPOOL.uid=TP.uid " .
+         "SET TP.NextRound=$next_round, TP.Lastchanged=$NOW, " .
+            "TP.ChangedBy=RTRIM(CONCAT('[".mysql_addslashes($changed_by)."]',TP.ChangedBy)) " .
+         "WHERE TPOOL.tid=$tid AND TPOOL.Round=$round AND TPOOL.Rank>0 " .
+            "AND TP.tid=$tid AND TP.NextRound <= $round" );
+   }//mark_next_round_participation
 
    /*! \brief Returns array with default and slice-mode array for round-robin-tournament. */
    public static function get_slice_modes()

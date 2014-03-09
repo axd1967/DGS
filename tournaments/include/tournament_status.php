@@ -193,16 +193,14 @@ class TournamentStatus
    /*!
     * \brief Check if change to PAIR-tourney-status is allowed.
     * \note Normal allowed status-change is only REG-to-PAIR.
+    * \note IMPORTANT: Do NOT use these checks for PLAY-to-PAIR status-change as different checks for higher rounds are required!
     */
    public function check_conditions_status_PAIR()
    {
       global $base_path;
 
-      //TODO TODO T-stat-chg *->PAIR: Set-Round may automatically change T-status PLAY->PAIR (for next-round), but as fallback manual change may be needed (e.g. by admin (perhaps for TD as well));; be careful with this though, because some config checked here may be round-specific (setup after current-round is set !?)
       $this->check_expected_status( TOURNEY_STATUS_REGISTER );
       $this->check_basic_conditions_status_change();
-
-      //TODO TODO T-stat-chg *->PAIR: check for higher rounds must be done separately, but where?
 
       // check min/max participants-count for current round on TP.NextRound
       $curr_round = $this->tourney->CurrentRound;
@@ -284,7 +282,7 @@ class TournamentStatus
 
       $this->check_conditions_unfinished_tourney_games();
 
-      //TODO TODO T-stat-chg *->CLOSED: check for tournament-results
+      //TODO TODO T-stat-chg *->CLOSED: check for tournament-results (warnings?);; maybe check for TPs with higher rounds but not participated yet;; maybe check for last round with >1 pool? (perhaps ok);; for TRR: all T-rounds must be finished
    }
 
 
@@ -294,7 +292,6 @@ class TournamentStatus
     */
    public function check_conditions_status_DEL()
    {
-      //TODO TODO T-stat-chg *->DEL: are these the only conditions to finish a T !?
       $this->check_conditions_unfinished_tourney_games();
    }
 

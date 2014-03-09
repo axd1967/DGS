@@ -61,8 +61,8 @@ $GLOBALS['ThePage'] = new Page('TournamentRoundEditor');
      tre_set_confirm&tid=&round=    : sets selected round as the current round (confirmed)
      tre_stat&tid=&round=           : changes round status (forward to separate edit-round-status page)
      tre_cancel&tid=&round=         : cancel previous action
-     tre_final&tid=&round=          : finalize round
-     tre_fillwin&tid=&round=        : fill tournament winners
+     tre_next&tid=&round=           : start next round (needs confirmation)
+     tre_next_confirm&tid=&round=   : start next round (confirmed)
 */
 
    $tid = (int) @$_REQUEST['tid'];
@@ -95,9 +95,10 @@ $GLOBALS['ThePage'] = new Page('TournamentRoundEditor');
       : null;
 
    // init
+   $is_admin = TournamentUtils::isAdmin();
    $errors = $tstatus->check_edit_status(
       array( TOURNEY_STATUS_NEW, TOURNEY_STATUS_REGISTER, TOURNEY_STATUS_PAIR, TOURNEY_STATUS_PLAY ) );
-   if ( !TournamentUtils::isAdmin() && $tourney->isFlagSet(TOURNEY_FLAG_LOCK_ADMIN) )
+   if ( !$is_admin && $tourney->isFlagSet(TOURNEY_FLAG_LOCK_ADMIN) )
       $errors[] = $tourney->buildAdminLockText();
    $authorise_set_tround = !TournamentRound::authorise_set_tround( $tourney->Status );
 
@@ -116,12 +117,10 @@ $GLOBALS['ThePage'] = new Page('TournamentRoundEditor');
          TournamentRoundHelper::remove_tournament_round( $tourney, $tround, $action_errors, true );
       elseif ( @$_REQUEST['tre_set'] )
          TournamentRoundHelper::set_tournament_round( $tourney, $round, $action_errors, true );
-      elseif ( @$_REQUEST['tre_final'] )
-         TournamentRoundHelper::finalize_tournament_round( $tourney, $round, $action_errors, true ); //TODO TODO finalize T-round (copy TPOOL->TP.NextRnd)
-      elseif ( @$_REQUEST['tre_fillwin'] )
-         TournamentRoundHelper::fill_tournament_round_winners( $tourney, $round, $action_errors, true ); //TODO TODO fill T-winners (add T-Result from TP.NextRnd > CurrRnd)
+      elseif ( @$_REQUEST['tre_next'] )
+         TournamentRoundHelper::start_next_tournament_round( $tourney, $action_errors, true );
       // do confirmed actions
-      elseif ( @$_REQUEST['tre_add_confirm'] ) // add new T-round
+      elseif ( @$_REQUEST['tre_add_confirm'] && $is_admin ) // add new T-round
       {
          $new_tround = TournamentRoundHelper::add_new_tournament_round( $tourney, $action_errors, false );
          if ( !is_null($new_tround) )
@@ -131,7 +130,7 @@ $GLOBALS['ThePage'] = new Page('TournamentRoundEditor');
             jump_to("tournaments/roundrobin/edit_rounds.php?tid=$tid".URI_AMP."round=$round".URI_AMP."sysmsg=$sys_msg");
          }
       }
-      elseif ( @$_REQUEST['tre_del_confirm'] && !is_null($tround) ) // remove T-round
+      elseif ( @$_REQUEST['tre_del_confirm'] && !is_null($tround) && $is_admin ) // remove T-round
       {
          $success = TournamentRoundHelper::remove_tournament_round( $tourney, $tround, $action_errors, false );
          if ( $success )
@@ -140,7 +139,7 @@ $GLOBALS['ThePage'] = new Page('TournamentRoundEditor');
             jump_to("tournaments/roundrobin/edit_rounds.php?tid=$tid".URI_AMP."sysmsg=$sys_msg");
          }
       }
-      elseif ( @$_REQUEST['tre_set_confirm'] ) // set current T-round
+      elseif ( @$_REQUEST['tre_set_confirm'] && $is_admin ) // set current T-round
       {
          $success = TournamentRoundHelper::set_tournament_round( $tourney, $round, $action_errors, false );
          if ( $success )
@@ -149,23 +148,16 @@ $GLOBALS['ThePage'] = new Page('TournamentRoundEditor');
             jump_to("tournaments/roundrobin/edit_rounds.php?tid=$tid".URI_AMP."round=$round".URI_AMP."sysmsg=$sys_msg");
          }
       }
-      elseif ( @$_REQUEST['tre_final_confirm'] ) // finalize current T-round
+      elseif ( @$_REQUEST['tre_next_confirm'] ) // start next T-round
       {
-         $success = TournamentRoundHelper::finalize_tournament_round( $tourney, $round, $action_errors, false ); //TODO TODO finalize T-round (copy TPOOL->TP.NextRnd)
-         if ( $success )
+         $success = TournamentRoundHelper::start_next_tournament_round( $tourney, $action_errors, false );
+         if ( ($success & 7) == 7 )
          {
-            $sys_msg = urlencode( sprintf( T_('Tournament Round #%s finalized!'), $round ) );
-            jump_to("tournaments/roundrobin/edit_rounds.php?tid=$tid".URI_AMP."round=$round".URI_AMP."sysmsg=$sys_msg");
+            $sys_msg = urlencode( sprintf( T_('Next Tournament Round #%s started!'), $round + 1 ) );
+            jump_to("tournaments/roundrobin/edit_rounds.php?tid=$tid".URI_AMP."sysmsg=$sys_msg");
          }
-      }
-      elseif ( @$_REQUEST['tre_fillwin_confirm'] ) // fill T-winners
-      {
-         $success = TournamentRoundHelper::fill_tournament_round_winners( $tourney, $round, $action_errors, false ); //TODO TODO fill T-winners (add T-Result from TP.NextRnd > CurrRnd)
-         if ( $success )
-         {
-            $sys_msg = T_('Tournament winners set!');
-            jump_to("tournaments/roundrobin/edit_rounds.php?tid=$tid".URI_AMP."round=$round".URI_AMP."sysmsg=$sys_msg");
-         }
+         else
+            $action_errors[] = sprintf( T_('Starting next tournament round has failed with error-value [%s].'), $success );
       }
 
       if ( count($action_errors) )
@@ -213,26 +205,6 @@ $GLOBALS['ThePage'] = new Page('TournamentRoundEditor');
          'DESCRIPTION', T_('Actions#tourney'),
          'SUBMITBUTTON', 'tre_view', T_('View Round#tourney'), ));
 
-   if ( $tourney->Rounds < $max_rounds ) // valid to add T-round
-   {
-      $tform->add_row( array(
-            'TAB',
-            'SUBMITBUTTON', 'tre_add', T_('Add Round#tourney'), ));
-      if ( @$_REQUEST['tre_add'] && !$has_action_error )
-         echo_confirm( $tform, T_('Please confirm adding of a new tournament round'),
-            'tre_add', T_('Confirm add') );
-   }
-
-   if ( $tourney->Rounds > 1 ) // valid to remove T-round
-   {
-      $tform->add_row( array(
-            'TAB',
-            'SUBMITBUTTON', 'tre_del', T_('Remove Round#tourney'), ));
-      if ( @$_REQUEST['tre_del'] && !$has_action_error )
-         echo_confirm( $tform, sprintf( T_('Please confirm deletion of selected tournament round #%s'), $round ),
-            'tre_del', T_('Confirm deletion') );
-   }
-
    $tform->add_row( array(
          'TAB',
          'SUBMITBUTTON', 'tre_edit', T_('Edit Round Properties#tourney'), ));
@@ -244,35 +216,47 @@ $GLOBALS['ThePage'] = new Page('TournamentRoundEditor');
    $tform->add_empty_row();
    $tform->add_row( array(
          'TAB',
-         'SUBMITBUTTON', 'tre_final', T_('Finalize Round#tourney'),
-         'TEXT', sptext(T_('Prepare next round / Prepare tournament winners#tourney'), 1), ));
-   //TODO TODO add confirm-text w/ extra-info for finalize-round
-   if ( @$_REQUEST['tre_final'] && !$has_action_error )
-      ;
+         'SUBMITBUTTON', 'tre_next', T_('Start Next Round#tourney'),
+         'TEXT', sptext( T_('Prepare next round, Switch tournament-status, Add & set new round#tourney'), 1), ));
+   if ( @$_REQUEST['tre_next'] && !$has_action_error )
+      echo_confirm( $tform, T_('Please confirm starting next tournament round'), 'tre_next', T_('Confirm') );
 
-   if ( $tourney->CurrentRound == $tourney->Rounds )
+   if ( $is_admin )
    {
-      $tform->add_row( array(
-            'TAB',
-            'SUBMITBUTTON', 'tre_fillwin', T_('Fill Tournament Winners'),
-            'TEXT', sptext(T_('Set tournament winners'), 1), ));
-      //TODO TODO add confirm-text w/ extra-info for filling-T-winners
-      if ( @$_REQUEST['tre_fillwin'] && !$has_action_error )
-         ;
-   }
+      $tform->add_empty_row();
+      if ( $tourney->Rounds < $max_rounds ) // valid to add T-round
+      {
+         $tform->add_row( array(
+               'TAB',
+               'SUBMITBUTTON', 'tre_add', T_('Add Round#tourney'), ));
+         if ( @$_REQUEST['tre_add'] && !$has_action_error )
+            echo_confirm( $tform, T_('Please confirm adding of a new tournament round'),
+               'tre_add', T_('Confirm add') );
+      }
 
-   if ( $authorise_set_tround && ($tourney->Rounds > 1) ) // valid to set current T-round
-   {
-      $tform->add_row( array(
-            'TAB',
-            'SUBMITBUTTON', 'tre_set', T_('Set Current Round#tourney'),
-            'TEXT', sptext(T_('Switch to selected round#tourney'), 1), ));
-      if ( @$_REQUEST['tre_set'] && !$has_action_error )
-         echo_confirm( $tform,
-            sprintf( T_('Please confirm setting the current tournament round from #%s to #%s'),
-                     $tourney->CurrentRound, $round ),
-            'tre_set', T_('Confirm setting#tround') );
-   }
+      if ( $tourney->Rounds > 1 ) // valid to remove T-round
+      {
+         $tform->add_row( array(
+               'TAB',
+               'SUBMITBUTTON', 'tre_del', T_('Remove Round#tourney'), ));
+         if ( @$_REQUEST['tre_del'] && !$has_action_error )
+            echo_confirm( $tform, sprintf( T_('Please confirm deletion of selected tournament round #%s'), $round ),
+               'tre_del', T_('Confirm deletion') );
+      }
+
+      if ( $authorise_set_tround && ($tourney->Rounds > 1) ) // valid to set current T-round
+      {
+         $tform->add_row( array(
+               'TAB',
+               'SUBMITBUTTON', 'tre_set', T_('Set Current Round#tourney'),
+               'TEXT', sptext(T_('Switch to selected round#tourney'), 1), ));
+         if ( @$_REQUEST['tre_set'] && !$has_action_error )
+            echo_confirm( $tform,
+               sprintf( T_('Please confirm setting the current tournament round from #%s to #%s'),
+                        $tourney->CurrentRound, $round ),
+               'tre_set', T_('Confirm setting#tround') );
+      }
+   }//T-admin
 
 
    // GUI: show round info -------------
