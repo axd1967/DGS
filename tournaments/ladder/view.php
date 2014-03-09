@@ -148,7 +148,8 @@ $GLOBALS['ThePage'] = new Page('TournamentLadderView');
          $ltable->add_tablehead(14, T_('Tournament Rating#header'), 'Rating', 0 );
       $ltable->add_tablehead( 7, T_('Actions#header'), '', TABLE_NO_HIDE );
       $ltable->add_tablehead(12, new TableHead( T_('Running and finished tournament games'), 'images/table.gif'), 'Image', 0 );
-      $ltable->add_tablehead( 8, T_('Challenges#header'), '', TABLE_NO_HIDE );
+      $ltable->add_tablehead( 8, T_('Challenges-In#header'), '', TABLE_NO_HIDE );
+      $ltable->add_tablehead(16, T_('Challenges-Out#header'), '', 0 );
       $ltable->add_tablehead( 9, T_('Rank Changed#T_ladder'), 'Date', 0 );
       $ltable->add_tablehead(10, T_('Rank Kept#header'), '', 0 );
       $ltable->add_tablehead(15, new TableHead( T_('User online#header'), 'images/online.gif',
@@ -258,6 +259,8 @@ $GLOBALS['ThePage'] = new Page('TournamentLadderView');
             $row_str[14] = echo_rating( $orow['TP_Rating'], true, $uid);
          if ( $ltable->Is_Column_Displayed[15] )
             $row_str[15] = echo_user_online_vacation( $user->urow['TLP_OnVacation'], $user->Lastaccess );
+         if ( $ltable->Is_Column_Displayed[16] )
+            $row_str[16] = implode(' ', $tladder->build_linked_outgoing_games( $my_uid ));
 
          if ( $is_mine )
             $row_str['extra_class'] = 'TourneyUser';

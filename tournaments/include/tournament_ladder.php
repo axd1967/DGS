@@ -83,6 +83,8 @@ class TournamentLadder
    public $MaxChallengedOut = false;
    /*! \brief array of TournamentGames-object of incoming-challenges: arr( TG.ID => TG ); TG with TG.RankRef added. */
    public $IncomingTourneyGames = array();
+   /*! \brief array of TournamentGames-object of outgoing-challenges: arr( TG.ID => TG ); TG with TG.RankRef added. */
+   public $OutgoingTourneyGames = array();
    /*! \brief how many hours to wait till rematch allowed with same user; -1=rematch allowed, 0=TG still on WAIT-status but due. */
    public $RematchWait = -1;
    /*! \brief theoretical ladder-position if ladder were ordered by rating; 0=unknown. */
@@ -114,11 +116,26 @@ class TournamentLadder
       $this->IncomingTourneyGames[$tgame->ID] = $tgame;
    }
 
-   /*! \brief Returns list of running TournamentGames-objects ordered by TG.ID, that is creation-order (first=first-created). */
+   /*! \brief Returns list of running incoming TournamentGames-objects ordered by TG.ID, that is creation-order (first=first-created). */
    private function get_incoming_games()
    {
       ksort( $this->IncomingTourneyGames, SORT_NUMERIC );
       return $this->IncomingTourneyGames;
+   }
+
+   /*! \brief Adds TournamentGames-object to list of outgoing challenge (running) games. */
+   public function add_outgoing_game( $tgame )
+   {
+      if ( !($tgame instanceof TournamentGames) )
+         error('invalid_args', "TournamentLadder.add_outgoing_game({$this->tid},{$this->rid})");
+      $this->OutgoingTourneyGames[$tgame->ID] = $tgame;
+   }
+
+   /*! \brief Returns list of running outgoing TournamentGames-objects ordered by TG.ID, that is creation-order (first=first-created). */
+   private function get_outgoing_games()
+   {
+      ksort( $this->OutgoingTourneyGames, SORT_NUMERIC );
+      return $this->OutgoingTourneyGames;
    }
 
    /*!
@@ -148,6 +165,34 @@ class TournamentLadder
       }
       return $arr;
    }//build_linked_incoming_games
+
+   /*!
+    * \brief Returns non-null array with "[#Rank]" linked to game-id for challenge-outgoing running tourney-games.
+    * \param $my_id if >0, mark my challenges
+    * \see fill_ladder_running_games()
+    */
+   public function build_linked_outgoing_games( $my_id=0 )
+   {
+      $arr = array();
+      if ( count($this->OutgoingTourneyGames) )
+      {
+         global $base_path;
+
+         foreach ( $this->get_outgoing_games() as $tgid => $tgame )
+         {
+            // [#R] = known challenger, [#] = unknown challenger (user removed); add class for detached (user could re-join)
+            $is_detached = ( $tgame->Flags & TG_FLAG_GAME_DETACHED );
+            $gtext = ( is_null($tgame->Defender_tladder) ) ? '#' : '#' . $tgame->Defender_tladder->Rank;
+            $ginfo = '[' . anchor( $base_path."game.php?gid={$tgame->gid}", $gtext ) . ']';
+            if ( $is_detached )
+               $ginfo = span('TGDetached', $ginfo, '%s', T_('detached#tourney') );
+            elseif ( $my_id > 0 && $tgame->Defender_uid == $my_id )
+               $ginfo = span('TourneyOpp', $ginfo);
+            $arr[] = $ginfo;
+         }
+      }
+      return $arr;
+   }//build_linked_outgoing_games
 
    public function to_string()
    {

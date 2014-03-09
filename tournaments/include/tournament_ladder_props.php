@@ -443,7 +443,8 @@ class TournamentLadderProps
    }//fill_ladder_challenge_range
 
    /*!
-    * \brief Enhances ladder with additional info/data for defenders (incoming challenge-games):
+    * \brief Enhances ladder with additional info/data for defenders (incoming challenge-games)
+    *       and challenges (outgoing challenge-games):
     * \param $iterator ListIterator on ordered TournamentLadder with iterator-Index on uid
     * \param $tgame_iterator ListIterator on TournamentGames
     * \return array( TG_STATUS_... => count, ... ); not all stati-keys filled
@@ -481,10 +482,16 @@ class TournamentLadderProps
                      $ch_tladder->RematchWait = $this->calc_rematch_wait_remaining_hours( $tgame );
                }
                else
+               {
                   $df_tladder->add_incoming_game( $tgame );
+                  $ch_tladder->add_outgoing_game( $tgame );
+               }
             }
             else // no challenger from detached T-game
+            {
                $df_tladder->add_incoming_game( $tgame );
+               $ch_tladder->add_outgoing_game( $tgame );
+            }
          }
 
          // count TG-status

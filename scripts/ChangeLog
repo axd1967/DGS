@@ -13,6 +13,20 @@ ChangeLog
 
 2014-03-09 jug
 
+   * tournaments/include/tournament_ladder.php (class TournamentLadder, ~.add_outgoing_game,
+       ~.get_outgoing_games, ~.build_linked_outgoing_games),
+     tournaments/include/tournament_ladder_props.php (TournamentLadderProps.fill_ladder_running_games),
+     scripts/updates/database_changes_1_0_16_to_1_0_17.mysql,
+     tournaments/ladder/view.php:
+   - view-ladder:
+     - added table-column with outgoing challenges, which is deactivated per default
+     - renamed header-column 'Challenges' -> Challenges-In
+-----------
+-- deactivate challenges-out column in ladder-view as default (to reduce server-load)
+UPDATE ConfigPages
+   SET ColumnsTournamentLadderView = ColumnsTournamentLadderView & ~0x8000 ;
+-----------
+
    * tournaments/register.php:
    - added text describing purpose of public-user-comment and user-message-box
 

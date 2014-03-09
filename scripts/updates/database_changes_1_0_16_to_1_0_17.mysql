@@ -15,3 +15,8 @@ ALTER TABLE TournamentParticipant
    ADD KEY tidNextRound (tid,NextRound) ;
 
 
+-- deactivate challenges-out column in ladder-view as default (to reduce server-load)
+UPDATE ConfigPages
+   SET ColumnsTournamentLadderView = ColumnsTournamentLadderView & ~0x8000 ;
+
+
