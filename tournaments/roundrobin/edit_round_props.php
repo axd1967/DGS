@@ -27,6 +27,7 @@ require_once 'tournaments/include/tournament_cache.php';
 require_once 'tournaments/include/tournament_factory.php';
 require_once 'tournaments/include/tournament_helper.php';
 require_once 'tournaments/include/tournament_round.php';
+require_once 'tournaments/include/tournament_round_status.php';
 require_once 'tournaments/include/tournament_status.php';
 require_once 'tournaments/include/tournament_utils.php';
 
@@ -69,9 +70,11 @@ $GLOBALS['ThePage'] = new Page('TournamentRoundEdit');
 
    // load existing T-round
    $tround = TournamentCache::load_cache_tournament_round( 'Tournament.edit_round_props', $tid, $round );
+   $trstatus = new TournamentRoundStatus( $tourney, $tround );
 
    // init
    $errors = $tstatus->check_edit_status( array( TOURNEY_STATUS_NEW, TOURNEY_STATUS_REGISTER, TOURNEY_STATUS_PAIR ) );
+   $errors = array_merge( $errors, $trstatus->check_edit_round_status( TROUND_STATUS_INIT ) );
    if ( !TournamentUtils::isAdmin() && $tourney->isFlagSet(TOURNEY_FLAG_LOCK_ADMIN) )
       $errors[] = $tourney->buildAdminLockText();
 
