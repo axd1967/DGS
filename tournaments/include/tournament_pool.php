@@ -682,7 +682,7 @@ class TournamentPool
          foreach ( $pool_summary as $pool => $arr )
          {
             $cnt_expected_games = $arr[2];
-            if ( $arr_game_counts[$pool] )
+            if ( isset($arr_game_counts[$pool]) )
             {
                list( $cnt_tgames, $cnt_games ) = $arr_game_counts[$pool];
                if ( $cnt_tgames != $cnt_games || $cnt_expected_games != $cnt_tgames )
@@ -1011,7 +1011,7 @@ class TournamentPool
          "UPDATE TournamentParticipant AS TP " .
             "INNER JOIN TournamentPool AS TPOOL ON TPOOL.uid=TP.uid " .
          "SET TP.NextRound=$next_round, TP.Lastchanged=$NOW, " .
-            "TP.ChangedBy=RTRIM(CONCAT('[".mysql_addslashes($changed_by)."]',TP.ChangedBy)) " .
+            "TP.ChangedBy=RTRIM(CONCAT('[".mysql_addslashes($changed_by)."] ',TP.ChangedBy)) " .
          "WHERE TPOOL.tid=$tid AND TPOOL.Round=$round AND TPOOL.Rank>0 " .
             "AND TP.tid=$tid AND TP.NextRound <= $round" );
    }//mark_next_round_participation
