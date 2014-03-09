@@ -228,7 +228,7 @@ $GLOBALS['ThePage'] = new Page('TournamentLadderView');
          $row_str = array();
 
          if ( $ltable->Is_Column_Displayed[ 1] )
-            $row_str[ 1] = $tladder->Rank . '.';
+            $row_str[ 1] = "<a name=\"rank{$tladder->Rank}\">{$tladder->Rank}.</a>";
          if ( $ltable->Is_Column_Displayed[ 2] )
             $row_str[ 2] = build_rank_change( $tladder );
          if ( $ltable->Is_Column_Displayed[ 3] )
@@ -320,7 +320,9 @@ $GLOBALS['ThePage'] = new Page('TournamentLadderView');
             echo sprintf( T_('Your rank (change) in the previous period was: %s#T_ladder'),
                         TournamentLadder::build_rank_diff( $tl_user->Rank, $cmp_prev_rank )), "<br>\n";
          }
-         echo sprintf( T_('Your current rank is %s.#T_ladder'), $tl_user->Rank ),
+
+         $jump_rank = max( 1, $tl_user->Rank - 10 );
+         echo anchor( "#rank{$jump_rank}", sprintf( T_('Your current rank is %s.#T_ladder'), $tl_user->Rank ) ),
             MED_SPACING,
             sprintf( T_('Your best rank is %s.#T_ladder'), $tl_user->BestRank ),
             "<br>\n";

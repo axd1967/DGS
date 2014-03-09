@@ -13,6 +13,9 @@ ChangeLog
 
 2014-03-09 jug
 
+   * tournaments/ladder/view.php:
+   - view-ladder: add link on own-rank-info to jump near own position in ladder
+
    * tournaments/roundrobin/view_pools.php:
    - round-robin: added links on top to view-pools of other rounds
 
