@@ -83,7 +83,7 @@ define('GA_RES_TIMOUT', 3);
    if ( is_null($tgame) )
       error('bad_tournament', "Tournament.game_admin.find_tgame($tid,$gid)");
    if ( $tgame->tid != $tid )
-      error('bad_tournament', "Tournament.game_admin.check_tgame.tid($tid,$gid)");
+      error('tournament_game_mismatch', "Tournament.game_admin.check_tgame.tid($tid,$gid)");
    $tg_score = $tgame->getScoreForUser( $game->Black_ID );
    $tg_score_text = score2text($tg_score, false);
    $diff_score = ( $g_score !== $tg_score );
