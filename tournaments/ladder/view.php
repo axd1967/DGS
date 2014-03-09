@@ -90,7 +90,7 @@ $GLOBALS['ThePage'] = new Page('TournamentLadderView');
    $tprops = TournamentCache::load_cache_tournament_properties( 'Tournament.ladder_view', $tid );
    $need_tp_rating = $tprops->need_rating_copy();
 
-   $errors = $tstatus->check_view_status( TournamentLadder::get_view_ladder_status($allow_edit_tourney) );
+   $errors = $tstatus->check_view_status( TournamentHelper::get_view_data_status($allow_edit_tourney) );
    $allow_view = ( count($errors) == 0 );
    $allow_admin = ($admin_mode)
       ? TournamentLadder::allow_edit_ladder($tourney, $errors) // check-locks
@@ -345,7 +345,7 @@ $GLOBALS['ThePage'] = new Page('TournamentLadderView');
          $menu_array[T_('Retreat from Ladder')] = "tournaments/ladder/retreat.php?tid=$tid";
    }
    $menu_array[T_('Tournament participants')] = "tournaments/list_participants.php?tid=$tid";
-   if ( in_array($tourney->Status, TournamentLadder::get_view_ladder_status()) )
+   if ( in_array($tourney->Status, TournamentHelper::get_view_data_status()) )
    {
       $menu_array[T_('All running games')] = "show_games.php?tid=$tid".URI_AMP."uid=all";
       $menu_array[T_('All finished games')] = "show_games.php?tid=$tid".URI_AMP."uid=all".URI_AMP."finished=1";

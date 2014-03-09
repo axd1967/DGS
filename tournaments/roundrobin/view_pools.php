@@ -64,6 +64,7 @@ $GLOBALS['ThePage'] = new Page('TournamentPoolView');
    $ttype = TournamentFactory::getTournament($tourney->WizardType);
    if ( !$ttype->need_rounds )
       error('tournament_edit_rounds_not_allowed', "Tournament.pool_view.find_tournament($tid)");
+   $tstatus = new TournamentStatus( $tourney );
 
    // create/edit allowed?
    $allow_edit_tourney = TournamentHelper::allow_edit_tournaments($tourney, $my_id );
@@ -76,22 +77,27 @@ $GLOBALS['ThePage'] = new Page('TournamentPoolView');
    $tround = TournamentCache::load_cache_tournament_round( 'Tournament.pool_view', $tid, $round );
 
    // init
-   $errors = array();
-   $tprops = TournamentCache::load_cache_tournament_properties( 'Tournament.pool_view', $tid );
-   $need_trating = $tprops->need_rating_copy();
-   $games_per_challenge = TournamentRoundHelper::determine_games_per_challenge( $tid );
+   $errors = $tstatus->check_view_status( TournamentHelper::get_view_data_status($allow_edit_tourney) );
+   $allow_view = ( count($errors) == 0 );
 
-   $tpool_iterator = new ListIterator( 'Tournament.pool_view.load_pools' );
-   $tpool_iterator = TournamentPool::load_tournament_pools( $tpool_iterator, $tid, $round, 0,
-      TPOOL_LOADOPT_USER | ( $need_trating ? TPOOL_LOADOPT_TRATING : 0 ) );
-   $poolTables = new PoolTables( $tround->Pools );
-   $poolTables->fill_pools( $tpool_iterator );
-   $count_players = $tpool_iterator->getItemCount();
+   if ( $allow_view )
+   {
+      $tprops = TournamentCache::load_cache_tournament_properties( 'Tournament.pool_view', $tid );
+      $need_trating = $tprops->need_rating_copy();
+      $games_per_challenge = TournamentRoundHelper::determine_games_per_challenge( $tid );
 
-   $tg_iterator = TournamentCache::load_cache_tournament_games( 'Tournament.pool_view',
-      $tid, $tround->ID, 0, /*all-stati*/null );
-   $poolTables->fill_games( $tg_iterator );
-   $counts = $poolTables->count_games();
+      $tpool_iterator = new ListIterator( 'Tournament.pool_view.load_pools' );
+      $tpool_iterator = TournamentPool::load_tournament_pools( $tpool_iterator, $tid, $round, 0,
+         TPOOL_LOADOPT_USER | ( $need_trating ? TPOOL_LOADOPT_TRATING : 0 ) );
+      $poolTables = new PoolTables( $tround->Pools );
+      $poolTables->fill_pools( $tpool_iterator );
+      $count_players = $tpool_iterator->getItemCount();
+
+      $tg_iterator = TournamentCache::load_cache_tournament_games( 'Tournament.pool_view',
+         $tid, $tround->ID, 0, /*all-stati*/null );
+      $poolTables->fill_games( $tg_iterator );
+      $counts = $poolTables->count_games();
+   }//allow_view
 
 
    // --------------- Tournament-Pools EDIT form --------------------
@@ -107,32 +113,36 @@ $GLOBALS['ThePage'] = new Page('TournamentPoolView');
          "</tr></table>\n";
    }
 
-   echo sprintf( T_('Round summary (%s players): %s games started, %s finished, %s running#tpool'),
-                 $count_players, $counts['all'], $counts['finished'], $counts['run'] ),
-      "<br>\n";
-
-   $my_tpool = $tpool_iterator->getIndexValue( 'uid', $my_id, 0 );
-   if ( $my_tpool )
+   if ( $allow_view )
    {
-      $pool_link = anchor('#pool'.$my_tpool->Pool, sprintf( T_('Pool %s'), $my_tpool->Pool ) );
-      echo sprintf( T_('You are playing in %s.#tpool'), $pool_link ), "<br>\n";
-   }
-   echo "<br>\n";
+      echo sprintf( T_('Round summary (%s players): %s games started, %s finished, %s running#tpool'),
+                    $count_players, $counts['all'], $counts['finished'], $counts['run'] ),
+         "<br>\n";
 
-   $poolViewer = new PoolViewer( $tid, $page, $poolTables, $games_per_challenge,
-      ($need_trating ? 0 : PVOPT_NO_TRATING) | ($edit ? PVOPT_EDIT_RANK : 0) );
-   if ( $edit )
-      $poolViewer->setEditCallback( 'pool_user_edit_rank' );
-   $poolViewer->init_pool_table();
-   $poolViewer->make_pool_table();
-   $poolViewer->echo_pool_table();
+      $my_tpool = $tpool_iterator->getIndexValue( 'uid', $my_id, 0 );
+      if ( $my_tpool )
+      {
+         $pool_link = anchor('#pool'.$my_tpool->Pool, sprintf( T_('Pool %s'), $my_tpool->Pool ) );
+         echo sprintf( T_('You are playing in %s.#tpool'), $pool_link ), "<br>\n";
+      }
+      echo "<br>\n";
+
+      $poolViewer = new PoolViewer( $tid, $page, $poolTables, $games_per_challenge,
+         ($need_trating ? 0 : PVOPT_NO_TRATING) | ($edit ? PVOPT_EDIT_RANK : 0) );
+      if ( $edit )
+         $poolViewer->setEditCallback( 'pool_user_edit_rank' );
+      $poolViewer->init_pool_table();
+      $poolViewer->make_pool_table();
+      $poolViewer->echo_pool_table();
+   }//allow_view
 
    echo_notes( 'edittournamentpoolnotesTable', T_('Tournament Pool notes'), build_pool_notes(), true, false );
 
 
    $menu_array = array();
    $menu_array[T_('Tournament info')] = "tournaments/view_tournament.php?tid=$tid";
-   $menu_array[T_('View Pools')] = "tournaments/roundrobin/view_pools.php?tid=$tid";
+   if ( $allow_view )
+      $menu_array[T_('View Pools')] = "tournaments/roundrobin/view_pools.php?tid=$tid";
    if ( $allow_edit_tourney )
    {
       if ( $tround->Status == TROUND_STATUS_POOL )

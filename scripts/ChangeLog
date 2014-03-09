@@ -13,10 +13,18 @@ ChangeLog
 
 2014-03-09 jug
 
+   * tournaments/include/tournament_helper.php (TournamentHelper.get_view_data_status),
+     tournaments/include/tournament_ladder.php (class TournamentLadder),
+     tournaments/roundrobin/view_pools.php,
+     tournaments/ladder/view.php:
+   - round-robin: allow view-pools only on PLAY/CLOSED tournament-status and on PAIR for T-directors
+   - refactored TournamentLadder::get_view_ladder_status() into tournament-type common function
+
    * tournaments/include/tournament_round_helper.php (TournamentRoundHelper.remove_tournament_round,
        ~.set_tournament_round, ~.start_next_tournament_round),
      tournaments/include/tournament_status.php (TournamentStatus.check_conditions_status_CLOSED):
-   - bugfix: moved check for tournament-participants for removing round in commented form to tournament-status-change to CLOSED
+   - bugfix: moved check for tournament-participants for removing round in commented form
+     to tournament-status-change to CLOSED
    - bugfix: missed setting of variable with tournament-id and tournament-status
    - bugfix: adding new tournament-round overwrites errors-array missing on some errors
    - optimize preparing next round by omitting double-check of missing next-rounders

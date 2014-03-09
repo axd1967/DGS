@@ -222,6 +222,14 @@ class TournamentHelper
       return array_unique($out);
    }//build_tournament_join_restrictions
 
+   /*! \brief Returns array of tournament-status on which it is allowed to view tournament-specific T-data (=ladder/pools). */
+   public static function get_view_data_status( $isTD=false )
+   {
+      static $statuslist_TD   = array( TOURNEY_STATUS_PAIR, TOURNEY_STATUS_PLAY, TOURNEY_STATUS_CLOSED );
+      static $statuslist_user = array( TOURNEY_STATUS_PLAY, TOURNEY_STATUS_CLOSED );
+      return ($isTD) ? $statuslist_TD : $statuslist_user;
+   }
+
 } // end of 'TournamentHelper'
 
 ?>

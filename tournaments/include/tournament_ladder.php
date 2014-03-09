@@ -1290,13 +1290,6 @@ class TournamentLadder
       return $statuslist;
    }
 
-   public static function get_view_ladder_status( $isTD=false )
-   {
-      static $statuslist_TD   = array( TOURNEY_STATUS_PAIR, TOURNEY_STATUS_PLAY, TOURNEY_STATUS_CLOSED );
-      static $statuslist_user = array( TOURNEY_STATUS_PLAY, TOURNEY_STATUS_CLOSED );
-      return ($isTD) ? $statuslist_TD : $statuslist_user;
-   }
-
    /*! \brief Loads and caches TournamentLadder-entries for given tournament-id. */
    public static function load_cache_tournament_ladder( $dbgmsg, $tid, $with_tp_rating, $need_tp_finished, $limit=0,
          $with_index=false )
