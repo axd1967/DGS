@@ -13,6 +13,9 @@ ChangeLog
 
 2014-03-09 jug
 
+   * tournaments/roundrobin/view_pools.php:
+   - round-robin: added links on top to view-pools of other rounds
+
    * tournaments/include/tournament_helper.php (TournamentHelper.get_view_data_status),
      tournaments/include/tournament_ladder.php (class TournamentLadder),
      tournaments/roundrobin/view_pools.php,

@@ -127,6 +127,15 @@ $GLOBALS['ThePage'] = new Page('TournamentPoolView');
       }
       echo "<br>\n";
 
+      if ( $tourney->Rounds > 1 )
+      {
+         $out = array();
+         for( $r=1; $r <= $tourney->Rounds; $r++ )
+            $out[] = anchor( $base_path."tournaments/roundrobin/view_pools.php?tid=$tid".URI_AMP."round=$r",
+               sprintf( T_('View Pools (Round #%s)'), $r ));
+         echo implode(', ', $out), "<br><br>\n";
+      }
+
       $poolViewer = new PoolViewer( $tid, $page, $poolTables, $games_per_challenge,
          ($need_trating ? 0 : PVOPT_NO_TRATING) | ($edit ? PVOPT_EDIT_RANK : 0) );
       if ( $edit )
