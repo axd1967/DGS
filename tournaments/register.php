@@ -347,10 +347,12 @@ $GLOBALS['ThePage'] = new Page('TournamentRegistration');
    {
       $tpform->add_row( array(
             'DESCRIPTION', T_('Public User Comment#tourney'),
-            'TEXTINPUT',   'comment', 60, 60, $tp->Comment, ));
+            'TEXTINPUT',   'comment', 60, 60, $tp->Comment,
+            'TEXT', T_('shown in tournament-participants list'), ));
       $tpform->add_row( array(
             'DESCRIPTION', T_('User Message#tourney'),
-            'TEXTAREA',    'user_message', 70, 5, $tp->UserMessage, ));
+            'TEXTAREA',    'user_message', 70, 5, $tp->UserMessage,
+            'TEXT', T_('use only if needed (see notes below)'), ));
       if ( @$_REQUEST['tp_preview'] )
          $tpform->add_row( array(
                'DESCRIPTION', T_('Preview'),

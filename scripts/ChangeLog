@@ -13,6 +13,9 @@ ChangeLog
 
 2014-03-09 jug
 
+   * tournaments/register.php:
+   - added text describing purpose of public-user-comment and user-message-box
+
    * tournaments/ladder/view.php:
    - view-ladder: add link on own-rank-info to jump near own position in ladder
 
