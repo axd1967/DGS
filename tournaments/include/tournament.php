@@ -305,10 +305,17 @@ class Tournament
       $data = $GLOBALS['ENTITY_TOURNAMENT']->newEntityData();
       $data->set_value( 'ID', $this->ID );
       if ( $change_rounds )
+      {
+         $this->Rounds += $change_rounds;
          $data->set_query_value( 'Rounds', "Rounds+($change_rounds)" );
+      }
       if ( $curr_round > 0 )
-         $data->set_value( 'CurrentRound', $curr_round );
-      $data->set_value( 'Lastchanged', $GLOBALS['NOW'] );
+      {
+         $this->CurrentRound = $curr_round;
+         $data->set_value( 'CurrentRound', $this->CurrentRound );
+      }
+      $this->Lastchanged = $GLOBALS['NOW'];
+      $data->set_value( 'Lastchanged', $this->Lastchanged );
       $data->set_value( 'ChangedBy', $this->ChangedBy );
       $result = $data->update( "Tournament.update_rounds(%s,$change_rounds,$curr_round)" );
       self::delete_cache_tournament( 'Tournament.update_rounds', $this->ID );

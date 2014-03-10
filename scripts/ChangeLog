@@ -13,6 +13,16 @@ ChangeLog
 
 2014-03-10 jug
 
+   * tournaments/include/tournament_round_helper.php (TournamentRoundHelper.add_new_tournament_round,
+       ~.remove_tournament_round, ~.set_tournament_round, ~.start_next_tournament_round),
+     tournaments/include/tournament_log_helper.php (TournamentLogHelper.log_add_tournament_round,
+       ~.log_delete_tournament_round, ~.log_set_tournament_round),
+     tournaments/roundrobin/edit_rounds.php:
+   - added tournament-logging for edit-rounds use-cases add-round, remove-round, set-current-round
+
+   * tournaments/include/tournament.php (Tournament.update_rounds):
+   - bugfix: update instance attributes on Tournament-entry update on rounds and/or current-round
+
    * admin_game.php (parse_edit_form, draw_game_admin_form):
    - allow toggle of rated-status also for tournament-game,
      but show warning to communicate to tournament-directors

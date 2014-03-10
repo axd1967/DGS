@@ -267,8 +267,9 @@ class TournamentRoundHelper
     * \param $set_curr_round true = sets current round to newly added round; false = no change of current round
     * \return new TournamentRound on success; null on failure
     */
-   public static function add_new_tournament_round( $tourney, &$errors, $check_only, $set_curr_round=false )
+   public static function add_new_tournament_round( $tlog_type, $tourney, &$errors, $check_only, $set_curr_round=false )
    {
+      $tid = $tourney->ID;
       $ttype = TournamentFactory::getTournament($tourney->WizardType);
       $t_limits = $ttype->getTournamentLimits();
 
@@ -281,9 +282,13 @@ class TournamentRoundHelper
 
       ta_begin();
       {//HOT-section to add T-round and updating T-data
-         $tround = TournamentRound::add_tournament_round( $tourney->ID );
+         $tround = TournamentRound::add_tournament_round( $tid );
          if ( !is_null($tround) )
             $success = $tourney->update_rounds( 1, ($set_curr_round ? $tround->Round : 0) );
+         else
+            $success = false;
+
+         TournamentLogHelper::log_add_tournament_round( $tid, $tlog_type, $set_curr_round, $tround, $tourney, $success );
       }
       ta_end();
 
@@ -292,7 +297,7 @@ class TournamentRoundHelper
 
 
    /*! \brief Deletes tournament-round and updates Tournament.Rounds. */
-   public static function remove_tournament_round( $tourney, $tround, &$errors, $check_only )
+   public static function remove_tournament_round( $tlog_type, $tourney, $tround, &$errors, $check_only )
    {
       if ( !$tround )
          error('invalid_args', "TournamentRoundHelper:remove_tournament_round.check.miss.t_round({$tourney->ID})");
@@ -323,6 +328,8 @@ class TournamentRoundHelper
          $success = TournamentRound::delete_tournament_round( $tourney->ID, $tround->Round );
          if ( $success )
             $success = $tourney->update_rounds( -1 );
+
+         TournamentLogHelper::log_delete_tournament_round( $tid, $tlog_type, $tround, $success );
       }
       ta_end();
 
@@ -331,7 +338,7 @@ class TournamentRoundHelper
 
 
    /*! \brief Sets current tournament-round updating Tournament.CurrentRound. */
-   public static function set_tournament_round( $tourney, $new_round, &$errors, $check_only )
+   public static function set_tournament_round( $tlog_type, $tourney, $new_round, &$errors, $check_only )
    {
       $tid = $tourney->ID;
       $tround = TournamentCache::load_cache_tournament_round( 'TRH.set_tournament_round', $tid, $tourney->CurrentRound );
@@ -359,6 +366,8 @@ class TournamentRoundHelper
       ta_begin();
       {//HOT-section to switch T-round
          $success = $tourney->update_rounds( 0, $new_round );
+
+         TournamentLogHelper::log_set_tournament_round( $tid, $tlog_type, $tround, $new_round, $success );
       }
       ta_end();
 
@@ -374,7 +383,7 @@ class TournamentRoundHelper
     *       3. add new round + set it as current round
     * \return success: 0=failure, otherwise bitmask with success of steps: step1=1, step2=2, step3=4; should be 7 for full success
     */
-   public static function start_next_tournament_round( $tourney, &$errors, $check_only )
+   public static function start_next_tournament_round( $tlog_type, $tourney, &$errors, $check_only )
    {
       static $ARR_TSTATUS = array( TOURNEY_STATUS_PAIR, TOURNEY_STATUS_PLAY );
 
@@ -403,7 +412,7 @@ class TournamentRoundHelper
 
       if ( $check_only && $curr_round == $cnt_rounds )
       {
-         self::add_new_tournament_round( $tourney, $errors_add_round, /*chk*/true );
+         self::add_new_tournament_round( $tlog_type, $tourney, $errors_add_round, /*chk*/true );
          if ( count($errors_add_round) )
             $errors = array_merge( $errors, $errors_add_round );
       }
@@ -439,7 +448,7 @@ class TournamentRoundHelper
 
          // 3. add new round + set it as current round
          // NOTE: must be atomar operation and last step (b/c current-round changed, which is a precondition for steps1+3)
-         if ( (($success & 3) == 3) && self::add_new_tournament_round( $tourney, $errors, /*chk*/false, /*set-curr-rnd*/true ) )
+         if ( (($success & 3) == 3) && self::add_new_tournament_round( $tlog_type, $tourney, $errors, /*chk*/false, /*set-curr-rnd*/true ) )
             $success |= 4;
       }
       ta_end();

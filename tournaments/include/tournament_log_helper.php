@@ -439,5 +439,30 @@ class TournamentLogHelper
       $tlog->insert();
    }
 
+   public static function log_add_tournament_round( $tid, $tlog_type, $set_curr_round, $tround, $tourney, $success )
+   {
+      $tlog = new Tournamentlog( 0, $tid, 0, 0, $tlog_type, 'TRND_Data', TLOG_ACT_ADD, 0,
+         sprintf('Added round(%s) -> [%s]: Round=[%s] CurrRound=%s',
+            ($set_curr_round ? 'Set_CR' : ''),
+            ($success ? 'OK' : 'FAILED'),
+            (is_null($tround) ? '-' : $tround->ID . '/#' . $tround->Round ),
+            $tourney->CurrentRound ));
+      $tlog->insert();
+   }
+
+   public static function log_delete_tournament_round( $tid, $tlog_type, $tround, $success )
+   {
+      $tlog = new Tournamentlog( 0, $tid, 0, 0, $tlog_type, 'TRND_Data', TLOG_ACT_REMOVE, 0,
+         sprintf('Removed round %s/#%s -> [%s]', $tround->ID, $tround->Round, ($success ? 'OK' : 'FAILED') ));
+      $tlog->insert();
+   }
+
+   public static function log_set_tournament_round( $tid, $tlog_type, $tround, $new_round, $success )
+   {
+      $tlog = new Tournamentlog( 0, $tid, 0, 0, $tlog_type, 'T_Round', TLOG_ACT_SET, 0,
+         sprintf('CurrentRound #%s -> #%s: [%s]', $tround->Round, $new_round, ($success ? 'OK' : 'FAILED') ));
+      $tlog->insert();
+   }
+
 } // end of 'TournamentLogHelper'
 ?>

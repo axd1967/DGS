@@ -83,7 +83,8 @@ $GLOBALS['ThePage'] = new Page('TournamentRoundEditor');
       error('tournament_edit_rounds_not_allowed', "Tournament.edit_rounds.need_rounds($tid)");
 
    // edit allowed?
-   if ( !TournamentHelper::allow_edit_tournaments($tourney, $my_id) )
+   $allow_edit_tourney = TournamentHelper::allow_edit_tournaments($tourney, $my_id);
+   if ( !$allow_edit_tourney )
       error('tournament_edit_not_allowed', "Tournament.edit_rounds.edit($tid,$my_id)");
 
    $t_limits = $ttype->getTournamentLimits();
@@ -112,17 +113,17 @@ $GLOBALS['ThePage'] = new Page('TournamentRoundEditor');
 
       // only checks
       if ( @$_REQUEST['tre_add'] )
-         TournamentRoundHelper::add_new_tournament_round( $tourney, $action_errors, true );
+         TournamentRoundHelper::add_new_tournament_round( $allow_edit_tourney, $tourney, $action_errors, true );
       elseif ( @$_REQUEST['tre_del'] )
-         TournamentRoundHelper::remove_tournament_round( $tourney, $tround, $action_errors, true );
+         TournamentRoundHelper::remove_tournament_round( $allow_edit_tourney, $tourney, $tround, $action_errors, true );
       elseif ( @$_REQUEST['tre_set'] )
-         TournamentRoundHelper::set_tournament_round( $tourney, $round, $action_errors, true );
+         TournamentRoundHelper::set_tournament_round( $allow_edit_tourney, $tourney, $round, $action_errors, true );
       elseif ( @$_REQUEST['tre_next'] )
-         TournamentRoundHelper::start_next_tournament_round( $tourney, $action_errors, true );
+         TournamentRoundHelper::start_next_tournament_round( $allow_edit_tourney, $tourney, $action_errors, true );
       // do confirmed actions
       elseif ( @$_REQUEST['tre_add_confirm'] && $is_admin ) // add new T-round
       {
-         $new_tround = TournamentRoundHelper::add_new_tournament_round( $tourney, $action_errors, false );
+         $new_tround = TournamentRoundHelper::add_new_tournament_round( $allow_edit_tourney, $tourney, $action_errors, false );
          if ( !is_null($new_tround) )
          {
             $round = $new_tround->Round;
@@ -132,7 +133,7 @@ $GLOBALS['ThePage'] = new Page('TournamentRoundEditor');
       }
       elseif ( @$_REQUEST['tre_del_confirm'] && !is_null($tround) && $is_admin ) // remove T-round
       {
-         $success = TournamentRoundHelper::remove_tournament_round( $tourney, $tround, $action_errors, false );
+         $success = TournamentRoundHelper::remove_tournament_round( $allow_edit_tourney, $tourney, $tround, $action_errors, false );
          if ( $success )
          {
             $sys_msg = urlencode( sprintf( T_('Tournament Round #%s removed!'), $round ) );
@@ -141,7 +142,7 @@ $GLOBALS['ThePage'] = new Page('TournamentRoundEditor');
       }
       elseif ( @$_REQUEST['tre_set_confirm'] && $is_admin ) // set current T-round
       {
-         $success = TournamentRoundHelper::set_tournament_round( $tourney, $round, $action_errors, false );
+         $success = TournamentRoundHelper::set_tournament_round( $allow_edit_tourney, $tourney, $round, $action_errors, false );
          if ( $success )
          {
             $sys_msg = urlencode( sprintf( T_('Tournament Round #%s switched!'), $round ) );
@@ -150,7 +151,7 @@ $GLOBALS['ThePage'] = new Page('TournamentRoundEditor');
       }
       elseif ( @$_REQUEST['tre_next_confirm'] ) // start next T-round
       {
-         $success = TournamentRoundHelper::start_next_tournament_round( $tourney, $action_errors, false );
+         $success = TournamentRoundHelper::start_next_tournament_round( $allow_edit_tourney, $tourney, $action_errors, false );
          if ( ($success & 7) == 7 )
          {
             $sys_msg = urlencode( sprintf( T_('Next Tournament Round #%s started!'), $round + 1 ) );
