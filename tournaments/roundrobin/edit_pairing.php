@@ -76,7 +76,8 @@ $GLOBALS['ThePage'] = new Page('TournamentPairEdit', PAGEFLAG_IMPLICIT_FLUSH ); 
       error('tournament_edit_rounds_not_allowed', "Tournament.edit_pairing.need_rounds($tid)");
 
    // create/edit allowed?
-   if ( !TournamentHelper::allow_edit_tournaments($tourney, $my_id) )
+   $allow_edit_tourney = TournamentHelper::allow_edit_tournaments($tourney, $my_id);
+   if ( !$allow_edit_tourney )
       error('tournament_edit_not_allowed', "Tournament.edit_pairing.edit_tournament($tid,$my_id)");
 
    // load existing T-round
@@ -182,7 +183,7 @@ $GLOBALS['ThePage'] = new Page('TournamentPairEdit', PAGEFLAG_IMPLICIT_FLUSH ); 
    {
       ta_begin();
       {//HOT-section to start all T-games for T-round
-         $result = TournamentRoundHelper::start_tournament_round_games( $tourney, $tround );
+         $result = TournamentRoundHelper::start_tournament_round_games( $allow_edit_tourney, $tourney, $tround );
       }
       ta_end();
 

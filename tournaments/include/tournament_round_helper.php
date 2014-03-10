@@ -69,6 +69,13 @@ class TournamentRoundHelper
          // update TP.Finished/Won/Lost for challenger and defender
          TournamentParticipant::update_game_end_stats( $tid, $tgame->Challenger_rid, $tgame->Challenger_uid, $tgame->Score );
          TournamentParticipant::update_game_end_stats( $tid, $tgame->Defender_rid, $tgame->Defender_uid, -$tgame->Score );
+
+         TournamentLogHelper::log_tournament_round_robin_game_end( $tid,
+            sprintf('Game End(game %s) Round_ID[%s] Pool[%s]: user_role:rid/uid Challenger:%s/%s vs Defender:%s/%s; T-Game(%s): Status=[%s], Flags=[%s], Score=[%s]',
+               $tgame->gid, $tgame->Round_ID, $tgame->Pool,
+               $tgame->Challenger_rid, $tgame->Challenger_uid,
+               $tgame->Defender_rid, $tgame->Defender_uid,
+               $tgame->ID, $tgame->Status, $tgame->formatFlags(), $tgame->Score ));
       }
       ta_end();
 
@@ -96,7 +103,7 @@ class TournamentRoundHelper
     *             existing tournament-extension-entry),
     *       or on success: arr( number of started games, expected number of games)
     */
-   public static function start_tournament_round_games( $tourney, $tround )
+   public static function start_tournament_round_games( $tlog_type, $tourney, $tround )
    {
       global $NOW;
       $tid = $tourney->ID;
@@ -194,7 +201,7 @@ class TournamentRoundHelper
                }
 
                if ( !(++$progress % 25) )
-                  echo sprintf( T_('Created %s games so far ...') . "<br>\n", $count_games );
+                  echo sprintf( T_('Created %s games so far ...#tourney') . "<br>\n", $count_games );
             }
          }
 
@@ -218,6 +225,9 @@ class TournamentRoundHelper
 
       // unlock T-ext
       $t_ext->delete();
+
+      TournamentLogHelper::log_start_tournament_games( $tid, $tlog_type, $tround, /*pool*/0,
+         $expected_games, $count_old_games, $count_games );
 
       return array( $count_games, $expected_games );
    }//start_tournament_round_games
@@ -450,6 +460,8 @@ class TournamentRoundHelper
          // NOTE: must be atomar operation and last step (b/c current-round changed, which is a precondition for steps1+3)
          if ( (($success & 3) == 3) && self::add_new_tournament_round( $tlog_type, $tourney, $errors, /*chk*/false, /*set-curr-rnd*/true ) )
             $success |= 4;
+
+         TournamentLogHelper::log_start_next_tournament_round( $tid, $tlog_type, $tourney, $curr_round, $success );
       }
       ta_end();
 
@@ -462,7 +474,7 @@ class TournamentRoundHelper
     * \param $tround TournamentRound-object
     * \return array of actions taken
     */
-   public static function fill_ranks_tournament_pool( $tround )
+   public static function fill_ranks_tournament_pool( $tlog_type, $tround )
    {
       $tid = $tround->tid;
       $round = $tround->Round;
@@ -515,7 +527,7 @@ class TournamentRoundHelper
             $count_done = 0;
             foreach ( $arr_updates as $rank => $arr_tpools )
             {
-               if ( TournamentPool::update_tournament_pool_ranks($arr_tpools, -$rank) )
+               if ( TournamentPool::update_tournament_pool_ranks($tlog_type, 'fill_ranks', $arr_tpools, -$rank) )
                   $count_done++;
             }
          }
@@ -534,7 +546,7 @@ class TournamentRoundHelper
     * \param $tround TournamentRound-object
     * \return array of actions taken
     */
-   public static function fill_pool_winners_tournament_pool( $tround )
+   public static function fill_pool_winners_tournament_pool( $tlog_type, $tround )
    {
       $tid = $tround->tid;
       $round = $tround->Round;
@@ -544,6 +556,8 @@ class TournamentRoundHelper
       $cnt_upd = TournamentPool::update_tournament_pool_set_pool_winners( $tround );
       $result[] = sprintf( T_('%s players set as pool winners for finished pools.'), $cnt_upd );
 
+      if ( $cnt_upd > 0 )
+         TournamentLogHelper::log_fill_tournament_pool_winners( $tid, $tlog_type, $tround, $cnt_upd );
       return $result;
    }//fill_pool_winners_tournament_pool
 

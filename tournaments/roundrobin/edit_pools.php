@@ -81,7 +81,8 @@ $GLOBALS['ThePage'] = new Page('TournamentPoolEdit');
       error('tournament_edit_rounds_not_allowed', "Tournament.edit_pools.need_rounds($tid)");
 
    // create/edit allowed?
-   if ( !TournamentHelper::allow_edit_tournaments($tourney, $my_id) )
+   $allow_edit_tourney = TournamentHelper::allow_edit_tournaments($tourney, $my_id);
+   if ( !$allow_edit_tourney )
       error('tournament_edit_not_allowed', "Tournament.edit_pools.edit_tournament($tid,$my_id)");
 
    // load existing T-round
@@ -122,7 +123,7 @@ $GLOBALS['ThePage'] = new Page('TournamentPoolEdit');
       {
          $arr_marked_uid = get_marked_users();
          if ( count($arr_marked_uid) )
-            TournamentPool::assign_pool( $tround, 0, $arr_marked_uid );
+            TournamentPool::assign_pool( $allow_edit_tourney, $tround, 0, $arr_marked_uid );
       }
       if ( @$_REQUEST['t_assign'] || @$_REQUEST['t_reassign'] )
       {
@@ -134,7 +135,7 @@ $GLOBALS['ThePage'] = new Page('TournamentPoolEdit');
          if ( count($arr_assign_uid) )
          {
             foreach ( $arr_assign_uid as $pool => $arr_uids )
-               TournamentPool::assign_pool( $tround, $pool, $arr_uids );
+               TournamentPool::assign_pool( $allow_edit_tourney, $tround, $pool, $arr_uids );
          }
       }
       if ( @$_REQUEST['t_assign'] )
@@ -149,7 +150,7 @@ $GLOBALS['ThePage'] = new Page('TournamentPoolEdit');
             {
                $arr_marked_uid = get_marked_users();
                if ( count($arr_marked_uid) )
-                  TournamentPool::assign_pool( $tround, $newpool, $arr_marked_uid );
+                  TournamentPool::assign_pool( $allow_edit_tourney, $tround, $newpool, $arr_marked_uid );
             }
          }
       }

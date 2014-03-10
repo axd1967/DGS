@@ -28,6 +28,7 @@ require_once 'tournaments/include/tournament_ladder_props.php';
 require_once 'tournaments/include/tournament_news.php';
 require_once 'tournaments/include/tournament_participant.php';
 require_once 'tournaments/include/tournament_properties.php';
+require_once 'tournaments/include/tournament_round.php';
 require_once 'tournaments/include/tournament_rules.php';
 require_once 'tournaments/include/tournament_utils.php';
 
@@ -189,6 +190,7 @@ class TournamentLogHelper
       $tlog->insert();
    }
 
+
    public static function log_change_tournament( $tid, $tlog_type, $edits, $old_t, $new_t )
    {
       $msg = array();
@@ -242,7 +244,6 @@ class TournamentLogHelper
          sprintf( "Change of [%s]: %s", implode(', ', $edits), implode('; ', $msg) ));
       $tlog->insert();
    }//log_change_tournament_news
-
 
    public static function log_change_tournament_props( $tid, $tlog_type, $edits, $old_tpr, $new_tpr )
    {
@@ -439,6 +440,7 @@ class TournamentLogHelper
       $tlog->insert();
    }
 
+
    public static function log_add_tournament_round( $tid, $tlog_type, $set_curr_round, $tround, $tourney, $success )
    {
       $tlog = new Tournamentlog( 0, $tid, 0, 0, $tlog_type, 'TRND_Data', TLOG_ACT_ADD, 0,
@@ -461,6 +463,142 @@ class TournamentLogHelper
    {
       $tlog = new Tournamentlog( 0, $tid, 0, 0, $tlog_type, 'T_Round', TLOG_ACT_SET, 0,
          sprintf('CurrentRound #%s -> #%s: [%s]', $tround->Round, $new_round, ($success ? 'OK' : 'FAILED') ));
+      $tlog->insert();
+   }
+
+   public static function log_start_next_tournament_round( $tid, $tlog_type, $tourney, $curr_round, $success )
+   {
+      $tlog = new Tournamentlog( 0, $tid, 0, 0, $tlog_type, 'TRND_Data', TLOG_ACT_START, 0,
+         sprintf('Started next round -> [%s]: old-Round=%s T-status=[%s] T-CurrRound=[%s]',
+            (int)$success, $curr_round, $tourney->Status, $tourney->CurrentRound ));
+      $tlog->insert();
+   }
+
+
+   public static function log_change_tournament_round_props( $tid, $tlog_type, $edits, $old_trnd, $new_trnd )
+   {
+      $msg = array();
+      if ( $old_trnd->Status != $new_trnd->Status )
+         $msg[] = sprintf(self::$DIFF_FMT, 'Status', $old_trnd->Status, $new_trnd->Status );
+      if ( $old_trnd->MinPoolSize != $new_trnd->MinPoolSize )
+         $msg[] = sprintf(self::$DIFF_FMT, 'MinPoolSize', $old_trnd->MinPoolSize, $new_trnd->MinPoolSize );
+      if ( $old_trnd->MaxPoolSize != $new_trnd->MaxPoolSize )
+         $msg[] = sprintf(self::$DIFF_FMT, 'MaxPoolSize', $old_trnd->MaxPoolSize, $new_trnd->MaxPoolSize );
+      if ( $old_trnd->MaxPoolCount != $new_trnd->MaxPoolCount )
+         $msg[] = sprintf(self::$DIFF_FMT, 'MaxPoolCount', $old_trnd->MaxPoolCount, $new_trnd->MaxPoolCount );
+      if ( $old_trnd->PoolWinnerRanks != $new_trnd->PoolWinnerRanks )
+         $msg[] = sprintf(self::$DIFF_FMT, 'PoolWinnerRanks', $old_trnd->PoolWinnerRanks, $new_trnd->PoolWinnerRanks );
+
+      $tlog = new Tournamentlog( 0, $tid, 0, 0, $tlog_type, 'TRND_Data', TLOG_ACT_CHANGE, 0,
+         sprintf( "Change of [%s] for Round-Properties %s/#%s: %s",
+            implode(', ', $edits), $old_trnd->ID, $old_trnd->Round, implode('; ', $msg) ));
+      $tlog->insert();
+   }//log_change_tournament_round_props
+
+
+   public static function log_assign_tournament_pool( $tid, $tlog_type, $tround, $old_pools, $uids, $new_pool )
+   {
+      $old_state = array();
+      foreach ( $old_pools as $old_pool => $old_uids )
+         $old_state[] = "pool $old_pool (" . implode(', ', $old_uids) . ')';
+
+      $tlog = new Tournamentlog( 0, $tid, 0, 0, $tlog_type, 'TRND_Pool', TLOG_ACT_SET, 0,
+         sprintf('Assign pool in round %s/#%s for users: [%s] -> new pool %s%s',
+            $tround->ID, $tround->Round, implode('; ', $old_state), $new_pool, ($new_pool==0 ? ' (DETACH)' : '') ));
+      $tlog->insert();
+   }
+
+
+   public static function log_define_tournament_pools( $tid, $tlog_type, $edits, $old_trnd, $new_trnd )
+   {
+      $msg = array();
+      if ( $old_trnd->PoolSize != $new_trnd->PoolSize )
+         $msg[] = sprintf(self::$DIFF_FMT, 'PoolSize', $old_trnd->PoolSize, $new_trnd->PoolSize );
+      if ( $old_trnd->Pools != $new_trnd->Pools )
+         $msg[] = sprintf(self::$DIFF_FMT, 'Pools', $old_trnd->Pools, $new_trnd->Pools );
+
+      $tlog = new Tournamentlog( 0, $tid, 0, 0, $tlog_type, 'TRND_Data', TLOG_ACT_CHANGE, 0,
+         sprintf( "Change of [%s] for Round-Pools %s/#%s: %s",
+            implode(', ', $edits), $old_trnd->ID, $old_trnd->Round, implode('; ', $msg) ));
+      $tlog->insert();
+   }
+
+
+   public static function log_seed_pools( $tid, $tlog_type, $round, $params, $count_users, $count_pools, $success )
+   {
+      $tlog = new Tournamentlog( 0, $tid, 0, 0, $tlog_type, 'TRND_Pool', TLOG_ACT_SEED, 0,
+         sprintf('Seed pools (%s) for round #%s: %s users, %s pools -> [%s]',
+            $params, $round, $count_users, $count_pools, ($success ? 'OK' : 'FAILED') ));
+      $tlog->insert();
+   }
+
+   public static function log_seed_pools_add_missing_users( $tid, $tlog_type, $round, $count_users, $success )
+   {
+      $tlog = new Tournamentlog( 0, $tid, 0, 0, $tlog_type, 'TRND_Pool', TLOG_ACT_SEED, 0,
+         sprintf('Seed pools for round #%s to pool 0 (add missing %s users) -> [%s]',
+            $round, $count_users, ($success ? 'OK' : 'FAILED') ));
+      $tlog->insert();
+   }
+
+   public static function log_delete_pools( $tid, $tlog_type, $round, $count_pools, $success )
+   {
+      $tlog = new Tournamentlog( 0, $tid, 0, 0, $tlog_type, 'TRND_Pool', TLOG_ACT_REMOVE, 0,
+         sprintf('Delete all %s pools for round #%s -> [%s]',
+            $count_pools, $round, ($success ? 'OK' : 'FAILED') ));
+      $tlog->insert();
+   }
+
+
+   public static function log_execute_tournament_pool_rank_action( $tid, $tlog_type, $round, $action, $uid,
+         $rank_from, $rank_to, $pool, $success )
+   {
+      if ( $action == RKACT_SET_POOL_WIN )
+         $act_text = 'SetPoolWinner';
+      elseif ( $action == RKACT_CLEAR_POOL_WIN )
+         $act_text = 'ClearPoolWinner';
+      elseif ( $action == RKACT_CLEAR_RANKS )
+         $act_text = 'ClearRank';
+      else //if ( $action == RKACT_REMOVE_RANKS )
+         $act_text = 'RemoveRank';
+
+      $tlog = new Tournamentlog( 0, $tid, 0, 0, $tlog_type, 'TPOOL_Rank', TLOG_ACT_SET, 0,
+         sprintf('Exec rank-action [%s:%s] on round #%s for user [%s]: rank %s..%s, pool %s -> [%s]',
+            $action, $act_text, $round, $uid, $rank_from, $rank_to,
+            ((string)$pool != '' ? $pool : 'ALL'), ($success ? 'OK' : 'FAILED') ));
+      $tlog->insert();
+   }
+
+   public static function log_set_tournament_pool_ranks( $tid, $tlog_type, $ref_title, $tpool_ids, $rank, $fix_rank, $success )
+   {
+      $tlog = new Tournamentlog( 0, $tid, 0, 0, $tlog_type, 'TPOOL_Rank', TLOG_ACT_SET, 0,
+         sprintf('Set ranks[%s] (fix_rank=%s) for pool-IDs [%s]: rank=%s -> [%s]',
+            $ref_title, ( $fix_rank ? 1 : 0 ),
+            ( is_array($tpool_ids) ? implode(', ', $tpool_ids) : $tpool_ids ),
+            $rank, ($success ? 'OK' : 'FAILED') ));
+      $tlog->insert();
+   }
+
+   public static function log_fill_tournament_pool_winners( $tid, $tlog_type, $tround, $count )
+   {
+      $tlog = new Tournamentlog( 0, $tid, 0, 0, $tlog_type, 'TPOOL_Rank', TLOG_ACT_SET, 0,
+         sprintf('Fill pool-winners for round %s/#%s, PW-ranks=[%s]: %s users',
+            $tround->ID, $tround->Round, (int)$tround->PoolWinnerRanks, $count ));
+      $tlog->insert();
+   }
+
+
+   public static function log_tournament_round_robin_game_end( $tid, $msg )
+   {
+      $tlog = new Tournamentlog( 0, $tid, 0, 0, TLOG_TYPE_CRON, 'TG_Data', TLOG_ACT_CHANGE, 0, $msg );
+      $tlog->insert();
+   }
+
+   public static function log_start_tournament_games( $tid, $tlog_type, $tround, $pool, $cnt_expected, $cnt_existing, $cnt_total )
+   {
+      $tlog = new Tournamentlog( 0, $tid, 0, 0, $tlog_type, 'TG_Data', TLOG_ACT_START, 0,
+         sprintf('Start tournament-games for Round[%s/#%s] Pool[%s]: %s expected, %s existing, %s created, %s total games',
+            $tround->ID, $tround->Round, $pool,
+            $cnt_expected, $cnt_existing, $cnt_total - $cnt_existing, $cnt_total ));
       $tlog->insert();
    }
 

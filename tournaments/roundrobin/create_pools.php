@@ -74,7 +74,8 @@ $GLOBALS['ThePage'] = new Page('TournamentPoolCreate');
       error('tournament_edit_rounds_not_allowed', "Tournament.create_pools.need_rounds($tid)");
 
    // create/edit allowed?
-   if ( !TournamentHelper::allow_edit_tournaments($tourney, $my_id) )
+   $allow_edit_tourney = TournamentHelper::allow_edit_tournaments($tourney, $my_id);
+   if ( !$allow_edit_tourney )
       error('tournament_edit_not_allowed', "Tournament.create_pools.edit_tournament($tid,$my_id)");
 
    // load existing T-round
@@ -109,7 +110,7 @@ $GLOBALS['ThePage'] = new Page('TournamentPoolCreate');
       {
          $seed_order = (int)get_request_arg('seed_order');
          $slice_mode = (int)get_request_arg('slice_mode');
-         if ( TournamentPool::seed_pools( $tid, $tprops, $tround, $seed_order, $slice_mode ) )
+         if ( TournamentPool::seed_pools( $allow_edit_tourney, $tid, $tprops, $tround, $seed_order, $slice_mode ) )
          {
             $sys_msg = urlencode( T_('Tournament Pools seeded!') );
             jump_to("tournaments/roundrobin/create_pools.php?tid=$tid".URI_AMP."sysmsg=$sys_msg");
@@ -117,7 +118,7 @@ $GLOBALS['ThePage'] = new Page('TournamentPoolCreate');
       }
       elseif ( @$_REQUEST['t_del_confirm'] && $count_poolrows > 0 )
       {
-         if ( TournamentPool::delete_pools($tid, $round) )
+         if ( TournamentPool::delete_pools( $allow_edit_tourney, $tid, $round ) )
          {
             $sys_msg = urlencode( T_('Tournament Pools removed!') );
             jump_to("tournaments/roundrobin/create_pools.php?tid=$tid".URI_AMP."sysmsg=$sys_msg");
@@ -125,7 +126,7 @@ $GLOBALS['ThePage'] = new Page('TournamentPoolCreate');
       }
       elseif ( @$_REQUEST['t_add_miss'] && $reg_count > $count_poolrows )
       {
-         if ( TournamentPool::add_missing_registered_users( $tid, $tround ) )
+         if ( TournamentPool::add_missing_registered_users( $allow_edit_tourney, $tid, $tround ) )
          {
             $sys_msg = urlencode( T_('Tournament Default Pool filled with missing users!') );
             jump_to("tournaments/roundrobin/create_pools.php?tid=$tid".URI_AMP."sysmsg=$sys_msg");

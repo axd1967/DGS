@@ -27,6 +27,7 @@ require_once 'include/table_columns.php';
 require_once 'tournaments/include/tournament_cache.php';
 require_once 'tournaments/include/tournament_factory.php';
 require_once 'tournaments/include/tournament_helper.php';
+require_once 'tournaments/include/tournament_log_helper.php';
 require_once 'tournaments/include/tournament_participant.php';
 require_once 'tournaments/include/tournament_pool.php';
 require_once 'tournaments/include/tournament_round.php';
@@ -73,7 +74,8 @@ $GLOBALS['ThePage'] = new Page('TournamentPoolDefine');
       error('tournament_edit_rounds_not_allowed', "Tournament.define_pools.need_rounds($tid)");
 
    // create/edit allowed?
-   if ( !TournamentHelper::allow_edit_tournaments($tourney, $my_id) )
+   $allow_edit_tourney = TournamentHelper::allow_edit_tournaments($tourney, $my_id);
+   if ( !$allow_edit_tourney )
       error('tournament_edit_not_allowed', "Tournament.define_pools.edit_tournament($tid,$my_id)");
 
    // load existing T-round
@@ -97,6 +99,7 @@ $GLOBALS['ThePage'] = new Page('TournamentPoolDefine');
    $max_pool_count = min( TROUND_MAX_POOLCOUNT, TournamentUtils::calc_pool_count($reg_count, $tround->MinPoolSize) );
 
    // check + parse edit-form (notes)
+   $old_tround = clone $tround;
    list( $vars, $edits, $input_errors ) = parse_edit_form( $tround, $reg_count );
    $errors = array_merge( $errors, $input_errors );
 
@@ -110,6 +113,7 @@ $GLOBALS['ThePage'] = new Page('TournamentPoolDefine');
          {
             $adjust_pool = '+1';
             $tround->Pools++;
+            $edits[] = T_('Pool Count') . $adjust_pool;
          }
          elseif ( $vars['delpool'] )
          {
@@ -117,7 +121,10 @@ $GLOBALS['ThePage'] = new Page('TournamentPoolDefine');
             if ( TournamentPool::exists_tournament_pool($tid, $round, $tround->Pools) )
                $errors[] = sprintf( T_('Last Pool [%s] must be empty to allow deletion!'), $tround->Pools );
             else
+            {
                $tround->Pools--;
+               $edits[] = T_('Pool Count') . $adjust_pool;
+            }
          }
       }
       else
@@ -149,6 +156,8 @@ $GLOBALS['ThePage'] = new Page('TournamentPoolDefine');
    if ( @$_REQUEST['t_save'] && count($errors) == 0 )
    {
       $tround->update();
+      TournamentLogHelper::log_define_tournament_pools( $tid, $allow_edit_tourney, $edits, $old_tround, $tround );
+
       jump_to("tournaments/roundrobin/define_pools.php?tid=$tid".URI_AMP."round=$round".URI_AMP
             . "sysmsg=". urlencode(T_('Tournament Round saved!')) );
    }

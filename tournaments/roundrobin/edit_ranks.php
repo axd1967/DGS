@@ -78,7 +78,8 @@ $GLOBALS['ThePage'] = new Page('TournamentRankEditor');
       error('tournament_edit_rounds_not_allowed', "Tournament.edit_ranks.need_rounds($tid)");
 
    // create/edit allowed?
-   if ( !TournamentHelper::allow_edit_tournaments($tourney, $my_id) )
+   $allow_edit_tourney = TournamentHelper::allow_edit_tournaments($tourney, $my_id);
+   if ( !$allow_edit_tourney )
       error('tournament_edit_not_allowed', "Tournament.edit_ranks.edit_tournament($tid,$my_id)");
 
    // load existing T-round
@@ -122,12 +123,12 @@ $GLOBALS['ThePage'] = new Page('TournamentRankEditor');
          $rank_from = get_request_arg('rank_from');
          $rank_to   = get_request_arg('rank_to');
          $act_pool  = get_request_arg('pool');
-         TournamentPool::execute_rank_action( $tid, $round, $action, /*uid*/0, $rank_from, $rank_to, $act_pool );
+         TournamentPool::execute_rank_action( $allow_edit_tourney, $tid, $round, $action, /*uid*/0, $rank_from, $rank_to, $act_pool );
       }
       elseif ( $uid && @$_REQUEST['t_userexec'] ) // execute rank-actions on single user
       {
          $action = (int)get_request_arg('action');
-         TournamentPool::execute_rank_action( $tid, $round, $action, $uid );
+         TournamentPool::execute_rank_action( $allow_edit_tourney, $tid, $round, $action, $uid );
          $tpool_user = TournamentPool::load_tournament_pool_user( $tid, $round, $uid, TPOOL_LOADOPT_USER );
       }
       elseif ( $uid && @$_REQUEST['t_setrank'] ) // set rank for single user
@@ -136,16 +137,16 @@ $GLOBALS['ThePage'] = new Page('TournamentRankEditor');
          $pool_win = (bool)get_request_arg('poolwin');
          if ( !$pool_win && $rank_value )
             $rank_value = -abs($rank_value);
-         if ( TournamentPool::update_tournament_pool_ranks( $tpool_user->ID, $rank_value, /*fix-rank*/true ) )
+         if ( TournamentPool::update_tournament_pool_ranks( $allow_edit_tourney, 'edit_ranks', $tpool_user->ID, $rank_value, /*fix-rank*/true ) )
             $tpool_user->Rank = $rank_value;
       }
 
       if ( $show_stats || @$_REQUEST['t_exec'] || @$_REQUEST['t_userexec'] || @$_REQUEST['t_setrank'] )
          $show_rank_sum = true;
       elseif ( @$_REQUEST['t_fillranks'] )
-         $result_notes = TournamentRoundHelper::fill_ranks_tournament_pool( $tround );
+         $result_notes = TournamentRoundHelper::fill_ranks_tournament_pool( $allow_edit_tourney, $tround );
       elseif ( @$_REQUEST['t_setpoolwinners'] )
-         $result_notes = TournamentRoundHelper::fill_pool_winners_tournament_pool( $tround );
+         $result_notes = TournamentRoundHelper::fill_pool_winners_tournament_pool( $allow_edit_tourney, $tround );
    }
 
    $pw_errors = $pw_warnings = null;

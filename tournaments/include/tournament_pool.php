@@ -26,6 +26,7 @@ require_once 'include/std_classes.php';
 require_once 'include/classlib_user.php';
 require_once 'tournaments/include/tournament_globals.php';
 require_once 'tournaments/include/tournament_helper.php';
+require_once 'tournaments/include/tournament_log_helper.php';
 require_once 'tournaments/include/tournament_pool_classes.php';
 require_once 'tournaments/include/tournament_round_helper.php';
 require_once 'tournaments/include/tournament_utils.php';
@@ -489,7 +490,7 @@ class TournamentPool
    }//load_tournament_participants_with_pools
 
    /*! \brief Delete all pools for given tournament-id and round. */
-   public static function delete_pools( $tid, $round )
+   public static function delete_pools( $tlog_type, $tid, $round )
    {
       if ( !is_numeric($tid) || $tid <= 0 )
          error('invalid_args', "TournamentPool:delete_pools.check.tid($tid,$round)");
@@ -497,11 +498,13 @@ class TournamentPool
          error('invalid_args', "TournamentPool:delete_pools.check.round($tid,$round)");
 
       $query = "DELETE FROM TournamentPool WHERE tid=$tid AND Round=$round";
-      return db_query( "TournamentPool:delete_pools($tid,$round)", $query );
+      $result = db_query( "TournamentPool:delete_pools($tid,$round)", $query );
+      TournamentLogHelper::log_delete_pools( $tid, $tlog_type, $round, mysql_affected_rows(), $result );
+      return $result;
    }
 
    /*! \brief Seeds pools with all registered TPs for round. */
-   public static function seed_pools( $tid, $tprops, $tround, $seed_order, $slice_mode )
+   public static function seed_pools( $tlog_type, $tid, $tprops, $tround, $seed_order, $slice_mode )
    {
       if ( !is_numeric($tid) || $tid <= 0 )
          error('unknown_tournament', "TournamentPool:seed_pools.check_tid($tid)");
@@ -578,11 +581,14 @@ class TournamentPool
       }
       db_unlock();
 
+      TournamentLogHelper::log_seed_pools( $tid, $tlog_type, $round,
+         "seed_order=$seed_order, slice_mode=$slice_mode", $cnt, count($arr_pools), $result );
+
       return $result;
    }//seed_pools
 
    /*! \brief Add missing registered users to pool #0 (very similar to seed_pools()-func). */
-   public static function add_missing_registered_users( $tid, $tround )
+   public static function add_missing_registered_users( $tlog_type, $tid, $tround )
    {
       if ( !is_numeric($tid) || $tid <= 0 )
          error('unknown_tournament', "TournamentPool:add_missing_registered_users.check_tid($tid)");
@@ -597,7 +603,7 @@ class TournamentPool
       $tpool_iterator->addQuerySQLMerge( new QuerySQL( SQLP_WHERE,  "TPOOL.Round=$round" ));
       $tpool_iterator = self::load_tournament_pools( $tpool_iterator, $tid, $round );
 
-      // find all registered TPs (optimized)
+      // find all registered TPs (optimized = no seed-order)
       $arr_TPs = TournamentParticipant::load_registered_users_in_seedorder( $tid, $round, TOURNEY_SEEDORDER_NONE );
 
       // add all missing TPs to pools
@@ -633,10 +639,13 @@ class TournamentPool
       }
       db_unlock();
 
+      TournamentLogHelper::log_seed_pools_add_missing_users( $tid, $tlog_type, $round, $cnt, $result );
+
       return $result;
    }//add_missing_registered_users
 
-   public static function assign_pool( $tround, $pool, $arr_uid )
+   /*! \brief Assigns list of users to given tournament-round and pool. */
+   public static function assign_pool( $tlog_type, $tround, $pool, $arr_uid )
    {
       $tid = (int)$tround->tid;
       $round = (int)$tround->Round;
@@ -647,9 +656,26 @@ class TournamentPool
       if ( $cnt == 0 )
          return true;
 
+      // find old-pool-state for T-logging
       $uid_where = implode(',', $arr_uid);
-      return db_query( "TournamentPool:assign_pool.update($tid,$round,$pool)",
+      $result = db_query( "TournamentPool:assign_pool.find_old($tid,$round,$pool)",
+         "SELECT Pool, uid FROM TournamentPool WHERE tid=$tid AND Round=$round AND uid IN ($uid_where) LIMIT $cnt" );
+      $arr_old_pools = array(); // pool -> [uid, ...]
+      while ( $row = mysql_fetch_assoc($result) )
+      {
+         $old_pool = $row['Pool'];
+         if ( !isset($arr_old_pools[$old_pool]) )
+            $arr_old_pools[$old_pool] = array( $row['uid'] );
+         else
+            $arr_old_pools[$old_pool][] = $row['uid'];
+      }
+      mysql_free_result($result);
+
+      // assign new pool for given users
+      $result = db_query( "TournamentPool:assign_pool.update($tid,$round,$pool)",
          "UPDATE TournamentPool SET Pool=$pool WHERE tid=$tid AND Round=$round AND uid IN ($uid_where) LIMIT $cnt" );
+      TournamentLogHelper::log_assign_tournament_pool( $tid, $tlog_type, $tround, $arr_old_pools, $arr_uid, $pool );
+      return $result;
    }//assign_pool
 
    /*!
@@ -824,7 +850,7 @@ class TournamentPool
     * \param $fix_rank if true, no update-restriction on Rank;
     *        otherwise expect Rank<TPOOLRK_RANK_ZONE to auto-fill rank
     */
-   public static function update_tournament_pool_ranks( $tpool_id, $rank, $fix_rank=false )
+   public static function update_tournament_pool_ranks( $tlog_type, $tlog_ref, $tpool_id, $rank, $fix_rank=false )
    {
       if ( is_array($tpool_id) )
       {
@@ -849,6 +875,8 @@ class TournamentPool
       $result = db_query( "TournamentPool:update_tournament_pool_ranks.update($tpool_id,$rank)",
          "UPDATE TournamentPool SET Rank=$rank " .
          "WHERE $qpart_tpools $qpart_rank LIMIT $cnt" );
+
+      TournamentLogHelper::log_set_tournament_pool_ranks( $tid, $tlog_type, $tlog_ref, $tpool_id, $rank, $fix_rank, $result );
       return $result;
    }//update_tournament_pool_ranks
 
@@ -884,7 +912,7 @@ class TournamentPool
     * \param $rank_to ''=same as rank_from (single rank), otherwise numeric rank
     * \param $pool ''=all pools, otherwise specific pool
     */
-   public static function execute_rank_action( $tid, $round, $action, $uid, $rank_from=null, $rank_to=null, $pool=null )
+   public static function execute_rank_action( $tlog_type, $tid, $round, $action, $uid, $rank_from=null, $rank_to=null, $pool=null )
    {
       if ( !is_numeric($action) && ($action < 1 || $action > 4) )
          error('invalid_args', "TournamentPool:execute_rank_action.check.action($tid,$round,$action)");
@@ -966,9 +994,13 @@ class TournamentPool
          . " AND Rank >".TPOOLRK_RANK_ZONE // don't touch UNSET-ranks
          . $qpart_rank
          . ( $uid ? " AND uid=$uid LIMIT 1" : '' );
-      return db_query( "TournamentPool:execute_rank_action.update("
+      $result = db_query( "TournamentPool:execute_rank_action.update("
          . "$tid,$round,a$action,u$uid,$rank_from-$rank_to,p$pool)", $query );
-   }//execute_rank_action_on_tournament_pools
+
+      TournamentLogHelper::log_execute_tournament_pool_rank_action( $tid, $tlog_type, $round,
+         $action, $uid, $rank_from, $rank_to, $pool, $result );
+      return $result;
+   }//execute_rank_action
 
 
    /*! \brief Returns number of user marked as next-rounders/finalists for given tournament-id and round. */

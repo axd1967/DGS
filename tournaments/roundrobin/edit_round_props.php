@@ -26,6 +26,7 @@ require_once 'include/form_functions.php';
 require_once 'tournaments/include/tournament_cache.php';
 require_once 'tournaments/include/tournament_factory.php';
 require_once 'tournaments/include/tournament_helper.php';
+require_once 'tournaments/include/tournament_log_helper.php';
 require_once 'tournaments/include/tournament_round.php';
 require_once 'tournaments/include/tournament_round_status.php';
 require_once 'tournaments/include/tournament_status.php';
@@ -65,7 +66,8 @@ $GLOBALS['ThePage'] = new Page('TournamentRoundEdit');
       error('tournament_edit_rounds_not_allowed', "Tournament.edit_round_props.need_rounds($tid)");
 
    // create/edit allowed?
-   if ( !TournamentHelper::allow_edit_tournaments($tourney, $my_id) )
+   $allow_edit_tourney = TournamentHelper::allow_edit_tournaments($tourney, $my_id);
+   if ( !$allow_edit_tourney )
       error('tournament_edit_not_allowed', "Tournament.edit_round_props.edit_tournament($tid,$my_id)");
 
    // load existing T-round
@@ -79,6 +81,7 @@ $GLOBALS['ThePage'] = new Page('TournamentRoundEdit');
       $errors[] = $tourney->buildAdminLockText();
 
    // check + parse edit-form (notes)
+   $old_tround = clone $tround;
    list( $vars, $edits, $input_errors ) = parse_edit_form( $tround, $t_limits );
    $errors = array_merge( $errors, $input_errors, $tround->check_properties() );
 
@@ -86,6 +89,8 @@ $GLOBALS['ThePage'] = new Page('TournamentRoundEdit');
    if ( @$_REQUEST['tr_save'] && !@$_REQUEST['tr_preview'] && count($errors) == 0 )
    {
       $tround->persist(); // insert or update
+      TournamentLogHelper::log_change_tournament_round_props( $tid, $allow_edit_tourney, $edits, $old_tround, $tround );
+
       jump_to("tournaments/roundrobin/edit_round_props.php?tid={$tid}".URI_AMP."round={$round}".URI_AMP
             . "sysmsg=". urlencode(T_('Tournament Round saved!')) );
    }
