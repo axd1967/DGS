@@ -115,10 +115,10 @@ define('GA_RES_TIMOUT', 3);
          ta_begin();
          {//HOT-section to change game-rated-status
             admin_log( $my_id, $player_row['Handle'], "Update game #$gid with Rated=[{$game->Rated} -> $toggled_rated]" );
-            db_query( "admin_game.toggle_rated($gid,$toggle_rated)",
+            db_query( "admin_game.toggle_rated($gid,$toggled_rated)",
                "UPDATE Games SET Rated='$toggled_rated' WHERE ID=$gid AND Rated='{$game->Rated}' LIMIT 1" );
 
-            GameHelper::delete_cache_game_row( "admin_game.toggle_rated.del_cache($gid,$toggle_rated)", $gid );
+            GameHelper::delete_cache_game_row( "admin_game.toggle_rated.del_cache($gid,$toggled_rated)", $gid );
          }
          ta_end();
 
@@ -263,8 +263,6 @@ function parse_edit_form( &$game )
       $errors[] = T_('Game-result can only be changed for running game!');
    if ( @$_REQUEST['grated_save'] )
    {
-      if ( $game->tid > 0 )
-         $errors[] = T_('Rated-status can not be changed for tournament-game!');
       if ( $game->GameType != GAMETYPE_GO )
          $errors[] = T_('Rated-status can not be changed for multi-player-game!');
    }
@@ -409,7 +407,7 @@ function draw_game_admin_form( $game )
 
    // ---------- Change rated-status ----------
 
-   if ( !@$_REQUEST['gdel'] && $game->tid == 0 && $game->ShapeID == 0 && $game->GameType == GAMETYPE_GO && isStartedGame($game->Status) )
+   if ( !@$_REQUEST['gdel'] && $game->ShapeID == 0 && $game->GameType == GAMETYPE_GO && isStartedGame($game->Status) )
    {
       if ( $draw_hr )
          $gaform->add_row( array( 'HR' ));
@@ -418,6 +416,14 @@ function draw_game_admin_form( $game )
       $gaform->add_row( array(
             'CELL', 2, '',
             'HEADER', T_('Change game rated-status'), ));
+      if ( $game->tid > 0 )
+      {
+         $gaform->add_row( array(
+            'CELL', 2, '',
+            'TEXT', span('ErrorMsg', make_html_safe( sprintf(
+                  T_("This is a tournament-game, so you should confer\nwith the <home %s>tournament-directors</home> about a change!"),
+                  "tournaments/list_directors.php?tid=".$game->tid), true)), ));
+      }
       $gaform->add_row( array(
             'DESCRIPTION', T_('Rated'),
             'TEXT', sprintf( '%s => %s', yesno($game->Rated), yesno(toggle_rated($game->Rated)) ), ));
