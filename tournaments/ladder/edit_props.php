@@ -319,15 +319,15 @@ function parse_edit_form( &$tlp, $t_limits )
             && $new_value >= -1 && $new_value <= TLADDER_MAX_CHRNG_ABS )
          $tlp->ChallengeRangeAbsolute = limit( $new_value, -1, TLADDER_MAX_CHRNG_ABS, 10 );
       else
-         $errors[] = sprintf( T_('Expecting number for absolute challenge range in range %s.#T_ladder'),
-                              build_range_text(-1, TLADDER_MAX_CHRNG_ABS) );
+         $errors[] = sprintf( T_('Expecting number for %s in range %s.'), T_('Challenge Range Absolute#T_ladder'),
+            build_range_text(-1, TLADDER_MAX_CHRNG_ABS) );
 
       $new_value = $vars['chall_range_rel'];
       if ( TournamentUtils::isNumberOrEmpty($new_value, true) )
          $tlp->ChallengeRangeRelative = (int)$new_value;
       else
          $errors[] = sprintf( T_('Expecting number for relative challenge range in percentage range %s.#T_ladder'),
-                              build_range_text(0, 100) );
+            build_range_text(0, 100) );
 
       $new_value = trim($vars['chall_range_rat']);
       $is_error = false;
@@ -338,8 +338,8 @@ function parse_edit_form( &$tlp, $t_limits )
       else
       {
          $is_error = true;
-         $errors[] = sprintf( T_('Expecting number for rating challenge range in range %s.#T_ladder'),
-                              build_range_text( -TLADDER_MAX_CHRNG_RATING, TLADDER_MAX_CHRNG_RATING ) );
+         $errors[] = sprintf( T_('Expecting number for %s in range %s.'), T_('Challenge Range Rating#T_ladder'),
+            build_range_text( -TLADDER_MAX_CHRNG_RATING, TLADDER_MAX_CHRNG_RATING ) );
       }
       if ( !$is_error ) // reformat
          $vars['chall_range_rat'] = TournamentLadderProps::formatChallengeRangeRating($tlp->ChallengeRangeRating);
@@ -349,7 +349,7 @@ function parse_edit_form( &$tlp, $t_limits )
          $tlp->ChallengeRematchWaitHours = $new_value;
       else
          $errors[] = sprintf( T_('Expecting number for rematch waiting time in hours range %s.#T_ladder'),
-                              build_range_text(0, TLADDER_MAX_WAIT_REMATCH) );
+            build_range_text(0, TLADDER_MAX_WAIT_REMATCH) );
 
 
       $new_value = $vars['max_def'];
@@ -362,9 +362,9 @@ function parse_edit_form( &$tlp, $t_limits )
             $tlp->MaxDefenses = $new_value;
       }
       else
-         $errors[] = sprintf( T_('Expecting number for max. defenses in range %s.#T_ladder'),
-                              // check for general MAX, but show specific max
-                              build_range_text(1, $t_limits->getMaxLimit(TLIMITS_TL_MAX_DF) ));
+         $errors[] = sprintf( T_('Expecting number for %s in range %s.'), T_('Max. Defenses#T_ladder'),
+            // check for general MAX, but show specific max
+            build_range_text(1, $t_limits->getMaxLimit(TLIMITS_TL_MAX_DF) ));
 
       $new_value = $vars['max_def1'];
       if ( TournamentUtils::isNumberOrEmpty($new_value) && $new_value >= 0 && $new_value <= TLADDER_MAX_DEFENSES )
@@ -415,8 +415,8 @@ function parse_edit_form( &$tlp, $t_limits )
             $tlp->MaxChallenges = $new_value;
       }
       else
-         $errors[] = sprintf( T_('Expecting number for max. outgoing challenges in range %s.#T_ladder'),
-                              $t_limits->getLimitRangeText(TLIMITS_TL_MAX_CH) ); // check for general MAX, but show specific max
+         $errors[] = sprintf( T_('Expecting number for %s in range %s.'), T_('Max. outgoing Challenges#T_ladder'),
+            $t_limits->getLimitRangeText(TLIMITS_TL_MAX_CH) ); // check for general MAX, but show specific max
 
 
       $new_value = $vars['uabs_days'];
@@ -424,14 +424,14 @@ function parse_edit_form( &$tlp, $t_limits )
          $tlp->UserAbsenceDays = $new_value;
       else
          $errors[] = sprintf( T_('Expecting number for user absence in range %s days#T_ladder'),
-                              build_range_text(0, 255) );
+            build_range_text(0, 255) );
 
       $new_value = $vars['rankplen'];
       if ( TournamentUtils::isNumberOrEmpty($new_value) )
          $tlp->RankPeriodLength = $new_value;
       else
          $errors[] = sprintf( T_('Expecting number for rank archiving period length in range %s months#T_ladder'),
-                              build_range_text(1, 255) );
+            build_range_text(1, 255) );
 
       $new_value = $vars['crownking'];
       $parsed_hours = TimeFormat::parse_time_days_hours( $new_value );

@@ -415,7 +415,7 @@ function parse_edit_form( &$survey )
          if ( isNumber($new_value) && $new_value >= $min_value && $new_value <= SURVEY_POINTS_MAX )
             $survey->MinPoints = (int)$new_value;
          else
-            $errors[] = sprintf( T_('Expecting number for min-points in range %s.'),
+            $errors[] = sprintf( T_('Expecting number for %s in range %s.'), T_('Min-Points'),
                                  build_range_text($min_value, SURVEY_POINTS_MAX) );
 
          $new_value = $vars['max_points'];
@@ -423,7 +423,7 @@ function parse_edit_form( &$survey )
          if ( isNumber($new_value) && $new_value >= $min_value && $new_value <= SURVEY_POINTS_MAX )
             $survey->MaxPoints = (int)$new_value;
          else
-            $errors[] = sprintf( T_('Expecting number for max-points in range %s.'),
+            $errors[] = sprintf( T_('Expecting number for %s in range %s.'), T_('Max-Points'),
                                  build_range_text($min_value, SURVEY_POINTS_MAX) );
 
          if ( $survey->MinPoints > $survey->MaxPoints )
@@ -448,14 +448,14 @@ function parse_edit_form( &$survey )
          if ( isNumber($new_value) && $new_value >= 0 && $new_value <= MAX_SURVEY_OPTIONS )
             $survey->MinPoints = (int)$new_value;
          else
-            $errors[] = sprintf( T_('Expecting number for min-selections in range %s.'),
+            $errors[] = sprintf( T_('Expecting number for %s in range %s.'), T_('min-selections#survey'),
                                  build_range_text(0, MAX_SURVEY_OPTIONS) );
 
          $new_value = $vars['max_points'];
          if ( isNumber($new_value) && $new_value >= 0 && $new_value <= MAX_SURVEY_OPTIONS )
             $survey->MaxPoints = (int)$new_value;
          else
-            $errors[] = sprintf( T_('Expecting number for max-selections in range %s.'),
+            $errors[] = sprintf( T_('Expecting number for %s in range %s.'), T_('max-selections#survey'),
                                  build_range_text(0, MAX_SURVEY_OPTIONS) );
 
          if ( $survey->MaxPoints > 0 )

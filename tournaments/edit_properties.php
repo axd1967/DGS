@@ -247,8 +247,8 @@ function parse_edit_form( &$tpr, $t_limits )
       if ( TournamentUtils::isNumberOrEmpty($new_value) && $new_value >=0 && $new_value <= TP_MAX_COUNT )
          $tpr->MinParticipants = limit( $new_value, 0, TP_MAX_COUNT, 0 );
       else
-         $errors[] = sprintf( T_('Expecting number for minimum participants in range %s.'),
-                              build_range_text(0, TP_MAX_COUNT) );
+         $errors[] = sprintf( T_('Expecting number for %s in range %s.'), T_('minimum participants#tourney'),
+            build_range_text(0, TP_MAX_COUNT) );
 
       $new_value = $vars['max_participants'];
       if ( TournamentUtils::isNumberOrEmpty($new_value) && $new_value >=0 && $new_value <= TP_MAX_COUNT )
@@ -260,7 +260,7 @@ function parse_edit_form( &$tpr, $t_limits )
             $tpr->MaxParticipants = limit( $new_value, 0, TP_MAX_COUNT, 0 );
       }
       else
-         $errors[] = sprintf( T_('Expecting number for maximum participants in range %s.'),
+         $errors[] = sprintf( T_('Expecting number for %s in range %s.'), T_('maximum participants#tourney'),
             $t_limits->getLimitRangeText(TLIMITS_MAX_TP, TP_MAX_COUNT) ); // check for general MAX, but show specific max
 
       if ( $tpr->MinParticipants > 0 && $tpr->MaxParticipants > 0 && $tpr->MinParticipants > $tpr->MaxParticipants )

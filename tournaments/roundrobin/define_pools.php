@@ -324,14 +324,14 @@ function parse_edit_form( &$trd )
       if ( TournamentUtils::isNumberOrEmpty($new_value) && $new_value >= $trd->MinPoolSize && $new_value <= $trd->MaxPoolSize )
          $trd->PoolSize = $new_value;
       else
-         $errors[] = sprintf( T_('Expecting number for pool size in range %s.'),
+         $errors[] = sprintf( T_('Expecting number for %s in range %s.'), T_('Pool Size'),
             build_range_text($trd->MinPoolSize, $trd->MaxPoolSize) );
 
       $new_value = $vars['pool_count'];
       if ( TournamentUtils::isNumberOrEmpty($new_value) && $new_value >= $min_pool_count && $new_value <= $max_pool_count )
          $trd->Pools = $new_value;
       else
-         $errors[] = sprintf( T_('Expecting number for pool count in range %s.'),
+         $errors[] = sprintf( T_('Expecting number for %s in range %s.'), T_('Pool Count'),
             build_range_text( $min_pool_count, $max_pool_count ) );
 
       if ( $vars['addpool'] && $vars['delpool'] )

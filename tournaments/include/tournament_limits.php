@@ -149,8 +149,8 @@ class TournamentLimits
    {
       return $this->_checkValue_MinMaxDisable(
          TLIMITS_MAX_TP, $value, $curr_value,
-         T_('Disabling feature of maximum participants with 0-value not allowed.#tourney'),
-         T_('Expecting number for maximum participants in range %s.#tourney') );
+         sprintf( T_('Disabling feature of %s with 0-value not allowed.#tourney'), T_('maximum participants#tourney') ),
+         sprintf( T_('Expecting number for %s in range %%s.'), T_('maximum participants#tourney') ) );
    }
 
    // ---------- Fields checks for Ladder-tournaments --------------------
@@ -164,7 +164,7 @@ class TournamentLimits
          $group_label = (is_null($group_id)) ? '' : " $group_id";
          list( $disable_allowed, $min_value, $max_value ) = $limits;
          if ( $value == 0 && is_null($group_id) /*&& !$disable_allowed*/ ) // always forbidden for main-group
-            $errors[] = T_('Disabling feature of maximum defenses with 0-value not allowed.#T_ladder');
+            $errors[] = sprintf( T_('Disabling feature of %s with 0-value not allowed.#tourney'), T_('Max. Defenses#T_ladder') );
          elseif (  ( !is_null($min_value) && $value < $min_value )
                || ( !is_null($max_value) && $max_value < TLADDER_MAX_DEFENSES && $value > $max_value ) )
          {
@@ -180,8 +180,8 @@ class TournamentLimits
    {
       return $this->_checkValue_MinMaxDisable(
          TLIMITS_TL_MAX_CH, $value, $curr_value,
-         T_('Disabling feature of max. outgoing challenges with 0-value not allowed.#T_ladder'),
-         T_('Max. outgoing challenges must be in range %s.#T_ladder') );
+         sprintf( T_('Disabling feature of %s with 0-value not allowed.#tourney'), T_('Max. outgoing Challenges#T_ladder') ),
+         sprintf( T_('Expecting number for %s in range %%s.'), T_('Max. outgoing Challenges#T_ladder') ) );
    }
 
    // ---------- Fields checks for Round-Robin-tournaments --------------------
@@ -191,8 +191,8 @@ class TournamentLimits
    {
       return $this->_checkValue_MinMaxDisable(
          TLIMITS_TRD_MAX_ROUNDS, $value, $curr_value,
-         T_('Disabling feature of maximum tournament rounds with 0-value not allowed.'),
-         T_('Expecting number for maximum tournament rounds in range %s.') );
+         sprintf( T_('Disabling feature of %s with 0-value not allowed.#tourney'), T_('maximum tournament rounds') ),
+         sprintf( T_('Expecting number for %s in range %%s.'), T_('maximum tournament rounds') ) );
    }
 
    /*! \brief Returns errors-array for check on min/max/disabling of tournament-round-robin-min-pool-size value. */
@@ -200,8 +200,8 @@ class TournamentLimits
    {
       return $this->_checkValue_MinMaxDisable(
          TLIMITS_TRD_MIN_POOLSIZE, $value, $curr_value,
-         T_('Disabling feature of minimum pool size with 0-value not allowed.'),
-         T_('Expecting number for min. pool size in range %s.') );
+         sprintf( T_('Disabling feature of %s with 0-value not allowed.#tourney'), T_('Min. Pool Size') ),
+         sprintf( T_('Expecting number for %s in range %%s.'), T_('Min. Pool Size') ) );
    }
 
    /*! \brief Returns errors-array for check on min/max/disabling of tournament-round-robin-max-pool-size value. */
@@ -209,8 +209,8 @@ class TournamentLimits
    {
       return $this->_checkValue_MinMaxDisable(
          TLIMITS_TRD_MAX_POOLSIZE, $value, $curr_value,
-         T_('Disabling feature of maximum pool size with 0-value not allowed.'),
-         T_('Expecting number for max. pool size in range %s.') );
+         sprintf( T_('Disabling feature of %s with 0-value not allowed.#tourney'), T_('Max. Pool Size') ),
+         sprintf( T_('Expecting number for %s in range %%s.'), T_('Max. Pool Size') ) );
    }
 
    /*! \brief Returns errors-array for check on min/max/disabling of tournament-round-robin-max-pool-count value. */
@@ -218,8 +218,8 @@ class TournamentLimits
    {
       return $this->_checkValue_MinMaxDisable(
          TLIMITS_TRD_MAX_POOLCOUNT, $value, $curr_value,
-         T_('Disabling feature of maximum pool count with 0-value not allowed.'),
-         T_('Expecting number for max. pool count in range %s.') );
+         sprintf( T_('Disabling feature of %s with 0-value not allowed.#tourney'), T_('Max. Pool Count') ),
+         sprintf( T_('Expecting number for %s in range %%s.'), T_('Max. Pool Count') ) );
    }
 
 

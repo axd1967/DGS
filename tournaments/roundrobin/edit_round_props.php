@@ -209,7 +209,7 @@ function parse_edit_form( &$trd, $t_limits )
             $trd->MinPoolSize = $new_value;
       }
       else
-         $errors[] = sprintf( T_('Expecting number for min. pool size in range %s.'),
+         $errors[] = sprintf( T_('Expecting number for %s in range %s.'), T_('Min. Pool Size'),
             $t_limits->getLimitRangeText(TLIMITS_TRD_MIN_POOLSIZE) ); // check for general MAX, but show specific max
 
       $new_value = $vars['max_pool_size'];
@@ -222,7 +222,7 @@ function parse_edit_form( &$trd, $t_limits )
             $trd->MaxPoolSize = $new_value;
       }
       else
-         $errors[] = sprintf( T_('Expecting number for max. pool size in range %s.'),
+         $errors[] = sprintf( T_('Expecting number for %s in range %s.'), T_('Max. Pool Size'),
             $t_limits->getLimitRangeText(TLIMITS_TRD_MAX_POOLSIZE) ); // check for general MAX, but show specific max
 
       $new_value = $vars['max_pool_count'];
@@ -235,7 +235,7 @@ function parse_edit_form( &$trd, $t_limits )
             $trd->MaxPoolCount = $new_value;
       }
       else
-         $errors[] = sprintf( T_('Expecting number for max. pool count in range %s.'),
+         $errors[] = sprintf( T_('Expecting number for %s in range %s.'), T_('Max. Pool Count'),
             $t_limits->getLimitRangeText(TLIMITS_TRD_MAX_POOLCOUNT) ); // check for general MAX, but show specific max
 
       $new_value = $vars['poolwinner_ranks'];

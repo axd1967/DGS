@@ -13,6 +13,17 @@ ChangeLog
 
 2014-03-11 jug
 
+   * tournaments/include/tournament_limits.php (TournamentLimits.check_MaxParticipants,
+       ~.checkLadder_MaxDefenses, ~.checkLadder_MaxChallenges, ~.check_MaxRounds,
+       ~.checkRounds_MinPoolSize, ~.checkRounds_MaxPoolSize, ~.checkRounds_MaxPoolCount),
+     tournaments/roundrobin/edit_round_props.php (parse_edit_form),
+     tournaments/roundrobin/define_pools.php (parse_edit_form),
+     tournaments/ladder/edit_props.php (parse_edit_form),
+     tournaments/edit_properties.php (parse_edit_form),
+     admin_survey.php (parse_edit_form):
+   - cleanup: reducing number by ca. 20 of specific T_() translation-texts by re-using more
+     of already existing text-parts
+
    * tournaments/include/tournament_round_helper.php (TournamentRoundHelper.start_tournament_round_games),
      tournaments/include/tournament_log_helper.php (TournamentLogHelper.log_start_tournament_games),
      tournaments/roundrobin/edit_pairing.php:
