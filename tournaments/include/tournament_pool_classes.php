@@ -132,7 +132,7 @@ class PoolGame
       elseif ( $score == SCORE_TIME )
          return T_('Timeout');
       else
-         return $score;
+         return abs($score);
    }
 
 } // end of 'PoolGame'
