@@ -29,6 +29,7 @@ require_once 'tournaments/include/tournament_games.php';
 require_once 'tournaments/include/tournament_ladder_props.php';
 require_once 'tournaments/include/tournament_news.php';
 require_once 'tournaments/include/tournament_participant.php';
+require_once 'tournaments/include/tournament_points.php';
 require_once 'tournaments/include/tournament_properties.php';
 require_once 'tournaments/include/tournament_result.php';
 require_once 'tournaments/include/tournament_round.php';
@@ -464,6 +465,30 @@ class TournamentCache
 
       return $tg_iterator;
    }//load_cache_tournament_games
+
+   /*!
+    * \brief Loads and caches TournamentPoints for given tournament-id.
+    * \param $check_exist true = die if db-entry cannot be found
+    */
+   public static function load_cache_tournament_points( $dbgmsg, $tid, $check_exist=true )
+   {
+      $tid = (int)$tid;
+      $dbgmsg .= ".TCache:load_cache_tpoints($tid,$check_exist)";
+      $key = "TPoints.$tid";
+
+      $tpoints = DgsCache::fetch( $dbgmsg, CACHE_GRP_TPOINTS, $key );
+      if ( is_null($tpoints) )
+      {
+         $tpoints = TournamentPoints::load_tournament_points($tid);
+         if ( $check_exist && is_null($tpoints) )
+            error('bad_tournament', $dbgmsg);
+
+         if ( !is_null($tpoints) ) // only cache if existing
+            DgsCache::store( $dbgmsg, CACHE_GRP_TPOINTS, $key, $tpoints, SECS_PER_DAY );
+      }
+
+      return $tpoints;
+   }//load_cache_tournament_points
 
 } // end of 'TournamentCache'
 ?>

@@ -723,6 +723,7 @@ See "template" for new cache-group at end of this section.
 * CACHE_GRP_TLPROPS (caching of the 'TournamentLadderProps'-table)
 * CACHE_GRP_TPROPS  (caching of the 'TournamentProperties'-table)
 * CACHE_GRP_TRULES  (caching of the 'TournamentRules'-table)
+* CACHE_GRP_TPOINTS (caching of the 'TournamentPoints'-table)
    - Once a tournament has been created and started, there are normally not longer
      changes to these db-tables except for admin-intervention. Also these tables
      are often used to configure tournaments on various pages, so their content

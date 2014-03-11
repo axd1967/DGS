@@ -971,7 +971,7 @@ Description:
 
 * Object : object action is performed on
    - format: <type>_<subtype>
-   - type: T, TD, TPR, TRULE, TN, TP, TG, TRES; TL, TLP, TRR, TRND, TPOOL
+   - type: T, TD, TPR, TRULE, TN, TP, TG, TRES; TL, TLP, TPOINT, TRR, TRND, TPOOL
    - subtype: Data, Lock, Status, Game, Reg, Rank, News, Props, Pool, Round, User, NextRound
 
    - Examples with content:
@@ -989,4 +989,73 @@ Description:
 
 * Message : free-text describing action
 
+
+
+###########################################################################
+## --- TournamentPoints ---
+
+Description:
+   Table to store point-scheme used to determine ranks for pools of round-robin-tournament
+
+| Field             | Type                  | Null | Key | Default             | Extra |
++-------------------+-----------------------+------+-----+---------------------+-------+
+| tid               | int(11)               | NO   | PRI | NULL                |       |
+| PointsType        | enum('SIMPLE','HAHN') | NO   |     | SIMPLE              |       |
+| Flags             | tinyint(3) unsigned   | NO   |     | 1                   |       |
+| PointsWon         | tinyint(4)            | NO   |     | 2                   |       |
+| PointsLost        | tinyint(4)            | NO   |     | 0                   |       |
+| PointsDraw        | tinyint(4)            | NO   |     | 1                   |       |
+| PointsBye         | smallint(6)           | NO   |     | 2                   |       |
+| PointsNoResult    | smallint(6)           | NO   |     | 1                   |       |
+| ScoreBlock        | tinyint(3) unsigned   | NO   |     | 10                  |       |
+| MaxPoints         | smallint(5) unsigned  | NO   |     | 10                  |       |
+| PointsResignation | smallint(6)           | NO   |     | 10                  |       |
+| PointsTimeout     | smallint(6)           | NO   |     | 10                  |       |
+| Lastchanged       | datetime              | NO   |     | 0000-00-00 00:00:00 |       |
+| ChangedBy         | varchar(54)           | NO   |     |                     |       |
+
+## Fields:
+
+* tid : tournament-id, FK to Tournament.ID
+
+* PointsType : type of point-scheme to apply
+   - SIMPLE =
+   - HAHN =
+
+* Flags : flags for point-scheme
+   - 0x01 = share-max-points for HAHN-type, see http://senseis.xmp.net/?HahnPointingSystem
+   - 0x02 = allow negative points for HAHN-type (for loser)
+
+* PointsWon : points added for game-winner (SIMPLE-type only)
+   - valid range: -100..100
+
+* PointsLost : points added for game-loser (SIMPLE-type only)
+   - valid range: -100..100
+
+* PointsDraw : points added for both-players on game-draw (SIMPLE-type only)
+   - valid range: -100..100
+
+* PointsBye : points added for game-winner on game-bye (both types)
+   - valid range for SIMPLE-type: -100..100
+   - valid range for HAHN-type: -1000..1000
+
+* PointsNoResult : points added for both-players on no-result-game (both types)
+   - valid range for SIMPLE-type: -100..100
+   - valid range for HAHN-type: -1000..1000
+
+* ScoreBlock : divisor to divide game-score-result into blocks (HAHN-type only)
+   - valid range: 1..1000
+
+* MaxPoints : maximum of awared points for players (HAHN-type only)
+   - valid range: 1..1000
+
+* PointsResignation : points added for winner on game-resignation (HAHN-type only)
+   - valid range: 1..1000
+
+* PointsTimeout : points added for winner on game-resignation (HAHN-type only)
+   - valid range: 1..1000
+
+* Lastchanged : date of last-update of T-points
+
+* ChangedBy : handle-list of users, that last changed data-row in format '[last-user] [prev-user] ...'
 

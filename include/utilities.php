@@ -384,4 +384,9 @@ function build_text_block( $arr, $item_count, $item_sep=', ', $line_sep="<br>\n"
    return implode($line_sep, $lines);
 }//build_text_block
 
+function signum( $x )
+{
+   return ($x < 0) ? -1 : ($x == 0 ? 0 : 1);
+}
+
 ?>

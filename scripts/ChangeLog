@@ -13,6 +13,55 @@ ChangeLog
 
 2014-03-11 jug
 
+   * tournaments/include/tournament_points.php (class TournamentPoints, ~.setPointsType,
+       ~.getPointsLimit, ~.persist, ~.insert, ~.update, ~.delete, ~.fillEntityData,
+       ~.setDefaults, ~.calculate_points, ~.isTournamentPoints, ~.build_query_sql,
+       ~.new_from_row, ~.load_tournament_points, ~.getPointsTypeText,
+       ~.get_edit_tournament_status, ~.delete_cache_tournament_points),
+     tournaments/include/tournament_pool_classes.php (PoolGame.calc_result, ~.get_score_text;
+       class PoolTables, ~.get_tournament_points, ~.fill_games;
+       PoolViewer.make_single_pool_table),
+     tournaments/include/tournament_round_helper.php (TournamentRoundHelper.fill_ranks_tournament_pool),
+     tournaments/include/tournament_log_helper.php (TournamentLogHelper.log_change_tournament_points),
+     tournaments/include/tournament_cache.php (TournamentCache.load_cache_tournament_points),
+     include/cache_globals.php (CACHE_GRP_TPOINTS, MAX_CACHE_GRP, $ARR_CACHE_GROUP_NAMES,
+       $ARR_CACHE_GROUP_CLEANUP),
+     include/config.php ($DGS_CACHE_GROUPS),
+     include/utilities.php (signum),
+     scripts/updates/database_changes_1_0_16_to_1_0_17.mysql,
+     scripts/updates/other_changes_1_0_16_to_1_0_17.txt,
+     scripts/tests/AllTests.php, scripts/tests/TournamentPointsTest.php, skins/dragon/screen.css,
+     specs/db/dragon-ddl.sql, specs/db/table-Tournaments.txt, specs/caching.txt,
+     tournaments/roundrobin/edit_points.php (parse_edit_form, build_points_examples),
+     tournaments/roundrobin/view_pools.php (build_pool_notes),
+     tournaments/manage_tournament.php (make_links_ttype_specific):
+   - added table TournamentPoints to store point-configuration for round-robin-tournaments
+     - added edit-page 'edit_points.php' to configure TournamentPoints with score-example-preview
+     - added tests for TournamentPoints score-point-calculation
+     - view-pools: use tournament-points-calculation in pools on view-pools
+     - view-pools: enhanced tooltip on game-reference in pools with game-score
+     - added caching for loading tournament-points
+-----------
+-- added table to store point-configuration for round-robin-tournaments
+CREATE TABLE TournamentPoints (
+  tid int NOT NULL,
+  PointsType enum('SIMPLE','HAHN') NOT NULL default 'SIMPLE',
+  Flags tinyint unsigned NOT NULL default '1',
+  PointsWon tinyint NOT NULL default '2',
+  PointsLost tinyint NOT NULL default '0',
+  PointsDraw tinyint NOT NULL default '1',
+  PointsBye smallint NOT NULL default '2',
+  PointsNoResult smallint NOT NULL default '1',
+  ScoreBlock tinyint unsigned NOT NULL default '10',
+  MaxPoints smallint unsigned NOT NULL default '10',
+  PointsResignation smallint NOT NULL default '10',
+  PointsTimeout smallint NOT NULL default '10',
+  Lastchanged datetime NOT NULL default '0000-00-00 00:00:00',
+  ChangedBy varchar(54) NOT NULL default '',
+  PRIMARY KEY (tid)
+) ENGINE=MyISAM ;
+-----------
+
    * tournaments/include/tournament_limits.php (TournamentLimits.check_MaxParticipants,
        ~.checkLadder_MaxDefenses, ~.checkLadder_MaxChallenges, ~.check_MaxRounds,
        ~.checkRounds_MinPoolSize, ~.checkRounds_MaxPoolSize, ~.checkRounds_MaxPoolCount),

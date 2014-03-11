@@ -20,3 +20,23 @@ UPDATE ConfigPages
    SET ColumnsTournamentLadderView = ColumnsTournamentLadderView & ~0x8000 ;
 
 
+-- added table to store point-configuration for round-robin-tournaments
+CREATE TABLE TournamentPoints (
+  tid int NOT NULL,
+  PointsType enum('SIMPLE','HAHN') NOT NULL default 'SIMPLE',
+  Flags tinyint unsigned NOT NULL default '1',
+  PointsWon tinyint NOT NULL default '2',
+  PointsLost tinyint NOT NULL default '0',
+  PointsDraw tinyint NOT NULL default '1',
+  PointsBye smallint NOT NULL default '2',
+  PointsNoResult smallint NOT NULL default '1',
+  ScoreBlock tinyint unsigned NOT NULL default '10',
+  MaxPoints smallint unsigned NOT NULL default '10',
+  PointsResignation smallint NOT NULL default '10',
+  PointsTimeout smallint NOT NULL default '10',
+  Lastchanged datetime NOT NULL default '0000-00-00 00:00:00',
+  ChangedBy varchar(54) NOT NULL default '',
+  PRIMARY KEY (tid)
+) ENGINE=MyISAM ;
+
+

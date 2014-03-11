@@ -503,6 +503,8 @@ class TournamentRoundHelper
       // 2. calculate ranks for users of identified (finished) pools
       if ( $count_finish )
       {
+         $tpoints = TournamentCache::load_cache_tournament_points( 'Tournament.pool_view', $tid );
+
          $tpool_iterator = new ListIterator( 'TRH:fill_ranks_tournament_pool.load_pools' );
          $tpool_iterator = TournamentPool::load_tournament_pools( $tpool_iterator, $tid, $round,
             $arr_pools_to_finish, /*load-opts*/0 );
@@ -512,7 +514,7 @@ class TournamentRoundHelper
          $tg_iterator = new ListIterator( 'TRH:fill_ranks_tournament_pool.load_tgames' );
          $tg_iterator = TournamentGames::load_tournament_games( $tg_iterator, $tid, $tround->ID,
             $arr_pools_to_finish, /*all-stati*/null );
-         $poolTables->fill_games( $tg_iterator );
+         $poolTables->fill_games( $tg_iterator, $tpoints );
 
          // 3. finish identified pools (update rank)
          $arr_updates = array(); // [ rank => [ TPool.ID, ... ], ... ]

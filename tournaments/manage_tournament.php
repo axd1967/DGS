@@ -66,7 +66,7 @@ $GLOBALS['ThePage'] = new Page('TournamentManage');
 
    // ---------- Tournament Info -----------------------------------
 
-   $tform = new Form( 'tournament', $page, FORM_POST );
+   $tform = new Form( 'tournament', $page, FORM_GET );
    $tform->add_hidden( 'tid', $tid );
 
    $tform->add_row( array(
@@ -228,6 +228,9 @@ function make_links_ttype_specific( $tourney, $tstat )
    {
       if ( $tstat == TOURNEY_STATUS_NEW )
          return '<li>'
+            . make_menu_link( T_('Edit points#tourney'), array( 'url' => "tournaments/roundrobin/edit_points.php?tid=$tid", 'class' => 'TAdmin' ))
+            . subList( array( T_('Setup tournament points to determine pool-winners') ))
+            . '<li>'
             . make_menu_link( T_('Edit rounds'), array( 'url' => "tournaments/roundrobin/edit_rounds.php?tid=$tid", 'class' => 'TAdmin' ))
             . subList( array( T_('Setup tournament rounds for pooling and pairing') ));
 

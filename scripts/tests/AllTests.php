@@ -33,6 +33,7 @@ require_once 'GameSetupTest.php';
 require_once 'GuiFunctionsTest.php';
 require_once 'ProfileTest.php';
 require_once 'TimeFormatTest.php';
+require_once 'TournamentPointsTest.php';
 
 /*!
  * \class AllTests
@@ -61,6 +62,7 @@ class AllTests
       $suite->addTestSuite('GuiFunctionsTest');
       $suite->addTestSuite('ProfileTest');
       $suite->addTestSuite('TimeFormatTest');
+      $suite->addTestSuite('TournamentPointsTest');
 
       return $suite;
    }

@@ -1,0 +1,5 @@
+
+-----------
+# adjust 'include/config-local.php' reflecting changes
+# - extended $DGS_CACHE_GROUPS with CACHE_GRP_TPOINTS for caching tournament-points
+

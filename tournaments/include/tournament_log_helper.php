@@ -602,5 +602,37 @@ class TournamentLogHelper
       $tlog->insert();
    }
 
+
+   public static function log_change_tournament_points( $tid, $tlog_type, $edits, $old_tp, $new_tp )
+   {
+      $msg = array();
+      if ( $old_tp->PointsType != $new_tp->PointsType )
+         $msg[] = sprintf(self::$DIFF_FMT, 'PointsType', $old_tp->PointsType, $new_tp->PointsType );
+      if ( $old_tp->Flags != $new_tp->Flags )
+         $msg[] = sprintf(self::$DIFF_FMT, 'Flags', $old_tp->Flags, $new_tp->Flags );
+      if ( $old_tp->PointsWon != $new_tp->PointsWon )
+         $msg[] = sprintf(self::$DIFF_FMT, 'PointsWon', $old_tp->PointsWon, $new_tp->PointsWon );
+      if ( $old_tp->PointsLost != $new_tp->PointsLost )
+         $msg[] = sprintf(self::$DIFF_FMT, 'PointsLost', $old_tp->PointsLost, $new_tp->PointsLost );
+      if ( $old_tp->PointsDraw != $new_tp->PointsDraw )
+         $msg[] = sprintf(self::$DIFF_FMT, 'PointsDraw', $old_tp->PointsDraw, $new_tp->PointsDraw );
+      if ( $old_tp->PointsBye != $new_tp->PointsBye )
+         $msg[] = sprintf(self::$DIFF_FMT, 'PointsBye', $old_tp->PointsBye, $new_tp->PointsBye );
+      if ( $old_tp->PointsNoResult != $new_tp->PointsNoResult )
+         $msg[] = sprintf(self::$DIFF_FMT, 'PointsNoResult', $old_tp->PointsNoResult, $new_tp->PointsNoResult );
+      if ( $old_tp->ScoreBlock != $new_tp->ScoreBlock )
+         $msg[] = sprintf(self::$DIFF_FMT, 'ScoreBlock', $old_tp->ScoreBlock, $new_tp->ScoreBlock );
+      if ( $old_tp->MaxPoints != $new_tp->MaxPoints )
+         $msg[] = sprintf(self::$DIFF_FMT, 'MaxPoints', $old_tp->MaxPoints, $new_tp->MaxPoints );
+      if ( $old_tp->PointsResignation != $new_tp->PointsResignation )
+         $msg[] = sprintf(self::$DIFF_FMT, 'PointsResignation', $old_tp->PointsResignation, $new_tp->PointsResignation );
+      if ( $old_tp->PointsTimeout != $new_tp->PointsTimeout )
+         $msg[] = sprintf(self::$DIFF_FMT, 'PointsTimeout', $old_tp->PointsTimeout, $new_tp->PointsTimeout );
+
+      $tlog = new Tournamentlog( 0, $tid, 0, 0, $tlog_type, 'TPOINT_Data', TLOG_ACT_CHANGE, 0,
+         sprintf( "Change of [%s]: %s", implode(', ', $edits), implode('; ', $msg) ));
+      $tlog->insert();
+   }//log_change_tournament_points
+
 } // end of 'TournamentLogHelper'
 ?>

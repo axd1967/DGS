@@ -3364,6 +3364,22 @@ a:hover.TLadderRank {
    text-decoration: underline;
 }
 
+table#PreviewTPointsTable {
+   border: 1px solid black;
+}
+table#PreviewTPointsTable td {
+   background: #e0e8ed;
+   border: 1px dotted black;
+}
+table#PreviewTPointsTable th {
+   background: #bbddff;
+   border: 1px dotted black;
+}
+table#PreviewTPointsTable td {
+   border-left: 1px dotted black;
+   border-right: 1px dotted black;
+}
+
 table#TPoolSuggestionsTable th,
 table#TPoolSuggestionsTable td {
    border: 1px dotted black;

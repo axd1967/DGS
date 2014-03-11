@@ -85,7 +85,7 @@ class PoolGame
    }
 
    /*! \brief Returns arr( user-score, points, cell-marker, title, style ) for given user-id. */
-   public function calc_result( $uid )
+   public function calc_result( $uid, $tpoints )
    {
       if ( is_null($this->Score) )
       {
@@ -98,24 +98,21 @@ class PoolGame
       else
       {
          $chk_score = $this->get_score($uid);
+         $points = $tpoints->calculate_points( $chk_score );
 
-         //TODO for Mego/Hahn use score instead +-score (S18)
-         if ( $chk_score < 0 )
+         if ( $chk_score < 0 ) // won
          {
-            $points = 2; // won
-            $title = T_('Game won');
+            $title = sprintf( T_('Game won by [%s]'), self::get_score_text($chk_score) );
             $style = 'MatrixWon';
          }
-         elseif ( $chk_score > 0 )
+         elseif ( $chk_score > 0 ) // lost
          {
-            $points = 0; // lost
-            $title = T_('Game lost');
+            $title = sprintf( T_('Game lost by [%s]'), self::get_score_text($chk_score) );
             $style = 'MatrixLost';
          }
-         else
+         else //=0 draw
          {
-            $points = 1; // jigo
-            $title = T_('Jigo');
+            $title = T_('Game draw (Jigo)');
             $style = 'MatrixJigo';
          }
          $mark = $points;
@@ -123,6 +120,20 @@ class PoolGame
 
       return array( $chk_score, $points, $mark, $title, $style );
    }//calc_result
+
+
+   // ------------ static functions ----------------------------
+
+   private static function get_score_text( $score )
+   {
+      $score = abs($score);
+      if ( $score == SCORE_RESIGN )
+         return T_('Resignation');
+      elseif ( $score == SCORE_TIME )
+         return T_('Timeout');
+      else
+         return $score;
+   }
 
 } // end of 'PoolGame'
 
@@ -357,6 +368,8 @@ class PoolTables
    public $users = array();
    /*! \brief list of pool-numbers with list of result-ordered(!) pool-users: map( poolNo => [ uid, ... ] ) */
    public $pools = array();
+   /*! \brief TournamentPoints-object; mandatory, if fill_games() is used to calculate points/rank of pool. */
+   private $tpoints = null;
 
    public function __construct( $count_pools )
    {
@@ -373,6 +386,11 @@ class PoolTables
    public function get_pool_users()
    {
       return $this->pools;
+   }
+
+   public function get_tournament_points()
+   {
+      return $this->tpoints;
    }
 
    /*!
@@ -404,9 +422,16 @@ class PoolTables
       }
    }//fill_pools
 
-   /*! \brief Sets TournamentGames for pool-tables and count games. */
-   public function fill_games( $tgames_iterator )
+   /*!
+    * \brief Sets TournamentGames for pool-tables and count games.
+    * \note also sets this->tpoints for consecutive pool-viewing & other actions calculating points/rank of pool.
+    */
+   public function fill_games( $tgames_iterator, $tpoints )
    {
+      if ( is_null($tpoints) )
+         error('invalid_args', "PoolTables.fill_games.miss_tpoints");
+      $this->tpoints = $tpoints;
+
       $reorder_pools = array(); // pool-no => 1 (=needs re-order of users)
       $defeated_opps = array(); // uid => [ opp-uid, ... ];  won(opp 2x) or jigo(opp 1x)
 
@@ -437,7 +462,7 @@ class PoolTables
          $tpool_ch->PoolGames[] = $poolGame;
          $tpool_df->PoolGames[] = $poolGame;
 
-         $ch_arr = $poolGame->calc_result( $ch_uid ); // score,points,mark,title,style
+         $ch_arr = $poolGame->calc_result( $ch_uid, $tpoints ); // score,points,mark,title,style
          $tpool_ch->Points += $ch_arr[1];
          $ch_score = $ch_arr[0];
          if ( !is_null($ch_score) )
@@ -448,7 +473,7 @@ class PoolTables
             if ( $ch_score <= 0 ) $defeated_opps[$ch_uid][] = $df_uid; // win counts double, jigo simple
          }
 
-         $df_arr = $poolGame->calc_result( $df_uid );
+         $df_arr = $poolGame->calc_result( $df_uid, $tpoints );
          $tpool_df->Points += $df_arr[1];
          $df_score = $df_arr[0];
          if ( !is_null($df_score) )
@@ -796,6 +821,10 @@ class PoolViewer
    {
       global $base_path, $NOW;
 
+      $tpoints = $this->ptabs->get_tournament_points();
+      if ( is_null($tpoints) )
+         error('miss_args', "PoolTables.make_single_pool_table.miss_tpoints");
+
       $arr_users = $this->ptabs->pools[$pool];
       $map_usercols = $this->ptabs->get_user_col_map( $pool, $this->games_per_challenge );
       $cnt_users = count($arr_users);
@@ -875,7 +904,7 @@ class PoolViewer
                $game_url = $base_path."game.php?gid=".$poolGame->gid;
                $col = $map_usercols[ $poolGame->get_opponent($uid) ] * $this->games_per_challenge + $poolGame->GameNo;
 
-               list( $score, $points, $mark, $title, $style ) = $poolGame->calc_result( $uid );
+               list( $score, $points, $mark, $title, $style ) = $poolGame->calc_result( $uid, $tpoints );
                $cell = anchor( $game_url, $mark, $title );
                if ( !is_null($style) )
                   $cell = Table::build_row_cell( $cell, $style );

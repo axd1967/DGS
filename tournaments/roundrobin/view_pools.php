@@ -76,6 +76,8 @@ $GLOBALS['ThePage'] = new Page('TournamentPoolView');
       $round = $tourney->CurrentRound;
    $tround = TournamentCache::load_cache_tournament_round( 'Tournament.pool_view', $tid, $round );
 
+   $tpoints = TournamentCache::load_cache_tournament_points( 'Tournament.pool_view', $tid );
+
    // init
    $errors = $tstatus->check_view_status( TournamentHelper::get_view_data_status($allow_edit_tourney) );
    $allow_view = ( count($errors) == 0 );
@@ -95,7 +97,7 @@ $GLOBALS['ThePage'] = new Page('TournamentPoolView');
 
       $tg_iterator = TournamentCache::load_cache_tournament_games( 'Tournament.pool_view',
          $tid, $tround->ID, 0, /*all-stati*/null );
-      $poolTables->fill_games( $tg_iterator );
+      $poolTables->fill_games( $tg_iterator, $tpoints );
       $counts = $poolTables->count_games();
    }//allow_view
 
@@ -145,7 +147,7 @@ $GLOBALS['ThePage'] = new Page('TournamentPoolView');
       $poolViewer->echo_pool_table();
    }//allow_view
 
-   echo_notes( 'edittournamentpoolnotesTable', T_('Tournament Pool notes'), build_pool_notes(), true, false );
+   echo_notes( 'edittournamentpoolnotesTable', T_('Tournament Pool notes'), build_pool_notes($tpoints), true, false );
 
 
    $menu_array = array();
@@ -177,7 +179,7 @@ function pool_user_edit_rank( &$poolviewer, $uid )
 }
 
 /*! \brief Returns array with notes about tournament pools. */
-function build_pool_notes()
+function build_pool_notes( $tpoints )
 {
    $notes = array();
    $notes[] = sprintf( T_('Pools are ranked by Tie-breakers: %s'),
@@ -185,15 +187,16 @@ function build_pool_notes()
 
    $mfmt = MINI_SPACING . '%s' . MINI_SPACING;
    $img_pool_winner = echo_image_tourney_pool_winner();
+   //TODO TODO adjust for TournamentPoints
    $notes[] =
       sprintf( T_('[%s] 1..n: \'#\' = running game, \'-\' = no game, %s#tpool'),
          T_('Position#tourneyheader'), span('MatrixSelf', T_('self#tpool_table'), $mfmt) )
       . ",<br>\n"
       . sprintf( T_('\'%s\' on colored background (%s)#tpool_table'), T_('Points#tourney'),
             sprintf( ' %s %s %s ',
-               span('MatrixWon', T_('game won#tpool_table')   . ' = 2', $mfmt),
-               span('MatrixLost', T_('game lost#tpool_table') . ' = 0', $mfmt),
-               span('MatrixJigo', T_('game draw#tpool_table') . ' = 1', $mfmt) ));
+               span('MatrixWon', T_('game won#tpool_table')   . ' = ' . $tpoints->PointsWon, $mfmt),
+               span('MatrixLost', T_('game lost#tpool_table') . ' = ' . $tpoints->PointsLost, $mfmt),
+               span('MatrixJigo', T_('game draw#tpool_table') . ' = ' . $tpoints->PointsDraw, $mfmt) ));
    $notes[] = sprintf( T_('[%s] in format "wins : losses" = number of wins and losses for user'), T_('#Wins#tourney') );
    $notes[] = sprintf( T_('[%s] = points calculated from wins, losses and jigo for user'), T_('Points#header') );
    $notes[] = sprintf( T_('[%s] = Tie-Breaker SODOS = Sum of Defeated Opponents Score'), T_('SODOS#tourney') );
