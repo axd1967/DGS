@@ -13,6 +13,9 @@ ChangeLog
 
 2014-03-11 jug
 
+   * all files:
+   - adjusted Copyright on every file to: 2001-2014
+
    * tournaments/include/tournament_points.php (class TournamentPoints, ~.setPointsType,
        ~.getPointsLimit, ~.persist, ~.insert, ~.update, ~.delete, ~.fillEntityData,
        ~.setDefaults, ~.calculate_points, ~.isTournamentPoints, ~.build_query_sql,
