@@ -13,6 +13,9 @@ ChangeLog
 
 2014-03-13 jug
 
+   * include/gamelist_control.php (GameListControl.build_games_query):
+   - removed join with Tournament-table optimizing query by always showing T-game-role in games-list
+
    * tournaments/include/tournament_points.php (class TournamentPoints, ~.__construct,
        ~.fillEntityData, ~.setDefaults, ~.new_from_row),
      tournaments/include/tournament_log_helper.php (TournamentLogHelper.log_change_tournament_points),

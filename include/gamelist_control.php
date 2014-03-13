@@ -308,12 +308,8 @@ class GameListControl
             "G.tid={$this->ext_tid}" );
 
          if ( !$is_all )
-         {
             $qsql->add_part( SQLP_FIELDS,
-               "IF(T.Type='".TOURNEY_TYPE_LADDER."',IF(TG.Challenger_uid=$uid,1,0),-1) AS TG_Challenge" );
-            $qsql->add_part( SQLP_FROM,
-               'INNER JOIN Tournament AS T ON T.ID=G.tid' );
-         }
+               "IF(TG.Challenger_uid=$uid,1,0) AS TG_Challenge" ); // -1 can be used to not show it
       }
 
       return $qsql;
