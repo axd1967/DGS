@@ -56,7 +56,7 @@ abstract class TournamentTemplateLadder extends TournamentTemplate
    }
 
    /*!
-    * \brief Function to persist create tournament-tables.
+    * \brief Function to persist create tournament-tables for ladder-tournament.
     * \internal
     */
    protected function _createTournament( $tourney, $tprops, $t_rules, $tl_props )
