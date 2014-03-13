@@ -234,7 +234,7 @@ Features / Processes:
    - pairing / rounds / pools
    - setup: winner-calculation (wins/tie-breaker/rounds)
    - (TRR) rules: tie-breaker, http://senseis.xmp.net/?TieBreaker
-   - (TRR) rules: score of a "bye" 0 or 0.5
+   - (TRR) rules: score of a "bye" (=forfeit) 0 or 0.5
    - (TRR) handling different participant-counts in pools towards points-rank
       - (TRR) handling tournament-escapers (odd <-> even TPs, pooling)
    - T-scoring / pairing: McMahon, Swiss, Round-Robin, Hahn-System (http://senseis.xmp.net/?HahnSystem)

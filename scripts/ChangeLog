@@ -13,6 +13,21 @@ ChangeLog
 
 2014-03-13 jug
 
+   * tournaments/include/tournament_points.php (class TournamentPoints, ~.__construct,
+       ~.fillEntityData, ~.setDefaults, ~.new_from_row),
+     tournaments/include/tournament_log_helper.php (TournamentLogHelper.log_change_tournament_points),
+     scripts/updates/database_changes_1_0_16_to_1_0_17.mysql,
+     specs/db/dragon-ddl.sql,
+     specs/db/table-Tournaments.txt,
+     specs/tournaments.txt,
+     tournaments/roundrobin/edit_points.php (parse_edit_form):
+   - renamed TournamentPoints.PointsBye to PointsForfeit for clearer term of the same concept
+-----------
+-- renamed TournamentPoints.PointsBye to PointsForfeit
+ALTER TABLE TournamentPoints
+   CHANGE PointsBye PointsForfeit smallint NOT NULL default '2' ;
+-----------
+
    * tournaments/include/tournament_pool_classes.php (class PoolViewer, ~.__construct,
        ~.init_pool_table, ~.make_single_pool_table):
    - view-pools for round-robin-tournaments: added column with table-icon linked

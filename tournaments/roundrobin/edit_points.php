@@ -175,8 +175,8 @@ $GLOBALS['ThePage'] = new Page('TournamentPointsEdit');
    $tform->add_empty_row();
    $tform->add_row( array( 'CHAPTER', T_('for all points-types#tourney'), ));
    $tform->add_row( array(
-         'DESCRIPTION', T_('Points Bye#tourney'),
-         'TEXTINPUT',   'points_bye', 5, 5, $vars['points_bye'],
+         'DESCRIPTION', T_('Points Forfeit#tourney'),
+         'TEXTINPUT',   'points_forfeit', 5, 5, $vars['points_forfeit'],
          'TEXT',        $text_winner, ));
    $tform->add_row( array(
          'DESCRIPTION', T_('Points No-Result#tourney'),
@@ -245,7 +245,7 @@ function parse_edit_form( &$tpoi )
       'flag_neg_points' => (bool)($tpoi->Flags & TPOINTS_FLAGS_NEGATIVE_POINTS),
       'points_resign'   => $tpoi->PointsResignation,
       'points_timeout'  => $tpoi->PointsTimeout,
-      'points_bye'      => $tpoi->PointsBye,
+      'points_forfeit'  => $tpoi->PointsForfeit,
       'points_no_res'   => $tpoi->PointsNoResult,
    );
 
@@ -340,14 +340,14 @@ function parse_edit_form( &$tpoi )
       else
          $tpoi->PointsTimeout = (int)$new_value;
 
-      $new_value = $vars['points_bye'];
+      $new_value = $vars['points_forfeit'];
       if ( !( isNumber($new_value) && $new_value >= -$tp_lim && $new_value <= $tp_lim ) )
-         $errors[] = sprintf( T_('Expecting number for %s in range %s.'), T_('Points Bye#tourney'), $tp_rng );
+         $errors[] = sprintf( T_('Expecting number for %s in range %s.'), T_('Points Forfeit#tourney'), $tp_rng );
       elseif ( $need_even_hahn && ($new_value & 1) )
          $errors[] = sprintf( T_('Expecting even number for %s if max. points are shared.#tourney'),
-            T_('Points Bye#tourney') );
+            T_('Points Forfeit#tourney') );
       else
-         $tpoi->PointsBye = (int)$new_value;
+         $tpoi->PointsForfeit = (int)$new_value;
 
       $new_value = $vars['points_no_res'];
       if ( !( isNumber($new_value) && $new_value >= -$tp_lim && $new_value <= $tp_lim ) )
@@ -372,7 +372,7 @@ function parse_edit_form( &$tpoi )
          $edits[] = T_('Allow Negative Points#tourney');
       if ( $old_vals['points_resign'] != $tpoi->PointsResignation ) $edits[] = T_('Points Resignation#tourney');
       if ( $old_vals['points_timeout'] != $tpoi->PointsTimeout ) $edits[] = T_('Points Timeout#tourney');
-      if ( $old_vals['points_bye'] != $tpoi->PointsBye ) $edits[] = T_('Points Bye#tourney');
+      if ( $old_vals['points_forfeit'] != $tpoi->PointsForfeit ) $edits[] = T_('Points Forfeit#tourney');
       if ( $old_vals['points_no_res'] != $tpoi->PointsNoResult ) $edits[] = T_('Points No-Result#tourney');
    }
 

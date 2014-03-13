@@ -1005,7 +1005,7 @@ Description:
 | PointsWon         | tinyint(4)            | NO   |     | 2                   |       |
 | PointsLost        | tinyint(4)            | NO   |     | 0                   |       |
 | PointsDraw        | tinyint(4)            | NO   |     | 1                   |       |
-| PointsBye         | smallint(6)           | NO   |     | 2                   |       |
+| PointsForfeit     | smallint(6)           | NO   |     | 2                   |       |
 | PointsNoResult    | smallint(6)           | NO   |     | 1                   |       |
 | ScoreBlock        | tinyint(3) unsigned   | NO   |     | 10                  |       |
 | MaxPoints         | smallint(5) unsigned  | NO   |     | 10                  |       |
@@ -1035,7 +1035,7 @@ Description:
 * PointsDraw : points added for both-players on game-draw (SIMPLE-type only)
    - valid range: -100..100
 
-* PointsBye : points added for game-winner on game-bye (both types)
+* PointsForfeit : points added for game-winner on game-forfeit (both types)
    - valid range for SIMPLE-type: -100..100
    - valid range for HAHN-type: -1000..1000
 

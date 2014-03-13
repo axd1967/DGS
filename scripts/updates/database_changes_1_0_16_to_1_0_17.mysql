@@ -40,3 +40,8 @@ CREATE TABLE TournamentPoints (
 ) ENGINE=MyISAM ;
 
 
+-- renamed TournamentPoints.PointsBye to PointsForfeit
+ALTER TABLE TournamentPoints
+   CHANGE PointsBye PointsForfeit smallint NOT NULL default '2' ;
+
+

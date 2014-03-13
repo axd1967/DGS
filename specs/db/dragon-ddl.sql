@@ -1214,6 +1214,7 @@ CREATE TABLE `TournamentPoints` (
   `PointsWon` tinyint(4) NOT NULL default '2',
   `PointsLost` tinyint(4) NOT NULL default '0',
   `PointsDraw` tinyint(4) NOT NULL default '1',
+  `PointsForfeit` smallint(6) NOT NULL default '2',
   `PointsBye` smallint(6) NOT NULL default '2',
   `PointsNoResult` smallint(6) NOT NULL default '1',
   `ScoreBlock` tinyint(3) unsigned NOT NULL default '10',

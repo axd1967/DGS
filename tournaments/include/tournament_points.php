@@ -52,7 +52,7 @@ global $ENTITY_TOURNAMENT_POINTS; //PHP5
 $ENTITY_TOURNAMENT_POINTS = new Entity( 'TournamentPoints',
       FTYPE_PKEY, 'tid',
       FTYPE_CHBY,
-      FTYPE_INT,  'tid', 'Flags', 'PointsWon', 'PointsLost', 'PointsDraw', 'PointsBye', 'PointsNoResult',
+      FTYPE_INT,  'tid', 'Flags', 'PointsWon', 'PointsLost', 'PointsDraw', 'PointsForfeit', 'PointsNoResult',
                   'ScoreBlock', 'MaxPoints', 'PointsResignation', 'PointsTimeout',
       FTYPE_DATE, 'Lastchanged',
       FTYPE_ENUM, 'PointsType'
@@ -66,7 +66,7 @@ class TournamentPoints
    public $PointsWon;
    public $PointsLost;
    public $PointsDraw;
-   public $PointsBye;
+   public $PointsForfeit;
    public $PointsNoResult;
    public $ScoreBlock;
    public $MaxPoints;
@@ -77,7 +77,7 @@ class TournamentPoints
 
    /*! \brief Constructs TournamentPoints-object with specified arguments. */
    public function __construct( $tid=0, $points_type=TPOINTSTYPE_SIMPLE, $flags=TPOINTS_FLAGS_SHARE_MAX_POINTS,
-         $points_won=2, $points_lost=0, $points_draw=1, $points_bye=2, $points_no_result=1,
+         $points_won=2, $points_lost=0, $points_draw=1, $points_forfeit=2, $points_no_result=1,
          $score_block=10, $max_points=10, $points_resignation=10, $points_timeout=10,
          $lastchanged=0, $changed_by='' )
    {
@@ -87,7 +87,7 @@ class TournamentPoints
       $this->PointsWon = (int)$points_won;
       $this->PointsLost = (int)$points_lost;
       $this->PointsDraw = (int)$points_draw;
-      $this->PointsBye = (int)$points_bye;
+      $this->PointsForfeit = (int)$points_forfeit;
       $this->PointsNoResult = (int)$points_no_result;
       $this->ScoreBlock = (int)$score_block;
       $this->MaxPoints = (int)$max_points;
@@ -158,7 +158,7 @@ class TournamentPoints
       $data->set_value( 'PointsWon', $this->PointsWon );
       $data->set_value( 'PointsLost', $this->PointsLost );
       $data->set_value( 'PointsDraw', $this->PointsDraw );
-      $data->set_value( 'PointsBye', $this->PointsBye );
+      $data->set_value( 'PointsForfeit', $this->PointsForfeit );
       $data->set_value( 'PointsNoResult', $this->PointsNoResult );
       $data->set_value( 'ScoreBlock', $this->ScoreBlock );
       $data->set_value( 'MaxPoints', $this->MaxPoints );
@@ -192,12 +192,12 @@ class TournamentPoints
       // SIMPLE | HAHN
       if ( $points_type == TPOINTSTYPE_SIMPLE )
       {
-         $this->PointsBye = 2;
+         $this->PointsForfeit = 2;
          $this->PointsNoResult = 1;
       }
       else //=TPOINTSTYPE_HAHN
       {
-         $this->PointsBye = 10;
+         $this->PointsForfeit = 10;
          $this->PointsNoResult = 0;
       }
    }//setDefaults
@@ -295,7 +295,7 @@ class TournamentPoints
             @$row['PointsWon'],
             @$row['PointsLost'],
             @$row['PointsDraw'],
-            @$row['PointsBye'],
+            @$row['PointsForfeit'],
             @$row['PointsNoResult'],
             @$row['ScoreBlock'],
             @$row['MaxPoints'],

@@ -616,8 +616,8 @@ class TournamentLogHelper
          $msg[] = sprintf(self::$DIFF_FMT, 'PointsLost', $old_tp->PointsLost, $new_tp->PointsLost );
       if ( $old_tp->PointsDraw != $new_tp->PointsDraw )
          $msg[] = sprintf(self::$DIFF_FMT, 'PointsDraw', $old_tp->PointsDraw, $new_tp->PointsDraw );
-      if ( $old_tp->PointsBye != $new_tp->PointsBye )
-         $msg[] = sprintf(self::$DIFF_FMT, 'PointsBye', $old_tp->PointsBye, $new_tp->PointsBye );
+      if ( $old_tp->PointsForfeit != $new_tp->PointsForfeit )
+         $msg[] = sprintf(self::$DIFF_FMT, 'PointsForfeit', $old_tp->PointsForfeit, $new_tp->PointsForfeit );
       if ( $old_tp->PointsNoResult != $new_tp->PointsNoResult )
          $msg[] = sprintf(self::$DIFF_FMT, 'PointsNoResult', $old_tp->PointsNoResult, $new_tp->PointsNoResult );
       if ( $old_tp->ScoreBlock != $new_tp->ScoreBlock )
