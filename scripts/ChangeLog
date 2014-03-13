@@ -11,6 +11,13 @@ Release [2013-08-11] - DGS 1.0.16 - tag [release-1_0_16-20130811] on (later) bra
 ChangeLog
 ------------------------------------------------------------------
 
+2014-03-13 jug
+
+   * tournaments/include/tournament_template_round_robin.php (TournamentTemplateRoundRobin._createTournament),
+     tournaments/include/types/dgs_round_robin.php (DgsRoundRobinTournament.createTournament):
+   - create TournamentPoints-db-entry with SIMPLE-type defaults on tournament-creation
+     of round-robin-tournament by tournament-wizard
+
 2014-03-11 jug
 
    * all files:

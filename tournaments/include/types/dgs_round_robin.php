@@ -65,13 +65,16 @@ class DgsRoundRobinTournament extends TournamentTemplateRoundRobin
       $trules->Size = 19;
       $trules->Handicaptype = TRULE_HANDITYPE_NIGIRI;
 
+      $tpoints = new TournamentPoints();
+      $tpoints->setDefaults( TPOINTSTYPE_SIMPLE );
+
       $tround = new TournamentRound();
       $tround->MinPoolSize = 0; // 0's provoke error, so change by TD enforced
       $tround->MaxPoolSize = 0;
       $tround->MaxPoolCount = 0;
       $tround->PoolWinnerRanks = 0;
 
-      return $this->_createTournament( $tourney, $tprops, $trules, $tround );
+      return $this->_createTournament( $tourney, $tprops, $trules, $tpoints, $tround );
    }//createTournament
 
 } // end of 'DgsRoundRobinTournament'

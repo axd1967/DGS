@@ -27,6 +27,7 @@ require_once 'tournaments/include/tournament_template.php';
 require_once 'tournaments/include/tournament_cache.php';
 require_once 'tournaments/include/tournament_games.php';
 require_once 'tournaments/include/tournament_participant.php';
+require_once 'tournaments/include/tournament_points.php';
 require_once 'tournaments/include/tournament_pool.php';
 require_once 'tournaments/include/tournament_pool_classes.php';
 require_once 'tournaments/include/tournament_properties.php';
@@ -61,10 +62,10 @@ abstract class TournamentTemplateRoundRobin extends TournamentTemplate
    }
 
    /*!
-    * \brief Function to persist create tournament-tables.
+    * \brief Function to persist create tournament-tables for round-robin tournament.
     * \internal
     */
-   protected function _createTournament( $tourney, $tprops, $trules, $tround )
+   protected function _createTournament( $tourney, $tprops, $trules, $tpoints, $tround )
    {
       global $NOW;
 
@@ -77,6 +78,8 @@ abstract class TournamentTemplateRoundRobin extends TournamentTemplate
             $this->create_error("TournamentTemplateRoundRobin._createTournament.tprops.check(%s)");
          if ( !($trules instanceof TournamentRules) )
             $this->create_error("TournamentTemplateRoundRobin._createTournament.trules.check(%s)");
+         if ( !($tpoints instanceof TournamentPoints) )
+            $this->create_error("TournamentTemplateRoundRobin._createTournament.tpoints.check(%s)");
          if ( !($tround instanceof TournamentRound) )
             $this->create_error("TournamentTemplateRoundRobin._createTournament.tround.check(%s)");
 
@@ -92,6 +95,10 @@ abstract class TournamentTemplateRoundRobin extends TournamentTemplate
          $trules->tid = $tid;
          if ( !$trules->insert() )
             $this->create_error("TournamentTemplateRoundRobin._createTournament.trules.insert(%s,$tid)");
+
+         $tpoints->tid = $tid;
+         if ( !$tpoints->insert() )
+            $this->create_error("TournamentTemplateRoundRobin._createTournament.tpoints.insert(%s,$tid)");
 
          $tround->tid = $tid;
          if ( !$tround->insert() )
