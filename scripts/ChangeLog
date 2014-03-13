@@ -13,6 +13,11 @@ ChangeLog
 
 2014-03-13 jug
 
+   * tournaments/include/tournament_pool_classes.php (class PoolViewer, ~.__construct,
+       ~.init_pool_table, ~.make_single_pool_table):
+   - view-pools for round-robin-tournaments: added column with table-icon linked
+     to users running tournament-games
+
    * tournaments/roundrobin/edit_points.php (build_points_examples):
    - added free input-fields in examples-preview on edit-points-page to allow directors
      to test other point-configs

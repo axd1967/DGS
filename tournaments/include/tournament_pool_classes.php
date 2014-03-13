@@ -706,6 +706,7 @@ define('PVOPT_EDIT_RANK',  0x40); // add edit-actions table-column for rank-edit
 
 class PoolViewer
 {
+   private $tid;
    private $ptabs; // PoolTables-object
    private $table; // Table-object
 
@@ -723,6 +724,7 @@ class PoolViewer
    {
       global $player_row;
 
+      $this->tid = $tid;
       $this->ptabs = $pool_tables;
       $this->my_id = $player_row['ID'];
       $this->games_per_challenge = (int)$games_per_challenge;
@@ -741,7 +743,7 @@ class PoolViewer
 
       $table = new Table( 'PoolViewer', $page, $cfg_tblcols, '', TABLE_NO_SORT|TABLE_NO_SIZE|TABLE_NO_THEAD );
       $table->use_show_rows(false);
-      $table->add_external_parameters( new RequestParameters( array( 'tid' => $tid )), true );
+      $table->add_external_parameters( new RequestParameters( array( 'tid' => $this->tid )), true );
       if ( !$hide_results )
          $table->add_or_del_column();
       $this->table = $table;
@@ -763,13 +765,13 @@ class PoolViewer
       if ( !($this->options & PVOPT_NO_TRATING) )
          $this->table->add_tablehead( 4, T_('Tournament Rating#header'), 'Rating', 0 );
       $this->table->add_tablehead( 5, T_('Country#header'), 'Image', 0 );
+      $this->table->add_tablehead(15, new TableHead( T_('Running tournament games'), 'images/table.gif'), 'Image', 0 );
       $this->table->add_tablehead(13, new TableHead( T_('User online#header'), 'images/online.gif',
          sprintf( T_('Indicator for being online up to %s mins ago'), SPAN_ONLINE_MINS)
             . ', ' . T_('or on vacation#header') ), 'Image', 0 );
       $this->table->add_tablehead(14, T_('Last access#header'), '', 0 );
-
       // IMPORTANT NOTE: increase accordingly when adding new columns!!
-      $idx = 14; // last used-static-col
+      $idx = 15; // last used-static-col
 
       $this->poolidx = $idx;
       if ( !($this->options & PVOPT_NO_RESULT) )
@@ -889,6 +891,10 @@ class PoolViewer
             $row_arr[4] = echo_rating( @$user->urow['TP_Rating'], true, $uid );
          if ( $this->table->Is_Column_Displayed[5] )
             $row_arr[5] = getCountryFlagImage( $user->Country );
+         if ( $this->table->Is_Column_Displayed[15] )
+            $row_arr[15] = echo_image_table( $base_path."show_games.php?tid={$this->tid}".URI_AMP."uid=$uid",
+                  sprintf( T_('Running tournament games of user [%s]'), $user->Handle ),
+                  false );
 
          if ( $show_results ) // build game-result-matrix (one user-row)
          {
