@@ -13,6 +13,14 @@ ChangeLog
 
 2014-03-13 jug
 
+   * tournaments/include/tournament_games.php (TournamentGames.is_score_change_allowed),
+     tournaments/include/tournament.php (Tournament.build_info),
+     include/gui_bulletin.php (GuiBulletin.build_view_bulletin),
+     show_games.php:
+   - added shortcut edit-icons on games-list linked to tournament-game-admin
+     - show edit-link only for tournament-director and only if tournament-status can still be modified
+     - extended title with tournament-games with full tournament-title
+
    * include/gamelist_control.php (GameListControl.build_games_query):
    - removed join with Tournament-table optimizing query by always showing T-game-role in games-list
 

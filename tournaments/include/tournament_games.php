@@ -606,5 +606,11 @@ class TournamentGames
       DgsCache::delete_group( $dbgmsg, CACHE_GRP_TGAMES, "TGames.$tid" );
    }
 
+   /*! \brief Returns true if given tournament-game-status, for that change of tournament-game-score is allowed. */
+   public static function is_score_change_allowed( $tg_status )
+   {
+      return ( $tg_status == TG_STATUS_INIT || $tg_status == TG_STATUS_PLAY );
+   }
+
 } // end of 'TournamentGames'
 ?>

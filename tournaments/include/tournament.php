@@ -354,7 +354,7 @@ class Tournament
       return false;
    }//allow_edit_directors
 
-   /*! \brief Returns info about tournament with linked ID, scope, type and title; version=1..3. */
+   /*! \brief Returns info about tournament with linked ID, scope, type and title; version=1..6. */
    public function build_info( $version=1, $extra='' )
    {
       global $base_path;
@@ -382,8 +382,8 @@ class Tournament
                          make_html_safe( $this->Title, true),
                          $extra );
 
-      if ( $version == 4 )
-         return sprintf( '(%s %s) %s #%s - %s: %s', // (scope type) Tournament #ID - status
+      if ( $version == 4 ) // (scope type) Tournament #ID - status
+         return sprintf( '(%s %s) %s #%s - %s: %s',
                          self::getScopeText($this->Scope),
                          self::getTypeText($this->Type),
                          T_('Tournament'),
@@ -391,7 +391,15 @@ class Tournament
                          T_('Status#tourney'),
                          self::getStatusText($this->Status) );
 
-      //if ( $version == 5 ) // extra=max-title-len
+      if ( $version == 5 ) // (img) (scope type) Tournament - Title
+         return sprintf( '%s (%s %s) %s - %s',
+                         echo_image_tournament_info($this->ID),
+                         self::getScopeText($this->Scope),
+                         self::getTypeText($this->Type),
+                         T_('Tournament'),
+                         make_html_safe( $this->Title, true) );
+
+      //if ( $version == 6 ) // extra=max-title-len
       return sprintf( '%s %s - %s', // linked: (img) Tournament - Title
                       echo_image_tournament_info($this->ID),
                       anchor( $base_path."tournaments/view_tournament.php?tid=".$this->ID, T_('Tournament') ),

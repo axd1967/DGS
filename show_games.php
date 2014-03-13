@@ -30,7 +30,10 @@ require_once 'include/filter.php';
 require_once 'include/classlib_profile.php';
 require_once 'include/classlib_userconfig.php';
 require_once 'include/time_functions.php';
+require_once 'tournaments/include/tournament.php';
+require_once 'tournaments/include/tournament_cache.php';
 require_once 'tournaments/include/tournament_games.php';
+require_once 'tournaments/include/tournament_helper.php';
 require_once 'include/filterlib_gametype.php';
 require_once 'include/gamelist_control.php';
 
@@ -59,6 +62,16 @@ $GLOBALS['ThePage'] = new Page('GamesList');
 
    $opt_ext_tid = (int)@$_REQUEST['tid']; // tourney
    $glc->ext_tid = ( !ALLOW_TOURNAMENTS || $opt_ext_tid < 0 ) ? 0 : $opt_ext_tid;
+   if ( $glc->ext_tid > 0 )
+   {
+      $tourney = TournamentCache::load_cache_tournament( 'show_games.find_tournament', $glc->ext_tid );
+      $allow_edit_tourney = TournamentHelper::allow_edit_tournaments($tourney, $my_id);
+   }
+   else
+   {
+      $tourney = null;
+      $allow_edit_tourney = false;
+   }
 
    $opt_observe = @$_REQUEST['observe']; // all | user (only my_id)
    if ( $opt_observe ) //OB=OU+OA
@@ -413,7 +426,7 @@ $GLOBALS['ThePage'] = new Page('GamesList');
  * 29: >  OB+FA+RA (White-StartRating)
  * 30: >  FA (White-EndRating)
  * 31: >  FA (White-RatingDiff)
- * 32:    (Link to game-info page, shape-game-info, tournament-info)
+ * 32:    (Link to game-info page, shape-game-info, tournament-info, admin-T-game)
  * 33: >  FU+RU [Notes AS X_Note] (Notes)
  * 34: >  OA [X_ObsCount] (Observer-count)
  * 35: >  OA [X_MeObserved] (My-Games-observed?)
@@ -613,12 +626,6 @@ $GLOBALS['ThePage'] = new Page('GamesList');
          user_reference( REF_LINK, 1, '', $user_row),
          echo_rating( @$user_row['Rating2'], true, $uid ));
    }
-   if ( $glc->ext_tid > 0 )
-   {
-      $title2 .= SEP_SPACING . '('
-         . anchor( $base_path."tournaments/view_tournament.php?tid={$glc->ext_tid}",
-                   T_('Tournament') . ' #' . $glc->ext_tid ) . ')';
-   }
    if ( $glc->mp_game )
       $title2 .= SEP_SPACING . '(' . T_('multi-player-games only') . ')';
 
@@ -627,6 +634,8 @@ $GLOBALS['ThePage'] = new Page('GamesList');
                button_style($player_row['Button']) );
 
    echo "<h3 class=Header>$title2</h3>\n";
+   if ( !is_null($tourney) )
+      echo "<h3 class=Header>", $tourney->build_info(5), "</h3>\n";
 
    if ( $restrict_games != '' && !$gfilter->is_init() )
    {
@@ -653,9 +662,13 @@ $GLOBALS['ThePage'] = new Page('GamesList');
       if ( $gtable->Is_Column_Displayed[32] )
       {
          $snapshot = ($Snapshot) ? $Snapshot : null;
-         $row_arr[32] = echo_image_gameinfo($ID, /*sep*/false, $Size, $snapshot, $Last_X, $Last_Y)
+         $str = echo_image_gameinfo($ID, /*sep*/false, $Size, $snapshot, $Last_X, $Last_Y)
             . echo_image_shapeinfo( $ShapeID, $Size, $ShapeSnapshot, false, true )
             . echo_image_tournament_info($tid,true);
+         if ( $allow_edit_tourney && TournamentGames::is_score_change_allowed(@$TG_Status) )
+            $str .= anchor( $base_path."tournaments/game_admin.php?tid=$tid".URI_AMP."gid=$ID",
+                  image( $base_path.'images/edit.gif', 'E', '', 'class="Action InTextImage TAdmin"' ), T_('Admin tournament game') );
+         $row_arr[32] = $str;
       }
       if ( $gtable->Is_Column_Displayed[2] )
          $row_arr[2] = "<A href=\"sgf.php?gid=$ID\">" . T_('sgf') . "</A>";

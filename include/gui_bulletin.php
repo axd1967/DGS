@@ -172,7 +172,7 @@ class GuiBulletin
          $ref_text = span('Reference',
             ( is_null($bulletin->Tournament)
                ? sprintf( T_('Unknown tournament [%s]'), $bulletin->tid )
-               : $bulletin->Tournament->build_info(5, 30) ));
+               : $bulletin->Tournament->build_info(6, 30) ));
       }
       elseif ( $bulletin->gid > 0 )
       {
