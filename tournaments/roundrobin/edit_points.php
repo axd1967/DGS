@@ -52,10 +52,10 @@ $GLOBALS['ThePage'] = new Page('TournamentPointsEdit');
       error('not_allowed_for_guest', 'Tournament.edit_points');
 
 /* Actual REQUEST calls used:
-     tid=                  : edit tournament points
-     tpts_preview&tid=     : preview for points-save
-     tpts_save&tid=        : update (replace) points in database
-     tpts_reset&tid=       : reset to defaults for selected 'points_type'
+     tid=                     : edit tournament points
+     tpts_preview&tid=&cpX=   : preview for points-save (with custom-points cpX, X=1..3)
+     tpts_save&tid=           : update (replace) points in database
+     tpts_reset&tid=          : reset to defaults for selected 'points_type'
 */
 
    $tid = (int) @$_REQUEST['tid'];
@@ -200,7 +200,7 @@ $GLOBALS['ThePage'] = new Page('TournamentPointsEdit');
       ));
 
 
-   $examples_table = build_points_examples($tpoints);
+   $examples_table = build_points_examples($tform, $tpoints);
    $tform->set_area( 3 );
    $tform->add_row( array(
          'HEADER', T_('Examples Preview#tourney'), ));
@@ -381,7 +381,7 @@ function parse_edit_form( &$tpoi )
 
 
 /*! \brief Returns table with examples for calculating points. */
-function build_points_examples( $tpoints )
+function build_points_examples( &$form, $tpoints )
 {
    $table = new Table( 'PreviewTPoints', '', null, '',
       TABLE_NO_SORT|TABLE_NO_HIDE|TABLE_NO_PAGE|TABLE_NO_SIZE );
@@ -392,6 +392,7 @@ function build_points_examples( $tpoints )
    $table->add_tablehead( 3, T_('Win#header'), 'NumberC' );
    $table->add_tablehead( 4, T_('Loss#header'), 'NumberC' );
 
+   $diff_title = T_('Point-Diff#tpoints');
    $arr_scores = array(
          // category (0=point-diff), score
          T_('Draw'), 0,
@@ -408,13 +409,28 @@ function build_points_examples( $tpoints )
       $title = $arr_scores[$i++];
       $score = $arr_scores[$i++];
       if ( !$title )
-         $title = T_('Point-Diff#tpoints');
+         $title = $diff_title;
 
       $table->add_row( array(
             1 => $title,
             2 => $score,
             3 => $tpoints->calculate_points( -$score ),
             4 => $tpoints->calculate_points(  $score ),
+         ));
+   }
+
+   for ( $i=1; $i <= 3; $i++)
+   {
+      $var_value = trim( get_request_arg("cp$i") ); // custom-points
+      if ( (string)$var_value == '' )
+         $var_value = 0;
+      $custom_points = (int)abs( $var_value );
+      $table->add_row( array(
+            1 => $diff_title,
+            2 => $form->print_insert_text_input( "cp$i", 4, 4, $var_value,
+               array( 'title' => T_('Custom value for point calculations#tpoints')) ),
+            3 => $tpoints->calculate_points( -$custom_points ),
+            4 => $tpoints->calculate_points(  $custom_points ),
          ));
    }
 

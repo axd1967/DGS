@@ -13,6 +13,10 @@ ChangeLog
 
 2014-03-13 jug
 
+   * tournaments/roundrobin/edit_points.php (build_points_examples):
+   - added free input-fields in examples-preview on edit-points-page to allow directors
+     to test other point-configs
+
    * tournaments/include/tournament_template_round_robin.php (TournamentTemplateRoundRobin._createTournament),
      tournaments/include/types/dgs_round_robin.php (DgsRoundRobinTournament.createTournament):
    - create TournamentPoints-db-entry with SIMPLE-type defaults on tournament-creation
