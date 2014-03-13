@@ -735,7 +735,7 @@ class PoolViewer
       {
          $cfg_tblcols = ConfigTableColumns::load_config( $this->my_id, CFGCOLS_TOURNAMENT_POOL_VIEW );
          if ( !$cfg_tblcols )
-            error('user_init_error', 'TournamentPoolClasses.constructor.init.config_table_cols');
+            error('user_init_error', 'PoolViewer.constructor.init.config_table_cols');
       }
       $hide_results = ( $this->options & PVOPT_NO_RESULT );
 
@@ -821,16 +821,17 @@ class PoolViewer
    {
       global $base_path, $NOW;
 
+      $show_results = ( $pool > 0 ) && !( $this->options & PVOPT_NO_RESULT );
+      $show_trating = !( $this->options & PVOPT_NO_TRATING );
+      $show_edit_col = ( $this->options & (PVOPT_EDIT_COL|PVOPT_EDIT_RANK) ) && !is_null($this->edit_callback);
+
       $tpoints = $this->ptabs->get_tournament_points();
-      if ( is_null($tpoints) )
-         error('miss_args', "PoolTables.make_single_pool_table.miss_tpoints");
+      if ( $show_results && is_null($tpoints) )
+         error('miss_args', "PoolViewer.make_single_pool_table.miss_tpoints");
 
       $arr_users = $this->ptabs->pools[$pool];
       $map_usercols = $this->ptabs->get_user_col_map( $pool, $this->games_per_challenge );
       $cnt_users = count($arr_users);
-      $show_results = ( $pool > 0 ) && !( $this->options & PVOPT_NO_RESULT );
-      $show_trating = !( $this->options & PVOPT_NO_TRATING );
-      $show_edit_col = ( $this->options & (PVOPT_EDIT_COL|PVOPT_EDIT_RANK) ) && !is_null($this->edit_callback);
 
       // header
       if ( !$this->first_pool )
