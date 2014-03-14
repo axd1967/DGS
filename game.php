@@ -859,6 +859,10 @@ $GLOBALS['ThePage'] = new Page('Game');
       $menu_array[T_('Show game-players')] = "game_players.php?gid=$gid";
    $menu_array[T_('Attach SGF')] = "manage_sgf.php?gid=$gid";
 
+   if ( @$player_row['admin_level'] & ADMIN_GAME )
+      $menu_array[T_('Admin game')] =
+         array( 'url' => "admin_game.php?gid=$gid", 'class' => 'AdminLink' );
+
    end_page(@$menu_array, -4);
 }// main
 

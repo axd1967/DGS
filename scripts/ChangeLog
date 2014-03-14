@@ -13,6 +13,9 @@ ChangeLog
 
 2014-03-14 jug
 
+   * game.php:
+   - added bottom-link for game-admin on game-page
+
    * tournaments/include/tournament_ladder_props.php (TournamentLadderProps.build_notes_props,
        ~.calc_game_end_action),
      tournaments/include/tournament_pool_classes.php (PoolGame.calc_result, ~.get_score_text;
