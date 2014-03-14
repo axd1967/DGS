@@ -228,6 +228,11 @@ class TournamentPoints
             $share_points = false;
             $points = $this->PointsTimeout;
          }
+         elseif ( $score_diff == SCORE_FORFEIT )
+         {
+            $share_points = false;
+            $points = $this->PointsForfeit;
+         }
          elseif ( $score_diff == 0 )
             $points = 0;
          else // point-diff

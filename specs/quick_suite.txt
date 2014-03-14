@@ -821,8 +821,11 @@ Commands:
 
       - Result (JSON) =
          {
-            "ruleset" : "CHINESE",           # game-ruleset
-            "score" : 0 | "W+7" | "B+2.5", # 0=jigo
+            "ruleset" : "CHINESE",     # game-ruleset
+            "score" : 0 | "W+7" | "B+2.5" | "W+R" | "B+T" | "W+F",
+                      # 0=jigo, or
+                      # "[col]+[res]" with col: 'B' (=Black won), or 'W' (=White won), and
+                      #    res : 'R' (=won by resignation), 'T' (=won by timeout), 'F' (=won by forfeit), or number of points
 
             # format of coordinates depends on FMT-parameter
             "dame"            : "...", # coords*
@@ -2078,7 +2081,7 @@ Response (SGF-properties):
       SZ[19]
       KM[6.5]
       HA[3]                            # handicap (omitted prop if no handicap)
-      RE[B+7.5]                        # result only for finished game
+      RE[B+7.5]                        # result only for finished game; for format set "score"-field for "status_score"-command
 
       # shape-game-setup (with shape-info-comment)
       AB[aa][bb][cc]                   # Black setup stones for shape-game

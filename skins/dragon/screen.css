@@ -3443,6 +3443,7 @@ span.MatrixSelf { background: black; color: white; }
 span.MatrixWon,  table#PoolViewerTable td.MatrixWon  { background: #bbffbb; }
 span.MatrixLost, table#PoolViewerTable td.MatrixLost { background: #ff99bb; }
 span.MatrixJigo, table#PoolViewerTable td.MatrixJigo { background: #aaddee; }
+span.MatrixForfeit, table#PoolViewerTable td.MatrixForfeit { border: 1px dashed black; }
 
 table#PoolViewerTable span.Calc {
    font-weight: normal;

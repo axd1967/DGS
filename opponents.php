@@ -305,11 +305,13 @@ require_once 'include/classlib_userpicture.php';
       $qsql_black->add_part( SQLP_FIELDS,
          // won
          'SUM(IF(G.Score<0,1,0)) as cntWon',
+         'SUM(IF(G.Score='.-SCORE_FORFEIT.',1,0)) as cntWonForfeit',
          'SUM(IF(G.Score='.-SCORE_TIME.',1,0)) as cntWonTime',
          'SUM(IF(G.Score='.-SCORE_RESIGN.',1,0)) as cntWonResign',
          'SUM(IF(G.Score>='.-SCORE_MAX.' AND G.Score<0,1,0)) as cntWonScore',
          // lost
          'SUM(IF(G.Score>0,1,0)) as cntLost',
+         'SUM(IF(G.Score='.SCORE_FORFEIT.',1,0)) as cntLostForfeit',
          'SUM(IF(G.Score='.SCORE_TIME.',1,0)) as cntLostTime',
          'SUM(IF(G.Score='.SCORE_RESIGN.',1,0)) as cntLostResign',
          'SUM(IF(G.Score>0 AND G.Score<='.SCORE_MAX.',1,0)) as cntLostScore' );
@@ -320,11 +322,13 @@ require_once 'include/classlib_userpicture.php';
       $qsql_white->add_part( SQLP_FIELDS,
          // won
          'SUM(IF(G.Score>0,1,0)) as cntWon',
+         'SUM(IF(G.Score='.SCORE_FORFEIT.',1,0)) as cntWonForfeit',
          'SUM(IF(G.Score='.SCORE_TIME.',1,0)) as cntWonTime',
          'SUM(IF(G.Score='.SCORE_RESIGN.',1,0)) as cntWonResign',
          'SUM(IF(G.Score>0 AND G.Score<='.SCORE_MAX.',1,0)) as cntWonScore',
          // lost
          'SUM(IF(G.Score<0,1,0)) as cntLost',
+         'SUM(IF(G.Score='.-SCORE_FORFEIT.',1,0)) as cntLostForfeit',
          'SUM(IF(G.Score='.-SCORE_TIME.',1,0)) as cntLostTime',
          'SUM(IF(G.Score='.-SCORE_RESIGN.',1,0)) as cntLostResign',
          'SUM(IF(G.Score>='.-SCORE_MAX.' AND G.Score<0,1,0)) as cntLostScore' );
@@ -506,8 +510,8 @@ function extract_user_stats( $color, $query = null )
       'cntGames',
       'cntJigo',
       'cntHandicap', 'maxHandicap',
-      'cntWon',  'cntWonTime',  'cntWonResign',  'cntWonScore',
-      'cntLost', 'cntLostTime', 'cntLostResign', 'cntLostScore'
+      'cntWon',  'cntWonForfeit',  'cntWonTime',  'cntWonResign',  'cntWonScore',
+      'cntLost', 'cntLostForfeit', 'cntLostTime', 'cntLostResign', 'cntLostScore'
    );
 
    $arr = array();
@@ -672,6 +676,11 @@ function print_stats_table( $p, $B, $W, $fin )
          $B['cntWonTime'], $B['cntLostTime'],
          $W['cntWonTime'], $W['cntLostTime'],
          ($B['cntWonTime'] + $W['cntWonTime']), ($B['cntLostTime'] + $W['cntLostTime']) );
+      $r .= sprintf( $rowpatt2,
+         $trclass_num, T_('#Games won : lost by Forfeit'),
+         $B['cntWonForfeit'], $B['cntLostForfeit'],
+         $W['cntWonForfeit'], $W['cntLostForfeit'],
+         ($B['cntWonForfeit'] + $W['cntWonForfeit']), ($B['cntLostForfeit'] + $W['cntLostForfeit']) );
 
       // stats: jigo
       $r .= sprintf( $rowpatt,

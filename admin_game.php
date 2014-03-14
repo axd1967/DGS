@@ -32,9 +32,10 @@ require_once 'tournaments/include/tournament_rules.php';
 
 $GLOBALS['ThePage'] = new Page('GameAdmin');
 
-define('GA_RES_SCORE',  1);
-define('GA_RES_RESIGN', 2);
-define('GA_RES_TIMOUT', 3);
+define('GA_RES_SCORE',   1);
+define('GA_RES_RESIGN',  2);
+define('GA_RES_TIMOUT',  3);
+define('GA_RES_FORFEIT', 4);
 
 
 {
@@ -128,7 +129,7 @@ define('GA_RES_TIMOUT', 3);
       {
          // send message to my opponent / all-players / observers about the result
          $game_notify = new GameNotify( $gid, /*adm*/0, $game->Status, $game->GameType, $game->GamePlayers,
-            $game->Flags, $game->Black_ID, $game->White_ID, $game->Score, /*rej-timeout*/false,
+            $game->Flags, $game->Black_ID, $game->White_ID, $game->Score, /*game-forfeited*/false, /*rej-timeout*/false,
             trim(get_request_arg('delmsg')) );
 
          ta_begin();
@@ -291,7 +292,7 @@ function parse_edit_form( &$game )
       if ( $new_value )
       {
          if ( $new_value != GA_RES_SCORE && $new_value != GA_RES_RESIGN
-               && $new_value != GA_RES_TIMOUT ) // shouldn't happen with radio-buttons
+               && $new_value != GA_RES_TIMOUT && $new_value != GA_RES_FORFEIT ) // shouldn't happen with radio-buttons
             error('assert', "admin_game.parse_edit_form.check.result($gid,$new_value)");
          else
          {
@@ -330,6 +331,8 @@ function parse_edit_form( &$game )
             $game_score = SCORE_RESIGN;
          elseif ( $vars['result'] == GA_RES_TIMOUT )
             $game_score = SCORE_TIME;
+         elseif ( $vars['result'] == GA_RES_FORFEIT )
+            $game_score = SCORE_FORFEIT;
          else
          {
             if ( $mask_gend & 4 )
@@ -393,6 +396,9 @@ function draw_game_admin_form( $game )
       $gaform->add_row( array(
             'TAB',
             'RADIOBUTTONS', 'result', array( GA_RES_TIMOUT => T_('Timeout') ), @$vars['result'], ));
+      $gaform->add_row( array(
+            'TAB',
+            'RADIOBUTTONS', 'result', array( GA_RES_FORFEIT => T_('Forfeit') ), @$vars['result'], ));
       $gaform->add_row( array(
             'CELL', 2, '',
             'BR', 'TEXT', T_('Message to players').':', ));

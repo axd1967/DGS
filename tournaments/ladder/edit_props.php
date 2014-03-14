@@ -186,12 +186,12 @@ $GLOBALS['ThePage'] = new Page('TournamentLadderPropsEdit');
          'TAB',
          'SELECTBOX',   'gend_timeout_w', 1, TournamentLadderProps::getGameEndText(null, TGE_TIMEOUT_WIN),
                         $vars['gend_timeout_w'], false,
-         'TEXT',        sprintf( '(%s)', T_('Challenger wins by timeout#T_ladder')), ));
+         'TEXT',        sprintf( '(%s)', T_('Challenger wins by timeout or forfeit#T_ladder')), )); //keep orig: T_('Challenger wins by timeout#T_ladder')
    $tform->add_row( array(
          'TAB',
          'SELECTBOX',   'gend_timeout_l', 1, TournamentLadderProps::getGameEndText(null, TGE_TIMEOUT_LOSS),
                         $vars['gend_timeout_l'], false,
-         'TEXT',        sprintf( '(%s)', T_('Challenger loses by timeout#T_ladder')), ));
+         'TEXT',        sprintf( '(%s)', T_('Challenger loses by timeout or forfeit#T_ladder')), )); //keep orig: T_('Challenger loses by timeout#T_ladder')
    $tform->add_row( array(
          'TAB',
          'SELECTBOX',   'gend_jigo', 1, TournamentLadderProps::getGameEndText(null, TGE_JIGO),

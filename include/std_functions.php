@@ -191,6 +191,7 @@ define('POSX_SCORE', -2);  // scoring step by Stone=BLACK|WHITE, PosY=0, Hours=p
 define('POSX_RESIGN', -3); // resigned by Stone=BLACK|WHITE: PosY=0, Hours=passed-time
 define('POSX_TIME', -4);   // timeout for Stone=BLACK|WHITE: PosY=0, Hours=passed-time
 define('POSX_SETUP', -5);  // setup for shape-game for Stone=BLACK: PosY=0, Hours=0
+define('POSX_FORFEIT', -6); // forfeit for Stone=BLACK|WHITE: PosY=0, Hours=passed-time
 // game commands
 define('POSX_ADDTIME', -50); // Add-Hours: Stone=BLACK|WHITE (time-adder), PosY=bitmask (bit #1(0|1)=byoyomi-reset, bit #2(0|2)=added-by-TD), Hours=add_hours
 
@@ -2234,7 +2235,7 @@ function score2text($score, $verbose, $keep_english=false, $quick=false)
    if ( $quick ) $verbose = false;
    $T_= ( $keep_english ? 'fnop' : 'T_' );
 
-   if ( is_null($score) || !isset($score) || abs($score) > SCORE_TIME )
+   if ( is_null($score) || !isset($score) || abs($score) > SCORE_FORFEIT )
       return ($quick) ? "" : "?";
 
    if ( $score == 0 )
@@ -2244,13 +2245,14 @@ function score2text($score, $verbose, $keep_english=false, $quick=false)
              ? ( $score > 0 ? $T_('White') : $T_('Black') )
              : ( $score > 0 ? 'W' : 'B' ));
 
-   if ( abs($score) == SCORE_TIME )
-      return ( $verbose ? sprintf( $T_("%s wins on time"), $color) : $color . ($quick ? "+T" : "+Time") );
-   elseif ( abs($score) == SCORE_RESIGN )
+   if ( abs($score) == SCORE_RESIGN )
       return ( $verbose ? sprintf( $T_("%s wins by resign"), $color) : $color . ($quick ? "+R" : "+Resign") );
+   elseif ( abs($score) == SCORE_TIME )
+      return ( $verbose ? sprintf( $T_("%s wins on time"), $color) : $color . ($quick ? "+T" : "+Time") );
+   elseif ( abs($score) == SCORE_FORFEIT )
+      return ( $verbose ? sprintf( $T_("%s wins by forfeit"), $color) : $color . ($quick ? "+F" : "+Forfeit") );
    else
-      return ( $verbose ? sprintf( $T_("%s wins by %.1f"), $color, abs($score))
-               : $color . '+' . abs($score) );
+      return ( $verbose ? sprintf( $T_("%s wins by %.1f"), $color, abs($score)) : $color . '+' . abs($score) );
 }
 
 // returns rows checked against min/max-limits; return default-rows if unset or exceeding limits

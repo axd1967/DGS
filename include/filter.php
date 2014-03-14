@@ -3137,7 +3137,7 @@ class FilterBoolean extends Filter
  /*!
   * \class FilterScore
   * \brief Filter for Score allowing exact value choosen by selection
-  *        (win by resignation, by time, by score, jigo) and an
+  *        (win by resignation, by time, by forfeit, by score, jigo) and an
   *        optional score-value; SearchFilter-Type: Score.
   * <p>GUI: selectbox + text input-box
   *
@@ -3152,8 +3152,8 @@ class FilterBoolean extends Filter
   *    FC_SYNTAX_HINT, FC_SYNTAX_HELP, FC_HIDE,
   *    FC_DEFAULT - score-mode (index) if scalar, or
   *                 array( '' => score-value, 'r' => score-mode-index );
-  *       score-mode: FSCORE_ALL=show-all (default), FSCORE_RESIGN|TIME|SCORE,
-  *                   FSCORE_B|W_RESIGN|TIME|SCORE, FSCORE_JIGO
+  *       score-mode: FSCORE_ALL=show-all (default), FSCORE_RESIGN|TIME|FORFEIT|SCORE,
+  *                   FSCORE_B|W_RESIGN|TIME|FORFEIT|SCORE, FSCORE_JIGO
   */
 
 // index for filter-score-choices, and for FC_DEFAULT-config
@@ -3164,10 +3164,13 @@ define('FSCORE_W_RESIGN', 3);
 define('FSCORE_TIME',     4);
 define('FSCORE_B_TIME',   5);
 define('FSCORE_W_TIME',   6);
-define('FSCORE_SCORE',    7);
-define('FSCORE_B_SCORE',  8);
-define('FSCORE_W_SCORE',  9);
-define('FSCORE_JIGO',    10);
+define('FSCORE_FORFEIT',  7);
+define('FSCORE_B_FORFEIT', 8);
+define('FSCORE_W_FORFEIT', 9);
+define('FSCORE_SCORE',    10);
+define('FSCORE_B_SCORE',  11);
+define('FSCORE_W_SCORE',  12);
+define('FSCORE_JIGO',     13);
 
 class FilterScore extends Filter
 {
@@ -3243,6 +3246,10 @@ class FilterScore extends Filter
             '%s IN (-'.SCORE_TIME.','.SCORE_TIME.')',
             '%s = -'.SCORE_TIME,
             '%s = '.SCORE_TIME,
+            //'?+F', 'B+F', 'W+F',
+            '%s IN (-'.SCORE_FORFEIT.','.SCORE_FORFEIT.')',
+            '%s = -'.SCORE_FORFEIT,
+            '%s = '.SCORE_FORFEIT,
             //'?+?', 'B+?', 'W+?',
             'ABS(%s)',
             '-%s',
@@ -3256,8 +3263,9 @@ class FilterScore extends Filter
       //   idx 0: show all
       //   idx 1-3: '?+R', 'B+R', 'W+R',
       //   idx 4-6: '?+T', 'B+T', 'W+T',
-      //   idx 7-9: '?+?', 'B+?', 'W+?',  expecting p_value, p_start, p_end set according to range
-      //   idx 10:  'Jigo'
+      //   idx 7-9: '?+F', 'B+F', 'W+F',
+      //   idx 10-12: '?+?', 'B+?', 'W+?',  expecting p_value, p_start, p_end set according to range
+      //   idx 13:  'Jigo'
       $idx = $this->values[$this->elem_result];
       if ( $idx == FSCORE_ALL )
          return;
@@ -3299,6 +3307,7 @@ class FilterScore extends Filter
             'All',
             '?+R', 'B+R', 'W+R',
             '?+T', 'B+T', 'W+T',
+            '?+F', 'B+F', 'W+F',
             '?+?', 'B+?', 'W+?',
             'Jigo',
          );

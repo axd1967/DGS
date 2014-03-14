@@ -64,6 +64,7 @@ class TournamentPointsTest extends PHPUnit_Framework_TestCase {
 
       $this->assertEquals( 2, $tp->calculate_points( -SCORE_RESIGN ) );
       $this->assertEquals( 2, $tp->calculate_points( -SCORE_TIME ) );
+      $this->assertEquals( 2, $tp->calculate_points( -SCORE_FORFEIT ) );
       $this->assertEquals( 2, $tp->calculate_points( -150 ) );
       $this->assertEquals( 2, $tp->calculate_points( -27 ) );
       $this->assertEquals( 2, $tp->calculate_points( -30.5 ) );
@@ -74,6 +75,7 @@ class TournamentPointsTest extends PHPUnit_Framework_TestCase {
 
       $this->assertEquals( 0, $tp->calculate_points( +SCORE_RESIGN ) );
       $this->assertEquals( 0, $tp->calculate_points( +SCORE_TIME ) );
+      $this->assertEquals( 0, $tp->calculate_points( +SCORE_FORFEIT ) );
       $this->assertEquals( 0, $tp->calculate_points( +150 ) );
       $this->assertEquals( 0, $tp->calculate_points( +27 ) );
       $this->assertEquals( 0, $tp->calculate_points( +30.5 ) );
@@ -90,6 +92,7 @@ class TournamentPointsTest extends PHPUnit_Framework_TestCase {
 
       $this->assertEquals( 10, $tp->calculate_points( -SCORE_RESIGN ) );
       $this->assertEquals( 10, $tp->calculate_points( -SCORE_TIME ) );
+      $this->assertEquals( 10, $tp->calculate_points( -SCORE_FORFEIT ) );
       $this->assertEquals( 10, $tp->calculate_points( -150 ) );
       $this->assertEquals(  9, $tp->calculate_points( -30.5 ) );
       $this->assertEquals(  8, $tp->calculate_points( -27 ) );
@@ -100,6 +103,7 @@ class TournamentPointsTest extends PHPUnit_Framework_TestCase {
 
       $this->assertEquals(  0, $tp->calculate_points( +SCORE_RESIGN ) );
       $this->assertEquals(  0, $tp->calculate_points( +SCORE_TIME ) );
+      $this->assertEquals(  0, $tp->calculate_points( +SCORE_FORFEIT ) );
       $this->assertEquals(  0, $tp->calculate_points( +150 ) );
       $this->assertEquals(  1, $tp->calculate_points( +30.5 ) );
       $this->assertEquals(  2, $tp->calculate_points( +27 ) );
@@ -115,6 +119,7 @@ class TournamentPointsTest extends PHPUnit_Framework_TestCase {
 
       $this->assertEquals( 10, $tp->calculate_points( -SCORE_RESIGN ) );
       $this->assertEquals( 10, $tp->calculate_points( -SCORE_TIME ) );
+      $this->assertEquals( 10, $tp->calculate_points( -SCORE_FORFEIT ) );
       $this->assertEquals( 10, $tp->calculate_points( -150 ) );
       $this->assertEquals(  4, $tp->calculate_points( -30.5 ) );
       $this->assertEquals(  3, $tp->calculate_points( -27 ) );
@@ -125,6 +130,7 @@ class TournamentPointsTest extends PHPUnit_Framework_TestCase {
 
       $this->assertEquals(  0, $tp->calculate_points( +SCORE_RESIGN ) );
       $this->assertEquals(  0, $tp->calculate_points( +SCORE_TIME ) );
+      $this->assertEquals(  0, $tp->calculate_points( +SCORE_FORFEIT ) );
       $this->assertEquals(  0, $tp->calculate_points( +27 ) );
       $this->assertEquals(  0, $tp->calculate_points( +150 ) );
       $this->assertEquals(  0, $tp->calculate_points( +30.5 ) );
@@ -140,6 +146,7 @@ class TournamentPointsTest extends PHPUnit_Framework_TestCase {
 
       $this->assertEquals( 10, $tp->calculate_points( -SCORE_RESIGN ) );
       $this->assertEquals( 10, $tp->calculate_points( -SCORE_TIME ) );
+      $this->assertEquals( 10, $tp->calculate_points( -SCORE_FORFEIT ) );
       $this->assertEquals( 10, $tp->calculate_points( -150 ) );
       $this->assertEquals(  4, $tp->calculate_points( -30.5 ) );
       $this->assertEquals(  3, $tp->calculate_points( -27 ) );
@@ -150,6 +157,7 @@ class TournamentPointsTest extends PHPUnit_Framework_TestCase {
 
       $this->assertEquals( -10, $tp->calculate_points( +SCORE_RESIGN ) );
       $this->assertEquals( -10, $tp->calculate_points( +SCORE_TIME ) );
+      $this->assertEquals( -10, $tp->calculate_points( +SCORE_FORFEIT ) );
       $this->assertEquals( -10, $tp->calculate_points( +150 ) );
       $this->assertEquals(  -4, $tp->calculate_points( +30.5 ) );
       $this->assertEquals(  -3, $tp->calculate_points( +27 ) );

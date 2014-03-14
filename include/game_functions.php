@@ -2050,6 +2050,7 @@ class GameFinalizer
     * \param $message message added in game-notify to players
     *
     * \note IMPORTANT NOTE: caller needs to open TA with HOT-section!!
+    * \note game is made unrated if game ended by forfeit by game-admin (this->action_by=ACTBY_ADMIN)
     */
    public function finish_game( $dbgmsg, $do_delete, $upd_game, $game_score, $message='' )
    {
@@ -2058,11 +2059,21 @@ class GameFinalizer
       $dbgmsg = "GameFinalizer:finish_game($gid).$dbgmsg";
 
       // update Games-entry
-      $timeout_rejected = false;
+      $timeout_rejected = $game_forfeited = false;
       if ( !$this->skip_game_query && !$do_delete )
       {
          if ( $this->action_by == ACTBY_ADMIN )
+         {
             $this->GameFlags |= GAMEFLAGS_ADMIN_RESULT;
+
+            // make game unrated if game scored with SCORE_FORFEIT
+            if ( abs($game_score) == SCORE_FORFEIT )
+               $game_forfeited = true;
+         }
+
+         // make game unrated if criteria matches and opponent rejects-win-by-timeout
+         $timeout_rejected = $this->should_reject_win_by_timeout($game_score);
+
          if ( is_null($upd_game) )
          {
             $upd_game = new UpdateQuery('Games');
@@ -2073,10 +2084,7 @@ class GameFinalizer
             $upd_game->upd_num('Score', $game_score );
             $upd_game->upd_time('Lastchanged');
          }
-
-         // make game unrated if criteria matches and opponent rejects-win-by-timeout
-         $timeout_rejected = $this->should_reject_win_by_timeout($game_score);
-         if ( $timeout_rejected )
+         if ( $game_forfeited || $timeout_rejected )
             $upd_game->upd_txt('Rated', 'N');
 
          $game_updquery = "UPDATE Games SET " . $upd_game->get_query() .
@@ -2093,7 +2101,8 @@ class GameFinalizer
 
       // send message to my opponent / all-players / observers about the result
       $game_notify = new GameNotify( $gid, $this->my_id, $this->Status, $this->GameType, $this->GamePlayers,
-         $this->GameFlags, $this->Black_ID, $this->White_ID, $game_score, $timeout_rejected, $message );
+         $this->GameFlags, $this->Black_ID, $this->White_ID, $game_score, $game_forfeited, $timeout_rejected,
+         $message );
 
       if ( $do_delete )
       {
@@ -2187,6 +2196,8 @@ class GameFinalizer
          return POSX_RESIGN;
       elseif ( abs($score) == SCORE_TIME )
          return POSX_TIME;
+      elseif ( abs($score) == SCORE_FORFEIT )
+         return POSX_FORFEIT;
       else
          return POSX_SCORE;
    }//convert_score_to_posx
@@ -2213,6 +2224,7 @@ class GameNotify
    private $black_id;
    private $white_id;
    private $score;
+   private $game_forfeited;
    private $timeout_rejected;
    private $message;
 
@@ -2223,7 +2235,7 @@ class GameNotify
 
    /*! \brief Constructs GameNotify also loading player-info from db. */
    public function __construct( $gid, $uid, $game_status, $game_type, $game_players, $game_flags,
-         $black_id, $white_id, $score, $timeout_rejected, $message )
+         $black_id, $white_id, $score, $game_forfeited, $timeout_rejected, $message )
    {
       $this->gid = (int)$gid;
       $this->uid = (int)$uid;
@@ -2234,7 +2246,8 @@ class GameNotify
       $this->black_id = (int)$black_id;
       $this->white_id = (int)$white_id;
       $this->score = $score;
-      $this->timeout_rejected = $timeout_rejected;
+      $this->game_forfeited = (bool)$game_forfeited;
+      $this->timeout_rejected = (bool)$timeout_rejected;
       $this->message = $message;
 
       $this->_load_players();
@@ -2355,6 +2368,9 @@ class GameNotify
          : '';
       $obs_info_text = $info_text;
 
+      if ( $action_by == ACTBY_ADMIN && $this->game_forfeited )
+         $info_text .= "<p><b>Info:</b> The game was changed to unrated, " .
+            "because it was ended by forfeit set by a game admin!";
       if ( $this->timeout_rejected )
          $info_text .= "<p><b>Info:</b> Based on the winner's profile preference, " .
             "the win by timeout was automatically rejected and the game was changed to unrated!";
@@ -2374,13 +2390,13 @@ class GameNotify
    }//get_text_game_result
 
    /*!
-    * \brief Returns list of Players.IDs to which message should be sent (to all for time-out,
+    * \brief Returns list of Players.IDs to which message should be sent (to all users for time-out & forfeit,
     *        otherwise only for others than current-user for resign/result/delete).
     */
    public function get_recipients()
    {
       $arr = array_keys( $this->players );
-      if ( $this->uid > 0 && abs($this->score) != SCORE_TIME )
+      if ( $this->uid > 0 && abs($this->score) != SCORE_TIME && abs($this->score) != SCORE_FORFEIT )
          unset($arr[$this->uid]);
       return $arr;
    }//get_recipients

@@ -11,6 +11,52 @@ Release [2013-08-11] - DGS 1.0.16 - tag [release-1_0_16-20130811] on (later) bra
 ChangeLog
 ------------------------------------------------------------------
 
+2014-03-14 jug
+
+   * tournaments/include/tournament_ladder_props.php (TournamentLadderProps.build_notes_props,
+       ~.calc_game_end_action),
+     tournaments/include/tournament_pool_classes.php (PoolGame.calc_result, ~.get_score_text;
+       PoolTables.count_games),
+     tournaments/include/tournament_points.php (TournamentPoints.calculate_points),
+     include/game_functions.php (GameFinalizer.finish_game, ~.convert_score_to_posx;
+       class GameNotify, ~.__construct, ~.get_text_game_result, ~.get_recipients),
+     include/sgf_builder.php (SgfBuilder.load_trimmed_moves, ~.build_filename_sgf),
+     include/filter.php (class FilterScore, ~.build_query, ~.get_input_element),
+     include/std_functions.php (POSX_FORFEIT, score2text),
+     include/globals.php (SCORE_FORFEIT, SCORE_MAX, CSS_VERSION, QUICK_VERSION),
+     include/board.php,
+     scripts/updates/database_changes_1_0_16_to_1_0_17.mysql,
+     scripts/tests/TournamentPointsTest.php,
+     specs/db/table-Tournaments.txt, specs/db/table-Games.txt, specs/quick_suite.txt,
+     skins/dragon/screen.css,
+     tournaments/roundrobin/edit_points.php (build_points_examples),
+     tournaments/roundrobin/view_pools.php, tournaments/ladder/edit_props.php,
+     tournaments/game_admin.php (GA_RES_FORFEIT; parse_edit_form, draw_game_end),
+     tournaments/cron_tournaments.php,
+     admin_game.php (GA_RES_FORFEIT; parse_edit_form, draw_game_admin_form),
+     opponents.php (extract_user_stats, print_stats_table),
+     game_players.php (delete_game_setup),
+     game.php:
+   - added new game-score FORFEIT to support a "bye" for round-robin-tournaments
+     - game-admin: added ending game with forfeit for either Black or White player by game-admin,
+       game is changed to unrated on forfeit,
+       players are informed in game-end message about implicit unrated-change on forfeiting
+     - tournament-game-admin: added ending game with forfeit by tournament-director
+     - edit-points: added points-calculation for forfeited game in examples-preview
+     - view-pools: mark forfeited game in pool-results of round-robin-tournamentsdashed
+       with dashed black border
+     - use TournamentPoints.PointsForfeit for point-calculations in tournament-pool
+     - process game-forfeit for ladder-tournaments like a game by timeout
+     - extended FilterScore to support searching game-score for forfeited games
+     - extended short-output of game-score for game-page/SGF/quick-suite with "B/W+F"
+     - added count of forfeited games on opponents-page
+-----------
+-- check if user needs re-do search-profiles for finished-games-lists, because score-filter changed:
+--    if the query-result is not empty AND parameter-value X of 'fsf10...=X' is >= 7,
+--    then user needs to re-do the corresponding search-profile
+SELECT * FROM Profiles WHERE Type BETWEEN 11 AND 13 AND Text LIKE '%fsf10%' ;
+-----------
+
 2014-03-13 jug
 
    * tournaments/include/tournament_games.php (TournamentGames.is_score_change_allowed),

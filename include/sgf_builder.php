@@ -410,7 +410,7 @@ class SgfBuilder
          //-1=POSX_PASS= skip ending pass, -2=POSX_SCORE= keep them ... -999= keep everything
          if ( abs($score) < SCORE_RESIGN ) // real-point-score
             $sgf_trim_level = POSX_SCORE; // keep PASSes for better SGF=DGS-move-numbering
-         else if ( abs($score) == SCORE_TIME )
+         else if ( abs($score) == SCORE_TIME || abs($score) == SCORE_FORFEIT )
             $sgf_trim_level = POSX_RESIGN; // keep PASSes and SCORing
          else // resignation
             $sgf_trim_level = POSX_SCORE;
@@ -451,10 +451,12 @@ class SgfBuilder
       if ( $this->game_row['Status'] == GAME_STATUS_FINISHED )
       {
          $f_result = '=' . ( $this->game_row['Score'] < 0 ? 'B' : 'W' );
-         if ( abs($this->game_row['Score']) == SCORE_TIME )
-            $f_result .= 'T';
-         elseif ( abs($this->game_row['Score']) == SCORE_RESIGN )
+         if ( abs($this->game_row['Score']) == SCORE_RESIGN )
             $f_result .= 'R';
+         elseif ( abs($this->game_row['Score']) == SCORE_TIME )
+            $f_result .= 'T';
+         elseif ( abs($this->game_row['Score']) == SCORE_FORFEIT )
+            $f_result .= 'F';
          else
             $f_result .= str_replace( '.', ',', abs($this->game_row['Score']) );
       }

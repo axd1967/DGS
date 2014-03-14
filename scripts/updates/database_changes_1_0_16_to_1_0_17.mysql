@@ -45,3 +45,9 @@ ALTER TABLE TournamentPoints
    CHANGE PointsBye PointsForfeit smallint NOT NULL default '2' ;
 
 
+-- check if user needs re-do search-profiles for finished-games-lists, because score-filter changed:
+--    if the query-result is not empty AND parameter-value X of 'fsf10...=X' is >= 7,
+--    then user needs to re-do the corresponding search-profile
+SELECT * FROM Profiles WHERE Type BETWEEN 11 AND 13 AND Text LIKE '%fsf10%' ;
+
+

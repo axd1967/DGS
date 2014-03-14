@@ -403,6 +403,7 @@ function build_points_examples( &$form, $tpoints )
          0, 150,
          T_('Resignation'), SCORE_RESIGN,
          T_('Timeout'), SCORE_TIME,
+         T_('Forfeit'), SCORE_FORFEIT,
       );
    for ( $i=0; $i < count($arr_scores); )
    {

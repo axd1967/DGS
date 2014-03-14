@@ -115,6 +115,8 @@ class PoolGame
             $title = T_('Game draw (Jigo)');
             $style = 'MatrixJigo';
          }
+         if ( abs($chk_score) == SCORE_FORFEIT )
+            $style .= ' MatrixForfeit';
          $mark = $points;
       }
 
@@ -131,6 +133,8 @@ class PoolGame
          return T_('Resignation');
       elseif ( $score == SCORE_TIME )
          return T_('Timeout');
+      elseif ( $score == SCORE_FORFEIT )
+         return T_('Forfeit');
       else
          return abs($score);
    }
@@ -529,16 +533,23 @@ class PoolTables
    }//compare_user_ranks
 
    /*!
-    * Returns arr( all => count-games, run => running-games, finished => finished-games,
-    *         jigo => games won by jigo, time => games won by timeout, resign => games won by resignation ).
+    * Returns arr(
+    *    all => count-games,
+    *    run => running-games,
+    *    finished => finished-games,
+    *    jigo => games won by jigo,
+    *    resign => games won by resignation,
+    *    time => games won by timeout,
+    *    forfeit => games won by forfeit ).
     */
    public function count_games()
    {
       $count_games = 0;
       $count_run = 0;
       $count_jigo = 0;
-      $count_time = 0;
       $count_resign = 0;
+      $count_time = 0;
+      $count_forfeit = 0;
 
       $visited = array(); // game-id, because each PoolGame appears twice for challenger+defender
       foreach ( $this->users as $uid => $tpool )
@@ -553,10 +564,12 @@ class PoolTables
                $count_run++;
             elseif ( $poolGame->Score == 0 )
                $count_jigo++;
-            elseif ( abs($poolGame->Score) == SCORE_TIME )
-               $count_time++;
             elseif ( abs($poolGame->Score) == SCORE_RESIGN )
                $count_resign++;
+            elseif ( abs($poolGame->Score) == SCORE_TIME )
+               $count_time++;
+            elseif ( abs($poolGame->Score) == SCORE_FORFEIT )
+               $count_forfeit++;
          }
       }
 
@@ -565,8 +578,9 @@ class PoolTables
          'run'  => $count_run,
          'finished' => $count_games - $count_run,
          'jigo' => $count_jigo,
-         'time' => $count_time,
          'resign' => $count_resign,
+         'time' => $count_time,
+         'forfeit' => $count_forfeit,
       );
    }//count_games
 
@@ -904,7 +918,7 @@ class PoolViewer
                $row_arr += $arr_miss_users;
 
             // add game-results
-            // - X=self, 0=lost, 1=jigo, 2=won, #=running-game;; for Hahn use score instead '+-score'
+            // - X=self, #=running-game;; points=lost/jigo/won (see TournamentPoints-config)
             // - linked to running/finished game
             foreach ( $tpool->PoolGames as $poolGame )
             {

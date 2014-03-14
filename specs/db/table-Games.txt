@@ -204,7 +204,7 @@ Description:
    - for game-status PLAY: x/y coordinates of last move (start at 0..size-1)
    - for game-status PASS: Last_X=POSX_PASS, Last_Y undefined
    - for game-status SCORE/SCORE2: Last_X=POSX_SCORE
-   - for game-status FINISHED: Last_X= POSX_RESIGN/TIME/SCORE
+   - for game-status FINISHED: Last_X= POSX_RESIGN/TIME/FORFEIT/SCORE
    - for other game-status: undefined
 
    - since 10-Dec-2013 used to hold last-move for last-move-marker in game-thumbnail
@@ -227,6 +227,8 @@ Description:
    - 0 = jigo
    - -1000, 1000 = Black(-1000)/White(1000) has won game by resignation
    - -2000, 2000 = Black(-2000)/White(2000) has won game by timeout
+   - -3000, 3000 = Black(-3000)/White(3000) has won game by forfeit,
+     can only be set by game-admin and for tournament-games!
 
 * Maintime : int, main-time for game
    - see Waitingroom.Maintime in 'specs/db/table-Waitingroom.txt'
@@ -559,10 +561,12 @@ Notes:
 
    - -3 (POSX_RESIGN) = resigned by Stone=BLACK|WHITE, PosY=0, Hours=passed-time
 
-   - -3 (POSX_TIME) = timeout for Stone=BLACK|WHITE, PosY=0, Hours=passed-time
+   - -4 (POSX_TIME) = timeout for Stone=BLACK|WHITE, PosY=0, Hours=passed-time
 
-   - -4 (POSX_SETUP) = setup for shape-game for Stone=BLACK: PosY=0, Hours=0
+   - -5 (POSX_SETUP) = setup for shape-game for Stone=BLACK: PosY=0, Hours=0
       - initial shape-setup for board is taken from Games.ShapeSnapshot
+
+   - -6 (POSX_FORFEIT) = forfeit for Stone=BLACK|WHITE, PosY=0, Hours=passed-time
 
    - -50 (POSX_ADDTIME) = added time by Stone=BLACK|WHITE,
      PosY = bitmask with bit 1 (0x01)=byoyomi-reset, bit 2 (0x02)=added-by-TD),

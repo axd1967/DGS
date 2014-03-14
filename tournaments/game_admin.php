@@ -39,9 +39,10 @@ require_once 'tournaments/include/tournament_log_helper.php';
 
 $GLOBALS['ThePage'] = new Page('TournamentGameAdmin');
 
-define('GA_RES_SCORE',  1);
-define('GA_RES_RESIGN', 2);
-define('GA_RES_TIMOUT', 3);
+define('GA_RES_SCORE',   1);
+define('GA_RES_RESIGN',  2);
+define('GA_RES_TIMOUT',  3);
+define('GA_RES_FORFEIT', 4);
 
 
 {
@@ -326,6 +327,8 @@ function parse_edit_form( &$tgame, $trule, $game )
          $vars['result'] = GA_RES_RESIGN;
       elseif ( abs($tgame->Score) == SCORE_TIME )
          $vars['result'] = GA_RES_TIMOUT;
+      elseif ( abs($tgame->Score) == SCORE_FORFEIT )
+         $vars['result'] = GA_RES_FORFEIT;
       else
       {
          $vars['result'] = GA_RES_SCORE;
@@ -364,7 +367,7 @@ function parse_edit_form( &$tgame, $trule, $game )
       if ( $new_value )
       {
          if ( $new_value != GA_RES_SCORE && $new_value != GA_RES_RESIGN
-               && $new_value != GA_RES_TIMOUT ) // shouldn't happen with radio-buttons
+               && $new_value != GA_RES_TIMOUT && $new_value != GA_RES_FORFEIT ) // shouldn't happen with radio-buttons
             error('assert', "Tournament.game_admin.parse_edit_form.check.result($tid,$gid,$new_value)");
          else
          {
@@ -391,6 +394,8 @@ function parse_edit_form( &$tgame, $trule, $game )
             $game_score = SCORE_RESIGN;
          elseif ( $vars['result'] == GA_RES_TIMOUT )
             $game_score = SCORE_TIME;
+         elseif ( $vars['result'] == GA_RES_FORFEIT )
+            $game_score = SCORE_FORFEIT;
          else
          {
             if ( $mask_gend & 4 )
@@ -404,7 +409,8 @@ function parse_edit_form( &$tgame, $trule, $game )
 
          if ( !is_null($game_score) )
          {
-            if ( $game_score != SCORE_RESIGN && $game_score != SCORE_TIME && !@$_REQUEST['jigo_check'] ) // jigo_check=1 : skip jigo-check
+            if ( $game_score != SCORE_RESIGN && $game_score != SCORE_TIME && $game_score != SCORE_FORFEIT
+               && !@$_REQUEST['jigo_check'] ) // jigo_check=1 : skip jigo-check
             {
                $jigo_behaviour = $trule->determineJigoBehaviour();
                $chk_score = floor( abs( 2 * (float)$game_score ) );
@@ -478,6 +484,9 @@ function draw_game_end( $tgame, $trule )
    $tform->add_row( array(
          'TAB',
          'RADIOBUTTONSX', 'result', array( GA_RES_TIMOUT => T_('Timeout') ), @$vars['result'], $disabled, ));
+   $tform->add_row( array(
+         'TAB',
+         'RADIOBUTTONSX', 'result', array( GA_RES_FORFEIT => T_('Forfeit') ), @$vars['result'], $disabled, ));
 
    $jigo_behaviour_text = TournamentRules::getJigoBehaviourText( $trule->determineJigoBehaviour() );
    if ( $jigo_behaviour_text )

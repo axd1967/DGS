@@ -108,7 +108,7 @@ if ( ALLOW_TOURNAMENTS && !$is_down )
 
 
 
-   // ---------- handle tournament-game ending by score/resignation/jigo/timeout
+   // ---------- handle tournament-game ending by score/resignation/jigo/timeout/forfeit
    // NOTE: keep after hourls & daily tournament-jobs! so copying ladder-ranks in daily-run is done first
 
    $tg_iterator = new ListIterator( 'cron_tournament.load_tgames.score', null, $tg_order );

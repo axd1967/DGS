@@ -187,7 +187,7 @@ function build_pool_notes( $tpoints )
 
    $mfmt = MINI_SPACING . '%s' . MINI_SPACING;
    $img_pool_winner = echo_image_tourney_pool_winner();
-   //TODO TODO adjust for TournamentPoints
+   //TODO TODO adjust for TournamentPoints; forfeit
    $notes[] =
       sprintf( T_('[%s] 1..n: \'#\' = running game, \'-\' = no game, %s#tpool'),
          T_('Position#tourneyheader'), span('MatrixSelf', T_('self#tpool_table'), $mfmt) )

@@ -371,9 +371,9 @@ class TournamentLadderProps
       $arr = array( T_('On game-end the following action is performed:#T_ladder') );
       $arr[] = sprintf( '%s: %s', T_('if challenger wins by score or resignation#T_ladder'),
                         self::getGameEndText($this->GameEndNormal) );
-      $arr[] = sprintf( '%s: %s', T_('if challenger wins by timeout#T_ladder'),
+      $arr[] = sprintf( '%s: %s', T_('if challenger wins by timeout or forfeit#T_ladder'), //FIXME keep orig: T_('if challenger wins by timeout#T_ladder')
                         self::getGameEndText($this->GameEndTimeoutWin) );
-      $arr[] = sprintf( '%s: %s', T_('if challenger loses by timeout#T_ladder'),
+      $arr[] = sprintf( '%s: %s', T_('if challenger loses by timeout or forfeit#T_ladder'), //FIXME keep orig: T_('if challenger loses by timeout#T_ladder')
                         self::getGameEndText($this->GameEndTimeoutLoss) );
       $arr[] = sprintf( '%s: %s', T_('on Jigo'), self::getGameEndText($this->GameEndJigo) );
       $arr_props[] = $arr;
@@ -636,9 +636,9 @@ class TournamentLadderProps
          if ( $tgame_flags & TG_FLAG_CH_DF_SWITCHED )
             $score = -$score; // role of challenger and defender is reversed
 
-         if ( $score == -SCORE_TIME ) // game timeout (challenger won)
+         if ( $score == -SCORE_TIME || $score == -SCORE_FORFEIT ) // game timeout or forfeit (challenger won)
             $action = $this->GameEndTimeoutWin;
-         elseif ( $score == SCORE_TIME ) // game timeout (challenger lost)
+         elseif ( $score == SCORE_TIME || $score == SCORE_FORFEIT ) // game timeout or forfeit (challenger lost)
             $action = $this->GameEndTimeoutLoss;
          elseif ( $score != 0 ) // game score|resignation
          {

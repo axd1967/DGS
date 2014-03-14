@@ -296,7 +296,7 @@ $GLOBALS['ThePage'] = new Page('Game');
       $may_play = false;
       if ( $Status == GAME_STATUS_FINISHED )
       {
-         if ( abs($Score) <= SCORE_MAX && $move == $Moves ) // don't calc for resign/time-out
+         if ( abs($Score) <= SCORE_MAX && $move == $Moves ) // don't calc for resign/time-out/forfeit
          {
             $score_board = clone $TheBoard;
             list( $score, $game_score ) =
@@ -966,7 +966,7 @@ function draw_moves( $gid, $move, $handicap )
                $c = $trres;
                break;
             default :
-               if ( $PosX < 0)
+               if ( $PosX < 0) // TIME|FORFEIT, etc. (no user "move")
                   continue;
                $c = number2board_coords($PosX, $PosY, $Size);
                break;
@@ -1116,7 +1116,7 @@ function build_move_comments()
          case POSX_SCORE: $move_pos = 'SCORE'; break;
          case POSX_RESIGN: $move_pos = 'RESIGN'; break;
          default:
-            if ( $PosX < 0) continue;
+            if ( $PosX < 0) continue; // TIME|FORFEIT, etc. (no user "move")
             $move_pos = number2board_coords($PosX, $PosY, $TheBoard->size);
             break;
       }
