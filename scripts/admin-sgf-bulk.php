@@ -74,7 +74,7 @@ require_once 'include/sgf_builder.php';
       SQLP_WHERE,
          'G.Moves > 10',
          'G.Size = 9',
-         'G.Score BETWEEN -1000 AND 1000', // no Timeouts
+         'G.Score BETWEEN -'.SCORE_RESIGN.' AND '.SCORE_RESIGN, // no Timeouts or Forfeits
          "G.Status='".GAME_STATUS_FINISHED."'",
       SQLP_ORDER,
          'G.ID ASC'
