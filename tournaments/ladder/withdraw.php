@@ -27,7 +27,7 @@ require_once 'tournaments/include/tournament_status.php';
 require_once 'tournaments/include/tournament_ladder.php';
 require_once 'tournaments/include/tournament_utils.php';
 
-$GLOBALS['ThePage'] = new Page('TournamentLadderRetreat');
+$GLOBALS['ThePage'] = new Page('TournamentLadderWithdraw');
 
 
 {
@@ -35,20 +35,20 @@ $GLOBALS['ThePage'] = new Page('TournamentLadderRetreat');
 
    $logged_in = who_is_logged( $player_row);
    if ( !$logged_in )
-      error('login_if_not_logged_in', 'Tournament.ladder.retreat');
+      error('login_if_not_logged_in', 'Tournament.ladder.withdraw');
    if ( !ALLOW_TOURNAMENTS )
-      error('feature_disabled', 'Tournament.ladder.retreat');
+      error('feature_disabled', 'Tournament.ladder.withdraw');
 
    $my_id = $player_row['ID'];
    if ( $my_id <= GUESTS_ID_MAX )
-      error('not_allowed_for_guest', 'Tournament.ladder.retreat');
+      error('not_allowed_for_guest', 'Tournament.ladder.withdraw');
 
-   $page = "retreat.php";
+   $page = "withdraw.php";
 
 /* Actual REQUEST calls used
-     tid=                : info about retreat
-     tid=&confirm=1      : retreat from ladder confirmed
-     tid=&tu_cancel      : cancel retreat
+     tid=                           : info about withdraw
+     tid=&tu_withdraw&&confirm=1    : withdraw from ladder confirmed
+     tid=&tu_cancel                 : cancel withdraw
 */
 
    $tid = (int)@$_REQUEST['tid'];
@@ -57,7 +57,7 @@ $GLOBALS['ThePage'] = new Page('TournamentLadderRetreat');
    if ( @$_REQUEST['tu_cancel'] ) // cancel delete
       jump_to("tournaments/ladder/view.php?tid=$tid");
 
-   $tourney = TournamentCache::load_cache_tournament( 'Tournament.ladder_retreat.find_tournament', $tid );
+   $tourney = TournamentCache::load_cache_tournament( 'Tournament.ladder.withdraw.find_tournament', $tid );
    $tstatus = new TournamentStatus( $tourney );
 
    $errors = $tstatus->check_edit_status( array( TOURNEY_STATUS_PLAY ) );
@@ -66,22 +66,22 @@ $GLOBALS['ThePage'] = new Page('TournamentLadderRetreat');
 
    $tladder = TournamentLadder::load_tournament_ladder_by_user($tid, $my_id);
    if ( is_null($tladder) )
-      $errors[] = T_('Retreat from this ladder is not possible, because you didn\'t join it.');
+      $errors[] = T_('Withdrawing from this ladder is not possible, because you didn\'t join it.');
 
 
    // ---------- Process actions ------------------------------------------------
 
-   if ( @$_REQUEST['confirm'] && !is_null($tladder) && count($errors) == 0 ) // confirm retreat
+   if ( @$_REQUEST['confirm'] && !is_null($tladder) && count($errors) == 0 ) // confirm withdrawal
    {
       ta_begin();
       {//HOT-section to remove user
-         $tladder->remove_user_from_ladder( 'Tournament.ladder_retreat',
-            TLOG_TYPE_USER, 'Ladder-Retreat', /*upd-rank*/false, $my_id, $player_row['Handle'], /*nfy-user*/false,
-            T_('User retreated from the ladder tournament.') );
+         $tladder->remove_user_from_ladder( 'Tournament.ladder.withdraw',
+            TLOG_TYPE_USER, 'Ladder-Withdraw', /*upd-rank*/false, $my_id, $player_row['Handle'], /*nfy-user*/false,
+            T_('User withdrew from the ladder tournament.') );
       }
       ta_end();
 
-      $sys_msg = urlencode( T_('Retreated from Ladder!') );
+      $sys_msg = urlencode( T_('Withdrawn from ladder!') );
       jump_to("tournaments/view_tournament.php?tid=$tid".URI_AMP."sysmsg=$sys_msg");
    }
 
@@ -128,22 +128,22 @@ $GLOBALS['ThePage'] = new Page('TournamentLadderRetreat');
 
    $tform->add_row( array(
          'TAB',
-         'TEXT', T_('Please confirm if you want to retreat from ladder!') . "<br>\n"
+         'TEXT', T_('Please confirm if you want to withdraw from ladder!') . "<br>\n"
                . T_('(also see notes below)'), ));
    $tform->add_row( array(
          'TAB', 'CELL', 2, '',
-         'SUBMITBUTTONX', 'tu_retreat', T_('Confirm Retreat#T_ladder'), ($has_errors ? 'disabled=1' : ''),
+         'SUBMITBUTTONX', 'tu_withdraw', T_('Confirm Withdrawal#T_ladder'), ($has_errors ? 'disabled=1' : ''),
          'TEXT', SMALL_SPACING,
          'SUBMITBUTTON', 'tu_cancel', T_('Cancel') ));
 
 
-   $title = T_('Retreat from Ladder');
+   $title = T_('Withdraw from Ladder');
    start_page( $title, true, $logged_in, $player_row );
    echo "<h3 class=Header>$title</h3>\n";
 
    $tform->echo_string();
 
-   echo_notes( 'retreatnotesTable', T_('Retreat notes#T_ladder'), build_retreat_notes() );
+   echo_notes( 'withdrawalNotesTable', T_('Withdrawal notes#T_ladder'), build_withdrawal_notes() );
 
 
    $menu_array = array();
@@ -156,16 +156,16 @@ $GLOBALS['ThePage'] = new Page('TournamentLadderRetreat');
 }//main
 
 
-/*! \brief Returns array with notes about retreating from ladder. */
-function build_retreat_notes()
+/*! \brief Returns array with notes about withdrawing from ladder. */
+function build_withdrawal_notes()
 {
    $notes = array();
 
    $notes[] = TournamentUtils::get_tournament_ladder_notes_user_removed() . "\n" .
-      T_('The opponents in your running tournament games (if there are any) will be notified about the retreat.#T_ladder');
-   $notes[] = T_('Retreating from this ladder will also remove your tournament user registration along with the tournaments rank history.');
+      T_('The opponents in your running tournament games (if there are any) will be notified about the withdrawal.#T_ladder');
+   $notes[] = T_('Withdrawing from this ladder will also remove your tournament user registration along with the tournaments rank history.');
    $notes[] = T_('If you rejoin the ladder, your ladder rank will be restarted according to the tournaments properties.');
 
    return $notes;
-}//build_retreat_notes
+}//build_withdrawal_notes
 ?>

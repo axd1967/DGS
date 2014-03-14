@@ -204,7 +204,7 @@ function build_pool_notes( $tpoints )
       sprintf( T_('[%s] = Rank of user within one pool (1=Highest rank); Format "R (CR) %s"#tpool'),
                T_('Rank#tpool'), $img_pool_winner ),
       T_('R = (optional) rank set by tournament director, really final only at end of tournament round#tpool'),
-      T_('R = \'---\' = user retreating from next round (temporary mark)#tpool'),
+      T_('R = \'---\' = user withdrawing from next round (temporary mark)#tpool'),
       T_('CR = preliminary calculated rank, omitted when it can\'t be calculated or identical to rank R#tpool'),
       sprintf( T_('%s = marks user as pool winner (to advance to next round, or mark for final result)#tpool'), $img_pool_winner ),
    );

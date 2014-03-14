@@ -13,6 +13,21 @@ ChangeLog
 
 2014-03-14 jug
 
+   * tournaments/include/tournament_ladder_props.php (TournamentLadderProps.build_notes_props),
+     tournaments/include/tournament_pool.php (TournamentPool.get_cmp_rank, ~.formatRank),
+     tournaments/include/tournament_round.php (TournamentRound.build_notes_props),
+     tournaments/include/tournament_globals.php (TPOOLRK_WITHDRAW),
+     tournaments/include/tournament_pool_classes.php,
+     scripts/tournament_consistency.php,
+     specs/db/table-Tournaments.txt,
+     specs/tournaments.txt,
+     specs/caching.txt,
+     tournaments/roundrobin/view_pools.php (build_pool_notes),
+     tournaments/ladder/withdraw.php (build_withdrawal_notes),
+     tournaments/ladder/retreat.php [RENAMED],,
+     tournaments/ladder/view.php:
+   - renamed "retreat" from ladder to "withdraw" from ladder
+
    * game.php:
    - added bottom-link for game-admin on game-page
 

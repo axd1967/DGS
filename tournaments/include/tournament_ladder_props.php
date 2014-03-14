@@ -386,7 +386,7 @@ class TournamentLadderProps
          $arr_props[] = sprintf( T_("The user will be removed from the ladder, if player hasn't accessed DGS\n"
             . 'within the last %d days (excluding vacation).'), $this->UserAbsenceDays );
 
-      $arr_props[] = T_('On user removal or retreat from the ladder') . ":\n"
+      $arr_props[] = T_('On user removal or withdrawal from the ladder') . ":\n"
          . wordwrap( TournamentUtils::get_tournament_ladder_notes_user_removed(), 80 );
 
       // rank-change period

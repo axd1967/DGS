@@ -106,7 +106,7 @@ class TournamentPool
 
    public function get_cmp_rank()
    {
-      if ( $this->Rank == TPOOLRK_RETREAT )
+      if ( $this->Rank == TPOOLRK_WITHDRAW )
          return 127; // lowest prio
       elseif ( $this->Rank == TPOOLRK_NO_RANK )
          return $this->CalcRank;
@@ -116,7 +116,7 @@ class TournamentPool
 
    public function formatRank( $incl_calc_rank=false, $unset_rank='' )
    {
-      if ( $this->Rank == TPOOLRK_RETREAT )
+      if ( $this->Rank == TPOOLRK_WITHDRAW )
          $s = NO_VALUE;
       elseif ( $this->Rank > TPOOLRK_RANK_ZONE )
          $s = abs($this->Rank);

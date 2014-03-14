@@ -267,7 +267,7 @@ function fix_tournament_ladder_challenge_count( $arg_tid, $do_it )
    $result = db_query( "tournament_consistency.fix_tournament_ladder_challenge_count.challenges_in($arg_tid)",
       "SELECT TL.tid, TL.rid, TL.ChallengesIn, SUM(IF(ISNULL(TG.ID),0,1)) AS X_Count " .
       "FROM TournamentLadder AS TL " .
-         // NOTE: only TG.uid has index, but join on TG.rid is the important one (as user could have retreated from ladder),
+         // NOTE: only TG.uid has index, but join on TG.rid is the important one (as user could have withdrawn from ladder),
          //       so join on TG.uid for index-use and join TG.rid for real-join
          // NOTE: left-join needed to also correct wrong 0-count
          "LEFT JOIN TournamentGames AS TG ON TG.Defender_uid=TL.uid AND TG.Defender_rid=TL.rid " .

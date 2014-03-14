@@ -970,7 +970,7 @@ class PoolViewer
   */
 class RankSummary
 {
-   private $rank_summary; // rank|TPOOLRK_NO_RANK/RETREAT => [ count, NextRound-count ]
+   private $rank_summary; // rank|TPOOLRK_NO_RANK/WITHDRAW => [ count, NextRound-count ]
    private $tp_count;
    private $table; // Table-object
 

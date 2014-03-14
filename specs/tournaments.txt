@@ -68,7 +68,7 @@ Topics:
    * ladder: "What happens with running games on user-removal ?"
       * use-cases for user-removal:
          (1) user removed by TD/T-Adm
-         (2) user retreated from ladder
+         (2) user withdrew from ladder
          (3) user removed by T-system (game-end ladder-config)
          (4) user removed by T-system (long-absence ladder-config)
       * user is removed from tournament-ladder (other users move up one rank)
@@ -138,7 +138,7 @@ Use-Cases:
 
 NOTES:
    - MaxTP may be 0 (=unlimited), then use db-MaxTP instead for checks
-   - for NOW, edit-TP is ONLY allowed for REG/PLAY (TL) or REG (TRR), i.e. all TPs must be properly REGed for PAIR-status (no user can be removed if he wishes for TRR, for TL it's possible by retreat or remove-user) -> for TRR it would be special use-case to remove-TP (or edit-TP) after T already started !!
+   - for NOW, edit-TP is ONLY allowed for REG/PLAY (TL) or REG (TRR), i.e. all TPs must be properly REGed for PAIR-status (no user can be removed if he wishes for TRR, for TL it's possible by withdrawal or remove-user) -> for TRR it would be special use-case to remove-TP (or edit-TP) after T already started !!
 
 Features:
    - F1. T has MinTP/MaxTP-limits, but MaxTP can be unlimited (=0)

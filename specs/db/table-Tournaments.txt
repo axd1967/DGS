@@ -84,7 +84,7 @@ Description:
      also see descriptions in 'tournaments/include/tournament.php' getFlagsText()-func
    - 0x0001 (=LOCK_ADMIN):
       - prohibits all read-write ops on tourney for non-TAdmins:
-         - prohibits user to all register-ops, challenge/retreat on ladder
+         - prohibits user to all register-ops, challenge on ladder, withdraw from ladder
          - prohibits TD/owner to edit-tourney/director/props/rules/rounds/participants/locks/status, game-admin
          - prohibits TD/owner to edit-ladder-props, admin/edit-ladder
          - prohibits cron from processing for locked tourney
@@ -94,14 +94,14 @@ Description:
       - prohibits cron (having less prio than tdwork-lock)
       - stop cron for current tourney with set ladder-lock
       - prohibits user to join tournament by apply/register/ack-invite or edit-registration
-      - prohibits user to challenge/retreat on ladder
+      - prohibits user to challenge on ladder, withdraw from ladder
       - needed to allow TD/owner/admin to admin/edit-ladder
    - 0x0008 (=LOCK_CRON):
       - can block some ops to admin/edit tournament for TD/Owner/Admin (e.g. for ladder)
    - 0x0010 (=LOCK_CLOSE): prepares tournament for transition to CLOSED-status
       - prohibits user to join tournament
       - prohibits TD/owner to edit-registration
-      - for ladder: prohibits user to challenge/retreat
+      - for ladder: prohibits user to challenge/withdraw
 
 * Created : date of creation of T
 

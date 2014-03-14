@@ -209,7 +209,7 @@ define('TROUND_SLICE_MANUAL', 3);
 // TournamentPool.Rank-values
 define('TPOOLRK_NO_RANK', -100); // unset pool-rank
 define('TPOOLRK_RANK_ZONE', -90); // reserved rank-zone -100..-90, >-90 zone with ranks
-define('TPOOLRK_RETREAT', 0); // temporary marked as retreat-from-next-round
+define('TPOOLRK_WITHDRAW', 0); // temporary marked as withdraw-from-next-round
 
 define('TIEBREAKER_POINTS', 1);
 define('TIEBREAKER_SODOS',  2);

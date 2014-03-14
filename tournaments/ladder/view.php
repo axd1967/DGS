@@ -347,7 +347,7 @@ $GLOBALS['ThePage'] = new Page('TournamentLadderView');
    {
       $menu_array[T_('View Ladder')] = "tournaments/ladder/view.php?tid=$tid";
       if ( !$is_seed_status && !is_null($tl_user) && !$admin_mode )
-         $menu_array[T_('Retreat from Ladder')] = "tournaments/ladder/retreat.php?tid=$tid";
+         $menu_array[T_('Withdraw from Ladder')] = "tournaments/ladder/withdraw.php?tid=$tid";
    }
    $menu_array[T_('Tournament participants')] = "tournaments/list_participants.php?tid=$tid";
    if ( in_array($tourney->Status, TournamentHelper::get_view_data_status()) )
