@@ -398,7 +398,8 @@ function draw_game_admin_form( $game )
             'RADIOBUTTONS', 'result', array( GA_RES_TIMOUT => T_('Timeout') ), @$vars['result'], ));
       $gaform->add_row( array(
             'TAB',
-            'RADIOBUTTONS', 'result', array( GA_RES_FORFEIT => T_('Forfeit') ), @$vars['result'], ));
+            'RADIOBUTTONS', 'result', array( GA_RES_FORFEIT => T_('Forfeit') ), @$vars['result'],
+            'TEXT', ' (+ '.T_('make game unrated') . ')' ));
       $gaform->add_row( array(
             'CELL', 2, '',
             'BR', 'TEXT', T_('Message to players').':', ));
