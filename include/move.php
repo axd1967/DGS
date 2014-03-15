@@ -93,7 +93,7 @@ class GameCheckMove
          return ''; // Ok, all tests passed.
       }
 
-      // note: $GameFlags has set Ko-flag if last move has taken a single stone
+      // note: $game_flags (Games.Flags) has set Ko-flag if last move has taken a single stone
       if ( $this->nr_prisoners == 1 && ($game_flags & GAMEFLAGS_KO) )
       {
          // Check for ko

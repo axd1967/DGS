@@ -790,7 +790,7 @@ $GLOBALS['ThePage'] = new Page('GamesList');
                   $row_arr[38] = ( $userRatingDiff > 0 ? '+' : '' ) . sprintf( "%0.2f", $userRatingDiff / 100 );
             }
 
-            if ( $gtable->Is_Column_Displayed[41] && ($X_GameFlags & GAMEFLAGS_HIDDEN_MSG) )
+            if ( $gtable->Is_Column_Displayed[41] && ($Flags & GAMEFLAGS_HIDDEN_MSG) )
                $row_arr[41] = echo_image_gamecomment($ID);
          }
          else //RU
@@ -856,7 +856,7 @@ $GLOBALS['ThePage'] = new Page('GamesList');
             $row_arr[10] = score2text($Score, false);
       }
 
-      if ( $gtable->Is_Column_Displayed[47] && ($X_GameFlags & GAMEFLAGS_ATTACHED_SGF) )
+      if ( $gtable->Is_Column_Displayed[47] && ($Flags & GAMEFLAGS_ATTACHED_SGF) )
          $row_arr[47] = echo_image_game_sgf($ID);
 
       $gtable->add_row( $row_arr );

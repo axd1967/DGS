@@ -276,7 +276,7 @@ class GameAddTime
    /*!
     * \brief returns true, if user (uid) (or TD) is allowed to add additional
     *        time for uid's opponent in game specified by $game_row.
-    * \param $game_row expect fields: Status, (Black|White)_(ID|Maintime), tid, GameFlags (int of G.Flags)
+    * \param $game_row expect fields: Status, (Black|White)_(ID|Maintime), tid, Flags
     * \param $is_tdir true, if tournament-director with TD_FLAG_GAME_ADD_TIME-right
     */
    public static function allow_add_time_opponent( $game_row, $uid, $is_tdir=false )
@@ -290,7 +290,7 @@ class GameAddTime
          return false;
 
       // must not be a tournament-game except TD-allowed-to-add-time or game is detached from tournament
-      if ( !$is_tdir && $game_row['tid'] != 0 && !($game_row['GameFlags'] & GAMEFLAGS_TG_DETACHED) )
+      if ( !$is_tdir && $game_row['tid'] != 0 && !($game_row['Flags'] & GAMEFLAGS_TG_DETACHED) )
          return false;
 
       // get opponents columns
@@ -1336,7 +1336,6 @@ class GameHelper
          : '';
       $grow = mysql_single_fetch( "GameHelper.load_game_row($gid).$dbgmsg",
             "SELECT G.*, " .
-            "G.Flags+0 AS GameFlags, " . //used by check_move
             $addfields_query .
             "black.ClockUsed AS X_BlackClock, " . // X_*Clock for GameHelper::update_clock()
             "white.ClockUsed AS X_WhiteClock, " .
@@ -4715,7 +4714,6 @@ class NextGameOrder
                'Games.*',
                'UNIX_TIMESTAMP(Games.Starttime) AS X_Starttime',
                'UNIX_TIMESTAMP(Games.Lastchanged) AS X_Lastchanged',
-               'Games.Flags+0 AS X_GameFlags',
                "IF(Games.Rated='N','N','Y') AS X_Rated",
                "(Games.White_ID=$uid)+0 AS Color",
                //extra bits of X_Color are for sorting purposes

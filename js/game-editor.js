@@ -1217,9 +1217,9 @@ DGS.GameChangeCalculator = function( goban ) {
 
       // check for ko
       /*
-      //TODO global $Last_Move, $GameFlags; //input only
-      // note: $GameFlags has set Ko-flag if last move has taken a single stone
-      if ( nr_prisoners == 1 && (GameFlags & GAMEFLAGS_KO) ) {
+      //TODO global $Last_Move, $Flags; //input only
+      // note: $Flags has set Ko-flag if last move has taken a single stone
+      if ( nr_prisoners == 1 && (Flags & GAMEFLAGS_KO) ) {
          var xy = prisoners[0];
          if ( Last_Move_xy == xy )
             return goban_changes; // ko not allowed

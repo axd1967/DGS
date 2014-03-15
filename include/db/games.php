@@ -44,7 +44,7 @@ $ENTITY_GAMES = new Entity( 'Games',
       FTYPE_PKEY, 'ID',
       FTYPE_AUTO, 'ID',
       FTYPE_INT,  'ID', 'tid', 'ShapeID', 'mid', 'DoubleGame_ID', 'Black_ID', 'White_ID', 'ToMove_ID', 'Size',
-                  'Handicap', 'Moves', 'Black_Prisoners', 'White_Prisoners', 'Last_X', 'Last_Y',
+                  'Handicap', 'Moves', 'Black_Prisoners', 'White_Prisoners', 'Last_X', 'Last_Y', 'Flags',
                   'Maintime', 'Byotime', 'Byoperiods', 'Black_Maintime', 'White_Maintime',
                   'Black_Byotime', 'White_Byotime', 'Black_Byoperiods', 'White_Byoperiods', 'LastTicks',
                   'ClockUsed', 'TimeOutDate',
@@ -52,7 +52,7 @@ $ENTITY_GAMES = new Entity( 'Games',
                    'White_End_Rating',
       FTYPE_TEXT, 'GamePlayers', 'Last_Move', 'Snapshot', 'ShapeSnapshot', 'GameSetup',
       FTYPE_DATE, 'Starttime', 'Lastchanged',
-      FTYPE_ENUM, 'Status', 'GameType', 'Ruleset', 'Flags', 'Byotype', 'Rated', 'StdHandicap', 'WeekendClock'
+      FTYPE_ENUM, 'Status', 'GameType', 'Ruleset', 'Byotype', 'Rated', 'StdHandicap', 'WeekendClock'
    );
 
 class Games
@@ -273,7 +273,7 @@ class Games
       $data->set_value( 'Last_X', $this->Last_X );
       $data->set_value( 'Last_Y', $this->Last_Y );
       $data->set_value( 'Last_Move', $this->Last_Move );
-      $data->set_value( 'Flags', self::buildFlags($this->Flags) );
+      $data->set_value( 'Flags', $this->Flags );
       $data->set_value( 'Score', $this->Score );
       $data->set_value( 'Maintime', $this->Maintime );
       $data->set_value( 'Byotype', $this->Byotype );
@@ -303,26 +303,6 @@ class Games
 
 
    // ------------ static functions ----------------------------
-
-   public static function parseFlags( $flags_str )
-   {
-      static $map_flags = array(
-         'KO'           => GAMEFLAGS_KO,
-         'HIDDENMSG'    => GAMEFLAGS_HIDDEN_MSG,
-         'ADMRESULT'    => GAMEFLAGS_ADMIN_RESULT,
-         'TGDETACHED'   => GAMEFLAGS_TG_DETACHED,
-         'ATTACHEDSGF'  => GAMEFLAGS_ATTACHED_SGF,
-      );
-
-      $flags = 0;
-      if ( $flags_str )
-      {
-         $arr = explode(',', $flags_str );
-         foreach ( $arr as $flagkey )
-            $flags |= $map_flags[strtoupper($flagkey)];
-      }
-      return $flags;
-   }//parseFlags
 
    public static function buildFlags( $flags )
    {
@@ -377,7 +357,7 @@ class Games
             @$row['Last_X'],
             @$row['Last_Y'],
             @$row['Last_Move'],
-            self::parseFlags( @$row['Flags'] ),
+            @$row['Flags'],
             @$row['Score'],
             @$row['Maintime'],
             @$row['Byotype'],

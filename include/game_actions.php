@@ -233,7 +233,7 @@ class GameActionHelper
       $this->message = replace_move_tag( $this->message_raw, $this->gid );
 
       if ( $this->message && preg_match( "#</?h(idden)?>#is", $this->message) )
-         $this->game_row['GameFlags'] |= GAMEFLAGS_HIDDEN_MSG;
+         $this->game_row['Flags'] |= GAMEFLAGS_HIDDEN_MSG;
    }//prepare_game_move_message
 
 
@@ -259,7 +259,7 @@ class GameActionHelper
       $Handicap = $this->game_row['Handicap'];
       $Status = $this->game_row['Status'];
       $White_ID = $this->game_row['White_ID'];
-      $GameFlags = $this->game_row['GameFlags'];
+      $Flags = $this->game_row['Flags'];
       $Size = $this->game_row['Size'];
       $dbgmsg .= ".GAH.prepare_game_action_set_handicap({$this->gid},{$this->action},$Status,$Moves,$Handicap)";
 
@@ -296,7 +296,7 @@ class GameActionHelper
       $this->game_updquery->upd_num('Last_X', $x);
       $this->game_updquery->upd_num('Last_Y', $y);
       $this->game_updquery->upd_txt('Last_Move', number2sgf_coords($x, $y, $Size) );
-      $this->game_updquery->upd_num('Flags', $GameFlags);
+      $this->game_updquery->upd_num('Flags', $Flags);
       $this->game_updquery->upd_txt('Snapshot', GameSnapshot::make_game_snapshot($Size, $this->board) );
       $this->game_updquery->upd_num('ToMove_ID', $White_ID);
    }//prepare_game_action_set_handicap
@@ -316,14 +316,14 @@ class GameActionHelper
       $Black_Prisoners = $this->game_row['Black_Prisoners'];
       $White_Prisoners = $this->game_row['White_Prisoners'];
       $Moves = $this->get_moves();
-      $GameFlags = $this->game_row['GameFlags'];
+      $Flags = $this->game_row['Flags'];
       $dbgmsg .= ".GAH.prepare_game_action_do_move({$this->gid},{$this->action})";
 
       {//to fix the old way Ko detect. Could be removed when no more old way games.
          if ( !@$Last_Move ) $Last_Move = number2sgf_coords($Last_X, $Last_Y, $Size);
       }
       $gchkmove = new GameCheckMove( $this->board );
-      $gchkmove->check_move( $move_coord, $this->to_move, $Last_Move, $GameFlags );
+      $gchkmove->check_move( $move_coord, $this->to_move, $Last_Move, $Flags );
       $gchkmove->update_prisoners( $Black_Prisoners, $White_Prisoners );
 
       $prisoner_string = '';
@@ -343,16 +343,16 @@ class GameActionHelper
          "({$this->gid}, $Moves, {$this->to_move}, {$gchkmove->colnr}, {$gchkmove->rownr}, {$this->hours}) ";
 
       if ( $gchkmove->nr_prisoners == 1 )
-         $GameFlags |= GAMEFLAGS_KO;
+         $Flags |= GAMEFLAGS_KO;
       else
-         $GameFlags &= ~GAMEFLAGS_KO;
+         $Flags &= ~GAMEFLAGS_KO;
 
       $this->game_updquery->upd_num('Moves', $Moves);
       $this->game_updquery->upd_num('Last_X', $gchkmove->colnr); //used with mail notifications
       $this->game_updquery->upd_num('Last_Y', $gchkmove->rownr);
       $this->game_updquery->upd_txt('Last_Move', number2sgf_coords($gchkmove->colnr, $gchkmove->rownr, $Size) ); //used to detect Ko
       $this->game_updquery->upd_txt('Status', GAME_STATUS_PLAY);
-      $this->game_updquery->upd_num('Flags', $GameFlags);
+      $this->game_updquery->upd_num('Flags', $Flags);
       $this->game_updquery->upd_txt('Snapshot', GameSnapshot::make_game_snapshot($Size, $this->board) );
       $this->game_updquery->upd_num('ToMove_ID', $this->next_to_move_ID);
       if ( $gchkmove->nr_prisoners > 0 )
@@ -372,7 +372,7 @@ class GameActionHelper
       $Handicap = $this->game_row['Handicap'];
       $Status = $this->game_row['Status'];
       $Last_Move = $this->game_row['Last_Move'];
-      $GameFlags = $this->game_row['GameFlags'];
+      $Flags = $this->game_row['Flags'];
       $dbgmsg .= ".GAH.prepare_game_action_pass({$this->gid},{$this->action},$Status,$Moves,$Handicap)";
 
       if ( $Moves < $Handicap )
@@ -392,7 +392,7 @@ class GameActionHelper
       $this->game_updquery->upd_num('Last_X', POSX_PASS);
       $this->game_updquery->upd_txt('Status', $next_status);
       //$this->game_updquery->upd_txt('Last_Move', $Last_Move); //Not a move, re-use last one
-      $this->game_updquery->upd_num('Flags', $GameFlags); //Don't reset KO-Flag else PASS,PASS,RESUME could break a Ko
+      $this->game_updquery->upd_num('Flags', $Flags); //Don't reset KO-Flag else PASS,PASS,RESUME could break a Ko
       $this->game_updquery->upd_num('ToMove_ID', $this->next_to_move_ID);
    }//prepare_game_action_pass
 
@@ -401,7 +401,7 @@ class GameActionHelper
    public function prepare_game_action_resign( $dbgmsg )
    {
       $Moves = $this->get_moves();
-      $GameFlags = $this->game_row['GameFlags'];
+      $Flags = $this->game_row['Flags'];
       $dbgmsg .= ".GAH.prepare_game_action_resign({$this->gid},{$this->action})";
 
       $this->score = ( $this->to_move == BLACK ) ? SCORE_RESIGN : -SCORE_RESIGN;
@@ -412,7 +412,7 @@ class GameActionHelper
       $this->game_updquery->upd_num('Moves', $Moves);
       $this->game_updquery->upd_num('Last_X', POSX_RESIGN);
       $this->game_updquery->upd_txt('Status', GAME_STATUS_FINISHED);
-      $this->game_updquery->upd_num('Flags', $GameFlags);
+      $this->game_updquery->upd_num('Flags', $Flags);
       $this->game_updquery->upd_num('ToMove_ID', 0);
       $this->game_updquery->upd_num('Score', $this->score);
 
@@ -436,7 +436,7 @@ class GameActionHelper
       $Ruleset = $this->game_row['Ruleset'];
       $Status = $this->game_row['Status'];
       $Size = $this->game_row['Size'];
-      $GameFlags = $this->game_row['GameFlags'];
+      $Flags = $this->game_row['Flags'];
       $dbgmsg .= ".GAH.prepare_game_action_score({$this->gid},{$this->action})";
 
       if ( !$this->is_quick )
@@ -479,7 +479,7 @@ class GameActionHelper
       $this->game_updquery->upd_num('Last_X', POSX_SCORE);
       $this->game_updquery->upd_txt('Status', $next_status);
       //$this->game_updquery->upd_txt('Last_Move', $Last_Move); //Not a move, re-use last one
-      $this->game_updquery->upd_num('Flags', $GameFlags);
+      $this->game_updquery->upd_num('Flags', $Flags);
       $this->game_updquery->upd_txt('Snapshot', GameSnapshot::make_game_snapshot($Size, $this->board) );
       $this->game_updquery->upd_num('Score', $this->score);
       $this->game_updquery->upd_num('ToMove_ID',
@@ -520,7 +520,7 @@ class GameActionHelper
       $White_ID = $this->game_row['White_ID'];
       $Rated = $this->game_row['Rated'];
       $ToMove_ID = $this->game_row['ToMove_ID'];
-      $GameFlags = $this->game_row['GameFlags'];
+      $Flags = $this->game_row['Flags'];
       $dbgmsg .= ".GAH.update_game({$this->gid},{$this->action})";
 
       ta_begin();
@@ -560,7 +560,7 @@ class GameActionHelper
          if ( $this->game_finished )
          {
             $game_finalizer = new GameFinalizer( ACTBY_PLAYER, $this->my_id, $this->gid, $tid, $Status,
-               $GameType, $GamePlayers, $GameFlags, $Black_ID, $White_ID, $Moves, ($Rated != 'N') );
+               $GameType, $GamePlayers, $Flags, $Black_ID, $White_ID, $Moves, ($Rated != 'N') );
 
             $do_delete = ( $this->action == GAMEACT_DELETE );
 

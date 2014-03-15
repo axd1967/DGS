@@ -309,7 +309,6 @@ class SgfBuilder
    {
       $result = db_query( "SgfBuilder.load_game_info({$this->gid})",
          'SELECT Games.*, ' .
-         'Games.Flags+0 AS X_GameFlags, ' .
          'UNIX_TIMESTAMP(Games.Starttime) AS startstamp, ' .
          'UNIX_TIMESTAMP(Games.Lastchanged) AS timestamp, ' .
          'black.Sessioncode AS Blackscode, ' .
@@ -567,7 +566,7 @@ class SgfBuilder
          . "\nGame Type: $GameType ($game_players)"
          . ( $tourney_info ? "\n$tourney_info" : '' )
          . "\nRated: ". ( $Rated=='N' ? 'N' : 'Y' )
-         . ( ($X_GameFlags & GAMEFLAGS_ADMIN_RESULT) ? "\nNote: game-result set by admin" : '' )
+         . ( ($Flags & GAMEFLAGS_ADMIN_RESULT) ? "\nNote: game-result set by admin" : '' )
          . "\n"
          . ( is_valid_rating($White_Start_Rating)
                ? sprintf( "\nWhite Start Rating: %s - ELO %d",
@@ -881,7 +880,7 @@ class SgfBuilder
       }
 
       $this->node_com .= "\nResult: " . score2text($score, false, true);
-      if ( $this->game_row['X_GameFlags'] & GAMEFLAGS_ADMIN_RESULT )
+      if ( $this->game_row['Flags'] & GAMEFLAGS_ADMIN_RESULT )
          $this->node_com .= " (set by admin)";
    }//build_sgf_result
 

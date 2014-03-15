@@ -303,7 +303,7 @@ function check_consistency( $gid)
   if ( !@$Last_Move ) $Last_Move= number2sgf_coords($Last_X, $Last_Y, $Size);
 }
    $games_Last_Move = $Last_Move;
-   $games_Flags = ( $Flags ? GAMEFLAGS_KO : 0 );
+   $game_flag_ko = ( $Flags & GAMEFLAGS_KO );
 
    $result = mysql_query( "SELECT * FROM Moves WHERE gid=$gid ORDER BY ID" )
        or die('<BR>' . mysql_error());
@@ -438,12 +438,12 @@ function check_consistency( $gid)
          return "Wrong Player to move! Should be $to_move.";
       }
 
-      if ( $games_Flags!=$GameFlags
+      if ( $game_flag_ko != $GameFlags
         || ( ($GameFlags & GAMEFLAGS_KO) && $games_Last_Move!=$Last_Move ) )
       {
          return "Wrong Ko status!"
             . "\nLast_Move: [$games_Last_Move] should be [$Last_Move]"
-            . "\nFlags: $games_Flags should be $GameFlags";
+            . "\nFlags: $game_flag_ko should be $GameFlags";
       }
 
       if (  !($ClockUsed>=0 && $ClockUsed<24)

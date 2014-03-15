@@ -51,3 +51,17 @@ ALTER TABLE TournamentPoints
 SELECT * FROM Profiles WHERE Type BETWEEN 11 AND 13 AND Text LIKE '%fsf10%' ;
 
 
+-- change Games.Flags from SET() into integer-flags
+ALTER TABLE Games
+   DROP KEY Flags,
+   CHANGE Flags OldFlags set('Ko','HiddenMsg','AdmResult','TGDetached','AttachedSgf') NOT NULL default '',
+   ADD Flags smallint unsigned NOT NULL DEFAULT '0' AFTER OldFlags ;
+
+UPDATE Games
+   SET Flags=OldFlags ;
+
+ALTER TABLE Games
+   ADD KEY Flags (Flags),
+   DROP COLUMN OldFlags ;
+
+

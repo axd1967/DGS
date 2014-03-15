@@ -28,15 +28,14 @@ Description:
 | Komi               | decimal(4,1)                                     | NO   |     | 6.5                 |                |
 | Handicap           | tinyint(3) unsigned                              | NO   | MUL | 0                   |                |
 | Status             | enum('KOMI','SETUP','INVITED','PLAY','PASS','SCORE','SCORE2','FINISHED')
-                                                                        | NO   | MUL | INVITED             |                |
+...                                                                     | NO   | MUL | INVITED             |                |
 | Moves              | smallint(5) unsigned                             | NO   | MUL | 0                   |                |
 | Black_Prisoners    | smallint(5) unsigned                             | NO   |     | 0                   |                |
 | White_Prisoners    | smallint(5) unsigned                             | NO   |     | 0                   |                |
 | Last_X             | tinyint(4)                                       | NO   |     | -1                  |                |
 | Last_Y             | tinyint(4)                                       | NO   |     | -1                  |                |
 | Last_Move          | char(2)                                          | NO   |     |                     |                |
-| Flags              | set('Ko','HiddenMsg','AdmResult','TGDetached','AttachedSgf')
-                                                                        | NO   | MUL |                     |                |
+| Flags              | smallint(5) unsigned                             | NO   | MUL | 0                   |                |
 | Score              | decimal(5,1)                                     | NO   | MUL | 0.0                 |                |
 | Maintime           | smallint(6)                                      | NO   |     | 0                   |                |
 | Byotype            | enum('JAP','CAN','FIS')                          | NO   |     | JAP                 |                |
@@ -217,11 +216,11 @@ Description:
      old way to detect Ko. Could be removed when no more old way games.
 
 * Flags : game-flags indicating certain state of game
-   - Ko: last move has taken a single stone, used to check for Ko
-   - HiddenMsg: one of the game-messages contain a hidden message ("<h>...</h>")
-   - AdmResult: game-result was set by admin
-   - TGDetached: tournament-game detached from tournament (e.g. because user removed from T)
-   - AttachedSgf: indicates that there at least one SGF is attached to game
+   - 0x0001 = Ko: last move has taken a single stone, used to check for Ko
+   - 0x0002 = HiddenMsg: one of the game-messages contain a hidden message ("<h>...</h>")
+   - 0x0004 = AdmResult: game-result was set by admin
+   - 0x0008 = TGDetached: tournament-game detached from tournament (e.g. because user removed from T)
+   - 0x0010 = AttachedSgf: indicates that there at least one SGF is attached to game
 
 * Score : score of game for finished game
    - 0 = jigo

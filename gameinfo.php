@@ -90,7 +90,6 @@ function build_rating_diff( $rating_diff )
       'WP.ClockUsed AS White_ClockUsed',
       'BRL.RatingDiff AS Black_RatingDiff',
       'WRL.RatingDiff AS White_RatingDiff',
-      'Games.Flags+0 AS X_GameFlags',
       'UNIX_TIMESTAMP(Starttime) AS X_Starttime',
       'UNIX_TIMESTAMP(Lastchanged) AS X_Lastchanged',
       "IF(Games.Rated='N','N','Y') AS X_Rated",
@@ -201,7 +200,7 @@ function build_rating_diff( $rating_diff )
       $itable->add_sinfo( T_('Fair Komi Type#fairkomi'), $fk_htype_text );
    if ( $game_finished )
    {
-      $admResult = ( $grow['X_GameFlags'] & GAMEFLAGS_ADMIN_RESULT )
+      $admResult = ( $grow['Flags'] & GAMEFLAGS_ADMIN_RESULT )
          ? span('ScoreWarning', sprintf(' (%s)', T_('set by admin#game')))
          : '';
       $itable->add_sinfo( T_('Score'), score2text(@$grow['Score'], false) . $admResult);

@@ -302,7 +302,7 @@ $GLOBALS['ThePage'] = new Page('Game');
             list( $score, $game_score ) =
                GameActionHelper::calculate_game_score( $score_board, $stonestring, $Ruleset, $coord );
          }
-         $admResult = ( $GameFlags & GAMEFLAGS_ADMIN_RESULT ) ? sprintf(' (%s)', T_('set by admin#game')) : '';
+         $admResult = ( $Flags & GAMEFLAGS_ADMIN_RESULT ) ? sprintf(' (%s)', T_('set by admin#game')) : '';
          $extra_infos[score2text($Score, true) . $admResult] = 'Score';
       }
       elseif ( $TheBoard->is_scoring_step($move, $Status) )
@@ -335,7 +335,7 @@ $GLOBALS['ThePage'] = new Page('Game');
                if ( !@$Last_Move ) $Last_Move= number2sgf_coords($Last_X, $Last_Y, $Size);
             }
             $gchkmove = new GameCheckMove( $TheBoard );
-            $gchkmove->check_move( $coord, $to_move, $Last_Move, $GameFlags );
+            $gchkmove->check_move( $coord, $to_move, $Last_Move, $Flags );
             $gchkmove->update_prisoners( $Black_Prisoners, $White_Prisoners );
             $game_row['Black_Prisoners'] = $Black_Prisoners;
             $game_row['White_Prisoners'] = $White_Prisoners;
@@ -618,7 +618,7 @@ $GLOBALS['ThePage'] = new Page('Game');
    else
       $js = null;
 
-   $cnt_attached_sgf = ( $GameFlags & GAMEFLAGS_ATTACHED_SGF ) ? GameSgfControl::count_cache_game_sgfs( $gid ) : 0;
+   $cnt_attached_sgf = ( $Flags & GAMEFLAGS_ATTACHED_SGF ) ? GameSgfControl::count_cache_game_sgfs( $gid ) : 0;
 
 
    $title = T_("Game") ." #$gid,$arg_move";
@@ -762,7 +762,7 @@ $GLOBALS['ThePage'] = new Page('Game');
                         'target' => FRIENDLY_SHORT_NAME.'_game_comments',
                         'class' => 'NoPrint' ));
    }
-   if ( $Status == GAME_STATUS_FINISHED && ($GameFlags & GAMEFLAGS_HIDDEN_MSG) )
+   if ( $Status == GAME_STATUS_FINISHED && ($Flags & GAMEFLAGS_HIDDEN_MSG) )
       echo MED_SPACING . echo_image_gamecomment( $gid );
    if ( $enable_game_viewer ) //TODO remove/replace later
    {
@@ -1376,7 +1376,7 @@ function draw_game_info( $game_row, $game_setup, $board, $tourney )
    //tournament rows
    if ( ALLOW_TOURNAMENTS && !is_null($tourney) )
    {
-      $tflags_str = ($game_row['GameFlags'] & GAMEFLAGS_TG_DETACHED)
+      $tflags_str = ($game_row['Flags'] & GAMEFLAGS_TG_DETACHED)
          ? span('TWarning', sprintf('(%s) ', T_('detached#tourney')))
          : '';
       echo "<tr>\n",

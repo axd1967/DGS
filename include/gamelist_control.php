@@ -135,7 +135,6 @@ class GameListControl
 
       $qsql = new QuerySQL( SQLP_FIELDS, // std-fields
          'G.*',
-         'G.Flags+0 AS X_GameFlags',
          'UNIX_TIMESTAMP(G.Lastchanged) AS X_Lastchanged',
          'UNIX_TIMESTAMP(G.Starttime) AS X_Starttime',
          "IF(G.Rated='N','N','Y') AS X_Rated" );

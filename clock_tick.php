@@ -167,7 +167,7 @@ function handle_game_timeouts()
    */
 
    $result = db_query( 'clock_tick.find_timeout_games',
-      "SELECT Games.*, Games.ID as gid, Clock.Ticks as ticks, Games.Flags+0 AS X_GameFlags"
+      "SELECT Games.*, Games.ID as gid, Clock.Ticks as ticks"
       ." FROM Games"
          ." INNER JOIN Clock ON Clock.ID=Games.ClockUsed AND ($clock_modified)"
       ." WHERE Clock.ID >= 0 AND" // older DGS-clones may still have clocks<0
@@ -212,7 +212,7 @@ function handle_game_timeouts()
 
          $score = ( $ToMove_ID == $Black_ID ) ? SCORE_TIME : -SCORE_TIME;
          $game_finalizer = new GameFinalizer( ACTBY_CRON, /*cron*/0, $gid, $tid,
-            $Status, $GameType, $GamePlayers, $X_GameFlags, $Black_ID, $White_ID, $Moves, ($Rated != 'N') );
+            $Status, $GameType, $GamePlayers, $Flags, $Black_ID, $White_ID, $Moves, ($Rated != 'N') );
 
          ta_begin();
          {//HOT-section to save game-timeout

@@ -56,7 +56,7 @@ class GameAddTimeTest extends PHPUnit_Framework_TestCase {
          'ID'                 => 4711,
          'tid'                => 0,
          'Status'             => GAME_STATUS_PLAY,
-         'GameFlags'          => 0,
+         'Flags'              => 0,
          // T=JAP, M=210, B=15, P=10; B(111): m=210,b=0,p=-1, W(222): m=210,b=0,p=-1
          'Byotype'            => BYOTYPE_JAPANESE,
          'Maintime'           => 14 * 15, // 14d
@@ -275,7 +275,7 @@ class GameAddTimeTest extends PHPUnit_Framework_TestCase {
       $gamerow = array() + $this->grow; // clone array to mess data
       $gamerow['tid'] = 1; // forbidden for tournament
       $this->assertFalse( GameAddTime::allow_add_time_opponent( $gamerow, 111 ));
-      $gamerow['GameFlags'] = GAMEFLAGS_TG_DETACHED; // forbidden unless T-game detached
+      $gamerow['Flags'] = GAMEFLAGS_TG_DETACHED; // forbidden unless T-game detached
       $this->assertTrue( GameAddTime::allow_add_time_opponent( $gamerow, 111 ));
    }
 

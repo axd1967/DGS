@@ -149,7 +149,7 @@ class QuickHandlerGameInfo extends QuickHandler
          GameHelper::get_quick_game_action($row['Status'], (int)$row['Handicap'], (int)$row['Moves'],
             new FairKomiNegotiation( $game_setup, $row ) );
       $out['status'] = strtoupper($row['Status']);
-      $out['flags'] = self::convertGameFlags($row['X_GameFlags']);
+      $out['flags'] = self::convertGameFlags($row['Flags']);
       $out['score'] = ( $row['Status'] == GAME_STATUS_FINISHED )
             ? score2text($row['Score'], /*verbose*/false, /*engl*/true, /*quick*/true)
             : "";
@@ -182,7 +182,7 @@ class QuickHandlerGameInfo extends QuickHandler
          $out['move_uid'] = (int)$row['ToMove_ID'];
          $out['move_opp'] = ($color == BLACK) ? (int)$row['White_ID'] : (int)$row['Black_ID'];
          $out['move_last'] = strtolower($row['Last_Move']);
-         //$out['move_ko'] = ($row['X_GameFlags'] & GAMEFLAGS_KO) ? 1 : 0;
+         //$out['move_ko'] = ($row['Flags'] & GAMEFLAGS_KO) ? 1 : 0;
 
          $out['prio'] = (int)@$row['X_Priority'];
          if ( $quick_handler->is_with_option(QWITH_NOTES) )
