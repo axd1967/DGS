@@ -420,6 +420,22 @@ class Games
       }
    }//update_game_flags
 
+   /*! \brief Updates Games.Rated with $new_rated if game not finished yet and optionally still matching old-Rated state. */
+   public static function update_game_rated( $dbgmsg, $gid, $new_rated, $old_rated=null )
+   {
+      $gid = (int)$gid;
+      if ( $new_rated != 'Y' && $new_rated != 'N' )
+         error('invalid_args', "Games:update_game_rated.check.new_rated($gid,$new_rated)");
+      if ( !is_null($old_rated) && !preg_match( "/^(Y|N|Done)$/", $old_rated ) )
+         error('invalid_args', "Games:update_game_rated.check.old_rated($gid,$old_rated)");
+
+      $chk_qpart = (is_null($old_rated)) ? '' : "AND Rated='$old_rated'";
+      db_query( "Games:update_game_rated($gid,$new_rated,$old_rated)",
+         "UPDATE Games SET Rated='$new_rated' " .
+         "WHERE ID=$gid $chk_qpart AND Status<>'".GAME_STATUS_FINISHED."' LIMIT 1" );
+      return mysql_affected_rows();
+   }//update_game_rated
+
    /*! \brief Returns status-text or all status-texts (if arg=null). */
    public static function getStatusText( $status=null )
    {

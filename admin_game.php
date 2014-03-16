@@ -115,9 +115,10 @@ define('GA_RES_FORFEIT', 4);
 
          ta_begin();
          {//HOT-section to change game-rated-status
-            admin_log( $my_id, $player_row['Handle'], "Update game #$gid with Rated=[{$game->Rated} -> $toggled_rated]" );
-            db_query( "admin_game.toggle_rated($gid,$toggled_rated)",
-               "UPDATE Games SET Rated='$toggled_rated' WHERE ID=$gid AND Rated='{$game->Rated}' LIMIT 1" );
+            $chg_unrated = Games::update_game_rated( "admin_game.toggle_rated($gid,$toggled_rated)", $gid, $toggled_rated, $game->Rated );
+
+            admin_log( $my_id, $player_row['Handle'],
+               "Update game #$gid with Rated=[{$game->Rated} -> $toggled_rated]: " . ($chg_unrated ? 'OK' : 'FAILED') );
 
             GameHelper::delete_cache_game_row( "admin_game.toggle_rated.del_cache($gid,$toggled_rated)", $gid );
          }
