@@ -217,7 +217,7 @@ class Board
          if ( $Stone <= WHITE ) //including NONE (prisoners)
          {
             if ( $PosX < 0 )
-               continue; //excluding PASS, RESIGN and SCORE, TIMEOUT, FORFEIT, ADDTIME
+               continue; //excluding PASS, RESIGN and SCORE, TIMEOUT, ADDTIME
 
             $this->array[$PosX][$PosY] = $Stone; //including DAME (prisoners)
 
@@ -1518,11 +1518,11 @@ class Board
       {
          //error_log("make_js_game_tree().js_moves.arr = [".dgs_json_encode($arr)."]");
          list( $move_nr, $stone, $x, $y ) = $arr;
-         if ( $x < POSX_SCORE ) // RESIGN|TIME|FORFEIT|SETUP|ADDTIME
+         if ( $x < POSX_SCORE ) // RESIGN|TIME|SETUP|ADDTIME
             continue;
 
          if ( !( $prop = @$MAP_PROPS[$stone] ) )
-            continue; // stone=NONE, x=POSX_RESIGN/TIMEOUT/FORFEIT
+            continue; // stone=NONE, x=POSX_RESIGN/TIMEOUT
 
          $val = ( $x == POSX_PASS || $x == POSX_SCORE ) ? '' : number2sgf_coords($x,$y, $this->size);
          if ( $move_nr == 0 )
