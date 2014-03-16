@@ -430,9 +430,11 @@ class Games
          error('invalid_args', "Games:update_game_rated.check.old_rated($gid,$old_rated)");
 
       $chk_qpart = (is_null($old_rated)) ? '' : "AND Rated='$old_rated'";
+
+      // NOTE: keep Rated-state if game already finished or rated-calculation done
       db_query( "Games:update_game_rated($gid,$new_rated,$old_rated)",
          "UPDATE Games SET Rated='$new_rated' " .
-         "WHERE ID=$gid $chk_qpart AND Status<>'".GAME_STATUS_FINISHED."' LIMIT 1" );
+         "WHERE ID=$gid $chk_qpart AND Status<>'".GAME_STATUS_FINISHED."' AND Rated<>'Done' LIMIT 1" );
       return mysql_affected_rows();
    }//update_game_rated
 

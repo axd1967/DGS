@@ -115,7 +115,8 @@ define('GA_RES_FORFEIT', 4);
 
          ta_begin();
          {//HOT-section to change game-rated-status
-            $chg_unrated = Games::update_game_rated( "admin_game.toggle_rated($gid,$toggled_rated)", $gid, $toggled_rated, $game->Rated );
+            $chg_unrated = Games::update_game_rated( "admin_game.toggle_rated($gid,$toggled_rated)",
+               $gid, $toggled_rated, $game->Rated );
 
             admin_log( $my_id, $player_row['Handle'],
                "Update game #$gid with Rated=[{$game->Rated} -> $toggled_rated]: " . ($chg_unrated ? 'OK' : 'FAILED') );
