@@ -2749,7 +2749,7 @@ Errors:
 
 #-------- (6a) Date-Formats ---------------------------------------------------
 
-There are three date-formats used for the quick-suite:
+There are two date-formats used for the quick-suite:
 
    - "YYYY-MM-DD"
      used when there is no time-info available, e.g. for registration-date
