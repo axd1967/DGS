@@ -50,8 +50,9 @@ class PoolGame
    public $Defender_uid;
    public $gid;
    public $Score; // score for challenger
+   public $Flags; // TournamentGame.Flags
 
-   public function __construct( $game_no, $ch_uid=0, $df_uid=0, $gid=0, $score=null )
+   public function __construct( $game_no, $ch_uid=0, $df_uid=0, $gid=0, $score=null, $flags=0 )
    {
       $this->GameNo = ($game_no) ? (int)$game_no : 1;
 
@@ -69,6 +70,7 @@ class PoolGame
          $this->Score = (is_null($new_score)) ? null : -$new_score;
       }
       $this->gid = (int)$gid;
+      $this->Flags = (int)$flags;
    }//__construct
 
    public function get_opponent( $uid )
@@ -98,9 +100,15 @@ class PoolGame
       else
       {
          $chk_score = $this->get_score($uid);
-         $points = $tpoints->calculate_points( $chk_score );
+         $points = $tpoints->calculate_points( $chk_score, $this->Flags );
+         $mark = $points;
 
-         if ( $chk_score < 0 ) // won
+         if ( $this->Flags & TG_FLAG_GAME_DETACHED ) // annulled (=detached) game has no effect on tournament
+         {
+            $title = T_('Game annulled');
+            $style = 'MatrixAnnulled';
+         }
+         elseif ( $chk_score < 0 ) // won
          {
             $title = sprintf( T_('Game won by [%s]'), self::get_score_text($chk_score) );
             $style = 'MatrixWon';
@@ -113,11 +121,10 @@ class PoolGame
          else //=0 draw
          {
             $title = T_('Game draw (Jigo)');
-            $style = 'MatrixJigo';
+            $style = 'MatrixDraw';
          }
          if ( abs($chk_score) == SCORE_FORFEIT )
             $style .= ' MatrixForfeit';
-         $mark = $points;
       }
 
       return array( $chk_score, $points, $mark, $title, $style );
@@ -453,8 +460,8 @@ class PoolTables
          $tpool_ch = $this->users[$ch_uid];
          $tpool_df = $this->users[$df_uid];
 
-         $game_score = ($tgame->isScoreStatus( /*chk-detach*/true )) ? $tgame->Score : null;
-         $poolGame = new PoolGame( 1, $ch_uid, $df_uid, $tgame->gid, $game_score );
+         $game_score = ($tgame->isScoreStatus( /*chk-detach*/false )) ? $tgame->Score : null;
+         $poolGame = new PoolGame( 1, $ch_uid, $df_uid, $tgame->gid, $game_score, $tgame->Flags );
 
          // fix PoolGame.GameNo in the same order as TG.ID to keep same position in pools-view
          $fkey = $poolGame->Challenger_uid . '.' . $poolGame->Defender_uid; // smaller uid 1st

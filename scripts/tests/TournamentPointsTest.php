@@ -81,6 +81,8 @@ class TournamentPointsTest extends PHPUnit_Framework_TestCase {
       $this->assertEquals( 0, $tp->calculate_points( +30.5 ) );
       $this->assertEquals( 0, $tp->calculate_points( +2.5 ) );
       $this->assertEquals( 0, $tp->calculate_points( +0.5 ) );
+
+      $this->assertEquals( 0, $tp->calculate_points( 0, TG_FLAG_GAME_DETACHED ) );
    }
 
 
@@ -109,6 +111,8 @@ class TournamentPointsTest extends PHPUnit_Framework_TestCase {
       $this->assertEquals(  2, $tp->calculate_points( +27 ) );
       $this->assertEquals(  4, $tp->calculate_points( +2.5 ) );
       $this->assertEquals(  4, $tp->calculate_points( +0.5 ) );
+
+      $this->assertEquals(  0, $tp->calculate_points( 0, TG_FLAG_GAME_DETACHED ) );
    }
 
    public function test_calculate_points_HAHN_not_shared() {
@@ -136,6 +140,8 @@ class TournamentPointsTest extends PHPUnit_Framework_TestCase {
       $this->assertEquals(  0, $tp->calculate_points( +30.5 ) );
       $this->assertEquals(  0, $tp->calculate_points( +2.5 ) );
       $this->assertEquals(  0, $tp->calculate_points( +0.5 ) );
+
+      $this->assertEquals(  0, $tp->calculate_points( 0, TG_FLAG_GAME_DETACHED ) );
    }
 
    public function test_calculate_points_HAHN_negative_points() {
@@ -163,6 +169,8 @@ class TournamentPointsTest extends PHPUnit_Framework_TestCase {
       $this->assertEquals(  -3, $tp->calculate_points( +27 ) );
       $this->assertEquals(  -1, $tp->calculate_points( +2.5 ) );
       $this->assertEquals(  -1, $tp->calculate_points( +0.5 ) );
+
+      $this->assertEquals(  0, $tp->calculate_points( 0, TG_FLAG_GAME_DETACHED ) );
    }
 
 }

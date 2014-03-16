@@ -196,7 +196,7 @@ function build_pool_notes( $tpoints )
             sprintf( ' %s %s %s ',
                span('MatrixWon', T_('game won#tpool_table')   . ' = ' . $tpoints->PointsWon, $mfmt),
                span('MatrixLost', T_('game lost#tpool_table') . ' = ' . $tpoints->PointsLost, $mfmt),
-               span('MatrixJigo', T_('game draw#tpool_table') . ' = ' . $tpoints->PointsDraw, $mfmt) ));
+               span('MatrixDraw', T_('game draw#tpool_table') . ' = ' . $tpoints->PointsDraw, $mfmt) ));
    $notes[] = sprintf( T_('[%s] in format "wins : losses" = number of wins and losses for user'), T_('#Wins#tourney') );
    $notes[] = sprintf( T_('[%s] = points calculated from wins, losses and jigo for user'), T_('Points#header') );
    $notes[] = sprintf( T_('[%s] = Tie-Breaker SODOS = Sum of Defeated Opponents Score'), T_('SODOS#tourney') );

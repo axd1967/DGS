@@ -13,6 +13,28 @@ ChangeLog
 
 2014-03-16 jug
 
+   * tournaments/include/tournament_pool_classes.php (class PoolGame, ~.__construct, ~.calc_result;
+       PoolTables.fill_games),
+     tournaments/include/tournament_log_helper.php (TournamentLogHelper.log_tournament_game_end),
+     tournaments/include/tournament_ladder.php (TournamentLadder.remove_user_from_ladder),
+     tournaments/include/tournament_points.php (TournamentPoints.calculate_points),
+     include/db/games.php (Games.detach_games),
+     skins/dragon/screen.css,
+     scripts/tests/TournamentPointsTest.php (class TournamentPointsTest),
+     tournaments/game_admin.php (GA_NEED_COL, GA_RES_DRAW, GA_RES_ANNUL; parse_edit_form, draw_game_end),
+     tournaments/roundrobin/edit_points.php (build_points_examples),
+     tournaments/roundrobin/view_pools.php (build_pool_notes):
+   - added game-annulling to detach game from tournament having no further effect on tournament
+     - setting TG.Score=0, TG.Flags=TG_FLAG_GAME_DETACHED, G.Rated=N, G.Flags=GAMEFLAGS_TG_DETACHED
+     - tournament-game-admin: added game-annulling which is the same as "detaching",
+       making game unrated, setting detached flags in tournament-game and Games-table
+     - tournament-game-admin: setting jigo as game-result does not require color-choice
+     - edit-points: added points-calculation for annulled game in examples-preview
+     - view-pools: mark annulled game in pool-results of round-robin-tournamentsdashed
+       with orange background
+     - view-pools: renamed CSS for MatrixJigo to MatrixDraw
+   - bugfix: showing Games.Rated state in tournament-game-admin was displayed in the wrong way
+
    * include/db/games.php (Games.update_game_rated),
      admin_game.php:
    - refactored updating Games.Rated-field into Games::update_game_rated()

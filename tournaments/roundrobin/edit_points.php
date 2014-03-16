@@ -394,29 +394,31 @@ function build_points_examples( &$form, $tpoints )
 
    $diff_title = T_('Point-Diff#tpoints');
    $arr_scores = array(
-         // category (0=point-diff), score
-         T_('Draw'), 0,
-         0, 0.5,
-         0, 2.5,
-         0, 30.5,
-         0, 27,
-         0, 150,
-         T_('Resignation'), SCORE_RESIGN,
-         T_('Timeout'), SCORE_TIME,
-         T_('Forfeit'), SCORE_FORFEIT,
+         // category (0=point-diff), score, TG-flags
+         T_('Draw'), 0, 0,
+         0, 0.5, 0,
+         0, 2.5, 0,
+         0, 30.5, 0,
+         0, 27, 0,
+         0, 150, 0,
+         T_('Resignation'), SCORE_RESIGN, 0,
+         T_('Timeout'), SCORE_TIME, 0,
+         T_('Forfeit'), SCORE_FORFEIT, 0,
+         T_('Annulled'), NO_VALUE, TG_FLAG_GAME_DETACHED,
       );
    for ( $i=0; $i < count($arr_scores); )
    {
       $title = $arr_scores[$i++];
       $score = $arr_scores[$i++];
+      $flags = $arr_scores[$i++];
       if ( !$title )
          $title = $diff_title;
 
       $table->add_row( array(
             1 => $title,
             2 => $score,
-            3 => $tpoints->calculate_points( -$score ),
-            4 => $tpoints->calculate_points(  $score ),
+            3 => $tpoints->calculate_points( -$score, $flags ),
+            4 => $tpoints->calculate_points(  $score, $flags ),
          ));
    }
 
@@ -430,8 +432,8 @@ function build_points_examples( &$form, $tpoints )
             1 => $diff_title,
             2 => $form->print_insert_text_input( "cp$i", 4, 4, $var_value,
                array( 'title' => T_('Custom value for point calculations#tpoints')) ),
-            3 => $tpoints->calculate_points( -$custom_points ),
-            4 => $tpoints->calculate_points(  $custom_points ),
+            3 => $tpoints->calculate_points( -$custom_points, 0 ),
+            4 => $tpoints->calculate_points(  $custom_points, 0 ),
          ));
    }
 

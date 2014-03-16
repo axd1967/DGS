@@ -3440,9 +3440,10 @@ table#PoolViewerTable td.TourneyUser {
 }
 table#PoolViewerTable td.MatrixSelf { background: black; color: black; }
 span.MatrixSelf { background: black; color: white; }
-span.MatrixWon,  table#PoolViewerTable td.MatrixWon  { background: #bbffbb; }
-span.MatrixLost, table#PoolViewerTable td.MatrixLost { background: #ff99bb; }
-span.MatrixJigo, table#PoolViewerTable td.MatrixJigo { background: #aaddee; }
+span.MatrixWon,  table#PoolViewerTable td.MatrixWon  { background: #bbffbb; } /*green*/
+span.MatrixLost, table#PoolViewerTable td.MatrixLost { background: #ff99bb; } /*red*/
+span.MatrixDraw, table#PoolViewerTable td.MatrixDraw { background: #aaddee; } /*blue*/
+span.MatrixAnnulled, table#PoolViewerTable td.MatrixAnnulled { background: #ffcc66; } /*orange*/
 span.MatrixForfeit, table#PoolViewerTable td.MatrixForfeit { border: 1px dashed black; }
 
 table#PoolViewerTable span.Calc {

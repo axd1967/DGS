@@ -438,6 +438,22 @@ class Games
       return mysql_affected_rows();
    }//update_game_rated
 
+   /*! \brief Detach given games from tournament by making unrated and setting detached-game-flags (only for tournament-games). */
+   public static function detach_games( $dbgmsg, $arr_gid )
+   {
+      if ( count($arr_gid) == 0 )
+         return 0;
+      $gids_str = implode(',', $arr_gid);
+
+      // NOTE: keep Rated-state if game already finished or rated-calculation done
+      db_query( "$dbgmsg.Games:detach_games.upd_games($gids_str)",
+         "UPDATE Games SET " .
+            "Flags=Flags | ".GAMEFLAGS_TG_DETACHED.", " .
+            "Rated=IF( (Status='".GAME_STATUS_FINISHED."' OR Rated='Done'), Rated,'N') " . // make unrated if running
+         "WHERE ID IN ($gids_str) AND tid > 0" ); // only for tournament-games
+      return mysql_affected_rows();
+   }//detach_games
+
    /*! \brief Returns status-text or all status-texts (if arg=null). */
    public static function getStatusText( $status=null )
    {

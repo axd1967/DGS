@@ -352,13 +352,7 @@ class TournamentLadder
          }
          if ( count($arr_gid) ) // set Games: make unrated, set detached-flag
          {
-            // NOTE: keep Rated-state if game already finished or rated-calculation done
-            db_query( "$xdbgmsg.upd_games.detach",
-               "UPDATE Games SET " .
-                  "Flags=Flags | ".GAMEFLAGS_TG_DETACHED.", " .
-                  "Rated=IF( (Status='".GAME_STATUS_FINISHED."' OR Rated='Done'), Rated,'N') " . // make unrated if running
-               "WHERE ID IN (" . implode(',', $arr_gid) . ")" );
-
+            Games::detach_games( $xdbgmsg, $arr_gid );
             foreach ( $arr_gid as $tgid )
                GameHelper::delete_cache_game_row( "$xdbgmsg.upd_games.detach.del_cach($tgid)", $tgid );
          }

@@ -202,9 +202,12 @@ class TournamentPoints
       }
    }//setDefaults
 
-   /*! \brief Calculates points for given game-score (<0 = win, >0 = loss, 0=jigo). */
-   public function calculate_points( $game_score )
+   /*! \brief Calculates points for given game-score (<0 = win, >0 = loss, 0=jigo) and tournament-game-flags. */
+   public function calculate_points( $game_score, $tgame_flags=0 )
    {
+      if ( $tgame_flags & TG_FLAG_GAME_DETACHED )
+         return 0; // annulled (=detached) game has no effect on tournament
+
       if ( $this->PointsType == TPOINTSTYPE_SIMPLE )
       {
          if ( $game_score < 0 )
