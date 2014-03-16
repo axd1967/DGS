@@ -219,7 +219,7 @@ class TournamentGames
 
    /*!
     * \brief Signals end of tournament-game updating TournamentGames to SCORE-status and
-    *        setting TG.Score for given tournament-ID and game-id.
+    *        setting TG.Score and TG.Flags for given tournament-ID and game-id.
     */
    public function update_score( $dbgmsg, $old_status=null )
    {
