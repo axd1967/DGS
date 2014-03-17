@@ -13,6 +13,9 @@ ChangeLog
 
 2014-03-17 jug
 
+   * tournaments/include/tournament_games.php (TournamentGames.buildStatusFilterArray):
+   - added search for 'Annulled' games in TournamentGames-status-filter in tournament-games-list
+
    * tournaments/include/tournament_ladder.php (TournamentLadder.build_linked_incoming_games,
        ~.build_linked_outgoing_games),
      tournaments/include/tournament_log_helper.php (TournamentLogHelper.log_assign_tournament_pool),

@@ -631,6 +631,7 @@ class TournamentGames
          );
       foreach ( self::getStatusText() as $tg_status => $tg_text )
          $arr[$tg_text] = $prefix."Status='$tg_status'";
+      $arr[T_('Annulled#TG_stat_filter')] = "{$prefix}Score=0 AND ({$prefix}Flags & ".TG_FLAG_GAME_DETACHED.")";
       $arr[T_('None#TG_stat_filter')] = $prefix.'Status IS NULL';
       return $arr;
    }
