@@ -61,7 +61,7 @@ $GLOBALS['ThePage'] = new Page('TournamentPoolEdit');
      tid=                                 : edit tournament pools
      t_unassigned&tid=                    : show unassigned users (+ selected pools)
      t_showpools&tid=                     : show selected pools only
-     t_detach&tid=&mark_$uid..            : detach marked users from assigned pools
+     t_remove&tid=&mark_$uid..            : remove marked users from assigned pools
      t_assign&tid=&newpool=&mark_$uid..   : assign marked users to new-pool
      t_assign&tid=&uap_$uid..             : assign (unassigned) users to individual new-pools
      t_reassign&tid=&rap_$uid..           : re-assign (assigned) users to individual new-pools
@@ -72,7 +72,7 @@ $GLOBALS['ThePage'] = new Page('TournamentPoolEdit');
    if ( $tid < 0 ) $tid = 0;
    $show_unassigned = ( @$_REQUEST['t_unassigned'] || @$_REQUEST['t_assign'] );
    $show_pools = ( @$_REQUEST['t_showpools'] || $show_unassigned
-      || @$_REQUEST['t_detach'] || @$_REQUEST['t_reassign'] );
+      || @$_REQUEST['t_remove'] || @$_REQUEST['t_reassign'] );
 
    $tourney = TournamentCache::load_cache_tournament( 'Tournament.edit_pools.find_tournament', $tid );
    $tstatus = new TournamentStatus( $tourney );
@@ -116,10 +116,10 @@ $GLOBALS['ThePage'] = new Page('TournamentPoolEdit');
                               $idx, $pool, $pool_range_str );
    }
 
-   // perform edit-actions: detach, assign-pool
+   // perform edit-actions: remove-from-pool, assign-pool
    if ( count($errors) == 0 )
    {
-      if ( @$_REQUEST['t_detach'] )
+      if ( @$_REQUEST['t_remove'] )
       {
          $arr_marked_uid = get_marked_users();
          if ( count($arr_marked_uid) )
@@ -131,7 +131,7 @@ $GLOBALS['ThePage'] = new Page('TournamentPoolEdit');
          if ( $show_pools && !$show_unassigned )
             $arr_assign_uid = get_assigned_user_pools( $errors, 'rap_' ); // re-assign pool-users
          else
-            $arr_assign_uid = get_assigned_user_pools( $errors, 'uap_' ); // assign detached users
+            $arr_assign_uid = get_assigned_user_pools( $errors, 'uap_' ); // assign removed users
          if ( count($arr_assign_uid) )
          {
             foreach ( $arr_assign_uid as $pool => $arr_uids )
@@ -261,8 +261,8 @@ $GLOBALS['ThePage'] = new Page('TournamentPoolEdit');
    {
       $tform->add_row( array(
             'TAB', 'CELL', 1, '', // align submit-buttons
-            'SUBMITBUTTON', 't_detach', T_('Detach from Pool'),
-            'TEXT', MED_SPACING . '(' . T_('To detach, mark in selected pools') . ')', ));
+            'SUBMITBUTTON', 't_remove', T_('Remove from Pool'),
+            'TEXT', MED_SPACING . '(' . T_('To remove, mark in selected pools') . ')', ));
       $tform->add_row( array(
             'TAB', 'CELL', 1, '', // align submit-buttons
             'SUBMITBUTTON', 't_reassign', T_('Reassign Pool'),
