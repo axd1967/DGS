@@ -13,6 +13,9 @@ ChangeLog
 
 2014-03-17 jug
 
+   * admin_game.php (draw_game_admin_form):
+   - game-admin: add warning about game-ending for tournament-game
+
    * tournaments/include/tournament_utils.php (TournamentUtils.get_tournament_ladder_notes_user_removed),
      tournaments/include/tournament_ladder_props.php (TournamentLadderProps.build_notes_props),
      tournaments/include/tournament_games.php (TournamentGames.count_user_running_games),

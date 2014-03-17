@@ -394,6 +394,15 @@ function draw_game_admin_form( $game, $trule )
       $gaform->add_row( array(
             'CELL', 2, '',
             'HEADER', T_('Set game result'), ));
+      if ( $game->tid > 0 )
+      {
+         $gaform->add_row( array(
+               'CELL', 2, '',
+               'TEXT', span('TWarningMsg bold', make_html_safe( sprintf(
+                     T_("This is a tournament-game, so you may need to talk\nwith the <home %s>tournament-directors</home> about \"surprising\" game-results!"),
+                     "tournaments/list_directors.php?tid=".$game->tid), true )), ));
+         $gaform->add_empty_row();
+      }
       $gaform->add_row( array(
             'CELL', 2, '',
             'TEXT', span('TWarning', T_('This operation is irreversible, so please be careful!')), ));
@@ -464,7 +473,7 @@ function draw_game_admin_form( $game, $trule )
          $gaform->add_row( array(
             'CELL', 2, '',
             'TEXT', span('ErrorMsg', make_html_safe( sprintf(
-                  T_("This is a tournament-game, so you should confer\nwith the <home %s>tournament-directors</home> about a change!"),
+                  T_("This is a tournament-game, so you should talk\nwith the <home %s>tournament-directors</home> about a change!"),
                   "tournaments/list_directors.php?tid=".$game->tid), true)), ));
       }
       $gaform->add_row( array(
