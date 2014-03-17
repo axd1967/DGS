@@ -246,7 +246,7 @@ define('GA_RES_ANNUL',     7);
          'DESCRIPTION', T_('Game Flags'),
          'TEXT',        Games::buildFlags($game->Flags) ));
    $tform->add_row( array(
-      'DESCRIPTION', T_('Game Score'),
+      'DESCRIPTION', T_('Game Score#title'),
       'TEXT',        ( $diff_score ? span('ScoreWarning', $g_score_text) : $g_score_text ) ));
    $tform->add_row( array(
          'DESCRIPTION', T_('Black player'),
