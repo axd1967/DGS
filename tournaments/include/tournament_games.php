@@ -477,6 +477,30 @@ class TournamentGames
       return array( $out_tg_id, $out_gid, array_unique($out_opp) );
    }//find_undetached_running_games
 
+   /*! \brief Returns number of running, undetached tournament-games for given tournament and user. */
+   public static function count_user_running_games( $tid, $uid )
+   {
+      $qsql = new QuerySQL(
+         SQLP_FIELDS,
+            'COUNT(*) AS X_Count',
+         SQLP_FROM,
+            'TournamentGames',
+         SQLP_WHERE,
+            "tid=$tid",
+            "Status IN ('".TG_STATUS_PLAY."','".TG_STATUS_SCORE."')",
+         SQLP_UNION_WHERE,
+            "Challenger_uid=$uid",
+            "Defender_uid=$uid" );
+      $result = db_query( "TournamentGames:find_undetached_running_games($tid,$uid)", $qsql->get_select() );
+
+      $cnt = 0;
+      while ( $row = mysql_fetch_array( $result ) )
+         $cnt += (int)$row['X_Count'];
+      mysql_free_result($result);
+
+      return $cnt;
+   }//count_undetached_running_games
+
    /*! \brief "End" finished rematch-waiting tournament-games for given tournament and user by setting Status=DONE. */
    public static function end_rematch_waiting_finished_games( $tid, $uid )
    {

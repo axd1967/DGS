@@ -68,6 +68,8 @@ $GLOBALS['ThePage'] = new Page('TournamentLadderWithdraw');
    if ( is_null($tladder) )
       $errors[] = T_('Withdrawing from this ladder is not possible, because you didn\'t join it.');
 
+   $count_run_games = ( is_null($tladder) ) ? -1 : TournamentGames::count_user_running_games( $tid, $my_id );
+
 
    // ---------- Process actions ------------------------------------------------
 
@@ -124,6 +126,12 @@ $GLOBALS['ThePage'] = new Page('TournamentLadderWithdraw');
    $tform->add_row( array(
          'DESCRIPTION', T_('Best Rank#T_ladder'),
          'TEXT',        $tladder->BestRank ));
+   if ( $count_run_games >= 0 )
+   {
+      $tform->add_row( array(
+            'DESCRIPTION', T_('Running tournament games'),
+            'TEXT',        span('bold', $count_run_games) ));
+   }
    $tform->add_empty_row();
 
    $tform->add_row( array(
@@ -161,10 +169,10 @@ function build_withdrawal_notes()
 {
    $notes = array();
 
-   $notes[] = TournamentUtils::get_tournament_ladder_notes_user_removed() . "\n" .
-      T_('The opponents in your running tournament games (if there are any) will be notified about the withdrawal.#T_ladder');
-   $notes[] = T_('Withdrawing from this ladder will also remove your tournament user registration along with the tournaments rank history.');
-   $notes[] = T_('If you rejoin the ladder, your ladder rank will be restarted according to the tournaments properties.');
+   $notes[] = wordwrap( TournamentUtils::get_tournament_ladder_notes_user_removed(), 100 ) . "\n" .
+      T_('The opponents in your running tournament games will be notified about the withdrawal.#T_ladder');
+   $notes[] = T_('Withdrawing from this ladder will remove your tournament user registration along with the rank history.');
+   $notes[] = T_('If you rejoin the ladder, your get a new ladder rank according to the tournaments properties.');
 
    return $notes;
 }//build_withdrawal_notes

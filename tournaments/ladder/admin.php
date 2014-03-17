@@ -328,7 +328,7 @@ $GLOBALS['ThePage'] = new Page('TournamentLadderAdmin');
             'ta_deluser', T_('Remove user [%s] from ladder'),
             T_('User will be removed from ladder along with tournament user registration.'),
             /*notify*/2,
-            TournamentUtils::get_tournament_ladder_notes_user_removed() );
+            wordwrap( TournamentUtils::get_tournament_ladder_notes_user_removed(), 80, "<br>\n" ) );
       }
       $tform->add_empty_row();
    }
@@ -377,16 +377,17 @@ $GLOBALS['ThePage'] = new Page('TournamentLadderAdmin');
 
 function add_form_edit_user( &$form, $user, $action, $act_fmt, $title, $notify=0, $extra='' )
 {
-   global $allow_admin;
+   global $allow_admin, $base_path;
+   $item = image( $base_path."images/star3.gif", '' ) . ' ';
 
    $form->add_row( array(
          'CELL', 2, '',
-         'TEXT', $title ));
+         'TEXT', span('bold', $title), ));
    if ( $extra )
    {
       $form->add_row( array(
             'CELL', 2, '',
-            'TEXT', '* ' . $extra ));
+            'TEXT', $item . $extra ));
    }
    if ( is_numeric($notify) )
    {
@@ -398,7 +399,7 @@ function add_form_edit_user( &$form, $user, $action, $act_fmt, $title, $notify=0
          $nfy_text = T_('User will NOT be notified about this.#tourney');
       $form->add_row( array(
             'CELL', 2, '',
-            'TEXT', '* ' . $nfy_text, ));
+            'TEXT', $item . $nfy_text, ));
    }
    $form->add_row( array(
          'CELL', 2, '',

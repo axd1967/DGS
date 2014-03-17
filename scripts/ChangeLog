@@ -13,6 +13,18 @@ ChangeLog
 
 2014-03-17 jug
 
+   * tournaments/include/tournament_utils.php (TournamentUtils.get_tournament_ladder_notes_user_removed),
+     tournaments/include/tournament_ladder_props.php (TournamentLadderProps.build_notes_props),
+     tournaments/include/tournament_games.php (TournamentGames.count_user_running_games),
+     tournaments/ladder/withdraw.php (build_withdrawal_notes),
+     tournaments/ladder/admin.php (add_form_edit_user):
+   - adjusted texts for ladder-tournaments about game-annulling (=detach-game) and NO-RESULT:
+     - added no-change-actions for ladder-properties-notes for annulled-game and NO-RESULT-game
+     - clarified texts, clarified game-annulling = "detaching" of tournament-games,
+       adding that game is made unrated
+     - user-withdrawal: added number of running tournament-games of user
+     - ladder-admin: used star-icon for prefixing note-items, use some word-wrapping for long notes
+
    * tournaments/include/tournament_games.php (TournamentGames.getGameScore, ~.update_tournament_game_end,
        ~.getFlagsText),
      tournaments/include/tournament_ladder_props.php (TournamentLadderProps.fill_ladder_running_games,

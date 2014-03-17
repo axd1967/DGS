@@ -375,7 +375,12 @@ class TournamentLadderProps
                         self::getGameEndText($this->GameEndTimeoutWin) );
       $arr[] = sprintf( '%s: %s', T_('if challenger loses by timeout or forfeit#T_ladder'), //FIXME keep orig: T_('if challenger loses by timeout#T_ladder')
                         self::getGameEndText($this->GameEndTimeoutLoss) );
-      $arr[] = sprintf( '%s: %s', T_('on Jigo'), self::getGameEndText($this->GameEndJigo) );
+      $arr[] = sprintf( '%s: %s', T_('on Jigo'), self::getGameEndText($this->GameEndJigo) )
+         . "<br><br>\n"; // leave some space to next 2 special game-ends
+      $arr[] = sprintf( '%s: %s', T_('if game was annulled by user withdrawal or by a tournament-director'),
+                        self::getGameEndText(TGEND_NO_CHANGE) );
+      $arr[] = sprintf( '%s: %s', T_('if game ended with No-Result set by a tournament-director or game-admin'),
+                        self::getGameEndText(TGEND_NO_CHANGE) );
       $arr_props[] = $arr;
 
       // user-join-order
