@@ -3451,6 +3451,10 @@ table#PoolViewerTable span.Calc {
    font-weight: normal;
 }
 
+table#tpoolnotesTable ul.SubNotes li {
+   line-height: 150%;
+}
+
 span.TRank {
    font-weight: bold;
 }

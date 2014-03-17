@@ -13,6 +13,13 @@ ChangeLog
 
 2014-03-17 jug
 
+   * include/globals.php (CSS_VERSION),
+     skins/dragon/screen.css,
+     tournaments/roundrobin/view_pools.php (build_pool_notes):
+   - fixed pool-notes for round-robin-tournaments view-pools-page
+     - added color-scheme used for pool-matrix for all possible game-results
+     - added notes about points-config for simple and Hahn points-type for tournament
+
    * tournaments/include/tournament_points.php (TournamentPoints.calculate_points):
    - bugfix: calculate points for NO-RESULT-game for Hahn-tournament-points-type in an unshared way
 
