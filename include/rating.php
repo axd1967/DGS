@@ -216,15 +216,16 @@ function update_rating2($gid, $check_done=true, $simul=false, $game_row=null)
    {
       static $fmt2 = "   uid [%6d] %s-Rating: Game-Current [%1.6f], Min [%1.6f], Max [%1.6f], Start(unused) [%1.6f]\n";
       echo "Rating Init ...\n",
-         sprintf("   Size %s, Handicap %s, Komi %s, Score [%s]\n", $Size, $Handicap, $Komi,
-                 ($Score < 0 ? 'Black won' : ($Score > 0 ? 'White won' : 'Jigo'))),
+         sprintf("   Size %s, Handicap %s, Komi %s, Score [%s], Flags [%s]\n", $Size, $Handicap, $Komi,
+                 ($Score < 0 ? 'Black won' : ($Score > 0 ? 'White won' : 'Jigo')),
+                 implode(',', Games::buildFlags($Flags)) ),
          sprintf($fmt2, $White_ID, 'White', $wRating, $wRatingMin, $wRatingMax, $White_Start_Rating),
          sprintf($fmt2, $Black_ID, 'Black', $bRating, $bRatingMin, $bRatingMax, $Black_Start_Rating);
    }
 
    $too_few_moves = ( $tid == 0 && !$simul ) ? ( $Moves < DELETE_LIMIT + $Handicap ) : false;
    if ( $too_few_moves || $Rated == 'N' || $wRatingStatus != RATING_RATED || $bRatingStatus != RATING_RATED
-         || $GameType != GAMETYPE_GO )
+         || $GameType != GAMETYPE_GO || ($Flags & GAMEFLAGS_NO_RESULT) )
    {
       if ( !$simul )
       {

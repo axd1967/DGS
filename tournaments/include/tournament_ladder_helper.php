@@ -93,8 +93,8 @@ class TournamentLadderHelper
             $tladder_ch = new TournamentLadder( $tid, $tgame->Challenger_rid, $tgame->Challenger_uid );
             $tladder_ch->update_outgoing_challenges( -1 );
 
-            // tournament-game done, or start rematch-wait-period if not detached-game
-            if ( $tl_props->ChallengeRematchWaitHours > 0 && !($tgame->Flags & TG_FLAG_GAME_DETACHED) )
+            // tournament-game done, or start rematch-wait-period if not detached-game and not no-result-game-end
+            if ( $tl_props->ChallengeRematchWaitHours > 0 && !($tgame->Flags & (TG_FLAG_GAME_DETACHED|TG_FLAG_GAME_NO_RESULT)) )
             {
                $tgame->setStatus(TG_STATUS_WAIT);
                $tgame->TicksDue = $tl_props->calc_ticks_due_rematch_wait();

@@ -158,7 +158,7 @@ function build_game_info( $row=null )
          ($row['Ruleset'] == 'CHINESE') ? 'CH' : 'JP',
          $row['Handicap'],
          $row['Komi'],
-         $row['Score'],
+         ( ($row['Flags'] & GAMEFLAGS_NO_RESULT) ? 'VOID' : $row['Score'] ),
          $row['Black_ID'],
          $row['White_ID'],
          $row['Black_Start_Rating'],

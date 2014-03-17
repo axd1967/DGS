@@ -120,8 +120,16 @@ class PoolGame
          }
          else //=0 draw
          {
-            $title = T_('Game draw (Jigo)');
-            $style = 'MatrixDraw';
+            if ( $this->Flags & TG_FLAG_GAME_NO_RESULT ) // game-end NO-RESULT
+            {
+               $title = T_('Game No-Result (Void)');
+               $style = 'MatrixNoResult';
+            }
+            else
+            {
+               $title = T_('Game draw (Jigo)');
+               $style = 'MatrixDraw';
+            }
          }
          if ( abs($chk_score) == SCORE_FORFEIT )
             $style .= ' MatrixForfeit';
@@ -481,7 +489,7 @@ class PoolTables
             if ( $ch_score > 0 ) $tpool_ch->Losses++;
             if ( $ch_score < 0 ) $tpool_ch->Wins++;
             if ( $ch_score < 0 ) $defeated_opps[$ch_uid][] = $df_uid;
-            if ( $ch_score <= 0 ) $defeated_opps[$ch_uid][] = $df_uid; // win counts double, jigo simple
+            if ( $ch_score <= 0 ) $defeated_opps[$ch_uid][] = $df_uid; // win counts double, jigo/void simple
          }
 
          $df_arr = $poolGame->calc_result( $df_uid, $tpoints );
@@ -492,7 +500,7 @@ class PoolTables
             if ( $df_score > 0 ) $tpool_df->Losses++;
             if ( $df_score < 0 ) $tpool_df->Wins++;
             if ( $df_score < 0 ) $defeated_opps[$df_uid][] = $ch_uid;
-            if ( $df_score <= 0 ) $defeated_opps[$df_uid][] = $ch_uid; // win counts double, jigo simple
+            if ( $df_score <= 0 ) $defeated_opps[$df_uid][] = $ch_uid; // win counts double, jigo/void simple
          }
 
          if ( !is_null($game_score) )
@@ -545,6 +553,7 @@ class PoolTables
     *    run => running-games,
     *    finished => finished-games,
     *    jigo => games won by jigo,
+    *    void => games ended with no-result (=void),
     *    resign => games won by resignation,
     *    time => games won by timeout,
     *    forfeit => games won by forfeit ).
@@ -554,6 +563,7 @@ class PoolTables
       $count_games = 0;
       $count_run = 0;
       $count_jigo = 0;
+      $count_void = 0;
       $count_resign = 0;
       $count_time = 0;
       $count_forfeit = 0;
@@ -570,7 +580,12 @@ class PoolTables
             if ( is_null($poolGame->Score) )
                $count_run++;
             elseif ( $poolGame->Score == 0 )
-               $count_jigo++;
+            {
+               if ( $poolGame->Flags & TG_FLAG_GAME_NO_RESULT )
+                  $count_void++;
+               else
+                  $count_jigo++;
+            }
             elseif ( abs($poolGame->Score) == SCORE_RESIGN )
                $count_resign++;
             elseif ( abs($poolGame->Score) == SCORE_TIME )
@@ -585,6 +600,7 @@ class PoolTables
          'run'  => $count_run,
          'finished' => $count_games - $count_run,
          'jigo' => $count_jigo,
+         'void' => $count_void,
          'resign' => $count_resign,
          'time' => $count_time,
          'forfeit' => $count_forfeit,
@@ -925,7 +941,7 @@ class PoolViewer
                $row_arr += $arr_miss_users;
 
             // add game-results
-            // - X=self, #=running-game;; points=lost/jigo/won (see TournamentPoints-config)
+            // - X=self, #=running-game;; points=won/lost/jigo/no-result (see TournamentPoints-config)
             // - linked to running/finished game
             foreach ( $tpool->PoolGames as $poolGame )
             {

@@ -3443,6 +3443,7 @@ span.MatrixSelf { background: black; color: white; }
 span.MatrixWon,  table#PoolViewerTable td.MatrixWon  { background: #bbffbb; } /*green*/
 span.MatrixLost, table#PoolViewerTable td.MatrixLost { background: #ff99bb; } /*red*/
 span.MatrixDraw, table#PoolViewerTable td.MatrixDraw { background: #aaddee; } /*blue*/
+span.MatrixNoResult, table#PoolViewerTable td.MatrixNoResult { background: #c0c0c0; } /*grey*/
 span.MatrixAnnulled, table#PoolViewerTable td.MatrixAnnulled { background: #ffcc66; } /*orange*/
 span.MatrixForfeit, table#PoolViewerTable td.MatrixForfeit { border: 1px dashed black; }
 

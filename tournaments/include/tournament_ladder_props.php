@@ -490,7 +490,6 @@ class TournamentLadderProps
             else // no challenger from detached T-game
             {
                $df_tladder->add_incoming_game( $tgame );
-               $ch_tladder->add_outgoing_game( $tgame );
             }
          }
 
@@ -630,8 +629,8 @@ class TournamentLadderProps
    {
       $action = TGEND_NO_CHANGE;
 
-      // Score only has meaning if game is not detached
-      if ( !($tgame_flags & TG_FLAG_GAME_DETACHED) )
+      // Score only has meaning if game is not detached and not a no-result-game
+      if ( !( $tgame_flags & (TG_FLAG_GAME_DETACHED|TG_FLAG_GAME_NO_RESULT) ) )
       {
          if ( $tgame_flags & TG_FLAG_CH_DF_SWITCHED )
             $score = -$score; // role of challenger and defender is reversed

@@ -527,10 +527,10 @@ elseif ( $fdemo == 12 )
    );
 
    # standard filter
-   $filter->add_filter( 1, 'Score', 'score1', true);
+   $filter->add_filter( 1, 'Score', array( 'score1', 'score1_flag', 1 ), true);
 
    # no range-allowed for score
-   $filter->add_filter( 2, 'Score', 'score2', true,
+   $filter->add_filter( 2, 'Score', array( 'score2', 'score2_flag', 2 ), true,
          array( FC_NO_RANGE => 1 ));
 }
 
@@ -678,7 +678,7 @@ elseif ( $fdemo == 15 || $fdemo == 19 )
             FC_DEFAULT => array( '' => 'tree +leaf -root', 'b' => true ))));
 
    # default for multi-element score-filter
-   $filter->add_filter(13, 'Score', 'def_score13', true,
+   $filter->add_filter(13, 'Score', array( 'def_score13', 'def_score13_flag', 1 ), true,
          def_array( $with_def, array(
             FC_DEFAULT => array( '' => '0.5-2', 'r' => FSCORE_B_SCORE ))));
 

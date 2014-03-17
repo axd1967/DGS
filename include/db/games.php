@@ -317,6 +317,8 @@ class Games
          $arr[] = 'TGDetached';
       if ( $flags & GAMEFLAGS_ATTACHED_SGF )
          $arr[] = 'AttachedSgf';
+      if ( $flags & GAMEFLAGS_NO_RESULT )
+         $arr[] = 'NoResult';
       return implode(',', $arr);
    }//buildFlags
 

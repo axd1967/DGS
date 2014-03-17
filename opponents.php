@@ -294,7 +294,8 @@ require_once 'include/classlib_userpicture.php';
       'COUNT(*) as cntGames',
       'SUM(IF(G.Handicap>0,1,0)) as cntHandicap',
       'MAX(G.Handicap) as maxHandicap',
-      'SUM(IF(G.Score=0,1,0)) as cntJigo' );
+      'SUM(IF(G.Score=0 AND (G.Flags & '.GAMEFLAGS_NO_RESULT.')=0,1,0)) as cntJigo',
+      'SUM(IF(G.Score=0 AND G.Flags > 0 AND (G.Flags & '.GAMEFLAGS_NO_RESULT.'),1,0)) as cntVoid' );
    $qsql->add_part( SQLP_FROM, 'Games AS G' );
    $qsql->merge ( $query_usfilter ); // clause-parts for filter
 
@@ -502,13 +503,14 @@ require_once 'include/classlib_userpicture.php';
 
 
 // return array with dbfields extracted from passed db-result
-// keys: cntGames, cntJigo, (cnt|max)Handicap, cnt(Won|Lost)(|Time|Resign|Score)
+// keys: cntGames, cntJigo, cntVoid, (cnt|max)Handicap, cnt(Won|Lost)(|Time|Resign|Score)
 // param query: if null, only fill array with 0-values
 function extract_user_stats( $color, $query = null )
 {
    static $ARR_DBFIELDKEYS = array(
       'cntGames',
       'cntJigo',
+      'cntVoid',
       'cntHandicap', 'maxHandicap',
       'cntWon',  'cntWonForfeit',  'cntWonTime',  'cntWonResign',  'cntWonScore',
       'cntLost', 'cntLostForfeit', 'cntLostTime', 'cntLostResign', 'cntLostScore'
@@ -634,6 +636,7 @@ function print_stats_table( $p, $B, $W, $fin )
    $cnt_games  = $B['cntGames'] + $W['cntGames'];
    $won_games  = $B['cntWon'] + $W['cntWon'];
    $jigo_games = $B['cntJigo'] + $W['cntJigo'];
+   $void_games = $B['cntVoid'] + $W['cntVoid'];
 
    if ( $fin )
    {
@@ -688,6 +691,13 @@ function print_stats_table( $p, $B, $W, $fin )
          $B['cntJigo'],
          $W['cntJigo'],
          $B['cntJigo'] + $W['cntJigo'] );
+
+      // stats: void
+      $r .= sprintf( $rowpatt,
+         $trclass_num, T_('#Games with No-Result'),
+         $B['cntVoid'],
+         $W['cntVoid'],
+         $B['cntVoid'] + $W['cntVoid'] );
    }
 
    // stats: handicap-games

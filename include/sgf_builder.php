@@ -404,12 +404,13 @@ class SgfBuilder
       if ( $this->game_row['Status'] == GAME_STATUS_FINISHED && isset($this->game_row['Score']) )
       {
          $score = $this->game_row['Score'];
+         $game_flags = (int)$this->game_row['Flags'];
 
          //skip the ending moves where PosX <= $sgf_trim_level
          //-1=POSX_PASS= skip ending pass, -2=POSX_SCORE= keep them ... -999= keep everything
-         if ( abs($score) < SCORE_RESIGN ) // real-point-score
+         if ( abs($score) <= SCORE_MAX ) // real-point-score
             $sgf_trim_level = POSX_SCORE; // keep PASSes for better SGF=DGS-move-numbering
-         else if ( abs($score) == SCORE_TIME || abs($score) == SCORE_FORFEIT )
+         else if ( abs($score) == SCORE_TIME || abs($score) == SCORE_FORFEIT || ($game_flags & GAMEFLAGS_NO_RESULT) )
             $sgf_trim_level = POSX_RESIGN; // keep PASSes and SCORing
          else // resignation
             $sgf_trim_level = POSX_SCORE;
@@ -457,7 +458,12 @@ class SgfBuilder
          elseif ( abs($this->game_row['Score']) == SCORE_FORFEIT )
             $f_result .= 'F';
          else
-            $f_result .= str_replace( '.', ',', abs($this->game_row['Score']) );
+         {
+            if ( $this->game_row['Flags'] & GAMEFLAGS_NO_RESULT )
+               $f_result = '=VOID';
+            else
+               $f_result .= str_replace( '.', ',', abs($this->game_row['Score']) );
+         }
       }
 
       // see <FILEFORMAT>-option in section "4.SGF" in 'specs/quick_suite.txt'
@@ -617,8 +623,8 @@ class SgfBuilder
 
       if ( $Status == GAME_STATUS_FINISHED && isset($Score) )
       {
-         $this->echo_sgf( "\nRE[" . self::sgf_simpletext( $Score==0 ? '0' : score2text($Score, false, true)) . "]",
-            /*lastprop*/'RE' );
+         $score_text = score2text( $Score, $Flags, false, true, /*quick(!)*/0 );
+         $this->echo_sgf( "\nRE[" . self::sgf_simpletext($score_text) . "]", /*lastprop*/'RE' );
       }
    }//build_sgf_start
 
@@ -857,7 +863,7 @@ class SgfBuilder
       $score = $this->game_row['Score'];
       $this->node_com .= "\n";
 
-      if ( abs($score) < SCORE_RESIGN ) // scor-able
+      if ( abs($score) <= SCORE_MAX ) // scor-able
       {
          $game_score = new GameScore( $this->game_row['Ruleset'], $this->game_row['Handicap'], $this->game_row['Komi'] );
          $game_score->set_prisoners_all( $this->game_row['Black_Prisoners'], $this->game_row['White_Prisoners'] );
@@ -879,7 +885,7 @@ class SgfBuilder
             $this->node_com .= "\n$key: $info";
       }
 
-      $this->node_com .= "\nResult: " . score2text($score, false, true);
+      $this->node_com .= "\nResult: " . score2text($score, $this->game_row['Flags'], false, true);
       if ( $this->game_row['Flags'] & GAMEFLAGS_ADMIN_RESULT )
          $this->node_com .= " (set by admin)";
    }//build_sgf_result

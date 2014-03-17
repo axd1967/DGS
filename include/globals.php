@@ -26,7 +26,7 @@ require_once 'include/config-local.php';
  */
 
 define('DGS_VERSION', '1.0.17');
-define('CSS_VERSION', '20140314022500'); // take UTC-timestamp of skins/dragon/screen.css
+define('CSS_VERSION', '20140316222200'); // take UTC-timestamp of skins/dragon/screen.css
 define('JS_VERSION',  '20131211220200'); // take UTC-timestamp of newest js/*.js script
 
 // global version of quick-suite: increased with each release
@@ -86,6 +86,7 @@ define('GAMEFLAGS_HIDDEN_MSG', 0x02);
 define('GAMEFLAGS_ADMIN_RESULT', 0x04);
 define('GAMEFLAGS_TG_DETACHED', 0x08);
 define('GAMEFLAGS_ATTACHED_SGF', 0x10);
+define('GAMEFLAGS_NO_RESULT', 0x20);
 
 // enum Games.GameType
 define('GAMETYPE_GO',      'GO');

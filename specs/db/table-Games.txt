@@ -203,7 +203,7 @@ Description:
    - for game-status PLAY: x/y coordinates of last move (start at 0..size-1)
    - for game-status PASS: Last_X=POSX_PASS, Last_Y undefined
    - for game-status SCORE/SCORE2: Last_X=POSX_SCORE
-   - for game-status FINISHED: Last_X= POSX_RESIGN/TIME/FORFEIT/SCORE
+   - for game-status FINISHED: Last_X= POSX_RESIGN/TIME/FORFEIT/NO_RESULT/SCORE
    - for other game-status: undefined
 
    - since 10-Dec-2013 used to hold last-move for last-move-marker in game-thumbnail
@@ -221,9 +221,10 @@ Description:
    - 0x0004 = AdmResult: game-result was set by admin
    - 0x0008 = TGDetached: tournament-game detached from tournament (e.g. because user removed from T)
    - 0x0010 = AttachedSgf: indicates that there at least one SGF is attached to game
+   - 0x0020 = NoResult: indicates game-result was NO-RESULT (set by game-admin)
 
 * Score : score of game for finished game
-   - 0 = jigo
+   - 0 = jigo, or no-result (=void, then additionally GAMEFLAGS_NO_RESULT set in Games.Flags)
    - -1000, 1000 = Black(-1000)/White(1000) has won game by resignation
    - -2000, 2000 = Black(-2000)/White(2000) has won game by timeout
    - -3000, 3000 = Black(-3000)/White(3000) has won game by forfeit,
@@ -564,8 +565,6 @@ Notes:
 
    - -5 (POSX_SETUP) = setup for shape-game for Stone=BLACK: PosY=0, Hours=0
       - initial shape-setup for board is taken from Games.ShapeSnapshot
-
-   - -6 (POSX_FORFEIT) = forfeit for Stone=BLACK|WHITE, PosY=0, Hours=passed-time
 
    - -50 (POSX_ADDTIME) = added time by Stone=BLACK|WHITE,
      PosY = bitmask with bit 1 (0x01)=byoyomi-reset, bit 2 (0x02)=added-by-TD),

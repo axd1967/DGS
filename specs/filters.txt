@@ -266,9 +266,11 @@ respective include/filterlib_*.php).
 For example with the following instructions a numeric-Filter
 is used. Values that are entered in the input-form-element are transformed
 into a SQL-query, that restrict the SQL-field 'P.ID'. The $dbfield must
-reference a valid SQL-field in the resulting main-query. Here, the resulting
-query must contain a FROM-part with 'Players P' for example. Of course,
-you can also write 'Players.ID' as $dbfield.
+reference a valid SQL-field in the resulting main-query. For some special
+filters like FilterScore for example, $dbfield can also be an array containing
+multiple fields. Though that requires special checks. Here, the resulting query
+must contain a FROM-part with 'Players P' for example. Of course, you can also
+write 'Players.ID' as $dbfield.
 
    $filter = new SearchFilter();
    $f1 =& $filter->add_filter( 1, 'Numeric', 'P.ID', true);

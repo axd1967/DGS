@@ -203,7 +203,7 @@ function build_rating_diff( $rating_diff )
       $admResult = ( $grow['Flags'] & GAMEFLAGS_ADMIN_RESULT )
          ? span('ScoreWarning', sprintf(' (%s)', T_('set by admin#game')))
          : '';
-      $itable->add_sinfo( T_('Score'), score2text(@$grow['Score'], false) . $admResult);
+      $itable->add_sinfo( T_('Score'), score2text(@$grow['Score'], @$grow['Flags'], /*verbose*/false) . $admResult);
    }
    $itable->add_sinfo( T_('Start Time'),  date(DATE_FMT3, @$grow['X_Starttime']) );
    $itable->add_sinfo( T_('Lastchanged'), date(DATE_FMT3, @$grow['X_Lastchanged']) );
@@ -527,14 +527,13 @@ function build_rating_diff( $rating_diff )
                $arr_flags[] = T_('by TD#TG_flag');
             $flags_str = (count($arr_flags)) ? sprintf( ' (%s)', implode(', ', $arr_flags)) : '';
 
-            $tg_score = $tgame->getScoreForUser( $black_id );
-            $tg_score_str = score2text( $tg_score, false );
-            if ( !$game_finished || ( !is_null($tg_score) && @$grow['Score'] != $tg_score ) )
-               $tg_score_str = span('ScoreWarning', $tg_score_str );
+            list( $tg_score, $tg_score_text ) = $tgame->getGameScore( $black_id, /*verbose*/false );
+            if ( !$game_finished || !is_null($tg_score) )
+               $tg_score_text = span('ScoreWarning', $tg_score_text );
 
             $itable->add_sinfo(
                   T_('Tournament Game Score'),
-                  $tg_score_str . $flags_str );
+                  $tg_score_text . $flags_str );
          }
 
          $arr_flags = array();

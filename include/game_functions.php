@@ -2017,6 +2017,7 @@ class GameFinalizer
    private $White_id;
    private $Moves;
    private $is_rated;
+   private $made_unrated = false;
    private $skip_game_query = false;
 
    public function __construct( $action_by, $my_id, $gid, $tid, $game_status, $game_type, $game_players, $game_flags,
@@ -2041,6 +2042,11 @@ class GameFinalizer
       $this->skip_game_query = true;
    }
 
+   public function is_made_unrated()
+   {
+      return $this->made_unrated;
+   }
+
    /*!
     * \brief Finishes or deletes game.
     * \param $do_delete true=delete-running-game, false=end-running-game
@@ -2049,7 +2055,8 @@ class GameFinalizer
     * \param $message message added in game-notify to players
     *
     * \note IMPORTANT NOTE: caller needs to open TA with HOT-section!!
-    * \note game is made unrated if game ended by forfeit by game-admin (this->action_by=ACTBY_ADMIN)
+    * \note game is made unrated if game ended by forfeit or no-result by game-admin (this->action_by=ACTBY_ADMIN);
+    *       sets this->made_unrated if game changed to unrated
     */
    public function finish_game( $dbgmsg, $do_delete, $upd_game, $game_score, $message='' )
    {
@@ -2058,16 +2065,18 @@ class GameFinalizer
       $dbgmsg = "GameFinalizer:finish_game($gid).$dbgmsg";
 
       // update Games-entry
-      $timeout_rejected = $game_forfeited = false;
+      $timeout_rejected = $game_forfeited = $game_no_result = false;
       if ( !$this->skip_game_query && !$do_delete )
       {
          if ( $this->action_by == ACTBY_ADMIN )
          {
             $this->GameFlags |= GAMEFLAGS_ADMIN_RESULT;
 
-            // make game unrated if game scored with SCORE_FORFEIT
+            // make game unrated if game scored with SCORE_FORFEIT or NO-RESULT
             if ( abs($game_score) == SCORE_FORFEIT )
                $game_forfeited = true;
+            elseif ( $this->GameFlags & GAMEFLAGS_NO_RESULT )
+               $game_no_result = true;
          }
 
          // make game unrated if criteria matches and opponent rejects-win-by-timeout
@@ -2077,14 +2086,17 @@ class GameFinalizer
          {
             $upd_game = new UpdateQuery('Games');
             $upd_game->upd_txt('Status', GAME_STATUS_FINISHED );
-            $upd_game->upd_num('Last_X', self::convert_score_to_posx($game_score) );
+            $upd_game->upd_num('Last_X', self::convert_score_to_posx($game_score, $this->GameFlags) );
             $upd_game->upd_num('ToMove_ID', 0 );
             $upd_game->upd_num('Flags', $this->GameFlags );
             $upd_game->upd_num('Score', $game_score );
             $upd_game->upd_time('Lastchanged');
          }
-         if ( $game_forfeited || $timeout_rejected )
+         if ( $game_forfeited || $game_no_result || $timeout_rejected )
+         {
             $upd_game->upd_txt('Rated', 'N');
+            $this->made_unrated = true;
+         }
 
          $game_updquery = "UPDATE Games SET " . $upd_game->get_query() .
             " WHERE ID=$gid AND Status".IS_STARTED_GAME." AND Moves={$this->Moves} LIMIT 1";
@@ -2096,12 +2108,12 @@ class GameFinalizer
       // signal game-end for tournament
       if ( $this->tid > 0 )
          TournamentGames::update_tournament_game_end( "$dbgmsg.tourney_game_end",
-            $this->tid, $gid, $this->Black_ID, $game_score );
+            $this->tid, $gid, $this->Black_ID, $game_score, $this->GameFlags );
 
       // send message to my opponent / all-players / observers about the result
       $game_notify = new GameNotify( $gid, $this->my_id, $this->Status, $this->GameType, $this->GamePlayers,
-         $this->GameFlags, $this->Black_ID, $this->White_ID, $game_score, $game_forfeited, $timeout_rejected,
-         $message );
+         $this->GameFlags, $this->Black_ID, $this->White_ID, $game_score, $game_forfeited, $game_no_result,
+         $timeout_rejected, $message );
 
       if ( $do_delete )
       {
@@ -2189,7 +2201,7 @@ class GameFinalizer
 
    // ------------ static functions ----------------------------
 
-   private static function convert_score_to_posx( $score )
+   private static function convert_score_to_posx( $score, $game_flags )
    {
       if ( abs($score) == SCORE_RESIGN )
          return POSX_RESIGN;
@@ -2197,8 +2209,13 @@ class GameFinalizer
          return POSX_TIME;
       elseif ( abs($score) == SCORE_FORFEIT )
          return POSX_FORFEIT;
-      else
-         return POSX_SCORE;
+      else //=score|0
+      {
+         if ( $score == 0 && ($game_flags & GAMEFLAGS_NO_RESULT) )
+            return POSX_NO_RESULT;
+         else
+            return POSX_SCORE;
+      }
    }//convert_score_to_posx
 
 } // end 'GameFinalizer
@@ -2224,6 +2241,7 @@ class GameNotify
    private $white_id;
    private $score;
    private $game_forfeited;
+   private $game_no_result;
    private $timeout_rejected;
    private $message;
 
@@ -2234,7 +2252,7 @@ class GameNotify
 
    /*! \brief Constructs GameNotify also loading player-info from db. */
    public function __construct( $gid, $uid, $game_status, $game_type, $game_players, $game_flags,
-         $black_id, $white_id, $score, $game_forfeited, $timeout_rejected, $message )
+         $black_id, $white_id, $score, $game_forfeited, $game_no_result, $timeout_rejected, $message )
    {
       $this->gid = (int)$gid;
       $this->uid = (int)$uid;
@@ -2246,6 +2264,7 @@ class GameNotify
       $this->white_id = (int)$white_id;
       $this->score = $score;
       $this->game_forfeited = (bool)$game_forfeited;
+      $this->game_no_result = (bool)$game_no_result;
       $this->timeout_rejected = (bool)$timeout_rejected;
       $this->message = $message;
 
@@ -2359,7 +2378,7 @@ class GameNotify
       $text = "The result in the game:<center>"
             . game_reference( REF_LINK, 1, '', $this->gid, 0, $this->build_game_ref_array() )
             . "</center>was:<center>"
-            . score2text($this->score, true, true)
+            . score2text($this->score, $this->game_flags, /*verbose*/true, /*engl*/true)
             . "</center>";
 
       $info_text = ( $this->game_flags & GAMEFLAGS_HIDDEN_MSG )
@@ -2370,6 +2389,9 @@ class GameNotify
       if ( $action_by == ACTBY_ADMIN && $this->game_forfeited )
          $info_text .= "<p><b>Info:</b> The game was changed to unrated, " .
             "because it was ended by forfeit set by a game admin!";
+      elseif ( $action_by == ACTBY_ADMIN && $this->game_no_result )
+         $info_text .= "<p><b>Info:</b> The game was changed to unrated, " .
+            "because it was ended with NO-RESULT by a game admin!";
       if ( $this->timeout_rejected )
          $info_text .= "<p><b>Info:</b> Based on the winner's profile preference, " .
             "the win by timeout was automatically rejected and the game was changed to unrated!";
@@ -2389,13 +2411,15 @@ class GameNotify
    }//get_text_game_result
 
    /*!
-    * \brief Returns list of Players.IDs to which message should be sent (to all users for time-out & forfeit,
-    *        otherwise only for others than current-user for resign/result/delete).
+    * \brief Returns list of Players.IDs to which message should be sent:
+    *       to all users for time-out & forfeit & no-result (=void);
+    *       otherwise only for others than current-user for resign/result/delete.
     */
    public function get_recipients()
    {
       $arr = array_keys( $this->players );
-      if ( $this->uid > 0 && abs($this->score) != SCORE_TIME && abs($this->score) != SCORE_FORFEIT )
+      if ( $this->uid > 0 && abs($this->score) != SCORE_TIME && abs($this->score) != SCORE_FORFEIT
+            && ($this->game_flags & GAMEFLAGS_NO_RESULT) == 0 )
          unset($arr[$this->uid]);
       return $arr;
    }//get_recipients
@@ -4562,7 +4586,7 @@ class GameScore
    }
 
    /*! \brief [GUI] Draws table of given GameScore and ruleset using echo(). */
-   public static function draw_score_box( $game_score, $ruleset )
+   public static function draw_score_box( $game_score, $game_flags, $ruleset )
    {
       if ( !($game_score instanceof GameScore) )
          error('internal_error', "game.draw_score_box");
@@ -4604,7 +4628,7 @@ class GameScore
          sprintf( $fmtline3, 'HeaderSum', T_('Score#scoring'),
                   $score_info[GSCOL_BLACK]['score'],
                   $score_info[GSCOL_WHITE]['score'] ),
-         sprintf( $fmtline2, 'HeaderSum', T_('Result#scoring'), score2text($score_info['score'], false) ),
+         sprintf( $fmtline2, 'HeaderSum', T_('Result#scoring'), score2text($score_info['score'], $game_flags, false) ),
          "</table>\n";
    }//draw_score_box
 

@@ -215,7 +215,12 @@ class TournamentPoints
          elseif ( $game_score > 0 )
             return $this->PointsLost;
          else //=0
-            return $this->PointsDraw;
+         {
+            if ( $tgame_flags & TG_FLAG_GAME_NO_RESULT )
+               return $this->PointsNoResult;
+            else
+               return $this->PointsDraw;
+         }
       }
       else //=TPOINTSTYPE_HAHN
       {
@@ -237,7 +242,12 @@ class TournamentPoints
             $points = $this->PointsForfeit;
          }
          elseif ( $score_diff == 0 )
-            $points = 0;
+         {
+            if ( $tgame_flags & TG_FLAG_GAME_NO_RESULT )
+               $points = $this->PointsNoResult;
+            else
+               $points = 0;
+         }
          else // point-diff
          {
             if ( 2*floor($score_diff) != 2*$score_diff ) // +0.5 for fractional-score x.5

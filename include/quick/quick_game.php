@@ -296,7 +296,8 @@ class QuickHandlerGame extends QuickHandler
       $score = $game_score->calculate_score();
 
       $this->addResultKey( 'ruleset', strtoupper($Ruleset) );
-      $this->addResultKey( 'score', score2text($score, false, false, true) );
+      $this->addResultKey( 'score',
+         score2text( $score, $this->game_row['Flags'], /*verbose*/false, /*engl*/false, /*quick*/true) );
 
       // board-status
       $fmt = get_request_arg(GAMEOPT_FORMAT, 'sgf');

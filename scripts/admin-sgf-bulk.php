@@ -75,6 +75,7 @@ require_once 'include/sgf_builder.php';
          'G.Moves > 10',
          'G.Size = 9',
          'G.Score BETWEEN -'.SCORE_RESIGN.' AND '.SCORE_RESIGN, // no Timeouts or Forfeits
+         '(G.Flags & '.GAMEFLAGS_NO_RESULT.')=0', // skip NO-RESULT games
          "G.Status='".GAME_STATUS_FINISHED."'",
       SQLP_ORDER,
          'G.ID ASC'

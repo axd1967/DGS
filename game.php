@@ -296,14 +296,15 @@ $GLOBALS['ThePage'] = new Page('Game');
       $may_play = false;
       if ( $Status == GAME_STATUS_FINISHED )
       {
-         if ( abs($Score) <= SCORE_MAX && $move == $Moves ) // don't calc for resign/time-out/forfeit
+         if ( abs($Score) <= SCORE_MAX && $move == $Moves && !($Flags & GAMEFLAGS_NO_RESULT) ) // don't calc for resign/time-out/forfeit/no-result
          {
             $score_board = clone $TheBoard;
             list( $score, $game_score ) =
                GameActionHelper::calculate_game_score( $score_board, $stonestring, $Ruleset, $coord );
          }
-         $admResult = ( $Flags & GAMEFLAGS_ADMIN_RESULT ) ? sprintf(' (%s)', T_('set by admin#game')) : '';
-         $extra_infos[score2text($Score, true) . $admResult] = 'Score';
+         $admResult = ( $Flags & GAMEFLAGS_ADMIN_RESULT ) ? span('ScoreWarning', sprintf(' (%s)', T_('set by admin#game'))) : '';
+         $score_text = score2text($Score, $Flags, /*verbose*/true) . $admResult;
+         $extra_infos[$score_text] = 'Score';
       }
       elseif ( $TheBoard->is_scoring_step($move, $Status) )
       {
@@ -452,7 +453,7 @@ $GLOBALS['ThePage'] = new Page('Game');
             $done_url = "game.php?gid=$gid".URI_AMP."a=done"
                . ( $stonestring ? URI_AMP."stonestring=$stonestring" : '' );
 
-            $extra_infos[T_('Preliminary Score') . ": " . score2text($score, true)] = 'Score';
+            $extra_infos[T_('Preliminary Score') . ": " . score2text($score, $Flags, /*verbose*/true)] = 'Score';
 
             $strtmp = span('NoPrint',
                sprintf( T_("Please mark dead stones and click %s'done'%s when finished."),
@@ -471,7 +472,7 @@ $GLOBALS['ThePage'] = new Page('Game');
             list( $score, $game_score ) =
                GameActionHelper::calculate_game_score( $TheBoard, $stonestring, $Ruleset );
 
-            $extra_infos[T_('Preliminary Score') . ": " . score2text($score, true)] = 'Score';
+            $extra_infos[T_('Preliminary Score') . ": " . score2text($score, $Flags, /*verbose*/true)] = 'Score';
             break;
          }//case 'done'
 
@@ -653,10 +654,10 @@ $GLOBALS['ThePage'] = new Page('Game');
    }
    if( !is_null($game_score) )
    {
-      GameScore::draw_score_box( $game_score, $Ruleset );
+      GameScore::draw_score_box( $game_score, $Flags, $Ruleset );
       //FIXME for debugging show other ruleset:
       //$other_ruleset = ( $Ruleset == RULESET_JAPANESE ) ? RULESET_CHINESE : RULESET_JAPANESE;
-      //GameScore::draw_score_box( $game_score, $other_ruleset );
+      //GameScore::draw_score_box( $game_score, $Flags, $other_ruleset );
    }
    echo "</td><td>";
 
@@ -970,7 +971,7 @@ function draw_moves( $gid, $move, $handicap )
                $c = $trres;
                break;
             default :
-               if ( $PosX < 0) // TIME|FORFEIT, etc. (no user "move")
+               if ( $PosX < 0)
                   continue;
                $c = number2board_coords($PosX, $PosY, $Size);
                break;
@@ -1120,7 +1121,8 @@ function build_move_comments()
          case POSX_SCORE: $move_pos = 'SCORE'; break;
          case POSX_RESIGN: $move_pos = 'RESIGN'; break;
          default:
-            if ( $PosX < 0) continue; // TIME|FORFEIT, etc. (no user "move")
+            if ( $PosX < 0)
+               continue;
             $move_pos = number2board_coords($PosX, $PosY, $TheBoard->size);
             break;
       }

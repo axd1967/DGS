@@ -707,7 +707,7 @@ Description:
 * Status : status for Tournament-game
    - INIT = Tournament-game scheduled, need to be started (not used for ladder-tournament)
    - PLAY = Tournament-game is being played by challenger and defender
-   - SCORE = Tournament-game has ended by score/resign/jigo/timeout/forfeit and
+   - SCORE = Tournament-game has ended by score/resign/jigo/timeout/forfeit/no-result and
      needs processing for tournament
    - WAIT = mark Tournament-game for rematch-waiting with same user,
      see TicksDue-field
@@ -725,6 +725,7 @@ Description:
      - for ladder-tournament the corresponding incoming- and outgoing challenges are freed for the
        involved tournament-participants
    - 0x0004 = if set, indicates that role of challenger and defender has switched at game-end
+   - 0x0008 = game-result NO-RESULT (then Score should be 0)
 
 * Lastchanged : date of last update of table-entry
 
@@ -746,9 +747,10 @@ Description:
    - 0 = unset yet, only for INIT/PLAY-status
 
    - set for SCORE/DONE-status:
-      - 0 = jigo
+      - 0 = jigo, or no-result (additionally TG_FLAG_GAME_NO_RESULT set in TournamentGames.Flags)
       - -1000, 1000 = Challenger(-1000)/Defender(1000) has won game by resignation
       - -2000, 2000 = Challenger(-2000)/Defender(2000) has won game by timeout
+      - -3000, 3000 = Challenger(-2000)/Defender(2000) has won game by forfeit (=bye)
 
 
 ###########################################################################

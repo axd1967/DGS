@@ -1814,6 +1814,7 @@ abstract class Filter
     * \brief Returns default sql-template 'tmplfield #OP #VAL' used to build base-query or
     *        return tmplfield if FC_SQL_TEMPLATE-config set for filter
     * \param tmplfield if null or omitted, use this->dbfield instead
+    * \note this only works with non-array dbfields (though this is not checked)
     */
    protected function default_sql_template( $tmplfield = null)
    {
@@ -3137,8 +3138,15 @@ class FilterBoolean extends Filter
  /*!
   * \class FilterScore
   * \brief Filter for Score allowing exact value choosen by selection
-  *        (win by resignation, by time, by forfeit, by score, jigo) and an
+  *        (win by resignation, by time, by forfeit, by score, jigo, no-result(=void) ) and an
   *        optional score-value; SearchFilter-Type: Score.
+  *
+  * \note $dbfield for FilterScore must be array with three entries:
+  *      1. field to filter on Games.Score
+  *      2. field-text with '&'-operation matching NO-RESULT game-flag
+  *      3. value of NO-RESULT game-flag
+  *      Example: array( 'Games.Score', 'Games.Flags', GAMEFLAGS_NO_RESULT )
+  *
   * <p>GUI: selectbox + text input-box
   *
   * <p>Allowed Syntax for score-value (for selection '?+?, B|W+?'):
@@ -3153,7 +3161,7 @@ class FilterBoolean extends Filter
   *    FC_DEFAULT - score-mode (index) if scalar, or
   *                 array( '' => score-value, 'r' => score-mode-index );
   *       score-mode: FSCORE_ALL=show-all (default), FSCORE_RESIGN|TIME|FORFEIT|SCORE,
-  *                   FSCORE_B|W_RESIGN|TIME|FORFEIT|SCORE, FSCORE_JIGO
+  *                   FSCORE_B|W_RESIGN|TIME|FORFEIT|SCORE, FSCORE_JIGO, FSCORE_VOID (=no-result)
   */
 
 // index for filter-score-choices, and for FC_DEFAULT-config
@@ -3171,6 +3179,7 @@ define('FSCORE_SCORE',    10);
 define('FSCORE_B_SCORE',  11);
 define('FSCORE_W_SCORE',  12);
 define('FSCORE_JIGO',     13);
+define('FSCORE_VOID',     14); //=no-result
 
 class FilterScore extends Filter
 {
@@ -3181,6 +3190,9 @@ class FilterScore extends Filter
    public function __construct( $name, $dbfield, $config )
    {
       static $_default_config = array( FC_SIZE => 4 );
+
+      if ( !is_array($dbfield) || count($dbfield) != 3 || !is_numeric($dbfield[2]) || (int)$dbfield[2] <= 0 )
+         error('invalid_args', "FilterScore.check.dbfield.expect_arr3($name,$dbfield,[".implode(',', @$dbfield)."])");
 
       parent::__construct($name, $dbfield, $_default_config, $config);
       $this->type = 'Score';
@@ -3254,8 +3266,11 @@ class FilterScore extends Filter
             'ABS(%s)',
             '-%s',
             '%s',
-            //Jigo
-            '%s = 0',
+            // %%s = dbfield[0] (=Games.Score-field), %1$s = dbfield[1] (=Games.Flags-field), %2$s = dbfield[2] (=game-flags NO-RESULT-value)
+            // Jigo
+            '(%%s = 0 AND (%1$s & %2$s)=0)',
+            // Void(=no-result)
+            '(%%s = 0 AND %1$s > 0 AND (%1$s & %2$s))',
          );
       }
 
@@ -3266,6 +3281,7 @@ class FilterScore extends Filter
       //   idx 7-9: '?+F', 'B+F', 'W+F',
       //   idx 10-12: '?+?', 'B+?', 'W+?',  expecting p_value, p_start, p_end set according to range
       //   idx 13:  'Jigo'
+      //   idx 14:  'Void'
       $idx = $this->values[$this->elem_result];
       if ( $idx == FSCORE_ALL )
          return;
@@ -3276,16 +3292,20 @@ class FilterScore extends Filter
             // use default to search for scoring without time + resignation
             $this->p_flags |= PFLAG_EXCL_START | PFLAG_EXCL_END;
             $this->p_start = 0;
-            $this->p_end   = min(SCORE_RESIGN, SCORE_TIME);
+            $this->p_end   = SCORE_MAX;
          }
       }
 
       // build SQL
-      $query = $this->build_base_query($this->dbfield, false, true); // query with set SQLP_FNAMES
+      $query = $this->build_base_query($this->dbfield[0], false, true); // query with set SQLP_FNAMES
       $arrfn = $query->get_parts(SQLP_FNAMES);
       $field = $arrfn[0];
 
-      $clause = sprintf( $FSCORE_BUILD_SQL[$idx], $field );
+      $tmpl_clause = $FSCORE_BUILD_SQL[$idx];
+      if ( $idx == FSCORE_JIGO || $idx == FSCORE_VOID )
+         $tmpl_clause = sprintf( $tmpl_clause, $this->dbfield[1], $this->dbfield[2] );
+      $clause = sprintf( $tmpl_clause, $field );
+
       if ( $idx >= FSCORE_SCORE && $idx <= FSCORE_W_SCORE )
       {
          // here $clause is field-part
@@ -3310,6 +3330,7 @@ class FilterScore extends Filter
             '?+F', 'B+F', 'W+F',
             '?+?', 'B+?', 'W+?',
             'Jigo',
+            'Void',
          );
 
       // select-box for result

@@ -397,13 +397,13 @@ function build_points_examples( &$form, $tpoints )
          // category (0=point-diff), score, TG-flags
          T_('Draw'), 0, 0,
          0, 0.5, 0,
-         0, 2.5, 0,
+         0, 17, 0,
          0, 30.5, 0,
-         0, 27, 0,
          0, 150, 0,
          T_('Resignation'), SCORE_RESIGN, 0,
          T_('Timeout'), SCORE_TIME, 0,
          T_('Forfeit'), SCORE_FORFEIT, 0,
+         T_('No-Result'), 0, TG_FLAG_GAME_NO_RESULT,
          T_('Annulled'), NO_VALUE, TG_FLAG_GAME_DETACHED,
       );
    for ( $i=0; $i < count($arr_scores); )

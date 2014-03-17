@@ -1456,7 +1456,7 @@ function delete_game_setup( $gid )
 
    // send message to all-players
    $game_notify = new GameNotify( $gid, /*adm*/0, $grow['Status'], $grow['GameType'], $grow['GamePlayers'],
-      $grow['Flags'], 0, 0, 0, /*game-forfeit*/false, /*rej-timeout*/false, '' );
+      $grow['Flags'], 0, 0, 0, /*game-forfeit*/false, /*game-nores*/false, /*rej-timeout*/false, '' );
 
    ta_begin();
    {//HOT-section for deleting multi-player-game

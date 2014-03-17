@@ -11,6 +11,69 @@ Release [2013-08-11] - DGS 1.0.16 - tag [release-1_0_16-20130811] on (later) bra
 ChangeLog
 ------------------------------------------------------------------
 
+2014-03-17 jug
+
+   * tournaments/include/tournament_games.php (TournamentGames.getGameScore, ~.update_tournament_game_end,
+       ~.getFlagsText),
+     tournaments/include/tournament_ladder_props.php (TournamentLadderProps.fill_ladder_running_games,
+       ~.calc_game_end_action),
+     tournaments/include/tournament_ladder_helper.php (TournamentLadderHelper.process_tournament_ladder_game_end),
+     tournaments/include/tournament_pool_classes.php (PoolGame.calc_result; PoolTables.fill_games,
+       ~.count_games),
+     tournaments/include/tournament_points.php (TournamentPoints.calculate_points),
+     tournaments/include/tournament_globals.php (TG_FLAG_GAME_NO_RESULT),
+     tournaments/include/tournament_participant.php,
+     include/game_functions.php (class GameFinalizer, ~.is_made_unrated, ~.finish_game, ~.convert_score_to_posx;
+       class GameNotify, ~.__construct, ~.get_text_game_result, ~.get_recipients;
+       GameScore.draw_score_box),
+     include/sgf_builder.php (SgfBuilder.load_trimmed_moves, ~.build_filename_sgf, ~.build_sgf_start,
+       ~.build_sgf_result),
+     include/filter.php (FSCORE_VOID; class Filter, ~.__construct, ~.build_query, ~.get_input_element),
+     include/quick/quick_game_info.php (QuickHandlerGameInfo.convertGameFlags, ~.fill_game_info),
+     include/quick/quick_game.php (QuickHandlerGame.process_cmd_status_score),
+     include/globals.php (CSS_VERSION, GAMEFLAGS_NO_RESULT),
+     include/std_functions.php (POSX_NO_RESULT; score2text),
+     include/db/games.php (Games.buildFlags),
+     include/rating.php (update_rating2),
+     scripts/tests/TournamentPointsTest.php (class TournamentPointsTest),
+     scripts/admin-export-games_info.php (build_game_info),
+     scripts/admin-sgf-bulk.php,
+     specs/db/table-Tournaments.txt, specs/db/table-Games.txt, specs/filters.txt, specs/quick_suite.txt,
+     skins/dragon/screen.css, code_examples/filter_example2.php,
+     images/no_result.gif,
+     tournaments/roundrobin/edit_points.php (build_points_examples),
+     tournaments/game_admin.php (GA_NEED_COLOR, GA_RES_NO_RESULT; parse_edit_form, draw_game_end),
+     tournaments/cron_tournaments.php,
+     admin_game.php (GA_NEED_COLOR, GA_RES_DRAW, GA_RES_NO_RESULT; parse_edit_form, draw_game_admin_form),
+     opponents.php (extract_user_stats, print_stats_table),
+     game_players.php (delete_game_setup),
+     gameinfo.php (build_rating_diff),
+     show_games.php, game.php:
+   - added NO-RESULT as result for game-end, set by game-admin
+     - NOTE: Games.Score=0 can now be Jigo OR No-Result, need to check Games.Flags to differ between them!
+     - NOTE: 'Void' is synonym for No-Result, used for SGF-download and quick-suite and for filters
+       as it's shorter
+     - tournament-game-admin: added setting game-end of NO-RESULT,
+       set TG.Score=0 + TG.Flags=TG_FLAG_GAME_NO_RESULT
+     - game-admin: added setting game-end of NO-RESULT,
+       set G.Score=0 + G.Flags=GAMEFLAGS_NO_RESULT + G.Rated=N
+     - game-admin: allowing to overwrite jigo-check preventing jigo for tournament-rules forbidding jigo
+     - game-admin: setting jigo as game-result does not require color-choice
+     - process game-end taking over NO-RESULT game-result from Games-table to TournamentGames-table
+       converting NO-RESULT-flag
+       - ladder-tournament: skip rematch-wait for game ended with NO-RESULT
+       - round-robin-tournament: use TournamentPoints.PointsNoResult for NO-RESULT game-end
+         for point-calculation in pools
+     - view-pools: mark NO-RESULT game in pool-results of round-robin-tournamentsdashed
+       with grey background
+     - edit-points: added points-calculation for NO-RESULT game in examples-preview
+     - extended Score-filter with No-Result
+     - games-list: added No-Result in score-column, extended score/won-filter with search for VOID-result
+     - games-list: added tooltips for won-column icons
+     - sgf-download: added Void-result for RE[]-prop, added '=VOID' as $r for download-filename-format
+     - opponents-page: added count for no-result, differ from jigo-count
+   - bugfix ladder-tournament: don't add outgoing-games for user just removed from ladder
+
 2014-03-16 jug
 
    * tournaments/include/tournament_pool_classes.php (class PoolGame, ~.__construct, ~.calc_result;

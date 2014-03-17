@@ -609,7 +609,8 @@ class TournamentParticipant
       $data->set_value( 'Lastchanged', $GLOBALS['NOW'] );
       $data->set_query_value( 'Finished', "Finished+1" );
 
-      // NOTE: jigo is not counted as Win, because count can be calculated: Jigo = Finished - Won - Lost
+      // NOTE: jigo is not counted as Win, because count can be calculated: Jigo = Finished - Won - Lost,
+      //       though that includes NO-RESULT-games
       if ( $score < 0 )
          $data->set_query_value( 'Won', "Won+1" );
       if ( $score > 0 )

@@ -23,6 +23,7 @@ $TranslateGroups[] = "Tournament";
 
 require_once 'include/db_classes.php';
 require_once 'include/std_classes.php';
+require_once 'include/std_functions.php';
 require_once 'tournaments/include/tournament_globals.php';
 
  /*!
@@ -134,6 +135,15 @@ class TournamentGames
          return (( $this->Challenger_uid == $uid ) ? 1 : -1 ) * $this->Score;
       else
          return null;
+   }
+
+   /*! \brief Returns arr( game-score, game-score-text ) for given user for this TournamentGames-instance. */
+   public function getGameScore( $uid, $verbose, $keep_english=false )
+   {
+      $game_score = $this->getScoreForUser( $uid );
+      $game_flags = ( $this->Flags & TG_FLAG_GAME_NO_RESULT ) ? GAMEFLAGS_NO_RESULT : 0;
+      $score_text = score2text( $game_score, $game_flags, $verbose, $keep_english );
+      return array( $game_score, $score_text );
    }
 
    /*! \brief Returns array( uid, uid ) from Challenger_uid and Defender_uid smallest first. */
@@ -481,9 +491,9 @@ class TournamentGames
 
    /*!
     * \brief Signals end of tournament-game updating TournamentGames to SCORE-status and
-    *        setting TG.Score for given tournament-ID and game-id.
+    *        setting TG.Score and TG.Flags for given tournament-ID and game-id.
     */
-   public static function update_tournament_game_end( $dbgmsg, $tid, $gid, $black_uid, $score )
+   public static function update_tournament_game_end( $dbgmsg, $tid, $gid, $black_uid, $score, $game_flags )
    {
       if ( !is_numeric($tid) || $tid <= 0 )
          error('invalid_args', "TournamentGames:update_tournament_game_end.check.tid($tid,$gid)");
@@ -494,11 +504,16 @@ class TournamentGames
       if ( is_null($score) )
          return 0;
 
+      $tg_flags = 0;
+      if ( $game_flags & GAMEFLAGS_NO_RESULT )
+         $tg_flags = TG_FLAG_GAME_NO_RESULT;
+
       global $NOW;
       $result = db_query( $dbgmsg."($gid,$tid,$black_uid,$score)",
          "UPDATE TournamentGames SET "
             . "Status='".TG_STATUS_SCORE."', "
             . "Score=IF(Challenger_uid=$black_uid,$score,-$score), "
+            . ( $tg_flags > 0 ? "Flags=Flags | $tg_flags, " : '' )
             . "EndTime=FROM_UNIXTIME($NOW), "
             . "Lastchanged=FROM_UNIXTIME($NOW) "
          . " WHERE tid=$tid AND gid=$gid AND Status='".TG_STATUS_PLAY."' LIMIT 1" );
@@ -572,6 +587,7 @@ class TournamentGames
          $arr[TG_FLAG_GAME_END_TD] = T_('Game End by TD#TG_flag');
          $arr[TG_FLAG_GAME_DETACHED] = T_('Game Detached#TG_flag');
          $arr[TG_FLAG_CH_DF_SWITCHED] = T_('Challenger/Defender switched#TG_flag');
+         $arr[TG_FLAG_GAME_NO_RESULT] = T_('Game No-Result#TG_flag');
          self::$ARR_TGAME_TEXTS[$key] = $arr;
       }
 

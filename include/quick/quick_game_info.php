@@ -122,6 +122,8 @@ class QuickHandlerGameInfo extends QuickHandler
          $out[] = 'TGDETACHED';
       if ( $flags & GAMEFLAGS_ATTACHED_SGF )
          $out[] = 'ATTACHEDSGF';
+      if ( $flags & GAMEFLAGS_NO_RESULT )
+         $out[] = 'NO_RESULT';
       return implode(',', $out);
    }//convertGameFlags
 
@@ -151,7 +153,7 @@ class QuickHandlerGameInfo extends QuickHandler
       $out['status'] = strtoupper($row['Status']);
       $out['flags'] = self::convertGameFlags($row['Flags']);
       $out['score'] = ( $row['Status'] == GAME_STATUS_FINISHED )
-            ? score2text($row['Score'], /*verbose*/false, /*engl*/true, /*quick*/true)
+            ? score2text( $row['Score'], $row['Flags'], /*verbose*/false, /*engl*/true, /*quick*/true )
             : "";
 
       $out['game_type'] = GameTexts::format_game_type($row['GameType'], $row['GamePlayers'], true);

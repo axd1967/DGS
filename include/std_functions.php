@@ -191,7 +191,8 @@ define('POSX_SCORE', -2);  // scoring step by Stone=BLACK|WHITE, PosY=0, Hours=p
 define('POSX_RESIGN', -3); // resigned by Stone=BLACK|WHITE: PosY=0, Hours=passed-time
 define('POSX_TIME', -4);   // timeout for Stone=BLACK|WHITE: PosY=0, Hours=passed-time
 define('POSX_SETUP', -5);  // setup for shape-game for Stone=BLACK: PosY=0, Hours=0
-define('POSX_FORFEIT', -6); // forfeit for Stone=BLACK|WHITE: PosY=0, Hours=passed-time
+define('POSX_FORFEIT', -6); // forfeit game (for Stone=BLACK|WHITE), set by game-admin (only for Games.Last_X, not stored in Moves-table)
+define('POSX_NO_RESULT', -7); // no-result game, set by game-admin (only for Games.Last_X, not stored in Moves-table)
 // game commands
 define('POSX_ADDTIME', -50); // Add-Hours: Stone=BLACK|WHITE (time-adder), PosY=bitmask (bit #1(0|1)=byoyomi-reset, bit #2(0|2)=added-by-TD), Hours=add_hours
 
@@ -2230,7 +2231,9 @@ function yesno( $yes)
    return ( $yes && strtolower(substr($yes,0,1))!='n' ) ? T_('Yes') : T_('No');
 }
 
-function score2text($score, $verbose, $keep_english=false, $quick=false)
+// \param $quick true = used by quick-suite for special quick-suite-format; 0 = used for SGF-building
+// \note $verbose=false + $keep_english=true + $quick=0(!) used by SGF-download (except for Jigo) !!
+function score2text( $score, $game_flags, $verbose, $keep_english=false, $quick=false )
 {
    if ( $quick ) $verbose = false;
    $T_= ( $keep_english ? 'fnop' : 'T_' );
@@ -2239,16 +2242,22 @@ function score2text($score, $verbose, $keep_english=false, $quick=false)
       return ($quick) ? "" : "?";
 
    if ( $score == 0 )
-      return ($quick) ? '0' : ( $keep_english ? 'Draw' : ( $verbose ? T_('Jigo') : 'Jigo' ));
+   {
+      if ( $game_flags & GAMEFLAGS_NO_RESULT )
+         return ($quick) ? 'VOID' : ( $quick === 0 ? 'Void' : ( $keep_english ? 'No-Result' : ( $verbose ? $T_('Game ends with No-Result') : 'No-Result' )));
+      else
+         return ($quick || $quick === 0 ) ? '0' : ( $keep_english ? 'Draw' : ( $verbose ? $T_('Jigo') : 'Jigo' ));
+   }
 
-   $color = ($verbose
-             ? ( $score > 0 ? $T_('White') : $T_('Black') )
-             : ( $score > 0 ? 'W' : 'B' ));
+   if ( $verbose )
+      $color = ( $score > 0 ) ? $T_('White') : $T_('Black');
+   else
+      $color = ( $score > 0 ) ? 'W' : 'B';
 
    if ( abs($score) == SCORE_RESIGN )
-      return ( $verbose ? sprintf( $T_("%s wins by resign"), $color) : $color . ($quick ? "+R" : "+Resign") );
+      return ( $verbose ? sprintf( $T_("%s wins by resignation"), $color) : $color . ($quick ? "+R" : "+Resign") );
    elseif ( abs($score) == SCORE_TIME )
-      return ( $verbose ? sprintf( $T_("%s wins on time"), $color) : $color . ($quick ? "+T" : "+Time") );
+      return ( $verbose ? sprintf( $T_("%s wins by timeout"), $color) : $color . ($quick ? "+T" : "+Time") );
    elseif ( abs($score) == SCORE_FORFEIT )
       return ( $verbose ? sprintf( $T_("%s wins by forfeit"), $color) : $color . ($quick ? "+F" : "+Forfeit") );
    else

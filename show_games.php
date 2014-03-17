@@ -235,7 +235,7 @@ $GLOBALS['ThePage'] = new Page('GamesList');
    }
    if ( $finished ) //FU+FA
    {
-      $gfilter->add_filter(10, 'Score', 'G.Score', false,
+      $gfilter->add_filter(10, 'Score', array( 'G.Score', 'G.Flags', GAMEFLAGS_NO_RESULT ), false,
             array( FC_SIZE => 3, FC_HIDE => 1 ));
       if ( $all ) //FA
       {
@@ -255,7 +255,8 @@ $GLOBALS['ThePage'] = new Page('GamesList');
                array( T_('All#filter')  => '',
                       T_('Won')  => new QuerySQL( SQLP_HAVING, 'X_Score>0' ),
                       T_('Lost') => new QuerySQL( SQLP_HAVING, 'X_Score<0' ),
-                      T_('Jigo') => 'G.Score=0' ),
+                      T_('Jigo') => 'G.Score=0 AND (G.Flags & '.GAMEFLAGS_NO_RESULT.')=0',
+                      T_('Void#gameresult') => 'G.Score=0 AND G.Flags > 0 AND (G.Flags & '.GAMEFLAGS_NO_RESULT.')' ),
                true,
                array( FC_FNAME => 'won' ));
          $gfilter->add_filter(23, 'Rating', 'oppStartRating', true,
@@ -404,7 +405,7 @@ $GLOBALS['ThePage'] = new Page('GamesList');
  *  7:    Handicap
  *  8:    Komi
  *  9:    Moves
- * 10: >  FU+FA [Score] (Score)
+ * 10: >  FU+FA [Score/Flags] (Score)
  * 11: >  FU [User-Score AS X_Score] (Win-graphic) -> fname=won
  * 12:    Weekendclock
  * 13:    FU+FA [Games.Lastchanged] (End date), OB+RU+RA [Games.Lastchanged] (Last move)
@@ -768,12 +769,17 @@ $GLOBALS['ThePage'] = new Page('GamesList');
             if ( $gtable->Is_Column_Displayed[11] )
             {
                if ( $X_Score > 0 )
-                  $attrstr = 'yes.gif" alt="' . T_('Yes');
+                  $img = image( $base_path.'images/yes.gif', T_('Won'), null, 'class="InTextImage"');
                elseif ( $X_Score < 0 )
-                  $attrstr = 'no.gif" alt="' . T_('No');
-               else
-                  $attrstr = 'dash.gif" alt="' . T_('Jigo');
-               $row_arr[11] = "<img src=\"images/$attrstr\">";
+                  $img = image( $base_path.'images/no.gif', T_('Lost'), null, 'class="InTextImage"');
+               else //=0
+               {
+                  if ( $Flags & GAMEFLAGS_NO_RESULT )
+                     $img = image( $base_path.'images/no_result.gif', T_('No-Result (=Void)'), null, 'class="InTextImage"');
+                  else
+                     $img = image( $base_path.'images/dash.gif', T_('Jigo'), null, 'class="InTextImage"');
+               }
+               $row_arr[11] = $img;
             }
             if ( $gtable->Is_Column_Displayed[24] )
                $row_arr[24] = echo_rating($oppEndRating,true,$oppID);
@@ -853,7 +859,7 @@ $GLOBALS['ThePage'] = new Page('GamesList');
       if ( $finished ) //FU+FA
       {
          if ( $gtable->Is_Column_Displayed[10] )
-            $row_arr[10] = score2text($Score, false);
+            $row_arr[10] = score2text($Score, $Flags, /*verbose*/false);
       }
 
       if ( $gtable->Is_Column_Displayed[47] && ($Flags & GAMEFLAGS_ATTACHED_SGF) )

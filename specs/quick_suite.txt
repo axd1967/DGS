@@ -590,7 +590,7 @@ Commands:
             "status" : "PLAY",      # game-status: KOMI | SETUP | PLAY | PASS | SCORE | SCORE2 | FINISHED
             "flags" : "HIDDENMSG",  # flags (comma-separated): HIDDENMSG (game contains hidden-messages), ADMRESULT (admin ended game),
                                     #    TGDETACHED (detached tournament-game, see 'specs/db/table-Tournaments.txt'),
-                                    #    ATTACHEDSGF (there are SGFs attached to game)
+                                    #    ATTACHEDSGF (there are SGFs attached to game), NO_RESULT (game ended with NO-RESULT, set by game-admin)
             "score" : "",           # score for finished game only (same format as for game-object status_score-command); '' (=empty) if game not finished
 
             "game_type" : "GO",     # GO | TEAM_GO(N:M) | ZEN_GO (N); N,M >= 1
@@ -822,8 +822,9 @@ Commands:
       - Result (JSON) =
          {
             "ruleset" : "CHINESE",     # game-ruleset
-            "score" : 0 | "W+7" | "B+2.5" | "W+R" | "B+T" | "W+F",
+            "score" : 0 | "VOID" | "W+7" | "B+2.5" | "W+R" | "B+T" | "W+F",
                       # 0=jigo, or
+                      # "VOID"=no-result, or
                       # "[col]+[res]" with col: 'B' (=Black won), or 'W' (=White won), and
                       #    res : 'R' (=won by resignation), 'T' (=won by timeout), 'F' (=won by forfeit), or number of points
 
@@ -1998,7 +1999,7 @@ Options:
          - $R = rated: 'F' = free, 'R' = rated
          - $H = handicap: '' = no handicap, 'H7'
          - $K = komi: 'K6,5'
-         - $r = result: '=B3,5' = B won by 3.5, '=W0' = jigo, '=W3' = white won by 3
+         - $r = result: '=B3,5' = B won by 3.5, '=W0' = jigo, '=VOID' = no-result, '=W3' = white won by 3
          - $d1 = last-changed date in format YYYYMMDD: 20130819
          - $d2 = last-changed date in format YYYY-MM-DD: 2013-08-19
 
@@ -2081,7 +2082,8 @@ Response (SGF-properties):
       SZ[19]
       KM[6.5]
       HA[3]                            # handicap (omitted prop if no handicap)
-      RE[B+7.5]                        # result only for finished game; for format set "score"-field for "status_score"-command
+      RE[B+7.5]                        # result only for finished game; format: 0=jigo, "B/W+Resign/Time/Forfeit/999[.5]", "Void"
+                                       # see also SGF-specs: http://www.red-bean.com/sgf/properties.html#RE
 
       # shape-game-setup (with shape-info-comment)
       AB[aa][bb][cc]                   # Black setup stones for shape-game
