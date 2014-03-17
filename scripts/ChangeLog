@@ -13,6 +13,9 @@ ChangeLog
 
 2014-03-17 jug
 
+   * tournaments/include/tournament_points.php (TournamentPoints.calculate_points):
+   - bugfix: calculate points for NO-RESULT-game for Hahn-tournament-points-type in an unshared way
+
    * admin_game.php (draw_game_admin_form):
    - game-admin: add warning about game-ending for tournament-game
 

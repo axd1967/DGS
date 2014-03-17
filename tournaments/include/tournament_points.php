@@ -244,7 +244,10 @@ class TournamentPoints
          elseif ( $score_diff == 0 )
          {
             if ( $tgame_flags & TG_FLAG_GAME_NO_RESULT )
+            {
+               $share_points = false;
                $points = $this->PointsNoResult;
+            }
             else
                $points = 0;
          }
