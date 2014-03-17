@@ -132,7 +132,7 @@ define('TG_STATUS_DONE',   'DONE');
 define('CHECK_TG_STATUS', 'INIT|PLAY|SCORE|WAIT|DONE');
 
 define('TG_FLAG_GAME_END_TD',    0x0001); // T-game ended by TD
-define('TG_FLAG_GAME_DETACHED',  0x0002); // T-game "detached" (taken out of T)
+define('TG_FLAG_GAME_DETACHED',  0x0002); // T-game "detached" (taken out of T, =game annulled)
 define('TG_FLAG_CH_DF_SWITCHED', 0x0004); // role of challenger and defender is switched
 define('TG_FLAG_GAME_NO_RESULT', 0x0008); // T-game ended with NO-RESULT
 

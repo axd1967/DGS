@@ -507,7 +507,7 @@ class TournamentLogHelper
 
       $tlog = new Tournamentlog( 0, $tid, 0, 0, $tlog_type, 'TRND_Pool', TLOG_ACT_SET, 0,
          sprintf('Assign pool in round %s/#%s for users: [%s] -> new pool %s%s',
-            $tround->ID, $tround->Round, implode('; ', $old_state), $new_pool, ($new_pool==0 ? ' (DETACH)' : '') ));
+            $tround->ID, $tround->Round, implode('; ', $old_state), $new_pool, ($new_pool==0 ? ' (REMOVE)' : '') ));
       $tlog->insert();
    }
 

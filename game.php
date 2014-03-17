@@ -1379,7 +1379,7 @@ function draw_game_info( $game_row, $game_setup, $board, $tourney )
    if ( ALLOW_TOURNAMENTS && !is_null($tourney) )
    {
       $tflags_str = ($game_row['Flags'] & GAMEFLAGS_TG_DETACHED)
-         ? span('TWarning', sprintf('(%s) ', T_('detached#tourney')))
+         ? span('TWarning', sprintf('(%s) ', T_('annulled#tourney')))
          : '';
       echo "<tr>\n",
          '<td class=Color>', echo_image_tournament_info($tourney->ID), "</td>\n",

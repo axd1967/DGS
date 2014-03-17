@@ -538,7 +538,7 @@ function build_rating_diff( $rating_diff )
 
          $arr_flags = array();
          if ( $tgame->Flags & TG_FLAG_GAME_DETACHED )
-            $arr_flags[] = span('TWarning', T_('detached#tourney'));
+            $arr_flags[] = span('TWarning', T_('annulled#tourney'));
          if ( count($arr_flags) )
          {
             $itable->add_sinfo(

@@ -13,6 +13,19 @@ ChangeLog
 
 2014-03-17 jug
 
+   * tournaments/include/tournament_ladder.php (TournamentLadder.build_linked_incoming_games,
+       ~.build_linked_outgoing_games),
+     tournaments/include/tournament_log_helper.php (TournamentLogHelper.log_assign_tournament_pool),
+     tournaments/include/tournament_games.php (TournamentGames.getFlagsText),
+     tournaments/include/tournament_pool_classes.php (PoolGame.calc_result),
+     tournaments/include/tournament_globals.php,
+     tournaments/roundrobin/edit_points.php (build_points_examples),
+     gameinfo.php (build_rating_diff),
+     game.php (draw_game_info),
+     show_games.php:
+   - adjusted texts in web-UI: changed some game "detached (from tournament)" to game "annulled"
+     for clearer term, but technically keep "detaching"
+
    * include/globals.php (CSS_VERSION),
      skins/dragon/screen.css,
      tournaments/roundrobin/view_pools.php (build_pool_notes):
@@ -175,8 +188,7 @@ ALTER TABLE Games
      tournaments/include/tournament_pool_classes.php,
      scripts/tournament_consistency.php,
      specs/db/table-Tournaments.txt,
-     specs/tournaments.txt,
-     specs/caching.txt,
+     specs/tournaments.txt, specs/caching.txt,
      tournaments/roundrobin/view_pools.php (build_pool_notes),
      tournaments/ladder/withdraw.php (build_withdrawal_notes),
      tournaments/ladder/retreat.php [RENAMED],,

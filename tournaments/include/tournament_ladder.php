@@ -157,7 +157,7 @@ class TournamentLadder
             $gtext = ( is_null($tgame->Challenger_tladder) ) ? '#' : '#' . $tgame->Challenger_tladder->Rank;
             $ginfo = '[' . anchor( $base_path."game.php?gid={$tgame->gid}", $gtext ) . ']';
             if ( $is_detached )
-               $ginfo = span('TGDetached', $ginfo, '%s', T_('detached#tourney') );
+               $ginfo = span('TGDetached', $ginfo, '%s', T_('annulled#tourney') );
             elseif ( $my_id > 0 && $tgame->Challenger_uid == $my_id )
                $ginfo = span('TourneyOpp', $ginfo);
             $arr[] = $ginfo;
@@ -185,7 +185,7 @@ class TournamentLadder
             $gtext = ( is_null($tgame->Defender_tladder) ) ? '#' : '#' . $tgame->Defender_tladder->Rank;
             $ginfo = '[' . anchor( $base_path."game.php?gid={$tgame->gid}", $gtext ) . ']';
             if ( $is_detached )
-               $ginfo = span('TGDetached', $ginfo, '%s', T_('detached#tourney') );
+               $ginfo = span('TGDetached', $ginfo, '%s', T_('annulled#tourney') );
             elseif ( $my_id > 0 && $tgame->Defender_uid == $my_id )
                $ginfo = span('TourneyOpp', $ginfo);
             $arr[] = $ginfo;

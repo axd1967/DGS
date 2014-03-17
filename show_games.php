@@ -841,7 +841,7 @@ $GLOBALS['ThePage'] = new Page('GamesList');
       {
          $row_arr[42] = TournamentGames::getStatusText($TG_Status);
          if ( @$TG_Flags & TG_FLAG_GAME_DETACHED )
-            $row_arr[42] .= span('TGDetached', ' (D)', '%s', T_('detached#tourney'));
+            $row_arr[42] .= span('TGDetached', ' (A)', '%s', T_('annulled#tourney'));
       }
       if ( $glc->ext_tid && !$all && @$gtable->Is_Column_Displayed[45] && @$TG_Challenge >= 0 )
          $row_arr[45] = ( $TG_Challenge > 0 ) ? T_('Challenger#T_ladder') : T_('Defender#T_ladder');

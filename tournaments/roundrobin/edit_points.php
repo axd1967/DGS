@@ -403,8 +403,8 @@ function build_points_examples( &$form, $tpoints )
          T_('Resignation'), SCORE_RESIGN, 0,
          T_('Timeout'), SCORE_TIME, 0,
          T_('Forfeit'), SCORE_FORFEIT, 0,
-         T_('No-Result'), 0, TG_FLAG_GAME_NO_RESULT,
-         T_('Annulled'), NO_VALUE, TG_FLAG_GAME_DETACHED,
+         T_('No-Result#gres'), 0, TG_FLAG_GAME_NO_RESULT,
+         T_('Annulled#gres'), NO_VALUE, TG_FLAG_GAME_DETACHED,
       );
    for ( $i=0; $i < count($arr_scores); )
    {

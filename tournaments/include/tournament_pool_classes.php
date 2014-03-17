@@ -105,7 +105,7 @@ class PoolGame
 
          if ( $this->Flags & TG_FLAG_GAME_DETACHED ) // annulled (=detached) game has no effect on tournament
          {
-            $title = T_('Game annulled');
+            $title = T_('Game annulled#tourney');
             $style = 'MatrixAnnulled';
          }
          elseif ( $chk_score < 0 ) // won
