@@ -105,8 +105,7 @@ ChangeLog
        - ladder-tournament: skip rematch-wait for game ended with NO-RESULT
        - round-robin-tournament: use TournamentPoints.PointsNoResult for NO-RESULT game-end
          for point-calculation in pools
-     - view-pools: mark NO-RESULT game in pool-results of round-robin-tournamentsdashed
-       with grey background
+     - view-pools: mark NO-RESULT game in pool-results of round-robin-tournaments with grey background
      - edit-points: added points-calculation for NO-RESULT game in examples-preview
      - extended Score-filter with No-Result
      - games-list: added No-Result in score-column, extended score/won-filter with search for VOID-result
@@ -134,8 +133,7 @@ ChangeLog
        making game unrated, setting detached flags in tournament-game and Games-table
      - tournament-game-admin: setting jigo as game-result does not require color-choice
      - edit-points: added points-calculation for annulled game in examples-preview
-     - view-pools: mark annulled game in pool-results of round-robin-tournamentsdashed
-       with orange background
+     - view-pools: mark annulled game in pool-results of round-robin-tournaments with orange background
      - view-pools: renamed CSS for MatrixJigo to MatrixDraw
    - bugfix: showing Games.Rated state in tournament-game-admin was displayed in the wrong way
 
@@ -231,7 +229,7 @@ ALTER TABLE Games
        players are informed in game-end message about implicit unrated-change on forfeiting
      - tournament-game-admin: added ending game with forfeit by tournament-director
      - edit-points: added points-calculation for forfeited game in examples-preview
-     - view-pools: mark forfeited game in pool-results of round-robin-tournamentsdashed
+     - view-pools: mark forfeited game in pool-results of round-robin-tournaments
        with dashed black border
      - use TournamentPoints.PointsForfeit for point-calculations in tournament-pool
      - process game-forfeit for ladder-tournaments like a game by timeout
