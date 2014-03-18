@@ -154,7 +154,7 @@ in the HTTP-headers for authentication, which can be created with:
    # disconnect to clear cookies with session
    login.php?quick_mode=1&logout=1
 
-Authentication is one purpose for the login, the other is to allow an user-based
+Authentication is one purpose for the login, the other is to allow a user-based
 quota (and for that the user must be known and must be authenticated to avoid abuse).
 
 

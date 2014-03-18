@@ -27,5 +27,8 @@
     * jonathan Multiple Moves: Allow users to enter sequences of moves. Similar to eBay's automatic bidding, your sequence of moves is revealed to your opponent only if they play a response included in your sequence. Being able to specify variations would be nice but not required -- even the ability to enter single threaded sequences would be useful.
     * The [ext] wyvern program fulfills all of these requests client-side: save your sequence of moves as an SGF, and wyvern will connect to DGS and play them for you. It even handles branching, so if you see that your opponent has several sane responses, you can give continuations for each of them.
 
+* stopping conditional-move-sequence if opponent typed message (that needs to be "seen" by player)
+   - alternative: play out conditional-sequence, but store the last-move the game was "viewed" (though may be difficult as there are several ways to view a game along its move-messages)
+
 * Q: implement using async-handling (more secure) !?
 
