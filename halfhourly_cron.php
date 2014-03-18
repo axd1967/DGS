@@ -260,7 +260,7 @@ if ( !$is_down )
 
                   // remove hidden tags, strip away <c>-tags but keeping surrounded text
                   $movemsg = remove_hidden_game_tags( $TheBoard->movemsg );
-                  $movemsg = trim( preg_replace( "'(<c(omment)?\\s*>(.*?)</c(omment)?\\s*>)", "\\3\n", $movemsg ) );
+                  $movemsg = trim( preg_replace( "'(<c(omment)?\\s*>(.*?)</c(omment)?\\s*>)'is", "\\3\n", $movemsg ) );
                   $movemsg = mail_strip_html($movemsg);
                   $msg .= $TheBoard->draw_ascii_board($movemsg) . "\n";
                }

@@ -13,6 +13,9 @@ ChangeLog
 
 2014-03-18 jug
 
+   * halfhourly_cron.php:
+   - bugfix introduced in release 1.0.16: fixed regex for removing public-comments
+
    * tournaments/include/tournament_ladder_helper.php (TournamentLadderHelper.process_tournament_ladder_game_end),
      tournaments/include/tournament_ladder.php (class TournamentLadder, ~.__construct,
        ~.build_log_string, ~.fillEntityData, ~.update_sequently_wins, ~.new_from_row,
