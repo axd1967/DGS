@@ -529,7 +529,7 @@ class TournamentRoundHelper
             $count_done = 0;
             foreach ( $arr_updates as $rank => $arr_tpools )
             {
-               if ( TournamentPool::update_tournament_pool_ranks($tlog_type, 'fill_ranks', $arr_tpools, -$rank) )
+               if ( TournamentPool::update_tournament_pool_ranks($tid, $tlog_type, 'fill_ranks', $arr_tpools, -$rank) )
                   $count_done++;
             }
          }
@@ -553,7 +553,7 @@ class TournamentRoundHelper
       $tid = $tround->tid;
       $round = $tround->Round;
       $arr_pools_to_finish = array(); // [ pool, ... ]
-      $result = self::fill_ranks_tournament_pool( $tround );
+      $result = self::fill_ranks_tournament_pool( $tlog_type, $tround );
 
       $cnt_upd = TournamentPool::update_tournament_pool_set_pool_winners( $tround );
       $result[] = sprintf( T_('%s players set as pool winners for finished pools.'), $cnt_upd );

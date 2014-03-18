@@ -182,13 +182,14 @@ class TournamentPool
 
    /*!
     * \brief Returns db-fields to be used for query of TournamentPool-objects for given tournament-id.
-    * \param $pool 0 = all pools, otherwise specific pool or pools if array of pools
+    * \param $pool 0 = all pools, otherwise specific pool or pool-list if array of pools
     */
    public static function build_query_sql( $tid=0, $round=0, $pool=0 )
    {
       $tid = (int)$tid;
       $round = (int)$round;
-      $pool = (int)$pool;
+      if ( !is_array($pool) )
+         $pool = (int)$pool;
 
       $qsql = $GLOBALS['ENTITY_TOURNAMENT_POOL']->newQuerySQL('TPOOL');
       if ( $tid > 0 )
@@ -850,7 +851,7 @@ class TournamentPool
     * \param $fix_rank if true, no update-restriction on Rank;
     *        otherwise expect Rank<TPOOLRK_RANK_ZONE to auto-fill rank
     */
-   public static function update_tournament_pool_ranks( $tlog_type, $tlog_ref, $tpool_id, $rank, $fix_rank=false )
+   public static function update_tournament_pool_ranks( $tid, $tlog_type, $tlog_ref, $tpool_id, $rank, $fix_rank=false )
    {
       if ( is_array($tpool_id) )
       {
@@ -866,13 +867,13 @@ class TournamentPool
       }
       else
       {
-         error('invalid_args', "TournamentPool:update_tournament_pool_ranks.check.tpool($tpool_id,$rank)");
+         error('invalid_args', "TournamentPool:update_tournament_pool_ranks.check.tpool($tid,$tpool_id,$rank)");
          return 0;
       }
       $rank = (int)$rank;
 
       $qpart_rank = ($fix_rank) ? '' : ' AND Rank<'.TPOOLRK_RANK_ZONE;
-      $result = db_query( "TournamentPool:update_tournament_pool_ranks.update($tpool_id,$rank)",
+      $result = db_query( "TournamentPool:update_tournament_pool_ranks.update($tid,$tpool_id,$rank)",
          "UPDATE TournamentPool SET Rank=$rank " .
          "WHERE $qpart_tpools $qpart_rank LIMIT $cnt" );
 

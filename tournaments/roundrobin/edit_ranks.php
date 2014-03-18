@@ -137,7 +137,8 @@ $GLOBALS['ThePage'] = new Page('TournamentRankEditor');
          $pool_win = (bool)get_request_arg('poolwin');
          if ( !$pool_win && $rank_value )
             $rank_value = -abs($rank_value);
-         if ( TournamentPool::update_tournament_pool_ranks( $allow_edit_tourney, 'edit_ranks', $tpool_user->ID, $rank_value, /*fix-rank*/true ) )
+         if ( TournamentPool::update_tournament_pool_ranks( $tid, $allow_edit_tourney, 'edit_ranks', $tpool_user->ID,
+               $rank_value, /*fix-rank*/true ) )
             $tpool_user->Rank = $rank_value;
       }
 
