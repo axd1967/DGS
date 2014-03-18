@@ -76,3 +76,11 @@ ALTER TABLE TournamentLadder
 SELECT ID AS tid FROM Tournament WHERE Type='LADDER' ;
 
 
+-- extended tournament-result
+ALTER TABLE TournamentResult
+   MODIFY Round tinyint unsigned NOT NULL default '1' AFTER Type,
+   ADD Result mediumint NOT NULL default '0' AFTER EndTime,
+   ADD Comment varchar(128) NOT NULL default '',
+   ADD Note varchar(255) NOT NULL default '' ;
+
+

@@ -44,7 +44,8 @@ global $ENTITY_TOURNAMENT_RESULT; //PHP5
 $ENTITY_TOURNAMENT_RESULT = new Entity( 'TournamentResult',
    FTYPE_PKEY,  'ID',
    FTYPE_AUTO,  'ID',
-   FTYPE_INT,   'ID', 'tid', 'uid', 'rid', 'Type', 'Round', 'Rank', 'RankKept',
+   FTYPE_INT,   'ID', 'tid', 'uid', 'rid', 'Type', 'Round', 'Result', 'Rank', 'RankKept',
+   FTYPE_TEXT,  'Comment', 'Note',
    FTYPE_FLOAT, 'Rating',
    FTYPE_DATE,  'StartTime', 'EndTime'
    );
@@ -57,15 +58,18 @@ class TournamentResult
    public $rid;
    public $Rating;
    public $Type;
+   public $Round;
    public $StartTime;
    public $EndTime;
-   public $Round;
+   public $Result;
    public $Rank;
    public $RankKept;
+   public $Comment;
+   public $Note;
 
    /*! \brief Constructs TournamentResult-object with specified arguments. */
-   public function __construct( $id=0, $tid=0, $uid=0, $rid=0, $rating=NO_RATING, $type=0,
-         $start_time=0, $end_time=0, $round=1, $rank=0, $rank_kept=0 )
+   public function __construct( $id=0, $tid=0, $uid=0, $rid=0, $rating=NO_RATING, $type=0, $round=1,
+         $start_time=0, $end_time=0, $result=0, $rank=0, $rank_kept=0, $comment='', $note='' )
    {
       $this->ID = (int)$id;
       $this->tid = (int)$tid;
@@ -73,11 +77,14 @@ class TournamentResult
       $this->rid = (int)$rid;
       $this->Rating = (float)$rating;
       $this->Type = (int)$type;
+      $this->Round = (int)$round;
       $this->StartTime = (int)$start_time;
       $this->EndTime = (int)$end_time;
-      $this->Round = (int)$round;
+      $this->Result = (int)$result;
       $this->Rank = (int)$rank;
       $this->RankKept = (int)$rank_kept;
+      $this->Comment = $comment;
+      $this->Note = $note;
    }
 
    public function to_string()
@@ -131,11 +138,14 @@ class TournamentResult
       $data->set_value( 'rid', $this->rid );
       $data->set_value( 'Rating', $this->Rating );
       $data->set_value( 'Type', $this->Type );
+      $data->set_value( 'Round', $this->Round );
       $data->set_value( 'StartTime', $this->StartTime );
       $data->set_value( 'EndTime', $this->EndTime );
-      $data->set_value( 'Round', $this->Round );
+      $data->set_value( 'Result', $this->Result );
       $data->set_value( 'Rank', $this->Rank );
       $data->set_value( 'RankKept', $this->RankKept );
+      $data->set_value( 'Comment', $this->Comment );
+      $data->set_value( 'Note', $this->Note );
       return $data;
    }
 
@@ -162,11 +172,14 @@ class TournamentResult
             @$row['rid'],
             @$row['Rating'],
             @$row['Type'],
+            @$row['Round'],
             @$row['X_StartTime'],
             @$row['X_EndTime'],
-            @$row['Round'],
+            @$row['Result'],
             @$row['Rank'],
-            @$row['RankKept']
+            @$row['RankKept'],
+            @$row['Comment'],
+            @$row['Note']
          );
       return $tres;
    }

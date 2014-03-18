@@ -259,8 +259,8 @@ class TournamentLadderHelper
 
       $rank_kept_hours = (int)( ($NOW - $row['X_RankChanged']) / SECS_PER_HOUR);
       $tresult = new TournamentResult( 0, $tid, $row['uid'], $row['rid'], $row['Rating2'],
-         TRESULTTYPE_KING_OF_THE_HILL, /*start*/$row['X_RankChanged'], /*end*/$NOW,
-         /*round*/1, $row['Rank'], $rank_kept_hours );
+         TRESULTTYPE_KING_OF_THE_HILL, /*round*/1, /*start*/$row['X_RankChanged'], /*end*/$NOW,
+         0, $row['Rank'], $rank_kept_hours, '', 'set by CRON' );
 
       $nfy_uids = TournamentDirector::load_tournament_directors_uid( $tid );
       $nfy_uids[] = $row['owner_uid'];

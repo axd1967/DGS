@@ -13,6 +13,22 @@ ChangeLog
 
 2014-03-18 jug
 
+   * tournaments/include/tournament_result.php (class TournamentResult, ~.__construct,
+       ~.fillEntityData, ~.new_from_row),
+     tournaments/include/tournament_ladder_helper.php (TournamentLadderHelper.process_tournament_ladder_crown_king),
+     tournaments/include/tournament_gui_helper.php (TournamentGuiHelper.build_tournament_results),
+     scripts/updates/database_changes_1_0_16_to_1_0_17.mysql,
+     specs/db/table-Tournaments.txt, specs/db/dragon-ddl.sql:
+   - extended tournament-results to support ladder sequently-wins & public & private comment on entry
+-----------
+-- extended tournament-result
+ALTER TABLE TournamentResult
+   MODIFY Round tinyint unsigned NOT NULL default '1' AFTER Type,
+   ADD Result mediumint NOT NULL default '0' AFTER EndTime,
+   ADD Comment varchar(128) NOT NULL default '',
+   ADD Note varchar(255) NOT NULL default '' ;
+-----------
+
    * halfhourly_cron.php:
    - bugfix introduced in release 1.0.16: fixed regex for removing public-comments
 

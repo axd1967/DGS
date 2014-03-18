@@ -127,6 +127,8 @@ class TournamentGuiHelper
       $table->add_or_del_column();
 
       // add_tablehead($nr, $descr, $attbs=null, $mode=TABLE_NO_HIDE|TABLE_NO_SORT, $sortx='')
+      if ( $tourney->Type == TOURNEY_TYPE_LADDER )
+         $table->add_tablehead( 9, T_('Result#tourney_result'), 'Number', TABLE_NO_HIDE, 'Result+');
       $table->add_tablehead( 6, T_('Rank#tourney_result'), 'Number', TABLE_NO_HIDE, 'Rank+');
       $table->add_tablehead( 1, T_('Name#header'), 'User', TABLE_NO_HIDE, 'TRP_Name+');
       $table->add_tablehead( 2, T_('Userid#header'), 'User', TABLE_NO_HIDE, 'TRP_Handle+');
@@ -136,6 +138,7 @@ class TournamentGuiHelper
       if ( $tourney->Type == TOURNEY_TYPE_LADDER )
          $table->add_tablehead( 7, T_('Rank Kept#header'), '', 0, 'RankKept-');
       $table->add_tablehead( 8, T_('Result Date#header'), '', 0, 'EndTime+');
+      $table->add_tablehead(10, T_('Comment#header'), '', 0, 'Comment+');
 
       if ( $tourney->Type == TOURNEY_TYPE_LADDER )
          $table->set_default_sort( 6, 7, 8 );
@@ -168,6 +171,13 @@ class TournamentGuiHelper
             $row_str[ 7] = TimeFormat::echo_time_diff( $tresult->EndTime, $tresult->StartTime, 24, TIMEFMT_SHORT, '' );
          if ( $table->Is_Column_Displayed[ 8] )
             $row_str[ 8] = ($tresult->EndTime > 0) ? date(DATE_FMT2, $tresult->EndTime) : '';
+         if ( @$table->Is_Column_Displayed[ 9] )
+         {
+            if ( $tresult->Type == TRESULTTYPE_KING_OF_THE_HILL )
+               $row_str[ 9] = ''; //$tresult->Result;
+         }
+         if ( $table->Is_Column_Displayed[10] )
+            $row_str[10] = $tresult->Comment;
          if ( $is_mine )
             $row_str['extra_class'] = 'TourneyUser';
          $table->add_row( $row_str );

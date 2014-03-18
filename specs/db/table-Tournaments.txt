@@ -859,11 +859,14 @@ Description:
 | rid       | int(11)              | NO   |     | 0                   |                |
 | Rating    | double               | NO   |     | -9999               |                |
 | Type      | tinyint(3) unsigned  | NO   |     | 0                   |                |
+| Round     | tinyint(3) unsigned  | NO   |     | 1                   |                |
 | StartTime | datetime             | NO   |     | 0000-00-00 00:00:00 |                |
 | EndTime   | datetime             | NO   |     | 0000-00-00 00:00:00 |                |
-| Round     | tinyint(3) unsigned  | NO   |     | 1                   |                |
+| Result    | mediumint(9)         | NO   |     | 0                   |                |
 | Rank      | smallint(5) unsigned | NO   |     | 0                   |                |
 | RankKept  | smallint(5) unsigned | NO   |     | 0                   |                |
+| Comment   | varchar(128)         | NO   |     |                     |                |
+| Note      | varchar(255)         | NO   |     |                     |                |
 
 
 ## Fields:
@@ -881,17 +884,26 @@ Description:
    - 1 = Crowned King (of ladder)
    - 2 = Round-Robin Winners (rank 1..n); Ranks need not to be unique
 
+* Round : round number
+   - always 1 for tournament-ladder
+
 * StartTime : start-time for entry
 
 * EndTime : end-time for entry
 
-* Round : round number
-   - always 1 for tournament-ladder
+* Result : customary result-value dependent on tournament-type and result-type
+   - can be TournamentLadder.SeqWinsBest for ladders
 
 * Rank : place of users for T-result
+   - ladder: typically the TournamentLadder.Rank of TP
+   - round-robin: typically the TournamentPool.Rank of TP in final round
 
 * RankKept : number of hours, rank is kept
    - only used for tournament-ladder
+
+* Comment : public comment about user of result
+
+* Note : private note about user, only for tournament-directors
 
 
 ###########################################################################
