@@ -65,3 +65,14 @@ ALTER TABLE Games
    DROP COLUMN OldFlags ;
 
 
+-- added tracking for number of sequently wins in ladder-tournament
+ALTER TABLE TournamentLadder
+   ADD SeqWins smallint unsigned NOT NULL DEFAULT '0',
+   ADD SeqWinsBest smallint unsigned NOT NULL DEFAULT '0' ;
+
+-- execute fix-script for all ladder-tournaments (use the following query to identify these)
+-- to fix current state of sequently-wins:
+--    'scripts/fix_ladder_seq_wins.php'
+SELECT ID AS tid FROM Tournament WHERE Type='LADDER' ;
+
+

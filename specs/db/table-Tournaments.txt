@@ -493,6 +493,8 @@ Description:
 | HistoryRank   | smallint(5) unsigned | NO   |     | 0                   |       |
 | ChallengesIn  | tinyint(3) unsigned  | NO   |     | 0                   |       |
 | ChallengesOut | tinyint(3) unsigned  | NO   |     | 0                   |       |
+| SeqWins       | smallint(5) unsigned | NO   |     | 0                   |       |
+| SeqWinsBest   | smallint(5) unsigned | NO   |     | 0                   |       |
 
 
 ## Fields:
@@ -529,6 +531,10 @@ Description:
 * ChallengesIn : number of current incoming challenges for ladder-user
 
 * ChallengesOut : number of current outgoing challenges for ladder-user
+
+* SeqWins : number of sequently wins (including jigo) for ladder-user, resetted to 0 winning-streak broken
+
+* SeqWinsBest : track best number of sequently wins (including jigo) for ladder-user
 
 
 ###########################################################################

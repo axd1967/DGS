@@ -54,7 +54,7 @@ global $ENTITY_TOURNAMENT_LADDER; //PHP5
 $ENTITY_TOURNAMENT_LADDER = new Entity( 'TournamentLadder',
       FTYPE_PKEY, 'tid', 'rid',
       FTYPE_INT,  'tid', 'rid', 'uid', 'Rank', 'BestRank', 'StartRank', 'PeriodRank', 'HistoryRank',
-                  'ChallengesIn', 'ChallengesOut',
+                  'ChallengesIn', 'ChallengesOut', 'SeqWins', 'SeqWinsBest',
       FTYPE_DATE, 'Created', 'RankChanged'
    );
 
@@ -72,6 +72,8 @@ class TournamentLadder
    public $HistoryRank;
    public $ChallengesIn;
    public $ChallengesOut;
+   public $SeqWins;
+   public $SeqWinsBest;
 
    // non-DB fields
 
@@ -92,7 +94,7 @@ class TournamentLadder
 
    /*! \brief Constructs TournamentLadder-object with specified arguments. */
    public function __construct( $tid=0, $rid=0, $uid=0, $created=0, $rank_changed=0, $rank=0, $best_rank=0,
-         $start_rank=0, $period_rank=0, $history_rank=0, $challenges_in=0, $challenges_out=0 )
+         $start_rank=0, $period_rank=0, $history_rank=0, $challenges_in=0, $challenges_out=0, $seq_wins=0, $seq_wins_best=0 )
    {
       $this->tid = (int)$tid;
       $this->rid = (int)$rid;
@@ -106,6 +108,8 @@ class TournamentLadder
       $this->HistoryRank = (int)$history_rank;
       $this->ChallengesIn = (int)$challenges_in;
       $this->ChallengesOut = (int)$challenges_out;
+      $this->SeqWins = (int)$seq_wins;
+      $this->SeqWinsBest = (int)$seq_wins_best;
    }
 
    /*! \brief Adds TournamentGames-object to list of incoming challenge (running) games. */
@@ -204,11 +208,13 @@ class TournamentLadder
       if ( $fmt == 1 )
          return sprintf("rid=[%s], uid=[%s], Rank=[%s]", $this->rid, $this->uid, $this->Rank );
       else
-         return sprintf("TournamentLadder: rid=[%s], uid=[%s], Created=[%s], RankChanged=[%s], Rank=[%s], BestRank=[%s], StartRank=[%s], PeriodRank=[%s], HistoryRank=[%s]",
+         return sprintf("TournamentLadder: rid=[%s], uid=[%s], Created=[%s], RankChanged=[%s], Rank=[%s], BestRank=[%s], " .
+                        "StartRank=[%s], PeriodRank=[%s], HistoryRank=[%s], SeqWins=[%s], SeqWinsBest=[%s]",
             $this->rid, $this->uid,
             ($this->Created > 0 ? date(DATE_FMT, $this->Created) : ''),
             ($this->RankChanged > 0 ? date(DATE_FMT, $this->RankChanged) : ''),
-            $this->Rank, $this->BestRank, $this->StartRank, $this->PeriodRank, $this->HistoryRank );
+            $this->Rank, $this->BestRank, $this->StartRank, $this->PeriodRank, $this->HistoryRank,
+            $this->SeqWins, $this->SeqWinsBest );
    }
 
    public function build_rank_kept( $timefmt=null, $zero_val='' )
@@ -258,6 +264,8 @@ class TournamentLadder
       $data->set_value( 'HistoryRank', $this->HistoryRank );
       $data->set_value( 'ChallengesIn', $this->ChallengesIn );
       $data->set_value( 'ChallengesOut', $this->ChallengesOut );
+      $data->set_value( 'SeqWins', $this->SeqWins );
+      $data->set_value( 'SeqWinsBest', $this->SeqWinsBest );
       return $data;
    }
 
@@ -299,6 +307,50 @@ class TournamentLadder
          $this->ChallengesOut += $diff;
       return $result;
    }
+
+   /*!
+    * \brief Increases or resets TournamentLadder.SeqWins and keep track of SeqWinsBest for current ladder user
+    *       dependent on score and game-flags.
+    * \param $game_score game-score relative to current ladder-user, i.e. score<0 =win
+    * \param $tgame_flags respective TournamentGames.Flags to decide on annulled-game and no-result-game (no action)
+    * \param $db_update false = only update this TournamentLadder-object
+    */
+   public function update_sequently_wins( $game_score, $tgame_flags, $db_update=true )
+   {
+      if ( $tgame_flags & (TG_FLAG_GAME_DETACHED|TG_FLAG_GAME_NO_RESULT) )
+         return false;
+
+      if ( $game_score <= 0 ) // game won or jigo
+      {
+         if ( $db_update )
+         {
+            $result = db_query( "TournamentLadder.update_sequently_wins.inc({$this->rid},$game_score,$tgame_flags)",
+               "UPDATE TournamentLadder SET SeqWins=SeqWins+1, SeqWinsBest=GREATEST(SeqWinsBest,SeqWins+1) " .
+               "WHERE tid={$this->tid} AND rid={$this->rid} LIMIT 1" );
+         }
+         else
+            $result = true;
+         if ( $result )
+         {
+            $this->SeqWins++;
+            $this->SeqWinsBest = max( $this->SeqWinsBest, $this->SeqWins );
+         }
+      }
+      else // game lost
+      {
+         if ( $db_update )
+         {
+            $result = db_query( "TournamentLadder.update_sequently_wins.reset({$this->rid},$game_score,$tgame_flags)",
+               "UPDATE TournamentLadder SET SeqWins=0 " .
+               "WHERE tid={$this->tid} AND rid={$this->rid} LIMIT 1" );
+         }
+         else
+            $result = true;
+         if ( $result )
+            $this->SeqWins = 0;
+      }
+      return $result;
+   }//update_sequently_wins
 
    /*!
     * \brief Removes user from ladder with given tournament tid, remove TP and notifies opponents of running games.
@@ -471,7 +523,9 @@ class TournamentLadder
             @$row['PeriodRank'],
             @$row['HistoryRank'],
             @$row['ChallengesIn'],
-            @$row['ChallengesOut']
+            @$row['ChallengesOut'],
+            @$row['SeqWins'],
+            @$row['SeqWinsBest']
          );
       return $tl;
    }
@@ -1423,6 +1477,18 @@ class TournamentLadder
          "WHERE TL.tid=$tid AND TLP.Rating2 >= $rating" );
       return ($row) ? (int)$row['X_Count'] : 0;
    }//find_ladder_rating_pos
+
+   /*! \brief Tracks (increases or resets) sequently wins for given tournament-game for challenger and defender. */
+   public static function process_game_end_sequently_wins( $tgame )
+   {
+      // track wins for challenger
+      $tladder_ch = new TournamentLadder( $tid, $tgame->Challenger_rid, $tgame->Challenger_uid );
+      $tladder_ch->update_sequently_wins( $tgame->Score, $tgame->Flags );
+
+      // track wins for defender
+      $tladder_df = new TournamentLadder( $tid, $tgame->Defender_rid, $tgame->Defender_uid );
+      $tladder_df->update_sequently_wins( -$tgame->Score, $tgame->Flags );
+   }//process_game_end_sequently_wins
 
 } // end of 'TournamentLadder'
 ?>

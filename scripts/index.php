@@ -72,6 +72,7 @@ require_once 'include/std_functions.php';
             'voting_consistency.php'      => "Check consistency of Feature- & Survey-data",
             'fix_game_snapshot.php'       => "Fix Games.Snapshot",
             'fix_games_timeleft.php'      => "Fix Games.TimeOutDate for running games (after long maintenance)",
+            'fix_ladder_seq_wins.php'     => "Fix TournamentLadder.SeqWins/SeqWinsBest for ladder-tournament",
 
          "Info" => 0,
             'phpinfo.php'              => "Shows PHP-info",

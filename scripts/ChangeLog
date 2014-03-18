@@ -11,6 +11,33 @@ Release [2013-08-11] - DGS 1.0.16 - tag [release-1_0_16-20130811] on (later) bra
 ChangeLog
 ------------------------------------------------------------------
 
+2014-03-18 jug
+
+   * tournaments/include/tournament_ladder_helper.php (TournamentLadderHelper.process_tournament_ladder_game_end),
+     tournaments/include/tournament_ladder.php (class TournamentLadder, ~.__construct,
+       ~.build_log_string, ~.fillEntityData, ~.update_sequently_wins, ~.new_from_row,
+       ~.process_game_end_sequently_wins),
+     scripts/updates/database_changes_1_0_16_to_1_0_17.mysql,
+     specs/db/table-Tournaments.txt, specs/db/dragon-ddl.sql,
+     scripts/fix_ladder_seq_wins.php (show_form, fix_ladder_seqwins, dbg_query),
+     scripts/index.php, tournaments/ladder/view.php:
+   - added tracking of sequently wins and best sequently wins for participants in ladder-tournament
+     - increase seq-wins for winner (including jigo) on processing game-end
+     - reset seq-wins for loser (excluding jigo) on processing game-end for
+     - added column in ladder-view showing sequently wins and best value
+     - added script to fix sequently wins for all users of ladder-tournament
+-----------
+-- added tracking for number of sequently wins in ladder-tournament
+ALTER TABLE TournamentLadder
+   ADD SeqWins smallint unsigned NOT NULL DEFAULT '0',
+   ADD SeqWinsBest smallint unsigned NOT NULL DEFAULT '0' ;
+
+-- execute fix-script for all ladder-tournaments (use the following query to identify these)
+-- to fix current state of sequently-wins:
+--    'scripts/fix_ladder_seq_wins.php'
+SELECT ID AS tid FROM Tournament WHERE Type='LADDER' ;
+-----------
+
 2014-03-17 jug
 
    * tournaments/include/tournament_games.php (TournamentGames.buildStatusFilterArray):

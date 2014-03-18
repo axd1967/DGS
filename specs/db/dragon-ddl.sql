@@ -1108,6 +1108,8 @@ CREATE TABLE IF NOT EXISTS `TournamentLadder` (
   `HistoryRank` smallint(5) unsigned NOT NULL default '0',
   `ChallengesIn` tinyint(3) unsigned NOT NULL default '0',
   `ChallengesOut` tinyint(3) unsigned NOT NULL default '0',
+  `SeqWins` smallint(5) unsigned NOT NULL default '0',
+  `SeqWinsBest` smallint(5) unsigned NOT NULL default '0',
   PRIMARY KEY  (`tid`,`rid`),
   KEY `uid` (`uid`),
   KEY `Rank` (`tid`,`Rank`)

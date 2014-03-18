@@ -152,6 +152,8 @@ $GLOBALS['ThePage'] = new Page('TournamentLadderView');
       $ltable->add_tablehead(16, T_('Challenges-Out#header'), '', 0 );
       $ltable->add_tablehead( 9, T_('Rank Changed#T_ladder'), 'Date', 0 );
       $ltable->add_tablehead(10, T_('Rank Kept#header'), '', 0 );
+      $ltable->add_tablehead(17, span('title="'.basic_safe(T_('Sequently Wins').' [: '.T_('Best Sequently Wins').']').'"',
+         T_('#Seq-Wins#header')), 'NumberC', 0 );
       $ltable->add_tablehead(15, new TableHead( T_('User online#header'), 'images/online.gif',
          sprintf( T_('Indicator for being online up to %s mins ago'), SPAN_ONLINE_MINS)
             . ', ' . T_('or on vacation#header') ), 'Image', 0 );
@@ -261,6 +263,9 @@ $GLOBALS['ThePage'] = new Page('TournamentLadderView');
             $row_str[15] = echo_user_online_vacation( $user->urow['TLP_OnVacation'], $user->Lastaccess );
          if ( $ltable->Is_Column_Displayed[16] )
             $row_str[16] = implode(' ', $tladder->build_linked_outgoing_games( $my_uid ));
+         if ( $ltable->Is_Column_Displayed[17] )
+            $row_str[17] = $tladder->SeqWins
+               . (( $tladder->SeqWins != $tladder->SeqWinsBest ) ? ' : ' . $tladder->SeqWinsBest : '' );
 
          if ( $is_mine )
             $row_str['extra_class'] = 'TourneyUser';
