@@ -104,7 +104,7 @@ require_once 'forum/forum_functions.php';
    $result = db_query( 'show_forumlog.find_data', $query );
 
    $show_rows = $fltable->compute_show_rows(mysql_num_rows($result));
-   $fltable->set_found_rows( mysql_found_rows('show_forumlog.found_rows') );
+   $fltable->set_found_rows( mysql_found_rows('admin_show_forumlog.found_rows') );
 
    $title = T_('Forum log');
    start_page( $title, true, $logged_in, $player_row );

@@ -130,19 +130,19 @@ class TournamentResultControl
          $trtable->set_default_sort( 6, 8 );
 
       // load tournament-results
-      $iterator = new ListIterator( "$dbgmsg.TournamentResultControl.build_tournament_result_table.find_tresults",
+      $iterator = new ListIterator( "$dbgmsg.TRC.build_tournament_result_table.find_tresults",
             $trtable->get_query(),
             $trtable->current_order_string(),
             ( $this->limit < 0 ? $trtable->current_limit_string() : "LIMIT {$this->limit}" ) );
       if ( $this->show_all || $this->limit < 0 )
          $iterator = TournamentResult::load_tournament_results( $iterator, $tid, /*player-info*/true );
       else
-         $iterator = TournamentCache::load_cache_tournament_results(
-            "$dbgmsg.TournamentResultControl.build_tournament_result_table", $tid, $iterator, /*player-info*/true );
+         $iterator = TournamentCache::load_cache_tournament_results( "$dbgmsg.TRC.build_tournament_result_table",
+            $tid, $iterator, /*player-info*/true );
 
       $this->show_rows = $trtable->compute_show_rows( $iterator->getResultRows() );
       $trtable->set_found_rows( ( $this->limit < 0 )
-          ? mysql_found_rows('Tournament.list_results.found_rows')
+          ? mysql_found_rows("$dbgmsg.TRC.build_tournament_result_table.found_rows")
           : $this->show_rows );
 
       $this->iterator = $iterator;

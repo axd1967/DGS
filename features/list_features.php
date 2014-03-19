@@ -129,7 +129,7 @@ require_once 'features/lib_votes.php';
    $result = db_query( 'featurelist.find_data', $query );
 
    $show_rows = $ftable->compute_show_rows(mysql_num_rows($result));
-   $ftable->set_found_rows( mysql_found_rows('featurelist.found_rows') );
+   $ftable->set_found_rows( mysql_found_rows('features.list_features.found_rows') );
 
    if ( $filter_my_vote->value == 2 ) // VOTED
       $title = T_('My Feature Votes#title');

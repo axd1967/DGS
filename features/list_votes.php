@@ -91,7 +91,7 @@ require_once 'features/lib_votes.php';
    $result = db_query( 'votelist.find_data', $query );
 
    $show_rows = $vtable->compute_show_rows(mysql_num_rows($result));
-   $vtable->set_found_rows( mysql_found_rows('votelist.found_rows') );
+   $vtable->set_found_rows( mysql_found_rows('features.list_votes.found_rows') );
 
    $title = T_('Feature Vote Results');
    start_page( $title, true, $logged_in, $player_row,

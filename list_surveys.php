@@ -110,7 +110,7 @@ $GLOBALS['ThePage'] = new Page('SurveyList');
    $iterator = Survey::load_surveys( $iterator );
 
    $show_rows = $table->compute_show_rows( $iterator->getResultRows() );
-   $table->set_found_rows( mysql_found_rows('Survey.list.found_rows') );
+   $table->set_found_rows( mysql_found_rows('list_surveys.found_rows') );
 
 
    $title = T_('Surveys');

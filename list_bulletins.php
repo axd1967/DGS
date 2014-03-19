@@ -208,7 +208,7 @@ $GLOBALS['ThePage'] = new Page('BulletinList');
    $iterator = Bulletin::load_bulletins( $iterator );
 
    $show_rows = $btable->compute_show_rows( $iterator->getResultRows() );
-   $btable->set_found_rows( mysql_found_rows('Bulletin.list.found_rows') );
+   $btable->set_found_rows( mysql_found_rows('list_bulletins.found_rows') );
 
 
    $title = T_('Bulletin Board');
