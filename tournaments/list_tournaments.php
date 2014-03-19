@@ -67,8 +67,11 @@ $GLOBALS['ThePage'] = new Page('TournamentList');
    foreach ( Tournament::getTypeText() as $type => $text )
       $type_filter_array[$text] = "T.Type='$type'";
 
-   $status_filter_array = array( T_('All') => '' );
-   $idx = 1;
+   $status_filter_array = array(
+         T_('All') => '',
+         T_('Open#tourney') => "T.Status IN ('".TOURNEY_STATUS_REGISTER."','".TOURNEY_STATUS_PAIR."','".TOURNEY_STATUS_PLAY."')",
+      );
+   $idx = count($status_filter_array);
    foreach ( Tournament::getStatusText() as $status => $text )
    {
       $status_filter_array[$text] = "T.Status='$status'";
@@ -107,7 +110,8 @@ $GLOBALS['ThePage'] = new Page('TournamentList');
    $tfilter->add_filter( 1, 'Numeric', 'T.ID', true);
    $tfilter->add_filter( 2, 'Selection', $scope_filter_array, true );
    $tfilter->add_filter( 3, 'Selection', $type_filter_array, true );
-   $tfilter->add_filter( 4, 'Selection', $status_filter_array, true );
+   $tfilter->add_filter( 4, 'Selection', $status_filter_array, true,
+         array( FC_DEFAULT => 1 ) );
    $filter_title =&
       $tfilter->add_filter( 5, 'Text', 'T.Title #OP #VAL', true,
          array( FC_SIZE => 16, FC_SUBSTRING => 1, FC_START_WILD => 3, FC_SQL_TEMPLATE => 1 ));

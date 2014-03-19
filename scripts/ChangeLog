@@ -11,6 +11,11 @@ Release [2013-08-11] - DGS 1.0.16 - tag [release-1_0_16-20130811] on (later) bra
 ChangeLog
 ------------------------------------------------------------------
 
+2014-03-20 jug
+
+   * tournaments/list_tournaments.php:
+   - show only "Open" tournaments (status REGISTER/PAIR/PLAY) per default in tournaments-list
+
 2014-03-19 jug
 
    * tournaments/include/tournament_result_control.php (class TournamentResultControl, ~.__construct,
