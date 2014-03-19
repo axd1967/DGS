@@ -11,6 +11,23 @@ Release [2013-08-11] - DGS 1.0.16 - tag [release-1_0_16-20130811] on (later) bra
 ChangeLog
 ------------------------------------------------------------------
 
+2014-03-19 jug
+
+   * tournaments/include/tournament_result_control.php (class TournamentResultControl, ~.__construct,
+       ~.get_show_rows, ~.build_tournament_result_table, ~.make_table_tournament_results),
+     tournaments/include/tournament_cache.php (TournamentCache.load_cache_tournament_results),
+     tournaments/include/tournament_result.php (TournamentResult.load_tournament_results),
+     tournaments/include/tournament_gui_helper.php (TournamentGuiHelper),
+     tournaments/manage_tournament.php, tournaments/view_tournament.php,
+     tournaments/list_results.php,
+     site_map.php:
+   - added new page with list of all tournament-results in preparation for editing-tournament-results
+     - added filter showing only my tournament-results
+     - added links to tournament-results-list-page in results-section on view-tournament-page
+     - cached TOP-10 tournament-results showed on view-tournament-page
+     - refactored TournamentGuiHelper.build_tournament_results()
+       into new class TournamentResultControl merging different views of tournament-results
+
 2014-03-18 jug
 
    * tournaments/include/tournament_result.php (class TournamentResult, ~.__construct,

@@ -179,7 +179,8 @@ function itemL($text, $link='', $working=true, $last=false)
                   item(T_('Show my opponents'), "opponents.php", false);
                   item(T_('Show my contacts'), "list_contacts.php", false, true);
                } $item_level--;
-               item(T_('Show tournament participants'), "tournaments/list_participants.php", false, true);
+               item(T_('Show tournament participants'), "tournaments/list_participants.php", false);
+               item(T_('All tournament results'), "tournaments/list_results.php", false, true);
             } $item_level--;
             item(T_('Tournament participants'), "tournaments/list_participants.php", false, false);
             item(T_('Registration#tourney'), "tournaments/register.php", false, false);

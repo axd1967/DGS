@@ -39,6 +39,7 @@ require_once 'tournaments/include/tournament_news.php';
 require_once 'tournaments/include/tournament_participant.php';
 require_once 'tournaments/include/tournament_properties.php';
 require_once 'tournaments/include/tournament_result.php';
+require_once 'tournaments/include/tournament_result_control.php';
 require_once 'tournaments/include/tournament_rules.php';
 require_once 'tournaments/include/tournament_utils.php';
 
@@ -287,12 +288,24 @@ $GLOBALS['ThePage'] = new Page('Tournament');
 
    if ( $show_tresult )
    {
-      section( 'TournamentResult', T_('Tournament Results'), 'result', true );
+      static $TRESULT_LIMIT = 10;
+      $tresult_control = new TournamentResultControl( /*full*/false, $page, $tourney, $TRESULT_LIMIT );
+      $tresult_control->build_tournament_result_table( 'Tournament.view_tournament' );
+      if ( $tresult_control->get_show_rows() == 0 )
+         $tresult_str = T_('No tournament results.');
+      else
+         $tresult_str = $tresult_control->make_table_tournament_results();
 
-      echo "<center>",
-         TournamentGuiHelper::build_tournament_results( $page, $tourney ),
-         "</center><br>\n";
+      section( 'TournamentResult', sprintf( T_('Tournament Results (TOP %s)'), $TRESULT_LIMIT ), 'result', true );
+
+      echo "<center>", $tresult_str, "</center><br>\n";
    }
+
+   $sectmenu = array();
+   $sectmenu[T_('All tournament results')] = "tournaments/list_results.php?tid=$tid";
+   $sectmenu[T_('My tournament results')] =
+      "tournaments/list_results.php?tid=$tid".URI_AMP."user=".urlencode($player_row['Handle']);
+   make_menu( $sectmenu, false);
 
    $menu = array();
    $menu[T_('Refresh tournament info')] = "tournaments/view_tournament.php?tid=$tid";

@@ -24,6 +24,7 @@ $TranslateGroups[] = "Tournament";
 require_once 'include/db_classes.php';
 require_once 'include/dgs_cache.php';
 require_once 'include/std_classes.php';
+require_once 'tournaments/include/tournament_globals.php';
 require_once 'tournaments/include/tournament_utils.php';
 
  /*!
@@ -185,10 +186,18 @@ class TournamentResult
    }
 
    /*! \brief Returns enhanced (passed) ListIterator with TournamentResult-objects for given tournament-id. */
-   public static function load_tournament_results( $iterator, $tid=-1 )
+   public static function load_tournament_results( $iterator, $tid=-1, $with_player_info=false )
    {
       $qsql = ( $tid >= 0 ) ? self::build_query_sql($tid) : new QuerySQL();
       $iterator->setQuerySQL( $qsql );
+      if ( $with_player_info )
+      {
+         $iterator->addQuerySQLMerge( new QuerySQL(
+               SQLP_FIELDS, 'TRP.Name AS TRP_Name', 'TRP.Handle AS TRP_Handle',
+                            'TRP.Country AS TRP_Country', 'TRP.Rating2 AS TRP_Rating2',
+               SQLP_FROM,   'INNER JOIN Players AS TRP ON TRP.ID=TRS.uid'
+            ));
+      }
       $query = $iterator->buildQuery();
       $result = db_query( "TournamentResult:load_tournament_results", $query );
       $iterator->setResultRows( mysql_num_rows($result) );

@@ -401,39 +401,51 @@ class TournamentCache
       return $result;
    }//is_cache_tournament_participant
 
-   /*! \brief Loads and caches TournamentResults for given tournament-id and type. */
-   public static function load_cache_tournament_results( $dbgmsg, $tid, $tourney_type )
+   /*!
+    * \brief Loads and caches TournamentResults for given tournament-id and type.
+    * \return IMPORTANT NOTE: ListIterator re-constructed from cached tournament-results lacks query-stuff
+    *       and only contains items and result-rows-count.
+    */
+   public static function load_cache_tournament_results( $dbgmsg, $tid, $iterator, $with_player )
    {
       $tid = (int)$tid;
-      $dbgmsg .= ".TCache:load_cache_tresults($tid,$tourney_type)";
+      $dbgmsg .= ".TCache:load_cache_tresults($tid,$with_player)";
       $key = "TResult.$tid";
+      $same_query_check = sprintf( '%s;%s;%s', $tid, ( $with_player ? 1 : 0 ), $iterator->buildQuery() );
 
       $arr_tresult = DgsCache::fetch( $dbgmsg, CACHE_GRP_TRESULT, $key );
+      if ( !is_null($arr_tresult) )
+      {
+         if ( count($arr_tresult) == 0 )
+            $arr_tresult = null; // something's fishy here, better reload
+         else
+         {
+            $same_query_cached = array_shift( $arr_tresult ); // remove 1st entry with query-check
+            if ( $same_query_cached != $same_query_check )
+               $arr_tresult = null; // need to load different query
+         }
+      }
       if ( is_null($arr_tresult) )
       {
          // load tournament-results
-         if ( $tourney_type == TOURNEY_TYPE_LADDER )
-            $order = 'ORDER BY Rank ASC, RankKept DESC, EndTime DESC';
-         elseif ( $tourney_type == TOURNEY_TYPE_ROUND_ROBIN )
-            $order = 'ORDER BY Round DESC, Rank ASC, EndTime DESC';
-         else
-            $order = 'ORDER BY ID';
-         $iterator = new ListIterator( $dbgmsg, null, $order );
-         $iterator->addQuerySQLMerge( new QuerySQL(
-               SQLP_FIELDS, 'TRP.Name AS TRP_Name', 'TRP.Handle AS TRP_Handle',
-                            'TRP.Country AS TRP_Country', 'TRP.Rating2 AS TRP_Rating2',
-               SQLP_FROM,   'INNER JOIN Players AS TRP ON TRP.ID=TRS.uid'
-            ));
-         $iterator = TournamentResult::load_tournament_results( $iterator, $tid );
+         $result_iterator = TournamentResult::load_tournament_results( $iterator, $tid, $with_player );
 
-         $arr_tresult = array();
-         while ( list(,$arr_item) = $iterator->getListIterator() )
-            $arr_tresult[] = $arr_item;
+         $arr_tresult = array( $same_query_check ); // first entry: query-check
+         while ( list(,$arr_item) = $result_iterator->getListIterator() )
+            $arr_tresult[] = $arr_item[1]; // only store orig-row to save cache-storage-space
+         $result_iterator->resetListIterator();
 
          DgsCache::store( $dbgmsg, CACHE_GRP_TRESULT, $key, $arr_tresult, SECS_PER_DAY );
       }
+      else // convert cached tresult-array into ListIterator
+      {
+         $result_iterator = new ListIterator( $dbgmsg );
+         $result_iterator->setResultRows( count($arr_tresult) );
+         foreach ( $arr_tresult as $orow )
+            $result_iterator->addItem( TournamentResult::new_from_row($orow), $orow ); // rebuild obj
+      }
 
-      return $arr_tresult;
+      return $result_iterator;
    }//load_cache_tournament_results
 
    /*! \brief Loads and caches TournamentGames for given tournament-id. */

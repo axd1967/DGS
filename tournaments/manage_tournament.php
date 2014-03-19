@@ -165,6 +165,7 @@ $GLOBALS['ThePage'] = new Page('TournamentManage');
       make_header( 4, T_('Play phase#tourney'), TOURNEY_STATUS_PLAY ), //------------------------
       '<ul class="TAdminLinks">',
          make_links_ttype_specific( $tourney, TOURNEY_STATUS_PLAY ),
+         '<li>', make_menu_link( T_('All tournament results'), "tournaments/list_results.php?tid=$tid" ),
       '</ul>',
 
       '</tr></td></table>',
