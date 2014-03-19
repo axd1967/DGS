@@ -168,7 +168,7 @@ if ( !$is_down )
          "FROM Players " .
          "WHERE Notify='NOW' AND FIND_IN_SET('ON',SendEmail) " .
          "ORDER BY Lastaccess ASC"); // oldest-access users first (as newer-access-users can see new games/messages anyway)
-   $nfyuser_iterator = new ListIterator( "halfhourly_cron.load_nfyuser" );
+   $nfyuser_iterator = new ListIterator( "halfhourly_cron.load_nfyuser.Players" );
    while ( $row = mysql_fetch_array( $result ) )
       $nfyuser_iterator->addItem( null, $row );
    mysql_free_result($result);

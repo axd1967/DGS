@@ -107,7 +107,7 @@ $GLOBALS['ThePage'] = new Page('TournamentNewsList');
 
    $tntable->set_default_sort( 5 ); //on Published
 
-   $iterator = new ListIterator( 'TournamentNews',
+   $iterator = new ListIterator( 'TournamentNews.list',
          $tntable->get_query(),
          $tntable->current_order_string(),
          $tntable->current_limit_string() );

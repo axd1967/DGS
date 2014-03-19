@@ -125,7 +125,7 @@ $GLOBALS['ThePage'] = new Page('TournamentParticipantList');
 
    $tptable->set_default_sort( 7 ); //on Reg-ID
 
-   $iterator = new ListIterator( 'TournamentParticipants',
+   $iterator = new ListIterator( 'TournamentParticipants.list',
          $tptable->get_query(),
          $tptable->current_order_string(),
          $tptable->current_limit_string() );

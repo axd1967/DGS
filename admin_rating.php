@@ -282,7 +282,7 @@ function load_old_rating_changes( $uid )
    $rcatable->add_tablehead( 2, T_('Changes#header'), 'Enum' );
    $rcatable->add_tablehead( 3, T_('Rating#header'), 'Rating' );
 
-   $iterator = new ListIterator( 'AdminRating', null, 'ORDER BY Created DESC' );
+   $iterator = new ListIterator( 'admin_rating.RatingChangeAdmin', null, 'ORDER BY Created DESC' );
    $iterator = RatingChangeAdmin::load_ratingchangeadmin( $iterator, $uid );
    $rcatable->set_found_rows( $iterator->getItemCount() );
 

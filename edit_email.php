@@ -117,7 +117,7 @@ require_once 'include/table_columns.php';
    $vtable->add_tablehead( 4, T_('Attempts#header'), 'Number', 0, 'Counter+');
    $vtable->set_default_sort( 3 ); //on Created
 
-   $iterator = new ListIterator( 'edit_email', null, $vtable->current_order_string('Created+') );
+   $iterator = new ListIterator( 'edit_email.verification', null, $vtable->current_order_string('Created+') );
    if ( $my_id > GUESTS_ID_MAX )
    {
       $iterator = Verification::load_verifications( $iterator, $my_id );

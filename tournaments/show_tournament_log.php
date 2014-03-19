@@ -125,7 +125,7 @@ require_once 'tournaments/include/tournament_log.php';
    if ( $tid > 0 )
       $qsql->add_part( SQLP_WHERE, "TLOG.tid=$tid" );
 
-   $iterator = new ListIterator( 'Tournamentlog',
+   $iterator = new ListIterator( 'Tournamentlog.list',
          $qsql,
          $table->current_order_string('ID-'),
          $table->current_limit_string() );

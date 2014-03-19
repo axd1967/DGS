@@ -92,7 +92,7 @@ echo ">>>> Must be enabled first in code. Make recalc-test. Do not run if you ar
    }
 
    // load admin-rating-changes
-   $iterator = new ListIterator( 'recalc_ratings', null, 'ORDER BY Created ASC, ID ASC' );
+   $iterator = new ListIterator( 'recalc_ratings.RatingChangeAdmin', null, 'ORDER BY Created ASC, ID ASC' );
    $iterator = RatingChangeAdmin::load_ratingchangeadmin( $iterator );
    $arr_rca = array();
    while ( list(,$arr_item) = $iterator->getListIterator() )

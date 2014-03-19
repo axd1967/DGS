@@ -222,7 +222,7 @@ class TournamentStatus
 
       // check basic restrictions for all REGISTERED users for ALL rounds 1..n on TP.StartRound.
       // (checks on TP.NextRound for higher rounds must be done separately)
-      $iterator = new ListIterator( 'TournamentStatus.check_conditions_status_PAIR',
+      $iterator = new ListIterator( 'TournamentStatus.check_conditions_status_PAIR.TP',
             new QuerySQL( SQLP_WHERE, "TP.Status='".TP_STATUS_REGISTER."'" )); // only registered TPs
       $iterator = TournamentParticipant::load_tournament_participants($iterator, $this->tid);
       $err_count = $limit_err_count = 50; // check all, but limit error-output to some users

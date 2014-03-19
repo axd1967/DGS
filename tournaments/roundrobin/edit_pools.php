@@ -180,7 +180,7 @@ $GLOBALS['ThePage'] = new Page('TournamentPoolEdit');
    {
       $games_per_challenge = TournamentRoundHelper::determine_games_per_challenge( $tid );
 
-      $tpool_iterator = new ListIterator( 'Tournament.pool_view.load_pools' );
+      $tpool_iterator = new ListIterator( 'Tournament.pool_edit.load_pools' );
       $tpool_iterator->addQuerySQLMerge(
          new QuerySQL( SQLP_WHERE, 'TPOOL.Pool IN (' . implode(',', $arr_selpool) . ')' ));
       $tpool_iterator = TournamentPool::load_tournament_pools(

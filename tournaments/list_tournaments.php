@@ -191,7 +191,7 @@ $GLOBALS['ThePage'] = new Page('TournamentList');
    }
 
 
-   $iterator = new ListIterator( 'Tournaments',
+   $iterator = new ListIterator( 'Tournaments.list',
          $tqsql,
          $ttable->current_order_string('ID-'),
          $ttable->current_limit_string() );

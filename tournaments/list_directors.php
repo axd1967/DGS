@@ -81,7 +81,7 @@ $GLOBALS['ThePage'] = new Page('TournamentDirectorList');
 
    $tdtable->set_default_sort( 4 ); //on Lastaccess
 
-   $iterator = new ListIterator( 'TournamentDirectors',
+   $iterator = new ListIterator( 'TournamentDirectors.list',
          $tdtable->get_query(),
          $tdtable->current_order_string(),
          $tdtable->current_limit_string() );

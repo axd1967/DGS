@@ -300,7 +300,7 @@ class TournamentCache
       {
          $news_qsql = TournamentNews::build_view_query_sql( /*tid*/0, /*tn*/0, TNEWS_STATUS_SHOW, $is_admin, $is_tp );
          $news_qsql->add_part( SQLP_ORDER, 'TN.Published DESC' );
-         $news_iterator = new ListIterator( 'Tournament.view_tournament.news.SHOW', $news_qsql );
+         $news_iterator = new ListIterator( 'Tournament.view_tournament.news.SHOW.tnews', $news_qsql );
          $news_iterator = TournamentNews::load_tournament_news( $news_iterator, $tid );
 
          $arr_tnews = array();

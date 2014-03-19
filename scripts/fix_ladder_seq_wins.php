@@ -155,7 +155,7 @@ function fix_ladder_seqwins( $tid )
 
    // load all still existing ladder-users and update differences in seq-wins-counts
    $cnt_fixed = 0;
-   $tl_iterator = new ListIterator( 'scripts.fix_ladder_seq_wins', null, 'ORDER BY TL.rid ASC' );
+   $tl_iterator = new ListIterator( 'scripts.fix_ladder_seq_wins.TL', null, 'ORDER BY TL.rid ASC' );
    $tl_iterator = TournamentLadder::load_tournament_ladder( $tl_iterator, $tid );
    while ( list(,$arr_item) = $tl_iterator->getListIterator() )
    {
