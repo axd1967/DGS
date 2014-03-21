@@ -104,6 +104,18 @@ class TournamentPool
       return print_r( $this, true );
    }
 
+   public function build_result_info()
+   {
+      $rank_str = $this->formatRank( false, UNKNOWN_VALUE );
+      return
+         echo_image_info( "tournaments/roundrobin/view_pools.php?tid={$this->tid}".URI_AMP."round={$this->Round}#pool{$this->Pool}",
+            T_('Tournament Pool') )
+         . MINI_SPACING
+         . span('bold', T_('Tournament Pool'), '%s: ')
+         . sprintf( T_('Pool [%s], Rank [%s]#tourney'), $this->Pool, $rank_str )
+         . ',' . MED_SPACING . $this->echoRankImage( T_('No Pool winner#tourney') );
+   }
+
    public function get_cmp_rank()
    {
       if ( $this->Rank == TPOOLRK_WITHDRAW )
@@ -363,8 +375,7 @@ class TournamentPool
    /*!
     * \brief Returns enhanced (passed) ListIterator with TournamentPool-objects for given tournament-id.
     * \param $pool 0 = load all pools, otherwise load specific pool or pools if array of pools
-    * \param $with_user false = don't load user, true = load user-data,
-    *        otherwise: rating-use-mode = load T-rating + TP-register-time
+    * \param $load_opts see options TPOOL_LOADOPT_...
     * \return uid-indexed iterator with items: TournamentPool + .User + .User.urow[TP_X_RegisterTime|TP_Rating]
     */
    public static function load_tournament_pools( $iterator, $tid, $round, $pool=0, $load_opts=0 )

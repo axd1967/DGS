@@ -11,6 +11,34 @@ Release [2013-08-11] - DGS 1.0.16 - tag [release-1_0_16-20130811] on (later) bra
 ChangeLog
 ------------------------------------------------------------------
 
+2014-03-21 jug
+
+   * tournaments/include/tournament_result.php (TournamentResult.build_log_string, ~.build_query_sql,
+       ~.load_tournament_result, ~.load_tournament_results, ~.getTypeText),
+     tournaments/include/tournament_result_control.php (class TournamentResultControl, ~.__construct,
+       ~.build_tournament_result_table, ~.make_table_tournament_results),
+     tournaments/include/tournament_log_helper.php (TournamentLogHelper.log_delete_tournament_result,
+       ~.log_change_tournament_result),
+     tournaments/include/tournament_ladder_helper.php (TournamentLadderHelper.process_tournament_ladder_crown_king),
+     tournaments/include/tournament_participant.php (TournamentParticipant.build_result_info),
+     tournaments/include/tournament_helper.php (TournamentHelper.check_tournament_result)
+     tournaments/include/tournament_ladder.php (TournamentLadder.build_result_info),
+     tournaments/include/tournament_pool.php (TournamentPool.build_result_info),
+     tournaments/include/tournament_globals.php,
+     include/quick/quick_game_info.php (QuickHandlerGameInfo.fill_game_info),
+     include/quick/quick_user.php (QuickHandlerUser.process),
+     include/rating.php (echo_rating, echo_rating_elo),
+     include/gui_functions.php (echo_image_info),
+     tournaments/edit_results.php (load_user_info, load_tournament_info, build_show_user_text,
+       parse_edit_form, fill_tournament_info),
+     tournaments/manage_tournament.php, tournaments/view_tournament.php, tournaments/list_results.php,
+     rating_changes.php (load_data_rating_changes, fill_user_rating_changes),
+     site_map.php:
+   - added edit-result-page to add/update/delete tournament-result-entries
+     - show tournament-info for specified user and round dependent on tournament-type
+     - auto-fill in tournament-results entry from loaded tournament-info-data
+   - cleanup: renamed tresult-type-consts
+
 2014-03-20 jug
 
    * tournaments/list_tournaments.php:

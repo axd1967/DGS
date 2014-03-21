@@ -23,6 +23,8 @@ $TranslateGroups[] = "Tournament";
 
 require_once 'include/utilities.php';
 require_once 'include/db_classes.php';
+require_once 'include/gui_functions.php';
+require_once 'include/rating.php';
 require_once 'tournaments/include/tournament.php';
 require_once 'tournaments/include/tournament_utils.php';
 require_once 'tournaments/include/tournament_globals.php';
@@ -163,6 +165,23 @@ class TournamentParticipant
             . ", Won=[{$this->Won}]"
             . ", Lost=[{$this->Lost}]"
          ;
+   }
+
+   public function build_result_info()
+   {
+      $rating_str = ( is_valid_rating($this->Rating) )
+         ? sprintf( T_(", T-Rating [%s][ELO %1.2f]"), echo_rating($this->Rating), $this->Rating )
+         : '';
+      return
+         echo_image_info( "tournaments/edit_participant.php?tid={$this->tid}".URI_AMP."uid={$this->uid}",
+            T_('Tournament Participant') )
+         . MINI_SPACING
+         . span('bold', T_('Tournament Participant'), '%s: ')
+         . sprintf( T_("StartRound [%s], Finished [%s], Won [%s], Lost [%s],\n"
+                  . "Flags [%s]%s, Created [%s]#tourney"),
+               $this->StartRound, $this->Finished, $this->Won, $this->Lost,
+               self::getFlagsText($this->Flags), $rating_str,
+               ($this->Created > 0 ? date(DATE_FMT, $this->Created) : '') );
    }
 
    public function build_log_string()

@@ -28,6 +28,7 @@ require_once 'tournaments/include/tournament_ladder_props.php';
 require_once 'tournaments/include/tournament_news.php';
 require_once 'tournaments/include/tournament_participant.php';
 require_once 'tournaments/include/tournament_properties.php';
+require_once 'tournaments/include/tournament_result.php';
 require_once 'tournaments/include/tournament_round.php';
 require_once 'tournaments/include/tournament_rules.php';
 require_once 'tournaments/include/tournament_utils.php';
@@ -636,6 +637,59 @@ class TournamentLogHelper
          sprintf( "Change of [%s]: %s", implode(', ', $edits), implode('; ', $msg) ));
       $tlog->insert();
    }//log_change_tournament_points
+
+
+   public static function log_delete_tournament_result( $tid, $tlog_type, $tresult )
+   {
+      $tlog = new Tournamentlog( 0, $tid, 0, 0, $tlog_type, 'TRES_Data', TLOG_ACT_REMOVE, $tresult->uid,
+         $tresult->build_log_string() );
+      $tlog->insert();
+   }
+
+   public static function log_change_tournament_result( $tid, $tlog_type, $is_new, $edits, $old_tr, $new_tr )
+   {
+      if ( $is_new ) // add
+      {
+         $tlog = new Tournamentlog( 0, $tid, 0, 0, $tlog_type, 'TRES_Data', TLOG_ACT_ADD, $new_tr->uid,
+            $tresult->build_log_string() );
+      }
+      else // update
+      {
+         $msg = array();
+         if ( $old_tr->uid != $new_tr->uid )
+            $msg[] = sprintf(self::$DIFF_FMT, 'uid', $old_tr->uid, $new_tr->uid );
+         if ( $old_tr->rid != $new_tr->rid )
+            $msg[] = sprintf(self::$DIFF_FMT, 'rid', $old_tr->rid, $new_tr->rid );
+         if ( $old_tr->Rating != $new_tr->Rating )
+            $msg[] = sprintf(self::$DIFF_FMT, 'Rating', $old_tr->Rating, $new_tr->Rating );
+         if ( $old_tr->Type != $new_tr->Type )
+            $msg[] = sprintf(self::$DIFF_FMT, 'Type', $old_tr->Type, $new_tr->Type );
+         if ( $old_tr->Round != $new_tr->Round )
+            $msg[] = sprintf(self::$DIFF_FMT, 'Round', $old_tr->Round, $new_tr->Round );
+         if ( $old_tr->StartTime != $new_tr->StartTime )
+            $msg[] = sprintf(self::$DIFF_FMT, 'StartTime',
+               ( $old_tr->StartTime > 0 ? date(DATE_FMT, $old_tr->StartTime) : ''),
+               ( $new_tr->StartTime > 0 ? date(DATE_FMT, $new_tr->StartTime) : '') );
+         if ( $old_tr->EndTime != $new_tr->EndTime )
+            $msg[] = sprintf(self::$DIFF_FMT, 'EndTime',
+               ( $old_tr->EndTime > 0 ? date(DATE_FMT, $old_tr->EndTime) : ''),
+               ( $new_tr->EndTime > 0 ? date(DATE_FMT, $new_tr->EndTime) : '') );
+         if ( $old_tr->Result != $new_tr->Result )
+            $msg[] = sprintf(self::$DIFF_FMT, 'Result', $old_tr->Result, $new_tr->Result );
+         if ( $old_tr->Rank != $new_tr->Rank )
+            $msg[] = sprintf(self::$DIFF_FMT, 'Rank', $old_tr->Rank, $new_tr->Rank );
+         if ( $old_tr->RankKept != $new_tr->RankKept )
+            $msg[] = sprintf(self::$DIFF_FMT, 'RankKept', $old_tr->RankKept, $new_tr->RankKept );
+         if ( $old_tr->Comment != $new_tr->Comment )
+            $msg[] = sprintf(self::$DIFF_FMT, 'Comment', $old_tr->Comment, $new_tr->Comment );
+         if ( $old_tr->Note != $new_tr->Note )
+            $msg[] = sprintf(self::$DIFF_FMT, 'Note', $old_tr->Note, $new_tr->Note );
+
+         $tlog = new Tournamentlog( 0, $tid, 0, 0, $tlog_type, 'TRES_Data', TLOG_ACT_CHANGE, $new_tr->uid,
+            sprintf( "Change of [%s]: %s", implode(', ', $edits), implode('; ', $msg) ));
+      }
+      $tlog->insert();
+   }
 
 } // end of 'TournamentLogHelper'
 ?>

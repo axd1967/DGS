@@ -118,6 +118,7 @@ function load_data_rating_changes( $b_id, $w_id, &$errors )
          'GameType' => GAMETYPE_GO, // no multi-player-game
          'Rated' => 'Y', // assume rated-game
          'Moves' => DELETE_LIMIT + 50, // keep game rated
+         'Flags' => 0, // assume normal game-result (!= no-result)
       );
 
    if ( $user_b )
@@ -153,7 +154,6 @@ function fill_user_rating_changes( $data, &$rform, &$itable, $b_id, $w_id )
    $ok = ( isset($data[BLACK]) && isset($data[WHITE]) );
    $userb = @$data[BLACK];
    $userw = @$data[WHITE];
-   $fmt_elo = '%1.2f';
    $has_b_rating = ($userb ? $userb->hasRating() : false);
    $has_w_rating = ($userw ? $userw->hasRating() : false);
 
@@ -176,16 +176,16 @@ function fill_user_rating_changes( $data, &$rform, &$itable, $b_id, $w_id )
          ($has_w_rating ? echo_rating(@$userw->Rating, true, $userw->ID, false) : NO_VALUE),
          '' ) );
    $itable->add_sinfo( T_('ELO Rating#ratchg'), array(
-         ($has_b_rating ? sprintf($fmt_elo, @$userb->Rating) : NO_VALUE),
-         ($has_w_rating ? sprintf($fmt_elo, @$userw->Rating) : NO_VALUE),
+         ($has_b_rating ? echo_rating_elo(@$userb->Rating, true) : NO_VALUE),
+         ($has_w_rating ? echo_rating_elo(@$userw->Rating, true) : NO_VALUE),
          ($has_b_rating && $has_w_rating
-            ? T_('DIFF#ratchg') . ': ' . sprintf($fmt_elo, abs(@$userb->Rating - @$userw->Rating))
+            ? T_('DIFF#ratchg') . echo_rating_elo(abs(@$userb->Rating - @$userw->Rating), ': ')
             : '' )) );
    $itable->add_sinfo( T_('ELO Rating Min - Max#ratchg'), array(
-         ($has_b_rating ? sprintf($fmt_elo, @$userb->urow['RatingMin']) : NO_VALUE) . ' - ' .
-            ($has_b_rating ? sprintf($fmt_elo, @$userb->urow['RatingMax']) : NO_VALUE),
-         ($has_w_rating ? sprintf($fmt_elo, @$userw->urow['RatingMin']) : NO_VALUE) . ' - ' .
-            ($has_w_rating ? sprintf($fmt_elo, @$userw->urow['RatingMax']) : NO_VALUE),
+         ($has_b_rating ? echo_rating_elo(@$userb->urow['RatingMin'], true) : NO_VALUE) . ' - ' .
+            ($has_b_rating ? echo_rating_elo(@$userb->urow['RatingMax'], true) : NO_VALUE),
+         ($has_w_rating ? echo_rating_elo(@$userw->urow['RatingMin'], true) : NO_VALUE) . ' - ' .
+            ($has_w_rating ? echo_rating_elo(@$userw->urow['RatingMax'], true) : NO_VALUE),
          T_('Confidence interval') ) );
 
    $size_value_arr = array_value_to_key_and_value( range( MIN_BOARD_SIZE, MAX_BOARD_SIZE ));
@@ -223,6 +223,7 @@ function fill_user_rating_changes( $data, &$rform, &$itable, $b_id, $w_id )
 
       if ( $has_b_rating && $has_w_rating )
       {
+         static $fmt_elo = '%1.2f'; // keep in sync with echo_rating_elo()
          list( $b_ratdiff_won, $w_ratdiff_lost ) = calculate_rating_change_prediction( $data, -1 ); // black won
          list( $b_ratdiff_jigo, $w_ratdiff_jigo ) = calculate_rating_change_prediction( $data, 0 ); // jigo
          list( $b_ratdiff_lost, $w_ratdiff_won ) = calculate_rating_change_prediction( $data, 1 ); // black lost

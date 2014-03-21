@@ -203,6 +203,22 @@ class TournamentLadder
       return print_r($this, true);
    }
 
+   public function build_result_info()
+   {
+      return
+         echo_image_info( "tournaments/ladder/view.php?tid={$this->tid}".URI_AMP."#rank{$this->Rank}",
+            T_('Tournament Ladder') )
+         . MINI_SPACING
+         . span('bold', T_('Tournament Ladder'), '%s: ')
+         . sprintf( T_("SeqWins [%s], SeqWinsBest [%s],\n"
+                  . "Rank [%s], BestRank [%s], StartRank [%s], PeriodRank [%s], HistoryRank [%s],\n"
+                  . "Created [%s], RankChanged [%s]#tourney"),
+               $this->SeqWins, $this->SeqWinsBest,
+               $this->Rank, $this->BestRank, $this->StartRank, $this->PeriodRank, $this->HistoryRank,
+               ($this->Created > 0 ? date(DATE_FMT, $this->Created) : ''),
+               ($this->RankChanged > 0 ? date(DATE_FMT, $this->RankChanged) : '') );
+   }
+
    public function build_log_string( $fmt=0 )
    {
       if ( $fmt == 1 )

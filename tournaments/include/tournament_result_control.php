@@ -46,6 +46,7 @@ class TournamentResultControl
    private $show_all; // full-mode for T-result-page or part-mode for view-T-page
    private $page;
    private $tourney;
+   private $allow_edit_tourney;
    private $limit;
 
    private $my_id;
@@ -53,7 +54,7 @@ class TournamentResultControl
    private $iterator = null;
    private $show_rows = 0;
 
-   public function __construct( $show_all, $page, $tourney, $limit )
+   public function __construct( $show_all, $page, $tourney, $allow_edit_tourney, $limit )
    {
       if ( $limit == 0 )
          error('invalid_args', "TournamentResultControl.construct.check.limit($show_all,$page,".(@$tourney->ID).",$limit)");
@@ -61,6 +62,7 @@ class TournamentResultControl
       $this->show_all = (bool)$show_all;
       $this->page = $page;
       $this->tourney = $tourney;
+      $this->allow_edit_tourney = $allow_edit_tourney;
       $this->limit = (int)$limit;
       $this->my_id = (int)$player_row['ID'];
    }
@@ -70,7 +72,7 @@ class TournamentResultControl
       return $this->show_rows;
    }
 
-   /*! \brief Returns QuerySQL for games-list. */
+   /*! \brief Creates Table, Filters and execute Query for tournament-results. */
    public function build_tournament_result_table( $dbgmsg )
    {
       $tid = $this->tourney->ID;
@@ -111,6 +113,8 @@ class TournamentResultControl
       $trtable->add_external_parameters( $page_vars, true ); // add as hiddens
 
       // add_tablehead($nr, $descr, $attbs=null, $mode=TABLE_NO_HIDE|TABLE_NO_SORT, $sortx='')
+      if ( $this->allow_edit_tourney )
+         $trtable->add_tablehead(11, T_('Actions#header'), 'Image', TABLE_NO_HIDE, '');
       if ( $this->tourney->Type == TOURNEY_TYPE_LADDER )
          $trtable->add_tablehead( 9, T_('Result#tourney_result'), 'Number', TABLE_NO_HIDE, 'Result+');
       $trtable->add_tablehead( 6, T_('Rank#tourney_result'), 'Number', TABLE_NO_HIDE, 'Rank+');
@@ -149,8 +153,12 @@ class TournamentResultControl
       $this->table = $trtable;
    }//build_tournament_result_table
 
+   /*! \brief Fills tournament-result-Table with data and returns table-string. */
    public function make_table_tournament_results()
    {
+      global $base_path;
+      $tid = $this->tourney->ID;
+
       while ( ($this->show_rows-- > 0) && list(,$arr_item) = $this->iterator->getListIterator() )
       {
          list( $tresult, $orow ) = $arr_item;
@@ -159,6 +167,16 @@ class TournamentResultControl
          $is_mine = ( $this->my_id == $uid );
 
          $row_str = array();
+
+         if ( $this->allow_edit_tourney && $this->table->Is_Column_Displayed[11] )
+         {
+            $links = array();
+            $links[] = anchor( $base_path."tournaments/edit_results.php?tid=$tid".URI_AMP."trid={$tresult->ID}",
+                  image( $base_path.'images/edit.gif', 'E', '', 'class="Action"' ), T_('Edit tournament result#tourney'));
+            $links[] = anchor( $base_path."tournaments/edit_results.php?tid=$tid".URI_AMP."trid={$tresult->ID}".URI_AMP."tr_del=1",
+                  image( $base_path.'images/trashcan.gif', 'E', '', 'class="Action"' ), T_('Delete tournament result#tourney'));
+            $row_str[11] = implode(' ', $links);
+         }
 
          if ( $this->table->Is_Column_Displayed[ 1] )
             $row_str[ 1] = user_reference( REF_LINK, 1, '', $uid, $user->Name, '');
@@ -178,8 +196,10 @@ class TournamentResultControl
             $row_str[ 8] = ($tresult->EndTime > 0) ? date(DATE_FMT2, $tresult->EndTime) : '';
          if ( @$this->table->Is_Column_Displayed[ 9] )
          {
-            if ( $tresult->Type == TRESULTTYPE_KING_OF_THE_HILL )
-               $row_str[ 9] = ''; //$tresult->Result;
+            if ( $tresult->Type == TRESULTTYPE_TL_SEQWINS )
+               $row_str[ 9] = $tresult->Result;
+            else
+               $row_str[ 9] = '';
          }
          if ( $this->table->Is_Column_Displayed[10] )
             $row_str[10] = $tresult->Comment;

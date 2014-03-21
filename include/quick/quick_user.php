@@ -120,7 +120,7 @@ class QuickHandlerUser extends QuickHandler
       $this->addResultKey( 'last_move', QuickHandler::formatDate(@$urow['X_LastMove']) );
       $this->addResultKey( 'rating_status', strtoupper($this->user->RatingStatus) );
       $this->addResultKey( 'rating', echo_rating($this->user->Rating, 1, 0, true, 1) );
-      $this->addResultKey( 'rating_elo', echo_rating_elo($this->user->Rating) );
+      $this->addResultKey( 'rating_elo', echo_rating_elo($this->user->Rating, false, '') );
       $this->addResultKey( 'rank', @$urow['Rank'] );
       $this->addResultKey( 'open_match', @$urow['Open'] );
       $this->addResultKey( 'games_running', (int)$this->user->urow['Running'] );

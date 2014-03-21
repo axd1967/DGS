@@ -29,6 +29,7 @@ require_once 'tournaments/include/tournament_factory.php';
 require_once 'tournaments/include/tournament_globals.php';
 require_once 'tournaments/include/tournament_ladder_helper.php';
 require_once 'tournaments/include/tournament_log_helper.php';
+require_once 'tournaments/include/tournament_result.php';
 require_once 'tournaments/include/tournament_round_helper.php';
 require_once 'tournaments/include/tournament_rules.php';
 require_once 'tournaments/include/tournament_status.php';
@@ -229,6 +230,44 @@ class TournamentHelper
       static $statuslist_user = array( TOURNEY_STATUS_PLAY, TOURNEY_STATUS_CLOSED );
       return ($isTD) ? $statuslist_TD : $statuslist_user;
    }
+
+   /*! \brief Perform tournament-type-specific checks on tournament-result return errors-array (or empty on success). */
+   public static function check_tournament_result( $tourney, $tresult )
+   {
+      $errors = array();
+
+      if ( $tresult->uid <= GUESTS_ID_MAX )
+         $errors[] = T_('Missing uid for tournament result.');
+      if ( $tresult->rid <= 0 )
+         $errors[] = T_('Missing rid (=TP.ID) for tournament result.');
+
+      if ( $tresult->Round < 1 || $tresult->Round > $tourney->Rounds )
+         $errors[] = sprintf( T_('Expecting number for %s in range %s.'), T_('Tournament Round'),
+            build_range_text(1, $tourney->Rounds) );
+
+      if ( $tresult->Type < 1 || $tresult->Type > CHECK_MAX_TRESULTYPE )
+         $errors[] = sprintf( T_('Invalid tournament-result-type [%s].'), $tresult->Type );
+      else
+      {
+         if ( ( $tourney->Type == TOURNEY_TYPE_LADDER
+                  && $tresult->Type != TRESULTTYPE_TL_KING_OF_THE_HILL && $tresult->Type != TRESULTTYPE_TL_SEQWINS )
+            || ( $tourney->Type == TOURNEY_TYPE_ROUND_ROBIN
+                  && $tresult->Type != TRESULTTYPE_TRR_POOL_WINNER ) )
+         {
+            $errors[] = sprintf( T_('Result type [%s] can not be selected for this tournament-type [%s].'),
+               TournamentResult::getTypeText($tresult->Type), Tournament::getTypeText($tourney->Type) );
+         }
+
+         if ( $tresult->Type != TRESULTTYPE_TL_SEQWINS && $tresult->Result != 0 )
+            $errors[] = sprintf( T_('Result value can only be provided for tournament-result-types [%s].'),
+               build_text_list( 'TournamentResult::getTypeText', array( TRESULTTYPE_TL_SEQWINS ), ', ' ) );
+      }
+
+      if ( $tresult->Rank <= 0 )
+         $errors[] = T_('Missing value for tournament result rank.');
+
+      return $errors;
+   }//check_tournament_result
 
 } // end of 'TournamentHelper'
 

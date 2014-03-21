@@ -258,6 +258,19 @@ function echo_off_time( $player_to_move, $on_vacation, $player_clock_used, $game
    return ($result) ? SMALL_SPACING . $result : '';
 }
 
+/*
+ * \brief Returns image linked to arbitrary page with more information about certain object.
+ * \param $url URL without $base_path
+ */
+function echo_image_info( $url, $info_obj )
+{
+   global $base_path;
+   return
+      anchor( $base_path.$url,
+         image( $base_path.'images/info.gif', '', null, 'class="InTextImage"'),
+         sprintf( T_('Show more information about [%s]'), $info_obj ) );
+}
+
 /*!
  * \brief Returns image to game-info page for given game-id.
  * \param $last_x include x/y coordinate for last-move-marker; null = no last-move-marker

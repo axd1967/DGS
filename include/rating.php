@@ -423,16 +423,19 @@ function echo_rating($rating, $show_percent=true, $graph_uid=0, $keep_english=fa
    if ( $graph_uid > 0 )
    {
       global $base_path;
-      $elo_str = T_('ELO#rating') . sprintf( ' %1.2f', $rating );
+      $elo_str = T_('ELO#rating') . echo_rating_elo($rating, true, ' ');
       $string = anchor( $base_path."ratinggraph.php?uid=$graph_uid", $string, $elo_str, 'class="Rating"' );
    }
    return $string;
 }//echo_rating
 
-// used for quick-suite
-function echo_rating_elo( $rating )
+// keep $round=false + $sep='' for quick-suite as defaults
+function echo_rating_elo( $rating, $round=false, $sep='' )
 {
-   return (is_valid_rating($rating)) ? $rating : '';
+   if ( is_valid_rating($rating) )
+      return $sep . ( $round ? sprintf('%1.2f', $rating) : $rating );
+   else
+      return '';
 }
 
 

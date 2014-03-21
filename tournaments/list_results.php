@@ -50,7 +50,7 @@ $GLOBALS['ThePage'] = new Page('TournamentResultList');
 
    $page = "list_results.php";
 
-   $tresult_control = new TournamentResultControl( /*full*/true, $page, $tourney, /*limit*/-1 );
+   $tresult_control = new TournamentResultControl( /*full*/true, $page, $tourney, $allow_edit_tourney, /*limit*/-1 );
    $tresult_control->build_tournament_result_table( 'Tournament.list_results' );
 
 
@@ -70,6 +70,8 @@ $GLOBALS['ThePage'] = new Page('TournamentResultList');
       "tournaments/list_results.php?tid=$tid".URI_AMP."user=".urlencode($player_row['Handle']);
    if ( $allow_edit_tourney )
    {
+      $menu_array[T_('Edit results#tourney')] =
+         array( 'url' => "tournaments/edit_results.php?tid=$tid", 'class' => 'TAdmin' );
       $menu_array[T_('Manage tournament')] =
          array( 'url' => "tournaments/manage_tournament.php?tid=$tid", 'class' => 'TAdmin' );
    }

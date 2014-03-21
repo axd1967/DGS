@@ -165,7 +165,10 @@ $GLOBALS['ThePage'] = new Page('TournamentManage');
       make_header( 4, T_('Play phase#tourney'), TOURNEY_STATUS_PLAY ), //------------------------
       '<ul class="TAdminLinks">',
          make_links_ttype_specific( $tourney, TOURNEY_STATUS_PLAY ),
-         '<li>', make_menu_link( T_('All tournament results'), "tournaments/list_results.php?tid=$tid" ),
+         '<li>', make_menu_link( T_('Edit results#tourney'), "tournaments/edit_results.php?tid=$tid" ),
+                 SEP_SPACING,
+                 make_menu_link( T_('Show all tournament results'), "tournaments/list_results.php?tid=$tid" ),
+                 subList( array( T_('Add, edit, delete tournament results'), )),
       '</ul>',
 
       '</tr></td></table>',

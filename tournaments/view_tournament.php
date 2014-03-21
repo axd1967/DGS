@@ -289,7 +289,7 @@ $GLOBALS['ThePage'] = new Page('Tournament');
    if ( $show_tresult )
    {
       static $TRESULT_LIMIT = 10;
-      $tresult_control = new TournamentResultControl( /*full*/false, $page, $tourney, $TRESULT_LIMIT );
+      $tresult_control = new TournamentResultControl( /*full*/false, $page, $tourney, /*edit*/false, $TRESULT_LIMIT );
       $tresult_control->build_tournament_result_table( 'Tournament.view_tournament' );
       if ( $tresult_control->get_show_rows() == 0 )
          $tresult_str = T_('No tournament results.');

@@ -93,6 +93,16 @@ class TournamentResult
       return print_r( $this, true );
    }
 
+   public function build_log_string()
+   {
+      return sprintf("TournamentResult: id=[%s], uid/rid=[%s/%s], Rating=[%s], Type=[%s], Round=[%s], " .
+                     "Start/EndTime=[%s/%s], Result=[%s], Rank=[%s], RankKept=[%s], Comment=[%s], Note=[%s]",
+         $this->ID, $this->uid, $this->rid, $this->Rating, $this->Type, $this->Round,
+         ($this->StartTime > 0 ? date(DATE_FMT, $this->StartTime) : ''),
+         ($this->EndTime > 0 ? date(DATE_FMT, $this->EndTime) : ''),
+         $this->Result, $this->Rank, $this->RankKept, $this->Comment, $this->Note );
+   }
+
    /*! \brief Inserts or updates tournament-result in database. */
    public function persist()
    {
@@ -154,13 +164,21 @@ class TournamentResult
    // ------------ static functions ----------------------------
 
    /*! \brief Returns db-fields to be used for query of TournamentResult-objects for given tournament-id. */
-   public static function build_query_sql( $tid=0 )
+   public static function build_query_sql( $tid=0, $with_player_info=false )
    {
       $qsql = $GLOBALS['ENTITY_TOURNAMENT_RESULT']->newQuerySQL('TRS');
       if ( $tid > 0 )
          $qsql->add_part( SQLP_WHERE, "TRS.tid='$tid'" );
+      if ( $with_player_info )
+      {
+         $qsql->add_part( SQLP_FIELDS,
+               'TRP.Name AS TRP_Name', 'TRP.Handle AS TRP_Handle',
+               'TRP.Country AS TRP_Country', 'TRP.Rating2 AS TRP_Rating2' );
+         $qsql->add_part( SQLP_FROM,
+               'INNER JOIN Players AS TRP ON TRP.ID=TRS.uid' );
+      }
       return $qsql;
-   }
+   }//build_query_sql
 
    /*! \brief Returns TournamentResult-object created from specified (db-)row. */
    public static function new_from_row( $row )
@@ -185,19 +203,37 @@ class TournamentResult
       return $tres;
    }
 
+   /*!
+    * \brief Returns single TournamentResult-objects for given tournament-result-id and check against optionally
+    *       given tournament-id.
+    * \note dies with error if $tid given and it doesn't match with found tournament-result
+    * \return TournamentResult-object; null if nothing found
+    */
+   public static function load_tournament_result( $dbgmsg, $tresult_id, $tid=0 )
+   {
+      $tresult_id = (int)$tresult_id;
+      $tid = (int)$tid;
+
+      $qsql = self::build_query_sql( 0, true );
+      $qsql->add_part( SQLP_WHERE, "TRS.ID=$tresult_id" );
+      $qsql->add_part( SQLP_LIMIT, '1' );
+
+      $row = mysql_single_fetch( "$dbgmsg.TournamentResult.load_tournament_result($tresult_id,$tid)",
+         $qsql->get_select() );
+      if ( !$row )
+         return null;
+
+      $tresult = TournamentResult::new_from_row($row);
+      if ( $tid > 0 && $tresult->tid != $tid )
+         error('', "$dbgmsg.TournamentResult.load_tournament_result.check.tid($tresult_id,$tid)");
+      return $tresult;
+   }//load_tournament_result
+
    /*! \brief Returns enhanced (passed) ListIterator with TournamentResult-objects for given tournament-id. */
    public static function load_tournament_results( $iterator, $tid=-1, $with_player_info=false )
    {
-      $qsql = ( $tid >= 0 ) ? self::build_query_sql($tid) : new QuerySQL();
+      $qsql = ( $tid >= 0 ) ? self::build_query_sql($tid, $with_player_info) : new QuerySQL();
       $iterator->setQuerySQL( $qsql );
-      if ( $with_player_info )
-      {
-         $iterator->addQuerySQLMerge( new QuerySQL(
-               SQLP_FIELDS, 'TRP.Name AS TRP_Name', 'TRP.Handle AS TRP_Handle',
-                            'TRP.Country AS TRP_Country', 'TRP.Rating2 AS TRP_Rating2',
-               SQLP_FROM,   'INNER JOIN Players AS TRP ON TRP.ID=TRS.uid'
-            ));
-      }
       $query = $iterator->buildQuery();
       $result = db_query( "TournamentResult:load_tournament_results", $query );
       $iterator->setResultRows( mysql_num_rows($result) );
@@ -212,6 +248,28 @@ class TournamentResult
 
       return $iterator;
    }//load_tournament_results
+
+   /*! \brief Returns type-text or all type-texts (if arg=null). */
+   public static function getTypeText( $type=null )
+   {
+      static $ARR_TRESULT_TEXTS = null;
+
+      // lazy-init of texts
+      if ( is_null($ARR_TRESULT_TEXTS) )
+      {
+         $arr = array();
+         $arr[TRESULTTYPE_TL_KING_OF_THE_HILL] = T_('King of the Hill#TRES_type');
+         $arr[TRESULTTYPE_TL_SEQWINS] = T_('Sequently Wins');
+         $arr[TRESULTTYPE_TRR_POOL_WINNER] = T_('Pool Winner#TRES_type');
+         $ARR_TRESULT_TEXTS = $arr;
+      }
+
+      if ( is_null($type) )
+         return $ARR_TRESULT_TEXTS;
+      if ( !isset($ARR_TRESULT_TEXTS[$type]) )
+         error('invalid_args', "TournamentResult:getTypeText($type)");
+      return $ARR_TRESULT_TEXTS[$type];
+   }//getTypeText
 
    public static function show_tournament_result( $t_status )
    {

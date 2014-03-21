@@ -214,12 +214,12 @@ class QuickHandlerGameInfo extends QuickHandler
          $ginfo['prisoners'] = (int)$row[$icol.'_Prisoners'];
          $ginfo['remtime'] = ($remtime) ? $remtime : '';
          $ginfo['rating_start'] = echo_rating($row[$icol.'_Start_Rating'], /*perc*/1, /*uid*/0, /*engl*/true, /*short*/1);
-         $ginfo['rating_start_elo'] = echo_rating_elo($row[$icol.'_Start_Rating']);
+         $ginfo['rating_start_elo'] = echo_rating_elo($row[$icol.'_Start_Rating'], false, '');
 
          if ( $game_finished )
          {
             $ginfo['rating_end']     = echo_rating($row[$icol.'_End_Rating'], /*perc*/1, /*uid*/0, /*engl*/true, /*short*/1);
-            $ginfo['rating_end_elo'] = echo_rating_elo($row[$icol.'_End_Rating']);
+            $ginfo['rating_end_elo'] = echo_rating_elo($row[$icol.'_End_Rating'], false, '');
 
             if ( $quick_handler->is_with_option(QWITH_RATINGDIFF) )
             {
