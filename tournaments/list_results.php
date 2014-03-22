@@ -43,11 +43,6 @@ $GLOBALS['ThePage'] = new Page('TournamentResultList');
    $tourney = TournamentCache::load_cache_tournament( 'Tournament.list_results.find_tournament', $tid );
    $allow_edit_tourney = TournamentHelper::allow_edit_tournaments($tourney, $my_id);
 
-   // create table
-   $cfg_tblcols = ConfigTableColumns::load_config( $my_id, CFGCOLS_TOURNAMENT_RESULTS );
-   if ( !$cfg_tblcols )
-      error('user_init_error', "Tournament.list_results.init.config_table_cols($tid)");
-
    $page = "list_results.php";
 
    $tresult_control = new TournamentResultControl( /*full*/true, $page, $tourney, $allow_edit_tourney, /*limit*/-1 );
