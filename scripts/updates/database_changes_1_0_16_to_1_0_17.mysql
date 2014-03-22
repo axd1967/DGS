@@ -84,3 +84,8 @@ ALTER TABLE TournamentResult
    ADD Note varchar(255) NOT NULL default '' ;
 
 
+-- cleanup: remove db-field calculated from other fields
+ALTER TABLE TournamentResult
+   DROP COLUMN RankKept ;
+
+

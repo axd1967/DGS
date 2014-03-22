@@ -1288,7 +1288,6 @@ CREATE TABLE IF NOT EXISTS `TournamentResult` (
   `EndTime` datetime NOT NULL default '0000-00-00 00:00:00',
   `Result` mediumint(9) NOT NULL default '0',
   `Rank` smallint(5) unsigned NOT NULL default '0',
-  `RankKept` smallint(5) unsigned NOT NULL default '0',
   `Comment` varchar(128) NOT NULL default '',
   `Note` varchar(255) NOT NULL default '',
   PRIMARY KEY  (`ID`),

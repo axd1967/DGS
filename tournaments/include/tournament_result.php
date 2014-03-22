@@ -45,7 +45,7 @@ global $ENTITY_TOURNAMENT_RESULT; //PHP5
 $ENTITY_TOURNAMENT_RESULT = new Entity( 'TournamentResult',
    FTYPE_PKEY,  'ID',
    FTYPE_AUTO,  'ID',
-   FTYPE_INT,   'ID', 'tid', 'uid', 'rid', 'Type', 'Round', 'Result', 'Rank', 'RankKept',
+   FTYPE_INT,   'ID', 'tid', 'uid', 'rid', 'Type', 'Round', 'Result', 'Rank',
    FTYPE_TEXT,  'Comment', 'Note',
    FTYPE_FLOAT, 'Rating',
    FTYPE_DATE,  'StartTime', 'EndTime'
@@ -64,13 +64,12 @@ class TournamentResult
    public $EndTime;
    public $Result;
    public $Rank;
-   public $RankKept;
    public $Comment;
    public $Note;
 
    /*! \brief Constructs TournamentResult-object with specified arguments. */
    public function __construct( $id=0, $tid=0, $uid=0, $rid=0, $rating=NO_RATING, $type=0, $round=1,
-         $start_time=0, $end_time=0, $result=0, $rank=0, $rank_kept=0, $comment='', $note='' )
+         $start_time=0, $end_time=0, $result=0, $rank=0, $comment='', $note='' )
    {
       $this->ID = (int)$id;
       $this->tid = (int)$tid;
@@ -83,7 +82,6 @@ class TournamentResult
       $this->EndTime = (int)$end_time;
       $this->Result = (int)$result;
       $this->Rank = (int)$rank;
-      $this->RankKept = (int)$rank_kept;
       $this->Comment = $comment;
       $this->Note = $note;
    }
@@ -96,11 +94,11 @@ class TournamentResult
    public function build_log_string()
    {
       return sprintf("TournamentResult: id=[%s], uid/rid=[%s/%s], Rating=[%s], Type=[%s], Round=[%s], " .
-                     "Start/EndTime=[%s/%s], Result=[%s], Rank=[%s], RankKept=[%s], Comment=[%s], Note=[%s]",
+                     "Start/EndTime=[%s/%s], Result=[%s], Rank=[%s], Comment=[%s], Note=[%s]",
          $this->ID, $this->uid, $this->rid, $this->Rating, $this->Type, $this->Round,
          ($this->StartTime > 0 ? date(DATE_FMT, $this->StartTime) : ''),
          ($this->EndTime > 0 ? date(DATE_FMT, $this->EndTime) : ''),
-         $this->Result, $this->Rank, $this->RankKept, $this->Comment, $this->Note );
+         $this->Result, $this->Rank, $this->Comment, $this->Note );
    }
 
    /*! \brief Inserts or updates tournament-result in database. */
@@ -154,7 +152,6 @@ class TournamentResult
       $data->set_value( 'EndTime', $this->EndTime );
       $data->set_value( 'Result', $this->Result );
       $data->set_value( 'Rank', $this->Rank );
-      $data->set_value( 'RankKept', $this->RankKept );
       $data->set_value( 'Comment', $this->Comment );
       $data->set_value( 'Note', $this->Note );
       return $data;
@@ -196,7 +193,6 @@ class TournamentResult
             @$row['X_EndTime'],
             @$row['Result'],
             @$row['Rank'],
-            @$row['RankKept'],
             @$row['Comment'],
             @$row['Note']
          );

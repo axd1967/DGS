@@ -678,8 +678,6 @@ class TournamentLogHelper
             $msg[] = sprintf(self::$DIFF_FMT, 'Result', $old_tr->Result, $new_tr->Result );
          if ( $old_tr->Rank != $new_tr->Rank )
             $msg[] = sprintf(self::$DIFF_FMT, 'Rank', $old_tr->Rank, $new_tr->Rank );
-         if ( $old_tr->RankKept != $new_tr->RankKept )
-            $msg[] = sprintf(self::$DIFF_FMT, 'RankKept', $old_tr->RankKept, $new_tr->RankKept );
          if ( $old_tr->Comment != $new_tr->Comment )
             $msg[] = sprintf(self::$DIFF_FMT, 'Comment', $old_tr->Comment, $new_tr->Comment );
          if ( $old_tr->Note != $new_tr->Note )

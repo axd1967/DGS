@@ -124,7 +124,7 @@ class TournamentResultControl
       $trtable->add_tablehead( 4, T_('Current Rating#header'), 'Rating', 0, 'TRP_Rating2-');
       $trtable->add_tablehead( 5, T_('Result Rating#header'), 'Rating', 0, 'Rating-');
       if ( $this->tourney->Type == TOURNEY_TYPE_LADDER )
-         $trtable->add_tablehead( 7, T_('Rank Kept#header'), '', 0, 'RankKept-');
+         $trtable->add_tablehead( 7, T_('Rank Kept#header'), '', TABLE_NO_SORT, ''); // calculated
       $trtable->add_tablehead( 8, T_('Result Date#header'), '', 0, 'EndTime+');
       $trtable->add_tablehead(10, T_('Comment#header'), '', 0, 'Comment+');
 

@@ -240,9 +240,6 @@ $GLOBALS['ThePage'] = new Page('TournamentEditResults');
             'DESCRIPTION', T_('Rank#tresult'),
             'TEXTINPUT',   'rank', 8, 8, $vars['rank'], ));
       $trform->add_row( array(
-            'DESCRIPTION', T_('Rank Kept#tourney'),
-            'TEXTINPUT',   'rank_kept', 8, 8, $vars['rank_kept'], ));
-      $trform->add_row( array(
             'DESCRIPTION', T_('Comment (public)#tourney'),
             'TEXTINPUT',   'comment', 70, 128, $vars['comment'], ));
       $trform->add_row( array(
@@ -414,7 +411,6 @@ function parse_edit_form( &$tresult, $tourney, $uvars )
       'end_time'     => formatDate( $tresult->EndTime ),
       'result'       => $tresult->Result,
       'rank'         => $tresult->Rank,
-      'rank_kept'    => $tresult->RankKept,
       'comment'      => $tresult->Comment,
       'note'         => $tresult->Note,
    );
@@ -509,12 +505,6 @@ function parse_edit_form( &$tresult, $tourney, $uvars )
       else
          $tresult->Rank = (int)$new_value;
 
-      $new_value = $vars['rank_kept'];
-      if ( (string)$new_value != '' && ( !is_numeric($new_value) || $new_value <= 0 ) )
-         $errors[] = T_('Rank Kept must be a positive number#tourney');
-      else
-         $tresult->RankKept = (int)$new_value;
-
       $new_value = trim($vars['comment']);
       if ( strlen($new_value) > 128 )
          $errors[] = sprintf( T_('Comment is too long (max. %s chars allowed).#tourney'), 128 );
@@ -537,7 +527,6 @@ function parse_edit_form( &$tresult, $tourney, $uvars )
       if ( $old_vals['end_time'] != $tresult->EndTime ) $edits[] = T_('End time#tourney');
       if ( $old_vals['result'] != $tresult->Result ) $edits[] = T_('Result#tresult');
       if ( $old_vals['rank'] != $tresult->Rank ) $edits[] = T_('Rank#tresult');
-      if ( $old_vals['rank_kept'] != $tresult->RankKept ) $edits[] = T_('Rank Kept#tourney');
       if ( $old_vals['comment'] != $tresult->Comment ) $edits[] = T_('Comment');
       if ( $old_vals['note'] != $tresult->Note ) $edits[] = T_('Note');
    }
@@ -575,8 +564,6 @@ function fill_tournament_info( &$vars, $uvars, $tourney, $user, $tp, $tladder, $
          $vars['start_time'] = formatDate( $tladder->RankChanged );
       $vars['result'] = $tladder->SeqWinsBest;
       $vars['rank'] = $tladder->Rank;
-      if ( $tladder->RankChanged > 0 )
-         $vars['rank_kept'] = (int)( ($NOW - $tladder->RankChanged) / SECS_PER_HOUR);
       $vars['comment'] = 'Sequently Wins';
    }
    else if ( !is_null($tpool) )

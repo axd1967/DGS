@@ -864,7 +864,6 @@ Description:
 | EndTime   | datetime             | NO   |     | 0000-00-00 00:00:00 |                |
 | Result    | mediumint(9)         | NO   |     | 0                   |                |
 | Rank      | smallint(5) unsigned | NO   |     | 0                   |                |
-| RankKept  | smallint(5) unsigned | NO   |     | 0                   |                |
 | Comment   | varchar(128)         | NO   |     |                     |                |
 | Note      | varchar(255)         | NO   |     |                     |                |
 
@@ -897,9 +896,6 @@ Description:
 * Rank : place of users for T-result
    - ladder: typically the TournamentLadder.Rank of TP
    - round-robin: typically the TournamentPool.Rank of TP in final round
-
-* RankKept : number of hours, rank is kept
-   - only used for tournament-ladder
 
 * Comment : public comment about user of result
 

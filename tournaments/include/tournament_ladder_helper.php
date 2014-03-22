@@ -257,10 +257,9 @@ class TournamentLadderHelper
       if ( !is_numeric($by_tdir_uid) || $by_tdir_uid < 0 )
          error('invalid_args', "TLH:process_tournament_ladder_crown_king.check.tdir_uid($tid,$by_tdir_uid)");
 
-      $rank_kept_hours = (int)( ($NOW - $row['X_RankChanged']) / SECS_PER_HOUR);
       $tresult = new TournamentResult( 0, $tid, $row['uid'], $row['rid'], $row['Rating2'],
          TRESULTTYPE_TL_KING_OF_THE_HILL, /*round*/1, /*start*/$row['X_RankChanged'], /*end*/$NOW,
-         0, $row['Rank'], $rank_kept_hours, '', 'set by CRON' );
+         0, $row['Rank'], '', 'set by CRON' );
 
       $nfy_uids = TournamentDirector::load_tournament_directors_uid( $tid );
       $nfy_uids[] = $row['owner_uid'];
