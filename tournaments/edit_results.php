@@ -100,8 +100,12 @@ $GLOBALS['ThePage'] = new Page('TournamentEditResults');
    $arr_result_types = TournamentResult::getTypeText();
 
    // check + load user + user-tournament-info (participant/ladder/pool)
-   list( $user_vars, $user ) = load_user_info( $errors );
-   list( $warnings, $tp, $tladder, $tpool, $info_str ) = load_tournament_info( $tourney, $user, $user_vars );
+   $user_vars = array( // defaults
+         'user' => trim( get_request_arg('user', ( @$_REQUEST['tr_show_user'] || @$_REQUEST['tr_use_info'] ? '' : $tresult->uid ) ) ),
+         'user_round' => trim( get_request_arg('user_round', ( @$_REQUEST['tr_show_user'] || @$_REQUEST['tr_use_info'] ? '' : $tresult->Round ) ) ),
+      );
+   $user = load_user_info( $errors, $user_vars, $is_new );
+   list( $warnings, $tp, $tladder, $tpool, $info_str ) = load_tournament_info( $tourney, $user, $user_vars, $is_new );
 
    // check + parse edit-form
    $old_tresult = clone $tresult;
@@ -160,6 +164,7 @@ $GLOBALS['ThePage'] = new Page('TournamentEditResults');
 
    $trform = new Form( 'tournamenteditresult', $page, FORM_POST );
    $trform->add_hidden( 'tid', $tid );
+   $trform->add_hidden( 'trid', $tresult->ID );
 
    $trform->add_row( array(
          'DESCRIPTION', T_('Tournament ID'),
@@ -174,7 +179,7 @@ $GLOBALS['ThePage'] = new Page('TournamentEditResults');
    $trform->add_row( array( 'HR' ));
    $trform->add_row( array(
          'DESCRIPTION', T_('Result Round#tourney'),
-         'TEXTINPUTX',   'user_round', 3, 3, $user_vars['user_round'], array( 'disabled' => ($tourney->Rounds > 1 ? 0:1) ), ));
+         'TEXTINPUT',   'user_round', 3, 3, $user_vars['user_round'], ));
    $trform->add_row( array(
          'DESCRIPTION', T_('Result User#tourney'),
          'TEXTINPUT',   'user', 16, 16, $user_vars['user'],
@@ -217,22 +222,22 @@ $GLOBALS['ThePage'] = new Page('TournamentEditResults');
       $trform->add_row( array(
             'DESCRIPTION', T_('Result rid#tourney'),
             'TEXTINPUT',   'rid', 8, 8, $vars['rid'],
-            'TEXT',        ' = ' . T_('Tournament Participant ID'), ));
+            'TEXT',        ' = ' . T_('Tournament Participant registration-ID'), ));
       $trform->add_row( array(
             'DESCRIPTION', T_('Result Round#tourney'),
             'TEXTINPUT',   'round', 3, 3, $vars['round'], ));
       $trform->add_row( array(
             'DESCRIPTION', T_('Result Rating#tourney'),
-            'TEXTINPUT',   'rating', 10, 10, $vars['rating'],
+            'TEXTINPUT',   'rating', 16, 16, $vars['rating'],
             'TEXT',        ( is_valid_rating($vars['rating']) ? ' = ' . echo_rating($vars['rating'], true) : '' ), ));
       $trform->add_row( array(
             'DESCRIPTION', T_('Start time#tourney'),
             'TEXTINPUT',   'start_time', 20, 20, $vars['start_time'],
-            'TEXT',  '&nbsp;' . span('EditNote', sprintf( T_('(Date format [%s])'), FMT_PARSE_DATE )), ));
+            'TEXT',  '&nbsp;' . span('EditNote', sprintf( T_('(Date format [%s])'), FMT_PARSE_DATE2 )), ));
       $trform->add_row( array(
             'DESCRIPTION', T_('End time#tourney'),
             'TEXTINPUT',   'end_time', 20, 20, $vars['end_time'],
-            'TEXT',  '&nbsp;' . span('EditNote', sprintf( T_('(Date format [%s])'), FMT_PARSE_DATE )), ));
+            'TEXT',  '&nbsp;' . span('EditNote', sprintf( T_('(Date format [%s])'), FMT_PARSE_DATE2 )), ));
       $trform->add_row( array(
             'DESCRIPTION', T_('Result#tresult'),
             'TEXTINPUT',   'result', 10, 10, $vars['result'], ));
@@ -249,7 +254,7 @@ $GLOBALS['ThePage'] = new Page('TournamentEditResults');
 
    if ( !is_null($user) )
    {
-      if ( @$_REQUEST['tr_use_info'] || @$_REQUEST['tr_preview'] )
+      if ( !$is_new || @$_REQUEST['tr_use_info'] || @$_REQUEST['tr_preview'] )
       {
          $trform->add_row( array(
                'DESCRIPTION', T_('Unsaved edits'),
@@ -292,14 +297,14 @@ $GLOBALS['ThePage'] = new Page('TournamentEditResults');
 }//main
 
 
-function load_user_info( &$errors )
+function load_user_info( &$errors, &$uvars, $is_new )
 {
-   $user_vars = array( 'user' => '' ); // defaults
    $user = null;
 
-   if ( count($errors) == 0 && ( @$_REQUEST['tr_show_user'] || @$_REQUEST['tr_use_info'] || @$_REQUEST['tr_preview'] ) )
+   if ( ( $is_new && count($errors) == 0 && ( @$_REQUEST['tr_show_user'] || @$_REQUEST['tr_use_info'] || @$_REQUEST['tr_preview'] ) )
+         || !$is_new )
    {
-      $new_value = trim( get_request_arg('user') );
+      $new_value = $uvars['user'];
       if ( (string)$new_value == '' || (is_numeric($new_value) && $new_value <= GUESTS_ID_MAX) )
          $errors[] = ErrorCode::get_error_text('invalid_user');
       elseif ( is_numeric($new_value) && $new_value > GUESTS_ID_MAX )
@@ -308,26 +313,26 @@ function load_user_info( &$errors )
       {
          $chk_value = ( substr($new_value, 0, 1) == '=' ) ? substr($new_value,1) : $new_value;
          if ( !preg_match("/^\\d+$/", $chk_value) ) // '='-prefix only needed for number-only user-ids
-            $new_value = $chk_value;
+            $uvars['user'] = $chk_value;
          $user = User::load_user_by_handle( $chk_value );
       }
       if ( is_null($user) && count($errors) == 0 )
          $errors[] = ErrorCode::get_error_text('unknown_user');
-      $user_vars['user'] = $new_value;
    }
 
-   return array( $user_vars, $user );
+   return $user;
 }//load_user_info
 
-function load_tournament_info( $tourney, $user, &$uvars )
+function load_tournament_info( $tourney, $user, &$uvars, $is_new )
 {
    $warnings = array();
    $tp = $tladder = $tpool = null;
    $info_str = '';
 
    // parse URL-vars for user-round
-   $new_value = trim( get_request_arg('user_round') );
-   if ( (@$_REQUEST['tr_show_user'] || @$_REQUEST['tr_use_info'] || @$_REQUEST['tr_preview']) && is_numeric($new_value) && $new_value >= 1 && $new_value <= $tourney->Rounds )
+   $new_value = $uvars['user_round'];
+   if ( ( $is_new && (@$_REQUEST['tr_show_user'] || @$_REQUEST['tr_use_info'] || @$_REQUEST['tr_preview']) && is_numeric($new_value) && $new_value >= 1 && $new_value <= $tourney->Rounds )
+         || !$is_new )
       $uvars['user_round'] = (int)$new_value;
    else
       $uvars['user_round'] = $tourney->CurrentRound; // default
@@ -393,12 +398,12 @@ function build_show_user_text( $tourney )
 // return [ vars-hash, edits-arr, errorlist ]
 function parse_edit_form( &$tresult, $tourney, $uvars )
 {
-   global $user, $tp, $tladder, $tpool;
+   global $is_new, $user, $tp, $tladder, $tpool;
 
    $edits = array();
    $errors = array();
 
-   $is_posted = ( @$_REQUEST['tr_use_info'] || @$_REQUEST['tr_preview'] );
+   $is_posted = ( !$is_new || @$_REQUEST['tr_use_info'] || @$_REQUEST['tr_preview'] );
 
    // read from props or set defaults
    $vars = array(
@@ -407,14 +412,14 @@ function parse_edit_form( &$tresult, $tourney, $uvars )
       'rid'          => $tresult->rid,
       'rating'       => $tresult->Rating,
       'round'        => $tresult->Round,
-      'start_time'   => formatDate( $tresult->StartTime ),
-      'end_time'     => formatDate( $tresult->EndTime ),
+      'start_time'   => formatDate( $tresult->StartTime, '', DATE_FMT_QUICK ),
+      'end_time'     => formatDate( $tresult->EndTime, '', DATE_FMT_QUICK ),
       'result'       => $tresult->Result,
       'rank'         => $tresult->Rank,
       'comment'      => $tresult->Comment,
       'note'         => $tresult->Note,
    );
-   if ( $tresult->ID <= 0 ) // for new entry clear all values as default
+   if ( $is_new ) // for new entry clear all values as default
    {
       foreach ( $vars as $key => $val )
          $vars[$key] = '';
@@ -472,20 +477,20 @@ function parse_edit_form( &$tresult, $tourney, $uvars )
             $tresult->Rating = $rating;
       }
 
-      $parsed_value = parseDate( T_('Start time for tournament result'), $vars['start_time'] );
+      $parsed_value = parseDate( T_('Start time for tournament result'), $vars['start_time'], /*secs*/true );
       if ( is_numeric($parsed_value) )
       {
          $tresult->StartTime = $parsed_value;
-         $vars['start_time'] = formatDate($tresult->StartTime);
+         $vars['start_time'] = formatDate($tresult->StartTime, '', DATE_FMT_QUICK);
       }
       else
          $errors[] = $parsed_value;
 
-      $parsed_value = parseDate( T_('End time for tournament result'), $vars['end_time'] );
+      $parsed_value = parseDate( T_('End time for tournament result'), $vars['end_time'], /*secs*/true );
       if ( is_numeric($parsed_value) )
       {
          $tresult->EndTime = $parsed_value;
-         $vars['end_time'] = formatDate($tresult->EndTime);
+         $vars['end_time'] = formatDate($tresult->EndTime, '', DATE_FMT_QUICK);
       }
       else
          $errors[] = $parsed_value;
@@ -540,7 +545,7 @@ function fill_tournament_info( &$vars, $uvars, $tourney, $user, $tp, $tladder, $
    global $NOW, $player_row;
 
    $vars['round'] = (int)$uvars['user_round'];
-   $vars['end_time'] = formatDate( $NOW );
+   $vars['end_time'] = formatDate( $NOW, '', DATE_FMT_QUICK );
    $vars['note'] = sprintf( 'auto-filled by [%s]', $player_row['Handle'] ); // no translation
 
    if ( !is_null($user) )
@@ -552,16 +557,16 @@ function fill_tournament_info( &$vars, $uvars, $tourney, $user, $tp, $tladder, $
    {
       $vars['rid'] = $tp->ID;
       if ( is_valid_rating($tp->Rating) )
-         $vars['rating'] = sprintf( '%1.2f', $tp->Rating );
+         $vars['rating'] = $tp->Rating;
       elseif ( is_valid_rating($user->Rating) )
-         $vars['rating'] = sprintf( '%1.2f', $user->Rating );
+         $vars['rating'] = $user->Rating;
    }
 
    if ( !is_null($tladder) )
    {
       $vars['type'] = TRESULTTYPE_TL_SEQWINS;
       if ( $tladder->RankChanged > 0 )
-         $vars['start_time'] = formatDate( $tladder->RankChanged );
+         $vars['start_time'] = formatDate( $tladder->RankChanged, '', DATE_FMT_QUICK );
       $vars['result'] = $tladder->SeqWinsBest;
       $vars['rank'] = $tladder->Rank;
       $vars['comment'] = 'Sequently Wins';
@@ -572,7 +577,7 @@ function fill_tournament_info( &$vars, $uvars, $tourney, $user, $tp, $tladder, $
       $tround = TournamentCache::load_cache_tournament_round( 'Tournament.edit_results.fill_tournament_info',
          $tourney->ID, (int)$vars['round'], /*chk*/false );
       if ( !is_null($tround) )
-         $vars['start_time'] = formatDate( $tround->Lastchanged );
+         $vars['start_time'] = formatDate( $tround->Lastchanged, '', DATE_FMT_QUICK );
       if ( $tpool->Rank > TPOOLRK_RANK_ZONE && $tpool->Rank != TPOOLRK_WITHDRAW )
          $vars['rank'] = abs($tpool->Rank);
       $vars['comment'] = 'Pool Winners';

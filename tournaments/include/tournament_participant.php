@@ -177,9 +177,10 @@ class TournamentParticipant
             T_('Tournament Participant') )
          . MINI_SPACING
          . span('bold', T_('Tournament Participant'), '%s: ')
-         . sprintf( T_("StartRound [%s], Finished [%s], Won [%s], Lost [%s],\n"
-                  . "Flags [%s]%s, Created [%s]#tourney"),
-               $this->StartRound, $this->Finished, $this->Won, $this->Lost,
+         . sprintf( T_("rid [%s], StartRound [%s], Finished [%s], Won [%s], Lost [%s],\n"
+                  . "Flags [%s]%s,\n"
+                  . "Created [%s]#tourney"),
+               $this->ID, $this->StartRound, $this->Finished, $this->Won, $this->Lost,
                self::getFlagsText($this->Flags), $rating_str,
                ($this->Created > 0 ? date(DATE_FMT, $this->Created) : '') );
    }

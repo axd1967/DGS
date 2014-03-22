@@ -3607,24 +3607,27 @@ function buildWarnListString( $warnmsg, $warnings, $colspan=0 )
 }
 
 /*!
- * \brief Parses given date-string (expect given format [YYYY-MM-DD hh:mm])
- *        into UNIX-timestamp; or return error-string.
- *        Returns 0 if no date-string given.
+ * \brief Parses given date-string using static date-formats into UNIX-timestamp.
+ * \param $allow_secs true = seconds will be parsed too with format [YYYY-MM-DD hh:mm:ss];
+ *       otherwise parse-format is [YYYY-MM-DD hh:mm] and seconds are set to 0
+ * \return 0 if no date-string given; integer as UNIX-timestamp with date-value; otherwise error-string
  */
-function parseDate( $msg, $date_str )
+function parseDate( $msg, $date_str, $allow_secs=false )
 {
    $result = 0;
    $date_str = trim($date_str);
    if ( $date_str != '' )
    {
-      if ( preg_match( "/^(\d{4})-?(\d+)-?(\d+)(?:\s+(\d+)(?::(\d+)))$/", $date_str, $matches ) )
-      {// (Y)=1, (M)=2, (D)=3, (h)=4, (m)=5
-         list(, $year, $month, $day, $hour, $min ) = $matches;
-         $result = mktime( 0+$hour, 0+$min, 0, 0+$month, 0+$day, 0+$year );
+      if ( preg_match( "/^(\d{4})-?(\d+)-?(\d+)(?:\s+(\d+)(?::(\d+)(?::(\d+))?))$/", $date_str, $matches ) )
+      {// (Y)=1, (M)=2, (D)=3, (h)=4, (m)=5, [ (s)=6 ]
+         list(, $year, $month, $day, $hour, $min, $secs ) = $matches;
+         if ( !$allow_secs || (string)$secs == '' )
+            $secs = 0;
+         $result = mktime( 0+$hour, 0+$min, 0+$secs, 0+$month, 0+$day, 0+$year );
       }
       else
          $result = sprintf( T_('Dateformat of [%s] is wrong, expected [%s] for [%s]'),
-            $date_str, FMT_PARSE_DATE, $msg );
+            $date_str, FMT_PARSE_DATE . ($allow_secs ? '[:ss]' : ''), $msg );
    }
    return $result;
 }//parseDate

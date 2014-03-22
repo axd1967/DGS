@@ -13,6 +13,15 @@ ChangeLog
 
 2014-03-22 jug
 
+   * tournaments/include/tournament_result_control.php (TournamentResultControl.make_table_tournament_results),
+     tournaments/include/tournament_participant.php (TournamentParticipant.build_result_info),
+     include/quick_common.php (FMT_PARSE_DATE2),
+     include/std_functions.php (parseDate),
+     scripts/tests/GeneralFunctionsTest.php (class GeneralFunctionsTest),
+     scripts/tests/AllTests.php (AllTest.suite),
+     tournaments/edit_results.php (load_user_info, load_tournament_info, parse_edit_form):
+   - edit-results: show existing tournament-result-entry, extend date-parsing with seconds
+
    * tournaments/include/tournament_helper.php (TournamentHelper.check_tournament_result),
      tournaments/edit_results.php (load_tournament_info, parse_edit_form, fill_tournament_info):
    - edit-results: added preview of new tournament-result

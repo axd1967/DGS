@@ -96,6 +96,7 @@ global $NOw; //PHP5
 $NOW = time() + (int)$timeadjust;
 
 define('FMT_PARSE_DATE', 'YYYY-MM-DD hh:mm');
+define('FMT_PARSE_DATE2', 'YYYY-MM-DD hh:mm:ss');
 define('DATE_FMT', 'Y-m-d H:i'); // see also parseDate()-func
 define('DATE_FMT2', 'Y-m-d&\n\b\s\p;H:i');
 define('DATE_FMT3', 'Y-m-d&\n\b\s\p;H:i:s');

@@ -193,7 +193,7 @@ class TournamentResultControl
          if ( @$this->table->Is_Column_Displayed[ 7] )
             $row_str[ 7] = TimeFormat::echo_time_diff( $tresult->EndTime, $tresult->StartTime, 24, TIMEFMT_SHORT, '' );
          if ( $this->table->Is_Column_Displayed[ 8] )
-            $row_str[ 8] = ($tresult->EndTime > 0) ? date(DATE_FMT2, $tresult->EndTime) : '';
+            $row_str[ 8] = ($tresult->EndTime > 0) ? date(DATE_FMT_QUICK, $tresult->EndTime) : '';
          if ( @$this->table->Is_Column_Displayed[ 9] )
          {
             if ( $tresult->Type == TRESULTTYPE_TL_SEQWINS )
