@@ -202,7 +202,7 @@ class TournamentResult
    /*!
     * \brief Returns single TournamentResult-objects for given tournament-result-id and check against optionally
     *       given tournament-id.
-    * \note dies with error if $tid given and it doesn't match with found tournament-result
+    * \param $tid dies with error if $tid given and it doesn't match with tournament-id found in tournament-result
     * \return TournamentResult-object; null if nothing found
     */
    public static function load_tournament_result( $dbgmsg, $tresult_id, $tid=0 )

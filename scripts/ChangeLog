@@ -13,6 +13,10 @@ ChangeLog
 
 2014-03-22 jug
 
+   * tournaments/include/tournament_helper.php (TournamentHelper.check_tournament_result),
+     tournaments/edit_results.php (load_tournament_info, parse_edit_form, fill_tournament_info):
+   - edit-results: added preview of new tournament-result
+
    * tournaments/include/tournament_result.php (class TournamentResult, ~.__construct,
        ~.build_log_string, ~.fillEntityData, ~.new_from_row),
      tournaments/include/tournament_ladder_helper.php (TournamentLadderHelper.process_tournament_ladder_crown_king),

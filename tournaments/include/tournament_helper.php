@@ -264,7 +264,7 @@ class TournamentHelper
       }
 
       if ( $tresult->Rank <= 0 )
-         $errors[] = T_('Missing value for tournament result rank.');
+         $errors[] = T_('Missing positive value for tournament result rank.');
 
       return $errors;
    }//check_tournament_result
