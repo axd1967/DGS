@@ -66,9 +66,12 @@ class TournamentRoundHelper
          $tgame->setStatus(TG_STATUS_DONE);
          $tgame->update();
 
-         // update TP.Finished/Won/Lost for challenger and defender
-         TournamentParticipant::update_game_end_stats( $tid, $tgame->Challenger_rid, $tgame->Challenger_uid, $tgame->Score );
-         TournamentParticipant::update_game_end_stats( $tid, $tgame->Defender_rid, $tgame->Defender_uid, -$tgame->Score );
+         // update TP.Finished/Won/Lost for challenger and defender (except for annulled(=detached) games)
+         if ( !( $tgame->Flags & TG_FLAG_GAME_DETACHED ) )
+         {
+            TournamentParticipant::update_game_end_stats( $tid, $tgame->Challenger_rid, $tgame->Challenger_uid, $tgame->Score );
+            TournamentParticipant::update_game_end_stats( $tid, $tgame->Defender_rid, $tgame->Defender_uid, -$tgame->Score );
+         }
 
          TournamentLogHelper::log_tournament_round_robin_game_end( $tid,
             sprintf('Game End(game %s) Round_ID[%s] Pool[%s]: user_role:rid/uid Challenger:%s/%s vs Defender:%s/%s; T-Game(%s): Status=[%s], Flags=[%s], Score=[%s]',

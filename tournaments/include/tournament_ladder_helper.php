@@ -106,9 +106,12 @@ class TournamentLadderHelper
                $tgame->setStatus(TG_STATUS_DONE);
             $tgame->update();
 
-            // update TP.Finished/Won/Lost for challenger and defender
-            TournamentParticipant::update_game_end_stats( $tid, $tgame->Challenger_rid, $tgame->Challenger_uid, $tgame->Score );
-            TournamentParticipant::update_game_end_stats( $tid, $tgame->Defender_rid, $tgame->Defender_uid, -$tgame->Score );
+            // update TP.Finished/Won/Lost for challenger and defender (except for annulled(=detached) games)
+            if ( !( $tgame->Flags & TG_FLAG_GAME_DETACHED ) )
+            {
+               TournamentParticipant::update_game_end_stats( $tid, $tgame->Challenger_rid, $tgame->Challenger_uid, $tgame->Score );
+               TournamentParticipant::update_game_end_stats( $tid, $tgame->Defender_rid, $tgame->Defender_uid, -$tgame->Score );
+            }
          }
 
          TournamentLogHelper::log_tournament_ladder_game_end( $tid,

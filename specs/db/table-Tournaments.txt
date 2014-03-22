@@ -260,7 +260,9 @@ Description:
 * AdminMessage : private message from TD to user
 
 * Finished, Won, Lost : number of finished/won/lost tournament-games of user
-   - for ladder-tournaments detached tournament-games (because of user-removals) are not counted
+   - Finished: annulled (=detached) tournament-games are not counted,
+     other games including no-results games are counting
+   - Won, Lost: jigo and no-result games are not counted as won or lost
 
 
 ###########################################################################
