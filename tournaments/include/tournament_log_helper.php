@@ -651,7 +651,7 @@ class TournamentLogHelper
       if ( $is_new ) // add
       {
          $tlog = new Tournamentlog( 0, $tid, 0, 0, $tlog_type, 'TRES_Data', TLOG_ACT_ADD, $new_tr->uid,
-            $tresult->build_log_string() );
+            $new_tr->build_log_string() );
       }
       else // update
       {
@@ -668,12 +668,12 @@ class TournamentLogHelper
             $msg[] = sprintf(self::$DIFF_FMT, 'Round', $old_tr->Round, $new_tr->Round );
          if ( $old_tr->StartTime != $new_tr->StartTime )
             $msg[] = sprintf(self::$DIFF_FMT, 'StartTime',
-               ( $old_tr->StartTime > 0 ? date(DATE_FMT, $old_tr->StartTime) : ''),
-               ( $new_tr->StartTime > 0 ? date(DATE_FMT, $new_tr->StartTime) : '') );
+               ( $old_tr->StartTime > 0 ? date(DATE_FMT_QUICK, $old_tr->StartTime) : ''),
+               ( $new_tr->StartTime > 0 ? date(DATE_FMT_QUICK, $new_tr->StartTime) : '') );
          if ( $old_tr->EndTime != $new_tr->EndTime )
             $msg[] = sprintf(self::$DIFF_FMT, 'EndTime',
-               ( $old_tr->EndTime > 0 ? date(DATE_FMT, $old_tr->EndTime) : ''),
-               ( $new_tr->EndTime > 0 ? date(DATE_FMT, $new_tr->EndTime) : '') );
+               ( $old_tr->EndTime > 0 ? date(DATE_FMT_QUICK, $old_tr->EndTime) : ''),
+               ( $new_tr->EndTime > 0 ? date(DATE_FMT_QUICK, $new_tr->EndTime) : '') );
          if ( $old_tr->Result != $new_tr->Result )
             $msg[] = sprintf(self::$DIFF_FMT, 'Result', $old_tr->Result, $new_tr->Result );
          if ( $old_tr->Rank != $new_tr->Rank )

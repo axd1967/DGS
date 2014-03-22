@@ -234,6 +234,7 @@ class TournamentHelper
    /*! \brief Perform tournament-type-specific checks on tournament-result return errors-array (or empty on success). */
    public static function check_tournament_result( $tourney, $tresult )
    {
+      global $NOW;
       $errors = array();
 
       if ( $tresult->uid <= GUESTS_ID_MAX )
@@ -262,6 +263,9 @@ class TournamentHelper
             $errors[] = sprintf( T_('Result value can only be provided for tournament-result-types [%s].'),
                build_text_list( 'TournamentResult::getTypeText', array( TRESULTTYPE_TL_SEQWINS ), ', ' ) );
       }
+
+      if ( $tresult->StartTime > $NOW || $tresult->EndTime > $NOW )
+         $errors[] = T_('Start time and End time can not be in the future.#tresult');
 
       if ( $tresult->Rank <= 0 )
          $errors[] = T_('Missing positive value for tournament result rank.');

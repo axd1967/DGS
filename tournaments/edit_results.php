@@ -56,25 +56,24 @@ $GLOBALS['ThePage'] = new Page('TournamentEditResults');
    $page = "edit_results.php";
 
 /* Actual REQUEST calls used (TD=tournament-director)
-     tid=                              : edit TRs (no result selected)
-     tid=&trid=                        : edit TR (given by TournamentResult.ID = trid)
+     tid=                                    : show user-input to add new TR
+     tid=&trid=                              : show existing TR (given by TournamentResult.ID = trid)
 
-     tr_show_user=&user=&user_round=   : show tournament-info about user; user='123' (uid) or '=abc' (handle)
-     tr_use_info=&user=                : fill-in info-data overwriting new/current tournament-result-fields
-     tr_preview&tid=                   : preview new TR
-     //TODO TODO impl
-     tr_preview&tid=&trid=             : preview update of TR
-     tr_save&tid=&trid=                : update TR in database
-     tr_del&tid=&trid=                 : remove TR (need confirm)
-     tr_del_confirm=1&tid=&trid=       : remove TR (confirmed)
-     tr_cancel&tid=                    : cancel operation
+     tr_show_user=&user=&user_round=         : show tournament-info about user; user='123' (uid) or '=abc' (handle)
+     tr_use_info=&user=                      : fill-in info-data overwriting new/current tournament-result-fields
+     tr_preview&tid=[&trid=]                 : preview new [or update] TR
+     tr_save&tid=[&trid=]                    : add new [/update] TR in database
+     tr_del&tid=&trid=                       : remove TR (need confirm)
+     tr_del_confirm=1&tid=&trid=             : remove TR (confirmed)
+     tr_cancel&tid=&trid=&user=&user_round=  : cancel operation (update/delete)
 */
 
    $tid = (int) @$_REQUEST['tid'];
    $trid = (int) @$_REQUEST['trid'];
 
    if ( @$_REQUEST['tr_cancel'] ) // cancel delete or edit
-      jump_to("tournaments/edit_results.php?tid=$tid");
+      jump_to("tournaments/edit_results.php?tid=$tid".URI_AMP."trid=$trid".URI_AMP
+         . "user=".urlencode(@$_REQUEST['user']).URI_AMP."user_round=".urlencode(@$_REQUEST['user_round']));
 
    $tourney = TournamentCache::load_cache_tournament( "Tournament.edit_results.find_tournament($my_id)", $tid );
    $tstatus = new TournamentStatus( $tourney );
@@ -101,8 +100,8 @@ $GLOBALS['ThePage'] = new Page('TournamentEditResults');
 
    // check + load user + user-tournament-info (participant/ladder/pool)
    $user_vars = array( // defaults
-         'user' => trim( get_request_arg('user', ( @$_REQUEST['tr_show_user'] || @$_REQUEST['tr_use_info'] ? '' : $tresult->uid ) ) ),
-         'user_round' => trim( get_request_arg('user_round', ( @$_REQUEST['tr_show_user'] || @$_REQUEST['tr_use_info'] ? '' : $tresult->Round ) ) ),
+         'user' => trim( get_request_arg('user', ( @$_REQUEST['tr_show_user'] || @$_REQUEST['tr_use_info'] || @$_REQUEST['tr_save'] ? '' : ( $is_new ? '' : $tresult->uid ) ) ) ),
+         'user_round' => trim( get_request_arg('user_round', ( @$_REQUEST['tr_show_user'] || @$_REQUEST['tr_use_info'] || @$_REQUEST['tr_save'] ? '' : ( $is_new ? $tourney->Rounds : $tresult->Round ) ) ) ),
       );
    $user = load_user_info( $errors, $user_vars, $is_new );
    list( $warnings, $tp, $tladder, $tpool, $info_str ) = load_tournament_info( $tourney, $user, $user_vars, $is_new );
@@ -113,17 +112,15 @@ $GLOBALS['ThePage'] = new Page('TournamentEditResults');
    $errors = array_merge( $errors, $input_errors );
 
    // check + fill in TResult.uid/rid/Round
-   if ( !is_null($user) && ( @$_REQUEST['tr_use_info'] || @$_REQUEST['tr_preview'] ) )
+   if ( !is_null($user) && ( @$_REQUEST['tr_use_info'] || @$_REQUEST['tr_preview'] || @$_REQUEST['tr_save'] ) )
    {
-      if ( !$is_new ) // edit existing T-result
-      {
-         if ( !is_null($user) && $tresult->uid != $user->ID )
-            $errors[] = sprintf( T_('Specified uid [%s] for user [%s] must match the stored tournament-result uid [%s].'),
-               $user->ID, $user->Handle, $tresult->uid );
-         if ( !is_null($tp) && !is_null($user) && $tresult->rid != $tp->ID )
-            $errors[] = sprintf( T_('Tournament participant-id [%s] of specified user [%s] must match the stored participant id [%s].'),
-               $tp->ID, $user->Handle, $tresult->rid );
-      }
+      if ( $tresult->uid != $user->ID )
+         $errors[] = sprintf( T_('Specified uid [%s] for user [%s] must match the new/stored result uid [%s].#tourney'),
+            $user->ID, $user->Handle, $tresult->uid );
+      if ( !is_null($tp) && $tresult->rid != $tp->ID )
+         $errors[] = sprintf( T_('Tournament participant rid [%s] for specified user [%s] must match the new/stored result rid [%s].#tourney'),
+            $tp->ID, $user->Handle, $tresult->rid );
+
       $errors = array_merge( $errors,
          TournamentHelper::check_tournament_result($tourney, $tresult) );
    }
@@ -155,7 +152,7 @@ $GLOBALS['ThePage'] = new Page('TournamentEditResults');
       ta_end();
 
       if ( $success )
-         jump_to("tournaments/edit_results.php?tid=$tid".URI_AMP."trid=$trid".URI_AMP
+         jump_to("tournaments/edit_results.php?tid=$tid".URI_AMP."trid={$tresult->ID}".URI_AMP
             . "sysmsg=" . urlencode(T_('Tournament result saved!')) );
    }
 
@@ -190,7 +187,7 @@ $GLOBALS['ThePage'] = new Page('TournamentEditResults');
          'TAB',
          'TEXT', T_('Syntax: uid, \'Userid\' or \'=Userid\', e.g. \'123\', \'abc\' or \'=abc\'#tourney'), ));
 
-   // add tournament-info about user
+   // show tournament-info about user
    if ( $info_str )
       $trform->add_row( array( 'CELL', 2, '', 'TEXT', $info_str, ));
 
@@ -208,7 +205,7 @@ $GLOBALS['ThePage'] = new Page('TournamentEditResults');
    }
 
    $trform->add_row( array( 'HR' ));
-   if ( !is_null($user) && ( !$is_new || @$_REQUEST['tr_use_info'] || @$_REQUEST['tr_preview'] ) )
+   if ( !is_null($user) && ( !$is_new || @$_REQUEST['tr_use_info'] || @$_REQUEST['tr_preview'] || @$_REQUEST['tr_save'] || @$_REQUEST['tr_del'] ) )
    {
       $trform->add_row( array(
             'DESCRIPTION', T_('Tournament Result ID'),
@@ -254,7 +251,15 @@ $GLOBALS['ThePage'] = new Page('TournamentEditResults');
 
    if ( !is_null($user) )
    {
-      if ( !$is_new || @$_REQUEST['tr_use_info'] || @$_REQUEST['tr_preview'] )
+      if ( @$_REQUEST['tr_del'] )
+      {
+         $trform->add_row( array(
+               'TAB', 'CELL', 1, '', // align submit-buttons
+               'SUBMITBUTTON', 'tr_del_confirm', T_('Confirm deletion of result#tourney'),
+               'TEXT', SMALL_SPACING,
+               'SUBMITBUTTON', 'tr_cancel', T_('Cancel') ));
+      }
+      elseif ( !$is_new || @$_REQUEST['tr_use_info'] || @$_REQUEST['tr_preview'] || @$_REQUEST['tr_save'] )
       {
          $trform->add_row( array(
                'DESCRIPTION', T_('Unsaved edits'),
@@ -265,14 +270,6 @@ $GLOBALS['ThePage'] = new Page('TournamentEditResults');
                'SUBMITBUTTON', 'tr_preview', T_('Preview'),
                'TEXT', SMALL_SPACING.SMALL_SPACING,
                'SUBMITBUTTON', 'tr_del', T_('Delete tournament result'),
-               'TEXT', SMALL_SPACING,
-               'SUBMITBUTTON', 'tr_cancel', T_('Cancel') ));
-      }
-      elseif ( @$_REQUEST['tr_del'] )
-      {
-         $trform->add_row( array(
-               'TAB', 'CELL', 1, '', // align submit-buttons
-               'SUBMITBUTTON', 'tr_del_confirm', T_('Confirm deletion of result#tourney'),
                'TEXT', SMALL_SPACING,
                'SUBMITBUTTON', 'tr_cancel', T_('Cancel') ));
       }
@@ -301,7 +298,7 @@ function load_user_info( &$errors, &$uvars, $is_new )
 {
    $user = null;
 
-   if ( ( $is_new && count($errors) == 0 && ( @$_REQUEST['tr_show_user'] || @$_REQUEST['tr_use_info'] || @$_REQUEST['tr_preview'] ) )
+   if ( ( $is_new && count($errors) == 0 && ( @$_REQUEST['tr_show_user'] || @$_REQUEST['tr_use_info'] || @$_REQUEST['tr_preview'] || @$_REQUEST['tr_save'] ) )
          || !$is_new )
    {
       $new_value = $uvars['user'];
@@ -331,11 +328,11 @@ function load_tournament_info( $tourney, $user, &$uvars, $is_new )
 
    // parse URL-vars for user-round
    $new_value = $uvars['user_round'];
-   if ( ( $is_new && (@$_REQUEST['tr_show_user'] || @$_REQUEST['tr_use_info'] || @$_REQUEST['tr_preview']) && is_numeric($new_value) && $new_value >= 1 && $new_value <= $tourney->Rounds )
+   if ( ( $is_new && (@$_REQUEST['tr_show_user'] || @$_REQUEST['tr_use_info'] || @$_REQUEST['tr_preview'] || @$_REQUEST['tr_save'] ) && is_numeric($new_value) && $new_value >= 1 && $new_value <= $tourney->Rounds )
          || !$is_new )
       $uvars['user_round'] = (int)$new_value;
    else
-      $uvars['user_round'] = $tourney->CurrentRound; // default
+      $uvars['user_round'] = $tourney->CurrentRound; // default and fallback if value has error
 
    // load T-info about user: TournamentParticipant, TournamentLadder (for TL), TournamentPool (for TRR)
    if ( !is_null($user) )
@@ -403,7 +400,7 @@ function parse_edit_form( &$tresult, $tourney, $uvars )
    $edits = array();
    $errors = array();
 
-   $is_posted = ( !$is_new || @$_REQUEST['tr_use_info'] || @$_REQUEST['tr_preview'] );
+   $is_posted = ( !$is_new || @$_REQUEST['tr_use_info'] || @$_REQUEST['tr_preview'] || @$_REQUEST['tr_save'] || @$_REQUEST['tr_del'] );
 
    // read from props or set defaults
    $vars = array(
@@ -580,7 +577,7 @@ function fill_tournament_info( &$vars, $uvars, $tourney, $user, $tp, $tladder, $
          $vars['start_time'] = formatDate( $tround->Lastchanged, '', DATE_FMT_QUICK );
       if ( $tpool->Rank > TPOOLRK_RANK_ZONE && $tpool->Rank != TPOOLRK_WITHDRAW )
          $vars['rank'] = abs($tpool->Rank);
-      $vars['comment'] = 'Pool Winners';
+      $vars['comment'] = 'Pool Winner';
    }
 }//fill_tournament_info
 

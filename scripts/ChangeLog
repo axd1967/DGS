@@ -13,6 +13,15 @@ ChangeLog
 
 2014-03-22 jug
 
+   * tournaments/include/tournament_log_helper.php (TournamentLogHelper.log_change_tournament_result),
+     tournaments/include/tournament_helper.php (TournamentHelper.check_tournament_result),
+     tournaments/edit_results.php (load_user_info, load_tournament_info, parse_edit_form,
+       fill_tournament_info):
+   - edit-result-page:
+     - added operations to add new, update or delete existing tournament-result entry,
+       preview and cancel operation
+     - fixed various bugs for editing operations, extended checks on result-fields
+
    * tournaments/include/tournament_result_control.php (TournamentResultControl.make_table_tournament_results),
      tournaments/include/tournament_participant.php (TournamentParticipant.build_result_info),
      include/quick_common.php (FMT_PARSE_DATE2),
