@@ -1498,11 +1498,11 @@ class TournamentLadder
    public static function process_game_end_sequently_wins( $tgame )
    {
       // track wins for challenger
-      $tladder_ch = new TournamentLadder( $tid, $tgame->Challenger_rid, $tgame->Challenger_uid );
+      $tladder_ch = new TournamentLadder( $tgame->tid, $tgame->Challenger_rid, $tgame->Challenger_uid );
       $tladder_ch->update_sequently_wins( $tgame->Score, $tgame->Flags );
 
       // track wins for defender
-      $tladder_df = new TournamentLadder( $tid, $tgame->Defender_rid, $tgame->Defender_uid );
+      $tladder_df = new TournamentLadder( $tgame->tid, $tgame->Defender_rid, $tgame->Defender_uid );
       $tladder_df->update_sequently_wins( -$tgame->Score, $tgame->Flags );
    }//process_game_end_sequently_wins
 
