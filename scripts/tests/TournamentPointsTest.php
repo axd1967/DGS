@@ -114,7 +114,9 @@ class TournamentPointsTest extends PHPUnit_Framework_TestCase {
       $this->assertEquals(  4, $tp->calculate_points( +0.5 ) );
 
       $this->assertEquals(  0, $tp->calculate_points( 0, TG_FLAG_GAME_DETACHED ) );
-      $this->assertEquals(  5, $tp->calculate_points( 0, TG_FLAG_GAME_NO_RESULT ) );
+      $this->assertEquals(  0, $tp->calculate_points( 0, TG_FLAG_GAME_NO_RESULT ) );
+      $tp->PointsNoResult = 10;
+      $this->assertEquals( 10, $tp->calculate_points( 0, TG_FLAG_GAME_NO_RESULT ) );
    }
 
    public function test_calculate_points_HAHN_not_shared() {
