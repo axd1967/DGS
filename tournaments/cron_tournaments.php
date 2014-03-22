@@ -205,7 +205,7 @@ function run_once_daily()
 
    // ---------- Delete old tournament-news on DELETE-status
 
-   TournamentNews::process_tournament_news_deleted( 7 ); // 7days
+   TournamentNews::process_tournament_news_deleted( 7 ); // 7days (no check for locks)
 
 }//run_once_daily
 
