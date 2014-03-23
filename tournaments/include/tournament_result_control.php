@@ -113,10 +113,13 @@ class TournamentResultControl
       $trtable->add_external_parameters( $page_vars, true ); // add as hiddens
 
       // add_tablehead($nr, $descr, $attbs=null, $mode=TABLE_NO_HIDE|TABLE_NO_SORT, $sortx='')
+      $trtable->add_tablehead(12, T_('Type#header'), '', 0, 'Type+');
+      if ( $this->tourney->Type == TOURNEY_TYPE_ROUND_ROBIN )
+         $trtable->add_tablehead(13, T_('Round#tresheader'), 'NumberC', 0, 'Round-');
       if ( $this->allow_edit_tourney )
          $trtable->add_tablehead(11, T_('Actions#header'), 'Image', TABLE_NO_HIDE, '');
       if ( $this->tourney->Type == TOURNEY_TYPE_LADDER )
-         $trtable->add_tablehead( 9, T_('Result#tourney_result'), 'Number', TABLE_NO_HIDE, 'Result+');
+         $trtable->add_tablehead( 9, T_('Result#tresult'), 'Number', TABLE_NO_HIDE, 'Result-');
       $trtable->add_tablehead( 6, T_('Rank#tourney_result'), 'Number', TABLE_NO_HIDE, 'Rank+');
       $trtable->add_tablehead( 1, T_('Name#header'), 'User', 0, 'TRP_Name+');
       $trtable->add_tablehead( 2, T_('Userid#header'), 'User', TABLE_NO_HIDE, 'TRP_Handle+');
@@ -129,9 +132,9 @@ class TournamentResultControl
       $trtable->add_tablehead(10, T_('Comment#header'), '', 0, 'Comment+');
 
       if ( $this->tourney->Type == TOURNEY_TYPE_LADDER )
-         $trtable->set_default_sort( 6, 7, 8 );
+         $trtable->set_default_sort( 9, 6 ); // [Type ASC,] Result DESC, Rank DESC [, EndTime ASC]
       elseif ( $this->tourney->Type == TOURNEY_TYPE_ROUND_ROBIN )
-         $trtable->set_default_sort( 6, 8 );
+         $trtable->set_default_sort( 6, 8 ); // [Type ASC, Round DESC,] Rank DESC, EndTime ASC
 
       // load tournament-results
       $iterator = new ListIterator( "$dbgmsg.TRC.build_tournament_result_table.find_tresults",
@@ -168,7 +171,7 @@ class TournamentResultControl
 
          $row_str = array();
 
-         if ( $this->allow_edit_tourney && $this->table->Is_Column_Displayed[11] )
+         if ( $this->allow_edit_tourney && @$this->table->Is_Column_Displayed[11] )
          {
             $links = array();
             $links[] = anchor( $base_path."tournaments/edit_results.php?tid=$tid".URI_AMP."trid={$tresult->ID}",
@@ -193,16 +196,21 @@ class TournamentResultControl
          if ( @$this->table->Is_Column_Displayed[ 7] )
             $row_str[ 7] = TimeFormat::echo_time_diff( $tresult->EndTime, $tresult->StartTime, 24, TIMEFMT_SHORT, '' );
          if ( $this->table->Is_Column_Displayed[ 8] )
-            $row_str[ 8] = ($tresult->EndTime > 0) ? date(DATE_FMT_QUICK, $tresult->EndTime) : '';
+            $row_str[ 8] = ($tresult->EndTime > 0) ? date(DATE_FMT, $tresult->EndTime) : '';
          if ( @$this->table->Is_Column_Displayed[ 9] )
          {
             if ( $tresult->Type == TRESULTTYPE_TL_SEQWINS )
                $row_str[ 9] = $tresult->Result;
             else
-               $row_str[ 9] = '';
+               $row_str[ 9] = NO_VALUE;
          }
          if ( $this->table->Is_Column_Displayed[10] )
             $row_str[10] = $tresult->Comment;
+         if ( $this->table->Is_Column_Displayed[12] )
+            $row_str[12] = TournamentResult::getTypeText($tresult->Type);
+         if ( @$this->table->Is_Column_Displayed[13] )
+            $row_str[13] = $tresult->Round;
+
          if ( $is_mine )
             $row_str['extra_class'] = 'TourneyUser';
          $this->table->add_row( $row_str );

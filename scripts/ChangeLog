@@ -13,6 +13,11 @@ ChangeLog
 
 2014-03-23 jug
 
+   * tournaments/include/tournament_result_control.php (TournamentResultControl.build_tournament_result_table,
+       ~.make_table_tournament_results):
+   - use specific tournament-type-specific default-order for tournament-results
+   - added table-columns for TournamentResult.Type + Round-field for round-robin-tournaments
+
    * scripts/updates/database_changes_1_0_16_to_1_0_17.mysql,
      specs/db/table-Tournaments.txt, specs/db/dragon-ddl.sql:
    - cleanup: remove unnecessary db-index on TournamentResult.uid
