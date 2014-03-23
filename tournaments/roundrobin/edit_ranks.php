@@ -160,7 +160,7 @@ $GLOBALS['ThePage'] = new Page('TournamentRankEditor');
       $rank_counts = TournamentPool::count_tournament_pool_ranks( $tid, $round );
       $rank_summary = new RankSummary( $page, $rank_counts, $tp_regcount );
       $rstable = $rank_summary->make_table_rank_summary();
-      $result_notes = $rank_summary->build_notes();
+      $result_notes = $rank_summary->build_notes_rank_summary();
 
       if ( $show_stats )
          list( $pw_errors, $pw_warnings ) = $ttype->checkPoolWinners( $tourney, $tround );

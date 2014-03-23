@@ -1733,7 +1733,7 @@ class FairKomiNegotiation
       return $actions;
    }//build_form_actions
 
-   public function build_notes()
+   public function build_notes_fair_komi()
    {
       $htype = $this->game_setup->Handicaptype;
       $notes = array();
@@ -1766,7 +1766,7 @@ class FairKomiNegotiation
       $notes[] = T_('During fair-komi negotiation the clock is running.#fairkomi');
 
       return $notes;
-   }//build_notes
+   }//build_notes_fair_komi
 
 
    /*! \brief Returns error-list checking komi-bid for fair-komi; empty on success. */

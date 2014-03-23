@@ -1038,7 +1038,7 @@ class RankSummary
       return $arr;
    }//get_ranks
 
-   public function build_notes()
+   public function build_notes_rank_summary()
    {
       $notes = array();
       $notes[] = T_('Rank \'TP\' = tournament-participants registered to start in next round');

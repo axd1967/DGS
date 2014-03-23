@@ -1564,7 +1564,7 @@ function draw_fairkomi_negotiation( $my_id, &$form, $grow, $game_setup )
 
    $fairkomi_type = GameTexts::get_fair_komi_types($game_setup->Handicaptype);
    echo_notes( 'fk_notes', sprintf( T_('Negotiation process for "%s":#fairkomi'), $fairkomi_type ),
-      $fk->build_notes(), false );
+      $fk->build_notes_fair_komi(), false );
 
    if ( count($errors) )
    {
