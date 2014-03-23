@@ -13,6 +13,17 @@ ChangeLog
 
 2014-03-23 jug
 
+   * tournaments/include/tournament_template_round_robin.php (TournamentTemplateRoundRobin.checkPoolWinners,
+       ~.check_auto_poolwinners, ~.check_minimum_poolwinners):
+   - round-robins edit-ranks: revise error-checks on pool-winners & extend warnings for current round
+     - allow that pool can have no pool-winners, e.g. if all pool-users withdrew or many games
+       has been annulled
+     - change error on pool having no pool-winner into warning
+     - add warning if ALL players of a pool are marked as pool-winners,
+       normally there should be less pool-winners
+     - add warning if there's not even one pool-winners in all pools
+     - add warning if for potential next-round there not at least 2 players
+
    * tournaments/include/tournament_pool.php (TournamentPool.execute_rank_action):
    - edit-ranks for round-robins: allow withdrawing pool-user set by T-director
      even if Pool-Rank still unset

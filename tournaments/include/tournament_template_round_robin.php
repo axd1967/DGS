@@ -214,7 +214,7 @@ abstract class TournamentTemplateRoundRobin extends TournamentTemplate
 
       $this->check_unset_pool_ranks( $tid, $round, $errors );
       $this->check_auto_poolwinners( $tid, $tround, $errors, $warnings );
-      $this->check_minimum_poolwinners( $tid, $tround, $errors );
+      $this->check_minimum_poolwinners( $tid, $tround, $errors, $warnings );
 
       return array( $errors, $warnings );
    }//checkPoolWinners
@@ -275,18 +275,19 @@ abstract class TournamentTemplateRoundRobin extends TournamentTemplate
             $warnings[] =
                sprintf( T_("There are the following users marked as pool winners with a bigger rank \n"
                         .  "than the pool-winner rank [%s] defined for this round (which is either a mistake \n"
-                        .  "or done intentionally by one of the tournament directors):"),
+                        .  "or done intentionally by the tournament directors):"),
                   $tround->PoolWinnerRanks ) . "<br>\n" . implode("<br>\n", $arr);
          }
       }
    }//check_auto_poolwinners
 
    /*! \brief Checks that at least ONE PoolWinner is set per pool of current round. */
-   private function check_minimum_poolwinners( $tid, $tround, &$errors )
+   private function check_minimum_poolwinners( $tid, $tround, &$errors, &$warnings )
    {
       $round = (int)$tround->Round;
 
-      $result = db_query( "TournamentTemplateRoundRobin.check_minimum_poolwinners($tid,$round)",
+      // warning, if there are pools without pool-winners
+      $result = db_query( "TournamentTemplateRoundRobin.check_minimum_poolwinners.1($tid,$round)",
          "SELECT SQL_SMALL_RESULT Pool, COUNT(*) AS X_Count FROM TournamentPool " .
          "WHERE tid=$tid AND Round=$round AND Rank > 0 GROUP BY Pool" );
       $arr = array_value_to_key_and_value( range(1, $tround->Pools) ); // [ 1=>1, 2=>2, ... ]
@@ -294,7 +295,28 @@ abstract class TournamentTemplateRoundRobin extends TournamentTemplate
          unset($arr[$row['Pool']]);
       mysql_free_result($result);
       if ( count($arr) )
-         $errors[] = sprintf( T_('Pool(s) [%s] must have at least one pool-winner.'), implode(',', array_keys($arr)) );
+         $warnings[] = sprintf( T_('Pool(s) [%s] should have at least one pool-winner.'), implode(',', array_keys($arr)) );
+
+      // warning, if there are pools with all players marked as pool-winners
+      $result = db_query( "TournamentTemplateRoundRobin.check_minimum_poolwinners.2($tid,$round)",
+         "SELECT SQL_SMALL_RESULT Pool, COUNT(*) AS X_PoolCount, SUM(IF(Rank>0,1,0)) AS X_WinnerCount FROM TournamentPool " .
+         "WHERE tid=$tid AND Round=$round GROUP BY Pool HAVING X_PoolCount=X_WinnerCount" );
+      $arr = array(); // [ Pool, ... ]
+      while ( $row = mysql_fetch_assoc($result) )
+         $arr[] = $row['Pool'];
+      mysql_free_result($result);
+      if ( count($arr) )
+         $warnings[] = sprintf( T_('In pool(s) [%s] ALL players are marked as pool-winners.'), implode(',', $arr) );
+
+      // warning, if there's not a single pool-winner for current round
+      $cnt_tpool_next_rounders = TournamentPool::count_tournament_pool_next_rounders( $tid, $round );
+      if ( $cnt_tpool_next_rounders == 0 )
+         $warnings[] = T_('There is no pool-winner for this round in any pool.');
+
+      // warning, if there are not enough players (min. 2) for start of a potential next round
+      $cnt_tp_nextround = TournamentParticipant::count_tournament_participants( $tid, null, $round + 1, /*NextRnd*/true );
+      if ( $cnt_tp_nextround + $cnt_tpool_next_rounders < 2 )
+         $warnings[] = sprintf( T_('Need at least %s players to start next round.'), 2 );
    }//check_min_poolwinners
 
 } // end of 'TournamentTemplateRoundRobin'
