@@ -115,6 +115,7 @@ $GLOBALS['ThePage'] = new Page('TournamentRankEditor');
    $show_rank_sum = false;
    $show_stats = @$_REQUEST['t_stats'];
    $has_errors = count($errors);
+   $upd_count = -1;
    if ( !$has_errors )
    {
       if ( @$_REQUEST['t_exec'] ) // execute rank-actions
@@ -123,12 +124,13 @@ $GLOBALS['ThePage'] = new Page('TournamentRankEditor');
          $rank_from = get_request_arg('rank_from');
          $rank_to   = get_request_arg('rank_to');
          $act_pool  = get_request_arg('pool');
-         TournamentPool::execute_rank_action( $allow_edit_tourney, $tid, $round, $action, /*uid*/0, $rank_from, $rank_to, $act_pool );
+         $upd_count = TournamentPool::execute_rank_action( $allow_edit_tourney, $tid, $round, $action, /*uid*/0,
+            $rank_from, $rank_to, $act_pool );
       }
       elseif ( $uid && @$_REQUEST['t_userexec'] ) // execute rank-actions on single user
       {
          $action = (int)get_request_arg('action');
-         TournamentPool::execute_rank_action( $allow_edit_tourney, $tid, $round, $action, $uid );
+         $upd_count = TournamentPool::execute_rank_action( $allow_edit_tourney, $tid, $round, $action, $uid );
          $tpool_user = TournamentPool::load_tournament_pool_user( $tid, $round, $uid, TPOOL_LOADOPT_USER );
       }
       elseif ( $uid && @$_REQUEST['t_setrank'] ) // set rank for single user
@@ -137,8 +139,9 @@ $GLOBALS['ThePage'] = new Page('TournamentRankEditor');
          $pool_win = (bool)get_request_arg('poolwin');
          if ( !$pool_win && $rank_value )
             $rank_value = -abs($rank_value);
-         if ( TournamentPool::update_tournament_pool_ranks( $tid, $allow_edit_tourney, 'edit_ranks', $tpool_user->ID,
-               $rank_value, /*fix-rank*/true ) )
+         $upd_count = TournamentPool::update_tournament_pool_ranks( $tid, $allow_edit_tourney, 'edit_ranks',
+            $tpool_user->ID, $rank_value, /*fix-rank*/true );
+         if ( $upd_count > 0 )
             $tpool_user->Rank = $rank_value;
       }
 
@@ -293,6 +296,13 @@ $GLOBALS['ThePage'] = new Page('TournamentRankEditor');
    section( 'actionResult', T_('Action Results') );
    if ( !is_null($rstable) )
    {
+      if ( $upd_count >= 0 )
+      {
+         echo span( ($upd_count > 0 ? 'TWarningMsg' : 'TWarning'),
+            sprintf( T_('%s entries have been updated for this action.#tourney'), $upd_count )),
+            "<br><br>\n";
+      }
+
       $rstable->echo_table();
 
       if ( is_array($pw_errors) || is_array($pw_warnings) )

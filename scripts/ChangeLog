@@ -13,6 +13,14 @@ ChangeLog
 
 2014-03-23 jug
 
+   * tournaments/include/tournament_log_helper.php (TournamentLogHelper.log_execute_tournament_pool_rank_action,
+       ~.log_set_tournament_pool_ranks),
+     tournaments/include/tournament_pool.php (TournamentPool.update_tournament_pool_ranks,
+       ~.execute_rank_action),
+     tournaments/include/tournament_round_helper.php (TournamentRoundHelper.fill_ranks_tournament_pool),
+     tournaments/roundrobin/edit_ranks.php:
+   - edit-ranks for round-robins: show number of updated pool-entries for executed action
+
    * tournaments/include/tournament_log_helper.php (TournamentLogHelper.log_execute_tournament_pool_rank_action),
      tournaments/include/tournament_globals.php (TPOOLRK_WITHDRAW, RKACT_WITHDRAW),
      tournaments/include/tournament_pool.php (TournamentPool.execute_rank_action),

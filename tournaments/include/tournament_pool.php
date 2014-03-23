@@ -861,6 +861,7 @@ class TournamentPool
     * \param $tpool_id single ID or array with IDs to update rank
     * \param $fix_rank if true, no update-restriction on Rank;
     *        otherwise expect Rank<TPOOLRK_RANK_ZONE to auto-fill rank
+    * \return number of updated entries
     */
    public static function update_tournament_pool_ranks( $tid, $tlog_type, $tlog_ref, $tpool_id, $rank, $fix_rank=false )
    {
@@ -887,9 +888,10 @@ class TournamentPool
       $result = db_query( "TournamentPool:update_tournament_pool_ranks.update($tid,$tpool_id,$rank)",
          "UPDATE TournamentPool SET Rank=$rank " .
          "WHERE $qpart_tpools $qpart_rank LIMIT $cnt" );
+      $upd_count = mysql_affected_rows();
 
-      TournamentLogHelper::log_set_tournament_pool_ranks( $tid, $tlog_type, $tlog_ref, $tpool_id, $rank, $fix_rank, $result );
-      return $result;
+      TournamentLogHelper::log_set_tournament_pool_ranks( $tid, $tlog_type, $tlog_ref, $tpool_id, $rank, $fix_rank, $upd_count );
+      return $upd_count;
    }//update_tournament_pool_ranks
 
    /*!
@@ -924,6 +926,7 @@ class TournamentPool
     * \param $rank_from ''=all ranks, otherwise numeric rank
     * \param $rank_to ''=same as rank_from (single rank), otherwise numeric rank
     * \param $pool ''=all pools, otherwise specific pool
+    * \return number of updated entries
     */
    public static function execute_rank_action( $tlog_type, $tid, $round, $action, $uid, $rank_from=null, $rank_to=null, $pool=null )
    {
@@ -1009,10 +1012,11 @@ class TournamentPool
          . ( $uid ? " AND uid=$uid LIMIT 1" : '' );
       $result = db_query( "TournamentPool:execute_rank_action.update("
          . "$tid,$round,a$action,u$uid,$rank_from-$rank_to,p$pool)", $query );
+      $upd_count = mysql_affected_rows();
 
       TournamentLogHelper::log_execute_tournament_pool_rank_action( $tid, $tlog_type, $round,
-         $action, $uid, $rank_from, $rank_to, $pool, $result );
-      return $result;
+         $action, $uid, $rank_from, $rank_to, $pool, $upd_count );
+      return $upd_count;
    }//execute_rank_action
 
 

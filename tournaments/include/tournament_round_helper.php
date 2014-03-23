@@ -532,14 +532,14 @@ class TournamentRoundHelper
             $count_done = 0;
             foreach ( $arr_updates as $rank => $arr_tpools )
             {
-               if ( TournamentPool::update_tournament_pool_ranks($tid, $tlog_type, 'fill_ranks', $arr_tpools, -$rank) )
-                  $count_done++;
+               $count_done += TournamentPool::update_tournament_pool_ranks($tid, $tlog_type, 'fill_ranks',
+                  $arr_tpools, -$rank);
             }
          }
          ta_end();
 
          if ( $count_done )
-            $result[] = T_('Pools finished.');
+            $result[] = sprintf( T_('Pools finished (%s entries updated).#tourney'), $count_done );
       }
 
       return $result;
