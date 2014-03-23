@@ -212,7 +212,7 @@ define('TROUND_SLICE_MANUAL', 3);
 // TournamentPool.Rank-values
 define('TPOOLRK_NO_RANK', -100); // unset pool-rank
 define('TPOOLRK_RANK_ZONE', -90); // reserved rank-zone -100..-90, >-90 zone with ranks
-define('TPOOLRK_WITHDRAW', 0); // temporary marked as withdraw-from-next-round
+define('TPOOLRK_WITHDRAW', 0); // marked as withdraw-from-next-round
 
 define('TIEBREAKER_POINTS', 1);
 define('TIEBREAKER_SODOS',  2);
@@ -220,7 +220,7 @@ define('TIEBREAKER_WINS',   3);
 
 define('RKACT_SET_POOL_WIN',   1); // mark user as pool-winner (to advance to next-round or mark as final result)
 define('RKACT_CLEAR_POOL_WIN', 2); // user will NOT be pool-winner
-define('RKACT_CLEAR_RANKS',    3); // set Rank=0 for user
+define('RKACT_WITHDRAW',       3); // set Rank=0 for user, which mark pool-user as withdrawn (no next-round advance or no pool-winner-marking)
 define('RKACT_REMOVE_RANKS',   4); // unset Rank for user
 
 ?>

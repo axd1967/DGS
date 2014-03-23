@@ -560,8 +560,8 @@ class TournamentLogHelper
          $act_text = 'SetPoolWinner';
       elseif ( $action == RKACT_CLEAR_POOL_WIN )
          $act_text = 'ClearPoolWinner';
-      elseif ( $action == RKACT_CLEAR_RANKS )
-         $act_text = 'ClearRank';
+      elseif ( $action == RKACT_WITHDRAW )
+         $act_text = 'WithdrawPoolPlayer_ClearRank';
       else //if ( $action == RKACT_REMOVE_RANKS )
          $act_text = 'RemoveRank';
 

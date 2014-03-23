@@ -203,7 +203,7 @@ $GLOBALS['ThePage'] = new Page('TournamentRankEditor');
    $arr_actions = array(
       RKACT_SET_POOL_WIN   => T_('Set Pool Winner'),
       RKACT_CLEAR_POOL_WIN => T_('Clear Pool Winner'),
-      RKACT_CLEAR_RANKS    => T_('Clear Rank (=0)#tpool'),
+      RKACT_WITHDRAW       => T_('Withdraw Player#tpool'),
       RKACT_REMOVE_RANKS   => T_('Remove Rank#tpool'),
    );
 

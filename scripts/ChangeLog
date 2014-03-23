@@ -13,6 +13,15 @@ ChangeLog
 
 2014-03-23 jug
 
+   * tournaments/include/tournament_log_helper.php (TournamentLogHelper.log_execute_tournament_pool_rank_action),
+     tournaments/include/tournament_globals.php (TPOOLRK_WITHDRAW, RKACT_WITHDRAW),
+     tournaments/include/tournament_pool.php (TournamentPool.execute_rank_action),
+     tournaments/include/tournament_pool_classes.php (RankSummary.build_notes),
+     tournaments/roundrobin/view_pools.php (build_pool_notes),
+     tournaments/roundrobin/edit_ranks.php:
+   - edit-ranks for round-robin-tournament: refactored clearing rank(=0) to naming it "withdrawing"
+     pool-user for clearer purpose
+
    * tournaments/include/tournament_result_control.php (TournamentResultControl.build_tournament_result_table,
        ~.make_table_tournament_results):
    - use specific tournament-type-specific default-order for tournament-results

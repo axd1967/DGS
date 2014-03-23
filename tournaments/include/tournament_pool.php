@@ -898,6 +898,7 @@ class TournamentPool
     * \return number of affected rows
     *
     * \note expecting TournamentPool.Rank already set, either manually by TD or TournamentRoundHelper::fill_ranks_tournament_pool()
+    * \note pool-entries on WITHDRAWN-rank are not touched
     * \note already set pool-winners are not touched
     */
    public static function update_tournament_pool_set_pool_winners( $tround )
@@ -918,7 +919,7 @@ class TournamentPool
     * \param $action one of RKACT_... to set/clear pool-winner (=next-round-"flag"), clear/reset rank;
     *        RKACT_SET_POOL_WIN   = sets pool-winner = ABS(Rank) for Ranks < 0
     *        RKACT_CLEAR_POOL_WIN = clears pool-winner = -ABS(Rank) for Ranks > 0
-    *        RKACT_CLEAR_RANKS    = sets Rank=0
+    *        RKACT_WITHDRAW       = sets Rank=0, withdrawing pool-user from next-round and as pool-winner
     *        RKACT_REMOVE_RANKS   = sets Rank=TPOOLRK_NO_RANK to allow filling ranks anew
     * \param $rank_from ''=all ranks, otherwise numeric rank
     * \param $rank_to ''=same as rank_from (single rank), otherwise numeric rank
@@ -964,7 +965,7 @@ class TournamentPool
          }
          elseif ( $action == RKACT_CLEAR_POOL_WIN && !is_numeric($rank_from) )
             $qpart_rank = " AND Rank > 0";
-         elseif ( ($action == RKACT_CLEAR_RANKS || $action == RKACT_REMOVE_RANKS) && is_numeric($rank_from) )
+         elseif ( ($action == RKACT_WITHDRAW || $action == RKACT_REMOVE_RANKS) && is_numeric($rank_from) )
          {
             if ( $rank_from == $rank_to )
                $qpart_rank = " AND Rank IN (-$rank_from,$rank_from)";
@@ -995,7 +996,7 @@ class TournamentPool
          $rankval = 'ABS(Rank)'; // where Rank < 0
       elseif ( $action == RKACT_CLEAR_POOL_WIN )
          $rankval = '-ABS(Rank)'; // where Rank > 0
-      elseif ( $action == RKACT_CLEAR_RANKS )
+      elseif ( $action == RKACT_WITHDRAW )
          $rankval = '0';
       else //if ( $action == RKACT_REMOVE_RANKS )
          $rankval = TPOOLRK_NO_RANK;

@@ -1042,6 +1042,7 @@ class RankSummary
    {
       $notes = array();
       $notes[] = T_('Rank \'TP\' = tournament-participants registered to start in next round');
+      $notes[] = sprintf( T_('Rank \'%s\' = pool-user has been withdrawn from next round (no pool-winner)'), TPOOLRK_WITHDRAW );
       $notes[] = sprintf( T_('Rank \'%s\' = rank not set yet for pool-users'), T_('unset#tpool') );
       $notes[] = sprintf( T_('%s = count of users with a set rank#tpool'), T_('Count#ranksum_header') );
       $notes[] = sprintf( T_('%s = count of pool-winners (playing in next round, or marked for final result)#tourney'),
