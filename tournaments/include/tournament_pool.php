@@ -106,7 +106,7 @@ class TournamentPool
 
    public function build_result_info()
    {
-      $rank_str = $this->formatRank( false, UNKNOWN_VALUE );
+      $rank_str = $this->formatRank(false, T_('unset#tpool'));
       return
          echo_image_info( "tournaments/roundrobin/view_pools.php?tid={$this->tid}".URI_AMP."round={$this->Round}#pool{$this->Pool}",
             T_('Tournament Pool') )
@@ -126,10 +126,10 @@ class TournamentPool
          return abs($this->Rank);
    }
 
-   public function formatRank( $incl_calc_rank=false, $unset_rank='' )
+   public function formatRank( $incl_calc_rank=false, $unset_rank='', $withdraw_rank=false )
    {
       if ( $this->Rank == TPOOLRK_WITHDRAW )
-         $s = NO_VALUE;
+         $s = NO_VALUE . ( $withdraw_rank ? sprintf(' (%s)', T_('player withdrawn#tpool')) : '' );
       elseif ( $this->Rank > TPOOLRK_RANK_ZONE )
          $s = abs($this->Rank);
       else // rank unset
@@ -139,6 +139,11 @@ class TournamentPool
          $s .= ' ' . span('Calc', sprintf( '(%s)', $this->CalcRank ));
       return trim($s);
    }//formatRank
+
+   public function formatRankText()
+   {
+      return $this->formatRank( false, T_('unset#tpool'), true );
+   }
 
    public function echoRankImage( $default='' )
    {

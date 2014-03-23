@@ -103,7 +103,7 @@ $GLOBALS['ThePage'] = new Page('Tournament');
          $tpool = TournamentPool::load_tournament_pool_user( $tid, $tourney->CurrentRound, $my_id );
          if ( $tpool && $tpool->Pool > 0 )
          {
-            $tt_user_state = sprintf( T_('Rank %s in Pool %s'), $tpool->formatRank(false, NO_VALUE), $tpool->Pool );
+            $tt_user_state = sprintf( T_('Rank %s in Pool %s'), $tpool->formatRankText(), $tpool->Pool );
             if ( $tpool->Rank > 0 )
                $tt_user_state .= SMALL_SPACING . '+ ' . $tpool->echoRankImage();
          }
