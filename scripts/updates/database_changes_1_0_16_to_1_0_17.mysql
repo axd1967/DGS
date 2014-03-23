@@ -89,3 +89,8 @@ ALTER TABLE TournamentResult
    DROP COLUMN RankKept ;
 
 
+-- cleanup: remove unnecessary db-index
+ALTER TABLE TournamentResult
+   DROP KEY uid ;
+
+

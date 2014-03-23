@@ -857,7 +857,7 @@ Description:
 +-----------+----------------------+------+-----+---------------------+----------------+
 | ID        | int(11)              | NO   | PRI | NULL                | auto_increment |
 | tid       | int(11)              | NO   | MUL | NULL                |                |
-| uid       | int(11)              | NO   | MUL | NULL                |                |
+| uid       | int(11)              | NO   |     | NULL                |                |
 | rid       | int(11)              | NO   |     | 0                   |                |
 | Rating    | double               | NO   |     | -9999               |                |
 | Type      | tinyint(3) unsigned  | NO   |     | 0                   |                |

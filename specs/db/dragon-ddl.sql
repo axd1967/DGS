@@ -1291,8 +1291,7 @@ CREATE TABLE IF NOT EXISTS `TournamentResult` (
   `Comment` varchar(128) NOT NULL default '',
   `Note` varchar(255) NOT NULL default '',
   PRIMARY KEY  (`ID`),
-  KEY `tidRank` (`tid`,`Rank`),
-  KEY `uid` (`uid`)
+  KEY `tidRank` (`tid`,`Rank`)
 ) ENGINE=MyISAM  DEFAULT CHARSET=latin1;
 
 -- --------------------------------------------------------

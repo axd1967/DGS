@@ -13,6 +13,15 @@ ChangeLog
 
 2014-03-23 jug
 
+   * scripts/updates/database_changes_1_0_16_to_1_0_17.mysql,
+     specs/db/table-Tournaments.txt, specs/db/dragon-ddl.sql:
+   - cleanup: remove unnecessary db-index on TournamentResult.uid
+-----------
+-- cleanup: remove unnecessary db-index
+ALTER TABLE TournamentResult
+   DROP KEY uid ;
+-----------
+
    * tournaments/include/tournament_round_helper.php (TournamentRoundHelper.process_tournament_round_robin_game_end),
      tournaments/include/tournament_ladder_helper.php (TournamentLadderHelper.process_tournament_ladder_game_end),
      specs/db/table-Tournaments.txt:
