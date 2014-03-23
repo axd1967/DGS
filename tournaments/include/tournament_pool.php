@@ -995,19 +995,23 @@ class TournamentPool
          }
       }//no uid
 
+      $change_unset = false; // unset-ranks are not allowed to be changed normally
       if ( $action == RKACT_SET_POOL_WIN )
          $rankval = 'ABS(Rank)'; // where Rank < 0
       elseif ( $action == RKACT_CLEAR_POOL_WIN )
          $rankval = '-ABS(Rank)'; // where Rank > 0
       elseif ( $action == RKACT_WITHDRAW )
+      {
          $rankval = '0';
+         $change_unset = true; // allow overwriting unset-ranks for withdrawing (as it's a manual TD-operation)
+      }
       else //if ( $action == RKACT_REMOVE_RANKS )
          $rankval = TPOOLRK_NO_RANK;
 
       $query = "UPDATE TournamentPool SET Rank=$rankval "
          . "WHERE tid=$tid AND Round=$round "
          . ( is_numeric($pool) ? " AND Pool=$pool" : '' )
-         . " AND Rank >".TPOOLRK_RANK_ZONE // don't touch UNSET-ranks
+         . ( $change_unset ? '' : " AND Rank >".TPOOLRK_RANK_ZONE ) // don't touch UNSET-ranks
          . $qpart_rank
          . ( $uid ? " AND uid=$uid LIMIT 1" : '' );
       $result = db_query( "TournamentPool:execute_rank_action.update("

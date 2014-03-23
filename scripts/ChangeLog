@@ -13,6 +13,10 @@ ChangeLog
 
 2014-03-23 jug
 
+   * tournaments/include/tournament_pool.php (TournamentPool.execute_rank_action):
+   - edit-ranks for round-robins: allow withdrawing pool-user set by T-director
+     even if Pool-Rank still unset
+
    * tournaments/include/tournament_log_helper.php (TournamentLogHelper.log_execute_tournament_pool_rank_action,
        ~.log_set_tournament_pool_ranks),
      tournaments/include/tournament_pool.php (TournamentPool.update_tournament_pool_ranks,
