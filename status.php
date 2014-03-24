@@ -398,7 +398,7 @@ function load_games_to_move( $uid, &$gtable )
             $snapshot = ($Snapshot) ? $Snapshot : null;
             $row_arr[15] = echo_image_gameinfo($ID, /*sep*/false, $Size, $snapshot, $Last_X, $Last_Y)
                . echo_image_shapeinfo( $ShapeID, $Size, $ShapeSnapshot, false, true)
-               . echo_image_tournament_info($tid, true);
+               . echo_image_tournament_info($tid, @$T_Title, true);
          }
          if ( $gtable->Is_Column_Displayed[17] )
             $row_arr[17] = ($X_Priority) ? $X_Priority : ''; // don't show 0

@@ -1451,7 +1451,8 @@ class GameHelper
     *        no need to cache anything); leave empty '' to always store in cache.
     * \return non-null array with rows from db-query
     */
-   public static function load_cache_status_games( $dbgmsg, $next_game_order, $field_lastaccess='X_Lastaccess', $load_prio=false, $load_notes=false )
+   public static function load_cache_status_games( $dbgmsg, $next_game_order, $field_lastaccess='X_Lastaccess',
+         $load_prio=false, $load_notes=false )
    {
       global $player_row, $NOW;
 
@@ -1461,7 +1462,7 @@ class GameHelper
 
       // build status-query (including next-game-order)
       $qsql = NextGameOrder::build_status_games_query(
-         $uid, IS_STARTED_GAME, $next_game_order, /*ticks*/true, $load_prio, $load_notes );
+         $uid, IS_STARTED_GAME, $next_game_order, /*ticks*/true, /*tourney*/true, $load_prio, $load_notes );
       $query = $qsql->get_select();
       $chksum_query = crc32($query); // compare with stored checksum in cache
 
@@ -4720,7 +4721,8 @@ class NextGameOrder
    }
 
    /*! \brief Builds basic QuerySQL for retrieving status-games. */
-   public static function build_status_games_query( $uid, $game_status_op, $next_game_order, $load_ticks=false, $load_prio_field=false, $load_notes=false )
+   public static function build_status_games_query( $uid, $game_status_op, $next_game_order, $load_ticks=false,
+         $load_tournament=false, $load_prio_field=false, $load_notes=false )
    {
       if ( stripos($game_status_op, GAME_STATUS_INVITED) !== false )
          error('invalid_args', "NextGameOrder:build_status_games_query.bad_status_op($uid,$game_status_op)");
@@ -4762,6 +4764,14 @@ class NextGameOrder
             "COALESCE(Clock.Ticks,0) AS X_Ticks" ); //always my clock because always my turn (status page)
          $qsql->add_part( SQLP_FROM,
             "LEFT JOIN Clock ON Clock.ID=Games.ClockUsed" );
+      }
+
+      if ( ALLOW_TOURNAMENTS && $load_tournament )
+      {
+         $qsql->add_part( SQLP_FIELDS,
+            'T.Title AS T_Title' );
+         $qsql->add_part( SQLP_FROM,
+            'LEFT JOIN Tournament AS T ON T.ID=Games.tid AND Games.tid>0' );
       }
 
       GameHelper::extend_query_with_game_prio( $qsql, $uid, $load_prio );

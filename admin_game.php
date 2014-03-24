@@ -190,7 +190,7 @@ define('GA_RES_NO_RESULT', 6);
    {
       $iform->add_row( array(
             'DESCRIPTION', T_('Tournament ID'),
-            'TEXT',        $tourney->build_info(4) . echo_image_tournament_info($tid, true), ));
+            'TEXT',        $tourney->build_info(4) . echo_image_tournament_info($tid, $tourney->Title, true), ));
    }
    if ( !is_null($tgame) )
    {

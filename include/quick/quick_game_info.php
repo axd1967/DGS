@@ -88,7 +88,8 @@ class QuickHandlerGameInfo extends QuickHandler
          $glc->setView( GAMEVIEW_INFO, 'all' );
          $this->glc = $glc;
 
-         $qsql = $glc->build_games_query( $this->is_with_option(QWITH_RATINGDIFF), /*remtime*/true, $this->is_with_option(QWITH_PRIO) );
+         $qsql = $glc->build_games_query( $this->is_with_option(QWITH_RATINGDIFF), /*remtime*/true,
+            $this->is_with_option(QWITH_PRIO), /*tourney*/false );
          $qsql->add_part( SQLP_WHERE, "G.ID=$gid" );
          $qsql->add_part( SQLP_LIMIT, 1 );
 

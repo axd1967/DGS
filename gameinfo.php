@@ -477,7 +477,7 @@ function build_rating_diff( $rating_diff )
       $itable->add_sinfo(
             T_('ID'),
             anchor( $base_path."tournaments/view_tournament.php?tid=$tid", "#$tid" )
-               . echo_image_tournament_info($tid, true) );
+               . echo_image_tournament_info($tid, $tourney->Title, true) );
       $itable->add_sinfo(
             T_('Scope#tourney'),
             Tournament::getScopeText($tourney->Scope) );

@@ -139,7 +139,8 @@ class QuickHandlerGameList extends QuickHandler
             $this->list_limit = $this->list_offset = 0;
 
          $qsql = GameListControl::build_game_list_query_status_view(
-            $uid, $this->is_with_option(QWITH_NOTES), $this->is_with_option(QWITH_PRIO), $f_mpg, $f_ext_tid );
+            $uid, /*tourney*/false, $this->is_with_option(QWITH_NOTES), $this->is_with_option(QWITH_PRIO),
+            $f_mpg, $f_ext_tid );
 
          $this->list_order = NextGameOrder::get_next_game_order( $player_row['NextGameOrder'], 'QUICK', false );
 
@@ -181,7 +182,8 @@ class QuickHandlerGameList extends QuickHandler
          $glc->load_notes = ($show_notes && $this->is_with_option(QWITH_NOTES) );
          $load_remaining_time = ( $glc->is_running() && !$glc->is_all() && $uid == $my_id );
 
-         $qsql = $glc->build_games_query( $this->is_with_option(QWITH_RATINGDIFF), $load_remaining_time, $this->is_with_option(QWITH_PRIO) );
+         $qsql = $glc->build_games_query( $this->is_with_option(QWITH_RATINGDIFF), $load_remaining_time,
+            $this->is_with_option(QWITH_PRIO), /*tourney*/false );
 
          // default order
          if ( $glc->is_observe_all() )

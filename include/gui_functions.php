@@ -348,23 +348,22 @@ function echo_image_shapeinfo( $shape_id, $board_size, $snapshot, $edit_goban=fa
 }
 
 /*! \brief Returns image to tournament-info page for given tournament-id. */
-function echo_image_tournament_info( $tid, $with_sep=false, $img_only=false )
+function echo_image_tournament_info( $tid, $tourney_title='', $with_sep=false, $img_only=false )
 {
    if ( ALLOW_TOURNAMENTS && $tid > 0 )
    {
       global $base_path;
-      $img_str = image( $base_path.'images/tourney.gif',
-                        ($img_only ? T_('Tournaments') : T_('Tournament info') . ' #' . $tid ),
-                        null, 'class="InTextImage"');
-      $str_sep = ($with_sep ? ' ' : '' );
-      if ( $img_only )
-         return $str_sep . $img_str;
-      else
-         return $str_sep . anchor( $base_path."tournaments/view_tournament.php?tid=$tid", $img_str );
+      $img_text = ( $img_only )
+         ? T_('Tournaments')
+         : T_('Tournament info') . ' #' . $tid . ( $tourney_title ? ": $tourney_title" : '' );
+      $img_str = image( $base_path.'images/tourney.gif', $img_text, null, 'class="InTextImage"');
+
+      return ( $with_sep ? ' ' : '' )
+         . ( $img_only ? $img_str : anchor( $base_path."tournaments/view_tournament.php?tid=$tid", $img_str ) );
    }
    else
       return '';
-}
+}//echo_image_tournament_info
 
 /*!
  * \brief Returns image indicating that game have hidden game-comments for given game-id.

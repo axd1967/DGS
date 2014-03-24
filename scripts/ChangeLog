@@ -13,6 +13,20 @@ ChangeLog
 
 2014-03-24 jug
 
+   * include/game_functions.php (GameHelper.load_cache_status_games;
+       NextGameOrder.build_status_games_query),
+     include/gamelist_control.php (GameListControl.build_games_query,
+       ~.build_game_list_query_status_view),
+     include/quick/quick_game_info.php (QuickHandlerGameInfo.prepare),
+     include/quick/quick_game_list.php (QuickHandlerGameList.prepare),
+     include/gui_functions.php (echo_image_tournament_info),
+     quick_status.php (print_status_games),
+     gameinfo.php (build_rating_diff),
+     status.php (load_games_to_move),
+     game.php (draw_game_info),
+     admin_game.php, show_games.php:
+   - added tournament-title in tooltip on tournament-icon
+
    * tournaments/include/tournament_status.php (class TournamentStatus, ~.__construct, ~.has_warning,
        ~.get_warnings, ~.add_warning, ~.check_conditions_status_CLOSED,
        ~.check_conditions_missing_tournament_results),

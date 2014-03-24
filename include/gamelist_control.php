@@ -120,7 +120,7 @@ class GameListControl
 
 
    /*! \brief Returns QuerySQL for games-list. */
-   public function build_games_query( $load_user_ratingdiff, $load_remaining_time, $load_game_prio )
+   public function build_games_query( $load_user_ratingdiff, $load_remaining_time, $load_game_prio, $load_tourney )
    {
       if ( $this->is_status() )
          error('invalid_action', "GameListControl.build_games_query({$this->view},{$this->view_all},{$this->view_uid})");
@@ -295,6 +295,13 @@ class GameListControl
             'LEFT JOIN Ratinglog AS blog ON blog.gid=G.ID AND blog.uid=G.Black_ID',
             'LEFT JOIN Ratinglog AS wlog ON wlog.gid=G.ID AND wlog.uid=G.White_ID' );
       }
+      if ( ALLOW_TOURNAMENTS && $load_tourney )
+      {
+         $qsql->add_part( SQLP_FIELDS,
+            'T.Title AS T_Title' );
+         $qsql->add_part( SQLP_FROM,
+            'LEFT JOIN Tournament AS T ON T.ID=G.tid AND G.tid>0' );
+      }
 
       if ( $this->ext_tid )
       {
@@ -317,14 +324,14 @@ class GameListControl
 
    // ------------ static functions ----------------------------
 
-   public static function build_game_list_query_status_view( $uid, $load_notes, $load_prio, $is_mpg, $ext_tid )
+   public static function build_game_list_query_status_view( $uid, $load_tourney, $load_notes, $load_prio, $is_mpg, $ext_tid )
    {
       global $player_row;
       $my_id = $player_row['ID'];
       $next_game_order = $player_row['NextGameOrder'];
 
       $qsql = NextGameOrder::build_status_games_query(
-         $uid, IS_STARTED_GAME, $next_game_order, /*ticks*/true, $load_prio, $load_notes );
+         $uid, IS_STARTED_GAME, $next_game_order, /*ticks*/true, $load_tourney, $load_prio, $load_notes );
 
       if ( $is_mpg )
          $qsql->add_part( SQLP_WHERE, "Games.GamePlayers>''" ); // '' = std-go

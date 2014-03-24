@@ -189,7 +189,7 @@ $GLOBALS['ThePage'] = new Page('GamesList');
       array( FC_FNAME => 'sgfs' ) );
    if ( ALLOW_TOURNAMENTS )
       $gfilter->add_filter(32, 'Boolean', 'G.tid>0', true,
-            array( FC_LABEL => echo_image_tournament_info(1, true, true) ));
+            array( FC_LABEL => echo_image_tournament_info(1, '', true, true) ));
    if ( $glc->ext_tid > 0 )
       $gfilter->add_filter(42, 'Selection', TournamentGames::buildStatusFilterArray('TG.'), true,
             array( FC_DEFAULT => ($finished) ? 0 : 1 ));
@@ -327,6 +327,9 @@ $GLOBALS['ThePage'] = new Page('GamesList');
    // avoiding additional outer-join on Clock-table !!
    $load_remaining_time = ( $running && !$all && $uid == $my_id
       && ($gtable->is_column_displayed(39) || $gtable->is_column_displayed(40)) );
+
+   // only load tournament-title for tournament-icon in game-info-column
+   $load_tourney = ( ALLOW_TOURNAMENTS && $gtable->is_column_displayed(32) );
 
 /*****
  * Views-pages identification:
@@ -597,7 +600,7 @@ $GLOBALS['ThePage'] = new Page('GamesList');
 
 
    // build SQL-query
-   $qsql = $glc->build_games_query( $load_user_ratingdiff, $load_remaining_time, $show_game_prio );
+   $qsql = $glc->build_games_query( $load_user_ratingdiff, $load_remaining_time, $show_game_prio, $load_tourney );
    $qsql->merge( $gtable->get_query() );
    $query = $qsql->get_select() . "$order$limit";
 
@@ -665,7 +668,7 @@ $GLOBALS['ThePage'] = new Page('GamesList');
          $snapshot = ($Snapshot) ? $Snapshot : null;
          $str = echo_image_gameinfo($ID, /*sep*/false, $Size, $snapshot, $Last_X, $Last_Y)
             . echo_image_shapeinfo( $ShapeID, $Size, $ShapeSnapshot, false, true )
-            . echo_image_tournament_info($tid,true);
+            . echo_image_tournament_info($tid, @$T_Title, true);
          if ( $allow_edit_tourney && TournamentGames::is_score_change_allowed(@$TG_Status) )
             $str .= anchor( $base_path."tournaments/game_admin.php?tid=$tid".URI_AMP."gid=$ID",
                   image( $base_path.'images/edit.gif', 'E', '', 'class="Action InTextImage TAdmin"' ), T_('Admin tournament game') );

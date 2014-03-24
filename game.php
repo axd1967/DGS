@@ -1382,7 +1382,7 @@ function draw_game_info( $game_row, $game_setup, $board, $tourney )
          ? span('TWarning', sprintf('(%s) ', T_('annulled#tourney')))
          : '';
       echo "<tr>\n",
-         '<td class=Color>', echo_image_tournament_info($tourney->ID), "</td>\n",
+         '<td class=Color>', echo_image_tournament_info($tourney->ID, $tourney->Title), "</td>\n",
          "<td colspan=\"$cols_r\">", $tourney->build_info(4), "</td>\n",
          "</tr>\n",
          "<tr>\n<td></td>\n",
