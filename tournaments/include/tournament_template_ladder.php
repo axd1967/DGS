@@ -152,6 +152,11 @@ abstract class TournamentTemplateLadder extends TournamentTemplate
       return $result;
    }
 
+   public function checkClosingTournament( $tourney )
+   {
+      return array( array(), array() );
+   }
+
 } // end of 'TournamentTemplateLadder'
 
 ?>

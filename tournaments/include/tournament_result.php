@@ -199,6 +199,16 @@ class TournamentResult
       return $tres;
    }
 
+   public static function count_tournament_results( $dbgmsg, $tid, $round )
+   {
+      $tid = (int)$tid;
+      $round = (int)$round;
+
+      $row = mysql_single_fetch( "TournamentResult:count_tresults($tid,$round)",
+         "SELECT COUNT(*) AS X_Count FROM TournamentResult WHERE tid=$tid AND Round=$round LIMIT 1" );
+      return ( $row ) ? (int)$row['X_Count'] : 0;
+   }//count_tournament_results
+
    /*!
     * \brief Returns single TournamentResult-objects for given tournament-result-id and check against optionally
     *       given tournament-id.

@@ -29,6 +29,7 @@ require_once 'tournaments/include/tournament_factory.php';
 require_once 'tournaments/include/tournament_games.php';
 require_once 'tournaments/include/tournament_participant.php';
 require_once 'tournaments/include/tournament_properties.php';
+require_once 'tournaments/include/tournament_result.php';
 require_once 'tournaments/include/tournament_utils.php';
 
  /*!
@@ -53,6 +54,7 @@ class TournamentStatus
    private $curr_status; // old Tournament.Status
    private $new_status; // new Tournament.Status
    private $errors; // arr
+   private $warnings; // arr
 
 
    /*!
@@ -81,6 +83,7 @@ class TournamentStatus
 
       $this->curr_status = $this->new_status = $this->tourney->Status;
       $this->errors = array();
+      $this->warnings = array();
    }
 
    public function get_tournament()
@@ -102,6 +105,22 @@ class TournamentStatus
    {
       if ( $str )
          $this->errors[] = $str;
+   }
+
+   public function has_warning()
+   {
+      return (bool)count($this->warnings);
+   }
+
+   public function get_warnings()
+   {
+      return $this->warnings;
+   }
+
+   public function add_warning( $str )
+   {
+      if ( $str )
+         $this->warnings[] = $str;
    }
 
    public function get_current_status()
@@ -281,12 +300,11 @@ class TournamentStatus
       $this->check_basic_conditions_status_change();
 
       $this->check_conditions_unfinished_tourney_games();
+      $this->check_conditions_missing_tournament_results();
 
-      //TODO TODO T-stat-chg *->CLOSED: check for tournament-results (warnings?);; maybe check for TPs with higher rounds but not participated yet;; maybe check for last round with >1 pool? (perhaps ok);; for TRR: all T-rounds must be finished
-      //TODO may use adjusted:
-      //$tp_count = TournamentParticipant::count_tournament_participants( $tourney->ID, /*all-stat*/null, $tround->Round, /*NextR*/true );
-      //if ( $tp_count > 0 )
-         //$errors[] = sprintf( T_('There are %s tournament participants registered to play in round %s.'), $tp_count, $tround->Round );
+      list( $chk_errors, $chk_warnings ) = $this->ttype->checkClosingTournament( $this->tourney );
+      $this->errors = array_merge( $this->errors, $chk_errors );
+      $this->warnings = array_merge( $this->warnings, $chk_warnings );
    }
 
 
@@ -313,7 +331,7 @@ class TournamentStatus
    }
 
    /*! \brief Checks if there are unfinished tourney-games that can prohibit tourney-status-change. */
-   public function check_conditions_unfinished_tourney_games()
+   private function check_conditions_unfinished_tourney_games()
    {
       // check for not-DONE T-games
       $tg_count_running = TournamentGames::count_tournament_games( $this->tid );
@@ -321,6 +339,18 @@ class TournamentStatus
       {
          $this->errors[] = sprintf( T_('Tournament has %s unfinished tournament games, that must be ended first.'),
             $tg_count_running );
+      }
+   }
+
+   /*! \brief Checks if there are no tournament-results (for last round) of tournament. */
+   private function check_conditions_missing_tournament_results()
+   {
+      $tresult_count = TournamentResult::count_tournament_results(
+         "TournamentStatus.check_conditions_missing_tournament_results.TResult", $this->tid, $this->tourney->Rounds );
+      if ( $tresult_count == 0 )
+      {
+         $this->warnings[] = sprintf( T_('Missing tournament-results for final round #%s in this tournament.'),
+            $this->tourney->Rounds );
       }
    }
 

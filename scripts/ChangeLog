@@ -13,6 +13,25 @@ ChangeLog
 
 2014-03-24 jug
 
+   * tournaments/include/tournament_status.php (class TournamentStatus, ~.__construct, ~.has_warning,
+       ~.get_warnings, ~.add_warning, ~.check_conditions_status_CLOSED,
+       ~.check_conditions_missing_tournament_results),
+     tournaments/include/tournament_template_round_robin.php (TournamentTemplateRoundRobin.checkClosingTournament,
+       ~.check_unfinished_rounds),
+     tournaments/include/tournament_template_ladder.php (TournamentTemplateLadder.checkClosingTournament),
+     tournaments/include/tournament_template.php (TournamentTemplate.checkClosingTournament),
+     tournaments/include/tournament_result.php (TournamentResult.count_tournament_results),
+     tournaments/edit_status.php:
+   - implemented change of tournament-status to CLOSED to finish tournament
+     - edit-status: added warnings on changing tournament-status,
+       that should be resolved but can be ignored by directors
+     - edit-status: added current tournament-status and round-info
+     - show warning about missing tournament-results for last-round of tournament
+     - show error if there are unfinished tournament-rounds for round-robins
+     - show warning if there are tournament participants for round-robins on higher start rounds
+       than last round
+     - show warning if there is more than one pool in last round
+
    * tournaments/include/tournament_result_control.php (TournamentResultControl.build_tournament_result_table,
        ~.create_tournament_result_pool_winners, ~.build_tournament_result_pool_winner),
      tournaments/include/tournament_log_helper.php (TournamentLogHelper.log_create_tournament_result_pool_winners),

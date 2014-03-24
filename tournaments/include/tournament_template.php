@@ -153,6 +153,12 @@ abstract class TournamentTemplate
       return $tp->persist();
    }
 
+   /*!
+    * \brief Returns list with warnings and errors from checking if tournament can be closed (=finished).
+    * \return array( errors, warnings )
+    */
+   abstract public function checkClosingTournament( $tourney );
+
 
    // ------------ static functions ----------------------------
 

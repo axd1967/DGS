@@ -104,13 +104,19 @@ $GLOBALS['ThePage'] = new Page('TournamentStatusEdit');
 
    // ---------- Tournament Status EDIT form -----------------------
 
-   $tform = new Form( 'tournament', $page, FORM_POST );
+   $tform = new Form( 'tournament', $page, FORM_GET );
    $tform->add_hidden( 'tid', $tid );
 
    $tform->add_row( array(
          'DESCRIPTION', T_('Tournament ID'),
          'TEXT',        $tourney->build_info() ));
    TournamentUtils::show_tournament_flags( $tform, $tourney );
+   $tform->add_row( array(
+         'DESCRIPTION', T_('Tournament Status'),
+         'TEXT', $tourney->getStatusText($tstatus->get_current_status()) ));
+   $tform->add_row( array(
+         'DESCRIPTION', T_('Tournament Round'),
+         'TEXT',        $tourney->formatRound(), ));
    $tform->add_row( array(
          'DESCRIPTION', T_('Created'),
          'TEXT',        date(DATE_FMT, $tourney->Created) ));
@@ -124,6 +130,13 @@ $GLOBALS['ThePage'] = new Page('TournamentStatusEdit');
       $tform->add_row( array(
             'DESCRIPTION', T_('Error'),
             'TEXT', buildErrorListString(T_('There are some errors'), $tstatus->get_errors()) ));
+      $tform->add_empty_row();
+   }
+   if ( $tstatus->has_warning() )
+   {
+      $tform->add_row( array(
+            'DESCRIPTION', T_('Warning'),
+            'TEXT', buildWarnListString(T_('There are some warnings'), $tstatus->get_warnings() ) ));
       $tform->add_empty_row();
    }
 

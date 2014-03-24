@@ -21,6 +21,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 $TranslateGroups[] = "Tournament";
 
+require_once 'include/std_classes.php';
 require_once 'tournaments/include/tournament_globals.php';
 require_once 'tournaments/include/tournament_template.php';
 
@@ -318,6 +319,62 @@ abstract class TournamentTemplateRoundRobin extends TournamentTemplate
       if ( $cnt_tp_nextround + $cnt_tpool_next_rounders < 2 )
          $warnings[] = sprintf( T_('Need at least %s players to start next round.'), 2 );
    }//check_min_poolwinners
+
+
+   public function checkClosingTournament( $tourney )
+   {
+      global $base_path;
+      $errors = array();
+      $warnings = array();
+      $tid = $tourney->ID;
+      $last_round = $tourney->Rounds;
+
+      $this->check_unfinished_rounds( $tid, $errors );
+
+      // warn, if there are TPs with higher (start-/)next-round w/o having played yet
+      $iterator = new ListIterator( 'TournamentTemplateRoundRobin.checkClosingTournament.TP',
+         new QuerySQL( SQLP_WHERE, "TP.NextRound > $last_round" ),
+         'ORDER BY TP.ID ASC' );
+      $iterator = TournamentParticipant::load_tournament_participants( $iterator, $tid );
+      $cnt_unplayed_tps = $iterator->getItemCount();
+      if ( $cnt_unplayed_tps > 0 )
+      {
+         $warnings[] = sprintf( T_('There are %s tournament participants registered to start in rounds higher than last round #%s:'),
+                                $cnt_unplayed_tps, $last_round )
+            . "<br>\n** " . T_('These participants should be "handled" first before finishing the tournament.')
+            . "<br>\n** "
+            . anchor( $base_path."tournaments/list_participants.php?tid=$tid".URI_AMP."round=".urlencode(($last_round+1).'-'),
+                      T_('Show tournament participants on higher start rounds.'));
+      }
+
+      // warn, if there is more than one pool in final round.
+      list( $cnt_all, $cnt_pools, $cnt_users ) = TournamentPool::count_tournament_pool( $tid, $last_round );
+      if ( $cnt_pools > 1 )
+         $warnings[] = sprintf( T_('There is more than one pool in last round #%s: found %s pools.'),
+            $last_round, $cnt_pools );
+
+      return array( $errors, $warnings );
+   }//checkClosingTournament
+
+   /*! \brief Adds error, if not all tournament-rounds are on DONE-Status. */
+   private function check_unfinished_rounds( $tid, &$errors )
+   {
+      $iterator = new ListIterator( 'TournamentTemplateRoundRobin.check_unfinished_rounds',
+         new QuerySQL( SQLP_WHERE, "Status<>'".TROUND_STATUS_DONE."'" ),
+         'ORDER BY Round ASC' );
+      $iterator = TournamentRound::load_tournament_rounds( $iterator, $tid );
+
+      $arr_rounds = array();
+      while ( list(,$arr_item) = $iterator->getListIterator() )
+      {
+         list( $tround, $orow ) = $arr_item;
+         $arr_rounds[] = $tround->Round;
+      }
+
+      if ( count($arr_rounds) > 0 )
+         $errors[] = sprintf( T_('All rounds must be done before tournament can be finished: Rounds [%s] are not done yet.'),
+            implode(',', $arr_rounds) );
+   }//check_unfinished_rounds
 
 } // end of 'TournamentTemplateRoundRobin'
 
