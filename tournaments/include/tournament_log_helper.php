@@ -687,7 +687,20 @@ class TournamentLogHelper
             sprintf( "Change of [%s]: %s", implode(', ', $edits), implode('; ', $msg) ));
       }
       $tlog->insert();
-   }
+   }//log_change_tournament_result
+
+   public static function log_create_tournament_result_pool_winners( $tid, $tlog_type, $round, $cnt_pool_winners,
+         $add_count, $arr_tresult )
+   {
+      $msg = array();
+      $msg[] = sprintf( 'Created %s of %s result entries from pool-winners of round %s; entries:',
+            $cnt_pool_winners, $add_count, $round );
+      foreach ( $arr_tresult as $tresult )
+         $msg[] = $tresult->build_log_string();
+
+      $tlog = new Tournamentlog( 0, $tid, 0, 0, $tlog_type, 'TRES_Data', TLOG_ACT_CREATE, 0, implode("\n", $msg) );
+      $tlog->insert();
+   }//log_create_tournament_result_pool_winners
 
 } // end of 'TournamentLogHelper'
 ?>

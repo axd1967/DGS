@@ -34,6 +34,7 @@ require_once 'tournaments/include/tournament_log_helper.php';
 require_once 'tournaments/include/tournament_participant.php';
 require_once 'tournaments/include/tournament_pool.php';
 require_once 'tournaments/include/tournament_result.php';
+require_once 'tournaments/include/tournament_result_control.php';
 require_once 'tournaments/include/tournament_round.php';
 require_once 'tournaments/include/tournament_status.php';
 
@@ -61,6 +62,8 @@ $GLOBALS['ThePage'] = new Page('TournamentEditResults');
 
      tr_show_user=&user=&user_round=         : show tournament-info about user; user='123' (uid) or '=abc' (handle)
      tr_use_info=&user=                      : fill-in info-data overwriting new/current tournament-result-fields
+     tr_create_pw=&user_round=               : create TRs from pool-winners (need confirm; for round-robins only)
+     tr_create_pw_confirm=&user_round=       : create TRs from pool-winners (confirmed)
      tr_preview&tid=[&trid=]                 : preview new [or update] TR
      tr_save&tid=[&trid=]                    : add new [/update] TR in database
      tr_del&tid=&trid=                       : remove TR (need confirm)
@@ -94,19 +97,21 @@ $GLOBALS['ThePage'] = new Page('TournamentEditResults');
    if ( is_null($tresult) )
       $tresult = new TournamentResult( 0, $tid );
    $is_new = ($tresult->ID == 0);
+   $is_trr = ( $tourney->Type == TOURNEY_TYPE_ROUND_ROBIN );
 
    // init
    $actset_get_tinfo = ( @$_REQUEST['tr_show_user'] || @$_REQUEST['tr_use_info'] || @$_REQUEST['tr_save'] );
    $actset_new_tresult = ( $actset_get_tinfo || @$_REQUEST['tr_preview'] );
    $actset_check_tresult = ( @$_REQUEST['tr_use_info'] || @$_REQUEST['tr_preview'] || @$_REQUEST['tr_save'] );
    $actset_show_tr_form = ( $actset_check_tresult || @$_REQUEST['tr_del'] );
+   $actset_create_pw = ( $is_trr && @$_REQUEST['tr_create_pw'] || @$_REQUEST['tr_create_pw_confirm'] );
 
    // check + load user + user-tournament-info (participant/ladder/pool)
    $user_vars = array( // defaults
          'user' => trim( get_request_arg('user',
                ( $actset_get_tinfo || $is_new ? '' : $tresult->uid ) ) ),
          'user_round' => trim( get_request_arg('user_round',
-               ( $actset_get_tinfo ? '' : ( $is_new ? $tourney->Rounds : $tresult->Round ) ) ) ),
+               ( $actset_get_tinfo || $actset_create_pw ? '' : ( $is_new ? $tourney->Rounds : $tresult->Round ) ) ) ),
       );
    $user = load_user_info( $errors, $user_vars, $is_new );
    list( $warnings, $tp, $tladder, $tpool, $info_str ) = load_tournament_info( $tourney, $user, $user_vars, $is_new );
@@ -115,6 +120,7 @@ $GLOBALS['ThePage'] = new Page('TournamentEditResults');
    $old_tresult = clone $tresult;
    list( $vars, $edits, $input_errors ) = parse_edit_form( $tresult, $tourney, $user_vars );
    $errors = array_merge( $errors, $input_errors );
+   $user_round = (int)$user_vars['user_round'];
 
    // check + fill in TResult.uid/rid/Round
    if ( !is_null($user) && $actset_check_tresult )
@@ -160,6 +166,16 @@ $GLOBALS['ThePage'] = new Page('TournamentEditResults');
          jump_to("tournaments/edit_results.php?tid=$tid".URI_AMP."trid={$tresult->ID}".URI_AMP
             . "sysmsg=" . urlencode(T_('Tournament result saved!')) );
    }
+   elseif ( $is_trr && @$_REQUEST['tr_create_pw_confirm'] && count($errors) == 0 ) // create results from pool-winners
+   {
+      $add_count = TournamentResultControl::create_tournament_result_pool_winners( $tid, $user_round, $allow_edit_tourney );
+      if ( $add_count > 0 )
+      {
+         $sysmsg = urlencode(sprintf( T_('Created %s tournament result entries from pool-winners of round %s!'),
+            $add_count, $user_round ));
+         jump_to("tournaments/list_results.php?tid=$tid".URI_AMP."sysmsg=$sysmsg");
+      }
+   }
 
 
    // ---------- Tournament-Result EDIT form ------------------------------------
@@ -179,9 +195,13 @@ $GLOBALS['ThePage'] = new Page('TournamentEditResults');
          'TEXT',        $tourney->formatRound(), ));
 
    $trform->add_row( array( 'HR' ));
-   $trform->add_row( array(
+   $row_arr = array(
          'DESCRIPTION', T_('Result Round#tourney'),
-         'TEXTINPUT',   'user_round', 3, 3, $user_vars['user_round'], ));
+         'TEXTINPUT',   'user_round', 3, 3, $user_vars['user_round'], );
+   if ( $is_trr )
+      array_push( $row_arr,
+         'SUBMITBUTTON', 'tr_create_pw', T_('Create tournament results from pool-winners') );
+   $trform->add_row( $row_arr );
    $trform->add_row( array(
          'DESCRIPTION', T_('Result User#tourney'),
          'TEXTINPUT',   'user', 16, 16, $user_vars['user'],
@@ -255,7 +275,11 @@ $GLOBALS['ThePage'] = new Page('TournamentEditResults');
             'TEXTAREA',    'note', 70, 2, $vars['note'], ));
    }
 
-   if ( !is_null($user) )
+   if ( $is_trr && @$_REQUEST['tr_create_pw'] && count($errors) == 0 )
+   {
+      echo_create_pool_winners_form( $trform, $tid, $user_round );
+   }
+   else if ( !is_null($user) )
    {
       if ( @$_REQUEST['tr_del'] )
       {
@@ -294,6 +318,7 @@ $GLOBALS['ThePage'] = new Page('TournamentEditResults');
    $menu_array = array();
    $menu_array[T_('Tournament info')] = "tournaments/view_tournament.php?tid=$tid";
    $menu_array[T_('All tournament results')] = "tournaments/list_results.php?tid=$tid";
+   $tourney->build_data_link( $menu_array );
    $menu_array[T_('Edit results#tourney')] =
          array( 'url' => "tournaments/edit_results.php?tid=$tid", 'class' => 'TAdmin' );
    $menu_array[T_('Manage tournament')] =
@@ -331,14 +356,14 @@ function load_user_info( &$errors, &$uvars, $is_new )
 
 function load_tournament_info( $tourney, $user, &$uvars, $is_new )
 {
-   global $actset_new_tresult;
+   global $actset_new_tresult, $actset_create_pw;
    $warnings = array();
    $tp = $tladder = $tpool = null;
    $info_str = '';
 
    // parse URL-vars for user-round
    $new_value = $uvars['user_round'];
-   if ( ( $is_new && $actset_new_tresult && is_numeric($new_value) && $new_value >= 1 && $new_value <= $tourney->Rounds )
+   if ( ( $is_new && ($actset_new_tresult || $actset_create_pw) && is_numeric($new_value) && $new_value >= 1 && $new_value <= $tourney->Rounds )
          || !$is_new )
       $uvars['user_round'] = (int)$new_value;
    else
@@ -547,6 +572,7 @@ function parse_edit_form( &$tresult, $tourney, $uvars )
 }//parse_edit_form
 
 // overwrites vars-input with data from various tournament-info-entries
+// NOTE: keep in sync with TournamentResultControl::build_tournament_result_pool_winner()
 function fill_tournament_info( &$vars, $uvars, $tourney, $user, $tp, $tladder, $tpool )
 {
    global $NOW, $player_row;
@@ -590,5 +616,54 @@ function fill_tournament_info( &$vars, $uvars, $tourney, $user, $tp, $tladder, $
       $vars['comment'] = 'Pool Winner';
    }
 }//fill_tournament_info
+
+// adds form-part with info for creating tournament-results from pool-winners
+function echo_create_pool_winners_form( &$form, $tid, $round )
+{
+   $tround = TournamentCache::load_cache_tournament_round( 'Tournament.edit_results.create_poolwinners',
+      $tid, $round, /*chk*/false );
+   $cnt_pool_winners = TournamentPool::count_tournament_pool_next_rounders( $tid, $round );
+
+   $form->add_row( array(
+         'DESCRIPTION', T_('Tournament Round'),
+         'TEXT',        $round, ));
+   $form->add_row( array(
+         'DESCRIPTION', T_('Tournament Round Status'),
+         'TEXT',        TournamentRound::getStatusText($tround->Status), ));
+   $form->add_row( array(
+         'DESCRIPTION', T_('Infos & Warnings#tourney'),
+         'TEXT', span('TWarningMsg', str_replace("\n", "<br>\n",
+               T_("This is best done after the tournament round is finished and the pool-winners have been finally set,\n" .
+                  "because all pool-winners will be copied and there are no checks for double result entries!"))), ));
+   $form->add_row( array(
+         'TAB',
+         'TEXT', span('TWarningMsg', sprintf( T_('Found %s pool-winners for round #%s in %s pools.'),
+               $cnt_pool_winners, $round, $tround->Pools )), ));
+   if ( $tround->Status != TROUND_STATUS_DONE )
+   {
+      $form->add_row( array(
+            'TAB',
+            'TEXT', span('TWarningMsg', sprintf( T_('Round #%s is not finished yet.#tourney'), $round )), ));
+   }
+
+   $form->add_empty_row();
+   if ( $cnt_pool_winners > 0 )
+   {
+      $form->add_row( array(
+            'TAB',
+            'TEXT', span('TWarning', T_('Please confirm creating tournament results from pool-winners!')), ));
+      $form->add_row( array(
+            'TAB', 'CELL', 1, '', // align submit-buttons
+            'SUBMITBUTTON', 'tr_create_pw_confirm', T_('Confirm creation of results#tourney'),
+            'TEXT', SMALL_SPACING,
+            'SUBMITBUTTON', 'tr_cancel', T_('Cancel') ));
+   }
+   else
+   {
+      $form->add_row( array(
+            'TAB',
+            'TEXT', span('TWarning', T_('There are no pool-winners found for this round.')), ));
+   }
+}//echo_create_pool_winners_form
 
 ?>

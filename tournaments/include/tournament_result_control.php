@@ -33,6 +33,7 @@ require_once 'include/table_columns.php';
 require_once 'include/time_functions.php';
 require_once 'tournaments/include/tournament_cache.php';
 require_once 'tournaments/include/tournament_globals.php';
+require_once 'tournaments/include/tournament_log_helper.php';
 require_once 'tournaments/include/tournament_result.php';
 
 
@@ -113,11 +114,11 @@ class TournamentResultControl
       $trtable->add_external_parameters( $page_vars, true ); // add as hiddens
 
       // add_tablehead($nr, $descr, $attbs=null, $mode=TABLE_NO_HIDE|TABLE_NO_SORT, $sortx='')
+      if ( $this->allow_edit_tourney )
+         $trtable->add_tablehead(11, T_('Actions#header'), 'Image', TABLE_NO_HIDE, '');
       $trtable->add_tablehead(12, T_('Type#header'), '', 0, 'Type+');
       if ( $this->tourney->Type == TOURNEY_TYPE_ROUND_ROBIN )
          $trtable->add_tablehead(13, T_('Round#tresheader'), 'NumberC', 0, 'Round-');
-      if ( $this->allow_edit_tourney )
-         $trtable->add_tablehead(11, T_('Actions#header'), 'Image', TABLE_NO_HIDE, '');
       if ( $this->tourney->Type == TOURNEY_TYPE_LADDER )
          $trtable->add_tablehead( 9, T_('Result#tresult'), 'Number', TABLE_NO_HIDE, 'Result-');
       $trtable->add_tablehead( 6, T_('Rank#tourney_result'), 'Number', TABLE_NO_HIDE, 'Rank+');
@@ -218,6 +219,64 @@ class TournamentResultControl
 
       return $this->table->make_table();
    }//make_table_tournament_results
+
+
+   // ------------ static functions ----------------------------
+
+   /* \brief Creates TournamentResult-entries from round-robins pool-winners for given round. */
+   public static function create_tournament_result_pool_winners( $tid, $round, $tlog_type )
+   {
+      $tround = TournamentCache::load_cache_tournament_round( 'TRC.create_tresult_poolwinners', $tid, $round );
+
+      $iterator = new ListIterator( "TRC:create_tresult_pool_winners.TournamentPool",
+         new QuerySQL( SQLP_WHERE, 'TPOOL.Rank > 0' ), // find pool-winners
+         'ORDER BY Rank ASC, Pool ASC' ); // order by highest rank first
+      $iterator = TournamentPool::load_tournament_pools( $iterator, $tid, $round, 0,
+         TPOOL_LOADOPT_USER | TPOOL_LOADOPT_TP_ID | TPOOL_LOADOPT_TRATING | TPOOL_LOADOPT_ONLY_RATING );
+
+      $cnt = 0;
+      ta_begin();
+      {//HOT-section to create tournament-results
+         $arr_tresult = array();
+         while ( list(,$arr_item) = $iterator->getListIterator() )
+         {
+            list( $tpool, $orow ) = $arr_item;
+            $tresult = self::build_tournament_result_pool_winner( $tround, $tpool );
+            if ( $tresult->persist() )
+               $arr_tresult[] = $tresult;
+         }
+
+         $cnt = count($arr_tresult);
+         if ( $cnt > 0 )
+            TournamentLogHelper::log_create_tournament_result_pool_winners( $tid, $tlog_type, $round,
+               $iterator->getItemCount(), $cnt, $arr_tresult );
+      }
+      ta_end();
+
+      return $cnt;
+   }//create_tournament_result_pool_winners
+
+   /*!
+    * \brief Builds TournamentResult-object from round-robins pool-winners for given round.
+    * \param $tpool TournamentPool with set User-object and urow with TP_ID/TP_Rating set
+    * \return null if no valid rating available or Pool-user is not a pool-winner (Rank>0); otherwise TournamentResult.
+    * \note keep in sync with fill_tournament_info()-function in 'edit_results.php'
+    */
+   private static function build_tournament_result_pool_winner( $tround, $tpool )
+   {
+      global $NOW, $player_row;
+
+      $rating = $tpool->User->urow['TP_Rating'];
+      if ( !is_valid_rating($rating) )
+         $rating = $tpool->User->Rating;
+      if ( $tpool->Rank <= 0 || !is_valid_rating($rating) )
+         return null;
+
+      $tresult = new TournamentResult( 0, $tround->tid, $tpool->uid, $tpool->User->urow['TP_ID'], $rating,
+         TRESULTTYPE_TRR_POOL_WINNER, $tround->Round, $tround->Lastchanged, $NOW, 0, $tpool->Rank,
+         'Pool Winner', sprintf( 'auto-filled by [%s]', $player_row['Handle'] ) ); // no translation
+      return $tresult;
+   }//build_tournament_result_pool_winner
 
 } // end of 'TournamentResultControl'
 
