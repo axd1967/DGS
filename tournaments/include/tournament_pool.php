@@ -223,7 +223,7 @@ class TournamentPool
    /*! \brief Returns TournamentPool-object created from specified (db-)row. */
    public static function new_from_row( $row )
    {
-      $trd = new TournamentPool(
+      $tpool = new TournamentPool(
             // from TournamentPool
             @$row['ID'],
             @$row['tid'],
@@ -232,7 +232,7 @@ class TournamentPool
             @$row['uid'],
             @$row['Rank']
          );
-      return $trd;
+      return $tpool;
    }
 
    /*! \brief Checks, if TournamentPool-entry exists in db; false if no entry found. */
