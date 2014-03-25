@@ -188,7 +188,7 @@ $GLOBALS['ThePage'] = new Page('TournamentPairEdit', PAGEFLAG_IMPLICIT_FLUSH ); 
       section('poolSummary', T_('Pool Summary'));
       echo sprintf( T_('Tournament Round #%s has %s pools with %s users: %s of %s expected games have been started.'),
                     $round, $count_pools, $count_users,
-                    MED_SPACING . span('Emphasize', $count_started_games), span('Emphasize', $count_games) ),
+                    MED_SPACING . span('EmphasizeWarn', $count_started_games), span('EmphasizeWarn', $count_games) ),
          "<br><br>\n",
          T_('Select pools for starting tournament-games (use last checkbox for all pools):'),
          "<br><br>\n";
@@ -232,7 +232,7 @@ $GLOBALS['ThePage'] = new Page('TournamentPairEdit', PAGEFLAG_IMPLICIT_FLUSH ); 
       if ( is_string($result) )
       {
          $has_errors = true;
-         echo span('ErrorMsg', span('bold', T_('A critical error has occured#tourney') . ":<br>\n") . $result),
+         echo span('CritError', T_('A critical error has occured#tourney'), '%s:') . "<br>\n" . $result,
             "<br><br>\n",
             span('ErrorMsg', $lock_errtext);
       }
@@ -241,16 +241,16 @@ $GLOBALS['ThePage'] = new Page('TournamentPairEdit', PAGEFLAG_IMPLICIT_FLUSH ); 
          list( $count_games, $expected_games, $switched_status ) = $result;
          if ( $count_games == $expected_games )
          {
-            echo span('TWarningMsg bold', sprintf( T_('All %s games for selected pools have been started.'), $count_games )),
+            echo span('TInfo bold', sprintf( T_('All %s games for selected pools have been started.'), $count_games )),
                "<br>\n";
 
             if ( $switched_status )
-               echo span('TWarningMsg bold', sprintf( T_('Tournament-Round Status has been changed to [%s].'),
+               echo span('TInfo bold', sprintf( T_('Tournament-Round Status has been changed to [%s].'),
                   TournamentRound::getStatusText(TROUND_STATUS_PLAY) ));
          }
          else
          {
-            echo span('ErrorMsg bold', T_('There are some errors') . ':'),
+            echo span('ErrorMsg bold', T_('There are some errors'), '%s:'),
                "<br>\n",
                span('ErrorMsg',
                   sprintf( T_('Expected %s games for selected pools, but only %s games has been started.#tourney'),

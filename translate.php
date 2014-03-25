@@ -393,7 +393,7 @@ $info_box = '<br>When translating you should keep the following things in mind:
 
          //$debuginfo must be html_safe.
          if ( (@$player_row['admin_level'] & ADMIN_DEVELOPER) /* && @$_REQUEST['debug'] */ )
-            $debuginfo = "<br><span class=\"DebugInfo Smaller\">"
+            $debuginfo = "<br><span class=\"DebugInfo smaller\">"
                . "L=".$row['Language_ID']
                . ", G=".$row['Group_ID']
                . ", TP=".$row['Type']
@@ -405,12 +405,12 @@ $info_box = '<br>When translating you should keep the following things in mind:
 
          $orig_updinfo = ( $row['TT_Updated'] )
             ? ( $row['TT_Updated'] > $row['T_Updated']
-                  ? span("Smaller UpdTransl", '(Updated: ' . date(DATE_FMT6, $row['TT_Updated']) . ')')
-                  : span('Smaller', '(Last change: ' . date(DATE_FMT6, $row['TT_Updated']) . ')')
+                  ? span("smaller UpdTransl", '(Updated: ' . date(DATE_FMT6, $row['TT_Updated']) . ')')
+                  : span('smaller', '(Last change: ' . date(DATE_FMT6, $row['TT_Updated']) . ')')
               )
             : '';
          $transl_updinfo = ( $row['T_Updated'] )
-            ? span('Smaller', '(Last change: ' . date(DATE_FMT6, $row['T_Updated']) . ')')
+            ? span('smaller', '(Last change: ' . date(DATE_FMT6, $row['T_Updated']) . ')')
             : '';
 
          $hsize = 70;

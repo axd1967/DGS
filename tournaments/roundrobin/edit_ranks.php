@@ -298,7 +298,7 @@ $GLOBALS['ThePage'] = new Page('TournamentRankEditor');
    {
       if ( $upd_count >= 0 )
       {
-         echo span( ($upd_count > 0 ? 'TWarningMsg' : 'TWarning'),
+         echo span( ($upd_count > 0 ? 'TInfo' : 'TWarning'),
             sprintf( T_('%s entries have been updated for this action.#tourney'), $upd_count )),
             "<br><br>\n";
       }
@@ -312,7 +312,7 @@ $GLOBALS['ThePage'] = new Page('TournamentRankEditor');
             $out[] = "<tr>" . buildErrorListString(T_('Errors'), $pw_errors, 1) . "</tr>\n";
          echo "</tr></table>\n";
          if ( count(@$pw_warnings) )
-            $out[] = "<tr>" . buildErrorListString(T_('Warnings'), $pw_warnings, 1, true, 'TWarningMsg', 'WarnMsg') . "</tr>\n";
+            $out[] = "<tr>" . buildErrorListString(T_('Warnings'), $pw_warnings, 1, true, 'TInfo', 'WarnMsg') . "</tr>\n";
          if ( count($out) == 0 )
             $out[] = "<tr><td>" . T_('No errors or warnings found.#tourney') . "<br><br></td></tr>\n";
          echo "<table>\n<tr><th>", T_('Pool Winners Check').':', "</th></tr>\n", implode('', $out), "</table>\n";

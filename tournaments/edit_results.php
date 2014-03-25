@@ -632,18 +632,18 @@ function echo_create_pool_winners_form( &$form, $tid, $round )
          'TEXT',        TournamentRound::getStatusText($tround->Status), ));
    $form->add_row( array(
          'DESCRIPTION', T_('Infos & Warnings#tourney'),
-         'TEXT', span('TWarningMsg', str_replace("\n", "<br>\n",
+         'TEXT', span('TInfo', str_replace("\n", "<br>\n",
                T_("This is best done after the tournament round is finished and the pool-winners have been finally set,\n" .
                   "because all pool-winners will be copied and there are no checks for double result entries!"))), ));
    $form->add_row( array(
          'TAB',
-         'TEXT', span('TWarningMsg', sprintf( T_('Found %s pool-winners for round #%s in %s pools.'),
+         'TEXT', span('TInfo', sprintf( T_('Found %s pool-winners for round #%s in %s pools.'),
                $cnt_pool_winners, $round, $tround->Pools )), ));
    if ( $tround->Status != TROUND_STATUS_DONE )
    {
       $form->add_row( array(
             'TAB',
-            'TEXT', span('TWarningMsg', sprintf( T_('Round #%s is not finished yet.#tourney'), $round )), ));
+            'TEXT', span('TInfo', sprintf( T_('Round #%s is not finished yet.#tourney'), $round )), ));
    }
 
    $form->add_empty_row();

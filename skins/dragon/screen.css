@@ -285,11 +285,6 @@ hr.Section {
    margin: 1em 0px 0px 0px;
 }
 
-.InlineHeader {
-   color: #800000;
-   font-weight: bold;
-}
-
 p.SysMsg {
    color: green;
    font-weight: bold;
@@ -309,24 +304,29 @@ p.WarnQuota {
    font-style: normal; /* normal italic oblique inherit (CSS2) */
    font-weight: normal;
 }
+span.ErrorMsg,
+span.FormWarning {
+   color: darkred;
+}
+
+.EmphasizeWarn,
+span.ErrMsgCode,
+span.ErrMsgMaxGames,
+span.MPGWarning {
+   font-weight: bold;
+   color: darkred;
+}
+
+.EmphasizeInfo {
+   font-weight: bold;
+   color: teal;
+}
 
 .WarnMsg {
    color: teal;
    text-decoration: none;
    font-style: normal;
    font-weight: normal;
-}
-
-span.FormWarning {
-   color: darkred;
-}
-
-span.Emphasize,
-span.ErrMsgCode,
-span.ErrMsgMaxGames,
-span.MPGWarning {
-   font-weight: bold;
-   color: darkred;
 }
 
 span.Maintenance {
@@ -396,10 +396,6 @@ img.MinWidth {
    height: 0px;
 }
 
-span.ErrorMsg {
-   color: darkred;
-}
-
 span.Note {
    font-style: italic;
 }
@@ -418,9 +414,6 @@ table#ErrorNote tr td {
    text-align: left;
 }
 
-span.Smaller {
-   font-size: smaller;
-}
 
 
 /* ************************* */
@@ -1002,33 +995,28 @@ table.Table td.Sgf a {
    color: #d50047;
 }
 
-table.Table td.ID,
-table.Table td.Number {
-   text-align: right; /* left */
-}
-
-table.Table td.NumberC {
-   text-align: center;
-}
-
+table.Table td.Center,
+table.Table td.Mark,
+table.Table td.NumberC,
 table.Table td.Image {
    text-align: center;
 }
 
-table.Table td.ImagesLeft {
-   text-align: left;
-}
-
+table.Table td.Right,
+table.Table td.ID,
+table.Table td.Number,
+table.Table td.MsgDir,
 table.Table td.ImagesRightPadded {
    text-align: right;
 }
+
 table.Table td.ImagesRightPadded img {
    padding-left:  0.4em;
    padding-right: 0.4em;
 }
 
-table.Table td.MsgDir {
-   text-align: right;
+table.Table td.ImagesLeft {
+   text-align: left;
 }
 
 table.Table td.GameSettings {
@@ -1046,22 +1034,12 @@ table.Table td.YesNo {
    font-size: smaller;
 }
 
-table.Table td.Mark {
-   text-align: center;
-}
-
-table.Table td.Right {
-   text-align: right;
-}
-
-table.Table td.Center {
-   text-align: center;
-}
-
-table.Table td.TRank, table.Table td.BoldC {
+table.Table td.TRank,
+table.Table td.BoldC {
    text-align: center;
    font-weight: bold;
 }
+
 
 table.Table th.Button {
 /* min-width problem, see MinWidth
@@ -2733,49 +2711,10 @@ table#commentTable img.InTextStone {
 span.GameTagC {
    color: blue;
 }
-
 span.GameTagH {
    color: red;
 }
 
-
-/* board page - old moves table */
-/*
-table.moves {
-   background: #66C17B;
-   border-width: 2px;
-   border-spacing: 0px;
-   margin: 4px;
-   empty-cells: hide;
-}
-
-table.moves th,
-table.moves td {
-   border-width: 1px;
-   padding: 1px;
-   color: black;
-   text-align: center;
-}
-
-table.moves td.c {
-   background: #F7F5E3;
-   color: red;
-   font: bold 85% sans-serif;
-   text-decoration: none;
-}
-
-table.moves a.w {
-   color: white;
-   font: bold 85% sans-serif;
-   text-decoration: none;
-}
-
-table.moves a.b {
-   color: black;
-   font: bold 85% sans-serif;
-   text-decoration: none;
-}
-*/
 
 
 /* ------------------------- */
@@ -3169,16 +3108,12 @@ span.AdminTournament {
 span.EditNote {
    font-size: 80%;
 }
-span.TInfo {
-   font-size: smaller;
-}
 
 span.TWarning {
    font-size: 90%;
    color: darkred;
 }
-
-span.TWarningMsg {
+span.TInfo {
    font-size: 90%;
    color: teal;
 }
@@ -3187,26 +3122,21 @@ span.TJoinErr,  td.TJoinErr  { background: #ff6347; /*red*/ }
 span.TJoinWarn, td.TJoinWarn { background: #ffb500; /*orange*/ }
 span.TJoinInv,  td.TJoinInv  { background: #ffe840; /*yellow*/ }
 
-span.TLockWarn {
-   font-weight: bold;
-   color: darkred;
-   font-style: italic;
-}
-
+span.TLockWarn,
 span.TLMaxChallenges {
    font-weight: bold;
    color: darkred;
    font-style: italic;
 }
 
-span.LadderInfo {
-   font-size: 85%;
-   font-style: italic;
-}
 span.LadderWarn {
    font-size: 85%;
    font-style: italic;
    color: darkred;
+}
+span.LadderInfo {
+   font-size: 85%;
+   font-style: italic;
 }
 
 span.TGDetached,
@@ -3336,7 +3266,6 @@ table#TPCountSummaryTable td {
 ul.TAdminLinks {
    line-height: 1.4em;
 }
-
 ul.TAdminLinks li {
    margin: 0.2em auto 0.6em;
 }
@@ -3583,10 +3512,6 @@ table.FAQAdmin {
    text-indent: 0px;
 }
 
-table.xxxFAQAdmin {
-   width: 60%;
-}
-
 table.ForumAdmin td,
 table.FAQAdmin td {
    border: 0px solid red;
@@ -3710,6 +3635,7 @@ table.EditProfilButtons td.button {
    text-align: center;
    vertical-align: middle;
 }
+
 
 /* ------------------------- */
 /* biographical infos */
@@ -3878,6 +3804,7 @@ div.Survey div.Extra span.Result {
    font-weight: bold;
    color: darkred;
 }
+
 div.Survey div.OptionHeader {
    clear: left;
    text-align: left;
@@ -3918,6 +3845,7 @@ div.Survey div.Options div.Text {
    display: block;
    padding-top: 3px;
 }
+
 div.Survey div.Actions {
    text-align: left;
    padding: 5px 0px 10px 1em;

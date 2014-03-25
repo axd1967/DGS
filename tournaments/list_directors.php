@@ -139,7 +139,7 @@ $GLOBALS['ThePage'] = new Page('TournamentDirectorList');
       if ( $tdtable->Is_Column_Displayed[5] )
          $row_str[5] = make_html_safe( $director->Comment, true );
       if ( $tdtable->Is_Column_Displayed[6] )
-         $row_str[6] = span('TInfo', $director->formatFlags());
+         $row_str[6] = span('smaller', $director->formatFlags());
 
       $tdtable->add_row( $row_str );
    }

@@ -704,7 +704,9 @@ class PoolSummary
             $key = "p$pool";
             $row_arr[5] = $this->choice_form->print_insert_checkbox( $key, '1', '', @$_REQUEST[$key],
                array( 'title' => T_('Select pool for starting tournament games')) );
-            $row_arr[6] = ( $pool_games != $pool_started_games ) ? span('Emphasize', $pool_started_games) : $pool_started_games;
+            $row_arr[6] = ( $pool_games != $pool_started_games )
+               ? span('EmphasizeWarn', $pool_started_games)
+               : $pool_started_games;
          }
          if ( $cnt_errors )
             $row_arr['extra_class'] = 'Violation';
@@ -723,7 +725,9 @@ class PoolSummary
          $row_arr[1] = T_('All');
          $row_arr[5] = $this->choice_form->print_insert_checkbox( 'pall', '1', '', @$_REQUEST['pall'],
                array( 'title' => T_('Starting tournament games for ALL pools')) );
-         $row_arr[6] = ( $cnt_games != $cnt_started_games ) ? span('Emphasize', $cnt_started_games) : $cnt_started_games;
+         $row_arr[6] = ( $cnt_games != $cnt_started_games )
+            ? span('EmphasizeWarn', $cnt_started_games)
+            : $cnt_started_games;
       }
       $this->table->add_row( $row_arr );
 

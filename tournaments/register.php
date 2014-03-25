@@ -298,7 +298,7 @@ $GLOBALS['ThePage'] = new Page('TournamentRegistration');
    $tpform->add_row( array( 'HR' ));
    $tpform->add_row( array(
          'DESCRIPTION', T_('Rating Use Mode#tourney'),
-         'TEXT',        span('TInfo', TournamentProperties::getRatingUseModeText($tprops->RatingUseMode, false)), ));
+         'TEXT',        span('smaller', TournamentProperties::getRatingUseModeText($tprops->RatingUseMode, false)), ));
 
    $current_rating_str = ($tp->User->hasRating()) ? echo_rating($tp->User->Rating, true, $my_id) : NO_VALUE;
    $tpform->add_row( array(

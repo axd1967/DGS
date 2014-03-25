@@ -13,6 +13,20 @@ ChangeLog
 
 2014-03-25 jug
 
+   * tournaments/include/tournament_pool_classes.php,
+     skins/dragon/screen.css,
+     tournaments/roundrobin/edit_pairing.php, tournaments/roundrobin/edit_ranks.php,
+     tournaments/edit_participant.php, tournaments/edit_results.php,
+     tournaments/list_directors.php, tournaments/register.php,
+     translate.php, userinfo.php:
+   - CSS-cleanup
+     - replaced TInfo -> smaller, renamed/reused TWarning/TWarningMsg -> TInfo,
+       replaced 'darkred bold' -> EmphasizeWarn, renamed Emphasize -> EmphasizeWarn,
+       added EmphasizeInfo, replaced Smaller with 'smaller', removed unused InlineHeader/xxxFAQAdmin
+     - grouped declarations with equal styles if topic not too different
+     - removed unused styles for old game-moves-table, which is still in history if needed
+     - re-ordered some style-definitions
+
    * tournaments/include/tournament_round_helper.php (TRR_START_TGAMES_LOCK_HOURS;
        TournamentRoundHelper.start_tournament_round_games, ~.start_games_for_specificed_pools),
      tournaments/include/tournament_pool_classes.php (PoolTables.calc_pool_summary;

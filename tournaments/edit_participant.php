@@ -394,7 +394,7 @@ $GLOBALS['ThePage'] = new Page('TournamentEditParticipant');
             'DESCRIPTION', T_('Rating Use Mode#tourney'),
             'TEXT',  TournamentProperties::getRatingUseModeText($tprops->RatingUseMode)
                      . "<br>\n"
-                     . span('TInfo', TournamentProperties::getRatingUseModeText($tprops->RatingUseMode, false), '(%s)'), ));
+                     . span('smaller', TournamentProperties::getRatingUseModeText($tprops->RatingUseMode, false), '(%s)'), ));
       $tpform->add_row( array(
             'DESCRIPTION', T_('Current User Rating'),
             'TEXT',        build_rating_str($tp->User->Rating, $tp->uid), ));
