@@ -432,10 +432,8 @@ function game_settings_form(&$mform, $formstyle, $viewmode, $iamrated=true, $my_
          $r2 = $map_ratings['rating2'];
          $arr_conv_sugg = $game_settings->suggest_conventional( $r1, $r2 );
          $arr_prop_sugg = $game_settings->suggest_proper( $r1, $r2 );
-         $sugg_conv = '<span class="Suggestion">' .
-            sptext( build_suggestion_shortinfo($arr_conv_sugg) ) . '</span>';
-         $sugg_prop = '<span class="Suggestion">' .
-            sptext( build_suggestion_shortinfo($arr_prop_sugg) ) . '</span>';
+         $sugg_conv = span('Suggestion', sptext( build_suggestion_shortinfo($arr_conv_sugg) ));
+         $sugg_prop = span('Suggestion', sptext( build_suggestion_shortinfo($arr_prop_sugg) ));
       }
       elseif ( !$iamrated )
          $sugg_conv = $sugg_prop = span('WarnMsg', $text_need_rating);

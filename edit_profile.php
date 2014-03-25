@@ -291,7 +291,7 @@ require_once 'include/gui_bulletin.php';
    {
       array_push( $row,
          'CHECKBOX', 'coordssgfover', 1,
-               sprintf( '<span class="AdminOption">%s</span>', sptext(T_('SGF Hover (show SGF coordinates)'))),
+               span('AdminOption', sptext(T_('SGF Hover (show SGF coordinates)'))),
                ($boardcoords & COORD_SGFOVER) );
    }
    $profile_form->add_row( $row);

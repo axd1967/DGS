@@ -112,7 +112,7 @@ require_once 'include/gui_functions.php';
       $pform->add_empty_row();
       $pform->add_row( array(
             'DESCRIPTION', T_('Errors'),
-            'TEXT',        sprintf( '<span class="TWarning">%s</span>', $errstr ), ));
+            'TEXT',        span('ErrorMsg', $errstr ), ));
    }
 
    $pform->add_empty_row();

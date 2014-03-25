@@ -169,10 +169,10 @@ function fix_single_game( $gid )
    {
       db_query( "fix_game_snapshost.fix_single_game.upd_game_snapshot($gid)",
             "UPDATE Games SET Snapshot='$new_snapshot' WHERE ID=$gid LIMIT 1" );
-      echo "<br><span class=ErrorMsg>Updated game-snapshot!!</span><br>\n\n";
+      echo "<br>", span('ErrorMsg', 'Updated game-snapshot!!'), "<br>\n\n";
    }
    else
-      echo "<span class=ErrorMsg>No UPDATE required</span><br>\n\n";
+      echo span('ErrorMsg', 'No UPDATE required'), "<br>\n\n";
 }//fix_single_game
 
 function bulk_fix_missing_game_snapshots( $status, $uid, $startgid, $limit, $sleep )
@@ -240,9 +240,11 @@ function bulk_fix_missing_game_snapshots( $status, $uid, $startgid, $limit, $sle
 
    if ( $cnt_err > 0 )
    {
-      echo sprintf( "<br><span class=ErrorMsg>Found %d errors: last game-id with error = %d</span><br>\n",
-                    $cnt_err, $lasterr_gid ),
-         sprintf( "<br><span class=ErrorMsg>Game-IDs with errors: [ %s ]</span><br>\n", implode(' ', $error_gids));
+      echo "<br>\n", '<span class="ErrorMsg">',
+         sprintf( 'Found %s errors: last game-id with error = %s', $cnt_err, $lasterr_gid ),
+         "<br><br>\n",
+         sprintf( 'Game-IDs with errors: [ %s ]', implode(' ', $error_gids) ),
+         '</span>', "<br>\n";
    }
 
    echo "\n<br>Needed: " . sprintf("%1.3fs", (getmicrotime() - $begin))

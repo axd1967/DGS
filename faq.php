@@ -73,7 +73,7 @@ $GLOBALS['ThePage'] = new Page('FAQ', 0, ROBOTS_NO_FOLLOW,
       'TEXT',           ' ' . sprintf( T_('in language (%s)'), $arr_languages[$lang] ),
       ));
    if ( $err_search )
-      $faq_form->add_row( array( 'TAB', 'TEXT', "<span class=ErrMsg>($err_search)</span>" ));
+      $faq_form->add_row( array( 'TAB', 'TEXT', span('ErrMsg', $err_search, '(%s)'), ));
    $faq_form->add_row( array(
       'TAB',
       'CHECKBOX', 'orig', 1, T_('search only in original english FAQ (in case of untranslated entries)'), $orig ));

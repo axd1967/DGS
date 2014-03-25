@@ -171,7 +171,7 @@ define('SGF_MAXSIZE_UPLOAD', 100*1024); // max. 100KB stored, keep factor of 102
       $form->add_empty_row();
       $form->add_row( array(
             'DESCRIPTION', T_('Errors'),
-            'TEXT',        sprintf( '<span class="TWarning">%s</span>', $errstr ), ));
+            'TEXT',        span('TWarning', $errstr ), ));
    }
 
    $form->add_empty_row();
@@ -222,8 +222,8 @@ define('SGF_MAXSIZE_UPLOAD', 100*1024); // max. 100KB stored, keep factor of 102
 
    $notes = array();
    $notes[] = array(
-      'text' => span('darkred bold', T_('To create a game review it\'s recommended to download the SGF without comments.')) . "<br>\n" .
-                span('darkred bold', T_('Otherwise it may happen that private comments or your game notes are published!')) . "<br>\n" .
+      'text' => span('EmphasizeWarn', T_('To create a game review it\'s recommended to download the SGF without comments.')) . "<br>\n" .
+                span('EmphasizeWarn', T_('Otherwise it may happen that private comments or your game notes are published!')) . "<br>\n" .
                 T_('For instructions please read the FAQ how best to download a SGF.#sgf')
       );
    $notes[] = null;

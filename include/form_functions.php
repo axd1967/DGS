@@ -834,7 +834,7 @@ class Form
          $tdtable_attbs = $this->get_form_attbs( $tdtable_attbs, 'C');
          $title = (string)@$this->get_areaconf( $L, 'title' );
          if ( $title )
-            $title = "<span class=Rubric>$title</span>";
+            $title = span('Rubric', $title);
          $areastr = "<TD$tdtable_attbs><!-- Area #$L -->$title<TABLE$table_attbs>\n"
                   . $areastr
                   . "</TABLE></TD>\n";

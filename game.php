@@ -1019,7 +1019,7 @@ function draw_moves( $gid, $move, $handicap )
          $sgf_move -= $handicap;
    }
 
-   echo '<span class="SgfMove">', sprintf( T_('(SGF-Move %s)'), $sgf_move ), '</span>&nbsp;';
+   echo span('SgfMove', sprintf( T_('(SGF-Move %s)'), $sgf_move )), MINI_SPACING;
 
    // add selectbox to show specific move
    echo "<SELECT name=\"gotomove\" size=\"1\"";

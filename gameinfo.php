@@ -193,8 +193,7 @@ function build_rating_diff( $rating_diff )
          );
    $itable->add_sinfo(
          T_('Status'),
-         $arr_status[$status]
-            . ( $is_admin ? " (<span class=\"DebugInfo\">$game_status</span>)" : '')
+         $arr_status[$status] . ( $is_admin ? ' ' . span('DebugInfo', $game_status, '(%s)') : '' )
       );
    if ( $is_fairkomi )
       $itable->add_sinfo( T_('Fair Komi Type#fairkomi'), $fk_htype_text );

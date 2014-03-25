@@ -89,9 +89,7 @@ $GLOBALS['ThePage'] = new Page('ForumsList');
       $lpost_author = ( $show_lp_author && $lpost->author->is_set() )
          ? sprintf( ' <span class=PostUser>%s %s</span>', T_('by'), $lpost->author->user_reference())
          : '';
-      $new_str = ( $forum->has_new_posts )
-         ? sprintf( '<span class="NewFlag">%s</span>', T_('new#forum') )
-         : '';
+      $new_str = ( $forum->has_new_posts ) ? span('NewFlag', T_('new#forum') ) : '';
       $fopts_str = $forum->build_options_text( $f_opts );
 
       //incompatible with: $c=($c % LIST_ROWS_MODULO)+1;

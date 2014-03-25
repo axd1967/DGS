@@ -58,7 +58,7 @@ function echo_item($text, $link, $show_link, $working=true, $last=false)
    if ( $show_link && $working && $link )
       echo "<a href=\"$link\">$text</a>";
    else
-      echo "<span class=Inactive>$text</span>";
+      echo span('Inactive', $text);
    echo "</td></tr>\n";
 } //echo_item
 

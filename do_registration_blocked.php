@@ -79,9 +79,7 @@ require_once 'include/register_functions.php';
       $error_str = format_array( $errors, "\n<li>%s</li>" );
 
       $reg_form->set_area(2);
-      $reg_form->add_row( array( 'TAB', 'TEXT',
-         sprintf( '<span class="ErrorMsg"><b>%s:</b></span>',
-                  T_('The following errors have been detected') )));
+      $reg_form->add_row( array( 'TAB', 'TEXT', span('ErrorMsg', T_('The following errors have been detected'), '%s:') ));
       $reg_form->add_row( array( 'TAB', 'TEXT', "<ul>$error_str</ul>" ));
    }
 

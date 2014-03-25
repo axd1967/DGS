@@ -1088,7 +1088,7 @@ class Table
       {
          $hdr = $title;
       }
-      $string .= '<span class="Header">' . $hdr . '</span>';
+      $string .= span('Header', $hdr);
 
       $query_del = !($mode & TABLE_NO_HIDE);
       if ( $query_del )
@@ -1133,7 +1133,7 @@ class Table
             $tool2 = "<span>$tool2</span>";
          }
 
-         $string .= '<span class=Tool>' . $tool1.$tool2 . "</span>";
+         $string .= span('Tool', $tool1.$tool2);
       }
 
       $string .= "</div></th>";
@@ -1215,7 +1215,7 @@ class Table
          $togglestr_show = "<a href=\"$query\" title=" . attb_quote(T_('Show')) . '>' . CHAR_SHOWFILTER ."</a>";
          $togglestr_hide = image( $base_path.'images/remove.gif', 'x', '', 'class=Hide');
          $togglestr_hide = anchor( $query, $togglestr_hide, T_('Hide'));
-         $togglestr_hide = '<span class=Tool>' . $togglestr_hide . "</span>";
+         $togglestr_hide = span('Tool', $togglestr_hide);
       }
 
       // check, if filter-field shown or hidden
@@ -1378,7 +1378,7 @@ class Table
       if ( $id == 'T' && $this->FoundRows >= 0 )
       {
          $fmt_entries = ($this->FoundRows == 1 ) ? T_('(%s entry)') : T_('(%s entries)');
-         $navi_entries = '<span class="NaviInfo">' . sprintf( $fmt_entries, $this->FoundRows ) . '</span>';
+         $navi_entries = span('NaviInfo', sprintf( $fmt_entries, $this->FoundRows ));
       }
 
       if ( $is_onepage )

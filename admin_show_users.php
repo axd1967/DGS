@@ -106,8 +106,8 @@ require_once 'include/table_columns.php';
    foreach ( $ARR_ADMLEVELS as $maskval => $arr )
    {
       $aform->add_row( array(
-         'TEXT', sprintf( '<span class="LegendItem">%s</span>', $arr[0]), 'TAB',
-         'TEXT', sprintf( '<span class="LegendDescr">%s</span>', $arr[1]) ));
+         'TEXT', span('LegendItem', $arr[0]), 'TAB',
+         'TEXT', span('LegendDescr', $arr[1]), ));
    }
    $aform->add_row( array( 'SPACE' ));
 
@@ -116,8 +116,8 @@ require_once 'include/table_columns.php';
    foreach ( $ARR_ADMOPTS as $maskval => $arr )
    {
       $aform->add_row( array(
-         'TEXT', sprintf( '<span class="LegendItem">%s</span>', $arr[0]), 'TAB',
-         'TEXT', sprintf( '<span class="LegendDescr">%s</span>', $arr[1]) ));
+         'TEXT', span('LegendItem', $arr[0]), 'TAB',
+         'TEXT', span('LegendDescr', $arr[1]), ));
    }
 
    $aform->echo_string();
@@ -162,11 +162,9 @@ function create_table( $show_edit_user, $page, $with_adminlevel, $query_msg, $qu
       if ( $atable->Is_Column_Displayed[2] )
          $arow_str[2] = ($row['X_Lastaccess'] > 0 ? date(DATE_FMT2, $row['X_Lastaccess']) : NULL );
       if ( $with_adminlevel && $atable->Is_Column_Displayed[3] )
-         $arow_str[3] = '<span class="Flags">'
-            . build_admin_flags( $ARR_ADMLEVELS, @$row['Adminlevel']+0 ) . '</span>';
+         $arow_str[3] = span('Flags', build_admin_flags( $ARR_ADMLEVELS, @$row['Adminlevel']+0 ) );
       if ( $atable->Is_Column_Displayed[4] )
-         $arow_str[4] = '<span class="Flags">'
-            . build_admin_flags( $ARR_ADMOPTS, @$row['AdminOptions']+0 ) . '</span>';
+         $arow_str[4] = span('Flags', build_admin_flags( $ARR_ADMOPTS, @$row['AdminOptions']+0 ) );
       if ( $atable->Is_Column_Displayed[5] )
          $arow_str[5] = @$row['AdminNote'];
       $atable->add_row( $arow_str );

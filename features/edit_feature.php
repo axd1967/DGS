@@ -196,7 +196,7 @@ require_once 'features/lib_votes.php';
    if ( !is_null($errormsg) )
       $fform->add_row( array(
          'DESCRIPTION', T_('Error'),
-         'TEXT', '<span class="ErrorMsg">' . $errormsg . '</span>' ));
+         'TEXT',        span('ErrorMsg', $errormsg), ));
 
    if ( @$_REQUEST['feature_delete'] ) // delete
    {

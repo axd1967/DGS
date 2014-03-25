@@ -303,8 +303,7 @@ class DisplayForum
          if ( $first && $this->found_rows >= 0 )
          {
             $fmt_entries = ($this->found_rows == 1 ) ? T_('%s entry') : T_('%s entries');
-            $name .= SMALL_SPACING .
-               '<span class="NaviInfo">(' . sprintf( $fmt_entries, $this->found_rows ) . ')</span>';
+            $name .= SMALL_SPACING . span('NaviInfo', sprintf( $fmt_entries, $this->found_rows ), '(%s)');
             $first = false;
          }
          echo "<td $attbs>$name</td>";
@@ -578,17 +577,16 @@ class DisplayForum
       if ( @$player_row['ID'] <= GUESTS_ID_MAX )
       {
          $form->add_row( array(
-               'DESCRIPTION', sprintf('<span class="ErrorMsg"><b>%s</b></span>', T_('NOTE#guest')),
-               'TEXT', '<span class="ErrorMsg">'
-                        . T_("Forum posts by the guest-user can be approved or rejected by the server admins.<br>\n"
-                           . "If you want a private (non-public) answer, add your email and ask for private contact.")
-                        . '</span>' ));
+               'DESCRIPTION', span('EmphasizeWarn', T_('NOTE#guest')),
+               'TEXT', span('EmphasizeWarn',
+                        T_("Forum posts by the guest-user can be approved or rejected by the server admins.<br>\n" .
+                           "If you want a private (non-public) answer, add your email and ask for private contact.")), ));
       }
       if ( $ErrorMsg )
       {
          $form->add_row( array(
-               'DESCRIPTION', sprintf('<span class="ErrorMsg"><b>%s</b></span>', T_('Error#forum')),
-               'TEXT', "<span class=\"ErrorMsg\">$ErrorMsg</span>" ));
+               'DESCRIPTION', span('ErrorMsg bold', T_('Error#forum')),
+               'TEXT', span('ErrorMsg', $ErrorMsg), ));
       }
 
       $form->add_row( array(
@@ -970,8 +968,7 @@ class DisplayForum
          $sbj = make_html_safe( $subj_part, SUBJECT_HTML, $this->rx_term );
          $newstr = ( !$hidden && !$post->is_read ) ? $this->get_new_string(NEWMODE_OVERVIEW) : '';
          $modstr = ( $hidden && ( $post->is_thread_post() || $this->is_moderator || $is_my_post ) )
-            ? MED_SPACING . sprintf( '<span class="Moderated">(%s)</span>',
-                  ForumPost::get_approved_text( $post->approved ) )
+            ? MED_SPACING . span('Moderated', ForumPost::get_approved_text( $post->approved ), '(%s)')
             : '';
 
          $c = 3 - $c;
@@ -985,7 +982,7 @@ class DisplayForum
             $newstr,
             $modstr,
             "</td><td>",
-            sprintf( '<span class=PostUser>%s</span>', $post->author->user_reference() ),
+            span('PostUser', $post->author->user_reference()),
             "</td><td>",
             sprintf( '<span class=PostDate>%s'.SMALL_SPACING.'(%s)</span>',
                date( DATE_FMT, max($post->created, $post->last_edited) ), $post->creation_order ),
@@ -1103,7 +1100,7 @@ class Forum
          $str .= $opt_prefix . T_('Hidden#forum') . ']';
 
       if ( $formatted && $str )
-         $str = SMALL_SPACING . sprintf( "<span class=\"ForumOpts\">%s</span>", $str );
+         $str = SMALL_SPACING . span('ForumOpts', $str);
       return $str;
    }
 

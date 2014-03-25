@@ -398,7 +398,7 @@ function draw_game_admin_form( $game, $trule )
       {
          $gaform->add_row( array(
                'CELL', 2, '',
-               'TEXT', span('TWarningMsg bold', make_html_safe( sprintf(
+               'TEXT', span('TInfo bold', make_html_safe( sprintf(
                      T_("This is a tournament-game, so you may need to talk\nwith the <home %s>tournament-directors</home> about \"surprising\" game-results!"),
                      "tournaments/list_directors.php?tid=".$game->tid), true )), ));
          $gaform->add_empty_row();
