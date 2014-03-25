@@ -198,9 +198,12 @@ class TournamentRoundStatus
    {
       $this->check_expected_round_status( TROUND_STATUS_PAIR, TOURNEY_STATUS_PAIR );
 
-      $this->errors[] = T_('Status change normally done automatically by Pairing-Editor.#tourney') . ' '
-         . sprintf( T_('Change to Tournament Round Status [%s] only allowed by Tournament Admin.'),
-                    TournamentRound::getStatusText($this->new_status) );
+      $this->errors[] =
+         make_html_safe( sprintf(
+               T_("Status change normally done automatically by <home %s>Pairing-Editor</home> after all games successfully started.#tourney"),
+               "tournaments/roundrobin/edit_pairing.php?tid={$this->tid}" ), true );
+      $this->errors[] = sprintf( T_('Direct change to Tournament Round Status [%s] only allowed by Tournament Admin.'),
+         TournamentRound::getStatusText($this->new_status) );
    }
 
 
