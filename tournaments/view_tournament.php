@@ -299,13 +299,13 @@ $GLOBALS['ThePage'] = new Page('Tournament');
       section( 'TournamentResult', sprintf( T_('Tournament Results (TOP %s)'), $TRESULT_LIMIT ), 'result', true );
 
       echo "<center>", $tresult_str, "</center><br>\n";
-   }
 
-   $sectmenu = array();
-   $sectmenu[T_('All tournament results')] = "tournaments/list_results.php?tid=$tid";
-   $sectmenu[T_('My tournament results')] =
-      "tournaments/list_results.php?tid=$tid".URI_AMP."user=".urlencode($player_row['Handle']);
-   make_menu( $sectmenu, false);
+      $sectmenu = array();
+      $sectmenu[T_('All tournament results')] = "tournaments/list_results.php?tid=$tid";
+      $sectmenu[T_('My tournament results')] =
+         "tournaments/list_results.php?tid=$tid".URI_AMP."user=".urlencode($player_row['Handle']);
+      make_menu( $sectmenu, false);
+   }
 
    $menu = array();
    $menu[T_('Refresh tournament info')] = "tournaments/view_tournament.php?tid=$tid";
