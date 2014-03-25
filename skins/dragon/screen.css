@@ -169,6 +169,10 @@ a.linkmarkup {
    font-weight: bold;
 }
 
+.underline {
+   text-decoration: underline;
+}
+
 .larger {
    font-size: larger;
 }
@@ -317,6 +321,7 @@ span.FormWarning {
    color: darkred;
 }
 
+span.Emphasize,
 span.ErrMsgCode,
 span.ErrMsgMaxGames,
 span.MPGWarning {

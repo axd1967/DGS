@@ -696,10 +696,14 @@ class TournamentPool
    }//assign_pool
 
    /*!
-    * \brief checks pool integrity and return list of errors; empty list if all ok.
+    * \brief checks pool integrity and return list of errors, and fills in number of started-game-counts
+    *       in PoolSummary-arrays; empty list if all ok.
     * \return array( errors, pool_summary )
     *         $pool_summary fill in pool-summary:
-    *         array( pool => array( pool-user-count, array( errormsg, ... ), pool-games-count ), ... )
+    *         array( pool => array( pool-user-count,
+    *                array( errormsg, ... ),
+    *                pool-games-count,
+    *                pool-started-games-count ), ... )
     */
    public static function check_pools( $tround, $only_summary=false )
    {
@@ -739,6 +743,7 @@ class TournamentPool
                      sprintf( T_('Inconsistency: expected %s games, but have: %s TGames & %s Games#tourney'),
                         $cnt_expected_games, $cnt_tgames, $cnt_games );
                }
+               $pool_summary[$pool][3] += $cnt_tgames;
             }
          }
          if ( $cnt_miss_games )

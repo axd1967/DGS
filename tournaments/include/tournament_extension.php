@@ -119,6 +119,26 @@ class TournamentExtension
       return $data;
    }
 
+   /*!
+    * \brief Tries get lock by storing this TournamentExtension.
+    * \param $expire_secs if >0 and TournamentExtension with that property is already stored,
+    *       it will be deleted (=unlocked) if the store-date (=Lastchanged) has expired.
+    * \return true = successfullly got lock (and tournament-extension has been stored);
+    *       false = could not get lock (and store tournament-extension)
+    */
+   public function getExtensionLock( $expire_secs=0 )
+   {
+      global $NOW;
+      if ( $expire_secs > 0 )
+      {
+         $t_ext = TournamentExtension::load_tournament_extension( $this->tid, $this->Property );
+         if ( !is_null($t_ext) && $t_ext->Lastchanged + $expire_secs <= $NOW )
+            $t_ext->delete();
+      }
+
+      return $this->insert(); // need to fail if existing
+   }//getExtensionLock
+
 
    // ------------ static functions ----------------------------
 

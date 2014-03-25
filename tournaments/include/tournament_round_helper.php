@@ -43,6 +43,8 @@ require_once 'tournaments/include/tournament_rules.php';
   */
 
 
+define('TRR_START_TGAMES_LOCK_HOURS', 3 ); // 3 hours lock on tournament-extension-locking
+
  /*!
   * \class TournamentRoundHelper
   *
@@ -97,26 +99,68 @@ class TournamentRoundHelper
    }//determine_games_per_challenge
 
    /*!
-    * \brief Start all tournament games needed for current round, prints progress by printing and flushing on STDOUT.
+    * \brief Starts all tournament games needed for current round and specified pools, prints progress by printing
+    *       and flushing on STDOUT.
+    * \param $create_pools 0 = start games for all pools, otherwise only for specific pool or array of pools
+    *
+    * \note TournamentRound-status will be set to PLAY if ALL expected games have been started.
+    *
     * \note IMPORTANT NOTE: caller needs to open TA with HOT-section!!
-    * \note to make flushing work, PAGEFLAG_IMPLICIT_FLUSH is required on using page!
+    * \note to make flushing work, PAGEFLAG_IMPLICIT_FLUSH is required on using-page!
     *
     * \return NULL on lock-error,
     *       or error-text on severe consistency-error (which also prohibits game-pairing till it's fixed by keeping
     *             existing tournament-extension-entry),
-    *       or on success: arr( number of started games, expected number of games)
+    *       or on success: arr( number of started games, expected number of games, tround-status-switched )
     */
-   public static function start_tournament_round_games( $tlog_type, $tourney, $tround )
+   public static function start_tournament_round_games( $tlog_type, $tourney, $tround, $create_pools )
    {
       global $NOW;
       $tid = $tourney->ID;
       $round = $tround->Round;
-      $dbgmsg = "TRH:start_tournament_round_games($tid,$round)";
 
-      // lock T-ext
+      // check pools to create games for -> create_pools = 0 | arr( pools )
+      if ( is_numeric($create_pools) )
+      {
+         if ( $create_pools < 0 || $create_pools > $tround->Pools )
+         {
+            return ErrorCode::get_error_text('invalid_args')
+               . "; TRH:start_tround_games.check.pools.bad_value($tid,$round,$create_pools)";
+         }
+         $dbg_pool = $create_pools;
+         if ( $create_pools > 0 )
+            $create_pools = array( (int)$create_pools );
+      }
+      elseif ( is_array($create_pools) )
+      {
+         if ( count($create_pools) == 0 )
+            return ErrorCode::get_error_text('invalid_args')
+               . "; TRH:start_tround_games.check.pools_arr.empty($tid,$round)";
+         foreach ( $create_pools as $pool )
+         {
+            if ( !is_numeric($pool) || $pool < 1 || $pool > $tround->Pools )
+            {
+               return ErrorCode::get_error_text('invalid_args')
+                  . "; TRH:start_tround_games.check.pools_arr.bad_value($tid,$round,$pool)";
+            }
+         }
+         $dbg_pool = implode(',', $create_pools);
+      }
+      else
+      {
+         return ErrorCode::get_error_text('invalid_args')
+            . "; TRH:start_tround_games.check.pools.bad_type($tid,$round,$create_pools)";
+      }
+      $dbgmsg = "TRH:start_tournament_round_games($tid,$round,pools=[$dbg_pool])";
+
+
+      // lock T-ext (expires after 3 hours)
       $t_ext = new TournamentExtension( $tid, TE_PROP_TROUND_START_TGAMES, 0, $NOW );
-      if ( !$t_ext->insert() ) // need to fail if existing
+      if ( !$t_ext->getExtensionLock( TRR_START_TGAMES_LOCK_HOURS * SECS_PER_HOUR ) )
          return null;
+      echo sprintf( T_('Established lock for starting tournament games. Lock expires in %s hours.'), TRR_START_TGAMES_LOCK_HOURS),
+         "<br>\n";
+
 
       // read T-rule
       $trules = TournamentCache::load_cache_tournament_rules( $dbgmsg, $tid );
@@ -126,10 +170,10 @@ class TournamentRoundHelper
       // read T-props
       $tprops = TournamentCache::load_cache_tournament_properties( $dbgmsg, $tid );
 
-      // read T-games: read all existing TGames to check if creation has been partly done
+      // read T-games: read all existing TGames for specified pools to check if creation has been partly done
       $check_tgames = array(); // uid.uid => game-count
       $tg_iterator = new ListIterator( "$dbgmsg.find_tgames" );
-      $tg_iterator = TournamentGames::load_tournament_games( $tg_iterator, $tid, $tround->ID );
+      $tg_iterator = TournamentGames::load_tournament_games( $tg_iterator, $tid, $tround->ID, $create_pools );
       while ( list(,$arr_item) = $tg_iterator->getListIterator() )
       {
          list( $tgame, $orow ) = $arr_item;
@@ -143,39 +187,86 @@ class TournamentRoundHelper
       unset($tg_iterator);
 
       // ensure, that games-per-challenge for existing games is ok (e.g. half of DOUBLE-game must be fixed by admin)
+      $inconsistencies = array();
       foreach ( $check_tgames as $fkey => $cnt )
       {
          if ( $cnt != $games_per_challenge )
-         {
-            return sprintf( T_('Inconsistency found: for tournament #%s in round %s there is a mismatch of games per challenge (%s) for user-pair [%s].'),
-               $tid, $round, "$games_per_challenge <-> $cnt", $fkey );
-         }
+            $inconsistencies[] = $fkey;
+      }
+      if ( count($inconsistencies) > 0 )
+      {
+         return sprintf( T_('Inconsistencies found: for tournament #%s in round %s there is a mismatch of games per challenge (%s) for user-pairs:'),
+                         $tid, $round, "$games_per_challenge <-> $cnt" )
+            . "<br>\n[" . implode('] [', $inconsistencies) . ']';
       }
 
-      // read all pools with all users and TPs (if needed for T-rating), need TP_ID for TG.*_rid
+      // read specified pools with all users and TPs (if needed for T-rating), need TP_ID for TG.*_rid
       $load_opts_tpool = TPOOL_LOADOPT_TP_ID | TPOOL_LOADOPT_USER | TPOOL_LOADOPT_ONLY_RATING | TPOOL_LOADOPT_UROW_RATING;
       if ( $tprops->RatingUseMode != TPROP_RUMODE_CURR_FIX )
          $load_opts_tpool |= TPOOL_LOADOPT_TRATING;
       $tpool_iterator = new ListIterator( "$dbgmsg.load_pools" );
       $tpool_iterator->addIndex( 'uid' );
-      $tpool_iterator = TournamentPool::load_tournament_pools( $tpool_iterator, $tid, $round, 0, $load_opts_tpool );
+      $tpool_iterator = TournamentPool::load_tournament_pools( $tpool_iterator, $tid, $round, $create_pools,
+         $load_opts_tpool );
 
       $poolTables = new PoolTables( $tround->Pools );
       $poolTables->fill_pools( $tpool_iterator );
       $arr_poolusers = $poolTables->get_pool_users();
       $expected_games = $poolTables->calc_pool_games_count( $games_per_challenge );
 
-      // loop over all pools
+      $errmsg = null;
+      $switched_tround_status = false;
+      if ( isset($arr_poolusers[0]) && count($arr_poolusers[0]) > 0 )
+      {
+         $errmsg = sprintf( T_('Inconsistency found: there are %s unassigned pool-users for tournament #%s in round %s.'),
+            count($arr_users), $tid, $round );
+      }
+      else
+      {
+         list( $count_games, $count_old_games ) =
+            self::start_games_for_specificed_pools( $tround, $trules, $arr_poolusers, $poolTables, $check_tgames );
+
+         if ( $count_games > 0 )
+         {
+            TournamentLogHelper::log_start_tournament_games( $tid, $tlog_type, $tround, $dbg_pool,
+               $expected_games, $count_old_games, $count_games );
+
+            // clear T-games cache
+            TournamentGames::delete_cache_tournament_games( "TRH:start_tournament_round_games($tid,$round)", $tid );
+         }
+
+         // switch T-round-status PAIR -> PLAY (only if ALL pools processed and all expected games have been started)
+         $count_games += $count_old_games;
+         if ( $create_pools == 0 && $count_games == $expected_games )
+         {
+            $tround->setStatus( TROUND_STATUS_PLAY );
+            if ( $tround->update() )
+               $switched_tround_status = true;
+         }
+      }
+
+      // unlock T-ext
+      $t_ext->delete();
+      echo T_('Released lock for starting tournament games.'), "<br>\n";
+
+      return ( !is_null($errmsg) ) ? $errmsg : array( $count_games, $expected_games, $switched_tround_status );
+   }//start_tournament_round_games
+
+   /*!
+    * \brief Starts tournament games for selected pools, prints progress by printing and flushing on STDOUT.
+    * \internal used by start_tournament_round_games()
+    * \return arr( count-games-created, count-old-games-existing, count-games-expected )
+    */
+   private static function start_games_for_specificed_pools( $tround, $trules, $arr_poolusers, $poolTables, $check_tgames )
+   {
+      // loop over specified pools
       echo "<table id=\"Progress\"><tr><td><ul>\n";
       $count_games = $count_old_games = $progress = 0;
       $cnt_pools = count($arr_poolusers);
       foreach ( $arr_poolusers as $pool => $arr_users )
       {
-         if ( $pool == 0 )
-         {
-            return sprintf( T_('Inconsistency found: there are %s unassigned pool-users for tournament #%s in round %s.'),
-               count($arr_users), $tid, $round );
-         }
+         if ( count($arr_users) == 0 ) // skip empty pools
+            continue;
 
          echo "<br>\n<li>", sprintf( T_('Pool %s of %s'), $pool, $cnt_pools ), ":<br>\n";
 
@@ -191,7 +282,7 @@ class TournamentRoundHelper
             {
                $df_tpool = $poolTables->get_user_tournament_pool( $df_uid );
 
-               // check if TGames already exists for pair challenger vs defender
+               // check if TGames already exists for pair "challenger vs defender"
                $fkey = ( $ch_uid < $df_uid ) ? "$ch_uid.$df_uid" : "$df_uid.$ch_uid";
                $cnt_exist_tgames = (int)@$check_tgames[$fkey];
                if ( $cnt_exist_tgames > 0 ) // games already created
@@ -203,8 +294,8 @@ class TournamentRoundHelper
                      $count_games += count($arr_tg);
                }
 
-               if ( !(++$progress % 25) )
-                  echo sprintf( T_('Created %s games so far ...#tourney') . "<br>\n", $count_games );
+               if ( !(++$progress % 10) )
+                  echo sprintf( T_('Step %s. Created %s games so far ...#tourney') . "<br>\n", $progress, $count_games );
             }
          }
 
@@ -214,26 +305,8 @@ class TournamentRoundHelper
          echo "<br>\n<li>", sprintf( T_('%s games already existed'), $count_old_games ), '</li>';
       echo "</ul></td></tr></table>\n";
 
-      // clear cache
-      TournamentGames::delete_cache_tournament_games( "TRH:start_tournament_round_games($tid,$round)", $tid );
-
-      // check expected games-count
-      $count_games += $count_old_games;
-      if ( $count_games == $expected_games )
-      {
-         // switch T-round-status PAIR -> PLAY
-         $tround->setStatus( TROUND_STATUS_PLAY );
-         $tround->update();
-      }
-
-      // unlock T-ext
-      $t_ext->delete();
-
-      TournamentLogHelper::log_start_tournament_games( $tid, $tlog_type, $tround, /*pool*/0,
-         $expected_games, $count_old_games, $count_games );
-
-      return array( $count_games, $expected_games );
-   }//start_tournament_round_games
+      return array( $count_games, $count_old_games );
+   }//start_games_for_specificed_pools
 
    /*!
     * \brief Creates tournament game (or games for DOUBLE) for specific pairing of two users for round-robin-tourneys.

@@ -597,12 +597,13 @@ class TournamentLogHelper
       $tlog->insert();
    }
 
-   public static function log_start_tournament_games( $tid, $tlog_type, $tround, $pool, $cnt_expected, $cnt_existing, $cnt_total )
+   public static function log_start_tournament_games( $tid, $tlog_type, $tround, $pools_info, $cnt_expected,
+         $cnt_existing, $cnt_created )
    {
       $tlog = new Tournamentlog( 0, $tid, 0, 0, $tlog_type, 'TG_Data', TLOG_ACT_START, 0,
-         sprintf('Start tournament-games for Round[%s/#%s] Pool[%s]: %s expected, %s existing, %s created, %s total games',
-            $tround->ID, $tround->Round, $pool,
-            $cnt_expected, $cnt_existing, $cnt_total - $cnt_existing, $cnt_total ));
+         sprintf('Start tournament-games for Round[%s/#%s] Pools[%s]: %s expected, %s existing, %s created, %s total games',
+            $tround->ID, $tround->Round, $pools_info,
+            $cnt_expected, $cnt_existing, $cnt_created, $cnt_existing + $cnt_created ));
       $tlog->insert();
    }
 

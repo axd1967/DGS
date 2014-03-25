@@ -25,6 +25,7 @@ require_once 'include/classlib_userconfig.php';
 require_once 'include/countries.php';
 require_once 'include/rating.php';
 require_once 'include/std_classes.php';
+require_once 'include/form_functions.php';
 require_once 'include/gui_functions.php';
 require_once 'include/table_columns.php';
 require_once 'tournaments/include/tournament_globals.php';
@@ -401,7 +402,7 @@ class PoolTables
       return @$this->users[$uid];
    }
 
-   /*! \brief Returns array( pool => arr[ uid's, ... ] ). */
+   /*! \brief Returns array( pool => arr[ uid's, ... ] ); not-filled pools have empty user-array. */
    public function get_pool_users()
    {
       return $this->pools;
@@ -621,15 +622,15 @@ class PoolTables
 
    /*!
     * \brief Returns #users for each pool with some extra.
-    * \return arr( pool => arr( user-count, errors-arr(empty), pool-games-count ), ... ).
+    * \return arr( pool => arr( user-count, errors-arr(empty), pool-games-count, pool-started-games-count=0 ), ... ).
     */
    public function calc_pool_summary( $games_per_challenge )
    {
-      $arr = array(); // [ pool => [ #users, [], #games-per-pool ], ... ]
+      $arr = array(); // [ pool => [ #users, [], #games-per-pool, #started-games-per-pool=0 ], ... ]
       foreach ( $this->pools as $pool => $arr_users )
       {
          $usercount = count($arr_users);
-         $arr[$pool] = array( $usercount, array(), TournamentUtils::calc_pool_games($usercount, $games_per_challenge) );
+         $arr[$pool] = array( $usercount, array(), TournamentUtils::calc_pool_games($usercount, $games_per_challenge), 0 );
       }
       return $arr;
    }
@@ -658,18 +659,24 @@ class PoolSummary
 {
    private $pool_summary; // pool => [ pool-user-count, errors, pool-games ]
    private $table; // Table-object
+   private $choice_form = null; // Form-object
 
-   public function __construct( $page, $arr_pool_sum )
+   public function __construct( $page, $arr_pool_sum, $choice_form=null )
    {
       $this->pool_summary = $arr_pool_sum;
+      $this->choice_form = $choice_form;
 
       $pstable = new Table( 'TPoolSummary', $page, null, 'ps',
          TABLE_NO_SORT|TABLE_NO_HIDE|TABLE_NO_PAGE|TABLE_NO_SIZE );
 
       // add_tablehead($nr, $descr, $attbs=null, $mode=TABLE_NO_HIDE|TABLE_NO_SORT, $sortx='')
+      if ( $this->choice_form )
+         $pstable->add_tablehead( 5, T_('Choice#header'), 'Mark' );
       $pstable->add_tablehead( 1, T_('Pool'), 'Number' );
       $pstable->add_tablehead( 2, T_('Size#header'), 'Number' );
       $pstable->add_tablehead( 3, T_('#Games#header'), 'Number' );
+      if ( $this->choice_form )
+         $pstable->add_tablehead( 6, T_('#Started Games#header'), 'Number' );
       $pstable->add_tablehead( 4, T_('Pool Errors#header'), 'Note' );
       $this->table = $pstable;
    }
@@ -677,14 +684,14 @@ class PoolSummary
    public function make_table_pool_summary()
    {
       ksort($this->pool_summary);
-      $cnt_users = 0;
-      $cnt_games = 0;
+      $cnt_users = $cnt_games = $cnt_started_games = 0;
       foreach ( $this->pool_summary as $pool => $arr )
       {
-         list( $pool_usercount, $errors, $pool_games ) = $arr;
+         list( $pool_usercount, $errors, $pool_games, $pool_started_games ) = $arr;
          $cnt_errors = count($errors);
          $cnt_users += $pool_usercount;
          $cnt_games += $pool_games;
+         $cnt_started_games += $pool_started_games;
 
          $row_arr = array(
             1 => $pool,
@@ -692,34 +699,50 @@ class PoolSummary
             3 => $pool_games,
             4 => ( $cnt_errors ? implode(', ', $errors ) : T_('OK') ),
          );
+         if ( $this->choice_form )
+         {
+            $key = "p$pool";
+            $row_arr[5] = $this->choice_form->print_insert_checkbox( $key, '1', '', @$_REQUEST[$key],
+               array( 'title' => T_('Select pool for starting tournament games')) );
+            $row_arr[6] = ( $pool_games != $pool_started_games ) ? span('Emphasize', $pool_started_games) : $pool_started_games;
+         }
          if ( $cnt_errors )
             $row_arr['extra_class'] = 'Violation';
          $this->table->add_row( $row_arr );
       }
 
       // summary row
-      $this->table->add_row( array(
+      $row_arr = array(
             2 => $cnt_users,
             3 => $cnt_games,
             4 => T_('Sum'),
-            'extra_class' => 'Sum', ));
+            'extra_class' => 'Sum',
+         );
+      if ( $this->choice_form )
+      {
+         $row_arr[1] = T_('All');
+         $row_arr[5] = $this->choice_form->print_insert_checkbox( 'pall', '1', '', @$_REQUEST['pall'],
+               array( 'title' => T_('Starting tournament games for ALL pools')) );
+         $row_arr[6] = ( $cnt_games != $cnt_started_games ) ? span('Emphasize', $cnt_started_games) : $cnt_started_games;
+      }
+      $this->table->add_row( $row_arr );
 
       return $this->table;
    }//make_table_pool_summary
 
-   /*! \brief returns arr( pools-count, user-count, games-count ). */
+   /*! \brief returns arr( pools-count, user-count, games-count, started-games-count ). */
    public function get_counts()
    {
-      $cnt_users = 0;
-      $cnt_games = 0;
+      $cnt_users = $cnt_games = $cnt_started_games = 0;
       foreach ( $this->pool_summary as $pool => $arr )
       {
-         list( $pool_usercount, $errors, $pool_games ) = $arr;
+         list( $pool_usercount, $errors, $pool_games, $pool_started_games ) = $arr;
          $cnt_users += $pool_usercount;
          $cnt_games += $pool_games;
+         $cnt_started_games += $pool_started_games;
       }
 
-      return array( count($this->pool_summary), $cnt_users, $cnt_games );
+      return array( count($this->pool_summary), $cnt_users, $cnt_games, $cnt_started_games );
    }//get_counts
 
 } // end of 'PoolSummary'

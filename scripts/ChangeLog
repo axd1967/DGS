@@ -11,6 +11,28 @@ Release [2013-08-11] - DGS 1.0.16 - tag [release-1_0_16-20130811] on (later) bra
 ChangeLog
 ------------------------------------------------------------------
 
+2014-03-25 jug
+
+   * tournaments/include/tournament_round_helper.php (TRR_START_TGAMES_LOCK_HOURS;
+       TournamentRoundHelper.start_tournament_round_games, ~.start_games_for_specificed_pools),
+     tournaments/include/tournament_pool_classes.php (PoolTables.calc_pool_summary;
+       class PoolSummary, ~.__construct, ~.make_table_pool_summary, ~.get_counts),
+     tournaments/include/tournament_log_helper.php (TournamentLogHelper.log_start_tournament_games),
+     tournaments/include/tournament_extension.php (TournamentExtension.getExtensionLock),
+     tournaments/include/tournament_pool.php (TournamentPool.check_pools),
+     include/globals.php (CSS_VERSION),
+     skins/dragon/screen.css,
+     tournaments/roundrobin/edit_pairing.php:
+   - round-robins edit-pairing:
+     - handle partial starting of tournament games for selected pools
+     - collect all inconsistencies at once when starting games for pools
+     - switch tournament-round-status to PLAY only if all games for all pools have been started
+     - added number of started games in pool-summary
+     - show progress on starting games in smaller steps 25 -> 10
+     - adding 3-hour expire-check on starting-games-lock on using tournament-extension
+     - adjusted writing of tournament-log for partial starting of games
+     - bugfix: release start-games-lock when return errors after finding inconsistencies
+
 2014-03-24 jug
 
    * include/game_functions.php (GameHelper.load_cache_status_games;
