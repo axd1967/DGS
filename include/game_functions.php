@@ -286,6 +286,7 @@ class GameAddTime
          return false;
 
       // must be one of my games (to give time to my opponent)
+      // NOTE: that means adding-time for MPGs is only possible, if user is on turn stored in Black_ID or White_ID
       if ( $game_row['White_ID'] != $uid && $game_row['Black_ID'] != $uid )
          return false;
 
