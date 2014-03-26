@@ -13,6 +13,9 @@ ChangeLog
 
 2014-03-26 jug
 
+   * tournaments/roundrobin/view_pools.php:
+   - view-pools: show pools-count in round-summary-line
+
    * tournaments/view_tournament.php:
    - show start-round of tournament-participant in tournament-status-section
 
