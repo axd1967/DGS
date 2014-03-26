@@ -518,7 +518,6 @@ class TournamentCache
       $load_opts = TPOOL_LOADOPT_USER | ( $need_trating ? TPOOL_LOADOPT_TRATING : 0 );
       $tpool_iterator = new ListIterator( $dbgmsg );
 
-      $use_cache = true;
       if ( $use_cache )
          $arr_tpools = DgsCache::fetch( $dbgmsg, CACHE_GRP_TPOOLS, $key );
       else
