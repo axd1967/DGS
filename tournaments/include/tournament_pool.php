@@ -461,7 +461,7 @@ class TournamentPool
     * \return orow: array( 'uid' => X, 'Pool' => Y, 'X_HasPool' => 0|1 (0=TP without pool-entry) ).
     * \note TPool returned is incomplete, so don't update() from that object
     */
-   public static function load_tournament_participants_with_pools( $iterator, $tid, $round, $only_pools=false )
+   private static function load_tournament_participants_with_pools( $iterator, $tid, $round, $only_pools=false )
    {
       if ( $only_pools )
       {
