@@ -304,7 +304,7 @@ class TournamentPool
       $round = (int)$round;
 
       $result = db_query( "TournamentPool:count_tournament_pool_ranks($tid,$round)",
-         "SELECT Rank, COUNT(*) AS X_Count FROM TournamentPool " .
+         "SELECT SQL_SMALL_RESULT Rank, COUNT(*) AS X_Count FROM TournamentPool " .
          "WHERE tid=$tid AND Round=$round GROUP BY Rank" );
 
       $arr = array();
@@ -852,6 +852,7 @@ class TournamentPool
       $round_id = $tround->ID;
 
       $qsql = new QuerySQL(
+         SQLP_OPTS, 'SQL_SMALL_RESULT',
          SQLP_FIELDS, 'Pool', 'COUNT(*) AS X_Count_TGames', 'SUM(IF(ISNULL(G.ID),0,1)) AS X_Count_Games',
          SQLP_FROM, 'TournamentGames AS TG', 'LEFT JOIN Games as G ON G.ID=TG.gid',
          SQLP_WHERE, "TG.tid=$tid", "TG.Round_ID=$round_id",

@@ -546,7 +546,8 @@ class UserRegistration
                   VFY_TYPE_EMAIL_CHANGE => 0,
                );
             $result = db_query( $dbgmsg."UserReg.remove_verification.count_types($vfy_id)",
-               "SELECT VType, COUNT(*) AS X_Count FROM Verification WHERE uid=$my_id AND Verified=0 GROUP BY VType" );
+               "SELECT SQL_SMALL_RESULT VType, COUNT(*) AS X_Count " .
+               "FROM Verification WHERE uid=$my_id AND Verified=0 GROUP BY VType" );
             while ( $row = mysql_fetch_assoc($result) )
                $arr[$row['VType']] = (int)$row['X_Count'];
             mysql_free_result($result);

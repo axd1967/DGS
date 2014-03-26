@@ -134,8 +134,8 @@ function fill_sql_template( $tmpl, $op, $val )
   * supported: sub-clauses (though those are since mysql4.1).
   *
   * SQL-parts of type:
-  *    SQLP_OPTS: [DISTINCT] [STRAIGHT_JOIN] [SQL_BIG_RESULT] [SQL_BUFFER_RESULT] [SQL_CACHE | SQL_NO_CACHE]
-  *               [SQL_CALC_FOUND_ROWS]
+  *    SQLP_OPTS: [DISTINCT] [STRAIGHT_JOIN] [SQL_SMALL_RESULT | SQL_BIG_RESULT] [SQL_BUFFER_RESULT]
+  *               [SQL_CACHE | SQL_NO_CACHE] [SQL_CALC_FOUND_ROWS]
   *    SQLP_GROUP, SQLP_LIMIT: can be only set once with same value
   *    SQLP_FIELDS, SQLP_FIELDS: mandatory
   *    SQLP_FNAMES, SQLP_WHERETMPL are not directly included for query, but fieldnames to be used for Filters

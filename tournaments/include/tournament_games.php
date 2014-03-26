@@ -404,6 +404,7 @@ class TournamentGames
 
       if ( $pool_group ) // group by Pool, Status
       {
+         $qsql->add_part( SQLP_OPTS, 'SQL_SMALL_RESULT' );
          $qsql->add_part( SQLP_FIELDS, 'Pool', 'Status' );
          $qsql->add_part( SQLP_GROUP, 'Pool', 'Status' );
          $result = db_query( "TournamentGames:count_tournament_games.group($tid,$round_id)", $qsql->get_select() );

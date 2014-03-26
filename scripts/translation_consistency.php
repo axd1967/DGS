@@ -361,7 +361,7 @@ function check_consistency_transl( $commit )
    // check that all Translations.Language_ID exists
    echo BRLF, "Checking FK Translations.Language_ID ...", BRLF;
    $result = db_query("$dbgmsg.check.FK.T.Language_ID",
-      "SELECT T.Language_ID, COUNT(*) AS X_Count " .
+      "SELECT SQL_SMALL_RESULT T.Language_ID, COUNT(*) AS X_Count " .
       "FROM Translations AS T " .
          "LEFT JOIN TranslationLanguages AS TL ON TL.ID=T.Language_ID " .
       "WHERE TL.ID IS NULL " .
@@ -380,7 +380,7 @@ function check_consistency_transl( $commit )
    // check that all Translations.Original_ID exists
    echo BRLF, "Checking FK Translations.Original_ID ...", BRLF;
    $result = db_query("$dbgmsg.check.FK.T.Original_ID",
-      "SELECT T.Original_ID, COUNT(*) AS X_Count " .
+      "SELECT SQL_SMALL_RESULT T.Original_ID, COUNT(*) AS X_Count " .
       "FROM Translations AS T " .
          "LEFT JOIN TranslationTexts AS TT ON TT.ID=T.Original_ID " .
       "WHERE TT.ID IS NULL " .
@@ -436,7 +436,7 @@ function check_consistency_transl( $commit )
       // fix remaining Translations.Updated with latest date for specific language
       echo BRLF, "Fixing Translations.Updated from other Translations ...", BRLF;
       $result = db_query("$dbgmsg.check.T.Updated.3",
-         "SELECT T.Language_ID, UNIX_TIMESTAMP(MAX(T.Updated)) AS X_Updated " .
+         "SELECT SQL_SMALL_RESULT T.Language_ID, UNIX_TIMESTAMP(MAX(T.Updated)) AS X_Updated " .
          "FROM Translations AS T " .
          "WHERE T.Updated > 0 " .
          "GROUP BY T.Language_ID" );
@@ -453,7 +453,8 @@ function check_consistency_transl( $commit )
       // fix remaining Translations.Updated with current or latest Translationlog-date for remaining languages
       echo BRLF, "Fixing remaining Translations.Updated ...", BRLF;
       $result = db_query("$dbgmsg.check.T.Updated.5",
-         "SELECT T.Language_ID, COUNT(*) AS X_Count FROM Translations AS T WHERE T.Updated=0 GROUP BY T.Language_ID" );
+         "SELECT SQL_SMALL_RESULT T.Language_ID, COUNT(*) AS X_Count " .
+         "FROM Translations AS T WHERE T.Updated=0 GROUP BY T.Language_ID" );
       while ( $row = mysql_fetch_assoc($result) )
       {
          $lang_id = $row['Language_ID'];

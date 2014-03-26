@@ -247,7 +247,7 @@ abstract class TournamentTemplateRoundRobin extends TournamentTemplate
          $round = (int)$tround->Round;
 
          $result = db_query( "TournamentTemplateRoundRobin.check_auto_poolwinners.miss_auto($tid,$round)",
-            "SELECT DISTINCT Pool FROM TournamentPool " .
+            "SELECT SQL_SMALL_RESULT DISTINCT Pool FROM TournamentPool " .
             "WHERE tid=$tid AND Round=$round AND Rank >= -{$tround->PoolWinnerRanks} AND Rank < 0" );
          $arr = array();
          while ( $row = mysql_fetch_assoc($result) )

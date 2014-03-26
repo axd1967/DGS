@@ -91,7 +91,7 @@ function count_translations()
 {
    $result = array();
    $db_result = db_query( "transl_stats.count_translations",
-      "SELECT TL.Name AS Lang, COUNT(*) AS X_Count " .
+      "SELECT SQL_SMALL_RESULT TL.Name AS Lang, COUNT(*) AS X_Count " .
       "FROM Translations AS T " .
          "INNER JOIN TranslationLanguages AS TL ON TL.ID=T.Language_ID " .
       "GROUP BY T.Language_ID " .

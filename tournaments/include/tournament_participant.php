@@ -362,7 +362,6 @@ class TournamentParticipant
    public static function count_tournament_participants( $tid, $tp_status, $round, $use_next_round )
    {
       $qsql = new QuerySQL(
-         SQLP_OPTS,   'SQL_SMALL_RESULT',
          SQLP_FIELDS, 'COUNT(*) AS X_Count',
          SQLP_FROM,   'TournamentParticipant',
          SQLP_WHERE,  "tid=$tid" );

@@ -129,7 +129,7 @@ function fix_tournament_RegisteredTP( $tid, $do_it )
 
    // note: join slightly faster than using subquery: Posts where User_ID not in (select ID from Players)
    $result = db_query( "tournament_consistency.fix_tournament_RegisteredTP($tid)",
-      "SELECT TP.tid, T.RegisteredTP, COUNT(*) AS X_Count " .
+      "SELECT SQL_SMALL_RESULT TP.tid, T.RegisteredTP, COUNT(*) AS X_Count " .
       "FROM TournamentParticipant AS TP INNER JOIN Tournament AS T ON T.ID=TP.tid " .
       "WHERE TP.Status='".TP_STATUS_REGISTER."' " . tid_clause('TP.tid', $tid) .
       "GROUP BY TP.tid HAVING T.RegisteredTP <> X_Count" );
