@@ -379,6 +379,9 @@ $GLOBALS['ThePage'] = new Page('GamesList');
  * GamesNotes (FU+RU) AS GN:
  *   ID, gid, uid, Hidden, Notes
  *
+ * Tournament (OB+FU+RU+FA+RA) AS T:
+ *   T_Title
+ *
  * TournamentGames (OB+FU+RU+FA+RA) AS TG:
  *   Status
  *
@@ -430,7 +433,7 @@ $GLOBALS['ThePage'] = new Page('GamesList');
  * 29: >  OB+FA+RA (White-StartRating)
  * 30: >  FA (White-EndRating)
  * 31: >  FA (White-RatingDiff)
- * 32:    (Link to game-info page, shape-game-info, tournament-info, admin-T-game)
+ * 32:    [ID; ShapeID/Snapshot/ShapeSnapshot/Size/Last_X/Last_Y, tid/T_Title/TG_Status] (Link to game-info page, shape-game-info, tournament-info, admin-T-game)
  * 33: >  FU+RU [Notes AS X_Note] (Notes)
  * 34: >  OA [X_ObsCount] (Observer-count)
  * 35: >  OA [X_MeObserved] (My-Games-observed?)
