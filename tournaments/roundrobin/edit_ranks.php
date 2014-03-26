@@ -142,7 +142,11 @@ $GLOBALS['ThePage'] = new Page('TournamentRankEditor');
          $upd_count = TournamentPool::update_tournament_pool_ranks( $tid, $allow_edit_tourney, 'edit_ranks',
             $tpool_user->ID, $rank_value, /*fix-rank*/true );
          if ( $upd_count > 0 )
+         {
             $tpool_user->Rank = $rank_value;
+            TournamentPool::delete_cache_tournament_pools( "Tournament.edit_ranks.set_rank_user1($tid,$round)",
+               $tid, $round );
+         }
       }
 
       if ( $show_stats || @$_REQUEST['t_exec'] || @$_REQUEST['t_userexec'] || @$_REQUEST['t_setrank'] )

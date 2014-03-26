@@ -30,6 +30,7 @@ require_once 'tournaments/include/tournament_ladder_props.php';
 require_once 'tournaments/include/tournament_news.php';
 require_once 'tournaments/include/tournament_participant.php';
 require_once 'tournaments/include/tournament_points.php';
+require_once 'tournaments/include/tournament_pool.php';
 require_once 'tournaments/include/tournament_properties.php';
 require_once 'tournaments/include/tournament_result.php';
 require_once 'tournaments/include/tournament_round.php';
@@ -501,6 +502,47 @@ class TournamentCache
 
       return $tpoints;
    }//load_cache_tournament_points
+
+   /*!
+    * \brief Loads and caches TournamentPools for given tournament-id and round.
+    * \param $use_cache false = bypass cache and do not store data in cache; true = use cache
+    * \note IMPORTANT NOTE: keep in sync with TournamentPool::load_tournament_pools()
+    */
+   public static function load_cache_tournament_pools( $dbgmsg, $tid, $round, $need_trating, $use_cache )
+   {
+      $tid = (int)$tid;
+      $dbgmsg .= ".TCache:load_cache_tpools($tid,$round,$need_trating,$use_cache)";
+      $key = "TPools.$tid.$round." . ($need_trating ? 1 : 0);
+      $group_id = "TPools.$tid.$round";
+
+      $load_opts = TPOOL_LOADOPT_USER | ( $need_trating ? TPOOL_LOADOPT_TRATING : 0 );
+      $tpool_iterator = new ListIterator( $dbgmsg );
+
+      $use_cache = true;
+      if ( $use_cache )
+         $arr_tpools = DgsCache::fetch( $dbgmsg, CACHE_GRP_TPOOLS, $key );
+      else
+         $arr_tpools = null;
+      if ( is_null($arr_tpools) )
+      {
+         $tpool_iterator = TournamentPool::load_tournament_pools( $tpool_iterator, $tid, $round, 0, $load_opts );
+
+         if ( $use_cache )
+            DgsCache::store( $dbgmsg, CACHE_GRP_TPOOLS, $key, $tpool_iterator->getItemRows(), SECS_PER_HOUR, $group_id );
+      }
+      else // transform cache-stored row-arr into ListIterator of TournamentPool
+      {
+         $tpool_iterator->addIndex( 'uid' );
+         foreach ( $arr_tpools as $row )
+         {
+            $tpool = TournamentPool::new_tournament_pool_from_cache_row( $row, $load_opts );
+            $tpool_iterator->addItem( $tpool, $row );
+         }
+         $tpool_iterator->setResultRows( $tpool_iterator->getItemCount() );
+      }
+
+      return $tpool_iterator;
+   }//load_cache_tournament_pools
 
 } // end of 'TournamentCache'
 ?>

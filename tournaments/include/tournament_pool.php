@@ -382,13 +382,13 @@ class TournamentPool
     * \param $pool 0 = load all pools, otherwise load specific pool or pools if array of pools
     * \param $load_opts see options TPOOL_LOADOPT_...
     * \return uid-indexed iterator with items: TournamentPool + .User + .User.urow[TP_X_RegisterTime|TP_Rating]
+    *
+    * \note IMPORTANT NOTE: keep in sync with TournamentCache::load_cache_tournament_pools()
     */
    public static function load_tournament_pools( $iterator, $tid, $round, $pool=0, $load_opts=0 )
    {
-      $needs_user = ( $load_opts & TPOOL_LOADOPT_USER );
       $needs_tp = ( $load_opts & (TPOOL_LOADOPT_TP_ID|TPOOL_LOADOPT_TRATING|TPOOL_LOADOPT_REGTIME) );
       $needs_tp_rating = ( $load_opts & TPOOL_LOADOPT_TRATING );
-      $has_userdata = $needs_user || $needs_tp;
 
       $qsql = self::build_query_sql( $tid, $round, $pool );
       if ( $load_opts & TPOOL_LOADOPT_USER )
@@ -437,23 +437,35 @@ class TournamentPool
       $iterator->clearItems();
       while ( $row = mysql_fetch_array( $result ) )
       {
-         $tpool = self::new_from_row( $row );
-         if ( $has_userdata )
-         {
-            $user = User::new_from_row( $row, 'TPU_', /*urow-strip-prefix*/true );
-            $user->urow['TP_ID'] = (int)@$row['TP_ID'];
-            $user->urow['TP_X_RegisterTime'] = (int)@$row['TP_X_RegisterTime'];
-            $user->urow['TP_Rating'] = (float)@$row['TP_Rating'];
-            if ( $load_opts & TPOOL_LOADOPT_UROW_RATING ) // User- or TP-rating dependent on load-opts TPOOL_LOADOPT_TRATING
-               $user->urow['Rating2'] = $user->urow['TP_Rating'];
-            $tpool->User = $user;
-         }
+         $tpool = self::new_tournament_pool_from_cache_row( $row, $load_opts );
          $iterator->addItem( $tpool, $row );
       }
       mysql_free_result($result);
 
       return $iterator;
    }//load_tournament_pools
+
+   /*!
+    * \brief Creates TournamentPool-object from row loaded by load_tournament_pools() to be placed in ListIterator.
+    * \note only used internally for load_tournament_pools() and TournamentCache::load_cache_tournament_pools().
+    */
+   public static function new_tournament_pool_from_cache_row( $row, $load_opts )
+   {
+      $has_user_data = ( $load_opts & (TPOOL_LOADOPT_USER | TPOOL_LOADOPT_TP_ID|TPOOL_LOADOPT_TRATING|TPOOL_LOADOPT_REGTIME) );
+
+      $tpool = self::new_from_row( $row );
+      if ( $has_user_data )
+      {
+         $user = User::new_from_row( $row, 'TPU_', /*urow-strip-prefix*/true );
+         $user->urow['TP_ID'] = (int)@$row['TP_ID'];
+         $user->urow['TP_X_RegisterTime'] = (int)@$row['TP_X_RegisterTime'];
+         $user->urow['TP_Rating'] = (float)@$row['TP_Rating'];
+         if ( $load_opts & TPOOL_LOADOPT_UROW_RATING ) // User- or TP-rating dependent on load-opts TPOOL_LOADOPT_TRATING
+            $user->urow['Rating2'] = $user->urow['TP_Rating'];
+         $tpool->User = $user;
+      }
+      return $tpool;
+   }//new_tournament_pool_from_cache_row
 
    /*!
     * \brief Returns ListIterator of tournament-participants with NextRound=$round with array-items:
@@ -517,8 +529,9 @@ class TournamentPool
       $query = "DELETE FROM TournamentPool WHERE tid=$tid AND Round=$round";
       $result = db_query( "TournamentPool:delete_pools($tid,$round)", $query );
       TournamentLogHelper::log_delete_pools( $tid, $tlog_type, $round, mysql_affected_rows(), $result );
+      self::delete_cache_tournament_pools( "TournamentPool:delete_pools($tid,$round)", $tid, $round );
       return $result;
-   }
+   }//delete_pools
 
    /*! \brief Seeds pools with all registered TPs for round. */
    public static function seed_pools( $tlog_type, $tid, $tprops, $tround, $seed_order, $slice_mode )
@@ -541,7 +554,6 @@ class TournamentPool
       // load already joined pool-users
       $tpool_iterator = new ListIterator( "TournamentPool:seed_pools.load_pools($tid,$round)" );
       $tpool_iterator->addIndex( 'uid' );
-      $tpool_iterator->addQuerySQLMerge( new QuerySQL( SQLP_WHERE,  "TPOOL.Round=$round" ));
       $tpool_iterator = self::load_tournament_pools( $tpool_iterator, $tid, $round );
 
       // find all registered TPs (optimized)
@@ -601,6 +613,8 @@ class TournamentPool
       TournamentLogHelper::log_seed_pools( $tid, $tlog_type, $round,
          "seed_order=$seed_order, slice_mode=$slice_mode", $cnt, count($arr_pools), $result );
 
+      self::delete_cache_tournament_pools( "TournamentPool:seed_pools($tid,$round)", $tid, $round );
+
       return $result;
    }//seed_pools
 
@@ -617,7 +631,6 @@ class TournamentPool
       // load already joined pool-users
       $tpool_iterator = new ListIterator( "TournamentPool:add_missing_registered_users.load_pools($tid,$round)" );
       $tpool_iterator->addIndex( 'uid' );
-      $tpool_iterator->addQuerySQLMerge( new QuerySQL( SQLP_WHERE,  "TPOOL.Round=$round" ));
       $tpool_iterator = self::load_tournament_pools( $tpool_iterator, $tid, $round );
 
       // find all registered TPs (optimized = no seed-order)
@@ -691,8 +704,14 @@ class TournamentPool
       // assign new pool for given users
       $result = db_query( "TournamentPool:assign_pool.update($tid,$round,$pool)",
          "UPDATE TournamentPool SET Pool=$pool WHERE tid=$tid AND Round=$round AND uid IN ($uid_where) LIMIT $cnt" );
+      $upd_count = mysql_affected_rows();
+
       TournamentLogHelper::log_assign_tournament_pool( $tid, $tlog_type, $tround, $arr_old_pools, $arr_uid, $pool );
-      return $result;
+
+      if ( $upd_count > 0 )
+         self::delete_cache_tournament_pools( "TournamentPool:assign_pool($tid,$round,$pool)", $tid, $round );
+
+      return $upd_count;
    }//assign_pool
 
    /*!
@@ -873,6 +892,8 @@ class TournamentPool
     * \param $fix_rank if true, no update-restriction on Rank;
     *        otherwise expect Rank<TPOOLRK_RANK_ZONE to auto-fill rank
     * \return number of updated entries
+    *
+    * \note tournament-pool cache for cache-group CACHE_GRP_TPOOLS is NOT invalidated! must be done at calling side.
     */
    public static function update_tournament_pool_ranks( $tid, $tlog_type, $tlog_ref, $tpool_id, $rank, $fix_rank=false )
    {
@@ -902,6 +923,7 @@ class TournamentPool
       $upd_count = mysql_affected_rows();
 
       TournamentLogHelper::log_set_tournament_pool_ranks( $tid, $tlog_type, $tlog_ref, $tpool_id, $rank, $fix_rank, $upd_count );
+
       return $upd_count;
    }//update_tournament_pool_ranks
 
@@ -924,7 +946,13 @@ class TournamentPool
          "UPDATE TournamentPool SET Rank=ABS(Rank) " .
          "WHERE tid=$tid AND Round=$round AND Rank < 0 AND Rank >= ".TPOOLRK_RANK_ZONE . // rank safety-checks
             " AND Rank >= -$poolwinner_ranks" );
-      return mysql_affected_rows();
+      $upd_count = mysql_affected_rows();
+
+      if ( $upd_count > 0 )
+         self::delete_cache_tournament_pools( "TournamentPool:update_tournament_pool_set_pool_winners($tid,$round)",
+            $tid, $round );
+
+      return $upd_count;
    }//update_tournament_pool_set_pool_winners
 
    /*!
@@ -1031,6 +1059,10 @@ class TournamentPool
 
       TournamentLogHelper::log_execute_tournament_pool_rank_action( $tid, $tlog_type, $round,
          $action, $uid, $rank_from, $rank_to, $pool, $upd_count );
+
+      if ( $upd_count > 0 )
+         self::delete_cache_tournament_pools( "TournamentPool:execute_rank_action($tid,$round)", $tid, $round );
+
       return $upd_count;
    }//execute_rank_action
 
@@ -1103,6 +1135,11 @@ class TournamentPool
    {
       static $statuslist = array( TOURNEY_STATUS_PAIR );
       return $statuslist;
+   }
+
+   public static function delete_cache_tournament_pools( $dbgmsg, $tid, $round )
+   {
+      DgsCache::delete_group( $dbgmsg, CACHE_GRP_TPOOLS, "TPools.$tid.$round" );
    }
 
 } // end of 'TournamentPool'

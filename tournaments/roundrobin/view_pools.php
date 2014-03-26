@@ -82,15 +82,18 @@ $GLOBALS['ThePage'] = new Page('TournamentPoolView');
    $errors = $tstatus->check_view_status( TournamentHelper::get_view_data_status($allow_edit_tourney) );
    $allow_view = ( count($errors) == 0 );
 
+   // no caching for directors, and only for T-status on PLAY/CLOSED, and if there are >4 pools
+   $use_pool_cache = !$allow_edit_tourney && ($tround->Pools > 4)
+      && in_array($tourney->Status, TournamentHelper::get_view_data_status());
+
    if ( $allow_view )
    {
       $tprops = TournamentCache::load_cache_tournament_properties( 'Tournament.pool_view', $tid );
       $need_trating = $tprops->need_rating_copy();
       $games_per_challenge = TournamentRoundHelper::determine_games_per_challenge( $tid );
 
-      $tpool_iterator = new ListIterator( 'Tournament.pool_view.load_pools' );
-      $tpool_iterator = TournamentPool::load_tournament_pools( $tpool_iterator, $tid, $round, 0,
-         TPOOL_LOADOPT_USER | ( $need_trating ? TPOOL_LOADOPT_TRATING : 0 ) );
+      $tpool_iterator = TournamentCache::load_cache_tournament_pools( 'Tournament.pool_view.load_pools',
+         $tid, $round, $need_trating, $use_pool_cache );
       $poolTables = new PoolTables( $tround->Pools );
       $poolTables->fill_pools( $tpool_iterator );
       $count_players = $tpool_iterator->getItemCount();
@@ -139,7 +142,7 @@ $GLOBALS['ThePage'] = new Page('TournamentPoolView');
       }
 
       $poolViewer = new PoolViewer( $tid, $page, $poolTables, $games_per_challenge,
-         ($need_trating ? 0 : PVOPT_NO_TRATING) | ($edit ? PVOPT_EDIT_RANK : 0) );
+         ($need_trating ? 0 : PVOPT_NO_TRATING) | ($edit ? PVOPT_EDIT_RANK : 0) | ($use_pool_cache ? PVOPT_NO_ONLINE : 0) );
       if ( $edit )
          $poolViewer->setEditCallback( 'pool_user_edit_rank' );
       $poolViewer->init_pool_table();

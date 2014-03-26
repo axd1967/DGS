@@ -767,6 +767,7 @@ define('PVOPT_EMPTY_SEL',  0x08); // show "selected" empty-pools (directly calle
 define('PVOPT_NO_TRATING', 0x10); // don't show T-rating (is same as user-rating)
 define('PVOPT_EDIT_COL',   0x20); // add edit-actions table-column for pool-edit
 define('PVOPT_EDIT_RANK',  0x40); // add edit-actions table-column for rank-edit
+define('PVOPT_NO_ONLINE',  0x80); // don't show user-online-icon (may be disabled if pools loaded from cache)
 
 class PoolViewer
 {
@@ -929,6 +930,7 @@ class PoolViewer
          $arr_miss_users = null;
 
       // build crosstable
+      $show_online_icon = !( $this->options & PVOPT_NO_ONLINE );
       $idx = -1;
       foreach ( $arr_users as $uid )
       {
@@ -944,7 +946,7 @@ class PoolViewer
             10 => $tpool->SODOS,
             11 => $tpool->formatRank( /*incl-CalcRank*/true ),
             12 => $tpool->echoRankImage(),
-            13 => echo_user_online_vacation( @$user->urow['OnVacation'], $user->Lastaccess ),
+            13 => echo_user_online_vacation( @$user->urow['OnVacation'], ($show_online_icon ? $user->Lastaccess : 0) ),
             14 => TimeFormat::echo_time_diff( $NOW, $user->Lastaccess, 24, TIMEFMT_SHORT|TIMEFMT_ZERO ),
          );
          if ( $this->table->Is_Column_Displayed[1] )

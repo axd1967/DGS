@@ -76,8 +76,9 @@ define('CACHE_GRP_GAMESGF_COUNT', 30); // 0.5KB/game-id * 30min -> 500 KB
 define('CACHE_GRP_TP_COUNT_ALL', 31); // 0.5KB/tourney * 1h -> 25 KB ?   // TournamentParticipant-all-count
 define('CACHE_GRP_USER_HANDLE', 32); // 2KB/handle * 1h -> 1 MB
 define('CACHE_GRP_TPOINTS', 33);    // 0.5KB/tourney * 1d -> 25 KB ?
+define('CACHE_GRP_TPOOLS', 34);     // 1KB/tourney/user * 1h -> 20 MB ?
 // NOTE: keep as last def and adjust to MAX when adding a new cache-group
-define('MAX_CACHE_GRP', 33);
+define('MAX_CACHE_GRP', 34);
 
 // names for DGS-cache manager
 global $ARR_CACHE_GROUP_NAMES;
@@ -117,6 +118,7 @@ $ARR_CACHE_GROUP_NAMES = array(
       CACHE_GRP_TP_COUNT_ALL   => 'TPCountAll',
       CACHE_GRP_USER_HANDLE    => 'user_hdl',
       CACHE_GRP_TPOINTS        => 'TPoints',
+      CACHE_GRP_TPOOLS         => 'TPools',
    );
 
 // configure cleanup for expired cache-entries (cache-groups not listed uses expire-time of CACHE_GRP_DEFAULT)
@@ -157,6 +159,7 @@ $ARR_CACHE_GROUP_CLEANUP = array(
       CACHE_GRP_TP_COUNT_ALL  => SECS_PER_DAY,
       CACHE_GRP_USER_HANDLE   => SECS_PER_HOUR,
       CACHE_GRP_TPOINTS       => SECS_PER_DAY,
+      CACHE_GRP_TPOOLS        => SECS_PER_HOUR,
    );
 
 ?>

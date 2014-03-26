@@ -100,7 +100,7 @@ $GLOBALS['ThePage'] = new Page('Tournament');
       if ( $my_tp )
       {
          $tt_user_state = NO_VALUE;
-         $tpool = TournamentPool::load_tournament_pool_user( $tid, $tourney->CurrentRound, $my_id );
+         $tpool = TournamentPool::load_tournament_pool_user( $tid, $tourney->CurrentRound, $my_id ); // NOTE: not cached for now
          if ( $tpool && $tpool->Pool > 0 )
          {
             $tt_user_state = sprintf( T_('Rank %s in Pool %s'), $tpool->formatRankText(), $tpool->Pool );

@@ -13,6 +13,28 @@ ChangeLog
 
 2014-03-26 jug
 
+   * tournaments/include/tournament_pool.php (TournamentPool.load_tournament_pools,
+       ~.new_tournament_pool_from_cache_row, ~.delete_pools, ~.seed_pools,
+       ~.add_missing_registered_users, ~.assign_pool, ~.update_tournament_pool_set_pool_winners,
+       ~.execute_rank_action, ~.delete_cache_tournament_pools),
+     tournaments/include/tournament_round_helper.php (TournamentRoundHelper.fill_ranks_tournament_pool),
+     tournaments/include/tournament_cache.php (TournamentCache.load_cache_tournament_pools),
+     tournaments/include/tournament_pool_classes.php (PoolViewer.make_single_pool_table),
+     include/cache_globals.php (CACHE_GRP_TPOOLS, MAX_CACHE_GRP, $ARR_CACHE_GROUP_NAMES,
+       $ARR_CACHE_GROUP_CLEANUP),
+     include/gui_functions.php (echo_user_online_vacation),
+     include/config.php ($DGS_CACHE_GROUPS),
+     scripts/updates/other_changes_1_0_16_to_1_0_17.txt, specs/caching.txt,
+     tournaments/roundrobin/edit_ranks.php, tournaments/roundrobin/view_pools.php,
+     tournaments/view_tournament.php:
+   - added caching for loading tournament-pools on view-pools-page
+     - invalidate tournament-pool-cache on actions: seed-pools, delete-pools, edit-pools,
+       assign-pool, set-pool-winners, fill-pool-ranks, edit-ranks
+     - load cached tournament-pools for view-pools only if there are >4 pools,
+       if tournament-status is PLAY|CLOSED, and if not showing pools for directors
+     - view-pools: show user-online-info with icon only if pool-loading is not cached
+   - cleanup: removed double query-where-parts
+
    * tournaments/roundrobin/view_pools.php:
    - view-pools: show pools-count in round-summary-line
 

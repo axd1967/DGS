@@ -612,7 +612,10 @@ class TournamentRoundHelper
          ta_end();
 
          if ( $count_done )
+         {
             $result[] = sprintf( T_('Pools finished (%s entries updated).#tourney'), $count_done );
+            TournamentPool::delete_cache_tournament_pools( "TRH:fill_ranks_tournament_pool($tid,$round)", $tid, $round );
+         }
       }
 
       return $result;
@@ -636,6 +639,7 @@ class TournamentRoundHelper
 
       if ( $cnt_upd > 0 )
          TournamentLogHelper::log_fill_tournament_pool_winners( $tid, $tlog_type, $tround, $cnt_upd );
+
       return $result;
    }//fill_pool_winners_tournament_pool
 

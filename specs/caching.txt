@@ -717,7 +717,7 @@ See "template" for new cache-group at end of this section.
    - Cache-invalidation is done on adding, changing or deleting a director of
      a tournament.
 
-   - Expire-time of each is 1 day.
+   - Expire-time of each cache-entry is 1 day.
 
 
 * CACHE_GRP_TLPROPS (caching of the 'TournamentLadderProps'-table)
@@ -737,7 +737,7 @@ See "template" for new cache-group at end of this section.
    - Cache-invalidation is done on any change of the respective db-table (except
      for an insert as that is only used for tournament-creation).
 
-   - Expire-time of each is 1 day.
+   - Expire-time of each cache-entry is 1 day.
 
 
 * CACHE_GRP_TROUND
@@ -753,7 +753,7 @@ See "template" for new cache-group at end of this section.
 
    - Cache-invalidation is done on any change of the 'TournamentRound'-table.
 
-   - Expire-time of each is 1 day.
+   - Expire-time of each cache-entry is 1 day.
 
 
 * CACHE_GRP_TNEWS
@@ -769,7 +769,7 @@ See "template" for new cache-group at end of this section.
 
    - Cache-invalidation is done on any change of the 'TournamentNews'-table.
 
-   - Expire-time of each is 1 day.
+   - Expire-time of each cache-entry is 1 day.
 
 
 * CACHE_GRP_TP_COUNT     (caching of the 'TournamentParticipant'-table)
@@ -792,7 +792,7 @@ See "template" for new cache-group at end of this section.
    - Cache-invalidation for both cache-groups is done on any change of the
      'TournamentParticipant'-table.
 
-   - Expire-time of each is 1 hour.
+   - Expire-time of each cache-entry is 1 hour.
 
 
 * CACHE_GRP_TRESULT
@@ -809,7 +809,7 @@ See "template" for new cache-group at end of this section.
 
    - Cache-invalidation is done on any change of the 'TournamentResult'-table.
 
-   - Expire-time of each is 1 day.
+   - Expire-time of cache-entry is 1 day.
 
 
 * CACHE_GRP_GAMES
@@ -825,7 +825,7 @@ See "template" for new cache-group at end of this section.
      negotiation, finishing a game, move-like operations, fix-script for
      time-left (Games.TimeOutDate), removing a user from a ladder-tournament.
 
-   - Expire-time is 10 mins.
+   - Expire-time of cache-entry is 10 mins.
 
 
 * CACHE_GRP_FORUM
@@ -840,7 +840,7 @@ See "template" for new cache-group at end of this section.
      forum-administration (e.g. changing flags, name or description), on posting
      or moderating forum-messages, recalculating and forum-consistency.
 
-   - Expire-time of is 1 day.
+   - Expire-time of of cache-entry is 1 day.
 
 
 * CACHE_GRP_FORUM_NAMES
@@ -852,7 +852,7 @@ See "template" for new cache-group at end of this section.
    - Cache-invalidation is done whenever an admin changes the forum-names or
      their order in the 'Forums'-table.
 
-   - Expire-time of is 1 day.
+   - Expire-time of of cache-entry is 1 day.
 
 
 * CACHE_GRP_GAMELIST_STATUS
@@ -918,7 +918,7 @@ See "template" for new cache-group at end of this section.
 
      The single global cache-entry is only updated (not deleted normally).
 
-   - Expire-time of each is 1 day.
+   - Expire-time of cache-entry is 1 day.
 
 
 * CACHE_GRP_MSGLIST
@@ -933,7 +933,7 @@ See "template" for new cache-group at end of this section.
    - Cache-invalidation is done on sending a private message, editing folders
      or moving the message into different folders.
 
-   - Expire-time of each is 4 hours (to avoid the needed cache-size grows too big).
+   - Expire-time of cache-entry is 4 hours (to avoid the needed cache-size grows too big).
 
 
 * CACHE_GRP_TGAMES
@@ -962,15 +962,16 @@ See "template" for new cache-group at end of this section.
    - The "TournamentCache"-class is used as wrapper to load cached data for these
      db-tables.
 
-   - Expire-time of a cache-entry is 1 day.
+   - Expire-time of cache-entry is 1 day.
 
 
 * CACHE_GRP_TLADDER
    - Right now there is a ladder-view for ladder-tournaments. With BIG tournaments
      the data to be loaded from the 'TournamentLadder'-table can be quite big as well.
      The full ladder would need to be loaded for every user. For larger tournaments
-     this could easily be around 1000 rows. Therefore it's imperative to try to
-     reduce to reload the same data over and over if it's not changing too often.
+     this could easily be around several hundred rows. Therefore it's imperative
+     to try to reduce to reload the same data over and over if it's not changing
+     too often.
 
      Also on the tournament-info for ladder-tournament the top 5 ladder-standings
      are shown, which is loaded from the same table. So some caching can be
@@ -997,7 +998,35 @@ See "template" for new cache-group at end of this section.
    - The "TournamentCache"-class is used as wrapper to load cached data for these
      db-tables.
 
-   - Expire-time of each is 1 hour.
+   - Expire-time of cache-entry is 1 hour.
+
+
+* CACHE_GRP_TPOOLS
+   - Right now there is a pool-view for round-robin-tournaments. With BIG tournaments
+     the data to be loaded from the 'TournamentPool'-table can be quite big as well.
+     The full pool-view  would need to be loaded for every user. For larger tournaments
+     this could easily be around several hundred rows. Therefore it's imperative
+     to try to reduce to reload the same data over and over if it's not changing
+     too often.
+
+   - A cache-entry for these tables depends on the tournament-ID (tid), tournament-
+     round (Round) and if the tournament-rating is included.
+
+     On the various occasions where a cache-invalidation is needed, not all of
+     the dependent variables are available. So a meta-group is used to collect
+     all related cache-entries for a specific tournament-ID and tournament-round.
+
+   - Cache-invalidation for this cache-group is done on creating and seeding pools,
+     editing the pool-rank of players, filling ranks, setting pool-winners.
+     All of these operations are executed manually by a tournament-director.
+
+     Processing the game-end for the tournament does not change the pool-data,
+     but only the tournament-games, and therefore needs no invalidation.
+
+   - The "TournamentCache"-class is used as wrapper to load cached data for these
+     db-tables.
+
+   - Expire-time of cache-entry is 1 hour.
 
 
 * CACHE_GRP_GAMESGF_COUNT
@@ -1012,7 +1041,7 @@ See "template" for new cache-group at end of this section.
      so there's only a dependency on game-id.
 
    - As the caching is only meant to decrease server-load for the case
-     of browsing the move-history of a game, the expire-time for the cache
+     of browsing the move-history of a game, the expire-time for a cache-entry
      is only 30 minutes.
 
 
@@ -1024,7 +1053,7 @@ See "template" for new cache-group at end of this section.
      identify it independent from the writing.
 
    - Only automatic expire-invalidation is performed as the rating does not
-     change so often.  Current expire-time is 1 hour.
+     change so often.  Current expire-time of cache-entry is 1 hour.
 
 
 * new cache-group CACHE_GRP_ ...
