@@ -13,7 +13,14 @@ ChangeLog
 
 2014-03-25 jug
 
+   * include/globals.php (CSS_VERSION),
+     skins/dragon/screen.css,
+     tournaments/show_tournament_log.php (format_tlog_message):
+   - used fixed width 500px for showing message for tournament-log
+     for better marking of text-search in message
+
    * tournaments/include/tournament_pool_classes.php,
+     include/globals.php (CSS_VERSION),
      skins/dragon/screen.css,
      tournaments/roundrobin/edit_pairing.php, tournaments/roundrobin/edit_ranks.php,
      tournaments/edit_participant.php, tournaments/edit_results.php,

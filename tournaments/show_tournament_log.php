@@ -107,7 +107,7 @@ require_once 'tournaments/include/tournament_log.php';
    $table->add_tablehead( 5, T_('Type#header'), 'Center', TABLE_NO_HIDE|TABLE_NO_SORT, 'Type+');
    $table->add_tablehead( 6, T_('Object#header'), 'Enum', TABLE_NO_HIDE|TABLE_NO_SORT, 'Object+');
    $table->add_tablehead( 7, T_('Action#header'), 'Action', TABLE_NO_HIDE|TABLE_NO_SORT, 'Action+');
-   $table->add_tablehead( 9, T_('Message#header'), 'Text');
+   $table->add_tablehead( 9, T_('Message#header'), 'MsgFixWidth');
    $table->add_tablehead( 4, T_('Action Date#header'), 'Date', TABLE_NO_SORT, 'Date-');
    $table->add_tablehead( 8, T_('Action User#header'), 'User', TABLE_NO_SORT, 'actuid+');
 
@@ -216,7 +216,8 @@ function format_tlog_message( $tlog, $rx_terms )
 {
    global $base_path;
    $msg = make_html_safe( $tlog->Message, false, $rx_terms );
-   $msg = wordwrap( str_replace( "\n", "<br>\n", $msg ), 80, "<br>\n", false );
+   $msg = str_replace( "\n", "<br>\n", $msg );
+   //$msg = wordwrap( $msg, 80, "<br>\n", false ); // not needed if MsgFixWidth-CSS works; allow better marks on msg-search
 
    $msg = preg_replace("/TG#(\\d+)/", anchor($base_path."tournaments/game_admin.php?tid={$tlog->tid}".URI_AMP.'gid=$1', 'TGame #$1'), $msg );
    $msg = preg_replace("/GID#(\\d+)/", anchor($base_path."game.php?gid=\$1", 'Game #$1'), $msg );

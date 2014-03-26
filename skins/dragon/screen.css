@@ -3400,6 +3400,12 @@ form#troundeditorForm table td.FormDescription {
    text-align: right;
 }
 
+table#tournamentlogTable th.MsgFixWidth,
+table#tournamentlogTable td.MsgFixWidth {
+   width: 500px;
+   white-space: normal;
+}
+
 
 /* ------------------------- */
 /* Multi-player-game pages */
