@@ -13,6 +13,9 @@ ChangeLog
 
 2014-03-26 jug
 
+   * tournaments/view_tournament.php:
+   - show start-round of tournament-participant in tournament-status-section
+
    * tournaments/include/tournament_pool.php (TournamentPool.count_tournament_pool_ranks,
        ~.check_pools_game_integrity),
      tournaments/include/tournament_template_round_robin.php (TournamentTemplateRoundRobin.check_auto_poolwinners),

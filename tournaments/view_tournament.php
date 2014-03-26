@@ -202,7 +202,11 @@ $GLOBALS['ThePage'] = new Page('Tournament');
    if ( $tourney->EndTime > 0 )
       $itable->add_sinfo( T_('Tournament ended'), format_translated_date(DATE_FMT6, $tourney->EndTime) );
    if ( $ttype->need_rounds )
+   {
       $itable->add_sinfo( T_('Tournament Round'), $tourney->formatRound() );
+      if ( $my_tp && $my_tp->StartRound > 1 )
+         $itable->add_sinfo( T_('Start Round#tourney'), $my_tp->StartRound );
+   }
    if ( $reg_user_info )
       $itable->add_sinfo( T_('Registration Status#tourney'), span('TUserStatus', $reg_user_info) );
    if ( $my_tp )
