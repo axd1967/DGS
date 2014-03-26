@@ -183,8 +183,7 @@ $GLOBALS['ThePage'] = new Page('TournamentPoolEdit');
       $tpool_iterator = new ListIterator( 'Tournament.pool_edit.load_pools' );
       $tpool_iterator->addQuerySQLMerge(
          new QuerySQL( SQLP_WHERE, 'TPOOL.Pool IN (' . implode(',', $arr_selpool) . ')' ));
-      $tpool_iterator = TournamentPool::load_tournament_pools(
-         $tpool_iterator, $tid, $round, 0, $load_opts_tpool );
+      $tpool_iterator = TournamentPool::load_tournament_pools( $tpool_iterator, $tid, $round, 0, $load_opts_tpool );
 
       $poolTables = new PoolTables( $tround->Pools );
       $poolTables->fill_pools( $tpool_iterator );
