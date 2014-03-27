@@ -1,6 +1,13 @@
 
 -----------
+// added images
+copy /images/no_result.gif
+
+-----------
 # adjust 'include/config-local.php' reflecting changes
 # - extended $DGS_CACHE_GROUPS with CACHE_GRP_TPOINTS for caching tournament-points
 # - extended $DGS_CACHE_GROUPS with CACHE_GRP_TPOOLS for caching tournament-pools
+
+-----------
+# shorten '#'-texts for tournaments, esp. '#Seq-Wins#header' -> '#SW'
 

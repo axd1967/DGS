@@ -242,7 +242,7 @@ define('WROOM_MAX_ENTRIES', 4);
 define('ALLOWED_RULESETS', 'JAPANESE|CHINESE');
 
 // list of supported tournament-types separated by '|'; for list see Type-enum in Tournament-table; ''=disable tournaments
-define('ALLOW_TOURNAMENTS', '');
+define('ALLOW_TOURNAMENTS', 'LADDER|ROUNDROBIN');
 
 // Allow creation of tournaments only to Tournament-Admin (false) or every user (true)
 define('ALLOW_TOURNAMENTS_CREATE_BY_USER', false);

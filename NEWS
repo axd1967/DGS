@@ -3,62 +3,152 @@ Copyright (C) 2001-2014  Erik Ouchterlony, Jens-Uwe Gaspar
 
 %TOC%
 
-#release DGS_1_0_17 [2013-???-??] - DGS 1.0.17  (??)
+#release DGS_1_0_17 [2014-???-??] - DGS 1.0.17  (Round-Robin-Tournaments)
 
    New features and Major changes:
 
-##   * <home tournaments/list_tournaments.php>Tournaments</home>:
-##      * Tournament types: Ladder, Round-Robin
-##
-##      * <home tournaments/wizard.php>Tournament-Wizard</home> to create tournaments:
-##         * Pooled Round-Robin Tournament without restrictions of 'Dragon'-scope (created by Admin only)
-##
-##    * Tournament-type specific pages for Pooled Round-Robin Tournament:
-##       * Allow to register players for higher start rounds
-##       * Tournament Rounds Editor
-##       * Tournament Round Properties Editor for round-robin-specific properties
-##       * Tournament Round Status Editor
-##          * Tournament Round Status: Init, Pool, Pair, Game, Play, Done
-##       * Tournament Round Pool Setup (define pool parameters, add pool, remove pool)
-##       * Tournament Round Pool Manager (seed pools, delete pools, add missing registered users)
-##       * Tournament Round Pool Editor (edit pools)
-##       * Tournament Round Pairing Editor (start games)
-##       * Tournament Round Rank Editor (finishing pools)
-##       * Tournament Pool view page with crosstables
-##          * Tie-Breaker (static): Points, SODOS
+   * <home tournaments/list_tournaments.php>Tournaments</home>:
+      * Tournament types: Round-Robin (new), Ladder (improved)
 
-## * <home game_editor.php>Game-editor</home>:
-##    * added experimental JavaScript-based game-editor using jQuery 1.6.1
-##    * added game-editor in main-menu
-##    * add game-related JavaScript for go-diagrams and game-viewer only on game and forum-read-page
-##    * use user-configured stone-size and wood-color to draw board, smooth-edge not supported
-##
-##    * added tool to create new board on Size-tab
-##    * added tools to edit markers on board on Edit-tab
-##      * added stone-tool to set/clear/toggle black/white stone
-##      * added marker-tool to toggle markers: circle, square, triangle, cross
-##      * added marker-tool to toggle markers: territory black/white/neutral/dame
-##      * added label-tool to toggle letter and stone-numbers on board with auto-increment
-##      * added undo-history-tool to undo goban-changes
-##      * added redo-history-tool to redo goban-changes, clear if varying from next-redo-step
-##    * added tool to play moves in Play-tab
-##      * added playing game-moves with capturing of stones, update last-move-marker
-##      * check for forbidden suicide of played-move
+      * <home tournaments/wizard.php>Tournament-Wizard</home> to create tournaments:
+         * Pooled Round-Robin Tournament without restrictions of 'Dragon'-scope (created by Admin only)
+
+      * General Changes for Tournaments:
+         * Handle game-annulling (to detach game from tournament) having no further effect on tournament
+
+         * <home tournaments/list_tournaments.php>Tournament List</home>:
+            * Show "Open" tournaments as default
+
+         * Tournament Info page:
+            * Show TOP-10 of tournament-results
+            * Added link to showing all tournament results
+         * Added Tournament Result List:
+            * Show all tournament results set automatically or by tournament-director
+            * Show my tournament results
+
+         * Tournament Participants list:
+            * Show "StartRound; NextRound" in Round-column if values are different
+
+      * Tournament Manager to edit and control tournament
+         * Tournament Results Editor (add & update & delete tournament results)
+
+         * Tournament Status Editor:
+            * Added warnings that should be resolved but can be ignored by directors
+            * Added finishing tournament
+
+         * Tournament Game Admin page for tournament-directors to end game:
+            * Added game-annulling (to detach game from tournament without further effect), making game unrated
+            * Added forfeit game (as "bye" in Round-Robin-tournaments), making game unrated
+            * Added no-result game
+
+         * Added link to tournament-participants-list for current round
+
+      * Tournament-type specific pages for Pooled Round-Robin Tournament:
+         * Tournament Info page:
+            * Show start-round of tournament-participant in tournament-status-section
+
+         * Tournament Registration page:
+            * Allow registering with higher start round
+
+         * Tournament Pool view page with crosstables
+            * Added links on top to view pools of other rounds
+            * Show game-results in colored matrix with tooltips (game won, game lost, game draw, game annulled, game no-result)
+            * Show points calculated from players game-results using the tournaments points-configuration
+            * Use static Tie-Breakers (Points, SODOS) to determine pool-user ranks
+
+         * Tournament Points Editor with point-configuration-types (Simple, Hahn-like system) and score-example preview
+         * Tournament Round Status Editor (Init, Pool, Pair, Play, Done)
+         * Tournament Round Editor (view round, start next round)
+            * Restricted adding & removing & switching rounds to tournament-admin
+         * Tournament Round Properties Editor for Round-Robin-specific properties
+         * Tournament Round Pool Setup (define pool parameters, add pool, remove pool)
+         * Tournament Round Pool Manager (seed pools, delete pools, add missing registered users)
+         * Tournament Round Pool Editor (edit pools, assign users to pools)
+         * Tournament Round Pairing Editor (pair users and start their tournament games)
+            * Added partial starting of tournament games for selected pools
+            * Added 3-hour expire-check on lock for starting tournament games
+         * Tournament Round Rank Editor (set pool-winners, change pool-user ranks, withdraw player)
+
+         * Tournament Results Editor (create tournament results from round pool-winners)
+
+   * Ladder-Tournament:
+      * Tournament Ladder view page:
+         * Added "Sequently Wins" and "Best Sequently Wins" in new table-column '#SW' (consecutive wins and jigo counts)
+         * Renamed 'Challenges'-table-column to 'Challenges-In' with incoming challenges
+         * Added table-column with outgoing challenges, hidden per default
+         * Added link on top to jump near own ladder-position
+
+      * Renamed "retreating from ladder" to "withdrawing from ladder"
+      * Clarified game-annulling (="detaching" of tournament-games):
+        annulled game is made unrated and continued as "normal" game
+
+   * Added NO-RESULT as game-end result (synonym is 'void")
+      * Set game-end by NO-RESULT by game-admin or a tournament-director
+      * Change no-result-game to unrated if set by game-admin
+
+      * Show no-result game-result as 'void' as shorter synonym for some pages (SGF-download, quick-suite, score-filter)
+      * Added count of no-result games on opponents-page to differ from Jigo
+      * <home show_games.php>Games list</home>:
+         * Show no-result in 'Win?'-column with <image no_result.gif>-icon
+         * Added tooltips for icons in 'Win?'-column
+
+      * Challenge Rematch-Wait in ladder-tournaments will be skipped if game ended with no-result allowing immediate rematch
+
+   * Added game-score FORFEIT to support a "bye" for Round-Robin-tournaments
+      * Set game-end by FORFEIT by game-admin or a tournament-director
+      * Change forfeit-game to unrated
+
+      * Show forfeit game-result for game-pages, SGF-download, in score-filter and the quick-suite as:
+         * "B+F" or "B+Forfeit" (Black won by forfeit), "W+F" or "W+Forfeit" (White won by forfeit)
+      * Added count of forfeit games on opponents-page
+
+      * Handle game ended by forfeit in ladder-tournaments like a timeout
 
 
    Minor changes:
 
+   * Tournaments:
+      * Game page: Allow adding time for annulled (=detached) tournament-game
+
+      * <home show_games.php>Games list</home>:
+         * Added search for annulled-games in TournamentGames-status-filter in tournament-games-list
+         * Added <image edit.gif>-edit-icons for tournament-directors linked to tournament-game-admin to end tournament-game,
+           but only if game can still be modified
+
+         * Added tournament title in tooltip on <image tourney.gif>-tournament-icon
+         * Show full tournament-title on page top
+
+      * Tournament Registration page: added short description of public user-comment and user-message-box
+
+
    Bug fixes:
+
+   * Fixed removing of public comments on sending game-move-messages in email to user
+   * Fixed various other bugs
+
 
    Code improvements:
 
+   * Shared memory caching using APC cache:
+      * Added caching to load tournament-points, tournament-pools, tournament-results
+
+
    Administrative changes:
+
+   * Changes for Tournament-Admins:
+      * Restricted Tournament Round Editor operations (switch round, add round, delete round), only allowed by tournament-admin
+      * Added script to fix Ladder-tournament sequently wins
+
+   * Changes for Game-Admins:
+      * Added ending of game by FORFEIT for Black or White player, game changed to unrated
+      * Allow change of rated-status also for tournament-game
+      * Added link to game-admin on game-page for easier access
+
 
    Server config:
 
-##      * Added config-switches:
-##         * ALLOW_GAME_EDITOR                 - disabled (needs JavaScript)
-##         * ENABLE_GAME_VIEWER                - disabled (needs JavaScript)
+   * Changed config-switches:
+      * ALLOW_TOURNAMENTS                 - enabled with: LADDER + ROUNDROBIN
 
 
 #release DGS_1_0_16 [2013-Aug-11] - DGS 1.0.16  (Ladder-Tournaments, Game settings, Mail-Activation)
@@ -101,7 +191,7 @@ Copyright (C) 2001-2014  Erik Ouchterlony, Jens-Uwe Gaspar
       * Tournament Directors page showing tournament-owner and tournament-directors
       * Adjusted <home show_games.php>Games page</home> to show only tournament-specific games
          * Added tournament game status, only showing active non-finished tournament-games as default
-         * Added game-role for ladder-tournament: Challenger or Defender
+         * Added game-role for Ladder-tournament: Challenger or Defender
       * Tournament Log page to track tournament-actions performed by admins, owner, directors, cron and users
 
       * Tournament Manager to edit and control tournament

@@ -180,12 +180,12 @@ function itemL($text, $link='', $working=true, $last=false)
                   item(T_('Show my contacts'), "list_contacts.php", false, true);
                } $item_level--;
                item(T_('Show tournament participants'), "tournaments/list_participants.php", false);
-               item(T_('Edit results#tourney'), "tournaments/edit_results.php", false);
-               item(T_('Show all tournament results'), "tournaments/list_results.php", false, true);
+               item(T_('Edit results#tourney'), "tournaments/edit_results.php", false, true);
             } $item_level--;
-            item(T_('Tournament participants'), "tournaments/list_participants.php", false, false);
-            item(T_('Registration#tourney'), "tournaments/register.php", false, false);
-            item(T_('Edit participants'), "tournaments/edit_participant.php", false, true);
+            item(T_('Tournament participants'), "tournaments/list_participants.php", false);
+            item(T_('Registration#tourney'), "tournaments/register.php", false);
+            item(T_('Edit participants'), "tournaments/edit_participant.php", false);
+            item(T_('Show all tournament results'), "tournaments/list_results.php", false, true);
          } $item_level--;
       } $item_level--;
       }
