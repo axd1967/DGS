@@ -7,6 +7,7 @@ copy /images/no_result.gif
 # adjust 'include/config-local.php' reflecting changes
 # - extended $DGS_CACHE_GROUPS with CACHE_GRP_TPOINTS for caching tournament-points
 # - extended $DGS_CACHE_GROUPS with CACHE_GRP_TPOOLS for caching tournament-pools
+# - allow round-robin-tournaments in 'ALLOW_TOURNAMENTS'-config
 
 -----------
 # shorten '#'-texts for tournaments, esp. '#Seq-Wins#header' -> '#SW'
