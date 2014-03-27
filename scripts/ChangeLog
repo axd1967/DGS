@@ -189,8 +189,12 @@ ALTER TABLE TournamentResult
 
    * tournaments/include/tournament_round_helper.php (TournamentRoundHelper.process_tournament_round_robin_game_end),
      tournaments/include/tournament_ladder_helper.php (TournamentLadderHelper.process_tournament_ladder_game_end),
-     specs/db/table-Tournaments.txt:
+     scripts/updates/database_changes_1_0_16_to_1_0_17.mysql, specs/db/table-Tournaments.txt:
    - bugfix: do not count annulled (=detached) tournament-games for TournamentParticipant.Finished
+-----------
+-- execute tournament-consistency-script to fix TournamentParticipant.Finished for annulled tournament-games
+--    'scripts/tournament_consistency.php'
+-----------
 
 2014-03-22 jug
 

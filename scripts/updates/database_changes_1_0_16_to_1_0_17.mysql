@@ -94,3 +94,7 @@ ALTER TABLE TournamentResult
    DROP KEY uid ;
 
 
+-- execute tournament-consistency-script to fix TournamentParticipant.Finished for annulled tournament-games
+--    'scripts/tournament_consistency.php'
+
+
