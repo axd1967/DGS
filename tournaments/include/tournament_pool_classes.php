@@ -832,11 +832,15 @@ class PoolViewer
       $this->table->add_tablehead( 5, T_('Country#header'), 'Image', 0 );
       $this->table->add_tablehead(15, new TableHead( T_('Running tournament games'), 'images/table.gif'), 'Image', 0 );
       $this->table->add_tablehead(13, new TableHead( T_('User online#header'), 'images/online.gif',
-         sprintf( T_('Indicator for being online up to %s mins ago'), SPAN_ONLINE_MINS)
-            . ', ' . T_('or on vacation#header') ), 'Image', 0 );
+         ( $this->options & PVOPT_NO_ONLINE
+            ? T_('Indicator for being on vacation#header')
+            : sprintf( T_('Indicator for being online up to %s mins ago'), SPAN_ONLINE_MINS) . ', ' . T_('or on vacation#header')
+         ), 'Image', 0 ));
       $this->table->add_tablehead(14, T_('Last access#header'), '', 0 );
-      // IMPORTANT NOTE: increase accordingly when adding new columns!!
-      $idx = 15; // last used-static-col
+
+      // IMPORTANT NOTE: don't use higher tablehead-nr after this!!
+      //    or else config-table-cols can't be correctly saved if future table-heads are added.
+      $idx = $this->table->get_max_tablehead_nr(); // last used-static-col
 
       $this->poolidx = $idx;
       if ( !($this->options & PVOPT_NO_RESULT) )
@@ -858,7 +862,7 @@ class PoolViewer
          $this->table->add_tablehead( 7, T_('Points#header'), 'NumberC', TABLE_NO_HIDE );
          $this->table->add_tablehead(10, T_('SODOS#tourney'), 'NumberC', 0 );
          $this->table->add_tablehead(11, T_('Rank#tpool'), 'TRank', TABLE_NO_HIDE );
-         $this->table->add_tablehead(12, '', '', TABLE_NO_HIDE );
+         $this->table->add_tablehead(12, '', '', TABLE_NO_HIDE ); // rank-image
       }
       if ( ($this->options & PVOPT_EDIT_RANK) && !($this->options & PVOPT_EDIT_COL) )
          $this->table->add_tablehead( 8, T_('Edit#header'), 'Image', TABLE_NO_HIDE );

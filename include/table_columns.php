@@ -356,6 +356,11 @@ class Table
          $this->Filters->set_visible($nr, $visible);
    }//add_tablehead
 
+   public function get_max_tablehead_nr()
+   {
+      return max( array_keys( $this->Tableheads ) );
+   }
+
    // \internal
    private function _parse_sort_extension( $dbgmsg, $sort_xtend )
    {
