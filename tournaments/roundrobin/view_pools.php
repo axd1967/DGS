@@ -157,6 +157,8 @@ $GLOBALS['ThePage'] = new Page('TournamentPoolView');
    $menu_array[T_('Tournament info')] = "tournaments/view_tournament.php?tid=$tid";
    if ( $allow_view )
       $menu_array[T_('View Pools')] = "tournaments/roundrobin/view_pools.php?tid=$tid";
+   if ( in_array($tourney->Status, TournamentHelper::get_view_data_status()) )
+      $menu_array[T_('All running games')] = "show_games.php?tid=$tid".URI_AMP."uid=all";
    if ( $allow_edit_tourney )
    {
       if ( $tround->Status == TROUND_STATUS_POOL )

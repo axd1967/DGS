@@ -13,6 +13,9 @@ ChangeLog
 
 2014-03-29 jug
 
+   * tournaments/roundrobin/view_pools.php:
+   - view-pools: added bottom-links to all running tournament-games
+
    * include/globals.php (CSS_VERSION),
      skins/dragon/screen.css, show_games.php:
    - use blue-background on edit-icon to tournament-game-admin to indicate tournament-director-operation
