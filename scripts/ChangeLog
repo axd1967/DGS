@@ -13,6 +13,12 @@ ChangeLog
 
 2014-03-29 jug
 
+   * tournaments/include/tournament_gui_helper.php (TournamentGuiHelper.build_tournament_pool_notes),
+     include/globals.php (CSS_VERSION),
+     skins/dragon/screen.css,
+     tournaments/roundrobin/view_pools.php, tournaments/view_tournament.php:
+   - show point-configuration in tournament-rules section on view-tournament for round-robin-tournaments
+
    * tournaments/include/tournament_round.php (TournamentRound.build_notes_props):
    - bugfix: remove note about withdrawing from round-robin-tournament as that need to be handled
      in different ways by tournament-director

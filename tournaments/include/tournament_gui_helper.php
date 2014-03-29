@@ -21,16 +21,18 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 $TranslateGroups[] = "Tournament";
 
-require_once 'include/table_columns.php';
-require_once 'include/classlib_user.php';
-require_once 'include/std_functions.php';
 require_once 'include/countries.php';
-require_once 'include/rating.php';
-require_once 'include/time_functions.php';
+require_once 'include/classlib_user.php';
 require_once 'include/classlib_userconfig.php';
+require_once 'include/gui_functions.php';
+require_once 'include/rating.php';
+require_once 'include/std_functions.php';
+require_once 'include/table_columns.php';
+require_once 'include/time_functions.php';
 require_once 'tournaments/include/tournament_cache.php';
 require_once 'tournaments/include/tournament_ladder.php';
 require_once 'tournaments/include/tournament_participant.php';
+require_once 'tournaments/include/tournament_points.php';
 require_once 'tournaments/include/tournament_utils.php';
 
 
@@ -139,6 +141,87 @@ class TournamentGuiHelper
 
       return ($reg_user_status) ? T_('Edit my registration#tourney') : T_('Registration#tourney');
    }//getLinkTextRegistration
+
+
+   /*! \brief Returns array with notes about tournament pools. */
+   function build_tournament_pool_notes( $tpoints, $pool_view )
+   {
+      $notes = array();
+
+      $mfmt = MINI_SPACING . '%s' . MINI_SPACING;
+      $sep = ', ' . MED_SPACING;
+      $img_pool_winner = echo_image_tourney_pool_winner();
+      $points_type_text = TournamentPoints::getPointsTypeText($tpoints->PointsType);
+
+      if ( $pool_view )
+      {
+         $notes[] = sprintf( T_('Pools are ranked by Tie-breakers: %s'),
+            implode(', ', array( T_('Points#tourney'), T_('SODOS#tourney') ) ));
+      }
+
+      if ( $pool_view )
+      {
+         $notes[] = array( T_('Pool matrix entries & colors (with link to game)#tpool_table') . ':',
+            sprintf( T_("'%s' = running game, '%s' = no game#tpool"), '#', '-' )
+            . $sep .
+            span('MatrixSelf', T_('self#tpool_table'), $mfmt),
+            span('MatrixWon', T_('game won#tpool_table'), $mfmt)
+            . $sep .
+            span('MatrixWon MatrixForfeit', T_('game won by forfeit#tpool_table'), $mfmt),
+            span('MatrixLost', T_('game lost#tpool_table'), $mfmt)
+            . $sep .
+            span('MatrixLost MatrixForfeit', T_('game lost by forfeit#tpool_table'), $mfmt),
+            span('MatrixDraw', T_('game draw#tpool_table'), $mfmt)
+            . $sep .
+            span('MatrixAnnulled', T_('game annulled#tpool_table'), $mfmt)
+            . $sep .
+            span('MatrixNoResult', T_('game no-result#tpool_table'), $mfmt)
+            );
+
+         $notes[] = sprintf( T_('[%s] in format "wins : losses" = number of wins and losses for user'), T_('#Wins#tourney') );
+         $notes[] = sprintf( T_('[%s] = sum of points calculated from game-results of player'), T_('Points#header') );
+      }
+
+      $arr = array( T_('Points configuration type#tpoints') . ': ' . span('bold', $points_type_text ) );
+      if ( $tpoints->PointsType == TPOINTSTYPE_SIMPLE )
+      {
+         $arr[] = sprintf( T_('game ended by score (>0), resignation or timeout: %s points for winner, %s points for loser#tpool_table'),
+            $tpoints->PointsWon, $tpoints->PointsLost );
+         $arr[] = sprintf( T_('game ended by forfeit: %s points for winner, %s points for loser#tpool_table'),
+            $tpoints->PointsForfeit, $tpoints->PointsLost );
+         $arr[] = sprintf( T_('game ended by draw: %s points for both players#tpool_table'), $tpoints->PointsDraw );
+         $arr[] = sprintf( T_('game ended by no-result: %s points for both players#tpool_table'), $tpoints->PointsNoResult );
+         $arr[] = sprintf( T_('game annulled: %s points#tpool_table'), 0 );
+      }
+      else //TPOINTSTYPE_HAHN
+      {
+         $arr[] = sprintf( T_('game ended by score or draw: %s points for every block of %s score-points#tpool_table'),
+            1, $tpoints->ScoreBlock );
+         $arr[] = sprintf( T_('game ended by resignation (%s points), timeout (%s points), forfeit (%s points), no-result (%s points)#tpool_table'),
+            $tpoints->PointsResignation, $tpoints->PointsTimeout, $tpoints->PointsForfeit, $tpoints->PointsNoResult );
+         $arr[] = sprintf( T_('max. points per game: %s points#tpool_table'), $tpoints->MaxPoints )
+            . ( ($tpoints->Flags & TPOINTS_FLAGS_SHARE_MAX_POINTS) ? $sep . T_('share points for game ended by score or draw#tpool_table') : '' )
+            . ( ($tpoints->Flags & TPOINTS_FLAGS_NEGATIVE_POINTS) ? $sep . T_('negative points allowed#tpool_table') : '' );
+         $arr[] = sprintf( T_('game annulled: %s points#tpool_table'), 0 );
+      }
+      $notes[] = $arr;
+
+      if ( $pool_view )
+      {
+         $notes[] = sprintf( T_('[%s] = Tie-Breaker SODOS = Sum of Defeated Opponents Score'), T_('SODOS#tourney') );
+         $notes[] = array(
+            sprintf( T_('[%s] = Rank of user within one pool (1=Highest rank); Format "R (CR) %s"#tpool'),
+                     T_('Rank#tpool'), $img_pool_winner ),
+            T_('R = (optional) rank set by tournament director, really final only at end of tournament round#tpool'),
+            sprintf( T_('R = \'%s\' = user withdrawing from next round#tpool'), span('bold', NO_VALUE) ),
+            T_('CR = preliminary calculated rank, omitted when it can\'t be calculated or identical to rank R#tpool'),
+            sprintf( T_('%s = marks user as pool winner (to advance to next round, or mark for final result)#tpool'),
+               $img_pool_winner ),
+         );
+      }
+
+      return $notes;
+   }//build_tournament_pool_notes
 
 } // end of 'TournamentGuiHelper'
 

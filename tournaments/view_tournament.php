@@ -81,7 +81,7 @@ $GLOBALS['ThePage'] = new Page('Tournament');
    $trule = TournamentCache::load_cache_tournament_rules( 'Tournament.view_tournament', $tid );
 
    // user result state
-   $tt_props = null; // T-type-specific props
+   $tt_props = $tpoints = null; // T-type-specific props
    $tt_user_state = '';
    if ( $tourney->Type == TOURNEY_TYPE_LADDER )
    {
@@ -96,7 +96,7 @@ $GLOBALS['ThePage'] = new Page('Tournament');
    elseif ( $tourney->Type == TOURNEY_TYPE_ROUND_ROBIN )
    {
       $tt_props = TournamentCache::load_cache_tournament_round( 'Tournament.view_tournament',
-         $tid, $tourney->CurrentRound, /*check*/false );
+         $tid, $tourney->CurrentRound, /*chk*/false );
       if ( $my_tp )
       {
          $tt_user_state = NO_VALUE;
@@ -108,6 +108,8 @@ $GLOBALS['ThePage'] = new Page('Tournament');
                $tt_user_state .= SMALL_SPACING . '+ ' . $tpool->echoRankImage();
          }
       }
+
+      $tpoints = TournamentCache::load_cache_tournament_points( 'Tournament.view_tournament', $tid, /*chk*/false );
    }
 
 
@@ -236,6 +238,12 @@ $GLOBALS['ThePage'] = new Page('Tournament');
    section( 'TournamentRules', T_('Tournament Rules'), 'rules', true );
 
    echo_tournament_rules( $tourney, $trule );
+
+   if ( !is_null($tpoints) )
+   {
+      $notes = TournamentGuiHelper::build_tournament_pool_notes($tpoints, /*pool-view*/false );
+      echo_notes( 'tpointsNotesTable', T_('Tournament Points Configuration'), $notes, /*sep*/false, false );
+   }
 
 
    // --------------- Registration ----------------------------------

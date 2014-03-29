@@ -3391,8 +3391,13 @@ table#PoolViewerTable span.Calc {
    font-weight: normal;
 }
 
+table#tpointsNotesTable ul.SubNotes li,
 table#tpoolnotesTable ul.SubNotes li {
    line-height: 150%;
+}
+
+table#tpointsNotesTable {
+   margin-left: 0px;
 }
 
 span.TRank {
