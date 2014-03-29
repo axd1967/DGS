@@ -673,8 +673,12 @@ $GLOBALS['ThePage'] = new Page('GamesList');
             . echo_image_shapeinfo( $ShapeID, $Size, $ShapeSnapshot, false, true )
             . echo_image_tournament_info($tid, @$T_Title, true);
          if ( $allow_edit_tourney && TournamentGames::is_score_change_allowed(@$TG_Status) )
-            $str .= anchor( $base_path."tournaments/game_admin.php?tid=$tid".URI_AMP."gid=$ID",
-                  image( $base_path.'images/edit.gif', 'E', '', 'class="Action InTextImage TAdmin"' ), T_('Admin tournament game') );
+         {
+            $str .= span('TAdminList',
+               anchor( $base_path."tournaments/game_admin.php?tid=$tid".URI_AMP."gid=$ID",
+                  image( $base_path.'images/edit.gif', 'E', '', 'class="Action InTextImage TAdmin"' ),
+                  T_('Admin tournament game') ));
+         }
          $row_arr[32] = $str;
       }
       if ( $gtable->Is_Column_Displayed[2] )

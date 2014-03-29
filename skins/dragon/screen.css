@@ -3156,6 +3156,12 @@ a.TAdmin {
    font-style: italic;
    background: #e0e8ff; /* light blue, complementary to background */
 }
+span.TAdminList,
+a.TAdminList {
+   color: blue;
+   font-style: italic;
+   background: #c8d0f0; /* darker blue for lists, complementary to background */
+}
 
 span.TUserStatus {
    font-weight: bold;

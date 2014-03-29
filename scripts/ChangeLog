@@ -13,6 +13,10 @@ ChangeLog
 
 2014-03-29 jug
 
+   * include/globals.php (CSS_VERSION),
+     skins/dragon/screen.css, show_games.php:
+   - use blue-background on edit-icon to tournament-game-admin to indicate tournament-director-operation
+
    * tournaments/include/tournament_ladder_helper.php (TournamentLadderHelper.process_tournament_ladder_game_end),
      tournaments/include/tournament_ladder.php (TournamentLadder.update_seq_wins,
        ~.process_game_end_seq_wins),
