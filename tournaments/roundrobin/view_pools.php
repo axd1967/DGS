@@ -120,8 +120,8 @@ $GLOBALS['ThePage'] = new Page('TournamentPoolView');
 
    if ( $allow_view )
    {
-      echo sprintf( T_('Round summary (%s players in %s pools): %s games started, %s finished, %s running#tpool'),
-                    $count_players, $tround->Pools, $counts['all'], $counts['finished'], $counts['run'] ),
+      echo sprintf( T_('Round summary (%s players in %s pools): %s games started, %s running, %s finished#tpool'),
+                    $count_players, $tround->Pools, $counts['all'], $counts['run'], $counts['finished'] ),
          "<br>\n";
 
       $my_tpool = $tpool_iterator->getIndexValue( 'uid', $my_id, 0 );
