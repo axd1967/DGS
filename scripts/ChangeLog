@@ -13,6 +13,10 @@ ChangeLog
 
 2014-03-29 jug
 
+   * tournaments/include/tournament_rules.php (TournamentRules.__construct):
+   - bugfix: use default-max-handicap instead of MAX_HANDICAP as initial default
+     for new TournamentRules-entry
+
    * tournaments/roundrobin/view_pools.php:
    - view-pools: added bottom-links to all running tournament-games
 
