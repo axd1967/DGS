@@ -13,6 +13,9 @@ ChangeLog
 
 2014-03-29 jug
 
+   * tournaments/roundrobin/define_pools.php (calc_suggestion, make_suggestions_table):
+   - round-robin define-pools-page: added max. number of games per user for suggested pool-distribution
+
    * tournaments/include/tournament_gui_helper.php (TournamentGuiHelper.build_tournament_pool_notes),
      include/globals.php (CSS_VERSION),
      skins/dragon/screen.css,

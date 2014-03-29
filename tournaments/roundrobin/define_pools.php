@@ -257,6 +257,7 @@ $GLOBALS['ThePage'] = new Page('TournamentPoolDefine');
          sprintf( T_('%s = best equally shared round-robin pool distribution for all %s registered users'),
                   stripLF(T_("Best Pool\nDistribution#tpool_sugg")), $reg_count )
             . "\n" . T_('P x S : P = number of pools, S = pool-size; P1 + P2 = chosen pool-count'),
+         sprintf( T_('%s = max. number of games per user (calculated for largest pool of distribution)'), stripLF(T_("User\nGames#tpool_sugg")) ),
          sprintf( T_('%s = number of games for best pool distribution'), stripLF(T_("Games\nCount#tpool_sugg")) ),
          null,
          T_("Recommended distributions are the suggestions with a minimal user-diff\nand a minimum of pools, that are smaller than the chosen pool-size."),
@@ -346,8 +347,8 @@ function parse_edit_form( &$trd )
 }//parse_edit_form
 
 // return array( 0:$pool_size, 1:$pool_count, 2:$user_capacity, 3:$pool_size_base,
-//               4:$pool_count_remain, 5:$pool_count_base, 6:$games_count, 7:$distribution,
-//               8:$user_choice )
+//               4:$pool_count_remain, 5:$pool_count_base, 6:$max_games_per_user 7:$games_count,
+//               8:$distribution, 9:$user_choice )
 //     for given pool-size and pool-count
 // param $chall_games : games per challenge = factor for games-count (e.g. 2 for double-htype tourney-rules)
 function calc_suggestion( $reg_count, $pool_size, $pool_count, $chall_games, $user_choice=0 )
@@ -360,13 +361,19 @@ function calc_suggestion( $reg_count, $pool_size, $pool_count, $chall_games, $us
               + $pool_count_remain * TournamentUtils::calc_pool_games( $pool_size_base + 1, $chall_games );
 
    if ( $pool_count_remain > 0 )
+   {
+      $max_games_per_user = $chall_games * $pool_size_base;
       $distribution = sprintf( '%d x %d + %d x %d', //==reg_count, PC_base + PC_remain = pool_count
          $pool_count_base, $pool_size_base, $pool_count_remain, $pool_size_base + 1 );
+   }
    else
+   {
+      $max_games_per_user = $chall_games * ( $pool_size_base - 1 );
       $distribution = sprintf( '%d x %d', $pool_count_base, $pool_size_base );
+   }
 
    return array( $pool_size, $pool_count, $user_capacity, $pool_size_base,
-      $pool_count_remain, $pool_count_base, $games_count, $distribution, $user_choice );
+      $pool_count_remain, $pool_count_base, $max_games_per_user, $games_count, $distribution, $user_choice );
 }//calc_suggestion
 
 function make_suggestions_table( $tround, $reg_count, &$errors, $games_per_challenge, $user_pool_size=0, $user_pool_count=0 )
@@ -406,14 +413,15 @@ function make_suggestions_table( $tround, $reg_count, &$errors, $games_per_chall
    $table->add_tablehead( 3, T_("User\nCapacity#tpool_sugg"), 'NumberC');
    $table->add_tablehead( 4, T_("User\nDiff#tpool_sugg"), 'NumberC');
    $table->add_tablehead( 5, T_("Best Pool\nDistribution#tpool_sugg"), 'Right');
-   $table->add_tablehead( 6, T_("Games\nCount#tpool_sugg"), 'Number');
-   $table->add_tablehead( 7, T_('Suggestion Note#tpool_sugg'), 'Note');
+   $table->add_tablehead( 6, T_("User\nGames#tpool_sugg"), 'Number');
+   $table->add_tablehead( 7, T_("Games\nCount#tpool_sugg"), 'Number');
+   $table->add_tablehead( $idx=8, T_('Suggestion Note#tpool_sugg'), 'Note');
 
    $arr_best = array();
    foreach ( $arr_check as $arr_item )
    {
       list( $pool_size, $pool_count, $user_capacity, $pool_size_base, $pool_count_remain,
-            $pool_count_base, $games_count, $distribution, $user_choice ) = $arr_item;
+            $pool_count_base, $max_games_per_user, $games_count, $distribution, $user_choice ) = $arr_item;
       $user_diff = $user_capacity - $reg_count;
 
       $row_str = array(
@@ -422,8 +430,9 @@ function make_suggestions_table( $tround, $reg_count, &$errors, $games_per_chall
          3 => $user_capacity,
          4 => $user_diff,
          5 => $distribution,
-         6 => $games_count,
-         7 => '',
+         6 => $max_games_per_user,
+         7 => $games_count,
+         $idx => '',
       );
 
       // check for violations
@@ -461,7 +470,7 @@ function make_suggestions_table( $tround, $reg_count, &$errors, $games_per_chall
          $arr_note[] = $violation;
       }
       if ( count($arr_note) )
-         $row_str[7] = implode(', ', $arr_note);
+         $row_str[$idx] = implode(', ', $arr_note);
       if ( $extra_class )
          $row_str['extra_class'] = trim($extra_class);
 
@@ -492,7 +501,7 @@ function make_suggestions_table( $tround, $reg_count, &$errors, $games_per_chall
          break;
       $break_val = $stop_val;
 
-      $row_str[7] = concat_str( $row_str[7], ', ', T_('Recommended distribution!#tpool_sugg') );
+      $row_str[$idx] = concat_str( $row_str[$idx], ', ', T_('Recommended distribution!#tpool_sugg') );
       $row_str['extra_class'] = concat_str( (string)@$row_str['extra_class'], ' ' , 'Best' );
    }
 
