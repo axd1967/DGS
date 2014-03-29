@@ -13,6 +13,9 @@ ChangeLog
 
 2014-03-29 jug
 
+   * include/std_functions.php (parseDate):
+   - bugfix: parse seconds correctly on parsing-date
+
    * tournaments/include/tournament_pool_classes.php (PoolTables.get_user_col_map, ~.calc_pool_summary,
          ~.calc_pool_games_count;
        class PoolViewer, ~.__construct, ~.init_pool_table, ~.make_single_pool_table),

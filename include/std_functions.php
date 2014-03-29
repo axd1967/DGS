@@ -3620,7 +3620,9 @@ function parseDate( $msg, $date_str, $allow_secs=false )
    {
       if ( preg_match( "/^(\d{4})-?(\d+)-?(\d+)(?:\s+(\d+)(?::(\d+)(?::(\d+))?))$/", $date_str, $matches ) )
       {// (Y)=1, (M)=2, (D)=3, (h)=4, (m)=5, [ (s)=6 ]
-         list(, $year, $month, $day, $hour, $min, $secs ) = $matches;
+         list(, $year, $month, $day, $hour, $min ) = $matches;
+         if ( count($matches) > 6 )
+            $secs = $matches[6];
          if ( !$allow_secs || (string)$secs == '' )
             $secs = 0;
          $result = mktime( 0+$hour, 0+$min, 0+$secs, 0+$month, 0+$day, 0+$year );
