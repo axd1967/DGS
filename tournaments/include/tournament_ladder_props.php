@@ -299,8 +299,11 @@ class TournamentLadderProps
       return $errors;
    }//check_properties
 
-   /*! \brief Returns array( header, notes-array ) with this properties in textual form. */
-   public function build_notes_props()
+   /*!
+    * \brief Returns array( header, notes-array ) with this properties in textual form.
+    * \param $games_factor factor for calculation of games per user (for ladders always 1)
+    */
+   public function build_notes_props( $games_factor=1 )
    {
       $arr_props = array();
 
@@ -360,6 +363,12 @@ class TournamentLadderProps
                                  self::echo_rematch_wait($this->ChallengeRematchWaitHours) );
 
       $arr_props[] = T_('You may only have one running game per opponent.#T_ladder');
+
+      $max_defenses = max( $this->MaxDefenses, $this->MaxDefenses1, $this->MaxDefenses2 );
+      $max_games_text = sprintf( T_('Max. simultaneous games for user: %s defenses + your choice of %s challenges'),
+         $max_defenses,
+         ( $this->MaxChallenges > 0 ? sprintf( T_('max. %s'), $this->MaxChallenges) : T_('unlimited') ) );
+      $arr_props[] = array( 'text' => span('bold smaller', make_html_safe($max_games_text, 'line')) );
 
       // determine challenger
       if ( $this->DetermineChallenger == TLP_DETERMINE_CHALL_GEND )

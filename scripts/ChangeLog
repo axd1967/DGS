@@ -13,6 +13,23 @@ ChangeLog
 
 2014-03-29 jug
 
+   * tournaments/include/tournament_pool_classes.php (PoolTables.get_user_col_map, ~.calc_pool_summary,
+         ~.calc_pool_games_count;
+       class PoolViewer, ~.__construct, ~.init_pool_table, ~.make_single_pool_table),
+     tournaments/include/tournament_round_helper.php (TournamentRoundHelper.start_tournament_round_games),
+     tournaments/include/tournament_pool.php (TournamentPool.count_tournament_pool_games, ~.check_pools),
+     tournaments/include/tournament_ladder_props.php (TournamentLadderProps.build_notes_props),
+     tournaments/include/tournament_helper.php (TournamentHelper.determine_games_factor),
+     tournaments/include/tournament_round.php (TournamentRound.build_notes_props),
+     tournaments/include/tournament_utils.php (TournamentUtils.calc_pool_games),
+     tournaments/roundrobin/define_pools.php (parse_edit_form, calc_suggestion, make_suggestions_table),
+     tournaments/roundrobin/edit_pools.php, tournaments/roundrobin/view_pools.php,
+     tournaments/view_tournament.php:
+   - show max. number of games per user for ladder- and round-robin-tournaments also on tournament-info-page
+     to aid users registration-decision
+     - refactored TournamentRoundHelper::determine_games_per_challenge()
+       into TournamentHelper::determine_games_factor()
+
    * tournaments/roundrobin/define_pools.php (calc_suggestion, make_suggestions_table):
    - round-robin define-pools-page: added max. number of games per user for suggested pool-distribution
 

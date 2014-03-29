@@ -231,6 +231,16 @@ class TournamentHelper
       return ($isTD) ? $statuslist_TD : $statuslist_user;
    }
 
+   /*! \brief Finds out games-factor (factor of games per challenge) from various sources for given tournament. */
+   public static function determine_games_factor( $tid, $trule=null )
+   {
+      // load T-rules (need Handicaptype for games-count)
+      if ( !($trule instanceof TournamentRules) )
+         $trule = TournamentCache::load_cache_tournament_rules( 'TournamentHelper:determine_games_factor', $tid );
+
+      return ( $trule->Handicaptype == TRULE_HANDITYPE_DOUBLE ) ? 2 : 1;
+   }//determine_games_factor
+
    /*! \brief Perform tournament-type-specific checks on tournament-result return errors-array (or empty on success). */
    public static function check_tournament_result( $tourney, $tresult )
    {

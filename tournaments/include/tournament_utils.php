@@ -175,10 +175,13 @@ class TournamentUtils
          return floor( ( $user_count + $pool_size - 1 ) / $pool_size );
    }
 
-   /*! Returns number of games that need to be played for a pool of given size: n*(n-1)/2 x games_per_round. */
-   public static function calc_pool_games( $pool_size, $games_per_challenge )
+   /*!
+    * Returns number of games that need to be played for a pool of given size: n*(n-1)/2 x games_per_round. 
+    * \param $games_factor factor of games per challenge
+    */
+   public static function calc_pool_games( $pool_size, $games_factor )
    {
-      return $games_per_challenge * floor( $pool_size * ( $pool_size - 1 ) / 2 );
+      return $games_factor * floor( $pool_size * ( $pool_size - 1 ) / 2 );
    }
 
    public static function get_tournament_ladder_notes_user_removed()

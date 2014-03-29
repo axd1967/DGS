@@ -31,7 +31,6 @@ require_once 'tournaments/include/tournament_helper.php';
 require_once 'tournaments/include/tournament_pool.php';
 require_once 'tournaments/include/tournament_pool_classes.php';
 require_once 'tournaments/include/tournament_properties.php';
-require_once 'tournaments/include/tournament_round_helper.php';
 require_once 'tournaments/include/tournament_status.php';
 require_once 'tournaments/include/tournament_utils.php';
 
@@ -91,7 +90,7 @@ $GLOBALS['ThePage'] = new Page('TournamentPoolView');
    {
       $tprops = TournamentCache::load_cache_tournament_properties( 'Tournament.pool_view', $tid );
       $need_trating = $tprops->need_rating_copy();
-      $games_per_challenge = TournamentRoundHelper::determine_games_per_challenge( $tid );
+      $games_factor = TournamentHelper::determine_games_factor( $tid );
 
       $tpool_iterator = TournamentCache::load_cache_tournament_pools( 'Tournament.pool_view.load_pools',
          $tid, $round, $need_trating, $use_pool_cache );
@@ -142,7 +141,7 @@ $GLOBALS['ThePage'] = new Page('TournamentPoolView');
          echo implode(', ', $out), "<br><br>\n";
       }
 
-      $poolViewer = new PoolViewer( $tid, $page, $poolTables, $games_per_challenge,
+      $poolViewer = new PoolViewer( $tid, $page, $poolTables, $games_factor,
          ($need_trating ? 0 : PVOPT_NO_TRATING) | ($edit ? PVOPT_EDIT_RANK : 0) | ($use_pool_cache ? PVOPT_NO_ONLINE : 0) );
       if ( $edit )
          $poolViewer->setEditCallback( 'pool_user_edit_rank' );

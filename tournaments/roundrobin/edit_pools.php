@@ -35,7 +35,6 @@ require_once 'tournaments/include/tournament_pool.php';
 require_once 'tournaments/include/tournament_pool_classes.php';
 require_once 'tournaments/include/tournament_properties.php';
 require_once 'tournaments/include/tournament_round.php';
-require_once 'tournaments/include/tournament_round_helper.php';
 require_once 'tournaments/include/tournament_round_status.php';
 require_once 'tournaments/include/tournament_status.php';
 require_once 'tournaments/include/tournament_utils.php';
@@ -178,7 +177,7 @@ $GLOBALS['ThePage'] = new Page('TournamentPoolEdit');
    $count_errors = count($errors);
    if ( $show_pools && count($arr_selpool) && ($count_errors == $count_status_errors) )
    {
-      $games_per_challenge = TournamentRoundHelper::determine_games_per_challenge( $tid );
+      $games_factor = TournamentHelper::determine_games_factor( $tid );
 
       $tpool_iterator = new ListIterator( 'Tournament.pool_edit.load_pools' );
       $tpool_iterator->addQuerySQLMerge(
@@ -284,7 +283,7 @@ $GLOBALS['ThePage'] = new Page('TournamentPoolEdit');
       $pv_opts = PVOPT_NO_COLCFG | PVOPT_NO_RESULT | PVOPT_NO_EMPTY;
       if ( $show_pools && !$show_unassigned && $count_status_errors == 0 )
          $pv_opts |= PVOPT_EDIT_COL;
-      $poolViewer = new PoolViewer( $tid, $page, $poolTables, $games_per_challenge, $pv_opts );
+      $poolViewer = new PoolViewer( $tid, $page, $poolTables, $games_factor, $pv_opts );
       $poolViewer->setEditCallback( 'pools_edit_col_actions' );
       $poolViewer->init_pool_table();
       foreach ( $arr_selpool as $pool )

@@ -183,8 +183,11 @@ class TournamentRound
       return $errors;
    }//check_properties
 
-   /*! \brief Returns array( header, notes-array ) with this properties in textual form. */
-   public function build_notes_props()
+   /*!
+    * \brief Returns array( header, notes-array ) with this properties in textual form.
+    * \param $games_factor factor for calculation of games per user
+    */
+   public function build_notes_props( $games_factor=1 )
    {
       $arr_props = array();
 
@@ -196,6 +199,10 @@ class TournamentRound
          $arr_props[] = sprintf( '%s: %s', T_('Maximum Pool count'), $this->MaxPoolCount );
 
       $arr_props[] = sprintf( '%s: %s', T_('Pool Count'), $this->Pools );
+
+      $max_games_text = sprintf( '%s: %s', T_('Max. simultaneous games per user in this round'),
+         $games_factor * ( $this->MaxPoolSize - 1 ) );
+      $arr_props[] = array( 'text' => span('bold', make_html_safe($max_games_text, 'line')) );
 
       // general conditions
       $arr_props[] = sprintf( T_('For the current round, the players with ranks %s are pool winners.'),

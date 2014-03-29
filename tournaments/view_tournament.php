@@ -79,6 +79,7 @@ $GLOBALS['ThePage'] = new Page('Tournament');
       $tid, $allow_edit_tourney, $reg_user_status );
    $tprops = TournamentCache::load_cache_tournament_properties( 'Tournament.view_tournament', $tid );
    $trule = TournamentCache::load_cache_tournament_rules( 'Tournament.view_tournament', $tid );
+   $games_factor = TournamentHelper::determine_games_factor( $tid, $trule );
 
    // user result state
    $tt_props = $tpoints = null; // T-type-specific props
@@ -279,7 +280,7 @@ $GLOBALS['ThePage'] = new Page('Tournament');
    // show tourney-type-specific properties
    $tt_notes = null;
    if ( !is_null($tt_props) )
-      $tt_notes = $tt_props->build_notes_props();
+      $tt_notes = $tt_props->build_notes_props( $games_factor );
    if ( !is_null($tt_notes) )
       echo_notes( 'ttprops', $tt_notes[0], $tt_notes[1], false );
 

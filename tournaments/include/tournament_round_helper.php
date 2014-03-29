@@ -87,17 +87,6 @@ class TournamentRoundHelper
       return true;
    }//process_tournament_round_robin_game_end
 
-   /*! \brief Finds out games-per-challenge from various sources for given tournament. */
-   public static function determine_games_per_challenge( $tid, $trule=null )
-   {
-      // load T-rules (need Handicaptype for games-count)
-      if ( !($trule instanceof TournamentRules) )
-         $trule = TournamentCache::load_cache_tournament_rules( 'TRH:determine_games_per_challenge', $tid );
-
-      $games_per_challenge = ( $trule->Handicaptype == TRULE_HANDITYPE_DOUBLE ) ? 2 : 1;
-      return $games_per_challenge;
-   }//determine_games_per_challenge
-
    /*!
     * \brief Starts all tournament games needed for current round and specified pools, prints progress by printing
     *       and flushing on STDOUT.
@@ -165,7 +154,7 @@ class TournamentRoundHelper
       // read T-rule
       $trules = TournamentCache::load_cache_tournament_rules( $dbgmsg, $tid );
       $trules->TourneyType = $tourney->Type;
-      $games_per_challenge = self::determine_games_per_challenge( $tid, $trules );
+      $games_factor = TournamentHelper::determine_games_factor( $tid, $trules );
 
       // read T-props
       $tprops = TournamentCache::load_cache_tournament_properties( $dbgmsg, $tid );
@@ -190,13 +179,13 @@ class TournamentRoundHelper
       $inconsistencies = array();
       foreach ( $check_tgames as $fkey => $cnt )
       {
-         if ( $cnt != $games_per_challenge )
+         if ( $cnt != $games_factor )
             $inconsistencies[] = $fkey;
       }
       if ( count($inconsistencies) > 0 )
       {
          return sprintf( T_('Inconsistencies found: for tournament #%s in round %s there is a mismatch of games per challenge (%s) for user-pairs:'),
-                         $tid, $round, "$games_per_challenge <-> $cnt" )
+                         $tid, $round, "$games_factor <-> $cnt" )
             . "<br>\n[" . implode('] [', $inconsistencies) . ']';
       }
 
@@ -212,7 +201,7 @@ class TournamentRoundHelper
       $poolTables = new PoolTables( $tround->Pools );
       $poolTables->fill_pools( $tpool_iterator );
       $arr_poolusers = $poolTables->get_pool_users();
-      $expected_games = $poolTables->calc_pool_games_count( $games_per_challenge );
+      $expected_games = $poolTables->calc_pool_games_count( $games_factor );
 
       $errmsg = null;
       $switched_tround_status = false;
@@ -386,7 +375,7 @@ class TournamentRoundHelper
    public static function remove_tournament_round( $tlog_type, $tourney, $tround, &$errors, $check_only )
    {
       if ( !$tround )
-         error('invalid_args', "TournamentRoundHelper:remove_tournament_round.check.miss.t_round({$tourney->ID})");
+         error('invalid_args', "TRH:remove_tournament_round.check.miss.t_round({$tourney->ID})");
 
       $errors = array();
       if ( $tourney->CurrentRound == $tround->Round )

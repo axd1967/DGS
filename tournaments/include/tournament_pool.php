@@ -28,7 +28,6 @@ require_once 'tournaments/include/tournament_globals.php';
 require_once 'tournaments/include/tournament_helper.php';
 require_once 'tournaments/include/tournament_log_helper.php';
 require_once 'tournaments/include/tournament_pool_classes.php';
-require_once 'tournaments/include/tournament_round_helper.php';
 require_once 'tournaments/include/tournament_utils.php';
 
  /*!
@@ -325,11 +324,11 @@ class TournamentPool
          "SELECT SQL_SMALL_RESULT Pool, COUNT(*) AS X_Count FROM TournamentPool " .
          "WHERE tid=$tid AND Round=$round GROUP BY Pool" );
 
-      $games_per_challenge = TournamentRoundHelper::determine_games_per_challenge( $tid );
+      $games_factor = TournamentHelper::determine_games_factor( $tid );
 
       $count = 0;
       while ( $row = mysql_fetch_assoc($result) )
-         $count += TournamentUtils::calc_pool_games( $row['X_Count'], $games_per_challenge );
+         $count += TournamentUtils::calc_pool_games( $row['X_Count'], $games_factor );
       mysql_free_result($result);
 
       return $count;
@@ -730,7 +729,7 @@ class TournamentPool
       $round = $tround->Round;
       $errors = array();
 
-      $games_per_challenge = TournamentRoundHelper::determine_games_per_challenge( $tid );
+      $games_factor = TournamentHelper::determine_games_factor( $tid );
 
       // load tourney-participants and pool data
       $iterator = new ListIterator( 'TournamentPool.check_pools.load_tp_pools' );
@@ -739,7 +738,7 @@ class TournamentPool
       $poolTables = new PoolTables( $tround->Pools );
       $poolTables->fill_pools( $iterator );
 
-      $pool_summary = $poolTables->calc_pool_summary( $games_per_challenge );
+      $pool_summary = $poolTables->calc_pool_summary( $games_factor );
       if ( $only_summary ) // load only summary
       {
          // check game-counts integrity for all pools

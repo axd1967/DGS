@@ -415,10 +415,10 @@ class PoolTables
 
    /*!
     * \brief Returns array( uid => col-idx, ... ) for given pool-no.
-    * \return col-idx in resulting array starting with 0(!) and not taking games-per-challenge into account.
+    * \return col-idx in resulting array starting with 0(!) and not taking $games_factor (games-per-challenge) into account.
     * \note array-key is defined by PoolGame.get_opponent()
     */
-   public function get_user_col_map( $pool, $games_per_challenge )
+   public function get_user_col_map( $pool, $games_factor )
    {
       $map = array();
       $idx = -1;
@@ -624,23 +624,23 @@ class PoolTables
     * \brief Returns #users for each pool with some extra.
     * \return arr( pool => arr( user-count, errors-arr(empty), pool-games-count, pool-started-games-count=0 ), ... ).
     */
-   public function calc_pool_summary( $games_per_challenge )
+   public function calc_pool_summary( $games_factor )
    {
       $arr = array(); // [ pool => [ #users, [], #games-per-pool, #started-games-per-pool=0 ], ... ]
       foreach ( $this->pools as $pool => $arr_users )
       {
          $usercount = count($arr_users);
-         $arr[$pool] = array( $usercount, array(), TournamentUtils::calc_pool_games($usercount, $games_per_challenge), 0 );
+         $arr[$pool] = array( $usercount, array(), TournamentUtils::calc_pool_games($usercount, $games_factor), 0 );
       }
       return $arr;
    }
 
    /*! \brief Returns expected sum of games for all pools. */
-   public function calc_pool_games_count( $games_per_challenge )
+   public function calc_pool_games_count( $games_factor )
    {
       $count = 0;
       foreach ( $this->pools as $pool => $arr_users )
-         $count += TournamentUtils::calc_pool_games( count($arr_users), $games_per_challenge );
+         $count += TournamentUtils::calc_pool_games( count($arr_users), $games_factor );
       return $count;
    }
 
@@ -776,7 +776,7 @@ class PoolViewer
    private $table; // Table-object
 
    private $my_id; // player_row['ID']
-   private $games_per_challenge;
+   private $games_factor;
    private $options;
    private $edit_callback = null;
 
@@ -785,14 +785,14 @@ class PoolViewer
    private $poolidx; // start-index of result-matrix starting with 1
 
    /*! \brief Construct PoolViewer setting up Table-structure. */
-   public function __construct( $tid, $page, $pool_tables, $games_per_challenge=1, $pv_opts=0 )
+   public function __construct( $tid, $page, $pool_tables, $games_factor=1, $pv_opts=0 )
    {
       global $player_row;
 
       $this->tid = $tid;
       $this->ptabs = $pool_tables;
       $this->my_id = $player_row['ID'];
-      $this->games_per_challenge = (int)$games_per_challenge;
+      $this->games_factor = (int)$games_factor;
       $this->options = (int)$pv_opts;
       $this->pools_max_users = $this->ptabs->count_pools_max_user();
 
@@ -849,9 +849,9 @@ class PoolViewer
 
          foreach ( range(1, $this->pools_max_users) as $pool )
          {
-            if ( $this->games_per_challenge > 1 )
+            if ( $this->games_factor > 1 )
             {
-               for ( $g=0; $g < $this->games_per_challenge; ++$g )
+               for ( $g=0; $g < $this->games_factor; ++$g )
                   $this->table->add_tablehead( ++$idx, $pool, 'Matrix', TABLE_NO_HIDE );
             }
             else
@@ -901,7 +901,7 @@ class PoolViewer
          error('miss_args', "PoolViewer.make_single_pool_table.miss_tpoints");
 
       $arr_users = $this->ptabs->pools[$pool];
-      $map_usercols = $this->ptabs->get_user_col_map( $pool, $this->games_per_challenge );
+      $map_usercols = $this->ptabs->get_user_col_map( $pool, $this->games_factor );
       $cnt_users = count($arr_users);
 
       // header
@@ -928,8 +928,8 @@ class PoolViewer
       // init crosstable
       $cell_matrix_self = Table::build_row_cell( 'X', 'MatrixSelf' );
       if ( $cnt_users < $this->pools_max_users ) // too few users in pool
-         $arr_miss_users = array_fill( $this->poolidx + 1 + $cnt_users * $this->games_per_challenge,
-            $this->pools_max_users - $cnt_users + $this->games_per_challenge - 1, '-' );
+         $arr_miss_users = array_fill( $this->poolidx + 1 + $cnt_users * $this->games_factor,
+            $this->pools_max_users - $cnt_users + $this->games_factor - 1, '-' );
       else
          $arr_miss_users = null;
 
@@ -968,8 +968,8 @@ class PoolViewer
 
          if ( $show_results ) // build game-result-matrix (one user-row)
          {
-            for ( $g=0; $g < $this->games_per_challenge; ++$g ) // blacken self-pairings
-               $row_arr[$this->poolidx + 1 + $idx * $this->games_per_challenge + $g] = $cell_matrix_self;
+            for ( $g=0; $g < $this->games_factor; ++$g ) // blacken self-pairings
+               $row_arr[$this->poolidx + 1 + $idx * $this->games_factor + $g] = $cell_matrix_self;
             if ( $arr_miss_users ) // add '-' if too few users in pool
                $row_arr += $arr_miss_users;
 
@@ -979,7 +979,7 @@ class PoolViewer
             foreach ( $tpool->PoolGames as $poolGame )
             {
                $game_url = $base_path."game.php?gid=".$poolGame->gid;
-               $col = $map_usercols[ $poolGame->get_opponent($uid) ] * $this->games_per_challenge + $poolGame->GameNo;
+               $col = $map_usercols[ $poolGame->get_opponent($uid) ] * $this->games_factor + $poolGame->GameNo;
 
                list( $score, $points, $mark, $title, $style ) = $poolGame->calc_result( $uid, $tpoints );
                $cell = anchor( $game_url, $mark, $title );
