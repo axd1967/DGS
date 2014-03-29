@@ -336,7 +336,7 @@ function parse_edit_form( &$game, $trule )
          $new_score = 0;
 
       if ( ($new_result == GA_RES_SCORE || $new_result == GA_RES_DRAW || $new_result == GA_RES_NO_RESULT)
-            && !is_null($new_score) && $game->tid > 0 && !@$_REQUEST['jigo_check'] ) // jigo_check=1: skip jigo-check
+            && !is_null($new_score) && $game->tid > 0 && !is_null($trule) && !@$_REQUEST['jigo_check'] ) // jigo_check=1: skip jigo-check
       {
          $jigo_behaviour = $trule->determineJigoBehaviour();
          $chk_score = floor( abs( 2 * (float)$new_score ) );
@@ -433,16 +433,21 @@ function draw_game_admin_form( $game, $trule )
             'CELL', 2, '',
             'RADIOBUTTONS', 'result', array( GA_RES_NO_RESULT => T_('No-Result (=Void, make game unrated)') ), @$vars['result'], ));
 
-      $jigo_behaviour_text = TournamentRules::getJigoBehaviourText( $trule->determineJigoBehaviour() );
-      if ( $jigo_behaviour_text )
+      // NOTE: jigo-behaviour only relevant for tournament-games as normal-games stand for themselves and violating
+      //    jigo-restriction has no effect
+      if ( !is_null($trule) )
       {
-         $gaform->add_empty_row();
-         $gaform->add_row( array(
-            'CELL', 2, '',
-            'TEXT', T_('Notes on Jigo') . ":<br>\n" . span('TWarning', $jigo_behaviour_text), ));
-         $gaform->add_row( array(
-            'CELL', 2, '',
-            'CHECKBOX', 'jigo_check', 1, T_('allow to set a score contradicting Jigo-restrictions'), @$_REQUEST['jigo_check'], ));
+         $jigo_behaviour_text = TournamentRules::getJigoBehaviourText( $trule->determineJigoBehaviour() );
+         if ( $jigo_behaviour_text )
+         {
+            $gaform->add_empty_row();
+            $gaform->add_row( array(
+               'CELL', 2, '',
+               'TEXT', T_('Notes on Jigo') . ":<br>\n" . span('TWarning', $jigo_behaviour_text), ));
+            $gaform->add_row( array(
+               'CELL', 2, '',
+               'CHECKBOX', 'jigo_check', 1, T_('allow to set a score contradicting Jigo-restrictions'), @$_REQUEST['jigo_check'], ));
+         }
       }
 
       $gaform->add_row( array(
