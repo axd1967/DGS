@@ -73,7 +73,7 @@ Copyright (C) 2001-2014  Erik Ouchterlony, Jens-Uwe Gaspar
 
    * Ladder-Tournament:
       * Tournament Ladder view page:
-         * Added "Sequently Wins" and "Best Sequently Wins" in new table-column '#SW' (consecutive wins and jigo counts)
+         * Added "Consecutive Wins" and "Max. Consecutive Wins" in new table-column '#CW' (counting wins and jigo)
          * Renamed 'Challenges'-table-column to 'Challenges-In' with incoming challenges
          * Added table-column with outgoing challenges, hidden per default
          * Added link on top to jump near own ladder-position
@@ -82,7 +82,7 @@ Copyright (C) 2001-2014  Erik Ouchterlony, Jens-Uwe Gaspar
       * Clarified game-annulling (="detaching" of tournament-games):
         annulled game is made unrated and continued as "normal" game
 
-   * Added NO-RESULT as game-end result (synonym is 'void")
+   * Added NO-RESULT as game-end result (synonym is "void")
       * Set game-end by NO-RESULT by game-admin or a tournament-director
       * Change no-result-game to unrated if set by game-admin
 
@@ -137,7 +137,7 @@ Copyright (C) 2001-2014  Erik Ouchterlony, Jens-Uwe Gaspar
 
    * Changes for Tournament-Admins:
       * Restricted Tournament Round Editor operations (switch round, add round, delete round), only allowed by tournament-admin
-      * Added script to fix Ladder-tournament sequently wins
+      * Added script to fix Ladder-tournament consecutive-wins
 
    * Changes for Game-Admins:
       * Added ending of game by FORFEIT for Black or White player, game changed to unrated

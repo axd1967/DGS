@@ -265,7 +265,7 @@ class TournamentResult
       {
          $arr = array();
          $arr[TRESULTTYPE_TL_KING_OF_THE_HILL] = T_('King of the Hill#TRES_type');
-         $arr[TRESULTTYPE_TL_SEQWINS] = T_('Sequently Wins');
+         $arr[TRESULTTYPE_TL_SEQWINS] = T_('Consecutive Wins'); // sequenced-wins
          $arr[TRESULTTYPE_TRR_POOL_WINNER] = T_('Pool Winner#TRES_type');
          $ARR_TRESULT_TEXTS = $arr;
       }

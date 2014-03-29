@@ -185,7 +185,7 @@ define('TLADDER_MAX_CHRNG_ABS', 2000);
 define('TLADDER_CHRNG_RATING_UNUSED', -TLADDER_MAX_CHRNG_RATING-1);
 
 define('TRESULTTYPE_TL_KING_OF_THE_HILL', 1); // ladder king
-define('TRESULTTYPE_TL_SEQWINS', 2); // ladder sequently-wins
+define('TRESULTTYPE_TL_SEQWINS', 2); // ladder consecutive-wins (=sequenced-wins)
 define('TRESULTTYPE_TRR_POOL_WINNER', 3); // round-robin pool-winner
 define('CHECK_MAX_TRESULTYPE', 3);
 

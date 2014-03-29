@@ -82,8 +82,8 @@ class TournamentLadderHelper
 
       ta_begin();
       {//HOT-section to process tournament-game-end
-         // track sequently-wins for both players before processing game-end
-         TournamentLadder::process_game_end_sequently_wins( $tgame );
+         // track consecutive-wins for both players before processing game-end
+         TournamentLadder::process_game_end_seq_wins( $tgame );
 
          $success = TournamentLadder::process_game_end( $tid, $tgame, $game_end_action );
          if ( $success )

@@ -55,7 +55,7 @@ $GLOBALS['ThePage'] = new Page('Script', PAGEFLAG_IMPLICIT_FLUSH );
    if ( $tid <= 0 ) $tid = '';
 
 
-   $title = T_('Fix Ladder Sequently Wins');
+   $title = T_('Fix Ladder Consecutive Wins');
    start_page( $title, true, $logged_in, $player_row );
 
    echo "<h3 class=Header>$title</h3>\n";
@@ -69,7 +69,7 @@ $GLOBALS['ThePage'] = new Page('Script', PAGEFLAG_IMPLICIT_FLUSH );
       fix_ladder_seqwins( $tid );
 
 
-   $menu_array = array( T_('Fix ladder sequently wins') => "scripts/$page" );
+   $menu_array = array( T_('Fix ladder consecutive wins') => "scripts/$page" );
    end_page(@$menu_array);
 }//main
 
@@ -86,7 +86,7 @@ function show_form()
 
    $tform->add_row( array(
          'TAB', 'CELL', 1, '',
-         'SUBMITBUTTON', 'fix', T_('Preview: Fix Sequently Wins for ladder-tournament'),
+         'SUBMITBUTTON', 'fix', T_('Preview: Fix Consecutive Wins for ladder-tournament'),
       ));
 
    if ( @$_REQUEST['fix'] ) // fix single ladder-tournament (confirm)
@@ -131,7 +131,7 @@ function fix_ladder_seqwins( $tid )
    $count_rows = (int)@mysql_num_rows($result);
    echo sprintf( "<br>Found %d tournament-games to process ...<br><br>\n", $count_rows );
 
-   // calculate all sequently-wins for all ever existing ladder-users
+   // calculate all consecutive-wins for all ever existing ladder-users
    $arr_tladders = array(); // rid => TournamentLadder
    while ( $tg_row = mysql_fetch_assoc($result) )
    {
@@ -147,8 +147,8 @@ function fix_ladder_seqwins( $tid )
       else
          $arr_tladders[$tgame->Defender_rid] = $tladder_df = new TournamentLadder( $tid, $tgame->Defender_rid, $tgame->Defender_uid );
 
-      $tladder_ch->update_sequently_wins( $tgame->Score, $tgame->Flags, /*db*/false );
-      $tladder_df->update_sequently_wins( -$tgame->Score, $tgame->Flags, /*db*/false );
+      $tladder_ch->update_seq_wins( $tgame->Score, $tgame->Flags, /*db*/false );
+      $tladder_df->update_seq_wins( -$tgame->Score, $tgame->Flags, /*db*/false );
    }
    mysql_free_result($result);
 
@@ -177,7 +177,7 @@ function fix_ladder_seqwins( $tid )
    }
 
    echo "<br>\n",
-      sprintf( "Tournament #%s -> fixed %s of %s TournamentLadder-entries<br>\n", $tid, $cnt_fixed, $count_rows );
+      sprintf( "Tournament #%s -> fixed %s TournamentLadder-entries for %s tournament-games<br>\n", $tid, $cnt_fixed, $count_rows );
 
    echo "\n<br>Needed: " . sprintf("%1.3fs", (getmicrotime() - $begin))
       , " - Fix Done.";

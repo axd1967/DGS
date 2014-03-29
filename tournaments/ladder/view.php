@@ -152,8 +152,8 @@ $GLOBALS['ThePage'] = new Page('TournamentLadderView');
       $ltable->add_tablehead(16, T_('Challenges-Out#header'), '', 0 );
       $ltable->add_tablehead( 9, T_('Rank Changed#T_ladder'), 'Date', 0 );
       $ltable->add_tablehead(10, T_('Rank Kept#header'), '', 0 );
-      $ltable->add_tablehead(17, span('title="'.basic_safe(T_('Sequently Wins').' [: '.T_('Best Sequently Wins').']').'"',
-         T_('#Seq-Wins#header')), 'NumberC', 0 );
+      $ltable->add_tablehead(17, span('title="'.basic_safe(T_('Consecutive Wins').' [: '.T_('Max. Consecutive Wins').']').'"',
+         T_('#Consecutive Wins#header')), 'NumberC', 0 );
       $ltable->add_tablehead(15, new TableHead( T_('User online#header'), 'images/online.gif',
          sprintf( T_('Indicator for being online up to %s mins ago'), SPAN_ONLINE_MINS)
             . ', ' . T_('or on vacation#header') ), 'Image', 0 );

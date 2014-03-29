@@ -34,7 +34,7 @@
 
 * Do final tests (see NEWS-file):
 
-     (a) Ladder-tournaments (seq-wins)
+     (a) Ladder-tournaments (consecutive-wins)
      (b) Status-page
      (c) Game-page, Game-Info
      (d) SGF-Download

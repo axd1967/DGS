@@ -10,5 +10,6 @@ copy /images/no_result.gif
 # - allow round-robin-tournaments in 'ALLOW_TOURNAMENTS'-config
 
 -----------
-# shorten '#'-texts for tournaments, esp. '#Seq-Wins#header' -> '#SW'
+# shorten '#'-texts for tournaments, esp. 'Consecutive Wins#header' -> '#CW',
+#     '#Started Games#header' -> '#SG', 'Position#tourneyheader' -> 'Pos.'
 

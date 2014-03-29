@@ -602,7 +602,7 @@ function fill_tournament_info( &$vars, $uvars, $tourney, $user, $tp, $tladder, $
          $vars['start_time'] = formatDate( $tladder->RankChanged, '', DATE_FMT_QUICK );
       $vars['result'] = $tladder->SeqWinsBest;
       $vars['rank'] = $tladder->Rank;
-      $vars['comment'] = 'Sequently Wins';
+      $vars['comment'] = 'Consecutive Wins';
    }
    else if ( !is_null($tpool) )
    {

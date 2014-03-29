@@ -534,9 +534,11 @@ Description:
 
 * ChallengesOut : number of current outgoing challenges for ladder-user
 
-* SeqWins : number of sequently wins (including jigo) for ladder-user, resetted to 0 winning-streak broken
+* SeqWins : sequenced wins
+   - number of consecutive wins (including jigo) for ladder-user
+   - resetted to 0 if winning-streak broken
 
-* SeqWinsBest : track best number of sequently wins (including jigo) for ladder-user
+* SeqWinsBest : track best (=max.) number of consecutive wins (including jigo) for ladder-user
 
 
 ###########################################################################

@@ -325,13 +325,13 @@ class TournamentLadder
    }
 
    /*!
-    * \brief Increases or resets TournamentLadder.SeqWins and keep track of SeqWinsBest for current ladder user
-    *       dependent on score and game-flags.
+    * \brief Increases or resets consecutive-wins stored in TournamentLadder.SeqWins and keep track of SeqWinsBest
+    *       for current ladder user dependent on score and game-flags.
     * \param $game_score game-score relative to current ladder-user, i.e. score<0 =win
     * \param $tgame_flags respective TournamentGames.Flags to decide on annulled-game and no-result-game (no action)
     * \param $db_update false = only update this TournamentLadder-object
     */
-   public function update_sequently_wins( $game_score, $tgame_flags, $db_update=true )
+   public function update_seq_wins( $game_score, $tgame_flags, $db_update=true )
    {
       if ( $tgame_flags & (TG_FLAG_GAME_DETACHED|TG_FLAG_GAME_NO_RESULT) )
          return false;
@@ -340,7 +340,7 @@ class TournamentLadder
       {
          if ( $db_update )
          {
-            $result = db_query( "TournamentLadder.update_sequently_wins.inc({$this->rid},$game_score,$tgame_flags)",
+            $result = db_query( "TournamentLadder.update_seq_wins.inc({$this->rid},$game_score,$tgame_flags)",
                "UPDATE TournamentLadder SET SeqWins=SeqWins+1, SeqWinsBest=GREATEST(SeqWinsBest,SeqWins+1) " .
                "WHERE tid={$this->tid} AND rid={$this->rid} LIMIT 1" );
          }
@@ -356,7 +356,7 @@ class TournamentLadder
       {
          if ( $db_update )
          {
-            $result = db_query( "TournamentLadder.update_sequently_wins.reset({$this->rid},$game_score,$tgame_flags)",
+            $result = db_query( "TournamentLadder.update_seq_wins.reset({$this->rid},$game_score,$tgame_flags)",
                "UPDATE TournamentLadder SET SeqWins=0 " .
                "WHERE tid={$this->tid} AND rid={$this->rid} LIMIT 1" );
          }
@@ -366,7 +366,7 @@ class TournamentLadder
             $this->SeqWins = 0;
       }
       return $result;
-   }//update_sequently_wins
+   }//update_seq_wins
 
    /*!
     * \brief Removes user from ladder with given tournament tid, remove TP and notifies opponents of running games.
@@ -1494,17 +1494,20 @@ class TournamentLadder
       return ($row) ? (int)$row['X_Count'] : 0;
    }//find_ladder_rating_pos
 
-   /*! \brief Tracks (increases or resets) sequently wins for given tournament-game for challenger and defender. */
-   public static function process_game_end_sequently_wins( $tgame )
+   /*!
+    * \brief Tracks (increases or resets) consecutive-wins (TournamentLadder.SeqWins/SeqWinsBest)
+    *       for given tournament-game for challenger and defender.
+    */
+   public static function process_game_end_seq_wins( $tgame )
    {
       // track wins for challenger
       $tladder_ch = new TournamentLadder( $tgame->tid, $tgame->Challenger_rid, $tgame->Challenger_uid );
-      $tladder_ch->update_sequently_wins( $tgame->Score, $tgame->Flags );
+      $tladder_ch->update_seq_wins( $tgame->Score, $tgame->Flags );
 
       // track wins for defender
       $tladder_df = new TournamentLadder( $tgame->tid, $tgame->Defender_rid, $tgame->Defender_uid );
-      $tladder_df->update_sequently_wins( -$tgame->Score, $tgame->Flags );
-   }//process_game_end_sequently_wins
+      $tladder_df->update_seq_wins( -$tgame->Score, $tgame->Flags );
+   }//process_game_end_seq_wins
 
 } // end of 'TournamentLadder'
 ?>
