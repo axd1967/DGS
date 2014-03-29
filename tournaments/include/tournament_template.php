@@ -48,7 +48,7 @@ abstract class TournamentTemplate
 
    // tournament-type-specific properties
 
-   public $need_rounds = false;
+   public $need_rounds = false; // true = tournament has round-management; false = tournament has no rounds
    public $allow_register_tourney_status = array( TOURNEY_STATUS_REGISTER );
    public $need_admin_create_tourney = true;
    public $showcount_tournament_standings = 0;

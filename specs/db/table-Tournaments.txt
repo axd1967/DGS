@@ -240,6 +240,7 @@ Description:
 * Rating : Rating used for T, depends on TournamentProperties.RatingUseMode
 
 * StartRound : Round user wants to start in for T
+   - first round = 1, higher start-round > 1
 
 * NextRound : Round user is going to play in for T
    - player is included in pooling for round: TP.NextRound == T.CurrentRound
