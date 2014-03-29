@@ -200,8 +200,6 @@ class TournamentRound
       // general conditions
       $arr_props[] = sprintf( T_('For the current round, the players with ranks %s are pool winners.'),
          '1..' . $this->PoolWinnerRanks );
-      $arr_props[] = sprintf( T_("You may only withdraw from the tournament round while not in round status [%s]."),
-         self::getStatusText(TROUND_STATUS_PLAY) );
 
       return array( sprintf( T_('Configuration of the current tournament round #%s'), $this->Round )
             . ':', $arr_props );

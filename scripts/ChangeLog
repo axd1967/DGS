@@ -13,6 +13,10 @@ ChangeLog
 
 2014-03-29 jug
 
+   * tournaments/include/tournament_round.php (TournamentRound.build_notes_props):
+   - bugfix: remove note about withdrawing from round-robin-tournament as that need to be handled
+     in different ways by tournament-director
+
    * admin_game.php (parse_edit_form):
    - bugfix: disable jigo-restriction-check for non-tournament-games
      - jigo-behaviour only relevant for tournament-games as normal-games stand for themselves and
