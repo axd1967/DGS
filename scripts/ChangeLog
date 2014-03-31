@@ -11,6 +11,44 @@ Release [2013-08-11] - DGS 1.0.16 - tag [release-1_0_16-20130811] on (later) bra
 ChangeLog
 ------------------------------------------------------------------
 
+2014-03-31 jug
+
+   * tournaments/include/tournament_properties.php (class TournamentProperties, ~.__construct,
+       ~.setMinRatingStartRound, ~.fillEntityData, ~.check_properties, ~.new_from_row),
+     tournaments/include/tournament_participant.php (TournamentParticipant.count_registered_tournament_participants),
+     tournaments/include/tournament_template.php (TournamentTemplate.getMaxRounds, ~.determineLimitMaxStartRound),
+     tournaments/include/tournament_template_round_robin.php (TournamentTemplateRoundRobin.checkProperties),
+     tournaments/include/tournament_log_helper.php (TournamentLogHelper.log_change_tournament_props),
+     tournaments/include/tournament_status.php (TournamentStatus.check_conditions_status_PAIR),
+     tournaments/include/tournament_template_ladder.php (TournamentTemplateLadder.__construct),
+     tournaments/include/tournament.php (class Tournament),
+     tournaments/include/types/dgs_round_robin.php (DgsRoundRobinTournament.createTournament),
+     scripts/updates/database_changes_1_0_16_to_1_0_17.mysql,
+     scripts/updates/other_changes_1_0_16_to_1_0_17.txt,
+     specs/db/table-Tournaments.txt, specs/db/dragon-ddl.sql,
+     tournaments/edit_participant.php (parse_edit_form),
+     tournaments/edit_properties.php (parse_edit_form),
+     tournaments/register.php (parse_edit_form),
+     tournaments/manage_tournament.php, NEWS:
+   - added restrictions to allow user to start in higher tournament-rounds
+     - TournamentProperties.MaxStartRound = restricts customized start-round for user and director
+     - TournamentProperties.MinRatingStartRound = restricts customized start-round for user,
+       - if NO_RATING, users are not allowed to customize start-round while director can change it
+       - otherwise users with higher rating are allowed to customize start-round
+     - edit-properties: added configurations of TProps.MaxStartRound and MinRatingStartRound
+       - max-start-round restricted by tournament-type-specific and logarithmic-limit on max-participants
+       - configuration only needed for tournaments, that have round-management
+     - edit-participant: show warning to directors if min-rating-start-round forbids customize by user
+     - cleanup: removed now unused Tournament::getRoundLimitText()
+     - added warning on tournament-status-change REG-to-PAIR about participants in higher rounds
+     - added check on TournamentProperties on tournament-status-change NEW-to-REG
+-----------
+-- added restrictions to allow user to start in higher rounds
+ALTER TABLE TournamentProperties
+   ADD MinRatingStartRound smallint NOT NULL default '-9999' AFTER MaxParticipants,
+   ADD MaxStartRound tinyint unsigned NOT NULL default '1' AFTER MaxParticipants ;
+-----------
+
 2014-03-29 jug
 
    * include/std_functions.php (parseDate):

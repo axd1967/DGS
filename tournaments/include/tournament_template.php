@@ -103,6 +103,30 @@ abstract class TournamentTemplate
          ? $this->showcount_tournament_standings : 0;
    }
 
+   /*! \brief Returns absolute max. limit of rounds for tournament. */
+   public function getMaxRounds()
+   {
+      if ( $this->need_rounds )
+         return $this->limits->getMaxLimit(TLIMITS_TRD_MAX_ROUNDS);
+      else
+         return 1;
+   }
+
+   /*! \brief Returns max-limit for TournamentProperties.MaxStartRound. */
+   public function determineLimitMaxStartRound( $max_tp )
+   {
+      if ( $this->need_rounds )
+      {
+         if ( $max_tp <= 0 )
+            $max_tp = TP_MAX_COUNT;
+         $max_rounds = (int)( log($max_tp) / log(2) ); // max-estimate for round-count dep. on max-participants-count
+         $max_limit = min( $this->limits->getMaxLimit(TLIMITS_TRD_MAX_ROUNDS), $max_rounds );
+      }
+      else // tournament without round-management
+         $max_limit = 1;
+      return $max_limit;
+   }//determineLimitMaxStartRound
+
 
    // ---------- Interface ----------------------------------------
 

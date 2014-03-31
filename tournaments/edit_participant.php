@@ -158,7 +158,7 @@ $GLOBALS['ThePage'] = new Page('TournamentEditParticipant');
    $old_tp = clone $tp;
 
    // check + parse edit-form
-   list( $vars, $edits, $input_errors ) = parse_edit_form( $tp, $tourney, $ttype );
+   list( $vars, $edits, $input_errors ) = parse_edit_form( $tp, $tourney, $ttype, $tprops );
    list( $reg_errors, $reg_warnings ) = ( !is_null($tprops) )
       ? $tprops->checkUserRegistration( $tourney, $tp, $user, TCHKTYPE_TD )
       : array( array(), array() );
@@ -433,11 +433,28 @@ $GLOBALS['ThePage'] = new Page('TournamentEditParticipant');
          $tpform->add_row( array(
                'DESCRIPTION', T_('Current Start Round#tourney'),
                'TEXT',        $old_start_round, ));
-         if ( $tourney->Rounds > 1 && !$is_delete && $authorise_edit_custom )
+
+         if ( $tprops->MaxStartRound > 1 && !$is_delete && $authorise_edit_custom )
+         {
             $tpform->add_row( array(
                   'DESCRIPTION', T_('Customized Start Round#tourney'),
                   'TEXTINPUT',   'start_round', 3, 3, get_request_arg('start_round'),
-                  'TEXT',        MINI_SPACING . $tourney->getRoundLimitText(), ));
+                  'TEXT',        ' ' . sprintf( T_('Range %s#tourney'), build_range_text(1, $tprops->MaxStartRound)), ));
+
+            $edit_warning = null;
+            if ( $tprops->MinRatingStartRound == NO_RATING )
+               $edit_warning = T_('Warning: Users are not allowed to choose a customized start round.#tourney');
+            elseif ( $user->Rating < $tprops->MinRatingStartRound )
+            {
+               $edit_warning = sprintf(
+                     T_("Warning: This user [%s] has a rating [%s] lower than the minimum rating [%s]\n" .
+                        "specified for this tournament to allow the user to choose a customized start round."),
+                     $user->Handle, echo_rating($user->Rating, true), echo_rating($tprops->MinRatingStartRound, true) );
+            }
+            if ( !is_null($edit_warning) )
+               $tpform->add_row( array( 'TAB', 'TEXT', span('TWarning', make_html_safe($edit_warning, true)), ));
+         }
+
          $tpform->add_empty_row();
       }
 
@@ -551,7 +568,7 @@ function build_new_status_choices( $tp )
 }
 
 // return [ vars-hash, edits-arr, errorlist ]
-function parse_edit_form( &$tp, $tourney, $ttype )
+function parse_edit_form( &$tp, $tourney, $ttype, $tprops )
 {
    $edits = array();
    $errors = array();
@@ -600,16 +617,14 @@ function parse_edit_form( &$tp, $tourney, $ttype )
       if ( get_request_arg('del_rating') )
          $tp->Rating = NO_RATING;
 
-      if ( $ttype->need_rounds && $tourney->Rounds > 1 )
+      if ( $ttype->need_rounds && $tprops->MaxStartRound > 1 )
       {
          $new_value = trim($vars['start_round']); // optional
          if ( (string)$new_value != '' )
          {
-            if ( !is_numeric($new_value) || $new_value < 1 )
-               $errors[] = T_('Expecting positive number for start round#tourney');
-            elseif ( $tourney->Rounds > 0 && $new_value > $tourney->Rounds )
-               $errors[] = sprintf( T_('Start round is out of range of actual rounds %s for this tournament.'),
-                  TournamentUtils::build_range_text(1, $tourney->Rounds) );
+            if ( !is_numeric($new_value) || $new_value < 1 || $new_value > $tprops->MaxStartRound )
+               $errors[] = sprintf( T_('Expecting number for %s in range %s.'), T_('Customized Start Round#tourney'),
+                  build_range_text(1, $tprops->MaxStartRound) );
             else
                $tp->StartRound = $new_value;
          }

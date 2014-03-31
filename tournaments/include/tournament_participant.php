@@ -387,7 +387,32 @@ class TournamentParticipant
    }//count_tournament_participants
 
    /*!
-    * \brief Returns non-null array with count of TournamentParticipants for all (start-)rounds and TP-stati.
+    * \brief Returns count of registered TournamentParticipants group by StartRound.
+    * \param $min_start_round 0 = find all rounds, >0 = find only entries with higher start-rounds
+    * \return arr( TP.StartRound => count )
+    */
+   public static function count_registered_tournament_participants( $tid, $min_start_round )
+   {
+      $qsql = new QuerySQL(
+         SQLP_FIELDS, 'StartRound', 'COUNT(*) AS X_Count',
+         SQLP_FROM,   'TournamentParticipant',
+         SQLP_WHERE,  "tid=$tid", "Status='".TP_STATUS_REGISTER."'",
+         SQLP_GROUP,  'StartRound' );
+      if ( is_numeric($min_start_round) && $min_start_round > 0 )
+         $qsql->add_part( SQLP_WHERE, "StartRound >= $min_start_round" );
+
+      $result = db_query( "TournamentParticipant:count_registered_TPs($tid,$min_start_round)", $qsql->get_select() );
+
+      $out = array();
+      while ( $row = mysql_fetch_array($result) )
+         $out[$row['StartRound']] = (int)$row['X_Count'];
+      mysql_free_result($result);
+
+      return $out;
+   }//count_registered_tournament_participants
+
+   /*!
+    * \brief Returns non-null array with count of TournamentParticipants for all start-rounds and TP-stati.
     * \return array( TPCOUNT_STATUS_ALL => sum-count for all rounds,
     *                TP.StartRound      => array( TP_STATUS_... => count, ... ))
     */

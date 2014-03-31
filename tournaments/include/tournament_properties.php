@@ -47,8 +47,8 @@ global $ENTITY_TOURNAMENT_PROPERTIES; //PHP5
 $ENTITY_TOURNAMENT_PROPERTIES = new Entity( 'TournamentProperties',
       FTYPE_PKEY, 'tid',
       FTYPE_CHBY,
-      FTYPE_INT,  'tid', 'MinParticipants', 'MaxParticipants', 'UserMinGamesFinished', 'UserMinGamesRated',
-                  'UserMinRating', 'UserMaxRating',
+      FTYPE_INT,  'tid', 'MinParticipants', 'MaxParticipants', 'MaxStartRound', 'MinRatingStartRound',
+                  'UserMinGamesFinished', 'UserMinGamesRated', 'UserMinRating', 'UserMaxRating',
       FTYPE_TEXT, 'Notes',
       FTYPE_DATE, 'Lastchanged', 'RegisterEndTime',
       FTYPE_ENUM, 'RatingUseMode', 'UserRated'
@@ -62,6 +62,8 @@ class TournamentProperties
    public $Notes;
    public $MinParticipants;
    public $MaxParticipants;
+   public $MaxStartRound;
+   public $MinRatingStartRound;
    public $RatingUseMode;
    public $RegisterEndTime;
    public $UserMinRating;
@@ -72,8 +74,9 @@ class TournamentProperties
 
    /*! \brief Constructs TournamentProperties-object with specified arguments. */
    public function __construct( $tid=0, $lastchanged=0, $changed_by='', $notes='',
-         $min_participants=2, $max_participants=0, $rating_use_mode=TPROP_RUMODE_COPY_CUSTOM,
-         $reg_end_time=0, $user_min_rating=MIN_RATING, $user_max_rating=RATING_9DAN, $user_rated=false,
+         $min_participants=2, $max_participants=0, $max_start_round=1, $min_rating_start_round=NO_RATING,
+         $rating_use_mode=TPROP_RUMODE_COPY_CUSTOM, $reg_end_time=0,
+         $user_min_rating=MIN_RATING, $user_max_rating=RATING_9DAN, $user_rated=false,
          $user_min_games_finished=0, $user_min_games_rated=0 )
    {
       $this->tid = (int)$tid;
@@ -82,6 +85,8 @@ class TournamentProperties
       $this->Notes = $notes;
       $this->MinParticipants = (int)$min_participants;
       $this->MaxParticipants = (int)$max_participants;
+      $this->MaxStartRound = (int)$max_start_round;
+      $this->setMinRatingStartRound( $min_rating_start_round );
       $this->setRatingUseMode( $rating_use_mode );
       $this->RegisterEndTime = (int)$reg_end_time;
       $this->setUserMinRating( $user_min_rating );
@@ -111,6 +116,11 @@ class TournamentProperties
    public function getMaxParticipants( $real_val=false )
    {
       return ( $real_val || $this->MaxParticipants > 0 ) ? $this->MaxParticipants : TP_MAX_COUNT;
+   }
+
+   public function setMinRatingStartRound( $rating )
+   {
+      $this->MinRatingStartRound = (int) TournamentUtils::normalizeRating( $rating );
    }
 
    public function to_string()
@@ -176,6 +186,8 @@ class TournamentProperties
       $data->set_value( 'ChangedBy', $this->ChangedBy );
       $data->set_value( 'MinParticipants', $this->MinParticipants );
       $data->set_value( 'MaxParticipants', $this->MaxParticipants );
+      $data->set_value( 'MaxStartRound', $this->MaxStartRound );
+      $data->set_value( 'MinRatingStartRound', $this->MinRatingStartRound );
       $data->set_value( 'RatingUseMode', $this->RatingUseMode );
       $data->set_value( 'RegisterEndTime', $this->RegisterEndTime );
       $data->set_value( 'UserMinRating', $this->UserMinRating );
@@ -186,6 +198,24 @@ class TournamentProperties
       $data->set_value( 'Notes', $this->Notes );
       return $data;
    }
+
+   /*! \brief Checks semantics of attributes of this TournamentProperties. */
+   public function check_properties( $max_start_round )
+   {
+      $errors = array();
+
+      if ( $this->MaxStartRound < 1 || $this->MaxStartRound > $max_start_round )
+         $errors[] = T_('Registration properties#tourney') . ': ' .
+            sprintf( T_('Expecting number for %s in range %s.'), T_('Max. Start Round'),
+               build_range_text(1, $max_start_round) );
+
+      if ( $this->MinRatingStartRound != NO_RATING && $this->MaxStartRound == 1 )
+         $errors[] = T_('Registration properties#tourney') . ': ' .
+            sprintf( T_('%s can not be set if %s is only %s.#tourney'),
+               T_('Min. Rating Start Round'), T_('Max. Start Round'), 1 );
+
+      return $errors;
+   }//check_properties
 
    /*!
     * \brief Checks potential registration by given user and returns non-null
@@ -211,6 +241,8 @@ class TournamentProperties
 
       if ( $is_new_tp && $check_type == TCHKTYPE_USER_NEW && $tourney->Scope == TOURNEY_SCOPE_PRIVATE )
          $errors[] = T_('This is a private tournament, so you must be invited to participate.');
+
+      // ----- tournament-type-specific checks -----
 
       // limit register end-time
       global $NOW;
@@ -345,6 +377,8 @@ class TournamentProperties
             @$row['Notes'],
             @$row['MinParticipants'],
             @$row['MaxParticipants'],
+            @$row['MaxStartRound'],
+            @$row['MinRatingStartRound'],
             @$row['RatingUseMode'],
             @$row['X_RegisterEndTime'],
             @$row['UserMinRating'],

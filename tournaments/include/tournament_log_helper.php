@@ -258,6 +258,10 @@ class TournamentLogHelper
          $msg[] = sprintf(self::$DIFF_FMT, 'MinParticipants', $old_tpr->MinParticipants, $new_tpr->MinParticipants );
       if ( $old_tpr->MaxParticipants != $new_tpr->MaxParticipants )
          $msg[] = sprintf(self::$DIFF_FMT, 'MaxParticipants', $old_tpr->MaxParticipants, $new_tpr->MaxParticipants );
+      if ( $old_tpr->MaxStartRound != $new_tpr->MaxStartRound )
+         $msg[] = sprintf(self::$DIFF_FMT, 'MaxStartRound', $old_tpr->MaxStartRound, $new_tpr->MaxStartRound );
+      if ( $old_tpr->MinRatingStartRound != $new_tpr->MinRatingStartRound )
+         $msg[] = sprintf(self::$DIFF_FMT, 'MinRatingStartRound', $old_tpr->MinRatingStartRound, $new_tpr->MinRatingStartRound );
       if ( $old_tpr->RatingUseMode != $new_tpr->RatingUseMode )
          $msg[] = sprintf(self::$DIFF_FMT, 'RatingUseMode', $old_tpr->RatingUseMode, $new_tpr->RatingUseMode );
       if ( $old_tpr->RegisterEndTime != $new_tpr->RegisterEndTime )

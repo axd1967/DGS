@@ -331,12 +331,16 @@ $GLOBALS['ThePage'] = new Page('TournamentRegistration');
       $tpform->add_row( array(
             'DESCRIPTION', T_('Current Start Round#tourney'),
             'TEXT',        $old_start_round, ));
-      if ( $tourney->Rounds > 1 && $allow_register && $authorise_edit_custom && !$is_invite && !$is_delete )
+
+      if ( $tprops->MaxStartRound > 1 && $allow_register && $authorise_edit_custom && !$is_invite && !$is_delete )
       {
-         $tpform->add_row( array(
-               'DESCRIPTION', T_('Customized Start Round#tourney'),
-               'TEXTINPUT',   'start_round', 3, 3, $vars['start_round'],
-               'TEXT',        MINI_SPACING . $tourney->getRoundLimitText(), ));
+         if ( $tprops->MinRatingStartRound != NO_RATING && $tp->User->Rating >= $tprops->MinRatingStartRound )
+         {
+            $tpform->add_row( array(
+                  'DESCRIPTION', T_('Customized Start Round#tourney'),
+                  'TEXTINPUT',   'start_round', 3, 3, $vars['start_round'],
+                  'TEXT',        ' ' . sprintf( T_('Range %s#tourney'), build_range_text(1, $tprops->MaxStartRound)), ));
+         }
       }
       $tpform->add_empty_row();
    }
@@ -471,16 +475,15 @@ function parse_edit_form( &$tp, $tourney, $ttype, $tprops )
          }
       }
 
-      if ( $ttype->need_rounds && $tourney->Rounds > 1 )
+      if ( $ttype->need_rounds && $tprops->MaxStartRound > 1
+            && $tprops->MinRatingStartRound != NO_RATING && $tp->User->Rating >= $tprops->MinRatingStartRound )
       {
          $new_value = trim($vars['start_round']); // optional
          if ( (string)$new_value != '' )
          {
-            if ( !is_numeric($new_value) || $new_value < 1 )
-               $errors[] = T_('Expecting positive number for start round#tourney');
-            elseif ( $tourney->Rounds > 0 && $new_value > $tourney->Rounds )
-               $errors[] = sprintf( T_('Start round is out of range of actual rounds %s for this tournament.'),
-                  build_range_text(1, $tourney->Rounds) );
+            if ( !is_numeric($new_value) || $new_value < 1 || $new_value > $tprops->MaxStartRound )
+               $errors[] = sprintf( T_('Expecting number for %s in range %s.'), T_('Customized Start Round#tourney'),
+                  build_range_text(1, $tprops->MaxStartRound) );
             else
                $tp->StartRound = $new_value;
          }

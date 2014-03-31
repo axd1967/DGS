@@ -196,14 +196,6 @@ class Tournament
          return ( $short ) ? 1 : T_('1 round#tourney');
    }//formatRound
 
-   public function getRoundLimitText()
-   {
-      if ( $this->Rounds > 0 )
-         return sprintf( T_('(max. %s rounds)#tourney'), $this->Rounds );
-      else
-         return T_('(unlimited rounds)#tourney');
-   }
-
    public function persist()
    {
       if ( $this->ID > 0 )

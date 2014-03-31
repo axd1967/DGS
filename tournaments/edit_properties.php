@@ -79,7 +79,7 @@ $GLOBALS['ThePage'] = new Page('TournamentPropertiesEdit');
 
    // check + parse edit-form
    $old_tprops = clone $tprops;
-   list( $vars, $edits, $input_errors ) = parse_edit_form( $tprops, $t_limits );
+   list( $vars, $edits, $input_errors ) = parse_edit_form( $tprops, $t_limits, $ttype );
    $errors = array_merge( $errors, $input_errors );
 
    // save tournament-properties-object with values from edit-form
@@ -119,6 +119,8 @@ $GLOBALS['ThePage'] = new Page('TournamentPropertiesEdit');
       $tform->add_empty_row();
    }
 
+   // ----- tournament-type-specific -----
+
    $reg_end_time = trim(get_request_arg('reg_end_time'));
    $tform->add_row( array(
          'DESCRIPTION', T_('Registration end time#tourney'),
@@ -134,10 +136,33 @@ $GLOBALS['ThePage'] = new Page('TournamentPropertiesEdit');
          'TEXTINPUT',   'max_participants', 5, 5, $vars['max_participants'],
          'TEXT',        MINI_SPACING . T_('(Maximum)'),
          'TEXT',        $t_limits->getLimitRangeTextAdmin(TLIMITS_MAX_TP), ));
+
+   if ( $ttype->getMaxRounds() > 1 )
+   {
+      $max_rounds = $ttype->determineLimitMaxStartRound( $tprops->MaxParticipants );
+      $tform->add_row( array(
+            'DESCRIPTION', T_('Max. Start Round'),
+            'TEXTINPUT',   'max_start_round', 5, 5, $vars['max_start_round'],
+            'TEXT',        MINI_SPACING . sprintf( T_('Range %s, depends on max. participants#tourney'),
+                  build_range_text(1, $max_rounds)), ));
+
+      $rating = $vars['min_rat_start_round'];
+      $valid_rat = is_valid_rating($rating);
+      $tform->add_row( array(
+            'DESCRIPTION', T_('Min. Rating Start Round'),
+            'TEXTINPUT',   'min_rat_start_round', 12, 12, ( $rating == NO_RATING
+                  ? ''
+                  : ( !$valid_rat ? $rating : echo_rating($rating, 1, 0, true, 1) ) ),
+            'TEXT', ( $valid_rat ? sprintf(' (=%s %s), ', T_('ELO#rating'), echo_rating_elo($rating)) : '' ),
+            'TEXT', T_('empty = forbid user to change start-round#tourney'), ));
+   }
+
    $tform->add_row( array(
          'DESCRIPTION', T_('Rating Use Mode#tourney'),
          'SELECTBOX',   'rating_use_mode', 1, $arr_rating_use_modes, $vars['rating_use_mode'], false, ));
    $tform->add_empty_row();
+
+   // ----- user-specific -----
 
    $tform->add_row( array(
          'DESCRIPTION', T_('Restrict user rating#tourney'),
@@ -196,7 +221,7 @@ $GLOBALS['ThePage'] = new Page('TournamentPropertiesEdit');
 
 
 // return [ vars-hash, edits-arr, errorlist ]
-function parse_edit_form( &$tpr, $t_limits )
+function parse_edit_form( &$tpr, $t_limits, $ttype )
 {
    $edits = array();
    $errors = array();
@@ -204,16 +229,18 @@ function parse_edit_form( &$tpr, $t_limits )
 
    // read from props or set defaults
    $vars = array(
-      'reg_end_time'       => formatDate($tpr->RegisterEndTime),
-      'min_participants'   => $tpr->MinParticipants,
-      'max_participants'   => $tpr->MaxParticipants,
-      'rating_use_mode'    => $tpr->RatingUseMode,
-      'user_rated'         => $tpr->UserRated,
-      'user_min_rating'    => echo_rating( $tpr->UserMinRating, false, 0, true, false ),
-      'user_max_rating'    => echo_rating( $tpr->UserMaxRating, false, 0, true, false ),
-      'min_games_finished' => $tpr->UserMinGamesFinished,
-      'min_games_rated'    => $tpr->UserMinGamesRated,
-      'notes'              => $tpr->Notes,
+      'reg_end_time'          => formatDate($tpr->RegisterEndTime),
+      'min_participants'      => $tpr->MinParticipants,
+      'max_participants'      => $tpr->MaxParticipants,
+      'max_start_round'       => $tpr->MaxStartRound,
+      'min_rat_start_round'   => $tpr->MinRatingStartRound,
+      'rating_use_mode'       => $tpr->RatingUseMode,
+      'user_rated'            => $tpr->UserRated,
+      'user_min_rating'       => echo_rating( $tpr->UserMinRating, false, 0, true, false ),
+      'user_max_rating'       => echo_rating( $tpr->UserMaxRating, false, 0, true, false ),
+      'min_games_finished'    => $tpr->UserMinGamesFinished,
+      'min_games_rated'       => $tpr->UserMinGamesRated,
+      'notes'                 => $tpr->Notes,
    );
 
    $old_vals = array() + $vars; // copy to determine edit-changes
@@ -271,6 +298,41 @@ function parse_edit_form( &$tpr, $t_limits )
       $tpr->setUserMinRating( read_rating( $vars['user_min_rating'] ));
       $tpr->setUserMaxRating( read_rating( $vars['user_max_rating'] ));
 
+      $allow_custom_round = ( $ttype->getMaxRounds() > 1 );
+      if ( $allow_custom_round )
+      {
+         if ( (string)$vars['min_rat_start_round'] == '' )
+            $old_vals['min_rat_start_round'] = NO_RATING;
+
+         $max_start_round = $ttype->determineLimitMaxStartRound( $tpr->MaxParticipants );
+         $new_value = $vars['max_start_round'];
+         if ( TournamentUtils::isNumberOrEmpty($new_value) && $new_value >= 1 && $new_value <= $max_start_round )
+            $tpr->MaxStartRound = limit( $new_value, 1, $max_start_round, 1 );
+         else
+            $errors[] = sprintf( T_('Expecting number for %s in range %s.'), T_('Max. Start Round'),
+               build_range_text(1, $max_start_round) );
+
+         $new_value = trim( $vars['min_rat_start_round'] );
+         if ( (string)$new_value != '' )
+         {
+            $new_rating = ( is_numeric($new_value) ) ? (int)$new_value : read_rating($new_value);
+            if ( is_valid_rating($new_rating) )
+            {
+               $tpr->setMinRatingStartRound( $new_rating );
+               $vars['min_rat_start_round'] = (int)$new_rating;
+            }
+            else
+               $errors[] = sprintf( T_('Invalid rating [%s] specified for %s.#tourney'),
+                  $new_value, T_('Min. Rating Start Round'));
+         }
+         else
+            $tpr->setMinRatingStartRound( NO_RATING );
+
+         if ( $tpr->MinRatingStartRound != NO_RATING && $tpr->MaxStartRound == 1 )
+            $errors[] = sprintf( T_('%s can not be set if %s is only %s.#tourney'),
+               T_('Min. Rating Start Round'), T_('Max. Start Round'), 1 );
+      }
+
       $new_value = $vars['min_games_finished'];
       if ( TournamentUtils::isNumberOrEmpty($new_value) && $new_value >=0 )
          $tpr->UserMinGamesFinished = limit( $new_value, 0, 9999, 0 );
@@ -293,6 +355,11 @@ function parse_edit_form( &$tpr, $t_limits )
       if ( $old_vals['reg_end_time'] != $tpr->RegisterEndTime ) $edits[] = T_('Registration end time#tourney');
       if ( $old_vals['min_participants'] != $tpr->MinParticipants ) $edits[] = T_('Participants');
       if ( $old_vals['max_participants'] != $tpr->MaxParticipants ) $edits[] = T_('Participants');
+      if ( $allow_custom_round )
+      {
+         if ( $old_vals['max_start_round'] != $tpr->MaxStartRound ) $edits[] = T_('Max. Start Round');
+         if ( $old_vals['min_rat_start_round'] != $tpr->MinRatingStartRound ) $edits[] = T_('Min. Rating Start Round');
+      }
       if ( $old_vals['rating_use_mode'] != $tpr->RatingUseMode ) $edits[] = T_('Rating Use Mode#tourney');
       if ( $old_vals['user_rated'] != $tpr->UserRated ) $edits[] = T_('User Rating');
       if ( $old_vals['user_min_rating'] != $tpr->UserMinRating ) $edits[] = T_('User Rating');

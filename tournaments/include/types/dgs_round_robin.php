@@ -60,6 +60,8 @@ class DgsRoundRobinTournament extends TournamentTemplateRoundRobin
       $tprops = new TournamentProperties();
       $tprops->MinParticipants = 0;
       $tprops->MaxParticipants = 0;
+      $tprops->MaxStartRound = 0; // 0 provoke error, so change by TD enforced
+      $tprops->setMinRatingStartRound( NO_RATING );
 
       $trules = new TournamentRules();
       $trules->Size = 19;

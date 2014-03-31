@@ -1259,6 +1259,8 @@ CREATE TABLE IF NOT EXISTS `TournamentProperties` (
   `ChangedBy` char(54) NOT NULL default '',
   `MinParticipants` smallint(6) NOT NULL default '2',
   `MaxParticipants` smallint(6) NOT NULL default '0',
+  `MaxStartRound` tinyint(3) unsigned NOT NULL default '1',
+  `MinRatingStartRound` smallint(6) NOT NULL default '-9999',
   `RatingUseMode` enum('COPY_CUSTOM','CURR_FIX','COPY_FIX') NOT NULL default 'COPY_CUSTOM',
   `RegisterEndTime` datetime NOT NULL default '0000-00-00 00:00:00',
   `UserMinRating` smallint(6) NOT NULL default '-9999',

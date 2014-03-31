@@ -1,3 +1,16 @@
+   - added restrictions to allow user to start in higher tournament-rounds
+     - TournamentProperties.MaxStartRound = restricts customized start-round for user and director
+     - TournamentProperties.MinRatingStartRound = restricts customized start-round for user,
+       - if value = -9999 = NO_RATING, users are not allowed to customize start-round while director can change it
+       - otherwise users with higher rating are allowed to customize start-round
+     - edit-properties: added configurations of TProps.MaxStartRound and MinRatingStartRound
+       - max-start-round restricted by tournament-type-specific limits and logarithmic-limit on max-participants
+       - configuration only needed for tournaments, that have round-management
+     - edit-participant: show warning to directors if min-rating-start-round forbids customization by user
+     - cleanup: removed now unused Tournament::getRoundLimitText()
+     - added warning on tournament-status-change REG-to-PAIR about participants in higher rounds
+     - added check on TournamentProperties on tournament-status-change NEW-to-REG
+
 DragonGoServer NEWS -- Release Notes. History of user-visible changes.
 Copyright (C) 2001-2014  Erik Ouchterlony, Jens-Uwe Gaspar
 
@@ -48,7 +61,7 @@ Copyright (C) 2001-2014  Erik Ouchterlony, Jens-Uwe Gaspar
             * Show start-round of tournament-participant in tournament-status-section
 
          * Tournament Registration page:
-            * Allow registering with higher start round
+            * Added restrictions to allow user to start in higher tournament-rounds
 
          * Tournament Pool view page with crosstables
             * Added links on top to view pools of other rounds

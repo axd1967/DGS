@@ -138,7 +138,7 @@ $GLOBALS['ThePage'] = new Page('TournamentManage');
                  sprintf( ' (%s)', T_('only by owner#tourney') ), SEP_SPACING,
                  make_menu_link( T_('Show tournament directors'), "tournaments/list_directors.php?tid=$tid" ),
          '<li>', make_menu_link( T_('Edit registration properties#tourney'), array( 'url' => "tournaments/edit_properties.php?tid=$tid", 'class' => 'TAdmin' )),
-                 subList( array( T_('tournament-related: end-time, min./max. participants, rating-use-mode#t_mng'),
+                 subList( array( T_('tournament-related: end-time, min./max. participants, rating-use-mode, start-round#t_mng'),
                                  T_('user-related: user rating-range, min. games#t_mng') )),
          '<li>', make_menu_link( T_('Edit rules#tourney'), array( 'url' => "tournaments/edit_rules.php?tid=$tid", 'class' => 'TAdmin' )),
                  subList( array( T_('Change game-settings: shape, ruleset, board size, handicap-settings, time-settings, rated#t_mng') )),

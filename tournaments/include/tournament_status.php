@@ -263,6 +263,18 @@ class TournamentStatus
       if ( $err_count < 0 )
          $this->errors[] = sprintf( T_('More than %s errors occured, so output was limited.#tourney'), $limit_err_count );
 
+      // warn about TPs in higher start-rounds
+      $tp_rnd_counts = TournamentParticipant::count_registered_tournament_participants( $this->tid, $curr_round + 1 );
+      $arr_rounds = array();
+      foreach ( $tp_rnd_counts as $start_round => $cnt_tp )
+      {
+         if ( $cnt_tp > 0 )
+            $arr_rounds[] = sprintf( T_('%s users for round #%s#tourney'), $cnt_tp, $start_round );
+      }
+      if ( count($arr_rounds) )
+         $this->warnings[] = sprintf( T_('Be prepared to handle participants on higher start rounds [%s].#tourney'),
+            implode(', ', $arr_rounds) );
+
       // check tournament-type specific checks
       $this->errors = array_merge( $this->errors,
          $this->ttype->checkProperties( $this->tourney, TOURNEY_STATUS_PAIR ) );

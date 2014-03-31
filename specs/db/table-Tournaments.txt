@@ -279,6 +279,8 @@ Description:
 | ChangedBy            | varchar(54)                               | NO   |     |                     |       |
 | MinParticipants      | smallint(6)                               | NO   |     | 2                   |       |
 | MaxParticipants      | smallint(6)                               | NO   |     | 0                   |       |
+| MaxStartRound        | tinyint(3) unsigned                       | NO   |     | 1                   |       |
+| MinRatingStartRound  | smallint(6)                               | NO   |     | -9999               |       |
 | RatingUseMode        | enum('COPY_CUSTOM','CURR_FIX','COPY_FIX') | NO   |     | COPY_CUSTOM         |       |
 | RegisterEndTime      | datetime                                  | NO   |     | 0000-00-00 00:00:00 |       |
 | UserMinRating        | smallint(6)                               | NO   |     | -9999               |       |
@@ -299,6 +301,17 @@ Description:
 
 * MinParticipants, MaxParticipants : minimum / maximum number of TPs
    - 0 = no limits
+
+* MaxStartRound : max. number of starting round
+   - restricts not only registration by user, but also editing participant by tournament-director
+   - range 1..X, X determined by tournament-type specific limit
+   - should be 1 for tournament-types without rounds (e.g. ladder)
+
+* MinRatingStartRound : min. rating for user-registration to allow higher start-round
+   - restricts registration by user to change start-round
+   - does not restrict edititing participant by tournament-director, if MaxStartRound allows it
+   - min. rating to allow user on registration to change start-round
+   - -9999 (=NO_RATING) = user can not enter at higher start-round, only tournament-director may do so
 
 * RatingUseMode : mode to handle tournament-rating on registration (and tournament playing)
    - COPY_CUSTOM = copies existing user-rating for T-rating,
@@ -996,7 +1009,6 @@ Description:
    - subtype: Data, Lock, Status, Game, Reg, Rank, News, Props, Pool, Round, User, NextRound
 
    - Examples with content:
-     - # TODO
      - T_Lock : change T-lock with lock-note
      - T_Status : change T-status with old -> new status
      - TRND_Status : change T-Round-status with old -> new status

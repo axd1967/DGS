@@ -98,3 +98,9 @@ ALTER TABLE TournamentResult
 --    'scripts/tournament_consistency.php'
 
 
+-- added restrictions to allow user to start in higher rounds
+ALTER TABLE TournamentProperties
+   ADD MinRatingStartRound smallint NOT NULL default '-9999' AFTER MaxParticipants,
+   ADD MaxStartRound tinyint unsigned NOT NULL default '1' AFTER MaxParticipants ;
+
+

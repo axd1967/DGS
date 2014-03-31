@@ -135,6 +135,14 @@ abstract class TournamentTemplateRoundRobin extends TournamentTemplate
       if ( $t_status == TOURNEY_STATUS_REGISTER || $t_status == TOURNEY_STATUS_PAIR )
          $errors = array_merge( $errors, $tround->check_properties() );
 
+      if ( $t_status == TOURNEY_STATUS_REGISTER ) // check semantics of registration-properties
+      {
+         $tprops = TournamentCache::load_cache_tournament_properties( 'TournamentTemplateRoundRobin.checkProperties',
+            $tid );
+         $max_start_round = $this->determineLimitMaxStartRound( $tprops->MaxParticipants );
+         $errors = array_merge( $errors, $tprops->check_properties( $max_start_round ) );
+      }
+
       if ( $t_status == TOURNEY_STATUS_PAIR ) // extra-checks for PAIR-status
       {
          // TPs on APPLY/INVITE-status are not allowed!
