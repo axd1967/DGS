@@ -13,6 +13,11 @@ ChangeLog
 
 2014-03-31 jug
 
+   * tournaments/include/tournament_pool_classes.php (PoolTables._compare_user_ranks),
+     NEWS:
+   - round-robins view-pools: order users on same pool-rank by user-rating,
+     but NOT to be used as a tie-breaker
+
    * tournaments/include/tournament_properties.php (class TournamentProperties, ~.__construct,
        ~.setMinRatingStartRound, ~.fillEntityData, ~.check_properties, ~.new_from_row),
      tournaments/include/tournament_participant.php (TournamentParticipant.count_registered_tournament_participants),

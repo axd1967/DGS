@@ -545,7 +545,11 @@ class PoolTables
       if ( $cmp_calcrank != 0 )
          return $cmp_calcrank;
 
-      return cmp_int( $a_uid, $b_uid ); // static ordering of users to assure same order
+      // NOT a tie-breaker: order on user-rating for meaningful order for same ranked-users in pool-matrix
+      $cmp_rating = -cmp_int( round(10*$a_tpool->User->Rating), round(10*$b_tpool->User->Rating) );
+      if ( $cmp_rating != 0 )
+         return $cmp_rating;
+      return cmp_int( $a_uid, $b_uid ); // static ordering of user-uid to assure same order
    }//compare_user_ranks
 
    /*!

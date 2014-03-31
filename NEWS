@@ -63,11 +63,12 @@ Copyright (C) 2001-2014  Erik Ouchterlony, Jens-Uwe Gaspar
          * Tournament Registration page:
             * Added restrictions to allow user to start in higher tournament-rounds
 
-         * Tournament Pool view page with crosstables
+         * Tournament Pool view page with crosstables:
             * Added links on top to view pools of other rounds
             * Show game-results in colored matrix with tooltips (game won, game lost, game draw, game annulled, game no-result)
             * Show points calculated from players game-results using the tournaments points-configuration
             * Use static Tie-Breakers (Points, SODOS) to determine pool-user ranks
+            * Use order by user-rating for users with same pool-rank
 
          * Tournament Points Editor with point-configuration-types (Simple, Hahn-like system) and score-example preview
          * Tournament Round Status Editor (Init, Pool, Pair, Play, Done)
