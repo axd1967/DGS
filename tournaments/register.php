@@ -79,7 +79,7 @@ $GLOBALS['ThePage'] = new Page('TournamentRegistration');
    $ttype = TournamentFactory::getTournament($tourney->WizardType);
    $tprops = TournamentCache::load_cache_tournament_properties( 'Tournament.register', $tid );
 
-   $errors = $tstatus->check_edit_status( $ttype->allow_register_tourney_status, false );
+   $status_errors = $tstatus->check_edit_status( $ttype->allow_register_tourney_status, false );
 
    // existing application ? (check matching tid & uid if loaded by rid)
    if ( $rid > 0 )
@@ -93,6 +93,22 @@ $GLOBALS['ThePage'] = new Page('TournamentRegistration');
    // authorize actions
    $authorise_delete = $tp->authorise_delete( $tourney->Status );
    $authorise_edit_custom = $tp->authorise_edit_customized( $tourney->Status );
+
+   // check exceptions for edit-allowed on PLAY-status for TP with higher start-round than current round
+   $warnings = array();
+   $allow_blocked_edit = false;
+   if ( $ttype->need_rounds && $tourney->Status == TOURNEY_STATUS_PLAY && count($status_errors) > 0
+         && $tp->StartRound > $tourney->CurrentRound )
+   {
+      if ( $rid && $is_delete ) // allow removal of existing-TP only on higher start-round (=withdrawal)
+         $allow_blocked_edit = true;
+      elseif ( $rid && @$_REQUEST['tp_ack_invite'] ) // accept invite
+         $allow_blocked_edit = true;
+
+      $warnings[] = make_html_safe( T_("Edit is normally forbidden except for accepting invitation or removing registration\n" .
+         "on higher start round than current round.#tourney"), true);
+   }
+   $errors = ( $allow_blocked_edit ) ? array() : $status_errors;
 
    if ( $rid && $is_delete && $authorise_delete && @$_REQUEST['confirm'] && count($errors) == 0 ) // confirm delete TP-reg
    {
@@ -145,6 +161,7 @@ $GLOBALS['ThePage'] = new Page('TournamentRegistration');
       $tp->Status = $tp->calc_init_status($tprops->RatingUseMode);
    }
    $errors = array_merge( $errors, $input_errors );
+   $warnings = array_merge( $lock_warnings, $warnings );
    $is_invite = ( $tp->Status == TP_STATUS_INVITE );
    $allow_register = ( count($reg_errors) + count($lock_errors) == 0 );
 
@@ -251,6 +268,9 @@ $GLOBALS['ThePage'] = new Page('TournamentRegistration');
          'DESCRIPTION', T_('Tournament Status'),
          'TEXT',        Tournament::getStatusText($tourney->Status) ));
    $tpform->add_row( array(
+         'DESCRIPTION', T_('Tournament Round'),
+         'TEXT',        $tourney->formatRound(), ));
+   $tpform->add_row( array(
          'DESCRIPTION', T_('User'),
          'TEXT',        user_reference( REF_LINK, 1, '', $player_row), ));
    if ( $tp->Created > 0 )
@@ -271,13 +291,21 @@ $GLOBALS['ThePage'] = new Page('TournamentRegistration');
             'DESCRIPTION', T_('New Registration Status#tourney'),
             'TEXT',        span('TWarning', TournamentParticipant::getStatusText($tp->Status)), ));
 
+   if ( count($errors) || count($warnings) )
+      $tpform->add_row( array( 'HR' ));
    if ( count($errors) )
    {
-      $tpform->add_row( array( 'HR' ));
       $tpform->add_row( array(
             'DESCRIPTION', T_('Error'),
             'TEXT', buildErrorListString(T_('There are some errors'), $errors) ));
    }
+   if ( count($warnings) )
+   {
+      $tpform->add_row( array(
+            'DESCRIPTION', T_('Warning'),
+            'TEXT', buildWarnListString(T_('There are some warnings'), $warnings) ));
+   }
+
    if ( count($reg_errors) || count($reg_warnings) )
    {
       // NOTE: if tourney-restrictions forbid registration -> TP can ask TD for invitation
@@ -326,23 +354,22 @@ $GLOBALS['ThePage'] = new Page('TournamentRegistration');
 
    // EDIT: Rounds ---------------------
 
-   if ( $ttype->need_rounds && !$is_delete )
+   if ( $ttype->need_rounds )
    {
       $tpform->add_row( array(
             'DESCRIPTION', T_('Current Start Round#tourney'),
             'TEXT',        $old_start_round, ));
 
-      if ( $tprops->MaxStartRound > 1 && $allow_register && $authorise_edit_custom && !$is_invite && !$is_delete )
+      if ( $tprops->MaxStartRound > 1 && $allow_register && $authorise_edit_custom && !$is_invite && !$is_delete
+           && $tprops->MinRatingStartRound != NO_RATING && $tp->User->Rating >= $tprops->MinRatingStartRound )
       {
-         if ( $tprops->MinRatingStartRound != NO_RATING && $tp->User->Rating >= $tprops->MinRatingStartRound )
-         {
-            $tpform->add_row( array(
-                  'DESCRIPTION', T_('Customized Start Round#tourney'),
-                  'TEXTINPUT',   'start_round', 3, 3, $vars['start_round'],
-                  'TEXT',        ' ' . sprintf( T_('Range %s#tourney'), build_range_text(1, $tprops->MaxStartRound)), ));
-         }
+         $tpform->add_row( array(
+               'DESCRIPTION', T_('Customized Start Round#tourney'),
+               'TEXTINPUT',   'start_round', 3, 3, $vars['start_round'],
+               'TEXT',        ' ' . sprintf( T_('Range %s#tourney'), build_range_text(1, $tprops->MaxStartRound)), ));
       }
-      $tpform->add_empty_row();
+      if ( !$is_delete )
+         $tpform->add_empty_row();
    }
 
    // EDIT: Texts ----------------------

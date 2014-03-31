@@ -93,7 +93,8 @@ $GLOBALS['ThePage'] = new Page('TournamentEditParticipant');
       error('tournament_edit_not_allowed', "Tournament.edit_participant($tid,$my_id)");
    $is_admin = TournamentUtils::isAdmin();
 
-   $errors = $tstatus->check_edit_status( $ttype->allow_register_tourney_status );
+   $errors = array();
+   $status_errors = $tstatus->check_edit_status( $ttype->allow_register_tourney_status );
 
    // load-user, change-user?
    if ( @$_REQUEST['tp_showuser_uid'] )
@@ -189,7 +190,32 @@ $GLOBALS['ThePage'] = new Page('TournamentEditParticipant');
 
       $tp->Status = TP_STATUS_INVITE; // TD can only invite
    }
-   $errors = array_merge( $errors, $input_errors );
+
+   // check exceptions for edit-allowed on PLAY-status for TP with higher start-round than current round
+   $allow_blocked_edit = false;
+   $warnings = array();
+   if ( $ttype->need_rounds && $tourney->Status == TOURNEY_STATUS_PLAY && count($status_errors) > 0
+         && $tp->StartRound > $tourney->CurrentRound )
+   {
+      if ( !$rid ) // allow new-TP with higher start-round than current round
+         $allow_blocked_edit = true;
+      elseif ( $rid && @$_REQUEST['tp_delete'] ) // allow removal of existing-TP only on higher start-round (=withdrawal)
+         $allow_blocked_edit = true;
+
+      $warnings[] = make_html_safe( T_("Edit is normally forbidden except for adding or removing user \n" .
+         "on higher start round than current round.#tourney"), true);
+   }
+   if ( $allow_blocked_edit )
+   {
+      $errors = array_merge( $errors, $input_errors );
+      $warnings = array_merge( $lock_warnings, $status_errors, $warnings );
+   }
+   else
+   {
+      $errors = array_merge( $status_errors, $errors, $input_errors );
+      $warnings = array_merge( $lock_warnings, $warnings );
+   }
+
 
    // ---------- Process inputs into actions ------------------------------------
 
@@ -313,25 +339,29 @@ $GLOBALS['ThePage'] = new Page('TournamentEditParticipant');
    $tpform->add_row( array(
          'DESCRIPTION', T_('Tournament Status'),
          'TEXT',        Tournament::getStatusText($tourney->Status), ));
+   $tpform->add_row( array(
+         'DESCRIPTION', T_('Tournament Round'),
+         'TEXT',        $tourney->formatRound(), ));
    if ( !is_null($user) )
       $tpform->add_row( array(
             'DESCRIPTION', T_('User'),
             'TEXT', $user->user_reference(), ));
 
+   if ( count($errors) || count($warnings) )
+      $tpform->add_row( array( 'HR' ));
    if ( count($errors) )
    {
       $tpform->add_row( array(
             'DESCRIPTION', T_('Error'),
             'TEXT', buildErrorListString( T_('There are some errors'), $errors ) ));
-      $tpform->add_empty_row();
    }
-   if ( count($lock_warnings) )
+   if ( count($warnings) )
    {
-      $tpform->add_row( array( 'HR' ));
       $tpform->add_row( array(
             'DESCRIPTION', T_('Warning'),
-            'TEXT', buildErrorListString(T_('There are some warnings'), $lock_warnings) ));
+            'TEXT', buildWarnListString(T_('There are some warnings'), $warnings) ));
    }
+
    if ( count($reg_errors) || count($reg_warnings) )
    {
       $tpform->add_row( array( 'HR' ));
@@ -343,7 +373,7 @@ $GLOBALS['ThePage'] = new Page('TournamentEditParticipant');
       if ( count($reg_warnings) )
       {
          $tpform->add_row( array(
-               'OWNHTML', buildErrorListString(
+               'OWNHTML', buildWarnListString(
                           T_('[Warnings]: User is normally not allowed to register for this tournament'), $reg_warnings, 2) ));
          if ( !$rid && count($reg_errors) == 0 ) // no ignore on error, else ignore only for NEW-reg
             $tpform->add_row( array(
@@ -352,8 +382,10 @@ $GLOBALS['ThePage'] = new Page('TournamentEditParticipant');
       $tpform->add_row( array( 'HR' ));
    }
 
+
    if ( !is_null($user) ) // edit
    {
+      $tpform->add_row( array( 'HR' ));
       if ( $tp->Created > 0 )
          $tpform->add_row( array(
                'DESCRIPTION', T_('Created'),
@@ -428,7 +460,7 @@ $GLOBALS['ThePage'] = new Page('TournamentEditParticipant');
 
       // EDIT: Rounds ---------------------
 
-      if ( $ttype->need_rounds && !$is_delete )
+      if ( $ttype->need_rounds )
       {
          $tpform->add_row( array(
                'DESCRIPTION', T_('Current Start Round#tourney'),
@@ -455,7 +487,8 @@ $GLOBALS['ThePage'] = new Page('TournamentEditParticipant');
                $tpform->add_row( array( 'TAB', 'TEXT', span('TWarning', make_html_safe($edit_warning, true)), ));
          }
 
-         $tpform->add_empty_row();
+         if ( !$is_delete )
+            $tpform->add_empty_row();
       }
 
       // EDIT: Texts ----------------------

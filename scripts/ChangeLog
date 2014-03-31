@@ -13,6 +13,24 @@ ChangeLog
 
 2014-03-31 jug
 
+   * tournaments/edit_participant.php, tournaments/register.php, NEWS:
+   - round-robin-tournament:
+     - allow adding new and removal of existing participant on higher customized start-round
+       that hasn't started yet
+     - operation additionally allowed on tournament-status PLAY for tournaments with round-management
+     - show warning that certain operations are allowed on edit-participant-page for directors
+       and register-page for users
+     - edit-participant for directors:
+       - allow adding new user with start-round higher than current tournament-round by director
+       - allow removing (=withdrawing) existing participant if start-round higher
+         than currently played tournament-round
+       - added tournament-round-info, adjusted some layout for warnings
+     - register-participant-page for user:
+       - allow accepting tournament-invitation by user with start-round higher than current round
+         initiated by director
+       - allow own removal (=withdrawing) if start-round higher than currently played tournament-round
+       - added tournament-round-info, add showing of lock-warnings, adjusted layout a bit for warnings
+
    * tournaments/include/tournament_pool_classes.php (PoolTables._compare_user_ranks),
      NEWS:
    - round-robins view-pools: order users on same pool-rank by user-rating,
