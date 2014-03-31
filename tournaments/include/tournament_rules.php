@@ -107,7 +107,7 @@ class TournamentRules
    public function __construct( $id=0, $tid=0, $lastchanged=0, $changed_by='', $flags=0, $notes='',
          $ruleset=RULESET_JAPANESE, $size=19, $handicaptype=TRULE_HANDITYPE_CONV,
          $handicap=0, $komi=DEFAULT_KOMI, $adj_komi=0.0, $jigo_mode=JIGOMODE_KEEP_KOMI,
-         $adj_handicap=0, $min_handicap=0, $max_handicap=-1, $std_handicap=true,
+         $adj_handicap=0, $min_handicap=0, $max_handicap=DEFAULT_MAX_HANDICAP, $std_handicap=true,
          $maintime=450, $byotype=BYOTYPE_FISCHER, $byotime=15, $byoperiods=10,
          $weekendclock=true, $rated=false, $shape_id=0, $shape_snapshot='' )
    {
