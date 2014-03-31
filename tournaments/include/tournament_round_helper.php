@@ -191,7 +191,7 @@ class TournamentRoundHelper
 
       // read specified pools with all users and TPs (if needed for T-rating), need TP_ID for TG.*_rid
       $load_opts_tpool = TPOOL_LOADOPT_TP_ID | TPOOL_LOADOPT_USER | TPOOL_LOADOPT_ONLY_RATING | TPOOL_LOADOPT_UROW_RATING;
-      if ( $tprops->RatingUseMode != TPROP_RUMODE_CURR_FIX )
+      if ( $tprops->need_rating_copy() )
          $load_opts_tpool |= TPOOL_LOADOPT_TRATING;
       $tpool_iterator = new ListIterator( "$dbgmsg.load_pools" );
       $tpool_iterator->addIndex( 'uid' );

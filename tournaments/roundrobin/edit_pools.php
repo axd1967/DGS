@@ -90,7 +90,7 @@ $GLOBALS['ThePage'] = new Page('TournamentPoolEdit');
    $trstatus = new TournamentRoundStatus( $tourney, $tround );
 
    $tprops = TournamentCache::load_cache_tournament_properties( 'Tournament.edit_pools', $tid );
-   $needs_trating = ( $tprops->RatingUseMode != TPROP_RUMODE_CURR_FIX );
+   $need_trating = $tprops->need_rating_copy();
    $load_opts_tpool = TPOOL_LOADOPT_USER | TPOOL_LOADOPT_REGTIME | ( $needs_trating ? TPOOL_LOADOPT_TRATING : 0 );
 
    // init
