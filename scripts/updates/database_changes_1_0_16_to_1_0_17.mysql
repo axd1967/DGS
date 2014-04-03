@@ -104,3 +104,12 @@ ALTER TABLE TournamentProperties
    ADD MaxStartRound tinyint unsigned NOT NULL default '1' AFTER MaxParticipants ;
 
 
+-- added min-threshold to cross by ladder-users best-consecutive-wins to enter tournament-result
+ALTER TABLE TournamentLadderProps
+   ADD SeqWinsThreshold tinyint unsigned NOT NULL default '0' ;
+
+-- added index for update on consecutive-wins in tournament-results
+ALTER TABLE TournamentResult
+   ADD KEY rid (rid) ;
+
+

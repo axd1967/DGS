@@ -83,6 +83,7 @@ Copyright (C) 2001-2014  Erik Ouchterlony, Jens-Uwe Gaspar
    * Ladder-Tournament:
       * Tournament Ladder view page:
          * Added "Consecutive Wins" and "Max. Consecutive Wins" in new table-column '#CW' (counting wins and jigo)
+         * Added tournament-result for max. consecutive wins if configured threshold reached by ladder-user
          * Renamed 'Challenges'-table-column to 'Challenges-In' with incoming challenges
          * Added table-column with outgoing challenges, hidden per default
          * Added link on top to jump near own ladder-position

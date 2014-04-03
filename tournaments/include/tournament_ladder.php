@@ -341,7 +341,7 @@ class TournamentLadder
          if ( $db_update )
          {
             $result = db_query( "TournamentLadder.update_seq_wins.inc({$this->rid},$game_score,$tgame_flags)",
-               "UPDATE TournamentLadder SET SeqWins=SeqWins+1, SeqWinsBest=GREATEST(SeqWinsBest,SeqWins+1) " .
+               "UPDATE TournamentLadder SET SeqWins=SeqWins+1, SeqWinsBest=GREATEST(SeqWinsBest,SeqWins) " .
                "WHERE tid={$this->tid} AND rid={$this->rid} LIMIT 1" );
          }
          else
@@ -1493,21 +1493,6 @@ class TournamentLadder
          "WHERE TL.tid=$tid AND TLP.Rating2 >= $rating" );
       return ($row) ? (int)$row['X_Count'] : 0;
    }//find_ladder_rating_pos
-
-   /*!
-    * \brief Tracks (increases or resets) consecutive-wins (TournamentLadder.SeqWins/SeqWinsBest)
-    *       for given tournament-game for challenger and defender.
-    */
-   public static function process_game_end_seq_wins( $tgame )
-   {
-      // track wins for challenger
-      $tladder_ch = new TournamentLadder( $tgame->tid, $tgame->Challenger_rid, $tgame->Challenger_uid );
-      $tladder_ch->update_seq_wins( $tgame->Score, $tgame->Flags );
-
-      // track wins for defender
-      $tladder_df = new TournamentLadder( $tgame->tid, $tgame->Defender_rid, $tgame->Defender_uid );
-      $tladder_df->update_seq_wins( -$tgame->Score, $tgame->Flags );
-   }//process_game_end_seq_wins
 
 } // end of 'TournamentLadder'
 ?>

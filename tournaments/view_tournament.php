@@ -143,7 +143,7 @@ $GLOBALS['ThePage'] = new Page('Tournament');
          "\n<li>", anchor( "$base_page_tourney#registration", T_('Tournament Registration') ),
          "\n<li>", anchor( "$base_page_tourney#games", T_('Tournament Games') ),
          ( $show_tresult
-            ? "\n<li>" . anchor( "$base_page_tourney#result", T_('Tournament Results') )
+            ? "\n<li>" . anchor( "$base_page_tourney#result", T_('Tournament Results (Hall of Fame)') )
             : ''),
       "</ul>\n",
       make_html_safe(
@@ -309,7 +309,8 @@ $GLOBALS['ThePage'] = new Page('Tournament');
       else
          $tresult_str = $tresult_control->make_table_tournament_results();
 
-      section( 'TournamentResult', sprintf( T_('Tournament Results (TOP %s)'), $TRESULT_LIMIT ), 'result', true );
+      section( 'TournamentResult', T_('Tournament Results (Hall of Fame)') . ' - ' .
+         sprintf( T_('TOP %s#tourney'), $TRESULT_LIMIT ), 'result', true );
 
       echo "<center>", $tresult_str, "</center><br>\n";
 

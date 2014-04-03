@@ -1145,6 +1145,7 @@ CREATE TABLE IF NOT EXISTS `TournamentLadderProps` (
   `RankPeriodLength` tinyint(3) unsigned NOT NULL default '1',
   `CrownKingHours` smallint(5) unsigned NOT NULL default '0',
   `CrownKingStart` datetime NOT NULL default '0000-00-00 00:00:00',
+  `SeqWinsThreshold` tinyint(3) unsigned NOT NULL default '0',
   PRIMARY KEY  (`tid`),
   KEY `UserAbsenceDays` (`UserAbsenceDays`)
 ) ENGINE=MyISAM DEFAULT CHARSET=latin1;
@@ -1293,7 +1294,8 @@ CREATE TABLE IF NOT EXISTS `TournamentResult` (
   `Comment` varchar(128) NOT NULL default '',
   `Note` varchar(255) NOT NULL default '',
   PRIMARY KEY  (`ID`),
-  KEY `tidRank` (`tid`,`Rank`)
+  KEY `tidRank` (`tid`,`Rank`),
+  KEY `rid` (`rid`)
 ) ENGINE=MyISAM  DEFAULT CHARSET=latin1;
 
 -- --------------------------------------------------------

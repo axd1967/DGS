@@ -235,6 +235,12 @@ $GLOBALS['ThePage'] = new Page('TournamentLadderPropsEdit');
          'TEXT',  '&nbsp;' . span('EditNote', sprintf( T_('(Date format [%s])'), FMT_PARSE_DATE )), ));
    $tform->add_empty_row();
 
+   // consecutive-wins threshold
+   $tform->add_row( array(
+         'DESCRIPTION', T_('Consecutive Wins Threshold#T_ladder'),
+         'TEXTINPUT',   'seqwins_threshold', 8, 8, $vars['seqwins_threshold'], ));
+   $tform->add_empty_row();
+
    $tform->add_row( array(
          'DESCRIPTION', T_('Unsaved edits'),
          'TEXT',        span('TWarning', implode(', ', $edits), '[%s]'), ));
@@ -301,6 +307,7 @@ function parse_edit_form( &$tlp, $t_limits )
       'rankplen'        => $tlp->RankPeriodLength,
       'crownking'       => $tlp->CrownKingHours,
       'crownstart'      => formatDate($tlp->CrownKingStart),
+      'seqwins_threshold' => $tlp->SeqWinsThreshold,
    );
 
    $old_vals = array() + $vars; // copy to determine edit-changes
@@ -449,6 +456,13 @@ function parse_edit_form( &$tlp, $t_limits )
       else
          $errors[] = $parsed_value;
 
+      $new_value = $vars['seqwins_threshold'];
+      if ( TournamentUtils::isNumberOrEmpty($new_value) && $new_value >= 0 && $new_value <= 255 )
+         $tlp->SeqWinsThreshold = (int)$new_value;
+      else
+         $errors[] = sprintf( T_('Expecting number for %s in range %s.'), T_('Consecutive Wins Threshold#T_ladder'),
+            build_range_text(0, 255) );
+
 
       $tlp->setDetermineChallenger( $vars['det_chall'] );
       $tlp->setGameEndNormal( $vars['gend_normal'] );
@@ -479,6 +493,7 @@ function parse_edit_form( &$tlp, $t_limits )
       if ( $old_vals['rankplen'] != $tlp->RankPeriodLength ) $edits[] = T_('Rank Archiving Period length#T_ladder');
       if ( $old_vals['crownking'] != $tlp->CrownKingHours ) $edits[] = T_('Crown King#T_ladder');
       if ( $old_vals['crownstart'] != $tlp->CrownKingStart ) $edits[] = T_('Crown King Check time#T_ladder');
+      if ( $old_vals['seqwins_threshold'] != $tlp->SeqWinsThreshold ) $edits[] = T_('Consecutive Wins Threshold#T_ladder');
    }
 
    return array( $vars, array_unique($edits), $errors );

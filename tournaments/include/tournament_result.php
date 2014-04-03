@@ -231,9 +231,33 @@ class TournamentResult
 
       $tresult = TournamentResult::new_from_row($row);
       if ( $tid > 0 && $tresult->tid != $tid )
-         error('', "$dbgmsg.TournamentResult.load_tournament_result.check.tid($tresult_id,$tid)");
+         error('', "$dbgmsg.TournamentResult:load_tournament_result.check.tid($tresult_id,$tid)");
       return $tresult;
    }//load_tournament_result
+
+   /*!
+    * \brief Returns array of TournamentResult-objects for given rid (TP.ID) and optional result-type TournamentResult.Type.
+    * \return arr( TournamentResult-object, ...)
+    */
+   public static function load_tournament_results_by_rid( $dbgmsg, $rid, $result_type=0 )
+   {
+      $rid = (int)$rid;
+      $result_type = (int)$result_type;
+
+      $qsql = self::build_query_sql();
+      $qsql->add_part( SQLP_WHERE, "TRS.rid=$rid" );
+      if ( $result_type > 0 )
+         $qsql->add_part( SQLP_WHERE, "TRS.Type=$result_type" );
+
+      $result = db_query( "TournamentResult:load_tournament_results_by_rid($rid,$result_type)", $qsql->get_select() );
+
+      $arr_tresult = array();
+      while ( $row = mysql_fetch_array($result) )
+         $arr_tresult[] = self::new_from_row( $row );
+      mysql_free_result($result);
+
+      return $arr_tresult;
+   }//load_tournament_results_by_rid
 
    /*! \brief Returns enhanced (passed) ListIterator with TournamentResult-objects for given tournament-id. */
    public static function load_tournament_results( $iterator, $tid=-1, $with_player_info=false )

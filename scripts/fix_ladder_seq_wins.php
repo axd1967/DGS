@@ -24,12 +24,16 @@ require_once 'include/std_functions.php';
 require_once 'include/std_classes.php';
 require_once 'include/form_functions.php';
 require_once 'tournaments/include/tournament.php';
+require_once 'tournaments/include/tournament_cache.php';
 require_once 'tournaments/include/tournament_games.php';
 require_once 'tournaments/include/tournament_ladder.php';
 
 define('SEPLINE', "\n<p><hr>\n");
 
 $GLOBALS['ThePage'] = new Page('Script', PAGEFLAG_IMPLICIT_FLUSH );
+
+define('FIXTYPE_SEQWINS_TLADDER', 1);
+define('FIXTYPE_SEQWINS_TRESULT', 2);
 
 
 {
@@ -47,12 +51,13 @@ $GLOBALS['ThePage'] = new Page('Script', PAGEFLAG_IMPLICIT_FLUSH );
    $page = "fix_ladder_seq_wins.php";
 
 /* Actual REQUEST calls used
-     fix&tid=                 : fix all users for specific ladder-tournament
-     fix_confirm&tid=         : fix all users for specific ladder-tournament
+     preview&tid=&type=      : preview for fix of all users for specific ladder-tournament & fix-type
+     confirm&tid=&type=      : fix all users for specific ladder-tournament & fix-type
 */
 
    $tid = (int)get_request_arg('tid');
    if ( $tid <= 0 ) $tid = '';
+   $fix_type = (int)get_request_arg('type');
 
 
    $title = T_('Fix Ladder Consecutive Wins');
@@ -65,8 +70,28 @@ $GLOBALS['ThePage'] = new Page('Script', PAGEFLAG_IMPLICIT_FLUSH );
 
    section( 'result', T_('Result') );
 
-   if ( $tid && (@$_REQUEST['fix'] || @$_REQUEST['fix_confirm']) ) // fix single ladder-tournament
-      fix_ladder_seqwins( $tid );
+   $errmsg = null;
+   if ( !$tid )
+      $errmsg = "Missing tournament-id";
+   else
+   {
+      $tourney = Tournament::load_tournament( $tid );
+      if ( is_null($tourney) )
+         $errmsg = "Tournament #$tid not found!";
+      else if ( $tourney->Type != TOURNEY_TYPE_LADDER )
+         $errmsg = "Tournament #$tid is NOT a ladder-tournament!";
+   }
+   if ( !is_null($errmsg) )
+      echo span('ErrMsgCode', "<br>$errmsg<br>\n");
+   else if ( $tid && (@$_REQUEST['preview'] || @$_REQUEST['confirm']) ) // fix single ladder-tournament
+   {
+      if ( $fix_type == FIXTYPE_SEQWINS_TLADDER )
+         fix_ladder_seqwins( $tid );
+      elseif ( $fix_type == FIXTYPE_SEQWINS_TRESULT )
+         fix_results_seqwins( $tid );
+      else
+         error('invalid_args', "scripts.fix_ladder_seq_wins($fix_type)");
+   }
 
 
    $menu_array = array( T_('Fix ladder consecutive wins') => "scripts/$page" );
@@ -76,24 +101,29 @@ $GLOBALS['ThePage'] = new Page('Script', PAGEFLAG_IMPLICIT_FLUSH );
 
 function show_form()
 {
-   global $page, $tid;
+   global $page, $tid, $fix_type;
 
    $tform = new Form('tform', $page, FORM_GET, true);
    $tform->add_row( array(
          'DESCRIPTION', T_('Ladder-Tournament (tid)'),
-         'TEXTINPUT',   'tid', 8, -1, get_request_arg('tid'),
-      ));
+         'TEXTINPUT',   'tid', 8, -1, get_request_arg('tid'), ));
+   $tform->add_row( array(
+         'DESCRIPTION', T_('Fix Type'),
+         'RADIOBUTTONS', 'type', array( FIXTYPE_SEQWINS_TLADDER => T_('Fix Consecutive Wins in ladder') ), $fix_type, ));
+   $tform->add_row( array(
+         'TAB',
+         'RADIOBUTTONS', 'type', array( FIXTYPE_SEQWINS_TRESULT => T_('Fix Max. Consecutive Wins in results (Preview = Confirm!)') ), $fix_type, ));
 
    $tform->add_row( array(
          'TAB', 'CELL', 1, '',
-         'SUBMITBUTTON', 'fix', T_('Preview: Fix Consecutive Wins for ladder-tournament'),
+         'SUBMITBUTTON', 'preview', T_('Preview'),
       ));
 
-   if ( @$_REQUEST['fix'] ) // fix single ladder-tournament (confirm)
+   if ( @$_REQUEST['preview'] ) // fix single ladder-tournament (confirm)
    {
       $tform->add_row( array(
             'TAB', 'CELL', 1, '',
-            'SUBMITBUTTON', 'fix_confirm', T_('Confirm Fix'),
+            'SUBMITBUTTON', 'confirm', T_('Confirm Fix'),
       ));
    }
 
@@ -103,23 +133,11 @@ function show_form()
 
 function fix_ladder_seqwins( $tid )
 {
-   $errmsg = null;
-   $tourney = Tournament::load_tournament( $tid );
-   if ( is_null($tourney) )
-      $errmsg = "Tournament #$tid not found!";
-   else if ( $tourney->Type != TOURNEY_TYPE_LADDER )
-      $errmsg = "Tournament #$tid is NOT a ladder-tournament!";
-   if ( !is_null($errmsg) )
-   {
-      echo span('ErrMsgCode', "<br><br>$errmsg<br>\n");
-      return;
-   }
-
    // load all finished tournament-games
    $qsql = TournamentGames::build_query_sql( $tid );
    $qsql->add_part( SQLP_OPTS, SQLOPT_CALC_ROWS );
    $qsql->add_part( SQLP_FIELDS, 'IF(ISNULL(G.ID),TG.Lastchanged,G.Lastchanged) AS X_FixOrder' );
-   $qsql->add_part( SQLP_FROM, 'LEFT JOIN Games AS G ON G.ID=TG.gid' ); // games may be deleted
+   $qsql->add_part( SQLP_FROM,  'LEFT JOIN Games AS G ON G.ID=TG.gid' ); // games may be deleted
    $qsql->add_part( SQLP_ORDER, 'X_FixOrder ASC' );
    $qsql->add_part( SQLP_WHERE, "TG.Status IN ('".TG_STATUS_WAIT."','".TG_STATUS_DONE."')" );
 
@@ -183,9 +201,35 @@ function fix_ladder_seqwins( $tid )
       , " - Fix Done.";
 }//fix_ladder_seqwins
 
+
+function fix_results_seqwins( $tid )
+{
+   $tl_props = TournamentCache::load_cache_tournament_ladder_props(
+      "scrips.fix_ladder_seq_wins.fix_results_seqwins($tid)", $tid );
+   if ( $tl_props->SeqWinsThreshold <= 0 )
+   {
+      echo span('TInfo', "<br><br>TournamentProperties.SeqWinsThreshold is 0 (=disabled).<br>\n");
+      return;
+   }
+
+   $begin = getmicrotime();
+   echo SEPLINE;
+   echo "Fix TournamentResult for max. consecutive wins ...<br>\n";
+
+   $cnt_fixed = TournamentResultControl::create_tournament_result_best_seq_wins(
+      $tid, null, $tl_props->SeqWinsThreshold );
+
+   echo "<br>\n",
+      sprintf( "Tournament #%s -> fixed %s TournamentResult-entries<br>\n", $tid, $cnt_fixed );
+
+   echo "\n<br>Needed: " . sprintf("%1.3fs", (getmicrotime() - $begin))
+      , " - Fix Done.";
+}//fix_results_seqwins
+
+
 function dbg_query( $dbgmsg, $query )
 {
-   if ( @$_REQUEST['fix_confirm'] )
+   if ( @$_REQUEST['confirm'] )
       $result = db_query( $dbgmsg, $query );
    else
    {

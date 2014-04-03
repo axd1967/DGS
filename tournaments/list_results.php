@@ -49,7 +49,7 @@ $GLOBALS['ThePage'] = new Page('TournamentResultList');
    $tresult_control->build_tournament_result_table( 'Tournament.list_results' );
 
 
-   $title = T_('Tournament Results');
+   $title = T_('Tournament Results (Hall of Fame)');
    start_page( $title, true, $logged_in, $player_row );
 
    echo "<h3 class=Header>$title</h3>\n",

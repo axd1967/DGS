@@ -55,7 +55,7 @@ $ENTITY_TOURNAMENT_LADDER_PROPS = new Entity( 'TournamentLadderProps',
       FTYPE_INT,  'tid', 'ChallengeRangeAbsolute', 'ChallengeRangeRelative', 'ChallengeRangeRating',
                   'ChallengeRematchWait',
                   'MaxDefenses', 'MaxDefenses1', 'MaxDefenses2', 'MaxDefensesStart1', 'MaxDefensesStart2',
-                  'MaxChallenges', 'UserAbsenceDays', 'RankPeriodLength', 'CrownKingHours',
+                  'MaxChallenges', 'UserAbsenceDays', 'RankPeriodLength', 'CrownKingHours', 'SeqWinsThreshold',
       FTYPE_DATE, 'Lastchanged', 'CrownKingStart',
       FTYPE_ENUM, 'DetermineChallenger', 'GameEndNormal', 'GameEndJigo', 'GameEndTimeoutWin', 'GameEndTimeoutLoss',
                   'UserJoinOrder'
@@ -88,6 +88,7 @@ class TournamentLadderProps
    public $RankPeriodLength;
    public $CrownKingHours;
    public $CrownKingStart;
+   public $SeqWinsThreshold;
 
    /*! \brief Constructs TournamentLadderProps-object with specified arguments. */
    public function __construct( $tid=0, $lastchanged=0, $changed_by='',
@@ -98,7 +99,7 @@ class TournamentLadderProps
          $game_end_normal=TGEND_CHALLENGER_ABOVE, $game_end_jigo=TGEND_CHALLENGER_BELOW,
          $game_end_timeout_win=TGEND_DEFENDER_BELOW, $game_end_timeout_loss=TGEND_CHALLENGER_LAST,
          $user_join_order=TLP_JOINORDER_REGTIME,
-         $user_absence_days=0, $rank_period_len=1, $crown_king_hours=0, $crown_king_start=0 )
+         $user_absence_days=0, $rank_period_len=1, $crown_king_hours=0, $crown_king_start=0, $seq_wins_threshold=0 )
    {
       $this->tid = (int)$tid;
       $this->Lastchanged = (int)$lastchanged;
@@ -123,6 +124,7 @@ class TournamentLadderProps
       $this->RankPeriodLength = limit( (int)$rank_period_len, 1, 255, 1 );
       $this->CrownKingHours = (int)$crown_king_hours;
       $this->CrownKingStart = (int)$crown_king_start;
+      $this->SeqWinsThreshold = (int)$seq_wins_threshold;
    }//__construct
 
    public function to_string()
@@ -235,6 +237,7 @@ class TournamentLadderProps
       $data->set_value( 'RankPeriodLength', $this->RankPeriodLength );
       $data->set_value( 'CrownKingHours', $this->CrownKingHours );
       $data->set_value( 'CrownKingStart', $this->CrownKingStart );
+      $data->set_value( 'SeqWinsThreshold', $this->SeqWinsThreshold );
       return $data;
    }
 
@@ -251,7 +254,7 @@ class TournamentLadderProps
             build_range_text(0, 100) );
       if ( $this->ChallengeRangeRating != TLADDER_CHRNG_RATING_UNUSED
             && abs($this->ChallengeRangeRating) > TLADDER_MAX_CHRNG_RATING )
-         $errors[] = sprintf( T_('Challenge Range Rating must be in range of %s.#T_ladder'),
+         $errors[] = sprintf( T_('Expecting number for %s in range %s.'), T_('Challenge Range Rating#T_ladder'),
             build_range_text( -TLADDER_MAX_CHRNG_RATING, TLADDER_MAX_CHRNG_RATING ) );
 
       if ( $this->MaxDefenses < 1 || $this->MaxDefenses > TLADDER_MAX_DEFENSES )
@@ -295,6 +298,10 @@ class TournamentLadderProps
             build_range_text(0, 50000) );
       if ( ($this->CrownKingHours > 0 && $this->CrownKingStart == 0) || ($this->CrownKingHours ==0 && $this->CrownKingStart > 0) )
          $errors[] = T_('For auto-crowning of king you need both settings (hours and check start date).#T_ladder');
+
+      if ( $this->SeqWinsThreshold < 0 || $this->SeqWinsThreshold > 255 )
+         $errors[] = sprintf( T_('Expecting number for %s in range %s.'), T_('Consecutive Wins Threshold#T_ladder'),
+            build_range_text(0, 255) );
 
       return $errors;
    }//check_properties
@@ -414,6 +421,11 @@ class TournamentLadderProps
          $arr_props[] = sprintf( T_('You will be crowned as "King of the Hill" after keeping the top rank for %s.#T_ladder'),
             TimeFormat::_echo_time( $this->CrownKingHours, 24, TIMEFMT_SHORT|TIMEFMT_ZERO, 0 ) ) . "\n" .
             sprintf( T_('The check for this starts at [%s].#T_ladder'), date(DATE_FMT, $this->CrownKingStart) );
+
+      // consecutive-wins
+      if ( $this->SeqWinsThreshold > 0 )
+         $arr_props[] = sprintf( T_('Achieving %s or more consecutive wins earns you a place in the "Hall of Fame".#T_ladder'),
+            $this->SeqWinsThreshold );
 
       return array( T_('The ladder is configured with the following properties') . ':', $arr_props );
    }//build_notes_props
@@ -725,7 +737,8 @@ class TournamentLadderProps
             @$row['UserAbsenceDays'],
             @$row['RankPeriodLength'],
             @$row['CrownKingHours'],
-            @$row['X_CrownKingStart']
+            @$row['X_CrownKingStart'],
+            @$row['SeqWinsThreshold']
          );
       return $tlp;
    }//new_from_row

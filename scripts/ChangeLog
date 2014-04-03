@@ -11,6 +11,41 @@ Release [2013-08-11] - DGS 1.0.16 - tag [release-1_0_16-20130811] on (later) bra
 ChangeLog
 ------------------------------------------------------------------
 
+2014-04-03 jug
+
+   * tournaments/include/tournament_result_control.php (TournamentResultControl.build_tournament_result_table,
+       ~.create_tournament_result_best_seq_wins, ~.build_tournament_result_seq_wins),
+     tournaments/include/tournament_ladder_props.php (class TournamentLadderProps, ~.__construct,
+       ~.fillEntityData, ~.check_properties, ~.build_notes_props, ~.new_from_row),
+     tournaments/include/tournament_ladder_helper.php (TournamentLadderHelper.process_tournament_ladder_game_end,
+       ~.process_game_end_seq_wins),
+     tournaments/include/tournament_result.php (TournamentResult.load_tournament_results_by_rid),
+     tournaments/include/tournament_ladder.php (TournamentLadder.update_seq_wins),
+     scripts/updates/database_changes_1_0_16_to_1_0_17.mysql,
+     specs/db/table-Tournaments.txt, specs/db/dragon-ddl.sql,
+     scripts/fix_ladder_seq_wins.php (show_form, fix_ladder_seqwins, fix_results_seqwins, dbg_query),
+     tournaments/ladder/edit_props.php (parse_edit_form),
+     tournaments/manage_tournament.php, tournaments/view_tournament.php,
+     tournaments/list_results.php, NEWS:
+   - added tournament-result for max. consecutive wins if certain threshold reached by ladder-user
+     - add or update tournament-result for max. consecutive wins on processing game-end
+     - added configuration for threshold in TournamentLadderProps.SeqWinsThreshold
+     - show threshold and entering tournament-result for max. consecutive wins on ladder-props-info
+       for view-tournament and ladder-view
+     - renamed tournament-result header 'Rank Kept' to more general 'Result Span'
+     - added fix-script to add tournament-result entries for existing ladder-users
+       with max. consecutive wins crossing threshold
+     - added name-extension for tournament-result with "Hall of Fame"
+-----------
+-- added min-threshold to cross by ladder-users best-consecutive-wins to enter tournament-result
+ALTER TABLE TournamentLadderProps
+   ADD SeqWinsThreshold tinyint unsigned NOT NULL default '0' ;
+
+-- added index for update on consecutive-wins in tournament-results
+ALTER TABLE TournamentResult
+   ADD KEY rid (rid) ;
+-----------
+
 2014-03-31 jug
 
    * tournaments/edit_participant.php, tournaments/register.php, NEWS:

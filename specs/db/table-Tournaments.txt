@@ -586,6 +586,7 @@ Description:
 | RankPeriodLength       | tinyint(3) unsigned                                                            | NO   |     | 1                   |       |
 | CrownKingHours         | smallint(5) unsigned                                                           | NO   |     | 0                   |       |
 | CrownKingStart         | datetime                                                                       | NO   |     | 0000-00-00 00:00:00 |       |
+| SeqWinsThreshold       | tinyint(3) unsigned                                                            | NO   |     | 0                   |       |
 
 
 ## Fields:
@@ -680,6 +681,10 @@ Description:
 
 * CrownKingStart : date from when CRON should check for king-crowning
    - 0 = no automatic crowning of king, then also CrownKingHours must be 0
+
+* SeqWinsThreshold : min-threshold to be crossed by ladder-user SeqWinsBest to enter tournament-result
+   - 0 = disabled
+   - >0 = if ladder-user SeqWinsBest crosses threshold adds or updates tournament-result for best mark
 
 
 ###########################################################################
@@ -874,7 +879,7 @@ Description:
 | ID        | int(11)              | NO   | PRI | NULL                | auto_increment |
 | tid       | int(11)              | NO   | MUL | NULL                |                |
 | uid       | int(11)              | NO   |     | NULL                |                |
-| rid       | int(11)              | NO   |     | 0                   |                |
+| rid       | int(11)              | NO   | MUL | 0                   |                |
 | Rating    | double               | NO   |     | -9999               |                |
 | Type      | tinyint(3) unsigned  | NO   |     | 0                   |                |
 | Round     | tinyint(3) unsigned  | NO   |     | 1                   |                |
@@ -898,8 +903,9 @@ Description:
 * Rating : current rating of player Players.Rating2 at time of storing result
 
 * Type : type of tournament-result
-   - 1 = Crowned King (of ladder)
-   - 2 = Round-Robin Winners (rank 1..n); Ranks need not to be unique
+   - 1 = Crowned King (of Ladder), StartTime = rank-changed-date
+   - 2 = Consecutive Wins (for Ladder), Result = count, StartTime = ladder-join-date
+   - 3 = Pool Winner (for Round-Robin), Rank 1..n; Ranks need not to be unique
 
 * Round : round number
    - always 1 for tournament-ladder
@@ -907,9 +913,10 @@ Description:
 * StartTime : start-time for entry
 
 * EndTime : end-time for entry
+   - normally date result-entry was added or updated
 
 * Result : customary result-value dependent on tournament-type and result-type
-   - can be TournamentLadder.SeqWinsBest for ladders
+   - can be TournamentLadder.SeqWinsBest for Type=2 (for ladder)
 
 * Rank : place of users for T-result
    - ladder: typically the TournamentLadder.Rank of TP

@@ -34,6 +34,7 @@ require_once 'tournaments/include/tournament_ladder_props.php';
 require_once 'tournaments/include/tournament_log_helper.php';
 require_once 'tournaments/include/tournament_participant.php';
 require_once 'tournaments/include/tournament_result.php';
+require_once 'tournaments/include/tournament_result_control.php';
 require_once 'tournaments/include/tournament_utils.php';
 
  /*!
@@ -83,7 +84,7 @@ class TournamentLadderHelper
       ta_begin();
       {//HOT-section to process tournament-game-end
          // track consecutive-wins for both players before processing game-end
-         TournamentLadder::process_game_end_seq_wins( $tgame );
+         self::process_game_end_seq_wins( $tgame, $tl_props->SeqWinsThreshold );
 
          $success = TournamentLadder::process_game_end( $tid, $tgame, $game_end_action );
          if ( $success )
@@ -127,6 +128,25 @@ class TournamentLadderHelper
 
       return $success;
    }//process_tournament_ladder_game_end
+
+   /*!
+    * \brief Tracks (increases or resets) consecutive-wins (TournamentLadder.SeqWins/SeqWinsBest)
+    *       for given tournament-game for challenger and defender, and adds/updates tournament-result
+    *       for best-seq-wins.
+    * \note IMPORTANT NOTE: caller needs to open TA with HOT-section!!
+    */
+   private static function process_game_end_seq_wins( $tgame, $seq_wins_threshold )
+   {
+      // track wins for challenger
+      $tladder_ch = new TournamentLadder( $tgame->tid, $tgame->Challenger_rid, $tgame->Challenger_uid );
+      $tladder_ch->update_seq_wins( $tgame->Score, $tgame->Flags );
+
+      // track wins for defender
+      $tladder_df = new TournamentLadder( $tgame->tid, $tgame->Defender_rid, $tgame->Defender_uid );
+      $tladder_df->update_seq_wins( -$tgame->Score, $tgame->Flags );
+
+      TournamentResultControl::create_tournament_result_best_seq_wins( 0, $tgame, $seq_wins_threshold );
+   }//process_game_end_seq_wins
 
 
    /*!

@@ -128,7 +128,7 @@ class TournamentResultControl
       $trtable->add_tablehead( 4, T_('Current Rating#header'), 'Rating', 0, 'TRP_Rating2-');
       $trtable->add_tablehead( 5, T_('Result Rating#header'), 'Rating', 0, 'Rating-');
       if ( $this->tourney->Type == TOURNEY_TYPE_LADDER )
-         $trtable->add_tablehead( 7, T_('Rank Kept#header'), '', TABLE_NO_SORT, ''); // calculated
+         $trtable->add_tablehead( 7, T_('Result Span#header'), '', TABLE_NO_SORT, ''); // calculated
       $trtable->add_tablehead( 8, T_('Result Date#header'), '', 0, 'EndTime+');
       $trtable->add_tablehead(10, T_('Comment#header'), '', 0, 'Comment+');
 
@@ -277,6 +277,78 @@ class TournamentResultControl
          'Pool Winner', sprintf( 'auto-filled by [%s]', $player_row['Handle'] ) ); // no translation
       return $tresult;
    }//build_tournament_result_pool_winner
+
+
+   /*
+    * \brief Creates TournamentResult-entries for max-consecutive-wins from ladder-tournament.
+    * \param $tid should be 0 if $tgame specified and must be given if $tgame is null
+    * \param $tgame TournamentGame-object = process tournament-game for game-end-processing;
+    *       null = process all tournament-ladder-entries for fix-script.
+    * \return added/updated tournament-result-entries
+    */
+   public static function create_tournament_result_best_seq_wins( $tid, $tgame, $seq_wins_threshold )
+   {
+      if ( !is_null($tgame) )
+         $tid = $tgame->tid;
+      if ( $seq_wins_threshold <= 0 || $tid <= 0 )
+         return;
+
+      // find ladder-entries for updated users with crossed seq-wins-threshold
+      $qsql = new QuerySQL(
+            SQLP_FIELDS, 'P.Rating2',
+            SQLP_FROM,   'Players AS P ON P.ID=TL.uid',
+            SQLP_WHERE,  "TL.SeqWinsBest >= $seq_wins_threshold" );
+      if ( !is_null($tgame) )
+      {
+         $qsql->add_part( SQLP_WHERE, "TL.rid IN ({$tgame->Challenger_rid},{$tgame->Defender_rid})" );
+         $qsql->add_part( SQLP_LIMIT, '2' );
+      }
+      $iterator = new ListIterator( 'TRC:create_tresult_best_seq_wins.TL', $qsql );
+      $iterator = TournamentLadder::load_tournament_ladder( $iterator, $tid );
+
+      while ( list(,$arr_item) = $iterator->getListIterator() )
+      {
+         list( $tladder, $orow ) = $arr_item;
+
+         // check for existing T-result; should be 0 or only 1 entry, if more then something wrong, so then take 1st
+         $arr_tresults = TournamentResult::load_tournament_results_by_rid( "TLH:process_game_end_seq_wins($tid)",
+            $tladder->rid, TRESULTTYPE_TL_SEQWINS );
+         $tresult = ( count($arr_tresults) > 0 ) ? $arr_tresults[0] : null;
+
+         if ( is_null($tresult) ) // add T-result
+            $tresult = self::build_tournament_result_seq_wins( $tladder, $orow['Rating2'] );
+         else if ( $tladder->SeqWinsBest > $tresult->Result ) // update T-result if BestSeqWins increased
+            $tresult = self::build_tournament_result_seq_wins( $tladder, $orow['Rating2'], $tresult );
+         $tresult->persist();
+      }
+
+      return $iterator->getItemCount();
+   }//create_tournament_result_best_seq_wins
+
+   /*!
+    * \brief Builds TournamentResult-object from tournament-ladder.
+    * \param $tresult null = create new TournamentResult-object; otherwise expects object to be modified for update
+    */
+   private static function build_tournament_result_seq_wins( $tladder, $user_rating, $tresult=null )
+   {
+      global $NOW;
+
+      if ( is_null($tresult) ) // new T-result
+      {
+         $tresult = new TournamentResult( 0, $tladder->tid, $tladder->uid, $tladder->rid, $user_rating,
+            TRESULTTYPE_TL_SEQWINS, /*round*/1, /*start*/$tladder->Created, /*end*/$NOW,
+            /*result*/$tladder->SeqWinsBest, $tladder->Rank, 'Consecutive Wins', 'set by CRON' );
+      }
+      else // update T-result
+      {
+         $tresult->Rating = $user_rating;
+         $tresult->EndTime = $NOW;
+         $tresult->Result = $tladder->SeqWinsBest;
+         $tresult->Rank = $tladder->Rank;
+      }
+
+      return $tresult;
+   }//build_tournament_result_seq_wins
 
 } // end of 'TournamentResultControl'
 
