@@ -76,6 +76,8 @@ $GLOBALS['ThePage'] = new Page('Game');
      toggleobserve=y|n  : toggle observing game
      movechange=1&gotomove= : view selected move (for view-move selectbox)
      move|m=            : view specific move (alternative for selecting move)
+
+     tm=1               : show territory markers (1=show, 0=normal end view) for finished game
 */
    // NOTE: using page: confirm.php
    // NOTE: allowed for guest-user: toggle-observe
@@ -86,6 +88,7 @@ $GLOBALS['ThePage'] = new Page('Game');
    $coord = (string)get_alt_arg( 'coord', 'c');
    $stonestring = (string)get_alt_arg( 'stonestring', 's');
    $preview = (bool)@$_REQUEST['preview'];
+   $terr_marker = (@$_REQUEST['tm']) ? 1 : 0;
 
    $message = get_request_arg( 'message');
    $message = replace_move_tag( $message, $gid );
@@ -298,7 +301,10 @@ $GLOBALS['ThePage'] = new Page('Game');
       {
          if ( abs($Score) <= SCORE_MAX && $move == $Moves && !($Flags & GAMEFLAGS_NO_RESULT) ) // don't calc for resign/time-out/forfeit/no-result
          {
-            $score_board = clone $TheBoard;
+            if ( $terr_marker ) // show territory-marker
+               $score_board = $TheBoard;
+            else
+               $score_board = clone $TheBoard;
             list( $score, $game_score ) =
                GameActionHelper::calculate_game_score( $score_board, $stonestring, $Ruleset, $coord );
          }
@@ -658,6 +664,10 @@ $GLOBALS['ThePage'] = new Page('Game');
       //FIXME for debugging show other ruleset:
       //$other_ruleset = ( $Ruleset == RULESET_JAPANESE ) ? RULESET_CHINESE : RULESET_JAPANESE;
       //GameScore::draw_score_box( $game_score, $Flags, $other_ruleset );
+
+      // only shown if there is a calculated game-score
+      echo anchor( $base_path."game.php?gid=$gid".URI_AMP."tm=".(1-$terr_marker),
+         T_('Toggle Territory Markers#game'), '', 'class="smaller"');
    }
    echo "</td><td>";
 

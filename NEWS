@@ -130,6 +130,9 @@ Copyright (C) 2001-2014  Erik Ouchterlony, Jens-Uwe Gaspar
 
       * Tournament Registration page: added short description of public user-comment and user-message-box
 
+   * Game page:
+      * Added territory-markers toggle-link for viewing finished game
+
 
    Bug fixes:
 

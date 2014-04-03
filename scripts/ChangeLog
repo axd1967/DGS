@@ -13,6 +13,9 @@ ChangeLog
 
 2014-04-03 jug
 
+   * game.php, NEWS:
+   - added link to toggle territory-markers for viewing finished game
+
    * tournaments/include/tournament_result_control.php (TournamentResultControl.build_tournament_result_table,
        ~.create_tournament_result_best_seq_wins, ~.build_tournament_result_seq_wins),
      tournaments/include/tournament_ladder_props.php (class TournamentLadderProps, ~.__construct,
