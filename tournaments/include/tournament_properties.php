@@ -200,7 +200,7 @@ class TournamentProperties
    }
 
    /*! \brief Checks semantics of attributes of this TournamentProperties. */
-   public function check_properties( $max_start_round )
+   public function check_registration_properties( $max_start_round )
    {
       $errors = array();
 
@@ -215,7 +215,7 @@ class TournamentProperties
                T_('Min. Rating Start Round'), T_('Max. Start Round'), 1 );
 
       return $errors;
-   }//check_properties
+   }//check_registration_properties
 
    /*!
     * \brief Checks potential registration by given user and returns non-null

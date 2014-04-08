@@ -83,7 +83,7 @@ $GLOBALS['ThePage'] = new Page('TournamentRoundEdit');
    // check + parse edit-form (notes)
    $old_tround = clone $tround;
    list( $vars, $edits, $input_errors ) = parse_edit_form( $tround, $t_limits );
-   $errors = array_merge( $errors, $input_errors, $tround->check_properties() );
+   $errors = array_merge( $errors, $input_errors, $tround->check_round_properties() );
 
    // save tournament-round-object with values from edit-form
    if ( @$_REQUEST['tr_save'] && !@$_REQUEST['tr_preview'] && count($errors) == 0 )

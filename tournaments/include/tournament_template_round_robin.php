@@ -135,7 +135,7 @@ abstract class TournamentTemplateRoundRobin extends TournamentTemplate
       $tround = TournamentCache::load_cache_tournament_round( 'TournamentTemplateRoundRobin.checkProperties',
          $tid, $curr_round );
       if ( $t_status == TOURNEY_STATUS_REGISTER || $t_status == TOURNEY_STATUS_PAIR )
-         $errors = array_merge( $errors, $tround->check_properties() );
+         $errors = array_merge( $errors, $tround->check_round_properties() );
 
       if ( $t_status == TOURNEY_STATUS_REGISTER )
       {
@@ -151,7 +151,7 @@ abstract class TournamentTemplateRoundRobin extends TournamentTemplate
          $tprops = TournamentCache::load_cache_tournament_properties( 'TournamentTemplateRoundRobin.checkProperties',
             $tid );
          $max_start_round = $this->determineLimitMaxStartRound( $tprops->MaxParticipants );
-         $errors = array_merge( $errors, $tprops->check_properties( $max_start_round ) );
+         $errors = array_merge( $errors, $tprops->check_registration_properties( $max_start_round ) );
       }
 
       if ( $t_status == TOURNEY_STATUS_PAIR ) // extra-checks for PAIR-status

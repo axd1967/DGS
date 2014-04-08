@@ -242,7 +242,7 @@ class TournamentLadderProps
    }
 
    /*! \brief Checks if all ladder-properties are valid; return error-list, empty if ok. */
-   public function check_properties()
+   public function check_ladder_properties()
    {
       $errors = array();
 
@@ -304,7 +304,7 @@ class TournamentLadderProps
             build_range_text(0, 255) );
 
       return $errors;
-   }//check_properties
+   }//check_ladder_properties
 
    /*!
     * \brief Returns array( header, notes-array ) with this properties in textual form.

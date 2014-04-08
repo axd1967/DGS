@@ -113,7 +113,7 @@ abstract class TournamentTemplateLadder extends TournamentTemplate
       if ( $t_status == TOURNEY_STATUS_REGISTER )
       {
          $tl_props = TournamentCache::load_cache_tournament_ladder_props( "TournamentTemplateLadder.checkProperties({$this->uid})", $tid );
-         $errors = $tl_props->check_properties();
+         $errors = $tl_props->check_ladder_properties();
       }
 
       // IMPORTANT NOTE for $t_status == PAIR: TPs on APPLY/INVITE-status are allowed!

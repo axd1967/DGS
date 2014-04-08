@@ -157,7 +157,7 @@ class TournamentRound
    }
 
    /*! \brief Checks if all round-properties are valid; return error-list, empty if ok. */
-   public function check_properties()
+   public function check_round_properties()
    {
       $errors = array();
 
@@ -181,7 +181,7 @@ class TournamentRound
             build_range_text(2, TROUND_MAX_POOLCOUNT) );
 
       return $errors;
-   }//check_properties
+   }//check_round_properties
 
    /*!
     * \brief Returns array( header, notes-array ) with this properties in textual form.

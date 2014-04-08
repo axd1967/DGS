@@ -79,7 +79,7 @@ $GLOBALS['ThePage'] = new Page('TournamentLadderPropsEdit');
    // check + parse edit-form
    $old_tl_props = clone $tl_props;
    list( $vars, $edits, $input_errors ) = parse_edit_form( $tl_props, $t_limits );
-   $errors = array_merge( $errors, $input_errors, $tl_props->check_properties() );
+   $errors = array_merge( $errors, $input_errors, $tl_props->check_ladder_properties() );
 
    // save properties-object with values from edit-form
    if ( @$_REQUEST['tlp_save'] && !@$_REQUEST['tlp_preview'] && count($edits) && count($errors) == 0 )
