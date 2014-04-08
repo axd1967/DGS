@@ -283,6 +283,15 @@ class TournamentHelper
       return $errors;
    }//check_tournament_result
 
+   /*! \brief Returns all rating-use-modes allowed for tournament; maybe restricted by given tournament-limits. */
+   public static function get_restricted_RatingUseModeTexts( $t_limits, $short=true )
+   {
+      $arr = TournamentProperties::getRatingUseModeText( null, $short );
+      if ( $t_limits->getMinLimit(TLIMITS_TPR_RATING_USE_MODE) & TLIM_TPR_RUM_NO_COPY_CUSTOM )
+         unset($arr[TPROP_RUMODE_COPY_CUSTOM]);
+      return $arr;
+   }
+
 } // end of 'TournamentHelper'
 
 ?>

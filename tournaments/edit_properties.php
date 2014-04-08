@@ -73,7 +73,7 @@ $GLOBALS['ThePage'] = new Page('TournamentPropertiesEdit');
 
    // init
    $errors = $tstatus->check_edit_status( TournamentProperties::get_edit_tournament_status() );
-   $arr_rating_use_modes = TournamentProperties::getRatingUseModeText();
+   $arr_rating_use_modes = TournamentHelper::get_restricted_RatingUseModeTexts($t_limits);
    $rating_array = getRatingArray();
    $allow_custom_round = ( $is_admin || $ttype->getMaxRounds() > 1 );
    if ( !$is_admin && $tourney->isFlagSet(TOURNEY_FLAG_LOCK_ADMIN) )
@@ -212,7 +212,7 @@ $GLOBALS['ThePage'] = new Page('TournamentPropertiesEdit');
    $tform->echo_string();
 
    echo_notes( 'edittournamentpropsnotesTable', T_('Tournament Properties notes'),
-               build_properties_notes() );
+               build_properties_notes($t_limits) );
 
 
    $menu_array = array();
@@ -299,7 +299,13 @@ function parse_edit_form( &$tpr, $t_limits, $ttype )
       if ( $tpr->MinParticipants > 0 && $tpr->MaxParticipants > 0 && $tpr->MinParticipants > $tpr->MaxParticipants )
          $errors[] = T_('Maximum participants must be greater than minimum participants');
 
-      $tpr->setRatingUseMode( $vars['rating_use_mode'] );
+      if ( $vars['rating_use_mode'] == TPROP_RUMODE_COPY_CUSTOM
+            && ($t_limits->getMinLimit(TLIMITS_TPR_RATING_USE_MODE) & TLIM_TPR_RUM_NO_COPY_CUSTOM) )
+         $errors[] = sprintf( T_('%s [%s] is not allowed for this tournament.'), T_('Rating Use Mode#tourney'),
+            TournamentProperties::getRatingUseModeText($vars['rating_use_mode']) );
+      else
+         $tpr->setRatingUseMode( $vars['rating_use_mode'] );
+
       $tpr->UserRated = (bool)$vars['user_rated'];
       $tpr->setUserMinRating( read_rating( $vars['user_min_rating'] ));
       $tpr->setUserMaxRating( read_rating( $vars['user_max_rating'] ));
@@ -390,17 +396,19 @@ function parse_edit_form( &$tpr, $t_limits, $ttype )
 }//parse_edit_form
 
 /*! \brief Returns array with notes about tournament properties. */
-function build_properties_notes()
+function build_properties_notes( $t_limits )
 {
    $notes = array();
    $notes[] = T_('To disable restrictions, you may use 0-value in (some) fields.');
    $notes[] = null; // empty line
 
    $narr = array( T_('Rating Use Mode#tourney') . ':' );
-   foreach ( TournamentProperties::getRatingUseModeText(null, false) as $usemode => $descr )
-      $narr[] = sprintf( "%s = $descr", TournamentProperties::getRatingUseModeText($usemode) );
+   $arr_rating_use_modes = TournamentHelper::get_restricted_RatingUseModeTexts($t_limits, /*short*/false);
+   foreach ( $arr_rating_use_modes as $usemode => $descr )
+      $narr[] = TournamentProperties::getRatingUseModeText($usemode) . ' = ' . $descr;;
    $notes[] = $narr;
 
    return $notes;
 }//build_properties_notes
+
 ?>

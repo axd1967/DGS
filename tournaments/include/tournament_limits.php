@@ -41,6 +41,11 @@ define('TLIMITS_TRD_MIN_POOLSIZE', 'trd_min_poolsize'); // TournamentRound.MinPo
 define('TLIMITS_TRD_MAX_POOLSIZE', 'trd_max_poolsize'); // TournamentRound.MaxPoolSize
 define('TLIMITS_TRD_MAX_POOLCOUNT', 'trd_max_poolcnt'); // TournamentRound.MaxPoolCount
 
+// TournamentProperties.RatingUseMode; TLimit.min=max; values: 0=no-restriction, TLIM_TPR_RUM_NO_COPY_CUSTOM
+define('TLIMITS_TPR_RATING_USE_MODE', 'trp_rat_use_mode');
+define('TLIM_TPR_RUM_NO_COPY_CUSTOM', 0x01); // forbid-COPY-CUSTOM rating-use-mode
+
+
  /*!
   * \class TournamentLimits
   *
@@ -53,9 +58,9 @@ class TournamentLimits
 {
    private $limit_config = array(); // [ limit-id => array( disable_allowed, min, max ) ]
 
-   public function setLimits( $limit_id, $disable_allowed, $min, $max )
+   public function setLimits( $limit_id, $disable_allowed, $min, $max=null )
    {
-      $this->limit_config[$limit_id] = array( $disable_allowed, $min, $max );
+      $this->limit_config[$limit_id] = array( $disable_allowed, $min, ( is_null($max) ? $min : $max ) );
    }
 
    public function getLimits( $limit_id )
@@ -236,6 +241,7 @@ class TournamentLimits
          TLIMITS_TRD_MIN_POOLSIZE   => TROUND_MAX_POOLSIZE,
          TLIMITS_TRD_MAX_POOLSIZE   => TROUND_MAX_POOLSIZE,
          TLIMITS_TRD_MAX_POOLCOUNT  => TROUND_MAX_POOLCOUNT,
+         TLIMITS_TPR_RATING_USE_MODE => 0,
       );
       return $arr[$limit_id];
    }

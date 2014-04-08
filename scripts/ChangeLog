@@ -13,6 +13,14 @@ ChangeLog
 
 2014-04-08 jug
 
+   * tournaments/include/tournament_limits.php (TLIMITS_TPR_RATING_USE_MODE, TLIM_TPR_RUM_NO_COPY_CUSTOM;
+       TournamentLimits.setLimits, ~.getStaticMaxLimit),
+     tournaments/edit_properties.php b/tournaments/edit_properties.php (parse_edit_form,
+       build_properties_notes),
+     tournaments/include/tournament_helper.php (TournamentHelper.get_restricted_RatingUseModeTexts),
+     tournaments/include/tournament_template.php (TournamentTemplate.__construct):
+   - added optional restriction of tournament-properties to forbid rating-use-mode COPY-CUSTOM
+
    * tournaments/include/types/public_round_robin.php (class PublicRoundRobinTournament,
        ~.__construct, ~.createTournament),
      tournaments/include/tournament_factory.php (TournamentFactory.getTournament, ~.getTournamentTypes),

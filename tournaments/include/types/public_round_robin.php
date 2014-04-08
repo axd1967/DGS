@@ -46,7 +46,7 @@ class PublicRoundRobinTournament extends TournamentTemplateRoundRobin
 {
    public function __construct()
    {
-      parent::__construct( TOURNEY_WIZTYPE_PUBLIC_ROUNDROBIN, //TODO more specific 1 RND, 1 POOL, also in class-name
+      parent::__construct( TOURNEY_WIZTYPE_PUBLIC_ROUNDROBIN,
          T_('Public Round-Robin with single round and one pool#tourney'),
          TOURNEY_TITLE_GAME_RESTRICTION );
 
@@ -55,6 +55,7 @@ class PublicRoundRobinTournament extends TournamentTemplateRoundRobin
       $this->limits->setLimits( TLIMITS_TRD_MIN_POOLSIZE, false, 3, 16 );
       $this->limits->setLimits( TLIMITS_TRD_MAX_POOLSIZE, false, 3, 16 );
       $this->limits->setLimits( TLIMITS_TRD_MAX_POOLCOUNT, true, 1, 1 );
+      $this->limits->setLimits( TLIMITS_TPR_RATING_USE_MODE, false, TLIM_TPR_RUM_NO_COPY_CUSTOM );
    }
 
    public function createTournament()
