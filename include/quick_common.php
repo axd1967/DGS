@@ -51,7 +51,7 @@ $chained = 0;
 //define('ADMOPT_BYPASS_IP_BLOCK', 0x001); // by-passes blocked IP for user
 define('ADMOPT_DENY_LOGIN',            0x0002); // deny: server usage, login
 define('ADMOPT_DENY_EDIT_BIO',         0x0004);
-//define('', 0x0008); // for re-use
+define('ADMOPT_ALLOW_TOURNEY_CREATE',  0x0008); // allow: tournament creation
 //define('', 0x0010); // for re-use
 //define('', 0x0020); // for re-use
 define('ADMOPT_HIDE_BIO',              0x0080); // hide user bio

@@ -245,6 +245,7 @@ define('ALLOWED_RULESETS', 'JAPANESE|CHINESE');
 define('ALLOW_TOURNAMENTS', 'LADDER|ROUNDROBIN');
 
 // Allow creation of tournaments only to Tournament-Admin (false) or every user (true)
+// NOTE: can be overwritten by Players.AdminOptions(ADMOPT_ALLOW_TOURNEY_CREATE)
 define('ALLOW_TOURNAMENTS_CREATE_BY_USER', false);
 
 // Allow usage of GoDiagrams (only working with JavaScript)

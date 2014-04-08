@@ -158,6 +158,9 @@ Copyright (C) 2001-2014  Erik Ouchterlony, Jens-Uwe Gaspar
       * Allow change of rated-status also for tournament-game
       * Added link to game-admin on game-page for easier access
 
+   * Changes for Admins:
+      * Added admin-option to allow tournament-creation for normal user
+
 
    Server config:
 

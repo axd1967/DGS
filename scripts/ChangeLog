@@ -13,6 +13,15 @@ ChangeLog
 
 2014-04-08 jug
 
+   * tournaments/include/tournament_utils.php (TournamentUtils.check_create_tournament),
+     include/quick_common.php (ADMOPT_ALLOW_TOURNEY_CREATE),
+     include/config.php,
+     admin_show_users.php, admin_users.php, NEWS:
+   - added admin-option to allow creation of tournaments to normal users
+     - admin-option deny-tournament-creation has precedence over allow-tournament-creation
+     - admin-option allow-tournament-creation has precedence over global-config
+       ALLOW_TOURNAMENTS_CREATE_BY_USER
+
    * tournaments/include/types/private_ladder.php (PrivateLadderTournament.__construct),
      tournaments/include/types/public_ladder.php (PublicLadderTournament.__construct),
      tournaments/include/types/private_round_robin.php (PrivateRoundRobinTournament.__construct),

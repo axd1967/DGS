@@ -75,14 +75,18 @@ class TournamentUtils
          return 0;
       }
 
-      if ( !TournamentUtils::isAdmin() && !ALLOW_TOURNAMENTS_CREATE_BY_USER )
+      $allow_user_create = ( @$player_row['AdminOptions'] & ADMOPT_ALLOW_TOURNEY_CREATE );
+      if ( ALLOW_TOURNAMENTS_CREATE_BY_USER )
+         $allow_user_create = true;
+
+      if ( !TournamentUtils::isAdmin() && !$allow_user_create )
       {
          if ( $label )
             error('tournament_create_only_by_admin', "$label.create.admin_only");
          return 0;
       }
 
-      return (ALLOW_TOURNAMENTS_CREATE_BY_USER) ? 2 : 1;
+      return ($allow_user_create) ? 2 : 1;
    }//check_create_tournament
 
    /*!

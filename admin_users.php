@@ -95,6 +95,7 @@ require_once 'include/form_functions.php';
       ADMOPT_FGROUP_DEV             => array( 'fl_admopt10', 'FGR_DEV',       T_('View DEV-forums') ),
       ADMOPT_FORUM_NO_POST          => array( 'fl_admopt11', 'FORUM_NO_POST', T_('Deny new & edit of forum posts') ),
       ADMOPT_FORUM_MOD_POST         => array( 'fl_admopt12', 'FORUM_MOD_POST', T_('Moderate all new & edited forum posts') ),
+      ADMOPT_ALLOW_TOURNEY_CREATE   => array( 'fl_admopt13', 'ALLOW_TNEY_CREATE', T_('Allow tournament creation') ),
    );
 
    // set field-values to change
