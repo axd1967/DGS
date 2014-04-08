@@ -120,7 +120,7 @@ abstract class TournamentTemplate
          if ( $max_tp <= 0 )
             $max_tp = TP_MAX_COUNT;
          $max_rounds = (int)( log($max_tp) / log(2) ); // max-estimate for round-count dep. on max-participants-count
-         $max_limit = min( $this->limits->getMaxLimit(TLIMITS_TRD_MAX_ROUNDS), $max_rounds );
+         $max_limit = min( $this->getMaxRounds(), $max_rounds );
       }
       else // tournament without round-management
          $max_limit = 1;

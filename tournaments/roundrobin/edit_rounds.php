@@ -61,8 +61,8 @@ $GLOBALS['ThePage'] = new Page('TournamentRoundEditor');
      tre_set_confirm&tid=&round=    : sets selected round as the current round (confirmed)
      tre_stat&tid=&round=           : changes round status (forward to separate edit-round-status page)
      tre_cancel&tid=&round=         : cancel previous action
-     tre_next&tid=&round=           : start next round (needs confirmation)
-     tre_next_confirm&tid=&round=   : start next round (confirmed)
+     tre_next&tid=                  : start next round (needs confirmation)
+     tre_next_confirm&tid=          : start next round (confirmed)
 */
 
    $tid = (int) @$_REQUEST['tid'];
@@ -87,8 +87,7 @@ $GLOBALS['ThePage'] = new Page('TournamentRoundEditor');
    if ( !$allow_edit_tourney )
       error('tournament_edit_not_allowed', "Tournament.edit_rounds.edit($tid,$my_id)");
 
-   $t_limits = $ttype->getTournamentLimits();
-   $max_rounds = $t_limits->getMaxLimit(TLIMITS_TRD_MAX_ROUNDS);
+   $max_rounds = max( $ttype->getMaxRounds(), $tourney->Rounds ); // allow higher rounds than limit, if T-adm started them
    if ( $round < 1 || $round > $max_rounds )
       $round = $tourney->CurrentRound;
    $tround = ( $round > 0 )
@@ -214,13 +213,16 @@ $GLOBALS['ThePage'] = new Page('TournamentRoundEditor');
          'TAB',
          'SUBMITBUTTON', 'tre_stat', T_('Change Round Status#tourney'), ));
 
-   $tform->add_empty_row();
-   $tform->add_row( array(
-         'TAB',
-         'SUBMITBUTTON', 'tre_next', T_('Start Next Round#tourney'),
-         'TEXT', sptext( T_('Prepare next round, Switch tournament-status, Add & set new round#tourney'), 1), ));
-   if ( @$_REQUEST['tre_next'] && !$has_action_error )
-      echo_confirm( $tform, T_('Please confirm starting next tournament round'), 'tre_next', T_('Confirm') );
+   if ( $is_admin || $tourney->Rounds < $max_rounds ) // valid to start next T-round
+   {
+      $tform->add_empty_row();
+      $tform->add_row( array(
+            'TAB',
+            'SUBMITBUTTON', 'tre_next', T_('Start Next Round#tourney'),
+            'TEXT', sptext( T_('Prepare next round, Switch tournament-status, Add & set new round#tourney'), 1), ));
+      if ( @$_REQUEST['tre_next'] && !$has_action_error )
+         echo_confirm( $tform, T_('Please confirm starting next tournament round'), 'tre_next', T_('Confirm') );
+   }
 
    if ( $is_admin )
    {

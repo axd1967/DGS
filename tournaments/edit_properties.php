@@ -62,6 +62,7 @@ $GLOBALS['ThePage'] = new Page('TournamentPropertiesEdit');
    $tstatus = new TournamentStatus( $tourney );
    $ttype = TournamentFactory::getTournament($tourney->WizardType);
    $t_limits = $ttype->getTournamentLimits();
+   $is_admin = TournamentUtils::isAdmin();
 
    // create/edit allowed?
    $allow_edit_tourney = TournamentHelper::allow_edit_tournaments($tourney, $my_id);
@@ -74,7 +75,8 @@ $GLOBALS['ThePage'] = new Page('TournamentPropertiesEdit');
    $errors = $tstatus->check_edit_status( TournamentProperties::get_edit_tournament_status() );
    $arr_rating_use_modes = TournamentProperties::getRatingUseModeText();
    $rating_array = getRatingArray();
-   if ( !TournamentUtils::isAdmin() && $tourney->isFlagSet(TOURNEY_FLAG_LOCK_ADMIN) )
+   $allow_custom_round = ( $is_admin || $ttype->getMaxRounds() > 1 );
+   if ( !$is_admin && $tourney->isFlagSet(TOURNEY_FLAG_LOCK_ADMIN) )
       $errors[] = $tourney->buildAdminLockText();
 
    // check + parse edit-form
@@ -137,14 +139,16 @@ $GLOBALS['ThePage'] = new Page('TournamentPropertiesEdit');
          'TEXT',        MINI_SPACING . T_('(Maximum)'),
          'TEXT',        $t_limits->getLimitRangeTextAdmin(TLIMITS_MAX_TP), ));
 
-   if ( $ttype->getMaxRounds() > 1 )
+   if ( $allow_custom_round )
    {
       $max_rounds = $ttype->determineLimitMaxStartRound( $tprops->MaxParticipants );
+      $range_text = sprintf( T_('Range %s, depends on max. participants#tourney'), build_range_text(1, $max_rounds));
+      if ( $is_admin )
+         $range_text = span('TWarning', $range_text);
       $tform->add_row( array(
             'DESCRIPTION', T_('Max. Start Round'),
             'TEXTINPUT',   'max_start_round', 5, 5, $vars['max_start_round'],
-            'TEXT',        MINI_SPACING . sprintf( T_('Range %s, depends on max. participants#tourney'),
-                  build_range_text(1, $max_rounds)), ));
+            'TEXT',        MINI_SPACING . $range_text, ));
 
       $rating = $vars['min_rat_start_round'];
       $valid_rat = is_valid_rating($rating);
@@ -223,6 +227,8 @@ $GLOBALS['ThePage'] = new Page('TournamentPropertiesEdit');
 // return [ vars-hash, edits-arr, errorlist ]
 function parse_edit_form( &$tpr, $t_limits, $ttype )
 {
+   global $allow_custom_round;
+
    $edits = array();
    $errors = array();
    $is_posted = ( @$_REQUEST['tp_save'] || @$_REQUEST['tp_preview'] );
@@ -298,7 +304,6 @@ function parse_edit_form( &$tpr, $t_limits, $ttype )
       $tpr->setUserMinRating( read_rating( $vars['user_min_rating'] ));
       $tpr->setUserMaxRating( read_rating( $vars['user_max_rating'] ));
 
-      $allow_custom_round = ( $ttype->getMaxRounds() > 1 );
       if ( $allow_custom_round )
       {
          if ( (string)$vars['min_rat_start_round'] == '' )

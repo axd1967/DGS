@@ -468,7 +468,13 @@ class TournamentRoundHelper
       $tid = $tourney->ID;
       $tround = TournamentCache::load_cache_tournament_round( 'TRH.start_next_tournament_round', $tid, $curr_round );
 
+      $ttype = TournamentFactory::getTournament($tourney->WizardType);
+      $t_limits = $ttype->getTournamentLimits();
+
       $errors = array();
+      if ( $cnt_rounds >= TROUND_MAX_COUNT ) // check for static-max T-rounds
+         $errors[] = sprintf( T_('Maximum of allowed tournament rounds of %s has been reached.'), TROUND_MAX_COUNT );
+      $errors = array_merge( $errors, $t_limits->check_MaxRounds( $next_round, $curr_round ) );
       if ( !in_array($tourney->Status, $ARR_TSTATUS) )
          $errors[] = sprintf( T_('Starting next round is only allowed on tournament status [%s].'),
             build_text_list('Tournament::getStatusText', $ARR_TSTATUS) );
@@ -487,9 +493,9 @@ class TournamentRoundHelper
 
       if ( $check_only && $curr_round == $cnt_rounds )
       {
-         self::add_new_tournament_round( $tlog_type, $tourney, $errors_add_round, /*chk*/true );
+         self::add_new_tournament_round( $tlog_type, $tourney, $errors_add_round, /*chk-only*/true );
          if ( count($errors_add_round) )
-            $errors = array_merge( $errors, $errors_add_round );
+            $errors = array_unique( array_merge( $errors, $errors_add_round ) );
       }
 
       if ( count($errors) || $check_only )
