@@ -43,7 +43,8 @@ define('TOURNEY_WIZTYPE_PUBLIC_LADDER', 2);
 define('TOURNEY_WIZTYPE_PRIVATE_LADDER', 3);
 define('TOURNEY_WIZTYPE_DGS_ROUNDROBIN', 4);
 define('TOURNEY_WIZTYPE_PUBLIC_ROUNDROBIN', 5);
-define('MAX_TOURNEY_WIZARD_TYPE', 5);
+define('TOURNEY_WIZTYPE_PRIVATE_ROUNDROBIN', 6);
+define('MAX_TOURNEY_WIZARD_TYPE', 6);
 
 // bitmasks for wizard: bits 0-3 reserved for modes/opts, bits 4-7 for types
 define('TWIZ_DGS',     0x03);
