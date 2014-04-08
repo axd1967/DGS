@@ -13,6 +13,13 @@ ChangeLog
 
 2014-04-08 jug
 
+   * tournaments/include/types/private_ladder.php (PrivateLadderTournament.__construct),
+     tournaments/include/types/public_ladder.php (PublicLadderTournament.__construct),
+     tournaments/include/types/private_round_robin.php (PrivateRoundRobinTournament.__construct),
+     tournaments/include/types/public_round_robin.php (PublicRoundRobinTournament.__construct):
+   - for now need tournament-admin to create private & public ladder-tournaments
+   - do not need tournament-admin to create private & public round-robin-tournaments
+
    * tournaments/include/types/private_round_robin.php (class PrivateRoundRobinTournament, ~.__construct,
        ~.createTournament),
      tournaments/include/tournament_factory.php (TournamentFactory.getTournament, ~.getTournamentTypes),

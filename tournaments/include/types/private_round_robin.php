@@ -50,6 +50,8 @@ class PrivateRoundRobinTournament extends TournamentTemplateRoundRobin
          T_('Private Round-Robin with single round and one pool#tourney'),
          TOURNEY_TITLE_GAME_RESTRICTION );
 
+      // overwrite tournament-type-specific properties
+      $this->need_admin_create_tourney = false;
       $this->limits->setLimits( TLIMITS_MAX_TP, true, 3, 16 );
       $this->limits->setLimits( TLIMITS_TRD_MAX_ROUNDS, false, 1 );
       $this->limits->setLimits( TLIMITS_TRD_MIN_POOLSIZE, false, 3, 16 );
