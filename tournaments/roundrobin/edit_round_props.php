@@ -216,9 +216,15 @@ function parse_edit_form( &$trd, $t_limits )
       if ( TournamentUtils::isNumberOrEmpty($new_value) && $new_value >= 0 && $new_value <= TROUND_MAX_POOLSIZE )
       {
          $limit_errors = $t_limits->checkRounds_MaxPoolSize( $new_value, $trd->MaxPoolSize );
-         if ( count($limit_errors) )
+         $cnt_limit_errors = count($limit_errors);
+         if ( $cnt_limit_errors )
             $errors = array_merge( $errors, $limit_errors );
-         else
+
+         $errmsg = TournamentRoundHelper::check_tournament_participant_max_games( $trd->tid, $t_limits, $new_value );
+         if ( !is_null($errmsg) )
+            $errors[] = $errmsg;
+
+         if ( $cnt_limit_errors == 0 && is_null($errmsg) )
             $trd->MaxPoolSize = $new_value;
       }
       else

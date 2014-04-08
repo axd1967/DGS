@@ -13,6 +13,18 @@ ChangeLog
 
 2014-04-08 jug
 
+   * tournaments/include/tournament_template_round_robin.php (TournamentTemplateRoundRobin.__construct,
+       ~.checkProperties),
+     tournaments/include/tournament_round_helper.php (TournamentRoundHelper.check_tournament_participant_max_games),
+     tournaments/include/tournament_limits.php (TLIMITS_TRD_TP_MAX_GAMES;
+       TournamentLimits.getStaticMaxLimit),
+     tournaments/include/types/public_round_robin.php (PublicRoundRobinTournament.__construct),
+     tournaments/roundrobin/edit_round_props.php (parse_edit_form):
+   - round-robin-tournaments: added optional wizard-type-restriction for games per tournament-participant
+     - check games-per-participant wizard-type restriction on edit-round-properties and
+       on tournament-status-change to REGISTER
+     - restricted public-round-robin with 15 max-games-per-participant for one round & pool
+
    * tournaments/include/tournament_limits.php (TLIMITS_TRULE_GAME_UNRATED;
        TournamentLimits.getStaticMaxLimit),
      tournaments/include/tournament_rules.php (TournamentRules.convertEditForm_to_TournamentRules),

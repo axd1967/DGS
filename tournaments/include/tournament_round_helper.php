@@ -29,6 +29,7 @@ require_once 'tournaments/include/tournament_factory.php';
 require_once 'tournaments/include/tournament_games.php';
 require_once 'tournaments/include/tournament_globals.php';
 require_once 'tournaments/include/tournament_helper.php';
+require_once 'tournaments/include/tournament_limits.php';
 require_once 'tournaments/include/tournament_log_helper.php';
 require_once 'tournaments/include/tournament_participant.php';
 require_once 'tournaments/include/tournament_pool.php';
@@ -637,6 +638,33 @@ class TournamentRoundHelper
 
       return $result;
    }//fill_pool_winners_tournament_pool
+
+   /*!
+    * \brief Returns error-text if games per tournament-participant exceed wizard-type limit.
+    * \return null on success; otherwise error-msg
+    */
+   public static function check_tournament_participant_max_games( $tid, $t_limits, $pool_size )
+   {
+      $errmsg = null;
+
+      $max_tp_games = $t_limits->getMaxLimit(TLIMITS_TRD_TP_MAX_GAMES);
+      if ( $max_tp_games > 0 )
+      {
+         $games_factor = TournamentHelper::determine_games_factor( $tid );
+         $tp_games = $games_factor * ( $pool_size - 1 );
+         if ( $tp_games > $max_tp_games )
+         {
+            $errmsg = sprintf( T_('The number of games [%s] per participant exceeds the wizard-type limit of [%s].#tourney'),
+               $tp_games, $max_tp_games ) . "<br>\n";
+            if ( $games_factor > 1 )
+               $errmsg .= T_('You can either reduce the max. pool size or do not use handicap-type "double" in the tournament rules.');
+            else
+               $errmsg .= T_('You have to reduce the max. pool size.#tourney');
+         }
+      }
+
+      return $errmsg;
+   }//check_tournament_participant_max_games
 
 } // end of 'TournamentRoundHelper'
 

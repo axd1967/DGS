@@ -26,6 +26,7 @@ require_once 'tournaments/include/tournament_globals.php';
 require_once 'tournaments/include/tournament_template.php';
 
 require_once 'tournaments/include/tournament_cache.php';
+require_once 'tournaments/include/tournament_factory.php';
 require_once 'tournaments/include/tournament_games.php';
 require_once 'tournaments/include/tournament_participant.php';
 require_once 'tournaments/include/tournament_points.php';
@@ -60,6 +61,7 @@ abstract class TournamentTemplateRoundRobin extends TournamentTemplate
       $this->limits->setLimits( TLIMITS_TRD_MIN_POOLSIZE, false, 2, TROUND_MAX_POOLSIZE );
       $this->limits->setLimits( TLIMITS_TRD_MAX_POOLSIZE, false, 2, TROUND_MAX_POOLSIZE );
       $this->limits->setLimits( TLIMITS_TRD_MAX_POOLCOUNT, true, 1, TROUND_MAX_POOLCOUNT );
+      $this->limits->setLimits( TLIMITS_TRD_TP_MAX_GAMES, false, 0, 0 ); // min irrelevant, max (0=unlimited)
    }
 
    /*!
@@ -134,6 +136,15 @@ abstract class TournamentTemplateRoundRobin extends TournamentTemplate
          $tid, $curr_round );
       if ( $t_status == TOURNEY_STATUS_REGISTER || $t_status == TOURNEY_STATUS_PAIR )
          $errors = array_merge( $errors, $tround->check_properties() );
+
+      if ( $t_status == TOURNEY_STATUS_REGISTER )
+      {
+         $ttype = TournamentFactory::getTournament($tourney->WizardType);
+         $t_limits = $ttype->getTournamentLimits();
+         $errmsg = TournamentRoundHelper::check_tournament_participant_max_games( $tid, $t_limits, $tround->MaxPoolSize );
+         if ( !is_null($errmsg) )
+            $errors[] = $errmsg;
+      }
 
       if ( $t_status == TOURNEY_STATUS_REGISTER ) // check semantics of registration-properties
       {

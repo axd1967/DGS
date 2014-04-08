@@ -55,6 +55,7 @@ class PublicRoundRobinTournament extends TournamentTemplateRoundRobin
       $this->limits->setLimits( TLIMITS_TRD_MIN_POOLSIZE, false, 3, 16 );
       $this->limits->setLimits( TLIMITS_TRD_MAX_POOLSIZE, false, 3, 16 );
       $this->limits->setLimits( TLIMITS_TRD_MAX_POOLCOUNT, true, 1 );
+      $this->limits->setLimits( TLIMITS_TRD_TP_MAX_GAMES, false, 0, 15 );
       $this->limits->setLimits( TLIMITS_TPR_RATING_USE_MODE, false, TLIM_TPR_RUM_NO_COPY_CUSTOM );
    }
 
