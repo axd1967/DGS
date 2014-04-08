@@ -110,6 +110,7 @@ class TournamentUtils
          TOURNEY_WIZTYPE_PUBLIC_LADDER  => TOURNEY_TYPE_LADDER,
          TOURNEY_WIZTYPE_PRIVATE_LADDER => TOURNEY_TYPE_LADDER,
          TOURNEY_WIZTYPE_DGS_ROUNDROBIN => TOURNEY_TYPE_ROUND_ROBIN,
+         TOURNEY_WIZTYPE_PUBLIC_ROUNDROBIN => TOURNEY_TYPE_ROUND_ROBIN,
       );
       if ( !isset($arr_map[$wizard_type]) )
          error('invalid_args', "TournamentUtils:getWizardTournamentType($wizard_type)");
@@ -176,7 +177,7 @@ class TournamentUtils
    }
 
    /*!
-    * Returns number of games that need to be played for a pool of given size: n*(n-1)/2 x games_per_round. 
+    * Returns number of games that need to be played for a pool of given size: n*(n-1)/2 x games_per_round.
     * \param $games_factor factor of games per challenge
     */
    public static function calc_pool_games( $pool_size, $games_factor )

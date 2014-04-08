@@ -13,6 +13,16 @@ ChangeLog
 
 2014-04-08 jug
 
+   * tournaments/include/types/public_round_robin.php (class PublicRoundRobinTournament,
+       ~.__construct, ~.createTournament),
+     tournaments/include/tournament_factory.php (TournamentFactory.getTournament, ~.getTournamentTypes),
+     tournaments/include/tournament_utils.php (TournamentUtils.getWizardTournamentType),
+     tournaments/include/tournament_globals.php (TOURNEY_WIZTYPE_PUBLIC_ROUNDROBIN),
+     tournaments/include/tournament.php (Tournament.getWizardTypeText),
+     NEWS:
+   - added wizard-type for public-round-robin with certain restrictions: TOURNEY_WIZTYPE_PUBLIC_ROUNDROBIN
+     - restrictions: min/max-TP=3..16, 1 round, 1 pool, min/max-poolsize=3..16
+
    * tournaments/include/tournament_round_helper.php (TournamentRoundHelper.start_next_tournament_round),
      tournaments/include/tournament_template.php (TournamentTemplate.determineLimitMaxStartRound),
      tournaments/edit_properties.php (parse_edit_form),
