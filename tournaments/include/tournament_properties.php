@@ -269,7 +269,6 @@ class TournamentProperties
       {// need user-rating or tournament-rating
          if ( !$user->hasRating() )
             $errors[] = T_('User has no valid Dragon rating, which is needed for tournament rating mode.');
-               //. "\n" . self::getRatingUseModeText($this->RatingUseMode, false);
       }
       elseif ( $this->RatingUseMode == TPROP_RUMODE_COPY_CUSTOM )
       {
@@ -405,7 +404,7 @@ class TournamentProperties
       return $result;
    }
 
-   /*! \brief Returns status-text or all status-texts (if arg=null). */
+   /*! \brief Returns rating-use-mode-text or all rating-use-modes (if arg=null). */
    public static function getRatingUseModeText( $use_mode=null, $short=true )
    {
       static $ARR_RAT_USEMODES = array(); // [key][use-mode] => text
