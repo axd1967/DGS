@@ -77,7 +77,7 @@ class PublicRoundRobinTournament extends TournamentTemplateRoundRobin
       $tpoints->setDefaults( TPOINTSTYPE_SIMPLE );
 
       $tround = new TournamentRound();
-      $tround->MinPoolSize = 3; // 0's provoke error, so change by TD enforced
+      $tround->MinPoolSize = 3;
       $tround->MaxPoolSize = 8;
       $tround->MaxPoolCount = 1;
       $tround->PoolWinnerRanks = 3;

@@ -50,6 +50,7 @@ class DgsRoundRobinTournament extends TournamentTemplateRoundRobin
          T_('DGS Round-Robin with multiple rounds and pools#tourney'),
          TOURNEY_TITLE_NO_RESTRICTION|TOURNEY_TITLE_ADMIN_ONLY );
 
+      // overwrite tournament-type-specific properties
       $this->limits->setLimits( TLIMITS_MAX_TP, true, 2, TP_MAX_COUNT );
    }
 
