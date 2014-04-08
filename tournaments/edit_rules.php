@@ -26,6 +26,7 @@ require_once 'include/form_functions.php';
 require_once 'include/message_functions.php';
 require_once 'include/db/shape.php';
 require_once 'tournaments/include/tournament_cache.php';
+require_once 'tournaments/include/tournament_factory.php';
 require_once 'tournaments/include/tournament_helper.php';
 require_once 'tournaments/include/tournament_log_helper.php';
 require_once 'tournaments/include/tournament_participant.php';
@@ -60,6 +61,8 @@ $GLOBALS['ThePage'] = new Page('TournamentRulesEdit');
 
    $tourney = TournamentCache::load_cache_tournament( 'Tournament.edit_rules.find_tournament', $tid );
    $tstatus = new TournamentStatus( $tourney );
+   $ttype = TournamentFactory::getTournament($tourney->WizardType);
+   $t_limits = $ttype->getTournamentLimits();
 
    // create/edit allowed?
    $allow_edit_tourney = TournamentHelper::allow_edit_tournaments($tourney, $my_id);
@@ -75,7 +78,7 @@ $GLOBALS['ThePage'] = new Page('TournamentRulesEdit');
 
    // check + parse edit-form (notes)
    $old_trule = clone $trule;
-   list( $vars, $edits, $input_errors, $gsc ) = parse_edit_form( $trule );
+   list( $vars, $edits, $input_errors, $gsc ) = parse_edit_form( $trule, $t_limits );
    $errors = array_merge( $errors, $input_errors );
 
    // check (if Rated=Yes) that ALL existing TPs have a user-rating (can happen by admin-ops)
@@ -162,7 +165,7 @@ $GLOBALS['ThePage'] = new Page('TournamentRulesEdit');
 
 
 // return [ vars-hash, edits-arr, errorlist, GameSetupChecker ]
-function parse_edit_form( &$trule )
+function parse_edit_form( &$trule, $t_limits )
 {
    $edits = array();
    $errors = array();
@@ -195,7 +198,8 @@ function parse_edit_form( &$trule )
    // parse URL-vars
    if ( $is_posted )
    {
-      $trule->convertEditForm_to_TournamentRules( $vars, $errors );
+      $allow_rated = !$t_limits->getMinLimit(TLIMITS_TRULE_GAME_UNRATED);
+      $trule->convertEditForm_to_TournamentRules( $vars, $errors, $allow_rated );
       if ( $trule->ShapeSnapshot ) // refresh loaded-shape-snapshot
          $vars['snapshot'] = $trule->ShapeSnapshot;
 

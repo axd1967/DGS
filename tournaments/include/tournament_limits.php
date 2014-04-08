@@ -45,6 +45,8 @@ define('TLIMITS_TRD_MAX_POOLCOUNT', 'trd_max_poolcnt'); // TournamentRound.MaxPo
 define('TLIMITS_TPR_RATING_USE_MODE', 'trp_rat_use_mode');
 define('TLIM_TPR_RUM_NO_COPY_CUSTOM', 0x01); // forbid-COPY-CUSTOM rating-use-mode
 
+define('TLIMITS_TRULE_GAME_UNRATED', 'trule_game_unrated'); // TournamentRules.Rated; TLimit.min=max; 0=no-restriction, 1=rated-forbidden
+
 
  /*!
   * \class TournamentLimits
@@ -242,6 +244,7 @@ class TournamentLimits
          TLIMITS_TRD_MAX_POOLSIZE   => TROUND_MAX_POOLSIZE,
          TLIMITS_TRD_MAX_POOLCOUNT  => TROUND_MAX_POOLCOUNT,
          TLIMITS_TPR_RATING_USE_MODE => 0,
+         TLIMITS_TRULE_GAME_UNRATED => 0,
       );
       return $arr[$limit_id];
    }

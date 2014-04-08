@@ -322,7 +322,7 @@ class TournamentRules
    }//convertTournamentRules_to_EditForm
 
    /*! \brief Converts and sets (parsed) form-values in this TournamentRules-object. */
-   public function convertEditForm_to_TournamentRules( $vars, &$errors )
+   public function convertEditForm_to_TournamentRules( $vars, &$errors, $allow_rated )
    {
       // NOTE: keep "sync'ed" with new-game handle_add_game()-func
 
@@ -414,6 +414,8 @@ class TournamentRules
 
 
       $rated = ( @$vars['rated'] == 'Y' );
+      if ( $rated && !$allow_rated )
+         $errors[] = T_('This tournament can not be rated due to wizard-type restrictions.');
 
       if ( ENABLE_STDHANDICAP )
          $stdhandicap = ( @$vars['stdhandicap'] == 'Y' );

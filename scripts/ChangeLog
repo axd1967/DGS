@@ -13,13 +13,20 @@ ChangeLog
 
 2014-04-08 jug
 
+   * tournaments/include/tournament_limits.php (TLIMITS_TRULE_GAME_UNRATED;
+       TournamentLimits.getStaticMaxLimit),
+     tournaments/include/tournament_rules.php (TournamentRules.convertEditForm_to_TournamentRules),
+     tournaments/include/tournament_template.php (TournamentTemplate.__construct),
+     tournaments/edit_rules.php (parse_edit_form):
+   - added optional wizard-type-restriction of tournament-rules to forbid rated-games
+
    * tournaments/include/tournament_limits.php (TLIMITS_TPR_RATING_USE_MODE, TLIM_TPR_RUM_NO_COPY_CUSTOM;
        TournamentLimits.setLimits, ~.getStaticMaxLimit),
      tournaments/edit_properties.php b/tournaments/edit_properties.php (parse_edit_form,
        build_properties_notes),
      tournaments/include/tournament_helper.php (TournamentHelper.get_restricted_RatingUseModeTexts),
      tournaments/include/tournament_template.php (TournamentTemplate.__construct):
-   - added optional restriction of tournament-properties to forbid rating-use-mode COPY-CUSTOM
+   - added optional wizard-type-restriction of tournament-properties to forbid rating-use-mode COPY-CUSTOM
 
    * tournaments/include/types/public_round_robin.php (class PublicRoundRobinTournament,
        ~.__construct, ~.createTournament),

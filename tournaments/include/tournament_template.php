@@ -69,6 +69,7 @@ abstract class TournamentTemplate
       $this->limits = new TournamentLimits();
       $this->limits->setLimits( TLIMITS_MAX_TP, false, 2, TP_MAX_COUNT );
       $this->limits->setLimits( TLIMITS_TPR_RATING_USE_MODE, false, 0 );
+      $this->limits->setLimits( TLIMITS_TRULE_GAME_UNRATED, false, 0 );
    }
 
    public function getTournamentLimits()
