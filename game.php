@@ -665,9 +665,12 @@ $GLOBALS['ThePage'] = new Page('Game');
       //$other_ruleset = ( $Ruleset == RULESET_JAPANESE ) ? RULESET_CHINESE : RULESET_JAPANESE;
       //GameScore::draw_score_box( $game_score, $Flags, $other_ruleset );
 
-      // only shown if there is a calculated game-score
-      echo anchor( $base_path."game.php?gid=$gid".URI_AMP."tm=".(1-$terr_marker),
-         T_('Toggle Territory Markers#game'), '', 'class="smaller"');
+      // only shown if there is a calculated game-score after game is finished
+      if ( $Status == GAME_STATUS_FINISHED )
+      {
+         echo anchor( $base_path."game.php?gid=$gid".URI_AMP."tm=".(1-$terr_marker),
+            T_('Toggle Territory Markers#game'), '', 'class="smaller"');
+      }
    }
    echo "</td><td>";
 
