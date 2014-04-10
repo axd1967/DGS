@@ -13,3 +13,13 @@ ChangeLog
 
 2014-04-10 jug
 
+   * scripts/updates/database_changes_1_0_13.mysql, scripts/updates/database_changes_1_0_14.mysql,
+     scripts/updates/database_changes_1_0_15.mysql, scripts/updates/database_changes_1_0_16.mysql,
+     scripts/updates/database_changes_1_0_17.mysql,
+     scripts/updates/other_changes_1_0_13.txt, scripts/updates/other_changes_1_0_15.txt,
+     scripts/updates/other_changes_1_0_16.txt, scripts/updates/other_changes_1_0_17.txt,
+     scripts/updates/roadmap_1_0_13.txt, scripts/updates/roadmap_1_0_14.txt,
+     scripts/updates/roadmap_1_0_15.txt, scripts/updates/roadmap_1_0_16.txt,
+     scripts/updates/roadmap_1_0_17.txt:
+   - simplified naming-scheme for release-files with db- & other-changes & roadmap-files
+
