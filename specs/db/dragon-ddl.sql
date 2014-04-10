@@ -1210,7 +1210,7 @@ CREATE TABLE IF NOT EXISTS `TournamentParticipant` (
 -- Table structure for table `TournamentPoints`
 --
 
-CREATE TABLE `TournamentPoints` (
+CREATE TABLE IF NOT EXISTS `TournamentPoints` (
   `tid` int(11) NOT NULL,
   `PointsType` enum('SIMPLE','HAHN') NOT NULL default 'SIMPLE',
   `Flags` tinyint(3) unsigned NOT NULL default '1',
@@ -1218,7 +1218,6 @@ CREATE TABLE `TournamentPoints` (
   `PointsLost` tinyint(4) NOT NULL default '0',
   `PointsDraw` tinyint(4) NOT NULL default '1',
   `PointsForfeit` smallint(6) NOT NULL default '2',
-  `PointsBye` smallint(6) NOT NULL default '2',
   `PointsNoResult` smallint(6) NOT NULL default '1',
   `ScoreBlock` tinyint(3) unsigned NOT NULL default '10',
   `MaxPoints` smallint(5) unsigned NOT NULL default '10',
@@ -1568,4 +1567,5 @@ CREATE TABLE IF NOT EXISTS `WaitingroomJoined` (
   `ExpireDate` datetime NOT NULL default '0000-00-00 00:00:00',
   PRIMARY KEY  (`wroom_id`,`opp_id`)
 ) ENGINE=MyISAM DEFAULT CHARSET=latin1;
+
 
