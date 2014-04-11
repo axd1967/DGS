@@ -352,7 +352,7 @@ function load_igoban_from_sgf( $file_sgf_arr )
    return array( $errors, $board_text );
 }//load_igoban_from_sgf
 
-// create <igoban>-tag from SGF parsed with sgf_parser(), see also 'include/sgf_parser.php'
+// create <igoban>-tag from SGF parsed with Sgf::sgf_parser(), see also 'include/sgf_parser.php'
 // return [ board_text, error|'' ]
 function create_igoban_from_parsed_sgf( $sgf_parser )
 {

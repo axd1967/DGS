@@ -11,6 +11,20 @@ Release [2014-03-27] - DGS 1.0.17 - tag [release-1_0_17-20140327] on branch [DGS
 ChangeLog
 ------------------------------------------------------------------
 
+2014-04-12 jug
+
+   * include/sgf_parser.php (class Sgf, ~.sgf_parser, ~.sgf_builder, ~.sgf_var_push, ~.sgf_skip_space,
+       ~.sgf_parse_node, ~.sgf_parse_args, ~.sgf_parse_key, ~.push_var_stack;
+       GameSgfParser.parse_sgf;
+       get_handicap_pattern)
+     goban_editor.php:
+   - cleanup: refactored local SGF-parsing functions into Sgf-class
+     - replaced deprecated string-index access s{i} with s[i]
+     - refactored constant data into static data
+     - adjusted for DGS-layout
+     - moved get_handicap_pattern()-function after classes
+     - added function-comments
+
 2014-04-11 jug
 
    * include/game_sgf_control.php (GameSgfControl.verify_game_sgf),

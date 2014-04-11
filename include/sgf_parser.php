@@ -85,325 +85,262 @@ define('SGF_NOD_BEG', ';');
 define('SGF_VAR_KEY', '++');
 
 
-// Explode a sgf string ($sgf, from file) into an array of games ($games)
-function sgf_parser( $sgf, &$games)
+
+/*! \brief Helper-class to parse SGF-data. */
+class Sgf
 {
-   $err= '';
-   $games= array();
+   private static $ARR_ROOT_DEFAULT_VALUES = array(
+         'FF' => 4,
+         'GM' => 1,
+         'SZ' => 19,
+         'RU' => 'Japanese',
+      );
 
-   $sgf_len= strlen($sgf);
-   $i= 0;
-   while ( !$err && false !== ($i= strpos($sgf,SGF_VAR_BEG,$i)) )
+   // ------------ static functions ----------------------------
+
+   /*! \brief Explodes a SGF-string ($sgf, from file) into an array of games ($games). */
+   public static function sgf_parser( $sgf, &$games )
    {
-      $ivar= 0;
-      $vars[$ivar]= array();
+      $err = '';
+      $games = array();
 
-      $i++;
-      if ( !sgf_skip_space( $sgf, $i, $sgf_len) )
+      $sgf_len = strlen($sgf);
+      $i = 0;
+      while ( !$err && false !== ($i = strpos($sgf,SGF_VAR_BEG,$i)) )
       {
-         $err = T_('Bad end of file#sgf');
-         break;
-      }
+         $ivar = 0;
+         $vars[$ivar] = array();
 
-      if ( $sgf{$i} != SGF_NOD_BEG )
-      {
-         $err = T_('Bad root node#sgf');
-         break;
-      }
-
-      $i++;
-      $err = sgf_parse_node( $sgf, $i, $sgf_len, $node);
-      if ( $err )
-         break;
-
-      if ( !isset($node['GM']) || @$node['GM'][0] != 1 )
-      {
-         $err = T_('Not a Go game (GM[1])#sgf');
-         break;
-      }
-
-      foreach ( array( //root default values
-           'FF' => 4,
-           'GM' => 1,
-           'SZ' => 19,
-           'RU' => 'Japanese',
-         ) as $key => $arg)
-      {
-         if ( !isset($node[$key]) )
-            $node[$key]= array($arg);
-      }
-
-      $vars[$node_ivar=$ivar][]= $node;
-
-      while ( !$err && $ivar>=0 && $c=sgf_skip_space( $sgf, $i, $sgf_len) )
-      {
-         switch ( (string)$c )
+         $i++;
+         if ( !self::sgf_skip_space( $sgf, $i, $sgf_len) )
          {
-            case SGF_VAR_END:
-               $ivar--; $i++;
-               $vars[$ivar][SGF_VAR_KEY][]= $vars[$ivar+1];
-               break;
-
-            case SGF_VAR_BEG:
-               $i++;
-               if ( SGF_NOD_BEG != sgf_skip_space( $sgf, $i, $sgf_len) )
-               {
-                  $err = T_('Bad node start#sgf');
-                  break;
-               }
-               if ( $node_ivar <= $ivar )
-                  $vars[$ivar][SGF_VAR_KEY]= array();
-               $ivar++;
-               $vars[$ivar]= array();
-            case SGF_NOD_BEG :
-               $i++;
-               $err= sgf_parse_node( $sgf, $i, $sgf_len, $node);
-               $vars[$node_ivar=$ivar][]= $node;
-               break;
-
-            default :
-               $err = T_('Syntax error#sgf');
-               break;
-         }
-      }
-      if ( $err )
-         break;
-
-      if ( $ivar>=0 )
-      {
-         $err = T_('Missing right parenthesis#sgf');
-         break;
-      }
-
-      $games[]= $vars[0];
-   }
-
-   if ( $err )
-   {
-      $tmp= max(0,$i-20);
-      $err= "SGF: ".$err
-         . "\nnear: "
-         . ltrim(substr( $sgf, $tmp, $i-$tmp))
-         . '<'
-         . substr( $sgf, $i, 1)
-         . '>'
-         . rtrim(substr( $sgf, $i+1, 20))
-         ;
-   }
-   return $err;
-}//sgf_parser
-
-
-// In short, it does the opposite of sgf_parser()
-function sgf_builder( $games, &$sgf)
-{
-   $err= '';
-   $sgf= '';
-
-   $vars= array();
-   //$games is an array of games (i.e. variations)
-   for ( $i=count($games)-1; $i>=0; $i-- )
-   {
-      sgf_var_push( $vars, $games[$i]);
-   }
-
-   while ( $var=array_pop($vars) )
-   {
-      if ( $var === SGF_VAR_END ) //see sgf_var_push()
-      {
-         $sgf.= SGF_VAR_END."\r\n";
-         continue;
-      }
-
-      $sgf.= SGF_VAR_BEG."\r\n";
-      //a variation is an array of nodes
-      foreach ( $var as $id => $node )
-      {
-         if ( $id === SGF_VAR_KEY )
-         {
-            //this perticular node is an array of variations
-            for ( $i=count($node)-1; $i>=0; $i-- )
-            {
-               sgf_var_push( $vars, $node[$i]);
-            }
-            continue;
-         }
-
-         $sgf.= SGF_NOD_BEG."\r\n";
-         //a node is an array of properties
-         foreach ( $node as $key => $args )
-         {
-            $sgf.= "$key";
-            foreach ( $args as $arg )
-            {
-               $sgf.= SGF_ARG_BEG.$arg.SGF_ARG_END;
-            }
-            $sgf.= "\r\n";
-         }
-      }
-   }
-
-   return $err;
-}
-
-
-function sgf_var_push( &$vars, &$var)
-{
-   if ( is_array($var) )
-   {
-      $vars[]= SGF_VAR_END;
-      $vars[]= &$var;
-   }
-}
-
-
-function sgf_skip_space( $sgf, &$i, $l)
-{
-   while ( $i<$l )
-   {
-      if ( $sgf{$i} > ' ' )
-         return $sgf{$i};
-      $i++;
-   }
-   return 0;
-}
-
-
-function sgf_parse_node( $sgf, &$i, $l, &$node)
-{
-   $node= array();
-   while ( $key= sgf_parse_key( $sgf, $i, $l) )
-   {
-      $err= sgf_parse_args( $sgf, $i, $l, $args, $key);
-      if ( $err )
-         return $err;
-      $node[$key]= $args;
-   }
-   $c= $sgf{$i}; //sgf_skip_space( $sgf, $i, $l)
-   if ( $c != SGF_NOD_BEG &&  $c != SGF_VAR_BEG && $c != SGF_VAR_END )
-   {
-      return T_('Syntax error#sgf');
-   }
-   return '';
-}
-
-
-function sgf_parse_args( $sgf, &$i, $l, &$args, $key)
-{
-   $args= array();
-   while ( sgf_skip_space( $sgf, $i, $l) == SGF_ARG_BEG )
-   {
-      $j= $i;
-      while ( false !== ($j=strpos($sgf,SGF_ARG_END,$j+1)) )
-      {
-         if ( $sgf{$j-1} != '\\' )
-         {
-            $arg= substr($sgf, $i+1, $j-$i-1);
-            $args[]= $arg;
-            $i= $j+1;
+            $err = T_('Bad end of file#sgf');
             break;
          }
-      }
-      if ( false === $j )
-         return T_('Missing right bracket#sgf');
-   }
-   return '';
-}
 
-
-function sgf_parse_key( $sgf, &$i, $l)
-{
-   $key= '';
-   while ( $i<$l )
-   {
-      $c= $sgf{$i};
-      if ( $c>='A' && $c<='Z' )
-         $key.= $c;
-      else if ( ($c>' ') && ($c<'a' || $c>'z') )
-         break;
-      $i++;
-   }
-   return $key;
-}
-
-
-if ( defined('ENABLE_STDHANDICAP') && ENABLE_STDHANDICAP ) {
-
-function handicap_push( &$vars, &$var, $nb)
-{
-   if ( is_array($var) )
-   {
-      $vars[]= array($nb, &$var);
-   }
-}
-
-// Read the standard handicap pattern file
-// and convert it to a stonestring.
-function get_handicap_pattern( $size, $handicap, &$err)
-{
-   $stonestring ='';
-   if ( $handicap < 2 )
-      return $stonestring;
-
-   $game = array();
-
-   $filename = "pattern/standard_handicap_$size.sgf";
-   $sgf = @read_from_file( $filename, 0);
-   if ( is_string($sgf) )
-      $err = sgf_parser( $sgf, $game);
-   else
-      $err = T_('File not found');
-   if ( $err ) {
-      //Simply returning the error message will allow
-      //the player to manually add his handicap stones.
-      $err= sprintf( T_('Bad handicap pattern for %s'), "size=$size h=$handicap err=[$err]" );
-      return $stonestring;
-   }
-   $game= $game[0]; //keep the first game only
-
-   $nb = 0;
-   $vars = array();
-   handicap_push( $vars, $game, $nb);
-
-   while ( list($nb,$var)=array_pop($vars) )
-   {
-      $stonestring = substr( $stonestring, 0, 2*$nb);
-
-      //a variation is an array of nodes
-      foreach ( $var as $id => $node )
-      {
-         if ( $id === SGF_VAR_KEY )
+         if ( $sgf[$i] != SGF_NOD_BEG )
          {
-            //this perticular node is an array of variations
-            for ( $i=count($node)-1; $i>=0; $i-- )
-               handicap_push( $vars, $node[$i], $nb);
+            $err = T_('Bad root node#sgf');
+            break;
+         }
+
+         $i++;
+         $err = self::sgf_parse_node( $sgf, $i, $sgf_len, $node);
+         if ( $err )
+            break;
+
+         if ( !isset($node['GM']) || @$node['GM'][0] != 1 )
+         {
+            $err = T_('Not a Go game (GM[1])#sgf');
+            break;
+         }
+
+         foreach ( self::$ARR_ROOT_DEFAULT_VALUES as $key => $arg )
+         {
+            if ( !isset($node[$key]) )
+               $node[$key] = array($arg);
+         }
+
+         $vars[$node_ivar = $ivar][] = $node;
+
+         while ( !$err && $ivar >= 0 && ($c = self::sgf_skip_space( $sgf, $i, $sgf_len)) )
+         {
+            switch ( (string)$c )
+            {
+               case SGF_VAR_END:
+                  $ivar--; $i++;
+                  $vars[$ivar][SGF_VAR_KEY][] = $vars[$ivar + 1];
+                  break;
+
+               case SGF_VAR_BEG:
+                  $i++;
+                  if ( SGF_NOD_BEG != self::sgf_skip_space( $sgf, $i, $sgf_len) )
+                  {
+                     $err = T_('Bad node start#sgf');
+                     break;
+                  }
+                  if ( $node_ivar <= $ivar )
+                     $vars[$ivar][SGF_VAR_KEY] = array();
+                  $ivar++;
+                  $vars[$ivar] = array();
+               case SGF_NOD_BEG :
+                  $i++;
+                  $err = self::sgf_parse_node( $sgf, $i, $sgf_len, $node);
+                  $vars[$node_ivar=$ivar][] = $node;
+                  break;
+
+               default :
+                  $err = T_('Syntax error#sgf');
+                  break;
+            }
+         }
+         if ( $err )
+            break;
+
+         if ( $ivar >= 0 )
+         {
+            $err = T_('Missing right parenthesis#sgf');
+            break;
+         }
+
+         $games[] = $vars[0];
+      }
+
+      if ( $err )
+      {
+         $tmp = max(0, $i-20);
+         $err= "SGF: ".$err
+            . "\nnear: "
+            . ltrim(substr( $sgf, $tmp, $i-$tmp))
+            . '<'
+            . substr( $sgf, $i, 1)
+            . '>'
+            . rtrim(substr( $sgf, $i+1, 20))
+            ;
+      }
+      return $err;
+   }//sgf_parser
+
+
+   // In short, it does the opposite of sgf_parser()
+   // NOTE: not used, but keep it for later
+   private static function sgf_builder( $games, &$sgf )
+   {
+      $err = '';
+      $sgf = '';
+
+      $vars = array();
+      //$games is an array of games (i.e. variations)
+      for ( $i=count($games)-1; $i >= 0; $i-- )
+         self::sgf_var_push( $vars, $games[$i] );
+
+      while ( $var = array_pop($vars) )
+      {
+         if ( $var === SGF_VAR_END ) //see Sgf::sgf_var_push()
+         {
+            $sgf .= SGF_VAR_END."\r\n";
             continue;
          }
 
-         //a node is an array of properties
-         if ( isset($node['B']) || isset($node['W']) )
+         $sgf .= SGF_VAR_BEG."\r\n";
+         //a variation is an array of nodes
+         foreach ( $var as $id => $node )
          {
-            $co= @$node['B'][0];
-            if ( !$co )
-               $co= @$node['W'][0];
-            if ( strlen($co) != 2 )
-               return $stonestring;
-            $stonestring.= $co;
-            $nb++;
-            if ( $nb >= $handicap )
-               return $stonestring;
+            if ( $id === SGF_VAR_KEY )
+            {
+               //this perticular node is an array of variations
+               for ( $i=count($node)-1; $i >= 0; $i-- )
+                  self::sgf_var_push( $vars, $node[$i] );
+               continue;
+            }
+
+            $sgf .= SGF_NOD_BEG."\r\n";
+            //a node is an array of properties
+            foreach ( $node as $key => $args )
+            {
+               $sgf .= "$key";
+               foreach ( $args as $arg )
+                  $sgf .= SGF_ARG_BEG.$arg.SGF_ARG_END;
+               $sgf .= "\r\n";
+            }
          }
       }
+
+      return $err;
+   }//sgf_builder
+
+   private static function sgf_var_push( &$vars, &$var )
+   {
+      if ( is_array($var) )
+      {
+         $vars[] = SGF_VAR_END;
+         $vars[] = &$var;
+      }
    }
-   //See previous error comment
-   $err = sprintf( T_('Insufficient handicap pattern for %s'), "size=$size h=$handicap n=$nb" );
-   return $stonestring;
-}
-
-}//ENABLE_STDHANDICAP
 
 
-/*! \brief Contains parsed properties from SGF for further processing. */
+   private static function sgf_skip_space( $sgf, &$i, $l )
+   {
+      while ( $i < $l )
+      {
+         if ( $sgf[$i] > ' ' )
+            return $sgf[$i];
+         $i++;
+      }
+      return 0;
+   }//sgf_skip_space
+
+
+   /*! \brief Parses SGF-node, e.g. 'MN[0]' into $node['MN'] = arr( '0' ). */
+   private static function sgf_parse_node( $sgf, &$i, $l, &$node )
+   {
+      $node = array();
+      while ( $key = self::sgf_parse_key( $sgf, $i, $l) )
+      {
+         $err = self::sgf_parse_args( $sgf, $i, $l, $args, $key);
+         if ( $err )
+            return $err;
+         $node[$key] = $args;
+      }
+      $c = $sgf[$i]; //sgf_skip_space( $sgf, $i, $l)
+      return ( $c != SGF_NOD_BEG && $c != SGF_VAR_BEG && $c != SGF_VAR_END ) ? T_('Syntax error#sgf') : '';
+   }//sgf_parse_args
+
+
+   /*! \brief Parses SGF-property-value, e.g. '0' from 'MN[0]'. */
+   private static function sgf_parse_args( $sgf, &$i, $l, &$args, $key )
+   {
+      $args = array();
+      while ( self::sgf_skip_space( $sgf, $i, $l) == SGF_ARG_BEG )
+      {
+         $j = $i;
+         while ( false !== ($j = strpos($sgf,SGF_ARG_END,$j+1)) )
+         {
+            if ( $sgf[$j-1] != '\\' )
+            {
+               $arg = substr($sgf, $i+1, $j-$i-1);
+               $args[] = $arg;
+               $i = $j + 1;
+               break;
+            }
+         }
+         if ( false === $j )
+            return T_('Missing right bracket#sgf');
+      }
+      return '';
+   }//sgf_parse_args
+
+
+   /*! \brief Parses SGF-property-key, e.g. 'MN' from 'MN[0]'. */
+   private static function sgf_parse_key( $sgf, &$i, $l )
+   {
+      $key = '';
+      while ( $i < $l )
+      {
+         $c = $sgf[$i];
+         if ( $c >= 'A' && $c <= 'Z' )
+            $key .= $c;
+         elseif ( ($c > ' ') && ($c < 'a' || $c > 'z') )
+            break;
+         $i++;
+      }
+      return $key;
+   }//sgf_parse_key
+
+
+   /*! \brief Pushes variation $var on variation-stack $vars with move-num $nb. */
+   public static function push_var_stack( &$vars, &$var, $nb )
+   {
+      if ( is_array($var) )
+         $vars[] = array( $nb, &$var );
+   }
+
+} //end 'Sgf'
+
+
+
+
+/*! \brief Class containing parsed properties from SGF for further processing. */
 class GameSgfParser
 {
    public $error; // error-message | '' (=success)
@@ -435,7 +372,7 @@ class GameSgfParser
    public static function parse_sgf( $sgf_data )
    {
       $game = array();
-      $error = sgf_parser( $sgf_data, $game );
+      $error = Sgf::sgf_parser( $sgf_data, $game );
 
       $sgf_parser = new GameSgfParser( $error );
       if ( $error )
@@ -444,7 +381,7 @@ class GameSgfParser
       $game = $game[0]; // check 1st game only
       $movenum = 0; // current move-number
       $vars = array(); // variations
-      handicap_push( $vars, $game, $movenum );
+      Sgf::push_var_stack( $vars, $game, $movenum );
 
       $parsed_HA = $parsed_KM = null;
       while ( list($movenum, $var) = array_pop($vars) ) // process variations-stack
@@ -455,7 +392,7 @@ class GameSgfParser
             if ( $id === SGF_VAR_KEY )
             {
                // this particular node is an array of variations, but only take first var (main-branch)
-               handicap_push( $vars, $node[0], $movenum );
+               Sgf::push_var_stack( $vars, $node[0], $movenum );
                continue;
             }
 
@@ -490,5 +427,76 @@ class GameSgfParser
    }//parse_sgf
 
 }//end 'GameSgfParser'
+
+
+
+if ( defined('ENABLE_STDHANDICAP') && ENABLE_STDHANDICAP ) {
+
+// Read the standard handicap pattern file
+// and convert it to a stonestring.
+function get_handicap_pattern( $size, $handicap, &$err)
+{
+   $stonestring ='';
+   if ( $handicap < 2 )
+      return $stonestring;
+
+   $game = array();
+
+   $filename = "pattern/standard_handicap_$size.sgf";
+   $sgf = @read_from_file( $filename, 0);
+   if ( is_string($sgf) )
+      $err = Sgf::sgf_parser( $sgf, $game);
+   else
+      $err = T_('File not found');
+   if ( $err )
+   {
+      //Simply returning the error message will allow
+      //the player to manually add his handicap stones.
+      $err = sprintf( T_('Bad handicap pattern for %s'), "size=$size h=$handicap err=[$err]" );
+      return $stonestring;
+   }
+   $game = $game[0]; //keep the first game only
+
+   $nb = 0;
+   $vars = array();
+   Sgf::push_var_stack( $vars, $game, $nb);
+
+   while ( list($nb,$var) = array_pop($vars) )
+   {
+      $stonestring = substr( $stonestring, 0, 2*$nb);
+
+      //a variation is an array of nodes
+      foreach ( $var as $id => $node )
+      {
+         if ( $id === SGF_VAR_KEY )
+         {
+            //this particular node is an array of variations
+            for ( $i=count($node)-1; $i >= 0; $i-- )
+               Sgf::push_var_stack( $vars, $node[$i], $nb);
+            continue;
+         }
+
+         //a node is an array of properties
+         if ( isset($node['B']) || isset($node['W']) )
+         {
+            $co = @$node['B'][0];
+            if ( !$co )
+               $co = @$node['W'][0];
+            if ( strlen($co) != 2 )
+               return $stonestring;
+            $stonestring .= $co;
+            $nb++;
+            if ( $nb >= $handicap )
+               return $stonestring;
+         }
+      }
+   }
+   //See previous error comment
+   $err = sprintf( T_('Insufficient handicap pattern for %s'), "size=$size h=$handicap n=$nb" );
+   return $stonestring;
+}//get_handicap_pattern
+
+}//ENABLE_STDHANDICAP
+
 
 ?>
