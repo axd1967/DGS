@@ -70,6 +70,8 @@ $GLOBALS['ThePage'] = new Page('TournamentList');
    $status_filter_array = array(
          T_('All') => '',
          T_('Open#tourney') => "T.Status IN ('".TOURNEY_STATUS_REGISTER."','".TOURNEY_STATUS_PAIR."','".TOURNEY_STATUS_PLAY."')",
+         T_('Director#tstatfilter') => "T.Status IN ('".TOURNEY_STATUS_NEW."','".TOURNEY_STATUS_REGISTER."','"
+               . TOURNEY_STATUS_PAIR."','".TOURNEY_STATUS_PLAY."')",
       );
    $idx = count($status_filter_array);
    foreach ( Tournament::getStatusText() as $status => $text )
@@ -93,6 +95,7 @@ $GLOBALS['ThePage'] = new Page('TournamentList');
    $search_profile->handle_action();
 
    // static filters
+   $tdir_uid = (int)@$_REQUEST['tdir'];
    $tsfilter->add_filter( 1, 'Text', 'TP.uid', true, array(
             FC_FNAME => 'uid',
             FC_QUERYSQL => new QuerySQL(
@@ -101,7 +104,8 @@ $GLOBALS['ThePage'] = new Page('TournamentList');
    $tsfilter->add_filter( 2, 'Text', 'TD.uid', true, array(
             FC_FNAME => 'tdir',
             FC_QUERYSQL => new QuerySQL(
-               SQLP_FROM,  'INNER JOIN TournamentDirector AS TD ON TD.tid=T.ID' ) ));
+               SQLP_FROM,  'LEFT JOIN TournamentDirector AS TD ON TD.tid=T.ID',
+               SQLP_WHERE, "(T.Owner_ID=$tdir_uid OR TD.tid IS NOT NULL)" ) ));
    $tsfilter->init();
    $has_uid = (bool)( $tsfilter->get_filter_value(1) );
    $has_tdir = (bool)( $tsfilter->get_filter_value(2) );
@@ -111,7 +115,7 @@ $GLOBALS['ThePage'] = new Page('TournamentList');
    $tfilter->add_filter( 2, 'Selection', $scope_filter_array, true );
    $tfilter->add_filter( 3, 'Selection', $type_filter_array, true );
    $tfilter->add_filter( 4, 'Selection', $status_filter_array, true,
-         array( FC_DEFAULT => 1 ) );
+         array( FC_DEFAULT => ($tdir_uid ? 2 : 1) ) );
    $filter_title =&
       $tfilter->add_filter( 5, 'Text', 'T.Title #OP #VAL', true,
          array( FC_SIZE => 16, FC_SUBSTRING => 1, FC_START_WILD => 3, FC_SQL_TEMPLATE => 1 ));

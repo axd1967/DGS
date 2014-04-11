@@ -11,6 +11,11 @@ Release [2014-03-27] - DGS 1.0.17 - tag [release-1_0_17-20140327] on branch [DGS
 ChangeLog
 ------------------------------------------------------------------
 
+2014-04-11 jug
+
+   * tournaments/list_tournaments.php:
+   - tournament-list: show directoring tournaments also for tournament-owner and including NEW-status
+
 2014-04-10 jug
 
    * scripts/updates/database_changes_1_0_13.mysql, scripts/updates/database_changes_1_0_14.mysql,
