@@ -13,6 +13,11 @@ ChangeLog
 
 2014-04-11 jug
 
+   * include/game_sgf_control.php (GameSgfControl.verify_game_sgf),
+     include/sgf_parser.php (class GameSgfParser),
+     goban_editor.php (load_igoban_from_sgf):
+   - renamed class SgfParser to GameSgfParser to free class-name
+
    * tournaments/list_tournaments.php:
    - tournament-list: show directoring tournaments also for tournament-owner and including NEW-status
 

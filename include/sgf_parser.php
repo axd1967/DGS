@@ -404,7 +404,7 @@ function get_handicap_pattern( $size, $handicap, &$err)
 
 
 /*! \brief Contains parsed properties from SGF for further processing. */
-class SgfParser
+class GameSgfParser
 {
    public $error; // error-message | '' (=success)
    public $Size = 0;
@@ -430,14 +430,14 @@ class SgfParser
 
    /*!
     * \brief Parses SGF-data into resulting-array (used to load SGF and flatten into Goban-objects for Shape-game).
-    * \return SgfParser-instance with filled properties; parsing-error in SgfParser->Error or '' if ok
+    * \return GameSgfParser-instance with filled properties; parsing-error in SgfParser->Error or '' if ok
     */
    public static function parse_sgf( $sgf_data )
    {
       $game = array();
       $error = sgf_parser( $sgf_data, $game );
 
-      $sgf_parser = new SgfParser( $error );
+      $sgf_parser = new GameSgfParser( $error );
       if ( $error )
          return $sgf_parser;
 
@@ -489,6 +489,6 @@ class SgfParser
       return $sgf_parser;
    }//parse_sgf
 
-}//end 'SgfParser'
+}//end 'GameSgfParser'
 
 ?>
