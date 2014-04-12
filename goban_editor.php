@@ -339,7 +339,7 @@ function load_igoban_from_sgf( $file_sgf_arr )
       if ( $sgf_data !== false )
       {
          $do_preview = true;
-         $sgf_parser = GameSgfParser::parse_sgf( $sgf_data );
+         $sgf_parser = GameSgfParser::parse_sgf_data( $sgf_data );
          list( $board_text, $err ) = create_igoban_from_parsed_sgf( $sgf_parser );
          if ( $err )
             $errors = array( $err );

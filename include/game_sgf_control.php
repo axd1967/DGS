@@ -131,7 +131,7 @@ class GameSgfControl
       if ( !GameSgfParser::might_be_sgf($sgf_data) )
          return array( T_('File has no SGF-format!') );
 
-      $sgf_parser = GameSgfParser::parse_sgf( $sgf_data );
+      $sgf_parser = GameSgfParser::parse_sgf_data( $sgf_data );
       if ( $sgf_parser->error )
          $errors[] = sprintf( T_('SGF-Parse error found: %s'), $sgf_parser->error );
       else

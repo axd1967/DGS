@@ -83,13 +83,16 @@ define('SGF_NOD_BEG', ';');
 define('SGF_VAR_KEY', '++');
 
 
-
 /*! \brief Helper-class to parse SGF-data. */
 class Sgf
 {
-   public $games;
-   public $error_msg;
-   public $error_loc;
+   private $sgf = '';
+   private $sgf_len = 0;
+   private $idx = 0;
+
+   public $games = array();
+   public $error_msg = '';
+   public $error_loc = '';
 
    private static $ARR_ROOT_DEFAULT_VALUES = array(
          'FF' => 4,
@@ -98,52 +101,68 @@ class Sgf
          'RU' => 'Japanese',
       );
 
-   private function __construct( $games, $error_msg, $error_loc )
+   private function __construct()
    {
-      $this->games = $games;
-      $this->error_msg = $error_msg;
-      $this->error_loc = $error_loc;
    }
 
-
-   // ------------ static functions ----------------------------
-
-   /*! \brief Explodes a SGF-string ($sgf, from file) into an array of games ($games). */
-   public static function sgf_parser( $sgf )
+   private function init_parser( $sgf )
    {
-      $err = '';
-      $games = array();
+      $this->sgf = $sgf;
+      $this->sgf_len = strlen($sgf);
+      $this->idx = 0;
 
-      $sgf_len = strlen($sgf);
-      $i = 0;
-      while ( !$err && false !== ($i = strpos( $sgf, SGF_VAR_BEG, $i )) )
+      $this->games = array();
+      $this->error_msg = '';
+      $this->error_loc = '';
+   }
+
+   /*!
+    * \brief Parses specified SGF-data into $this->games-array; return true on success, false on error.
+    * \note $this->error_msg contains error (or ''=no-error), $this->error_loc contains error-context in SGF-data
+    */
+   public function parse_sgf( $sgf )
+   {
+      $this->init_parser( $sgf );
+
+      $this->error_msg = $this->parse_sgf_tree();
+
+      if ( $this->error_msg )
+      {
+         $tmp = max(0, $this->idx-20);
+         $this->error_loc = "SGF: {$this->error_msg}\nnear: "
+            . ltrim(substr( $this->sgf, $tmp, $this->idx-$tmp))
+            . '<' . substr( $this->sgf, $this->idx, 1) . '>'
+            . rtrim(substr( $this->sgf, $this->idx+1, 20));
+      }
+
+      return ( (string)$this->error_msg == '' );
+   }//parse_sgf
+
+   /*!
+    * \brief Parses SGF-data; returning '' on success or else error-msg.
+    * \note Sets $this->games with parsed tree with nodes.
+    */
+   private function parse_sgf_tree()
+   {
+      while ( false !== ($this->idx = strpos( $this->sgf, SGF_VAR_BEG, $this->idx)) )
       {
          $ivar = 0;
          $vars[$ivar] = array();
 
-         $i++;
-         if ( !self::sgf_skip_space( $sgf, $i, $sgf_len) )
-         {
-            $err = T_('Bad end of file#sgf');
-            break;
-         }
+         $this->idx++;
+         if ( !$this->sgf_skip_space() )
+            return T_('Bad end of file#sgf');
 
-         if ( $sgf[$i] != SGF_NOD_BEG )
-         {
-            $err = T_('Bad root node#sgf');
-            break;
-         }
+         if ( $this->sgf[$this->idx] != SGF_NOD_BEG )
+            return T_('Bad root node#sgf');
 
-         $i++;
-         $err = self::sgf_parse_node( $sgf, $i, $sgf_len, $node);
+         $this->idx++;
+         $err = $this->sgf_parse_node( $node );
          if ( $err )
-            break;
+            return $err;
 
          if ( !isset($node['GM']) || @$node['GM'][0] != 1 )
-         {
-            $err = T_('Not a Go game (GM[1])#sgf');
-            break;
-         }
+            return T_('Not a Go game (GM[1])#sgf');
 
          foreach ( self::$ARR_ROOT_DEFAULT_VALUES as $key => $arg )
          {
@@ -153,79 +172,165 @@ class Sgf
 
          $vars[$node_ivar = $ivar][] = $node;
 
-         while ( !$err && $ivar >= 0 && ($c = self::sgf_skip_space( $sgf, $i, $sgf_len)) )
+         while ( $ivar >= 0 && ($c = $this->sgf_skip_space()) )
          {
             switch ( (string)$c )
             {
                case SGF_VAR_END:
-                  $ivar--; $i++;
+                  $ivar--;
+                  $this->idx++;
                   $vars[$ivar][SGF_VAR_KEY][] = $vars[$ivar + 1];
                   break;
 
                case SGF_VAR_BEG:
-                  $i++;
-                  if ( SGF_NOD_BEG != self::sgf_skip_space( $sgf, $i, $sgf_len) )
-                  {
-                     $err = T_('Bad node start#sgf');
-                     break;
-                  }
+                  $this->idx++;
+                  if ( $this->sgf_skip_space() != SGF_NOD_BEG )
+                     return T_('Bad node start#sgf');
+
                   if ( $node_ivar <= $ivar )
                      $vars[$ivar][SGF_VAR_KEY] = array();
                   $ivar++;
                   $vars[$ivar] = array();
-               case SGF_NOD_BEG :
-                  $i++;
-                  $err = self::sgf_parse_node( $sgf, $i, $sgf_len, $node);
-                  $vars[$node_ivar=$ivar][] = $node;
+                  // NOTE: running through (no break here)
+
+               case SGF_NOD_BEG:
+                  $this->idx++;
+                  $err = $this->sgf_parse_node( $node );
+                  $vars[$node_ivar = $ivar][] = $node;
+                  if ( $err )
+                     return $err;
                   break;
 
-               default :
-                  $err = T_('Syntax error#sgf');
-                  break;
+               default:
+                  return T_('Syntax error#sgf');
             }
          }
-         if ( $err )
-            break;
 
          if ( $ivar >= 0 )
-         {
-            $err = T_('Missing right parenthesis#sgf');
-            break;
-         }
+            return T_('Missing right parenthesis#sgf');
 
-         $games[] = $vars[0];
+         $this->games[] = $vars[0];
       }
 
-      $err_msg = $err;
-      if ( $err )
+      return ''; // no-error
+   }//parse_sgf_tree
+
+
+   /*!
+    * Skips white-space in SGF-data.
+    * \return character after skipped white-spaces; should be non-number
+    */
+   private function sgf_skip_space()
+   {
+      while ( $this->idx < $this->sgf_len )
       {
-         $tmp = max(0, $i-20);
-         $err = "SGF: $err\nnear: "
-            . ltrim(substr( $sgf, $tmp, $i-$tmp))
-            . '<' . substr( $sgf, $i, 1) . '>'
-            . rtrim(substr( $sgf, $i+1, 20));
+         if ( $this->sgf[$this->idx] > ' ' )
+            return $this->sgf[$this->idx];
+         $this->idx++;
+      }
+      return 0;
+   }//sgf_skip_space
+
+   /*!
+    * \brief Parses "Node" in SGF-data, e.g. 'MN[0][1]C[note]' into $node = arr( 'MN' => arr( 0, 1 ), 'C' => arr( 'note' )).
+    * \note node-data must end with one of: "; ( )"
+    * \param $node array passed via back-reference with parsed nodes
+    * \return '' = no-error; else error-msg with parsing-error
+    */
+   private function sgf_parse_node( &$node )
+   {
+      $node = array();
+      while ( $key = $this->sgf_parse_key() )
+      {
+         $err = $this->sgf_parse_args( $args );
+         if ( $err )
+            return $err;
+         $node[$key] = $args;
       }
 
-      $sgf_parser = new Sgf( $games, $err_msg, $err );
-      return $sgf_parser;
-   }//sgf_parser
+      $c = $this->sgf[$this->idx]; //sgf_skip_space()
+      return ( $c != SGF_NOD_BEG && $c != SGF_VAR_BEG && $c != SGF_VAR_END ) ? T_('Syntax error#sgf') : '';
+   }//sgf_parse_args
 
+   /*!
+    * \brief Parses "PropValue" in SGF-data, e.g. '0' from 'MN[0]'.
+    * \param $args array passed via back-reference with parsed arguments, e.g. '[0][1]' -> ( 0, 1 )
+    * \return '' = no-error; else error-msg with parsing-error
+    */
+   private function sgf_parse_args( &$args )
+   {
+      $args = array();
+      while ( $this->sgf_skip_space() == SGF_ARG_BEG )
+      {
+         $j = $this->idx;
+         while ( false !== ($j = strpos( $this->sgf, SGF_ARG_END, $j + 1 )) )
+         {
+            if ( $this->sgf[$j-1] != '\\' )
+            {
+               $arg = substr( $this->sgf, $this->idx + 1, $j - $this->idx - 1 );
+               $args[] = $arg;
+               $this->idx = $j + 1;
+               break;
+            }
+         }
+         if ( false === $j )
+            return T_('Missing right bracket#sgf');
+      }
+      return '';
+   }//sgf_parse_args
+
+   /*!
+    * \brief Parses upper-case "Property" from SGF-data, e.g. 'MN' from 'MN[0]'; skipping lower-case and white-spaces.
+    * \return property-key
+    */
+   private function sgf_parse_key()
+   {
+      $key = '';
+      while ( $this->idx < $this->sgf_len )
+      {
+         $c = $this->sgf[$this->idx];
+         if ( $c >= 'A' && $c <= 'Z' )
+            $key .= $c;
+         elseif ( ($c > ' ') && ($c < 'a' || $c > 'z') )
+            break;
+         $this->idx++;
+      }
+      return $key;
+   }//sgf_parse_key
+
+
+   // ------------ static functions ----------------------------
+
+   /*! \brief Explodes a SGF-string ($sgf, from file) into an array of games. */
+   public static function sgf_parser( $sgf_data )
+   {
+      $sgf = new Sgf();
+      $sgf->parse_sgf( $sgf_data );
+      return $sgf;
+   }
+
+   /*! \brief Pushes variation $var on variation-stack $vars with move-num $num. */
+   public static function push_var_stack( &$vars, &$var, $num )
+   {
+      if ( is_array($var) )
+         $vars[] = array( $num, &$var );
+   }
 
    // In short, it does the opposite of sgf_parser()
-   // \return error or else '' (=ok)
-   // NOTE: not used, but keep it for later
-   private static function sgf_builder( $games, &$sgf )
+   // \return built sgf-data
+   // NOTE: not used, but keep it for debugging-purposes
+   private static function sgf_builder( $games )
    {
       $sgf = '';
 
       $vars = array();
       //$games is an array of games (i.e. variations)
       for ( $i=count($games)-1; $i >= 0; $i-- )
-         self::sgf_var_push( $vars, $games[$i] );
+         array_push( $vars, SGF_VAR_END, $games[$i] );
 
       while ( $var = array_pop($vars) )
       {
-         if ( $var === SGF_VAR_END ) //see Sgf::sgf_var_push()
+         if ( $var === SGF_VAR_END )
          {
             $sgf .= SGF_VAR_END."\r\n";
             continue;
@@ -237,9 +342,9 @@ class Sgf
          {
             if ( $id === SGF_VAR_KEY )
             {
-               //this perticular node is an array of variations
+               //this particular node is an array of variations
                for ( $i=count($node)-1; $i >= 0; $i-- )
-                  self::sgf_var_push( $vars, $node[$i] );
+                  array_push( $vars, SGF_VAR_END, $node[$i] );
                continue;
             }
 
@@ -255,115 +360,8 @@ class Sgf
          }
       }
 
-      return '';
+      return $sgf;
    }//sgf_builder
-
-   /*! \brief Pushes variation $var on variation-stack $vars. */
-   private static function sgf_var_push( &$vars, &$var )
-   {
-      if ( is_array($var) )
-      {
-         $vars[] = SGF_VAR_END;
-         $vars[] = &$var;
-      }
-   }
-
-   /*!
-    * Skips white-space in SGF-data.
-    * \param $sgf string with length $l to parse
-    * \param $i index to start in $sgf; modified to next position after white-spaces
-    * \return character after skipped white-spaces; should be non-number
-    */
-   private static function sgf_skip_space( $sgf, &$i, $l )
-   {
-      while ( $i < $l )
-      {
-         if ( $sgf[$i] > ' ' )
-            return $sgf[$i];
-         $i++;
-      }
-      return 0;
-   }//sgf_skip_space
-
-   /*!
-    * \brief Parses "Node" in SGF-data, e.g. 'MN[0][1]C[note]' into $node = arr( 'MN' => arr( 0, 1 ), 'C' => arr( 'note' )).
-    * \note node-data must end with one of: "; ( )"
-    * \param $sgf string with length $l to parse
-    * \param $i index to start in $sgf; modified to next position after node
-    * \param $node array passed via back-reference with parsed nodes
-    * \return '' = no-error; else error-msg with parsing-error
-    */
-   private static function sgf_parse_node( $sgf, &$i, $l, &$node )
-   {
-      $node = array();
-      while ( $key = self::sgf_parse_key( $sgf, $i, $l ) )
-      {
-         $err = self::sgf_parse_args( $sgf, $i, $l, $args );
-         if ( $err )
-            return $err;
-         $node[$key] = $args;
-      }
-      $c = $sgf[$i]; //sgf_skip_space( $sgf, $i, $l)
-      return ( $c != SGF_NOD_BEG && $c != SGF_VAR_BEG && $c != SGF_VAR_END ) ? T_('Syntax error#sgf') : '';
-   }//sgf_parse_args
-
-   /*!
-    * \brief Parses "PropValue" in SGF-data, e.g. '0' from 'MN[0]'.
-    * \param $sgf string with length $l to parse
-    * \param $i index to start in $sgf; modified to next position after arguments
-    * \param $args array passed via back-reference with parsed arguments, e.g. '[0][1]' -> ( 0, 1 )
-    * \return '' = no-error; else error-msg with parsing-error
-    */
-   private static function sgf_parse_args( $sgf, &$i, $l, &$args )
-   {
-      $args = array();
-      while ( self::sgf_skip_space( $sgf, $i, $l) == SGF_ARG_BEG )
-      {
-         $j = $i;
-         while ( false !== ($j = strpos( $sgf, SGF_ARG_END, $j + 1 )) )
-         {
-            if ( $sgf[$j-1] != '\\' )
-            {
-               $arg = substr( $sgf, $i + 1, $j - $i - 1 );
-               $args[] = $arg;
-               $i = $j + 1;
-               break;
-            }
-         }
-         if ( false === $j )
-            return T_('Missing right bracket#sgf');
-      }
-      return '';
-   }//sgf_parse_args
-
-   /*!
-    * \brief Parses upper-case "Property" from SGF-data, e.g. 'MN' from 'MN[0]'; skipping lower-case and white-spaces.
-    * \param $sgf string with length $l to parse
-    * \param $i index to start in $sgf; modified to next position after property-key
-    * \return property-key
-    */
-   private static function sgf_parse_key( $sgf, &$i, $l )
-   {
-      $key = '';
-      while ( $i < $l )
-      {
-         $c = $sgf[$i];
-         if ( $c >= 'A' && $c <= 'Z' )
-            $key .= $c;
-         elseif ( ($c > ' ') && ($c < 'a' || $c > 'z') )
-            break;
-         $i++;
-      }
-      return $key;
-   }//sgf_parse_key
-
-
-   /*! \brief Pushes variation $var on variation-stack $vars with move-num $nb. */
-   public static function push_var_stack( &$vars, &$var, $nb )
-   {
-      if ( is_array($var) )
-         $vars[] = array( $nb, &$var );
-   }
 
 } //end 'Sgf'
 
@@ -399,7 +397,7 @@ class GameSgfParser
     * \brief Parses SGF-data into resulting-array (used to load SGF and flatten into Goban-objects for Shape-game).
     * \return GameSgfParser-instance with filled properties; parsing-error in SgfParser->Error or '' if ok
     */
-   public static function parse_sgf( $sgf_data )
+   public static function parse_sgf_data( $sgf_data )
    {
       $sgf_parser = Sgf::sgf_parser( $sgf_data );
       $game_sgf_parser = new GameSgfParser( $sgf_parser->error_loc );
@@ -452,7 +450,7 @@ class GameSgfParser
       }
 
       return $game_sgf_parser;
-   }//parse_sgf
+   }//parse_sgf_data
 
 }//end 'GameSgfParser'
 
@@ -468,14 +466,12 @@ function get_handicap_pattern( $size, $handicap, &$err)
    if ( $handicap < 2 )
       return $stonestring;
 
-   $game = array();
-
    $filename = "pattern/standard_handicap_$size.sgf";
    $sgf_data = @read_from_file( $filename, 0);
    if ( is_string($sgf_data) )
    {
       $sgf_parser = Sgf::sgf_parser( $sgf_data );
-      $game = $sgf_parser->games;
+      $game = $sgf_parser->games[0]; //keep the first game only
       $err = $sgf_parser->error_loc;
    }
    else
@@ -486,7 +482,6 @@ function get_handicap_pattern( $size, $handicap, &$err)
       $err = sprintf( T_('Bad handicap pattern for %s'), "size=$size h=$handicap err=[$err]" );
       return $stonestring;
    }
-   $game = $game[0]; //keep the first game only
 
    $nb = 0;
    $vars = array();
