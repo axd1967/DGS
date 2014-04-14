@@ -328,24 +328,15 @@ function load_igoban_from_sgf( $file_sgf_arr )
    global $do_preview;
 
    // upload SGF and parse into Goban
-   $errors = NULL;
-   $board_text = NULL;
-   $upload = new FileUpload( $file_sgf_arr, SGF_MAXSIZE_UPLOAD );
-   if ( $upload->is_uploaded() && !$upload->has_error() )
+   list( $errors, $sgf_data ) = FileUpload::load_data_from_file( $file_sgf_arr, SGF_MAXSIZE_UPLOAD );
+   if ( is_null($errors) )
    {
-      $sgf_data = @read_from_file( $upload->get_file_src_tmpfile() );
-      if ( $sgf_data !== false )
-      {
-         $do_preview = true;
-         $game_sgf_parser = GameSgfParser::parse_sgf_game( $sgf_data );
-         list( $board_text, $err ) = create_igoban_from_parsed_sgf( $game_sgf_parser );
-         if ( $err )
-            $errors = array( $err );
-      }
+      $do_preview = true;
+      $game_sgf_parser = GameSgfParser::parse_sgf_game( $sgf_data );
+      list( $board_text, $err ) = create_igoban_from_parsed_sgf( $game_sgf_parser );
+      if ( $err )
+         $errors = array( $err );
    }
-   if ( $upload->has_error() )
-      $errors = $upload->get_errors();
-   @$upload->cleanup();
 
    return array( $errors, $board_text );
 }//load_igoban_from_sgf

@@ -13,6 +13,10 @@ ChangeLog
 
 2014-04-14 jug
 
+   * include/classlib_upload.php (FileUpload.load_data_from_file),
+     goban_editor.php (load_igoban_from_sgf):
+   - cleanup: refactored loading simple-text from uploaded-file into FileUpload::load_data_from_file()
+
    * include/sgf_parser.php (SGFP_OPT_SKIP_ROOT_NODE;
        class SgfParser, ~.__construct, ~.parse_sgf, ~.parse_sgf_game_tree, ~.sgf_parse_node,
          ~.sgf_parser, ~.sgf_builder;

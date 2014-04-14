@@ -52,6 +52,10 @@ class FileUpload
    protected $file_src_size;
    protected $file_src_type;
 
+   /*!
+    * \brief Constructs FileUpload-instance to upload files sent by client.
+    * \param $arr_file array as delivered in $_FILES[key]. Format: arr( tmp_name/name/size/type/error => value )
+    */
    public function __construct( $arr_file, $max_upload_size=0 )
    {
       $this->arr_file = $arr_file;
@@ -153,6 +157,36 @@ class FileUpload
       if ( file_exists($this->file_src_tmpfile) )
          @unlink($this->file_src_tmpfile);
    }
+
+
+   // ------------ static functions ----------------------------
+
+   /*!
+    * \brief Loads text-string from uploaded data sent by client.
+    * \param $arr_file see constructor FileUpload-class
+    * \return arr( errors=null|array, result_text ); success if errors is null
+    */
+   public static function load_data_from_file( $arr_file, $max_size=0 )
+   {
+      $errors = $result_text = null;
+
+      $upload = new FileUpload( $arr_file, $max_size );
+      if ( $upload->is_uploaded() && !$upload->has_error() )
+      {
+         $sgf_data = @read_from_file( $upload->get_file_src_tmpfile() );
+         if ( $sgf_data !== false )
+            $result_text = $sgf_data;
+         else
+            $errors = array( T_('The uploaded file could not be opened for reading.') );
+      }
+      if ( $upload->has_error() )
+         $errors = $upload->get_errors();
+      @$upload->cleanup();
+
+      if ( !is_array($errors) || count($errors) == 0 )
+         $errors = null;
+      return array( $errors, $result_text );
+   }//load_data_from_file
 
 } // end of 'FileUpload'
 
