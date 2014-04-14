@@ -1,0 +1,5 @@
+
+-----------
+# adjust 'include/config-local.php' reflecting changes
+# - added 'ALLOW_CONDITIONAL_MOVES'
+

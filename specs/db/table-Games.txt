@@ -758,3 +758,76 @@ Notes:
   Maintime, Byotype, Byotime, Byoperiods, Rated, StdHandicap, WeekendClock
    - fields exactly like in Waitingroom-table, see 'specs/db/table-Waitingroom.txt'
 
+
+
+###########################################################################
+## --- MoveSequence ---
+
+Description:
+   Table to store conditional moves.
+
+| Field       | Type                                                            | Null | Key | Default  | Extra          |
++-------------+-----------------------------------------------------------------+------+-----+----------+----------------+
+| ID          | int(11)                                                         | NO   | PRI | NULL     | auto_increment |
+| gid         | int(11)                                                         | NO   | MUL | NULL     |                |
+| uid         | int(11)                                                         | NO   |     | NULL     |                |
+| Status      | enum('INACTIVE','ACTIVE','ILLEGAL','OPP_MSG','DEVIATED','DONE') | NO   |     | INACTIVE |                |
+| Flags       | tinyint(3) unsigned                                             | NO   |     | 0        |                |
+| StartMoveNr | smallint(5) unsigned                                            | NO   |     | 0        |                |
+| StartMove   | char(2)                                                         | NO   |     |          |                |
+| LastMoveNr  | smallint(5) unsigned                                            | NO   |     | 0        |                |
+| LastMovePos | smallint(5) unsigned                                            | NO   |     | 0        |                |
+| LastMove    | char(2)                                                         | NO   |     |          |                |
+| Sequence    | varbinary(2048)                                                 | NO   |     |          |                |
+
+
+## Fields:
+
+* ID : primary key, games-ID
+
+* gid : foreign key to Games.ID
+
+* uid : foreign key to Players.ID
+
+* Status :
+   - INACTIVE = sequence is inactive and will not be used
+   - ACTIVE = sequence is active and will be used
+   - ILLEGAL = found illegal move in sequence, e.g. because of ko-rules, point taken
+   - OPP_MSG = sequence stopped on next own move, because opponent posted move-message, that user should be able to see
+   - DEVIATED = sequence broken, because opponent deviated from sequence
+   - DONE = sequence used completely, no further moves available in sequence
+
+* Flags : flags for conditional moves sequence
+   - 0x01 = PRIVATE-flag (default=0 =PUBLIC), i.e. conditional moves will not be visible
+     after game is finished to opponents or observers
+
+* StartMoveNr : Games.MoveNr of last own move starting conditional-moves-sequence
+
+* StartMove : last own move starting sequence
+   - 'ab' = SGF-coord of last own move
+   - '' = PASS-move
+
+* LastMoveNr : Games.MoveNr of last move from processed sequence
+   - equals StartMoveNr on new sequence
+   - will be updated on processing sequence
+   - value of last move-nr is kept, if sequence is completed or stopped (on move-error or deviation)
+
+* LastMovePos : binary-char position in Sequence-field of chosen node
+   - string-index pointing to ';' in move-sequence for optimized parsing for next move-processing-step
+   - value of last move is kept, if sequence is completed or stopped (on move-error or deviation)
+
+* LastMove : last move from processed sequence
+   - equals StartMove on new sequence
+   - will be updated on processing sequence
+   - value of last move-nr is kept, if sequence is completed or stopped (on move-error or deviation)
+
+* Sequence : conditional moves sequence
+   - uses SGF-like tree format without root-tree-node (which is stored in StartMove/LastMove)
+   - syntax (using SGF-properties):
+      - B[aa] W[bb] = B and W moves
+      - B[] W[] = B and W PASS-moves
+      - C[comment]
+      - ";node;node(;var1_node(;var1_1_node)(;var1_2_node))"
+      - "(;var1_node;var1_node)(;var2_node;var2_node)"
+
+

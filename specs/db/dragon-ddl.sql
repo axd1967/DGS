@@ -656,6 +656,28 @@ CREATE TABLE IF NOT EXISTS `MoveMessages` (
 -- --------------------------------------------------------
 
 --
+-- Table structure for table `MoveSequence`
+--
+
+CREATE TABLE IF NOT EXISTS `MoveSequence` (
+  `ID` int(11) NOT NULL auto_increment,
+  `gid` int(11) NOT NULL,
+  `uid` int(11) NOT NULL,
+  `Status` enum('INACTIVE','ACTIVE','ILLEGAL','OPP_MSG','DEVIATED','DONE') NOT NULL default 'INACTIVE',
+  `Flags` tinyint(3) unsigned NOT NULL default '0',
+  `StartMoveNr` smallint(5) unsigned NOT NULL default '0',
+  `StartMove` char(2) NOT NULL default '',
+  `LastMoveNr` smallint(5) unsigned NOT NULL default '0',
+  `LastMovePos` smallint(5) unsigned NOT NULL default '0',
+  `LastMove` char(2) NOT NULL default '',
+  `Sequence` varbinary(2048) NOT NULL default '',
+  PRIMARY KEY  (`ID`),
+  KEY `gid_uid_status` (`gid`,`uid`,`Status`)
+) ENGINE=MyISAM DEFAULT CHARSET=latin1;
+
+-- --------------------------------------------------------
+
+--
 -- Table structure for table `MoveStats`
 --
 

@@ -26,7 +26,7 @@ require_once 'include/config-local.php';
  */
 
 define('DGS_VERSION', '1.0.17');
-define('CSS_VERSION', '20140329135700'); // take UTC-timestamp of skins/dragon/screen.css
+define('CSS_VERSION', '20140414172200'); // take UTC-timestamp of skins/dragon/screen.css
 define('JS_VERSION',  '20131211220200'); // take UTC-timestamp of newest js/*.js script
 
 // global version of quick-suite: increased with each release
@@ -146,6 +146,17 @@ define('GAMEACT_PASS',    'pass');
 define('GAMEACT_RESIGN',  'resign');
 define('GAMEACT_SCORE',   'done');
 define('GAMEACT_SET_HANDICAP', 'handicap');
+
+// ---------- Conditional Moves -----------------------------------
+
+define('MSEQ_STATUS_INACTIVE', 'INACTIVE');
+define('MSEQ_STATUS_ACTIVE', 'ACTIVE');
+define('MSEQ_STATUS_ILLEGAL', 'ILLEGAL');
+define('MSEQ_STATUS_OPP_MSG', 'OPP_MSG');
+define('MSEQ_STATUS_DEVIATED', 'DEVIATED');
+define('MSEQ_STATUS_DONE', 'DONE');
+define('CHECK_MSEQ_STATUS', 'INACTIVE|ACTIVE|ILLEGAL|OPP_MSG|DEVIATED|DONE');
+
 
 // ---------- Folder & Message stuff ------------------------------
 

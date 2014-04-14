@@ -2630,18 +2630,26 @@ table.AddtimeForm td {
 table.MessageForm td {
    text-align: left;
 }
-
 table.MessageForm td.Rubric {
    text-align: right;
 }
-
 table.MessageForm tr.Submit td {
    text-align: left;
    font-size: smaller;
 }
-
+table.MessageForm tr td.Preview,
 table.MessageForm tr td.Cancel {
    text-align: right;
+}
+
+
+table#CondMovesTable tr {
+   vertical-align: top;
+}
+table#CondMovesTable tr.Error td {
+   color: darkred;
+   font-weight: bold;
+   font-size: smaller;
 }
 
 

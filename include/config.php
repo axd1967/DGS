@@ -268,6 +268,9 @@ define('ALLOW_SURVEY_VOTE', true);
 // Allow usage of new quick-do-suite
 define('ALLOW_QUICK_DO', true);
 
+// Allow conditional moves
+define('ALLOW_CONDITIONAL_MOVES', false);
+
 // Forum: number of weeks ending NEW-scope (older entries are considered READ)
 define('FORUM_WEEKS_NEW_END', 12);
 

@@ -49,9 +49,8 @@ require_once 'include/rating.php';
 require_once 'include/table_infos.php';
 require_once 'include/classlib_goban.php';
 require_once 'include/game_sgf_control.php';
-if ( ENABLE_STDHANDICAP ) {
-   require_once 'include/sgf_parser.php';
-}
+require_once 'include/conditional_moves.php';
+require_once 'include/sgf_parser.php';
 if ( ALLOW_TOURNAMENTS ) {
    require_once 'tournaments/include/tournament_cache.php';
 }
@@ -73,6 +72,8 @@ $GLOBALS['ThePage'] = new Page('Game');
      a=remove           : multiple input step, dead-stone-marking in scoring-mode
      a=resign           : show resign dialog -> confirm-page on submit
 
+     gid=&cma=action    : conditional-move action: add
+
      toggleobserve=y|n  : toggle observing game
      movechange=1&gotomove= : view selected move (for view-move selectbox)
      move|m=            : view specific move (alternative for selecting move)
@@ -89,6 +90,7 @@ $GLOBALS['ThePage'] = new Page('Game');
    $stonestring = (string)get_alt_arg( 'stonestring', 's');
    $preview = (bool)@$_REQUEST['preview'];
    $terr_marker = (@$_REQUEST['tm']) ? 1 : 0;
+   $cm_action = get_request_arg('cma');
 
    $message = get_request_arg( 'message');
    $message = replace_move_tag( $message, $gid );
@@ -508,6 +510,10 @@ $GLOBALS['ThePage'] = new Page('Game');
             $message = "<c>\n\n</c>";
       }
    }
+   else if ( preg_match("/^(add)$/", $cm_action) )
+   {
+      $may_play = false;
+   }
 
 
    //----------------------------------------
@@ -634,7 +640,7 @@ $GLOBALS['ThePage'] = new Page('Game');
 
 
    $jumpanchor = ( $validation_step ) ? '#msgbox' : '';
-   echo "\n<FORM name=\"game_form\" action=\"game.php?gid=$gid$jumpanchor\" method=\"POST\">";
+   echo "\n<FORM name=\"game_form\" action=\"game.php?gid=$gid$jumpanchor\" method=\"POST\" enctype=\"multipart/form-data\">";
    $gform = new Form( 'game_form', "game.php?gid=$gid$jumpanchor", FORM_POST, false );
    $gform->set_config(FEC_BLOCK_FORM, true);
    $page_hiddens = array();
@@ -742,7 +748,17 @@ $GLOBALS['ThePage'] = new Page('Game');
    else if ( $Moves > 1 || $is_shape )
    {
       if ( !$show_game_tools )
+      {
+         if ( ALLOW_CONDITIONAL_MOVES && !$is_fairkomi_negotiation )
+         {
+            if ( $cm_action == 'add' )
+               draw_conditional_moves_input( $gid, $cm_action );
+            else
+               draw_conditional_moves_links( $gid );
+         }
+
          draw_moves( $gid, $arg_move, $game_row['Handicap'] );
+      }
       if ( $show_notes )
       {
          draw_notes('Y');
@@ -799,6 +815,7 @@ $GLOBALS['ThePage'] = new Page('Game');
       $page_hiddens['stonestring'] = $stonestring;
    $page_hiddens['movenumbers'] = @$_REQUEST['movenumbers'];
    $page_hiddens['notesmode'] = @$_REQUEST['notesmode'];
+   $page_hiddens['cma'] = $cm_action;
 
    echo build_hidden( $page_hiddens);
    echo "\n</FORM>";
@@ -1590,5 +1607,117 @@ function draw_fairkomi_negotiation( $my_id, &$form, $grow, $game_setup )
 
    $fk->echo_fairkomi_table( $form, $user, $show_bid, $my_id );
 }//draw_fairkomi_negotiation
+
+
+function draw_conditional_moves_links( $gid )
+{
+   global $base_path;
+   $link_base = $base_path."game.php?gid=$gid".URI_AMP.'cma=';
+
+   echo T_('Conditional moves'), ': ';
+   echo anchor( $link_base.'add', T_('Add#condmoves') );
+   echo "<br><br>\n";
+}//draw_conditional_moves_links
+
+
+function draw_conditional_moves_input( $gid, $cm_action )
+{
+   global $Size, $to_move, $gform, $base_path;
+
+   $cond_moves = get_request_arg('cond_moves');
+   $var_view = get_request_arg('cm_var_view', '1');
+   $var_views_str = '1';
+   $cm_active = get_request_arg('cm_active', 0);
+   $cm_private = get_request_arg('cm_private', 0);
+
+   if ( @$_REQUEST['cma_upload'] && isset($_FILES['cm_sgf_file']) )
+   {
+      list( $errors, $sgf_data, $sgf_parser ) = ConditionalMoves::load_cond_moves_from_sgf( $_FILES['cm_sgf_file'] );
+      if ( !$sgf_parser->error_loc )
+      {
+         echo "<pre>", SgfParser::sgf_builder($sgf_parser->games, ''), "</pre><br><br>\n";
+      }
+   }
+   else
+      $errors = array();
+
+   $sgf_parser = new SgfParser( SGFP_OPT_SKIP_ROOT_NODE );
+   if ( @$_REQUEST['preview'] && $cond_moves )
+   {
+      $cond_moves = ConditionalMoves::reformat_to_sgf( $cond_moves, $Size, ($to_move == BLACK) );
+      if ( $sgf_parser->parse_sgf($cond_moves) )
+      {
+         echo "<pre>", SgfParser::sgf_builder($sgf_parser->games, ''), "</pre><br><br>\n";
+         //TODO echo "<pre>", print_r($sgf_parser->games, true), "</pre>\n";
+      }
+   }
+
+   echo name_anchor('condmoves'),
+      "<TABLE id=\"CondMovesTable\" class=MessageForm>\n";
+
+   if ( $sgf_parser->error_msg )
+   {
+      echo "<TR class=Error>\n",
+            '<TD class=Rubric>', T_('Parse errors#condmoves'), ":</TD>\n",
+            '<TD colspan="2">', $sgf_parser->error_loc, "<br><br>\n", "</TD>\n",
+         '</TR>';
+   }
+   if ( count($errors) )
+   {
+      echo "<TR class=Error>\n",
+            '<TD class=Rubric>', T_('More errors#condmoves'), ":</TD>\n",
+            '<TD colspan="2">', implode("<br>\n", $errors), "<br><br>\n", "</TD>\n",
+         '</TR>';
+   }
+
+   echo
+      "<TR>\n",
+         '<TD class=Rubric>', T_('Conditional moves'), ":</TD>\n",
+         '<TD colspan="2">',
+            anchor( $base_path."sgf.php?gid=$gid".URI_AMP."cm=1", T_('Download SGF with conditional moves')),
+         "</TD>\n",
+      '</TR>',
+      "<TR>\n",
+         "<TD></TD>\n",
+         '<TD colspan="2">',
+            $gform->print_insert_file( 'cm_sgf_file', 12, SGF_MAXSIZE_UPLOAD, 'application/x-go-sgf', true ),
+            MED_SPACING,
+            $gform->print_insert_submit_button( 'cma_upload', T_('Upload SGF with conditional moves') ),
+         "</TD>\n",
+      '</TR>',
+      "<TR>\n",
+         '<TD class=Rubric>', span('smaller', T_('Edit sequence')), ":</TD>\n",
+         '<TD colspan="2">',
+            $gform->print_insert_textarea( 'cond_moves', 70, 2, $cond_moves ),
+         "</TD>\n",
+      '</TR>',
+      "<TR class=Vars>\n",
+         '<TD class=Rubric>', T_('Variations#condmoves'), ":</TD>\n",
+         '<TD>', $var_views_str, "</TD>\n",
+         '<TD class="Preview">',
+            $gform->print_insert_text_input( 'cm_var_view', 6, 16, $var_view ),
+            $gform->print_insert_submit_buttonx( 'preview', T_('Preview variation#condmoves'),
+                  array( 'accesskey' => ACCKEY_ACT_PREVIEW, 'title' => '[&amp;'.ACCKEY_ACT_PREVIEW.']' )),
+         "</TD>\n",
+      '</TR>',
+      "<TR class=Attr>\n",
+         '<TD class=Rubric>', T_('Attributes#condmoves'), ":</TD>\n",
+         '<TD colspan="2">',
+            $gform->print_insert_checkbox( 'cm_active', '1', T_('Active#condmoves'), $cm_active ),
+            SMALL_SPACING, SMALL_SPACING,
+            $gform->print_insert_checkbox( 'cm_private', '1', T_('Private (after game finished)#condmoves'), $cm_private ),
+         "</TD>\n",
+      '</TR>',
+      "<TR class=Submit>\n",
+         "<TD></TD>\n",
+         '<TD>',
+            $gform->print_insert_submit_button( 'cm_save', T_('Save conditional moves') ),
+         "</TD>\n",
+         '<TD class="Cancel">',
+            $gform->print_insert_submit_button( 'cancel', T_('Cancel') ),
+         "</TD>\n",
+      '</TR>',
+      "</TABLE><br>\n";
+}//draw_conditional_moves_input
 
 ?>

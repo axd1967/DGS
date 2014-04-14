@@ -13,6 +13,39 @@ ChangeLog
 
 2014-04-14 jug
 
+   * include/db/move_sequence.php (class MoveSequence, ~.__construct, ~.setStatus, ~.persist,
+       ~.insert, ~.update, ~.fillEntityData, ~.build_query_sql, ~.new_from_row),
+     include/conditional_moves.php (class ConditionalMoves, ~.load_cond_moves_from_sgf,
+       ~.reformat_to_sgf),
+     include/globals.php (CSS_VERSION, MSEQ_STATUS_...),
+     include/config.php (ALLOW_CONDITIONAL_MOVES),
+     scripts/updates/database_changes_1_0_18.mysql, scripts/updates/other_changes_1_0_18.txt,
+     specs/db/table-Games.txt, specs/db/dragon-ddl.sql,
+     skins/dragon/screen.css, NEWS,
+     game.php (draw_conditional_moves_links, draw_conditional_moves_input):
+   - adjusted GUI of game-page to add conditional-moves by uploading from SGF or entering manually
+     - game-page: reformat manually entered conditional-moves into SGF-like format
+     - added MoveSequence-table and persistence-class to store conditional-moves
+     - added server-config ALLOW_CONDITIONAL_MOVES to enable or disable conditional-moves
+-----------
+-- added table to store conditional-moves
+CREATE TABLE MoveSequence (
+  ID int NOT NULL auto_increment,
+  gid int NOT NULL,
+  uid int NOT NULL,
+  Status enum('INACTIVE','ACTIVE','ILLEGAL','OPP_MSG','DEVIATED','DONE') NOT NULL default 'INACTIVE',
+  Flags tinyint unsigned NOT NULL default '0',
+  StartMoveNr smallint unsigned NOT NULL default '0',
+  StartMove char(2) NOT NULL default '',
+  LastMoveNr smallint unsigned NOT NULL default '0',
+  LastMovePos smallint unsigned NOT NULL default '0',
+  LastMove char(2) NOT NULL default '',
+  Sequence varbinary(2048) NOT NULL default '',
+  PRIMARY KEY (ID),
+  KEY gid_uid_status (gid,uid,Status)
+) ENGINE=MyISAM ;
+-----------
+
    * include/classlib_upload.php (FileUpload.load_data_from_file),
      goban_editor.php (load_igoban_from_sgf):
    - cleanup: refactored loading simple-text from uploaded-file into FileUpload::load_data_from_file()

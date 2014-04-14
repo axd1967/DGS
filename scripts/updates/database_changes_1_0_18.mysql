@@ -1,0 +1,30 @@
+# Release DGS 1.0.18 at ??-???-2014 from MAIN-branch:
+#
+# IMPORTANT NOTE:
+# * Do a full backup of all data in the database before performing (these) changes !!
+#   Note current space (phpmyadmin or 'show table status') for later comparison.
+# * Do NOT simply execute these SQL-statements as there are DROP-tables,
+#   some to-be-replaced templates and non-SQL-statements in it !!
+# * enable mysql-client warnings with: \W
+#
+# * Recommendation: Import it section by section manually taking comments into account !
+#
+
+-- added table to store conditional-moves
+CREATE TABLE MoveSequence (
+  ID int NOT NULL auto_increment,
+  gid int NOT NULL,
+  uid int NOT NULL,
+  Status enum('INACTIVE','ACTIVE','ILLEGAL','OPP_MSG','DEVIATED','DONE') NOT NULL default 'INACTIVE',
+  Flags tinyint unsigned NOT NULL default '0',
+  StartMoveNr smallint unsigned NOT NULL default '0',
+  StartMove char(2) NOT NULL default '',
+  LastMoveNr smallint unsigned NOT NULL default '0',
+  LastMovePos smallint unsigned NOT NULL default '0',
+  LastMove char(2) NOT NULL default '',
+  Sequence varbinary(2048) NOT NULL default '',
+  PRIMARY KEY (ID),
+  KEY gid_uid_status (gid,uid,Status)
+) ENGINE=MyISAM ;
+
+
