@@ -13,6 +13,9 @@ ChangeLog
 
 2014-04-14 jug
 
+   * include/sgf_parser.php, include/make_game.php:
+   - cleanup: get rid of conditional-code-includes for ENABLE_STDHANDICAP
+
    * include/db/move_sequence.php (class MoveSequence, ~.__construct, ~.setStatus, ~.persist,
        ~.insert, ~.update, ~.fillEntityData, ~.build_query_sql, ~.new_from_row),
      include/conditional_moves.php (class ConditionalMoves, ~.load_cond_moves_from_sgf,

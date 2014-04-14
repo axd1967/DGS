@@ -25,6 +25,10 @@ require_once 'include/rulesets.php';
 require_once 'include/rating.php';
 require_once 'include/board.php';
 
+// for get_handicap_pattern:
+require_once 'include/sgf_parser.php';
+require_once 'include/coords.php';
+
 
 // Inserts INVITATION-game or updates DISPUTE-game
 // always return a valid game ID from the database, else call error()
@@ -741,11 +745,6 @@ function standard_handicap_is_possible($size, $hcp)
    return ( $size == 19 || $hcp <= 4 || ($hcp <= 9 && $size%2 == 1 && $size>=9) );
 }
 
-if ( ENABLE_STDHANDICAP & 2 ) { //skip black validation
-//for get_handicap_pattern:
-require_once 'include/sgf_parser.php';
-require_once 'include/coords.php';
-
 //return false if no placement is done but is still possible
 // IMPORTANT NOTE: caller needs to open TA with HOT-section if used with other db-writes!!
 function make_standard_placement_of_handicap_stones( $size, $hcp, $gid, $allow_incomplete_pattern=false )
@@ -789,7 +788,5 @@ function make_standard_placement_of_handicap_stones( $size, $hcp, $gid, $allow_i
 
    return true;
 }//make_standard_placement_of_handicap_stones
-
-} //ENABLE_STDHANDICAP & 2
 
 ?>

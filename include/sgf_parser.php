@@ -479,8 +479,6 @@ class GameSgfParser
 
 
 
-if ( defined('ENABLE_STDHANDICAP') && ENABLE_STDHANDICAP ) {
-
 // Read the standard handicap pattern file
 // and convert it to a stonestring.
 function get_handicap_pattern( $size, $handicap, &$err)
@@ -544,8 +542,5 @@ function get_handicap_pattern( $size, $handicap, &$err)
    $err = sprintf( T_('Insufficient handicap pattern for %s'), "size=$size h=$handicap n=$nb" );
    return $stonestring;
 }//get_handicap_pattern
-
-}//ENABLE_STDHANDICAP
-
 
 ?>
