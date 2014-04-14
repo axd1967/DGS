@@ -13,6 +13,10 @@ ChangeLog
 
 2014-04-14 jug
 
+   * include/std_functions.php, ratinggraph.php, ratingpng.php (interpolate):
+   - cleanup: removed switch GRAPH_RATING_BY_NUM_ENABLED to disable the "by number of games"
+     rating-graph with just being available
+
    * include/sgf_parser.php, include/make_game.php:
    - cleanup: get rid of conditional-code-includes for ENABLE_STDHANDICAP
 

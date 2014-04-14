@@ -111,7 +111,7 @@ require_once 'include/form_functions.php';
       echo "\n<img src=\"ratingpng.php?uid=$uid"
          ,($show_time ? URI_AMP.'show_time=1' : '')
          ,($winpie ? URI_AMP.'winpie=1' : '')
-         ,(GRAPH_RATING_BY_NUM_ENABLED && $bynumber ? URI_AMP.'bynumber=1' : '')
+         ,($bynumber ? URI_AMP.'bynumber=1' : '')
          ,URI_AMP,"dyna=$dyna" //force caches refresh
          ,URI_AMP,"startyear=$startyear"
          ,URI_AMP,"startmonth=$startmonth"
@@ -141,13 +141,10 @@ require_once 'include/form_functions.php';
                    'HIDDEN', 'winpie', $winpie,
                    'HIDDEN', 'show_time', $show_time,
                    'SUBMITBUTTON', 'submit', T_('Change interval') );
-      if ( GRAPH_RATING_BY_NUM_ENABLED )
-      {
-        array_push($row,
-                  'OWNHTML', '&nbsp;&nbsp;',
-                  'CHECKBOX', 'bynumber', '1',
-                  T_('Games'), $bynumber);
-      }
+      array_push( $row,
+            'OWNHTML', '&nbsp;&nbsp;',
+            'CHECKBOX', 'bynumber', '1',
+            T_('Games'), $bynumber );
       $form->add_row( $row);
 
       $form->echo_string(1);

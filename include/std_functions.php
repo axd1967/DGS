@@ -127,9 +127,8 @@ $ActivityMax = 0x7FFF0000-$ActivityForMove;
 
 define('NEWGAME_MAX_GAMES', 10);
 
-//Allow the "by number of games" graphic (as well as "by date of games").
-define('GRAPH_RATING_BY_NUM_ENABLED', true);
 define('GRAPH_RATING_MIN_INTERVAL', 2*31 * SECS_PER_DAY);
+
 // see also CACHE_FOLDER in config.php
 define('CACHE_EXPIRE_GRAPH', SECS_PER_DAY); //1 day
 

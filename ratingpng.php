@@ -63,7 +63,7 @@ function interpolate($val1, $val3, $time1, $time2, $time3)
       $ratinglabel = create_function('$x', 'return echo_rating($x,0,0,1);' );
    }
 
-   $show_by_number = GRAPH_RATING_BY_NUM_ENABLED && ((bool)@$_GET['bynumber']);
+   $show_by_number = (bool)@$_GET['bynumber'];
    $show_win_pie = ENA_WIN_PIE && (SHOW_WIN_PIE xor ((bool)@$_GET['winpie']));
 
 
@@ -118,7 +118,7 @@ function interpolate($val1, $val3, $time1, $time2, $time3)
       $endnumber = round($number[count($number)-1]);
    }
 
-   if ( GRAPH_RATING_BY_NUM_ENABLED && $show_by_number )
+   if ( $show_by_number )
    {
       $xvals = $number;
       $xlims = array('MIN'=>$startnumber, 'MAX'=>$endnumber);
@@ -183,7 +183,7 @@ function interpolate($val1, $val3, $time1, $time2, $time3)
 
    //horizontal scaling
 
-   if ( GRAPH_RATING_BY_NUM_ENABLED && $show_by_number )
+   if ( $show_by_number )
    { // the X-axis is the number of games
       $step = 20.; //min grid distance in pixels
       $step/= $gr->sizeX; //graph width
@@ -213,7 +213,7 @@ function interpolate($val1, $val3, $time1, $time2, $time3)
          $gr->gridX( $startnumber, $step, $y, '', $number_color, '', $red, 0, $x );
       }
    }
-   else //!(GRAPH_RATING_BY_NUM_ENABLED && $show_by_number)
+   else //!$show_by_number
    { // the X-axis is the date of games
       $step = 20.; //min grid distance in pixels
       $step/= $gr->sizeX; //graph width
