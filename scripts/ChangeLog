@@ -13,6 +13,10 @@ ChangeLog
 
 2014-04-14 jug
 
+   * include/std_functions.php, game.php:
+   - cleanup: get rid of $has_sgf_alias to use URL 'game123.sgf' to download SGF
+     with Apache AliasMatch-config
+
    * include/std_functions.php, ratinggraph.php, ratingpng.php (interpolate):
    - cleanup: removed switch GRAPH_RATING_BY_NUM_ENABLED to disable the "by number of games"
      rating-graph with just being available

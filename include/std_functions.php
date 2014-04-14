@@ -62,12 +62,6 @@ define('DGS_DESCRIPTION',
 global $hostname_jump; //PHP5
 $hostname_jump = true;  // ensure $HTTP_HOST is same as HOSTNAME
 
-// If using apache add this row to your virtual host to make this work:
-// AliasMatch game([0-9]+)\.sgf /path/to/sgf.php
-global $has_sgf_alias; //PHP5
-$has_sgf_alias = false;
-
-
 /* when $GUESTPASS is modified,
  * run HOSTBASE."change_password.php?guestpass=".GUEST_ID
  * with ADMIN_PASSWORD privileges
