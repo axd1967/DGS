@@ -35,8 +35,6 @@ require_once 'include/db/shape.php';
 
 $GLOBALS['ThePage'] = new Page('GobanEdit');
 
-define('SGF_MAXSIZE_UPLOAD', 30*1024); // bytes
-
 
 {
    // NOTE: using page: edit_shape.php
@@ -339,8 +337,8 @@ function load_igoban_from_sgf( $file_sgf_arr )
       if ( $sgf_data !== false )
       {
          $do_preview = true;
-         $sgf_parser = GameSgfParser::parse_sgf_data( $sgf_data );
-         list( $board_text, $err ) = create_igoban_from_parsed_sgf( $sgf_parser );
+         $game_sgf_parser = GameSgfParser::parse_sgf_game( $sgf_data );
+         list( $board_text, $err ) = create_igoban_from_parsed_sgf( $game_sgf_parser );
          if ( $err )
             $errors = array( $err );
       }
@@ -352,13 +350,13 @@ function load_igoban_from_sgf( $file_sgf_arr )
    return array( $errors, $board_text );
 }//load_igoban_from_sgf
 
-// create <igoban>-tag from SGF parsed with Sgf::sgf_parser(), see also 'include/sgf_parser.php'
+// create <igoban>-tag from parsed-SGF
 // return [ board_text, error|'' ]
-function create_igoban_from_parsed_sgf( $sgf_parser )
+function create_igoban_from_parsed_sgf( $game_sgf_parser )
 {
    global $width, $height;
 
-   $size = $sgf_parser->Size;
+   $size = $game_sgf_parser->Size;
    if ( $size >= MIN_BOARD_SIZE && $size <= MAX_BOARD_SIZE )
       $width = $height = $size;
 
@@ -368,7 +366,7 @@ function create_igoban_from_parsed_sgf( $sgf_parser )
    // handle setup B/W-stone
    foreach ( array( BLACK, WHITE ) as $stone )
    {
-      $arr_coords = ( $stone == BLACK ) ? $sgf_parser->SetBlack : $sgf_parser->SetWhite;
+      $arr_coords = ( $stone == BLACK ) ? $game_sgf_parser->SetBlack : $game_sgf_parser->SetWhite;
       foreach ( $arr_coords as $sgf_coord )
       {
          list($x,$y) = sgf2number_coords($sgf_coord, $size);
@@ -383,7 +381,7 @@ function create_igoban_from_parsed_sgf( $sgf_parser )
    $GameFlags = 0;
    $to_move = BLACK;
    $parse_error = '';
-   foreach ( $sgf_parser->Moves as $move ) // move = B|W sgf-coord, e.g. "Baa", "Wbb"
+   foreach ( $game_sgf_parser->Moves as $move ) // move = B|W sgf-coord, e.g. "Baa", "Wbb"
    {
       if ( $move[0] == 'B' )
          $to_move = BLACK;

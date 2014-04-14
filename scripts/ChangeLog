@@ -11,6 +11,28 @@ Release [2014-03-27] - DGS 1.0.17 - tag [release-1_0_17-20140327] on branch [DGS
 ChangeLog
 ------------------------------------------------------------------
 
+2014-04-14 jug
+
+   * include/sgf_parser.php (SGFP_OPT_SKIP_ROOT_NODE;
+       class SgfParser, ~.__construct, ~.parse_sgf, ~.parse_sgf_game_tree, ~.sgf_parse_node,
+         ~.sgf_parser, ~.sgf_builder;
+       class SgfNode;
+       class GameSgfParser, ~.parse_sgf_game; get_handicap_pattern),
+     include/game_sgf_control.php (GameSgfControl.verify_game_sgf),
+     include/globals.php (SGF_MAXSIZE_UPLOAD),
+     goban_editor.php (load_igoban_from_sgf, create_igoban_from_parsed_sgf),
+     manage_sgf.php:
+   - cleanup & prepare for parsing conditional moves:
+     - added option to skip parsing of SGF-root-node
+     - SGF-parsing: replace node-array with properties with SgfNode-object with props-array
+       for later storing parsing position
+     - detailed syntax-error on parsing SGF-part for game-tree or sub-node
+     - renamed Sgf-class -> SgfParser-class
+     - renamed SgfParser.parse_sgf_tree() -> .parse_sgf_game_tree()
+     - renamed GameSgfParser::parse_sgf_data() -> .parse_sgf_game() to avoid function-name-clashes
+     - renamed vars to reflect name of set class-instance
+     - moved const SGF_MAXSIZE_UPLOAD to common include
+
 2014-04-12 jug
 
    * include/sgf_parser.php (class Sgf, ~.sgf_parser, ~.sgf_builder, ~.sgf_var_push, ~.sgf_skip_space,

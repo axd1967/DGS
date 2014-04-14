@@ -47,6 +47,8 @@ define('SEP_MEDSPACING',   MED_SPACING.'|'.MED_SPACING);
 
 define('COUNTNEW_RECALC', 'recalc');
 
+define('SGF_MAXSIZE_UPLOAD', 30*1024); // bytes
+
 
 // ---------- Clock stuff -----------------------------------------
 

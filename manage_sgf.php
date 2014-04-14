@@ -28,7 +28,7 @@ require_once 'include/db/games.php';
 require_once 'include/db/game_sgf.php';
 require_once 'include/classlib_upload.php';
 
-define('SGF_MAXSIZE_UPLOAD', 100*1024); // max. 100KB stored, keep factor of 1024
+define('ATTACH_SGF_MAXSIZE_UPLOAD', 100*1024); // max. 100KB stored, keep factor of 1024
 
 
 {
@@ -92,7 +92,7 @@ define('SGF_MAXSIZE_UPLOAD', 100*1024); // max. 100KB stored, keep factor of 102
    if ( @$_REQUEST['sgf_save'] && isset($_FILES['file_sgf']) )
    {
       // update SGF in db with values from edit-form
-      $upload = new FileUpload( $_FILES['file_sgf'], SGF_MAXSIZE_UPLOAD );
+      $upload = new FileUpload( $_FILES['file_sgf'], ATTACH_SGF_MAXSIZE_UPLOAD );
       if ( $upload->is_uploaded() && !$upload->has_error() )
       {
          $errors = GameSgfControl::save_game_sgf( $game, $my_id, $upload->get_file_src_tmpfile() );
@@ -188,7 +188,7 @@ define('SGF_MAXSIZE_UPLOAD', 100*1024); // max. 100KB stored, keep factor of 102
    {
       $form->add_row( array(
          'DESCRIPTION', T_('Upload SGF'),
-         'FILE',        'file_sgf', 40, SGF_MAXSIZE_UPLOAD, 'application/x-go-sgf', true ));
+         'FILE',        'file_sgf', 40, ATTACH_SGF_MAXSIZE_UPLOAD, 'application/x-go-sgf', true ));
 
       $form->add_empty_row();
       $arr = array(
@@ -228,7 +228,7 @@ define('SGF_MAXSIZE_UPLOAD', 100*1024); // max. 100KB stored, keep factor of 102
       );
    $notes[] = null;
    $notes[] = T_('Each user can upload only one SGF.' );
-   $notes[] = sprintf( T_('Limit on uploaded SGF-file: max. %s KB'), ROUND(10*SGF_MAXSIZE_UPLOAD/1024)/10 );
+   $notes[] = sprintf( T_('Limit on uploaded SGF-file: max. %s KB'), ROUND(10*ATTACH_SGF_MAXSIZE_UPLOAD/1024)/10 );
    echo_notes( 'managesgf', T_('Manage SGF notes'), $notes );
 
 

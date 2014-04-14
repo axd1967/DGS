@@ -131,17 +131,17 @@ class GameSgfControl
       if ( !GameSgfParser::might_be_sgf($sgf_data) )
          return array( T_('File has no SGF-format!') );
 
-      $sgf_parser = GameSgfParser::parse_sgf_data( $sgf_data );
-      if ( $sgf_parser->error )
-         $errors[] = sprintf( T_('SGF-Parse error found: %s'), $sgf_parser->error );
+      $game_sgf_parser = GameSgfParser::parse_sgf_game( $sgf_data );
+      if ( $game_sgf_parser->error )
+         $errors[] = sprintf( T_('SGF-Parse error found: %s'), $game_sgf_parser->error );
       else
       {
-         if ( $sgf_parser->Size != $gsize )
-            $errors[] = sprintf( T_('Board size mismatch: expected %s but found %s#sgf'), $gsize, $sgf_parser->Size );
-         if ( $sgf_parser->Handicap != $game->Handicap )
-            $errors[] = sprintf( T_('Handicap mismatch: expected %s but found %s#sgf'), $game->Handicap, $sgf_parser->Handicap );
-         if ( (float)$sgf_parser->Komi != (float)$game->Komi )
-            $errors[] = sprintf( T_('Komi mismatch: expected %s but found %s#sgf'), $game->Komi, $sgf_parser->Komi );
+         if ( $game_sgf_parser->Size != $gsize )
+            $errors[] = sprintf( T_('Board size mismatch: expected %s but found %s#sgf'), $gsize, $game_sgf_parser->Size );
+         if ( $game_sgf_parser->Handicap != $game->Handicap )
+            $errors[] = sprintf( T_('Handicap mismatch: expected %s but found %s#sgf'), $game->Handicap, $game_sgf_parser->Handicap );
+         if ( (float)$game_sgf_parser->Komi != (float)$game->Komi )
+            $errors[] = sprintf( T_('Komi mismatch: expected %s but found %s#sgf'), $game->Komi, $game_sgf_parser->Komi );
       }
 
       if ( count($errors) == 0 )
@@ -152,7 +152,7 @@ class GameSgfControl
          // compare shape-setup from DB with B/W-stone-setup parsed from SGF
          foreach ( array( BLACK, WHITE ) as $stone )
          {
-            $arr_coords = ( $stone == BLACK ) ? $sgf_parser->SetBlack : $sgf_parser->SetWhite;
+            $arr_coords = ( $stone == BLACK ) ? $game_sgf_parser->SetBlack : $game_sgf_parser->SetWhite;
             foreach ( $arr_coords as $sgf_coord )
             {
                if ( !isset($db_shape_setup[$sgf_coord]) || $db_shape_setup[$sgf_coord] != $stone )
@@ -173,7 +173,7 @@ class GameSgfControl
 
          // compare some db-moves with moves parsed from SGF
          $move_nr = 0;
-         foreach ( $sgf_parser->Moves as $move ) // move = B|W sgf-coord, e.g. "Baa", "Wbb"
+         foreach ( $game_sgf_parser->Moves as $move ) // move = B|W sgf-coord, e.g. "Baa", "Wbb"
          {
             if ( $move_nr >= $chk_cnt_moves )
                break;

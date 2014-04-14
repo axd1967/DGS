@@ -21,7 +21,7 @@ $TranslateGroups[] = "Game";
 
 
 /*
-Basic (EBNF) Definition
+Basic (EBNF) Definition - see http://www.red-bean.com/sgf/sgf4.html#2
 
   "..." : terminal symbols
   [...] : option: occurs at most once
@@ -44,7 +44,8 @@ SGF EBNF Definition
   ValueType  = (None | Number | Real | Double | Color | SimpleText | Text | Point  | Move | Stone)
 
 White space (space, tab, carriage return, line feed, vertical tab and so on)
- may appear anywhere between PropValues, Properties, Nodes, Sequences and GameTrees.
+may appear anywhere between PropValues, Properties, Nodes, Sequences and GameTrees.
+
 There are two types of property lists: 'list of' and 'elist of'.
 'list of':    PropValue { PropValue }
 'elist of':   ((PropValue { PropValue }) | None)
@@ -82,10 +83,13 @@ define('SGF_ARG_END', ']');
 define('SGF_NOD_BEG', ';');
 define('SGF_VAR_KEY', '++');
 
+define('SGFP_OPT_SKIP_ROOT_NODE', 0x01);
+
 
 /*! \brief Helper-class to parse SGF-data. */
-class Sgf
+class SgfParser
 {
+   private $options = '';
    private $sgf = '';
    private $sgf_len = 0;
    private $idx = 0;
@@ -101,8 +105,9 @@ class Sgf
          'RU' => 'Japanese',
       );
 
-   private function __construct()
+   public function __construct( $options=0 )
    {
+      $this->options = $options;
    }
 
    private function init_parser( $sgf )
@@ -124,12 +129,12 @@ class Sgf
    {
       $this->init_parser( $sgf );
 
-      $this->error_msg = $this->parse_sgf_tree();
+      $this->error_msg = $this->parse_sgf_game_tree();
 
       if ( $this->error_msg )
       {
          $tmp = max(0, $this->idx-20);
-         $this->error_loc = "SGF: {$this->error_msg}\nnear: "
+         $this->error_loc = "SGF: {$this->error_msg}, near: "
             . ltrim(substr( $this->sgf, $tmp, $this->idx-$tmp))
             . '<' . substr( $this->sgf, $this->idx, 1) . '>'
             . rtrim(substr( $this->sgf, $this->idx+1, 20));
@@ -139,38 +144,44 @@ class Sgf
    }//parse_sgf
 
    /*!
-    * \brief Parses SGF-data; returning '' on success or else error-msg.
-    * \note Sets $this->games with parsed tree with nodes.
+    * \brief Parses list of "GameTree" from SGF-data; returning '' on success or else error-msg.
+    * \note Sets $this->games with parsed tree with SgfNode-objects.
     */
-   private function parse_sgf_tree()
+   private function parse_sgf_game_tree()
    {
+      $skip_root_node = ( $this->options & SGFP_OPT_SKIP_ROOT_NODE );
+
+      $vars = array();
       while ( false !== ($this->idx = strpos( $this->sgf, SGF_VAR_BEG, $this->idx)) )
       {
          $ivar = 0;
-         $vars[$ivar] = array();
+         $vars[$node_ivar = $ivar] = array();
 
-         $this->idx++;
-         if ( !$this->sgf_skip_space() )
-            return T_('Bad end of file#sgf');
-
-         if ( $this->sgf[$this->idx] != SGF_NOD_BEG )
-            return T_('Bad root node#sgf');
-
-         $this->idx++;
-         $err = $this->sgf_parse_node( $node );
-         if ( $err )
-            return $err;
-
-         if ( !isset($node['GM']) || @$node['GM'][0] != 1 )
-            return T_('Not a Go game (GM[1])#sgf');
-
-         foreach ( self::$ARR_ROOT_DEFAULT_VALUES as $key => $arg )
+         if ( !$skip_root_node )
          {
-            if ( !isset($node[$key]) )
-               $node[$key] = array($arg);
-         }
+            $this->idx++;
+            if ( !$this->sgf_skip_space() )
+               return T_('Bad end of file#sgf');
 
-         $vars[$node_ivar = $ivar][] = $node;
+            if ( $this->sgf[$this->idx] != SGF_NOD_BEG )
+               return T_('Bad root node#sgf');
+
+            $this->idx++;
+            $err = $this->sgf_parse_node( $node );
+            if ( $err )
+               return $err;
+
+            if ( !isset($node->props['GM']) || @$node->props['GM'][0] != 1 )
+               return T_('Not a Go game (GM[1])#sgf');
+
+            foreach ( self::$ARR_ROOT_DEFAULT_VALUES as $key => $arg ) // set defaults
+            {
+               if ( !isset($node->props[$key]) )
+                  $node->props[$key] = array($arg);
+            }
+
+            $vars[$node_ivar = $ivar][] = $node;
+         }//skip-root-node
 
          while ( $ivar >= 0 && ($c = $this->sgf_skip_space()) )
          {
@@ -202,18 +213,18 @@ class Sgf
                   break;
 
                default:
-                  return T_('Syntax error#sgf');
+                  return T_('Game-Tree syntax error#sgf');
             }
          }
 
-         if ( $ivar >= 0 )
+         if ( $ivar >= ($skip_root_node ? 1 : 0) )
             return T_('Missing right parenthesis#sgf');
 
          $this->games[] = $vars[0];
       }
 
       return ''; // no-error
-   }//parse_sgf_tree
+   }//parse_sgf_game_tree
 
 
    /*!
@@ -232,24 +243,28 @@ class Sgf
    }//sgf_skip_space
 
    /*!
-    * \brief Parses "Node" in SGF-data, e.g. 'MN[0][1]C[note]' into $node = arr( 'MN' => arr( 0, 1 ), 'C' => arr( 'note' )).
-    * \note node-data must end with one of: "; ( )"
-    * \param $node array passed via back-reference with parsed nodes
+    * \brief Parses "Node" in SGF-data.
+    * \note Example: 'MN[0][1]C[note]' into $node = SgfNote( props: arr( 'MN' => arr( 0, 1 ), 'C' => arr( 'note' )) )
+    * \note node from sgf-data must end with one of: "; ( )"
+    *
+    * \param $node SgfNode-object passed via back-reference with parsed nodes
     * \return '' = no-error; else error-msg with parsing-error
     */
    private function sgf_parse_node( &$node )
    {
-      $node = array();
+      $node = new SgfNode();
       while ( $key = $this->sgf_parse_key() )
       {
          $err = $this->sgf_parse_args( $args );
          if ( $err )
             return $err;
-         $node[$key] = $args;
+         if ( isset($node->props[$key]) )
+            return T_('Property not unique#sgf');
+         $node->props[$key] = $args;
       }
 
       $c = $this->sgf[$this->idx]; //sgf_skip_space()
-      return ( $c != SGF_NOD_BEG && $c != SGF_VAR_BEG && $c != SGF_VAR_END ) ? T_('Syntax error#sgf') : '';
+      return ( $c != SGF_NOD_BEG && $c != SGF_VAR_BEG && $c != SGF_VAR_END ) ? T_('Node syntax error#sgf') : '';
    }//sgf_parse_args
 
    /*!
@@ -301,12 +316,12 @@ class Sgf
 
    // ------------ static functions ----------------------------
 
-   /*! \brief Explodes a SGF-string ($sgf, from file) into an array of games. */
+   /*! \brief Explodes a SGF-string ($sgf, from file) into an array of games stored in SgfParser-object. */
    public static function sgf_parser( $sgf_data )
    {
-      $sgf = new Sgf();
-      $sgf->parse_sgf( $sgf_data );
-      return $sgf;
+      $sgf_parser = new SgfParser();
+      $sgf_parser->parse_sgf( $sgf_data );
+      return $sgf_parser;
    }
 
    /*! \brief Pushes variation $var on variation-stack $vars with move-num $num. */
@@ -319,7 +334,7 @@ class Sgf
    // In short, it does the opposite of sgf_parser()
    // \return built sgf-data
    // NOTE: not used, but keep it for debugging-purposes
-   private static function sgf_builder( $games )
+   public static function sgf_builder( $games, $sep="\r\n" )
    {
       $sgf = '';
 
@@ -332,11 +347,11 @@ class Sgf
       {
          if ( $var === SGF_VAR_END )
          {
-            $sgf .= SGF_VAR_END."\r\n";
+            $sgf .= SGF_VAR_END.$sep;
             continue;
          }
 
-         $sgf .= SGF_VAR_BEG."\r\n";
+         $sgf .= SGF_VAR_BEG.$sep;
          //a variation is an array of nodes
          foreach ( $var as $id => $node )
          {
@@ -348,14 +363,14 @@ class Sgf
                continue;
             }
 
-            $sgf .= SGF_NOD_BEG."\r\n";
-            //a node is an array of properties
-            foreach ( $node as $key => $args )
+            $sgf .= SGF_NOD_BEG.$sep;
+            //a node is a SgfNode-object with an array of properties
+            foreach ( $node->props as $key => $args )
             {
-               $sgf .= "$key";
+               $sgf .= $key;
                foreach ( $args as $arg )
                   $sgf .= SGF_ARG_BEG.$arg.SGF_ARG_END;
-               $sgf .= "\r\n";
+               $sgf .= $sep;
             }
          }
       }
@@ -363,7 +378,15 @@ class Sgf
       return $sgf;
    }//sgf_builder
 
-} //end 'Sgf'
+} //end 'SgfParser'
+
+
+
+/*! \brief Class used to store node parsed from SGF. */
+class SgfNode
+{
+   public $props = array();
+} //end 'SgfNode'
 
 
 
@@ -387,7 +410,7 @@ class GameSgfParser
 
    // ------------ static functions ----------------------------
 
-   /*! Returns false if passed SGF-data does not rudimentary looking like a SGF. */
+   /*! Returns true, if passed SGF-data does rudimentary looking like a SGF. */
    public static function might_be_sgf( $sgf_data )
    {
       return preg_match("/^\\s*\\(\\s*;\\s*[a-z]/si", $sgf_data);
@@ -397,9 +420,9 @@ class GameSgfParser
     * \brief Parses SGF-data into resulting-array (used to load SGF and flatten into Goban-objects for Shape-game).
     * \return GameSgfParser-instance with filled properties; parsing-error in SgfParser->Error or '' if ok
     */
-   public static function parse_sgf_data( $sgf_data )
+   public static function parse_sgf_game( $sgf_data )
    {
-      $sgf_parser = Sgf::sgf_parser( $sgf_data );
+      $sgf_parser = SgfParser::sgf_parser( $sgf_data );
       $game_sgf_parser = new GameSgfParser( $sgf_parser->error_loc );
       if ( $sgf_parser->error_msg )
          return $game_sgf_parser;
@@ -407,7 +430,7 @@ class GameSgfParser
       $game = $sgf_parser->games[0]; // check 1st game only
       $movenum = 0; // current move-number
       $vars = array(); // variations
-      Sgf::push_var_stack( $vars, $game, $movenum );
+      SgfParser::push_var_stack( $vars, $game, $movenum );
 
       $parsed_HA = $parsed_KM = null;
       while ( list($movenum, $var) = array_pop($vars) ) // process variations-stack
@@ -418,39 +441,39 @@ class GameSgfParser
             if ( $id === SGF_VAR_KEY )
             {
                // this particular node is an array of variations, but only take first var (main-branch)
-               Sgf::push_var_stack( $vars, $node[0], $movenum );
+               SgfParser::push_var_stack( $vars, $node[0], $movenum );
                continue;
             }
 
-            // a node is an array of properties
-            if ( isset($node['B']) || isset($node['W']) )
+            // a node is a SgfNode-object with an array of properties
+            if ( isset($node->props['B']) || isset($node->props['W']) )
             {
-               $key = ( isset($node['B']) ) ? 'B' : 'W';
-               $sgf_coord = @$node[$key][0];
+               $key = ( isset($node->props['B']) ) ? 'B' : 'W';
+               $sgf_coord = @$node->props[$key][0];
                $game_sgf_parser->Moves[] = $key . $sgf_coord;
                $movenum++;
             }
-            if ( isset($node['AB']) )
+            if ( isset($node->props['AB']) )
             {
-               foreach ( @$node['AB'] as $sgf_coord )
+               foreach ( @$node->props['AB'] as $sgf_coord )
                   $game_sgf_parser->SetBlack[] = $sgf_coord;
             }
-            if ( isset($node['AW']) )
+            if ( isset($node->props['AW']) )
             {
-               foreach ( @$node['AW'] as $sgf_coord )
+               foreach ( @$node->props['AW'] as $sgf_coord )
                   $game_sgf_parser->SetWhite[] = $sgf_coord;
             }
-            if ( isset($node['SZ']) && !$game_sgf_parser->Size )
-               $game_sgf_parser->Size = (int)$node['SZ'][0];
-            if ( isset($node['HA']) && is_null($parsed_HA) )
-               $game_sgf_parser->Handicap = $parsed_HA = (int)$node['HA'][0];
-            if ( isset($node['KM']) && is_null($parsed_KM) )
-               $game_sgf_parser->Komi = $parsed_KM = (float)$node['KM'][0];
+            if ( isset($node->props['SZ']) && !$game_sgf_parser->Size )
+               $game_sgf_parser->Size = (int)$node->props['SZ'][0];
+            if ( isset($node->props['HA']) && is_null($parsed_HA) )
+               $game_sgf_parser->Handicap = $parsed_HA = (int)$node->props['HA'][0];
+            if ( isset($node->props['KM']) && is_null($parsed_KM) )
+               $game_sgf_parser->Komi = $parsed_KM = (float)$node->props['KM'][0];
          }
       }
 
       return $game_sgf_parser;
-   }//parse_sgf_data
+   }//parse_sgf_game
 
 }//end 'GameSgfParser'
 
@@ -470,7 +493,7 @@ function get_handicap_pattern( $size, $handicap, &$err)
    $sgf_data = @read_from_file( $filename, 0);
    if ( is_string($sgf_data) )
    {
-      $sgf_parser = Sgf::sgf_parser( $sgf_data );
+      $sgf_parser = SgfParser::sgf_parser( $sgf_data );
       $game = $sgf_parser->games[0]; //keep the first game only
       $err = $sgf_parser->error_loc;
    }
@@ -485,7 +508,7 @@ function get_handicap_pattern( $size, $handicap, &$err)
 
    $nb = 0;
    $vars = array();
-   Sgf::push_var_stack( $vars, $game, $nb);
+   SgfParser::push_var_stack( $vars, $game, $nb);
 
    while ( list($nb,$var) = array_pop($vars) )
    {
@@ -498,16 +521,16 @@ function get_handicap_pattern( $size, $handicap, &$err)
          {
             //this particular node is an array of variations
             for ( $i=count($node)-1; $i >= 0; $i-- )
-               Sgf::push_var_stack( $vars, $node[$i], $nb);
+               SgfParser::push_var_stack( $vars, $node[$i], $nb);
             continue;
          }
 
-         //a node is an array of properties
-         if ( isset($node['B']) || isset($node['W']) )
+         // a node is a SgfNode-object with an array of properties
+         if ( isset($node->props['B']) || isset($node->props['W']) )
          {
-            $co = @$node['B'][0];
+            $co = @$node->props['B'][0];
             if ( !$co )
-               $co = @$node['W'][0];
+               $co = @$node->props['W'][0];
             if ( strlen($co) != 2 )
                return $stonestring;
             $stonestring .= $co;
