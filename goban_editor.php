@@ -331,11 +331,18 @@ function load_igoban_from_sgf( $file_sgf_arr )
    list( $errors, $sgf_data ) = FileUpload::load_data_from_file( $file_sgf_arr, SGF_MAXSIZE_UPLOAD );
    if ( is_null($errors) )
    {
+      $errors = array();
       $do_preview = true;
       $game_sgf_parser = GameSgfParser::parse_sgf_game( $sgf_data );
-      list( $board_text, $err ) = create_igoban_from_parsed_sgf( $game_sgf_parser );
+      $err = $game_sgf_parser->get_error();
       if ( $err )
-         $errors = array( $err );
+         $errors[] = $err;
+      else
+      {
+         list( $board_text, $err ) = create_igoban_from_parsed_sgf( $game_sgf_parser );
+         if ( $err )
+            $errors[] = $err;
+      }
    }
 
    return array( $errors, $board_text );

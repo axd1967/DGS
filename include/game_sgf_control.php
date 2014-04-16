@@ -125,130 +125,30 @@ class GameSgfControl
     */
    public static function verify_game_sgf( $game, $sgf_data )
    {
-      $errors = array();
-      $gsize = $game->Size;
-
       if ( !GameSgfParser::might_be_sgf($sgf_data) )
          return array( T_('File has no SGF-format!') );
 
       $game_sgf_parser = GameSgfParser::parse_sgf_game( $sgf_data );
-      if ( $game_sgf_parser->error )
-         $errors[] = sprintf( T_('SGF-Parse error found: %s'), $game_sgf_parser->error );
+      $parse_err = $game_sgf_parser->get_error();
+      if ( $parse_err )
+         $errors = array( sprintf( T_('SGF-Parse error found: %s'), $parse_err ) );
       else
-      {
-         if ( $game_sgf_parser->Size != $gsize )
-            $errors[] = sprintf( T_('Board size mismatch: expected %s but found %s#sgf'), $gsize, $game_sgf_parser->Size );
-         if ( $game_sgf_parser->Handicap != $game->Handicap )
-            $errors[] = sprintf( T_('Handicap mismatch: expected %s but found %s#sgf'), $game->Handicap, $game_sgf_parser->Handicap );
-         if ( (float)$game_sgf_parser->Komi != (float)$game->Komi )
-            $errors[] = sprintf( T_('Komi mismatch: expected %s but found %s#sgf'), $game->Komi, $game_sgf_parser->Komi );
-      }
+         $errors = $game_sgf_parser->verify_game_attributes( $game->Size, $game->Handicap, $game->Komi );
 
       if ( count($errors) == 0 )
       {
          // load some of the current game-moves and shape-setup from DB to compare with SGF
-         list( $chk_cnt_moves, $db_shape_setup, $db_sgf_moves ) = self::prepare_verify_game_sgf( $game );
+         static $skip_pass = true;
+         list( $chk_cnt_moves, $db_shape_setup, $db_sgf_moves ) =
+            Board::prepare_verify_game_sgf( $game, /*Board*/null, 25, $skip_pass );
 
-         // compare shape-setup from DB with B/W-stone-setup parsed from SGF
-         foreach ( array( BLACK, WHITE ) as $stone )
-         {
-            $arr_coords = ( $stone == BLACK ) ? $game_sgf_parser->SetBlack : $game_sgf_parser->SetWhite;
-            foreach ( $arr_coords as $sgf_coord )
-            {
-               if ( !isset($db_shape_setup[$sgf_coord]) || $db_shape_setup[$sgf_coord] != $stone )
-               {
-                  $coord = sgf2board_coords( $sgf_coord, $gsize );
-                  $errors[] = sprintf( T_('Shape-Setup mismatch: found discrepancy at coord [%s]#sgf'), $coord );
-               }
-               unset($db_shape_setup[$sgf_coord]);
-            }
-         }
-         if ( count($db_shape_setup) > 0 )
-         {
-            $coords = array();
-            foreach ( $db_shape_setup as $sgf_coord => $stone )
-               $coords[] = sgf2board_coords( $sgf_coord, $gsize );
-            $errors[] = sprintf( T_('Shape-Setup mismatch: missing setup stones in SGF [%s]#sgf'), implode(',', $coords) );
-         }
-
-         // compare some db-moves with moves parsed from SGF
-         $move_nr = 0;
-         foreach ( $game_sgf_parser->Moves as $move ) // move = B|W sgf-coord, e.g. "Baa", "Wbb"
-         {
-            if ( $move_nr >= $chk_cnt_moves )
-               break;
-            if ( strlen($move) != 3 ) // skip PASS-move
-               continue;
-            if ( $move != $db_sgf_moves[$move_nr++] )
-            {
-               $errors[] = sprintf( T_('Moves mismatch: found discrepancy at move #%s#sgf'), $move_nr + 1 );
-               break;
-            }
-         }
+         $errors = array_merge(
+            $game_sgf_parser->verify_game_shape_setup( $db_shape_setup, $game->Size ),
+            $game_sgf_parser->verify_game_moves( $chk_cnt_moves, $db_sgf_moves, $skip_pass ) );
       }
 
       return $errors;
    }//verify_game_sgf
-
-   /*!
-    * \brief Loads game-, shape-setup- and moves-data from DGS-database to compare with SGF-parsed-data in verify_game_sgf()-function.
-    * \param $game pre-loaded Games-object
-    * \return arr( count-moves-to-check, db-shape-setup-arr, db-sgf-moves-arr )
-    *     - db-shape-setup-arr = arr( SGF-coord => BLACK|WHITE, ... )
-    *     - db-sgf-moves-arr   = arr( 'Baa', 'Wbb', ... );   // <COLOR><SGF_COORD>; only B/W-moves; captured stones and PASS-moves are not returned
-    */
-   private static function prepare_verify_game_sgf( $game )
-   {
-      $gid = $game->ID;
-      $size = $game->Size;
-
-      // load some of the current game-moves and shape-setup from DB to compare with SGF
-      $chk_cnt_moves = min( 25, $game->Moves );
-      $game_row = array(
-         'ID' => $gid,
-         'Size' => $size,
-         'Moves' => $game->Moves,
-         'ShapeSnapshot' => $game->ShapeSnapshot
-      );
-      $board = new Board();
-      if ( !$board->load_from_db( $game_row, $chk_cnt_moves, BOARDOPT_USE_CACHE ) )
-         error('internal_error', "GameSgfControl:prepare_verify_game_sgf.check.moves($gid,$chk_cnt_moves)");
-
-      // prepare shape-setup from db
-      $db_shape_setup = array(); // arr( SGF-coord => BLACK|WHITE, ... )
-      foreach ( $board->shape_arr_xy as $arr )
-      {
-         list( $Stone, $PosX, $PosY) = $arr;
-         $sgf_coord = number2sgf_coords( $PosX, $PosY, $size, $size );
-         $db_shape_setup[$sgf_coord] = $Stone;
-      }
-
-      // prepare to verify some moves: read some db-moves
-      $db_sgf_moves = array(); // Baa, Wbb, ...
-      $count_handicap = $game->Handicap;
-      foreach ( $board->moves as $arr ) // arr: Stone,PosX,PosY
-      {
-         list( $Stone, $PosX, $PosY) = $arr;
-         if ( $PosX < 0 ) // check for valid move
-            continue;
-         if ( $Stone == BLACK )
-            $color = 'B';
-         elseif ( $Stone == WHITE )
-            $color = 'W';
-         else
-            continue;
-
-         if ( $count_handicap-- > 0 ) // put handicap-stones into shape-setup-arr
-         {
-            $sgf_coord = number2sgf_coords( $PosX, $PosY, $size, $size );
-            $db_shape_setup[$sgf_coord] = $Stone;
-         }
-         else
-            $db_sgf_moves[] = $color . number2sgf_coords( $arr[1], $arr[2], $size, $size );
-      }
-
-      return array( $chk_cnt_moves, $db_shape_setup, $db_sgf_moves );
-   }//prepare_verify_game_sgf
 
    /*!
     * \brief Downloads (non-cached) stored SGF for given game-id and user-id.

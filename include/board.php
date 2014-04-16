@@ -375,6 +375,84 @@ class Board
    }
 
    /*!
+    * \brief Loads game-, shape-setup- and moves-data from DGS-database to compare with SGF-parsed-data
+    *       in verify_game_sgf()-function.
+    * \param $game pre-loaded Games-object, or Games-row with at least fields (ID, Size, Moves, Handicap, ShapeSnapshot)
+    * \param $board pre-loaded Board-object, null = Board with moves will be loaded
+    * \param $max_moves <0 = load all moves, else restrict loaded moves by given amount
+    * \param $skip_pass false = include PASSes as 'B' and 'W' in resulting db-sgf-moves-arr; true = do not include PASS-moves
+    * \return arr( count-moves-to-check, db-shape-setup-arr, db-sgf-moves-arr )
+    *     - db-shape-setup-arr = arr( SGF-coord => BLACK|WHITE, ... )
+    *     - db-sgf-moves-arr   = arr( 'Baa', 'Wbb', ... );   // <COLOR><SGF_COORD>; only B/W-moves;
+    *       PASS-moves are only returned if $skip_pass=false; captured stones are not returned
+    */
+   public static function prepare_verify_game_sgf( $game, $board, $max_moves, $skip_pass )
+   {
+      if ( is_array($game) )
+         $game_row = $game;
+      else
+      {
+         $game_row = array(
+            'ID' => $game->ID,
+            'Size' => $game->Size,
+            'Moves' => $game->Moves,
+            'Handicap' => $game->Handicap,
+            'ShapeSnapshot' => $game->ShapeSnapshot,
+         );
+      }
+      $gid = $game_row['ID'];
+      $size = $game_row['Size'];
+
+      // load some of the current game-moves and shape-setup from DB to compare with SGF
+      $chk_cnt_moves = ( $max_moves < 0 ) ? $game_row['Moves'] : min( $max_moves, $game_row['Moves'] );
+      if ( is_null($board) )
+      {
+         $board = new Board();
+         if ( !$board->load_from_db( $game_row, $chk_cnt_moves, BOARDOPT_USE_CACHE ) )
+            error('internal_error', "GameSgfControl:prepare_verify_game_sgf.check.moves($gid,$chk_cnt_moves,$skip_pass)");
+      }
+
+      // prepare shape-setup from db
+      $db_shape_setup = array(); // arr( SGF-coord => BLACK|WHITE, ... )
+      foreach ( $board->shape_arr_xy as $arr )
+      {
+         list( $Stone, $PosX, $PosY) = $arr;
+         $sgf_coord = number2sgf_coords( $PosX, $PosY, $size, $size );
+         $db_shape_setup[$sgf_coord] = $Stone;
+      }
+
+      // prepare to verify some moves: read some db-moves
+      $db_sgf_moves = array(); // Baa, Wbb, B (=PASS) ...
+      $count_handicap = $game_row['Handicap'];
+      $check_posx = ( $skip_pass ) ? 0 : POSX_PASS;
+      foreach ( $board->moves as $arr ) // arr: Stone,PosX,PosY
+      {
+         list( $Stone, $PosX, $PosY) = $arr;
+         if ( $PosX < $check_posx ) // check for valid move (or PASS, if PASS shouldn't be skipped)
+            continue;
+
+         if ( $Stone == BLACK )
+            $color = 'B';
+         elseif ( $Stone == WHITE )
+            $color = 'W';
+         else
+            continue;
+
+         $sgf_coord = ( $PosX >= 0 ) ? number2sgf_coords( $PosX, $PosY, $size, $size ) : ''; // ''=PASS
+         if ( $count_handicap > 0 ) // put handicap-stones into shape-setup-arr
+         {
+            $count_handicap--;
+            if ( $sgf_coord )
+               $db_shape_setup[$sgf_coord] = $Stone;
+         }
+         else
+            $db_sgf_moves[] = $color . $sgf_coord;
+      }
+
+      return array( $chk_cnt_moves, $db_shape_setup, $db_sgf_moves );
+   }//prepare_verify_game_sgf
+
+   /*!
     * \brief Fills $array with positions where the stones are (incl. handling of shape-game).
     * \note only used for shape-checking, not to control board
     */

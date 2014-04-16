@@ -19,6 +19,8 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 $TranslateGroups[] = "Game";
 
+require_once 'include/coords.php';
+
 
 /*
 Basic (EBNF) Definition - see http://www.red-bean.com/sgf/sgf4.html#2
@@ -317,9 +319,9 @@ class SgfParser
    // ------------ static functions ----------------------------
 
    /*! \brief Explodes a SGF-string ($sgf, from file) into an array of games stored in SgfParser-object. */
-   public static function sgf_parser( $sgf_data )
+   public static function sgf_parser( $sgf_data, $parse_options=0 )
    {
-      $sgf_parser = new SgfParser();
+      $sgf_parser = new SgfParser( $parse_options );
       $sgf_parser->parse_sgf( $sgf_data );
       return $sgf_parser;
    }
@@ -394,7 +396,9 @@ class SgfNode
 /*! \brief Class containing parsed properties from SGF for further processing. */
 class GameSgfParser
 {
-   public $error; // error-message | '' (=success)
+   public $sgf_parser; // SgfParser
+   public $extra_nodes = null;
+
    public $Size = 0;
    public $Handicap = 0; // number of handicap-stones
    public $Komi = 0;
@@ -402,10 +406,93 @@ class GameSgfParser
    public $SetBlack = array();
    public $Moves = array(); // [ 'B|W'.sgf-coord, ... ], for example: [ 'Baa', ... ]
 
-   public function __construct( $error )
+   public function __construct( $sgf_parser )
    {
-      $this->error = $error;
+      $this->sgf_parser = $sgf_parser;
    }
+
+   /*! \brief Returns error from SGF-parser; error-message | '' (=success). */
+   public function get_error()
+   {
+      return $this->sgf_parser->error_loc;
+   }
+
+   /*!
+    * \brief Verifies basic attributes of game to match those parsed from SGF: size, handicap, komi.
+    * \return empty-array = success; errors otherwise
+    */
+   public function verify_game_attributes( $size, $handicap, $komi )
+   {
+      $errors = array();
+
+      if ( $this->Size != $size )
+         $errors[] = sprintf( T_('Board size mismatch: expected %s but found %s#sgf'), $size, $this->Size );
+      if ( $this->Handicap != $handicap )
+         $errors[] = sprintf( T_('Handicap mismatch: expected %s but found %s#sgf'), $handicap, $this->Handicap );
+      if ( (float)$this->Komi != (float)$komi )
+         $errors[] = sprintf( T_('Komi mismatch: expected %s but found %s#sgf'), $komi, $this->Komi );
+
+      return $errors;
+   }//verify_game_attributes
+
+   /*!
+    * \brief Verifies game shape-setup to match those parsed from SGF.
+    * \return empty-array = success; errors otherwise
+    */
+   public function verify_game_shape_setup( $db_shape_setup, $gsize )
+   {
+      $errors = array();
+
+      // compare shape-setup from DB with B/W-stone-setup parsed from SGF
+      foreach ( array( BLACK, WHITE ) as $stone )
+      {
+         $arr_coords = ( $stone == BLACK ) ? $this->SetBlack : $this->SetWhite;
+         foreach ( $arr_coords as $sgf_coord )
+         {
+            if ( !isset($db_shape_setup[$sgf_coord]) || $db_shape_setup[$sgf_coord] != $stone )
+            {
+               $coord = sgf2board_coords( $sgf_coord, $gsize );
+               $errors[] = sprintf( T_('Shape-Setup mismatch: found discrepancy at coord [%s]#sgf'), $coord );
+            }
+            unset($db_shape_setup[$sgf_coord]);
+         }
+      }
+      if ( count($db_shape_setup) > 0 )
+      {
+         $coords = array();
+         foreach ( $db_shape_setup as $sgf_coord => $stone )
+            $coords[] = sgf2board_coords( $sgf_coord, $gsize );
+         $errors[] = sprintf( T_('Shape-Setup mismatch: missing setup stones in SGF [%s]#sgf'), implode(',', $coords) );
+      }
+
+      return $errors;
+   }//verify_game_shape_setup
+
+   /*!
+    * \brief Verifies count of $chk_cnt_moves game-moves to match those parsed from SGF.
+    * \return empty-array = success; errors otherwise
+    */
+   public function verify_game_moves( $chk_cnt_moves, $db_sgf_moves, $skip_pass )
+   {
+      $errors = array();
+
+      // compare some db-moves with moves parsed from SGF
+      $move_nr = 0;
+      foreach ( $this->Moves as $move ) // move = B|W sgf-coord, e.g. "Baa", "Wbb"
+      {
+         if ( $move_nr >= $chk_cnt_moves )
+            break;
+         if ( $skip_pass && strlen($move) != 3 ) // skip PASS-move
+            continue;
+         if ( $move != $db_sgf_moves[$move_nr++] )
+         {
+            $errors[] = sprintf( T_('Moves mismatch: found discrepancy at move #%s#sgf'), $move_nr );
+            break;
+         }
+      }
+
+      return $errors;
+   }//verify_game_moves
 
 
    // ------------ static functions ----------------------------
@@ -420,19 +507,22 @@ class GameSgfParser
     * \brief Parses SGF-data into resulting-array (used to load SGF and flatten into Goban-objects for Shape-game).
     * \return GameSgfParser-instance with filled properties; parsing-error in SgfParser->Error or '' if ok
     */
-   public static function parse_sgf_game( $sgf_data )
+   public static function parse_sgf_game( $sgf_data, $last_move_nr=-1 )
    {
       $sgf_parser = SgfParser::sgf_parser( $sgf_data );
-      $game_sgf_parser = new GameSgfParser( $sgf_parser->error_loc );
+      $game_sgf_parser = new GameSgfParser( $sgf_parser );
       if ( $sgf_parser->error_msg )
          return $game_sgf_parser;
 
       $game = $sgf_parser->games[0]; // check 1st game only
       $movenum = 0; // current move-number
       $vars = array(); // variations
+      $parsed_HA = $parsed_KM = null;
+      $game_sgf_parser->extra_nodes = array();
+      $collect_extra_nodes = 0; // 0|-1 = no collecting, 1 = collect nodes, -1 = collecting stopped
+
       SgfParser::push_var_stack( $vars, $game, $movenum );
 
-      $parsed_HA = $parsed_KM = null;
       while ( list($movenum, $var) = array_pop($vars) ) // process variations-stack
       {
          // a variation is an array of nodes
@@ -440,35 +530,53 @@ class GameSgfParser
          {
             if ( $id === SGF_VAR_KEY )
             {
+               if ( $collect_extra_nodes > 0 )
+               {
+                  $game_sgf_parser->extra_nodes[$id] = $node;
+                  $collect_extra_nodes = -1; // stop collecting, because var already contains the rest
+               }
+
                // this particular node is an array of variations, but only take first var (main-branch)
                SgfParser::push_var_stack( $vars, $node[0], $movenum );
                continue;
             }
+
+            if ( $collect_extra_nodes > 0 )
+               $game_sgf_parser->extra_nodes[] = $node;
 
             // a node is a SgfNode-object with an array of properties
             if ( isset($node->props['B']) || isset($node->props['W']) )
             {
                $key = ( isset($node->props['B']) ) ? 'B' : 'W';
                $sgf_coord = @$node->props[$key][0];
+               if ( $game_sgf_parser->Size <= 19 && $sgf_coord == 'tt' ) // tt=>'' (=PASS)
+                  $sgf_coord = '';
                $game_sgf_parser->Moves[] = $key . $sgf_coord;
                $movenum++;
+
+               // start collecting additional nodes after last curr-move
+               if ( $last_move_nr >= 0 && $collect_extra_nodes == 0 && $movenum >= $last_move_nr )
+                  $collect_extra_nodes = 1; // start collecting cond-moves after last move
             }
-            if ( isset($node->props['AB']) )
+            if ( $movenum == 0 ) // parse certain props only from root-node (before 1st move starts)
             {
-               foreach ( @$node->props['AB'] as $sgf_coord )
-                  $game_sgf_parser->SetBlack[] = $sgf_coord;
+               if ( isset($node->props['AB']) )
+               {
+                  foreach ( @$node->props['AB'] as $sgf_coord )
+                     $game_sgf_parser->SetBlack[] = $sgf_coord;
+               }
+               if ( isset($node->props['AW']) )
+               {
+                  foreach ( @$node->props['AW'] as $sgf_coord )
+                     $game_sgf_parser->SetWhite[] = $sgf_coord;
+               }
+               if ( isset($node->props['SZ']) && !$game_sgf_parser->Size )
+                  $game_sgf_parser->Size = (int)$node->props['SZ'][0];
+               if ( isset($node->props['HA']) && is_null($parsed_HA) )
+                  $game_sgf_parser->Handicap = $parsed_HA = (int)$node->props['HA'][0];
+               if ( isset($node->props['KM']) && is_null($parsed_KM) )
+                  $game_sgf_parser->Komi = $parsed_KM = (float)$node->props['KM'][0];
             }
-            if ( isset($node->props['AW']) )
-            {
-               foreach ( @$node->props['AW'] as $sgf_coord )
-                  $game_sgf_parser->SetWhite[] = $sgf_coord;
-            }
-            if ( isset($node->props['SZ']) && !$game_sgf_parser->Size )
-               $game_sgf_parser->Size = (int)$node->props['SZ'][0];
-            if ( isset($node->props['HA']) && is_null($parsed_HA) )
-               $game_sgf_parser->Handicap = $parsed_HA = (int)$node->props['HA'][0];
-            if ( isset($node->props['KM']) && is_null($parsed_KM) )
-               $game_sgf_parser->Komi = $parsed_KM = (float)$node->props['KM'][0];
          }
       }
 
@@ -476,6 +584,7 @@ class GameSgfParser
    }//parse_sgf_game
 
 }//end 'GameSgfParser'
+
 
 
 

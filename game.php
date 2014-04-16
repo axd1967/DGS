@@ -1620,7 +1620,7 @@ function draw_conditional_moves_links( $gid )
 
 function draw_conditional_moves_input( $gid, $cm_action )
 {
-   global $Size, $to_move, $gform, $base_path;
+   global $game_row, $Size, $to_move, $gform, $base_path, $TheBoard;
 
    $cond_moves = get_request_arg('cond_moves');
    $var_view = get_request_arg('cm_var_view', '1');
@@ -1630,10 +1630,12 @@ function draw_conditional_moves_input( $gid, $cm_action )
 
    if ( @$_REQUEST['cma_upload'] && isset($_FILES['cm_sgf_file']) )
    {
-      list( $errors, $sgf_data, $sgf_parser ) = ConditionalMoves::load_cond_moves_from_sgf( $_FILES['cm_sgf_file'] );
-      if ( !$sgf_parser->error_loc )
+      list( $errors, $sgf_data, $game_sgf_parser ) =
+         ConditionalMoves::load_cond_moves_from_sgf( $_FILES['cm_sgf_file'], $game_row, $TheBoard );
+      if ( count($errors) == 0 )
       {
-         echo "<pre>", SgfParser::sgf_builder($sgf_parser->games, ''), "</pre><br><br>\n";
+         //TODO handle $game_sgf_parser->extra_nodes
+         echo "<pre>", SgfParser::sgf_builder( array( $game_sgf_parser->extra_nodes ), ''), "</pre><br><br>\n";
       }
    }
    else

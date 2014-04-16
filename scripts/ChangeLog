@@ -11,6 +11,30 @@ Release [2014-03-27] - DGS 1.0.17 - tag [release-1_0_17-20140327] on branch [DGS
 ChangeLog
 ------------------------------------------------------------------
 
+2014-04-16 jug
+
+   * include/sgf_parser.php (SgfParser.sgf_parser; class GameSgfParser, ~.__construct, ~.get_error,
+       ~.verify_game_attributes, ~.verify_game_shape_setup, ~.verify_game_moves, ~.parse_sgf_game),
+     include/conditional_moves.php (ConditionalMoves.load_cond_moves_from_sgf),
+     include/game_sgf_control.php (GameSgfControl.verify_game_sgf),
+     include/board.php (Board.prepare_verify_game_sgf),
+     game.php (draw_conditional_moves_input),
+     goban_editor.php (load_igoban_from_sgf):
+   - adjusted SGF-game-verification from attaching-SGF to be re-used for parsing and
+     checking uploaded SGF with conditional-moves
+     - added SGF-game-verification for uploaded conditional-moves from SGF on identical
+       game-attributes, shape-setup and played moves
+     - added option to enable checking PASS-moves on SGF-game-verification
+     - identify start of conditional-moves in uploaded SGF
+     - refactored GameSgfControl::prepare_verify_game_sgf() into Board-class to be re-used for
+       parsing and checking uploaded SGF with conditional-moves
+     - refactored checking of game-attributes, shape-setup and played moves from GameSgfControl-class
+       into GameSgfParser-class
+     - convert SGF PASS-notation with B/W[tt] for board-size <= 19 to standard B/W[]
+     - bugfix for GameSgfParser.parse_sgf_game(): parse certain game-attribute SGF-properties
+       only in root-node
+   - bugfix goban-editor: also show SGF-parsing errors on uploading shape from SGF
+
 2014-04-14 jug
 
    * include/std_functions.php, game.php:

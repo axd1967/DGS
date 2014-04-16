@@ -19,6 +19,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 $TranslateGroups[] = "Game";
 
+require_once 'include/board.php';
 require_once 'include/classlib_upload.php';
 require_once 'include/sgf_parser.php';
 require_once 'include/std_functions.php';
@@ -32,42 +33,78 @@ require_once 'include/std_functions.php';
 class ConditionalMoves
 {
 
-   //TODO comments
-   public static function load_cond_moves_from_sgf( $file_sgf_arr )
+   /*!
+    * \bried Loads uploaded SGF-file, checks that played moves are identical and finds start of conditional-moves.
+    * \param $file_sgf_arr files-arr taken from global $_FILES[key]
+    * \param $grow Games-row with at least fields (ID, Size, Moves, Handicap, Komi, ShapeSnapshot)
+    * \param $board pre-loaded Board-object to avoid re-loading; null = reload Board with shape/moves
+    * \return arr( errors, sgf-data, game-sgf-parser ):
+    *       errors = empty-arr (success), otherwise error-list;
+    *       sgf-data = raw SGF-data from uploaded file;
+    *       game-sgf-parser = GameSgfParser with parsed SGF-data
+    */
+   public static function load_cond_moves_from_sgf( $file_sgf_arr, $grow, $board )
    {
-      // upload SGF and parse
-      list( $errors, $sgf_data ) = FileUpload::load_data_from_file( $file_sgf_arr, SGF_MAXSIZE_UPLOAD );
-      if ( is_null($errors) )
+      $errors = array();
+      $game_sgf_parser = null;
+
+      // read SGF from uploaded file
+      list( $upload_errors, $sgf_data ) = FileUpload::load_data_from_file( $file_sgf_arr, SGF_MAXSIZE_UPLOAD );
+      if ( !is_null($upload_errors) && count($upload_errors) > 0 )
+         $errors = $upload_errors;
+      else
       {
-         $sgf_parser = new SgfParser();
-         if ( $sgf_parser->parse_sgf($sgf_data) )
-         {
-            //TODO check parsed SGF game-tree:
-            //TODO - check: only 1 SGF-game
-            //TODO - check: same board-size, handicap, komi like curr-game
-            //TODO - check: same shape-setup and moves like curr-game
-            //TODO - last same move is starting point for cond-moves -> extract cond-moves-part
-
-            //TODO from here also used for manually entered cond-moves:
-            //TODO check cond-moves-part:
-            //TODO   - check: each node need B|W-prop
-            //TODO   - check: alternating colors in all vars B-W
-            //TODO   - check: all vars ending with own move
-            //TODO   - check: check if COs (SGF- or board-format) are valid (syntax); moves not played out
-            //TODO   - replace: tt=PASS to '' (=empty)
-            //TODO   - check: not more than 2 passes per var
-            //TODO   - check: max-size for rebuilt cond-moves is 2048
-            //TODO   - LATER: check that all vars contain valid moves, that can be played rule-conform (empty-points, ko, etc); see create_igoban_from_parsed_sgf()
-
-            //TODO $game_sgf_parser = GameSgfParser::parse_sgf_game( $sgf_data );
-            //TODO see verify_game_sgf()
-         }
+         // parse SGF and identify start of cond-moves
+         $game_sgf_parser = GameSgfParser::parse_sgf_game( $sgf_data, $grow['Moves'] );
+         $parse_err = $game_sgf_parser->get_error();
+         if ( $parse_err )
+            $errors[] = sprintf( T_('SGF-Parse error found: %s'), $parse_err );
          else
-            $errors = array( $sgf_parser->error_loc );
+         {
+            // check parsed SGF game-tree
+            if ( count($game_sgf_parser->sgf_parser->games) > 1 ) // check for only 1 SGF-gametree
+               $errors[] = T_('SGF contains more than one game-tree.');
+            else
+            {
+               // check for same board-size, handicap, komi
+               $errors = $game_sgf_parser->verify_game_attributes( $grow['Size'], $grow['Handicap'], $grow['Komi'] );
+
+               if ( count($errors) == 0 )
+               {
+                  // load some of the current game-moves and shape-setup from DB to compare with SGF
+                  static $skip_pass = false;
+                  list( $moves, $db_shape_setup, $db_sgf_moves ) =
+                     Board::prepare_verify_game_sgf( $grow, $board, -1, $skip_pass );
+
+                  // check: same shape-setup and moves
+                  $errors = array_merge(
+                     $game_sgf_parser->verify_game_shape_setup( $db_shape_setup, $grow['Size'] ),
+                     $game_sgf_parser->verify_game_moves( $moves, $db_sgf_moves, $skip_pass ) );
+               }
+            }
+         }
       }
 
-      return array( $errors, $sgf_data, $sgf_parser );
+      return array( $errors, $sgf_data, $game_sgf_parser );
    }//load_cond_moves_from_sgf
+
+
+   public static function handle_TODO( $game_sgf_parser )
+   {
+      //TODO - last same move is starting point for cond-moves -> extract cond-moves-part
+
+      //TODO from here also used for manually entered cond-moves:
+      //TODO check cond-moves-part:
+      //TODO   - check: no node "outside" of vars
+      //TODO   - check: each node need B|W-prop
+      //TODO   - check: alternating colors in all vars B-W; relative to last-move
+      //TODO   - check: all vars ending with own move
+      //TODO   - check: check if COs (SGF- or board-format) are valid (syntax); moves not played out
+      //TODO   - replace: tt=PASS to '' (=empty)
+      //TODO   - check: not more than 2 passes per var
+      //TODO   - check: max-size for rebuilt cond-moves is 2048
+      //TODO   - LATER: check that all vars contain valid moves, that can be played rule-conform (empty-points, ko, etc); see create_igoban_from_parsed_sgf()
+   }
 
 
    /*!
