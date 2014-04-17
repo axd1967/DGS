@@ -13,6 +13,10 @@ ChangeLog
 
 2014-04-17 jug
 
+   * game.php (handle_conditional_moves, draw_conditional_moves_input):
+   - split handling and GUI-drawing for conditional-moves to prepare
+     for showing variation-preview on board
+
    * include/sgf_parser.php (SgfParser.parse_sgf_game_tree, ~.sgf_parse_node, ~.push_var_stack;
        class SgfNode, ~.__construct, ~.get_props_text),
      include/conditional_moves.php (ConditionalMoves.reformat_to_sgf, check_nodes_cond_moves),

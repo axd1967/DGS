@@ -293,6 +293,12 @@ $GLOBALS['ThePage'] = new Page('Game');
    $movecol = $TheBoard->movecol;
    $last_move_msg = ( is_array($TheBoard->movemsg) ) ? @$TheBoard->movemsg[$move] : $TheBoard->movemsg;
 
+   if ( $allow_cond_moves )
+   {
+      list( $cm_sgf_parser, $cm_errors, $cm_var_names, $cond_moves ) =
+         handle_conditional_moves( $game_row, $cm_action, $TheBoard, $to_move, $my_id );
+   }
+
    $extra_infos = array();
    $game_score = null;
 
@@ -753,7 +759,7 @@ $GLOBALS['ThePage'] = new Page('Game');
          if ( $allow_cond_moves )
          {
             if ( $cm_action == 'add' )
-               draw_conditional_moves_input( $gid, $cm_action );
+               draw_conditional_moves_input( $gform, $gid, $cm_sgf_parser, $cm_errors, $cond_moves, $cm_var_names );
             else
                draw_conditional_moves_links( $gid );
          }
@@ -1619,24 +1625,22 @@ function draw_conditional_moves_links( $gid )
 }//draw_conditional_moves_links
 
 
-function draw_conditional_moves_input( $gid, $cm_action )
+function handle_conditional_moves( $game_row, $cm_action, $board, $to_move, $my_id )
 {
-   global $game_row, $my_id, $Size, $to_move, $gform, $base_path, $TheBoard;
+   $gid = $game_row['ID'];
+   $Size = $game_row['Size'];
    $my_col = ($game_row['Black_ID'] == $my_id) ? BLACK : WHITE;
    $last_move_col = ($to_move == BLACK) ? WHITE : BLACK;
 
    $cond_moves = get_request_arg('cond_moves');
    $var_view = get_request_arg('cm_var_view', '1');
-   $var_views_str = '1';
-   $cm_active = get_request_arg('cm_active', 0);
-   $cm_private = get_request_arg('cm_private', 0);
    $is_preview = $_REQUEST['preview'];
 
    $var_names = array();
    if ( @$_REQUEST['cma_upload'] && isset($_FILES['cm_sgf_file']) ) // upload SGF from file
    {
       list( $errors, $sgf_data, $game_sgf_parser ) =
-         ConditionalMoves::load_cond_moves_from_sgf( $_FILES['cm_sgf_file'], $game_row, $TheBoard );
+         ConditionalMoves::load_cond_moves_from_sgf( $_FILES['cm_sgf_file'], $game_row, $board );
       if ( count($errors) == 0 )
       {
          // re-parse conditional-moves part for input-box
@@ -1656,14 +1660,24 @@ function draw_conditional_moves_input( $gid, $cm_action )
          $extra_nodes = $sgf_parser->games[0];
          list( $errors, $var_names ) =
             ConditionalMoves::check_nodes_cond_moves( $extra_nodes, $Size, $my_col, $last_move_col );
-         if ( count($var_names) )
-            $var_views_str = implode(' / ', $var_names);
 
          //echo "<pre>", SgfParser::sgf_builder( array( $extra_nodes ), ''), "</pre><br><br>\n";
          //echo "<pre>-----", print_r($extra_nodes, true), "</pre>\n";
       }
    }
 
+   return array( $sgf_parser, $errors, $var_names, $cond_moves );
+}//handle_conditional_moves
+
+function draw_conditional_moves_input( &$gform, $gid, $sgf_parser, $errors, $cond_moves, $var_names )
+{
+   global $base_path;
+
+   $var_view = get_request_arg('cm_var_view', '1');
+   $cm_active = get_request_arg('cm_active', 0);
+   $cm_private = get_request_arg('cm_private', 0);
+
+   $var_views_str = implode(' , ', $var_names);
 
    echo name_anchor('condmoves'),
       "<TABLE id=\"CondMovesTable\" class=MessageForm>\n";
