@@ -28,6 +28,7 @@ require_once 'PHPUnit/Framework/TestCase.php';
 require_once 'PHPUnit/Framework/TestSuite.php';
 
 require_once 'include/std_functions.php';
+require_once 'include/coords.php';
 
 
 
@@ -61,6 +62,37 @@ class GeneralFunctionsTest extends PHPUnit_Framework_TestCase {
       $this->assertEquals( $ts - 17, parseDate('test', '2013-04-13 12:36:17', /*secs*/false) );
       $this->assertEquals( $ts - 17, parseDate('test', '2013-04-13 12:36', /*secs*/false) );
       $this->assertEquals( $ts - 17, parseDate('test', '2013-04-13 12:36', /*secs*/true) );
+   }
+
+   /** Tests is_valid_sgf_coords(). */
+   public function test_is_valid_sgf_coords() {
+      $this->assertTrue( is_valid_sgf_coords( 'aa', 5 ));
+      $this->assertTrue( is_valid_sgf_coords( 'yy', 25 ));
+      $this->assertTrue( is_valid_sgf_coords( 'ss', 19 ));
+      $this->assertFalse( is_valid_sgf_coords( 'ss', 18 ));
+      $this->assertFalse( is_valid_sgf_coords( 'AA', 5 ));
+      $this->assertFalse( is_valid_sgf_coords( '', 5 ));
+   }
+
+   /** Tests is_valid_board_coords(). */
+   public function test_is_valid_board_coords() {
+      $this->assertTrue( is_valid_board_coords( 'a1', 5 ));
+      $this->assertTrue( is_valid_board_coords( 'A1', 5 ));
+      $this->assertTrue( is_valid_board_coords( 'e5', 5 ));
+      $this->assertTrue( is_valid_board_coords( 'E5', 5 ));
+      $this->assertFalse( is_valid_board_coords( 'f3', 5 ));
+      $this->assertFalse( is_valid_board_coords( 'e6', 5 ));
+      $this->assertFalse( is_valid_board_coords( '', 5 ));
+      $this->assertTrue( is_valid_board_coords( 'z25', 25 ));
+      $this->assertTrue( is_valid_board_coords( 'Z25', 25 ));
+      $this->assertFalse( is_valid_board_coords( 'i1', 9 ));
+      $this->assertFalse( is_valid_board_coords( 'i1', 5 ));
+      $this->assertTrue( is_valid_board_coords( 'h8', 8 ));
+      $this->assertFalse( is_valid_board_coords( 'h8', 7 ));
+      $this->assertTrue( is_valid_board_coords( 't19', 19 ));
+      $this->assertFalse( is_valid_board_coords( 'u19', 19 ));
+      $this->assertFalse( is_valid_board_coords( 't20', 19 ));
+      $this->assertFalse( is_valid_board_coords( 'T20', 19 ));
    }
 
 }

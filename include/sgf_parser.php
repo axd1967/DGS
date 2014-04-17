@@ -85,7 +85,7 @@ define('SGF_ARG_END', ']');
 define('SGF_NOD_BEG', ';');
 define('SGF_VAR_KEY', '++');
 
-define('SGFP_OPT_SKIP_ROOT_NODE', 0x01);
+define('SGFP_OPT_SKIP_ROOT_NODE', 0x01); // don't read root-node and simplify game-tree if possible
 
 
 /*! \brief Helper-class to parse SGF-data. */
@@ -222,6 +222,13 @@ class SgfParser
          if ( $ivar >= ($skip_root_node ? 1 : 0) )
             return T_('Missing right parenthesis#sgf');
 
+         // simplify if only one variation with empty root-node
+         if ( $skip_root_node )
+         {
+            if ( count($vars[0]) == 1 && isset($vars[0][SGF_VAR_KEY]) && count($vars[0][SGF_VAR_KEY]) == 1 )
+               $vars[0] = $vars[0][SGF_VAR_KEY][0];
+         }
+
          $this->games[] = $vars[0];
       }
 
@@ -254,7 +261,7 @@ class SgfParser
     */
    private function sgf_parse_node( &$node )
    {
-      $node = new SgfNode();
+      $node = new SgfNode( $this->idx - 1 );
       while ( $key = $this->sgf_parse_key() )
       {
          $err = $this->sgf_parse_args( $args );
@@ -326,11 +333,11 @@ class SgfParser
       return $sgf_parser;
    }
 
-   /*! \brief Pushes variation $var on variation-stack $vars with move-num $num. */
-   public static function push_var_stack( &$vars, &$var, $num )
+   /*! \brief Pushes variation $var on variation-stack $vars with some varying data-payload. */
+   public static function push_var_stack( &$vars, &$var, $data=0 )
    {
       if ( is_array($var) )
-         $vars[] = array( $num, &$var );
+         $vars[] = array( $data, $var );
    }
 
    // In short, it does the opposite of sgf_parser()
@@ -387,7 +394,22 @@ class SgfParser
 /*! \brief Class used to store node parsed from SGF. */
 class SgfNode
 {
-   public $props = array();
+   public $props = array(); // propkey => arr( value, ... )
+   public $pos; // parsing pos of node-start ';'
+
+   public function __construct( $pos )
+   {
+      $this->pos = $pos;
+   }
+
+   public function get_props_text()
+   {
+      $out = array();
+      foreach ( $this->props as $prop => $value )
+         $out[] = "{$prop}[" . implode('][', $value) . "]";
+      return implode(' ', $out);
+   }
+
 } //end 'SgfNode'
 
 

@@ -82,6 +82,32 @@ function board2number_coords($coord, $Size)
    return array(NULL,NULL);
 }
 
+// \param $coord expecting real move != PASS-move ('tt' or '')
+function is_valid_sgf_coords( $coord, $size )
+{
+   if ( strlen($coord) != 2 )
+      return false;
+   if ( $coord[0] < 'a' || $coord[1] < 'a' )
+      return false;
+   $max_ch = chr( ord('a') + (int)$size - 1 );
+   return ( $coord[0] <= $max_ch && $coord[1] <= $max_ch );
+}//is_valid_sgf_coords
+
+function is_valid_board_coords( $coord, $size )
+{
+   if ( strlen($coord) < 2 )
+      return false;
+   $c2 = substr($coord, 1);
+   if ( !is_numeric($c2) || $c2 < 1 || $c2 > $size )
+      return false;
+
+   $c1 = strtolower($coord[0]);
+   if ( $c1 < 'a' || $c1 == 'i' )
+      return false;
+   $max_ch = chr( ord('a') + (int)$size - ($size <= 8 ? 1 : 0) );
+   return ( $c1 <= $max_ch );
+}//is_valid_board_coords
+
 
 //index=size: dist (value=side-distance), pos (value=mask)
 //$hoshi_pos: 0x01 allow center, 0x02 allow side, 0x04 allow corner
