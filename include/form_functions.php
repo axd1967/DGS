@@ -1335,12 +1335,12 @@ class Form
     * \param $rows         The number of rows in the textarea.
     * \param $initial_text Text that appears initially in the textarea.
     */
-   public function print_insert_textarea( $name, $columns, $rows, $initial_text )
+   public function print_insert_textarea( $name, $columns, $rows, $initial_text, $attbs='' )
    {
       if ( $this->make_texts_safe )
          $initial_text = textarea_safe($initial_text);
-      return "<TEXTAREA name=\"$name\" cols=\"$columns\"" .
-         $this->get_input_attbs() . " rows=\"$rows\">$initial_text</TEXTAREA>";
+      return "<TEXTAREA name=\"$name\" cols=\"$columns\"" . $this->get_input_attbs() .
+         self::parse_input_standard_attributes($attbs) . " rows=\"$rows\">$initial_text</TEXTAREA>";
    }
 
    public function print_insert_select_box( $name, $size, $value_array, $selected, $multiple=0 )
@@ -1360,6 +1360,7 @@ class Form
     *                     else the value of the selected value.
     * \param $multiple    If it should be possible to select more than one
     *                     value. $name will be extended to "$name[]"
+    * \param $attbs       Additional attributes.
     */
    public function print_insert_select_boxx( $name, $size, $value_array, $selected, $multiple=0, $attbs='' )
    {
@@ -1396,7 +1397,7 @@ class Form
     *                     'value' => 'description'.
     * \param $selected    If multiple this should be an array of all values that should be selected from start
     *                     else the value of the selected value.
-    * \param $attbs Additionnal attributes.
+    * \param $attbs       Additional attributes.
     * \param $use_disable false to restrict 'disabled'-attribute to $attbs-argument;
     *                     otherwise this->disabled is used.
     */
@@ -1457,9 +1458,9 @@ class Form
     *
     * \param $name The field name that will be used as the variable name in the GET or POST.
     * \param $text The text on the submit button.
-    * \param $attbs Additionnal attributes.
+    * \param $attbs Additional attributes.
     */
-   public function print_insert_submit_buttonx( $name, $text, $attbs )
+   public function print_insert_submit_buttonx( $name, $text, $attbs='' )
    {
       $str = self::parse_input_standard_attributes($attbs);
       return "<INPUT type=\"submit\" name=\"$name\" value=\"$text\"" .

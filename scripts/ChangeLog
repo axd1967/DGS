@@ -13,6 +13,10 @@ ChangeLog
 
 2014-04-18 jug
 
+   * include/form_functions.php (Form.print_insert_textarea, ~.print_insert_submit_buttonx):
+   - added additional attributes for printing textarea-element and default empty-attributes
+     for print_insert_submit_buttonx()
+
    * include/conditional_moves.php (ConditionalMoves.extract_variation,
        ~.add_played_conditional_moves_on_board),
      include/board.php (class Board, ~.set_conditional_moves, ~.has_conditional_moves,
