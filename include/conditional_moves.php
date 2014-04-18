@@ -21,6 +21,7 @@ $TranslateGroups[] = "Game";
 
 require_once 'include/board.php';
 require_once 'include/classlib_upload.php';
+require_once 'include/move.php';
 require_once 'include/sgf_parser.php';
 require_once 'include/std_functions.php';
 
@@ -324,6 +325,114 @@ class ConditionalMoves
 
       return array( array_reverse( array_unique($errors) ), array_reverse( array_keys($var_names) ) );
    }//check_nodes_cond_moves
+
+   /*!
+    * \brief Extracts specified variation-reference from given nodes-tree.
+    * \return error-text, or else arr( move, ... ); move = arr( BLACK|WHITE, x-pos, y-pos ) with x-pos can be POSX_PASS
+    */
+   public static function extract_variation( $cm_nodes, $variation, $board_size )
+   {
+      $moves = array();
+      $varpart_ref = explode('.', $variation);
+
+      if ( array_shift($varpart_ref) != '1' ) // variation-ref must start with '1'
+         return sprintf( T_('Variation reference [%s] must start with \'1\'.#condmoves'), $variation );
+
+      // traverse game-tree
+      $vars = array(); // stack for variations for traversal of game-tree
+      SgfParser::push_var_stack( $vars, $cm_nodes );
+
+      $var_visit = array( 1 );
+      while ( list($data, $var) = array_pop($vars) ) // process variations-stack
+      {
+         foreach ( $var as $id => $node )
+         {
+            if ( $id === SGF_VAR_KEY )
+            {
+               // this particular node is an array of variations
+               $var_idx = ( count($varpart_ref) ) ? array_shift($varpart_ref) - 1 : 0;
+               $var_visit[] = $var_idx + 1;
+               if ( !isset($node[$var_idx]) )
+                  return sprintf( T_('Sub-variation [%s] can not be found.#condmoves'), implode('.', $var_visit));
+               SgfParser::push_var_stack( $vars, $node[$var_idx] );
+               continue;
+            }//else: a node is a SgfNode-object with an array of properties
+
+            if ( isset($node->props['B']) )
+            {
+               $coord = $node->props['B'][0];
+               $stone_col = BLACK;
+            }
+            else //if ( isset($node->props['W']) )
+            {
+               $coord = $node->props['W'][0];
+               $stone_col = WHITE;
+            }
+
+            if ( (string)$coord == '' || ( $board_size <= 19 && $coord == 'tt' ) )
+            {
+               $x = POSX_PASS;
+               $y = 0;
+            }
+            elseif ( is_valid_sgf_coords($coord, $board_size) )
+               list( $x, $y ) = sgf2number_coords($coord, $board_size);
+            elseif ( is_valid_board_coords($coord, $board_size) )
+               list( $x, $y ) = board2number_coords($coord, $board_size);
+            else
+               return sprintf( T_('Illegal coordinate found [%s] in sub-variation [%s].#condmoves'),
+                  $coord, implode('.', $var_visit));
+
+            $moves[] = array( $stone_col, $x, $y );
+         }
+      }
+
+      return $moves;
+   }//extract_variation
+
+   /*!
+    * \brief Plays conditional moves on board.
+    * \return ''=success; else illegal-move-error
+    */
+   public static function add_played_conditional_moves_on_board( &$board, $moves, $size )
+   {
+      // handle B/W-moves on board handling captures
+      $gchkmove = new GameCheckMove( $board );
+      $Black_Prisoners = $White_Prisoners = 0;
+      $Last_Move = '';
+      $GameFlags = 0;
+      $to_move = BLACK;
+      $error = '';
+      $movenum = 0;
+      foreach ( $moves as $move ) // move = ( stone=BLACK|WHITE, posx, posy ); posx can be POSX_PASS
+      {
+         $movenum++;
+         list( $to_move, $x, $y ) = $move;
+         if ( $x == POSX_PASS )
+         {
+            $Last_Move = '';
+            continue;
+         }
+
+         $err = $gchkmove->check_move( array( $x, $y ), $to_move, $Last_Move, $GameFlags, /*exit*/false);
+         if ( $err )
+         {
+            $board_pos = number2board_coords( $x, $y, $size );
+            $board->set_conditional_moves_errpos( $movenum - 1 );
+            $error = sprintf( T_('Playing conditional moves stopped: Error [%s] at move #%s [%s] found!'),
+               $err, $movenum, ($to_move==BLACK ? 'B' : 'W') . $board_pos );
+            break;
+         }
+         $gchkmove->update_prisoners( $Black_Prisoners, $White_Prisoners );
+
+         if ( $gchkmove->nr_prisoners == 1 )
+            $GameFlags |= GAMEFLAGS_KO;
+         else
+            $GameFlags &= ~GAMEFLAGS_KO;
+         $Last_Move = number2sgf_coords( $x, $y, $size );
+      }
+
+      return $error;
+   }//add_played_conditional_moves_on_board
 
 } //end 'ConditionalMoves'
 

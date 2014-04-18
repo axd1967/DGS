@@ -648,29 +648,38 @@ $GLOBALS['ThePage'] = new Page('Game');
 
    $jumpanchor = ( $validation_step ) ? '#msgbox' : '';
    echo "\n<FORM name=\"game_form\" action=\"game.php?gid=$gid$jumpanchor\" method=\"POST\" enctype=\"multipart/form-data\">";
-   $gform = new Form( 'game_form', "game.php?gid=$gid$jumpanchor", FORM_POST, false );
+   $gform = new Form( 'game_form', "game.php?gid=$gid$jumpanchor", FORM_POST, false ); //NOTE: only used indirectly
    $gform->set_config(FEC_BLOCK_FORM, true);
    $page_hiddens = array();
    // [ game_form start
 
    echo "\n<table id=GamePage align=center>\n<tr><td>"; //board & associates table {--------
 
-   if ( $movenumbers>0 )
+   if ( $TheBoard->has_conditional_moves() )
    {
-      $movemodulo = $cfg_board->get_move_modulo();
-      if ( $movemodulo >= 0 )
+      $TheBoard->move_marks( 1, 0 );
+      $TheBoard->draw_captures_box( T_('Captures'));
+   }
+   else
+   {
+      if ( $movenumbers>0 )
       {
-         $TheBoard->move_marks( $move - $movenumbers, $move, $movemodulo );
-         $TheBoard->draw_captures_box( T_('Captures'));
+         $movemodulo = $cfg_board->get_move_modulo();
+         if ( $movemodulo >= 0 )
+         {
+            $TheBoard->move_marks( $move - $movenumbers, $move, $movemodulo );
+            $TheBoard->draw_captures_box( T_('Captures'));
+            echo "<br>\n";
+         }
+      }
+      if ( !$show_game_tools && ($cfg_board->get_board_flags() & BOARDFLAG_MARK_LAST_CAPTURE) )
+      {
+         $TheBoard->mark_last_captures( $move );
+         $TheBoard->draw_last_captures_box( T_('Last Move Capture') );
          echo "<br>\n";
       }
-   }
-   if ( !$show_game_tools && ($cfg_board->get_board_flags() & BOARDFLAG_MARK_LAST_CAPTURE) )
-   {
-      $TheBoard->mark_last_captures( $move );
-      $TheBoard->draw_last_captures_box( T_('Last Move Capture') );
-      echo "<br>\n";
-   }
+   }//!cond-moves
+
    if( !is_null($game_score) )
    {
       GameScore::draw_score_box( $game_score, $Flags, $Ruleset );
@@ -1625,7 +1634,7 @@ function draw_conditional_moves_links( $gid )
 }//draw_conditional_moves_links
 
 
-function handle_conditional_moves( $game_row, $cm_action, $board, $to_move, $my_id )
+function handle_conditional_moves( $game_row, $cm_action, &$board, $to_move, $my_id )
 {
    $gid = $game_row['ID'];
    $Size = $game_row['Size'];
@@ -1634,9 +1643,9 @@ function handle_conditional_moves( $game_row, $cm_action, $board, $to_move, $my_
 
    $cond_moves = get_request_arg('cond_moves');
    $var_view = get_request_arg('cm_var_view', '1');
-   $is_preview = $_REQUEST['preview'];
 
    $var_names = array();
+   $reformat = false;
    if ( @$_REQUEST['cma_upload'] && isset($_FILES['cm_sgf_file']) ) // upload SGF from file
    {
       list( $errors, $sgf_data, $game_sgf_parser ) =
@@ -1645,14 +1654,14 @@ function handle_conditional_moves( $game_row, $cm_action, $board, $to_move, $my_
       {
          // re-parse conditional-moves part for input-box
          $cond_moves = SgfParser::sgf_builder( array( $game_sgf_parser->extra_nodes ), '');
-         $is_preview = true;
+         $reformat = true;
       }
    }
    else
       $errors = array();
 
    $sgf_parser = new SgfParser( SGFP_OPT_SKIP_ROOT_NODE );
-   if ( $is_preview && $cond_moves )
+   if ( (@$_REQUEST['preview'] || $reformat) && $cond_moves )
    {
       $cond_moves = ConditionalMoves::reformat_to_sgf( $cond_moves, $Size, ($to_move == BLACK) );
       if ( $sgf_parser->parse_sgf($cond_moves) )
@@ -1660,6 +1669,20 @@ function handle_conditional_moves( $game_row, $cm_action, $board, $to_move, $my_
          $extra_nodes = $sgf_parser->games[0];
          list( $errors, $var_names ) =
             ConditionalMoves::check_nodes_cond_moves( $extra_nodes, $Size, $my_col, $last_move_col );
+
+         if ( @$_REQUEST['preview'] && $var_view && count($errors) == 0 )
+         {
+            $result = ConditionalMoves::extract_variation( $extra_nodes, $var_view, $Size );
+            if ( is_array($result) )
+            {
+               $board->set_conditional_moves( $result );
+               $err = ConditionalMoves::add_played_conditional_moves_on_board( $board, $result, $Size );
+               if ( $err )
+                  $errors[] = $err;
+            }
+            else
+               $errors[] = $result;
+         }
 
          //echo "<pre>", SgfParser::sgf_builder( array( $extra_nodes ), ''), "</pre><br><br>\n";
          //echo "<pre>-----", print_r($extra_nodes, true), "</pre>\n";

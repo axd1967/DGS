@@ -11,6 +11,17 @@ Release [2014-03-27] - DGS 1.0.17 - tag [release-1_0_17-20140327] on branch [DGS
 ChangeLog
 ------------------------------------------------------------------
 
+2014-04-18 jug
+
+   * include/conditional_moves.php (ConditionalMoves.extract_variation,
+       ~.add_played_conditional_moves_on_board),
+     include/board.php (class Board, ~.set_conditional_moves, ~.has_conditional_moves,
+       ~.set_conditional_moves, ~.move_marks, ~.draw_captures_box),
+     game.php (handle_conditional_moves):
+   - show preview of specific variation of conditional-moves on game-board
+     - extract specific variaton from conditional-moves entered for previewing
+     - add moves and captures from conditional-moves with move-numbering starting with 1
+
 2014-04-17 jug
 
    * game.php (handle_conditional_moves, draw_conditional_moves_input):

@@ -55,6 +55,9 @@ class Board
    public $shape_arr_xy = array();
    public $prisoners = array( BLACK => 0, WHITE => 0 ); //array: [BLACK|WHITE] => count
 
+   private $cond_moves = null; // array: B|W[sgf_coord], e.g. 'Baa', 'W' (=pass), 'Wee'
+   private $cond_moves_errpos = -1; // pos in $this->cond_moves of move-error
+
    //Last move shown ($movemrkx<0 if PASS, RESIGN or SCORE)
    private $movemrkx = -1;
    private $movemrky = -1;
@@ -91,7 +94,23 @@ class Board
       $this->moves_captures = array();
       $this->shape_arr_xy = array();
       $this->prisoners = array( BLACK => 0, WHITE => 0 );
+      $this->cond_moves = null;
    }//init_board
+
+   public function set_conditional_moves( $moves )
+   {
+      $this->cond_moves = ( is_array($moves) && count($moves) ) ? $moves : null;
+   }
+
+   public function has_conditional_moves()
+   {
+      return !is_null($this->cond_moves);
+   }
+
+   public function set_conditional_moves_errpos( $pos )
+   {
+      $this->cond_moves_errpos = $pos;
+   }
 
    /*!
     * \brief Loads move and messages into Board for given game-info and move-number.
@@ -500,6 +519,23 @@ class Board
 
    public function move_marks( $start, $end, $mark=0)
    {
+      if ( $this->cond_moves ) // conditional-moves-preview overwrites move-numbering
+      {
+         $moves = $this->cond_moves;
+         $is_relative = true;
+         $is_reverse  = false;
+         $mark = 0;
+         $start = 0;
+         $end = ( $this->cond_moves_errpos < 0 ) ? count($moves) - 1 : $this->cond_moves_errpos;
+      }
+      else
+      {
+         $moves = $this->moves;
+         $is_relative = ($this->coord_borders & COORD_RELATIVE_MOVENUM);
+         $is_reverse  = ($this->coord_borders & COORD_REVERSE_MOVENUM);
+         $start = max( $start, 1 );
+      }
+
       if ( is_string( $mark) )
          $mod = 0;
       else if ( is_numeric( $mark) )
@@ -516,18 +552,17 @@ class Board
       else
          return;
 
-      $start = max( $start, 1);
-      $movenums = count($this->moves);
-      if ( isset($this->moves[MOVE_SETUP]) ) // shape-game-setup
+      $movenums = count($moves);
+      if ( !$this->cond_moves && isset($moves[MOVE_SETUP]) ) // shape-game-setup
          $movenums--;
 
-      $is_relative = ($this->coord_borders & COORD_RELATIVE_MOVENUM);
-      $is_reverse  = ($this->coord_borders & COORD_REVERSE_MOVENUM);
       for ( $n=$end; $n>=$start; $n-- )
       {
-         if ( isset($this->moves[$n]) )
+         if ( isset($moves[$n]) )
          {
-            list( $s, $x, $y) = $this->moves[$n];
+            list( $s, $x, $y) = $moves[$n];
+            if ( $x == POSX_PASS )
+               continue;
             //if ( $s != BLACK && $s != WHITE ) continue;
             $sgfc = number2sgf_coords( $x, $y, $this->size);
             if ( $sgfc )
@@ -580,7 +615,7 @@ class Board
 
    public function draw_captures_box( $caption)
    {
-      if ( !is_array($this->captures) )
+      if ( !is_array($this->captures) || $this->cond_moves_errpos >= 0 )
          return false;
       $n= count($this->captures);
       if ( $n < 1 )
