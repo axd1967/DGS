@@ -22,6 +22,7 @@ $TranslateGroups[] = "Game";
 require_once 'include/globals.php';
 require_once 'include/db/games.php';
 require_once 'include/db/game_invitation.php';
+require_once 'include/db/move_sequence.php';
 require_once 'include/board.php';
 require_once 'include/rulesets.php';
 require_once 'include/rating.php';
@@ -1173,6 +1174,8 @@ class GameHelper
          "DELETE FROM GamesNotes WHERE gid=$gid" );
       db_query( "GameHelper:_delete_base_game_tables.movemsg($gid)",
          "DELETE FROM MoveMessages WHERE gid=$gid" );
+      db_query( "GameHelper:_delete_base_game_tables.cond_moves($gid)",
+         "DELETE FROM MoveSequence WHERE gid=$gid" );
       db_query( "GameHelper:_delete_base_game_tables.moves($gid)",
          "DELETE FROM Moves WHERE gid=$gid" );
       db_query( "GameHelper:_delete_base_game_tables.gameplayers($gid)",
@@ -1183,6 +1186,7 @@ class GameHelper
       // clear big-cache-entries to free cache-space
       DgsCache::delete_group( "GameHelper:_delete_base_game_tables.observers($gid)",
          CACHE_GRP_GAME_OBSERVERS, "Observers.$gid" );
+      MoveSequence::delete_cache_move_sequence( "GameHelper:_delete_base_game_tables.cond_moves($gid)", $gid );
       Board::delete_cache_game_moves( "GameHelper:_delete_base_game_tables.moves($gid)", $gid );
       Board::delete_cache_game_move_messages( "GameHelper:_delete_base_game_tables.movemsg($gid)", $gid );
       self::delete_cache_game_row( "GameHelper:_delete_base_game_tables.games($gid)", $gid );

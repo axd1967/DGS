@@ -2,4 +2,5 @@
 -----------
 # adjust 'include/config-local.php' reflecting changes
 # - added 'ALLOW_CONDITIONAL_MOVES'
+# - extended $DGS_CACHE_GROUPS with CACHE_GRP_COND_MOVES for caching conditional-moves
 

@@ -201,8 +201,11 @@ $GLOBALS['ThePage'] = new Page('Game');
    $my_game = ( $logged_in && ( $my_id == $Black_ID || $my_id == $White_ID ) );
    $is_mp_game = ( $GameType != GAMETYPE_GO );
 
-   $allow_cond_moves = ( ALLOW_CONDITIONAL_MOVES && !$is_mp_game && !$is_fairkomi_negotiation );
-   $cm_move_seq = ( $allow_cond_moves ) ? MoveSequence::load_last_move_sequence($gid, $my_id) : null;
+   // only for players and normal games (no FK, no MPG)
+   $allow_cond_moves = ( ALLOW_CONDITIONAL_MOVES && $my_game && !$is_mp_game && !$is_fairkomi_negotiation );
+   $cm_move_seq = ( $allow_cond_moves )
+      ? MoveSequence::load_cache_last_move_sequence( 'game', $gid, $my_id )
+      : null;
 
    $mpg_users = array();
    $mpg_active_user = null;

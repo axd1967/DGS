@@ -656,7 +656,7 @@ See "template" for new cache-group at end of this section.
      as caching would be a great danger of race-conditions or inaccurate data,
      which could be easily lead to inconsistencies.
 
-   - A cache-entry depends only the game-id.
+   - A cache-entry depends only on the game-id.
 
    - Cache-entries for cache-group CACHE_GRP_GAME_MOVES are invalidated
      on every occasion someone has to insert an entry into the 'Moves'-table
@@ -670,6 +670,24 @@ See "template" for new cache-group at end of this section.
    - Storing the moves can consume quite some space, therefore only a short
      time of 10 mins is chosen as expire-time, or even less with 5 mins for
      finished games or game in fair-komi-negotiation.
+
+
+* CACHE_GRP_COND_MOVES
+   - The game-page is frequently loaded to just browse the move-history
+     of a game by the same users within a shorter amount of time.
+     To reduce the db-load caching the conditional-moves that might exist for
+     the players are cached. For observers there are no conditional-moves,
+     that need to be loaded or cached.
+
+   - A cache-entry depends on the game-id and user-id, but for game-deletions
+     also a group-cache-entry is stored to invalidate cached conditional-moves
+     entries for both players.
+
+   - Cache-entries for this cache-group are invalidated on every edit or
+     moves played from the conditional-moves-sequence, i.e. an update
+     on the corresponding 'MoveSequence'-table.
+
+   - Expire-time of 1 hour is used.
 
 
 * CACHE_GRP_TOURNAMENT

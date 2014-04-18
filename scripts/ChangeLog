@@ -13,6 +13,17 @@ ChangeLog
 
 2014-04-18 jug
 
+   * include/db/move_sequence.php (MoveSequence.insert, ~.update, ~.load_cache_last_move_sequence, ~.delete_cache_move_sequence),
+     include/cache_globals.php (CACHE_GRP_COND_MOVES, $ARR_CACHE_GROUP_NAMES, $ARR_CACHE_GROUP_CLEANUP, $DGS_CACHE_GROUPS),
+     include/game_functions.php (GameHelper._delete_base_game_tables),
+     scripts/updates/other_changes_1_0_18.txt,
+     specs/caching.txt,
+     game.php:
+   - added caching for loading conditional-moves move-sequence on game-page
+     - invalidate conditional-moves-cache on actions: insert, update, game-deletion
+     - bugfix: allow and load conditional-moves on game-page only for players
+   - delete conditional-moves on game-deletion
+
    * include/db/move_sequence.php (MoveSequence.build_query_sql, ~.load_last_move_sequence,
        ~.load_last_move_sequences),
      include/conditional_moves.php (ConditionalMoves.get_nodes_start_move_sgf_coords),

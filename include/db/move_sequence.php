@@ -23,6 +23,7 @@ $TranslateGroups[] = "Game";
 
 require_once 'include/globals.php';
 require_once 'include/db_classes.php';
+require_once 'include/dgs_cache.php';
 require_once 'include/std_classes.php';
 
  /*!
@@ -104,6 +105,7 @@ class MoveSequence
       $result = $entityData->insert( "move_sequence.insert(%s)" );
       if ( $result )
          $this->ID = mysql_insert_id();
+      self::delete_cache_move_sequence( "move_sequence.insert({$this->gid},{$this->uid})", $this->gid, $this->uid );
       return $result;
    }
 
@@ -112,7 +114,9 @@ class MoveSequence
       $this->Lastchanged = $GLOBALS['NOW'];
 
       $entityData = $this->fillEntityData();
-      return $entityData->update( "move_sequence.update(%s)" );
+      $result = $entityData->update( "move_sequence.update(%s)" );
+      self::delete_cache_move_sequence( "move_sequence.update({$this->gid},{$this->uid})", $this->gid, $this->uid );
+      return $result;
    }
 
    public function fillEntityData( $data=null )
@@ -199,6 +203,36 @@ class MoveSequence
 
       return $iterator;
    }//load_move_sequences
+
+   /*!
+    * \brief Loads and returns latest MoveSequence-object (biggest ID) for given game-id and user-id from cache.
+    * \return NULL if nothing found; MoveSequence-object otherwise
+    */
+   public static function load_cache_last_move_sequence( $dbgmsg, $gid, $uid )
+   {
+      $dbgmsg = "MoveSequence:load_cache_last_move_sequence($gid,$uid).$dbgmsg";
+      $key = "CondMoves.$gid.$uid";
+
+      $move_seq = DgsCache::fetch( $dbgmsg, CACHE_GRP_COND_MOVES, $key );
+      if ( is_null($move_seq) )
+      {
+         $move_seq = self::load_last_move_sequence( $gid, $uid );
+         $cache_val = ( is_null($move_seq) ) ? 0 : $move_seq; // store NULL (=not-found) as 0 to differ from "not-cached"
+         DgsCache::store( $dbgmsg, CACHE_GRP_COND_MOVES, $key, $cache_val, SECS_PER_HOUR, "CondMoves.$gid" );
+      }
+      elseif ( is_numeric($move_seq) )
+         $move_seq = null;
+
+      return $move_seq;
+   }//load_cache_last_move_sequence
+
+   public static function delete_cache_move_sequence( $dbgmsg, $gid, $uid=0 )
+   {
+      if ( $uid <= 0 )
+         DgsCache::delete_group( $dbgmsg, CACHE_GRP_COND_MOVES, "CondMoves.$gid" );
+      else
+         DgsCache::delete( $dbgmsg, CACHE_GRP_COND_MOVES, "CondMoves.$gid.$uid" );
+   }
 
 } // end of 'MoveSequence'
 ?>
