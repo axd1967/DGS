@@ -137,10 +137,12 @@ class MoveSequence
    // ------------ static functions ----------------------------
 
    /*! \brief Returns db-fields to be used for query of MoveSequence-objects for given game-id. */
-   public static function build_query_sql( $gid )
+   public static function build_query_sql( $gid, $uid=0 )
    {
       $qsql = $GLOBALS['ENTITY_MOVE_SEQUENCE']->newQuerySQL('MS');
       $qsql->add_part( SQLP_WHERE, "MS.gid=$gid" );
+      if ( $uid > 0 )
+         $qsql->add_part( SQLP_WHERE, "MS.uid=$uid" );
       return $qsql;
    }//build_query_sql
 
@@ -163,6 +165,40 @@ class MoveSequence
          );
       return $move_seq;
    }//new_from_row
+
+   /*!
+    * \brief Loads and returns latest MoveSequence-object (biggest ID) for given game-id and user-id.
+    * \return NULL if nothing found; MoveSequence-object otherwise
+    */
+   public static function load_last_move_sequence( $gid, $uid )
+   {
+      $qsql = self::build_query_sql( $gid, $uid );
+      $qsql->add_part( SQLP_ORDER, 'MS.ID DESC' );
+      $qsql->add_part( SQLP_LIMIT, '1' );
+
+      $row = mysql_single_fetch( "MoveSequence:load_last_move_sequence.find_move_seq($gid,$uid)", $qsql->get_select() );
+      return ($row) ? self::new_from_row($row) : NULL;
+   }//load_last_move_sequence
+
+   /*! \brief Returns enhanced (passed) ListIterator with MoveSequence-objects. */
+   public static function load_move_sequences( $iterator, $gid, $uid=0 )
+   {
+      $qsql = self::build_query_sql( $gid, $uid );
+      $iterator->setQuerySQL( $qsql );
+      $query = $iterator->buildQuery();
+      $result = db_query( "MoveSequence:load_move_sequences", $query );
+      $iterator->setResultRows( mysql_num_rows($result) );
+
+      $iterator->clearItems();
+      while ( $row = mysql_fetch_array( $result ) )
+      {
+         $move_seq = self::new_from_row( $row );
+         $iterator->addItem( $move_seq, $row );
+      }
+      mysql_free_result($result);
+
+      return $iterator;
+   }//load_move_sequences
 
 } // end of 'MoveSequence'
 ?>

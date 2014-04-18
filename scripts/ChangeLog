@@ -13,6 +13,13 @@ ChangeLog
 
 2014-04-18 jug
 
+   * include/db/move_sequence.php (MoveSequence.build_query_sql, ~.load_last_move_sequence,
+       ~.load_last_move_sequences),
+     include/conditional_moves.php (ConditionalMoves.get_nodes_start_move_sgf_coords),
+     game.php (draw_conditional_moves_links, handle_conditional_moves, draw_conditional_moves_input):
+   - added show-mode and saving in edit-mode for conditional-moves
+     - disable edit-elements in show-mode, but allow previewing of variations
+
    * include/form_functions.php (Form.print_insert_textarea, ~.print_insert_submit_buttonx):
    - added additional attributes for printing textarea-element and default empty-attributes
      for print_insert_submit_buttonx()

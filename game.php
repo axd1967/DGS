@@ -50,6 +50,7 @@ require_once 'include/table_infos.php';
 require_once 'include/classlib_goban.php';
 require_once 'include/game_sgf_control.php';
 require_once 'include/conditional_moves.php';
+require_once 'include/db/move_sequence.php';
 require_once 'include/sgf_parser.php';
 if ( ALLOW_TOURNAMENTS ) {
    require_once 'tournaments/include/tournament_cache.php';
@@ -72,7 +73,9 @@ $GLOBALS['ThePage'] = new Page('Game');
      a=remove           : multiple input step, dead-stone-marking in scoring-mode
      a=resign           : show resign dialog -> confirm-page on submit
 
-     gid=&cma=action    : conditional-move action: add
+     gid=&cma=action    : conditional-move action: edit, show
+     gid=&cm_preview=   : preview cond-moves
+     gid=&cm_save=      : save cond-moves
 
      toggleobserve=y|n  : toggle observing game
      movechange=1&gotomove= : view selected move (for view-move selectbox)
@@ -197,7 +200,9 @@ $GLOBALS['ThePage'] = new Page('Game');
 
    $my_game = ( $logged_in && ( $my_id == $Black_ID || $my_id == $White_ID ) );
    $is_mp_game = ( $GameType != GAMETYPE_GO );
+
    $allow_cond_moves = ( ALLOW_CONDITIONAL_MOVES && !$is_mp_game && !$is_fairkomi_negotiation );
+   $cm_move_seq = ( $allow_cond_moves ) ? MoveSequence::load_last_move_sequence($gid, $my_id) : null;
 
    $mpg_users = array();
    $mpg_active_user = null;
@@ -296,7 +301,7 @@ $GLOBALS['ThePage'] = new Page('Game');
    if ( $allow_cond_moves )
    {
       list( $cm_sgf_parser, $cm_errors, $cm_var_names, $cond_moves ) =
-         handle_conditional_moves( $game_row, $cm_action, $TheBoard, $to_move, $my_id );
+         handle_conditional_moves( $cm_move_seq, $game_row, $cm_action, $TheBoard, $to_move, $my_id );
    }
 
    $extra_infos = array();
@@ -767,10 +772,10 @@ $GLOBALS['ThePage'] = new Page('Game');
       {
          if ( $allow_cond_moves )
          {
-            if ( $cm_action == 'add' )
-               draw_conditional_moves_input( $gform, $gid, $cm_sgf_parser, $cm_errors, $cond_moves, $cm_var_names );
+            if ( $cm_action == 'edit' || $cm_action == 'show' )
+               draw_conditional_moves_input( $gform, $gid, $my_id, $cm_action, $cm_move_seq, $cm_sgf_parser, $cm_errors, $cond_moves, $cm_var_names );
             else
-               draw_conditional_moves_links( $gid );
+               draw_conditional_moves_links( $gid, $my_id, $cm_move_seq );
          }
 
          draw_moves( $gid, $arg_move, $game_row['Handicap'] );
@@ -1623,29 +1628,42 @@ function draw_fairkomi_negotiation( $my_id, &$form, $grow, $game_setup )
 }//draw_fairkomi_negotiation
 
 
-function draw_conditional_moves_links( $gid )
+function draw_conditional_moves_links( $gid, $my_id, $move_seq )
 {
    global $base_path;
    $link_base = $base_path."game.php?gid=$gid".URI_AMP.'cma=';
+   $has_cm = !is_null($move_seq);
 
    echo T_('Conditional moves'), ': ';
-   echo anchor( $link_base.'add', T_('Add#condmoves') );
+   if ( $has_cm )
+      echo anchor( $link_base.'show', T_('Show#condmoves') ), SEP_MEDSPACING;
+   if ( $has_cm )
+      echo anchor( $link_base.'edit', T_('Edit#condmoves') );
+   else
+      echo anchor( $link_base.'edit', T_('Add#condmoves') );
    echo "<br><br>\n";
 }//draw_conditional_moves_links
 
 
-function handle_conditional_moves( $game_row, $cm_action, &$board, $to_move, $my_id )
+function handle_conditional_moves( $move_seq, $game_row, $cm_action, &$board, $to_move, $my_id )
 {
    $gid = $game_row['ID'];
    $Size = $game_row['Size'];
    $my_col = ($game_row['Black_ID'] == $my_id) ? BLACK : WHITE;
    $last_move_col = ($to_move == BLACK) ? WHITE : BLACK;
 
-   $cond_moves = get_request_arg('cond_moves');
    $var_view = get_request_arg('cm_var_view', '1');
 
-   $var_names = array();
-   $reformat = false;
+   $db_cond_moves = '';
+   if ( !is_null($move_seq) )
+   {
+      $db_cond_moves = $move_seq->Sequence;
+      $check_nodes = true;
+   }
+   else
+      $check_nodes = false;
+   $cond_moves = get_request_arg('cond_moves', $db_cond_moves);
+
    if ( @$_REQUEST['cma_upload'] && isset($_FILES['cm_sgf_file']) ) // upload SGF from file
    {
       list( $errors, $sgf_data, $game_sgf_parser ) =
@@ -1654,14 +1672,15 @@ function handle_conditional_moves( $game_row, $cm_action, &$board, $to_move, $my
       {
          // re-parse conditional-moves part for input-box
          $cond_moves = SgfParser::sgf_builder( array( $game_sgf_parser->extra_nodes ), '');
-         $reformat = true;
+         $check_nodes = true;
       }
    }
    else
       $errors = array();
 
+   $var_names = array();
    $sgf_parser = new SgfParser( SGFP_OPT_SKIP_ROOT_NODE );
-   if ( (@$_REQUEST['preview'] || $reformat) && $cond_moves )
+   if ( $cond_moves && ( $check_nodes || @$_REQUEST['cm_preview'] || @$_REQUEST['cm_save'] ) )
    {
       $cond_moves = ConditionalMoves::reformat_to_sgf( $cond_moves, $Size, ($to_move == BLACK) );
       if ( $sgf_parser->parse_sgf($cond_moves) )
@@ -1670,7 +1689,7 @@ function handle_conditional_moves( $game_row, $cm_action, &$board, $to_move, $my
          list( $errors, $var_names ) =
             ConditionalMoves::check_nodes_cond_moves( $extra_nodes, $Size, $my_col, $last_move_col );
 
-         if ( @$_REQUEST['preview'] && $var_view && count($errors) == 0 )
+         if ( @$_REQUEST['cm_preview'] && $var_view && count($errors) == 0 )
          {
             $result = ConditionalMoves::extract_variation( $extra_nodes, $var_view, $Size );
             if ( is_array($result) )
@@ -1686,15 +1705,40 @@ function handle_conditional_moves( $game_row, $cm_action, &$board, $to_move, $my
 
          //echo "<pre>", SgfParser::sgf_builder( array( $extra_nodes ), ''), "</pre><br><br>\n";
          //echo "<pre>-----", print_r($extra_nodes, true), "</pre>\n";
+
+         if ( @$_REQUEST['cm_save'] && count($errors) == 0 )
+         {
+            $cm_id = ( is_null($move_seq) ) ? 0 : $move_seq->ID; // NEW or EDIT
+            $cm_flags = 0;
+            $cm_active = get_request_arg('cm_active', 0); //TODO
+            $cm_private = get_request_arg('cm_private', 0);
+            if ( $cm_private )
+               $cm_flags |= MSEQ_FLAG_PRIVATE;
+
+            $cm_start_move_nr = $game_row['Moves'] + 1;
+            $cm_start_move = ConditionalMoves::get_nodes_start_move_sgf_coords( $extra_nodes, $Size );
+
+            $cm_moveseq = new MoveSequence( $cm_id, $gid, $my_id, MSEQ_STATUS_INACTIVE, $cm_flags,
+               $cm_start_move_nr, $cm_start_move, $cm_start_move_nr, 1, $cm_start_move, $cond_moves );
+
+            ta_begin();
+            {//HOT-section to save conditional-moves
+               $cm_moveseq->persist();
+            }
+            ta_end();
+         }
       }
    }
 
    return array( $sgf_parser, $errors, $var_names, $cond_moves );
 }//handle_conditional_moves
 
-function draw_conditional_moves_input( &$gform, $gid, $sgf_parser, $errors, $cond_moves, $var_names )
+function draw_conditional_moves_input( &$gform, $gid, $my_id, $cm_action, $move_seq, $sgf_parser, $errors, $cond_moves, $var_names )
 {
    global $base_path;
+   $is_show = ( $cm_action == 'show' );
+   $has_cm = !is_null($move_seq);
+   $attbs_disabled = ( $is_show ) ? 'disabled=1' : '';
 
    $var_view = get_request_arg('cm_var_view', '1');
    $cm_active = get_request_arg('cm_active', 0);
@@ -1725,20 +1769,27 @@ function draw_conditional_moves_input( &$gform, $gid, $sgf_parser, $errors, $con
          '<TD class=Rubric>', T_('Conditional moves'), ":</TD>\n",
          '<TD colspan="2">',
             anchor( $base_path."sgf.php?gid=$gid".URI_AMP."cm=1", T_('Download SGF with conditional moves')),
+            ( $has_cm && $is_show
+               ? SEP_MEDSPACING . anchor( $base_path."game.php?gid=$gid".URI_AMP.'cma=edit', T_('Edit#condmoves'))
+               : '' ),
          "</TD>\n",
-      '</TR>',
-      "<TR>\n",
-         "<TD></TD>\n",
-         '<TD colspan="2">',
-            $gform->print_insert_file( 'cm_sgf_file', 12, SGF_MAXSIZE_UPLOAD, 'application/x-go-sgf', true ),
-            MED_SPACING,
-            $gform->print_insert_submit_button( 'cma_upload', T_('Upload SGF with conditional moves') ),
-         "</TD>\n",
-      '</TR>',
+      '</TR>';
+   if ( !$is_show )
+   {
+      echo "<TR>\n",
+            "<TD></TD>\n",
+            '<TD colspan="2">',
+               $gform->print_insert_file( 'cm_sgf_file', 12, SGF_MAXSIZE_UPLOAD, 'application/x-go-sgf', true ),
+               MED_SPACING,
+               $gform->print_insert_submit_button( 'cma_upload', T_('Upload SGF with conditional moves') ),
+            "</TD>\n",
+         '</TR>';
+   }
+   echo
       "<TR>\n",
          '<TD class=Rubric>', span('smaller', T_('Edit sequence')), ":</TD>\n",
          '<TD colspan="2">',
-            $gform->print_insert_textarea( 'cond_moves', 80, 3, $cond_moves ),
+            $gform->print_insert_textarea( 'cond_moves', 80, 3, $cond_moves, $attbs_disabled ),
          "</TD>\n",
       '</TR>',
       "<TR class=Vars>\n",
@@ -1746,22 +1797,22 @@ function draw_conditional_moves_input( &$gform, $gid, $sgf_parser, $errors, $con
          '<TD>', $var_views_str, "</TD>\n",
          '<TD class="Preview">',
             $gform->print_insert_text_input( 'cm_var_view', 6, 16, $var_view ),
-            $gform->print_insert_submit_buttonx( 'preview', T_('Preview variation#condmoves'),
+            $gform->print_insert_submit_buttonx( 'cm_preview', T_('Preview variation#condmoves'),
                   array( 'accesskey' => ACCKEY_ACT_PREVIEW, 'title' => '[&amp;'.ACCKEY_ACT_PREVIEW.']' )),
          "</TD>\n",
       '</TR>',
       "<TR class=Attr>\n",
          '<TD class=Rubric>', T_('Attributes#condmoves'), ":</TD>\n",
          '<TD colspan="2">',
-            $gform->print_insert_checkbox( 'cm_active', '1', T_('Active#condmoves'), $cm_active ),
+            $gform->print_insert_checkbox( 'cm_active', '1', T_('Active#condmoves'), $cm_active, $attbs_disabled ),
             SMALL_SPACING, SMALL_SPACING,
-            $gform->print_insert_checkbox( 'cm_private', '1', T_('Private (after game finished)#condmoves'), $cm_private ),
+            $gform->print_insert_checkbox( 'cm_private', '1', T_('Private (after game finished)#condmoves'), $cm_private, $attbs_disabled ),
          "</TD>\n",
       '</TR>',
       "<TR class=Submit>\n",
          "<TD></TD>\n",
          '<TD>',
-            $gform->print_insert_submit_button( 'cm_save', T_('Save conditional moves') ),
+            $gform->print_insert_submit_buttonx( 'cm_save', T_('Save conditional moves'), $attbs_disabled ),
          "</TD>\n",
          '<TD class="Cancel">',
             $gform->print_insert_submit_button( 'cancel', T_('Cancel') ),

@@ -390,7 +390,7 @@ class ConditionalMoves
    }//extract_variation
 
    /*!
-    * \brief Plays conditional moves on board.
+    * \brief Plays conditional moves on board for showing all of them for preview.
     * \return ''=success; else illegal-move-error
     */
    public static function add_played_conditional_moves_on_board( &$board, $moves, $size )
@@ -433,6 +433,42 @@ class ConditionalMoves
 
       return $error;
    }//add_played_conditional_moves_on_board
+
+   /*!
+    * \brief Returns start-move in parsed conditional-moves.
+    * \param $cm_nodes array with SgfNode-entries (and without parsing-errors)
+    * \return '' (=PASS), or else sgf-coord of 1st move in conditional-moves
+    */
+   public static function get_nodes_start_move_sgf_coords( $cm_nodes, $size )
+   {
+      if ( count($cm_nodes) == 0 )
+         error('invalid_args', "CM.get_nodes_start_move_sgf_coords.check.miss_cond_moves($size)");
+
+      $node = $cm_nodes[0];
+      if ( !( $node instanceof SgfNode ) )
+         error('invalid_args', "CM.get_nodes_start_move_sgf_coords.check.bad_node($size,$node)");
+
+      if ( isset($node->props['B']) )
+         $coord = $node->props['B'][0];
+      elseif ( isset($node->props['W']) )
+         $coord = $node->props['W'][0];
+      else
+         error('invalid_args', "CM.get_nodes_start_move_sgf_coords.check.miss_BW_move($size,".$node->get_props_text().")");
+
+      if ( (string)$coord == '' || ($size <= 19 && $coord == 'tt') )
+         $move = ''; // PASS
+      elseif ( is_valid_sgf_coords($coord, $size) )
+         $move = $coord;
+      elseif ( is_valid_board_coords($coord, $size) )
+      {
+         list( $x, $y ) = board2number_coords( $coord, $size );
+         $move = number2sgf_coords( $x, $y, $size );
+      }
+      else
+         error('invalid_args', "CM.get_nodes_start_move_sgf_coords($size,$coord)");
+
+      return $move;
+   }//get_nodes_start_move_sgf_coords
 
 } //end 'ConditionalMoves'
 
