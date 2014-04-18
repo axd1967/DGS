@@ -1653,6 +1653,8 @@ function handle_conditional_moves( $move_seq, $game_row, $cm_action, &$board, $t
    $last_move_col = ($to_move == BLACK) ? WHITE : BLACK;
 
    $var_view = get_request_arg('cm_var_view', '1');
+   if ( !$var_view )
+      $var_view = '1';
 
    $db_cond_moves = '';
    if ( !is_null($move_seq) )
@@ -1662,7 +1664,7 @@ function handle_conditional_moves( $move_seq, $game_row, $cm_action, &$board, $t
    }
    else
       $check_nodes = false;
-   $cond_moves = get_request_arg('cond_moves', $db_cond_moves);
+   $cond_moves = trim( get_request_arg('cond_moves', $db_cond_moves) );
 
    if ( @$_REQUEST['cma_upload'] && isset($_FILES['cm_sgf_file']) ) // upload SGF from file
    {
@@ -1677,6 +1679,9 @@ function handle_conditional_moves( $move_seq, $game_row, $cm_action, &$board, $t
    }
    else
       $errors = array();
+
+   if ( !$cond_moves && ( @$_REQUEST['cm_preview'] || @$_REQUEST['cm_save'] ) )
+      $errors[] = T_('Missing conditional moves.');
 
    $var_names = array();
    $sgf_parser = new SgfParser( SGFP_OPT_SKIP_ROOT_NODE );
@@ -1740,9 +1745,14 @@ function draw_conditional_moves_input( &$gform, $gid, $my_id, $cm_action, $move_
    $has_cm = !is_null($move_seq);
    $attbs_disabled = ( $is_show ) ? 'disabled=1' : '';
 
+   if ( is_null($move_seq) )
+      $move_seq = new MoveSequence( 0, $gid, $my_id );
+
    $var_view = get_request_arg('cm_var_view', '1');
-   $cm_active = get_request_arg('cm_active', 0);
-   $cm_private = get_request_arg('cm_private', 0);
+   if ( !$var_view )
+      $var_view = '1';
+   $cm_active = get_request_arg('cm_active', ( ($move_seq->Status == MSEQ_STATUS_ACTIVE) ? 1 : 0) );
+   $cm_private = get_request_arg('cm_private', ( ($move_seq->Flags & MSEQ_FLAG_PRIVATE) ? 1 : 0) );
 
    $var_views_str = implode(' , ', $var_names);
 
@@ -1763,6 +1773,8 @@ function draw_conditional_moves_input( &$gform, $gid, $my_id, $cm_action, $move_
             '<TD colspan="2">', implode("<br>\n", $errors), "<br><br>\n", "</TD>\n",
          '</TR>';
    }
+
+   $cm_lines = max( 1, min( 4, max( (int)(strlen($cond_moves)/60) + 1, substr_count($cond_moves, "\n") ) ) );
 
    echo
       "<TR>\n",
@@ -1789,7 +1801,7 @@ function draw_conditional_moves_input( &$gform, $gid, $my_id, $cm_action, $move_
       "<TR>\n",
          '<TD class=Rubric>', span('smaller', T_('Edit sequence')), ":</TD>\n",
          '<TD colspan="2">',
-            $gform->print_insert_textarea( 'cond_moves', 80, 3, $cond_moves, $attbs_disabled ),
+            $gform->print_insert_textarea( 'cond_moves', 80, $cm_lines, $cond_moves, $attbs_disabled ),
          "</TD>\n",
       '</TR>',
       "<TR class=Vars>\n",
