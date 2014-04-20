@@ -202,7 +202,8 @@ $GLOBALS['ThePage'] = new Page('Game');
    $is_mp_game = ( $GameType != GAMETYPE_GO );
 
    // only for players and normal games (no FK, no MPG)
-   $allow_cond_moves = ( ALLOW_CONDITIONAL_MOVES && $my_game && !$is_mp_game && !$is_fairkomi_negotiation );
+   $allow_cond_moves = ( ALLOW_CONDITIONAL_MOVES && $my_game && !$is_mp_game && !$is_fairkomi_negotiation
+         && $Status != GAME_STATUS_FINISHED );
    $cm_move_seq = ( $allow_cond_moves )
       ? MoveSequence::load_cache_last_move_sequence( 'game', $gid, $my_id )
       : null;
@@ -1676,7 +1677,7 @@ function handle_conditional_moves( $move_seq, $game_row, $cm_action, &$board, $t
       if ( count($errors) == 0 )
       {
          // re-parse conditional-moves part for input-box
-         $cond_moves = SgfParser::sgf_builder( array( $game_sgf_parser->extra_nodes ), '');
+         $cond_moves = SgfParser::sgf_builder( array( $game_sgf_parser->extra_nodes ), '' );
          $check_nodes = true;
       }
    }
@@ -1783,7 +1784,7 @@ function draw_conditional_moves_input( &$gform, $gid, $my_id, $cm_action, $move_
       "<TR>\n",
          '<TD class=Rubric>', T_('Conditional moves'), ":</TD>\n",
          '<TD colspan="2">',
-            anchor( $base_path."sgf.php?gid=$gid".URI_AMP."cm=1", T_('Download SGF with conditional moves')),
+            anchor( $base_path."sgf.php?gid=$gid".URI_AMP."cm=1".URI_AMP."no_cache=1", T_('Download SGF with conditional moves')),
             ( $has_cm && $is_show
                ? SEP_MEDSPACING . anchor( $base_path."game.php?gid=$gid".URI_AMP.'cma=edit', T_('Edit#condmoves'))
                : '' ),
