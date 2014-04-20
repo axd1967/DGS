@@ -11,6 +11,13 @@ Release [2014-03-27] - DGS 1.0.17 - tag [release-1_0_17-20140327] on branch [DGS
 ChangeLog
 ------------------------------------------------------------------
 
+2014-04-19 jug
+
+   * include/sgf_parser.php (SgfParser.sgf_builder, ~.sgf_convert_move_to_board_coords,
+       ~.sgf_convert_move_to_sgf_coords):
+   - added callback on SGF-builder-function to convert SGF-property-values for moves
+     to SGF- or board-coordinates
+
 2014-04-18 jug
 
    * include/db/move_sequence.php (MoveSequence.insert, ~.update, ~.load_cache_last_move_sequence, ~.delete_cache_move_sequence),

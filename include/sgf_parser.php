@@ -343,7 +343,7 @@ class SgfParser
    // In short, it does the opposite of sgf_parser()
    // \return built sgf-data
    // NOTE: not used, but keep it for debugging-purposes
-   public static function sgf_builder( $games, $sep="\r\n" )
+   public static function sgf_builder( $games, $sep="\r\n", $convert_node_func=null, $convert_extra_arg=null )
    {
       $sgf = '';
 
@@ -374,7 +374,10 @@ class SgfParser
 
             $sgf .= SGF_NOD_BEG.$sep;
             //a node is a SgfNode-object with an array of properties
-            foreach ( $node->props as $key => $args )
+            $conv_node = (is_null($convert_node_func))
+               ? $node
+               : call_user_func( $convert_node_func, $node, $convert_extra_arg );
+            foreach ( $conv_node->props as $key => $args )
             {
                $sgf .= $key;
                foreach ( $args as $arg )
@@ -386,6 +389,49 @@ class SgfParser
 
       return $sgf;
    }//sgf_builder
+
+   /*!
+    * \brief callback-function for sgf_builder() to convert B/W-moves in SgfNode-object to board-coordinates (+ use '' for PASS-move).
+    * \return modified SgfNode-object
+    */
+   public static function sgf_convert_move_to_board_coords( $sgf_node, $size )
+   {
+      foreach( $sgf_node->props as $prop => $values )
+      {
+         if ( $prop == 'B' || $prop == 'W' )
+         {
+            $coord = $values[0];
+            if ( (string)$coord == '' || ( $size <= 19 && $coord == 'tt' ) )
+               $sgf_node->props[$prop][0] = '';
+            elseif ( (string)$coord != '' && is_valid_sgf_coords($coord, $size) )
+               $sgf_node->props[$prop][0] = sgf2board_coords($coord, $size);
+         }
+      }
+      return $sgf_node;
+   }//sgf_convert_move_to_board_coords
+
+   /*!
+    * \brief callback-function for sgf_builder() to convert B/W-moves in SgfNode-object to sgf-coordinates (+ use '' for PASS-move).
+    * \return modified SgfNode-object
+    */
+   public static function sgf_convert_move_to_sgf_coords( $sgf_node, $size )
+   {
+      foreach( $sgf_node->props as $prop => $values )
+      {
+         if ( $prop == 'B' || $prop == 'W' )
+         {
+            $coord = $values[0];
+            if ( (string)$coord == '' || ( $size <= 19 && $coord == 'tt' ) )
+               $sgf_node->props[$prop][0] = '';
+            elseif ( (string)$coord != '' && is_valid_board_coords($coord, $size) )
+            {
+               list( $x, $y ) = board2number_coords($coord, $size);
+               $sgf_node->props[$prop][0] = number2sgf_coords($x, $y, $size);
+            }
+         }
+      }
+      return $sgf_node;
+   }//sgf_convert_move_to_sgf_coords
 
 } //end 'SgfParser'
 
