@@ -13,6 +13,19 @@ ChangeLog
 
 2014-04-19 jug
 
+   * include/sgf_builder.php (SgfBuilder.sgf_echo_prop, ~.sgf_echo_comment, ~.sgf_echo_point,
+       ~.build_sgf_start, ~.build_sgf_moves, ~.build_sgf_result, ~.sgf_simpletext):
+   - cleanup and simplified generating SGF in preparation for merging in conditional-moves
+     - sgf_echo_prop() also outputs SGF-property-values to later use building full SGF-node at one place
+     - refactored sgf_echo_point() to easier & clearer output with full SGF-node and list of prop-values
+     - removed redundant code for sgf_echo_comment() using extended sgf_simpletext()-function
+     - replaced output of separated property- and value part into output of full SGF-node
+       using only one call of sgf_echo_prop()
+     - replaced output of single node-start while looping over moves by using 'force_node'-prop_type
+       in next call of sgf_echo_prop()
+     - used array-mode for str_replace() to avoid calling it twice
+     - bugfix: added SGF-text-escaping for shape-info in general comments
+
    * include/sgf_parser.php (SgfParser.sgf_builder, ~.sgf_convert_move_to_board_coords,
        ~.sgf_convert_move_to_sgf_coords):
    - added callback on SGF-builder-function to convert SGF-property-values for moves
