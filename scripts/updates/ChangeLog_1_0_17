@@ -6,8 +6,20 @@ Release [2014-03-27] - DGS 1.0.17 - tag [release-1_0_17-20140327] on (later) bra
 2014-04-03: various updates with bug-fixes and smaller improvements (by JUG) as DGS 1.0.17.b
 2014-04-09: updates & bugfixes (by JUG) as DGS 1.0.17.c
 2014-04-10: closing release, added snapshot (by JUG) as DGS 1.0.17.d
+2014-04-21: bugfixes (by JUG) as DGS 1.0.17.e
 
 ==================================================================
+
+### ----- release-1_0_17-20140421 -----
+
+2014-04-21 jug
+
+   * tournaments/include/tournament_pool_classes.php (PoolRankCalculator.calc_ranks):
+   - bugfixes: fixed rank-calculation applying tie-breakers
+     - missed shifting down rank of multiple same-rank-user-subgroups needing tie-breaker
+       due to skipped inbetween one-item sub-groups without tie-break
+     - restart partly successful tie-breaking of same-rank-user-subgroup till no users are tied
+       any more or there are no more tie-breakers
 
 ### ----- release-1_0_17-20140410 -----
 

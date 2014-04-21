@@ -206,7 +206,7 @@ class PoolRankCalculator
       // Note on algorithm:
       // - if more tie-breakers must be applied, identify sub-groups with same-rank
       //   and apply tie-breaking on those recursively (without recursion)
-      $arr_stop_tiebreak = array(); // [ uid => 1, ...]: no tie-breaking if set for uid
+      $arr_stop_tiebreak = array(); // [ uid => 1, ...]: no tie-breaking needed if set for uid
       $max_tiebreaker = self::get_tiebreaker(null) - 1;
       for ( $tie_level++; $tie_level <= $max_tiebreaker; $tie_level++ )
       {
@@ -216,43 +216,43 @@ class PoolRankCalculator
          if ( is_null($same_ranks) ) // completely ordered = all ranks appear only once
             break;
 
+         $next_rank = 0; // to "shift" lower ranks down after determining in-between ranks with tie-breakers
+         // NOTE: to make the "shifting" work, $same_ranks must be ordered(!) with highest rank (0) as 1st item
          foreach ( $same_ranks as $arr_users ) // tie-break subgroups with same rank
          {
-            $stop_tiebreaking = true;
-            if ( count($arr_users) > 1 ) // subgroup only if >1 members
-            {
-               // set ranks (starting with 0) for subgroup of users
-               $groupuser_ranks = self::build_user_ranks( $arr_tpools,
-                  array_keys($arr_users), self::get_tiebreaker($tie_level) );
-               if ( count( array_count_values($groupuser_ranks) ) > 1 ) // tie-breaking successful
-               {
-                  // adjust ranks in main-result for new-ranks (make "hole" by increasing remaining ranks)
-                  $same_rank_val = current( $arr_users );
-                  $max_rank_new = max( $groupuser_ranks );
-                  foreach ( $user_ranks as $uid => $rank )
-                  {
-                     if ( $rank > $same_rank_val )
-                        $user_ranks[$uid] += $max_rank_new;
-                  }
-
-                  // copy new ranks to main-result $user_ranks
-                  foreach ( $groupuser_ranks as $uid => $rank_new )
-                     $user_ranks[$uid] = $same_rank_val + $rank_new;
-               }
-               else // tie-breaking failed for current tie-breaker (still a draw)
-               {
-                  if ( $tie_level >= $max_tiebreaker )
-                     $stop_tiebreaking = false; // continue tie-breaking if there are more tie-breakers
-               }
-            }
-
-            if ( $stop_tiebreaking )
+            if ( count($arr_users) < 1 ) // subgroup with only 1 member
             {
                foreach ( $arr_users as $uid => $rank )
+               {
+                  $user_ranks[$uid] = $next_rank++;
                   $arr_stop_tiebreak[$uid] = 1;
+               }
             }
-         }
-      }
+            else // subgroup with >1 members
+            {
+               // set ranks (starting with 0) for subgroup of users applying tie-breaker
+               $groupuser_ranks = self::build_user_ranks( $arr_tpools,
+                  array_keys($arr_users), self::get_tiebreaker($tie_level) );
+               $group_rank_counts = array_count_values($groupuser_ranks);
+               if ( count( $group_rank_counts ) > 1 ) // tie-breaking successful (complete or partly)
+               {
+                  foreach ( $groupuser_ranks as $uid => $rank_new ) // set new ranks in main-result
+                  {
+                     $user_ranks[$uid] = $next_rank + $rank_new;
+                     if ( $group_rank_counts[$rank_new] <= 1 ) // if >1 tie-breaking was only partly successful
+                        $arr_stop_tiebreak[$uid] = 1;
+                  }
+                  $next_rank += max( $groupuser_ranks ) + 1;
+               }
+               else // tie-breaking failed with current tie-breaker (still a draw for all sub-group-users)
+               {
+                  foreach ( $groupuser_ranks as $uid => $rank_new )
+                     $user_ranks[$uid] = $next_rank;
+                  $next_rank++;
+               }
+            }
+         }//loop same-rank-user-subgroups
+      }//loop tie-breakers
 
       // copy final ranks into TPool->CalcRank for given users
       foreach ( $user_ranks as $uid => $rank )
