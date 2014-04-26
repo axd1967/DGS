@@ -11,6 +11,17 @@ Release [2014-03-27] - DGS 1.0.17 - tag [release-1_0_17-20140327] on branch [DGS
 ChangeLog
 ------------------------------------------------------------------
 
+2014-04-26 jug
+
+   * include/globals.php (HOSTBASE),
+     include/mail_functions.php, include/config.php,
+     scripts/updates/other_changes_1_0_18.txt,
+     goodies/index.php, rss/status.php, wap/status.php,
+     docs.php, donation.php, install.php, quick_status.php, NEWS, INSTALL:
+   - adjusted pages to use web-protocol http or secure https for subsequent pages
+     like in original server-request
+     - moved HOSTBASE-define from include/config*.php to include/globals.php
+
 2014-04-21 jug
 
    * tournaments/include/tournament_pool_classes.php (PoolRankCalculator.calc_ranks):

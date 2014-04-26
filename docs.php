@@ -46,7 +46,7 @@ $GLOBALS['ThePage'] = new Page('Docs', 0, ROBOTS_NO_FOLLOW,
    add_link_page_link("people.php", T_('People'), T_("who contributes to Dragon"));
 
    $arr_stats = array( "statistics.php" => T_('Statistics') );
-   if ( strpos(HOSTBASE,'dragongoserver.net') !== false )
+   if ( strpos(HOSTNAME,'dragongoserver.net') !== false )
       $arr_stats[HOSTBASE.'stat/'] = T_('Web-Statistics');
    $arr_stats["translation_stats.php"] = T_('Translation-Statistics');
    add_link_page_link( $arr_stats, ', ', T_("Statistics about Dragon"));

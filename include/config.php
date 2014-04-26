@@ -15,12 +15,6 @@ define('FRIENDLY_LONG_NAME', 'Dragon Go Server');
 define('FRIENDLY_SHORT_NAME', 'DGS');
 
 
-// This is the main url. If the main page is, e.g.,
-// http://www.some_domain.com/~my_dir/index.php
-// set HOSTBASE = "http://www.some_domain.com/~my_dir/";
-
-define('HOSTBASE', 'http://localhost/');
-
 // This is the server name. If the main page is, e.g.,
 // http://www.some_domain.com/~my_dir/index.php
 // http://www.some_domain.com/index.php
@@ -35,8 +29,6 @@ define('HOSTNAME', 'localhost');
 // set $SUB_PATH = "/~my_dir/";
 
 define('SUB_PATH', '/');
-
-// Then you should have: HOSTBASE = "http://" . $HOSTNAME . $SUB_PATH;
 
 
 // From address for notification emails

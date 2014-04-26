@@ -134,7 +134,7 @@ else
    {
       warning('excessive_usage',
          "quick_status.returning_cached_data($uhandle)" .
-         ".see_faq[http://www.dragongoserver.net/faq.php?read=t&cat=15#Entry302]");
+         ".see_faq[".HOSTBASE."faq.php?read=t&cat=15#Entry302]");
       writeIpStats('QSTC'); // cached
    }
    else

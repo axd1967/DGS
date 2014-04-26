@@ -36,7 +36,7 @@ require_once 'include/std_functions.php';
    //$contents = implode('', file ('INSTALL'));
    $contents= @read_from_file('INSTALL');
    $contents = @htmlentities($contents, ENT_QUOTES);
-   $contents = preg_replace("%&lt;(http://.*?)&gt;%is", "(<a href=\"\\1\">\\1</a>)", $contents);
+   $contents = preg_replace("%&lt;(https?://.*?)&gt;%is", "(<a href=\"\\1\">\\1</a>)", $contents);
    echo $contents;
 
    echo "</pre>\n";

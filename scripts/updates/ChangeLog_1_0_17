@@ -7,8 +7,21 @@ Release [2014-03-27] - DGS 1.0.17 - tag [release-1_0_17-20140327] on (later) bra
 2014-04-09: updates & bugfixes (by JUG) as DGS 1.0.17.c
 2014-04-10: closing release, added snapshot (by JUG) as DGS 1.0.17.d
 2014-04-21: bugfixes (by JUG) as DGS 1.0.17.e
+2014-04-26: updates (by JUG) as DGS 1.0.17.f
 
 ==================================================================
+
+### ----- release-1_0_17-20140426 -----
+
+2014-04-26 jug
+
+   * include/globals.php (HOSTBASE),
+     include/mail_functions.php, include/config.php,
+     scripts/updates/other_changes_1_0_16_to_1_0_17.txt,
+     goodies/index.php, rss/status.php, wap/status.php,
+     docs.php, donation.php, install.php, quick_status.php, NEWS, INSTALL:
+   - adjusted pages to use web-protocol http or secure https for subsequent pages
+     like in original server-request (sync'ed from dev-branch)
 
 ### ----- release-1_0_17-20140421 -----
 

@@ -34,7 +34,7 @@ require_once 'include/std_functions.php';
 
    $donate_url = ( ENABLE_DONATIONS )
        ? 'https://www.paypal.com/cgi-bin/webscr'
-       : 'http://www.dragongoserver.net/forum/read.php?forum=1&thread=24242'; // thx, goal-reached
+       : HOSTBASE.'forum/read.php?forum=1&thread=24242'; // thx, goal-reached
 
    echo
       "<center>\n",

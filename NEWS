@@ -164,6 +164,8 @@ Copyright (C) 2001-2014  Erik Ouchterlony, Jens-Uwe Gaspar
    * Shared memory caching using APC cache:
       * Added caching to load tournament-points, tournament-pools, tournament-results
 
+   * Adjusted site to better support https
+
 
    Administrative changes:
 

@@ -370,7 +370,7 @@ else
       rss_open( "[DISABLED] $channel_title", $channel_description, HOSTBASE.'status.php' );
 
       $tit = sprintf( T_('%s-Status of [%s] temporarily disabled due to excessive usage!#alt'), 'RSS', $uhandle );
-      $lnk = "http://www.dragongoserver.net/faq.php?read=t&cat=15#Entry302"; // FAQ-entry on quota/responsible-user
+      $lnk = HOSTBASE."faq.php?read=t&cat=15#Entry302"; // FAQ-entry on quota/responsible-user
       $dsc = array(
             sprintf( T_('Please follow the link, read the FAQ entry and re-configure your %s configuration accordingly.#alt'), 'RSS'),
             T_('Please do it as soon as possible to reduce the stress on the server.#alt'),

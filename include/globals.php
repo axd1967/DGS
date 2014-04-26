@@ -35,6 +35,9 @@ define('QUICK_SUITE_VERSION', DGS_VERSION.':'.QUICK_VERSION);
 
 // ---------- General stuff----------------------------------------
 
+// preserve protocol http|https in main-URL HOSTBASE
+define('HOSTBASE', ( @$_SERVER['HTTPS'] ? 'https://' : 'http://' ) . HOSTNAME . SUB_PATH);
+
 define('NO_VALUE', '---');
 define('UNKNOWN_VALUE', '???');
 

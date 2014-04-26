@@ -75,10 +75,7 @@ $GLOBALS['ThePage'] = new Page('Goodies', 0, ROBOTS_NO_FOLLOW,
       preg_match($r, $txt, $m);
       $infos = @$m[1];
       $infos = trim($infos, "\n\r");
-      $infos = preg_replace(
-         '%(http://[^\\s]+)%is',
-         "<a href='\\1'>\\1</a>",
-         $infos);
+      $infos = preg_replace( '%(https?://[^\\s]+)%is', "<a href='\\1'>\\1</a>", $infos);
 
       $txt = '';
       $str = "- $description\n";

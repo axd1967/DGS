@@ -8,6 +8,7 @@ copy /images/no_result.gif
 # - extended $DGS_CACHE_GROUPS with CACHE_GRP_TPOINTS for caching tournament-points
 # - extended $DGS_CACHE_GROUPS with CACHE_GRP_TPOOLS for caching tournament-pools
 # - allow round-robin-tournaments in 'ALLOW_TOURNAMENTS'-config
+# - removed 'HOSTBASE' by setting it automatically
 
 -----------
 # shorten '#'-texts for tournaments, esp. 'Consecutive Wins#header' -> '#CW',

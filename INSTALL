@@ -7,7 +7,7 @@ Help with installation:
    If you need assistance or have questions about the install procedure,
    please ask in the Support-forum of the LIVE-server:
 
-      http://www.dragongoserver.net/forum/list.php?forum=2
+      <http://www.dragongoserver.net/forum/list.php?forum=2>
 
    For developers there's also a normally hidden development-forum on the
    LIVE-server. If you want to have access, please file a request in the
@@ -53,7 +53,7 @@ Either download from Git-repository on SourceForge.net:
    # OR: with an anonymous read-only checkout from SourceForge:
    git clone git://git.code.sf.net/p/dragongoserver/dgs-main DGS_ROOT
 
-   # OR: download a snapshot from   http://www.dragongoserver.net/snapshot.php
+   # OR: download a snapshot from   <http://www.dragongoserver.net/snapshot.php>
 
 For both git clone methods, the images are already included, while the download
 of an archive from the snapshot-page does only contain the sources while the images
@@ -79,7 +79,7 @@ in the root folder). Some older browsers ignore the shortcut-icon directive
 and expects it to be in the document-root.
 
 Copy all  /images/apple-touch-icon-*.png  into the DGS_ROOT folder to avoid 'page_not_found'-errors.
-For reference see also http://mathiasbynens.be/notes/touch-icons
+For reference see also <http://mathiasbynens.be/notes/touch-icons>
 
 
 #--------------------------------------------------------------------
@@ -144,7 +144,7 @@ Create the translations:
 Now, add the latest translations.
 The data file can be downloaded and extracted from:
 
-   http://www.dragongoserver.net/snapshot.php
+   <http://www.dragongoserver.net/snapshot.php>
 
    gunzip Translationdata.mysql.gz
    mysql -D dragondb < Translationdata.mysql
@@ -279,10 +279,10 @@ NOTE: order of the following items is not strict. You may need to re-edit the
 * MySQL Database Config:
 
   In order to support the forum search using a good full-text index,
-  the real DragonGoServer http://www.dragongoserver.net/ changed the
+  the real DragonGoServer <http://www.dragongoserver.net/> changed the
   following server variable:
 
-     http://dev.mysql.com/doc/refman/5.0/en/server-system-variables.html#sysvar_ft_min_word_len
+     <http://dev.mysql.com/doc/refman/5.0/en/server-system-variables.html#sysvar_ft_min_word_len>
 
      ft_min_word_len  =  1     (default-value is 4)
 
@@ -400,7 +400,7 @@ MAILTO= < EMAIL-OF-YOUR-CHOICE >
 #--------------------------------------------------------------------
 
 7) If you have problems you can ask for help in the Support or Development forum
-   at dragon   http://www.dragongoserver.net   as explained in the "help" note
+   at dragon   <http://www.dragongoserver.net>   as explained in the "help" note
    at the top of this documentation.
 
    If you are successful and have a running Dragon server,
