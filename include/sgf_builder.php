@@ -626,7 +626,7 @@ class SgfBuilder
 
       if ( $Status == GAME_STATUS_FINISHED && isset($Score) )
       {
-         $score_text = score2text( $Score, $Flags, false, true, /*quick(!)*/0 );
+         $score_text = score2text( $Score, $Flags, /*verbose*/false, /*engl*/true, /*quick(!)*/0 );
          $this->echo_sgf( "\nRE[" . self::sgf_simpletext($score_text) . "]", /*lastprop*/'RE' );
       }
    }//build_sgf_start
@@ -877,7 +877,7 @@ class SgfBuilder
             $this->node_com .= "\n$key: $info";
       }
 
-      $this->node_com .= "\nResult: " . score2text($score, $this->game_row['Flags'], false, true);
+      $this->node_com .= "\nResult: " . score2text($score, $this->game_row['Flags'], /*verbose*/false, /*engl*/true);
       if ( $this->game_row['Flags'] & GAMEFLAGS_ADMIN_RESULT )
          $this->node_com .= " (set by admin)";
    }//build_sgf_result

@@ -11,6 +11,15 @@ Release [2014-03-27] - DGS 1.0.17 - tag [release-1_0_17-20140327] on branch [DGS
 ChangeLog
 ------------------------------------------------------------------
 
+2014-05-01 jug
+
+   * include/std_functions.php (score2text),
+     include/game_functions.php, include/sgf_builder.php,
+     tournaments/game_admin.php:
+   - made all parts of score-text translatable for all info-pages if they use non-verbose output
+     - keep english texts in SGF-download due to potential charset problems
+     - keep in quick-suite due to fix API
+
 2014-04-26 jug
 
    * include/globals.php (HOSTBASE),

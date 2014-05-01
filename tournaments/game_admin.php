@@ -82,14 +82,14 @@ define('GA_RES_ANNUL',     7);
    if ( is_null($game) )
       error('unknown_game', "Tournament.game_admin.find_tournament($tid)");
    $g_score = ( $game->Status == GAME_STATUS_FINISHED ) ? $game->Score : null;
-   $g_score_text = score2text($g_score, $game->Flags, false);
+   $g_score_text = score2text($g_score, $game->Flags, /*verbose*/false);
 
    $tgame = TournamentGames::load_tournament_game_by_gid($gid);
    if ( is_null($tgame) )
       error('bad_tournament', "Tournament.game_admin.find_tgame($tid,$gid)");
    if ( $tgame->tid != $tid )
       error('tournament_game_mismatch', "Tournament.game_admin.check_tgame.tid($tid,$gid)");
-   list( $tg_score, $tg_score_text ) = $tgame->getGameScore( $game->Black_ID, false );
+   list( $tg_score, $tg_score_text ) = $tgame->getGameScore( $game->Black_ID, /*verbose*/false );
    $diff_score = ( $g_score !== $tg_score );
    $old_tg_flags = $tgame->Flags;
    $old_tg_status = $tgame->Status;

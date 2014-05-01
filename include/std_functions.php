@@ -2237,25 +2237,43 @@ function score2text( $score, $game_flags, $verbose, $keep_english=false, $quick=
    if ( $score == 0 )
    {
       if ( $game_flags & GAMEFLAGS_NO_RESULT )
-         return ($quick) ? 'VOID' : ( $quick === 0 ? 'Void' : ( $keep_english ? 'No-Result' : ( $verbose ? $T_('Game ends with No-Result') : 'No-Result' )));
+      {
+         return ($quick) ? 'VOID' : ( $quick === 0 ? 'Void' : ( $keep_english
+            ? 'No-Result'
+            : ( $verbose ? $T_('Game ends with No-Result') : $T_('No-Result#score') )));
+      }
       else
-         return ($quick || $quick === 0 ) ? '0' : ( $keep_english ? 'Draw' : ( $verbose ? $T_('Jigo') : 'Jigo' ));
+         return ($quick || $quick === 0 ) ? '0' : ( $keep_english ? 'Draw' : $T_('Jigo') );
    }
 
    if ( $verbose )
       $color = ( $score > 0 ) ? $T_('White') : $T_('Black');
-   else
+   else if ( $keep_english || $quick || $quick === 0 )
       $color = ( $score > 0 ) ? 'W' : 'B';
+   else
+      $color = ( $score > 0 ) ? $T_('W#white_short') : $T_('B#black_short');
 
    if ( abs($score) == SCORE_RESIGN )
-      return ( $verbose ? sprintf( $T_("%s wins by resignation"), $color) : $color . ($quick ? "+R" : "+Resign") );
+   {
+      return ( $verbose
+         ? sprintf( $T_("%s wins by resignation"), $color)
+         : $color . '+' . ($quick ? "R" : ($keep_english || $quick === 0 ? 'Resign' : $T_('Resign#score')) ) );
+   }
    elseif ( abs($score) == SCORE_TIME )
-      return ( $verbose ? sprintf( $T_("%s wins by timeout"), $color) : $color . ($quick ? "+T" : "+Time") );
+   {
+      return ( $verbose
+         ? sprintf( $T_("%s wins by timeout"), $color)
+         : $color . '+' . ($quick ? "T" : ($keep_english || $quick === 0 ? 'Time' : $T_('Time#score')) ) );
+   }
    elseif ( abs($score) == SCORE_FORFEIT )
-      return ( $verbose ? sprintf( $T_("%s wins by forfeit"), $color) : $color . ($quick ? "+F" : "+Forfeit") );
+   {
+      return ( $verbose
+         ? sprintf( $T_("%s wins by forfeit"), $color)
+         : $color . '+' . ($quick ? "F" : ($keep_english || $quick === 0 ? 'Forfeit' : $T_('Forfeit#score')) ) );
+   }
    else
       return ( $verbose ? sprintf( $T_("%s wins by %.1f"), $color, abs($score)) : $color . '+' . abs($score) );
-}
+}//score2text
 
 // returns rows checked against min/max-limits; return default-rows if unset or exceeding limits
 function get_maxrows( $rows, $maxrows, $defrows = MAXROWS_PER_PAGE_DEFAULT )
