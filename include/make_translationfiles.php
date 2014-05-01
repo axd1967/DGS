@@ -163,6 +163,7 @@ function make_include_files($language=null, $group=null) //must be called from m
 } //make_include_files
 
 
+// $untranslated: 0=all, 1=untranslated-only, 2=translated-only (search in original English), 3=translated-only (search in transl-lang)
 function translations_query( $translate_lang, $untranslated, $group, $from_row=-1, $alpha_order=false, $filter_en='', $max_len=0 )
 {
    /* Note: Some items appear two or more times within the untranslated set
@@ -186,7 +187,7 @@ function translations_query( $translate_lang, $untranslated, $group, $from_row=-
       $limit = '';
 
    $sql_opts = ( ALLOW_SQL_CALC_ROWS ) ? 'SQL_CALC_FOUND_ROWS' : '';
-   $join_translations = ( $untranslated == 2 ) ? 'INNER' : 'LEFT'; // 2=translated-only
+   $join_translations = ( $untranslated == 2 || $untranslated == 3 ) ? 'INNER' : 'LEFT'; // 2=translated-only
    $query = "SELECT $sql_opts Translations.Text"
           . ",TT.ID AS Original_ID"
           . ",TL.ID AS Language_ID"
@@ -207,10 +208,11 @@ function translations_query( $translate_lang, $untranslated, $group, $from_row=-
       . " AND TT.Text>''"
       . " AND TT.Translatable!='N'" ;
 
+   $text_field = ( $untranslated == 3 ) ? 'Translations.Text' : 'TT.Text';
    if ( $filter_en )
-      $query .= " AND TT.Text LIKE '%".mysql_addslashes($filter_en)."%'";
+      $query .= " AND $text_field LIKE '%".mysql_addslashes($filter_en)."%'";
    if ( is_numeric($max_len) && $max_len > 0 )
-      $query .= " AND LENGTH(TT.Text) <= $max_len";
+      $query .= " AND LENGTH($text_field) <= $max_len";
 
    if ( $untranslated == 1 ) // untranslated-only
    {

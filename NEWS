@@ -15,6 +15,9 @@ Copyright (C) 2001-2014  Erik Ouchterlony, Jens-Uwe Gaspar
 
    Administrative changes:
 
+   * Changes for Translators:
+      * Added case-sensitive search in texts of selected translation-language
+
    Server config:
 
    * Changed config-switches:

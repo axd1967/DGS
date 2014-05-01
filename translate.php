@@ -140,7 +140,7 @@ $info_box = '<br>When translating you should keep the following things in mind:
       $profil_charset = 0;
 
    $group = get_request_arg('group');
-   $untranslated = (int)@$_REQUEST['untranslated']; // 0=all, 1=untranslated-only, 2=translated-only
+   $untranslated = (int)@$_REQUEST['untranslated']; // see translation_query()
    $alpha_order = (int)@$_REQUEST['alpha_order'];
    $filter_en = trim(get_request_arg('filter_en'));
    $max_len = (int)@$_REQUEST['max_len'];
@@ -159,12 +159,6 @@ $info_box = '<br>When translating you should keep the following things in mind:
    mysql_free_result( $result);
    ksort( $translation_groups);
    $translation_groups['allgroups'] = 'All groups';
-
-   $arr_translated = array(
-         1 => 'Untranslated',
-         2 => 'Translated',
-         0 => 'All texts',
-      );
 
    if ( !$group || !array_key_exists( $group, $translation_groups) )
    {
@@ -215,6 +209,7 @@ $info_box = '<br>When translating you should keep the following things in mind:
    }
 
 
+   $language_name = '';
    if ( $translate_lang )
    {
       $lang_string = '';
@@ -230,6 +225,7 @@ $info_box = '<br>When translating you should keep the following things in mind:
          $lang_string = substr( $lang_string, 1);
       else
          $lang_string = $translate_lang;
+      $language_name = $lang_string;
 
       @list($browsercode,$translate_encoding) = explode( LANG_CHARSET_CHAR, $translate_lang, 2);
 
@@ -241,6 +237,14 @@ $info_box = '<br>When translating you should keep the following things in mind:
       if ( ALLOW_PROFIL_CHARSET )
         $lang_string.=  ' / ' . $encoding_used;
    }
+
+   $arr_translated = array(
+         1 => 'Untranslated (in original texts)',
+         2 => 'Translated (in original texts)',
+         0 => 'All texts (in original texts)',
+      );
+   if ( $language_name )
+      $arr_translated[3] = sprintf( 'Translated (in %s texts)', $language_name );
 
 
    $page = 'translate.php';
@@ -420,8 +424,8 @@ $info_box = '<br>When translating you should keep the following things in mind:
                   )));
 
          //insert the rx_term highlights as if it was 'faq' (lose) item
-         $orig_preview = make_html_safe( strip_translation_label($orig_string), 'faq', $rx_term);
-         $translation_preview = make_html_safe($translation, 'faq');
+         $orig_preview = make_html_safe( strip_translation_label($orig_string), 'faq', ( $untranslated != 3 ? $rx_term : '' ));
+         $translation_preview = make_html_safe($translation, 'faq', ( $untranslated == 3 ? $rx_term : '' ));
 
          //execute the textarea_safe() here because of the various_encoding
          $orig_string = textarea_safe( $orig_string, 'iso-8859-1'); //LANG_DEF_CHARSET);
@@ -519,11 +523,17 @@ $info_box = '<br>When translating you should keep the following things in mind:
 
       $groupchoice_form->add_row( array(
             'CELL', $nbcol, '',
-            'TEXT', T_('English filter (_:any char, %:any number of chars, \:escape)&nbsp;'),
+            'TEXT', T_('Filter (_:any char, %:any number of chars, \:escape)&nbsp;'),
             'TEXTINPUT', 'filter_en', 20, 80, $filter_en,
             'TEXT', sptext(T_('with max. length'), 1),
             'TEXTINPUT', 'max_len', 4, 4, (int)@$_REQUEST['max_len'],
          ));
+      if ( $language_name )
+      {
+         $groupchoice_form->add_row( array(
+               'CELL', $nbcol, '',
+               'TEXT', sprintf( T_('Searching with selection [%s] is case-sensitive!'), $arr_translated[3] ) ));
+      }
       $groupchoice_form->add_row( array(
 //         'DESCRIPTION', T_('Change to group'),
             'CELL', $nbcol, '',

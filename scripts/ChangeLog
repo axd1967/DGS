@@ -13,6 +13,12 @@ ChangeLog
 
 2014-05-01 jug
 
+   * include/make_translationfiles.php (translations_query),
+     translate.php, NEWS:
+   - translate-page: added case-sensitive search in texts of selected translation-language
+     - highlighting search-term in translated text if searched in translated text-language,
+       or in original text if searched in original text-language
+
    * include/std_functions.php (score2text),
      include/game_functions.php, include/sgf_builder.php,
      tournaments/game_admin.php:
