@@ -774,10 +774,10 @@ Description:
 | Status      | enum('INACTIVE','ACTIVE','ILLEGAL','OPP_MSG','DEVIATED','DONE') | NO   |     | INACTIVE |                |
 | Flags       | tinyint(3) unsigned                                             | NO   |     | 0        |                |
 | StartMoveNr | smallint(5) unsigned                                            | NO   |     | 0        |                |
-| StartMove   | char(2)                                                         | NO   |     |          |                |
+| StartMove   | char(3)                                                         | NO   |     |          |                |
 | LastMoveNr  | smallint(5) unsigned                                            | NO   |     | 0        |                |
 | LastMovePos | smallint(5) unsigned                                            | NO   |     | 0        |                |
-| LastMove    | char(2)                                                         | NO   |     |          |                |
+| LastMove    | char(3)                                                         | NO   |     |          |                |
 | Sequence    | varbinary(2048)                                                 | NO   |     |          |                |
 
 
@@ -803,9 +803,9 @@ Description:
 
 * StartMoveNr : Games.MoveNr of last own move starting conditional-moves-sequence
 
-* StartMove : last own move starting sequence
-   - 'ab' = SGF-coord of last own move
-   - '' = PASS-move
+* StartMove : last own move starting sequence with move-color
+   - 'Bab' = SGF-coord of last own move (color Black)
+   - 'W' = PASS-move (color White)
 
 * LastMoveNr : Games.MoveNr of last move from processed sequence
    - equals StartMoveNr on new sequence
@@ -816,13 +816,14 @@ Description:
    - string-index pointing to ';' in move-sequence for optimized parsing for next move-processing-step
    - value of last move is kept, if sequence is completed or stopped (on move-error or deviation)
 
-* LastMove : last move from processed sequence
+* LastMove : last move from processed sequence with move-color
    - equals StartMove on new sequence
    - will be updated on processing sequence
    - value of last move-nr is kept, if sequence is completed or stopped (on move-error or deviation)
 
 * Sequence : conditional moves sequence
    - uses SGF-like tree format without root-tree-node (which is stored in StartMove/LastMove)
+   - move-nodes must only use SGF-coords
    - syntax (using SGF-properties):
       - B[aa] W[bb] = B and W moves
       - B[] W[] = B and W PASS-moves

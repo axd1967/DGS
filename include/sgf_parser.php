@@ -20,6 +20,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 $TranslateGroups[] = "Game";
 
 require_once 'include/coords.php';
+require_once 'include/utilities.php';
 
 
 /*
@@ -341,11 +342,13 @@ class SgfParser
    }
 
    // In short, it does the opposite of sgf_parser()
+   // \param $props_lf_sep comma-separated list of props with preceding LF
    // \return built sgf-data
    // NOTE: not used, but keep it for debugging-purposes
-   public static function sgf_builder( $games, $sep="\r\n", $convert_node_func=null, $convert_extra_arg=null )
+   public static function sgf_builder( $games, $var_start_sep="\n", $node_start_sep="", $props_lf_sep='', $convert_node_func=null, $convert_extra_arg=null )
    {
       $sgf = '';
+      $map_props_with_lf = array_value_to_key_and_value( explode(',', $props_lf_sep) ); // props with preceding LF
 
       $vars = array();
       //$games is an array of games (i.e. variations)
@@ -356,11 +359,11 @@ class SgfParser
       {
          if ( $var === SGF_VAR_END )
          {
-            $sgf .= SGF_VAR_END.$sep;
+            $sgf .= SGF_VAR_END;
             continue;
          }
 
-         $sgf .= SGF_VAR_BEG.$sep;
+         $sgf .= $var_start_sep . SGF_VAR_BEG;
          //a variation is an array of nodes
          foreach ( $var as $id => $node )
          {
@@ -372,23 +375,38 @@ class SgfParser
                continue;
             }
 
-            $sgf .= SGF_NOD_BEG.$sep;
+            $sgf .= $node_start_sep . SGF_NOD_BEG;
             //a node is a SgfNode-object with an array of properties
             $conv_node = (is_null($convert_node_func))
                ? $node
                : call_user_func( $convert_node_func, $node, $convert_extra_arg );
             foreach ( $conv_node->props as $key => $args )
             {
+               if ( isset($map_props_with_lf[$key]) )
+                  $sgf .= "\n";
                $sgf .= $key;
                foreach ( $args as $arg )
                   $sgf .= SGF_ARG_BEG.$arg.SGF_ARG_END;
-               $sgf .= $sep;
             }
          }
       }
 
-      return $sgf;
+      return trim($sgf);
    }//sgf_builder
+
+   /*! \brief Normalizes given coordinate (in SGF- or board-format) to SGF-coord, use '' for PASS-move. */
+   public static function normalize_move_coords( $coord, $size )
+   {
+      if ( (string)$coord == '' || ( $size <= 19 && $coord == 'tt' ) ) // normalize PASS-move
+         return '';
+      elseif ( is_valid_board_coords($coord, $size) )
+      {
+         list( $x, $y ) = board2number_coords($coord, $size);
+         return number2sgf_coords($x, $y, $size);
+      }
+      else //if ( is_valid_sgf_coords($coord, $size) )
+         return $coord;
+   }//normalize_move_coords
 
    /*!
     * \brief callback-function for sgf_builder() to convert B/W-moves in SgfNode-object to board-coordinates (+ use '' for PASS-move).
@@ -396,12 +414,12 @@ class SgfParser
     */
    public static function sgf_convert_move_to_board_coords( $sgf_node, $size )
    {
-      foreach( $sgf_node->props as $prop => $values )
+      foreach ( $sgf_node->props as $prop => $values )
       {
          if ( $prop == 'B' || $prop == 'W' )
          {
             $coord = $values[0];
-            if ( (string)$coord == '' || ( $size <= 19 && $coord == 'tt' ) )
+            if ( (string)$coord == '' || ( $size <= 19 && $coord == 'tt' ) ) // normalize PASS-move
                $sgf_node->props[$prop][0] = '';
             elseif ( (string)$coord != '' && is_valid_sgf_coords($coord, $size) )
                $sgf_node->props[$prop][0] = sgf2board_coords($coord, $size);
@@ -416,18 +434,12 @@ class SgfParser
     */
    public static function sgf_convert_move_to_sgf_coords( $sgf_node, $size )
    {
-      foreach( $sgf_node->props as $prop => $values )
+      foreach ( $sgf_node->props as $prop => $values )
       {
          if ( $prop == 'B' || $prop == 'W' )
          {
             $coord = $values[0];
-            if ( (string)$coord == '' || ( $size <= 19 && $coord == 'tt' ) )
-               $sgf_node->props[$prop][0] = '';
-            elseif ( (string)$coord != '' && is_valid_board_coords($coord, $size) )
-            {
-               list( $x, $y ) = board2number_coords($coord, $size);
-               $sgf_node->props[$prop][0] = number2sgf_coords($x, $y, $size);
-            }
+            $sgf_node->props[$prop][0] = self::normalize_move_coords( $coord, $size );
          }
       }
       return $sgf_node;
@@ -442,6 +454,7 @@ class SgfNode
 {
    public $props = array(); // propkey => arr( value, ... )
    public $pos; // parsing pos of node-start ';'
+   public $move_nr = 0;
 
    public function __construct( $pos )
    {
@@ -454,6 +467,11 @@ class SgfNode
       foreach ( $this->props as $prop => $value )
          $out[] = "{$prop}[" . implode('][', $value) . "]";
       return implode(' ', $out);
+   }
+
+   public function to_string()
+   {
+      return $this->get_props_text() . "{#{$this->move_nr}@{$this->pos}}";
    }
 
 } //end 'SgfNode'
@@ -573,6 +591,7 @@ class GameSgfParser
 
    /*!
     * \brief Parses SGF-data into resulting-array (used to load SGF and flatten into Goban-objects for Shape-game).
+    * \param $last_move_nr >=0 to collect extra-nodes starting from that move-nr; <0 = no collecting of extra-nodes
     * \return GameSgfParser-instance with filled properties; parsing-error in SgfParser->Error or '' if ok
     */
    public static function parse_sgf_game( $sgf_data, $last_move_nr=-1 )

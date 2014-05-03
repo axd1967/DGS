@@ -33,6 +33,7 @@ require_once 'include/std_functions.php';
  */
 class ConditionalMoves
 {
+   public static $TXT_CM_START = 'CONDITIONAL_MOVES';
 
    /*!
     * \bried Loads uploaded SGF-file, checks that played moves are identical and finds start of conditional-moves.
@@ -181,7 +182,7 @@ class ConditionalMoves
     * \param $gsize board-size
     * \param $player_color BLACK | WHITE
     * \param $last_move_color BLACK | WHITE
-    * \return arr( errors, variation-name-references )
+    * \return arr( errors, variation-name-references, cond-moves-sgf-coords )
     */
    public static function check_nodes_cond_moves( &$cm_nodes, $gsize, $player_color, $last_move_color )
    {
@@ -222,6 +223,8 @@ class ConditionalMoves
          $cnt_subvars = 0;
          foreach ( $var as $id => $node )
          {
+            //TODO TODO check, that 1st entry is a move, and not starting with variations !?
+
             if ( $id === SGF_VAR_KEY )
             {
                $has_vars = true;
@@ -319,11 +322,12 @@ class ConditionalMoves
 
       // check max-size for rebuilt cond-moves (to be stored)
       static $max_cm_len = 2048;
-      $sgf_cond_moves = SgfParser::sgf_builder( array( $cm_nodes ), '' );
+      $sgf_cond_moves = SgfParser::sgf_builder( array( $cm_nodes ), '', '', '',
+         'SgfParser::sgf_convert_move_to_sgf_coords', $gsize );
       if ( strlen($sgf_cond_moves) > $max_cm_len )
          $errors[] = sprintf( T_('Conditional moves sequence is too long (max. %s characters allowed).'), $max_cm_len );
 
-      return array( array_reverse( array_unique($errors) ), array_reverse( array_keys($var_names) ) );
+      return array( array_reverse( array_unique($errors) ), array_reverse( array_keys($var_names) ), $sgf_cond_moves );
    }//check_nodes_cond_moves
 
    /*!
@@ -437,7 +441,7 @@ class ConditionalMoves
    /*!
     * \brief Returns start-move in parsed conditional-moves.
     * \param $cm_nodes array with SgfNode-entries (and without parsing-errors)
-    * \return '' (=PASS), or else sgf-coord of 1st move in conditional-moves
+    * \return 'W' (=white-PASS), or else move-color + sgf-coord of 1st move in conditional-moves, e.g. 'Bef'
     */
    public static function get_nodes_start_move_sgf_coords( $cm_nodes, $size )
    {
@@ -449,26 +453,52 @@ class ConditionalMoves
          error('invalid_args', "CM.get_nodes_start_move_sgf_coords.check.bad_node($size,$node)");
 
       if ( isset($node->props['B']) )
+      {
+         $color = 'B';
          $coord = $node->props['B'][0];
+      }
       elseif ( isset($node->props['W']) )
+      {
+         $color = 'W';
          $coord = $node->props['W'][0];
+      }
       else
          error('invalid_args', "CM.get_nodes_start_move_sgf_coords.check.miss_BW_move($size,".$node->get_props_text().")");
 
       if ( (string)$coord == '' || ($size <= 19 && $coord == 'tt') )
-         $move = ''; // PASS
+         $move = $color; // PASS
       elseif ( is_valid_sgf_coords($coord, $size) )
-         $move = $coord;
+         $move = $color . $coord;
       elseif ( is_valid_board_coords($coord, $size) )
       {
          list( $x, $y ) = board2number_coords( $coord, $size );
-         $move = number2sgf_coords( $x, $y, $size );
+         $move = $color . number2sgf_coords( $x, $y, $size );
       }
       else
          error('invalid_args', "CM.get_nodes_start_move_sgf_coords($size,$coord)");
 
       return $move;
    }//get_nodes_start_move_sgf_coords
+
+   /*!
+    * \brief callback-function for SgfParser::sgf_builder() to strip out C-sgf-nodes with text starting conditional-moves.
+    * \return modified SgfNode-object
+    */
+   public static function sgf_strip_cond_moves_notes( $sgf_node )
+   {
+      foreach ( $sgf_node->props as $prop => $values )
+      {
+         if ( $prop == 'C' )
+         {
+            $text = trim( str_replace( self::$TXT_CM_START, '', $values[0] ) ); // remove CM-indicator-text
+            if ( (string)$text == '' )
+               unset($sgf_node->props['C']);
+            else
+               $sgf_node->props[$prop][0] = $text;
+         }
+      }
+      return $sgf_node;
+   }//sgf_strip_cond_moves_notes
 
 } //end 'ConditionalMoves'
 

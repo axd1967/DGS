@@ -304,6 +304,7 @@ $GLOBALS['ThePage'] = new Page('Game');
 
    if ( $allow_cond_moves )
    {
+      //TODO TODO handle finished games (no $to_move)
       list( $cm_sgf_parser, $cm_errors, $cm_var_names, $cond_moves ) =
          handle_conditional_moves( $cm_move_seq, $game_row, $cm_action, $TheBoard, $to_move, $my_id );
    }
@@ -1670,14 +1671,17 @@ function handle_conditional_moves( $move_seq, $game_row, $cm_action, &$board, $t
       $check_nodes = false;
    $cond_moves = trim( get_request_arg('cond_moves', $db_cond_moves) );
 
+   $cm_src_manual = true;
    if ( @$_REQUEST['cma_upload'] && isset($_FILES['cm_sgf_file']) ) // upload SGF from file
    {
       list( $errors, $sgf_data, $game_sgf_parser ) =
          ConditionalMoves::load_cond_moves_from_sgf( $_FILES['cm_sgf_file'], $game_row, $board );
       if ( count($errors) == 0 )
       {
-         // re-parse conditional-moves part for input-box
-         $cond_moves = SgfParser::sgf_builder( array( $game_sgf_parser->extra_nodes ), '' );
+         // re-parse & re-format conditional-moves part for input-box
+         $cond_moves = SgfParser::sgf_builder( array( $game_sgf_parser->extra_nodes ), '', '', '',
+            'ConditionalMoves::sgf_strip_cond_moves_notes' );
+         $cm_src_manual = false;
          $check_nodes = true;
       }
    }
@@ -1691,12 +1695,21 @@ function handle_conditional_moves( $move_seq, $game_row, $cm_action, &$board, $t
    $sgf_parser = new SgfParser( SGFP_OPT_SKIP_ROOT_NODE );
    if ( $cond_moves && ( $check_nodes || @$_REQUEST['cm_preview'] || @$_REQUEST['cm_save'] ) )
    {
-      $cond_moves = ConditionalMoves::reformat_to_sgf( $cond_moves, $Size, ($to_move == BLACK) );
+      if ( $cm_src_manual )
+         $cond_moves = ConditionalMoves::reformat_to_sgf( $cond_moves, $Size, ($to_move == BLACK) );
+
       if ( $sgf_parser->parse_sgf($cond_moves) )
       {
          $extra_nodes = $sgf_parser->games[0];
-         list( $errors, $var_names ) =
+         list( $errors, $var_names, $cond_moves_sgf_coords ) =
             ConditionalMoves::check_nodes_cond_moves( $extra_nodes, $Size, $my_col, $last_move_col );
+
+         // reformat cond-moves with board-coords for display in edit-box
+         if ( count($errors) == 0 )
+         {
+            $cond_moves = SgfParser::sgf_builder( array( $extra_nodes ), "\r\n", ' ', '',
+               'SgfParser::sgf_convert_move_to_board_coords', $Size );
+         }
 
          if ( @$_REQUEST['cm_preview'] && $var_view && count($errors) == 0 )
          {
@@ -1712,14 +1725,14 @@ function handle_conditional_moves( $move_seq, $game_row, $cm_action, &$board, $t
                $errors[] = $result;
          }
 
-         //echo "<pre>", SgfParser::sgf_builder( array( $extra_nodes ), ''), "</pre><br><br>\n";
+         //echo "<pre>", SgfParser::sgf_builder( array( $extra_nodes ) ), "</pre><br><br>\n";
          //echo "<pre>-----", print_r($extra_nodes, true), "</pre>\n";
 
          if ( @$_REQUEST['cm_save'] && count($errors) == 0 )
          {
             $cm_id = ( is_null($move_seq) ) ? 0 : $move_seq->ID; // NEW or EDIT
             $cm_flags = 0;
-            $cm_active = get_request_arg('cm_active', 0); //TODO
+            $cm_active = get_request_arg('cm_active', 0); //TODO TODO this is a status, not a flag
             $cm_private = get_request_arg('cm_private', 0);
             if ( $cm_private )
                $cm_flags |= MSEQ_FLAG_PRIVATE;
@@ -1728,7 +1741,7 @@ function handle_conditional_moves( $move_seq, $game_row, $cm_action, &$board, $t
             $cm_start_move = ConditionalMoves::get_nodes_start_move_sgf_coords( $extra_nodes, $Size );
 
             $cm_moveseq = new MoveSequence( $cm_id, $gid, $my_id, MSEQ_STATUS_INACTIVE, $cm_flags,
-               $cm_start_move_nr, $cm_start_move, $cm_start_move_nr, 1, $cm_start_move, $cond_moves );
+               $cm_start_move_nr, $cm_start_move, $cm_start_move_nr, 1, $cm_start_move, $cond_moves_sgf_coords );
 
             ta_begin();
             {//HOT-section to save conditional-moves
@@ -1736,7 +1749,7 @@ function handle_conditional_moves( $move_seq, $game_row, $cm_action, &$board, $t
             }
             ta_end();
          }
-      }
+      }//parse-sgf
    }
 
    return array( $sgf_parser, $errors, $var_names, $cond_moves );

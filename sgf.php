@@ -33,6 +33,8 @@ require_once 'include/sgf_builder.php';
       bulk=0|1             : 1 = use special filename-pattern (omit handicap if =0 and result if unfinished game):
                              DGS-<gid>_YYYY-MM-DD_<rated=R|F><size>(H<handi>)K<komi>(=<result>)_<white>-<black>.sgf
       filefmt=format       : special-format, see <FILEFORMAT>-option in section "4.SGF" in 'specs/quick_suite.txt'
+      cm=0|1|2|3           : 0 = no conditional-moves included, 1 | 2 = include own|opponents conditional-moves, 3=1+2;
+                             see (4.SGF) in 'specs/quick_suite.txt' for more details
  */
 
 $quick_mode = (boolean)@$_REQUEST['quick_mode'];
@@ -74,9 +76,11 @@ else
    }
 
    $opt_mpg = (int)@$_REQUEST['mpg'];
+   $opt_cond_moves = @$_REQUEST['cm'];
 
    $sgf = new SgfBuilder( $gid, /*use_buf*/false );
    $sgf->set_file_format( @$_REQUEST['filefmt'] );
+   $sgf->set_include_conditional_moves( $opt_cond_moves );
    if ( $opt_mpg & 1 )
       $sgf->set_mpg_node_add_user(false);
 
@@ -87,9 +91,9 @@ else
 
    // set $owned_comments: BLACK|WHITE=viewed by B/W-game-player (also for MP-game), DAME=viewed by other user
    $owned_uid = 0;
-   if ( $arg_owned_comments )
+   $owned_comments = DAME;
+   if ( $arg_owned_comments || (int)$opt_cond_moves > 0 )
    {
-      $owned_comments = DAME;
       $cookie_handle = safe_getcookie('handle');
       if ( $sgf->is_mpgame() )
       {
@@ -121,8 +125,9 @@ else
          }
       }
    }
-   else
+   if ( !$arg_owned_comments )
       $owned_comments = DAME;
+   $sgf->set_player_uid( $owned_uid );
 
    // load GamesNotes for player
    if ( $sgf->is_include_games_notes() && ($owned_comments != DAME) && ($owned_uid > 0) )
@@ -138,10 +143,10 @@ else
    header( "Content-Disposition: $disposition_type; filename=\"$filename.sgf\"" );
    header( "Content-Description: PHP Generated Data" );
 
-   //to allow some mime applications to find it in the cache
+   // allow some applications to find it in the cache
    if ( $use_cache )
    {
-      header('Expires: ' . gmdate(GMDATE_FMT, $NOW+5*SECS_PER_MIN));
+      header('Expires: ' . gmdate(GMDATE_FMT, $NOW + 5*SECS_PER_MIN));
       header('Last-Modified: ' . gmdate(GMDATE_FMT, $NOW));
    }
 

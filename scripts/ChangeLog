@@ -13,6 +13,41 @@ ChangeLog
 
 2014-05-03 jug
 
+   * include/sgf_builder.php (class SgfBuilder, ~.set_include_conditional_moves, ~.set_player_uid,
+       ~.is_game_player, ~.echo_sgf, ~.sgf_echo_prop, ~.sgf_echo_points, ~.load_trimmed_moves,
+       ~.load_conditional_moves, ~.prepare_merge_cond_moves, ~.build_sgf, ~.build_sgf_shape_setup,
+       ~.build_sgf_moves, ~.build_sgf_moves_with_conditional_moves, ~.merge_conditional_moves,
+       ~.build_sgf_result, ~.sgf_simpletext, ~.new_sgf_node, ~.merge_sgf_node_props,
+       ~.append_remaining_conditional_moves, ~.get_variation_first_sgf_node),
+     include/conditional_moves.php ($TXT_CM_START; ConditionalMoves.check_nodes_cond_moves,
+       ~.get_nodes_start_move_sgf_coords, ~.sgf_strip_cond_moves_notes),
+     include/sgf_parser.php (SgfParser.sgf_builder, ~.normalize_move_coords,
+       ~.sgf_convert_move_to_sgf_coords; class SgfNode, ~.to_string),
+     include/db/move_sequence.php (class MoveSequence),
+     specs/db/table-Games.txt, specs/db/dragon-ddl.sql,
+     specs/quick_suite.txt, scripts/updates/database_changes_1_0_18.mysql,
+     scripts/admin-sgf-bulk.php,
+     game.php (handle_conditional_moves),
+     sgf.php:
+   - merging conditional-moves on SGF-download:
+     - added 'cm'-option to merge conditional-moves and all SGF-properties with game-moves
+     - merging private conditional-moves only for owner
+     - merging public conditional-moves if game is finished or for players
+     - determine logged-in user for conditional-moves filtering
+     - extended SGF-formatting of SgfParser::sgf_builder() with separate separator of variation
+       and nodes and certain properties
+     - store MoveSequence.StartMove/LastMove for conditional-moves with color-prefix
+   - game-page:
+     - re-format conditional-moves for input-box converting to board-coords
+     - saving conditional-moves converting to sgf-coordinates
+     - strip away conditional-moves notes from uploaded SGF planted there from SGF-download
+-----------
+-- prefix start & last move of conditional-moves-sequence with move-color
+ALTER TABLE MoveSequence
+   MODIFY StartMove char(3) NOT NULL default '',
+   MODIFY LastMove char(3) NOT NULL default '' ;
+-----------
+
    * tournaments/include/tournament_round_helper.php (TournamentRoundHelper.notify_directors_last_game_finished),
      tournaments/include/tournament_games.php (TournamentGames.count_tournament_games,
        ~.exists_tournament_game, ~.build_query_count_tournament_games),

@@ -666,10 +666,10 @@ CREATE TABLE IF NOT EXISTS `MoveSequence` (
   `Status` enum('INACTIVE','ACTIVE','ILLEGAL','OPP_MSG','DEVIATED','DONE') NOT NULL default 'INACTIVE',
   `Flags` tinyint(3) unsigned NOT NULL default '0',
   `StartMoveNr` smallint(5) unsigned NOT NULL default '0',
-  `StartMove` char(2) NOT NULL default '',
+  `StartMove` char(3) NOT NULL default '',
   `LastMoveNr` smallint(5) unsigned NOT NULL default '0',
   `LastMovePos` smallint(5) unsigned NOT NULL default '0',
-  `LastMove` char(2) NOT NULL default '',
+  `LastMove` char(3) NOT NULL default '',
   `Sequence` varbinary(2048) NOT NULL default '',
   PRIMARY KEY  (`ID`),
   KEY `gid_uid_status` (`gid`,`uid`,`Status`)

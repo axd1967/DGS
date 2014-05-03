@@ -1926,7 +1926,7 @@ Purpose:
 
 Request:
 
-   sgf.php?gid=<GAME_ID>&owned_comments=<CMODE>&mpg=<MPG>&quick_mode=<QMODE>&inline=<INLINE>&no_cache=<CACHE>&bulk=<BULK>&filefmt=<FILEFORMAT>
+   sgf.php?gid=<GAME_ID>&owned_comments=<CMODE>&mpg=<MPG>&quick_mode=<QMODE>&inline=<INLINE>&no_cache=<CACHE>&bulk=<BULK>&filefmt=<FILEFORMAT>&cm=<CONDMOVES>
 
 Important Notes:
 
@@ -2002,6 +2002,17 @@ Options:
          - $r = result: '=B3,5' = B won by 3.5, '=W0' = jigo, '=VOID' = no-result, '=W3' = white won by 3
          - $d1 = last-changed date in format YYYYMMDD: 20130819
          - $d2 = last-changed date in format YYYY-MM-DD: 2013-08-19
+
+   <CONDMOVES> = 0 | 1 | 2 | 3; default = 0 for running game, = 3 for finished game
+      - 0 = do not include any conditional-moves
+      - 1 = merge game-moves with own used & unused conditional-moves
+      - 2 = merge game-moves with opponents used & unused conditional-moves
+      - 3 = 1 + 2 = merge game-moves used & unused conditional-moves of both players
+
+      - a players "private" conditional-moves can only be retrieved by the owner (=himself/herself)
+      - opponents "public" conditional-moves can only be retrieved for finished game
+      - observers can retrieve conditional-moves only for finished game
+      - value 1 or 2 makes only sense for players, for observers 3 is assumed automatically
 
 
 Response (SGF-properties):
@@ -2094,6 +2105,7 @@ Response (SGF-properties):
 
       # game-moves (with comments)
       # - prefix '[Handle]' for multi-player-game added on each move (if not deactivated by MPG-option)
+      # - can contain variations if conditional-moves are included
       AB[cc][ee][gg]                   # handicap stones (optional prop)
       MN[1]                            # correct move-number
       B[qd]
@@ -2148,6 +2160,9 @@ Examples:
 
    # download SGF (e.g. for robot, no comments)
    sgf.php?gid=557175&owned_comments=N&quick_mode=1&no_cache=1
+
+   # download SGF with conditional-moves of both players
+   sgf.php?gid=557175&cm=3
 
 References:
 

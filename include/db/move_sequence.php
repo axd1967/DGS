@@ -65,6 +65,10 @@ class MoveSequence
    public $LastMove;
    public $Sequence;
 
+   // non-DB fields:
+
+   public $parsed_nodes = null; // SGF-game-tree
+
    /*! \brief Constructs MoveSequence-object with specified arguments. */
    public function __construct( $id=0, $gid=0, $uid=0, $status=MSEQ_STATUS_INACTIVE, $flags=0,
          $start_move_nr=0, $start_move='', $last_move_nr=0, $last_move_pos=0, $last_move='', $sequence='' )

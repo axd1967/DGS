@@ -25,6 +25,9 @@ require_once 'include/rating.php';
 require_once 'include/game_functions.php';
 require_once 'include/game_comments.php';
 require_once 'include/board.php';
+require_once 'include/db/move_sequence.php';
+require_once 'include/sgf_parser.php';
+require_once 'include/conditional_moves.php';
 require_once 'include/shape_control.php';
 require_once 'tournaments/include/tournament_cache.php';
 
@@ -155,6 +158,12 @@ class SgfBuilder
 
    private $file_format = null; // null = use default, see build_filename_sgf()
 
+   private $include_cond_moves = -1; // -1 = default-behaviour, see (4.SGF) in 'specs/quick_suite.xt'
+   private $player_uid = 0; // (optionally) logged-in user
+   private $cm_nodes = null; // array to collect conditional-moves variation
+   private $cm_last_node = null; // last SgfNode to collect conditional-moves
+   private $cond_moves_mseq = null; // arr( MoveSequence->parsed_node, ... ) with conditional-moves to merge
+
    // load data from database
 
    private $gid;
@@ -197,6 +206,33 @@ class SgfBuilder
       $this->mpg_node_add_user = $mpg_node_add_user;
    }
 
+   /*!
+    * \brief Sets mode for loading conditional-moves.
+    * \param $cm_opt '' (=use default), 0-3 = restricting conditional-moves, see specs (4.SGF) in 'specs/quick_suite.txt'
+    */
+   public function set_include_conditional_moves( $cm_opt )
+   {
+      if ( (string)$cm_opt != '' )
+      {
+         if ( $cm_opt >= 0 && $cm_opt <= 3 )
+            $this->include_cond_moves = (int)$cm_opt;
+         else
+            error('invalid_args', "SgfBuilder.set_include_conditional_moves.check.bad_value($cm_opt)");
+      }
+   }
+
+   /*! \brief Sets logged-in player. */
+   public function set_player_uid( $uid )
+   {
+      $this->player_uid = max( 0, (int)$uid );
+   }
+
+   // need this->load_game_info() first
+   private function is_game_player()
+   {
+      return ( $this->player_uid == $this->game_row['Black_ID'] || $this->player_uid == $this->game_row['White_ID'] );
+   }
+
    public function is_mpgame()
    {
       return $this->is_mpgame;
@@ -214,50 +250,77 @@ class SgfBuilder
          $this->file_format = $file_format;
    }
 
+   // outputs SGF-text (only if not collecting cond-moves)
    private function echo_sgf( $sgf_text, $last_prop=0 )
    {
-      if ( $this->use_buffer )
-         $this->SGF .= $sgf_text;
-      else
-         echo $sgf_text;
       if ( $last_prop )
          $this->last_prop = $last_prop;
+
+      if ( !$this->cm_nodes )
+      {
+         if ( $this->use_buffer )
+            $this->SGF .= $sgf_text;
+         else
+            echo $sgf_text;
+      }
    }//echo_sgf
 
    /*!
-    * \brief Outputs SGF-property with value(s).
+    * \brief Outputs SGF-property with value(s) as text or else collect SgfNode-entries for merging conditional-moves
+    *       if $this->cm_nodes is an array.
     * \param $value scalar-value or array of values
+    * \param $move_nr -1 = don't set move-number in SgfNode for collecting moves for cond-moves-merge; else >0
+    *
+    * \note SgfNode collected if $this->cm_nodes is an array:
+    *       sets SgfNode->move_nr, sgf_move=Bxx (xx='' for PASS, else SGF-coord)
     */
-   private function sgf_echo_prop( $prop, $value )
+   private function sgf_echo_prop( $prop, $value, $move_nr=0 )
    {
+      $start_node = false;
       //if ( stristr('-B-W-MN-BL-WL-KO-BM-DO-IT-OB-OW-TE-', $prop.'-') )
       if ( stristr('-B-W-MN-', "-$prop-") )
       {
          if ( $this->prop_type == 'setup' || $this->prop_type == 'force_node' )
-            $this->echo_sgf( "\n;" . $prop ); // start node
-         else
-            $this->echo_sgf( $prop );
+            $start_node = true;
          $this->prop_type = 'move';
       }
-      else if ( stristr('-AB-AE-AW-PL-', "-$prop-") )
+      elseif ( stristr('-AB-AE-AW-PL-', "-$prop-") )
       {
          if ( $this->prop_type == 'move' || $this->prop_type == 'force_node' )
-            $this->echo_sgf( "\n;" . $prop ); // start node
-         else
-            $this->echo_sgf( $prop );
+            $start_node = true;
          $this->prop_type = 'setup';
       }
-      else
-         $this->echo_sgf( $prop );
       $this->last_prop = $prop;
 
-      // output single value or list of values: prop[val]  or  prop[val1][val2]...
-      if ( is_array($value) )
-         $this->echo_sgf( '[' . implode('][', $value) . ']' );
-      else
-         $this->echo_sgf( "[$value]" );
+      if ( is_array($this->cm_nodes) ) // collect nodes for merging of cond-moves
+      {
+         if ( $start_node )
+         {
+            $this->cm_last_node = self::new_sgf_node();
+            $this->cm_nodes[] = $this->cm_last_node;
+         }
+         $this->cm_last_node->props[$prop][] = $value; // single or list of values
+         if ( $prop == 'B' || $prop == 'W' )
+            $this->cm_last_node->sgf_move = $prop . $value;
+         if ( $move_nr > 0 && (int)@$this->cm_last_node->move_nr <= 0 )
+            $this->cm_last_node->move_nr = $move_nr; // set dynamic attribute
+      }
+      else // output moves directly
+      {
+         if ( $start_node )
+            $this->echo_sgf( "\n;" . $prop );
+         else
+            $this->echo_sgf( $prop );
+
+         // output single value or list of values: prop[val]  or  prop[val1][val2]...
+         if ( is_array($value) )
+            $this->echo_sgf( '[' . implode('][', $value) . ']' );
+         else
+            $this->echo_sgf( "[$value]" );
+      }
    }//sgf_echo_prop
 
+   // outputs SGF-comment property 'C'
    private function sgf_echo_comment( $comment, $check_empty=true )
    {
       $comment = trim($comment);
@@ -283,7 +346,7 @@ class SgfBuilder
     * - TB/TW: mark territory black/white
     * \param $overwrite_prop false = no overwrite; else prop to use instead of element-values in $points
     */
-   private function sgf_echo_point( $points, $overwrite_prop=false )
+   private function sgf_echo_points( $points, $move_nr=-1, $overwrite_prop=false )
    {
       if ( count($points) <= 0 )
          return false;
@@ -300,11 +363,11 @@ class SgfBuilder
       foreach ( $values as $point_prop => $prop_values )
       {
          $this->echo_sgf( "\n" );
-         $this->sgf_echo_prop( ($overwrite_prop ? $overwrite_prop : $point_prop), $prop_values );
+         $this->sgf_echo_prop( ($overwrite_prop ? $overwrite_prop : $point_prop), $prop_values, $move_nr );
       }
 
       return true;
-   }//sgf_echo_point
+   }//sgf_echo_points
 
 
    public function load_game_info()
@@ -380,12 +443,15 @@ class SgfBuilder
       }
    }//load_player_game_notes
 
+   // load moves, including conditional-moves (if needed)
    public function load_trimmed_moves( $with_comments )
    {
       // load moves
       $arr_moves = Board::load_cache_game_moves( 'SgfBuilder.load_trimmed_moves', $this->gid, /*fetch*/true, /*store*/false );
       if ( !is_array($arr_moves) )
          $arr_moves = array();
+
+      $this->load_conditional_moves();
 
       // load move-messages
       if ( $with_comments )
@@ -433,6 +499,99 @@ class SgfBuilder
          $this->moves_iterator->addItem( null, $row );
       }
    }//load_trimmed_moves
+
+
+   /*!
+    * \brief Loads and checks if and what merge with conditional-moves are needed.
+    * \note Modifies $this->include_cond_moves: 0 = no cond-moves to merge, >0 according value to specs
+    * \note Fills $this->cond_moves_mseq with array of MoveSequence-objects with set attribute parsed_nodes
+    *       containing game-tree to merge with
+    */
+   private function load_conditional_moves()
+   {
+      $this->cond_moves_mseq = array();
+
+      $status = $this->game_row['Status'];
+      $is_game_finished = ( $status == GAME_STATUS_FINISHED );
+      $is_player = $this->is_game_player();
+
+      if ( $this->game_row['GameType'] != GAMETYPE_GO || $status == GAME_STATUS_KOMI ) // not for MPG or FK-negotiation
+         $this->include_cond_moves = 0;
+      if ( $this->include_cond_moves < 0 ) // determine default
+         $this->include_cond_moves = ( $is_game_finished ) ? 3 : 0;
+      if ( $this->include_cond_moves > 0 && !$is_game_finished && !$is_player )
+         $this->include_cond_moves = 0;
+      if ( $is_player && ( $this->include_cond_moves == 1 || $this->include_cond_moves == 2 ) )
+         $this->include_cond_moves = 3;
+
+      if ( $this->include_cond_moves == 0 ) // don't load cond-moves
+         return;
+
+
+      $iterator = new ListIterator( 'SgfBuilder.load_conditional_moves.MoveSequence' );
+      $iterator = MoveSequence::load_move_sequences( $iterator, $this->gid ); // CMs of both players
+      while ( list(,$arr_item) = $iterator->getListIterator() )
+      {
+         $move_seq = $arr_item[0];
+         $is_private = ( $move_seq->Flags & MSEQ_FLAG_PRIVATE );
+         $is_owner = ( $this->player_uid == $move_seq->uid ); // is "author" of this CM
+
+         // only "owner" can see private CMs and CMs for running games; it's forbidden for observers and opponent
+         if ( !$is_owner && ( $is_private || !$is_game_finished ) )
+            continue;
+         // hide CMs for players according to specified include-cond-moves option
+         if ( $is_player && (
+                  (  $is_owner && !($this->include_cond_moves & 2) )       // only show own CMs
+               || ( !$is_owner && !($this->include_cond_moves & 1) ) ) )   // only show opponent CMs
+            continue;
+
+         $sgf_parser = new SgfParser( SGFP_OPT_SKIP_ROOT_NODE );
+         if ( $sgf_parser->parse_sgf($move_seq->Sequence) )
+         {
+            // normalize: use SGF-coords for B/W-moves & use '' for PASS-move
+            $move_seq->parsed_nodes = self::prepare_merge_cond_moves(
+               $sgf_parser->games[0], $this->game_row['Size'], $move_seq->StartMoveNr );
+            $this->cond_moves_mseq[] = $move_seq;
+         }
+      }
+
+      if ( count($this->cond_moves_mseq) == 0 ) // nothing to merge
+         $this->include_cond_moves = 0;
+   }//load_conditional_moves
+
+   // normalize B/W-move-props into sgf-coords, set SgfNode-attributes move_nr, sgf_move=Baa|Wbb|B(=pass) for all SgfNodes
+   private static function prepare_merge_cond_moves( $nodes, $size, $start_move_nr )
+   {
+      // traverse game-tree
+      $vars = array(); // stack for variations for traversal of game-tree
+      SgfParser::push_var_stack( $vars, $nodes, $start_move_nr );
+
+      while ( list($move_nr, $var) = array_pop($vars) ) // process variations-stack
+      {
+         // a variation is an array of nodes
+         foreach ( $var as $id => $node )
+         {
+            if ( $id === SGF_VAR_KEY )
+            {
+               // this particular node is an array of variations
+               foreach ( $node as $sub_tree )
+                  SgfParser::push_var_stack( $vars, $sub_tree, $move_nr );
+               continue;
+            }//else: a node is a SgfNode-object with an array of properties
+
+            // set SgfNode->sgf_move for easier move-comparing/merging
+            if ( isset($node->props['B']) )
+               $node->sgf_move = 'B' . $node->props['B'][0];
+            if ( isset($node->props['W']) )
+               $node->sgf_move = 'W' . $node->props['W'][0];
+
+            $node->move_nr = $move_nr++; // add move-nr
+         }//var-end
+      }//game-tree end
+
+      return $nodes;
+   }//prepare_merge_cond_moves
+
 
    public function build_filename_sgf( $bulk_filename )
    {
@@ -489,16 +648,25 @@ class SgfBuilder
       return $filename;
    }//build_filename_sgf
 
+
+   // main-function to build full SGF
    // owned_comments: BLACK|WHITE=viewed by B/W-player (or game-player for MP-game), DAME=viewed by other user
    public function build_sgf( $filename, $owned_comments )
    {
       $this->build_sgf_start( $filename );
       $this->build_sgf_shape_setup(); // handle shape-game
-      $this->build_sgf_moves( $owned_comments ); // loop over Moves
+
+      // loop over Moves
+      if ( $this->include_cond_moves > 0 )
+         $this->build_sgf_moves_with_conditional_moves( $owned_comments );
+      else
+         $this->build_sgf_moves( $owned_comments );
+
       $this->build_sgf_result();
       $this->build_sgf_end( $owned_comments );
-   }
+   }//build_sgf
 
+   // builds root-node for SGF
    private function build_sgf_start( $filename )
    {
       extract($this->game_row);
@@ -649,7 +817,7 @@ class SgfBuilder
             $this->points[$sgf_coord] = $prop;
          }
 
-         $this->sgf_echo_point( $this->points);
+         $this->sgf_echo_points( $this->points);
          $this->points = array();
 
          $comments = array();
@@ -766,7 +934,7 @@ class SgfBuilder
                   if ( $MoveNr < $Handicap)
                      break; //switch-break
 
-                  $this->sgf_echo_point( $this->points);
+                  $this->sgf_echo_points( $this->points );
                   $this->points = array();
 
                   $this->sgf_echo_comment( $this->node_com );
@@ -795,7 +963,7 @@ class SgfBuilder
 
                   if ( $PosX < POSX_PASS )
                   { //score steps, others filtered by sgf_trim_level
-                     $this->sgf_echo_prop($color, ''); // add 3rd pass
+                     $this->sgf_echo_prop($color, '', $MoveNr); // add 3rd pass
                      $this->next_color = self::switch_move_color( $color );
 
                      if ( $this->sgf_score_highlight & 1 )
@@ -804,14 +972,14 @@ class SgfBuilder
                      if ( $this->sgf_score_highlight & 2 )
                         $this->node_com .= "\n$color SCORE";
 
-                     $this->sgf_echo_point( $this->points );
+                     $this->sgf_echo_points( $this->points );
                   }
                   else
                   { //pass, normal move or non AB handicap
 
                      if ( $PosX == POSX_PASS )
                      {
-                        $this->sgf_echo_prop($color, ''); //move property, do not use [tt] for PASS
+                        $this->sgf_echo_prop($color, '', $MoveNr); //move property, do not use [tt] for PASS
 
                         if ( $this->sgf_pass_highlight & 1 )
                            $this->sgf_echo_prop( 'N', "$color PASS" );
@@ -820,7 +988,7 @@ class SgfBuilder
                            $this->node_com .= "\n$color PASS";
                      }
                      else //move or non AB handicap
-                        $this->sgf_echo_prop($color, $coord); //move property
+                        $this->sgf_echo_prop($color, $coord, $MoveNr); //move property
 
                      $this->points = array();
                   }
@@ -835,6 +1003,184 @@ class SgfBuilder
          $this->sgf_trim_nr--;
       }
    }//build_sgf_moves
+
+
+   // builds SGF moves-part if conditional-moves must be merged-in
+   private function build_sgf_moves_with_conditional_moves( $owned_comments )
+   {
+      // collect sgf-nodes
+      $this->cm_last_node = self::new_sgf_node();
+      $this->cm_nodes = array( $this->cm_last_node );
+      $this->build_sgf_moves( $owned_comments );
+      if ( count($this->cm_nodes[0]->props) == 0 ) // nothing have been catched in very first "catch" node
+         array_shift( $this->cm_nodes );
+
+      // merge in conditional-moves into game-moves stored in this->cm_nodes
+      foreach ( $this->cond_moves_mseq as $move_seq )
+         $this->merge_conditional_moves( $move_seq );
+
+      // output merged variations
+      $sgf = SgfParser::sgf_builder( array( $this->cm_nodes ), "\n", "\n", 'C,AB,AW' );
+      if ( $sgf[0] == '(' && $sgf[1] != '(' && substr($sgf, -1, 1) == ')' ) // strip surrounding superfluous braces
+         $sgf = trim( substr( $sgf, 1, -1 ) );
+
+      $this->cm_nodes = null; // let echo_sgf() output built stuff (instead of collecting nodes)
+      $this->echo_sgf( $sgf );
+      //error_log("#SGF: $sgf");
+   }//build_sgf_moves_with_conditional_moves
+
+
+   /*!
+    * \brief Merges in given MoveSequence into main game-moves this->cm_nodes.
+    * \note MoveSequence->parsed_nodes attributes: move_nr, sgf_move
+    */
+   private function merge_conditional_moves( $mseq )
+   {
+      // 1. find starting point of CM (can only be in main-var), then merge from there
+
+      $game_moves = $this->game_row['Moves'];
+      $merge_var = $merge_id = null;
+      if ( $mseq->StartMoveNr <= $game_moves )
+      {
+         // traverse game-tree
+         $vars_game = array(); // stack for variations for traversal of game-tree
+         SgfParser::push_var_stack( $vars_game, $this->cm_nodes );
+
+         while ( list($data, $var) = array_pop($vars_game) ) // process variations-stack
+         {
+            // a variation is an array of nodes
+            foreach ( $merge_var as $id => $node )
+            {
+               if ( $id === SGF_VAR_KEY )
+               {
+                  // this particular node is an array of variations
+                  SgfParser::push_var_stack( $vars_game, $node[0] ); // follow 1st sub-tree with main-path
+                  continue;
+               }//else: a node is a SgfNode-object with an array of properties
+
+               if ( $node->move_nr == $mseq->StartMoveNr && $node->sgf_move == $mseq->StartMove )
+               {
+                  $merge_id = $id;
+                  break 2;
+               }
+            }//var-end
+         }//game-tree end
+      }//end if ( $mseq->StartMoveNr <= $game_moves )
+
+
+      // 2a. if cond-moves starts after last-move, then append cond-moves
+
+      if ( is_null($merge_id) )
+      {
+         if ( $mseq->StartMoveNr == $game_moves + 1 )
+         {
+            self::append_remaining_conditional_moves( $this->cm_nodes, $mseq->parsed_nodes, /*reset*/true );
+         }//else: shouldn't happen
+         return;
+      }
+
+
+      // 2b. otherwise merge in cond-moves from matching-start-move
+      // NOTE: $merge_var (internal-arr-pointer) & merge_id points to a SgfNode
+
+      // traverse game-tree of cond-moves
+      $vars_cm = array(); // stack for variations for traversal of game-tree
+      SgfParser::push_var_stack( $vars_cm, $this->cm_nodes, array( $merge_var, $merge_id, false ) );
+
+      while ( list($data, $var) = array_pop($vars_cm) ) // process variations-stack of CM-var
+      {
+         list( $merge_var, $merge_id, $merge_get_next ) = $data;
+
+         foreach ( $var as $id => $cm_node ) // a variation is an array of nodes (for CM-var)
+         {
+            if ( $id === SGF_VAR_KEY )
+            {
+               // this particular node is an array of variations
+               foreach ( $cm_node as $sub_tree )
+                  SgfParser::push_var_stack( $vars_cm, $sub_tree, array( $merge_var, $merge_id, $merge_get_next ) );
+               continue;
+            }//else: a node is a SgfNode-object with an array of properties
+
+            // get next target-node in main-nodes (for merging-in CM-node)
+            if ( $merge_get_next )
+            {
+               while ( $arr_each = each($merge_var) )
+               {
+                  list( $merge_id, $merge_node ) = $arr_each;
+                  if ( $merge_id != SGF_VAR_KEY ) // found next main-node
+                     break;
+                  else // found variation-array
+                  {
+                     // find correct variation from list (of main-var) with matching 1st (CM-move)
+                     $sub_var = null;
+                     foreach ( $merge_node as $sub_tree ) // this particular merge-node is an array of variations
+                     {
+                        $sub_node = self::get_variation_first_sgf_node($sub_tree);
+                        if ( !is_null($sub_node) ) // no sgf-node found (shouldn't happen as empty var is forbidden)
+                        {
+                           if ( $cm_node->sgf_move == $sub_first_node->sgf_move )
+                           {
+                              $sub_var = $sub_tree; // found variation with matching move from CM-node
+                              break;
+                           }
+                        }
+                     }
+
+                     if ( is_null($sub_var) )
+                     {
+                        // no variation found with matching move, so add new variation
+                        $remaining_cm_var = array();
+                        prev($var); // include previous CM-node
+                        self::append_remaining_conditional_moves( $remaining_cm_var, $var, /*reset*/false );
+                        $merge_node[] = $remaining_cm_var;
+                        break 2; // continue merging next CM-var from stack
+                     }
+                     else
+                        $merge_var = $sub_var;
+                  }
+               }//end-while
+
+               if ( $arr_each === false ) // end of merge-var reached -> append remaining nodes
+               {
+                  prev($var); // include previous CM-node
+                  self::append_remaining_conditional_moves( $merge_var, $var, /*reset*/false );
+                  break 2; // continue merging next CM-var from stack
+               }
+            }
+            else
+               $merge_get_next = true;
+
+
+            // merge CM-node with node from main-path (in merge_var)
+            $merge_node = $merge_var[$merge_id];
+            if ( $merge_node->move_nr == $cm_node->move_nr && $merge_node->sgf_move == $cm_node->sgf_move )
+            {
+               // move is the same, so merge only SGF-props
+               self::merge_sgf_node_props( $merge_var[$merge_id], $cm_node );
+            }
+            else // start new variation replacing current node (in merge_var)
+            {
+               // collect remaining-nodes of current target merge-var
+               $remaining_merge_var = array();
+               while ( list( $k, $v ) = each($merge_var) )
+               {
+                  $remaining_merge_var[$k] = $v;
+                  unset($merge_var[$k]);
+               }
+
+               // collect remaining nodes of current cond-moves-var
+               $remaining_cm_var = array();
+               prev($var); // include previous CM-node
+               self::append_remaining_conditional_moves( $remaining_cm_var, $var, /*reset*/false );
+
+               // replace original merge-node with the 2 collected variations
+               $merge_var[] = array( $remaining_merge_var, $remaining_cm_var );
+               break; // continue merging next CM-var from stack
+            }
+         }//var-end
+      }//game-tree end
+   }//merge_conditional_moves
+
 
    private function build_sgf_result()
    {
@@ -866,10 +1212,10 @@ class SgfBuilder
 
          //Last dead stones mark
          if ( $this->dead_stone_prop )
-            $this->sgf_echo_point( $arr_prisoners, $this->dead_stone_prop );
+            $this->sgf_echo_points( $arr_prisoners, -1, $this->dead_stone_prop );
 
          //$points from last skipped SCORE/SCORE2 marked points
-         $this->sgf_echo_point( array_merge( $this->points, $arr_territory ) );
+         $this->sgf_echo_points( array_merge( $this->points, $arr_territory ) );
 
          $game_score->calculate_score( null, 'sgf' );
          $scoring_info = $game_score->get_scoring_info();
@@ -917,6 +1263,7 @@ class SgfBuilder
 
    // ------------ static functions ----------------------------
 
+   // escapes text for SGF-output
    private static function sgf_simpletext( $str, $repl_white_space=true )
    {
       $str = reverse_htmlentities($str);
@@ -924,9 +1271,88 @@ class SgfBuilder
          $str = preg_replace( "/[\\x1-\\x20]+/", ' ', $str );
       return
          str_replace(
-            array( "]",   "\\" ),
-            array( "\\]", "\\\\" ), $str );
+            array( "\\", "[", "]" ),
+            array( "\\\\", "\\[", "\\]" ), $str );
    }
+
+   // creates SgfNode needed for merging of conditional-moves
+   private static function new_sgf_node()
+   {
+      $sgf_node = new SgfNode(0);
+      $sgf_node->move_nr = 0;
+      return $sgf_node;
+   }
+
+   // merges certain SGF-properties from src-node into target-node, no overwriting of props
+   private static function merge_sgf_node_props( $trg_node, $src_node )
+   {
+      foreach ( $src_node->props as $key => $values )
+      {
+         if ( isset($trg_node->props[$key]) ) // merge values for existing prop
+         {
+            if ( $key == 'C' ) // merge text into one value for specific props (uniqued over values)
+               $trg_node->props[$key][0] = trim( implode("\n\n",
+                  array_unique( array_merge( $values, $src_node->props[$key] ))));
+            elseif ( preg_match("/^(AB|AE|AR|AW|CR|DD|LB|LN|MA|SL|SQ|TB|TR|TW|VW)$/", $key) ) // merge unique list values
+               $trg_node->props[$key] = array_unique( array_merge( $values, $src_node->props[$key] ) );
+            //else: no merge for other props, do not overwrite source-property-value(s)
+         }
+         else
+            $trg_node->props[$key] = $values;
+      }
+   }//merge_sgf_node_props
+
+   // appending SgfNodes from source-nodes-array into target-nodes
+   // \param $reset_node_iter false = start "copying" from current internal array-pointer in $src_nodes
+   // NOTE: needed for merging conditional-moves
+   private static function append_remaining_conditional_moves( &$trg_nodes, $src_nodes, $reset_node_iter=false )
+   {
+      // append all nodes from cond-moves after last-move
+      $first_node = true;
+      if ( $reset_node_iter )
+         reset( $src_nodes );
+      while ( list( $id, $node ) = each($src_nodes) )
+      {
+         if ( $id === SGF_VAR_KEY )
+         {
+            if ( isset($trg_nodes[$id]) ) // shouldn't happen
+               error('invalid_args', "SgfBuilder:append_rem_cond_moves.exists_var_key");
+            $trg_nodes[$id] = $node;
+         }
+         else
+         {
+            if ( $first_node )
+            {
+               $node->props['C'][0] = self::sgf_simpletext(ConditionalMoves::$TXT_CM_START)
+                  . ( isset($node->props['C']) ? "\n" . $node->props['C'][0] : '' );
+               $first_node = false;
+            }
+            $trg_nodes[] = $node;
+         }
+      }
+   }//append_remaining_conditional_moves
+
+   // returns first SgfNode from given gametree
+   // NOTE: needed for merging conditional-moves
+   private static function get_variation_first_sgf_node( $var )
+   {
+      // NOTE: it shouldn't happen, that a variation starts with another variation, so "return $var[0];" should suffice, ...
+      //       but who knows what weird SGF-nodes we see, so safely traverse to first non-var node.
+
+      reset($var);
+      while ( list( $id, $node ) = each($var) )
+      {
+         if ( $id == SGF_VAR_KEY ) // shouldn't happen, that variation starts with another variation
+         {
+            $var = $node;
+            reset($var);
+         }
+         else
+            return $node;
+      }
+
+      return null; // no node found
+   }//get_variation_first_sgf_node
 
    private static function switch_move_color( $color )
    {

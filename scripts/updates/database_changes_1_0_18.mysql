@@ -28,3 +28,8 @@ CREATE TABLE MoveSequence (
 ) ENGINE=MyISAM ;
 
 
+-- prefix start & last move of conditional-moves-sequence with move-color
+ALTER TABLE MoveSequence
+   MODIFY StartMove char(3) NOT NULL default '',
+   MODIFY LastMove char(3) NOT NULL default '' ;
+
