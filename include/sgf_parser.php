@@ -445,6 +445,28 @@ class SgfParser
       return $sgf_node;
    }//sgf_convert_move_to_sgf_coords
 
+   // returns first SgfNode from given gametree
+   // NOTE: needed for merging conditional-moves
+   public static function get_variation_first_sgf_node( $var )
+   {
+      // NOTE: it shouldn't happen, that a variation starts with another variation, so "return $var[0];" should suffice, ...
+      //       but who knows what weird SGF-nodes we see, so safely traverse to first non-var node.
+
+      reset($var);
+      while ( list( $id, $node ) = each($var) )
+      {
+         if ( $id === SGF_VAR_KEY ) // shouldn't happen, that variation starts with another variation
+         {
+            $var = $node;
+            reset($var);
+         }
+         else
+            return $node;
+      }
+
+      return null; // no node found
+   }//get_variation_first_sgf_node
+
 } //end 'SgfParser'
 
 

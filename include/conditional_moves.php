@@ -187,10 +187,11 @@ class ConditionalMoves
    public static function check_nodes_cond_moves( &$cm_nodes, $gsize, $player_color, $last_move_color )
    {
       $errors = array();
-      $own_col = ($player_color == BLACK) ? 'B' : 'W';
-      $opp_col = ($player_color == BLACK) ? 'W' : 'B';
-      $last_col = ($last_move_color == BLACK) ? 'B' : 'W';
+      $own_color = ($player_color == BLACK) ? 'B' : 'W';
+      $opp_color = ($player_color == BLACK) ? 'W' : 'B';
+      $last_color = ($last_move_color == BLACK) ? 'B' : 'W';
 
+      $cnt_total_nodes = 0;
       $last_pos = 0;
       $var_names = array(); // varname => 1
 
@@ -199,7 +200,7 @@ class ConditionalMoves
       SgfParser::push_var_stack( $vars, $cm_nodes, array(
             'level'     => 0, // level=0 (root)
             'varname'   => '1',
-            'last_col'  => $last_col,
+            'last_color' => $last_color,
             'last_move' => -1,
             'cnt_pass'  => 0,
             'cnt_vnode' => 0,
@@ -208,7 +209,7 @@ class ConditionalMoves
       while ( list($data, $var) = array_pop($vars) ) // process variations-stack
       {
          $varname = $data['varname'];
-         $last_col = $data['last_col'];
+         $last_color = $data['last_color'];
          $last_move = $data['last_move'];
          $cnt_pass = $data['cnt_pass'];
          $cnt_var_nodes = $data['cnt_vnode'];
@@ -223,30 +224,46 @@ class ConditionalMoves
          $cnt_subvars = 0;
          foreach ( $var as $id => $node )
          {
-            //TODO TODO check, that 1st entry is a move, and not starting with variations !?
-
             if ( $id === SGF_VAR_KEY )
             {
+               // check, that 1st entry is a move (and not another variation); shouldn't happen as SgfParser already prevents that with "bad node start"
+               if ( $cnt_var_nodes == 0 )
+                  $errors[] = sprintf( T_('Variation [%s] at position %s must not start with another variation.#sgf'),
+                     $varname, $last_pos );
+
                $has_vars = true;
-               // this particular node is an array of variations
                $varnum = 1;
-               foreach ( $node as $sub_tree )
+               $first_moves = array();
+               foreach ( $node as $sub_tree ) // this particular node is an array of variations
                {
                   ++$cnt_subvars;
+                  $sub_varname = $varname . '.'. ($varnum++);
                   SgfParser::push_var_stack( $vars, $sub_tree, array(
                         'level'     => $data['level'] + 1,
-                        'varname'   => $varname . '.'. ($varnum++),
-                        'last_col'  => $last_col,
+                        'varname'   => $sub_varname,
+                        'last_color' => $last_color,
                         'last_move' => $last_move,
                         'cnt_pass'  => $cnt_pass,
                         'cnt_vnode' => $cnt_var_nodes,
                      ));
+
+                  // check that all variations start with unique move
+                  $node_first_move = SgfParser::get_variation_first_sgf_node($sub_tree);
+                  $node_mv = self::get_conditional_move_format_from_sgf_node($node_first_move, $gsize, /*die-err*/false );
+                  if ( !is_null($node_mv) )
+                  {
+                     if ( isset($first_moves[$node_mv]) )
+                        $errors[] = sprintf( T_('Variation [%s] at position %s started with move [%s], but it must be different from other variations.#condmoves'),
+                           $sub_varname, $last_pos, self::convert_conditional_move_format_to_board_coords($node_mv, $gsize) );
+                     else
+                        $first_moves[$node_mv] = 1;
+                  }
                }
                continue;
             }//else: a node is a SgfNode-object with an array of properties
 
             // start all variations with opponents move (not own move); except for root-node, which can contain 1st move
-            if ( ++$cnt_var_nodes == 1 && isset($node->props[$own_col]) && $data['level'] > 0 )
+            if ( ++$cnt_var_nodes == 1 && isset($node->props[$own_color]) && $data['level'] > 0 )
                $errors[] = sprintf( T_('Variation [%s] in node [%s] at position %s must start with opponents move.#condmoves'),
                   $varname, $node->get_props_text(), $node->pos );
 
@@ -265,10 +282,10 @@ class ConditionalMoves
             {
                // moves must have alternating colors (relative to last-move)
                $col_key = ( $has_prop_B ) ? 'B' : 'W';
-               if ( $col_key == $last_col )
+               if ( $col_key == $last_color )
                   $errors[] = sprintf( T_('Node [%s] at position %s in variation [%s] has same color as previous move.#condmoves'),
                      $node->get_props_text(), $node->pos, $varname );
-               $last_col = $col_key;
+               $last_color = $col_key;
 
                // NOTE: sgf-coord from SGF-file, but sgf- or board-coord from manually entered cond-move
                $coord = @$node->props[$col_key][0];
@@ -315,17 +332,28 @@ class ConditionalMoves
          }
 
          // each variation must end with own move
-         if ( $cnt_subvars <= 1 && $last_col != $own_col )
+         if ( $cnt_subvars <= 1 && $last_color != $own_color )
             $errors[] = sprintf( T_('Variation [%s] ending at position %s must end with players color.#condmoves'),
                $varname, $last_pos );
+
+         $cnt_total_nodes += $cnt_var_nodes;
       }//game-tree end
+
+
+      // check total number of nodes
+      static $max_cm_nodes = 100;
+      if ( $cnt_total_nodes > $max_cm_nodes )
+         $errors[] = sprintf( T_('Conditional moves sequence contains %s nodes, but only %s are allowed.'),
+            $cnt_total_nodes, $max_cm_nodes );
 
       // check max-size for rebuilt cond-moves (to be stored)
       static $max_cm_len = 2048;
       $sgf_cond_moves = SgfParser::sgf_builder( array( $cm_nodes ), '', '', '',
          'SgfParser::sgf_convert_move_to_sgf_coords', $gsize );
-      if ( strlen($sgf_cond_moves) > $max_cm_len )
-         $errors[] = sprintf( T_('Conditional moves sequence is too long (max. %s characters allowed).'), $max_cm_len );
+      $sgf_length = strlen($sgf_cond_moves);
+      if ( $sgf_length > $max_cm_len )
+         $errors[] = sprintf( T_('Conditional moves sequence is %s bytes long, but only %s are allowed.'),
+            $sgf_length - $max_cm_len, $max_cm_len );
 
       return array( array_reverse( array_unique($errors) ), array_reverse( array_keys($var_names) ), $sgf_cond_moves );
    }//check_nodes_cond_moves
@@ -448,22 +476,39 @@ class ConditionalMoves
       if ( count($cm_nodes) == 0 )
          error('invalid_args', "CM.get_nodes_start_move_sgf_coords.check.miss_cond_moves($size)");
 
-      $node = $cm_nodes[0];
-      if ( !( $node instanceof SgfNode ) )
-         error('invalid_args', "CM.get_nodes_start_move_sgf_coords.check.bad_node($size,$node)");
+      return self::get_conditional_move_format_from_sgf_node( $cm_nodes[0], $size );
+   }//get_nodes_start_move_sgf_coords
 
-      if ( isset($node->props['B']) )
+   /*!
+    * \brief Returns conditional-move in format COLOR . COORD.
+    * \param $sgf_node SgfNode to get B/W-property with move
+    * \return 'W' (=white-PASS), or else move-color + sgf-coord, e.g. 'Bef'; null = error if !$die_on_error
+    */
+   public static function get_conditional_move_format_from_sgf_node( $sgf_node, $size, $die_on_error=true )
+   {
+      if ( !( $sgf_node instanceof SgfNode ) )
+      {
+         if ( $die_on_error )
+            error('invalid_args', "CM.get_cm_move_fmt_from_sgf_node.check.bad_node($size)");
+         return null;
+      }
+
+      if ( isset($sgf_node->props['B']) )
       {
          $color = 'B';
-         $coord = $node->props['B'][0];
+         $coord = $sgf_node->props['B'][0];
       }
-      elseif ( isset($node->props['W']) )
+      elseif ( isset($sgf_node->props['W']) )
       {
          $color = 'W';
-         $coord = $node->props['W'][0];
+         $coord = $sgf_node->props['W'][0];
       }
       else
-         error('invalid_args', "CM.get_nodes_start_move_sgf_coords.check.miss_BW_move($size,".$node->get_props_text().")");
+      {
+         if ( $die_on_error )
+            error('invalid_args', "CM.get_cm_move_fmt_from_sgf_node.check.miss_BW_move($size,".$sgf_node->get_props_text().")");
+         return null;
+      }
 
       if ( (string)$coord == '' || ($size <= 19 && $coord == 'tt') )
          $move = $color; // PASS
@@ -475,10 +520,22 @@ class ConditionalMoves
          $move = $color . number2sgf_coords( $x, $y, $size );
       }
       else
-         error('invalid_args', "CM.get_nodes_start_move_sgf_coords($size,$coord)");
+      {
+         if ( $die_on_error )
+            error('invalid_args', "CM.get_cm_move_fmt_from_sgf_node.conv_move($size,$coord)");
+         return null;
+      }
 
       return $move;
-   }//get_nodes_start_move_sgf_coords
+   }//get_conditional_move_format_from_sgf_node
+
+   private static function convert_conditional_move_format_to_board_coords( $cm_move, $size )
+   {
+      $board_move = $cm_move[0];
+      if ( strlen($cm_move) == 3 )
+         $board_move .= sgf2board_coords( substr($cm_move, 1), $size );
+      return $board_move;
+   }//convert_conditional_move_format_to_board_coords
 
    /*!
     * \brief callback-function for SgfParser::sgf_builder() to strip out C-sgf-nodes with text starting conditional-moves.

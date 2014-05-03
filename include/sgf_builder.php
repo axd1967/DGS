@@ -1115,7 +1115,7 @@ class SgfBuilder
                      $sub_var = null;
                      foreach ( $merge_node as $sub_tree ) // this particular merge-node is an array of variations
                      {
-                        $sub_node = self::get_variation_first_sgf_node($sub_tree);
+                        $sub_node = SgfParser::get_variation_first_sgf_node($sub_tree);
                         if ( !is_null($sub_node) ) // no sgf-node found (shouldn't happen as empty var is forbidden)
                         {
                            if ( $cm_node->sgf_move == $sub_first_node->sgf_move )
@@ -1331,28 +1331,6 @@ class SgfBuilder
          }
       }
    }//append_remaining_conditional_moves
-
-   // returns first SgfNode from given gametree
-   // NOTE: needed for merging conditional-moves
-   private static function get_variation_first_sgf_node( $var )
-   {
-      // NOTE: it shouldn't happen, that a variation starts with another variation, so "return $var[0];" should suffice, ...
-      //       but who knows what weird SGF-nodes we see, so safely traverse to first non-var node.
-
-      reset($var);
-      while ( list( $id, $node ) = each($var) )
-      {
-         if ( $id == SGF_VAR_KEY ) // shouldn't happen, that variation starts with another variation
-         {
-            $var = $node;
-            reset($var);
-         }
-         else
-            return $node;
-      }
-
-      return null; // no node found
-   }//get_variation_first_sgf_node
 
    private static function switch_move_color( $color )
    {

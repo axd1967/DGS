@@ -11,6 +11,19 @@ Release [2014-03-27] - DGS 1.0.17 - tag [release-1_0_17-20140327] on branch [DGS
 ChangeLog
 ------------------------------------------------------------------
 
+2014-05-04 jug
+
+   * include/conditional_moves.php (ConditionalMoves.check_nodes_cond_moves,
+       ~.get_nodes_start_move_sgf_coords, ~.get_conditional_move_format_from_sgf_node,
+       ~.convert_conditional_move_format_to_board_coords),
+     include/sgf_parser.php (SgfParser.get_variation_first_sgf_node),
+     include/sgf_builder.php (class SgfBuilder):
+   - added checks on conditional-moves
+     - extended check of conditional-moves: first entry of variation must be a node and not another variation
+     - check that all variations for conditional-moves start with a unique move
+     - restrict total number of sgf-nodes for conditional-moves to 100
+     - added info about how much size of conditional-moves is too large
+
 2014-05-03 jug
 
    * include/sgf_builder.php (class SgfBuilder, ~.set_include_conditional_moves, ~.set_player_uid,
