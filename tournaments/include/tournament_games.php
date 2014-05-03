@@ -387,20 +387,11 @@ class TournamentGames
     */
    public static function count_tournament_games( $tid, $round_id=0, $arr_status=null, $pool_group=false )
    {
-      static $tg_undone_status = array( TG_STATUS_INIT, TG_STATUS_PLAY, TG_STATUS_SCORE, TG_STATUS_WAIT );
       $tid = (int)$tid;
       $round_id = (int)$round_id;
-      if ( is_null($arr_status) )
-         $arr_status = $tg_undone_status;
-      elseif ( !is_array($arr_status) )
-         $arr_status = array( $arr_status );
 
-      $qsql = new QuerySQL(
-         SQLP_FIELDS, 'COUNT(*) AS X_Count',
-         SQLP_FROM, 'TournamentGames AS TG',
-         SQLP_WHERE, "TG.tid=$tid", build_query_in_clause('TG.Status', $arr_status, /*is_str*/true) );
-      if ( $round_id > 0 )
-         $qsql->add_part( SQLP_WHERE, "TG.Round_ID=$round_id" );
+      $qsql = self::build_query_count_tournament_games( $tid, $round_id, $arr_status );
+      $qsql->add_part( SQLP_FIELDS, 'COUNT(*) AS X_Count' );
 
       if ( $pool_group ) // group by Pool, Status
       {
@@ -422,6 +413,41 @@ class TournamentGames
          return ( $row ) ? (int)$row['X_Count'] : 0;
       }
    }//count_tournament_games
+
+   /*!
+    * \brief Returns true if tournament-game-entry exists for given parameters.
+    * \param $arr_status null = search for undone games (INIT|PLAY|SCORE|WAIT)
+    */
+   public static function exists_tournament_game( $tid, $round_id=0, $arr_status=null )
+   {
+      $tid = (int)$tid;
+      $round_id = (int)$round_id;
+
+      $qsql = self::build_query_count_tournament_games( $tid, $round_id, $arr_status );
+      $qsql->add_part( SQLP_FIELDS, '1' );
+      $qsql->add_part( SQLP_LIMIT, '1' );
+
+      $row = mysql_single_fetch( "TournamentGames:exists_tournament_game($tid,$round_id)", $qsql->get_select() );
+      return (bool)$row;
+   }//exists_tournament_game
+
+   private static function build_query_count_tournament_games( $tid, $round_id=0, $arr_status=null )
+   {
+      static $tg_undone_status = array( TG_STATUS_INIT, TG_STATUS_PLAY, TG_STATUS_SCORE, TG_STATUS_WAIT );
+
+      if ( is_null($arr_status) )
+         $arr_status = $tg_undone_status;
+      elseif ( !is_array($arr_status) )
+         $arr_status = array( $arr_status );
+
+      $qsql = new QuerySQL(
+         SQLP_FROM, 'TournamentGames AS TG',
+         SQLP_WHERE, "TG.tid=$tid", build_query_in_clause('TG.Status', $arr_status, /*is_str*/true) );
+      if ( $round_id > 0 )
+         $qsql->add_part( SQLP_WHERE, "TG.Round_ID=$round_id" );
+
+      return $qsql;
+   }//build_query_count_tournament_games
 
    /*! \brief Counts Games for consistency-check with Tournament-games. */
    public static function count_games_started( $tid, $round_id )

@@ -125,6 +125,7 @@ class GuiBulletin
          $arr = array();
          $arr[BULLETIN_FLAG_ADMIN_CREATED] = T_('Admin-Created#B_flag');
          $arr[BULLETIN_FLAG_USER_EDIT]     = T_('User-Changeable#B_flag');
+         $arr[BULLETIN_FLAG_CRON_CREATED]  = T_('Cron-Created#B_flag');
          self::$ARR_BULLETIN_TEXTS[$key] = $arr;
       }
 
@@ -161,7 +162,8 @@ class GuiBulletin
       $text = make_html_safe($bulletin->Text, true, $rx_term);
       $text = preg_replace( "/[\r\n]+/", '<br>', $text ); //reduce multiple LF to one <br>
       $publish_text = sprintf( T_('[%s] by %s#bulletin'),
-         date(DATE_FMT2, $bulletin->PublishTime), $bulletin->User->user_reference() );
+         date(DATE_FMT2, $bulletin->PublishTime),
+         ( $bulletin->uid > 0 ? $bulletin->User->user_reference() : T_('CRON') ) );
 
       if ( $bulletin->tid > 0 )
       {

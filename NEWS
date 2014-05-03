@@ -9,6 +9,10 @@ Copyright (C) 2001-2014  Erik Ouchterlony, Jens-Uwe Gaspar
 
    Minor changes:
 
+   * <home tournaments/list_tournaments.php>Tournaments</home>:
+      * Round-Robin tournaments: Notify tournament-directors with private bulletin about last game-finished
+
+
    Bug fixes:
 
    Code improvements:

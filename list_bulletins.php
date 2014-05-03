@@ -268,7 +268,7 @@ $GLOBALS['ThePage'] = new Page('BulletinList');
          $row_str[ 1] = $links;
       }
       if ( @$btable->Is_Column_Displayed[ 2] )
-         $row_str[ 2] = user_reference( REF_LINK, 1, '', $uid, $bulletin->User->Handle, '');
+         $row_str[ 2] = ( $uid > 0 ) ? user_reference( REF_LINK, 1, '', $uid, $bulletin->User->Handle, '') : T_('CRON');
       if ( @$btable->Is_Column_Displayed[ 3] )
          $row_str[ 3] = GuiBulletin::getStatusText( $bulletin->Status );
       if ( @$btable->Is_Column_Displayed[ 4] )

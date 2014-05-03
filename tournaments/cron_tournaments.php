@@ -29,6 +29,8 @@ require_once 'tournaments/include/tournament_helper.php';
 require_once 'tournaments/include/tournament_ladder_helper.php';
 require_once 'tournaments/include/tournament_log.php';
 require_once 'tournaments/include/tournament_news.php';
+require_once 'tournaments/include/tournament_round.php';
+require_once 'tournaments/include/tournament_round_helper.php';
 
 $TheErrors->set_mode(ERROR_MODE_COLLECT);
 
@@ -114,7 +116,7 @@ if ( ALLOW_TOURNAMENTS && !$is_down )
    $tg_iterator = new ListIterator( 'cron_tournament.load_tgames.score', null, $tg_order );
    $tg_iterator = TournamentGames::load_tournament_games( $tg_iterator, 0, 0, 0, TG_STATUS_SCORE );
 
-   $clear_cache = array();
+   $visited_tourney = array();
    while ( list(,$arr_item) = $tg_iterator->getListIterator() )
    {
       list( $tgame, $orow ) = $arr_item;
@@ -126,18 +128,33 @@ if ( ALLOW_TOURNAMENTS && !$is_down )
          $tcache->release_tournament_cron_lock( $tid );
          if ( $tcache->set_tournament_cron_lock( $tid ) )
             TournamentHelper::process_tournament_game_end( $tourney, $tgame, /*check*/false );
-         $clear_cache[$tid] = $tourney->Type;
+         $visited_tourney[$tid] = $tourney;
       }
    }
    $tcache->release_tournament_cron_lock();
 
    // clear caches
-   foreach ( $clear_cache as $tid => $ttype )
+   foreach ( $visited_tourney as $tid => $tourney )
    {
+      $ttype = $tourney->Type;
       $dbgmsg = "cron_tournament.game_end($tid,$ttype)";
       TournamentGames::delete_cache_tournament_games( $dbgmsg, $tid );
       if ( $ttype == TOURNEY_TYPE_LADDER )
          TournamentLadder::delete_cache_tournament_ladder( $dbgmsg, $tid );
+   }
+
+   // notify T-director about last game-finished for round-robin-Ts
+   static $ARR_ROUND_ROBIN_TG_STAT_OPEN = array( TG_STATUS_INIT, TG_STATUS_PLAY, TG_STATUS_SCORE );
+   foreach ( $visited_tourney as $tid => $tourney )
+   {
+      if ( $tourney->Type == TOURNEY_TYPE_ROUND_ROBIN )
+      {
+         $tround = TournamentRound::load_tournament_round( $tid, $tourney->CurrentRound );
+         if ( is_null($tround) ) // something dead wrong if that happens
+            continue;
+         if ( !TournamentGames::exists_tournament_game( $tid, $tround->ID, $ARR_ROUND_ROBIN_TG_STAT_OPEN ) )
+            TournamentRoundHelper::notify_directors_last_game_finished( $tid, $tourney->CurrentRound );
+      }
    }
 
 

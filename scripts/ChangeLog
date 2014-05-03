@@ -11,6 +11,19 @@ Release [2014-03-27] - DGS 1.0.17 - tag [release-1_0_17-20140327] on branch [DGS
 ChangeLog
 ------------------------------------------------------------------
 
+2014-05-03 jug
+
+   * tournaments/include/tournament_round_helper.php (TournamentRoundHelper.notify_directors_last_game_finished),
+     tournaments/include/tournament_games.php (TournamentGames.count_tournament_games,
+       ~.exists_tournament_game, ~.build_query_count_tournament_games),
+     include/db/bulletin.php (BULLETIN_FLAG_CRON_CREATED; Bulletin.build_query_sql),
+     include/gui_bulletin.php (GuiBulletin.build_view_bulletin, ~.getFlagsText),
+     specs/db/table-Bulletins.txt,
+     tournaments/cron_tournaments.php, list_bulletins.php, NEWS:
+   - notify tournament-directors with private bulletin about last game-finished
+     for round-robin-tournaments
+   - allow bulletins with uid=0 representing bulletins created by CRON-scripts
+
 2014-05-01 jug
 
    * include/make_translationfiles.php (translations_query),

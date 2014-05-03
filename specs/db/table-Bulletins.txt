@@ -40,7 +40,7 @@ Permission-Matrix for writing bulletins:
      - update allowed by user;  Target: ALL, UL
 
    - Category = TNEWS : tournament-specific news / announcements
-     - create allowed by Admin, T-Admin, TD, T-owner; Target: TD (private T-news), TP (public T-news)
+     - create allowed by Admin, CRON, T-Admin, TD, T-owner; Target: TD (private T-news), TP (public T-news)
 
    - Category = FEATURE : feature-info
      - create allowed by Admin; Target: ALL, UL, TD, TP, MPG
@@ -119,6 +119,7 @@ Description:
 * Flags : admin-flags of bulletin
    - 0x01 = created by admin
    - 0x02 = changeable by user
+   - 0x04 = created by CRON-script
 
 * PublishTime : defines order of bulletins
 

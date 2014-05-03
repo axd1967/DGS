@@ -62,6 +62,7 @@ define('CHECK_BULLETIN_TARGET_TYPE', 'UNSET|ALL|TD|TP|UL|MPG');
 // also adjust GuiBulletin::getFlagsText()
 define('BULLETIN_FLAG_ADMIN_CREATED', 0x01); // bulletin created by admin
 define('BULLETIN_FLAG_USER_EDIT',     0x02); // bulletin can be edited by user
+define('BULLETIN_FLAG_CRON_CREATED',  0x04); // bulletin created by cron
 
 // stored in bitmask Players.SkipBulletin
 define('BULLETIN_SKIPCAT_TOURNAMENT',  0x01);
@@ -338,11 +339,11 @@ class Bulletin
       if ( $with_player )
       {
          $qsql->add_part( SQLP_FIELDS,
-            'B.uid AS BP_ID',
+            'COALESCE(B.uid,0) AS BP_ID',
             'BP.Name AS BP_Name',
             'BP.Handle AS BP_Handle' );
          $qsql->add_part( SQLP_FROM,
-            'INNER JOIN Players AS BP ON BP.ID=B.uid' );
+            'LEFT JOIN Players AS BP ON BP.ID=B.uid' ); // LEFT-JOIN for uid=0 (=CRON)
       }
       if ( $bid > 0 )
          $qsql->add_part( SQLP_WHERE, "B.ID=$bid" );

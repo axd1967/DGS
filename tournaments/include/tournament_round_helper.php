@@ -22,6 +22,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 $TranslateGroups[] = "Tournament";
 
 require_once 'include/std_classes.php';
+require_once 'include/db/bulletin.php';
 require_once 'tournaments/include/tournament.php';
 require_once 'tournaments/include/tournament_cache.php';
 require_once 'tournaments/include/tournament_extension.php';
@@ -665,6 +666,29 @@ class TournamentRoundHelper
 
       return $errmsg;
    }//check_tournament_participant_max_games
+
+   /*! \brief Creates bulletin addressed to tournament-directors only about last game finished for tournament-round. */
+   public static function notify_directors_last_game_finished( $tid, $round )
+   {
+      $bulletin = new Bulletin( 0, /*CRON*/0, null, BULLETIN_CAT_TOURNAMENT_NEWS, BULLETIN_STATUS_SHOW,
+         BULLETIN_TRG_TD, BULLETIN_FLAG_CRON_CREATED, $GLOBALS['NOW'], 0, $tid );
+
+      $bulletin->Subject = sprintf( T_('[Notification by CRON]: Last game in round %s finished#tourney'), $round );
+      $bulletin->Text = sprintf( T_('To all tournament directors of this tournament,
+
+this is an automatic notification informing you, that all games in round %s of this tournament has been processed.
+Next step for you is to finish the tournament round, and then either start a new round or end the tournament.'), $round );
+
+      ta_begin();
+      {//HOT-section to insert bulletin
+         $success = $bulletin->persist();
+         if ( $success )
+            $success = $bulletin->update_count_players('TRH:notify_directors_last_game_finished');
+      }
+      ta_end();
+
+      return $success;
+   }//notify_directors_last_game_finished
 
 } // end of 'TournamentRoundHelper'
 
