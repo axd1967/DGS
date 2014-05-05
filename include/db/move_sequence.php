@@ -238,5 +238,28 @@ class MoveSequence
          DgsCache::delete( $dbgmsg, CACHE_GRP_COND_MOVES, "CondMoves.$gid.$uid" );
    }
 
+   /*! \brief Returns status-text or all status-texts (if arg=null). */
+   public static function getStatusText( $status )
+   {
+      static $ARR_MSEQ_STATUS = null; // status => text
+
+      // lazy-init of texts
+      if ( is_null($ARR_MSEQ_STATUS) )
+      {
+         $arr = array();
+         $arr[MSEQ_STATUS_INACTIVE] = T_('Inactive#CM_status');
+         $arr[MSEQ_STATUS_ACTIVE] = T_('Active#CM_status');
+         $arr[MSEQ_STATUS_ILLEGAL] = T_('Illegal#CM_status');
+         $arr[MSEQ_STATUS_OPP_MSG] = T_('Opponent Message#CM_status');
+         $arr[MSEQ_STATUS_DEVIATED] = T_('Deviated#CM_status');
+         $arr[MSEQ_STATUS_DONE] = T_('Done#CM_status');
+         $ARR_MSEQ_STATUS = $arr;
+      }
+
+      if ( !isset($ARR_MSEQ_STATUS[$status]) )
+         error('invalid_args', "MoveSequence:getStatusText($status)");
+      return $ARR_MSEQ_STATUS[$status];
+   }//getStatusText
+
 } // end of 'MoveSequence'
 ?>

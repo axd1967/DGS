@@ -527,7 +527,7 @@ $GLOBALS['ThePage'] = new Page('Game');
             $message = "<c>\n\n</c>";
       }
    }
-   else if ( preg_match("/^(add)$/", $cm_action) )
+   else if ( preg_match("/^(show|edit)$/", $cm_action) )
    {
       $may_play = false;
    }
@@ -1732,7 +1732,6 @@ function handle_conditional_moves( $move_seq, $game_row, $cm_action, &$board, $t
          {
             $cm_id = ( is_null($move_seq) ) ? 0 : $move_seq->ID; // NEW or EDIT
             $cm_flags = 0;
-            $cm_active = get_request_arg('cm_active', 0); //TODO TODO this is a status, not a flag
             $cm_private = get_request_arg('cm_private', 0);
             if ( $cm_private )
                $cm_flags |= MSEQ_FLAG_PRIVATE;
@@ -1768,7 +1767,6 @@ function draw_conditional_moves_input( &$gform, $gid, $my_id, $cm_action, $move_
    $var_view = get_request_arg('cm_var_view', '1');
    if ( !$var_view )
       $var_view = '1';
-   $cm_active = get_request_arg('cm_active', ( ($move_seq->Status == MSEQ_STATUS_ACTIVE) ? 1 : 0) );
    $cm_private = get_request_arg('cm_private', ( ($move_seq->Flags & MSEQ_FLAG_PRIVATE) ? 1 : 0) );
 
    $var_views_str = implode(' , ', $var_names);
@@ -1822,7 +1820,7 @@ function draw_conditional_moves_input( &$gform, $gid, $my_id, $cm_action, $move_
          "</TD>\n",
       '</TR>',
       "<TR class=Vars>\n",
-         '<TD class=Rubric>', T_('Variations#condmoves'), ":</TD>\n",
+         '<TD class=Rubric>', span('smaller', T_('Variations#condmoves')), ":</TD>\n",
          '<TD>', $var_views_str, "</TD>\n",
          '<TD class="Preview">',
             $gform->print_insert_text_input( 'cm_var_view', 6, 16, $var_view ),
@@ -1831,9 +1829,9 @@ function draw_conditional_moves_input( &$gform, $gid, $my_id, $cm_action, $move_
          "</TD>\n",
       '</TR>',
       "<TR class=Attr>\n",
-         '<TD class=Rubric>', T_('Attributes#condmoves'), ":</TD>\n",
+         '<TD class=Rubric>', span('smaller', T_('Status#condmoves') . ' / ' . T_('Attributes#condmoves')), ":</TD>\n",
          '<TD colspan="2">',
-            $gform->print_insert_checkbox( 'cm_active', '1', T_('Active#condmoves'), $cm_active, $attbs_disabled ),
+            span('EmphasizeWarn', MoveSequence::getStatusText($move_seq->Status)),
             SMALL_SPACING, SMALL_SPACING,
             $gform->print_insert_checkbox( 'cm_private', '1', T_('Private (after game finished)#condmoves'), $cm_private, $attbs_disabled ),
          "</TD>\n",

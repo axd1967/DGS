@@ -11,6 +11,13 @@ Release [2014-03-27] - DGS 1.0.17 - tag [release-1_0_17-20140327] on branch [DGS
 ChangeLog
 ------------------------------------------------------------------
 
+2014-05-05 jug
+
+   * include/db/move_sequence.php (MoveSequence.getStatusText),
+     game.php (handle_conditional_moves, draw_conditional_moves_input):
+   - show conditional-moves current status of MoveSequence-entry
+   - bugfix: board can be not clicked on for move if in show/edit-mode for conditional-moves
+
 2014-05-04 jug
 
    * include/conditional_moves.php (ConditionalMoves.check_nodes_cond_moves,
