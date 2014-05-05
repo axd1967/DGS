@@ -12,6 +12,9 @@ Copyright (C) 2001-2014  Erik Ouchterlony, Jens-Uwe Gaspar
    * <home tournaments/list_tournaments.php>Tournaments</home>:
       * Round-Robin tournaments: Notify tournament-directors with private bulletin about last game-finished
 
+   * Game page:
+      * Changed default of territory-markers for viewing finished game to showing them like in score-mode
+
 
    Bug fixes:
 

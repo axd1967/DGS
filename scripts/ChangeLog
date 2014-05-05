@@ -13,6 +13,9 @@ ChangeLog
 
 2014-05-05 jug
 
+   * game.php, NEWS:
+   - changed default for viewing finished game showing territory-markers like in score-mode
+
    * include/db/move_sequence.php (MoveSequence.getStatusText),
      game.php (handle_conditional_moves, draw_conditional_moves_input):
    - show conditional-moves current status of MoveSequence-entry

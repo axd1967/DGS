@@ -81,7 +81,7 @@ $GLOBALS['ThePage'] = new Page('Game');
      movechange=1&gotomove= : view selected move (for view-move selectbox)
      move|m=            : view specific move (alternative for selecting move)
 
-     tm=1               : show territory markers (1=show, 0=normal end view) for finished game
+     tm=1               : hide territory markers (1=hide, 0=view with marked territory like in score-mode) for finished game
 */
    // NOTE: using page: confirm.php
    // NOTE: allowed for guest-user: toggle-observe
@@ -321,9 +321,9 @@ $GLOBALS['ThePage'] = new Page('Game');
          if ( abs($Score) <= SCORE_MAX && $move == $Moves && !($Flags & GAMEFLAGS_NO_RESULT) ) // don't calc for resign/time-out/forfeit/no-result
          {
             if ( $terr_marker ) // show territory-marker
-               $score_board = $TheBoard;
-            else
                $score_board = clone $TheBoard;
+            else
+               $score_board = $TheBoard;
             list( $score, $game_score ) =
                GameActionHelper::calculate_game_score( $score_board, $stonestring, $Ruleset, $coord );
          }
