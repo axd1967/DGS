@@ -212,6 +212,7 @@ class QuickHandlerGame extends QuickHandler
 
       $this->gah->set_game_action( $this->action );
       $this->gah->init_globals( $dbgmsg );
+      $this->gah->load_game_conditional_moves( $dbgmsg );
       $this->TheBoard = $this->gah->load_game_board( $dbgmsg ); // load board with moves
    }//prepare
 
@@ -279,7 +280,7 @@ class QuickHandlerGame extends QuickHandler
       }//switch $this->action
 
       $this->gah->prepare_game_action_generic();
-      $this->gah->update_game( $dbgmsg );
+      $this->gah->process_game_action( $dbgmsg );
    }//process_cmd_play
 
    private function process_cmd_status_score()

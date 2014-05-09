@@ -11,6 +11,43 @@ Release [2014-03-27] - DGS 1.0.17 - tag [release-1_0_17-20140327] on branch [DGS
 ChangeLog
 ------------------------------------------------------------------
 
+2014-05-09 jug
+
+   * include/game_actions.php (class GameActionHelper, ~.__construct, ~.has_conditional_moves,
+       ~.init_globals, ~.load_game_conditional_moves, ~.prepare_game_action_do_move,
+       ~.prepare_game_action_pass, ~.process_game_action, ~.update_game, ~.process_post_action,
+       ~.process_conditional_moves, ~.prepare_conditional_moves, ~.build_board_moves,
+       ~.validate_next_conditional_move, ~.update_cm_move_sequence, ~.play_conditional_move),
+     include/db/move_sequence.php (MSEQ_ERR_...;
+       class MoveSequence, ~.__construct, ~.set_last_move_info, ~.fillEntityData, ~.new_from_row,
+         ~.load_last_move_sequence, ~.deactivate_move_sequences, ~.getErrorCodeText),
+     include/sgf_builder.php (SgfBuilder.load_conditional_moves, ~.merge_conditional_moves),
+     include/conditional_moves.php (ConditionalMoves.fill_conditional_moves_attributes),
+     include/quick/quick_game.php (QuickHandlerGame.prepare, ~.process_cmd_play),
+     include/game_functions.php (GameFinalizer.finish_game),
+     scripts/updates/database_changes_1_0_18.mysql,
+     specs/db/dragon-ddl.sql, specs/db/table-Games.txt,
+     game.php (handle_conditional_moves),
+     confirm.php, quick_play.php:
+   - added "playing" of conditonal-moves after submitting a move
+     - conditional-moves are only played for MOVE or PASS and for non-multi-player-games
+     - added MoveSequence.ErrorCode to differ illegal-move-issues on playing conditional-moves
+     - GameActionHelper:
+       - fix assertion-expression
+       - extract HOT-section to update game and process conditional-moves
+       - notify only opponent of last-move executed after processing conditional-moves
+       - update Players.LastAccess/LastQuickAccess/Activity and increasing move-stats
+         only on original move and not for conditional-moves
+     - refactored SgfBuilder.prepare_merge_cond_moves()
+       to ConditionalMoves.fill_conditional_moves_attributes() for re-use
+   - deactivate all conditional-moves when game is finished
+   - bugfix SgfBuilder: wrong var used for check on 1st node
+-----------
+-- added error-code for illegal conditional-move
+ALTER TABLE MoveSequence
+   ADD ErrorCode tinyint unsigned NOT NULL default '0' AFTER Flags ;
+-----------
+
 2014-05-05 jug
 
    * game.php, NEWS:

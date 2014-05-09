@@ -557,6 +557,43 @@ class ConditionalMoves
       return $sgf_node;
    }//sgf_strip_cond_moves_notes
 
+   /*!
+    * \brief Sets SgfNode-attributes: node->move_nr starting with $start_move_nr
+    *       and set node->sgf_move=Baa|Wbb|B(=pass) for all SgfNodes.
+    * \return modified list of sgf-nodes
+    */
+   public static function fill_conditional_moves_attributes( $nodes, $start_move_nr )
+   {
+      // traverse game-tree
+      $vars = array(); // stack for variations for traversal of game-tree
+      SgfParser::push_var_stack( $vars, $nodes, $start_move_nr );
+
+      while ( list($move_nr, $var) = array_pop($vars) ) // process variations-stack
+      {
+         // a variation is an array of nodes
+         foreach ( $var as $id => $node )
+         {
+            if ( $id === SGF_VAR_KEY )
+            {
+               // this particular node is an array of variations
+               foreach ( $node as $sub_tree )
+                  SgfParser::push_var_stack( $vars, $sub_tree, $move_nr );
+               continue;
+            }//else: a node is a SgfNode-object with an array of properties
+
+            // set SgfNode->sgf_move for easier move-comparing/merging
+            if ( isset($node->props['B']) )
+               $node->sgf_move = 'B' . $node->props['B'][0];
+            if ( isset($node->props['W']) )
+               $node->sgf_move = 'W' . $node->props['W'][0];
+
+            $node->move_nr = $move_nr++; // add move-nr
+         }//var-end
+      }//game-tree end
+
+      return $nodes;
+   }//fill_conditional_moves_attributes
+
 } //end 'ConditionalMoves'
 
 ?>

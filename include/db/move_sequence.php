@@ -35,6 +35,16 @@ require_once 'include/std_classes.php';
 
 define('MSEQ_FLAG_PRIVATE', 0x01); // conditional moves only visible to "author"
 
+define('MSEQ_ERR_MISS_CONTEXT_MOVE', 1);
+define('MSEQ_ERR_NO_LAST_MOVE', 2);
+define('MSEQ_ERR_NEXT_MOVE_VARNODE', 3);
+define('MSEQ_ERR_NEXT_MOVE_BAD_MOVE_NR', 4);
+define('MSEQ_ERR_NEXT_MOVE_COLOR_MISMATCH', 5);
+define('MSEQ_ERR_ILLEGAL_STATE_PASS_MOVE', 6);
+define('MSEQ_ERR_ILLEGAL_MOVE_COORDS', 7);
+define('MSEQ_ERR_ILLEGAL_MOVE_KO', 8);
+define('MSEQ_ERR_ILLEGAL_MOVE_SUICIDE', 9);
+
 
  /*!
   * \class MoveSequence
@@ -46,7 +56,7 @@ global $ENTITY_MOVE_SEQUENCE; //PHP5
 $ENTITY_MOVE_SEQUENCE = new Entity( 'MoveSequence',
       FTYPE_PKEY, 'ID',
       FTYPE_AUTO, 'ID',
-      FTYPE_INT,  'ID', 'gid', 'uid', 'Flags', 'StartMoveNr', 'LastMoveNr', 'LastMovePos',
+      FTYPE_INT,  'ID', 'gid', 'uid', 'Flags', 'ErrorCode', 'StartMoveNr', 'LastMoveNr', 'LastMovePos',
       FTYPE_TEXT, 'StartMove', 'LastMove', 'Sequence',
       FTYPE_ENUM, 'Status'
    );
@@ -58,6 +68,7 @@ class MoveSequence
    public $uid;
    public $Status;
    public $Flags;
+   public $ErrorCode;
    public $StartMoveNr;
    public $StartMove;
    public $LastMoveNr;
@@ -70,7 +81,7 @@ class MoveSequence
    public $parsed_nodes = null; // SGF-game-tree
 
    /*! \brief Constructs MoveSequence-object with specified arguments. */
-   public function __construct( $id=0, $gid=0, $uid=0, $status=MSEQ_STATUS_INACTIVE, $flags=0,
+   public function __construct( $id=0, $gid=0, $uid=0, $status=MSEQ_STATUS_INACTIVE, $flags=0, $error_code=0,
          $start_move_nr=0, $start_move='', $last_move_nr=0, $last_move_pos=0, $last_move='', $sequence='' )
    {
       $this->ID = (int)$id;
@@ -78,11 +89,10 @@ class MoveSequence
       $this->uid = (int)$uid;
       $this->setStatus( $status );
       $this->Flags = (int)$flags;
+      $this->ErrorCode = (int)$error_code;
       $this->StartMoveNr = (int)$start_move_nr;
       $this->StartMove = $start_move;
-      $this->LastMoveNr = (int)$last_move_nr;
-      $this->LastMovePos = (int)$last_move_pos;
-      $this->LastMove = $last_move;
+      $this->set_last_move_info( $last_move_nr, $last_move_pos, $last_move );
       $this->Sequence = $sequence;
    }//__construct
 
@@ -91,6 +101,13 @@ class MoveSequence
       if ( !preg_match( "/^(".CHECK_MSEQ_STATUS.")$/", $status ) )
          error('invalid_args', "MoveSequence.setStatus($status)");
       $this->Status = $status;
+   }
+
+   public function set_last_move_info( $last_move_nr, $last_move_pos, $last_move )
+   {
+      $this->LastMoveNr = (int)$last_move_nr;
+      $this->LastMovePos = (int)$last_move_pos;
+      $this->LastMove = $last_move;
    }
 
    /*! \brief Inserts or updates MoveSequence-entry in database. */
@@ -132,6 +149,7 @@ class MoveSequence
       $data->set_value( 'uid', $this->uid );
       $data->set_value( 'Status', $this->Status );
       $data->set_value( 'Flags', $this->Flags );
+      $data->set_value( 'ErrorCode', $this->ErrorCode );
       $data->set_value( 'StartMoveNr', $this->StartMoveNr );
       $data->set_value( 'StartMove', $this->StartMove );
       $data->set_value( 'LastMoveNr', $this->LastMoveNr );
@@ -164,6 +182,7 @@ class MoveSequence
             @$row['uid'],
             @$row['Status'],
             @$row['Flags'],
+            @$row['ErrorCode'],
             @$row['StartMoveNr'],
             @$row['StartMove'],
             @$row['LastMoveNr'],
@@ -178,9 +197,11 @@ class MoveSequence
     * \brief Loads and returns latest MoveSequence-object (biggest ID) for given game-id and user-id.
     * \return NULL if nothing found; MoveSequence-object otherwise
     */
-   public static function load_last_move_sequence( $gid, $uid )
+   public static function load_last_move_sequence( $gid, $uid, $status=null )
    {
       $qsql = self::build_query_sql( $gid, $uid );
+      if ( !is_null($status) )
+         $qsql->add_part( SQLP_WHERE, "MS.Status='".mysql_addslashes($status)."'" );
       $qsql->add_part( SQLP_ORDER, 'MS.ID DESC' );
       $qsql->add_part( SQLP_LIMIT, '1' );
 
@@ -230,6 +251,17 @@ class MoveSequence
       return $move_seq;
    }//load_cache_last_move_sequence
 
+   /*! \brief Deactives still active conditional-moves setting them to INACTIVE-status. */
+   public static function deactivate_move_sequences( $dbgmsg, $gid )
+   {
+      $gid = (int)$gid;
+      $result = db_query( $dbgmsg.".MoveSequence:deactivate_move_sequences($gid)",
+         "UPDATE MoveSequence SET Status='".MSEQ_STATUS_INACTIVE."' " .
+         "WHERE gid=$gid AND Status='".MSEQ_STATUS_ACTIVE."'" );
+      self::delete_cache_move_sequence( $dbgmsg, $gid );
+      return $result;
+   }
+
    public static function delete_cache_move_sequence( $dbgmsg, $gid, $uid=0 )
    {
       if ( $uid <= 0 )
@@ -260,6 +292,32 @@ class MoveSequence
          error('invalid_args', "MoveSequence:getStatusText($status)");
       return $ARR_MSEQ_STATUS[$status];
    }//getStatusText
+
+   /*! \brief Returns text for error-codes. */
+   public static function getErrorCodeText( $error_code )
+   {
+      static $ARR_MSEQ_ERRORCODE = null; // error-code => text
+
+      // lazy-init of texts
+      if ( is_null($ARR_MSEQ_STATUS) )
+      {
+         $arr = array();
+         $arr[MSEQ_ERR_MISS_CONTEXT_MOVE] = T_('Missing context start-move#CM_err');
+         $arr[MSEQ_ERR_NO_LAST_MOVE] = T_('No last move found#CM_err');
+         $arr[MSEQ_ERR_NEXT_MOVE_VARNODE] = T_('Expected move-node, but found variation#CM_err');
+         $arr[MSEQ_ERR_NEXT_MOVE_BAD_MOVE_NR] = T_('Unexpected move-nr for next-move found#CM_err');
+         $arr[MSEQ_ERR_NEXT_MOVE_COLOR_MISMATCH] = T_('Color mismatch for next-move#CM_err');
+         $arr[MSEQ_ERR_ILLEGAL_STATE_PASS_MOVE] = T_('Bad game-status for PASS-move#CM_err');
+         $arr[MSEQ_ERR_ILLEGAL_MOVE_COORDS] = T_('Illegal position for next-move#CM_err');
+         $arr[MSEQ_ERR_ILLEGAL_MOVE_KO] = T_('Illegal ko for next-move#CM_err');
+         $arr[MSEQ_ERR_ILLEGAL_MOVE_SUICIDE] = T_('Illegal suicide for next-move#CM_err');
+         $ARR_MSEQ_ERRORCODE = $arr;
+      }
+
+      if ( !isset($ARR_MSEQ_ERRORCODE[$error_code]) )
+         error('invalid_args', "MoveSequence:getErrorCodeText($error_code)");
+      return $ARR_MSEQ_ERRORCODE[$error_code];
+   }//getErrorCodeText
 
 } // end of 'MoveSequence'
 ?>

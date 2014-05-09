@@ -1739,7 +1739,7 @@ function handle_conditional_moves( $move_seq, $game_row, $cm_action, &$board, $t
             $cm_start_move_nr = $game_row['Moves'] + 1;
             $cm_start_move = ConditionalMoves::get_nodes_start_move_sgf_coords( $extra_nodes, $Size );
 
-            $cm_moveseq = new MoveSequence( $cm_id, $gid, $my_id, MSEQ_STATUS_INACTIVE, $cm_flags,
+            $cm_moveseq = new MoveSequence( $cm_id, $gid, $my_id, MSEQ_STATUS_INACTIVE, $cm_flags, 0,
                $cm_start_move_nr, $cm_start_move, $cm_start_move_nr, 1, $cm_start_move, $cond_moves_sgf_coords );
 
             ta_begin();

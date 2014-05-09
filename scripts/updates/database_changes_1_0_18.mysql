@@ -33,3 +33,9 @@ ALTER TABLE MoveSequence
    MODIFY StartMove char(3) NOT NULL default '',
    MODIFY LastMove char(3) NOT NULL default '' ;
 
+
+-- added error-code for illegal conditional-move
+ALTER TABLE MoveSequence
+   ADD ErrorCode tinyint unsigned NOT NULL default '0' AFTER Flags ;
+
+

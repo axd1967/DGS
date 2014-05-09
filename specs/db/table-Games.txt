@@ -766,6 +766,10 @@ Notes:
 Description:
    Table to store conditional moves.
 
+Notes:
+   - only supported are board-moves and pass-moves
+   - not supported for multi-player-games, fair-komi-negotiation, handicap-setup or scoring-steps
+
 | Field       | Type                                                            | Null | Key | Default  | Extra          |
 +-------------+-----------------------------------------------------------------+------+-----+----------+----------------+
 | ID          | int(11)                                                         | NO   | PRI | NULL     | auto_increment |
@@ -773,6 +777,7 @@ Description:
 | uid         | int(11)                                                         | NO   |     | NULL     |                |
 | Status      | enum('INACTIVE','ACTIVE','ILLEGAL','OPP_MSG','DEVIATED','DONE') | NO   |     | INACTIVE |                |
 | Flags       | tinyint(3) unsigned                                             | NO   |     | 0        |                |
+| ErrorCode   | tinyint(3) unsigned                                             | NO   |     | 0        |                |
 | StartMoveNr | smallint(5) unsigned                                            | NO   |     | 0        |                |
 | StartMove   | char(3)                                                         | NO   |     |          |                |
 | LastMoveNr  | smallint(5) unsigned                                            | NO   |     | 0        |                |
@@ -784,6 +789,7 @@ Description:
 ## Fields:
 
 * ID : primary key, games-ID
+   - latest move-sequence for conditional-moves is the entry with the highest number for a user
 
 * gid : foreign key to Games.ID
 
@@ -792,34 +798,58 @@ Description:
 * Status :
    - INACTIVE = sequence is inactive and will not be used
    - ACTIVE = sequence is active and will be used
-   - ILLEGAL = found illegal move in sequence, e.g. because of ko-rules, point taken
+   - ILLEGAL = found illegal move in sequence, e.g. because of ko-rules, point taken; see ErrorCode
    - OPP_MSG = sequence stopped on next own move, because opponent posted move-message, that user should be able to see
    - DEVIATED = sequence broken, because opponent deviated from sequence
    - DONE = sequence used completely, no further moves available in sequence
+
+   - only one entry should remain ACTIVE per player in a game
 
 * Flags : flags for conditional moves sequence
    - 0x01 = PRIVATE-flag (default=0 =PUBLIC), i.e. conditional moves will not be visible
      after game is finished to opponents or observers
 
+* ErrorCode : error-code for illegal-state of conditional-move
+   - 0 = no error
+   - >0 = error, see MSEQ_ERR_...-consts in 'include/db/move_sequence.php'
+
+   - NOTE: should be set if Status=ILLEGAL as indicator for user or support what went wrong
+
 * StartMoveNr : Games.MoveNr of last own move starting conditional-moves-sequence
 
-* StartMove : last own move starting sequence with move-color
+* StartMove : last move starting sequence with move-color
    - 'Bab' = SGF-coord of last own move (color Black)
    - 'W' = PASS-move (color White)
 
-* LastMoveNr : Games.MoveNr of last move from processed sequence
+   - can be own or opponents move, dependent on which players turn it is
+
+* LastMoveNr : game-move-number of last move from processed sequence
    - equals StartMoveNr on new sequence
    - will be updated on processing sequence
    - value of last move-nr is kept, if sequence is completed or stopped (on move-error or deviation)
+   - same numbering as with Moves.MoveNr or Games.Moves
+
+   - on status ILLEGAL: move-nr of illegal-move (not last-move)
+   - on status OPP_MSG: move-nr of next-move (not last-move)
+     that would have been committed if not for opponents-message
+   - on status DEVIATED: move-nr of last opponents move
+   - on status ACTIVE, DONE: move-nr of last played move
 
 * LastMovePos : binary-char position in Sequence-field of chosen node
    - string-index pointing to ';' in move-sequence for optimized parsing for next move-processing-step
    - value of last move is kept, if sequence is completed or stopped (on move-error or deviation)
 
+   - positioned according to LastMove
+
 * LastMove : last move from processed sequence with move-color
    - equals StartMove on new sequence
    - will be updated on processing sequence
    - value of last move-nr is kept, if sequence is completed or stopped (on move-error or deviation)
+
+   - on status ILLEGAL: illegal-move (not last-move)
+   - on status OPP_MSG: next-move (not last-move), that would have been committed if not for opponents-message
+   - on status DEVIATED: opponents last move
+   - on status ACTIVE, DONE: last played move
 
 * Sequence : conditional moves sequence
    - uses SGF-like tree format without root-tree-node (which is stored in StartMove/LastMove)

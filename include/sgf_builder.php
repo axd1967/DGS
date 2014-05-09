@@ -549,8 +549,8 @@ class SgfBuilder
          if ( $sgf_parser->parse_sgf($move_seq->Sequence) )
          {
             // normalize: use SGF-coords for B/W-moves & use '' for PASS-move
-            $move_seq->parsed_nodes = self::prepare_merge_cond_moves(
-               $sgf_parser->games[0], $this->game_row['Size'], $move_seq->StartMoveNr );
+            $move_seq->parsed_nodes =
+               ConditionalMoves::fill_conditional_moves_attributes( $sgf_parser->games[0], $move_seq->StartMoveNr );
             $this->cond_moves_mseq[] = $move_seq;
          }
       }
@@ -558,39 +558,6 @@ class SgfBuilder
       if ( count($this->cond_moves_mseq) == 0 ) // nothing to merge
          $this->include_cond_moves = 0;
    }//load_conditional_moves
-
-   // normalize B/W-move-props into sgf-coords, set SgfNode-attributes move_nr, sgf_move=Baa|Wbb|B(=pass) for all SgfNodes
-   private static function prepare_merge_cond_moves( $nodes, $size, $start_move_nr )
-   {
-      // traverse game-tree
-      $vars = array(); // stack for variations for traversal of game-tree
-      SgfParser::push_var_stack( $vars, $nodes, $start_move_nr );
-
-      while ( list($move_nr, $var) = array_pop($vars) ) // process variations-stack
-      {
-         // a variation is an array of nodes
-         foreach ( $var as $id => $node )
-         {
-            if ( $id === SGF_VAR_KEY )
-            {
-               // this particular node is an array of variations
-               foreach ( $node as $sub_tree )
-                  SgfParser::push_var_stack( $vars, $sub_tree, $move_nr );
-               continue;
-            }//else: a node is a SgfNode-object with an array of properties
-
-            // set SgfNode->sgf_move for easier move-comparing/merging
-            if ( isset($node->props['B']) )
-               $node->sgf_move = 'B' . $node->props['B'][0];
-            if ( isset($node->props['W']) )
-               $node->sgf_move = 'W' . $node->props['W'][0];
-
-            $node->move_nr = $move_nr++; // add move-nr
-         }//var-end
-      }//game-tree end
-
-      return $nodes;
-   }//prepare_merge_cond_moves
 
 
    public function build_filename_sgf( $bulk_filename )
@@ -1116,9 +1083,9 @@ class SgfBuilder
                      foreach ( $merge_node as $sub_tree ) // this particular merge-node is an array of variations
                      {
                         $sub_node = SgfParser::get_variation_first_sgf_node($sub_tree);
-                        if ( !is_null($sub_node) ) // no sgf-node found (shouldn't happen as empty var is forbidden)
+                        if ( !is_null($sub_node) ) // safety-check (but shouldn't happen as empty var is forbidden)
                         {
-                           if ( $cm_node->sgf_move == $sub_first_node->sgf_move )
+                           if ( $cm_node->sgf_move == $sub_node->sgf_move )
                            {
                               $sub_var = $sub_tree; // found variation with matching move from CM-node
                               break;

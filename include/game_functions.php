@@ -2141,6 +2141,8 @@ class GameFinalizer
          list( $Subject, $Text, $observerText ) = $game_notify->get_text_game_result( $this->action_by,
             ($this->my_id > 0 ? $player_row : null) );
 
+         MoveSequence::deactivate_move_sequences( $dbgmsg, $gid );
+
          // GamesPriority-entries are kept for running games only, delete for finished games too
          NextGameOrder::delete_game_priorities( $gid );
 

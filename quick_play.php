@@ -57,6 +57,7 @@ else
    $game_row = $gah->load_game( 'quick_play' );
    extract($game_row);
    list( $to_move ) = $gah->init_globals( 'quick_play' );
+   $gah->load_game_conditional_moves( 'quick_play' );
 
    // affirm, that game is running
    if ( $Status == GAME_STATUS_INVITED || $Status == GAME_STATUS_SETUP )
@@ -120,7 +121,7 @@ else
    $gah->prepare_game_action_do_move( 'quick_play', $coord );
 
    $gah->prepare_game_action_generic();
-   $gah->update_game( 'quick_play' );
+   $gah->process_game_action( 'quick_play' );
 
 // No Jump somewhere
 

@@ -665,6 +665,7 @@ CREATE TABLE IF NOT EXISTS `MoveSequence` (
   `uid` int(11) NOT NULL,
   `Status` enum('INACTIVE','ACTIVE','ILLEGAL','OPP_MSG','DEVIATED','DONE') NOT NULL default 'INACTIVE',
   `Flags` tinyint(3) unsigned NOT NULL default '0',
+  `ErrorCode` tinyint(3) unsigned NOT NULL default '0',
   `StartMoveNr` smallint(5) unsigned NOT NULL default '0',
   `StartMove` char(3) NOT NULL default '',
   `LastMoveNr` smallint(5) unsigned NOT NULL default '0',

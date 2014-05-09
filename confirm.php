@@ -73,6 +73,7 @@ require_once 'include/rating.php';
    $game_row = $gah->load_game( 'confirm' );
    extract($game_row);
    $gah->init_globals( 'confirm' );
+   $gah->load_game_conditional_moves( 'confirm' );
 
 
    if ( @$_REQUEST['nextskip'] )
@@ -177,7 +178,7 @@ require_once 'include/rating.php';
    }//switch $action
 
    $gah->prepare_game_action_generic();
-   $gah->update_game( 'confirm' );
+   $gah->process_game_action( 'confirm' );
 
 
    // Jump somewhere
