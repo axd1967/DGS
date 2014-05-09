@@ -164,8 +164,8 @@ class GameActionHelper
       $dbgmsg .= ".GAH.load_game_cm({$this->gid})";
       if ( is_null($this->game_row) || !$this->action )
          error('assert', "$dbgmsg.miss_init1");
-
-      extract($this->game_row);
+      $Status = $this->game_row['Status'];
+      $GameType = $this->game_row['GameType'];
 
       // check for conditional moves: only on move|pass (not handicap-setup, scoring, FK-negotiation), nor for MPG
       $this->cond_moves_mseq = null;
@@ -174,8 +174,8 @@ class GameActionHelper
             && ($this->action == GAMEACT_DO_MOVE || $this->action == GAMEACT_PASS ) && $GameType == GAMETYPE_GO
             && ($Status == GAME_STATUS_PLAY || $Status == GAMEACT_PASS) )
       {
-         $opp_uid = ( $ToMove_ID == $Black_ID ) ? $White_ID : $Black_ID;
-         $move_seq = MoveSequence::load_last_move_sequence( $this->gid, $opp_uid, MSEQ_STATUS_ACTIVE );
+         // load and parse active cond-moves from opponent
+         $move_seq = MoveSequence::load_last_move_sequence( $this->gid, $this->next_to_move_ID, MSEQ_STATUS_ACTIVE );
          if ( !is_null($move_seq) )
          {
             $sgf_parser = new SgfParser( SGFP_OPT_SKIP_ROOT_NODE );
@@ -417,7 +417,7 @@ class GameActionHelper
             $this->game_updquery->upd_num('White_Prisoners', $White_Prisoners);
       }
 
-      // needed vars for potential conditional-moves
+      // needed updates for potential conditional-moves
       $sgf_coord = ( is_array($move_coord) ) ? number2sgf_coords($move_coord[0], $move_coord[1], $Size) : $move_coord;
       $this->last_move = ( ($this->to_move == BLACK) ? 'B' : 'W' ) . $sgf_coord;
       $this->upd_game_row['Flags'] = $Flags;
@@ -456,7 +456,7 @@ class GameActionHelper
       $this->game_updquery->upd_num('Flags', $Flags); //Don't reset KO-Flag else PASS,PASS,RESUME could break a Ko
       $this->game_updquery->upd_num('ToMove_ID', $this->next_to_move_ID);
 
-      // needed vars for potential conditional-moves
+      // needed updates for potential conditional-moves
       $this->last_move = ($this->to_move == BLACK) ? 'B' : 'W'; // ''=pass-move
       $this->upd_game_row['Status'] = $next_status;
    }//prepare_game_action_pass
@@ -692,6 +692,35 @@ class GameActionHelper
    private function process_conditional_moves( $dbgmsg )
    {
       $dbgmsg .= ".GAH.process_cm";
+
+      /*
+      How are conditional-moves processed?
+      - a move LM (=last-move) is submitted by a player
+
+      - after the move (PASS or board-move) is executed and saved after the last call of update_game()
+        this method 'process_conditional_moves()' is called starting a loop:
+
+         - stop if there is no last-move (only set by a previously PASS or MOVE execution)
+           or if there are no active conditional-moves of the opponent
+         - find the last-move (context) in the parsed conditional-moves and get the next-move;
+           (because there are no db-transactions, saving of previous cond-moves could have failed;
+            so this "search" can also pick up from previous failed updates of the conditional-moves)
+         - if there is a next-move, play it using a new GameActionHelper-instance, which in turn
+           loads conditional-moves of the new opponent
+         - to avoid recursion, after update_game() called in play_conditional_move() on the new instance,
+           process_conditional_moves() is not called again, but the GameActionHelper-instance is saved
+           and used in the next loop-run
+         - after the move is played, the changed state of the conditional-moves are saved
+
+      - this process reloads all data (Games-table, all moves, cond-moves), because it's very error-prone
+        to correctly change the inner state of all objects (e.g. Board, Games-row) to be able to correctly
+        process consecutive move-execution (e.g. when both player have conditional-moves in place).
+
+        The other reason for this approach (SAVE(!) + reload after EACH move) is, because DGS has no real
+        db-transactions due to MyISAM-engine used for the db-tables.  If it would be done in one "save"-section
+        (with different tables written), the inconsistencies in case of a db-failure would be much more
+        difficult to fix.
+      */
 
       $curr_gah = (ALLOW_CONDITIONAL_MOVES) ? $this : null;
       $last_gah = null;
@@ -939,7 +968,12 @@ class GameActionHelper
    }
 
 
-   // \param $next_move_coord '' (=PASS), or else sgf-coord
+   /*!
+    * \brief Executes next-move from conditional-move-sequence without (recursive) call of processing consecutive
+    *       conditional-moves, which is handled at callers site.
+    * \param $next_move_coord '' (=PASS), or else sgf-coord
+    * \return new GameActionHelper-instance, that processed next-move execution of cond-move
+    */
    private function play_conditional_move( $dbgmsg, $next_move_coord )
    {
       $is_pass_move = ( $next_move_coord == '' );
