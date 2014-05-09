@@ -55,7 +55,7 @@ class Board
    public $shape_arr_xy = array();
    public $prisoners = array( BLACK => 0, WHITE => 0 ); //array: [BLACK|WHITE] => count
 
-   private $cond_moves = null; // array: B|W[sgf_coord], e.g. 'Baa', 'W' (=pass), 'Wee'
+   private $cond_moves = null; // array: B|W[sgf_coord], e.g. 'Baa', 'W' (=pass), 'Wee'; no tree, but flat variation
    private $cond_moves_errpos = -1; // pos in $this->cond_moves of move-error
 
    //Last move shown ($movemrkx<0 if PASS, RESIGN or SCORE)
