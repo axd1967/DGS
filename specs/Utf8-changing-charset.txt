@@ -24,6 +24,46 @@ UTF-8 Links & Stuff to know about UTF-8 with PHP:
 
 ##############################################################################3
 
+# Potentially the following tables would require utf8-encoding, because they contain some text under user-influence
+Adminlog
+Bio
+Bulletin
+Contacts
+Errorlog
+FAQlog
+Feature
+Folders
+Forums
+Games
+GamesNotes
+GoDiagrams
+Intro
+Links
+Messages
+MoveMessages
+MoveSequence
+Players
+Posts
+Profiles
+Shape
+Survey
+SurveyOption
+Tournament
+TournamentDirector
+TournamentNews
+TournamentParticipant
+TournamentProperties
+TournamentResult
+TournamentRules
+Tournamentlog
+TranslationLanguages
+TranslationTexts
+Translationlog
+Translations
+Waitingroom
+
+##############################################################################3
+
 Hi Rod,
 
 rod.ival@libertysurf.fr wrote:
