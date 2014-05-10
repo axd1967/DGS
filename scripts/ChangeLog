@@ -11,6 +11,15 @@ Release [2014-03-27] - DGS 1.0.17 - tag [release-1_0_17-20140327] on branch [DGS
 ChangeLog
 ------------------------------------------------------------------
 
+2014-05-10 jug
+
+   * include/sgf_builder.php (SgfBuilder.load_conditional_moves),
+     specs/quick_suite.txt,
+     game.php:
+   - changed SGF-download of finished game not to include conditional-moves per default
+     - including conditional-moves in SGF-download must be explicitly asked for with 'cm'-arg > 0
+     - added link for SGF-download with conditional-moves for finished game on game-page
+
 2014-05-09 jug
 
    * include/game_actions.php (class GameActionHelper, ~.__construct, ~.has_conditional_moves,

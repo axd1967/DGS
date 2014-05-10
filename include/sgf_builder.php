@@ -517,8 +517,8 @@ class SgfBuilder
 
       if ( $this->game_row['GameType'] != GAMETYPE_GO || $status == GAME_STATUS_KOMI ) // not for MPG or FK-negotiation
          $this->include_cond_moves = 0;
-      if ( $this->include_cond_moves < 0 ) // determine default
-         $this->include_cond_moves = ( $is_game_finished ) ? 3 : 0;
+      if ( $this->include_cond_moves < 0 || $this->include_cond_moves > 3 ) // determine default, limit
+         $this->include_cond_moves = 0;
       if ( $this->include_cond_moves > 0 && !$is_game_finished && !$is_player )
          $this->include_cond_moves = 0;
       if ( $is_player && ( $this->include_cond_moves == 1 || $this->include_cond_moves == 2 ) )

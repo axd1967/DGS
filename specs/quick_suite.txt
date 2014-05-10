@@ -2003,7 +2003,7 @@ Options:
          - $d1 = last-changed date in format YYYYMMDD: 20130819
          - $d2 = last-changed date in format YYYY-MM-DD: 2013-08-19
 
-   <CONDMOVES> = 0 | 1 | 2 | 3; default = 0 for running game, = 3 for finished game
+   <CONDMOVES> = 0 | 1 | 2 | 3; default = 0 for running/finished game
       - 0 = do not include any conditional-moves
       - 1 = merge game-moves with own used & unused conditional-moves
       - 2 = merge game-moves with opponents used & unused conditional-moves

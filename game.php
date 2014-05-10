@@ -893,6 +893,8 @@ $GLOBALS['ThePage'] = new Page('Game');
          $menu_array[T_('Download sgf')] = "sgf.php?gid=$gid";
          if ( ($my_game || $my_mpgame) && ($Moves>0 || $is_shape) )
             $menu_array[T_('Download sgf with all comments')] = "sgf.php?gid=$gid".URI_AMP."owned_comments=1" ;
+         if ( ALLOW_CONDITIONAL_MOVES && $Status == GAME_STATUS_FINISHED )
+            $menu_array[T_('Download SGF with conditional moves')] = "sgf.php?gid=$gid".URI_AMP."cm=3";
       }
 
       if ( !is_null($my_observe) )
