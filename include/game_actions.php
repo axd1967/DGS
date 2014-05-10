@@ -575,8 +575,10 @@ class GameActionHelper
       {//HOT-section to process game-action
          $this->update_game( $dbgmsg );
 
-         if ( $this->process_conditional_moves($dbgmsg) == 0 )
-            $this->process_post_action( $dbgmsg ); // move-notify opponent if there are no cond-moves
+         $last_gah = $this->process_conditional_moves( $dbgmsg );
+
+         $gah = ( is_null($last_gah) ) ? $this : $last_gah;
+         $gah->process_post_action( $dbgmsg ); // move-notify opponent of last cond-move or originally submitted move
       }
       ta_end();
    }//process_game_action
@@ -684,7 +686,8 @@ class GameActionHelper
 
    /*!
     * \brief Processes conditional-moves.
-    * \return number of cond-moves played
+    * \return GameActionHelper-instance that needs post-processing (notifying opponent, etc);
+    *       null = no post-processing for cond-moves needed (but for original submitted move)
     *
     * \note IMPORTANT NOTE: caller needs to open TA with HOT-section!!
     * \note implementation should not use recursion!
@@ -711,6 +714,8 @@ class GameActionHelper
            process_conditional_moves() is not called again, but the GameActionHelper-instance is saved
            and used in the next loop-run
          - after the move is played, the changed state of the conditional-moves are saved
+         - as last step the opponent needs to be notified about the last submitted (original or conditional) move,
+           though this notification should happen at the caller of this function
 
       - this process reloads all data (Games-table, all moves, cond-moves), because it's very error-prone
         to correctly change the inner state of all objects (e.g. Board, Games-row) to be able to correctly
@@ -724,7 +729,6 @@ class GameActionHelper
 
       $curr_gah = (ALLOW_CONDITIONAL_MOVES) ? $this : null;
       $last_gah = null;
-      $cnt_cm_played = 0;
 
       while ( $curr_gah && $curr_gah->last_move && $curr_gah->has_conditional_moves() )
       {
@@ -735,7 +739,6 @@ class GameActionHelper
          {
             $next_gah = $curr_gah->play_conditional_move( $dbgmsg, $next_sgf_move );
             $last_gah = $next_gah;
-            $cnt_cm_played++;
          }
          else
             $next_gah = null;
@@ -744,10 +747,7 @@ class GameActionHelper
          $curr_gah = $next_gah;
       }
 
-      if ( !is_null($last_gah) )
-         $last_gah->process_post_action( $dbgmsg ); // notify opponent of last submitted cond-move
-
-      return $cnt_cm_played;
+      return $last_gah;
    }//process_conditional_moves
 
    /*! \brief Finds and returns next-move in conditional-moves; or else null. */

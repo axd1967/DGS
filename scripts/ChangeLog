@@ -13,6 +13,10 @@ ChangeLog
 
 2014-05-10 jug
 
+   * include/game_actions.php (GameActionHelper.process_game_action, ~.process_conditional_moves):
+   - refactored opponent-notification of last submitted move
+     into caller-function of processing conditional-moves
+
    * include/sgf_builder.php (SgfBuilder.load_conditional_moves),
      specs/quick_suite.txt,
      game.php:
