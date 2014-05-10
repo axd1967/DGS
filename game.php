@@ -1816,9 +1816,11 @@ function draw_conditional_moves_input( &$gform, $gid, $my_id, $cm_action, $move_
    }
    echo
       "<TR>\n",
-         '<TD class=Rubric>', span('smaller', T_('Edit sequence')), ":</TD>\n",
-         '<TD colspan="2">',
-            $gform->print_insert_textarea( 'cond_moves', 80, $cm_lines, $cond_moves, $attbs_disabled ),
+         '<TD class=Rubric>', span('smaller', ( $is_show ? T_('Sequence#condmoves') : T_('Edit sequence') )), ":</TD>\n",
+         '<TD colspan="2" ', ($is_show ? 'class=CMSequence>' : '>'),
+            ( $is_show
+               ? span('CMSequence', wordwrap( str_replace("\n", "<br>\n", $cond_moves), 80, "<br>\n", false ))
+               : $gform->print_insert_textarea( 'cond_moves', 80, $cm_lines, $cond_moves, $attbs_disabled ) ),
          "</TD>\n",
       '</TR>',
       "<TR class=Vars>\n",

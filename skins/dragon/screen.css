@@ -2694,6 +2694,16 @@ body.Game ul.SubNotes {
 }
 
 
+span.CMSequence {
+   font-size: smaller;
+}
+td.CMSequence {
+   border: 1px solid blue;
+   padding: 0.3em 0.5em;
+   background-color: #f7f5f3;
+}
+
+
 /* ------------------------- */
 /* game comments table (class=Table) */
 /* ------------------------- */

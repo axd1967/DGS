@@ -13,6 +13,12 @@ ChangeLog
 
 2014-05-10 jug
 
+   * include/globals.php (CSS_VERSION),
+     skins/dragon/screen.css,
+     game.php (draw_conditional_moves_input):
+   - use normal-text for "showing" read-only conditional-moves on game-page
+     instead of non-copyable textarea
+
    * include/game_actions.php (GameActionHelper.process_game_action, ~.process_conditional_moves):
    - refactored opponent-notification of last submitted move
      into caller-function of processing conditional-moves
