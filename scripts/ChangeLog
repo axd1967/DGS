@@ -11,6 +11,16 @@ Release [2014-03-27] - DGS 1.0.17 - tag [release-1_0_17-20140327] on branch [DGS
 ChangeLog
 ------------------------------------------------------------------
 
+2014-05-13 jug
+
+   * include/move.php (class GameCheckMove, ~.replay_moves, ~.replay_move, ~.__clone,
+       ~.prepare_game_check_move_board_start),
+     include/db/move_sequence.php (MoveSequence.getErrorCodeText, ~.get_check_move_error_code),
+     include/game_actions.php (GameActionHelper.validate_next_conditional_move),
+     include/conditional_moves.php (ConditionalMoves.check_nodes_cond_moves),
+     game.php (handle_conditional_moves):
+   - verify that added conditional-moves can be played rule-conform
+
 2014-05-10 jug
 
    * include/globals.php (CSS_VERSION),

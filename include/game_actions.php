@@ -936,12 +936,7 @@ class GameActionHelper
 
             $gchkmove = new GameCheckMove( $this->board ); // board->array already contains last-move
             $err = $gchkmove->check_move( $coord_next_move, $this->next_to_move, $Last_Move, $Flags, /*die*/false );
-            if ( $err == 'ko' )
-               $cm_error = MSEQ_ERR_ILLEGAL_MOVE_KO;
-            elseif ( $err == 'suicide' )
-               $cm_error = MSEQ_ERR_ILLEGAL_MOVE_SUICIDE;
-            elseif ( $err ) // =='illegal_position'
-               $cm_error = MSEQ_ERR_ILLEGAL_MOVE_COORDS;
+            $cm_error = MoveSequence::get_check_move_error_code( $err );
          }
       }
 

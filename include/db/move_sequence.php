@@ -296,28 +296,41 @@ class MoveSequence
    /*! \brief Returns text for error-codes. */
    public static function getErrorCodeText( $error_code )
    {
-      static $ARR_MSEQ_ERRORCODE = null; // error-code => text
+      static $ARR_MSEQ_ERROR_CODE = null; // error-code => text
 
       // lazy-init of texts
-      if ( is_null($ARR_MSEQ_STATUS) )
+      if ( is_null($ARR_MSEQ_ERROR_CODE) )
       {
          $arr = array();
          $arr[MSEQ_ERR_MISS_CONTEXT_MOVE] = T_('Missing context start-move#CM_err');
          $arr[MSEQ_ERR_NO_LAST_MOVE] = T_('No last move found#CM_err');
          $arr[MSEQ_ERR_NEXT_MOVE_VARNODE] = T_('Expected move-node, but found variation#CM_err');
-         $arr[MSEQ_ERR_NEXT_MOVE_BAD_MOVE_NR] = T_('Unexpected move-nr for next-move found#CM_err');
-         $arr[MSEQ_ERR_NEXT_MOVE_COLOR_MISMATCH] = T_('Color mismatch for next-move#CM_err');
+         $arr[MSEQ_ERR_NEXT_MOVE_BAD_MOVE_NR] = T_('Unexpected move-nr#CM_err');
+         $arr[MSEQ_ERR_NEXT_MOVE_COLOR_MISMATCH] = T_('Color mismatch#CM_err');
          $arr[MSEQ_ERR_ILLEGAL_STATE_PASS_MOVE] = T_('Bad game-status for PASS-move#CM_err');
-         $arr[MSEQ_ERR_ILLEGAL_MOVE_COORDS] = T_('Illegal position for next-move#CM_err');
-         $arr[MSEQ_ERR_ILLEGAL_MOVE_KO] = T_('Illegal ko for next-move#CM_err');
-         $arr[MSEQ_ERR_ILLEGAL_MOVE_SUICIDE] = T_('Illegal suicide for next-move#CM_err');
-         $ARR_MSEQ_ERRORCODE = $arr;
+         $arr[MSEQ_ERR_ILLEGAL_MOVE_COORDS] = T_('Illegal position#CM_err');
+         $arr[MSEQ_ERR_ILLEGAL_MOVE_KO] = T_('Illegal ko#CM_err');
+         $arr[MSEQ_ERR_ILLEGAL_MOVE_SUICIDE] = T_('Illegal suicide#CM_err');
+         $ARR_MSEQ_ERROR_CODE = $arr;
       }
 
-      if ( !isset($ARR_MSEQ_ERRORCODE[$error_code]) )
+      if ( !isset($ARR_MSEQ_ERROR_CODE[$error_code]) )
          error('invalid_args', "MoveSequence:getErrorCodeText($error_code)");
-      return $ARR_MSEQ_ERRORCODE[$error_code];
+      return $ARR_MSEQ_ERROR_CODE[$error_code];
    }//getErrorCodeText
+
+   /*! \brief Map error from GameCheckMove->check_move() to move-sequence error-code. */
+   public static function get_check_move_error_code( $move_err )
+   {
+      if ( $move_err == 'ko' )
+         return MSEQ_ERR_ILLEGAL_MOVE_KO;
+      elseif ( $move_err == 'suicide' )
+         return MSEQ_ERR_ILLEGAL_MOVE_SUICIDE;
+      elseif ( $move_err ) // =='illegal_position'
+         return MSEQ_ERR_ILLEGAL_MOVE_COORDS;
+      else
+         return 0;
+   }//get_check_move_error_code
 
 } // end of 'MoveSequence'
 ?>

@@ -179,12 +179,13 @@ class ConditionalMoves
    /*!
     * \brief Checks syntax and replaces PASS-moves of conditional-moves-part (read from uploaded-SGF or manually entered).
     * \param $cm_nodes parsed nodes (sub-tree) with only conditional-moves; as parsed from SgfParser
+    * \param $gchkmove GameCheckMove initialized with shape-setup and moves up to but excluding first move of cond-moves
     * \param $gsize board-size
     * \param $player_color BLACK | WHITE
     * \param $last_move_color BLACK | WHITE
     * \return arr( errors, variation-name-references, cond-moves-sgf-coords )
     */
-   public static function check_nodes_cond_moves( &$cm_nodes, $gsize, $player_color, $last_move_color )
+   public static function check_nodes_cond_moves( &$cm_nodes, $gchkmove, $gsize, $player_color, $last_move_color )
    {
       $errors = array();
       $own_color = ($player_color == BLACK) ? 'B' : 'W';
@@ -204,6 +205,7 @@ class ConditionalMoves
             'last_move' => -1,
             'cnt_pass'  => 0,
             'cnt_vnode' => 0,
+            'gchkmove'  => clone $gchkmove,
          ));
 
       while ( list($data, $var) = array_pop($vars) ) // process variations-stack
@@ -213,12 +215,14 @@ class ConditionalMoves
          $last_move = $data['last_move'];
          $cnt_pass = $data['cnt_pass'];
          $cnt_var_nodes = $data['cnt_vnode'];
+         $gchkmove = $data['gchkmove'];
 
          $cnt_nodes = count($var);
          if ( $cnt_nodes == 0 )
             $errors[] = sprintf( T_('Empty variation [%s] after position %s is not allowed.#sgf'), $varname, $last_pos );
 
          // a variation is an array of nodes
+         $var_has_bad_move = false;
          $has_vars = false; // sub-tree has vars?
          $cnt_var_nodes = 0;
          $cnt_subvars = 0;
@@ -245,6 +249,7 @@ class ConditionalMoves
                         'last_move' => $last_move,
                         'cnt_pass'  => $cnt_pass,
                         'cnt_vnode' => $cnt_var_nodes,
+                        'gchkmove'  => clone $gchkmove,
                      ));
 
                   // check that all variations start with unique move
@@ -296,7 +301,14 @@ class ConditionalMoves
                $is_pass = ( (string)$coord == '' );
                if ( !$is_pass )
                {
-                  if ( !is_valid_sgf_coords($coord, $gsize) && !is_valid_board_coords($coord, $gsize) )
+                  if ( is_valid_sgf_coords($coord, $gsize) )
+                     $sgf_coord = $coord;
+                  elseif ( is_valid_board_coords($coord, $gsize) )
+                  {
+                     list( $x, $y ) = board2number_coords($coord, $gsize);
+                     $sgf_coord = number2sgf_coords( $x, $y, $gsize );
+                  }
+                  else
                      $errors[] = sprintf( T_('Node [%s] at position %s in variation [%s] has invalid coordinates [%s].#condmoves'),
                         $node->get_props_text(), $node->pos, $varname, $coord );
 
@@ -308,9 +320,23 @@ class ConditionalMoves
                   $cnt_pass = 0;
                }
                else //PASS
+               {
+                  $sgf_coord = '';
                   $cnt_pass = ( (string)$last_move == '' ) ? $cnt_pass + 1 : 1;
+               }
 
-               //TODO LATER: check that all vars contain valid moves, that can be played rule-conform (empty-points, ko, etc); see create_igoban_from_parsed_sgf()
+               // check if move can be played rule-conform (empty-points, ko, suicide, invalid coord)
+               if ( !$var_has_bad_move ) // stop move-play-checking if former move on same var-path was bad
+               {
+                  $move_err = $gchkmove->replay_move( $col_key . $sgf_coord );
+                  $mseq_err = MoveSequence::get_check_move_error_code( $move_err );
+                  if ( $mseq_err > 0 )
+                  {
+                     $var_has_bad_move = true;
+                     $errors[] = sprintf( T_('Move in node [%s] at position %s in variation [%s] is invalid (%s).#condmoves'),
+                        $node->get_props_text(), $node->pos, $varname, MoveSequence::getErrorCodeText($mseq_err) );
+                  }
+               }
 
                $last_move = $coord;
             }

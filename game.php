@@ -1667,10 +1667,14 @@ function handle_conditional_moves( $move_seq, $game_row, $cm_action, &$board, $t
    if ( !is_null($move_seq) )
    {
       $db_cond_moves = $move_seq->Sequence;
+      $cnt_replay_moves = $move_seq->StartMoveNr - 1;
       $check_nodes = true;
    }
    else
+   {
+      $cnt_replay_moves = $game_row['Moves'];
       $check_nodes = false;
+   }
    $cond_moves = trim( get_request_arg('cond_moves', $db_cond_moves) );
 
    $cm_src_manual = true;
@@ -1703,8 +1707,10 @@ function handle_conditional_moves( $move_seq, $game_row, $cm_action, &$board, $t
       if ( $sgf_parser->parse_sgf($cond_moves) )
       {
          $extra_nodes = $sgf_parser->games[0];
+         $gchkmove = GameCheckMove::prepare_game_check_move_board_start( $Size, $game_row['ShapeSnapshot'] );
+         $gchkmove->replay_moves( $board->moves, $cnt_replay_moves );
          list( $errors, $var_names, $cond_moves_sgf_coords ) =
-            ConditionalMoves::check_nodes_cond_moves( $extra_nodes, $Size, $my_col, $last_move_col );
+            ConditionalMoves::check_nodes_cond_moves( $extra_nodes, $gchkmove, $Size, $my_col, $last_move_col );
 
          // reformat cond-moves with board-coords for display in edit-box
          if ( count($errors) == 0 )

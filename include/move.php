@@ -40,6 +40,10 @@ class GameCheckMove
    public $colnr;
    public $rownr;
 
+   private $replay_last_move = '';
+   private $replay_game_flags = 0;
+
+
    public function __construct( &$board )
    {
       $this->board = $board;
@@ -125,6 +129,102 @@ class GameCheckMove
       $black_pr += $this->black_prisoners;
       $white_pr += $this->white_prisoners;
    }//update_prisoners
+
+
+   /*!
+    * \brief Replays moves on board up to given move-position.
+    * \param $arr_moves arr( [stone,x,y], ... ) like Board->moves
+    * \param $last_move_nr last-move that should be played
+    * \note ignore prisoners-counting
+    */
+   public function replay_moves( $arr_board_moves, $last_move_nr )
+   {
+      $this->replay_last_move = '';
+      $this->replay_game_flags = 0;
+      foreach ( $arr_board_moves as $move_nr => $arr_move )
+      {
+         if ( !is_numeric($move_nr) )
+            continue;
+         if ( $move_nr > $last_move_nr )
+            break;
+
+         $err = $this->replay_move( $arr_move );
+      }
+   }//replay_moves
+
+   /*!
+    * \brief Replays single move on board (PASS-move is skipped).
+    * \param $move array( BLACK|WHITE, x, y ) with x=POSX_PASS for PASS-move;
+    *       or sgf-coord "<COL><SGF_COORD|''>" e.g. 'Baa', 'W'
+    * \return error-string from this->check_move(); or else '' on successfully played move
+    */
+   public function replay_move( $move )
+   {
+      static $MAP_COLORS = array( 'B' => BLACK, 'W' => WHITE );
+      if ( is_array($move) )
+      {
+         list( $stone, $x, $y ) = $move;
+         $sgf_move = ( $x <= POSX_PASS ) ? '' : number2sgf_coords( $x, $y, $this->board->size );
+      }
+      else
+      {
+         $stone = @$MAP_COLORS[$move[0]];
+         $sgf_move = substr($move, 1);
+         if ( $sgf_move )
+            list( $x, $y ) = sgf2number_coords( $sgf_move, $this->board->size );
+         else
+            $x = POSX_PASS;
+      }
+
+      if ( $x <= POSX_PASS || ($stone != BLACK && $stone != WHITE) )
+         $err = ''; // keep last-move/game-flags on PASS-move for ko-check
+      else
+      {
+         $err = $this->check_move( array($x,$y), $stone, $this->replay_last_move, $this->replay_game_flags, /*exit*/false );
+         if ( !$err )
+         {
+            if ( $this->nr_prisoners == 1 )
+               $this->replay_game_flags |= GAMEFLAGS_KO;
+            else
+               $this->replay_game_flags &= ~GAMEFLAGS_KO;
+
+            $this->replay_last_move = $sgf_move;
+         }
+      }
+
+      return $err;
+   }//replay_move
+
+   public function __clone()
+   {
+      $this->board = clone $this->board;
+   }
+
+
+   // ------------ static functions ----------------------------
+
+   /*! \brief Prepares a new GameCheckMove-instance with given board-size and initial shape-setup. */
+   public static function prepare_game_check_move_board_start( $size, $shape_snapshot )
+   {
+      $board = new Board( 0, $size ); // need board to really "move" (with capturing stones)
+      $board->init_board();
+
+      if ( $shape_snapshot )
+      {
+         $arr_xy = GameSnapshot::parse_stones_snapshot( $size, $shape_snapshot, BLACK, WHITE );
+         if ( count($arr_xy) )
+         {
+            foreach ( $arr_xy as $arr_setup )
+            {
+               list( $Stone, $PosX, $PosY ) = $arr_setup;
+               $board->array[$PosX][$PosY] = $Stone;
+            }
+         }
+      }
+
+      $gchkmove = new GameCheckMove( $board );
+      return $gchkmove;
+   }//prepare_game_check_move_board_start
 
 } // end 'GameCheckMove'
 
