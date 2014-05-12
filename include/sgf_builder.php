@@ -515,13 +515,14 @@ class SgfBuilder
       $is_game_finished = ( $status == GAME_STATUS_FINISHED );
       $is_player = $this->is_game_player();
 
-      if ( $this->game_row['GameType'] != GAMETYPE_GO || $status == GAME_STATUS_KOMI ) // not for MPG or FK-negotiation
+      if ( !ALLOW_CONDITIONAL_MOVES
+            || $this->game_row['GameType'] != GAMETYPE_GO || $status == GAME_STATUS_KOMI ) // not for MPG or FK-negotiation
          $this->include_cond_moves = 0;
-      if ( $this->include_cond_moves < 0 || $this->include_cond_moves > 3 ) // determine default, limit
+      elseif ( $this->include_cond_moves < 0 || $this->include_cond_moves > 3 ) // determine default, limit
          $this->include_cond_moves = 0;
-      if ( $this->include_cond_moves > 0 && !$is_game_finished && !$is_player )
+      elseif ( $this->include_cond_moves > 0 && !$is_game_finished && !$is_player )
          $this->include_cond_moves = 0;
-      if ( $is_player && ( $this->include_cond_moves == 1 || $this->include_cond_moves == 2 ) )
+      elseif ( $is_player && ( $this->include_cond_moves == 1 || $this->include_cond_moves == 2 ) )
          $this->include_cond_moves = 3;
 
       if ( $this->include_cond_moves == 0 ) // don't load cond-moves

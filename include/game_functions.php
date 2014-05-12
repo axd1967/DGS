@@ -1174,8 +1174,9 @@ class GameHelper
          "DELETE FROM GamesNotes WHERE gid=$gid" );
       db_query( "GameHelper:_delete_base_game_tables.movemsg($gid)",
          "DELETE FROM MoveMessages WHERE gid=$gid" );
-      db_query( "GameHelper:_delete_base_game_tables.cond_moves($gid)",
-         "DELETE FROM MoveSequence WHERE gid=$gid" );
+      if ( ALLOW_CONDITIONAL_MOVES )
+         db_query( "GameHelper:_delete_base_game_tables.cond_moves($gid)",
+            "DELETE FROM MoveSequence WHERE gid=$gid" );
       db_query( "GameHelper:_delete_base_game_tables.moves($gid)",
          "DELETE FROM Moves WHERE gid=$gid" );
       db_query( "GameHelper:_delete_base_game_tables.gameplayers($gid)",
@@ -1186,7 +1187,8 @@ class GameHelper
       // clear big-cache-entries to free cache-space
       DgsCache::delete_group( "GameHelper:_delete_base_game_tables.observers($gid)",
          CACHE_GRP_GAME_OBSERVERS, "Observers.$gid" );
-      MoveSequence::delete_cache_move_sequence( "GameHelper:_delete_base_game_tables.cond_moves($gid)", $gid );
+      if ( ALLOW_CONDITIONAL_MOVES )
+         MoveSequence::delete_cache_move_sequence( "GameHelper:_delete_base_game_tables.cond_moves($gid)", $gid );
       Board::delete_cache_game_moves( "GameHelper:_delete_base_game_tables.moves($gid)", $gid );
       Board::delete_cache_game_move_messages( "GameHelper:_delete_base_game_tables.movemsg($gid)", $gid );
       self::delete_cache_game_row( "GameHelper:_delete_base_game_tables.games($gid)", $gid );
@@ -2141,7 +2143,8 @@ class GameFinalizer
          list( $Subject, $Text, $observerText ) = $game_notify->get_text_game_result( $this->action_by,
             ($this->my_id > 0 ? $player_row : null) );
 
-         MoveSequence::deactivate_move_sequences( $dbgmsg, $gid );
+         if ( ALLOW_CONDITIONAL_MOVES )
+            MoveSequence::deactivate_move_sequences( $dbgmsg, $gid );
 
          // GamesPriority-entries are kept for running games only, delete for finished games too
          NextGameOrder::delete_game_priorities( $gid );
