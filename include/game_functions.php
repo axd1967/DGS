@@ -3104,7 +3104,7 @@ class GameSetup
 
    public static function create_opponent_game_setup( $game_setup, $opp_id )
    {
-      $opp_gs = clone $game_setup; //PHP5 clone
+      $opp_gs = clone $game_setup;
       $opp_gs->init_opponent_handicaptype( $opp_id );
       return $opp_gs;
    }//create_opponent_game_setup
