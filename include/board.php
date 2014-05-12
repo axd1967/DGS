@@ -67,8 +67,8 @@ class Board
    public $infos = array(); //extra-infos collected
 
    // directions arrays
-   private $dirx = array( -1,0,1,0 );
-   private $diry = array( 0,-1,0,1 );
+   private static $dirx = array( -1,0,1,0 );
+   private static $diry = array( 0,-1,0,1 );
    public $visited_points = null; // visited coords arr[x][y] set after run of has_liberty_check()-call
 
 
@@ -96,6 +96,17 @@ class Board
       $this->prisoners = array( BLACK => 0, WHITE => 0 );
       $this->cond_moves = null;
    }//init_board
+
+   public function debug_array( $sep=':' )
+   {
+      $arr = array();
+      foreach ( $this->array as $x => $y_arr )
+      {
+         foreach ( $y_arr as $y => $v )
+            $arr[] = number2board_coords( $x, $y, $this->size ) . $sep . $v;
+      }
+      return implode(' ', $arr);
+   }
 
    public function set_conditional_moves( $moves )
    {
@@ -1255,8 +1266,8 @@ class Board
          list( $x, $y ) = $arr_xy;
 
          for ( $dir=0; $dir < 4; $dir++) { // scan all directions: W N E S
-            $new_x = $x + $this->dirx[$dir];
-            $new_y = $y + $this->diry[$dir];
+            $new_x = $x + self::$dirx[$dir];
+            $new_y = $y + self::$diry[$dir];
 
             if ( ($new_x >= 0 && $new_x < $this->size) && ($new_y >= 0 && $new_y < $this->size) )
             {
@@ -1300,8 +1311,8 @@ class Board
       $some = false;
       for ($i=0; $i<4; $i++) // determine captured stones for ALL directions
       {
-         $x = $colnr + $this->dirx[$i];
-         $y = $rownr + $this->diry[$i];
+         $x = $colnr + self::$dirx[$i];
+         $y = $rownr + self::$diry[$i];
 
          if ( @$this->array[$x][$y] == $col )
          {
@@ -1333,8 +1344,8 @@ class Board
          list( $x, $y ) = $arr_xy;
 
          for ( $dir=0; $dir < 4; $dir++) { // scan all directions: W N E S
-            $new_x = $x + $this->dirx[$dir];
-            $new_y = $y + $this->diry[$dir];
+            $new_x = $x + self::$dirx[$dir];
+            $new_y = $y + self::$diry[$dir];
 
             if ( ($new_x >= 0 && $new_x < $this->size) && ($new_y >= 0 && $new_y < $this->size) && !@$visited[$new_x][$new_y] )
             {
@@ -1500,8 +1511,8 @@ class Board
          list( $x, $y ) = $arr_xy;
 
          for ( $dir=0; $dir < 4; $dir++) { // scan all directions: W N E S
-            $new_x = $x + $this->dirx[$dir];
-            $new_y = $y + $this->diry[$dir];
+            $new_x = $x + self::$dirx[$dir];
+            $new_y = $y + self::$diry[$dir];
 
             if ( ($new_x >= 0 && $new_x < $this->size) && ($new_y >= 0 && $new_y < $this->size) && !@$visited[$new_x][$new_y] )
             {
