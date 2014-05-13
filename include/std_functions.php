@@ -2336,50 +2336,48 @@ function build_url( $args, $end_sep=false, $sep=URI_AMP )
       if ( (string)$value == '' || !is_string($key) || empty($key) )
          continue;
       if ( !is_array($value) )
+         $arr_str[] = $key . '=' . urlencode($value);
+      else
       {
-         $arr_str[]= $key . '=' . urlencode($value);
-         continue;
-      }
-      $key.= '%5b%5d='; //encoded []
-      foreach ( $value as $val )
-      {
-         // some clients need ''<>0, so don't use empty(val)
-         if ( (string)$val != '' )
-            $arr_str[]= $key . urlencode($val);
+         $key.= '%5b%5d='; //encoded []
+         foreach ( $value as $val )
+         {
+            // some clients need ''<>0, so don't use empty(val)
+            if ( (string)$val != '' )
+               $arr_str[] = $key . urlencode($val);
+         }
       }
    }
    if ( count($arr_str) )
       return implode( $sep, $arr_str) . ( $end_sep ? $sep : '' );
    return '';
-} //build_url
+}//build_url
 
 function build_hidden( $args)
 {
-   if ( !is_array( $args) )
+   static $hidden_fmt = "\n<input type=\"hidden\" name=\"%s\" value=%s>";
+   if ( !is_array($args) )
       return '';
+
    $arr_str = array();
    foreach ( $args as $key => $value )
    {
-      // some clients need ''<>0, so don't use empty(val)
       if ( (string)$value == '' || !is_string($key) || empty($key) )
          continue;
       if ( !is_array($value) )
+         $arr_str[] = sprintf( $hidden_fmt, $key, attb_quote($value) );
+      else
       {
-         $arr_str[]= "name=\"$key\" value=" . attb_quote($value);
-         continue;
-      }
-      $key.= '[]'; //%5b%5d encoded []
-      foreach ( $value as $val )
-      {
-         // some clients need ''<>0, so don't use empty(val)
-         if ( (string)$val != '' )
-            $arr_str[]=  "name=\"$key\" value=" . attb_quote($val);
+         $key .= '[]'; //%5b%5d encoded []
+         foreach ( $value as $val )
+         {
+            if ( (string)$val != '' )
+               $arr_str[] = sprintf( $hidden_fmt, $key, attb_quote($val) );
+         }
       }
    }
-   if ( count($arr_str) )
-      return "\n<input type=\"hidden\" ".implode( ">\n<input type=\"hidden\" ", $arr_str) .">";
-   return '';
-} //build_hidden
+   return implode('', $arr_str);
+}//build_hidden
 
 //see also the PHP parse_str() and parse_url()
 //this one use URI_AMP by default to be the make_url() mirror
