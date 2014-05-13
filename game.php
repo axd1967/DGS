@@ -203,7 +203,7 @@ $GLOBALS['ThePage'] = new Page('Game');
 
    // only for players and normal games (no FK, no MPG)
    $allow_cond_moves = ( ALLOW_CONDITIONAL_MOVES && $my_game && !$is_mp_game && !$is_fairkomi_negotiation
-         && $Status != GAME_STATUS_FINISHED );
+         && isRunningGame($Status) );
    $cm_move_seq = ( $allow_cond_moves )
       ? MoveSequence::load_cache_last_move_sequence( 'game', $gid, $my_id )
       : null;
@@ -1652,7 +1652,7 @@ function draw_conditional_moves_links( $gid, $my_id, $move_seq )
 }//draw_conditional_moves_links
 
 
-function handle_conditional_moves( $move_seq, $game_row, $cm_action, &$board, $to_move, $my_id )
+function handle_conditional_moves( &$move_seq, $game_row, $cm_action, &$board, $to_move, $my_id )
 {
    $gid = $game_row['ID'];
    $Size = $game_row['Size'];
@@ -1663,15 +1663,21 @@ function handle_conditional_moves( $move_seq, $game_row, $cm_action, &$board, $t
    if ( !$var_view )
       $var_view = '1';
 
-   $db_cond_moves = '';
    if ( !is_null($move_seq) )
    {
       $db_cond_moves = $move_seq->Sequence;
       $cnt_replay_moves = $move_seq->StartMoveNr - 1;
       $check_nodes = true;
+
+      if ( $cm_action == 'edit' && $move_seq->Status == MSEQ_STATUS_ACTIVE ) // inactivate on edit
+      {
+         $move_seq->setStatus( MSEQ_STATUS_INACTIVE );
+         $move_seq->update();
+      }
    }
    else
    {
+      $db_cond_moves = '';
       $cnt_replay_moves = $game_row['Moves'];
       $check_nodes = false;
    }
@@ -1697,6 +1703,7 @@ function handle_conditional_moves( $move_seq, $game_row, $cm_action, &$board, $t
    if ( !$cond_moves && ( @$_REQUEST['cm_preview'] || @$_REQUEST['cm_save'] ) )
       $errors[] = T_('Missing conditional moves.');
 
+
    $var_names = array();
    $sgf_parser = new SgfParser( SGFP_OPT_SKIP_ROOT_NODE );
    if ( $cond_moves && ( $check_nodes || @$_REQUEST['cm_preview'] || @$_REQUEST['cm_save'] ) )
@@ -1706,6 +1713,7 @@ function handle_conditional_moves( $move_seq, $game_row, $cm_action, &$board, $t
 
       if ( $sgf_parser->parse_sgf($cond_moves) )
       {
+         // check syntax of cond-moves
          $extra_nodes = $sgf_parser->games[0];
          $gchkmove = GameCheckMove::prepare_game_check_move_board_start( $Size, $game_row['ShapeSnapshot'] );
          $gchkmove->replay_moves( $board->moves, $cnt_replay_moves );
@@ -1719,7 +1727,7 @@ function handle_conditional_moves( $move_seq, $game_row, $cm_action, &$board, $t
                'SgfParser::sgf_convert_move_to_board_coords', $Size );
          }
 
-         if ( @$_REQUEST['cm_preview'] && $var_view && count($errors) == 0 )
+         if ( @$_REQUEST['cm_preview'] && $var_view && count($errors) == 0 ) // show selected CM-variation on board
          {
             $result = ConditionalMoves::extract_variation( $extra_nodes, $var_view, $Size );
             if ( is_array($result) )
@@ -1736,7 +1744,7 @@ function handle_conditional_moves( $move_seq, $game_row, $cm_action, &$board, $t
          //echo "<pre>", SgfParser::sgf_builder( array( $extra_nodes ) ), "</pre><br><br>\n";
          //echo "<pre>-----", print_r($extra_nodes, true), "</pre>\n";
 
-         if ( @$_REQUEST['cm_save'] && count($errors) == 0 )
+         if ( @$_REQUEST['cm_save'] && count($errors) == 0 ) // save cond-moves
          {
             $cm_id = ( is_null($move_seq) ) ? 0 : $move_seq->ID; // NEW or EDIT
             $cm_flags = 0;

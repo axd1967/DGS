@@ -13,6 +13,9 @@ ChangeLog
 
 2014-05-13 jug
 
+   * game.php (handle_conditional_moves):
+   - inactivate cond-moves on edit-action
+
    * include/move.php (class GameCheckMove, ~.replay_moves, ~.replay_move, ~.__clone,
        ~.prepare_game_check_move_board_start),
      include/db/move_sequence.php (MoveSequence.getErrorCodeText, ~.get_check_move_error_code),
