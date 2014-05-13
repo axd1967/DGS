@@ -569,16 +569,14 @@ class ConditionalMoves
     */
    public static function sgf_strip_cond_moves_notes( $sgf_node )
    {
-      foreach ( $sgf_node->props as $prop => $values )
+      if ( isset($sgf_node->props[$prop = 'C']) )
       {
-         if ( $prop == 'C' )
-         {
-            $text = trim( str_replace( self::$TXT_CM_START, '', $values[0] ) ); // remove CM-indicator-text
-            if ( (string)$text == '' )
-               unset($sgf_node->props['C']);
-            else
-               $sgf_node->props[$prop][0] = $text;
-         }
+         $values = $sgf_node->props[$prop];
+         $text = trim( str_replace( self::$TXT_CM_START, '', $values[0] ) ); // remove CM-indicator-text
+         if ( (string)$text == '' )
+            unset($sgf_node->props[$prop]);
+         else
+            $sgf_node->props[$prop][0] = $text;
       }
       return $sgf_node;
    }//sgf_strip_cond_moves_notes
