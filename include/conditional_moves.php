@@ -167,7 +167,7 @@ class ConditionalMoves
       $new_str = preg_replace("/ +/", ' ', $new_str); // remove double-spaces
 
       // surround with "(; ... )"
-      if ( preg_match("/^(\\()?\\s*(;)\\s*?(.*)$/", $new_str, $matches) )
+      if ( preg_match("/^(\\()?\\s*(;)?\\s*?(.*)$/", $new_str, $matches) )
          $new_str = '(;' . $matches[3];
       if ( substr($str, -1) != ')' )
          $new_str .= ' )';
@@ -182,15 +182,13 @@ class ConditionalMoves
     * \param $gchkmove GameCheckMove initialized with shape-setup and moves up to but excluding first move of cond-moves
     * \param $gsize board-size
     * \param $player_color BLACK | WHITE
-    * \param $last_move_color BLACK | WHITE
     * \return arr( errors, variation-name-references, cond-moves-sgf-coords )
     */
-   public static function check_nodes_cond_moves( &$cm_nodes, $gchkmove, $gsize, $player_color, $last_move_color )
+   public static function check_nodes_cond_moves( &$cm_nodes, $gchkmove, $gsize, $player_color )
    {
       $errors = array();
       $own_color = ($player_color == BLACK) ? 'B' : 'W';
       $opp_color = ($player_color == BLACK) ? 'W' : 'B';
-      $last_color = ($last_move_color == BLACK) ? 'B' : 'W';
 
       $cnt_total_nodes = 0;
       $last_pos = 0;
@@ -201,8 +199,8 @@ class ConditionalMoves
       SgfParser::push_var_stack( $vars, $cm_nodes, array(
             'level'     => 0, // level=0 (root)
             'varname'   => '1',
-            'last_color' => $last_color,
-            'last_move' => -1,
+            'last_color' => ( ( $gchkmove->get_replay_last_color() == BLACK ) ? 'B' : 'W' ),
+            'last_move' => $gchkmove->get_replay_last_sgf_move(), // SGF- or board-coord, ''=PASS, -1 = unset
             'cnt_pass'  => 0,
             'cnt_vnode' => 0,
             'gchkmove'  => clone $gchkmove,
@@ -292,8 +290,7 @@ class ConditionalMoves
                      $node->get_props_text(), $node->pos, $varname );
                $last_color = $col_key;
 
-               // NOTE: sgf-coord from SGF-file, but sgf- or board-coord from manually entered cond-move
-               $coord = @$node->props[$col_key][0];
+               $coord = @$node->props[$col_key][0]; // SGF-coord or board-coord
                if ( $gsize <= 19 && $coord == 'tt' ) // replace PASS-notation of 'tt' -> ''
                   $node->prop[$col_key][0] = $coord = '';
 
@@ -451,43 +448,26 @@ class ConditionalMoves
     * \brief Plays conditional moves on board for showing all of them for preview.
     * \return ''=success; else illegal-move-error
     */
-   public static function add_played_conditional_moves_on_board( &$board, $moves, $size )
+   public static function add_played_conditional_moves_on_board( &$board, $gchkmove, $moves )
    {
-      // handle B/W-moves on board handling captures
-      $gchkmove = new GameCheckMove( $board );
-      $Black_Prisoners = $White_Prisoners = 0;
-      $Last_Move = '';
-      $GameFlags = 0;
-      $to_move = BLACK;
       $error = '';
       $movenum = 0;
       foreach ( $moves as $move ) // move = ( stone=BLACK|WHITE, posx, posy ); posx can be POSX_PASS
       {
          $movenum++;
-         list( $to_move, $x, $y ) = $move;
-         if ( $x == POSX_PASS )
-         {
-            $Last_Move = '';
-            continue;
-         }
-
-         $err = $gchkmove->check_move( array( $x, $y ), $to_move, $Last_Move, $GameFlags, /*exit*/false);
+         $err = $gchkmove->replay_move( $move );
          if ( $err )
          {
-            $board_pos = number2board_coords( $x, $y, $size );
+            list( $to_move, $x, $y ) = $move;
+            $board_pos = number2board_coords( $x, $y, $board->size );
             $board->set_conditional_moves_errpos( $movenum - 1 );
             $error = sprintf( T_('Playing conditional moves stopped: Error [%s] at move #%s [%s] found!'),
                $err, $movenum, ($to_move==BLACK ? 'B' : 'W') . $board_pos );
             break;
          }
-         $gchkmove->update_prisoners( $Black_Prisoners, $White_Prisoners );
-
-         if ( $gchkmove->nr_prisoners == 1 )
-            $GameFlags |= GAMEFLAGS_KO;
-         else
-            $GameFlags &= ~GAMEFLAGS_KO;
-         $Last_Move = number2sgf_coords( $x, $y, $size );
       }
+
+      $gchkmove->assign_board_array( $board );
 
       return $error;
    }//add_played_conditional_moves_on_board

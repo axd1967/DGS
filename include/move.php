@@ -40,13 +40,33 @@ class GameCheckMove
    public $colnr;
    public $rownr;
 
-   private $replay_last_move = '';
-   private $replay_game_flags = 0;
+   private $replay_last_move = ''; // SGF-coords (used for replaying)
+   private $replay_game_flags = 0; // GAMEFLAGS_KO
+
+   // tracking of last-color/move for handling of cond-moves
+   private $replay_last_color = BLACK; // BLACK | WHITE
+   private $replay_last_sgf_move = -1; // SGF-coords
 
 
    public function __construct( &$board )
    {
       $this->board = $board;
+   }
+
+   public function get_replay_last_color()
+   {
+      return $this->replay_last_color;
+   }
+
+   public function get_replay_last_sgf_move()
+   {
+      return $this->replay_last_sgf_move;
+   }
+
+   /*! Take over board-array in this GameCheckMove-instance into passed Board-instance. */
+   public function assign_board_array( &$board )
+   {
+      $board->array = $this->board->array;
    }
 
    /*!
@@ -139,8 +159,8 @@ class GameCheckMove
     */
    public function replay_moves( $arr_board_moves, $last_move_nr )
    {
-      $this->replay_last_move = '';
-      $this->replay_game_flags = 0;
+      $this->init_replay_moves();
+
       foreach ( $arr_board_moves as $move_nr => $arr_move )
       {
          if ( !is_numeric($move_nr) )
@@ -151,6 +171,15 @@ class GameCheckMove
          $err = $this->replay_move( $arr_move );
       }
    }//replay_moves
+
+   public function init_replay_moves()
+   {
+      $this->replay_last_move = '';
+      $this->replay_game_flags = 0;
+
+      $this->replay_last_color = BLACK;
+      $this->replay_last_sgf_move = -1;
+   }
 
    /*!
     * \brief Replays single move on board (PASS-move is skipped).
@@ -176,9 +205,15 @@ class GameCheckMove
             $x = POSX_PASS;
       }
 
-      if ( $x <= POSX_PASS || ($stone != BLACK && $stone != WHITE) )
+      if ( $x < POSX_PASS || ($stone != BLACK && $stone != WHITE) )
+         $err = ''; // keep last-move/game-flags for non-move
+      elseif ( $x == POSX_PASS ) // PASS
+      {
          $err = ''; // keep last-move/game-flags on PASS-move for ko-check
-      else
+         $this->replay_last_color = $stone;
+         $this->replay_last_sgf_move = '';
+      }
+      else // move
       {
          $err = $this->check_move( array($x,$y), $stone, $this->replay_last_move, $this->replay_game_flags, /*exit*/false );
          if ( !$err )
@@ -189,6 +224,9 @@ class GameCheckMove
                $this->replay_game_flags &= ~GAMEFLAGS_KO;
 
             $this->replay_last_move = $sgf_move;
+
+            $this->replay_last_color = $stone;
+            $this->replay_last_sgf_move = $sgf_move;
          }
       }
 
@@ -204,9 +242,9 @@ class GameCheckMove
    // ------------ static functions ----------------------------
 
    /*! \brief Prepares a new GameCheckMove-instance with given board-size and initial shape-setup. */
-   public static function prepare_game_check_move_board_start( $size, $shape_snapshot )
+   public static function prepare_game_check_move_board_start( $gid, $size, $shape_snapshot )
    {
-      $board = new Board( 0, $size ); // need board to really "move" (with capturing stones)
+      $board = new Board( $gid, $size ); // need board to really "move" (with capturing stones)
       $board->init_board();
 
       if ( $shape_snapshot )

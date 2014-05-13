@@ -75,7 +75,8 @@ $GLOBALS['ThePage'] = new Page('Game');
 
      gid=&cma=action    : conditional-move action: edit, show
      gid=&cm_preview=   : preview cond-moves
-     gid=&cm_save=      : save cond-moves
+     gid=&cm_save=      : save cond-moves (save inactive only)
+     gid=&cm_activate=  : save and activate cond-moves; set cm_act_id for confirm-page
 
      toggleobserve=y|n  : toggle observing game
      movechange=1&gotomove= : view selected move (for view-move selectbox)
@@ -94,6 +95,7 @@ $GLOBALS['ThePage'] = new Page('Game');
    $preview = (bool)@$_REQUEST['preview'];
    $terr_marker = (@$_REQUEST['tm']) ? 1 : 0;
    $cm_action = get_request_arg('cma');
+   $cm_activate_id = (int)get_request_arg('cm_act_id');
 
    $message = get_request_arg( 'message');
    $message = replace_move_tag( $message, $gid );
@@ -125,6 +127,7 @@ $GLOBALS['ThePage'] = new Page('Game');
       error('unknown_game', "game.bad_game_id($gid)");
    extract($game_row);
    $is_shape = ($ShapeID > 0);
+   $is_my_turn = ( $my_id == $ToMove_ID );
 
    if ( $Status == GAME_STATUS_INVITED || $Status == GAME_STATUS_SETUP )
       error('game_not_started', "game.check.bad_status($gid,$Status)");
@@ -165,7 +168,7 @@ $GLOBALS['ThePage'] = new Page('Game');
 
    if ( $Status == GAME_STATUS_KOMI )
    {
-      $may_play = ( $logged_in && $my_id == $ToMove_ID ) ;
+      $may_play = ( $logged_in && $is_my_turn );
       if ( !$action )
          $action = 'negotiate_komi';
    }
@@ -173,7 +176,7 @@ $GLOBALS['ThePage'] = new Page('Game');
       $may_play = false;
    else
    {
-      $may_play = ( $logged_in && $my_id == $ToMove_ID ) ;
+      $may_play = ( $logged_in && $is_my_turn );
       if ( $may_play )
       {
          if ( !$action )
@@ -203,7 +206,7 @@ $GLOBALS['ThePage'] = new Page('Game');
 
    // only for players and normal games (no FK, no MPG)
    $allow_cond_moves = ( ALLOW_CONDITIONAL_MOVES && $my_game && !$is_mp_game && !$is_fairkomi_negotiation
-         && isRunningGame($Status) );
+         && ($Status == GAME_STATUS_PLAY || $Status == GAME_STATUS_PASS) && $Moves >= $Handicap );
    $cm_move_seq = ( $allow_cond_moves )
       ? MoveSequence::load_cache_last_move_sequence( 'game', $gid, $my_id )
       : null;
@@ -305,8 +308,15 @@ $GLOBALS['ThePage'] = new Page('Game');
    if ( $allow_cond_moves )
    {
       //TODO TODO handle finished games (no $to_move)
-      list( $cm_sgf_parser, $cm_errors, $cm_var_names, $cond_moves ) =
-         handle_conditional_moves( $cm_move_seq, $game_row, $cm_action, $TheBoard, $to_move, $my_id );
+      list( $cm_sgf_parser, $cm_errors, $cm_var_names, $cond_moves, $new_action, $new_coord ) =
+         handle_conditional_moves( $cm_move_seq, $game_row, $cm_action, $TheBoard, $to_move, $my_id, $is_my_turn );
+      if ( $new_action )
+      {
+         $action = $new_action;
+         if ( $new_coord )
+            $coord = $new_coord;
+         $cm_activate_id = ( is_null($cm_move_seq) ) ? 0 : $cm_move_seq->ID;
+      }
    }
 
    $extra_infos = array();
@@ -667,7 +677,8 @@ $GLOBALS['ThePage'] = new Page('Game');
 
    if ( $TheBoard->has_conditional_moves() )
    {
-      $TheBoard->move_marks( 1, 0 );
+      $TheBoard->move_marks( 1, 0 ); // preview variation
+      $TheBoard->set_move_mark(); // remove last-move-mark
       $TheBoard->draw_captures_box( T_('Captures'));
    }
    else
@@ -713,7 +724,12 @@ $GLOBALS['ThePage'] = new Page('Game');
 
    //messages about actions
    if ( $validation_step )
-      $extra_infos[T_('Hit "Submit" to confirm')] = 'Guidance';
+   {
+      if ( $cm_activate_id )
+         $extra_infos[T_('Hit "Submit" to confirm and activate conditional-moves!')] = 'Guidance';
+      else
+         $extra_infos[T_('Hit "Submit" to confirm')] = 'Guidance';
+   }
 
    if ( count($extra_infos) )
    {
@@ -842,6 +858,7 @@ $GLOBALS['ThePage'] = new Page('Game');
    $page_hiddens['movenumbers'] = @$_REQUEST['movenumbers'];
    $page_hiddens['notesmode'] = @$_REQUEST['notesmode'];
    $page_hiddens['cma'] = $cm_action;
+   $page_hiddens['cm_act_id'] = $cm_activate_id;
 
    echo build_hidden( $page_hiddens);
    echo "\n</FORM>";
@@ -1652,12 +1669,13 @@ function draw_conditional_moves_links( $gid, $my_id, $move_seq )
 }//draw_conditional_moves_links
 
 
-function handle_conditional_moves( &$move_seq, $game_row, $cm_action, &$board, $to_move, $my_id )
+function handle_conditional_moves( &$move_seq, $game_row, $cm_action, &$board, $to_move, $my_id, $is_my_turn )
 {
    $gid = $game_row['ID'];
    $Size = $game_row['Size'];
    $my_col = ($game_row['Black_ID'] == $my_id) ? BLACK : WHITE;
-   $last_move_col = ($to_move == BLACK) ? WHITE : BLACK;
+
+   $new_action = $new_coord = $cm_start_move = '';
 
    $var_view = get_request_arg('cm_var_view', '1');
    if ( !$var_view )
@@ -1700,79 +1718,105 @@ function handle_conditional_moves( &$move_seq, $game_row, $cm_action, &$board, $
    else
       $errors = array();
 
-   if ( !$cond_moves && ( @$_REQUEST['cm_preview'] || @$_REQUEST['cm_save'] ) )
+   if ( !$cond_moves && ( @$_REQUEST['cm_preview'] || @$_REQUEST['cm_save'] || @$_REQUEST['cm_activate'] ) )
       $errors[] = T_('Missing conditional moves.');
 
 
    $var_names = array();
    $sgf_parser = new SgfParser( SGFP_OPT_SKIP_ROOT_NODE );
-   if ( $cond_moves && ( $check_nodes || @$_REQUEST['cm_preview'] || @$_REQUEST['cm_save'] ) )
+   if ( $cond_moves && ( $check_nodes || @$_REQUEST['cm_preview'] || @$_REQUEST['cm_save'] || @$_REQUEST['cm_activate'] ) )
    {
       if ( $cm_src_manual )
          $cond_moves = ConditionalMoves::reformat_to_sgf( $cond_moves, $Size, ($to_move == BLACK) );
 
       if ( $sgf_parser->parse_sgf($cond_moves) )
       {
-         // check syntax of cond-moves
-         $extra_nodes = $sgf_parser->games[0];
-         $gchkmove = GameCheckMove::prepare_game_check_move_board_start( $Size, $game_row['ShapeSnapshot'] );
-         $gchkmove->replay_moves( $board->moves, $cnt_replay_moves );
-         list( $errors, $var_names, $cond_moves_sgf_coords ) =
-            ConditionalMoves::check_nodes_cond_moves( $extra_nodes, $gchkmove, $Size, $my_col, $last_move_col );
-
-         // reformat cond-moves with board-coords for display in edit-box
-         if ( count($errors) == 0 )
+         if ( count($sgf_parser->games) == 0 )
+            $errors[] = T_('Can\'t detect conditional moves.');
+         else
          {
-            $cond_moves = SgfParser::sgf_builder( array( $extra_nodes ), "\r\n", ' ', '',
-               'SgfParser::sgf_convert_move_to_board_coords', $Size );
-         }
+            // check syntax of cond-moves
+            $extra_nodes = $sgf_parser->games[0];
+            $gchkmove = GameCheckMove::prepare_game_check_move_board_start( $gid, $Size, $game_row['ShapeSnapshot'] );
+            $gchkmove->replay_moves( $board->moves, $cnt_replay_moves );
+            $preview_gchkmove = clone $gchkmove;
+            list( $errors, $var_names, $cond_moves_sgf_coords ) =
+               ConditionalMoves::check_nodes_cond_moves( $extra_nodes, $gchkmove, $Size, $my_col );
 
-         if ( @$_REQUEST['cm_preview'] && $var_view && count($errors) == 0 ) // show selected CM-variation on board
-         {
-            $result = ConditionalMoves::extract_variation( $extra_nodes, $var_view, $Size );
-            if ( is_array($result) )
+            // reformat cond-moves with board-coords for display in edit-box
+            if ( count($errors) == 0 )
             {
-               $board->set_conditional_moves( $result );
-               $err = ConditionalMoves::add_played_conditional_moves_on_board( $board, $result, $Size );
-               if ( $err )
-                  $errors[] = $err;
+               $cond_moves = SgfParser::sgf_builder( array( $extra_nodes ), "\r\n", ' ', '',
+                  'SgfParser::sgf_convert_move_to_board_coords', $Size );
             }
-            else
-               $errors[] = $result;
-         }
 
-         //echo "<pre>", SgfParser::sgf_builder( array( $extra_nodes ) ), "</pre><br><br>\n";
-         //echo "<pre>-----", print_r($extra_nodes, true), "</pre>\n";
-
-         if ( @$_REQUEST['cm_save'] && count($errors) == 0 ) // save cond-moves
-         {
-            $cm_id = ( is_null($move_seq) ) ? 0 : $move_seq->ID; // NEW or EDIT
-            $cm_flags = 0;
-            $cm_private = get_request_arg('cm_private', 0);
-            if ( $cm_private )
-               $cm_flags |= MSEQ_FLAG_PRIVATE;
-
-            $cm_start_move_nr = $game_row['Moves'] + 1;
-            $cm_start_move = ConditionalMoves::get_nodes_start_move_sgf_coords( $extra_nodes, $Size );
-
-            $cm_moveseq = new MoveSequence( $cm_id, $gid, $my_id, MSEQ_STATUS_INACTIVE, $cm_flags, 0,
-               $cm_start_move_nr, $cm_start_move, $cm_start_move_nr, 1, $cm_start_move, $cond_moves_sgf_coords );
-
-            ta_begin();
-            {//HOT-section to save conditional-moves
-               $cm_moveseq->persist();
+            if ( @$_REQUEST['cm_preview'] && $var_view && count($errors) == 0 ) // show selected CM-variation on board
+            {
+               $result = ConditionalMoves::extract_variation( $extra_nodes, $var_view, $Size );
+               if ( is_array($result) )
+               {
+                  $board->set_conditional_moves( $result );
+                  $err = ConditionalMoves::add_played_conditional_moves_on_board( $board, $preview_gchkmove, $result );
+                  if ( $err )
+                     $errors[] = $err;
+               }
+               else
+                  $errors[] = $result;
             }
-            ta_end();
+
+            if ( (@$_REQUEST['cm_save'] || @$_REQUEST['cm_activate']) && count($errors) == 0 ) // save cond-moves
+            {
+               $cm_id = ( is_null($move_seq) ) ? 0 : $move_seq->ID; // NEW or EDIT
+               $cm_flags = 0;
+               $cm_private = get_request_arg('cm_private', 0);
+               if ( $cm_private )
+                  $cm_flags |= MSEQ_FLAG_PRIVATE;
+               $cm_status = ( @$_REQUEST['cm_activate'] && !$is_my_turn ) ? MSEQ_STATUS_ACTIVE : MSEQ_STATUS_INACTIVE;
+
+               if ( $cm_id ) // EDIT (reset start-/last-move to start-move)
+               {
+                  $cm_start_move_nr = $move_seq->StartMoveNr;
+                  $cm_start_move = $move_seq->StartMove;
+               }
+               else // NEW
+               {
+                  $cm_start_move_nr = $game_row['Moves'] + 1;
+                  $cm_start_move = ConditionalMoves::get_nodes_start_move_sgf_coords( $extra_nodes, $Size );
+               }
+               $cm_moveseq = new MoveSequence( $cm_id, $gid, $my_id, $cm_status, $cm_flags, 0,
+                  $cm_start_move_nr, $cm_start_move, $cm_start_move_nr, 1, $cm_start_move, $cond_moves_sgf_coords );
+
+               ta_begin();
+               {//HOT-section to save conditional-moves
+                  if ( $cm_moveseq->persist() )
+                  {
+                     $_REQUEST['sysmsg'] = ( $cm_moveseq->Status == MSEQ_STATUS_ACTIVE )
+                         ? T_('Conditional moves saved and activated!')
+                         : T_('Conditional moves saved, but not activated!');
+                     $move_seq = $cm_moveseq;
+                  }
+               }
+               ta_end();
+            }
          }
       }//parse-sgf
    }
 
-   return array( $sgf_parser, $errors, $var_names, $cond_moves );
+
+   // show first move to submit on CM-activate
+   if ( count($errors) == 0 && @$_REQUEST['cm_activate'] && $cm_start_move )
+   {
+      $new_coord = substr( $cm_start_move, 1 );
+      $new_action = ( $new_coord ) ? GAMEACT_DO_MOVE : GAMEACT_PASS;
+   }
+
+   return array( $sgf_parser, $errors, $var_names, $cond_moves, $new_action, $new_coord );
 }//handle_conditional_moves
 
 function draw_conditional_moves_input( &$gform, $gid, $my_id, $cm_action, $move_seq, $sgf_parser, $errors, $cond_moves, $var_names )
 {
-   global $base_path;
+   global $base_path, $is_my_turn;
+
    $is_show = ( $cm_action == 'show' );
    $has_cm = !is_null($move_seq);
    $attbs_disabled = ( $is_show ) ? 'disabled=1' : '';
@@ -1830,7 +1874,7 @@ function draw_conditional_moves_input( &$gform, $gid, $my_id, $cm_action, $move_
    }
    echo
       "<TR>\n",
-         '<TD class=Rubric>', span('smaller', ( $is_show ? T_('Sequence#condmoves') : T_('Edit sequence') )), ":</TD>\n",
+         '<TD class=Rubric>', ( $is_show ? T_('Sequence#condmoves') : T_('Edit sequence') ), ":</TD>\n",
          '<TD colspan="2" ', ($is_show ? 'class=CMSequence>' : '>'),
             ( $is_show
                ? span('CMSequence', wordwrap( str_replace("\n", "<br>\n", $cond_moves), 80, "<br>\n", false ))
@@ -1838,7 +1882,7 @@ function draw_conditional_moves_input( &$gform, $gid, $my_id, $cm_action, $move_
          "</TD>\n",
       '</TR>',
       "<TR class=Vars>\n",
-         '<TD class=Rubric>', span('smaller', T_('Variations#condmoves')), ":</TD>\n",
+         '<TD class=Rubric>', T_('Variations#condmoves'), ":</TD>\n",
          '<TD>', $var_views_str, "</TD>\n",
          '<TD class="Preview">',
             $gform->print_insert_text_input( 'cm_var_view', 6, 16, $var_view ),
@@ -1847,7 +1891,7 @@ function draw_conditional_moves_input( &$gform, $gid, $my_id, $cm_action, $move_
          "</TD>\n",
       '</TR>',
       "<TR class=Attr>\n",
-         '<TD class=Rubric>', span('smaller', T_('Status#condmoves') . ' / ' . T_('Attributes#condmoves')), ":</TD>\n",
+         '<TD class=Rubric>', T_('Status#condmoves'), ' / ', T_('Attributes#condmoves'), ":</TD>\n",
          '<TD colspan="2">',
             span('EmphasizeWarn', MoveSequence::getStatusText($move_seq->Status)),
             SMALL_SPACING, SMALL_SPACING,
@@ -1857,7 +1901,10 @@ function draw_conditional_moves_input( &$gform, $gid, $my_id, $cm_action, $move_
       "<TR class=Submit>\n",
          "<TD></TD>\n",
          '<TD>',
-            $gform->print_insert_submit_buttonx( 'cm_save', T_('Save conditional moves'), $attbs_disabled ),
+            $gform->print_insert_submit_buttonx( 'cm_activate',
+               ( $is_my_turn ? T_('Save to activate#condmoves') : T_('Activate#condmoves') ), $attbs_disabled ),
+            SMALL_SPACING,
+            $gform->print_insert_submit_buttonx( 'cm_save', T_('Save inactive#condmoves'), $attbs_disabled ),
          "</TD>\n",
          '<TD class="Cancel">',
             $gform->print_insert_submit_button( 'cancel', T_('Cancel') ),

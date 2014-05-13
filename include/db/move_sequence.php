@@ -262,6 +262,19 @@ class MoveSequence
       return $result;
    }
 
+   /*! \brief Activates (inactive) conditional-moves for given game-id and user-id. */
+   public static function activate_move_sequence( $dbgmsg, $mseq_id, $gid, $uid )
+   {
+      $mseq_id = (int)$mseq_id;
+      $gid = (int)$gid;
+      $uid = (int)$uid;
+      $result = db_query( $dbgmsg.".MoveSequence:activate_move_sequence($gid,$uid)",
+         "UPDATE MoveSequence SET Status='".MSEQ_STATUS_ACTIVE."' " .
+         "WHERE ID=$mseq_id AND gid=$gid AND uid=$uid AND Status='".MSEQ_STATUS_INACTIVE."' LIMIT 1" );
+      self::delete_cache_move_sequence( $dbgmsg, $gid );
+      return $result;
+   }
+
    public static function delete_cache_move_sequence( $dbgmsg, $gid, $uid=0 )
    {
       if ( $uid <= 0 )

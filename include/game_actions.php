@@ -83,6 +83,7 @@ class GameActionHelper
    private static $MOVE_INSERT_QUERY = "INSERT INTO Moves ( gid, MoveNr, Stone, PosX, PosY, Hours ) VALUES ";
    private $move_query = ''; // (gid,MoveNr,Stone,PosX,PosY,Hours)
 
+   private $cond_moves_activate_id = 0; // MoveSequence.ID to activate
    private $cond_moves_mseq = null; // MoveSequence-entry if there are cond-moves of opponent
    private $last_move = ''; // last-move for PASS|MOVE in format: "<COLOR><SGF_COORD>", e.g. 'B' (=B-pass), 'Wee'
    private $upd_game_row = array(); // filled with game_row-values (key=>val) to overwrite on game-update
@@ -298,6 +299,12 @@ class GameActionHelper
       return $this->game_row['Moves'];
    }
 
+
+   public function prepare_conditional_moves_activation( $cm_activate_id )
+   {
+      if ( ALLOW_CONDITIONAL_MOVES && $cm_activate_id >= 0 )
+         $this->cond_moves_activate_id = (int)$cm_activate_id;
+   }
 
    /*!
     * \brief Sets handicap-stones for game using either $orig_stonestring OR $quick_moves depending on $this->is_quick.
@@ -573,6 +580,8 @@ class GameActionHelper
    {
       ta_begin();
       {//HOT-section to process game-action
+         $this->activate_conditional_moves( $dbgmsg );
+
          $this->update_game( $dbgmsg );
 
          $last_gah = $this->process_conditional_moves( $dbgmsg );
@@ -582,6 +591,14 @@ class GameActionHelper
       }
       ta_end();
    }//process_game_action
+
+   private function activate_conditional_moves( $dbgmsg )
+   {
+      if ( $this->cond_moves_activate_id <= 0 )
+         return false;
+
+      return MoveSequence::activate_move_sequence( $dbgmsg, $this->cond_moves_activate_id, $this->gid, $this->my_id );
+   }//activate_conditional_moves
 
    /*!
     * \brief Executes SQL-statements prepared by this->prepare_game_action_...()-functions for the game.
@@ -957,7 +974,7 @@ class GameActionHelper
       if ( !is_null($mseq_status) )
          $this->cond_moves_mseq->setStatus( $mseq_status );
       if ( $node instanceof SgfNode )
-         $this->cond_moves_mseq->set_last_move_info( $node->move_nr, $node->pos, $node->move );
+         $this->cond_moves_mseq->set_last_move_info( $node->move_nr, $node->pos, $node->sgf_move );
       if ( $error_code >= 0 )
          $this->cond_moves_mseq->ErrorCode = (int)$error_code;
    }

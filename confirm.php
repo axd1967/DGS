@@ -49,6 +49,7 @@ require_once 'include/rating.php';
 
      a=delete           : execute deletion of game
      a=domove&c=&s=     : execute move
+     a=domove&c=&s=&cm_act_id= : execute move and activate conditional-moves
      a=done&s=          : execute final scoring of game
      a=handicap&s=      : save placed free handicap-stones
      a=pass             : execute pass-move
@@ -68,6 +69,8 @@ require_once 'include/rating.php';
       error('not_allowed_for_guest', 'confirm');
 
    $action = @$_REQUEST['action'];
+   $cm_activate_id = (int)@$_REQUEST['cm_act_id'];
+
    $gah = new GameActionHelper( $my_id, $gid, /*quick*/false );
    $gah->set_game_action( $action );
    $game_row = $gah->load_game( 'confirm' );
@@ -134,6 +137,8 @@ require_once 'include/rating.php';
          if ( !$is_running_game ) //after resume
             error('invalid_action', "confirm.domove.check_status($gid,$Status)");
 
+         $gah->prepare_conditional_moves_activation( $cm_activate_id );
+
          $coord = @$_REQUEST['coord'];
          $stonestring = @$_REQUEST['stonestring']; //stonestring is the list of prisoners
          $gah->prepare_game_action_do_move( 'confirm', $coord, $stonestring );
@@ -141,6 +146,7 @@ require_once 'include/rating.php';
       }
 
       case GAMEACT_PASS:
+         $gah->prepare_conditional_moves_activation( $cm_activate_id );
          $gah->prepare_game_action_pass( 'confirm' );
          break;
 

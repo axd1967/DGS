@@ -13,6 +13,33 @@ ChangeLog
 
 2014-05-13 jug
 
+   * include/move.php (class GameCheckMove, ~.get_replay_last_color, ~.get_replay_last_sgf_move,
+       ~.assign_board_array, ~.replay_moves, ~.replay_move, ~.prepare_game_check_move_board_start),
+     include/game_actions.php (class GameActionHelper, ~.prepare_conditional_moves_activation,
+       ~.process_game_action, ~.activate_conditional_moves, ~.update_cm_move_sequence),
+     include/conditional_moves.php (ConditionalMoves.reformat_to_sgf, ~.check_nodes_cond_moves,
+       ~.add_played_conditional_moves_on_board),
+     include/db/move_sequence.php (MoveSequence.activate_move_sequence),
+     game.php (handle_conditional_moves, draw_conditional_moves_input),
+     confirm.php:
+   - save and activate inactive conditional-moves on my or opponents turn
+     - added activation of conditional-moves as two-step process if it is my turn:
+       1. save conditional-moves as inactive,
+       2. activate on submitting first move to allow optional move-message
+     - splitted save and activation action for editing conditional-moves
+     - added showing and editing of conditional-moves for already started sequence
+     - reset start- and last-move data for editing of already started conditional-move sequence
+     - bugfix: only allow showing & editing conditional-moves on game-status PLAY/PASS
+       and only after handicap-stones-setup
+     - bugfix: remove last-move-marker on previewing variation of conditional-moves
+     - bugfix: detect error if parsing of conditional-moves was ok but without detecting the nodes
+       of the game-tree
+     - bugfix: added game-id for debugging in preparing GameCheckMove-instance for replaying moves
+       for preview of conditional-moves
+     - bugfix: detect and auto-fix missing trailing ';'-node on reformatting format of conditional-moves
+     - bugfix GameActionHelper.update_cm_move_sequence: used wrong SgfNode-attribute
+       to update last-move coordinate
+
    * game.php (handle_conditional_moves):
    - inactivate cond-moves on edit-action
 
