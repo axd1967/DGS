@@ -408,6 +408,12 @@ class SgfParser
          return $coord;
    }//normalize_move_coords
 
+   //TODO TODO remove later
+   public static function debug_sgf_builder( $game, $size=19 )
+   {
+      return self::sgf_builder( array( $game ), "\n", '', '', 'SgfParser::sgf_convert_move_to_board_coords', $size );
+   }
+
    /*!
     * \brief callback-function for sgf_builder() to convert B/W-moves in SgfNode-object to board-coordinates (+ use '' for PASS-move).
     * \return modified SgfNode-object
@@ -493,7 +499,10 @@ class SgfNode
 
    public function to_string()
    {
-      return $this->get_props_text() . "{#{$this->move_nr}@{$this->pos}}";
+      $out = array();
+      foreach ( $this as $k => $v )
+         $out[] = ( $k == 'props' ) ? 'props=' . $this->get_props_text() : "$k=[$v]";
+      return '{' . implode(', ', $out) . '}';
    }
 
 } //end 'SgfNode'
