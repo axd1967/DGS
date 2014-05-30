@@ -13,6 +13,9 @@ ChangeLog
 
 2014-05-30 jug
 
+   * goban_editor.php (create_igoban_from_parsed_sgf):
+   - bugfix: skip PASS-moves on creating igoban from parsed SGF
+
    * include/sgf_parser.php (SgfParser.parse_sgf_game_tree, ~.sgf_parse_args, ~.push_var_stack,
          ~.sgf_builder;
        class SgfGameTree, ~.has_nodes, ~.has_vars, ~.get_first_node, ~.to_string, ~.debug;

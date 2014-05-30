@@ -379,7 +379,7 @@ function create_igoban_from_parsed_sgf( $game_sgf_parser )
    $GameFlags = 0;
    $to_move = BLACK;
    $parse_error = '';
-   foreach ( $game_sgf_parser->Moves as $move ) // move = B|W sgf-coord, e.g. "Baa", "Wbb"
+   foreach ( $game_sgf_parser->Moves as $move ) // move = B|W sgf-coord, e.g. "Baa", "Wbb", "B"
    {
       if ( $move[0] == 'B' )
          $to_move = BLACK;
@@ -388,6 +388,8 @@ function create_igoban_from_parsed_sgf( $game_sgf_parser )
       else
          continue; // unknown value
       $sgf_move = substr($move, 1);
+      if ( (string)$sgf_move == '' )
+         continue; // skip PASS
 
       $err = $gchkmove->check_move( $sgf_move, $to_move, $Last_Move, $GameFlags, /*exit*/false);
       if ( $err )
