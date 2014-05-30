@@ -182,7 +182,7 @@ class GameActionHelper
             $sgf_parser = new SgfParser( SGFP_OPT_SKIP_ROOT_NODE );
             if ( $sgf_parser->parse_sgf($move_seq->Sequence) )
             {
-               $move_seq->parsed_nodes =
+               $move_seq->parsed_game_tree =
                   ConditionalMoves::fill_conditional_moves_attributes( $sgf_parser->games[0], $move_seq->StartMoveNr );
                $this->cond_moves_mseq = $move_seq;
             }
@@ -781,63 +781,60 @@ class GameActionHelper
 
       // traverse game-tree of cond-moves searching last game-move
       $board_moves = $this->build_board_moves( $game_move_nr );
-      $var = $this->cond_moves_mseq->parsed_nodes;
+      $next_game_tree = $this->cond_moves_mseq->parsed_game_tree;
       $last_move_node = $prev_move_node = null;
       $cm_deviated = false;
-      while ( $arr_each = each($var) )
+      while ( $next_game_tree )
       {
-         list( $id, $node ) = $arr_each;
-         $game_move = @$board_moves[$game_move_nr];
+         $game_tree = $next_game_tree;
+         $next_game_tree = null;
 
-         if ( $id === SGF_VAR_KEY ) // found variation-array
+         reset($game_tree->nodes);
+         while ( $arr_each = each($game_tree->nodes) )
          {
-            // find correct variation from list with matching 1st CM-move
-            $next_var = null;
-            foreach ( $node as $sub_tree ) // this particular node is an array of variations
+            list( $id, $node ) = $arr_each; // $node is SgfNode
+            $game_move = @$board_moves[$game_move_nr];
+
+            if ( $game_move_nr == $node->move_nr && $game_move == $node->sgf_move )
             {
-               $sub_node = SgfParser::get_variation_first_sgf_node($sub_tree);
-               if ( !is_null($sub_node) ) // safety-check (but shouldn't happen as empty var is forbidden)
+               if ( $game_move_nr == $last_move_nr ) // found last-move
                {
-                  if ( $game_move_nr == $sub_node->move_nr && $game_move == $sub_node->sgf_move )
-                  {
-                     $next_var = $sub_tree; // found variation with matching move from CM-node
-                     break;
-                  }
+                  $last_move_node = $node;
+                  break 2;
                }
             }
-
-            if ( is_null($next_var) ) // there were vars, but none with matching move
+            else // move from game and CM not matching
             {
                $last_move_node = $prev_move_node;
                $cm_deviated = true;
-               break;
+               break 2;
             }
-            else // found var with matching move, so continue last-move-search in this var
-            {
-               $var = $next_var;
-               reset($var);
-               continue;
-            }
-         }//else: node is SgfNode
 
-         if ( $game_move_nr == $node->move_nr && $game_move == $node->sgf_move )
+            $prev_move_node = $node;
+            $game_move_nr++;
+         }//nodes-end
+
+         // find correct variation from list with matching 1st CM-move
+         foreach ( $game_tree->vars as $sub_tree )
          {
-            if ( $game_move_nr == $last_move_nr ) // found last-move
+            $sub_node = $sub_tree->get_first_node();
+            if ( !is_null($sub_node) ) // safety-check (shouldn't happen as empty var is forbidden)
             {
-               $last_move_node = $node;
-               break;
+               if ( $game_move_nr == $sub_node->move_nr && $game_move == $sub_node->sgf_move )
+               {
+                  $next_game_tree = $sub_tree; // found variation with matching move from CM-node
+                  break;
+               }
             }
          }
-         else // move from game and CM not matching
+
+         if ( is_null($next_game_tree) ) // no vars with matching move
          {
             $last_move_node = $prev_move_node;
             $cm_deviated = true;
             break;
-         }
-
-         $prev_move_node = $node;
-         $game_move_nr++;
-      }//end-while
+         }//else: found game-tree with matching move, so continue last-move-search in found game-tree
+      }//end-next-game-tree
 
 
       $next_move_node = null;
@@ -851,13 +848,15 @@ class GameActionHelper
       }
       else // last-move found, so now get next move
       {
-         if ( $arr_each = each($var) ) // get next node from variation
+         $arr_each = each($game_tree->nodes); // get next node from variation, or false
+         $has_vars = $game_tree->has_vars();
+         if ( $arr_each || $has_var )
          {
-            list( $id, $next_move_node ) = $arr_each;
-            if ( $id === SGF_VAR_KEY || $next_move_node->move_nr != $last_move_nr + 1 ) // something wrong in CM
+            $next_move_node = ( $arr_each ) ? $arr_each[1] : 0;
+            if ( $has_var || $next_move_node->move_nr != $last_move_nr + 1 ) // something wrong in CM
             {
                $this->update_cm_move_sequence( MSEQ_STATUS_ILLEGAL, null,
-                  ( $id === SGF_VAR_KEY ? MSEQ_ERR_NEXT_MOVE_VARNODE : MSEQ_ERR_NEXT_MOVE_BAD_MOVE_NR ) );
+                  ( ( $has_var && !$arr_each ) ? MSEQ_ERR_NEXT_MOVE_VARNODE : MSEQ_ERR_NEXT_MOVE_BAD_MOVE_NR ) );
                $next_move_node = null;
             }
          }
@@ -878,7 +877,7 @@ class GameActionHelper
          }
          else
          {
-            if ( each($var) === false ) // variation end reached
+            if ( each($game_tree->nodes) === false && !$game_tree->has_vars() ) // variation end reached
                $this->update_cm_move_sequence( MSEQ_STATUS_DONE, $next_move_node );
             else // keep previous ACTIVE-status
                $this->update_cm_move_sequence( null, $next_move_node );

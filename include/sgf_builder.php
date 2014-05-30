@@ -160,7 +160,7 @@ class SgfBuilder
 
    private $include_cond_moves = -1; // -1 = default-behaviour, see (4.SGF) in 'specs/quick_suite.xt'
    private $player_uid = 0; // (optionally) logged-in user
-   private $cm_nodes = null; // array to collect conditional-moves variation
+   private $cm_game_tree = null; // SgfGameTree to collect conditional-moves variation from game-moves
    private $cm_last_node = null; // last SgfNode to collect conditional-moves
    private $cond_moves_mseq = null; // arr( MoveSequence->parsed_node, ... ) with conditional-moves to merge
 
@@ -256,7 +256,7 @@ class SgfBuilder
       if ( $last_prop )
          $this->last_prop = $last_prop;
 
-      if ( !$this->cm_nodes )
+      if ( !$this->cm_game_tree )
       {
          if ( $this->use_buffer )
             $this->SGF .= $sgf_text;
@@ -267,11 +267,11 @@ class SgfBuilder
 
    /*!
     * \brief Outputs SGF-property with value(s) as text or else collect SgfNode-entries for merging conditional-moves
-    *       if $this->cm_nodes is an array.
+    *       if $this->cm_game_tree is non-null.
     * \param $value scalar-value or array of values
     * \param $move_nr -1 = don't set move-number in SgfNode for collecting moves for cond-moves-merge; else >0
     *
-    * \note SgfNode collected if $this->cm_nodes is an array:
+    * \note SgfNodes collected if $this->cm_game_tree is non-null SgfGameTree:
     *       sets SgfNode->move_nr, sgf_move=Bxx (xx='' for PASS, else SGF-coord)
     */
    private function sgf_echo_prop( $prop, $value, $move_nr=0 )
@@ -292,12 +292,12 @@ class SgfBuilder
       }
       $this->last_prop = $prop;
 
-      if ( is_array($this->cm_nodes) ) // collect nodes for merging of cond-moves
+      if ( $this->cm_game_tree ) // collect nodes for merging of cond-moves into SgfGameTree
       {
          if ( $start_node )
          {
             $this->cm_last_node = self::new_sgf_node();
-            $this->cm_nodes[] = $this->cm_last_node;
+            $this->cm_game_tree->nodes[] = $this->cm_last_node;
          }
          $this->cm_last_node->props[$prop][] = $value; // single or list of values
          if ( $prop == 'B' || $prop == 'W' )
@@ -504,7 +504,7 @@ class SgfBuilder
    /*!
     * \brief Loads and checks if and what merge with conditional-moves are needed.
     * \note Modifies $this->include_cond_moves: 0 = no cond-moves to merge, >0 according value to specs
-    * \note Fills $this->cond_moves_mseq with array of MoveSequence-objects with set attribute parsed_nodes
+    * \note Fills $this->cond_moves_mseq with array of MoveSequence-objects with set attribute ->parsed_game_tree
     *       containing game-tree to merge with
     */
    private function load_conditional_moves()
@@ -550,7 +550,7 @@ class SgfBuilder
          if ( $sgf_parser->parse_sgf($move_seq->Sequence) )
          {
             // normalize: use SGF-coords for B/W-moves & use '' for PASS-move
-            $move_seq->parsed_nodes =
+            $move_seq->parsed_game_tree =
                ConditionalMoves::fill_conditional_moves_attributes( $sgf_parser->games[0], $move_seq->StartMoveNr );
             $this->cond_moves_mseq[] = $move_seq;
          }
@@ -978,174 +978,205 @@ class SgfBuilder
    {
       // collect sgf-nodes
       $this->cm_last_node = self::new_sgf_node();
-      $this->cm_nodes = array( $this->cm_last_node );
+      $this->cm_game_tree = new SgfGameTree();
+      $this->cm_game_tree->nodes[] = $this->cm_last_node;
       $this->build_sgf_moves( $owned_comments );
-      if ( count($this->cm_nodes[0]->props) == 0 ) // nothing have been catched in very first "catch" node
-         array_shift( $this->cm_nodes );
+      if ( count($this->cm_game_tree->nodes[0]->props) == 0 ) // nothing have been catched in very first "catch" node
+         array_shift( $this->cm_game_tree->nodes );
 
-      // merge in conditional-moves into game-moves stored in this->cm_nodes
+      // merge in conditional-moves into game-moves stored in this->cm_game_tree
       foreach ( $this->cond_moves_mseq as $move_seq )
          $this->merge_conditional_moves( $move_seq );
 
       // output merged variations
-      $sgf = SgfParser::sgf_builder( array( $this->cm_nodes ), "\n", "\n", 'C,AB,AW' );
+      $sgf = SgfParser::sgf_builder( array( $this->cm_game_tree ), "\n", "\n", 'C,AB,AW' );
       if ( $sgf[0] == '(' && $sgf[1] != '(' && substr($sgf, -1, 1) == ')' ) // strip surrounding superfluous braces
          $sgf = trim( substr( $sgf, 1, -1 ) );
 
-      $this->cm_nodes = null; // let echo_sgf() output built stuff (instead of collecting nodes)
+      $this->cm_game_tree = null; // let echo_sgf() output built stuff (instead of collecting nodes)
       $this->echo_sgf( $sgf );
       //error_log("#SGF: $sgf");
    }//build_sgf_moves_with_conditional_moves
 
 
    /*!
-    * \brief Merges in given MoveSequence into main game-moves this->cm_nodes.
-    * \note MoveSequence->parsed_nodes attributes: move_nr, sgf_move
+    * \brief Merges in given MoveSequence into main game-moves this->cm_game_tree.
+    * \note MoveSequence->parsed_game_tree attributes: move_nr, sgf_move
     */
    private function merge_conditional_moves( $mseq )
    {
       // 1. find starting point of CM (can only be in main-var), then merge from there
 
       $game_moves = $this->game_row['Moves'];
-      $merge_var = $merge_id = null;
+      $trg_tree = $trg_node_idx = null;
       if ( $mseq->StartMoveNr <= $game_moves )
       {
          // traverse game-tree
          $vars_game = array(); // stack for variations for traversal of game-tree
-         SgfParser::push_var_stack( $vars_game, $this->cm_nodes );
+         SgfParser::push_var_stack( $vars_game, $this->cm_game_tree );
 
-         while ( list($data, $var) = array_pop($vars_game) ) // process variations-stack
+         while ( list($data, $trg_tree) = array_pop($vars_game) ) // process variations-stack
          {
-            // a variation is an array of nodes
-            foreach ( $merge_var as $id => $node )
+            foreach ( $trg_tree->nodes as $node_idx => $node ) // $node is a SgfNode
             {
-               if ( $id === SGF_VAR_KEY )
-               {
-                  // this particular node is an array of variations
-                  SgfParser::push_var_stack( $vars_game, $node[0] ); // follow 1st sub-tree with main-path
-                  continue;
-               }//else: a node is a SgfNode-object with an array of properties
-
                if ( $node->move_nr == $mseq->StartMoveNr && $node->sgf_move == $mseq->StartMove )
                {
-                  $merge_id = $id;
+                  $trg_node_idx = $node_idx;
                   break 2;
                }
-            }//var-end
+            }//nodes-end
+
+            if ( $trg_tree->has_vars() )
+               SgfParser::push_var_stack( $vars_game, $trg_tree->vars[0] ); // follow 1st sub-tree with main-path
          }//game-tree end
       }//end if ( $mseq->StartMoveNr <= $game_moves )
 
 
       // 2a. if cond-moves starts after last-move, then append cond-moves
 
-      if ( is_null($merge_id) )
+      if ( is_null($trg_node_idx) )
       {
          if ( $mseq->StartMoveNr == $game_moves + 1 )
          {
-            self::append_remaining_conditional_moves( $this->cm_nodes, $mseq->parsed_nodes, /*reset*/true );
+            self::append_remaining_conditional_moves( $trg_tree, $mseq->parsed_game_tree, /*reset*/true );
          }//else: shouldn't happen
          return;
       }
 
 
       // 2b. otherwise merge in cond-moves from matching-start-move
-      // NOTE: $merge_var (internal-arr-pointer) & merge_id points to a SgfNode
+      // NOTE: $trg_tree (internal-arr-pointer) & merge_id points to a SgfNode in $this->cm_game_tree
 
       // traverse game-tree of cond-moves
       $vars_cm = array(); // stack for variations for traversal of game-tree
-      SgfParser::push_var_stack( $vars_cm, $this->cm_nodes, array( $merge_var, $merge_id, false ) );
+      SgfParser::push_var_stack( $vars_cm, $mseq->parsed_game_tree,
+         array( $trg_tree, $trg_node_idx, false, (int)key($trg_tree->nodes) ) ); // (int)key=null -> 0
 
-      while ( list($data, $var) = array_pop($vars_cm) ) // process variations-stack of CM-var
+error_log("#0: orig: ".$this->cm_game_tree->debug());
+      while ( list($data, $src_game_tree) = array_pop($vars_cm) ) // process variations-stack of CM-var
       {
-         list( $merge_var, $merge_id, $merge_get_next ) = $data;
+         list( $trg_tree, $trg_node_idx, $merge_get_next, $expected_key ) = $data;
 
-         foreach ( $var as $id => $cm_node ) // a variation is an array of nodes (for CM-var)
+         // move nodes-iterator to expected key for same start-point for merging,
+         //    but tree could be splitted so dive into sub-tree if necessary to reach "moved" key.
+error_log("#A.1: merge_id=$trg_node_idx exp_key=$expected_key : key=".key($trg_tree->nodes)."; m.gnext=[$merge_get_next]: ".$trg_tree->debug());
+         $node_idx = -1;
+         while ( key($trg_tree->nodes) < $expected_key )
          {
-            if ( $id === SGF_VAR_KEY )
+            $arr_each = each($trg_tree->nodes);
+            if ( $arr_each === false ) // no more nodes
             {
-               // this particular node is an array of variations
-               foreach ( $cm_node as $sub_tree )
-                  SgfParser::push_var_stack( $vars_cm, $sub_tree, array( $merge_var, $merge_id, $merge_get_next ) );
-               continue;
-            }//else: a node is a SgfNode-object with an array of properties
+               reset($trg_tree->nodes); // reset for future traversal
+               if ( $trg_tree->has_vars() )
+               {
+                  $expected_key -= count($trg_tree->nodes);
+                  $trg_tree = $trg_tree->vars[0]; // traverse 1st var, where the original path is put on a split!
+                  reset($trg_tree->nodes);
+                  $node_idx = 0;
+               }
+               else
+                  break 2; // stop merging as something's dead wrong here
+            }
+            else if ( $node_idx >=0 )
+               $node_idx++;
+         }
+         if ( $node_idx >= 0 )
+            $trg_node_idx = $node_idx;
+error_log("#A.2: merge_id=$trg_node_idx exp_key=$expected_key : key=".key($trg_tree->nodes)."; m.gnext=[$merge_get_next]: ".$trg_tree->debug());
 
+         $process_src_vars = true;
+         foreach ( $src_game_tree->nodes as $src_node_idx => $src_node ) // $src_node is a SgfNode
+         {
+error_log("#B.1: src_node[$src_node_idx] = ".$src_node->to_string());
             // get next target-node in main-nodes (for merging-in CM-node)
             if ( $merge_get_next )
             {
-               while ( $arr_each = each($merge_var) )
+               while ( true )
                {
-                  list( $merge_id, $merge_node ) = $arr_each;
-                  if ( $merge_id != SGF_VAR_KEY ) // found next main-node
-                     break;
-                  else // found variation-array
+                  $arr_each = each($trg_tree->nodes);
+                  if ( $arr_each !== false ) // found next main-node (from game to merge)
                   {
-                     // find correct variation from list (of main-var) with matching 1st (CM-move)
-                     $sub_var = null;
-                     foreach ( $merge_node as $sub_tree ) // this particular merge-node is an array of variations
+                     list( $trg_node_idx, /*$trg_merge_node*/ ) = $arr_each;
+                     break;
+                  }//else: no further nodes, so now check optional sub-trees
+
+                  // find variation from main-path (target-game-tree) with matching 1st src-node-move
+                  $no_match_sub_tree = true;
+                  foreach ( $trg_tree->vars as $sub_tree )
+                  {
+                     $sub_node = $sub_tree->get_first_node();
+                     if ( !is_null($sub_node) ) // safety-check (shouldn't happen as empty var is forbidden)
                      {
-                        $sub_node = SgfParser::get_variation_first_sgf_node($sub_tree);
-                        if ( !is_null($sub_node) ) // safety-check (but shouldn't happen as empty var is forbidden)
+                        if ( $src_node->sgf_move == $sub_node->sgf_move )
                         {
-                           if ( $cm_node->sgf_move == $sub_node->sgf_move )
-                           {
-                              $sub_var = $sub_tree; // found variation with matching move from CM-node
-                              break;
-                           }
+                           $trg_tree = $sub_tree; // found variation with matching move from src-game-tree
+                           reset($trg_tree->nodes);
+                           $no_match_sub_tree = false;
+                           break; // continue finding next main-node in sub-tree
                         }
                      }
-
-                     if ( is_null($sub_var) )
-                     {
-                        // no variation found with matching move, so add new variation
-                        $remaining_cm_var = array();
-                        prev($var); // include previous CM-node
-                        self::append_remaining_conditional_moves( $remaining_cm_var, $var, /*reset*/false );
-                        $merge_node[] = $remaining_cm_var;
-                        break 2; // continue merging next CM-var from stack
-                     }
-                     else
-                        $merge_var = $sub_var;
                   }
-               }//end-while
 
-               if ( $arr_each === false ) // end of merge-var reached -> append remaining nodes
-               {
-                  prev($var); // include previous CM-node
-                  self::append_remaining_conditional_moves( $merge_var, $var, /*reset*/false );
-                  break 2; // continue merging next CM-var from stack
-               }
+                  if ( $no_match_sub_tree ) // no variation found with matching move, so add new variation
+                  {
+                     if ( $trg_tree->has_vars() ) // there are vars but w/o a matching move
+                     {
+                        $remaining_game_tree = new SgfGameTree();
+                        prev($src_game_tree->nodes); // include previous CM-node
+                        self::append_remaining_conditional_moves( $remaining_game_tree, $src_game_tree, /*reset*/false );
+                        $trg_tree->vars[] = $remaining_game_tree;
+                        $process_src_vars = false;
+                        break 2; // continue merging next src-subtree from stack
+                     }
+                     else // no vars yet in target-merge-tree
+                     {
+                        prev($src_game_tree->nodes); // include previous CM-node
+                        self::append_remaining_conditional_moves( $trg_tree, $src_game_tree, /*reset*/false );
+                        break; // continue merging next CM-var from stack
+                     }
+                  }
+               }//end-while get-next-merge-node
             }
             else
                $merge_get_next = true;
 
 
-            // merge CM-node with node from main-path (in merge_var)
-            $merge_node = $merge_var[$merge_id];
-            if ( $merge_node->move_nr == $cm_node->move_nr && $merge_node->sgf_move == $cm_node->sgf_move )
+            // merge CM-node with node from main-path (in target merge_tree)
+            $trg_merge_node = $trg_tree->nodes[$trg_node_idx];
+            if ( $trg_merge_node->move_nr == $src_node->move_nr && $trg_merge_node->sgf_move == $src_node->sgf_move )
             {
                // move is the same, so merge only SGF-props
-               self::merge_sgf_node_props( $merge_var[$merge_id], $cm_node );
+               self::merge_sgf_node_props( $trg_merge_node, $src_node );
             }
-            else // start new variation replacing current node (in merge_var)
+            else // start new variation replacing current node (in merge_var, which is not a var-array)
             {
-               // collect remaining-nodes of current target merge-var
-               $remaining_merge_var = array();
-               while ( list( $k, $v ) = each($merge_var) )
-               {
-                  $remaining_merge_var[$k] = $v;
-                  unset($merge_var[$k]);
-               }
+               // collect remaining-nodes of current target merge-game-tree
+               $remaining_merge_tree = new SgfGameTree();
+               prev($trg_tree->nodes);
+               list( $start_idx, $v ) = each($trg_tree->nodes);
+               $remaining_merge_tree->nodes = array_splice( $trg_tree->nodes, $start_idx );
+               $remaining_merge_tree->vars = $trg_tree->vars;
 
                // collect remaining nodes of current cond-moves-var
-               $remaining_cm_var = array();
-               prev($var); // include previous CM-node
-               self::append_remaining_conditional_moves( $remaining_cm_var, $var, /*reset*/false );
+               $remaining_game_tree = new SgfGameTree();
+               prev($src_game_tree->nodes); // include previous CM-node
+               self::append_remaining_conditional_moves( $remaining_game_tree, $src_game_tree, /*reset*/false );
 
                // replace original merge-node with the 2 collected variations
-               $merge_var[] = array( $remaining_merge_var, $remaining_cm_var );
-               break; // continue merging next CM-var from stack
+               $trg_tree->vars = array( $remaining_merge_tree, $remaining_game_tree );
+               $process_src_vars = false;
+               break; // continue merging next src-game-tree from stack
             }
-         }//var-end
+         }//nodes-end
+
+         if ( $process_src_vars )
+         {
+            foreach ( array_reverse($src_game_tree->vars) as $sub_tree )
+            {
+               SgfParser::push_var_stack( $vars_cm, $sub_tree,
+                  array( $trg_tree, $trg_node_idx, $merge_get_next, (int)key($trg_tree->nodes) ) ); // (int)key=null -> 0
+            }
+         }
       }//game-tree end
    }//merge_conditional_moves
 
@@ -1270,34 +1301,32 @@ class SgfBuilder
       }
    }//merge_sgf_node_props
 
-   // appending SgfNodes from source-nodes-array into target-nodes
-   // \param $reset_node_iter false = start "copying" from current internal array-pointer in $src_nodes
-   // NOTE: needed for merging conditional-moves
-   private static function append_remaining_conditional_moves( &$trg_nodes, $src_nodes, $reset_node_iter=false )
+   // appending SgfNodes and variations from source-gametree into target-gametree
+   // \param $reset_node_iter false = start "copying" from current internal array-pointer in $src_game_tree->nodes
+   // NOTE: need assertion, that $trg_game_tree has no variations
+   private static function append_remaining_conditional_moves( $trg_game_tree, $src_game_tree, $reset_node_iter=false )
    {
+      if ( $trg_game_tree->has_vars() )
+         return; //TODO TODO throw error !?
+
       // append all nodes from cond-moves after last-move
-      $first_node = true;
       if ( $reset_node_iter )
-         reset( $src_nodes );
-      while ( list( $id, $node ) = each($src_nodes) )
+         reset( $src_game_tree->nodes );
+
+      $first_node = true;
+      while ( list( $id, $node ) = each($src_game_tree->nodes) ) // NOTE: 'foreach' resets iterator, so need 'while'
       {
-         if ( $id === SGF_VAR_KEY )
+         if ( $first_node )
          {
-            if ( isset($trg_nodes[$id]) ) // shouldn't happen
-               error('invalid_args', "SgfBuilder:append_rem_cond_moves.exists_var_key");
-            $trg_nodes[$id] = $node;
+            $node->props['C'][0] = self::sgf_simpletext(ConditionalMoves::$TXT_CM_START)
+               . ( isset($node->props['C']) ? "\n" . $node->props['C'][0] : '' );
+            $first_node = false;
          }
-         else
-         {
-            if ( $first_node )
-            {
-               $node->props['C'][0] = self::sgf_simpletext(ConditionalMoves::$TXT_CM_START)
-                  . ( isset($node->props['C']) ? "\n" . $node->props['C'][0] : '' );
-               $first_node = false;
-            }
-            $trg_nodes[] = $node;
-         }
+         $trg_game_tree->nodes[] = $node;
       }
+
+      foreach ( $src_game_tree->vars as $sub_tree )
+         $trg_game_tree->vars[] = $sub_tree;
    }//append_remaining_conditional_moves
 
    private static function switch_move_color( $color )

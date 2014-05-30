@@ -112,6 +112,8 @@ class ConditionalMoves
       $color = ($is_blacks_turn) ? 0 : 1;
       $size = (int)$size;
       $str = trim($str);
+      if ( (string)$str == '' )
+         return '';
 
       // regex for board- & SGF-coordinate depending on board-size
       $rxc_s = 'a-' . chr( ord('a') + $size - 1 ); // max-coord for SGF-coords
@@ -178,102 +180,55 @@ class ConditionalMoves
 
    /*!
     * \brief Checks syntax and replaces PASS-moves of conditional-moves-part (read from uploaded-SGF or manually entered).
-    * \param $cm_nodes parsed nodes (sub-tree) with only conditional-moves; as parsed from SgfParser
+    * \param $sgf_game_tree SgfGameTree with parsed nodes (sub-tree) with only conditional-moves; as parsed from SgfParser
     * \param $gchkmove GameCheckMove initialized with shape-setup and moves up to but excluding first move of cond-moves
     * \param $gsize board-size
     * \param $player_color BLACK | WHITE
     * \return arr( errors, variation-name-references, cond-moves-sgf-coords )
     */
-   public static function check_nodes_cond_moves( &$cm_nodes, $gchkmove, $gsize, $player_color )
+   public static function check_nodes_cond_moves( &$sgf_game_tree, $gchkmove, $gsize, $player_color )
    {
       $errors = array();
       $own_color = ($player_color == BLACK) ? 'B' : 'W';
       $opp_color = ($player_color == BLACK) ? 'W' : 'B';
 
+      $sgf_cond_moves = SgfParser::sgf_builder( array( $sgf_game_tree ), '', '', '',
+         'SgfParser::sgf_convert_move_to_sgf_coords', $gsize );
+      $var_names = array(); // varname => 1
       $cnt_total_nodes = 0;
       $last_pos = 0;
-      $var_names = array(); // varname => 1
 
       // traverse game-tree
       $vars = array(); // stack for variations for traversal of game-tree
-      SgfParser::push_var_stack( $vars, $cm_nodes, array(
-            'level'     => 0, // level=0 (root)
-            'varname'   => '1',
-            'last_color' => ( ( $gchkmove->get_replay_last_color() == BLACK ) ? 'B' : 'W' ),
-            'last_move' => $gchkmove->get_replay_last_sgf_move(), // SGF- or board-coord, ''=PASS, -1 = unset
-            'cnt_pass'  => 0,
-            'cnt_vnode' => 0,
-            'gchkmove'  => clone $gchkmove,
+      SgfParser::push_var_stack( $vars, $sgf_game_tree, array(
+            'level'        => 0, // level=0 (root)
+            'varname'      => '1',
+            'last_color'   => ( ( $gchkmove->get_replay_last_color() == BLACK ) ? 'B' : 'W' ),
+            'last_move'    => $gchkmove->get_replay_last_sgf_move(), // SGF- or board-coord, ''=PASS, -1 = unset
+            'cnt_pass'     => 0,
+            'gchkmove'     => clone $gchkmove,
          ));
 
-      while ( list($data, $var) = array_pop($vars) ) // process variations-stack
+      while ( list($data, $game_tree) = array_pop($vars) ) // process variations-stack
       {
          $varname = $data['varname'];
          $last_color = $data['last_color'];
          $last_move = $data['last_move'];
          $cnt_pass = $data['cnt_pass'];
-         $cnt_var_nodes = $data['cnt_vnode'];
          $gchkmove = $data['gchkmove'];
 
-         $cnt_nodes = count($var);
+         $cnt_nodes = count($game_tree->nodes);
+         $cnt_total_nodes += $cnt_nodes;
          if ( $cnt_nodes == 0 )
-            $errors[] = sprintf( T_('Empty variation [%s] after position %s is not allowed.#sgf'), $varname, $last_pos );
+            $errors[] = sprintf( T_('Variation [%s] at position %s is missing nodes.#sgf'), $varname, $last_pos );
 
-         // a variation is an array of nodes
          $var_has_bad_move = false;
-         $has_vars = false; // sub-tree has vars?
-         $cnt_var_nodes = 0;
-         $cnt_subvars = 0;
-         foreach ( $var as $id => $node )
+         foreach ( $game_tree->nodes as $node_idx => $node ) // $node is a SgfNode
          {
-            if ( $id === SGF_VAR_KEY )
-            {
-               // check, that 1st entry is a move (and not another variation); shouldn't happen as SgfParser already prevents that with "bad node start"
-               if ( $cnt_var_nodes == 0 )
-                  $errors[] = sprintf( T_('Variation [%s] at position %s must not start with another variation.#sgf'),
-                     $varname, $last_pos );
-
-               $has_vars = true;
-               $varnum = 1;
-               $first_moves = array();
-               foreach ( $node as $sub_tree ) // this particular node is an array of variations
-               {
-                  ++$cnt_subvars;
-                  $sub_varname = $varname . '.'. ($varnum++);
-                  SgfParser::push_var_stack( $vars, $sub_tree, array(
-                        'level'     => $data['level'] + 1,
-                        'varname'   => $sub_varname,
-                        'last_color' => $last_color,
-                        'last_move' => $last_move,
-                        'cnt_pass'  => $cnt_pass,
-                        'cnt_vnode' => $cnt_var_nodes,
-                        'gchkmove'  => clone $gchkmove,
-                     ));
-
-                  // check that all variations start with unique move
-                  $node_first_move = SgfParser::get_variation_first_sgf_node($sub_tree);
-                  $node_mv = self::get_conditional_move_format_from_sgf_node($node_first_move, $gsize, /*die-err*/false );
-                  if ( !is_null($node_mv) )
-                  {
-                     if ( isset($first_moves[$node_mv]) )
-                        $errors[] = sprintf( T_('Variation [%s] at position %s started with move [%s], but it must be different from other variations.#condmoves'),
-                           $sub_varname, $last_pos, self::convert_conditional_move_format_to_board_coords($node_mv, $gsize) );
-                     else
-                        $first_moves[$node_mv] = 1;
-                  }
-               }
-               continue;
-            }//else: a node is a SgfNode-object with an array of properties
-
             // start all variations with opponents move (not own move); except for root-node, which can contain 1st move
-            if ( ++$cnt_var_nodes == 1 && isset($node->props[$own_color]) && $data['level'] > 0 )
+            if ( $node_idx == 0 && isset($node->props[$own_color]) && $data['level'] > 0 )
                $errors[] = sprintf( T_('Variation [%s] in node [%s] at position %s must start with opponents move.#condmoves'),
                   $varname, $node->get_props_text(), $node->pos );
-
-            // no node "outside" of variations allowed (according to SGF-specs)
-            if ( $has_vars )
-               $errors[] = sprintf( T_('Node [%s] in variation [%s] at position %s is not allowed after variations.#sgf'),
-                  $node->get_props_text(), $varname, $node->pos );
 
             // check move
             $has_prop_B = isset($node->props['B']);
@@ -342,24 +297,49 @@ class ConditionalMoves
                   $node->get_props_text(), $node->pos, $varname );
 
             $last_pos = $node->pos;
-         }//var-end
+         }//tree-nodes end
 
-         if ( !$has_vars )
+         if ( $game_tree->has_vars() )
+         {
+            $first_moves = array();
+            foreach ( $game_tree->vars as $varnum => $sub_tree )
+            {
+               $sub_varname = $varname . '.'. ($varnum + 1);
+               SgfParser::push_var_stack( $vars, $sub_tree, array(
+                     'level'        => $data['level'] + 1,
+                     'varname'      => $sub_varname,
+                     'last_color'   => $last_color,
+                     'last_move'    => $last_move,
+                     'cnt_pass'     => $cnt_pass,
+                     'gchkmove'     => clone $gchkmove,
+                  ));
+
+               // check that all variations start with unique move
+               $first_node = $sub_tree->get_first_node();
+               $node_mv = self::get_conditional_move_format_from_sgf_node($first_node, $gsize, /*die-err*/false );
+               if ( !is_null($node_mv) )
+               {
+                  if ( isset($first_moves[$node_mv]) )
+                     $errors[] = sprintf( T_('Variation [%s] at position %s started with move [%s], but it must be different from other variations.#condmoves'),
+                        $sub_varname, $last_pos, self::convert_conditional_move_format_to_board_coords($node_mv, $gsize) );
+                  $first_moves[$node_mv] = 1;
+               }
+            }//end-foreach tree-vars
+
+            // variations must end with own move
+            if ( count($game_tree->vars) <= 1 && $last_color != $own_color )
+               $errors[] = sprintf( T_('Variation [%s] ending at position %s must end with players color.#condmoves'),
+                  $varname, $last_pos );
+         }
+         else // game-tree has no vars
          {
             $var_names[$varname] = 1; // collect variation-"structure" for var-preview
 
-            // each variation (without sub-vars) must have at least 2 moves (opponent + own move)
-            if ( $cnt_var_nodes < 2 )
+            // each game-tree (without sub-vars) must have at least 2 moves (opponent + own move)
+            if ( $cnt_nodes < 2 )
                $errors[] = sprintf( T_('Variation [%s] ending at position %s must have at least two moves.#condmoves'),
                   $varname, $last_pos );
          }
-
-         // each variation must end with own move
-         if ( $cnt_subvars <= 1 && $last_color != $own_color )
-            $errors[] = sprintf( T_('Variation [%s] ending at position %s must end with players color.#condmoves'),
-               $varname, $last_pos );
-
-         $cnt_total_nodes += $cnt_var_nodes;
       }//game-tree end
 
 
@@ -371,8 +351,6 @@ class ConditionalMoves
 
       // check max-size for rebuilt cond-moves (to be stored)
       static $max_cm_len = 2048;
-      $sgf_cond_moves = SgfParser::sgf_builder( array( $cm_nodes ), '', '', '',
-         'SgfParser::sgf_convert_move_to_sgf_coords', $gsize );
       $sgf_length = strlen($sgf_cond_moves);
       if ( $sgf_length > $max_cm_len )
          $errors[] = sprintf( T_('Conditional moves sequence is %s bytes long, but only %s are allowed.'),
@@ -385,7 +363,7 @@ class ConditionalMoves
     * \brief Extracts specified variation-reference from given nodes-tree.
     * \return error-text, or else arr( move, ... ); move = arr( BLACK|WHITE, x-pos, y-pos ) with x-pos can be POSX_PASS
     */
-   public static function extract_variation( $cm_nodes, $variation, $board_size )
+   public static function extract_variation( $sgf_game_tree, $variation, $board_size )
    {
       $moves = array();
       $varpart_ref = explode('.', $variation);
@@ -395,34 +373,25 @@ class ConditionalMoves
 
       // traverse game-tree
       $vars = array(); // stack for variations for traversal of game-tree
-      SgfParser::push_var_stack( $vars, $cm_nodes );
+      SgfParser::push_var_stack( $vars, $sgf_game_tree );
 
       $var_visit = array( 1 );
-      while ( list($data, $var) = array_pop($vars) ) // process variations-stack
+      while ( list($data, $game_tree) = array_pop($vars) ) // process variations-stack
       {
-         foreach ( $var as $id => $node )
+         foreach ( $game_tree->nodes as $node ) // $node is a SgfNode
          {
-            if ( $id === SGF_VAR_KEY )
-            {
-               // this particular node is an array of variations
-               $var_idx = ( count($varpart_ref) ) ? array_shift($varpart_ref) - 1 : 0;
-               $var_visit[] = $var_idx + 1;
-               if ( !isset($node[$var_idx]) )
-                  return sprintf( T_('Sub-variation [%s] can not be found.#condmoves'), implode('.', $var_visit));
-               SgfParser::push_var_stack( $vars, $node[$var_idx] );
-               continue;
-            }//else: a node is a SgfNode-object with an array of properties
-
             if ( isset($node->props['B']) )
             {
                $coord = $node->props['B'][0];
                $stone_col = BLACK;
             }
-            else //if ( isset($node->props['W']) )
+            elseif ( isset($node->props['W']) )
             {
                $coord = $node->props['W'][0];
                $stone_col = WHITE;
             }
+            else
+               continue;
 
             if ( (string)$coord == '' || ( $board_size <= 19 && $coord == 'tt' ) )
             {
@@ -438,6 +407,15 @@ class ConditionalMoves
                   $coord, implode('.', $var_visit));
 
             $moves[] = array( $stone_col, $x, $y );
+         }
+
+         if ( $game_tree->has_vars() )
+         {
+            $var_idx = ( count($varpart_ref) ) ? array_shift($varpart_ref) - 1 : 0;
+            $var_visit[] = $var_idx + 1;
+            if ( !isset($game_tree->vars[$var_idx]) )
+               return sprintf( T_('Sub-variation [%s] can not be found.#condmoves'), implode('.', $var_visit));
+            SgfParser::push_var_stack( $vars, $game_tree->vars[$var_idx] );
          }
       }
 
@@ -474,15 +452,15 @@ class ConditionalMoves
 
    /*!
     * \brief Returns start-move in parsed conditional-moves.
-    * \param $cm_nodes array with SgfNode-entries (and without parsing-errors)
+    * \param $sgf_game_tree SgfGameTree with SgfNode-entries (and without parsing-errors)
     * \return 'W' (=white-PASS), or else move-color + sgf-coord of 1st move in conditional-moves, e.g. 'Bef'
     */
-   public static function get_nodes_start_move_sgf_coords( $cm_nodes, $size )
+   public static function get_nodes_start_move_sgf_coords( $sgf_game_tree, $size )
    {
-      if ( count($cm_nodes) == 0 )
+      if ( !$sgf_game_tree->has_nodes() )
          error('invalid_args', "CM.get_nodes_start_move_sgf_coords.check.miss_cond_moves($size)");
 
-      return self::get_conditional_move_format_from_sgf_node( $cm_nodes[0], $size );
+      return self::get_conditional_move_format_from_sgf_node( $sgf_game_tree->nodes[0], $size );
    }//get_nodes_start_move_sgf_coords
 
    /*!
@@ -564,27 +542,19 @@ class ConditionalMoves
    /*!
     * \brief Sets SgfNode-attributes: node->move_nr starting with $start_move_nr
     *       and set node->sgf_move=Baa|Wbb|B(=pass) for all SgfNodes.
-    * \return modified list of sgf-nodes
+    * \return modified SgfGameTree
+    * \note also modifies passed $sgf_game_tree (as it's an object)
     */
-   public static function fill_conditional_moves_attributes( $nodes, $start_move_nr )
+   public static function fill_conditional_moves_attributes( $sgf_game_tree, $start_move_nr )
    {
       // traverse game-tree
       $vars = array(); // stack for variations for traversal of game-tree
-      SgfParser::push_var_stack( $vars, $nodes, $start_move_nr );
+      SgfParser::push_var_stack( $vars, $sgf_game_tree, $start_move_nr );
 
-      while ( list($move_nr, $var) = array_pop($vars) ) // process variations-stack
+      while ( list($move_nr, $game_tree) = array_pop($vars) ) // process variations-stack
       {
-         // a variation is an array of nodes
-         foreach ( $var as $id => $node )
+         foreach ( $game_tree->nodes as $node ) // $node is a SgfNode
          {
-            if ( $id === SGF_VAR_KEY )
-            {
-               // this particular node is an array of variations
-               foreach ( $node as $sub_tree )
-                  SgfParser::push_var_stack( $vars, $sub_tree, $move_nr );
-               continue;
-            }//else: a node is a SgfNode-object with an array of properties
-
             // set SgfNode->sgf_move for easier move-comparing/merging
             if ( isset($node->props['B']) )
                $node->sgf_move = 'B' . $node->props['B'][0];
@@ -592,10 +562,13 @@ class ConditionalMoves
                $node->sgf_move = 'W' . $node->props['W'][0];
 
             $node->move_nr = $move_nr++; // add move-nr
-         }//var-end
+         }//var-nodes end
+
+         foreach ( $game_tree->vars as $sub_tree )
+            SgfParser::push_var_stack( $vars, $sub_tree, $move_nr );
       }//game-tree end
 
-      return $nodes;
+      return $sgf_game_tree;
    }//fill_conditional_moves_attributes
 
 } //end 'ConditionalMoves'

@@ -11,6 +11,40 @@ Release [2014-03-27] - DGS 1.0.17 - tag [release-1_0_17-20140327] on branch [DGS
 ChangeLog
 ------------------------------------------------------------------
 
+2014-05-30 jug
+
+   * include/sgf_parser.php (SgfParser.parse_sgf_game_tree, ~.sgf_parse_args, ~.push_var_stack,
+         ~.sgf_builder;
+       class SgfGameTree, ~.has_nodes, ~.has_vars, ~.get_first_node, ~.to_string, ~.debug;
+       class GameSgfParser, ~.parse_sgf_game;
+       get_handicap_pattern),
+     include/sgf_builder.php (class SgfBuilder, ~.echo_sgf, ~.sgf_echo_prop, ~.load_conditional_moves,
+       ~.build_sgf_moves_with_conditional_moves, ~.merge_conditional_moves,
+       ~.append_remaining_conditional_moves),
+     include/conditional_moves.php (ConditionalMoves.reformat_to_sgf, ~.check_nodes_cond_moves,
+       ~.extract_variation, ~.get_nodes_start_move_sgf_coords, ~.fill_conditional_moves_attributes),
+     include/game_actions.php (GameActionHelper.load_game_conditional_moves,
+       ~.prepare_conditional_moves),
+     include/db/move_sequence.php (class MoveSequence),
+     scripts/tests/AllTests.php (AllTests.suite), scripts/tests/ConditionalMovesTest.php,
+     scripts/tests/GameSgfParserTest.php, scripts/tests/SgfParserTest.php,
+     scripts/tests/pattern,
+     game.php (handle_conditional_moves):
+   - refactored representation of sgf-game-tree using array with nodes and with variations-array
+     in '++'-key to SgfGameTree-class
+     - replaced SGF_VAR_KEY '++' as key in game-tree-array to store variations-array
+       with SgfGameTree-class with separate array of nodes and variations
+     - bugfix: reset iterator on sub-game-tree-nodes on merging conditional-moves for SGF-download
+     - SgfParser:
+       - moved check for bad node-position outside variation from conditional-moves checking
+         to parsing SGF
+       - bugfix: fixed parsing-position of variation-begin '(' if skipping root-node
+       - bugfix: fixed loop-expression on parsing of SGF-arguments,
+         expression [ 0 == ')' ] was true -> need '==='-comparison
+     - added tests for classes ConditionalMoves, GameSgfParser, SgfParser
+       with sym-link to pattern-directory
+   - bugfix: reformat empty conditional-moves to empty instead of '(; )'
+
 2014-05-13 jug
 
    * include/move.php (class GameCheckMove, ~.get_replay_last_color, ~.get_replay_last_sgf_move,

@@ -1709,7 +1709,7 @@ function handle_conditional_moves( &$move_seq, $game_row, $cm_action, &$board, $
       if ( count($errors) == 0 )
       {
          // re-parse & re-format conditional-moves part for input-box
-         $cond_moves = SgfParser::sgf_builder( array( $game_sgf_parser->extra_nodes ), '', '', '',
+         $cond_moves = SgfParser::sgf_builder( array( $game_sgf_parser->sgf_game_tree ), '', '', '',
             'ConditionalMoves::sgf_strip_cond_moves_notes' );
          $cm_src_manual = false;
          $check_nodes = true;
@@ -1736,23 +1736,23 @@ function handle_conditional_moves( &$move_seq, $game_row, $cm_action, &$board, $
          else
          {
             // check syntax of cond-moves
-            $extra_nodes = $sgf_parser->games[0];
+            $game_tree = $sgf_parser->games[0];
             $gchkmove = GameCheckMove::prepare_game_check_move_board_start( $gid, $Size, $game_row['ShapeSnapshot'] );
             $gchkmove->replay_moves( $board->moves, $cnt_replay_moves );
             $preview_gchkmove = clone $gchkmove;
             list( $errors, $var_names, $cond_moves_sgf_coords ) =
-               ConditionalMoves::check_nodes_cond_moves( $extra_nodes, $gchkmove, $Size, $my_col );
+               ConditionalMoves::check_nodes_cond_moves( $game_tree, $gchkmove, $Size, $my_col );
 
             // reformat cond-moves with board-coords for display in edit-box
             if ( count($errors) == 0 )
             {
-               $cond_moves = SgfParser::sgf_builder( array( $extra_nodes ), "\r\n", ' ', '',
+               $cond_moves = SgfParser::sgf_builder( array( $game_tree ), "\r\n", ' ', '',
                   'SgfParser::sgf_convert_move_to_board_coords', $Size );
             }
 
             if ( @$_REQUEST['cm_preview'] && $var_view && count($errors) == 0 ) // show selected CM-variation on board
             {
-               $result = ConditionalMoves::extract_variation( $extra_nodes, $var_view, $Size );
+               $result = ConditionalMoves::extract_variation( $game_tree, $var_view, $Size );
                if ( is_array($result) )
                {
                   $board->set_conditional_moves( $result );
@@ -1781,7 +1781,7 @@ function handle_conditional_moves( &$move_seq, $game_row, $cm_action, &$board, $
                else // NEW
                {
                   $cm_start_move_nr = $game_row['Moves'] + 1;
-                  $cm_start_move = ConditionalMoves::get_nodes_start_move_sgf_coords( $extra_nodes, $Size );
+                  $cm_start_move = ConditionalMoves::get_nodes_start_move_sgf_coords( $game_tree, $Size );
                }
                $cm_moveseq = new MoveSequence( $cm_id, $gid, $my_id, $cm_status, $cm_flags, 0,
                   $cm_start_move_nr, $cm_start_move, $cm_start_move_nr, 1, $cm_start_move, $cond_moves_sgf_coords );

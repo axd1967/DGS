@@ -78,7 +78,7 @@ class MoveSequence
 
    // non-DB fields:
 
-   public $parsed_nodes = null; // SGF-game-tree
+   public $parsed_game_tree = null; // SgfGameTree
 
    /*! \brief Constructs MoveSequence-object with specified arguments. */
    public function __construct( $id=0, $gid=0, $uid=0, $status=MSEQ_STATUS_INACTIVE, $flags=0, $error_code=0,

@@ -84,7 +84,6 @@ define('SGF_VAR_END', ')');
 define('SGF_ARG_BEG', '[');
 define('SGF_ARG_END', ']');
 define('SGF_NOD_BEG', ';');
-define('SGF_VAR_KEY', '++');
 
 define('SGFP_OPT_SKIP_ROOT_NODE', 0x01); // don't read root-node and simplify game-tree if possible
 
@@ -95,7 +94,7 @@ class SgfParser
    private $options = '';
    private $sgf = '';
    private $sgf_len = 0;
-   private $idx = 0;
+   private $idx = 0; // string-position while parsing
 
    public $games = array();
    public $error_msg = '';
@@ -148,7 +147,7 @@ class SgfParser
 
    /*!
     * \brief Parses list of "GameTree" from SGF-data; returning '' on success or else error-msg.
-    * \note Sets $this->games with parsed tree with SgfNode-objects.
+    * \note Sets $this->games with array of SgfGameTree-objects.
     */
    private function parse_sgf_game_tree()
    {
@@ -157,12 +156,13 @@ class SgfParser
       $vars = array();
       while ( false !== ($this->idx = strpos( $this->sgf, SGF_VAR_BEG, $this->idx)) )
       {
-         $ivar = 0;
-         $vars[$node_ivar = $ivar] = array();
+         // $vars holds parsed variations (SgfGameTree), 1st elem is one complete EBNF-GameTree
+         $idx_var = 0;
+         $vars[$idx_var] = new SgfGameTree();
 
+         $this->idx++;
          if ( !$skip_root_node )
          {
-            $this->idx++;
             if ( !$this->sgf_skip_space() )
                return T_('Bad end of file#sgf');
 
@@ -183,17 +183,17 @@ class SgfParser
                   $node->props[$key] = array($arg);
             }
 
-            $vars[$node_ivar = $ivar][] = $node;
+            $vars[$idx_var]->nodes[] = $node;
          }//skip-root-node
 
-         while ( $ivar >= 0 && ($c = $this->sgf_skip_space()) )
+         while ( $idx_var >= 0 && ($c = $this->sgf_skip_space()) )
          {
             switch ( (string)$c )
             {
                case SGF_VAR_END:
-                  $ivar--;
+                  $idx_var--;
                   $this->idx++;
-                  $vars[$ivar][SGF_VAR_KEY][] = $vars[$ivar + 1];
+                  $vars[$idx_var]->vars[] = $vars[$idx_var + 1];
                   break;
 
                case SGF_VAR_BEG:
@@ -201,16 +201,16 @@ class SgfParser
                   if ( $this->sgf_skip_space() != SGF_NOD_BEG )
                      return T_('Bad node start#sgf');
 
-                  if ( $node_ivar <= $ivar )
-                     $vars[$ivar][SGF_VAR_KEY] = array();
-                  $ivar++;
-                  $vars[$ivar] = array();
+                  $idx_var++;
+                  $vars[$idx_var] = new SgfGameTree();
                   // NOTE: running through (no break here)
 
                case SGF_NOD_BEG:
                   $this->idx++;
+                  if ( $vars[$idx_var]->has_vars() )
+                     return T_('Bad node position outside variation#sgf');
                   $err = $this->sgf_parse_node( $node );
-                  $vars[$node_ivar = $ivar][] = $node;
+                  $vars[$idx_var]->nodes[] = $node;
                   if ( $err )
                      return $err;
                   break;
@@ -220,18 +220,19 @@ class SgfParser
             }
          }
 
-         if ( $ivar >= ($skip_root_node ? 1 : 0) )
+         if ( $idx_var >= ($skip_root_node ? 1 : 0) )
             return T_('Missing right parenthesis#sgf');
 
          // simplify if only one variation with empty root-node
          if ( $skip_root_node )
          {
-            if ( count($vars[0]) == 1 && isset($vars[0][SGF_VAR_KEY]) && count($vars[0][SGF_VAR_KEY]) == 1 )
-               $vars[0] = $vars[0][SGF_VAR_KEY][0];
+            if ( !$vars[0]->has_nodes() && count($vars[0]->vars) == 1 )
+               $vars[0] = $vars[0]->vars[0];
          }
 
          $this->games[] = $vars[0];
       }
+      unset($vars);
 
       return ''; // no-error
    }//parse_sgf_game_tree
@@ -285,9 +286,10 @@ class SgfParser
    private function sgf_parse_args( &$args )
    {
       $args = array();
-      while ( $this->sgf_skip_space() == SGF_ARG_BEG )
+      while ( $this->sgf_skip_space() === SGF_ARG_BEG )
       {
          $j = $this->idx;
+         $found_arg = false;
          while ( false !== ($j = strpos( $this->sgf, SGF_ARG_END, $j + 1 )) )
          {
             if ( $this->sgf[$j-1] != '\\' )
@@ -295,10 +297,11 @@ class SgfParser
                $arg = substr( $this->sgf, $this->idx + 1, $j - $this->idx - 1 );
                $args[] = $arg;
                $this->idx = $j + 1;
+               $found_arg = true;
                break;
             }
          }
-         if ( false === $j )
+         if ( !$found_arg && false === $j )
             return T_('Missing right bracket#sgf');
       }
       return '';
@@ -334,60 +337,50 @@ class SgfParser
       return $sgf_parser;
    }
 
-   /*! \brief Pushes variation $var on variation-stack $vars with some varying data-payload. */
-   public static function push_var_stack( &$vars, &$var, $data=0 )
+   /*! \brief Pushes variation $var (mostly SgfGameTree) on variation-stack $vars with some varying data-payload. */
+   public static function push_var_stack( &$vars, &$entry, $data=0 )
    {
-      if ( is_array($var) )
-         $vars[] = array( $data, $var );
+      $vars[] = array( $data, $entry );
    }
 
    // In short, it does the opposite of sgf_parser()
    // \param $props_lf_sep comma-separated list of props with preceding LF
    // \return built sgf-data
-   // NOTE: not used, but keep it for debugging-purposes
-   public static function sgf_builder( $games, $var_start_sep="\n", $node_start_sep="", $props_lf_sep='', $convert_node_func=null, $convert_extra_arg=null )
+   public static function sgf_builder( $games, $var_start_sep="\n", $node_start_sep="", $props_lf_sep='',
+         $convert_node_func=null, $convert_extra_arg=null )
    {
       $sgf = '';
       $map_props_with_lf = array_value_to_key_and_value( explode(',', $props_lf_sep) ); // props with preceding LF
 
       $vars = array();
-      //$games is an array of games (i.e. variations)
-      for ( $i=count($games)-1; $i >= 0; $i-- )
-         array_push( $vars, SGF_VAR_END, $games[$i] );
+      foreach ( array_reverse($games) as $tree ) //$games is array of SgfGameTree
+         array_push( $vars, SGF_VAR_END, $tree );
 
-      while ( $var = array_pop($vars) )
+      while ( $tree = array_pop($vars) )
       {
-         if ( $var === SGF_VAR_END )
-         {
+         if ( $tree === SGF_VAR_END )
             $sgf .= SGF_VAR_END;
-            continue;
-         }
-
-         $sgf .= $var_start_sep . SGF_VAR_BEG;
-         //a variation is an array of nodes
-         foreach ( $var as $id => $node )
+         else
          {
-            if ( $id === SGF_VAR_KEY )
+            $sgf .= $var_start_sep . SGF_VAR_BEG;
+            foreach ( $tree->nodes as $node ) //$node is a SgfNode with an array of properties
             {
-               //this particular node is an array of variations
-               for ( $i=count($node)-1; $i >= 0; $i-- )
-                  array_push( $vars, SGF_VAR_END, $node[$i] );
-               continue;
+               $sgf .= $node_start_sep . SGF_NOD_BEG;
+               $conv_node = (is_null($convert_node_func))
+                  ? $node
+                  : call_user_func( $convert_node_func, $node, $convert_extra_arg );
+               foreach ( $conv_node->props as $key => $args )
+               {
+                  if ( isset($map_props_with_lf[$key]) )
+                     $sgf .= "\n";
+                  $sgf .= $key;
+                  foreach ( $args as $arg )
+                     $sgf .= SGF_ARG_BEG.$arg.SGF_ARG_END;
+               }
             }
 
-            $sgf .= $node_start_sep . SGF_NOD_BEG;
-            //a node is a SgfNode-object with an array of properties
-            $conv_node = (is_null($convert_node_func))
-               ? $node
-               : call_user_func( $convert_node_func, $node, $convert_extra_arg );
-            foreach ( $conv_node->props as $key => $args )
-            {
-               if ( isset($map_props_with_lf[$key]) )
-                  $sgf .= "\n";
-               $sgf .= $key;
-               foreach ( $args as $arg )
-                  $sgf .= SGF_ARG_BEG.$arg.SGF_ARG_END;
-            }
+            foreach ( array_reverse($tree->vars) as $sub_tree )
+               array_push( $vars, SGF_VAR_END, $sub_tree );
          }
       }
 
@@ -408,15 +401,10 @@ class SgfParser
          return $coord;
    }//normalize_move_coords
 
-   //TODO TODO remove later
-   public static function debug_sgf_builder( $game, $size=19 )
-   {
-      return self::sgf_builder( array( $game ), "\n", '', '', 'SgfParser::sgf_convert_move_to_board_coords', $size );
-   }
-
    /*!
     * \brief callback-function for sgf_builder() to convert B/W-moves in SgfNode-object to board-coordinates (+ use '' for PASS-move).
     * \return modified SgfNode-object
+    * \note $sgf_node is modified as well, because objects are passed by reference
     */
    public static function sgf_convert_move_to_board_coords( $sgf_node, $size )
    {
@@ -437,6 +425,7 @@ class SgfParser
    /*!
     * \brief callback-function for sgf_builder() to convert B/W-moves in SgfNode-object to sgf-coordinates (+ use '' for PASS-move).
     * \return modified SgfNode-object
+    * \note $sgf_node is modified as well, because objects are passed by reference
     */
    public static function sgf_convert_move_to_sgf_coords( $sgf_node, $size )
    {
@@ -451,30 +440,43 @@ class SgfParser
       return $sgf_node;
    }//sgf_convert_move_to_sgf_coords
 
-   // returns first SgfNode from given gametree
-   // NOTE: needed for merging conditional-moves
-   public static function get_variation_first_sgf_node( $var )
-   {
-      // NOTE: it shouldn't happen, that a variation starts with another variation, so "return $var[0];" should suffice, ...
-      //       but who knows what weird SGF-nodes we see, so safely traverse to first non-var node.
-
-      reset($var);
-      while ( list( $id, $node ) = each($var) )
-      {
-         if ( $id === SGF_VAR_KEY ) // shouldn't happen, that variation starts with another variation
-         {
-            $var = $node;
-            reset($var);
-         }
-         else
-            return $node;
-      }
-
-      return null; // no node found
-   }//get_variation_first_sgf_node
-
 } //end 'SgfParser'
 
+
+
+/*! \brief Class used to store game-tree with nodes parsed from SGF. */
+class SgfGameTree
+{
+   public $nodes = array(); // SgfNode, ...
+   public $vars = array(); // SgfGameTree, ...
+
+   public function has_nodes()
+   {
+      return count($this->nodes);
+   }
+
+   public function has_vars()
+   {
+      return count($this->vars);
+   }
+
+   public function get_first_node()
+   {
+      return ( count($this->nodes) ) ? $this->nodes[0] : null;
+   }
+
+   public function to_string( $conv_func=null, $conv_size=19 )
+   {
+      return SgfParser::sgf_builder( array( clone $this ), "\n", '', '', $conv_func, $conv_size );
+   }
+
+   public function debug( $conv_size=19 )
+   {
+      return SgfParser::sgf_builder( array( clone $this ), ' ', '', '' );
+      //return SgfParser::sgf_builder( array( clone $this ), ' ', '', '', 'SgfParser::sgf_convert_move_to_board_coords', $conv_size ); //TODO TODO
+   }
+
+} //end 'SgfGameTree'
 
 
 /*! \brief Class used to store node parsed from SGF. */
@@ -514,7 +516,7 @@ class SgfNode
 class GameSgfParser
 {
    public $sgf_parser; // SgfParser
-   public $extra_nodes = null;
+   public $sgf_game_tree = null;
 
    public $Size = 0;
    public $Handicap = 0; // number of handicap-stones
@@ -554,6 +556,7 @@ class GameSgfParser
 
    /*!
     * \brief Verifies game shape-setup to match those parsed from SGF.
+    * \param $db_shape_setup array( sgf-coord => BLACK | WHITE, ... )
     * \return empty-array = success; errors otherwise
     */
    public function verify_game_shape_setup( $db_shape_setup, $gsize )
@@ -587,6 +590,9 @@ class GameSgfParser
 
    /*!
     * \brief Verifies count of $chk_cnt_moves game-moves to match those parsed from SGF.
+    * \param $chk_cnt_moves how many moves to check starting at first
+    * \param $db_sgf_moves array with moves from db-game in format <B|W sgf-coord|''>, e.g. "Baa", "W"
+    * \param $skip_pass true = skip PASS-moves in this parsed SGF; false = also match PASS-moves
     * \return empty-array = success; errors otherwise
     */
    public function verify_game_moves( $chk_cnt_moves, $db_sgf_moves, $skip_pass )
@@ -622,7 +628,8 @@ class GameSgfParser
 
    /*!
     * \brief Parses SGF-data into resulting-array (used to load SGF and flatten into Goban-objects for Shape-game).
-    * \param $last_move_nr >=0 to collect extra-nodes starting from that move-nr; <0 = no collecting of extra-nodes
+    * \param $last_move_nr >=0 to collect extra-nodes in this->sgf_game_tree starting from that move-nr;
+    *       <0 = no collecting of game-tree
     * \return GameSgfParser-instance with filled properties; parsing-error in SgfParser->Error or '' if ok
     */
    public static function parse_sgf_game( $sgf_data, $last_move_nr=-1 )
@@ -632,37 +639,18 @@ class GameSgfParser
       if ( $sgf_parser->error_msg )
          return $game_sgf_parser;
 
-      $game = $sgf_parser->games[0]; // check 1st game only
       $movenum = 0; // current move-number
       $vars = array(); // variations
       $parsed_HA = $parsed_KM = null;
-      $game_sgf_parser->extra_nodes = array();
-      $collect_extra_nodes = 0; // 0|-1 = no collecting, 1 = collect nodes, -1 = collecting stopped
+      $game_sgf_parser->sgf_game_tree = new SgfGameTree();
+      $collect_gametree = 0; // for game-tree: 0|-1 = no collecting, 1 = collect nodes, -1 = collecting stopped
 
-      SgfParser::push_var_stack( $vars, $game, $movenum );
+      SgfParser::push_var_stack( $vars, $sgf_parser->games[0], $movenum ); // check 1st game only
 
-      while ( list($movenum, $var) = array_pop($vars) ) // process variations-stack
+      while ( list($movenum, $game_tree) = array_pop($vars) ) // process variations-stack
       {
-         // a variation is an array of nodes
-         foreach ( $var as $id => $node )
+         foreach ( $game_tree->nodes as $node ) // $node is a SgfNode
          {
-            if ( $id === SGF_VAR_KEY )
-            {
-               if ( $collect_extra_nodes > 0 )
-               {
-                  $game_sgf_parser->extra_nodes[$id] = $node;
-                  $collect_extra_nodes = -1; // stop collecting, because var already contains the rest
-               }
-
-               // this particular node is an array of variations, but only take first var (main-branch)
-               SgfParser::push_var_stack( $vars, $node[0], $movenum );
-               continue;
-            }
-
-            if ( $collect_extra_nodes > 0 )
-               $game_sgf_parser->extra_nodes[] = $node;
-
-            // a node is a SgfNode-object with an array of properties
             if ( isset($node->props['B']) || isset($node->props['W']) )
             {
                $key = ( isset($node->props['B']) ) ? 'B' : 'W';
@@ -673,8 +661,8 @@ class GameSgfParser
                $movenum++;
 
                // start collecting additional nodes after last curr-move
-               if ( $last_move_nr >= 0 && $collect_extra_nodes == 0 && $movenum >= $last_move_nr )
-                  $collect_extra_nodes = 1; // start collecting cond-moves after last move
+               if ( $last_move_nr >= 0 && $collect_gametree == 0 && $movenum >= $last_move_nr )
+                  $collect_gametree = 1; // start collecting cond-moves after last move
             }
             if ( $movenum == 0 ) // parse certain props only from root-node (before 1st move starts)
             {
@@ -695,6 +683,20 @@ class GameSgfParser
                if ( isset($node->props['KM']) && is_null($parsed_KM) )
                   $game_sgf_parser->Komi = $parsed_KM = (float)$node->props['KM'][0];
             }
+
+            if ( $collect_gametree > 0 )
+               $game_sgf_parser->sgf_game_tree->nodes[] = $node;
+         }//end-nodes
+
+         if ( $game_tree->has_vars() )
+         {
+            $sub_tree = $game_tree->vars[0]; // only take first var (main-branch)
+            if ( $collect_gametree > 0 )
+            {
+               $game_sgf_parser->sgf_game_tree->vars[] = $sub_tree;
+               $collect_gametree = -1; // stop collecting, because var already contains the rest
+            }
+            SgfParser::push_var_stack( $vars, $sub_tree, $movenum );
          }
       }
 
@@ -719,7 +721,7 @@ function get_handicap_pattern( $size, $handicap, &$err)
    if ( is_string($sgf_data) )
    {
       $sgf_parser = SgfParser::sgf_parser( $sgf_data );
-      $game = $sgf_parser->games[0]; //keep the first game only
+      $game_tree = $sgf_parser->games[0]; //keep the first game only
       $err = $sgf_parser->error_loc;
    }
    else
@@ -733,24 +735,15 @@ function get_handicap_pattern( $size, $handicap, &$err)
 
    $nb = 0;
    $vars = array();
-   SgfParser::push_var_stack( $vars, $game, $nb);
+   SgfParser::push_var_stack( $vars, $game_tree, $nb);
 
-   while ( list($nb,$var) = array_pop($vars) )
+   while ( list($nb, $game_tree) = array_pop($vars) )
    {
       $stonestring = substr( $stonestring, 0, 2*$nb);
 
       //a variation is an array of nodes
-      foreach ( $var as $id => $node )
+      foreach ( $game_tree->nodes as $node ) // $node is a SgfNode
       {
-         if ( $id === SGF_VAR_KEY )
-         {
-            //this particular node is an array of variations
-            for ( $i=count($node)-1; $i >= 0; $i-- )
-               SgfParser::push_var_stack( $vars, $node[$i], $nb);
-            continue;
-         }
-
-         // a node is a SgfNode-object with an array of properties
          if ( isset($node->props['B']) || isset($node->props['W']) )
          {
             $co = @$node->props['B'][0];
@@ -764,6 +757,9 @@ function get_handicap_pattern( $size, $handicap, &$err)
                return $stonestring;
          }
       }
+
+      foreach ( array_reverse($game_tree->vars) as $sub_tree )
+         SgfParser::push_var_stack( $vars, $sub_tree, $nb );
    }
    //See previous error comment
    $err = sprintf( T_('Insufficient handicap pattern for %s'), "size=$size h=$handicap n=$nb" );
