@@ -11,6 +11,20 @@ Release [2014-03-27] - DGS 1.0.17 - tag [release-1_0_17-20140327] on branch [DGS
 ChangeLog
 ------------------------------------------------------------------
 
+2014-06-01 jug
+
+   * include/sgf_builder.php (SgfBuilder.merge_conditional_moves, ~.find_target_start_node,
+       ~.yield_next_target_node, ~.append_remaining_conditional_moves,
+       ~.mark_node_conditional_moves_start):
+   - fixed merging of conditional-moves into game-tree for SGF-download
+     - rewrite merging of conditional-moves to overcome implementation-"traps" of array_splice()
+       resetting array
+     - added special handling for prev() on last item from iterating array
+     - simplified merging function by combining former special-case for appending conditional-moves
+       after last-game-move
+     - simplified merging function by refactoring finding target-game-tree starting point and
+       getting next target-node into separate functions
+
 2014-05-30 jug
 
    * goban_editor.php (create_igoban_from_parsed_sgf):
