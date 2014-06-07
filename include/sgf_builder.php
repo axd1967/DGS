@@ -1014,6 +1014,7 @@ class SgfBuilder
       // - array-iterator is reset on array_splice(), therefore looping-forward is needed (find_target_start_node-func)
       // - prev() with iterator returning last item does NOT move iterator back, but stays at the end,
       //   therefore special handling for last-item required
+      // - must keep main-game-line always in 1st var in sub-trees
 
       // traverse game-tree of cond-moves (=source) and merge into target-tree
       $vars_cm = array(); // stack for variations for traversal of game-tree with conditional-moves

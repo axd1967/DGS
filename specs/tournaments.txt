@@ -185,7 +185,7 @@ What can be expected for T-status:
 
 Tournament-types:
    - Ladder, King of the hill
-   - Round-Robin
+   - Round-Robin (= Elimination)
       - Matrix = round-robin single or double with 1 round & 1 pool
    - League-T (pyramid-like structure), connection to next/prev Ts
    - Championship (ala IYT): http://www.itsyourturn.com/pp?tournmain

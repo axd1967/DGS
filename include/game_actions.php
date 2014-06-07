@@ -722,28 +722,34 @@ class GameActionHelper
 
          - stop if there is no last-move (only set by a previously PASS or MOVE execution)
            or if there are no active conditional-moves of the opponent
+
          - find the last-move (context) in the parsed conditional-moves and get the next-move;
            (because there are no db-transactions, saving of previous cond-moves could have failed;
             so this "search" can also pick up from previous failed updates of the conditional-moves)
+
          - if there is a next-move, play it using a new GameActionHelper-instance, which in turn
-           loads conditional-moves of the new opponent
+           loads conditional-moves of the "new" opponent
+
          - to avoid recursion, after update_game() called in play_conditional_move() on the new instance,
            process_conditional_moves() is not called again, but the GameActionHelper-instance is saved
            and used in the next loop-run
+
          - after the move is played, the changed state of the conditional-moves are saved
+
          - as last step the opponent needs to be notified about the last submitted (original or conditional) move,
-           though this notification should happen at the caller of this function
+           though this notification should be done by the caller-function of this function here
 
       - this process reloads all data (Games-table, all moves, cond-moves), because it's very error-prone
         to correctly change the inner state of all objects (e.g. Board, Games-row) to be able to correctly
         process consecutive move-execution (e.g. when both player have conditional-moves in place).
 
         The other reason for this approach (SAVE(!) + reload after EACH move) is, because DGS has no real
-        db-transactions due to MyISAM-engine used for the db-tables.  If it would be done in one "save"-section
-        (with different tables written), the inconsistencies in case of a db-failure would be much more
-        difficult to fix.
+        db-transactions over multiple tables due to the MyISAM-engine used for the db-tables.  If it would
+        be done in one "save"-section (with different tables written), the inconsistencies in case
+        of a db-failure would be much more difficult to sort out and fix.
       */
 
+      // GameActionHelper to process on
       $curr_gah = (ALLOW_CONDITIONAL_MOVES) ? $this : null;
       $last_gah = null;
 
