@@ -11,6 +11,13 @@ Release [2014-03-27] - DGS 1.0.17 - tag [release-1_0_17-20140327] on branch [DGS
 ChangeLog
 ------------------------------------------------------------------
 
+2014-07-27 jug
+
+   * opponents.php, userinfo.php, users.php, NEWS:
+   - added filter for rated-win-percentage on users and opponents page
+     - renamed table-header 'Percent' -> 'Win%'
+   - renamed user-info field 'Percent' -> 'Rated Win %' on user-info-page
+
 2014-06-01 jug
 
    * include/sgf_builder.php (SgfBuilder.merge_conditional_moves, ~.find_target_start_node,

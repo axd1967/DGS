@@ -54,8 +54,8 @@ $GLOBALS['ThePage'] = new Page('UserInfo');
    $row = mysql_single_fetch( "userinfo.find_player($uid,$uhandle)",
       "SELECT *"
       .",(Activity>$ActiveLevel1)+(Activity>$ActiveLevel2) AS ActivityLevel"
-      //i.e. Percent = 100*(Won+Jigo/2)/RatedGames
-      .",ROUND(50*(RatedGames+Won-Lost)/RatedGames) AS Percent"
+      //i.e. RatedWinPercent = 100*(Won+Jigo/2)/RatedGames
+      .",ROUND(50*(RatedGames+Won-Lost)/RatedGames) AS RatedWinPercent"
       .",UNIX_TIMESTAMP(Registerdate) AS X_Registerdate"
       .",UNIX_TIMESTAMP(Lastaccess) AS X_Lastaccess"
       .",UNIX_TIMESTAMP(LastQuickAccess) AS X_LastQuickAccess"
@@ -139,7 +139,7 @@ $GLOBALS['ThePage'] = new Page('UserInfo');
       $lastaccess = ( @$row['X_Lastaccess'] > 0 ) ? date(DATE_FMT2, $row['X_Lastaccess']) : '';
       $lastquickaccess = ( @$row['X_LastQuickAccess'] > 0 ) ? date(DATE_FMT2, $row['X_LastQuickAccess']) : NO_VALUE;
       $lastmove = ( @$row['X_LastMove'] > 0 ) ? date(DATE_FMT2, $row['X_LastMove']) : '';
-      $percent = ( is_numeric($row['Percent']) ) ? $row['Percent'].'%' : '';
+      $rated_win_percent = ( is_numeric($row['RatedWinPercent']) ) ? $row['RatedWinPercent'].'%' : '';
 
 
       // draw user-info fields in two separate columns
@@ -212,7 +212,7 @@ $GLOBALS['ThePage'] = new Page('UserInfo');
       $itable2->add_sinfo( anchor( $rat_link, T_('Rated games')),    $row['RatedGames'] );
       $itable2->add_sinfo( anchor( $won_link, T_('Won games')),      $row['Won'] );
       $itable2->add_sinfo( anchor( $los_link, T_('Lost games')),     $row['Lost'] );
-      $itable2->add_sinfo( T_('Percent'), $percent );
+      $itable2->add_sinfo( T_('Rated Win %'), $rated_win_percent );
       if ( $show_mpg )
       {
          $itable2->add_row( array(

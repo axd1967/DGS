@@ -151,6 +151,8 @@ require_once 'include/classlib_userpicture.php';
          array( FC_SIZE => 4 ));
    $ufilter->add_filter(11, 'Numeric', 'P.Lost', true,
          array( FC_SIZE => 4 ));
+   $ufilter->add_filter(12, 'Numeric', 'IF(P.RatedGames>0,(50*(P.RatedGames+P.Won-P.Lost)/P.RatedGames),0)', true,
+         array( FC_SIZE => 4, FC_SYNTAX_HELP => 'NUM %' ));
    $ufilter->add_filter(13, 'Boolean', "P.Activity>$ActiveLevel1", true,
          array( FC_FNAME => 'active', FC_LABEL => T_('Active'), FC_STATIC => 1 ) );
    $ufilter->add_filter(14, 'RelativeDate', 'P.Lastaccess', true,
@@ -214,7 +216,7 @@ require_once 'include/classlib_userpicture.php';
    $utable->add_tablehead(17, T_('Rated#header'), 'Number', 0, 'RatedGames-');
    $utable->add_tablehead(10, T_('Won#header'), 'Number', 0, 'Won-');
    $utable->add_tablehead(11, T_('Lost#header'), 'Number', 0, 'Lost-');
-   $utable->add_tablehead(12, T_('Percent#header'), 'Number', 0, 'Percent-');
+   $utable->add_tablehead(12, T_('Win%#header'), 'Number', 0, 'RatedWinPercent-');
    $utable->add_tablehead(13, T_('Activity#header'), 'Image', TABLE_NO_HIDE, 'ActivityLevel-');
    $utable->add_tablehead(20, new TableHead( T_('User online#header'), 'images/online.gif',
       sprintf( T_('Indicator for being online up to %s mins ago'), SPAN_ONLINE_MINS)
@@ -277,8 +279,8 @@ require_once 'include/classlib_userpicture.php';
       'P.*', 'P.Rank AS Rankinfo',
       "(P.Activity>$ActiveLevel1)+(P.Activity>$ActiveLevel2) AS ActivityLevel",
       'P.Running+P.Finished AS Games',
-      //i.e. Percent = 100*(Won+Jigo/2)/RatedGames
-      'ROUND(50*(RatedGames+Won-Lost)/RatedGames) AS Percent',
+      //i.e. RatedWinPercent = 100*(Won+Jigo/2)/RatedGames
+      'ROUND(50*(RatedGames+Won-Lost)/RatedGames) AS RatedWinPercent',
       'UNIX_TIMESTAMP(P.Lastaccess) AS LastaccessU',
       'UNIX_TIMESTAMP(P.LastMove) AS LastMoveU',
       'UNIX_TIMESTAMP(P.Registerdate) AS X_Registerdate' );
@@ -430,7 +432,7 @@ require_once 'include/classlib_userpicture.php';
          if ( $utable->Is_Column_Displayed[11] )
             $urow_strings[11] = $row['Lost'];
          if ( $utable->Is_Column_Displayed[12] )
-            $urow_strings[12] = ( is_numeric($row['Percent']) ? $row['Percent'].'%' : '' );
+            $urow_strings[12] = ( is_numeric($row['RatedWinPercent']) ? $row['RatedWinPercent'].'%' : '' );
          if ( $utable->Is_Column_Displayed[13] )
             $urow_strings[13] = activity_string( $row['ActivityLevel']);
          if ( $utable->Is_Column_Displayed[14] )

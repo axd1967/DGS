@@ -15,6 +15,12 @@ Copyright (C) 2001-2014  Erik Ouchterlony, Jens-Uwe Gaspar
    * Game page:
       * Changed default of territory-markers for viewing finished game to showing them like in score-mode
 
+   * <home users.php>Users list</home>, <home opponents.php>Opponents list</home>:
+      * Added filter on (rated) win-percentage column 'Win%'
+      * Renamed 'Percent'-field to 'Win%'
+
+   * <home userinfo.php>User info page</home>:
+      * Renamed 'Percent'-field to 'Rated Win %'
 
    Bug fixes:
 
