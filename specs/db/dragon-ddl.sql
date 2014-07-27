@@ -780,6 +780,7 @@ CREATE TABLE IF NOT EXISTS `Players` (
   `Won` mediumint(8) unsigned NOT NULL default '0',
   `Lost` mediumint(8) unsigned NOT NULL default '0',
   `GamesMPG` smallint(5) unsigned NOT NULL default '0',
+  `GamesWeaker` mediumint(8) unsigned NOT NULL default '0',
   `Translator` varchar(80) NOT NULL default '',
   `IP` varchar(16) NOT NULL default '',
   `Browser` varchar(150) NOT NULL default '',

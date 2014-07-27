@@ -167,6 +167,8 @@ require_once 'include/classlib_userpicture.php';
    $ufilter->add_filter(19, 'Boolean', "P.UserPicture", true );
    $ufilter->add_filter(22, 'RelativeDate', 'P.Registerdate', true,
          array( FC_TIME_UNITS => FRDTU_YMWD|FRDTU_ABS ) );
+   $ufilter->add_filter(23, 'Numeric', 'IF(P.Finished>'.MIN_FIN_GAMES_HERO_AWARD.',100*P.GamesWeaker/P.Finished,0)', true,
+         array( FC_SIZE => 4, FC_SYNTAX_HELP => 'NUM %' ));
    $ufilter->init(); // parse current value from _GET
 
    // init table
@@ -217,6 +219,7 @@ require_once 'include/classlib_userpicture.php';
    $utable->add_tablehead(10, T_('Won#header'), 'Number', 0, 'Won-');
    $utable->add_tablehead(11, T_('Lost#header'), 'Number', 0, 'Lost-');
    $utable->add_tablehead(12, T_('Win%#header'), 'Number', 0, 'RatedWinPercent-');
+   $utable->add_tablehead(23, T_('Hero%#header'), 'Number', 0, 'HeroRatio-');
    $utable->add_tablehead(13, T_('Activity#header'), 'Image', TABLE_NO_HIDE, 'ActivityLevel-');
    $utable->add_tablehead(20, new TableHead( T_('User online#header'), 'images/online.gif',
       sprintf( T_('Indicator for being online up to %s mins ago'), SPAN_ONLINE_MINS)
@@ -281,6 +284,7 @@ require_once 'include/classlib_userpicture.php';
       'P.Running+P.Finished AS Games',
       //i.e. RatedWinPercent = 100*(Won+Jigo/2)/RatedGames
       'ROUND(50*(RatedGames+Won-Lost)/RatedGames) AS RatedWinPercent',
+      'IF(P.Finished>'.MIN_FIN_GAMES_HERO_AWARD.',P.GamesWeaker/P.Finished,0) AS HeroRatio',
       'UNIX_TIMESTAMP(P.Lastaccess) AS LastaccessU',
       'UNIX_TIMESTAMP(P.LastMove) AS LastMoveU',
       'UNIX_TIMESTAMP(P.Registerdate) AS X_Registerdate' );
@@ -452,6 +456,13 @@ require_once 'include/classlib_userpicture.php';
          }
          if ( $utable->Is_Column_Displayed[22] )
             $urow_strings[22] = ($row['X_Registerdate'] > 0 ? date(DATE_FMT_YMD, $row['X_Registerdate']) : '' );
+         if ( $utable->Is_Column_Displayed[23] )
+         {
+            $hero_ratio = $row['HeroRatio'];
+            $urow_strings[23] = ( $hero_ratio * 100 >= HERO_BRONZE )
+               ? echo_image_hero_badge($hero_ratio) . ' ' . sprintf('%d%%', 100*$hero_ratio)
+               : '';
+         }
 
          $utable->add_row( $urow_strings );
       }

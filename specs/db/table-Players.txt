@@ -80,6 +80,7 @@ OS  | RatedGames       | mediumint(8) unsigned                       | NO   |   
 OS  | Won              | mediumint(8) unsigned                       | NO   |     | 0                   |                |
 OS  | Lost             | mediumint(8) unsigned                       | NO   |     | 0                   |                |
 OS  | GamesMPG         | smallint(5) unsigned                        | NO   |     | 0                   |                |
+OS  | GamesWeaker      | mediumint(8) unsigned                       | NO   |     | 0                   |                |
   A | Translator       | varchar(80)                                 | NO   |     |                     |                |
  S  | IP               | varchar(16)                                 | NO   |     |                     |                |
  S  | Browser          | varchar(150)                                | NO   |     |                     |                |
@@ -204,6 +205,12 @@ Zu  | ThumbnailSize    | tinyint(3) unsigned                         | NO   |   
    - -1 if joined user is removed by game-master
    - -1 for all joined users if setup-MP-game is started
    - no change if invite-reservation is accepted by user
+
+* GamesWeaker : number of (non-MP) games played with weaker players
+   - badges of honor awarded for ratio in certain ranges:
+      - golden hero: ratio >= 61.8% (= 1/golden_ratio)
+      - silver hero: ratio >= 50%
+      - bronze hero: ratio >= 32.8% (= 100% - 1/golden_ratio)
 
 * RejectTimeoutWin :
    - -1 = no rejection of win-by-timeout (default)

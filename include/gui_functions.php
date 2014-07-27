@@ -438,6 +438,35 @@ function echo_image_game_players( $gid, $icon_text='' )
    return ($gid > 0) ? anchor( $base_path."game_players.php?gid=$gid", $img ) : $img;
 }
 
+// NOTE: Gold badge awarded for players with min. 62% of games played with weaker players
+define('HERO_GOLDEN', 62); // rounded 1/golden_ratio
+define('HERO_SILVER', 50);
+define('HERO_BRONZE', 38); // 100% - HERO_GOLDEN
+define('MIN_FIN_GAMES_HERO_AWARD', 20);
+define('MIN_RATDIFF_HERO', 100); // 1k rating-diff minimum for hero-awards
+
+/*!
+ * \brief Returns image for hero badge-of-honor for given hero-ratio.
+ * \param $hero_ratio between 0..1 expressing percentage of ratio: Players.GamesWeaker/Finished if Finished>MIN_FIN_GAMES_HERO_AWARD
+ */
+function echo_image_hero_badge( $hero_ratio )
+{
+   global $base_path;
+   $chk_hero_ratio = 100 * $hero_ratio;
+   if ( $chk_hero_ratio >= HERO_GOLDEN )
+      list( $img, $medal, $perc ) = array( 'hero_gold.gif', T_('Golden#hero_badge'), HERO_GOLDEN );
+   elseif ( $chk_hero_ratio >= HERO_SILVER )
+      list( $img, $medal, $perc ) = array( 'hero_silver.gif', T_('Silver#hero_badge'), HERO_SILVER );
+   elseif ( $chk_hero_ratio >= HERO_BRONZE )
+      list( $img, $medal, $perc ) = array( 'hero_bronze.gif', T_('Bronze#hero_badge'), HERO_BRONZE );
+   else
+      return '';
+
+   return image( $base_path.'images/'.$img,
+      sprintf( T_('%s Badge of Honor (for playing >%s games with weaker players)'), $medal, $perc.'%'),
+      null, 'class="InTextImage"' );
+}//echo_image_hero_badge
+
 /*!
  * \brief Returns image-tags for user being on-vacation and/or online.
  * \param $last_access 0 = don't add online-icon (used if data is cached for example as then online-data may be misleading)

@@ -319,6 +319,9 @@ function get_executives( $level )
       . build_icon('note.gif', 'Note created from [script]')
       . build_icon('newgame.gif', 'Plus created from [add]')
       . build_icon('sgf.gif', 'Save-SGF created from [disk]')
+      . build_icon('hero_bronze.gif', 'Hero Bronze [award_star_bronze_2]')
+      . build_icon('hero_silver.gif', 'Hero Silver [award_star_silver_3]')
+      . build_icon('hero_gold.gif', 'Hero Gold [award_star_gold_1]')
       ;
    add_contributor_link(
       'Taken and modified some icons from Mark James\' silk icons collection (version 1.3) under ' .

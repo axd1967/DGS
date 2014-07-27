@@ -5,3 +5,9 @@
 # - extended $DGS_CACHE_GROUPS with CACHE_GRP_COND_MOVES for caching conditional-moves
 # - removed 'HOSTBASE' by setting it automatically
 
+-----------
+// added images for hero-awards
+copy /images/hero_bronze.gif
+copy /images/hero_gold.gif
+copy /images/hero_silver.gif
+

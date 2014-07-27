@@ -660,7 +660,8 @@ class GameActionHelper
       if ( $this->game_finished )
       {
          $game_finalizer = new GameFinalizer( ACTBY_PLAYER, $this->my_id, $this->gid, $tid, $Status,
-            $GameType, $GamePlayers, $Flags, $Black_ID, $White_ID, $Moves, ($Rated != 'N') );
+            $GameType, $GamePlayers, $Flags, $Black_ID, $White_ID, $Moves, ($Rated != 'N'),
+            $this->game_row['Black_Start_Rating'], $this->game_row['White_Start_Rating'] );
 
          $do_delete = ( $this->action == GAMEACT_DELETE );
          $this->notify_opponent = !$do_delete;

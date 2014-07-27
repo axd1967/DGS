@@ -31,6 +31,7 @@ require_once 'include/classlib_user.php';
 require_once 'include/utilities.php';
 require_once 'include/std_classes.php';
 require_once 'include/std_functions.php';
+require_once 'include/gui_functions.php';
 require_once 'include/time_functions.php';
 require_once 'include/message_functions.php';
 require_once 'include/game_texts.php';
@@ -1236,7 +1237,8 @@ class GameHelper
     * \brief Updates game-stats in Players-table for simple or multi-player game when game is finished.
     * \note IMPORTANT NOTE: caller needs to open TA with HOT-section!!
     */
-   public static function update_players_end_game( $dbgmsg, $gid, $game_type, $rated_status, $score, $black_id, $white_id )
+   public static function update_players_end_game( $dbgmsg, $gid, $game_type, $rated_status, $score,
+         $black_id, $white_id, $black_start_rating, $white_start_rating )
    {
       if ( !is_numeric($gid) && $gid <= 0 )
          return;
@@ -1254,10 +1256,33 @@ class GameHelper
             .($rated_status ? '' : ", RatedGames=RatedGames+1"
                .($score < 0 ? ", Won=Won+1" : ($score > 0 ? ", Lost=Lost+1 " : ""))
              ). " WHERE ID=$black_id LIMIT 1" );
+
+         // track game-count with weaker player
+         $hero_uid = self::determine_finished_game_hero_uid( $black_id, $white_id, $black_start_rating, $white_start_rating );
+         if ( $hero_uid > 0 )
+         {
+            db_query( $dbgmsg."GameHelper:update_players_end_game.C($gid,$hero_uid)",
+               "UPDATE Players SET GamesWeaker=GamesWeaker+1 WHERE ID=$hero_uid LIMIT 1" );
+         }
       }
       else // multi-player-go
          MultiPlayerGame::update_players_end_mpgame( $gid, /*setup*/false, /*del*/false );
    }//update_players_end_game
+
+   /*! \brief Returns uid for hero-awarding (playing with weaker player); or 0 if no user eligible. */
+   public static function determine_finished_game_hero_uid( $black_id, $white_id, $b_start_rating, $w_start_rating )
+   {
+      if ( $b_start_rating >= MIN_RATING
+            && ( $w_start_rating <= -OUT_OF_RATING || $b_start_rating > $w_start_rating + MIN_RATDIFF_HERO ) )
+         $hero_uid = $black_id;
+      elseif ( $w_start_rating >= MIN_RATING
+            && ( $b_start_rating <= -OUT_OF_RATING || $w_start_rating > $b_start_rating + MIN_RATDIFF_HERO ) )
+         $hero_uid = $white_id;
+      else
+         $hero_uid = 0;
+
+      return $hero_uid;
+   }//determine_finished_game_hero_uid
 
    /*! \brief Returns number of started games (used for same-opponent-check). */
    public static function count_started_games( $uid, $opp )
@@ -2027,9 +2052,11 @@ class GameFinalizer
    private $is_rated;
    private $made_unrated = false;
    private $skip_game_query = false;
+   private $Black_Start_Rating;
+   private $White_Start_Rating;
 
    public function __construct( $action_by, $my_id, $gid, $tid, $game_status, $game_type, $game_players, $game_flags,
-         $black_id, $white_id, $moves, $is_rated )
+         $black_id, $white_id, $moves, $is_rated, $b_start_rat, $w_start_rat )
    {
       $this->action_by = $action_by;
       $this->my_id = (int)$my_id;
@@ -2043,6 +2070,8 @@ class GameFinalizer
       $this->White_ID = (int)$white_id;
       $this->Moves = (int)$moves;
       $this->is_rated = (bool)$is_rated;
+      $this->Black_Start_Rating = (float)$b_start_rat;
+      $this->White_Start_Rating = (float)$w_start_rat;
    }//__construct
 
    public function skip_game_query()
@@ -2138,7 +2167,8 @@ class GameFinalizer
          else
             $rated_status = update_rating2($gid);
          GameHelper::update_players_end_game( $dbgmsg,
-            $gid, $this->GameType, $rated_status, $game_score, $this->Black_ID, $this->White_ID );
+            $gid, $this->GameType, $rated_status, $game_score, $this->Black_ID, $this->White_ID,
+            $this->Black_Start_Rating, $this->White_Start_Rating );
 
          list( $Subject, $Text, $observerText ) = $game_notify->get_text_game_result( $this->action_by,
             ($this->my_id > 0 ? $player_row : null) );

@@ -39,3 +39,11 @@ ALTER TABLE MoveSequence
    ADD ErrorCode tinyint unsigned NOT NULL default '0' AFTER Flags ;
 
 
+-- added games-counter played with weaker player
+ALTER TABLE Players
+   ADD GamesWeaker mediumint unsigned NOT NULL default '0' AFTER GamesMPG ;
+
+-- execute fix-script (with do_it=1) to set counter of games with weaker players:
+--    'scripts/updates/fix_players_weaker_games-1_0_18.php'
+
+

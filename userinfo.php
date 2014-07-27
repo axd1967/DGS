@@ -139,8 +139,11 @@ $GLOBALS['ThePage'] = new Page('UserInfo');
       $lastaccess = ( @$row['X_Lastaccess'] > 0 ) ? date(DATE_FMT2, $row['X_Lastaccess']) : '';
       $lastquickaccess = ( @$row['X_LastQuickAccess'] > 0 ) ? date(DATE_FMT2, $row['X_LastQuickAccess']) : NO_VALUE;
       $lastmove = ( @$row['X_LastMove'] > 0 ) ? date(DATE_FMT2, $row['X_LastMove']) : '';
-      $rated_win_percent = ( is_numeric($row['RatedWinPercent']) ) ? $row['RatedWinPercent'].'%' : '';
-
+      $rated_win_percent = ( is_numeric($row['RatedWinPercent']) ) ? $row['RatedWinPercent'].'%' : NO_VALUE;
+      $hero_ratio = ( $row['RatingStatus'] == RATING_RATED && $row['Rating2'] >= MIN_RATING && $row['Finished'] > MIN_FIN_GAMES_HERO_AWARD )
+         ? $row['GamesWeaker'] / $row['Finished']
+         : 0;
+      $hero_img = echo_image_hero_badge($hero_ratio);
 
       // draw user-info fields in two separate columns
       $twoCols = true;
@@ -212,7 +215,16 @@ $GLOBALS['ThePage'] = new Page('UserInfo');
       $itable2->add_sinfo( anchor( $rat_link, T_('Rated games')),    $row['RatedGames'] );
       $itable2->add_sinfo( anchor( $won_link, T_('Won games')),      $row['Won'] );
       $itable2->add_sinfo( anchor( $los_link, T_('Lost games')),     $row['Lost'] );
-      $itable2->add_sinfo( T_('Rated Win %'), $rated_win_percent );
+      $itable2->add_sinfo( T_('Rated Win %') . ' / ' . T_('Hero %'),
+         $rated_win_percent . ' / ' .
+         // always show badge, but ratio only for own-info or if badge awarded (or for admin)
+         ( $hero_ratio > 0
+            ? ( $hero_img ? $hero_img.' ' : '' ) .
+               ( ( $my_info || $is_admin || $is_game_admin || $hero_ratio >= HERO_BRONZE )
+                  ? sprintf('%1.1f%%', 100*$hero_ratio)
+                  : NO_VALUE )
+            : NO_VALUE ) );
+
       if ( $show_mpg )
       {
          $itable2->add_row( array(

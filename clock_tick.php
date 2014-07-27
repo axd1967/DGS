@@ -212,7 +212,8 @@ function handle_game_timeouts()
 
          $score = ( $ToMove_ID == $Black_ID ) ? SCORE_TIME : -SCORE_TIME;
          $game_finalizer = new GameFinalizer( ACTBY_CRON, /*cron*/0, $gid, $tid,
-            $Status, $GameType, $GamePlayers, $Flags, $Black_ID, $White_ID, $Moves, ($Rated != 'N') );
+            $Status, $GameType, $GamePlayers, $Flags, $Black_ID, $White_ID, $Moves, ($Rated != 'N'),
+            $Black_Start_Rating, $White_Start_Rating );
 
          ta_begin();
          {//HOT-section to save game-timeout

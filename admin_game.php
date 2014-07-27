@@ -100,7 +100,7 @@ define('GA_RES_NO_RESULT', 6);
       {
          $game_finalizer = new GameFinalizer( ACTBY_ADMIN, $my_id, $gid, $game->tid, $game->Status,
             $game->GameType, $game->GamePlayers, $game->Flags, $game->Black_ID, $game->White_ID, $game->Moves,
-            ($game->Rated != 'N') );
+            ($game->Rated != 'N'), $game->Black_Start_Rating, $game->White_Start_Rating );
 
          if ( $game->Score == 0 )
             $score_text = ( $game->Flags & GAMEFLAGS_NO_RESULT ) ? 'void' : 'jigo';

@@ -13,6 +13,35 @@ ChangeLog
 
 2014-07-27 jug
 
+   * include/game_functions.php (GameHelper.update_players_end_game, ~.determine_finished_game_hero_uid;
+       class GameFinalizer, ~.__construct, ~.finish_game),
+     include/gui_functions.php (HERO_GOLDEN, HERO_SILVER, HERO_BRONZE, MIN_FIN_GAMES_HERO_AWARD,
+       MIN_RATDIFF_HERO, echo_image_hero_badge),
+     include/game_actions.php (GameActionHelper.update_game),
+     scripts/updates/fix_players_weaker_games-1_0_18.php, scripts/updates/database_changes_1_0_18.mysql,
+     scripts/updates/other_changes_1_0_18.txt, scripts/index.php,
+     specs/db/dragon-ddl.sql, specs/db/table-Players.txt,
+     images/hero_bronze.gif, images/hero_gold.gif, images/hero_silver.gif,
+     clock_tick.php (handle_game_timeouts),
+     people.php (get_executives),
+     admin_game.php, opponents.php, userinfo.php, users.php, NEWS:
+   - award badge of honor for "heros" playing games with weaker players
+     - min. percentage of games with weaker players:
+       38% for Bronze Badge, 50% for Silver Badge, 62% for Golden Badge
+     - show bronze/silver/golden badge-icon on user-info, users and opponents page in new Hero%-column
+     - track number of finished non-multi-player games played with weaker players
+       in Players.WeakerGames with a min. rating-diff of 1k
+     - hero-percentage of other players is not shown if no badge is awarded
+     - added script to set added Players.GamesWeaker-field for all players and their finished games
+-----------
+-- added games-counter played with weaker player
+ALTER TABLE Players
+   ADD GamesWeaker mediumint unsigned NOT NULL default '0' AFTER GamesMPG ;
+
+-- execute fix-script (with do_it=1) to set counter of games with weaker players:
+--    'scripts/updates/fix_players_weaker_games-1_0_18.php'
+-----------
+
    * opponents.php, userinfo.php, users.php, NEWS:
    - added filter for rated-win-percentage on users and opponents page
      - renamed table-header 'Percent' -> 'Win%'
