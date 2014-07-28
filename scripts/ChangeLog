@@ -13,6 +13,14 @@ ChangeLog
 
 2014-07-28 jug
 
+   * tournaments/include/tournament_result_control.php (TournamentResultControl.build_tournament_result_table,
+       ~.make_table_tournament_results),
+     include/table_columns.php (Table.get_found_rows),
+     include/globals.php (CSS_VERSION),
+     skins/dragon/screen.css, tournaments/view_tournament.php:
+   - show count of all entries for Hall of Fame on tournament-info page
+     with hint to remaining omitted entries
+
    * include/game_functions.php (class GameSetup, ~.encode_game_setup, ~.to_string, ~.new_from_game_setup,
          ~.new_from_waitingroom_game_row;
        GameSetupChecker.check_hero_ratio, ~.check_fields;
@@ -40,7 +48,7 @@ ChangeLog
      specs/db/table-Waitingroom.txt, specs/quick_suite.txt,
      skins/dragon/screen.css,
      new_game.php (handle_add_game),
-     userinfo.php, waiting_room.php, NEWS:
+     userinfo.php, waiting_room.php:
    - added waitingroom-restriction for min. hero percentage
      - extended fix-script to enrich game-setup for games and profile-templates
        with restriction on hero-ratio

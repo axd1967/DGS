@@ -3326,6 +3326,11 @@ a:hover.TLadderRank {
    text-decoration: underline;
 }
 
+table#tournament_resultsTable tr.Footer td {
+   background: #F7F5E3;
+   font-size: smaller;
+}
+
 table#PreviewTPointsTable {
    border: 1px solid black;
 }
@@ -3371,7 +3376,6 @@ table#TPoolSummaryTable td {
    border-left: 1px dotted black;
    border-right: 1px dotted black;
 }
-
 
 table#PoolViewerTable tr.Title,
 table#PoolViewerTable tr.Empty {

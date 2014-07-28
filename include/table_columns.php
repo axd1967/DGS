@@ -303,6 +303,11 @@ class Table
          $this->FoundRows = $found_rows;
    }
 
+   public function get_found_rows()
+   {
+      return $this->FoundRows;
+   }
+
    public function set_row_num_diff( $row_num_diff )
    {
       $this->RowNumDiff = $row_num_diff;

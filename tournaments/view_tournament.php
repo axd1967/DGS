@@ -307,7 +307,7 @@ $GLOBALS['ThePage'] = new Page('Tournament');
       if ( $tresult_control->get_show_rows() == 0 )
          $tresult_str = T_('No tournament results.');
       else
-         $tresult_str = $tresult_control->make_table_tournament_results();
+         $tresult_str = $tresult_control->make_table_tournament_results( /*footer*/true );
 
       section( 'TournamentResult', T_('Tournament Results (Hall of Fame)') . ' - ' .
          sprintf( T_('TOP %s#tourney'), $TRESULT_LIMIT ), 'result', true );

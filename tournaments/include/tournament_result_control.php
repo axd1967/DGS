@@ -149,21 +149,21 @@ class TournamentResultControl
             $tid, $iterator, /*player-info*/true );
 
       $this->show_rows = $trtable->compute_show_rows( $iterator->getResultRows() );
-      $trtable->set_found_rows( ( $this->limit < 0 )
-          ? mysql_found_rows("$dbgmsg.TRC.build_tournament_result_table.found_rows")
-          : $this->show_rows );
+      $trtable->set_found_rows( mysql_found_rows("$dbgmsg.TRC.build_tournament_result_table.found_rows") );
 
       $this->iterator = $iterator;
       $this->table = $trtable;
    }//build_tournament_result_table
 
    /*! \brief Fills tournament-result-Table with data and returns table-string. */
-   public function make_table_tournament_results()
+   public function make_table_tournament_results( $show_footer=false )
    {
       global $base_path;
       $tid = $this->tourney->ID;
+      $show_rows = $this->show_rows;
+      $found_rows = $this->table->get_found_rows();
 
-      while ( ($this->show_rows-- > 0) && list(,$arr_item) = $this->iterator->getListIterator() )
+      while ( ($show_rows-- > 0) && list(,$arr_item) = $this->iterator->getListIterator() )
       {
          list( $tresult, $orow ) = $arr_item;
          $uid = $tresult->uid;
@@ -215,6 +215,13 @@ class TournamentResultControl
          if ( $is_mine )
             $row_str['extra_class'] = 'TourneyUser';
          $this->table->add_row( $row_str );
+      }
+
+      if ( $show_footer && $found_rows > 0 && $found_rows > $this->show_rows )
+      {
+         $this->table->add_row_one_col(
+            sprintf(T_('There are %s more entries in total ...'), $found_rows - $this->show_rows ),
+            array( 'extra_class' => 'Footer' ) );
       }
 
       return $this->table->make_table();

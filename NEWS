@@ -23,6 +23,9 @@ Copyright (C) 2001-2014  Erik Ouchterlony, Jens-Uwe Gaspar
    * <home tournaments/list_tournaments.php>Tournaments</home>:
       * Round-Robin tournaments: Notify tournament-directors with private bulletin after last game has finished
 
+   * Tournament-info page:
+      * Show count of all entries for Hall of Fame with hint to remaining omitted entries
+
    * Quick-Suite (alternative interface "quick_do.php"):
       * Extended user-handler and waitingroom-handler with hero-award-info
 
