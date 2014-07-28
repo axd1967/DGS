@@ -13,6 +13,10 @@ ChangeLog
 
 2014-07-28 jug
 
+   * tournaments/show_tournament_log.php:
+   - added search-filters for user/action-user, object, action for browsing tournament-log
+     and full page-navigation
+
    * tournaments/include/tournament_result_control.php (TournamentResultControl.build_tournament_result_table,
        ~.make_table_tournament_results),
      include/table_columns.php (Table.get_found_rows),

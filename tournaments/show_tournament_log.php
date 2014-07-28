@@ -81,16 +81,24 @@ require_once 'tournaments/include/tournament_log.php';
    // table filters
    $tlogfilter = new SearchFilter();
    $tlogfilter->add_filter( 1, 'Numeric', 'TLOG.ID', true);
+   $tlogfilter->add_filter( 3, 'Text', 'P.Handle', true,
+      array( FC_START_WILD => STARTWILD_OPTMINCHARS ));
    $tlogfilter->add_filter( 4, 'RelativeDate', 'TLOG.Date', true,
       array( FC_TIME_UNITS => FRDTU_ALL_ABS, FC_SIZE => 8 ));
    $tlogfilter->add_filter( 5, 'Selection', $types_arr, true );
+   $tlogfilter->add_filter( 6, 'Text', 'TLOG.Object', true,
+      array( FC_SIZE => 6, FC_SUBSTRING => 1, FC_START_WILD => 3 ));
+   $tlogfilter->add_filter( 7, 'Text', 'TLOG.Action', true,
+      array( FC_SIZE => 6, FC_NO_RANGE => 1 ));
+   $tlogfilter->add_filter( 8, 'Text', 'AP.Handle', true,
+      array( FC_START_WILD => STARTWILD_OPTMINCHARS ));
    $tlogfilter->add_filter( 9, 'Text', 'TLOG.Message', true,
       array( FC_SIZE => 50, FC_SUBSTRING => 1, FC_START_WILD => 2 ));
    $tlogfilter->init(); // parse current value from _GET
    $filter_msg =& $tlogfilter->get_filter(9);
    $rx_terms_msg = implode('|', $filter_msg->get_rx_terms() );
 
-   $table = new Table( 'tournamentlog', $page );
+   $table = new Table( 'tournamentlog', $page, null, '', TABLE_NO_SORT|TABLE_NO_HIDE|TABLE_ROWS_NAVI );
    $table->register_filter( $tlogfilter );
    $table->add_or_del_column();
 
@@ -132,7 +140,7 @@ require_once 'tournaments/include/tournament_log.php';
    $iterator = Tournamentlog::load_tournament_logs( $iterator );
 
    $show_rows = $table->compute_show_rows( $iterator->getResultRows() );
-   //$table->set_found_rows( mysql_found_rows('Tournament.show_tlog.found_rows') );
+   $table->set_found_rows( mysql_found_rows('Tournament.show_tlog.found_rows') );
 
    while ( ($show_rows-- > 0) && list(,$arr_item) = $iterator->getListIterator() )
    {
