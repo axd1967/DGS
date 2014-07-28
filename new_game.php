@@ -357,6 +357,7 @@ function handle_add_game( $my_id, $viewmode )
    }
 
    $min_rated_games = limit( (int)@$_REQUEST['min_rated_games'], 0, 999, 0 ); // 3-chars max.
+   $min_hero_ratio = limit( (int)@$_REQUEST['min_hero_ratio'], 0, 100, 0 );
    $same_opponent = (int)@$_REQUEST['same_opp'];
 
 
@@ -370,6 +371,7 @@ function handle_add_game( $my_id, $viewmode )
       $komi = Ruleset::getRulesetDefaultKomi( $ruleset );
       $rated = 'N';
       //$min_rated_games = 0;
+      //$min_hero_ratio = 0;
       //$same_opponent = -1; // same-opp only ONCE for Team-/Zen-Go
    }
 
@@ -410,6 +412,7 @@ function handle_add_game( $my_id, $viewmode )
       $gs->RatingMin = $rating1;
       $gs->RatingMax = $rating2;
       $gs->MinRatedGames = $min_rated_games;
+      $gs->MinHeroRatio = $min_hero_ratio;
       $gs->SameOpponent = $same_opponent;
 
       if ( $cat_handicap_type == CAT_HTYPE_FAIR_KOMI )
@@ -499,6 +502,7 @@ function handle_add_game( $my_id, $viewmode )
          "RatingMin=$rating1, " .
          "RatingMax=$rating2, " .
          "MinRatedGames=$min_rated_games, " .
+         "MinHeroRatio=$min_hero_ratio, " .
          "SameOpponent=$same_opponent, " .
          "ShapeID=$shape_id, " .
          "ShapeSnapshot='" . mysql_addslashes($shape_snapshot) . "', " .

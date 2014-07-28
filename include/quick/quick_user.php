@@ -129,6 +129,10 @@ class QuickHandlerUser extends QuickHandler
       $this->addResultKey( 'games_won', (int)$this->user->urow['Won'] );
       $this->addResultKey( 'games_lost', (int)$this->user->urow['Lost'] );
       $this->addResultKey( 'games_mpg', (int)$this->user->urow['GamesMPG'] );
+      $hero_ratio = User::calculate_hero_ratio( $this->user->urow['GamesWeaker'], $this->user->GamesFinished,
+         $this->user->Rating, $this->user->RatingStatus );
+      $this->addResultKey( 'hero_ratio', $hero_ratio );
+      $this->addResultKey( 'hero_badge', User::determine_hero_badge($hero_ratio) );
    }//process
 
 

@@ -46,6 +46,7 @@ Important Note:
 | RatingMin     | smallint(6)                              | NO   |     | -9999               |                |
 | RatingMax     | smallint(6)                              | NO   |     | -9999               |                |
 | MinRatedGames | smallint(6)                              | NO   |     | 0                   |                |
+| MinHeroRatio  | tinyint(3) unsigned                      | NO   |     | 0                   |                |
 | SameOpponent  | tinyint(4)                               | NO   |     | 0                   |                |
 | ShapeSnapshot | varchar(255)                             | NO   |     |                     |                |
 | Comment       | varchar(40)                              | NO   |     |                     |                |
@@ -164,6 +165,9 @@ Important Note:
    - only integer-precision required
 
 * MinRatedGames : number of minimum rated finished games of challenger
+
+* MinHeroRatio : hero percentage has to be greather than this value
+   - allowed integer-range: 0..100 [%]
 
 * SameOpponent : restrictions on challenger for same game-offer
    - join-status is kept in table 'WaitingroomJoined'

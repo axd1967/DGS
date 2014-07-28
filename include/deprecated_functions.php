@@ -186,6 +186,26 @@ class DeprecatedGameSetup
       return $htype;
    }//get_handicaptype_for_invite
 
+
+
+   /*!
+    * \brief Enriches 1.0.17 game-setup format (simple + invitation) with new default (empty) hero-ratio.
+    * \return null = no change required; otherwise enriched game-setup-string
+    */
+   public static function enrich_game_setup_hero_ratio( $game_setup )
+   {
+      $rv = "[^:]*"; // regex for value between colons
+      //GS-fmt since DGS 1.0.18 (with hero-ratio): $rx_gs = "/T$rv:U$rv:H$rv:$rv:$rv:$rv:K$rv:$rv:J$rv:FK$rv:R$rv:$rv:$rv:$rv:H%$rv:$rv:C/"
+      //GS-fmt prior to DGS 1.0.18 (without hero-ratio H%...):
+      $rx_gs_1_0_17 = "/(T$rv:U$rv:H$rv:$rv:$rv:$rv:K$rv:$rv:J$rv:FK$rv:R$rv:$rv:$rv:$rv)(:$rv:C)/";
+
+      // add default (empty) hero-ratio
+      $replace_count = 0;
+      $enriched_game_setup = preg_replace( $rx_gs_1_0_17, '\1:H%\2', $game_setup, 2, $replace_count );
+
+      return ( !is_null($enriched_game_setup) && strcmp($game_setup, $enriched_game_setup) != 0 ) ? $enriched_game_setup : null;
+   }//enrich_game_setup_hero_ratio
+
 } //end 'DeprecatedGameSetup'
 
 ?>

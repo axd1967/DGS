@@ -207,10 +207,10 @@ Zu  | ThumbnailSize    | tinyint(3) unsigned                         | NO   |   
    - no change if invite-reservation is accepted by user
 
 * GamesWeaker : number of (non-MP) games played with weaker players
-   - badges of honor awarded for ratio in certain ranges:
-      - golden hero: ratio >= 61.8% (= 1/golden_ratio)
-      - silver hero: ratio >= 50%
-      - bronze hero: ratio >= 32.8% (= 100% - 1/golden_ratio)
+   - badges of honor awarded for hero-ratio in certain ranges:
+      - golden badge: ratio >= 61.8% (= 1/golden_ratio)
+      - silver badge: ratio >= 50%
+      - bronze badge: ratio >= 32.8% (= 100% - 1/golden_ratio)
 
 * RejectTimeoutWin :
    - -1 = no rejection of win-by-timeout (default)

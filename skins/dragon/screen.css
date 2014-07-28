@@ -396,6 +396,10 @@ img.MinWidth {
    height: 0px;
 }
 
+img.Hero {
+   padding-left: 0.4em;
+}
+
 span.Note {
    font-style: italic;
 }

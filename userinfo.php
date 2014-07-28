@@ -27,6 +27,7 @@ require_once 'include/table_infos.php';
 require_once 'include/rating.php';
 require_once 'include/countries.php';
 require_once 'include/contacts.php';
+require_once 'include/classlib_user.php';
 require_once 'include/classlib_userpicture.php';
 
 $GLOBALS['ThePage'] = new Page('UserInfo');
@@ -140,9 +141,7 @@ $GLOBALS['ThePage'] = new Page('UserInfo');
       $lastquickaccess = ( @$row['X_LastQuickAccess'] > 0 ) ? date(DATE_FMT2, $row['X_LastQuickAccess']) : NO_VALUE;
       $lastmove = ( @$row['X_LastMove'] > 0 ) ? date(DATE_FMT2, $row['X_LastMove']) : '';
       $rated_win_percent = ( is_numeric($row['RatedWinPercent']) ) ? $row['RatedWinPercent'].'%' : NO_VALUE;
-      $hero_ratio = ( $row['RatingStatus'] == RATING_RATED && $row['Rating2'] >= MIN_RATING && $row['Finished'] > MIN_FIN_GAMES_HERO_AWARD )
-         ? $row['GamesWeaker'] / $row['Finished']
-         : 0;
+      $hero_ratio = User::calculate_hero_ratio( $row['GamesWeaker'], $row['Finished'], $row['Rating2'], $row['RatingStatus'] );
       $hero_img = echo_image_hero_badge($hero_ratio);
 
       // draw user-info fields in two separate columns
@@ -221,7 +220,8 @@ $GLOBALS['ThePage'] = new Page('UserInfo');
          ( $hero_ratio > 0
             ? ( $hero_img ? $hero_img.' ' : '' ) .
                ( ( $my_info || $is_admin || $is_game_admin || $hero_ratio >= HERO_BRONZE )
-                  ? sprintf('%1.1f%%', 100*$hero_ratio)
+                  ? sprintf('<span title="%s">%1.1f%%</span>',
+                        basic_safe(T_('Percentage of games with weaker players')), 100*$hero_ratio)
                   : NO_VALUE )
             : NO_VALUE ) );
 

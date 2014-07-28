@@ -378,7 +378,7 @@ Description:
         though for invitations there are needed to calculate diffs for invitation-order.
 
    - (A) Format for started games & game-invitations (1st part):
-      - "T<htype>:U<uid>:H<handicap>:<adjH>:<minH>:<maxH>:K<komi>:<adjK>:J<jigomode>:FK<oppkomi>:R<mustBeRated>:<ratingMin>:<ratingMax>:<minRG>:<sameOpp>:C<msg>"
+      - "T<htype>:U<uid>:H<handicap>:<adjH>:<minH>:<maxH>:K<komi>:<adjK>:J<jigomode>:FK<oppkomi>:R<mustBeRated>:<ratingMin>:<ratingMax>:<minRG>:H%<heroRng>:<sameOpp>:C<msg>"
          - <htype> : handicap-type
          - <uid> : user-id (=Players.ID), game started/initiated by given user
          - <handicap> : number of handicap-stones
@@ -392,13 +392,14 @@ Description:
          - <mustBeRated> : 0=false, 1=true
          - <ratingMin|Max> : min/max-rating for waiting-room
          - <minRG> : min. rated finished games, see WaitingRoom.MinRatedGames in 'specs/db/table-Waitingroom.txt'
+         - <heroRng> : min. hero ratio in format: "min-", with 'min' in integer-range 0..100; or "" (empty for default-range 0-100%)
          - <sameOpp> : see Waitingroom.SameOpponent in 'specs/db/table-Waitingroom.txt'
          - <msg> : waiting-room-comment or invitation-message (part)
 
       - Fields <mustBeRated>, <ratingMin|Max>, <minRG>, <sameOpp> have no meaning for invitations,
         default-values are stored
 
-      - Example: "T1:U123:H0:-2:0:9:K6.5:0:J2:FK:R1:-800:2000:5:-101:Cslow game"
+      - Example: "T1:U123:H0:-2:0:9:K6.5:0:J2:FK:R1:-800:2000:5:H%60-:-101:Cslow game"
 
    - (B) Format for game-invitations (2nd part):
       - OBSOLETE since 1.0.16 for game-invitations, replaced with GameInvitation-table
@@ -421,8 +422,8 @@ Description:
             - <wkclock> : 0=clock-stopped-on-weekend, 1=clock-running-on-weekend
 
          - Example:
-            - old-invitation: "T1:U12:H0:0:0:-1:K6:0:J2:FK:R0:0:0:0:0:C:I19:1:r1:0:tF:60:15:0:1 T1:U12:H0:0:0:21:K6:0:J2:FK:R0:0:0:0:0:C:I19:1:r0:0:tF:45:15:0:0"
-            - invite-template GameSetup-part: "T1:U12:H0:0:0:-1:K6:0:J2:FK:R1:-900:2900:0:0:C:I19:1:r1:0:tF:60:15:0:1"
+            - old-invitation: "T1:U12:H0:0:0:-1:K6:0:J2:FK:R0:0:0:0:H%:0:C:I19:1:r1:0:tF:60:15:0:1 T1:U12:H0:0:0:21:K6:0:J2:FK:R0:0:0:0:H%:0:C:I19:1:r0:0:tF:45:15:0:0"
+            - invite-template GameSetup-part: "T1:U12:H0:0:0:-1:K6:0:J2:FK:R1:-900:2900:0:H%:0:C:I19:1:r1:0:tF:60:15:0:1"
 
 
 

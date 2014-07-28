@@ -44,6 +44,14 @@ ALTER TABLE Players
    ADD GamesWeaker mediumint unsigned NOT NULL default '0' AFTER GamesMPG ;
 
 -- execute fix-script (with do_it=1) to set counter of games with weaker players:
---    'scripts/updates/fix_players_weaker_games-1_0_18.php'
+--    'scripts/updates/fix_players_weaker_games-1_0_18.php?action=1'
+
+
+-- added waiting-room restriction on hero-ratio
+ALTER TABLE Waitingroom
+   ADD MinHeroRatio tinyint unsigned NOT NULl default 0 AFTER MinRatedGames ;
+
+-- execute fix-script (with do_it=1) to enrich hero-ratio in game-setup for profiles & games:
+--    'scripts/updates/fix_players_weaker_games-1_0_18.php?action=2'
 
 

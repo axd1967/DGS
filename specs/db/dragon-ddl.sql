@@ -1571,6 +1571,7 @@ CREATE TABLE IF NOT EXISTS `Waitingroom` (
   `RatingMin` smallint(6) NOT NULL default '-9999',
   `RatingMax` smallint(6) NOT NULL default '-9999',
   `MinRatedGames` smallint(6) NOT NULL default '0',
+  `MinHeroRatio` tinyint(3) unsigned NOT NULL default '0',
   `SameOpponent` tinyint(4) NOT NULL default '0',
   `ShapeSnapshot` varchar(255) NOT NULL default '',
   `Comment` varchar(40) NOT NULL default '',

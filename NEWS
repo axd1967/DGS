@@ -14,10 +14,17 @@ Copyright (C) 2001-2014  Erik Ouchterlony, Jens-Uwe Gaspar
 
       * Added filter on (rated) win-percentage column 'Win%' (renamed from 'Percentage/Perc.') or 'Rated Win %' on user-info-page
 
+   * <home waiting_room.php>Waiting room</home>:
+      * Added restriction for min. "hero" percentage (ratio of games played with weaker players)
+      * Show hero badges in waiting-room info and list page
+
    Minor changes:
 
    * <home tournaments/list_tournaments.php>Tournaments</home>:
       * Round-Robin tournaments: Notify tournament-directors with private bulletin after last game has finished
+
+   * Quick-Suite (alternative interface "quick_do.php"):
+      * Extended user-handler and waitingroom-handler with hero-award-info
 
    * Game page:
       * Changed default of territory-markers for viewing finished game to showing them like in score-mode

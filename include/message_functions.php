@@ -34,6 +34,7 @@ require_once 'include/make_game.php';
 require_once 'include/dgs_cache.php';
 require_once 'include/classlib_goban.php';
 require_once 'include/classlib_userconfig.php';
+require_once 'include/classlib_user.php';
 
 
 // game-settings form-/table-style defs
@@ -883,6 +884,7 @@ function game_info_table( $tablestyle, $game_row, $player_row, $iamrated, $game_
       case GSET_WAITINGROOM:
          //$calculated passed in from $game_row
          $goodmingames = ( $MinRatedGames > 0 ) ? ((int)@$player_row['RatedGames'] >= $MinRatedGames) : true;
+         //$goodhero passed in from $game_row
          //$goodrated passed in from $game_row
          //$haverating passed in from $game_row
          break;
@@ -895,6 +897,7 @@ function game_info_table( $tablestyle, $game_row, $player_row, $iamrated, $game_
          //$calculated passed in from $game_row
          $goodrating = 1;
          $goodmingames = true;
+         $goodhero = true;
          $goodrated = 1; // tournament-participants always have a rating
          $haverating = ( $iamrated || !$calculated );
          break;
@@ -927,6 +930,7 @@ function game_info_table( $tablestyle, $game_row, $player_row, $iamrated, $game_
          $calculated = is_htype_calculated( $Handicaptype );
          $goodrating = 1;
          $goodmingames = true;
+         $goodhero = true;
          $goodrated = ( $iamrated || $Rated == 'N' );
          $haverating = ( $iamrated || !$calculated );
          break;
@@ -945,7 +949,8 @@ function game_info_table( $tablestyle, $game_row, $player_row, $iamrated, $game_
             $nrGames );
       $itable->add_sinfo(
             T_('Player'),
-            user_reference( REF_LINK, 1, '', $other_id, $other_name, $other_handle) );
+            user_reference( REF_LINK, 1, '', $other_id, $other_name, $other_handle) .
+            echo_image_hero_badge( @$WRP_HeroRatio ) );
 
       $itable->add_sinfo( T_('Rating'), echo_rating($other_rating,true,$other_id) );
    }
@@ -1125,6 +1130,17 @@ function game_info_table( $tablestyle, $game_row, $player_row, $iamrated, $game_
             ( count($r_out) ? warning_cell_attb( $restricted_text . implode(', ', $r_out)) : '' ) );
       }
 
+      // check + show if there are restrictions on hero-ratio
+      if ( $MinHeroRatio > 0 )
+      {
+         $my_hero_ratio = User::calculate_hero_ratio( $player_row['GamesWeaker'], $player_row['Finished'],
+            $player_row['Rating2'], $player_row['RatingStatus'] );
+         $itable->add_sinfo(
+            T_('Min. hero percentage'),
+            sprintf('%s%% %s(%s: %1.1f%%)', $MinHeroRatio, SMALL_SPACING, T_('Your ratio#hero'), 100*$my_hero_ratio ),
+            ( $goodhero ? '' : warning_cell_attb( $restricted_text . T_('User hero percentage is too small#wroom')) ) );
+      }
+
       // check + show if there are restrictions for same-opponent-check
       $same_opp_str = echo_accept_same_opponent($SameOpponent, $game_row);
       if ( $SameOpponent != 0 )
@@ -1198,6 +1214,7 @@ function build_game_restriction_notes()
                   sprintf(T_('Rated Games[%s]#short'),2) ),
          sprintf( T_('Max. number of opponents started games must not exceed limits, marked by "%s"#wroom'),
                   'MXG' ),
+         sprintf( T_('Min. hero percentage, e.g. "%s"#wroom'), 'H%[40-]' ),
          sprintf( T_('Acceptance mode for challenges from same opponent, e.g. "%s" (total) or "%s" or "%s"#wroom'),
                   'SOT[1]', 'SO[1x]', 'SO[&gt;7d]' ),
          sprintf( T_('Handicap-type (conventional and proper handicap-type need a rating for calculations), marked by "%s"#wroom'),
@@ -1211,12 +1228,12 @@ function build_game_restriction_notes()
 
 /*!
  * \brief Returns restrictions for waiting-room-offer on rating-range, rated-finished-games,
- *       acceptance-mode-same-opponent, contact-hidden option.
+ *       hero-ratio-range, acceptance-mode-same-opponent, contact-hidden option.
  * \param $OppGoodMaxGames ignore if null
  * \param $SameOpponent ignore if null
  * \param $Hidden ignore if null
- * \param $haverating ignore if null
  * \param $goodrated ignore if null
+ * \param $haverating ignore if null
  * \param $html false=no HTML-entities
  * \return NO_VALUE if no restrictions; otherwise string-list of with found restriction
  *
@@ -1227,8 +1244,9 @@ function build_game_restriction_notes()
  *
  * \see also build_game_restriction_notes() for used abbreviations and check-order of restrictions
  */
-function echo_game_restrictions($MustBeRated, $RatingMin, $RatingMax, $MinRatedGames, $OppGoodMaxGames=null,
-      $SameOpponent=null, $Hidden=null, $goodrated=null, $haverating=null, $short=true, $html=true )
+function echo_game_restrictions($MustBeRated, $RatingMin, $RatingMax, $MinRatedGames,
+      $MinHeroRatio=null, $OppGoodMaxGames=null, $SameOpponent=null, $Hidden=null,
+      $goodrated=null, $haverating=null, $short=true, $html=true )
 {
    $out = array();
 
@@ -1249,6 +1267,9 @@ function echo_game_restrictions($MustBeRated, $RatingMin, $RatingMax, $MinRatedG
       $rg_str = ($short) ? T_('Rated Games[%s]#short') : T_('Rated finished Games[&gt;=%s]');
       $out[] = sprintf( $rg_str, $MinRatedGames );
    }
+
+   if ( !is_null($MinHeroRatio) && $MinHeroRatio > 0 )
+      $out[] = "H%[{$MinHeroRatio}-]";
 
    if ( !is_null($OppGoodMaxGames) && !$OppGoodMaxGames )
       $out[] = 'MXG';

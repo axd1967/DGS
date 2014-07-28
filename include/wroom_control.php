@@ -22,12 +22,14 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 $TranslateGroups[] = "Game";
 
 require_once 'include/std_functions.php';
+require_once 'include/gui_functions.php';
 require_once 'include/message_functions.php';
 require_once 'include/game_functions.php';
 require_once 'include/rating.php';
 require_once 'include/make_game.php';
 require_once 'include/contacts.php';
 require_once 'include/db/waitingroom.php';
+require_once 'include/classlib_user.php';
 
 
  /*!
@@ -49,6 +51,8 @@ class WaitingroomControl
       $my_rating = $player_row['Rating2'];
       $my_rated_games = (int)$player_row['RatedGames'];
       $iamrated = user_has_rating();
+      $my_hero_ratio_perc = 100 * User::calculate_hero_ratio( $player_row['GamesWeaker'], $player_row['Finished'],
+         $player_row['Rating2'], $player_row['RatingStatus'] );
 
       $qsql = Waitingroom::build_query_sql( $wroom_id, /*with_player*/true );
 
@@ -63,6 +67,7 @@ class WaitingroomControl
       // else if ( user-has-rating ) $goodrating = ( $my_rating>=$RatingMin && $my_rating<=$RatingMax );
       // else                        $goodrating = false;
       // $goodmingames = ( $MinRatedGames > 0 ? ($my_rated_games >= $MinRatedGames) : true );
+      // $goodhero = ( $my_hero_ratio_perc >= $MinHeroRatio )
 
       $calculated = "(WR.Handicaptype='".HTYPE_CONV."' OR WR.Handicaptype='".HTYPE_PROPER."')";
       if ( $iamrated )
@@ -79,6 +84,8 @@ class WaitingroomControl
       }
       $sql_goodmingames = "IF(WR.MinRatedGames>0,($my_rated_games >= WR.MinRatedGames),1)";
 
+      $sql_goodhero = "($my_hero_ratio_perc >= WR.MinHeroRatio)";
+
       $sql_goodmaxgames = ( MaxGamesCheck::is_limited() ) // Opponent max-games
          ? "IF(WR.uid=$my_id OR (WRP.Running + WRP.GamesMPG < ".MAX_GAMESRUN."),1,0)" : 1;
 
@@ -88,6 +95,7 @@ class WaitingroomControl
          "$haverating AS haverating",
          "$goodrating AS goodrating",
          "$sql_goodmingames AS goodmingames",
+         "$sql_goodhero AS goodhero",
          "$sql_goodmaxgames AS goodmaxgames",
          "CASE WHEN (WR.uid=$my_id OR WR.SameOpponent=0 OR (WR.SameOpponent > ".SAMEOPP_TOTAL." AND ISNULL(WRJ.wroom_id))) THEN 1 " .
               "WHEN (WR.SameOpponent < ".SAMEOPP_TOTAL.") THEN ( " . // total-times-check
@@ -130,7 +138,7 @@ class WaitingroomControl
    /*! \brief Extend and return passed QuerySQL $qsql with HAVING-clause for suitable-filter. */
    public static function extend_query_waitingroom_suitable( $qsql )
    {
-      $qsql->add_part( SQLP_HAVING, 'goodrating', 'goodmingames', 'goodrated', 'haverating', 'goodsameopp' );
+      $qsql->add_part( SQLP_HAVING, 'goodrating', 'goodmingames', 'goodrated', 'haverating', 'goodhero', 'goodsameopp' );
       return $qsql;
    }
 
@@ -143,10 +151,11 @@ class WaitingroomControl
    public static function get_waitingroom_restrictions( $row, $suitable, $html=true )
    {
       $restrictions = echo_game_restrictions( $row['MustBeRated'], $row['RatingMin'], $row['RatingMax'],
-            $row['MinRatedGames'], $row['goodmaxgames'], $row['SameOpponent'],
-            ( !$suitable && $row['CH_hidden'] ), $row['goodrated'], $row['haverating'], /*short*/true, $html );
+            $row['MinRatedGames'], $row['MinHeroRatio'], $row['goodmaxgames'], $row['SameOpponent'],
+            ( !$suitable && $row['CH_hidden'] ), $row['goodrated'], $row['haverating'],
+            /*short*/true, $html );
       $joinable = ( $row['goodrated'] && $row['haverating'] && $row['goodrating'] && $row['goodmingames']
-         && $row['goodmaxgames'] && $row['goodsameopp'] && !$row['C_denied'] );
+         && $row['goodhero'] && $row['goodmaxgames'] && $row['goodsameopp'] && !$row['C_denied'] );
       return array( $restrictions, $joinable );
    }//get_waitingroom_restrictions
 
@@ -171,6 +180,10 @@ class WaitingroomControl
       $sql_goodmaxgames = ( MaxGamesCheck::is_limited() ) // Opponent max-games
          ? "IF(P.Running + P.GamesMPG < ".MAX_GAMESRUN.",1,0)" : 1;
 
+      $my_hero_ratio_perc = 100 * User::calculate_hero_ratio( $player_row['GamesWeaker'], $player_row['Finished'],
+         $player_row['Rating2'], $player_row['RatingStatus'] );
+      $sql_goodhero = "($my_hero_ratio_perc >= WR.MinHeroRatio)";
+
       $query= "SELECT W.*"
             . ',IF(ISNULL(C.uid),0,C.SystemFlags & '.CSYSFLAG_WAITINGROOM.') AS C_denied'
             . ',IF(ISNULL(WRJ.opp_id),0,1) AS X_wrj_exists'
@@ -181,6 +194,7 @@ class WaitingroomControl
                   . "(WRJ.ExpireDate <= FROM_UNIXTIME($NOW)) )) AS goodsameopp"
             . ",$sql_goodmingames AS goodmingames"
             . ",$sql_goodmaxgames AS goodmaxgames"
+            . ",$sql_goodhero AS goodhero"
             . ",(P.Running + P.GamesMPG) AS X_OppGamesCount"
             . " FROM Waitingroom AS W"
                . " LEFT JOIN Players AS P ON P.ID=W.uid"
@@ -216,6 +230,10 @@ class WaitingroomControl
       if ( !$game_row['goodmingames'] )
          error('waitingroom_not_enough_rated_fin_games',
             "WC:join_waitingroom_game.min_rated_fin_games($gid,$my_id,{$game_row['MinRatedGames']})");
+
+      if ( !$game_row['goodhero'] )
+         error('waitingroom_not_in_hero_range',
+            "WC:join_waitingroom_game.check.hero_ratio($wr_id,$my_hero_ratio_perc%,{$game_row['MinHeroRatio']}%)");
 
       if ( !$game_row['goodmaxgames'] )
          error('max_games_opp', "WC:join_waitingroom_game.opp_max_games($gid,$my_id,{$game_row['X_OppGamesCount']})");

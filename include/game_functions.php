@@ -31,7 +31,6 @@ require_once 'include/classlib_user.php';
 require_once 'include/utilities.php';
 require_once 'include/std_classes.php';
 require_once 'include/std_functions.php';
-require_once 'include/gui_functions.php';
 require_once 'include/time_functions.php';
 require_once 'include/message_functions.php';
 require_once 'include/game_texts.php';
@@ -2589,6 +2588,7 @@ class GameSetup
    public $RatingMin;
    public $RatingMax;
    public $MinRatedGames;
+   public $MinHeroRatio;
    public $SameOpponent;
    public $Message;
 
@@ -2692,6 +2692,7 @@ class GameSetup
       $this->RatingMin = MIN_RATING;
       $this->RatingMax = RATING_9DAN;
       $this->MinRatedGames = 0;
+      $this->MinHeroRatio = 0;
       $this->SameOpponent = 0;
       $this->Message = '';
 
@@ -2769,12 +2770,13 @@ class GameSetup
       $out[] = self::$MAP_GAME_SETUP[$this->JigoMode]; // J<x>
       $out[] = (is_null($this->OppKomi)) ? 'FK' : sprintf('FK%.1f', (float)$this->OppKomi);
 
-      // restriction-stuff: R1:-900:2900:999:-103
+      // restriction-stuff: R1:-900:2900:999:H%50-:-103
       array_push($out,
          'R' . ( $this->MustBeRated ? 1 : 0 ),
          (int)$this->RatingMin,
          (int)$this->RatingMax,
          (int)$this->MinRatedGames,
+         'H%' . ( $this->MinHeroRatio <= 0 ? '' : $this->MinHeroRatio . '-' ),
          (int)$this->SameOpponent );
 
       if ( $enc_flags & GSENC_FULL_GAME )
@@ -2867,7 +2869,7 @@ class GameSetup
          "H={$this->Handicap}/{$this->AdjHandicap}/{$this->MinHandicap}..{$this->MaxHandicap} " .
          "K={$this->Komi}/{$this->AdjKomi} J={$this->JigoMode} FK={$this->OppKomi} " .
          "MBR=" . yesno($this->MustBeRated) . " Rating={$this->RatingMin}..{$this->RatingMax} " .
-         "MRG={$this->MinRatedGames} SO={$this->SameOpponent} M=[{$this->Message}]";
+         "MRG={$this->MinRatedGames} HERO={$this->MinHeroRatio}- SO={$this->SameOpponent} M=[{$this->Message}]";
       if ( $invitation )
          $result .= "; S={$this->Size} Rules={$this->Ruleset} Rated=" . yesno($this->Rated) . " StdH=" . yesno($this->StdHandicap) .
             " Time={$this->Byotype}:{$this->Maintime}/{$this->Byotime}/{$this->Byoperiods}:" . yesno($this->WeekendClock) .
@@ -2951,12 +2953,12 @@ class GameSetup
          return ($null_on_empty) ? null : $gs;
 
       // Standard:
-      //   "T<htype>:U<uid>:H<handicap>:<adjH>:<minH>:<maxH>:K<komi>:<adjK>:J<jigomode>:R<mustBeRated>:<ratingMin>:<ratingMax>:<minRG>:<sameOpp>:C<msg>"
+      //   "T<htype>:U<uid>:H<handicap>:<adjH>:<minH>:<maxH>:K<komi>:<adjK>:J<jigomode>:R<mustBeRated>:<ratingMin>:<ratingMax>:<minRG>:H%<heroRange>:<sameOpp>:C<msg>"
       // Invitation (standard-part shows example):
       //   "T1:U2:H0:0:0:-1:K6.5:0.0:J2:R0:0:0:0:0:C:I<size>:<rated>:r<ruleset>:<stdH>:t<byoType>:<mainT>:<byoTime>:<byoPeriods>:<wkclock>"
       // NOTE: when adding new game-settings -> adjust regex also matching "old" syntaxes
       $rx_inv = ($invitation) ? ":I\\d+:[01]:r\\d+:[01]:t[JCF]:\\d+:\\d+:\\d+:[01]\$" : '';
-      $rx_gs = "/^T\\d+:U\\d+:H\\d+:-?\\d+:\\d+:-?\\d+:K$RX_KOMI2:$RX_KOMI:J[012]:FK$RX_KOMI2:R[01]:-?\\d+:-?\\d+:\\d+:-?\\d+:C$rx_inv/";
+      $rx_gs = "/^T\\d+:U\\d+:H\\d+:-?\\d+:\\d+:-?\\d+:K$RX_KOMI2:$RX_KOMI:J[012]:FK$RX_KOMI2:R[01]:-?\\d+:-?\\d+:\\d+:H%(\\d+-)?:-?\\d+:C$rx_inv/";
       if ( !preg_match($rx_gs, $game_setup) )
          error('invalid_args', "GameSetup:new_from_game_setup.check_gs($invitation,$game_setup)");
       $arr = explode(GS_SEP, $game_setup);
@@ -2981,6 +2983,8 @@ class GameSetup
       $gs->RatingMin = (int)array_shift($arr);
       $gs->RatingMax = (int)array_shift($arr);
       $gs->MinRatedGames = (int)array_shift($arr);
+      $arr_hero = explode('-', substr( array_shift($arr), 2 ) ); // H% | H%99-
+      $gs->MinHeroRatio = ( count($arr_hero) > 0 ) ? (int)$arr_hero[0] : 0;
       $gs->SameOpponent = (int)array_shift($arr);
 
       if ( $invitation )
@@ -3008,7 +3012,7 @@ class GameSetup
    /*!
     * \brief Creates GameSetup parsing fields from games-row (for waiting-room).
     * \param $grow array with keys: uid, Handicaptype, Handicap, Adj/Min/MaxHandicap, Komi, AdjKomi, JigoMode,
-    *        MustBeRated, RatingMin/Max, MinRatedGames, SameOpponent, Message|Comment
+    *        MustBeRated, RatingMin/Max, MinRatedGames, MinHeroRatio, SameOpponent, Message|Comment
     * \see GameSetup.read_waitingroom_fields()
     */
    public static function new_from_waitingroom_game_row( $grow )
@@ -3026,6 +3030,7 @@ class GameSetup
       $gs->RatingMin = (int)$grow['RatingMin'];
       $gs->RatingMax = (int)$grow['RatingMax'];
       $gs->MinRatedGames = (int)$grow['MinRatedGames'];
+      $gs->MinHeroRatio = (int)$grow['MinHeroRatio'];
       $gs->SameOpponent = (int)$grow['SameOpponent'];
       if ( isset($grow['Message']) )
          $gs->Message = $grow['Message'];
@@ -3380,6 +3385,24 @@ class GameSetupChecker
          $this->error_fields['min_rated_games'] = 1;
    }//check_min_rated_games
 
+   private function check_hero_ratio()
+   {
+      // min-hero-ratio only for: std/fair-komi new-game
+      if ( $this->view != GSETVIEW_STANDARD && $this->view != GSETVIEW_FAIRKOMI )
+         return;
+
+      $min_hero_ratio = @$_REQUEST['min_hero_ratio'];
+      if ( (string)$min_hero_ratio == '' )
+         $min_hero_ratio = 0;
+
+      $has_min_err = false;
+      if ( !is_numeric($min_hero_ratio) || (int)$min_hero_ratio != $min_hero_ratio || $min_hero_ratio < 0 || $min_hero_ratio > 100 )
+         $this->errors[] = $has_min_err = sprintf( T_('Invalid value for min. hero ratio [%s] (only integer in range 0..100).'), $min_hero_ratio );
+
+      if ( $has_min_err )
+         $this->error_fields['min_hero_ratio'] = 1;
+   }//check_hero_ratio
+
    private function check_game_players()
    {
       // game-players only for: MPG new-game
@@ -3407,6 +3430,7 @@ class GameSetupChecker
       $gsc->check_time();
       $gsc->check_adjust_komi();
       $gsc->check_min_rated_games();
+      $gsc->check_hero_ratio();
       $gsc->check_game_players();
 
       if ( $gsc->has_errors() )
@@ -3529,6 +3553,7 @@ class GameSetupBuilder
       if ( $this->game_setup->RatingMax < OUT_OF_RATING )
          $url['rat2'] = $this->game_setup->RatingMax;
       $url['min_rg'] = $this->game_setup->MinRatedGames;
+      $url['min_hero_ratio'] = $this->game_setup->MinHeroRatio;
       $url['same_opp'] = $this->game_setup->SameOpponent;
       $url['comment'] = $this->game_setup->Message;
    }//fill_new_game_from_game_setup
@@ -5452,6 +5477,7 @@ function append_form_add_waiting_room_game( &$mform, $viewmode, $read_args=false
          $rating_max = echo_rating( $url_rat_max, /*%*/false, /*gfx-uid*/0, /*engl*/true, /*short*/false );
       }
       $min_rated_games = (int) @$_REQUEST['min_rg'];
+      $min_hero_ratio = @$_REQUEST['min_hero_ratio'];
       $same_opponent = (int) @$_REQUEST['same_opp'];
       $comment = trim(@$_REQUEST['comment']);
    }
@@ -5459,6 +5485,7 @@ function append_form_add_waiting_room_game( &$mform, $viewmode, $read_args=false
    {
       $must_be_rated = false;
       $min_rated_games = $comment = '';
+      $min_hero_ratio = '';
       $same_opponent = 0;
    }
    if ( $viewmode == GSETVIEW_MPGAME )
@@ -5478,6 +5505,11 @@ function append_form_add_waiting_room_game( &$mform, $viewmode, $read_args=false
          'DESCRIPTION', T_('Min. rated finished games'),
          'TEXTINPUTX', 'min_rated_games', 5, 5, $min_rated_games, $gsc->get_class_error_field('min_rated_games'),
          'TEXT', MINI_SPACING . T_('(optional)'), ));
+
+   $mform->add_row( array(
+         'DESCRIPTION', T_('Min. hero percentage'),
+         'TEXTINPUTX', 'min_hero_ratio', 3, 3, $min_hero_ratio, $gsc->get_class_error_field('min_hero_ratio'),
+         'TEXT', '%' . MED_SPACING . T_('(optional)'), ));
 
    if ( $viewmode == GSETVIEW_STANDARD || $viewmode == GSETVIEW_FAIRKOMI )
    {

@@ -42,7 +42,7 @@ class User
    public $Type;
    public $Lastaccess;
    public $Country;
-   public $Rating;
+   public $Rating; // Players.Rating2
    public $RatingStatus;
    public $GamesRated;
    public $GamesFinished;
@@ -291,6 +291,28 @@ class User
       }
       return $out;
    }//load_quick_userinfo
+
+   /*! \brief Calculates hero-ratio of user. */
+   public static function calculate_hero_ratio( $games_weaker, $games_finished, $rating, $rating_status )
+   {
+      return ( $rating_status == RATING_RATED && $rating >= MIN_RATING && $games_finished > MIN_FIN_GAMES_HERO_AWARD )
+         ? $games_weaker / $games_finished
+         : 0;
+   }
+
+   /*! \brief Calculated hero-badge value-representation for hero-ratio: 0=none, 1=bronze, 2=silver, 3=gold. */
+   public static function determine_hero_badge( $hero_ratio )
+   {
+      $chk_hero_ratio = 100 * $hero_ratio;
+      if ( $chk_hero_ratio >= HERO_GOLDEN )
+         return 3;
+      elseif ( $chk_hero_ratio >= HERO_SILVER )
+         return 2;
+      elseif ( $chk_hero_ratio >= HERO_BRONZE )
+         return 1;
+      else
+         return 0;
+   }//determine_hero_badge
 
 } // end of 'User'
 

@@ -11,6 +11,53 @@ Release [2014-03-27] - DGS 1.0.17 - tag [release-1_0_17-20140327] on branch [DGS
 ChangeLog
 ------------------------------------------------------------------
 
+2014-07-28 jug
+
+   * include/game_functions.php (class GameSetup, ~.encode_game_setup, ~.to_string, ~.new_from_game_setup,
+         ~.new_from_waitingroom_game_row;
+       GameSetupChecker.check_hero_ratio, ~.check_fields;
+       GameSetupBuilder.fill_new_game_from_game_setup;
+       append_form_add_waiting_room_game),
+     include/wroom_control.php (WaitingroomControl.build_waiting_room_query,
+       ~.extend_query_waitingroom_suitable, ~.get_waitingroom_restrictions, ~.join_waitingroom_game),
+     include/message_functions.php (game_info_table, build_game_restriction_notes,
+       build_game_restriction_notes, echo_game_restrictions),
+     include/db/waitingroom.php (class Waitingroom, ~.__construct, ~.fillEntityData, ~.build_query_sql,
+       ~.new_from_row),
+     include/deprecated_functions.php (DeprecatedGameSetup.enrich_game_setup_hero_ratio),
+     include/classlib_user.php (User.calculate_hero_ratio, ~.determine_hero_badge),
+     include/quick/quick_wroom.php (QuickHandlerWaitingroom.fill_wroom_object),
+     include/quick/quick_user.php (QuickHandlerUser.process),
+     include/gui_functions.php (echo_image_hero_badge),
+     include/error_codes.php (ErrorCode.init),
+     include/globals.php,
+     scripts/updates/fix_hero_ratio-1_0_18.php (fix_hero_ratio, update_players_games_weaker,
+       fix_enrich_game_setup_hero_ratio),
+     scripts/updates/database_changes_1_0_18.mysql,
+     scripts/tests/DeprecatedGameSetupTest.php, scripts/tests/GameSetupTest.php,
+     scripts/index.php,
+     specs/db/dragon-ddl.sql, specs/db/table-Games.txt, specs/db/table-Players.txt,
+     specs/db/table-Waitingroom.txt, specs/quick_suite.txt,
+     skins/dragon/screen.css,
+     new_game.php (handle_add_game),
+     userinfo.php, waiting_room.php, NEWS:
+   - added waitingroom-restriction for min. hero percentage
+     - extended fix-script to enrich game-setup for games and profile-templates
+       with restriction on hero-ratio
+     - extended GameSetup-format with min. restriction on hero-percentage
+     - added hero-badge of user on list and info-table on waitingroom-page
+     - renamed fix-script 'fix_players_weaker_games-1_0_18.php' to 'fix_hero_ratio-1_0_18.php'
+     - refactored hero-ratio calculation into User-class
+     - quick-handler user-info & wroom-info/list: added fields 'hero_ratio/hero_badge'
+-----------
+-- added waiting-room restriction on hero-ratio
+ALTER TABLE Waitingroom
+   ADD MinHeroRatio tinyint unsigned NOT NULl default 0 AFTER MinRatedGames ;
+
+-- execute fix-script (with do_it=1) to enrich hero-ratio in game-setup for profiles & games:
+--    'scripts/updates/fix_players_weaker_games-1_0_18.php?action=2'
+-----------
+
 2014-07-27 jug
 
    * include/game_functions.php (GameHelper.update_players_end_game, ~.determine_finished_game_hero_uid;
@@ -39,7 +86,7 @@ ALTER TABLE Players
    ADD GamesWeaker mediumint unsigned NOT NULL default '0' AFTER GamesMPG ;
 
 -- execute fix-script (with do_it=1) to set counter of games with weaker players:
---    'scripts/updates/fix_players_weaker_games-1_0_18.php'
+--    'scripts/updates/fix_players_weaker_games-1_0_18.php?action=1'
 -----------
 
    * opponents.php, userinfo.php, users.php, NEWS:

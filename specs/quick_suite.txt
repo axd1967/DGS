@@ -1087,6 +1087,8 @@ Commands:
             "games_won" : 8,         # number of (finished rated) won games
             "games_lost" : 2,        # number of (finished rated) lost games
             "games_mpg" : 0,         # number of started multi-player-games
+            "hero_ratio" : 0.38,     # hero-percentage 0..1
+            "hero_badge" : 1,        # hero-badge: 0=none, 1=bronze, 2=silver, 3=gold
          }
 
       - Result Values:
@@ -1714,7 +1716,7 @@ Commands:
             - VAL = '2' : find own game-offers
 
       - WITH-option:
-         - 'user_id' : return additional user_id-data of game-offerer
+         - 'user_id' : return additional user_id-data of game-offerer, including 'hero_badge'
 
       - Errors:
          - all errors of: [E-LOGIN], [E-GEN]
@@ -1773,6 +1775,7 @@ Commands:
          - waitingroom_own_game : you can not join your own waiting-room game-offer
          - waitingroom_not_in_rating_range : your rating is not within the requested range of the game-offer
          - waitingroom_not_enough_rated_fin_games : you have not finished enough rated games
+         - waitingroom_not_in_hero_range : your hero-percentage is not within the requested range of the game-offer
          - waitingroom_not_same_opponent : waiting-room restriction on joining by same-opponent is violated
          - no_initial_rating : handicap-type of game-offer requires a rating
          - internal_error : inconsistency found in game-offer -> contact admin

@@ -225,7 +225,7 @@ require_once 'include/wroom_control.php';
          $wro = new WaitingroomOffer( $row );
          $wro_settings = $wro->calculate_offer_settings();
          $is_fairkomi = $wro->is_fairkomi();
-         extract($row); //including: $calculated, $goodrated, $haverating, $goodrating, $goodmingames, $goodmaxgames, $goodsameopp, $X_Time
+         extract($row); //including: $calculated, $goodrated, $haverating, $goodrating, $goodmingames, $goodhero, $goodmaxgames, $goodsameopp, $X_Time
 
          list( $restrictions, $joinable ) = WaitingroomControl::get_waitingroom_restrictions( $row, $suitable );
 
@@ -241,7 +241,10 @@ require_once 'include/wroom_control.php';
          if ( $wrtable->Is_Column_Displayed[ 1] )
             $row_arr[ 1] = user_reference( REF_LINK, 1, '', $WRP_ID, $WRP_Name, '');
          if ( $wrtable->Is_Column_Displayed[ 2] )
-            $row_arr[ 2] = user_reference( REF_LINK, 1, '', $WRP_ID, $WRP_Handle, '');
+         {
+            $row_arr[ 2] = user_reference( REF_LINK, 1, '', $WRP_ID, $WRP_Handle, '') .
+               echo_image_hero_badge( $WRP_HeroRatio );
+         }
          if ( $wrtable->Is_Column_Displayed[ 3] )
             $row_arr[ 3] = echo_rating($WRP_Rating2, true, $WRP_ID);
          if ( $wrtable->Is_Column_Displayed[ 4] )

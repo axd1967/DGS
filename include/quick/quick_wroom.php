@@ -178,6 +178,8 @@ class QuickHandlerWaitingroom extends QuickHandler
 
       $result['id'] = $wr->ID;
       $result['user'] = $this->build_obj_user($wr->uid, @$user_rows[$wr->uid], '', 'country,rating');
+      if ( $this->is_with_option(QWITH_USER_ID) )
+         $result['user']['hero_badge'] = User::determine_hero_badge( @$user_rows[$wr->uid]['WRP_HeroRatio'] );
       $result['created_at'] = QuickHandler::formatDate($wr->Created);
       $result['count_offers'] = $wr->CountOffers;
       $result['comment'] = $wr->Comment;

@@ -44,7 +44,7 @@ $ENTITY_WROOM = new Entity( 'Waitingroom',
       FTYPE_AUTO, 'ID',
       FTYPE_INT,  'ID', 'uid', 'gid', 'ShapeID', 'nrGames', 'Size', 'Handicap',
                   'AdjHandicap', 'MinHandicap', 'MaxHandicap', 'Maintime', 'Byotime', 'Byoperiods',
-                  'RatingMin', 'RatingMax', 'MinRatedGames', 'SameOpponent',
+                  'RatingMin', 'RatingMax', 'MinRatedGames', 'MinHeroRatio', 'SameOpponent',
       FTYPE_FLOAT, 'Komi', 'AdjKomi',
       FTYPE_ENUM, 'GameType', 'Handicaptype', 'JigoMode', 'Rated', 'StdHandicap', 'WeekendClock', 'MustBeRated',
       FTYPE_TEXT, 'GamePlayers', 'Ruleset', 'Handicaptype', 'Byotype', 'ShapeSnapshot', 'Comment',
@@ -81,6 +81,7 @@ class Waitingroom
    public $RatingMin;
    public $RatingMax;
    public $MinRatedGames;
+   public $MinHeroRatio;
    public $SameOpponent;
    public $ShapeID;
    public $ShapeSnapshot;
@@ -97,7 +98,8 @@ class Waitingroom
          $handicap=0, $adj_komi=0, $jigo_mode=JIGOMODE_KEEP_KOMI, $adj_handicap=0, $min_handicap=0, $max_handicap=0,
          $maintime=0, $byotype=BYOTYPE_FISCHER, $byotime=0, $byoperiods=0, $weekendclock=true,
          $rated=true, $std_handicap=true, $must_be_rated=false, $rating_min=0, $rating_max=0,
-         $min_rated_games=0, $same_opponent=0, $shape_id=0, $shape_snaphost='', $comment='' )
+         $min_rated_games=0, $min_hero_ratio=0, $same_opponent=0, $shape_id=0,
+         $shape_snaphost='', $comment='' )
    {
       $this->ID = (int)$id;
       $this->uid = (int)$uid;
@@ -127,6 +129,7 @@ class Waitingroom
       $this->RatingMin = (int)$rating_min;
       $this->RatingMax = (int)$rating_max;
       $this->MinRatedGames = (int)$min_rated_games;
+      $this->MinHeroRatio = (int)$min_hero_ratio;
       $this->SameOpponent = (int)$same_opponent;
       $this->ShapeID = (int)$shape_id;
       $this->ShapeSnapshot = $shape_snaphost;
@@ -206,6 +209,7 @@ class Waitingroom
       $data->set_value( 'RatingMin', $this->RatingMin );
       $data->set_value( 'RatingMax', $this->RatingMax );
       $data->set_value( 'MinRatedGames', $this->MinRatedGames );
+      $data->set_value( 'MinHeroRatio', $this->MinHeroRatio );
       $data->set_value( 'SameOpponent', $this->SameOpponent );
       $data->set_value( 'ShapeID', $this->ShapeID );
       $data->set_value( 'ShapeSnapshot', $this->ShapeSnapshot );
@@ -229,7 +233,8 @@ class Waitingroom
             'WRP.Type AS WRP_Type',
             'WRP.Rating2 AS WRP_Rating2',
             'WRP.RatingStatus AS WRP_RatingStatus',
-            'WRP.Country AS WRP_Country' );
+            'WRP.Country AS WRP_Country',
+            'IF(WRP.Finished>'.MIN_FIN_GAMES_HERO_AWARD.',WRP.GamesWeaker/WRP.Finished,0) AS WRP_HeroRatio' );
          $qsql->add_part( SQLP_FROM,
             'INNER JOIN Players AS WRP ON WRP.ID=WR.uid' );
       }
@@ -272,6 +277,7 @@ class Waitingroom
             @$row['RatingMin'],
             @$row['RatingMax'],
             @$row['MinRatedGames'],
+            @$row['MinHeroRatio'],
             @$row['SameOpponent'],
             @$row['ShapeID'],
             @$row['ShapeSnapshot'],

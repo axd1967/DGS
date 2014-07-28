@@ -102,6 +102,7 @@ class GameSetupTest extends PHPUnit_Framework_TestCase {
       $this->assertEquals( -800, $this->gs->RatingMin );
       $this->assertEquals( 2600, $this->gs->RatingMax );
       $this->assertEquals( 998, $this->gs->MinRatedGames );
+      $this->assertEquals( 0, $this->gs->MinHeroRatio );
       $this->assertEquals( -102, $this->gs->SameOpponent );
       $this->assertEquals( 'slow game', $this->gs->Message );
    }
@@ -126,7 +127,7 @@ class GameSetupTest extends PHPUnit_Framework_TestCase {
 
    public function test_encode() {
       $gs = $this->gs;
-      $this->assertEquals( 'T7:U123:H2:-1:3:9:K-199.5:70.0:J1:FK:R1:-800:2600:998:-102:Cslow game', $gs->encode_game_setup() );
+      $this->assertEquals( 'T7:U123:H2:-1:3:9:K-199.5:70.0:J1:FK:R1:-800:2600:998:H%:-102:Cslow game', $gs->encode_game_setup() );
 
       $gs->Handicaptype = HTYPE_PROPER;
       $gs->AdjHandicap = +7;
@@ -134,14 +135,15 @@ class GameSetupTest extends PHPUnit_Framework_TestCase {
       $gs->AdjKomi = -199.5;
       $gs->JigoMode = JIGOMODE_KEEP_KOMI;
       $gs->SameOpponent = 0;
+      $gs->MinHeroRatio = 40;
       $gs->Message = 'bla:blub';
-      $this->assertEquals( 'T2:U123:H2:7:3:9:K6.0:-199.5:J0:FK:R1:-800:2600:998:0:Cbla:blub', $gs->encode_game_setup() );
+      $this->assertEquals( 'T2:U123:H2:7:3:9:K6.0:-199.5:J0:FK:R1:-800:2600:998:H%40-:0:Cbla:blub', $gs->encode_game_setup() );
    }
 
    public function test_encode_invite() {
       $gsi = $this->gsi;
-      $this->assertEquals( 'T7:U123:H2:-1:3:9:K-199.5:70.0:J1:FK:R1:-800:2600:998:-102:C:I17:1:r2:0:tJ:61:17:4:1', $gsi->encode_game_setup(GSENC_FULL_GAME) );
-      $this->assertEquals( 'T7:U123:H2:-1:3:9:K-199.5:70.0:J1:FK:R1:-800:2600:998:-102:C', $gsi->encode_game_setup() );
+      $this->assertEquals( 'T7:U123:H2:-1:3:9:K-199.5:70.0:J1:FK:R1:-800:2600:998:H%:-102:C:I17:1:r2:0:tJ:61:17:4:1', $gsi->encode_game_setup(GSENC_FULL_GAME) );
+      $this->assertEquals( 'T7:U123:H2:-1:3:9:K-199.5:70.0:J1:FK:R1:-800:2600:998:H%:-102:C', $gsi->encode_game_setup() );
 
       $gsi->Handicaptype = HTYPE_PROPER;
       $gsi->Komi = 6;
@@ -158,46 +160,46 @@ class GameSetupTest extends PHPUnit_Framework_TestCase {
       $gsi->Byotime = 10;
       $gsi->Byoperiods = 3;
       $gsi->WeekendClock = false;
-      $this->assertEquals( 'T2:U123:H2:-1:3:9:K6.0:10.0:J2:FK:R1:-800:2600:998:3:C:I18:0:r1:1:tC:6:10:3:0', $gsi->encode_game_setup(GSENC_FULL_GAME) );
-      $this->assertEquals( 'T2:U123:H2:-1:3:9:K6.0:10.0:J2:FK:R1:-800:2600:998:3:Cwwi', $gsi->encode_game_setup() );
+      $this->assertEquals( 'T2:U123:H2:-1:3:9:K6.0:10.0:J2:FK:R1:-800:2600:998:H%:3:C:I18:0:r1:1:tC:6:10:3:0', $gsi->encode_game_setup(GSENC_FULL_GAME) );
+      $this->assertEquals( 'T2:U123:H2:-1:3:9:K6.0:10.0:J2:FK:R1:-800:2600:998:H%:3:Cwwi', $gsi->encode_game_setup() );
    }
 
    public function test_new_from_game_setup() {
-      $gs = GameSetup::new_from_game_setup( 'T7:U123:H2:-1:3:9:K-199.5:70.0:J1:FK:R1:-800:2600:998:-102:Cslow game' );
+      $gs = GameSetup::new_from_game_setup( 'T7:U123:H2:-1:3:9:K-199.5:70.0:J1:FK:R1:-800:2600:998:H%:-102:Cslow game' );
       $this->assertEquals( $this->gs->to_string(), $gs->to_string() );
       $this->assertEquals( $this->gs->to_string(true), $gs->to_string(true) );
 
-      $gs = GameSetup::new_from_game_setup( 'T2:U123:H2:7:3:9:K6.0:-190.5:J0:FK-7.0:R0:-333:1000:5:0:Cbla:blub' );
-      $this->assertEquals( 'GameSetup: U=123 T=proper H=2/7/3..9 K=6/-190.5 J=KEEP_KOMI FK=-7 MBR=No Rating=-333..1000 MRG=5 SO=0 M=[bla:blub]; #G=1 view=', $gs->to_string() );
-      $this->assertEquals( 'GameSetup: U=123 T=proper H=2/7/3..9 K=6/-190.5 J=KEEP_KOMI FK=-7 MBR=No Rating=-333..1000 MRG=5 SO=0 M=[bla:blub]; S=19 Rules=JAPANESE Rated=Yes StdH=Yes Time=FIS:210/15/0:Yes tid=0 shape=0/[] gtype=GO/; #G=1 view=', $gs->to_string(true) );
+      $gs = GameSetup::new_from_game_setup( 'T2:U123:H2:7:3:9:K6.0:-190.5:J0:FK-7.0:R0:-333:1000:5:H%33-:0:Cbla:blub' );
+      $this->assertEquals( 'GameSetup: U=123 T=proper H=2/7/3..9 K=6/-190.5 J=KEEP_KOMI FK=-7 MBR=No Rating=-333..1000 MRG=5 HERO=33- SO=0 M=[bla:blub]; #G=1 view=', $gs->to_string() );
+      $this->assertEquals( 'GameSetup: U=123 T=proper H=2/7/3..9 K=6/-190.5 J=KEEP_KOMI FK=-7 MBR=No Rating=-333..1000 MRG=5 HERO=33- SO=0 M=[bla:blub]; S=19 Rules=JAPANESE Rated=Yes StdH=Yes Time=FIS:210/15/0:Yes tid=0 shape=0/[] gtype=GO/; #G=1 view=', $gs->to_string(true) );
    }
 
    public function test_new_from_game_setup_invitation() {
-      $gsi = GameSetup::new_from_game_setup( 'T7:U123:H2:-1:3:9:K-199.5:70.0:J1:FK:R1:-800:2600:998:-102:C:I17:1:r2:0:tJ:61:17:4:1', true );
+      $gsi = GameSetup::new_from_game_setup( 'T7:U123:H2:-1:3:9:K-199.5:70.0:J1:FK:R1:-800:2600:998:H%:-102:C:I17:1:r2:0:tJ:61:17:4:1', true );
       $this->gsi->tid = $this->gsi->ShapeID = 0;
       $this->gsi->ShapeSnapshot = $this->gsi->GamePlayers = '';
       $this->assertEquals( $this->gsi->to_string(true), $gsi->to_string(true) );
 
-      $gsi = GameSetup::new_from_game_setup( 'T2:U123:H2:7:3:9:K6.0:-190.5:J0:FK-7.0:R0:-333:1000:5:0:C:I9:0:r2:1:tC:50:10:7:0', true );
-      $this->assertEquals( 'GameSetup: U=123 T=proper H=2/7/3..9 K=6/-190.5 J=KEEP_KOMI FK=-7 MBR=No Rating=-333..1000 MRG=5 SO=0 M=[]; S=9 Rules=CHINESE Rated=No StdH=Yes Time=CAN:50/10/7:No tid=0 shape=0/[] gtype=GO/; #G=1 view=', $gsi->to_string(true) );
+      $gsi = GameSetup::new_from_game_setup( 'T2:U123:H2:7:3:9:K6.0:-190.5:J0:FK-7.0:R0:-333:1000:5:H%:0:C:I9:0:r2:1:tC:50:10:7:0', true );
+      $this->assertEquals( 'GameSetup: U=123 T=proper H=2/7/3..9 K=6/-190.5 J=KEEP_KOMI FK=-7 MBR=No Rating=-333..1000 MRG=5 HERO=0- SO=0 M=[]; S=9 Rules=CHINESE Rated=No StdH=Yes Time=CAN:50/10/7:No tid=0 shape=0/[] gtype=GO/; #G=1 view=', $gsi->to_string(true) );
 
       // catch error: no message for 'Ccomment'
       UnitTestHelper::clearErrors(ERROR_MODE_TEST);
-      $gsi = GameSetup::new_from_game_setup( 'T2:U123:H2:7:3:9:K6.0:-190.5:J0:FK-7.0:R0:-333:1000:5:0:Cbad-text:I9:0:r2:1:tC:50:10:7:0', true );
+      $gsi = GameSetup::new_from_game_setup( 'T2:U123:H2:7:3:9:K6.0:-190.5:J0:FK-7.0:R0:-333:1000:5:H%:0:Cbad-text:I9:0:r2:1:tC:50:10:7:0', true );
       $this->assertEquals( 1, UnitTestHelper::countErrors() );
 
       // catch error: unknown byo-type
       UnitTestHelper::clearErrors(ERROR_MODE_TEST);
-      $gsi = GameSetup::new_from_game_setup( 'T2:U123:H2:7:3:9:K6.0:-190.5:J0:FK-7.0:R0:-333:1000:5:0:C:I9:0:r2:1:tA:50:10:7:0', true );
+      $gsi = GameSetup::new_from_game_setup( 'T2:U123:H2:7:3:9:K6.0:-190.5:J0:FK-7.0:R0:-333:1000:5:H%:0:C:I9:0:r2:1:tA:50:10:7:0', true );
       $this->assertEquals( 1, UnitTestHelper::countErrors() );
    }
 
    public function test_build_invitation_diffs() {
-      $gs1 = GameSetup::new_from_game_setup( 'T2:U123:H2:0:0:0:K6:0:J0:FK:R0:0:0:0:0:C:I9:0:r2:1:tC:50:10:7:0', true );
+      $gs1 = GameSetup::new_from_game_setup( 'T2:U123:H2:0:0:0:K6:0:J0:FK:R0:0:0:0:H%:0:C:I9:0:r2:1:tC:50:10:7:0', true );
       $gs2 = clone $gs1;
       $this->assertEquals( 0, count(GameSetup::build_invitation_diffs($gs1,$gs2)) );
 
-      $gs2 = GameSetup::new_from_game_setup( 'T4:U123:H0:0:0:0:K-5:0:J1:FK:R0:0:0:0:0:C:I11:1:r1:0:tC:90:5:4:1', true );
+      $gs2 = GameSetup::new_from_game_setup( 'T4:U123:H0:0:0:0:K-5:0:J1:FK:R0:0:0:0:H%:0:C:I11:1:r1:0:tC:90:5:4:1', true );
       $r = GameSetup::build_invitation_diffs($gs1,$gs2);
       $this->assertEquals( 8, count($r) );
       $i = 0;
@@ -218,7 +220,7 @@ class GameSetupTest extends PHPUnit_Framework_TestCase {
       $this->assertEquals(
          array( 'Rated game', 'No', 'Yes' ), $r[$i++] );
 
-      $gs3 = GameSetup::new_from_game_setup( 'T7:U123:H0:0:0:0:K5:0:J2:FK:R0:0:0:0:0:C:I11:1:r1:0:tJ:90:5:4:1', true );
+      $gs3 = GameSetup::new_from_game_setup( 'T7:U123:H0:0:0:0:K5:0:J2:FK:R0:0:0:0:H%:0:C:I11:1:r1:0:tJ:90:5:4:1', true );
       $r = GameSetup::build_invitation_diffs($gs2,$gs3);
       $this->assertEquals( 3, count($r) );
       $i = 0;
@@ -246,6 +248,7 @@ class GameSetupTest extends PHPUnit_Framework_TestCase {
          'RatingMin' => -800,
          'RatingMax' => 2600,
          'MinRatedGames' => 998,
+         'MinHeroRatio' => 0,
          'SameOpponent' => -102,
          'Message' => 'slow game',
       );

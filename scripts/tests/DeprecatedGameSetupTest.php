@@ -67,7 +67,7 @@ class DeprecatedGameSetupTest extends PHPUnit_Framework_TestCase {
       $gs2->Size = 13;
       $str = DeprecatedGameSetup::build_invitation_game_setup( $gs1, $gs2 );
       $this->assertEquals( $gs1->encode_game_setup(GSENC_FULL_GAME) . GS_SEP_INVITATION . $gs2->encode_game_setup(GSENC_FULL_GAME), $str );
-      $this->assertEquals( 'T7:U11:H2:-1:3:9:K5.5:70.0:J1:FK:R1:-800:2600:998:-102:C:I17:1:r2:0:tJ:61:17:4:1 T7:U22:H2:-1:3:9:K-199.5:70.0:J1:FK:R1:-800:2600:998:-102:C:I13:1:r2:0:tJ:61:17:4:1', $str );
+      $this->assertEquals( 'T7:U11:H2:-1:3:9:K5.5:70.0:J1:FK:R1:-800:2600:998:H%:-102:C:I17:1:r2:0:tJ:61:17:4:1 T7:U22:H2:-1:3:9:K-199.5:70.0:J1:FK:R1:-800:2600:998:H%:-102:C:I13:1:r2:0:tJ:61:17:4:1', $str );
 
       $arr_gs = DeprecatedGameSetup::parse_invitation_game_setup( 22, '' );
       $this->assertEquals( 2, count($arr_gs));

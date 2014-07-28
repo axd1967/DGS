@@ -483,6 +483,9 @@ class ErrorCode
          $arr['waitingroom_not_enough_rated_fin_games'] =
             T_("Sorry, you don't have enough rated finished games to join this game offer.");
 
+         $arr['waitingroom_not_in_hero_range'] =
+            T_("Sorry, your hero percentage is not in the specified ratio range.");
+
          $arr['waitingroom_not_same_opponent'] =
             T_("Sorry, on this game offer there are counter- or time-based restrictions for challenges from the same opponent.");
 

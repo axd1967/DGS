@@ -26,7 +26,7 @@ require_once 'include/config-local.php';
  */
 
 define('DGS_VERSION', '1.0.17');
-define('CSS_VERSION', '20140510160500'); // take UTC-timestamp of skins/dragon/screen.css
+define('CSS_VERSION', '20140728134200'); // take UTC-timestamp of skins/dragon/screen.css
 define('JS_VERSION',  '20131211220200'); // take UTC-timestamp of newest js/*.js script
 
 // global version of quick-suite: increased with each release
@@ -221,6 +221,13 @@ define('CSYSFLAG_WAITINGROOM',    0x0001); // hide my games in waiting-room from
 define('CSYSFLAG_REJECT_MESSAGE', 0x0002); // don't accept message from contact
 define('CSYSFLAG_REJECT_INVITE',  0x0004); // don't accept invitation from contact
 define('CSYSFLAG_WR_HIDE_GAMES',  0x0008); // hide games of user in waiting-room (e.g. paid games)
+
+// NOTE: Gold badge awarded for players with min. percentage of games played with weaker players
+define('HERO_GOLDEN', 62); // 62% = rounded 1/golden_ratio
+define('HERO_SILVER', 50);
+define('HERO_BRONZE', 38); // 38% = 100% - HERO_GOLDEN
+define('MIN_FIN_GAMES_HERO_AWARD', 20);
+define('MIN_RATDIFF_HERO', 100); // 1k rating-diff minimum for hero-awards
 
 // ---------- Quick-suite stuff -----------------------------------
 

@@ -90,7 +90,7 @@ require_once 'include/std_functions.php';
             'fix_default_max_handi-1_0_16.php'    => "Set default max-handicap",
             'fix_game_invitations-1_0_16.php'     => "Migrate old 1.0.15-style game-invitations",
          "Migration scripts for release 1.0.18, use <b>ONLY</b> if you know how they work !!<br>\n(see database_changes_1_0_18.mysql)" => 0,
-            'fix_players_weaker_games-1_0_18.php' => "Sets Players.WeakerGames for hero awards",
+            'fix_hero_ratio-1_0_18.php'      => "Sets Players.WeakerGames for hero awards and enrich game-setup",
       ),
    ); //arr_scripts
 
