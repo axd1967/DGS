@@ -13,8 +13,10 @@ ChangeLog
 
 2014-07-29 jug
 
-   * admin_faq.php (show_preview),
-     introduction.php (load_intro):
+   * translation_stats.php (show_translation_stats, count_translation_texts):
+   - added language-code and encoding on translation-statistics page
+
+   * admin_faq.php (show_preview), introduction.php (load_intro):
    - bugfix: allow usage of DGS-tags on Introduction-page and introduction-editor admin-page
 
 2014-07-28 jug

@@ -32,6 +32,8 @@ Copyright (C) 2001-2014  Erik Ouchterlony, Jens-Uwe Gaspar
    * Game page:
       * Changed default of territory-markers for viewing finished game to showing them like in score-mode
 
+   * Added language-code and encoding on translation-statistics page
+
    Bug fixes:
 
    * Fixes usage of DGS-tags on <home introduction.php>introduction page</home> and introduction editor-page

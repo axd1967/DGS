@@ -51,6 +51,8 @@ function show_translation_stats()
 
    // add_tablehead($nr, $descr, $attbs=null, $mode=TABLE_NO_HIDE|TABLE_NO_SORT, $sortx='')
    $table->add_tablehead( 1, T_('Language#header'), '', 0, 'TL.Name+');
+   $table->add_tablehead( 5, T_('Code#header') );
+   $table->add_tablehead( 6, T_('Encoding#header') );
    $table->add_tablehead( 2, T_('Translated#header'), 'Number');
    $table->add_tablehead( 3, T_('Missing#header'), 'Number');
    $table->add_tablehead( 4, T_('Total%#header'), 'Number');
@@ -58,8 +60,12 @@ function show_translation_stats()
    $table->set_default_sort( 2); // on Translated
    $table->set_found_rows( count($cnt_translations) );
 
-   foreach ( $cnt_translations as $language => $count ) // $count = lang-specific translated-count
+   foreach ( $cnt_translations as $language => $arr ) // $count = lang-specific translated-count
    {
+      $code = $arr['Code'];
+      $count = $arr['X_Count'];
+      list( $lang_code, $lang_enc ) = explode('.', $code );
+
       $row_str = array();
       if ( $table->Is_Column_Displayed[1] )
          $row_str[1] = $language;
@@ -69,6 +75,10 @@ function show_translation_stats()
          $row_str[3] = $cnt_transl_texts - $count;
       if ( $table->Is_Column_Displayed[4] )
          $row_str[4] = sprintf( '%3.2f%%', $count / $cnt_transl_texts * 100 );
+      if ( $table->Is_Column_Displayed[5] )
+         $row_str[5] = $lang_code;
+      if ( $table->Is_Column_Displayed[6] )
+         $row_str[6] = $lang_enc;
 
       $table->add_row( $row_str );
    }
@@ -86,19 +96,19 @@ function count_translation_texts()
    return ($result) ? $result['X_Count'] : 0;
 }//count_translation_texts
 
-// returns count of language-specific translations in arr( Language => count, ... ) ordered by max-count first
+// returns count of language-specific translations in arr( Language => arr( Code/Lang/X_Count => value ) ) ordered by max-count first
 function count_translations()
 {
    $result = array();
    $db_result = db_query( "transl_stats.count_translations",
-      "SELECT SQL_SMALL_RESULT TL.Name AS Lang, COUNT(*) AS X_Count " .
-      "FROM Translations AS T " .
-         "INNER JOIN TranslationLanguages AS TL ON TL.ID=T.Language_ID " .
+      "SELECT SQL_SMALL_RESULT TL.Language AS Code, TL.Name AS Lang, COUNT(*) AS X_Count " .
+      "FROM TranslationLanguages AS TL " .
+         "LEFT JOIN Translations AS T ON T.Language_ID=TL.ID " .
       "GROUP BY T.Language_ID " .
       "ORDER BY X_Count DESC" );
 
    while ( $row = mysql_fetch_array($db_result) )
-      $result[$row['Lang']] = $row['X_Count'];
+      $result[$row['Lang']] = $row;
    mysql_free_result($db_result);
 
    return $result;
