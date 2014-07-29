@@ -318,7 +318,7 @@ class TournamentResultControl
          list( $tladder, $orow ) = $arr_item;
 
          // check for existing T-result; should be 0 or only 1 entry, if more then something wrong, so then take 1st
-         $arr_tresults = TournamentResult::load_tournament_results_by_rid( "TLH:process_game_end_seq_wins($tid)",
+         $arr_tresults = TournamentResult::load_tournament_results_by_rid( "TLH:create_tresult_best_seq_wins($tid)",
             $tladder->rid, TRESULTTYPE_TL_SEQWINS );
          $tresult = ( count($arr_tresults) > 0 ) ? $arr_tresults[0] : null;
 
