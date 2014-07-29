@@ -730,8 +730,9 @@ function show_preview( $level, $question, $answer, $reference, $id='preview', $r
          section('IntroPreview', $question );
       else
       {
+         $answer_txt = make_html_safe( $answer, 'faq', $rx_term );
          section('IntroPreview', T_('Preview') );
-         echo "<dl><dt>$question</dt>\n<dd>$answer</dd></dl>\n";
+         echo "<dl><dt>$question</dt>\n<dd>$answer_txt</dd></dl>\n";
       }
    }
    elseif ( $objtype == TXTOBJTYPE_LINKS ) // Links-view, see also links.php

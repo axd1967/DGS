@@ -11,6 +11,12 @@ Release [2014-03-27] - DGS 1.0.17 - tag [release-1_0_17-20140327] on branch [DGS
 ChangeLog
 ------------------------------------------------------------------
 
+2014-07-29 jug
+
+   * admin_faq.php (show_preview),
+     introduction.php (load_intro):
+   - bugfix: allow usage of DGS-tags on Introduction-page and introduction-editor admin-page
+
 2014-07-28 jug
 
    * tournaments/show_tournament_log.php:

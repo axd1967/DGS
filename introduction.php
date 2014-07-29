@@ -95,7 +95,10 @@ function load_intro()
          echo "<dl>\n";
       }
       elseif ( $row['Level'] == 2 ) // link-entry
-         echo "<dt>", $TW_($row['Q']), "</dt>\n<dd>", $TW_($row['A']), "</dd>\n";
+      {
+         $answer = make_html_safe( $row['A'], 'faq' );
+         echo "<dt>", $TW_($row['Q']), "</dt>\n<dd>", $answer, "</dd>\n";
+      }
 
       $last_level = $row['Level'];
    }

@@ -34,6 +34,8 @@ Copyright (C) 2001-2014  Erik Ouchterlony, Jens-Uwe Gaspar
 
    Bug fixes:
 
+   * Fixes usage of DGS-tags on <home introduction.php>introduction page</home> and introduction editor-page
+
    Code improvements:
 
    Administrative changes:
