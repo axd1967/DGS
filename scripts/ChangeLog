@@ -13,6 +13,12 @@ ChangeLog
 
 2014-07-29 jug
 
+   * tournaments/include/tournament_ladder_helper.php (TournamentLadderHelper.process_tournament_ladder_game_end,
+       ~.process_game_end_seq_wins),
+     tournaments/include/tournament_games.php (TournamentGames.load_tournament_game_by_id):
+   - bugfix: track consecutive-ladder-wins AFTER processing of game-end as to potentially changed
+     tournament-game-flags like annulled game
+
    * translation_stats.php (show_translation_stats, count_translation_texts):
    - added language-code and encoding on translation-statistics page
 

@@ -290,6 +290,24 @@ class TournamentGames
    }
 
    /*!
+    * \brief Loads and returns TournamentGames-object for given TournamentGames.ID.
+    * \return NULL if nothing found; TournamentGames otherwise
+    */
+   public static function load_tournament_game_by_id( $tgame_id )
+   {
+      if ( !is_numeric($tgame_id) || $tgame_id <= 0 )
+         error('invalid_args', "TournamentGames:load_tournament_game_by_id.check_tgame_id($tgame_id)");
+
+      $qsql = self::build_query_sql();
+      $qsql->add_part( SQLP_WHERE, "TG.ID=$tgame_id" );
+      $qsql->add_part( SQLP_LIMIT, '1' );
+
+      $row = mysql_single_fetch( "TournamentGames:load_tournament_game_by_id.find_tgame($tgame_id)",
+         $qsql->get_select() );
+      return ($row) ? self::new_from_row($row) : NULL;
+   }//load_tournament_game_by_id
+
+   /*!
     * \brief Loads and returns TournamentGames-object for given games-ID.
     * \return NULL if nothing found; TournamentGames otherwise
     */
@@ -299,8 +317,7 @@ class TournamentGames
          error('invalid_args', "TournamentGames:load_tournament_game_by_gid.check_gid($gid)");
 
       $qsql = self::build_query_sql();
-      $qsql->add_part( SQLP_WHERE,
-            "TG.gid=$gid" );
+      $qsql->add_part( SQLP_WHERE, "TG.gid=$gid" );
       $qsql->add_part( SQLP_LIMIT, '1' );
 
       $row = mysql_single_fetch( "TournamentGames:load_tournament_game_by_gid.find_tgame($gid)",

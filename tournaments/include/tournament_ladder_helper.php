@@ -83,9 +83,6 @@ class TournamentLadderHelper
 
       ta_begin();
       {//HOT-section to process tournament-game-end
-         // track consecutive-wins for both players before processing game-end
-         self::process_game_end_seq_wins( $tgame, $tl_props->SeqWinsThreshold );
-
          $success = TournamentLadder::process_game_end( $tid, $tgame, $game_end_action );
          if ( $success )
          {
@@ -115,6 +112,9 @@ class TournamentLadderHelper
             }
          }
 
+         // track consecutive-wins for both players
+         self::process_game_end_seq_wins( $tgame->ID, $tl_props->SeqWinsThreshold );
+
          TournamentLogHelper::log_tournament_ladder_game_end( $tid,
             sprintf('Game End(game %s): Users role:rid/uid:Rank %s:%s/%s:%d vs %s:%s/%s:%s; T-Game(%s): Status=[%s], Flags=[%s], Score=[%s] => Action %s',
                $tgame->gid,
@@ -133,10 +133,18 @@ class TournamentLadderHelper
     * \brief Tracks (increases or resets) consecutive-wins (TournamentLadder.SeqWins/SeqWinsBest)
     *       for given tournament-game for challenger and defender, and adds/updates tournament-result
     *       for best-seq-wins.
+    * \note must be called AFTER game-end processing, because game-end processing is setting TG.Flags for annulled games.
+    *       It could be though, that challenger or defender could have been removed by game-end processing (loser removed
+    *       from ladder), but if lost consecutive-win-count is not increased.
     * \note IMPORTANT NOTE: caller needs to open TA with HOT-section!!
     */
-   private static function process_game_end_seq_wins( $tgame, $seq_wins_threshold )
+   private static function process_game_end_seq_wins( $tgame_id, $seq_wins_threshold )
    {
+      // reload T-game due to potentially changed flags after game-end processing
+      $tgame = TournamentGames::load_tournament_game_by_id( $tgame_id );
+      if ( is_null($tgame) )
+         return;
+
       // track wins for challenger
       $tladder_ch = new TournamentLadder( $tgame->tid, $tgame->Challenger_rid, $tgame->Challenger_uid );
       $tladder_ch->update_seq_wins( $tgame->Score, $tgame->Flags );
