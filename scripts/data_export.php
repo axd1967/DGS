@@ -289,6 +289,7 @@ function get_tables( $database)
             'Messages',
             'MoveMessages',
             'Moves',
+            'MoveSequence',
             'MoveStats',
             'Observers',
             'Players',
