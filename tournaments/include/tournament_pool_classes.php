@@ -220,7 +220,7 @@ class PoolRankCalculator
          // NOTE: to make the "shifting" work, $same_ranks must be ordered(!) with highest rank (0) as 1st item
          foreach ( $same_ranks as $arr_users ) // tie-break subgroups with same rank
          {
-            if ( count($arr_users) < 1 ) // subgroup with only 1 member
+            if ( count($arr_users) <= 1 ) // subgroup with only 1 member
             {
                foreach ( $arr_users as $uid => $rank )
                {
@@ -234,21 +234,29 @@ class PoolRankCalculator
                $groupuser_ranks = self::build_user_ranks( $arr_tpools,
                   array_keys($arr_users), self::get_tiebreaker($tie_level) );
                $group_rank_counts = array_count_values($groupuser_ranks);
-               if ( count( $group_rank_counts ) > 1 ) // tie-breaking successful (complete or partly)
+               if ( count($group_rank_counts) > 1 ) // tie-breaking successful (complete or partly)
                {
-                  foreach ( $groupuser_ranks as $uid => $rank_new ) // set new ranks in main-result
+                  // determine "skipped" ranks for (tied) sub-groups, e.g. (1,1,3) to avoid (1,1,2)
+                  $assign_rank = array();
+                  foreach ( $group_rank_counts as $sub_rank => $sub_rank_count )
                   {
-                     $user_ranks[$uid] = $next_rank + $rank_new;
+                     $assign_rank[$sub_rank] = $next_rank;
+                     $next_rank += $sub_rank_count;
+                  }
+
+                  // set new ranks in main-result
+                  foreach ( $groupuser_ranks as $uid => $rank_new )
+                  {
+                     $user_ranks[$uid] = $assign_rank[$rank_new];
                      if ( $group_rank_counts[$rank_new] <= 1 ) // if >1 tie-breaking was only partly successful
                         $arr_stop_tiebreak[$uid] = 1;
                   }
-                  $next_rank += max( $groupuser_ranks ) + 1;
                }
-               else // tie-breaking failed with current tie-breaker (still a draw for all sub-group-users)
+               else // tie-breaking failed with current tie-breaker (still a draw with same value for all sub-group-users)
                {
                   foreach ( $groupuser_ranks as $uid => $rank_new )
                      $user_ranks[$uid] = $next_rank;
-                  $next_rank++;
+                  $next_rank += count($groupuser_ranks);
                }
             }
          }//loop same-rank-user-subgroups
@@ -290,7 +298,7 @@ class PoolRankCalculator
     *        containing the required data to determine rank for users
     * \param $users [ uid, ... ]: list of users expected to have the same rank
     *        (or initially having no rank, which is also "having the same rank")
-    * \param $tie_breaker Determine ranks determined by using tie-breaker (TIEBREAKER_...)
+    * \param $tie_breaker determine ranks by using this given tie-breaker (TIEBREAKER_...)
     * \return [ uid => rank, ... ]: array mapping user ($uid) to rank (starting at 0)
     *         ordered by ascending rank
     *

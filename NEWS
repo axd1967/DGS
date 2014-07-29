@@ -38,6 +38,7 @@ Copyright (C) 2001-2014  Erik Ouchterlony, Jens-Uwe Gaspar
 
    * Fixed usage of DGS-tags on <home introduction.php>introduction page</home> and introduction editor-page
    * Fixed tracking of consecutive wins for ladder-tournament after game annulling in game-end-processing
+   * Fixed skipping rank-numbers after tied rank sub-groups for pool-ranks in round-robin tournaments
 
    Code improvements:
 

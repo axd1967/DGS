@@ -13,6 +13,10 @@ ChangeLog
 
 2014-07-29 jug
 
+   * tournaments/include/tournament_pool_classes.php (PoolRankCalculator.calc_ranks):
+   - bugfix: skip rank-numbers after tied rank sub-groups for pool-ranks in round-robin tournaments,
+     i.e. use ranks (1,1,3,3,5) instead of (1,1,2,2,3)
+
    * tournaments/include/tournament_ladder_helper.php (TournamentLadderHelper.process_tournament_ladder_game_end,
        ~.process_game_end_seq_wins),
      tournaments/include/tournament_games.php (TournamentGames.load_tournament_game_by_id):
