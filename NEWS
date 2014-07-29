@@ -11,6 +11,7 @@ Copyright (C) 2001-2014  Erik Ouchterlony, Jens-Uwe Gaspar
       * Added 'Hero%' with percentage of games played with weaker players (min. 1k rating-difference)
       * Award badges of honor to players with larger hero-percentages:
          * Min. percentage: 38% for Bronze Badge (<image hero_bronze.gif>), 50% for Silver Badge (<image hero_silver.gif>), 62% for Golden Badge (<image hero_gold.gif>)
+      * Quick-Suite: Extended user-handler and waitingroom-handler with hero-award-info
 
       * Added filter on (rated) win-percentage column 'Win%' (renamed from 'Percentage/Perc.') or 'Rated Win %' on user-info-page
 
@@ -20,18 +21,13 @@ Copyright (C) 2001-2014  Erik Ouchterlony, Jens-Uwe Gaspar
 
    Minor changes:
 
-   * Tournaments:
-      * <home tournaments/list_tournaments.php>Tournaments</home>:
-         * Round-Robin tournaments: Notify tournament-directors with private bulletin after last game has finished
-
+   * <home tournaments/list_tournaments.php>Tournaments</home>:
       * Tournament-info page:
          * Show count of all entries for Hall of Fame with hint to remaining omitted entries
 
       * Changes for tournament-directors:
+         * Round-Robin tournaments: Notify tournament-directors with private bulletin after last game has finished
          * Added search filters and full page-navigation on browsing tournament-log
-
-   * Quick-Suite (alternative interface "quick_do.php"):
-      * Extended user-handler and waitingroom-handler with hero-award-info
 
    * Game page:
       * Changed default of territory-markers for viewing finished game to showing them like in score-mode
