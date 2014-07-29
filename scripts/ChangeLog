@@ -11,6 +11,8 @@ Release [2014-03-27] - DGS 1.0.17 - tag [release-1_0_17-20140327] on branch [DGS
 ChangeLog
 ------------------------------------------------------------------
 
+### ----- release-1_0_18-20140730 -----
+
 2014-07-29 jug
 
    * tournaments/include/tournament_pool_classes.php (PoolRankCalculator.calc_ranks):
