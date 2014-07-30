@@ -182,7 +182,7 @@ class WaitingroomControl
 
       $my_hero_ratio_perc = 100 * User::calculate_hero_ratio( $player_row['GamesWeaker'], $player_row['Finished'],
          $player_row['Rating2'], $player_row['RatingStatus'] );
-      $sql_goodhero = "($my_hero_ratio_perc >= WR.MinHeroRatio)";
+      $sql_goodhero = "($my_hero_ratio_perc >= W.MinHeroRatio)";
 
       $query= "SELECT W.*"
             . ',IF(ISNULL(C.uid),0,C.SystemFlags & '.CSYSFLAG_WAITINGROOM.') AS C_denied'

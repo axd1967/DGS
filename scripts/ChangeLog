@@ -13,6 +13,11 @@ ChangeLog
 
 ### ----- release-1_0_18-20140730 -----
 
+2014-07-30 jug
+
+   * include/wroom_control.php (WaitingroomControl.join_waitingroom_game):
+   - bugfix: fixed check on joining waiting-room for hero-ratio
+
 2014-07-29 jug
 
    * tournaments/include/tournament_pool_classes.php (PoolRankCalculator.calc_ranks):
