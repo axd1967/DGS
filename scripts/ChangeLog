@@ -15,6 +15,11 @@ ChangeLog
 
 2014-07-30 jug
 
+   * include/std_functions.php ($html_safe_preg):
+   - bugfix: prevent <image>-tag to be used to embed externally-linked images
+   - butfix: fixed regex to escape ALL DGS-tags replaced with $html_preg_safe,
+     order tags alphabetically
+
    * confirm.php:
    - bugfix: no init-check for GameActionHelper for actions: nextskip + nextaddtime
 

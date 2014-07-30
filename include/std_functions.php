@@ -2038,7 +2038,7 @@ $html_safe_preg = array(
 
 //<image pict> =>translated to <img src="{HOSTBASE}images/$pict">
 //<image board/pict> =>translated to <img src="{HOSTBASE}17/$pict">
- '%'.ALLOWED_LT."image[\\n\\s]+(board/)?((\.?[^\.\\\\:\"`\\n\\s])+)".ALLOWED_GT.'%ise'
+ '%'.ALLOWED_LT."image[\\n\\s]+(board/)?([\\.\\-/a-zA-Z0-9_]+)".ALLOWED_GT.'%ise'
   => '"'.ALLOWED_LT."img class=InTextImage"
       ." alt=".ALLOWED_QUOT."(img)".ALLOWED_QUOT
       ." src=".ALLOWED_QUOT.HOSTBASE
@@ -2053,9 +2053,8 @@ $html_safe_preg = array(
   => ALLOWED_LT."/pre".ALLOWED_GT,
 */
 
-//reverse to bad the skiped (faulty) ones
- '%'.ALLOWED_LT."(/?(image|home|quote|code|note|color|" //|tt if <tt> above
-      ."user|send|game|mailto|news|ftp|http)[^`]*)"
+//reverse (=escape) bad skipped (faulty) tags; keep them alphabetic here
+ '%'.ALLOWED_LT."(/?_?(code|color|ftp|game|home|https?|image|mailto|news|note|quote|send|survey|tourney|user).*?)"
     .ALLOWED_GT.'%is'
   => "&lt;\\1&gt;",
 ); //$html_safe_preg
