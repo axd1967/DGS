@@ -15,6 +15,9 @@ ChangeLog
 
 2014-07-30 jug
 
+   * userinfo.php:
+   - bugfix: show hero-percentage on user-info if hero-badge awarded
+
    * include/std_functions.php ($html_safe_preg):
    - bugfix: prevent <image>-tag to be used to embed externally-linked images
    - butfix: fixed regex to escape ALL DGS-tags replaced with $html_preg_safe,

@@ -219,7 +219,7 @@ $GLOBALS['ThePage'] = new Page('UserInfo');
          // always show badge, but ratio only for own-info or if badge awarded (or for admin)
          ( $hero_ratio > 0
             ? ( $hero_img ? $hero_img.' ' : '' ) .
-               ( ( $my_info || $is_admin || $is_game_admin || $hero_ratio >= HERO_BRONZE )
+               ( ( $my_info || $is_admin || $is_game_admin || 100*$hero_ratio >= HERO_BRONZE )
                   ? sprintf('<span title="%s">%1.1f%%</span>',
                         basic_safe(T_('Percentage of games with weaker players')), 100*$hero_ratio)
                   : NO_VALUE )
