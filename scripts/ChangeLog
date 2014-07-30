@@ -15,6 +15,9 @@ ChangeLog
 
 2014-07-30 jug
 
+   * confirm.php:
+   - bugfix: no init-check for GameActionHelper for actions: nextskip + nextaddtime
+
    * include/wroom_control.php (WaitingroomControl.join_waitingroom_game):
    - bugfix: fixed check on joining waiting-room for hero-ratio
 

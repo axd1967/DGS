@@ -75,8 +75,6 @@ require_once 'include/rating.php';
    $gah->set_game_action( $action );
    $game_row = $gah->load_game( 'confirm' );
    extract($game_row);
-   $gah->init_globals( 'confirm' );
-   $gah->load_game_conditional_moves( 'confirm' );
 
 
    if ( @$_REQUEST['nextskip'] )
@@ -84,6 +82,9 @@ require_once 'include/rating.php';
 
    if ( @$_REQUEST['nextaddtime'] )
       do_add_time( $game_row, $my_id); // jump back
+
+   $gah->init_globals( 'confirm' );
+   $gah->load_game_conditional_moves( 'confirm' );
 
    // affirm, that game is started
    if ( $Status == GAME_STATUS_INVITED || $Status == GAME_STATUS_SETUP )
