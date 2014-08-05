@@ -15,8 +15,13 @@ ChangeLog
 
 2014-08-05 jug
 
+   * game.php:
+   - show territory-markers for all users for game on SCORE|SCORE2-status
+     if last move was scoring-step POSX_SCORE
+
    * include/wroom_control.php (WaitingroomControl.build_waiting_room_query, ~.join_waitingroom_game):
-   - bugfix: fixed missing check of waiting-room accept-same-opponent-restriction for total-count of joined games
+   - bugfix: fixed missing check of waiting-room accept-same-opponent-restriction
+     for total-count of joined games
      - sync'ed SQL-clause-parts
 
 2014-07-30 jug

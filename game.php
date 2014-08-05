@@ -330,8 +330,8 @@ $GLOBALS['ThePage'] = new Page('Game');
       {
          if ( abs($Score) <= SCORE_MAX && $move == $Moves && !($Flags & GAMEFLAGS_NO_RESULT) ) // don't calc for resign/time-out/forfeit/no-result
          {
-            if ( $terr_marker ) // show territory-marker
-               $score_board = clone $TheBoard;
+            if ( $terr_marker )
+               $score_board = clone $TheBoard; // hide territory-marker
             else
                $score_board = $TheBoard;
             list( $score, $game_score ) =
@@ -343,7 +343,7 @@ $GLOBALS['ThePage'] = new Page('Game');
       }
       elseif ( $TheBoard->is_scoring_step($move, $Status) )
       {
-         $score_board = clone $TheBoard;
+         $score_board = $TheBoard;
          list( $score, $game_score ) =
             GameActionHelper::calculate_game_score( $score_board, $stonestring, $Ruleset );
       }
