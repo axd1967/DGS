@@ -162,7 +162,7 @@ class GuiBulletin
       $text = make_html_safe($bulletin->Text, true, $rx_term);
       $text = preg_replace( "/[\r\n]+/", '<br>', $text ); //reduce multiple LF to one <br>
       $publish_text = sprintf( T_('[%s] by %s#bulletin'),
-         date(DATE_FMT2, $bulletin->PublishTime),
+         date(DATE_FMT5, $bulletin->PublishTime),
          ( $bulletin->uid > 0 ? $bulletin->User->user_reference() : T_('CRON') ) );
 
       if ( $bulletin->tid > 0 )

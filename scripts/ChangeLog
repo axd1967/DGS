@@ -15,6 +15,9 @@ ChangeLog
 
 2014-08-05 jug
 
+   * include/gui_bulletin.php (GuiBulletin.build_view_bulletin):
+   - show publish-time of bulletin with weekday and timezone
+
    * game.php:
    - show territory-markers for all users for game on SCORE|SCORE2-status
      if last move was scoring-step POSX_SCORE
