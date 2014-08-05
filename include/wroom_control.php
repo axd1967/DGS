@@ -69,7 +69,7 @@ class WaitingroomControl
       // $goodmingames = ( $MinRatedGames > 0 ? ($my_rated_games >= $MinRatedGames) : true );
       // $goodhero = ( $my_hero_ratio_perc >= $MinHeroRatio )
 
-      $calculated = "(WR.Handicaptype='".HTYPE_CONV."' OR WR.Handicaptype='".HTYPE_PROPER."')";
+      $calculated = "WR.Handicaptype IN ('".HTYPE_CONV."','".HTYPE_PROPER."')";
       if ( $iamrated )
       {
          $goodrated = "1";
@@ -84,19 +84,10 @@ class WaitingroomControl
       }
       $sql_goodmingames = "IF(WR.MinRatedGames>0,($my_rated_games >= WR.MinRatedGames),1)";
 
-      $sql_goodhero = "($my_hero_ratio_perc >= WR.MinHeroRatio)";
-
       $sql_goodmaxgames = ( MaxGamesCheck::is_limited() ) // Opponent max-games
          ? "IF(WR.uid=$my_id OR (WRP.Running + WRP.GamesMPG < ".MAX_GAMESRUN."),1,0)" : 1;
 
-      $qsql->add_part( SQLP_FIELDS,
-         "$calculated AS calculated",
-         "$goodrated AS goodrated",
-         "$haverating AS haverating",
-         "$goodrating AS goodrating",
-         "$sql_goodmingames AS goodmingames",
-         "$sql_goodhero AS goodhero",
-         "$sql_goodmaxgames AS goodmaxgames",
+      $sql_goodsameopp =
          "CASE WHEN (WR.uid=$my_id OR WR.SameOpponent=0 OR (WR.SameOpponent > ".SAMEOPP_TOTAL." AND ISNULL(WRJ.wroom_id))) THEN 1 " .
               "WHEN (WR.SameOpponent < ".SAMEOPP_TOTAL.") THEN ( " . // total-times-check
                   "((SELECT COUNT(*) FROM Games AS G1 WHERE G1.Status".IS_STARTED_GAME." AND G1.GameType='".GAMETYPE_GO."' AND G1.Black_ID=$my_id AND G1.White_ID=WR.uid) + " .
@@ -104,7 +95,19 @@ class WaitingroomControl
                   "< -WR.SameOpponent + ".SAMEOPP_TOTAL." ) " .
               "WHEN (WR.SameOpponent<0) THEN (WRJ.JoinedCount < -WR.SameOpponent) " . // same-offer-times-check
               "ELSE (WRJ.ExpireDate <= FROM_UNIXTIME($NOW)) " . // same-offer-date-check
-              "END AS goodsameopp",
+              "END";
+
+      $sql_goodhero = "($my_hero_ratio_perc >= WR.MinHeroRatio)";
+
+      $qsql->add_part( SQLP_FIELDS,
+         "$calculated AS calculated",
+         "$goodrated AS goodrated",
+         "$haverating AS haverating",
+         "$goodrating AS goodrating",
+         "$sql_goodmingames AS goodmingames",
+         "$sql_goodmaxgames AS goodmaxgames",
+         "$sql_goodsameopp AS goodsameopp",
+         "$sql_goodhero AS goodhero",
          "IF(WR.uid=$my_id OR WR.SameOpponent > ".SAMEOPP_TOTAL.",0, " .
               "((SELECT COUNT(*) FROM Games AS G1 WHERE G1.Status".IS_STARTED_GAME." AND G1.GameType='".GAMETYPE_GO."' AND G1.Black_ID=$my_id AND G1.White_ID=WR.uid) + " .
               " (SELECT COUNT(*) FROM Games AS G2 WHERE G2.Status".IS_STARTED_GAME." AND G2.GameType='".GAMETYPE_GO."' AND G2.Black_ID=WR.uid AND G2.White_ID=$my_id)) ) AS X_TotalCount"
@@ -176,24 +179,32 @@ class WaitingroomControl
          error('max_games', "WC:join_waitingroom_game.max_games($wr_id,{$maxGamesCheck->count_games})");
 
       $my_rated_games = (int)$player_row['RatedGames'];
+      $my_hero_ratio_perc = 100 * User::calculate_hero_ratio( $player_row['GamesWeaker'], $player_row['Finished'],
+         $player_row['Rating2'], $player_row['RatingStatus'] );
+
       $sql_goodmingames = "IF(W.MinRatedGames>0,($my_rated_games >= W.MinRatedGames),1)";
       $sql_goodmaxgames = ( MaxGamesCheck::is_limited() ) // Opponent max-games
          ? "IF(P.Running + P.GamesMPG < ".MAX_GAMESRUN.",1,0)" : 1;
 
-      $my_hero_ratio_perc = 100 * User::calculate_hero_ratio( $player_row['GamesWeaker'], $player_row['Finished'],
-         $player_row['Rating2'], $player_row['RatingStatus'] );
+      $sql_goodsameopp =
+         "CASE WHEN (W.uid=$my_id OR W.SameOpponent=0 OR (W.SameOpponent > ".SAMEOPP_TOTAL." AND ISNULL(WRJ.wroom_id))) THEN 1 " .
+              "WHEN (W.SameOpponent < ".SAMEOPP_TOTAL.") THEN ( " . // total-times-check
+                  "((SELECT COUNT(*) FROM Games AS G1 WHERE G1.Status".IS_STARTED_GAME." AND G1.GameType='".GAMETYPE_GO."' AND G1.Black_ID=$my_id AND G1.White_ID=W.uid) + " .
+                  " (SELECT COUNT(*) FROM Games AS G2 WHERE G2.Status".IS_STARTED_GAME." AND G2.GameType='".GAMETYPE_GO."' AND G2.Black_ID=W.uid AND G2.White_ID=$my_id)) " .
+                  "< -W.SameOpponent + ".SAMEOPP_TOTAL." ) " .
+              "WHEN (W.SameOpponent<0) THEN (WRJ.JoinedCount < -W.SameOpponent) " . // same-offer-times-check
+              "ELSE (WRJ.ExpireDate <= FROM_UNIXTIME($NOW)) " . // same-offer-date-check
+              "END";
+
       $sql_goodhero = "($my_hero_ratio_perc >= W.MinHeroRatio)";
 
       $query= "SELECT W.*"
             . ',IF(ISNULL(C.uid),0,C.SystemFlags & '.CSYSFLAG_WAITINGROOM.') AS C_denied'
             . ',IF(ISNULL(WRJ.opp_id),0,1) AS X_wrj_exists'
             . ',WRJ.JoinedCount'
-            . ',IF(W.SameOpponent=0 OR ISNULL(WRJ.wroom_id), 1, '
-               . 'IF(W.SameOpponent<0, '
-                  . '(WRJ.JoinedCount < -W.SameOpponent), '
-                  . "(WRJ.ExpireDate <= FROM_UNIXTIME($NOW)) )) AS goodsameopp"
             . ",$sql_goodmingames AS goodmingames"
             . ",$sql_goodmaxgames AS goodmaxgames"
+            . ",$sql_goodsameopp AS goodsameopp"
             . ",$sql_goodhero AS goodhero"
             . ",(P.Running + P.GamesMPG) AS X_OppGamesCount"
             . " FROM Waitingroom AS W"

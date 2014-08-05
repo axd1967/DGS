@@ -13,6 +13,12 @@ ChangeLog
 
 ### ----- release-1_0_18-20140730 -----
 
+2014-08-05 jug
+
+   * include/wroom_control.php (WaitingroomControl.build_waiting_room_query, ~.join_waitingroom_game):
+   - bugfix: fixed missing check of waiting-room accept-same-opponent-restriction for total-count of joined games
+     - sync'ed SQL-clause-parts
+
 2014-07-30 jug
 
    * userinfo.php:
