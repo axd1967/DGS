@@ -41,8 +41,9 @@ require_once 'include/game_functions.php';
    if ( $argc == 2 )
    {
       $offset = $argv[1];
-      if ( !is_numeric($offset) || $offset < 10 || $offset > 1000 )
-         $errors[] = "Bad offset '$offset', allowed are integers between [10..1000]";
+      $max_offset = 10000;
+      if ( !is_numeric($offset) || $offset < 10 || $offset > $max_offset )
+         $errors[] = "Bad offset '$offset', allowed are integers between [10..$max_offset]";
    }
    else
       $errors[] = 'Bad arguments';
@@ -74,6 +75,7 @@ require_once 'include/game_functions.php';
          'Games AS G',
       SQLP_WHERE,
          "G.Status='".GAME_STATUS_FINISHED."'",
+         "G.GameType='".GAMETYPE_GO."'",
       SQLP_ORDER,
          'G.Lastchanged ASC' // needs sort by date (year)
    );
@@ -82,6 +84,8 @@ require_once 'include/game_functions.php';
    $cnt = 0;
    $begin_secs = time();
    $filehandle = null;
+   global $filehandle;
+
    $curr_year = -1;
    $curr_offset = 0;
    while ( true )
@@ -128,7 +132,7 @@ function write_game_info( &$curr_year, $row )
    }
    $curr_year = $year;
 
-   @fwrite( $filehandle, build_game_info($row) );
+   fwrite( $filehandle, build_game_info($row) );
 }
 
 function close_file()
@@ -143,7 +147,7 @@ function build_game_info( $row=null )
 {
    if ( is_null($row) ) // headers
    {
-      return "GameID;Starttime;EndTime;Size;Moves;Rated;GameType;Ruleset;Handicap;Komi;Score;BlackID;WhiteID;BlackStartRating;WhiteStartRating;BlackEndRating;WhiteEndRating;TimeLimit\r\n";
+      return "GameID;Starttime;EndTime;Size;Moves;Rated;Ruleset;Handicap;Komi;Score;BlackID;WhiteID;BlackStartRating;WhiteStartRating;BlackEndRating;WhiteEndRating;TimeLimit\r\n";
    }
    else
    {
@@ -154,7 +158,6 @@ function build_game_info( $row=null )
          $row['Size'],
          $row['Moves'],
          ($row['Rated'] == 'N') ? 0 : 1,
-         GameTexts::format_game_type($row['GameType'], $row['GamePlayers'], true),
          ($row['Ruleset'] == 'CHINESE') ? 'CH' : 'JP',
          $row['Handicap'],
          $row['Komi'],
