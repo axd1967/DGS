@@ -259,7 +259,7 @@ NOTE: order of the following items is not strict. You may need to re-edit the
   chmod -R 775 data-store
   su -c 'chgrp -R www-data data-store'
 
-* Eventually you need to adjust the used timezone.
+* Maybe you need to adjust the used timezone.
   This can be done by creating a file in the dragon-root:
 
      filename:              timeadjust.php
@@ -268,6 +268,8 @@ NOTE: order of the following items is not strict. You may need to re-edit the
   This file is read by the PHP-include 'include/quick_common.php'
   and the unit for the variable $timeadjust is seconds.
   It's added to form the "current timestamp" ($NOW).
+
+  If you want to use the servers time, you can skip this step.
 
 * Now you need to create the remaining page-specific translations.
   After ensuring, that all the previous steps to prepare translations have been taken
@@ -388,7 +390,7 @@ MAILTO= < EMAIL-OF-YOUR-CHOICE >
 #--------------------------------------------------------------------
 
 6) Protect the scripts/ folder from outside access:
-   The scripts/ folder contains sensible tools reserved to the developers
+   The scripts/ folder contains security-sensitive tools reserved to the developers
    or the admins team.
    You have to protect it with an authentification process (using, for
    example, the .htaccess AuthUserFile command) or at least move the
