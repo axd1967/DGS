@@ -73,13 +73,38 @@ require_once 'include/sgf_builder.php';
          'Games AS G',
       SQLP_WHERE,
          'G.Moves > 10',
-         'G.Size = 9',
-         'G.Score BETWEEN -'.SCORE_RESIGN.' AND '.SCORE_RESIGN, // no Timeouts or Forfeits
-         '(G.Flags & '.GAMEFLAGS_NO_RESULT.')=0', // skip NO-RESULT games
+         //'G.Size = 9',
+         //'G.Score BETWEEN -'.SCORE_RESIGN.' AND '.SCORE_RESIGN, // no Timeouts or Forfeits
+         //'(G.Flags & '.GAMEFLAGS_NO_RESULT.')=0', // skip NO-RESULT games
          "G.Status='".GAME_STATUS_FINISHED."'",
+         "G.Lastchanged >= '2012-01-01'",
+         "G.Lastchanged <  '2013-01-01'",
+         //"G.ID >= 758800",
       SQLP_ORDER,
          'G.ID ASC'
    );
+
+/*
+mysql> select year(Lastchanged) as Y, count(*) AS CNT from Games where status='finished' and Moves> 10 group by Y ;
++------+-------+
+| Y    | CNT   |
++------+-------+
+| 2001 |   257 |
+| 2002 |  8130 |
+| 2003 | 22639 |
+| 2004 | 41152 |
+| 2005 | 63421 |
+| 2006 | 79885 |
+| 2007 | 79365 |
+| 2008 | 74255 |
+| 2009 | 73978 |
+| 2010 | 67887 |
+| 2011 | 70957 |
+| 2012 | 70795 |
+| 2013 | 76693 |
+| 2014 | 50829 |
+
+*/
    $result = db_query( 'sgf_bulk.find_games', $qsql->get_select() );
 
    $rows = @mysql_num_rows($result);
@@ -103,11 +128,12 @@ require_once 'include/sgf_builder.php';
 
       // build SGF in buffer
       $sgf = new SgfBuilder( $gid, /*use_buf*/true );
+      $sgf->set_file_format( 'dgs-$d1-$g_$T_$R$S$H0$K_$M$r' );
       $sgf->set_include_conditional_moves( 0 ); // do not include cond-moves
       $sgf->load_game_info();
-      $filename = $sgf->build_filename_sgf( /*bulk*/true );
+      $filename = $sgf->build_filename_sgf( /*bulk*/false ); // false = use file_format set above
       $sgf->load_trimmed_moves( /*comments*/false );
-      $sgf->build_sgf( $filename, $owned_comments );
+      $sgf->build_sgf( $filename, DAME ); // DAME=viewed by others
 
       // NOTE: adjust dir-creation to new path-pattern
       $path = "$out_dir/$year/$month";
