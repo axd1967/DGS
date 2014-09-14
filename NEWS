@@ -31,6 +31,7 @@ Copyright (C) 2001-2014  Erik Ouchterlony, Jens-Uwe Gaspar
 
    * Game page:
       * Changed default of territory-markers for viewing finished game to showing them like in score-mode
+      * Show territory-markers for viewing running games for all users if in score-mode
 
    * Added language-code and encoding on translation-statistics page
 
