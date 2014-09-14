@@ -1997,14 +1997,17 @@ Options:
          - $$ = escape special-symbol: '$'
          - $b = black-user handle
          - $w = white-user handle
-         - $g = game-id
-         - $S = board-size: '19'
-         - $R = rated: 'F' = free, 'R' = rated
-         - $H = handicap: '' = no handicap, 'H7'
-         - $K = komi: 'K6,5'
-         - $r = result: '=B3,5' = B won by 3.5, '=W0' = jigo, '=VOID' = no-result, '=W3' = white won by 3
          - $d1 = last-changed date in format YYYYMMDD: 20130819
          - $d2 = last-changed date in format YYYY-MM-DD: 2013-08-19
+         - $g = game-id
+         - $H0 = handicap: 'H0' = no handicap, 'H7'
+         - $H = handicap: '' = no handicap, 'H7'
+         - $K = komi: 'K6,5', 'K-3'
+         - $M = moves: 'M157'
+         - $R = rated: 'F' = free, 'R' = rated
+         - $r = result: '=B3,5' = B won by 3.5, '=W0' = jigo, '=VOID' = no-result, '=W3' = white won by 3
+         - $S = board-size: '19'
+         - $T = game-type: 'T0' = GO, 'Tn:m' = Team-Go (e.g. 'T2:2' = Rengo), 'Tn' = Zen-Go (n>0)
 
    <CONDMOVES> = 0 | 1 | 2 | 3; default = 0 for running/finished game
       - 0 = do not include any conditional-moves

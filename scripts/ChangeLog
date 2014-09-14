@@ -11,6 +11,13 @@ Release [2014-03-27] - DGS 1.0.17 - tag [release-1_0_17-20140327] on branch [DGS
 ChangeLog
 ------------------------------------------------------------------
 
+2014-09-14 jug
+
+   * include/sgf_builder.php (SgfBuilder.build_filename_sgf),
+     specs/quick_suite.txt:
+   - added file-pattern formatting for SGF-download:
+     $M = moves-count, $H0 = handicap (with 0), $T = game-type
+
 ### ----- release-1_0_18-20140730 -----
 
 2014-08-05 jug

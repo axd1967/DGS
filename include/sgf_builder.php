@@ -573,7 +573,15 @@ class SgfBuilder
       else
          $file_format = $this->file_format;
 
+      if ( $this->game_row['GameType'] == GAMETYPE_TEAM_GO )
+         $f_gametype = 'T' . $this->game_row['GamePlayers']; // T3:2
+      elseif ( $this->game_row['GameType'] == GAMETYPE_ZEN_GO )
+         $f_gametype = 'T' . (int)$this->game_row['GamePlayers']; // T5
+      else // GAMETYPE_GO
+         $f_gametype = 'T0';
+      $f_moves = 'M' . (int)$this->game_row['Moves'];
       $f_rated = ( $this->game_row['Rated'] == 'N' ) ? 'F' : 'R';
+      $f_handi0 = 'H' . (int)$this->game_row['Handicap'];
       $f_handi = ( $this->game_row['Handicap'] > 0 ) ? 'H' . $this->game_row['Handicap'] : '';
       $f_komi = 'K' . str_replace( '.', ',', $this->game_row['Komi'] );
       $f_result = '';
@@ -597,7 +605,7 @@ class SgfBuilder
 
       // see <FILEFORMAT>-option in section "4.SGF" in 'specs/quick_suite.txt'
       $filename = str_replace(
-         array( '$b', '$w', '$g', '$d1', '$d2', '$S', '$R', '$H', '$K', '$r', '$$' ),
+         array( '$b', '$w', '$g', '$d1', '$d2', '$S', '$M', '$R', '$H0', '$H', '$K', '$r', '$T', '$$' ),
          array(
             $this->game_row['Blackhandle'], // $b
             $this->game_row['Whitehandle'], // $w
@@ -605,10 +613,13 @@ class SgfBuilder
             date('Ymd', $this->game_row['timestamp']),   // $d1
             date('Y-m-d', $this->game_row['timestamp']), // $d2
             $this->game_row['Size'], // $S
+            $f_moves,  // $M
             $f_rated,  // $R
+            $f_handi0,  // $H0
             $f_handi,  // $H
             $f_komi,   // $K
             $f_result, // $r
+            $f_gametype, // $T
             '$', // $$
          ),
          $file_format );
