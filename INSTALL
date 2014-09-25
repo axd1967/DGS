@@ -128,11 +128,11 @@ Import mandatory initial-data for the server:
 
 
 IMPORTANT NOTE:
-   Before you try logging in on your local DGS-server, ensure that the translations are added first.
+   Before you try logging in on your local DGS-server, ensure that the core translation scripts have been generated.
    Otherwise the import may fail because of changed primary-keys of translation-data that will be
    inserted by the running server itself.
 
-Create the translations:
+Generate the translations scripts:
 
   > mkdir translations
   > su -c 'chgrp www-data translations'
@@ -142,7 +142,7 @@ Create the translations:
   > popd
 
 
-Now, add the latest translations.
+Optionally, add the latest translations.
 The data file can be downloaded and extracted from:
 
    <http://www.dragongoserver.net/snapshot.php>
