@@ -59,8 +59,8 @@ For both git clone methods, the images are already included, while the download
 of an archive from the snapshot-page only contains the sources, in which case the images
 must be downloaded separately from the snapshot-page as well.
 
-If the images are downloaded from the snapshot, unpack the archive into the dragon-root
-directory to obtain a tree like:
+If the images are downloaded from the snapshot, unpack the archive into DGS_ROOT
+to obtain a tree like:
 
 
       DGS_ROOT/
@@ -213,7 +213,7 @@ NOTE: order of the following items is not strict. You may need to re-edit the
   > su -c 'chgrp www-data include/config-local.php'
   > chmod 640 include/config-local.php
 
-* If wanted, create a CACHE_FOLDER (from include/config-local.php) with
+* If desired, create a CACHE_FOLDER (from include/config-local.php) with
   the proper user/groups and rights, so that your web-server
   can read and write that directory.
 
@@ -260,7 +260,7 @@ NOTE: order of the following items is not strict. You may need to re-edit the
   su -c 'chgrp -R www-data data-store'
 
 * Maybe you need to adjust the used timezone.
-  This can be done by creating a file in the dragon-root:
+  This can be done by creating a file in DGS_ROOT:
 
      filename:              timeadjust.php
      content (for example): <?php $timeadjust = ...; ?>
@@ -271,14 +271,14 @@ NOTE: order of the following items is not strict. You may need to re-edit the
 
   If you want to use the servers time, you can skip this step.
 
-* Now you need to create the remaining page-specific translations.
-  After ensuring, that all the previous steps to prepare translations have been taken
+* Optionally, create the remaining page-specific translations.
+  After ensuring that all the previous steps to prepare translations have been taken
   as described above, read and execute the directives in 'scripts/README.translations'.
 
 * If you want to adjust the source-code, please have a look to the
   notes in 'scripts/README.developers'
 
-* MySQL Database Config:
+* MySQL database config:
 
   In order to support the forum search using a good full-text index,
   the real DragonGoServer <http://www.dragongoserver.net/> changed the
