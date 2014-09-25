@@ -84,22 +84,24 @@ For reference see also <http://mathiasbynens.be/notes/touch-icons>
 
 #--------------------------------------------------------------------
 
-2) Make a mysql database and a mysql user to access the database:
+2) Create a mysql database and one or more mysql users to access the database:
+
+   mysql> CREATE DATABASE dragondb;
 
 IMPORTANT NOTE:
 For creating and altering database tables you will need a separate database admin user, e.g. 'dragon-admin'.
-For safety reasons, the db-user used for the website MUST NOT have rights to create, alter or drop tables!
-
-   mysql> CREATE DATABASE dragondb;
-   
-   mysql> GRANT SELECT, INSERT, UPDATE, DELETE, CREATE TEMPORARY TABLES, LOCK TABLES
-          ON dragondb.* TO dragonuser@localhost IDENTIFIED BY 'secret';
-
 As dragon-admin user you may either use the database 'root'-user which has all rights or
-create a separate user with additional access rights.
+create a separate user with additional access rights:
 
    mysql> GRANT SELECT, INSERT, UPDATE, DELETE, CREATE TEMPORARY TABLES, LOCK TABLES,
-          CREATE, ALTER, DROP ON dragondb.* TO dragonadmin@localhost IDENTIFIED BY 'adminsecret';
+          CREATE, ALTER, DROP 
+          ON dragondb.* TO dragonadmin@localhost IDENTIFIED BY 'adminsecret';
+
+For safety reasons, the website should be accessed by a separate dragon-user who SHOULD NOT have rights to create, alter or drop tables!
+
+  
+   mysql> GRANT SELECT, INSERT, UPDATE, DELETE, CREATE TEMPORARY TABLES, LOCK TABLES
+          ON dragondb.* TO dragonuser@localhost IDENTIFIED BY 'secret';
 
 
 #--------------------------------------------------------------------
@@ -114,7 +116,7 @@ NOTE: This DDL-Export has been created using PHPMyAdmin: Export(DB) with Export 
       - Data: off
       'dragon-ddl.sql' (unused tables removed)
 
-With an db admin user create all the tables:
+Have the db admin user create all the tables:
 
    > mysql -D dragondb < specs/db/dragon-ddl.sql
 
@@ -178,9 +180,6 @@ after the registration.
              SET V.Verified=NOW(), V.Counter=V.Counter+1 WHERE P.Handle='adminusernick';
 
 ))
-
-
-
 
 #--------------------------------------------------------------------
 
