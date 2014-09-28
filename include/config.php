@@ -44,10 +44,10 @@ define('EMAIL_ADMINS', 'root@localhost');
 // These four are used to connect to mysql, with a command corresponding to
 // mysql -u$MYSQLUSER -p$MYSQLPASSWORD -h$MYSQLHOST -D$DB_NAME
 
-define('MYSQLHOST', 'mysql');
-define('MYSQLUSER', 'dragon-db-user');
+define('MYSQLHOST', 'mysqlhost');
+define('MYSQLUSER', 'dragon_user');
 define('MYSQLPASSWORD', '');
-define('DB_NAME', 'dragongoserver');
+define('DB_NAME', 'dragondb');
 
 
 // Dependent of your mysql version:

@@ -62,7 +62,6 @@ must be downloaded separately from the snapshot-page as well.
 If the images are downloaded from the snapshot, unpack the archive into DGS_ROOT
 to obtain a tree like:
 
-
       DGS_ROOT/
          include/
          forum/
@@ -89,20 +88,18 @@ For reference see also <http://mathiasbynens.be/notes/touch-icons>
    mysql> CREATE DATABASE dragondb;
 
 IMPORTANT NOTE:
-For creating and altering database tables you will need a separate database admin user, e.g. 'dragon-db-admin'.
+For creating and altering database tables you will need a separate database admin user, e.g. 'dragon_admin'.
 As dragon-db-admin user you may either use the database 'root'-user which has all rights
 or create a separate user with additional access rights:
 
-   mysql> GRANT SELECT, INSERT, UPDATE, DELETE, CREATE TEMPORARY TABLES, LOCK TABLES,
-          CREATE, ALTER, DROP 
-          ON dragondb.* TO dragonadmin@localhost IDENTIFIED BY 'adminsecret';
+   mysql> GRANT SELECT, INSERT, UPDATE, DELETE, CREATE TEMPORARY TABLES, LOCK TABLES, CREATE, ALTER, DROP
+          ON dragondb.* TO dragon_admin@localhost IDENTIFIED BY 'adminsecret';
 
-For safety reasons, the website should be accessed by a separate dragon-db-user 
+For safety reasons, the website should be accessed by a separate dragon-db-user
 who SHOULD NOT have rights to create, alter or drop tables!
 
-  
    mysql> GRANT SELECT, INSERT, UPDATE, DELETE, CREATE TEMPORARY TABLES, LOCK TABLES
-          ON dragondb.* TO dragonuser@localhost IDENTIFIED BY 'secret';
+          ON dragondb.* TO dragon_user@localhost IDENTIFIED BY 'secret';
 
 
 #--------------------------------------------------------------------
@@ -117,27 +114,22 @@ NOTE: This DDL-Export has been created using PHPMyAdmin: Export(DB) with Export 
       - Data: off
       'dragon-ddl.sql' (unused tables removed)
 
-Have the db admin user create all the tables:
+Have the dragon-db-admin-user create all the tables:
 
-   > mysql -D dragondb < specs/db/dragon-ddl.sql
-
-   ## or maybe, if needed by your configuration, the more complete:
-   > mysql -D dragondb -h mysqlhost -u dragon-db-admin -p < specs/db/dragon-ddl.sql
-
+   > mysql -h mysqlhost -u dragon_admin -D dragondb -p < specs/db/dragon-ddl.sql
 
 Import mandatory initial-data for the server:
 
-   > mysql -D dragondb < specs/db/dragon-data.sql
+   > mysql -h mysqlhost -u dragon_admin -D dragondb -p < specs/db/dragon-data.sql
 
 
 IMPORTANT NOTE:
-(FIXME: is this mandatory? If not, this needs further rephrasing.)
-   Before you try logging in on your local DGS-server, ensure that at least the core translation scripts
+   Before you try logging in on your local DGS-server, ensure that at least the core translation files
    have been generated.
    Otherwise the import in step 2 may fail because of changed primary-keys of translation-data that will be
    inserted by the running server itself.
 
-Step 1: generate the translations scripts:
+Step 1: generate the translations files:
 
   > mkdir translations
   > su -c 'chgrp www-data translations'
@@ -148,14 +140,16 @@ Step 1: generate the translations scripts:
 
 
 Step 2: optionally, add the latest translations.
+
+After ensuring that all the previous steps to prepare translations have been taken
+as described above, read and execute the directives in 'scripts/README.translations'.
+
 The data file can be downloaded and extracted from:
 
    <http://www.dragongoserver.net/snapshot.php>
 
    gunzip Translationdata.mysql.gz
    mysql -D dragondb < Translationdata.mysql
-
-For more details on translation issues, see 'README.translations'.
 
 
 (( The following creation of an DGS admin user could be delayed until you need it:
@@ -278,10 +272,6 @@ NOTE: order of the following items is not strict. You may need to re-edit the
   It's added to form the "current timestamp" ($NOW).
 
   If you want to use the servers time, you can skip this step.
-
-* Optionally, create the remaining page-specific translations.
-  After ensuring that all the previous steps to prepare translations have been taken
-  as described above, read and execute the directives in 'scripts/README.translations'.
 
 * If you want to adjust the source-code, please have a look to the
   notes in 'scripts/README.developers'
