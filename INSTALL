@@ -89,15 +89,16 @@ For reference see also <http://mathiasbynens.be/notes/touch-icons>
    mysql> CREATE DATABASE dragondb;
 
 IMPORTANT NOTE:
-For creating and altering database tables you will need a separate database admin user, e.g. 'dragon-admin'.
-As dragon-admin user you may either use the database 'root'-user which has all rights or
-create a separate user with additional access rights:
+For creating and altering database tables you will need a separate database admin user, e.g. 'dragon-db-admin'.
+As dragon-db-admin user you may either use the database 'root'-user which has all rights
+or create a separate user with additional access rights:
 
    mysql> GRANT SELECT, INSERT, UPDATE, DELETE, CREATE TEMPORARY TABLES, LOCK TABLES,
           CREATE, ALTER, DROP 
           ON dragondb.* TO dragonadmin@localhost IDENTIFIED BY 'adminsecret';
 
-For safety reasons, the website should be accessed by a separate dragon-user who SHOULD NOT have rights to create, alter or drop tables!
+For safety reasons, the website should be accessed by a separate dragon-db-user 
+who SHOULD NOT have rights to create, alter or drop tables!
 
   
    mysql> GRANT SELECT, INSERT, UPDATE, DELETE, CREATE TEMPORARY TABLES, LOCK TABLES
@@ -121,7 +122,7 @@ Have the db admin user create all the tables:
    > mysql -D dragondb < specs/db/dragon-ddl.sql
 
    ## or maybe, if needed by your configuration, the more complete:
-   > mysql -D dragondb -h mysqlhost -u dragon-admin -p < specs/db/dragon-ddl.sql
+   > mysql -D dragondb -h mysqlhost -u dragon-db-admin -p < specs/db/dragon-ddl.sql
 
 
 Import mandatory initial-data for the server:
@@ -130,11 +131,13 @@ Import mandatory initial-data for the server:
 
 
 IMPORTANT NOTE:
-   Before you try logging in on your local DGS-server, ensure that the core translation scripts have been generated.
-   Otherwise the import may fail because of changed primary-keys of translation-data that will be
+(FIXME: is this mandatory? If not, this needs further rephrasing.)
+   Before you try logging in on your local DGS-server, ensure that at least the core translation scripts
+   have been generated.
+   Otherwise the import in step 2 may fail because of changed primary-keys of translation-data that will be
    inserted by the running server itself.
 
-Generate the translations scripts:
+Step 1: generate the translations scripts:
 
   > mkdir translations
   > su -c 'chgrp www-data translations'
@@ -144,13 +147,15 @@ Generate the translations scripts:
   > popd
 
 
-Optionally, add the latest translations.
+Step 2: optionally, add the latest translations.
 The data file can be downloaded and extracted from:
 
    <http://www.dragongoserver.net/snapshot.php>
 
    gunzip Translationdata.mysql.gz
    mysql -D dragondb < Translationdata.mysql
+
+For more details on translation issues, see 'README.translations'.
 
 
 (( The following creation of an DGS admin user could be delayed until you need it:
@@ -180,6 +185,9 @@ after the registration.
              SET V.Verified=NOW(), V.Counter=V.Counter+1 WHERE P.Handle='adminusernick';
 
 ))
+
+
+
 
 #--------------------------------------------------------------------
 

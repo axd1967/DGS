@@ -43,10 +43,9 @@ define('EMAIL_ADMINS', 'root@localhost');
 
 // These four are used to connect to mysql, with a command corresponding to
 // mysql -u$MYSQLUSER -p$MYSQLPASSWORD -h$MYSQLHOST -D$DB_NAME
-// (this is the normal 'dragon-user' user referred to in INSTALL)
 
 define('MYSQLHOST', 'mysql');
-define('MYSQLUSER', 'dragonuser');
+define('MYSQLUSER', 'dragon-db-user');
 define('MYSQLPASSWORD', '');
 define('DB_NAME', 'dragongoserver');
 

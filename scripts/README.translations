@@ -1,4 +1,4 @@
-To scan PHP files and recover Groups+Pages, run (need the ADMIN_DATABASE privilege):
+To scan PHP files and recover Groups+Pages, run (WHAT?) (need the ADMIN_DATABASE privilege):
 
 # NOTE:
 # keep in mind, that translation-text discovery only works correctly,
@@ -55,7 +55,7 @@ then update the database with new English text data,
 run the following (need the ADMIN_TRANSLATORS privilege):
 
 > scripts/generate_translation_texts.php
-then, after checking:
+then, after checking (FOR WHAT?):
 > scripts/generate_translation_texts.php?do_it=1
 
 
