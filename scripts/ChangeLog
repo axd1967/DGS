@@ -11,6 +11,14 @@ Release [2014-03-27] - DGS 1.0.17 - tag [release-1_0_17-20140327] on branch [DGS
 ChangeLog
 ------------------------------------------------------------------
 
+2014-10-06 jug
+
+   * include/classlib_userconfig.php (ConfigBoard.set_wood_color),
+     include/std_functions.php ($woodbgcolors),
+     js/goeditor.js (woodbgcolors),
+     specs/db/table-Players.txt, images/smallwood16.gif, edit_profile.php,:
+   - added white-wood-background for game-board-display
+
 2014-10-05 jug
 
    * include/config.php (ALLOW_QUOTING),

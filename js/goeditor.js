@@ -63,7 +63,7 @@ var gr_img = 'grey.gif'; // transparent-pixel
 var letters = ['', 'a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm', 'n',
                'o', 'p', 'q', 'r', 's', 't', 'u', 'v', 'w', 'x', 'y', 'z'];
 
-var woodbgcolors = ['', '#e8c878','#e8b878','#e8a858', '#d8b878', '#b88848'];
+var woodbgcolors = ['', '#e8c878','#e8b878','#e8a858', '#d8b878', '#b88848', '#ffffff'];
 
 function init(nr)
 {

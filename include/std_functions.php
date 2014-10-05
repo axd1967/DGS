@@ -139,7 +139,7 @@ $buttoncolors = array('white','white','white','white',
                       'white','white','white','black');
 define('BUTTON_MAX', count($buttonfiles));
 
-$woodbgcolors = array(1=>'#e8c878','#e8b878','#e8a858', '#d8b878', '#b88848');
+$woodbgcolors = array(1=>'#e8c878','#e8b878','#e8a858', '#d8b878', '#b88848', '#ffffff');
 
 global $cookie_pref_rows; //PHP5
 $cookie_pref_rows = array(

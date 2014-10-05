@@ -120,6 +120,11 @@ Zu  | ThumbnailSize    | tinyint(3) unsigned                         | NO   |   
 | NotesLargeMode   | enum('RIGHT','BELOW','RIGHTOFF','BELOWOFF') | NO   |     | RIGHT   |       |
 | NotesCutoff      | tinyint(3) unsigned                         | NO   |     | 13      |       |
 
+* Woodcolor : int
+   - 1..5 = textured wood-images
+   - 11..16 = uni-colored "wood", see $woodbgcolors-array with wood-colors
+
+
 # Fields for pages-related GUI-config in ConfigPages-table (category = 1u):
 
 | Field                           | Type                | Null | Key | Default | Extra |

@@ -131,10 +131,10 @@ class ConfigBoard
       return $this->wood_color;
    }
 
-   /*! \brief Sets valid wood-color [1..5,11..15]; if invalid set to default 1. */
+   /*! \brief Sets valid wood-color [1..5,11..16]; if invalid set to default 1. */
    public function set_wood_color( $wood_color=1 )
    {
-      if ( ( $wood_color >= 1 && $wood_color <= 5 ) || ( $wood_color >= 11 && $wood_color <= 15 ) )
+      if ( ( $wood_color >= 1 && $wood_color <= 5 ) || ( $wood_color >= 11 && $wood_color <= 16 ) )
          $this->wood_color = (int)$wood_color;
       else
          $this->wood_color = 1;

@@ -61,7 +61,7 @@ require_once 'include/gui_bulletin.php';
    $thumbnailsizes = array_value_to_key_and_value( array( 7, 11 ) );
 
    $woodcolors = array();
-   for ($i=1; $i<16; $i++ )
+   for ($i=1; $i<=16; $i++ )
    {
       $tmp = "<img width=30 height=30 src=\"images/smallwood$i.gif\" alt=\"wood$i\">";
       if ( $i==5 )
