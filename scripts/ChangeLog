@@ -13,6 +13,9 @@ ChangeLog
 
 2014-10-05 jug
 
+   * forum/forum_functions.php (FORUM_MAX_INDENT):
+   - increased forum-max-indent level from 15 to 25 as recent discussion went very deep
+
    * include/std_functions.php ($html_code_closed, $html_code, $html_safe_preg, ticket_reference),
      include/config.php (TICKET_REF),
      INSTALL:

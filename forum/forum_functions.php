@@ -41,7 +41,7 @@ require_once 'forum/class_forum_read.php';
 //must follow the "ORDER BY PosIndex" order and have at least 64 chars:
 define('ORDER_STR', "*+-/0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz");
 define('FORUM_MAX_DEPTH', 40); //half the length of the Posts.PosIndex field
-define('FORUM_MAX_INDENT', 15); //at the display time
+define('FORUM_MAX_INDENT', 25); //at the display time
 
 
 define("LINK_FORUMS", 1 << 0);
