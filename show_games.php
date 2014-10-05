@@ -481,12 +481,12 @@ $GLOBALS['ThePage'] = new Page('GamesList');
    {
       $gtable->add_tablehead(17, T_('Black name#header'), 'User', 0, 'blackName+');
       $gtable->add_tablehead(18, T_('Black userid#header'), 'User', 0, 'blackHandle+');
-      $gtable->add_tablehead(26, T_('Black start rating#header'), 'Rating', 0, 'Black_Start_Rating-');
       $gtable->add_tablehead(19, T_('Black rating#header'), 'Rating', 0, 'blackRating2-');
+      $gtable->add_tablehead(26, T_('Black start rating#header'), 'Rating', 0, 'Black_Start_Rating-');
       $gtable->add_tablehead(20, T_('White name#header'), 'User', 0, 'whiteName+');
       $gtable->add_tablehead(21, T_('White userid#header'), 'User', 0, 'whiteHandle+');
-      $gtable->add_tablehead(29, T_('White start rating#header'), 'Rating', 0, 'White_Start_Rating-');
       $gtable->add_tablehead(22, T_('White rating#header'), 'Rating', 0, 'whiteRating2-');
+      $gtable->add_tablehead(29, T_('White start rating#header'), 'Rating', 0, 'White_Start_Rating-');
    }
    else if ( $finished ) //FU+FA ?UNION
    {
@@ -494,15 +494,15 @@ $GLOBALS['ThePage'] = new Page('GamesList');
       {
          $gtable->add_tablehead(17, T_('Black name#header'), 'User', 0, 'blackName+');
          $gtable->add_tablehead(18, T_('Black userid#header'), 'User', 0, 'blackHandle+');
+         $gtable->add_tablehead(19, T_('Black rating#header'), 'Rating', 0, 'blackRating2-');
          $gtable->add_tablehead(26, T_('Black start rating#header'), 'Rating', 0, 'Black_Start_Rating-');
          $gtable->add_tablehead(27, T_('Black end rating#header'), 'Rating', 0, 'blackEndRating-');
-         $gtable->add_tablehead(19, T_('Black rating#header'), 'Rating', 0, 'blackRating2-');
          $gtable->add_tablehead(28, T_('Black rating diff#header'), 'Number', 0, 'blackDiff-');
          $gtable->add_tablehead(20, T_('White name#header'), 'User', 0, 'whiteName+');
          $gtable->add_tablehead(21, T_('White userid#header'), 'User', 0, 'whiteHandle+');
+         $gtable->add_tablehead(22, T_('White rating#header'), 'Rating', 0, 'whiteRating2-');
          $gtable->add_tablehead(29, T_('White start rating#header'), 'Rating', 0, 'White_Start_Rating-');
          $gtable->add_tablehead(30, T_('White end rating#header'), 'Rating', 0, 'whiteEndRating-');
-         $gtable->add_tablehead(22, T_('White rating#header'), 'Rating', 0, 'whiteRating2-');
          $gtable->add_tablehead(31, T_('White rating diff#header'), 'Number', 0, 'whiteDiff-');
       }
       else //FU ?UNION
@@ -510,9 +510,9 @@ $GLOBALS['ThePage'] = new Page('GamesList');
          $player_title = ($glc->mp_game) ? T_('Name#header') : T_('Opponent#header');
          $gtable->add_tablehead( 3, $player_title, 'User', 0, 'oppName+');
          $gtable->add_tablehead( 4, T_('Userid#header'), 'User', 0, 'oppHandle+');
+         $gtable->add_tablehead(16, T_('Rating#header'), 'Rating', 0, 'oppRating-');
          $gtable->add_tablehead(23, T_('Start rating#header'), 'Rating', 0, 'oppStartRating-');
          $gtable->add_tablehead(24, T_('End rating#header'), 'Rating', 0, 'oppEndRating-');
-         $gtable->add_tablehead(16, T_('Rating#header'), 'Rating', 0, 'oppRating-');
          $gtable->add_tablehead(25, T_('Rating diff#header'), 'Number', 0, 'oppRatingDiff-');
          $gtable->add_tablehead(36, T_('User Start rating#header'), 'Rating', 0, 'userStartRating-');
          $gtable->add_tablehead(37, T_('User End rating#header'), 'Rating', 0, 'userEndRating-');
@@ -526,20 +526,20 @@ $GLOBALS['ThePage'] = new Page('GamesList');
       {
          $gtable->add_tablehead(17, T_('Black name#header'), 'User', 0, 'blackName+');
          $gtable->add_tablehead(18, T_('Black userid#header'), 'User', 0, 'blackHandle+');
-         $gtable->add_tablehead(26, T_('Black start rating#header'), 'Rating', 0, 'Black_Start_Rating-');
          $gtable->add_tablehead(19, T_('Black rating#header'), 'Rating', 0, 'blackRating2-');
+         $gtable->add_tablehead(26, T_('Black start rating#header'), 'Rating', 0, 'Black_Start_Rating-');
          $gtable->add_tablehead(20, T_('White name#header'), 'User', 0, 'whiteName+');
          $gtable->add_tablehead(21, T_('White userid#header'), 'User', 0, 'whiteHandle+');
-         $gtable->add_tablehead(29, T_('White start rating#header'), 'Rating', 0, 'White_Start_Rating-');
          $gtable->add_tablehead(22, T_('White rating#header'), 'Rating', 0, 'whiteRating2-');
+         $gtable->add_tablehead(29, T_('White start rating#header'), 'Rating', 0, 'White_Start_Rating-');
       }
       else //RU ?UNION
       {
          $player_title = ($glc->mp_game) ? T_('Name#header') : T_('Opponent#header');
          $gtable->add_tablehead( 3, $player_title, 'User', 0, 'oppName+');
          $gtable->add_tablehead( 4, T_('Userid#header'), 'User', 0, 'oppHandle+');
-         $gtable->add_tablehead(23, T_('Start rating#header'), 'Rating', 0, 'oppStartRating-');
          $gtable->add_tablehead(16, T_('Rating#header'), 'Rating', 0, 'oppRating-');
+         $gtable->add_tablehead(23, T_('Start rating#header'), 'Rating', 0, 'oppStartRating-');
          $gtable->add_tablehead(36, T_('User Start rating#header'), 'Rating', 0, 'userStartRating-');
          $gtable->add_tablehead( 5, T_('Colors#header'), 'Image', 0, 'X_Color+');
       }
