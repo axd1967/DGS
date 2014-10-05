@@ -13,6 +13,9 @@ ChangeLog
 
 2014-10-05 jug
 
+   * snapshot.php:
+   - translation-data export must also contain FAQ/Links/Intro-table-data
+
    * show_games.php:
    - changed order of current-rating-columns by moving current-rating right after user-id
      - for all kind of users: user, opponent, black, white user
@@ -26,8 +29,7 @@ ChangeLog
    - increased forum-max-indent level from 15 to 25 as recent discussion went very deep
 
    * include/std_functions.php ($html_code_closed, $html_code, $html_safe_preg, ticket_reference),
-     include/config.php (TICKET_REF),
-     INSTALL:
+     include/config.php (TICKET_REF), INSTALL:
    - added DGS-tag <ticket issue> to reference issues in external ticket-system
      - external URL to ticket-system can be configured with global config 'TICKET_REF'
 

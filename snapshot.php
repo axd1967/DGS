@@ -25,7 +25,7 @@ $GLOBALS['ThePage'] = new Page('Docs');
 /*
  * IMPORTANT NOTES:
  * - To create translation-data snapshot you may use (replace 'DBUSER' and 'DATABASE_NAME'):
- *   mysqldump --quick --extended-insert --compress --no-create-info -hdragongoserver.net -uDBUSER -p DATABASE_NAME  TranslationLanguages TranslationGroups TranslationPages TranslationTexts TranslationFoundInGroup Translations | gzip -c > Translationdata.mysql.gz
+ *   mysqldump --quick --extended-insert --compress --no-create-info -hdragongoserver.net -uDBUSER -p DATABASE_NAME  TranslationLanguages TranslationGroups TranslationPages TranslationTexts TranslationFoundInGroup Translations FAQ Intro Links | gzip -c > Translationdata.mysql.gz
  *
  * - To create a stable-snapshot from Git WITH images you may use (replace 'BRANCH_NAME'):
  *   git checkout BRANCH_NAME
