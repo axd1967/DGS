@@ -1685,7 +1685,7 @@ function add_line_breaks( $str)
   // ** keep a '|' at both ends (or empty):
 global $html_code_closed; //PHP5
 $html_code_closed['cell'] = '|note|b|i|u|strong|em|tt|strike|color|';
-$html_code_closed['line'] = '|home_|home|a'.$html_code_closed['cell'];
+$html_code_closed['line'] = '|home_|home|a'.$html_code_closed['cell'] . (TICKET_REF ? '|ticket' : '');
 $html_code_closed['msg'] = '|center|ul|ol|font|pre|code|quote|igoban'.$html_code_closed['line'];
 $html_code_closed['game'] = '|h|hidden|c|comment'.$html_code_closed['msg'];
 //$html_code_closed['faq'] = ''; //no closed check
@@ -1695,7 +1695,7 @@ $html_code_closed['faq'] = $html_code_closed['msg']; //minimum closed check
   // ** no '|' at ends:
 global $html_code; //PHP5
 $html_code['cell'] = 'note|b|i|u|strong|em|tt|strike|color';
-$html_code['line'] = 'home|a|'.$html_code['cell'];
+$html_code['line'] = 'home|a|'.$html_code['cell'] . (TICKET_REF ? '|ticket' : '');
 $html_code['msg'] = 'br|/br|p|/p|li|hr'.$html_code_closed['msg']
    .'goban|mailto|_?https?|_?news|_?ftp|game_?|tourney_?|survey_?|user_?|send_?|image';
 $html_code['game'] = 'br|/br|p|/p|li|hr'.$html_code_closed['game']
@@ -1964,6 +1964,7 @@ function reverse_allowed( $msg)
 
 
 
+// see user_reference()-function for description
 define('REF_LINK', 0x1);
 define('REF_LINK_ALLOWED', 0x2);
 define('REF_LINK_BLANK', 0x4);
@@ -1993,6 +1994,10 @@ $html_safe_preg = array(
 //<game gid[,move]> =>show game
  '/'.ALLOWED_LT."game(_)? +([0-9]+)( *, *(".MOVE_SETUP."|[0-9]+))? *".ALLOWED_GT.'/ise'
   => "game_reference(('\\1'?".REF_LINK_BLANK.":0)+".REF_LINK_ALLOWED.",1,'',\\2,'\\4')",
+
+//<ticket issue_id> => link to issue
+ '/'.ALLOWED_LT."ticket +([\\w_-]+) *".ALLOWED_GT.'/ise'
+ => ( TICKET_REF ? "ticket_reference(".REF_LINK_ALLOWED.",1,'','\\1')" : "'\\0'"),
 
 //<tourney tid> => show tournament
  '/'.ALLOWED_LT."tourney(_)? +([0-9]+) *".ALLOWED_GT.'/ise'
@@ -2054,10 +2059,11 @@ $html_safe_preg = array(
 */
 
 //reverse (=escape) bad skipped (faulty) tags; keep them alphabetic here
- '%'.ALLOWED_LT."(/?_?(code|color|ftp|game|home|https?|image|mailto|news|note|quote|send|survey|tourney|user).*?)"
+ '%'.ALLOWED_LT."(/?_?(code|color|ftp|game|home|https?|image|mailto|news|note|quote|send|survey|tourney|user".(TICKET_REF ? '|ticket':'').").*?)"
     .ALLOWED_GT.'%is'
   => "&lt;\\1&gt;",
 ); //$html_safe_preg
+
 
 
 /**
@@ -3033,6 +3039,34 @@ function game_reference( $link, $safe_it, $class, $gid, $move=0, $extra=null )
    }
    return $text;
 }//game_reference
+
+// format: ticket:issue
+// NOTE: expects TICKET_REF with '%s' to be replaced with issue-arg
+function ticket_reference( $link, $safe_it, $class, $issue )
+{
+   if ( !TICKET_REF )
+      return $issue;
+
+   $ticket_str = sprintf('%s:%s', T_('Ticket'), $issue);
+   if ( $safe_it )
+      $ticket_str = make_html_safe($ticket_str);
+
+   if ( $link )
+   {
+      $url = 'A href="' . str_replace('%s', urlencode($issue), TICKET_REF) . '"';
+      if ( $class )
+         $url .= " class=$class";
+      if ( $link & REF_LINK_ALLOWED )
+      {
+         $url = str_replace('"', ALLOWED_QUOT, $url);
+         $ticket_str = ALLOWED_LT.$url.ALLOWED_GT.$ticket_str.ALLOWED_LT."/A".ALLOWED_GT;
+      }
+      else
+         $ticket_str = "<$url>$ticket_str</A>";
+   }
+
+   return $ticket_str;
+}//ticket_reference
 
 // format: Tournament #n [title]
 function tournament_reference( $link, $safe_it, $class, $tid )

@@ -117,6 +117,10 @@ define('DATASTORE_FOLDER', '../data-store/');
 // NOTE: not to be mistaken for an URL, which may look the same
 define('USERPIC_FOLDER', 'userpic/');
 
+// URL to ticket-issues with '%s' to be replaced with ticket-id.
+// Set to '' (empty string) if no references to tickets used.
+define('TICKET_REF', 'https://dragongoserver.atlassian.net/browse/%s');
+
 
 // Global parameters to control caching
 

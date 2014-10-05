@@ -13,6 +13,12 @@ ChangeLog
 
 2014-10-05 jug
 
+   * include/std_functions.php ($html_code_closed, $html_code, $html_safe_preg, ticket_reference),
+     include/config.php (TICKET_REF),
+     INSTALL:
+   - added DGS-tag <ticket issue> to reference issues in external ticket-system
+     - external URL to ticket-system can be configured with global config 'TICKET_REF'
+
    * tournaments/include/types/public_round_robin.php (PublicRoundRobinTournament.createTournament):
    - changed default-title for newly create public-round-robin tournament to
      "user's mini-tournament (size)"

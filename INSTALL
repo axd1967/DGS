@@ -273,6 +273,11 @@ NOTE: order of the following items is not strict. You may need to re-edit the
 
   If you want to use the servers time, you can skip this step.
 
+* Configure if you use an external ticket-system.
+  If you do NOT use an external ticket-system to track issues set the config 'TICKET_REF'
+  to an empty string.  Otherwise you may configure a URL, so that the '<ticket issue>' DGS-tag
+  can be used to reference issues in the external ticket-system.
+
 * If you want to adjust the source-code, please have a look to the
   notes in 'scripts/README.developers'
 
