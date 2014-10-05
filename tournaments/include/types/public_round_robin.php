@@ -63,7 +63,9 @@ class PublicRoundRobinTournament extends TournamentTemplateRoundRobin
 
    public function createTournament()
    {
-      $tourney = $this->make_tournament( TOURNEY_SCOPE_PUBLIC, "Public Round-Robin (19x19)" );
+      global $player_row;
+      $title = sprintf("%s's mini-tournament (19x19)", $player_row['Handle']);
+      $tourney = $this->make_tournament( TOURNEY_SCOPE_PUBLIC, $title );
 
       $tprops = new TournamentProperties();
       $tprops->MinParticipants = 3;

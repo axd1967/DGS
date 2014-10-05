@@ -13,6 +13,10 @@ ChangeLog
 
 2014-10-05 jug
 
+   * tournaments/include/types/public_round_robin.php (PublicRoundRobinTournament.createTournament):
+   - changed default-title for newly create public-round-robin tournament to
+     "user's mini-tournament (size)"
+
    * scripts/README.developers:
    - added site-policy regarding the use of JavaScript on DGS,
      inspired by https://sourceforge.net/p/dragongoserver/dgs-main/merge-requests/6/
