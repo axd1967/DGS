@@ -1684,7 +1684,7 @@ function add_line_breaks( $str)
 // ** keep them lowercase and do not use parenthesis **
   // ** keep a '|' at both ends (or empty):
 global $html_code_closed; //PHP5
-$html_code_closed['cell'] = '|note|b|i|u|strong|em|tt|strike|color|';
+$html_code_closed['cell'] = '|note|b|i|u|strong|em|tt|strike|color|bgcolor|';
 $html_code_closed['line'] = '|home_|home|a'.$html_code_closed['cell'] . (TICKET_REF ? '|ticket' : '');
 $html_code_closed['msg'] = '|center|ul|ol|font|pre|code|quote|igoban'.$html_code_closed['line'];
 $html_code_closed['game'] = '|h|hidden|c|comment'.$html_code_closed['msg'];
@@ -1694,7 +1694,7 @@ $html_code_closed['faq'] = $html_code_closed['msg']; //minimum closed check
 
   // ** no '|' at ends:
 global $html_code; //PHP5
-$html_code['cell'] = 'note|b|i|u|strong|em|tt|strike|color';
+$html_code['cell'] = 'note|b|i|u|strong|em|tt|strike|color|bgcolor|';
 $html_code['line'] = 'home|a|'.$html_code['cell'] . (TICKET_REF ? '|ticket' : '');
 $html_code['msg'] = 'br|/br|p|/p|li|hr'.$html_code_closed['msg']
    .'goban|mailto|_?https?|_?news|_?ftp|game_?|tourney_?|survey_?|user_?|send_?|image';
@@ -2020,6 +2020,12 @@ $html_safe_preg = array(
  '%'.ALLOWED_LT."/color *".ALLOWED_GT.'%is'
   => ALLOWED_LT."/font".ALLOWED_GT,
 
+//<bgcolor col>...</bgcolor> =>translated to <span style="background-color: col">...</span>
+ '%'.ALLOWED_LT."bgcolor +(#?\\w+) *".ALLOWED_GT.'%is'
+  => ALLOWED_LT."span style=".ALLOWED_QUOT."background-color: \\1".ALLOWED_QUOT.ALLOWED_GT,
+ '%'.ALLOWED_LT."/bgcolor *".ALLOWED_GT.'%is'
+  => ALLOWED_LT."/span".ALLOWED_GT,
+
 //<code>...</code> =>translated to <pre class=code>...</pre>
 // see also parse_tags_safe() for the suppression of inner html codes
  '%'.ALLOWED_LT."code([^`\\n\\t]*)".ALLOWED_GT.'%is'
@@ -2059,7 +2065,7 @@ $html_safe_preg = array(
 */
 
 //reverse (=escape) bad skipped (faulty) tags; keep them alphabetic here
- '%'.ALLOWED_LT."(/?_?(code|color|ftp|game|home|https?|image|mailto|news|note|quote|send|survey|tourney|user".(TICKET_REF ? '|ticket':'').").*?)"
+ '%'.ALLOWED_LT."(/?_?(bgcolor|code|color|ftp|game|home|https?|image|mailto|news|note|quote|send|survey".(TICKET_REF ? '|ticket':'')."|tourney|user).*?)"
     .ALLOWED_GT.'%is'
   => "&lt;\\1&gt;",
 ); //$html_safe_preg

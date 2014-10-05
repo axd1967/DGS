@@ -13,6 +13,9 @@ ChangeLog
 
 2014-10-05 jug
 
+   * include/std_functions.php ($html_code_closed, $html_code, $html_safe_preg):
+   - added DGS-tag <bgcolor col>...</bgcolor> to mark text with background-color
+
    * forum/forum_functions.php (FORUM_MAX_INDENT):
    - increased forum-max-indent level from 15 to 25 as recent discussion went very deep
 
