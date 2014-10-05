@@ -293,7 +293,7 @@ require_once 'forum/post.php';
       $GoDiagrams = NULL;
 //      if ( ALLOW_GO_DIAGRAMS && is_javascript_enabled() )
 //         $GoDiagrams = GoDiagram::find_godiagrams($post->text, $cfg_board);
-      $post_reference = $disp_forum->draw_post( $drawmode, $post, $is_my_post, $GoDiagrams );
+      $disp_forum->draw_post( $drawmode, $post, $is_my_post, $GoDiagrams );
 
       // preview of new or existing post (within existing thread)
       $pvw_post = $post->copy_post(); // copy for preview/edit
@@ -315,7 +315,10 @@ require_once 'forum/post.php';
          {
             // can only quote "showable"-post (non-hidden, my-post, or moderator)
             if ( ALLOW_QUOTING && @$_REQUEST['quote'] && !($drawmode & MASK_DRAWPOST_NO_BODY) )
-               $pvw_post_text = "<quote>$post_reference\n\n$pvw_post_text</quote>\n";
+            {
+               $post_reference = sprintf( '[%s]:', $post->author->Handle );
+               $pvw_post_text = "<quote>$post_reference\n$pvw_post_text</quote>\n";
+            }
             else
                $pvw_post_text = '';
             $GoDiagrams = null;

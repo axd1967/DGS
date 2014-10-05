@@ -13,6 +13,14 @@ ChangeLog
 
 2014-10-05 jug
 
+   * include/config.php (ALLOW_QUOTING),
+     forum/forum_functions.php (DisplayForum.draw_post),
+     forum/read.php:
+   - re-enabled ALLOW_QUOTING to get access to a forum post's RAW-text
+     - enabled ALLOW_QUOTING in 'include/config.php' to show 'quote'-link right
+       to 'reply'-link on each forum-post
+     - simplified quote-pre-amble to only contain quoted user
+
    * include/message_functions.php (game_info_table),
      waiting_room.php :
    - for waiting-room added link to finished games with opponent

@@ -724,7 +724,6 @@ class DisplayForum
       $term_url = ( $this->rx_term != '' ) ? URI_AMP."xterm=".urlencode($this->rx_term) : '';
       $user_may_post = !($player_row['AdminOptions'] & ADMOPT_FORUM_NO_POST); // use allowed to post?
 
-      $post_reference = '';
       $cols = 2; //one for the subject header, one for the possible approved/hidden state
 
       // highlight terms in Subject/Text
@@ -836,25 +835,21 @@ class DisplayForum
          // [header-row] post-info: "author, created (edited)  (No. X)"
          echo "\n<tr class=\"$hdrclass Author\"><td class=Author colspan=$hdrcols>";
 
-         $post_reference = date(DATE_FMT, $post->created);
          $author_rating_str = ( $post->author->hasRating(false) )
             ? ', ' . echo_rating($post->author->Rating, /*show%*/false, $post->author->ID, /*engl*/false, /*short*/true)
             : '';
          echo T_('by'), ' ',
               echo_image_admin( $post->author->AdminLevel ),
-              ' ', $post->author->user_reference(), $author_rating_str, SMALL_SPACING, $post_reference;
+              ' ', $post->author->user_reference(), $author_rating_str, SMALL_SPACING,
+              date(DATE_FMT, $post->created);
 
          if ( !($drawmode & MASK_DRAWPOST_NO_BODY) )
             echo $this->get_post_edited_string( $post );
-         if ( $post->last_edited > 0 )
-            $post_reference = date(DATE_FMT, $post->last_edited);
 
          if ( $drawmode_type != DRAWPOST_SEARCH && !($drawmode & MASK_DRAWPOST_NO_NUM) )
             echo SMALL_SPACING, sprintf( '(%s %s)', T_('No.#num'), $post->creation_order );
 
          echo "</td></tr>";
-
-         $post_reference = "<user {$post->author->ID}> ($post_reference):";
       }
 
       // post body
@@ -900,7 +895,7 @@ class DisplayForum
                echo '<a href="', $thread_url,URI_AMP,"reply=$pid#$pid\">[ ", T_('reply#forum'), " ]</a>&nbsp;&nbsp;";
                if ( ALLOW_QUOTING )
                   echo '<a href="', $thread_url,URI_AMP,"quote=1",URI_AMP,"reply=$pid#$pid\">[ ",
-                     T_('quote'), " ]</a>&nbsp;&nbsp;";
+                     T_('quote#forum'), " ]</a>&nbsp;&nbsp;";
             }
 
             // edit link
@@ -938,8 +933,6 @@ class DisplayForum
          }
          echo "</td></tr>\n";
       }//post-footer
-
-      return $post_reference;
    }//draw_post
 
    /*! \brief Draw tree-overview for this thread. */

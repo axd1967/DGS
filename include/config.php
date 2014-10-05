@@ -253,8 +253,8 @@ define('ALLOW_GAME_EDITOR', false);
 define('ALLOW_OLD_GOBAN_EDITOR', false);
 define('ENABLE_GAME_VIEWER', false);
 
-// Forum: 'Quote' works as 'Reply', but inits textbox with previous post in <quote>-tags
-define('ALLOW_QUOTING', false);
+// Forum: 'Quote' works as 'Reply', but inits textbox with previous raw-post in <quote>-tags
+define('ALLOW_QUOTING', true);
 
 // Feature-voting: no voting-stuff shown/accessible if disabled
 define('ALLOW_FEATURE_VOTE', true);
