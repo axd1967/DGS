@@ -1682,25 +1682,21 @@ function add_line_breaks( $str)
 //Warning: </br> was historically used in end game messages. It remains in database.
 
 // ** keep them lowercase and do not use parenthesis **
-  // ** keep a '|' at both ends (or empty):
+// ** keep a '|' at both ends (or empty):
 global $html_code_closed; //PHP5
 $html_code_closed['cell'] = '|note|b|i|u|strong|em|tt|strike|color|bgcolor|';
-$html_code_closed['line'] = '|home_|home|a'.$html_code_closed['cell'] . (TICKET_REF ? '|ticket' : '');
-$html_code_closed['msg'] = '|center|ul|ol|font|pre|code|quote|igoban'.$html_code_closed['line'];
+$html_code_closed['line'] = '|home_|home|a'.$html_code_closed['cell'];
+$html_code_closed['msg']  = '|center|ul|ol|font|pre|code|quote|igoban'.$html_code_closed['line'];
 $html_code_closed['game'] = '|h|hidden|c|comment'.$html_code_closed['msg'];
-//$html_code_closed['faq'] = ''; //no closed check
-$html_code_closed['faq'] = $html_code_closed['msg']; //minimum closed check
-  // more? '|/li|/p|/br|/ *br';
+$html_code_closed['faq']  = $html_code_closed['msg']; //minimum closed check
 
-  // ** no '|' at ends:
+// ** no '|' at ends:
 global $html_code; //PHP5
-$html_code['cell'] = 'note|b|i|u|strong|em|tt|strike|color|bgcolor|';
-$html_code['line'] = 'home|a|'.$html_code['cell'] . (TICKET_REF ? '|ticket' : '');
-$html_code['msg'] = 'br|/br|p|/p|li|hr'.$html_code_closed['msg']
-   .'goban|mailto|_?https?|_?news|_?ftp|game_?|tourney_?|survey_?|user_?|send_?|image';
-$html_code['game'] = 'br|/br|p|/p|li|hr'.$html_code_closed['game']
-   .'goban|mailto|_?https?|_?news|_?ftp|game_?|tourney_?|survey_?|user_?|send_?|image';
-$html_code['faq'] = '\w+|/\w+'; //all non-empty words
+$html_code['cell'] = 'note|b|i|u|strong|em|tt|strike|color|bgcolor';
+$html_code['line'] = 'home|a|ticket|'.$html_code['cell'];
+$html_code['msg']  = 'br|/br|p|/p|li|hr'.$html_code_closed['msg'] .'goban|mailto|_?https?|_?news|_?ftp|game_?|ticket|tourney_?|survey_?|user_?|send_?|image';
+$html_code['game'] = 'br|/br|p|/p|li|hr'.$html_code_closed['game'].'goban|mailto|_?https?|_?news|_?ftp|game_?|ticket|tourney_?|survey_?|user_?|send_?|image';
+$html_code['faq']  = '/?\w+'; //all non-empty words
 
 
 //** no reg_exp chars nor ampersand nor '%' (see also $html_safe_preg):
@@ -1777,7 +1773,7 @@ function parse_atbs_safe( &$trail, &$bad)
          .'|\\beval\\s*\\('      //eval() can split most of the keywords
          .'|\\bstyle\\s*='       //disabling style= is not bad too
          ;
-      if ( /*$quote &&*/  preg_match( "%($quote)%i", preg_replace( "/[\\x01-\\x1f]+/", '', $head)) )
+      if ( preg_match( "%($quote)%i", preg_replace( "/[\\x01-\\x1f]+/", '', $head)) )
          $bad = 2;
    }
    if ( $bad )
@@ -1864,7 +1860,7 @@ function parse_tags_safe( &$trail, &$bad, &$html_code, &$html_code_closed, $stop
          $trail= preg_replace( "/^(\\r\\n|\\r|\\n)/", '', $trail);
       }
 
-      if ( $stop == $tag )
+      if ( (string)$stop == $tag )
          return $before .ALLOWED_LT. $head .ALLOWED_GT .$marks; //mark after
 
       $before.= $marks; //mark before
@@ -1996,8 +1992,8 @@ $html_safe_preg = array(
   => "game_reference(('\\1'?".REF_LINK_BLANK.":0)+".REF_LINK_ALLOWED.",1,'',\\2,'\\4')",
 
 //<ticket issue_id> => link to issue
- '/'.ALLOWED_LT."ticket +([\\w_-]+) *".ALLOWED_GT.'/ise'
- => ( TICKET_REF ? "ticket_reference(".REF_LINK_ALLOWED.",1,'','\\1')" : "'\\0'"),
+ '/'.ALLOWED_LT."ticket +([\\-\\w]+) *".ALLOWED_GT.'/ise'
+  => ( TICKET_REF ? "ticket_reference(".REF_LINK_ALLOWED.",1,'','\\1')" : "'\\0'" ),
 
 //<tourney tid> => show tournament
  '/'.ALLOWED_LT."tourney(_)? +([0-9]+) *".ALLOWED_GT.'/ise'
@@ -2065,7 +2061,7 @@ $html_safe_preg = array(
 */
 
 //reverse (=escape) bad skipped (faulty) tags; keep them alphabetic here
- '%'.ALLOWED_LT."(/?_?(bgcolor|code|color|ftp|game|home|https?|image|mailto|news|note|quote|send|survey".(TICKET_REF ? '|ticket':'')."|tourney|user).*?)"
+ '%'.ALLOWED_LT."(/?_?(bgcolor|code|color|ftp|game|home|https?|image|mailto|news|note|quote|send|survey|ticket|tourney|user).*?)"
     .ALLOWED_GT.'%is'
   => "&lt;\\1&gt;",
 ); //$html_safe_preg
