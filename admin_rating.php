@@ -86,7 +86,7 @@ $GLOBALS['ThePage'] = new Page('RatingAdmin');
 
       if ( (string)$arg_rating != '' ) // update rating
       {
-         $upd_user['Rating'] = convert_to_rating($arg_rating, $arg_ratingtype);
+         $upd_user['Rating'] = convert_to_rating($arg_rating, $arg_ratingtype, MAX_ABS_RATING);
          if ( abs($upd_user['Rating'] - $user->Rating) > 0.005 )
             $changes |= RCADM_CHANGE_RATING;
       }

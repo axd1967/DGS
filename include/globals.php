@@ -204,6 +204,7 @@ define('SPURL_NO_DEF', URI_AMP.SP_ARG_NO_DEF.'=1');
 // ---------- Rating stuff ----------------------------------------
 
 define('MAX_START_RATING', 2600); //6 dan
+define('MAX_ABS_RATING', 3000); //10 dan
 define('MIN_RATING', -900); //30 kyu
 define('OUT_OF_RATING', 9999); //ominous rating bounds: [-OUT_OF_RATING,OUT_OF_RATING]
 define('NO_RATING', -OUT_OF_RATING);

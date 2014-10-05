@@ -638,7 +638,7 @@ function parse_edit_form( &$tp, $tourney, $ttype, $tprops )
       if ( (string)$new_value != '' )
       {
          $rating_type = get_request_arg('rating_type', 'dragonrank');
-         $custom_rating = convert_to_rating( $new_value, $rating_type, true );
+         $custom_rating = convert_to_rating( $new_value, $rating_type, MAX_ABS_RATING, true );
          if ( !is_valid_rating($custom_rating) )
             $errors[] = ErrorCode::get_error_text('invalid_rating');
          else

@@ -13,6 +13,17 @@ ChangeLog
 
 2014-10-06 jug
 
+   * include/rank_converter.php (RankConverter.buildForm),
+     include/rating.php (convert_to_rating),
+     include/globals.php (MAX_ABS_RATING),
+     tournaments/edit_participant.php (parse_edit_form),
+     tournaments/edit_results.php (parse_edit_form),
+     tournaments/register.php (parse_edit_form),
+     admin_rating.php, edit_rating.php:
+   - fixed bug for max-rating of 10dan allowed to register in tournaments and for rank-converter
+     - MAX_START_RATING to set initial rating, or
+     - MAX_ABS_RATING for entering existing rating of users
+
    * include/classlib_userconfig.php (ConfigBoard.set_wood_color),
      include/std_functions.php ($woodbgcolors),
      js/goeditor.js (woodbgcolors),

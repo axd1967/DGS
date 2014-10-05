@@ -502,7 +502,7 @@ function parse_edit_form( &$tresult, $tourney, $uvars )
       $new_value = trim($vars['rating']);
       if ( (string)$new_value != '' )
       {
-         $rating = convert_to_rating( $new_value, 'dragonrating', true );
+         $rating = convert_to_rating( $new_value, 'dragonrating', MAX_ABS_RATING, true );
          if ( !is_valid_rating($rating) )
             $errors[] = ErrorCode::get_error_text('invalid_rating');
          else

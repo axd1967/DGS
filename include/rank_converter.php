@@ -47,7 +47,7 @@ class RankConverter
       if ( @$_REQUEST['convert'] && (string)$conv_rating != '' )
       {
          $conv_ratingtype = get_request_arg('conv_ratingtype');
-         $conv_newrating = convert_to_rating($conv_rating, $conv_ratingtype);
+         $conv_newrating = convert_to_rating($conv_rating, $conv_ratingtype, MAX_ABS_RATING);
          $converted_rank = ($conv_newrating != NO_RATING)
             ? sprintf( "=> %s: %s<br>\n=> %s: %d",
                        T_('DGS-rank'), echo_rating($conv_newrating, true, 0, true),

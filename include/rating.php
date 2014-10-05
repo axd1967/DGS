@@ -515,7 +515,9 @@ function getRatingTypes()
 
 // May rise an error if not said otherwise (except for bad ranktype) returning an out-of-range-rating then
 // check RATING_PATTERN for syntax, this func must be kept synchron with read_rating-func
-function convert_to_rating($string, $type, $no_error=false)
+// \param $max_rating max-rating to allow on converting to rating,
+//        usually MAX_START_RATING to set initial rating, or MAX_ABS_RATING for entering existing rating of users
+function convert_to_rating($string, $type, $max_rating, $no_error=false)
 {
    // tables for interpolating rating IGS/KGS
    static $IGS_TABLE = array(
@@ -737,12 +739,12 @@ function convert_to_rating($string, $type, $no_error=false)
    }
 
    //valid rating, so ends with a limited bound corrections, else error
-   if ( $rating-50 > MAX_START_RATING )
-      $rating = MAX_START_RATING;
+   if ( $rating-50 > $max_rating )
+      $rating = $max_rating;
    if ( $rating+50 < MIN_RATING )
       $rating = MIN_RATING;
 
-   if ( $rating >= MIN_RATING && $rating <= MAX_START_RATING )
+   if ( $rating >= MIN_RATING && $rating <= $max_rating )
       return $rating;
 
    if ( $no_error )

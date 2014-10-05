@@ -56,7 +56,7 @@ require_once 'include/rank_converter.php';
 
       // update Rating
       $ratingtype = get_request_arg('ratingtype') ;
-      $newrating = convert_to_rating(get_request_arg('rating'), $ratingtype);
+      $newrating = convert_to_rating(get_request_arg('rating'), $ratingtype, MAX_START_RATING);
       $oldrating = $player_row['Rating2'];
       if ( $player_row['RatingStatus'] != RATING_RATED
             && (is_numeric($newrating) && $newrating >= MIN_RATING)
