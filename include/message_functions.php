@@ -950,7 +950,9 @@ function game_info_table( $tablestyle, $game_row, $player_row, $iamrated, $game_
       $itable->add_sinfo(
             T_('Player'),
             user_reference( REF_LINK, 1, '', $other_id, $other_name, $other_handle) .
-            echo_image_hero_badge( @$WRP_HeroRatio ) );
+            echo_image_hero_badge( @$WRP_HeroRatio ) .
+            SMALL_SPACING .
+            echo_image_opp_games( $my_id, $other_handle, /*fin*/true ) );
 
       $itable->add_sinfo( T_('Rating'), echo_rating($other_rating,true,$other_id) );
    }

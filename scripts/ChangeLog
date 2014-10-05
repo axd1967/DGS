@@ -13,6 +13,12 @@ ChangeLog
 
 2014-10-05 jug
 
+   * include/message_functions.php (game_info_table),
+     waiting_room.php :
+   - for waiting-room added link to finished games with opponent
+     - added column for waiting-room-list with table-icon linked to finished games with opponent
+     - added table-icon linked to finished games with opponent on viewing single waiting-room-entry
+
    * snapshot.php:
    - translation-data export must also contain FAQ/Links/Intro-table-data
 

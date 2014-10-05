@@ -155,6 +155,8 @@ require_once 'include/wroom_control.php';
    // NOTE: The TABLE_NO_HIDEs are needed, because the columns are needed
    //       for the "static" filtering(!) of; also see named-filters
    $wrtable->add_tablehead(17, T_('Info#header'), 'Button', TABLE_NO_HIDE|TABLE_NO_SORT);
+   $wrtable->add_tablehead(21, new TableHead( T_('Opponent games#header'),
+      'images/table.gif', T_('Link to games with opponent') ), 'Image', TABLE_NO_SORT );
    $wrtable->add_tablehead(16, T_('UserType#headerwr'), 'User', 0, 'WRP_Type+');
    $wrtable->add_tablehead( 1, T_('Name#header'), 'User', 0, 'WRP_Name+');
    $wrtable->add_tablehead( 2, T_('Userid#header'), 'User', 0, 'WRP_Handle+');
@@ -312,6 +314,8 @@ require_once 'include/wroom_control.php';
                GameTexts::format_game_type($GameType, $GamePlayers) .
                ( $is_fairkomi ? GameTexts::build_fairkomi_gametype(GAME_STATUS_KOMI) : '' );
          }
+         if ( $wrtable->Is_Column_Displayed[21] )
+            $row_arr[21] = echo_image_opp_games( $my_id, $WRP_Handle, /*fin*/true );
 
          $wrtable->add_row( $row_arr );
       }//while
