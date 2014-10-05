@@ -131,6 +131,53 @@ General instructions for developers:
 
 ----------------- JavaScript:
 
+   Site-design policy for DGS is to stay independent of JavaScript for its main functionality.
+   That means, JavaScript is allowed for a "MAIN" feature, but only if there is also a way
+   to use the feature WITHOUT relying on JavaScript.  This is mainly done to support a wide
+   range of mobile devices or handhelds (and older browser), that often have a poor support
+   for JavaScript.
+
+   So what is considered "main"-functionality?
+   JavaScript is allowed for convenience functionality and smaller features, for example:
+
+      * toggling the row-color in table-listings on double-click
+        (this has no counterpart for non-JavaScript users)
+
+      * for new-game-page or invitations the komi value is changed when switching the ruleset,
+        and the max-handicap default-text is adjusted when changing the board-size;
+        also some radio-buttons are automatically selected if user changes values on respective lines
+        for manual-handicap, time-settings, require rated opponents
+        (this has no counterpart for non-JavaScript users)
+
+      * on view-ladder-page for ladder-tournaments the rank-info is shown as pop-up per user
+        (this has no counterpart for non-JavaScript users)
+
+      * on selecting bookmarks from the top-bar it automatically fires the submit;
+        also on games-page view-move has an auto-submit
+        (non-JavaScript would be to manually do the submit after selection)
+
+      * on games-list info-icons it opens a thumbnail-snapshot of the game
+        (non-JavaScript would need to open the game-page to see the game)
+
+      * on shape-icons it opens a thumbnail-snapshot of the shape
+        (non-JavaScript would need to open the shape-page with the shape-pattern)
+
+   The server-operator can also choose to completely disable all JavaScript functionality
+   with the server-config 'ALLOW_JAVASCRIPT' in config-file 'include/config-local.php'.
+   A user can enable or disable the use of JavaScript with a flag in the user-profile,
+   which is stored in (Players.UserFlags & 0x1); see also 'specs/db/table-Players.txt'.
+
+   So when implementing JavaScript-stuff, you have to check for the global config-flag and
+   the user-specific flag, for example with:
+
+      if (ALLOW_JAVASCRIPT && is_javascript_enabled() )
+         ; # do your stuff
+
+   Therefore more JavaScript-based functionality can be added in the future,
+   but it must be switchable in the user-profile (probably additional options can be added
+   to switch off/on only certain features).
+
+
    Currently (Dec-2013), using features of JavaScript-versions > 1.8.1
    should not be used to keep compatibility with older browsers.
 

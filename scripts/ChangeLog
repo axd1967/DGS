@@ -11,6 +11,12 @@ Release [2014-03-27] - DGS 1.0.17 - tag [release-1_0_17-20140327] on branch [DGS
 ChangeLog
 ------------------------------------------------------------------
 
+2014-10-05 jug
+
+   * scripts/README.developers:
+   - added site-policy regarding the use of JavaScript on DGS,
+     inspired by https://sourceforge.net/p/dragongoserver/dgs-main/merge-requests/6/
+
 2014-09-14 jug
 
    * include/sgf_builder.php (SgfBuilder.build_filename_sgf),
