@@ -11,6 +11,11 @@ Release [2014-03-27] - DGS 1.0.17 - tag [release-1_0_17-20140327] on branch [DGS
 ChangeLog
 ------------------------------------------------------------------
 
+2014-10-08 jug
+
+   * include/std_functions.php ($html_code, $html_safe_preg; feature_reference):
+   - added DGS-tag <feature id> to reference DGS-feature
+
 2014-10-06 jug
 
    * include/rank_converter.php (RankConverter.buildForm),

@@ -1693,9 +1693,9 @@ $html_code_closed['faq']  = $html_code_closed['msg']; //minimum closed check
 // ** no '|' at ends:
 global $html_code; //PHP5
 $html_code['cell'] = 'note|b|i|u|strong|em|tt|strike|color|bgcolor';
-$html_code['line'] = 'home|a|ticket|'.$html_code['cell'];
-$html_code['msg']  = 'br|/br|p|/p|li|hr'.$html_code_closed['msg'] .'goban|mailto|_?https?|_?news|_?ftp|game_?|ticket|tourney_?|survey_?|user_?|send_?|image';
-$html_code['game'] = 'br|/br|p|/p|li|hr'.$html_code_closed['game'].'goban|mailto|_?https?|_?news|_?ftp|game_?|ticket|tourney_?|survey_?|user_?|send_?|image';
+$html_code['line'] = 'home|a|feature|ticket|'.$html_code['cell'];
+$html_code['msg']  = 'br|/br|p|/p|li|hr'.$html_code_closed['msg'] .'goban|mailto|_?https?|_?news|_?ftp|game_?|ticket|tourney_?|survey_?|user_?|send_?|image|feature';
+$html_code['game'] = 'br|/br|p|/p|li|hr'.$html_code_closed['game'].'goban|mailto|_?https?|_?news|_?ftp|game_?|ticket|tourney_?|survey_?|user_?|send_?|image|feature';
 $html_code['faq']  = '/?\w+'; //all non-empty words
 
 
@@ -1999,6 +1999,10 @@ $html_safe_preg = array(
  '/'.ALLOWED_LT."tourney(_)? +([0-9]+) *".ALLOWED_GT.'/ise'
   => "tournament_reference(('\\1'?".REF_LINK_BLANK.":0)+".REF_LINK_ALLOWED.",1,'',\\2)",
 
+//<feature id> => link to feature
+ '/'.ALLOWED_LT."feature +([0-9]+) *".ALLOWED_GT.'/ise'
+  => "feature_reference(".REF_LINK_ALLOWED.",1,'',\\1)",
+
 //<survey sid> => show survey
  '/'.ALLOWED_LT."survey(_)? +([0-9]+) *".ALLOWED_GT.'/ise'
   => "survey_reference(('\\1'?".REF_LINK_BLANK.":0)+".REF_LINK_ALLOWED.",1,'',\\2)",
@@ -2061,7 +2065,7 @@ $html_safe_preg = array(
 */
 
 //reverse (=escape) bad skipped (faulty) tags; keep them alphabetic here
- '%'.ALLOWED_LT."(/?_?(bgcolor|code|color|ftp|game|home|https?|image|mailto|news|note|quote|send|survey|ticket|tourney|user).*?)"
+ '%'.ALLOWED_LT."(/?_?(bgcolor|code|color|feature|ftp|game|home|https?|image|mailto|news|note|quote|send|survey|ticket|tourney|user).*?)"
     .ALLOWED_GT.'%is'
   => "&lt;\\1&gt;",
 ); //$html_safe_preg
@@ -3069,6 +3073,48 @@ function ticket_reference( $link, $safe_it, $class, $issue )
 
    return $ticket_str;
 }//ticket_reference
+
+// format: Feature #n: title
+function feature_reference( $link, $safe_it, $class, $fid )
+{
+   global $base_path;
+
+   $fid = (int)$fid;
+   $legal = ( $fid > 0 );
+   if ( $legal )
+   {
+      $query = "SELECT Subject FROM Feature WHERE ID=$fid LIMIT 1";
+      if ( $row = mysql_single_fetch( "feature_reference.find_feature($fid)", $query ) )
+      {
+         $title = trim(@$row['Subject']);
+         $safe_it = true;
+      }
+      else
+         $legal = false;
+   }
+
+   $feature = sprintf( T_('Feature #%s: %s'), $fid, ( $legal ? $title : T_('???#feature') ));
+   if ( $safe_it )
+      $feature = make_html_safe($feature);
+
+   if ( $link && $legal )
+   {
+      $url = $base_path."features/vote_feature.php?fid=$fid";
+      $url = 'A href="' . $url . '"';
+      $class = 'Feature'.$class;
+      if ( $class )
+        $url .= " class=$class";
+      if ( $link & REF_LINK_ALLOWED )
+      {
+         $url = str_replace('"', ALLOWED_QUOT, $url);
+         $feature = ALLOWED_LT.$url.ALLOWED_GT.$feature.ALLOWED_LT."/A".ALLOWED_GT ;
+      }
+      else
+         $feature = "<$url>$feature</A>";
+   }
+
+   return $feature;
+}//feature_reference
 
 // format: Tournament #n [title]
 function tournament_reference( $link, $safe_it, $class, $tid )
