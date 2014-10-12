@@ -230,6 +230,8 @@ define('HERO_BRONZE', 38); // 38% = 100% - HERO_GOLDEN
 define('MIN_FIN_GAMES_HERO_AWARD', 20);
 define('MIN_RATDIFF_HERO', 100); // 1k rating-diff minimum for hero-awards
 
+define('DAYS_RESET_COUNT_TOURNEY_NEW', 2*7); // auto-reload of new-tournament-counter in days
+
 // ---------- Quick-suite stuff -----------------------------------
 
 define('QST_CACHE_BULLETIN', 'B');

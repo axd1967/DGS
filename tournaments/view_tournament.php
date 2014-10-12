@@ -42,6 +42,7 @@ require_once 'tournaments/include/tournament_result.php';
 require_once 'tournaments/include/tournament_result_control.php';
 require_once 'tournaments/include/tournament_rules.php';
 require_once 'tournaments/include/tournament_utils.php';
+require_once 'tournaments/include/tournament_visit.php';
 
 $GLOBALS['ThePage'] = new Page('Tournament');
 
@@ -113,6 +114,7 @@ $GLOBALS['ThePage'] = new Page('Tournament');
       $tpoints = TournamentCache::load_cache_tournament_points( 'Tournament.view_tournament', $tid, /*chk*/false );
    }
 
+   TournamentVisit::mark_tournament_visited( $my_id, $tid );
 
    $page_tdirs   = "tournaments/list_directors.php?tid=$tid";
    $page_tourney = "tournaments/view_tournament.php?tid=$tid";

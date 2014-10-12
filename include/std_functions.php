@@ -586,6 +586,7 @@ function make_dragon_main_menu( $player_row )
    $cnt_msg_new = (isset($player_row['CountMsgNew'])) ? (int)$player_row['CountMsgNew'] : -1;
    $cnt_feat_new = (isset($player_row['CountFeatNew'])) ? (int)$player_row['CountFeatNew'] : -1;
    $cnt_bulletin_new = (isset($player_row['CountBulletinNew'])) ? (int)$player_row['CountBulletinNew'] : -1;
+   $cnt_tourney_new = (isset($player_row['CountTourneyNew'])) ? (int)$player_row['CountTourneyNew'] : -1;
    $has_forum_new = load_global_forum_new();
 
    $menu = new Matrix(); // keep x/y sorted (then no need to sort in make_menu_horizontal/vertical)
@@ -596,7 +597,15 @@ function make_dragon_main_menu( $player_row )
    $menu->add( 1,2, array( T_('Waiting room'), 'waiting_room.php',
       T_('show new game offers from other players#menu'), array( 'accesskey' => ACCKEY_MENU_WAITROOM )));
    if ( ALLOW_TOURNAMENTS )
-      $menu->add( 1,3, array( T_('Tournaments'), 'tournaments/list_tournaments.php', '', array( 'accesskey' => ACCKEY_MENU_TOURNAMENT )));
+   {
+      $arr_tourney = array( array( T_('Tournaments'), 'tournaments/list_tournaments.php', '', array( 'accesskey' => ACCKEY_MENU_TOURNAMENT )) );
+      if ( $cnt_tourney_new > 0 )
+      {
+         $arr_tourney[] = MINI_SPACING;
+         $arr_tourney[] = span('MainMenuCount', $cnt_tourney_new, '(%s)', T_('New tournaments') );
+      }
+      $menu->add( 1,3, $arr_tourney );
+   }
    $menu->add( 1,4, array( T_('User info'),    'userinfo.php',     '', array( 'accesskey' => ACCKEY_MENU_USERINFO )));
 
    $arr_msgs = array( array( T_('Messages'), 'list_messages.php',
@@ -2742,6 +2751,16 @@ function is_logged_in($handle, $scode, &$player_row, $login_opts=LOGIN_DEFAULT_O
          $upd->upd_num('CountBulletinNew', $count_bulletin_new );
          $player_row['CountBulletinNew'] = $count_bulletin_new;
       }
+
+      if ( ALLOW_TOURNAMENTS )
+      {
+         $count_tourney_new = count_tourney_new( $uid, $player_row['X_Lastaccess'], $player_row['CountTourneyNew'] );
+         if ( $count_tourney_new >= 0 )
+         {
+            $upd->upd_num('CountTourneyNew', $count_tourney_new );
+            $player_row['CountTourneyNew'] = $count_tourney_new;
+         }
+      }
    }
 
 
@@ -2801,7 +2820,7 @@ function count_messages_new( $uid, $curr_count=-1 )
    $row = mysql_single_fetch( "count_messages_new($uid)",
       "SELECT COUNT(*) AS X_Count FROM MessageCorrespondents WHERE uid='$uid' AND Folder_nr=".FOLDER_NEW );
    return ($row) ? (int)@$row['X_Count'] : -1;
-}
+}//count_messages_new
 
 /*!
  * \brief Counts new features for given user-id if current count < 0 (=needs-update).
@@ -2823,7 +2842,35 @@ function count_feature_new( $uid, $curr_count=-1 )
          "LEFT JOIN FeatureVote AS FV ON F.ID=FV.fid AND FV.Voter_ID='$uid' " .
       "WHERE F.Status='VOTE' AND ISNULL(FV.fid)" );
    return ($row) ? (int)@$row['X_Count'] : -1;
-}
+}//count_features_new
+
+/*!
+ * \brief Counts new tournaments for given user-id if current count < 0 (=needs-update).
+ * \param $last_access timestamp of last-access
+ * \param $curr_count force counting if <0 or omitted
+ * \return new tournament count (>=0) for given user-id; or -1 on error
+ */
+function count_tourney_new( $uid, $last_access, $curr_count=-1 )
+{
+   global $NOW;
+
+   if ( !ALLOW_TOURNAMENTS )
+      return -1;
+
+   // auto-refresh if last-access too old
+   if ( $curr_count >= 0 && $last_access >= $NOW - DAYS_RESET_COUNT_TOURNEY_NEW*SECS_PER_DAY )
+      return $curr_count;
+
+   if ( !is_numeric($uid) || $uid <= 0 )
+      error( 'invalid_args', "count_tourney_new.check.uid($uid)" );
+
+   $row = mysql_single_fetch( "count_tourney_new($uid)",
+      "SELECT COUNT(*) AS X_Count " .
+      "FROM Tournament AS T " .
+         "LEFT JOIN TournamentVisit AS TV ON TV.uid=$uid AND TV.tid=T.ID " .
+      "WHERE T.Status IN ('REG','PAIR','PLAY') AND TV.tid IS NULL" ); // see consts TOURNEY_STATUS_...
+   return ($row) ? (int)@$row['X_Count'] : -1;
+}//count_tourney_new
 
 /*!
  * \brief Loads (and updates if needed) global-forum NEW-flag-state for current player.

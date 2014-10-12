@@ -491,6 +491,38 @@ $GLOBALS['ThePage'] = new Page('Script', PAGEFLAG_IMPLICIT_FLUSH );
    echo "\n<br>BulletinNew count Done.";
 
 
+   // fix Players.CountTourneyNew
+   $query = "SELECT ID, UNIX_TIMESTAMP(Lastaccess) AS X_Lastaccess, CountTourneyNew " .
+            "FROM Players WHERE CountTourneyNew>=0 " .
+            uid_clause( 'ID', 'AND' ) .
+            "ORDER BY ID $limit";
+   $result = explain_query("CountTourneyNew1", $query)
+      or die("CountTourneyNew2: " . mysql_error());
+   $err = 0;
+   while ( $row = mysql_fetch_assoc($result) )
+   {
+      $uid = $row['ID'];
+      $CountTourneyNew = $row['CountTourneyNew'];
+      $X_Lastaccess = $row['X_Lastaccess'];
+
+      $count_tourney_new = count_tourney_new( $uid, $X_Lastaccess ); // force-recalc
+      if ( $count_tourney_new >= 0 && $count_tourney_new != $CountTourneyNew )
+      {
+         echo "\n<br>ID: $uid fix CountTourneyNew [$CountTourneyNew] -> [$count_tourney_new].";
+         $err++;
+      }
+   }
+   mysql_free_result($result);
+   if ( $err )
+   {
+      // reset all to recalc on user-reloading
+      dbg_query("UPDATE Players SET CountTourneyNew=-1 WHERE CountTourneyNew>=0 LIMIT $err");
+      echo "\n<br>--- $err error(s) found.";
+   }
+
+   echo "\n<br>TourneyNew count Done.";
+
+
    echo "\n<br>Needed: " . sprintf("%1.3fs", (getmicrotime() - $begin));
    echo "\n<br>Players main-menu counts Done.";
 

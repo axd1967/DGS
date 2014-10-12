@@ -57,6 +57,7 @@ Ou  | Rank             | varchar(40)                                 | NO   |   
  SZ | CountMsgNew      | mediumint(9)                                | NO   |     | -1                  |                |
  SZ | CountFeatNew     | smallint(6)                                 | NO   |     | -1                  |                |
  SZ | CountBulletinNew | smallint(6)                                 | NO   |     | -1                  |                |
+ SZ | CountTourneyNew  | smallint(6)                                 | NO   |     | -1                  |                |
   A | Adminlevel       | smallint(5) unsigned                        | NO   | MUL | 0                   |                |
   A | AdminOptions     | smallint(5) unsigned                        | NO   | MUL | 0                   |                |
   A | AdminNote        | varchar(100)                                | NO   |     |                     |                |
@@ -99,6 +100,12 @@ Zu  | NextGameOrder    | enum('LASTMOVED','MOVES','PRIO','TIMELEFT') | NO   |   
 Zu  | SkipBulletin     | tinyint(3) unsigned                         | NO   |     | 4                   |                |
 Zu  | RejectTimeoutWin | tinyint(4)                                  | NO   |     | -1                  |                |
 Zu  | ThumbnailSize    | tinyint(3) unsigned                         | NO   |     | 7                   |                |
+
+* CountTourneyNew : number of tournaments that are "new" to user
+   - -1 = need reload for count of tournaments on (REG,PAIR,PLAY status) that are new to user
+   - NOTE: "new" is not further described here as its semantics may be detailed to only include tournaments,
+     that user can actually join (e.g. by rating-range, max participants, register end-time, etc)
+   - NOTE: auto-reload done if last-access was older than 4 weeks
 
 
 # Fields for board-related GUI-config in ConfigBoard-table (category = Gu):

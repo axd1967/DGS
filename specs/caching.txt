@@ -1074,6 +1074,21 @@ See "template" for new cache-group at end of this section.
      change so often.  Current expire-time of cache-entry is 1 hour.
 
 
+* CACHE_GRP_TVISIT
+   - Cache visits (="viewing") of tournament-info-page by users, which is used
+     to calculate count of new tournaments to join, that users have not seen yet.
+
+   - A cache-entry for these tables depends on the user-id (uid) and contains
+     a list of tournament-ID (tid) that have been visited by a user.
+
+   - Cache invalidation is done for a user, if a visit has been added.
+
+   - The "TournamentCache"-class is used as wrapper to load cached data for these
+     db-tables.
+
+   - Expire-time of cache-entry is 7 days.
+
+
 * new cache-group CACHE_GRP_ ...
    - motivation, description, cache-invalidation, expire-time, special-handling ?
 

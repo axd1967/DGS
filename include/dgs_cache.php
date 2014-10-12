@@ -658,9 +658,10 @@ class DgsCache
    /*!
     * \brief Purges expired cache-entries for all supported cache-groups.
     * \param $only_cache_group null = cleanup all cache-groups; otherwise only given one
+    * \param $enforce_expire_date null = use default expire-dates, otherwise expire-date to enforce
     * \return return number of deleted cache-entries.
     */
-   public static function cleanup_cache( $only_cache_group=null )
+   public static function cleanup_cache( $only_cache_group=null, $enforce_expire_date=null )
    {
       global $NOW, $ARR_CACHE_GROUP_CLEANUP;
       if ( !is_numeric($only_cache_group) || $only_cache_group < 0 || $only_cache_group > MAX_CACHE_GRP)
@@ -677,9 +678,15 @@ class DgsCache
          $cache = self::get_cache( $cache_group );
          if ( !is_null($cache) )
          {
-            $group_expire = ( isset($ARR_CACHE_GROUP_CLEANUP[$cache_group]) )
-               ? $NOW - $ARR_CACHE_GROUP_CLEANUP[$cache_group]
-               : $default_expire;
+            if ( is_null($enforce_expire_date) )
+            {
+               $group_expire = ( isset($ARR_CACHE_GROUP_CLEANUP[$cache_group]) )
+                  ? $NOW - $ARR_CACHE_GROUP_CLEANUP[$cache_group]
+                  : $default_expire;
+            }
+            else
+               $group_expire = $enforce_expire_date;
+
             $cnt_cleanup = $cache->cache_cleanup( $cache_group, $group_expire );
             if ( is_numeric($cnt_cleanup) )
                $cnt_deleted += $cnt_cleanup;

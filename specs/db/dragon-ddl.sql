@@ -757,6 +757,7 @@ CREATE TABLE IF NOT EXISTS `Players` (
   `CountMsgNew` mediumint(9) NOT NULL default '-1',
   `CountFeatNew` smallint(6) NOT NULL default '-1',
   `CountBulletinNew` smallint(6) NOT NULL default '-1',
+  `CountTourneyNew` smallint(6) NOT NULL default '-1',
   `Adminlevel` smallint(5) unsigned NOT NULL default '0',
   `AdminOptions` smallint(5) unsigned NOT NULL default '0',
   `AdminNote` varchar(100) NOT NULL default '',
@@ -1400,6 +1401,20 @@ CREATE TABLE IF NOT EXISTS `Tournamentlog` (
   PRIMARY KEY  (`ID`),
   KEY `tid` (`tid`)
 ) ENGINE=MyISAM  DEFAULT CHARSET=latin1;
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `TournamentVisit`
+--
+
+CREATE TABLE `TournamentVisit` (
+  `uid` int(11) NOT NULL,
+  `tid` int(11) NOT NULL,
+  `VisitTime` datetime NOT NULL default '0000-00-00 00:00:00',
+  PRIMARY KEY  (`uid`,`tid`),
+  KEY `tid` (`tid`)
+) ENGINE=MyISAM DEFAULT CHARSET=latin1;
 
 -- --------------------------------------------------------
 

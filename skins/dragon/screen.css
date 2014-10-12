@@ -3196,6 +3196,19 @@ body.Tournament table#pageLayout td#pageBody div.Section {
    text-align: left;
 }
 
+table span.TNewFlag {
+   margin: 0px 3px;
+   font-size: 80%;
+   font-weight: bold;
+   color: #dd0000;
+}
+table span.TInitFlag {
+   margin: 0px 3px;
+   font-size: 80%;
+   font-weight: bold;
+   color: darkgrey;
+}
+
 table tr.TourneyUser td,
 span.TourneyOpp {
    background: #bbddff;

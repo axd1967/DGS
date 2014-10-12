@@ -3,9 +3,15 @@ Copyright (C) 2001-2014  Erik Ouchterlony, Jens-Uwe Gaspar
 
 %TOC%
 
-#release DGS_1_0_19 [2014-???-??] - DGS 1.0.19  (Smaller Markup, Forum, Games, Tournaments changes)
+#release DGS_1_0_19 [2014-???-??] - DGS 1.0.19  (Tournament, Markup, Forum, Games changes)
 
    New features and Major changes:
+
+   * <home tournaments/list_tournaments.php>Tournaments</home>:
+      * Added counter for new tournaments in main-menu
+      * Added 'new'-indicator in <home tournaments/list_tournaments.php>tournaments list page</home>, that vanishes if tournament-info page is visited
+         * shown in red-color <color darkred>new</color> for active tournaments (Register, Pair, Play phase)
+         * shown in grey-color <color darkgrey>new</color> for inactive tournaments (in setup phase or if finished)
 
    Minor changes:
 

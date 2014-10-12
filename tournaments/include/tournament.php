@@ -573,6 +573,13 @@ class Tournament
       }
    }
 
+   /*! \brief Returns true if given status represents "active" tournament-status. */
+   public static function is_active_tournament( $status )
+   {
+      static $ARR_TSTAT_ACTIVE = array( TOURNEY_STATUS_REGISTER, TOURNEY_STATUS_PAIR, TOURNEY_STATUS_PLAY );
+      return in_array( $status, $ARR_TSTAT_ACTIVE );
+   }
+
    /*! \brief Returns scope-text or all scope-texts (if arg=null). */
    public static function getScopeText( $scope=null )
    {

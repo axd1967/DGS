@@ -180,6 +180,7 @@ $DGS_CACHE_GROUPS = array(
       #CACHE_GRP_TPOINTS       => CACHE_TYPE_APC,
       #CACHE_GRP_TPOOLS        => CACHE_TYPE_APC,
       #CACHE_GRP_COND_MOVES    => CACHE_TYPE_APC,
+      #CACHE_GRP_TVISIT        => CACHE_TYPE_APC,
    );
 
 

@@ -1099,3 +1099,24 @@ Description:
 
 * ChangedBy : handle-list of users, that last changed data-row in format '[last-user] [prev-user] ...'
 
+
+
+###########################################################################
+## --- TournamentVisit ---
+
+Description:
+   Table to store last "view" of tournament-info-page, used for NEW-counter in main-menu
+
+| Field     | Type     | Null | Key | Default             | Extra |
++-----------+----------+------+-----+---------------------+-------+
+| uid       | int(11)  | NO   | PRI | NULL                |       |
+| tid       | int(11)  | NO   | PRI | NULL                |       |
+| VisitTime | datetime | NO   |     | 0000-00-00 00:00:00 |       |
+
+## Fields:
+
+* uid, tid : primary key of this table
+   - Existing DB-entry indicates that user [uid] viewed tournament-info page of T [tid]
+
+* VisitTime : date of last-visit of T-info-page
+

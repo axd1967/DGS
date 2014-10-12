@@ -31,6 +31,7 @@ require_once 'tournaments/include/tournament_log.php';
 require_once 'tournaments/include/tournament_news.php';
 require_once 'tournaments/include/tournament_round.php';
 require_once 'tournaments/include/tournament_round_helper.php';
+require_once 'tournaments/include/tournament_visit.php';
 
 $TheErrors->set_mode(ERROR_MODE_COLLECT);
 
@@ -223,6 +224,10 @@ function run_once_daily()
    // ---------- Delete old tournament-news on DELETE-status
 
    TournamentNews::process_tournament_news_deleted( 7 ); // 7days (no check for locks)
+
+   // ---------- Delete tournament-visits for closed tournaments
+
+   TournamentVisit::cleanup_tournament_visits();
 
 }//run_once_daily
 

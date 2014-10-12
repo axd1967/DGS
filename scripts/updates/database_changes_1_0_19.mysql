@@ -10,4 +10,23 @@
 # * Recommendation: Import it section by section manually taking comments into account !
 #
 
+-- added table to store tournament-visits for NEW-counter in main-menu
+CREATE TABLE TournamentVisit (
+  uid int NOT NULL,
+  tid int NOT NULL,
+  VisitTime datetime NOT NULL default '0000-00-00 00:00:00',
+  PRIMARY KEY (uid,tid),
+  KEY (tid)
+) ENGINE=MyISAM ;
+
+-- initial fill tournament-participants that joined active tournaments
+INSERT IGNORE INTO TournamentVisit (uid,tid,VisitTime)
+   SELECT TP.uid, TP.tid, TP.Created
+   FROM TournamentParticipant AS TP INNER JOIN Tournament AS T ON T.ID=TP.tid
+   WHERE T.Status in ('REG','PAIR','PLAY') ;
+
+-- added counter for new tournaments
+ALTER TABLE Players
+   ADD CountTourneyNew smallint NOT NULL default '-1' AFTER CountBulletinNew ;
+
 

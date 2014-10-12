@@ -145,6 +145,7 @@ $GLOBALS['ThePage'] = new Page('TournamentList');
    $ttable->add_tablehead( 3, T_('Type#T_header'), 'Enum', 0, 'T.Type+');
    $ttable->add_tablehead( 4, T_('Status#header'), 'Enum', 0, 'T.Status+');
    $ttable->add_tablehead( 5, T_('Title#header'), '', TABLE_NO_HIDE, 'Title+');
+   $ttable->add_tablehead(19, '', 'Image', TABLE_NO_HIDE|TABLE_NO_SORT, 'TV.tid+');
    $ttable->add_tablehead(11, T_('Registration Status#T_header'), 'Enum', ($has_uid ? TABLE_NO_HIDE : 0), 'TP_Status+');
    $ttable->add_tablehead(13, T_('Size#header'), 'Number', 0, 'TRULE.Size-');
    $ttable->add_tablehead(14, T_('Rated#header'), 'YesNo', TABLE_NO_SORT);
@@ -173,8 +174,10 @@ $GLOBALS['ThePage'] = new Page('TournamentList');
          'TRULE.Ruleset',
          'TRULE.ShapeID', 'TRULE.ShapeSnapshot',
          'TRULE.Maintime', 'TRULE.Byotype', 'TRULE.Byotime', 'TRULE.Byoperiods',
+         'COALESCE(TV.tid,0) AS TV_tid',
       SQLP_FROM,
-         'INNER JOIN TournamentRules AS TRULE ON TRULE.tid=T.ID' ));
+         'INNER JOIN TournamentRules AS TRULE ON TRULE.tid=T.ID',
+         "LEFT JOIN TournamentVisit AS TV ON TV.uid=$my_id AND TV.tid=T.ID" ));
    if ( $ttable->is_column_displayed(18) )
    {
       $tqsql->merge( new QuerySQL(
@@ -305,6 +308,11 @@ $GLOBALS['ThePage'] = new Page('TournamentList');
          $row_str[18] = ( $class )
             ? array( 'text' => $restrictions, 'attbs' => array( 'class' => $class, 'title' => $title ) )
             : $restrictions;
+      }
+      if ( !$orow['TV_tid'] && $ttable->Is_Column_Displayed[19] )
+      {
+         $row_str[19] = (Tournament::is_active_tournament($tourney->Status))
+            ? span('TNewFlag', T_('new#tourney')) : span('TInitFlag', T_('new#tourney'));
       }
 
       $ttable->add_row( $row_str );

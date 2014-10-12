@@ -318,6 +318,7 @@ function get_tables( $database)
             'TournamentResult',
             'TournamentRound',
             'TournamentRules',
+            'TournamentVisit',
             'TranslationFoundInGroup',
             'TranslationGroups',
             'TranslationLanguages',

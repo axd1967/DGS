@@ -5,11 +5,60 @@ changelog reference at:
 http://www.gnu.org/prep/standards/html_node/Change-Logs.html
 
 previous server update:
-Release [2014-03-27] - DGS 1.0.17 - tag [release-1_0_17-20140327] on branch [DGS-stable-20140327]
+Release [2014-07-30] - DGS 1.0.18 - tag [release-1_0_18-20140730] on branch [DGS-stable-20140730]
 
 ------------------------------------------------------------------
 ChangeLog
 ------------------------------------------------------------------
+
+2014-10-13 jug
+
+   * tournaments/include/tournament_visit.php (class TournamentVisit, ~.mark_tournament_visited,
+       ~.has_visited_tournament, ~.load_tournament_visits, ~.delete_cache_tournament_visits,
+       ~.cleanup_tournament_visits, ~.reset_players_tournament_new_count),
+     tournaments/include/tournament.php (Tournament.is_active_tournament),
+     include/cache_globals.php (CACHE_GRP_TVISIT, $ARR_CACHE_GROUP_NAMES, $ARR_CACHE_GROUP_CLEANUP),
+     include/std_functions.php (make_dragon_main_menu, is_logged_in, count_tourney_new),
+     include/globals.php (DAYS_RESET_COUNT_TOURNEY_NEW),
+     include/dgs_cache.php (DgsCache.cleanup_cache),
+     include/config.php  ($DGS_CACHE_GROUPS),
+     scripts/updates/database_changes_1_0_19.mysql, scripts/updates/other_changes_1_0_19.txt,
+     scripts/player_consistency.php, scripts/data_export.php, skins/dragon/screen.css,
+     specs/db/table-Tournaments.txt, specs/db/table-Players.txt,
+     specs/db/dragon-ddl.sql, specs/caching.txt,
+     tournaments/cron_tournaments.php (run_once_daily),
+     tournaments/list_tournaments.php, tournaments/view_tournament.php,
+     tournaments/edit_status.php, NEWS:
+   - main-menu: added counter for (un-visited) NEW tournaments
+     - list-tournament: added column with "new" as indicator of (un-visited) NEW tournaments
+       in red-font (for active tournaments) and in grey-font (for inactive tournaments)
+     - view-tournament: mark tournament as visited removing "new" indicator from tournament-list
+       and reset counter
+     - enforce reload of new-tournament-counter if tournament-status changes from active
+       to inactive or vice versa
+     - auto-refresh of counter in users main-menu after 2 weeks of inactivity on last-access
+     - delete old tournament-visits for finished tournaments in tournaments-cron
+   - cleanup cache: added parameter to enforce cache-cleanup for DgsCache
+-----------
+-- added table to store tournament-visits for NEW-counter in main-menu
+CREATE TABLE TournamentVisit (
+  uid int NOT NULL,
+  tid int NOT NULL,
+  VisitTime datetime NOT NULL default '0000-00-00 00:00:00',
+  PRIMARY KEY (uid,tid),
+  KEY (tid)
+) ENGINE=MyISAM ;
+
+-- initial fill tournament-participants that joined active tournaments
+INSERT IGNORE INTO TournamentVisit (uid,tid,VisitTime)
+   SELECT TP.uid, TP.tid, TP.Created
+   FROM TournamentParticipant AS TP INNER JOIN Tournament AS T ON T.ID=TP.tid
+   WHERE T.Status in ('REG','PAIR','PLAY') ;
+
+-- added counter for new tournaments
+ALTER TABLE Players
+   ADD CountTourneyNew smallint NOT NULL default '-1' AFTER CountBulletinNew ;
+-----------
 
 2014-10-12 jug
 

@@ -28,6 +28,7 @@ require_once 'tournaments/include/tournament_helper.php';
 require_once 'tournaments/include/tournament_status.php';
 require_once 'tournaments/include/tournament_utils.php';
 require_once 'tournaments/include/tournament_log_helper.php';
+require_once 'tournaments/include/tournament_visit.php';
 
 $GLOBALS['ThePage'] = new Page('TournamentStatusEdit');
 
@@ -89,6 +90,12 @@ $GLOBALS['ThePage'] = new Page('TournamentStatusEdit');
       ta_begin();
       {//HOT-section to change tournament-status
          $tourney->persist();
+
+         $old_active_status = Tournament::is_active_tournament( $tstatus->get_current_status() );
+         $new_active_status = Tournament::is_active_tournament( $tstatus->get_new_status() );
+         if ( $old_active_status != $new_active_status );
+            TournamentVisit::reset_players_tournament_new_count();
+
          TournamentLogHelper::log_change_tournament_status( $tid, $allow_edit_tourney,
             sprintf('%s -> %s', $tstatus->get_current_status(), $tstatus->get_new_status() ) );
       }
