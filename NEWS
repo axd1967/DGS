@@ -3,6 +3,44 @@ Copyright (C) 2001-2014  Erik Ouchterlony, Jens-Uwe Gaspar
 
 %TOC%
 
+#release DGS_1_0_19 [2014-???-??] - DGS 1.0.19  (Smaller Markup, Forum, Games, Tournaments changes)
+
+   New features and Major changes:
+
+   Minor changes:
+
+   * Markup tags and Images:
+      * &lt;feature id> : showing link to corresponding feature
+      * &lt;bgcolor col> : showing text with background-color
+      * &lt;ticket issue> : showing link to external ticket-system (Jira)
+
+   * Forum:
+      * Added "quote"-link in post near "reply" (also to view the RAW-text of a forum post)
+      * Increased max. indent level from 15 to 25 for deep forum-threads
+
+   * <home waiting_room.php>Waiting room</home>:
+      * Added column with <image table.gif>-icon linked to finished games with opponent
+
+   * Games:
+      * Added white wood background in user profile for display of game-board
+      * Changed order of columns on games-page by moving current-rating near user-info
+      * Added file-pattern-formatting for SGF-download: $M = moves-count, $H0 = handicap (with 0), $T = game-type
+
+   Bug fixes:
+
+   * Fixed tournament-registration and rank-converter to accept user with rating > 6d
+
+   Code improvements:
+
+   Administrative changes:
+
+   Server config:
+
+   * Added & Changed config-switches:
+      * ALLOW_QUOTING                     - enabled with: true
+      * TICKET_REF                        - enabled with reference to Jira
+
+
 #release DGS_1_0_18 [2014-Jul-30] - DGS 1.0.18  (User & Tournament changes)
 
    New features and Major changes:
@@ -416,12 +454,12 @@ Copyright (C) 2001-2014  Erik Ouchterlony, Jens-Uwe Gaspar
 
    Server config:
 
-      * Added config-switches:
-         * ALLOW_TOURNAMENTS                 - enabled with: LADDER (ROUNDROBIN disabled)
-         * ALLOW_TOURNAMENTS_CREATE_BY_USER  - disabled
-         * Added restriction on max. running games for tournament-registration (150)
-         * ALLOWED_RULESETS                  - enabled with: JAPANESE (default) + CHINESE
-         * SEND_ACTIVATION_MAIL              - enabled
+   * Added config-switches:
+      * ALLOW_TOURNAMENTS                 - enabled with: LADDER (ROUNDROBIN disabled)
+      * ALLOW_TOURNAMENTS_CREATE_BY_USER  - disabled
+      * Added restriction on max. running games for tournament-registration (150)
+      * ALLOWED_RULESETS                  - enabled with: JAPANESE (default) + CHINESE
+      * SEND_ACTIVATION_MAIL              - enabled
 
 
 #release DGS_1_0_15 [2012-Jun-08] - DGS 1.0.15  (Game types & settings, Users, Forum, Voting)

@@ -1,0 +1,13 @@
+# Release DGS 1.0.19 at ??-???-2014 from MAIN-branch:
+#
+# IMPORTANT NOTE:
+# * Do a full backup of all data in the database before performing (these) changes !!
+#   Note current space (phpmyadmin or 'show table status') for later comparison.
+# * Do NOT simply execute these SQL-statements as there are DROP-tables,
+#   some to-be-replaced templates and non-SQL-statements in it !!
+# * enable mysql-client warnings with: \W
+#
+# * Recommendation: Import it section by section manually taking comments into account !
+#
+
+

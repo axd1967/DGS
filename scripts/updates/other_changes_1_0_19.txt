@@ -1,0 +1,9 @@
+
+-----------
+# adjust 'include/config-local.php' reflecting changes
+# - enabled 'ALLOW_QUOTING'
+
+-----------
+// added images
+copy /images/smallwood16.gif
+
