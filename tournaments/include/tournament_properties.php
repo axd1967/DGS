@@ -173,7 +173,7 @@ class TournamentProperties
    {
       $entityData = $this->fillEntityData();
       $result = $entityData->delete( "TournamentProperties.delete(%s)" );
-      Tournament::delete_cache_tournament_properties( 'TournamentProperties.delete', $this->tid );
+      self::delete_cache_tournament_properties( 'TournamentProperties.delete', $this->tid );
       return $result;
    }
 
