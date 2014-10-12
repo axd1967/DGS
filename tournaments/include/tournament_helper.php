@@ -156,7 +156,8 @@ class TournamentHelper
     * \return array of restrictions with category-prefix: [ cat:reason, ... ]
     *         cat : E (error), W (warning), I (invite-only)
     *         E-reasons : STAT (tournament-status), MXG (max-games-check), R (rating),
-    *         W-reasons : RRNG (rating-range), MXP (max participants), REND (register-end-time), FG (min. finished games), RG (min. rated games),
+    *         W-reasons : 30k-9d (rating-range), MXP (max participants), REND (register-end-time),
+    *                     FG (min. finished games), RG (min. rated games),
     *         I-reasons : PRIV (private tournament)
     *
     * \note E = ERR  -> T cannot be joined, T not suitable (no-rating, max-game-check, T-status)
@@ -193,7 +194,7 @@ class TournamentHelper
          if ( !$user_has_rating )
             $out[] = 'E:R';
          elseif ( !$user->matchRating( $row['UserMinRating'], $row['UserMaxRating'] ) )
-            $out[] = 'W:RRNG';
+            $out[] = sprintf('W:%s-%s', echo_rating($row['UserMinRating'],0,0,1,1), echo_rating($row['UserMaxRating'],0,0,1,1) );
       }
 
       // registration only up to max-participants

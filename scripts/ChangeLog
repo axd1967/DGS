@@ -11,6 +11,12 @@ Release [2014-03-27] - DGS 1.0.17 - tag [release-1_0_17-20140327] on branch [DGS
 ChangeLog
 ------------------------------------------------------------------
 
+2014-10-12 jug
+
+   * tournaments/include/tournament_helper.php (TournamentHelper.build_tournament_join_restrictions),
+     tournaments/list_tournaments.php, NEWS:
+   - list-tournaments: replaced 'RRNG'-restriction with actual restricted rating-range '30k-9d'
+
 2014-10-08 jug
 
    * include/std_functions.php ($html_code, $html_safe_preg; feature_reference):
