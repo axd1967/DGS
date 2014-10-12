@@ -1,0 +1,52 @@
+## Server Upgrade from DGS 1.0.17 to DGS 1.0.18 on 30-Jul-2014
+
+* Take Server offline. Clear cache!
+   - upload 'include/quick_common.php' with $is_down=true and adjusted $is_down_message
+   - clear cache with script: ./scripts/apc_clear_cache.php
+
+* Transfer changes to samurajdata. Clear cache!
+   - update remote site with updates, used prepared tar-file with quick-common adjusted to maintenance-mode
+
+* Update code (locally) from GIT
+   - set GIT-tag: release-1_0_18-20140730: DONE
+   - sync $is_down_message from live-server to local-file: include/quick_common.php
+   - prepare server-config for live-server (copy from config.php): include/config-local.php
+
+* Update web-site with  ./scripts/updates/other_changes_1_0_18.txt
+
+* Update database with  ./scripts/updates/database_changes_1_0_18.mysql
+   - Execute all db-changes
+
+* Run consistency tests.
+   - Run some consistency tests (if needed):
+      ./scripts/fix_ladder-seq-wins.php
+
+* Fix translations.
+
+* Do final tests (see NEWS-file):
+
+     (a) Ladder-tournaments (seq-wins)
+     (b) Status-page
+     (c) Game-page, Game-Info
+     (d) SGF-Download: not testable
+     (e) Game-lists
+     (f) Quick-Suite, Quick-Status: not testable
+
+* Start server. Clear cache!
+   - upload 'include/quick_common.php' with $is_down=false
+
+* Post in News-forum
+* Announce changes about server-upgrade 1.0.17 in news-forum
+
+* Update forum with all fixes
+
+* Export database DDL and save as specs/db/dragon-ddl.sql in CVS
+
+* Do Snapshots:
+   - Adjust snapshot page to include new version release: DGS-YYYYMMDD.tar.gz + images-YYYYMMDD.tar.gz; rename older entries
+   - Create snapshot without passwords and upload it to /snapshot directory
+
+* Make a branch later with released version: DGS-stable-20140730
+
+* Adjust FAQ
+
