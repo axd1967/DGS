@@ -72,7 +72,7 @@ class TournamentStatus
       {
          $this->tid = (int)$tid;
          $this->tourney = TournamentCache::load_cache_tournament(
-            'TournamentStatus.constructfind_tournament.find_tournament', $this->tid );
+            'TournamentStatus.construct.find_tournament.find_tournament', $this->tid );
       }
       if ( is_null($this->tourney) || (int)$this->tid <= 0 )
          error('unknown_tournament', "TournamentStatus.construct.find_tournament2({$this->tid})");
