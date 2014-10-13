@@ -398,7 +398,7 @@ $GLOBALS['ThePage'] = new Page('Script', PAGEFLAG_IMPLICIT_FLUSH );
 
 //----------------- counters
 
-   echo span($C, "\n<br><br>Check message/feature/bulletin new-counters of players ...\n<br>");
+   echo span($C, "\n<br><br>Check message/feature/bulletin/tournament new-counters of players ...\n<br>");
 
    $begin = getmicrotime();
 
