@@ -98,6 +98,8 @@ abstract class TournamentTemplateLadder extends TournamentTemplate
          if ( !$t_ext->persist() )
             $this->create_error("TournamentTemplateLadder._createTournament.t_ext.insert(%s,$tid)");
 
+         $this->create_default_tournament_director( $tid );
+
          TournamentLogHelper::log_create_tournament( $tid, $tourney->WizardType, $tourney->Title );
       }
       ta_end();

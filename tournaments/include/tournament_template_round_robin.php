@@ -107,6 +107,8 @@ abstract class TournamentTemplateRoundRobin extends TournamentTemplate
          if ( !$tround->insert() )
             $this->create_error("TournamentTemplateRoundRobin._createTournament.tround.insert(%s,$tid)");
 
+         $this->create_default_tournament_director( $tid );
+
          TournamentLogHelper::log_create_tournament( $tid, $tourney->WizardType, $tourney->Title );
       }
       ta_end();

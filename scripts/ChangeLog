@@ -13,6 +13,11 @@ ChangeLog
 
 2014-10-13 jug
 
+   * tournaments/include/tournament_template.php (TournamentTemplate.create_default_tournament_director),
+     tournaments/include/tournament_template_ladder.php (TournamentTemplateLadder._createTournament),
+     tournaments/include/tournament_template_round_robin.php (TournamentTemplateRoundRobin._createTournament):
+   - tournament-wizard: add default tournament-director with game-end privilege on creating new tournament
+
    * tournaments/view_tournament.php:
    - mark only active tournaments as visited, because they would reappear as "new"
      after tournament closed or deleted

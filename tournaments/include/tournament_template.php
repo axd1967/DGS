@@ -21,6 +21,8 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 require_once 'tournaments/include/tournament_globals.php';
 require_once 'tournaments/include/tournament_limits.php';
+require_once 'tournaments/include/tournament_director.php';
+require_once 'tournaments/include/tournament_utils.php';
 
  /*!
   * \file tournament_template.php
@@ -128,6 +130,17 @@ abstract class TournamentTemplate
          $max_limit = 1;
       return $max_limit;
    }//determineLimitMaxStartRound
+
+   /*! \brief Creates default tournament-director with only game-end-privilege (if not admin). */
+   protected function create_default_tournament_director( $tid )
+   {
+      if ( !TournamentUtils::isAdmin() && $this->uid > GUESTS_ID_MAX )
+      {
+         $t_director = new TournamentDirector( $tid, $this->uid, TD_FLAG_GAME_END );
+         if ( !$t_director->insert() )
+            $this->create_error("TournamentTemplate.create_default_tournament_director.insert(%s,$tid)");
+      }
+   }//create_default_tournament_director
 
 
    // ---------- Interface ----------------------------------------
