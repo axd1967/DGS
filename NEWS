@@ -38,6 +38,9 @@ Copyright (C) 2001-2014  Erik Ouchterlony, Jens-Uwe Gaspar
    Bug fixes:
 
    * Fixed tournament-registration and rank-converter to accept user with rating > 6d
+   * Fixed missing check of waiting-room accept-same-opponent-restriction for total-count of joined games
+   * Fixed showing territory-markers for all users for game on score-status if last move was scoring-step
+   * Fixed showing publish-time of bulletin with weekday and timezone
 
    Code improvements:
 

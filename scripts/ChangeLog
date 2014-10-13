@@ -154,8 +154,6 @@ ALTER TABLE Players
    - added file-pattern formatting for SGF-download:
      $M = moves-count, $H0 = handicap (with 0), $T = game-type
 
-### ----- release-1_0_18-20140730 -----
-
 2014-08-05 jug
 
    * include/gui_bulletin.php (GuiBulletin.build_view_bulletin):
@@ -169,6 +167,8 @@ ALTER TABLE Players
    - bugfix: fixed missing check of waiting-room accept-same-opponent-restriction
      for total-count of joined games
      - sync'ed SQL-clause-parts
+
+### ----- release-1_0_18-20140730 -----
 
 2014-07-30 jug
 
