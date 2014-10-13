@@ -13,6 +13,10 @@ ChangeLog
 
 2014-10-13 jug
 
+   * tournaments/list_tournaments.php:
+   - tournament-list: only mark NEW and active tournaments as "new", because visits are removed
+     for closed and deleted tournaments
+
    * tournaments/include/tournament_visit.php (class TournamentVisit, ~.mark_tournament_visited,
        ~.has_visited_tournament, ~.load_tournament_visits, ~.delete_cache_tournament_visits,
        ~.cleanup_tournament_visits, ~.reset_players_tournament_new_count),

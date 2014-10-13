@@ -311,8 +311,10 @@ $GLOBALS['ThePage'] = new Page('TournamentList');
       }
       if ( !$orow['TV_tid'] && $ttable->Is_Column_Displayed[19] )
       {
-         $row_str[19] = (Tournament::is_active_tournament($tourney->Status))
-            ? span('TNewFlag', T_('new#tourney')) : span('TInitFlag', T_('new#tourney'));
+         if ( $tourney->Status == TOURNEY_STATUS_NEW )
+            $row_str[19] = span('TInitFlag', T_('new#tourney'));
+         elseif ( Tournament::is_active_tournament($tourney->Status) )
+            $row_str[19] = span('TNewFlag', T_('new#tourney'));
       }
 
       $ttable->add_row( $row_str );
