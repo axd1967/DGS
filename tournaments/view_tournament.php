@@ -114,7 +114,8 @@ $GLOBALS['ThePage'] = new Page('Tournament');
       $tpoints = TournamentCache::load_cache_tournament_points( 'Tournament.view_tournament', $tid, /*chk*/false );
    }
 
-   TournamentVisit::mark_tournament_visited( $my_id, $tid );
+   if ( Tournament::is_active_tournament($tourney->Status) )
+      TournamentVisit::mark_tournament_visited( $my_id, $tid );
 
    $page_tdirs   = "tournaments/list_directors.php?tid=$tid";
    $page_tourney = "tournaments/view_tournament.php?tid=$tid";
