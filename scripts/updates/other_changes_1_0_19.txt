@@ -2,12 +2,9 @@
 -----------
 # adjust 'include/config-local.php' reflecting changes
 # - enabled 'ALLOW_QUOTING'
+# - extended $DGS_CACHE_GROUPS with CACHE_GRP_TVISIT for caching tournament-visit-table
 
 -----------
 // added images
 copy /images/smallwood16.gif
-
------------
-# adjust 'include/config-local.php' reflecting changes
-# - extended $DGS_CACHE_GROUPS with CACHE_GRP_TVISIT for caching tournament-visit-table
 
