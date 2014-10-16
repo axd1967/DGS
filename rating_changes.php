@@ -179,7 +179,7 @@ function fill_user_rating_changes( $data, &$rform, &$itable, $b_id, $w_id )
          ($has_b_rating ? echo_rating_elo(@$userb->Rating, true) : NO_VALUE),
          ($has_w_rating ? echo_rating_elo(@$userw->Rating, true) : NO_VALUE),
          ($has_b_rating && $has_w_rating
-            ? T_('DIFF#ratchg') . echo_rating_elo(abs(@$userb->Rating - @$userw->Rating), ': ')
+            ? T_('DIFF#ratchg') . echo_rating_elo(abs(@$userb->Rating - @$userw->Rating), true, ': ')
             : '' )) );
    $itable->add_sinfo( T_('ELO Rating Min - Max#ratchg'), array(
          ($has_b_rating ? echo_rating_elo(@$userb->urow['RatingMin'], true) : NO_VALUE) . ' - ' .
