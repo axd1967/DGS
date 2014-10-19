@@ -11,6 +11,11 @@ Release [2014-07-30] - DGS 1.0.18 - tag [release-1_0_18-20140730] on branch [DGS
 ChangeLog
 ------------------------------------------------------------------
 
+2014-10-19 jug
+
+   * tournaments/include/tournament_rules.php (TournamentRules.update, ~.delete):
+   - fix bug: wrong id used for cache-invalidation of TournamentRules-entries
+
 2014-10-13 jug
 
    * tournaments/include/tournament_template.php (TournamentTemplate.create_default_tournament_director),

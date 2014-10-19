@@ -181,7 +181,7 @@ class TournamentRules
 
       $entityData = $this->fillEntityData();
       $result = $entityData->update( "TournamentRules.update(%s,{$this->tid})" );
-      self::delete_cache_tournament_rules( 'TournamentRules.update', $this->ID );
+      self::delete_cache_tournament_rules( 'TournamentRules.update', $this->tid );
       return $result;
    }
 
@@ -189,7 +189,7 @@ class TournamentRules
    {
       $entityData = $this->fillEntityData();
       $result = $entityData->delete( "TournamentRules.delete(%s,{$this->tid})" );
-      self::delete_cache_tournament_rules( 'TournamentRules.delete', $this->ID );
+      self::delete_cache_tournament_rules( 'TournamentRules.delete', $this->tid );
       return $result;
    }
 
