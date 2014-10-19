@@ -97,6 +97,13 @@ class Board
       $this->cond_moves = null;
    }//init_board
 
+   private function get_last_move_mark_type()
+   {
+      return ( 0 && ( $this->stone_size == 21 || $this->stone_size == 25 ) )
+         ? 'ms' // special last-move-marker
+         : 'm'; // normal last-move-marker
+   }
+
    public function debug_array( $sep=':' )
    {
       $arr = array();
@@ -1056,7 +1063,7 @@ class Board
                       && $this->movemrkx == $colnr
                       && $this->movemrky == $this->size-$rownr )
                   { //last move mark
-                     $type .= 'm';
+                     $type .= $this->get_last_move_mark_type();
                      $alt = ( $stone == BLACK ? '#' : '@' );
                      $img_id = 'lastMove';
                      $marked = true;

@@ -13,6 +13,11 @@ ChangeLog
 
 2014-10-19 jug
 
+   * include/board.php (Board.get_last_move_mark_type, ~.draw_board),
+     scripts/updates/1.19/other_changes.txt,
+     21/bms.gif, 21/wms.gif, 25/bms.gif, 25/wms.gif:
+   - added special last-move-marker
+
    * include/globals.php (DGS_VERSION),
      scripts/updates/<VERSION>/database_changes.mysql,
      scripts/updates/<VERSION>/other_changes.txt,

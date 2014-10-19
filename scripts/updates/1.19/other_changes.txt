@@ -7,4 +7,8 @@
 -----------
 // added images
 copy /images/smallwood16.gif
+copy /21/bms.gif
+copy /21/wms.gif
+copy /25/bms.gif
+copy /25/wms.gif
 
