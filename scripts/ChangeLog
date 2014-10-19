@@ -13,6 +13,14 @@ ChangeLog
 
 2014-10-19 jug
 
+   * tournaments/include/tournament_round_helper.php (TournamentRoundHelper.check_tournament_participant_max_games),
+     tournaments/include/types/private_round_robin.php (PrivateRoundRobinTournament.__construct),
+     tournaments/include/types/public_round_robin.php (PublicRoundRobinTournament.__construct):
+   - increase number of max. games per participant in pool for public/private round-robin-tournaments
+     - increased number of max. games per participant from 15 to 18 to allow 10 TPs max
+       with DOUBLE-round-robin
+     - tournament-admin can overwrite max. games per participant, but then also need to change T-status
+
    * tournaments/include/types/private_round_robin.php (PrivateRoundRobinTournament.createTournament):
    - changed default-title for newly create private-round-robin tournament
      to "user's private mini-tournament (size)"

@@ -22,6 +22,7 @@ Copyright (C) 2001-2014  Erik Ouchterlony, Jens-Uwe Gaspar
 
    * <home tournament/list_tournaments.php>Tournaments</home>:
       * Replaced 'RRNG'-restriction with actual restricted rating-range '30k-9d'
+      * Increased max. number of games (18) per participant to allow double-round-robin for private/public tournaments
 
    * Forum:
       * Added "quote"-link in post near "reply" (also to view the RAW-text of a forum post)

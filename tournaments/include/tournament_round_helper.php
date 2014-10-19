@@ -37,6 +37,7 @@ require_once 'tournaments/include/tournament_pool.php';
 require_once 'tournaments/include/tournament_pool_classes.php';
 require_once 'tournaments/include/tournament_round.php';
 require_once 'tournaments/include/tournament_rules.php';
+require_once 'tournaments/include/tournament_utils.php';
 
  /*!
   * \file tournament_round_helper.php
@@ -642,6 +643,7 @@ class TournamentRoundHelper
 
    /*!
     * \brief Returns error-text if games per tournament-participant exceed wizard-type limit.
+    * \note No restriction for Tournament-admin.
     * \return null on success; otherwise error-msg
     */
    public static function check_tournament_participant_max_games( $tid, $t_limits, $pool_size )
@@ -649,9 +651,9 @@ class TournamentRoundHelper
       $errmsg = null;
 
       $max_tp_games = $t_limits->getMaxLimit(TLIMITS_TRD_TP_MAX_GAMES);
-      if ( $max_tp_games > 0 )
+      if ( $max_tp_games > 0 && !TournamentUtils::isAdmin() ) // T-Admin can set any out-of-limit value
       {
-         $games_factor = TournamentHelper::determine_games_factor( $tid );
+         $games_factor = TournamentHelper::determine_games_factor( $tid ); // load from T-rules
          $tp_games = $games_factor * ( $pool_size - 1 );
          if ( $tp_games > $max_tp_games )
          {
