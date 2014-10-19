@@ -13,6 +13,10 @@ ChangeLog
 
 2014-10-19 jug
 
+   * tournaments/include/types/private_round_robin.php (PrivateRoundRobinTournament.createTournament):
+   - changed default-title for newly create private-round-robin tournament
+     to "user's private mini-tournament (size)"
+
    * tournaments/include/tournament_rules.php (TournamentRules.update, ~.delete):
    - fix bug: wrong id used for cache-invalidation of TournamentRules-entries
 
