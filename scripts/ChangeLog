@@ -11,6 +11,15 @@ Release [2014-07-30] - DGS 1.0.18 - tag [release-1_0_18-20140730] on branch [DGS
 ChangeLog
 ------------------------------------------------------------------
 
+2014-10-20 jug
+
+   * include/make_game.php (make_invite_game_setup_from_url),
+     include/message_functions.php (game_settings_form),
+     new_game.php (handle_add_game):
+   - prevent conventional- and proper handicap-type for shape-games
+     - use manual handicap-type nigiri as default for shape-games invitations and waiting-room
+     - disable conventional- and proper handicap-type radio-buttons for shape-games
+
 2014-10-19 jug
 
    * include/board.php (Board.get_last_move_mark_type, ~.draw_board),

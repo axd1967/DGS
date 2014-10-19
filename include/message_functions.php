@@ -115,12 +115,13 @@ function game_settings_form(&$mform, $formstyle, $viewmode, $iamrated=true, $my_
 
    $allowed = true;
    $shape_init = true;
+   $shape_id = ( $gid == 0 ) ? (int)@$_REQUEST['shape'] : 0;
 
    // Default values: for invite/waitingroom/tournament (dispute comes from DB)
    $ShapeID = $orig_shape_id = 0;
    $ShapeSnapshot = '';
    $Size = 19;
-   $Handitype = ($iamrated) ? HTYPE_CONV : HTYPE_NIGIRI;
+   $Handitype = ( $iamrated && $shape_id <= 0 ) ? HTYPE_CONV : HTYPE_NIGIRI;
    $Color_m = HTYPE_NIGIRI; // always my-color of current-user (also for dispute)
    $CategoryHandiType = get_category_handicaptype( $Handitype );
    $Ruleset = Ruleset::get_default_ruleset();
@@ -155,13 +156,10 @@ function game_settings_form(&$mform, $formstyle, $viewmode, $iamrated=true, $my_
       $CategoryHandiType = CAT_HTYPE_MANUAL;
       $Rated = false;
    }
-   if ( $gid == 0 ) // handle shape-game
+   if ( $shape_id > 0 ) // handle shape-game
    {
-      if ( ($shape_id = (int)@$_REQUEST['shape']) > 0 )
-      {
-         $ShapeID = $shape_id;
-         $ShapeSnapshot = @$_REQUEST['snapshot'];
-      }
+      $ShapeID = $shape_id;
+      $ShapeSnapshot = @$_REQUEST['snapshot'];
    }
 
    if ( $my_ID==='redraw' && is_array($arr_url_or_gid) )
@@ -439,7 +437,7 @@ function game_settings_form(&$mform, $formstyle, $viewmode, $iamrated=true, $my_
       elseif ( !$iamrated )
          $sugg_conv = $sugg_prop = span('WarnMsg', $text_need_rating);
 
-      $calc_htype_disabled = ( $iamrated ) ? '' : 'disabled=1';
+      $calc_htype_disabled = ( $iamrated && $ShapeID <= 0 ) ? '' : 'disabled=1';
       $mform->add_row( array(
             'DESCRIPTION', T_('Conventional handicap (komi 0.5 if not even)'),
             'RADIOBUTTONSX', 'cat_htype', array( CAT_HTYPE_CONV => '' ), $CategoryHandiType, $calc_htype_disabled,

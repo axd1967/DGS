@@ -209,6 +209,8 @@ function make_invite_game_setup_from_url( $my_urow, $opp_urow )
       $arr_shape = GameSnapshot::parse_check_extended_snapshot($gs->ShapeSnapshot);
       if ( !is_array($arr_shape) ) // overwrite with defaults
          error('invalid_snapshot', "make_invite_game_setup_from_url.check.shape({$gs->ShapeID},{$gs->ShapeSnapshot})");
+      if ( $gs->Handicaptype == HTYPE_CONV || $gs->Handicaptype == HTYPE_PROPER )
+         error('invalid_args', "make_invite_game_setup_from_url.check.shape.htype({$gs->ShapeID},{$gs->ShapeSnapshot},{$gs->Handicaptype})");
 
       $gs->Size = (int)$arr_shape['Size'];
       $gs->StdHandicap = false;

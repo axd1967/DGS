@@ -35,6 +35,7 @@ Copyright (C) 2001-2014  Erik Ouchterlony, Jens-Uwe Gaspar
       * Added white wood background in user profile for display of game-board
       * Changed order of columns on games-page by moving current-rating near user-info
       * Added file-pattern-formatting for SGF-download: $M = moves-count, $H0 = handicap (with 0), $T = game-type
+      * Enforce manual handicap-type for shape-games in waiting-room and for invitations
 
    Bug fixes:
 

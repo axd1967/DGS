@@ -382,6 +382,8 @@ function handle_add_game( $my_id, $viewmode )
       $arr_shape = GameSnapshot::parse_check_extended_snapshot($shape_snapshot);
       if ( !is_array($arr_shape) ) // overwrite with defaults
          error('invalid_snapshot', "new_game.handle_add_game.check.shape($shape_id,$shape_snapshot)");
+      if ( $handicap_type == HTYPE_CONV || $handicap_type == HTYPE_PROPER )
+         error('invalid_args', "new_game.handle_add_game.check.shape.htype($shape_id,$shape_snapshot,$handicap_type)");
 
       // implicit defaults for shape-game
       $size = (int)$arr_shape['Size'];
