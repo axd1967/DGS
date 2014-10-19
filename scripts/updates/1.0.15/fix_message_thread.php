@@ -17,7 +17,7 @@ You should have received a copy of the GNU Affero General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-chdir( '../../' );
+chdir( '../../../' );
 require_once 'include/std_functions.php';
 
 $GLOBALS['ThePage'] = new Page('Script', PAGEFLAG_IMPLICIT_FLUSH );
@@ -68,7 +68,7 @@ $GLOBALS['ThePage'] = new Page('Script', PAGEFLAG_IMPLICIT_FLUSH );
 
    // NOTE: This may run into memory problems, because it needs to load all messages
    //       to update at once. So it's good to have some preparations done before.
-   //       see scripts/updates/database_changes_1_0_14_to_1_0_15.mysql
+   //       see scripts/updates/1.0.15/database_changes.mysql
 
    echo "<hr>Find messages without thread ...";
 

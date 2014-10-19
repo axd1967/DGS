@@ -13,6 +13,28 @@ ChangeLog
 
 2014-10-19 jug
 
+   * include/globals.php (DGS_VERSION),
+     scripts/updates/<VERSION>/database_changes.mysql,
+     scripts/updates/<VERSION>/other_changes.txt,
+     scripts/updates/<VERSION>/release.txt,
+     scripts/updates/<VERSION>/ChangeLog,
+     scripts/updates/1.0.15/fix_game_comments.php,
+     scripts/updates/1.0.15/fix_message_thread.php,
+     scripts/updates/1.0.16/fix_default_max_handi.php,
+     scripts/updates/1.0.16/fix_game_invitations.php,
+     scripts/updates/1.0.16/fix_new_game_expert_view.php,
+     scripts/updates/1.0.18/fix_hero_ratio.php,
+     scripts/index.php, specs/caching.txt, NEWS:
+   - changed server versioning scheme: ARCHITECTURE.MAJOR.MINOR -> 1.19.0
+     - moved and adjusted files 'scripts/updates/FILE<VERSION>' into 'scripts/updates/<VERSION>/FILE'
+       for old versions 1.0.13, 1.0.14, 1.0.15, 1.0.16, 1.0.17, 1.0.18, 1.0.19 (-> 1.19]
+     - adjusted scripts and documentation matching new version-specific directories
+       - renamed 'database_changes_<VERSION>.mysql' -> '<VERSION>/database_changes.mysql'
+       - renamed 'other_changes_<VERSION>.txt' -> '<VERSION>/other_changes.txt'
+       - renamed 'roadmap_<VERSION>.txt' -> '<VERSION>/release.txt'
+       - renamed 'ChangeLog_<VERSION>' -> '<VERSION>/ChangeLog'
+       - renamed 'fix_<SCRIPT>-<VERSION>.php' -> '<VERSION>/fix_<SCRIPT>.php'
+
    * tournaments/include/tournament_round_helper.php (TournamentRoundHelper.check_tournament_participant_max_games),
      tournaments/include/types/private_round_robin.php (PrivateRoundRobinTournament.__construct),
      tournaments/include/types/public_round_robin.php (PublicRoundRobinTournament.__construct):

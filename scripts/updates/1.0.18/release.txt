@@ -12,9 +12,9 @@
    - sync $is_down_message from live-server to local-file: include/quick_common.php
    - prepare server-config for live-server (copy from config.php): include/config-local.php
 
-* Update web-site with  ./scripts/updates/other_changes_1_0_18.txt
+* Update web-site with  ./scripts/updates/1.0.18/other_changes.txt
 
-* Update database with  ./scripts/updates/database_changes_1_0_18.mysql
+* Update database with  ./scripts/updates/1.0.18/database_changes.mysql
    - Execute all db-changes
 
 * Run consistency tests.

@@ -15,7 +15,7 @@
 
 (5) Transfer changes to samurajdata. Clear cache!
 
-(6) Update database with /scripts/database_changes_1_0_13_to_1_0_14.mysql
+(6) Update database with /scripts/updates/1.0.14/database_changes.mysql
 
    (.) Export database DDL and save as init.mysql in CVS
 

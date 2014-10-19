@@ -17,9 +17,8 @@ You should have received a copy of the GNU Affero General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-chdir( '../../' );
+chdir( '../../../' );
 require_once 'include/std_functions.php';
-require_once 'include/game_functions.php';
 
 $GLOBALS['ThePage'] = new Page('Script', PAGEFLAG_IMPLICIT_FLUSH );
 
@@ -31,17 +30,17 @@ $GLOBALS['ThePage'] = new Page('Script', PAGEFLAG_IMPLICIT_FLUSH );
 
    $logged_in = who_is_logged( $player_row);
    if ( !$logged_in )
-      error('login_if_not_logged_in', 'scripts.fix_new_game_expert_view-1_0_16');
+      error('login_if_not_logged_in', 'scripts.fix_game_comments-1_0_15');
    if ( $player_row['ID'] <= GUESTS_ID_MAX )
-      error('not_allowed_for_guest', 'scripts.fix_new_game_expert_view-1_0_16');
-   if ( !(@$player_row['admin_level'] & ADMIN_DATABASE) )
-      error('adminlevel_too_low', 'scripts.fix_new_game_expert_view-1_0_16');
+      error('not_allowed_for_guest', 'scripts.fix_game_comments-1_0_15');
+   if ( !(@$player_row['admin_level'] & (ADMIN_DATABASE|ADMIN_GAME)) )
+      error('adminlevel_too_low', 'scripts.fix_game_comments-1_0_15');
 
    $page = $_SERVER['PHP_SELF'];
    $page_args = array();
 
 
-   start_html( 'fix_new_game_expert_view', false );
+   start_html( 'fix_game_comments', false );
 
 //echo ">>>> One shot fix. Do not run it again."; end_html(); exit;
 
@@ -53,7 +52,7 @@ $GLOBALS['ThePage'] = new Page('Script', PAGEFLAG_IMPLICIT_FLUSH );
            die("<BR>$s;<BR>" . mysql_error() );
          if ( DBG_QUERY>1 ) error_log("dbg_query(DO_IT): $s");
       }
-      echo "<p>*** Fixes new-game-profiles with expert-view (old ".DEPRECATED_GSETVIEW_EXPERT.") ***"
+      echo "<p>*** Fixes hidden game comments flag ***"
          ."<br>".anchor(make_url($page, $page_args), 'Just show it')
          ."</p>";
    }
@@ -64,59 +63,65 @@ $GLOBALS['ThePage'] = new Page('Script', PAGEFLAG_IMPLICIT_FLUSH );
          if ( DBG_QUERY>1 ) error_log("dbg_query(SIMUL): $s");
       }
       $tmp = array_merge($page_args,array('do_it' => 1));
-      echo "<p><b><font color=red>Important Note:</font></b> Ensure, that script 'fix_default_max_handi-1_0_16.php' has run first (once only)!"
-         ."<p>(just show needed queries)"
+      echo "<p>(just show needed queries)"
          ."<br>".anchor(make_url($page, $page_args), 'Show it again')
          ."<br>".anchor(make_url($page, $tmp), '[Validate it]')
          ."</p>";
    }
 
 
-   echo "<hr>Find new-game profiles with deprecated expert-view ...";
+   // NOTE: Using a GROUP-BY SQL-statement may run into memory problems,
+   //       so scan MoveMessages for hidden game-comments separatly for each game.
 
-   $arr_templates = load_profile_templates_new_game_expert_view(); // arr( Profiles.ID => ProfileTemplate, ...)
+   echo "<hr>Find games with hidden game comments ...";
 
-   $all_cnt = count($arr_templates);
+   $arr_games = load_games_with_hidden_comment( GAMEFLAGS_HIDDEN_MSG ); // gid => 1
+
+   $query = "SELECT DISTINCT gid FROM MoveMessages WHERE Text RLIKE '</?h(idden)?>'";
+   $result = mysql_query( $query ) or die(mysql_error());
+
+   $games_cnt = @mysql_num_rows($result);
    $curr_cnt = 0;
-   echo "<br>Found $all_cnt profiles to fix ...\n";
+   echo "<br>Found $games_cnt games to check and potentially set hidden-comments-flag ...\n";
 
-   // fix view-mode
+   // update Games.Flags
    $cnt_fix = 0;
-   foreach ( $arr_templates as $profile_id => $tmpl )
+   while ( $row = mysql_fetch_assoc( $result ) )
    {
-      if ( ($curr_cnt++ % 50) == 0 )
-         echo "<br><br>... $curr_cnt of $all_cnt updated ...\n";
-
-      $tmpl->GameSetup->ViewMode = GSETVIEW_STANDARD;
-      $fix_text = $tmpl->encode_template();
-      dbg_query( "UPDATE Profiles SET Text='".mysql_addslashes($fix_text)."' WHERE ID=$profile_id LIMIT 1" );
-      $cnt_fix++;
+      $gid = $row['gid'];
+      if ( !isset($arr_games[$gid]) )
+         $cnt_fix += update_games_flags( $gid, GAMEFLAGS_HIDDEN_MSG );
    }
+   mysql_free_result($result);
 
-   echo "<br>Found $cnt_fix profiles that required fixing ...\n";
+   echo "<br>Found $cnt_fix games that required fixing ...\n";
 
    if ( $do_it )
-      echo 'Fix by merging profile deprecated expert-view finished.';
+      echo 'Games hidden-comments-flag fix finished.';
 
    end_html();
 }//main
 
 
-function load_profile_templates_new_game_expert_view()
+function update_games_flags( $gid, $flagval )
 {
-   static $template_type = PROFTYPE_TMPL_NEWGAME;
+   global $games_cnt, $curr_cnt;
+   if ( ($curr_cnt++ % 50) == 0 )
+      echo "<br><br>... $curr_cnt of $games_cnt updated ...\n";
+   $update_query = "UPDATE Games SET Flags=Flags | $flagval WHERE ID='$gid' LIMIT 1";
+   dbg_query($update_query);
+   return 1;
+}
 
+function load_games_with_hidden_comment( $flagval )
+{
    $arr = array();
-   $result = db_query("fix_new_game_expert_view.load_profile_templates_new_game_expert_view()",
-      "SELECT ID, Text FROM Profiles WHERE Type=$template_type" );
+   $query = "SELECT ID FROM Games WHERE (Flags & $flagval) > 0";
+   $result = mysql_query( $query ) or die(mysql_error());
    while ( $row = mysql_fetch_assoc( $result ) )
-   {
-      $tmpl = ProfileTemplate::decode( $template_type, $row['Text'] );
-      if ( $tmpl->GameSetup->ViewMode == DEPRECATED_GSETVIEW_EXPERT )
-         $arr[$row['ID']] = $tmpl;
-   }
+      $arr[$row['ID']] = 1;
    mysql_free_result($result);
    return $arr;
-}//load_profile_templates_new_game_expert_view
+}//load_games_with_hidden_comment
 
 ?>

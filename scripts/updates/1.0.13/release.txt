@@ -59,10 +59,10 @@
 (6) Transfer changes to samurajdata.
 
 
-(7) Update database with /scripts/database_changes_1_0_12_to_1_0_13.mysql
+(7) Update database with /scripts/updates/1.0.13/database_changes.mysql
 
 
-(8) Apply changes from /scripts/other_changes_1_0_12_to_1_0_13.txt
+(8) Apply changes from /scripts/updates/1.0.13/other_changes.txt
 
    * Run the new consistency tests:
       -/scripts/message_consistency.php

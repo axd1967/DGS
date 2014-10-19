@@ -383,8 +383,8 @@ To add a new cache-group the following steps are required:
    * Adjust "include/config-local.php" on the live-server:
       - Configure the new cache-group according to the specific needs of the live-server.
 
-   * Adjust "scripts/updates/other_changes_...txt":
-      - Add a new configuration also in the "scripts/updates/other_changes_.."-file,
+   * Adjust "scripts/updates/<VERSION>/other_changes.txt":
+      - Add a new configuration also in the "scripts/updates/<VERSION>/other_changes.txt"-file,
         so that it is not forgotten on server-upgrades.
 
    * Use DgsCache::fetch/store/delete to fetch, store and invalidate (=delete)

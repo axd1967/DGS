@@ -82,15 +82,15 @@ require_once 'include/std_functions.php';
       ),
 
       'scripts/updates/', array(
-         "Migration scripts for release 1.0.15, use <b>ONLY</b> if you know how they work !!<br>\n(see database_changes_1_0_15.mysql)" => 0,
-            'fix_message_thread-1_0_15.php'  => "Set message-threads/level",
-            'fix_game_comments-1_0_15.php'   => "Set game hidden-comments flags",
-         "Migration scripts for release 1.0.16, use <b>ONLY</b> if you know how they work !!<br>\n(see database_changes_1_0_16.mysql)" => 0,
-            'fix_new_game_expert_view-1_0_16.php' => "Replace deprecated new-game expert-view",
-            'fix_default_max_handi-1_0_16.php'    => "Set default max-handicap",
-            'fix_game_invitations-1_0_16.php'     => "Migrate old 1.0.15-style game-invitations",
-         "Migration scripts for release 1.0.18, use <b>ONLY</b> if you know how they work !!<br>\n(see database_changes_1_0_18.mysql)" => 0,
-            'fix_hero_ratio-1_0_18.php'      => "Sets Players.WeakerGames for hero awards and enrich game-setup",
+         "Migration scripts for release 1.0.15, use <b>ONLY</b> if you know how they work !!<br>\n(see 1.0.15/database_changes.mysql)" => 0,
+            '1.0.15/fix_message_thread.php'  => "Set message-threads/level",
+            '1.0.15/fix_game_comments.php'   => "Set game hidden-comments flags",
+         "Migration scripts for release 1.0.16, use <b>ONLY</b> if you know how they work !!<br>\n(see 1.0.16/database_changes.mysql)" => 0,
+            '1.0.16/fix_new_game_expert_view.php' => "Replace deprecated new-game expert-view",
+            '1.0.16/fix_default_max_handi.php'    => "Set default max-handicap",
+            '1.0.16/fix_game_invitations.php'     => "Migrate old 1.0.15-style game-invitations",
+         "Migration scripts for release 1.0.18, use <b>ONLY</b> if you know how they work !!<br>\n(see 1.0.18/database_changes.mysql)" => 0,
+            '1.0.18/fix_hero_ratio.php'      => "Sets Players.WeakerGames for hero awards and enrich game-setup",
       ),
    ); //arr_scripts
 

@@ -28,11 +28,11 @@
 * Transfer changes to samurajdata. Clear cache!
    - update remote site with updates
 
-* Update web-site with  ./scripts/other_changes_1_0_14_to_1_0_15.txt
+* Update web-site with  ./scripts/updates/1.0.15/other_changes.txt
    - prepare web-site including all steps from 'INSTALL'-docfile,
      including: CACHE_FOLDER, USERPIC_FOLDER, DATASTORE_FOLDER
 
-* Update database with  ./scripts/database_changes_1_0_13_to_1_0_14.mysql
+* Update database with  ./scripts/updates/1.0.15/database_changes.mysql
    - Execute all db-changes
 
    - Export database DDL and save as specs/db/dragon-ddl.sql in CVS
