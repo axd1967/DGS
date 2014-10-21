@@ -11,7 +11,10 @@ Copyright (C) 2001-2014  Erik Ouchterlony, Jens-Uwe Gaspar
       * Added counter for new tournaments in main-menu
       * Added 'new'-indicator in <home tournaments/list_tournaments.php>tournaments list page</home>, that vanishes if tournament-info page is visited
          * shown in red-color <color darkred>new</color> for active tournaments (Register, Pair, Play phase)
-         * shown in grey-color <color darkgrey>new</color> for inactive tournaments (setup phase)
+         * shown in grey-color <color darkgrey>new</color> for inactive tournaments (Setup phase)
+
+      * Replaced 'RRNG'-restriction with actual restricted rating-range '30k-9d'
+      * Increased max. number of games (18) per participant to allow double-round-robin for private/public tournaments
 
    Minor changes:
 
@@ -19,10 +22,6 @@ Copyright (C) 2001-2014  Erik Ouchterlony, Jens-Uwe Gaspar
       * &lt;feature id> : showing link to corresponding feature
       * &lt;bgcolor col> : showing text with background-color
       * &lt;ticket issue> : showing link to external ticket-system (Jira)
-
-   * <home tournament/list_tournaments.php>Tournaments</home>:
-      * Replaced 'RRNG'-restriction with actual restricted rating-range '30k-9d'
-      * Increased max. number of games (18) per participant to allow double-round-robin for private/public tournaments
 
    * Forum:
       * Added "quote"-link in post near "reply" (also to view the RAW-text of a forum post)
