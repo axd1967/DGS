@@ -1,0 +1,447 @@
+# Jira-schema retrieved with REST-API of Jira-server for DGS
+# started to evaluate on 27-Dec-2013
+
+USER=auto-dgs
+PASS=********
+curl -D- -k -u "$USER:$PASS" -X GET -H "Content-Type: application/json" https://dragongoserver.atlassian.net/rest/api/2/issue/createmeta | tee OUT
+
+{
+   "expand": "projects",
+   "projects": [
+      {
+         "self": "https://dragongoserver.atlassian.net/rest/api/2/project/10001",
+         "id": "10001",
+         "key": "DGS",
+         "name": "Dragon Go Server",
+         "avatarUrls":
+            {
+               "16x16": "https://dragongoserver.atlassian.net/secure/projectavatar?size=xsmall&pid=10001&avatarId=10011",
+               "24x24": "https://dragongoserver.atlassian.net/secure/projectavatar?size=small&pid=10001&avatarId=10011",
+               "32x32": "https://dragongoserver.atlassian.net/secure/projectavatar?size=medium&pid=10001&avatarId=10011",
+               "48x48": "https://dragongoserver.atlassian.net/secure/projectavatar?pid=10001&avatarId=10011"
+            },
+         "issuetypes": [
+            {
+               "self": "https://dragongoserver.atlassian.net/rest/api/2/issuetype/1",
+               "id": "1",
+               "description": "A problem which impairs or prevents the functions of the product.",
+               "iconUrl": "https://dragongoserver.atlassian.net/images/icons/issuetypes/bug.png",
+               "name": "Bug",
+               "subtask": false
+
+               "expand": "fields",
+               "fields": {
+
+                     "summary": {
+                           "required": true,
+                           "schema": {
+                                 "type": "string",
+                                 "system": "summary" },
+                           "name": "Summary",
+                           "hasDefaultValue": false,
+                           "operations": ["set"]
+                        },
+
+                     # DGS-field
+                     "customfield_10103": {
+                           "required": false,
+                           "schema": {
+                                 "type": "string",
+                                 "custom": "com.atlassian.jira.plugin.system.customfieldtypes:url",
+                                 "customId": 10103},
+                           "name": "DGS User",
+                           "hasDefaultValue": false,
+                           "operations": ["set"]},
+
+                     "timetracking": {
+                           "required": false,
+                           "schema": {
+                                 "type": "timetracking",
+                                 "system": "timetracking" },
+                           "name": "Time Tracking",
+                           "hasDefaultValue": false,
+                           "operations": ["set", "edit"]},
+
+                     # for AGILE
+                     "customfield_10009": {
+                           "required": true,
+                           "schema": {
+                                 "type": "string",
+                                 "custom": "com.pyxis.greenhopper.jira:gh-epic-label",
+                                 "customId": 10009},
+                           "name": "Epic Name",
+                           "hasDefaultValue": false,
+                           "operations": ["set"]},
+
+                     "issuetype": {
+                           "required": true,
+                           "schema": {
+                                 "type": "issuetype",
+                                 "system": "issuetype" },
+                           "name": "Issue Type",
+                           "hasDefaultValue": false,
+                           "operations": [],
+                           "allowedValues": [ {
+                                 "self": "https://dragongoserver.atlassian.net/rest/api/2/issuetype/1",
+                                 "id": "1",
+                                 "description": "A problem which impairs or prevents the functions of the product.",
+                                 "iconUrl": "https://dragongoserver.atlassian.net/images/icons/issuetypes/bug.png",
+                                 "name": "Bug",
+                                 "subtask": false}]},
+
+                     # for AGILE
+                     "customfield_10008": {
+                           "required": false,
+                           "schema": {
+                                 "type": "array",
+                                 "items": "string",
+                                 "custom": "com.pyxis.greenhopper.jira:gh-epic-link",
+                                 "customId": 10008},
+                           "name": "Epic Link",
+                           "hasDefaultValue": false,
+                           "operations": ["set"]},
+
+                     "labels": {
+                           "required": false,
+                           "schema": {
+                                 "type": "array",
+                                 "items": "string",
+                                 "system": "labels" },
+                           "name": "Labels",
+                           "autoCompleteUrl": "https://dragongoserver.atlassian.net/rest/api/1.0/labels/suggest?query=",
+                           "hasDefaultValue": false,
+                           "operations": ["add", "set", "remove"]},
+
+                     # for SUB-TASK
+                     "parent": {
+                           "required": true,
+                           "schema": {
+                                 "type": "issuelink",
+                                 "system": "parent"},
+                           "name": "Parent",
+                           "hasDefaultValue": false,
+                           "operations": ["set"]},
+
+                     "attachment": {
+                           "required": false,
+                           "schema": {
+                                 "type": "array",
+                                 "items": "attachment",
+                                 "system": "attachment" },
+                           "name": "Attachment",
+                           "hasDefaultValue": false,
+                           "operations": []},
+
+                     "security": {
+                           "required": false,
+                           "schema": {
+                                 "type": "securitylevel",
+                                 "system": "security" },
+                           "name": "Security Level",
+                           "hasDefaultValue": true,
+                           "operations": ["set"],
+                           "allowedValues": [
+                              {
+                                 "self": "https://dragongoserver.atlassian.net/rest/api/2/securitylevel/10006",
+                                 "id": "10006",
+                                 "description": "Issues only developers can view.",
+                                 "name": "Developers only" },
+                              {
+                                 "self": "https://dragongoserver.atlassian.net/rest/api/2/securitylevel/10004",
+                                 "id": "10004",
+                                 "description": "Public access on issue.",
+                                 "name": "Public access" },
+                              {
+                                 "self": "https://dragongoserver.atlassian.net/rest/api/2/securitylevel/10005",
+                                 "id": "10005",
+                                 "description": "Issues only supporters or higher support levels can view.",
+                                 "name": "Supporters only" }]},
+
+                     "project": {
+                           "required": true,
+                           "schema": {
+                                 "type": "project",
+                                 "system": "project" },
+                           "name": "Project",
+                           "hasDefaultValue": false,
+                           "operations": ["set"],
+                           "allowedValues": [ {
+                                 "self": "https://dragongoserver.atlassian.net/rest/api/2/project/10001",
+                                 "id": "10001",
+                                 "key": "DGS",
+                                 "name": "Dragon Go Server",
+                                 "avatarUrls": {"16x16": "https://dragongoserver.atlassian.net/secure/projectavatar?size=xsmall&pid=10001&avatarId=10011",
+                                       "24x24": "https://dragongoserver.atlassian.net/secure/projectavatar?size=small&pid=10001&avatarId=10011",
+                                       "32x32": "https://dragongoserver.atlassian.net/secure/projectavatar?size=medium&pid=10001&avatarId=10011",
+                                       "48x48": "https://dragongoserver.atlassian.net/secure/projectavatar?pid=10001&avatarId=10011" }}]},
+
+                     "versions": {
+                           "required": true,
+                           "schema": {
+                                 "type": "array",
+                                 "items": "version",
+                                 "system": "versions" },
+                           "name": "Affects Version/s",
+                           "hasDefaultValue": false,
+                           "operations": ["set", "add", "remove"],
+                           "allowedValues": [
+                              {
+                                 "self": "https://dragongoserver.atlassian.net/rest/api/2/version/10000",
+                                 "id": "10000",
+                                 "description": "Latest test server version on SourceForge.net",
+                                 "name": "Test Server",
+                                 "archived": false,
+                                 "released": false,
+                                 "projectId": 10001},
+                              {
+                                 "self": "https://dragongoserver.atlassian.net/rest/api/2/version/10001",
+                                 "id": "10001",
+                                 "description": "Latest live server version",
+                                 "name": "Live Server",
+                                 "archived": false,
+                                 "released": false,
+                                 "projectId": 10001},
+                              {
+                                 "self": "https://dragongoserver.atlassian.net/rest/api/2/version/10002",
+                                 "id": "10002",
+                                 "description": "Any local server version",
+                                 "name": "Local Server",
+                                 "archived": false,
+                                 "released": false,
+                                 "projectId": 10001},
+                              {
+                                 "self": "https://dragongoserver.atlassian.net/rest/api/2/version/10003",
+                                 "id": "10003",
+                                 "description": "Some future version",
+                                 "name": "FUTURE",
+                                 "archived": false,
+                                 "released": false,
+                                 "projectId": 10001},
+                              {
+                                 "self": "https://dragongoserver.atlassian.net/rest/api/2/version/10004",
+                                 "id": "10004",
+                                 "description": "Live server 1.0.16",
+                                 "name": "1.0.16",
+                                 "archived": false,
+                                 "released": false,
+                                 "releaseDate": "2013-12-12",
+                                 "overdue": true,
+                                 "userReleaseDate": "12/Dec/13",
+                                 "projectId": 10001},
+                              {
+                                 "self": "https://dragongoserver.atlassian.net/rest/api/2/version/10005",
+                                 "id": "10005",
+                                 "description": "Live server 1.0.17",
+                                 "name": "1.0.17",
+                                 "archived": false,
+                                 "released": false,
+                                 "projectId": 10001}]},
+
+                     "environment": {
+                           "required": false,
+                           "schema": {
+                                 "type": "string",
+                                 "system": "environment" },
+                           "name": "Environment",
+                           "hasDefaultValue": false,
+                           "operations": ["set"]},
+
+                     "priority": {
+                           "required": false,
+                           "schema": {
+                                 "type": "priority",
+                                 "system": "priority" },
+                           "name": "Priority",
+                           "hasDefaultValue": true,
+                           "operations": ["set"],
+                           "allowedValues": [
+                              {
+                                 "self": "https://dragongoserver.atlassian.net/rest/api/2/priority/1",
+                                 "iconUrl": "https://dragongoserver.atlassian.net/images/icons/priorities/blocker.png",
+                                 "name": "Blocker",
+                                 "id": "1" },
+                        {
+                           "self": "https://dragongoserver.atlassian.net/rest/api/2/priority/2",
+                           "iconUrl": "https://dragongoserver.atlassian.net/images/icons/priorities/critical.png",
+                           "name": "Critical",
+                           "id": "2" },
+                        {
+                           "self": "https://dragongoserver.atlassian.net/rest/api/2/priority/3",
+                           "iconUrl": "https://dragongoserver.atlassian.net/images/icons/priorities/major.png",
+                           "name": "Major",
+                           "id": "3" },
+                        {
+                           "self": "https://dragongoserver.atlassian.net/rest/api/2/priority/4",
+                           "iconUrl": "https://dragongoserver.atlassian.net/images/icons/priorities/minor.png",
+                           "name": "Minor",
+                           "id": "4" },
+                        {
+                           "self": "https://dragongoserver.atlassian.net/rest/api/2/priority/5",
+                           "iconUrl": "https://dragongoserver.atlassian.net/images/icons/priorities/trivial.png",
+                           "name": "Trivial",
+                           "id": "5" },
+                        {
+                           "self": "https://dragongoserver.atlassian.net/rest/api/2/priority/10000",
+                           "iconUrl": "https://dragongoserver.atlassian.net/images/icons/emoticons/wink.gif",
+                           "name": "Nice To Have",
+                           "id": "10000" }]},
+
+                     "description": {
+                           "required": false,
+                           "schema": {
+                                 "type": "string",
+                                 "system": "description" },
+                           "name": "Description",
+                           "hasDefaultValue": false,
+                           "operations": ["set"]},
+
+                     "customfield_10003": {
+                           "required": false,
+                           "schema": {
+                                 "type": "array",
+                                 "items": "string",
+                                 "custom": "com.atlassian.jira.plugin.system.customfieldtypes:labels",
+                                 "customId": 10003},
+                           "name": "Epic/Theme",
+                           "autoCompleteUrl": "https://dragongoserver.atlassian.net/rest/api/1.0/labels/null/suggest?customFieldId=10003&query=",
+                           "hasDefaultValue": false,
+                           "operations": ["add", "set", "remove"]},
+
+                     "customfield_10004": {
+                           "required": false,
+                           "schema": {
+                                 "type": "number",
+                                 "custom": "com.atlassian.jira.plugin.system.customfieldtypes:float",
+                                 "customId": 10004},
+                           "name": "Story Points",
+                           "hasDefaultValue": false,
+                           "operations": ["set"]},
+
+                     "components": {
+                           "required": false,
+                           "schema": {
+                                 "type": "array",
+                                 "items": "component",
+                                 "system": "components" },
+                           "name": "Component/s",
+                           "hasDefaultValue": false,
+                           "operations": ["add", "set", "remove"],
+                           "allowedValues": [
+                              {"self": "https://dragongoserver.atlassian.net/rest/api/2/component/10007",
+                                 "id": "10007",
+                                 "name": "API",
+                                 "description": "issues with quick-suite API for external clients & robots" },
+                              {"self": "https://dragongoserver.atlassian.net/rest/api/2/component/10010",
+                                 "id": "10010",
+                                 "name": "Development",
+                                 "description": "issues with processes around development, coding, specs, releases" },
+                              {"self": "https://dragongoserver.atlassian.net/rest/api/2/component/10005",
+                                 "id": "10005",
+                                 "name": "Forums",
+                                 "description": "forum specific stuff" },
+                              {"self": "https://dragongoserver.atlassian.net/rest/api/2/component/10004",
+                                 "id": "10004",
+                                 "name": "Game Playing",
+                                 "description": "game playing related stuff" },
+                              {"self": "https://dragongoserver.atlassian.net/rest/api/2/component/10002",
+                                 "id": "10002",
+                                 "name": "Game Settings",
+                                 "description": "settings for new game, waiting-room & invitations" },
+                              {"self": "https://dragongoserver.atlassian.net/rest/api/2/component/10009",
+                                 "id": "10009",
+                                 "name": "Info",
+                                 "description": "FAQ, help text, introduction, link collection, site documents" },
+                              {"self": "https://dragongoserver.atlassian.net/rest/api/2/component/10003",
+                                 "id": "10003",
+                                 "name": "Messaging",
+                                 "description": "private messaging, email notifications" },
+                              {"self": "https://dragongoserver.atlassian.net/rest/api/2/component/10000",
+                                 "id": "10000",
+                                 "name": "Registration",
+                                 "description": "user registration, activation & email verification" },
+                              {"self": "https://dragongoserver.atlassian.net/rest/api/2/component/10001",
+                                 "id": "10001",
+                                 "name": "Tournaments",
+                                 "description": "all kind of tournaments" },
+                              {"self": "https://dragongoserver.atlassian.net/rest/api/2/component/10008",
+                                 "id": "10008",
+                                 "name": "User",
+                                 "description": "user specific info, profile, rating" },
+                              {"self": "https://dragongoserver.atlassian.net/rest/api/2/component/10006",
+                                 "id": "10006",
+                                 "name": "User Interface",
+                                 "description": "issues with user interface" }]},
+
+                     "customfield_10105": {
+                           "required": false,
+                           "schema": {
+                                 "type": "string",
+                                 "custom": "com.atlassian.jira.plugin.system.customfieldtypes:textarea",
+                                 "customId": 10105},
+                           "name": "DGS References",
+                           "hasDefaultValue": false,
+                           "operations": ["set"]}
+
+                  }
+            },
+            {
+               "self": "https://dragongoserver.atlassian.net/rest/api/2/issuetype/4",
+               "id": "4",
+               "description": "An improvement or enhancement to an existing feature or task.",
+               "iconUrl": "https://dragongoserver.atlassian.net/images/icons/issuetypes/improvement.png",
+               "name": "Improvement",
+               "subtask": false
+            },
+            {
+            "self": "https://dragongoserver.atlassian.net/rest/api/2/issuetype/2",
+               "id": "2",
+               "description": "A new feature of the product,
+               which has yet to be developed.",
+               "iconUrl": "https://dragongoserver.atlassian.net/images/icons/issuetypes/newfeature.png",
+               "name": "New Feature",
+               "subtask": false
+            },
+            {
+            "self": "https://dragongoserver.atlassian.net/rest/api/2/issuetype/3",
+               "id": "3",
+               "description": "A task that needs to be done.",
+               "iconUrl": "https://dragongoserver.atlassian.net/images/icons/issuetypes/task.png",
+               "name": "Task",
+               "subtask": false
+            },
+            {
+               "self": "https://dragongoserver.atlassian.net/rest/api/2/issuetype/5",
+               "id": "5",
+               "description": "The sub-task of the issue",
+               "iconUrl": "https://dragongoserver.atlassian.net/images/icons/issuetypes/subtask_alternate.png",
+               "name": "Sub-task",
+               "subtask": true
+            },
+            {
+               "self": "https://dragongoserver.atlassian.net/rest/api/2/issuetype/10000",
+               "id": "10000",
+               "description": "Created by JIRA Agile - do not edit or delete. Issue type for a big user story that needs to be broken down.",
+               "iconUrl": "https://dragongoserver.atlassian.net/images/icons/ico_epic.png",
+               "name": "Epic",
+               "subtask": false
+            },
+            {
+               "self": "https://dragongoserver.atlassian.net/rest/api/2/issuetype/10001",
+               "id": "10001",
+               "description": "",
+               "iconUrl": "https://dragongoserver.atlassian.net/images/icons/ico_story.png",
+               "name": "Story",
+               "subtask": false
+            },
+            {
+               "self": "https://dragongoserver.atlassian.net/rest/api/2/issuetype/10002",
+               "id": "10002",
+               "description": "Created by JIRA Agile - do not edit or delete. Issue type for a technical task.",
+               "iconUrl": "https://dragongoserver.atlassian.net/images/icons/ico_task.png",
+               "name": "Technical task",
+               "subtask": true
+            }
+         ]
+      }
+   ]
+}
