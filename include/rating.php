@@ -444,7 +444,8 @@ define('RATING_PATTERN', '/^\s*([1-9][0-9]*)\s*(k|d|kyu|dan|gup)\s*(\(?\s*([-+]?
 
 // Must not rise an error because used in filter.php
 // check RATING_PATTERN for syntax, this func must be kept synchron with convert_to_rating-func
-function read_rating($string)
+// \param $ignore_percentage true = don't parse "(+-NN%)" part in rank, e.g. "1d (+20%)" => 2100 (and not 2120)
+function read_rating( $string, $ignore_percentage=false )
 {
    $string = strtolower($string);
 
@@ -452,7 +453,7 @@ function read_rating($string)
       return NO_RATING;
 
    $kyu = ( $matches[2] == 'dan' || $matches[2] == 'd' ) ? 2 : 1;
-   return rank_to_rating($matches[1], $kyu) + ((int)@$matches[4]);
+   return rank_to_rating($matches[1], $kyu) + ( $ignore_percentage ? 0 : (int)@$matches[4] );
 }//read_rating
 
 //Must not rise an error, see read_rating()

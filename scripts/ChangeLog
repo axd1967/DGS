@@ -13,6 +13,13 @@ ChangeLog
 
 2014-10-22 jug
 
+   * tournaments/edit_properties.php (parse_edit_form),
+     include/classlib_user.php (User.matchRating),
+     include/rating.php (read_rating),
+     specs/db/table-Tournaments.txt:
+   - added more details about min/max-limit of matching a rating-range
+     - allow to parse DGS-rank with percentage-part into DGS-rating
+
    * tournaments/include/tournament_round_status.php (TournamentRoundStatus.check_conditions_round_status_PLAY),
      tournaments/include/tournament_pool_classes.php (PoolSummary.make_table_pool_summary),
      tournaments/roundrobin/edit_pairing.php:

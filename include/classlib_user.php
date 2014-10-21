@@ -100,7 +100,10 @@ class User
          return ( abs($this->Rating) < OUT_OF_RATING ); // valid rating
    }//hasRating
 
-   /*! \brief Returns true, if user-rating falls inbetween given rating range (+/- 50%). */
+   /*!
+    * \brief Returns true, if user-rating falls inbetween given rating range (+/- 50%).
+    * \param $fix true = check users rating in range [$min,$max]; false = check in range [$min-50, $max+50]
+    */
    public function matchRating( $min, $max, $fix=false )
    {
       if ( !$fix )
@@ -108,7 +111,7 @@ class User
          $min = limit( $min - 50, MIN_RATING, OUT_OF_RATING-1, $min );
          $max = limit( $max + 50, MIN_RATING, OUT_OF_RATING-1, $max );
       }
-      return ( $min <= $this->Rating ) && ( $this->Rating <= $max );
+      return ( $this->Rating >= $min ) && ( $this->Rating <= $max );
    }//matchRating
 
    /*! \brief Returns string-representation of this object (for debugging purposes). */

@@ -307,8 +307,8 @@ function parse_edit_form( &$tpr, $t_limits, $ttype )
          $tpr->setRatingUseMode( $vars['rating_use_mode'] );
 
       $tpr->UserRated = (bool)$vars['user_rated'];
-      $tpr->setUserMinRating( read_rating( $vars['user_min_rating'] ));
-      $tpr->setUserMaxRating( read_rating( $vars['user_max_rating'] ));
+      $tpr->setUserMinRating( read_rating( $vars['user_min_rating'], /*ignore%*/true ));
+      $tpr->setUserMaxRating( read_rating( $vars['user_max_rating'], /*ignore%*/true ));
 
       if ( $allow_custom_round )
       {
