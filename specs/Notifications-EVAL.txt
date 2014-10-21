@@ -1,0 +1,41 @@
+# Evaluation started in 10-Sep-2013 to find messages, that would need translated text
+# see also DGS-forums:
+# - http://www.dragongoserver.net/forum/read.php?forum=2&thread=36890#36890
+# - http://www.dragongoserver.net/forum/read.php?forum=11&thread=39411#39420
+
+# what text-language is used on sending message or email?
+# - system-messages addressed to one target can be language-specific for target, but with #>1 targets
+# - user-messages sent to #>=1 other players should be in the source-users language (as they might want to talk and have to find a common base-lang)
+#
+# '#E' text in pure English (as no login / cron / or no T_()-text)
+# '#U' text from user to user or to himself initiated by system, so no control anyways
+# '#M' text in English (but mixed with user-message)
+
+# ./include/std_functions.php:1281:function send_message( $debugmsg, $text='', $subject=''
+#E ./admin_game.php:150:               send_message( 'confirm', $Text, $Subject,
+#E ./daily_cron.php:90:               send_message( "daily_cron.waitingroom.del_mpg.notify_master($wr_id,$gid,$master_uid)",
+./game_players.php:1022:      send_message( "game_players.reject_invite.notify_user($gid,$uid,$master_uid)",
+./game_players.php:1046:      send_message( "game_players.delete_joined_player.notify_user($gid,$uid,$master_uid)",
+#E ./game_players.php:1467:         send_message( 'confirm', $Text, $Subject,
+./game_players.php:970:      send_message( "game_players.delete_invite.notify_user($gid,$uid,$master_uid)",
+./game_players.php:998:      send_message( "game_players.accept_invite.notify_user($gid,$uid,$master_uid)",
+#E ./halfhourly_cron.php:189:            send_message( "halfhourly_cron.notify.bad_email($uid)",
+#E ./include/game_functions.php:2108:      send_message( "$dbgmsg.msg", $Text, $Subject,
+#M ./include/message_functions.php:2423:      send_message( 'send_message', $message, $subject
+#U ./include/std_functions.php:2632:            send_message("fever_vault.msg($uid,$ip)", $text, $subject, '', $handles, /*notify*/false );
+#E ./include/std_functions.php:3319:         send_message( $dbgmsg.'send_msg', $Text, $Subject
+#M ./include/wroom_control.php:385:         send_message( 'WC:join_waitingroom_game', $message, $subject
+./tournaments/edit_participant.php:678:   send_message( "tournament.edit_participant.$type($tid,$uid,$my_id)",
+./tournaments/include/tournament_ladder.php:1155:      send_message( "$dbgmsg.sendmsg($tid,$rm_uid)",
+./tournaments/include/tournament_ladder_helper.php:291:         send_message( "TLH:process_tournament_ladder_crown_king.check.tid($tid)",
+./tournaments/ladder/challenge.php:151:         send_message( "$dbgmsg.notify",
+
+# ./include/std_functions.php:1221:function send_email( $debugmsg, $email, $formatopts, $text, $subject='', $headers='', $params='')
+#U ./edit_email.php:320:            send_email( "edit_email.send_email_change($my_id,{$vfy->ID})",
+#U ./edit_email.php:377:      $success = send_email( "edit_email.handle_resend_mail.resend_mail($my_id,{$vfy->ID})",
+#E ./halfhourly_cron.php:323:      $nfy_done = send_email("halfhourly_cron($uid)", $Email, EMAILFMT_SKIP_WORDWRAP/*msg already wrapped*/, $msg );
+#E ./halfhourly_cron.php:60:         send_email("halfhourly_cron.concurrent_run($clock_ticks)", EMAIL_ADMINS, 0,
+#E ./include/register_functions.php:292:               send_email( "UserReg.register_user.send_activation($new_id,{$vfy->ID})",
+#U ./include/std_functions.php:2636:            send_email("fever_vault.email($handle)", $email, 0, $text, FRIENDLY_LONG_NAME.' - '.$subject);
+./send_new_password.php:114:      send_email("send_new_password Uid:$pswduser Subject:$subject Text:$msg", $Email, 0, $msg, $subject );
+
