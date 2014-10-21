@@ -11,6 +11,16 @@ Release [2014-07-30] - DGS 1.0.18 - tag [release-1_0_18-20140730] on branch [DGS
 ChangeLog
 ------------------------------------------------------------------
 
+2014-10-21 jug
+
+   * tournaments/roundrobin/define_pools.php (make_suggestions_table):
+   - fix bugs for define-pool-page: show errors on pool-count & min-pool-size
+     - show error for define-pool on pool-count & min-pool-size only for user-choice
+       instead of all suggestions
+     - show error for define-pool if user-capacity of pool-size/count choice is not enough
+       to satisfy count of registered participants
+     - preserve original T-director choice for making suggestions on defining-pool parameters
+
 2014-10-20 jug
 
    * include/make_game.php (make_invite_game_setup_from_url),

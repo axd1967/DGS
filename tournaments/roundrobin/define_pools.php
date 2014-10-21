@@ -349,6 +349,7 @@ function parse_edit_form( &$trd )
 //               8:$distribution, 9:$user_choice )
 //     for given pool-size and pool-count
 // param $games_factor : games per challenge = factor for games-count (e.g. 2 for double-htype tourney-rules)
+// param $user_choice : 1=parameter-choice by user, 0=suggested or calculated choice (default)
 function calc_suggestion( $reg_count, $pool_size, $pool_count, $games_factor, $user_choice=0 )
 {
    $user_capacity = $pool_size * $pool_count;
@@ -380,16 +381,22 @@ function make_suggestions_table( $tround, $reg_count, &$errors, $games_factor, $
    $arr_uniq = array();
    if ( $user_pool_size > 0 && $user_pool_count > 0 )
    {
-      $old_user_pool_size = $user_pool_size;
       $arr_sugg = calc_suggestion( $reg_count, $user_pool_size, $user_pool_count, $games_factor, 1 );
-      if ( $arr_sugg[4] > 0 && $arr_sugg[3] + 1 != $user_pool_size )
-         $user_pool_size = $arr_sugg[3] + 1;
-      elseif ( $arr_sugg[4] == 0 && $arr_sugg[3] != $user_pool_size )
-         $user_pool_size = $arr_sugg[3];
-      if ( $old_user_pool_size != $user_pool_size )
-         $arr_sugg = calc_suggestion( $reg_count, $user_pool_size, $user_pool_count, $games_factor, 2 );
       $arr_uniq["$user_pool_size:$user_pool_count"] = 1;
       $arr_check[] = $arr_sugg;
+
+      // check if extra-suggestion makes better choice
+      $new_user_pool_size = $user_pool_size;
+      if ( $arr_sugg[4] > 0 && $arr_sugg[3] + 1 != $user_pool_size )
+         $new_user_pool_size = $arr_sugg[3] + 1;
+      elseif ( $arr_sugg[4] == 0 && $arr_sugg[3] != $user_pool_size )
+         $new_user_pool_size = $arr_sugg[3];
+      if ( $new_user_pool_size != $user_pool_size )
+      {
+         $arr_sugg = calc_suggestion( $reg_count, $new_user_pool_size, $user_pool_count, $games_factor );
+         $arr_uniq["$new_user_pool_size:$user_pool_count"] = 1;
+         $arr_check[] = $arr_sugg;
+      }
    }
    for ( $pool_size = $tround->MinPoolSize; $pool_size <= $tround->MaxPoolSize; $pool_size++ )
    {
@@ -439,20 +446,23 @@ function make_suggestions_table( $tround, $reg_count, &$errors, $games_factor, $
       if ( $pool_size_check < $tround->MinPoolSize )
       {
          $violation = T_('Violates min. pool-size on slicing!');
-         $errors[] = sprintf( T_('Pool count [%s] is too large, the min. pool size [%s] would be violated on slicing.'),
-            $pool_count, $tround->MinPoolSize );
+         if ( $user_choice )
+            $errors[] = sprintf( T_('Pool count [%s] is too large, the min. pool size [%s] would be violated on slicing.'),
+               $pool_count, $tround->MinPoolSize );
       }
       elseif ( $pool_size_check > $tround->MaxPoolSize )
       {
          $violation = T_('Violates max. pool-size!');
-         $errors[] = sprintf( T_('Pool count [%s] is too small, the max. pool size [%s] would be violated.'),
-            $pool_count, $tround->MaxPoolSize );
+         if ( $user_choice )
+            $errors[] = sprintf( T_('Pool count [%s] is too small, the max. pool size [%s] would be violated.'),
+               $pool_count, $tround->MaxPoolSize );
       }
       elseif ( $user_capacity < $reg_count )
       {
          $violation = T_('Pool-size or count too small!');
-         $errors[] = sprintf( T_('Either the pool size [%s] or pool count [%s] is too small to cover all %s registered users.'),
-            $pool_size, $pool_count, $reg_count );
+         if ( $user_choice )
+            $errors[] = sprintf( T_('Either the pool size [%s] or pool count [%s] is too small to cover all %s registered users.'),
+               $pool_size, $pool_count, $reg_count );
       }
 
       $extra_class = '';
