@@ -696,6 +696,7 @@ class PoolSummary
    public function make_table_pool_summary()
    {
       ksort($this->pool_summary);
+      $cnt_pools = count($this->pool_summary);
       $cnt_users = $cnt_games = $cnt_started_games = 0;
       foreach ( $this->pool_summary as $pool => $arr )
       {
@@ -714,8 +715,9 @@ class PoolSummary
          if ( $this->choice_form )
          {
             $key = "p$pool";
-            $row_arr[5] = $this->choice_form->print_insert_checkbox( $key, '1', '', @$_REQUEST[$key],
-               array( 'title' => T_('Select pool for starting tournament games')) );
+            if ( $cnt_pools > 1 ) // use 'ALL' instead if only 1 pool in total
+               $row_arr[5] = $this->choice_form->print_insert_checkbox( $key, '1', '', @$_REQUEST[$key],
+                  array( 'title' => T_('Select pool for starting tournament games')) );
             $row_arr[6] = ( $pool_games != $pool_started_games )
                ? span('EmphasizeWarn', $pool_started_games)
                : $pool_started_games;

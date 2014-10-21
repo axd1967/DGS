@@ -11,6 +11,17 @@ Release [2014-07-30] - DGS 1.0.18 - tag [release-1_0_18-20140730] on (later) bra
 ChangeLog
 ------------------------------------------------------------------
 
+2014-10-22 jug
+
+   * tournaments/include/tournament_round_status.php (TournamentRoundStatus.check_conditions_round_status_PLAY),
+     tournaments/include/tournament_pool_classes.php (PoolSummary.make_table_pool_summary),
+     tournaments/roundrobin/edit_pairing.php:
+   - fix bug: for single-pooled round-robin-tournament only show mandatory final-step "ALL"-choice
+     to start tournament-games
+     - added note about mandatory final step using "ALL"-choice to start-games on edit-game-pairing-page
+       and tournament-round-status-page to let system implicitly change tournament-round-status
+       from PAIR to PLAY after all games could have been checked
+
 2014-10-21 jug
 
    * tournaments/roundrobin/define_pools.php (make_suggestions_table):

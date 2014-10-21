@@ -190,7 +190,7 @@ $GLOBALS['ThePage'] = new Page('TournamentPairEdit', PAGEFLAG_IMPLICIT_FLUSH ); 
                     $round, $count_pools, $count_users,
                     MED_SPACING . span('EmphasizeWarn', $count_started_games), span('EmphasizeWarn', $count_games) ),
          "<br><br>\n",
-         T_('Select pools for starting tournament-games (use last checkbox for all pools):'),
+         T_('Select pools for starting tournament-games (use last checkbox for all pools and final check):'),
          "<br><br>\n";
       $pstable->echo_table();
 
@@ -211,6 +211,7 @@ $GLOBALS['ThePage'] = new Page('TournamentPairEdit', PAGEFLAG_IMPLICIT_FLUSH ); 
          T_('Creating all games may take a while. Please be patient!'),
          T_('Once started, the creation process must not be stopped. Progress of the creation will be shown.'),
          T_('The games for all pairings will start immediately and can neither be changed nor removed.'),
+         T_('As final step you must start the games (once) with the "All"-selection to let the system switch the round-status.'),
       );
    echo_notes( 'tournamentPairingNotes', T_('Pairing notes#tourney'), $notes );
 

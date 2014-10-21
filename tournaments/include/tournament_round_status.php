@@ -200,7 +200,7 @@ class TournamentRoundStatus
 
       $this->errors[] =
          make_html_safe( sprintf(
-               T_("Status change normally done automatically by <home %s>Pairing-Editor</home> after all games successfully started.#tourney"),
+               T_("Status change normally done automatically by <home %s>Pairing-Editor</home> after all games successfully started in final step.#tourney"),
                "tournaments/roundrobin/edit_pairing.php?tid={$this->tid}" ), true );
       $this->errors[] = sprintf( T_('Direct change to Tournament Round Status [%s] only allowed by Tournament Admin.'),
          TournamentRound::getStatusText($this->new_status) );
