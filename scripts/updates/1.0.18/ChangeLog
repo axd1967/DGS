@@ -5,7 +5,607 @@ Release [2014-07-30] - DGS 1.0.18 - tag [release-1_0_18-20140730] on (later) bra
 2014-07-30: release 1.0.18 (from DGS-MAIN master)
 30-Jul-2014: bugfixes (by JUG) as DGS 1.0.18.a
 31-Jul-2014: bugfixes (by JUG) as DGS 1.0.18.b
-05-Aug-2014: bugfixes (by JUG) as DGS 1.0.18.c
 
 ==================================================================
+
+### ----- release-1_0_18-20140730 -----
+
+2014-07-30 jug
+
+   * userinfo.php:
+   - bugfix: show hero-percentage on user-info if hero-badge awarded
+
+   * include/std_functions.php ($html_safe_preg):
+   - bugfix: prevent <image>-tag to be used to embed externally-linked images
+   - butfix: fixed regex to escape ALL DGS-tags replaced with $html_preg_safe,
+     order tags alphabetically
+
+   * confirm.php:
+   - bugfix: no init-check for GameActionHelper for actions: nextskip + nextaddtime
+
+   * include/wroom_control.php (WaitingroomControl.join_waitingroom_game):
+   - bugfix: fixed check on joining waiting-room for hero-ratio
+
+2014-07-29 jug
+
+   * tournaments/include/tournament_pool_classes.php (PoolRankCalculator.calc_ranks):
+   - bugfix: skip rank-numbers after tied rank sub-groups for pool-ranks in round-robin tournaments,
+     i.e. use ranks (1,1,3,3,5) instead of (1,1,2,2,3)
+
+   * tournaments/include/tournament_ladder_helper.php (TournamentLadderHelper.process_tournament_ladder_game_end,
+       ~.process_game_end_seq_wins),
+     tournaments/include/tournament_games.php (TournamentGames.load_tournament_game_by_id):
+   - bugfix: track consecutive-ladder-wins AFTER processing of game-end as to potentially changed
+     tournament-game-flags like annulled game
+
+   * translation_stats.php (show_translation_stats, count_translation_texts):
+   - added language-code and encoding on translation-statistics page
+
+   * admin_faq.php (show_preview), introduction.php (load_intro):
+   - bugfix: allow usage of DGS-tags on Introduction-page and introduction-editor admin-page
+
+2014-07-28 jug
+
+   * tournaments/show_tournament_log.php:
+   - added search-filters for user/action-user, object, action for browsing tournament-log
+     and full page-navigation
+
+   * tournaments/include/tournament_result_control.php (TournamentResultControl.build_tournament_result_table,
+       ~.make_table_tournament_results),
+     include/table_columns.php (Table.get_found_rows),
+     include/globals.php (CSS_VERSION),
+     skins/dragon/screen.css, tournaments/view_tournament.php:
+   - show count of all entries for Hall of Fame on tournament-info page
+     with hint to remaining omitted entries
+
+   * include/game_functions.php (class GameSetup, ~.encode_game_setup, ~.to_string, ~.new_from_game_setup,
+         ~.new_from_waitingroom_game_row;
+       GameSetupChecker.check_hero_ratio, ~.check_fields;
+       GameSetupBuilder.fill_new_game_from_game_setup;
+       append_form_add_waiting_room_game),
+     include/wroom_control.php (WaitingroomControl.build_waiting_room_query,
+       ~.extend_query_waitingroom_suitable, ~.get_waitingroom_restrictions, ~.join_waitingroom_game),
+     include/message_functions.php (game_info_table, build_game_restriction_notes,
+       build_game_restriction_notes, echo_game_restrictions),
+     include/db/waitingroom.php (class Waitingroom, ~.__construct, ~.fillEntityData, ~.build_query_sql,
+       ~.new_from_row),
+     include/deprecated_functions.php (DeprecatedGameSetup.enrich_game_setup_hero_ratio),
+     include/classlib_user.php (User.calculate_hero_ratio, ~.determine_hero_badge),
+     include/quick/quick_wroom.php (QuickHandlerWaitingroom.fill_wroom_object),
+     include/quick/quick_user.php (QuickHandlerUser.process),
+     include/gui_functions.php (echo_image_hero_badge),
+     include/error_codes.php (ErrorCode.init),
+     include/globals.php,
+     scripts/updates/fix_hero_ratio-1_0_18.php (fix_hero_ratio, update_players_games_weaker,
+       fix_enrich_game_setup_hero_ratio),
+     scripts/updates/database_changes_1_0_18.mysql,
+     scripts/tests/DeprecatedGameSetupTest.php, scripts/tests/GameSetupTest.php,
+     scripts/index.php,
+     specs/db/dragon-ddl.sql, specs/db/table-Games.txt, specs/db/table-Players.txt,
+     specs/db/table-Waitingroom.txt, specs/quick_suite.txt,
+     skins/dragon/screen.css,
+     new_game.php (handle_add_game),
+     userinfo.php, waiting_room.php:
+   - added waitingroom-restriction for min. hero percentage
+     - extended fix-script to enrich game-setup for games and profile-templates
+       with restriction on hero-ratio
+     - extended GameSetup-format with min. restriction on hero-percentage
+     - added hero-badge of user on list and info-table on waitingroom-page
+     - renamed fix-script 'fix_players_weaker_games-1_0_18.php' to 'fix_hero_ratio-1_0_18.php'
+     - refactored hero-ratio calculation into User-class
+     - quick-handler user-info & wroom-info/list: added fields 'hero_ratio/hero_badge'
+-----------
+-- added waiting-room restriction on hero-ratio
+ALTER TABLE Waitingroom
+   ADD MinHeroRatio tinyint unsigned NOT NULl default 0 AFTER MinRatedGames ;
+
+-- execute fix-script (with do_it=1) to enrich hero-ratio in game-setup for profiles & games:
+--    'scripts/updates/fix_players_weaker_games-1_0_18.php?action=2'
+-----------
+
+2014-07-27 jug
+
+   * include/game_functions.php (GameHelper.update_players_end_game, ~.determine_finished_game_hero_uid;
+       class GameFinalizer, ~.__construct, ~.finish_game),
+     include/gui_functions.php (HERO_GOLDEN, HERO_SILVER, HERO_BRONZE, MIN_FIN_GAMES_HERO_AWARD,
+       MIN_RATDIFF_HERO, echo_image_hero_badge),
+     include/game_actions.php (GameActionHelper.update_game),
+     scripts/updates/fix_players_weaker_games-1_0_18.php, scripts/updates/database_changes_1_0_18.mysql,
+     scripts/updates/other_changes_1_0_18.txt, scripts/index.php,
+     specs/db/dragon-ddl.sql, specs/db/table-Players.txt,
+     images/hero_bronze.gif, images/hero_gold.gif, images/hero_silver.gif,
+     clock_tick.php (handle_game_timeouts),
+     people.php (get_executives),
+     admin_game.php, opponents.php, userinfo.php, users.php, NEWS:
+   - award badge of honor for "heros" playing games with weaker players
+     - min. percentage of games with weaker players:
+       38% for Bronze Badge, 50% for Silver Badge, 62% for Golden Badge
+     - show bronze/silver/golden badge-icon on user-info, users and opponents page in new Hero%-column
+     - track number of finished non-multi-player games played with weaker players
+       in Players.WeakerGames with a min. rating-diff of 1k
+     - hero-percentage of other players is not shown if no badge is awarded
+     - added script to set added Players.GamesWeaker-field for all players and their finished games
+-----------
+-- added games-counter played with weaker player
+ALTER TABLE Players
+   ADD GamesWeaker mediumint unsigned NOT NULL default '0' AFTER GamesMPG ;
+
+-- execute fix-script (with do_it=1) to set counter of games with weaker players:
+--    'scripts/updates/fix_players_weaker_games-1_0_18.php?action=1'
+-----------
+
+   * opponents.php, userinfo.php, users.php, NEWS:
+   - added filter for rated-win-percentage on users and opponents page
+     - renamed table-header 'Percent' -> 'Win%'
+   - renamed user-info field 'Percent' -> 'Rated Win %' on user-info-page
+
+2014-06-01 jug
+
+   * include/sgf_builder.php (SgfBuilder.merge_conditional_moves, ~.find_target_start_node,
+       ~.yield_next_target_node, ~.append_remaining_conditional_moves,
+       ~.mark_node_conditional_moves_start):
+   - fixed merging of conditional-moves into game-tree for SGF-download
+     - rewrite merging of conditional-moves to overcome implementation-"traps" of array_splice()
+       resetting array
+     - added special handling for prev() on last item from iterating array
+     - simplified merging function by combining former special-case for appending conditional-moves
+       after last-game-move
+     - simplified merging function by refactoring finding target-game-tree starting point and
+       getting next target-node into separate functions
+
+2014-05-30 jug
+
+   * goban_editor.php (create_igoban_from_parsed_sgf):
+   - bugfix: skip PASS-moves on creating igoban from parsed SGF
+
+   * include/sgf_parser.php (SgfParser.parse_sgf_game_tree, ~.sgf_parse_args, ~.push_var_stack,
+         ~.sgf_builder;
+       class SgfGameTree, ~.has_nodes, ~.has_vars, ~.get_first_node, ~.to_string, ~.debug;
+       class GameSgfParser, ~.parse_sgf_game;
+       get_handicap_pattern),
+     include/sgf_builder.php (class SgfBuilder, ~.echo_sgf, ~.sgf_echo_prop, ~.load_conditional_moves,
+       ~.build_sgf_moves_with_conditional_moves, ~.merge_conditional_moves,
+       ~.append_remaining_conditional_moves),
+     include/conditional_moves.php (ConditionalMoves.reformat_to_sgf, ~.check_nodes_cond_moves,
+       ~.extract_variation, ~.get_nodes_start_move_sgf_coords, ~.fill_conditional_moves_attributes),
+     include/game_actions.php (GameActionHelper.load_game_conditional_moves,
+       ~.prepare_conditional_moves),
+     include/db/move_sequence.php (class MoveSequence),
+     scripts/tests/AllTests.php (AllTests.suite), scripts/tests/ConditionalMovesTest.php,
+     scripts/tests/GameSgfParserTest.php, scripts/tests/SgfParserTest.php,
+     scripts/tests/pattern,
+     game.php (handle_conditional_moves):
+   - refactored representation of sgf-game-tree using array with nodes and with variations-array
+     in '++'-key to SgfGameTree-class
+     - replaced SGF_VAR_KEY '++' as key in game-tree-array to store variations-array
+       with SgfGameTree-class with separate array of nodes and variations
+     - bugfix: reset iterator on sub-game-tree-nodes on merging conditional-moves for SGF-download
+     - SgfParser:
+       - moved check for bad node-position outside variation from conditional-moves checking
+         to parsing SGF
+       - bugfix: fixed parsing-position of variation-begin '(' if skipping root-node
+       - bugfix: fixed loop-expression on parsing of SGF-arguments,
+         expression [ 0 == ')' ] was true -> need '==='-comparison
+     - added tests for classes ConditionalMoves, GameSgfParser, SgfParser
+       with sym-link to pattern-directory
+   - bugfix: reformat empty conditional-moves to empty instead of '(; )'
+
+2014-05-13 jug
+
+   * include/move.php (class GameCheckMove, ~.get_replay_last_color, ~.get_replay_last_sgf_move,
+       ~.assign_board_array, ~.replay_moves, ~.replay_move, ~.prepare_game_check_move_board_start),
+     include/game_actions.php (class GameActionHelper, ~.prepare_conditional_moves_activation,
+       ~.process_game_action, ~.activate_conditional_moves, ~.update_cm_move_sequence),
+     include/conditional_moves.php (ConditionalMoves.reformat_to_sgf, ~.check_nodes_cond_moves,
+       ~.add_played_conditional_moves_on_board),
+     include/db/move_sequence.php (MoveSequence.activate_move_sequence),
+     game.php (handle_conditional_moves, draw_conditional_moves_input),
+     confirm.php:
+   - save and activate inactive conditional-moves on my or opponents turn
+     - added activation of conditional-moves as two-step process if it is my turn:
+       1. save conditional-moves as inactive,
+       2. activate on submitting first move to allow optional move-message
+     - splitted save and activation action for editing conditional-moves
+     - added showing and editing of conditional-moves for already started sequence
+     - reset start- and last-move data for editing of already started conditional-move sequence
+     - bugfix: only allow showing & editing conditional-moves on game-status PLAY/PASS
+       and only after handicap-stones-setup
+     - bugfix: remove last-move-marker on previewing variation of conditional-moves
+     - bugfix: detect error if parsing of conditional-moves was ok but without detecting the nodes
+       of the game-tree
+     - bugfix: added game-id for debugging in preparing GameCheckMove-instance for replaying moves
+       for preview of conditional-moves
+     - bugfix: detect and auto-fix missing trailing ';'-node on reformatting format of conditional-moves
+     - bugfix GameActionHelper.update_cm_move_sequence: used wrong SgfNode-attribute
+       to update last-move coordinate
+
+   * game.php (handle_conditional_moves):
+   - inactivate cond-moves on edit-action
+
+   * include/move.php (class GameCheckMove, ~.replay_moves, ~.replay_move, ~.__clone,
+       ~.prepare_game_check_move_board_start),
+     include/db/move_sequence.php (MoveSequence.getErrorCodeText, ~.get_check_move_error_code),
+     include/game_actions.php (GameActionHelper.validate_next_conditional_move),
+     include/conditional_moves.php (ConditionalMoves.check_nodes_cond_moves),
+     game.php (handle_conditional_moves):
+   - verify that added conditional-moves can be played rule-conform
+
+2014-05-10 jug
+
+   * include/globals.php (CSS_VERSION),
+     skins/dragon/screen.css,
+     game.php (draw_conditional_moves_input):
+   - use normal-text for "showing" read-only conditional-moves on game-page
+     instead of non-copyable textarea
+
+   * include/game_actions.php (GameActionHelper.process_game_action, ~.process_conditional_moves):
+   - refactored opponent-notification of last submitted move
+     into caller-function of processing conditional-moves
+
+   * include/sgf_builder.php (SgfBuilder.load_conditional_moves),
+     specs/quick_suite.txt,
+     game.php:
+   - changed SGF-download of finished game not to include conditional-moves per default
+     - including conditional-moves in SGF-download must be explicitly asked for with 'cm'-arg > 0
+     - added link for SGF-download with conditional-moves for finished game on game-page
+
+2014-05-09 jug
+
+   * include/game_actions.php (class GameActionHelper, ~.__construct, ~.has_conditional_moves,
+       ~.init_globals, ~.load_game_conditional_moves, ~.prepare_game_action_do_move,
+       ~.prepare_game_action_pass, ~.process_game_action, ~.update_game, ~.process_post_action,
+       ~.process_conditional_moves, ~.prepare_conditional_moves, ~.build_board_moves,
+       ~.validate_next_conditional_move, ~.update_cm_move_sequence, ~.play_conditional_move),
+     include/db/move_sequence.php (MSEQ_ERR_...;
+       class MoveSequence, ~.__construct, ~.set_last_move_info, ~.fillEntityData, ~.new_from_row,
+         ~.load_last_move_sequence, ~.deactivate_move_sequences, ~.getErrorCodeText),
+     include/sgf_builder.php (SgfBuilder.load_conditional_moves, ~.merge_conditional_moves),
+     include/conditional_moves.php (ConditionalMoves.fill_conditional_moves_attributes),
+     include/quick/quick_game.php (QuickHandlerGame.prepare, ~.process_cmd_play),
+     include/game_functions.php (GameFinalizer.finish_game),
+     scripts/updates/database_changes_1_0_18.mysql,
+     specs/db/dragon-ddl.sql, specs/db/table-Games.txt,
+     game.php (handle_conditional_moves),
+     confirm.php, quick_play.php:
+   - added "playing" of conditonal-moves after submitting a move
+     - conditional-moves are only played for MOVE or PASS and for non-multi-player-games
+     - added MoveSequence.ErrorCode to differ illegal-move-issues on playing conditional-moves
+     - GameActionHelper:
+       - fix assertion-expression
+       - extract HOT-section to update game and process conditional-moves
+       - notify only opponent of last-move executed after processing conditional-moves
+       - update Players.LastAccess/LastQuickAccess/Activity and increasing move-stats
+         only on original move and not for conditional-moves
+     - refactored SgfBuilder.prepare_merge_cond_moves()
+       to ConditionalMoves.fill_conditional_moves_attributes() for re-use
+   - deactivate all conditional-moves when game is finished
+   - bugfix SgfBuilder: wrong var used for check on 1st node
+-----------
+-- added error-code for illegal conditional-move
+ALTER TABLE MoveSequence
+   ADD ErrorCode tinyint unsigned NOT NULL default '0' AFTER Flags ;
+-----------
+
+2014-05-05 jug
+
+   * game.php, NEWS:
+   - changed default for viewing finished game showing territory-markers like in score-mode
+
+   * include/db/move_sequence.php (MoveSequence.getStatusText),
+     game.php (handle_conditional_moves, draw_conditional_moves_input):
+   - show conditional-moves current status of MoveSequence-entry
+   - bugfix: board can be not clicked on for move if in show/edit-mode for conditional-moves
+
+2014-05-04 jug
+
+   * include/conditional_moves.php (ConditionalMoves.check_nodes_cond_moves,
+       ~.get_nodes_start_move_sgf_coords, ~.get_conditional_move_format_from_sgf_node,
+       ~.convert_conditional_move_format_to_board_coords),
+     include/sgf_parser.php (SgfParser.get_variation_first_sgf_node),
+     include/sgf_builder.php (class SgfBuilder):
+   - added checks on conditional-moves
+     - extended check of conditional-moves: first entry of variation must be a node and not another variation
+     - check that all variations for conditional-moves start with a unique move
+     - restrict total number of sgf-nodes for conditional-moves to 100
+     - added info about how much size of conditional-moves is too large
+
+2014-05-03 jug
+
+   * include/sgf_builder.php (class SgfBuilder, ~.set_include_conditional_moves, ~.set_player_uid,
+       ~.is_game_player, ~.echo_sgf, ~.sgf_echo_prop, ~.sgf_echo_points, ~.load_trimmed_moves,
+       ~.load_conditional_moves, ~.prepare_merge_cond_moves, ~.build_sgf, ~.build_sgf_shape_setup,
+       ~.build_sgf_moves, ~.build_sgf_moves_with_conditional_moves, ~.merge_conditional_moves,
+       ~.build_sgf_result, ~.sgf_simpletext, ~.new_sgf_node, ~.merge_sgf_node_props,
+       ~.append_remaining_conditional_moves, ~.get_variation_first_sgf_node),
+     include/conditional_moves.php ($TXT_CM_START; ConditionalMoves.check_nodes_cond_moves,
+       ~.get_nodes_start_move_sgf_coords, ~.sgf_strip_cond_moves_notes),
+     include/sgf_parser.php (SgfParser.sgf_builder, ~.normalize_move_coords,
+       ~.sgf_convert_move_to_sgf_coords; class SgfNode, ~.to_string),
+     include/db/move_sequence.php (class MoveSequence),
+     specs/db/table-Games.txt, specs/db/dragon-ddl.sql,
+     specs/quick_suite.txt, scripts/updates/database_changes_1_0_18.mysql,
+     scripts/admin-sgf-bulk.php,
+     game.php (handle_conditional_moves),
+     sgf.php:
+   - merging conditional-moves on SGF-download:
+     - added 'cm'-option to merge conditional-moves and all SGF-properties with game-moves
+     - merging private conditional-moves only for owner
+     - merging public conditional-moves if game is finished or for players
+     - determine logged-in user for conditional-moves filtering
+     - extended SGF-formatting of SgfParser::sgf_builder() with separate separator of variation
+       and nodes and certain properties
+     - store MoveSequence.StartMove/LastMove for conditional-moves with color-prefix
+   - game-page:
+     - re-format conditional-moves for input-box converting to board-coords
+     - saving conditional-moves converting to sgf-coordinates
+     - strip away conditional-moves notes from uploaded SGF planted there from SGF-download
+-----------
+-- prefix start & last move of conditional-moves-sequence with move-color
+ALTER TABLE MoveSequence
+   MODIFY StartMove char(3) NOT NULL default '',
+   MODIFY LastMove char(3) NOT NULL default '' ;
+-----------
+
+   * tournaments/include/tournament_round_helper.php (TournamentRoundHelper.notify_directors_last_game_finished),
+     tournaments/include/tournament_games.php (TournamentGames.count_tournament_games,
+       ~.exists_tournament_game, ~.build_query_count_tournament_games),
+     include/db/bulletin.php (BULLETIN_FLAG_CRON_CREATED; Bulletin.build_query_sql),
+     include/gui_bulletin.php (GuiBulletin.build_view_bulletin, ~.getFlagsText),
+     specs/db/table-Bulletins.txt,
+     tournaments/cron_tournaments.php, list_bulletins.php, NEWS:
+   - notify tournament-directors with private bulletin about last game-finished
+     for round-robin-tournaments
+   - allow bulletins with uid=0 representing bulletins created by CRON-scripts
+
+2014-05-01 jug
+
+   * include/make_translationfiles.php (translations_query),
+     translate.php, NEWS:
+   - translate-page: added case-sensitive search in texts of selected translation-language
+     - highlighting search-term in translated text if searched in translated text-language,
+       or in original text if searched in original text-language
+
+   * include/std_functions.php (score2text),
+     include/game_functions.php, include/sgf_builder.php,
+     tournaments/game_admin.php:
+   - made all parts of score-text translatable for all info-pages if they use non-verbose output
+     - keep english texts in SGF-download due to potential charset problems
+     - keep in quick-suite due to fix API
+
+2014-04-26 jug
+
+   * include/globals.php (HOSTBASE),
+     include/mail_functions.php, include/config.php,
+     scripts/updates/other_changes_1_0_18.txt,
+     goodies/index.php, rss/status.php, wap/status.php,
+     docs.php, donation.php, install.php, quick_status.php, NEWS, INSTALL:
+   - adjusted pages to use web-protocol http or secure https for subsequent pages
+     like in original server-request
+     - moved HOSTBASE-define from include/config*.php to include/globals.php
+
+2014-04-21 jug
+
+   * tournaments/include/tournament_pool_classes.php (PoolRankCalculator.calc_ranks):
+   - bugfixes: fixed rank-calculation applying tie-breakers (patch from DGS-stable-20140327 branch)
+     - missed shifting down rank of multiple same-rank-user-subgroups needing tie-breaker
+       due to skipped inbetween one-item sub-groups without tie-break
+     - restart partly successful tie-breaking of same-rank-user-subgroup till no users are tied
+       any more or there are no more tie-breakers
+
+2014-04-19 jug
+
+   * include/sgf_builder.php (SgfBuilder.sgf_echo_prop, ~.sgf_echo_comment, ~.sgf_echo_point,
+       ~.build_sgf_start, ~.build_sgf_moves, ~.build_sgf_result, ~.sgf_simpletext):
+   - cleanup and simplified generating SGF in preparation for merging in conditional-moves
+     - sgf_echo_prop() also outputs SGF-property-values to later use building full SGF-node at one place
+     - refactored sgf_echo_point() to easier & clearer output with full SGF-node and list of prop-values
+     - removed redundant code for sgf_echo_comment() using extended sgf_simpletext()-function
+     - replaced output of separated property- and value part into output of full SGF-node
+       using only one call of sgf_echo_prop()
+     - replaced output of single node-start while looping over moves by using 'force_node'-prop_type
+       in next call of sgf_echo_prop()
+     - used array-mode for str_replace() to avoid calling it twice
+     - bugfix: added SGF-text-escaping for shape-info in general comments
+
+   * include/sgf_parser.php (SgfParser.sgf_builder, ~.sgf_convert_move_to_board_coords,
+       ~.sgf_convert_move_to_sgf_coords):
+   - added callback on SGF-builder-function to convert SGF-property-values for moves
+     to SGF- or board-coordinates
+
+2014-04-18 jug
+
+   * include/db/move_sequence.php (MoveSequence.insert, ~.update, ~.load_cache_last_move_sequence, ~.delete_cache_move_sequence),
+     include/cache_globals.php (CACHE_GRP_COND_MOVES, $ARR_CACHE_GROUP_NAMES, $ARR_CACHE_GROUP_CLEANUP, $DGS_CACHE_GROUPS),
+     include/game_functions.php (GameHelper._delete_base_game_tables),
+     scripts/updates/other_changes_1_0_18.txt,
+     specs/caching.txt,
+     game.php:
+   - added caching for loading conditional-moves move-sequence on game-page
+     - invalidate conditional-moves-cache on actions: insert, update, game-deletion
+     - bugfix: allow and load conditional-moves on game-page only for players
+   - delete conditional-moves on game-deletion
+
+   * include/db/move_sequence.php (MoveSequence.build_query_sql, ~.load_last_move_sequence,
+       ~.load_last_move_sequences),
+     include/conditional_moves.php (ConditionalMoves.get_nodes_start_move_sgf_coords),
+     game.php (draw_conditional_moves_links, handle_conditional_moves, draw_conditional_moves_input):
+   - added show-mode and saving in edit-mode for conditional-moves
+     - disable edit-elements in show-mode, but allow previewing of variations
+
+   * include/form_functions.php (Form.print_insert_textarea, ~.print_insert_submit_buttonx):
+   - added additional attributes for printing textarea-element and default empty-attributes
+     for print_insert_submit_buttonx()
+
+   * include/conditional_moves.php (ConditionalMoves.extract_variation,
+       ~.add_played_conditional_moves_on_board),
+     include/board.php (class Board, ~.set_conditional_moves, ~.has_conditional_moves,
+       ~.set_conditional_moves, ~.move_marks, ~.draw_captures_box),
+     game.php (handle_conditional_moves):
+   - show preview of specific variation of conditional-moves on game-board
+     - extract specific variaton from conditional-moves entered for previewing
+     - add moves and captures from conditional-moves with move-numbering starting with 1
+
+2014-04-17 jug
+
+   * game.php (handle_conditional_moves, draw_conditional_moves_input):
+   - split handling and GUI-drawing for conditional-moves to prepare
+     for showing variation-preview on board
+
+   * include/sgf_parser.php (SgfParser.parse_sgf_game_tree, ~.sgf_parse_node, ~.push_var_stack;
+       class SgfNode, ~.__construct, ~.get_props_text),
+     include/conditional_moves.php (ConditionalMoves.reformat_to_sgf, check_nodes_cond_moves),
+     include/coords.php (is_valid_sgf_coords, is_valid_board_coords),
+     scripts/tests/GeneralFunctionsTest.php (GeneralFunctionsTest.test_is_valid_sgf_coords,
+       ~.test_is_valid_board_coords),
+     game.php (draw_conditional_moves_input):
+   - check syntax of conditional-moves and extract variation-names SGF-file-upload or manually entered
+     - forbid empty variation
+     - all variations must start with opponents move, except for root-node
+     - forbid move "outside" i.e. after variation
+     - each node must have Black or White move, but not both, and must have alternating colors
+     - allow SGF- and board-coordinates, but forbid invalid coordinates outside board-limits
+     - forbid move after two consecutive passes
+     - variations must have at least 2 moves and end with own move-color
+     - restrict conditional-moves total size to 2048 bytes
+     - replace PASS-move with 'tt'-notation to ''
+   - extract variation-references on conditional-moves-syntax-check like '1.2' for variation-preview
+   - re-build and re-parse conditional-moves part from SGF-file for manual input-box for conditional-moves
+   - changes to SGF-parsing:
+     - store parsing-position for nodes for reference in errors
+     - simplify node-tree on parsing SGF-data if only one variation with empty root-node
+       if root-node skipped
+     - bugfix SgfParser::push_var_stack(): do not push double var-reference on stack
+   - changes to reformatting conditional-moves into SGF-like format:
+     - bugfix: do not remove LFs from manually entered conditional-moves, but remove double spaces
+     - use optimized regex-matching "//S"
+
+2014-04-16 jug
+
+   * include/sgf_parser.php (SgfParser.sgf_parser; class GameSgfParser, ~.__construct, ~.get_error,
+       ~.verify_game_attributes, ~.verify_game_shape_setup, ~.verify_game_moves, ~.parse_sgf_game),
+     include/conditional_moves.php (ConditionalMoves.load_cond_moves_from_sgf),
+     include/game_sgf_control.php (GameSgfControl.verify_game_sgf),
+     include/board.php (Board.prepare_verify_game_sgf),
+     game.php (draw_conditional_moves_input),
+     goban_editor.php (load_igoban_from_sgf):
+   - adjusted SGF-game-verification from attaching-SGF to be re-used for parsing and
+     checking uploaded SGF with conditional-moves
+     - added SGF-game-verification for uploaded conditional-moves from SGF on identical
+       game-attributes, shape-setup and played moves
+     - added option to enable checking PASS-moves on SGF-game-verification
+     - identify start of conditional-moves in uploaded SGF
+     - refactored GameSgfControl::prepare_verify_game_sgf() into Board-class to be re-used for
+       parsing and checking uploaded SGF with conditional-moves
+     - refactored checking of game-attributes, shape-setup and played moves from GameSgfControl-class
+       into GameSgfParser-class
+     - convert SGF PASS-notation with B/W[tt] for board-size <= 19 to standard B/W[]
+     - bugfix for GameSgfParser.parse_sgf_game(): parse certain game-attribute SGF-properties
+       only in root-node
+   - bugfix goban-editor: also show SGF-parsing errors on uploading shape from SGF
+
+2014-04-14 jug
+
+   * include/std_functions.php, game.php:
+   - cleanup: get rid of $has_sgf_alias to use URL 'game123.sgf' to download SGF
+     with Apache AliasMatch-config
+
+   * include/std_functions.php, ratinggraph.php, ratingpng.php (interpolate):
+   - cleanup: removed switch GRAPH_RATING_BY_NUM_ENABLED to disable the "by number of games"
+     rating-graph with just being available
+
+   * include/sgf_parser.php, include/make_game.php:
+   - cleanup: get rid of conditional-code-includes for ENABLE_STDHANDICAP
+
+   * include/db/move_sequence.php (class MoveSequence, ~.__construct, ~.setStatus, ~.persist,
+       ~.insert, ~.update, ~.fillEntityData, ~.build_query_sql, ~.new_from_row),
+     include/conditional_moves.php (class ConditionalMoves, ~.load_cond_moves_from_sgf,
+       ~.reformat_to_sgf),
+     include/globals.php (CSS_VERSION, MSEQ_STATUS_...),
+     include/config.php (ALLOW_CONDITIONAL_MOVES),
+     scripts/updates/database_changes_1_0_18.mysql, scripts/updates/other_changes_1_0_18.txt,
+     specs/db/table-Games.txt, specs/db/dragon-ddl.sql,
+     skins/dragon/screen.css, NEWS,
+     game.php (draw_conditional_moves_links, draw_conditional_moves_input):
+   - adjusted GUI of game-page to add conditional-moves by uploading from SGF or entering manually
+     - game-page: reformat manually entered conditional-moves into SGF-like format
+     - added MoveSequence-table and persistence-class to store conditional-moves
+     - added server-config ALLOW_CONDITIONAL_MOVES to enable or disable conditional-moves
+-----------
+-- added table to store conditional-moves
+CREATE TABLE MoveSequence (
+  ID int NOT NULL auto_increment,
+  gid int NOT NULL,
+  uid int NOT NULL,
+  Status enum('INACTIVE','ACTIVE','ILLEGAL','OPP_MSG','DEVIATED','DONE') NOT NULL default 'INACTIVE',
+  Flags tinyint unsigned NOT NULL default '0',
+  StartMoveNr smallint unsigned NOT NULL default '0',
+  StartMove char(2) NOT NULL default '',
+  LastMoveNr smallint unsigned NOT NULL default '0',
+  LastMovePos smallint unsigned NOT NULL default '0',
+  LastMove char(2) NOT NULL default '',
+  Sequence varbinary(2048) NOT NULL default '',
+  PRIMARY KEY (ID),
+  KEY gid_uid_status (gid,uid,Status)
+) ENGINE=MyISAM ;
+-----------
+
+   * include/classlib_upload.php (FileUpload.load_data_from_file),
+     goban_editor.php (load_igoban_from_sgf):
+   - cleanup: refactored loading simple-text from uploaded-file into FileUpload::load_data_from_file()
+
+   * include/sgf_parser.php (SGFP_OPT_SKIP_ROOT_NODE;
+       class SgfParser, ~.__construct, ~.parse_sgf, ~.parse_sgf_game_tree, ~.sgf_parse_node,
+         ~.sgf_parser, ~.sgf_builder;
+       class SgfNode;
+       class GameSgfParser, ~.parse_sgf_game; get_handicap_pattern),
+     include/game_sgf_control.php (GameSgfControl.verify_game_sgf),
+     include/globals.php (SGF_MAXSIZE_UPLOAD),
+     goban_editor.php (load_igoban_from_sgf, create_igoban_from_parsed_sgf),
+     manage_sgf.php:
+   - cleanup & prepare for parsing conditional moves:
+     - added option to skip parsing of SGF-root-node
+     - SGF-parsing: replace node-array with properties with SgfNode-object with props-array
+       for later storing parsing position
+     - detailed syntax-error on parsing SGF-part for game-tree or sub-node
+     - renamed Sgf-class -> SgfParser-class
+     - renamed SgfParser.parse_sgf_tree() -> .parse_sgf_game_tree()
+     - renamed GameSgfParser::parse_sgf_data() -> .parse_sgf_game() to avoid function-name-clashes
+     - renamed vars to reflect name of set class-instance
+     - moved const SGF_MAXSIZE_UPLOAD to common include
+
+2014-04-12 jug
+
+   * include/sgf_parser.php (class Sgf, ~.sgf_parser, ~.sgf_builder, ~.sgf_var_push, ~.sgf_skip_space,
+       ~.sgf_parse_node, ~.sgf_parse_args, ~.sgf_parse_key, ~.push_var_stack;
+       GameSgfParser.parse_sgf;
+       get_handicap_pattern)
+     goban_editor.php:
+   - cleanup: refactored local SGF-parsing functions into Sgf-class
+     - replaced deprecated string-index access s{i} with s[i]
+     - refactored constant data into static data
+     - adjusted for DGS-layout
+     - moved get_handicap_pattern()-function after classes
+     - added function-comments
+
+2014-04-11 jug
+
+   * include/game_sgf_control.php (GameSgfControl.verify_game_sgf),
+     include/sgf_parser.php (class GameSgfParser),
+     goban_editor.php (load_igoban_from_sgf):
+   - renamed class SgfParser to GameSgfParser to free class-name
+
+   * tournaments/list_tournaments.php:
+   - tournament-list: show directoring tournaments also for tournament-owner and including NEW-status
+
+2014-04-10 jug
+
+   * scripts/updates/database_changes_1_0_13.mysql, scripts/updates/database_changes_1_0_14.mysql,
+     scripts/updates/database_changes_1_0_15.mysql, scripts/updates/database_changes_1_0_16.mysql,
+     scripts/updates/database_changes_1_0_17.mysql,
+     scripts/updates/other_changes_1_0_13.txt, scripts/updates/other_changes_1_0_15.txt,
+     scripts/updates/other_changes_1_0_16.txt, scripts/updates/other_changes_1_0_17.txt,
+     scripts/updates/roadmap_1_0_13.txt, scripts/updates/roadmap_1_0_14.txt,
+     scripts/updates/roadmap_1_0_15.txt, scripts/updates/roadmap_1_0_16.txt,
+     scripts/updates/roadmap_1_0_17.txt:
+   - simplified naming-scheme for release-files with db- & other-changes & roadmap-files
 
