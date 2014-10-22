@@ -256,7 +256,11 @@ function jump_to_next_game($uid, $Lastchanged, $moves, $TimeOutDate, $gid)
          $qsql->add_part( SQLP_WHERE,
             "( TimeOutDate > $TimeOutDate OR (TimeOutDate=$TimeOutDate AND $def_where_nextgame ))" );
          break;
-      default: //case NGO_LASTMOVED
+      case NGO_LASTMOVED_NEW_FIRST:
+         $qsql->add_part( SQLP_WHERE,
+            "( Lastchanged < '$Lastchanged' OR ( Lastchanged = '$Lastchanged' AND ID>$gid ))" );
+         break;
+      default: //case NGO_LASTMOVED_OLD_FIRST
          $qsql->add_part( SQLP_WHERE, $def_where_nextgame );
          break;
    }

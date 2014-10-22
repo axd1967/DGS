@@ -795,7 +795,7 @@ CREATE TABLE IF NOT EXISTS `Players` (
   `TableMaxRows` smallint(5) unsigned NOT NULL default '20',
   `Button` tinyint(4) NOT NULL default '0',
   `UserPicture` varchar(48) NOT NULL default '',
-  `NextGameOrder` enum('LASTMOVED','MOVES','PRIO','TIMELEFT') NOT NULL default 'LASTMOVED',
+  `NextGameOrder` enum('LASTMOVED_OF','LASTMOVED_NF','MOVES','PRIO','TIMELEFT') NOT NULL default 'LASTMOVED_OF',
   `SkipBulletin` tinyint(3) unsigned NOT NULL default '4',
   `RejectTimeoutWin` tinyint(4) NOT NULL default '-1',
   `ThumbnailSize` tinyint(3) unsigned NOT NULL default '7',

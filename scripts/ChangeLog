@@ -13,6 +13,24 @@ ChangeLog
 
 2014-10-22 jug
 
+   * include/game_functions.php (NGO_LASTMOVED_OLD_FIRST, NGO_LASTMOVED_NEW_FIRST;
+       NextGameOrder.get_next_game_orders_selection, ~.build_status_games_query, ~.get_next_game_order),
+     scripts/updates/1.19/database_changes.mysql, specs/db/table-Players.txt, specs/db/dragon-ddl.sql,
+     confirm.php (jump_to_next_game), status.php, NEWS:
+   - added sort-order for status-games ordered by last moved (newest first)
+     - renamed NGO_LASTMOVED to NGO_LASTMOVED_OLD_FIRST
+     - added NGO_LASTMOVED_NEW_FIRST
+     - extended & replaced 'Last move' with 'Last Move (old first)' which is also the default
+-----------
+-- added sort-order 'Last moved (new first)' for status-games-page
+ALTER TABLE Players
+   MODIFY NextGameOrder enum('LASTMOVED','LASTMOVED_OF','LASTMOVED_NF','MOVES','PRIO','TIMELEFT') NOT NULL default 'LASTMOVED_OF' ;
+UPDATE PLAYERS
+   SET NextGameOrder = 'LASTMOVED_OF' WHERE NextGameOrder = 'LASTMOVED' ;
+ALTER TABLE Players
+   MODIFY NextGameOrder enum('LASTMOVED_OF','LASTMOVED_NF','MOVES','PRIO','TIMELEFT') NOT NULL default 'LASTMOVED_OF' ;
+-----------
+
    * tournaments/edit_properties.php (parse_edit_form),
      include/classlib_user.php (User.matchRating),
      include/rating.php (read_rating),

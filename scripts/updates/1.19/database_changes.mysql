@@ -30,3 +30,12 @@ ALTER TABLE Players
    ADD CountTourneyNew smallint NOT NULL default '-1' AFTER CountBulletinNew ;
 
 
+-- added sort-order 'Last moved (new first)' for status-games-page
+ALTER TABLE Players
+   MODIFY NextGameOrder enum('LASTMOVED','LASTMOVED_OF','LASTMOVED_NF','MOVES','PRIO','TIMELEFT') NOT NULL default 'LASTMOVED_OF' ;
+UPDATE PLAYERS
+   SET NextGameOrder = 'LASTMOVED_OF' WHERE NextGameOrder = 'LASTMOVED' ;
+ALTER TABLE Players
+   MODIFY NextGameOrder enum('LASTMOVED_OF','LASTMOVED_NF','MOVES','PRIO','TIMELEFT') NOT NULL default 'LASTMOVED_OF' ;
+
+

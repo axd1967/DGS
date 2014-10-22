@@ -4766,7 +4766,8 @@ class BoardStatus
   *        and GamesPriority-table.
   */
 
-define('NGO_LASTMOVED', 'LASTMOVED');
+define('NGO_LASTMOVED_OLD_FIRST', 'LASTMOVED_OF');
+define('NGO_LASTMOVED_NEW_FIRST', 'LASTMOVED_NF');
 define('NGO_MOVES', 'MOVES');
 define('NGO_PRIO', 'PRIO');
 define('NGO_TIMELEFT', 'TIMELEFT');
@@ -4779,10 +4780,11 @@ class NextGameOrder
    public static function get_next_game_orders_selection()
    {
       return array(
-         1 => T_('Last moved#nextgame'),
-         2 => T_('Moves#nextgame'),
-         3 => T_('Priority#nextgame'),
-         4 => T_('Time remaining#nextgame'),
+         1 => T_('Last moved (old first)#nextgame'),
+         2 => T_('Last moved (new first)#nextgame'),
+         3 => T_('Moves#nextgame'),
+         4 => T_('Priority#nextgame'),
+         5 => T_('Time remaining#nextgame'),
       );
    }
 
@@ -4796,7 +4798,9 @@ class NextGameOrder
       $checked_order = ( is_numeric($next_game_order) )
          ? NextGameOrder::get_next_game_order( $next_game_order ) // int -> enum
          : $next_game_order;
-      $next_game_order = ( (string)$checked_order != '' ) ? $checked_order : NGO_LASTMOVED; // default on invalid order
+      $next_game_order = ( (string)$checked_order != '' ) // default on invalid order
+         ? $checked_order
+         : NGO_LASTMOVED_OLD_FIRST;
 
       $sql_order = NextGameOrder::get_next_game_order( $next_game_order, 'Games', /*orderby*/false ); // enum -> order
       $load_prio = ($next_game_order == NGO_PRIO) || $load_prio_field;
@@ -4869,14 +4873,16 @@ class NextGameOrder
       // NOTE: also adjust 'jump_to_next_game(..)' in confirm.php
       static $ARR_NEXT_GAME_ORDER = array(
          // idx => [ Players.NextGameOrder-value, order-string, quick-suite-order ]
-         1 => array( NGO_LASTMOVED, '%G.Lastchanged ASC, %G.ID DESC',                     'time_lastmove+,id-' ),
-         2 => array( NGO_MOVES,     '%G.Moves DESC, %G.Lastchanged ASC, %G.ID DESC',      'move_count-,time_lastmove+,id-' ),
-         3 => array( NGO_PRIO,      'X_Priority DESC, %G.Lastchanged ASC, %G.ID DESC',    'prio-,time_lastmove+,id-' ),
-         4 => array( NGO_TIMELEFT,  '%G.TimeOutDate ASC, %G.Lastchanged ASC, %G.ID DESC', 'TIMEOUTDATE+,time_lastmove+,id-' ),
-         NGO_LASTMOVED => 1,
-         NGO_MOVES     => 2,
-         NGO_PRIO      => 3,
-         NGO_TIMELEFT  => 4,
+         1 => array( NGO_LASTMOVED_OLD_FIRST, '%G.Lastchanged ASC, %G.ID DESC',           'time_lastmove+,id-' ),
+         2 => array( NGO_LASTMOVED_NEW_FIRST, '%G.Lastchanged DESC, %G.ID DESC',          'time_lastmove-,id-' ),
+         3 => array( NGO_MOVES,     '%G.Moves DESC, %G.Lastchanged ASC, %G.ID DESC',      'move_count-,time_lastmove+,id-' ),
+         4 => array( NGO_PRIO,      'X_Priority DESC, %G.Lastchanged ASC, %G.ID DESC',    'prio-,time_lastmove+,id-' ),
+         5 => array( NGO_TIMELEFT,  '%G.TimeOutDate ASC, %G.Lastchanged ASC, %G.ID DESC', 'TIMEOUTDATE+,time_lastmove+,id-' ),
+         NGO_LASTMOVED_OLD_FIRST => 1,
+         NGO_LASTMOVED_NEW_FIRST => 2,
+         NGO_MOVES     => 3,
+         NGO_PRIO      => 4,
+         NGO_TIMELEFT  => 5,
       );
 
       if ( !isset($ARR_NEXT_GAME_ORDER[$idx]) )

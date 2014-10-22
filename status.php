@@ -312,13 +312,16 @@ function load_games_to_move( $uid, &$gtable )
    $gtable->add_tablehead(11, new TableHead( T_('User online#header'), 'images/online.gif',
       sprintf( T_('Indicator for being online up to %s mins ago'), SPAN_ONLINE_MINS)
          . ', ' . T_('or on vacation#header') ), 'Image', 0 );
-   $gtable->add_tablehead(13, T_('Last move#header'), 'Date', 0, 'Lastchanged+');
+   if ( $next_game_order == NGO_LASTMOVED_NEW_FIRST )
+      $gtable->add_tablehead(13, T_('Last move#header'), 'Date', 0, 'Lastchanged-');
+   else
+      $gtable->add_tablehead(13, T_('Last move#header'), 'Date', 0, 'Lastchanged+');
    $gtable->add_tablehead(17, T_('Priority#header'), 'Number',
       ($show_prio ? TABLE_NO_HIDE : 0), 'X_Priority-');
    $gtable->add_tablehead(10, T_('Time remaining#header'), null, 0, 'TimeOutDate+');
 
    // static order for status-games (coupled with "next game" on game-page); for table-sort-indicators
-   if ( $next_game_order == NGO_LASTMOVED )
+   if ( $next_game_order == NGO_LASTMOVED_OLD_FIRST || $next_game_order == NGO_LASTMOVED_NEW_FIRST )
       $gtable->set_default_sort( 13, 1); //on Lastchanged,ID
    elseif ( $next_game_order == NGO_MOVES )
       $gtable->set_default_sort( 9, 13); //on Moves,Lastchanged

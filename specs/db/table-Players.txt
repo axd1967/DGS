@@ -96,7 +96,8 @@ Zu  | MenuDirection    | enum('VERTICAL','HORIZONTAL')               | NO   |   
 Zu  | TableMaxRows     | smallint(5) unsigned                        | NO   |     | 20                  |                |
 Zu  | Button           | tinyint(4)                                  | NO   |     | 0                   |                |
 Zu  | UserPicture      | varchar(48)                                 | NO   |     |                     |                |
-Zu  | NextGameOrder    | enum('LASTMOVED','MOVES','PRIO','TIMELEFT') | NO   |     | LASTMOVED           |                |
+Zu  | NextGameOrder    | enum('LASTMOVED_OF','LASTMOVED_NF','MOVES','PRIO','TIMELEFT')
+                                                                     | NO   |     | LASTMOVED_OF        |                |
 Zu  | SkipBulletin     | tinyint(3) unsigned                         | NO   |     | 4                   |                |
 Zu  | RejectTimeoutWin | tinyint(4)                                  | NO   |     | -1                  |                |
 Zu  | ThumbnailSize    | tinyint(3) unsigned                         | NO   |     | 7                   |                |
