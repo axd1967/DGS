@@ -163,6 +163,8 @@ Important Note:
 
 * RatingMin, RatingMax : rating range challengers rating has to be in
    - only integer-precision required
+   - only checked, if MustBeRated='Y'
+   - users rating (if rating existing and valid) good, if $rating >= RatingMin-50 AND $rating < RatingMax+50
 
 * MinRatedGames : number of minimum rated finished games of challenger
 

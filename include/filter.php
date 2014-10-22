@@ -2232,7 +2232,7 @@ class FilterText extends Filter
   *
   * <p>Allowed Syntax:
   *    note: rank-specification according to read_rating()-func
-  *    "7k" = representing rating for 7 kyu within range: 7k = 7k(-50%) .. 7k(+49%)
+  *    "7k" = representing rating for 7 kyu within range: 7k = 7k(-50%) .. 7k(+50%)
   *    "3d, 3dan, 3 dan"      = alternatives for rank of 3 dan
   *    "7k, 7kyu, 7 k, 7 gup" = alternatives for rank of 7k
   *    range-syntax: like for \see FilterText

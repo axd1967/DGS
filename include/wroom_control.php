@@ -64,7 +64,7 @@ class WaitingroomControl
       // $goodrated  = ( user-has-rating || Rated == 'N' );
       // $haverating = ( user-has-rating || !$calculated );
       // if ( $MustBeRated != 'Y' )  $goodrating = true;
-      // else if ( user-has-rating ) $goodrating = ( $my_rating>=$RatingMin && $my_rating<=$RatingMax );
+      // else if ( user-has-rating ) $goodrating = ( $my_rating >= $RatingMin && $my_rating < $RatingMax );
       // else                        $goodrating = false;
       // $goodmingames = ( $MinRatedGames > 0 ? ($my_rated_games >= $MinRatedGames) : true );
       // $goodhero = ( $my_hero_ratio_perc >= $MinHeroRatio )
@@ -74,7 +74,7 @@ class WaitingroomControl
       {
          $goodrated = "1";
          $haverating = "1";
-         $goodrating = "IF(WR.MustBeRated='Y' AND ($my_rating<WR.RatingMin OR $my_rating>WR.RatingMax),0,1)";
+         $goodrating = "IF(WR.MustBeRated='Y' AND ($my_rating < WR.RatingMin OR $my_rating >= WR.RatingMax),0,1)";
       }
       else // user unrated
       {
@@ -235,7 +235,7 @@ class WaitingroomControl
          error('waitingroom_own_game', "WC:join_waitingroom_game.check.opp($wr_id)");
 
       if ( $game_row['MustBeRated'] == 'Y' &&
-          !($player_row['Rating2'] >= $game_row['RatingMin'] && $player_row['Rating2'] <= $game_row['RatingMax']) )
+          !($player_row['Rating2'] >= $game_row['RatingMin'] && $player_row['Rating2'] < $game_row['RatingMax']) )
          error('waitingroom_not_in_rating_range', "WC:join_waitingroom_game.check.rating($wr_id)");
 
       if ( !$game_row['goodmingames'] )

@@ -327,8 +327,8 @@ Description:
    - -9999 = not limited
    - is not used, if UserRated='N'
    - only integer-precision required
-   - 2000 (=1k) .. 2600 (=6d) means, that a user with rating between ELO-rating >= 1950 and <= 2650,
-     respectively "1k (-50%)" .. "7d (-50%)" would match the rating range of UserMinRating..UserMaxRating
+   - 2000 (=1k) .. 2600 (=6d) means, that a user with rating between ELO-rating >= 1950 and < 2650,
+     respectively "1k (-50%)" .. "6d (+50%)" would match the rating range of UserMinRating..UserMaxRating
 
 * UserRated :
    - Y = user must have a rating on registering
