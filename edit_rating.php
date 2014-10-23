@@ -142,8 +142,8 @@ require_once 'include/rank_converter.php';
       T_("<b>Changing an established Rating</b> can only be done on certain conditions#ranknotes"),
          T_("Keep in mind, that playing many games letting the rating-system adjust your rating is the preferred way.#ranknotes"),
          T_("A rating reset/change can normally be asked once a year.#ranknotes"),
-         T_("If the ranking-diff is >3k, you may ask for a reset of your rating confidence level to let the rating-system adjust faster.#ranknotes"),
-         T_("If the ranking-diff is >6k, you may ask for a rating-change.#ranknotes"),
+         sprintf( T_("If the ranking-diff is >%s, you may ask for a reset of your rating confidence level to let the rating-system adjust faster.#ranknotes"), '3k' ),
+         sprintf( T_("If the ranking-diff is >%s, you may ask for a rating-change.#ranknotes"), '5k' ),
          sprintf(
             T_("Add a request in the Support-forum with subject \"%s\". A game-admin will then check and process your application.<br>\n" .
                "Please provide infos about: your target rank, sources that verify your claim preferrably with matching user-IDs, " .

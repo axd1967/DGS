@@ -11,6 +11,11 @@ Release [2014-07-30] - DGS 1.0.18 - tag [release-1_0_18-20140730] on (later) bra
 ChangeLog
 ------------------------------------------------------------------
 
+2014-10-23 jug
+
+   * edit_rating.php:
+   - decreased rank-diff to grant rating-change 6k -> 5k
+
 2014-10-22 jug
 
    * include/game_functions.php (NGO_LASTMOVED_OLD_FIRST, NGO_LASTMOVED_NEW_FIRST;
