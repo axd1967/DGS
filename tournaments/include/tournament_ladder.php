@@ -22,6 +22,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 $TranslateGroups[] = "Tournament";
 
 require_once 'include/db_classes.php';
+require_once 'include/db/bulletin.php';
 require_once 'include/std_classes.php';
 require_once 'include/std_functions.php';
 require_once 'include/utilities.php';
@@ -433,8 +434,7 @@ class TournamentLadder
 
          // reset Players.CountBulletinNew (as visibility of T-typed bulletins can change)
          if ( $this->uid > 0 )
-            db_query( "$xdbgmsg.upd_cntbullnew",
-               "UPDATE Players SET CountBulletinNew=-1 WHERE ID='{$this->uid}' LIMIT 1" );
+            Bulletin::update_count_bulletin_new( "$xdbgmsg.upd_cntbullnew", $this->uid );
 
          TournamentLogHelper::log_delete_user_from_tournament_ladder( $this->tid, $tlog_type, $this, $arr_gid, $tlog_msg );
       }
