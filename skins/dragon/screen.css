@@ -1021,7 +1021,7 @@ table.Table td.BoldC {
 
 table.Table th.Button {
    margin: 0px;
-   padding: 2px 4px;
+   padding: 2px 8px;
    text-align: center;
 }
 
@@ -1029,7 +1029,7 @@ table.Table td.Button {
    background-repeat: no-repeat;
    background-position: center center; /* V H: top left */
    margin: 0px;
-   padding: 3px 4px 2px 4px;
+   padding: 3px 8px 2px 8px;
    text-align: center;
    white-space: nowrap;
 }

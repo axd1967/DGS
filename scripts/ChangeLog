@@ -13,6 +13,13 @@ ChangeLog
 
 2014-10-26 jug
 
+   * include/globals.php (CSS_VERSION),
+     skins/dragon/screen.css, edit_profile.php,
+     images/button0.gif, images/button1.gif, images/button2.gif, images/button3.gif,
+     images/button4.gif, images/button5.gif, images/button6.gif, images/button7.gif,
+     images/button8.png, images/button9.png, images/button10.png:
+   - increased width of ID-buttons by 13 pixels for game-IDs >= 1.000.000
+
    * include/db/bulletin.php (class Bulletin, ~.__construct, ~.setTargetRatingMin, ~.setTargetRatingMax,
        ~.fillEntityData, ~.new_from_row, ~.build_view_query_sql, ~.get_target_types_with_user_rating),
      include/gui_bulletin.php (GuiBulletin.getTargetTypeTextsWithUserRating, ~.hasTargetRatingRange,

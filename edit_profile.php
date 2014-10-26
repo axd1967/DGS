@@ -243,7 +243,7 @@ require_once 'include/gui_bulletin.php';
       }
       else
          $button_code .= "<td></td>";
-      $button_style = 'color:' . $buttoncolors[$i] . ';' . 'background-image:url(images/' . $buttonfiles[$i] . ');';
+      $button_style = 'width: 107px; color:' . $buttoncolors[$i] . ';' . 'background-image:url(images/' . $buttonfiles[$i] . ');';
       $button_code .=
          "<td><input type='radio' name='button' value=$i" . ( $i == $button_nr ? ' checked' : '') . "></td>" .
          "<td class=button style='$button_style'>1348</td>";
