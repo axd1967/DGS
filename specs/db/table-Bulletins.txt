@@ -63,24 +63,26 @@ Description:
    that shouldn't be handled with the private-message system and is more "prominently"
    than the forums.
 
-| Field       | Type                                                                | Null | Key | Default             | Extra          |
-+-------------+---------------------------------------------------------------------+------+-----+---------------------+----------------+
-| ID          | int(11)                                                             | NO   | PRI | NULL                | auto_increment |
-| uid         | int(11)                                                             | NO   |     | NULL                |                |
-| LockVersion | tinyint(3) unsigned                                                 | NO   |     | 0                   |                |
-| Category    | enum('MAINT','ADM_MSG','TOURNEY','TNEWS','FEATURE','PRIV_MSG','AD') | NO   |     | PRIV_MSG            |                |
-| Status      | enum('NEW','PENDING','REJECTED','SHOW','ARCHIVE','DELETE')          | NO   | MUL | NEW                 |                |
-| TargetType  | enum('ALL','TD','TP','UL','MPG')                                    | NO   |     | NULL                |                |
-| Flags       | tinyint(3) unsigned                                                 | NO   |     | 0                   |                |
-| PublishTime | datetime                                                            | NO   |     | 0000-00-00 00:00:00 |                |
-| ExpireTime  | datetime                                                            | NO   |     | 0000-00-00 00:00:00 |                |
-| tid         | int(11)                                                             | NO   |     | 0                   |                |
-| gid         | int(11)                                                             | NO   |     | 0                   |                |
-| CountReads  | mediumint(8) unsigned                                               | NO   |     | 0                   |                |
-| AdminNote   | varchar(255)                                                        | NO   |     |                     |                |
-| Subject     | varchar(255)                                                        | NO   |     | NULL                |                |
-| Text        | text                                                                | NO   |     | NULL                |                |
-| Lastchanged | datetime                                                            | NO   |     | 0000-00-00 00:00:00 |                |
+| Field           | Type                                                                | Null | Key | Default             | Extra          |
++-----------------+---------------------------------------------------------------------+------+-----+---------------------+----------------+
+| ID              | int(11)                                                             | NO   | PRI | NULL                | auto_increment |
+| uid             | int(11)                                                             | NO   |     | NULL                |                |
+| LockVersion     | tinyint(3) unsigned                                                 | NO   |     | 0                   |                |
+| Category        | enum('MAINT','ADM_MSG','TOURNEY','TNEWS','FEATURE','PRIV_MSG','AD') | NO   |     | PRIV_MSG            |                |
+| Status          | enum('NEW','PENDING','REJECTED','SHOW','ARCHIVE','DELETE')          | NO   | MUL | NEW                 |                |
+| TargetType      | enum('ALL','TD','TP','UL','MPG')                                    | NO   |     | NULL                |                |
+| TargetRatingMin | smallint(6)                                                         | NO   |     | -9999               |                |
+| TargetRatingMax | smallint(6)                                                         | NO   |     | 9999                |                |
+| Flags           | tinyint(3) unsigned                                                 | NO   |     | 0                   |                |
+| PublishTime     | datetime                                                            | NO   |     | 0000-00-00 00:00:00 |                |
+| ExpireTime      | datetime                                                            | NO   |     | 0000-00-00 00:00:00 |                |
+| tid             | int(11)                                                             | NO   |     | 0                   |                |
+| gid             | int(11)                                                             | NO   |     | 0                   |                |
+| CountReads      | mediumint(8) unsigned                                               | NO   |     | 0                   |                |
+| AdminNote       | varchar(255)                                                        | NO   |     |                     |                |
+| Subject         | varchar(255)                                                        | NO   |     | NULL                |                |
+| Text            | text                                                                | NO   |     | NULL                |                |
+| Lastchanged     | datetime                                                            | NO   |     | 0000-00-00 00:00:00 |                |
 
 
 ## Fields:
@@ -115,6 +117,13 @@ Description:
    - TP = bulletin shown to tournament-participants of referenced tournament (Ref_ID := tid)
    - UL = bulletin shown to User-List (Ref_ID := 0)
    - NOTE: no default defined in DB, because it MUST be set by application
+
+* TargetRatingMin, TargetRatingMax : target bulletin only to users within certain rating-range
+   - rating-range check only applied for TargetType = ALL | TP
+   - TargetRatingMin = -9999 (=NO_RATING) : no lower rating limit for user
+   - TargetRatingMax = +9999 (=OUT_OF_RATING) : no upper rating limit for user
+   - otherwise TargetRatingMin/Max should be in range [MIN_RATING,MAX_RATING]
+   - should be: TargetRatingMin <= TargetRatingMax
 
 * Flags : admin-flags of bulletin
    - 0x01 = created by admin

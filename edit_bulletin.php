@@ -74,6 +74,8 @@ $GLOBALS['ThePage'] = new Page('BulletinEdit');
       if ( is_null($bulletin) )
          error('unknown_bulletin', "edit_bulletin.check.load_bulletin($bid)");
       $bulletin->allow_bulletin_user_edit( $my_id, "edit_bulletin.check.edit");
+      if ( $bulletin->TargetType == BULLETIN_TRG_USERLIST )
+         $bulletin->loadUserList();
    }
    else
       $bulletin = Bulletin::new_bulletin( /*adm*/false, $n_gid, $n_tid );
@@ -189,20 +191,35 @@ $GLOBALS['ThePage'] = new Page('BulletinEdit');
          'DESCRIPTION', T_('Status#bulletin'),
          'TEXT',        GuiBulletin::getStatusText($b_old_status) .
                         ' => ' . span('BulletinNewStatus', GuiBulletin::getStatusText($bulletin->Status)) ));
-   if ( $bulletin->gid > 0 )
-   {
-      $bform->add_row( array(
-            'DESCRIPTION', T_('Target Type#bulletin'),
-            'TEXT',        GuiBulletin::getTargetTypeText($bulletin->TargetType) ));
-   }
-   elseif ( $bulletin->tid > 0 )
+   if ( $bulletin->tid > 0 )
    {
       $bform->add_row( array(
             'DESCRIPTION', T_('Current Target Type#bulletin'),
             'TEXT',        GuiBulletin::getTargetTypeText($b_old_target_type) ));
       $bform->add_row( array(
             'TAB',
-            'SELECTBOX',    'target_type', 1, $arr_target_types, $vars['target_type'], false, ));
+            'SELECTBOX',   'target_type', 1, $arr_target_types, $vars['target_type'], false, ));
+   }
+   else
+   {
+      $bform->add_row( array(
+            'DESCRIPTION', T_('Target Type#bulletin'),
+            'TEXT',        GuiBulletin::getTargetTypeText($bulletin->TargetType) ));
+   }
+
+   if ( $bulletin->TargetType == BULLETIN_TRG_USERLIST )
+   {
+      $bform->add_row( array(
+            'DESCRIPTION', T_('User List'),
+            'TEXT', wordwrap( implode(', ', $bulletin->UserListHandles ), 80, "<br>") ));
+   }
+
+   $b_rating_range = GuiBulletin::build_target_rating_range( $bulletin );
+   if ( $b_rating_range )
+   {
+      $bform->add_row( array(
+            'DESCRIPTION', T_('Target User Rating Range#bulletin'),
+            'TEXT', $b_rating_range, ));
    }
 
    $bform->add_empty_row();
@@ -324,7 +341,13 @@ function parse_edit_form( &$bulletin )
       $old_vals['expire_time'] = $bulletin->ExpireTime;
 
       if ( $bulletin->tid > 0 )
-         $bulletin->setTargetType($vars['target_type']);
+      {
+         $new_value = $vars['target_type'];
+         if ( $new_value == BULLETIN_TRG_TP || $new_value == BULLETIN_TRG_TD )
+            $bulletin->setTargetType($new_value);
+         else
+            $errors[] = sprintf( T_('Invalid bulletin target type [%s] used for user-edit.'), $new_value );
+      }
 
       $parsed_value = parseDate( T_('Expire time for bulletin'), $vars['expire_time'] );
       if ( is_numeric($parsed_value) )

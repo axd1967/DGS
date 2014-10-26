@@ -82,7 +82,7 @@ $ENTITY_BULLETIN = new Entity( 'Bulletin',
       FTYPE_PKEY, 'ID',
       FTYPE_AUTO, 'ID',
       FTYPE_OPTLOCK,
-      FTYPE_INT,  'ID', 'uid', 'tid', 'gid', 'CountReads', 'Flags',
+      FTYPE_INT,  'ID', 'uid', 'tid', 'gid', 'CountReads', 'TargetRatingMin', 'TargetRatingMax', 'Flags',
       FTYPE_ENUM, 'Category', 'Status', 'TargetType',
       FTYPE_TEXT, 'AdminNote', 'Subject', 'Text',
       FTYPE_DATE, 'PublishTime', 'ExpireTime', 'Lastchanged'
@@ -96,6 +96,8 @@ class Bulletin
    public $Category;
    public $Status;
    public $TargetType;
+   public $TargetRatingMin;
+   public $TargetRatingMax;
    public $Flags;
    public $PublishTime;
    public $ExpireTime;
@@ -117,9 +119,14 @@ class Bulletin
 
    public $ReadState = false; // 0 = unread, 1 = marked as read, false = unset
 
-   /*! \brief Constructs Bulletin-object with specified arguments. */
+   /*!
+    * \brief Constructs Bulletin-object with specified arguments.
+    * \param $target_rating_min null = use default, see setTargetRatingMin()
+    * \param $target_rating_max null = use default, see setTargetRatingMax()
+    */
    public function __construct( $id=0, $uid=0, $user=null, $category=BULLETIN_CAT_ADMIN_MSG,
-            $status=BULLETIN_STATUS_NEW, $target_type=BULLETIN_TRG_UNSET, $flags=0,
+            $status=BULLETIN_STATUS_NEW, $target_type=BULLETIN_TRG_UNSET,
+            $target_rating_min=null, $target_rating_max=null, $flags=0,
             $publish_time=0, $expire_time=0, $tid=0, $gid=0, $count_reads=0, $admin_note='',
             $subject='', $text='', $lastchanged=0 )
    {
@@ -129,6 +136,8 @@ class Bulletin
       $this->setCategory( $category );
       $this->setStatus( $status );
       $this->setTargetType( $target_type );
+      $this->setTargetRatingMin( $target_rating_min );
+      $this->setTargetRatingMax( $target_rating_max );
       $this->Flags = (int)$flags;
       $this->PublishTime = (int)$publish_time;
       $this->ExpireTime = (int)$expire_time;
@@ -186,6 +195,20 @@ class Bulletin
       $this->TargetType = $target_type;
    }
 
+   public function setTargetRatingMin( $target_rating_min )
+   {
+      $this->TargetRatingMin = (is_null($target_rating_min))
+         ? NO_RATING
+         : max( NO_RATING, (int)$target_rating_min );
+   }
+
+   public function setTargetRatingMax( $target_rating_max )
+   {
+      $this->TargetRatingMax = (is_null($target_rating_max))
+         ? OUT_OF_RATING
+         : min( OUT_OF_RATING, (int)$target_rating_max );
+   }
+
    public function is_user_bulletin()
    {
       return ($this->Flags & BULLETIN_FLAG_USER_EDIT);
@@ -231,6 +254,8 @@ class Bulletin
       $data->set_value( 'Category', $this->Category );
       $data->set_value( 'Status', $this->Status );
       $data->set_value( 'TargetType', $this->TargetType );
+      $data->set_value( 'TargetRatingMin', $this->TargetRatingMin );
+      $data->set_value( 'TargetRatingMax', $this->TargetRatingMax );
       $data->set_value( 'Flags', $this->Flags );
       $data->set_value( 'PublishTime', $this->PublishTime );
       $data->set_value( 'ExpireTime', $this->ExpireTime );
@@ -361,6 +386,8 @@ class Bulletin
             @$row['Category'],
             @$row['Status'],
             @$row['TargetType'],
+            @$row['TargetRatingMin'],
+            @$row['TargetRatingMax'],
             @$row['Flags'],
             @$row['X_PublishTime'],
             @$row['X_ExpireTime'],
@@ -393,6 +420,11 @@ class Bulletin
       $uid = (int)@$player_row['ID'];
       if ( $uid <= 0 )
          error('invalid_args', "Bulletin:build_view_query_sql.check.uid($is_admin,$count_new,$show_target_type)");
+
+      $user_rating = ( is_numeric(@$player_row['Rating2']) ) ? $player_row['Rating2'] : NO_RATING;
+      $query_rating = ( $is_admin )
+         ? 1
+         : "IF(B.TargetRatingMin <= $user_rating AND $user_rating <= B.TargetRatingMax,1,0)";
 
       $qsql = new QuerySQL();
       if ( $count_new )
@@ -435,7 +467,7 @@ class Bulletin
       // handle target-types (UNSET not possible)
       if ( $show_target_type == BULLETIN_TRG_TP ) // restricted to TargetType=TP (tournament-participant)
       {
-         $qsql->add_part( SQLP_FIELDS, "1 AS B_View" );
+         $qsql->add_part( SQLP_FIELDS, "$query_rating AS B_View" );
          $qsql->add_part( SQLP_FROM,   "INNER JOIN TournamentParticipant AS BTP ON BTP.tid=B.tid AND BTP.uid=$uid" );
          $qsql->add_part( SQLP_WHERE,
             "B.TargetType='$show_target_type'",
@@ -460,7 +492,7 @@ class Bulletin
       }
       elseif ( $show_target_type == BULLETIN_TRG_ALL ) // restricted to TargetType=ALL (all-users)
       {
-         $qsql->add_part( SQLP_FIELDS, "1 AS B_View" );
+         $qsql->add_part( SQLP_FIELDS, "$query_rating AS B_View" );
       }
       elseif ( $show_target_type == BULLETIN_TRG_MPG ) // restricted to TargetType=MPG (multi-player-game)
       {
@@ -477,8 +509,8 @@ class Bulletin
       {
          $view_sql =
             "CASE B.TargetType " .
-               "WHEN '".BULLETIN_TRG_ALL."' THEN 1 " .
-               "WHEN '".BULLETIN_TRG_TP."' THEN IF(BTP.tid IS NULL,0,1) " .
+               "WHEN '".BULLETIN_TRG_ALL."' THEN $query_rating " .
+               "WHEN '".BULLETIN_TRG_TP."' THEN IF(BTP.tid IS NULL,0,$query_rating) " .
                "WHEN '".BULLETIN_TRG_TD."' THEN IF(BTD.tid IS NULL,IF(BTN.ID IS NULL,0,1),1) " .
                "WHEN '".BULLETIN_TRG_USERLIST."' THEN IF(BT.bid IS NULL,0,1) " .
                "WHEN '".BULLETIN_TRG_MPG."' THEN IF(GP.gid IS NULL,0,1) " .
@@ -641,6 +673,13 @@ class Bulletin
 
       return $bulletin;
    }//new_bulletin
+
+   /*! \brief Returns array with target-types that support target user-rating-range. */
+   public static function get_target_types_with_user_rating()
+   {
+      static $ARR = array( BULLETIN_TRG_ALL, BULLETIN_TRG_TP );
+      return $ARR;
+   }
 
    public static function mark_bulletin_as_read( $bid )
    {

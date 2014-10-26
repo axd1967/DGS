@@ -289,7 +289,12 @@ $GLOBALS['ThePage'] = new Page('BulletinList');
       if ( @$btable->Is_Column_Displayed[ 7] )
          $row_str[ 7] = formatDate($bulletin->Lastchanged);
       if ( @$btable->Is_Column_Displayed[ 8] )
-         $row_str[ 8] = GuiBulletin::getTargetTypeText( $bulletin->TargetType );
+      {
+         $row_str[ 8] = GuiBulletin::getTargetTypeText( $bulletin->TargetType ) .
+            ( GuiBulletin::hasTargetRatingRange($bulletin)
+               ? MED_SPACING . span('smaller darkred', '[R]', '%s', T_('Bulletin has restriction on users rating-range.'))
+               : '' );
+      }
       if ( @$btable->Is_Column_Displayed[ 9] )
          $row_str[ 9] = formatDate($bulletin->ExpireTime, NO_VALUE);
       if ( @$btable->Is_Column_Displayed[10] )

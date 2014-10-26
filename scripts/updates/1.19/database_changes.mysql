@@ -39,3 +39,9 @@ ALTER TABLE Players
    MODIFY NextGameOrder enum('LASTMOVED_OF','LASTMOVED_NF','MOVES','PRIO','TIMELEFT') NOT NULL default 'LASTMOVED_OF' ;
 
 
+-- added target user rating-range for bulletins
+ALTER TABLE Bulletin
+   ADD TargetRatingMax smallint NOT NULL default '9999' AFTER TargetType,
+   ADD TargetRatingMin smallint NOT NULL default '-9999' AFTER TargetType ;
+
+

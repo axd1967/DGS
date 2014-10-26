@@ -25,6 +25,7 @@ require_once 'include/db/bulletin.php';
 require_once 'include/classlib_user.php';
 require_once 'include/std_functions.php';
 require_once 'include/gui_functions.php';
+require_once 'include/rating.php';
 require_once 'tournaments/include/tournament_cache.php';
 
 
@@ -115,6 +116,22 @@ class GuiBulletin
       return self::$ARR_BULLETIN_TEXTS[$key][$trg_type];
    }//getTargetTypeText
 
+   /*! \brief Returns array with target-type-texts that support target user-rating-range. */
+   public static function getTargetTypeTextsWithUserRating()
+   {
+      $arr = Bulletin::get_target_types_with_user_rating();
+      $out = array();
+      foreach ( $arr as $trg_type )
+         $out[] = GuiBulletin::getTargetTypeText($trg_type);
+      return $out;
+   }
+
+   /*! \brief Returns true, if bulletin restricted to users rating-range. */
+   public static function hasTargetRatingRange( $bulletin )
+   {
+      return ( $bulletin->TargetRatingMin >= MIN_RATING || $bulletin->TargetRatingMax <= MAX_ABS_RATING );
+   }
+
    /*! \brief Returns Flags-text or all Flags-texts (if arg=null). */
    public static function getFlagsText( $flag=null )
    {
@@ -165,6 +182,10 @@ class GuiBulletin
          date(DATE_FMT5, $bulletin->PublishTime),
          ( $bulletin->uid > 0 ? $bulletin->User->user_reference() : T_('CRON') ) );
 
+      $rating_range_text = self::build_target_rating_range( $bulletin, /*show%*/false );
+      if ( $rating_range_text )
+         $rating_range_text = span('BulletinRating', $rating_range_text, '[%s]'.MINI_SPACING);
+
       if ( $bulletin->tid > 0 )
       {
          if ( is_null($bulletin->Tournament) )
@@ -199,12 +220,23 @@ class GuiBulletin
       return
          "<div class=\"Bulletin\">\n" .
             "<div class=\"Category\">{$category}{$ref_text}</div>" .
-            "<div class=\"PublishTime\">$publish_text</div>" .
+            "<div class=\"PublishTime\">$rating_range_text$publish_text</div>" .
             "<div class=\"Title\">$title</div>" .
             "<div class=\"Text\">$text</div>" .
             $div_mark .
          "</div>\n";
    }//build_view_bulletin
+
+   /*! \brief Builds rating-range "min-max" for bulletin TargetRatingMin/Max-fields; or '' in not restricted. */
+   public static function build_target_rating_range( $bulletin, $show_percent=true )
+   {
+      $out = array();
+      if ( $bulletin->TargetRatingMin >= MIN_RATING )
+         $out[] = echo_rating( $bulletin->TargetRatingMin, $show_percent, 0,1,1 );
+      if ( $bulletin->TargetRatingMax <= MAX_ABS_RATING )
+         $out[] = echo_rating( $bulletin->TargetRatingMax, $show_percent, 0,1,1 );
+      return implode(' - ', $out);
+   }
 
    public static function check_expiretime( $bulletin, $parsed_expiretime, &$errors )
    {

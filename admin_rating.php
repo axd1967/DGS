@@ -545,7 +545,7 @@ function notify_fix_running_games( $uid, $handle, $changes, $old_rating, $new_ra
    foreach ( $arr_tourneys as $tid )
    {
       $bulletin = new Bulletin( 0, $player_row['ID'], null, BULLETIN_CAT_ADMIN_MSG, BULLETIN_STATUS_NEW,
-            BULLETIN_TRG_TD, BULLETIN_FLAG_ADMIN_CREATED, $NOW, $NOW + 30*SECS_PER_DAY, $tid, /*gid*/0,
+            BULLETIN_TRG_TD, null, null, BULLETIN_FLAG_ADMIN_CREATED, $NOW, $NOW + 30*SECS_PER_DAY, $tid, /*gid*/0,
             0, 'created automatically by admin_rating-script',
             sprintf( T_('Rating change of opponent [%s] in your running games and invitations'), $handle ),
             sprintf( T_('Hello,
@@ -570,7 +570,7 @@ DGS-Admin'), $uid, $old_rating_str, $new_rating_str, $tid )
    // create bulletins
 
    $bulletin = new Bulletin( 0, $player_row['ID'], null, BULLETIN_CAT_ADMIN_MSG, BULLETIN_STATUS_NEW,
-         BULLETIN_TRG_USERLIST, BULLETIN_FLAG_ADMIN_CREATED, $NOW, $NOW + 30*SECS_PER_DAY, /*tid*/0, /*gid*/0,
+         BULLETIN_TRG_USERLIST, null, null, BULLETIN_FLAG_ADMIN_CREATED, $NOW, $NOW + 30*SECS_PER_DAY, /*tid*/0, /*gid*/0,
          0, 'created automatically by admin_rating-script',
          sprintf( T_('Rating change of opponent [%s] in your running games and invitations'), $handle ),
          sprintf( T_('Hello,

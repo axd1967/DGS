@@ -52,6 +52,9 @@ Copyright (C) 2001-2014  Erik Ouchterlony, Jens-Uwe Gaspar
 
    Administrative changes:
 
+   * Changes for Admins:
+      * Added optional target user rating-range for admin-created bulletins
+
    * Changed server versioning scheme: ARCHITECTURE.MAJOR.MINOR
 
    Server config:

@@ -44,7 +44,7 @@ $GLOBALS['ThePage'] = new Page('BulletinView');
 
    // init
    $qsql = Bulletin::build_query_sql( $bid );
-   $qsql->merge( Bulletin::build_view_query_sql( false, /*count*/false, '', /*check*/true ) );
+   $qsql->merge( Bulletin::build_view_query_sql( false, /*count*/false, '', /*check-view*/true ) );
    list( $bulletin, $orow ) = Bulletin::load_bulletin_by_query( $qsql, /*withrow*/true );
    if ( is_null($bulletin) )
       error('unknown_bulletin', "view_bulletin.find_bulletin1($bid)");

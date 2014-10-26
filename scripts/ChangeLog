@@ -11,6 +11,36 @@ Release [2014-07-30] - DGS 1.0.18 - tag [release-1_0_18-20140730] on (later) bra
 ChangeLog
 ------------------------------------------------------------------
 
+2014-10-26 jug
+
+   * include/db/bulletin.php (class Bulletin, ~.__construct, ~.setTargetRatingMin, ~.setTargetRatingMax,
+       ~.fillEntityData, ~.new_from_row, ~.build_view_query_sql, ~.get_target_types_with_user_rating),
+     include/gui_bulletin.php (GuiBulletin.getTargetTypeTextsWithUserRating, ~.hasTargetRatingRange,
+       ~.build_view_bulletin, ~.build_target_rating_range),
+     tournaments/include/tournament_round_helper.php (TournamentRoundHelper.notify_directors_last_game_finished),
+     include/rating.php (getRatingArray),
+     include/globals.php (CSS_VERSION),
+     scripts/updates/1.19/database_changes.mysql, scripts/updates/1.19/other_changes.txt,
+     specs/db/table-Bulletins.txt, specs/db/dragon-ddl.sql, skins/dragon/screen.css,
+     admin_rating.php (notify_fix_running_games),
+     admin_bulletin.php (parse_edit_form),
+     edit_bulletin.php (parse_edit_form)
+     list_bulletins.php, view_bulletin.php:
+   - added target user rating-range for bulletins with target-type all-users and tournament-participants
+     - allow adding bulletin target user rating-range only for admins
+     - normal users can edit admin-created-bulletins with rating-range
+     - mark target-type on bulletin-list-page if bulletin has target-user rating-range
+     - show target user rating-range on viewing single bulletin if set
+   - show user-list-handles and target user rating-range on bulletin-user-edit
+   - always show target-type on bulletin-user-edit
+   - only allow setting target-types tournament-director and tournament-participants on bulletin-user-edit
+-----------
+-- added target user rating-range for bulletins
+ALTER TABLE Bulletin
+   ADD TargetRatingMax smallint NOT NULL default '9999' AFTER TargetType,
+   ADD TargetRatingMin smallint NOT NULL default '-9999' AFTER TargetType ;
+-----------
+
 2014-10-23 jug
 
    * edit_rating.php:

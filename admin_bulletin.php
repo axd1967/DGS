@@ -27,6 +27,7 @@ require_once 'include/db/bulletin.php';
 require_once 'include/gui_bulletin.php';
 require_once 'include/gui_user_functions.php';
 require_once 'include/classlib_user.php';
+require_once 'include/rating.php';
 require_once 'tournaments/include/tournament_cache.php';
 
 $GLOBALS['ThePage'] = new Page('BulletinAdmin');
@@ -86,6 +87,7 @@ $GLOBALS['ThePage'] = new Page('BulletinAdmin');
    $arr_status = GuiBulletin::getStatusText();
    $arr_categories = GuiBulletin::getCategoryText();
    $arr_target_types = GuiBulletin::getTargetTypeText();
+   $arr_trg_types_rating_texts = GuiBulletin::getTargetTypeTextsWithUserRating();
 
    // check + parse edit-form
    list( $vars, $edits, $arr_user_msg_rejected, $input_errors ) = parse_edit_form( $bulletin );
@@ -235,6 +237,15 @@ $GLOBALS['ThePage'] = new Page('BulletinAdmin');
    }
 
    $bform->add_row( array(
+         'DESCRIPTION', T_('Target User Rating Range#bulletin'),
+         'TEXT', T_('min.').' ',
+         'TEXTINPUT', 'trg_rating_min', 10, 16, $vars['trg_rating_min'],
+         'TEXT', sptext(T_('max.'),1),
+         'TEXTINPUT', 'trg_rating_max', 10, 16, $vars['trg_rating_max'],
+         'TEXT', span('smaller', sprintf( T_('only for target types: %s'), implode(', ', $arr_trg_types_rating_texts) ), ' (%s)'),
+         ));
+
+   $bform->add_row( array(
          'DESCRIPTION', T_('Admin Note'),
          'TEXTINPUT',   'admin_note', 80, 255, $vars['admin_note'] ));
 
@@ -322,6 +333,8 @@ $GLOBALS['ThePage'] = new Page('BulletinAdmin');
 // return [ vars-hash, edits-arr, handle-msg-rejected-map, errorlist ]
 function parse_edit_form( &$bulletin )
 {
+   global $arr_trg_types_rating_texts;
+
    $edits = array();
    $errors = array();
    $arr_rejected = array();
@@ -332,6 +345,8 @@ function parse_edit_form( &$bulletin )
       'category'        => $bulletin->Category,
       'status'          => $bulletin->Status,
       'target_type'     => $bulletin->TargetType,
+      'trg_rating_min'  => ( $bulletin->TargetRatingMin == NO_RATING ) ? '' : echo_rating($bulletin->TargetRatingMin, 1,0,1,1 ),
+      'trg_rating_max'  => ( $bulletin->TargetRatingMax == OUT_OF_RATING ) ? '' : echo_rating($bulletin->TargetRatingMax, 1,0,1,1 ),
       'admin_note'      => $bulletin->AdminNote,
       'author'          => $bulletin->User->Handle,
       'publish_time'    => formatDate($bulletin->PublishTime),
@@ -358,6 +373,8 @@ function parse_edit_form( &$bulletin )
    // parse URL-vars
    if ( $is_posted )
    {
+      $old_vals['trg_rating_min'] = $bulletin->TargetRatingMin;
+      $old_vals['trg_rating_max'] = $bulletin->TargetRatingMax;
       $old_vals['publish_time'] = $bulletin->PublishTime;
       $old_vals['expire_time'] = $bulletin->ExpireTime;
 
@@ -480,6 +497,70 @@ function parse_edit_form( &$bulletin )
       if ( count($arr_rejected) && !$vars['warn_reject'] ) // don't show on preview
          $errors[] = T_('There are User List Warnings which must be checked for saving bulletin!');
 
+      $has_rating_min_error = false;
+      $new_value = trim($vars['trg_rating_min']);
+      if ( (string)$new_value != '' )
+      {
+         if ( is_numeric($new_value) && $new_value >= MIN_RATING && $new_value <= RATING_9DAN )
+            $bulletin->setTargetRatingMin( $new_value );
+         else
+         {
+            $new_rating = read_rating($new_value);
+            if ( $new_rating == NO_RATING )
+            {
+               $has_rating_min_error = true;
+               $errors[] = sprintf(T_('Invalid value [%s] for target user %s rating.#bulletin'), $new_value, T_('min.') );
+            }
+            else
+               $bulletin->setTargetRatingMin( $new_rating );
+         }
+      }
+      else
+         $bulletin->setTargetRatingMin(null); // no-limit
+
+      $has_rating_max_error = false;
+      $new_value = trim($vars['trg_rating_max']);
+      if ( (string)$new_value != '' )
+      {
+         if ( is_numeric($new_value) && $new_value >= MIN_RATING && $new_value <= RATING_9DAN )
+            $bulletin->setTargetRatingMax( $new_value );
+         else
+         {
+            $new_rating = read_rating($new_value);
+            if ( $new_rating == NO_RATING )
+            {
+               $has_rating_max_error = true;
+               $errors[] = sprintf(T_('Invalid value [%s] for target user %s rating.#bulletin'), T_('max.'), $new_value );
+            }
+            else
+               $bulletin->setTargetRatingMax( $new_rating );
+         }
+      }
+      else
+         $bulletin->setTargetRatingMax(null); // no-limit
+
+      // target-user-rating checks
+      $arr_trg_types_rating = Bulletin::get_target_types_with_user_rating();
+      if ( in_array( $bulletin->TargetType, $arr_trg_types_rating ) )
+      {
+         if ( $bulletin->TargetRatingMin != NO_RATING && $bulletin->TargetRatingMax != OUT_OF_RATING )
+         {
+            if ( $bulletin->TargetRatingMin > $bulletin->TargetRatingMax )
+               swap( $bulletin->TargetRatingMin, $bulletin->TargetRatingMax );
+         }
+         else if ( ($bulletin->TargetRatingMin == NO_RATING && $bulletin->TargetRatingMax != OUT_OF_RATING )
+               ||  ($bulletin->TargetRatingMin != NO_RATING && $bulletin->TargetRatingMax == OUT_OF_RATING ) )
+         {
+            $errors[] = T_('Bulletin target user rating range needs both (min & max) rating if used.');
+         }
+      }
+      else
+      {
+         if ( $bulletin->TargetRatingMin != NO_RATING || $bulletin->TargetRatingMax != OUT_OF_RATING )
+            $errors[] = sprintf( T_('Bulletin target user rating range can only be used for target types [%s].'),
+               implode(', ', $arr_trg_types_rating_texts ));
+      }
+
       $parsed_value = parseDate( T_('Publish time for bulletin'), $vars['publish_time'] );
       if ( is_numeric($parsed_value) )
       {
@@ -526,10 +607,20 @@ function parse_edit_form( &$bulletin )
          $bulletin->AdminNote = $new_value;
 
 
+      // reformat
+      if ( !$has_rating_min_error )
+         $vars['trg_rating_min'] =
+            ( $bulletin->TargetRatingMin == NO_RATING ) ? '' : echo_rating($bulletin->TargetRatingMin, 1,0,1,1 );
+      if ( !$has_rating_max_error )
+         $vars['trg_rating_max'] =
+            ( $bulletin->TargetRatingMax == OUT_OF_RATING ) ? '' : echo_rating($bulletin->TargetRatingMax, 1,0,1,1 );
+
       // determine edits
       if ( $old_vals['category'] != $bulletin->Category ) $edits[] = T_('Category');
       if ( $old_vals['status'] != $bulletin->Status ) $edits[] = T_('Status');
       if ( $old_vals['target_type'] != $bulletin->TargetType ) $edits[] = T_('Target Type#bulletin');
+      if ( $old_vals['trg_rating_min'] != $bulletin->TargetRatingMin ) $edits[] = T_('Target Rating#bulletin');
+      if ( $old_vals['trg_rating_max'] != $bulletin->TargetRatingMax ) $edits[] = T_('Target Rating#bulletin');
       if ( $old_vals['admin_note'] != $bulletin->AdminNote ) $edits[] = T_('Admin Note');
       if ( $old_vals['tnews_tid'] != $bulletin->tid ) $edits[] = T_('Tournament ID');
       if ( $old_vals['gid'] != $bulletin->gid ) $edits[] = T_('Game ID');

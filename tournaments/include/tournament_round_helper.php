@@ -673,7 +673,7 @@ class TournamentRoundHelper
    public static function notify_directors_last_game_finished( $tid, $round )
    {
       $bulletin = new Bulletin( 0, /*CRON*/0, null, BULLETIN_CAT_TOURNAMENT_NEWS, BULLETIN_STATUS_SHOW,
-         BULLETIN_TRG_TD, BULLETIN_FLAG_CRON_CREATED, $GLOBALS['NOW'], 0, $tid );
+         BULLETIN_TRG_TD, null, null, BULLETIN_FLAG_CRON_CREATED, $GLOBALS['NOW'], 0, $tid );
 
       $bulletin->Subject = sprintf( T_('[Notification by CRON]: Last game in round %s finished#tourney'), $round );
       $bulletin->Text = sprintf( T_('To all tournament directors of this tournament,

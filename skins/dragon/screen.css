@@ -3779,6 +3779,10 @@ div.Bulletin div.Category span.Reference {
    text-align: right;
    margin-left: 3em;
 }
+span.BulletinRating {
+   font-weight: normal;
+   color: darkred;
+}
 div.Bulletin div.PublishTime {
    text-align: right;
    font-weight: bold;

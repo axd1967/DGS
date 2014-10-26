@@ -382,15 +382,26 @@ function is_valid_rating( $dgs_rating, $check_min=true )
 }
 
 // 30k .. 9d, used for selectboxes
-function getRatingArray()
+// \param $rating_values false = values are ranks (e.g. "30 kyu"); true = values are rating (e.g. "-900")
+function getRatingArray( $rating_values=false )
 {
    $rating_array = array();
-   $s = ' ' . T_('dan');
-   for ($i=9; $i>0; $i--)
-      $rating_array["$i dan"] = $i . $s;
-   $s = ' ' . T_('kyu');
-   for ($i=1; $i<=30; $i++) //30 = (2100-MIN_RATING)/100
-      $rating_array["$i kyu"] = $i . $s;
+   $sd = ' ' . T_('dan');
+   $sk = ' ' . T_('kyu');
+   if ( $rating_values )
+   {
+      for ($i=9; $i>0; $i--)
+         $rating_array[2000 + $i*100] = $i . $sd;
+      for ($i=1; $i<=30; $i++) //30 = (2100-MIN_RATING)/100
+         $rating_array[2100 - $i*100] = $i . $sk;
+   }
+   else
+   {
+      for ($i=9; $i>0; $i--)
+         $rating_array["$i dan"] = $i . $sd;
+      for ($i=1; $i<=30; $i++) //30 = (2100-MIN_RATING)/100
+         $rating_array["$i kyu"] = $i . $sk;
+   }
    return $rating_array;
 }//getRatingArray
 

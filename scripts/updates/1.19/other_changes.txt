@@ -12,3 +12,6 @@ copy /21/wms.gif
 copy /25/bms.gif
 copy /25/wms.gif
 
+-----------
+# clear APC-cache (because of Bulletin-changes)
+
