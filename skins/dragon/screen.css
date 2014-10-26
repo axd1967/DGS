@@ -354,11 +354,6 @@ span.Maintenance {
    background: #bcffab; /* light green */
    overflow: hidden; /* hidden visible scroll auto */
    margin: 0px;
-/*
-   float: left;
-   top: 0px;
-   left: 0px;
-   position: absolute; /* absolute relative */
 }
 
 .DebugInfo {
@@ -597,16 +592,9 @@ table.MenuVertical {
    border-width: 1px;
    width: auto;
    margin: 0px; /* seems to not always work. See td.Menu padding */
-/*
-   float: left;
-*/
 }
 
 table#pageLayout tr.LayoutVertical td.Menu {
-/*
-   border: 0px solid red;
-   width: auto;
-*/
    width: 10%;
    text-align: left;
    vertical-align: top;
@@ -655,35 +643,21 @@ table.MenuVertical td.Logo2 img {
 table.MenuHorizontal dl {
    margin:  0.3em 0px 0.3em 0px;
    padding: 0px;
-/*
-   list-style-type:none;
-*/
 }
 table.MenuHorizontal dt {
    white-space: nowrap;
    padding: 0.1em 0px;
    height: 30%;
-/*
-   display: block;
-   line-height: 90%;
-*/
 }
 
 table.MenuVertical dl {
    margin:  0.3em 0px 0.3em 0px;
    padding: 0px;
-/*
-   list-style-type:none;
-*/
 }
 table.MenuVertical dt {
    white-space: nowrap;
    padding: 0.1em 0px;
    height: 30%;
-/*
-   display: block;
-   line-height: 90%;
-*/
 }
 
 span.MainMenuCount {
@@ -1046,11 +1020,6 @@ table.Table td.BoldC {
 
 
 table.Table th.Button {
-/* min-width problem, see MinWidth
-   min-width: 100px;
-   width: 100px;
-   white-space: nowrap;
-*/
    margin: 0px;
    padding: 2px 4px;
    text-align: center;
@@ -1063,16 +1032,6 @@ table.Table td.Button {
    padding: 3px 4px 2px 4px;
    text-align: center;
    white-space: nowrap;
-/* min-width problem, see MinWidth
-/* for FF: */
-/*
-   min-width: 100px;
-*/
-/* for IE: */
-/*
-   width: 100px;
-*/
-/* endfor */
 }
 
 table.Table tr.Filter td.Button, /* especially this one */
@@ -1088,17 +1047,6 @@ table.Table a.Button {
    font-weight: bold;
    text-align: center;
    white-space: nowrap;
-/* min-width problem, see MinWidth
-/* for FF: */
-/*
-   min-width: 92px;
-   margin: 0px auto;
-*/
-/* for IE: */
-/*
-   width: 92px;
-*/
-/* endfor */
 }
 table.Table a.ButtonText {
    text-decoration: underline;
@@ -3261,7 +3209,6 @@ div.TournamentNews {
    margin: 0px 10% 1em 10%;
    padding: 5px 8px;
    background: #F7ECD0;
-   /*background: #E6E9F7;*/
    border: 1px dotted black;
 }
 form#tournamenteditnewsForm td.Preview div.TournamentNews, /*edit-news*/
@@ -3534,11 +3481,6 @@ table.FAQ td.FAQread div.Answer {
    border: 0px solid red;
    padding-top: 1em;
    padding-bottom: 2em;
-/*
-   margin-bottom: 2em;
-   margin: 0px 0px 0px 0px;
-   padding: 0px 8px 0px 8px;
-*/
 }
 
 table.FAQ td.FAQsearch div.Answer {
@@ -3558,10 +3500,6 @@ table.FAQAdmin {
    border-collapse: collapse;
    border-spacing: 0px;
    max-width: none;
-/*
-   width: auto;
-   margin: 0px 6%;
-*/
    margin: 0px auto;
    overflow: visible;
    empty-cells: show;
@@ -3606,7 +3544,6 @@ table.FAQAdmin td.Category,
 table.FAQAdmin td.Entry {
    border: 0px solid #808080;
    border-width: 0px 0px 0px 1px;
-/*   margin-left: 2px; /* */
 }
 
 form#adminuserForm td span.LegendItem {
@@ -3682,9 +3619,6 @@ table.EditProfilButtons td.button {
    background-position: center;
    width: 96px;
    height: 25px;
-/*
-   font: bold 100% sans-serif;
-*/
    font-weight: bold;
    font-size: 100%;
    text-decoration: none;
@@ -3696,16 +3630,6 @@ table.EditProfilButtons td.button {
 /* ------------------------- */
 /* biographical infos */
 /* ------------------------- */
-
-/*
- biographical infos:
- must left the links in the right column natural
-*/
-/*
-table#bioTableInfos a {
-   color: default;
-}
-*/
 
 form#bioformForm td {
    vertical-align: top;
@@ -3753,7 +3677,6 @@ div.Bulletin {
    width: 80%;
    margin: 0px 10% 1em 10%;
    padding: 5px 8px;
-   /*background: #F7ECD0;*/
    background: #E6E9F7;
    border: 1px dotted black;
 }
@@ -3948,9 +3871,6 @@ div.quote {
    padding: 0.3em 0em 0.3em 0.5em;
    width: auto;
    font-style: italic;
-/*
-   line-height: 1.5em;
-*/
 }
 
 
