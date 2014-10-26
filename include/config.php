@@ -119,7 +119,8 @@ define('USERPIC_FOLDER', 'userpic/');
 
 // URL to ticket-issues with '%s' to be replaced with ticket-id.
 // Set to '' (empty string) if no references to tickets used.
-define('TICKET_REF', 'https://dragongoserver.atlassian.net/browse/%s');
+//define('TICKET_REF', 'https://dragongoserver.atlassian.net/browse/%s');
+define('TICKET_REF', '');
 
 
 // Global parameters to control caching

@@ -21,7 +21,7 @@ Copyright (C) 2001-2014  Erik Ouchterlony, Jens-Uwe Gaspar
    * Markup tags and Images:
       * &lt;feature id> : showing link to corresponding feature
       * &lt;bgcolor col> : showing text with background-color
-      * &lt;ticket issue> : showing link to external ticket-system (Jira)
+#      * &lt;ticket issue> : showing link to external ticket-system (Jira)
 
    * Forum:
       * Added "quote"-link in post near "reply" (also to view the RAW-text of a forum post)
@@ -61,7 +61,7 @@ Copyright (C) 2001-2014  Erik Ouchterlony, Jens-Uwe Gaspar
 
    * Added & Changed config-switches:
       * ALLOW_QUOTING                     - enabled with: true
-      * TICKET_REF                        - enabled with reference to Jira
+#      * TICKET_REF                        - enabled with reference to Jira
 
 
 #release DGS_1_0_18 [2014-Jul-30] - DGS 1.0.18  (User & Tournament changes)
