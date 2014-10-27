@@ -404,7 +404,8 @@ class TournamentCache
 
    /*!
     * \brief Loads and caches TournamentResults for given tournament-id and type.
-    * \return IMPORTANT NOTE: ListIterator re-constructed from cached tournament-results lacks query-stuff
+    * \return arr( ListIterator, found_rows )
+    *       IMPORTANT NOTE: ListIterator re-constructed from cached tournament-results lacks query-stuff
     *       and only contains items and result-rows-count.
     */
    public static function load_cache_tournament_results( $dbgmsg, $tid, $iterator, $with_player )
@@ -415,23 +416,28 @@ class TournamentCache
       $same_query_check = sprintf( '%s;%s;%s', $tid, ( $with_player ? 1 : 0 ), $iterator->buildQuery() );
 
       $arr_tresult = DgsCache::fetch( $dbgmsg, CACHE_GRP_TRESULT, $key );
-      if ( !is_null($arr_tresult) )
+      if ( !is_null($arr_tresult) ) // check if cache-entry needs to be invalidated
       {
-         if ( count($arr_tresult) == 0 )
+         // expected cache-entry: $same_query_check, $result_found_rows, $arr_tresult
+         if ( count($arr_tresult) != 3 )
             $arr_tresult = null; // something's fishy here, better reload
          else
          {
-            $same_query_cached = array_shift( $arr_tresult ); // remove 1st entry with query-check
+            $same_query_cached = $arr_tresult[0]; // check 1st entry with same-query-check
             if ( $same_query_cached != $same_query_check )
                $arr_tresult = null; // need to load different query
          }
       }
+
       if ( is_null($arr_tresult) )
       {
          // load tournament-results
          $result_iterator = TournamentResult::load_tournament_results( $iterator, $tid, $with_player );
+         $result_found_rows = mysql_found_rows("$dbgmsg.found_rows");
 
-         $arr_tresult = array( $same_query_check ); // first entry: query-check
+         // start with 1st + 2nd entry: query-check + mysql-found-rows
+         $arr_tresult = array( $same_query_check, $result_found_rows );
+
          while ( list(,$arr_item) = $result_iterator->getListIterator() )
             $arr_tresult[] = $arr_item[1]; // only store orig-row to save cache-storage-space
          $result_iterator->resetListIterator();
@@ -440,13 +446,15 @@ class TournamentCache
       }
       else // convert cached tresult-array into ListIterator
       {
+         $same_query_cached = array_shift( $arr_tresult ); // remove 1st entry with query-check
+         $result_found_rows = (int)array_shift( $arr_tresult ); // remove 2nd entry with mysql-found-rows
          $result_iterator = new ListIterator( $dbgmsg );
          $result_iterator->setResultRows( count($arr_tresult) );
          foreach ( $arr_tresult as $orow )
             $result_iterator->addItem( TournamentResult::new_from_row($orow), $orow ); // rebuild obj
       }
 
-      return $result_iterator;
+      return array( $result_iterator, $result_found_rows );
    }//load_cache_tournament_results
 
    /*! \brief Loads and caches TournamentGames for given tournament-id. */

@@ -11,6 +11,16 @@ Release [2014-07-30] - DGS 1.0.18 - tag [release-1_0_18-20140730] on (later) bra
 ChangeLog
 ------------------------------------------------------------------
 
+2014-10-27 jug
+
+   * tournaments/include/tournament_result_control.php (class TournamentResultControl,
+       ~.build_tournament_result_table, ~.make_table_tournament_results),
+     tournaments/include/tournament_cache.php (TournamentCache.load_cache_tournament_results):
+   - fix bug: tournament-result-TOP10-list on view-tournament-page showed wrong counts
+     due to wrong parsing of caching entries
+     - table-header shows number of shown entries
+     - table-footer shows total found entries
+
 2014-10-26 jug
 
    * include/globals.php (CSS_VERSION),

@@ -54,6 +54,7 @@ class TournamentResultControl
    private $table = null;
    private $iterator = null;
    private $show_rows = 0;
+   private $total_found_rows = 0;
 
    public function __construct( $show_all, $page, $tourney, $allow_edit_tourney, $limit )
    {
@@ -143,13 +144,16 @@ class TournamentResultControl
             $trtable->current_order_string(),
             ( $this->limit < 0 ? $trtable->current_limit_string() : "LIMIT {$this->limit}" ) );
       if ( $this->show_all || $this->limit < 0 )
+      {
          $iterator = TournamentResult::load_tournament_results( $iterator, $tid, /*player-info*/true );
+         $this->total_found_rows = mysql_found_rows("$dbgmsg.TRC.build_tournament_result_table.found_rows");
+      }
       else
-         $iterator = TournamentCache::load_cache_tournament_results( "$dbgmsg.TRC.build_tournament_result_table",
-            $tid, $iterator, /*player-info*/true );
+         list( $iterator, $this->total_found_rows ) = TournamentCache::load_cache_tournament_results(
+            "$dbgmsg.TRC.build_tournament_result_table", $tid, $iterator, /*player-info*/true );
 
       $this->show_rows = $trtable->compute_show_rows( $iterator->getResultRows() );
-      $trtable->set_found_rows( mysql_found_rows("$dbgmsg.TRC.build_tournament_result_table.found_rows") );
+      $trtable->set_found_rows( $this->show_rows );
 
       $this->iterator = $iterator;
       $this->table = $trtable;
@@ -161,7 +165,7 @@ class TournamentResultControl
       global $base_path;
       $tid = $this->tourney->ID;
       $show_rows = $this->show_rows;
-      $found_rows = $this->table->get_found_rows();
+      $total_found_rows = $this->total_found_rows;
 
       while ( ($show_rows-- > 0) && list(,$arr_item) = $this->iterator->getListIterator() )
       {
@@ -217,10 +221,11 @@ class TournamentResultControl
          $this->table->add_row( $row_str );
       }
 
-      if ( $show_footer && $found_rows > 0 && $found_rows > $this->show_rows )
+      if ( $show_footer && $total_found_rows > 0 && $total_found_rows > $this->show_rows )
       {
          $this->table->add_row_one_col(
-            sprintf(T_('There are %s more entries in total ...'), $found_rows - $this->show_rows ),
+            sprintf(T_('There are %s more for a total of %s entries ...'),
+               $total_found_rows - $this->show_rows, $total_found_rows ),
             array( 'extra_class' => 'Footer' ) );
       }
 
