@@ -11,6 +11,8 @@ Release [2014-07-30] - DGS 1.0.18 - tag [release-1_0_18-20140730] on (later) bra
 ChangeLog
 ------------------------------------------------------------------
 
+### ----- release-1_19_0-20141029 -----
+
 2014-10-27 jug
 
    * tournaments/include/tournament_result_control.php (class TournamentResultControl,
