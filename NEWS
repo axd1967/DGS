@@ -51,8 +51,6 @@ Copyright (C) 2001-2014  Erik Ouchterlony, Jens-Uwe Gaspar
    * Fixed showing territory-markers for all users for game on score-status if last move was scoring-step
    * Fixed showing publish-time of bulletin with weekday and timezone
 
-   Code improvements:
-
    Administrative changes:
 
    * Changes for Admins:
