@@ -29,6 +29,9 @@ Copyright (C) 2001-2014  Erik Ouchterlony, Jens-Uwe Gaspar
       * Added "quote"-link in post near "reply" (also to view the RAW-text of a forum post)
       * Increased max. indent level from 15 to 25 for deep forum-threads
 
+   * <home userinfo.php>User info page</home>:
+      * Added games-count needed to reach next hero-badge-level on own user-info-page and for quick-suite user-info-handler
+
    * <home waiting_room.php>Waiting room</home>:
       * Added column with <image table.gif>-icon linked to finished games with opponent
 

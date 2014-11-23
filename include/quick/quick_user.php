@@ -105,6 +105,14 @@ class QuickHandlerUser extends QuickHandler
    public function process()
    {
       $urow = $this->user->urow;
+
+      $my_info = ($this->user->ID == $this->my_id );
+      $hero_ratio = User::calculate_hero_ratio( $this->user->urow['GamesWeaker'], $this->user->GamesFinished,
+         $this->user->Rating, $this->user->RatingStatus );
+      $hero_badge = User::determine_hero_badge($hero_ratio);
+      $games_next_herolevel = User::determine_games_next_hero_level( $hero_ratio,
+         $this->user->GamesFinished, $this->user->urow['GamesWeaker'], $this->user->RatingStatus );
+
       $this->addResultKey( 'id', $this->user->ID );
       $this->addResultKey( 'handle', $this->user->Handle );
       $this->addResultKey( 'type', self::convertUserType($this->user->Type) );
@@ -129,10 +137,12 @@ class QuickHandlerUser extends QuickHandler
       $this->addResultKey( 'games_won', (int)$this->user->urow['Won'] );
       $this->addResultKey( 'games_lost', (int)$this->user->urow['Lost'] );
       $this->addResultKey( 'games_mpg', (int)$this->user->urow['GamesMPG'] );
-      $hero_ratio = User::calculate_hero_ratio( $this->user->urow['GamesWeaker'], $this->user->GamesFinished,
-         $this->user->Rating, $this->user->RatingStatus );
-      $this->addResultKey( 'hero_ratio', $hero_ratio );
+      if ( $hero_badge > 0 )
+         $this->addResultKey( 'hero_ratio', $hero_ratio );
       $this->addResultKey( 'hero_badge', User::determine_hero_badge($hero_ratio) );
+      if ( $my_info )
+         $this->addResultKey( 'hero_games_next',
+            ( $games_next_herolevel < 0 ? -MIN_FIN_GAMES_HERO_AWARD : $games_next_herolevel ) );
    }//process
 
 

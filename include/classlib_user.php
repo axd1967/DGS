@@ -304,6 +304,29 @@ class User
          : 0;
    }
 
+   /*!
+    * \brief Returns number of games with weaker players required to reach next higher hero-level; 0 if end reached.
+    * \param $hero_ratio 0..1
+    * \param $cnt_finished number of finished games
+    * \param $cnt_weaker number of finished games with weaker players
+    * \return 0 = max hero-level reached; -1 = rating needed and min. 20 finished games
+    *       else needed game-count with weaker players to reach next hero-level (>0 with rating, <0 miss rating)
+    */
+   public static function determine_games_next_hero_level( $hero_ratio, $cnt_finished, $cnt_weaker, $rating_status )
+   {
+      static $ARR_NEXT_HERO_LEVEL = array( 0 => HERO_BRONZE, 1 => HERO_SILVER, 2 => HERO_GOLDEN );
+
+      if ( $rating_status != RATING_RATED || $cnt_finished <= MIN_FIN_GAMES_HERO_AWARD )
+         return -1;
+
+      $hero_level = self::determine_hero_badge( $hero_ratio );
+      if ( $hero_level == 3 )
+         return 0;
+
+      $calc_hero_ratio = $ARR_NEXT_HERO_LEVEL[$hero_level] / 100;
+      return round( ($calc_hero_ratio * $cnt_finished - $cnt_weaker) / ( 1 - $calc_hero_ratio) + 0.5 );
+   }//determine_games_next_hero_level
+
    /*! \brief Calculated hero-badge value-representation for hero-ratio: 0=none, 1=bronze, 2=silver, 3=gold. */
    public static function determine_hero_badge( $hero_ratio )
    {

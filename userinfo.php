@@ -143,6 +143,10 @@ $GLOBALS['ThePage'] = new Page('UserInfo');
       $rated_win_percent = ( is_numeric($row['RatedWinPercent']) ) ? $row['RatedWinPercent'].'%' : NO_VALUE;
       $hero_ratio = User::calculate_hero_ratio( $row['GamesWeaker'], $row['Finished'], $row['Rating2'], $row['RatingStatus'] );
       $hero_img = echo_image_hero_badge($hero_ratio);
+      $games_next_herolevel = User::determine_games_next_hero_level( $hero_ratio,
+         $row['Finished'], $row['GamesWeaker'], $row['RatingStatus'] );
+      $hero_info = build_hero_info( ($my_info || $is_admin || $is_game_admin),
+         $hero_ratio, $hero_img, $games_next_herolevel );
 
       // draw user-info fields in two separate columns
       $twoCols = true;
@@ -216,14 +220,7 @@ $GLOBALS['ThePage'] = new Page('UserInfo');
       $itable2->add_sinfo( anchor( $los_link, T_('Lost games')),     $row['Lost'] );
       $itable2->add_sinfo( T_('Rated Win %') . ' / ' . T_('Hero %'),
          $rated_win_percent . ' / ' .
-         // always show badge, but ratio only for own-info or if badge awarded (or for admin)
-         ( $hero_ratio > 0
-            ? ( $hero_img ? $hero_img.' ' : '' ) .
-               ( ( $my_info || $is_admin || $is_game_admin || 100*$hero_ratio >= HERO_BRONZE )
-                  ? sprintf('<span title="%s">%1.1f%%</span>',
-                        basic_safe(T_('Percentage of games with weaker players')), 100*$hero_ratio)
-                  : NO_VALUE )
-            : NO_VALUE ) );
+         implode('', $hero_info) );
 
       if ( $show_mpg )
       {
@@ -377,5 +374,47 @@ $GLOBALS['ThePage'] = new Page('UserInfo');
    }
 
    end_page(@$menu_array);
-}
+}//main
+
+
+function build_hero_info( $show_info, $hero_ratio, $hero_img, $games_next_herolevel )
+{
+   $info = array();
+
+   // always show badge (if $show_info=true), but ratio only for own-info or if badge awarded (or for admin)
+   if ( $hero_ratio > 0 )
+   {
+      $str = ( $hero_img ) ? $hero_img.' ' : '';
+      if ( $show_info || 100*$hero_ratio >= HERO_BRONZE )
+      {
+         $str .= sprintf('<span title="%s">%1.1f%%</span>',
+            basic_safe(T_('Percentage of games with weaker players')), 100*$hero_ratio);
+      }
+      else
+         $str .= NO_VALUE;
+      $info[] = $str;
+   }
+   else
+      $info[] = NO_VALUE;
+
+   if ( $show_info )
+   {
+      if ( $games_next_herolevel < 0 )
+      {
+         $info[] = MED_SPACING .
+            sprintf('<span class="smaller" title="%s">[%s]</span>',
+               sprintf( T_('Need rating and min. %s finished games (%s%% with weaker players >1k-diff) to get hero badge'),
+                  MIN_FIN_GAMES_HERO_AWARD, HERO_BRONZE ),
+               MIN_FIN_GAMES_HERO_AWARD );
+      }
+      elseif ( $games_next_herolevel > 0 )
+      {
+         $info[] = span('smaller', $games_next_herolevel, MED_SPACING.'[%s]',
+            T_('Games with weaker players >1k-diff needed to reach next hero badge level') );
+      }
+   }
+
+   return $info;
+}//build_hero_info
+
 ?>

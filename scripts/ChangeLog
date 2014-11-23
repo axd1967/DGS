@@ -13,6 +13,17 @@ ChangeLog
 
 2014-11-23 jug
 
+   * include/classlib_user.php (User.determine_games_next_hero_level),
+     include/quick/quick_user.php (QuickHandlerUser.process),
+     include/globals.php (DGS_VERSION, QUICK_VERSION),
+     specs/quick_suite.txt,
+     userinfo.php (build_hero_info):
+   - show number of games needed to reach next hero-badge-level on user-info-page
+     - only shown for own user-info
+     - omitted if already reached golden-hero-badge
+     - show that rating and min. number of finished games are needed to get hero-badge
+     - show also for quick-suite user-info-handler
+
    * include/gui_functions.php (span):
    - bugfix: span() needed basic-safe encoding for title-attribute
 
