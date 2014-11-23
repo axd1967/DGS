@@ -32,6 +32,9 @@ Copyright (C) 2001-2014  Erik Ouchterlony, Jens-Uwe Gaspar
    * <home waiting_room.php>Waiting room</home>:
       * Added column with <image table.gif>-icon linked to finished games with opponent
 
+   * Game page:
+      * Added button to submit-move & reload page with same game, can be enabled in user-profile
+
    * Games:
       * Added file-pattern-formatting for SGF-download: $M = moves-count, $H0 = handicap (with 0), $T = game-type
       * Added sort-order for status-games ordered by last moved (newest first)

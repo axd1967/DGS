@@ -132,6 +132,9 @@ Zu  | ThumbnailSize    | tinyint(3) unsigned                         | NO   |   
    - 1..5 = textured wood-images
    - 11..16 = uni-colored "wood", see $woodbgcolors-array with wood-colors
 
+* BoardFlags : int
+   - see consts BOARDFLAG_...
+
 
 # Fields for pages-related GUI-config in ConfigPages-table (category = 1u):
 

@@ -11,6 +11,20 @@ Release [2014-07-30] - DGS 1.0.18 - tag [release-1_0_18-20140730] on (later) bra
 ChangeLog
 ------------------------------------------------------------------
 
+2014-11-23 jug
+
+   * include/classlib_userconfig.php (BOARDFLAG_SUBMIT_MOVE_STAY_GAME),
+     include/globals.php (CSS_VERSION),
+     specs/db/table-Players.txt,
+     skins/dragon/screen.css,
+     edit_profile.php (parse_edit_form),
+     game.php (draw_message_box),
+     confirm.php:
+   - added button on game-page to submit-move & reload page with same game
+     - button to submit & stay on same game can be enabled with new game-page-setting in user-profile
+     - moved 'Message'-box description from left-side to above text-area input-box
+     - extended move-message width: 70 -> 80
+
 ### ----- release-1_19_0-20141029 -----
 
 2014-10-27 jug

@@ -2589,10 +2589,6 @@ table.MessageForm tr.Submit td {
    text-align: left;
    font-size: smaller;
 }
-table.MessageForm tr td.Preview,
-table.MessageForm tr td.Cancel {
-   text-align: right;
-}
 
 
 table#CondMovesTable tr {

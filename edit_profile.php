@@ -326,6 +326,15 @@ require_once 'include/gui_bulletin.php';
    }
 
 
+   $profile_form->add_row( array( 'HEADER', T_('Game page settings') ) );
+
+   $profile_form->add_row( array(
+         'DESCRIPTION', T_('Submit move button'),
+         'CHECKBOX', 'bfl_submit_stay_game', 1, sptext(T_('Show button to submit move and stay on same game'),2),
+            ($board_flags & BOARDFLAG_SUBMIT_MOVE_STAY_GAME),
+      ));
+
+
    $profile_form->add_row( array( 'HEADER', T_('Private game notes') ) );
 
    foreach ( array( 'small', 'large') as $ltyp )
@@ -594,7 +603,8 @@ function parse_edit_form( &$cfg_board )
 
       $vars['move_modulo'] = ( (int)@$_REQUEST['movemodulo'] ) ? 100 : 0;
 
-      $vars['board_flags'] = ( @$_REQUEST['bfl_mark_lc'] ? BOARDFLAG_MARK_LAST_CAPTURE : 0 );
+      $vars['board_flags'] = ( @$_REQUEST['bfl_mark_lc'] ? BOARDFLAG_MARK_LAST_CAPTURE : 0 )
+         | ( @$_REQUEST['bfl_submit_stay_game'] ? BOARDFLAG_SUBMIT_MOVE_STAY_GAME : 0 );
 
 
       // parse private game notes -------------------------------------

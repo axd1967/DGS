@@ -41,6 +41,7 @@ require_once 'include/rating.php';
      cancel             : cancel previous operation (validation-step), show game-page
      nextskip           : jump to next-game in line
 
+     staygame           : submit-move + reload page with current game
      nextgame           : submit-move + jump to next game
      nextstatus         : submit-move + jump to status afterwards
      nextaddtime&add_days=&reset_byoyomi=    : adds time (after submit on game-page)
@@ -194,8 +195,8 @@ require_once 'include/rating.php';
       jump_to("status.php");
    elseif ( /*submit-move*/@$_REQUEST['nextgame'] )
       jump_to_next_game( $my_id, $Lastchanged, $gah->get_moves(), $TimeOutDate, $gid);
-
-   jump_to("game.php?gid=$gid");
+   else //if ( /*submit-move*/@$_REQUEST['staygame'] )
+      jump_to("game.php?gid=$gid");
 }//main
 
 

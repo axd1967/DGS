@@ -49,7 +49,8 @@ define('CFGBOARD_NOTES_SMALL', 'Small');
 define('CFGBOARD_NOTES_LARGE', 'Large');
 
 // Board-Flags
-define('BOARDFLAG_MARK_LAST_CAPTURE', 0x01);
+define('BOARDFLAG_MARK_LAST_CAPTURE',     0x01);
+define('BOARDFLAG_SUBMIT_MOVE_STAY_GAME', 0x02); // enabled = show button to stay on game-page on move-msg-submit
 
 // Boardcoords
 define('COORD_LEFT',    0x001); // short coordinates left from board

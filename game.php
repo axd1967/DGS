@@ -20,6 +20,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 // jump to confirm.php (=form-submits)
 if ( @$_REQUEST['nextgame']
       || @$_REQUEST['nextstatus']
+      || @$_REQUEST['staygame']
       || @$_REQUEST['cancel']
       || @$_REQUEST['nextskip']
       || @$_REQUEST['nextaddtime']
@@ -777,7 +778,7 @@ $GLOBALS['ThePage'] = new Page('Game');
          draw_add_time( $game_row, $to_move );
       else
       {
-         draw_message_box( $message );
+         draw_message_box( $cfg_board, $message );
 
          if ( $preview )
          {
@@ -1276,37 +1277,47 @@ function get_final_score_move( $move )
    return ( $PosX == POSX_SCORE ) ? $move - 1 : $move;
 }
 
-function draw_message_box( $message )
+function draw_message_box( $cfg_board, $message )
 {
    $tabindex = 1;
 
    echo name_anchor('msgbox'),
       '<TABLE class=MessageForm>',
       '<TR class=Message>',
-      '<TD class=Rubric>', T_('Message'), ':</TD>',
-      '<TD colspan="2"><textarea name="message" tabindex="', ($tabindex++), '" cols="70" rows="8">',
-         textarea_safe($message), '</textarea></TD>',
+         '<TD>', T_('Message'), ':</TD>',
+      '</TR>',
+      '<TR>',
+         '<TD>',
+            '<textarea name="message" tabindex="', ($tabindex++), '" cols="80" rows="8">',
+               textarea_safe($message), '</textarea>',
+         '</TD>',
       '</TR>',
       '<TR class=Submit>',
-      '<TD></TD>',
-      '<TD>',
-         '<input type="submit" name="nextgame" tabindex="', ($tabindex++),
-            '" value="', T_('Submit and go to next game'),
-            '" accesskey="', ACCKEY_ACT_EXECUTE, '" title="[&amp;', ACCKEY_ACT_EXECUTE, ']">',
-         '<input type="submit" name="nextstatus" tabindex="', ($tabindex++),
-            '" value="', T_("Submit and go to status"), '">',
+         '<TD>',
+            '<input type="submit" name="nextgame" tabindex="', ($tabindex++),
+               '" value="', T_('Submit and go to next game'),
+               '" accesskey="', ACCKEY_ACT_EXECUTE, '" title="[&amp;', ACCKEY_ACT_EXECUTE, ']">',
+            '<input type="submit" name="nextstatus" tabindex="', ($tabindex++),
+               '" value="', T_("Submit and go to status"), '">',
 
-         SMALL_SPACING,
-         '<input type="submit" name="preview" tabindex="', ($tabindex++),
-            '" value="', T_('Preview'),
-            '" accesskey="', ACCKEY_ACT_PREVIEW, '" title="[&amp;', ACCKEY_ACT_PREVIEW, ']">',
-      '</TD>',
-      '<TD class="Cancel">',
-         '<input type=submit name="cancel" tabindex="', ($tabindex++), '" value="', T_('Cancel move'), '">',
-      '</TD>',
-      '</TR>',
-      '</TABLE>',
-      "<br>\n";
+            SMALL_SPACING,
+            '<input type="submit" name="preview" tabindex="', ($tabindex++),
+               '" value="', T_('Preview'),
+               '" accesskey="', ACCKEY_ACT_PREVIEW, '" title="[&amp;', ACCKEY_ACT_PREVIEW, ']">',
+            MED_SPACING,
+            '<input type="submit" name="cancel" tabindex="', ($tabindex++), '" value="', T_('Cancel move'), '">',
+         '</TD>',
+      '</TR>';
+
+   if ( $cfg_board->get_board_flags() & BOARDFLAG_SUBMIT_MOVE_STAY_GAME )
+   {
+      echo
+         '<TR class=Submit>', '<TD>',
+            '<input type="submit" name="staygame" tabindex="', ($tabindex++), '" value="', T_('Submit and stay'), '">',
+         '</TD>', '</TR>';
+   }
+
+   echo '</TABLE>', "<br>\n";
 } //draw_message_box
 
 // keep in sync with tournaments/game_admin.php#draw_add_time()-func
