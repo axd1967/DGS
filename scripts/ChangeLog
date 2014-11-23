@@ -13,6 +13,9 @@ ChangeLog
 
 2014-11-23 jug
 
+   * tournaments/include/tournament_properties.php (TournamentProperties.__construct, ~.build_seed_order):
+   - changed default of RatingUseMode from TPROP_RUMODE_COPY_CUSTOM -> TPROP_RUMODE_CURR_FIX
+
    * include/classlib_user.php (User.determine_games_next_hero_level),
      include/quick/quick_user.php (QuickHandlerUser.process),
      include/globals.php (DGS_VERSION, QUICK_VERSION),

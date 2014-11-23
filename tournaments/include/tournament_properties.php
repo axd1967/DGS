@@ -75,7 +75,7 @@ class TournamentProperties
    /*! \brief Constructs TournamentProperties-object with specified arguments. */
    public function __construct( $tid=0, $lastchanged=0, $changed_by='', $notes='',
          $min_participants=2, $max_participants=0, $max_start_round=1, $min_rating_start_round=NO_RATING,
-         $rating_use_mode=TPROP_RUMODE_COPY_CUSTOM, $reg_end_time=0,
+         $rating_use_mode=TPROP_RUMODE_CURR_FIX, $reg_end_time=0,
          $user_min_rating=MIN_RATING, $user_max_rating=RATING_9DAN, $user_rated=false,
          $user_min_games_finished=0, $user_min_games_rated=0 )
    {
@@ -333,7 +333,7 @@ class TournamentProperties
       $arr[TOURNEY_SEEDORDER_REGISTER_TIME] = T_('Tournament Registration Time');
       if ( $default == 0 )
          $default = TOURNEY_SEEDORDER_REGISTER_TIME;
-      if ( $this->RatingUseMode == TPROP_RUMODE_COPY_CUSTOM || $this->RatingUseMode == TPROP_RUMODE_COPY_FIX )
+      if ( $this->need_rating_copy() )
          $arr[TOURNEY_SEEDORDER_TOURNEY_RATING] = T_('Tournament Rating');
       $arr[TOURNEY_SEEDORDER_RANDOM] = T_('Random#T_ladder');
       return array( $default, $arr );
