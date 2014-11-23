@@ -13,6 +13,9 @@ ChangeLog
 
 2014-11-23 jug
 
+   * include/gui_functions.php (span):
+   - bugfix: span() needed basic-safe encoding for title-attribute
+
    * include/classlib_userconfig.php (BOARDFLAG_SUBMIT_MOVE_STAY_GAME),
      include/globals.php (CSS_VERSION),
      specs/db/table-Players.txt,

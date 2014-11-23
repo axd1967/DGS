@@ -506,7 +506,7 @@ function spacing( $str, $space_count=0, $tag_l='', $tag_r=null )
 function span( $class, $str='', $strfmt='%s', $title='' )
 {
    if ( $title )
-      $title = " title=\"$title\"";
+      $title = " title=\"" . basic_safe($title) . "\"";
    if ( strpos($class,'=') !== false )
       return sprintf( "<span " . attb_build($class) . $title . ">$strfmt</span>", $str );
    else
