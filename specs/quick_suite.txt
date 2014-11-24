@@ -1087,7 +1087,7 @@ Commands:
             "games_won" : 8,         # number of (finished rated) won games
             "games_lost" : 2,        # number of (finished rated) lost games
             "games_mpg" : 0,         # number of started multi-player-games
-            "hero_ratio" : 0.38,     # hero-percentage 0..1; field ONLY present if "hero_badge"-field >0
+            "hero_ratio" : 0.38,     # hero-percentage 0..1; field ONLY present if "hero_badge"-field >0 or for own user-info
             "hero_badge" : 1,        # hero-badge: 0=none, 1=bronze, 2=silver, 3=gold
             "hero_games_next" : 7,   # NOTE: field ONLY present for own user-info;
                                      #     0 = already reached gold-badge (highest level)
