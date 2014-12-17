@@ -22,6 +22,7 @@ $TranslateGroups[] = "Users";
 require_once 'include/std_functions.php';
 require_once 'include/form_functions.php';
 require_once 'include/table_infos.php';
+require_once 'include/rating.php';
 
 define('USER_BIO_ADDENTRIES', 3);
 
@@ -35,6 +36,10 @@ function find_category_box_text($cat)
 
 {
    // NOTE: using page: change_bio.php
+
+/* Actual REQUEST calls used:
+     ri=1         : add/pre-fill new bio-entry with rank-info (of go-servers)
+*/
 
    connect2mysql();
 
@@ -65,6 +70,7 @@ function find_category_box_text($cat)
          'Occupation' => T_('Occupation'),
          'Native Language' => T_('Native Language'),
          'Language Competence' => T_('Language Competence'),
+         'Rank info' => T_('Rank info'),
       );
 
 
@@ -149,19 +155,29 @@ function find_category_box_text($cat)
 
    if ( !$editorder )
    {
+      // fill-in default-template for entering rank-info (of other Go-servers)
+      $add_rank_info = '';
+      if ( @$_REQUEST['ri'] )
+      {
+         $dgs_rank = echo_rating( $player_row['Rating2'], false, 0, true, 1);
+         $add_rank_info = sprintf('DGS %s, KGS , IGS , OGS , Tygem , Wbaduk , EGF , AGA , Japan , China , Korea , FICGS , IYT , LittleGolem, INGO',
+            ($dgs_rank ? $dgs_rank : '?') );
+      }
+
       // And now some empty ones:
       for ($i=1; $i <= USER_BIO_ADDENTRIES; $i++)
       {
          $bio_form->add_row( array(
                'CELL', 0, 'class=NewHeader',
-               'SELECTBOX', "newcategory" . $i, 1, $categories, '', false,
+               'SELECTBOX', "newcategory" . $i, 1, $categories, ($add_rank_info ? 'Rank info' : ''), false,
 
                'BR',
                'TEXTINPUT', "newother" . $i, $cat_width, $cat_max, "",
 
                'CELL', 0, 'class=NewInfo',
-               'TEXTAREA', "newtext" . $i, $text_width, $text_height, "",
+               'TEXTAREA', "newtext" . $i, $text_width, $text_height, ($add_rank_info ? $add_rank_info : ''),
             ));
+         $add_rank_info = 0;
       }
 
       $bio_form->add_row( array(
