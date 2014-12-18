@@ -56,6 +56,7 @@ function find_category_box_text($cat)
       "SELECT * FROM Bio WHERE uid=$my_id ORDER BY SortOrder" );
    $row_cnt = @mysql_num_rows($result);
 
+   $cat_rank_info = 'Rank info';
    $categories = array(
          '' => T_('Other:'),
          'Country' => T_('Country'),
@@ -70,7 +71,7 @@ function find_category_box_text($cat)
          'Occupation' => T_('Occupation'),
          'Native Language' => T_('Native Language'),
          'Language Competence' => T_('Language Competence'),
-         'Rank info' => T_('Rank info'),
+         $cat_rank_info => T_('Rank info'),
       );
 
 
@@ -99,13 +100,17 @@ function find_category_box_text($cat)
       $bio_table = new Table_info('biomove');
    $moveurl .= '?';
 
+   $arr_categories = array();
    while ( $row = mysql_fetch_assoc( $result ) )
    {
       $bid = $row['ID'];
       $other = $row['Category'];
       $cat = find_category_box_text($other);
       if ( $cat )
+      {
          $other = '';
+         $arr_categories[$cat] = $bid;
+      }
       else
       {
          if ( substr( $other, 0, 1) == '=' )
@@ -157,7 +162,7 @@ function find_category_box_text($cat)
    {
       // fill-in default-template for entering rank-info (of other Go-servers)
       $add_rank_info = '';
-      if ( @$_REQUEST['ri'] )
+      if ( @$_REQUEST['ri'] && !isset($arr_categories[$cat_rank_info]) )
       {
          $dgs_rank = echo_rating( $player_row['Rating2'], false, 0, true, 1);
          $add_rank_info = sprintf('DGS %s, KGS , IGS , OGS , Tygem , Wbaduk , EGF , AGA , Japan , China , Korea , FICGS , IYT , LittleGolem, INGO',
@@ -169,7 +174,7 @@ function find_category_box_text($cat)
       {
          $bio_form->add_row( array(
                'CELL', 0, 'class=NewHeader',
-               'SELECTBOX', "newcategory" . $i, 1, $categories, ($add_rank_info ? 'Rank info' : ''), false,
+               'SELECTBOX', "newcategory" . $i, 1, $categories, ($add_rank_info ? $cat_rank_info : ''), false,
 
                'BR',
                'TEXTINPUT', "newother" . $i, $cat_width, $cat_max, "",
