@@ -234,7 +234,8 @@ class TournamentProperties
       $is_new_tp = ( $tp->ID == 0 ); // >0 = edit-existing-TP
 
       $errors = array();
-      if ( $is_new_tp )
+      $return_warn_as_err = $is_new_tp && ($check_type != TCHKTYPE_TD);
+      if ( $return_warn_as_err )
          $warnings =& $errors;
       else
          $warnings = array();
@@ -305,7 +306,7 @@ class TournamentProperties
                $this->UserMinGamesRated, $user->GamesRated );
       }
 
-      return ( $is_new_tp )
+      return ( $return_warn_as_err )
          ? array( $errors, array() )
          : array( $errors, $warnings );
    }//checkUserRegistration
