@@ -13,6 +13,9 @@ ChangeLog
 
 2014-12-26 jug
 
+   * include/classlib_goban.php (MarkupHandlerGoban.parse_igoban):
+   - bugfix: displaying text with bad igoban-tag must not redirect to error-page by throwing error()
+
    * tournaments/edit_participant.php:
    - bugfix: copy user-rating to tournament-rating for COPY_CUSTOM-rating-use-mode
      also on inviting participant by tournament-director

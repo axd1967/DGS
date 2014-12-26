@@ -1791,7 +1791,7 @@ function parse_atbs_safe( &$trail, &$bad)
       $head = str_replace(ALLOWED_APOS, "'", $head);
    }
    return $head;
-}
+}//parse_atbs_safe
 
 
 /**

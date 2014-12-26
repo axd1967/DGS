@@ -101,12 +101,11 @@ class MarkupHandlerGoban
       if ( is_null($igoban_type) )
          return $rawtext;
 
+      // NOTE: displaying text with bad igoban-tag must not redirect to error-page by throwing error() here
       $readerClass = @self::$ARR_GOBAN_HANDLERS_READER[strtoupper($igoban_type)];
       $writerClass = @self::$ARR_GOBAN_HANDLERS_WRITER[strtoupper($writer_type)];
-      if ( !$readerClass )
-         error('invalid_args', "MarkupHandlerGoban:parse_igoban.check.igoban_type($igoban_type)");
-      if ( !$writerClass )
-         error('invalid_args', "MarkupHandlerGoban:parse_igoban.check.writer_type($writer_type)");
+      if ( !$readerClass || !$writerClass )
+         return $rawtext;
 
       $goban_reader = new $readerClass( $map_args );
       $goban = $goban_reader->read_goban( $text );
