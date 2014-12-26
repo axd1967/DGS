@@ -117,7 +117,7 @@ require_once 'include/classlib_userpicture.php';
    $usfilter->add_filter( 2, 'RatedSelect',  'G.Rated', true );
    $usfilter->add_filter( 3, 'Date',         'G.Lastchanged', true );
    $usfilter->add_filter( 4, 'Selection',
-         array( T_('All games#filteropp') => '',
+         array( T_('All games#filteropp')      => 'G.Status' . not_in_clause($ENUM_GAMES_STATUS, GAME_STATUS_SETUP, GAME_STATUS_INVITED),
                 T_('Running games#filteropp')  => 'G.Status' . IS_STARTED_GAME,
                 T_('Finished games#filteropp') => "G.Status='".GAME_STATUS_FINISHED."'" ),
          true,
