@@ -204,7 +204,7 @@ $GLOBALS['ThePage'] = new Page('Tournament');
    if ( count($arr_locks) )
       $itable->add_sinfo( T_('Tournament Locks'), implode("<br>\n", $arr_locks) );
    $itable->add_sinfo( T_('Tournament Status'), $tourney->getStatusText($tourney->Status) );
-   $itable->add_sinfo( T_('Tournament started'), format_translated_date(DATE_FMT6, $tourney->StartTime) );
+   $itable->add_sinfo( T_('Tournament Start'), format_translated_date(DATE_FMT6, $tourney->StartTime) );
    if ( $tourney->EndTime > 0 )
       $itable->add_sinfo( T_('Tournament ended'), format_translated_date(DATE_FMT6, $tourney->EndTime) );
    if ( $ttype->need_rounds )
