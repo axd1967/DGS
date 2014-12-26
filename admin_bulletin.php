@@ -238,9 +238,9 @@ $GLOBALS['ThePage'] = new Page('BulletinAdmin');
 
    $bform->add_row( array(
          'DESCRIPTION', T_('Target User Rating Range#bulletin'),
-         'TEXT', T_('min.').' ',
+         'TEXT', T_('Min.').' ',
          'TEXTINPUT', 'trg_rating_min', 10, 16, $vars['trg_rating_min'],
-         'TEXT', sptext(T_('max.'),1),
+         'TEXT', sptext(T_('Max.'),1),
          'TEXTINPUT', 'trg_rating_max', 10, 16, $vars['trg_rating_max'],
          'TEXT', span('smaller', sprintf( T_('only for target types: %s'), implode(', ', $arr_trg_types_rating_texts) ), ' (%s)'),
          ));
@@ -509,7 +509,8 @@ function parse_edit_form( &$bulletin )
             if ( $new_rating == NO_RATING )
             {
                $has_rating_min_error = true;
-               $errors[] = sprintf(T_('Invalid value [%s] for target user %s rating.#bulletin'), $new_value, T_('min.') );
+               $errors[] = sprintf(T_('Invalid value [%s] for target user rating range [%s].#bulletin'),
+                  $new_value, T_('Min.') );
             }
             else
                $bulletin->setTargetRatingMin( $new_rating );
@@ -530,7 +531,8 @@ function parse_edit_form( &$bulletin )
             if ( $new_rating == NO_RATING )
             {
                $has_rating_max_error = true;
-               $errors[] = sprintf(T_('Invalid value [%s] for target user %s rating.#bulletin'), T_('max.'), $new_value );
+               $errors[] = sprintf(T_('Invalid value [%s] for target user rating range [%s].#bulletin'),
+                  $new_value, T_('Max.') );
             }
             else
                $bulletin->setTargetRatingMax( $new_rating );
