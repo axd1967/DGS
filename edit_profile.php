@@ -205,17 +205,22 @@ require_once 'include/gui_bulletin.php';
          'TEXT', sptext(T_('choosing a lower value helps the server (see also FAQ)')),
       ));
 
-   if ( ALLOW_JAVASCRIPT )
-   {
-      $userflags = (int)$vars['user_flags'];
-      $profile_form->add_row( array(
-            'DESCRIPTION', T_('Enable JavaScript'),
-            'CHECKBOX', 'jsenable', 1, '', ($userflags & USERFLAG_JAVASCRIPT_ENABLED) ) );
-   }
-
    $profile_form->add_row( array(
          'DESCRIPTION', T_('Thumbnail size'),
          'SELECTBOX', 'thumbnailsize', 1, $thumbnailsizes, (int)$vars['thumbnail_size'], false ) );
+
+   $userflags = (int)$vars['user_flags'];
+   if ( ALLOW_JAVASCRIPT )
+   {
+      $profile_form->add_row( array(
+            'DESCRIPTION', T_('Enable JavaScript'),
+            'CHECKBOX', 'ufl_jsenable', 1, '', ($userflags & USERFLAG_JAVASCRIPT_ENABLED) ) );
+   }
+
+   $profile_form->add_row( array(
+         'DESCRIPTION', T_('Show rating graph by games'),
+         'CHECKBOX', 'ufl_ratgraph_by_games', 1, '', ($userflags & USERFLAG_RATINGGRAPH_BY_GAMES) ) );
+
 
    $profile_form->add_empty_row();
    if ( (@$player_row['admin_level'] & ADMIN_SKINNER) )
@@ -536,11 +541,15 @@ function parse_edit_form( &$cfg_board )
       $user_flags = $vars['user_flags']; // preserve other user-flags
       if ( ALLOW_JAVASCRIPT )
       {
-         if ( @$_REQUEST['jsenable'] )
+         if ( @$_REQUEST['ufl_jsenable'] )
             $user_flags |= USERFLAG_JAVASCRIPT_ENABLED;
          else
             $user_flags &= ~USERFLAG_JAVASCRIPT_ENABLED;
       }
+      if ( @$_REQUEST['ufl_ratgraph_by_games'] )
+         $user_flags |= USERFLAG_RATINGGRAPH_BY_GAMES;
+      else
+         $user_flags &= ~USERFLAG_RATINGGRAPH_BY_GAMES;
       $vars['user_flags'] = $user_flags;
 
       $thumbnail_size = (int)@$_REQUEST['thumbnailsize'];

@@ -13,6 +13,11 @@ ChangeLog
 
 2014-12-26 jug
 
+   * include/std_functions.php (USERFLAG_RATINGGRAPH_BY_GAMES),
+     edit_profile.php, ratinggraph.php, NEWS:
+   - added customizable setting in user-profile to show rating-graph by-games,
+     default is disabled i.e. show by-time
+
    * opponents.php:
    - bugfix: exclude invitations and MPGs for 'All games'-filter on opponents-page
 

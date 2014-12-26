@@ -32,6 +32,10 @@ Copyright (C) 2001-2014  Erik Ouchterlony, Jens-Uwe Gaspar
    * <home userinfo.php>User info page</home>:
       * Added games-count needed to reach next hero-badge-level on own user-info-page and for quick-suite user-info-handler
 
+   * Rating graph:
+      * Added option in <home edit_profile.php>user-profile</home> to configure to show rating-graph by games,
+        default is to show rating-graph by time
+
    * <home waiting_room.php>Waiting room</home>:
       * Added column with <image table.gif>-icon linked to finished games with opponent
 

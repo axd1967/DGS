@@ -26,7 +26,6 @@ require_once 'include/form_functions.php';
    connect2mysql();
 
    $logged_in = who_is_logged( $player_row);
-
    if ( !$logged_in )
       error('login_if_not_logged_in', 'ratinggraph');
 
@@ -106,7 +105,7 @@ require_once 'include/form_functions.php';
       $show_time = (int)(bool)@$_REQUEST['show_time'];
       $dyna= floor($NOW/(SECS_PER_HOUR/TICK_FREQUENCY));
       $winpie = (bool)@$_REQUEST['winpie'];
-      $bynumber = (bool)@$_REQUEST['bynumber'];
+      $bynumber = (bool)get_request_arg('bynumber', ($player_row['UserFlags'] & USERFLAG_RATINGGRAPH_BY_GAMES) );
 
       echo "\n<img src=\"ratingpng.php?uid=$uid"
          ,($show_time ? URI_AMP.'show_time=1' : '')
@@ -143,8 +142,7 @@ require_once 'include/form_functions.php';
                    'SUBMITBUTTON', 'submit', T_('Change interval') );
       array_push( $row,
             'OWNHTML', '&nbsp;&nbsp;',
-            'CHECKBOX', 'bynumber', '1',
-            T_('Games'), $bynumber );
+            'CHECKBOX', 'bynumber', '1', T_('Games'), $bynumber );
       $form->add_row( $row);
 
       $form->echo_string(1);
