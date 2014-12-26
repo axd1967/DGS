@@ -267,7 +267,8 @@ $GLOBALS['ThePage'] = new Page('TournamentEditParticipant');
       if ( $tid && @$_REQUEST['tp_save'] && !@$_REQUEST['tp_preview'] && count($errors) == 0
             && count($reg_errors) == 0 && ( $rid || $ignore_warnings || count($reg_warnings) == 0 ) )
       {
-         if ( $tp->Status == TP_STATUS_REGISTER && $tprops->need_rating_copy() && !$tp->hasRating() )
+         if ( ($tp->Status == TP_STATUS_REGISTER || $tp->Status == TP_STATUS_INVITE) && $tprops->need_rating_copy()
+               && !$tp->hasRating() )
          {
             if ( !$vars['_has_custom_rating'] ) // copy only if no customized-rating
                $tp->Rating = $tp->User->Rating;

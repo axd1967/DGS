@@ -13,6 +13,10 @@ ChangeLog
 
 2014-12-26 jug
 
+   * tournaments/edit_participant.php:
+   - bugfix: copy user-rating to tournament-rating for COPY_CUSTOM-rating-use-mode
+     also on inviting participant by tournament-director
+
    * tournaments/include/tournament_properties.php (TournamentProperties.checkUserRegistration):
    - bugfix: allow inviting by tournament-director of user violating tournament-registration-checks
      by not returning warning as errors
