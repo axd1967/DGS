@@ -11,6 +11,19 @@ Release [2014-07-30] - DGS 1.0.18 - tag [release-1_0_18-20140730] on (later) bra
 ChangeLog
 ------------------------------------------------------------------
 
+2014-12-31 jug
+
+   * scripts/updates/1.19/database_changes.mysql,
+     specs/db/table-Messages.txt, specs/db/dragon-ddl.sql,
+     search_messages.php (build_qsql_games), NEWS:
+   - extended message-search with selection to find all, accepted, declined, pending invitations
+     - added index on Messages.Game_ID to optimize search for invitation messages
+-----------
+-- added index to optimize search for pending invitations
+ALTER TABLE Messages
+   ADD KEY Game_ID (Game_ID) ;
+-----------
+
 2014-12-26 jug
 
    * include/std_functions.php (USERFLAG_RATINGGRAPH_BY_GAMES),

@@ -45,3 +45,8 @@ ALTER TABLE Bulletin
    ADD TargetRatingMin smallint NOT NULL default '-9999' AFTER TargetType ;
 
 
+-- added index to optimize search for pending invitations
+ALTER TABLE Messages
+   ADD KEY Game_ID (Game_ID) ;
+
+

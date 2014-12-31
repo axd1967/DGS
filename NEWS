@@ -29,6 +29,9 @@ Copyright (C) 2001-2014  Erik Ouchterlony, Jens-Uwe Gaspar
       * Added "quote"-link in post near "reply" (also to view the RAW-text of a forum post)
       * Increased max. indent level from 15 to 25 for deep forum-threads
 
+   * <home search_messages.php>Search messages</home>:
+      * Extended message-search to find all, accepted, declined, pending invitations
+
    * <home userinfo.php>User info page</home>:
       * Added games-count needed to reach next hero-badge-level on own user-info-page and for quick-suite user-info-handler
 
@@ -60,6 +63,11 @@ Copyright (C) 2001-2014  Erik Ouchterlony, Jens-Uwe Gaspar
    * Fixed missing check of waiting-room accept-same-opponent-restriction for total-count of joined games
    * Fixed showing territory-markers for all users for game on score-status if last move was scoring-step
    * Fixed showing publish-time of bulletin with weekday and timezone
+
+   Code improvements:
+
+   * Improvements of database queries
+      * Messages: optimized search for invitations
 
    Administrative changes:
 

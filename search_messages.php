@@ -84,11 +84,15 @@ require_once 'include/classlib_profile.php';
                 T_('Game-related#filtermsg')   => 'M.Game_ID>0', // <>0
                 T_('Game-unrelated#filtermsg') => 'M.Game_ID=0' ),
          true);
-   $smfilter->add_filter( 5, 'Boolean',
-         new QuerySQL(SQLP_FROM,  "LEFT JOIN Games AS G ON M.Game_ID=G.ID",
-                      SQLP_WHERE, "G.Status='".GAME_STATUS_INVITED."'"), // not in left-join(!)
-         true,
-         array( FC_LABEL => T_('Show only pending invitations (if message not deleted)') ));
+   $smfilter->add_filter( 5, 'Selection',
+         array( T_('All messages#filtermsg') => '',
+                T_('Pending invitations#filterinv') => build_qsql_games(GAME_STATUS_INVITED),
+                T_('Accepted invitations (for started games)#filterinv') => build_qsql_games(true),
+                T_('Accepted invitations (for finished games)#filterinv') => build_qsql_games(GAME_STATUS_FINISHED),
+                T_('Declined invitations#filterinv') => new QuerySQL(SQLP_WHERE, "M.Game_ID>0", "M.Subject='Game invitation decline'" ),
+                T_('All invitations (without declines)#filterinv') => build_qsql_games(),
+            ),
+         true);
    $smfilter->init(); // parse current value from _GET
 
    // table-filters
@@ -141,12 +145,13 @@ require_once 'include/classlib_profile.php';
          'DESCRIPTION', T_('Select folders#filtermsg'),
          'FILTER',      $smfilter, 1 ));
    $smform->add_row( array(
-         'DESCRIPTION', T_('Message scope#filtermsg'),
+         'DESCRIPTION', T_('Invitations#filtermsg'),
+         'FILTER',      $smfilter, 5 ));
+   $smform->add_row( array(
+         'DESCRIPTION', T_('Game message scope#filtermsg'),
          'FILTER',      $smfilter, 4, // game-related
          'BR',
          'FILTER',      $smfilter, 2, // initial-msg
-         'BR',
-         'FILTER',      $smfilter, 5, // pending invitations
          ));
 
    // build SQL-query
@@ -190,5 +195,19 @@ require_once 'include/classlib_profile.php';
    $menu_array[ T_('Edit folders') ] = "edit_folders.php";
 
    end_page(@$menu_array);
+}//main
+
+
+function build_qsql_games( $gstatus=null )
+{
+   $qsql = new QuerySQL(
+      SQLP_FROM, "INNER JOIN Games AS G ON G.ID=M.Game_ID",
+      SQLP_WHERE, "M.Type<>'".MSGTYPE_RESULT."'" );
+   if ( $gstatus === true )
+      $qsql->add_part( SQLP_WHERE, 'G.Status'.IS_STARTED_GAME );
+   elseif ( !is_null($gstatus) )
+      $qsql->add_part( SQLP_WHERE, "G.Status='$gstatus'" );
+   return $qsql;
 }
+
 ?>

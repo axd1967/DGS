@@ -639,6 +639,7 @@ CREATE TABLE IF NOT EXISTS `Messages` (
   KEY `ReplyTo` (`ReplyTo`),
   KEY `Thread` (`Thread`),
   KEY `Time` (`Time`),
+  KEY `Game_ID` (`Game_ID`),
   FULLTEXT KEY `Subject` (`Subject`,`Text`)
 ) ENGINE=MyISAM  DEFAULT CHARSET=latin1;
 

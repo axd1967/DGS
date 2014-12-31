@@ -61,7 +61,7 @@ Notes about "Multiple-receiver (bulk) messages":
 | Thread  | int(11)                                         | NO   | MUL | 0                   |                |
 | Level   | smallint(6)                                     | NO   |     | 0                   |                |
 | ReplyTo | int(11)                                         | NO   | MUL | 0                   |                |
-| Game_ID | int(11)                                         | NO   |     | 0                   |                |
+| Game_ID | int(11)                                         | NO   | MUL | 0                   |                |
 | Time    | datetime                                        | NO   | MUL | 0000-00-00 00:00:00 |                |
 | Subject | varchar(80)                                     | NO   | MUL |                     |                |
 | Text    | text                                            | NO   |     | NULL                |                |
