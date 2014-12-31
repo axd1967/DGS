@@ -217,8 +217,8 @@ class Table_info
 /*
       if ( ALLOW_JAVASCRIPT && $rclass )
       {
-         //$string.= " ondblclick=\"javascript:this.className=((this.className=='highlight')?'$rclass':'highlight');\"";
-         $string.= " ondblclick=\"javascript:this.className=((this.className=='$rclass')?'Hil$rclass':'$rclass');\"";
+         //$string.= " ondblclick=\"this.className=((this.className=='highlight')?'$rclass':'highlight');\"";
+         $string.= " ondblclick=\"this.className=((this.className=='$rclass')?'Hil$rclass':'$rclass');\"";
       }
 */
       $string.= ">\n  ";

@@ -1099,7 +1099,7 @@ function draw_moves( $gid, $move, $handicap )
    echo "<SELECT name=\"gotomove\" size=\"1\"";
    if ( is_javascript_enabled() )
    {
-      echo " onchange=\"javascript:this.form['movechange'].click();\"";
+      echo " onchange=\"this.form['movechange'].click();\"";
    }
    echo ">\n$str</SELECT>";
    echo '<INPUT type="HIDDEN" name="gid" value="' . $gid . "\" class=NoPrint>";

@@ -527,7 +527,7 @@ function echo_dragon_top_bar( $logged_in, $user_handle )
    {
       echo SEP_SPACING,
          '<select name="jumpto" size="1"',
-               ( is_javascript_enabled() ? " onchange=\"javascript:this.form['show'].click();\"" : '' ), ">\n",
+               ( is_javascript_enabled() ? " onchange=\"this.form['show'].click();\"" : '' ), ">\n",
             '<option value="">&lt;', T_('Bookmarks#bookmark'), "&gt;</option>\n",
             '<option value="S6">', T_('My running MP-games#bookmark'), "</option>\n",
             '<option value="S1">', T_('Latest forum posts#bookmark'), "</option>\n",
