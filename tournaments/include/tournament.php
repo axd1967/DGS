@@ -168,12 +168,16 @@ class Tournament
 
    public function buildMaintenanceLockText( $intersect_flags=0, $suffix='.' )
    {
-      $check_flags = ($intersect_flags > 0)
-         ? $intersect_flags
-         : TOURNEY_FLAG_LOCK_ADMIN | TOURNEY_FLAG_LOCK_TDWORK;
-      $str = sprintf( self::getFlagsText(TOURNEY_FLAG_LOCK_ADMIN, 'LOCK') . $suffix,
+      if ( $intersect_flags < 0 )
+         $check_flags = 0;
+      elseif ( $intersect_flags > 0 )
+         $check_flags = $intersect_flags;
+      else
+         $check_flags = TOURNEY_FLAG_LOCK_ADMIN | TOURNEY_FLAG_LOCK_TDWORK;
+
+      $str = sprintf( self::getFlagsText(TOURNEY_FLAG_LOCK_ADMIN, 'LOCK'),
                       $this->formatFlags('', $check_flags) );
-      return span('TLockWarn', $str);
+      return span('TLockWarn', $str . $suffix);
    }
 
    public function buildAdminLockText()

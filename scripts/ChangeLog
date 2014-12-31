@@ -13,6 +13,10 @@ ChangeLog
 
 2014-12-31 jug
 
+   * tournaments/include/tournament.php (Tournament.buildMaintenanceLockText),
+     tournaments/ladder/view.php:
+   - bugfix: on ladder-view show not only admin/td-work-lock but all lock-types in maintenance-lock-text
+
    * scripts/updates/1.19/database_changes.mysql,
      specs/db/table-Messages.txt, specs/db/dragon-ddl.sql,
      search_messages.php (build_qsql_games), NEWS:

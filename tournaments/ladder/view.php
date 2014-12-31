@@ -292,7 +292,7 @@ $GLOBALS['ThePage'] = new Page('TournamentLadderView');
       if ( $play_locked )
       {
          if ( !$admin_mode || $tdwork_locked )
-            echo $tourney->buildMaintenanceLockText(0, ': '),
+            echo $tourney->buildMaintenanceLockText(-1, ': '),
                span('LadderWarn', T_('Challenging locked#T_ladder')), ".<br>\n";
          if ( $tourney->isFlagSet(TOURNEY_FLAG_LOCK_CLOSE) )
             echo Tournament::getLockText(TOURNEY_FLAG_LOCK_CLOSE), MINI_SPACING,
