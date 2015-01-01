@@ -202,7 +202,7 @@ function build_qsql_games( $gstatus=null )
 {
    $qsql = new QuerySQL(
       SQLP_FROM, "INNER JOIN Games AS G ON G.ID=M.Game_ID",
-      SQLP_WHERE, "M.Type<>'".MSGTYPE_RESULT."'" );
+      SQLP_WHERE, "M.Type<>'".MSGTYPE_RESULT."'", "me.Sender IN ('Y','N')" );
    if ( $gstatus === true )
       $qsql->add_part( SQLP_WHERE, 'G.Status'.IS_STARTED_GAME );
    elseif ( !is_null($gstatus) )
