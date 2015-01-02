@@ -1,7 +1,7 @@
 <?php
 /*
 Dragon Go Server
-Copyright (C) 2001-2014  Erik Ouchterlony, Jens-Uwe Gaspar
+Copyright (C) 2001-2015  Erik Ouchterlony, Jens-Uwe Gaspar
 
 This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU Affero General Public License as
@@ -25,7 +25,7 @@ require_once 'include/config-local.php';
  * \brief Definitions and declarations of DGS globally used vars and constants.
  */
 
-define('DGS_VERSION', '1.19.1'); // ARCHITECTURE(1=php).MAJOR.MINOR
+define('DGS_VERSION', '1.19.2'); // ARCHITECTURE(1=php).MAJOR.MINOR
 define('CSS_VERSION', '20141123172700'); // take UTC-timestamp of skins/dragon/screen.css
 define('JS_VERSION',  '20131211220200'); // take UTC-timestamp of newest js/*.js script
 
