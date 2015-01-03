@@ -645,33 +645,33 @@ class TournamentLadder
    }//load_tournament_ladder_by_rank
 
    /*!
-    * \brief Loads and returns TournamentLadder-object for given tournament-ID:
-    *        find entry with lowest ladder-position with at least the given user-rating.
+    * \brief Finds ladder-position (TL.Rank) after which to insert user with given user-rating for given tournament-ID.
     * \param $use_tourney_rating true = compare given $user_rating with ladder users TournamentParticipant.Rating2;
     *        false = compare given $user_rating with ladder users Players.Rating2
-    * \return found TournamentLadder-object; or null if ladder contains only users with weaker user-rating.
+    * \return ladder-position after which to insert user (if ladder sorted by rating);
+    *       0 = takes top position, because ladder contains only users with weaker user-rating.
     */
-   public static function load_tournament_ladder_by_user_rating( $tid, $user_rating, $use_tourney_rating )
+   public static function find_tournament_ladder_pos_for_user_rating( $tid, $user_rating, $use_tourney_rating )
    {
       $qsql = self::build_query_sql( $tid );
+      $qsql->clear_parts( SQLP_FIELDS );
+      $qsql->add_part( SQLP_FIELDS, 'COUNT(*) AS X_Count' );
+
       if ( $use_tourney_rating )
       {
          $qsql->add_part( SQLP_FROM, "INNER JOIN TournamentParticipant AS TP ON TP.tid=TL.tid AND TP.ID=TL.rid" );
          $qsql->add_part( SQLP_WHERE, "TP.Rating >= $user_rating" );
-         $qsql->add_part( SQLP_ORDER, 'TP.Rating ASC' );
       }
       else
       {
          $qsql->add_part( SQLP_FROM, "INNER JOIN Players AS P ON P.ID=TL.uid" );
          $qsql->add_part( SQLP_WHERE, "P.Rating2 >= $user_rating" );
-         $qsql->add_part( SQLP_ORDER, 'P.Rating2 ASC' );
       }
-      $qsql->add_part( SQLP_LIMIT, '1' );
 
-      $row = mysql_single_fetch( "TournamentLadder:load_tournament_ladder_by_user_rating($tid,$user_rating,$use_tourney_rating)",
+      $row = mysql_single_fetch( "TournamentLadder:find_tournament_ladder_pos_for_user_rating($tid,$user_rating,$use_tourney_rating)",
          $qsql->get_select() );
-      return ($row) ? self::new_from_row($row) : null;
-   }//load_tournament_ladder_by_user_rating
+      return ( $row ) ? (int)@$row['X_Count'] : 0;
+   }//find_tournament_ladder_pos_for_user_rating
 
    /*! \brief Returns enhanced (passed) ListIterator with TournamentLadder-objects for given tournament-id. */
    public static function load_tournament_ladder( $iterator, $tid=-1 )
@@ -792,23 +792,19 @@ class TournamentLadder
          $user_rating = $arr[$uid]['Rating2'];
       }
 
-      $extra_lock = ( $use_tourney_rating ) //see load_tournament_ladder_by_user_rating()
+      $extra_lock = ( $use_tourney_rating ) //see find_tournament_ladder_pos_for_user_rating()
          ? ', TournamentParticipant AS TP READ'
          : ', Players AS P READ';
       db_lock( "TournamentLadder:add_participant_to_ladder_by_rating($tid,$rid,$uid)",
          "TournamentLadder WRITE, TournamentLadder AS TL READ $extra_lock" );
       {//LOCK TournamentLadder (to avoid race-conditions)
          $cnt_tp = self::count_tournament_ladder( $tid );
-         if ( $cnt_tp > 0 )
-         {
-            $tladder_rating = self::load_tournament_ladder_by_user_rating( $tid, $user_rating, $use_tourney_rating );
-            if ( is_null($tladder_rating) )
-               $new_rank = 1; // all ladder-users are weaker
-            else
-               $new_rank = $tladder_rating->Rank + 1; // insert below user with same or stronger rating
-         }
-         else
-            $new_rank = 1;
+
+         // insert below user with same or stronger rating
+         $new_rank = self::find_tournament_ladder_pos_for_user_rating( $tid, $user_rating, $use_tourney_rating );
+         $new_rank++;
+         if ( $cnt_tp > 1 && $new_rank == 1 ) // don't insert at top position without a game played
+            $new_rank++;
 
          $result = self::_add_participant_to_ladder_with_new_rank( $tp, $cnt_tp, $new_rank );
       }

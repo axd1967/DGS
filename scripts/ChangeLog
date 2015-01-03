@@ -11,6 +11,13 @@ Release [2014-07-30] - DGS 1.0.18 - tag [release-1_0_18-20140730] on (later) bra
 ChangeLog
 ------------------------------------------------------------------
 
+2015-01-04 jug
+
+   * tournaments/include/tournament_ladder.php (TournamentLadder.find_tournament_ladder_pos_for_user_rating,
+       ~.add_participant_to_ladder_by_rating):
+   - bugfix: fix finding correct insert-position for ladder-tournament with RATING-join-order
+     - don't insert strongest player at top-position without having played a game
+
 2015-01-03 jug
 
    * tournaments/include/tournament_participant.php (class TournamentParticipant, ~.__construct,
