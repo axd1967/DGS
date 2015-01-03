@@ -177,6 +177,7 @@ Description:
 | Finished     | mediumint(8) unsigned             | NO   |     | 0                   |                |
 | Won          | mediumint(8) unsigned             | NO   |     | 0                   |                |
 | Lost         | mediumint(8) unsigned             | NO   |     | 0                   |                |
+| Lastmoved    | datetime                          | NO   |     | 0000-00-00 00:00:00 |                |
 
 
 ## Fields:
@@ -264,6 +265,9 @@ Description:
    - Finished: annulled (=detached) tournament-games are not counted,
      other games including no-results games are counting
    - Won, Lost: jigo and no-result games are not counted as won or lost
+
+* Lastmoved : date of last moved
+   - 0 = not moved yet
 
 
 ###########################################################################

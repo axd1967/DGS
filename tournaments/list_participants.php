@@ -89,6 +89,8 @@ $GLOBALS['ThePage'] = new Page('TournamentParticipantList');
    $tpfilter->add_filter(12, 'RelativeDate', 'TP.Created', true,
          array( FC_TIME_UNITS => FRDTU_ALL_ABS, FC_SIZE => 6 ));
    $tpfilter->add_filter(13, 'RelativeDate', 'TP.Lastchanged', true);
+   $tpfilter->add_filter(19, 'RelativeDate', 'TP.Lastmoved', true,
+         array( FC_TIME_UNITS => FRDTU_ALL_ABS, FC_SIZE => 6 ));
    $tpfilter->init();
 
    // init table
@@ -119,6 +121,7 @@ $GLOBALS['ThePage'] = new Page('TournamentParticipantList');
    $tptable->add_tablehead(17, T_('Won#header'), 'Number', 0, 'Won-');
    $tptable->add_tablehead(18, T_('Lost#header'), 'Number', 0, 'Lost-');
    $tptable->add_tablehead(12, T_('Registered#T_header'), 'Date', 0, 'Created+');
+   $tptable->add_tablehead(19, T_('Tournament last move#header'), 'Date', 0, 'Lastmoved-');
    $tptable->add_tablehead(13, T_('Updated#header'), 'Date', 0, 'Lastchanged-');
    if ( $allow_edit_tourney )
       $tptable->add_tablehead(14, T_('Messages#T_header'), 'Enum', TABLE_NO_SORT);
@@ -210,6 +213,8 @@ $GLOBALS['ThePage'] = new Page('TournamentParticipantList');
          $row_str[17] = $tp->Won;
       if ( $tptable->Is_Column_Displayed[18] )
          $row_str[18] = $tp->Lost;
+      if ( $tptable->Is_Column_Displayed[19] )
+         $row_str[19] = ($tp->Lastmoved > 0) ? date(DATE_FMT2, $tp->Lastmoved) : '';
 
       $tptable->add_row( $row_str );
    }

@@ -395,6 +395,10 @@ $GLOBALS['ThePage'] = new Page('TournamentEditParticipant');
          $tpform->add_row( array(
                'DESCRIPTION', T_('Last changed'),
                'TEXT',        TournamentUtils::buildLastchangedBy($tp->Lastchanged, $tp->ChangedBy) ));
+      if ( $tp->Lastmoved > 0 )
+         $tpform->add_row( array(
+               'DESCRIPTION', T_('Tournament last move'),
+               'TEXT',        date(DATE_FMT2, $tp->Lastmoved) ));
 
       // EDIT: Status ---------------------
 

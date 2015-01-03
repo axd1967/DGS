@@ -50,3 +50,11 @@ ALTER TABLE Messages
    ADD KEY Game_ID (Game_ID) ;
 
 
+-- set TournamentParticipant.Lastmoved if moved in tournament-game
+ALTER TABLE TournamentParticipant
+   ADD Lastmoved datetime NOT NULL default '0000-00-00 00:00:00' ;
+
+-- execute fix-script (with do_it=1) to init TP.Lastmoved for some participants as good as existing data allows
+--    'scripts/tournament_consistency.php'
+
+

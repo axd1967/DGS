@@ -4,7 +4,7 @@ General infos
 changelog reference at:
 http://www.gnu.org/prep/standards/html_node/Change-Logs.html
 
-previous server update:
+previous server upgrade:
 Release [2014-07-30] - DGS 1.0.18 - tag [release-1_0_18-20140730] on (later) branch [DGS-stable-20140730]
 
 ------------------------------------------------------------------
@@ -12,6 +12,28 @@ ChangeLog
 ------------------------------------------------------------------
 
 2015-01-03 jug
+
+   * tournaments/include/tournament_participant.php (class TournamentParticipant, ~.__construct,
+       ~.to_string, ~.build_log_string, ~.fillEntityData, ~.new_from_row),
+     tournaments/include/tournament_ladder.php (TournamentLadder.load_cache_tournament_ladder),
+     include/game_actions.php (GameActionHelper.update_game),
+     scripts/tournament_consistency.php (fix_tournament_participant_last_moved, collect_tp_last_move),
+     scripts/updates/1.19/database_changes.mysql, scripts/updates/1.19/other_changes.txt,
+     specs/db/table-Tournaments.txt, specs/db/dragon-ddl.sql,
+     tournaments/edit_participant.php, tournaments/list_participants.php,
+     tournaments/register.php, tournaments/view_tournament.php:
+   - set TournamentParticipant.Lastmoved if moved in tournament-game
+     - show tournament-last-moved on pages view-tournament, registration,
+       edit-participant, list-participants
+     - extended tournament-consistency-script to init unset TP.Lastmoved
+-----------
+-- set TournamentParticipant.Lastmoved if moved in tournament-game
+ALTER TABLE TournamentParticipant
+   ADD Lastmoved datetime NOT NULL default '0000-00-00 00:00:00' ;
+
+-- execute fix-script (with do_it=1) to init TP.Lastmoved for some participants as good as existing data allows
+--    'scripts/tournament_consistency.php'
+-----------
 
    * include/quick/quick_game.php (class QuickHandlerGame, ~.prepareMoves),
      include/sgf_parser.php  (get_handicap_pattern),

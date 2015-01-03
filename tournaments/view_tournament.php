@@ -223,6 +223,8 @@ $GLOBALS['ThePage'] = new Page('Tournament');
       if ( $tourney->Type == TOURNEY_TYPE_LADDER || $tourney->Type == TOURNEY_TYPE_ROUND_ROBIN )
          $itable->add_sinfo( T_('User Result State#tourney'), $tt_user_state );
    }
+   if ( $my_tp && $my_tp->Lastmoved > 0 )
+      $itable->add_sinfo( T_('Tournament last move'), date(DATE_FMT, $my_tp->Lastmoved));
 
    echo $itable->make_table();
 

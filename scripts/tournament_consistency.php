@@ -83,6 +83,8 @@ define('SEPLINE', "\n<p><hr>\n");
       $cnt_err += fix_tournament_RegisteredTP( $tid, $do_it );
       $cnt_err += fix_tournament_participant_game_count( $tid, $do_it );
       $cnt_err += fix_tournament_ladder_challenge_count( $tid, $do_it );
+      $cnt_err += fix_tournament_participant_last_moved( $tid, $do_it );
+
       $cnt_err += check_tournament_ladder_unique_rank( $tid );
       $cnt_err += check_tournament_ladder_miss_tp_entry( $tid );
    }
@@ -384,5 +386,127 @@ function check_tournament_ladder_miss_tp_entry( $arg_tid )
 
    return $cnt_err;
 }//check_tournament_ladder_miss_tp_entry
+
+
+function fix_tournament_participant_last_moved( $arg_tid, $do_it )
+{
+   $begin = getmicrotime();
+   $cnt_err = 0;
+   echo SEPLINE;
+   echo "Fix TournamentParticipant.Lastmoved ...<br>\n";
+
+   // find existing TP without Lastmoved
+   $map_tp = array(); // tid => { uid => timestamp }
+   $cnt_tp = 0;
+   $result = db_query( "tournament_consistency.fix_tournament_participant_last_moved.find_tp($arg_tid)",
+      "SELECT tid, uid, UNIX_TIMESTAMP(TP.Lastmoved) AS X_Lastmoved " .
+      "FROM TournamentParticipant AS TP WHERE TP.Status='".TP_STATUS_REGISTER."' AND Lastmoved=0" );
+   while ( $row = mysql_fetch_array($result) )
+   {
+      extract($row);
+      $cnt_tp++;
+      if ( !isset($map_tp[$tid]) )
+         $map_tp[$tid] = array();
+      $map_tp[$tid][$uid] = $X_Lastmoved;
+   }
+   mysql_free_result($result);
+
+   echo "\n<br>Found $cnt_tp tournament-participants on REGISTER-status without last-moved-date ...<br>\n";
+
+   // collect last-moved data of finished and started games
+   $cnt_games = 0;
+   $map_lm = array(); // tid => { uid => timestamp }
+   $result = db_query( "tournament_consistency.fix_tournament_participant_last_moved.find_games($arg_tid)",
+      "SELECT DISTINCT G.ID AS gid, G.tid, G.Status, G.Moves, G.Handicap, G.StdHandicap, " .
+         "G.Black_ID, G.White_ID, G.ToMove_ID, UNIX_TIMESTAMP(G.Lastchanged) AS X_Lastchanged, " .
+         "M1.Stone AS Stone1, M1.Hours AS Hours1, M2.Stone AS Stone2 " .
+      "FROM Games AS G " .
+         "LEFT JOIN Moves AS M1 ON M1.gid=G.ID AND M1.MoveNr=G.Moves AND M1.Stone IN (".BLACK.",".WHITE.") " .
+         "LEFT JOIN Moves AS M2 ON M2.gid=G.ID AND M2.MoveNr=G.Moves-1 AND M2.Stone IN (".BLACK.",".WHITE.") " .
+      "WHERE G.GameType='".GAMETYPE_GO."' AND G.tid > 0 " .
+         tid_clause('G.tid', $arg_tid, /*with-OP*/true, /*with-WHERE*/false) .
+      "ORDER BY G.Lastchanged ASC" );
+   while ( $row = mysql_fetch_array($result) )
+   {
+      extract($row);
+      $cnt_games++;
+
+      if ( $Status == GAME_STATUS_FINISHED )
+      {
+         if ( @$Stone1 )
+         {
+            if ( $Stone1 == BLACK )
+            {
+               collect_tp_last_move( $map_lm, $tid, $Black_ID, $X_Lastchanged );
+               if ( @$Stone2 == WHITE ) // approximate
+                  collect_tp_last_move( $map_lm, $tid, $White_ID, $X_Lastchanged - (int)@$Hours1 * SECS_PER_HOUR);
+            }
+            elseif ( $Stone1 == WHITE )
+            {
+               collect_tp_last_move( $map_lm, $tid, $White_ID, $X_Lastchanged );
+               if ( @$Stone2 == BLACK ) // approximate
+                  collect_tp_last_move( $map_lm, $tid, $Black_ID, $X_Lastchanged - (int)@$Hours1 * SECS_PER_HOUR);
+            }
+         }
+      }
+      elseif ( isStartedGame($Status) )
+      {
+         if ( ( $Moves > $Handicap ) || ( $Handicap > 0 && $StdHandicap == 'N' && $Moves > 0 ) )
+         {
+            $uid = ( $ToMove_ID == $Black_ID ) ? $White_ID : $Black_ID;
+            collect_tp_last_move( $map_lm, $tid, $uid, $X_Lastchanged );
+            if ( $Moves > $Handicap + 1 ) // approximate
+               collect_tp_last_move( $map_lm, $tid, $ToMove_ID, $X_Lastchanged - (int)@$Hours1 * SECS_PER_HOUR);
+         }
+      }
+   }
+   mysql_free_result($result);
+
+   echo "\n<br>Checked $cnt_games games ...<br><br>\n";
+
+   // fix TP.Lastmoved
+   $upd_arr = array();
+   foreach ( $map_lm as $tid => $data )
+   {
+      foreach ( $data as $uid => $last_moved )
+      {
+         // only update TPs with Lastmoved=0
+         if ( isset($map_tp[$tid][$uid]) && $last_moved > @$map_tp[$tid][$uid] )
+         {
+            $upd_arr[] = "UPDATE TournamentParticipant SET Lastmoved=GREATEST(Lastmoved,FROM_UNIXTIME($last_moved)) " .
+               "WHERE tid=$tid AND Status='".TP_STATUS_REGISTER."' AND uid=$uid LIMIT 1";
+            echo sprintf( "TournamentParticipant: found last-move-date [%s] for tid [%s] uid [%s]<br>\n",
+               date(DATE_FMT, $last_moved), $tid, $uid );
+         }
+      }
+   }
+
+   $cnt_err += count($upd_arr);
+
+   do_updates( 'tournament_consistency.fix_tournament_participant_last_moved', $upd_arr, $do_it );
+
+   $row = mysql_single_fetch( "tournament_consistency.fix_tournament_participant_last_moved.count_tp_no_lastmove($arg_tid)",
+      "SELECT COUNT(*) AS X_Count FROM TournamentParticipant WHERE Status='".TP_STATUS_REGISTER."' AND Lastmoved=0" );
+   $cnt_tp_lm0 = ($row) ? (int)$row['X_Count'] : 0;
+
+   echo "\nNOTE: $cnt_tp_lm0 participants without last-moved ...<br>\n";
+
+   echo "\n<br>Needed: " . sprintf("%1.3fs", (getmicrotime() - $begin))
+      , " - TournamentParticipant.Lastmoved check Done.";
+
+   return $cnt_err;
+}//fix_tournament_participant_last_moved
+
+function collect_tp_last_move( &$map, $tid, $uid, $game_lm )
+{
+   if ( $uid > 0 && $game_lm > 0 )
+   {
+      if ( !isset($map[$tid]) )
+         $map[$tid] = array();
+      $last_moved = ( isset($map[$tid][$uid]) ) ? $map[$tid][$uid] : 0;
+      if ( $game_lm > $last_moved )
+         $map[$tid][$uid] = $game_lm;
+   }
+}//collect_tp_last_move
 
 ?>

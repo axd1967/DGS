@@ -16,6 +16,9 @@ Copyright (C) 2001-2015  Erik Ouchterlony, Jens-Uwe Gaspar
       * Replaced 'RRNG'-restriction with actual restricted rating-range '30k-9d'
       * Increased max. number of games (18) per participant to allow double-round-robin for private/public tournaments
 
+      * Added last-moved date for tournament-games
+         * Show on pages: view-tournament, tournament-registration, list-participants, edit-participant (for T-director)
+
    Minor changes:
 
    * Markup tags and Images:

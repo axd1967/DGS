@@ -50,7 +50,7 @@ $ENTITY_TOURNAMENT_PARTICIPANT = new Entity( 'TournamentParticipant',
       FTYPE_INT,  'ID', 'tid', 'uid', 'Flags', 'StartRound', 'NextRound', 'Finished', 'Won', 'Lost',
       FTYPE_FLOAT, 'Rating',
       FTYPE_TEXT, 'Comment', 'Notes', 'UserMessage', 'AdminMessage',
-      FTYPE_DATE, 'Created', 'Lastchanged',
+      FTYPE_DATE, 'Created', 'Lastchanged', 'Lastmoved',
       FTYPE_ENUM, 'Status'
    );
 
@@ -76,6 +76,7 @@ class TournamentParticipant
    public $Finished;
    public $Won;
    public $Lost;
+   public $Lastmoved;
 
    // non-DB fields
 
@@ -84,7 +85,7 @@ class TournamentParticipant
    /*! \brief Constructs TournamentParticipant-object with specified arguments. */
    public function __construct( $id=0, $tid=0, $uid=0, $user=NULL, $status=null, $flags=0,
          $rating=NULL, $start_round=1, $next_round=0, $created=0, $lastchanged=0, $changed_by='',
-         $comment='', $notes='', $user_message='', $admin_message='', $finished=0, $won=0, $lost=0 )
+         $comment='', $notes='', $user_message='', $admin_message='', $finished=0, $won=0, $lost=0, $lastmoved=0 )
    {
       $this->ID = (int)$id;
       $this->tid = (int)$tid;
@@ -104,6 +105,7 @@ class TournamentParticipant
       $this->Finished = (int)$finished;
       $this->Won = (int)$won;
       $this->Lost = (int)$lost;
+      $this->Lastmoved = (int)$lastmoved;
       // non-DB fields
       $this->User = ($user instanceof User) ? $user : new User( $this->uid );
    }
@@ -164,6 +166,7 @@ class TournamentParticipant
             . ", Finished=[{$this->Finished}]"
             . ", Won=[{$this->Won}]"
             . ", Lost=[{$this->Lost}]"
+            . ", Lastmoved=[{$this->Lastmoved}]"
          ;
    }
 
@@ -207,6 +210,8 @@ class TournamentParticipant
          $out[] = "AdmMsg=[{$this->AdminMessage}]";
       if ( $this->Finished + $this->Won + $this->Lost > 0 )
          $out[] = "Fin/Won/Lost=[{$this->Finished}/{$this->Won}/{$this->Lost}]";
+      if ( $this->Lastmoved > 0 )
+         $out[] = "Lastmoved=[".date(DATE_FMT, $this->Lastmoved)."]";
       return implode(', ', $out);
    }//build_log_string
 
@@ -347,6 +352,7 @@ class TournamentParticipant
       $data->set_value( 'Finished', $this->Finished );
       $data->set_value( 'Won', $this->Won );
       $data->set_value( 'Lost', $this->Lost );
+      $data->set_value( 'Lastmoved', $this->Lastmoved );
       return $data;
    }
 
@@ -480,7 +486,8 @@ class TournamentParticipant
             @$row['AdminMessage'],
             @$row['Finished'],
             @$row['Won'],
-            @$row['Lost']
+            @$row['Lost'],
+            @$row['X_Lastmoved']
          );
       return $tp;
    }

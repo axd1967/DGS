@@ -1427,6 +1427,7 @@ class TournamentLadder
          if ( $with_tp )
             $tl_iterator->addQuerySQLMerge( new QuerySQL(
                   SQLP_FIELDS, 'TP.Rating AS TP_Rating', 'TP.Finished AS TP_Finished',
+                               'UNIX_TIMESTAMP(TP.Lastmoved) AS TP_X_Lastmoved',
                   SQLP_FROM,   'INNER JOIN TournamentParticipant AS TP ON TP.tid=TL.tid AND TP.ID=TL.rid'
                ));
          if ( $with_index )

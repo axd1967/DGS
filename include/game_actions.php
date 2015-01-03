@@ -28,6 +28,7 @@ require_once 'include/sgf_parser.php';
 require_once 'include/std_classes.php';
 require_once 'include/std_functions.php';
 require_once 'include/game_functions.php';
+require_once 'tournaments/include/tournament_globals.php';
 
 
 /*!
@@ -672,6 +673,14 @@ class GameActionHelper
       else
          $this->notify_opponent = true;
 
+
+      // Update TournamentParticipant.Lastmoved
+      if ( ALLOW_TOURNAMENTS && $tid > 0 )
+      {
+         db_query( "$dbgmsg.upd_tp.lastmoved($tid,{$this->my_id})",
+            "UPDATE TournamentParticipant SET Lastmoved=FROM_UNIXTIME($NOW) " .
+            "WHERE tid=$tid AND Status='".TP_STATUS_REGISTER."' AND uid={$this->my_id} LIMIT 1" );
+      }
 
       // Increase moves and activity
       $upd = new UpdateQuery('Players');
