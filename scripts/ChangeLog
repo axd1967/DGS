@@ -11,6 +11,14 @@ Release [2014-07-30] - DGS 1.0.18 - tag [release-1_0_18-20140730] on (later) bra
 ChangeLog
 ------------------------------------------------------------------
 
+2015-01-03 jug
+
+   * include/quick/quick_game.php (class QuickHandlerGame, ~.prepareMoves),
+     include/sgf_parser.php  (get_handicap_pattern),
+     specs/quick_suite.txt, NEWS:
+   - extended quick-game-handler set_handicap-command to allow to use standard handicap placement
+     with argument 'move=std'
+
 ### ----- release-1_19_1-20141231 -----
 
 2014-12-31 jug

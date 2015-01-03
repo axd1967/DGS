@@ -52,6 +52,9 @@ Copyright (C) 2001-2015  Erik Ouchterlony, Jens-Uwe Gaspar
       * Changed order of columns on games-page by moving current-rating near user-info
       * Enforce manual handicap-type for shape-games in waiting-room and for invitations
 
+   * Quick-Suite (alternative interface "quick_do.php"):
+      * Extended game-handler to set standard handicap placement
+
    Bug fixes:
 
    * Fixed tournament-registration and rank-converter to accept user with rating > 6d

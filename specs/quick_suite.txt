@@ -775,7 +775,9 @@ Commands:
 
    "set_handicap" : sets handicap stones at start of game
       - required opts: GAME_ID, MOVE_ID, MOVES
-         - MOVE = moves : list of coordinates of the handicap-stone placement
+         - MOVES = moves : list of coordinates of the handicap-stone placement
+         - MOVES = 'std' : uses standard placement for handicap-stones as defined by DGS,
+                           see size-dependent SGF-files 'pattern/standard_handicap_$SIZE.sgf'
       - optional opts: MESSAGE
 
       - Errors:

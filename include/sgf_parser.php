@@ -708,11 +708,13 @@ class GameSgfParser
 
 
 
-// Read the standard handicap pattern file
-// and convert it to a stonestring.
+// Read the standard handicap pattern file and convert it to a stonestring.
+// \param $err Contains parse-error or '' on success
+// \return stonestring with SGF-coords
 function get_handicap_pattern( $size, $handicap, &$err)
 {
-   $stonestring ='';
+   $err = '';
+   $stonestring = '';
    if ( $handicap < 2 )
       return $stonestring;
 

@@ -47,6 +47,7 @@ define('GAMEOPT_AGREE',   'agree');
 define('QGAME_OPTIONS', 'gid|move_id|move|msg|fmt|toggle|agree');
 
 define('GAMEOPTVAL_MOVE_PASS', 'pass');
+define('GAMEOPTVAL_MOVE_STDHANDICAP', 'std');
 define('GAMEOPTVAL_TOGGLE_ALL',    'all');
 define('GAMEOPTVAL_TOGGLE_UNIQUE', 'uniq');
 
@@ -335,17 +336,26 @@ class QuickHandlerGame extends QuickHandler
       if ( empty($this->url_moves) )
          return;
 
-      if ( (string)$this->url_moves == GAMEOPTVAL_MOVE_PASS )
+      $size = $this->game_row['Size'];
+      $handicap = $this->game_row['Handicap'];
+
+      $parse_url_moves = $this->url_moves;
+      if ( (string)$parse_url_moves == GAMEOPTVAL_MOVE_PASS )
       {
          $this->is_pass_move = true;
          return;
       }
+      elseif ( (string)$parse_url_moves == GAMEOPTVAL_MOVE_STDHANDICAP )
+      {
+         $parse_url_moves = get_handicap_pattern( $size, $handicap, $pattern_error );
+         if ( $pattern_error )
+            error('invalid_coord', "QuickHandlerGame.prepareMoves({$this->gid},$size,[$coord]}): $pattern_error");
+      }
 
-      $size = $this->game_row['Size'];
-      $is_label_format = preg_match("/\\d/", $this->url_moves); // label | sgf format
+      $is_label_format = preg_match("/\\d/", $parse_url_moves); // label | sgf format
 
       $arr_double = array(); // check for doublettes
-      $arr_coords = self::parse_coords( $this->url_moves );
+      $arr_coords = self::parse_coords( $parse_url_moves );
       foreach ( $arr_coords as $coord )
       {
          $xy_arr = ($is_label_format) ? board2number_coords($coord, $size) : sgf2number_coords($coord, $size);
