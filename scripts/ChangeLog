@@ -11,9 +11,13 @@ Release [2014-07-30] - DGS 1.0.18 - tag [release-1_0_18-20140730] on (later) bra
 ChangeLog
 ------------------------------------------------------------------
 
-### ----- release-1_19_2-20150104 -----
-
 2015-01-04 jug
+
+   * scripts/tournament_consistency.php (fix_tournament_participant_last_moved):
+   - bugfix: only count tournament-participants without last-move for given tournament-IDs
+     and not on REGISTER-phase
+
+### ----- release-1_19_2-20150104 -----
 
    * tournaments/include/tournament_ladder.php (TournamentLadder.find_tournament_ladder_pos_for_user_rating,
        ~.add_participant_to_ladder_by_rating):

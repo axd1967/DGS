@@ -395,12 +395,18 @@ function fix_tournament_participant_last_moved( $arg_tid, $do_it )
    echo SEPLINE;
    echo "Fix TournamentParticipant.Lastmoved ...<br>\n";
 
+   $tp_lm0_qpart =
+      "FROM TournamentParticipant AS TP " .
+         "INNER JOIN Tournament AS T ON T.ID=TP.tid " .
+      "WHERE TP.Status='".TP_STATUS_REGISTER."' AND Lastmoved=0 " .
+         "AND T.Status <> '".TOURNEY_STATUS_REGISTER."'" .
+         tid_clause('T.ID', $arg_tid, /*with-OP*/true, /*with-WHERE*/false);
+
    // find existing TP without Lastmoved
    $map_tp = array(); // tid => { uid => timestamp }
    $cnt_tp = 0;
    $result = db_query( "tournament_consistency.fix_tournament_participant_last_moved.find_tp($arg_tid)",
-      "SELECT tid, uid, UNIX_TIMESTAMP(TP.Lastmoved) AS X_Lastmoved " .
-      "FROM TournamentParticipant AS TP WHERE TP.Status='".TP_STATUS_REGISTER."' AND Lastmoved=0" );
+      "SELECT tid, uid, UNIX_TIMESTAMP(TP.Lastmoved) AS X_Lastmoved " . $tp_lm0_qpart );
    while ( $row = mysql_fetch_array($result) )
    {
       extract($row);
@@ -486,7 +492,7 @@ function fix_tournament_participant_last_moved( $arg_tid, $do_it )
    do_updates( 'tournament_consistency.fix_tournament_participant_last_moved', $upd_arr, $do_it );
 
    $row = mysql_single_fetch( "tournament_consistency.fix_tournament_participant_last_moved.count_tp_no_lastmove($arg_tid)",
-      "SELECT COUNT(*) AS X_Count FROM TournamentParticipant WHERE Status='".TP_STATUS_REGISTER."' AND Lastmoved=0" );
+      "SELECT COUNT(*) AS X_Count " . $tp_lm0_qpart );
    $cnt_tp_lm0 = ($row) ? (int)$row['X_Count'] : 0;
 
    echo "\nNOTE: $cnt_tp_lm0 participants without last-moved ...<br>\n";
