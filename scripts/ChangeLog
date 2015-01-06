@@ -13,6 +13,17 @@ ChangeLog
 
 2015-01-06 jug
 
+   * tournaments/include/tournament_pool_classes.php (PoolViewer.init_pool_table,
+       ~.make_single_pool_table),
+     include/gui_functions.php (echo_image_table, echo_image_opp_games),
+     scripts/updates/1.19/other_changes.txt,
+     tournaments/list_participants.php, tournaments/ladder/view.php,
+     images/gamestable-fin.gif, images/gamestable-run.gif:
+   - added different table-icons for link to list with running and finished games
+     - use running/finished table-icons for opponents-page, ladder-view, pool-view,
+       tournament-participants-list
+     - added link & icon to finished tournament-games on tournament-participants-list and pool-view
+
    * ratinggraph.php:
    - bugfix: rating-graph shown by-games enabled in profile was always used, even when unchecked in form
 

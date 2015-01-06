@@ -115,7 +115,7 @@ $GLOBALS['ThePage'] = new Page('TournamentParticipantList');
    if ( $allow_edit_tourney )
       $tptable->add_tablehead( 9, T_('Flags#header'), 'Enum', 0, 'Flags+');
    $tptable->add_tablehead(10, T_('Round#header'), 'Number', 0, 'NextRound-');
-   $tptable->add_tablehead(15, new TableHead( T_('Running games'), 'images/table.gif'), 'ImagesLeft', TABLE_NO_SORT);
+   $tptable->add_tablehead(15, new TableHead( T_('Running and finished tournament games'), 'images/table.gif'), 'Image', TABLE_NO_SORT);
    $tptable->add_tablehead(11, T_('Tournament Rating#header'), 'Rating', 0, ( $has_tp_rating ? 'TP.Rating-' : 'Rating2-' ));
    $tptable->add_tablehead(16, T_('Finished#header'), 'Number', 0, 'Finished-');
    $tptable->add_tablehead(17, T_('Won#header'), 'Number', 0, 'Won-');
@@ -203,9 +203,14 @@ $GLOBALS['ThePage'] = new Page('TournamentParticipantList');
       }
       if ( $tptable->Is_Column_Displayed[15] )
       {
-         $row_str[15] = echo_image_table(
+         $row_str[15] = echo_image_table( IMG_GAMETABLE_RUN,
                $base_path."show_games.php?tid=$tid".URI_AMP."uid=$uid",
-               sprintf( T_('Running games of user [%s]'), $tp->User->Handle ) );
+               sprintf( T_('Running tournament games of user [%s]'), $tp->User->Handle ),
+               false )
+            . echo_image_table( IMG_GAMETABLE_FIN,
+               $base_path."show_games.php?tid=$tid".URI_AMP."uid=$uid".URI_AMP."finished=1",
+               sprintf( T_('Finished tournament games of user [%s]'), $tp->User->Handle ),
+               false );
       }
       if ( $tptable->Is_Column_Displayed[16] )
          $row_str[16] = $tp->Finished;

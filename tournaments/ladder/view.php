@@ -212,7 +212,8 @@ $GLOBALS['ThePage'] = new Page('TournamentLadderView');
          {
             if ( $tladder->ChallengesIn + $tladder->ChallengesOut > 0 )
             {
-               $run_games_str = echo_image_table( $base_path."show_games.php?tid=$tid".URI_AMP."uid=$uid",
+               $run_games_str = echo_image_table( IMG_GAMETABLE_RUN,
+                  $base_path."show_games.php?tid=$tid".URI_AMP."uid=$uid",
                   ( ($is_mine)
                         ? T_('My running tournament games')
                         : sprintf( T_('Running tournament games of user [%s]'), $user->Handle ) ),
@@ -220,7 +221,8 @@ $GLOBALS['ThePage'] = new Page('TournamentLadderView');
             }
             if ( @$orow['TP_Finished'] > 0 )
             {
-               $fin_games_str = echo_image_table( $base_path."show_games.php?tid=$tid".URI_AMP."uid=$uid".URI_AMP."finished=1",
+               $fin_games_str = echo_image_table( IMG_GAMETABLE_FIN,
+                  $base_path."show_games.php?tid=$tid".URI_AMP."uid=$uid".URI_AMP."finished=1",
                   ( ($is_mine)
                         ? T_('My finished tournament games')
                         : sprintf( T_('Finished tournament games of user [%s]'), $user->Handle ) ),

@@ -844,7 +844,7 @@ class PoolViewer
       if ( !($this->options & PVOPT_NO_TRATING) )
          $this->table->add_tablehead( 4, T_('Tournament Rating#header'), 'Rating', 0 );
       $this->table->add_tablehead( 5, T_('Country#header'), 'Image', 0 );
-      $this->table->add_tablehead(15, new TableHead( T_('Running tournament games'), 'images/table.gif'), 'Image', 0 );
+      $this->table->add_tablehead(15, new TableHead( T_('Running and finished tournament games'), 'images/table.gif'), 'Image', 0 );
       $this->table->add_tablehead(13, new TableHead( T_('User online#header'), 'images/online.gif',
          ( $this->options & PVOPT_NO_ONLINE
             ? T_('Indicator for being on vacation#header')
@@ -976,9 +976,16 @@ class PoolViewer
          if ( $this->table->Is_Column_Displayed[5] )
             $row_arr[5] = getCountryFlagImage( $user->Country );
          if ( $this->table->Is_Column_Displayed[15] )
-            $row_arr[15] = echo_image_table( $base_path."show_games.php?tid={$this->tid}".URI_AMP."uid=$uid",
+         {
+            $row_arr[15] = echo_image_table( IMG_GAMETABLE_RUN,
+                  $base_path."show_games.php?tid={$this->tid}".URI_AMP."uid=$uid",
                   sprintf( T_('Running tournament games of user [%s]'), $user->Handle ),
+                  false )
+               . echo_image_table( IMG_GAMETABLE_FIN,
+                  $base_path."show_games.php?tid={$this->tid}".URI_AMP."uid=$uid".URI_AMP."finished=1",
+                  sprintf( T_('Finished tournament games of user [%s]'), $user->Handle ),
                   false );
+         }
 
          if ( $show_results ) // build game-result-matrix (one user-row)
          {

@@ -20,3 +20,8 @@ copy /25/wms.gif
 -----------
 # adjust english translation for 'Tournament last move#header'
 
+-----------
+// added images
+copy /images/gamestable-fin.gif
+copy /images/gamestable-run.gif
+

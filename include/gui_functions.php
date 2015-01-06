@@ -399,13 +399,28 @@ function echo_image_note( $text, $withSep=true )
       . image( $GLOBALS['base_path'].'images/note.gif', $text, null, 'class="InTextImage"');
 }
 
-/*! \brief Returns image-tag for table-list with link. */
-function echo_image_table( $url, $title, $withSep=true )
+
+define('IMG_GAMETABLE_STD', 0);
+define('IMG_GAMETABLE_RUN', 1);
+define('IMG_GAMETABLE_FIN', 2);
+
+/*!
+ * \brief Returns image-tag for table-list with link.
+ * \param $img_gametable one of consts IMG_GAMETABLE...
+ */
+function echo_image_table( $img_gametable, $url, $title, $withSep=true )
 {
    global $base_path;
+   static $ARR_IMG = array(
+         IMG_GAMETABLE_STD => 'table.gif',
+         IMG_GAMETABLE_RUN => 'gamestable-run.gif',
+         IMG_GAMETABLE_FIN => 'gamestable-fin.gif',
+      );
+   if ( !isset($ARR_IMG[$img_gametable]) )
+      $img_gametable = IMG_GAMETABLE_STD;
    return ($withSep ? MINI_SPACING : '')
       . anchor( $url,
-         image( $base_path.'images/table.gif', $title, null, 'class="InTextImage"' ),
+         image( $base_path.'images/'.$ARR_IMG[$img_gametable], $title, null, 'class="InTextImage"' ),
          $title );
 }
 
@@ -414,7 +429,7 @@ function echo_image_opp_games( $uid, $opp_handle, $is_finished )
    $link_fmt = ( $is_finished )
       ? T_('Link to finished games with opponent [%s]')
       : T_('Link to running games with opponent [%s]'); // running + all
-   return echo_image_table(
+   return echo_image_table( ($is_finished ? IMG_GAMETABLE_FIN : IMG_GAMETABLE_RUN),
       "show_games.php?uid=$uid".URI_AMP."opp_hdl=".urlencode($opp_handle).REQF_URL.'opp_hdl'
          . ( $is_finished ? URI_AMP.'finished=1' : '' ),
       sprintf($link_fmt, $opp_handle), true );
