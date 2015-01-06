@@ -420,6 +420,7 @@ class QuickHandlerMessage extends QuickHandler
                   'time_byo' => $row['Byotime'],
                   'time_periods' => $row['Byoperiods'],
 
+                  'own_started_games' => (int)$player_row['Running'],
                   'opp_started_games' => GameHelper::count_started_games( $my_id, $other_uid ),
                   'calc_type' => $gs_calc->calc_type,
                   'calc_color' => $gs_calc->calc_color,

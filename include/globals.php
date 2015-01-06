@@ -30,7 +30,7 @@ define('CSS_VERSION', '20141123172700'); // take UTC-timestamp of skins/dragon/s
 define('JS_VERSION',  '20131211220200'); // take UTC-timestamp of newest js/*.js script
 
 // global version of quick-suite: increased with each release
-define('QUICK_VERSION', 6);
+define('QUICK_VERSION', 7);
 define('QUICK_SUITE_VERSION', DGS_VERSION.':'.QUICK_VERSION);
 
 // ---------- General stuff----------------------------------------

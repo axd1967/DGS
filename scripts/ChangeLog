@@ -13,6 +13,12 @@ ChangeLog
 
 2015-01-06 jug
 
+   * include/quick/quick_message.php (QuickHandlerMessage.fill_message_info),
+     include/globals.php (QUICK_VERSION),
+     specs/quick_suite.txt:
+   - add own number of started games in quick-message-handler for an invitation
+     in field 'own_started_games'
+
    * tournaments/include/tournament_pool_classes.php (PoolViewer.init_pool_table,
        ~.make_single_pool_table),
      include/gui_functions.php (echo_image_table, echo_image_opp_games),

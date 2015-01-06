@@ -58,6 +58,7 @@ Copyright (C) 2001-2015  Erik Ouchterlony, Jens-Uwe Gaspar
 
    * Quick-Suite (alternative interface "quick_do.php"):
       * Extended game-handler to set standard handicap placement
+      * Extended message-handler to set 'own_started_games' for invitations to support restrictions by bots
 
    Bug fixes:
 
