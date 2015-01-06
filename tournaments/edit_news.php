@@ -156,7 +156,7 @@ $GLOBALS['ThePage'] = new Page('TournamentNewsEdit');
    $tnform->add_row( array(
          'DESCRIPTION', T_('Publish time'),
          'TEXTINPUT',   'publish', 20, 30, $vars['publish'],
-         'TEXT',  '&nbsp;' . span('EditNote', sprintf( T_('(Date format [%s])'), FMT_PARSE_DATE )), ));
+         'TEXT',  '&nbsp;' . span('EditNote', sprintf( T_('(Date format [%s], local timezone)'), FMT_PARSE_DATE )), ));
    $tnform->add_row( array(
          'DESCRIPTION', T_('Subject'),
          'TEXTINPUT',   'subject', 80, 255, $vars['subject'] ));

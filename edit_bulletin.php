@@ -226,7 +226,7 @@ $GLOBALS['ThePage'] = new Page('BulletinEdit');
    $bform->add_row( array(
          'DESCRIPTION', T_('Expire Time'),
          'TEXTINPUT',   'expire_time', 20, 30, $vars['expire_time'],
-         'TEXT',  '&nbsp;' . span('EditNote', sprintf( T_('(Date format [%s])'), FMT_PARSE_DATE )), ));
+         'TEXT',  '&nbsp;' . span('EditNote', sprintf( T_('(Date format [%s], local timezone)'), FMT_PARSE_DATE )), ));
    $bform->add_row( array(
          'DESCRIPTION', T_('Subject'),
          'TEXTINPUT',   'subject', 80, 255, $vars['subject'] ));

@@ -169,7 +169,7 @@ $GLOBALS['ThePage'] = new Page('TournamentEdit');
    $tform->add_row( array(
          'DESCRIPTION', T_('Start time#tourney'),
          'TEXTINPUT',   'start_time', 20, 20, $vars['start_time'],
-         'TEXT',  '&nbsp;' . span('EditNote', sprintf( T_('(Date format [%s])'), FMT_PARSE_DATE )), ));
+         'TEXT',  '&nbsp;' . span('EditNote', sprintf( T_('(Date format [%s], local timezone)'), FMT_PARSE_DATE )), ));
    $tform->add_row( array(
          'DESCRIPTION', T_('End time'),
          'TEXT',        formatDate($tourney->EndTime, NO_VALUE) ));

@@ -257,12 +257,12 @@ $GLOBALS['ThePage'] = new Page('BulletinAdmin');
    $bform->add_row( array(
          'DESCRIPTION', T_('Publish time'),
          'TEXTINPUT',   'publish_time', 20, 30, $vars['publish_time'],
-         'TEXT',  '&nbsp;' . span('EditNote', sprintf( T_('(Date format [%s])'), FMT_PARSE_DATE)), ));
+         'TEXT',  '&nbsp;' . span('EditNote', sprintf( T_('(Date format [%s], local timezone)'), FMT_PARSE_DATE)), ));
    $bform->add_row( array(
          'DESCRIPTION', T_('Expire Time'),
          'TEXTINPUT',   'expire_time', 20, 30, $vars['expire_time'],
          'TEXT',  '&nbsp;' .
-            span('EditNote', sprintf( T_('(Date format [%s])'), FMT_PARSE_DATE ) .
+            span('EditNote', sprintf( T_('(Date format [%s], local timezone)'), FMT_PARSE_DATE ) .
                   ( $bulletin->is_user_bulletin() ? '' : ', ' . T_('can be empty') )
                ), ));
 

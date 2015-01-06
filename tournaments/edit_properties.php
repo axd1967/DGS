@@ -127,7 +127,7 @@ $GLOBALS['ThePage'] = new Page('TournamentPropertiesEdit');
    $tform->add_row( array(
          'DESCRIPTION', T_('Registration end time#tourney'),
          'TEXTINPUT',   'reg_end_time', 20, 20, $vars['reg_end_time'],
-         'TEXT',  '&nbsp;' . span('EditNote', sprintf( T_('(Date format [%s])'), FMT_PARSE_DATE )), ));
+         'TEXT',  '&nbsp;' . span('EditNote', sprintf( T_('(Date format [%s], local timezone)'), FMT_PARSE_DATE )), ));
 
    $tform->add_row( array(
          'DESCRIPTION', T_('Restrict participants#tourney'),

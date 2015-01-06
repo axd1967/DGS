@@ -256,11 +256,11 @@ $GLOBALS['ThePage'] = new Page('TournamentEditResults');
       $trform->add_row( array(
             'DESCRIPTION', T_('Start time#tourney'),
             'TEXTINPUT',   'start_time', 20, 20, $vars['start_time'],
-            'TEXT',  '&nbsp;' . span('EditNote', sprintf( T_('(Date format [%s])'), FMT_PARSE_DATE2 )), ));
+            'TEXT',  '&nbsp;' . span('EditNote', sprintf( T_('(Date format [%s], local timezone)'), FMT_PARSE_DATE2 )), ));
       $trform->add_row( array(
             'DESCRIPTION', T_('End time#tourney'),
             'TEXTINPUT',   'end_time', 20, 20, $vars['end_time'],
-            'TEXT',  '&nbsp;' . span('EditNote', sprintf( T_('(Date format [%s])'), FMT_PARSE_DATE2 )), ));
+            'TEXT',  '&nbsp;' . span('EditNote', sprintf( T_('(Date format [%s], local timezone)'), FMT_PARSE_DATE2 )), ));
       $trform->add_row( array(
             'DESCRIPTION', T_('Result#tresult'),
             'TEXTINPUT',   'result', 10, 10, $vars['result'], ));

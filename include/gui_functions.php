@@ -513,7 +513,7 @@ function span( $class, $str='', $strfmt='%s', $title='' )
       return sprintf( "<span class=\"$class\"$title>$strfmt</span>", $str );
 }
 
-// NOTE: if $datefmt contains 'D' or 'M', function format_translated_date() must be used instead to keep month/weekday translated!
+// NOTE: if $datefmt contains 'D' or 'M', format_translated_date()-function must be used instead to keep month/weekday translated!
 function formatDate( $date, $defval='', $datefmt=DATE_FMT )
 {
    return ($date > 0) ? date($datefmt, $date) : $defval;

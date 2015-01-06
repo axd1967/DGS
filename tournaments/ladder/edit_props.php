@@ -232,7 +232,7 @@ $GLOBALS['ThePage'] = new Page('TournamentLadderPropsEdit');
    $tform->add_row( array(
          'DESCRIPTION', T_('Crown King Check time#T_ladder'),
          'TEXTINPUT',   'crownstart', 20, 20, $vars['crownstart'],
-         'TEXT',  '&nbsp;' . span('EditNote', sprintf( T_('(Date format [%s])'), FMT_PARSE_DATE )), ));
+         'TEXT',  '&nbsp;' . span('EditNote', sprintf( T_('(Date format [%s], local timezone)'), FMT_PARSE_DATE )), ));
    $tform->add_empty_row();
 
    // consecutive-wins threshold
