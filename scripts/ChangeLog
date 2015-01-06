@@ -13,6 +13,8 @@ ChangeLog
 
 2015-01-06 jug
 
+### ----- release-1_19_3-20150106 -----
+
    * include/quick/quick_message.php (QuickHandlerMessage.fill_message_info),
      include/globals.php (QUICK_VERSION),
      specs/quick_suite.txt:
