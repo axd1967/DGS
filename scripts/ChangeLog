@@ -11,6 +11,11 @@ Release [2014-07-30] - DGS 1.0.18 - tag [release-1_0_18-20140730] on (later) bra
 ChangeLog
 ------------------------------------------------------------------
 
+2015-01-06 jug
+
+   * ratinggraph.php:
+   - bugfix: rating-graph shown by-games enabled in profile was always used, even when unchecked in form
+
 2015-01-04 jug
 
    * scripts/tournament_consistency.php (fix_tournament_participant_last_moved):

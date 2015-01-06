@@ -105,7 +105,10 @@ require_once 'include/form_functions.php';
       $show_time = (int)(bool)@$_REQUEST['show_time'];
       $dyna= floor($NOW/(SECS_PER_HOUR/TICK_FREQUENCY));
       $winpie = (bool)@$_REQUEST['winpie'];
-      $bynumber = (bool)get_request_arg('bynumber', ($player_row['UserFlags'] & USERFLAG_RATINGGRAPH_BY_GAMES) );
+      if ( @$_REQUEST['use_form'] ) // NOTE: needed to overwrite db-default b/c unchecked checkbox leads to using default
+         $bynumber = (bool)@$_REQUEST['bynumber'];
+      else
+         $bynumber = (bool)get_request_arg('bynumber', ($player_row['UserFlags'] & USERFLAG_RATINGGRAPH_BY_GAMES) );
 
       echo "\n<img src=\"ratingpng.php?uid=$uid"
          ,($show_time ? URI_AMP.'show_time=1' : '')
@@ -139,6 +142,7 @@ require_once 'include/form_functions.php';
                    'HIDDEN', 'uid', $uid,
                    'HIDDEN', 'winpie', $winpie,
                    'HIDDEN', 'show_time', $show_time,
+                   'HIDDEN', 'use_form', 1,
                    'SUBMITBUTTON', 'submit', T_('Change interval') );
       array_push( $row,
             'OWNHTML', '&nbsp;&nbsp;',
