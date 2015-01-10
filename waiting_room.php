@@ -175,6 +175,7 @@ require_once 'include/wroom_control.php';
    $wrtable->add_tablehead(11, T_('Rated#header'), '', 0, 'Rated-');
    $wrtable->add_tablehead(10, new TableHead( T_('#Games#header'), T_('#Game offers')), 'Number', 0, 'nrGames-');
    $wrtable->add_tablehead(12, new TableHead( T_('Weekend Clock#header'), T_('Weekend Clock')), 'Date', 0, 'WeekendClock-');
+   $wrtable->add_tablehead(22, T_('Created#header'), 'Date smaller', 0, 'Time+');
    // NOTE: User can choose:
    // View "merged" "Handicap + StdPlacement (in Settings column),
    // but has separate column on StdPlacement for filtering on it:
@@ -316,6 +317,8 @@ require_once 'include/wroom_control.php';
          }
          if ( $wrtable->Is_Column_Displayed[21] )
             $row_arr[21] = echo_image_opp_games( $my_id, $WRP_Handle, /*fin*/true );
+         if ( $wrtable->Is_Column_Displayed[22] )
+            $row_arr[22] = ( $X_Time > 0 ) ? date(DATE_FMT, $X_Time) : '';
 
          $wrtable->add_row( $row_arr );
       }//while

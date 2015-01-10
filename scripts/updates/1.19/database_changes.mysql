@@ -58,3 +58,8 @@ ALTER TABLE TournamentParticipant
 --    'scripts/tournament_consistency.php'
 
 
+-- hide creation-date for waiting-room entries
+UPDATE ConfigPages
+   SET ColumnsWaitingroom=ColumnsWaitingroom & ~0x200000 ;
+
+

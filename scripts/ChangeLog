@@ -13,6 +13,15 @@ ChangeLog
 
 2015-01-10 jug
 
+   * waiting_room.php,
+     scripts/updates/1.19/database_changes.mysql:
+   - added creation-date for waiting-room entries as hidden column per default
+-----------
+-- hide creation-date for waiting-room entries
+UPDATE ConfigPages
+   SET ColumnsWaitingroom=ColumnsWaitingroom & ~0x200000 ;
+-----------
+
    * include/table_columns.php (Table.make_tablehead, ~.make_add_column_form,
          ~._compare_removed_column_names;
        class TableHead, ~.__construct, ~.getHeaderHtml, ~.getHeaderTitle, ~.getHeaderName;
