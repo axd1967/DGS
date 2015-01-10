@@ -16,6 +16,7 @@ ChangeLog
    * waiting_room.php,
      scripts/updates/1.19/database_changes.mysql:
    - added creation-date for waiting-room entries as hidden column per default
+   - hide user-related columns and unhide created-column for view with own game-offers
 -----------
 -- hide creation-date for waiting-room entries
 UPDATE ConfigPages

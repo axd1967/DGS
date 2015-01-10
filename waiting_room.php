@@ -107,6 +107,7 @@ require_once 'include/wroom_control.php';
             set_request_arg('good', ( $wr_uid == $my_id ) ? 2 : 0 ); // my|all-wrgames-view
       }
    }
+   $my_offers = ( (int)get_request_arg('good') == 2 );
 
    $page = "waiting_room.php";
 
@@ -155,13 +156,16 @@ require_once 'include/wroom_control.php';
    // NOTE: The TABLE_NO_HIDEs are needed, because the columns are needed
    //       for the "static" filtering(!) of; also see named-filters
    $wrtable->add_tablehead(17, T_('Info#header'), 'Button', TABLE_NO_HIDE|TABLE_NO_SORT);
-   $wrtable->add_tablehead(21, new TableHeadImage( T_('Opponent games#header'),
-      'images/table.gif', T_('Link to games with opponent') ), 'Image', TABLE_NO_SORT );
-   $wrtable->add_tablehead(16, T_('UserType#headerwr'), 'User', 0, 'WRP_Type+');
-   $wrtable->add_tablehead( 1, T_('Name#header'), 'User', 0, 'WRP_Name+');
-   $wrtable->add_tablehead( 2, T_('Userid#header'), 'User', 0, 'WRP_Handle+');
-   $wrtable->add_tablehead(15, T_('Country#header'), 'Image', 0, 'WRP_Country+');
-   $wrtable->add_tablehead( 3, T_('Rating#header'), 'Rating', 0, 'WRP_Rating2-');
+   if ( !$my_offers )
+   {
+      $wrtable->add_tablehead(21, new TableHeadImage( T_('Opponent games#header'),
+         'images/table.gif', T_('Link to games with opponent') ), 'Image', TABLE_NO_SORT );
+      $wrtable->add_tablehead(16, T_('UserType#headerwr'), 'User', 0, 'WRP_Type+');
+      $wrtable->add_tablehead( 1, T_('Name#header'), 'User', 0, 'WRP_Name+');
+      $wrtable->add_tablehead( 2, T_('Userid#header'), 'User', 0, 'WRP_Handle+');
+      $wrtable->add_tablehead(15, T_('Country#header'), 'Image', 0, 'WRP_Country+');
+      $wrtable->add_tablehead( 3, T_('Rating#header'), 'Rating', 0, 'WRP_Rating2-');
+   }
    $wrtable->add_tablehead( 4, T_('Comment#header'), null, TABLE_NO_SORT );
    $wrtable->add_tablehead(20, T_('GameType#header'), '', TABLE_NO_HIDE, 'GameType+');
    $wrtable->add_tablehead(19, T_('Ruleset#header'), '', 0, 'Ruleset+');
@@ -175,7 +179,7 @@ require_once 'include/wroom_control.php';
    $wrtable->add_tablehead(11, T_('Rated#header'), '', 0, 'Rated-');
    $wrtable->add_tablehead(10, new TableHead( T_('#Games#header'), T_('#Game offers')), 'Number', 0, 'nrGames-');
    $wrtable->add_tablehead(12, new TableHead( T_('Weekend Clock#header'), T_('Weekend Clock')), 'Date', 0, 'WeekendClock-');
-   $wrtable->add_tablehead(22, T_('Created#header'), 'Date smaller', 0, 'Time+');
+   $wrtable->add_tablehead(22, T_('Created#header'), 'Date smaller', ($my_offers ? TABLE_NO_HIDE : 0), 'Time+');
    // NOTE: User can choose:
    // View "merged" "Handicap + StdPlacement (in Settings column),
    // but has separate column on StdPlacement for filtering on it:
@@ -241,14 +245,14 @@ require_once 'include/wroom_control.php';
          }
 
          $row_arr = array();
-         if ( $wrtable->Is_Column_Displayed[ 1] )
+         if ( @$wrtable->Is_Column_Displayed[ 1] )
             $row_arr[ 1] = user_reference( REF_LINK, 1, '', $WRP_ID, $WRP_Name, '');
-         if ( $wrtable->Is_Column_Displayed[ 2] )
+         if ( @$wrtable->Is_Column_Displayed[ 2] )
          {
             $row_arr[ 2] = user_reference( REF_LINK, 1, '', $WRP_ID, $WRP_Handle, '') .
                echo_image_hero_badge( $WRP_HeroRatio );
          }
-         if ( $wrtable->Is_Column_Displayed[ 3] )
+         if ( @$wrtable->Is_Column_Displayed[ 3] )
             $row_arr[ 3] = echo_rating($WRP_Rating2, true, $WRP_ID);
          if ( $wrtable->Is_Column_Displayed[ 4] )
             $row_arr[ 4] = make_html_safe($Comment, INFO_HTML);
@@ -298,9 +302,9 @@ require_once 'include/wroom_control.php';
                : $Handicap;
             $row_arr[14] = ( (string)$h_str != '' ) ? $h_str : NO_VALUE;
          }
-         if ( $wrtable->Is_Column_Displayed[15] )
+         if ( @$wrtable->Is_Column_Displayed[15] )
             $row_arr[15] = getCountryFlagImage( @$row['WRP_Country'] );
-         if ( $wrtable->Is_Column_Displayed[16] )
+         if ( @$wrtable->Is_Column_Displayed[16] )
             $row_arr[16] = build_usertype_text($WRP_Type, ARG_USERTYPE_NO_TEXT, true, '');
          if ( $wrtable->Is_Column_Displayed[17] )
             $row_arr[17] = button_TD_anchor( $baseURL."info=$ID#joingameForm", T_('Info'));
@@ -315,7 +319,7 @@ require_once 'include/wroom_control.php';
                GameTexts::format_game_type($GameType, $GamePlayers) .
                ( $is_fairkomi ? GameTexts::build_fairkomi_gametype(GAME_STATUS_KOMI) : '' );
          }
-         if ( $wrtable->Is_Column_Displayed[21] )
+         if ( @$wrtable->Is_Column_Displayed[21] )
             $row_arr[21] = echo_image_opp_games( $my_id, $WRP_Handle, /*fin*/true );
          if ( $wrtable->Is_Column_Displayed[22] )
             $row_arr[22] = ( $X_Time > 0 ) ? date(DATE_FMT, $X_Time) : '';
