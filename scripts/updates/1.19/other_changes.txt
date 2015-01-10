@@ -19,6 +19,7 @@ copy /25/wms.gif
 
 -----------
 # adjust english translation for 'Tournament last move#header'
+# adjust english translation for '%#T_header'
 
 -----------
 // added images

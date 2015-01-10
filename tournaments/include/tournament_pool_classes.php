@@ -846,7 +846,7 @@ class PoolViewer
             ? T_('Indicator for being on vacation#header')
             : sprintf( T_('Indicator for being online up to %s mins ago'), SPAN_ONLINE_MINS) . ', ' . T_('or on vacation#header')
          ), 'Image', 0 ));
-      $this->table->add_tablehead(14, T_('Last access#header'), '', 0 );
+      $this->table->add_tablehead(14, T_('Last access#T_header'), '', 0 );
 
       // IMPORTANT NOTE: don't use higher tablehead-nr after this!!
       //    or else config-table-cols can't be correctly saved if future table-heads are added.

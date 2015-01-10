@@ -13,6 +13,12 @@ ChangeLog
 
 2015-01-10 jug
 
+   * tournaments/include/tournament_pool_classes.php (PoolViewer.init_pool_table),
+     scripts/updates/1.19/other_changes.txt,
+     tournaments/ladder/view.php:
+   - adjusted header-texts to allow for shorter translation to keep table-width in check
+     on ladder-view/pool-view
+
    * tournaments/include/tournament_pool_classes.php (PoolTables.fill_games):
    - order all users in round-robin-tournaments by user-rating/ID in unplayed pools
 
