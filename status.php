@@ -294,7 +294,7 @@ function load_games_to_move( $uid, &$gtable )
    // NOTE: mostly but not always same col-IDs used as in show_games-page (except: 10, 11, 12, 15) + <=30(!)
    // add_tablehead($nr, $descr, $attbs=null, $mode=TABLE_NO_HIDE|TABLE_NO_SORT, $sortx='')
    $gtable->add_tablehead( 1, T_('Game ID#header'), 'Button', TABLE_NO_HIDE, 'ID-');
-   $gtable->add_tablehead(15, new TableHead( T_('Game information'), 'images/info.gif'), 'ImagesLeft', 0 );
+   $gtable->add_tablehead(15, new TableHeadImage( T_('Game information'), 'images/info.gif'), 'ImagesLeft', 0 );
    $gtable->add_tablehead( 2, T_('sgf#header'), 'Sgf', TABLE_NO_SORT );
    if ( $show_notes )
       $gtable->add_tablehead(12, T_('Notes#header'), '', 0, 'X_Note-');
@@ -305,11 +305,11 @@ function load_games_to_move( $uid, &$gtable )
    $gtable->add_tablehead(19, T_('GameType#header'), '', 0, 'GameType+');
    $gtable->add_tablehead(18, T_('Ruleset#header'), '', 0, 'Ruleset-');
    $gtable->add_tablehead( 6, T_('Size#header'), 'Number', 0, 'Size-');
-   $gtable->add_tablehead( 7, T_('Handicap#header'), 'Number', 0, 'Handicap+');
+   $gtable->add_tablehead( 7, new TableHead( T_('Handicap#header'), T_('Handicap')), 'Number', 0, 'Handicap+');
    $gtable->add_tablehead( 8, T_('Komi#header'), 'Number', 0, 'Komi-');
-   $gtable->add_tablehead( 9, T_('Moves#header'), 'Number', 0, 'Moves-');
+   $gtable->add_tablehead( 9, new TableHead( T_('Moves#header'), T_('Moves')), 'Number', 0, 'Moves-');
    $gtable->add_tablehead(14, T_('Rated#header'), '', 0, 'X_Rated-');
-   $gtable->add_tablehead(11, new TableHead( T_('User online#header'), 'images/online.gif',
+   $gtable->add_tablehead(11, new TableHeadImage( T_('User online#header'), 'images/online.gif',
       sprintf( T_('Indicator for being online up to %s mins ago'), SPAN_ONLINE_MINS)
          . ', ' . T_('or on vacation#header') ), 'Image', 0 );
    if ( $next_game_order == NGO_LASTMOVED_NEW_FIRST )

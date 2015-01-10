@@ -13,6 +13,24 @@ ChangeLog
 
 2015-01-10 jug
 
+   * include/table_columns.php (Table.make_tablehead, ~.make_add_column_form,
+         ~._compare_removed_column_names;
+       class TableHead, ~.__construct, ~.getHeaderHtml, ~.getHeaderTitle, ~.getHeaderName;
+       class TableHeadImage, ~.__construct, ~.getHeaderHtml),
+     tournaments/include/tournament_pool_classes.php (PoolSummary.__construct, ~.init_pool_table),
+     tournaments/ladder/view.php,
+     tournaments/list_news.php, tournaments/list_participants.php, tournaments/list_tournaments.php,
+     features/list_votes.php,
+     list_bulletins.php, list_contacts.php, list_shapes.php, list_surveys.php,
+     opponents.php, show_games.php, status.php, users.php, waiting_room.php:
+   - added description in hover-text and full-name in add-column selectbox
+     for abbreviated header-text in table-lists
+     - refactored image-rendering for TableHead() into class TableHeadImage()
+     - added full description for abbreviated headers in hover-text also for sorting-links
+     - show abbreviated headers with full header-description in add-column-selectbox with '(..)'
+     - sorted header-names in add-column selectbox alphabetically ignoring leading '(' and '#'
+     - show empty string for user without tournament-last-move on ladder-view
+
    * tournaments/ladder/view.php:
    - aligned running and finished table-icons with link to tournament-games on ladder-view
 

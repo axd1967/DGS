@@ -140,7 +140,9 @@ $GLOBALS['ThePage'] = new Page('TournamentLadderView');
       // add_tablehead($nr, $descr, $attbs=null, $mode=TABLE_NO_HIDE|TABLE_NO_SORT, $sortx='')
       $ltable->add_tablehead( 2, T_('Change#TL_header'), 'Center', 0 );
       $ltable->add_tablehead( 1, T_('Rank#T_ladder'), 'Number', TABLE_NO_HIDE, 'Rank+' );
-      $ltable->add_tablehead(19, T_('Rating Pos#TL_header'), 'RatPos', 0 );
+      $ltable->add_tablehead(19, new TableHead( T_('Rating Pos#TL_header'),
+         T_('Theoretical ladder position if sorted by user rating'), T_('Rating Position#tourney') ),
+         'RatPos', 0 );
       $ltable->add_tablehead( 3, T_('Name#header'), 'User', 0 );
       $ltable->add_tablehead( 4, T_('Userid#header'), 'User', TABLE_NO_HIDE );
       $ltable->add_tablehead( 5, T_('Country#header'), 'Image', 0 );
@@ -148,18 +150,19 @@ $GLOBALS['ThePage'] = new Page('TournamentLadderView');
       if ( $need_tp_rating )
          $ltable->add_tablehead(14, T_('Tournament Rating#header'), 'Rating', 0 );
       $ltable->add_tablehead( 7, T_('Actions#header'), '', TABLE_NO_HIDE );
-      $ltable->add_tablehead(12, new TableHead( T_('Running and finished tournament games'), 'images/table.gif'), 'ImageLeft', 0 );
+      $ltable->add_tablehead(12, new TableHeadImage( T_('Running and finished tournament games'), 'images/table.gif'), 'ImageLeft', 0 );
       $ltable->add_tablehead( 8, T_('Challenges-In#header'), '', TABLE_NO_HIDE );
       $ltable->add_tablehead(16, T_('Challenges-Out#header'), '', 0 );
       $ltable->add_tablehead( 9, T_('Rank Changed#T_ladder'), 'Date', 0 );
       $ltable->add_tablehead(10, T_('Rank Kept#header'), '', 0 );
-      $ltable->add_tablehead(17, span('title="'.basic_safe(T_('Consecutive Wins').' [: '.T_('Max. Consecutive Wins').']').'"',
-         T_('#Consecutive Wins#header')), 'NumberC', 0 );
-      $ltable->add_tablehead(15, new TableHead( T_('User online#header'), 'images/online.gif',
-         sprintf( T_('Indicator for being online up to %s mins ago'), SPAN_ONLINE_MINS)
-            . ', ' . T_('or on vacation#header') ), 'Image', 0 );
+      $ltable->add_tablehead(17, new TableHead( T_('#Consecutive Wins#header'),
+         sprintf('%s [: %s]', T_('#Consecutive Wins'), T_('Max. Consecutive Wins')), T_('#Consecutive Wins')),
+         'NumberC', 0 );
+      $ltable->add_tablehead(15, new TableHeadImage( T_('User online#header'), 'images/online.gif',
+         sprintf( T_('Indicator for being online up to %s mins ago'), SPAN_ONLINE_MINS) . ', ' . T_('or on vacation#header') ),
+         'Image', 0 );
       $ltable->add_tablehead(13, T_('Last access#T_header'), '', 0 );
-      $ltable->add_tablehead(18, T_('Tournament last move#T_header'), '', 0 );
+      $ltable->add_tablehead(18, new TableHead( T_('Tournament last move#T_header'), T_('Tournament last move')), '', 0 );
       $ltable->add_tablehead(11, T_('Started#header'), 'Date', 0 );
 
       $ltable->set_default_sort( 1 );
@@ -280,7 +283,7 @@ $GLOBALS['ThePage'] = new Page('TournamentLadderView');
             $tp_lastmoved = (int)@$orow['TP_X_Lastmoved'];
             $row_str[18] = ( $tp_lastmoved > 0 )
                ? TimeFormat::echo_time_diff( $NOW, $tp_lastmoved, 24, TIMEFMT_SHORT|TIMEFMT_ZERO )
-               : NO_VALUE;
+               : '';
          }
          if ( $ltable->Is_Column_Displayed[19] )
             $row_str[19] = span('smaller', (int)$tladder->UserRatingPos);

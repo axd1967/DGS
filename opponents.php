@@ -200,11 +200,11 @@ require_once 'include/classlib_userpicture.php';
    //       for the "static" filtering(!) of: Activity; also see named-filters
    $header_1 = ($tid) ? T_('Invite#header') : T_('ID#header');
    $utable->add_tablehead( 1, $header_1, 'Button', TABLE_NO_HIDE, 'ID+');
-   $utable->add_tablehead(21, new TableHead( T_('Opponent games#header'),
+   $utable->add_tablehead(21, new TableHeadImage( T_('Opponent games#header'),
       'images/table.gif', T_('Link to games with opponent') ), 'Image', TABLE_NO_SORT );
    $utable->add_tablehead(18, T_('Type#header'), 'Enum', 0, 'Type+');
    if ( USERPIC_FOLDER != '' )
-      $utable->add_tablehead(19, new TableHead( T_('User picture#header'),
+      $utable->add_tablehead(19, new TableHeadImage( T_('User picture#header'),
          'images/picture.gif', T_('Indicator for existing user picture') ), 'Image', 0, 'UserPicture+' );
    $utable->add_tablehead( 2, T_('Name#header'), 'User', 0, 'Name+');
    $utable->add_tablehead( 3, T_('Userid#header'), 'User', 0, 'Handle+');
@@ -212,7 +212,7 @@ require_once 'include/classlib_userpicture.php';
    $utable->add_tablehead( 4, T_('Rank info#header'), null, TABLE_NO_SORT );
    $utable->add_tablehead( 5, T_('Rating#header'), 'Rating', 0, 'Rating2-');
    $utable->add_tablehead( 6, T_('Open for matches?#header'), null, TABLE_NO_SORT );
-   $utable->add_tablehead( 7, T_('#Games#header'), 'Number', 0, 'Games-');
+   $utable->add_tablehead( 7, new TableHead( T_('#Games#header'), T_('#Games')), 'Number', 0, 'Games-');
    $utable->add_tablehead( 8, T_('Running#header'), 'Number', 0, 'Running-');
    $utable->add_tablehead( 9, T_('Finished#header'), 'Number', 0, 'Finished-');
    $utable->add_tablehead(17, T_('Rated#header'), 'Number', 0, 'RatedGames-');
@@ -221,7 +221,7 @@ require_once 'include/classlib_userpicture.php';
    $utable->add_tablehead(12, T_('Win%#header'), 'Number', 0, 'RatedWinPercent-');
    $utable->add_tablehead(23, T_('Hero%#header'), 'Number', 0, 'HeroRatio-');
    $utable->add_tablehead(13, T_('Activity#header'), 'Image', TABLE_NO_HIDE, 'ActivityLevel-');
-   $utable->add_tablehead(20, new TableHead( T_('User online#header'), 'images/online.gif',
+   $utable->add_tablehead(20, new TableHeadImage( T_('User online#header'), 'images/online.gif',
       sprintf( T_('Indicator for being online up to %s mins ago'), SPAN_ONLINE_MINS)
          . ', ' . T_('or on vacation#header') ), 'Image', 0 );
    $utable->add_tablehead(22, T_('Registered#header'), 'Date', 0, 'Registerdate+');

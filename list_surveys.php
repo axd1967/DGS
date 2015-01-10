@@ -92,7 +92,7 @@ $GLOBALS['ThePage'] = new Page('SurveyList');
    $table->add_tablehead( 3, T_('Type#header'), 'Enum', TABLE_NO_HIDE, 'Type+');
    $table->add_tablehead( 4, T_('Status#header'), 'Enum', TABLE_NO_HIDE, 'Status+');
    if ( $is_admin )
-      $table->add_tablehead( 2, new TableHead( T_('Edit Survey#survey'), 'images/edit.gif'), 'ImagesLeft', TABLE_NO_HIDE);
+      $table->add_tablehead( 2, new TableHeadImage( T_('Edit Survey#survey'), 'images/edit.gif'), 'ImagesLeft', TABLE_NO_HIDE);
    $table->add_tablehead( 5, T_('Author#header'), 'User', 0, 'SP_Handle+');
    $table->add_tablehead( 6, T_('Title#header'), null, TABLE_NO_SORT|TABLE_NO_HIDE );
    $table->add_tablehead( 9, T_('#Votes#survey'), 'Number', 0, 'UserCount+' );

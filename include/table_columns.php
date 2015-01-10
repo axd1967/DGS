@@ -1052,7 +1052,7 @@ class Table
       if ( !$this->Is_Column_Displayed[$nr] )
       {
          if ( $is_std )
-            $this->Removed_Columns[ $nr ] = $tablehead['Description']->getDescriptionAddCol();
+            $this->Removed_Columns[ $nr ] = $tablehead['Description']->getHeaderName();
          return '';
       }
 
@@ -1081,23 +1081,20 @@ class Table
          ; //end_sep
 
       // field-sort-link
-      $title = @$tablehead['Description']->getDescriptionHtml();
       $field = (string)@$tablehead['Sort_String'];
-      $sortimg= (string)@$this->Sortimg[$nr];
-
+      $sortimg = (string)@$this->Sortimg[$nr];
       if ( $field && !($mode & TABLE_NO_SORT) )
       {
+         $title = @$tablehead['Description']->getHeaderTitle( T_('Sort') . ' ' );
+         $descr = @$tablehead['Description']->getHeaderHtml(false);
          $hdr = '<a href="' . $this->Page; //end_sep
          $hdr .= $this->make_sort_string( $nr, true ); //end_sep
          $hdr .= $this->current_from_string( true); //end_sep
          $hdr .= $common_url; //end_sep
-         $hdr = clean_url($hdr) . "#$curColId\" title="
-            . attb_quote(T_('Sort')) . ">$title</a>";
+         $hdr = clean_url($hdr) . "#$curColId\" title=" . attb_quote($title) . ">$descr</a>";
       }
       else
-      {
-         $hdr = $title;
-      }
+         $hdr = @$tablehead['Description']->getHeaderHtml();
       $string .= span('Header', $hdr);
 
       $query_del = !($mode & TABLE_NO_HIDE);
@@ -1544,7 +1541,7 @@ class Table
             $ac_form->add_hidden( $key, $value);
          }
          //Note: asort on translated strings
-         asort($this->Removed_Columns);
+         uasort($this->Removed_Columns, array( $this, '_compare_removed_column_names' ) );
          $this->Removed_Columns[ 0 ] = '';
          $this->Removed_Columns[ -1 ] = T_('All columns');
          $ac_string = $ac_form->print_insert_select_box(
@@ -1581,6 +1578,13 @@ class Table
 
       return $string;
    }//make_add_column_form
+
+   /*! \internal Comparator-function to sort removed column-names. */
+   private function _compare_removed_column_names( $a, $b )
+   {
+      static $TRIM_CHARS = "(#";
+      return strcasecmp( ltrim($a, $TRIM_CHARS), ltrim($b, $TRIM_CHARS) );
+   }//_compare_removed_column_names
 
    /*! \brief Builds select-box and submit-button to be able to change 'show-max-rows' */
    private function make_show_rows( &$form )
@@ -1725,44 +1729,75 @@ class Table
 /*!
  * \class TableHead
  *
- * \brief Class to represent table-head (text or image).
+ * \brief Class to represent table-head (with text).
+ * \see TableHeadImage
  */
 class TableHead
 {
-   public $description;
-   private $image_url;
-   private $image_alt;
-   private $image_title;
-   private $image_attbs;
+   /*! \brief header-text shown (can be shortened). */
+   protected $Text;
+   /*! \brief hover-title of header (can be null). */
+   protected $Title;
+   /*! \brief header-text used in removed-column selectbox (use Text if null). */
+   protected $Name;
 
    /*! \brief Constructs TableHead-instance. */
-   public function __construct( $description, $image_url=null, $image_title=null, $image_attbs=null )
+   public function __construct( $text, $title=null, $name=null )
    {
-      $this->description = $description;
-      $this->image_url = $image_url;
-      $this->image_alt = $description;
-      $this->image_title = (is_null($image_title)) ? $description : $image_title;
-      $this->image_attbs = $image_attbs;
+      $this->Text = $text;
+      $this->Title = $title;
+      if ( is_null($name) )
+         $this->Name = ( is_null($title) ) ? null : "($title)";
+      else
+         $this->Name = "($name)";
    }
 
-   public function isImage()
+   public function getHeaderHtml( $with_title=true )
    {
-      return !(is_null($this->image_url));
+      return ( $with_title && !is_null($this->Title) )
+         ? "<span title=" . attb_quote($this->Title) . ">" . basic_safe($this->Text) . "</span>"
+         : basic_safe($this->Text);
    }
 
-   public function getDescriptionHtml()
+   public function getHeaderTitle( $prefix='' )
    {
-      global $base_path;
-      return ($this->isImage())
-         ? image( $base_path . $this->image_url, $this->image_alt, $this->image_title, $this->image_attbs )
-         : $this->description;
+      return $prefix . $this->Title;
    }
 
-   public function getDescriptionAddCol()
+   public function getHeaderName()
    {
-      return ( $this->isImage() ) ? "({$this->description})" : $this->description;
+      return ( is_null($this->Name) ) ? $this->Text : $this->Name;
    }
 
 } // end of 'TableHead'
+
+
+
+/*!
+ * \class TableHeadImage
+ *
+ * \brief Class to represent table-head (with image).
+ */
+class TableHeadImage extends TableHead
+{
+   private $image_url;
+   private $image_attbs;
+
+   /*! \brief Constructs TableHeadImage-instance. */
+   public function __construct( $descr, $image_url, $image_title=null, $image_attbs=null )
+   {
+      parent::__construct( $descr, (is_null($image_title) ? $descr : $image_title), $descr );
+      $this->image_url = $image_url;
+      $this->image_attbs = $image_attbs;
+   }
+
+   public function getHeaderHtml( $with_title=true )
+   {
+      global $base_path;
+      $title = ($with_title) ? $this->Title : '';
+      return image( $base_path . $this->image_url, $this->Title, $title, $this->image_attbs );
+   }
+
+} // end of 'TableHeadImage'
 
 ?>

@@ -155,7 +155,7 @@ require_once 'include/wroom_control.php';
    // NOTE: The TABLE_NO_HIDEs are needed, because the columns are needed
    //       for the "static" filtering(!) of; also see named-filters
    $wrtable->add_tablehead(17, T_('Info#header'), 'Button', TABLE_NO_HIDE|TABLE_NO_SORT);
-   $wrtable->add_tablehead(21, new TableHead( T_('Opponent games#header'),
+   $wrtable->add_tablehead(21, new TableHeadImage( T_('Opponent games#header'),
       'images/table.gif', T_('Link to games with opponent') ), 'Image', TABLE_NO_SORT );
    $wrtable->add_tablehead(16, T_('UserType#headerwr'), 'User', 0, 'WRP_Type+');
    $wrtable->add_tablehead( 1, T_('Name#header'), 'User', 0, 'WRP_Name+');
@@ -168,13 +168,13 @@ require_once 'include/wroom_control.php';
    $wrtable->add_tablehead( 7, T_('Size#header'), 'Number', 0, 'Size-');
    $wrtable->add_tablehead( 5, T_('Type#headerwr'), '', 0, 'Handicaptype+');
    $wrtable->add_tablehead(18, T_('Settings#headerwr'), 'GameSettings', TABLE_NO_HIDE|TABLE_NO_SORT );
-   $wrtable->add_tablehead(14, T_('Handicap#header'), 'Number', 0, 'Handicap+');
+   $wrtable->add_tablehead(14, new TableHead( T_('Handicap#header'), T_('Handicap')), 'Number', 0, 'Handicap+');
    $wrtable->add_tablehead( 6, T_('Komi#header'), 'Number', 0, 'Komi-');
    $wrtable->add_tablehead( 8, T_('Restrictions#header'), '', TABLE_NO_HIDE|TABLE_NO_SORT);
    $wrtable->add_tablehead( 9, T_('Time limit#header'), null, TABLE_NO_SORT );
    $wrtable->add_tablehead(11, T_('Rated#header'), '', 0, 'Rated-');
-   $wrtable->add_tablehead(10, T_('#Games#header'), 'Number', 0, 'nrGames-');
-   $wrtable->add_tablehead(12, T_('Weekend Clock#header'), '', 0, 'WeekendClock-');
+   $wrtable->add_tablehead(10, new TableHead( T_('#Games#header'), T_('#Game offers')), 'Number', 0, 'nrGames-');
+   $wrtable->add_tablehead(12, new TableHead( T_('Weekend Clock#header'), T_('Weekend Clock')), 'Date', 0, 'WeekendClock-');
    // NOTE: User can choose:
    // View "merged" "Handicap + StdPlacement (in Settings column),
    // but has separate column on StdPlacement for filtering on it:

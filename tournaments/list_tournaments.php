@@ -146,7 +146,8 @@ $GLOBALS['ThePage'] = new Page('TournamentList');
    $ttable->add_tablehead( 4, T_('Status#header'), 'Enum', 0, 'T.Status+');
    $ttable->add_tablehead( 5, T_('Title#header'), '', TABLE_NO_HIDE, 'Title+');
    $ttable->add_tablehead(19, '', 'Image', TABLE_NO_HIDE|TABLE_NO_SORT, 'TV.tid+');
-   $ttable->add_tablehead(11, T_('Registration Status#T_header'), 'Enum', ($has_uid ? TABLE_NO_HIDE : 0), 'TP_Status+');
+   $ttable->add_tablehead(11, new TableHead( T_('Registration Status#T_header'), T_('Registration Status#tourney')),
+      'Enum', ($has_uid ? TABLE_NO_HIDE : 0), 'TP_Status+');
    $ttable->add_tablehead(13, T_('Size#header'), 'Number', 0, 'TRULE.Size-');
    $ttable->add_tablehead(14, T_('Rated#header'), 'YesNo', TABLE_NO_SORT);
    $ttable->add_tablehead(15, T_('Ruleset#header'), 'Enum', TABLE_NO_SORT);
@@ -155,7 +156,9 @@ $GLOBALS['ThePage'] = new Page('TournamentList');
    $ttable->add_tablehead(16, T_('Time limit#header'), 'Enum', TABLE_NO_SORT);
    $ttable->add_tablehead(18, T_('Restrictions#header'), '', TABLE_NO_SORT);
    $ttable->add_tablehead(10, T_('Round#header'), 'NumberC', 0, 'CurrentRound+');
-   $ttable->add_tablehead(17, T_('Tournament-Size#header'), 'Number', TABLE_NO_SORT);
+   $ttable->add_tablehead(17, new TableHead( T_('Tournament-Size#header'),
+      T_('Tournament participants / max. participants'), T_('Tournament size')),
+      'Number', TABLE_NO_SORT);
    $ttable->add_tablehead( 7, T_('Last changed#header'), 'Date', 0, 'T.Lastchanged-');
    $ttable->add_tablehead( 8, T_('Start time#header'), 'Date', 0, 'StartTime+');
    $ttable->add_tablehead( 9, T_('End time#header'), 'Date', 0, 'EndTime+');
@@ -327,7 +330,7 @@ $GLOBALS['ThePage'] = new Page('TournamentList');
    $notes = array();
    if ( $ttable->is_column_displayed(11) ) // reg-status
    {
-      $reg_notes = array( sprintf('<b>%s</b> (%s):', T_('Registration Status#T_header'), T_('Registration Status') ) );
+      $reg_notes = array( sprintf('<b>%s</b> (%s):', T_('Registration Status#T_header'), T_('Registration Status#tourney') ) );
       $arr = array_merge( array( '' => NO_VALUE ), TournamentParticipant::getStatusText() );
       foreach ( $arr as $tpstat => $text )
          $reg_notes[] = $text . ' = ' . TournamentParticipant::getStatusText($tpstat, false, true);

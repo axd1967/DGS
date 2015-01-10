@@ -183,13 +183,13 @@ $GLOBALS['ThePage'] = new Page('BulletinList');
    $btable->add_tablehead( 3, T_('Status#header'), 'Enum', TABLE_NO_HIDE, 'Status+');
    $btable->add_tablehead( 4, T_('Category#bulletin'), 'Enum', TABLE_NO_HIDE, 'Category+');
    if ( $view_edit )
-      $btable->add_tablehead( 1, new TableHead( T_('Edit Bulletin#bulletin'), 'images/edit.gif'), 'ImagesLeft', TABLE_NO_HIDE);
+      $btable->add_tablehead( 1, new TableHeadImage( T_('Edit Bulletin#bulletin'), 'images/edit.gif'), 'ImagesLeft', TABLE_NO_HIDE);
    $btable->add_tablehead( 2, T_('Author#header'), 'User', 0, 'Handle+');
    $btable->add_tablehead( 5, T_('Published#header'), 'Date', TABLE_NO_HIDE, 'PublishTime-');
    $btable->add_tablehead(10, T_('Read#bulletin'), 'Image', TABLE_NO_HIDE, 'BR_Read+' );
    if ( $view_edit )
       $btable->add_tablehead(12, T_('View#bulletin'), 'Image', TABLE_NO_HIDE, 'B_View+' );
-   $btable->add_tablehead(13, new TableHead( T_('Information#bulletin'), 'images/info.gif'), 'ImagesLeft', 0);
+   $btable->add_tablehead(13, new TableHeadImage( T_('Information#bulletin'), 'images/info.gif'), 'ImagesLeft', 0);
    $btable->add_tablehead( 6, T_('Subject#header'), null, TABLE_NO_SORT);
    $btable->add_tablehead(11, T_('Hits#bulletin'), 'Number', 0, 'CountReads-' );
    $btable->add_tablehead( 9, T_('Expires#header'), 'Date', 0, 'ExpireTime+');

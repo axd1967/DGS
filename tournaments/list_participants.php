@@ -115,13 +115,15 @@ $GLOBALS['ThePage'] = new Page('TournamentParticipantList');
    if ( $allow_edit_tourney )
       $tptable->add_tablehead( 9, T_('Flags#header'), 'Enum', 0, 'Flags+');
    $tptable->add_tablehead(10, T_('Round#header'), 'Number', 0, 'NextRound-');
-   $tptable->add_tablehead(15, new TableHead( T_('Running and finished tournament games'), 'images/table.gif'), 'Image', TABLE_NO_SORT);
+   $tptable->add_tablehead(15, new TableHeadImage( T_('Running and finished tournament games'), 'images/table.gif'), 
+      'Image', TABLE_NO_SORT);
    $tptable->add_tablehead(11, T_('Tournament Rating#header'), 'Rating', 0, ( $has_tp_rating ? 'TP.Rating-' : 'Rating2-' ));
    $tptable->add_tablehead(16, T_('Finished#header'), 'Number', 0, 'Finished-');
    $tptable->add_tablehead(17, T_('Won#header'), 'Number', 0, 'Won-');
    $tptable->add_tablehead(18, T_('Lost#header'), 'Number', 0, 'Lost-');
    $tptable->add_tablehead(12, T_('Registered#T_header'), 'Date', 0, 'Created+');
-   $tptable->add_tablehead(19, T_('Tournament last move#header'), 'Date', 0, 'Lastmoved-');
+   $tptable->add_tablehead(19, new TableHead( T_('Tournament last move#T_header'), T_('Tournament last move')), 
+      'Date', 0, 'Lastmoved-');
    $tptable->add_tablehead(13, T_('Updated#header'), 'Date', 0, 'Lastchanged-');
    if ( $allow_edit_tourney )
       $tptable->add_tablehead(14, T_('Messages#T_header'), 'Enum', TABLE_NO_SORT);

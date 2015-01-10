@@ -111,13 +111,13 @@ require_once 'include/classlib_userpicture.php';
    $ctable->add_tablehead( 9, T_('Actions#header'), 'Image', TABLE_NO_HIDE, '');
    $ctable->add_tablehead(12, T_('Type#header'), 'Enum', 0, 'P.Type+');
    if ( USERPIC_FOLDER != '' )
-      $ctable->add_tablehead(13, new TableHead( T_('User picture#header'),
+      $ctable->add_tablehead(13, new TableHeadImage( T_('User picture#header'),
          'images/picture.gif', T_('Indicator for existing user picture') ), 'Image', 0, 'P.UserPicture+' );
    $ctable->add_tablehead( 1, T_('Name#header'), 'User', 0, 'P.Name+');
    $ctable->add_tablehead( 2, T_('Userid#header'), 'User', TABLE_NO_HIDE, 'P.Handle+');
    $ctable->add_tablehead( 3, T_('Country#header'), 'Image', 0, 'P.Country+');
    $ctable->add_tablehead( 4, T_('Rating#header'), 'Rating', 0, 'P.Rating2-');
-   $ctable->add_tablehead(14, new TableHead( T_('User online#header'), 'images/online.gif',
+   $ctable->add_tablehead(14, new TableHeadImage( T_('User online#header'), 'images/online.gif',
       sprintf( T_('Indicator for being online up to %s mins ago'), SPAN_ONLINE_MINS)
          . ', ' . T_('or on vacation#header') ), 'Image', 0 );
    $ctable->add_tablehead( 5, T_('Last access#header'), 'Date', 0, 'P.Lastaccess-');

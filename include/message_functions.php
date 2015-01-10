@@ -1979,7 +1979,7 @@ class MessageListBuilder
       // add_tablehead($nr, $descr, $attbs=null, $mode=TABLE_NO_HIDE|TABLE_NO_SORT, $sortx='')
       $this->table->add_tablehead( 1, T_('Folder#header'), 'Folder',
             ($this->current_folder > FOLDER_ALL_RECEIVED ? TABLE_NO_SORT : 0), 'folder-');
-      $this->table->add_tablehead( 9, new TableHead( T_('Message thread#header'),
+      $this->table->add_tablehead( 9, new TableHeadImage( T_('Message thread#header'),
             'images/thread.gif', T_('Show message thread') ), 'Image', 0, 'Thread+' );
 
       if ( $this->full_details )
@@ -1995,9 +1995,9 @@ class MessageListBuilder
                'User', 0, 'other_name+');
 
       $this->table->add_tablehead( 3, T_('Subject#header'), '', 0, 'Subject+');
-      list($ico,$alt) = $msg_icones[0];
-      $this->table->add_tablehead( 8, image( $ico, '*-*'), 'Image', TABLE_NO_HIDE, 'flow+');
-      $this->table->add_tablehead(10, new TableHead( T_('First message in thread#header'),
+      $this->table->add_tablehead( 8, new TableHeadImage( T_('Message Flow'), $msg_icones[0][0]), 
+            'Image', TABLE_NO_HIDE, 'flow+');
+      $this->table->add_tablehead(10, new TableHeadImage( T_('First message in thread#header'),
             'images/msg_first.gif', T_('Show initial message in thread') ), 'Image', TABLE_NO_SORT );
       $this->table->add_tablehead( 4, T_('Created#header'), 'Date', 0, 'me.mid-'); // order of me.mid == order of msg-date
       if ( !$this->no_mark )

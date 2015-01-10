@@ -682,9 +682,9 @@ class PoolSummary
          $pstable->add_tablehead( 5, T_('Choice#header'), 'Mark' );
       $pstable->add_tablehead( 1, T_('Pool'), 'Number' );
       $pstable->add_tablehead( 2, T_('Size#header'), 'Number' );
-      $pstable->add_tablehead( 3, T_('#Games#header'), 'Number' );
+      $pstable->add_tablehead( 3, new TableHead( T_('#Games#header'), T_('#Games')), 'Number' );
       if ( $this->choice_form )
-         $pstable->add_tablehead( 6, T_('#Started Games#header'), 'Number' );
+         $pstable->add_tablehead( 6, new TableHead( T_('#Started Games#header'), T_('#Started Games#tourney')), 'Number' );
       $pstable->add_tablehead( 4, T_('Pool Errors#header'), 'Note' );
       $this->table = $pstable;
    }
@@ -840,14 +840,15 @@ class PoolViewer
       if ( !($this->options & PVOPT_NO_TRATING) )
          $this->table->add_tablehead( 4, T_('Tournament Rating#header'), 'Rating', 0 );
       $this->table->add_tablehead( 5, T_('Country#header'), 'Image', 0 );
-      $this->table->add_tablehead(15, new TableHead( T_('Running and finished tournament games'), 'images/table.gif'), 'Image', 0 );
-      $this->table->add_tablehead(13, new TableHead( T_('User online#header'), 'images/online.gif',
-         ( $this->options & PVOPT_NO_ONLINE
-            ? T_('Indicator for being on vacation#header')
-            : sprintf( T_('Indicator for being online up to %s mins ago'), SPAN_ONLINE_MINS) . ', ' . T_('or on vacation#header')
-         ), 'Image', 0 ));
+      $this->table->add_tablehead(15, new TableHeadImage( T_('Running and finished tournament games'), 'images/table.gif'), 'Image', 0 );
+      $this->table->add_tablehead(13, new TableHeadImage( T_('User online#header'), 'images/online.gif',
+            ( $this->options & PVOPT_NO_ONLINE
+                  ? T_('Indicator for being on vacation#header')
+                  : sprintf( T_('Indicator for being online up to %s mins ago'), SPAN_ONLINE_MINS) . ', ' . T_('or on vacation#header')
+            )
+         ), 'Image', 0 );
       $this->table->add_tablehead(14, T_('Last access#T_header'), '', 0 );
-      $this->table->add_tablehead(16, T_('Tournament last move#T_header'), '', 0 );
+      $this->table->add_tablehead(16, new TableHead( T_('Tournament last move#T_header'), T_('Tournament last move')), '', 0 );
 
       // IMPORTANT NOTE: don't use higher tablehead-nr after this!!
       //    or else config-table-cols can't be correctly saved if future table-heads are added.

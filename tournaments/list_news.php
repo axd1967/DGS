@@ -100,7 +100,7 @@ $GLOBALS['ThePage'] = new Page('TournamentNewsList');
       $tntable->add_tablehead( 4, T_('Flags#header'), 'Enum', 0, 'Flags+');
    }
    $tntable->add_tablehead( 5, T_('Published#header'), 'Date', 0, 'Published-');
-   $tntable->add_tablehead( 8, new TableHead( T_('View Tournament News'), 'images/info.gif'), 'Image', 0);
+   $tntable->add_tablehead( 8, new TableHeadImage( T_('View Tournament News'), 'images/info.gif'), 'Image', 0);
    $tntable->add_tablehead( 6, T_('Subject#header'), null, TABLE_NO_SORT);
    $tntable->add_tablehead( 7, T_('Updated#header'), 'Date', 0, 'Lastchanged-');
    $cnt_tablecols = $tntable->get_column_count() - ($allow_edit_tourney ? 1 : 0);

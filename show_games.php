@@ -455,16 +455,16 @@ $GLOBALS['ThePage'] = new Page('GamesList');
    // NOTE: The TABLE_NO_HIDEs are needed, because the columns are needed
    //       for the "static" filtering(!) of: Win/Rated; also see named-filters
    $gtable->add_tablehead( 1, T_('Game ID#header'), 'Button', TABLE_NO_HIDE, 'ID-');
-   $gtable->add_tablehead(32, new TableHead( T_('Game information'), 'images/info.gif'), 'ImagesLeft', 0 ); // game-info
+   $gtable->add_tablehead(32, new TableHeadImage( T_('Game information'), 'images/info.gif'), 'ImagesLeft', 0 );
    if ( $finished && !$all ) //FU
-      $gtable->add_tablehead(41, new TableHead( T_('Hidden game comments'), 'images/game_comment.gif'), 'Image', 0 ); // game-comment
-   $gtable->add_tablehead(47, new TableHead( T_('Attached SGF'), 'images/sgf.gif'), 'Image', 0 );
+      $gtable->add_tablehead(41, new TableHeadImage( T_('Hidden game comments'), 'images/game_comment.gif'), 'Image', 0 );
+   $gtable->add_tablehead(47, new TableHeadImage( T_('Attached SGF'), 'images/sgf.gif'), 'Image', 0 );
    $gtable->add_tablehead( 2, T_('sgf#header'), 'Sgf', TABLE_NO_SORT);
    if ( $glc->ext_tid )
    {
-      $gtable->add_tablehead(42, T_('TGame-Status#header'), 'Enum', 0 );
+      $gtable->add_tablehead(42, new TableHead( T_('TGame-Status#header'), T_('Tournament Game Status')), 'Enum', 0 );
       if ( !$all )
-         $gtable->add_tablehead(45, T_('TGame-Role#header'), 'Enum', 0 );
+         $gtable->add_tablehead(45, new TableHead( T_('TGame-Role#header'), T_('Tournament Game Role')), 'Enum', 0 );
    }
    if ( $observe_all )
    {
@@ -548,9 +548,9 @@ $GLOBALS['ThePage'] = new Page('GamesList');
    $gtable->add_tablehead(44, T_('GameType#header'), '', 0, 'GameType+');
    $gtable->add_tablehead(43, T_('Ruleset#header'), '', 0, 'Ruleset-');
    $gtable->add_tablehead( 6, T_('Size#header'), 'Number', 0, 'Size-');
-   $gtable->add_tablehead( 7, T_('Handicap#header'), 'Number', 0, 'Handicap+');
+   $gtable->add_tablehead( 7, new TableHead( T_('Handicap#header'), T_('Handicap')), 'Number', 0, 'Handicap+');
    $gtable->add_tablehead( 8, T_('Komi#header'), 'Number', 0, 'Komi-');
-   $gtable->add_tablehead( 9, T_('Moves#header'), 'Number', 0, 'Moves-');
+   $gtable->add_tablehead( 9, new TableHead( T_('Moves#header'), T_('Moves')), 'Number', 0, 'Moves-');
 
    if ( $finished ) //FU+FA
    {
@@ -586,7 +586,7 @@ $GLOBALS['ThePage'] = new Page('GamesList');
             $gtable->add_tablehead(46, T_('Priority#header'), 'Number', 0, 'X_Priority-');
       }
    }
-   $gtable->add_tablehead(12, T_('Weekend Clock#header'), 'Date', 0, 'WeekendClock-');
+   $gtable->add_tablehead(12, new TableHead( T_('Weekend Clock#header'), T_('Weekend Clock')), 'Date', 0, 'WeekendClock-');
 
    if ( $running && !$all && $is_mine ) //RU
    {

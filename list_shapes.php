@@ -74,7 +74,7 @@ $GLOBALS['ThePage'] = new Page('ShapeList');
 
    // add_tablehead($nr, $descr, $attbs=null, $mode=TABLE_NO_HIDE|TABLE_NO_SORT, $sortx='')
    $table->add_tablehead( 1, T_('ID#header'), 'Button', TABLE_NO_HIDE, 'ID-');
-   $table->add_tablehead( 2, new TableHead( T_('Shape Information'), 'images/shape.gif'), 'ImagesLeft', TABLE_NO_HIDE);
+   $table->add_tablehead( 2, new TableHeadImage( T_('Shape Information'), 'images/shape.gif'), 'ImagesLeft', TABLE_NO_HIDE);
    $table->add_tablehead( 3, T_('Author#header'), 'User', 0, 'SHPP_Handle+');
    $table->add_tablehead( 4, T_('Name#header'), 'Text', TABLE_NO_HIDE, 'Name+');
    $table->add_tablehead( 5, T_('Size#header'), 'Number', TABLE_NO_HIDE, 'Size+');

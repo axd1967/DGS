@@ -74,7 +74,7 @@ require_once 'features/lib_votes.php';
    $vtable->add_tablehead( 3, T_('Status#header'),  'Enum', 0, 'F.Status+');
    $vtable->add_tablehead(14, T_('Size#feature'),   'Enum', 0, 'F.Size+');
    $vtable->add_tablehead( 4, T_('Subject#header'), '', 0, 'F.Subject+');
-   $vtable->add_tablehead(15, T_('My Points#header'), 'NumberC', 0, 'myPoints-');
+   $vtable->add_tablehead(15, new TableHead( T_('My Points#header'), T_('My voted points')), 'NumberC', 0, 'myPoints-');
    $vtable->add_tablehead(10, T_('Points#header'),  'Number', 0, 'sumPoints-');
    $vtable->add_tablehead(11, T_('#Votes#header'),  'Number', 0, 'countVotes-');
    $vtable->add_tablehead(12, T_('#Y#header'),      'Number', 0, 'countYes-');
