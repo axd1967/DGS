@@ -148,7 +148,7 @@ $GLOBALS['ThePage'] = new Page('TournamentLadderView');
       if ( $need_tp_rating )
          $ltable->add_tablehead(14, T_('Tournament Rating#header'), 'Rating', 0 );
       $ltable->add_tablehead( 7, T_('Actions#header'), '', TABLE_NO_HIDE );
-      $ltable->add_tablehead(12, new TableHead( T_('Running and finished tournament games'), 'images/table.gif'), 'Image', 0 );
+      $ltable->add_tablehead(12, new TableHead( T_('Running and finished tournament games'), 'images/table.gif'), 'ImageLeft', 0 );
       $ltable->add_tablehead( 8, T_('Challenges-In#header'), '', TABLE_NO_HIDE );
       $ltable->add_tablehead(16, T_('Challenges-Out#header'), '', 0 );
       $ltable->add_tablehead( 9, T_('Rank Changed#T_ladder'), 'Date', 0 );
@@ -224,6 +224,8 @@ $GLOBALS['ThePage'] = new Page('TournamentLadderView');
                         : sprintf( T_('Running tournament games of user [%s]'), $user->Handle ) ),
                   false );
             }
+            else
+               $run_games_str = insert_width(17);
             if ( @$orow['TP_Finished'] > 0 )
             {
                $fin_games_str = echo_image_table( IMG_GAMETABLE_FIN,

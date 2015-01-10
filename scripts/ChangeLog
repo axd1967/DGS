@@ -13,7 +13,11 @@ ChangeLog
 
 2015-01-10 jug
 
-   * tournaments/include/tournament_ladder.php (class TournamentLadder, ~.compute_user_rating_pos_tournament_ladder),
+   * tournaments/ladder/view.php:
+   - aligned running and finished table-icons with link to tournament-games on ladder-view
+
+   * tournaments/include/tournament_ladder.php (class TournamentLadder,
+       ~.compute_user_rating_pos_tournament_ladder),
      include/globals.php (CSS_VERSION),
      scripts/updates/1.19/other_changes.txt,
      skins/dragon/screen.css,
