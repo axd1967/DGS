@@ -90,8 +90,10 @@ class TournamentLadder
    public $OutgoingTourneyGames = array();
    /*! \brief how many hours to wait till rematch allowed with same user; -1=rematch allowed, 0=TG still on WAIT-status but due. */
    public $RematchWait = -1;
-   /*! \brief theoretical ladder-position if ladder were ordered by rating; 0=unknown. */
+   /*! \brief theoretical ladder-position if ladder were ordered by rating (user or tournament rating dependent on T-props); 0=unknown. */
    public $RatingPos = 0;
+   /*! \brief theoretical ladder-position if ladder were ordered by Players.Rating2; 0=unknown. */
+   public $UserRatingPos = 0;
 
    /*! \brief Constructs TournamentLadder-object with specified arguments. */
    public function __construct( $tid=0, $rid=0, $uid=0, $created=0, $rank_changed=0, $rank=0, $best_rank=0,
@@ -1490,6 +1492,30 @@ class TournamentLadder
          "WHERE TL.tid=$tid AND TLP.Rating2 >= $rating" );
       return ($row) ? (int)$row['X_Count'] : 0;
    }//find_ladder_rating_pos
+
+   /*! \brief Determines theoretical ladder position if ordered by user-rating, set in TournamentLadder->UserRatingPos. */
+   public static function compute_user_rating_pos_tournament_ladder( $tl_iterator )
+   {
+      $arr = array(); // use other array for sorting to preserve order of given iterator
+      while ( list(,$arr_item) = $tl_iterator->getListIterator() )
+      {
+         list( $tladder, $orow ) = $arr_item;
+         $arr[$tladder->uid] = $orow['TLP_Rating2'];
+      }
+      $tl_iterator->resetListIterator();
+
+      arsort($arr);
+      $pos = 0;
+      foreach( $arr as $uid => $rating )
+         $arr[$uid] = ++$pos;
+
+      while ( list(,$arr_item) = $tl_iterator->getListIterator() )
+      {
+         $tladder = $arr_item[0];
+         $tladder->UserRatingPos = $arr[$tladder->uid];
+      }
+      $tl_iterator->resetListIterator();
+   }//compute_user_rating_pos_tournament_ladder
 
 } // end of 'TournamentLadder'
 ?>

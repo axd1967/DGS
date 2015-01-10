@@ -13,6 +13,13 @@ ChangeLog
 
 2015-01-10 jug
 
+   * tournaments/include/tournament_ladder.php (class TournamentLadder, ~.compute_user_rating_pos_tournament_ladder),
+     include/globals.php (CSS_VERSION),
+     scripts/updates/1.19/other_changes.txt,
+     skins/dragon/screen.css,
+     tournaments/ladder/view.php:
+   - added column on ladder-view with theoretical ladder-rank if sorted by user rating
+
    * tournaments/include/tournament_pool.php (TournamentPool.load_tournament_pools,
        ~.new_tournament_pool_from_cache_row),
      tournaments/include/tournament_pool_classes.php (PoolViewer.init_pool_table,

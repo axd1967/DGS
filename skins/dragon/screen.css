@@ -988,6 +988,11 @@ table.Table td.ImagesRightPadded {
    text-align: right;
 }
 
+table.Table td.RatPos {
+   text-align: right;
+   color: #555555;
+}
+
 table.Table td.ImagesRightPadded img {
    padding-left:  0.4em;
    padding-right: 0.4em;

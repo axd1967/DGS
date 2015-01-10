@@ -140,6 +140,7 @@ $GLOBALS['ThePage'] = new Page('TournamentLadderView');
       // add_tablehead($nr, $descr, $attbs=null, $mode=TABLE_NO_HIDE|TABLE_NO_SORT, $sortx='')
       $ltable->add_tablehead( 2, T_('Change#TL_header'), 'Center', 0 );
       $ltable->add_tablehead( 1, T_('Rank#T_ladder'), 'Number', TABLE_NO_HIDE, 'Rank+' );
+      $ltable->add_tablehead(19, T_('Rating Pos#TL_header'), 'RatPos', 0 );
       $ltable->add_tablehead( 3, T_('Name#header'), 'User', 0 );
       $ltable->add_tablehead( 4, T_('Userid#header'), 'User', TABLE_NO_HIDE );
       $ltable->add_tablehead( 5, T_('Country#header'), 'Image', 0 );
@@ -170,6 +171,9 @@ $GLOBALS['ThePage'] = new Page('TournamentLadderView');
       $ltable->set_found_rows( $cnt_players );
       $ltable->set_rows_per_page( null ); // no navigating
       $show_rows = $ltable->compute_show_rows( $iterator->getResultRows() );
+
+      if ( $ltable->Is_Column_Displayed[19] )
+         TournamentLadder::compute_user_rating_pos_tournament_ladder( $iterator );
 
       if ( $admin_mode )
       {
@@ -276,6 +280,8 @@ $GLOBALS['ThePage'] = new Page('TournamentLadderView');
                ? TimeFormat::echo_time_diff( $NOW, $tp_lastmoved, 24, TIMEFMT_SHORT|TIMEFMT_ZERO )
                : NO_VALUE;
          }
+         if ( $ltable->Is_Column_Displayed[19] )
+            $row_str[19] = span('smaller', (int)$tladder->UserRatingPos);
 
          if ( $is_mine )
             $row_str['extra_class'] = 'TourneyUser';

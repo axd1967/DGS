@@ -20,6 +20,7 @@ Copyright (C) 2001-2015  Erik Ouchterlony, Jens-Uwe Gaspar
       * Added last-moved date for tournament-games
          * Show on pages: view-tournament, view-ladder, view-pools, tournament-registration, list-participants,
            edit-participant (T-director)
+      * Added column on tournament-ladder-view with theoretical ladder-rank if sorted by user rating
 
    Minor changes:
 

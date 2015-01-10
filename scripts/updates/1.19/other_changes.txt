@@ -15,11 +15,14 @@ copy /25/bms.gif
 copy /25/wms.gif
 
 -----------
-# clear APC-cache (because of Bulletin- & TournamentParticipant- & TournamentPool-changes)
+# clear APC-cache due to changes of cached objects:
+# - Bulletin
+# - TournamentLadder
+# - TournamentParticipant
+# - TournamentPool
 
 -----------
-# adjust english translation for 'Tournament last move#header'
-# adjust english translation for '%#T_header'
+# adjust english translation for 'Tournament last move#header', '%#T_header', '%#TL_header'
 
 -----------
 // added images
