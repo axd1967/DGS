@@ -13,6 +13,16 @@ ChangeLog
 
 2015-01-10 jug
 
+   * tournaments/include/tournament_pool.php (TournamentPool.load_tournament_pools,
+       ~.new_tournament_pool_from_cache_row),
+     tournaments/include/tournament_pool_classes.php (PoolViewer.init_pool_table,
+       ~.make_single_pool_table),
+     tournaments/include/tournament_ladder.php (TournamentLadder.load_cache_tournament_ladder),
+     tournaments/include/tournament_cache.php (TournamentCache.load_cache_tournament_pools),
+     scripts/updates/1.19/other_changes.txt,
+     tournaments/roundrobin/view_pools.php, tournaments/ladder/view.php, tournaments/view_tournament.php:
+   - added users last-moved date for tournament-games on ladder-view and pool-view
+
    * tournaments/include/tournament_pool_classes.php (PoolViewer.init_pool_table),
      scripts/updates/1.19/other_changes.txt,
      tournaments/ladder/view.php:

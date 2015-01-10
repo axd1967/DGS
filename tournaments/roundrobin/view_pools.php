@@ -93,7 +93,7 @@ $GLOBALS['ThePage'] = new Page('TournamentPoolView');
       $games_factor = TournamentHelper::determine_games_factor( $tid );
 
       $tpool_iterator = TournamentCache::load_cache_tournament_pools( 'Tournament.pool_view.load_pools',
-         $tid, $round, $need_trating, $use_pool_cache );
+         $tid, $round, $need_trating, /*TP-lastmove*/true, $use_pool_cache );
       $poolTables = new PoolTables( $tround->Pools );
       $poolTables->fill_pools( $tpool_iterator );
       $count_players = $tpool_iterator->getItemCount();

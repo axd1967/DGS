@@ -847,6 +847,7 @@ class PoolViewer
             : sprintf( T_('Indicator for being online up to %s mins ago'), SPAN_ONLINE_MINS) . ', ' . T_('or on vacation#header')
          ), 'Image', 0 ));
       $this->table->add_tablehead(14, T_('Last access#T_header'), '', 0 );
+      $this->table->add_tablehead(16, T_('Tournament last move#T_header'), '', 0 );
 
       // IMPORTANT NOTE: don't use higher tablehead-nr after this!!
       //    or else config-table-cols can't be correctly saved if future table-heads are added.
@@ -962,6 +963,7 @@ class PoolViewer
             12 => $tpool->echoRankImage(),
             13 => echo_user_online_vacation( @$user->urow['OnVacation'], ($show_online_icon ? $user->Lastaccess : 0) ),
             14 => TimeFormat::echo_time_diff( $NOW, $user->Lastaccess, 24, TIMEFMT_SHORT|TIMEFMT_ZERO ),
+            16 => TimeFormat::echo_time_diff( $NOW, (int)@$user->urow['TP_X_Lastmoved'], 24, TIMEFMT_SHORT|TIMEFMT_ZERO ),
          );
          if ( $this->table->Is_Column_Displayed[1] )
             $row_arr[1] = $user->Name;

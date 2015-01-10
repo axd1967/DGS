@@ -516,14 +516,15 @@ class TournamentCache
     * \param $use_cache false = bypass cache and do not store data in cache; true = use cache
     * \note IMPORTANT NOTE: keep in sync with TournamentPool::load_tournament_pools()
     */
-   public static function load_cache_tournament_pools( $dbgmsg, $tid, $round, $need_trating, $use_cache )
+   public static function load_cache_tournament_pools( $dbgmsg, $tid, $round, $need_trating, $need_tp_lastmoved, $use_cache )
    {
       $tid = (int)$tid;
-      $dbgmsg .= ".TCache:load_cache_tpools($tid,$round,$need_trating,$use_cache)";
-      $key = "TPools.$tid.$round." . ($need_trating ? 1 : 0);
+      $dbgmsg .= ".TCache:load_cache_tpools($tid,$round,$need_trating,$need_tp_lastmoved,$use_cache)";
+      $key = "TPools.$tid.$round." . ($need_trating || $need_tp_lastmoved ? 1 : 0);
       $group_id = "TPools.$tid.$round";
 
-      $load_opts = TPOOL_LOADOPT_USER | ( $need_trating ? TPOOL_LOADOPT_TRATING : 0 );
+      $load_opts = TPOOL_LOADOPT_USER | ( $need_trating ? TPOOL_LOADOPT_TRATING : 0 )
+         | ( $need_tp_lastmoved ? TPOOL_LOADOPT_TP_LASTMOVED : 0 );
       $tpool_iterator = new ListIterator( $dbgmsg );
 
       if ( $use_cache )

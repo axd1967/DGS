@@ -158,13 +158,14 @@ $GLOBALS['ThePage'] = new Page('TournamentLadderView');
          sprintf( T_('Indicator for being online up to %s mins ago'), SPAN_ONLINE_MINS)
             . ', ' . T_('or on vacation#header') ), 'Image', 0 );
       $ltable->add_tablehead(13, T_('Last access#T_header'), '', 0 );
+      $ltable->add_tablehead(18, T_('Tournament last move#T_header'), '', 0 );
       $ltable->add_tablehead(11, T_('Started#header'), 'Date', 0 );
 
       $ltable->set_default_sort( 1 );
       //$ltable->make_sort_images(); //obvious, so left away as it also take a bit of unneccessary table-width
 
       $iterator = TournamentLadder::load_cache_tournament_ladder( 'Tournament.ladder_view', $tid, $need_tp_rating,
-         /*need-TP.Fin*/true, 0, /*idx*/true );
+         /*need-TP.Fin*/true, /*TP.Lastmove*/true, 0, /*idx*/true );
       $cnt_players = $iterator->getItemCount();
       $ltable->set_found_rows( $cnt_players );
       $ltable->set_rows_per_page( null ); // no navigating
@@ -258,7 +259,7 @@ $GLOBALS['ThePage'] = new Page('TournamentLadderView');
          if ( $ltable->Is_Column_Displayed[12] )
             $row_str[12] = $run_games_str . $fin_games_str;
          if ( $ltable->Is_Column_Displayed[13] )
-            $row_str[13] = TimeFormat::echo_time_diff( $GLOBALS['NOW'], $user->Lastaccess, 24, TIMEFMT_SHORT|TIMEFMT_ZERO );
+            $row_str[13] = TimeFormat::echo_time_diff( $NOW, $user->Lastaccess, 24, TIMEFMT_SHORT|TIMEFMT_ZERO );
          if ( $need_tp_rating && @$ltable->Is_Column_Displayed[14] )
             $row_str[14] = echo_rating( $orow['TP_Rating'], true, $uid);
          if ( $ltable->Is_Column_Displayed[15] )
@@ -268,6 +269,13 @@ $GLOBALS['ThePage'] = new Page('TournamentLadderView');
          if ( $ltable->Is_Column_Displayed[17] )
             $row_str[17] = $tladder->SeqWins
                . (( $tladder->SeqWins != $tladder->SeqWinsBest ) ? ' : ' . $tladder->SeqWinsBest : '' );
+         if ( $ltable->Is_Column_Displayed[18] )
+         {
+            $tp_lastmoved = (int)@$orow['TP_X_Lastmoved'];
+            $row_str[18] = ( $tp_lastmoved > 0 )
+               ? TimeFormat::echo_time_diff( $NOW, $tp_lastmoved, 24, TIMEFMT_SHORT|TIMEFMT_ZERO )
+               : NO_VALUE;
+         }
 
          if ( $is_mine )
             $row_str['extra_class'] = 'TourneyUser';

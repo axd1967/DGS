@@ -49,8 +49,9 @@ define('TPOOL_LOADOPT_USER',    0x01 ); // load Players-stuff
 define('TPOOL_LOADOPT_TP_ID',   0x02 ); // load TournamentParticipant.ID (for rid)
 define('TPOOL_LOADOPT_TRATING', 0x04 ); // load TournamentParticipant.Rating
 define('TPOOL_LOADOPT_REGTIME', 0x08 ); // load TournamentParticipant.Created (=register-time)
-define('TPOOL_LOADOPT_ONLY_RATING', 0x10 ); // only load Rating2 from Players-table
-define('TPOOL_LOADOPT_UROW_RATING', 0x20 ); // additionally set TPool->User->urow['Rating2']
+define('TPOOL_LOADOPT_TP_LASTMOVED', 0x10 ); // load TournamentParticipant.Lastmoved
+define('TPOOL_LOADOPT_ONLY_RATING', 0x20 ); // only load Rating2 from Players-table
+define('TPOOL_LOADOPT_UROW_RATING', 0x40 ); // additionally set TPool->User->urow['Rating2']
 
 global $ENTITY_TOURNAMENT_POOL; //PHP5
 $ENTITY_TOURNAMENT_POOL = new Entity( 'TournamentPool',
@@ -386,7 +387,7 @@ class TournamentPool
     */
    public static function load_tournament_pools( $iterator, $tid, $round, $pool=0, $load_opts=0 )
    {
-      $needs_tp = ( $load_opts & (TPOOL_LOADOPT_TP_ID|TPOOL_LOADOPT_TRATING|TPOOL_LOADOPT_REGTIME) );
+      $needs_tp = ( $load_opts & (TPOOL_LOADOPT_TP_ID|TPOOL_LOADOPT_TRATING|TPOOL_LOADOPT_TP_LASTMOVED|TPOOL_LOADOPT_REGTIME) );
       $needs_tp_rating = ( $load_opts & TPOOL_LOADOPT_TRATING );
 
       $qsql = self::build_query_sql( $tid, $round, $pool );
@@ -419,6 +420,8 @@ class TournamentPool
       {
          if ( $needs_tp_rating )
             $qsql->add_part( SQLP_FIELDS, 'TP.Rating AS TP_Rating' );
+         if ( $load_opts & TPOOL_LOADOPT_TP_LASTMOVED )
+            $qsql->add_part( SQLP_FIELDS, 'UNIX_TIMESTAMP(TP.Lastmoved) AS TP_X_Lastmoved' );
          if ( $load_opts & TPOOL_LOADOPT_REGTIME )
             $qsql->add_part( SQLP_FIELDS, 'UNIX_TIMESTAMP(TP.Created) AS TP_X_RegisterTime' );
 
@@ -450,7 +453,8 @@ class TournamentPool
     */
    public static function new_tournament_pool_from_cache_row( $row, $load_opts )
    {
-      $has_user_data = ( $load_opts & (TPOOL_LOADOPT_USER | TPOOL_LOADOPT_TP_ID|TPOOL_LOADOPT_TRATING|TPOOL_LOADOPT_REGTIME) );
+      $has_user_data = ( $load_opts & (TPOOL_LOADOPT_USER
+         | TPOOL_LOADOPT_TP_ID|TPOOL_LOADOPT_TRATING|TPOOL_LOADOPT_TP_LASTMOVED|TPOOL_LOADOPT_REGTIME) );
 
       $tpool = self::new_from_row( $row );
       if ( $has_user_data )
@@ -458,6 +462,7 @@ class TournamentPool
          $user = User::new_from_row( $row, 'TPU_', /*urow-strip-prefix*/true );
          $user->urow['TP_ID'] = (int)@$row['TP_ID'];
          $user->urow['TP_X_RegisterTime'] = (int)@$row['TP_X_RegisterTime'];
+         $user->urow['TP_X_Lastmoved'] = (int)@$row['TP_X_Lastmoved'];
          $user->urow['TP_Rating'] = (float)@$row['TP_Rating'];
          if ( $load_opts & TPOOL_LOADOPT_UROW_RATING ) // User- or TP-rating dependent on load-opts TPOOL_LOADOPT_TRATING
             $user->urow['Rating2'] = $user->urow['TP_Rating'];

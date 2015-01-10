@@ -1396,10 +1396,10 @@ class TournamentLadder
    }
 
    /*! \brief Loads and caches TournamentLadder-entries for given tournament-id. */
-   public static function load_cache_tournament_ladder( $dbgmsg, $tid, $with_tp_rating, $need_tp_finished, $limit=0,
-         $with_index=false )
+   public static function load_cache_tournament_ladder( $dbgmsg, $tid, $with_tp_rating, $need_tp_finished,
+         $with_tp_lastmove, $limit=0, $with_index=false )
    {
-      $with_tp = ( $with_tp_rating || $need_tp_finished ) ? 1 : 0;
+      $with_tp = ( $with_tp_rating || $need_tp_finished || $with_tp_lastmove ) ? 1 : 0;
 
       $dbgmsg .= ".TL:load_cache_tournament_ladder($tid,$with_tp,$limit)";
       $group_id = "TLadder.$tid";

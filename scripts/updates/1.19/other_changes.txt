@@ -15,7 +15,7 @@ copy /25/bms.gif
 copy /25/wms.gif
 
 -----------
-# clear APC-cache (because of Bulletin- & TournamentParticipant-changes)
+# clear APC-cache (because of Bulletin- & TournamentParticipant- & TournamentPool-changes)
 
 -----------
 # adjust english translation for 'Tournament last move#header'
