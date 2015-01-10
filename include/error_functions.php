@@ -314,6 +314,7 @@ class DgsErrors
             'server_down' => 1,
             'suicide' => 1,
             'time_limit_too_small' => 1,
+            'time_limits_exceeded' => 1,
             'tournament_director_min1' => 1,
             'unknown_user' => 1,
             'userid_illegal_chars' => 1,

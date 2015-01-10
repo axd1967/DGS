@@ -203,6 +203,9 @@ class ErrorCode
          $arr['time_limit_too_small'] =
             T_("The time limit is too small, please choose at least one hour.");
 
+         $arr['time_limits_exceeded'] =
+            T_("The time settings are too large, please choose shorter time settings.");
+
          $arr_logid['move_problem'] = 1;
          $arr['move_problem'] =
             T_("An error occurred for this move. Usually it works if you try again, otherwise please contact the support.");

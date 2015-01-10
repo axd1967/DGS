@@ -60,6 +60,11 @@ Copyright (C) 2001-2015  Erik Ouchterlony, Jens-Uwe Gaspar
       * Changed order of columns on games-page by moving current-rating near user-info
       * Enforce manual handicap-type for shape-games in waiting-room and for invitations
 
+   * Time settings restricted:
+      * Japanese byo-yomi: 90 days main-time, 30 days byo-yomi * 120 periods
+      * Canadian byo-yomi: 90 days main-time, 90 days byo-yomi / 120 moves
+      * Fischer time: 90 days main-time, 30 days extra-time
+
    * Quick-Suite (alternative interface "quick_do.php"):
       * Extended game-handler to set standard handicap placement
       * Extended message-handler to set 'own_started_games' for invitations to support restrictions by bots

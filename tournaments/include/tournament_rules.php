@@ -406,7 +406,9 @@ class TournamentRules
          DefaultMaxHandicap::limit_min_max_with_def_handicap( $size, $min_handicap, (int)@$vars['max_handicap'] );
 
       // time settings
-      list( $hours, $byohours, $byoperiods ) = self::convertFormTimeSettings( $vars );
+      list( $hours, $byohours, $byoperiods, $time_errors, $time_errfields ) = self::convertFormTimeSettings( $vars );
+      if ( count($time_errors) )
+         $errors = array_merge( $errors, $time_errors );
       $byoyomitype = @$vars['byoyomitype'];
 
       if ( $hours < 1 && ($byohours < 1 || $byoyomitype == BYOTYPE_FISCHER) )
@@ -470,9 +472,9 @@ class TournamentRules
       $this->Rated = (bool)$rated;
       $this->ShapeID = (int)$shape_id;
       $this->ShapeSnapshot = $shape_snapshot;
-   } //convertTournamentRules_to_EditForm
+   }//convertTournamentRules_to_EditForm
 
-   // returns array [ $main_hours, $byohours, $byoperiods ]
+   // returns array [ $main_hours, $byohours, $byoperiods, $time_errors, $time_errfields ]
    public function convertFormTimeSettings( $map )
    {
       // time settings

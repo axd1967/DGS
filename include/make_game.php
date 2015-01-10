@@ -289,13 +289,16 @@ function make_invite_game_setup_from_url( $my_urow, $opp_urow )
    $byotimevalue_fis = (int)@$_REQUEST['byotimevalue_fis'];
    $timeunit_fis = @$_REQUEST['timeunit_fis'];
 
-   list($hours, $byohours, $byoperiods) =
+   list( $hours, $byohours, $byoperiods, $time_errors, $time_errfields ) =
       interpret_time_limit_forms($byoyomitype, $timevalue, $timeunit,
                                  $byotimevalue_jap, $timeunit_jap, $byoperiods_jap,
                                  $byotimevalue_can, $timeunit_can, $byoperiods_can,
-                                 $byotimevalue_fis, $timeunit_fis);
+                                 $byotimevalue_fis, $timeunit_fis, /*limit*/true );
    if ( $hours < 1 && ($byohours < 1 || $byoyomitype == BYOTYPE_FISCHER) )
-      error('time_limit_too_small', "make_invite_game_setup_from_url.check.time($byoyomitype,$hours,$byohours,$byoperiods)");
+      error('time_limit_too_small', "make_invite_game_setup_from_url.check.time.min($byoyomitype,$hours,$byohours,$byoperiods)");
+   if ( count($time_errors) ) // should not happen with "limited" time-settings
+      error('time_limits_exceeded', "make_invite_game_setup_from_url.check.time.max($byoyomitype,$hours,$byohours,$byoperiods)");
+
    $gs->Maintime = $hours;
    $gs->Byotype = $byoyomitype;
    $gs->Byotime = $byohours;

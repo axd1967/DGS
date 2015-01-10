@@ -13,6 +13,20 @@ ChangeLog
 
 2015-01-10 jug
 
+   * tournaments/include/tournament_rules.php (TournamentRules.convertEditForm_to_TournamentRules),
+     include/message_functions.php (interpret_time_limit_forms),
+     include/game_functions.php (GameSetupChecker.check_time),
+     include/error_functions.php (DgsErrors.need_db_errorlog),
+     include/make_game.php (make_invite_game_setup_from_url),
+     include/error_codes.php (ErrorCode.init),
+     tournaments/edit_rules.php,
+     new_game.php:
+   - restricted time-limits to more reasonable numbers
+     - Japanese byo-yomi: 90d main-time, 30d byo-yomi * 120 periods
+     - Canadian byo-yomi: 90d main-time, 90d byo-yomi / 120 moves
+     - Fischer time: 90d main-time, 30d extra-time
+   - limit time-settings to max-values if parsed from older game-setup
+
    * waiting_room.php,
      scripts/updates/1.19/database_changes.mysql:
    - added creation-date for waiting-room entries as hidden column per default

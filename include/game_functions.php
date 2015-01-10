@@ -3326,11 +3326,17 @@ class GameSetupChecker
       $byotimevalue_fis = (int)@$_REQUEST['byotimevalue_fis'];
       $timeunit_fis = @$_REQUEST['timeunit_fis'];
 
-      list($hours, $byohours, $byoperiods) =
+      list( $hours, $byohours, $byoperiods, $limit_errors, $limit_errfields ) =
          interpret_time_limit_forms($byoyomitype, $timevalue, $timeunit,
                                     $byotimevalue_jap, $timeunit_jap, $byoperiods_jap,
                                     $byotimevalue_can, $timeunit_can, $byoperiods_can,
                                     $byotimevalue_fis, $timeunit_fis);
+      if ( count($limit_errors) )
+      {
+         $this->errors = array_merge( $this->errors, $limit_errors );
+         $this->error_fields = array_merge( $this->error_fields, $limit_errfields );
+         $has_err = 1;
+      }
 
       if ( $hours < 1 && ($byohours < 1 || $byoyomitype == BYOTYPE_FISCHER) )
       {
@@ -3449,10 +3455,12 @@ class GameSetupChecker
          $row = mysql_single_fetch( "GameSetupChecker:check_wroom_count.count_wr($uid,$view)",
                "SELECT COUNT(*) AS X_Count FROM Waitingroom WHERE uid=$uid" );
          if ( $row && (int)@$row['X_Count'] >= WROOM_MAX_ENTRIES )
+         {
             $errors[] = sprintf( T_('Max. number of own waiting-room entries [%s] has been reached.'), WROOM_MAX_ENTRIES ) . "\n" .
                T_('You can save the form as template for later, delete one waiting-room offer or wait till they are joined.') . "\n" .
                ( $view != GSETVIEW_MPGAME ?
                   T_('Number of games for same offer can be set with \'Number of games to add\'.') : '' );
+         }
       }
    }//check_wroom_count
 

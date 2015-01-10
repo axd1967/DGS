@@ -224,8 +224,10 @@ function parse_edit_form( &$trule, $t_limits )
       if ( getBool($old_vals['stdhandicap']) != getBool($trule->StdHandicap) )
          $edits[] = T_('Standard placement');
 
-      list($old_hours, $old_byohours, $old_byoperiods) =
+      list( $old_hours, $old_byohours, $old_byoperiods, $time_errors, $time_errfields ) =
          TournamentRules::convertFormTimeSettings( $old_vals );
+      if ( count($time_errors) )
+         $errors = array_merge( $errors, $time_errors );
       if ( ($old_vals['byoyomitype'] != $trule->Byotype)
             || ($old_hours != $trule->Maintime)
             || ($old_byohours != $trule->Byotime)

@@ -1297,59 +1297,128 @@ function echo_game_restrictions($MustBeRated, $RatingMin, $RatingMax, $MinRatedG
 }//echo_game_restrictions
 
 
-function interpret_time_limit_forms($byoyomitype, $timevalue, $timeunit,
-                                    $byotimevalue_jap, $timeunit_jap, $byoperiods_jap,
-                                    $byotimevalue_can, $timeunit_can, $byoperiods_can,
-                                    $byotimevalue_fis, $timeunit_fis)
+function interpret_time_limit_forms($byoyomitype, $timevalue, $timeunit,  $byotimevalue_jap, $timeunit_jap, $byoperiods_jap,
+      $byotimevalue_can, $timeunit_can, $byoperiods_can,  $byotimevalue_fis, $timeunit_fis,  $limit_time=false )
 {
-   $max = time_convert_to_hours( 365, 'days');
+   static $ABS_MAXDAYS_TIME = 365;
+   static $MAXDAYS_MAINTIME = 90;
+   static $JAP_MAXDAYS_BYOTIME = 30;
+   static $JAP_MAXPERIODS = 120;
+   static $CAN_MAXDAYS_BYOTIME = 90;
+   static $CAN_MAXMOVES = 120;
+   static $FIS_MAXDAYS_BYOTIME = 30;
+
+   $errors = array();
+   $error_fields = array();
+   $maxhours_time = time_convert_to_hours($ABS_MAXDAYS_TIME, 'days');
+   $maxhours_maintime = time_convert_to_hours($MAXDAYS_MAINTIME, 'days');
+   $maxhours_byotime_jap = time_convert_to_hours($JAP_MAXDAYS_BYOTIME, 'days');
+   $maxhours_byotime_can = time_convert_to_hours($CAN_MAXDAYS_BYOTIME, 'days');
+   $maxhours_byotime_fis = time_convert_to_hours($FIS_MAXDAYS_BYOTIME, 'days');
 
    $mainhours = time_convert_to_hours($timevalue, $timeunit);
-   if ( $mainhours > $max )
-      $mainhours = $max;
+   if ( $mainhours > $maxhours_time )
+      $mainhours = $maxhours_time;
+   elseif ( $limit_time && $mainhours > $maxhours_maintime )
+      $mainhours = $maxhours_maintime;
    elseif ( $mainhours < 0 )
       $mainhours = 0;
+   if ( $mainhours > $maxhours_maintime )
+   {
+      $errors[] = sprintf( T_('%s must not be > %s days.'), T_('Main time'), $MAXDAYS_MAINTIME );
+      $error_fields['timevalue'] = $error_fields['timeunit'] = 1;
+   }
 
    if ( $byoyomitype == BYOTYPE_JAPANESE )
    {
       $byohours = time_convert_to_hours($byotimevalue_jap, $timeunit_jap);
-      if ( $byohours > $max )
-         $byohours = $max;
+      if ( $byohours > $maxhours_time )
+         $byohours = $maxhours_time;
+      elseif ( $limit_time && $byohours > $maxhours_byotime_jap )
+         $byohours = $maxhours_byotime_jap;
       elseif ( $byohours < 0 )
          $byohours = 0;
 
       $byoperiods = (int)$byoperiods_jap;
       if ( $byoperiods < 1 )
          $byoperiods = 1;
-      if ( $byohours * $byoperiods > $max )
-         $byoperiods = floor($max/$byohours);
+      if ( $limit_time && $byoperiods > $JAP_MAXPERIODS )
+         $byoperiods = $JAP_MAXPERIODS;
+      if ( $byohours * $byoperiods > $maxhours_time )
+         $byoperiods = floor($maxhours_time/$byohours);
+
+      if ( $byohours > $maxhours_byotime_jap )
+      {
+         $errors[] = sprintf( T_('Byo-yomi time for [%s] must not be > %s days.'),
+            T_('Japanese byoyomi'), $JAP_MAXDAYS_BYOTIME );
+         $error_fields['byotimevalue_jap'] = $error_fields['timeunit_jap'] = 1;
+      }
+      if ( $byoperiods > $JAP_MAXPERIODS )
+      {
+         $errors[] = sprintf( T_('Periods for %s [%s] must not be > %s.'),
+            T_('Japanese byoyomi'), $byoperiods, $JAP_MAXPERIODS );
+         $error_fields['byoperiods_jap'] = 1;
+      }
    }
    else if ( $byoyomitype == BYOTYPE_CANADIAN )
    {
       $byohours = time_convert_to_hours($byotimevalue_can, $timeunit_can);
-      if ( $byohours > $max )
-         $byohours = $max;
+      if ( $byohours > $maxhours_time )
+         $byohours = $maxhours_time;
+      elseif ( $limit_time && $byohours > $maxhours_byotime_can )
+         $byohours = $maxhours_byotime_can;
       elseif ( $byohours < 0 )
          $byohours = 0;
 
       $byoperiods = (int)$byoperiods_can;
       if ( $byoperiods < 1 )
          $byoperiods = 1;
+      if ( $limit_time && $byoperiods > $CAN_MAXMOVES )
+         $byoperiods = $CAN_MAXMOVES;
+
+      if ( $byohours > $maxhours_byotime_can )
+      {
+         $errors[] = sprintf( T_('Byo-yomi time for [%s] must not be > %s days.'),
+            T_('Canadian byoyomi'), $CAN_MAXDAYS_BYOTIME );
+         $error_fields['byotimevalue_can'] = $error_fields['timeunit_can'] = 1;
+      }
+      if ( $byoperiods > $CAN_MAXMOVES )
+      {
+         $errors[] = sprintf( T_('Moves (stones) for %s [%s] must not be > %s.'),
+            T_('Canadian byoyomi'), $byoperiods, $CAN_MAXMOVES );
+         $error_fields['byoperiods_can'] = 1;
+      }
    }
    else // if ( $byoyomitype == BYOTYPE_FISCHER )
    {
       $byoyomitype = BYOTYPE_FISCHER;
       $byohours = time_convert_to_hours($byotimevalue_fis, $timeunit_fis);
       if ( $byohours > $mainhours )
-         $byohours = $mainhours;
+      {
+         if ( $limit_time )
+            $byohours = $mainhours;
+         else
+         {
+            $errors[] = sprintf( T_('Extra time for [%s] must not be longer than main time.'), T_('Fischer time') );
+            $error_fields['byotimevalue_fis'] = $error_fields['timeunit_fis'] = 1;
+         }
+      }
+      elseif ( $limit_time && $byohours > $maxhours_byotime_fis )
+         $byohours = $maxhours_byotime_fis;
       elseif ( $byohours < 0 )
          $byohours = 0;
 
       $byoperiods = 0;
+
+      if ( $byohours > $maxhours_byotime_fis )
+      {
+         $errors[] = sprintf( T_('Extra time for [%s] must not be > %s days.'), T_('Fischer time'), $FIS_MAXDAYS_BYOTIME );
+         $error_fields['byotimevalue_fis'] = $error_fields['timeunit_fis'] = 1;
+      }
    }
 
-   return array($mainhours, $byohours, $byoperiods);
-}
+   return array( $mainhours, $byohours, $byoperiods, $errors, $error_fields );
+}//interpret_time_limit_forms
 
 // FOLDER_DESTROYED is NOT in standard-folders
 // return: [ folder_id => [ Name, BGColor, FGColor ], ...]
@@ -1995,7 +2064,7 @@ class MessageListBuilder
                'User', 0, 'other_name+');
 
       $this->table->add_tablehead( 3, T_('Subject#header'), '', 0, 'Subject+');
-      $this->table->add_tablehead( 8, new TableHeadImage( T_('Message Flow'), $msg_icones[0][0]), 
+      $this->table->add_tablehead( 8, new TableHeadImage( T_('Message Flow'), $msg_icones[0][0]),
             'Image', TABLE_NO_HIDE, 'flow+');
       $this->table->add_tablehead(10, new TableHeadImage( T_('First message in thread#header'),
             'images/msg_first.gif', T_('Show initial message in thread') ), 'Image', TABLE_NO_SORT );

@@ -323,14 +323,16 @@ function handle_add_game( $my_id, $viewmode )
    $byotimevalue_fis = @$_REQUEST['byotimevalue_fis'];
    $timeunit_fis = @$_REQUEST['timeunit_fis'];
 
-   list($hours, $byohours, $byoperiods) =
+   list( $hours, $byohours, $byoperiods, $time_errors, $time_errfields ) =
       interpret_time_limit_forms($byoyomitype, $timevalue, $timeunit,
                                  $byotimevalue_jap, $timeunit_jap, $byoperiods_jap,
                                  $byotimevalue_can, $timeunit_can, $byoperiods_can,
                                  $byotimevalue_fis, $timeunit_fis);
 
    if ( $hours<1 && ($byohours<1 || $byoyomitype == BYOTYPE_FISCHER) )
-      error('time_limit_too_small', "new_game.check.timelimit($hours,$byohours,$byoyomitype)");
+      error('time_limit_too_small', "new_game.check.timelimit.min($byoyomitype,$hours,$byohours,$byoperiods)");
+   if ( count($time_errors) )
+      error('time_limits_exceeded', "new_game.check.timelimit.max($byoyomitype,$hours,$byohours,$byoperiods)");
 
 
    if ( ($rated = @$_REQUEST['rated']) != 'Y' || $player_row['RatingStatus'] == RATING_NONE )
