@@ -460,7 +460,6 @@ class PoolTables
          error('invalid_args', "PoolTables.fill_games.miss_tpoints");
       $this->tpoints = $tpoints;
 
-      $reorder_pools = array(); // pool-no => 1 (=needs re-order of users)
       $defeated_opps = array(); // uid => [ opp-uid, ... ];  won(opp 2x) or jigo(opp 1x)
 
       // fix stored PoolGame-list to correct PoolGame.GameNo in correct order
@@ -511,9 +510,6 @@ class PoolTables
             if ( $df_score < 0 ) $defeated_opps[$df_uid][] = $ch_uid;
             if ( $df_score <= 0 ) $defeated_opps[$df_uid][] = $ch_uid; // win counts double, jigo/void simple
          }
-
-         if ( !is_null($game_score) )
-            $reorder_pools[$tpool_ch->Pool] = 1;
       }//process TGs
 
       // calc SODOS
@@ -528,8 +524,8 @@ class PoolTables
          $tpool_ch->SODOS /= 2;
       }
 
-      // re-order pool-users
-      foreach ( $reorder_pools as $pool => $tmp )
+      // re-order all pool-users per pool (unplayed pools by user-rating)
+      foreach ( $this->pools as $pool => $tmp )
       {
          // calculate rank for users determined by tie-breakers
          PoolRankCalculator::calc_ranks( $this->users, $this->pools[$pool] );

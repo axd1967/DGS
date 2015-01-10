@@ -11,9 +11,14 @@ Release [2014-07-30] - DGS 1.0.18 - tag [release-1_0_18-20140730] on (later) bra
 ChangeLog
 ------------------------------------------------------------------
 
-2015-01-06 jug
+2015-01-10 jug
+
+   * tournaments/include/tournament_pool_classes.php (PoolTables.fill_games):
+   - order all users in round-robin-tournaments by user-rating/ID in unplayed pools
 
 ### ----- release-1_19_3-20150106 -----
+
+2015-01-06 jug
 
    * include/quick/quick_message.php (QuickHandlerMessage.fill_message_info),
      include/globals.php (QUICK_VERSION),
