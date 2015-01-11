@@ -61,8 +61,8 @@ Copyright (C) 2001-2015  Erik Ouchterlony, Jens-Uwe Gaspar
       * Enforce manual handicap-type for shape-games in waiting-room and for invitations
 
    * Time settings restricted:
-      * Japanese byo-yomi: 90 days main-time, 30 days byo-yomi * 120 periods
-      * Canadian byo-yomi: 90 days main-time, 90 days byo-yomi / 120 moves
+      * Japanese byo-yomi: 90 days main-time, 30 days byo-yomi * 100 periods
+      * Canadian byo-yomi: 90 days main-time, 30 days byo-yomi / 100 moves
       * Fischer time: 90 days main-time, 30 days extra-time
 
    * Quick-Suite (alternative interface "quick_do.php"):

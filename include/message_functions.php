@@ -1303,9 +1303,9 @@ function interpret_time_limit_forms($byoyomitype, $timevalue, $timeunit,  $byoti
    static $ABS_MAXDAYS_TIME = 365;
    static $MAXDAYS_MAINTIME = 90;
    static $JAP_MAXDAYS_BYOTIME = 30;
-   static $JAP_MAXPERIODS = 120;
-   static $CAN_MAXDAYS_BYOTIME = 90;
-   static $CAN_MAXMOVES = 120;
+   static $JAP_MAXPERIODS = 200;
+   static $CAN_MAXDAYS_BYOTIME = 30;
+   static $CAN_MAXMOVES = 200;
    static $FIS_MAXDAYS_BYOTIME = 30;
 
    $errors = array();

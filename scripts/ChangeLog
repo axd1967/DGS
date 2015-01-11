@@ -22,8 +22,8 @@ ChangeLog
      tournaments/edit_rules.php,
      new_game.php:
    - restricted time-limits to more reasonable numbers
-     - Japanese byo-yomi: 90d main-time, 30d byo-yomi * 120 periods
-     - Canadian byo-yomi: 90d main-time, 90d byo-yomi / 120 moves
+     - Japanese byo-yomi: 90d main-time, 30d byo-yomi * 200 periods
+     - Canadian byo-yomi: 90d main-time, 30d byo-yomi / 200 moves
      - Fischer time: 90d main-time, 30d extra-time
    - limit time-settings to max-values if parsed from older game-setup
 
