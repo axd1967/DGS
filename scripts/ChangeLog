@@ -13,6 +13,11 @@ ChangeLog
 
 2015-01-11 jug
 
+   * tournaments/include/tournament_template_ladder.php (TournamentTemplateLadder.__construct),
+     tournaments/include/tournament_template.php (class TournamentTemplate),
+     tournaments/game_admin.php (parse_edit_form, draw_game_end):
+   - allow tournament-game annulling only for ladder-tournament-types
+
    * include/game_functions.php (GameFinalizer.finish_game, ~.should_reject_win_by_timeout),
      include/rating.php (update_rating2),
      specs/tournaments.txt:

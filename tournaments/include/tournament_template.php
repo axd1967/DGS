@@ -52,6 +52,7 @@ abstract class TournamentTemplate
 
    public $need_rounds = false; // true = tournament has round-management; false = tournament has no rounds
    public $allow_register_tourney_status = array( TOURNEY_STATUS_REGISTER );
+   public $allow_game_annul = false; // true = tournament-game can be annulled (=detached) by T-Admin or T-Director
    public $need_admin_create_tourney = true;
    public $showcount_tournament_standings = 0;
    public $limits;

@@ -30,6 +30,7 @@ require_once 'include/time_functions.php';
 require_once 'include/db/games.php';
 require_once 'tournaments/include/tournament.php';
 require_once 'tournaments/include/tournament_cache.php';
+require_once 'tournaments/include/tournament_factory.php';
 require_once 'tournaments/include/tournament_games.php';
 require_once 'tournaments/include/tournament_helper.php';
 require_once 'tournaments/include/tournament_rules.php';
@@ -76,6 +77,7 @@ define('GA_RES_ANNUL',     7);
    if ( $gid < 0 ) $gid = 0;
 
    $tourney = TournamentCache::load_cache_tournament( 'Tournament.game_admin.find_tournament', $tid );
+   $ttype = TournamentFactory::getTournament($tourney->WizardType);
    $tstatus = new TournamentStatus( $tourney );
 
    $game = Games::load_game($gid);
@@ -109,7 +111,7 @@ define('GA_RES_ANNUL',     7);
    $authorise_add_time = TournamentHelper::allow_edit_tournaments($tourney, $my_id, TD_FLAG_GAME_ADD_TIME);
 
    // init
-   list( $vars, $edits, $input_errors ) = parse_edit_form( $tgame, $trule, $game );
+   list( $vars, $edits, $input_errors ) = parse_edit_form( $tgame, $tourney, $ttype, $trule, $game );
    $errors = array_merge( $errors, $input_errors );
    $user_black = User::load_user( $game->Black_ID );
    if ( !$user_black )
@@ -132,7 +134,7 @@ define('GA_RES_ANNUL',     7);
             $success = $tgame->update_score( 'Tournament.game_admin', /*old-st*/TG_STATUS_PLAY );
             if ( $success )
             {
-               if ( $vars['result'] == GA_RES_ANNUL && ($tgame->Flags & TG_FLAG_GAME_DETACHED) )
+               if ( $ttype->allow_game_annul && $vars['result'] == GA_RES_ANNUL && ($tgame->Flags & TG_FLAG_GAME_DETACHED) )
                   Games::detach_games( "Tournament.game_admin($tid)", array( $tgame->gid ) );
 
                // clear cache
@@ -269,7 +271,7 @@ define('GA_RES_ANNUL',     7);
    // ADMIN: End game ------------------
 
    if ( $authorise_game_end )
-      draw_game_end( $tgame, $trule );
+      draw_game_end( $ttype, $tgame, $trule );
    else
       echo span('TWarning', T_('You are not authorised to end a tournament game.')), "<br><br>\n";
 
@@ -297,7 +299,7 @@ define('GA_RES_ANNUL',     7);
 
 
 // return [ vars-hash, edits-arr, errorlist ]
-function parse_edit_form( &$tgame, $trule, $game )
+function parse_edit_form( &$tgame, $tourney, $ttype, $trule, $game )
 {
    $edits = array();
    $errors = array();
@@ -411,6 +413,9 @@ function parse_edit_form( &$tgame, $trule, $game )
       }
       elseif ( $new_result == GA_RES_DRAW || $new_result == GA_RES_NO_RESULT )
          $new_score = 0;
+      elseif ( $new_result == GA_RES_ANNUL && !$ttype->allow_game_annul )
+         $errors[] = sprintf( T_('Annulling tournament-game is not allowed for type of this tournament [%s].'),
+            Tournament::getTypeText($tourney->Type) );
 
       if ( ($new_result == GA_RES_SCORE || $new_result == GA_RES_DRAW || $new_result == GA_RES_NO_RESULT)
             && !is_null($new_score) && !@$_REQUEST['jigo_check'] ) // jigo_check=1: skip jigo-check
@@ -420,7 +425,6 @@ function parse_edit_form( &$tgame, $trule, $game )
          if ( ( $jigo_behaviour > 0 && !($chk_score & 1) ) || ( $jigo_behaviour == 0 && ($chk_score & 1) ) )
             $errors[] = TournamentRules::getJigoBehaviourText( $jigo_behaviour );
       }
-
 
       // set values combining color + result + score
       if ( count($errors) == 0 )
@@ -474,7 +478,7 @@ function parse_edit_form( &$tgame, $trule, $game )
    return array( $vars, array_unique($edits), $errors );
 }//parse_edit_form
 
-function draw_game_end( $tgame, $trule )
+function draw_game_end( $ttype, $tgame, $trule )
 {
    global $page, $vars;
    $allow_edit = ( $tgame->Status == TG_STATUS_PLAY );
@@ -521,7 +525,8 @@ function draw_game_end( $tgame, $trule )
    $tform->add_row( array(
          'CELL', 2, '',
          'RADIOBUTTONSX', 'result', array( GA_RES_ANNUL => T_('Annul game (detach from tournament)') ),
-               @$vars['result'], $disabled, ));
+               @$vars['result'], ( ( $disabled || !$ttype->allow_game_annul ) ? 'disabled=1' : '' ),
+         'TEXT', ( !$ttype->allow_game_annul ? ' --- ' . T_('not allowed for this tournament-type') : '' ), ));
 
    $jigo_behaviour_text = TournamentRules::getJigoBehaviourText( $trule->determineJigoBehaviour() );
    if ( $jigo_behaviour_text )

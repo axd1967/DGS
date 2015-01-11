@@ -50,6 +50,7 @@ abstract class TournamentTemplateLadder extends TournamentTemplate
 
       // overwrite tournament-type-specific properties
       $this->allow_register_tourney_status = array( TOURNEY_STATUS_REGISTER, TOURNEY_STATUS_PLAY );
+      $this->allow_game_annul = true;
       $this->showcount_tournament_standings = 5;
       $this->limits->setLimits( TLIMITS_TRD_MAX_ROUNDS, false, 1, 1 );
       $this->limits->setLimits( TLIMITS_TL_MAX_DF, false, 0, TLADDER_MAX_DEFENSES );
