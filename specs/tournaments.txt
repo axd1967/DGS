@@ -74,7 +74,7 @@ Topics:
       * user is removed from tournament-ladder (other users move up one rank)
       * users tournament user registration is removed
       * running games are "detached" (continued as normal games)
-         * Games.Flags-detach set, Games made UNRATED (!)
+         * Games.Flags-detach set
          * TG.Flags-detach set, TG.Status=SCORE to be processed and challengesIn/Out corrected (time-delayed by cron)
          * "detached" can be seen on game-page, gameinfo-page, game-list for T
       * if user re-joins challengesIn/Out are corrected from ACTIVE (PLAY|SCORE) games

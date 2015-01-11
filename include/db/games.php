@@ -435,23 +435,20 @@ class Games
 
       // NOTE: keep Rated-state if game already finished or rated-calculation done
       db_query( "Games:update_game_rated($gid,$new_rated,$old_rated)",
-         "UPDATE Games SET Rated='$new_rated' " .
+         "UPDATE Games SET Rated='" . mysql_addslashes($new_rated) . "' " .
          "WHERE ID=$gid $chk_qpart AND Status<>'".GAME_STATUS_FINISHED."' AND Rated<>'Done' LIMIT 1" );
       return mysql_affected_rows();
    }//update_game_rated
 
-   /*! \brief Detach given games from tournament by making unrated and setting detached-game-flags (only for tournament-games). */
+   /*! \brief Detach given games from tournament by setting detached-game-flags (only for tournament-games). */
    public static function detach_games( $dbgmsg, $arr_gid )
    {
       if ( count($arr_gid) == 0 )
          return 0;
       $gids_str = implode(',', $arr_gid);
 
-      // NOTE: keep Rated-state if game already finished or rated-calculation done
       db_query( "$dbgmsg.Games:detach_games.upd_games($gids_str)",
-         "UPDATE Games SET " .
-            "Flags=Flags | ".GAMEFLAGS_TG_DETACHED.", " .
-            "Rated=IF( (Status='".GAME_STATUS_FINISHED."' OR Rated='Done'), Rated,'N') " . // make unrated if running
+         "UPDATE Games SET Flags=Flags | ".GAMEFLAGS_TG_DETACHED." " .
          "WHERE ID IN ($gids_str) AND tid > 0" ); // only for tournament-games
       return mysql_affected_rows();
    }//detach_games

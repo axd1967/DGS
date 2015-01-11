@@ -13,6 +13,11 @@ Copyright (C) 2001-2015  Erik Ouchterlony, Jens-Uwe Gaspar
          * shown in red-color <color darkred>new</color> for active tournaments (Register, Pair, Play phase)
          * shown in grey-color <color darkgrey>new</color> for inactive tournaments (Setup phase)
 
+      * Keep rated-state of tournament-game on
+         * removing tournament-participant by tournament-director or game-end-processing by T-cron
+         * annulling (=detaching) tournament-game by tournament-director
+         * setting forfeit-game-result by game-admin or tournament-director
+
       * Replaced 'RRNG'-restriction with actual restricted rating-range '30k-9d'
       * Increased max. number of games (18) per participant to allow double-round-robin for private/public tournaments
 

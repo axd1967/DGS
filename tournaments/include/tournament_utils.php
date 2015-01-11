@@ -192,7 +192,7 @@ class TournamentUtils
 
    public static function get_tournament_ladder_notes_user_removed()
    {
-      return T_('Running tournament games will be annulled, i.e. made unrated and detached from the tournament, ' .
+      return T_('Running tournament games will be annulled, i.e. detached from the tournament, ' .
          'so they have no further effect on the tournament, but will be continued as normal games.');
    }
 

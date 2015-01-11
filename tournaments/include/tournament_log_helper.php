@@ -77,7 +77,7 @@ class TournamentLogHelper
    }
 
    public static function log_tournament_game_end( $tid, $tlog_type, $gid, $edits, $old_score, $new_score,
-         $old_flags, $new_flags, $old_status, $new_status, $change_game_unrated )
+         $old_flags, $new_flags, $old_status, $new_status )
    {
       $msg = array();
       if ( $old_score !== $new_score )
@@ -87,8 +87,6 @@ class TournamentLogHelper
          $msg[] = sprintf('TG-Flags [%s] -> [%s]', $old_flags, $new_flags );
       if ( $old_status != $new_status )
          $msg[] = sprintf('TG-Status [%s] -> [%s]', $old_status, $new_status );
-      if ( $change_game_unrated )
-         $msg[] = 'Games.Rated -> unrated';
 
       $tlog = new Tournamentlog( 0, $tid, 0, 0, $tlog_type, 'TG_Data', TLOG_ACT_CHANGE, 0,
          sprintf("Change of [%s] for TG#%s with GID#%s:\n%s", implode(', ', $edits), $gid, $gid, implode('; ', $msg) ));

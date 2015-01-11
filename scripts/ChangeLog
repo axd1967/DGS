@@ -11,6 +11,22 @@ Release [2014-07-30] - DGS 1.0.18 - tag [release-1_0_18-20140730] on (later) bra
 ChangeLog
 ------------------------------------------------------------------
 
+2015-01-11 jug
+
+   * tournaments/include/tournament_utils.php (TournamentUtils.get_tournament_ladder_notes_user_removed),
+     tournaments/include/tournament_log_helper.php (TournamentLogHelper.log_tournament_game_end),
+     tournaments/include/tournament_ladder.php (TournamentLadder.remove_user_from_ladder),
+     include/game_functions.php (GameFinalizer.finish_game; GameNotify.get_text_game_result),
+     include/db/games.php (Games.detach_games),
+     include/globals.php (DGS_VERSION),
+     specs/tournaments.txt,
+     tournaments/game_admin.php (draw_game_end),
+     admin_game.php (draw_game_admin_form):
+   - keep rated-state of game for tournament
+     - on removing tournament-participant by tournament-director or game-end-processing by T-cron
+     - on annulling (=detaching) tournament-game by tournament-director
+     - on setting forfeit-game-result by game-admin or tournament-director
+
 ### ----- release-1_19_4-20150111 -----
 
 2015-01-10 jug

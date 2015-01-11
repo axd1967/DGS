@@ -379,7 +379,7 @@ class TournamentLadder
     * \return is-deleted
     *
     * \note notification to removed-user is done outside of this function
-    * \note running games for tournament are "detached" (made unrated + detached-flag set)
+    * \note running games for tournament are "detached" (detached-flag set)
     * \note IMPORTANT NOTE: expecting to run in HOT-section
     */
    public function remove_user_from_ladder( $dbgmsg, $tlog_type, $tlog_msg, $upd_rank, $rm_uid, $rm_uhandle, $nfy_user, $reason=null )
@@ -421,7 +421,7 @@ class TournamentLadder
                "WHERE ID IN (" . implode(',', $arr_tg_id) . ") AND " .
                   "Status IN ('".TG_STATUS_PLAY."','".TG_STATUS_SCORE."')" ); // avoid race-condition
          }
-         if ( count($arr_gid) ) // set Games: make unrated, set detached-flag
+         if ( count($arr_gid) ) // set Games: set detached-flag
          {
             Games::detach_games( $xdbgmsg, $arr_gid );
             foreach ( $arr_gid as $tgid )

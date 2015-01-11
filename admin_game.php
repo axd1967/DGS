@@ -424,8 +424,7 @@ function draw_game_admin_form( $game, $trule )
             'RADIOBUTTONS', 'result', array( GA_RES_TIMOUT => T_('Timeout') ), @$vars['result'], ));
       $gaform->add_row( array(
             'TAB',
-            'RADIOBUTTONS', 'result', array( GA_RES_FORFEIT => T_('Forfeit') ), @$vars['result'],
-            'TEXT', ' (+ '.T_('make game unrated') . ')' ));
+            'RADIOBUTTONS', 'result', array( GA_RES_FORFEIT => T_('Forfeit') ), @$vars['result'], ));
 
       $gaform->add_row( array(
             'RADIOBUTTONS', 'result', array( GA_RES_DRAW => T_('Draw (=Jigo)') ), @$vars['result'], ));
@@ -477,8 +476,8 @@ function draw_game_admin_form( $game, $trule )
       {
          $gaform->add_row( array(
             'CELL', 2, '',
-            'TEXT', span('ErrorMsg', make_html_safe( sprintf(
-                  T_("This is a tournament-game, so you should talk\nwith the <home %s>tournament-directors</home> about a change!"),
+            'TEXT', span('TInfo bold', make_html_safe( sprintf(
+                  T_("This is a tournament-game, so you may want to inform\nthe <home %s>tournament-directors</home> about a change!"),
                   "tournaments/list_directors.php?tid=".$game->tid), true)), ));
       }
       $gaform->add_row( array(

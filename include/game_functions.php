@@ -2091,7 +2091,7 @@ class GameFinalizer
     * \param $message message added in game-notify to players
     *
     * \note IMPORTANT NOTE: caller needs to open TA with HOT-section!!
-    * \note game is made unrated if game ended by forfeit or no-result by game-admin (this->action_by=ACTBY_ADMIN);
+    * \note game is made unrated if game ended by no-result by game-admin (this->action_by=ACTBY_ADMIN);
     *       sets this->made_unrated if game changed to unrated
     */
    public function finish_game( $dbgmsg, $do_delete, $upd_game, $game_score, $message='' )
@@ -2108,7 +2108,7 @@ class GameFinalizer
          {
             $this->GameFlags |= GAMEFLAGS_ADMIN_RESULT;
 
-            // make game unrated if game scored with SCORE_FORFEIT or NO-RESULT
+            // make game unrated if game scored with NO-RESULT
             if ( abs($game_score) == SCORE_FORFEIT )
                $game_forfeited = true;
             elseif ( $this->GameFlags & GAMEFLAGS_NO_RESULT )
@@ -2128,7 +2128,7 @@ class GameFinalizer
             $upd_game->upd_num('Score', $game_score );
             $upd_game->upd_time('Lastchanged');
          }
-         if ( $game_forfeited || $game_no_result || $timeout_rejected )
+         if ( $game_no_result || $timeout_rejected )
          {
             $upd_game->upd_txt('Rated', 'N');
             $this->made_unrated = true;
@@ -2426,10 +2426,7 @@ class GameNotify
          : '';
       $obs_info_text = $info_text;
 
-      if ( $action_by == ACTBY_ADMIN && $this->game_forfeited )
-         $info_text .= "<p><b>Info:</b> The game was changed to unrated, " .
-            "because it was ended by forfeit set by a game admin!";
-      elseif ( $action_by == ACTBY_ADMIN && $this->game_no_result )
+      if ( $action_by == ACTBY_ADMIN && $this->game_no_result )
          $info_text .= "<p><b>Info:</b> The game was changed to unrated, " .
             "because it was ended with NO-RESULT by a game admin!";
       if ( $this->timeout_rejected )

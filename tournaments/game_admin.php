@@ -133,17 +133,14 @@ define('GA_RES_ANNUL',     7);
             if ( $success )
             {
                if ( $vars['result'] == GA_RES_ANNUL && ($tgame->Flags & TG_FLAG_GAME_DETACHED) )
-                  $chg_unrated = Games::detach_games( "Tournament.game_admin($tid)", array( $tgame->gid ) );
-               else
-                  $chg_unrated = false;
+                  Games::detach_games( "Tournament.game_admin($tid)", array( $tgame->gid ) );
 
                // clear cache
                TournamentGames::delete_cache_tournament_games( "Tournament.game_admin($tid)", $tid );
 
                TournamentLogHelper::log_tournament_game_end( $tid, $allow_edit_tourney, $tgame->gid, $edits,
                   $tg_score, $tgame->Score, $tgame->formatFlags($old_tg_flags), $tgame->formatFlags(),
-                  TournamentGames::getStatusText($old_tg_status), TournamentGames::getStatusText($tgame->Status),
-                  $chg_unrated );
+                  TournamentGames::getStatusText($old_tg_status), TournamentGames::getStatusText($tgame->Status) );
             }
          }
          ta_end();
@@ -523,7 +520,7 @@ function draw_game_end( $tgame, $trule )
          'RADIOBUTTONSX', 'result', array( GA_RES_NO_RESULT => T_('No-Result (=Void)') ), @$vars['result'], $disabled, ));
    $tform->add_row( array(
          'CELL', 2, '',
-         'RADIOBUTTONSX', 'result', array( GA_RES_ANNUL => T_('Annul game (detach from tournament, make unrated)') ),
+         'RADIOBUTTONSX', 'result', array( GA_RES_ANNUL => T_('Annul game (detach from tournament)') ),
                @$vars['result'], $disabled, ));
 
    $jigo_behaviour_text = TournamentRules::getJigoBehaviourText( $trule->determineJigoBehaviour() );
