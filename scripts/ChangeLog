@@ -13,6 +13,10 @@ ChangeLog
 
 2015-01-11 jug
 
+   * tournaments/include/tournament_ladder_props.php (TournamentLadderProps.fill_ladder_running_games),
+     tournaments/include/tournament_ladder.php:
+   - bugfix: don't show detached tournament-games on ladder-view
+
    * tournaments/include/tournament_utils.php (TournamentUtils.get_tournament_ladder_notes_user_removed),
      tournaments/include/tournament_log_helper.php (TournamentLogHelper.log_tournament_game_end),
      tournaments/include/tournament_ladder.php (TournamentLadder.remove_user_from_ladder),

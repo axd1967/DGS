@@ -470,7 +470,7 @@ class TournamentLadderProps
 
    /*!
     * \brief Enhances ladder with additional info/data for defenders (incoming challenge-games)
-    *       and challenges (outgoing challenge-games):
+    *       and challenges (outgoing challenge-games), but without detached games:
     * \param $iterator ListIterator on ordered TournamentLadder with iterator-Index on uid
     * \param $tgame_iterator ListIterator on TournamentGames
     * \return array( TG_STATUS_... => count, ... ); not all stati-keys filled
@@ -484,6 +484,8 @@ class TournamentLadderProps
       while ( list(,$arr_item) = $tgame_iterator->getListIterator() )
       {
          list( $tgame, $orow ) = $arr_item;
+         if ( $tgame->Flags & TG_FLAG_GAME_DETACHED )
+            continue;
 
          // identify TLadder of defender and challenger
          $df_tladder = $iterator->getIndexValue( 'uid', $tgame->Defender_uid, 0 );
