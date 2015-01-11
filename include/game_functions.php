@@ -2108,7 +2108,6 @@ class GameFinalizer
          {
             $this->GameFlags |= GAMEFLAGS_ADMIN_RESULT;
 
-            // make game unrated if game scored with NO-RESULT
             if ( abs($game_score) == SCORE_FORFEIT )
                $game_forfeited = true;
             elseif ( $this->GameFlags & GAMEFLAGS_NO_RESULT )
@@ -2128,7 +2127,7 @@ class GameFinalizer
             $upd_game->upd_num('Score', $game_score );
             $upd_game->upd_time('Lastchanged');
          }
-         if ( $game_no_result || $timeout_rejected )
+         if ( $game_no_result || $timeout_rejected ) // make game unrated on NO-RESULT score
          {
             $upd_game->upd_txt('Rated', 'N');
             $this->made_unrated = true;
@@ -2200,8 +2199,8 @@ class GameFinalizer
    {
       global $NOW;
 
-      // must be scored by timeout, must be rated game, must be GO-type game, must not be a tournament
-      if ( abs($game_score) == SCORE_TIME && $this->is_rated && $this->GameType == GAMETYPE_GO && $this->tid == 0 )
+      // must be scored by timeout, must be rated game, must be GO-type game
+      if ( abs($game_score) == SCORE_TIME && $this->is_rated && $this->GameType == GAMETYPE_GO )
       {
          if ( $game_score == -SCORE_TIME )
          {

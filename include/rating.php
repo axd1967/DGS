@@ -223,7 +223,7 @@ function update_rating2($gid, $check_done=true, $simul=false, $game_row=null)
          sprintf($fmt2, $Black_ID, 'Black', $bRating, $bRatingMin, $bRatingMax, $Black_Start_Rating);
    }
 
-   $too_few_moves = ( $tid == 0 && !$simul ) ? ( $Moves < DELETE_LIMIT + $Handicap ) : false;
+   $too_few_moves = ( !$simul ) ? ( $Moves < DELETE_LIMIT + $Handicap ) : false;
    if ( $too_few_moves || $Rated == 'N' || $wRatingStatus != RATING_RATED || $bRatingStatus != RATING_RATED
          || $GameType != GAMETYPE_GO || ($Flags & GAMEFLAGS_NO_RESULT) )
    {

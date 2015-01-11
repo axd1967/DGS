@@ -13,6 +13,12 @@ ChangeLog
 
 2015-01-11 jug
 
+   * include/game_functions.php (GameFinalizer.finish_game, ~.should_reject_win_by_timeout),
+     include/rating.php (update_rating2),
+     specs/tournaments.txt:
+   - make tournament-game unrated like non-tournament-game if too few moves,
+     or on opponent reject-win-on-timeout
+
    * tournaments/include/tournament_ladder_props.php (TournamentLadderProps.fill_ladder_running_games),
      tournaments/include/tournament_ladder.php:
    - bugfix: don't show detached tournament-games on ladder-view

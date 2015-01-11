@@ -239,6 +239,8 @@ Features / Processes:
       - (TRR) handling tournament-escapers (odd <-> even TPs, pooling)
    - T-scoring / pairing: McMahon, Swiss, Round-Robin, Hahn-System (http://senseis.xmp.net/?HahnSystem)
    - T-scoring: http://senseis.xmp.net/?TournamentScoring
+   - T-game: game rating is independent from tournament
+      - T can have rated games but should not control if game is made unrated, though T-director can set T-game unrated as T-director set up T as rated
 
 #-------- Tournament References --------------------------------
 
