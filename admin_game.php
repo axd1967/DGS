@@ -205,7 +205,7 @@ define('GA_RES_NO_RESULT', 6);
 
    $gflags = ($game->Flags & ~GAMEFLAGS_KO );
    $iform->add_row( array(
-         'DESCRIPTION', T_('Game Type & Status & Flags'),
+         'DESCRIPTION', T_('Game Type [Status] | Flags'),
          'TEXT', sprintf( '%s [%s] %s| %s',
                           GameTexts::format_game_type( $game->GameType, $game->GamePlayers )
                               . ($game->GameType == GAMETYPE_GO ? '' : MINI_SPACING . echo_image_game_players($gid)),
@@ -283,6 +283,8 @@ function parse_edit_form( &$game, $trule )
    {
       if ( $game->tid > 0 )
          $errors[] = T_('Tournament-game can not be deleted!');
+      elseif ( $game->tid == 0 && ($game->Flags & GAMEFLAGS_TG_DETACHED) )
+         $errors[] = T_('Former tournament-game can not be deleted!');
       elseif ( $game->Status == GAME_STATUS_FINISHED && $game->Rated != 'N' )
          $errors[] = T_('Finished rated game can not be deleted!');
    }
@@ -490,7 +492,8 @@ function draw_game_admin_form( $game, $trule )
 
    // ---------- Delete game ----------
 
-   if ( $game->tid == 0 || ($game->Status == GAME_STATUS_FINISHED && $game->tid == 0 && $game->Rated == 'N') )
+   if ( $game->tid == 0 && !($game->Flags & GAMEFLAGS_TG_DETACHED)
+         && ( $game->Status != GAME_STATUS_FINISHED || $game->Rated == 'N') )
    {
       $too_few_moves = ( $game->Moves < DELETE_LIMIT + $game->Handicap );
       if ( $draw_hr )

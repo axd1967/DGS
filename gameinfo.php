@@ -117,8 +117,17 @@ function build_rating_diff( $rating_diff )
    $shape_id = (int)@$grow['ShapeID'];
    $tid = (int) @$grow['tid'];
    $tourney = $tgame = $tladder_rank = null;
+   $old_tid = 0;
    if ( !ALLOW_TOURNAMENTS || $tid <= 0 )
+   {
       $tid = 0;
+      if ( @$grow['Flags'] & GAMEFLAGS_TG_DETACHED )
+      {
+         $old_tgame = TournamentGames::load_tournament_game_by_gid($gid);
+         if ( !is_null($old_tgame) )
+            $old_tid = $old_tgame->tid;
+      }
+   }
    else
    {
       $tourney = TournamentCache::load_cache_tournament( "gameinfo.find_tournament($gid,$tid)", $tid );
@@ -191,6 +200,11 @@ function build_rating_diff( $rating_diff )
          GameTexts::format_game_type($grow['GameType'], $grow['GamePlayers'])
             . ( ($grow['GameType'] != GAMETYPE_GO ) ? MED_SPACING . echo_image_game_players($gid) : '' )
          );
+   if ( $old_tid > 0 ) // annulled tournament-game
+   {
+      $itable->add_sinfo( T_('Game Flags'),
+            span('TWarning', T_('annulled#tourney')) . echo_image_tournament_info($old_tid, '', true) );
+   }
    $itable->add_sinfo(
          T_('Status'),
          $arr_status[$status] . ( $is_admin ? ' ' . span('DebugInfo', $game_status, '(%s)') : '' )

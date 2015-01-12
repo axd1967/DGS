@@ -163,9 +163,10 @@ class QuickHandlerGame extends QuickHandler
       if ( $cmd == GAMECMD_DELETE )
       {
          $too_few_moves = ( $Moves < DELETE_LIMIT + $Handicap );
-         $may_del_game  = $too_few_moves && ( $tid == 0 ) && !$is_mpgame;
+         $may_del_game = $too_few_moves && !$is_mp_game
+            && ( $tid == 0 ) && !($Flags & GAMEFLAGS_TG_DETACHED); // delete ok if is and was no tournament-game
          if ( !$may_del_game )
-            error('invalid_action', "$dbgmsg.check.status($cmd,$Handicap,$Moves,$tid)");
+            error('invalid_action', "$dbgmsg.check.status($cmd,$Handicap,$Moves,$tid,$Flags)");
       }
       elseif ( $cmd == GAMECMD_SET_HANDICAP )
       {

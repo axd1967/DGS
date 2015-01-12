@@ -67,7 +67,10 @@ Description:
 * ID : primary key, games-ID
 
 * tid : tournament-id, FK to Tournament.ID
-   - 0 = no tournament-game
+   - 0 = no tournament-game, or was annulled (=detached) tournament-game
+      - for annulled tournament-games, TGDetached-Games.Flags is set
+        former tournament-relationship can still be checked
+        with a join on TournamentGames on TournamentGames.gid = Games.ID
 
 * ShapeID : shape-id, FK to Shape.ID
    - 0 = no shape-game (standard)
@@ -219,7 +222,8 @@ Description:
    - 0x0001 = Ko: last move has taken a single stone, used to check for Ko
    - 0x0002 = HiddenMsg: one of the game-messages contain a hidden message ("<h>...</h>")
    - 0x0004 = AdmResult: game-result was set by admin
-   - 0x0008 = TGDetached: tournament-game detached from tournament (e.g. because user removed from T)
+   - 0x0008 = TGDetached: tournament-game annulled (=detached from) tournament,
+     annulled games can not be deleted (needed for tournament-game-admin)
    - 0x0010 = AttachedSgf: indicates that there at least one SGF is attached to game
    - 0x0020 = NoResult: indicates game-result was NO-RESULT (set by game-admin)
 

@@ -11,6 +11,29 @@ Release [2014-07-30] - DGS 1.0.18 - tag [release-1_0_18-20140730] on (later) bra
 ChangeLog
 ------------------------------------------------------------------
 
+2015-01-12 jug
+
+   * include/game_functions.php (GameHelper.delete_running_game, ~.delete_finished_unrated_game),
+     include/quick/quick_game.php (QuickHandlerGame.prepare),
+     include/db/games.php (Games.detach_games),
+     scripts/updates/1.19/database_changes.mysql,
+     specs/db/table-Tournaments.txt, specs/db/table-Games.txt,
+     admin_game.php (parse_edit_form, draw_game_admin_form),
+     confirm.php, game.php, gameinfo.php, show_games.php:
+   - set Games.tid=0 on annulling (=detaching) tournament-game
+     - removed annulled games from tournament-games-list
+     - allowed adding time for annulled tournament-games
+     - annulled tournament-game can not be deleted
+     - game-info-page: show annulled tournament-game with game-flags & link to former tournament
+     - show-games-page: show tournament-data only for non-detached tournament-games
+     - show-games-page: for game-admin/tournament-admin/developer-admin show small 'A'
+       in info-column for annulled tournament-games
+-----------
+-- set Games.tid=0 for annulled tournament-games
+UPDATE Games
+   SET tid=0 WHERE tid > 0 AND (Flags & 8) ;
+-----------
+
 2015-01-11 jug
 
    * tournaments/include/tournament_template_ladder.php (TournamentTemplateLadder.__construct),

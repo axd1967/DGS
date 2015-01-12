@@ -440,7 +440,11 @@ class Games
       return mysql_affected_rows();
    }//update_game_rated
 
-   /*! \brief Detach given games from tournament by setting detached-game-flags (only for tournament-games). */
+   /*!
+    * \brief Detach given games from tournament by setting Games.tid=0 and detached-game-flags (only for tournament-games).
+    * \note Relation of tournament to game still possible with join of TournamentGames.gid = Games.ID,
+    *       even though Games.tid has been reset.
+    */
    public static function detach_games( $dbgmsg, $arr_gid )
    {
       if ( count($arr_gid) == 0 )
@@ -448,7 +452,7 @@ class Games
       $gids_str = implode(',', $arr_gid);
 
       db_query( "$dbgmsg.Games:detach_games.upd_games($gids_str)",
-         "UPDATE Games SET Flags=Flags | ".GAMEFLAGS_TG_DETACHED." " .
+         "UPDATE Games SET tid=0, Flags=Flags | ".GAMEFLAGS_TG_DETACHED." " .
          "WHERE ID IN ($gids_str) AND tid > 0" ); // only for tournament-games
       return mysql_affected_rows();
    }//detach_games

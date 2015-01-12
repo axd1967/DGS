@@ -19,6 +19,10 @@ Copyright (C) 2001-2015  Erik Ouchterlony, Jens-Uwe Gaspar
          * setting forfeit-game-result by game-admin or tournament-director
       * Make tournament-game unrated like normal game, if too few moves or depending on opponents reject-win-on-timeout setting
       * Allow tournament-game annulling by tournament-directors only for ladder-tournament-types
+         * Enabled adding-time for annulled tournament-games, but deletion still not possible
+         * Added original link to former tournament for annulled tournament-games on game-info-page
+         * Show tournament-data on games-list only for non-detached tournament-games
+         * Hide annulled tournament-games from tournament-games-list
 
       * Replaced 'RRNG'-restriction with actual restricted rating-range '30k-9d'
       * Increased max. number of games (18) per participant to allow double-round-robin for private/public tournaments
@@ -99,6 +103,7 @@ Copyright (C) 2001-2015  Erik Ouchterlony, Jens-Uwe Gaspar
 
    * Changes for Admins:
       * Added optional target user rating-range for admin-created bulletins
+      * Mark annulled tournament-games in games-list for game-/tournament-/developer-admin
 
    * Changed server versioning scheme: ARCHITECTURE.MAJOR.MINOR
 

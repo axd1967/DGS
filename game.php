@@ -241,7 +241,8 @@ $GLOBALS['ThePage'] = new Page('Game');
 
 
    $too_few_moves = ( $Moves < DELETE_LIMIT+$Handicap );
-   $may_del_game  = $my_game && $too_few_moves && isStartedGame($Status) && ( $tid == 0 ) && !$is_mp_game;
+   $may_del_game = $my_game && $too_few_moves && isStartedGame($Status) && !$is_mp_game
+      && ( $tid == 0 ) && !($Flags & GAMEFLAGS_TG_DETACHED); // delete ok if is and was no tournament-game
 
    $is_running_game = isRunningGame($Status);
    $may_resign_game = ( $action == 'choose_move')

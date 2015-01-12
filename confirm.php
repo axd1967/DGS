@@ -48,6 +48,7 @@ require_once 'include/rating.php';
      komi_save&komibid=                      : save komi-bid on fair-komi-negotiation
      fk_start                                : start game on fair-komi-negotiation
 
+     # NOTE: URL-arg 'a' is short for 'action'
      a=delete           : execute deletion of game
      a=domove&c=&s=     : execute move
      a=domove&c=&s=&cm_act_id= : execute move and activate conditional-moves
@@ -101,7 +102,8 @@ require_once 'include/rating.php';
    $my_game = ( $my_id == $Black_ID || $my_id == $White_ID );
 
    $too_few_moves = ( $Moves < DELETE_LIMIT+$Handicap );
-   $may_del_game = $my_game && $too_few_moves && isStartedGame($Status) && ( $tid == 0 ) && ($GameType == GAMETYPE_GO);
+   $may_del_game = $my_game && $too_few_moves && isStartedGame($Status) && ($GameType == GAMETYPE_GO)
+      && ( $tid == 0 ) && !($Flags & GAMEFLAGS_TG_DETACHED); // delete ok if is and was no tournament-game
 
    $is_running_game = isRunningGame($Status);
    $may_resign_game = $my_game && $is_running_game;

@@ -738,6 +738,10 @@ Description:
    - NOTE: field is needed to speed up db-queries on filling-ranks of finished pools
 
 * gid : FK to Games.ID, 0 = unset yet
+   - must not be set to 0, once Games-entry has been started (needed for tournament-game-admin)
+   - annulled (=detached) tournament-games have updated Games.tid := 0,
+     but TournamentGames.gid is still kept pointing to corresponding Games.ID
+     even if back-reference from game to tournament removed
 
 * Status : status for Tournament-game
    - INIT = Tournament-game scheduled, need to be started (not used for ladder-tournament)

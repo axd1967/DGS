@@ -57,6 +57,7 @@ $GLOBALS['ThePage'] = new Page('GamesList');
 */
 
    $glc = new GameListControl(/*quick*/false);
+   $show_annulled_games = ($player_row['admin_level'] & (ADMIN_DEVELOPER|ADMIN_GAME|ADMIN_TOURNAMENT));
 
    $glc->mp_game = (int)get_request_arg(FGTNAME_MPGAME); // multi-player-game
 
@@ -672,13 +673,15 @@ $GLOBALS['ThePage'] = new Page('GamesList');
          $str = echo_image_gameinfo($ID, /*sep*/false, $Size, $snapshot, $Last_X, $Last_Y)
             . echo_image_shapeinfo( $ShapeID, $Size, $ShapeSnapshot, false, true )
             . echo_image_tournament_info($tid, @$T_Title, true);
-         if ( $allow_edit_tourney && TournamentGames::is_score_change_allowed(@$TG_Status) )
+         if ( $tid > 0 && $allow_edit_tourney && TournamentGames::is_score_change_allowed(@$TG_Status) )
          {
             $str .= span('TAdminList',
                anchor( $base_path."tournaments/game_admin.php?tid=$tid".URI_AMP."gid=$ID",
                   image( $base_path.'images/edit.gif', 'E', '', 'class="Action InTextImage TAdmin"' ),
                   T_('Admin tournament game') ));
          }
+         if ( $show_annulled_games && ($Flags & GAMEFLAGS_TG_DETACHED) )
+            $str .= ' ' . span('DebugInfo smaller', 'A'); // annulled tournament-game
          $row_arr[32] = $str;
       }
       if ( $gtable->Is_Column_Displayed[2] )
@@ -847,13 +850,13 @@ $GLOBALS['ThePage'] = new Page('GamesList');
       if ( $gtable->Is_Column_Displayed[14] )
          $row_arr[14] = ($X_Rated == 'N' ? T_('No') : T_('Yes') );
 
-      if ( $glc->ext_tid && $gtable->Is_Column_Displayed[42] && @$TG_Status )
+      if ( $tid > 0 && $glc->ext_tid && $gtable->Is_Column_Displayed[42] && @$TG_Status )
       {
          $row_arr[42] = TournamentGames::getStatusText($TG_Status);
          if ( @$TG_Flags & TG_FLAG_GAME_DETACHED )
             $row_arr[42] .= span('TGDetached', ' (A)', '%s', T_('annulled#tourney'));
       }
-      if ( $glc->ext_tid && !$all && @$gtable->Is_Column_Displayed[45] && @$TG_Challenge >= 0 )
+      if ( $tid > 0 && $glc->ext_tid && !$all && @$gtable->Is_Column_Displayed[45] && @$TG_Challenge >= 0 )
          $row_arr[45] = ( $TG_Challenge > 0 ) ? T_('Challenger#T_ladder') : T_('Defender#T_ladder');
 
       if ( $gtable->Is_Column_Displayed[43] )
@@ -876,7 +879,7 @@ $GLOBALS['ThePage'] = new Page('GamesList');
          $row_arr[47] = echo_image_game_sgf($ID);
 
       $gtable->add_row( $row_arr );
-   }
+   }//while
    if ( $result )
       mysql_free_result($result);
    $gtable->echo_table();

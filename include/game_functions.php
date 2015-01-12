@@ -572,7 +572,7 @@ class MultiPlayerGame
    public static function load_master_uid( $dbgmsg, $gid )
    {
       $grow = mysql_single_fetch( "$dbgmsg.load_master_uid($gid)",
-            "SELECT ToMove_ID from Games WHERE ID=$gid LIMIT 1");
+            "SELECT ToMove_ID FROM Games WHERE ID=$gid LIMIT 1");
       return ( $grow ) ? (int)@$grow['ToMove_ID'] : 0;
    }//load_master_uid
 
@@ -1045,7 +1045,8 @@ class GameHelper
 {
 
    /*!
-    * \brief Deletes non-tourney game and all related tables for given game-id, if not finished yet.
+    * \brief Deletes non-tourney non-detached (=non-annulled) game and all related tables for given game-id,
+    *       if not finished yet.
     * \param $upd_players if true, also decrease Players.Running
     * \return true on success, false on invalid args or invalid game to delete (finished, tourney)
     */
@@ -1055,8 +1056,9 @@ class GameHelper
          return false;
 
       $grow = mysql_single_fetch( "GameHelper:delete_running_game.check.gid($gid)",
-            "SELECT Status, tid, DoubleGame_ID, GameType, Black_ID, White_ID, ToMove_ID from Games WHERE ID=$gid LIMIT 1");
-      if ( !$grow || (int)@$grow['tid'] > 0 )
+            "SELECT Status, tid, Flags, DoubleGame_ID, GameType, Black_ID, White_ID, ToMove_ID " .
+            "FROM Games WHERE ID=$gid LIMIT 1");
+      if ( !$grow || (int)@$grow['tid'] > 0 || ((int)@$grow['Flags'] & GAMEFLAGS_TG_DETACHED) )
          return false;
       elseif ( @$grow['Status'] == GAME_STATUS_FINISHED ) // must not be finished game, allow for setup/fair-komi
       {
@@ -1101,9 +1103,11 @@ class GameHelper
    }//delete_running_game
 
    /*!
-    * \brief Deletes finished non-tourney unrated game and all related tables for given game-id.
+    * \brief Deletes finished non-tourney non-detached (=non-annulled) unrated game and all related tables
+    *       for given game-id.
     * \note Players-table will be updated (decrease Players.Finished/etc)
-    * \return true on success, false on invalid args or invalid game to delete (not finished, tourney, rated game)
+    * \return true on success, false on invalid args or invalid game to delete (not finished, tourney,
+    *       annulled, rated game)
     */
    public static function delete_finished_unrated_game( $gid )
    {
@@ -1111,7 +1115,7 @@ class GameHelper
          return false;
 
       $grow = mysql_single_fetch( "GameHelper:delete_finished_unrated_game.check.gid($gid)",
-         "SELECT Status, tid, DoubleGame_ID, GameType, Black_ID, White_ID, Rated " .
+         "SELECT Status, tid, Flags, DoubleGame_ID, GameType, Black_ID, White_ID, Rated " .
          "FROM Games WHERE ID=$gid LIMIT 1");
       if ( is_null($grow) )
          return false;
@@ -1120,7 +1124,7 @@ class GameHelper
          error('invalid_args', "GameHelper:delete_finished_unrated_game.check.status($gid,{$grow['Status']})");
          return false; // if passing through on error()
       }
-      elseif ( (int)@$grow['tid'] > 0 )
+      elseif ( (int)@$grow['tid'] > 0 || ((int)@$grow['Flags'] & GAMEFLAGS_TG_DETACHED) )
          return false;
       elseif ( @$grow['Rated'] != 'N' )
          return false;
@@ -1162,6 +1166,7 @@ class GameHelper
    /*!
     * \brief Deletes basic game-related table-entries for given game-id.
     * \internal
+    * FIXME potential race-condition as DGS does not have real transactions, game-ending while this is called leads to corrupted data!
     */
    private static function _delete_base_game_tables( $gid )
    {

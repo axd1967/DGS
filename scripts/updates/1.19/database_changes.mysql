@@ -63,3 +63,8 @@ UPDATE ConfigPages
    SET ColumnsWaitingroom=ColumnsWaitingroom & ~0x200000 ;
 
 
+-- set Games.tid=0 for annulled tournament-games
+UPDATE Games
+   SET tid=0 WHERE tid > 0 AND (Flags & 8) ;
+
+
