@@ -13,6 +13,9 @@ ChangeLog
 
 2015-01-12 jug
 
+   * show_games.php:
+   - show tournament-game-role on tournament-game-lists only for ladder-type-tournaments
+
    * include/game_functions.php (GameHelper.delete_running_game, ~.delete_finished_unrated_game),
      include/quick/quick_game.php (QuickHandlerGame.prepare),
      include/db/games.php (Games.detach_games),

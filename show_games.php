@@ -464,7 +464,7 @@ $GLOBALS['ThePage'] = new Page('GamesList');
    if ( $glc->ext_tid )
    {
       $gtable->add_tablehead(42, new TableHead( T_('TGame-Status#header'), T_('Tournament Game Status')), 'Enum', 0 );
-      if ( !$all )
+      if ( !$all && $tourney->Type == TOURNEY_TYPE_LADDER )
          $gtable->add_tablehead(45, new TableHead( T_('TGame-Role#header'), T_('Tournament Game Role')), 'Enum', 0 );
    }
    if ( $observe_all )
