@@ -13,6 +13,8 @@ ChangeLog
 
 2015-01-12 jug
 
+### ----- release-1_19_5-20150112 -----
+
    * show_games.php:
    - show tournament-game-role on tournament-game-lists only for ladder-type-tournaments
 
@@ -65,6 +67,7 @@ UPDATE Games
      admin_game.php (draw_game_admin_form):
    - keep rated-state of game for tournament
      - on removing tournament-participant by tournament-director or game-end-processing by T-cron
+     - on withdrawal from tournament by tournament-participant
      - on annulling (=detaching) tournament-game by tournament-director
      - on setting forfeit-game-result by game-admin or tournament-director
 

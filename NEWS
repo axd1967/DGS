@@ -15,6 +15,7 @@ Copyright (C) 2001-2015  Erik Ouchterlony, Jens-Uwe Gaspar
 
       * Keep rated-state of tournament-game on
          * removing tournament-participant by tournament-director or game-end-processing by T-cron
+         * withdrawal from tournament by tournament-participant
          * annulling (=detaching) tournament-game by tournament-director
          * setting forfeit-game-result by game-admin or tournament-director
       * Make tournament-game unrated like normal game, if too few moves or depending on opponents reject-win-on-timeout setting
