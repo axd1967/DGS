@@ -25,7 +25,7 @@ require_once 'include/config-local.php';
  * \brief Definitions and declarations of DGS globally used vars and constants.
  */
 
-define('DGS_VERSION', '1.19.5'); // ARCHITECTURE(1=php).MAJOR.MINOR
+define('DGS_VERSION', '1.19.6'); // ARCHITECTURE(1=php).MAJOR.MINOR
 define('CSS_VERSION', '20150110143700'); // take UTC-timestamp of skins/dragon/screen.css
 define('JS_VERSION',  '20131211220200'); // take UTC-timestamp of newest js/*.js script
 

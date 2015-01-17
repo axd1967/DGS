@@ -201,7 +201,7 @@ function echo_save_template( $arr_profiles, $errors, $new_name )
    $form->set_config( FEC_EXTERNAL_FORM, true );
    $form->add_hidden('cmd', CMD_NEW);
    $form->add_hidden('type', $_REQUEST['type']);
-   $form->add_hidden('data', $_REQUEST['data']);
+   $form->add_hidden('data', textarea_safe($_REQUEST['data']));
 
    if ( !is_null($errors) && count($errors) )
    {
