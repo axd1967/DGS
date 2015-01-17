@@ -13,6 +13,12 @@ ChangeLog
 
 2015-01-17 jug
 
+   * include/std_functions.php (start_html, make_dragon_tools, end_page, is_logged_in),
+     include/quick_common.php (get_base_page),
+     translate.php (build_translation_page_group_info):
+   - add Translate-link "this" in bottom-bar for translators to select untranslated text
+     of translation group for current page
+
    * include/globals.php (DGS_VERSION),
      templates.php (echo_save_template):
    - bugfix: saving special HTML-characters like '&' in templates by HTML-escaping them

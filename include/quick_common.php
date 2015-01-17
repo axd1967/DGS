@@ -162,6 +162,11 @@ function safe_getcookie($name)
    return $cookie;
 }
 
+function get_base_page()
+{
+   return substr( @$_SERVER['PHP_SELF'], strlen(SUB_PATH));
+}
+
 // Returns value for passed varname $name or else $default if varname not set or if value is invalid
 //    (invalid = not an element of the optional list containing the valid values)
 function get_request_arg( $name, $def='', $list=NULL)

@@ -359,7 +359,8 @@ function start_html( $title, $no_cache, $skinname=NULL, $style_string=NULL, $las
    echo "\n <link rel=\"stylesheet\" type=\"text/css\" media=\"print\" href=\"{$base_path}skins/$skin_print/print.css?t=".CSS_VERSION."\">";
 
    $enable_js_game = false;
-   switch ( (string)substr( @$_SERVER['PHP_SELF'], strlen(SUB_PATH)) )
+   $page = get_base_page();
+   switch ( (string)$page )
    {
       case 'status.php':
          // RSS Autodiscovery:
@@ -684,7 +685,7 @@ function make_dragon_tools()
    global $base_path;
 
    $tools_array = array(); //$url => array($img,$alt,$title)
-   $page = substr( @$_SERVER['PHP_SELF'], strlen(SUB_PATH));
+   $page = get_base_page();
    switch ( (string)$page )
    {
       case 'status.php':
@@ -769,9 +770,15 @@ function end_page( $menu_array=NULL, $links_per_line=0 )
          echo "<a href=\"{$base_path}admin.php\">", T_('Admin'), "</a>", SMALL_SPACING;
 
       if ( @$player_row['Translator'] && !$printable )
-         echo anchor( $base_path.'translate.php',
-                      T_('Translate'), '', array( 'accesskey' => ACCKEY_MENU_TRANSLATE ))
-            , SMALL_SPACING;
+      {
+         $curr_page = get_base_page();
+         echo anchor( $base_path.'translate.php', T_('Translate'), '', array( 'accesskey' => ACCKEY_MENU_TRANSLATE )),
+            MINI_SPACING,
+            span('smaller',
+               anchor( $base_path.'translate.php?tpage='.urlencode($curr_page),
+                  sprintf('(%s)', T_('page#translate'))) ),
+            SMALL_SPACING;
+      }
 
       echo anchor( $base_path."index.php?logout=t",
                    ( @$player_row['ID'] > 0 ) ? T_('Logout') : T_('Login'),
@@ -2450,6 +2457,7 @@ function clean_url( $url, $sep='' )
 
 // relative to the calling URL, not to the current dir
 // returns empty or some rel-dir with trailing '/'
+// see also get_base_page()
 function rel_base_dir()
 {
    $dir = str_replace('\\','/',$_SERVER['PHP_SELF']);
@@ -2778,7 +2786,8 @@ function is_logged_in($handle, $scode, &$player_row, $login_opts=LOGIN_DEFAULT_O
 
    if ( !$vaultcnt ) //vault entered
    {
-      switch ( (string)substr( @$_SERVER['PHP_SELF'], strlen(SUB_PATH)) )
+      $base_page = get_base_page();
+      switch ( (string)$base_page )
       {
          case 'index.php':
             $text = sprintf($vault_fmt, $handle, date(DATE_FMT,$vaulttime));

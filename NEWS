@@ -106,6 +106,9 @@ Copyright (C) 2001-2015  Erik Ouchterlony, Jens-Uwe Gaspar
       * Added optional target user rating-range for admin-created bulletins
       * Mark annulled tournament-games in games-list for game-/tournament-/developer-admin
 
+   * Changes for Translators:
+      * Added Translate-link "this" in bottom-bar to select untranslated texts of translation group for current page
+
    * Changed server versioning scheme: ARCHITECTURE.MAJOR.MINOR
 
    Server config:
