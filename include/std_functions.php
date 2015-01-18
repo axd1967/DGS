@@ -2004,6 +2004,12 @@ $html_safe_preg = array(
          . ".( strlen(trim('\\4')) ? '\\4' : '\\2' )."
          . '"'.ALLOWED_LT."/a".ALLOWED_GT.'"',
 
+// ( |>)http(s)?://...( |<)     ; simple auto-link without <...>
+ '%'."(^|\s|".ALLOWED_GT.")(http(s)?://[^\\r\\n]+?)"."($|\s|".ALLOWED_LT.")".'%is'
+  => "\\1" . ALLOWED_LT.'a class='.ALLOWED_QUOT.'linkmarkup'.ALLOWED_QUOT
+         . ' href='.ALLOWED_QUOT."\\2".ALLOWED_QUOT.ALLOWED_GT
+         . "\\2" . ALLOWED_LT."/a".ALLOWED_GT . "\\4",
+
 //<game gid[,move]> =>show game
  '/'.ALLOWED_LT."game(_)? +([0-9]+)( *, *(".MOVE_SETUP."|[0-9]+))? *".ALLOWED_GT.'/ise'
   => "game_reference(('\\1'?".REF_LINK_BLANK.":0)+".REF_LINK_ALLOWED.",1,'',\\2,'\\4')",

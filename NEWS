@@ -39,6 +39,7 @@ Copyright (C) 2001-2015  Erik Ouchterlony, Jens-Uwe Gaspar
    * Markup tags and Images:
       * &lt;feature id> : showing link to corresponding feature
       * &lt;bgcolor col> : showing text with background-color
+      * http(s)://URL : create auto-link without using DGS-tagging &lt;...>
 ##      * &lt;ticket issue> : showing link to external ticket-system (Jira)
 
       * Increased width of ID-buttons for game-IDs >= 1.000.000
