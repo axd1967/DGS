@@ -11,6 +11,11 @@ Release [2014-07-30] - DGS 1.0.18 - tag [release-1_0_18-20140730] on (later) bra
 ChangeLog
 ------------------------------------------------------------------
 
+2015-01-24 jug
+
+   * forum/read.php:
+   - append quoted text directly behind author for quote-"reply" in forum-threads
+
 2015-01-18 jug
 
    * include/std_functions.php ($html_safe_preg):

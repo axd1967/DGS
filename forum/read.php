@@ -317,7 +317,7 @@ require_once 'forum/post.php';
             if ( ALLOW_QUOTING && @$_REQUEST['quote'] && !($drawmode & MASK_DRAWPOST_NO_BODY) )
             {
                $post_reference = sprintf( '[%s]:', $post->author->Handle );
-               $pvw_post_text = "<quote>$post_reference\n$pvw_post_text</quote>\n";
+               $pvw_post_text = "<quote>$post_reference $pvw_post_text</quote>\n";
             }
             else
                $pvw_post_text = '';
