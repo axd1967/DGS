@@ -13,6 +13,14 @@ ChangeLog
 
 2015-01-24 jug
 
+   * include/classlib_user.php (User.calculate_hero_ratio, ~.determine_games_next_hero_level),
+     include/db/waitingroom.php (Waitingroom.build_query_sql),
+     include/gui_functions.php,
+     opponents.php,
+     users.php:
+   - bugfix: correct check on including min. number of finished games (20)
+     to determine hero-percentage of user
+
    * forum/read.php:
    - append quoted text directly behind author for quote-"reply" in forum-threads
 

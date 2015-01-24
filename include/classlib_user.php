@@ -299,7 +299,7 @@ class User
    /*! \brief Calculates hero-ratio of user. */
    public static function calculate_hero_ratio( $games_weaker, $games_finished, $rating, $rating_status )
    {
-      return ( $rating_status == RATING_RATED && $rating >= MIN_RATING && $games_finished > MIN_FIN_GAMES_HERO_AWARD )
+      return ( $rating_status == RATING_RATED && $rating >= MIN_RATING && $games_finished >= MIN_FIN_GAMES_HERO_AWARD )
          ? $games_weaker / $games_finished
          : 0;
    }
@@ -316,7 +316,7 @@ class User
    {
       static $ARR_NEXT_HERO_LEVEL = array( 0 => HERO_BRONZE, 1 => HERO_SILVER, 2 => HERO_GOLDEN );
 
-      if ( $rating_status != RATING_RATED || $cnt_finished <= MIN_FIN_GAMES_HERO_AWARD )
+      if ( $rating_status != RATING_RATED || $cnt_finished < MIN_FIN_GAMES_HERO_AWARD )
          return -1;
 
       $hero_level = self::determine_hero_badge( $hero_ratio );

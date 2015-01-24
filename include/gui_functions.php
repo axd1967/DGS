@@ -455,7 +455,7 @@ function echo_image_game_players( $gid, $icon_text='' )
 
 /*!
  * \brief Returns image for hero badge-of-honor for given hero-ratio.
- * \param $hero_ratio between 0..1 expressing percentage of ratio: Players.GamesWeaker/Finished if Finished>MIN_FIN_GAMES_HERO_AWARD
+ * \param $hero_ratio between 0..1 expressing percentage of ratio: Players.GamesWeaker/Finished if Finished>=MIN_FIN_GAMES_HERO_AWARD
  */
 function echo_image_hero_badge( $hero_ratio )
 {

@@ -234,7 +234,7 @@ class Waitingroom
             'WRP.Rating2 AS WRP_Rating2',
             'WRP.RatingStatus AS WRP_RatingStatus',
             'WRP.Country AS WRP_Country',
-            'IF(WRP.Finished>'.MIN_FIN_GAMES_HERO_AWARD.',WRP.GamesWeaker/WRP.Finished,0) AS WRP_HeroRatio' );
+            'IF(WRP.Finished>='.MIN_FIN_GAMES_HERO_AWARD.',WRP.GamesWeaker/WRP.Finished,0) AS WRP_HeroRatio' );
          $qsql->add_part( SQLP_FROM,
             'INNER JOIN Players AS WRP ON WRP.ID=WR.uid' );
       }

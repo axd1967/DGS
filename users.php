@@ -116,7 +116,7 @@ require_once 'include/classlib_userpicture.php';
    $ufilter->add_filter(19, 'Boolean', "P.UserPicture", true );
    $ufilter->add_filter(22, 'RelativeDate', 'P.Registerdate', true,
          array( FC_TIME_UNITS => FRDTU_YMWD|FRDTU_ABS ) );
-   $ufilter->add_filter(23, 'Numeric', 'IF(P.Finished>'.MIN_FIN_GAMES_HERO_AWARD.',100*P.GamesWeaker/P.Finished,0)', true,
+   $ufilter->add_filter(23, 'Numeric', 'IF(P.Finished>='.MIN_FIN_GAMES_HERO_AWARD.',100*P.GamesWeaker/P.Finished,0)', true,
          array( FC_SIZE => 4, FC_SYNTAX_HELP => 'NUM %' ));
    $f_active =& $ufilter->get_filter(13);
 
@@ -187,7 +187,7 @@ require_once 'include/classlib_userpicture.php';
       'P.Running+P.Finished AS Games',
       //i.e. RatedWinPercent = 100*(Won+Jigo/2)/RatedGames
       'ROUND(50*(RatedGames+Won-Lost)/RatedGames) AS RatedWinPercent',
-      'IF(P.Finished>'.MIN_FIN_GAMES_HERO_AWARD.',P.GamesWeaker/P.Finished,0) AS HeroRatio',
+      'IF(P.Finished>='.MIN_FIN_GAMES_HERO_AWARD.',P.GamesWeaker/P.Finished,0) AS HeroRatio',
       'UNIX_TIMESTAMP(P.Lastaccess) AS LastaccessU',
       'UNIX_TIMESTAMP(P.LastMove) AS LastMoveU',
       'UNIX_TIMESTAMP(P.Registerdate) AS X_Registerdate' );
