@@ -11,6 +11,13 @@ Release [2014-07-30] - DGS 1.0.18 - tag [release-1_0_18-20140730] on (later) bra
 ChangeLog
 ------------------------------------------------------------------
 
+2015-02-28 jug
+
+   * include/quick/quick_user.php (QuickHandlerUser.process),
+     include/globals.php (QUICK_VERSION),
+     specs/quick_suite.txt:
+   - quick-handler: added number of web-site-hits and game-moves for user-info command
+
 2015-01-24 jug
 
    * include/classlib_user.php (User.calculate_hero_ratio, ~.determine_games_next_hero_level),
