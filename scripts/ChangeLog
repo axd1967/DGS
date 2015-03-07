@@ -13,6 +13,11 @@ ChangeLog
 
 2015-03-07 jug
 
+   * include/filter_functions.php (sql_replace_wildcards):
+   - fix bug: escaping of SQL-wildcards ('_%') was not counting wildcards, which lead in the filters
+     in using '='-operation instead of 'LIKE' to match the escaped SQL-wildcards
+     - filtering on user with '_' in user-handle was not working
+
    * include/contacts.php (Contact.update_contact, ~.delete_contact,
        ~.load_cache_contact_uids_by_systemflag, ~.delete_cache_contact_fp_hide),
      include/cache_globals.php (CACHE_GRP_CONT_FP_HIDE, MAX_CACHE_GRP, $ARR_CACHE_GROUP_NAMES,

@@ -114,7 +114,11 @@ function sql_replace_wildcards( $valsql, $arr_repl, $arr_allow = array() )
                   $sql .= '\\';
          }
          elseif ( !(strpos($sql_spec, $char) === false) ) // SQL-special -> escape
+         {
             $sql .= '\\';
+            if ($char == '%' || $char == '_')
+               $cnt_wild++;
+         }
       }
 
       $sql .= $repl;
