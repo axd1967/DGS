@@ -278,6 +278,25 @@ class Contact
       return $out;
    }//load_quick_contacts
 
+   /*! \brief Loads and return non-empty list of uid, that have a certain contact-system-flag set. */
+   public static function load_contact_uids_by_systemflag( $uid, $sysflags )
+   {
+      $out = array();
+      if ( !is_numeric($uid) )
+         error('invalid_args', "contact.load_contact_uids_by_systemflag.check.uid($uid)");
+      $sysflags = (int)$sysflags;
+      if ( $uid <= GUESTS_ID_MAX || $sysflags <= 0 )
+         return $out;
+
+      $result = db_query( "contact.load_contact_uids_by_systemflag($uid,$sysflags)",
+         "SELECT cid FROM Contacts WHERE uid=$uid AND (SystemFlags & $sysflags)>0" );
+      while ( $row = mysql_fetch_assoc( $result ) )
+         $out[] = $row['cid'];
+      mysql_free_result($result);
+
+      return $out;
+   }//load_contact_uids_by_systemflag
+
    /*!
     * \brief Static function returning
     *   1: $cid is a defined contact of $uid.
@@ -381,6 +400,7 @@ class Contact
             $arr[CSYSFLAG_WAITINGROOM]    = array( 0, 'WR_PROTECT_GAMES' );
             $arr[CSYSFLAG_REJECT_MESSAGE] = array( 0, 'REJECT_MESSAGE' );
             $arr[CSYSFLAG_REJECT_INVITE]  = array( 0, 'REJECT_INVITE' );
+            $arr[CSYSFLAG_F_HIDE_POSTS]   = array( 0, 'F_HIDE_POSTS' );
          }
          else
          {
@@ -388,6 +408,7 @@ class Contact
             $arr[CSYSFLAG_WAITINGROOM]    = array( 'sfl_wr_protect', T_('Protect waitingroom games') );
             $arr[CSYSFLAG_REJECT_MESSAGE] = array( 'sfl_reject_msg', T_('Reject messages') );
             $arr[CSYSFLAG_REJECT_INVITE]  = array( 'sfl_reject_inv', T_('Reject invitations') );
+            $arr[CSYSFLAG_F_HIDE_POSTS]   = array( 'sfl_fpost_hide', T_('Hide forum posts') );
          }
          self::$ARR_CONTACT_TEXTS[$key] = $arr;
       }

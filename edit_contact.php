@@ -64,7 +64,7 @@ require_once 'include/contacts.php';
    if ( $cid )
    { // have cid to edit new or existing
       $result = db_query( 'edit_contact.find_user.id',
-         "SELECT ID, Name, Handle FROM Players WHERE ID=$cid" );
+         "SELECT ID, Name, Handle, Adminlevel FROM Players WHERE ID=$cid" );
       if ( mysql_affected_rows() == 1 )
          $other_row = mysql_fetch_assoc( $result );
       mysql_free_result($result);
@@ -73,13 +73,14 @@ require_once 'include/contacts.php';
    { // load cid for userid
       $qhandle = mysql_addslashes($cuser);
       $result = db_query( 'edit_contact.find_user.handle',
-         "SELECT ID, Name, Handle FROM Players WHERE Handle='$qhandle'" );
+         "SELECT ID, Name, Handle, Adminlevel FROM Players WHERE Handle='$qhandle'" );
       if ( mysql_affected_rows() == 1 )
          $other_row = mysql_fetch_assoc( $result );
       mysql_free_result($result);
    }
 
    $errormsg = null;
+   $cadmlevel = 0;
    if ( $other_row ) // valid contact
    {
       $cid = $other_row['ID'];
@@ -90,6 +91,8 @@ require_once 'include/contacts.php';
          $cid = 0;
          $errormsg = '('.T_('Can\'t add myself as contact').')';
       }
+      else
+         $cadmlevel = (int)@$other_row['Adminlevel'];
    }
    else
       $errormsg = '('.T_('Unknown user').')';
@@ -113,9 +116,14 @@ require_once 'include/contacts.php';
       $contact->parse_user_flags(); // read ufl_...
       $contact->set_note( get_request_arg('note') );
 
-      $contact->update_contact();
-      jump_to("list_contacts.php?sysmsg=". urlencode(T_('Contact saved!')) );
-      //jump_to("edit_contact.php?cid=$cid".URI_AMP."sysmsg=". urlencode(T_('Contact saved!')) );
+      if ( ($contact->sysflags & CSYSFLAG_F_HIDE_POSTS ) && ($cadmlevel & ADMINGROUP_EXECUTIVE) )
+         $errormsg = T_('Hide forum posts not allowed for admin-users.');
+      else
+      {
+         $contact->update_contact();
+         jump_to("list_contacts.php?sysmsg=". urlencode(T_('Contact saved!')) );
+         //jump_to("edit_contact.php?cid=$cid".URI_AMP."sysmsg=". urlencode(T_('Contact saved!')) );
+      }
    }
 
 
@@ -130,15 +138,19 @@ require_once 'include/contacts.php';
    $cform->set_layout( FLAYOUT_GLOBAL, ( $cid ? '1,2|3,4' : '1' ) );
 
    $cform->set_area(1);
+   if ( $errormsg )
+   {
+      $cform->add_row( array(
+         'TAB',
+         'TEXT', buildErrorListString(T_('There are some errors'), array( $errormsg )) ));
+      $cform->add_row( array( 'HR' ));
+   }
    if ( $cid <= 0 ) // ask for contact to add/edit
    {
       $cform->add_row( array(
          'DESCRIPTION',  T_('Userid'),
          'TEXTINPUT',    'cuser', 16, 16, $cuser,
          'SUBMITBUTTON', 'contact_check', T_('Check contact') ));
-      if ( !is_null($errormsg) )
-         $cform->add_row( array(
-            'TAB', 'TEXT', $errormsg ));
    }
    else // edit contact (no change of contact-id allowed)
    {

@@ -22,6 +22,7 @@ $TranslateGroups[] = "Forum";
 chdir('..');
 require_once 'forum/forum_functions.php';
 require_once 'include/std_classes.php';
+require_once 'include/contacts.php';
 require_once 'include/filter.php';
 require_once 'include/filterlib_mysqlmatch.php';
 
@@ -47,6 +48,7 @@ require_once 'include/filterlib_mysqlmatch.php';
       $arr_forum[$name] = 'P.Forum_ID=' . $id;
 
    $disp_forum = new DisplayForum( $my_id, $is_moderator );
+   $disp_forum->set_hide_post_users( Contact::load_contact_uids_by_systemflag($my_id, CSYSFLAG_F_HIDE_POSTS) );
    $disp_forum->links = LINKPAGE_SEARCH | LINK_SEARCH;
 
    $page = "search.php";

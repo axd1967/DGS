@@ -2996,6 +2996,12 @@ table.Forum tr.PostBody {
    color: black;
 }
 
+table.Forum tr.PostBodyHide {
+   background: #ffe0e0;
+   color: darkgrey;
+   font-style: italic;
+}
+
 table.Forum tr.PostButtons {
    background: #ffffff;
    color: black;

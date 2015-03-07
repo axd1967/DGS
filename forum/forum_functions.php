@@ -211,6 +211,7 @@ class DisplayForum
    public $show_score = false; // used for forum-search
    /*! \brief rx-terms (optionally array) that are to be highlighted in text. */
    private $rx_term = '';
+   private $hide_post_users = array(); // uid-list with users to hide post
    private $ConfigBoard = null;
    private $forum_opts = null;
    public $flat_view = 0; // 0 = tree-view, -1 = flat-old-first (order Posts.Time ASC), 1 = flat-new-first (order Posts.Time DESC)
@@ -239,6 +240,11 @@ class DisplayForum
          $this->rx_term = '';
       else
          $this->rx_term = $rx_term;
+   }
+
+   public function set_hide_post_users( $uids )
+   {
+      $this->hide_post_users = (is_array($uids)) ? $uids : array();
    }
 
    public function setConfigBoard( $cfg_board )
@@ -712,7 +718,7 @@ class DisplayForum
     */
    public function draw_post( $drawmode, $post, $is_my_post, $GoDiagrams=null )
    {
-      global $NOW, $player_row;
+      global $NOW, $player_row, $base_path;
 
       // post-vars needed:
       //    id, forum_id, thread_id, parent_id, subject, text, author(id,name,handle,rating),
@@ -853,7 +859,14 @@ class DisplayForum
       }
 
       // post body
-      if ( !($drawmode & MASK_DRAWPOST_NO_BODY) )
+      $reply_link = "<a href=\"".$base_path."forum/" . $thread_url.URI_AMP. "reply=$pid#$pid\">[ " . T_('reply#forum') . " ]</a>";
+      if ( in_array($post->author->ID, $this->hide_post_users) && ($drawmode_type != DRAWPOST_REPLY) )
+      {
+         echo "\n<tr class=PostBodyHide><td colspan=$cols>",
+            sprintf( T_('The author of this post is on your forum-post hide-list. Use %s to display it.'), $reply_link ),
+            "</td></tr>";
+      }
+      elseif ( !($drawmode & MASK_DRAWPOST_NO_BODY) )
          echo "\n<tr class=PostBody><td colspan=$cols>$txt</td></tr>";
 
 
@@ -892,7 +905,7 @@ class DisplayForum
             if ( !is_null($post->thread_post) && $post->thread_post->allow_post_reply() && $drawmode_type != DRAWPOST_REPLY )
             {
                // reply link
-               echo '<a href="', $thread_url,URI_AMP,"reply=$pid#$pid\">[ ", T_('reply#forum'), " ]</a>&nbsp;&nbsp;";
+               echo $reply_link, "&nbsp;&nbsp;";
                if ( ALLOW_QUOTING )
                   echo '<a href="', $thread_url,URI_AMP,"quote=1",URI_AMP,"reply=$pid#$pid\">[ ",
                      T_('quote#forum'), " ]</a>&nbsp;&nbsp;";
