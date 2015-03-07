@@ -175,6 +175,8 @@ class Contact
          . ", Notes='" . mysql_addslashes($this->note) . "'"
          ;
       $result = db_query( "contact.update_contact2({$this->uid},{$this->cid})", $update_query );
+
+      self::delete_cache_contact_fp_hide( "contact.update_contact", $this->uid );
    }//update_contact
 
    /*! \brief Deletes current Contact from database. */
@@ -188,6 +190,8 @@ class Contact
       $delete_query = "DELETE FROM Contacts "
          . "WHERE uid='{$this->uid}' AND cid='{$this->cid}' LIMIT 1";
       $result = db_query( 'contacts.delete_contact', $delete_query );
+
+      self::delete_cache_contact_fp_hide( "contact.delete_contact", $this->uid );
    }//delete_contact
 
    /*! \brief Returns string-representation of this object (for debugging purposes). */
@@ -415,6 +419,31 @@ class Contact
 
       return self::$ARR_CONTACT_TEXTS[$key];
    }//getContactSystemFlags
+
+   /*!
+    * \brief Loads and caches output of Contact::load_contact_uids_by_systemflag().
+    * \note IMPORTANT NOTE: can only be used for not more than one specific sysflag!
+    */
+   public static function load_cache_contact_uids_by_systemflag( $dbgmsg, $uid, $sysflag )
+   {
+      $uid = (int)$uid;
+      $dbgmsg .= ".contact.load_cache_cids_sysflag($uid,$sysflag)";
+      $key = "Cont_FP_Hide.$uid";
+
+      $arr_uids = DgsCache::fetch( $dbgmsg, CACHE_GRP_CONT_FP_HIDE, $key );
+      if ( is_null($arr_uids) )
+      {
+         $arr_uids = self::load_contact_uids_by_systemflag( $uid, $sysflag );
+         DgsCache::store( $dbgmsg, CACHE_GRP_CONT_FP_HIDE, $key, $arr_uids, 3*SECS_PER_DAY );
+      }
+
+      return $arr_uids;
+   }//load_cache_contact_uids_by_systemflag
+
+   public static function delete_cache_contact_fp_hide( $dbgmsg, $uid )
+   {
+      DgsCache::delete( $dbgmsg, CACHE_GRP_CONT_FP_HIDE, "Cont_FP_Hide.$uid" );
+   }
 
 } // end of 'Contact'
 

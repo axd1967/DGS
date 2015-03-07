@@ -3,6 +3,7 @@
 # adjust 'include/config-local.php' reflecting changes
 # - enabled 'ALLOW_QUOTING'
 # - extended $DGS_CACHE_GROUPS with CACHE_GRP_TVISIT for caching tournament-visit-table
+# - extended $DGS_CACHE_GROUPS with CACHE_GRP_CONT_FP_HIDE for caching contacts forum-post hide-list
 
 -----------
 // added images

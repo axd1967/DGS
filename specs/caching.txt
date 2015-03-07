@@ -1089,6 +1089,21 @@ See "template" for new cache-group at end of this section.
    - Expire-time of cache-entry is 7 days.
 
 
+* CACHE_GRP_CONT_FP_HIDE
+   - Viewing forum-posts on the forum-read and forum-search page should use a cache
+     to load the forum-post hide-list of a user from the Contacts-table.
+
+   - A cache-entry depends on the users contact-list with the forum-post-hide
+     system-flag being set.
+     Cache can currently only be used for one specific system-flag.
+
+   - Cache invalidation is done for a user, if contacts are added or updated.
+
+   - The "Contact"-class is used as wrapper to load and store this cached data.
+
+   - Expire-time of cache-entry is 3 days.
+
+
 * new cache-group CACHE_GRP_ ...
    - motivation, description, cache-invalidation, expire-time, special-handling ?
 

@@ -79,8 +79,9 @@ define('CACHE_GRP_TPOINTS', 33);    // 0.5KB/tourney * 1d -> 25 KB ?
 define('CACHE_GRP_TPOOLS', 34);     // 1KB/tourney/user * 1h -> 20 MB ?
 define('CACHE_GRP_COND_MOVES', 35); // 1KB/user/game * 1h -> 10 MB ?
 define('CACHE_GRP_TVISIT', 36); // 1KB/user * 7d -> 20 MB ?
+define('CACHE_GRP_CONT_FP_HIDE', 37); // 0.5KB/user * 3d -> 10 MB ?
 // NOTE: keep as last def and adjust to MAX when adding a new cache-group
-define('MAX_CACHE_GRP', 36);
+define('MAX_CACHE_GRP', 37);
 
 // names for DGS-cache manager
 global $ARR_CACHE_GROUP_NAMES;
@@ -123,6 +124,7 @@ $ARR_CACHE_GROUP_NAMES = array(
       CACHE_GRP_TPOOLS         => 'TPools',
       CACHE_GRP_COND_MOVES     => 'CondMoves',
       CACHE_GRP_TVISIT         => 'TVisit',
+      CACHE_GRP_CONT_FP_HIDE   => 'Cont_FP_Hide',
    );
 
 // configure cleanup for expired cache-entries (cache-groups not listed uses expire-time of CACHE_GRP_DEFAULT)
@@ -166,6 +168,7 @@ $ARR_CACHE_GROUP_CLEANUP = array(
       CACHE_GRP_TPOOLS        => SECS_PER_HOUR,
       CACHE_GRP_COND_MOVES    => SECS_PER_HOUR,
       CACHE_GRP_TVISIT        => 7*SECS_PER_DAY, // 7d
+      CACHE_GRP_CONT_FP_HIDE  => 3*SECS_PER_DAY, // 3d
    );
 
 ?>

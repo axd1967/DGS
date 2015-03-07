@@ -13,6 +13,16 @@ ChangeLog
 
 2015-03-07 jug
 
+   * include/contacts.php (Contact.update_contact, ~.delete_contact,
+       ~.load_cache_contact_uids_by_systemflag, ~.delete_cache_contact_fp_hide),
+     include/cache_globals.php (CACHE_GRP_CONT_FP_HIDE, MAX_CACHE_GRP, $ARR_CACHE_GROUP_NAMES,
+       $ARR_CACHE_GROUP_CLEANUP),
+     include/config.php ($DGS_CACHE_GROUPS),
+     scripts/updates/1.19/other_changes.txt, specs/caching.txt,
+     forum/read.php, forum/search.php:
+   - added caching to store forum-post hide-list to avoid reload on forum-search and forum-read page
+     - invalidate cache on creating, updating and deleting contact-entry for user
+
    * include/contacts.php (Contact.load_contact_uids_by_systemflag, ~.getContactSystemFlags),
      include/globals.php (CSS_VERSION, CSYSFLAG_F_HIDE_POSTS),
      forum/forum_functions.php (class DisplayForum, ~.set_hide_post_users, ~.draw_post),

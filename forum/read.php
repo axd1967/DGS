@@ -136,7 +136,8 @@ require_once 'forum/post.php';
    $disp_forum->set_threadpost_view( $f_flags );
    $disp_forum->set_forum_options( $forum->options );
    $disp_forum->set_rx_term( $rx_term );
-   $disp_forum->set_hide_post_users( Contact::load_contact_uids_by_systemflag($my_id, CSYSFLAG_F_HIDE_POSTS) );
+   $disp_forum->set_hide_post_users(
+      Contact::load_cache_contact_uids_by_systemflag( "forum.read", $my_id, CSYSFLAG_F_HIDE_POSTS) );
    $disp_forum->cols = 2;
    $disp_forum->links = LINKPAGE_READ;
    $disp_forum->links |= LINK_FORUMS | LINK_THREADS | LINK_SEARCH | LINK_REFRESH;
