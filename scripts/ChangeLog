@@ -13,6 +13,14 @@ ChangeLog
 
 2015-03-07 jug
 
+   * tournaments/include/tournament_pool_classes.php (PoolViewer.init_pool_table,
+       ~.make_single_pool_table),
+     include/time_functions.php (TIMEFMT_ADD_HOUR; TimeFormat._echo_time),
+     tournaments/ladder/view.php:
+   - right-align time-diff columns rank-kept/last-access/last-tournament-move on ladder-view
+     and round-robin-pool-view
+   - added time-format to also show zero-hours in time
+
    * scripts/tournament_consistency.php:
    - added checkbox to choose to fix tournament-last-move, disabled per default
 

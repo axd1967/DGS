@@ -427,7 +427,8 @@ define('TIMEFMT_HTMLSPC',  0x0004 ); // whitespace separator: plain space <-> HT
 define('TIMEFMT_ADDTYPE',  0x0008 ); // omit byo-type <-> include byo-type
 define('TIMEFMT_NO_EXTRA', 0x0010 ); // include extra-time <-> omit extra-time (byo-yomi)
 define('TIMEFMT_ZERO',     0x0020 ); // use zero time <-> return special-zero-value on zero
-define('TIMEFMT_QUICK',    0x0040 ); // time-format for quick-suite (also see specs/quick_suite.txt)
+define('TIMEFMT_ADD_HOUR', 0x0040 ); // always add hours (even if 0h)
+define('TIMEFMT_QUICK',    0x0080 ); // time-format for quick-suite (also see specs/quick_suite.txt)
 
 /*!
  * \brief Static helper class to format Dragon time.
@@ -487,7 +488,7 @@ class TimeFormat
       $days = ($hours-$h) / $hours_per_day;
       $str = ( $days > 0 ) ? self::echo_day( $days, $fmtflags ) : '';
 
-      if ( $h > 0 ) //or $str == '' )
+      if ( $h > 0 || ($fmtflags & TIMEFMT_ADD_HOUR) ) //or $str == '' )
       {
          if ( $str > '' )
          {

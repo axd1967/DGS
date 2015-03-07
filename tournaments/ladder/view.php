@@ -154,15 +154,15 @@ $GLOBALS['ThePage'] = new Page('TournamentLadderView');
       $ltable->add_tablehead( 8, T_('Challenges-In#header'), '', TABLE_NO_HIDE );
       $ltable->add_tablehead(16, T_('Challenges-Out#header'), '', 0 );
       $ltable->add_tablehead( 9, T_('Rank Changed#T_ladder'), 'Date', 0 );
-      $ltable->add_tablehead(10, T_('Rank Kept#header'), '', 0 );
+      $ltable->add_tablehead(10, T_('Rank Kept#header'), 'Right', 0 );
       $ltable->add_tablehead(17, new TableHead( T_('#Consecutive Wins#header'),
          sprintf('%s [: %s]', T_('#Consecutive Wins'), T_('Max. Consecutive Wins')), T_('#Consecutive Wins')),
          'NumberC', 0 );
       $ltable->add_tablehead(15, new TableHeadImage( T_('User online#header'), 'images/online.gif',
          sprintf( T_('Indicator for being online up to %s mins ago'), SPAN_ONLINE_MINS) . ', ' . T_('or on vacation#header') ),
          'Image', 0 );
-      $ltable->add_tablehead(13, T_('Last access#T_header'), '', 0 );
-      $ltable->add_tablehead(18, new TableHead( T_('Tournament last move#T_header'), T_('Tournament last move')), '', 0 );
+      $ltable->add_tablehead(13, T_('Last access#T_header'), 'Right', 0 );
+      $ltable->add_tablehead(18, new TableHead( T_('Tournament last move#T_header'), T_('Tournament last move')), 'Right', 0 );
       $ltable->add_tablehead(11, T_('Started#header'), 'Date', 0 );
 
       $ltable->set_default_sort( 1 );
@@ -206,6 +206,7 @@ $GLOBALS['ThePage'] = new Page('TournamentLadderView');
 
    if ( $allow_view )
    {
+      $timediff_fmt = TIMEFMT_SHORT|TIMEFMT_ZERO|TIMEFMT_ADD_HOUR;
       $my_uid = (is_null($tl_user)) ? 0 : $my_id; // i'm participating on ladder
       $tform = $ltable->make_table_form();
       while ( list(,$arr_item) = $iterator->getListIterator() )
@@ -262,13 +263,13 @@ $GLOBALS['ThePage'] = new Page('TournamentLadderView');
          if ( $ltable->Is_Column_Displayed[ 9] )
             $row_str[ 9] = ($tladder->RankChanged > 0) ? date(DATE_FMT2, $tladder->RankChanged) : '';
          if ( $ltable->Is_Column_Displayed[10] )
-            $row_str[10] = $tladder->build_rank_kept();
+            $row_str[10] = $tladder->build_rank_kept( $timediff_fmt );
          if ( $ltable->Is_Column_Displayed[11] )
             $row_str[11] = ($tladder->Created > 0) ? date(DATE_FMT2, $tladder->Created) : '';
          if ( $ltable->Is_Column_Displayed[12] )
             $row_str[12] = $run_games_str . $fin_games_str;
          if ( $ltable->Is_Column_Displayed[13] )
-            $row_str[13] = TimeFormat::echo_time_diff( $NOW, $user->Lastaccess, 24, TIMEFMT_SHORT|TIMEFMT_ZERO );
+            $row_str[13] = TimeFormat::echo_time_diff( $NOW, $user->Lastaccess, 24, $timediff_fmt );
          if ( $need_tp_rating && @$ltable->Is_Column_Displayed[14] )
             $row_str[14] = echo_rating( $orow['TP_Rating'], true, $uid);
          if ( $ltable->Is_Column_Displayed[15] )
@@ -282,7 +283,7 @@ $GLOBALS['ThePage'] = new Page('TournamentLadderView');
          {
             $tp_lastmoved = (int)@$orow['TP_X_Lastmoved'];
             $row_str[18] = ( $tp_lastmoved > 0 )
-               ? TimeFormat::echo_time_diff( $NOW, $tp_lastmoved, 24, TIMEFMT_SHORT|TIMEFMT_ZERO )
+               ? TimeFormat::echo_time_diff( $NOW, $tp_lastmoved, 24, $timediff_fmt )
                : '';
          }
          if ( $ltable->Is_Column_Displayed[19] )
