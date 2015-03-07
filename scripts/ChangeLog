@@ -13,6 +13,9 @@ ChangeLog
 
 2015-03-07 jug
 
+   * scripts/tournament_consistency.php:
+   - added checkbox to choose to fix tournament-last-move, disabled per default
+
    * include/filter_functions.php (sql_replace_wildcards):
    - fix bug: escaping of SQL-wildcards ('_%') was not counting wildcards, which lead in the filters
      in using '='-operation instead of 'LIKE' to match the escaped SQL-wildcards

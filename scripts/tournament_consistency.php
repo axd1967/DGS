@@ -60,6 +60,10 @@ define('SEPLINE', "\n<p><hr>\n");
          'DESCRIPTION', 'tid',
          'TEXTINPUT',   'tid', 12, 12, $tid,
          'TEXT',        '0 (=all) | tournament-id', ));
+   $form->add_row( array(
+         'TAB',
+         'CHECKBOX', 'fix_last_move', 1, 'Enable tournament last-move fix', @$_REQUEST['fix_last_move'], ));
+
    $form->add_empty_row();
    $form->add_row( array(
          'SUBMITBUTTON', 'check_it', 'Check Only',
@@ -83,7 +87,8 @@ define('SEPLINE', "\n<p><hr>\n");
       $cnt_err += fix_tournament_RegisteredTP( $tid, $do_it );
       $cnt_err += fix_tournament_participant_game_count( $tid, $do_it );
       $cnt_err += fix_tournament_ladder_challenge_count( $tid, $do_it );
-      $cnt_err += fix_tournament_participant_last_moved( $tid, $do_it );
+      if ( @$_REQUEST['fix_last_move'] )
+         $cnt_err += fix_tournament_participant_last_moved( $tid, $do_it );
 
       $cnt_err += check_tournament_ladder_unique_rank( $tid );
       $cnt_err += check_tournament_ladder_miss_tp_entry( $tid );
