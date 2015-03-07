@@ -1870,7 +1870,7 @@ abstract class Filter
    /*!
     * \brief Builds QuerySQL for textual-syntax (exact, range or wildcard) from local vars
     *        p_start, p_end, p_value and used dbfield-specification.
-    * \brief Builds QuerySQL for textual-syntax from local vars p_start, p_end, p_value, p_flags
+    *        Builds QuerySQL for textual-syntax from local vars p_start, p_end, p_value, p_flags
     *        and used dbfield-specification.
     * \return null if parse-error occured.
     * \note p_end is treated as exclusive-range-value.
