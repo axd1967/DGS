@@ -11,6 +11,13 @@ Release [2014-07-30] - DGS 1.0.18 - tag [release-1_0_18-20140730] on (later) bra
 ChangeLog
 ------------------------------------------------------------------
 
+2015-03-16 jug
+
+   * include/quick/quick_user.php (QuickHandlerUser.process),
+     include/globals.php (QUICK_VERSION),
+     specs/quick_suite.txt:
+   - quick-handler user-info: return number of "moves" only for own user
+
 2015-03-07 jug
 
    * tournaments/include/tournament_pool_classes.php (PoolViewer.init_pool_table,

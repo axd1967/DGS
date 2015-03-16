@@ -1084,7 +1084,7 @@ Commands:
             "rank" : "5k EGF",                 # user rank-info (contains HTML)
             "open_match" : "ask later",        # user open-for-match-info (contains HTML)
             "hits" : 100,            # number of access-hits on web-site (since user-registration)
-            "moves" : 200,           # number of moves in games (since user-registration)
+            "moves" : 200,           # number of moves in games (since user-registration); only for own user
             "games_running" : 5,     # number of running games
             "games_finished" : 50,   # number of finished games
             "games_rated" : 10,      # number of (finished) rated games
