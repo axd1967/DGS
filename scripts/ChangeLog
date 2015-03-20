@@ -11,6 +11,12 @@ Release [2014-07-30] - DGS 1.0.18 - tag [release-1_0_18-20140730] on (later) bra
 ChangeLog
 ------------------------------------------------------------------
 
+2015-03-20 jug
+
+   * include/quick/quick_user.php (QuickHandlerUser.process),
+     specs/quick_suite.txt:
+   - quick-handler user-info: return number of "hits" only for own user
+
 2015-03-16 jug
 
    * include/quick/quick_user.php (QuickHandlerUser.process),
@@ -71,8 +77,7 @@ ChangeLog
    * include/classlib_user.php (User.calculate_hero_ratio, ~.determine_games_next_hero_level),
      include/db/waitingroom.php (Waitingroom.build_query_sql),
      include/gui_functions.php,
-     opponents.php,
-     users.php:
+     opponents.php, users.php:
    - bugfix: correct check on including min. number of finished games (20)
      to determine hero-percentage of user
 

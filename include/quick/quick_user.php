@@ -131,9 +131,11 @@ class QuickHandlerUser extends QuickHandler
       $this->addResultKey( 'rating_elo', echo_rating_elo($this->user->Rating, false, '') );
       $this->addResultKey( 'rank', @$urow['Rank'] );
       $this->addResultKey( 'open_match', @$urow['Open'] );
-      $this->addResultKey( 'hits', (int)$this->user->urow['Hits'] );
       if ( $my_info )
+      {
+         $this->addResultKey( 'hits', (int)$this->user->urow['Hits'] );
          $this->addResultKey( 'moves', (int)$this->user->urow['Moves'] );
+      }
       $this->addResultKey( 'games_running', (int)$this->user->urow['Running'] );
       $this->addResultKey( 'games_finished', (int)$this->user->GamesFinished );
       $this->addResultKey( 'games_rated', (int)$this->user->GamesRated );
