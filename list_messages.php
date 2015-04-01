@@ -43,13 +43,14 @@ require_once 'include/filter.php';
 
 /*
    *folder* args rules:
-   - no &folder= neither &current_folder= set:
+
+   - &folder= not set, and &current_folder= not set:
        assume enter FOLDER_ALL_RECEIVED without move
-   - &folder= set but not &current_folder=:
+   - &folder= set, and &current_folder= not set:
        assume enter &folder= without move
-   - no &folder= but &current_folder= set (may be 0=FOLDER_ALL_RECEIVED):
+   - &folder= not set, and &current_folder= set (may be 0=FOLDER_ALL_RECEIVED):
        reenter &current_folder= without move
-   - both &folder= and &current_folder= set:
+   - &folder= set, and &current_folder= set:
        reenter &current_folder=
        &folder= is the move query field, effective on a *move_marked* click
 
@@ -63,13 +64,13 @@ require_once 'include/filter.php';
 */
    $folder = (int)@$_GET['folder']; // 0 if unset
    if ( $folder < FOLDER_ALL_RECEIVED )
-      $folder = FOLDER_ALL_RECEIVED; //ineffective for move
+      $folder = FOLDER_ALL_RECEIVED; // ineffective for move
 
    $current_folder = @$_GET['current_folder'];
    if ( !isset($current_folder) )
    {
       $current_folder = $folder;
-      $folder = FOLDER_ALL_RECEIVED; //ineffective for move
+      $folder = FOLDER_ALL_RECEIVED; // ineffective for move
    }
    else
       $current_folder = (int)$current_folder;
@@ -87,12 +88,13 @@ require_once 'include/filter.php';
       {
          if ( isset($my_folders[$folder]) && $current_folder != FOLDER_DELETED && $follow )
          {
-            //follow the move if one
+            // follow the move if one
             $current_folder= $folder;
+
             // first page if a move. keep $mtable prefix
-            $_GET['from_row'] = 0;
             // WARNING: it should be better to follow the message but
             // we don't know its page in the new folder+sorting.
+            $_GET['from_row'] = 0;
          }
       }
    }
@@ -167,8 +169,8 @@ require_once 'include/filter.php';
    if ( $can_move_messages )
    {
       /****
-       *      Actually, toggle marks does not destroy sort
-       *      but sort, page move and add/del column destroy marks.
+       * Actually, toggle marks does not destroy sort,
+       * but sort, page move and add/del-column destroy marks.
        * (unless a double *toggle marks* that transfer marks in URL)
        * (but then, the URL limited length may not be enough)
        * See message_list_head/body() to re-insert the marks in the URL
