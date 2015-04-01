@@ -94,7 +94,7 @@ require_once 'include/filter.php';
             // first page if a move. keep $mtable prefix
             // WARNING: it should be better to follow the message but
             // we don't know its page in the new folder+sorting.
-            $_GET['from_row'] = 0;
+            $_REQUEST['from_row'] = $_GET['from_row'] = 0;
          }
       }
    }

@@ -11,6 +11,11 @@ Release [2014-07-30] - DGS 1.0.18 - tag [release-1_0_18-20140730] on (later) bra
 ChangeLog
 ------------------------------------------------------------------
 
+2015-04-01 jug
+
+   * list_messages.php:
+   - bugfix: fix reset to first page on following moving message into new target folder
+
 2015-03-20 jug
 
    * include/quick/quick_user.php (QuickHandlerUser.process),
