@@ -265,7 +265,7 @@ class TournamentProperties
          $errors[] = sprintf( T_('Tournament max. participant limit (%s users) for Start-Round %s is reached.'),
             $round_max_tps, $tp->StartRound );
 
-      if ( $check_flags & TCHKFLAG_OLD_GAMES )
+      if ( $is_new_tp && ($check_flags & TCHKFLAG_OLD_GAMES) )
       {
          $errmsg = self::check_tournament_games_for_rejoin( $tourney->ID, $user->ID );
          if ( (string)$errmsg != '' )
