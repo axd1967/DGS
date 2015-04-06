@@ -96,6 +96,7 @@ Copyright (C) 2001-2015  Erik Ouchterlony, Jens-Uwe Gaspar
    Bug fixes:
 
    * Fixed ignoring detached tournament-games on ladder-view
+   * Fixed tournament-registration preventing re-joining if there are open unprocessed tournament-games
    * Fixed tournament-registration and rank-converter to accept user with rating > 6d
    * Fixed error-checks & suggestions to define tournament pool-parameters for tournament-round
    * Fixed starting all tournament-games for single-pooled round-robin tournament

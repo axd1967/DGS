@@ -28,6 +28,7 @@ require_once 'include/gui_functions.php';
 require_once 'tournaments/include/tournament_cache.php';
 require_once 'tournaments/include/tournament_globals.php';
 require_once 'tournaments/include/tournament_utils.php';
+require_once 'tournaments/include/tournament_games.php';
 require_once 'tournaments/include/tournament_participant.php';
 
  /*!
@@ -225,11 +226,12 @@ class TournamentProperties
     *        $tp->Rating set if customized-rating wanted for tourney
     * \param $check_user User-object or user-id
     * \param $check_type TCHKTYPE_USER_NEW | TCHKTYPE_USER_EDIT | TCHKTYPE_TD describing use-case/scope for checks
+    * \param $check_flags bitmask: TCHKFLAG_OLD_GAMES
     * \return arr( reg-error-array, reg-warning-error )
     * \note some checks are reported as warnings, because T-directors can ignore some checks while a
     *       new-user-registration (TCHKTYPE_USER_NEW) returns also the warnings as errors.
     */
-   public function checkUserRegistration( $tourney, $tp, $check_user, $check_type )
+   public function checkUserRegistration( $tourney, $tp, $check_user, $check_type, $check_flags )
    {
       $is_new_tp = ( $tp->ID == 0 ); // >0 = edit-existing-TP
 
@@ -242,6 +244,8 @@ class TournamentProperties
 
       if ( $is_new_tp && $check_type == TCHKTYPE_USER_NEW && $tourney->Scope == TOURNEY_SCOPE_PRIVATE )
          $errors[] = T_('This is a private tournament, so you must be invited to participate.');
+
+      $user = $this->_load_user($check_user);
 
       // ----- tournament-type-specific checks -----
 
@@ -261,9 +265,14 @@ class TournamentProperties
          $errors[] = sprintf( T_('Tournament max. participant limit (%s users) for Start-Round %s is reached.'),
             $round_max_tps, $tp->StartRound );
 
-      // ----- user-specific checks -----
+      if ( $check_flags & TCHKFLAG_OLD_GAMES )
+      {
+         $errmsg = self::check_tournament_games_for_rejoin( $tourney->ID, $user->ID );
+         if ( (string)$errmsg != '' )
+            $errors[] = $errmsg;
+      }
 
-      $user = $this->_load_user($check_user);
+      // ----- user-specific checks -----
 
       // check use-rating-modes
       if ( $this->RatingUseMode == TPROP_RUMODE_CURR_FIX || $this->RatingUseMode == TPROP_RUMODE_COPY_FIX )
@@ -320,6 +329,28 @@ class TournamentProperties
          error('invalid_args', "TournamentProperties._load_user($check_user)");
       return User::load_user( (int)$check_user );
    }
+
+   /*!
+    * \brief Returns error-message if there are existing unprocessed tournament games for potentially rejoining user.
+    * \return ''=no-error, else error-message
+    *
+    * \note When a user had been removed from the same tournament and rejoins now, there could
+    *       still be running games from the moment of the removal (which are detached
+    *       from the tournament). They are set on TG.Status=SCORE to remove the challenges.
+    *       Howver, the processing is delayed (because running in a cron), so it can happen,
+    *       that those games are still there, which must be prevented to avoid race-conditions
+    *       leading to inconsistent data on incoming/outgoing challenges as user-id is "re-used"
+    *       (the next run of the tourney-cron should fix this).
+    * \see TournamentLadder#remove_user_from_ladder()
+    */
+   private static function check_tournament_games_for_rejoin( $tid, $uid )
+   {
+      $count_run_tg = TournamentGames::count_user_running_games( $tid, 0, $uid );
+      return ( $count_run_tg > 0 )
+         ? sprintf( T_('Registration has to wait till the open %s tournament games have been processed.#tourney'), $count_run_tg )
+         : '';
+   }//check_tournament_games_for_rejoin
+
 
    /*! \brief Returns array with default and seed-order array for tournaments (ladder + round-robin). */
    public function build_seed_order()

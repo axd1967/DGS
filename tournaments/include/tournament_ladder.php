@@ -793,8 +793,6 @@ class TournamentLadder
 
       if ( $success )
       {
-         $success = self::fix_tournament_games_for_rejoin( $tid, $tp->ID, $uid );
-
          self::delete_cache_tournament_ladder( "TournamentLadder:add_user_to_ladder($tid,$uid)", $tid );
 
          $user_rank = self::load_rank($tid, 0, $uid);
@@ -920,49 +918,6 @@ class TournamentLadder
 
       return $result;
    }//_add_participant_to_ladder_with_new_rank
-
-   /*!
-    * \brief Fixes TournamentLadder.ChallengesIn/Out for potentially rejoining user.
-    * \return success
-    * \internal
-    *
-    * \note When a user had been removed from the same tournament and rejoins now, there could
-    *       still be running games from the moment of the removal (which are detached
-    *       from the tournament). They are set on TG.Status=SCORE to remove the challenges.
-    *       Howver, the processing is delayed (because running in a cron), so it can happen,
-    *       that those games are still there. Therefore they still count as incoming and
-    *       outgoing challenges for the challenger and defender in order to ensure correct
-    *       in/out-limits on the ladder-users (the next run of the tourney-cron should fix this).
-    * \see remove_user_from_ladder()
-    */
-   private static function fix_tournament_games_for_rejoin( $tid, $rid, $uid )
-   {
-      $dbgmsg = "TournamentLadder:fix_tournament_games_for_rejoin($tid,$rid,$uid)";
-      $query_part = "SELECT COUNT(*) AS X_Count FROM TournamentGames WHERE tid=$tid AND " .
-         "Status IN ('".TG_STATUS_PLAY."','".TG_STATUS_SCORE."') AND ";
-
-      $row = mysql_single_fetch( "$dbgmsg.ch", $query_part . "Challenger_uid=$uid" );
-      $challenges_out = (int)@$row['X_Count'];
-
-      $row = mysql_single_fetch( "$dbgmsg.df", $query_part . "Defender_uid=$uid" );
-      $challenges_in = (int)@$row['X_Count'];
-
-      $qset = array();
-      if ( $challenges_in > 0 )
-         $qset[] = "ChallengesIn=$challenges_in";
-      if ( $challenges_out > 0 )
-         $qset[] = "ChallengesOut=$challenges_out";
-
-      if ( count($qset) > 0 )
-      {
-         $success = db_query( "$dbgmsg.upd_tl",
-            "UPDATE TournamentLadder SET " . implode(', ', $qset) . " WHERE tid=$tid AND rid=$rid LIMIT 1" );
-      }
-      else
-         $success = true;
-
-      return $success;
-   }//fix_tournament_games_for_rejoin
 
    /*!
     * \brief Moves all tourney-users one rank up for incl. rank-range; min/max=0 separately or both for all.

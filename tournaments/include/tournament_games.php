@@ -521,8 +521,12 @@ class TournamentGames
       return array( $out_tg_id, $out_gid, array_unique($out_opp) );
    }//find_undetached_running_games
 
-   /*! \brief Returns number of running (unprocessed) tournament-games for given tournament and users TP-id. */
-   public static function count_user_running_games( $tid, $rid )
+   /*!
+    * \brief Returns number of running (unprocessed) tournament-games for given tournament and user.
+    * \param $rid TP.ID matching TL.Challenger/Defender_rid, or if 0 using $uid
+    * \param $uid Players.ID matching TL.Challenger/Defender_uid
+    */
+   public static function count_user_running_games( $tid, $rid, $uid=0 )
    {
       $qsql = new QuerySQL(
          SQLP_FIELDS,
@@ -531,11 +535,14 @@ class TournamentGames
             'TournamentGames',
          SQLP_WHERE,
             "tid=$tid",
-            "Status IN ('".TG_STATUS_INIT."','".TG_STATUS_PLAY."','".TG_STATUS_SCORE."')",
-         SQLP_UNION_WHERE,
-            "Challenger_rid=$rid",
-            "Defender_rid=$rid" );
-      $result = db_query( "TournamentGames:count_user_running_games($tid,$rid)", $qsql->get_select() );
+            "Status IN ('".TG_STATUS_INIT."','".TG_STATUS_PLAY."','".TG_STATUS_SCORE."')" );
+      if ( is_numeric($rid) && $rid > 0 )
+         $qsql->add_part( SQLP_UNION_WHERE, "Challenger_rid=$rid", "Defender_rid=$rid" );
+      elseif ( is_numeric($uid) && $uid > 0 )
+         $qsql->add_part( SQLP_UNION_WHERE, "Challenger_uid=$uid", "Defender_uid=$uid" );
+      else
+         error('invalid_args', "TG.count_user_running_games.check.bad_args($tid,$rid,$uid)");
+      $result = db_query( "TournamentGames:count_user_running_games($tid,$rid,$uid)", $qsql->get_select() );
 
       // NOTE: need loop for UNION-query returns 2 rows
       $cnt = 0;

@@ -13,6 +13,16 @@ ChangeLog
 
 2015-04-06 jug
 
+   * tournaments/include/tournament_properties.php (TournamentProperties.checkUserRegistration,
+       ~.check_tournament_games_for_rejoin),
+     tournaments/include/tournament_status.php (TournamentStatus.check_conditions_status_PAIR),
+     tournaments/include/tournament_games.php (TournamentGames.count_user_running_games),
+     tournaments/include/tournament_ladder.php (TournamentLadder.add_user_to_ladder),
+     tournaments/include/tournament_globals.php (TCHKFLAG_OLD_GAMES),
+     tournaments/edit_participant.php, tournaments/register.php:
+   - bugfix on tournament-registration: to avoid wrong challenge-counts prevent re-joining of user
+     if there are open unprocessed tournament-games
+
    * tournaments/edit_properties.php (parse_edit_form):
    - bugfix on tournament-configuration: added min-check on register-end-time,
      should be at least 7 days in the future
