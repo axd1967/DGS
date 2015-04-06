@@ -13,6 +13,10 @@ ChangeLog
 
 2015-04-06 jug
 
+   * include/std_functions.php (get_user_cache_language),
+     statisticspng.php, statratingspng.php:
+   - bugfix: use language-specific caching files for statistics-graphs as they contain translated texts
+
    * include/game_functions.php (GameHelper._delete_base_game_tables):
    - bugfix: avoid potential race-condition by locking tables on deleting games-related tables
      as DGS does not have real transactions

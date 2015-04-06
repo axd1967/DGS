@@ -61,7 +61,7 @@ define('MIN_RANK', round(MIN_RATING/100.0));
 
    if ( $cache_it )
    {
-      $cache_name= CACHE_FOLDER.'cache_statratings.png';
+      $cache_name = CACHE_FOLDER . sprintf('cache_statratings-%s.png', get_user_cache_language());
       clearstatcache();
       $tmp= ((int)@filemtime($cache_name)) + CACHE_EXPIRE_GRAPH;
       if ( $tmp >= $NOW )

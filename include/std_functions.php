@@ -3903,4 +3903,12 @@ function clear_cache_quick_status( $arr_uids, $cache_key )
    }
 }//clear_cache_quick_status
 
+// returns language-string, that can be used for filename-part for caching
+function get_user_cache_language( $row=null )
+{
+   if ( is_null($row) )
+      $row = $GLOBALS['player_row'];
+   return (isset($row['Lang'])) ? preg_replace("/[^a-z0-9]+/i", '_', $row['Lang']) : 'C';
+}
+
 ?>

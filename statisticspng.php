@@ -50,7 +50,7 @@ require_once 'include/graph.php';
 
    if ( $cache_it )
    {
-      $cache_name= CACHE_FOLDER . sprintf('cache_statistics-%s.png', $activity);
+      $cache_name = CACHE_FOLDER . sprintf('cache_statistics-%s-%s.png', $activity, get_user_cache_language());
       clearstatcache(); //FIXME since PHP5.3.0 with filename
       $tmp= ((int)@filemtime($cache_name)) + CACHE_EXPIRE_GRAPH;
       if ( $tmp >= $NOW )
