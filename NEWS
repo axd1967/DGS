@@ -7,7 +7,7 @@ Copyright (C) 2001-2015  Erik Ouchterlony, Jens-Uwe Gaspar
 
    New features and Major changes:
 
-   * <home tournaments/list_tournaments.php>Tournaments</home>:
+   * <home tournaments/list_tournaments.php>Tournaments</home> in general:
       * Added counter for new tournaments in main-menu
       * Added 'new'-indicator in <home tournaments/list_tournaments.php>tournaments list page</home>, that vanishes if tournament-info page is visited
          * shown in red-color <color darkred>new</color> for active tournaments (Register, Pair, Play phase)
@@ -19,11 +19,6 @@ Copyright (C) 2001-2015  Erik Ouchterlony, Jens-Uwe Gaspar
          * annulling (=detaching) tournament-game by tournament-director
          * setting forfeit-game-result by game-admin or tournament-director
       * Make tournament-game unrated like normal game, if too few moves or depending on opponents reject-win-on-timeout setting
-      * Allow tournament-game annulling by tournament-directors only for ladder-tournament-types
-         * Enabled adding-time for annulled tournament-games, but deletion still not possible
-         * Added original link to former tournament for annulled tournament-games on game-info-page
-         * Show tournament-data on games-list only for non-detached tournament-games
-         * Hide annulled tournament-games from tournament-games-list
 
       * Replaced 'RRNG'-restriction with actual restricted rating-range '30k-9d'
       * Increased max. number of games (18) per participant to allow double-round-robin for private/public tournaments
@@ -32,7 +27,21 @@ Copyright (C) 2001-2015  Erik Ouchterlony, Jens-Uwe Gaspar
       * Added last-moved date for tournament-games
          * Show on pages: view-tournament, view-ladder, view-pools, tournament-registration, list-participants,
            edit-participant (T-director)
+
+   * Ladder-Tournament:
+      * Delay withdrawal from ladder till all running tournament games are finished and preventing new challenges
+         * ladder-view: "<i>Challenging on hold</i>" = indicating initiated withdrawal by yourself
+         * ladder-view: "<i>Withdrawal initiated</i>" = challenge not allowed due to initiated withdrawal of other ladder-user
+
+         * ladder-admin (for tournament-director): added toggle of withdrawal state for ladder-user
+
       * Added column on tournament-ladder-view with theoretical ladder-rank if sorted by user rating
+
+      * Allow tournament-game annulling by tournament-directors only for ladder-tournament-types
+         * Enabled adding-time for annulled tournament-games, but deletion still not possible
+         * Added original link to former tournament for annulled tournament-games on game-info-page
+         * Show tournament-data on games-list only for non-detached tournament-games
+         * Hide annulled tournament-games from tournament-games-list
 
    Minor changes:
 

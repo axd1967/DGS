@@ -304,6 +304,7 @@ p.WarnQuota {
    font-style: normal; /* normal italic oblique inherit (CSS2) */
    font-weight: normal;
 }
+span.ImportantNote,
 span.ErrorMsg,
 span.FormWarning {
    color: darkred;

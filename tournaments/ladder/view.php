@@ -194,6 +194,8 @@ $GLOBALS['ThePage'] = new Page('TournamentLadderView');
       }
    }//allow-view
 
+   $user_onhold_withdraw = !is_null($tl_user) && ($tl_user->Flags & TL_FLAG_HOLD_WITHDRAW);
+
 
    $title = sprintf( T_('Tournament-Ladder #%s'), $tid );
    start_page( $title, true, $logged_in, $player_row, null, null, $js );
@@ -333,14 +335,18 @@ $GLOBALS['ThePage'] = new Page('TournamentLadderView');
          if ( $tl_props->MaxChallenges > 0 )
             $ch_out_str = sprintf( T_('You have started %s of max. %s outgoing game challenges#T_ladder'),
                                    $tl_user->ChallengesOut, $tl_props->MaxChallenges ) . ': ';
-         else
+         else // unlimited
             $ch_out_str = sprintf( T_('You have started %s outgoing game challenges#T_ladder'),
                                    $tl_user->ChallengesOut ) . ': ';
-         echo
-            ( ($tl_user->MaxChallengedOut)
-               ? span('TLMaxChallenges', $ch_out_str) . span('LadderWarn', T_('Challenging stalled#T_ladder'))
-               : $ch_out_str . T_('Challenging allowed#T_ladder')
-            ), ".<br>\n";
+
+         if ( $user_onhold_withdraw )
+            echo $ch_out_str . span('LadderWarn', T_('Challenging on-hold (due to initiated withdrawal)#T_ladder'));
+         elseif ( $tl_user->MaxChallengedOut )
+            echo span('TLMaxChallenges', $ch_out_str) . span('LadderWarn', T_('Challenging stalled#T_ladder'));
+         else
+            echo $ch_out_str . T_('Challenging allowed#T_ladder');
+         echo ".<br>\n";
+
          if ( !is_javascript_enabled() )
          {
             $cmp_curr_rank = ( $tl_user->PeriodRank > 0 ) ? $tl_user->PeriodRank : $tl_user->StartRank;
@@ -449,7 +455,7 @@ function build_rank_change( $tladder )
 
 function build_action_row_str( &$tladder, &$form, $is_mine, $rid, $run_games_str )
 {
-   global $base_path, $admin_mode, $allow_play, $allow_admin;
+   global $base_path, $admin_mode, $allow_play, $allow_admin, $user_onhold_withdraw;
    $tid = $tladder->tid;
 
    $row_str = '';
@@ -464,14 +470,16 @@ function build_action_row_str( &$tladder, &$form, $is_mine, $rid, $run_games_str
                   image( $base_path.'images/edit.gif', 'E', '', 'class="Action InTextImage"' ), T_('Admin user') )
             . ' '
             . $form->print_insert_radio_buttonsx( 'rid', array( $tladder->rid => '' ), ($rid == $tladder->rid) );
+         if ( $tladder->Flags & TL_FLAG_HOLD_WITHDRAW )
+            $row_str .= span('LadderWarn', 'HOLD[WD]', ' %s');
       }
    }
    elseif ( $is_mine )
    {
-      $out = array();
+      $title = array();
       if ( $tladder->RatingPos > 0 )
-         $out[] = sprintf( T_('Your ladder-rank ordered by rating would be %s.'), $tladder->RatingPos );
-      $row_str = span('TourneyUser', T_('This is you#T_ladder'), '%s', implode('; ', $out));
+         $title[] = sprintf( T_('Your ladder-rank ordered by rating would be %s.'), $tladder->RatingPos );
+      $row_str = span('TourneyUser', T_('This is you#T_ladder'), '%s', implode('; ', $title));
       if ( $run_games_str )
          $row_str .= SMALL_SPACING . $run_games_str;
    }
@@ -482,6 +490,10 @@ function build_action_row_str( &$tladder, &$form, $is_mine, $rid, $run_games_str
          global $tl_user, $play_locked;
          if ( $play_locked )
             $row_str = span('LadderWarn', T_('Challenging locked#T_ladder') );
+         elseif ( $tladder->Flags & TL_FLAG_HOLD_WITHDRAW )
+            $row_str = span('LadderWarn', T_('Withdrawal initiated#T_ladder') );
+         elseif ( $user_onhold_withdraw )
+            $row_str = span('LadderWarn', T_('Challenging on-hold#T_ladder') );
          elseif ( !is_null($tl_user) && $tl_user->MaxChallengedOut )
             $row_str = span('LadderWarn', T_('Challenging stalled#T_ladder') );
          else

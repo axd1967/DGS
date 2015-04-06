@@ -60,6 +60,8 @@ $GLOBALS['ThePage'] = new Page('TournamentLadderAdmin');
      ta_deluser&tid=&uid=        : remove user (Players.ID) along WITH user-registration (no confirm)
      ta_delete&tid=              : delete T-ladder (to seed again, need confirm)
      ta_delete&confirm=1&tid=    : delete T-ladder (confirmed)
+     ta_wduser&tid=&uid=         : withdraw user from T-ladder
+     ta_revokewduser&tid=&uid=   : revoke withdraw of user from T-ladder
      ta_cancel&tid=              : cancel ladder-deletion
      ta_crownking&tid=&uid=      : crown user as king of the hill
 */
@@ -162,13 +164,35 @@ $GLOBALS['ThePage'] = new Page('TournamentLadderAdmin');
          $sys_msg = urlencode( sprintf( T_('User [%s] added to ladder!'), $user->Handle) );
          jump_to("tournaments/ladder/admin.php?tid=$tid".URI_AMP."uid=$uid".URI_AMP."sysmsg=$sys_msg");
       }
+      elseif ( @$_REQUEST['ta_wduser'] && $authorise_edit_user && !is_null($user) && !is_null($tladder_user) )
+      {
+         ta_begin();
+         {//HOT-section to withdraw user from ladder
+            $act_msg = $tladder_user->schedule_withdrawal_from_ladder( 'ladder.admin.withdraw_user',
+               TLOG_TYPE_DIRECTOR, $user->Handle );
+         }
+         ta_end();
+         $sys_msg = urlencode( $act_msg );
+         jump_to("tournaments/ladder/admin.php?tid=$tid".URI_AMP."uid=$uid".URI_AMP."sysmsg=$sys_msg");
+      }
+      elseif ( @$_REQUEST['ta_revokewduser'] && $authorise_edit_user && !is_null($user) && !is_null($tladder_user) )
+      {
+         ta_begin();
+         {//HOT-section to revoke withdrawal of user from ladder
+            $tladder_user->revoke_withdrawal_from_ladder( 'ladder.admin.revoke_withdraw_user' );
+         }
+         ta_end();
+         $sys_msg = urlencode( T_('Withdrawal of user from ladder revoked!') );
+         jump_to("tournaments/ladder/admin.php?tid=$tid".URI_AMP."uid=$uid".URI_AMP."sysmsg=$sys_msg");
+      }
       elseif ( @$_REQUEST['ta_deluser'] && $authorise_edit_user && !is_null($user) && !is_null($tladder_user) )
       {
          $reason = sprintf( T_('Tournament-Director (or admin) %s has removed the user.'), "<user $my_id>" );
          ta_begin();
          {//HOT-section to remove user from ladder
             $success = $tladder_user->remove_user_from_ladder( 'Tournament.ladder_admin',
-               $allow_edit_tourney, 'Ladder-Admin', /*upd-rank*/false, $uid, $user->Handle, /*nfy-user*/true, $reason );
+               $allow_edit_tourney, 'Ladder-Admin', /*upd-rank*/false, $uid, $user->Handle,
+               /*withdraw*/false, /*nfy-user*/true, $reason );
             if ( $success )
             {
                $sys_msg = urlencode( sprintf( T_('User [%s] removed from this ladder-tournament!'), $user->Handle )
@@ -285,7 +309,7 @@ $GLOBALS['ThePage'] = new Page('TournamentLadderAdmin');
       $tform->add_empty_row();
    }
 
-   // ADMIN: Add/Remove user -----------
+   // ADMIN: Add/Remove user; Toggle HOLD-withdrawal -----------
 
    $tform->add_row( array( 'HR' ));
    $tform->add_row( array( 'HEADER', T_('Admin Ladder participants') ));
@@ -314,7 +338,7 @@ $GLOBALS['ThePage'] = new Page('TournamentLadderAdmin');
       {
          if ( $authorise_add_user )
             add_form_edit_user( $tform, $user,
-               'ta_adduser', T_('Add user [%s] to ladder'),
+               'ta_adduser', /*confirm*/false, T_('Add user [%s] to ladder'),
                T_('Add registered tournament participant to ladder (at bottom).'),
                /*notify*/0 );
          else
@@ -324,8 +348,26 @@ $GLOBALS['ThePage'] = new Page('TournamentLadderAdmin');
       }
       else
       {
+         if ( $tladder_user->Flags & TL_FLAG_HOLD_WITHDRAW )
+         {
+            add_form_edit_user( $tform, $user,
+               'ta_revokewduser', /*confirm*/false, T_('Revoke withdrawal of user [%s] from ladder'),
+               T_('Withdrawal of user from ladder will be revoked.') );
+         }
+         else
+         {
+            add_form_edit_user( $tform, $user,
+               'ta_wduser', /*confirm*/false, T_('Withdraw user [%s] from ladder'),
+               T_('Withdrawal from ladder will be initiated.'),
+               /*notify*/0,
+               wordwrap( T_('Prevent new challenges with HOLD-flag to allow finishing and processing of tournament games, ' .
+                     'after which user is automatically removed.'),
+                  80, "<br>\n" ) );
+         }
+         $tform->add_empty_row();
+
          add_form_edit_user( $tform, $user,
-            'ta_deluser', T_('Remove user [%s] from ladder'),
+            'ta_deluser', /*confirm*/false, T_('Remove user [%s] from ladder'),
             T_('User will be removed from ladder along with tournament user registration.'),
             /*notify*/2,
             wordwrap( TournamentUtils::get_tournament_ladder_notes_user_removed(), 80, "<br>\n" ) );
@@ -341,7 +383,7 @@ $GLOBALS['ThePage'] = new Page('TournamentLadderAdmin');
          && $tl_props->CrownKingHours == 0 ) // valid user and no auto-crowning
    {
       add_form_edit_user( $tform, $user,
-         'ta_crownking', T_("Crown user [%s] as 'King of the Hill'#T_ladder"),
+         'ta_crownking', /*confirm*/false, T_("Crown user [%s] as 'King of the Hill'#T_ladder"),
          T_('User will be crowned as king. This is stored as tournament result.'),
          /*notify*/0,
          T_('User will NOT be notified of this. All tournament directors and owner will be notified.') );
@@ -375,7 +417,7 @@ $GLOBALS['ThePage'] = new Page('TournamentLadderAdmin');
 }//main
 
 
-function add_form_edit_user( &$form, $user, $action, $act_fmt, $title, $notify=0, $extra='' )
+function add_form_edit_user( &$form, $user, $action, $confirm, $act_fmt, $title, $notify=0, $extra='' )
 {
    global $allow_admin, $base_path;
    $item = image( $base_path."images/star3.gif", '' ) . ' ';
@@ -403,6 +445,7 @@ function add_form_edit_user( &$form, $user, $action, $act_fmt, $title, $notify=0
    }
    $form->add_row( array(
          'CELL', 2, '',
-         'SUBMITBUTTONX', $action, sprintf( $act_fmt, $user->Handle ), array( 'disabled' => !$allow_admin ) ));
+         'SUBMITBUTTONX', $action, sprintf( $act_fmt, $user->Handle ), array( 'disabled' => !$allow_admin ),
+         'TEXT', sptext(($confirm ? "(need confirmation)" : "(no confirmation)"),1), ));
 }//add_form_edit_user
 ?>

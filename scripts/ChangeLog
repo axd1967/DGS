@@ -11,6 +11,63 @@ Release [2014-07-30] - DGS 1.0.18 - tag [release-1_0_18-20140730] on (later) bra
 ChangeLog
 ------------------------------------------------------------------
 
+2015-04-06 jug
+
+   * tournaments/include/tournament_ladder.php (class TournamentLadder, ~.__construct, ~.build_log_string,
+       ~.fillEntityData, ~.schedule_withdrawal_from_ladder, ~.revoke_withdrawal_from_ladder,
+       ~.remove_user_from_ladder, ~.new_from_row, ~._add_participant_to_ladder_with_new_rank,
+       ~.seed_ladder, ~._process_game_end, ~.notify_user_removal),
+     tournaments/include/tournament_log_helper.php (TournamentLogHelper.log_withdraw_user_from_tournament_ladder,
+       ~.log_revoke_withdrawal_from_tournament_ladder),
+     tournaments/include/tournament_ladder_props.php (TournamentLadderProps.build_notes_props,
+       ~.verify_challenge),
+     tournaments/include/tournament_ladder_helper.php (TournamentLadderHelper.process_initiated_withdrawals),
+     tournaments/include/tournament_games.php (TournamentGames.count_user_running_games),
+     tournaments/include/tournament_globals.php (TL_FLAG_HOLD_WITHDRAW),
+     include/globals.php (CSS_VERSION),
+     scripts/updates/1.19/database_changes.mysql,
+     specs/db/dragon-ddl.sql, specs/db/table-Tournaments.txt,
+     skins/dragon/screen.css,
+     tournaments/ladder/admin.php (add_form_edit_user),
+     tournaments/ladder/view.php (build_action_row_str),
+     tournaments/ladder/withdraw.php (build_withdrawal_state, build_withdrawal_notes),
+     tournaments/cron_tournaments.php:
+   - Delay withdrawal from ladder till all running tournament games are finished
+     - Introduced user-specific HOLD_WITHDRAW-flag with TournamentLadder.Flags to prevent incoming
+       and outgoing ladder-challenges.
+     - Withdrawal from ladder by user will schedule removal from tournament by setting HOLD_WITHDRAW-flag.
+     - User will be removed immediately if there are no running or unprocessed tournament games left.
+     - User with initiated withdrawal will be automatically removed from active ladders
+       on tournament PLAY-status by tournament-cron after all running tournament games of user
+       are finished and processed.
+     - Delayed withdrawing avoids disadvantage (by non-counting games) and advantage (by auto-winning
+       games) of opponents in running tournament games by former annulling of games due to user removal
+       by withdrawing.
+     - Withdrawal request can only be revoked by a tournament-director.
+     - ladder-withdraw:
+       - show current withdrawal-state of user and running tournament-games
+       - allow withdrawing only if not already initiated
+       - emphasized important withdrawal notes
+     - ladder-view:
+       - show info about own withdrawal-state with "Challenging on-hold"
+       - show "Withdrawal initiated" in Actions-column, if challenging is not allowed due to withdrawal
+         of other ladder-user
+     - ladder-edit: show HOLD-withdraw-flag 'HOLD[WD]' in Actions-column for tournament-director
+     - ladder-admin:
+       - added toggle on withdrawal of user from ladder by tournament-director
+       - add info-text, if confirmation required on actions
+     - adjusted all info-texts and notes about ladder-withdrawal in contrast to hard user-removal
+       by annulling tournament-games, which is still possible by ladder-action,
+       enfored by tournament-director or by inactivity-handling.
+     - shortened and cleaned up notification-message on ladder-withdrawal omitting info about detached
+       and running tournament-games
+     - cleanup: count running tournament-games including INIT-status and using TP.ID instead of uid
+-----------
+-- added ON-HOLD flag to allow graceful withdrawal from ladder
+ALTER TABLE TournamentLadder
+   ADD Flags tinyint unsigned NOT NULL default '0' AFTER uid ;
+-----------
+
 2015-04-01 jug
 
    * list_messages.php:

@@ -414,6 +414,20 @@ class TournamentLogHelper
       $tlog->insert();
    }
 
+   public static function log_withdraw_user_from_tournament_ladder( $tid, $tlog_type, $tladder, $count_run_games )
+   {
+      $tlog = new Tournamentlog( 0, $tid, 0, 0, $tlog_type, 'TL_User', TLOG_ACT_CHANGE, $tladder->uid,
+         "Ladder-Withdrawal initiated: run-tgames=[$count_run_games] for User: " . $tladder->build_log_string() );
+      $tlog->insert();
+   }
+
+   public static function log_revoke_withdrawal_from_tournament_ladder( $tid, $tlog_type, $tladder )
+   {
+      $tlog = new Tournamentlog( 0, $tid, 0, 0, $tlog_type, 'TL_User', TLOG_ACT_CHANGE, $tladder->uid,
+         "Ladder-Withdrawal revoked: for User: " . $tladder->build_log_string() );
+      $tlog->insert();
+   }
+
    public static function log_delete_user_from_tournament_ladder( $tid, $tlog_type, $tladder, $arr_detached_gid, $msg )
    {
       $msg .= "; Removed user: " . $tladder->build_log_string();

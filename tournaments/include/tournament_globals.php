@@ -150,7 +150,7 @@ define('CHECK_TNEWS_STATUS', 'NEW|SHOW|ARCHIVE|DELETE');
 define('TNEWS_FLAG_HIDDEN',     0x01); // T-news hidden on T-list/T-info-pages for non-TDs
 define('TNEWS_FLAG_PRIVATE',    0x02); // T-news only visible to TPs/TDs/T-owner of T
 
-// ---------- Tournament Ladder Props -----------------------------
+// ---------- Tournament Ladder Stuff -----------------------------
 
 // action to do for handling game-end in tournament for case
 define('TGEND_NO_CHANGE',           'NO_CHANGE');  // no change for challenger and defender
@@ -185,6 +185,9 @@ define('TLADDER_MAX_WAIT_REMATCH', 3*30*24); // [hours]: 3 months
 define('TLADDER_MAX_CHRNG_RATING', 32767);
 define('TLADDER_MAX_CHRNG_ABS', 2000);
 define('TLADDER_CHRNG_RATING_UNUSED', -TLADDER_MAX_CHRNG_RATING-1);
+
+// TournamentLadder.Flags
+define('TL_FLAG_HOLD_WITHDRAW', 0x01);
 
 define('TRESULTTYPE_TL_KING_OF_THE_HILL', 1); // ladder king
 define('TRESULTTYPE_TL_SEQWINS', 2); // ladder consecutive-wins (=sequenced-wins)

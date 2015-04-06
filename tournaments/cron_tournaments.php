@@ -165,6 +165,10 @@ if ( ALLOW_TOURNAMENTS && !$is_down )
    TournamentGames::update_tournament_game_wait( 'cron_tournament', $wait_ticks );
 
 
+   // ---------- remove users scheduled for withdrawal from ladder
+
+   TournamentLadderHelper::process_initiated_withdrawals( 'cron_tournament.withdrawals' );
+
 
    // ---------- END --------------------------------
 

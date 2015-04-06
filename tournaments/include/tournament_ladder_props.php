@@ -393,7 +393,7 @@ class TournamentLadderProps
                         self::getGameEndText($this->GameEndTimeoutLoss) );
       $arr[] = sprintf( '%s: %s', T_('on Jigo'), self::getGameEndText($this->GameEndJigo) )
          . "<br><br>\n"; // leave some space to next 2 special game-ends
-      $arr[] = sprintf( '%s: %s', T_('if game was annulled by user withdrawal or by a tournament-director'),
+      $arr[] = sprintf( '%s: %s', T_('if game was annulled by user or a tournament-director'),
                         self::getGameEndText(TGEND_NO_CHANGE) );
       $arr[] = sprintf( '%s: %s', T_('if game ended with No-Result set by a tournament-director or game-admin'),
                         self::getGameEndText(TGEND_NO_CHANGE) );
@@ -407,7 +407,7 @@ class TournamentLadderProps
          $arr_props[] = sprintf( T_("The user will be removed from the ladder, if player hasn't accessed DGS\n"
             . 'within the last %d days (excluding vacation).'), $this->UserAbsenceDays );
 
-      $arr_props[] = T_('On user removal or withdrawal from the ladder') . ":\n"
+      $arr_props[] = T_('On user removal from the ladder (by game-end action or by tournament-director)') . ":\n"
          . wordwrap( TournamentUtils::get_tournament_ladder_notes_user_removed(), 80 );
 
       // rank-change period
@@ -642,6 +642,12 @@ class TournamentLadderProps
       // check challengers max. outgoing challenges
       if ( $tladder_ch->ChallengesOut >= $this->MaxChallenges )
          $errors[] = sprintf( T_('Challenger already has max. %s outgoing challenges.#T_ladder'), $tladder_ch->ChallengesOut );
+
+      // check on-hold state preventing challenges
+      if ( $tladder_ch->Flags & TL_FLAG_HOLD_WITHDRAW )
+         $errors[] = T_('Challenger scheduled for withdrawal (challenge not allowed).#T_ladder');
+      if ( $tladder_df->Flags & TL_FLAG_HOLD_WITHDRAW )
+         $errors[] = T_('Defender scheduled for withdrawal (challenge not allowed).#T_ladder');
 
       return $errors;
    }//verify_challenge

@@ -1127,6 +1127,7 @@ CREATE TABLE IF NOT EXISTS `TournamentLadder` (
   `tid` int(11) NOT NULL,
   `rid` int(11) NOT NULL,
   `uid` int(11) NOT NULL,
+  `Flags` tinyint(3) unsigned NOT NULL default '0',
   `Created` datetime NOT NULL default '0000-00-00 00:00:00',
   `RankChanged` datetime NOT NULL default '0000-00-00 00:00:00',
   `Rank` smallint(5) unsigned NOT NULL default '0',

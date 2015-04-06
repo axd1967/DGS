@@ -67,23 +67,23 @@ $GLOBALS['ThePage'] = new Page('TournamentLadderWithdraw');
    $tladder = TournamentLadder::load_tournament_ladder_by_user($tid, $my_id);
    if ( is_null($tladder) )
       $errors[] = T_('Withdrawing from this ladder is not possible, because you didn\'t join it.');
+   $is_withdrawn = ( $tladder->Flags & TL_FLAG_HOLD_WITHDRAW );
 
-   $count_run_games = ( is_null($tladder) ) ? -1 : TournamentGames::count_user_running_games( $tid, $my_id );
+   $count_run_games = ( is_null($tladder) ) ? -1 : TournamentGames::count_user_running_games( $tid, $tladder->rid );
 
 
    // ---------- Process actions ------------------------------------------------
 
-   if ( @$_REQUEST['confirm'] && !is_null($tladder) && count($errors) == 0 ) // confirm withdrawal
+   if ( @$_REQUEST['confirm'] && !is_null($tladder) && count($errors) == 0 && !$is_withdrawn ) // confirm withdrawal
    {
       ta_begin();
-      {//HOT-section to remove user
-         $tladder->remove_user_from_ladder( 'Tournament.ladder.withdraw',
-            TLOG_TYPE_USER, 'Ladder-Withdraw', /*upd-rank*/false, $my_id, $player_row['Handle'], /*nfy-user*/false,
-            T_('User withdrew from the ladder tournament.') );
+      {//HOT-section to withdraw user
+         $act_msg = $tladder->schedule_withdrawal_from_ladder( 'Tournament.ladder.withdraw', TLOG_TYPE_USER,
+            $player_row['Handle'] );
       }
       ta_end();
 
-      $sys_msg = urlencode( T_('Withdrawn from ladder!') );
+      $sys_msg = urlencode( $act_msg );
       jump_to("tournaments/view_tournament.php?tid=$tid".URI_AMP."sysmsg=$sys_msg");
    }
 
@@ -126,23 +126,23 @@ $GLOBALS['ThePage'] = new Page('TournamentLadderWithdraw');
    $tform->add_row( array(
          'DESCRIPTION', T_('Best Rank#T_ladder'),
          'TEXT',        $tladder->BestRank ));
-   if ( $count_run_games >= 0 )
-   {
-      $tform->add_row( array(
-            'DESCRIPTION', T_('Running tournament games'),
-            'TEXT',        span('bold', $count_run_games) ));
-   }
+   $tform->add_row( array(
+         'DESCRIPTION', T_('Withdrawal state#T_ladder'),
+         'TEXT',        build_withdrawal_state($tladder, $count_run_games), ));
    $tform->add_empty_row();
 
-   $tform->add_row( array(
-         'TAB',
-         'TEXT', T_('Please confirm if you want to withdraw from ladder!') . "<br>\n"
-               . T_('(also see notes below)'), ));
-   $tform->add_row( array(
-         'TAB', 'CELL', 2, '',
-         'SUBMITBUTTONX', 'tu_withdraw', T_('Confirm Withdrawal#T_ladder'), ($has_errors ? 'disabled=1' : ''),
-         'TEXT', SMALL_SPACING,
-         'SUBMITBUTTON', 'tu_cancel', T_('Cancel') ));
+   if ( !$is_withdrawn )
+   {
+      $tform->add_row( array(
+            'TAB',
+            'TEXT', T_('Please confirm if you want to withdraw from ladder!') . "<br>\n"
+                  . T_('(please read notes below first)'), ));
+      $tform->add_row( array(
+            'TAB', 'CELL', 2, '',
+            'SUBMITBUTTONX', 'tu_withdraw', T_('Confirm Withdrawal#T_ladder'), ($has_errors ? 'disabled=1' : ''),
+            'TEXT', SMALL_SPACING,
+            'SUBMITBUTTON', 'tu_cancel', T_('Cancel') ));
+   }
 
 
    $title = T_('Withdraw from Ladder');
@@ -164,13 +164,31 @@ $GLOBALS['ThePage'] = new Page('TournamentLadderWithdraw');
 }//main
 
 
+function build_withdrawal_state( $tladder, $count_run_games )
+{
+   $out = array();
+   if ( $tladder->Flags & TL_FLAG_HOLD_WITHDRAW )
+      $out[] = span('TWarn', T_('Already scheduled for withdrawal#T_ladder'));
+   if ( $count_run_games >= 0 )
+      $out[] = sprintf( T_('%s running tournament games'), $count_run_games);
+   if ( count($out) == 0 )
+      $out[] = NO_VALUE;
+   return join(", ", $out);
+}
+
 /*! \brief Returns array with notes about withdrawing from ladder. */
 function build_withdrawal_notes()
 {
    $notes = array();
 
-   $notes[] = wordwrap( TournamentUtils::get_tournament_ladder_notes_user_removed(), 100 ) . "\n" .
-      T_('The opponents in your running tournament games will be notified about the withdrawal.#T_ladder');
+   $notes[] = array( 'text' => span('ImportantNote', wordwrap(
+         T_('Withdrawing will schedule your removal from the ladder tournament. ' .
+            'You are set on-hold to prevent incoming challenges. ' .
+            'After all your running tournament games have been finished and processed, ' .
+            'you will be automatically removed from the ladder tournament.'), 100, "<br>\n" )));
+   $notes[] = T_('A withdrawal request can only be revoked by a tournament-director.#T_ladder');
+   $notes[] = null;
+
    $notes[] = T_('Withdrawing from this ladder will remove your tournament user registration along with the rank history.');
    $notes[] = T_('If you rejoin the ladder, your get a new ladder rank according to the tournaments properties.');
 

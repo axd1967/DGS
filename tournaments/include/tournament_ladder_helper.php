@@ -331,6 +331,54 @@ class TournamentLadderHelper
       ta_end();
    }//process_tournament_ladder_crown_king
 
+
+   /*! \brief Finds initiated withdrawals and remove users after all tournament-games finished and processed. */
+   public static function process_initiated_withdrawals( $dbgmsg )
+   {
+      // find tournament-participants on active ladders with initiated withdrawals
+      $qsql = new QuerySQL(
+         SQLP_FIELDS,
+            'TL.tid',
+            'TL.rid',
+            'P.Handle',
+         SQLP_FROM,
+            'Tournament AS T',
+            'INNER JOIN TournamentLadder AS TL ON TL.tid=T.ID',
+            'INNER JOIN Players AS P ON P.ID=TL.uid',
+         SQLP_WHERE,
+            "T.Status='".TOURNEY_STATUS_PLAY."'",
+            "TL.Flags>0 AND (TL.Flags & ".TL_FLAG_HOLD_WITHDRAW.")"
+         );
+      $result = db_query( "$dbgmsg.TLH:process_initiated_withdrawals", $qsql->get_select() );
+
+      $arr_proc = array();
+      while ( $row = mysql_fetch_array($result) )
+         $arr_proc[] = $row;
+      mysql_free_result($result);
+
+      ta_begin();
+      {//HOT-section to check and remove users with initiated withdrawals
+         foreach( $arr_proc as $arr )
+         {
+            $tid = (int)$arr['tid'];
+            $rid = (int)$arr['rid'];
+
+            $count_run_tg = TournamentGames::count_user_running_games( $tid, $rid );
+            if ( $count_run_tg == 0 )
+            {
+               $tladder = TournamentLadder::load_tournament_ladder_by_user( $tid, 0, $rid );
+               if ( !is_null($tladder) )
+               {
+                  $tladder->remove_user_from_ladder( "$dbgmsg.proc_init_wd", TLOG_TYPE_CRON, 'Ladder-Withdraw',
+                     /*upd-rank*/false, $tladder->uid, $arr['Handle'], /*withdraw*/true, /*nfy-user*/true,
+                     T_('User has been withdrawn from the ladder tournament.') );
+               }
+            }
+         }
+      }
+      ta_end();
+   }//process_initiated_withdrawals
+
 } // end of 'TournamentLadderHelper'
 
 ?>

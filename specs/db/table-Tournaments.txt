@@ -232,10 +232,10 @@ Description:
 
 * Flags :
    - additional properties of registered user:
-      - INVITED (by TD)
-      - VERIFIED (by TD)
-      - INVITE_ACK (by user after invitation)
-      - APPLY_ACK (by TD after verifying application)
+      - 0x0001 (=INVITED): invited by TD
+      - 0x0002 (=ACK_INVITE): invite by TD approved by user
+      - 0x0004 (=ACK_APPLY): user-application approved by TD
+      - 0x0008 (=VIOLATE): user-registration violates T-restrictions
       - future: LOCK (user blocked/locked by TD for arbitrary reason)
 
 * Rating : Rating used for T, depends on TournamentProperties.RatingUseMode
@@ -506,6 +506,7 @@ Description:
 | tid           | int(11)              | NO   | PRI | NULL                |       |
 | rid           | int(11)              | NO   | PRI | NULL                |       |
 | uid           | int(11)              | NO   | MUL | NULL                |       |
+| Flags         | tinyint(3) unsigned  | NO   |     | 0                   |       |
 | Created       | datetime             | NO   |     | 0000-00-00 00:00:00 |       |
 | RankChanged   | datetime             | NO   |     | 0000-00-00 00:00:00 |       |
 | Rank          | smallint(5) unsigned | NO   |     | 0                   |       |
@@ -526,6 +527,10 @@ Description:
 * rid : FK to TournamentParticipant.ID
 
 * uid : FK to TournamentParticipant.uid (=redundant with rid, added for faster-access)
+
+* Flags : flags of participant in ladder-tournament
+   - 0x01 (=HOLD_WITHDRAWAL): HOLD-state to indicate scheduled withdrawal
+      from ladder-tournament, prevents being challenged
 
 * Created : start-date of user in ladder
 

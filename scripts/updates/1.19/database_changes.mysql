@@ -68,3 +68,8 @@ UPDATE Games
    SET tid=0 WHERE tid > 0 AND (Flags & 8) ;
 
 
+-- added ON-HOLD flag to allow graceful withdrawal from ladder
+ALTER TABLE TournamentLadder
+   ADD Flags tinyint unsigned NOT NULL default '0' AFTER uid ;
+
+

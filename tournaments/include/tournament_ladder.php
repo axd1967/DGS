@@ -54,7 +54,7 @@ require_once 'tournaments/include/tournament_utils.php';
 global $ENTITY_TOURNAMENT_LADDER; //PHP5
 $ENTITY_TOURNAMENT_LADDER = new Entity( 'TournamentLadder',
       FTYPE_PKEY, 'tid', 'rid',
-      FTYPE_INT,  'tid', 'rid', 'uid', 'Rank', 'BestRank', 'StartRank', 'PeriodRank', 'HistoryRank',
+      FTYPE_INT,  'tid', 'rid', 'uid', 'Flags', 'Rank', 'BestRank', 'StartRank', 'PeriodRank', 'HistoryRank',
                   'ChallengesIn', 'ChallengesOut', 'SeqWins', 'SeqWinsBest',
       FTYPE_DATE, 'Created', 'RankChanged'
    );
@@ -64,6 +64,7 @@ class TournamentLadder
    public $tid;
    public $rid;
    public $uid;
+   public $Flags;
    public $Created;
    public $RankChanged;
    public $Rank;
@@ -96,12 +97,13 @@ class TournamentLadder
    public $UserRatingPos = 0;
 
    /*! \brief Constructs TournamentLadder-object with specified arguments. */
-   public function __construct( $tid=0, $rid=0, $uid=0, $created=0, $rank_changed=0, $rank=0, $best_rank=0,
+   public function __construct( $tid=0, $rid=0, $uid=0, $flags=0, $created=0, $rank_changed=0, $rank=0, $best_rank=0,
          $start_rank=0, $period_rank=0, $history_rank=0, $challenges_in=0, $challenges_out=0, $seq_wins=0, $seq_wins_best=0 )
    {
       $this->tid = (int)$tid;
       $this->rid = (int)$rid;
       $this->uid = (int)$uid;
+      $this->Flags = (int)$flags;
       $this->Created = (int)$created;
       $this->RankChanged = (int)$rank_changed;
       $this->Rank = (int)$rank;
@@ -225,11 +227,11 @@ class TournamentLadder
    public function build_log_string( $fmt=0 )
    {
       if ( $fmt == 1 )
-         return sprintf("rid=[%s], uid=[%s], Rank=[%s]", $this->rid, $this->uid, $this->Rank );
+         return sprintf("rid=[%s], uid=[%s], Flags=[$%x], Rank=[%s]", $this->rid, $this->uid, $this->Flags, $this->Rank );
       else
-         return sprintf("TournamentLadder: rid=[%s], uid=[%s], Created=[%s], RankChanged=[%s], Rank=[%s], BestRank=[%s], " .
+         return sprintf("TournamentLadder: rid=[%s], uid=[%s], Flags=[$%x], Created=[%s], RankChanged=[%s], Rank=[%s], BestRank=[%s], " .
                         "StartRank=[%s], PeriodRank=[%s], HistoryRank=[%s], SeqWins=[%s], SeqWinsBest=[%s]",
-            $this->rid, $this->uid,
+            $this->rid, $this->uid, $this->Flags,
             ($this->Created > 0 ? date(DATE_FMT, $this->Created) : ''),
             ($this->RankChanged > 0 ? date(DATE_FMT, $this->RankChanged) : ''),
             $this->Rank, $this->BestRank, $this->StartRank, $this->PeriodRank, $this->HistoryRank,
@@ -274,6 +276,7 @@ class TournamentLadder
       $data->set_value( 'tid', $this->tid );
       $data->set_value( 'rid', $this->rid );
       $data->set_value( 'uid', $this->uid );
+      $data->set_value( 'Flags', $this->Flags );
       $data->set_value( 'Created', $this->Created );
       $data->set_value( 'RankChanged', $this->RankChanged );
       $data->set_value( 'Rank', $this->Rank );
@@ -372,9 +375,62 @@ class TournamentLadder
    }//update_seq_wins
 
    /*!
+    * \brief Schedules withdrawal request for user from ladder with given tournament tid.
+    *     User removed immeditately, if all tournament games are finished and processed.
+    * \param $tlog_type TLOG_TYPE_...
+    * \return success message text
+    *
+    * \note IMPORTANT NOTE: expecting to run in HOT-section
+    */
+   public function schedule_withdrawal_from_ladder( $dbgmsg, $tlog_type, $uhandle )
+   {
+      $xdbgmsg = "$dbgmsg.TL.schedule_withdrawal_from_ladder({$this->tid},{$this->rid},{$this->uid})";
+
+      $count_run_tg = TournamentGames::count_user_running_games( $this->tid, $this->rid );
+      if ( $count_run_tg > 0 )
+      {
+         $result = db_query( "$xdbgmsg.set.hold_wd",
+            "UPDATE TournamentLadder SET Flags=Flags | " . TL_FLAG_HOLD_WITHDRAW .
+            " WHERE tid={$this->tid} AND rid={$this->rid} LIMIT 1" );
+
+         self::delete_cache_tournament_ladder( $xdbgmsg, $this->tid );
+         TournamentLogHelper::log_withdraw_user_from_tournament_ladder( $this->tid, $tlog_type, $this, $count_run_tg );
+         $act_msg = T_('Withdrawal from ladder initiated!');
+      }
+      else
+      {
+         $this->remove_user_from_ladder( "$dbgmsg.sched_wd", $tlog_type, 'Ladder-Withdraw',
+            /*upd-rank*/false, $this->uid, $uhandle, /*withdraw*/true, /*nfy-user*/false,
+            T_('User withdrew from the ladder tournament.') );
+         $act_msg = T_('Withdrawn from ladder!');
+      }
+
+      return $act_msg;
+   }//schedule_withdrawal_from_ladder
+
+   /*!
+    * \brief Revokes initiated withdrawal (on-hold flag) for user from ladder with given tournament tid.
+    * \param $tlog_type TLOG_TYPE_...
+    *
+    * \note IMPORTANT NOTE: expecting to run in HOT-section
+    */
+   public function revoke_withdrawal_from_ladder( $dbgmsg )
+   {
+      $xdbgmsg = "$dbgmsg.TL.revoke_withdrawal_from_ladder({$this->tid},{$this->rid},{$this->uid})";
+
+      $result = db_query( "$xdbgmsg.clear.hold_wd",
+         "UPDATE TournamentLadder SET Flags=Flags & ~" . TL_FLAG_HOLD_WITHDRAW .
+         " WHERE tid={$this->tid} AND rid={$this->rid} LIMIT 1" );
+
+      self::delete_cache_tournament_ladder( $xdbgmsg, $this->tid );
+      TournamentLogHelper::log_revoke_withdrawal_from_tournament_ladder( $this->tid, TLOG_TYPE_DIRECTOR, $this );
+   }//revoke_withdrawal_from_ladder
+
+   /*!
     * \brief Removes user from ladder with given tournament tid, remove TP and notifies opponents of running games.
     * \param $tlog_type TLOG_TYPE_...
     * \param $upd_rank false (normal), true = update TL.RankChanged-field
+    * \param $is_withdrawal true = assume no running T-games and being removed gracefully (no annulled games)
     * \param $nfy_user true = notify user, false = user not informed about own user-removal
     * \return is-deleted
     *
@@ -382,9 +438,10 @@ class TournamentLadder
     * \note running games for tournament are "detached" (detached-flag set)
     * \note IMPORTANT NOTE: expecting to run in HOT-section
     */
-   public function remove_user_from_ladder( $dbgmsg, $tlog_type, $tlog_msg, $upd_rank, $rm_uid, $rm_uhandle, $nfy_user, $reason=null )
+   public function remove_user_from_ladder( $dbgmsg, $tlog_type, $tlog_msg, $upd_rank, $rm_uid, $rm_uhandle,
+         $is_withdrawal, $nfy_user, $reason=null )
    {
-      $xdbgmsg = "$dbgmsg.TL.remove_user_from_ladder({$this->tid},{$this->rid},{$this->uid},$rm_uid,$nfy_user)";
+      $xdbgmsg = "$dbgmsg.TL.remove_user_from_ladder({$this->tid},{$this->rid},{$this->uid},$rm_uid,$is_withdrawal,$nfy_user)";
 
       //HOT-section to remove user from ladder and eventually from TournamentParticipant-table
       db_lock( "$xdbgmsg.upd_tladder",
@@ -429,10 +486,10 @@ class TournamentLadder
          }
 
          // notify opponents about user-removal (if there are running games)
-         self::notify_user_removal( "$xdbgmsg.opp_nfy", $this->tid, $rm_uid, $rm_uhandle, $reason, $arr_opp );
+         self::notify_user_removal( "$xdbgmsg.opp_nfy", $this->tid, $rm_uid, $rm_uhandle, $is_withdrawal, $reason, $arr_opp );
 
          if ( $nfy_user ) // notify removed user
-            self::notify_user_removal( "$xdbgmsg.user_nfy", $this->tid, $rm_uid, $rm_uhandle, $reason );
+            self::notify_user_removal( "$xdbgmsg.user_nfy", $this->tid, $rm_uid, $rm_uhandle, $is_withdrawal, $reason );
 
          // reset Players.CountBulletinNew (as visibility of T-typed bulletins can change)
          if ( $this->uid > 0 )
@@ -533,6 +590,7 @@ class TournamentLadder
             @$row['tid'],
             @$row['rid'],
             @$row['uid'],
+            @$row['Flags'],
             @$row['X_Created'],
             @$row['X_RankChanged'],
             @$row['Rank'],
@@ -759,7 +817,7 @@ class TournamentLadder
       $rid = $tp->ID;
       $uid = $tp->uid;
 
-      // defaults: RankChanged=0, ChallengesIn=0, ChallengesOut=0; PeriodRank=0, HistoryRank=0
+      // defaults: Flags=0, RankChanged=0, ChallengesIn=0, ChallengesOut=0; PeriodRank=0, HistoryRank=0
       $query = "INSERT INTO TournamentLadder (tid,rid,uid,Created,Rank,BestRank,StartRank) "
              . "SELECT $tid, $rid, $uid, FROM_UNIXTIME($NOW), "
                   . "$query_next_rank AS Rank, "
@@ -856,7 +914,7 @@ class TournamentLadder
          // insert at new ladder-pos
          self::move_down_ladder_part( $tp->tid, false, $new_rank, 0 );
 
-         $tladder = new TournamentLadder( $tp->tid, $tp->ID, $tp->uid, 0, 0, $new_rank, $new_rank, $new_rank );
+         $tladder = new TournamentLadder( $tp->tid, $tp->ID, $tp->uid, 0, 0, 0, $new_rank, $new_rank, $new_rank );
          $result = $tladder->insert();
       }
 
@@ -990,7 +1048,7 @@ class TournamentLadder
             $tladder = $tl_iterator->getIndexValue( 'uid', $uid, 0 );
             if ( is_null($tladder) ) // user not joined ladder yet
             {
-               $tladder = new TournamentLadder( $tid, $row['rid'], $uid, $NOW, 0, $rank, $rank, $rank );
+               $tladder = new TournamentLadder( $tid, $row['rid'], $uid, 0, $NOW, 0, $rank, $rank, $rank );
             }
             else // user already joined ladder
             {
@@ -1189,7 +1247,7 @@ class TournamentLadder
          case TGEND_CHALLENGER_DELETE: // remove challenger from ladder
          {
             $success = $tladder_ch->remove_user_from_ladder( $dbgmsg, TLOG_TYPE_CRON, "Game-End[$game_end_action]",
-               /*upd-rank*/true, $tladder_ch->uid, '', /*nfy-user*/true );
+               /*upd-rank*/true, $tladder_ch->uid, '', /*withdraw*/false, /*nfy-user*/true );
             $logmsg = "CH.Rank={$tladder_ch->Rank}>DEL";
             break;
          }
@@ -1235,7 +1293,7 @@ class TournamentLadder
          case TGEND_DEFENDER_DELETE: // remove defender from ladder
          {
             $success = $tladder_df->remove_user_from_ladder( $dbgmsg, TLOG_TYPE_CRON, "Game-End[$game_end_action]",
-               /*upd-rank*/true, $tladder_df->uid, '', /*nfy-user*/true );
+               /*upd-rank*/true, $tladder_df->uid, '', /*withdraw*/false, /*nfy-user*/true );
             $logmsg = "DF.Rank={$tladder_df->Rank}>DEL";
             break;
          }
@@ -1251,46 +1309,53 @@ class TournamentLadder
     * \brief Sends notify to removed-user or to list of opponents about user-removal and detached tournament-games.
     * \param $rm_uid removed-user-id
     * \param $rm_uhandle should be set, but is loaded if empty
+    * \param $is_withdrawal true = assume no running T-games and being removed gracefully (no annulled games)
     * \param $reason null (default on processing game-end); or text instead
     * \param $arr_uid null = send msg to removed-user; otherwise send msg to opponents-uids from $arr_uid (if not empty)
     */
-   public static function notify_user_removal( $dbgmsg, $tid, $rm_uid, $rm_uhandle, $reason=null, $arr_uid=null )
+   public static function notify_user_removal( $dbgmsg, $tid, $rm_uid, $rm_uhandle, $is_withdrawal, $reason=null, $arr_uid=null )
    {
       $is_user = !is_array($arr_uid);
       if ( !$is_user && count($arr_uid) == 0 )
          return;
 
-      if ( !$is_user && !$rm_uhandle ) // load removed-user handle if not set
+      if ( !$is_user && (string)$rm_uhandle != '' ) // load removed-user handle if not set
       {
          $uarr = User::load_quick_userinfo( array( $rm_uid ) );
          $rm_uhandle = @$uarr[$rm_uid]['Handle'];
-         if ( !$rm_uhandle )
+         if ( (string)$rm_uhandle != '' )
             $rm_uhandle = "<user $rm_uid>";
       }
 
       if ( !$reason ) // default reason for processing game-end
          $reason = T_('The system has removed the user from the tournament due to the ladder-configurations defined for tournament-game endings.');
 
-      $subject = ( $is_user )
-          ? sprintf( T_('Removal from tournament #%s'), $tid )
-          : sprintf( T_('Removal of user [%s] from tournament #%s'), $rm_uhandle, $tid );
+      if ( $is_withdrawal )
+         $subject = sprintf( T_('Withdrawal of user [%s] from tournament #%s'), $rm_uhandle, $tid );
+      elseif ( $is_user )
+         $subject = sprintf( T_('Removal from tournament #%s'), $tid );
+      else
+         $subject = sprintf( T_('Removal of user [%s] from tournament #%s'), $rm_uhandle, $tid );
 
       $body = array();
       $body[] = ( $is_user )
          ? T_('You have been removed from the tournament') . ": <tourney $tid>"
          : sprintf( T_('User %s has been removed from the tournament'), "<user $rm_uid>" ) . ": <tourney $tid>";
-      $body[] = T_('Reason#tourney') . ': ' . $reason . "\n";
-      $body[] = TournamentUtils::get_tournament_ladder_notes_user_removed() . "\n";
-      $body[] = ( $is_user )
-         ? anchor( "show_games.php?tid=$tid",
-                   sprintf( T_('My running games for tournament #%s'), $tid ))
-         : anchor( "show_games.php?tid=$tid".URI_AMP."opp_hdl=".urlencode($rm_uhandle),
-                   sprintf( T_('My running games with user [%s] for tournament #%s'), $rm_uhandle, $tid ));
+      $body[] = "\n" . T_('Reason#tourney') . ': ' . $reason . "\n";
+      if ( !$is_withdrawal )
+      {
+         $body[] = TournamentUtils::get_tournament_ladder_notes_user_removed() . "\n";
+         $body[] = ( $is_user )
+            ? anchor( "show_games.php?tid=$tid",
+                      sprintf( T_('My running games for tournament #%s'), $tid ))
+            : anchor( "show_games.php?tid=$tid".URI_AMP."opp_hdl=".urlencode($rm_uhandle),
+                      sprintf( T_('My running games with user [%s] for tournament #%s'), $rm_uhandle, $tid ));
+      }
 
       send_message( "$dbgmsg.sendmsg($tid,$rm_uid)",
          implode("\n", $body), $subject,
          ( $is_user ? $rm_uid : $arr_uid ), '', /*notify*/true,
-         0/*sys-msg*/, MSGTYPE_NORMAL );
+         /*sys-msg*/0, MSGTYPE_NORMAL );
    }//notify_user_removal
 
    /*!
