@@ -1166,28 +1166,42 @@ class GameHelper
    /*!
     * \brief Deletes basic game-related table-entries for given game-id.
     * \internal
-    * FIXME potential race-condition as DGS does not have real transactions, game-ending while this is called leads to corrupted data!
     */
    private static function _delete_base_game_tables( $gid )
    {
-      NextGameOrder::delete_game_priorities($gid);
-      db_query( "GameHelper:_delete_base_game_tables.observers($gid)",
-         "DELETE FROM Observers WHERE ID=$gid" );
-      db_query( "GameHelper:_delete_base_game_tables.game_sgf($gid)",
-         "DELETE FROM GameSgf WHERE gid=$gid" );
-      db_query( "GameHelper:_delete_base_game_tables.notes($gid)",
-         "DELETE FROM GamesNotes WHERE gid=$gid" );
-      db_query( "GameHelper:_delete_base_game_tables.movemsg($gid)",
-         "DELETE FROM MoveMessages WHERE gid=$gid" );
-      if ( ALLOW_CONDITIONAL_MOVES )
-         db_query( "GameHelper:_delete_base_game_tables.cond_moves($gid)",
-            "DELETE FROM MoveSequence WHERE gid=$gid" );
-      db_query( "GameHelper:_delete_base_game_tables.moves($gid)",
-         "DELETE FROM Moves WHERE gid=$gid" );
-      db_query( "GameHelper:_delete_base_game_tables.gameplayers($gid)",
-         "DELETE FROM GamePlayers WHERE gid=$gid" );
-      db_query( "GameHelper:_delete_base_game_tables.games($gid)",
-         "DELETE FROM Games WHERE ID=$gid LIMIT 1" );
+      //HOT-section to avoid potential race-condition as DGS does not have real transactions,
+      //    game-ending while this is called leads to corrupted data!
+      db_lock( "GameHelper:_delete_base_game_tables($gid)",
+         "GamesPriority WRITE, " .
+         "Observers WRITE, " .
+         "GameSgf WRITE, " .
+         "GamesNotes WRITE, " .
+         "MoveMessages WRITE, " .
+         ( ALLOW_CONDITIONAL_MOVES ? "MoveSequence WRITE, " : '' ) .
+         "Moves WRITE, " .
+         "GamePlayers WRITE, " .
+         "Games WRITE " );
+      {//LOCK Games-related tables
+         NextGameOrder::delete_game_priorities($gid);
+         db_query( "GameHelper:_delete_base_game_tables.observers($gid)",
+            "DELETE FROM Observers WHERE ID=$gid" );
+         db_query( "GameHelper:_delete_base_game_tables.game_sgf($gid)",
+            "DELETE FROM GameSgf WHERE gid=$gid" );
+         db_query( "GameHelper:_delete_base_game_tables.notes($gid)",
+            "DELETE FROM GamesNotes WHERE gid=$gid" );
+         db_query( "GameHelper:_delete_base_game_tables.movemsg($gid)",
+            "DELETE FROM MoveMessages WHERE gid=$gid" );
+         if ( ALLOW_CONDITIONAL_MOVES )
+            db_query( "GameHelper:_delete_base_game_tables.cond_moves($gid)",
+               "DELETE FROM MoveSequence WHERE gid=$gid" );
+         db_query( "GameHelper:_delete_base_game_tables.moves($gid)",
+            "DELETE FROM Moves WHERE gid=$gid" );
+         db_query( "GameHelper:_delete_base_game_tables.gameplayers($gid)",
+            "DELETE FROM GamePlayers WHERE gid=$gid" );
+         db_query( "GameHelper:_delete_base_game_tables.games($gid)",
+            "DELETE FROM Games WHERE ID=$gid LIMIT 1" );
+      }
+      db_unlock();
 
       // clear big-cache-entries to free cache-space
       DgsCache::delete_group( "GameHelper:_delete_base_game_tables.observers($gid)",
