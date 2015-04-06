@@ -13,6 +13,10 @@ ChangeLog
 
 2015-04-06 jug
 
+   * tournaments/ladder/view.php (build_action_row_str):
+   - ladder-view: show HOLD-flag-state "Withdrawal initiated" also for ladder-observers
+     and participants with higher rank
+
    * tournaments/include/tournament_ladder_props.php (TournamentLadderProps.check_ladder_properties,
        ~.build_notes_props),
      tournaments/include/tournament_globals.php (TLADDER_MAX_CHALLENGES),

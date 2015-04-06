@@ -451,7 +451,7 @@ function build_rank_change( $tladder )
 
 function build_action_row_str( &$tladder, &$form, $is_mine, $rid, $run_games_str )
 {
-   global $base_path, $admin_mode, $allow_play, $allow_admin, $user_onhold_withdraw;
+   global $base_path, $admin_mode, $play_locked, $allow_play, $allow_admin, $tl_user, $user_onhold_withdraw;
    $tid = $tladder->tid;
 
    $row_str = '';
@@ -481,12 +481,14 @@ function build_action_row_str( &$tladder, &$form, $is_mine, $rid, $run_games_str
    }
    elseif ( $allow_play )
    {
-      if ( $tladder->AllowChallenge )
+      $init_withdraw = ($tladder->Flags & TL_FLAG_HOLD_WITHDRAW);
+      if ( is_null($tl_user) && $init_withdraw ) // ladder-observer
+         $row_str = span('LadderWarn', T_('Withdrawal initiated#T_ladder') );
+      elseif ( $tladder->AllowChallenge )
       {
-         global $tl_user, $play_locked;
          if ( $play_locked )
             $row_str = span('LadderWarn', T_('Challenging locked#T_ladder') );
-         elseif ( $tladder->Flags & TL_FLAG_HOLD_WITHDRAW )
+         elseif ( $init_withdraw )
             $row_str = span('LadderWarn', T_('Withdrawal initiated#T_ladder') );
          elseif ( $user_onhold_withdraw )
             $row_str = span('LadderWarn', T_('Challenging on-hold#T_ladder') );
@@ -497,10 +499,10 @@ function build_action_row_str( &$tladder, &$form, $is_mine, $rid, $run_games_str
                anchor( $base_path."tournaments/ladder/challenge.php?tid=$tid".URI_AMP."rid={$tladder->rid}",
                        T_('Challenge this user#T_ladder') ));
       }
+      elseif ( $init_withdraw )
+         $row_str = span('LadderWarn', T_('Withdrawal initiated#T_ladder') );
       elseif ( $tladder->MaxChallengedIn )
-      {
          $row_str = span('LadderInfo', sprintf( T_('Already in %s challenges#T_ladder'), $tladder->ChallengesIn ));
-      }
       elseif ( $tladder->RematchWait >= 0 )
       {
          if ( $tladder->RematchWait > 0 )
