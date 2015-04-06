@@ -542,6 +542,7 @@ class TournamentGames
          $qsql->add_part( SQLP_UNION_WHERE, "Challenger_uid=$uid", "Defender_uid=$uid" );
       else
          error('invalid_args', "TG.count_user_running_games.check.bad_args($tid,$rid,$uid)");
+      $qsql->useUnionAll();
       $result = db_query( "TournamentGames:count_user_running_games($tid,$rid,$uid)", $qsql->get_select() );
 
       // NOTE: need loop for UNION-query returns 2 rows

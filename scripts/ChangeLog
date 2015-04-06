@@ -13,6 +13,10 @@ ChangeLog
 
 2015-04-06 jug
 
+   * tournaments/include/tournament_games.php (TournamentGames.count_user_running_games):
+   - bugfix: fix SQL-query counting ALL running tournament-games requiring UNION-ALL
+     instead of UNION-DISTINCT
+
    * tournaments/include/tournament_properties.php (TournamentProperties.checkUserRegistration,
        ~.check_tournament_games_for_rejoin),
      tournaments/include/tournament_status.php (TournamentStatus.check_conditions_status_PAIR),
