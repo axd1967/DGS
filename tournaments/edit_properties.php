@@ -35,6 +35,8 @@ require_once 'tournaments/include/tournament_utils.php';
 
 $GLOBALS['ThePage'] = new Page('TournamentPropertiesEdit');
 
+define('DAYS_MIN_REG_ENDTIME', 7);
+
 
 {
    connect2mysql();
@@ -227,7 +229,7 @@ $GLOBALS['ThePage'] = new Page('TournamentPropertiesEdit');
 // return [ vars-hash, edits-arr, errorlist ]
 function parse_edit_form( &$tpr, $t_limits, $ttype )
 {
-   global $allow_custom_round;
+   global $allow_custom_round, $NOW;
 
    $edits = array();
    $errors = array();
@@ -268,13 +270,16 @@ function parse_edit_form( &$tpr, $t_limits, $ttype )
       $old_vals['user_max_rating'] = $tpr->UserMaxRating;
 
       $parsed_value = parseDate( T_('End time for registration#tourney'), $vars['reg_end_time'] );
-      if ( is_numeric($parsed_value) )
+      if ( !is_numeric($parsed_value) )
+         $errors[] = $parsed_value;
+      elseif ( $parsed_value > 0 && $parsed_value < $NOW + DAYS_MIN_REG_ENDTIME * SECS_PER_DAY )
+         $errors[] = sprintf( T_('End time for registration should be at least %s days in the future#tourney'),
+            DAYS_MIN_REG_ENDTIME );
+      else
       {
          $tpr->RegisterEndTime = $parsed_value;
          $vars['reg_end_time'] = formatDate($tpr->RegisterEndTime);
       }
-      else
-         $errors[] = $parsed_value;
 
       $new_value = $vars['min_participants'];
       if ( TournamentUtils::isNumberOrEmpty($new_value) && $new_value >=0 && $new_value <= TP_MAX_COUNT )

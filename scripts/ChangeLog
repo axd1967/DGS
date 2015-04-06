@@ -13,6 +13,10 @@ ChangeLog
 
 2015-04-06 jug
 
+   * tournaments/edit_properties.php (parse_edit_form):
+   - bugfix on tournament-configuration: added min-check on register-end-time,
+     should be at least 7 days in the future
+
    * tournaments/ladder/view.php (build_action_row_str):
    - ladder-view: show HOLD-flag-state "Withdrawal initiated" also for ladder-observers
      and participants with higher rank
