@@ -168,8 +168,8 @@ define('MSGBOXROWS_INVITE', 6);
    $iamrated = ( $player_row['RatingStatus'] != RATING_NONE ) && is_valid_rating($my_rating);
 
 
-   $default_subject = get_request_arg('subject');
-   $default_message = get_request_arg('message');
+   $default_subject = trim( get_request_arg('subject') );
+   $default_message = trim( get_request_arg('message') );
    if ( $is_rematch && empty($default_subject) )
       $default_subject = 'Game invitation';
 
@@ -208,7 +208,7 @@ define('MSGBOXROWS_INVITE', 6);
       {
          if ( !$preview )
          {
-            $default_subject = $Subject;
+            $default_subject = trim( $Subject );
             $default_message = ( count($errors) ? $default_message : '' );
          }
          if ( strcasecmp(substr($default_subject,0,3), "re:") != 0 )

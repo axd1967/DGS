@@ -13,6 +13,9 @@ ChangeLog
 
 2015-04-06 jug
 
+   * message.php:
+   - bugfix: trim subject and body to prevent sending empty message
+
    * include/std_functions.php (get_user_cache_language),
      statisticspng.php, statratingspng.php:
    - bugfix: use language-specific caching files for statistics-graphs as they contain translated texts
