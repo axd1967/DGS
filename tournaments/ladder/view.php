@@ -332,12 +332,8 @@ $GLOBALS['ThePage'] = new Page('TournamentLadderView');
 
       if ( !is_null($tl_user) && !$admin_mode )
       {
-         if ( $tl_props->MaxChallenges > 0 )
-            $ch_out_str = sprintf( T_('You have started %s of max. %s outgoing game challenges#T_ladder'),
-                                   $tl_user->ChallengesOut, $tl_props->MaxChallenges ) . ': ';
-         else // unlimited
-            $ch_out_str = sprintf( T_('You have started %s outgoing game challenges#T_ladder'),
-                                   $tl_user->ChallengesOut ) . ': ';
+         $ch_out_str = sprintf( T_('You have started %s of max. %s outgoing game challenges#T_ladder'),
+               $tl_user->ChallengesOut, $tl_props->MaxChallenges ) . ': ';
 
          if ( $user_onhold_withdraw )
             echo $ch_out_str . span('LadderWarn', T_('Challenging on-hold (due to initiated withdrawal)#T_ladder'));

@@ -52,7 +52,7 @@ class DgsLadderTournament extends TournamentTemplateLadder
       // overwrite tournament-type-specific properties
       $this->limits->setLimits( TLIMITS_MAX_TP, true, 2, TP_MAX_COUNT );
       $this->limits->setLimits( TLIMITS_TL_MAX_DF, false, 0, TLADDER_MAX_DEFENSES );
-      $this->limits->setLimits( TLIMITS_TL_MAX_CH, true, 0, TLADDER_MAX_CHALLENGES );
+      $this->limits->setLimits( TLIMITS_TL_MAX_CH, false, 0, TLADDER_MAX_CHALLENGES );
    }
 
    public function createTournament()
@@ -69,7 +69,7 @@ class DgsLadderTournament extends TournamentTemplateLadder
 
       $tl_props = new TournamentLadderProps();
       $tl_props->ChallengeRangeAbsolute = 10;
-      $tl_props->MaxChallenges = 10;
+      $tl_props->MaxChallenges = 5;
       // 1..5 max. 5 games, 6..10 max. 4 games, else 3 games:
       $tl_props->MaxDefenses1 = 5;
       $tl_props->MaxDefensesStart1 = 5;

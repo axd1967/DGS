@@ -13,6 +13,16 @@ ChangeLog
 
 2015-04-06 jug
 
+   * tournaments/include/tournament_ladder_props.php (TournamentLadderProps.check_ladder_properties,
+       ~.build_notes_props),
+     tournaments/include/tournament_globals.php (TLADDER_MAX_CHALLENGES),
+     tournaments/include/types/dgs_ladder.php (DgsLadderTournament.__construct),
+     specs/db/table-Tournaments.txt,
+     tournaments/ladder/view.php:
+   - forbid ladder with unlimited max. outgoing challenges
+     - reduced limit for max. outgoing challenges from 50 to 20
+     - reduced default for max. outgoing challenges for DGS-scoped ladder from 10 to 5
+
    * tournaments/include/tournament_ladder.php (class TournamentLadder, ~.__construct, ~.build_log_string,
        ~.fillEntityData, ~.schedule_withdrawal_from_ladder, ~.revoke_withdrawal_from_ladder,
        ~.remove_user_from_ladder, ~.new_from_row, ~._add_participant_to_ladder_with_new_rank,

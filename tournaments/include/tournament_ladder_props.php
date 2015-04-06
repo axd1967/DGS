@@ -281,9 +281,9 @@ class TournamentLadderProps
       if ( $this->MaxDefenses1 == 0 && $this->MaxDefensesStart1 == 0 && $this->MaxDefenses2 > 0 )
          $errors[] = T_('If one group is unused, it must be group #2.#T_ladder');
 
-      if ( $this->MaxChallenges < 0 || $this->MaxChallenges > TLADDER_MAX_CHALLENGES )
+      if ( $this->MaxChallenges < 1 || $this->MaxChallenges > TLADDER_MAX_CHALLENGES )
          $errors[] = sprintf( T_('Max. outgoing challenges must be in range %s.#T_ladder'),
-            build_range_text(0, TLADDER_MAX_CHALLENGES) );
+            build_range_text(1, TLADDER_MAX_CHALLENGES) );
 
       if ( $this->UserAbsenceDays < 0 || $this->UserAbsenceDays > 255 )
          $errors[] = sprintf( T_('User absence must be in range %s days.#T_ladder'),
@@ -373,8 +373,7 @@ class TournamentLadderProps
 
       $max_defenses = max( $this->MaxDefenses, $this->MaxDefenses1, $this->MaxDefenses2 );
       $max_games_text = sprintf( T_('Max. simultaneous games for user: %s defenses + your choice of %s challenges'),
-         $max_defenses,
-         ( $this->MaxChallenges > 0 ? sprintf( T_('max. %s'), $this->MaxChallenges) : T_('unlimited') ) );
+         $max_defenses, sprintf( T_('max. %s'), $this->MaxChallenges) );
       $arr_props[] = array( 'text' => span('bold smaller', make_html_safe($max_games_text, 'line')) );
 
       // determine challenger
