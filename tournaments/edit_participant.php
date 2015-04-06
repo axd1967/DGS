@@ -252,11 +252,11 @@ $GLOBALS['ThePage'] = new Page('TournamentEditParticipant');
          $tp->Status = TP_STATUS_INVITE;
 
       if ( $tp->Status == TP_STATUS_INVITE )
-         $tp->Flags = ($tp->Flags | TP_FLAGS_INVITED) & ~TP_FLAGS_ACK_INVITE;
+         $tp->Flags = ($tp->Flags | TP_FLAG_INVITED) & ~TP_FLAG_ACK_INVITE;
       elseif ( $old_status == TP_STATUS_APPLY && $tp->Status == TP_STATUS_REGISTER )
-         $tp->Flags |= TP_FLAGS_ACK_APPLY;
+         $tp->Flags |= TP_FLAG_ACK_APPLY;
       if ( count($reg_errors) || count($reg_warnings) ) // violate registration restrictions
-         $tp->Flags |= TP_FLAGS_VIOLATE;
+         $tp->Flags |= TP_FLAG_VIOLATE;
 
       if ( $old_status != $tp->Status )
          $edits[] = T_('Status');

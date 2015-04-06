@@ -756,10 +756,10 @@ class TournamentParticipant
       if ( !isset(self::$ARR_TP_TEXTS['FLAGS']) )
       {
          $arr = array();
-         $arr[TP_FLAGS_INVITED]     = T_('Invited#TP_flag');
-         $arr[TP_FLAGS_ACK_INVITE]  = T_('ACK-Invite#TP_flag');
-         $arr[TP_FLAGS_ACK_APPLY]   = T_('ACK-Apply#TP_flag');
-         $arr[TP_FLAGS_VIOLATE]     = T_('REG-Violate#TP_flag');
+         $arr[TP_FLAG_INVITED]     = T_('Invited#TP_flag');
+         $arr[TP_FLAG_ACK_INVITE]  = T_('ACK-Invite#TP_flag');
+         $arr[TP_FLAG_ACK_APPLY]   = T_('ACK-Apply#TP_flag');
+         $arr[TP_FLAG_VIOLATE]     = T_('REG-Violate#TP_flag');
          self::$ARR_TP_TEXTS['FLAGS'] = $arr;
       }
       else

@@ -119,10 +119,10 @@ define('TP_STATUS_INVITE',    'INVITE');
 define('CHECK_TP_STATUS', 'APPLY|REGISTER|INVITE');
 define('TPCOUNT_STATUS_ALL',  '*');
 
-define('TP_FLAGS_INVITED',       0x0001); // invited by TD
-define('TP_FLAGS_ACK_INVITE',    0x0002); // invite by TD approved by user
-define('TP_FLAGS_ACK_APPLY',     0x0004); // user-application approved by TD
-define('TP_FLAGS_VIOLATE',       0x0008); // user-registration violates T-restrictions
+define('TP_FLAG_INVITED',        0x0001); // invited by TD
+define('TP_FLAG_ACK_INVITE',     0x0002); // invite by TD approved by user
+define('TP_FLAG_ACK_APPLY',      0x0004); // user-application approved by TD
+define('TP_FLAG_VIOLATE',        0x0008); // user-registration violates T-restrictions
 
 define('TP_MAX_COUNT', 32000); //actually 32767 is max limit of signed int from DB-table, but 32K makes a rounder number
 
