@@ -25,6 +25,7 @@ require_once 'include/form_functions.php';
 require_once 'include/classlib_user.php';
 require_once 'tournaments/include/tournament_cache.php';
 require_once 'tournaments/include/tournament_factory.php';
+require_once 'tournaments/include/tournament_games.php';
 require_once 'tournaments/include/tournament_helper.php';
 require_once 'tournaments/include/tournament_ladder.php';
 require_once 'tournaments/include/tournament_ladder_helper.php';
@@ -97,7 +98,7 @@ $GLOBALS['ThePage'] = new Page('TournamentLadderAdmin');
    $user = null;
    $tladder_user = null;
    $authorise_edit_user = $authorise_add_user = false;
-   $count_tp_reg = $count_tl_user = 0;
+   $count_tp_reg = $count_tl_user = $count_run_tg = 0;
    if ( !$is_delete && $uid > 0 )
    {
       $user = User::load_user($uid);
@@ -112,6 +113,8 @@ $GLOBALS['ThePage'] = new Page('TournamentLadderAdmin');
             $errors[] = sprintf( T_('Missing tournament user registration for user [%s].'), $user->Handle );
          else
          {
+            $count_run_tg = TournamentGames::count_user_running_games( $tid, $tp->ID );
+
             $authorise_edit_user = true;
             $authorise_add_user = ( $tp->Status == TP_STATUS_REGISTER );
 
@@ -321,9 +324,13 @@ $GLOBALS['ThePage'] = new Page('TournamentLadderAdmin');
             'TEXT', T_('User to edit') . ': ' .
                     sptext( $user->user_reference(), 3) .
                     anchor( $base_path."tournaments/edit_participant.php?tid=$tid".URI_AMP."uid=$uid",
-                            T_('Edit participant'), '', 'class="TAdmin"') .
+                            T_('Edit participant'), '', 'class="TAdmin"'),
+         ));
+      $tform->add_row( array(
+            'CELL', 2, '',
+            'TEXT', sprintf( T_('Tournament Games of [%s]'), $user->Handle ) . ': ' .
+                    sprintf( T_('open unprocessed games [%s]'), $count_run_tg) .
                     SEP_SPACING .
-                    sprintf( T_('Tournament Games of [%s]'), $user->Handle ) . ': ' .
                     anchor( $base_path."show_games.php?tid=$tid".URI_AMP."uid=$uid",
                             T_('Running games') ) .
                     MED_SPACING .

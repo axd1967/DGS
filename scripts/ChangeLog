@@ -13,6 +13,9 @@ ChangeLog
 
 2015-04-06 jug
 
+   * tournaments/ladder/admin.php:
+   - ladder-admin: show number of open and unprocessed tournament-games for ladder-user to edit
+
    * tournaments/include/tournament_games.php (TournamentGames.count_user_running_games):
    - bugfix: fix SQL-query counting ALL running tournament-games requiring UNION-ALL
      instead of UNION-DISTINCT
