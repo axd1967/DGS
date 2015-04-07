@@ -677,9 +677,10 @@ class GameActionHelper
       // Update TournamentParticipant.Lastmoved
       if ( ALLOW_TOURNAMENTS && $tid > 0 )
       {
+         // change tournament-participant: set last-moved, reset timeout-loss-flag on own move-action
          db_query( "$dbgmsg.upd_tp.lastmoved($tid,{$this->my_id})",
-            "UPDATE TournamentParticipant SET Lastmoved=FROM_UNIXTIME($NOW) " .
-            "WHERE tid=$tid AND Status='".TP_STATUS_REGISTER."' AND uid={$this->my_id} LIMIT 1" );
+            "UPDATE TournamentParticipant SET Lastmoved=FROM_UNIXTIME($NOW), Flags=Flags & ~" .TP_FLAG_TIMEOUT_LOSS .
+            " WHERE tid=$tid AND Status='".TP_STATUS_REGISTER."' AND uid={$this->my_id} LIMIT 1" );
       }
 
       // Increase moves and activity

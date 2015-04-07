@@ -86,7 +86,7 @@ $GLOBALS['ThePage'] = new Page('TournamentLadderChallenge');
    $user_ch = User::new_from_row( $player_row );
 
    $tladder_df = TournamentLadder::load_tournament_ladder_by_user($tid, 0, $rid); // defender
-   $user_df = null;
+   $user_df = $tp_df = null;
    if ( is_null($tladder_df) )
       $errors[] = T_('Defender is not participating on ladder');
    else
@@ -94,6 +94,11 @@ $GLOBALS['ThePage'] = new Page('TournamentLadderChallenge');
       $user_df = User::load_user( $tladder_df->uid );
       if ( !$user_df )
          error('unknown_user', "Tournament.ladder.challenge.load_user($tid,{$tladder_df->uid}");
+
+      $tp_df = TournamentParticipant::load_tournament_participant( $tid, $tladder_df->uid );
+      if ( !$tp_df )
+         error('unknown_user', "Tournament.ladder.challenge.load_tp_def($tid,{$tladder_df->uid}");
+      $tladder_df->TP_Flags = $tp_df->Flags;
    }
 
    // check if challenge is valid

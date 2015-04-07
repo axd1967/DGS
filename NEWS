@@ -32,8 +32,12 @@ Copyright (C) 2001-2015  Erik Ouchterlony, Jens-Uwe Gaspar
       * Delay withdrawal from ladder till all running tournament games are finished and preventing new challenges
          * ladder-view: "<i>Challenging on hold</i>" = indicating initiated withdrawal by yourself
          * ladder-view: "<i>Withdrawal initiated</i>" = challenge not allowed due to initiated withdrawal of other ladder-user
-
          * ladder-admin (for tournament-director): added toggle of withdrawal state for ladder-user
+
+      * Block new incoming challenges for ladder-participant after losing on timeout
+         * Reset on performing own move-action on game in tournament
+         * ladder-view: "<i>Challenge timeout lock</i>" = challenging by other ladder-user not allowed due to timeout-loss
+         * ladder-admin (for tournament-director): added toggle on timeout-loss flag for ladder-user
 
       * Added column on tournament-ladder-view with theoretical ladder-rank if sorted by user rating
 

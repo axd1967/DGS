@@ -29,6 +29,7 @@ require_once 'tournaments/include/tournament_director.php';
 require_once 'tournaments/include/tournament_extension.php';
 require_once 'tournaments/include/tournament_games.php';
 require_once 'tournaments/include/tournament_globals.php';
+require_once 'tournaments/include/tournament_helper.php';
 require_once 'tournaments/include/tournament_ladder.php';
 require_once 'tournaments/include/tournament_ladder_props.php';
 require_once 'tournaments/include/tournament_log_helper.php';
@@ -115,6 +116,8 @@ class TournamentLadderHelper
          // track consecutive-wins for both players
          self::process_game_end_seq_wins( $tgame->ID, $tl_props->SeqWinsThreshold );
 
+         $logmsg_timeout = TournamentHelper::update_timeout_loss_for_participant( $tgame );
+
          TournamentLogHelper::log_tournament_ladder_game_end( $tid,
             sprintf('Game End(game %s): Users role:rid/uid:Rank %s:%s/%s:%d vs %s:%s/%s:%s; T-Game(%s): Status=[%s], Flags=[%s], Score=[%s] => Action %s',
                $tgame->gid,
@@ -122,7 +125,8 @@ class TournamentLadderHelper
                $tgame->Challenger_rid, $tgame->Challenger_uid, $tl_rank_ch,
                ( $tgame->Flags & TG_FLAG_CH_DF_SWITCHED ? 'Challenger' : 'Defender' ),
                $tgame->Defender_rid, $tgame->Defender_uid, $tl_rank_df,
-               $tgame->ID, $tgame->Status, $tgame->formatFlags(), $tgame->Score, $game_end_action ));
+               $tgame->ID, $tgame->Status, $tgame->formatFlags(), $tgame->Score, $game_end_action ) .
+            $logmsg_timeout );
       }
       ta_end();
 

@@ -123,6 +123,7 @@ define('TP_FLAG_INVITED',        0x0001); // invited by TD
 define('TP_FLAG_ACK_INVITE',     0x0002); // invite by TD approved by user
 define('TP_FLAG_ACK_APPLY',      0x0004); // user-application approved by TD
 define('TP_FLAG_VIOLATE',        0x0008); // user-registration violates T-restrictions
+define('TP_FLAG_TIMEOUT_LOSS',   0x0100); // indicates TP lost on timeout
 
 define('TP_MAX_COUNT', 32000); //actually 32767 is max limit of signed int from DB-table, but 32K makes a rounder number
 

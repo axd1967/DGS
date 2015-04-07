@@ -79,6 +79,9 @@ class TournamentLadder
 
    // non-DB fields
 
+   /*! \brief copy of TournamentParticipant.Flags (not always set) */
+   public $TP_Flags = 0;
+
    /*! \brief true if challenge allowed on this user, also if max. outgoing challenges reached. */
    public $AllowChallenge = false;
    /*! \brief true, if max. number of incoming challenges reached for ladder-user. */
@@ -603,6 +606,7 @@ class TournamentLadder
             @$row['SeqWins'],
             @$row['SeqWinsBest']
          );
+      $tl->TP_Flags = (int)@$row['TP_Flags'];
       return $tl;
    }
 
@@ -1418,10 +1422,9 @@ class TournamentLadder
    }
 
    /*! \brief Loads and caches TournamentLadder-entries for given tournament-id. */
-   public static function load_cache_tournament_ladder( $dbgmsg, $tid, $with_tp_rating, $need_tp_finished,
-         $with_tp_lastmove, $limit=0, $with_index=false )
+   public static function load_cache_tournament_ladder( $dbgmsg, $tid, $with_tp, $limit=0, $with_index=false )
    {
-      $with_tp = ( $with_tp_rating || $need_tp_finished || $with_tp_lastmove ) ? 1 : 0;
+      $with_tp = ( $with_tp ) ? 1 : 0;
 
       $dbgmsg .= ".TL:load_cache_tournament_ladder($tid,$with_tp,$limit)";
       $group_id = "TLadder.$tid";
@@ -1444,7 +1447,7 @@ class TournamentLadder
             ));
          if ( $with_tp )
             $tl_iterator->addQuerySQLMerge( new QuerySQL(
-                  SQLP_FIELDS, 'TP.Rating AS TP_Rating', 'TP.Finished AS TP_Finished',
+                  SQLP_FIELDS, 'TP.Flags AS TP_Flags', 'TP.Rating AS TP_Rating', 'TP.Finished AS TP_Finished',
                                'UNIX_TIMESTAMP(TP.Lastmoved) AS TP_X_Lastmoved',
                   SQLP_FROM,   'INNER JOIN TournamentParticipant AS TP ON TP.tid=TL.tid AND TP.ID=TL.rid'
                ));

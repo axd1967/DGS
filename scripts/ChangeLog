@@ -11,6 +11,33 @@ Release [2014-07-30] - DGS 1.0.18 - tag [release-1_0_18-20140730] on (later) bra
 ChangeLog
 ------------------------------------------------------------------
 
+2015-04-07 jug
+
+   * tournaments/include/tournament_ladder.php (class TournamentLadder, ~.new_from_row,
+       ~.load_cache_tournament_ladder),
+     tournaments/include/tournament_round_helper.php (TournamentRoundHelper.process_tournament_round_robin_game_end),
+     tournaments/include/tournament_ladder_helper.php (TournamentLadderHelper.process_tournament_ladder_game_end),
+     tournaments/include/tournament_helper.php (TournamentHelper.update_timeout_loss_for_participant),
+     tournaments/include/tournament_participant.php (TournamentParticipant.update_participant_flags,
+       ~.getFlagsText),
+     tournaments/include/tournament_ladder_props.php (TournamentLadderProps.verify_challenge),
+     tournaments/include/tournament_globals.php (TP_FLAG_TIMEOUT_LOSS),
+     include/game_actions.php (GameActionHelper.update_game),
+     specs/db/table-Tournaments.txt,
+     tournaments/ladder/view.php (build_action_row_str, build_admin_hold_flags),
+     tournaments/ladder/admin.php, tournaments/ladder/challenge.php, tournaments/view_tournament.php:
+   - block new incoming challenges for tournament-ladder-participant after losing on timeout
+     - motivation: first step to replace hard user-removal on timeout-handling,
+       avoid that timed-out users is targeted for easy leapfrogging by preventing new incoming challenges
+     - introduced user-specific TIMEOUT_LOSS-flag stored in TournamentParticipant.Flags,
+       set on timeout-loss, cleared on user performing a move-action on game of tournament,
+       update also for round-robin-tournaments to keep it consistent
+     - ladder-view: show info about own timeout-loss-state if TIMEOUT_LOSS-flag set
+     - ladder-view: show "Challenge timeout lock" in Actions-column,
+       if challenging is not allowed due to timeout-loss
+     - ladder-edit: show HOLD-withdraw-flag 'HOLD[TO]' in Actions-column for tournament-director
+     - ladder-admin: added toggle on TIMEOUT_LOSS-flag of user for tournament by tournament-director
+
 2015-04-06 jug
 
    * message.php:

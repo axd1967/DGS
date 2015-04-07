@@ -78,12 +78,15 @@ class TournamentRoundHelper
             TournamentParticipant::update_game_end_stats( $tid, $tgame->Defender_rid, $tgame->Defender_uid, -$tgame->Score );
          }
 
+         $logmsg_timeout = TournamentHelper::update_timeout_loss_for_participant( $tgame );
+
          TournamentLogHelper::log_tournament_round_robin_game_end( $tid,
             sprintf('Game End(game %s) Round_ID[%s] Pool[%s]: user_role:rid/uid Challenger:%s/%s vs Defender:%s/%s; T-Game(%s): Status=[%s], Flags=[%s], Score=[%s]',
                $tgame->gid, $tgame->Round_ID, $tgame->Pool,
                $tgame->Challenger_rid, $tgame->Challenger_uid,
                $tgame->Defender_rid, $tgame->Defender_uid,
-               $tgame->ID, $tgame->Status, $tgame->formatFlags(), $tgame->Score ));
+               $tgame->ID, $tgame->Status, $tgame->formatFlags(), $tgame->Score ) .
+            $logmsg_timeout );
       }
       ta_end();
 

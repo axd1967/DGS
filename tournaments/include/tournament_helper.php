@@ -29,6 +29,7 @@ require_once 'tournaments/include/tournament_factory.php';
 require_once 'tournaments/include/tournament_globals.php';
 require_once 'tournaments/include/tournament_ladder_helper.php';
 require_once 'tournaments/include/tournament_log_helper.php';
+require_once 'tournaments/include/tournament_participant.php';
 require_once 'tournaments/include/tournament_result.php';
 require_once 'tournaments/include/tournament_round_helper.php';
 require_once 'tournaments/include/tournament_rules.php';
@@ -291,6 +292,22 @@ class TournamentHelper
       if ( $t_limits->getMinLimit(TLIMITS_TPR_RATING_USE_MODE) & TLIM_TPR_RUM_NO_COPY_CUSTOM )
          unset($arr[TPROP_RUMODE_COPY_CUSTOM]);
       return $arr;
+   }
+
+   /*!
+    * \brief Sets timeout-loss flag for tournament-participant from given TournamentGames-object.
+    * \return tournament-log-message, or '' if nothing changed
+    */
+   public static function update_timeout_loss_for_participant( $tgame )
+   {
+      $msg = '';
+      if ( abs($tgame->Score) == SCORE_TIME )
+      {
+         $loser_uid = ( $tgame->Score < 0 ) ? $tgame->Defender_uid : $tgame->Challenger_uid;
+         TournamentParticipant::update_participant_flags( $tgame->tid, $loser_uid, TP_FLAG_TIMEOUT_LOSS, /*set*/true );
+         $msg = "; set Timeout-Loss[$loser_uid]";
+      }
+      return $msg;
    }
 
 } // end of 'TournamentHelper'

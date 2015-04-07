@@ -672,6 +672,28 @@ class TournamentParticipant
       return $result;
    }//update_game_end_stats
 
+   /*!
+    * \brief Updates bitmask $flag in TP.Flags for given tournament and user-id.
+    * \param $flag bitmask-value to set or clear
+    * \param $flag_op true|>0 = set flag, false|0 = clear flag, <0 = toggle flag
+    */
+   public static function update_participant_flags( $tid, $uid, $flag, $flag_op )
+   {
+      if ( !is_numeric($flag) || $flag <= 0 )
+         error('invalid_args', "TournamentParticipant:update_participant_flags.check.bad_flag($tid,$uid,$flag,$flag_op)");
+      $tid = (int)$tid;
+      $uid = (int)$uid;
+
+      $qval_flag = ( is_numeric($flag_op) && $flag_op < 0 )
+         ? "^ $flag"
+         : ( $flag_op ? "| $flag" : "& ~$flag" );
+      $result = db_query( "TournamentParticipant:update_participant_flags.upd($tid,$uid,$flag,$flag_op)",
+         "UPDATE TournamentParticipant SET Flags=Flags $qval_flag WHERE tid=$tid AND uid=$uid LIMIT 1" );
+
+      self::delete_cache_tournament_participant( 'TournamentParticipant:update_participant_flags', $tid, $uid );
+      return $result;
+   }//update_participant_flags
+
    /*! \brief Updates Tournament.RegisteredTP if needed by comparing old/new TP-status. */
    public static function sync_tournament_registeredTP( $tid, $old_tp_status, $new_tp_status )
    {
@@ -760,6 +782,7 @@ class TournamentParticipant
          $arr[TP_FLAG_ACK_INVITE]  = T_('ACK-Invite#TP_flag');
          $arr[TP_FLAG_ACK_APPLY]   = T_('ACK-Apply#TP_flag');
          $arr[TP_FLAG_VIOLATE]     = T_('REG-Violate#TP_flag');
+         $arr[TP_FLAG_TIMEOUT_LOSS] = T_('Timeout-Loss#TP_flag');
          self::$ARR_TP_TEXTS['FLAGS'] = $arr;
       }
       else

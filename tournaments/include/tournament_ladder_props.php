@@ -642,11 +642,15 @@ class TournamentLadderProps
       if ( $tladder_ch->ChallengesOut >= $this->MaxChallenges )
          $errors[] = sprintf( T_('Challenger already has max. %s outgoing challenges.#T_ladder'), $tladder_ch->ChallengesOut );
 
-      // check on-hold state preventing challenges
+      // check on-hold state (due to withdrawal) preventing challenges
       if ( $tladder_ch->Flags & TL_FLAG_HOLD_WITHDRAW )
          $errors[] = T_('Challenger scheduled for withdrawal (challenge not allowed).#T_ladder');
       if ( $tladder_df->Flags & TL_FLAG_HOLD_WITHDRAW )
          $errors[] = T_('Defender scheduled for withdrawal (challenge not allowed).#T_ladder');
+
+      // check on-hold state (due to timeout-loss) preventing incoming challenge
+      if ( $tladder_df->TP_Flags & TP_FLAG_TIMEOUT_LOSS )
+         $errors[] = T_('Defender can not be challenged due to loss on timeout.#T_ladder');
 
       return $errors;
    }//verify_challenge

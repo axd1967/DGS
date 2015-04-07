@@ -236,6 +236,7 @@ Description:
       - 0x0002 (=ACK_INVITE): invite by TD approved by user
       - 0x0004 (=ACK_APPLY): user-application approved by TD
       - 0x0008 (=VIOLATE): user-registration violates T-restrictions
+      - 0x0100 (=TIMEOUT_LOSS): TP lost by timeout
       - future: LOCK (user blocked/locked by TD for arbitrary reason)
 
 * Rating : Rating used for T, depends on TournamentProperties.RatingUseMode

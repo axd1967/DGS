@@ -63,6 +63,7 @@ $GLOBALS['ThePage'] = new Page('TournamentLadderAdmin');
      ta_delete&confirm=1&tid=    : delete T-ladder (confirmed)
      ta_wduser&tid=&uid=         : withdraw user from T-ladder
      ta_revokewduser&tid=&uid=   : revoke withdraw of user from T-ladder
+     ta_toggle_timeout_loss&tid=&uid= : toggle timeout-loss flag for TP
      ta_cancel&tid=              : cancel ladder-deletion
      ta_crownking&tid=&uid=      : crown user as king of the hill
 */
@@ -139,6 +140,8 @@ $GLOBALS['ThePage'] = new Page('TournamentLadderAdmin');
 
    if ( $allow_admin && count($errors) == 0 )
    {
+      $allow_edit_user = ( $authorise_edit_user && !is_null($user) && !is_null($tladder_user) );
+
       if ( $is_delete && $authorise_seed && @$_REQUEST['confirm'] ) // confirm delete ladder
       {
          TournamentLadder::delete_ladder($tid);
@@ -167,7 +170,7 @@ $GLOBALS['ThePage'] = new Page('TournamentLadderAdmin');
          $sys_msg = urlencode( sprintf( T_('User [%s] added to ladder!'), $user->Handle) );
          jump_to("tournaments/ladder/admin.php?tid=$tid".URI_AMP."uid=$uid".URI_AMP."sysmsg=$sys_msg");
       }
-      elseif ( @$_REQUEST['ta_wduser'] && $authorise_edit_user && !is_null($user) && !is_null($tladder_user) )
+      elseif ( @$_REQUEST['ta_wduser'] && $allow_edit_user )
       {
          ta_begin();
          {//HOT-section to withdraw user from ladder
@@ -178,7 +181,7 @@ $GLOBALS['ThePage'] = new Page('TournamentLadderAdmin');
          $sys_msg = urlencode( $act_msg );
          jump_to("tournaments/ladder/admin.php?tid=$tid".URI_AMP."uid=$uid".URI_AMP."sysmsg=$sys_msg");
       }
-      elseif ( @$_REQUEST['ta_revokewduser'] && $authorise_edit_user && !is_null($user) && !is_null($tladder_user) )
+      elseif ( @$_REQUEST['ta_revokewduser']  && $allow_edit_user )
       {
          ta_begin();
          {//HOT-section to revoke withdrawal of user from ladder
@@ -188,7 +191,13 @@ $GLOBALS['ThePage'] = new Page('TournamentLadderAdmin');
          $sys_msg = urlencode( T_('Withdrawal of user from ladder revoked!') );
          jump_to("tournaments/ladder/admin.php?tid=$tid".URI_AMP."uid=$uid".URI_AMP."sysmsg=$sys_msg");
       }
-      elseif ( @$_REQUEST['ta_deluser'] && $authorise_edit_user && !is_null($user) && !is_null($tladder_user) )
+      elseif ( @$_REQUEST['ta_toggle_timeout_loss'] && $allow_edit_user )
+      {
+         TournamentParticipant::update_participant_flags( $tid, $uid, TP_FLAG_TIMEOUT_LOSS, -1 );
+         $sys_msg = urlencode( T_('Toggled timeout-loss flag for tournament participant!') );
+         jump_to("tournaments/ladder/admin.php?tid=$tid".URI_AMP."uid=$uid".URI_AMP."sysmsg=$sys_msg");
+      }
+      elseif ( @$_REQUEST['ta_deluser'] && $allow_edit_user )
       {
          $reason = sprintf( T_('Tournament-Director (or admin) %s has removed the user.'), "<user $my_id>" );
          ta_begin();
@@ -205,8 +214,7 @@ $GLOBALS['ThePage'] = new Page('TournamentLadderAdmin');
          }
          ta_end();
       }
-      elseif ( @$_REQUEST['ta_crownking'] && $authorise_edit_user && !is_null($user) && !is_null($tladder_user)
-            && $tl_props->CrownKingHours == 0 )
+      elseif ( @$_REQUEST['ta_crownking'] && $allow_edit_user && $tl_props->CrownKingHours == 0 )
       {
          TournamentLadderHelper::process_tournament_ladder_crown_king( array(
                'tid'             => $tid,
@@ -248,7 +256,7 @@ $GLOBALS['ThePage'] = new Page('TournamentLadderAdmin');
             'TEXT', buildErrorListString( T_('There are some errors'), $errors ) ));
       $tform->add_empty_row();
    }
-   elseif ( $tourney->isFlagSet(TOURNEY_FLAG_LOCK_TDWORK) )
+   elseif ( $tdwork_locked )
    {
       $tform->add_row( array( 'HR' ));
       $tform->add_row( array(
@@ -341,7 +349,7 @@ $GLOBALS['ThePage'] = new Page('TournamentLadderAdmin');
    }
    if ( !$is_delete && !is_null($user) && $authorise_edit_user ) // valid user
    {
-      if ( is_null($tladder_user) )
+      if ( is_null($tladder_user) ) // new TP
       {
          if ( $authorise_add_user )
             add_form_edit_user( $tform, $user,
@@ -353,7 +361,7 @@ $GLOBALS['ThePage'] = new Page('TournamentLadderAdmin');
                   'CELL', 2, '',
                   'TEXT', T_('NOTE: Adding user only allowed for registered tournament participants.'), ));
       }
-      else
+      else // existing TP
       {
          if ( $tladder_user->Flags & TL_FLAG_HOLD_WITHDRAW )
          {
@@ -372,6 +380,15 @@ $GLOBALS['ThePage'] = new Page('TournamentLadderAdmin');
                   80, "<br>\n" ) );
          }
          $tform->add_empty_row();
+
+         if ( !is_null($tp) )
+         {
+            add_form_edit_user( $tform, $user,
+               'ta_toggle_timeout_loss', /*confirm*/false, T_('Toggle timeout-loss flag for user [%s]'),
+               T_('Timeout-loss flag of tournament participant')
+                  . sprintf( ': [%s]', ($tp->Flags & TP_FLAG_TIMEOUT_LOSS) ? 1 : 0 ) );
+            $tform->add_empty_row();
+         }
 
          add_form_edit_user( $tform, $user,
             'ta_deluser', /*confirm*/false, T_('Remove user [%s] from ladder'),

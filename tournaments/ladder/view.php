@@ -168,8 +168,8 @@ $GLOBALS['ThePage'] = new Page('TournamentLadderView');
       $ltable->set_default_sort( 1 );
       //$ltable->make_sort_images(); //obvious, so left away as it also take a bit of unneccessary table-width
 
-      $iterator = TournamentLadder::load_cache_tournament_ladder( 'Tournament.ladder_view', $tid, $need_tp_rating,
-         /*need-TP.Fin*/true, /*TP.Lastmove*/true, 0, /*idx*/true );
+      $iterator = TournamentLadder::load_cache_tournament_ladder( 'Tournament.ladder_view',
+         $tid, /*need-TP*/true, 0, /*idx*/true );
       $cnt_players = $iterator->getItemCount();
       $ltable->set_found_rows( $cnt_players );
       $ltable->set_rows_per_page( null ); // no navigating
@@ -330,7 +330,7 @@ $GLOBALS['ThePage'] = new Page('TournamentLadderView');
             $cnt_players, (int)@$arr_tg_counts[TG_STATUS_PLAY], (int)@$arr_tg_counts[TG_STATUS_SCORE] ), "<br>\n";
       }
 
-      if ( !is_null($tl_user) && !$admin_mode )
+      if ( !is_null($tl_user) && !$admin_mode ) // TP-info about myself
       {
          $ch_out_str = sprintf( T_('You have started %s of max. %s outgoing game challenges#T_ladder'),
                $tl_user->ChallengesOut, $tl_props->MaxChallenges ) . ': ';
@@ -342,6 +342,13 @@ $GLOBALS['ThePage'] = new Page('TournamentLadderView');
          else
             echo $ch_out_str . T_('Challenging allowed#T_ladder');
          echo ".<br>\n";
+
+         if ( $tl_user->TP_Flags & TP_FLAG_TIMEOUT_LOSS )
+         {
+            echo span('ImportantNote', T_('Timeout loss state#T_ladder'), '%s: '),
+               span('LadderWarn', T_('Challenge timeout lock#T_ladder') ),
+               "<br>\n";
+         }
 
          if ( !is_javascript_enabled() )
          {
@@ -453,6 +460,8 @@ function build_action_row_str( &$tladder, &$form, $is_mine, $rid, $run_games_str
 {
    global $base_path, $admin_mode, $play_locked, $allow_play, $allow_admin, $tl_user, $user_onhold_withdraw;
    $tid = $tladder->tid;
+   $init_withdraw = ($tladder->Flags & TL_FLAG_HOLD_WITHDRAW);
+   $timeout_loss = ($tladder->TP_Flags & TP_FLAG_TIMEOUT_LOSS);
 
    $row_str = '';
    if ( $admin_mode )
@@ -465,12 +474,11 @@ function build_action_row_str( &$tladder, &$form, $is_mine, $rid, $run_games_str
             anchor( $base_path."tournaments/ladder/admin.php?tid=$tid".URI_AMP."uid={$tladder->uid}",
                   image( $base_path.'images/edit.gif', 'E', '', 'class="Action InTextImage"' ), T_('Admin user') )
             . ' '
-            . $form->print_insert_radio_buttonsx( 'rid', array( $tladder->rid => '' ), ($rid == $tladder->rid) );
-         if ( $tladder->Flags & TL_FLAG_HOLD_WITHDRAW )
-            $row_str .= span('LadderWarn', 'HOLD[WD]', ' %s');
+            . $form->print_insert_radio_buttonsx( 'rid', array( $tladder->rid => '' ), ($rid == $tladder->rid) )
+            . build_admin_hold_flags( $init_withdraw, $timeout_loss );
       }
    }
-   elseif ( $is_mine )
+   elseif ( $is_mine ) // my own row-entry
    {
       $title = array();
       if ( $tladder->RatingPos > 0 )
@@ -481,29 +489,35 @@ function build_action_row_str( &$tladder, &$form, $is_mine, $rid, $run_games_str
    }
    elseif ( $allow_play )
    {
-      $init_withdraw = ($tladder->Flags & TL_FLAG_HOLD_WITHDRAW);
-      if ( is_null($tl_user) && $init_withdraw ) // ladder-observer
-         $row_str = span('LadderWarn', T_('Withdrawal initiated#T_ladder') );
+      if ( is_null($tl_user) ) // ladder-observer
+      {
+         if ( $init_withdraw )
+            $row_str = span('LadderWarn', T_('Withdrawal initiated#T_ladder') );
+         elseif ( $timeout_loss )
+            $row_str = span('LadderWarn', T_('Challenge timeout lock#T_ladder') );
+      }
       elseif ( $tladder->AllowChallenge )
       {
          if ( $play_locked )
             $row_str = span('LadderWarn', T_('Challenging locked#T_ladder') );
          elseif ( $init_withdraw )
             $row_str = span('LadderWarn', T_('Withdrawal initiated#T_ladder') );
-         elseif ( $user_onhold_withdraw )
+         elseif ( $timeout_loss )
+            $row_str = span('LadderWarn', T_('Challenge timeout lock#T_ladder') );
+         elseif ( $user_onhold_withdraw ) // OUT-challenges on-hold for myself
             $row_str = span('LadderWarn', T_('Challenging on-hold#T_ladder') );
-         elseif ( !is_null($tl_user) && $tl_user->MaxChallengedOut )
+         elseif ( $tl_user->MaxChallengedOut ) // max. OUT-challenges reached for myself
             $row_str = span('LadderWarn', T_('Challenging stalled#T_ladder') );
-         else
+         else // challenge allowed
             $row_str = sprintf( '[%s]',
                anchor( $base_path."tournaments/ladder/challenge.php?tid=$tid".URI_AMP."rid={$tladder->rid}",
                        T_('Challenge this user#T_ladder') ));
       }
-      elseif ( $init_withdraw )
+      elseif ( $init_withdraw ) // opponent withdrawal
          $row_str = span('LadderWarn', T_('Withdrawal initiated#T_ladder') );
-      elseif ( $tladder->MaxChallengedIn )
+      elseif ( $tladder->MaxChallengedIn ) // opponents max. IN-challenges reached
          $row_str = span('LadderInfo', sprintf( T_('Already in %s challenges#T_ladder'), $tladder->ChallengesIn ));
-      elseif ( $tladder->RematchWait >= 0 )
+      elseif ( $tladder->RematchWait >= 0 ) // rematch on opponent has to wait
       {
          if ( $tladder->RematchWait > 0 )
          {
@@ -514,8 +528,21 @@ function build_action_row_str( &$tladder, &$form, $is_mine, $rid, $run_games_str
             $time_str = T_('Rematch Wait due#T_ladder');
          $row_str = span('LadderInfo', $time_str);
       }
+      elseif ( $timeout_loss ) // opponent lost on timeout
+         $row_str = span('LadderWarn', T_('Challenge timeout lock#T_ladder') );
    }
 
    return $row_str;
 }//build_action_row_str
+
+function build_admin_hold_flags( $tl_hold_withdraw, $tp_hold_timeout )
+{
+   $out = '';
+   if ( $tl_hold_withdraw )
+      $out .= ',WD';
+   if ( $tp_hold_timeout )
+      $out .= ',TO';
+   return ($out) ? span('LadderWarn', ' HOLD['.substr($out,1).']') : '';
+}//build_admin_hold_flags
+
 ?>
