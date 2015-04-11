@@ -13,6 +13,10 @@ ChangeLog
 
 2015-04-11 jug
 
+   * tournaments/manage_tournament.php:
+   - bugfix: enforce showing 'Round'-column on tournament-participant-list from link
+     on manage-tournament-page
+
    * tournaments/include/tournament_participant.php (class TournamentParticipant, ~.__construct,
        ~.to_string, ~.build_result_info, ~.build_log_string, ~.fillEntityData, ~.new_from_row,
        ~.update_participant_flags_with_penalty),
@@ -33,8 +37,8 @@ ChangeLog
      tournaments/ladder/admin.php, tournaments/list_participants.php:
    - added timeout-handling for ladder-tournaments starting withdrawal on 100 timeout-received
      penalty-points reach a limit of 500
-	  - motivation: second step to discourage losing on timeouts but allowing a few timeouts 
-	    and a way to recover by playing
+     - motivation: second step to discourage losing on timeouts but allowing a few timeouts
+       and a way to recover by playing
      - added TournamentParticipant.PenaltyPoints increasing by 100 on losing on timeout,
        negative penalty-points are ignored
      - making a move decreases tournament-participants penalty-points by 1 point

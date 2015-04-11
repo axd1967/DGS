@@ -151,7 +151,8 @@ $GLOBALS['ThePage'] = new Page('TournamentManage');
                  SEP_SPACING,
                  make_menu_link( T_('Show tournament participants'), "tournaments/list_participants.php?tid=$tid" ),
                  ( $tourney->Rounds > 1 )
-                     ? ' (' . make_menu_link( T_('current round only#tourney'), "tournaments/list_participants.php?tid=$tid".URI_AMP."round=".$tourney->CurrentRound ) . ')'
+                     ? ' (' . make_menu_link( T_('current round only#tourney'),
+                              "tournaments/list_participants.php?tid=$tid".URI_AMP."round=".$tourney->CurrentRound.REQF_URL.'round' ) . ')'
                      : '',
                  subList( array( T_('Manage registration of users: invite user, approve or reject application, remove registration#t_mng'),
                                  T_('Change status, start-round, read message from user and answer with message#t_mng') )),
