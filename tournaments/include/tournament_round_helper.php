@@ -78,7 +78,8 @@ class TournamentRoundHelper
             TournamentParticipant::update_game_end_stats( $tid, $tgame->Defender_rid, $tgame->Defender_uid, -$tgame->Score );
          }
 
-         $logmsg_timeout = TournamentHelper::update_timeout_loss_for_participant( $tgame );
+         list( $withdraw_tp, $logmsg_timeout ) =
+            TournamentHelper::handle_timeout_loss_for_participant( $tgame, 0, 0 ); // no penalty
 
          TournamentLogHelper::log_tournament_round_robin_game_end( $tid,
             sprintf('Game End(game %s) Round_ID[%s] Pool[%s]: user_role:rid/uid Challenger:%s/%s vs Defender:%s/%s; T-Game(%s): Status=[%s], Flags=[%s], Score=[%s]',

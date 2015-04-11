@@ -295,20 +295,31 @@ class TournamentHelper
    }
 
    /*!
-    * \brief Sets timeout-loss flag for tournament-participant from given TournamentGames-object.
-    * \return tournament-log-message, or '' if nothing changed
+    * \brief Sets timeout-loss flag and increase TP.PenaltyPoints by given amount for tournament-participant
+    *       from given TournamentGames-object.
+    * \return arr( TournamentParticipant-object, tournament-log-message ) with 1st arg set if penalty-limit reached
+    *       and withdraw should be started for returned TP-obj; or arr(null, '') if nothing to change
     */
-   public static function update_timeout_loss_for_participant( $tgame )
+   public static function handle_timeout_loss_for_participant( $tgame, $penalty_timeout, $penalty_limit )
    {
+      $withdraw_tp = null;
       $msg = '';
       if ( abs($tgame->Score) == SCORE_TIME )
       {
          $loser_uid = ( $tgame->Score < 0 ) ? $tgame->Defender_uid : $tgame->Challenger_uid;
-         TournamentParticipant::update_participant_flags( $tgame->tid, $loser_uid, TP_FLAG_TIMEOUT_LOSS, /*set*/true );
-         $msg = "; set Timeout-Loss[$loser_uid]";
+         TournamentParticipant::update_participant_flags_with_penalty( $tgame->tid, $loser_uid, TP_FLAG_TIMEOUT_LOSS,
+            /*set*/true, $penalty_timeout );
+         $msg = "; set Timeout-Loss[$loser_uid], +$penalty_timeout penalty";
+
+         if ( $penalty_limit > 0 )
+         {
+            $tp = TournamentParticipant::load_tournament_participant( $tgame->tid, $loser_uid );
+            if ( $tp && $tp->PenaltyPoints > $penalty_limit )
+               $withdraw_tp = $tp;
+         }
       }
-      return $msg;
-   }
+      return array( $withdraw_tp, $msg );
+   }//handle_timeout_loss_for_participant
 
 } // end of 'TournamentHelper'
 

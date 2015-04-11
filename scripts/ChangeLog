@@ -11,6 +11,41 @@ Release [2014-07-30] - DGS 1.0.18 - tag [release-1_0_18-20140730] on (later) bra
 ChangeLog
 ------------------------------------------------------------------
 
+2015-04-11 jug
+
+   * tournaments/include/tournament_participant.php (class TournamentParticipant, ~.__construct,
+       ~.to_string, ~.build_result_info, ~.build_log_string, ~.fillEntityData, ~.new_from_row,
+       ~.update_participant_flags_with_penalty),
+     tournaments/include/tournament_ladder.php (class TournamentLadder, ~.schedule_withdrawal_from_ladder,
+       ~.start_withdrawal_from_ladder, ~._update_ladder_set_withdraw_flag, ~.new_from_row,
+       ~.load_cache_tournament_ladder),
+     tournaments/include/tournament_ladder_helper.php (TournamentLadderHelper.process_tournament_ladder_game_end,
+       ~.process_tournament_ladder_timeout),
+     tournaments/include/tournament_log_helper.php (TournamentLogHelper.log_start_withdraw_user_from_tournament_ladder),
+     tournaments/include/tournament_round_helper.php (TournamentRoundHelper.process_tournament_round_robin_game_end),
+     tournaments/include/tournament_helper.php (TournamentHelper.handle_timeout_loss_for_participant),
+     tournaments/include/tournament_ladder_props.php (TournamentLadderProps.build_notes_props),
+     tournaments/include/tournament_globals.php (TP_PENALTY_TIMEOUT, TP_PENALTY_LIMIT),
+     include/game_actions.php (GameActionHelper.update_game),
+     scripts/updates/1.19/database_changes.mysql, scripts/updates/1.19/other_changes.txt,
+     specs/db/dragon-ddl.sql, specs/db/table-Tournaments.txt,
+     tournaments/ladder/view.php (echo_timeout_info),
+     tournaments/ladder/admin.php, tournaments/list_participants.php:
+   - added timeout-handling for ladder-tournaments starting withdrawal on 100 timeout-received
+     penalty-points reach a limit of 500
+	  - motivation: second step to discourage losing on timeouts but allowing a few timeouts 
+	    and a way to recover by playing
+     - added TournamentParticipant.PenaltyPoints increasing by 100 on losing on timeout,
+       negative penalty-points are ignored
+     - making a move decreases tournament-participants penalty-points by 1 point
+     - ladder-view: extended timeout-information with own penalty-points and penalty-limit for withdrawal
+     - tournament-participant-list: added column for tournament-directors only with penalty-points
+-----------
+-- added timeout-handling based on penalty-points
+ALTER TABLE TournamentParticipant
+   ADD PenaltyPoints mediumint NOT NULL default '0' AFTER Lost ;
+-----------
+
 2015-04-07 jug
 
    * tournaments/include/tournament_ladder.php (class TournamentLadder, ~.new_from_row,

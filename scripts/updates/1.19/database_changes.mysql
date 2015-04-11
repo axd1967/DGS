@@ -73,3 +73,8 @@ ALTER TABLE TournamentLadder
    ADD Flags tinyint unsigned NOT NULL default '0' AFTER uid ;
 
 
+-- added timeout-handling based on penalty-points
+ALTER TABLE TournamentParticipant
+   ADD PenaltyPoints mediumint NOT NULL default '0' AFTER Lost ;
+
+

@@ -23,7 +23,7 @@ copy /25/wms.gif
 # - TournamentPool
 
 -----------
-# adjust english translation for 'Tournament last move#header', '%#T_header', '%#TL_header'
+# adjust english translation for 'Tournament last move#header', '%#T_header', '%#TL_header', 'Penalty-Points#header'
 
 -----------
 // added images

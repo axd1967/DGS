@@ -157,27 +157,28 @@ Description:
 Description:
    list with TPs of tournament and user-specific tournament data
 
-| Field        | Type                              | Null | Key | Default             | Extra          |
-+--------------+-----------------------------------+------+-----+---------------------+----------------+
-| ID           | int(11)                           | NO   | PRI | NULL                | auto_increment |
-| tid          | int(11)                           | NO   | MUL | NULL                |                |
-| uid          | int(11)                           | NO   | MUL | NULL                |                |
-| Status       | enum('APPLY','REGISTER','INVITE') | NO   |     | APPLY               |                |
-| Flags        | smallint(5) unsigned              | NO   |     | 0                   |                |
-| Rating       | double                            | NO   |     | -9999               |                |
-| StartRound   | tinyint(3) unsigned               | NO   |     | 1                   |                |
-| NextRound    | tinyint(3) unsigned               | NO   |     | 0                   |                |
-| Created      | datetime                          | NO   |     | 0000-00-00 00:00:00 |                |
-| Lastchanged  | datetime                          | NO   |     | 0000-00-00 00:00:00 |                |
-| ChangedBy    | varchar(54)                       | NO   |     |                     |                |
-| Comment      | varchar(60)                       | NO   |     |                     |                |
-| Notes        | text                              | NO   |     | NULL                |                |
-| UserMessage  | text                              | NO   |     | NULL                |                |
-| AdminMessage | text                              | NO   |     | NULL                |                |
-| Finished     | mediumint(8) unsigned             | NO   |     | 0                   |                |
-| Won          | mediumint(8) unsigned             | NO   |     | 0                   |                |
-| Lost         | mediumint(8) unsigned             | NO   |     | 0                   |                |
-| Lastmoved    | datetime                          | NO   |     | 0000-00-00 00:00:00 |                |
+| Field         | Type                              | Null | Key | Default             | Extra          |
++---------------+-----------------------------------+------+-----+---------------------+----------------+
+| ID            | int(11)                           | NO   | PRI | NULL                | auto_increment |
+| tid           | int(11)                           | NO   | MUL | NULL                |                |
+| uid           | int(11)                           | NO   | MUL | NULL                |                |
+| Status        | enum('APPLY','REGISTER','INVITE') | NO   |     | APPLY               |                |
+| Flags         | smallint(5) unsigned              | NO   |     | 0                   |                |
+| Rating        | double                            | NO   |     | -9999               |                |
+| StartRound    | tinyint(3) unsigned               | NO   |     | 1                   |                |
+| NextRound     | tinyint(3) unsigned               | NO   |     | 0                   |                |
+| Created       | datetime                          | NO   |     | 0000-00-00 00:00:00 |                |
+| Lastchanged   | datetime                          | NO   |     | 0000-00-00 00:00:00 |                |
+| ChangedBy     | varchar(54)                       | NO   |     |                     |                |
+| Comment       | varchar(60)                       | NO   |     |                     |                |
+| Notes         | text                              | NO   |     | NULL                |                |
+| UserMessage   | text                              | NO   |     | NULL                |                |
+| AdminMessage  | text                              | NO   |     | NULL                |                |
+| Finished      | mediumint(8) unsigned             | NO   |     | 0                   |                |
+| Won           | mediumint(8) unsigned             | NO   |     | 0                   |                |
+| Lost          | mediumint(8) unsigned             | NO   |     | 0                   |                |
+| PenaltyPoints | mediumint(9)                      | NO   |     | 0                   |                |
+| Lastmoved     | datetime                          | NO   |     | 0000-00-00 00:00:00 |                |
 
 
 ## Fields:
@@ -266,6 +267,10 @@ Description:
    - Finished: annulled (=detached) tournament-games are not counted,
      other games including no-results games are counting
    - Won, Lost: jigo and no-result games are not counted as won or lost
+
+* PenaltyPoints : points
+   - increase and decrease on tournament-specific configurations and trigger action on configured threshold
+   - default 0, negative points allowed
 
 * Lastmoved : date of last moved
    - 0 = not moved yet

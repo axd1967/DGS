@@ -127,6 +127,9 @@ define('TP_FLAG_TIMEOUT_LOSS',   0x0100); // indicates TP lost on timeout
 
 define('TP_MAX_COUNT', 32000); //actually 32767 is max limit of signed int from DB-table, but 32K makes a rounder number
 
+define('TP_PENALTY_TIMEOUT', 100);
+define('TP_PENALTY_LIMIT', 500);
+
 // ---------- Tournament Games Stuff ------------------------------
 
 define('TG_STATUS_INIT',   'INIT');

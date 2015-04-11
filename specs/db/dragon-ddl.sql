@@ -1226,6 +1226,7 @@ CREATE TABLE IF NOT EXISTS `TournamentParticipant` (
   `Finished` mediumint(8) unsigned NOT NULL default '0',
   `Won` mediumint(8) unsigned NOT NULL default '0',
   `Lost` mediumint(8) unsigned NOT NULL default '0',
+  `PenaltyPoints` mediumint(9) NOT NULL default '0',
   `Lastmoved` datetime NOT NULL default '0000-00-00 00:00:00',
   PRIMARY KEY  (`ID`),
   KEY `uid` (`uid`),

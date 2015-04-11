@@ -193,8 +193,8 @@ $GLOBALS['ThePage'] = new Page('TournamentLadderAdmin');
       }
       elseif ( @$_REQUEST['ta_toggle_timeout_loss'] && $allow_edit_user )
       {
-         TournamentParticipant::update_participant_flags( $tid, $uid, TP_FLAG_TIMEOUT_LOSS, -1 );
-         $sys_msg = urlencode( T_('Toggled timeout-loss flag for tournament participant!') );
+         TournamentParticipant::update_participant_flags_with_penalty( $tid, $uid, TP_FLAG_TIMEOUT_LOSS, -1 );
+         $sys_msg = urlencode( T_('Toggled timeout-loss flag for tournament participant (without penalty)!') );
          jump_to("tournaments/ladder/admin.php?tid=$tid".URI_AMP."uid=$uid".URI_AMP."sysmsg=$sys_msg");
       }
       elseif ( @$_REQUEST['ta_deluser'] && $allow_edit_user )
@@ -386,7 +386,10 @@ $GLOBALS['ThePage'] = new Page('TournamentLadderAdmin');
             add_form_edit_user( $tform, $user,
                'ta_toggle_timeout_loss', /*confirm*/false, T_('Toggle timeout-loss flag for user [%s]'),
                T_('Timeout-loss flag of tournament participant')
-                  . sprintf( ': [%s]', ($tp->Flags & TP_FLAG_TIMEOUT_LOSS) ? 1 : 0 ) );
+                  . sprintf( ': [%s], PenaltyPoints [%s]',
+                     ($tp->Flags & TP_FLAG_TIMEOUT_LOSS) ? 1 : 0, $tp->PenaltyPoints ),
+               /*notify*/0,
+               T_('Tournament participants penalty points will not be changed.') );
             $tform->add_empty_row();
          }
 

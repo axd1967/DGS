@@ -674,13 +674,14 @@ class GameActionHelper
          $this->notify_opponent = true;
 
 
-      // Update TournamentParticipant.Lastmoved
+      // Update TournamentParticipant-fields
       if ( ALLOW_TOURNAMENTS && $tid > 0 )
       {
-         // change tournament-participant: set last-moved, reset timeout-loss-flag on own move-action
+         // set last-moved, reset timeout-loss-flag on own move-action, decrease PenaltyPoints
          db_query( "$dbgmsg.upd_tp.lastmoved($tid,{$this->my_id})",
             "UPDATE TournamentParticipant SET Lastmoved=FROM_UNIXTIME($NOW), Flags=Flags & ~" .TP_FLAG_TIMEOUT_LOSS .
-            " WHERE tid=$tid AND Status='".TP_STATUS_REGISTER."' AND uid={$this->my_id} LIMIT 1" );
+               ", PenaltyPoints=PenaltyPoints-1 " .
+            "WHERE tid=$tid AND Status='".TP_STATUS_REGISTER."' AND uid={$this->my_id} LIMIT 1" );
       }
 
       // Increase moves and activity

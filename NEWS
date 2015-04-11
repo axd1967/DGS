@@ -39,6 +39,11 @@ Copyright (C) 2001-2015  Erik Ouchterlony, Jens-Uwe Gaspar
          * ladder-view: "<i>Challenge timeout lock</i>" = challenging by other ladder-user not allowed due to timeout-loss
          * ladder-admin (for tournament-director): added toggle on timeout-loss flag for ladder-user
 
+      * Added timeout-handling initiating withdrawal on reaching a certain limit of penalty points
+         * Penalty points are increased a lot on a loss by timeout and decreased by one playing in tournament games
+         * ladder-view: show own penalty points and limit for auto-withdrawing
+         * tournament-participant-list (for tournament-director): added column with penalty-points
+
       * Added column on tournament-ladder-view with theoretical ladder-rank if sorted by user rating
 
       * Allow tournament-game annulling by tournament-directors only for ladder-tournament-types

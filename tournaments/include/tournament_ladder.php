@@ -81,6 +81,8 @@ class TournamentLadder
 
    /*! \brief copy of TournamentParticipant.Flags (not always set) */
    public $TP_Flags = 0;
+   /*! \brief copy of TournamentParticipant.PenaltyPoints (not always set) */
+   public $TP_PenaltyPoints = 0;
 
    /*! \brief true if challenge allowed on this user, also if max. outgoing challenges reached. */
    public $AllowChallenge = false;
@@ -377,6 +379,7 @@ class TournamentLadder
       return $result;
    }//update_seq_wins
 
+
    /*!
     * \brief Schedules withdrawal request for user from ladder with given tournament tid.
     *     User removed immeditately, if all tournament games are finished and processed.
@@ -392,9 +395,7 @@ class TournamentLadder
       $count_run_tg = TournamentGames::count_user_running_games( $this->tid, $this->rid );
       if ( $count_run_tg > 0 )
       {
-         $result = db_query( "$xdbgmsg.set.hold_wd",
-            "UPDATE TournamentLadder SET Flags=Flags | " . TL_FLAG_HOLD_WITHDRAW .
-            " WHERE tid={$this->tid} AND rid={$this->rid} LIMIT 1" );
+         $this->_update_ladder_set_withdraw_flag( $xdbgmsg );
 
          self::delete_cache_tournament_ladder( $xdbgmsg, $this->tid );
          TournamentLogHelper::log_withdraw_user_from_tournament_ladder( $this->tid, $tlog_type, $this, $count_run_tg );
@@ -412,6 +413,39 @@ class TournamentLadder
    }//schedule_withdrawal_from_ladder
 
    /*!
+    * \brief Withdraw user from ladder by setting TL_FLAG_HOLD_WITHDRAW-flag for this ladder-user,
+    *       if withdrawal not already initiated.
+    * \param $tlog_type TLOG_TYPE_...
+    * \return true = withdraw-flag set, false = nothing changed (according flag already set)
+    *
+    * \note IMPORTANT NOTE: expecting to run in HOT-section
+    * \note normally used by tournament-cron
+    */
+   public function start_withdrawal_from_ladder( $dbgmsg, $tlog_type )
+   {
+      if ( !($this->Flags & TL_FLAG_HOLD_WITHDRAW) )
+      {
+         $xdbgmsg = "$dbgmsg.TL.start_withdrawal_from_ladder({$this->tid},{$this->rid},{$this->uid})";
+
+         $this->_update_ladder_set_withdraw_flag( $xdbgmsg );
+
+         self::delete_cache_tournament_ladder( $xdbgmsg, $this->tid );
+         TournamentLogHelper::log_start_withdraw_user_from_tournament_ladder( $this->tid, $tlog_type, $this );
+         return true;
+      }
+      else
+         return false;
+   }//start_withdrawal_from_ladder
+
+   // \internal
+   private function _update_ladder_set_withdraw_flag( $dbgmsg )
+   {
+      return db_query( "$dbgmsg.set.hold_wd",
+         "UPDATE TournamentLadder SET Flags=Flags | " . TL_FLAG_HOLD_WITHDRAW .
+         " WHERE tid={$this->tid} AND rid={$this->rid} LIMIT 1" );
+   }
+
+   /*!
     * \brief Revokes initiated withdrawal (on-hold flag) for user from ladder with given tournament tid.
     * \param $tlog_type TLOG_TYPE_...
     *
@@ -421,7 +455,7 @@ class TournamentLadder
    {
       $xdbgmsg = "$dbgmsg.TL.revoke_withdrawal_from_ladder({$this->tid},{$this->rid},{$this->uid})";
 
-      $result = db_query( "$xdbgmsg.clear.hold_wd",
+      db_query( "$xdbgmsg.clear.hold_wd",
          "UPDATE TournamentLadder SET Flags=Flags & ~" . TL_FLAG_HOLD_WITHDRAW .
          " WHERE tid={$this->tid} AND rid={$this->rid} LIMIT 1" );
 
@@ -607,6 +641,7 @@ class TournamentLadder
             @$row['SeqWinsBest']
          );
       $tl->TP_Flags = (int)@$row['TP_Flags'];
+      $tl->TP_PenaltyPoints = (int)@$row['TP_PenaltyPoints'];
       return $tl;
    }
 
@@ -1447,7 +1482,8 @@ class TournamentLadder
             ));
          if ( $with_tp )
             $tl_iterator->addQuerySQLMerge( new QuerySQL(
-                  SQLP_FIELDS, 'TP.Flags AS TP_Flags', 'TP.Rating AS TP_Rating', 'TP.Finished AS TP_Finished',
+                  SQLP_FIELDS, 'TP.Flags AS TP_Flags', 'TP.PenaltyPoints AS TP_PenaltyPoints',
+                               'TP.Rating AS TP_Rating', 'TP.Finished AS TP_Finished',
                                'UNIX_TIMESTAMP(TP.Lastmoved) AS TP_X_Lastmoved',
                   SQLP_FROM,   'INNER JOIN TournamentParticipant AS TP ON TP.tid=TL.tid AND TP.ID=TL.rid'
                ));

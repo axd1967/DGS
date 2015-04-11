@@ -47,7 +47,7 @@ $ENTITY_TOURNAMENT_PARTICIPANT = new Entity( 'TournamentParticipant',
       FTYPE_PKEY, 'ID',
       FTYPE_AUTO, 'ID',
       FTYPE_CHBY,
-      FTYPE_INT,  'ID', 'tid', 'uid', 'Flags', 'StartRound', 'NextRound', 'Finished', 'Won', 'Lost',
+      FTYPE_INT,  'ID', 'tid', 'uid', 'Flags', 'StartRound', 'NextRound', 'Finished', 'Won', 'Lost', 'PenaltyPoints',
       FTYPE_FLOAT, 'Rating',
       FTYPE_TEXT, 'Comment', 'Notes', 'UserMessage', 'AdminMessage',
       FTYPE_DATE, 'Created', 'Lastchanged', 'Lastmoved',
@@ -76,6 +76,7 @@ class TournamentParticipant
    public $Finished;
    public $Won;
    public $Lost;
+   public $PenaltyPoints;
    public $Lastmoved;
 
    // non-DB fields
@@ -85,7 +86,8 @@ class TournamentParticipant
    /*! \brief Constructs TournamentParticipant-object with specified arguments. */
    public function __construct( $id=0, $tid=0, $uid=0, $user=NULL, $status=null, $flags=0,
          $rating=NULL, $start_round=1, $next_round=0, $created=0, $lastchanged=0, $changed_by='',
-         $comment='', $notes='', $user_message='', $admin_message='', $finished=0, $won=0, $lost=0, $lastmoved=0 )
+         $comment='', $notes='', $user_message='', $admin_message='', $finished=0, $won=0, $lost=0,
+         $penalty_points=0, $lastmoved=0 )
    {
       $this->ID = (int)$id;
       $this->tid = (int)$tid;
@@ -105,6 +107,7 @@ class TournamentParticipant
       $this->Finished = (int)$finished;
       $this->Won = (int)$won;
       $this->Lost = (int)$lost;
+      $this->PenaltyPoints = (int)$penalty_points;
       $this->Lastmoved = (int)$lastmoved;
       // non-DB fields
       $this->User = ($user instanceof User) ? $user : new User( $this->uid );
@@ -166,6 +169,7 @@ class TournamentParticipant
             . ", Finished=[{$this->Finished}]"
             . ", Won=[{$this->Won}]"
             . ", Lost=[{$this->Lost}]"
+            . ", PenaltyPoints=[{$this->PenaltyPoints}]"
             . ", Lastmoved=[{$this->Lastmoved}]"
          ;
    }
@@ -180,10 +184,10 @@ class TournamentParticipant
             T_('Tournament Participant') )
          . MINI_SPACING
          . span('bold', T_('Tournament Participant'), '%s: ')
-         . sprintf( T_("rid [%s], StartRound [%s], Finished [%s], Won [%s], Lost [%s],\n"
+         . sprintf( T_("rid [%s], StartRound [%s], Finished [%s], Won [%s], Lost [%s], PenaltyPoints [%s],\n"
                   . "Flags [%s]%s,\n"
                   . "Created [%s]#tourney"),
-               $this->ID, $this->StartRound, $this->Finished, $this->Won, $this->Lost,
+               $this->ID, $this->StartRound, $this->Finished, $this->Won, $this->Lost, $this->PenaltyPoints,
                self::getFlagsText($this->Flags), $rating_str,
                ($this->Created > 0 ? date(DATE_FMT, $this->Created) : '') );
    }
@@ -210,6 +214,7 @@ class TournamentParticipant
          $out[] = "AdmMsg=[{$this->AdminMessage}]";
       if ( $this->Finished + $this->Won + $this->Lost > 0 )
          $out[] = "Fin/Won/Lost=[{$this->Finished}/{$this->Won}/{$this->Lost}]";
+      $out[] = "PenaltyPoints=[{$this->PenaltyPoints}]";
       if ( $this->Lastmoved > 0 )
          $out[] = "Lastmoved=[".date(DATE_FMT, $this->Lastmoved)."]";
       return implode(', ', $out);
@@ -352,6 +357,7 @@ class TournamentParticipant
       $data->set_value( 'Finished', $this->Finished );
       $data->set_value( 'Won', $this->Won );
       $data->set_value( 'Lost', $this->Lost );
+      $data->set_value( 'PenaltyPoints', $this->PenaltyPoints );
       $data->set_value( 'Lastmoved', $this->Lastmoved );
       return $data;
    }
@@ -487,6 +493,7 @@ class TournamentParticipant
             @$row['Finished'],
             @$row['Won'],
             @$row['Lost'],
+            @$row['PenaltyPoints'],
             @$row['X_Lastmoved']
          );
       return $tp;
@@ -676,23 +683,30 @@ class TournamentParticipant
     * \brief Updates bitmask $flag in TP.Flags for given tournament and user-id.
     * \param $flag bitmask-value to set or clear
     * \param $flag_op true|>0 = set flag, false|0 = clear flag, <0 = toggle flag
+    * \param $penalty_add 0 = no change, otherwise add int-value to TP.PenaltyPoints;
+    *       if PP<0 and $penalty_add>0 reset TP.PenaltyPoints to $penalty_add
     */
-   public static function update_participant_flags( $tid, $uid, $flag, $flag_op )
+   public static function update_participant_flags_with_penalty( $tid, $uid, $flag, $flag_op, $penalty_add=0 )
    {
+      $dbgmsg = "TournamentParticipant:update_participant_flags_with_penalty";
       if ( !is_numeric($flag) || $flag <= 0 )
-         error('invalid_args', "TournamentParticipant:update_participant_flags.check.bad_flag($tid,$uid,$flag,$flag_op)");
+         error('invalid_args', "$dbgmsg.check.bad_flag($tid,$uid,$flag,$flag_op,$penalty_add)");
       $tid = (int)$tid;
       $uid = (int)$uid;
+      $penalty_add = (int)$penalty_add;
 
       $qval_flag = ( is_numeric($flag_op) && $flag_op < 0 )
          ? "^ $flag"
          : ( $flag_op ? "| $flag" : "& ~$flag" );
-      $result = db_query( "TournamentParticipant:update_participant_flags.upd($tid,$uid,$flag,$flag_op)",
-         "UPDATE TournamentParticipant SET Flags=Flags $qval_flag WHERE tid=$tid AND uid=$uid LIMIT 1" );
+      $result = db_query( "$dbgmsg.upd($tid,$uid,$flag,$flag_op,$penalty_add)",
+         "UPDATE TournamentParticipant " .
+         "SET Flags=Flags $qval_flag, " .
+            "PenaltyPoints=IF($penalty_add>0 AND PenaltyPoints<0,0,PenaltyPoints) + ($penalty_add) " .
+         "WHERE tid=$tid AND uid=$uid LIMIT 1" );
 
-      self::delete_cache_tournament_participant( 'TournamentParticipant:update_participant_flags', $tid, $uid );
+      self::delete_cache_tournament_participant( $dbgmsg, $tid, $uid );
       return $result;
-   }//update_participant_flags
+   }//update_participant_flags_with_penalty
 
    /*! \brief Updates Tournament.RegisteredTP if needed by comparing old/new TP-status. */
    public static function sync_tournament_registeredTP( $tid, $old_tp_status, $new_tp_status )

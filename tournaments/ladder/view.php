@@ -334,7 +334,6 @@ $GLOBALS['ThePage'] = new Page('TournamentLadderView');
       {
          $ch_out_str = sprintf( T_('You have started %s of max. %s outgoing game challenges#T_ladder'),
                $tl_user->ChallengesOut, $tl_props->MaxChallenges ) . ': ';
-
          if ( $user_onhold_withdraw )
             echo $ch_out_str . span('LadderWarn', T_('Challenging on-hold (due to initiated withdrawal)#T_ladder'));
          elseif ( $tl_user->MaxChallengedOut )
@@ -343,12 +342,7 @@ $GLOBALS['ThePage'] = new Page('TournamentLadderView');
             echo $ch_out_str . T_('Challenging allowed#T_ladder');
          echo ".<br>\n";
 
-         if ( $tl_user->TP_Flags & TP_FLAG_TIMEOUT_LOSS )
-         {
-            echo span('ImportantNote', T_('Timeout loss state#T_ladder'), '%s: '),
-               span('LadderWarn', T_('Challenge timeout lock#T_ladder') ),
-               "<br>\n";
-         }
+         echo_timeout_info( $tl_user );
 
          if ( !is_javascript_enabled() )
          {
@@ -544,5 +538,23 @@ function build_admin_hold_flags( $tl_hold_withdraw, $tp_hold_timeout )
       $out .= ',TO';
    return ($out) ? span('LadderWarn', ' HOLD['.substr($out,1).']') : '';
 }//build_admin_hold_flags
+
+function echo_timeout_info( $tladder )
+{
+   $out = array();
+   if ( TP_PENALTY_LIMIT > 0 && $tladder->TP_PenaltyPoints > 0 )
+   {
+      $out[] = T_('Penalty Points#tourney') . sprintf(' [%s] (%s)',
+            ($tladder->TP_PenaltyPoints > 0
+               ? span('darkred', $tladder->TP_PenaltyPoints)
+               : $tladder->TP_PenaltyPoints ),
+            sprintf( T_('Auto-withdraw on %s#T_ladder'), TP_PENALTY_LIMIT ) );
+   }
+   if ( $tladder->TP_Flags & TP_FLAG_TIMEOUT_LOSS )
+      $out[] = span('LadderWarn', T_('Challenge timeout lock#T_ladder') );
+
+   if ( count($out) )
+      echo span('EmphasizeInfo', T_('Timeout information#T_ladder'), '%s: '), join(', ', $out), "<br>\n";
+}//echo_timeout_info
 
 ?>

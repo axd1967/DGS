@@ -398,6 +398,15 @@ class TournamentLadderProps
                         self::getGameEndText(TGEND_NO_CHANGE) );
       $arr_props[] = $arr;
 
+      // timeout-handling
+      if ( TP_PENALTY_TIMEOUT > 0 && TP_PENALTY_LIMIT > 0 )
+      {
+         $arr_props[] = sprintf( T_("On each <b>timeout</b> the losing player will receive a <b>penalty</b> of %s points.\n" .
+               "The penalty points can be reduced by one with each own move played.\n" .
+               "If %s penalty points are reached, the user will be automatically withdrawn from the tournament.#T_ladder"),
+            TP_PENALTY_TIMEOUT, TP_PENALTY_LIMIT );
+      }
+
       // user-join-order
       $arr_props[] = self::getUserJoinOrderText($this->UserJoinOrder, /*short*/false);
 

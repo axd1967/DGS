@@ -116,7 +116,8 @@ class TournamentLadderHelper
          // track consecutive-wins for both players
          self::process_game_end_seq_wins( $tgame->ID, $tl_props->SeqWinsThreshold );
 
-         $logmsg_timeout = TournamentHelper::update_timeout_loss_for_participant( $tgame );
+         // process timeout-loss handling and potential withdrawal if reached penalty-points-limit
+         $logmsg_timeout = self::process_tournament_ladder_timeout( $tgame, TP_PENALTY_TIMEOUT, TP_PENALTY_LIMIT );
 
          TournamentLogHelper::log_tournament_ladder_game_end( $tid,
             sprintf('Game End(game %s): Users role:rid/uid:Rank %s:%s/%s:%d vs %s:%s/%s:%s; T-Game(%s): Status=[%s], Flags=[%s], Score=[%s] => Action %s',
@@ -132,6 +133,24 @@ class TournamentLadderHelper
 
       return $success;
    }//process_tournament_ladder_game_end
+
+   /*! \brief Process timeout-loss handling and potential withdrawal if reached penalty-points-limit. */
+   private static function process_tournament_ladder_timeout( $tgame, $penalty_timeout, $penalty_limit )
+   {
+      list( $withdraw_tp, $logmsg_timeout ) =
+         TournamentHelper::handle_timeout_loss_for_participant( $tgame, $penalty_timeout, $penalty_limit );
+      if ( !is_null($withdraw_tp) )
+      {
+         $withdraw_tl = TournamentLadder::load_tournament_ladder_by_user( $tgame->tid, 0, $withdraw_tp->ID );
+         if ( !is_null($withdraw_tl) )
+         {
+            if ( $withdraw_tl->start_withdrawal_from_ladder( 'TLH:process_tladder_timeout', TLOG_TYPE_CRON ) )
+               $logmsg_timeout .= " => withdraw started (PenaltyPoints=[{$withdraw_tp->PenaltyPoints}] > PenaltyLimit=[$penalty_limit])";
+         }
+      }
+
+      return $logmsg_timeout;
+   }//process_tournament_ladder_timeout
 
    /*!
     * \brief Tracks (increases or resets) consecutive-wins (TournamentLadder.SeqWins/SeqWinsBest)
