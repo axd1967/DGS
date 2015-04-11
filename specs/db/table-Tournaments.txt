@@ -598,6 +598,8 @@ Description:
 | GameEndJigo            | enum('NO_CHANGE','CH_ABOVE','CH_BELOW')                                        | NO   |     | CH_BELOW            |       |
 | GameEndTimeoutWin      | enum('NO_CHANGE','CH_ABOVE','CH_BELOW','SWITCH','DF_BELOW','DF_LAST','DF_DEL') | NO   |     | DF_BELOW            |       |
 | GameEndTimeoutLoss     | enum('NO_CHANGE','CH_LAST','CH_DEL')                                           | NO   |     | CH_LAST             |       |
+| PenaltyTimeout         | smallint(5) unsigned                                                           | NO   |     | 0                   |       |
+| PenaltyLimit           | smallint(5) unsigned                                                           | NO   |     | 0                   |       |
 | UserJoinOrder          | enum('REGTIME','RATING','RANDOM')                                              | NO   |     | REGTIME             |       |
 | UserAbsenceDays        | tinyint(3) unsigned                                                            | NO   | MUL | 0                   |       |
 | RankPeriodLength       | tinyint(3) unsigned                                                            | NO   |     | 1                   |       |
@@ -674,6 +676,16 @@ Description:
 * GameEndTimeoutLoss : handling of game-end when challengers loses by timeout (=defender wins by timeout)
    - default = CH_LAST
    - Enum-values: see tournaments/include/tournament_globals.php
+
+* PenaltyTimeout : penalty added for loss on timeout
+   - TournamentParticipant.PenaltyPoints is increased by this amount on loss by timeout
+   - value-range 0-1000
+   - 0 = disabled, then PenaltyLimit must be 0 as well
+
+* PenaltyLimit : penalty reaching limit starts certain actions
+   - for ladders: user is withdrawn for ladder, if TournamentParticipant.PenaltyPoints reach limit
+   - value-range 0-50000
+   - 0 = disabled, then PenaltyTimeout must be 0 as well
 
 * UserJoinOrder : determines position in ladder for newly joined user
    - REGTIME : add users in ladder-position ordered by register-time (new at bottom); default

@@ -55,7 +55,8 @@ $ENTITY_TOURNAMENT_LADDER_PROPS = new Entity( 'TournamentLadderProps',
       FTYPE_INT,  'tid', 'ChallengeRangeAbsolute', 'ChallengeRangeRelative', 'ChallengeRangeRating',
                   'ChallengeRematchWait',
                   'MaxDefenses', 'MaxDefenses1', 'MaxDefenses2', 'MaxDefensesStart1', 'MaxDefensesStart2',
-                  'MaxChallenges', 'UserAbsenceDays', 'RankPeriodLength', 'CrownKingHours', 'SeqWinsThreshold',
+                  'MaxChallenges', 'PenaltyTimeout', 'PenaltyLimit', 'UserAbsenceDays', 'RankPeriodLength',
+                  'CrownKingHours', 'SeqWinsThreshold',
       FTYPE_DATE, 'Lastchanged', 'CrownKingStart',
       FTYPE_ENUM, 'DetermineChallenger', 'GameEndNormal', 'GameEndJigo', 'GameEndTimeoutWin', 'GameEndTimeoutLoss',
                   'UserJoinOrder'
@@ -83,6 +84,8 @@ class TournamentLadderProps
    public $GameEndJigo;
    public $GameEndTimeoutWin;
    public $GameEndTimeoutLoss;
+   public $PenaltyTimeout;
+   public $PenaltyLimit;
    public $UserJoinOrder;
    public $UserAbsenceDays;
    public $RankPeriodLength;
@@ -98,7 +101,7 @@ class TournamentLadderProps
          $max_challenges=0, $determine_challenger=TLP_DETERMINE_CHALL_GEND,
          $game_end_normal=TGEND_CHALLENGER_ABOVE, $game_end_jigo=TGEND_CHALLENGER_BELOW,
          $game_end_timeout_win=TGEND_DEFENDER_BELOW, $game_end_timeout_loss=TGEND_CHALLENGER_LAST,
-         $user_join_order=TLP_JOINORDER_REGTIME,
+         $penalty_timeout=0, $penalty_limit=0, $user_join_order=TLP_JOINORDER_REGTIME,
          $user_absence_days=0, $rank_period_len=1, $crown_king_hours=0, $crown_king_start=0, $seq_wins_threshold=0 )
    {
       $this->tid = (int)$tid;
@@ -119,6 +122,8 @@ class TournamentLadderProps
       $this->setGameEndJigo($game_end_jigo);
       $this->setGameEndTimeoutWin($game_end_timeout_win);
       $this->setGameEndTimeoutLoss($game_end_timeout_loss);
+      $this->PenaltyTimeout = (int)$penalty_timeout;
+      $this->PenaltyLimit = (int)$penalty_limit;
       $this->setUserJoinOrder($user_join_order);
       $this->UserAbsenceDays = (int)$user_absence_days;
       $this->RankPeriodLength = limit( (int)$rank_period_len, 1, 255, 1 );
@@ -232,6 +237,8 @@ class TournamentLadderProps
       $data->set_value( 'GameEndJigo', $this->GameEndJigo );
       $data->set_value( 'GameEndTimeoutWin', $this->GameEndTimeoutWin );
       $data->set_value( 'GameEndTimeoutLoss', $this->GameEndTimeoutLoss );
+      $data->set_value( 'PenaltyTimeout', $this->PenaltyTimeout );
+      $data->set_value( 'PenaltyLimit', $this->PenaltyLimit );
       $data->set_value( 'UserJoinOrder', $this->UserJoinOrder );
       $data->set_value( 'UserAbsenceDays', $this->UserAbsenceDays );
       $data->set_value( 'RankPeriodLength', $this->RankPeriodLength );
@@ -284,6 +291,17 @@ class TournamentLadderProps
       if ( $this->MaxChallenges < 1 || $this->MaxChallenges > TLADDER_MAX_CHALLENGES )
          $errors[] = sprintf( T_('Max. outgoing challenges must be in range %s.#T_ladder'),
             build_range_text(1, TLADDER_MAX_CHALLENGES) );
+
+      if ( $this->PenaltyTimeout < 0 || $this->PenaltyTimeout > 1000 )
+         $errors[] = sprintf( T_('Expecting number for %s in range %s.'), T_('Penalty timeout#tourney'),
+            build_range_text(0, 1000) );
+      if ( $this->PenaltyLimit < 0 || $this->PenaltyLimit > 1000 )
+         $errors[] = sprintf( T_('Expecting number for %s in range %s.'), T_('Penalty limit#tourney'),
+            build_range_text(0, 50000) );
+      if ( ($this->PenaltyTimeout == 0 && $this->PenaltyLimit > 0) || ($this->PenaltyTimeout > 0 && $this->PenaltyLimit == 0) )
+         $errors[] = T_('Penalty timeout and limit must both be disabled or both be set.#tourney');
+      if ( $this->PenaltyTimeout > 0 && $this->PenaltyTimeout >= $this->PenaltyLimit )
+         $errors[] = T_('Penalty timeout must not be larger than penalty limit.#tourney');
 
       if ( $this->UserAbsenceDays < 0 || $this->UserAbsenceDays > 255 )
          $errors[] = sprintf( T_('User absence must be in range %s days.#T_ladder'),
@@ -399,12 +417,12 @@ class TournamentLadderProps
       $arr_props[] = $arr;
 
       // timeout-handling
-      if ( TP_PENALTY_TIMEOUT > 0 && TP_PENALTY_LIMIT > 0 )
+      if ( $this->PenaltyTimeout > 0 && $this->PenaltyLimit > 0 )
       {
          $arr_props[] = sprintf( T_("On each <b>timeout</b> the losing player will receive a <b>penalty</b> of %s points.\n" .
                "The penalty points can be reduced by one with each own move played.\n" .
                "If %s penalty points are reached, the user will be automatically withdrawn from the tournament.#T_ladder"),
-            TP_PENALTY_TIMEOUT, TP_PENALTY_LIMIT );
+            $this->PenaltyTimeout, $this->PenaltyLimit );
       }
 
       // user-join-order
@@ -753,6 +771,8 @@ class TournamentLadderProps
             @$row['GameEndJigo'],
             @$row['GameEndTimeoutWin'],
             @$row['GameEndTimeoutLoss'],
+            @$row['PenaltyTimeout'],
+            @$row['PenaltyLimit'],
             @$row['UserJoinOrder'],
             @$row['UserAbsenceDays'],
             @$row['RankPeriodLength'],

@@ -199,6 +199,16 @@ $GLOBALS['ThePage'] = new Page('TournamentLadderPropsEdit');
          'TEXT',        sprintf( '(%s)', T_('Jigo')), ));
    $tform->add_empty_row();
 
+   // penalty
+   $tform->add_row( array(
+         'DESCRIPTION', T_('Penalty timeout#tourney'),
+         'TEXTINPUT',   'penalty_timeout', 6, 6, $vars['penalty_timeout'],
+         'TEXT',        T_('penalty for losing by timeout#tourney'), ));
+   $tform->add_row( array(
+         'DESCRIPTION', T_('Penalty limit#tourney'),
+         'TEXTINPUT',   'penalty_limit', 6, 6, $vars['penalty_limit'], ));
+   $tform->add_empty_row();
+
    // user-join-order
    $tform->add_row( array(
          'DESCRIPTION', T_('User Join Order#T_ladder'),
@@ -302,6 +312,8 @@ function parse_edit_form( &$tlp, $t_limits )
       'gend_jigo'       => $tlp->GameEndJigo,
       'gend_timeout_w'  => $tlp->GameEndTimeoutWin,
       'gend_timeout_l'  => $tlp->GameEndTimeoutLoss,
+      'penalty_timeout' => $tlp->PenaltyTimeout,
+      'penalty_limit'   => $tlp->PenaltyLimit,
       'join_order'      => $tlp->UserJoinOrder,
       'uabs_days'       => $tlp->UserAbsenceDays,
       'rankplen'        => $tlp->RankPeriodLength,
@@ -426,6 +438,21 @@ function parse_edit_form( &$tlp, $t_limits )
             $t_limits->getLimitRangeText(TLIMITS_TL_MAX_CH) ); // check for general MAX, but show specific max
 
 
+      $new_value = $vars['penalty_timeout'];
+      if ( TournamentUtils::isNumberOrEmpty($new_value) )
+         $tlp->PenaltyTimeout = $new_value;
+      else
+         $errors[] = sprintf( T_('Expecting number for %s in range %s.'), T_('Penalty timeout#tourney'),
+            build_range_text(0, 1000) );
+
+      $new_value = $vars['penalty_limit'];
+      if ( TournamentUtils::isNumberOrEmpty($new_value) )
+         $tlp->PenaltyLimit = $new_value;
+      else
+         $errors[] = sprintf( T_('Expecting number for %s in range %s.'), T_('Penalty limit#tourney'),
+            build_range_text(0, 50000) );
+
+
       $new_value = $vars['uabs_days'];
       if ( TournamentUtils::isNumberOrEmpty($new_value) )
          $tlp->UserAbsenceDays = $new_value;
@@ -488,6 +515,8 @@ function parse_edit_form( &$tlp, $t_limits )
       if ( $old_vals['gend_timeout_w'] != $tlp->GameEndTimeoutWin ) $edits[] = T_('Game End');
       if ( $old_vals['gend_timeout_l'] != $tlp->GameEndTimeoutLoss ) $edits[] = T_('Game End');
       if ( $old_vals['gend_jigo'] != $tlp->GameEndJigo ) $edits[] = T_('Game End');
+      if ( $old_vals['penalty_timeout'] != $tlp->PenaltyTimeout ) $edits[] = T_('Penalty timeout#tourney');
+      if ( $old_vals['penalty_limit'] != $tlp->PenaltyLimit ) $edits[] = T_('Penalty limit#tourney');
       if ( $old_vals['join_order'] != $tlp->UserJoinOrder ) $edits[] = T_('User Join Order#T_ladder');
       if ( $old_vals['uabs_days'] != $tlp->UserAbsenceDays ) $edits[] = T_('User Absence#T_ladder');
       if ( $old_vals['rankplen'] != $tlp->RankPeriodLength ) $edits[] = T_('Rank Archiving Period length#T_ladder');

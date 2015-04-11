@@ -13,6 +13,24 @@ ChangeLog
 
 2015-04-11 jug
 
+   * tournaments/include/tournament_ladder_props.php (class TournamentLadderProps, ~.__construct,
+       ~.fillEntityData, ~.check_ladder_properties, ~.build_notes_props, ~.new_from_row),
+     tournaments/include/tournament_ladder_helper.php (TournamentLadderHelper.process_tournament_ladder_game_end),
+     tournaments/include/tournament_log_helper.php (TournamentLogHelper.log_change_tournament_ladder_props),
+     tournaments/include/tournament_globals.php,
+     scripts/updates/1.19/database_changes.mysql,
+     specs/db/table-Tournaments.txt, specs/db/dragon-ddl.sql,
+     tournaments/ladder/edit_props.php (parse_edit_form),
+     tournaments/ladder/view.php (echo_timeout_info),
+     tournaments/manage_tournament.php (make_links_ttype_specific):
+   - added ladder-properties to configure penalty timeout and limit
+-----------
+-- added configuration for penalty timeout and limit
+ALTER TABLE TournamentLadderProps
+   ADD PenaltyTimeout smallint unsigned NOT NULL default '0' AFTER GameEndTimeoutLoss,
+   ADD PenaltyLimit smallint unsigned NOT NULL default '0' AFTER PenaltyTimeout ;
+-----------
+
    * tournaments/manage_tournament.php:
    - bugfix: enforce showing 'Round'-column on tournament-participant-list from link
      on manage-tournament-page

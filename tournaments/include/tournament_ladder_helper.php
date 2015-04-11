@@ -117,7 +117,7 @@ class TournamentLadderHelper
          self::process_game_end_seq_wins( $tgame->ID, $tl_props->SeqWinsThreshold );
 
          // process timeout-loss handling and potential withdrawal if reached penalty-points-limit
-         $logmsg_timeout = self::process_tournament_ladder_timeout( $tgame, TP_PENALTY_TIMEOUT, TP_PENALTY_LIMIT );
+         $logmsg_timeout = self::process_tournament_ladder_timeout( $tgame, $tl_props->PenaltyTimeout, $tl_props->PenaltyLimit );
 
          TournamentLogHelper::log_tournament_ladder_game_end( $tid,
             sprintf('Game End(game %s): Users role:rid/uid:Rank %s:%s/%s:%d vs %s:%s/%s:%s; T-Game(%s): Status=[%s], Flags=[%s], Score=[%s] => Action %s',

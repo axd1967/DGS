@@ -368,6 +368,10 @@ class TournamentLogHelper
          $msg[] = sprintf(self::$DIFF_FMT, 'GameEndTimeoutWin', $old_tlp->GameEndTimeoutWin, $new_tlp->GameEndTimeoutWin );
       if ( $old_tlp->GameEndTimeoutLoss != $new_tlp->GameEndTimeoutLoss )
          $msg[] = sprintf(self::$DIFF_FMT, 'GameEndTimeoutLoss', $old_tlp->GameEndTimeoutLoss, $new_tlp->GameEndTimeoutLoss );
+      if ( $old_tlp->PenaltyTimeout != $new_tlp->PenaltyTimeout )
+         $msg[] = sprintf(self::$DIFF_FMT, 'PenaltyTimeout', $old_tlp->PenaltyTimeout, $new_tlp->PenaltyTimeout );
+      if ( $old_tlp->PenaltyLimit != $new_tlp->PenaltyLimit )
+         $msg[] = sprintf(self::$DIFF_FMT, 'PenaltyLimit', $old_tlp->PenaltyLimit, $new_tlp->PenaltyLimit );
       if ( $old_tlp->UserJoinOrder != $new_tlp->UserJoinOrder )
          $msg[] = sprintf(self::$DIFF_FMT, 'UserJoinOrder', $old_tlp->UserJoinOrder, $new_tlp->UserJoinOrder );
       if ( $old_tlp->UserAbsenceDays != $new_tlp->UserAbsenceDays )

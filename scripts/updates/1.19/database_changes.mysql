@@ -78,3 +78,9 @@ ALTER TABLE TournamentParticipant
    ADD PenaltyPoints mediumint NOT NULL default '0' AFTER Lost ;
 
 
+-- added configuration for penalty timeout and limit
+ALTER TABLE TournamentLadderProps
+   ADD PenaltyTimeout smallint unsigned NOT NULL default '0' AFTER GameEndTimeoutLoss,
+   ADD PenaltyLimit smallint unsigned NOT NULL default '0' AFTER PenaltyTimeout ;
+
+
