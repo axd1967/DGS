@@ -430,7 +430,7 @@ class TournamentLadderProps
 
       // user absence handling
       if ( $this->UserAbsenceDays > 0 )
-         $arr_props[] = sprintf( T_("The user will be removed from the ladder, if player hasn't accessed DGS\n"
+         $arr_props[] = sprintf( T_("The user will be withdrawn from the ladder, if player hasn't accessed the server\n"
             . 'within the last %d days (excluding vacation).'), $this->UserAbsenceDays );
 
       $arr_props[] = T_('On user removal from the ladder (by game-end action or by tournament-director)') . ":\n"

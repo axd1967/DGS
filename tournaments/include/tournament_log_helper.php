@@ -425,10 +425,10 @@ class TournamentLogHelper
       $tlog->insert();
    }
 
-   public static function log_start_withdraw_user_from_tournament_ladder( $tid, $tlog_type, $tladder )
+   public static function log_start_withdraw_user_from_tournament_ladder( $tid, $tlog_type, $tladder, $cause )
    {
       $tlog = new Tournamentlog( 0, $tid, 0, 0, $tlog_type, 'TL_User', TLOG_ACT_CHANGE, $tladder->uid,
-         "Ladder-Withdrawal started: for User: " . $tladder->build_log_string() );
+         "Ladder-Withdrawal started ($cause): for User: " . $tladder->build_log_string() );
       $tlog->insert();
    }
 

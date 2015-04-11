@@ -221,7 +221,7 @@ $GLOBALS['ThePage'] = new Page('TournamentLadderPropsEdit');
    $tform->add_row( array(
          'DESCRIPTION', T_('User Absence handling#T_ladder'),
          'TEXTINPUT',   'uabs_days', 4, 4, $vars['uabs_days'],
-         'TEXT',        T_('[days] user can be absent without being removed from ladder'), ));
+         'TEXT',        T_('[days] user can be absent without being withdrawn from ladder'), ));
    $tform->add_empty_row();
 
    // rank-archiving-period

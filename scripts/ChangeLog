@@ -13,6 +13,16 @@ ChangeLog
 
 2015-04-11 jug
 
+   * tournaments/include/tournament_log_helper.php (TournamentLogHelper.log_start_withdraw_user_from_tournament_ladder),
+     tournaments/include/tournament_ladder.php (TournamentLadder.start_withdrawal_from_ladder,
+       ~.process_user_absence),
+     tournaments/include/tournament_ladder_helper.php (TournamentLadderHelper.process_tournament_ladder_game_end),
+     tournaments/include/tournament_ladder_props.php (TournamentLadderProps.build_notes_props),
+     specs/db/table-Tournaments.txt,
+     tournaments/ladder/edit_props.php:
+   - replaced user-removal with user-withdrawal from ladder-tournament,
+     if user too long absent from server
+
    * tournaments/include/tournament_ladder_props.php (class TournamentLadderProps, ~.__construct,
        ~.fillEntityData, ~.check_ladder_properties, ~.build_notes_props, ~.new_from_row),
      tournaments/include/tournament_ladder_helper.php (TournamentLadderHelper.process_tournament_ladder_game_end),

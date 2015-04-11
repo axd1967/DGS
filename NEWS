@@ -45,6 +45,8 @@ Copyright (C) 2001-2015  Erik Ouchterlony, Jens-Uwe Gaspar
          * ladder-view: show own penalty points and limit for auto-withdrawing
          * tournament-participant-list (for tournament-director): added column with penalty-points
 
+      * Replaced user-removal with user-withdrawal from ladder-tournament, if user too long absent from server
+
       * Added column on tournament-ladder-view with theoretical ladder-rank if sorted by user rating
 
       * Allow tournament-game annulling by tournament-directors only for ladder-tournament-types

@@ -144,7 +144,7 @@ class TournamentLadderHelper
          $withdraw_tl = TournamentLadder::load_tournament_ladder_by_user( $tgame->tid, 0, $withdraw_tp->ID );
          if ( !is_null($withdraw_tl) )
          {
-            if ( $withdraw_tl->start_withdrawal_from_ladder( 'TLH:process_tladder_timeout', TLOG_TYPE_CRON ) )
+            if ( $withdraw_tl->start_withdrawal_from_ladder( 'TLH:process_tladder_timeout', TLOG_TYPE_CRON, 'Timeout' ) )
                $logmsg_timeout .= " => withdraw started (PenaltyPoints=[{$withdraw_tp->PenaltyPoints}] > PenaltyLimit=[$penalty_limit])";
          }
       }

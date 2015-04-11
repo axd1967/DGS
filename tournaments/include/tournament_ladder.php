@@ -382,7 +382,7 @@ class TournamentLadder
 
    /*!
     * \brief Schedules withdrawal request for user from ladder with given tournament tid.
-    *     User removed immeditately, if all tournament games are finished and processed.
+    *     User removed immediately, if all tournament games are finished and processed.
     * \param $tlog_type TLOG_TYPE_...
     * \return success message text
     *
@@ -416,21 +416,22 @@ class TournamentLadder
     * \brief Withdraw user from ladder by setting TL_FLAG_HOLD_WITHDRAW-flag for this ladder-user,
     *       if withdrawal not already initiated.
     * \param $tlog_type TLOG_TYPE_...
+    * \param $cause cause logged into Tournament-log
     * \return true = withdraw-flag set, false = nothing changed (according flag already set)
     *
     * \note IMPORTANT NOTE: expecting to run in HOT-section
     * \note normally used by tournament-cron
     */
-   public function start_withdrawal_from_ladder( $dbgmsg, $tlog_type )
+   public function start_withdrawal_from_ladder( $dbgmsg, $tlog_type, $cause )
    {
       if ( !($this->Flags & TL_FLAG_HOLD_WITHDRAW) )
       {
-         $xdbgmsg = "$dbgmsg.TL.start_withdrawal_from_ladder({$this->tid},{$this->rid},{$this->uid})";
+         $xdbgmsg = "$dbgmsg.TL.start_withdrawal_from_ladder({$this->tid},{$this->rid},{$this->uid},$cause)";
 
          $this->_update_ladder_set_withdraw_flag( $xdbgmsg );
 
          self::delete_cache_tournament_ladder( $xdbgmsg, $this->tid );
-         TournamentLogHelper::log_start_withdraw_user_from_tournament_ladder( $this->tid, $tlog_type, $this );
+         TournamentLogHelper::log_start_withdraw_user_from_tournament_ladder( $this->tid, $tlog_type, $this, $cause );
          return true;
       }
       else
@@ -1353,7 +1354,7 @@ class TournamentLadder
    }//notify_user_removal
 
    /*!
-    * \brief Processes long absence of user not being online by removing user from ladder.
+    * \brief Processes long absence of user not being online by withdrawing user from ladder.
     * \note IMPORTANT NOTE: expecting to run in HOT-section
     * \note only called by CRON! (for tournament-logging)
     */
@@ -1364,15 +1365,9 @@ class TournamentLadder
       if ( is_null($tladder) )
          return true;
 
-      // remove user from ladder
-      $reason = sprintf( T_('The system has removed the user from the tournament due to inactivity for more than %s days as defined in the ladder-configurations.'),
-                         $user_abs_days );
-      $success = $tladder->remove_user_from_ladder( "TournamentLadder:process_user_absence($tid,$uid,$user_abs_days)",
-         TLOG_TYPE_CRON, 'User-Absence', /*upd-rank*/true, $uid, '', /*nfy-user*/true, $reason );
-      $logmsg = "U.Rank={$tladder->Rank}>DEL";
-
-      if ( DBG_QUERY )
-         error_log("TournamentLadder:process_user_absence($tid,$uid,$user_abs_days): $logmsg");
+      // withdraw user from ladder
+      $success = $tladder->start_withdrawal_from_ladder( "TournamentLadder:process_user_absence($tid,$uid,$user_abs_days)",
+         TLOG_TYPE_CRON, "User-Absence[{$user_abs_days}]" );
 
       return $success;
    }//process_user_absence
