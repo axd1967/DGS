@@ -11,6 +11,8 @@ Release [2014-07-30] - DGS 1.0.18 - tag [release-1_0_18-20140730] on (later) bra
 ChangeLog
 ------------------------------------------------------------------
 
+### ----- release-1_19_6-20150412 -----
+
 2015-04-11 jug
 
    * tournaments/include/tournament_log_helper.php (TournamentLogHelper.log_start_withdraw_user_from_tournament_ladder),
