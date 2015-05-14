@@ -523,9 +523,16 @@ class Table
     */
    public function add_row_one_col( $col_arr_text, $row_arr_attr=null )
    {
-      reset($this->Tableheads);
-      $first_col = each($this->Tableheads);
-      $first_col = $first_col['value']['Nr'];
+      // find first non-hidden column to add column
+      $first_col = 0;
+      foreach ( $this->Tableheads as $nr => $arr )
+      {
+         if ( $this->Is_Column_Displayed[$nr] )
+         {
+            $first_col = $nr;
+            break;
+         }
+      }
 
       $col_arr = ( is_array($col_arr_text) ) ? $col_arr_text : array( 'text' => $col_arr_text );
       if ( !isset($col_arr['attbs']) )
