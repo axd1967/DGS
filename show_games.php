@@ -510,7 +510,7 @@ $GLOBALS['ThePage'] = new Page('GamesList');
       {
          $gtable->add_tablehead( 3, new TableHead( T_('Opponent name#header'), T_('Opponent name')), 'User', 0, 'oppName+');
          $gtable->add_tablehead( 4, new TableHead( T_('Opponent userid#header'), T_('Opponent userid')), 'User', 0, 'oppHandle+');
-         $gtable->add_tablehead(16, new TableHead( T_('Opponent rating#header'), T_('Opponent rating')), 'Rating', 0, 'oppRating-');
+         $gtable->add_tablehead(16, new TableHead( T_('Opponent rating#header'), T_('Opponent rating#2')), 'Rating', 0, 'oppRating-');
          $gtable->add_tablehead(23, new TableHead( T_('Opponent start rating#header'), T_('Opponent start rating')), 'Rating', 0, 'oppStartRating-');
          $gtable->add_tablehead(24, new TableHead( T_('Opponent end rating#header'), T_('Opponent end rating')), 'Rating', 0, 'oppEndRating-');
          $gtable->add_tablehead(25, new TableHead( T_('Opponent rating diff#header'), T_('Opponent rating diff')), 'Number', 0, 'oppRatingDiff-');
@@ -537,7 +537,7 @@ $GLOBALS['ThePage'] = new Page('GamesList');
       {
          $gtable->add_tablehead( 3, new TableHead( T_('Opponent name#header'), T_('Opponent name')), 'User', 0, 'oppName+');
          $gtable->add_tablehead( 4, new TableHead( T_('Opponent userid#header'), T_('Opponent userid')), 'User', 0, 'oppHandle+');
-         $gtable->add_tablehead(16, new TableHead( T_('Opponent rating#header'), T_('Opponent rating')), 'Rating', 0, 'oppRating-');
+         $gtable->add_tablehead(16, new TableHead( T_('Opponent rating#header'), T_('Opponent rating#2')), 'Rating', 0, 'oppRating-');
          $gtable->add_tablehead(23, new TableHead( T_('Opponent start rating#header'), T_('Opponent start rating')), 'Rating', 0, 'oppStartRating-');
          $gtable->add_tablehead(36, new TableHead( T_('User start rating#header'), T_('User start rating')), 'Rating', 0, 'userStartRating-');
          $gtable->add_tablehead( 5, T_('Colors#header'), 'Image', 0, 'X_Color+');
