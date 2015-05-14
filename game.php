@@ -691,7 +691,7 @@ $GLOBALS['ThePage'] = new Page('Game');
          $movemodulo = $cfg_board->get_move_modulo();
          if ( $movemodulo >= 0 )
          {
-            $TheBoard->move_marks( $move - $movenumbers, $move, $movemodulo );
+            $TheBoard->move_marks( $move - $movenumbers, $move, $movemodulo, ((string)$action == GAMEACT_DO_MOVE) );
             $TheBoard->draw_captures_box( T_('Captures'));
             echo "<br>\n";
          }

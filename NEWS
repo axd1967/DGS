@@ -120,6 +120,7 @@ Copyright (C) 2001-2015  Erik Ouchterlony, Jens-Uwe Gaspar
    * Fixed statistics graphs using language-specific caching
    * Fixed to exclude max-rating in a user's rating-range check for waiting-room and tournament-registration
    * Fixed missing check of waiting-room accept-same-opponent-restriction for total-count of joined games
+   * Fixed missing move-numbering on last-move after user chooses the next move
    * Fixed showing territory-markers for all users for game on score-status if last move was scoring-step
    * Fixed showing publish-time of bulletin with weekday and timezone
 

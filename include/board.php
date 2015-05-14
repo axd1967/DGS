@@ -534,8 +534,7 @@ class Board
       $this->movemrky= $y;
    }
 
-
-   public function move_marks( $start, $end, $mark=0)
+   public function move_marks( $start, $end, $mark=0, $next_move_marked=false )
    {
       if ( $this->cond_moves ) // conditional-moves-preview overwrites move-numbering
       {
@@ -554,9 +553,9 @@ class Board
          $start = max( $start, 1 );
       }
 
-      if ( is_string( $mark) )
+      if ( is_string($mark) )
          $mod = 0;
-      else if ( is_numeric( $mark) )
+      elseif ( is_numeric($mark) )
       {
          if ( $mark > 0 )
             $mod = $mark;
@@ -570,15 +569,24 @@ class Board
       else
          return;
 
+      if ( $next_move_marked )
+      {
+         $start--;
+         $delta = 1;
+      }
+      else
+         $delta = 0;
+
       $movenums = count($moves);
       if ( !$this->cond_moves && isset($moves[MOVE_SETUP]) ) // shape-game-setup
          $movenums--;
 
       for ( $n=$end; $n>=$start; $n-- )
       {
-         if ( isset($moves[$n]) )
+         $move_idx = $n + $delta;
+         if ( isset($moves[$move_idx]) )
          {
-            list( $s, $x, $y) = $moves[$n];
+            list( $s, $x, $y) = $moves[$move_idx];
             if ( $x == POSX_PASS )
                continue;
             //if ( $s != BLACK && $s != WHITE ) continue;
@@ -610,7 +618,7 @@ class Board
                   if ( $b==NONE )
                      $this->marks[$sgfc] = 'x';
                }
-               $this->captures[$n] = array( $s, $x, $y, $mrk);
+               $this->captures[$move_idx] = array( $s, $x, $y, $mrk);
             }
          }
       }
