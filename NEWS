@@ -86,6 +86,7 @@ Copyright (C) 2001-2015  Erik Ouchterlony, Jens-Uwe Gaspar
       * Hide user-related columns for view with own waiting-room entries
 
    * Game page:
+      * Added option in user-profile to change position of game-move message above or below the game-board
       * Added button to submit-move & reload page with same game, can be enabled in user-profile
 
    * Games:

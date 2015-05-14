@@ -828,6 +828,9 @@ class Board
       if ( ($gid=$this->gid) <= 0 )
          $may_play= false;
 
+      $has_move_msg = ( is_array($draw_move_msg) && count($draw_move_msg) == 2 );
+      $show_movemsg_above = ($this->board_flags & BOARDFLAG_MOVEMSG_ABOVE_BOARD);
+
       $stone_size = $this->stone_size;
       $coord_width = floor($stone_size*31/25);
       $mark_last_capture = ($this->board_flags & BOARDFLAG_MARK_LAST_CAPTURE );
@@ -913,7 +916,7 @@ class Board
          $move_end = ".gif\"></a></td>\n";
       }
 
-      if ( is_array($draw_move_msg) && count($draw_move_msg) == 2 )
+      if ( $show_movemsg_above && $has_move_msg )
          $this->draw_move_message( $draw_move_msg[1], $draw_move_msg[0] );
 
 
@@ -1124,6 +1127,9 @@ class Board
          echo '</tbody>';
          echo "</table>\n";
       } //goban
+
+      if ( !$show_movemsg_above && $has_move_msg )
+         $this->draw_move_message( $draw_move_msg[1], $draw_move_msg[0] );
    }//draw_board
 
 

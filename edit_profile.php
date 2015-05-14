@@ -113,6 +113,10 @@ require_once 'include/gui_bulletin.php';
       $langs['N'] = /**T_**/('Native texts'); // pseudo-language, that shows original texts
    $langs['C'] = T_('Use browser settings');
 
+   $gamemsg_positions = array(
+      1 => sptext(T_('Above'),2),
+      0 => sptext(T_('Below'),2));
+
    $notesmodes = array('RIGHT' => sptext(T_('Right'),2),
                        'BELOW' => sptext(T_('Below'),2));
 
@@ -332,6 +336,12 @@ require_once 'include/gui_bulletin.php';
 
 
    $profile_form->add_row( array( 'HEADER', T_('Game page settings') ) );
+
+   $profile_form->add_row( array(
+         'DESCRIPTION', T_('Game move message'),
+         'TEXT', sptext(T_('Position relative to game board').':',2),
+         'RADIOBUTTONS', 'bfl_gamemsg_pos', $gamemsg_positions, ($board_flags & BOARDFLAG_MOVEMSG_ABOVE_BOARD) ? 1 : 0,
+      ));
 
    $profile_form->add_row( array(
          'DESCRIPTION', T_('Submit move button'),
@@ -613,7 +623,8 @@ function parse_edit_form( &$cfg_board )
       $vars['move_modulo'] = ( (int)@$_REQUEST['movemodulo'] ) ? 100 : 0;
 
       $vars['board_flags'] = ( @$_REQUEST['bfl_mark_lc'] ? BOARDFLAG_MARK_LAST_CAPTURE : 0 )
-         | ( @$_REQUEST['bfl_submit_stay_game'] ? BOARDFLAG_SUBMIT_MOVE_STAY_GAME : 0 );
+         | ( @$_REQUEST['bfl_submit_stay_game'] ? BOARDFLAG_SUBMIT_MOVE_STAY_GAME : 0 )
+         | ( @$_REQUEST['bfl_gamemsg_pos'] ? BOARDFLAG_MOVEMSG_ABOVE_BOARD : 0 ); // 0=below
 
 
       // parse private game notes -------------------------------------

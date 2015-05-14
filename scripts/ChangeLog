@@ -13,6 +13,11 @@ ChangeLog
 
 2015-05-14 jug
 
+   * include/classlib_userconfig.php (BOARDFLAG_MOVEMSG_ABOVE_BOARD),
+     include/board.php (Board.draw_board),
+     edit_profile.php (parse_edit_form):
+   - added option in user-profile to change position of game-move message above or below the game-board
+
    * include/board.php (Board.draw_board, ~.draw_move_message),
      include/globals.php (CSS_VERSION),
      game.php (build_last_move_title),
