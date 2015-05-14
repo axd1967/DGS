@@ -11,6 +11,11 @@ Release [2014-07-30] - DGS 1.0.18 - tag [release-1_0_18-20140730] on (later) bra
 ChangeLog
 ------------------------------------------------------------------
 
+2015-05-14 jug
+
+   * include/gui_functions.php (echo_image_hero_badge):
+   - adjusted texts for 'badge of honor' to avoid different translations of words in other contexts
+
 ### ----- release-1_19_6-20150412 -----
 
 2015-04-11 jug
