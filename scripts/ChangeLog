@@ -13,6 +13,11 @@ ChangeLog
 
 2015-05-14 jug
 
+   * show_games.php:
+   - added tooltips for long column headers for all views of games-list-page:
+     all-running, all-finished, all-observed, observing games,
+     my/user-running, my/user-finished games
+
    * include/std_functions.php (make_dragon_main_menu):
    - added more tooltips on the links in the main-menu:
      status, send message, users, contacts, games

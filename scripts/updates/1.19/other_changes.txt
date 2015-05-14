@@ -30,3 +30,7 @@ copy /25/wms.gif
 copy /images/gamestable-fin.gif
 copy /images/gamestable-run.gif
 
+-----------
+# adjust english translation for games-list-page long header-names matching queries:
+#     '% time remaining#header', 'Opponent %#header', 'User%rating%#header'
+
