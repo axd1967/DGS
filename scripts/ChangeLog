@@ -13,11 +13,16 @@ ChangeLog
 
 2015-05-14 jug
 
+   * include/std_functions.php (get_language_text),
+     userinfo.php:
+   - show language-setting with full encoding on user-info-page
+
    * include/table_columns.php (Table.add_row_one_col):
    - fix bug: show round-robin pool-title if first table-column is hidden
      by adding column-data on Table-row with one column in 1st non-hidden column
 
-   * include/board.php (Board.move_marks), game.php:
+   * include/board.php (Board.move_marks),
+     game.php:
    - fix bug: game-move-numbering on game-board-preview was not showing the number on the last-move
      after user chooses the next-move
      - show one more move-number on choosing next-move

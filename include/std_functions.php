@@ -3917,4 +3917,17 @@ function get_user_cache_language( $row=null )
    return (isset($row['Lang'])) ? preg_replace("/[^a-z0-9]+/i", '_', $row['Lang']) : 'C';
 }
 
+// returns language-config for given language as saved in Players.Lang in format 'en.iso-8891-1'
+function get_language_text( $lang )
+{
+   global $known_languages;
+
+   if ( $lang == 'C' )
+      return T_('Default#lang');
+
+   $arr = explode( LANG_CHARSET_CHAR, $lang ); // lang-code, encoding
+   $ltext = ( is_array($arr) && count($arr) == 2 ) ? @$known_languages[$arr[0]][$arr[1]] : 0;
+   return ($ltext) ? $ltext : T_('Default#lang');
+}//get_language_text
+
 ?>
