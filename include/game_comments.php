@@ -66,7 +66,7 @@ class GameCommentHelper
    private $mpg_users; // Players-fields, see last arg of GamePlayer::load_users_for_mpgame()-func
    private $mpg_active_user;
 
-   // runtime
+   // runtime (set by filter_comment-func)
    private $mpg_user = 0;
    private $mpg_move_color = 0;
 

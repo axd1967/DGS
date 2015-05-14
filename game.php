@@ -629,6 +629,7 @@ $GLOBALS['ThePage'] = new Page('Game');
 
    $last_move_msg = $gc_helper->filter_comment( $last_move_msg, $move, $movecol, $view_comment, /*html*/true );
    $last_move_msg = MarkupHandlerGoban::replace_igoban_tags( $last_move_msg );
+   $last_move_title = build_last_move_title( $gc_helper, $game_row );
 
    if ( ENA_MOVENUMBERS && !$show_game_tools )
    {
@@ -722,7 +723,10 @@ $GLOBALS['ThePage'] = new Page('Game');
    if ( $is_fairkomi_negotiation )
       draw_fairkomi_negotiation( $my_id, $gform, $game_row, $game_setup );
    else
-      $TheBoard->draw_board( $may_play, $action, $stonestring, ( $show_game_tools ? '' : $last_move_msg ) );
+   {
+      $TheBoard->draw_board( $may_play, $action, $stonestring,
+         ( $show_game_tools ? null : array( $last_move_title, $last_move_msg ) ) );
+   }
 
    //messages about actions
    if ( $validation_step )
@@ -785,7 +789,7 @@ $GLOBALS['ThePage'] = new Page('Game');
          {
             $preview_msg = make_html_safe( $message, 'gameh' );
             $preview_msg = MarkupHandlerGoban::replace_igoban_tags( $preview_msg );
-            $TheBoard->draw_move_message( $preview_msg );
+            $TheBoard->draw_move_message( $preview_msg, T_('Preview').':' );
          }
       }
    }
@@ -1924,5 +1928,21 @@ function draw_conditional_moves_input( &$gform, $gid, $my_id, $cm_action, $move_
       '</TR>',
       "</TABLE><br>\n";
 }//draw_conditional_moves_input
+
+function build_last_move_title( $gc_helper, $game_row )
+{
+   $mpg_user = $gc_helper->get_mpg_user();
+   if ( is_array($mpg_user) )
+      $last_move_user_str = user_reference( 0, 1, '', $mpg_user['uid'], $mpg_user['Name'], $mpg_user['Handle'] );
+   else
+   {
+      $PFX = ( $game_row['ToMove_ID'] == $game_row['Black_ID'] ) ? 'White' : 'Black';
+      $last_move_user_str = user_reference( 0, 1, '',
+         ( $game_row['ToMove_ID'] == $game_row['Black_ID'] ? $game_row['White_ID'] : $game_row['Black_ID'] ),
+         $game_row["{$PFX}name"], $game_row["{$PFX}handle"] );
+   }
+
+   return sprintf(T_('Message from %s#gamemsg'), $last_move_user_str) . ':';
+}//build_last_move_title
 
 ?>

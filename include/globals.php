@@ -26,7 +26,7 @@ require_once 'include/config-local.php';
  */
 
 define('DGS_VERSION', '1.19.6'); // ARCHITECTURE(1=php).MAJOR.MINOR
-define('CSS_VERSION', '20150405172300'); // take UTC-timestamp of skins/dragon/screen.css
+define('CSS_VERSION', '20150514104500'); // take UTC-timestamp of skins/dragon/screen.css
 define('JS_VERSION',  '20131211220200'); // take UTC-timestamp of newest js/*.js script
 
 // global version of quick-suite: increased with each release

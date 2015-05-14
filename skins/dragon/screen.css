@@ -2234,9 +2234,9 @@ div.GobanEnd {
 }
 
 
-/* ------------------------- */
-/* game page / board page */
-/* ------------------------- */
+/* ----------------------------- */
+/* NEW JS game page / board page */
+/* ----------------------------- */
 
 table#GamePage div#tabs {
    display: none;
@@ -2325,6 +2325,31 @@ span#GameViewer img {
    vertical-align: middle;
 }
 
+
+/* ---------------------- */
+/* game page / board page */
+/* ---------------------- */
+
+table.GameMessageBox {
+   table-layout: auto;
+   border: 0px solid black;
+   margin: 0.5em 0px;
+   width: 30em; /* 475px; */
+   max-width: none;
+   overflow: visible;
+   empty-cells: hide;
+}
+
+table.GameMessageBox th {
+   text-align: left;
+   font-weight: normal;
+}
+
+table.GameMessageBox td {
+   padding: 5px 8px;
+   background: #e0e8ed;
+   border: 1px dotted black;
+}
 
 
 /*

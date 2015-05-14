@@ -820,8 +820,8 @@ class Board
    // keep in sync with GobanHandlerGfxBoard
    // board: img.alt-attr mapping: B>X W>O, last-move B># W>@, dead B>x W>o, terr B>+ W>-, dame>. seki-dame>s hoshi>, else>.
    // \param $action GAMEACT_SET_HANDICAP, 'remove', or other text
-   // \param $draw_move_msg move-message to show above board in message-box, empty=no move-msg
-   public function draw_board( $may_play=false, $action='', $stonestring='', $draw_move_msg='' )
+   // \param $draw_move_msg array( move-title, move-message ) to show above board in message-box, null=no move-msg
+   public function draw_board( $may_play=false, $action='', $stonestring='', $draw_move_msg=null )
    {
       global $woodbgcolors;
 
@@ -913,8 +913,8 @@ class Board
          $move_end = ".gif\"></a></td>\n";
       }
 
-      if ( (string)$draw_move_msg != '' )
-         $this->draw_move_message( $draw_move_msg );
+      if ( is_array($draw_move_msg) && count($draw_move_msg) == 2 )
+         $this->draw_move_message( $draw_move_msg[1], $draw_move_msg[0] );
 
 
       { // draw goban
@@ -1242,10 +1242,14 @@ class Board
       return $out;
    }//draw_ascii_board
 
-   public function draw_move_message( $msg )
+   public function draw_move_message( $msg, $title=null )
    {
-      $width = $this->stone_size * 19;
-      echo "<table class=MessageBox><tr><td width=\"$width\">$msg</td></tr></table><BR>\n";
+      if ( (string)$msg != '' )
+      {
+         $width = $this->stone_size * 19;
+         $title_row = ($title) ? "<tr><th width=\"$width\">$title</th></tr>" : '';
+         echo "<table class=GameMessageBox>{$title_row}<tr><td width=\"$width\">$msg</td></tr></table>\n";
+      }
    }
 
    /*!

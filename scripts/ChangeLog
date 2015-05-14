@@ -13,6 +13,15 @@ ChangeLog
 
 2015-05-14 jug
 
+   * include/board.php (Board.draw_board, ~.draw_move_message),
+     include/globals.php (CSS_VERSION),
+     game.php (build_last_move_title),
+     skins/dragon/screen.css:
+   - adjusted message-boxes on game-page
+     - added title for game-message with player of last-move
+     - added title for preview of own game-message response
+     - changed appearance of game-message with simpler border and light-blue background
+
    * include/gui_functions.php (echo_image_hero_badge):
    - adjusted texts for 'badge of honor' to avoid different translations of words in other contexts
 
