@@ -13,6 +13,10 @@ ChangeLog
 
 2015-05-14 jug
 
+   * include/std_functions.php (make_dragon_main_menu):
+   - added more tooltips on the links in the main-menu:
+     status, send message, users, contacts, games
+
    * include/classlib_userconfig.php (BOARDFLAG_MOVEMSG_ABOVE_BOARD),
      include/board.php (Board.draw_board),
      edit_profile.php (parse_edit_form):

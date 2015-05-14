@@ -595,7 +595,9 @@ function make_dragon_main_menu( $player_row )
    // object = arr( itemtext, itemlink, itemtitle [, arr( accesskey/class => value ) ]
    // NOTE: row-number can be skipped, only for ordering
    // NOTE: multi-text per matrix-entry possible: use list of arrays with arr( itemtext ..) or sep-str
-   $menu->add( 1,1, array( T_('Status'),       'status.php',       '', array( 'accesskey' => ACCKEY_MENU_STATUS, 'class' => 'strong' )));
+   $menu->add( 1,1, array( T_('Status'),       'status.php',
+      T_('show bulletins, private messages, my games to move & MP-games to setup#menu'),
+      array( 'accesskey' => ACCKEY_MENU_STATUS, 'class' => 'strong' )));
    $menu->add( 1,2, array( T_('Waiting room'), 'waiting_room.php',
       T_('show new game offers from other players#menu'), array( 'accesskey' => ACCKEY_MENU_WAITROOM )));
    if ( ALLOW_TOURNAMENTS )
@@ -608,7 +610,7 @@ function make_dragon_main_menu( $player_row )
       }
       $menu->add( 1,3, $arr_tourney );
    }
-   $menu->add( 1,4, array( T_('User info'),    'userinfo.php',     '', array( 'accesskey' => ACCKEY_MENU_USERINFO )));
+   $menu->add( 1,4, array( T_('User info'), 'userinfo.php', '', array( 'accesskey' => ACCKEY_MENU_USERINFO )));
 
    $arr_msgs = array( array( T_('Messages'), 'list_messages.php',
       T_('show your messages and folders#menu'), array( 'accesskey' => ACCKEY_MENU_MESSAGES ) ));
@@ -621,15 +623,19 @@ function make_dragon_main_menu( $player_row )
          array( 'class' => 'MainMenuCount' ) );
    }
    $menu->add( 2,1, $arr_msgs );
-   $menu->add( 2,2, array( T_('Send message'), 'message.php?mode=NewMessage', '', array( 'accesskey' => ACCKEY_MENU_SENDMSG )));
+   $menu->add( 2,2, array( T_('Send message'), 'message.php?mode=NewMessage',
+      T_('send private message to other user#menu'), array( 'accesskey' => ACCKEY_MENU_SENDMSG )));
    $menu->add( 2,3, array( T_('Invite'),       'message.php?mode=Invite',
       T_('send game invitation to another player#menu'), array( 'accesskey' => ACCKEY_MENU_INVITE )));
    $menu->add( 2,4, array( T_('New Game'),     'new_game.php',
       T_('offer new games in waiting room for other players#menu'), array( 'accesskey' => ACCKEY_MENU_NEWGAME )));
 
-   $menu->add( 3,1, array( T_('Users'),    'users.php',              '', array( 'accesskey' => ACCKEY_MENU_USERS )));
-   $menu->add( 3,2, array( T_('Contacts'), 'list_contacts.php',      '', array( 'accesskey' => ACCKEY_MENU_CONTACTS )));
-   $menu->add( 3,3, array( T_('Games'),    'show_games.php?uid=all', '', array( 'accesskey' => ACCKEY_MENU_GAMES )));
+   $menu->add( 3,1, array( T_('Users'),    'users.php',
+      T_('show all users#menu'), array( 'accesskey' => ACCKEY_MENU_USERS )));
+   $menu->add( 3,2, array( T_('Contacts'), 'list_contacts.php',
+      T_('show my private contacts#menu'), array( 'accesskey' => ACCKEY_MENU_CONTACTS )));
+   $menu->add( 3,3, array( T_('Games'),    'show_games.php?uid=all',
+      T_('show all games#menu'), array( 'accesskey' => ACCKEY_MENU_GAMES )));
 
    $menu->add( 4,1, array( T_('Introduction'), 'introduction.php', '', array()));
    $menu->add( 4,2, array( T_('Help / FAQ'), 'faq.php',
