@@ -11,9 +11,12 @@ Release [2014-07-30] - DGS 1.0.18 - tag [release-1_0_18-20140730] on (later) bra
 ChangeLog
 ------------------------------------------------------------------
 
-### ----- release-1_19_7-20150514 -----
-
 2015-05-14 jug
+
+   * game.php (build_last_move_title):
+   - fix bug: show correct author of game-move message also for all previous moves
+
+### ----- release-1_19_7-20150514 -----
 
    * include/std_functions.php (get_language_text),
      userinfo.php:
