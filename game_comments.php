@@ -112,6 +112,7 @@ $TheErrors->set_mode(ERROR_MODE_PRINT);
    $ctable->add_tablehead(2, T_('Comments'), 'Comment');
 
    $cnt_comments = $mpg_user = 0;
+   $href_game_move = $base_path.'game.php?gid='.$gid.URI_AMP.'move=';
    foreach ( $arr_moves as $row )
    {
       $move_nr = (int)$row['MoveNr'];
@@ -132,7 +133,7 @@ $TheErrors->set_mode(ERROR_MODE_PRINT);
          $colortxt = '<img src="17/w.gif" alt="' . T_('White') . "\"$color_class>" ;
 
       $crow_strings = array();
-      $crow_strings[1] = "$move_nr&nbsp;$colortxt";
+      $crow_strings[1] = anchor( $href_game_move.$move_nr, $move_nr ) . "&nbsp;$colortxt";
       $crow_strings[2] = $Text;
       if ( $is_mp_game && is_array($mpg_user) )
          $crow_strings[3] = user_reference( REF_LINK, 1, '', $mpg_user['uid'], $mpg_user['Handle'], '' );

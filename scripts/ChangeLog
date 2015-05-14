@@ -13,6 +13,9 @@ ChangeLog
 
 2015-05-14 jug
 
+   * game_comments.php:
+   - added link to corresponding game & move on move-number of game-comments-page
+
    * game.php (build_last_move_title):
    - fix bug: show correct author of game-move message also for all previous moves
 
