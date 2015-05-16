@@ -11,6 +11,11 @@ Release [2014-07-30] - DGS 1.0.18 - tag [release-1_0_18-20140730] on (later) bra
 ChangeLog
 ------------------------------------------------------------------
 
+2015-05-16 jug
+
+   * scripts/analyze-weblogs/parse-errorlog-dbcon-errors.pl:
+   - added script to analyze db-connection-errors written in web-error-log
+
 2015-05-14 jug
 
    * game_comments.php:
