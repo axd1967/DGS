@@ -179,7 +179,7 @@ function load_links()
          "INNER JOIN TranslationTexts AS Question ON Question.ID=entry.Question " .
          "LEFT JOIN TranslationTexts AS Answer ON Answer.ID=entry.Answer " .
       "WHERE (entry.Level BETWEEN 1 AND 2) " .
-         "AND entry.Hidden='N' AND parent.Hidden='N'" . //need a viewable root
+         "AND entry.Flags < ".FLAG_HELP_HIDDEN." AND parent.Flags < ".FLAG_HELP_HIDDEN." ". //need a viewable root
       "ORDER BY CatOrder, entry.Level, entry.SortOrder" );
 
    $last_level = 0;

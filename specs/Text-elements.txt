@@ -62,7 +62,7 @@ Changes to FAQ-table:
      Comment        -- varchar(255)
      Text1          -- foreign key to TranslationTexts.ID
      Text2          -- foreign key to TranslationTexts.ID
-     Hidden         -- Enum( 'Y', 'N' ), copy from FAQ
+     Flags          -- tinyint unsigned, copy from FAQ
      Translatable   -- Enum( 'Y', 'N' )
 
 - field 'Type' identifies which of the TYPES entry is for
@@ -160,7 +160,7 @@ Changes need to source-code:
 - this class can then be used on links-, faq-, help-, translate-
    page to avoid (would make smaller code, avoid redundancy)
 - admin_faq.php -> admin_texts.php,
-   - structure-view: handle Hidden, Translateable,
+   - structure-view: handle Hidden-flag, Translateable,
      add TYPE-selection to edit entries for
    - entry-view: add form-elements for label, comment and checkbox
      to mark as minor-edit (or need-for-translation)
@@ -177,7 +177,7 @@ More notes:
 - if the structure is the same, the TYPES could be extended.
    this may also be used for the introduction.php-page
 
-- TextElements.Hidden-field could also be set to 'Static' (or provide
+- TextElements.Flags Hidden-field could also be set to 'Static' (or provide
    an additional field for it) to forbid that an entry can be deleted
    (e.g. for referenced, labeled entry used in the source-code) ...
 

@@ -41,8 +41,7 @@ $GLOBALS['ThePage'] = new Page('FAQ', 0, ROBOTS_NO_FOLLOW,
    // init vars
    $TW_ = 'T_'; // for non-const translation-texts
    $faq_url = 'faq.php?';
-   //$faqhide = " entry.Hidden='N' AND (entry.Level=1 OR parent.Hidden='N') ";
-   $faqhide = " entry.Hidden='N' AND parent.Hidden='N' "; //need a viewable root
+   $qpart_faqhidden = " entry.Flags < ".FLAG_HELP_HIDDEN." AND parent.Flags < ".FLAG_HELP_HIDDEN; //need a viewable root
 
    $arr_languages = get_language_descriptions_translated();
    $lang = get_request_arg('lang', 0);
@@ -110,7 +109,7 @@ $GLOBALS['ThePage'] = new Page('FAQ', 0, ROBOTS_NO_FOLLOW,
             "INNER JOIN FAQ AS parent ON parent.ID=entry.Parent " .
             "INNER JOIN TranslationTexts AS Question ON Question.ID=entry.Question " .
             "LEFT JOIN TranslationTexts AS Answer ON Answer.ID=entry.Answer " .
-         "WHERE $faqhide $q_part " .
+         "WHERE $qpart_faqhidden $q_part " .
          "ORDER BY CatOrder,ParentOrder,entry.SortOrder";
       $result = db_query( 'faq.search_entries', $query );
 
@@ -184,7 +183,7 @@ $GLOBALS['ThePage'] = new Page('FAQ', 0, ROBOTS_NO_FOLLOW,
             "INNER JOIN FAQ AS parent ON parent.ID=entry.Parent " .
             "INNER JOIN TranslationTexts AS Question ON Question.ID=entry.Question " .
             "LEFT JOIN TranslationTexts AS Answer ON Answer.ID=entry.Answer " .
-         "WHERE $faqhide $q_part " .
+         "WHERE $qpart_faqhidden $q_part " .
          "ORDER BY CatOrder,ParentOrder,entry.SortOrder" );
 
       if ( mysql_num_rows($result) > 0 )
@@ -216,7 +215,7 @@ $GLOBALS['ThePage'] = new Page('FAQ', 0, ROBOTS_NO_FOLLOW,
          "FROM FAQ AS entry " .
             "INNER JOIN FAQ AS parent ON parent.ID=entry.Parent " .
             "INNER JOIN TranslationTexts AS Question ON Question.ID=entry.Question " .
-         "WHERE $faqhide AND entry.Level<3 AND entry.Level>0 " .
+         "WHERE $qpart_faqhidden AND entry.Level<3 AND entry.Level>0 " .
          "ORDER BY CatOrder,entry.Level,entry.SortOrder" );
 
       if ( mysql_num_rows($result) > 0 )

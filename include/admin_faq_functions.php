@@ -19,6 +19,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 $TranslateGroups[] = "FAQ";
 
+require_once 'include/globals.php';
 require_once 'include/connect2mysql.php';
 require_once 'include/utilities.php';
 
@@ -105,12 +106,12 @@ class AdminFAQ
          // add ROOT-element (=seed) for $dbtable
          $query = "SELECT * FROM $dbtable WHERE ID=$fid LIMIT 1";
          $row = mysql_single_fetch( "$dbgmsg.do_new.find1($fid)", $query );
-         if ( $fid==1 && (!$row || $row['Hidden']=='Y') )
+         if ( $fid==1 && (!$row || ($row['Flags'] & FLAG_HELP_HIDDEN)) )
          {
-            //adjust the seed. must be Hidden='N' even if invisible
+            //adjust the seed. must be NOT hidden even if invisible
             db_query( "$dbgmsg.do_new.replace_seed($fid)",
-               "REPLACE INTO $dbtable (ID,Parent,Level,SortOrder,Question,Answer,Hidden)"
-                        . " VALUES (1,1,0,0,0,0,'N')" );
+               "REPLACE INTO $dbtable (ID,Parent,Level,SortOrder,Question,Answer,Flags)"
+                        . " VALUES (1,1,0,0,0,0,0)" );
             //reload it:
             $row = mysql_single_fetch( "$dbgmsg.do_new.find2($fid)", $query );
          }
@@ -320,16 +321,17 @@ class AdminFAQ
       $dbgmsg .= ".toggle_hidden_faq_entry($dbtable,$fid)";
 
       $row = self::get_faq_entry_row( $dbtable, $fid );
-      $faqhide = ( @$row['Hidden'] == 'Y' );
+      $faqhidden = ( @$row['Flags'] & FLAG_HELP_HIDDEN );
 
       ta_begin();
       {//HOT-section to toggle hidden FAQ-entry
+         $qpart = ( $faqhidden ) ? 'Flags & ~' . FLAG_HELP_HIDDEN : 'Flags | ' . FLAG_HELP_HIDDEN;
 
          db_query( "$dbgmsg.upd_entry",
-            "UPDATE $dbtable SET Hidden='" . ( $faqhide ? 'N' : 'Y' ) . "' WHERE ID=$fid LIMIT 1" );
+            "UPDATE $dbtable SET Flags=$qpart WHERE ID=$fid LIMIT 1" );
 
          $transl = self::transl_toggle_state($row);
-         if ( $faqhide && $transl == 'Y' )
+         if ( $faqhidden && $transl == 'Y' )
          {
             //remove it from translation. No need to adjust Translations.Translated
             $arr = array( $row['Question'] );

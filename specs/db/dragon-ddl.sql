@@ -230,11 +230,12 @@ CREATE TABLE IF NOT EXISTS `FAQ` (
   `SortOrder` smallint(6) NOT NULL default '0',
   `Question` int(11) NOT NULL default '0',
   `Answer` int(11) NOT NULL default '0',
-  `Hidden` enum('N','Y') NOT NULL default 'N',
+  `Flags` tinyint(3) unsigned NOT NULL default '128',
   `Reference` varchar(255) NOT NULL default '',
   PRIMARY KEY  (`ID`),
   KEY `Parent` (`Parent`),
-  KEY `Level` (`Level`)
+  KEY `Level` (`Level`),
+  KEY `Flags` (`Flags`)
 ) ENGINE=MyISAM  DEFAULT CHARSET=latin1;
 
 -- --------------------------------------------------------
@@ -554,11 +555,12 @@ CREATE TABLE IF NOT EXISTS `Intro` (
   `SortOrder` smallint(6) NOT NULL default '0',
   `Question` int(11) NOT NULL default '0',
   `Answer` int(11) NOT NULL default '0',
-  `Hidden` enum('N','Y') NOT NULL default 'N',
+  `Flags` tinyint(3) unsigned NOT NULL default '128',
   `Reference` varchar(255) NOT NULL default '',
   PRIMARY KEY  (`ID`),
   KEY `Parent` (`Parent`),
-  KEY `Level` (`Level`)
+  KEY `Level` (`Level`),
+  KEY `Flags` (`Flags`)
 ) ENGINE=MyISAM  DEFAULT CHARSET=latin1;
 
 -- --------------------------------------------------------
@@ -591,11 +593,12 @@ CREATE TABLE IF NOT EXISTS `Links` (
   `SortOrder` smallint(6) NOT NULL default '0',
   `Question` int(11) NOT NULL default '0',
   `Answer` int(11) NOT NULL default '0',
-  `Hidden` enum('N','Y') NOT NULL default 'N',
+  `Flags` tinyint(3) unsigned NOT NULL default '128',
   `Reference` varchar(255) NOT NULL default '',
   PRIMARY KEY  (`ID`),
   KEY `Parent` (`Parent`),
-  KEY `Level` (`Level`)
+  KEY `Level` (`Level`),
+  KEY `Flags` (`Flags`)
 ) ENGINE=MyISAM  DEFAULT CHARSET=latin1;
 
 -- --------------------------------------------------------

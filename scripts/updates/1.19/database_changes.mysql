@@ -84,3 +84,33 @@ ALTER TABLE TournamentLadderProps
    ADD PenaltyLimit smallint unsigned NOT NULL default '0' AFTER PenaltyTimeout ;
 
 
+-- replacing Hidden-field for FAQ/Intro/Links with Flags-field
+ALTER TABLE FAQ
+   ADD Flags tinyint unsigned NOT NULL default 0x80 AFTER Answer ;
+ALTER TABLE Intro
+   ADD Flags tinyint unsigned NOT NULL default 0x80 AFTER Answer ;
+ALTER TABLE Links
+   ADD Flags tinyint unsigned NOT NULL default 0x80 AFTER Answer ;
+
+UPDATE FAQ
+   SET Flags=Flags & ~0x80 WHERE Hidden='N';
+UPDATE Intro
+   SET Flags=Flags & ~0x80 WHERE Hidden='N';
+UPDATE Links
+   SET Flags=Flags & ~0x80 WHERE Hidden='N';
+
+ALTER TABLE FAQ
+   ADD KEY Flags (Flags) ;
+ALTER TABLE Intro
+   ADD KEY Flags (Flags) ;
+ALTER TABLE Links
+   ADD KEY Flags (Flags) ;
+
+ALTER TABLE FAQ
+   DROP COLUMN Hidden ;
+ALTER TABLE Intro
+   DROP COLUMN Hidden ;
+ALTER TABLE Links
+   DROP COLUMN Hidden ;
+
+

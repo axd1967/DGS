@@ -240,4 +240,9 @@ define('QST_CACHE_MSG',      'M');
 define('QST_CACHE_GAMES',    'G');
 define('QST_CACHE_MPG',      'MPG');
 
+// ---------- Help/FAQ stuff --------------------------------------
+
+// FAQ/Intro/Links.Flags 0xff
+define('FLAG_HELP_HIDDEN', 0x80); // must be highest bit (for efficient index-use)
+
 ?>

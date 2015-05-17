@@ -13,6 +13,43 @@ ChangeLog
 
 2015-05-17 jug
 
+   * include/admin_faq_functions.php (AdminFAQ.save_new_faq_entry, ~.toggle_hidden_faq_entry),
+     include/globals.php (FLAG_HELP_HIDDEN),
+     scripts/updates/1.19/database_changes.mysql,
+     specs/Text-elements.txt, specs/db/dragon-ddl.sql,
+     admin_faq.php, faq.php, introduction.php, links.php:
+   - replaced Hidden-field for FAQ/Intro/Links with Flags-field to prepare for more selective flags
+-----------
+-- replacing Hidden-field for FAQ/Intro/Links with Flags-field
+ALTER TABLE FAQ
+   ADD Flags tinyint unsigned NOT NULL default 0x80 AFTER Answer ;
+ALTER TABLE Intro
+   ADD Flags tinyint unsigned NOT NULL default 0x80 AFTER Answer ;
+ALTER TABLE Links
+   ADD Flags tinyint unsigned NOT NULL default 0x80 AFTER Answer ;
+
+UPDATE FAQ
+   SET Flags=Flags & ~0x80 WHERE Hidden='N';
+UPDATE Intro
+   SET Flags=Flags & ~0x80 WHERE Hidden='N';
+UPDATE Links
+   SET Flags=Flags & ~0x80 WHERE Hidden='N';
+
+ALTER TABLE FAQ
+   ADD KEY Flags (Flags) ;
+ALTER TABLE Intro
+   ADD KEY Flags (Flags) ;
+ALTER TABLE Links
+   ADD KEY Flags (Flags) ;
+
+ALTER TABLE FAQ
+   DROP COLUMN Hidden ;
+ALTER TABLE Intro
+   DROP COLUMN Hidden ;
+ALTER TABLE Links
+   DROP COLUMN Hidden ;
+-----------
+
    * show_games.php:
    - fix bug: wrong query with ambiguous column searching for fair-komi games in games-list
 

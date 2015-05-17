@@ -264,7 +264,7 @@ $info_box = '<ul>
       $show_list = false;
 
       $row = AdminFAQ::get_faq_entry_row( $dbtable, $fid );
-      $faqhide = ( @$row['Hidden'] == 'Y' );
+      $faqhidden = ( @$row['Flags'] & FLAG_HELP_HIDDEN );
 
       if ( @$_REQUEST['preview'] )
       {
@@ -302,7 +302,7 @@ $info_box = '<ul>
                                      'CHECKBOXX', 'Qchanged', 'Y',
                                      sprintf( 'Mark entry as changed for translators (Last change: %s)', $q_updated ),
                                      get_request_arg('Qchanged', false),
-                                     array( 'disabled' => ( $faqhide || $row['QTranslatable'] !== 'Done' ) ) ));
+                                     array( 'disabled' => ( $faqhidden || $row['QTranslatable'] !== 'Done' ) ) ));
       }
       else //i.e. Question/Answer/Reference
       {
@@ -320,14 +320,14 @@ $info_box = '<ul>
                                      'CHECKBOXX', 'Qchanged', 'Y',
                                      sprintf( 'Mark entry as changed for translators (Last change: %s)', $q_updated ),
                                      get_request_arg('Qchanged', false),
-                                     array( 'disabled' => ( $faqhide || $row['QTranslatable'] !== 'Done' ) ) ));
+                                     array( 'disabled' => ( $faqhidden || $row['QTranslatable'] !== 'Done' ) ) ));
          $edit_form->add_row( array( 'DESCRIPTION', $label_cont,
                                      'TEXTAREA', 'answer', 80, $rows_cont, $answer ) );
          $edit_form->add_row( array( 'TAB',
                                      'CHECKBOXX', 'Achanged', 'Y',
                                      sprintf( 'Mark entry as changed for translators (Last change: %s)', $a_updated ),
                                      get_request_arg('Achanged', false),
-                                     array( 'disabled' => ( $faqhide || $row['ATranslatable'] !== 'Done' ) ) ));
+                                     array( 'disabled' => ( $faqhidden || $row['ATranslatable'] !== 'Done' ) ) ));
       }
 
       $edit_form->add_row( array(
@@ -607,7 +607,7 @@ $info_box = '<ul>
       while ( $row = mysql_fetch_assoc( $result ) )
       {
          $question = (empty($row['Q']) ? '(empty)' : $row['Q']);
-         $faqhide = ( @$row['Hidden'] == 'Y' );
+         $faqhidden = ( @$row['Flags'] & FLAG_HELP_HIDDEN );
          $transl = AdminFAQ::transl_toggle_state($row);
          $eid = $row['ID'];
          $entry_ref = "#e$eid";
@@ -637,7 +637,7 @@ $info_box = '<ul>
          }
 
          // question/answer (1 col)
-         if ( $faqhide )
+         if ( $faqhidden )
             echo "(H) ";
          echo "<A href=\"$page".URI_AMP."edit=1".URI_AMP."type=$typechar".URI_AMP."id=$eid"
                   ."$url_term\" title=\"Edit\">$question</A>";
@@ -670,7 +670,7 @@ $info_box = '<ul>
                'images/new.png', 'N');
 
          // hide (focus parent category)
-         if ( $faqhide )
+         if ( $faqhidden )
             echo TD_button( 'Show',
                   $page.URI_AMP."toggleH=N".URI_AMP."id=$eid$entry_ref",
                   'images/hide_no.png', 'h');
@@ -680,7 +680,7 @@ $info_box = '<ul>
                   'images/hide.png', 'H');
 
          // translatable (focus parent category)
-         if ( !$faqhide && $transl )
+         if ( !$faqhidden && $transl )
          {
             if ( $transl == 'Y' )
                echo TD_button( 'Make untranslatable',
