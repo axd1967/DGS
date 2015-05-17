@@ -157,7 +157,7 @@ $GLOBALS['ThePage'] = new Page('GamesList');
 
    $game_type_filter_array = MultiPlayerGame::build_game_type_filter_array();
    $game_type_filter_array[T_('Shape-Game')] = "ShapeID>0";
-   $game_type_filter_array[T_('Fair Komi#fairkomi')] = "Status='".GAME_STATUS_KOMI."'";
+   $game_type_filter_array[T_('Fair Komi#fairkomi')] = "G.Status='".GAME_STATUS_KOMI."'";
 
    // load table-columns
    $cfg_tblcols = ConfigTableColumns::load_config( $my_id, $column_set_name );
