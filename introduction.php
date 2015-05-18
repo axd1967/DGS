@@ -28,11 +28,12 @@ $GLOBALS['ThePage'] = new Page('Intro', 0, ROBOTS_NO_FOLLOW, DGS_DESCRIPTION );
 {
    connect2mysql();
    $logged_in = who_is_logged($player_row, LOGIN_DEFAULT_OPTS|LOGIN_SKIP_VFY_CHK );
+   $is_admin = ( @$player_row['admin_level'] & ADMIN_FAQ );
 
    start_page(T_('Introduction'), true, $logged_in, $player_row );
 
    // show Intro from database, or static intro if no entries found in db
-   if ( !load_intro() )
+   if ( !load_intro( $is_admin ) )
       show_static_intro();
 
    end_page();
@@ -68,12 +69,12 @@ function show_static_intro()
       , T_("Once again welcome, and enjoy your visit here!") . "\n";
 }//show_static_intro
 
-function load_intro()
+function load_intro( $load_hidden )
 {
    $TW_ = 'T_'; // for non-const translation-texts
 
    $result = db_query( 'intro.load_intro',
-      "SELECT entry.Level, entry.SortOrder, entry.Reference, " .
+      "SELECT entry.Level, entry.SortOrder, entry.Reference, entry.Flags, " .
          "Question.Text AS Q, Answer.Text AS A, " .
          "IF(entry.Level=1, entry.SortOrder, parent.SortOrder) AS CatOrder " .
       "FROM Intro AS entry " .
@@ -81,23 +82,26 @@ function load_intro()
          "INNER JOIN TranslationTexts AS Question ON Question.ID=entry.Question " .
          "LEFT JOIN TranslationTexts AS Answer ON Answer.ID=entry.Answer " .
       "WHERE (entry.Level BETWEEN 1 AND 2) " .
-         "AND entry.Flags < ".FLAG_HELP_HIDDEN." AND parent.Flags < ".FLAG_HELP_HIDDEN." ". //need a viewable root
+         ( $load_hidden
+            ? ''
+            : "AND entry.Flags < ".FLAG_HELP_HIDDEN." AND parent.Flags < ".FLAG_HELP_HIDDEN." " ) . //need a viewable root
       "ORDER BY CatOrder, entry.Level, entry.SortOrder" );
 
    $last_level = 0;
    while ( $row = mysql_fetch_assoc($result) )
    {
+      $prefix_hide = ($row['Flags'] & FLAG_HELP_HIDDEN) ? span('HiddenHelp', '[HIDDEN]') : '';
       if ( $row['Level'] == 1 ) // section
       {
          if ( $last_level > 0 )
             echo "</dl>\n";
-         section( 'IntroTitle'.$row['SortOrder'], $TW_($row['Q']) );
+         section( 'IntroTitle'.$row['SortOrder'], $prefix_hide . $TW_($row['Q']) );
          echo "<dl>\n";
       }
       elseif ( $row['Level'] == 2 ) // link-entry
       {
          $answer = make_html_safe( $row['A'], 'faq' );
-         echo "<dt>", $TW_($row['Q']), "</dt>\n<dd>", $answer, "</dd>\n";
+         echo "<dt>", $prefix_hide . $TW_($row['Q']), "</dt>\n<dd>", $answer, "</dd>\n";
       }
 
       $last_level = $row['Level'];

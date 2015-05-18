@@ -11,6 +11,18 @@ Release [2014-07-30] - DGS 1.0.18 - tag [release-1_0_18-20140730] on (later) bra
 ChangeLog
 ------------------------------------------------------------------
 
+2015-05-19 jug
+
+   * include/faq_functions.php (faq_item_html),
+     include/globals.php (CSS_VERSION),
+     skins/dragon/screen.css,
+     admin_faq.php, faq.php,
+     introduction.php (load_intro),
+     links.php (load_links):
+   - always show hidden FAQ/intro/link entries for FAQ-editors to better support writing entries
+     with references to other entries
+     - mark hidden FAQ/intro/link entries on faq-/introduction-/links-page for FAQ-editors
+
 2015-05-17 jug
 
    * include/admin_faq_functions.php (AdminFAQ.save_new_faq_entry, ~.toggle_hidden_faq_entry),

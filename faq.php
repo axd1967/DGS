@@ -31,6 +31,7 @@ $GLOBALS['ThePage'] = new Page('FAQ', 0, ROBOTS_NO_FOLLOW,
    connect2mysql();
 
    $logged_in = who_is_logged( $player_row, LOGIN_DEFAULT_OPTS|LOGIN_SKIP_VFY_CHK );
+   $is_admin = ( @$player_row['admin_level'] & ADMIN_FAQ );
 
    start_page(T_("FAQ"), true, $logged_in, $player_row );
    $menu_array = array();
@@ -41,7 +42,9 @@ $GLOBALS['ThePage'] = new Page('FAQ', 0, ROBOTS_NO_FOLLOW,
    // init vars
    $TW_ = 'T_'; // for non-const translation-texts
    $faq_url = 'faq.php?';
-   $qpart_faqhidden = " entry.Flags < ".FLAG_HELP_HIDDEN." AND parent.Flags < ".FLAG_HELP_HIDDEN; //need a viewable root
+   $qpart_faqhidden = ( $is_admin )
+      ? ' 1'
+      : " entry.Flags < ".FLAG_HELP_HIDDEN." AND parent.Flags < ".FLAG_HELP_HIDDEN; //need a viewable root
 
    $arr_languages = get_language_descriptions_translated();
    $lang = get_request_arg('lang', 0);
@@ -143,7 +146,7 @@ $GLOBALS['ThePage'] = new Page('FAQ', 0, ROBOTS_NO_FOLLOW,
                   ? $href_base.$row['ID'].URI_AMP.$qterm_url."#Title{$row['ID']}\""
                   : $href_base.$row['Parent'].URI_AMP.'e='.$row['ID'].URI_AMP.$qterm_url.'#Entry'.$row['ID'].'"';
                $attb = "name=\"Entry{$row['ID']}\"";
-               $faqtext = faq_item_html( $level, $question, $answer, $href, $attb, $rx_term );
+               $faqtext = faq_item_html( $level, $row['Flags'], $question, $answer, $href, $attb, $rx_term );
             }
             else
                $faqtext = '';
@@ -197,7 +200,7 @@ $GLOBALS['ThePage'] = new Page('FAQ', 0, ROBOTS_NO_FOLLOW,
                ? "href=\"faq.php#Title{$row['ID']}\""
                : $href_base.$row['Parent'].URI_AMP.'e='.$row['ID'].'#Entry'.$row['ID'].'"';
             $attb = "name=\"Entry{$row['ID']}\"";
-            echo faq_item_html( $row['Level'], $TW_( $row['Q'] ), $TW_( $row['A'] ), $href, $attb );
+            echo faq_item_html( $row['Level'], $row['Flags'], $TW_( $row['Q'] ), $TW_( $row['A'] ), $href, $attb );
             if ( $row['Level'] == 1 )
                echo name_anchor("Entry{$row['ID']}");
          }
@@ -228,7 +231,7 @@ $GLOBALS['ThePage'] = new Page('FAQ', 0, ROBOTS_NO_FOLLOW,
             $href = ( $row['Level'] == 1 )
                ? $href_base.$row['ID'].'#Entry'.$row['ID'].'"'
                : $href_base.$row['Parent'].'#Entry'.$row['ID'].'"';
-            echo faq_item_html( $row['Level'], $TW_( $row['Q'] ), '', $href );
+            echo faq_item_html( $row['Level'], $row['Flags'], $TW_( $row['Q'] ), '', $href );
             if ( $row['Level'] == 1 )
                echo name_anchor("Title{$row['ID']}");
          }

@@ -749,7 +749,7 @@ function show_preview( $level, $question, $answer, $reference, $id='preview', $r
    {
       echo "<table class=FAQ><tr><td class=FAQread>\n";
       echo faq_item_html( 0);
-      echo faq_item_html( $level, $question, $answer, ( $level == 1 ? "href=\"#$id\"" : "name=\"$id\"" ), '', $rx_term );
+      echo faq_item_html( $level, 0, $question, $answer, ( $level == 1 ? "href=\"#$id\"" : "name=\"$id\"" ), '', $rx_term );
       echo faq_item_html(-1);
       echo "</td></tr></table>\n";
    }

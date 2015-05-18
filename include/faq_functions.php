@@ -27,11 +27,13 @@ require_once 'include/classlib_goban.php';
  * $level=-1 print the end of the container
  * $href + $attbs : is the '<A $href $attbs></A>' arguments which will enclose the $Qtxt
  **/
-function faq_item_html( $level=2, $Qtext='', $Atext='', $href='', $attbs='', $rx_term='' )
+function faq_item_html( $level=2, $flags=0, $Qtext='', $Atext='', $href='', $attbs='', $rx_term='' )
 {
    static $prevlevel= 0;
 
    $str = '';
+   $prefix_hide = ($flags & FLAG_HELP_HIDDEN) ? span('HiddenHelp', '[HIDDEN]') : '';
+
    switch ( (int)$level )
    {
       case -1:
@@ -49,6 +51,8 @@ function faq_item_html( $level=2, $Qtext='', $Atext='', $href='', $attbs='', $rx
          $tmp = make_html_safe( $Qtext, 'cell', $rx_term );
          if ( !$tmp )
             $tmp = UNKNOWN_VALUE;
+         if ( $prefix_hide )
+            $tmp = $prefix_hide . $tmp;
          $a_attbs = trim($href . ' ' . $attbs);
          if ( $a_attbs )
             $tmp = "<A $a_attbs>$tmp</A>";
@@ -70,6 +74,8 @@ function faq_item_html( $level=2, $Qtext='', $Atext='', $href='', $attbs='', $rx
          $tmp = make_html_safe( $Qtext, 'cell', $rx_term );
          if ( !$tmp )
             $tmp = UNKNOWN_VALUE;
+         if ( $prefix_hide )
+            $tmp = $prefix_hide . $tmp;
          $a_attbs = trim($href . ' ' . $attbs);
          if ( $a_attbs )
             $tmp = "<A $a_attbs>$tmp</A>";

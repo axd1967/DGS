@@ -29,6 +29,7 @@ $GLOBALS['ThePage'] = new Page('Links');
    connect2mysql();
 
    $logged_in = who_is_logged( $player_row, LOGIN_DEFAULT_OPTS|LOGIN_SKIP_VFY_CHK );
+   $is_admin = ( @$player_row['admin_level'] & ADMIN_FAQ );
 
    start_page(T_('Links'), true, $logged_in, $player_row, "a.blue:visited{color:purple;}" );
    echo "<h3 class=Header>", T_('Link collection'), "</h3>\n";
@@ -38,7 +39,7 @@ $GLOBALS['ThePage'] = new Page('Links');
    $link_class = 'DocLinkNarrow';
 
    // show Links from database, or static links if no entries found in db
-   if ( !load_links() )
+   if ( !load_links( $is_admin ) )
    {
       ta_begin();
       {//HOT-section to seed database with link-texts
@@ -166,12 +167,12 @@ function save_link_entry( $url='', $text='', $extra='' )
       $text, $extra, $url, true, 'Y', false, /*chk-md*/2 );
 }
 
-function load_links()
+function load_links( $load_hidden )
 { // show only faq-titles
    global $TW_;
 
    $result = db_query( 'links.load_links',
-      "SELECT entry.Level, entry.SortOrder, entry.Reference, " .
+      "SELECT entry.Level, entry.SortOrder, entry.Reference, entry.Flags, " .
          "Question.Text AS Q, Answer.Text AS A, " .
          "IF(entry.Level=1, entry.SortOrder, parent.SortOrder) AS CatOrder " .
       "FROM Links AS entry " .
@@ -179,19 +180,22 @@ function load_links()
          "INNER JOIN TranslationTexts AS Question ON Question.ID=entry.Question " .
          "LEFT JOIN TranslationTexts AS Answer ON Answer.ID=entry.Answer " .
       "WHERE (entry.Level BETWEEN 1 AND 2) " .
-         "AND entry.Flags < ".FLAG_HELP_HIDDEN." AND parent.Flags < ".FLAG_HELP_HIDDEN." ". //need a viewable root
+         ( $load_hidden
+            ? ''
+            : "AND entry.Flags < ".FLAG_HELP_HIDDEN." AND parent.Flags < ".FLAG_HELP_HIDDEN." " ) . //need a viewable root
       "ORDER BY CatOrder, entry.Level, entry.SortOrder" );
 
    $last_level = 0;
    while ( $row = mysql_fetch_assoc($result) )
    {
+      $prefix_hide = ($row['Flags'] & FLAG_HELP_HIDDEN) ? span('HiddenHelp', '[HIDDEN]') : '';
       if ( $last_level > 0 && $row['Level'] != $last_level )
          add_link_page_link();
 
       if ( $row['Level'] == 1 ) // section
-         section( 'LinkTitle'.$row['SortOrder'], $TW_($row['Q']) );
+         section( 'LinkTitle'.$row['SortOrder'], $prefix_hide . $TW_($row['Q']) );
       elseif ( $row['Level'] == 2 ) // link-entry
-         add_link_page_link( $row['Reference'], $TW_($row['Q']), $TW_($row['A']) );
+         add_link_page_link( $row['Reference'], $prefix_hide . $TW_($row['Q']), $TW_($row['A']) );
 
       $last_level = $row['Level'];
    }
