@@ -335,14 +335,14 @@ class TournamentCache
       $group_id = "TPCount.$tid";
       $key = "TPCount.$tid.$stat_str.$round." . ($use_next_round ? 1 : 0);
 
-      $arr_counts = DgsCache::fetch( $dbgmsg, CACHE_GRP_TP_COUNT, $key );
-      if ( is_null($arr_counts) )
+      $count_tps = DgsCache::fetch( $dbgmsg, CACHE_GRP_TP_COUNT, $key );
+      if ( is_null($count_tps) )
       {
-         $arr_counts = TournamentParticipant::count_tournament_participants($tid, $tp_status, $round, $use_next_round);
-         DgsCache::store( $dbgmsg, CACHE_GRP_TP_COUNT, $key, $arr_counts, SECS_PER_DAY, $group_id );
+         $count_tps = TournamentParticipant::count_tournament_participants($tid, $tp_status, $round, $use_next_round);
+         DgsCache::store( $dbgmsg, CACHE_GRP_TP_COUNT, $key, $count_tps, SECS_PER_DAY, $group_id );
       }
 
-      return $arr_counts;
+      return $count_tps;
    }//count_cache_tournament_participants
 
    /*!
