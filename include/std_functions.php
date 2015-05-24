@@ -509,6 +509,18 @@ function start_page( $title, $no_cache, $logged_in, &$player_row,
       end_page();
       exit;
    }
+
+   if ( 0 ) // keep for debugging
+   {
+      echo "<br><pre>\n",
+         "\n_SERVER:\n", print_r($_SERVER, true),
+         //"\n_ENV:\n", print_r($_ENV, true),
+         //"\n_COOKIE:\n", print_r($_COOKIE, true),
+         "\n_REQUEST:\n", print_r($_REQUEST, true),
+         "\n_GET:\n", print_r($_GET, true),
+         "\n_POST:\n", print_r($_POST, true),
+         "</pre><br>\n";
+   }
 } //start_page
 
 function echo_dragon_top_bar( $logged_in, $user_handle )
