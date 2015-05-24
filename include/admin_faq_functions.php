@@ -29,8 +29,8 @@ require_once 'include/utilities.php';
  */
 class AdminFAQ
 {
-   private static final $RX_DBTABLES = "/^(FAQ|Links|Intro)$/";
-   private static final $RX_TRANSLATABLE = "/^(Y|N)$/"; // arg-check
+   private static $RX_DBTABLES = "/^(FAQ|Links|Intro)$/";
+   private static $RX_TRANSLATABLE = "/^(Y|N)$/"; // arg-check
 
    // ------------ static functions ----------------------------
 
@@ -48,7 +48,7 @@ class AdminFAQ
    public static function get_faq_entry_row( $dbtable, $id )
    {
       $id = (int)$id;
-      if ( !preg_match($RX_DBTABLES, $dbtable) )
+      if ( !preg_match(self::$RX_DBTABLES, $dbtable) )
          error('invalid_args', "get_faq_entry_row.check.bad_dbtable");
 
       $row = mysql_single_fetch( "AdminFAQ:get_faq_entry_row($id)",
@@ -78,9 +78,9 @@ class AdminFAQ
 
       $fid = (int)$fid;
       $dbgmsg .= ".save_new_faq_entry($dbtable,$tr_group,$fid)";
-      if ( !preg_match($RX_DBTABLES, $dbtable) )
+      if ( !preg_match(self::$RX_DBTABLES, $dbtable) )
          error('invalid_args', "$dbgmsg.check.bad_dbtable");
-      if ( !preg_match($RX_TRANSLATABLE, $translatable) )
+      if ( !preg_match(self::$RX_TRANSLATABLE, $translatable) )
          error('invalid_args', "$dbgmsg.check.bad_translatable($translatable)");
       $db_type = strtoupper($dbtable);
 
@@ -226,7 +226,7 @@ class AdminFAQ
    {
       $fid = (int)$fid;
       $dbgmsg .= ".move_faq_entry_same_level($dbtable,$fid,$direction)";
-      if ( !preg_match($RX_DBTABLES, $dbtable) )
+      if ( !preg_match(self::$RX_DBTABLES, $dbtable) )
          error('invalid_args', "$dbgmsg.check.bad_dbtable");
 
       $row = mysql_single_fetch( "$dbgmsg.find($fid)",
@@ -268,7 +268,7 @@ class AdminFAQ
    {
       $fid = (int)$fid;
       $dbgmsg .= ".move_faq_entry_to_new_category($dbtable,$fid,$direction)";
-      if ( !preg_match($RX_DBTABLES, $dbtable) )
+      if ( !preg_match(self::$RX_DBTABLES, $dbtable) )
          error('invalid_args', "$dbgmsg.check.bad_dbtable");
 
       $row = mysql_single_fetch( "$dbgmsg.find($fid)",
@@ -341,7 +341,7 @@ class AdminFAQ
 
       $fid = (int)$fid;
       $dbgmsg .= ".toggle_hidden_faq_entry($dbtable,$fid)";
-      if ( !preg_match($RX_DBTABLES, $dbtable) )
+      if ( !preg_match(self::$RX_DBTABLES, $dbtable) )
          error('invalid_args', "$dbgmsg.check.bad_dbtable");
 
       $row = self::get_faq_entry_row( $dbtable, $fid );
@@ -380,7 +380,7 @@ class AdminFAQ
    public static function toggle_translatable_faq_entry( $dbgmsg, $dbtable, $row, $curr_translatable )
    {
       $dbgmsg .= ".toggle_translatable_faq_entry($dbtable)";
-      if ( !preg_match($RX_DBTABLES, $dbtable) )
+      if ( !preg_match(self::$RX_DBTABLES, $dbtable) )
          error('invalid_args', "$dbgmsg.check.bad_dbtable");
 
       // not yet translated: may toggle it. No need to adjust Translations.Translated
@@ -397,7 +397,7 @@ class AdminFAQ
    {
       $fid = (int)$fid;
       $dbgmsg .= ".delete_faq_entry($dbtable,$fid)";
-      if ( !preg_match($RX_DBTABLES, $dbtable) )
+      if ( !preg_match(self::$RX_DBTABLES, $dbtable) )
          error('invalid_args', "$dbgmsg.check.bad_dbtable");
       $QID = (int)@$row['Question'];
       $AID = (int)@$row['Answer'];
@@ -433,7 +433,7 @@ class AdminFAQ
 
       $fid = (int)$fid;
       $dbgmsg .= ".update_faq_entry($dbtable,$fid)";
-      if ( !preg_match($RX_DBTABLES, $dbtable) )
+      if ( !preg_match(self::$RX_DBTABLES, $dbtable) )
          error('invalid_args', "$dbgmsg.check.bad_dbtable");
       $QID = (int)@$row['Question'];
       $AID = (int)@$row['Answer'];
