@@ -29,12 +29,16 @@ require_once 'include/utilities.php';
  */
 class AdminFAQ
 {
+   private static final $RX_DBTABLES = "/^(FAQ|Links|Intro)$/";
+   private static final $RX_TRANSLATABLE = "/^(Y|N)$/"; // arg-check
+
    // ------------ static functions ----------------------------
 
    public static function get_faq_group_id( $dbgmsg, $tr_group )
    {
+      $qtr_group = mysql_addslashes($tr_group);
       $row = mysql_single_fetch( "$dbgmsg.get_faq_group_id($tr_group)",
-         "SELECT ID FROM TranslationGroups WHERE Groupname='$tr_group' LIMIT 1" );
+         "SELECT ID FROM TranslationGroups WHERE Groupname='$qtr_group' LIMIT 1" );
       if ( !$row )
          error('internal_error', "$dbgmsg.get_faq_group_id($tr_group)");
       return $row['ID'];
@@ -43,6 +47,10 @@ class AdminFAQ
    // returns row with fields: FAQ/Links/Intro.* + Q + A + (Q|A)Translatable + (Q|A)Updated
    public static function get_faq_entry_row( $dbtable, $id )
    {
+      $id = (int)$id;
+      if ( !preg_match($RX_DBTABLES, $dbtable) )
+         error('invalid_args', "get_faq_entry_row.check.bad_dbtable");
+
       $row = mysql_single_fetch( "AdminFAQ:get_faq_entry_row($id)",
            "SELECT DBT.*, Question.Text AS Q, Answer.Text AS A".
                ", Question.Translatable AS QTranslatable".
@@ -52,7 +60,7 @@ class AdminFAQ
            "FROM $dbtable AS DBT " .
                "INNER JOIN TranslationTexts AS Question ON Question.ID=DBT.Question " .
                "LEFT JOIN TranslationTexts AS Answer ON Answer.ID=DBT.Answer " .
-           "WHERE DBT.ID='$id' LIMIT 1" )
+           "WHERE DBT.ID=$id LIMIT 1" )
          or error('internal_error', "AdminFAQ:get_faq_entry_row($id)");
 
       return $row;
@@ -68,14 +76,17 @@ class AdminFAQ
    {
       global $NOW, $player_row;
 
+      $fid = (int)$fid;
       $dbgmsg .= ".save_new_faq_entry($dbtable,$tr_group,$fid)";
-      if ( !preg_match("/^(FAQ|Links|Intro)$/", $dbtable) )
+      if ( !preg_match($RX_DBTABLES, $dbtable) )
          error('invalid_args', "$dbgmsg.check.bad_dbtable");
+      if ( !preg_match($RX_TRANSLATABLE, $translatable) )
+         error('invalid_args', "$dbgmsg.check.bad_translatable($translatable)");
       $db_type = strtoupper($dbtable);
 
       $tr_group_id = self::get_faq_group_id( $dbgmsg, $tr_group );
 
-      $ReferenceSql = ($reference) ? mysql_addslashes($reference) : $reference;
+      $ReferenceSql = mysql_addslashes($reference);
       if ( $chk_mode == 2 && $reference )
       {
          // check if URL already existing
@@ -213,7 +224,10 @@ class AdminFAQ
 
    public static function move_faq_entry_same_level( $dbgmsg, $dbtable, $fid, $direction )
    {
+      $fid = (int)$fid;
       $dbgmsg .= ".move_faq_entry_same_level($dbtable,$fid,$direction)";
+      if ( !preg_match($RX_DBTABLES, $dbtable) )
+         error('invalid_args', "$dbgmsg.check.bad_dbtable");
 
       $row = mysql_single_fetch( "$dbgmsg.find($fid)",
                 "SELECT Parent, SortOrder FROM $dbtable WHERE ID=$fid LIMIT 1" )
@@ -232,12 +246,12 @@ class AdminFAQ
       {
          $dir = ($direction > 0) ? 1 : -1;
          $start += $dir;
+         if ( $start > $end )
+            swap( $start, $end );
 
          ta_begin();
          {//HOT-section to move FAQ-entry
             // shift the neighbours backward, reference by SortOrder
-            if ( $start > $end )
-               swap( $start, $end );
             db_query( "$dbgmsg.update_sortorder1",
                "UPDATE $dbtable SET SortOrder=SortOrder-($dir) " .
                "WHERE (SortOrder BETWEEN $start AND $end) AND Parent=$parent LIMIT $cnt" );
@@ -252,7 +266,10 @@ class AdminFAQ
 
    public static function move_faq_entry_to_new_category( $dbgmsg, $dbtable, $fid, $direction )
    {
+      $fid = (int)$fid;
       $dbgmsg .= ".move_faq_entry_to_new_category($dbtable,$fid,$direction)";
+      if ( !preg_match($RX_DBTABLES, $dbtable) )
+         error('invalid_args', "$dbgmsg.check.bad_dbtable");
 
       $row = mysql_single_fetch( "$dbgmsg.find($fid)",
             "SELECT Entry.SortOrder, Entry.Parent, Parent.SortOrder AS ParentOrder " .
@@ -302,12 +319,12 @@ class AdminFAQ
    {
       //Warning: for toggle, Answer follow Question
       //         but they could be translated independently
-      if ( $row['Question'] <= 0 )
+      if ( (int)@$row['Question'] <= 0 )
          return ''; //can't be toggled
       $transl = @$row['QTranslatable'];
       if ( $transl == 'Done' || $transl == 'Changed' )
          return ''; //can't be toggled
-      if ( $row['Answer']>0 )
+      if ( (int)@$row['Answer'] > 0 )
       {
          $transl = @$row['ATranslatable'];
          if ( $transl == 'Done' || $transl == 'Changed' )
@@ -320,29 +337,42 @@ class AdminFAQ
 
    public static function toggle_hidden_faq_entry( $dbgmsg, $dbtable, $fid )
    {
+      global $NOW, $player_row;
+
+      $fid = (int)$fid;
       $dbgmsg .= ".toggle_hidden_faq_entry($dbtable,$fid)";
+      if ( !preg_match($RX_DBTABLES, $dbtable) )
+         error('invalid_args', "$dbgmsg.check.bad_dbtable");
 
       $row = self::get_faq_entry_row( $dbtable, $fid );
-      $faqhidden = ( @$row['Flags'] & HELPFLAG_HIDDEN );
+      $flags = (int)@$row['Flags'];
+      $faqhidden = ( $flags & HELPFLAG_HIDDEN );
+      $upd_flags = $flags;
+      if ( $faqhidden )
+         $upd_flags |= HELPFLAG_HIDDEN;
+      else
+         $upd_flags &= ~HELPFLAG_HIDDEN;
 
       ta_begin();
       {//HOT-section to toggle hidden FAQ-entry
-         $qpart = ( $faqhidden ) ? 'Flags & ~' . HELPFLAG_HIDDEN : 'Flags | ' . HELPFLAG_HIDDEN;
-
-         db_query( "$dbgmsg.upd_entry",
-            "UPDATE $dbtable SET Flags=$qpart WHERE ID=$fid LIMIT 1" );
+         $qpart_flags = ( $faqhidden ) ? 'Flags & ~' . HELPFLAG_HIDDEN : 'Flags | ' . HELPFLAG_HIDDEN;
+         db_query( "$dbgmsg.upd_entry.flags($flags>$upd_flags)",
+            "UPDATE $dbtable SET Flags=$qpart_flags WHERE ID=$fid LIMIT 1" );
 
          $transl = self::transl_toggle_state($row);
-         if ( $faqhidden && $transl == 'Y' )
+         if ( $faqhidden && $transl == 'Y' && $row )
          {
             //remove it from translation. No need to adjust Translations.Translated
             $arr = array( $row['Question'] );
             if ( $row['Level'] != 1 )
                $arr[] = $row['Answer'];
-            db_query( "$dbgmsg.upd_transltext",
+            db_query( "$dbgmsg.upd_transltext($flags>$upd_flags)",
                "UPDATE TranslationTexts SET Translatable='N' " .
-               "WHERE ID IN ('" . implode("','", $arr) . "') LIMIT " . count($arr) );
+               "WHERE ID IN (" . join(',', $arr) . ") LIMIT " . count($arr) );
          }
+
+         db_query( "$dbgmsg.faqlog($flags>$upd_flags)",
+            "INSERT INTO FAQlog SET Type='$dbtable', Ref_ID=$fid, uid={$player_row['ID']}, Flags=$upd_flags" );
       }
       ta_end();
    }//toggle_hidden_faq_entry
@@ -350,26 +380,31 @@ class AdminFAQ
    public static function toggle_translatable_faq_entry( $dbgmsg, $dbtable, $row, $curr_translatable )
    {
       $dbgmsg .= ".toggle_translatable_faq_entry($dbtable)";
+      if ( !preg_match($RX_DBTABLES, $dbtable) )
+         error('invalid_args', "$dbgmsg.check.bad_dbtable");
 
       // not yet translated: may toggle it. No need to adjust Translations.Translated
-      $arr = array( $row['Question'] );
-      if ( $row['Level'] != 1 )
-         $arr[] = $row['Answer'];
+      $arr = array( (int)@$row['Question'] );
+      if ( (int)@$row['Level'] != 1 )
+         $arr[] = (int)@$row['Answer'];
       db_query( "$dbgmsg.upd_transltext",
          "UPDATE TranslationTexts SET Translatable='" . ($curr_translatable == 'Y' ? 'N' : 'Y' ) . "' " .
-         "WHERE ID IN ('" . implode("','", $arr) . "') LIMIT " . count($arr) );
+         "WHERE ID IN (" . implode(',', $arr) . ") LIMIT " . count($arr) );
    }//toggle_translatable_faq_entry
 
    //$row = row from AdminFAQ::get_faq_entry_row()
    public static function delete_faq_entry( $dbgmsg, $dbtable, $fid, $row )
    {
+      $fid = (int)$fid;
       $dbgmsg .= ".delete_faq_entry($dbtable,$fid)";
-      $QID = $row['Question'];
-      $AID = $row['Answer'];
+      if ( !preg_match($RX_DBTABLES, $dbtable) )
+         error('invalid_args', "$dbgmsg.check.bad_dbtable");
+      $QID = (int)@$row['Question'];
+      $AID = (int)@$row['Answer'];
 
       $exists_category = mysql_single_fetch( 'admin_faq.do_edit.empty',
          "SELECT ID FROM $dbtable WHERE Parent=$fid LIMIT 1");
-      if ( $row['Level'] <= 1 && $exists_category )
+      if ( (int)@$row['Level'] <= 1 && $exists_category )
          return false;
 
       ta_begin();
@@ -378,12 +413,12 @@ class AdminFAQ
             "DELETE FROM $dbtable WHERE ID=$fid LIMIT 1" );
          db_query( "$dbgmsg.update_sortorder",
             "UPDATE $dbtable SET SortOrder=SortOrder-1 " .
-            "WHERE Parent={$row['Parent']} AND SortOrder > " . $row['SortOrder'] );
+            "WHERE Parent={$row['Parent']} AND SortOrder > " . (int)@$row['SortOrder'] );
 
          db_query( "$dbgmsg.delete_tranlsgrps",
-            "DELETE FROM TranslationFoundInGroup WHERE Text_ID IN ('$QID','$AID') LIMIT 2" );
+            "DELETE FROM TranslationFoundInGroup WHERE Text_ID IN ($QID,$AID) LIMIT 2" );
          db_query( "$dbgmsg.delete_tranlstexts",
-            "DELETE FROM TranslationTexts WHERE ID IN ('$QID','$AID') LIMIT 2" );
+            "DELETE FROM TranslationTexts WHERE ID IN ($QID,$AID) LIMIT 2" );
       }
       ta_end();
 
@@ -396,12 +431,13 @@ class AdminFAQ
    {
       global $NOW, $player_row;
 
+      $fid = (int)$fid;
       $dbgmsg .= ".update_faq_entry($dbtable,$fid)";
-      if ( !preg_match("/^(FAQ|Links|Intro)$/", $dbtable) )
+      if ( !preg_match($RX_DBTABLES, $dbtable) )
          error('invalid_args', "$dbgmsg.check.bad_dbtable");
-      $QID = $row['Question'];
-      $AID = $row['Answer'];
-      $flags = (int)$row['Flags'];
+      $QID = (int)@$row['Question'];
+      $AID = (int)@$row['Answer'];
+      $flags = (int)@$row['Flags'];
       $log = 0;
 
       $upd_flags = $flags; // preserve HELPFLAG_HIDDEN

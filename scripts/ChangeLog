@@ -13,6 +13,13 @@ ChangeLog
 
 2015-05-24 jug
 
+   * include/admin_faq_functions.php (class AdminFAQ, ~.get_faq_group_id, ~.get_faq_entry_row,
+       ~.save_new_faq_entry, ~.move_faq_entry_same_level, ~.move_faq_entry_to_new_category,
+       ~.toggle_hidden_faq_entry, ~.toggle_translatable_faq_entry, ~.delete_faq_entry,
+       ~.update_faq_entry):
+   - write FAQ-log on toggling hidden-flag for FAQ/Intro/Link-entry
+   - cleanup: added more arg-checks/casting/mysql-escaping to prevent SQL-injection
+
    * include/admin_faq_functions.php (AdminFAQ.save_new_faq_entry, ~.update_faq_entry),
      include/globals.php (CSS_VERSION, HELPFLAG_OPS_ONLY, HELPFLAG_HIDDEN),
      include/faq_functions.php (faq_item_html),
