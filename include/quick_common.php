@@ -92,7 +92,7 @@ if ( !is_numeric($timeadjust) )
    $timeadjust = 0;
 
 // time() always returns time in UTC
-global $NOw; //PHP5
+global $NOW; //PHP5
 $NOW = time() + (int)$timeadjust;
 
 define('FMT_PARSE_DATE', 'YYYY-MM-DD hh:mm');
