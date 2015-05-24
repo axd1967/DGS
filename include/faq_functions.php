@@ -32,7 +32,12 @@ function faq_item_html( $level=2, $flags=0, $Qtext='', $Atext='', $href='', $att
    static $prevlevel= 0;
 
    $str = '';
-   $prefix_hide = ($flags & FLAG_HELP_HIDDEN) ? span('HiddenHelp', '[HIDDEN]') : '';
+   $out = array();
+   if ( $flags & HELPFLAG_HIDDEN )
+      $out[] = 'HIDDEN';
+   if ( $flags & HELPFLAG_OPS_ONLY )
+      $out[] = 'OPS-only';
+   $prefix_hide = ( count($out) > 0 ) ? span('HiddenHelp', join(', ', $out), '[%s]') : '';
 
    switch ( (int)$level )
    {

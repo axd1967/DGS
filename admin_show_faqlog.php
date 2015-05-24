@@ -53,6 +53,7 @@ require_once 'include/table_columns.php';
    // add_tablehead($nr, $descr, $attbs=null, $mode=TABLE_NO_HIDE|TABLE_NO_SORT, $sortx='')
    $atable->add_tablehead( 1, T_('ID#header'), 'ID');
    $atable->add_tablehead( 7, T_('Type#header'));
+   $atable->add_tablehead( 8, T_('Flags#header'));
    $atable->add_tablehead( 2, T_('User#header'), 'User');
    $atable->add_tablehead( 3, T_('Time#header'), 'User');
    $atable->add_tablehead( 4, T_('Ref ID#header'), 'ID');
@@ -95,6 +96,15 @@ require_once 'include/table_columns.php';
          $arow_str[6] = make_html_safe( wordwrap(@$row['Answer'], 60, "\n", false), 'faq' );
       if ( $atable->Is_Column_Displayed[7] )
          $arow_str[7] = @$row['Type'];
+      if ( $atable->Is_Column_Displayed[8] )
+      {
+         $out = array();
+         if ( @$row['Flags'] & HELPFLAG_HIDDEN )
+            $out[] = 'Hidden';
+         if ( @$row['Flags'] & HELPFLAG_OPS_ONLY )
+            $out[] = 'OPS-only';
+         $arow_str[8] = explode(', ', $out);
+      }
       $atable->add_row( $arow_str );
    }
    mysql_free_result($result);

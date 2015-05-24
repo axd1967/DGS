@@ -3525,6 +3525,7 @@ table.FAQ td.FAQsearch div.Answer {
 span.HiddenHelp {
    padding-right: 0.5em;
    font-weight: bold;
+   font-size: smaller;
    background: #c0ffb0;
    color: darkgreen;
    text-decoration: none;

@@ -114,3 +114,8 @@ ALTER TABLE Links
    DROP COLUMN Hidden ;
 
 
+-- added Flags in FAQ-log
+ALTER TABLE FAQlog
+   ADD Flags tinyint unsigned NOT NULL default '0' AFTER Type ;
+
+

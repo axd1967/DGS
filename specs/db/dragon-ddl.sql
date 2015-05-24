@@ -249,6 +249,7 @@ CREATE TABLE IF NOT EXISTS `FAQlog` (
   `uid` int(11) NOT NULL default '0',
   `Ref_ID` int(11) NOT NULL default '0',
   `Type` enum('FAQ','Links','Intro') NOT NULL default 'FAQ',
+  `Flags` tinyint(3) unsigned NOT NULL default '0',
   `Question` text NOT NULL,
   `Answer` text NOT NULL,
   `Reference` varchar(255) NOT NULL default '',

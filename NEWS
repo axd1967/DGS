@@ -140,6 +140,7 @@ Copyright (C) 2001-2015  Erik Ouchterlony, Jens-Uwe Gaspar
 
    * Changes for FAQ-editors:
       * Show also hidden FAQ/introduction/links-entries in respective page-lists
+      * Added option to show FAQ-entries only to executives & translators
 
    * Changes for Translators:
       * Added Translate-link "this" in bottom-bar to select untranslated texts of translation group for current page

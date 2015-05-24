@@ -99,6 +99,8 @@ $info_box = '<ul>
    - all the *language* Translated flags are set to 'N'
   As soon as one translator change a *language* Translated flag to 'Y'
    - the Translatable flag is set to 'Done'
+
+  Option 'ops_only' is only relevant for object-type FAQ.
 */
 
 {
@@ -176,6 +178,7 @@ $info_box = '<ul>
    }
    else // FAQ
    {
+      $objtype = TXTOBJTYPE_FAQ;
       $dbtable = $adm_title = $tr_group = 'FAQ';
       $label_head = 'Question';
       $label_cont = 'Answer';
@@ -250,7 +253,7 @@ $info_box = '<ul>
 
    // ***********        Edit entry       ****************
 
-   // args: id, edit=t, type=c|e, question, answer, reference  [ preview=1, qterm=sql_term ]
+   // args: id, edit=t, type=c|e, question, answer, reference, ops_only  [ preview=1, qterm=sql_term ]
    // keep it tested before 'do_edit' for the preview feature
    elseif ( @$_REQUEST['edit'] && ( ($action=@$_REQUEST['type']) == 'c' ||  $action == 'e' ) )
    {
@@ -264,13 +267,14 @@ $info_box = '<ul>
       $show_list = false;
 
       $row = AdminFAQ::get_faq_entry_row( $dbtable, $fid );
-      $faqhidden = ( @$row['Flags'] & FLAG_HELP_HIDDEN );
+      $faqhidden = ( @$row['Flags'] & HELPFLAG_HIDDEN );
 
       if ( @$_REQUEST['preview'] )
       {
          $question = trim( get_request_arg('question') );
          $answer = trim( get_request_arg('answer') );
          $reference = trim( get_request_arg('reference') );
+         $ops_only = (int)get_request_arg('ops_only');
          $question = latin1_safe($question);
          $answer = latin1_safe($answer);
       }
@@ -279,6 +283,7 @@ $info_box = '<ul>
          $question = $row['Q'];
          $answer = $row['A'];
          $reference = $row['Reference'];
+         $ops_only = ( @$row['Flags'] & HELPFLAG_OPS_ONLY );
       }
       if ( $action == 'e' )
          check_reference( $errors, $objtype, $reference );
@@ -303,6 +308,8 @@ $info_box = '<ul>
                                      sprintf( 'Mark entry as changed for translators (Last change: %s)', $q_updated ),
                                      get_request_arg('Qchanged', false),
                                      array( 'disabled' => ( $faqhidden || $row['QTranslatable'] !== 'Done' ) ) ));
+         if ( $objtype == TXTOBJTYPE_FAQ )
+            $edit_form->add_row( array( 'TAB', 'CHECKBOX', 'ops_only', 1, 'Show entry only for operators', $ops_only, ));
       }
       else //i.e. Question/Answer/Reference
       {
@@ -321,6 +328,8 @@ $info_box = '<ul>
                                      sprintf( 'Mark entry as changed for translators (Last change: %s)', $q_updated ),
                                      get_request_arg('Qchanged', false),
                                      array( 'disabled' => ( $faqhidden || $row['QTranslatable'] !== 'Done' ) ) ));
+         if ( $objtype == TXTOBJTYPE_FAQ )
+            $edit_form->add_row( array( 'TAB', 'CHECKBOX', 'ops_only', 1, 'Show entry only for operators', $ops_only, ));
          $edit_form->add_row( array( 'DESCRIPTION', $label_cont,
                                      'TEXTAREA', 'answer', 80, $rows_cont, $answer ) );
          $edit_form->add_row( array( 'TAB',
@@ -350,13 +359,14 @@ $info_box = '<ul>
 
    // ***********        Save edited entry       ****************
 
-   // args: id, do_edit=t type=c|e, question, answer, reference  [ preview='', qterm=sql_term ]
+   // args: id, do_edit=t type=c|e, question, answer, reference, ops_only  [ preview='', qterm=sql_term ]
    // keep it tested after 'edit' for the preview feature
    elseif ( @$_REQUEST['do_edit'] && ( ($action=@$_REQUEST['type']) == 'c' ||  $action == 'e' ) )
    {
       $question = trim( get_request_arg('question') );
       $answer = trim( get_request_arg('answer') );
       $reference = trim( get_request_arg('reference') );
+      $ops_only = ( $objtype == TXTOBJTYPE_FAQ ) ? (bool)get_request_arg('ops_only') : 0;
 
       $row = AdminFAQ::get_faq_entry_row( $dbtable, $fid );
 
@@ -382,7 +392,7 @@ $info_box = '<ul>
          $log = AdminFAQ::update_faq_entry( "admin_faq", $dbtable, $fid, $row,
             ( @$_REQUEST['Qchanged'] === 'Y' ), //only if not hidden
             ( @$_REQUEST['Achanged'] === 'Y' ), //only if not hidden
-            $question, $answer, $reference );
+            $question, $answer, $reference, $ops_only );
       }
 
       if ( $log & 0x7 ) //i.e. modified except deleted, 0x8=reference (not translated)
@@ -400,7 +410,7 @@ $info_box = '<ul>
 
    // ***********        New entry       ****************
 
-   // args: id, new=t, type=c|e, question, answer, reference  [ do_new=?, preview=t ]
+   // args: id, new=t, type=c|e, question, answer, reference, ops_only  [ do_new=?, preview=t ]
    // keep it tested before 'do_new' for the preview feature
    elseif ( @$_REQUEST['new'] && ( ($action=@$_REQUEST['type']) == 'c' ||  $action == 'e' ) )
    {
@@ -418,6 +428,7 @@ $info_box = '<ul>
          $question = trim( get_request_arg('question') );
          $answer = trim( get_request_arg('answer') );
          $reference = trim( get_request_arg('reference') );
+         $ops_only = (int)get_request_arg('ops_only');
          $question = latin1_safe($question);
          $answer = latin1_safe($answer);
       }
@@ -426,6 +437,7 @@ $info_box = '<ul>
          $question = '';
          $answer = '';
          $reference = '';
+         $ops_only = 0;
       }
       if ( $action == 'e' )
          check_reference( $errors, $objtype, $reference );
@@ -444,6 +456,8 @@ $info_box = '<ul>
          //$edit_form->add_row( array( 'HEADER', 'New category' ) );
          $edit_form->add_row( array( 'DESCRIPTION', 'Category',
                                      'TEXTINPUT', 'question', 80, 80, $question ) );
+         if ( $objtype == TXTOBJTYPE_FAQ )
+            $edit_form->add_row( array( 'TAB', 'CHECKBOX', 'ops_only', 1, 'Show entry only for operators', $ops_only, ));
       }
       else
       {
@@ -455,6 +469,8 @@ $info_box = '<ul>
          }
          $edit_form->add_row( array( 'DESCRIPTION', $label_head,
                                      'TEXTINPUT', 'question', 80, 80, $question ) );
+         if ( $objtype == TXTOBJTYPE_FAQ )
+            $edit_form->add_row( array( 'TAB', 'CHECKBOX', 'ops_only', 1, 'Show entry only for operators', $ops_only, ));
          $edit_form->add_row( array( 'DESCRIPTION', $label_cont,
                                      'TEXTAREA', 'answer', 80, $rows_cont, $answer ) );
       }
@@ -477,19 +493,20 @@ $info_box = '<ul>
 
    // ***********        Save new entry       ****************
 
-   // args: id, do_new=t type=c|e, question, answer, reference  [ preview='' ]
+   // args: id, do_new=t type=c|e, question, answer, reference, ops_only  [ preview='' ]
    // keep it tested after 'new' for the preview feature
    elseif ( @$_REQUEST['do_new'] && ( ($action=@$_REQUEST['type']) == 'c' ||  $action == 'e' ) )
    {
       $question = trim( get_request_arg('question') );
       $answer = trim( get_request_arg('answer') );
       $reference = trim( get_request_arg('reference') );
+      $ops_only = ( $objtype == TXTOBJTYPE_FAQ ) ? (bool)get_request_arg('ops_only') : 0;
 
       if ( !$question || ($objtype == TXTOBJTYPE_LINKS && $action == 'e' && !$reference) )
          jump_to($page.URI_AMP."sysmsg=".urlencode('Error: an entry must be given'));
 
       $new_id = AdminFAQ::save_new_faq_entry( 'admin_faq', $dbtable, $tr_group, $fid, ($action == 'c'),
-         $question, $answer, $reference );
+         $question, $answer, $reference, $ops_only );
 
       jump_to( $page.URI_AMP."id=$ref_id#e$ref_id" ); //clean URL (focus on new entry)
       // overview-loading takes so long, so redirect to edit-page
@@ -578,12 +595,11 @@ $info_box = '<ul>
 
 
       echo "<h3 class=Header>$title</h3>\n";
-
-      $nbcol = 12;
       echo name_anchor('general'), "<table class=FAQAdmin>\n";
 
       // table-columns:
-      // curr-entry | match-term | Q/New | A | move-up | ~down | cat-up | ~down | New | Hide | Transl
+      // curr-entry | match-term | Q/New | A | move-up | ~down | cat-up | ~down | New | Hide | Transl | ops-only
+      $nbcol = 13;
 
       if ( !$view_all )
          echo "<tr><td colspan=2></td>",
@@ -607,10 +623,11 @@ $info_box = '<ul>
       while ( $row = mysql_fetch_assoc( $result ) )
       {
          $question = (empty($row['Q']) ? '(empty)' : $row['Q']);
-         $faqhidden = ( @$row['Flags'] & FLAG_HELP_HIDDEN );
+         $faqhidden = ( @$row['Flags'] & HELPFLAG_HIDDEN );
          $transl = AdminFAQ::transl_toggle_state($row);
          $eid = $row['ID'];
          $entry_ref = "#e$eid";
+         $ops_only = ( @$row['Flags'] & HELPFLAG_OPS_ONLY );
 
          // mark 'current' entry and matched-terms (2 cols)
          echo '<tr><td>';
@@ -693,6 +710,9 @@ $info_box = '<ul>
          }
          else
             echo '<td></td>';
+
+         // ops-only
+         echo '<td>', ($ops_only ? span('HiddenHelp', '[OPS-only]') : ''), '</td>';
 
          echo '</tr>';
 

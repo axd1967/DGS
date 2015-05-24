@@ -64,7 +64,7 @@ class AdminFAQ
     * \param $chk_mode 0=std-entry (Answer), 1=Question, 2=reference (for Links)
     */
    public static function save_new_faq_entry( $dbgmsg, $dbtable, $tr_group, $fid, $is_cat, $question, $answer, $reference,
-         $append=false, $translatable='N', $do_log=true, $chk_mode=0 )
+         $ops_only, $append=false, $translatable='N', $do_log=true, $chk_mode=0 )
    {
       global $NOW, $player_row;
 
@@ -106,7 +106,7 @@ class AdminFAQ
          // add ROOT-element (=seed) for $dbtable
          $query = "SELECT * FROM $dbtable WHERE ID=$fid LIMIT 1";
          $row = mysql_single_fetch( "$dbgmsg.do_new.find1($fid)", $query );
-         if ( $fid==1 && (!$row || ($row['Flags'] & FLAG_HELP_HIDDEN)) )
+         if ( $fid==1 && (!$row || ($row['Flags'] & HELPFLAG_HIDDEN)) )
          {
             //adjust the seed. must be NOT hidden even if invisible
             db_query( "$dbgmsg.do_new.replace_seed($fid)",
@@ -123,7 +123,7 @@ class AdminFAQ
          elseif ( $row['Level'] == 1 && !$is_cat ) // entry
             $row = array('Parent' => $row['ID'], 'SortOrder' => 0, 'Level' => 2);
 
-         if ( $append )
+         if ( $append ) // append new entry at bottom of category
          {
             $order_row = mysql_single_fetch( "$dbgmsg.do_new.find_order($fid)",
                "SELECT MAX(SortOrder) AS X_MaxSortOrder FROM $dbtable " .
@@ -133,7 +133,7 @@ class AdminFAQ
             else
                $new_sortorder = 1;
          }
-         else
+         else // move lower entries down to make space for new entry in category
          {
             db_query( "$dbgmsg.do_new.update_sortorder",
                "UPDATE $dbtable SET SortOrder=SortOrder+1 " .
@@ -142,9 +142,11 @@ class AdminFAQ
             $new_sortorder = $row['SortOrder'] + 1;
          }
 
+         $FlagsSql = HELPFLAG_HIDDEN | ( $ops_only ? HELPFLAG_OPS_ONLY : 0 );
          db_query( "$dbgmsg.do_new.insert",
             "INSERT INTO $dbtable SET " .
-            "SortOrder=$new_sortorder, Parent={$row['Parent']}, Level={$row['Level']}, Reference='$ReferenceSql'" );
+            "SortOrder=$new_sortorder, Parent={$row['Parent']}, Level={$row['Level']}, " .
+            "Reference='$ReferenceSql', Flags=$FlagsSql" );
          $faq_id = mysql_insert_id(); // FAQ | Intro | Links
 
          $Qsql = mysql_addslashes( latin1_safe($question) );
@@ -200,7 +202,7 @@ class AdminFAQ
          if ( $do_log )
          {
             db_query( "$dbgmsg.do_new.faqlog",
-               "INSERT INTO FAQlog SET Type='$dbtable', Ref_ID=$fid, uid={$player_row['ID']}, " .
+               "INSERT INTO FAQlog SET Type='$dbtable', Ref_ID=$fid, uid={$player_row['ID']}, Flags=$FlagsSql, " .
                   "Question='$Qsql', Answer='$Asql', Reference='$ReferenceSql'" ); //+ Date= timestamp
          }
       }
@@ -321,11 +323,11 @@ class AdminFAQ
       $dbgmsg .= ".toggle_hidden_faq_entry($dbtable,$fid)";
 
       $row = self::get_faq_entry_row( $dbtable, $fid );
-      $faqhidden = ( @$row['Flags'] & FLAG_HELP_HIDDEN );
+      $faqhidden = ( @$row['Flags'] & HELPFLAG_HIDDEN );
 
       ta_begin();
       {//HOT-section to toggle hidden FAQ-entry
-         $qpart = ( $faqhidden ) ? 'Flags & ~' . FLAG_HELP_HIDDEN : 'Flags | ' . FLAG_HELP_HIDDEN;
+         $qpart = ( $faqhidden ) ? 'Flags & ~' . HELPFLAG_HIDDEN : 'Flags | ' . HELPFLAG_HIDDEN;
 
          db_query( "$dbgmsg.upd_entry",
             "UPDATE $dbtable SET Flags=$qpart WHERE ID=$fid LIMIT 1" );
@@ -389,7 +391,8 @@ class AdminFAQ
    }//delete_faq_entry
 
    //$row = row from AdminFAQ::get_faq_entry_row()
-   public static function update_faq_entry( $dbgmsg, $dbtable, $fid, $row, $q_change, $a_change, $question, $answer, $reference )
+   public static function update_faq_entry( $dbgmsg, $dbtable, $fid, $row, $q_change, $a_change, $question, $answer,
+         $reference, $ops_only )
    {
       global $NOW, $player_row;
 
@@ -398,15 +401,27 @@ class AdminFAQ
          error('invalid_args', "$dbgmsg.check.bad_dbtable");
       $QID = $row['Question'];
       $AID = $row['Answer'];
+      $flags = (int)$row['Flags'];
       $log = 0;
+
+      $upd_flags = $flags; // preserve HELPFLAG_HIDDEN
+      if ( $ops_only )
+         $upd_flags |= HELPFLAG_OPS_ONLY;
+      else
+         $upd_flags &= ~HELPFLAG_OPS_ONLY;
 
       ta_begin();
       {//HOT-section to update FAQ-entry
+         $upd_dbtable_qpart = array();
          $ReferenceSql = mysql_addslashes($reference);
          if ( $row['Reference'] != $reference )
+            $upd_dbtable_qpart[] = "Reference='$ReferenceSql'";
+         if ( $flags != $upd_flags )
+            $upd_dbtable_qpart[] = "Flags=$upd_flags";
+         if ( count($upd_dbtable_qpart) > 0 )
          {
-            db_query( "$dbgmsg.update_reference",
-               "UPDATE $dbtable SET Reference='$ReferenceSql' WHERE ID=$fid LIMIT 1" );
+            db_query( "$dbgmsg.update_main(ref,flags)",
+               "UPDATE $dbtable SET " . join(', ', $upd_dbtable_qpart) . " WHERE ID=$fid LIMIT 1" );
             $log |= 0x8;
          }
 
@@ -455,7 +470,7 @@ class AdminFAQ
          if ( $log )
          {
             db_query( "$dbgmsg.faqlog",
-               "INSERT INTO FAQlog SET Type='$dbtable', Ref_ID=$fid, uid={$player_row['ID']}, " .
+               "INSERT INTO FAQlog SET Type='$dbtable', Ref_ID=$fid, uid={$player_row['ID']}, Flags=$upd_flags, " .
                   "Question='$Qsql', Answer='$Asql', Reference='$ReferenceSql'" ); //+ Date= timestamp
          }
       }

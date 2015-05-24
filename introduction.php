@@ -84,13 +84,13 @@ function load_intro( $load_hidden )
       "WHERE (entry.Level BETWEEN 1 AND 2) " .
          ( $load_hidden
             ? ''
-            : "AND entry.Flags < ".FLAG_HELP_HIDDEN." AND parent.Flags < ".FLAG_HELP_HIDDEN." " ) . //need a viewable root
+            : "AND entry.Flags < ".HELPFLAG_HIDDEN." AND parent.Flags < ".HELPFLAG_HIDDEN." " ) . //need a viewable root
       "ORDER BY CatOrder, entry.Level, entry.SortOrder" );
 
    $last_level = 0;
    while ( $row = mysql_fetch_assoc($result) )
    {
-      $prefix_hide = ($row['Flags'] & FLAG_HELP_HIDDEN) ? span('HiddenHelp', '[HIDDEN]') : '';
+      $prefix_hide = ($row['Flags'] & HELPFLAG_HIDDEN) ? span('HiddenHelp', '[HIDDEN]') : '';
       if ( $row['Level'] == 1 ) // section
       {
          if ( $last_level > 0 )

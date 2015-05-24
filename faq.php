@@ -32,6 +32,7 @@ $GLOBALS['ThePage'] = new Page('FAQ', 0, ROBOTS_NO_FOLLOW,
 
    $logged_in = who_is_logged( $player_row, LOGIN_DEFAULT_OPTS|LOGIN_SKIP_VFY_CHK );
    $is_admin = ( @$player_row['admin_level'] & ADMIN_FAQ );
+   $is_op = ( @$player_row['admin_level'] & ADMINGROUP_EXECUTIVE ) || @$player_row['Translator'];
 
    start_page(T_("FAQ"), true, $logged_in, $player_row );
    $menu_array = array();
@@ -42,9 +43,10 @@ $GLOBALS['ThePage'] = new Page('FAQ', 0, ROBOTS_NO_FOLLOW,
    // init vars
    $TW_ = 'T_'; // for non-const translation-texts
    $faq_url = 'faq.php?';
+   $omit_flags = ( $is_op ) ? HELPFLAG_HIDDEN : HELPFLAG_OPS_ONLY;
    $qpart_faqhidden = ( $is_admin )
       ? ' 1'
-      : " entry.Flags < ".FLAG_HELP_HIDDEN." AND parent.Flags < ".FLAG_HELP_HIDDEN; //need a viewable root
+      : " entry.Flags < $omit_flags AND parent.Flags < $omit_flags"; //need a viewable root
 
    $arr_languages = get_language_descriptions_translated();
    $lang = get_request_arg('lang', 0);

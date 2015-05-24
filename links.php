@@ -153,18 +153,18 @@ function save_link_section( $arg, $title )
 {
    global $f;
 
-   //save_new_faq_entry(dbgmsg,dbtable,tr_group,fid,is_cat,Q,A,Ref, append,translatable,log,chk_mode)
+   //save_new_faq_entry(dbgmsg,dbtable,tr_group,fid,is_cat,Q,A,Ref,OpsOnly, append,translatable,log,chk_mode)
    $f = AdminFAQ::save_new_faq_entry( 'links.save_link_section', 'Links', 'Links', 1, true,
-      $title, '', '', true, 'Y', false, /*chk-md*/1 );
+      $title, '', '', /*ops-only*/false, /*append*/true, 'Y', /*log*/false, /*chk-md*/1 );
 }
 
 function save_link_entry( $url='', $text='', $extra='' )
 {
    global $f;
 
-   //save_new_faq_entry(dbgmsg,dbtable,tr_group,fid,is_cat,Q,A,Ref, append,translatable,log,chk_mode)
+   //save_new_faq_entry(dbgmsg,dbtable,tr_group,fid,is_cat,Q,A,Ref,OpsOnly, append,translatable,log,chk_mode)
    AdminFAQ::save_new_faq_entry( 'links.save_link_entry', 'Links', 'Links', /*parent*/$f, false,
-      $text, $extra, $url, true, 'Y', false, /*chk-md*/2 );
+      $text, $extra, $url, /*ops-only*/false, /*append*/true, 'Y', /*log*/false, /*chk-md*/2 );
 }
 
 function load_links( $load_hidden )
@@ -182,13 +182,13 @@ function load_links( $load_hidden )
       "WHERE (entry.Level BETWEEN 1 AND 2) " .
          ( $load_hidden
             ? ''
-            : "AND entry.Flags < ".FLAG_HELP_HIDDEN." AND parent.Flags < ".FLAG_HELP_HIDDEN." " ) . //need a viewable root
+            : "AND entry.Flags < ".HELPFLAG_HIDDEN." AND parent.Flags < ".HELPFLAG_HIDDEN." " ) . //need a viewable root
       "ORDER BY CatOrder, entry.Level, entry.SortOrder" );
 
    $last_level = 0;
    while ( $row = mysql_fetch_assoc($result) )
    {
-      $prefix_hide = ($row['Flags'] & FLAG_HELP_HIDDEN) ? span('HiddenHelp', '[HIDDEN]') : '';
+      $prefix_hide = ($row['Flags'] & HELPFLAG_HIDDEN) ? span('HiddenHelp', '[HIDDEN]') : '';
       if ( $last_level > 0 && $row['Level'] != $last_level )
          add_link_page_link();
 

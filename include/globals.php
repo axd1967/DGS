@@ -26,7 +26,7 @@ require_once 'include/config-local.php';
  */
 
 define('DGS_VERSION', '1.19.8'); // ARCHITECTURE(1=php).MAJOR.MINOR
-define('CSS_VERSION', '20150519004500'); // take UTC-timestamp of skins/dragon/screen.css
+define('CSS_VERSION', '20150524123700'); // take UTC-timestamp of skins/dragon/screen.css
 define('JS_VERSION',  '20131211220200'); // take UTC-timestamp of newest js/*.js script
 
 // global version of quick-suite: increased with each release
@@ -243,6 +243,8 @@ define('QST_CACHE_MPG',      'MPG');
 // ---------- Help/FAQ stuff --------------------------------------
 
 // FAQ/Intro/Links.Flags 0xff
-define('FLAG_HELP_HIDDEN', 0x80); // must be highest bit (for efficient index-use)
+// NOTE: HELPFLAG_OPS_ONLY & HELPFLAG_HIDDEN must be highest bits with HIDDEN > OPS_ONLY (for efficient index-use, see faq.php)
+define('HELPFLAG_OPS_ONLY', 0x40); // show entry only to operators (=executives + translators)
+define('HELPFLAG_HIDDEN',   0x80); // hide entry (except for FAQ-admins)
 
 ?>
