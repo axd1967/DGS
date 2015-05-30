@@ -1542,8 +1542,8 @@ class TournamentLadder
 
       // count of ladder-users with rating >= given-rating
       $row = mysql_single_fetch( $dbgmsg.".TL:find_ladder_rating_pos($tid,$rating)",
-         "SELECT COUNT(*) AS X_Count FROM TournamentLadder AS TL INNER JOIN Players AS TLP ON TLP.ID=TL.uid " .
-         "WHERE TL.tid=$tid AND TLP.Rating2 >= $rating" );
+         "SELECT COUNT(*) AS X_Count FROM TournamentLadder AS TL INNER JOIN Players AS TL_P ON TL_P.ID=TL.uid " .
+         "WHERE TL.tid=$tid AND TL_P.Rating2 >= $rating" );
       return ($row) ? (int)$row['X_Count'] : 0;
    }//find_ladder_rating_pos
 
