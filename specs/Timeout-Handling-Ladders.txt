@@ -1,0 +1,295 @@
+###################################################################################
+# Problems & possible solutions (+ comments)
+# !!! = important argument, Q=question, S=solution, (Lx)=Label #x
+
+* Q: What are the main use-cases to handle?
+   - G ends by timeout
+   - TG ends by timeout
+      - T-cron removes TP from T
+   - TP withdraws
+   - TD removes TP from T
+   - TD annulls TG
+   - TP/TD sets TP on HOLD
+   - TP was inactive on T
+
+* tournament is layer on top of the game-system
+   * [L1] game-results (jigo, score/resign, forfeit, no-result, timeout) can be handled differently according to defined tournament-properties {L8 1st-T-impl-KISS, L3b wanted}
+   * [L2] ladder-rank should be achieved by skill and not by luck (of a timeout)
+   * [L3a] pressure players to avoid timeouts, "punishment" is to lose achievments (ladder-bottom, removal)
+   * [L3b] loser with timeout should be "punished" somehow !!! => S:
+   * [L5] avoid abuse to aim for timeouts to get easy win !!! => S: better inactive-handling
+   * [L6] win-by-timeout unfair on leapfrogged players
+   * [L7] ladder has less than normal timeouts (~5%, normal 25%), unknown due to what (T-env or TL-timeout-props?) {25% timeouts are part of "inflated" DGS-rating, so timeout-wins are natural}
+   - [L8] TL allows only action on winner XOR loser !!! => S: separate action on winner and loser ?
+   - [L9] often opponents stop playing when losing "escaping with timeout" {can be seen as win} !!!
+   - [La] winner is "punished" by timeout (winner did nothing wrong(!) but no rank-gain, has to wait for game-end, ties free challenges, down-ranked due to somewhat blocked challenge {depends on pace})
+   - [Lb] loser is already "punished" by timeout {depends; but agree timeouts can happen -> allow way to "recover" from punishment-"lock"}
+   - [Lc] a timeout-win is also a win, consistency wanted (game <-> T)
+   - [Ld] TO should not remove users from TL (other annulled games are misleading and hard to understand for remaining players)
+   - S: block challenges IN/OUT somehow for losers by timeout ?
+
+* T-withdrawal, T-removal
+   - [Ld] TP withdraw, re-enter again soon to preserve rating !!! => S: unrated Ts only, keep rating of TGs, don't allow withdrawal with running TGs
+   - [Le] T-withdrawal detaches running TGs, make unrated => S: leave rated (done), withdrawal only if no running TGs
+   - [Lf] TP-rejoin delay after withdrawal {probably unfair as timeouts can have good reasons} -> do withdrawal+rejoin without advantage => S: keep TGs rated-state (done), withdrawal only w/o run-TGs
+
+- S: TD removal of TP to annul TGs can be treated by ending TG, but continuing Gs ?
+
+- Q: should TL support removal of user on timeout ?
+
+- Q: does game-result during HOLD-status change own TL-pos on winning (even though opponents TL-pos may change) ? if "price" setting HOLD is rank-drop WHEN to apply (start or end of HOLD-process) ?
+
+- Q: need special TL-handling for game-end by forfeit ?
+
+- Q: take caution on absence-handling for users with last-moved earlier than their last ladder join-time !?
+
+- Q: check/re-define questionable ladder-props / behavior regarding: annulling, detaching, timeouts, withdrawal, user-removal, inactivity, re-enter
+   - NOTE: restrict only clearly identifiable abuse; allow thriving; "keep" achievements, but prevent abuse
+   - Q: when to apply game-annulling of TG ?
+   - TP-withdrawal: keep TGs rated-state (done), withdrawal only after all TGs finished => HOLD-status + AUTO-withdrawal-flag (remove after last TG finished) ?
+   - support for immediate removal/withdrawal ?
+   - TD-removal: replace feature ? HOLD-status or annulling (set TG-result and make unrated) or end game by forfeit ? there should be a way for TD to immediately remove TP (perhaps with delay ?)
+   - T-CRON-removal: remove feature ?
+
+- bug: game-ends, user withdraws before game-end processed by T-cron -> made game unrated + no TL-change !!! => S: avoid race by denying TL-withdrawal with "unprocessed" TG-ends; or HOLD-state + auto-withdrawal after all TGs ended and processed; or process TL-withdrawal in T-cron async (after TG-ends) {prevents immediate re-join till delay op processed}
+
+- S: change TL-props: separate actions for winner & loser ?
+- idea: to avoid targeting timeout'ed-players -> do TL-action only if TG has played 6 moves for timeout (perhaps TL-config for board-size dependent Ts, e.g. 5x5-TL); maybe allow revoke/DELETE-TG
+- idea: block incoming challenges for newly joined TPs ?
+- idea: block incoming challenges for TP with previous losing-by-timeout ? {prevents re-challenge to gain rank or rating for rated-Ts}
+- idea: graceful withdrawal (block IN/OUT-challenges), finish running TGs + auto-removal afterwards; should allow cancel withdrawal by TP/TD
+- idea: prevent "kicking out" TPs in TL by remove feature of "TP-removal as TL-action" (so that TP not removed from TL) {then only gain rank left as possibility}
+- idea: TP set on timeout-HOLD-status on 1st timeout-losing (no IN/OUT-challenges), but no auto-removal -> normal absence-removal; timeout-HOLD cancelled if TG ended w/o timeout ?
+- idea: allow to set HOLD-status by TP any time (as "break" from TL w/o losing rank); should have a price-tag (drop rank by X or X% places) to allow leapfrogging (else blocking top-spot possible); then dropping later follows naturally (being leapfrogged); show have HOLD-status a time-limit (similar to "vacation" from TL) ?
+- idea: "vacation" from TL by withdrawing with option to re-join at old ladder-pos (and old "stats", TP.Status=PAUSED, not appearing on TL, but TP kept)
+- idea: remove TP from TL after X timeouts ? or if reached TL-bottom (in steps) ?
+
+
+###################################################################################
+# Discussion/Ideas:
+# REF: - ? DISC: [tourney] answer Q: ladder-timeout-discussion: http://www.dragongoserver.net/forum/read.php?forum=11&thread=36945#38975;;
+# REF: - ? DISC: [tourney] answer Q about timeout-handling: http://www.dragongoserver.net/forum/read.php?forum=11&thread=36945#37208 -> not done
+# REF: - 3 WAIT: [tourney] answer Q about timeout-no-result-treating: http://www.dragongoserver.net/forum/read.php?forum=11&thread=36945#37203 -> keep for archive
+
+- JUG,4k: ladder-rank should be achieved by skill and not by luck (of a timeout)
+   - FT: it is unfair on the winner, however the win is gained. It is not the fault of the winner that an opponent times out. It is very bad luck for them.
+- JUG: That rule also places some pressure on the players, not to let time out games as the "punishment" is to lose all achieved ranks (and be moved to the ladder-bottom). Perhaps a less harsh rule for timeouts would be only to move the loser below the winner (instead of to the bottom).
+- JUG: avoid potential abuse to aim for timeouts
+   - FT: potential abuse could also come from helpful resignations? Couldn't it come from helpful weak play?
+- JUG: how to treat a timout, is basically the same line of thinking that stands behind the feature "reject a win on timeout".
+
+- Timeout-Stats of TLs (usually ~25%):
+| tid | Type       | TPs | TOs  | TimeoutP | count(*) |
++-----+------------+-----+------+----------+----------+
+|   1 | LADDER     | 379 |  536 |   4.6383 |    11556 |
+|   2 | LADDER     | 188 |  132 |   3.9771 |     3319 |
+|   3 | LADDER     | 679 |  455 |   4.6878 |     9706 |
+|   4 | LADDER     |  84 |   40 |   1.3784 |     2902 |
+
+- Q: should a rated TG treated the same for reject-win-by-TO and Moves<10 ?
+
+- JUG: tournament is an additional layer on top of the normal game-system. How the different game-result (jigo, score/resign, timeout) are interpreted depends on the tournament-properties.
+   - how game-results are treated within a tournament is totally subjective to the tournament. So for example you could also base actions to be influenced by the actual score
+
+- opposing views:
+   - a win by score/resign/timeout should be treated the same (the challenger moves up in a ladder).
+   - for a ladder a timeout is treated differently (as I don't think the challenger deserves to climb up if won by a timeout).
+      - IMHO the targeted ladder position resembles a skill-rank and a game won by timeout is insufficient to determine that. Therefore a game-result by timeout is treated a no-result.
+         - FT: I agree with the resemblance. This is reflected in normal DGS play in which a ranked game won by timeout results in an increase in rating (unless the win is rejected).
+
+- JUG: I consider it unfair on the leapfrogged players, if a player would jump on a game won by a timeout and not by his real strength.
+   - DrStraw: I agree with this, but one problem I have is that I have to wait for 14 days before it times out.
+   - DrStraw: A time limit which encourages quicker moves is more appropriate for a ladder environment because by the time these games are eventually finished (whether by time out or play out) the players involved will be well below their relative position when the games started.
+
+- DrStraw,1d: when I challenge someone I have an expectation that if I beat them I will move up the ladder. To be tied up for 14 days, waiting for a win on time, unable to issue other challenges, and then get nothing for it seems very unsatisfactory. If I were able to issue other challenges during that time then it would not bother me as much.
+   - JUG: the current ladder-implementation only allows to "move" one player (either the winner or the loser).
+   - JUG: But even if the winner of a timeout would move up, I would also like to "punish" the timeout-loser, which is not possible with the current implementation.
+      - leu: I do not see the necessity as the loser (by what reason ever) is already punished by having lost.
+
+- DrStraw: you don't seem to think of a win on time as a real win. But that is just not true. When someone enters a tournament they are expect to follow the rules of the tournament and if they don't, then they lose.
+   - JUG: I have no problem treating a timeout as win for other tournaments (McMahon-formats or round-robin). But for these ladders I choose to treat it differently (reasons have been given).
+
+- FT,9k: want consistent rules across all games
+
+- FT: If we reversed the notion and suggested that wins by time out affect ladder rank but not DGS rating it perhaps puts the thing in perspective. I imagine from your post that you would not be happy with that. I am equally unhappy because I see my position on the ladder as a genuine rank.
+   - If time out wins affect rating in non-ladder games they should affect ladder rank in ladder games.
+
+- lorl,1d: it's unfair not to move up won by timeout
+   - A win by timeout is a win. It's not my fault that my opponent doesnt answer.
+   - I have wait for 14 days with no possibility to begin a new challenge, and I gained nothing... Quite frustrating
+   - In most cases, opponents stops playing when losing.
+
+- Sakata,1d: I have five games in which my opponents have losing positions and have just stopped playing. One is refusing to fill the last point when behind by double-digit points on a small board. This is most frustrating. It ties up my free challenges and does not benefit me at all if I win on time. That the opponent drops to the bottom is of little consolation to me.
+
+- GregorS,1k: The only valid reason for this rule I think was the possibility for aiming for a timeout win by challenging inactive users. However, inactive users will be moved to the bottom of the ladder (and in the other ladders they even get kicked), so this is already a non-issue; no reason to punish someone who already got punished without fault because their opponents stopped moving for 2 weeks (most likely in a resignable position) and clogged up their challenge spots.
+
+- JocaRamiro,5k: players stop making moves when they are sure they have lost. So, I accept wins by time out as affecting my rank.
+   - for an non-rated tournament, where the only goal is moving up a ladder, and having some fun games, I have no objection to time out wins being treated differently. I do think the Jug argument for not counting them has a logical basis, since clearly some timeouts are based on external reasons (not on evaluation of a lost position)
+
+#################
+# REF: - think about conflicting ladder-props/features to resolve different expectations of all parties:
+# REF: - http://www.dragongoserver.net/message.php?mode=ShowMessage&mid=2786867
+
+- JUG: opponent timed-out in one of his tournament-games, which will have him removed from the ladder, thereby all of his games were annulled (and detached from the ladder), which leads to making them unrated and not longer influence the ladder-tournament.
+   - Jester,19k: That is very unfair ! We finished several days ago and I actually played well and won..... though I would consider it just as unfair If I had lost
+      - I absolutely fail to see how a defection by a player can make finished games invalid.. only games in progress.
+         - JUG: ?? perhaps a bug of treating timeouts/withdrawals during T-cron not-processing it yet !?
+
+#################
+# REF: - http://www.dragongoserver.net/forum/read.php?forum=11&thread=40161#42209 (let timeout-handling be as it is)
+# REF: - 2 SPEC: [tourney] (T022) TL: don't make game unrated on user-removal (timeout/withdrawal); what about forfeit/no-result-handling?: http://www.dragongoserver.net/forum/read.php?forum=11&thread=40161#40172
+
+- Basileus,2d: Some people quit TL only to enter it shortly afterwards.
+   - people quit only to conserve rating points it's not fair play. I don't understand why games become unrated when a player quit from the tournament.
+   - JUG: was done in order not to punish people, that want to leave the tournament, because the don't have time any more or they underestimated the amount of time they need to spend to play on the ladder.
+      - normal withdrawal detaching the running tournament-games (which includes making them unrated)
+      - removal of user with detaching of the running tournament-games on timeouts (what you reported in this topic)
+
+- Basileus: Perhaps, we should make some delay before one who quit is allowed to play in the tournament again.
+   - JUG: I'm not sure adding a delay to prevent immediate re-joining is such a good idea: how long should the delay be? 7 days, 14 days, 30 days? ... a removed user (due to timeout) or by normal withdrawal can still come back and do the same again (even if there is a delay).
+      - problem I have with a delay is, that we have no way to differ between a good or bad intent behind a certain behaviour (automatically). A delay would also punish other use-cases than your reported situation (including the "good" people).
+         - JUG: a delay for re-joining is IMHO totally unconnected to a withdrawal from a ladder-tournament if it is to prevent an "escape" to avoid a rating-change ... because a ladder can be unrated and so for those it would make no difference it you delay or not.
+      - solution: to prevent, that users can avoid a rating-change, then the best approach would be to remove the step to make the game unrated on timeout-handling or withdrawal from the tournament.
+      - it's better to implement restricting features, only if a situation can be clearly identified as "abuse". Withdrawal and re-joining a tournament I wouldn't consider abuse. If too much restrictions are in place to allow people to play, that's certainly not making a thtriving place.
+
+- schroeder,1k: ALL my tournament games went unrated was "this is not fair for my opponents";
+
+- Q: Perhaps it's not such a big pain for normal "with-drawers" to let the game continue as rated games!?
+   - Basileus: Keeping tournaments game rated after withdrawl is the simplest and reasonable way to prevent escaping.
+   - BigElefant,8k: Keeping rated games rated after a withdrawal sounds reasonable.
+   - FT,9k: if players leave a ladder then their games should remain rated.
+
+- Neltharion,20k: i really like kicking people out of the ladder via timeout, and its also a hobby of me to challenge players who never played a game or never won a game in the tournament.
+   - when i win by timeout i am basically taking points from inactive players and distributing them amongst my peers
+   - ladder leavers and re-joiners are not really a problem. the only problem seems to be that they can switch games to unrated by leaving the ladder. its more of a side-issue affecting the rating of the players involved.
+   - idea-solution: could be to leave the games rated, but that has one problem: when a person is a candidate for timeout, people might challenge him to get some points.
+      => solution: set HOLD-status for loser by timeout that stops incoming challenges
+   - inactive players in the ladder basically have a bounty on their head, someone can get some free rating points by challenging them.
+      => solution: only start unrated TLs
+
+- FT: idea: alternative is for any game to be annulled completely if someone leaves. That is, not just annulled from the ladder but the game totally voided.
+
+- JUG: idea: block incoming challenges for newly joined TPs !?
+
+
+#################
+# REF: - ? DISC: [tourney] answer Q-thread: anomaly (timeout-handling <-> rated games): http://www.dragongoserver.net/forum/read.php?forum=11&thread=42283
+
+- FT,9k: reason for not allowing the win by timeout was the potential for manipulation. that potential lies likely in rating changes even if the win is not allowed for ladder purposes. some players will manipulate their position (ladder or rating) regardless of any system. But that should not prevent the normal fair player receiving their wins for timeouts - as per the norm on non-ladder games on DGS.
+   - idea: The alternative is to annul the game for all purposes. I believe that would deter players from targeting potential timeout wins.
+   - JocaRamiro,5k: a win by time out is still a win, and it is correct for the ratings to allow that. issue of consistency does not move me particularly.
+
+- Q: JUG: 25% timeouts is normal on DGS and maybe part of "inflated" ratings on DGS -> this could be a reason to support the stance that timeouts are a "normal" thing (also for TLs) !?
+
+- FT: We now have a player targetting potential timeouts and gain rating increases from that in ladder games, as the stronger players cannot refuse the game offers. that's unethical. I dislike a system that enables it to occur and accepts it occurring once it has been seen. Removing the rating change removes that incentive.
+   - JUG: rating-increase AND kick out inactive TL-users are motivations.  Removing rating-change is probably not a good solution for this !?
+
+
+#################
+# REF: - ? DISC: [tourney] answer Q/discuss to yagiza-suggestions: http://www.dragongoserver.net/forum/read.php?forum=11&thread=40241#40348
+# REF: - ? DISC: [tourney] TL: answer Q: yagiza ladder withdrawal/HOLD-status/reduce game-load: http://www.dragongoserver.net/forum/read.php?forum=11&thread=40241#40315
+# REF: - 4 SPEC: [tourney] (T022) TL: allow HOLD-status to prevent challenges for some time: http://www.dragongoserver.net/forum/read.php?forum=11&thread=40241#40283
+# REF: - 1 BUG:  [tourney] (T022) TL: forbid withdrawal as long as there are unprocessed game-endings (to be done by T-cron); OR, better follow Avics approach to delay the withdrawal and process in T-cron (has lesser bad things happening); would make sense to have a HOLD-state to prevent further challenges; option (yagiza): withdrawal=set-HOLD & wait till all games finished on TL before withdrawing automatically then: http://www.dragongoserver.net/forum/read.php?forum=11&thread=40241#40262
+
+- DrStraw,1d: there should be a way to retire from the ladder by not allowing any further challeges either way but requiring current games to finish.
+   - axd,12k: Wouldn't this only force someone to play dummy moves just to get rid of the game? (Or just let it time out) ?
+
+- problem/bug: game-ended and user withdraws afterwards but before ended game processed by T-cron (makes game unrated, no TL-change)
+   - idea: JUG: simplest way to avoid this race-condition would be to deny withdrawal from the ladder as long as there are "unprocessed" game-endings.
+   - idea: forbid TL withdrawal as long as there are unprocessed game-endings (to be done by T-cron)
+   - idea: delay the withdrawal and process in T-cron (has lesser bad things happening)
+   - idea: add a HOLD-state to prevent further challenges
+      - idea of yagiza: option: withdrawal=set-HOLD & wait till all games finished on TL before withdrawing automatically then
+   - idea: Avic: delay the withdrawal and let it also process by the T-cron. a bit more complex to do, and it would prohibit an immediate re-joining without the waiting for T-cron.
+      - idea: JUG: better if used in combination with a new HOLD-TL-flag to prevent new incoming challenges
+      - idea: yagiza: HOLD-flag can be used as additional feature to allow users to put their ladder-participation on HOLD without the requirement to withdraw from the ladder
+         - User may then continue playing any ongoing games as usual. When all ongoing games are completed, user is withdrawn and the normal actions/conditions for a withdrawal apply.
+         - JUG: setting yourself on HOLD should have a price-tag, e.g. drop your rank by some places (e.g. by 5 or X or X%) to allow other users to leapfrog; otherwise you can take the top spot and keep it forever.
+         - Basileus,1d: why not just set HOLD status after withdrawl (preventing all challenges)?
+            - DrStraw,1d: That would only work if it were a hold until all games were completed (then dropping out). Otherwise someone could get to the top and then hold.
+   - idea: JUG: Withdrawing from the ladder would set the HOLD-status (preventing incoming AND outgoing challenges), let's the user finish all remaining games, and after the last game finished, the user would be automatically be removed after all game-results have been "booked" in the ladder.
+      - This solves some of the other "unfair"-perceived circumstances (as they would be no more detached games originating from user-initiated withdrawals).
+      - I think it would also require, that the game-results would no longer change the ladder-position of the user on HOLD-status, even though the opponents position may change. Also activating HOLD-status must drop the user a few steps in the ladder (otherwise the top-position could be blocked).
+      - JUG: the dropping follows naturally when they are leap-frogged by other users (while the HOLD user does nothing). Not sure, if we need to alleviate that.
+      - JUG: The HOLD-status would basically be a "vacation" from the ladder without losing your position (too much).
+      - JUG: But as the normal vacation is limited, also the HOLD-status should have some limits ... perhaps a year or half a year after which the user is removed.
+
+- Q: reasons for immediate withdrawal? by-TD or by-TP ? and how to do that (unrated? running games?)
+   - JUG: probably should only be possible by-TD, otherwise TP could immediate-withdrawl and re-enter immediately.
+   - JUG: TD could end running TGs by Forfeit !? or detach games !?
+
+- Basileus,2d: no problem if user clearly denotes his wish to withdraw. In this case his outgoing challenges should be removed, the players who challenge him obtain some advances in the ladder and he loses all tournament games as rated.
+
+- idea: Basileus: the player obtains HOLD status after first game lost by time if it's not his only game in the tournament (in the latter case he should just be removed from the tournament). Then he drops in the ladder by several positions and don't get any challenges. If next game is lost by time he should be removed from the tournament and if he wins or loses next game HOLD status should be removed.
+   - JUG: agree somewhat, need detailing
+
+
+#################
+
+- TODO: check questionable ladder-props / behavior regarding: annulling, detaching, timeouts, withdrawal, user-removal, inactivity, re-enter
+
+- Q: need to migrate something?
+- Q: need to re-calc ratings?
+
+###################################################################################
+
+- 2 SPEC: [tourney] timeout-handling, race-condition game-end-processing/withdrawal, withdrawal, HOLD-state;; collect items from TODO
+- 5 SPEC: [tourney] TL: (T017.4c.b) game-end-processing of "forfeit" for ladder: (b) add special options (re-do with adding extra-action for winner AND loser-on-timeout) !?
+- 1 ADM:  [tourney] re-think DGS-ladders: 1. timeout-handling, 2. absence-handling; "keep" achievements, but prevent abuse;; 3. separate action on timeouts !?
+- 3 CHK:  [tourney] survey: change timeout-handling ? 1. winner moves up and loser moves down|removed, 2. keep it as it is (only loser-timout ladder-bottom|removed), 3. winner moves up/loser stays at pos (like normal win/loss)
+- ? SPEC: [tourney] Ladder: config "remove user from ladder after N timeouts" !?
+- 4 SPEC: [tourney] TL: (T017.4c.a) game-end-processing of "forfeit" for ladder: (a) treat like timeout (at first); later: special options (re-do with adding extra-action for winner AND loser-on-timeout) !? -> done!?
+
+- 1 BUG:  [tourney] (T022) TL: forbid withdrawal as long as there are unprocessed game-endings (to be done by T-cron); OR, better follow Avics approach to delay the withdrawal and process in T-cron (has lesser bad things happening); would make sense to have a HOLD-state to prevent further challenges; option (yagiza): withdrawal=set-HOLD & wait till all games finished on TL before withdrawing automatically then
+- 4 BUG:  [tourney] TL: game annulled, shown as '[#]' on ladder, user re-enters ladder: The number behind the '#' is the ladder-rank of the opponent on the ladder. As the user is back, a number is shown again, even though the game is still annulled (having no impact on the ladder). Currently this is a flaw, which will be fixed as part of the timeout-overwork as well;; http://www.dragongoserver.net/message.php?mode=ShowMessage&mid=2870710 => avoid by finishing all annulled games before removing user from ladder !?
+
+- 5 IDEA: [tourney] change TL: perhaps removing only after 3 consecutive-timeouts (configurable)... and upto 3 move to ladder-bottom (or move down by X, e.g. 50) ... or 3 steps down (=on 3rd-> removed)
+- 5 IDEA: [tourney] change TL: if win-by-timeout moves winner up, player could challenge timeout'ler preferably with this setting ...
+- 5 IDEA: [tourney] change TL: "softer" timeouting to keep ladder-participation for a timeout-"glitch"
+
+###################################################################################
+# Problems: (P)
+
+- game with timeout will be rated (if T rated) even if #M < 10
+   - can be abused to increase own rating with stronger inactive players on TL
+
+- remove on timeout for TL:
+   - can be abused to kick out inactive players
+      => solution: use other TL-prop, e.g. switch pos on timeout, so that loser is not removed
+
+- remaining TGs of player with losing on timeout will be annulled and detached from TL
+   - CON: undeserved for remaining-opponents to get unrated game and not be able to climb TL
+
+- what is game-annulling of TG ?
+- when to apply game-annulling of TG ?
+
+- there should be a TD-way to remove a user from TL (immediately, perhaps with delay acceptable?)
+
+- withdrawal from TL detaches games (make unrated, remove user)
+   => solution: use HOLD-state + AUTO-withdrawal-flag (remove after last TG finished)
+
+- allow HOLD-state anytime
+   - forbid challenging, being challenged, lose some TL-ranks?, TGs continue
+
+- a win by timeout is still a win and should be treated as such
+- a win by timeout has special meaning in a TL
+
+- a win by timeout inc rank of winner + dec rank of loser
+   - currently only switch possible or winner XOR loser moves in TL
+
+
+###################################################################################
+# IMPLEMENTED:
+
+- QA: rating should be independent from tournament ? -> unrated if Moves<10 or reject-win-by-TO; need rating-recalc ? { would prevent aiming for timeout on game start with inactive TPs } !!!
+   - timeout affects ratings in non-T-games, then they should affect ladder-rank as well
+- QA(later): is TD allowed make game unrated ? -> perhaps, => S: later feature
+- QA: what is game-annulling of TG ? Games.tid=0 + Games.Flags=detached + T-game (skip scoring, T-game ended, detached-flag set)
+
+- QA: implications of annulling/detaching for TRR ? -> not allowed
+- QA: idea: fully void (=delete?) TGs/games on withdrawal/removal ? -> no
+
+- fixed bug: TL-TG annulled, shown as '[#]' on TL, user re-enters TL -> game shows up with new TL-pos but TG still annulled !!! => S: all TGs must be finished before TP withdrawn/removed; or S: re-join not allowed with annulled TGs not finished -> fixed (ignore detached TGs on ladder-view)
+
+- decision: S: if TP "leaves" TL (withdrawal, annulling, removal) -> keep TGs in rated-state! (exception by G-admin or TD-grant) -> done
+
