@@ -1,41 +1,68 @@
 # Evaluation started in 10-Sep-2013 to find messages, that would need translated text
+#
 # see also DGS-forums:
 # - http://www.dragongoserver.net/forum/read.php?forum=2&thread=36890#36890
 # - http://www.dragongoserver.net/forum/read.php?forum=11&thread=39411#39420
+# - http://www.dragongoserver.net/forum/read.php?forum=2&thread=44695#44695
 
 # what text-language is used on sending message or email?
-# - system-messages addressed to one target can be language-specific for target, but with #>1 targets
-# - user-messages sent to #>=1 other players should be in the source-users language (as they might want to talk and have to find a common base-lang)
+# - perfect would be probably to send msg/mails in the language of the target-user,
+#   though this would mean, that if there are multiple recipients, different versions
+#   of the msg/mail-subject/body would need to be built (for distinct lanagues of target-users).
+#   However, text written by source-user cannot be translated, so it would be a mix anyway.
 #
-# '#E' text in pure English (as no login / cron / or no T_()-text)
-# '#U' text from user to user or to himself initiated by system, so no control anyways
-# '#M' text in English (but mixed with user-message)
+# - system-messages addressed to one target can be language-specific for target.
+#   But with #>1 targets multiple text-versions would be needed.
+# - user-messages sent to #>=1 other players should be in the source-users language
+#   as they might want to talk and have to find a common base-lang.
+#   Still static parts would be needed to have multiple versions for different languages of the target users
 
-# ./include/std_functions.php:1281:function send_message( $debugmsg, $text='', $subject=''
-#E ./admin_game.php:150:               send_message( 'confirm', $Text, $Subject,
-#E ./daily_cron.php:90:               send_message( "daily_cron.waitingroom.del_mpg.notify_master($wr_id,$gid,$master_uid)",
-./game_players.php:1022:      send_message( "game_players.reject_invite.notify_user($gid,$uid,$master_uid)",
-./game_players.php:1046:      send_message( "game_players.delete_joined_player.notify_user($gid,$uid,$master_uid)",
-#E ./game_players.php:1467:         send_message( 'confirm', $Text, $Subject,
-./game_players.php:970:      send_message( "game_players.delete_invite.notify_user($gid,$uid,$master_uid)",
-./game_players.php:998:      send_message( "game_players.accept_invite.notify_user($gid,$uid,$master_uid)",
-#E ./halfhourly_cron.php:189:            send_message( "halfhourly_cron.notify.bad_email($uid)",
-#E ./include/game_functions.php:2108:      send_message( "$dbgmsg.msg", $Text, $Subject,
-#M ./include/message_functions.php:2423:      send_message( 'send_message', $message, $subject
-#U ./include/std_functions.php:2632:            send_message("fever_vault.msg($uid,$ip)", $text, $subject, '', $handles, /*notify*/false );
-#E ./include/std_functions.php:3319:         send_message( $dbgmsg.'send_msg', $Text, $Subject
-#M ./include/wroom_control.php:385:         send_message( 'WC:join_waitingroom_game', $message, $subject
-./tournaments/edit_participant.php:678:   send_message( "tournament.edit_participant.$type($tid,$uid,$my_id)",
-./tournaments/include/tournament_ladder.php:1155:      send_message( "$dbgmsg.sendmsg($tid,$rm_uid)",
-./tournaments/include/tournament_ladder_helper.php:291:         send_message( "TLH:process_tournament_ladder_crown_king.check.tid($tid)",
-./tournaments/ladder/challenge.php:151:         send_message( "$dbgmsg.notify",
+#------------ 21-Jun-2015 --- re-evaluated send_message/send_email-calls
+#
+# [L=cron|user|serv] language of cron(=default EN)|user|serv (=system) used for text (may be ignored if #E-type)
+#
+# '#E' text in pure English (as no login / cron / or no T_()-text);  [L=..] irrelevant
+# '#M' text in English (but mixed with user-message), includes '#E'-type
+# '#U' text from user to user or to himself initiated by system, so no control anyways (can contain T_-texts as well)
+# '#S' text from system to user
+#
+# Analysis for action-category:
+# - '#E'-type: not considered a problem if server-language 'English' is used as that has a higher probability of everyone understanding it
+# - '#M'-type: like '#E' as the only difference is the (optional) extra message from a user, which cannot be translated anyway
+# - '#U/S'-type: depends on the case.  Note potential actions after '=>':
+#              OK(.. -> '#new-type')
+#              OK(best) = works as it should
+#              OK(target) = could use target-user language (single target-user)
+#              OK(targets) = could use target-users languages (multiple target-users)
 
-# ./include/std_functions.php:1221:function send_email( $debugmsg, $email, $formatopts, $text, $subject='', $headers='', $params='')
-#U ./edit_email.php:320:            send_email( "edit_email.send_email_change($my_id,{$vfy->ID})",
-#U ./edit_email.php:377:      $success = send_email( "edit_email.handle_resend_mail.resend_mail($my_id,{$vfy->ID})",
-#E ./halfhourly_cron.php:323:      $nfy_done = send_email("halfhourly_cron($uid)", $Email, EMAILFMT_SKIP_WORDWRAP/*msg already wrapped*/, $msg );
-#E ./halfhourly_cron.php:60:         send_email("halfhourly_cron.concurrent_run($clock_ticks)", EMAIL_ADMINS, 0,
-#E ./include/register_functions.php:292:               send_email( "UserReg.register_user.send_activation($new_id,{$vfy->ID})",
-#U ./include/std_functions.php:2636:            send_email("fever_vault.email($handle)", $email, 0, $text, FRIENDLY_LONG_NAME.' - '.$subject);
-./send_new_password.php:114:      send_email("send_new_password Uid:$pswduser Subject:$subject Text:$msg", $Email, 0, $msg, $subject );
+# ./include/std_functions.php:1331:function send_message( $debugmsg, $text='', $subject=''
+# #type[src_lang] file:line call  ### use-case description  => action-category - action-comments
+#E[L=cron] ./daily_cron.php:90: send_message( "daily_cron.waitingroom.del_mpg.notify_master($wr_id,$gid,$master_uid)",  ### msg from CRON to MPG-game-master about deletion of WROOM-entry  => OK(target -> #S)
+#E[L=cron] ./halfhourly_cron.php:189: send_message( "halfhourly_cron.notify.bad_email($uid)",  ### msg from CRON to user about invalid-email & deactivated email-notification  => OK(target -> #S)
+#E[L=cron] ./tournaments/include/tournament_ladder_helper.php:347: send_message( "TLH:process_tournament_ladder_crown_king.check.tid($tid)",  ### msg from CRON to user about ladder-crowned-king  => OK(target -> #S)
+#E[L=user] ./admin_game.php:163: send_message( 'confirm', $Text, $Subject,   ### msg from admin to game players about game-deletion  => OK(targets -> #U)
+#E[L=user] ./game_players.php:1467: send_message( 'confirm', $Text, $Subject,  ### msg from MPG-game-master to user-list about MPG-game-deletion  => OK(targets -> #U)
+#E[L=user] ./include/std_functions.php:3536: send_message( $dbgmsg.'send_msg', $Text, $Subject  ### msg from CRON(timeout) or from USER to user about deleted observed-games due to game-end  => OK(targets -> #U/S)
+#E[L=user] ./include/wroom_control.php:414: send_message( 'WC:join_waitingroom_game', $message, $subject  ### msg from user to user about joined waiting-room-game  => OK(target => #U)
+#M[L=user|cron] ./include/game_functions.php:2192: send_message( "$dbgmsg.msg", $Text, $Subject,  ### msg from CRON(timeout) or from USER to user with game-end-result (English texts + msg-from-user)  => OK(targets -> #U/S)
+#S[L=user] ./include/std_functions.php:2739: send_message("fever_vault.msg($uid,$ip)", $text, $subject, '', $handles, /*notify*/false );  ### msg from system to user about quota-exceeded (in language of logged-in user)  => OK(best)
+#U[L=user] ./game_players.php:1022: send_message( "game_players.reject_invite.notify_user($gid,$uid,$master_uid)",  ### msg from invited user to MPG-game-master about invite-rejection  => OK(target -> #S)
+#U[L=user] ./game_players.php:1046: send_message( "game_players.delete_joined_player.notify_user($gid,$uid,$master_uid)",  ### msg from MPG-game-master to user about revoking participation in MPG  => OK(target -> #U)
+#U[L=user] ./game_players.php:970: send_message( "game_players.delete_invite.notify_user($gid,$uid,$master_uid)",  ### msg from MPG-game-master to user about deletion of user-invite for MPG  => OK(target -> #U)
+#U[L=user] ./game_players.php:998: send_message( "game_players.accept_invite.notify_user($gid,$uid,$master_uid)",  ### msg from invited user to MPG-game-master about invite-accept for MPG  => OK(target -> #U)
+#U[L=user] ./include/message_functions.php:2529: send_message( 'send_message', $message, $subject  ### msg from user to user with private-message (can be bulk-msg for admin-users) - no translation in msg  => OK(best)
+#U[L=user] ./tournaments/edit_participant.php:731: send_message( "tournament.edit_participant.$type($tid,$uid,$my_id)",  ### msg from T-director to user with tournament-registration-notification about deletion-from-T / ack-apply / new-invite / apply-invite / register-invite WITH T_-texts AND old T-user-msg AND new T-director-msg (big mix)  => OK(target -> #U)
+#U[L=user] ./tournaments/ladder/challenge.php:184: send_message( "$dbgmsg.notify",  ### msg from user to user about ladder-challenge  => OK(target -> #S)
+#U[L=user](if by T-director)-#E[L=cron] ./tournaments/include/tournament_ladder.php:1350: send_message( "$dbgmsg.sendmsg($tid,$rm_uid)",  ### msg from CRON(#E-type) or T-director (#U-type) to user about withdrawal/removal from tournament WITH reason (given by system or by T-director)  => OK(target -> #S/U)
+
+# ./include/std_functions.php:1270:function send_email( $debugmsg, $email, $formatopts, $text, $subject='', $headers='', $params='')
+# #type[src_lang] file:line call  ### use-case description  => action-category - action-comments
+#E[L=cron] ./halfhourly_cron.php:60: send_email("halfhourly_cron.concurrent_run($clock_ticks)", EMAIL_ADMINS, 0,  ### mail from system to admin-user (local-config) about concurrent run of cron - admin-functionality is not translated  => OK(best)
+#M[L=cron] ./halfhourly_cron.php:321: $nfy_done = send_email("halfhourly_cron($uid)", $Email, EMAILFMT_SKIP_WORDWRAP/*msg already wrapped*/, $msg );  ### mail from system to user with email-nofitication about new private-messages and new game-moves  => OK(target -> #S)
+#M[L=user] ./scripts/mailtest.php:118: $res = send_email( false, $Email, 0, $msg, FRIENDLY_LONG_NAME.' mail test', $headers );  ### mail from admin-user to someone with test-mail - admin-functionality  => OK(best)
+#S[L=serv] ./include/register_functions.php:294: send_email( "UserReg.register_user.send_activation($new_id,{$vfy->ID})",  ### mail from system to user with email-verification for user-registration  => OK(target -> #S) - would need Language-selection on user-registration
+#S[L=serv|user] ./send_new_password.php:114: send_email("send_new_password Uid:$pswduser Subject:$subject Text:$msg", $Email, 0, $msg, $subject );  ### mail from system to user with new password (L=user if logged in, but then new password not needed)  => OK(best) - otherwise would need Language-selection on new-password-page : NOT DONE
+#S[L=user] ./include/std_functions.php:2743: send_email("fever_vault.email($handle)", $email, 0, $text, FRIENDLY_LONG_NAME.' - '.$subject);  ### mail from system to user about quota-exceeded (in language of logged-in user)  => OK(best)
+#U[L=user] ./edit_email.php:320: send_email( "edit_email.send_email_change($my_id,{$vfy->ID})",  ### mail from user to user-himself about email-verification after changed-email  => OK(best)
+#U[L=user] ./edit_email.php:377: $success = send_email( "edit_email.handle_resend_mail.resend_mail($my_id,{$vfy->ID})",  ### mail from user to user-himself about email-verification after changed-email (reminder)  => OK(best)
 
