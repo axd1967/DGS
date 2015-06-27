@@ -144,6 +144,7 @@ Copyright (C) 2001-2015  Erik Ouchterlony, Jens-Uwe Gaspar
 
    * Changes for Translators:
       * Added Translate-link "this" in bottom-bar to select untranslated texts of translation group for current page
+      * Added search on translate-page for translated text that is the same as the original text
 
    * Changed server versioning scheme: ARCHITECTURE.MAJOR.MINOR
 
