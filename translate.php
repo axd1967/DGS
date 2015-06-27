@@ -140,7 +140,7 @@ $info_box = '<br>When translating you should keep the following things in mind:
       $profil_charset = 0;
 
    $group = get_request_arg('group');
-   $untranslated = (int)@$_REQUEST['untranslated']; // see translation_query()
+   $untranslated = (int)@$_REQUEST['untranslated']; // see translations_query()
    $alpha_order = (int)@$_REQUEST['alpha_order'];
    $filter_en = trim(get_request_arg('filter_en'));
    $max_len = (int)@$_REQUEST['max_len'];
@@ -194,7 +194,7 @@ $info_box = '<br>When translating you should keep the following things in mind:
       if ( !in_array( $translate_lang, $translator_array ) )
          error('not_correct_transl_language', "translate.check.language($translate_lang)");
 
-      $result = translations_query( $translate_lang, $untranslated, $group, $from_row, $alpha_order, $filter_en, $max_len) 
+      $result = translations_query( $translate_lang, $untranslated, $group, $from_row, $alpha_order, $filter_en, $max_len)
          or error('mysql_query_failed','translate.translation_query');
 
       $show_rows = (int)@mysql_num_rows($result);
@@ -250,6 +250,7 @@ $info_box = '<br>When translating you should keep the following things in mind:
 
    $arr_translated = array(
          1 => 'Untranslated (in original texts)',
+         4 => 'Translated (same as original texts)',
          2 => 'Translated (in original texts)',
          0 => 'All texts (in original texts)',
       );

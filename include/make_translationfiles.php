@@ -163,7 +163,15 @@ function make_include_files($language=null, $group=null) //must be called from m
 } //make_include_files
 
 
-// $untranslated: 0=all, 1=untranslated-only, 2=translated-only (search in original English), 3=translated-only (search in transl-lang)
+/*!
+ * \brief Find translations with given restrictions.
+ * \param $untranslated
+ *    0=all
+ *    1=untranslated-only
+ *    2=translated-only (search in original English)
+ *    3=translated-only (search in transl-lang)
+ *    4=translated-only (with same text as original)
+ */
 function translations_query( $translate_lang, $untranslated, $group, $from_row=-1, $alpha_order=false, $filter_en='', $max_len=0 )
 {
    /* Note: Some items appear two or more times within the untranslated set
@@ -187,7 +195,7 @@ function translations_query( $translate_lang, $untranslated, $group, $from_row=-
       $limit = '';
 
    $sql_opts = ( ALLOW_SQL_CALC_ROWS ) ? 'SQL_CALC_FOUND_ROWS' : '';
-   $join_translations = ( $untranslated == 2 || $untranslated == 3 ) ? 'INNER' : 'LEFT'; // 2=translated-only
+   $join_translations = ( $untranslated == 2 || $untranslated == 3 || $untranslated == 4 ) ? 'INNER' : 'LEFT'; // 2/3/4=translated-only
    $query = "SELECT $sql_opts Translations.Text"
           . ",TT.ID AS Original_ID"
           . ",TL.ID AS Language_ID"
@@ -218,6 +226,11 @@ function translations_query( $translate_lang, $untranslated, $group, $from_row=-
    {
       // Translations.Translated IS NULL means "never translated" (LEFT JOIN fails).
       $query .= " AND (Translations.Translated IS NULL OR Translations.Translated='N')";
+   }
+   elseif ( $untranslated == 4 ) // translated-only (same as orig text)
+   {
+      // translations with "untranslated"-checkbox are stored with Translations-entry with empty Text-field
+      $query .= " AND (Translations.Text='' OR TT.Text=Translations.Text)";
    }
 
    if ( $group != 'allgroups' )

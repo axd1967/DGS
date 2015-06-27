@@ -11,6 +11,12 @@ Release [2014-07-30] - DGS 1.0.18 - tag [release-1_0_18-20140730] on (later) bra
 ChangeLog
 ------------------------------------------------------------------
 
+2015-06-27 jug
+
+   * include/make_translationfiles.php (translations_query),
+     translate.php:
+   - added search on translate-page for translated text with same text as original text
+
 2015-05-24 jug
 
    * include/admin_faq_functions.php (class AdminFAQ, ~.get_faq_group_id, ~.get_faq_entry_row,
